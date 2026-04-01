@@ -379,6 +379,10 @@ input[type="number"].readonly { opacity: 0.4; cursor: not-allowed; background: #
     US 微型期貨
     <span>MES / MNQ / M2K</span>
   </button>
+  <button class="tab-btn" onclick="switchTab('log')">
+    日誌
+    <span id="log-count-badge">0 筆</span>
+  </button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -534,6 +538,46 @@ input[type="number"].readonly { opacity: 0.4; cursor: not-allowed; background: #
 
 </div><!-- /panel-us -->
 
+<!-- ════════════════════════════════════════════
+     PANEL C：交易日誌
+════════════════════════════════════════════ -->
+<div class="panel" id="panel-log">
+  <div style="margin-top:16px;">
+
+    <!-- 統計 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">總筆數</div>
+        <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--accent);" id="stat-total">0</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">作多</div>
+        <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--success);" id="stat-long">0</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">作空</div>
+        <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--danger);" id="stat-short">0</div>
+      </div>
+    </div>
+
+    <!-- 日誌列表 -->
+    <div id="log-list">
+      <div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;background:#fff;border:1px solid var(--border);border-radius:14px;">
+        還沒有記錄<br>
+        <span style="font-size:11px;opacity:0.7;">計算完後按「記錄這筆」</span>
+      </div>
+    </div>
+
+    <!-- 清除按鈕 -->
+    <div style="text-align:center;margin-top:16px;">
+      <button onclick="clearLog()" style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;padding:8px 20px;border-radius:20px;border:1px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;">
+        清除所有記錄
+      </button>
+    </div>
+
+  </div>
+</div>
+
 <!-- REFERENCE TABLE -->
 <div style="padding: 0 16px 0; margin-bottom: 0;">
   <div style="background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
@@ -626,10 +670,13 @@ let currentFuture = 'ES';
 ═══════════════════════════════ */
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', (tab === 'txf' && i === 0) || (tab === 'us' && i === 1));
+    b.classList.toggle('active',
+      (tab==='txf'&&i===0)||(tab==='us'&&i===1)||(tab==='log'&&i===2));
   });
-  document.getElementById('panel-txf').classList.toggle('active', tab === 'txf');
-  document.getElementById('panel-us').classList.toggle('active',  tab === 'us');
+  document.getElementById('panel-txf').classList.toggle('active', tab==='txf');
+  document.getElementById('panel-us').classList.toggle('active',  tab==='us');
+  document.getElementById('panel-log').classList.toggle('active', tab==='log');
+  if (tab==='log') renderLog();
 }
 
 /* ═══════════════════════════════
@@ -824,6 +871,22 @@ function calcResult(equity, margin, entry, stop, pointVal, prefix, fmtFn) {
     </div>
     <div class="factor-row">
       ${factors.map(f=>`<div class="factor-tag ${binding.includes(f.label)?'binding':''}">${f.label}：${f.val}口${binding.includes(f.label)?' ◀ 限制因子':''}</div>`).join('')}
+    </div>
+    <div style="margin-top:14px;text-align:center;">
+      <button onclick='saveLogEntry(${JSON.stringify({
+        type: prefix==="txf-"?"TXF":"US",
+        symbol: prefix==="txf-"?"台指期貨":currentFuture,
+        dir: isLong?"LONG":"SHORT",
+        entry, stop, stopPts,
+        c1, c2,
+        loss1: Math.round(loss1*100)/100,
+        loss1Pct: Math.round(loss1Pct*100)/100,
+        loss2: Math.round(loss2*100)/100,
+        loss2Pct: Math.round(loss2Pct*100)/100,
+        currency: prefix==="txf-"?"NT$":"USD"
+      })})' style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px;padding:10px 24px;border-radius:20px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;width:100%;">
+        ＋ 記錄這筆交易
+      </button>
     </div>`;
 }
 
@@ -863,6 +926,98 @@ function calcUS() {
 });
 
 /* ═══════════════════════════════
+   交易日誌
+═══════════════════════════════ */
+function getLog() {
+  try { return JSON.parse(localStorage.getItem('mq_tradelog') || '[]'); } catch { return []; }
+}
+function saveLogEntry(data) {
+  const log = getLog();
+  const now = new Date();
+  const entry = {
+    id: Date.now(),
+    date: now.toLocaleDateString('zh-TW', {month:'2-digit',day:'2-digit'}),
+    time: now.toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit'}),
+    ...data
+  };
+  log.unshift(entry);
+  localStorage.setItem('mq_tradelog', JSON.stringify(log));
+  updateLogBadge();
+  showToast('✦ 已記錄這筆交易');
+}
+function deleteLogEntry(id) {
+  const log = getLog().filter(e => e.id !== id);
+  localStorage.setItem('mq_tradelog', JSON.stringify(log));
+  updateLogBadge();
+  renderLog();
+}
+function clearLog() {
+  if (!confirm('確定要清除所有交易記錄？')) return;
+  localStorage.removeItem('mq_tradelog');
+  updateLogBadge();
+  renderLog();
+}
+function updateLogBadge() {
+  const n = getLog().length;
+  document.getElementById('log-count-badge').textContent = n + ' 筆';
+  document.getElementById('stat-total').textContent = n;
+  const log = getLog();
+  document.getElementById('stat-long').textContent  = log.filter(e=>e.dir==='LONG').length;
+  document.getElementById('stat-short').textContent = log.filter(e=>e.dir==='SHORT').length;
+}
+function renderLog() {
+  const log = getLog();
+  updateLogBadge();
+  const el = document.getElementById('log-list');
+  if (log.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;background:#fff;border:1px solid var(--border);border-radius:14px;">還沒有記錄<br><span style="font-size:11px;opacity:0.7;">計算完後按「記錄這筆」</span></div>`;
+    return;
+  }
+  el.innerHTML = log.map(e => {
+    const isLong = e.dir === 'LONG';
+    const dirColor = isLong ? 'var(--success)' : 'var(--danger)';
+    const dirBg    = isLong ? 'rgba(30,122,74,0.08)' : 'rgba(192,57,43,0.07)';
+    const fmtLoss  = e.currency === 'NT$'
+      ? e.loss1.toLocaleString('zh-TW') + ' 千'
+      : '$' + Math.round(e.loss1).toLocaleString('en-US');
+    return `
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:'DM Mono',monospace;font-size:11px;background:${dirBg};color:${dirColor};border:1px solid ${dirColor};padding:3px 9px;border-radius:12px;">${isLong?'▲':'▼'} ${e.dir}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--accent);">${e.symbol}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">${e.date} ${e.time}</span>
+          <button onclick="deleteLogEntry(${e.id})" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid var(--border);">✕</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
+        <div style="background:#f8f7f4;border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">買入</div>
+          <div style="font-family:'DM Mono',monospace;font-size:13px;">${e.entry}</div>
+        </div>
+        <div style="background:#f8f7f4;border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">停損</div>
+          <div style="font-family:'DM Mono',monospace;font-size:13px;">${e.stop}</div>
+        </div>
+        <div style="background:${dirBg};border-radius:8px;padding:8px;text-align:center;border:1px solid ${dirColor}20;">
+          <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">1% 口數</div>
+          <div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:${dirColor};">${e.c1}</div>
+        </div>
+        <div style="background:rgba(154,98,0,0.05);border-radius:8px;padding:8px;text-align:center;border:1px solid rgba(154,98,0,0.15);">
+          <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">2% 口數</div>
+          <div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--warn);">${e.c2}</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;">
+        停損 ${fmtLoss}（${e.loss1Pct}% 權益）· 停損點數 ${e.stopPts}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════
    INIT
 ═══════════════════════════════ */
 const txfRestored = loadTXF();
@@ -870,6 +1025,7 @@ const usRestored  = loadUS();
 if (txfRestored || usRestored) showToast('✦ 已讀取上次記憶');
 calcTXF();
 calcUS();
+updateLogBadge();
 </script>
 </body>
 </html>
