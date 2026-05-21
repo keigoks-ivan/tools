@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Timing Dashboard | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f0f5fb;color:#1e3a5f}
+
+.navbar{background:#fff;border-bottom:1px solid #dce8f5;height:52px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-left{display:flex;align-items:center;gap:12px}
+.nav-brand{font-size:12px;font-weight:700;letter-spacing:.12em;color:#1e3a5f;text-decoration:none}
+.nav-brand:hover{color:#3b82f6}
+.nav-sep{color:#dce8f5;font-size:14px}
+.nav-page{font-size:11px;font-weight:600;letter-spacing:.08em;color:#3b82f6}
+.lang-btns{display:flex;gap:4px}
+.lang-btn{padding:4px 10px;border:1px solid #dce8f5;border-radius:4px;font-size:11px;cursor:pointer;background:#fff;color:#5a7a9a;font-family:inherit}
+.lang-btn.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+
+.hero{background:#fff;border-bottom:1px solid #dce8f5;padding:20px 32px}
+.hero-inner{max-width:min(1280px,96vw);margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.hero-eyebrow{font-size:9.5px;letter-spacing:.15em;color:#3b82f6;font-weight:600;text-transform:uppercase;margin-bottom:5px}
+.hero-h1{font-size:19px;font-weight:700;color:#0f2a45;line-height:1.2;margin-bottom:5px}
+.hero-sub{font-size:12px;color:#5a7a9a;line-height:1.5;max-width:520px}
+.hero-meta{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.meta-badge{display:inline-flex;align-items:center;gap:5px;background:#eef3f9;border:1px solid #dce8f5;border-radius:20px;padding:3px 10px;font-size:10.5px;color:#5a7a9a}
+.meta-live{width:7px;height:7px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.sig-row{display:flex;gap:10px;flex-shrink:0;flex-wrap:wrap;align-items:flex-start}
+.sig-card{border:1px solid;border-radius:10px;padding:10px 18px;min-width:110px;text-align:center;cursor:default}
+.sig-card.g{background:#f0fdf4;border-color:#86efac}
+.sig-card.y{background:#fefce8;border-color:#fde68a}
+.sig-card.r{background:#fef2f2;border-color:#fca5a5}
+.sig-count{font-size:24px;font-weight:700;line-height:1}
+.sig-card.g .sig-count{color:#16a34a}
+.sig-card.y .sig-count{color:#d97706}
+.sig-card.r .sig-count{color:#dc2626}
+.sig-label{font-size:10px;margin-top:2px}
+.sig-card.g .sig-label{color:#15803d}
+.sig-card.y .sig-label{color:#a16207}
+.sig-card.r .sig-label{color:#b91c1c}
+.sig-markets{font-size:9px;color:#94a3b8;margin-top:3px}
+
+.content{max-width:min(1280px,96vw);margin:0 auto;padding:24px 32px;display:flex;flex-direction:column;gap:20px}
+.section-label{font-size:9.5px;letter-spacing:.16em;font-weight:600;color:#3b82f6;text-transform:uppercase;margin-bottom:12px}
+
+.card{background:#fff;border:1px solid #dce8f5;border-radius:10px;padding:18px 20px}
+.chart-box{height:300px}
+
+/* Heat-map table */
+.tbl-wrap{background:#fff;border:1px solid #dce8f5;border-radius:10px;overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:900px}
+thead th{background:#f4f8fd;font-size:9px;letter-spacing:.08em;color:#5a7a9a;font-weight:600;padding:8px 10px;text-align:center;border-bottom:1px solid #dce8f5;white-space:nowrap}
+thead th:first-child{text-align:left;position:sticky;left:0;background:#f4f8fd;z-index:2;min-width:160px;border-right:1px solid #e8f0fa;padding:8px 14px}
+thead th.score-col{min-width:60px}
+tbody td{padding:6px 8px;border-bottom:1px solid #f0f5fb;text-align:center;vertical-align:middle}
+tbody td:first-child{text-align:left;font-weight:600;position:sticky;left:0;background:#fff;z-index:1;border-right:1px solid #f0f5fb;padding:6px 14px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#f8fbff}
+tbody tr:hover td:first-child{background:#f8fbff}
+
+.mkt-cell{display:flex;align-items:center;gap:9px}
+.mkt-flag{font-size:18px;line-height:1;flex-shrink:0}
+.mkt-en{font-size:12px;font-weight:600;color:#1e3a5f;display:block}
+.mkt-zh{font-size:10px;color:#94a3b8;display:block}
+.mkt-rank{font-size:9.5px;color:#b0c0d4;font-weight:700;width:14px;flex-shrink:0}
+
+.ind{display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:4px 6px;border-radius:5px;min-width:52px}
+.ind .ind-val{font-size:10px;font-weight:500}
+.ind.g{background:#dcfce7;color:#15803d}
+.ind.y{background:#fef9c3;color:#a16207}
+.ind.r{background:#fee2e2;color:#b91c1c}
+
+.score-badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;font-size:13px;font-weight:700;border:2px solid}
+.score-badge.g{background:#f0fdf4;color:#16a34a;border-color:#86efac}
+.score-badge.y{background:#fefce8;color:#d97706;border-color:#fde68a}
+.score-badge.r{background:#fef2f2;color:#dc2626;border-color:#fca5a5}
+
+.sig-pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;border:1px solid;white-space:nowrap}
+.sig-pill.g{background:#f0fdf4;color:#16a34a;border-color:#86efac}
+.sig-pill.y{background:#fefce8;color:#d97706;border-color:#fde68a}
+.sig-pill.r{background:#fef2f2;color:#dc2626;border-color:#fca5a5}
+
+/* Method */
+.method-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.method-card{background:#fff;border:1px solid #dce8f5;border-radius:8px;padding:12px 14px}
+.method-title{font-size:10.5px;font-weight:700;color:#1e3a5f;margin-bottom:8px;line-height:1.3}
+.method-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px;font-size:10px;color:#5a7a9a;line-height:1.3}
+.m-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.m-dot.g{background:#16a34a}
+.m-dot.y{background:#d97706}
+.m-dot.r{background:#dc2626}
+.method-weight{font-size:9px;color:#94a3b8;margin-top:6px}
+
+.footnote{font-size:10.5px;color:#64748b;background:#f8fafc;border:1px solid #dce8f5;border-radius:8px;padding:12px 16px;line-height:1.6}
+.footer{max-width:min(1280px,96vw);margin:0 auto;padding:16px 32px;font-size:10px;color:#94a3b8;display:flex;justify-content:space-between}
+
+@media(max-width:900px){.method-grid{grid-template-columns:repeat(2,1fr)}.hero{padding:14px 16px}.content{padding:16px}}
+@media(max-width:520px){.method-grid{grid-template-columns:1fr}.sig-row{gap:6px}.sig-card{min-width:90px;padding:8px 10px}}
+.lang-en{}.lang-zh{}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow lang-en">Global Real Estate · Monthly Snapshot</div>
+      <div class="hero-eyebrow lang-zh" style="display:none">全球不動產 · 每月快照</div>
+      <h1 class="hero-h1 lang-en">Market Entry Timing Dashboard</h1>
+      <h1 class="hero-h1 lang-zh" style="display:none">進場時機儀表板</h1>
+      <p class="hero-sub lang-en">7-factor scoring across 12 markets — affordability, yield spread, supply pipeline, rate cycle, price momentum, vacancy, and transaction volume. Updated monthly.</p>
+      <p class="hero-sub lang-zh" style="display:none">7 項指標橫掃 12 個市場：負擔比、收益差、供給管線、利率週期、價格動能、空置率、成交量。每月更新一次。</p>
+      <div class="hero-meta">
+        <div class="meta-badge"><span class="meta-live"></span><span id="updated-label">Data: Apr 2026</span></div>
+        <div class="meta-badge lang-en">Score 0–14 · ≥10 Buy · 6–9 Watch · ≤5 Avoid</div>
+        <div class="meta-badge lang-zh" style="display:none">評分 0–14 · ≥10 進場 · 6–9 觀望 · ≤5 迴避</div>
+      </div>
+    </div>
+    <div class="sig-row">
+      <div class="sig-card g">
+        <div class="sig-count">3</div>
+        <div class="sig-label lang-en">Buy</div>
+        <div class="sig-label lang-zh" style="display:none">進場</div>
+        <div class="sig-markets">CA · NZ · UK</div>
+      </div>
+      <div class="sig-card y">
+        <div class="sig-count">7</div>
+        <div class="sig-label lang-en">Watch</div>
+        <div class="sig-label lang-zh" style="display:none">觀望</div>
+        <div class="sig-markets">AU IE MY US KR JP VN</div>
+      </div>
+      <div class="sig-card r">
+        <div class="sig-count">2</div>
+        <div class="sig-label lang-en">Avoid</div>
+        <div class="sig-label lang-zh" style="display:none">迴避</div>
+        <div class="sig-markets">TH · TW</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- Bar chart -->
+  <div>
+    <div class="section-label lang-en">Overall Score Ranking</div>
+    <div class="section-label lang-zh" style="display:none">綜合評分排行</div>
+    <div class="card">
+      <div id="chartRanking" class="chart-box"></div>
+    </div>
+  </div>
+
+  <!-- Heat-map table -->
+  <div>
+    <div class="section-label lang-en">Indicator Detail (click market to view report)</div>
+    <div class="section-label lang-zh" style="display:none">指標明細（點擊市場進入報告）</div>
+    <div class="tbl-wrap">
+      <table id="timing-table">
+        <thead>
+          <tr>
+            <th style="text-align:left" class="lang-en">Market</th>
+            <th style="text-align:left" class="lang-zh" style="display:none">市場</th>
+            <th class="score-col lang-en">Score</th>
+            <th class="score-col lang-zh" style="display:none">評分</th>
+            <th><span class="lang-en">Affordability</span><span class="lang-zh" style="display:none">負擔比</span></th>
+            <th><span class="lang-en">Yield Spread</span><span class="lang-zh" style="display:none">收益差</span></th>
+            <th><span class="lang-en">Supply</span><span class="lang-zh" style="display:none">供給壓力</span></th>
+            <th><span class="lang-en">Rate Cycle</span><span class="lang-zh" style="display:none">利率週期</span></th>
+            <th><span class="lang-en">Momentum</span><span class="lang-zh" style="display:none">價格動能</span></th>
+            <th><span class="lang-en">Vacancy</span><span class="lang-zh" style="display:none">空置率</span></th>
+            <th><span class="lang-en">Volume</span><span class="lang-zh" style="display:none">成交量</span></th>
+            <th><span class="lang-en">Signal</span><span class="lang-zh" style="display:none">訊號</span></th>
+          </tr>
+        </thead>
+        <tbody id="timing-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Methodology -->
+  <div>
+    <div class="section-label lang-en">Indicator Methodology</div>
+    <div class="section-label lang-zh" style="display:none">指標說明</div>
+    <div class="method-grid">
+      <div class="method-card">
+        <div class="method-title lang-en">① Affordability Ratio<br><small style="color:#94a3b8">Median Price / Annual Income</small></div>
+        <div class="method-title lang-zh" style="display:none">① 負擔比<br><small style="color:#94a3b8">房價中位數 / 年收入</small></div>
+        <div class="method-row"><span class="m-dot g"></span><span class="lang-en">&lt; 8× — affordable</span><span class="lang-zh" style="display:none">&lt; 8× 可負擔</span></div>
+        <div class="method-row"><span class="m-dot y"></span><span class="lang-en">8–12× — stretched</span><span class="lang-zh" style="display:none">8–12× 偏高</span></div>
+        <div class="method-row"><span class="m-dot r"></span><span class="lang-en">&gt; 12× — unaffordable</span><span class="lang-zh" style="display:none">&gt; 12× 難負擔</span></div>
+      </div>
+      <div class="method-card">
+        <div class="method-title lang-en">② Yield Spread<br><small style="color:#94a3b8">Gross Yield − 10Y Gov Bond</small></div>
+        <div class="method-title lang-zh" style="display:none">② 收益差<br><small style="color:#94a3b8">租金毛收益率 − 10Y公債</small></div>
+        <div class="method-row"><span class="m-dot g"></span><span class="lang-en">&gt; 2% — good carry</span><span class="lang-zh" style="display:none">&gt; 2% 利差佳</span></div>
+        <div class="method-row"><span class="m-dot y"></span><span class="lang-en">0–2% — thin margin</span><span class="lang-zh" style="display:none">0–2% 利差薄</span></div>
+        <div class="method-row"><span class="m-dot r"></span><span class="lang-en">&lt; 0% — negative carry</span><span class="lang-zh" style="display:none">&lt; 0% 負利差</span></div>
+      </div>
+      <div class="method-card">
+        <div class="method-title lang-en">③ Future Supply Pressure<br><small style="color:#94a3b8">Pipeline vs. annual completions</small></div>
+        <div class="method-title lang-zh" style="display:none">③ 未來供給壓力<br><small style="color:#94a3b8">在建量 vs. 年完工量</small></div>
+        <div class="method-row"><span class="m-dot g"></span><span class="lang-en">Low — supply deficit</span><span class="lang-zh" style="display:none">低 — 供給不足</span></div>
+        <div class="method-row"><span class="m-dot y"></span><span class="lang-en">Mid — balanced</span><span class="lang-zh" style="display:none">中 — 供需平衡</span></div>
+        <div class="method-row"><span class="m-dot r"></span><span class="lang-en">High — oversupply risk</span><span class="lang-zh" style="display:none">高 — 供過於求風險</span></div>
+      </div>
+      <div class="method-card">
+        <div class="method-title lang-en">④ Rate Cycle Position<br><small style="color:#94a3b8">Cuts from policy rate peak</small></div>
+        <div class="method-title lang-zh" style="display:none">④ 利率週期位置<br><small style="color:#94a3b8">距利率高點的降幅</small></div>
+        <div class="method-row"><span class="m-dot g"></span><span class="lang-en">&gt; 100 bp cut — easing</span><span class="lang-zh" style="display:none">&gt; 100bp 明顯寬鬆</span></div>
+        <div class="method-row"><span class="m-dot y"></span><span class="lang-en">25–100 bp — early cycle</span><span class="lang-zh" style="display:none">25–100bp 初步降息</span></div>
+        <div class="method-row"><span class="m-dot r"></span><span class="lang-en">At peak / hiking</span><span class="lang-zh" style="display:none">在高點 / 升息</span></div>
+      </div>
+      <div class="method-card">
+        <div class="method-title lang-en">⑤ Price Momentum<br><small style="color:#94a3b8">House price YoY %</small></div>
+        <div class="method-title lang-zh" style="display:none">⑤ 價格動能<br><small style="color:#94a3b8">房價年增率</small></div>
+        <div class="method-row"><span class="m-dot g"></span><span class="lang-en">&lt; 3% — cooling / stable</span><span class="lang-zh" style="display:none">&lt; 3% 降溫或穩定</span></div>
+        <div class="method-row"><span class="m-dot y"></span><span class="lang-en">3–8% — moderate growth</span><span class="lang-zh" style="display:none">3–8% 溫和成長</span></div>
+        <div class="method-row"><span class="m-dot r"></span><span class="lang-en">&gt; 8% — overheating</span><span class="lang-zh" style="display:none">&gt; 8% 過熱</span></div>
+      </div>
+      <div class="method-card">
+        <div class="method-title lang-en">⑥ Vacancy Rate<br><small style="color:#94a3b8">% of rentable units empty</small></div>
+        <div class="method-title lang-zh" style="display:none">⑥ 空置率<br><small style="color:#94a3b8">可出租單位空置比例</small></div>
+        <div class="method-row"><span class="m-dot g"></span><span class="lang-en">&lt; 3% — tight rental mkt</span><span class="lang-zh" style="display:none">&lt; 3% 租賃市場吃緊</span></div>
+        <div class="method-row"><span class="m-dot y"></span><span class="lang-en">3–6% — balanced</span><span class="lang-zh" style="display:none">3–6% 供需均衡</span></div>
+        <div class="method-row"><span class="m-dot r"></span><span class="lang-en">&gt; 6% — oversupply</span><span class="lang-zh" style="display:none">&gt; 6% 供過於求</span></div>
+      </div>
+      <div class="method-card">
+        <div class="method-title lang-en">⑦ Transaction Volume Trend<br><small style="color:#94a3b8">Transactions YoY %</small></div>
+        <div class="method-title lang-zh" style="display:none">⑦ 成交量趨勢<br><small style="color:#94a3b8">成交量年增率</small></div>
+        <div class="method-row"><span class="m-dot g"></span><span class="lang-en">&gt; 0% — rising demand</span><span class="lang-zh" style="display:none">&gt; 0% 需求上升</span></div>
+        <div class="method-row"><span class="m-dot y"></span><span class="lang-en">−10–0% — slowing</span><span class="lang-zh" style="display:none">−10%–0% 放緩</span></div>
+        <div class="method-row"><span class="m-dot r"></span><span class="lang-en">&lt; −10% — contraction</span><span class="lang-zh" style="display:none">&lt; −10% 量縮</span></div>
+      </div>
+      <div class="method-card" style="background:#f8fafc">
+        <div class="method-title lang-en">Score → Signal</div>
+        <div class="method-title lang-zh" style="display:none">評分 → 訊號</div>
+        <div class="method-row"><span class="m-dot g"></span><span class="lang-en">10–14 pts → Buy</span><span class="lang-zh" style="display:none">10–14 分 → 進場</span></div>
+        <div class="method-row"><span class="m-dot y"></span><span class="lang-en">6–9 pts → Watch</span><span class="lang-zh" style="display:none">6–9 分 → 觀望</span></div>
+        <div class="method-row"><span class="m-dot r"></span><span class="lang-en">0–5 pts → Avoid</span><span class="lang-zh" style="display:none">0–5 分 → 迴避</span></div>
+        <div class="method-weight lang-en" style="margin-top:8px">Each indicator: 2 pts (green) · 1 pt (yellow) · 0 pts (red). Max 14 pts.</div>
+        <div class="method-weight lang-zh" style="display:none;margin-top:8px">每項：2分（綠）· 1分（黃）· 0分（紅）。滿分14分。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <span class="lang-en"><strong>Disclaimer:</strong> Scores are based on publicly available macro data as of the update date. This dashboard provides a systematic framework for comparison — it is not investment advice. Data sources: central bank websites, national statistics offices, CBRE, Knight Frank, UBS Global Real Estate Bubble Index, CEIC. Individual city dynamics may differ significantly from national averages.</span>
+    <span class="lang-zh" style="display:none"><strong>免責聲明：</strong>評分基於更新日期的公開總體數據，本儀表板提供系統性比較框架，不構成投資建議。資料來源：各國央行、統計局、CBRE、萊坊、UBS全球房產泡沫指數、CEIC。個別城市走勢可能與全國平均值差異顯著。</span>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>Property Monitor — myproperty.investmquest.com</span>
+  <span class="lang-en">Updated monthly · Data: Apr 2026</span>
+  <span class="lang-zh" style="display:none">每月更新 · 資料：2026年4月</span>
+</div>
+
+<script>
+var DATA = {
+  lastUpdated: 'Apr 2026',
+  markets: [
+    {rank:1, code:'CA', flag:'🇨🇦', en:'Canada',         zh:'加拿大',   url:'ca/',
+     ind:[{s:1,v:'11.5x'},{s:1,v:'+0.8%'},{s:2,v:'Low'},{s:2,v:'225 bp'},{s:2,v:'−2%'},{s:2,v:'1.5%'},{s:2,v:'+4%'}], total:12},
+    {rank:2, code:'NZ', flag:'🇳🇿', en:'New Zealand',    zh:'紐西蘭',   url:'nz/',
+     ind:[{s:1,v:'10.5x'},{s:0,v:'−0.2%'},{s:1,v:'Mid'},{s:2,v:'125 bp'},{s:2,v:'0%'},{s:2,v:'2.5%'},{s:2,v:'+5%'}], total:10},
+    {rank:3, code:'UK', flag:'🇬🇧', en:'United Kingdom', zh:'英國',     url:'uk/',
+     ind:[{s:1,v:'8.5x'},{s:1,v:'+0.9%'},{s:2,v:'Low'},{s:1,v:'50 bp'},{s:1,v:'+4%'},{s:2,v:'1.5%'},{s:2,v:'+6%'}], total:10},
+    {rank:4, code:'AU', flag:'🇦🇺', en:'Australia',      zh:'澳洲',     url:'au/',
+     ind:[{s:1,v:'10.2x'},{s:0,v:'−0.9%'},{s:2,v:'Low'},{s:1,v:'25 bp'},{s:1,v:'+5%'},{s:2,v:'1.1%'},{s:2,v:'+3%'}], total:9},
+    {rank:5, code:'IE', flag:'🇮🇪', en:'Ireland',        zh:'愛爾蘭',   url:'ie/',
+     ind:[{s:0,v:'13.0x'},{s:2,v:'+2.1%'},{s:2,v:'Low'},{s:1,v:'85 bp'},{s:0,v:'+9%'},{s:2,v:'0.8%'},{s:2,v:'+7%'}], total:9},
+    {rank:6, code:'MY', flag:'🇲🇾', en:'Malaysia',       zh:'馬來西亞', url:'my/',
+     ind:[{s:2,v:'7.0x'},{s:1,v:'+0.6%'},{s:1,v:'Mid'},{s:0,v:'0 bp'},{s:1,v:'+5%'},{s:1,v:'4.5%'},{s:2,v:'+8%'}], total:8},
+    {rank:7, code:'US', flag:'🇺🇸', en:'United States',  zh:'美國',     url:'us/',
+     ind:[{s:1,v:'9.5x'},{s:1,v:'+0.2%'},{s:1,v:'Mid'},{s:2,v:'100 bp'},{s:1,v:'+5%'},{s:1,v:'3.5%'},{s:1,v:'−8%'}], total:8},
+    {rank:8, code:'KR', flag:'🇰🇷', en:'South Korea',    zh:'韓國',     url:'kr/',
+     ind:[{s:0,v:'25.0x'},{s:0,v:'−0.3%'},{s:2,v:'Low'},{s:1,v:'75 bp'},{s:1,v:'+7%'},{s:2,v:'2.0%'},{s:2,v:'+10%'}], total:8},
+    {rank:9, code:'JP', flag:'🇯🇵', en:'Japan',           zh:'日本',     url:'jp/',
+     ind:[{s:0,v:'18.0x'},{s:2,v:'+2.3%'},{s:2,v:'Low'},{s:0,v:'↑ hiking'},{s:0,v:'+15%'},{s:1,v:'5.0%'},{s:2,v:'+5%'}], total:7},
+    {rank:10,code:'VN', flag:'🇻🇳', en:'Vietnam',         zh:'越南',     url:'vn/',
+     ind:[{s:0,v:'22.0x'},{s:1,v:'+0.7%'},{s:2,v:'Low'},{s:1,v:'25 bp'},{s:0,v:'+18%'},{s:0,v:'8.0%'},{s:2,v:'+15%'}], total:6},
+    {rank:11,code:'TH', flag:'🇹🇭', en:'Thailand',        zh:'泰國',     url:'th/',
+     ind:[{s:1,v:'9.0x'},{s:2,v:'+2.5%'},{s:0,v:'High'},{s:1,v:'25 bp'},{s:1,v:'+3%'},{s:0,v:'18%'},{s:0,v:'−12%'}], total:5},
+    {rank:12,code:'TW', flag:'🇹🇼', en:'Taiwan',          zh:'台灣',     url:'tw/',
+     ind:[{s:0,v:'20.0x'},{s:0,v:'−0.1%'},{s:2,v:'Low'},{s:1,v:'25 bp'},{s:0,v:'+10%'},{s:0,v:'12%'},{s:1,v:'−8%'}], total:4},
+  ]
+};
+
+var CLS = ['g','y','r'];
+var sigColor = {g:'#16a34a', y:'#d97706', r:'#dc2626'};
+var sigBar   = {g:'#16a34a', y:'#f59e0b', r:'#ef4444'};
+
+function scoreCls(total){ return total>=10?'g':total>=6?'y':'r'; }
+
+var allCharts=[];
+
+function initCharts(lang){
+  allCharts.length=0;
+  var c=echarts.init(document.getElementById('chartRanking'));
+  allCharts.push(c);
+
+  var names=[], scores=[], colors=[], enNames=[], zhNames=[];
+  var rev=DATA.markets.slice().reverse();
+  rev.forEach(function(m){
+    enNames.push(m.flag+' '+m.en);
+    zhNames.push(m.flag+' '+m.zh);
+    scores.push(m.total);
+    colors.push(sigBar[scoreCls(m.total)]);
+  });
+  var labels=lang==='zh'?zhNames:enNames;
+
+  c.setOption({
+    grid:{left:10,right:40,top:10,bottom:10,containLabel:true},
+    tooltip:{
+      trigger:'axis',axisPointer:{type:'none'},
+      backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:'#1e3a5f',fontSize:11,fontFamily:'system-ui'},
+      formatter:function(p){return p[0].name+': <strong>'+p[0].value+' / 14</strong>';}
+    },
+    xAxis:{
+      type:'value',min:0,max:14,
+      axisLabel:{color:'#5a7a9a',fontSize:10,fontFamily:'system-ui'},
+      axisLine:{lineStyle:{color:'#e8f0fa'}},
+      splitLine:{lineStyle:{color:'#e8f0fa'}},
+      axisTick:{show:false},
+    },
+    yAxis:{
+      type:'category',data:labels,
+      axisLabel:{color:'#1e3a5f',fontSize:11,fontFamily:'system-ui',rich:{}},
+      axisLine:{show:false},axisTick:{show:false},splitLine:{show:false}
+    },
+    series:[{
+      type:'bar',data:scores,
+      itemStyle:{color:function(p){return colors[p.dataIndex];},borderRadius:[0,4,4,0]},
+      barMaxWidth:22,
+      label:{show:true,position:'right',color:'#5a7a9a',fontSize:10,fontFamily:'system-ui',
+             formatter:function(p){return p.value+'/14';}}
+    }],
+    markLine:{
+      data:[{xAxis:6,lineStyle:{color:'#d97706',type:'dashed',width:1}},{xAxis:10,lineStyle:{color:'#16a34a',type:'dashed',width:1}}]
+    }
+  });
+}
+
+function renderTable(lang){
+  var tb=document.getElementById('timing-tbody');
+  var sigEN={g:'Buy',y:'Watch',r:'Avoid'};
+  var sigZH={g:'進場',y:'觀望',r:'迴避'};
+  tb.innerHTML=DATA.markets.map(function(m){
+    var sc=scoreCls(m.total);
+    var inds=m.ind.map(function(i){
+      var cl=i.s===2?'g':i.s===1?'y':'r';
+      return '<td><div class="ind '+cl+'"><span class="ind-val">'+i.v+'</span></div></td>';
+    }).join('');
+    var nameTd='<div class="mkt-cell"><span class="mkt-rank">#'+m.rank+'</span><span class="mkt-flag">'+m.flag+'</span><div><a href="'+m.url+'report.html" style="text-decoration:none"><span class="mkt-en lang-en">'+m.en+'</span><span class="mkt-zh lang-zh" style="display:none">'+m.zh+'</span></a></div></div>';
+    var sigText='<span class="sig-pill '+sc+' lang-en">'+sigEN[sc]+'</span><span class="sig-pill '+sc+' lang-zh" style="display:none">'+sigZH[sc]+'</span>';
+    return '<tr><td>'+nameTd+'</td><td style="text-align:center"><span class="score-badge '+sc+'">'+m.total+'</span></td>'+inds+'<td>'+sigText+'</td></tr>';
+  }).join('');
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  renderTable(lang);
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

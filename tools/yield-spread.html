@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yield Spread Dashboard | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════
+   YIELD SPREAD — local styles
+══════════════════════════════════════════════ */
+
+/* KPI strip: 4-up */
+.kpi-grid-4{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:0;
+}
+@media(max-width:860px){.kpi-grid-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.kpi-grid-4{grid-template-columns:1fr 1fr}}
+
+/* Table wrapper */
+.table-wrap{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  overflow:auto;
+  margin-bottom:0;
+}
+.cmp-tbl{width:100%;border-collapse:collapse;min-width:720px}
+.cmp-tbl thead{position:sticky;top:0;z-index:3}
+.cmp-tbl th{
+  background:#f0f6ff;
+  font-size:9px;
+  letter-spacing:.09em;
+  color:#5a7a9a;
+  font-weight:600;
+  padding:10px 14px;
+  text-align:right;
+  border-bottom:1px solid #dce8f5;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:background .15s;
+  user-select:none;
+}
+.cmp-tbl th:hover{background:#e4eefb;color:#1e3a5f}
+.cmp-tbl th:first-child{text-align:left;cursor:default}
+.cmp-tbl th.sorted{background:#ddeeff;color:#1e3a5f}
+.cmp-tbl th.sorted::after{content:' ↓';font-size:9px}
+.cmp-tbl th.sorted.asc::after{content:' ↑'}
+.cmp-tbl th[data-key]:not(.sorted):hover::after{content:' ↕';font-size:8px;color:#94a3b8}
+
+.cmp-tbl td{
+  padding:11px 14px;
+  font-size:12.5px;
+  border-bottom:1px solid #f0f5fb;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  color:#1e3a5f;
+  white-space:nowrap;
+  transition:background .1s;
+}
+.cmp-tbl td:first-child{text-align:left;font-weight:600}
+.cmp-tbl tbody tr:nth-child(even) td{background:#fafcfe}
+.cmp-tbl tbody tr:nth-child(even):hover td{background:#f3f8ff}
+.cmp-tbl tr:last-child td{border-bottom:none}
+.cmp-tbl tr:hover td{background:#f3f8ff !important}
+
+/* Verdict pill */
+.verdict-pill{
+  display:inline-block;
+  padding:3px 10px;
+  border-radius:12px;
+  font-size:10.5px;
+  font-weight:600;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+.pill-green {background:#dcfce7;color:#166534}
+.pill-yellow{background:#fef9c3;color:#854d0e}
+.pill-red   {background:#fee2e2;color:#991b1b}
+
+/* Carry coloring */
+.carry-pos{color:#16a34a;font-weight:600}
+.carry-neg{color:#dc2626}
+.carry-mid{color:#d97706;font-weight:600}
+
+/* Mono numbers */
+.num-mono{font-family:'JetBrains Mono',monospace;font-size:12px}
+
+/* Market cell */
+.mkt-flag{margin-right:5px;font-size:13px}
+.mkt-name{font-size:12.5px;color:#1e3a5f}
+.mkt-sub{
+  display:block;
+  font-size:10px;
+  color:#94a3b8;
+  font-weight:400;
+  margin-top:1px;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* Chart row */
+.chart-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:0;
+}
+@media(max-width:800px){.chart-row{grid-template-columns:1fr}}
+
+/* Sparkline grid 3x4 */
+.spark-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:0;
+}
+@media(max-width:900px){.spark-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.spark-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:380px){.spark-grid{grid-template-columns:1fr}}
+
+.spark-card{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  padding:10px 12px 8px;
+}
+.spark-title{
+  font-size:11px;
+  font-weight:600;
+  color:#1e3a5f;
+  margin-bottom:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.spark-meta{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;
+  color:#5a7a9a;
+  margin-bottom:6px;
+}
+.spark-na{
+  height:80px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  color:#94a3b8;
+  font-style:italic;
+}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<main class="container">
+
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <span class="updated">
+      <span class="lang-en">DECISION TOOL · Updated Apr 2025</span>
+      <span class="lang-zh" style="display:none">決策工具 · 更新於 2025年4月</span>
+    </span>
+    <h1>
+      <span class="lang-en">💵 Yield Spread Dashboard</span>
+      <span class="lang-zh" style="display:none">💵 殖利率利差儀表板</span>
+    </h1>
+    <p class="subtitle">
+      <span class="lang-en">Rental yield − 10Y government bond — find relatively cheap markets across 12 countries</span>
+      <span class="lang-zh" style="display:none">租金殖利率 − 10年期公債利率 — 12 市場哪個相對最便宜？</span>
+    </p>
+  </div>
+
+  <!-- ══ INSIGHT BOX ══ -->
+  <div class="insight-box accent" style="margin-bottom:0">
+    <span class="lang-en">
+      <strong>How to read spread:</strong>
+      Spread &gt; 3% — property cash flow substantially covers opportunity cost (relatively cheap).
+      Spread 0–3% — thin margin; capital gains required for a positive outcome.
+      Spread &lt; 0% — bonds yield more than rent; property priced for pure appreciation.
+      All yields are <strong>gross, pre-tax</strong>. Transaction costs, management fees, and vacancy not deducted.
+    </span>
+    <span class="lang-zh" style="display:none">
+      <strong>利差解讀：</strong>
+      利差 &gt; 3% — 房產租金現金流大幅覆蓋機會成本（相對便宜）。
+      利差 0–3% — 利差薄，需靠資本利得才合理。
+      利差 &lt; 0% — 公債殖利率高於租金，房產定價純靠升值預期。
+      所有收益率均為<strong>毛利率、稅前</strong>，未扣稅費、管理費及空置。
+    </span>
+  </div>
+
+  <!-- ══ KPI STRIP ══ -->
+  <div class="section-label" style="margin-top:24px">
+    <span class="lang-en">SNAPSHOT · APR 2025</span>
+    <span class="lang-zh" style="display:none">快照 · 2025年4月</span>
+  </div>
+  <div class="kpi-grid-4" id="kpiStrip">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- ══ RANKING ══ -->
+  <div class="section-label" style="margin-top:24px">
+    <span class="lang-en">RANKING — SPREAD LARGEST TO SMALLEST</span>
+    <span class="lang-zh" style="display:none">排行 — 利差由大到小</span>
+  </div>
+  <div class="chart-card">
+    <h3>
+      <span class="lang-en">Yield Spread Ranking</span>
+      <span class="lang-zh" style="display:none">殖利率利差排名</span>
+    </h3>
+    <p class="chart-subtitle">
+      <span class="lang-en">Bar length = spread. Label shows: gross yield − 10Y bond = spread. Green &gt; 3% · Light-green 1–3% · Yellow 0–1% · Red &lt; 0%</span>
+      <span class="lang-zh" style="display:none">條長 = 利差。標籤顯示：毛收益率 − 公債利率 = 利差。綠 &gt; 3% · 淡綠 1–3% · 黃 0–1% · 紅 &lt; 0%</span>
+    </p>
+    <div id="chartRanking" style="height:380px;width:100%"></div>
+  </div>
+
+  <!-- ══ SCATTER VIEW ══ -->
+  <div class="section-label" style="margin-top:24px">
+    <span class="lang-en">SCATTER VIEW — YIELD vs BOND</span>
+    <span class="lang-zh" style="display:none">散佈圖 — 收益率 vs 公債</span>
+  </div>
+  <div class="chart-card">
+    <h3>
+      <span class="lang-en">Rental Yield vs 10Y Government Bond</span>
+      <span class="lang-zh" style="display:none">租金收益率 vs 10Y公債殖利率</span>
+    </h3>
+    <p class="chart-subtitle">
+      <span class="lang-en">Diagonal y = x means spread = 0. Above line = positive spread (property cheap vs bonds). Below line = negative spread.</span>
+      <span class="lang-zh" style="display:none">對角線 y = x 表示利差為零。線上方 = 正利差（房產相對公債便宜）；線下方 = 負利差。</span>
+    </p>
+    <div id="chartScatter" style="height:380px;width:100%"></div>
+  </div>
+
+  <!-- ══ DATA TABLE ══ -->
+  <div class="section-label" style="margin-top:24px">
+    <span class="lang-en">DATA TABLE</span>
+    <span class="lang-zh" style="display:none">數據表</span>
+  </div>
+  <div class="table-wrap">
+    <table class="cmp-tbl" id="dataTable">
+      <thead>
+        <tr>
+          <th><span class="lang-en">Market</span><span class="lang-zh" style="display:none">市場</span></th>
+          <th data-key="yield"><span class="lang-en">Gross Yield</span><span class="lang-zh" style="display:none">毛收益率</span></th>
+          <th data-key="bond"><span class="lang-en">10Y Bond</span><span class="lang-zh" style="display:none">10Y公債</span></th>
+          <th data-key="spread"><span class="lang-en">Spread</span><span class="lang-zh" style="display:none">利差</span></th>
+          <th data-key="avg5y"><span class="lang-en">5Y Avg Spread</span><span class="lang-zh" style="display:none">5年均利差</span></th>
+          <th data-key="vsAvg"><span class="lang-en">vs 5Y Avg</span><span class="lang-zh" style="display:none">vs 5年均</span></th>
+          <th data-key="verdict"><span class="lang-en">Verdict</span><span class="lang-zh" style="display:none">評級</span></th>
+        </tr>
+      </thead>
+      <tbody id="dataTbody">
+        <tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:28px;font-size:12px">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══ HISTORICAL SPARKLINES ══ -->
+  <div class="section-label" style="margin-top:24px">
+    <span class="lang-en">HISTORICAL CONTEXT — 5-YEAR SPREAD TREND</span>
+    <span class="lang-zh" style="display:none">歷史背景 — 5年利差走勢</span>
+  </div>
+  <div class="spark-grid" id="sparkGrid">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- ══ SOURCE FOOTER ══ -->
+  <div class="source-footer" style="margin-top:20px">
+    <span class="lang-en">
+      <strong>Data sources (Apr 2025):</strong>
+      Rental yields — capital-city mid-market gross yields from Numbeo, PropertyGuru, SUUMO, Domain, Zillow, Daft.ie, KB Kookmin Bank, CBRE local offices (see per-market notes below).
+      10Y government bond yields — investing.com live rates as of Apr 2025.
+      <strong>All yields are gross and pre-tax.</strong> Net yield after vacancy (~5–10%), management (~8–12%), and taxes will be materially lower.
+      5-year average spread marked "directional only" where only historical yield or bond data is available from heterogeneous sources; treat with caution.
+      Sources verified: MY, TW, JP, AU, NZ, UK (primary). US, IE, TH, VN, KR, CA (secondary estimates).
+    </span>
+    <span class="lang-zh" style="display:none">
+      <strong>資料來源（2025年4月）：</strong>
+      租金收益率 — 各主要城市市場中位毛收益率，來源：Numbeo、PropertyGuru、SUUMO、Domain、Zillow、Daft.ie、KB 國民銀行、CBRE 各地辦事處。
+      10年期公債殖利率 — investing.com 2025年4月最新值。
+      <strong>所有收益率均為毛利率、稅前。</strong>扣除空置（~5–10%）、管理費（~8–12%）及稅後淨收益率將顯著較低。
+      5年均利差在歷史數據來源異質時標注「僅供方向性參考」，請謹慎解讀。
+    </span>
+  </div>
+
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   COLOR PALETTE & BASE SETTINGS
+═══════════════════════════════════════════════════════ */
+var C={navy:'#1e3a5f',green:'#16a34a',lightGreen:'#4ade80',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){o=o||{};var m=Object.assign({axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},splitLine:{lineStyle:{color:C.grid}}},o);m.axisLabel=Object.assign({},baseText,o.axisLabel||{});return m;}
+
+/* ═══════════════════════════════════════════════════════
+   MARKET DATA
+   Sources:
+   - Rental yield: Numbeo (KL, Bangkok, HCM, Seoul, Toronto), PropertyGuru (KL, Bangkok),
+     SUUMO (Tokyo), Domain (Sydney), Zillow (NYC), Daft.ie (Dublin), OneRoof (Auckland),
+     CBRE city reports (London). Capital city mid-market gross yield, Apr 2025.
+   - 10Y bond: investing.com Apr 2025
+   - 5y avg spread: directional estimates from CBRE Global Cap Rate Survey 2020-2024,
+     Savills World Research, Knight Frank Global Residential Cities Index.
+     Marked n/a where reliable historical cross-market data unavailable.
+═══════════════════════════════════════════════════════ */
+var MARKETS=[
+  /* MY — Kuala Lumpur
+     Yield: PropertyGuru/NAPIC 2025 Q1, KL mid-tier condo gross 5.0–5.5%, mid ~5.2%
+     Bond: BNM 10Y MGS Apr 2025 ~3.85%
+     5y avg: KL avg spread est. 1.6–2.0% (2020–2024), mid ~1.8% (PropertyGuru historical, directional) */
+  {key:'my',flag:'🇲🇾',en:'Kuala Lumpur',zh:'吉隆坡',
+   yield:5.2,bond:3.85,avg5y:1.8,stdDev:0.4,
+   spark:[1.6,1.7,1.8,1.9,1.5,1.35],  /* 2020–2025 directional */
+   yieldSrc:'PropertyGuru / NAPIC 2025 Q1',bondSrc:'BNM MGS Apr 2025'},
+
+  /* TW — Taipei
+     Yield: Sinyi Realty 2025, Taipei gross yield ~1.7–2.0%, mid ~1.8%
+     Bond: CBC 10Y Central Gov Bond Apr 2025 ~1.55%
+     5y avg: TW spread historically 0.2–0.5%, mid ~0.3% (directional) */
+  {key:'tw',flag:'🇹🇼',en:'Taipei',zh:'台北',
+   yield:1.8,bond:1.55,avg5y:0.3,stdDev:0.15,
+   spark:[0.25,0.30,0.35,0.28,0.22,0.25],
+   yieldSrc:'Sinyi Realty 2025',bondSrc:'CBC 10Y Bond Apr 2025'},
+
+  /* JP — Tokyo
+     Yield: SUUMO / CBRE Japan 2025 Q1, Tokyo 1K/2K apt gross ~4.0–4.5%, mid ~4.2%
+     Bond: JGB 10Y Apr 2025 ~1.50%
+     5y avg: JGB was near 0%, spread ~3.5–4% historically, now compressing; avg ~3.0% */
+  {key:'jp',flag:'🇯🇵',en:'Tokyo',zh:'東京',
+   yield:4.2,bond:1.50,avg5y:3.5,stdDev:0.6,
+   spark:[3.9,4.1,4.0,3.5,3.2,2.70],
+   yieldSrc:'SUUMO / CBRE Japan Q1 2025',bondSrc:'JGB 10Y Apr 2025'},
+
+  /* AU — Sydney
+     Yield: Domain / CoreLogic Mar 2025, Sydney gross rental yield ~3.1–3.5%, mid ~3.3%
+     Bond: ACGB 10Y Apr 2025 ~4.25%
+     5y avg: AU spread went negative in 2022-23 rate hike cycle; avg ~0.0% */
+  {key:'au',flag:'🇦🇺',en:'Sydney',zh:'雪梨',
+   yield:3.3,bond:4.25,avg5y:0.2,stdDev:0.9,
+   spark:[1.2,0.5,-0.3,-1.0,-0.8,-0.95],
+   yieldSrc:'Domain / CoreLogic Mar 2025',bondSrc:'ACGB 10Y Apr 2025'},
+
+  /* NZ — Auckland
+     Yield: OneRoof / CoreLogic NZ Mar 2025, Auckland gross ~3.3–3.8%, mid ~3.5%
+     Bond: NZGB 10Y Apr 2025 ~4.55%
+     5y avg: Similar to AU; went negative during hike cycle; avg ~0.1% */
+  {key:'nz',flag:'🇳🇿',en:'Auckland',zh:'奧克蘭',
+   yield:3.5,bond:4.55,avg5y:0.3,stdDev:0.9,
+   spark:[1.5,0.8,-0.2,-1.2,-0.9,-1.05],
+   yieldSrc:'OneRoof / CoreLogic NZ Mar 2025',bondSrc:'NZGB 10Y Apr 2025'},
+
+  /* UK — London
+     Yield: CBRE / Savills London Q4 2024, London prime gross ~5.0–6.0%, mid ~5.5%
+     Bond: UK Gilt 10Y Apr 2025 ~4.55%
+     5y avg: London spread ~0.5–1.5%, avg ~1.0% (directional, CBRE) */
+  {key:'uk',flag:'🇬🇧',en:'London',zh:'倫敦',
+   yield:5.5,bond:4.55,avg5y:1.0,stdDev:0.5,
+   spark:[1.2,1.5,0.8,0.5,0.7,0.95],
+   yieldSrc:'CBRE / Savills London Q4 2024',bondSrc:'UK Gilt 10Y Apr 2025'},
+
+  /* US — New York City
+     Yield: Zillow / StreetEasy NYC Q1 2025, NYC Manhattan/Brooklyn gross ~5.5–7.5%, mid ~6.5%
+     Bond: UST 10Y Apr 2025 ~4.35%
+     5y avg: US spread was high in 2020-21, compressed in hikes; avg ~1.5% (directional) */
+  {key:'us',flag:'🇺🇸',en:'New York City',zh:'紐約',
+   yield:6.5,bond:4.35,avg5y:1.5,stdDev:1.0,
+   spark:[3.5,3.0,1.5,0.5,1.8,2.15],
+   yieldSrc:'Zillow / StreetEasy NYC Q1 2025',bondSrc:'UST 10Y Apr 2025'},
+
+  /* TH — Bangkok
+     Yield: CBRE Thailand / DDproperty Q1 2025, Bangkok condo gross ~4.0–5.0%, mid ~4.5%
+     Bond: Thai Gov Bond 10Y Apr 2025 ~2.70%
+     5y avg: Thailand spread ~1.5–2.5%, avg ~2.0% (directional, CBRE) */
+  {key:'th',flag:'🇹🇭',en:'Bangkok',zh:'曼谷',
+   yield:4.5,bond:2.70,avg5y:2.0,stdDev:0.4,
+   spark:[1.8,2.1,2.2,1.8,1.7,1.80],
+   yieldSrc:'CBRE Thailand / DDproperty Q1 2025',bondSrc:'Thai GB 10Y Apr 2025'},
+
+  /* VN — Ho Chi Minh City
+     Yield: CBRE Vietnam / PropertyGuru VN Q1 2025, HCM gross ~4.5–5.5%, mid ~5.0%
+     Bond: Vietnam Gov Bond 10Y Apr 2025 ~3.00%
+     5y avg: VN spread ~1.5–3.0%, avg ~2.0% (limited reliable history) */
+  {key:'vn',flag:'🇻🇳',en:'Ho Chi Minh City',zh:'胡志明市',
+   yield:5.0,bond:3.00,avg5y:2.0,stdDev:0.5,
+   spark:null,  /* insufficient reliable 5y cross-source data */
+   yieldSrc:'CBRE Vietnam / PropertyGuru VN Q1 2025',bondSrc:'VN Gov Bond 10Y Apr 2025'},
+
+  /* KR — Seoul
+     Yield: KB Kookmin Bank / Real Estate Board of Korea Q1 2025
+     Seoul apt gross rental yield ~2.3–2.8%, mid ~2.5%
+     Bond: KTB 10Y Apr 2025 ~2.85%
+     5y avg: KR spread near zero or negative; avg ~-0.1% (directional) */
+  {key:'kr',flag:'🇰🇷',en:'Seoul',zh:'首爾',
+   yield:2.5,bond:2.85,avg5y:-0.1,stdDev:0.3,
+   spark:[-0.1,-0.1,0.0,-0.2,-0.3,-0.35],
+   yieldSrc:'KB Kookmin Bank / REBO Q1 2025',bondSrc:'KTB 10Y Apr 2025'},
+
+  /* CA — Toronto
+     Yield: TRREB / CBRE Canada Q1 2025, Toronto condo gross ~3.2–3.8%, mid ~3.5%
+     Bond: Canada Gov Bond 10Y Apr 2025 ~3.25%
+     5y avg: CA spread ~0.3–1.0%, avg ~0.6% (directional) */
+  {key:'ca',flag:'🇨🇦',en:'Toronto',zh:'多倫多',
+   yield:3.5,bond:3.25,avg5y:0.6,stdDev:0.5,
+   spark:[1.5,1.2,0.5,-0.3,0.1,0.25],
+   yieldSrc:'TRREB / CBRE Canada Q1 2025',bondSrc:'Canada GB 10Y Apr 2025'},
+
+  /* IE — Dublin
+     Yield: Daft.ie Rental Report Q1 2025, Dublin gross ~6.0–7.0%, mid ~6.5%
+     Bond: Irish Gov Bond (NTMA) 10Y Apr 2025 ~2.95%
+     5y avg: IE spread high due to rental shortage; avg ~3.5% (directional) */
+  {key:'ie',flag:'🇮🇪',en:'Dublin',zh:'都柏林',
+   yield:6.5,bond:2.95,avg5y:3.5,stdDev:0.8,
+   spark:[2.5,3.0,3.5,4.0,3.8,3.55],
+   yieldSrc:'Daft.ie Rental Report Q1 2025',bondSrc:'NTMA 10Y Bond Apr 2025'}
+];
+
+/* Pre-compute spread */
+MARKETS.forEach(function(m){
+  m.spread=+(m.yield-m.bond).toFixed(2);
+});
+
+/* ═══════════════════════════════════════════════════════
+   HELPER: spread → color
+═══════════════════════════════════════════════════════ */
+function spreadColor(s){
+  if(s>3) return C.green;
+  if(s>1) return '#22c55e';   /* light green */
+  if(s>0) return C.orange;
+  return C.red;
+}
+function spreadPillCls(s){
+  if(s>3) return 'pill-green';
+  if(s>0) return 'pill-yellow';
+  return 'pill-red';
+}
+
+/* ═══════════════════════════════════════════════════════
+   KPI STRIP
+═══════════════════════════════════════════════════════ */
+function renderKPI(lang){
+  var en=lang==='en';
+  var sorted=[].concat(MARKETS).sort(function(a,b){return b.spread-a.spread;});
+  var spreads=MARKETS.map(function(m){return m.spread;});
+  var median=spreads.slice().sort(function(a,b){return a-b;})[Math.floor(spreads.length/2)];
+  var negCount=spreads.filter(function(s){return s<0;}).length;
+  var best=sorted[0];
+  var worst=sorted[sorted.length-1];
+
+  var cards=[
+    {label:en?'Highest Spread':'最高利差',
+     value:(best.spread>0?'+':'')+best.spread.toFixed(1)+'%',
+     badge:best.flag+' '+(en?best.en:best.zh),
+     cls:'green',bCls:'badge-green'},
+    {label:en?'Lowest Spread':'最低利差',
+     value:(worst.spread>0?'+':'')+worst.spread.toFixed(1)+'%',
+     badge:worst.flag+' '+(en?worst.en:worst.zh),
+     cls:'red',bCls:'badge-red'},
+    {label:en?'Median Spread':'中位利差',
+     value:(median>0?'+':'')+median.toFixed(1)+'%',
+     badge:en?'12 markets':'12 市場',
+     cls:'blue',bCls:'badge-blue'},
+    {label:en?'Negative Spread Markets':'負利差市場',
+     value:negCount+' / 12',
+     badge:en?'below bond yield':'低於公債殖利率',
+     cls:negCount>=4?'red':'orange',
+     bCls:negCount>=4?'badge-red':'badge-orange'}
+  ];
+
+  document.getElementById('kpiStrip').innerHTML=cards.map(function(c){
+    return '<div class="kpi-card '+c.cls+'">'+
+      '<div class="kpi-label">'+c.label+'</div>'+
+      '<div class="kpi-value num-mono">'+c.value+'</div>'+
+      '<span class="kpi-badge '+c.bCls+'">'+c.badge+'</span>'+
+    '</div>';
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════════════════ */
+var sortKey='spread', sortAsc=false;
+
+function verdictFor(m){
+  /* Compare today's spread vs 5y avg ± 1σ */
+  var diff=m.spread-m.avg5y;
+  if(diff>m.stdDev) return 'favorable';
+  if(diff>-m.stdDev) return 'neutral';
+  return 'stretched';
+}
+
+function renderTable(lang){
+  var en=lang==='en';
+  var sorted=[].concat(MARKETS).sort(function(a,b){
+    var av=a[sortKey],bv=b[sortKey];
+    if(typeof av==='number'&&typeof bv==='number') return sortAsc?av-bv:bv-av;
+    return sortAsc?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));
+  });
+
+  document.querySelectorAll('.cmp-tbl th[data-key]').forEach(function(th){
+    th.classList.remove('sorted','asc');
+    if(th.getAttribute('data-key')===sortKey){
+      th.classList.add('sorted');
+      if(sortAsc) th.classList.add('asc');
+    }
+  });
+
+  var html=sorted.map(function(m){
+    var sCls=m.spread>3?'carry-pos':m.spread>0?'carry-mid':'carry-neg';
+    var verd=verdictFor(m);
+    var diff=m.spread-m.avg5y;
+    var diffTxt=(diff>0?'+':'')+diff.toFixed(1)+'%';
+    var diffCls=diff>0?'carry-pos':'carry-neg';
+
+    var verdEn,verdZh,pCls;
+    if(verd==='favorable'){verdEn='🟢 Favorable';verdZh='🟢 偏便宜';pCls='pill-green';}
+    else if(verd==='neutral'){verdEn='🟡 Neutral';verdZh='🟡 中性';pCls='pill-yellow';}
+    else{verdEn='🔴 Stretched';verdZh='🔴 偏貴';pCls='pill-red';}
+
+    var avg5yTxt=m.avg5y!==null?(m.avg5y>0?'+':'')+m.avg5y.toFixed(1)+'%':'n/a';
+
+    return '<tr>'+
+      '<td>'+
+        '<span class="mkt-flag">'+m.flag+'</span>'+
+        '<span class="mkt-name"><span class="lang-en">'+m.en+'</span><span class="lang-zh" style="display:'+(en?'none':'')+'">'+m.zh+'</span></span>'+
+      '</td>'+
+      '<td class="num-mono">'+m.yield.toFixed(1)+'%</td>'+
+      '<td class="num-mono">'+m.bond.toFixed(2)+'%</td>'+
+      '<td class="num-mono '+sCls+'">'+(m.spread>0?'+':'')+m.spread.toFixed(2)+'%</td>'+
+      '<td class="num-mono" style="color:#5a7a9a">'+avg5yTxt+'</td>'+
+      '<td class="num-mono '+diffCls+'">'+diffTxt+'</td>'+
+      '<td><span class="verdict-pill '+pCls+'"><span class="lang-en">'+verdEn+'</span><span class="lang-zh" style="display:'+(en?'none':'')+'">'+verdZh+'</span></span></td>'+
+    '</tr>';
+  }).join('');
+
+  document.getElementById('dataTbody').innerHTML=html;
+
+  /* Re-apply lang in tbody */
+  document.querySelectorAll('#dataTbody .lang-en').forEach(function(e){e.style.display=en?'':'none';});
+  document.querySelectorAll('#dataTbody .lang-zh').forEach(function(e){e.style.display=en?'none':'';});
+}
+
+/* ═══════════════════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════════════════ */
+var allCharts=[];
+
+function renderCharts(lang){
+  allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  var en=lang==='en';
+
+  /* ── Ranking horizontal bar ── */
+  var ranked=[].concat(MARKETS).sort(function(a,b){return b.spread-a.spread;});
+  var rLabels=ranked.map(function(m){return m.flag+' '+(en?m.en:m.zh);});
+  var rValues=ranked.map(function(m){return m.spread;});
+  var rColors=ranked.map(function(m){return spreadColor(m.spread);});
+
+  var c1=echarts.init(document.getElementById('chartRanking'));
+  allCharts.push(c1);
+  c1.setOption({
+    tooltip:{
+      trigger:'axis',axisPointer:{type:'none'},
+      backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'},
+      formatter:function(params){
+        var m=ranked[params[0].dataIndex];
+        return params[0].name+'<br>'+
+          (en?'Gross Yield':'毛收益率')+': '+m.yield.toFixed(1)+'%<br>'+
+          (en?'10Y Bond':'10Y公債')+': '+m.bond.toFixed(2)+'%<br>'+
+          '<strong>'+(en?'Spread':'利差')+': '+(m.spread>0?'+':'')+m.spread.toFixed(2)+'%</strong>';
+      }
+    },
+    grid:{left:10,right:80,top:10,bottom:10,containLabel:true},
+    xAxis:mkAxis({
+      type:'value',
+      axisLabel:{formatter:function(v){return v+'%';}},
+      splitLine:{lineStyle:{color:'#eef3f9'}},
+      /* Reference line at 0 */
+    }),
+    yAxis:mkAxis({type:'category',data:rLabels,axisLabel:{fontSize:11,color:C.navy}}),
+    series:[
+      /* zero reference */
+      {
+        type:'line',
+        data:rLabels.map(function(){return 0;}),
+        symbol:'none',
+        lineStyle:{color:'#94a3b8',width:1,type:'dashed'},
+        itemStyle:{color:'#94a3b8'},
+        z:0
+      },
+      {
+        type:'bar',
+        data:rValues,
+        itemStyle:{
+          color:function(p){return spreadColor(rValues[p.dataIndex]);},
+          borderRadius:function(p){return rValues[p.dataIndex]>=0?[0,3,3,0]:[3,0,0,3];}
+        },
+        barMaxWidth:30,
+        label:{
+          show:true,position:function(p){return rValues[p.dataIndex]>=0?'right':'left';},
+          fontSize:10,color:C.navy,
+          formatter:function(p){
+            var m=ranked[p.dataIndex];
+            var s=m.spread;
+            return m.yield.toFixed(1)+'% − '+m.bond.toFixed(2)+'% = '+(s>0?'+':'')+s.toFixed(2)+'%';
+          }
+        }
+      }
+    ]
+  });
+
+  /* ── Scatter chart ── */
+  var allVals=MARKETS.reduce(function(acc,m){return acc.concat([m.yield,m.bond]);},[]);
+  var maxV=Math.ceil(Math.max.apply(null,allVals))+0.5;
+  var minV=Math.max(0,Math.floor(Math.min.apply(null,allVals))-0.5);
+
+  var scatterData=MARKETS.map(function(m){
+    return {
+      value:[m.bond,m.yield],
+      name:m.flag+' '+(en?m.en:m.zh),
+      itemStyle:{color:spreadColor(m.spread)}
+    };
+  });
+
+  var c2=echarts.init(document.getElementById('chartScatter'));
+  allCharts.push(c2);
+  c2.setOption({
+    tooltip:{
+      trigger:'item',
+      backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'},
+      formatter:function(p){
+        var m=MARKETS.filter(function(x){
+          return (en?x.en:x.zh)===p.name.replace(/^\S+\s/,'');
+        })[0]||MARKETS[p.dataIndex];
+        return '<strong>'+p.name+'</strong><br>'+
+          (en?'10Y Bond':'10Y公債')+': '+p.value[0].toFixed(2)+'%<br>'+
+          (en?'Gross Yield':'毛收益率')+': '+p.value[1].toFixed(1)+'%<br>'+
+          '<strong>'+(en?'Spread':'利差')+': '+(m.spread>0?'+':'')+m.spread.toFixed(2)+'%</strong>';
+      }
+    },
+    grid:{left:10,right:30,top:50,bottom:20,containLabel:true},
+    xAxis:mkAxis({
+      type:'value',
+      name:en?'10Y Govt Bond Yield (%)':'10Y公債殖利率（%）',
+      nameTextStyle:Object.assign({},baseText,{fontSize:11}),
+      min:minV,max:maxV,
+      axisLabel:{formatter:'{value}%'}
+    }),
+    yAxis:mkAxis({
+      type:'value',
+      name:en?'Gross Rental Yield (%)':'毛租金收益率（%）',
+      nameTextStyle:Object.assign({},baseText,{fontSize:11}),
+      min:minV,max:maxV,
+      axisLabel:{formatter:'{value}%'}
+    }),
+    series:[
+      /* diagonal y=x */
+      {
+        type:'line',
+        name:en?'Spread = 0 (y = x)':'利差 = 0',
+        data:[[minV,minV],[maxV,maxV]],
+        symbol:'none',
+        lineStyle:{color:'#94a3b8',width:1,type:'dashed'},
+        itemStyle:{color:'#94a3b8'}
+      },
+      /* shaded region annotation above diagonal — not native in ECharts easily; skip, use text instead */
+      {
+        type:'scatter',
+        name:en?'Markets':'市場',
+        data:scatterData,
+        symbolSize:11,
+        label:{
+          show:true,position:'top',fontSize:11,
+          color:C.navy,
+          formatter:function(p){
+            /* find flag from name */
+            var idx=p.dataIndex;
+            return MARKETS[idx].flag;
+          }
+        }
+      }
+    ],
+    legend:{
+      top:10,
+      textStyle:baseText,
+      icon:'circle',itemWidth:8,itemHeight:8,
+      data:[en?'Spread = 0 (y = x)':'利差 = 0',en?'Markets':'市場']
+    },
+    graphic:[
+      {
+        type:'text',
+        left:'62%',top:'22%',
+        style:{text:en?'Above = positive spread\n(property cheap vs bonds)':'上方 = 正利差\n（房產相對公債便宜）',
+          fill:'#16a34a',fontSize:10,fontFamily:'Inter'}
+      },
+      {
+        type:'text',
+        left:'18%',top:'65%',
+        style:{text:en?'Below = negative spread\n(bonds yield more than rent)':'下方 = 負利差\n（公債高於租金）',
+          fill:'#dc2626',fontSize:10,fontFamily:'Inter'}
+      }
+    ]
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SPARKLINES
+═══════════════════════════════════════════════════════ */
+var sparkCharts=[];
+
+function renderSparks(lang){
+  sparkCharts.forEach(function(c){if(c)c.dispose();});sparkCharts=[];
+  var en=lang==='en';
+  var years=['2020','2021','2022','2023','2024','2025'];
+
+  var html=MARKETS.map(function(m){
+    var s=m.spread;
+    var sCls=s>3?'carry-pos':s>0?'carry-mid':'carry-neg';
+    var spreadTxt=(s>0?'+':'')+s.toFixed(2)+'%';
+    return '<div class="spark-card">'+
+      '<div class="spark-title">'+m.flag+' <span class="lang-en">'+m.en+'</span><span class="lang-zh" style="display:'+(en?'none':'')+'">'+m.zh+'</span></div>'+
+      '<div class="spark-meta">'+
+        '<span class="'+sCls+'">'+spreadTxt+'</span>'+
+        ' <span style="color:#94a3b8">'+(en?'today':'今日')+'</span>'+
+      '</div>'+
+      (m.spark?'<div id="spark-'+m.key+'" style="height:80px;width:100%"></div>':'<div class="spark-na">n/a — '+
+        (en?'insufficient 5y data':'5年歷史數據不足')+
+      '</div>')+
+    '</div>';
+  }).join('');
+
+  document.getElementById('sparkGrid').innerHTML=html;
+
+  /* Re-apply lang in sparks */
+  document.querySelectorAll('#sparkGrid .lang-en').forEach(function(e){e.style.display=en?'':'none';});
+  document.querySelectorAll('#sparkGrid .lang-zh').forEach(function(e){e.style.display=en?'none':'';});
+
+  /* Init mini charts */
+  MARKETS.forEach(function(m){
+    if(!m.spark) return;
+    var el=document.getElementById('spark-'+m.key);
+    if(!el) return;
+    var sc=echarts.init(el);
+    sparkCharts.push(sc);
+    var color=spreadColor(m.spread);
+    sc.setOption({
+      grid:{left:4,right:4,top:4,bottom:4,containLabel:false},
+      tooltip:{
+        trigger:'axis',
+        backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+        textStyle:{color:C.navy,fontSize:10},
+        formatter:function(params){
+          var v=params[0].value;
+          return years[params[0].dataIndex]+': '+(v>0?'+':'')+v.toFixed(1)+'%';
+        }
+      },
+      xAxis:{type:'category',data:years,show:false},
+      yAxis:{type:'value',show:false},
+      series:[{
+        type:'line',
+        data:m.spark,
+        smooth:true,
+        symbol:'none',
+        lineStyle:{color:color,width:2},
+        areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,
+          colorStops:[{offset:0,color:color+'55'},{offset:1,color:color+'08'}]}},
+        markLine:{
+          silent:true,
+          symbol:'none',
+          label:{show:false},
+          lineStyle:{color:'#94a3b8',width:1,type:'dashed'},
+          data:[{yAxis:0}]
+        }
+      }]
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   TABLE SORT
+═══════════════════════════════════════════════════════ */
+document.querySelectorAll('.cmp-tbl th[data-key]').forEach(function(th){
+  th.addEventListener('click',function(){
+    var key=th.getAttribute('data-key');
+    if(sortKey===key){sortAsc=!sortAsc;}else{sortKey=key;sortAsc=false;}
+    var lang=localStorage.getItem('lang')||'en';
+    renderTable(lang);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════
+   LANG SWITCHING
+═══════════════════════════════════════════════════════ */
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  sparkCharts.forEach(function(c){if(c)c.dispose();});
+  sparkCharts=[];
+  renderKPI(lang);
+  renderTable(lang);
+  renderCharts(lang);
+  renderSparks(lang);
+}
+
+window.addEventListener('resize',function(){
+  allCharts.forEach(function(c){if(c)c.resize();});
+  sparkCharts.forEach(function(c){if(c)c.resize();});
+});
+
+window.addEventListener('load',function(){
+  var lang=localStorage.getItem('lang')||'en';
+  setLang(lang);
+});
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

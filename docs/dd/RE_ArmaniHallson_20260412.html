@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Armani Hallson KLCC｜建案深度分析報告</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.7}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:12px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace}
+.top-bar span{opacity:.85}
+.container{max-width:1100px;margin:0 auto;padding:70px 24px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:8px}
+.report-title .subtitle{font-size:12px;opacity:.75;font-family:'IBM Plex Mono',monospace}
+.report-title .meta-row{display:flex;gap:24px;flex-wrap:wrap;margin-top:16px}
+.meta-badge{background:rgba(255,255,255,.15);padding:4px 12px;border-radius:4px;font-size:12px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:14px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A;display:flex;align-items:center;gap:10px}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px;text-align:center;border-top:3px solid #14532D}
+.kpi-card .kpi-value{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-card .kpi-label{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-card .kpi-change{font-size:12px;font-family:'IBM Plex Mono',monospace;margin-top:4px}
+.up{color:#16a34a}.down{color:#dc2626}.neutral{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:10px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:9px 12px;border-bottom:1px solid #e2e8f0}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.alert-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.alert-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.alert-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.alert-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.alert-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+h3{color:#14532D;font-size:14px;margin:16px 0 8px}
+h4{font-size:13px;color:#334155;margin:12px 0 6px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.callout strong{color:#C2410C}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+.divider{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.source{font-size:11px;color:#94a3b8;margin-top:8px;font-style:italic}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:2px}
+.tag-red{background:#FEE2E2;color:#991B1B}
+.tag-green{background:#DCFCE7;color:#166534}
+.tag-yellow{background:#FEF9C3;color:#92400E}
+.tag-blue{background:#EFF6FF;color:#1e40af}
+/* Score card */
+.score-outer{background:#14532D;border-radius:10px;padding:28px;margin:20px 0}
+.score-title{color:#fff;font-size:13px;font-weight:700;margin-bottom:20px;text-align:center;opacity:.8}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.score-col{background:rgba(255,255,255,.07);border-radius:8px;padding:20px}
+.score-col-title{color:#86efac;font-size:12px;font-weight:700;margin-bottom:14px;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em}
+.score-item{margin-bottom:10px}
+.score-item-label{color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px;display:flex;justify-content:space-between}
+.score-item-label span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.score-bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:8px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.score-total-box{text-align:center;padding:28px;border-top:1px solid rgba(255,255,255,.15);margin-top:20px}
+.score-number{font-family:'IBM Plex Mono',monospace;font-size:64px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-family:'IBM Plex Mono',monospace;font-size:24px;color:rgba(255,255,255,.4)}
+.score-rating{display:inline-block;margin-top:12px;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700}
+.verdict-green{background:#DCFCE7;color:#166534;padding:20px 24px;border-radius:6px;margin:16px 0;border-left:5px solid #16a34a}
+.verdict-yellow{background:#FEF9C3;color:#92400E;padding:20px 24px;border-radius:6px;margin:16px 0;border-left:5px solid #d97706}
+.verdict-red{background:#FEE2E2;color:#991B1B;padding:20px 24px;border-radius:6px;margin:16px 0;border-left:5px solid #dc2626}
+.dual-card{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.buy-card{background:#F0FDF4;border-radius:8px;padding:20px;border:1px solid #bbf7d0}
+.market-card{background:#F8FAFC;border-radius:8px;padding:20px;border:1px solid #e2e8f0}
+.card-title{font-size:12px;font-weight:700;margin-bottom:12px;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em}
+.buy-card .card-title{color:#166534}
+.market-card .card-title{color:#475569}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+.print-btn:hover{background:#166534}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:12px}
+.spec-label{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.spec-value{font-size:14px;font-weight:700;color:#14532D}
+.risk-table td:first-child{font-weight:600;width:120px}
+@media(max-width:700px){.two-col,.score-cols,.dual-card{grid-template-columns:1fr}.score-number{font-size:48px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:20px}body{background:#fff}.section{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span>📍 分析建案：Armani Hallson KLCC ｜ 框架版本 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 數據基礎：NAPIC Q3 2025 + 上游 KL 深度報告</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:11px;opacity:.6;font-family:'IBM Plex Mono',monospace;margin-bottom:8px">房地產建案深度分析 v1.3 ｜ 買側研究視角</div>
+  <h1>Armani Hallson KLCC<br>建案深度分析與投資評分報告</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&price=1100000&from=ArmaniHallson"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=ArmaniHallson"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="subtitle">Jalan Ampang，距 KLCC Petronas Twin Towers 300m ｜ GDV RM30億 ｜ 2,215單位 ｜ 竣工 2029/2030</div>
+  <div class="meta-row">
+    <span class="meta-badge">📁 依據：KL供需Overhang報告(2026-04-01)</span>
+    <span class="meta-badge">📁 依據：KL RM1M+市場分析(2026-03)</span>
+    <span class="meta-badge">🔍 資料來源：The Edge / PropertyGuru / EdgeProp / AmBank / NAPIC</span>
+    <span class="meta-badge">⏱ 報告日期：2026-04-12</span>
+  </div>
+</div>
+
+<!-- KPI Overview -->
+<div class="section">
+  <div class="section-header">📊 建案基本數據一覽</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-value">RM30億</div>
+        <div class="kpi-label">估計 GDV</div>
+        <div class="kpi-change neutral">Armani Group 最大規模項目</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">2,215</div>
+        <div class="kpi-label">總單位數（3棟）</div>
+        <div class="kpi-change neutral">SOHO 775 + SOVO 1,440</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">RM1,636+</div>
+        <div class="kpi-label">起步 PSF（發售價）</div>
+        <div class="kpi-change neutral">二手掛牌 PSF RM1,613–3,662</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">70%</div>
+        <div class="kpi-label">取購率（2025年9月）</div>
+        <div class="kpi-change up">▲ 發售後約6週達成</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">2029/30</div>
+        <div class="kpi-label">預計竣工交屋</div>
+        <div class="kpi-change neutral">60個月施工期（SPA 2025年）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">商業地契</div>
+        <div class="kpi-label">地契類型（SOVO棟）</div>
+        <div class="kpi-change down">⚠ SOHO棟受 HDA 保護</div>
+      </div>
+    </div>
+
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">開發商</div><div class="spec-value">Armani Group（Armani Hallson KLCC Sdn Bhd）</div></div>
+      <div class="spec-item"><div class="spec-label">地段</div><div class="spec-value">Jalan Ampang，前身 SJKC Lai Meng，2.61英畝</div></div>
+      <div class="spec-item"><div class="spec-label">SOHO規格</div><div class="spec-value">538–558 sqft，Block C（68層），775戶</div></div>
+      <div class="spec-item"><div class="spec-label">SOVO規格</div><div class="spec-value">406–1,182 sqft，Block A+B（78層），1,440戶</div></div>
+      <div class="spec-item"><div class="spec-label">管理費</div><div class="spec-value">RM0.95 psf（含沉沒基金）</div></div>
+      <div class="spec-item"><div class="spec-label">銀行支持</div><div class="spec-value">AmBank（開發融資合作）</div></div>
+      <div class="spec-item"><div class="spec-label">土地來源</div><div class="spec-value">Magna Prima Bhd 與 Armani 合作開發（土地2014年以RM1.48億購入）</div></div>
+      <div class="spec-item"><div class="spec-label">連接設施</div><div class="spec-value">KLCC Link Bridge（覆蓋走廊）+ Bukit Nanas Monorail 400m</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 First Principles -->
+<div class="section">
+  <div class="section-header">§0｜第一性原理與城市定位</div>
+  <div class="section-body">
+    <h3>A｜KL KLCC 地段解決什麼不可替代需求？</h3>
+    <p>Armani Hallson 所在的 Jalan Ampang / KLCC 核心廊帶，是馬來西亞唯一具備「全球金融中心辨識度」的地段——Petronas Twin Towers 作為國家品牌符號，使 KLCC 地址本身已是身份錨點。這一地段為外籍高淨值人士提供「住在全球最具辨識度城市地標旁」的心理訴求，是吉隆坡其他任何地段都無法複製的。依據我們的 KL 供需報告，MM2H 買家中有 744 宗（RM15億）已在 KL 完成購置，而 KLCC/Town Centre 正是此類買家的首選落腳地。</p>
+
+    <p>然而，Armani Hallson 是以 SOHO/SOVO 混合體入場，而非傳統住宅地契公寓。從結構上看，它介於 TS2（Bukit Bintang 純功能性 SR）和 KLCC 頂奢稀缺物業（Binjai、Four Seasons）之間——試圖以 RM1,636+ psf 的定價觸及「KLCC 位置 + 相對可負擔入場」的交集。問題是，這個交集在歷史上是 KL 供給最過剩、定價最難撐起的区间。</p>
+
+    <div class="alert alert-orange">
+      <strong>第一性原理洞察：</strong>地段頂級，但產品類型（SOVO 商業地契）屬於歷史上積壓最重的品類（全馬服務式公寓庫存 17,900 戶，KL 估 8,000–9,000 戶）。KLCC 地址溢價能否彌補 SOVO 結構性折扣，是本案最關鍵的投資論點。
+    </div>
+
+    <hr class="divider">
+    <h3>B｜Munger 逆向推演——哪些路徑會讓這個建案投資失敗？</h3>
+
+    <table class="risk-table">
+      <thead><tr><th>風險維度</th><th>具體情境</th><th>觸發概率</th><th>對 Armani Hallson 的傳導</th></tr></thead>
+      <tbody>
+        <tr><td>供給過剩</td><td>2029年竣工時，KLCC周邊 SOVO/SR 廣義庫存仍高企，租客有大量替代選擇</td><td>🟠 中高</td><td>租金難以支撐 3–4% gross yield；二手流動性差</td></tr>
+        <tr><td>商業地契結構</td><td>SOVO 棟無 HDA 保護，水電費維持商業費率（若無法申請改民用），持有成本長期偏高</td><td>🟠 中</td><td>買方池結構性窄於住宅地契；二手轉讓折讓 10–15%</td></tr>
+        <tr><td>開發商風險</td><td>Armani Group 首次承接 RM30 億級項目，規模是過往全部完成項目（RM17 億）的 1.76 倍；施工延期或品質問題</td><td>🟡 中</td><td>2029–2030 交屋若有延遲，持有成本累積；品質未達預期影響二手溢價</td></tr>
+        <tr><td>定價過高</td><td>RM1,636–2,300 psf 的定價，在同區同期 SOVO 類競品中屬中高位，若 2029年 KLCC 市場走弱，估值難以撐住</td><td>🟡 中</td><td>二手轉讓空間受壓；投資者進場成本難以回收</td></tr>
+        <tr><td>MM2H 政策轉向</td><td>馬來西亞外資購屋政策收緊或 MM2H 門檻提高</td><td>🔵 低</td><td>少部分 MM2H 需求撤出，但主要買家為本地和新加坡人</td></tr>
+        <tr><td>密度過高</td><td>2.61 英畝上蓋 2,215 個單位，密度極高，公設競爭激烈，社區品質下降</td><td>🟠 中高</td><td>出租管理複雜，短租平台競爭激烈，品牌難以持守</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout"><strong>最大尾部風險：</strong>SOVO商業地契 × 高密度 × 2029年完工潮（恰好落在廣義 Overhang 次高峰期），三重壓力疊加，若租金市場同步走弱，期房投資者的退出流動性可能遠低於預期。這是最難提前察覺的一條，因為在發售期（2025年）市場仍相對熱絡。</div>
+
+    <hr class="divider">
+    <h3>C｜投資論點錨定</h3>
+    <table>
+      <thead><tr><th>項目</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr><td>核心驅動力</td><td>KLCC 地址稀缺性 + KLCC Link Bridge 步行連接 + 70% 快速取購率顯示需求端真實 + MM2H 台灣/新加坡買家興趣</td></tr>
+        <tr><td>主要假設 H1</td><td>2029–2030 年竣工時，KLCC SOVO 租金市場仍能維持 RM4,000–6,000/月（2BR equivalent），支撐 3–4% gross yield</td></tr>
+        <tr><td>主要假設 H2</td><td>Armani Group 能按時交屋且品質符合 RM1,636 psf 定價水準，品牌溢價得以兌現</td></tr>
+        <tr><td>關鍵監測指標</td><td>① 2027–2028 年 KLCC SOVO 空置率（若 >30% 則重評）；② 同棟二手掛牌 PSF 折讓幅度；③ 2026年後 KL SR 廣義 Overhang 是否惡化超過 12,000 戶</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §1 Market Overview -->
+<div class="section">
+  <div class="section-header">§1｜總體市場概況（依據上游 KL 報告）</div>
+  <div class="section-body">
+    <h3>1.1 KLCC 區域價格趨勢（Q3 2025）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>當前值</th><th>1年前</th><th>YoY 變化</th><th>解讀</th></tr></thead>
+      <tbody>
+        <tr><td>KL 全市公寓中位數</td><td>RM 510,000</td><td>~RM 490,000</td><td><span class="up">+4.1%</span></td><td>整體溫和上行</td></tr>
+        <tr><td>KLCC/Town Centre 公寓中位數</td><td>RM 600,000</td><td>~RM 575,000</td><td><span class="up">+4.3%</span></td><td>核心區優於全市</td></tr>
+        <tr><td>高端住宅 PSF（JLL）</td><td>USD 240（≈RM1,100–1,200）</td><td>~USD 225</td><td><span class="up">+6.7%</span></td><td>外籍高端需求帶動</td></tr>
+        <tr><td>Binjai on the Park（頂奢稀缺）</td><td>RM 2,660 psf</td><td>~RM 1,673 psf</td><td><span class="up">+59.1%</span></td><td>稀缺性推動，不具代表性</td></tr>
+        <tr><td>Sky Suites BB（量產 SR）</td><td>下跌</td><td>—</td><td><span class="down">-6.6%</span></td><td>中端 SR 代表性跌幅，是 Armani Hallson 的警訊</td></tr>
+        <tr><td>KL RM100萬+ 成交量</td><td>3,079 宗（2024）</td><td>2,351 宗（2023）</td><td><span class="up">+31.0%</span></td><td>高端需求結構性上行</td></tr>
+      </tbody>
+    </table>
+    <p class="source">來源：NAPIC Q3 2025；JLL KL Q2 2025；KL RM1M+深度報告 2026-03</p>
+
+    <div class="alert alert-yellow">
+      <strong>市場分化警示：</strong>KL RM1M+ 市場呈現極度二元化——超豪華稀缺物業（Binjai +59%）持續上漲，中端量產型 SR（Sky Suites -6.6%）持續承壓。Armani Hallson 的 PSF 定價（RM1,636–2,300）與產品性質（SOVO 商業地契，高密度），使其更接近「中端量產 SR」而非「超豪華稀缺」，需警惕向下趨同的風險。
+    </div>
+
+    <h3>1.2 成交量趨勢</h3>
+    <table>
+      <thead><tr><th>指標</th><th>Q3 2024</th><th>Q3 2025</th><th>YoY 變化</th></tr></thead>
+      <tbody>
+        <tr><td>KL 公寓成交量</td><td>1,729 戶</td><td>1,869 戶</td><td><span class="up">+8.1%</span></td></tr>
+        <tr><td>KL 公寓成交額</td><td>RM14.64億</td><td>RM15.97億</td><td><span class="up">+9.1%</span></td></tr>
+        <tr><td>KLCC Town Centre 公寓成交</td><td>310 戶</td><td>313 戶</td><td><span class="neutral">+1.0%</span></td></tr>
+        <tr><td>全市 2024 年住宅成交量</td><td colspan="2">18,913 宗 (+5.5% YoY)</td><td><span class="up">量穩健</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-blue">
+      <strong>週期定位：</strong>當前 KL 市場處於「擴張期中段」——量穩上行，高端成交額增幅（+16.6%）遠超成交量（+5.5%），顯示買家升級。但 2025–2027 年完工潮仍是短期供給壓力。信心程度：中等。
+    </div>
+  </div>
+</div>
+
+<!-- §2 Supply Demand -->
+<div class="section">
+  <div class="section-header">§2｜供需結構分析（直接應用 KL Overhang 報告數據）</div>
+  <div class="section-body">
+    <h3>2.1 Armani Hallson 所屬品類的供需現況</h3>
+    <p>依據 KL 供需 Overhang 深度報告（2026-04-01），Armani Hallson 的 SOVO 棟屬於「服務式公寓（商業地契）」，<strong>未計入官方住宅 Overhang 數字</strong>，但計入 NAPIC 商業物業統計：</p>
+
+    <table>
+      <thead><tr><th>供給類別</th><th>數量</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>KL 官方住宅 Overhang（Q3 2025）</td><td>2,287 戶</td><td>歷史低點，但 100% 為高層公寓，均價 RM105萬</td></tr>
+        <tr><td>全馬服務式公寓廣義庫存</td><td>17,900 戶</td><td>不計入住宅 Overhang，KL 佔比估 45%（8,000–9,000 戶）</td></tr>
+        <tr><td>KL 在建未售（含 SR）</td><td>5,356 戶+</td><td>2025–2027 陸續完工壓力</td></tr>
+        <tr><td>KL RM1M+ 段 Overhang</td><td>478 戶（Q3 2025）</td><td>去化率 69.8%，積壓相對高端</td></tr>
+        <tr><td>Armani Hallson 竣工後新增 SOVO 供給</td><td>~1,440 戶</td><td>2029–2030 進入廣義庫存，是重大新增壓力</td></tr>
+      </tbody>
+    </table>
+    <p class="source">來源：NAPIC Q3 2025；KL 供需 Overhang 深度報告 2026-04-01</p>
+
+    <div class="callout">
+      <strong>⚠ 關鍵結構性問題：</strong>Armani Hallson 的 1,440 戶 SOVO 棟本身就是 KL 廣義 Overhang 庫存的未來供給。當它在 2029–2030 年完工時，KL 廣義庫存（含 SR）預計仍在 8,000–11,000 戶的中等壓力範圍。這代表竣工時要消化的不只是 Armani Hallson 自身的未售單位，還要與同期大量競爭 SR 物業搶奪同一租客池。
+    </div>
+
+    <h3>2.2 需求面支撐分析</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>占比估計</th><th>趨勢</th><th>對 Armani Hallson 的關聯</th></tr></thead>
+      <tbody>
+        <tr><td>本地投資買家</td><td>~55–60%</td><td>↑</td><td>主力（Armani Group 自述 70% 取購 = 本地+新加坡人為主）</td></tr>
+        <tr><td>新加坡買家</td><td>~20%</td><td>↑</td><td>匯率吸引，KL 低估 vs 新加坡，有套利動機</td></tr>
+        <tr><td>台灣/香港/日本</td><td>~10–15%</td><td>↑</td><td>MM2H 渠道、地緣政治避險，台灣為 KL MM2H 第二大來源</td></tr>
+        <tr><td>MM2H 合規買家</td><td>~5–10%</td><td>↑</td><td>2,637 名待購 MM2H 買家，RM23億待釋放，Armani Hallson 符合 RM100萬門檻</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-green">
+      <strong>需求端正面訊號：</strong>70% 的快速取購率（發售後約6週，2025年9月數據），且目標再衝刺到18個月內達 90%，顯示短期需求端真實存在。台灣和日本買家的興趣特別值得關注，與 MM2H 趨勢吻合。
+    </div>
+
+    <h3>2.3 供需平衡指標（整體 KL SOVO/SR 市場）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>當前估計</th><th>健康基準</th><th>判斷</th></tr></thead>
+      <tbody>
+        <tr><td>SOVO/SR 廣義空置率（KLCC周邊）</td><td>估 20–35%</td><td>&lt;15% 為健康</td><td><span class="tag tag-red">偏高</span></td></tr>
+        <tr><td>KL 新案去化週期</td><td>~12–18 個月（高端段）</td><td>&lt;12 個月為健康</td><td><span class="tag tag-yellow">邊緣</span></td></tr>
+        <tr><td>KLCC 公寓 Gross Yield</td><td>3–4%</td><td>5%+ 為投資健康</td><td><span class="tag tag-yellow">偏低</span></td></tr>
+        <tr><td>KL 高端房價收入比</td><td>~8–12（RM1M+段）</td><td>&lt;15 相對可負擔</td><td><span class="tag tag-green">尚可</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §3 Area Analysis -->
+<div class="section">
+  <div class="section-header">§3｜區域細分——Armani Hallson 的地段定位</div>
+  <div class="section-body">
+    <h3>3.1 Jalan Ampang / KLCC 地段特性</h3>
+    <p>Armani Hallson 地處 Jalan Ampang，距 Petronas Twin Towers 直線 300m，屬 KL 最高地段（Zone 1 核心區）。以我們的區域分級框架：</p>
+
+    <table>
+      <thead><tr><th>Zone</th><th>區域</th><th>均價 PSF</th><th>Yield</th><th>Armani Hallson 定位</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Zone 1 核心</strong></td><td>KLCC / Jalan Ampang</td><td>RM1,400–2,660 psf</td><td>3–4%</td><td>✅ 本案所在地段（發售 RM1,636+ psf）</td></tr>
+        <tr><td>Zone 1 次核</td><td>Mont Kiara</td><td>RM778–1,300 psf</td><td>5–6%</td><td>定價低，yield 更高，但步行生活圈弱</td></tr>
+        <tr><td>Zone 2</td><td>TRX / Bangsar South</td><td>RM700–1,500 psf</td><td>4–5%</td><td>更好的 Freehold 住宅替代選項</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 地段優勢量化</h3>
+    <div class="two-col">
+      <div>
+        <div class="alert alert-green">
+          <strong>✅ KLCC Link Bridge — 最大差異化賣點</strong><br>
+          Armani Hallson 宣稱提供覆蓋走廊直通 Petronas Twin Towers，進而連接 KLCC LRT 站。若如期建成，這是 Jalan Ampang 沿線同類建案中稀缺的步行連結，對外籍租客和自住買家的吸引力顯著高於單純「距離 300m」。
+        </div>
+        <div class="alert alert-green">
+          <strong>✅ Bukit Nanas Monorail 400m</strong><br>
+          Monorail + KLCC LRT 雙交通樞紐，公共交通覆蓋全 KL。
+        </div>
+      </div>
+      <div>
+        <div class="alert alert-yellow">
+          <strong>⚠ 周邊 SOVO 競爭密集</strong><br>
+          Jalan Ampang 沿線已有多個 SOVO/SR 項目（CloutHaus @ Jalan P Ramlee，GDV RM15.15億，RM2,900 psf；舊有多棟 2015–2019 年量產 SOVO），形成同質化競爭。
+        </div>
+        <div class="alert alert-red">
+          <strong>❌ 高密度——2.61英畝上蓋 2,215 戶</strong><br>
+          密度約 850 戶/英畝，遠高於精品低密度開發標準（100–200 戶/英畝）。社區管理壓力大，短租競爭激烈。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- §4 New vs Secondary Market -->
+<div class="section">
+  <div class="section-header">§4｜新案定價分析與二手市場訊號</div>
+  <div class="section-body">
+    <div class="alert alert-orange">
+      <strong>⚠ FIX-01 應用：同期競品比較基準</strong>｜依據 v1.3 方法論，以下比較僅採用同期（2024–2026 年發布）、同區（KLCC/Jalan Ampang）、同類型（SOVO/SR）新案。
+    </div>
+
+    <h3>4.1 同期新案競品比較表</h3>
+    <table>
+      <thead><tr><th>項目</th><th>Armani Hallson（本案）</th><th>CloutHaus（KLCC）</th><th>TRX Residences</th><th>The Ashwood @ U-Thant</th></tr></thead>
+      <tbody>
+        <tr><td>地段</td><td>Jalan Ampang</td><td>Jalan P Ramlee</td><td>TRX 金融區</td><td>大使館區 U-Thant</td></tr>
+        <tr><td>地契</td><td><span class="tag tag-red">商業地契（SOVO）</span> / HDA（SOHO）</td><td><span class="tag tag-red">商業地契</span></td><td><span class="tag tag-green">Freehold 住宅</span></td><td><span class="tag tag-green">住宅地契</span></td></tr>
+        <tr><td>PSF（發售）</td><td>RM1,636–2,300 psf</td><td>RM2,900 psf</td><td>RM2,293 psf（2024成交中位）</td><td>中端定價（未公開）</td></tr>
+        <tr><td>規模</td><td>2,215 戶（高密度）</td><td>未公開（TA Global）</td><td>~1,000+ 戶</td><td>354 戶（低密度）</td></tr>
+        <tr><td>竣工</td><td>2029/2030</td><td>2029</td><td>住宅首批 2026–2027</td><td>2026（已完工）</td></tr>
+        <tr><td>KLCC 步行</td><td>✅ Link Bridge（若建成）</td><td>✅ 步行距離</td><td>❌ 需 MRT（2站）</td><td>❌ 需車</td></tr>
+        <tr><td>Yield 潛力</td><td>3–4%（估）</td><td>3–4%（估）</td><td>4–5%（成熟後）</td><td>4–5%</td></tr>
+        <tr><td>風報比評估</td><td><span class="tag tag-yellow">中（地契劣勢大）</span></td><td><span class="tag tag-red">偏弱（最貴 SOVO）</span></td><td><span class="tag tag-green">最佳（住宅地契）</span></td><td><span class="tag tag-green">佳（低密度）</span></td></tr>
+      </tbody>
+    </table>
+    <p class="source">來源：KL供需Overhang報告 §6；EdgeProp 2026；KL RM1M+報告；The Edge Malaysia 2025</p>
+
+    <div class="alert alert-blue">
+      <strong>估值結論（FIX-01）：</strong>Armani Hallson 的 RM1,636–2,300 psf，在同期 KLCC SOVO 競品中屬「合理至中高」定價。相比 CloutHaus 的 RM2,900 psf 有 20–43% 折讓，是相對誠實的定價。但核心問題是，SOVO 商業地契應有 10–15% 的結構性折扣對比同區住宅地契（TRX RM2,293 psf Freehold 住宅）——若如此計算，Armani Hallson 的實際性價比並不突出。
+    </div>
+
+    <h3>4.2 二手掛牌分析（FIX-03/04 應用）</h3>
+    <p>PropertyGuru 顯示 Armani Hallson 已有二手掛牌，PSF 範圍 RM1,613–3,662。依 v1.3 要求，需收集 5–10 筆並標準化樓層後才能判斷信號：</p>
+
+    <div class="alert alert-yellow">
+      <strong>⚠ 二手市場樣本警告：</strong>Armani Hallson 目前以期房形式存在（2029/2030 竣工），現有二手掛牌為「期房轉讓（subsale）」而非實際完工單位。PSF 範圍 RM1,613–3,662 跨度極大（127% 差距），顯示大量掛牌為不同樓層/朝向/坪數的未標準化數據。<br><br>依據 FIX-04，「起步 PSF RM1,613」僅代表最低樓層最小坪數最差朝向的掛牌，<strong>不可用作市場定價基準</strong>。目前樣本量與樓層資訊不足以輸出標準化信號結論，建議向代理查詢最新掛牌分布。
+    </div>
+
+    <p>若以 PropertyGuru 掛牌的 PSF 中位數估計（假設中層 SOVO 約 RM2,000–2,300 psf），相比開發商起始 PSF RM1,636，掛牌溢價約 22–40%，說明早期買家仍有帳面獲利，但：</p>
+    <ul style="padding-left:20px;margin-bottom:12px">
+      <li>折扣結構（Bumiputera/早鳥/法律費豁免等）無法從公開資料確認百分比，依 FIX-02 不能推算 Net Price，無法精確判斷折讓信號</li>
+      <li>帳面溢價未必能實現——SOVO 期房二手市場流動性有限，若竣工前市場降溫，掛牌可能迅速下修</li>
+    </ul>
+  </div>
+</div>
+
+<!-- §5 Rental -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率分析</div>
+  <div class="section-body">
+    <h3>5.1 KLCC 周邊租金行情（Q1 2025）</h3>
+    <table>
+      <thead><tr><th>區域/物業</th><th>2BR 月租</th><th>Gross Yield</th><th>Net Yield（估）</th><th>YoY 變化</th></tr></thead>
+      <tbody>
+        <tr><td>KLCC / 金三角</td><td>RM 5,500–8,000</td><td>3–4%</td><td>2–3%</td><td>+3.5%</td></tr>
+        <tr><td>Armani Hallson 估算（SOVO 2BR）</td><td>RM 4,500–6,500</td><td>估 3–4%</td><td>估 2–2.5%（商業水電扣除後）</td><td>N/A（期房）</td></tr>
+        <tr><td>Mont Kiara（外籍需求最強）</td><td>RM 3,500–5,000</td><td>5–6%</td><td>3.5–4.5%</td><td>+6.4%</td></tr>
+        <tr><td>Bangsar South</td><td>RM 2,800–3,500</td><td>4–5%</td><td>3–3.8%</td><td>+4–6%</td></tr>
+      </tbody>
+    </table>
+    <p class="source">來源：Savills KL Q1 2025；JLL Q2 2025；KL RM1M+報告</p>
+
+    <h3>5.2 Armani Hallson SOVO 的商業水電費問題</h3>
+    <div class="two-col">
+      <div>
+        <div class="alert alert-red">
+          <strong>❌ SOVO 棟（1,440戶）：商業水電費</strong><br>
+          商業電費約為住宅費率的 6 倍（依 KL 上游報告）。若無法向 TNB 申請改民用費率，持有者每月多付的水電成本可能達 RM300–800，直接侵蝕租金收益。這是 KL SR/SOVO 類產品長期被買方折扣的最大結構性問題。
+        </div>
+      </div>
+      <div>
+        <div class="alert alert-green">
+          <strong>✅ SOHO 棟（775戶）：HDA 保護 + 民用費率</strong><br>
+          SOHO 棟受 Housing Development Act 保護，法律上屬住宅，享有民用水電費率。但 SOHO 棟規模較小（775戶），且坪數段 538–558 sqft 偏小，住宅地契的優勢需配合地段潛力兌現。
+        </div>
+      </div>
+    </div>
+
+    <h3>5.3 現金流試算（SOVO 406 sqft 最小單位，假設 RM1,143,806 入場）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>租金收入（月租 RM3,500 × 12）</td><td>RM 42,000</td><td>KLCC 小坪數 SOVO 保守估計</td></tr>
+        <tr><td>管理費（RM0.95 psf × 406 × 12）</td><td><span class="down">-RM 4,628</span></td><td>年度管理費</td></tr>
+        <tr><td>商業水電費溢額（估 RM500/月 × 12）</td><td><span class="down">-RM 6,000</span></td><td>SOVO 商業費率超額部分</td></tr>
+        <tr><td>地稅 + 門牌稅（估）</td><td><span class="down">-RM 2,000</span></td><td></td></tr>
+        <tr><td>非居民租金所得稅（30%，外國人）</td><td><span class="down">-RM 8,811</span></td><td>（42,000-12,628）×30%</td></tr>
+        <tr><td>代管費（10%，若遠程管理）</td><td><span class="down">-RM 4,200</span></td><td>非必要</td></tr>
+        <tr><td><strong>淨現金流（含代管，外國人）</strong></td><td><strong>~RM 16,361/年</strong></td><td>Gross Yield 約 3.67%，Net ≈ 1.43%</td></tr>
+        <tr><td>淨現金流（無代管，外國人）</td><td>~RM 20,561/年</td><td>Net Yield ≈ 1.80%</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>外國人視角：Net Yield 約 1.4–1.8%</strong>（考慮30%非居民租金所得稅 + 商業水電費後），遠低於 Gross Yield 宣傳的 3–4%。對外國投資者而言，這幾乎是「收租保本」邊緣，資本利得成為主要回報依賴——但 SOVO 商業地契歷史上資本增值弱於住宅地契。</div>
+  </div>
+</div>
+
+<!-- §6 Foreign Regulations -->
+<div class="section">
+  <div class="section-header">§6｜外資法規與馬來西亞購屋框架（2026年最新）</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>本地買家</th><th>外國買家</th><th>對 Armani Hallson 的影響</th></tr></thead>
+      <tbody>
+        <tr><td>最低購置門檻（KL）</td><td>無限制</td><td>RM 1,000,000</td><td>✅ SOHO（RM1.1–1.28M）和 SOVO（RM1.14M+）均符合</td></tr>
+        <tr><td>印花稅（2026年起）</td><td>1–4%（階梯）</td><td>4% 統一稅率</td><td>RM1.14M 物業印花稅 = RM45,600（外國人多付）</td></tr>
+        <tr><td>RPGT（5年內）</td><td>30%</td><td>30%</td><td>2029/2030 竣工，RPGT 第6年 ≈ 2035–2036</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>0%</td><td>10%（永遠無法降至0）</td><td>外國人最優退出時機：2035–2036年後，仍需付10%</td></tr>
+        <tr><td>State Consent</td><td>不需要</td><td>需申請（1–3個月）</td><td>額外行政成本 ~RM5,000</td></tr>
+        <tr><td>MM2H Gold 持有要求</td><td>N/A</td><td>RM100M+，持有10年</td><td>Armani Hallson 符合門檻，但以 SOVO 入場有地契限制爭議</td></tr>
+        <tr><td>HDA 保護</td><td>SOHO 棟：受保護<br>SOVO 棟：無保護</td><td>同上</td><td>SOVO 爛尾風險無官方賠償機制，需評估開發商財務</td></tr>
+      </tbody>
+    </table>
+    <p class="source">來源：KL RM1M+深度報告 §外國人法規 2026</p>
+
+    <h3>外國人完整入場成本試算（SOHO 棟 RM1.14M 入場）</h3>
+    <table>
+      <thead><tr><th>費用項目</th><th>金額（RM）</th></tr></thead>
+      <tbody>
+        <tr><td>印花稅（4% flat，外國人）</td><td>RM 45,600</td></tr>
+        <tr><td>律師費（SPA + 貸款）</td><td>RM 12,000</td></tr>
+        <tr><td>State Consent 費用</td><td>RM 5,000</td></tr>
+        <tr><td>入場總成本（估計）</td><td><strong>~RM 62,600（物業價值5.5%）</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-yellow">
+      <strong>RPGT 時間軸（外國人）：</strong>若 SPA 約在 2025年簽署，RPGT 第6年約在 2031年，屆時稅率從 30% 降至 10%。但竣工為 2029–2030 年，意味著從交屋到 RPGT 最低稅率只有 1–2 年窗口，流動性極差。實際持有至第6年（RPGT 10%）才是最優退出時機，對台灣/外國投資者而言是長期鎖倉型資產。
+    </div>
+  </div>
+</div>
+
+<!-- §7 Financing -->
+<div class="section">
+  <div class="section-header">§7｜貸款環境與利率分析</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>本地買家</th><th>外國買家</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>馬來西亞基準利率（OPR）</td><td colspan="2">3.00%（2025–2026 年維持）</td><td>BNM 維持不動，匯率穩定</td></tr>
+        <tr><td>房貸利率範圍</td><td>3.8–4.5%</td><td>外國人通常難取得本地房貸</td><td>SOVO 商業地契貸款更難，利率可能更高</td></tr>
+        <tr><td>最高貸款成數（LTV）</td><td>70–90%</td><td>外國人 LTV 60–70%（若能取得）</td><td>外國人實際頭期款需求更高</td></tr>
+        <tr><td>外國人本地房貸</td><td>N/A</td><td>極難（SOVO 商業地契更難）</td><td>外國人通常需全額現金或海外融資</td></tr>
+        <tr><td>SOVO 商業地契貸款</td><td>難度較高，需商業貸款利率</td><td>幾乎不可能</td><td>這是 SOVO 外國買家的實質性制約</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>外國投資者貸款風險：</strong>SOVO 棟商業地契通常無法申請一般住宅房貸，本地買家須走商業貸款（利率更高）；外國人幾乎只能全額現金購買。若以 RM114萬+ 的 SOVO 入場，外國投資者的資金占用成本極高，且 Net Yield 僅 1.4–1.8%（稅後），資金效率極低。
+    </div>
+
+    <h3>7.1 利率敏感度分析</h3>
+    <table>
+      <thead><tr><th>情境</th><th>對 Armani Hallson 的影響</th></tr></thead>
+      <tbody>
+        <tr><td>OPR 升息 +50bps</td><td>買家月供壓力增加，本地投資需求輕微降溫；外國人無貸款，影響有限</td></tr>
+        <tr><td>OPR 不變（基本情境）</td><td>當前寬鬆環境維持，對發售期有利；但 2029 年竣工時利率環境未知</td></tr>
+        <tr><td>馬幣貶值 MYR/USD 升至 4.8+</td><td>外籍買家進場成本下降（以外幣計算），利好 MM2H 和外國投資者；但暗示馬來西亞宏觀壓力</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §8 Infrastructure -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設與重劃區發展</div>
+  <div class="section-body">
+    <h3>8.1 Armani Hallson 受益的基建項目</h3>
+    <table>
+      <thead><tr><th>項目</th><th>狀態</th><th>對 Armani Hallson 影響</th></tr></thead>
+      <tbody>
+        <tr><td>KLCC LRT 站（現有）</td><td>已運營</td><td>✅ 直接受益，步行連接</td></tr>
+        <tr><td>Bukit Nanas Monorail（400m）</td><td>已運營</td><td>✅ 補充交通覆蓋</td></tr>
+        <tr><td>TRX 金融區成熟化</td><td>2026–2028 陸續完善</td><td>✅ 帶動 KLCC-TRX 廊帶整體升值</td></tr>
+        <tr><td>MRT3 Circle Line</td><td>2025年7月獲政府核准，2027+建設</td><td>⚠ 受益有限（MRT3 站點不直接服務 Jalan Ampang）</td></tr>
+        <tr><td>KLCC Link Bridge（項目自建）</td><td>開發商承諾，竣工後建成</td><td>✅ 若如期建成，是最大差異化基礎設施；若延遲或縮水，重大減分</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <strong>基建溢價評估：</strong>Armani Hallson 所在的 Jalan Ampang 本身已在 KL 最核心的基建密度區，無需等待新基建完工。最大的基建催化劑反而是「自建」的 KLCC Link Bridge——這既是最大賣點，也是最大執行風險。開發商需按期交付這條連廊，否則定價邏輯將受到嚴峻質疑。
+    </div>
+  </div>
+</div>
+
+<!-- §9 Demographics -->
+<div class="section">
+  <div class="section-header">§9｜人口結構與移入移出趨勢</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>數值</th><th>趨勢</th><th>對 Armani Hallson 的關聯</th></tr></thead>
+      <tbody>
+        <tr><td>KL 城市人口</td><td>~200萬（WP KL）</td><td>↑ 緩慢增長</td><td>基礎租賃需求穩定</td></tr>
+        <tr><td>外籍居民佔比</td><td>KLCC 區約 15–20%</td><td>↑</td><td>Armani Hallson 的核心外籍租客池</td></tr>
+        <tr><td>MM2H 申請累積（2024年6月後）</td><td>14,535 件，核准 9,511 人</td><td>↑</td><td>2,637 名待購買家，潛在 RM23億，Armani Hallson 符合門檻</td></tr>
+        <tr><td>台灣 MM2H 買家</td><td>佔 17%（第二大來源）</td><td>↑</td><td>台灣地緣政治避險需求，直接目標客群</td></tr>
+        <tr><td>25–44 歲主力購屋族</td><td>KL 市區高濃度</td><td>→</td><td>SOVO 工作生活型買家基礎穩定</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-green">
+      <strong>台灣投資者視角：</strong>作為 Ivan 的分析框架——Armani Hallson 符合 MM2H Gold 的 RM100萬購屋門檻。但需注意：依據 KL RM1M+報告的結論，SOVO 商業地契作為 MM2H 合規資產可能存在爭議，建議向 MM2H 主管機關確認商業地契是否完全符合持有要求。TS2（武吉免登）已採用 Freehold 商業地契，與 Armani Hallson SOVO 地契性質相似，可作為參考。
+    </div>
+  </div>
+</div>
+
+<!-- §10 Comparison -->
+<div class="section">
+  <div class="section-header">§10｜橫向建案比較——同期 KLCC 周邊競品</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>Armani Hallson（本案）</th><th>TS2 武吉免登</th><th>TRX Residences</th><th>The Ashwood @ U-Thant</th></tr></thead>
+      <tbody>
+        <tr><td>定價（PSF）</td><td>RM1,636–2,300</td><td>~RM1,475（估RM100萬/678sqft）</td><td>RM2,293（中位，2024實際成交）</td><td>未公開（估 RM1,200–1,600）</td></tr>
+        <tr><td>地契</td><td>SOVO：商業 / SOHO：HDA</td><td>商業地契（Freehold）</td><td>Freehold 住宅地契</td><td>住宅地契</td></tr>
+        <tr><td>規模</td><td>2,215 戶（極高密度）</td><td>未公開（較小規模）</td><td>~1,000+</td><td>354 戶（低密度）</td></tr>
+        <tr><td>步行生活圈</td><td>KLCC 300m（若 Link Bridge 建成）</td><td>Berjaya Times Square 直連，Imbi Monorail 100m</td><td>Exchange TRX 最強</td><td>需車</td></tr>
+        <tr><td>MM2H 合規</td><td>✅ 符合 RM100萬門檻</td><td>✅ 符合（Ivan 持有）</td><td>✅（RM130萬起）</td><td>✅</td></tr>
+        <tr><td>Gross Yield（估）</td><td>3–4%</td><td>~3.6%（租金 RM3,000/月）</td><td>4–5%（金融區成熟後）</td><td>4–5%</td></tr>
+        <tr><td>外國人 Net Yield</td><td>~1.4–1.8%</td><td>~1.8–2.2%（TS2試算）</td><td>~2.5–3%</td><td>~2–3%</td></tr>
+        <tr><td>資本增值潛力</td><td>中（SOVO 地契折扣）</td><td>弱（決策框架已確認）</td><td>中強（金融區敘事）</td><td>中</td></tr>
+        <tr><td>綜合評級（v1.3 框架）</td><td>⭐⭐⭐（中等，5.5–6.5）</td><td>⭐⭐⭐（功能性，5.5–6.5）</td><td>⭐⭐⭐⭐（優質，7.0–7.5）</td><td>⭐⭐⭐⭐（優質，7.0）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-blue">
+      <strong>橫向比較結論：</strong>在同等預算（RM100–130萬）下，TRX Residences 的 Freehold 住宅地契 + 金融區基本面是最優風報比選項，但預算略高。Armani Hallson 的核心競爭優勢是「KLCC 位置 + 相對折價於 TRX」，但必須接受 SOVO 商業地契的結構性折扣。與 Ivan 持有的 TS2 相比，Armani Hallson 地段更佳（KLCC vs 武吉免登），但兩者都是商業地契，資本增值潛力同樣受限。
+    </div>
+  </div>
+</div>
+
+<!-- §11 Valuation Timing -->
+<div class="section">
+  <div class="section-header">§11｜進場時機與估值判斷</div>
+  <div class="section-body">
+    <h3>11.1 估值定位</h3>
+    <table>
+      <thead><tr><th>估值指標</th><th>當前值</th><th>歷史均值</th><th>分位</th><th>解讀</th></tr></thead>
+      <tbody>
+        <tr><td>KLCC SOVO/SR PSF 歷史均值</td><td>RM1,636（起步）</td><td>~RM1,200–1,500（2018–2022 peak）</td><td>60–70%</td><td><span class="tag tag-yellow">中高位</span></td></tr>
+        <tr><td>KLCC 整體公寓中位數</td><td>RM 600,000</td><td>~RM 550,000</td><td>55–65%</td><td><span class="tag tag-yellow">合理區間</span></td></tr>
+        <tr><td>KL 房價收入比</td><td>~10–12（RM1M+段）</td><td>~9–11</td><td>60%</td><td><span class="tag tag-yellow">中等</span></td></tr>
+        <tr><td>租售比（Price-to-Rent）</td><td>~25–30x（SOVO）</td><td>~20–25x</td><td>65–75%</td><td><span class="tag tag-yellow">偏貴</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.2 進場時機矩陣</h3>
+    <table>
+      <thead><tr><th></th><th>趨勢向上</th><th>趨勢持平</th><th>趨勢向下</th></tr></thead>
+      <tbody>
+        <tr><td><strong>估值便宜</strong></td><td>🟢 最佳</td><td>🟢 分批</td><td>🟡 等待</td></tr>
+        <tr><td><strong>估值合理</strong></td><td>🟡 可進場，控制倉位</td><td>🟡 觀望</td><td>🔴 避免</td></tr>
+        <tr><td><strong>估值偏貴</strong></td><td>🟡 短線可，長線謹慎</td><td>🔴 避免</td><td>🔴 絕對避免</td></tr>
+      </tbody>
+    </table>
+    <p><strong>當前落點：估值中高位（合理偏貴），趨勢持平至輕微向上 → 對應：🟡 觀望，或有明確使用需求時審慎少量進場。</strong></p>
+
+    <h3>11.3 持有期情境分析（外國投資者）</h3>
+    <table>
+      <thead><tr><th>持有期</th><th>樂觀情境</th><th>基本情境</th><th>悲觀情境</th></tr></thead>
+      <tbody>
+        <tr><td>交屋至 2031（RPGT 降稅後）</td><td>+15–25%（MM2H+外資持續湧入）</td><td>+5–10%（市場溫和升值）</td><td>-5 至 +0%（SOVO 積壓拖累）</td></tr>
+        <tr><td>5年持有（2030–2034）</td><td>+25–35%</td><td>+10–20%</td><td>-10 至 +5%</td></tr>
+        <tr><td>10年持有（2030–2039）</td><td>+40–60%</td><td>+20–35%</td><td>+0 至 +15%</td></tr>
+      </tbody>
+    </table>
+    <p class="source">悲觀情境假設：SOVO 積壓惡化 + 租金下行 + 廣義 Overhang 升至 12,000 戶以上</p>
+  </div>
+</div>
+
+<!-- §12 Decision Framework -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點（雙視角）</div>
+  <div class="section-body">
+    <div class="dual-card">
+      <div class="buy-card">
+        <div class="card-title">【買方視角】投資決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:140px;font-weight:600">現在是買方還是賣方市場？</td><td>輕微賣方市場（70% 快速取購，供給仍緊張）</td></tr>
+            <tr><td>議價空間？</td><td>發售期議價空間小；若期房二手轉讓，議價空間 5–10%</td></tr>
+            <tr><td>哪類單位風報比最優？</td><td>SOHO 棟（HDA + 住宅費率），坪數 538–558 sqft，高樓層 KLCC 景觀</td></tr>
+            <tr><td>最大進場風險？</td><td>SOVO 地契結構性劣勢 + 開發商首次 RM30 億規模執行風險</td></tr>
+            <tr><td>建議物業類型？</td><td>若必須進場，SOHO 棟優於 SOVO；預算彈性的話 TRX > Armani Hallson</td></tr>
+            <tr><td>槓桿建議？</td><td>外國人難獲本地貸款，建議全現金或海外槓桿，最高60%LTV</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="market-card">
+        <div class="card-title">【市場研究視角】純分析結論</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟠 廣義 SOVO/SR 供過於求（KL 估 8,000–9,000 戶廣義庫存）</td></tr>
+            <tr><td>價格趨勢</td><td>🟡 持平至輕微上行（高端段），SOVO 同質品類下行壓力</td></tr>
+            <tr><td>租金市場</td><td>🟡 穩定（KLCC+3.5%），但高密度 SOVO 競爭激烈</td></tr>
+            <tr><td>法規環境</td><td>🟡 中性（外國人印花稅 4%，RPGT 外國人永遠 10%）</td></tr>
+            <tr><td>進場估值</td><td>🟠 中高位，租售比偏高，Yield 偏低（尤其外國投資者稅後）</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;padding:8px;background:#f1f5f9;border-radius:4px;font-size:12px">
+          <strong>市場研究一句話：</strong>地段一流，產品類型二流，定價三流（相對住宅地契）——KLCC 位置是唯一真正的護城河，其餘各項皆有結構性折扣。
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:20px">最終進場建議</h3>
+    <div class="verdict-yellow">
+      <strong>🟡 觀望等待——有條件審慎進場</strong><br><br>
+      <strong>核心邏輯：</strong>Armani Hallson 地段毋庸置疑（KLCC 300m），但 SOVO 商業地契 × 高密度（2,215戶/2.61英畝）× 2029年竣工恰好落在 KL 廣義 Overhang 次高峰期（KL Overhang 報告預測 2026–2027 為次高峰），三重結構性壓力使投資風報比不如同等預算下的住宅地契選項（如 TRX Residences）。<br><br>
+      <strong>若必須進場的條件：</strong>① 選 SOHO 棟（HDA 保護 + 住宅費率）而非 SOVO；② 高樓層 KLCC 景觀單位；③ 持有至 2035–2036 年（RPGT 10% 後退出）；④ 確認 KLCC Link Bridge 的具體法律承諾已寫入 SPA；⑤ 以功能性自住（如 MM2H 合規錨點）而非純投資邏輯進場。<br><br>
+      <strong>等待觸發條件：</strong>開發商提供更優惠的 early bird 折扣（降至 RM1,400 psf 以下）；或 2026年底 KL 廣義 Overhang 未惡化超過 10,000 戶（改善信號）。
+    </div>
+
+    <h3>最關鍵監測指標</h3>
+    <table>
+      <thead><tr><th>#</th><th>監測指標</th><th>觸發重新評估的閾值</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>KL 廣義 SR 庫存（NAPIC 商業物業統計）</td><td>若 2026–2027 年 KL 廣義庫存惡化超過 12,000 戶 → 暫緩進場</td></tr>
+        <tr><td>2</td><td>Armani Hallson 二手掛牌 PSF 趨勢</td><td>若中高樓層標準化 PSF 跌破 RM1,500 → 重評定價論點</td></tr>
+        <tr><td>3</td><td>KLCC Link Bridge 施工進度</td><td>若 2027年中期無明顯施工進展 → 最大賣點兌現風險上升</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §13 Project Scoring -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分【v1.2 建案評分模組】</div>
+  <div class="section-body">
+
+    <div class="score-outer">
+      <div class="score-title">Armani Hallson KLCC ｜ 建案綜合評分卡</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-title">A 類｜大環境評分（權重 40%）</div>
+
+          <div class="score-item">
+            <div class="score-item-label">A1 城市經濟基本面（20%）<span>7.5/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">GDP 4–5%，MM2H 管道 2,637 待購，KL RM100萬+成交+31%（2024），基本面強</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">A2 區域供需平衡（25%）<span>4.5/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:45%;background:#f97316"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">廣義 SR 庫存 8,000–9,000 戶（KL），去化率偏低，SOVO 積壓最重品類，2027 Overhang 次高峰</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">A3 市場週期位置（20%）<span>5.5/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">整體擴張期，但完工潮壓力 2025–2027 高位，2029竣工時機中性</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">A4 基建與地段催化劑（20%）<span>8.0/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">KLCC LRT 步行、TRX 金融區成熟化、現有基建最密集地段，加分顯著</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">A5 法規與外資友好度（15%）<span>5.5/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">印花稅 4%（2026），RPGT 外國人永遠 10%，法規中性；SOVO 無 HDA 保護是明確減分</div>
+          </div>
+
+          <div style="margin-top:14px;padding:10px;background:rgba(255,255,255,.1);border-radius:6px;text-align:center">
+            <div style="color:rgba(255,255,255,.6);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;color:#86efac;font-weight:700">6.0/10</div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px">7.5×.2 + 4.5×.25 + 5.5×.2 + 8.0×.2 + 5.5×.15</div>
+          </div>
+        </div>
+
+        <div class="score-col">
+          <div class="score-col-title">B 類｜建案本身評分（權重 60%）</div>
+
+          <div class="score-item">
+            <div class="score-item-label">B1 開發商信用與交屋風險（20%）<span>5.0/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:50%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">已完工 RM17億項目，但本案 RM30億是過往全部完工量的 1.76 倍；首次超大型項目，執行風險非零。AmBank 銀行融資背書加分，SOVO 無 HDA 保護減分</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">B2 相對估值合理性（20%）<span>5.5/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">比 CloutHaus（RM2,900）便宜 20–43%；但相比住宅地契 TRX 並無明顯折讓優勢，SOVO 地契應有結構性折扣</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">B3 租金報酬率潛力（15%）<span>4.5/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:45%;background:#f97316"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">Gross Yield 3–4%，外國人稅後 Net Yield 1.4–1.8%，商業水電費蠶食收益，租金回報不佳</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">B4 地段與交通連接（15%）<span>8.5/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">KLCC 300m（若 Link Bridge 建成）、KLCC LRT 步行、Bukit Nanas Monorail 400m，KL 最頂級地段連接</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">B5 產品設計與差異化（10%）<span>6.5/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:65%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">80+ 設施、Level 10 三萬尺熱帶花園、Sky Pool L67/L76、Onsen 等設施豐富；但 2,215 戶密度極高是減分，設施使用爭議風險</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">B6 產權與法律結構（10%）<span>4.0/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:40%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">SOVO（1,440戶）商業地契，無 HDA，無爛尾補償機制；僅 SOHO（775戶）受 HDA 保護。Freehold 加分，但商業地契嚴重削弱其意義</div>
+          </div>
+
+          <div class="score-item">
+            <div class="score-item-label">B7 流動性與退出難易度（10%）<span>4.5/10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:45%;background:#f97316"></div></div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:3px">期房二手轉讓市場存在，但 SOVO 流動性歷史上弱於住宅地契；RPGT 外國人 2031 才降至 10%，鎖倉期長</div>
+          </div>
+
+          <div style="margin-top:14px;padding:10px;background:rgba(255,255,255,.1);border-radius:6px;text-align:center">
+            <div style="color:rgba(255,255,255,.6);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;color:#86efac;font-weight:700">5.5/10</div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px">5.0×.2 + 5.5×.2 + 4.5×.15 + 8.5×.15 + 6.5×.1 + 4.0×.1 + 4.5×.1</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-total-box">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:rgba(255,255,255,.5);margin-bottom:8px">A 類 6.0 × 40%&nbsp;+&nbsp;B 類 5.5 × 60%</div>
+        <div class="score-number">5.7<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-rating" style="background:#FEF9C3;color:#92400E">⭐⭐⭐ 中等 — 有亮點但有明確缺陷，需設定停損條件</span>
+        </div>
+        <div style="margin-top:16px;font-size:13px;color:rgba(255,255,255,.7);max-width:700px;margin-left:auto;margin-right:auto;line-height:1.8">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>KL 最核心地段（KLCC 300m），KLCC Link Bridge 若兌現將成為稀缺步行連結；MM2H 待購管道帶動確定性需求。<br>
+          <strong style="color:#fca5a5">最大風險：</strong>SOVO 商業地契 × 高密度 2,215 戶 × 2029年完工恰逢 KL 廣義 Overhang 次高峰，外國人租金稅後 Net Yield 僅 1.4–1.8%，資本利得依賴度過高而住宅地契競品更優。
+        </div>
+      </div>
+    </div>
+
+    <!-- Score breakdown explanation -->
+    <h3>A 類評分說明</h3>
+    <p>KL 城市基本面強勁（MM2H 管道、RM100萬+成交+31%、GDP 4–5%），基建催化劑密集（A4 8.0分），是 Armani Hallson 最大的大環境優勢。但 SOVO/SR 品類的供需結構嚴重拖累 A2 評分（4.5分）——廣義庫存 8,000–9,000 戶、2027年 Overhang 次高峰、歷史去化率偏低，構成本案最嚴峻的大環境制約。綜合 A 類 6.0 分，屬「有強有弱」的大環境組合。</p>
+
+    <h3>B 類評分說明</h3>
+    <p>地段連接（B4 8.5分）是本案最高分項，KLCC 步行連接幾乎無法複製。但地契結構（B6 4.0分）和租金回報（B3 4.5分）是最大扣分因素——SOVO 商業地契無 HDA 保護、外國人 Net Yield 低至 1.4–1.8%、流動性歷史偏低，系統性地削弱了地段優勢的投資回報。開發商執行風險（B1 5.0分）也是需要持續追蹤的變量，RM30 億規模超越 Armani Group 過往所有完工項目的總和。</p>
+  </div>
+</div>
+
+<!-- Final Summary -->
+<div class="section">
+  <div class="section-header">📋 一頁式決策摘要</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>維度</th><th>結論</th><th>信心</th></tr></thead>
+      <tbody>
+        <tr><td>地段品質</td><td>✅ KL 最優地段，KLCC 300m，無可置疑</td><td>高</td></tr>
+        <tr><td>產品結構</td><td>⚠ SOVO 商業地契是結構性缺陷，SOHO（HDA）明顯優於 SOVO</td><td>高</td></tr>
+        <tr><td>定價合理性</td><td>🟡 RM1,636–2,300 psf 在 SOVO 競品中合理，但相比住宅地契無折讓優勢</td><td>中</td></tr>
+        <tr><td>供需環境</td><td>⚠ SOVO/SR 廣義庫存壓力重，2026–2027 次高峰，2029 竣工承壓</td><td>高</td></tr>
+        <tr><td>租金回報</td><td>❌ 外國人 Net Yield 1.4–1.8%，商業水電費蠶食，純收益模式不佳</td><td>高</td></tr>
+        <tr><td>資本增值</td><td>🟡 依賴地段稀缺性，SOVO 歷史上弱於住宅地契，基本情境 +5–10%（5年）</td><td>中</td></tr>
+        <tr><td>開發商風險</td><td>⚠ 首次 RM30 億規模，建成記錄仍在建立中；AmBank 融資背書是正向訊號</td><td>中</td></tr>
+        <tr><td>退出流動性</td><td>🟡 RPGT 外國人 2031 年降至 10%（SPA 2025年簽署），鎖倉期長</td><td>高</td></tr>
+        <tr><td>MM2H 合規性</td><td>✅ 符合 RM100萬門檻；建議確認商業地契 SOVO 是否完全符合 MM2H 持有規定</td><td>中</td></tr>
+      </tbody>
+    </table>
+
+    <div class="verdict-yellow" style="margin-top:20px">
+      <strong>📌 最終一句話評語（評分 5.7/10 — 中等）：</strong><br>
+      Armani Hallson 是一個「地段頂級、產品次級」的建案——KLCC 地址是真實的、步行連接是差異化的，但 SOVO 商業地契、極高密度、外國人稅後超低 Net Yield、恰好落在 KL 廣義 Overhang 壓力最高時期竣工，使其整體風報比不如同等預算下的住宅地契選項。適合以「功能性地標資產」定位入場（如 MM2H 合規、台灣地緣政治避險）且優先選 SOHO 棟的買家；不適合以純租金收益或短期資本利得為目標的投資者。
+    </div>
+  </div>
+</div>
+
+<div class="source" style="text-align:center;margin-top:20px;padding:16px">
+  主要數據來源：NAPIC JPPH Q3 2025 ｜ KL 供需與 Overhang 深度分析報告（2026-04-01）｜ KL RM1M+ 高端住宅研究報告（2026-03）｜ The Edge Malaysia（2025-04, 2025-09）｜ PropertyGuru ｜ EdgeProp ｜ AmBank Group ｜ JLL KL Q2 2025 ｜ Savills KL Q1 2025<br>
+  本報告基於公開資料及上游研究，不構成投資建議。地契、折扣結構等重要條款需向開發商或律師確認。
+</div>
+
+</div><!-- /container -->
+
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+
+</body>
+</html>

@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KL Deep Dive | Malaysia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}</style>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q3 2025</span><span class="lang-zh" style="display:none">最後更新：2025年Q3</span></span>
+      <h1><span class="lang-en">Kuala Lumpur — Deep Dive</span><span class="lang-zh" style="display:none">吉隆坡深度分析</span></h1>
+      <p class="subtitle"><span class="lang-en">Micro-Market Analysis Across KL's Three Distinct Zones</span><span class="lang-zh" style="display:none">吉隆坡三個微型市場深度分析</span></p>
+    </div>
+
+    <!-- KL Interactive Map CTA -->
+    <a href="/my/kl-map.html" style="display:flex;justify-content:space-between;align-items:center;background:#1e3a5f;color:#fff;padding:16px 22px;border-radius:10px;text-decoration:none;margin-bottom:20px;transition:background .15s" onmouseover="this.style.background='#2c4a6f'" onmouseout="this.style.background='#1e3a5f'">
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.08em;opacity:.8;margin-bottom:4px;font-family:'IBM Plex Mono',monospace">
+          <span class="lang-en">NEW · INTERACTIVE PROPERTY MAP</span><span class="lang-zh" style="display:none">新功能 · 建案互動地圖</span>
+        </div>
+        <div style="font-size:16px;font-weight:600">
+          <span class="lang-en">Explore 22 curated RM1M+ projects — scored, mapped, and linked to deep-dive reports</span><span class="lang-zh" style="display:none">探索 22 個精選 RM100 萬以上 KL 建案——評分、地圖、深度報告一目了然</span>
+        </div>
+      </div>
+      <div style="font-size:28px;font-weight:300;opacity:.9;padding-left:16px;flex-shrink:0">→</div>
+    </a>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">KL Avg Price</span><span class="lang-zh" style="display:none">吉隆坡平均房價</span></div>
+        <div class="kpi-value">RM 804,642</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">-4.3% YoY</span><span class="lang-zh" style="display:none">年跌4.3%</span></span>
+        <div class="kpi-source">Q3 2025 JPPH</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">KL Avg Rent</span><span class="lang-zh" style="display:none">吉隆坡平均租金</span></div>
+        <div class="kpi-value">RM 2,901<span style="font-size:13px">/mo</span></div>
+        <span class="kpi-badge badge-green"><span class="lang-en">+6.1% YoY</span><span class="lang-zh" style="display:none">年漲6.1%</span></span>
+        <div class="kpi-source">Q3 2025</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">KL H1 Overhang</span><span class="lang-zh" style="display:none">吉隆坡上半年積壓</span></div>
+        <div class="kpi-value">3,643 <span style="font-size:13px">units</span></div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">RM 3.16B value</span><span class="lang-zh" style="display:none">價值RM 31.6億</span></span>
+        <div class="kpi-source">H1 2025 NAPIC</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Luxury Rent (Top 10%)</span><span class="lang-zh" style="display:none">豪宅租金（前10%）</span></div>
+        <div class="kpi-value">RM 5,295<span style="font-size:13px">/mo</span></div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Top decile</span><span class="lang-zh" style="display:none">前十分位</span></span>
+        <div class="kpi-source">Q3 2025</div>
+      </div>
+    </div>
+
+    <!-- Three Micro-Markets + Luxury -->
+    <h2 class="section-heading"><span class="lang-en">Three Micro-Markets + Luxury</span><span class="lang-zh" style="display:none">三個微型市場 + 豪宅</span></h2>
+    <div id="zone-tabs">
+      <div class="tab-bar">
+        <button class="active" data-tab="z1" onclick="switchTab('zone-tabs','z1')"><span class="lang-en">Zone 1: KLCC / Bukit Bintang</span><span class="lang-zh" style="display:none">第一區：KLCC/武吉免登</span></button>
+        <button data-tab="z2" onclick="switchTab('zone-tabs','z2')"><span class="lang-en">Zone 2: Mid Valley / OKR</span><span class="lang-zh" style="display:none">第二區：中谷/舊巴生路</span></button>
+        <button data-tab="z3" onclick="switchTab('zone-tabs','z3')"><span class="lang-en">Zone 3: Kepong / Cheras / Setapak</span><span class="lang-zh" style="display:none">第三區：甲洞/蕉賴/士打末</span></button>
+        <button data-tab="z4" onclick="switchTab('zone-tabs','z4')"><span class="lang-en">Luxury RM1M+</span><span class="lang-zh" style="display:none">豪宅 RM1M+</span></button>
+      </div>
+
+      <!-- Tab 1: Zone 1 KLCC / Bukit Bintang -->
+      <div id="tab-z1" class="tab-panel active">
+        <div class="framework-box" style="margin:12px 0;">
+          <span class="lang-en">Prime luxury zone. MM2H, expatriates and HNW locals. Supply constrained. Pricing anchored to regional comparison, not local income. MM2H updated: property purchase requirement RM600k–RM2M. Directly supports this corridor.</span>
+          <span class="lang-zh" style="display:none">頂級豪宅區。由MM2H、外籍人士及本地高淨值買家主導。供給極為稀缺，定價以區域比較為基準，而非本地收入水平。MM2H更新規定：須購置60萬至200萬令吉住宅，直接支撐本走廊需求。</span>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="kpi-card blue">
+            <div class="kpi-label"><span class="lang-en">PSF Range</span><span class="lang-zh" style="display:none">呎價範圍</span></div>
+            <div class="kpi-value">RM 1,200–2,500+</div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-label"><span class="lang-en">Yield</span><span class="lang-zh" style="display:none">收益率</span></div>
+            <div class="kpi-value">3.5–4.5%</div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-label"><span class="lang-en">Foreign Buyer</span><span class="lang-zh" style="display:none">外國買家</span></div>
+            <div class="kpi-value">~30–40%</div>
+          </div>
+        </div>
+        <div class="chart-grid two-col">
+          <div class="chart-card">
+            <h3><span class="lang-en">Zone 1 Price Trend</span><span class="lang-zh" style="display:none">第一區價格趨勢</span></h3>
+            <div style="position:relative;height:220px;"><div id="chart-z1-price" style="width:100%;height:100%"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">Yield vs Borrowing Cost</span><span class="lang-zh" style="display:none">收益率 vs 借貸成本</span></h3>
+            <div style="position:relative;height:220px;"><div id="chart-z1-yield" style="width:100%;height:100%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Zone 2 Mid Valley / OKR -->
+      <div id="tab-z2" class="tab-panel">
+        <div class="framework-box" style="margin:12px 0;">
+          <span class="lang-en">The sweet spot. RM400k–RM800k. 2024's most active launch band. Best supply-demand balance in KL.</span>
+          <span class="lang-zh" style="display:none">最佳甜蜜點。售價40至80萬令吉。2024年推盤最活躍的價格帶，供需平衡最佳。</span>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="kpi-card green">
+            <div class="kpi-label"><span class="lang-en">PSF Range</span><span class="lang-zh" style="display:none">呎價範圍</span></div>
+            <div class="kpi-value">RM 500–900</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label"><span class="lang-en">Yield</span><span class="lang-zh" style="display:none">收益率</span></div>
+            <div class="kpi-value">5–6%</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label"><span class="lang-en">Absorption</span><span class="lang-zh" style="display:none">吸收週期</span></div>
+            <div class="kpi-value">6–12 months</div>
+          </div>
+        </div>
+        <div class="chart-grid two-col">
+          <div class="chart-card">
+            <h3><span class="lang-en">New Launch Take-up Rate</span><span class="lang-zh" style="display:none">新推案去化率</span></h3>
+            <div style="position:relative;height:220px;"><div id="chart-z2-launch" style="width:100%;height:100%"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">Supply vs Demand Balance</span><span class="lang-zh" style="display:none">供需平衡</span></h3>
+            <div style="position:relative;height:220px;"><div id="chart-z2-balance" style="width:100%;height:100%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Zone 3 Kepong / Cheras / Setapak -->
+      <div id="tab-z3" class="tab-panel">
+        <div class="framework-box" style="margin:12px 0;">
+          <span class="lang-en">Overhang epicenter. PSF trap widespread. Serviced apartments dominate — commercial utilities, harder to finance. H1 2025: KL overhang highest nationally at 3,643 units (RM3.16B), concentrated here.</span>
+          <span class="lang-zh" style="display:none">積壓重災區。呎價陷阱普遍。服務式公寓主導——商業水電費率，貸款審批難度更高。2025年上半年：吉隆坡待售餘屋全國最高，達3,643套（RM 31.6億），主要集中於本區。</span>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="kpi-card orange">
+            <div class="kpi-label"><span class="lang-en">Nominal Price</span><span class="lang-zh" style="display:none">名義價格</span></div>
+            <div class="kpi-value">RM 280k–500k</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-label"><span class="lang-en">Actual PSF</span><span class="lang-zh" style="display:none">實際呎價</span></div>
+            <div class="kpi-value">RM 800–1,200</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-label"><span class="lang-en">Overhang Share</span><span class="lang-zh" style="display:none">積壓佔比</span></div>
+            <div class="kpi-value">~40% of KL</div>
+          </div>
+        </div>
+        <div class="chart-grid two-col">
+          <div class="chart-card">
+            <h3><span class="lang-en">PSF Trap — Size vs PSF</span><span class="lang-zh" style="display:none">呎價陷阱——面積 vs 呎價</span></h3>
+            <div style="position:relative;height:220px;"><div id="chart-z3-psf" style="width:100%;height:100%"></div></div>
+            <p class="chart-footnote"><span class="lang-en">*Illustrative estimates; actual PSF varies by location.</span><span class="lang-zh" style="display:none">*示意估算數據，實際呎價因地段而異。</span></p>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">SA vs Residential Overhang</span><span class="lang-zh" style="display:none">服務式公寓 vs 住宅積壓</span></h3>
+            <div style="position:relative;height:220px;"><div id="chart-z3-sa" style="width:100%;height:100%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Luxury RM1M+ -->
+      <div id="tab-z4" class="tab-panel">
+        <div class="kpi-grid">
+          <div class="kpi-card green">
+            <div class="kpi-label"><span class="lang-en">RM1M+ Transactions</span><span class="lang-zh" style="display:none">RM1M+ 交易量</span></div>
+            <div class="kpi-value">+6.5% <span style="font-size:13px">YoY</span></div>
+            <span class="kpi-badge badge-green"><span class="lang-en">2024 growth</span><span class="lang-zh" style="display:none">2024年增長</span></span>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-label"><span class="lang-en">KLCC PSF</span><span class="lang-zh" style="display:none">KLCC 呎價</span></div>
+            <div class="kpi-value">RM 1,200–2,500+</div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-label"><span class="lang-en">Luxury Rental Top 10%</span><span class="lang-zh" style="display:none">豪宅租金前10%</span></div>
+            <div class="kpi-value">RM 5,295<span style="font-size:13px">/mo</span></div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-label"><span class="lang-en">Discount in Oversupply</span><span class="lang-zh" style="display:none">過剩折扣</span></div>
+            <div class="kpi-value">8–12%</div>
+            <span class="kpi-badge badge-orange"><span class="lang-en">Below launch price</span><span class="lang-zh" style="display:none">低於發售價</span></span>
+          </div>
+        </div>
+
+        <div class="chart-card" style="margin:12px 0;">
+          <div class="lang-en" style="font-size:13px;color:#4a6080;line-height:1.8;padding:8px 0;">
+            <p style="margin-bottom:10px;">KL's luxury segment is caught between two forces. Transactions above RM1M grew 6.5% in 2024, and top-decile rentals reached RM5,295/month. Yet overhang remains concentrated in RM1M+ and SOHO categories, meaning pockets of oversupply persist even as headline demand improves.</p>
+            <p style="margin-bottom:10px;">KLCC and Bukit Bintang attract foreign buyers at RM1,200–2,500+ PSF, with 8–12% discounts available from distressed or motivated sellers. In contrast, Bangsar and Mont Kiara in the RM1.2–1.6M range show stronger fundamentals with 4.5–6% gross yields, supported by established expatriate demand and limited new supply.</p>
+            <p>Branded residences have proven most resilient — TRX Residences from RM1.2M, Pavilion Bukit Bintang from RM1.7M, and Alila 2 Bangsar at ~RM1,200 PSF. For qualified buyers, the current window is the most favourable in 5 years, combining price correction, rental growth, and selective discounts.</p>
+          </div>
+          <div class="lang-zh" style="display:none;font-size:13px;color:#4a6080;line-height:1.8;padding:8px 0;">
+            <p style="margin-bottom:10px;">吉隆坡豪宅市場正處於兩股力量的拉扯之中。2024年RM1M以上交易量增長6.5%，前十分位租金達RM5,295/月。然而積壓仍集中在RM1M+及SOHO類別，意味著即使整體需求改善，局部過剩依然存在。</p>
+            <p style="margin-bottom:10px;">KLCC及武吉免登以RM1,200–2,500+呎價吸引外國買家，急售或有動機的賣家提供8–12%的折扣。相比之下，滿家樂及滿都卡拉（Mont Kiara）RM1.2–1.6M價位展現更強勁的基本面，毛收益率4.5–6%，得益於穩定的外籍人士需求和有限的新供應。</p>
+            <p>品牌住宅表現最具韌性——TRX Residences起價RM1.2M、Pavilion武吉免登起價RM1.7M、Alila 2 Bangsar約RM1,200呎價。對於合格買家而言，當前視窗是過去5年最有利的，結合了價格修正、租金增長及選擇性折扣。</p>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3><span class="lang-en">Luxury Segment Transaction Growth (YoY%)</span><span class="lang-zh" style="display:none">豪宅交易量增長（同比%）</span></h3>
+          <div style="position:relative;height:220px;"><div id="chart-luxury-growth" style="width:100%;height:100%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KL Supply Pipeline -->
+    <h2 class="section-heading"><span class="lang-en">KL Supply Pipeline</span><span class="lang-zh" style="display:none">吉隆坡供給分析</span></h2>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">KL Supply Trend</span><span class="lang-zh" style="display:none">吉隆坡供給趨勢</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-kl-supply" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">KL Rental Trend</span><span class="lang-zh" style="display:none">吉隆坡租金趨勢</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-kl-rental" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">KL Overhang Forecast 2025–2029</span><span class="lang-zh" style="display:none">吉隆坡待售餘屋預測 2025–2029年</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">KL accounts for ~13% of national overhang</span><span class="lang-zh" style="display:none">吉隆坡約佔全國待售餘屋13%</span></p>
+        <div style="position:relative;height:280px;"><div id="chartKLForecast" style="width:100%;height:100%"></div></div>
+        <div class="insight-box" style="margin-top:12px;">
+          <div class="lang-en">Base case (absorption 85,000/yr): KL overhang peaks at ~6,400 units in 2027, normalising to ~1,800 by 2029. Bull case (90,000/yr): peak ~5,500, clears to ~1,000. Bear case (75,000/yr): peak ~7,500, still ~3,800 in 2029. The correction window — falling prices, rising rents — is most acute in 2025–2026.</div>
+          <div class="lang-zh" style="display:none">基本情境（年均吸收85,000套）：吉隆坡待售餘屋在2027年高峰約6,400套，2029年回落至約1,800套。樂觀情境（吸收90,000套）：高峰約5,500套，2029年降至約1,000套。保守情境（吸收75,000套）：高峰約7,500套，2029年仍達3,800套。房價修正、租金上漲的組合在2025至2026年最為明顯。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:12px;">
+      <h3><span class="lang-en">Zone PSF Comparison</span><span class="lang-zh" style="display:none">各區呎價比較</span></h3>
+      <div style="position:relative;height:220px;"><div id="chart-zone-psf" style="width:100%;height:100%"></div></div>
+    </div>
+
+    <!-- RM1M+ Deep Dive Section -->
+    <h2 class="section-heading">
+      <span class="lang-en">RM1M+ Luxury Market: Deep Dive</span>
+      <span class="lang-zh" style="display:none">百萬豪宅深度分析</span>
+    </h2>
+
+    <!-- Tab bar for sub-sections -->
+    <div class="chart-card" id="luxury-tabs">
+      <div class="tab-bar">
+        <button class="active" data-tab="lx-supply" onclick="switchTab('luxury-tabs','lx-supply')">
+          <span class="lang-en">Supply & Overhang</span>
+          <span class="lang-zh" style="display:none">供給與餘屋</span>
+        </button>
+        <button data-tab="lx-demand" onclick="switchTab('luxury-tabs','lx-demand')">
+          <span class="lang-en">Demand & Transactions</span>
+          <span class="lang-zh" style="display:none">需求與成交</span>
+        </button>
+        <button data-tab="lx-yield" onclick="switchTab('luxury-tabs','lx-yield')">
+          <span class="lang-en">Yields & Cost</span>
+          <span class="lang-zh" style="display:none">報酬率與持有成本</span>
+        </button>
+        <button data-tab="lx-district" onclick="switchTab('luxury-tabs','lx-district')">
+          <span class="lang-en">District Comparison</span>
+          <span class="lang-zh" style="display:none">地段比較</span>
+        </button>
+        <button data-tab="lx-outlook" onclick="switchTab('luxury-tabs','lx-outlook')">
+          <span class="lang-en">Outlook 2026–2035</span>
+          <span class="lang-zh" style="display:none">2026–2035展望</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: Supply & Overhang -->
+      <div class="tab-panel active" id="tab-lx-supply">
+        <div class="insight-box" style="margin-bottom:16px;">
+          <div class="lang-en">
+            <strong>The key shift:</strong> RM1M+ national overhang collapsed 41% from 4,173 units (2023) to 2,463 units (2024), while sub-RM500K overhang expanded. High-end absorption is improving. But KL completions surged 32.7% YoY in Q1–Q3 2025 (7,418 units) while starts fell 14.9% — meaning the delivery wave peaks in 2026 before thinning.
+          </div>
+          <div class="lang-zh" style="display:none">
+            <strong>關鍵轉折：</strong>全國RM1M+待售餘屋從2023年的4,173套大幅萎縮41%至2024年的2,463套，而RM50萬以下的積壓反而持續擴大。高端段的吸納能力正在改善。但KL 2025年前三季完工戶數年增32.7%（7,418套），同時開工量卻年減14.9%——意味著交屋潮在2026年達到頂峰後將快速消退。
+          </div>
+        </div>
+        <div class="chart-grid two-col">
+          <div class="chart-card">
+            <h3><span class="lang-en">National RM1M+ Overhang Trend</span><span class="lang-zh" style="display:none">全國RM1M+待售餘屋趨勢</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">-41% in 2024 — fastest clearance of any price band · NAPIC</span><span class="lang-zh" style="display:none">2024年減41%——各價格帶中清倉最快 · NAPIC</span></p>
+            <div style="position:relative;height:220px;"><div id="chart-lx-oh-trend" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">Overhang by Price Band 2024</span><span class="lang-zh" style="display:none">2024年各價格帶待售餘屋</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">RM1M+ now only 10.6% of total overhang · NAPIC 2024</span><span class="lang-zh" style="display:none">RM1M+僅佔總餘屋10.6% · NAPIC 2024</span></p>
+            <div style="position:relative;height:220px;"><div id="chart-lx-oh-band" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">KL Completions vs Starts (Q1-Q3 2025)</span><span class="lang-zh" style="display:none">KL完工 vs 開工（2025年Q1-Q3）</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Completions +32.7% while starts -14.9% — peak delivery approaching · NAPIC</span><span class="lang-zh" style="display:none">完工+32.7%同時開工-14.9%——交屋潮頂峰將至 · NAPIC</span></p>
+            <div style="position:relative;height:220px;"><div id="chart-lx-completion" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">SA Overhang by State Q3 2025</span><span class="lang-zh" style="display:none">2025Q3各州服務式公寓積壓</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Johor dominates — KL contained · NAPIC Q3 2025</span><span class="lang-zh" style="display:none">柔佛最嚴重——吉隆坡相對可控 · NAPIC Q3 2025</span></p>
+            <div style="position:relative;height:220px;"><div id="chart-lx-sa-state" style="width:100%;height:100%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Demand & Transactions -->
+      <div class="tab-panel" id="tab-lx-demand">
+        <div class="insight-box" style="margin-bottom:16px;">
+          <div class="lang-en">
+            <strong>Demand is real but narrow:</strong> RM1M+ transactions grew 11.3% in 2024 (14,307 units nationally) vs only 4% for the overall market. KL specifically saw 18,913 transactions in 2024 (+5.5%), with the RM1M+ segment growing 31% YoY to 3,079 units. Foreign buyers are only 0.76% of volume but 3.8% of value — average ticket RM2.09M. Chinese buyers lead (329 transactions, RM835M), Singapore second (320 transactions, RM518M).
+          </div>
+          <div class="lang-zh" style="display:none">
+            <strong>需求真實但集中：</strong>2024年RM1M+成交量全國年增11.3%（14,307套），遠高於整體市場的4%。KL全年成交18,913套（+5.5%），其中RM1M+段年增31%至3,079套。外國買家僅佔成交量0.76%但貢獻3.8%的金額——平均每筆RM209萬。中國買家居首（329宗，RM8.35億），新加坡第二（320宗，RM5.18億）。
+          </div>
+        </div>
+        <div class="chart-grid two-col">
+          <div class="chart-card">
+            <h3><span class="lang-en">KL RM1M+ vs Total Transactions</span><span class="lang-zh" style="display:none">KL RM1M+成交 vs 總成交</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Luxury growing faster than market · NAPIC / Savills 2024</span><span class="lang-zh" style="display:none">豪宅成長速度超越大市 · NAPIC / Savills 2024</span></p>
+            <div style="position:relative;height:220px;"><div id="chart-lx-tx-trend" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">Foreign Buyer Origin 2025 H1</span><span class="lang-zh" style="display:none">2025上半年外國買家來源</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">China + Singapore = 71% of foreign transactions · Parliament Q&A 2025</span><span class="lang-zh" style="display:none">中國+新加坡佔外資成交71% · 國會書面答覆2025</span></p>
+            <div style="position:relative;height:220px;"><div id="chart-lx-foreign" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">KL Transaction by Price Band 2024</span><span class="lang-zh" style="display:none">KL 2024年成交依價格帶</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">RM1M+ fastest growing at +31% YoY · NAPIC 2024</span><span class="lang-zh" style="display:none">RM1M+年增31%，各價格帶成長最快 · NAPIC 2024</span></p>
+            <div style="position:relative;height:220px;"><div id="chart-lx-price-band" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">MYR Exchange Rate vs Key Currencies</span><span class="lang-zh" style="display:none">馬幣匯率 vs 主要貨幣</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">MYR appreciated 10-20% since 2024 lows — FX advantage narrowing</span><span class="lang-zh" style="display:none">馬幣自2024年低位升值10-20%——匯率紅利收窄</span></p>
+            <div style="position:relative;height:220px;"><div id="chart-lx-fx" style="width:100%;height:100%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Yields & Cost -->
+      <div class="tab-panel" id="tab-lx-yield">
+        <div class="insight-box" style="margin-bottom:16px;">
+          <div class="lang-en">
+            <strong>Yield vs capital gain is an inverse relationship in KL luxury:</strong> Projects with highest gross yields (7%+) show flat or declining capital values. Ultra-luxury with 2% yields show 30-59% capital appreciation. Net yield after costs and 30% non-resident tax: ~1.1–2.1% — competitive vs Singapore (sub-2%) and Hong Kong (sub-1.5%) but not passive income.
+          </div>
+          <div class="lang-zh" style="display:none">
+            <strong>KL豪宅市場：收益率與資本增值是反向關係。</strong>毛收益率最高的項目（7%+）往往資本價值停滯甚至下跌；超豪華物業收益率僅2%，卻錄得30-59%的資本增值。扣除持有成本和30%非居民稅後，淨收益率約1.1-2.1%——雖優於新加坡（不到2%）和香港（不到1.5%），但稱不上被動收入。
+          </div>
+        </div>
+        <div class="chart-grid two-col">
+          <div class="chart-card">
+            <h3><span class="lang-en">Gross Yield by Project / District</span><span class="lang-zh" style="display:none">各項目/地段毛收益率</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Higher yield = lower capital growth · Knight Frank / EdgeProp 2024</span><span class="lang-zh" style="display:none">收益率越高 = 資本增值越低 · Knight Frank / EdgeProp 2024</span></p>
+            <div style="position:relative;height:260px;"><div id="chart-lx-yield" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">Annual Holding Cost Breakdown</span><span class="lang-zh" style="display:none">年度持有成本分解</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">RM1.5M property · Non-resident owner · Est. RM34K–54K/yr (2.3–3.6%)</span><span class="lang-zh" style="display:none">RM150萬物業 · 非居民業主 · 估計年持有成本RM3.4萬至5.4萬（2.3-3.6%）</span></p>
+            <div style="position:relative;height:260px;"><div id="chart-lx-holding-cost" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">Entry Cost Comparison 2025 vs 2026</span><span class="lang-zh" style="display:none">進場成本比較：2025 vs 2026</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Stamp duty 4% → 8% for foreigners from Jan 2026</span><span class="lang-zh" style="display:none">外國買家印花稅2026年起從4%升至8%</span></p>
+            <div style="position:relative;height:260px;"><div id="chart-lx-stamp" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">RPGT by Holding Period</span><span class="lang-zh" style="display:none">RPGT vs 持有年期</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Year 5→6 cliff: 30% → 10% for foreigners · IRB Malaysia</span><span class="lang-zh" style="display:none">第5→6年斷崖：外國人稅率從30%降至10% · 馬來西亞稅務局</span></p>
+            <div style="position:relative;height:260px;"><div id="chart-lx-rpgt" style="width:100%;height:100%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: District Comparison -->
+      <div class="tab-panel" id="tab-lx-district">
+        <div class="insight-box" style="margin-bottom:16px;">
+          <div class="lang-en">
+            <strong>Six districts, three tiers:</strong> Ultra-luxury (KLCC, Damansara Heights): capital gain play, sub-3% yield. Prime rental (Mont Kiara, Bangsar): 5-5.4% yield, MRT3 catalyst. Emerging value (TRX, Bangsar South): 5-8% capital growth potential, discount to established areas.
+          </div>
+          <div class="lang-zh" style="display:none">
+            <strong>六大地段、三個層次：</strong>超豪華（KLCC、白沙羅高地）：資本增值為主，毛收益率低於3%。優質收租（蒙吉拉、孟沙）：收益率5-5.4%，MRT3環線催化劑加持。新興價值（TRX、南蒙沙）：資本增值潛力5-8%，相對成熟地段仍有折價。
+          </div>
+        </div>
+        <div class="chart-grid two-col">
+          <div class="chart-card">
+            <h3><span class="lang-en">District PSF Comparison</span><span class="lang-zh" style="display:none">各地段呎價比較</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Median transacted PSF · Brickz / Knight Frank 2024</span><span class="lang-zh" style="display:none">中位成交呎價 · Brickz / Knight Frank 2024</span></p>
+            <div style="position:relative;height:280px;"><div id="chart-lx-psf" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">Yield vs Capital Growth Matrix</span><span class="lang-zh" style="display:none">收益率 vs 資本增值矩陣</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Bubble size = liquidity (transaction volume) · 2024 data</span><span class="lang-zh" style="display:none">氣泡大小 = 流動性（成交量） · 2024數據</span></p>
+            <div style="position:relative;height:280px;"><div id="chart-lx-matrix" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card" style="grid-column:span 2;">
+            <h3><span class="lang-en">District Scorecard</span><span class="lang-zh" style="display:none">地段評分卡</span></h3>
+            <div style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;font-size:11px;">
+                <thead>
+                  <tr style="background:#eef3f9;color:#1e3a5f;">
+                    <th style="padding:8px;text-align:left;border-bottom:1px solid #ccd9e8;"><span class="lang-en">District</span><span class="lang-zh" style="display:none">地段</span></th>
+                    <th style="padding:8px;text-align:center;border-bottom:1px solid #ccd9e8;"><span class="lang-en">PSF Range</span><span class="lang-zh" style="display:none">呎價範圍</span></th>
+                    <th style="padding:8px;text-align:center;border-bottom:1px solid #ccd9e8;"><span class="lang-en">Gross Yield</span><span class="lang-zh" style="display:none">毛收益率</span></th>
+                    <th style="padding:8px;text-align:center;border-bottom:1px solid #ccd9e8;"><span class="lang-en">5Y Capital Growth</span><span class="lang-zh" style="display:none">5年資本增值</span></th>
+                    <th style="padding:8px;text-align:center;border-bottom:1px solid #ccd9e8;"><span class="lang-en">MRT3 Impact</span><span class="lang-zh" style="display:none">MRT3影響</span></th>
+                    <th style="padding:8px;text-align:center;border-bottom:1px solid #ccd9e8;"><span class="lang-en">Verdict</span><span class="lang-zh" style="display:none">結論</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid #eef3f9;">
+                    <td style="padding:8px;font-weight:600;color:#1e3a5f;">KLCC</td>
+                    <td style="padding:8px;text-align:center;">RM900–4,437</td>
+                    <td style="padding:8px;text-align:center;">2.1–5.9%</td>
+                    <td style="padding:8px;text-align:center;color:#16a34a;">+30-59% (ultra)</td>
+                    <td style="padding:8px;text-align:center;color:#5a7a9a;">None</td>
+                    <td style="padding:8px;text-align:center;"><span style="background:#1e3a5f;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;"><span class="lang-en">Ultra only</span><span class="lang-zh" style="display:none">僅限頂奢</span></span></td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #eef3f9;background:#f9fbfd;">
+                    <td style="padding:8px;font-weight:600;color:#1e3a5f;"><span class="lang-en">Mont Kiara</span><span class="lang-zh" style="display:none">蒙吉拉</span></td>
+                    <td style="padding:8px;text-align:center;">RM550–1,374</td>
+                    <td style="padding:8px;text-align:center;color:#16a34a;">5.0–5.4%</td>
+                    <td style="padding:8px;text-align:center;color:#16a34a;">Steady +15-25%</td>
+                    <td style="padding:8px;text-align:center;color:#16a34a;">High (+20-30%)</td>
+                    <td style="padding:8px;text-align:center;"><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;"><span class="lang-en">Best balanced</span><span class="lang-zh" style="display:none">最佳平衡</span></span></td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #eef3f9;">
+                    <td style="padding:8px;font-weight:600;color:#1e3a5f;"><span class="lang-en">Damansara Hts</span><span class="lang-zh" style="display:none">白沙羅高地</span></td>
+                    <td style="padding:8px;text-align:center;">RM1,400–1,800</td>
+                    <td style="padding:8px;text-align:center;">3–5%</td>
+                    <td style="padding:8px;text-align:center;color:#16a34a;">+37% (landed)</td>
+                    <td style="padding:8px;text-align:center;color:#5a7a9a;">Low</td>
+                    <td style="padding:8px;text-align:center;"><span style="background:#1e3a5f;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;"><span class="lang-en">Illiquid prestige</span><span class="lang-zh" style="display:none">流動性低</span></span></td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #eef3f9;background:#f9fbfd;">
+                    <td style="padding:8px;font-weight:600;color:#1e3a5f;"><span class="lang-en">Bangsar</span><span class="lang-zh" style="display:none">孟沙</span></td>
+                    <td style="padding:8px;text-align:center;">RM540–1,000</td>
+                    <td style="padding:8px;text-align:center;color:#16a34a;">5–6%</td>
+                    <td style="padding:8px;text-align:center;color:#16a34a;">+20-30%</td>
+                    <td style="padding:8px;text-align:center;color:#5a7a9a;">Medium</td>
+                    <td style="padding:8px;text-align:center;"><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;"><span class="lang-en">Solid income</span><span class="lang-zh" style="display:none">穩定收租</span></span></td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #eef3f9;">
+                    <td style="padding:8px;font-weight:600;color:#16a34a;">TRX</td>
+                    <td style="padding:8px;text-align:center;">RM1,000–2,300</td>
+                    <td style="padding:8px;text-align:center;">4–5%</td>
+                    <td style="padding:8px;text-align:center;color:#16a34a;">+5-8%/yr</td>
+                    <td style="padding:8px;text-align:center;color:#16a34a;">Adjacent</td>
+                    <td style="padding:8px;text-align:center;"><span style="background:#d97706;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;"><span class="lang-en">Best growth</span><span class="lang-zh" style="display:none">最強增值</span></span></td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px;font-weight:600;color:#dc2626;"><span class="lang-en">Bukit Bintang SA</span><span class="lang-zh" style="display:none">武吉免登服務式公寓</span></td>
+                    <td style="padding:8px;text-align:center;">RM800–1,200</td>
+                    <td style="padding:8px;text-align:center;color:#dc2626;">6–9% (advertised)</td>
+                    <td style="padding:8px;text-align:center;color:#dc2626;">Flat/Negative</td>
+                    <td style="padding:8px;text-align:center;color:#5a7a9a;">None</td>
+                    <td style="padding:8px;text-align:center;"><span style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;"><span class="lang-en">Avoid</span><span class="lang-zh" style="display:none">避開</span></span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: Outlook -->
+      <div class="tab-panel" id="tab-lx-outlook">
+        <div class="insight-box" style="margin-bottom:16px;">
+          <div class="lang-en">
+            <strong>Three catalysts define the next decade:</strong> MRT3 Circle Line (51.6km, 33 stations, 2032 completion) will unlock Mont Kiara's transit premium. TRX maturation (45,000 workers, Exchange TRX mall fully operational, HSBC/Prudential anchors) will close the new-district discount. Bandar Malaysia (486 acres, RM140B GDV, 2026 groundbreak) reshapes South KL values over a 50-year horizon. Against these, 2026 stamp duty to 8% and MYR appreciation represent headwinds for foreign capital.
+          </div>
+          <div class="lang-zh" style="display:none">
+            <strong>三大催化劑定義未來十年：</strong>MRT3環線（51.6公里、33站、2032年通車）將解鎖蒙吉拉的交通溢價。TRX成熟化（45,000名常駐上班族、Exchange TRX購物中心全面運營、匯豐和保誠進駐）將收斂新區折價。馬來西亞城（486英畝、GDV1,400億令吉、2026年動工）在50年周期內重塑南KL格局。但2026年印花稅升至8%和馬幣升值，構成外資進場的阻力。
+          </div>
+        </div>
+        <div class="chart-grid two-col">
+          <div class="chart-card">
+            <h3><span class="lang-en">MRT3 Circle Line — Key Stops</span><span class="lang-zh" style="display:none">MRT3環線——主要站點</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Final approval July 2025 · Completion 2032 · 500m radius = up to +30% value uplift</span><span class="lang-zh" style="display:none">2025年7月獲批 · 2032年通車 · 站點500米內估計增值最高30%</span></p>
+            <div style="position:relative;height:260px;"><div id="chart-lx-mrt3" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">10-Year Return Simulation</span><span class="lang-zh" style="display:none">10年回報模擬</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">RM1.5M property · Foreign buyer · Bull/Base/Bear scenarios</span><span class="lang-zh" style="display:none">RM150萬物業 · 外國買家 · 樂觀/基本/保守情境</span></p>
+            <div style="position:relative;height:260px;"><div id="chart-lx-return-sim" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">Digital FDI Investment Commitments</span><span class="lang-zh" style="display:none">數位經濟FDI投資承諾</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">RM278B committed 2021-2024 · Creates high-income expat demand · DOSM / MIDA</span><span class="lang-zh" style="display:none">2021-2024年承諾RM2,780億 · 創造高薪外派住房需求 · DOSM / MIDA</span></p>
+            <div style="position:relative;height:260px;"><div id="chart-lx-fdi" style="width:100%;height:100%;"></div></div>
+          </div>
+          <div class="chart-card">
+            <h3><span class="lang-en">Risk Matrix</span><span class="lang-zh" style="display:none">風險矩陣</span></h3>
+            <p class="chart-subtitle"><span class="lang-en">Probability vs impact · KL RM1M+ segment</span><span class="lang-zh" style="display:none">發生概率 vs 影響程度 · KL RM1M+市場</span></p>
+            <div style="position:relative;height:260px;"><div id="chart-lx-risk" style="width:100%;height:100%;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End luxury-tabs -->
+
+    <!-- KL Summary -->
+    <h2 class="section-heading"><span class="lang-en">KL Summary</span><span class="lang-zh" style="display:none">吉隆坡總結</span></h2>
+    <div class="summary-grid">
+      <div class="summary-card red-left">
+        <h4><span class="lang-en">Price Correction</span><span class="lang-zh" style="display:none">房價修正</span></h4>
+        <p><span class="lang-en">KL -4.3% YoY — supply-driven correction, not demand collapse. Structural oversupply in high-rise segment driving price adjustment.</span><span class="lang-zh" style="display:none">吉隆坡年跌4.3%——供給驅動的修正，非需求崩潰。高層住宅結構性過剩推動價格調整。</span></p>
+      </div>
+      <div class="summary-card green-left">
+        <h4><span class="lang-en">Rental Bright Spot</span><span class="lang-zh" style="display:none">租金市場亮點</span></h4>
+        <p><span class="lang-en">Rents +6.1% YoY. Yield expanding as prices fall. Compression between rent growth and price decline creates opportunity.</span><span class="lang-zh" style="display:none">租金年漲6.1%。房價下跌同時收益率擴大。租金增長與房價下跌之間的壓縮創造機會。</span></p>
+      </div>
+      <div class="summary-card green-left">
+        <h4><span class="lang-en">Zone 2 Best Risk-Reward</span><span class="lang-zh" style="display:none">第二區風險回報最佳</span></h4>
+        <p><span class="lang-en">Mid Valley/OKR, RM500k–700k sweet spot. Best absorption, balanced supply, yield covers borrowing cost.</span><span class="lang-zh" style="display:none">中谷/舊巴生路，50至70萬令吉甜蜜點。吸收最佳、供需平衡、收益率覆蓋借貸成本。</span></p>
+      </div>
+      <div class="summary-card orange-left">
+        <h4><span class="lang-en">Zone 3 Caution</span><span class="lang-zh" style="display:none">第三區請謹慎</span></h4>
+        <p><span class="lang-en">SA overhang, PSF trap. Small-format units at RM800–1,200 PSF with limited livability and financing complications.</span><span class="lang-zh" style="display:none">服務式公寓積壓、呎價陷阱。小面積單位呎價RM800至1,200，居住效用有限且貸款困難。</span></p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">NAPIC Q3 2025 / H1 2025 &middot; Global Property Guide 2025 &middot; Savills Klang Valley Monitor 3Q2024 &middot; EdgeProp 2024 &middot; DOSM 2022 &middot; BNM<br><em>Some figures are estimates — see individual chart annotations. Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">NAPIC Q3 2025 / H1 2025 &middot; Global Property Guide 2025 &middot; Savills 巴生谷監測 3Q2024 &middot; EdgeProp 2024 &middot; DOSM 2022 &middot; BNM<br><em>部分數據為估算值——請參閱各圖表註解。非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:'#1e3a5f', green:'#16a34a', orange:'#d97706',
+    red:'#dc2626', blue:'#2563eb', muted:'#5a7a9a',
+    grid:'#e8f0f9', text:'#1e3a5f'
+  };
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+  var baseGrid = { left: 50, right: 20, top: 40, bottom: 30, containLabel: true };
+  var baseTooltip = {
+    trigger: 'axis', backgroundColor: '#fff',
+    borderColor: '#ccd9e8', borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+  var baseLegend = { top: 8, textStyle: baseText, icon: 'circle', itemWidth: 8, itemHeight: 8 };
+
+  function fmtRM(v) {
+    if (v >= 1000000) return 'RM ' + (v/1000000).toFixed(1) + 'M';
+    if (v >= 1000) return 'RM ' + (v/1000).toFixed(0) + 'K';
+    return 'RM ' + v;
+  }
+  function fmtNum(v) { return v >= 1000 ? (v/1000).toFixed(0)+'K' : v; }
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+    allCharts.forEach(function(c){ if(c) c.resize(); });
+  }
+
+  function switchTab(cid, tab){
+    var w = document.getElementById(cid); if(!w) return;
+    w.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+    w.querySelectorAll('.tab-bar button').forEach(function(b){ b.classList.remove('active'); });
+    var p = w.querySelector('#tab-'+tab); if(p) p.classList.add('active');
+    w.querySelectorAll('.tab-bar button').forEach(function(b){ if(b.dataset.tab===tab) b.classList.add('active'); });
+    setTimeout(function(){
+      allCharts.forEach(function(c){ if(c) c.resize(); });
+    }, 100);
+  }
+
+  var allCharts = [];
+
+  window.addEventListener('load', function(){
+
+    // ==================== MAIN CHARTS (always visible) ====================
+
+    // chart-kl-supply
+    var cSupply = echarts.init(document.getElementById('chart-kl-supply'));
+    allCharts.push(cSupply);
+    cSupply.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Completions','Starts'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025 Q1-Q3'] }),
+      yAxis: mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } }) }),
+      series: [
+        {
+          name: 'Completions', type: 'line',
+          data: [22000,20000,18000,19000,18000,15000,16200,14800,16500,21600,17200],
+          lineStyle: { color: C.navy, width: 2 }, itemStyle: { color: C.navy },
+          areaStyle: { color: 'rgba(30,58,95,0.08)' },
+          smooth: 0.2, symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'Starts', type: 'line',
+          data: [20000,19000,17000,18000,19000,14000,17500,16000,15800,19200,10800],
+          lineStyle: { color: C.muted, width: 2, type: 'dashed' }, itemStyle: { color: C.muted },
+          smooth: 0.2, symbol: 'circle', symbolSize: 6
+        }
+      ]
+    });
+
+    // chart-kl-rental
+    var cRental = echarts.init(document.getElementById('chart-kl-rental'));
+    allCharts.push(cRental);
+    cRental.setOption({
+      tooltip: baseTooltip,
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'] }),
+      yAxis: mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: function(v){ return 'RM '+v.toLocaleString(); } }) }),
+      series: [{
+        type: 'line',
+        data: [1800,1850,1900,1980,2100,2000,2000,2100,2350,2730,2901],
+        lineStyle: { color: C.green, width: 2 }, itemStyle: { color: C.green },
+        areaStyle: { color: 'rgba(22,163,74,0.08)' },
+        smooth: 0.3, symbol: 'circle', symbolSize: 6,
+        markPoint: {
+          data: [{ coord: ['2025', 2901], symbol: 'circle', symbolSize: 45,
+            label: { formatter: 'RM 2,901 +6.1% YoY', fontSize: 9, fontWeight: 'bold' },
+            itemStyle: { color: C.green } }]
+        }
+      }]
+    });
+
+    // chart-zone-psf
+    var cZonePSF = echarts.init(document.getElementById('chart-zone-psf'));
+    allCharts.push(cZonePSF);
+    cZonePSF.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['Zone 1\nKLCC/BB','Zone 2\nMid Valley','Zone 3\nOuter'] }),
+      yAxis: mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: function(v){ return 'RM '+v.toLocaleString(); } }) }),
+      series: [{
+        type: 'bar',
+        data: [
+          { value: 1800, itemStyle: { color: C.orange, borderRadius: [4,4,0,0] } },
+          { value: 700, itemStyle: { color: C.green, borderRadius: [4,4,0,0] } },
+          { value: 490, itemStyle: { color: C.red, borderRadius: [4,4,0,0] } }
+        ],
+        barMaxWidth: 100,
+        label: { show: true, position: 'top', formatter: 'RM {c} psf', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }
+      }]
+    });
+
+    // chartKLForecast
+    var cForecast = echarts.init(document.getElementById('chartKLForecast'));
+    allCharts.push(cForecast);
+    cForecast.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Historical / \u6b77\u53f2','Bull (90K)','Base (85K)','Bear (75K)'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['2023','2024H1','25E','26E','27E','28E','29E'], axisLabel: Object.assign({}, baseText, { rotate: 0, interval: 0 }) }),
+      yAxis: mkAxis({ type: 'value', min: 0, axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } }) }),
+      series: [
+        {
+          name: 'Historical / \u6b77\u53f2', type: 'line',
+          data: [4100,3643,null,null,null,null,null],
+          lineStyle: { color: C.navy, width: 2 }, itemStyle: { color: C.navy },
+          areaStyle: { color: 'rgba(30,58,95,0.08)' },
+          symbol: 'circle', symbolSize: 7
+        },
+        {
+          name: 'Bull (90K)', type: 'line',
+          data: [null,3643,4000,5600,5500,3000,1000],
+          lineStyle: { color: C.green, width: 1.5, type: [4,2] }, itemStyle: { color: C.green },
+          symbol: 'circle', symbolSize: 4
+        },
+        {
+          name: 'Base (85K)', type: 'line',
+          data: [null,3643,4200,6100,6400,3900,1800],
+          lineStyle: { color: C.orange, width: 2, type: [6,3] }, itemStyle: { color: C.orange },
+          symbol: 'circle', symbolSize: 5
+        },
+        {
+          name: 'Bear (75K)', type: 'line',
+          data: [null,3643,4400,6800,7500,5700,3800],
+          lineStyle: { color: C.red, width: 1.5, type: [8,4] }, itemStyle: { color: C.red },
+          symbol: 'circle', symbolSize: 4
+        }
+      ]
+    });
+
+    // ==================== TAB: Zone 1 ====================
+
+    // chart-z1-price
+    var cZ1Price = echarts.init(document.getElementById('chart-z1-price'));
+    allCharts.push(cZ1Price);
+    cZ1Price.setOption({
+      tooltip: baseTooltip,
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['2020','2021','2022','2023','2024','2025Q3'] }),
+      yAxis: mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtRM(v); } }) }),
+      series: [{
+        type: 'line',
+        data: [850000, 870000, 890000, 920000, 950000, 980000],
+        lineStyle: { color: C.orange, width: 2 }, itemStyle: { color: C.orange },
+        smooth: 0.2, symbol: 'circle', symbolSize: 6
+      }]
+    });
+
+    // chart-z1-yield
+    var cZ1Yield = echarts.init(document.getElementById('chart-z1-yield'));
+    allCharts.push(cZ1Yield);
+    cZ1Yield.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['KLCC Fringe','TRX','Pavilion BB','Bukit Ceylon'] }),
+      yAxis: mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) }),
+      series: [{
+        type: 'bar',
+        data: [3.2, 3.5, 3.8, 4.1].map(function(v){
+          return { value: v, itemStyle: { color: C.orange, borderRadius: [4,4,0,0] } };
+        }),
+        barMaxWidth: 50,
+        label: { show: true, position: 'top', formatter: '{c}%', fontSize: 11 },
+        markLine: {
+          silent: true, symbol: 'none',
+          lineStyle: { color: C.red, type: 'dashed', width: 1 },
+          label: { formatter: 'OPR 2.75%', fontSize: 10, color: C.red },
+          data: [{ yAxis: 2.75 }]
+        }
+      }]
+    });
+
+    // ==================== TAB: Zone 2 ====================
+
+    // chart-z2-launch
+    var cZ2Launch = echarts.init(document.getElementById('chart-z2-launch'));
+    allCharts.push(cZ2Launch);
+    cZ2Launch.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['OKR North','Mid Valley','Bangsar South','KL Eco City'] }),
+      yAxis: mkAxis({ type: 'value', max: 100, axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) }),
+      series: [{
+        type: 'bar',
+        data: [68, 74, 71, 65].map(function(v){
+          return { value: v, itemStyle: { color: C.green, borderRadius: [4,4,0,0] } };
+        }),
+        barMaxWidth: 55,
+        label: { show: true, position: 'top', formatter: '{c}%', fontSize: 11 }
+      }]
+    });
+
+    // chart-z2-balance
+    var cZ2Balance = echarts.init(document.getElementById('chart-z2-balance'));
+    allCharts.push(cZ2Balance);
+    cZ2Balance.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Supply','Demand'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['2021','2022','2023','2024','2025E'] }),
+      yAxis: mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } }) }),
+      series: [
+        {
+          name: 'Supply', type: 'line',
+          data: [2800,3100,2900,3200,2800],
+          lineStyle: { color: C.muted, width: 2 }, itemStyle: { color: C.muted },
+          symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'Demand', type: 'line',
+          data: [3200,3400,3100,3500,3400],
+          lineStyle: { color: C.navy, width: 2 }, itemStyle: { color: C.navy },
+          symbol: 'circle', symbolSize: 6
+        }
+      ]
+    });
+
+    // ==================== TAB: Zone 3 ====================
+
+    // chart-z3-psf
+    var cZ3PSF = echarts.init(document.getElementById('chart-z3-psf'));
+    allCharts.push(cZ3PSF);
+    cZ3PSF.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: { left: 100, right: 60, top: 10, bottom: 20, containLabel: false },
+      xAxis: mkAxis({ type: 'value', min: 0 }),
+      yAxis: mkAxis({
+        type: 'category',
+        data: ['Kepong','Setapak','Cheras North','Cheras South','Wangsa Maju'],
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      }),
+      series: [{
+        type: 'bar',
+        data: [380, 420, 450, 490, 510].map(function(v){
+          return { value: v, itemStyle: { color: C.red, borderRadius: [0,4,4,0] } };
+        }),
+        barMaxWidth: 22,
+        label: { show: true, position: 'right', formatter: 'RM {c} psf', fontSize: 10, fontFamily: 'Inter' }
+      }]
+    });
+
+    // chart-z3-sa
+    var cZ3SA = echarts.init(document.getElementById('chart-z3-sa'));
+    allCharts.push(cZ3SA);
+    cZ3SA.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['Kepong','Setapak','Cheras','Wangsa Maju','Others'] }),
+      yAxis: mkAxis({ type: 'value' }),
+      series: [{
+        type: 'bar',
+        data: [420, 380, 520, 290, 310].map(function(v){
+          return { value: v, itemStyle: { color: C.red, borderRadius: [4,4,0,0] } };
+        }),
+        barMaxWidth: 50,
+        label: { show: true, position: 'top', fontSize: 10 }
+      }]
+    });
+
+    // ==================== TAB: Luxury ====================
+
+    // chart-luxury-growth
+    var cLuxury = echarts.init(document.getElementById('chart-luxury-growth'));
+    allCharts.push(cLuxury);
+    cLuxury.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: ['2021','2022','2023','2024','2025E'] }),
+      yAxis: mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) }),
+      series: [{
+        type: 'bar',
+        data: [2.1, 3.4, 4.2, 6.5, 5.8].map(function(v){
+          return { value: v, itemStyle: { color: C.orange, borderRadius: [4,4,0,0] } };
+        }),
+        barMaxWidth: 55,
+        label: { show: true, position: 'top', formatter: function(p){ return '+'+p.value+'%'; }, fontSize: 10, fontFamily: 'JetBrains Mono, monospace' },
+        markLine: {
+          silent: true, symbol: 'none',
+          lineStyle: { color: C.muted, type: 'dashed', width: 1 },
+          label: { show: false },
+          data: [{ yAxis: 0 }]
+        }
+      }]
+    });
+
+    // ==================== RM1M+ LUXURY DEEP DIVE ====================
+    var en = (localStorage.getItem('lang')||'en') === 'en';
+
+    // chart-lx-oh-trend
+    var cLxOhTrend = echarts.init(document.getElementById('chart-lx-oh-trend'));
+    allCharts.push(cLxOhTrend);
+    cLxOhTrend.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:['RM1M+','RM500K-1M','<RM500K']}),
+      grid: baseGrid,
+      xAxis: mkAxis({type:'category',data:['2022','2023','2024']}),
+      yAxis: mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtNum(v);}})}),
+      series:[
+        {name:'RM1M+',type:'bar',stack:'total',color:C.orange,data:[3804,4173,2463],barMaxWidth:50,
+         label:{show:true,position:'inside',fontSize:9,formatter:function(p){return fmtNum(p.value);}}},
+        {name:'RM500K-1M',type:'bar',stack:'total',color:C.navy,data:[7454,7523,6569]},
+        {name:'<RM500K',type:'bar',stack:'total',color:'#93b4d4',data:[16488,14120,14117]}
+      ]
+    });
+
+    // chart-lx-oh-band
+    var cLxOhBand = echarts.init(document.getElementById('chart-lx-oh-band'));
+    allCharts.push(cLxOhBand);
+    cLxOhBand.setOption({
+      tooltip:{trigger:'item',formatter:'{b}: {c} units ({d}%)'},
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      series:[{
+        type:'pie',radius:['35%','65%'],center:['50%','45%'],
+        data:[
+          {value:7624,name:en?'<RM300K':'30萬以下',itemStyle:{color:'#93b4d4'}},
+          {value:6569,name:'RM300-500K',itemStyle:{color:C.navy}},
+          {value:6493,name:'RM500K-1M',itemStyle:{color:C.orange}},
+          {value:2463,name:en?'>RM1M':'逾1M',itemStyle:{color:C.red}}
+        ],
+        label:{formatter:'{b}\n{c}',fontSize:10,fontFamily:'Inter,sans-serif'},
+        emphasis:{itemStyle:{shadowBlur:8,shadowColor:'rgba(0,0,0,0.2)'}}
+      }]
+    });
+
+    // chart-lx-completion
+    var cLxComp = echarts.init(document.getElementById('chart-lx-completion'));
+    allCharts.push(cLxComp);
+    cLxComp.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:[en?'Completions':'完工量',en?'Starts':'開工量']}),
+      grid: baseGrid,
+      xAxis: mkAxis({type:'category',data:['2022','2023','2024','2025 Q1-Q3']}),
+      yAxis: mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return (v/1000).toFixed(0)+'K';}})}),
+      series:[
+        {name:en?'Completions':'完工量',type:'bar',color:C.orange,barMaxWidth:35,
+         data:[{value:14800},{value:16500},{value:10712},{value:7418}].map(function(d){return Object.assign(d,{itemStyle:{borderRadius:[3,3,0,0]}});}),
+         label:{show:true,position:'top',fontSize:9,formatter:function(p){return (p.value/1000).toFixed(1)+'K';}}},
+        {name:en?'Starts':'開工量',type:'bar',color:C.navy,barMaxWidth:35,
+         data:[{value:16000},{value:15800},{value:18900},{value:11013}].map(function(d){return Object.assign(d,{itemStyle:{borderRadius:[3,3,0,0]}});}),
+         label:{show:true,position:'top',fontSize:9,formatter:function(p){return (p.value/1000).toFixed(1)+'K';}}}
+      ]
+    });
+
+    // chart-lx-sa-state
+    var cLxSA = echarts.init(document.getElementById('chart-lx-sa-state'));
+    allCharts.push(cLxSA);
+    var saLabels = en?['Johor','KL','Selangor','Penang','Others']:['柔佛','吉隆坡','雪蘭莪','檳城','其他'];
+    cLxSA.setOption({
+      tooltip: baseTooltip,
+      grid:{left:80,right:20,top:20,bottom:20,containLabel:true},
+      xAxis: mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtNum(v);}})}),
+      yAxis: mkAxis({type:'category',data:saLabels,axisLabel:{color:C.navy,fontFamily:'Inter,sans-serif',fontSize:10}}),
+      series:[{type:'bar',barMaxWidth:28,
+        data:[
+          {value:9018,itemStyle:{color:C.red,borderRadius:[0,3,3,0]}},
+          {value:4100,itemStyle:{color:C.orange,borderRadius:[0,3,3,0]}},
+          {value:2200,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:1100,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:1474,itemStyle:{color:'#93b4d4',borderRadius:[0,3,3,0]}}
+        ],
+        label:{show:true,position:'right',fontSize:10,formatter:function(p){return fmtNum(p.value);}}
+      }]
+    });
+
+    // chart-lx-tx-trend
+    var cLxTx = echarts.init(document.getElementById('chart-lx-tx-trend'));
+    allCharts.push(cLxTx);
+    cLxTx.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:[en?'KL Total':'KL總計',en?'RM1M+ (KL)':'KL逾百萬']}),
+      grid:{left:50,right:60,top:36,bottom:30,containLabel:true},
+      xAxis: mkAxis({type:'category',data:['2022','2023','2024']}),
+      yAxis:[
+        mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return (v/1000).toFixed(0)+'K';}})}),
+        mkAxis({type:'value',min:0,max:5000,splitLine:{show:false},axisLabel:{formatter:function(v){return fmtNum(v);},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11}})
+      ],
+      series:[
+        {name:en?'KL Total':'KL總計',type:'bar',color:C.navy,barMaxWidth:40,
+         data:[16900,17928,18913].map(function(v){return{value:v,itemStyle:{borderRadius:[3,3,0,0]}};}),
+         label:{show:true,position:'top',fontSize:9,formatter:function(p){return (p.value/1000).toFixed(1)+'K';}}},
+        {name:en?'RM1M+ (KL)':'KL逾百萬',type:'line',yAxisIndex:1,color:C.orange,
+         data:[1800,2351,3079],symbol:'circle',symbolSize:7,lineStyle:{width:2},
+         label:{show:true,position:'top',fontSize:9,formatter:function(p){return fmtNum(p.value);}}}
+      ]
+    });
+
+    // chart-lx-foreign
+    var cLxForeign = echarts.init(document.getElementById('chart-lx-foreign'));
+    allCharts.push(cLxForeign);
+    var foreignLabels = en
+      ? ['China','Singapore','India','UK','Indonesia','Hong Kong','US','Korea','Taiwan','Others']
+      : ['中國','新加坡','印度','英國','印尼','香港','美國','韓國','台灣','其他'];
+    cLxForeign.setOption({
+      tooltip: baseTooltip,
+      grid:{left:80,right:60,top:20,bottom:20,containLabel:true},
+      xAxis: mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v;}})}),
+      yAxis: mkAxis({type:'category',data:foreignLabels,axisLabel:{color:C.navy,fontFamily:'Inter,sans-serif',fontSize:10}}),
+      series:[{type:'bar',barMaxWidth:22,
+        data:[
+          {value:329,itemStyle:{color:C.red,borderRadius:[0,3,3,0]}},
+          {value:320,itemStyle:{color:C.orange,borderRadius:[0,3,3,0]}},
+          {value:47,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:38,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:28,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:24,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:18,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:15,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:12,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:82,itemStyle:{color:'#93b4d4',borderRadius:[0,3,3,0]}}
+        ],
+        label:{show:true,position:'right',fontSize:9}
+      }]
+    });
+
+    // chart-lx-price-band
+    var cLxPBand = echarts.init(document.getElementById('chart-lx-price-band'));
+    allCharts.push(cLxPBand);
+    cLxPBand.setOption({
+      tooltip: Object.assign({},baseTooltip,{formatter:function(p){return p[0].axisValue+'<br/>'+p[0].seriesName+': '+p[0].data+'%';}}),
+      legend: Object.assign({},baseLegend,{data:['2023','2024']}),
+      grid: baseGrid,
+      xAxis: mkAxis({type:'category',data:en?['<RM300K','RM300-500K','RM500K-1M','>RM1M']:['30萬以下','30-50萬','50萬-1M','逾1M']}),
+      yAxis: mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11}}),
+      series:[
+        {name:'2023',type:'bar',color:'#93b4d4',barMaxWidth:30,data:[54.1,23.5,15.6,6.8],
+         label:{show:true,position:'top',fontSize:9,formatter:function(p){return p.value+'%';}}},
+        {name:'2024',type:'bar',color:C.navy,barMaxWidth:30,data:[52.5,24.5,17.5,5.5],
+         label:{show:true,position:'top',fontSize:9,formatter:function(p){return p.value+'%';}}}
+      ]
+    });
+
+    // chart-lx-fx
+    var cLxFx = echarts.init(document.getElementById('chart-lx-fx'));
+    allCharts.push(cLxFx);
+    cLxFx.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:['USD/MYR','SGD/MYR','TWD/MYR×0.1']}),
+      grid: baseGrid,
+      xAxis: mkAxis({type:'category',data:['2024 Low','2025 Q2','2025 Q4','2026 Mar','MUFG Target']}),
+      yAxis: mkAxis({type:'value',min:3,max:5}),
+      series:[
+        {name:'USD/MYR',type:'line',color:C.navy,data:[4.50,4.20,4.15,4.02,3.70],
+         symbol:'circle',symbolSize:5,lineStyle:{width:2},
+         markPoint:{data:[{coord:['2026 Mar',4.02],label:{formatter:'4.02\nNow',fontSize:9},itemStyle:{color:C.navy}}]}},
+        {name:'SGD/MYR',type:'line',color:C.green,data:[3.37,3.25,3.20,3.12,2.95],
+         symbol:'circle',symbolSize:5,lineStyle:{width:1.5,type:'dashed'}},
+        {name:'TWD/MYR×0.1',type:'line',color:C.orange,data:[0.68,0.75,0.79,0.813,null],
+         symbol:'circle',symbolSize:5,lineStyle:{width:1.5,type:'dashed'}}
+      ]
+    });
+
+    // chart-lx-yield
+    var cLxYield = echarts.init(document.getElementById('chart-lx-yield'));
+    allCharts.push(cLxYield);
+    var yieldProjects = ['Mercu Summer','Sky Suites','Mont Kiara avg','Banyan Tree','Four Seasons','Binjai on Park','ViPod'];
+    var yieldData = [7.0,5.9,5.24,3.84,4.24,2.12,2.11];
+    var yieldCapGrowth = [0,-6.6,15,30.7,20,59.1,-5];
+    cLxYield.setOption({
+      tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+      legend: Object.assign({},baseLegend,{data:[en?'Gross Yield %':'毛收益率%',en?'Capital Growth %':'資本增值%']}),
+      grid:{left:100,right:60,top:36,bottom:20,containLabel:true},
+      xAxis:[
+        {type:'value',name:en?'Yield %':'收益率%',nameTextStyle:baseText,axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:10},position:'bottom'},
+        {type:'value',name:en?'Capital %':'增值%',nameTextStyle:baseText,axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:10},position:'top',gridIndex:0}
+      ],
+      yAxis: mkAxis({type:'category',data:yieldProjects,axisLabel:{color:C.navy,fontFamily:'Inter,sans-serif',fontSize:10}}),
+      series:[
+        {name:en?'Gross Yield %':'毛收益率%',type:'bar',xAxisIndex:0,color:C.green,barMaxWidth:18,
+         data:yieldData.map(function(v){return{value:v,itemStyle:{borderRadius:[0,3,3,0]}};})},
+        {name:en?'Capital Growth %':'資本增值%',type:'bar',xAxisIndex:1,barMaxWidth:18,
+         data:yieldCapGrowth.map(function(v){return{value:v,itemStyle:{color:v>0?C.orange:C.red,borderRadius:v>0?[0,3,3,0]:[3,0,0,3]}};})}
+      ]
+    });
+
+    // chart-lx-holding-cost
+    var cLxCost = echarts.init(document.getElementById('chart-lx-holding-cost'));
+    allCharts.push(cLxCost);
+    cLxCost.setOption({
+      tooltip:{trigger:'item',formatter:'{b}: RM{c} ({d}%)'},
+      series:[{
+        type:'pie',radius:['30%','60%'],center:['50%','48%'],
+        data:[
+          {value:18000,name:en?'Management Fee':'管理費',itemStyle:{color:C.navy}},
+          {value:3600,name:en?'Property Agent':'物業代理費',itemStyle:{color:'#93b4d4'}},
+          {value:3600,name:en?'Assessment Tax':'門牌稅',itemStyle:{color:C.muted}},
+          {value:1800,name:en?'Sinking Fund':'儲備金',itemStyle:{color:'#7fb3d3'}},
+          {value:15000,name:en?'Income Tax (30%)':'所得稅（30%）',itemStyle:{color:C.red}}
+        ],
+        label:{formatter:'{b}\nRM{c}',fontSize:10,fontFamily:'Inter,sans-serif'},
+        emphasis:{itemStyle:{shadowBlur:8}}
+      }]
+    });
+
+    // chart-lx-stamp
+    var cLxStamp = echarts.init(document.getElementById('chart-lx-stamp'));
+    allCharts.push(cLxStamp);
+    cLxStamp.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:[en?'MY Citizen':'馬來西亞公民',en?'Foreign 2025':'外國人2025',en?'Foreign 2026':'外國人2026']}),
+      grid: baseGrid,
+      xAxis: mkAxis({type:'category',data:['RM600K','RM1M','RM1.5M','RM2M','RM3M']}),
+      yAxis: mkAxis({type:'value',axisLabel:{formatter:function(v){return 'RM'+(v/1000).toFixed(0)+'K';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11}}),
+      series:[
+        {name:en?'MY Citizen':'馬來西亞公民',type:'bar',color:C.green,barMaxWidth:25,
+         data:[15000,24000,44000,54000,84000].map(function(v){return{value:v,itemStyle:{borderRadius:[3,3,0,0]}};}),
+         label:{show:false}},
+        {name:en?'Foreign 2025':'外國人2025',type:'bar',color:C.navy,barMaxWidth:25,
+         data:[24000,40000,60000,80000,120000].map(function(v){return{value:v,itemStyle:{borderRadius:[3,3,0,0]}};}),
+         label:{show:false}},
+        {name:en?'Foreign 2026':'外國人2026',type:'bar',color:C.red,barMaxWidth:25,
+         data:[48000,80000,120000,160000,240000].map(function(v){return{value:v,itemStyle:{borderRadius:[3,3,0,0]}};}),
+         label:{show:true,position:'top',fontSize:9,formatter:function(p){return 'RM'+(p.value/1000).toFixed(0)+'K';}}}
+      ]
+    });
+
+    // chart-lx-rpgt
+    var cLxRpgt = echarts.init(document.getElementById('chart-lx-rpgt'));
+    allCharts.push(cLxRpgt);
+    cLxRpgt.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:[en?'MY Citizen/PR':'公民/PR',en?'Foreign Buyer':'外國買家']}),
+      grid: baseGrid,
+      xAxis: mkAxis({type:'category',data:['Yr 1','Yr 2','Yr 3','Yr 4','Yr 5','Yr 6+']}),
+      yAxis: mkAxis({type:'value',max:35,axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11}}),
+      series:[
+        {name:en?'MY Citizen/PR':'公民/PR',type:'line',color:C.green,
+         data:[30,30,30,20,15,0],symbol:'circle',symbolSize:6,lineStyle:{width:2},
+         markPoint:{data:[{coord:['Yr 6+',0],label:{formatter:'0%',fontSize:9,color:'#fff'},itemStyle:{color:C.green}}]}},
+        {name:en?'Foreign Buyer':'外國買家',type:'line',color:C.red,
+         data:[30,30,30,30,30,10],symbol:'circle',symbolSize:6,lineStyle:{width:2},
+         markLine:{data:[{xAxis:'Yr 6+'}],lineStyle:{type:'dashed',color:C.orange},
+           label:{formatter:en?'30%→10% cliff':'30%→10%斷崖',color:C.orange,fontSize:10}}}
+      ]
+    });
+
+    // chart-lx-psf
+    var cLxPsf = echarts.init(document.getElementById('chart-lx-psf'));
+    allCharts.push(cLxPsf);
+    var psfDistricts = en
+      ? ['Bukit Bintang\nSA','Bangsar\nSouth','Mont\nKiara','Bangsar','KL\nSentral','Damansara\nHts','TRX','KLCC\nultra']
+      : ['武吉免登\nSA','南蒙沙','蒙吉拉','孟沙','吉隆坡\n中環','白沙羅\n高地','TRX','KLCC\n頂奢'];
+    cLxPsf.setOption({
+      tooltip: baseTooltip,
+      grid:{left:20,right:20,top:40,bottom:60,containLabel:true},
+      xAxis: mkAxis({type:'category',data:psfDistricts,axisLabel:{color:C.navy,fontFamily:'Inter,sans-serif',fontSize:9,interval:0}}),
+      yAxis: mkAxis({type:'value',axisLabel:{formatter:function(v){return 'RM'+v;},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:10}}),
+      series:[{type:'bar',barMaxWidth:40,
+        data:[
+          {value:900,itemStyle:{color:C.red,borderRadius:[3,3,0,0]}},
+          {value:540,itemStyle:{color:C.green,borderRadius:[3,3,0,0]}},
+          {value:778,itemStyle:{color:C.green,borderRadius:[3,3,0,0]}},
+          {value:765,itemStyle:{color:C.green,borderRadius:[3,3,0,0]}},
+          {value:1103,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]}},
+          {value:1400,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]}},
+          {value:2293,itemStyle:{color:C.orange,borderRadius:[3,3,0,0]}},
+          {value:2950,itemStyle:{color:C.orange,borderRadius:[3,3,0,0]}}
+        ],
+        label:{show:true,position:'top',fontSize:9,formatter:function(p){return 'RM'+fmtNum(p.value);}}
+      }]
+    });
+
+    // chart-lx-matrix
+    var cLxMatrix = echarts.init(document.getElementById('chart-lx-matrix'));
+    allCharts.push(cLxMatrix);
+    var matrixData = [
+      [7.0, 0, 20, 'Mercu Summer'],
+      [5.9, -6.6, 25, 'Sky Suites'],
+      [5.4, 18, 80, 'Mont Kiara'],
+      [5.5, 25, 60, 'Bangsar South'],
+      [5.0, 22, 55, 'Bangsar'],
+      [4.5, 15, 40, 'KL Sentral'],
+      [4.5, 5.6, 35, 'TRX'],
+      [3.84, 30.7, 30, 'Banyan Tree'],
+      [4.24, 20, 20, 'Four Seasons'],
+      [2.12, 59.1, 15, 'Binjai']
+    ];
+    cLxMatrix.setOption({
+      tooltip:{formatter:function(p){return p.data[3]+'<br/>Yield: '+p.data[0]+'%<br/>Cap Growth: '+p.data[1]+'%';}},
+      xAxis:{type:'value',name:en?'Gross Yield %':'毛收益率%',nameTextStyle:baseText,min:1,max:8,
+        axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:10},
+        splitLine:{lineStyle:{color:C.grid}}},
+      yAxis:{type:'value',name:en?'Capital Growth %':'資本增值%',nameTextStyle:baseText,min:-20,max:70,
+        axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:10},
+        splitLine:{lineStyle:{color:C.grid}}},
+      series:[{
+        type:'scatter',
+        data:matrixData.map(function(d){return{value:[d[0],d[1]],symbolSize:d[2],
+          itemStyle:{color:d[1]>0?C.green:C.red,opacity:0.8},
+          label:{show:true,formatter:d[3],fontSize:8,color:C.navy,position:'right'}};})
+      }]
+    });
+
+    // chart-lx-mrt3
+    var cLxMrt3 = echarts.init(document.getElementById('chart-lx-mrt3'));
+    allCharts.push(cLxMrt3);
+    var mrt3Districts = en
+      ? ['Sentul\n(North)','Kepong','Mont Kiara','Sri Hartamas','Damansara','Bangsar','Pantai\nDalam','Kerinchi']
+      : ['仙特爾（北）','甲洞','蒙吉拉','士蒂亞旺薩','白沙羅','孟沙','班底\n達蘭','格林芝'];
+    var mrt3Impact = [12,15,28,22,18,14,20,18];
+    cLxMrt3.setOption({
+      tooltip:{formatter:function(p){return p.name+'<br/>'+(en?'Est. value uplift':'估計增值')+': +'+p.value+'%';}},
+      radar:{
+        indicator:mrt3Districts.map(function(n){return{name:n,max:35};}),
+        center:['50%','55%'],radius:'60%',
+        name:{textStyle:{color:C.navy,fontFamily:'Inter,sans-serif',fontSize:9}},
+        splitLine:{lineStyle:{color:C.grid}},
+        axisLine:{lineStyle:{color:C.grid}}
+      },
+      series:[{
+        type:'radar',
+        data:[{value:mrt3Impact,name:en?'Est. Value Uplift %':'估計增值%',
+          lineStyle:{color:C.orange,width:2},
+          areaStyle:{color:'rgba(217,119,6,0.15)'},
+          itemStyle:{color:C.orange}}]
+      }]
+    });
+
+    // chart-lx-return-sim
+    var cLxSim = echarts.init(document.getElementById('chart-lx-return-sim'));
+    allCharts.push(cLxSim);
+    var simYears = ['0','1','2','3','4','5','6','7','8','9','10'];
+    cLxSim.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:['Bull (8% CAGR)','Base (5% CAGR)','Bear (2% CAGR)']}),
+      grid: baseGrid,
+      xAxis: mkAxis({type:'category',data:simYears,axisLabel:Object.assign({},baseText,{formatter:function(v){return 'Yr'+v;}})}),
+      yAxis: mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11},
+        splitLine:{lineStyle:{color:C.grid}}}),
+      series:[
+        {name:'Bull (8% CAGR)',type:'line',color:C.green,
+         data:[-11,-7,1,9,18,28,42,57,74,92,112],
+         symbol:'none',lineStyle:{width:2},
+         markPoint:{data:[{coord:['10',112],label:{formatter:'112%',fontSize:9,color:'#fff'},itemStyle:{color:C.green}}]}},
+        {name:'Base (5% CAGR)',type:'line',color:C.orange,
+         data:[-11,-8,-4,1,6,12,22,32,43,55,68],
+         symbol:'none',lineStyle:{width:2,type:'dashed'}},
+        {name:'Bear (2% CAGR)',type:'line',color:C.red,
+         data:[-11,-10,-9,-8,-7,-6,-4,-2,0,2,4],
+         symbol:'none',lineStyle:{width:1.5,type:[4,2]}}
+      ]
+    });
+
+    // chart-lx-fdi
+    var cLxFdi = echarts.init(document.getElementById('chart-lx-fdi'));
+    allCharts.push(cLxFdi);
+    cLxFdi.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:[en?'Data Centre':'數據中心',en?'Other Digital':'其他數位']}),
+      grid: baseGrid,
+      xAxis: mkAxis({type:'category',data:['2021','2022','2023','2024','2025E']}),
+      yAxis: mkAxis({type:'value',axisLabel:{formatter:function(v){return 'RM'+v+'B';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:10}}),
+      series:[
+        {name:en?'Data Centre':'數據中心',type:'bar',stack:'fdi',color:C.navy,barMaxWidth:40,
+         data:[25,45,72,85,60].map(function(v){return{value:v,itemStyle:{borderRadius:[0,0,0,0]}};}),
+         label:{show:false}},
+        {name:en?'Other Digital':'其他數位',type:'bar',stack:'fdi',color:'#93b4d4',barMaxWidth:40,
+         data:[10,18,30,25,20].map(function(v){return{value:v,itemStyle:{borderRadius:[3,3,0,0]}};}),
+         label:{show:true,position:'top',fontSize:9,formatter:function(p){
+           var totals=[35,63,102,110,80];
+           return 'RM'+totals[p.dataIndex]+'B';
+         }}}
+      ]
+    });
+
+    // chart-lx-risk
+    var cLxRisk = echarts.init(document.getElementById('chart-lx-risk'));
+    allCharts.push(cLxRisk);
+    var risks = en
+      ? ['Structural oversupply\n(KLCC mid/BB SA)',
+         'MYR appreciation',
+         'Stamp duty 8%\n(2026)',
+         'MM2H policy change',
+         'Trade war/GDP shock',
+         'Flood risk\n(climate)',
+         'MRT3 delay']
+      : ['結構性過剩\n（KLCC中端/SA）',
+         '馬幣升值',
+         '印花稅8%\n（2026年）',
+         'MM2H政策變動',
+         '貿易戰/GDP衝擊',
+         '洪災風險（氣候）',
+         'MRT3延期'];
+    var riskData = [[4.5,4],[3.5,3],[4,3.5],[2.5,3],[2,4.5],[1.5,3],[2,2.5]];
+    cLxRisk.setOption({
+      tooltip:{formatter:function(p){return risks[p.dataIndex]+'<br/>'+(en?'Prob':'概率')+': '+p.data[0]+'/5<br/>'+(en?'Impact':'影響')+': '+p.data[1]+'/5';}},
+      xAxis:{type:'value',name:en?'Probability':'發生概率',nameTextStyle:baseText,min:1,max:5,
+        axisLabel:{formatter:function(v){return v;},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:10},
+        splitLine:{lineStyle:{color:C.grid}}},
+      yAxis:{type:'value',name:en?'Impact':'影響程度',nameTextStyle:baseText,min:1,max:5,
+        axisLabel:{formatter:function(v){return v;},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:10},
+        splitLine:{lineStyle:{color:C.grid}}},
+      series:[{
+        type:'scatter',symbolSize:25,
+        data:riskData.map(function(d,i){return{value:d,
+          itemStyle:{color:(d[0]>3&&d[1]>3)?C.red:(d[0]>2.5||d[1]>3)?C.orange:C.navy,opacity:0.85},
+          label:{show:true,formatter:risks[i].split('\n')[0],fontSize:8,color:C.navy,position:'right'}};})
+      }]
+    });
+
+    setLang(localStorage.getItem('lang')||'en');
+  });
+
+  window.addEventListener('resize', function(){
+    allCharts.forEach(function(c){ if(c) c.resize(); });
+  });
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

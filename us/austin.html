@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Austin Deep Dive | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+  .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+  .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+  .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+  .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+  .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+  .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+  .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+  .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+  .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+  .chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+  .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+  .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+  .report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+  .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+  .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+  .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+  .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+  .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+  .toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+  .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+  .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+  .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+  .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+  .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+  .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+  .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+  .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}
+  @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="report-container">
+
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-correction" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">The Correction</span><span class="side-nav-label lang-zh" style="display:none">修正解析</span></a>
+    <a href="#sec-supply" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Supply &amp; Demand</span><span class="side-nav-label lang-zh" style="display:none">供需</span></a>
+    <a href="#sec-econ" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Economic Base</span><span class="side-nav-label lang-zh" style="display:none">經濟基礎</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rent Control</span><span class="side-nav-label lang-zh" style="display:none">租管</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+
+  <div class="report-header">
+    <div class="lang-en"><h1>AUSTIN &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: Unlock MLS / ABoR / Zillow / FHFA / Texas A&amp;M Real Estate Research Center</div></div>
+    <div class="lang-zh" style="display:none"><h1>奧斯丁——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：Unlock MLS / ABoR / Zillow / FHFA / 德州農工大學房地產研究中心</div></div>
+  </div>
+
+  <div class="report-body">
+
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend: Boom, Peak &amp; Correction</span><span class="lang-zh" style="display:none">2. 房價走勢：繁榮、峰值與修正</span></a>
+        <a href="#sec-correction" onclick="closeTocMobile()"><span class="lang-en">3. The Correction: How Deep, How Long?</span><span class="lang-zh" style="display:none">3. 修正解析：多深，多久？</span></a>
+        <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">4. Supply &amp; Demand: Finding the Floor</span><span class="lang-zh" style="display:none">4. 供需：尋找底部</span></a>
+        <a href="#sec-econ" onclick="closeTocMobile()"><span class="lang-en">5. Economic Base: Tech, Samsung &amp; Diversification</span><span class="lang-zh" style="display:none">5. 經濟基礎：科技、三星與多元化</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">6. Rent Control: Texas Total Preemption</span><span class="lang-zh" style="display:none">6. 租管：德州全面先占</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Austin's housing market in 2026 is a case study in mean reversion &mdash; the most extreme pandemic appreciation in the Tier-1 U.S. market universe, followed by the deepest nominal correction, followed by a tentative stabilization that most analysts now date to mid-to-late 2026. The city of Austin median home price peaked at <strong>$538,000</strong> in May 2022, driven by the simultaneous arrival of Tesla's Gigafactory Texas, Apple's $1 billion campus expansion, Oracle's headquarters relocation, and a nationwide tsunami of remote workers choosing Austin for its zero income tax, relative affordability versus coastal markets, and lifestyle appeal. Between 2020 and 2022, some Austin neighborhoods appreciated over 100%. By January 2025, the median had corrected to $400,000 &mdash; a nominal decline of <strong>25.7%</strong> from peak, or approximately 27% in real (CPI-adjusted) terms. No other major U.S. metro produced both the magnitude of appreciation and the subsequent correction seen in Austin.</p>
+      <p>The correction mechanism was a three-factor reversal of the same forces that drove the boom: (1) the rate lock-in effect eliminated most discretionary move-up sellers while simultaneously raising buyer monthly costs by 70&ndash;80% from 2021 levels; (2) return-to-office mandates reduced the remote-work demand premium that had made Austin's cost-of-living equation compelling; (3) Austin's zoning-permissive, builder-friendly environment produced a massive new construction response &mdash; more than 12,000 active listings at the MSA level &mdash; that took 2&ndash;3 years to absorb. Unlike Miami or Phoenix, Austin did not experience a speculative investor overhang or insurance-driven structural deterioration; the correction was cleaner and more mechanical. By February 2026, early signs of recovery are emerging: active MSA listings fell to 10,000 (down 4.8% YoY), pending sales are up <strong>15.1%</strong> YoY, and the price-to-income ratio has returned to approximately 3.5x &mdash; the same level as 2014, before the tech boom began.</p>
+      <p>The investment case for Austin in 2026 rests on three structural pillars. First, the economic base is genuinely diversified beyond the initial tech-relocation thesis: Samsung's $17 billion semiconductor fab in Taylor (producing from 2025), Tesla's ongoing Gigafactory expansion, and Austin-Bergstrom International Airport's continued route expansion provide manufacturing and logistics employment anchors alongside the software sector. Second, Texas's total rent control preemption and zero income tax create the most landlord-friendly regulatory environment of any major U.S. market. Third, at $412,000 (MSA median) with 6 months of supply and motivated sellers offering 7.9% below list on average, Austin represents the most accessible entry point into a high-growth metro of any city in this monitor. The bear case is a further 5&ndash;10% correction if the tech sector's ongoing cautious posture translates into net job losses; the base case is stabilization and modest recovery.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2026年奧斯丁住宅市場是均值回歸的教科書案例——一線美國市場中最極端的疫情升幅，隨後是最深的名義修正，再到大多數分析師現在定位於2026年中至年底的試探性穩定。奧斯丁城市房屋中位數在2022年5月達到<strong>538,000美元</strong>的峰值，由特斯拉德州超級工廠、蘋果10億美元園區擴張、甲骨文總部遷移，以及全國性的遠程工作者浪潮同時推動。2020至2022年間，部分奧斯丁社區升值超過100%。到2025年1月，中位數修正至400,000美元——較峰值名義下跌<strong>25.7%</strong>，或實際（CPI調整後）約27%。沒有其他主要美國大都市同時產生了如此量級的升值和隨後的修正。</p>
+      <p>修正機制是推動繁榮的同一力量的三因素逆轉：（1）利率鎖定效應消除了大多數自主換屋賣家，同時將買家月供從2021年水平提高了70至80%；（2）返回辦公室要求降低了使奧斯丁生活成本方程式具有吸引力的遠程工作需求溢價；（3）奧斯丁友好分區的建設者環境產生了大規模的新建住宅響應——都會區活躍掛牌超過12,000套——吸收需要2至3年時間。與邁阿密或鳳凰城不同，奧斯丁沒有出現投機投資者過剩或保險驅動的結構性惡化；修正更清晰、更機械。到2026年2月，復甦的早期跡象正在浮現：活躍MSA掛牌降至10,000套（年降4.8%），待成交量年增<strong>15.1%</strong>，房價收入比回到約3.5倍——與科技繁榮開始前2014年的水平相同。</p>
+      <p>2026年奧斯丁的投資論點依賴三個結構性支柱。首先，經濟基礎真正超越了最初的科技遷移論點實現多元化：三星在泰勒170億美元的半導體工廠（2025年起量產）、特斯拉持續的超級工廠擴張和奧斯丁機場持續的航線擴張，提供了除軟件行業之外的製造業和物流就業錨點。其次，德州的全面租管先占和零所得稅創造了任何主要美國市場中最友好的房東監管環境。第三，都會區中位數412,000美元，6個月供給，賣家平均低於報價7.9%出售，奧斯丁代表了本監測中任何城市進入高增長大都市的最易達入口點。悲觀情境是科技行業持續謹慎轉化為淨就業損失時進一步下跌5至10%；基本情境是穩定和溫和復甦。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">CITY MEDIAN (FEB 2026)</span><span class="lang-zh" style="display:none">城市中位數（2026年2月）</span></div>
+        <div class="kpi-value">$540K</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">City of Austin &middot; Unlock MLS &middot; YoY -2.7%</span><span class="lang-zh" style="display:none">奧斯丁市 &middot; Unlock MLS &middot; 年降2.7%</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">MSA MEDIAN (FEB 2026)</span><span class="lang-zh" style="display:none">都會區中位數（2026年2月）</span></div>
+        <div class="kpi-value">$412K</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Austin-Round Rock MSA &middot; YoY -3.6%</span><span class="lang-zh" style="display:none">奧斯丁-圓石城MSA &middot; 年降3.6%</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">PEAK DECLINE</span><span class="lang-zh" style="display:none">峰值跌幅</span></div>
+        <div class="kpi-value">-19% nom.</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">May 2022 $538K &rarr; Dec 2025 $435K &middot; Real: -27% CPI-adj</span><span class="lang-zh" style="display:none">2022年5月$538K→2025年12月$435K &middot; 實質：CPI調整-27%</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">MSA MONTHS SUPPLY</span><span class="lang-zh" style="display:none">供給月數</span></div>
+        <div class="kpi-value">6.1 mo</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">City of Austin Feb 2026 &middot; Balanced = 4&ndash;6mo</span><span class="lang-zh" style="display:none">奧斯丁市2026年2月 &middot; 均衡=4–6個月</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">ACTIVE LISTINGS (FEB 2026)</span><span class="lang-zh" style="display:none">活躍掛牌（2026年2月）</span></div>
+        <div class="kpi-value">10,000</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">MSA &middot; Down 4.8% YoY &middot; Buyers returning</span><span class="lang-zh" style="display:none">MSA &middot; 年降4.8% &middot; 買家回歸</span></span>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">GDP GROWTH 2020&ndash;2025</span><span class="lang-zh" style="display:none">GDP成長2020–2025</span></div>
+        <div class="kpi-value">+39% real</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Austin MSA $268B (2024) &middot; Tech: 16.3% of jobs</span><span class="lang-zh" style="display:none">奧斯丁MSA $268B（2024）&middot; 科技：16.3%就業</span></span>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND: BOOM, PEAK &amp; CORRECTION</span><span class="lang-zh" style="display:none">房價走勢：繁榮、峰值與修正</span></h2>
+    <div class="lang-en">
+      <p>Austin's decade-long price trajectory divides cleanly into three phases. The pre-pandemic growth phase (2015&ndash;2019) produced steady 5&ndash;8% annual appreciation, driven by organic tech employment growth as Dell, IBM, and emerging startups built an employment base. The pandemic explosion (2020&ndash;2022) compressed what would have been 8&ndash;10 years of appreciation into 24 months, taking the median from $299,000 (January 2020) to $538,000 (May 2022) &mdash; an 80% increase. This was not speculation in the traditional sense; it was real demand, in person, from real households who relocated from San Francisco, Seattle, and New York. The correction phase (mid-2022 to present) is Austin's defining market chapter: the median declined from $538,000 to approximately $399,990 by January 2025 &mdash; a 25.7% nominal drawdown &mdash; before partially recovering to $435,000 by end-2025 and the city proper reaching $540,000 by February 2026 (data noise from mix shift). The FHFA index for the Austin MSA, which accounts for repeat sales, shows a more conservative peak-to-trough of approximately 12&ndash;15%.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>奧斯丁的十年房價走勢清晰分為三個階段。疫情前增長期（2015至2019年）產生穩定的年均5至8%升值，由戴爾、IBM和新興創業公司建立就業基礎帶動的有機科技就業增長驅動。疫情爆炸期（2020至2022年）將本應是8至10年的升值壓縮至24個月，中位數從299,000美元（2020年1月）升至538,000美元（2022年5月）——增幅80%。這不是傳統意義上的投機；這是來自從舊金山、西雅圖和紐約遷移的真實家庭的真實需求。修正期（2022年中至今）是奧斯丁的決定性市場篇章：中位數從538,000美元降至2025年1月約399,990美元——名義回撤25.7%——在2025年底部分回升至435,000美元，城市本身到2026年2月達到540,000美元（受結構組合轉變影響的數據噪聲）。奧斯丁都會區的FHFA指數顯示更保守的峰值至谷值約12至15%。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Austin City Median Home Price 2015&ndash;2025</span><span class="lang-zh" style="display:none">奧斯丁城市中位數房價 2015&ndash;2025</span></h4>
+        <p><span class="lang-en">Annual &middot; Source: Unlock MLS / ABoR</span><span class="lang-zh" style="display:none">年度 &middot; 來源：Unlock MLS / ABoR</span></p>
+        <div id="chartAUSTINPrice" style="height:220px"></div>
+        <p class="chart-note orange"><span class="lang-en">Peak-to-trough: $538K &rarr; $400K (Jan 2025) = -25.7% nominal, -27% real. Feb 2026 city median: $540K (mix shift effect)</span><span class="lang-zh" style="display:none">峰值至谷值：$538K→$400K（2025年1月）=-25.7%名義，-27%實質。2026年2月城市中位數：$540K（組合轉變效應）</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Austin MSA YoY Price Change 2016&ndash;2025</span><span class="lang-zh" style="display:none">奧斯丁MSA年增率 2016&ndash;2025</span></h4>
+        <p><span class="lang-en">Source: FHFA / Zillow</span><span class="lang-zh" style="display:none">來源：FHFA / Zillow</span></p>
+        <div id="chartAUSTINYoY" style="height:220px"></div>
+        <p class="chart-note red"><span class="lang-en">2021: +45.5% &mdash; single largest annual gain of any Tier-1 U.S. metro. 2023: -13% &mdash; deepest single-year correction. 2025: -2.4%, approaching floor</span><span class="lang-zh" style="display:none">2021年：+45.5%——一線美國大都市年增幅最大。2023年：-13%——單年最深修正。2025年：-2.4%，接近底部</span></p>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <h2 id="sec-correction"><span class="lang-en">THE CORRECTION: HOW DEEP, HOW LONG?</span><span class="lang-zh" style="display:none">修正解析：多深，多久？</span></h2>
+    <div class="lang-en">
+      <p>Austin's correction stands apart from other U.S. market corrections in 2022&ndash;2025 because it was driven by supply normalization, not demand destruction. Austin's zoning framework is among the most permissive in any major U.S. city &mdash; the city council has consistently approved new residential development, and the five-county MSA produced approximately 50,000 new housing units annually at the peak of the boom. This supply response &mdash; which Phoenix, Denver, and to a lesser extent Miami also experienced &mdash; is precisely what the market needed, but it arrived simultaneously with the rate shock of 2022&ndash;2023, creating an inventory surge that overwhelmed buyer capacity. Active MSA listings peaked at over 12,000 units in mid-2023 (versus fewer than 2,000 at the peak of the boom in 2021), representing a 6x increase in supply against 25&ndash;30% fewer qualified buyers.</p>
+      <p>The correction has been orderly. Foreclosure rates remain near historic lows (0.3% of Austin homes in 2023, below the national 0.4%). Days on market extended from 7 days (2021 peak) to 50&ndash;70 days (2025). Sellers are accepting approximately <strong>7.9%</strong> below list price on average. The price-to-income ratio has returned to approximately 3.5x &mdash; matching 2014 levels &mdash; which analysts broadly view as the natural equilibrium for Austin given its demographic profile. The bottom formation appears to be materializing: February 2026 data shows active listings at 10,000 (down 4.8% YoY), pending sales up 15.1%, and inventory falling for the first time in three years in some submarkets. Most forecasters place the true bottom in Q2&ndash;Q3 2026.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>奧斯丁的修正與美國其他2022至2025年市場修正的不同在於，它由供給正常化而非需求破壞驅動。奧斯丁的分區框架是主要美國城市中最寬鬆的之一——市議會始終批准新住宅開發，五縣都會區在繁榮高峰期年產約50,000套新住宅。這一供給響應與2022至2023年的利率衝擊同時到來，造成庫存激增，超出買家承受能力。活躍MSA掛牌在2023年中峰值超過12,000套（相比2021年繁榮峰值時不足2,000套），在合格買家減少25至30%的情況下供給增加了6倍。</p>
+      <p>修正是有序的。止贖率維持在歷史低位附近（2023年奧斯丁房屋的0.3%，低於全國0.4%）。在市場天數從7天（2021年峰值）延長至50至70天（2025年）。賣家平均接受低於報價約<strong>7.9%</strong>的成交。房價收入比回到約3.5倍——與2014年水平匹配。底部形成似乎正在具體化：2026年2月數據顯示活躍掛牌降至10,000套（年降4.8%），待成交量年增15.1%，部分子市場庫存三年來首次下降。大多數預測者將真正的底部定在2026年Q2至Q3。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Austin MSA Active Listings + Months Supply 2020&ndash;2026</span><span class="lang-zh" style="display:none">奧斯丁MSA活躍掛牌 + 供給月數 2020&ndash;2026</span></h4>
+      <div id="chartAUSTINInventory" style="height:220px"></div>
+      <p class="chart-note green"><span class="lang-en">Feb 2026: listings fell to 10K (&minus;4.8% YoY) as buyers returned faster than sellers. Pending sales +15.1% YoY &mdash; bottom formation underway</span><span class="lang-zh" style="display:none">2026年2月：掛牌降至10K（年降4.8%），買家回歸速度快於賣家。待成交量年增15.1%——底部形成中</span></p>
+    </div>
+
+    <!-- 4 -->
+    <h2 id="sec-supply"><span class="lang-en">SUPPLY &amp; DEMAND: FINDING THE FLOOR</span><span class="lang-zh" style="display:none">供需：尋找底部</span></h2>
+    <div class="lang-en">
+      <p>The demand side in Austin shows a clear bifurcation by buyer type. New construction buyers (approximately 40% of Austin sales at peak, higher than any other major U.S. metro) are returning first, attracted by builder incentives that include mortgage rate buydowns bringing effective financing costs to <strong>5.27%</strong> (a full percentage point below resale financing), seller-paid closing costs of $5,000&ndash;$15,000, and price reductions averaging 5% on spec inventory. Resale buyers are more hesitant but showing signs of re-engagement: the February 2026 pending sales increase of 15.1% YoY is the strongest leading indicator since 2022. The average close-to-list price ratio of 92.1% (February 2026) means buyers are still capturing approximately 8% negotiation discount &mdash; the most buyer-favorable conditions since the pre-boom era.</p>
+      <p>On the supply side, the new construction pipeline is meaningfully contracting. Land acquisition activity, which signaled the beginning of every prior Austin growth cycle, collapsed in mid-2025 as builders recalibrated to the new demand reality. Building permits have trended down from the 3,386/month peak of August 2023. This supply contraction &mdash; combined with the demand recovery signals of early 2026 &mdash; is what most analysts are pointing to as the floor formation mechanism. The sub-$300,000 segment, which had virtually disappeared during the boom, is beginning to reappear as builders downsize unit footprints and target first-time buyers. This price segment reappearance is a hallmark of market normalization.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>需求面顯示按買家類型的清晰分化。新建住宅買家（奧斯丁銷售的約40%）首先回歸，被包括將有效融資成本降至<strong>5.27%</strong>的按揭利率補貼、5,000至15,000美元的賣方付款成交費用，以及現貨庫存平均5%降價的建商激勵所吸引。二手房買家更加謹慎，但顯示出重新參與的跡象：2026年2月待成交量年增15.1%是2022年以來最強的領先指標。成交價對報價比率的92.1%意味著買家仍能獲得約8%的議價折扣——這是繁榮前時代以來最有利於買家的條件。</p>
+      <p>在供給面，新建住宅管道正在有意義地收縮。土地收購活動在2025年中隨著建商重新校準新的需求現實而崩潰。建築許可從2023年8月每月3,386件的峰值呈下降趨勢。這一供給收縮——結合2026年初的需求復甦信號——是大多數分析師指向底部形成機制的依據。30萬美元以下的價格段在繁榮期幾乎消失，隨著建商縮小單位面積並瞄準首次購房者，開始重新出現。這一價格段的重新出現是市場正常化的標誌。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Austin New Housing Permits (Monthly, 3-mo avg) 2020&ndash;2025</span><span class="lang-zh" style="display:none">奧斯丁新住宅許可（月度3月均值）2020&ndash;2025</span></h4>
+      <div id="chartAUSTINBuilds" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">Permit peak Aug 2023 = 3,386/mo. Land acquisition collapsed mid-2025 &rarr; future supply pipeline contracting = floor formation catalyst for 2026</span><span class="lang-zh" style="display:none">許可峰值2023年8月=3,386件/月。土地收購2025年中崩潰→未來在建供給收縮=2026年底部形成催化劑</span></p>
+    </div>
+
+    <!-- 5 -->
+    <h2 id="sec-econ"><span class="lang-en">ECONOMIC BASE: TECH, SAMSUNG &amp; DIVERSIFICATION</span><span class="lang-zh" style="display:none">經濟基礎：科技、三星與多元化</span></h2>
+    <div class="lang-en">
+      <p>Austin's economic foundation in 2026 is more diversified than the "tech relocation story" that defined its 2020&ndash;2022 narrative. The metro's real GDP reached <strong>$268 billion</strong> in 2024, growing 3.7% in real terms, with cumulative real GDP growth of 39% from 2020 to 2025. Tech employment represents 16.3% of total Austin employment &mdash; more than double the national average &mdash; but the composition has shifted from software-centric to hardware and semiconductor-inclusive.</p>
+      <p>Samsung's $17 billion semiconductor fabrication facility in Taylor, Texas (20 miles northeast of Austin) began volume production in 2025. This single investment represents the largest foreign direct investment in U.S. manufacturing history and will employ approximately 2,000+ direct workers at full ramp, with 30,000+ indirect jobs in the supply chain. Tesla's Gigafactory Texas, which produces the Model Y and Cybertruck, employs approximately <strong>22,000</strong> workers and is expanding by 50%. Apple's $1 billion Austin campus employs 5,000+. Oracle's headquarters relocation brought approximately 1,000 corporate roles. The unemployment rate has stabilized at approximately 3.4&ndash;3.8%, below the national average.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2026年奧斯丁的經濟基礎比定義其2020至2022年敘事的「科技遷移故事」更為多元化。大都市2024年實質GDP達<strong>2,680億美元</strong>，實質增長3.7%，2020至2025年累計實質GDP增長39%。科技就業佔奧斯丁總就業的16.3%——超過全國平均水平兩倍以上——但構成已從以軟件為中心轉向包含硬件和半導體。</p>
+      <p>三星在泰勒170億美元的半導體晶圓廠於2025年開始量產。這一單筆投資代表美國製造業歷史上最大的外國直接投資，滿負荷運行時僱用約2,000名以上直接工人，供應鏈帶動3萬以上間接就業。特斯拉德州超級工廠（生產Model Y和Cybertruck）僱用約<strong>22,000</strong>名工人，正在擴張50%。蘋果10億美元奧斯丁園區僱用5,000人以上。甲骨文總部遷移帶來約1,000個企業職位。失業率穩定在約3.4至3.8%，低於全國平均水平。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Austin MSA Real GDP Growth vs Tech Employment Share 2018&ndash;2024</span><span class="lang-zh" style="display:none">奧斯丁MSA實質GDP增長 vs 科技就業佔比 2018&ndash;2024</span></h4>
+      <div id="chartAUSTINGDP" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">GDP +39% real (2020&ndash;2025). Tech = 16.3% of jobs (2&times; national avg). Samsung $17B fab + Tesla Gigafactory = manufacturing diversification beyond software</span><span class="lang-zh" style="display:none">GDP實質+39%（2020至2025年）。科技=16.3%就業（全國均值2倍）。三星170億美元晶圓廠+特斯拉超級工廠=超越軟件的製造業多元化</span></p>
+    </div>
+
+    <!-- 6 -->
+    <h2 id="sec-rent"><span class="lang-en">RENT CONTROL: TEXAS TOTAL PREEMPTION</span><span class="lang-zh" style="display:none">租管：德州全面先占</span></h2>
+    <div class="lang-en">
+      <p>Texas has some of the most landlord-favorable rental regulations of any U.S. state. There is no statewide rent control law, and Texas state law preempts local municipalities from enacting any form of rent control or rent stabilization ordinance. This is a permanent legislative preemption, not subject to municipal override. Combined with Texas's zero income tax, no transfer tax, and relatively moderate property tax rates (approximately 1.8&ndash;2.2% in Travis County), Austin represents a structurally favorable investment environment for residential landlords.</p>
+      <p>The practical rental market dynamics have been the mirror image of the ownership market. Austin rents surged 30&ndash;40% in 2021&ndash;2022. Since late 2022, rents have declined significantly: Austin was identified by Realtor.com as the metro with the largest peak-to-current rent decline among the 50 largest U.S. metros, with the median asking rent falling approximately $195 (<strong>-11.5%</strong>) from the September 2022 peak of approximately $1,689 to approximately $1,494 by April 2024. The new apartment construction pipeline has delivered thousands of units, increasing renter negotiating power. For buy-to-let investors, Austin's current cap rates (approximately 4.5&ndash;5.5% in desirable sub-markets) are the most attractive they have been since 2018.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>德州擁有美國任何州中最有利於房東的租賃法規。德州沒有州級租管法，州法先占地方政府頒布任何形式租管或租金穩定條例的能力。這是永久性的立法先占。結合德州零所得稅、無過戶稅，以及相對溫和的財產稅率（特拉維斯縣約1.8至2.2%），奧斯丁從監管角度代表住宅房東的結構性有利投資環境。</p>
+      <p>實際租賃市場動態是購房市場的鏡像。2021至2022年奧斯丁租金飆升30至40%。2022年底以來，租金大幅下降：Realtor.com認定奧斯丁是50個最大美國大都市中峰值至今租金降幅最大的市場，中位數要求租金從2022年9月約1,689美元的峰值降至2024年4月約1,494美元，降幅約195美元（<strong>-11.5%</strong>）。新公寓建設在建量交付了數千套，增加了租房者的議價能力。對於出租投資者，奧斯丁當前的資本化率（約4.5至5.5%）是2018年以來最具吸引力的。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Austin Median Asking Rent + YoY% 2019&ndash;2025</span><span class="lang-zh" style="display:none">奧斯丁中位數要價租金 + 年增率 2019&ndash;2025</span></h4>
+      <div id="chartAUSTINRent" style="height:220px"></div>
+      <p class="chart-note green"><span class="lang-en">Austin rents: biggest peak-to-trough decline of any top-50 U.S. metro (&minus;11.5%). No rent control: correction fully passed through. Cap rates: 4.5&ndash;5.5% in 2026</span><span class="lang-zh" style="display:none">奧斯丁租金：50大美國大都市峰值至谷值降幅最大（-11.5%）。無租管：修正完全傳導。資本化率：2026年4.5至5.5%</span></p>
+    </div>
+
+    <!-- 7 -->
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+    <div class="lang-en">
+      <p>Austin's 2026&ndash;2028 outlook is the most constructive in absolute terms of any correcting U.S. market in this monitor, driven by three concurrent factors: the deepest price correction has reset the PTI ratio to 2014 levels (3.5x), creating genuine affordability; the economic base is demonstrably diversifying into semiconductors and advanced manufacturing; and the supply pipeline is contracting at exactly the moment when early demand signals are recovering. The base case (<strong>60%</strong> probability) projects modest price appreciation of 2&ndash;5% annually in 2026&ndash;2027, as the market bottoms in Q2&ndash;Q3 2026 and begins a gradual recovery.</p>
+      <p>The bull case (<strong>25%</strong> probability) requires two catalysts: a 30-year mortgage rate at or below 5.5% and a strong tech hiring cycle driven by AI infrastructure buildout. In this scenario, the Austin market's combination of relative affordability, zero income tax, and robust employment growth could attract a second wave of high-income relocators. Under this scenario, the city of Austin median could recover toward $580&ndash;600K by end-2027.</p>
+      <p>The bear case (<strong>15%</strong> probability) envisions a compounding of tech-sector caution: if the Samsung Taylor fab faces production ramp delays, Tesla Gigafactory scales back expansion plans, and the AI hiring cycle proves shorter than expected, net job growth in Austin could turn negative for the first time in 20 years. Under this scenario, the current 6-month inventory could re-expand toward 8&ndash;10 months, and prices could decline an additional 8&ndash;12% from current levels before finding a true floor in 2027&ndash;2028. The bear case floor in Austin (approximately $360&ndash;380K MSA median) would still represent a 20&ndash;25% premium to 2019 pre-pandemic levels, suggesting the structural appreciation of the tech-driven 2015&ndash;2019 period has not been fully surrendered.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>奧斯丁2026至2028年的展望在本監測所有修正中的美國市場中最具建設性，由三個並行因素驅動：最深的價格修正將PTI比率重置至2014年水平（3.5倍），創造了真實的可負擔性；經濟基礎正明確多元化至半導體和先進製造業；在建供給在早期需求信號回升的恰好時刻收縮。基本情境（概率<strong>60%</strong>）預計2026至2027年每年溫和升值2至5%，市場在2026年Q2至Q3觸底後開始漸進復甦。</p>
+      <p>樂觀情境（概率<strong>25%</strong>）需要兩個催化劑：30年利率等於或低於5.5%，以及AI基礎設施建設驅動的強勁科技招聘週期。在此情境下，奧斯丁市場組合可能吸引第二波高收入遷移者。城市中位數到2027年底可能回升至58至60萬美元。</p>
+      <p>悲觀情境（概率<strong>15%</strong>）設想科技行業謹慎的疊加：若三星泰勒晶圓廠面臨產量爬坡延遲、特斯拉超級工廠縮減擴張計劃，且AI招聘週期比預期更短，奧斯丁的淨就業增長可能出現20年來首次負值。在此情境下，價格可能從當前水平再下跌8至12%。悲觀底部（約都會區中位數36至38萬美元）仍代表較2019年疫情前水平溢價20至25%，表明科技驅動的2015至2019年結構性升值尚未完全回吐。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Austin MSA Median Price Forecast 2026&ndash;2028</span><span class="lang-zh" style="display:none">奧斯丁MSA中位數房價預測 2026&ndash;2028</span></h4>
+      <div id="chartAUSTINForecast" style="height:220px"></div>
+      <p class="chart-note green"><span class="lang-en">Base case: bottom Q2&ndash;Q3 2026, then +2&ndash;5%/yr. PTI back to 2014 levels (3.5&times;). Bear floor ~$375K = still 25% above pre-pandemic 2019</span><span class="lang-zh" style="display:none">基本情境：2026年Q2至Q3觸底，此後+2至5%/年。PTI回到2014年水平（3.5倍）。悲觀底部約$375K=仍高於疫情前2019年25%</span></p>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: Unlock MLS / Austin Board of Realtors (ABoR) Monthly Market Reports 2025&ndash;2026 &middot; FHFA All-Transactions HPI for Austin-Round Rock-Georgetown MSA (FRED ATNHPIUS12420Q) &middot; Texas Real Estate Research Center at Texas A&amp;M University &middot; Zillow Home Value Index Austin TX &middot; Redfin Austin Housing Market Data &middot; U.S. Census Bureau Population Estimates &middot; Samsung Austin Semiconductor &mdash; Taylor Fab Press Releases &middot; KXAN Austin Housing Market Data (Feb 2026). All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：Unlock MLS / 奧斯丁房地產委員會（ABoR）月度市場報告2025至2026年 &middot; FHFA奧斯丁-圓石城-喬治城都會區全交易房價指數（FRED ATNHPIUS12420Q）&middot; 德州農工大學德州房地產研究中心 &middot; Zillow奧斯丁房屋價值指數 &middot; Redfin奧斯丁住宅市場數據 &middot; 美國人口普查局人口估算 &middot; 三星奧斯丁半導體——泰勒晶圓廠新聞稿 &middot; KXAN奧斯丁住宅市場數據（2026年2月）。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+
+function initAllCharts(lang){
+  allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawAUSTINPrice(lang);drawAUSTINYoY(lang);drawAUSTINInventory(lang);
+  drawAUSTINBuilds(lang);drawAUSTINGDP(lang);drawAUSTINRent(lang);drawAUSTINForecast(lang);
+}
+
+function drawAUSTINPrice(lang){
+  var dom=document.getElementById('chartAUSTINPrice');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var data=[240,263,295,320,340,380,480,525,460,445,435];
+  var colors=data.map(function(v){return v>=500?C.red:v>=400?C.orange:C.navy;});
+  c.setOption({
+    tooltip:baseTooltip,grid:{left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:200,max:600,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+    series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:28,itemStyle:{borderRadius:[3,3,0,0]},
+      markLine:{data:[{yAxis:538,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'May 2022 peak $538K':'2022年5月峰值$538K',fontSize:8,color:C.red}},
+        {yAxis:299,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Jan 2020 $299K':'2020年1月$299K',fontSize:8,color:C.muted}}]}}]
+  });
+}
+
+function drawAUSTINYoY(lang){
+  var dom=document.getElementById('chartAUSTINYoY');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var yoy=[9.5,12.2,8.5,6.3,27.0,45.5,-8.0,-13.0,-3.5,-2.4];
+  var colors=yoy.map(function(v){return v>0?C.green:C.red;});
+  c.setOption({
+    tooltip:baseTooltip,grid:{left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:-20,max:50,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{type:'bar',data:yoy.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:28,itemStyle:{borderRadius:[3,3,0,0]},
+      label:{show:true,position:function(p){return p[1]>=0?'top':'bottom';},formatter:function(p){return p.value>0?'+'+p.value+'%':p.value+'%';},fontSize:9,color:C.muted},
+      markLine:{data:[{yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1},label:{show:false}}]}}]
+  });
+}
+
+function drawAUSTINInventory(lang){
+  var dom=document.getElementById('chartAUSTINInventory');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['Jan 20','Jan 21','Jan 22','Jan 23','Jan 24','Jan 25','Feb 26'];
+  var listings=[4.5,1.8,2.5,11.5,13.2,12.8,10.0];
+  var months=[2.8,0.8,1.2,5.4,6.2,5.8,6.1];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis:[mkAxis({type:'value',min:0,max:15,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),
+      mkAxis({type:'value',min:0,max:8,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}mo'},splitLine:{show:false}})],
+    series:[
+      {name:en?'Active Listings (K)':'活躍掛牌(K)',type:'line',data:listings,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,yAxisIndex:0},
+      {name:en?'Months Supply':'供給月數',type:'line',data:months,lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,
+        markLine:{data:[{yAxis:4,lineStyle:{color:C.green,type:'dashed',width:1},label:{formatter:en?'Balanced low':'均衡下限',fontSize:8,color:C.green}},
+          {yAxis:6,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Balanced high':'均衡上限',fontSize:8,color:C.muted}}]}}
+    ]
+  });
+}
+
+function drawAUSTINBuilds(lang){
+  var dom=document.getElementById('chartAUSTINBuilds');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['Jan 20','Jul 20','Jan 21','Jul 21','Jan 22','Jul 22','Jan 23','Aug 23','Jan 24','Jul 24','Jan 25','Jul 25'];
+  var permits=[1800,2100,2500,3000,2800,2600,2400,3386,2800,2200,1800,1500];
+  var colors=permits.map(function(v){return v>=3000?C.red:v>=2400?C.orange:C.navy;});
+  c.setOption({
+    tooltip:baseTooltip,grid:{left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:8,rotate:45}}),
+    yAxis:mkAxis({type:'value',min:1000,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/1000).toFixed(1)+'K';}}}),
+    series:[{type:'bar',data:permits.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:22,itemStyle:{borderRadius:[3,3,0,0]},
+      markLine:{data:[{yAxis:3386,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'Aug 2023 peak':'2023年8月峰值',fontSize:8,color:C.red}}]}}]
+  });
+}
+
+function drawAUSTINGDP(lang){
+  var dom=document.getElementById('chartAUSTINGDP');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2018','2019','2020','2021','2022','2023','2024'];
+  var gdp=[4.2,5.0,1.8,11.5,7.8,4.5,3.7];
+  var tech=[11.2,12.5,13.0,15.0,16.8,16.5,16.3];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:[mkAxis({type:'value',min:0,max:14,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+      mkAxis({type:'value',min:10,max:18,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[
+      {name:en?'Real GDP Growth %':'實質GDP增長%',type:'bar',data:gdp,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.3)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'Tech Employment Share %':'科技就業佔比%',type:'line',data:tech,lineStyle:{color:C.blue,width:2.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:5,yAxisIndex:1}
+    ]
+  });
+}
+
+function drawAUSTINRent(lang){
+  var dom=document.getElementById('chartAUSTINRent');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];
+  var rent=[1250,1290,1580,1870,1680,1494,1480];
+  var yoy=[3.2,3.2,22.5,18.4,-10.2,-11.0,-0.9];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:[mkAxis({type:'value',min:1100,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return'$'+v;}}}),
+      mkAxis({type:'value',min:-15,max:25,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[
+      {name:en?'Median Rent ($)':'中位數租金($)',type:'bar',data:rent,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0,
+        markLine:{data:[{yAxis:1689,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'Sep 2022 peak $1,689':'2022年9月峰值$1,689',fontSize:8,color:C.red}}]}},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1}
+    ]
+  });
+}
+
+function drawAUSTINForecast(lang){
+  var dom=document.getElementById('chartAUSTINForecast');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var periods=['Dec 2025','2026E','2027E','2028E'];
+  var bull=[435,450,480,510];var base=[435,445,458,470];var bear=[435,415,390,375];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:340,max:560,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return'$'+v+'K';}}}),
+    series:[
+      {name:en?'Bull (25%) — AI+rate cut':'樂觀(25%)—AI+降息',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+      {name:en?'Base (60%) — stabilize':'基本(60%)—穩定',type:'line',data:base,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+      {name:en?'Bear (15%) — tech pullback':'悲觀(15%)—科技退縮',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5},
+      {type:'line',markLine:{data:[{yAxis:538,lineStyle:{color:C.red,type:'dotted',width:1},label:{formatter:en?'2022 peak':'2022年峰值',fontSize:8,color:C.red}}]}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);initAllCharts(lang);
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+function toggleCityMenu(){document.getElementById('cityDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}
+  if(!e.target.closest('.city-dropdown')){var d2=document.getElementById('cityDropdown');if(d2)d2.classList.remove('open');}
+});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+
+(function(){
+  function initScrollSpy(){
+    var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;
+    var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});
+    function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}
+    window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}
+})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

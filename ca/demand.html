@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demand Analysis | Canada Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="dashboard">
+    <h1 class="page-title"><span class="lang-en">Demand Analysis</span><span class="lang-zh" style="display:none">需求分析</span></h1>
+
+    <div class="kpi-row">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">2025 Sales</span><span class="lang-zh" style="display:none">2025年銷售量</span></div>
+        <div class="kpi-value">~480,000</div>
+        <div class="kpi-delta positive"><span class="lang-en">+8% YoY | CREA</span><span class="lang-zh" style="display:none">年增8% | CREA</span></div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">Immigration 2025</span><span class="lang-zh" style="display:none">2025年移民</span></div>
+        <div class="kpi-value">500K</div>
+        <div class="kpi-delta positive"><span class="lang-en">Structural demand</span><span class="lang-zh" style="display:none">結構性需求</span></div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">First-time Buyers</span><span class="lang-zh" style="display:none">首購族</span></div>
+        <div class="kpi-value">48%</div>
+        <div class="kpi-delta" style="color:#2563eb"><span class="lang-en">Of purchases</span><span class="lang-zh" style="display:none">占總購買量</span></div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">5Y Fixed Rate</span><span class="lang-zh" style="display:none">5年固定利率</span></div>
+        <div class="kpi-value">4.8%</div>
+        <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Declining</span><span class="lang-zh" style="display:none">下降中</span></div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Avg Days on Market</span><span class="lang-zh" style="display:none">平均上市天數</span></div>
+        <div class="kpi-value">32</div>
+        <div class="kpi-delta" style="color:#2563eb"><span class="lang-en">National</span><span class="lang-zh" style="display:none">全國</span></div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Investor Share</span><span class="lang-zh" style="display:none">投資者占比</span></div>
+        <div class="kpi-value">25%</div>
+        <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Toronto condo</span><span class="lang-zh" style="display:none">多倫多公寓</span></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">Sales Volume Trend</span><span class="lang-zh" style="display:none">銷售量趨勢</span></h3>
+        <div id="chartCaSales" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">Toronto vs Vancouver vs Calgary Sales</span><span class="lang-zh" style="display:none">多倫多 vs 溫哥華 vs 卡加利 銷售量</span></h3>
+        <div id="chartCaCitySales" style="height:370px"></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">Buyer Composition</span><span class="lang-zh" style="display:none">買家組成</span></h3>
+        <div id="chartCaBuyer" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">BOC Rate vs Sales Volume</span><span class="lang-zh" style="display:none">央行利率 vs 銷售量</span></h3>
+        <div id="chartCaRateSales" style="height:370px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>A project by InvestMQuest.</p>
+  </footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    allCharts.length=0;
+
+    /* Chart 1: Sales Volume Trend (line) */
+    var c1=echarts.init(document.getElementById('chartCaSales'));
+    c1.setOption({
+      tooltip:baseTooltip,
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[{
+        type:'line',
+        data:[486000,552000,667000,500000,440000,445000,480000],
+        smooth:0.2,
+        lineStyle:{color:C.navy,width:2},
+        itemStyle:{color:C.navy},
+        symbol:'circle',
+        symbolSize:7,
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(30,58,95,0.15)'},{offset:1,color:'rgba(30,58,95,0)'}])},
+        markPoint:{
+          data:[
+            {type:'max',name:'Max',symbolSize:50,label:{fontSize:10,fontFamily:'Inter'}},
+            {type:'min',name:'Min',symbolSize:50,label:{fontSize:10,fontFamily:'Inter'}}
+          ],
+          itemStyle:{color:C.navy}
+        }
+      }]
+    });
+    allCharts.push(c1);
+
+    /* Chart 2: Toronto vs Vancouver vs Calgary Sales (grouped bar) */
+    var c2=echarts.init(document.getElementById('chartCaCitySales'));
+    c2.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'多倫多':'Toronto',lang==='zh'?'溫哥華':'Vancouver',lang==='zh'?'卡加利':'Calgary']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[
+        {name:lang==='zh'?'多倫多':'Toronto',type:'bar',data:[75000,68000,70000,78000],itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barMaxWidth:35},
+        {name:lang==='zh'?'溫哥華':'Vancouver',type:'bar',data:[32000,28000,30000,33000],itemStyle:{color:C.green,borderRadius:[3,3,0,0]},barMaxWidth:35},
+        {name:lang==='zh'?'卡加利':'Calgary',type:'bar',data:[28000,30000,35000,40000],itemStyle:{color:C.orange,borderRadius:[3,3,0,0]},barMaxWidth:35}
+      ]
+    });
+    allCharts.push(c2);
+
+    /* Chart 3: Buyer Composition (horizontal bar %) */
+    var buyerLabels=lang==='zh'?['投資者','換屋族','首購族']:['Investor','Move-up','First-time'];
+    var buyerVals=[25,27,48];
+    var buyerColors=[C.orange,C.blue,C.navy];
+    var c3=echarts.init(document.getElementById('chartCaBuyer'));
+    c3.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': '+p[0].value+'%';}}),
+      grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+      yAxis:mkAxis({type:'category',data:buyerLabels}),
+      series:[{
+        type:'bar',
+        data:buyerVals.map(function(v,i){return{value:v,itemStyle:{color:buyerColors[i],borderRadius:[0,4,4,0]}};}),
+        label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:11,fontFamily:'Inter, sans-serif',color:C.navy},
+        barWidth:20
+      }]
+    });
+    allCharts.push(c3);
+
+    /* Chart 4: BOC Rate vs Sales Volume (dual-axis) */
+    var c4=echarts.init(document.getElementById('chartCaRateSales'));
+    c4.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',formatter:function(p){var s='';p.forEach(function(item){if(item.seriesName.indexOf('Rate')>=0||item.seriesName.indexOf('利率')>=0){s+=item.marker+item.seriesName+': '+item.value+'%<br>';}else{s+=item.marker+item.seriesName+': '+fmtK(item.value)+'<br>';}});return s;}}),
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'BOC利率':'BOC Rate',lang==='zh'?'銷售量(K)':'Sales (K)']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025']}),
+      yAxis:[
+        mkAxis({type:'value',name:lang==='zh'?'利率 %':'Rate %',axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:C.grid}}}),
+        mkAxis({type:'value',name:lang==='zh'?'銷售量':'Sales',position:'right',axisLabel:{formatter:function(v){return fmtK(v);}},splitLine:{show:false}})
+      ],
+      series:[
+        {name:lang==='zh'?'BOC利率':'BOC Rate',type:'line',data:[0.25,0.25,4.25,5.00,4.25,3.25],lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},symbol:'circle',symbolSize:7,yAxisIndex:0},
+        {name:lang==='zh'?'銷售量(K)':'Sales (K)',type:'bar',data:[552000,667000,500000,440000,445000,480000],itemStyle:{color:C.navy,borderRadius:[3,3,0,0],opacity:0.7},barMaxWidth:35,yAxisIndex:1}
+      ]
+    });
+    allCharts.push(c4);
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

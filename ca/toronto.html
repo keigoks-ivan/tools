@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Toronto Deep Dive | Canada Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}.report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}.report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}.report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}.report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}.report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}.report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}.report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}.chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}.chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}.chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}.report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}.report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}.toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}.toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}.toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}.toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}.toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}.toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}.report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}.side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}.side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}.side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}.side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}.side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600}.side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  .data-table{width:100%;border-collapse:collapse;margin:16px 0;font-family:'Inter',sans-serif;font-size:12px}.data-table th{background:#f4f7fc;color:#1e3a5f;font-weight:600;text-align:left;padding:10px 12px;border-bottom:1.5px solid #ccd9e8;font-size:11px;text-transform:uppercase;letter-spacing:.03em}.data-table td{padding:10px 12px;border-bottom:1px solid #eef3f9;color:#2c3e50}.data-table tr:last-child td{border-bottom:none}.data-table .td-num{font-family:'JetBrains Mono',monospace;color:#1e3a5f;text-align:right}.data-table .td-pos{color:#16a34a;font-weight:600}.data-table .td-neg{color:#dc2626;font-weight:600}
+  .callout{background:#fff9ed;border-left:3px solid #d97706;border-radius:0 6px 6px 0;padding:14px 18px;margin:20px 0;font-family:'Inter',sans-serif;font-size:13px;line-height:1.75;color:#2c3e50}.callout strong{background:transparent!important;padding:0!important;color:#d97706!important}
+  .callout.red{background:#fef2f2;border-left-color:#dc2626}.callout.red strong{color:#dc2626!important}
+  @media(max-width:1100px){.side-nav{display:none}}@media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}.data-table{font-size:11px}.data-table th,.data-table td{padding:7px 6px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-neighbourhoods" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Neighbourhoods</span><span class="side-nav-label lang-zh" style="display:none">重點社區</span></a>
+    <a href="#sec-condo" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Condo Crisis</span><span class="side-nav-label lang-zh" style="display:none">公寓危機</span></a>
+    <a href="#sec-transit" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Transit &amp; Dev</span><span class="side-nav-label lang-zh" style="display:none">交通與開發</span></a>
+    <a href="#sec-rental" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rental Market</span><span class="side-nav-label lang-zh" style="display:none">租賃市場</span></a>
+    <a href="#sec-policy" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Policy (Foreign Ban / Stress Test)</span><span class="side-nav-label lang-zh" style="display:none">政策（禁外購/壓力測試）</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+  <div class="report-header">
+    <div class="lang-en"><h1>TORONTO &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: CREA / TRREB / CMHC / BOC / Urbanation</div></div>
+    <div class="lang-zh" style="display:none"><h1>多倫多——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：CREA / TRREB / CMHC / 加拿大央行 / Urbanation</div></div>
+  </div>
+  <div class="report-body">
+    <div class="toc-box" id="tocBox"><div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend &amp; Correction</span><span class="lang-zh" style="display:none">2. 房價走勢與修正</span></a>
+        <a href="#sec-neighbourhoods" onclick="closeTocMobile()"><span class="lang-en">3. Key Neighbourhoods Deep Dive</span><span class="lang-zh" style="display:none">3. 重點社區深度分析</span></a>
+        <a href="#sec-condo" onclick="closeTocMobile()"><span class="lang-en">4. Condo Crisis</span><span class="lang-zh" style="display:none">4. 公寓危機</span></a>
+        <a href="#sec-transit" onclick="closeTocMobile()"><span class="lang-en">5. Transit &amp; Ontario Line</span><span class="lang-zh" style="display:none">5. 交通與安大略線</span></a>
+        <a href="#sec-rental" onclick="closeTocMobile()"><span class="lang-en">6. Rental Market</span><span class="lang-zh" style="display:none">6. 租賃市場</span></a>
+        <a href="#sec-policy" onclick="closeTocMobile()"><span class="lang-en">7. Policy: Foreign Ban / Stress Test / NRST</span><span class="lang-zh" style="display:none">7. 政策：禁外購/壓力測試/NRST</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">8. Outlook &amp; Scenarios</span><span class="lang-zh" style="display:none">8. 展望與情景</span></a>
+      </div></div>
+
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>The Greater Toronto Area (GTA), home to <strong>7.1 million people</strong> and growing at <strong>~150K/year</strong>, is Canada's largest housing market and currently its most stressed. TRREB's MLS HPI composite benchmark sat at <strong>C$941,800</strong> in March 2026 (average selling price C$1,017,796), down <strong>-7.4% YoY</strong> and <strong>~22% from the February 2022 peak</strong> in nominal terms, and <strong>~30%+ in real (CPI-adjusted) terms</strong>. Detached homes have held up relatively well at <strong>C$1.40M average</strong>, while the <strong>condo segment is in crisis</strong>: investor-owned units represent ~40% of the Toronto condo stock, and a record wave of pre-construction completions in 2024&ndash;2026 (~25,000 units/year) is arriving into a market where many of those original pre-con buyers cannot close or are forced to assignment-sell at a loss.</p>
+      <p>The investment thesis for 2026 has three pillars and three risks. <strong>Pillars</strong>: (i) Bank of Canada has cut the policy rate to <strong>2.25%</strong> (held at the 18 March 2026 meeting, next decision 29 April) and 5-year fixed mortgages are now at <strong>4.04%</strong> broker-best (bank-posted 4.29%), (ii) <strong>Ontario Line</strong> (15.6km subway, 15 stations, 2031 target) is generating early-stage premiums of 5&ndash;10% near confirmed stations, and (iii) structural housing undersupply (CMHC estimates 3.5M units needed nationally by 2030). <strong>Risks</strong>: (i) the foreign buyer ban (extended to 2027) and <strong>NRST (Non-Resident Speculation Tax at 25%)</strong> effectively excluded foreign capital, (ii) <strong>stress test at mortgage rate + 200bp</strong> continues to cap domestic buyer pool, (iii) if federal immigration targets are cut (2025 reduction announced), demand could decelerate materially.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>大多倫多地區（GTA）人口<strong>710萬</strong>，年增<strong>約15萬</strong>，為加拿大最大也是目前最承壓的住宅市場。平均房價<strong>C$108萬</strong>，較2022年2月高峰名目下跌<strong>約16%</strong>、實質（CPI調整）下跌<strong>約26%</strong>。獨棟住宅相對穩固在<strong>C$140萬均價</strong>，<strong>公寓板塊危機</strong>：投資者持有單位佔多倫多公寓存量約40%，2024-2026年創紀錄預售竣工浪潮（年約25,000套）湧入，許多原預售買家無法交割或被迫虧損轉讓。</p>
+      <p>2026年投資命題三支柱三風險。<strong>支柱</strong>：(i) 加拿大央行已降至<strong>3.25%</strong>並可能續降（市場計入2026年底2.75%）；(ii) <strong>安大略線</strong>（15.6公里地鐵、15站、2031年目標）在已確認站點附近產生5-10%早期溢價；(iii) 結構性住房不足（CMHC估2030年前全國需350萬套）。<strong>風險</strong>：(i) 禁外購令（延至2027）及<strong>NRST（非居民投機稅25%）</strong>實質排除外資；(ii) <strong>按揭利率+200bp壓力測試</strong>持續壓縮國內買家池；(iii) 若聯邦移民目標削減（2025年已宣布減量），需求可能顯著減速。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">GTA HPI BENCHMARK</span><span class="lang-zh" style="display:none">GTA HPI基準</span></div><div class="kpi-value">C$942K</div><span class="kpi-badge badge-red"><span class="lang-en">−7.4% YoY · TRREB Mar 2026</span><span class="lang-zh" style="display:none">年-7.4% · TRREB 2026年3月</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">PTI RATIO</span><span class="lang-zh" style="display:none">房價所得比</span></div><div class="kpi-value">10.5x</div><span class="kpi-badge badge-red"><span class="lang-en">Severely unaffordable · 2nd worst OECD</span><span class="lang-zh" style="display:none">嚴重不可負擔 · OECD第二差</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">CONDO COMPLETIONS</span><span class="lang-zh" style="display:none">公寓竣工</span></div><div class="kpi-value">25K/yr</div><span class="kpi-badge badge-orange"><span class="lang-en">Record wave 2024–26 · Investor exits</span><span class="lang-zh" style="display:none">2024-26創紀錄浪潮 · 投資者退出</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">ONTARIO LINE</span><span class="lang-zh" style="display:none">安大略線</span></div><div class="kpi-value">15.6 km</div><span class="kpi-badge badge-green"><span class="lang-en">15 stations · 2031 target · +5–10% premium</span><span class="lang-zh" style="display:none">15站 · 2031目標 · +5-10%溢價</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">BOC RATE</span><span class="lang-zh" style="display:none">央行利率</span></div><div class="kpi-value">2.25%</div><span class="kpi-badge badge-green"><span class="lang-en">Held Mar 2026 · 5yr fixed 4.04%</span><span class="lang-zh" style="display:none">2026年3月維持 · 5年固定4.04%</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">NRST</span><span class="lang-zh" style="display:none">NRST</span></div><div class="kpi-value">25%</div><span class="kpi-badge badge-red"><span class="lang-en">Non-Resident Speculation Tax · ON-wide</span><span class="lang-zh" style="display:none">非居民投機稅 · 全省適用</span></span></div>
+    </div>
+
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND &amp; CORRECTION</span><span class="lang-zh" style="display:none">房價走勢與修正</span></h2>
+    <div class="lang-en">
+      <p>Toronto's price cycle is one of the most dramatic in OECD property history. The index rose from ~100 (2015) to ~178 (Feb 2022 peak) &mdash; an <strong>78% nominal gain in 7 years</strong>, or 11% CAGR. The pandemic period alone (Jan 2020 to Feb 2022) added <strong>+46%</strong>, the steepest acceleration on record for any major North American metro. The BOC's 475bp hike cycle (2022&ndash;2023) reversed this brutally: <strong>peak-to-trough of -19%</strong> by early 2024, with segments (investor condos in 905 region) down 25&ndash;30%.</p>
+      <p>Since mid-2024, prices have stabilised. The benchmark home price index (HPI) has moved sideways in a <strong>±3% band</strong> for 18 months. Transaction volume has recovered but remains <strong>~25% below 2021 peak levels</strong>. The detached segment leads any recovery (down only 12% from peak vs. condo down 22%) reflecting end-user dominance vs. investor retreat. <strong>Key signal to watch</strong>: the Teranet-National Bank composite home price index &mdash; if it holds above 2024 lows through a second full spring (Mar&ndash;May 2026), it signals the correction is structurally complete.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>多倫多價格週期為OECD房產史上最劇烈之一。指數從約100（2015年）升至約178（2022年2月高峰）——<strong>7年名目漲幅78%</strong>，年複合11%。單疫情期（2020年1月至2022年2月）即增加<strong>+46%</strong>，為任何北美大都會有紀錄以來最陡峭加速。BOC 475bp升息週期（2022-2023）殘酷逆轉：至2024年初<strong>高峰至低谷-19%</strong>，某些板塊（905區投資公寓）下跌25-30%。</p>
+      <p>2024年中以來價格穩定。基準房價指數（HPI）在<strong>±3%區間</strong>橫盤18個月。成交量已恢復但仍<strong>低於2021年高峰約25%</strong>。獨棟板塊領先任何復甦（較高峰僅-12%，對比公寓-22%），反映自住主導對投資者撤退。<strong>關鍵訊號</strong>：Teranet國家銀行綜合房價指數——若在第二個完整春季（2026年3-5月）維持在2024年低點以上，顯示修正結構性完成。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card"><h4><span class="lang-en">TRREB HPI + BOC Rate Path</span><span class="lang-zh" style="display:none">TRREB HPI + BOC利率路徑</span></h4><p><span class="lang-en">Price peak-to-trough vs rate cycle</span><span class="lang-zh" style="display:none">價格峰谷 vs 利率週期</span></p><div id="chartTORCycle" style="height:240px"></div></div>
+      <div class="report-chart-card"><h4><span class="lang-en">Condo vs Detached (2019=100)</span><span class="lang-zh" style="display:none">公寓 vs 獨棟（2019=100）</span></h4><p><span class="lang-en">Divergence widening · Investor exits</span><span class="lang-zh" style="display:none">分歧擴大 · 投資者退出</span></p><div id="chartTORCondoDetached" style="height:240px"></div></div>
+    </div>
+
+    <h2 id="sec-neighbourhoods"><span class="lang-en">KEY NEIGHBOURHOODS DEEP DIVE</span><span class="lang-zh" style="display:none">重點社區深度分析</span></h2>
+    <div class="lang-en">
+      <p>Toronto's residential geography is sharply stratified. The <strong>central 416 area</strong> (old City of Toronto) contains the prime neighbourhoods; the <strong>outer 905 area</strong> (Mississauga, Brampton, Markham, Vaughan, Oakville, Richmond Hill) hosts most commuter detached stock and investor-focused condo supply. Within 416: <strong>Yorkville / Rosedale / Forest Hill</strong> are the ultra-premium enclaves trading at C$2.5&ndash;5M+; these areas have been the most insulated from the condo correction given negligible new supply.</p>
+      <p><strong>Downtown Core (King/Spadina/St. Lawrence)</strong> is the epicentre of condo stock and thus the epicentre of the correction &mdash; condo average C$750K, down 18% from peak. <strong>Midtown (Yonge-Eglinton)</strong> benefits from the Eglinton Crosstown LRT opening (2026, after 15-year delays) and trades at C$1.2M average. <strong>North York</strong> offers relative value at C$950K with Finch West LRT. <strong>Mississauga</strong>, the largest 905 suburb (750K population), benefits from the Hurontario LRT completion; it offers the best GTA gross yield at 4.0%. <strong>Markham / Richmond Hill</strong> are the historically Chinese-buyer-preferred areas &mdash; these have been most affected by the foreign buyer ban, with transaction volumes down 40%+ from 2021.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>多倫多住宅地理明顯分層。<strong>中央416區</strong>（舊多倫多市）含頂級社區；<strong>外圍905區</strong>（密西沙加、賓頓、萬錦、旺市、奧克維爾、列治文山）擁有大部分通勤獨棟存量與投資者導向公寓供給。416區內：<strong>約克維爾/羅斯代爾/森林山</strong>為超高端區，C$250-500萬+交易；因幾乎零新供給，在公寓修正中最為隔絕。</p>
+      <p><strong>市中心核心（國王/Spadina/聖勞倫斯）</strong>為公寓存量震央、也是修正震央——公寓均價C$75萬，較高峰跌18%。<strong>中城（央街-Eglinton）</strong>受益於Eglinton Crosstown輕軌開通（2026年，延誤15年後）及C$120萬均價。<strong>北約克</strong>以C$95萬提供相對價值，含Finch West輕軌。<strong>密西沙加</strong>為最大905郊區（人口75萬），受益於Hurontario輕軌完工；GTA最佳毛收益率4.0%。<strong>萬錦/列治文山</strong>歷史上為華人買家偏好區——受禁外購令影響最大，交易量較2021年下降40%+。</p>
+    </div>
+
+    <table class="data-table">
+      <thead><tr>
+        <th><span class="lang-en">Neighbourhood</span><span class="lang-zh" style="display:none">社區</span></th>
+        <th><span class="lang-en">Avg C$K</span><span class="lang-zh" style="display:none">均價 C$K</span></th>
+        <th><span class="lang-en">Peak Δ%</span><span class="lang-zh" style="display:none">高峰漲跌</span></th>
+        <th><span class="lang-en">Yield</span><span class="lang-zh" style="display:none">收益率</span></th>
+        <th><span class="lang-en">Transit</span><span class="lang-zh" style="display:none">交通</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Yorkville / Rosedale</td><td class="td-num">2,500+</td><td class="td-num td-neg">-7%</td><td class="td-num">2.8%</td><td>TTC Yonge</td></tr>
+        <tr><td>Forest Hill</td><td class="td-num">2,800</td><td class="td-num td-neg">-6%</td><td class="td-num">2.5%</td><td>St. Clair</td></tr>
+        <tr><td>Midtown (Yonge-Eglinton)</td><td class="td-num">1,200</td><td class="td-num td-neg">-14%</td><td class="td-num">3.5%</td><td>Eglinton LRT</td></tr>
+        <tr><td>Downtown Core</td><td class="td-num">850</td><td class="td-num td-neg">-18%</td><td class="td-num">3.8%</td><td>TTC Line 1</td></tr>
+        <tr><td>North York</td><td class="td-num">950</td><td class="td-num td-neg">-13%</td><td class="td-num">3.8%</td><td>Finch West</td></tr>
+        <tr><td>Mississauga</td><td class="td-num">780</td><td class="td-num td-neg">-16%</td><td class="td-num">4.0%</td><td>Hurontario LRT</td></tr>
+        <tr><td>Markham / R. Hill</td><td class="td-num">1,150</td><td class="td-num td-neg">-22%</td><td class="td-num">3.6%</td><td>GO Train</td></tr>
+        <tr><td>Scarborough</td><td class="td-num">820</td><td class="td-num td-neg">-17%</td><td class="td-num">3.9%</td><td>Scar. Ext.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="chart-inline"><h4><span class="lang-en">Price by Area (C$K)</span><span class="lang-zh" style="display:none">各區域價格（C$K）</span></h4><div id="chartTORAreas" style="height:220px"></div><p class="chart-note navy"><span class="lang-en">Forest Hill and Yorkville most insulated from correction. Markham/R. Hill hit hardest by foreign buyer ban</span><span class="lang-zh" style="display:none">森林山與約克維爾在修正中最為隔絕。萬錦/列治文山受禁外購令衝擊最大</span></p></div>
+
+    <h2 id="sec-condo"><span class="lang-en">CONDO CRISIS</span><span class="lang-zh" style="display:none">公寓危機</span></h2>
+    <div class="lang-en">
+      <p>Toronto's condo market is in the deepest stress of any major North American property segment. The issue is a supply-demand mismatch caused by <strong>record pre-construction completions hitting in 2024&ndash;2026</strong>. Approximately <strong>25,000 condo units are completing annually</strong> (vs. 10,000&ndash;12,000 historical average). These were pre-sold 3&ndash;5 years ago when rates were at 1.5% and prices 30% higher. Original buyers &mdash; <strong>~40% of which are investors, not end-users</strong> &mdash; now face closing at mortgage rates of 5.5&ndash;6.5% on units valued 20&ndash;30% below purchase.</p>
+      <p>The consequences: (i) <strong>assignment sales</strong> have exploded &mdash; listings where the original pre-con buyer tries to "flip" their contract before closing, often at a loss; Urbanation reports 2024 assignment listings 3x the 2021 level, (ii) <strong>forced closings</strong> leading to distress sales &mdash; some buyers take possession then immediately list below cost to exit, (iii) <strong>negative cash flow rentals</strong> &mdash; an investor unit bought at C$900K with C$675K mortgage at 6% generates <strong>C$4,050/month in payments vs. C$2,500 rental income</strong>, implying <strong>-C$1,550/month subsidy</strong> required to hold. Many investors simply cannot afford this ongoing loss. The <strong>90-day delinquency rate on condo mortgages</strong> has risen from 0.09% (2022) to <strong>0.28% (Q4 2025)</strong> &mdash; still low absolutely but trending in a worrying direction.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>多倫多公寓市場承受任何北美主要房產板塊中最深壓力。問題是<strong>2024-2026年創紀錄預售竣工</strong>造成的供需錯配。目前<strong>年度公寓竣工約25,000套</strong>（歷史均值10,000-12,000）。這些3-5年前在利率1.5%、價格高30%時預售。原買家——<strong>約40%為投資者非自住</strong>——目前面臨以按揭利率5.5-6.5%交割估值較購買價低20-30%的單位。</p>
+      <p>後果：(i) <strong>轉讓銷售</strong>爆發——原預售買家試圖在交割前「翻轉」合約的掛牌，通常虧損；Urbanation報告2024年轉讓掛牌為2021年的3倍；(ii) <strong>被迫交割</strong>導致困境銷售——部分買家接手後立即低於成本掛售求退出；(iii) <strong>負現金流租賃</strong>——以C$90萬購買、6% C$67.5萬按揭的投資者單位<strong>月支付C$4,050 vs 租金收入C$2,500</strong>，意味著每月需<strong>-C$1,550補貼</strong>持有。許多投資者無法負擔持續虧損。<strong>公寓按揭90日逾期率</strong>從0.09%（2022）升至<strong>0.28%（2025年Q4）</strong>——絕對值仍低但趨勢令人擔憂。</p>
+    </div>
+
+    <div class="callout red">
+      <span class="lang-en"><strong>RISK:</strong> The 2025–2026 pre-con completion wave peaks around Q3 2026. If the BOC rate does not drop to 3.0% or below by then, Urbanation forecasts distressed inventory could push condo prices down another 8–12% before stabilising. This is the single most important 2026 data point to monitor.</span>
+      <span class="lang-zh" style="display:none"><strong>風險：</strong>2025-2026年預售竣工浪潮在2026年Q3達峰。若BOC利率屆時未降至3.0%或以下，Urbanation預測困境庫存可能推動公寓價格再下跌8-12%才穩定。此為2026年需監測的最重要單一數據點。</span>
+    </div>
+
+    <h2 id="sec-transit"><span class="lang-en">TRANSIT &amp; ONTARIO LINE</span><span class="lang-zh" style="display:none">交通與安大略線</span></h2>
+    <div class="lang-en">
+      <p>The <strong>Ontario Line</strong> is the most transformative transit project in Toronto's history: a <strong>15.6 km subway with 15 stations</strong> connecting Ontario Place (waterfront) through downtown to the Ontario Science Centre (Don Mills). Budget: <strong>C$10.9B + C$9B O&amp;M</strong> (total cost ~C$27B including financing). Construction is underway, with the contract awarded in Nov 2022 to Connect 6ix consortium. Target <strong>full opening 2031</strong>. Early-stage price premiums of <strong>5&ndash;10%</strong> are already emerging near confirmed station locations. Based on BTS/TTC Line 1 precedent, properties within 500m of stations could see <strong>12&ndash;18% uplift</strong> post-opening.</p>
+      <p>Other major transit catalysts: <strong>Eglinton Crosstown LRT (Line 5)</strong> &mdash; 19 km, 25 stations, finally opening 2026 after 15-year delays; expected 6&ndash;10% uplift in mid-town and east-end neighbourhoods. <strong>Finch West LRT (Line 6)</strong> &mdash; 11 km, opening 2025. <strong>Scarborough Subway Extension (Line 2 east)</strong> &mdash; 7.8 km, 3 stations, targeting 2030. <strong>Hurontario LRT</strong> (Mississauga) &mdash; opened 2024, already driving Mississauga condo demand. <strong>Yonge North Subway Extension</strong> to Richmond Hill &mdash; pre-construction, 2030&ndash;2032 target.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p><strong>安大略線</strong>為多倫多史上最具變革性交通項目：<strong>15.6公里地鐵、15站</strong>，連接Ontario Place（濱水）經市中心至Ontario Science Centre（Don Mills）。預算：<strong>C$109億+C$90億維運</strong>（含融資總成本約C$270億）。施工進行中，2022年11月標授Connect 6ix聯盟。目標<strong>2031年全面開通</strong>。已確認車站位置附近已出現<strong>5-10%</strong>早期溢價。基於BTS/TTC 1號線先例，車站500米內物業開通後可能有<strong>12-18%提升</strong>。</p>
+      <p>其他主要交通催化劑：<strong>Eglinton Crosstown輕軌（5號線）</strong>——19公里、25站，延誤15年後2026年終於開通；預期中城與東區提升6-10%。<strong>Finch West輕軌（6號線）</strong>——11公里，2025年開通。<strong>士嘉堡地鐵延伸（2號線東）</strong>——7.8公里、3站，目標2030年。<strong>Hurontario輕軌</strong>（密西沙加）——2024年開通，已推動密西沙加公寓需求。<strong>央街北延伸</strong>至列治文山——前期施工，2030-2032年目標。</p>
+    </div>
+
+    <h2 id="sec-rental"><span class="lang-en">RENTAL MARKET</span><span class="lang-zh" style="display:none">租賃市場</span></h2>
+    <div class="lang-en">
+      <p>Toronto's rental market has been among the tightest in North America &mdash; driven by record immigration (international students + permanent residents + temporary foreign workers), Ontario's <strong>2018 rent control</strong> (new units post-Nov 2018 are exempt but capping existing stock), and limited purpose-built rental supply. Average rent for a 1-bedroom condo downtown: <strong>C$2,400/month</strong>; 2-bedroom: <strong>C$3,200/month</strong>; detached 4-bedroom house: <strong>C$4,500+/month</strong>. Gross yields of <strong>3.8%</strong> barely cover the 5-year fixed mortgage rate of 4.8&ndash;5.2%, meaning <strong>negative leverage carry</strong> on most investor purchases &mdash; the sole return driver is capital appreciation.</p>
+      <p>Three 2026 rental shifts to watch. First, the <strong>flood of investor-owned condo completions</strong> is pushing rental supply up and <strong>vacancy rates from 1.2% (2022) to 2.8% (Q4 2025)</strong> &mdash; still tight but moving in a renter-friendly direction. Second, <strong>federal immigration cap reduction</strong> announced October 2024 (permanent resident target cut from 500K to 395K annually for 2025&ndash;2027) could temper rental demand growth by 15&ndash;20%. Third, Ontario's <strong>Landlord and Tenant Board (LTB)</strong> has a 12-month+ hearing backlog for eviction cases &mdash; favours professional landlords with cash flow to weather disputes; deters smaller individual investors.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>多倫多租賃市場為北美最緊之一——受創紀錄移民（國際學生+永久居民+臨時外國勞工）、安大略<strong>2018年租金管制</strong>（2018年11月後新單位豁免但封頂現有存量）、有限的專建租賃供給驅動。市中心一房公寓月租<strong>C$2,400</strong>；兩房<strong>C$3,200</strong>；獨棟四房住宅<strong>C$4,500+</strong>。<strong>3.8%毛收益率</strong>勉強覆蓋5年期固定按揭利率4.8-5.2%，意味著多數投資者購買為<strong>負槓桿利差</strong>——唯一回報驅動為資本增值。</p>
+      <p>三個2026年租賃變化需關注。其一，<strong>投資者持有公寓竣工湧入</strong>推升租賃供給，<strong>空置率從2022年1.2%升至2025年Q4 2.8%</strong>——仍緊但朝租客友善方向移動。其二，2024年10月宣布的<strong>聯邦移民上限削減</strong>（2025-2027年永久居民目標從50萬降至年39.5萬）可能抑制租賃需求增長15-20%。其三，安大略<strong>房東租戶委員會（LTB）</strong>驅趕案件聽證積壓12個月以上——偏袒有現金流可持久爭議的專業房東；嚇退規模較小的個體投資者。</p>
+    </div>
+
+    <h2 id="sec-policy"><span class="lang-en">POLICY: FOREIGN BAN / STRESS TEST / NRST</span><span class="lang-zh" style="display:none">政策：禁外購/壓力測試/NRST</span></h2>
+    <div class="lang-en">
+      <p>Four federal/provincial policies materially shape Toronto's market. <strong>(1) Non-Canadian Purchase of Residential Property Act (NCPRA, "foreign buyer ban")</strong>: effective 1 Jan 2023, extended in Feb 2024 to <strong>31 Dec 2026</strong> (with Quebec extension to 2027). Prohibits non-Canadians from purchasing residential property except for limited exemptions (work-permit holders meeting 3-year residency, international students, refugees). Exemptions are tightly enforced. Impact: foreign demand in Markham/Richmond Hill down ~70%.</p>
+      <p><strong>(2) Non-Resident Speculation Tax (NRST)</strong>: Ontario-wide 25% tax on residential property purchases by foreign nationals (raised from 15% in March 2022, then Ontario-wide from March 2023). Even work-permit holders sometimes pay if their permit expires within 2 years. <strong>(3) Mortgage Stress Test (B-20)</strong>: borrowers must qualify at <strong>contract rate + 200bp OR 5.25%</strong>, whichever is higher. For a buyer at 5.0% mortgage rate, qualification is at 7.0%, reducing borrowing capacity by ~20%. <strong>(4) Capital gains</strong>: principal residence exemption fully protects owner-occupiers. For investors, the 2024 federal budget raised the <strong>capital gains inclusion rate from 50% to 66.67% on gains over C$250K</strong> &mdash; materially affecting investor exit economics. Non-resident sellers face a 25% withholding tax on gross proceeds unless a clearance certificate (T2062) is obtained.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>四項聯邦/省級政策重大塑造多倫多市場。<strong>(1) 非加拿大人購買住宅房產法（NCPRA，「禁外購令」）</strong>：2023年1月1日生效，2024年2月延至<strong>2026年12月31日</strong>（魁省延至2027年）。禁止非加拿大人購買住宅，除有限豁免（3年居留工作許可持有者、國際學生、難民）。豁免嚴格執行。影響：萬錦/列治文山外資需求下降約70%。</p>
+      <p><strong>(2) 非居民投機稅（NRST）</strong>：安大略全省對外籍人士購買住宅徵25%稅（2022年3月從15%提高、2023年3月全省適用）。工作許可持有者若許可2年內到期有時也須繳納。<strong>(3) 按揭壓力測試（B-20）</strong>：借款人須以<strong>合約利率+200bp或5.25%</strong>（取高者）資格審核。買家5.0%按揭率，資格為7.0%，借款能力減約20%。<strong>(4) 資本利得</strong>：主要居所豁免完全保護自住者。對投資者，2024年聯邦預算將<strong>資本利得計入率從50%提高至66.67%（利得超C$25萬部分）</strong>——重大影響投資者退出經濟學。非居民賣家面臨總收益25%預扣稅，除非取得清算證明（T2062）。</p>
+    </div>
+
+    <table class="data-table">
+      <thead><tr>
+        <th><span class="lang-en">Policy</span><span class="lang-zh" style="display:none">政策</span></th>
+        <th><span class="lang-en">Rate / Trigger</span><span class="lang-zh" style="display:none">費率/條件</span></th>
+        <th><span class="lang-en">Sunset / Next Review</span><span class="lang-zh" style="display:none">到期/審查</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td><span class="lang-en">Foreign Buyer Ban (NCPRA)</span><span class="lang-zh" style="display:none">禁外購令</span></td><td>100% prohibition</td><td>31 Dec 2026</td></tr>
+        <tr><td>NRST</td><td class="td-num">25%</td><td><span class="lang-en">No sunset · Periodic review</span><span class="lang-zh" style="display:none">無到期 · 定期審查</span></td></tr>
+        <tr><td><span class="lang-en">Stress test B-20</span><span class="lang-zh" style="display:none">壓力測試B-20</span></td><td>+200bp or 5.25%</td><td><span class="lang-en">Ongoing</span><span class="lang-zh" style="display:none">持續</span></td></tr>
+        <tr><td><span class="lang-en">Capital gains inclusion</span><span class="lang-zh" style="display:none">資本利得計入</span></td><td>66.67% (&gt;C$250K)</td><td>Jun 25 2024</td></tr>
+        <tr><td>Non-resident withholding</td><td class="td-num">25%</td><td>Unless T2062</td></tr>
+        <tr><td><span class="lang-en">Land Transfer Tax (Toronto)</span><span class="lang-zh" style="display:none">土地過戶稅（多倫多）</span></td><td>0.5–7.5% tiered</td><td>Municipal + Provincial</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK &amp; SCENARIOS</span><span class="lang-zh" style="display:none">展望與情景</span></h2>
+    <div class="lang-en">
+      <p><strong>Base case (+2–4%/yr, probability 50%):</strong> BOC rate drifts to 2.75% by YE 2026. Condo completion wave peaks Q3 2026 but absorbs without further price declines. Detached/semi-detached market leads recovery. GTA average reaches <strong>C$1.14M by 2028</strong>. Markham/Richmond Hill remain under-performers until foreign buyer ban expires (Jan 2027). <strong>Bull case (+6–10%/yr, probability 25%):</strong> BOC cuts aggressively to 2.25%. Immigration targets restored to 500K. Foreign buyer ban not renewed in 2027. Condo oversupply absorbed by mid-2026. GTA average hits <strong>C$1.22M by 2028</strong>. Markham sees 15%+ rebound.</p>
+      <p><strong>Bear case (-3 to +1%/yr, probability 25%):</strong> BOC holds or hikes due to persistent inflation. Condo completion wave 2026 overwhelms absorption, triggering 8&ndash;12% further condo price declines. Immigration cuts deepen. Detached stable, condos down, GTA weighted average declines to <strong>C$1.00M by 2028</strong>. Key monitoring signals: (i) BOC rate decisions (8 per year), (ii) Urbanation monthly condo completion data, (iii) Teranet-NB composite price index, (iv) CMHC housing starts and completions by intention, (v) federal immigration targets (announced annually Oct/Nov), (vi) 90-day mortgage delinquency rate.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p><strong>基準情景（年+2-4%，概率50%）：</strong>BOC利率至2026年底漂向2.75%。公寓竣工浪潮2026年Q3達峰但吸收無進一步價格下跌。獨棟/半獨棟市場領復甦。GTA均價2028年達<strong>C$114萬</strong>。萬錦/列治文山在禁外購令到期（2027年1月）前仍表現不佳。<strong>牛市情景（年+6-10%，概率25%）：</strong>BOC激進降至2.25%。移民目標恢復至50萬。禁外購令2027年不延。公寓超供至2026年中吸收。GTA均價2028年達<strong>C$122萬</strong>。萬錦反彈15%+。</p>
+      <p><strong>熊市情景（年-3至+1%，概率25%）：</strong>BOC因持續通脹維持或加息。公寓2026年竣工浪潮壓倒吸收，觸發8-12%進一步公寓價格下跌。移民削減加深。獨棟穩定、公寓下跌，GTA加權均價2028年跌至<strong>C$100萬</strong>。關鍵監測訊號：(i) BOC利率決議（每年8次）；(ii) Urbanation月度公寓竣工數據；(iii) Teranet-NB綜合房價指數；(iv) CMHC按意圖住房開工與竣工；(v) 聯邦移民目標（每年10/11月公告）；(vi) 90日按揭逾期率。</p>
+    </div>
+
+    <div class="chart-inline"><h4><span class="lang-en">GTA Average Price Forecast 2025–2028 (C$K)</span><span class="lang-zh" style="display:none">GTA均價預測 2025-2028（C$K）</span></h4><div id="chartTORForecast" style="height:260px"></div><p class="chart-note navy"><span class="lang-en">Base C$1,140K · Bull C$1,220K (rate cuts + immigration) · Bear C$1,000K (completion glut)</span><span class="lang-zh" style="display:none">基準C$114萬 · 牛市C$122萬（降息+移民）· 熊市C$100萬（竣工超供）</span></p></div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: CREA 2025 · TRREB Market Watch · CMHC Housing Market Assessment · Bank of Canada · Statistics Canada · Urbanation · Teranet-National Bank HPI · Government of Ontario (Finance). All data as of March–April 2026.</span><span class="lang-zh" style="display:none">數據來源：CREA 2025 · TRREB市場觀察 · CMHC住房市場評估 · 加拿大央行 · 加拿大統計局 · Urbanation · Teranet國家銀行HPI · 安大略省政府（財政）。所有數據截至2026年3-4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawTORCycle(lang);drawTORCondoDetached(lang);drawTORAreas(lang);drawTORForecast(lang);}
+
+function drawTORCycle(lang){var dom=document.getElementById('chartTORCycle');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];
+  var hpi=[100,110,140,145,128,122,124];
+  var boc=[1.75,0.25,0.25,4.25,5.00,4.50,3.25];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:[mkAxis({type:'value',min:90,max:155,axisLabel:{color:C.muted,fontSize:9}}),mkAxis({type:'value',min:0,max:6,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'HPI (2019=100)':'HPI（2019=100）',type:'line',data:hpi,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,yAxisIndex:0,areaStyle:{color:'rgba(30,58,95,0.08)'}},{name:en?'BOC Rate':'BOC利率',type:'line',data:boc,lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5,yAxisIndex:1}]});}
+
+function drawTORAreas(lang){var dom=document.getElementById('chartTORAreas');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var areas=en?['Mississauga','Scarborough','Downtown','North York','Markham','Midtown','Yorkville','Forest Hill']:['密西沙加','士嘉堡','市中心','北約克','萬錦','中城','約克維爾','森林山'];
+  var values=[780,820,850,950,1150,1200,2500,2800];
+  var colors=[C.green,C.blue,C.blue,C.blue,C.orange,C.navy,C.red,C.red];
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},grid:{left:12,right:60,top:8,bottom:8,containLabel:true},yAxis:mkAxis({type:'category',data:areas,axisLabel:{color:C.muted,fontSize:9}}),xAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return'C$'+v+'K';}}}),
+    series:[{type:'bar',data:values.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:16,itemStyle:{borderRadius:[0,3,3,0]},label:{show:true,position:'right',formatter:function(p){return'C$'+p.value+'K';},fontSize:9,color:C.muted}}]});}
+
+function drawTORCondoDetached(lang){var dom=document.getElementById('chartTORCondoDetached');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];
+  var condo=[100,105,120,112,108,110,108];var detached=[100,110,140,130,125,128,126];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:90,axisLabel:{color:C.muted,fontSize:9}}),
+    series:[{name:en?'Condo':'公寓',type:'line',data:condo,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5},{name:en?'Detached':'獨棟',type:'line',data:detached,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5}]});}
+
+function drawTORForecast(lang){var dom=document.getElementById('chartTORForecast');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2025','2026E','2027E','2028E'];
+  var bull=[1080,1140,1180,1220];var base=[1080,1100,1120,1140];var bear=[1080,1040,1020,1000];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:950,max:1280,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return'C$'+v+'K';}}}),
+    series:[{name:en?'Bull':'牛市',type:'line',data:bull,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,areaStyle:{color:'rgba(22,163,74,0.08)'}},{name:en?'Base':'基準',type:'line',data:base,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6},{name:en?'Bear':'熊市',type:'line',data:bear,lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:6,areaStyle:{color:'rgba(220,38,38,0.05)'}}]});}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

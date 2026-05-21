@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demand Analysis | U.S. Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer}</style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .chart-note.red{color:#dc2626}
+    .chart-note.navy{color:#1e3a5f}
+    .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+    .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+    .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+    .report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+    .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+    .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+    .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+    .toc-collapsed .toc-list{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+    .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+    /* Side Nav */
+    .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+    @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+    .data-table{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0}
+    .data-table th,.data-table td{padding:8px 12px;text-align:left;border-bottom:1px solid #dde8f2}
+    .data-table th{color:#5a7a9a;font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:.05em;background:#f4f7fc}
+    .data-table td{color:#2c3e50}
+    .data-table .cell-green{color:#16a34a;font-weight:500}
+    .data-table .cell-orange{color:#d97706;font-weight:500}
+    .data-table .cell-red{color:#dc2626;font-weight:500}
+    .data-table .cell-navy{color:#1e3a5f;font-weight:500}
+    .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .table-scroll .data-table{min-width:680px}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="report-container">
+
+  <!-- Side Nav -->
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-migration" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Migration</span><span class="side-nav-label lang-zh" style="display:none">遷徙</span></a>
+    <a href="#sec-employment" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Employment</span><span class="side-nav-label lang-zh" style="display:none">就業</span></a>
+    <a href="#sec-affordability" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Affordability</span><span class="side-nav-label lang-zh" style="display:none">可負擔性</span></a>
+    <a href="#sec-cashbuyers" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Cash Buyers</span><span class="side-nav-label lang-zh" style="display:none">現金買家</span></a>
+    <a href="#sec-comparison" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Comparison</span><span class="side-nav-label lang-zh" style="display:none">比較</span></a>
+  </nav>
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="lang-en">
+      <h1>U.S. REAL ESTATE &mdash; DEMAND ANALYSIS</h1>
+      <div class="report-meta">April 2026 &middot; 12-City Monitor</div>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <h1>美國房地產——需求分析</h1>
+      <div class="report-meta">2026年4月 &middot; 十二城市監測</div>
+    </div>
+  </div>
+
+  <div class="report-body">
+
+    <!-- TOC -->
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()">
+        <span class="lang-en">Contents</span><span class="lang-zh" style="display:none">目錄</span>
+        <button class="toc-toggle" id="tocToggle">&#9650;</button>
+      </div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-migration" onclick="closeTocMobile()"><span class="lang-en">1. Migration Flows</span><span class="lang-zh" style="display:none">1. 遷徙流動</span></a>
+        <a href="#sec-employment" onclick="closeTocMobile()"><span class="lang-en">2. Employment Anchors</span><span class="lang-zh" style="display:none">2. 就業錨定</span></a>
+        <a href="#sec-affordability" onclick="closeTocMobile()"><span class="lang-en">3. Affordability</span><span class="lang-zh" style="display:none">3. 可負擔性</span></a>
+        <a href="#sec-cashbuyers" onclick="closeTocMobile()"><span class="lang-en">4. Cash Buyers</span><span class="lang-zh" style="display:none">4. 現金買家</span></a>
+        <a href="#sec-comparison" onclick="closeTocMobile()"><span class="lang-en">5. 12-City Demand Comparison</span><span class="lang-zh" style="display:none">5. 十二城市需求比較</span></a>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 1. MIGRATION FLOWS -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-migration"><span class="lang-en">MIGRATION FLOWS</span><span class="lang-zh" style="display:none">遷徙流動</span></h2>
+
+    <div class="lang-en">
+      <p>The pandemic-era migration boom that reshaped American housing demand has largely exhausted itself. Florida, which absorbed a net <strong>+85,000</strong> domestic migrants in 2022, saw inflows collapse to just <strong>+6,000</strong> in 2025 as insurance costs, property taxes, and climate risk repriced the Sunbelt value proposition. Austin, the poster child of tech-driven migration, plateaued at <strong>+15,000</strong> net domestic arrivals versus its 2022 peak of <strong>+52,000</strong>. Meanwhile, the traditional outflow cities &mdash; New York, San Francisco, and Los Angeles &mdash; have seen their net losses decelerate sharply: NYC's net outflow narrowed from <strong>-45,000</strong> to <strong>-20,000</strong>, and San Francisco has nearly reached equilibrium at <strong>-5,000</strong>.</p>
+      <p>The implication for housing demand is a normalization of geographic pressure. The Sunbelt markets that benefited from migration-driven price spikes now face a demand vacuum just as their supply pipelines deliver peak completions. Coastal gateway cities, by contrast, are experiencing a modest demand recovery as return-to-office mandates and urban amenity preferences pull population back.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>疫情時期重塑美國住房需求的遷徙潮已基本耗盡。佛羅里達州在2022年吸收了<strong>+85,000</strong>的國內淨遷入人口，但到2025年隨著保險成本、房產稅及氣候風險重新定價陽光帶的價值主張，流入量驟降至僅<strong>+6,000</strong>。奧斯丁這一科技驅動遷徙的典型城市，從2022年高峰的<strong>+52,000</strong>降至<strong>+15,000</strong>的淨流入。與此同時，傳統外流城市——紐約、舊金山和洛杉磯——的淨流失大幅減緩：紐約的淨流出從<strong>-45,000</strong>收窄至<strong>-20,000</strong>，舊金山接近平衡僅為<strong>-5,000</strong>。</p>
+      <p>對住房需求的含義是地理壓力的正常化。曾受遷徙驅動價格飆升的陽光帶市場，如今在在建供給交付高峰之際面臨需求真空。相比之下，沿海門戶城市正經歷溫和的需求復甦，因為回辦公室政策和城市生活偏好將人口拉回。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Net Domestic Migration: 2022 Peak vs 2025 (Thousands)</span><span class="lang-zh" style="display:none">國內淨遷徙：2022年高峰 vs 2025年（千人）</span></h4>
+      <div id="chartDemandMig" style="height:300px"></div>
+      <p class="chart-note orange"><span class="lang-en">Sunbelt inflows have collapsed; coastal outflows are decelerating sharply</span><span class="lang-zh" style="display:none">陽光帶流入已崩潰；沿海地區外流大幅減緩</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 2. EMPLOYMENT ANCHORS -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-employment"><span class="lang-en">EMPLOYMENT ANCHORS</span><span class="lang-zh" style="display:none">就業錨定</span></h2>
+
+    <div class="lang-en">
+      <p>Housing demand durability correlates strongly with the diversification of the local employment base. Cities anchored by a single industry &mdash; notably San Francisco's extreme tech dependence &mdash; are vulnerable to cyclical demand swings. By contrast, markets like San Diego and Boston benefit from multi-sector employment across defense, biotech, healthcare, and technology, creating a more resilient demand floor. New York's dominance in finance provides a stable but highly compensated demand base that supports premium price levels even during periods of broader market stress.</p>
+      <p>The radar chart below maps five major employment sectors across five key cities. Markets with broader radar profiles tend to exhibit more stable housing demand through economic cycles, while those with narrow concentration face sharper boom-bust dynamics in residential property.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>住房需求的持久性與當地就業基礎的多元化程度高度相關。依賴單一產業的城市——尤其是舊金山對科技業的極度依賴——容易受到週期性需求波動的衝擊。相比之下，聖地牙哥和波士頓受益於國防、生物科技、醫療保健和科技等多行業就業，形成了更具韌性的需求底部。紐約在金融領域的主導地位提供了穩定且高薪的需求基礎，即使在更廣泛的市場壓力期間也能支撐溢價水平。</p>
+      <p>下方雷達圖繪製了五個主要就業部門在五個重點城市的分布。雷達輪廓較寬的市場往往在經濟週期中展現更穩定的住房需求，而集中度較高的城市則面臨更劇烈的房地產繁榮-衰退動態。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Employment Sector Diversification — 5 Cities</span><span class="lang-zh" style="display:none">就業行業多元化——五大城市</span></h4>
+      <div id="chartDemandEmp" style="height:320px"></div>
+      <p class="chart-note navy"><span class="lang-en">SD and Boston show broadest profiles; SF is heavily tech-concentrated</span><span class="lang-zh" style="display:none">聖地牙哥和波士頓輪廓最寬；舊金山高度集中於科技業</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 3. AFFORDABILITY -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-affordability"><span class="lang-en">AFFORDABILITY</span><span class="lang-zh" style="display:none">可負擔性</span></h2>
+
+    <div class="lang-en">
+      <p>The price-to-income (PTI) ratio remains the single most important demand constraint across U.S. markets. At a national level, the median home now costs approximately <strong>6.0&times;</strong> median household income, versus the long-run historical average of <strong>3.5&ndash;4.0&times;</strong>. But the city-level variation is extreme: Austin at <strong>3.5&times;</strong> has corrected back toward historical norms following its supply surge, while Silicon Valley at <strong>19.5&times;</strong> occupies a different economic universe entirely, sustained only by the extraordinary compensation packages of the tech sector.</p>
+      <p>Markets above the <strong>12&times;</strong> threshold &mdash; San Francisco, Silicon Valley, and increasingly New York &mdash; function as cash-buyer and high-income markets where mortgage affordability is largely irrelevant. Markets below <strong>6&times;</strong> retain genuine first-time buyer accessibility. The intermediate zone (6&ndash;12&times;) is where mortgage rate sensitivity is highest: these markets saw the sharpest volume declines when rates rose and will see the fastest recovery when rates eventually fall.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>房價收入比（PTI）仍然是美國各市場最重要的需求約束。全國層面，中位數房屋價格約為中位數家庭收入的<strong>6.0倍</strong>，而長期歷史平均為<strong>3.5至4.0倍</strong>。但城市層級的差異極為懸殊：奧斯丁在供給激增後已回調至<strong>3.5倍</strong>接近歷史常態，而矽谷以<strong>19.5倍</strong>完全處於另一個經濟維度，僅靠科技業的超額薪酬維持。</p>
+      <p>超過<strong>12倍</strong>門檻的市場——舊金山、矽谷及日益接近的紐約——實質上已成為現金買家和高收入市場，按揭可負擔性基本無關緊要。低於<strong>6倍</strong>的市場仍保有真正的首次購房者可及性。中間地帶（6至12倍）是按揭利率敏感度最高的區域：這些市場在利率上升時成交量下滑最劇烈，利率最終下降時恢復也最快。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Price-to-Income Ratio — 12 Cities</span><span class="lang-zh" style="display:none">房價收入比——十二城市</span></h4>
+      <div id="chartDemandAfford" style="height:340px"></div>
+      <p class="chart-note red"><span class="lang-en">SF and SV exceed 18&times; — effectively cash-only markets for median buyers</span><span class="lang-zh" style="display:none">舊金山和矽谷超過18倍——對中位數買家而言實質上是純現金市場</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 4. CASH BUYERS -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-cashbuyers"><span class="lang-en">CASH BUYERS</span><span class="lang-zh" style="display:none">現金買家</span></h2>
+
+    <div class="lang-en">
+      <p>The high-rate environment has turbocharged cash buyers' competitive advantage. Nationally, all-cash transactions now represent <strong>28%</strong> of home purchases, up from a pre-pandemic norm of 20&ndash;22%. In luxury segments and select coastal markets, cash dominance is far more extreme: <strong>68%</strong> of sales in San Diego's coastal submarkets and San Francisco's luxury tier close without mortgage financing. New York City's co-op and condo market sees <strong>63%</strong> cash transactions, driven by both domestic wealth and international capital flows.</p>
+      <p>This cash buyer concentration creates a two-tier demand structure: price-insensitive buyers sustain valuations at the top while rate-sensitive first-time and move-up buyers are effectively locked out. The structural consequence is that price corrections in these markets require either a wealth shock (equity market crash) or a policy intervention (mansion tax, foreign buyer restrictions), not simply higher mortgage rates.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>高利率環境極大增強了現金買家的競爭優勢。全國範圍內，全現金交易目前佔購房量的<strong>28%</strong>，高於疫情前20至22%的常態。在豪宅市場和部分沿海市場，現金主導程度更為極端：聖地牙哥沿海區域和舊金山豪宅市場有<strong>68%</strong>的成交不使用按揭融資。紐約市合作公寓及共管公寓市場<strong>63%</strong>為現金交易，受國內財富和國際資本流動共同驅動。</p>
+      <p>現金買家的集中造就了雙層需求結構：價格不敏感的買家在頂部維持估值水平，而利率敏感的首次購房者和改善型買家則被有效鎖定在外。結構性後果是，這些市場的價格修正需要財富衝擊（股市崩盤）或政策干預（豪宅稅、外國買家限制），而非僅僅是更高的按揭利率。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Cash Buyer Share by Market Segment (%)</span><span class="lang-zh" style="display:none">各市場現金買家佔比 (%)</span></h4>
+      <div id="chartDemandCash" style="height:280px"></div>
+      <p class="chart-note red"><span class="lang-en">Luxury coastal markets: 60-68% cash — mortgage rates are irrelevant to price discovery</span><span class="lang-zh" style="display:none">沿海豪宅市場：60-68%現金——按揭利率對價格發現已無影響</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 5. 12-CITY COMPARISON TABLE -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-comparison"><span class="lang-en">12-CITY DEMAND COMPARISON</span><span class="lang-zh" style="display:none">十二城市需求比較</span></h2>
+
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">City</span><span class="lang-zh" style="display:none">城市</span></th>
+            <th><span class="lang-en">PTI Ratio</span><span class="lang-zh" style="display:none">房價收入比</span></th>
+            <th><span class="lang-en">Migration Trend</span><span class="lang-zh" style="display:none">遷徙趨勢</span></th>
+            <th><span class="lang-en">Cash Buyer %</span><span class="lang-zh" style="display:none">現金買家%</span></th>
+            <th><span class="lang-en">Employment Diversity</span><span class="lang-zh" style="display:none">就業多元化</span></th>
+            <th><span class="lang-en">Demand Outlook</span><span class="lang-zh" style="display:none">需求展望</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>New York</td>
+            <td class="cell-red">14.75&times;</td>
+            <td class="cell-green"><span class="lang-en">Outflow narrowing</span><span class="lang-zh" style="display:none">外流收窄</span></td>
+            <td>63%</td>
+            <td><span class="lang-en">High (Finance)</span><span class="lang-zh" style="display:none">高（金融）</span></td>
+            <td class="cell-green"><span class="lang-en">Stable</span><span class="lang-zh" style="display:none">穩定</span></td>
+          </tr>
+          <tr>
+            <td>Los Angeles</td>
+            <td class="cell-red">12.0&times;</td>
+            <td class="cell-green"><span class="lang-en">Outflow decelerating</span><span class="lang-zh" style="display:none">外流減緩</span></td>
+            <td>35%</td>
+            <td><span class="lang-en">Moderate</span><span class="lang-zh" style="display:none">中等</span></td>
+            <td class="cell-orange"><span class="lang-en">Neutral</span><span class="lang-zh" style="display:none">中性</span></td>
+          </tr>
+          <tr>
+            <td>San Francisco</td>
+            <td class="cell-red">18.0&times;</td>
+            <td class="cell-green"><span class="lang-en">Near equilibrium</span><span class="lang-zh" style="display:none">接近平衡</span></td>
+            <td>68%</td>
+            <td><span class="lang-en">Low (Tech)</span><span class="lang-zh" style="display:none">低（科技）</span></td>
+            <td class="cell-orange"><span class="lang-en">Volatile</span><span class="lang-zh" style="display:none">波動</span></td>
+          </tr>
+          <tr>
+            <td>Silicon Valley</td>
+            <td class="cell-red">19.5&times;</td>
+            <td class="cell-orange"><span class="lang-en">Near equilibrium</span><span class="lang-zh" style="display:none">接近平衡</span></td>
+            <td>35%</td>
+            <td><span class="lang-en">Low (Tech)</span><span class="lang-zh" style="display:none">低（科技）</span></td>
+            <td class="cell-orange"><span class="lang-en">Volatile</span><span class="lang-zh" style="display:none">波動</span></td>
+          </tr>
+          <tr>
+            <td>San Diego</td>
+            <td class="cell-orange">11.5&times;</td>
+            <td class="cell-orange"><span class="lang-en">Inflow slowing</span><span class="lang-zh" style="display:none">流入放緩</span></td>
+            <td>68%</td>
+            <td><span class="lang-en">High (Diversified)</span><span class="lang-zh" style="display:none">高（多元化）</span></td>
+            <td class="cell-green"><span class="lang-en">Stable</span><span class="lang-zh" style="display:none">穩定</span></td>
+          </tr>
+          <tr>
+            <td>Miami</td>
+            <td class="cell-orange">7.0&times;</td>
+            <td class="cell-red"><span class="lang-en">Inflow collapsed</span><span class="lang-zh" style="display:none">流入崩潰</span></td>
+            <td>42%</td>
+            <td><span class="lang-en">Moderate</span><span class="lang-zh" style="display:none">中等</span></td>
+            <td class="cell-red"><span class="lang-en">Weakening</span><span class="lang-zh" style="display:none">走弱</span></td>
+          </tr>
+          <tr>
+            <td>Austin</td>
+            <td class="cell-green">3.5&times;</td>
+            <td class="cell-orange"><span class="lang-en">Plateaued</span><span class="lang-zh" style="display:none">趨平</span></td>
+            <td>25%</td>
+            <td><span class="lang-en">Moderate (Tech)</span><span class="lang-zh" style="display:none">中等（科技）</span></td>
+            <td class="cell-orange"><span class="lang-en">Recovering</span><span class="lang-zh" style="display:none">復甦中</span></td>
+          </tr>
+          <tr>
+            <td>Seattle</td>
+            <td class="cell-orange">10.5&times;</td>
+            <td class="cell-orange"><span class="lang-en">Outflow narrowing</span><span class="lang-zh" style="display:none">外流收窄</span></td>
+            <td>30%</td>
+            <td><span class="lang-en">Moderate (Tech)</span><span class="lang-zh" style="display:none">中等（科技）</span></td>
+            <td class="cell-orange"><span class="lang-en">Neutral</span><span class="lang-zh" style="display:none">中性</span></td>
+          </tr>
+          <tr>
+            <td>Chicago</td>
+            <td class="cell-green">4.5&times;</td>
+            <td class="cell-orange"><span class="lang-en">Outflow narrowing</span><span class="lang-zh" style="display:none">外流收窄</span></td>
+            <td>32%</td>
+            <td><span class="lang-en">High (Diversified)</span><span class="lang-zh" style="display:none">高（多元化）</span></td>
+            <td class="cell-green"><span class="lang-en">Stable</span><span class="lang-zh" style="display:none">穩定</span></td>
+          </tr>
+          <tr>
+            <td>Boston</td>
+            <td class="cell-orange">10.0&times;</td>
+            <td class="cell-orange"><span class="lang-en">Slight outflow</span><span class="lang-zh" style="display:none">輕微外流</span></td>
+            <td>30%</td>
+            <td><span class="lang-en">High (Biotech/Edu)</span><span class="lang-zh" style="display:none">高（生技/教育）</span></td>
+            <td class="cell-green"><span class="lang-en">Stable</span><span class="lang-zh" style="display:none">穩定</span></td>
+          </tr>
+          <tr>
+            <td>Phoenix</td>
+            <td class="cell-green">5.2&times;</td>
+            <td class="cell-orange"><span class="lang-en">Inflow normalizing</span><span class="lang-zh" style="display:none">流入正常化</span></td>
+            <td>28%</td>
+            <td><span class="lang-en">Moderate</span><span class="lang-zh" style="display:none">中等</span></td>
+            <td class="cell-orange"><span class="lang-en">Recovering</span><span class="lang-zh" style="display:none">復甦中</span></td>
+          </tr>
+          <tr>
+            <td>Denver</td>
+            <td class="cell-orange">6.8&times;</td>
+            <td class="cell-orange"><span class="lang-en">Inflow normalizing</span><span class="lang-zh" style="display:none">流入正常化</span></td>
+            <td>27%</td>
+            <td><span class="lang-en">Moderate</span><span class="lang-zh" style="display:none">中等</span></td>
+            <td class="cell-orange"><span class="lang-en">Neutral</span><span class="lang-zh" style="display:none">中性</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="report-footer">
+      <p><span class="lang-en">Data Sources: U.S. Census Bureau, Bureau of Labor Statistics, NAR, Redfin, Freddie Mac, FRED, CoreLogic</span><span class="lang-zh" style="display:none">數據來源：美國人口普查局、勞工統計局、NAR、Redfin、Freddie Mac、FRED、CoreLogic</span></p>
+      <p><span class="lang-en">Last updated: April 2026 &middot; Property Monitor Research</span><span class="lang-zh" style="display:none">最後更新：2026年4月 &middot; Property Monitor Research</span></p>
+    </div>
+
+  </div><!-- /report-body -->
+</div><!-- /report-container -->
+
+<script>
+  // ── Color System ──
+  var C = {
+    navy:   '#1e3a5f',
+    green:  '#16a34a',
+    orange: '#d97706',
+    red:    '#dc2626',
+    blue:   '#2563eb',
+    muted:  '#5a7a9a',
+    grid:   '#e8f0f9',
+    text:   '#1e3a5f'
+  };
+  var baseText    = {color:C.muted, fontFamily:'Inter, sans-serif', fontSize:11};
+  var baseGrid    = {left:50, right:20, top:40, bottom:30, containLabel:true};
+  var baseTooltip = {trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy, fontSize:11, fontFamily:'Inter'}};
+  var baseLegend  = {top:8, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+  var allCharts = [];
+
+  // ── 1. Migration Flows ──
+  function drawDemandMig(lang) {
+    var dom = document.getElementById('chartDemandMig');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var cities = ['NYC','LA','SF','SV','SD','Miami','Austin','Seattle','Chicago','Boston','Phoenix','Denver'];
+    var d2022 = [-45,-80,-25,-12,18,85,52,-8,-25,-5,65,28];
+    var d2025 = [-20,-35,-5,-2,8,6,15,-5,-10,-3,22,10];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11} },
+      legend: { bottom:0, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8 },
+      grid: { left:12, right:12, top:24, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:cities, axisLabel:{color:C.muted,fontSize:9,rotate:30} }),
+      yAxis: mkAxis({ type:'value', axisLabel:{color:C.muted,fontSize:10,formatter:'{value}K'} }),
+      series: [
+        {
+          name: en ? '2022 Peak' : '2022高峰',
+          type: 'bar',
+          data: d2022.map(function(v){ return { value:v, itemStyle:{color: v>=0 ? 'rgba(22,163,74,0.4)' : 'rgba(220,38,38,0.4)'} }; }),
+          barMaxWidth: 18,
+          barGap: '20%',
+          itemStyle: { borderRadius:[3,3,0,0] }
+        },
+        {
+          name: en ? '2025 Current' : '2025現況',
+          type: 'bar',
+          data: d2025.map(function(v){ return { value:v, itemStyle:{color: v>=0 ? C.green : C.red} }; }),
+          barMaxWidth: 18,
+          itemStyle: { borderRadius:[3,3,0,0] }
+        }
+      ]
+    });
+  }
+
+  // ── 2. Employment Radar ──
+  function drawDemandEmp(lang) {
+    var dom = document.getElementById('chartDemandEmp');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var indicators = [
+      { name: en?'Tech':'科技', max:45 },
+      { name: en?'Defense/Aero':'國防/航太', max:30 },
+      { name: en?'Finance':'金融', max:50 },
+      { name: en?'Biotech':'生物科技', max:35 },
+      { name: en?'Healthcare':'醫療', max:30 }
+    ];
+    c.setOption({
+      tooltip: {},
+      legend: { bottom:0, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8 },
+      radar: {
+        indicator: indicators,
+        radius: '58%',
+        center: ['50%','48%'],
+        axisName: { color:C.muted, fontSize:10, fontFamily:'Inter, sans-serif' },
+        splitArea: { areaStyle:{ color:['#fff','#f4f7fc','#fff','#f4f7fc'] } },
+        splitLine: { lineStyle:{ color:C.grid } },
+        axisLine: { lineStyle:{ color:C.grid } }
+      },
+      series: [{
+        type: 'radar',
+        data: [
+          { value:[35,5,15,20,10], name:'SF', lineStyle:{color:C.red,width:2}, itemStyle:{color:C.red}, areaStyle:{color:'rgba(220,38,38,0.08)'} },
+          { value:[18,25,8,22,18], name:'SD', lineStyle:{color:C.blue,width:2}, itemStyle:{color:C.blue}, areaStyle:{color:'rgba(37,99,235,0.08)'} },
+          { value:[12,5,42,5,18], name:'NYC', lineStyle:{color:C.navy,width:2}, itemStyle:{color:C.navy}, areaStyle:{color:'rgba(30,58,95,0.08)'} },
+          { value:[20,8,15,28,22], name:'Boston', lineStyle:{color:C.green,width:2}, itemStyle:{color:C.green}, areaStyle:{color:'rgba(22,163,74,0.08)'} },
+          { value:[25,10,10,5,12], name:'Austin', lineStyle:{color:C.orange,width:2}, itemStyle:{color:C.orange}, areaStyle:{color:'rgba(217,119,6,0.08)'} }
+        ]
+      }]
+    });
+  }
+
+  // ── 3. Affordability (PTI Ratio) ──
+  function drawDemandAfford(lang) {
+    var dom = document.getElementById('chartDemandAfford');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    // Sorted low → high
+    var cities = ['Austin','Chicago','Phoenix','Denver','Miami','Boston','Seattle','SD','LA','NYC','SF','SV'];
+    var values = [3.5,4.5,5.2,6.8,7.0,10.0,10.5,11.5,12.0,14.75,18.0,19.5];
+    var colors = values.map(function(v){
+      if(v<=5) return C.green;
+      if(v<=8) return C.navy;
+      if(v<=12) return C.orange;
+      return C.red;
+    });
+    c.setOption({
+      tooltip: { trigger:'axis', axisPointer:{type:'shadow'}, backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11}, formatter:function(p){ return p[0].name+': '+p[0].value+'\u00d7'; } },
+      grid: { left:12, right:60, top:16, bottom:12, containLabel:true },
+      xAxis: mkAxis({ type:'value', axisLabel:{color:C.muted,fontSize:10,formatter:'{value}\u00d7'} }),
+      yAxis: mkAxis({ type:'category', data:cities, axisLabel:{color:C.muted,fontSize:10} }),
+      series: [{
+        type: 'bar',
+        data: values.map(function(v,i){ return { value:v, itemStyle:{color:colors[i]} }; }),
+        barMaxWidth: 20,
+        itemStyle: { borderRadius:[0,3,3,0] },
+        label: { show:true, position:'right', formatter:'{c}\u00d7', fontSize:10, color:C.muted, fontFamily:'JetBrains Mono, monospace' },
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          data: [{ xAxis:6.0, lineStyle:{color:C.green,type:'dashed',width:1.5}, label:{formatter:en?'Affordable threshold':'可負擔門檻',fontSize:9,color:C.green,position:'end'} }]
+        }
+      }]
+    });
+  }
+
+  // ── 4. Cash Buyers ──
+  function drawDemandCash(lang) {
+    var dom = document.getElementById('chartDemandCash');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var labels = en
+      ? ['National avg','LA overall','SV $2M+','Miami overall','Miami luxury','NYC','SF luxury','SD coastal']
+      : ['全國平均','洛杉磯整體','矽谷$2M+','邁阿密整體','邁阿密豪宅','紐約','舊金山豪宅','聖地牙哥沿海'];
+    var values = [28,35,35,42,60,63,68,68];
+    var colors = values.map(function(v){
+      if(v>=60) return C.red;
+      if(v>=40) return C.orange;
+      if(v>=30) return C.navy;
+      return C.green;
+    });
+    c.setOption({
+      tooltip: { trigger:'axis', axisPointer:{type:'shadow'}, backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11}, formatter:function(p){ return p[0].name+': '+p[0].value+'%'; } },
+      grid: { left:12, right:50, top:16, bottom:12, containLabel:true },
+      xAxis: mkAxis({ type:'value', max:80, axisLabel:{color:C.muted,fontSize:10,formatter:'{value}%'} }),
+      yAxis: mkAxis({ type:'category', data:labels, axisLabel:{color:C.muted,fontSize:10} }),
+      series: [{
+        type: 'bar',
+        data: values.map(function(v,i){ return { value:v, itemStyle:{color:colors[i]} }; }),
+        barMaxWidth: 20,
+        itemStyle: { borderRadius:[0,3,3,0] },
+        label: { show:true, position:'right', formatter:'{c}%', fontSize:10, color:C.muted, fontFamily:'JetBrains Mono, monospace' }
+      }]
+    });
+  }
+
+  // ── Init All Charts ──
+  function initAllCharts(lang) {
+    allCharts.forEach(function(c){ if(c) c.dispose(); });
+    allCharts = [];
+    drawDemandMig(lang);
+    drawDemandEmp(lang);
+    drawDemandAfford(lang);
+    drawDemandCash(lang);
+  }
+
+  // ── Language ──
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+    initAllCharts(lang);
+  }
+
+  // ── Dropdowns & TOC ──
+  function toggleMarketMenu(){ document.getElementById('marketDropdown').classList.toggle('open'); }
+  function toggleCityMenu(){ document.getElementById('cityDropdown').classList.toggle('open'); }
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.market-selector')){ var d=document.getElementById('marketDropdown'); if(d) d.classList.remove('open'); }
+    if(!e.target.closest('.city-dropdown')){ var d2=document.getElementById('cityDropdown'); if(d2) d2.classList.remove('open'); }
+  });
+  function toggleToc(){ document.getElementById('tocBox').classList.toggle('toc-collapsed'); }
+  function closeTocMobile(){ if(window.innerWidth<=768){ document.getElementById('tocBox').classList.add('toc-collapsed'); } }
+
+  // ── Load & Resize ──
+  window.addEventListener('load', function(){
+    var lang = localStorage.getItem('lang') || 'en';
+    setLang(lang);
+  });
+  window.addEventListener('resize', function(){
+    allCharts.forEach(function(c){ if(c) c.resize(); });
+  });
+
+  // ── ScrollSpy ──
+  (function(){
+    function initScrollSpy(){
+      var items = document.querySelectorAll('.side-nav-item');
+      if(!items.length) return;
+      var sections = [];
+      items.forEach(function(a){
+        var id = a.getAttribute('href').replace('#','');
+        var el = document.getElementById(id);
+        if(el) sections.push({el:el, a:a});
+      });
+      function onScroll(){
+        var scrollY = window.scrollY + window.innerHeight * 0.25;
+        var current = sections[0];
+        sections.forEach(function(s){ if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s; });
+        items.forEach(function(a){ a.classList.remove('active'); });
+        if(current) current.a.classList.add('active');
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    }
+    if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', initScrollSpy); }
+    else { initScrollSpy(); }
+  })();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

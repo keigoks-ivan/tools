@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Supply Analysis | Japan Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="dashboard">
+  <h1 class="page-title"><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="lang-en">2025 Housing Starts</span><span class="lang-zh" style="display:none">2025年新建開工數</span></div>
+      <div class="kpi-value">~760K <span class="kpi-unit">units</span></div>
+      <div class="kpi-delta negative">-4.6% YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="lang-en">Akiya Rate</span><span class="lang-zh" style="display:none">空屋率</span></div>
+      <div class="kpi-value" style="color:#dc2626">13.8%</div>
+      <div class="kpi-delta negative">2023 Census</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="lang-en">Vacant Homes</span><span class="lang-zh" style="display:none">空屋數</span></div>
+      <div class="kpi-value" style="color:#dc2626"><span class="lang-en">9M+</span><span class="lang-zh" style="display:none">900萬+</span></div>
+      <div class="kpi-delta negative"><span class="lang-en">National</span><span class="lang-zh" style="display:none">全國</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="lang-en">New Condo Supply</span><span class="lang-zh" style="display:none">新建公寓供給</span></div>
+      <div class="kpi-value" style="color:#d97706;font-size:20px"><span class="lang-en">Shrinking</span><span class="lang-zh" style="display:none">持續減少</span></div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Major cities</span><span class="lang-zh" style="display:none">主要城市</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="lang-en">Construction Costs</span><span class="lang-zh" style="display:none">建設成本</span></div>
+      <div class="kpi-value" style="color:#d97706">+25-29%</div>
+      <div class="kpi-delta" style="color:#d97706">vs 2021</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="lang-en">Osaka Expo Effect</span><span class="lang-zh" style="display:none">大阪萬博效應</span></div>
+      <div class="kpi-value" style="color:#16a34a;font-size:20px"><span class="lang-en">Demand boost</span><span class="lang-zh" style="display:none">需求提升</span></div>
+      <div class="kpi-delta" style="color:#16a34a">2025</div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card full">
+      <h3><span class="lang-en">Housing Starts Trend</span><span class="lang-zh" style="display:none">新建住宅開工數趨勢</span></h3>
+      <div id="chartJpStarts" style="height:220px"></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Akiya Vacancy Rate</span><span class="lang-zh" style="display:none">空屋率趨勢</span></h3>
+      <div id="chartJpAkiya" style="height:220px"></div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">3-City New Condo Supply</span><span class="lang-zh" style="display:none">三都市新建公寓供給</span></h3>
+      <div id="chartJpCitySupply" style="height:220px"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtJPY(v,lang){lang=lang||localStorage.getItem('lang')||'en';if(lang==='zh'){if(v>=10000)return(v/10000).toFixed(0)+'\u5104\u5186';return v+'\u4e07\u5186';}var a=v*10000;if(a>=100000000)return '\u00a5'+(a/100000000).toFixed(1)+'B';if(a>=1000000)return '\u00a5'+(a/1000000).toFixed(1)+'M';return '\u00a5'+Math.round(a/1000)+'K';}
+function fmtJPYShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh'){if(v>=10000)return(v/10000).toFixed(1)+'\u5104';return v+'\u4e07';}if(a>=100000000)return(a/100000000).toFixed(1)+'B';if(a>=1000000)return(a/1000000).toFixed(0)+'M';return Math.round(a/1000)+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+allCharts.length=0;
+
+/* Chart 1: Housing Starts Trend */
+var c1=echarts.init(document.getElementById('chartJpStarts'));
+c1.setOption({
+  tooltip:baseTooltip,
+  grid:baseGrid,
+  xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025E']}),
+  yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+  series:[{
+    type:'line',smooth:true,
+    data:[905000,812000,865000,860000,820000,800000,760000],
+    lineStyle:{color:C.orange,width:2},
+    itemStyle:{color:C.orange},
+    areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(217,119,6,0.25)'},{offset:1,color:'rgba(217,119,6,0.02)'}])},
+    markPoint:{data:[{type:'min',label:{formatter:function(p){return fmtK(p.value);}},itemStyle:{color:C.orange}}],symbolSize:40}
+  }]
+});
+allCharts.push(c1);
+
+/* Chart 2: Akiya Vacancy Rate */
+var c2=echarts.init(document.getElementById('chartJpAkiya'));
+c2.setOption({
+  tooltip:baseTooltip,
+  grid:baseGrid,
+  xAxis:mkAxis({type:'category',data:['1993','1998','2003','2008','2013','2018','2023']}),
+  yAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'},min:8,max:16}),
+  series:[{
+    type:'line',smooth:true,
+    data:[9.8,11.5,12.2,13.1,13.5,13.6,13.8],
+    lineStyle:{color:C.red,width:2},
+    itemStyle:{color:C.red},
+    markLine:{silent:true,data:[{yAxis:13,label:{formatter:'13%',color:C.muted,fontSize:10},lineStyle:{color:C.red,type:'dashed',width:1}}]}
+  }]
+});
+allCharts.push(c2);
+
+/* Chart 3: 3-City New Condo Supply */
+var c3=echarts.init(document.getElementById('chartJpCitySupply'));
+var cityLabelsEn=['Tokyo','Osaka','Fukuoka'];
+var cityLabelsZh=['\u6771\u4eac','\u5927\u962a','\u798f\u5ca1'];
+var cityLabels=lang==='zh'?cityLabelsZh:cityLabelsEn;
+c3.setOption({
+  tooltip:baseTooltip,
+  legend:Object.assign({},baseLegend,{data:cityLabels}),
+  grid:baseGrid,
+  xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025E']}),
+  yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+  series:[
+    {name:cityLabels[0],type:'line',smooth:true,data:[28000,32000,29000,26000,25000,22000],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy}},
+    {name:cityLabels[1],type:'line',smooth:true,data:[12000,14000,13000,15000,17000,15000],lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange}},
+    {name:cityLabels[2],type:'line',smooth:true,data:[5000,6000,6500,7000,7500,7000],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green}}
+  ]
+});
+allCharts.push(c3);
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

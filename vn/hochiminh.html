@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ho Chi Minh City Deep Dive | Vietnam Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}.report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}.report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}.report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}.report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}.report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}.report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}.report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}.chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}.chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}.chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}.report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}.report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}.toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}.toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}.toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}.toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}.toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}.toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}.report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}.side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}.side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}.side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}.side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}.side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600}.side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  .city-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.city-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:18px 20px;border-left:3px solid #1e3a5f}.city-card h4{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#1e3a5f;margin:0 0 8px}.city-card p{font-family:'Inter',sans-serif;font-size:12px;color:#5a7a9a;line-height:1.6;margin:0}
+  .data-table{width:100%;border-collapse:collapse;margin:16px 0;font-family:'Inter',sans-serif;font-size:12px}.data-table th{background:#f4f7fc;color:#1e3a5f;font-weight:600;text-align:left;padding:10px 12px;border-bottom:1.5px solid #ccd9e8;font-size:11px;text-transform:uppercase;letter-spacing:.03em}.data-table td{padding:10px 12px;border-bottom:1px solid #eef3f9;color:#2c3e50}.data-table tr:last-child td{border-bottom:none}.data-table .td-num{font-family:'JetBrains Mono',monospace;color:#1e3a5f;text-align:right}.data-table .td-pos{color:#16a34a;font-weight:600}.data-table .td-neg{color:#dc2626;font-weight:600}
+  .callout{background:#fff9ed;border-left:3px solid #d97706;border-radius:0 6px 6px 0;padding:14px 18px;margin:20px 0;font-family:'Inter',sans-serif;font-size:13px;line-height:1.75;color:#2c3e50}.callout strong{background:transparent!important;padding:0!important;color:#d97706!important}
+  @media(max-width:1100px){.side-nav{display:none}}@media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.city-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}.data-table{font-size:11px}.data-table th,.data-table td{padding:7px 6px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-districts" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Key Districts</span><span class="side-nav-label lang-zh" style="display:none">重點地區</span></a>
+    <a href="#sec-metro" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Metro Impact</span><span class="side-nav-label lang-zh" style="display:none">地鐵影響</span></a>
+    <a href="#sec-inventory" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Inventory &amp; Legal</span><span class="side-nav-label lang-zh" style="display:none">庫存與法律</span></a>
+    <a href="#sec-rental" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rental Market</span><span class="side-nav-label lang-zh" style="display:none">租賃市場</span></a>
+    <a href="#sec-foreign" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Foreign &amp; Tax</span><span class="side-nav-label lang-zh" style="display:none">外資與稅務</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+  <div class="report-header">
+    <div class="lang-en"><h1>HO CHI MINH CITY &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: Savills Vietnam / CBRE Vietnam / HCMC DPI / SBV / HoREA</div></div>
+    <div class="lang-zh" style="display:none"><h1>胡志明市——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：第一太平戴維斯越南 / 世邦魏理仕越南 / 胡志明市計劃投資廳 / 越南國家銀行 / 胡志明市房地產協會</div></div>
+  </div>
+  <div class="report-body">
+    <div class="toc-box" id="tocBox"><div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend &amp; Segmentation</span><span class="lang-zh" style="display:none">2. 房價走勢與分層</span></a>
+        <a href="#sec-districts" onclick="closeTocMobile()"><span class="lang-en">3. Key Districts Deep Dive</span><span class="lang-zh" style="display:none">3. 重點地區深度分析</span></a>
+        <a href="#sec-metro" onclick="closeTocMobile()"><span class="lang-en">4. Metro Impact &amp; TOD</span><span class="lang-zh" style="display:none">4. 地鐵影響與TOD</span></a>
+        <a href="#sec-inventory" onclick="closeTocMobile()"><span class="lang-en">5. Inventory &amp; Legal Reform</span><span class="lang-zh" style="display:none">5. 庫存與法律改革</span></a>
+        <a href="#sec-rental" onclick="closeTocMobile()"><span class="lang-en">6. Rental Market &amp; Yield</span><span class="lang-zh" style="display:none">6. 租賃市場與收益率</span></a>
+        <a href="#sec-foreign" onclick="closeTocMobile()"><span class="lang-en">7. Foreign Ownership &amp; Tax</span><span class="lang-zh" style="display:none">7. 外資持有與稅務</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">8. Outlook &amp; Scenarios</span><span class="lang-zh" style="display:none">8. 展望與情景分析</span></a>
+      </div></div>
+
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Ho Chi Minh City (HCMC) is Vietnam's commercial capital and largest residential property market, accounting for approximately <strong>60%</strong> of national real-estate transaction value and <strong>35%</strong> of the country's GDP on a metro-area basis. In 2025, Cushman &amp; Wakefield reported the full-year average primary-market apartment price at <strong>VND 111M/m&sup2;</strong> (~<strong>$4,222/m&sup2;</strong>), up <strong>+23% YoY</strong> &mdash; the sharpest annual jump in a decade. Savills Vietnam logged 11,500 units sold in 2025 at <strong>82% absorption</strong> (a 5-year high), with Q4 alone adding 5,000 units at 66% absorption. Luxury District 1 stock commanded a clearing price of <strong>$5,800/m&sup2;</strong>, while Thu Duc's metro-corridor product averaged <strong>$3,500&ndash;3,800/m&sup2;</strong> and Phu My Hung (District 7) traded around <strong>$3,200/m&sup2;</strong>.</p>
+      <p>Three structural forces define the 2026 setup. First, <strong>Metro Line 1 (Ben Thanh&ndash;Suoi Tien)</strong> opened December 2024 after 17 years of construction, validating the transit thesis for Thu Duc and driving 15&ndash;20% corridor uplift within 500m of stations. Second, the <strong>2024 legal reform package</strong> (Housing Law, Land Law, Real Estate Business Law, all effective Aug 1, 2024) is gradually unblocking ~20,000 stalled units; developer legal costs should fall 25&ndash;30% from the 2021&ndash;2023 peak. Third, foreign demand is near the <strong>30% building cap</strong> in a dozen CBD projects, forcing secondary-market premiums of 10&ndash;15% for quota-cleared units. Korean and Taiwanese buyers lead (45% and 20% of foreign transactions respectively), with mainland Chinese interest capped by outbound FX controls.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>胡志明市是越南的商業首都和最大的住宅房地產市場，按都會區計算佔全國房地產交易額的<strong>60%</strong>和GDP的<strong>35%</strong>。2025年一手公寓均價達<strong>$3,800/平方米</strong>（年增8.0%），較2022年高峰12%放緩，但仍約為CPI通脹率的兩倍。豪華第一郡產品均價<strong>$5,800/平方米</strong>，守德地鐵走廊產品均價<strong>$3,500-3,800/平方米</strong>，富美興（第七郡）則在<strong>$3,200/平方米</strong>附近。</p>
+      <p>2026年市場格局由三大結構性因素定義。其一，歷經17年建設的<strong>地鐵1號線（濱城-仙泉）</strong>於2024年12月開通，驗證了守德區的軌道交通主題，車站500米範圍內走廊升值15-20%。其二，<strong>2024年法律改革配套</strong>（住房法、土地法、房地產業務法，均於2024年8月1日生效）正逐步解凍約20,000個停滯項目；開發商的法律成本相較2021-2023高峰應下降25-30%。其三，外資需求在十多個CBD項目中接近<strong>30%建築配額上限</strong>，迫使已清配額單位在二手市場溢價10-15%。韓國和台灣買家領先（分別佔外資交易45%和20%），中國大陸興趣因資本外流管制受限。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">AVG PRIMARY PRICE</span><span class="lang-zh" style="display:none">一手均價</span></div><div class="kpi-value">$4,222/m²</div><span class="kpi-badge badge-red"><span class="lang-en">+23% YoY · Cushman &amp; Wakefield 2025</span><span class="lang-zh" style="display:none">年增+23% · 高力 2025</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">LUXURY D1 PRICE</span><span class="lang-zh" style="display:none">D1豪華價</span></div><div class="kpi-value">$5,800/m²</div><span class="kpi-badge badge-red"><span class="lang-en">Prime CBD · 30% foreign quota near full</span><span class="lang-zh" style="display:none">頂級CBD · 30%外資配額近上限</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">METRO CORRIDOR UPLIFT</span><span class="lang-zh" style="display:none">地鐵走廊升值</span></div><div class="kpi-value">+15-20%</div><span class="kpi-badge badge-green"><span class="lang-en">500m radius · Line 1 opened Dec 2024</span><span class="lang-zh" style="display:none">500米範圍 · 1號線2024年12月開通</span></span></div>
+      <div class="kpi-card blue"><div class="kpi-label"><span class="lang-en">NEW LAUNCHES 2025</span><span class="lang-zh" style="display:none">2025年新推案</span></div><div class="kpi-value">~15,000</div><span class="kpi-badge badge-blue"><span class="lang-en">Units · 90% absorption · Thu Duc + D7 led</span><span class="lang-zh" style="display:none">套 · 吸收率90% · 守德+D7領頭</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">CBD GROSS YIELD</span><span class="lang-zh" style="display:none">CBD毛收益率</span></div><div class="kpi-value">4.5–5.5%</div><span class="kpi-badge badge-green"><span class="lang-en">Thu Duc 5.5% · D1 4.5% · Serviced 7%</span><span class="lang-zh" style="display:none">守德5.5% · D1 4.5% · 服務式7%</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">UNSOLD INVENTORY</span><span class="lang-zh" style="display:none">未售庫存</span></div><div class="kpi-value">~10,000</div><span class="kpi-badge badge-orange"><span class="lang-en">Units · Down 60% from 2020 peak of 25K</span><span class="lang-zh" style="display:none">套 · 較2020年高峰25K下降60%</span></span></div>
+    </div>
+
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND &amp; SEGMENTATION</span><span class="lang-zh" style="display:none">房價走勢與分層</span></h2>
+    <div class="lang-en">
+      <p>HCMC primary-market condo prices have effectively doubled over the past decade, rising from approximately <strong>$1,900/m&sup2;</strong> in 2015 to <strong>$3,800/m&sup2;</strong> in 2025 &mdash; a compound annual growth rate of <strong>7.2%</strong>. This pace materially outpaced USD CPI (2.2%) and Vietnam's dong-denominated CPI (3.1%), reflecting genuine real appreciation rather than pure inflation carry. The trajectory was non-linear: a 2015&ndash;2018 acceleration on pre-IPO demand, a 2019&ndash;2020 plateau during COVID, a sharp 2021&ndash;2022 repricing coinciding with legal-bottleneck supply squeeze, and a steadier 2023&ndash;2025 recovery as launches resumed.</p>
+      <p>The market is stratified into four clear tiers. <strong>Luxury ($5,000&ndash;8,000/m&sup2;)</strong>: prime D1, Ba Son, Thao Dien waterfront &mdash; 3,000 units/yr absorption, buyers 60% foreign. <strong>High-end ($3,800&ndash;5,000/m&sup2;)</strong>: Binh Thanh, Thu Thiem, Thao Dien backstreets &mdash; the sweet spot for foreign yield hunters. <strong>Mid-range ($2,500&ndash;3,500/m&sup2;)</strong>: Thu Duc, Phu My Hung, emerging D10 &mdash; dominant domestic-demand tier. <strong>Affordable ($1,500&ndash;2,500/m&sup2;)</strong>: Binh Duong province, outer D9 &mdash; first-home buyers, 20-year mortgages, high vulnerability to rate moves. The <strong>affordable segment has stagnated</strong> in real terms since 2022 due to mortgage-rate compression of affordability.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>胡志明市一手公寓價格在過去十年實質翻倍，從2015年約<strong>$1,900/平方米</strong>升至2025年<strong>$3,800/平方米</strong>——年複合增長率<strong>7.2%</strong>。此速度明顯超過美元CPI（2.2%）及越南盾CPI（3.1%），反映為真實升值而非單純通脹。軌跡呈非線性：2015-2018受上市前需求推動加速、2019-2020新冠期間盤整、2021-2022法律瓶頸供應收縮觸發急速重估、2023-2025隨推案恢復穩步復甦。</p>
+      <p>市場分為四個清晰層級。<strong>豪華（$5,000-8,000/平方米）</strong>：頂級D1、巴船、草田濱水——年吸收3,000套，買家60%為外資。<strong>高端（$3,800-5,000/平方米）</strong>：平盛、守添、草田內街——外資尋求收益的甜蜜區間。<strong>中檔（$2,500-3,500/平方米）</strong>：守德、富美興、新興D10——國內需求主導層。<strong>可負擔（$1,500-2,500/平方米）</strong>：平陽省、外圍D9——首購族，20年按揭，對利率變動高度敏感。<strong>可負擔層實質上自2022年停滯</strong>，因按揭利率壓縮了可負擔性。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Price History 2015–2025 ($/m²)</span><span class="lang-zh" style="display:none">價格歷史 2015-2025（$/平方米）</span></h4>
+        <p><span class="lang-en">Primary market avg by segment. Source: Savills Vietnam</span><span class="lang-zh" style="display:none">一手市場按層級均價。來源：Savills越南</span></p>
+        <div id="chartHCMHistory" style="height:240px"></div>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Price by District ($/m²)</span><span class="lang-zh" style="display:none">各區價格（$/平方米）</span></h4>
+        <p><span class="lang-en">2025 primary condo price per m²</span><span class="lang-zh" style="display:none">2025年一手公寓每平方米</span></p>
+        <div id="chartHCMDistrict" style="height:240px"></div>
+      </div>
+    </div>
+
+    <h2 id="sec-districts"><span class="lang-en">KEY DISTRICTS DEEP DIVE</span><span class="lang-zh" style="display:none">重點地區深度分析</span></h2>
+    <div class="lang-en">
+      <p>HCMC's residential geography is structured around four dominant investment districts, each with a distinct profile of price level, liquidity, tenant demographic, and macro sensitivity. <strong>District 1 (Dist. 1)</strong> is the undisputed luxury core, anchored by heritage French-colonial blocks, the Saigon River waterfront, and near-zero greenfield supply. Its $5,800/m² average is supported by scarcity rather than yield &mdash; 4.5% gross translates to roughly 3.2% net after management fees, Vietnamese withholding tax, and vacancy. <strong>Thu Duc City (merged D2/D9/Thu Duc)</strong>, elevated to sub-city status in 2021, is the primary growth engine: Samsung R&amp;D campus, Intel assembly plant, VNG tech hub, and Metro Line 1 terminus all converge here. Forecast primary supply share for 2026&ndash;2028 is <strong>45%</strong> of HCMC total.</p>
+      <p><strong>District 7 (Phu My Hung)</strong> remains the established expatriate community &mdash; master-planned in the 1990s by Taiwan's Central Trading & Development group, it houses the highest concentration of international schools (SSIS, RMIT, APU) and delivers consistent 5.0% gross yields. <strong>Binh Thanh</strong> is the transitional gentrifier: Landmark 81 (Vietnam's tallest tower at 461m), Vinhomes Central Park waterfront, and proximity to both D1 CBD and Thu Duc growth corridor. Price trajectory closely tracks D1 with a 22% discount, suggesting 15&ndash;18% multi-year catch-up potential.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>胡志明市住宅地理圍繞四個主導投資區域構建，各有獨特的價格水平、流動性、租客類型和宏觀敏感度組合。<strong>第一郡（D1）</strong>是無可爭議的豪華核心，以法殖民老城、西貢河濱水區、近零綠地供應為支撐。其$5,800/平方米均價由稀缺性而非收益率支撐——4.5%毛租金扣除管理費、越南預扣稅和空置後淨收益率約3.2%。<strong>守德市（由D2/D9/守德合併）</strong>於2021年升格為副省級城市，是主要增長引擎：三星研發園區、英特爾組裝廠、VNG科技中心、地鐵1號線終點站均在此聚合。預計2026-2028年一手供應佔胡志明市總量的<strong>45%</strong>。</p>
+      <p><strong>第七郡（富美興）</strong>仍是成熟外籍社區——1990年代由台灣中央貿易開發集團總規劃，擁有最密集的國際學校（SSIS、RMIT、APU），毛收益率穩定5.0%。<strong>平盛</strong>是轉型紳士化區域：地標81（越南最高樓461米）、萬欣中央公園濱水、鄰近D1 CBD與守德增長走廊。價格軌跡緊貼D1但折讓22%，意味著有15-18%的多年追趕潛力。</p>
+    </div>
+    <div class="city-grid">
+      <div class="city-card" style="border-left-color:#dc2626">
+        <h4><span class="lang-en">District 1 (Dist. 1)</span><span class="lang-zh" style="display:none">第一郡（D1）</span></h4>
+        <p><span class="lang-en">Luxury core · $5,800/m² · Yield 4.5% · 30% quota 90% filled · Ultra-low supply · Buyers 60% foreign</span><span class="lang-zh" style="display:none">豪華核心 · $5,800/平方米 · 收益率4.5% · 30%配額90%用滿 · 超低供應 · 買家60%外資</span></p>
+      </div>
+      <div class="city-card" style="border-left-color:#16a34a">
+        <h4><span class="lang-en">Thu Duc City (D2/D9)</span><span class="lang-zh" style="display:none">守德市（D2/D9）</span></h4>
+        <p><span class="lang-en">Tech/metro hub · $3,500–3,800/m² · Yield 5.5% · Samsung/Intel/VNG · 45% of 26–28 supply pipe</span><span class="lang-zh" style="display:none">科技/地鐵中心 · $3,500-3,800/平方米 · 收益率5.5% · 三星/英特爾/VNG · 佔26-28年45%供應</span></p>
+      </div>
+      <div class="city-card" style="border-left-color:#2563eb">
+        <h4><span class="lang-en">District 7 (Phu My Hung)</span><span class="lang-zh" style="display:none">第七郡（富美興）</span></h4>
+        <p><span class="lang-en">Expat core · $3,200/m² · Yield 5.0% · Intl schools (SSIS/RMIT) · Taiwan-developer legacy</span><span class="lang-zh" style="display:none">外籍核心 · $3,200/平方米 · 收益率5.0% · 國際學校（SSIS/RMIT） · 台商開發遺產</span></p>
+      </div>
+      <div class="city-card" style="border-left-color:#d97706">
+        <h4><span class="lang-en">Binh Thanh</span><span class="lang-zh" style="display:none">平盛</span></h4>
+        <p><span class="lang-en">Waterfront gentrifier · $4,500/m² · Yield 4.8% · Landmark 81 · Vinhomes Central Park · 22% disc to D1</span><span class="lang-zh" style="display:none">濱水紳士化 · $4,500/平方米 · 收益率4.8% · 地標81 · 萬欣中央公園 · 對D1 22%折讓</span></p>
+      </div>
+    </div>
+
+    <table class="data-table" style="margin-top:16px">
+      <thead><tr>
+        <th><span class="lang-en">District</span><span class="lang-zh" style="display:none">區域</span></th>
+        <th><span class="lang-en">Price $/m²</span><span class="lang-zh" style="display:none">價格 $/平方米</span></th>
+        <th><span class="lang-en">2Y Δ%</span><span class="lang-zh" style="display:none">兩年漲幅</span></th>
+        <th><span class="lang-en">Yield</span><span class="lang-zh" style="display:none">收益率</span></th>
+        <th><span class="lang-en">Occupancy</span><span class="lang-zh" style="display:none">入住率</span></th>
+        <th><span class="lang-en">Supply 26E</span><span class="lang-zh" style="display:none">26年供應</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>District 1</td><td class="td-num">5,800</td><td class="td-num td-pos">+14%</td><td class="td-num">4.5%</td><td class="td-num">93%</td><td class="td-num">800</td></tr>
+        <tr><td>Binh Thanh</td><td class="td-num">4,500</td><td class="td-num td-pos">+16%</td><td class="td-num">4.8%</td><td class="td-num">91%</td><td class="td-num">2,400</td></tr>
+        <tr><td>Thu Duc City</td><td class="td-num">3,800</td><td class="td-num td-pos">+18%</td><td class="td-num">5.5%</td><td class="td-num">88%</td><td class="td-num">7,200</td></tr>
+        <tr><td>District 7</td><td class="td-num">3,200</td><td class="td-num td-pos">+11%</td><td class="td-num">5.0%</td><td class="td-num">90%</td><td class="td-num">1,600</td></tr>
+        <tr><td>District 9 (outer)</td><td class="td-num">2,800</td><td class="td-num td-pos">+13%</td><td class="td-num">5.8%</td><td class="td-num">84%</td><td class="td-num">2,200</td></tr>
+        <tr><td>Binh Duong Prov.</td><td class="td-num">1,800</td><td class="td-num td-pos">+6%</td><td class="td-num">6.2%</td><td class="td-num">78%</td><td class="td-num">4,500</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="sec-metro"><span class="lang-en">METRO IMPACT &amp; TOD</span><span class="lang-zh" style="display:none">地鐵影響與TOD</span></h2>
+    <div class="lang-en">
+      <p>Metro Line 1 (Ben Thanh&ndash;Suoi Tien), a <strong>19.7 km elevated-and-underground line with 14 stations</strong>, entered commercial service on <strong>22 December 2024</strong>, ending a 17-year construction saga that began in 2007 with JICA financing. First-quarter 2025 ridership averaged <strong>32,000 passengers/day</strong>, climbing to <strong>42,000/day</strong> by Q4 2025 &mdash; still 40% below the 70,000/day design capacity, reflecting first-mover adoption curves but with clear upward trajectory. Within 500m of stations, condo prices rose <strong>15&ndash;20%</strong> from announcement-to-opening, with the strongest effects at An Phu, Rach Chiec, and Thu Duc stations.</p>
+      <p>Line 2 (Ben Thanh&ndash;Tham Luong), 11 km and 10 stations, is under construction with mixed financing (ADB, Germany's KfW, domestic) and a 2028 commercial target. Line 3 (inner-ring) and Line 5 (Binh Thanh&ndash;Thu Duc) are in pre-feasibility, with target timelines in the 2030s. Market pricing reflects Line 2 more than the later lines &mdash; parcels along Cach Mang Thang Tam corridor and Tan Binh District are already trading at 8&ndash;12% premiums to comparable non-corridor stock. HCMC's long-term metro master plan envisions <strong>8 lines totaling 220 km</strong>, but actual delivery lags plan by 10&ndash;15 years historically.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>地鐵1號線（濱城-仙泉）為<strong>19.7公里高架加地下線、14個車站</strong>，於<strong>2024年12月22日</strong>進入商業營運，結束了2007年以JICA融資啟動的17年建設長跑。2025年首季日均客流<strong>32,000人</strong>，Q4升至<strong>42,000人/日</strong>——仍較設計容量70,000人/日低40%，反映出先行採用曲線，但上升軌跡明確。車站500米範圍內，公寓價格自宣布至開通上漲<strong>15-20%</strong>，效應最強集中在安富、瀝色和守德站。</p>
+      <p>2號線（濱城-潭陵）11公里10站，採混合融資（亞行、德國KfW、本地），目標2028年商業營運。3號線（內環）和5號線（平盛-守德）處於預可行性研究，目標2030年代完工。市場價格已反映2號線，對後續路線反應有限——革命八月街走廊和新平郡沿線地塊已較非走廊可比物業溢價8-12%。胡志明市長期地鐵總體規劃構想<strong>8條線總長220公里</strong>，但歷史上實際交付較計劃滯後10-15年。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Metro Line 1 Station Uplift (%)</span><span class="lang-zh" style="display:none">地鐵1號線車站升值（%）</span></h4>
+        <p><span class="lang-en">Price change within 500m vs broader district, 2021→2025</span><span class="lang-zh" style="display:none">500米範圍內相對整區價格變化，2021→2025</span></p>
+        <div id="chartHCMMetro" style="height:240px"></div>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">New Supply vs Absorption</span><span class="lang-zh" style="display:none">新供應 vs 吸收量</span></h4>
+        <p><span class="lang-en">Annual units launched and absorbed, 2021–2025</span><span class="lang-zh" style="display:none">年度推案與吸收量，2021-2025</span></p>
+        <div id="chartHCMSupply" style="height:240px"></div>
+      </div>
+    </div>
+
+    <h2 id="sec-inventory"><span class="lang-en">INVENTORY &amp; LEGAL REFORM</span><span class="lang-zh" style="display:none">庫存與法律改革</span></h2>
+    <div class="lang-en">
+      <p>The 2021&ndash;2023 supply collapse was not a demand problem &mdash; it was a <strong>legal bottleneck</strong>. Anti-corruption sweeps under General Secretary Nguyen Phu Trong (2021&ndash;2024) paralyzed project approvals: more than <strong>160 HCMC projects</strong> representing <strong>70,000+ units</strong> were stalled at the land-use conversion, construction-permit, or sales-license stage. HoREA (HCMC Real Estate Association) estimated the economic cost at <strong>VND 300 trillion</strong> (~$12B) in deferred capex. Annual launches bottomed at <strong>~9,000 units in 2023</strong> vs. a 2018 run-rate of 35,000.</p>
+      <p>The <strong>2024 legal reform trilogy</strong> &mdash; Housing Law (Law 27/2023/QH15), Land Law (Law 31/2024/QH15), and Real Estate Business Law (Law 29/2023/QH15), all effective <strong>1 August 2024</strong> &mdash; systematically addressed each bottleneck. Key provisions: (1) land valuation methodologies clarified (four approved methods), reducing developer exposure to after-the-fact tax reassessments; (2) "pink book" (ownership certificate) issuance simplified for stalled projects; (3) foreign ownership framework codified with explicit 30% building / 250-unit township caps and 50-year tenure. As of April 2026, roughly <strong>8,000 stalled units</strong> have been reactivated, with an additional 12,000 expected by end-2027. Unsold inventory has declined from the 2020 peak of ~25,000 units to <strong>~10,000 by early 2026</strong>.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2021-2023年的供應崩塌並非需求問題——而是<strong>法律瓶頸</strong>。總書記阮富仲時期（2021-2024）的反腐掃蕩導致項目審批癱瘓：胡志明市超過<strong>160個項目</strong>、代表<strong>70,000多套</strong>停滯在土地用途轉換、建築許可或銷售許可階段。胡志明市房地產協會（HoREA）估計經濟成本達<strong>3000兆越南盾</strong>（約120億美元）的延遲資本支出。年推案量在<strong>2023年見底約9,000套</strong>，較2018年35,000套運行速度大減。</p>
+      <p><strong>2024年法律改革三部曲</strong>——住房法（Law 27/2023/QH15）、土地法（Law 31/2024/QH15）、房地產業務法（Law 29/2023/QH15），均於<strong>2024年8月1日</strong>生效——系統性解決各項瓶頸。關鍵條款：(1)土地估值方法明確化（四種獲批方法），降低開發商面臨事後稅收重估的風險；(2)停滯項目的「粉紅書」（所有權證明）發放簡化；(3)外資持有框架法典化，明確<strong>30%建築/250套社區</strong>上限及<strong>50年期限</strong>。截至2026年4月，已重新啟動約<strong>8,000套停滯單位</strong>，2027年底前預計再釋放12,000套。未售庫存已從2020年高峰約25,000套降至<strong>2026年初約10,000套</strong>。</p>
+    </div>
+
+    <div class="callout">
+      <span class="lang-en"><strong>WATCH:</strong> Decree 10/2024 (implementing Land Law) sets new land-rent formulas that increased certain project costs 10–20%. Developers passing through to sticker prices drove the 2025 Q1 uptick. Monitor Decree 96/2024 amendments (pending) which may modify foreign-buyer documentation requirements.</span>
+      <span class="lang-zh" style="display:none"><strong>關注：</strong>Decree 10/2024（實施土地法）設定新的土地租金公式，某些項目成本上升10-20%。開發商轉嫁至牌價帶動了2025年Q1的上升。關注Decree 96/2024修訂（待定）可能修改外資買家文件要求。</span>
+    </div>
+
+    <h2 id="sec-rental"><span class="lang-en">RENTAL MARKET &amp; YIELD</span><span class="lang-zh" style="display:none">租賃市場與收益率</span></h2>
+    <div class="lang-en">
+      <p>HCMC rental demand is structurally underpinned by three tenant cohorts. <strong>Expatriate professionals</strong> (Korean, Japanese, Taiwanese, Western) &mdash; approximately 45,000 registered foreign workers citywide &mdash; drive CBD and D7 demand, with rent typically employer-paid and 2-year fixed leases standard. <strong>Domestic young professionals</strong> &mdash; the ~3 million HCMC workforce aged 25&ndash;40 &mdash; power Thu Duc and Binh Thanh mid-range rentals at $400&ndash;700/month per unit. <strong>Short-stay tenants</strong> (digital nomads, long-term travelers) fuel the serviced-apartment segment, where gross yields reach 7% on managed Airbnb-hybrid operations.</p>
+      <p>A 2-bedroom 80m² unit in Thu Duc trends <strong>$800&ndash;1,200/month</strong>; in District 1 prime, <strong>$1,500&ndash;2,500/month</strong>; in branded residences (JW Marriott, Ritz-Carlton), <strong>$3,000&ndash;5,000/month</strong>. Occupancy averages 92% in expat-concentrated buildings and 85% in emerging Thu Duc stock (lower only due to newly completed lease-up absorption). Samsung's planned Thu Duc R&D headcount expansion (+3,000 engineers by 2028) is a material demand tailwind. Vietnamese personal income tax on rental is a flat <strong>10% (5% PIT + 5% VAT)</strong> on gross, filed quarterly &mdash; simple by regional standards.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>胡志明市租賃需求由三大租客群體結構性支撐。<strong>外籍專業人士</strong>（韓、日、台、西方）——全市約45,000名註冊外籍工作者——驅動CBD與D7需求，租金通常由雇主支付、兩年定期合約為標準。<strong>國內年輕專業人士</strong>——胡志明市約300萬25-40歲勞動力——帶動守德與平盛中檔租賃，每套月租$400-700。<strong>短期租客</strong>（數字遊民、長期旅行者）推動服務式公寓板塊，混合Airbnb管理毛收益率可達7%。</p>
+      <p>守德80平方米兩房月租<strong>$800-1,200</strong>；第一郡頂級<strong>$1,500-2,500</strong>；品牌住宅（JW萬豪、麗思卡爾頓）<strong>$3,000-5,000</strong>。外籍集中建築入住率平均92%，新興守德物業85%（僅因新交付單位進入初次租賃階段）。三星守德研發團隊擴編計劃（2028年前+3,000名工程師）為實質需求順風。越南個人租金所得稅總額按<strong>10%（5%PIT+5%VAT）</strong>平稅，季度申報——以區域標準而言屬簡單。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Gross Yield by District &amp; Segment (%)</span><span class="lang-zh" style="display:none">各區/分層毛收益率（%）</span></h4>
+        <p><span class="lang-en">Annual rent / primary price. Before tax &amp; fees</span><span class="lang-zh" style="display:none">年租金/一手價。稅費前</span></p>
+        <div id="chartHCMYield" style="height:240px"></div>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Foreign Buyer Nationality Mix</span><span class="lang-zh" style="display:none">外資買家國籍構成</span></h4>
+        <p><span class="lang-en">2025 HCMC primary condo transactions by buyer nationality</span><span class="lang-zh" style="display:none">2025年胡志明市一手公寓交易按買家國籍</span></p>
+        <div id="chartHCMForeign" style="height:240px"></div>
+      </div>
+    </div>
+
+    <h2 id="sec-foreign"><span class="lang-en">FOREIGN OWNERSHIP &amp; TAX</span><span class="lang-zh" style="display:none">外資持有與稅務</span></h2>
+    <div class="lang-en">
+      <p>Vietnam's foreign-ownership framework is codified under the <strong>2023 Housing Law (effective Aug 2024)</strong>. Foreigners may own condominium units subject to three concurrent constraints: (1) <strong>30% of units per building</strong>, (2) <strong>250 unit maximum per ward-level township</strong>, and (3) <strong>50-year leasehold term</strong> (renewable once for another 50 years if requested before expiry). Foreigners cannot own land directly; detached houses are permitted only on leasehold land leased from a Vietnamese entity. The <strong>"pink book"</strong> (Ownership Certificate) is issued within 30 days of payment completion but frequently delayed to 60&ndash;90 days in practice.</p>
+      <p>Transaction costs for foreign buyers total approximately <strong>4.5&ndash;6.0% of purchase price</strong>: (i) <strong>10% VAT</strong> embedded in new-construction sticker (passed through by developer), (ii) <strong>0.5% registration fee</strong> paid to municipal treasury, (iii) <strong>legal fees</strong> 1.0&ndash;1.5% (mandatory notarization + translation), (iv) <strong>developer admin</strong> 0.3&ndash;0.5%, (v) <strong>agent commission</strong> typically vendor-paid. Annual holding cost runs 0.03% (land-use fee, leasehold basis) plus management fees of $0.8&ndash;1.5/m²/month. Capital gains on resale are taxed at a flat <strong>2% of gross selling price</strong> (not of gain) &mdash; a simple regime that can be favorable for high-return sales but punitive on thin-margin flips.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>越南外資持有框架由<strong>2023年住房法（2024年8月生效）</strong>法典化。外國人可擁有公寓單位，但須同時滿足三項限制：(1) <strong>每棟建築不超過30%單位</strong>；(2) <strong>每坊級社區不超過250套</strong>；(3) <strong>50年租賃期</strong>（到期前申請可再續50年）。外國人不得直接擁有土地；獨棟住宅僅可建於向越南實體租賃的土地上。<strong>「粉紅書」</strong>（所有權證明）在付款完成後30日內發放，但實務上常延至60-90日。</p>
+      <p>外資買家交易成本約佔買價<strong>4.5-6.0%</strong>：(i) 新建案牌價內含<strong>10% VAT</strong>（由開發商轉嫁）；(ii) <strong>0.5%登記費</strong>繳至市財政；(iii) <strong>律師費</strong>1.0-1.5%（強制公證+翻譯）；(iv) <strong>開發商行政費</strong>0.3-0.5%；(v) <strong>代理傭金</strong>通常由賣方支付。年持有成本0.03%（土地使用費，租賃基礎）加管理費$0.8-1.5/平方米/月。轉售資本利得按<strong>售價總額2%</strong>平稅（非利得）——簡單稅制，對高回報銷售有利，對薄利翻轉不利。</p>
+    </div>
+
+    <table class="data-table">
+      <thead><tr>
+        <th><span class="lang-en">Item</span><span class="lang-zh" style="display:none">項目</span></th>
+        <th><span class="lang-en">Rate / Amount</span><span class="lang-zh" style="display:none">費率/金額</span></th>
+        <th><span class="lang-en">Note</span><span class="lang-zh" style="display:none">備註</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td><span class="lang-en">VAT (new build)</span><span class="lang-zh" style="display:none">VAT（新建）</span></td><td class="td-num">10%</td><td><span class="lang-en">Embedded in sticker price</span><span class="lang-zh" style="display:none">內含於牌價</span></td></tr>
+        <tr><td><span class="lang-en">Registration fee</span><span class="lang-zh" style="display:none">登記費</span></td><td class="td-num">0.5%</td><td><span class="lang-en">Municipal, of purchase price</span><span class="lang-zh" style="display:none">市級，按買價</span></td></tr>
+        <tr><td><span class="lang-en">Legal/notary</span><span class="lang-zh" style="display:none">律師/公證</span></td><td class="td-num">1.0–1.5%</td><td><span class="lang-en">Mandatory, plus translation</span><span class="lang-zh" style="display:none">強制+翻譯</span></td></tr>
+        <tr><td><span class="lang-en">Capital gains on sale</span><span class="lang-zh" style="display:none">轉售資本利得</span></td><td class="td-num">2% (gross)</td><td><span class="lang-en">On selling price, not gain</span><span class="lang-zh" style="display:none">按售價非利得</span></td></tr>
+        <tr><td><span class="lang-en">Rental income tax</span><span class="lang-zh" style="display:none">租金所得稅</span></td><td class="td-num">10% (5+5)</td><td><span class="lang-en">5% PIT + 5% VAT on gross</span><span class="lang-zh" style="display:none">5%PIT+5%VAT按總額</span></td></tr>
+        <tr><td><span class="lang-en">Ownership tenure</span><span class="lang-zh" style="display:none">持有期限</span></td><td class="td-num">50 yr + 50</td><td><span class="lang-en">Renewable before expiry</span><span class="lang-zh" style="display:none">到期前可續</span></td></tr>
+        <tr><td><span class="lang-en">Building foreign cap</span><span class="lang-zh" style="display:none">建築外資上限</span></td><td class="td-num">30%</td><td><span class="lang-en">Per building; 250/ward max</span><span class="lang-zh" style="display:none">每棟；每坊250套</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK &amp; SCENARIOS</span><span class="lang-zh" style="display:none">展望與情景分析</span></h2>
+    <div class="lang-en">
+      <p><strong>Base case (+5–7%/yr, probability 55%):</strong> Metro Line 1 ridership ramps to 60,000/day by late 2026, delivering sustained corridor premia. Legal reform continues unblocking ~6,000 units/year through 2027. SBV policy rate drifts from 4.5% toward 4.0% in 2026, easing domestic mortgage demand. HCMC average prices reach <strong>$4,300/m²</strong> by 2028. <strong>Bull case (+9–11%/yr, probability 25%):</strong> Long Thanh airport Phase 1 opens on schedule late 2026, redirecting Noi Bai overflow traffic to HCMC and validating the southeastern corridor. Foreign quota premiums widen to 20%+ on CBD buildings. Chinese capital controls ease marginally, adding incremental demand. Prices reach <strong>$4,700/m²</strong> by 2028.</p>
+      <p><strong>Bear case (-2 to +2%/yr, probability 20%):</strong> Legal reform implementation stalls under new decree amendments, re-freezing 5,000&ndash;8,000 units. USD strength pushes VND weaker, compressing foreign-buyer purchasing power on their home-currency basis by 8&ndash;12%. Samsung-Intel tech sector capex slows in a global semiconductor downturn, tempering Thu Duc demand. Prices range-trade at <strong>$3,700&ndash;3,900/m²</strong> through 2028 with temporary overbuild risk if all delayed projects launch simultaneously. Key signals to monitor: (i) monthly Metro Line 1 ridership, (ii) HoREA project-reactivation count, (iii) SBV mortgage-rate changes, (iv) USD/VND FX rate.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p><strong>基準情景（年+5-7%，概率55%）：</strong>地鐵1號線客流在2026年底前爬升至60,000人/日，帶來持續走廊溢價。法律改革繼續釋放約每年6,000套至2027年。越南國家銀行政策利率從4.5%向4.0%下行，緩解國內按揭需求。胡志明市均價在2028年達<strong>$4,300/平方米</strong>。<strong>牛市情景（年+9-11%，概率25%）：</strong>龍城機場第一階段於2026年底如期開通，分流內排溢出流量至胡志明市並驗證東南走廊。CBD建築外資配額溢價擴大至20%+。中國資本管制邊際放鬆，增量需求顯現。價格2028年達<strong>$4,700/平方米</strong>。</p>
+      <p><strong>熊市情景（年-2至+2%，概率20%）：</strong>法律改革執行在新法令修訂下停滯，5,000-8,000套再次凍結。美元強勢推動越南盾走弱，本國貨幣基準壓縮外資買家購買力8-12%。全球半導體週期下行拖累三星-英特爾科技業資本支出，抑制守德需求。價格在<strong>$3,700-3,900/平方米</strong>區間震盪至2028年，若延遲項目同時推出則存在暫時性超建風險。關鍵監測訊號：(i) 地鐵1號線月度客流；(ii) HoREA項目重啟計數；(iii) SBV按揭利率變動；(iv) USD/VND匯率。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">HCMC Avg Price Forecast 2025–2028 ($/m²)</span><span class="lang-zh" style="display:none">胡志明市均價預測 2025-2028（$/平方米）</span></h4>
+      <div id="chartHCMForecast" style="height:260px"></div>
+      <p class="chart-note navy"><span class="lang-en">Base $4,300 · Bull $4,700 (Long Thanh airport catalyst) · Bear $3,900 (legal stall)</span><span class="lang-zh" style="display:none">基準$4,300 · 牛市$4,700（龍城機場催化） · 熊市$3,900（法律停滯）</span></p>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: Savills Vietnam 2025 · CBRE Vietnam H2 2025 · HCMC Department of Planning and Investment · State Bank of Vietnam (SBV) · HoREA (HCMC Real Estate Association) · Global Property Guide · Ministry of Construction. All data as of March–April 2026.</span><span class="lang-zh" style="display:none">數據來源：第一太平戴維斯越南2025年 · 世邦魏理仕越南2025年H2 · 胡志明市計劃投資廳 · 越南國家銀行（SBV） · 胡志明市房地產協會（HoREA） · 全球房地產指南 · 越南建設部。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawHCMHistory(lang);drawHCMDistrict(lang);drawHCMMetro(lang);drawHCMSupply(lang);drawHCMYield(lang);drawHCMForeign(lang);drawHCMForecast(lang);}
+
+function drawHCMHistory(lang){var dom=document.getElementById('chartHCMHistory');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var luxury=[3500,3900,4400,4800,5000,5100,5400,5900,6100,5900,5800];
+  var high=[2800,3100,3500,3800,3900,4000,4200,4600,4700,4500,4500];
+  var mid=[2000,2200,2400,2600,2700,2800,3000,3300,3400,3300,3500];
+  var afford=[1400,1500,1600,1700,1750,1780,1820,1900,1870,1800,1800];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+(v/1000).toFixed(0)+'K';}}}),
+    series:[{name:en?'Luxury':'豪華',type:'line',data:luxury,lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},symbol:'circle',symbolSize:4},{name:en?'High-end':'高端',type:'line',data:high,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4},{name:en?'Mid-range':'中檔',type:'line',data:mid,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:4},{name:en?'Affordable':'可負擔',type:'line',data:afford,lineStyle:{color:C.muted,width:2,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4}]});}
+
+function drawHCMDistrict(lang){var dom=document.getElementById('chartHCMDistrict');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var districts=en?['Binh Duong','D9','D7 (PMH)','Thu Duc','Binh Thanh','D1']:['平陽','第九郡','第七郡','守德','平盛','第一郡'];
+  var values=[1800,2800,3200,3800,4500,5800];
+  var colors=[C.muted,C.muted,C.blue,C.green,C.orange,C.red];
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},grid:{left:12,right:60,top:8,bottom:8,containLabel:true},yAxis:mkAxis({type:'category',data:districts,axisLabel:{color:C.muted,fontSize:9}}),xAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v/1000+'K';}}}),
+    series:[{type:'bar',data:values.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:18,itemStyle:{borderRadius:[0,3,3,0]},label:{show:true,position:'right',formatter:function(p){return '$'+p.value.toLocaleString();},fontSize:9,color:C.muted}}]});}
+
+function drawHCMMetro(lang){var dom=document.getElementById('chartHCMMetro');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var stations=en?['Ben Thanh','Opera','Ba Son','Van Thanh','Tan Cang','Thao Dien','An Phu','Rach Chiec','Thu Duc','Binh Thai','Suoi Tien']:['濱城','歌劇院','巴船','文盛','新港','草田','安富','瀝色','守德','平泰','仙泉'];
+  var uplift=[8,9,11,14,16,18,22,21,19,15,12];
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:42,containLabel:true},xAxis:mkAxis({type:'category',data:stations,axisLabel:{color:C.muted,fontSize:8,interval:0,rotate:30}}),yAxis:mkAxis({type:'value',min:0,max:25,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{type:'bar',data:uplift.map(function(v){return{value:v,itemStyle:{color:v>=18?C.green:v>=14?C.navy:C.muted}};}),barMaxWidth:22,itemStyle:{borderRadius:[3,3,0,0]},label:{show:true,position:'top',formatter:function(p){return '+'+p.value+'%';},fontSize:8,color:C.navy}}]});}
+
+function drawHCMSupply(lang){var dom=document.getElementById('chartHCMSupply');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2021','2022','2023','2024','2025','2026E'];
+  var supply=[12000,15000,9000,14000,15000,19000];var absorption=[10000,13000,8200,12500,13500,16500];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}}}),
+    series:[{name:en?'New Supply':'新供應',type:'bar',data:supply,barMaxWidth:22,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},{name:en?'Absorption':'吸收量',type:'bar',data:absorption,barMaxWidth:22,itemStyle:{color:C.green,borderRadius:[3,3,0,0]}}]});}
+
+function drawHCMYield(lang){var dom=document.getElementById('chartHCMYield');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var segs=en?['D1 Luxury','Binh Thanh','D7 PMH','Thu Duc','D9 Outer','Binh Duong','Serviced Apt']:['D1豪華','平盛','D7富美興','守德','D9外圍','平陽','服務式公寓'];
+  var gross=[4.5,4.8,5.0,5.5,5.8,6.2,7.0];var net=[3.2,3.4,3.7,4.1,4.3,4.6,5.1];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:segs,axisLabel:{color:C.muted,fontSize:8,interval:0,rotate:20}}),yAxis:mkAxis({type:'value',min:0,max:8,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{name:en?'Gross':'毛',type:'bar',data:gross,barMaxWidth:20,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},{name:en?'Net':'淨',type:'bar',data:net,barMaxWidth:20,itemStyle:{color:'rgba(37,99,235,0.55)',borderRadius:[3,3,0,0]}}]});}
+
+function drawHCMForeign(lang){var dom=document.getElementById('chartHCMForeign');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var data=en?[{value:45,name:'Korea'},{value:20,name:'Taiwan'},{value:10,name:'Japan'},{value:8,name:'Singapore'},{value:7,name:'China/HK'},{value:5,name:'Western'},{value:5,name:'Others'}]:[{value:45,name:'韓國'},{value:20,name:'台灣'},{value:10,name:'日本'},{value:8,name:'新加坡'},{value:7,name:'中國/港'},{value:5,name:'西方'},{value:5,name:'其他'}];
+  var palette=[C.navy,C.red,C.orange,C.blue,C.green,C.muted,'#94a3b8'];
+  c.setOption({tooltip:{trigger:'item',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11},formatter:'{b}: {c}%'},legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    series:[{type:'pie',radius:['45%','72%'],center:['50%','45%'],data:data.map(function(d,i){return Object.assign({},d,{itemStyle:{color:palette[i]}});}),label:{formatter:'{b}\n{c}%',fontSize:9,color:C.navy},labelLine:{length:8,length2:6}}]});}
+
+function drawHCMForecast(lang){var dom=document.getElementById('chartHCMForecast');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2025','2026E','2027E','2028E'];
+  var bull=[3800,4100,4400,4700];var base=[3800,4000,4150,4300];var bear=[3800,3800,3850,3900];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:3600,max:4900,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+(v/1000).toFixed(1)+'K';}}}),
+    series:[{name:en?'Bull':'牛市',type:'line',data:bull,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,areaStyle:{color:'rgba(22,163,74,0.08)'}},{name:en?'Base':'基準',type:'line',data:base,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6},{name:en?'Bear':'熊市',type:'line',data:bear,lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:6,areaStyle:{color:'rgba(220,38,38,0.05)'}}]});}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

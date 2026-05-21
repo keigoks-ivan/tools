@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | Vietnam Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">Vietnam — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">越南 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q1 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q1</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:2;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Inflation Crisis</span><span class="lang-zh" style="display:none">通膨危機</span></div>
+        <div class="cs-year">08–11</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#6b7280">
+        <div class="cs-title"><span class="lang-en">Bust/Freeze</span><span class="lang-zh" style="display:none">崩盤凍結</span></div>
+        <div class="cs-year">12–13</div>
+      </div>
+      <div class="cycle-seg" style="flex:6;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Reform Boom</span><span class="lang-zh" style="display:none">改革榮景</span></div>
+        <div class="cs-year">14–21</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Bond Crisis</span><span class="lang-zh" style="display:none">債券危機</span></div>
+        <div class="cs-year">22–23</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Trough</span><span class="lang-zh" style="display:none">谷底</span></div>
+        <div class="cs-year">24–25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">SBV refinance rate at 4.50% — aggressive cuts since 2023; corporate bond market still healing post Vạn Thịnh Phát fraud; property transaction volumes recovering</span>
+        <span class="lang-zh" style="display:none">SBV再融資利率4.50%——2023年以來大幅降息；公司債市場仍在萬盛發詐騙案後復原中；房產交易量逐步回升</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">SBV Refinance Rate</span><span class="lang-zh" style="display:none">SBV再融資利率</span></div>
+      <div class="kpi-value">4.50%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">−200bp from 2023 peak</span><span class="lang-zh" style="display:none">較2023年高點降200bp</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">HCM City Apt Price</span><span class="lang-zh" style="display:none">胡志明市公寓均價</span></div>
+      <div class="kpi-value">~$3,200/m²</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">USD/sqm (Savills est.)</span><span class="lang-zh" style="display:none">美元/平方公尺（Savills估）</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CPI YoY</span><span class="lang-zh" style="display:none">通膨 YoY</span></div>
+      <div class="kpi-value">3.6%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Within SBV target</span><span class="lang-zh" style="display:none">在SBV目標範圍內</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">7.1%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">2024 full year</span><span class="lang-zh" style="display:none">2024全年</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Unemployment</span><span class="lang-zh" style="display:none">失業率</span></div>
+      <div class="kpi-value">2.2%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Urban formal sector</span><span class="lang-zh" style="display:none">城市正規就業部門</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">FDI Disbursed</span><span class="lang-zh" style="display:none">FDI實際撥付</span></div>
+      <div class="kpi-value">$25.4B</div>
+      <span class="lang-zh" style="display:none"></span>
+      <span class="kpi-badge badge-green"><span class="lang-en">2024 record high</span><span class="lang-zh" style="display:none">2024年創歷史新高</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">SBV Rate Range (17yr)</span><span class="lang-zh" style="display:none">SBV歷史區間</span></div>
+      <div class="ctx-val">4.00%–15.00%</div>
+      <div class="ctx-sub"><span class="lang-en">Low: 2020–21 · High: 2011 crisis</span><span class="lang-zh" style="display:none">低點：2020–21 · 高點：2011年危機</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">HCM Price Gain (14yr)</span><span class="lang-zh" style="display:none">胡志明市14年漲幅</span></div>
+      <div class="ctx-val" style="color:#16a34a">~+200%</div>
+      <div class="ctx-sub"><span class="lang-en">~$1,000 → $3,200/sqm (Savills/CBRE)</span><span class="lang-zh" style="display:none">約$1,000→$3,200/平方公尺（Savills/CBRE）</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+8.0% / +2.9%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2022 · Lowest: 2021 COVID</span><span class="lang-zh" style="display:none">最佳：2022年 · 最低：2021年COVID</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Bond Fraud Losses</span><span class="lang-zh" style="display:none">公司債詐騙損失</span></div>
+      <div class="ctx-val" style="color:#dc2626">~$12B</div>
+      <div class="ctx-sub"><span class="lang-en">2022 Vạn Thịnh Phát scandal</span><span class="lang-zh" style="display:none">2022年萬盛發詐騙案</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × House Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Vietnam's property market is structurally different from developed markets — most transactions are cash or short-term bank credit, with no 30yr mortgage culture. SBV rate changes have indirect effect through developer credit. The 2022 bond crisis froze developer funding directly — rate cuts alone cannot fix structural credit channel breakdown.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>越南房市與發達市場有結構性差異——多數交易以現金或短期銀行信貸完成，沒有30年長期房貸文化。SBV利率變動透過開發商信貸間接發揮影響。2022年債券危機直接凍結了開發商融資管道——單純降息無法修復結構性信貸管道斷裂。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">SBV Rate / Lending Rate / CPI vs HCM Apt Price Index (2008–2025)</span>
+      <span class="lang-zh" style="display:none">SBV利率 / 貸款利率 / CPI vs 胡志明公寓價格指數（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × House Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Vietnam's GDP growth has been remarkably resilient (+7.1% in 2024) driven by manufacturing FDI — Samsung, LG, Intel, Apple suppliers. But this export-led growth doesn't always translate to housing demand: supply-side financing constraints (developer credit, bond market) have been the binding factor since 2022, not consumer income.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>越南GDP成長（2024年+7.1%）表現出色，由製造業FDI驅動——三星、LG、英特爾、蘋果供應商紛紛佈局。但這種出口導向成長未必直接轉化為住房需求：2022年以來的制約因素是供給側融資約束（開發商信貸、債券市場），而非消費者收入。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">GDP / FDI Disbursed / Unemployment vs HCM Apt Price (2008–2025)</span>
+      <span class="lang-zh" style="display:none">GDP / FDI實際撥付 / 失業率 vs 胡志明公寓價格（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">2008–2011 · INFLATION CRISIS</span><span class="lang-zh" style="display:none">2008–2011 · 通膨危機</span></div>
+      <div class="ev-title"><span class="lang-en">SBV Hikes to 15% — CPI Hits 23%</span><span class="lang-zh" style="display:none">SBV升息至15%，CPI達23%</span></div>
+      <div class="ev-desc"><span class="lang-en">Vietnam's post-WTO-accession credit bubble meets GFC commodity shock. CPI peaks at 23% (Aug 2011). SBV raises refinance rate to 15% to defend VND. Property transactions freeze — bank credit to real estate cut sharply. Hanoi land prices crash −40%. NPL crisis emerges in banking system.</span><span class="lang-zh" style="display:none">越南入世後信貸泡沫遭遇GFC大宗商品衝擊，CPI飆至23%（2011年8月）。SBV升息至15%以捍衛越南盾，房產交易凍結，銀行對房地產信貸大幅削減，河內地價崩跌40%。銀行系統不良貸款危機浮現。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #6b7280">
+      <div class="ev-year" style="color:#6b7280"><span class="lang-en">2012–2013 · MARKET FREEZE</span><span class="lang-zh" style="display:none">2012–2013 · 市場凍結</span></div>
+      <div class="ev-title"><span class="lang-en">Property Market Near-Defunct — Developer Defaults</span><span class="lang-zh" style="display:none">房市幾近停擺，開發商違約</span></div>
+      <div class="ev-desc"><span class="lang-en">Transaction volumes collapse to near zero in many segments. Major developers (e.g., Quoc Cuong Gia Lai) face liquidity crises. Government launches Resolution 02 (January 2013) — VND 30 trillion social housing package. SBV reduces rate to 7%. VAMC (Vietnam Asset Management Company) established to absorb NPLs.</span><span class="lang-zh" style="display:none">多個市場的交易量幾乎歸零，主要開發商（如國強嘉來）面臨流動性危機。政府推出第02號決議（2013年1月）——3兆越南盾社會住房一攬子計劃。SBV降息至7%，越南資產管理公司（VAMC）成立以吸收不良貸款。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #8b5cf6">
+      <div class="ev-year" style="color:#8b5cf6"><span class="lang-en">2014–2015 · LAW REFORM CATALYST</span><span class="lang-zh" style="display:none">2014–2015 · 法規改革催化</span></div>
+      <div class="ev-title"><span class="lang-en">Foreigners Allowed to Own — Market Restarts</span><span class="lang-zh" style="display:none">外國人獲准置業，市場重啟</span></div>
+      <div class="ev-desc"><span class="lang-en">Amended Housing Law (effective Jul 2015) allows foreign nationals to purchase apartments for 50yr leasehold (renewable). Overseas Vietnamese (Viet Kieu) gain full ownership rights. Market re-ignites: HCM City new launches surge. Novaland, Vinhomes, Khang Dien emerge as dominant developers. Prices rise +15–20% in 2015–16.</span><span class="lang-zh" style="display:none">修訂後的住房法（2015年7月生效）允許外籍人士購買公寓（50年使用權，可續期）。海外越南人（越僑）獲得完整所有權。市場重新點火，胡志明市新推盤量激增，南龍、萬盛、康熙成為主要開發商。2015–16年房價上漲15–20%。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2016–2019 · REFORM BOOM</span><span class="lang-zh" style="display:none">2016–2019 · 改革榮景</span></div>
+      <div class="ev-title"><span class="lang-en">FDI + Manufacturing Boom Drives Urban Demand</span><span class="lang-zh" style="display:none">FDI+製造業榮景驅動城市需求</span></div>
+      <div class="ev-desc"><span class="lang-en">Samsung, Intel, LG expand Vietnam manufacturing. GDP +6–7%/yr. HCM City and Hanoi prices surge +15–25% cumulatively. Land banking fever emerges — provincial land auction prices soar beyond fundamentals in Da Nang, Nha Trang, Phu Quoc. Bond market opens to fund developer expansion.</span><span class="lang-zh" style="display:none">三星、英特爾、LG擴大越南製造業規模，GDP每年增長6–7%。胡志明市和河內累計漲幅達15–25%。土地投機熱潮興起——峴港、芽莊、富國島土拍價格遠超基本面。債券市場開放以支持開發商擴張。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">2020–2021 · COVID — HCM LOCKED DOWN</span><span class="lang-zh" style="display:none">2020–2021 · COVID，胡志明市封城</span></div>
+      <div class="ev-title"><span class="lang-en">SBV Cuts to 4.00%; Prices Resilient</span><span class="lang-zh" style="display:none">SBV降至4.00%；房價韌性強</span></div>
+      <div class="ev-desc"><span class="lang-en">Vietnam manages COVID well initially (2020 GDP +2.9%). HCM City faces severe Delta lockdown (Jul–Sep 2021) — GDP −6% in Q3. SBV cuts to 4%. Property prices surprisingly resilient: limited supply + cash buyers insulate market. Industrial real estate (factory/warehouse) booms from China+1 strategy.</span><span class="lang-zh" style="display:none">越南最初應對COVID表現良好（2020年GDP+2.9%），但胡志明市遭遇嚴峻的Delta封城（2021年7–9月），第三季GDP衰退6%。SBV降至4%。房價韌性出人意料：供給有限加上現金買家隔絕市場波動。受中國加一戰略驅動，工業地產（廠房/倉儲）大幅增長。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">2022 · BOND FRAUD CRISIS</span><span class="lang-zh" style="display:none">2022年 · 公司債詐騙危機</span></div>
+      <div class="ev-title"><span class="lang-en">Tân Hoàng Minh & Vạn Thịnh Phát Arrested — Bonds Freeze</span><span class="lang-zh" style="display:none">新皇明和萬盛發被捕，債券市場凍結</span></div>
+      <div class="ev-desc"><span class="lang-en">March 2022: Tân Hoàng Minh (real estate developer) arrested for fraudulent bond issuance (VND 10.3tn). October 2022: Trương Mỹ Lan (Vạn Thịnh Phát) arrested — Vietnam's biggest financial fraud. Bond market freezes: VND 300tn+ in corporate bonds outstanding suddenly unenforceable. Property developers starved of credit. Transactions collapse −50%.</span><span class="lang-zh" style="display:none">2022年3月：新皇明（房地產開發商）因詐騙性債券發行（103兆越南盾）被捕。2022年10月：張美蘭（萬盛發）被捕——越南史上最大金融詐騙案。債券市場凍結：逾300兆越南盾公司債突然陷入執行困境，開發商信貸斷炊，房產交易量崩跌50%。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">2023 · AGGRESSIVE SBV EASING</span><span class="lang-zh" style="display:none">2023年 · SBV積極寬鬆</span></div>
+      <div class="ev-title"><span class="lang-en">4 Rate Cuts: 6.5% → 4.5%; Market Still Frozen</span><span class="lang-zh" style="display:none">4次降息：6.5%→4.5%，市場仍凍結</span></div>
+      <div class="ev-desc"><span class="lang-en">SBV cuts refinance rate four times in 2023 (150bp total). Government passes revised Land Law (effective 2024) to unlock project approvals. Property transactions remain very low — banks reluctant to lend to developers amid audit crackdown (Lò Đốt Anti-Corruption Campaign). GDP growth 5.05% — below 6.5% target.</span><span class="lang-zh" style="display:none">SBV在2023年四次降息（合計150bp）。政府通過修訂土地法（2024年生效），以疏通項目審批。在反腐運動（「燒柴爐」）審計打壓下，銀行對開發商貸款仍謹慎，房產交易量持續低迷。GDP增長5.05%，低於6.5%目標。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2024–2025 · SLOW RECOVERY BEGINS</span><span class="lang-zh" style="display:none">2024–2025 · 緩慢復甦啟動</span></div>
+      <div class="ev-title"><span class="lang-en">New Land Law in Effect; HCM Prices Edge Higher</span><span class="lang-zh" style="display:none">新土地法生效；胡志明市房價小幅回升</span></div>
+      <div class="ev-desc"><span class="lang-en">Revised Land Law (Aug 2024) streamlines project approvals and updates land pricing to market value. Developer launches cautiously restart. HCM City primary apartment prices recover +5–8%. GDP 7.1% in 2024. FDI hits record $25.4bn disbursed. Hanoi mid-range segment showing strongest momentum. Bond market slowly recovering with new regulatory framework.</span><span class="lang-zh" style="display:none">修訂後土地法（2024年8月）簡化項目審批並將地價更新為市場價值。開發商謹慎重啟推盤，胡志明市一手公寓價格回升5–8%，2024年GDP達7.1%，FDI實際撥付創紀錄達254億美元。河內中端市場表現最強，債券市場在新監管框架下緩慢恢復。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#d97706;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#d97706;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook — Trough / Early Recovery</span><span class="lang-zh" style="display:none">當前週期展望 — 谷底/早期復甦</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">GDP +7.1% (2024) driven by record FDI manufacturing</span><span class="lang-zh" style="display:none">GDP+7.1%（2024年），由創紀錄FDI製造業驅動</span></li>
+          <li><span class="lang-en">New Land Law (2024) unlocking project pipeline</span><span class="lang-zh" style="display:none">新土地法（2024年）疏通項目管線</span></li>
+          <li><span class="lang-en">SBV at 4.5% — lowest in a decade, supporting credit</span><span class="lang-zh" style="display:none">SBV利率4.5%為十年低點，支撐信貸</span></li>
+          <li><span class="lang-en">China+1 manufacturing FDI driving industrial real estate</span><span class="lang-zh" style="display:none">中國加一製造業FDI驅動工業地產需求</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Bond market not fully healed — developer credit still constrained</span><span class="lang-zh" style="display:none">債券市場未完全修復，開發商信貸仍受限</span></li>
+          <li><span class="lang-en">Anti-corruption campaign uncertainty — project approval delays</span><span class="lang-zh" style="display:none">反腐運動不確定性導致項目審批延誤</span></li>
+          <li><span class="lang-en">US tariff risk (46% proposed) threatening export-led growth model</span><span class="lang-zh" style="display:none">美國關稅風險（擬議46%）威脅出口導向成長模式</span></li>
+          <li><span class="lang-en">Vạn Thịnh Phát trial outcomes still affecting market confidence</span><span class="lang-zh" style="display:none">萬盛發案件審判結果仍影響市場信心</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: State Bank of Vietnam (SBV refinance rate, sbv.gov.vn), GSO Vietnam (GDP, CPI, Labour Force Survey — gso.gov.vn), Savills Vietnam / CBRE Vietnam (residential price data — savills.com.vn, cbre.com.vn), MPI (FDI statistics — mpi.gov.vn). Note: Vietnam lacks a comprehensive official residential price index; price data uses Savills/CBRE HCM City apartment median (USD/sqm) as proxy. Historical series 2008–2013 based on limited broker data and estimated from trend — treat as approximate. 2025 data are Q1 actuals or estimates.</span>
+    <span class="lang-zh" style="display:none">來源：越南國家銀行（SBV再融資利率 · sbv.gov.vn）、越南統計總局GSO（GDP、CPI、勞動力調查 · gso.gov.vn）、仲量聯行越南/世邦魏理仕越南（住宅價格數據 · savills.com.vn, cbre.com.vn）、計劃投資部（FDI統計 · mpi.gov.vn）。注意：越南缺乏全面的官方住宅價格指數，本頁使用Savills/CBRE胡志明市公寓中位數（美元/平方公尺）作為代理指標。2008–2013年歷史序列基於有限仲介數據及趨勢估算，僅供參考。2025年數據為Q1實際值或估算。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, sources: SBV / GSO / Savills / CBRE) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+/* HCM City primary apartment median price USD/sqm (Savills/CBRE proxy) */
+/* 2008–2013 estimated from broker data and trend; limited public records */
+/* Note: treat 2008–2013 as approximate */
+var hpi = [900,800,900,850,780,820,950,1100,1350,1550,1800,2100,2200,2400,2500,2350,2800,3200];
+
+/* Chart 1: Monetary */
+/* SBV refinance rate (year-end) — sbv.gov.vn */
+var sbvRate    = [8.50,8.00,9.00,15.00,9.00,7.00,6.50,6.50,6.50,6.25,6.25,6.00,4.00,4.00,6.00,4.50,4.50,4.50];
+/* Vietnamese commercial bank average lending rate (approximate) */
+var mortRate   = [18.0,12.0,14.0,18.0,13.0,10.0,9.0,8.5,8.0,8.0,9.0,9.0,7.0,7.0,8.5,7.0,6.5,6.0];
+/* GSO CPI YoY% annual avg */
+var cpiYoy     = [23.1,6.9,9.2,18.6,9.1,6.6,4.1,0.6,2.7,3.5,3.5,2.8,3.2,1.8,3.2,3.3,4.1,3.6];
+
+/* Chart 2: Real Economy */
+/* GSO real GDP YoY% */
+var gdpGrowth  = [5.7,5.4,6.4,6.2,5.2,5.4,6.0,6.7,6.2,6.8,7.1,7.0,2.9,2.6,8.0,5.1,7.1,6.5];
+/* FDI actually disbursed USD billions — MPI */
+var fdiB       = [11.5,10.0,11.0,11.0,10.5,11.5,12.4,14.5,15.8,17.5,19.1,20.4,19.9,19.7,22.4,23.2,25.4,null];
+/* GSO urban unemployment % */
+var unemployRate = [2.4,2.9,2.9,2.2,2.1,2.2,2.1,2.3,2.3,2.2,2.2,2.2,4.4,3.2,2.4,2.3,2.3,2.2];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × HPI ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(220,38,38,0.10)'},label:{formatter:isZh?'通膨危機':'Inflation Crisis',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2011'}],
+    [{xAxis:'2012',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'市場凍結':'Market Freeze',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2013'}],
+    [{xAxis:'2014',itemStyle:{color:'rgba(22,163,74,0.07)'},  label:{formatter:isZh?'改革榮景':'Reform Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.08)'},  label:{formatter:isZh?'債券危機':'Bond Crisis',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(217,119,6,0.07)'},  label:{formatter:isZh?'谷底復甦':'Recovery',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2011',label:{formatter:isZh?'SBV升至15%':'SBV 15%',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2015',label:{formatter:isZh?'外籍置業開放':'Foreign Ownership',color:'#8b5cf6',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#8b5cf6',type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'萬盛發危機':'VTP Crisis',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2024',label:{formatter:isZh?'新土地法':'New Land Law',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:80,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-5,max:25,interval:5,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:500,max:3500,interval:500,axisLabel:{formatter:'${value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'公寓均價(USD/sqm)':'Apt Price (USD/sqm)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'SBV再融資利率':'SBV Refinance Rate',type:'line',data:sbvRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'商業銀行貸款利率':'Lending Rate',type:'line',data:mortRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpiYoy,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'胡志明市公寓均價(USD/m²)':'HCM Apt Price (USD/m²)',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy × HPI ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gdpBarData = gdpGrowth.map(function(v){return {value:v,itemStyle:{color:v>=0?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(220,38,38,0.10)'},label:{formatter:isZh?'通膨危機':'Inflation Crisis',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2011'}],
+    [{xAxis:'2014',itemStyle:{color:'rgba(22,163,74,0.07)'},  label:{formatter:isZh?'改革榮景':'Reform Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.08)'},  label:{formatter:isZh?'債券危機':'Bond Crisis',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}]
+  ];
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:80,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:0,max:30,interval:5,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'GDP%/FDI(B$)':'GDP%/FDI(B$)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:500,max:3500,interval:500,axisLabel:{formatter:'${value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'公寓均價(USD/sqm)':'Apt Price (USD/sqm)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GDP YoY%':'GDP YoY%',type:'bar',data:gdpBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'FDI實際撥付(十億美元)':'FDI Disbursed ($B)',type:'line',data:fdiB,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false,connectNulls:false},
+      {name:isZh?'城市失業率%':'Urban Unemployment%',type:'line',data:unemployRate,yAxisIndex:0,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'胡志明市公寓均價(USD/m²)':'HCM Apt Price (USD/m²)',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

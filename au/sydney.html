@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sydney Deep Dive | Australia Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="container">
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+    <h1><span class="lang-en">Sydney &mdash; 2026 Deep Dive</span><span class="lang-zh" style="display:none">雪梨 &mdash; 2026深度研究</span></h1>
+    <p class="subtitle"><span class="lang-en">Greater Sydney Residential Supply &amp; Demand Analysis</span><span class="lang-zh" style="display:none">大雪梨地區住宅供需深度研究</span></p>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">MEDIAN HOUSE PRICE</span><span class="lang-zh" style="display:none">獨棟中位價</span></div>
+      <div class="kpi-value">A$1,607,046</div>
+      <span class="kpi-badge badge-blue"><span class="lang-en">+6.0% YoY &middot; CoreLogic</span><span class="lang-zh" style="display:none">年增+6.0% &middot; CoreLogic</span></span>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">MEDIAN UNIT PRICE</span><span class="lang-zh" style="display:none">公寓中位價</span></div>
+      <div class="kpi-value">A$903,080</div>
+      <span class="kpi-badge badge-blue"><span class="lang-en">+6.0% YoY &middot; CoreLogic</span><span class="lang-zh" style="display:none">年增+6.0% &middot; CoreLogic</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">WEEKLY RENT (HOUSE)</span><span class="lang-zh" style="display:none">週租金（獨棟）</span></div>
+      <div class="kpi-value">A$800</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">+3.9% YoY &middot; Domain</span><span class="lang-zh" style="display:none">年增+3.9% &middot; Domain</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">WEEKLY RENT (UNIT)</span><span class="lang-zh" style="display:none">週租金（公寓）</span></div>
+      <div class="kpi-value">A$750</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">+7.1% YoY &middot; Domain</span><span class="lang-zh" style="display:none">年增+7.1% &middot; Domain</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">VACANCY RATE</span><span class="lang-zh" style="display:none">空置率</span></div>
+      <div class="kpi-value">1.5%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Jan 2026 &middot; SQM</span><span class="lang-zh" style="display:none">2026年1月 &middot; SQM</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">CLEARANCE RATE</span><span class="lang-zh" style="display:none">清盤率</span></div>
+      <div class="kpi-value">55%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Mar 2026 low &middot; Avg 67%</span><span class="lang-zh" style="display:none">2026年3月低點 &middot; 歷史均67%</span></span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: MACRO & MONETARY POLICY -->
+  <div class="section-label"><span class="lang-en">MACRO &amp; MONETARY POLICY</span><span class="lang-zh" style="display:none">總體經濟與貨幣政策</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">RBA raised the cash rate 25bp to 4.10% on 17 March 2026 — the second consecutive hike — driven by sticky inflation and Middle East energy shocks. ASX futures imply rates could reach 4.75% by early 2027. Mortgage repayments now consume 56.8% of median household income in NSW.</span><span class="lang-zh" style="display:none">澳洲儲備銀行2026年3月17日以5比4的分歧票數，再次升息25個基點至4.10%——連續第二次緊縮，主因是通膨黏性與中東能源衝擊。ASX期貨隱含利率可能在2027年初升至4.75%。NSW房貸還款已佔家庭收入中位數的56.8%。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">RBA Rate Path vs Market Implied</span><span class="lang-zh" style="display:none">RBA利率路徑 vs 市場隱含</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Official Cash Rate &amp; ASX Futures</span><span class="lang-zh" style="display:none">官方利率與ASX期貨</span></p>
+      <div style="position:relative;height:220px;"><div id="chartRBARatePath" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Mortgage Affordability by State</span><span class="lang-zh" style="display:none">各州房貸負擔能力</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">% of Median Income on Repayments</span><span class="lang-zh" style="display:none">房貸還款佔收入中位數比例</span></p>
+      <div style="position:relative;height:220px;"><div id="chartMortgageAffordability" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Employment Growth &amp; Unemployment</span><span class="lang-zh" style="display:none">就業增長與失業率</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Annual &middot; ABS Labour Force</span><span class="lang-zh" style="display:none">年度 &middot; ABS勞動力調查</span></p>
+      <div style="position:relative;height:220px;"><div id="chartEmployment" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Bank Price Forecasts 2026</span><span class="lang-zh" style="display:none">銀行2026房價預測</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Sydney House Price Change %</span><span class="lang-zh" style="display:none">雪梨房價變動%</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBankForecast" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: DEMOGRAPHICS & MIGRATION -->
+  <div class="section-label"><span class="lang-en">DEMOGRAPHICS &amp; MIGRATION</span><span class="lang-zh" style="display:none">人口結構與移民趨勢</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">Australia's population surpassed 27.5M in 2025. NSW will gain 1.7M from net overseas migration by 2041, far outweighing 400K interstate losses. Total fertility rate collapsed to 1.42 — migration is now the sole engine of population growth. Student visa holders (157,000 in 2024-25) create direct demand for inner-city rental units.</span><span class="lang-zh" style="display:none">澳洲人口在2025年突破2,750萬。NSW至2041年將從海外淨移入170萬人，遠超40萬的跨州人口流失。生育率崩跌至1.42——移民已成為人口增長的唯一引擎。學生簽證持有者（2024-25年度157,000人）直接推動內城區租賃需求。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Net Overseas Migration</span><span class="lang-zh" style="display:none">海外淨移民</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Annual Persons &middot; ABS</span><span class="lang-zh" style="display:none">年度人數 &middot; ABS</span></p>
+      <div style="position:relative;height:220px;"><div id="chartNOM" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">NSW Population Growth Components</span><span class="lang-zh" style="display:none">NSW人口增長組成</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Cumulative to 2041 (Millions)</span><span class="lang-zh" style="display:none">至2041年累計（百萬）</span></p>
+      <div style="position:relative;height:220px;"><div id="chartNSWPopGrowth" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Migration Visa Breakdown 2024-25</span><span class="lang-zh" style="display:none">2024-25移民簽證類別</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">By Visa Category</span><span class="lang-zh" style="display:none">按簽證類別</span></p>
+      <div style="position:relative;height:220px;"><div id="chartMigrantVisa" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">NSW Population Forecast</span><span class="lang-zh" style="display:none">NSW人口預測</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">2021&ndash;2041 &middot; NSW Planning</span><span class="lang-zh" style="display:none">2021&ndash;2041 &middot; NSW規劃部</span></p>
+      <div style="position:relative;height:220px;"><div id="chartPopForecast" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: SUPPLY -->
+  <div class="section-label"><span class="lang-en">SUPPLY: STRUCTURAL BOTTLENECKS</span><span class="lang-zh" style="display:none">供給面：系統性瓶頸</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">NSW needs 75,400 new homes per year to meet the National Housing Accord target of 377,000 by 2029. Reality: only 29,900 expected in 2025-26 — a 60% shortfall. National forecast gap: 262,000 homes by 2029. Building approvals collapsed 7.2% in January 2026; private sector apartments down 24.5%. Key bottlenecks: high financing costs (4.10% cash rate), chronic skilled labour shortage, and Sydney Water infrastructure constraints blocking TOD developments.</span><span class="lang-zh" style="display:none">NSW需每年新建75,400套才能完成《國家住房協議》至2029年的37.7萬套目標。現實：2025-26年預計僅完工29,900套——缺口高達60%。全國預測缺口：至2029年累計26.2萬套。2026年1月建築批准量暴跌7.2%，私人公寓更下滑24.5%。關鍵瓶頸：融資成本高昂（現金利率4.10%）、熟練勞工嚴重短缺，以及雪梨水務公司基礎設施限制阻礙TOD開發。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">NSW Dwelling Completions vs Accord Target</span><span class="lang-zh" style="display:none">NSW住宅完工量 vs 協議目標</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Annual Dwellings</span><span class="lang-zh" style="display:none">年度住宅量</span></p>
+      <div style="position:relative;height:220px;"><div id="chartNSWCompletions" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Building Approvals (National)</span><span class="lang-zh" style="display:none">建築批准量（全國）</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Monthly &middot; ABS</span><span class="lang-zh" style="display:none">月度 &middot; ABS</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBuildingApprovals" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Cumulative Supply Gap</span><span class="lang-zh" style="display:none">累計供給缺口</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Target vs Forecast &middot; NHSAC</span><span class="lang-zh" style="display:none">目標 vs 預測 &middot; NHSAC</span></p>
+      <div style="position:relative;height:220px;"><div id="chartSupplyGap" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Construction Cost Inflation</span><span class="lang-zh" style="display:none">建築成本通膨</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Annual % Change</span><span class="lang-zh" style="display:none">年度變動%</span></p>
+      <div style="position:relative;height:220px;"><div id="chartConstructionCost" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: TRANSACTION MARKET -->
+  <div class="section-label"><span class="lang-en">TRANSACTION MARKET DYNAMICS</span><span class="lang-zh" style="display:none">買賣市場動態</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">Sydney's auction clearance rate crashed to 55% in late March 2026 — the lowest since July 2022 and well below the 67% historical March average. House values: flat in Q1 2026 (0.0% monthly, -0.1% quarterly) despite +6.0% annual. The "vendors on strike" phenomenon keeps active listings 4% below 5-year averages, preventing deep price falls. Affordable segment (bottom quartile) up 2.5% in 3 months; premium segment down 2.0%.</span><span class="lang-zh" style="display:none">2026年3月底雪梨拍賣清盤率暴跌至55%——2022年7月以來最低，遠低於3月歷史均值67%。房屋價值在2026年Q1幾乎停滯（月增0.0%，季降0.1%），儘管年增率仍有6.0%。「賣方罷工」現象使活躍掛牌物件低於五年均值4%，防止了房價深度回調。低價位（下四分位）季增2.5%；高端市場下跌2.0%。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Auction Clearance Rate</span><span class="lang-zh" style="display:none">拍賣清盤率</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Sydney Weekly &middot; CoreLogic</span><span class="lang-zh" style="display:none">雪梨每週 &middot; CoreLogic</span></p>
+      <div style="position:relative;height:240px;"><div id="chartClearanceRate" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Sydney Price Trajectory</span><span class="lang-zh" style="display:none">雪梨房價走勢</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Houses vs Units &middot; CoreLogic</span><span class="lang-zh" style="display:none">獨棟 vs 公寓 &middot; CoreLogic</span></p>
+      <div style="position:relative;height:240px;"><div id="chartSydneyPriceQ" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Q1 2026 Performance by Quartile</span><span class="lang-zh" style="display:none">2026年Q1各價格段表現</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">3-Month Price Change %</span><span class="lang-zh" style="display:none">季度價格變動%</span></p>
+      <div style="position:relative;height:240px;"><div id="chartQuartilePerf" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Active Listings Trend</span><span class="lang-zh" style="display:none">活躍掛牌趨勢</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Sydney &middot; Current vs 5Y Avg</span><span class="lang-zh" style="display:none">雪梨 &middot; 目前 vs 五年均值</span></p>
+      <div style="position:relative;height:220px;"><div id="chartListingTrend" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: RENTAL MARKET -->
+  <div class="section-label"><span class="lang-en">RENTAL MARKET CRISIS</span><span class="lang-zh" style="display:none">租賃市場危機</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">Sydney vacancy rate: 1.5% in Jan 2026, tightening to 1.3% by March. Equilibrium is 2.5-3.0%. Median house rent: A$800/week (+3.9% YoY); Units: A$750/week (+7.1% YoY). Domain forecasts house rents hitting A$815/week in 2026. But rent growth is slowing — not from new supply, but because tenants have hit their absolute affordability ceiling. NSW rental reforms (no-grounds eviction ban, annual rent cap) risk triggering investor exit and permanent reduction in rental supply.</span><span class="lang-zh" style="display:none">雪梨空置率：2026年1月1.5%，3月進一步緊縮至1.3%。均衡水位為2.5-3.0%。獨棟中位租金A$800/週（年增3.9%）；公寓A$750/週（年增7.1%）。Domain預測2026年獨棟週租將達A$815。但租金增速放緩——並非因為新供給出現，而是租客負擔能力已觸頂。NSW租賃改革（禁止無理由驅逐、年度租金上調限制）存在引發投資者撤出並永久削減租賃供給的風險。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Vacancy Rate by City</span><span class="lang-zh" style="display:none">各城市空置率</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Jan 2026 &middot; SQM Research</span><span class="lang-zh" style="display:none">2026年1月 &middot; SQM Research</span></p>
+      <div style="position:relative;height:220px;"><div id="chartVacancyRate" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Sydney Weekly Rent Trend</span><span class="lang-zh" style="display:none">雪梨每週租金趨勢</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Houses vs Units &middot; Domain</span><span class="lang-zh" style="display:none">獨棟 vs 公寓 &middot; Domain</span></p>
+      <div style="position:relative;height:220px;"><div id="chartRentTrend" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Rent Growth YoY</span><span class="lang-zh" style="display:none">租金年增率</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Houses vs Units %</span><span class="lang-zh" style="display:none">獨棟 vs 公寓 %</span></p>
+      <div style="position:relative;height:220px;"><div id="chartRentYoY" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Rent-to-Income Ratio</span><span class="lang-zh" style="display:none">租金收入比</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">% of Household Income</span><span class="lang-zh" style="display:none">佔家庭收入比例</span></p>
+      <div style="position:relative;height:220px;"><div id="chartAffordabilityRent" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: POLICY -->
+  <div class="section-label"><span class="lang-en">POLICY IMPACT &amp; FIRST HOME BUYERS</span><span class="lang-zh" style="display:none">政策干預與首購族效應</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">From 1 Oct 2025: First Home Guarantee expanded to unlimited places, no income caps, Sydney price cap raised from A$900K to A$1.5M. NSW stamp duty exemption for homes under A$800K. These policies are compressing demand into the A$800K–$1.5M band, creating fierce competition and forming a price floor at the cap ceiling. Bottom quartile prices rose 2.5% in Q1 2026 while premium fell 2.0% — textbook policy-driven segmentation.</span><span class="lang-zh" style="display:none">2025年10月1日起：首購族擔保計畫取消名額限制、取消收入上限，雪梨價格上限從90萬提升至150萬澳元。NSW對80萬以下住宅提供全額印花稅豁免。這些政策將需求壓縮至80至150萬澳元的價格帶，在政策上限附近製造激烈競爭並形成支撐。2026年Q1低價位段漲2.5%，高端跌2.0%——教科書式的政策驅動市場分化。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Policy Timeline</span><span class="lang-zh" style="display:none">政策時間線</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Key Housing Interventions</span><span class="lang-zh" style="display:none">關鍵住房干預措施</span></p>
+      <div style="position:relative;height:180px;"><div id="chartPolicyTimeline" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Demand by Price Band</span><span class="lang-zh" style="display:none">各價格帶需求</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Relative Competition Index</span><span class="lang-zh" style="display:none">相對競爭指數</span></p>
+      <div style="position:relative;height:220px;"><div id="chartPriceCap" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Stamp Duty: Standard vs FHB</span><span class="lang-zh" style="display:none">印花稅：標準 vs 首購族</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">NSW Transfer Duty A$</span><span class="lang-zh" style="display:none">NSW過戶稅 A$</span></p>
+      <div style="position:relative;height:220px;"><div id="chartStampDuty" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Market Segmentation Map</span><span class="lang-zh" style="display:none">市場分化地圖</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Price vs Demand Pressure</span><span class="lang-zh" style="display:none">價格 vs 需求壓力</span></p>
+      <div style="position:relative;height:280px;"><div id="chartSegmentation" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: SUMMARY -->
+  <div class="section-label"><span class="lang-en">SUMMARY</span><span class="lang-zh" style="display:none">摘要與結論</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div class="summary-card" style="border-left:4px solid #dc2626;">
+      <h4><span class="lang-en">Fragile Equilibrium</span><span class="lang-zh" style="display:none">脆弱的僵局</span></h4>
+      <p><span class="lang-en">Auction clearance at 55%, vendors holding firm, buyers priced out. Market locked in a standoff until rate cuts emerge.</span><span class="lang-zh" style="display:none">清盤率55%，賣方拒絕降價，買方無力追高。市場陷入僵局，等待降息解套。</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #d97706;">
+      <h4><span class="lang-en">Supply Structural Failure</span><span class="lang-zh" style="display:none">供給系統性失靈</span></h4>
+      <p><span class="lang-en">NSW will miss the Accord target by ~180,000 units by 2029. Inelastic supply is the price floor — markets don't crash when there's nothing to sell.</span><span class="lang-zh" style="display:none">NSW至2029年供給缺口將達約18萬套。非彈性供給是房價底部——沒有房子可賣時市場不會崩盤。</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #dc2626;">
+      <h4><span class="lang-en">Rental Crisis Structural</span><span class="lang-zh" style="display:none">租賃危機結構性</span></h4>
+      <p><span class="lang-en">Vacancy at 1.5%, rents at absolute affordability ceiling. NSW rental reforms risk investor exit, which would make the crisis worse.</span><span class="lang-zh" style="display:none">空置率1.5%，租金觸及絕對負擔極限。NSW租賃改革存在引發投資者撤出的風險，這反而會惡化危機。</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #16a34a;">
+      <h4><span class="lang-en">Affordable Segment Opportunity</span><span class="lang-zh" style="display:none">低價位段機會</span></h4>
+      <p><span class="lang-en">Policy and affordability constraints are funnelling demand into sub-$1.5M units and western Sydney. This segment has structural support.</span><span class="lang-zh" style="display:none">政策與負擔能力限制正將需求導向150萬以下公寓與西雪梨。此板塊具備結構性支撐。</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #d97706;grid-column:span 2">
+      <h4><span class="lang-en">Watch Triggers</span><span class="lang-zh" style="display:none">關鍵觸發因素</span></h4>
+      <p><span class="lang-en">Upside: rate cuts + supply breakthrough. Downside: unemployment spike + second inflation wave. Neither is imminent, but both are non-zero.</span><span class="lang-zh" style="display:none">上行觸發：降息+供給突破。下行觸發：失業率飆升+通膨二次爆發。兩者均未迫在眉睫，但概率非零。</span></p>
+    </div>
+  </div>
+
+  <div class="source-footer">
+    <span class="lang-en">CoreLogic Mar 2026 &middot; Domain Rental Report Dec 2025 &middot; SQM Research &middot; ABS Labour Force Feb 2026 &middot; ABS Building Approvals Jan 2026 &middot; RBA Mar 2026 &middot; ASX RBA Rate Tracker &middot; NSW Planning Portal &middot; NHSAC Q1 2026 &middot; UDIA NSW &middot; Treasury.gov.au &middot; Housing Australia &middot; Revenue NSW<br><em>Not investment advice.</em></span>
+    <span class="lang-zh" style="display:none">CoreLogic 2026年3月 &middot; Domain租賃報告2025年12月 &middot; SQM Research &middot; ABS勞動力調查2026年2月 &middot; ABS建築批准2026年1月 &middot; RBA 2026年3月 &middot; ASX RBA利率追蹤 &middot; NSW規劃部 &middot; NHSAC 2026年Q1 &middot; UDIA NSW &middot; 財政部 &middot; 住房澳洲 &middot; NSW稅務局<br><em>非投資建議。</em></span>
+  </div>
+</main>
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtAUD(v){if(v>=1000000)return 'A$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return 'A$'+(v/1000).toFixed(0)+'K';return 'A$'+v;}
+function fmtAUDShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}
+function fmtK(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}
+  initCharts(lang);
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+
+function initCharts(lang){
+  allCharts.length=0;
+  var en=lang==='en';
+
+  /* Chart 1: chartRBARatePath */
+  var c1=echarts.init(document.getElementById('chartRBARatePath'));allCharts.push(c1);
+  c1.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['Mar 26','Apr 26','May 26','Jun 26','Sep 26','Dec 26','Mar 27']}),
+    yAxis:mkAxis({type:'value',min:3.8,max:5.0,axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[
+      {name:en?'Official Cash Rate':'官方利率',type:'line',color:C.navy,data:[4.10,4.10,4.10,4.10,4.10,4.10,4.10],symbol:'circle',symbolSize:5,lineStyle:{width:2}},
+      {name:en?'Implied Yield':'隱含殖利率',type:'line',color:C.orange,data:[4.10,4.095,4.25,4.32,4.45,4.60,4.755],symbol:'circle',symbolSize:5,lineStyle:{width:2,type:'dashed'},
+       markLine:{silent:true,lineStyle:{type:'dashed',color:C.red},data:[{yAxis:4.75}],label:{formatter:en?'Market Ceiling 4.75%':'市場上限4.75%',color:C.red,fontSize:10}}}
+    ]
+  });
+
+  /* Chart 2: chartMortgageAffordability */
+  var c2=echarts.init(document.getElementById('chartMortgageAffordability'));allCharts.push(c2);
+  var affLabels=en?['NSW','VIC','QLD','WA','SA','National Avg']:['新南威爾斯','維多利亞','昆士蘭','西澳','南澳','全國平均'];
+  var affData=[56.8,48.2,42.1,35.6,38.9,47.5];
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+    grid:{left:90,right:30,top:20,bottom:20,containLabel:false},
+    yAxis:mkAxis({type:'category',data:affLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+    xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[{type:'bar',data:affData.map(function(v){return{value:v,itemStyle:{color:v>=50?C.red:v>=40?C.orange:C.navy,borderRadius:[0,4,4,0]}};}),barMaxWidth:28,
+      label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:10,fontFamily:'JetBrains Mono'}},
+    ],
+    markLine:{data:[]},
+    // Use a hidden series for the markLine
+  });
+  // Add markLine via separate update
+  c2.setOption({series:[{markLine:{silent:true,lineStyle:{type:'dashed',color:C.green},data:[{xAxis:30}],label:{formatter:en?'Stress threshold 30%':'壓力門檻30%',color:C.green,fontSize:10}}}]});
+
+  /* Chart 3: chartEmployment */
+  var c3=echarts.init(document.getElementById('chartEmployment'));allCharts.push(c3);
+  c3.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025','2026 Feb']}),
+    yAxis:[mkAxis({type:'value'}),mkAxis({type:'value',min:0,max:10,axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}}),splitLine:{show:false}})],
+    series:[
+      {name:en?'Employment Growth (K)':'就業增長(千人)',type:'bar',color:C.navy,data:[120,180,290,210,180,160,49],barMaxWidth:35},
+      {name:en?'Unemployment %':'失業率%',type:'line',yAxisIndex:1,color:C.orange,data:[7.2,5.1,3.5,3.7,3.9,4.1,4.3],symbol:'circle',symbolSize:5}
+    ]
+  });
+
+  /* Chart 4: chartBankForecast */
+  var c4=echarts.init(document.getElementById('chartBankForecast'));allCharts.push(c4);
+  var bfLabels=['CBA','Westpac','ANZ','SQM (bear)','SQM (bull)'];
+  var bfData=[2.0,3.0,2.5,-6.0,-2.0];
+  c4.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+    grid:{left:90,right:30,top:20,bottom:20,containLabel:false},
+    yAxis:mkAxis({type:'category',data:bfLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+    xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[{type:'bar',data:bfData.map(function(v){return{value:v,itemStyle:{color:v>0?C.green:C.red,borderRadius:v>0?[0,4,4,0]:[4,0,0,4]}};}),barMaxWidth:28,
+      label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:10,fontFamily:'JetBrains Mono'},
+      markLine:{silent:true,lineStyle:{color:C.muted},data:[{xAxis:0}],label:{show:false}}}
+    ]
+  });
+
+  /* Chart 5: chartNOM */
+  var c5=echarts.init(document.getElementById('chartNOM'));allCharts.push(c5);
+  var nomLabels=['2019-20','2020-21','2021-22','2022-23','2023-24','2024-25','2025-26E'];
+  var nomData=[194000,-89000,171000,538000,446000,306000,260000];
+  c5.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:nomLabels}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+    series:[{type:'bar',data:nomData.map(function(v){return{value:v,itemStyle:{color:v>=0?C.navy:C.red}};}),barMaxWidth:35,
+      markPoint:{data:[{type:'max',label:{formatter:en?'Post-COVID Peak':'疫後高峰',fontSize:9,color:'#fff'},itemStyle:{color:C.navy}}]}}
+    ]
+  });
+
+  /* Chart 6: chartNSWPopGrowth */
+  var c6=echarts.init(document.getElementById('chartNSWPopGrowth'));allCharts.push(c6);
+  var popLabels=en?['Births\n+2.0M','Deaths\n-1.2M','Overseas\nMigration\n+1.7M','Interstate\nLoss\n-0.4M','Net\nGrowth']:['出生\n+200萬','死亡\n-120萬','海外移民\n+170萬','跨州流失\n-40萬','淨增長'];
+  var popData=[2.0,-1.2,1.7,-0.4,2.1];
+  c6.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:popLabels,axisLabel:Object.assign({},baseText,{interval:0})}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'M';}})}),
+    series:[{type:'bar',data:popData.map(function(v,i){return{value:v,itemStyle:{color:i===4?C.navy:v>0?C.green:C.red}};}),barMaxWidth:35,
+      label:{show:true,position:function(p){return p.data>=0?'top':'bottom';},formatter:function(p){return p.value+'M';},fontSize:10,fontFamily:'JetBrains Mono'}}
+    ]
+  });
+
+  /* Chart 7: chartMigrantVisa */
+  var c7=echarts.init(document.getElementById('chartMigrantVisa'));allCharts.push(c7);
+  c7.setOption({
+    tooltip:{trigger:'item',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}},
+    legend:Object.assign({},baseLegend,{top:'auto',bottom:5}),
+    series:[{type:'pie',radius:['35%','65%'],center:['50%','45%'],
+      data:[
+        {value:157000,name:en?'Student':'學生',itemStyle:{color:C.navy}},
+        {value:89000,name:en?'Skilled':'技術移民',itemStyle:{color:C.green}},
+        {value:52000,name:en?'Family':'家庭',itemStyle:{color:C.orange}},
+        {value:8000,name:en?'Other':'其他',itemStyle:{color:C.muted}}
+      ],
+      label:{formatter:'{b}\n{d}%',fontSize:10,color:C.navy},
+      emphasis:{itemStyle:{shadowBlur:10,shadowColor:'rgba(0,0,0,0.2)'}}
+    }]
+  });
+
+  /* Chart 8: chartPopForecast */
+  var c8=echarts.init(document.getElementById('chartPopForecast'));allCharts.push(c8);
+  c8.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2021','2023','2025','2027','2029','2031','2033','2035','2037','2039','2041']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return(v/1000000).toFixed(1)+'M';}})}),
+    series:[{type:'line',data:[5100000,5200000,5350000,5520000,5700000,5890000,6080000,6270000,6480000,6790000,7100000],
+      lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.08)'},smooth:0.2,symbol:'circle',symbolSize:5}]
+  });
+
+  /* Chart 9: chartNSWCompletions */
+  var c9=echarts.init(document.getElementById('chartNSWCompletions'));allCharts.push(c9);
+  c9.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2024-25','2025-26','2026-27','2027-28','2028-29']}),
+    yAxis:mkAxis({type:'value'}),
+    series:[{type:'bar',color:C.navy,data:[28300,29900,29050,30050,31200],barMaxWidth:35,
+      label:{show:true,position:'top',formatter:function(p){return fmtK(p.value);},fontSize:10,fontFamily:'JetBrains Mono'},
+      markLine:{silent:true,lineStyle:{type:'dashed',color:C.red},data:[{yAxis:75400}],label:{formatter:en?'Accord Target 75,400':'協議目標 75,400',color:C.red,fontSize:10}}}
+    ]
+  });
+
+  /* Chart 10: chartBuildingApprovals */
+  var c10=echarts.init(document.getElementById('chartBuildingApprovals'));allCharts.push(c10);
+  c10.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26']}),
+    yAxis:mkAxis({type:'value'}),
+    series:[
+      {name:en?'Total Approvals':'總批准量',type:'bar',color:C.navy,data:[17200,16800,16500,15900,16100,15600,14564],barMaxWidth:30},
+      {name:en?'Apartments Only':'公寓批准量',type:'bar',color:C.orange,data:[7800,7200,7000,6500,6800,6200,4682],barMaxWidth:30,
+       markPoint:{data:[{coord:['Jan 26',4682],label:{formatter:'-24.5%',fontSize:9,color:'#fff'},itemStyle:{color:C.red}}]}}
+    ]
+  });
+
+  /* Chart 11: chartSupplyGap */
+  var c11=echarts.init(document.getElementById('chartSupplyGap'));allCharts.push(c11);
+  c11.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['2024-25','2025-26','2026-27','2027-28','2028-29']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+    series:[
+      {name:en?'Target Cumulative':'累計目標',type:'line',color:C.green,data:[75400,150800,226200,301600,377000],lineStyle:{type:'dashed'},symbol:'circle',symbolSize:5},
+      {name:en?'Forecast Cumulative':'累計預測',type:'line',color:C.red,data:[28300,58200,87250,117300,148500],symbol:'circle',symbolSize:5,
+       areaStyle:{color:'rgba(220,38,38,0.1)'}}
+    ]
+  });
+
+  /* Chart 12: chartConstructionCost */
+  var c12=echarts.init(document.getElementById('chartConstructionCost'));allCharts.push(c12);
+  var ccData=[7.3,11.4,8.2,4.1,2.1,1.3];
+  c12.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2021','2022','2023','2024','2025','2026Q1']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[{type:'bar',data:ccData.map(function(v){return{value:v,itemStyle:{color:v>=8?C.red:v>=4?C.orange:C.navy}};}),barMaxWidth:35,
+      markLine:{silent:true,lineStyle:{type:'dashed',color:C.muted},data:[{yAxis:3}],label:{formatter:en?'Historical avg ~3%':'歷史均值~3%',color:C.muted,fontSize:10}}}
+    ]
+  });
+
+  /* Chart 13: chartClearanceRate */
+  var c13=echarts.init(document.getElementById('chartClearanceRate'));allCharts.push(c13);
+  c13.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['Jan 25','Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    visualMap:{show:false,pieces:[{gt:70,color:C.green},{gt:60,lte:70,color:C.orange},{lte:60,color:C.red}],dimension:1},
+    series:[{type:'line',data:[63,67,68,65,62,60,58,62,66,69,68,64,61,65,55],symbol:'circle',symbolSize:5,lineStyle:{width:2},
+      markLine:{silent:true,data:[
+        {yAxis:70,lineStyle:{type:'dashed',color:C.green},label:{formatter:en?'70% Seller':'70%賣方市場',color:C.green,fontSize:10}},
+        {yAxis:60,lineStyle:{type:'dashed',color:C.orange},label:{formatter:en?'60% Neutral':'60%中性',color:C.orange,fontSize:10}}
+      ]},
+      markPoint:{data:[{coord:['Mar 26',55],label:{formatter:'55%',fontSize:9,color:'#fff'},itemStyle:{color:C.red}}]}}
+    ]
+  });
+
+  /* Chart 14: chartSydneyPriceQ */
+  var c14=echarts.init(document.getElementById('chartSydneyPriceQ'));allCharts.push(c14);
+  c14.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025','2026Q1']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtAUDShort(v);}})}),
+    series:[
+      {name:en?'Houses':'獨棟',type:'line',color:C.navy,data:[870000,872000,1350000,1175000,1070000,1460000,1575000,1607046],symbol:'circle',symbolSize:5,lineStyle:{width:2}},
+      {name:en?'Units':'公寓',type:'line',color:C.orange,data:[620000,618000,780000,760000,720000,820000,870000,903080],symbol:'circle',symbolSize:5,lineStyle:{width:2,type:'dashed'}}
+    ]
+  });
+
+  /* Chart 15: chartQuartilePerf */
+  var c15=echarts.init(document.getElementById('chartQuartilePerf'));allCharts.push(c15);
+  var qLabels=en?['Bottom Quartile\n(Affordable)','Second Quartile','Third Quartile','Top Quartile\n(Premium)']:['下四分位\n（可負擔）','第二四分位','第三四分位','上四分位\n（高端）'];
+  var qData=[2.5,1.2,0.3,-2.0];
+  c15.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:qLabels,axisLabel:Object.assign({},baseText,{interval:0})}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[{type:'bar',data:qData.map(function(v){return{value:v,itemStyle:{color:v>0?C.green:C.red}};}),barMaxWidth:35,
+      markLine:{silent:true,lineStyle:{color:C.muted},data:[{yAxis:0}],label:{show:false}}}
+    ]
+  });
+
+  /* Chart 16: chartListingTrend */
+  var c16=echarts.init(document.getElementById('chartListingTrend'));allCharts.push(c16);
+  c16.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['Jan 24','Mar 24','May 24','Jul 24','Sep 24','Nov 24','Jan 25','Mar 25','May 25','Jul 25','Sep 25','Nov 25','Jan 26','Mar 26']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+    series:[
+      {name:en?'5Y Average':'五年均值',type:'line',color:C.muted,data:[32000,31500,30000,29500,30500,32500,33000,31500,30000,29000,30000,32000,33000,31500],lineStyle:{type:'dashed'},symbol:'none'},
+      {name:en?'Current':'目前',type:'line',color:C.navy,data:[29000,28500,27500,28000,29500,30000,28500,27500,26000,25000,26000,27500,29000,30200],symbol:'circle',symbolSize:4}
+    ]
+  });
+
+  /* Chart 17: chartVacancyRate */
+  var c17=echarts.init(document.getElementById('chartVacancyRate'));allCharts.push(c17);
+  var vrLabels=['Brisbane','Adelaide','Perth','Sydney','Melbourne','National'];
+  var vrData=[0.9,1.1,1.2,1.5,1.7,1.2];
+  c17.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+    grid:{left:80,right:30,top:20,bottom:20,containLabel:false},
+    yAxis:mkAxis({type:'category',data:vrLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+    xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[{type:'bar',data:vrData.map(function(v){return{value:v,itemStyle:{color:v<=1.0?C.red:v<=2.0?C.orange:C.navy,borderRadius:[0,4,4,0]}};}),barMaxWidth:28,
+      label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:10,fontFamily:'JetBrains Mono'},
+      markLine:{silent:true,lineStyle:{type:'dashed',color:C.green},data:[{xAxis:2.5}],label:{formatter:en?'Equilibrium 2.5-3.0%':'均衡水位2.5-3.0%',color:C.green,fontSize:10}}}
+    ]
+  });
+
+  /* Chart 18: chartRentTrend */
+  var c18=echarts.init(document.getElementById('chartRentTrend'));allCharts.push(c18);
+  c18.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025','2026E']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return 'A$'+v;}})}),
+    series:[
+      {name:en?'Houses':'獨棟',type:'line',color:C.navy,data:[560,550,550,600,700,750,800,815],symbol:'circle',symbolSize:5,lineStyle:{width:2},
+       markPoint:{data:[{coord:['2026E',815],label:{formatter:'A$815\n'+(en?'Forecast':'預測'),fontSize:9,color:'#fff'},itemStyle:{color:C.navy}}]}},
+      {name:en?'Units':'公寓',type:'line',color:C.orange,data:[490,480,470,530,620,690,750,800],symbol:'circle',symbolSize:5,lineStyle:{width:2,type:'dashed'}}
+    ]
+  });
+
+  /* Chart 19: chartRentYoY */
+  var c19=echarts.init(document.getElementById('chartRentYoY'));allCharts.push(c19);
+  c19.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['2021','2022','2023','2024','2025 H2']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[
+      {name:en?'Houses':'獨棟',type:'bar',color:C.navy,data:[0.5,9.1,16.7,7.1,3.9],barMaxWidth:30},
+      {name:en?'Units':'公寓',type:'bar',color:C.orange,data:[1.2,13.2,17.0,11.3,7.1],barMaxWidth:30,
+       markLine:{silent:true,lineStyle:{color:C.muted},data:[{yAxis:0}],label:{show:false}}}
+    ]
+  });
+
+  /* Chart 20: chartAffordabilityRent */
+  var c20=echarts.init(document.getElementById('chartAffordabilityRent'));allCharts.push(c20);
+  var arLabels=en?['Sydney\nHouse','Sydney\nUnit','Melbourne','Brisbane','Perth','National\nBenchmark\n(30%)']:['雪梨\n獨棟','雪梨\n公寓','墨爾本','布里斯本','伯斯','全國\n基準（30%）'];
+  var arData=[52,43,38,35,31,30];
+  c20.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:arLabels,axisLabel:Object.assign({},baseText,{interval:0})}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[{type:'bar',data:arData.map(function(v){return{value:v,itemStyle:{color:v>=50?C.red:v>=35?C.orange:v>=30?C.muted:C.green}};}),barMaxWidth:35,
+      markLine:{silent:true,lineStyle:{type:'dashed',color:C.green},data:[{yAxis:30}],label:{formatter:en?'30% Stress Threshold':'30%壓力門檻',color:C.green,fontSize:10}}}
+    ]
+  });
+
+  /* Chart 21: chartPolicyTimeline */
+  var c21=echarts.init(document.getElementById('chartPolicyTimeline'));allCharts.push(c21);
+  c21.setOption({
+    grid:{left:50,right:20,top:20,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:['2024 Q4','2025 Q1','2025 Q2','2025 Q3','2025 Oct','2026 Jan','2026 Jul']}),
+    yAxis:mkAxis({type:'value',show:false,min:0,max:1}),
+    series:[{type:'scatter',symbolSize:20,color:C.green,
+      data:[
+        {value:['2025 Oct',0.5],label:{show:true,formatter:en?'FHG: unlimited\nplaces, cap ↑':'FHG：無限\n名額，上限↑',position:'top',fontSize:9,color:C.navy}},
+        {value:['2025 Oct',0.8],label:{show:true,formatter:en?'Stamp duty\nexempt <$800K':'印花稅\n豁免<80萬',position:'top',fontSize:9,color:C.navy}},
+        {value:['2026 Jan',0.5],label:{show:true,formatter:en?'Energy rebates\nAUD150':'能源補貼\nA$150',position:'top',fontSize:9,color:C.navy}},
+        {value:['2026 Jul',0.5],label:{show:true,formatter:en?'Income tax\ncuts':'個稅\n減免',position:'top',fontSize:9,color:C.navy}}
+      ]
+    }]
+  });
+
+  /* Chart 22: chartPriceCap */
+  var c22=echarts.init(document.getElementById('chartPriceCap'));allCharts.push(c22);
+  var pcLabels=en?['<$500K','$500-800K\n(stamp duty exempt)','$800K-1.5M\n(FHG zone)','$1.5M-2M','$2M+']:['50萬以下','50-80萬\n（印花稅豁免）','80萬-150萬\n（FHG適用）','150-200萬','200萬以上'];
+  var pcData=[45,78,100,42,28];
+  c22.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:pcLabels,axisLabel:Object.assign({},baseText,{interval:0})}),
+    yAxis:mkAxis({type:'value'}),
+    series:[{type:'bar',data:pcData.map(function(v){return{value:v,itemStyle:{color:v===100?C.orange:C.navy}};}),barMaxWidth:35,
+      markLine:{silent:true,lineStyle:{type:'dashed',color:C.orange},data:[{yAxis:70}],label:{formatter:en?'High competition zone':'高競爭區',color:C.orange,fontSize:10}}}
+    ]
+  });
+
+  /* Chart 23: chartStampDuty */
+  var c23=echarts.init(document.getElementById('chartStampDuty'));allCharts.push(c23);
+  c23.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['A$500K','A$700K','A$800K','A$1M','A$1.5M','A$2M']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return 'A$'+fmtK(v);}})}),
+    series:[
+      {name:en?'Standard Rate':'標準稅率',type:'bar',color:C.navy,data:[17990,26990,31490,40490,64490,88490],barMaxWidth:30},
+      {name:en?'FHB Rate':'首購族稅率',type:'bar',color:C.green,data:[0,0,0,8990,64490,88490],barMaxWidth:30}
+    ]
+  });
+
+  /* Chart 24: chartSegmentation */
+  var c24=echarts.init(document.getElementById('chartSegmentation'));allCharts.push(c24);
+  var segData=[
+    {value:[600,9,40],name:en?'Western Sydney\nUnits <$800K':'西雪梨\n公寓<80萬',itemStyle:{color:C.orange}},
+    {value:[950,8,35],name:en?'Mid-ring Units\n$800K-1.1M':'中環公寓\n80萬-110萬',itemStyle:{color:C.orange}},
+    {value:[1200,6,30],name:en?'Inner West\nTownhouses':'內西區\n聯排',itemStyle:{color:C.navy}},
+    {value:[1600,4,25],name:en?'North Shore\nHouses':'北岸\n獨棟',itemStyle:{color:C.navy}},
+    {value:[2200,3,20],name:en?'Eastern Suburbs\nHouses':'東區\n獨棟',itemStyle:{color:C.muted}},
+    {value:[3000,2,15],name:en?'Premium\nHarbour':'頂級\n港灣物業',itemStyle:{color:C.muted}}
+  ];
+  c24.setOption({
+    tooltip:{trigger:'item',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'},formatter:function(p){return p.data.name+'<br>'+(en?'Price':'價格')+': A$'+fmtK(p.data.value[0]*1000)+'<br>'+(en?'Demand':'需求')+': '+p.data.value[1]+'/10';}},
+    grid:{left:50,right:20,top:30,bottom:40,containLabel:true},
+    xAxis:mkAxis({type:'value',name:en?'Price (A$K)':'價格(A$千)',nameLocation:'middle',nameGap:25,nameTextStyle:baseText}),
+    yAxis:mkAxis({type:'value',name:en?'Demand Pressure':'需求壓力',nameLocation:'middle',nameGap:35,nameTextStyle:baseText,min:0,max:10}),
+    series:[{type:'scatter',data:segData,symbolSize:function(d){return d[2];},
+      label:{show:true,formatter:function(p){return p.data.name;},fontSize:9,color:C.navy,position:'right'}}
+    ]
+  });
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

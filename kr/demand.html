@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demand Analysis | South Korea Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="dashboard">
+    <h1 class="page-title"><span class="lang-en">Demand Analysis</span><span class="lang-zh" style="display:none">需求分析</span></h1>
+
+    <div class="kpi-row">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">2025 Transactions</span><span class="lang-zh" style="display:none">2025年交易量</span></div>
+        <div class="kpi-value">~82,000</div>
+        <span class="kpi-badge badge-green">+12% YoY</span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Foreign Purchases</span><span class="lang-zh" style="display:none">外國人購買</span></div>
+        <div class="kpi-value">~12,000</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Chinese 60%</span><span class="lang-zh" style="display:none">中國人占60%</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Jeonse Ratio</span><span class="lang-zh" style="display:none">全租房比例</span></div>
+        <div class="kpi-value">58%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Declining</span><span class="lang-zh" style="display:none">下降中</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Mortgage Rate</span><span class="lang-zh" style="display:none">房貸利率</span></div>
+        <div class="kpi-value">4.2%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Effective avg</span><span class="lang-zh" style="display:none">有效平均</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">Seoul Waiting List</span><span class="lang-zh" style="display:none">首爾申購比</span></div>
+        <div class="kpi-value">15:1</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Subscription ratio</span><span class="lang-zh" style="display:none">認購倍數</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Household Formation</span><span class="lang-zh" style="display:none">家戶形成</span></div>
+        <div class="kpi-value">+180K<span class="kpi-unit">/yr</span></div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Slowing</span><span class="lang-zh" style="display:none">趨緩</span></span>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">Transaction Volume Trend</span><span class="lang-zh" style="display:none">交易量趨勢</span></h3>
+        <div id="chartKRTxn" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">Seoul vs Non-Seoul Transactions</span><span class="lang-zh" style="display:none">首爾 vs 非首爾交易量</span></h3>
+        <div id="chartKRSeoulNon" style="height:370px"></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">Buyer Age Distribution (%)</span><span class="lang-zh" style="display:none">買家年齡分布 (%)</span></h3>
+        <div id="chartKRAge" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">Mortgage Rate vs Transaction Volume</span><span class="lang-zh" style="display:none">房貸利率 vs 交易量</span></h3>
+        <div id="chartKRRateVol" style="height:370px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>A project by InvestMQuest.</p>
+  </footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    allCharts.length=0;
+
+    /* Chart 1: Transaction Volume Trend (line) */
+    var c1=echarts.init(document.getElementById('chartKRTxn'));
+    c1.setOption({
+      tooltip:baseTooltip,
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[{
+        type:'line',
+        data:[78000,110000,95000,52000,55000,73000,82000],
+        smooth:0.2,
+        lineStyle:{color:C.navy,width:2},
+        itemStyle:{color:C.navy},
+        symbol:'circle',
+        symbolSize:7,
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(30,58,95,0.15)'},{offset:1,color:'rgba(30,58,95,0)'}])},
+        markPoint:{
+          data:[
+            {type:'max',name:'Max',symbolSize:50,label:{fontSize:10,fontFamily:'Inter'}},
+            {type:'min',name:'Min',symbolSize:50,label:{fontSize:10,fontFamily:'Inter'}}
+          ],
+          itemStyle:{color:C.navy}
+        }
+      }]
+    });
+    allCharts.push(c1);
+
+    /* Chart 2: Seoul vs Non-Seoul Transactions (stacked bar) */
+    var c2=echarts.init(document.getElementById('chartKRSeoulNon'));
+    c2.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'首爾':'Seoul',lang==='zh'?'非首爾':'Non-Seoul']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[
+        {name:lang==='zh'?'首爾':'Seoul',type:'bar',stack:'total',data:[42000,22000,25000,35000,40000],itemStyle:{color:C.navy},barMaxWidth:40},
+        {name:lang==='zh'?'非首爾':'Non-Seoul',type:'bar',stack:'total',data:[53000,30000,30000,38000,42000],itemStyle:{color:C.orange,borderRadius:[3,3,0,0]},barMaxWidth:40}
+      ]
+    });
+    allCharts.push(c2);
+
+    /* Chart 3: Buyer Age Distribution % (horizontal bar) */
+    var ageLabels=lang==='zh'?['60歲以上','50多歲','40多歲','30多歲','20多歲']:['60+','50s','40s','30s','20s'];
+    var ageVals=[7,12,28,38,15];
+    var ageColors=[C.muted,C.navy,C.navy,C.blue,C.orange];
+    var c3=echarts.init(document.getElementById('chartKRAge'));
+    c3.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': '+p[0].value+'%';}}),
+      grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+      yAxis:mkAxis({type:'category',data:ageLabels}),
+      series:[{
+        type:'bar',
+        data:ageVals.map(function(v,i){return{value:v,itemStyle:{color:ageColors[i],borderRadius:[0,3,3,0]}};}),
+        label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:11,fontFamily:'Inter, sans-serif',color:C.navy},
+        barWidth:20
+      }]
+    });
+    allCharts.push(c3);
+
+    /* Chart 4: Mortgage Rate vs Transaction Volume (dual-axis line) */
+    var c4=echarts.init(document.getElementById('chartKRRateVol'));
+    c4.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(item){s+=item.marker+' '+item.seriesName+': '+(item.seriesIndex===0?item.value+'%':fmtK(item.value*1000))+'<br/>';});return s;}}),
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'房貸利率':'Mortgage Rate',lang==='zh'?'交易量':'Volume']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025']}),
+      yAxis:[
+        mkAxis({type:'value',name:lang==='zh'?'利率 (%)':'Rate (%)',axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:C.grid}}}),
+        mkAxis({type:'value',name:lang==='zh'?'交易量 (千)':'Volume (K)',axisLabel:{formatter:function(v){return v+'K';}},splitLine:{show:false}})
+      ],
+      series:[
+        {name:lang==='zh'?'房貸利率':'Mortgage Rate',type:'line',smooth:0.2,data:[2.5,2.8,5.0,4.5,4.0,4.2],yAxisIndex:0,lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},symbol:'circle',symbolSize:6},
+        {name:lang==='zh'?'交易量':'Volume',type:'line',smooth:0.2,data:[110,95,52,55,73,82],yAxisIndex:1,lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue},symbol:'circle',symbolSize:6,
+          areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(37,99,235,0.12)'},{offset:1,color:'rgba(37,99,235,0)'}])}
+        }
+      ]
+    });
+    allCharts.push(c4);
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

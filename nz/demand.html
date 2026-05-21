@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demand Analysis | NZ Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+      <h1><span class="lang-en">Demand Analysis</span><span class="lang-zh" style="display:none">需求分析</span></h1>
+      <p class="subtitle"><span class="lang-en">Transactions, Rents, Migration &amp; Buyer Segments</span><span class="lang-zh" style="display:none">成交量、租金、移民與買方結構</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">DEMAND INDICATORS</span><span class="lang-zh" style="display:none">需求指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">ANNUAL SALES</span><span class="lang-zh" style="display:none">年度成交量</span></div>
+        <div class="kpi-value">80,655</div>
+        <span class="kpi-badge badge-green">+10.3% YoY</span>
+        <div class="kpi-source">REINZ 2025</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">FIRST-HOME BUYERS</span><span class="lang-zh" style="display:none">首購族占比</span></div>
+        <div class="kpi-value">27%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Share of sales</span><span class="lang-zh" style="display:none">成交占比</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">NET MIGRATION</span><span class="lang-zh" style="display:none">淨移民</span></div>
+        <div class="kpi-value">Positive</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">But slowing</span><span class="lang-zh" style="display:none">但正在放緩</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">RENT CHANGE</span><span class="lang-zh" style="display:none">租金變化</span></div>
+        <div class="kpi-value">-1.6%</div>
+        <span class="kpi-badge badge-red">YoY National</span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">LVR EASING</span><span class="lang-zh" style="display:none">LVR放寬</span></div>
+        <div class="kpi-value">Dec 2025</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">First-home buyers</span><span class="lang-zh" style="display:none">首購族</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">AUCKLAND RENT</span><span class="lang-zh" style="display:none">奧克蘭租金</span></div>
+        <div class="kpi-value">-3.4%</div>
+        <span class="kpi-badge badge-red">YoY</span>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid two-col" style="margin-top:20px;">
+      <div class="chart-card">
+        <h3><span class="lang-en">Annual Transactions</span><span class="lang-zh" style="display:none">年度成交量</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">National residential sales volume</span><span class="lang-zh" style="display:none">全國住宅成交量</span></p>
+        <div style="position:relative;height:260px;"><div id="chartNzTxn" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Rent Trend by Region</span><span class="lang-zh" style="display:none">各區租金趨勢</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Median weekly rent (NZ$)</span><span class="lang-zh" style="display:none">每週租金中位數（紐幣）</span></p>
+        <div style="position:relative;height:260px;"><div id="chartNzRentTrend" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">Net Migration</span><span class="lang-zh" style="display:none">淨移民</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Annual net migration (persons)</span><span class="lang-zh" style="display:none">年度淨移民人數</span></p>
+        <div style="position:relative;height:280px;"><div id="chartNzMigration" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">REINZ &middot; Stats NZ &middot; Trade Me Property &middot; RBNZ Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">REINZ &middot; 紐西蘭統計局 &middot; Trade Me Property &middot; RBNZ 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  function fmtNZD(v){if(v>=1000000)return 'NZ$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return 'NZ$'+Math.round(v/1000)+'K';return 'NZ$'+v;}
+  function fmtNZDShort(v){if(v>=1000000)return(v/1000000).toFixed(2)+'M';if(v>=1000)return Math.round(v/1000)+'K';return v.toString();}
+  var baseText={color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+
+    // chartNzTxn: Area line transactions
+    var c1=echarts.init(document.getElementById('chartNzTxn'));allCharts.push(c1);
+    c1.setOption({
+      tooltip:baseTooltip,grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+      series:[{
+        type:'line',data:[78000,72000,98000,68000,65000,73000,80655],
+        lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},
+        areaStyle:{color:'rgba(30,58,95,0.08)'},smooth:0.2,symbol:'circle',symbolSize:6,
+        markPoint:{data:[{type:'max',name:'Max',label:{formatter:'High',fontSize:9},itemStyle:{color:C.green}},{type:'min',name:'Min',label:{formatter:'Low',fontSize:9},itemStyle:{color:C.red}}]}
+      }]
+    });
+
+    // chartNzRentTrend: 3-line rent trend
+    var c2=echarts.init(document.getElementById('chartNzRentTrend'));allCharts.push(c2);
+    c2.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'奧克蘭':'Auckland',lang==='zh'?'基督城':'Christchurch',lang==='zh'?'全國':'National']}),
+      grid:{left:50,right:20,top:45,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:['2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return 'NZ$'+v;}})}),
+      series:[
+        {name:lang==='zh'?'奧克蘭':'Auckland',type:'line',data:[560,620,660,685,650],lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5},
+        {name:lang==='zh'?'基督城':'Christchurch',type:'line',data:[440,500,540,570,580],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+        {name:lang==='zh'?'全國':'National',type:'line',data:[450,510,560,610,610],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5}
+      ]
+    });
+
+    // chartNzMigration: Bar positive/negative with markPoint
+    var c3=echarts.init(document.getElementById('chartNzMigration'));allCharts.push(c3);
+    c3.setOption({
+      tooltip:baseTooltip,grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025E']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+      series:[{
+        type:'bar',data:[55000,-8000,-15000,72000,130000,90000,60000].map(function(v){return{value:v,itemStyle:{color:v>=0?C.green:C.red,borderRadius:v>=0?[4,4,0,0]:[0,0,4,4]}};}),
+        barMaxWidth:40,
+        label:{show:true,position:'top',fontFamily:'JetBrains Mono',fontSize:9,formatter:function(p){return fmtK(p.value);}},
+        markPoint:{data:[{type:'max',name:'Peak',label:{formatter:lang==='zh'?'高峰':'Peak',fontSize:9},itemStyle:{color:C.green}}]}
+      }]
+    });
+  }
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

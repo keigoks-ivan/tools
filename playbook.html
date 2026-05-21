@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property Playbook | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e3a5f;line-height:1.5}
+a{color:inherit;text-decoration:none}
+
+.navbar{background:#fff;border-bottom:1px solid #dce8f5;height:52px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-l{display:flex;align-items:center;gap:14px}
+.nav-brand{font-size:12px;font-weight:700;letter-spacing:.12em;color:#1e3a5f}
+.nav-brand:hover{color:#3b82f6}
+.nav-sep{color:#dce8f5}
+.nav-page{font-size:11px;font-weight:600;letter-spacing:.08em;color:#3b82f6}
+.nav-r{display:flex;align-items:center;gap:14px}
+.nav-link{font-size:11px;color:#5a7a9a;font-weight:500}
+.nav-link:hover{color:#3b82f6}
+.lang-btns{display:flex;gap:4px}
+.lang-btn{padding:4px 10px;border:1px solid #dce8f5;border-radius:4px;font-size:11px;cursor:pointer;background:#fff;color:#5a7a9a;font-family:inherit}
+.lang-btn.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+
+.hero{background:linear-gradient(180deg,#0f1e33 0%,#162e4d 100%);color:#e2ecf8;padding:48px 32px}
+.hero-inner{max-width:min(1280px,96vw);margin:0 auto}
+.hero-eyebrow{font-size:10px;letter-spacing:.18em;font-weight:700;color:#f59e0b;margin-bottom:12px}
+.hero-h1{font-size:32px;font-weight:800;color:#fff;line-height:1.15;letter-spacing:-.015em;margin-bottom:12px;max-width:760px}
+.hero-h1 em{color:#f59e0b;font-style:normal}
+.hero-sub{font-size:14px;color:#94a3b8;line-height:1.65;max-width:680px}
+@media(max-width:760px){.hero{padding:28px 16px}.hero-h1{font-size:22px}.hero-sub{font-size:12.5px}}
+
+.section{max-width:min(1280px,96vw);margin:0 auto;padding:36px 32px}
+.section-hdr{display:flex;align-items:baseline;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.section-title{font-size:10px;letter-spacing:.16em;color:#3b82f6;font-weight:600}
+.section-desc{font-size:12px;color:#94a3b8}
+.upd-stamp{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:9.5px;color:#94a3b8;letter-spacing:.04em;white-space:nowrap}
+.upd-stamp a{color:#3b82f6;text-decoration:none}
+.upd-stamp a:hover{text-decoration:underline}
+.upd-dot{width:6px;height:6px;border-radius:50%;background:#16a34a;display:inline-block;animation:upd-pulse 2.5s infinite}
+@keyframes upd-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:560px){.upd-stamp{margin-left:0;width:100%;margin-top:4px}}
+
+/* Cost Calculator */
+.cc-preset{font-size:10px;padding:4px 9px;background:#f0f6ff;border:1px solid #dce8f5;color:#5a7a9a;border-radius:4px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .12s}
+.cc-preset:hover{background:#3b82f6;color:#fff;border-color:#3b82f6}
+#cc-output .cc-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid #e8eef7}
+#cc-output .cc-row:last-of-type{border-bottom:none}
+#cc-output .cc-lbl{font-size:10.5px;color:#5a7a9a;font-weight:500}
+#cc-output .cc-amt{font-size:13px;font-weight:700;color:#1e3a5f;font-variant-numeric:tabular-nums}
+#cc-output .cc-pct{font-size:9.5px;color:#94a3b8;font-weight:500;margin-left:6px}
+#cc-output .cc-row.total{border-top:2px solid #1e3a5f;border-bottom:none;margin-top:6px;padding-top:10px}
+#cc-output .cc-row.total .cc-amt{font-size:16px;color:#0f1e33}
+#cc-output .cc-cliff{margin-top:10px;padding:8px 10px;border-radius:6px;font-size:10px;line-height:1.5}
+#cc-output .cc-cliff strong{font-weight:700}
+#cc-output .cc-be{margin-top:8px;padding:8px 10px;background:#eef6ff;border-radius:6px;font-size:10px;color:#1e3a5f;line-height:1.5;border-left:3px solid #3b82f6}
+@media(max-width:760px){
+  #costCalc > div:nth-child(2){grid-template-columns:1fr!important}
+  .section{padding:24px 16px}
+  .section > div[style*="repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
+}
+@media(max-width:560px){
+  .section > div[style*="repeat(4"]{grid-template-columns:1fr!important}
+  .section > div[style*="grid-template-columns:repeat(3"]{grid-template-columns:1fr!important}
+}
+
+.footer{border-top:1px solid #dce8f5;padding:18px 32px;max-width:min(1400px,96vw);margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.footer-l{font-size:11px;font-weight:700;letter-spacing:.08em;color:#1e3a5f}
+.footer-r{font-size:10px;color:#94a3b8}
+.footer a{color:#3b82f6}
+
+.lang-en{}.lang-zh{display:none}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="lang-en">CROSS-BORDER PROPERTY PLAYBOOK</span><span class="lang-zh">跨境房產操作手冊</span></div>
+    <h1 class="hero-h1">
+      <span class="lang-en">From <em>buy</em> to <em>hold</em> to <em>sell</em>.</span>
+      <span class="lang-zh">從<em>買入</em>到<em>持有</em>到<em>退場</em>。</span>
+    </h1>
+    <p class="hero-sub">
+      <span class="lang-en">Foundations every cross-border investor should read before signing anything: how to read carry / PTI / vacancy, country tax tables, the cross-border cost calculator, and the full pre-buy / hold / exit checklist that professionals actually use.</span>
+      <span class="lang-zh">跨境投資前必讀：利差／PTI／空置率怎麼讀、各國稅表、跨境成本計算機，以及專業投資人從買入到退場實際使用的完整查核清單。</span>
+    </p>
+  </div>
+</section>
+
+<!-- Property Investment Fundamentals -->
+<section style="background:#fff">
+  <div class="section" style="max-width:min(1400px,96vw);margin:0 auto">
+    <div class="section-hdr">
+      <span class="section-title lang-en">PROPERTY INVESTMENT FUNDAMENTALS</span>
+      <span class="section-title lang-zh">房產投資基本知識</span>
+      <span class="section-desc lang-en">How to read the numbers in the table above</span>
+      <span class="section-desc lang-zh">如何解讀上方表格中的數字</span>
+      <span class="upd-stamp"><span class="upd-dot"></span><span class="lang-en">Tax tables 2026-04 &middot; <a href="/methodology.html">Sources</a></span><span class="lang-zh">稅表 2026-04 &middot; <a href="/methodology.html">來源</a></span></span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+
+      <!-- Card 1: Carry -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:12px"><span class="lang-en">Carry Spread Strategy</span><span class="lang-zh" style="display:none">利差策略指南</span></div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:Inter,sans-serif">
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:6px 0;font-weight:600;color:#16a34a"><span class="lang-en">+2% or above</span><span class="lang-zh" style="display:none">+2% 以上</span></td><td style="padding:6px 8px;color:#475569"><span class="lang-en">Income play. Rental covers mortgage + surplus. Ideal for retirees, passive investors.</span><span class="lang-zh" style="display:none">收租型。租金覆蓋房貸且有盈餘。適合退休族、被動投資者。</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:6px 0;font-weight:600;color:#1e3a5f"><span class="lang-en">0% to +2%</span><span class="lang-zh" style="display:none">0% ~ +2%</span></td><td style="padding:6px 8px;color:#475569"><span class="lang-en">Neutral carry. Hold and wait for appreciation. Suits long-term owner-occupiers.</span><span class="lang-zh" style="display:none">中性利差。持有等增值。適合長期自住兼投資。</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:6px 0;font-weight:600;color:#d97706"><span class="lang-en">-1% to 0%</span><span class="lang-zh" style="display:none">-1% ~ 0%</span></td><td style="padding:6px 8px;color:#475569"><span class="lang-en">Mild negative. Need salary to cover gap. Betting on capital gains.</span><span class="lang-zh" style="display:none">輕微負利差。需薪水補缺口。押注資本增值。</span></td></tr>
+          <tr><td style="padding:6px 0;font-weight:600;color:#dc2626"><span class="lang-en">Below -3%</span><span class="lang-zh" style="display:none">-3% 以下</span></td><td style="padding:6px 8px;color:#475569"><span class="lang-en">Deep negative. Cash buyers only. Leveraged investors stay away.</span><span class="lang-zh" style="display:none">深度負利差。僅適合現金買家。槓桿投資者勿碰。</span></td></tr>
+        </table>
+      </div>
+
+      <!-- Card 2: PTI & P/R -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:12px"><span class="lang-en">Reading PTI &amp; P/R Ratios</span><span class="lang-zh" style="display:none">如何解讀房價收入比與房租比</span></div>
+        <div style="font-size:11px;font-weight:600;color:#5a7a9a;margin-bottom:6px"><span class="lang-en">Price-to-Income (PTI)</span><span class="lang-zh" style="display:none">房價收入比（PTI）</span></div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:Inter,sans-serif;margin-bottom:14px">
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 0;color:#16a34a;font-weight:600">&lt;5&times;</td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Affordable</span><span class="lang-zh" style="display:none">可負擔</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 0;color:#d97706;font-weight:600">5&ndash;10&times;</td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Stretched &mdash; most Asian cities</span><span class="lang-zh" style="display:none">偏高——多數亞洲城市</span></td></tr>
+          <tr><td style="padding:4px 0;color:#dc2626;font-weight:600">&gt;10&times;</td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Severely unaffordable &mdash; HK, SYD, TPE</span><span class="lang-zh" style="display:none">嚴重不可負擔——港、雪梨、台北</span></td></tr>
+        </table>
+        <div style="font-size:11px;font-weight:600;color:#5a7a9a;margin-bottom:6px"><span class="lang-en">Price-to-Rent (P/R)</span><span class="lang-zh" style="display:none">房租比（P/R）</span></div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:Inter,sans-serif">
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 0;color:#16a34a;font-weight:600">&lt;20&times;</td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Buy favored &mdash; cheaper to own than rent</span><span class="lang-zh" style="display:none">買入有利——擁有比租更便宜</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 0;color:#1e3a5f;font-weight:600">20&ndash;30&times;</td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Neutral &mdash; depends on individual situation</span><span class="lang-zh" style="display:none">中性——取決於個人狀況</span></td></tr>
+          <tr><td style="padding:4px 0;color:#dc2626;font-weight:600">&gt;30&times;</td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Rent favored &mdash; buying is overpriced</span><span class="lang-zh" style="display:none">租賃有利——買入代價過高</span></td></tr>
+        </table>
+        <div style="font-size:9px;color:#64748b;line-height:1.5;border-top:1px solid #e2e8f0;padding-top:8px;margin-top:6px">
+          <div style="margin-bottom:6px">
+            <span style="display:inline-block;background:#f0fdf4;color:#166534;font-weight:700;padding:1px 5px;border-radius:3px;font-size:7.5px;margin-bottom:2px"><span class="lang-en">BEST VALUE: PTI&lt;5 + P/R&lt;20</span><span class="lang-zh" style="display:none">最佳價值：PTI&lt;5 + P/R&lt;20</span></span><br>
+            <span class="lang-en">Chicago (PTI 4.5&times; · P/R 19&times; · yield 5.8%)</span>
+            <span class="lang-zh" style="display:none">芝加哥（PTI 4.5倍 · P/R 19倍 · 收益率5.8%）</span>
+          </div>
+          <div style="margin-bottom:6px">
+            <span style="display:inline-block;background:#eff6ff;color:#1e3a5f;font-weight:700;padding:1px 5px;border-radius:3px;font-size:7.5px;margin-bottom:2px"><span class="lang-en">BUY-FAVORED: PTI 5-10 + P/R&lt;20</span><span class="lang-zh" style="display:none">買入有利：PTI 5-10 + P/R&lt;20</span></span><br>
+            <span class="lang-en">Dubai · Edinburgh · Manchester · Newcastle · Valencia · Malaga · Marseille · Istanbul · Mexico City · Lima · Bogota · S&atilde;o Paulo</span>
+            <span class="lang-zh" style="display:none">杜拜 · 愛丁堡 · 曼徹斯特 · 紐卡斯爾 · 瓦倫西亞 · 馬拉加 · 馬賽 · 伊斯坦堡 · 墨西哥城 · 利馬 · 波哥大 · 聖保羅</span>
+          </div>
+          <div>
+            <span style="display:inline-block;background:#fef2f2;color:#991b1b;font-weight:700;padding:1px 5px;border-radius:3px;font-size:7.5px;margin-bottom:2px"><span class="lang-en">WORST: PTI&gt;10 + P/R&gt;30</span><span class="lang-zh" style="display:none">最差組合：PTI&gt;10 + P/R&gt;30</span></span><br>
+            <span class="lang-en">Taipei · New Taipei · Hsinchu · Taichung · Kaohsiung · Hong Kong · Seoul · Tokyo · Osaka · Fukuoka · Paris · Munich · SF · LA · Vancouver · Mumbai · Gold Coast</span>
+            <span class="lang-zh" style="display:none">台北 · 新北 · 新竹 · 台中 · 高雄 · 香港 · 首爾 · 東京 · 大阪 · 福岡 · 巴黎 · 慕尼黑 · 舊金山 · 洛杉磯 · 溫哥華 · 孟買 · 黃金海岸</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Real Case Studies -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">Real Case Studies</span><span class="lang-zh" style="display:none">真實案例研究</span></div>
+        <div style="font-size:9px;color:#94a3b8;margin-bottom:12px;letter-spacing:.04em"><span class="lang-en">Four lessons paid for by other people's losses (and one win)</span><span class="lang-zh" style="display:none">四個別人付學費換來的教訓（外加一個贏家）</span></div>
+
+        <!-- CASE 1: Istanbul TRY trap -->
+        <div style="background:#fff;border-left:3px solid #dc2626;padding:10px 12px;border-radius:4px;margin-bottom:10px;font-family:Inter,sans-serif">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:8px;font-weight:700;background:#fef2f2;color:#991b1b;padding:2px 6px;border-radius:3px;letter-spacing:.04em"><span class="lang-en">YIELD TRAP</span><span class="lang-zh" style="display:none">收益率陷阱</span></span>
+            <span style="font-size:11px;font-weight:700;color:#1e3a5f">🇹🇷 Istanbul · 2018&ndash;2026</span>
+          </div>
+          <div style="font-size:10px;color:#475569;line-height:1.55;margin-bottom:5px">
+            <span class="lang-en">TRY 5 &rarr; 40 vs USD over 8 years (&minus;87% in USD). Property nominal +200%, but USD-denominated investor lost &minus;60% of real capital. Real-terms 2026 YoY: <strong style="color:#dc2626">&minus;3.4%</strong> despite +27.8% nominal.</span>
+            <span class="lang-zh" style="display:none">8 年內里拉對美元從 5 跌到 40（美元計-87%）。房產名目漲 200%，但美元投資者實質虧 -60%。2026 名目+27.8%，實質 <strong style="color:#dc2626">-3.4%</strong>。</span>
+          </div>
+          <div style="font-size:9.5px;color:#1e3a5f;font-weight:600;border-top:1px dashed #e2e8f0;padding-top:5px">
+            <span class="lang-en">Lesson: A 7% yield in a currency falling 30%/year nets you &minus;23%.</span>
+            <span class="lang-zh" style="display:none">教訓：年貶 30% 的貨幣中，7% 收益率實際淨值是 -23%。</span>
+          </div>
+        </div>
+
+        <!-- CASE 2: Manila oversupply -->
+        <div style="background:#fff;border-left:3px solid #d97706;padding:10px 12px;border-radius:4px;margin-bottom:10px;font-family:Inter,sans-serif">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:8px;font-weight:700;background:#fffbeb;color:#92400e;padding:2px 6px;border-radius:3px;letter-spacing:.04em"><span class="lang-en">OVERSUPPLY TRAP</span><span class="lang-zh" style="display:none">供給過剩陷阱</span></span>
+            <span style="font-size:11px;font-weight:700;color:#1e3a5f">🇵🇭 Manila · 2018&ndash;2026</span>
+          </div>
+          <div style="font-size:10px;color:#475569;line-height:1.55;margin-bottom:5px">
+            <span class="lang-en">Pre-2018 Chinese POGO demand drove pre-sale boom. POGO ban 2024 + Chinese capital flight = 30,000 unsold condos, <strong style="color:#dc2626">8-year absorption</strong>, vacancy 26%. BSP RPPI +1.6% YoY 2026 = lowest in 6 years. Many off-plan buyers cannot find tenants at advertised yields.</span>
+            <span class="lang-zh" style="display:none">2018 前中國 POGO 帶動預售熱潮。2024 POGO 禁令 + 中資撤離 = 3 萬未售公寓，<strong style="color:#dc2626">8 年消化</strong>，空置 26%。BSP RPPI 2026 +1.6%，6 年新低。許多預售買家找不到租客。</span>
+          </div>
+          <div style="font-size:9.5px;color:#1e3a5f;font-weight:600;border-top:1px dashed #e2e8f0;padding-top:5px">
+            <span class="lang-en">Lesson: A single regulatory event (POGO ban) collapsed an entire pre-sale market overnight.</span>
+            <span class="lang-zh" style="display:none">教訓：單一政策事件（POGO 禁令）一夜壓垮整個預售市場。</span>
+          </div>
+        </div>
+
+        <!-- CASE 3: Singapore ABSD overnight -->
+        <div style="background:#fff;border-left:3px solid #d97706;padding:10px 12px;border-radius:4px;margin-bottom:10px;font-family:Inter,sans-serif">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:8px;font-weight:700;background:#fffbeb;color:#92400e;padding:2px 6px;border-radius:3px;letter-spacing:.04em"><span class="lang-en">POLICY REVERSAL</span><span class="lang-zh" style="display:none">政策反轉</span></span>
+            <span style="font-size:11px;font-weight:700;color:#1e3a5f">🇸🇬 Singapore · 27 Apr 2023</span>
+          </div>
+          <div style="font-size:10px;color:#475569;line-height:1.55;margin-bottom:5px">
+            <span class="lang-en">Foreign buyer ABSD doubled overnight: <strong>30% &rarr; 60%</strong>. A S$2M condo's stamp duty jumped from S$600K to S$1.2M with zero notice. Foreign buyer transactions collapsed &minus;61% the following quarter. Buyers in mid-purchase had to walk away from deposits.</span>
+            <span class="lang-zh" style="display:none">外國買家 ABSD 一夜翻倍：<strong>30% → 60%</strong>。S$200 萬公寓印花稅從 S$60 萬跳到 S$120 萬，零預警。下一季外國買家成交 -61%。交易進行中的買家被迫棄訂。</span>
+          </div>
+          <div style="font-size:9.5px;color:#1e3a5f;font-weight:600;border-top:1px dashed #e2e8f0;padding-top:5px">
+            <span class="lang-en">Lesson: Tax tables are not contracts. Always price in 5&ndash;15% policy headroom.</span>
+            <span class="lang-zh" style="display:none">教訓：稅表不是合約。預留 5–15% 政策變動空間。</span>
+          </div>
+        </div>
+
+        <!-- CASE 4: Sydney scarcity wins -->
+        <div style="background:#fff;border-left:3px solid #16a34a;padding:10px 12px;border-radius:4px;font-family:Inter,sans-serif">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:8px;font-weight:700;background:#f0fdf4;color:#166534;padding:2px 6px;border-radius:3px;letter-spacing:.04em"><span class="lang-en">SCARCITY WINS</span><span class="lang-zh" style="display:none">稀缺者勝</span></span>
+            <span style="font-size:11px;font-weight:700;color:#1e3a5f">🇦🇺 Sydney · 2016&ndash;2026</span>
+          </div>
+          <div style="font-size:10px;color:#475569;line-height:1.55;margin-bottom:5px">
+            <span class="lang-en">Carry has been negative the whole decade (yield 3.0% &minus; mortgage 5.5% = <strong style="color:#dc2626">&minus;2.5%</strong>). Yet 10yr cumulative gain <strong style="color:#16a34a">+65%</strong>. Why: SQM vacancy 1.1%, geographic constraint, near-zero high-rise approvals in established suburbs. Negative carry investors covered the gap from salary; capital appreciation paid them back.</span>
+            <span class="lang-zh" style="display:none">整整 10 年負利差（收益率 3.0% - 房貸 5.5% = <strong style="color:#dc2626">-2.5%</strong>）。但 10 年累計 <strong style="color:#16a34a">+65%</strong>。原因：SQM 空置 1.1%、地理限制、舊市區幾乎不核准高樓。負利差投資人用薪水補缺口，最後資本增值還給他們。</span>
+          </div>
+          <div style="font-size:9.5px;color:#1e3a5f;font-weight:600;border-top:1px dashed #e2e8f0;padding-top:5px">
+            <span class="lang-en">Lesson: When supply cannot grow, carry math stops being the answer.</span>
+            <span class="lang-zh" style="display:none">教訓：當供給無法增長，利差計算不再是答案。</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Supply-Demand -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:12px"><span class="lang-en">Reading Supply &amp; Demand</span><span class="lang-zh" style="display:none">如何判讀供需狀況</span></div>
+        <div style="font-size:11px;font-weight:600;color:#5a7a9a;margin-bottom:6px"><span class="lang-en">Current Supply (Now)</span><span class="lang-zh" style="display:none">現在供需</span></div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:Inter,sans-serif;margin-bottom:14px">
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 0;font-weight:600;color:#991b1b">🔴 <span class="lang-en">Tight</span><span class="lang-zh" style="display:none">緊張</span></td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Low inventory. Sellers have pricing power. Rents rising.</span><span class="lang-zh" style="display:none">庫存低。賣方掌握定價權。租金上漲中。</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 0;font-weight:600;color:#92400e">🟡 <span class="lang-en">Balanced</span><span class="lang-zh" style="display:none">平衡</span></td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Neither side dominates. Negotiation possible.</span><span class="lang-zh" style="display:none">買賣雙方勢均力敵。有議價空間。</span></td></tr>
+          <tr><td style="padding:4px 0;font-weight:600;color:#166534">🟢 <span class="lang-en">Loose</span><span class="lang-zh" style="display:none">寬鬆</span></td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Buyer leverage. Discounts available. Watch for oversupply.</span><span class="lang-zh" style="display:none">買方有優勢。可拿折扣。留意供給過剩。</span></td></tr>
+        </table>
+        <div style="font-size:11px;font-weight:600;color:#5a7a9a;margin-bottom:6px"><span class="lang-en">Future Supply (Pipeline)</span><span class="lang-zh" style="display:none">未來供給</span></div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:Inter,sans-serif;margin-bottom:14px">
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 0;font-weight:600;color:#166534"><span class="lang-en">Low &lt;1%</span><span class="lang-zh" style="display:none">低 &lt;1%</span></td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Minimal new builds. Scarcity likely to persist 3yr+.</span><span class="lang-zh" style="display:none">極少新建。稀缺性可能持續3年以上。</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 0;font-weight:600;color:#1e3a5f"><span class="lang-en">Mod 1&ndash;2.5%</span><span class="lang-zh" style="display:none">中 1&ndash;2.5%</span></td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Moderate pipeline. Market depends on absorption speed.</span><span class="lang-zh" style="display:none">適量在建。市場走向取決於消化速度。</span></td></tr>
+          <tr><td style="padding:4px 0;font-weight:600;color:#92400e"><span class="lang-en">High &gt;2.5%</span><span class="lang-zh" style="display:none">高 &gt;2.5%</span></td><td style="padding:4px 8px;color:#475569"><span class="lang-en">Large wave coming. Check 3yr Outlook for flip risk.</span><span class="lang-zh" style="display:none">大量新屋即將湧入。查看3年展望判斷翻轉風險。</span></td></tr>
+        </table>
+        <div style="font-size:9.5px;color:#64748b;line-height:1.55;border-top:1px solid #e2e8f0;padding-top:8px">
+          <div style="margin-bottom:8px">
+            <span style="display:inline-block;background:#f0fdf4;color:#166534;font-weight:700;padding:2px 6px;border-radius:3px;font-size:8px;margin-bottom:3px"><span class="lang-en">STRONGEST SUPPORT</span><span class="lang-zh" style="display:none">最強支撐</span></span><br>
+            <span class="lang-en"><strong>🔴Tight + Low pipeline (&lt;1%)</strong><br>Perth · Gold Coast · Brisbane · Adelaide · Fukuoka · Tokyo · Osaka · Sapporo · Edinburgh · Geneva · Zurich · Florence · Amsterdam · Taipei · Silicon Valley · Sydney · Seoul · Chicago</span>
+            <span class="lang-zh" style="display:none"><strong>🔴緊張 + 低在建（&lt;1%）</strong><br>伯斯 · 黃金海岸 · 布里斯本 · 阿德萊德 · 福岡 · 東京 · 大阪 · 札幌 · 愛丁堡 · 日内瓦 · 蘇黎世 · 佛羅倫斯 · 阿姆斯特丹 · 台北 · 矽谷 · 雪梨 · 首爾 · 芝加哥</span>
+          </div>
+          <div style="margin-bottom:8px">
+            <span style="display:inline-block;background:#eff6ff;color:#1e3a5f;font-weight:700;padding:2px 6px;border-radius:3px;font-size:8px;margin-bottom:3px"><span class="lang-en">STRONG BUT WATCH</span><span class="lang-zh" style="display:none">強勢但需留意</span></span><br>
+            <span class="lang-en"><strong>🔴Tight + Mod pipeline (1&ndash;2.5%)</strong><br>Dublin · Cork · Madrid · Malaga · Lisbon · Prague · Singapore · Birmingham · Seattle</span>
+            <span class="lang-zh" style="display:none"><strong>🔴緊張 + 中在建（1&ndash;2.5%）</strong><br>都柏林 · 科克 · 馬德里 · 馬拉加 · 里斯本 · 布拉格 · 新加坡 · 伯明翰 · 西雅圖</span>
+          </div>
+          <div style="margin-bottom:8px">
+            <span style="display:inline-block;background:#fffbeb;color:#92400e;font-weight:700;padding:2px 6px;border-radius:3px;font-size:8px;margin-bottom:3px"><span class="lang-en">FLIP RISK</span><span class="lang-zh" style="display:none">翻轉風險</span></span><br>
+            <span class="lang-en"><strong>🟡Balanced + High pipeline (&gt;2.5%)</strong><br>Dubai · Istanbul · Mumbai · Bangalore · Hyderabad · Phoenix · Toronto · S&atilde;o Paulo</span>
+            <span class="lang-zh" style="display:none"><strong>🟡平衡 + 高在建（&gt;2.5%）</strong><br>杜拜 · 伊斯坦堡 · 孟買 · 班加羅爾 · 海得拉巴 · 鳳凰城 · 多倫多 · 聖保羅</span>
+          </div>
+          <div>
+            <span style="display:inline-block;background:#fef2f2;color:#991b1b;font-weight:700;padding:2px 6px;border-radius:3px;font-size:8px;margin-bottom:3px"><span class="lang-en">HIGHEST CORRECTION RISK</span><span class="lang-zh" style="display:none">最高修正風險</span></span><br>
+            <span class="lang-en"><strong>🟢Loose + High pipeline (&gt;2.5%)</strong><br>Austin · Miami · KL · Bangkok · Jakarta · Manila · Auckland · Delhi NCR</span>
+            <span class="lang-zh" style="display:none"><strong>🟢寬鬆 + 高在建（&gt;2.5%）</strong><br>奧斯丁 · 邁阿密 · 吉隆坡 · 曼谷 · 雅加達 · 馬尼拉 · 奧克蘭 · 德里首都圈</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5: Entry Costs -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:8px"><span class="lang-en">Entry Costs by Country</span><span class="lang-zh" style="display:none">各國進場成本速查</span></div>
+        <div style="font-size:8.5px;color:#94a3b8;margin-bottom:8px"><span class="lang-en">Foreign buyer stamp duty where applicable · Sorted by total cost</span><span class="lang-zh" style="display:none">外國買家適用印花稅 · 依總成本排序</span></div>
+        <div style="max-height:380px;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:9px;font-family:Inter,sans-serif">
+          <tr style="background:#f0f6ff;position:sticky;top:0"><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"></td><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"><span class="lang-en">Stamp</span><span class="lang-zh" style="display:none">印花稅</span></td><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"><span class="lang-en">Agent+Legal</span><span class="lang-zh" style="display:none">仲介律師</span></td><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"><span class="lang-en">Total</span><span class="lang-zh" style="display:none">合計</span></td><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"><span class="lang-en">Note</span><span class="lang-zh" style="display:none">備註</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇦🇪 <span class="lang-en">Dubai</span><span class="lang-zh" style="display:none">杜拜</span></td><td style="padding:3px 5px">4%</td><td style="padding:3px 5px">2%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">6%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">No extra foreign tax</span><span class="lang-zh" style="display:none">外國人無額外稅</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇮🇪 <span class="lang-en">Ireland</span><span class="lang-zh" style="display:none">愛爾蘭</span></td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">2-4%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">No foreign restriction</span><span class="lang-zh" style="display:none">無外國人限制</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇩🇪 <span class="lang-en">Germany</span><span class="lang-zh" style="display:none">德國</span></td><td style="padding:3px 5px">3.5-6.5%</td><td style="padding:3px 5px">2-3%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">6-10%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">Varies by state</span><span class="lang-zh" style="display:none">各邦不同</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇪🇸 <span class="lang-en">Spain</span><span class="lang-zh" style="display:none">西班牙</span></td><td style="padding:3px 5px">6-10%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">7-12%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">Golden Visa ended 2025</span><span class="lang-zh" style="display:none">黃金簽證2025結束</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇯🇵 <span class="lang-en">Japan</span><span class="lang-zh" style="display:none">日本</span></td><td style="padding:3px 5px">0-1%</td><td style="padding:3px 5px">4-5%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">5-6%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">No foreign restriction</span><span class="lang-zh" style="display:none">無外國人限制</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇬🇧 <span class="lang-en">UK</span><span class="lang-zh" style="display:none">英國</span></td><td style="padding:3px 5px">2-5%+2%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">5-9%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">+2% foreign surcharge</span><span class="lang-zh" style="display:none">外國人+2%附加</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇺🇸 <span class="lang-en">US</span><span class="lang-zh" style="display:none">美國</span></td><td style="padding:3px 5px">0-2%</td><td style="padding:3px 5px">3-6%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">3-8%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">FIRPTA 15% withhold on sale</span><span class="lang-zh" style="display:none">賣出時FIRPTA預扣15%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇮🇹 <span class="lang-en">Italy</span><span class="lang-zh" style="display:none">義大利</span></td><td style="padding:3px 5px">2-9%</td><td style="padding:3px 5px">3-4%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">5-13%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">2% if first home</span><span class="lang-zh" style="display:none">首套住宅2%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇵🇹 <span class="lang-en">Portugal</span><span class="lang-zh" style="display:none">葡萄牙</span></td><td style="padding:3px 5px">0-8%</td><td style="padding:3px 5px">2-3%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">2-11%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">Golden Visa ended 2023</span><span class="lang-zh" style="display:none">黃金簽證2023結束</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇳🇱 <span class="lang-en">Netherlands</span><span class="lang-zh" style="display:none">荷蘭</span></td><td style="padding:3px 5px">2-10.4%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">3-12%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">10.4% for investors</span><span class="lang-zh" style="display:none">投資客10.4%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇨🇭 <span class="lang-en">Switzerland</span><span class="lang-zh" style="display:none">瑞士</span></td><td style="padding:3px 5px">1-3%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">2-5%</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">Lex Koller: restricted</span><span class="lang-zh" style="display:none">Lex Koller法限制外國人</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇵🇱 <span class="lang-en">Poland</span><span class="lang-zh" style="display:none">波蘭</span></td><td style="padding:3px 5px">2%</td><td style="padding:3px 5px">2-3%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">4-5%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">EU/EEA: no permit needed</span><span class="lang-zh" style="display:none">歐盟公民免許可</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇨🇿 <span class="lang-en">Czechia</span><span class="lang-zh" style="display:none">捷克</span></td><td style="padding:3px 5px">4%</td><td style="padding:3px 5px">2-3%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">6-7%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">No foreign restriction</span><span class="lang-zh" style="display:none">無外國人限制</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇫🇷 <span class="lang-en">France</span><span class="lang-zh" style="display:none">法國</span></td><td style="padding:3px 5px">5-6%</td><td style="padding:3px 5px">7-8%</td><td style="padding:3px 5px;font-weight:700;color:#dc2626">12-14%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">Notaire fees are high</span><span class="lang-zh" style="display:none">公證人費用高</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇹🇼 <span class="lang-en">Taiwan</span><span class="lang-zh" style="display:none">台灣</span></td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">2-4%</td><td style="padding:3px 5px;color:#d97706"><span class="lang-en">LTV cap 30-60% for 2nd+</span><span class="lang-zh" style="display:none">第二戶起貸款成數30-60%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇰🇷 <span class="lang-en">S. Korea</span><span class="lang-zh" style="display:none">韓國</span></td><td style="padding:3px 5px">1-3%</td><td style="padding:3px 5px">0.5-1%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">2-4%</td><td style="padding:3px 5px;color:#d97706"><span class="lang-en">Multi-home tax up to 12%</span><span class="lang-zh" style="display:none">多屋稅最高12%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇳🇿 <span class="lang-en">NZ</span><span class="lang-zh" style="display:none">紐西蘭</span></td><td style="padding:3px 5px">0%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">1-2%</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">Foreign ban (existing homes)</span><span class="lang-zh" style="display:none">禁止外國人買中古屋</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇲🇾 <span class="lang-en">Malaysia</span><span class="lang-zh" style="display:none">馬來西亞</span></td><td style="padding:3px 5px">8%</td><td style="padding:3px 5px">2-3%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">10-12%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">RM1M min for foreigners</span><span class="lang-zh" style="display:none">外國人最低RM100萬</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇦🇺 <span class="lang-en">Australia</span><span class="lang-zh" style="display:none">澳洲</span></td><td style="padding:3px 5px">4-5%+8%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#dc2626">13-15%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">New builds only for foreign</span><span class="lang-zh" style="display:none">外國人限買新屋</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇹🇭 <span class="lang-en">Thailand</span><span class="lang-zh" style="display:none">泰國</span></td><td style="padding:3px 5px">2-3%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">3-5%</td><td style="padding:3px 5px;color:#d97706"><span class="lang-en">Condo only; 49% foreign quota</span><span class="lang-zh" style="display:none">僅公寓；外國人49%配額</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇻🇳 <span class="lang-en">Vietnam</span><span class="lang-zh" style="display:none">越南</span></td><td style="padding:3px 5px">0.5%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">2-3%</td><td style="padding:3px 5px;color:#d97706"><span class="lang-en">50yr leasehold; 30% cap</span><span class="lang-zh" style="display:none">50年租賃權；30%配額</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇮🇳 <span class="lang-en">India</span><span class="lang-zh" style="display:none">印度</span></td><td style="padding:3px 5px">5-7%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">6-9%</td><td style="padding:3px 5px;color:#d97706"><span class="lang-en">NRI OK; PIO/OCI required</span><span class="lang-zh" style="display:none">需NRI或PIO/OCI身份</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇵🇭 <span class="lang-en">Philippines</span><span class="lang-zh" style="display:none">菲律賓</span></td><td style="padding:3px 5px">1.5-6%</td><td style="padding:3px 5px">2-3%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">4-9%</td><td style="padding:3px 5px;color:#d97706"><span class="lang-en">Condo OK; no land ownership</span><span class="lang-zh" style="display:none">公寓可買；不可持有土地</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇮🇩 <span class="lang-en">Indonesia</span><span class="lang-zh" style="display:none">印尼</span></td><td style="padding:3px 5px">5%</td><td style="padding:3px 5px">2-3%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">7-8%</td><td style="padding:3px 5px;color:#d97706"><span class="lang-en">Hak Pakai 70yr only</span><span class="lang-zh" style="display:none">僅使用權70年</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇨🇦 <span class="lang-en">Canada</span><span class="lang-zh" style="display:none">加拿大</span></td><td style="padding:3px 5px">1-4%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#16a34a">2-6%</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">Foreign ban until 2027</span><span class="lang-zh" style="display:none">外國人禁令至2027年</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇭🇰 <span class="lang-en">HK</span><span class="lang-zh" style="display:none">香港</span></td><td style="padding:3px 5px">4.25%</td><td style="padding:3px 5px">1-2%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">5-6%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">Extra duties removed 2024</span><span class="lang-zh" style="display:none">2024年撤銷辣招</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇹🇷 <span class="lang-en">Turkey</span><span class="lang-zh" style="display:none">土耳其</span></td><td style="padding:3px 5px">4%</td><td style="padding:3px 5px">3-5%</td><td style="padding:3px 5px;font-weight:700;color:#d97706">7-9%</td><td style="padding:3px 5px;color:#94a3b8"><span class="lang-en">$400K for citizenship</span><span class="lang-zh" style="display:none">$40萬可申請公民</span></td></tr>
+          <tr><td style="padding:3px 5px;font-weight:600">🇸🇬 <span class="lang-en">Singapore</span><span class="lang-zh" style="display:none">新加坡</span></td><td style="padding:3px 5px;color:#dc2626;font-weight:700">60%</td><td style="padding:3px 5px">2-3%</td><td style="padding:3px 5px;font-weight:700;color:#dc2626">62-63%</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">Highest in the world</span><span class="lang-zh" style="display:none">全球最高</span></td></tr>
+        </table>
+        </div>
+        <div style="font-size:8px;color:#94a3b8;margin-top:6px"><span class="lang-en">Rates for foreign buyers. Actual varies by value, buyer status, property type. Always verify with local lawyer.</span><span class="lang-zh" style="display:none">外國買家適用稅率。實際依價值、身份、物業類型而異。務必向當地律師確認。</span></div>
+      </div>
+
+      <!-- Card 6: Holding & Exit Tax -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:8px"><span class="lang-en">Holding &amp; Exit Costs</span><span class="lang-zh" style="display:none">持有與退出成本</span></div>
+        <div style="font-size:8.5px;color:#94a3b8;margin-bottom:8px"><span class="lang-en">Annual holding + capital gains tax for non-resident investors</span><span class="lang-zh" style="display:none">非居民投資者年度持有成本+資本利得稅</span></div>
+        <div style="max-height:380px;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:9px;font-family:Inter,sans-serif">
+          <tr style="background:#f0f6ff;position:sticky;top:0"><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"></td><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"><span class="lang-en">Tax/yr</span><span class="lang-zh" style="display:none">年稅</span></td><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"><span class="lang-en">Rent Tax</span><span class="lang-zh" style="display:none">租金稅</span></td><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"><span class="lang-en">CGT</span><span class="lang-zh" style="display:none">資本利得</span></td><td style="padding:3px 5px;font-weight:600;color:#5a7a9a"><span class="lang-en">Key</span><span class="lang-zh" style="display:none">關鍵</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇦🇪 <span class="lang-en">Dubai</span><span class="lang-zh" style="display:none">杜拜</span></td><td style="padding:3px 5px;color:#16a34a">0%</td><td style="padding:3px 5px;color:#16a34a">0%</td><td style="padding:3px 5px;color:#16a34a">0%</td><td style="padding:3px 5px;color:#16a34a"><span class="lang-en">Zero tax haven</span><span class="lang-zh" style="display:none">零稅天堂</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇹🇼 <span class="lang-en">Taiwan</span><span class="lang-zh" style="display:none">台灣</span></td><td style="padding:3px 5px;color:#16a34a">&lt;0.1%</td><td style="padding:3px 5px">5-40%</td><td style="padding:3px 5px;color:#dc2626">45%&rarr;20%</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">&lt;2yr 45%; &gt;5yr 20%</span><span class="lang-zh" style="display:none">&lt;2年45%；&gt;5年20%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇯🇵 <span class="lang-en">Japan</span><span class="lang-zh" style="display:none">日本</span></td><td style="padding:3px 5px;color:#16a34a">0.3-0.5%</td><td style="padding:3px 5px">20-30%</td><td style="padding:3px 5px;color:#d97706">39%&rarr;20%</td><td style="padding:3px 5px"><span class="lang-en">&lt;5yr 39%; &gt;5yr 20%</span><span class="lang-zh" style="display:none">&lt;5年39%；&gt;5年20%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇲🇾 <span class="lang-en">MY</span><span class="lang-zh" style="display:none">馬來西亞</span></td><td style="padding:3px 5px;color:#16a34a">~0.1%</td><td style="padding:3px 5px">30%</td><td style="padding:3px 5px;color:#16a34a">30%&rarr;10%</td><td style="padding:3px 5px"><span class="lang-en">&lt;5yr 30%; &gt;6yr 10%</span><span class="lang-zh" style="display:none">&lt;5年30%；&gt;6年10%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇹🇭 <span class="lang-en">Thailand</span><span class="lang-zh" style="display:none">泰國</span></td><td style="padding:3px 5px;color:#16a34a">~0.1%</td><td style="padding:3px 5px">15%</td><td style="padding:3px 5px;color:#16a34a">0% <span class="lang-en">&gt;5yr</span><span class="lang-zh" style="display:none">&gt;5年</span></td><td style="padding:3px 5px;color:#16a34a"><span class="lang-en">Withholding tax system</span><span class="lang-zh" style="display:none">預扣稅制</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇻🇳 <span class="lang-en">Vietnam</span><span class="lang-zh" style="display:none">越南</span></td><td style="padding:3px 5px;color:#16a34a">0.03-0.15%</td><td style="padding:3px 5px">5%</td><td style="padding:3px 5px">2%</td><td style="padding:3px 5px;color:#16a34a"><span class="lang-en">Flat 2% on gross sale</span><span class="lang-zh" style="display:none">按總售價2%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇰🇷 <span class="lang-en">S. Korea</span><span class="lang-zh" style="display:none">韓國</span></td><td style="padding:3px 5px;color:#d97706">0.1-0.5%</td><td style="padding:3px 5px">22-44%</td><td style="padding:3px 5px;color:#dc2626">6-45%</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">Multi-home +20-30%</span><span class="lang-zh" style="display:none">多屋加徵20-30%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇸🇬 <span class="lang-en">SG</span><span class="lang-zh" style="display:none">新加坡</span></td><td style="padding:3px 5px;color:#16a34a">~0.1%</td><td style="padding:3px 5px">22%</td><td style="padding:3px 5px;color:#16a34a">0% <span class="lang-en">&gt;3yr</span><span class="lang-zh" style="display:none">&gt;3年</span></td><td style="padding:3px 5px"><span class="lang-en">SSD 12%&rarr;0% over 3yr</span><span class="lang-zh" style="display:none">SSD 3年內12%降至0%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇭🇰 <span class="lang-en">HK</span><span class="lang-zh" style="display:none">香港</span></td><td style="padding:3px 5px;color:#16a34a">~0.1%</td><td style="padding:3px 5px">15%</td><td style="padding:3px 5px;color:#16a34a">0%</td><td style="padding:3px 5px;color:#16a34a"><span class="lang-en">No CGT; SSD removed 2024</span><span class="lang-zh" style="display:none">無CGT；SSD已2024撤銷</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇺🇸 <span class="lang-en">US</span><span class="lang-zh" style="display:none">美國</span></td><td style="padding:3px 5px;color:#dc2626">1-2.5%</td><td style="padding:3px 5px">30%</td><td style="padding:3px 5px">15-20%</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">FIRPTA 15% withhold</span><span class="lang-zh" style="display:none">FIRPTA預扣15%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇬🇧 <span class="lang-en">UK</span><span class="lang-zh" style="display:none">英國</span></td><td style="padding:3px 5px;color:#d97706">Council tax</td><td style="padding:3px 5px">20-45%</td><td style="padding:3px 5px">18-24%</td><td style="padding:3px 5px"><span class="lang-en">No non-res exemption</span><span class="lang-zh" style="display:none">非居民無免稅</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇮🇪 <span class="lang-en">Ireland</span><span class="lang-zh" style="display:none">愛爾蘭</span></td><td style="padding:3px 5px;color:#16a34a">LPT ~0.1%</td><td style="padding:3px 5px">20-40%</td><td style="padding:3px 5px">33%</td><td style="padding:3px 5px"><span class="lang-en">Flat 33% CGT</span><span class="lang-zh" style="display:none">統一33% CGT</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇦🇺 <span class="lang-en">AU</span><span class="lang-zh" style="display:none">澳洲</span></td><td style="padding:3px 5px;color:#d97706">Land tax</td><td style="padding:3px 5px">32.5%+</td><td style="padding:3px 5px;color:#dc2626">32.5%+</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">No CGT discount non-res</span><span class="lang-zh" style="display:none">非居民無CGT折扣</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇳🇿 <span class="lang-en">NZ</span><span class="lang-zh" style="display:none">紐西蘭</span></td><td style="padding:3px 5px;color:#16a34a">0%</td><td style="padding:3px 5px">28-39%</td><td style="padding:3px 5px;color:#d97706">39% <span class="lang-en">&lt;10yr</span><span class="lang-zh" style="display:none">&lt;10年</span></td><td style="padding:3px 5px"><span class="lang-en">Bright-line 10yr rule</span><span class="lang-zh" style="display:none">明線規則10年</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇫🇷 <span class="lang-en">France</span><span class="lang-zh" style="display:none">法國</span></td><td style="padding:3px 5px;color:#d97706">Taxe fonci&egrave;re</td><td style="padding:3px 5px">20-45%</td><td style="padding:3px 5px;color:#16a34a">0% <span class="lang-en">&gt;22yr</span><span class="lang-zh" style="display:none">&gt;22年</span></td><td style="padding:3px 5px"><span class="lang-en">IFI wealth tax &gt;&euro;1.3M</span><span class="lang-zh" style="display:none">IFI富人稅&gt;&euro;130萬</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇩🇪 <span class="lang-en">Germany</span><span class="lang-zh" style="display:none">德國</span></td><td style="padding:3px 5px;color:#16a34a">0.3-1%</td><td style="padding:3px 5px">25-45%</td><td style="padding:3px 5px;color:#16a34a">0% <span class="lang-en">&gt;10yr</span><span class="lang-zh" style="display:none">&gt;10年</span></td><td style="padding:3px 5px;color:#16a34a"><span class="lang-en">Hold 10yr = tax free</span><span class="lang-zh" style="display:none">持有10年=免稅</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇪🇸 <span class="lang-en">Spain</span><span class="lang-zh" style="display:none">西班牙</span></td><td style="padding:3px 5px;color:#d97706">IBI 0.4-1.1%</td><td style="padding:3px 5px">24%</td><td style="padding:3px 5px">19-23%</td><td style="padding:3px 5px"><span class="lang-en">Modelo 210 quarterly</span><span class="lang-zh" style="display:none">每季申報Modelo 210</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇮🇹 <span class="lang-en">Italy</span><span class="lang-zh" style="display:none">義大利</span></td><td style="padding:3px 5px;color:#d97706">IMU 0.4-1%</td><td style="padding:3px 5px">21% flat</td><td style="padding:3px 5px">26%</td><td style="padding:3px 5px"><span class="lang-en">Cedolare secca 21% opt-in</span><span class="lang-zh" style="display:none">可選21%固定稅率</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇵🇹 <span class="lang-en">Portugal</span><span class="lang-zh" style="display:none">葡萄牙</span></td><td style="padding:3px 5px;color:#d97706">IMI 0.3-0.8%</td><td style="padding:3px 5px">25-28%</td><td style="padding:3px 5px">28%</td><td style="padding:3px 5px"><span class="lang-en">NHR regime ended 2024</span><span class="lang-zh" style="display:none">NHR優惠2024結束</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇳🇱 <span class="lang-en">NL</span><span class="lang-zh" style="display:none">荷蘭</span></td><td style="padding:3px 5px;color:#d97706">WOZ ~0.1%</td><td style="padding:3px 5px">Box 3: 36%</td><td style="padding:3px 5px">Box 3: 36%</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">Deemed return tax</span><span class="lang-zh" style="display:none">推定報酬課稅</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇨🇭 <span class="lang-en">CH</span><span class="lang-zh" style="display:none">瑞士</span></td><td style="padding:3px 5px;color:#16a34a">0.1-0.3%</td><td style="padding:3px 5px">Cantonal</td><td style="padding:3px 5px;color:#d97706">Cantonal</td><td style="padding:3px 5px"><span class="lang-en">Varies by canton</span><span class="lang-zh" style="display:none">各州不同</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇵🇱 <span class="lang-en">Poland</span><span class="lang-zh" style="display:none">波蘭</span></td><td style="padding:3px 5px;color:#16a34a">~0.1%</td><td style="padding:3px 5px">8.5-12.5%</td><td style="padding:3px 5px;color:#16a34a">0% <span class="lang-en">&gt;5yr</span><span class="lang-zh" style="display:none">&gt;5年</span></td><td style="padding:3px 5px;color:#16a34a"><span class="lang-en">Low tax; 5yr exemption</span><span class="lang-zh" style="display:none">低稅；5年免稅</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇨🇿 <span class="lang-en">Czechia</span><span class="lang-zh" style="display:none">捷克</span></td><td style="padding:3px 5px;color:#16a34a">&lt;0.1%</td><td style="padding:3px 5px">15%</td><td style="padding:3px 5px;color:#16a34a">0% <span class="lang-en">&gt;5yr</span><span class="lang-zh" style="display:none">&gt;5年</span></td><td style="padding:3px 5px;color:#16a34a"><span class="lang-en">Very low holding cost</span><span class="lang-zh" style="display:none">持有成本極低</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇹🇷 <span class="lang-en">Turkey</span><span class="lang-zh" style="display:none">土耳其</span></td><td style="padding:3px 5px;color:#16a34a">0.1-0.2%</td><td style="padding:3px 5px">15-35%</td><td style="padding:3px 5px;color:#16a34a">0% <span class="lang-en">&gt;5yr</span><span class="lang-zh" style="display:none">&gt;5年</span></td><td style="padding:3px 5px"><span class="lang-en">Inflation adj. on cost basis</span><span class="lang-zh" style="display:none">成本可通膨調整</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇮🇳 <span class="lang-en">India</span><span class="lang-zh" style="display:none">印度</span></td><td style="padding:3px 5px;color:#16a34a">&lt;0.1%</td><td style="padding:3px 5px">30%+</td><td style="padding:3px 5px">20% <span class="lang-en">w/ index</span><span class="lang-zh" style="display:none">含指數化</span></td><td style="padding:3px 5px"><span class="lang-en">Indexation benefit on LTCG</span><span class="lang-zh" style="display:none">長期利得可指數化</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇵🇭 <span class="lang-en">PH</span><span class="lang-zh" style="display:none">菲律賓</span></td><td style="padding:3px 5px;color:#16a34a">1-2%</td><td style="padding:3px 5px">25%</td><td style="padding:3px 5px">6%</td><td style="padding:3px 5px"><span class="lang-en">Flat 6% on gross price</span><span class="lang-zh" style="display:none">按總價6%</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 5px;font-weight:600">🇮🇩 <span class="lang-en">ID</span><span class="lang-zh" style="display:none">印尼</span></td><td style="padding:3px 5px;color:#16a34a">0.5%</td><td style="padding:3px 5px">20%</td><td style="padding:3px 5px">2.5%</td><td style="padding:3px 5px;color:#16a34a"><span class="lang-en">Low flat CGT 2.5%</span><span class="lang-zh" style="display:none">低平稅率2.5%</span></td></tr>
+          <tr><td style="padding:3px 5px;font-weight:600">🇨🇦 <span class="lang-en">Canada</span><span class="lang-zh" style="display:none">加拿大</span></td><td style="padding:3px 5px;color:#d97706">0.5-2%</td><td style="padding:3px 5px">25-53%</td><td style="padding:3px 5px;color:#dc2626">50% inclusion</td><td style="padding:3px 5px;color:#dc2626"><span class="lang-en">Speculation tax in BC</span><span class="lang-zh" style="display:none">BC省投機稅</span></td></tr>
+        </table>
+        </div>
+        <div style="font-size:8px;color:#94a3b8;margin-top:6px"><span class="lang-en">Non-resident rates. CGT arrows show short→long term. Always consult cross-border tax advisor.</span><span class="lang-zh" style="display:none">非居民稅率。CGT箭頭為短→長期。務必諮詢跨境稅務顧問。</span></div>
+      </div>
+
+      <!-- Card 7: Currency Risk -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:12px"><span class="lang-en">Currency &amp; FX Risk</span><span class="lang-zh" style="display:none">匯率與外匯風險</span></div>
+        <div style="font-size:11px;color:#475569;line-height:1.7;font-family:Inter,sans-serif">
+          <div style="margin-bottom:10px;padding:8px;background:#fef2f2;border-radius:6px;border-left:3px solid #dc2626">
+            <span class="lang-en"><strong>Rule of thumb:</strong> A 10% depreciation in property currency wipes out ~2 years of rental income. Your real return = property return + FX return.</span>
+            <span class="lang-zh" style="display:none"><strong>經驗法則：</strong>當地貨幣貶值10%等於抹去約2年租金收入。你的實際報酬 = 房產報酬 + 匯率報酬。</span>
+          </div>
+          <div style="margin-bottom:8px"><span style="font-weight:600;color:#16a34a">&#9650;</span> <span class="lang-en"><strong>Strong currency markets</strong> (CHF, SGD, USD): FX tailwind for foreign owners. Currency acts as a bonus return layer.</span><span class="lang-zh" style="display:none"><strong>強勢貨幣市場</strong>（瑞郎、新幣、美元）：匯率為外國業主帶來順風。貨幣本身是額外報酬層。</span></div>
+          <div style="margin-bottom:8px"><span style="font-weight:600;color:#dc2626">&#9660;</span> <span class="lang-en"><strong>Weak/volatile currencies</strong> (TRY, IDR, PHP, MYR): High yields can be entirely offset by depreciation. Istanbul 25% YoY growth means nothing if lira drops 30%.</span><span class="lang-zh" style="display:none"><strong>弱勢/波動貨幣</strong>（土耳其里拉、印尼盾、披索、馬幣）：高收益率可能完全被貶值抵消。伊斯坦堡年增25%在里拉跌30%後毫無意義。</span></div>
+          <div><span style="font-weight:600;color:#1e3a5f">&#9654;</span> <span class="lang-en"><strong>Hedging options:</strong> USD-pegged markets (Dubai AED, HK HKD) eliminate FX risk vs USD. JPY weakness has been a structural entry discount for Asian buyers since 2022.</span><span class="lang-zh" style="display:none"><strong>對沖選項：</strong>掛鉤美元市場（杜拜迪拉姆、港幣）消除對美元匯率風險。日圓弱勢自2022年起為亞洲買家提供結構性進場折價。</span></div>
+        </div>
+      </div>
+
+      <!-- Card 8: Vacancy & Tenant Risk -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:8px"><span class="lang-en">Vacancy &amp; Tenant Risk</span><span class="lang-zh" style="display:none">空租與租客風險</span></div>
+        <div style="font-size:10px;color:#475569;line-height:1.6;font-family:Inter,sans-serif">
+          <div style="margin-bottom:8px;padding:7px;background:#fffbeb;border-radius:6px;border-left:3px solid #d97706;font-size:9.5px">
+            <span class="lang-en"><strong>Actual yield = gross yield &times; occupancy rate.</strong> A 6% yield at 80% occupancy = 4.8%.</span>
+            <span class="lang-zh" style="display:none"><strong>實際收益率 = 毛收益率 &times; 出租率。</strong>6%收益率在80%出租率下 = 實際4.8%。</span>
+          </div>
+          <div style="font-size:9px;line-height:1.55">
+            <div style="margin-bottom:8px">
+              <span style="display:inline-block;background:#f0fdf4;color:#166534;font-weight:700;padding:1px 5px;border-radius:3px;font-size:8px;margin-bottom:3px"><span class="lang-en">LOW RISK: Vacancy &lt;1%</span><span class="lang-zh" style="display:none">低風險：空置率&lt;1%</span></span><br>
+              <span style="color:#64748b"><span class="lang-en">Corporate tenants, embassy staff, hospital/university workers. Near-zero vacancy.</span><span class="lang-zh" style="display:none">企業租客、使館人員、醫院/大學員工。接近零空置。</span></span><br>
+              <span class="lang-en">Geneva 0.3% · Dublin 0.5% · Zurich 0.5% · Perth 0.6% · Cork 0.6% · Adelaide 0.7% · Edinburgh 0.8% · Munich 0.8% · Gold Coast 0.9% · Brisbane 0.9% · Berlin 0.9%</span>
+              <span class="lang-zh" style="display:none">日内瓦0.3% · 都柏林0.5% · 蘇黎世0.5% · 伯斯0.6% · 科克0.6% · 阿德萊德0.7% · 愛丁堡0.8% · 慕尼黑0.8% · 黃金海岸0.9% · 布里斯本0.9% · 柏林0.9%</span>
+            </div>
+            <div style="margin-bottom:8px">
+              <span style="display:inline-block;background:#eff6ff;color:#1e3a5f;font-weight:700;padding:1px 5px;border-radius:3px;font-size:8px;margin-bottom:3px"><span class="lang-en">MODERATE: Vacancy 1&ndash;3%</span><span class="lang-zh" style="display:none">中度風險：空置率1&ndash;3%</span></span><br>
+              <span style="color:#64748b"><span class="lang-en">Young professionals, students. Seasonal gaps possible. Manageable.</span><span class="lang-zh" style="display:none">年輕專業人士、學生。可能有季節性空窗。可管理。</span></span><br>
+              <span class="lang-en">Manchester 1% · Malaga 1% · London 1.2% · Valencia 1.2% · Sydney 1.5% · Taipei 1.5% · Amsterdam 1.5% · Barcelona 1.5% · Tokyo 1.8% · Madrid 1.8% · Lisbon 1.8% · Boston 2% · Osaka 2% · Warsaw 2% · Florence 2% · NYC 2.8% · Seoul 2.8% · Vancouver 2.8%</span>
+              <span class="lang-zh" style="display:none">曼徹斯特1% · 馬拉加1% · 倫敦1.2% · 瓦倫西亞1.2% · 雪梨1.5% · 台北1.5% · 阿姆斯特丹1.5% · 巴塞隆納1.5% · 東京1.8% · 馬德里1.8% · 里斯本1.8% · 波士頓2% · 大阪2% · 華沙2% · 佛羅倫斯2% · 紐約2.8% · 首爾2.8% · 溫哥華2.8%</span>
+            </div>
+            <div style="margin-bottom:8px">
+              <span style="display:inline-block;background:#fffbeb;color:#92400e;font-weight:700;padding:1px 5px;border-radius:3px;font-size:8px;margin-bottom:3px"><span class="lang-en">ELEVATED: Vacancy 3&ndash;5%</span><span class="lang-zh" style="display:none">偏高風險：空置率3&ndash;5%</span></span><br>
+              <span style="color:#64748b"><span class="lang-en">Mixed tenant pool. Negotiation leverage shifts to tenants. Monitor closely.</span><span class="lang-zh" style="display:none">租客池混雜。議價籌碼向租客傾斜。需密切監測。</span></span><br>
+              <span class="lang-en">Singapore 3.2% · Chicago 3.5% · Toronto 3.5% · Hyderabad 3.5% · Marseille 3.5% · Istanbul 3% · Auckland 4.2% · LA 4.5% · Hong Kong 4.5% · Bangalore 4.5% · Seattle 4.8%</span>
+              <span class="lang-zh" style="display:none">新加坡3.2% · 芝加哥3.5% · 多倫多3.5% · 海得拉巴3.5% · 馬賽3.5% · 伊斯坦堡3% · 奧克蘭4.2% · 洛杉磯4.5% · 香港4.5% · 班加羅爾4.5% · 西雅圖4.8%</span>
+            </div>
+            <div>
+              <span style="display:inline-block;background:#fef2f2;color:#991b1b;font-weight:700;padding:1px 5px;border-radius:3px;font-size:8px;margin-bottom:3px"><span class="lang-en">HIGH RISK: Vacancy 5%+</span><span class="lang-zh" style="display:none">高風險：空置率5%+</span></span><br>
+              <span style="color:#64748b"><span class="lang-en">Tourist/Airbnb dependent or structural oversupply. Significant rental income risk.</span><span class="lang-zh" style="display:none">依賴觀光客/Airbnb或結構性過剩。租金收入風險顯著。</span></span><br>
+              <span class="lang-en">SF 5.8% · HCMC 6% · Denver 6.2% · Miami 7.5% · Phoenix 8% · Delhi 8% · Dubai 8.5% · Austin 10.5% · Penang 12% · Bangkok 12% · Manila 14% · Jakarta 15% · <strong style="color:#dc2626">KL 18%</strong></span>
+              <span class="lang-zh" style="display:none">舊金山5.8% · 胡志明市6% · 丹佛6.2% · 邁阿密7.5% · 鳳凰城8% · 德里8% · 杜拜8.5% · 奧斯丁10.5% · 檳城12% · 曼谷12% · 馬尼拉14% · 雅加達15% · <strong style="color:#dc2626">吉隆坡18%</strong></span>
+            </div>
+          </div>
+          <div style="font-size:8px;color:#94a3b8;margin-top:8px;border-top:1px solid #e2e8f0;padding-top:6px"><span class="lang-en">Always ask: Who is my tenant? How stable is their income? Can they leave easily? Is my unit competing with 500 identical units?</span><span class="lang-zh" style="display:none">永遠要問：我的租客是誰？收入穩定嗎？他們容易搬走嗎？我的單位在跟500個一樣的單位競爭嗎？</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Full-width: Cross-Border Cost Calculator -->
+    <div id="costCalc" style="margin-top:20px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;font-family:Inter,sans-serif">
+      <div style="background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:14px;font-weight:700;color:#fff;letter-spacing:.02em"><span class="lang-en">Cross-Border Cost Calculator</span><span class="lang-zh" style="display:none">跨境總成本計算機</span></div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:3px;letter-spacing:.04em"><span class="lang-en">Entry + holding + exit + CGT cliff for foreign buyers · Numbers above synthesize the two tables</span><span class="lang-zh" style="display:none">外國買家進場+持有+退場+資本利得斷崖 · 數字綜合上方兩張表</span></div>
+        </div>
+        <span style="font-size:9px;color:#3b82f6;font-weight:600;letter-spacing:.06em;background:rgba(59,130,246,.12);padding:3px 8px;border-radius:3px">2026 RATES</span>
+      </div>
+
+      <div style="padding:18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+        <!-- LEFT: INPUTS -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label style="display:block;font-size:9.5px;font-weight:600;letter-spacing:.08em;color:#5a7a9a;margin-bottom:6px"><span class="lang-en">COUNTRY</span><span class="lang-zh" style="display:none">國家</span></label>
+            <select id="cc-country" style="width:100%;padding:8px 10px;border:1px solid #dce8f5;border-radius:6px;font-size:12px;font-family:inherit;background:#fff;color:#1e3a5f;cursor:pointer"></select>
+          </div>
+          <div>
+            <label style="display:block;font-size:9.5px;font-weight:600;letter-spacing:.08em;color:#5a7a9a;margin-bottom:6px"><span class="lang-en">PROPERTY PRICE (USD)</span><span class="lang-zh" style="display:none">房產總價（美元）</span></label>
+            <input id="cc-price" type="number" min="50000" max="20000000" step="10000" value="500000" style="width:100%;padding:8px 10px;border:1px solid #dce8f5;border-radius:6px;font-size:12px;font-family:inherit;background:#fff;color:#1e3a5f">
+            <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+              <button onclick="ccSetPrice(250000)" class="cc-preset">$250K</button>
+              <button onclick="ccSetPrice(500000)" class="cc-preset">$500K</button>
+              <button onclick="ccSetPrice(1000000)" class="cc-preset">$1M</button>
+              <button onclick="ccSetPrice(2000000)" class="cc-preset">$2M</button>
+            </div>
+          </div>
+          <div>
+            <label style="display:flex;justify-content:space-between;font-size:9.5px;font-weight:600;letter-spacing:.08em;color:#5a7a9a;margin-bottom:6px">
+              <span><span class="lang-en">HOLDING YEARS</span><span class="lang-zh" style="display:none">持有年數</span></span>
+              <span id="cc-years-label" style="color:#1e3a5f">5 yrs</span>
+            </label>
+            <input id="cc-years" type="range" min="1" max="15" step="1" value="5" style="width:100%;cursor:pointer;accent-color:#3b82f6">
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;margin-top:2px"><span>1</span><span>5</span><span>10</span><span>15</span></div>
+          </div>
+          <div>
+            <label style="display:flex;justify-content:space-between;font-size:9.5px;font-weight:600;letter-spacing:.08em;color:#5a7a9a;margin-bottom:6px">
+              <span><span class="lang-en">ASSUMED CAPITAL GAIN AT EXIT</span><span class="lang-zh" style="display:none">退場時假設資本增值</span></span>
+              <span id="cc-gain-label" style="color:#1e3a5f">+25%</span>
+            </label>
+            <input id="cc-gain" type="range" min="-30" max="100" step="5" value="25" style="width:100%;cursor:pointer;accent-color:#3b82f6">
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;margin-top:2px"><span>-30%</span><span>0%</span><span>+50%</span><span>+100%</span></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: OUTPUT -->
+        <div id="cc-output" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;font-size:11.5px"></div>
+      </div>
+
+      <div style="border-top:1px solid #e2e8f0;padding:10px 20px;background:#fef9e7;font-size:10px;color:#92400e;line-height:1.5">
+        <span class="lang-en"><strong>⚠ Calculator caveats:</strong> Estimates use representative rates for non-resident buyers. Actual costs vary by state/canton, property value tier, citizenship, and deal structure. CGT cliff schedules are simplified (real schedules may have multiple steps). Assumes flat USD pricing — does not model FX. <strong>Always verify with a local lawyer or tax advisor.</strong></span>
+        <span class="lang-zh" style="display:none"><strong>⚠ 計算機注意事項：</strong>數字採非居民買家代表性稅率。實際成本因州/邦、價格級距、國籍、交易架構而異。資本利得斷崖採簡化模型（真實制度可能多階）。假設美元計價、不計匯率變動。<strong>請務必與當地律師或稅務顧問確認。</strong></span>
+      </div>
+    </div>
+
+    <!-- Full-width: Buy-to-Sell Checklist -->
+    <div style="margin-top:20px;max-width:min(1400px,96vw);background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+      <div style="background:#1e3a5f;padding:14px 20px">
+        <div style="font-size:14px;font-weight:700;color:#fff"><span class="lang-en">Buy-to-Sell Checklist: What Professionals Track</span><span class="lang-zh" style="display:none">從買到賣：專業投資人追蹤清單</span></div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:3px"><span class="lang-en">Data collection framework for cross-border property investment</span><span class="lang-zh" style="display:none">跨國房產投資的資料蒐集框架</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);font-size:10.5px;font-family:Inter,sans-serif;color:#334155;line-height:1.65">
+
+        <!-- Phase 1: Pre-Purchase Research (expanded) -->
+        <div style="padding:16px 18px;border-right:1px solid #f0f5fb">
+          <div style="font-size:11px;font-weight:700;color:#1e3a5f;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #1e3a5f"><span class="lang-en">PHASE 1: Before You Buy</span><span class="lang-zh" style="display:none">階段一：買入前研究</span></div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px;margin-top:8px"><span class="lang-en">&#9312; Macro &amp; Policy Environment</span><span class="lang-zh" style="display:none">&#9312; 總經與政策環境</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Central bank rate direction &amp; forward guidance<br>&#9744; Inflation trajectory — above target = rate hike risk<br>&#9744; GDP growth &amp; unemployment trend — jobs = rental demand<br>&#9744; Foreign buyer restrictions, extra stamp duties, LTV caps<br>&#9744; Visa/residency pathway tied to purchase (Golden Visa, MM2H)<br>&#9744; Currency trend vs home currency — 3yr &amp; 10yr chart<br>&#9744; Political stability &amp; upcoming elections — policy reversal risk<br>&#9744; Capital controls — can you repatriate sale proceeds freely?</span>
+            <span class="lang-zh" style="display:none">&#9744; 央行利率方向與前瞻指引<br>&#9744; 通膨走勢——超標=升息風險<br>&#9744; GDP與失業率趨勢——就業=租賃需求<br>&#9744; 外國買家限制、額外印花稅、貸款成數上限<br>&#9744; 購房可否取得簽證/居留權（黃金簽證、MM2H）<br>&#9744; 匯率走勢——看3年和10年線圖<br>&#9744; 政治穩定度與選舉時程——政策翻轉風險<br>&#9744; 資本管制——賣房後資金能自由匯回嗎？</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9313; Market Cycle &amp; Supply-Demand</span><span class="lang-zh" style="display:none">&#9313; 市場週期與供需分析</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Where in the cycle? — peak / correction / trough / recovery<br>&#9744; Vacancy rate — &lt;2% landlord market, &gt;5% oversupply<br>&#9744; Supply pipeline — units completing next 1/2/3 years<br>&#9744; Transaction volume trend — rising confirms price direction<br>&#9744; Days on market — &lt;30 hot, 30-60 neutral, &gt;60 soft<br>&#9744; Auction clearance rate (AU/UK) or absorption rate (Asia)<br>&#9744; Distressed listings trend — falling = no forced sellers<br>&#9744; Rent growth YoY — the real demand signal, harder to fake</span>
+            <span class="lang-zh" style="display:none">&#9744; 市場處於週期哪個位置？——高峰/修正/低谷/復甦<br>&#9744; 空置率——&lt;2%房東市場，&gt;5%供過於求<br>&#9744; 在建供給——未來1/2/3年各有多少完工<br>&#9744; 成交量趨勢——上升確認價格方向<br>&#9744; 在市天數——&lt;30天熱市，30-60中性，&gt;60冷市<br>&#9744; 拍賣清盤率（澳/英）或去化率（亞洲）<br>&#9744; 不良掛牌量趨勢——下降=無被迫拋售<br>&#9744; 租金年增率——最真實的需求信號，最難造假</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9314; Location Micro-Analysis</span><span class="lang-zh" style="display:none">&#9314; 地段微觀分析</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Employment anchor within 3km — who are the tenants?<br>&#9744; Public transport — walk to MRT/train &lt;800m is rental gold<br>&#9744; School district quality — drives family demand &amp; resale<br>&#9744; Infrastructure catalyst — new MRT line, highway, hospital<br>&#9744; Neighbourhood trajectory — gentrifying or declining?<br>&#9744; Flood/natural disaster zone check<br>&#9744; Street-level visit at night &amp; weekends — safety, noise, vibe</span>
+            <span class="lang-zh" style="display:none">&#9744; 3公里內就業錨點——租客是誰？<br>&#9744; 公共運輸——步行至捷運/火車站&lt;800公尺是租賃黃金<br>&#9744; 學區品質——驅動家庭需求與轉售力<br>&#9744; 基建催化劑——新捷運線、高速公路、醫院<br>&#9744; 社區軌跡——正在仕紳化還是衰退中？<br>&#9744; 洪水/天災區域確認<br>&#9744; 夜間與週末實地走訪——安全、噪音、氛圍</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9315; Property Due Diligence</span><span class="lang-zh" style="display:none">&#9315; 物件盡職調查</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Title type — freehold / leasehold (years left?) / commercial<br>&#9744; Comparable transactions within 500m in last 6 months<br>&#9744; Body corporate fees — what % of annual rent do they eat?<br>&#9744; Sinking fund adequacy — underfunded = special levy risk<br>&#9744; Building age &amp; maintenance history — facade, lift, pipes<br>&#9744; Floor plan efficiency — usable sqm vs gross sqm ratio<br>&#9744; Developer track record — completion history, defect rate<br>&#9744; Rental comps on same street — verify the yield is real</span>
+            <span class="lang-zh" style="display:none">&#9744; 產權類型——永久/租賃（剩幾年？）/商業地契<br>&#9744; 500公尺內近6個月可比成交<br>&#9744; 管理費——佔年租金收入的幾%？<br>&#9744; 儲備基金是否足夠——不足=被追繳風險<br>&#9744; 建物屋齡與維護紀錄——外牆、電梯、管線<br>&#9744; 格局效率——可用面積 vs 登記面積比<br>&#9744; 開發商紀錄——完工歷史、瑕疵率<br>&#9744; 同街租金行情——確認收益率是真的</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9316; Legal &amp; Financing Structure</span><span class="lang-zh" style="display:none">&#9316; 法律與融資架構</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Local property law — tenant protection level (eviction rules)<br>&#9744; Purchase entity — personal name vs company vs trust?<br>&#9744; Financing — local mortgage vs offshore loan vs cash?<br>&#9744; LTV available to foreigners — 50%? 70%? 0%?<br>&#9744; Interest-only option — preserves cash flow in early years<br>&#9744; Lawyer selection — independent, not developer-recommended<br>&#9744; Contract review — penalty clauses, completion guarantees</span>
+            <span class="lang-zh" style="display:none">&#9744; 當地物業法——租客保護程度（驅逐規則）<br>&#9744; 購買主體——個人/公司/信託？<br>&#9744; 融資方式——當地房貸/海外貸款/全現金？<br>&#9744; 外國人可得貸款成數——50%？70%？0%？<br>&#9744; 寬限期/只付利息選項——保護前期現金流<br>&#9744; 律師選擇——獨立的，不是開發商推薦的<br>&#9744; 合約審查——違約條款、完工保證</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9317; Pre-Buy Financial Model</span><span class="lang-zh" style="display:none">&#9317; 買入前財務模型</span></div>
+          <div>
+            <span class="lang-en">&#9744; Build a 5yr cash flow spreadsheet BEFORE signing<br>&#9744; Entry costs: stamp duty + legal + agent + renovation<br>&#9744; Annual costs: mortgage + tax + management + insurance<br>&#9744; Rental income: use CONSERVATIVE estimate (90% occupancy)<br>&#9744; Exit costs at year 3/5/7: CGT + agent + legal + FX<br>&#9744; Breakeven analysis: how many years to recover entry costs?<br>&#9744; Stress test: what if rates rise 2%? vacancy doubles? FX drops 15%?<br><br><em style="color:#dc2626">&#9888; If the deal only works with optimistic assumptions, walk away.</em></span>
+            <span class="lang-zh" style="display:none">&#9744; 簽約前先建一張5年現金流試算表<br>&#9744; 進場成本：印花稅+律師+仲介+裝修<br>&#9744; 年度成本：房貸+稅+管理+保險<br>&#9744; 租金收入：用保守估計（90%出租率）<br>&#9744; 第3/5/7年退場成本：資本利得稅+仲介+律師+匯率<br>&#9744; 損益平衡分析：幾年才能回收進場成本？<br>&#9744; 壓力測試：利率升2%？空租率翻倍？匯率跌15%？<br><br><em style="color:#dc2626">&#9888; 如果這筆交易只有在樂觀假設下才成立——放棄。</em></span>
+          </div>
+        </div>
+
+        <!-- Phase 2: Holding Period -->
+        <div style="padding:16px 18px;border-right:1px solid #f0f5fb">
+          <div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #d97706"><span class="lang-en">PHASE 2: While You Hold</span><span class="lang-zh" style="display:none">階段二：持有期管理</span></div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px;margin-top:8px"><span class="lang-en">Cash Flow Monitoring</span><span class="lang-zh" style="display:none">現金流監控</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Net yield after all costs (mortgage + tax + management + vacancy)<br>&#9744; Rent review cycle — annual? CPI-linked? Market-rate?<br>&#9744; Tenant payment history — arrears over 30 days = red flag<br>&#9744; FX impact on remitted rental income<br>&#9744; Insurance adequacy — building + landlord liability + loss of rent</span>
+            <span class="lang-zh" style="display:none">&#9744; 扣除所有成本後的淨收益率（房貸+稅+管理+空租）<br>&#9744; 租金調整週期——年度？掛鉤CPI？市場行情？<br>&#9744; 租客付款歷史——逾期超過30天=紅旗<br>&#9744; 匯率對匯回租金收入的影響<br>&#9744; 保險充足性——建物+房東責任+租金損失</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">Market Watch Signals</span><span class="lang-zh" style="display:none">市場警訊監測</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Quarterly vacancy rate trend in your district<br>&#9744; New supply completions within 2km — direct competition<br>&#9744; Rental listing volume — sudden spike = oversupply forming<br>&#9744; Interest rate decisions — each 25bp hike = ~3% less buyer pool<br>&#9744; Policy changes — rent control, foreign buyer tax, visa rules</span>
+            <span class="lang-zh" style="display:none">&#9744; 你所在區域的季度空置率趨勢<br>&#9744; 2公里內新屋完工量——直接競爭<br>&#9744; 租屋掛牌量——突然激增=過剩正在形成<br>&#9744; 利率決議——每升息25bp=買家池縮小約3%<br>&#9744; 政策變化——租金管制、外國人稅、簽證規則</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">Tax & Compliance</span><span class="lang-zh" style="display:none">稅務與合規</span></div>
+          <div>
+            <span class="lang-en">&#9744; Annual property tax / council tax / land tax payment<br>&#9744; Rental income declaration in BOTH countries<br>&#9744; Double taxation agreement — claim credits to avoid double-pay<br>&#9744; Capital gains holding period — many countries have cliff rates<br>&#9744; Withholding tax on rental income for non-residents</span>
+            <span class="lang-zh" style="display:none">&#9744; 年度房產稅/市政稅/土地稅繳納<br>&#9744; 租金所得在兩國都要申報<br>&#9744; 雙邊租稅協定——申請抵免避免重複課稅<br>&#9744; 資本利得持有年限——多國有斷崖式稅率<br>&#9744; 非居民租金所得預扣稅</span>
+          </div>
+        </div>
+
+        <!-- Phase 3: Exit -->
+        <div style="padding:16px 18px">
+          <div style="font-size:11px;font-weight:700;color:#16a34a;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #16a34a"><span class="lang-en">PHASE 3: When You Sell</span><span class="lang-zh" style="display:none">階段三：退場決策</span></div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px;margin-top:8px"><span class="lang-en">Timing Signals</span><span class="lang-zh" style="display:none">時機判斷訊號</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Capital gains tax cliff — selling 1 month early can cost 10-20%<br>&nbsp;&nbsp;&nbsp;&nbsp;<em>MY: 30%→10% at yr 6 · TW: 45%→20% at yr 5 · JP: 39%→20% at yr 5</em><br>&#9744; Market cycle position — sell when clearance rate &gt;75% (seller market)<br>&#9744; Supply pipeline about to deliver — sell before new stock hits market<br>&#9744; Currency at multi-year high vs your home currency = bonus exit<br>&#9744; Rental yield compressing below mortgage rate = sell signal</span>
+            <span class="lang-zh" style="display:none">&#9744; 資本利得稅斷崖——提早1個月賣可能多繳10-20%<br>&nbsp;&nbsp;&nbsp;&nbsp;<em>馬來西亞：第6年30%→10% · 台灣：第5年45%→20% · 日本：第5年39%→20%</em><br>&#9744; 市場週期位置——清盤率&gt;75%（賣方市場）時出售<br>&#9744; 在建供給即將完工——在新供給衝擊前出售<br>&#9744; 當地貨幣對你的本幣處於多年高點=匯率紅利退場<br>&#9744; 租金收益率壓縮至低於房貸利率=出售信號</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">Exit Cost Calculation</span><span class="lang-zh" style="display:none">退場成本計算</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Agent commission (1-6% depending on country)<br>&#9744; Capital gains tax (varies 0-45% by holding period)<br>&#9744; Legal / conveyancing fees<br>&#9744; Early mortgage repayment penalty<br>&#9744; FX conversion cost on repatriating proceeds</span>
+            <span class="lang-zh" style="display:none">&#9744; 仲介佣金（依國家1-6%不等）<br>&#9744; 資本利得稅（依持有年限0-45%不等）<br>&#9744; 律師/過戶費用<br>&#9744; 提前還貸違約金<br>&#9744; 資金匯回的外匯兌換成本</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">Total Return Formula</span><span class="lang-zh" style="display:none">總報酬公式</span></div>
+          <div style="padding:10px;background:#f0fdf4;border-radius:6px;border-left:3px solid #16a34a;font-size:10px">
+            <span class="lang-en"><strong>True Return =</strong><br>Capital gain (local currency)<br>+ Cumulative net rental income<br>&minus; Entry costs (stamp duty + legal)<br>&minus; Exit costs (CGT + agent + legal)<br>&minus; Holding costs (tax + management + vacancy)<br>&plusmn; FX gain/loss on total invested capital<br><br><em>Most investors only calculate the first line. Professionals calculate all seven.</em></span>
+            <span class="lang-zh" style="display:none"><strong>真實報酬 =</strong><br>資本增值（當地貨幣）<br>+ 累計淨租金收入<br>&minus; 進場成本（印花稅+律師費）<br>&minus; 退場成本（資本利得稅+仲介+律師）<br>&minus; 持有成本（稅+管理+空租）<br>&plusmn; 總投入資本的匯率損益<br><br><em>多數投資人只算第一項。專業投資人算完全部七項。</em></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="footer">
+  <span class="footer-l">INVESTMQUEST · PROPERTY MONITOR</span>
+  <span class="footer-r">
+    <a href="/methodology.html"><span class="lang-en">Methodology</span><span class="lang-zh">方法論</span></a> ·
+    <a href="/dashboard"><span class="lang-en">Dashboard</span><span class="lang-zh">儀表板</span></a> ·
+    <span class="lang-en">Updated Q1 2026</span><span class="lang-zh">2026Q1 更新</span>
+  </span>
+</footer>
+
+<script>
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.textContent.trim()===(lang==='en'?'EN':'中文'));});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+  if(typeof ccRender==='function')ccRender();
+}
+
+/* ============================================
+   COST CALCULATOR
+   Entry % = stamp + agent/legal (mid of band)
+   holdAnnual % = property tax + ~rental tax drag (~1/3 of rentTax × 5% rent yield)
+   exitFee % = agent + legal at exit
+   cgt: array {maxYr, rate} stepped to yr 99
+   ============================================ */
+var CC_COUNTRIES=[
+  {code:'ae',flag:'🇦🇪',name:'Dubai (UAE)',nameZh:'杜拜（阿聯）',entry:6.0,holdAnnual:0.5,exitFee:4.0,cgt:[{maxYr:99,rate:0}],note:{en:'Zero income & capital gains tax',zh:'零所得稅與資本利得稅'}},
+  {code:'ie',flag:'🇮🇪',name:'Ireland',nameZh:'愛爾蘭',entry:3.0,holdAnnual:0.5,exitFee:3.0,cgt:[{maxYr:99,rate:33}],note:{en:'Flat 33% CGT, no holding-period relief',zh:'統一 33% CGT，無持有年限優惠'}},
+  {code:'de',flag:'🇩🇪',name:'Germany',nameZh:'德國',entry:8.0,holdAnnual:0.7,exitFee:5.0,cgt:[{maxYr:10,rate:30},{maxYr:99,rate:0}],note:{en:'Hold ≥10 years = 0% CGT (Spekulationsfrist)',zh:'持有滿 10 年免 CGT（投機期）'}},
+  {code:'es',flag:'🇪🇸',name:'Spain',nameZh:'西班牙',entry:9.0,holdAnnual:0.9,exitFee:5.0,cgt:[{maxYr:99,rate:21}],note:{en:'IBI 0.4–1.1% annual; CGT 19–23% non-res',zh:'IBI 年稅 0.4–1.1%；非居民 CGT 19–23%'}},
+  {code:'jp',flag:'🇯🇵',name:'Japan',nameZh:'日本',entry:6.0,holdAnnual:1.0,exitFee:5.0,cgt:[{maxYr:5,rate:39},{maxYr:99,rate:20}],note:{en:'CGT cliff at 5 years: 39% → 20%',zh:'第 5 年 CGT 斷崖：39% → 20%'}},
+  {code:'uk',flag:'🇬🇧',name:'United Kingdom',nameZh:'英國',entry:7.0,holdAnnual:0.5,exitFee:2.0,cgt:[{maxYr:99,rate:24}],note:{en:'+2% foreign surcharge on SDLT; flat 24% CGT non-res',zh:'外國買家+2% SDLT；非居民統一 24% CGT'}},
+  {code:'us',flag:'🇺🇸',name:'United States',nameZh:'美國',entry:5.5,holdAnnual:1.8,exitFee:6.0,cgt:[{maxYr:1,rate:32},{maxYr:99,rate:18}],note:{en:'FIRPTA 15% withhold on sale; <1yr ordinary rate',zh:'FIRPTA 賣出預扣 15%；<1 年按一般稅率'}},
+  {code:'it',flag:'🇮🇹',name:'Italy',nameZh:'義大利',entry:9.0,holdAnnual:0.7,exitFee:3.5,cgt:[{maxYr:5,rate:26},{maxYr:99,rate:0}],note:{en:'IMU 0.4–1%; CGT 26% if <5yr, 0% after',zh:'IMU 0.4–1%；<5 年 CGT 26%，之後 0%'}},
+  {code:'pt',flag:'🇵🇹',name:'Portugal',nameZh:'葡萄牙',entry:7.0,holdAnnual:0.5,exitFee:5.0,cgt:[{maxYr:99,rate:28}],note:{en:'NHR regime ended 2024; 28% CGT non-res',zh:'NHR 優惠 2024 結束；非居民 28% CGT'}},
+  {code:'nl',flag:'🇳🇱',name:'Netherlands',nameZh:'荷蘭',entry:8.0,holdAnnual:0.4,exitFee:3.0,cgt:[{maxYr:99,rate:36}],note:{en:'Box 3 deemed-return tax 36% on imputed yield',zh:'Box 3 推定報酬稅 36%'}},
+  {code:'ch',flag:'🇨🇭',name:'Switzerland',nameZh:'瑞士',entry:3.5,holdAnnual:0.3,exitFee:3.0,cgt:[{maxYr:5,rate:30},{maxYr:25,rate:18},{maxYr:99,rate:6}],note:{en:'Lex Koller restricts foreign buyers; cantonal CGT decreases over time',zh:'Lex Koller 限制外國買家；州級 CGT 隨持有期降低'}},
+  {code:'pl',flag:'🇵🇱',name:'Poland',nameZh:'波蘭',entry:5.0,holdAnnual:0.3,exitFee:3.0,cgt:[{maxYr:5,rate:19},{maxYr:99,rate:0}],note:{en:'Hold ≥5 years = 0% CGT',zh:'持有滿 5 年免 CGT'}},
+  {code:'cz',flag:'🇨🇿',name:'Czechia',nameZh:'捷克',entry:6.5,holdAnnual:0.1,exitFee:3.0,cgt:[{maxYr:5,rate:15},{maxYr:99,rate:0}],note:{en:'Very low holding cost; 5yr CGT exemption',zh:'持有成本極低；5 年免 CGT'}},
+  {code:'fr',flag:'🇫🇷',name:'France',nameZh:'法國',entry:13.0,holdAnnual:1.0,exitFee:6.0,cgt:[{maxYr:5,rate:36},{maxYr:22,rate:18},{maxYr:99,rate:0}],note:{en:'Notaire fees high; CGT tapers to 0% after 22 years',zh:'公證人費用高；持有 22 年後 CGT 降至 0%'}},
+  {code:'tw',flag:'🇹🇼',name:'Taiwan',nameZh:'台灣',entry:4.0,holdAnnual:0.3,exitFee:2.0,cgt:[{maxYr:2,rate:45},{maxYr:5,rate:35},{maxYr:10,rate:20},{maxYr:99,rate:15}],note:{en:'LTV cap 30–60% for 2nd+; LVITA cliff 45→35→20',zh:'第二戶起 LTV 30–60%；房地合一 45→35→20'}},
+  {code:'kr',flag:'🇰🇷',name:'South Korea',nameZh:'韓國',entry:3.0,holdAnnual:0.4,exitFee:1.0,cgt:[{maxYr:2,rate:50},{maxYr:99,rate:25}],note:{en:'Multi-home tax up to +20–30pp surcharge',zh:'多屋稅最高加徵 20–30 個百分點'}},
+  {code:'nz',flag:'🇳🇿',name:'New Zealand',nameZh:'紐西蘭',entry:1.5,holdAnnual:0.2,exitFee:3.0,cgt:[{maxYr:10,rate:39},{maxYr:99,rate:0}],note:{en:'Foreign ban on existing homes; bright-line 10yr',zh:'禁外國人買中古屋；明線規則 10 年'}},
+  {code:'my',flag:'🇲🇾',name:'Malaysia',nameZh:'馬來西亞',entry:11.0,holdAnnual:0.3,exitFee:3.0,cgt:[{maxYr:3,rate:30},{maxYr:5,rate:30},{maxYr:99,rate:10}],note:{en:'RM1M minimum for foreigners; RPGT cliff yr 6: 30→10',zh:'外國人最低 RM100 萬；RPGT 第 6 年 30→10'}},
+  {code:'au',flag:'🇦🇺',name:'Australia',nameZh:'澳洲',entry:14.0,holdAnnual:1.2,exitFee:2.5,cgt:[{maxYr:99,rate:32.5}],note:{en:'+8% foreign surcharge; non-res no CGT discount',zh:'+8% 外國附加印花稅；非居民無 CGT 折扣'}},
+  {code:'th',flag:'🇹🇭',name:'Thailand',nameZh:'泰國',entry:4.0,holdAnnual:0.3,exitFee:2.0,cgt:[{maxYr:5,rate:8},{maxYr:99,rate:2}],note:{en:'Condo only; 49% foreign quota; withholding system',zh:'僅限公寓；外國 49% 配額；預扣稅制'}},
+  {code:'vn',flag:'🇻🇳',name:'Vietnam',nameZh:'越南',entry:2.5,holdAnnual:0.2,exitFee:2.0,cgt:[{maxYr:99,rate:2}],note:{en:'50yr leasehold; 30% foreign cap; 2% flat on gross',zh:'50 年租賃；外國 30% 配額；按總價 2%'}},
+  {code:'in',flag:'🇮🇳',name:'India',nameZh:'印度',entry:7.5,holdAnnual:0.3,exitFee:2.5,cgt:[{maxYr:2,rate:30},{maxYr:99,rate:20}],note:{en:'NRI/PIO/OCI required; LTCG indexation benefit',zh:'需 NRI/PIO/OCI 身份；長期利得可指數化'}},
+  {code:'ph',flag:'🇵🇭',name:'Philippines',nameZh:'菲律賓',entry:6.5,holdAnnual:1.5,exitFee:4.0,cgt:[{maxYr:99,rate:6}],note:{en:'Condo only; flat 6% CGT on gross sale',zh:'僅限公寓；按總售價 6% CGT'}},
+  {code:'id',flag:'🇮🇩',name:'Indonesia',nameZh:'印尼',entry:7.0,holdAnnual:0.5,exitFee:3.0,cgt:[{maxYr:99,rate:2.5}],note:{en:'Hak Pakai 70yr only; flat 2.5% CGT',zh:'僅 70 年使用權；統一 2.5% CGT'}},
+  {code:'ca',flag:'🇨🇦',name:'Canada',nameZh:'加拿大',entry:5.0,holdAnnual:1.5,exitFee:4.5,cgt:[{maxYr:99,rate:25}],note:{en:'Foreign ban until 2027; BC speculation tax',zh:'外國人禁令至 2027；BC 省投機稅'}},
+  {code:'hk',flag:'🇭🇰',name:'Hong Kong',nameZh:'香港',entry:5.5,holdAnnual:0.5,exitFee:2.0,cgt:[{maxYr:99,rate:0}],note:{en:'Extra duties removed 2024; no CGT',zh:'2024 撤辣；無資本利得稅'}},
+  {code:'tr',flag:'🇹🇷',name:'Turkey',nameZh:'土耳其',entry:8.0,holdAnnual:0.2,exitFee:4.0,cgt:[{maxYr:5,rate:25},{maxYr:99,rate:0}],note:{en:'$400K route to citizenship; 5yr CGT exemption',zh:'$40 萬可申請公民；持有 5 年免 CGT'}},
+  {code:'sg',flag:'🇸🇬',name:'Singapore',nameZh:'新加坡',entry:62.0,holdAnnual:0.5,exitFee:2.5,cgt:[{maxYr:1,rate:12},{maxYr:2,rate:8},{maxYr:3,rate:4},{maxYr:99,rate:0}],note:{en:'60% ABSD foreign buyer (highest globally); SSD tapers 12→0% over 3yr',zh:'外國買家 60% ABSD（全球最高）；SSD 3 年內 12% 降至 0%'}}
+];
+function ccLang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function ccFmt(n){if(!isFinite(n))return '$0';var sign=n<0?'-':'';n=Math.abs(n);if(n>=1e6)return sign+'$'+(n/1e6).toFixed(2)+'M';if(n>=1e3)return sign+'$'+Math.round(n/1e3)+'K';return sign+'$'+Math.round(n);}
+function ccCgtAt(c,yr){for(var i=0;i<c.cgt.length;i++){if(yr<=c.cgt[i].maxYr)return c.cgt[i].rate;}return c.cgt[c.cgt.length-1].rate;}
+function ccCgtCliff(c,yr){
+  var current=ccCgtAt(c,yr);
+  for(var i=yr+1;i<=15;i++){
+    var futureRate=ccCgtAt(c,i);
+    if(futureRate<current-3)return {nextYr:i,nextRate:futureRate,currentRate:current,delta:current-futureRate};
+  }
+  return null;
+}
+function ccSetPrice(p){var el=document.getElementById('cc-price');if(el){el.value=p;ccRender();}}
+function ccInit(){
+  var sel=document.getElementById('cc-country');if(!sel)return;
+  var lang=ccLang();
+  sel.innerHTML=CC_COUNTRIES.map(function(c){return '<option value="'+c.code+'">'+c.flag+' '+(lang==='zh'?c.nameZh:c.name)+'</option>';}).join('');
+  sel.value='us';
+  sel.addEventListener('change',ccRender);
+  document.getElementById('cc-price').addEventListener('input',ccRender);
+  document.getElementById('cc-years').addEventListener('input',ccRender);
+  document.getElementById('cc-gain').addEventListener('input',ccRender);
+  ccRender();
+}
+function ccRender(){
+  var sel=document.getElementById('cc-country');if(!sel||!sel.value)return;
+  var lang=ccLang();
+  // re-populate label language
+  Array.prototype.forEach.call(sel.options,function(o){
+    var c=CC_COUNTRIES.find(function(x){return x.code===o.value;});
+    if(c)o.textContent=c.flag+' '+(lang==='zh'?c.nameZh:c.name);
+  });
+  var c=CC_COUNTRIES.find(function(x){return x.code===sel.value;});
+  if(!c)return;
+  var price=Math.max(0,parseFloat(document.getElementById('cc-price').value)||0);
+  var yrs=parseInt(document.getElementById('cc-years').value)||5;
+  var gainPct=parseFloat(document.getElementById('cc-gain').value)||0;
+  document.getElementById('cc-years-label').textContent=yrs+(lang==='zh'?' 年':' yrs');
+  document.getElementById('cc-gain-label').textContent=(gainPct>0?'+':'')+gainPct+'%';
+
+  var entryAbs=price*c.entry/100;
+  var holdAbs=price*c.holdAnnual/100*yrs;
+  var exitFeeAbs=price*c.exitFee/100;
+  var gainAbs=price*gainPct/100;
+  var cgtRate=ccCgtAt(c,yrs);
+  var cgtAbs=gainAbs>0?gainAbs*cgtRate/100:0;
+  var totalCost=entryAbs+holdAbs+exitFeeAbs+cgtAbs;
+  var totalCostPct=price>0?(totalCost/price)*100:0;
+  var netPnl=gainAbs-totalCost;
+  var cliff=ccCgtCliff(c,yrs);
+
+  var L={
+    entry:lang==='zh'?'進場成本（印花+仲介+律師）':'Entry costs (stamp + agent + legal)',
+    hold:lang==='zh'?'持有成本（'+yrs+' 年）':'Holding costs ('+yrs+' yrs)',
+    exit:lang==='zh'?'退場費用（仲介+律師）':'Exit fees (agent + legal)',
+    cgt:lang==='zh'?'資本利得稅（'+cgtRate+'% × +'+gainPct+'%）':'CGT ('+cgtRate+'% × +'+gainPct+'% gain)',
+    total:lang==='zh'?'總成本':'TOTAL COST',
+    pl:lang==='zh'?'淨損益（增值 − 成本）':'Net P&L (gain − cost)',
+    note:lang==='zh'?c.note.zh:c.note.en,
+    cliffMsg:cliff?(lang==='zh'?
+      '<strong>⏱ CGT 斷崖：</strong>若再持有至第 '+cliff.nextYr+' 年，CGT 從 '+cliff.currentRate+'% 降到 '+cliff.nextRate+'%，可省 '+ccFmt(gainAbs*cliff.delta/100)+'。'
+      :'<strong>⏱ CGT cliff:</strong> Hold until year '+cliff.nextYr+' and your CGT drops from '+cliff.currentRate+'% to '+cliff.nextRate+'%, saving '+ccFmt(gainAbs*cliff.delta/100)+'.'):'',
+    be:lang==='zh'?'<strong>損益平衡：</strong>需要至少 +'+(totalCostPct).toFixed(1)+'% 增值（總額 '+ccFmt(totalCost)+'）才能不虧損。'
+      :'<strong>Break-even:</strong> Need at least +'+(totalCostPct).toFixed(1)+'% capital gain ('+ccFmt(totalCost)+') just to not lose money.'
+  };
+
+  var pnlColor=netPnl>=0?'#16a34a':'#dc2626';
+  var cgtColor=cgtRate===0?'#16a34a':cgtRate<=15?'#1e3a5f':cgtRate<=30?'#d97706':'#dc2626';
+
+  var html=''+
+    '<div class="cc-row"><span class="cc-lbl">'+L.entry+'</span><span><span class="cc-amt">'+ccFmt(entryAbs)+'</span><span class="cc-pct">'+c.entry.toFixed(1)+'%</span></span></div>'+
+    '<div class="cc-row"><span class="cc-lbl">'+L.hold+'</span><span><span class="cc-amt">'+ccFmt(holdAbs)+'</span><span class="cc-pct">'+c.holdAnnual.toFixed(1)+'%/yr</span></span></div>'+
+    '<div class="cc-row"><span class="cc-lbl">'+L.exit+'</span><span><span class="cc-amt">'+ccFmt(exitFeeAbs)+'</span><span class="cc-pct">'+c.exitFee.toFixed(1)+'%</span></span></div>'+
+    '<div class="cc-row"><span class="cc-lbl">'+L.cgt+'</span><span><span class="cc-amt" style="color:'+cgtColor+'">'+ccFmt(cgtAbs)+'</span><span class="cc-pct">'+cgtRate+'%</span></span></div>'+
+    '<div class="cc-row total"><span class="cc-lbl" style="font-weight:700;color:#0f1e33;letter-spacing:.06em;font-size:11px">'+L.total+'</span><span><span class="cc-amt">'+ccFmt(totalCost)+'</span><span class="cc-pct" style="color:#5a7a9a;font-weight:600">'+totalCostPct.toFixed(1)+'% '+(lang==='zh'?'總價':'of price')+'</span></span></div>'+
+    '<div class="cc-row" style="border-top:none"><span class="cc-lbl">'+L.pl+'</span><span><span class="cc-amt" style="color:'+pnlColor+'">'+(netPnl>=0?'+':'')+ccFmt(netPnl)+'</span></span></div>'+
+    (cliff?'<div class="cc-cliff" style="background:#fef9e7;color:#92400e;border-left:3px solid #d97706">'+L.cliffMsg+'</div>':'')+
+    '<div class="cc-be">'+L.be+'</div>'+
+    '<div style="margin-top:10px;font-size:9.5px;color:#5a7a9a;line-height:1.5;font-style:italic">'+L.note+'</div>';
+  document.getElementById('cc-output').innerHTML=html;
+}
+
+window.addEventListener('load',function(){
+  var saved='en';try{saved=localStorage.getItem('lang')||localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(saved);
+  if(typeof ccInit==='function')ccInit();
+});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

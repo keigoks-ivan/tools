@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Demand Analysis | Taiwan Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+  <h1 class="page-title"><span class="lang-en">Demand Analysis</span><span class="lang-zh" style="display:none">需求分析</span></h1>
+
+  <div class="kpi-row">
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">2025 Six-City Txn</span><span class="lang-zh" style="display:none">2025六都交易量</span></div>
+      <div class="kpi-value">205,000</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">-24.6% YoY, 8Y low</span><span class="lang-zh" style="display:none">年減24.6%，8年新低</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Pre-sale Volume</span><span class="lang-zh" style="display:none">預售量</span></div>
+      <div class="kpi-value">-74.7% <span class="kpi-unit">YoY</span></div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Frozen</span><span class="lang-zh" style="display:none">急凍</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Weekly Visitor Groups</span><span class="lang-zh" style="display:none">每週來客組數</span></div>
+      <div class="kpi-value">0.8</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Worse than COVID L3</span><span class="lang-zh" style="display:none">比疫情三級更差</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">New Case Sales Progress</span><span class="lang-zh" style="display:none">新案銷售進度</span></div>
+      <div class="kpi-value">~21%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Healthy >50%</span><span class="lang-zh" style="display:none">健康值>50%</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">New Youth Loan</span><span class="lang-zh" style="display:none">新青安貸款</span></div>
+      <div class="kpi-value">100K+ <span class="kpi-unit"><span class="lang-en">households</span><span class="lang-zh" style="display:none">戶</span></span></div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Expires Jul 2026</span><span class="lang-zh" style="display:none">2026年7月到期</span></span>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">Resale Share</span><span class="lang-zh" style="display:none">中古屋占比</span></div>
+      <div class="kpi-value">64.4%</div>
+      <span class="kpi-badge badge-blue"><span class="lang-en">Dominant channel</span><span class="lang-zh" style="display:none">主要交易管道</span></span>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Six-City Transaction Trend</span><span class="lang-zh" style="display:none">六都交易量趨勢</span></h3>
+      <div id="chartTwTxn" style="height:370px"></div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">City 2025 YoY Transaction Change (%)</span><span class="lang-zh" style="display:none">各城市2025年交易量年增率 (%)</span></h3>
+      <div id="chartTwCityGrowth" style="height:370px"></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Transaction Structure (%)</span><span class="lang-zh" style="display:none">交易結構 (%)</span></h3>
+      <div id="chartTwStructure" style="height:370px"></div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">Mortgage Rate Trend (%)</span><span class="lang-zh" style="display:none">房貸利率趨勢 (%)</span></h3>
+      <div id="chartTwRate" style="height:370px"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtPrice(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return 'NT$'+v+'\u842c';if(a>=1000000)return 'NT$'+(a/1000000).toFixed(2)+'M';return 'NT$'+Math.round(a/1000)+'K';}
+function fmtPriceShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return v+'\u842c';if(a>=1000000)return(a/1000000).toFixed(1)+'M';return Math.round(a/1000)+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+function initCharts(lang){
+allCharts.length=0;
+var isZh=lang==='zh';
+
+/* Chart 1: Six-City Transaction Trend */
+var c1=echarts.init(document.getElementById('chartTwTxn'));
+c1.setOption({
+  tooltip:baseTooltip,
+  grid:baseGrid,
+  xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+  yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+  series:[{
+    type:'line',
+    data:[240000,265000,280000,230000,250000,272000,205000],
+    smooth:0.2,
+    lineStyle:{color:C.navy,width:2},
+    itemStyle:{color:C.navy},
+    symbol:'circle',
+    symbolSize:7,
+    areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(30,58,95,0.15)'},{offset:1,color:'rgba(30,58,95,0)'}])},
+    markPoint:{
+      data:[
+        {coord:['2025',205000],value:isZh?'8年低':'8Y Low',symbolSize:55,label:{fontSize:10,fontFamily:'Inter'},itemStyle:{color:C.red}},
+        {coord:['2021',280000],value:isZh?'高點':'Peak',symbolSize:50,label:{fontSize:10,fontFamily:'Inter'},itemStyle:{color:C.green}}
+      ]
+    }
+  }]
+});
+allCharts.push(c1);
+
+/* Chart 2: City 2025 YoY Transaction Change (horizontal bar) */
+var cityLabels=isZh?['台北','桃園','新北','台中','台南','高雄']:['Taipei','Taoyuan','New Taipei','Taichung','Tainan','Kaohsiung'];
+var cityVals=[-18,-20,-22,-23,-28.8,-31];
+var c2=echarts.init(document.getElementById('chartTwCityGrowth'));
+c2.setOption({
+  tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': '+p[0].value+'%';}}),
+  grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+  xAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+  yAxis:mkAxis({type:'category',data:cityLabels,inverse:false}),
+  series:[{
+    type:'bar',
+    data:cityVals.map(function(v){return {value:v,itemStyle:{color:C.red,borderRadius:[3,0,0,3]}};}),
+    label:{show:true,position:'left',formatter:function(p){return p.value+'%';},fontSize:11,fontFamily:'Inter, sans-serif',color:C.red},
+    barWidth:22
+  }]
+});
+allCharts.push(c2);
+
+/* Chart 3: Transaction Structure (horizontal bar) */
+var structLabels=isZh?['新成屋','預售屋','中古屋']:['New completion','Pre-sale','Resale'];
+var structVals=[6.8,28.7,64.4];
+var structColors=[C.muted,C.orange,C.navy];
+var c3=echarts.init(document.getElementById('chartTwStructure'));
+c3.setOption({
+  tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': '+p[0].value+'%';}}),
+  grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+  xAxis:mkAxis({type:'value',max:70,axisLabel:{formatter:'{value}%'}}),
+  yAxis:mkAxis({type:'category',data:structLabels,inverse:false}),
+  series:[{
+    type:'bar',
+    data:structVals.map(function(v,i){return {value:v,itemStyle:{color:structColors[i],borderRadius:[0,3,3,0]}};}),
+    label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:11,fontFamily:'Inter, sans-serif',color:C.navy},
+    barWidth:28
+  }]
+});
+allCharts.push(c3);
+
+/* Chart 4: Mortgage Rate Trend */
+var c4=echarts.init(document.getElementById('chartTwRate'));
+c4.setOption({
+  tooltip:Object.assign({},baseTooltip,{formatter:function(p){return p[0].name+': '+p[0].value+'%';}}),
+  grid:baseGrid,
+  xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025','2026']}),
+  yAxis:mkAxis({type:'value',min:1.0,max:2.6,interval:0.2,axisLabel:{formatter:'{value}%'}}),
+  series:[{
+    type:'line',
+    data:[1.35,1.35,1.72,2.06,2.18,2.33,2.33],
+    smooth:0.2,
+    lineStyle:{color:C.red,width:2},
+    itemStyle:{color:C.red},
+    symbol:'circle',
+    symbolSize:7,
+    areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(220,38,38,0.12)'},{offset:1,color:'rgba(220,38,38,0)'}])},
+    markLine:{
+      silent:true,
+      symbol:'none',
+      lineStyle:{color:C.blue,type:'dashed',width:1},
+      label:{formatter:'CBC rate 2.0%',fontSize:10,color:C.blue,fontFamily:'Inter, sans-serif',position:'end'},
+      data:[{yAxis:2.0}]
+    },
+    markPoint:{
+      data:[{coord:['2025',2.33],value:'2.33%',symbolSize:50,label:{fontSize:10,fontFamily:'Inter'},itemStyle:{color:C.red}}]
+    }
+  }]
+});
+allCharts.push(c4);
+}
+
+var allCharts=[];
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Brisbane Deep Dive | Australia Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="container">
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+    <h1><span class="lang-en">Brisbane &mdash; 2026 Deep Dive</span><span class="lang-zh" style="display:none">布里斯本 &mdash; 2026深度研究</span></h1>
+    <p class="subtitle"><span class="lang-en">South East Queensland Supply &amp; Demand Analysis &middot; 2032 Olympics Catalyst</span><span class="lang-zh" style="display:none">昆士蘭東南部供需深度研究 &middot; 2032奧運催化劑</span></p>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">MEDIAN HOUSE PRICE</span><span class="lang-zh" style="display:none">獨棟中位價</span></div>
+      <div class="kpi-value">A$1.08M</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">+14.5% YoY &middot; CoreLogic</span><span class="lang-zh" style="display:none">年增+14.5% &middot; CoreLogic</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">MEDIAN UNIT PRICE</span><span class="lang-zh" style="display:none">公寓中位價</span></div>
+      <div class="kpi-value">A$680K</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">+11.2% YoY</span><span class="lang-zh" style="display:none">年增+11.2%</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">WEEKLY RENT</span><span class="lang-zh" style="display:none">週租金</span></div>
+      <div class="kpi-value">A$594</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">+24.8% YoY &middot; &gt;Melbourne $549</span><span class="lang-zh" style="display:none">年增+24.8% &middot; 超越墨爾本$549</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">VACANCY RATE</span><span class="lang-zh" style="display:none">空置率</span></div>
+      <div class="kpi-value">0.9%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">2nd lowest on record &middot; SQM</span><span class="lang-zh" style="display:none">歷史第二低 &middot; SQM</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">2032 OLYMPICS</span><span class="lang-zh" style="display:none">2032奧運</span></div>
+      <div class="kpi-value">Catalyst</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Victoria Park Stadium confirmed</span><span class="lang-zh" style="display:none">Victoria Park體育場確定</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CROSS RIVER RAIL</span><span class="lang-zh" style="display:none">跨河鐵路</span></div>
+      <div class="kpi-value">2026</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">8 new stations</span><span class="lang-zh" style="display:none">8座新車站</span></span>
+    </div>
+  </div>
+
+  <!-- SECTION 1: POPULATION & MIGRATION ENGINE -->
+  <div class="section-label"><span class="lang-en">POPULATION &amp; MIGRATION ENGINE</span><span class="lang-zh" style="display:none">人口爆炸與移民引擎</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">Queensland's population grew 1.8% in 2025 — well above the 1.6% national average, adding 98,636 people in a single year. Migration drives 79% of growth (vs 58% in the 1980s). NZ migration to Queensland surged 78.4% in two years. Brisbane receives the lion's share of interstate wealthy migrants selling high-priced Sydney/Melbourne homes for cash-rich entry.</span><span class="lang-zh" style="display:none">昆士蘭2025年人口增長1.8%，遠超全國均值1.6%，單年增加98,636人。移民貢獻增長的79%（1980年代僅58%）。紐西蘭移民兩年內激增78.4%。布里斯本吸引大批持有南部高價房屋套現現金的跨州富裕移民。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">QLD Population Growth by Component</span><span class="lang-zh" style="display:none">昆士蘭人口增長構成</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Annual Persons</span><span class="lang-zh" style="display:none">年度人數</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEMigration" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Queensland Share of Australia's Total Population</span><span class="lang-zh" style="display:none">昆士蘭佔澳洲總人口比例</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">% of National Population</span><span class="lang-zh" style="display:none">佔全國人口百分比</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEPopShare" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Brisbane Labour Market by Sub-region</span><span class="lang-zh" style="display:none">布里斯本各分區就業市場</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Employment (K) &amp; Unemployment %</span><span class="lang-zh" style="display:none">就業人數(千) &amp; 失業率%</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNELabour" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Distressed Property Listings</span><span class="lang-zh" style="display:none">不良資產上市量</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">YoY Change %</span><span class="lang-zh" style="display:none">年變動%</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEDistressed" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: SUPPLY: SYSTEM FAILURE -->
+  <div class="section-label"><span class="lang-en">SUPPLY: SYSTEM FAILURE</span><span class="lang-zh" style="display:none">供給端：系統性崩潰</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">Queensland needs 49,000 new homes/year under the National Housing Accord. Actual completions: ~34,000. January 2026 approvals trend: 3,555 — running 13% below target annually. Construction cost of a Brisbane apartment surged 19% in 2024 alone to A$690,045. Airbnb shadow hotels: 5,000+ long-term homes removed from Brisbane's rental market.</span><span class="lang-zh" style="display:none">昆士蘭在《國家住房協議》下每年需新建49,000套。實際完工量約34,000套。2026年1月批准趨勢值：3,555套——年化進度落後目標13%。2024年布里斯本公寓建造成本一年激增19%至A$690,045。Airbnb影子酒店：逾5,000套長租房源被從市場抽走。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">QLD Building Approvals (Monthly Trend)</span><span class="lang-zh" style="display:none">昆士蘭建築批准（月度趨勢）</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Total &amp; Apartment Approvals</span><span class="lang-zh" style="display:none">總批准量與公寓批准量</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEApprovals" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Average Cost to Build a Brisbane Apartment</span><span class="lang-zh" style="display:none">布里斯本公寓平均建造成本</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">A$ per unit</span><span class="lang-zh" style="display:none">每套澳幣</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEConstCost" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Developer Pipeline by Price Segment</span><span class="lang-zh" style="display:none">開發商供給按價格區間分佈</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">% of New Projects</span><span class="lang-zh" style="display:none">新專案佔比%</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEDevPivot" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Short-term Rental vs Long-term Rental</span><span class="lang-zh" style="display:none">短租 vs 長租收入與規模</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Income &amp; Scale Comparison</span><span class="lang-zh" style="display:none">收入與規模對比</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNESTRA" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: BRISBANE MARKET DYNAMICS -->
+  <div class="section-label"><span class="lang-en">BRISBANE MARKET DYNAMICS</span><span class="lang-zh" style="display:none">布里斯本市場動態</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">Brisbane has crossed the A$1M median house price threshold — up over 50% since COVID. The "Blanket Price Phenomenon": no decent suburb within 20km of CBD offers entry below A$1.1M. First Home Guarantee (price cap raised to A$1M) and QLD stamp duty exemption create artificial price floors.</span><span class="lang-zh" style="display:none">布里斯本獨棟中位價正式突破百萬澳幣，自COVID以來上漲逾50%。「統一底價現象」：CBD方圓20公里內任何「體面」郊區入門價均不低於A$110萬。首購擔保計畫和昆士蘭印花稅減免在供給真空中製造人為的價格地板。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Brisbane Median Price Trajectory</span><span class="lang-zh" style="display:none">布里斯本中位價走勢</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Houses vs Units</span><span class="lang-zh" style="display:none">獨棟 vs 公寓</span></p>
+      <div style="position:relative;height:240px;"><div id="chartBNEPrice" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Suburb Median House Prices</span><span class="lang-zh" style="display:none">各郊區獨棟中位價</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Selected Brisbane Suburbs</span><span class="lang-zh" style="display:none">布里斯本精選郊區</span></p>
+      <div style="position:relative;height:280px;"><div id="chartBNESuburb" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Auction Clearance Rates</span><span class="lang-zh" style="display:none">拍賣清盤率</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Brisbane vs Sydney vs Melbourne</span><span class="lang-zh" style="display:none">布里斯本 vs 雪梨 vs 墨爾本</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEClearance" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Policy Price Thresholds</span><span class="lang-zh" style="display:none">政策價格門檻</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Government Caps vs Market Floor</span><span class="lang-zh" style="display:none">政府上限 vs 市場底價</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEPolicy" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: RENTAL CRISIS -->
+  <div class="section-label"><span class="lang-en">RENTAL CRISIS</span><span class="lang-zh" style="display:none">租賃市場危機</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">Brisbane vacancy rate: 0.8-1.0% — second lowest on record. Weekly rents hit A$594, overtaking Melbourne (A$549). YoY rent inflation: 24.8%. NSW rental reforms risk triggering investor exit.</span><span class="lang-zh" style="display:none">布里斯本空置率0.8-1.0%——歷史第二低。週租金達A$594，首次超越墨爾本。年度租金通膨24.8%。NSW租賃改革存在引發投資者撤出的風險。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Brisbane Vacancy Rate</span><span class="lang-zh" style="display:none">布里斯本空置率</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">% &middot; SQM Research</span><span class="lang-zh" style="display:none">% &middot; SQM Research</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEVacancy" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Brisbane Weekly Rent Trajectory</span><span class="lang-zh" style="display:none">布里斯本週租金走勢</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">A$/week &middot; Houses vs Units</span><span class="lang-zh" style="display:none">澳幣/週 &middot; 獨棟 vs 公寓</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNERent" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Rent Inflation vs CPI Rent</span><span class="lang-zh" style="display:none">租金通膨 vs CPI租金</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">YoY %</span><span class="lang-zh" style="display:none">年增%</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNERentYoY" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Displacement Effect</span><span class="lang-zh" style="display:none">擠壓效應</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">CRA Recipient Change &amp; Homelessness %</span><span class="lang-zh" style="display:none">CRA受益人變動 &amp; 無家可歸%</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEDisplacement" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: 2032 OLYMPICS CATALYST -->
+  <div class="section-label"><span class="lang-en">2032 OLYMPICS CATALYST</span><span class="lang-zh" style="display:none">2032奧運催化劑</span></div>
+  <div class="insight-box">
+    <p><span class="lang-en">Sydney 2000 Olympics: property values surged 8% pa for 7 years before the Games. Brisbane is experiencing this "pull-forward" effect now. Victoria Park Stadium confirmed. Cross River Rail 2026. Investors in HODL mode.</span><span class="lang-zh" style="display:none">2000年雪梨奧運：賽前7年每年增值8%。布里斯本正經歷「預期前置」效應。Victoria Park體育場確定。跨河鐵路2026年通車。投資者進入惜售模式。</span></p>
+  </div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Olympic Zone Price Premium</span><span class="lang-zh" style="display:none">奧運區域價格溢價</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">% Above City-wide Median</span><span class="lang-zh" style="display:none">高於全市中位價%</span></p>
+      <div style="position:relative;height:280px;"><div id="chartBNEOlympicZone" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Olympic Host City Property Impact</span><span class="lang-zh" style="display:none">奧運主辦城市房產影響</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Pre &amp; Post Games Annual Growth %</span><span class="lang-zh" style="display:none">賽前賽後年增幅%</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEOlympicHistory" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Infrastructure Timeline</span><span class="lang-zh" style="display:none">基礎建設時間軸</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Key Milestones to 2032</span><span class="lang-zh" style="display:none">至2032年關鍵里程碑</span></p>
+      <div style="position:relative;height:200px;"><div id="chartBNEInfra" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Brisbane Price Forecasts</span><span class="lang-zh" style="display:none">布里斯本房價預測</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">2026 &amp; 2027E Growth %</span><span class="lang-zh" style="display:none">2026 &amp; 2027E增幅%</span></p>
+      <div style="position:relative;height:220px;"><div id="chartBNEForecast" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="section-label"><span class="lang-en">SUMMARY</span><span class="lang-zh" style="display:none">總結</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div class="summary-card green">
+      <h4><span class="lang-en">Olympic Pipeline</span><span class="lang-zh" style="display:none">奧運建設在建量</span></h4>
+      <p><span class="lang-en">A$7B+ infrastructure, Cross River Rail 2026, Victoria Park Stadium confirmed.</span><span class="lang-zh" style="display:none">逾A$70億基礎設施，跨河鐵路2026通車，Victoria Park體育場確定。</span></p>
+    </div>
+    <div class="summary-card green">
+      <h4><span class="lang-en">Population Juggernaut</span><span class="lang-zh" style="display:none">人口巨輪</span></h4>
+      <p><span class="lang-en">1.8% annual growth, 98,636 added. Migration = 79%.</span><span class="lang-zh" style="display:none">年增長1.8%，增加98,636人。移民佔79%。</span></p>
+    </div>
+    <div class="summary-card red">
+      <h4><span class="lang-en">Rental Emergency</span><span class="lang-zh" style="display:none">租賃緊急狀態</span></h4>
+      <p><span class="lang-en">0.9% vacancy. 24.8% YoY rent inflation. A$594/wk &gt; Melbourne.</span><span class="lang-zh" style="display:none">空置率0.9%。租金年增24.8%。A$594/週超越墨爾本。</span></p>
+    </div>
+    <div class="summary-card orange">
+      <h4><span class="lang-en">Supply Structural Deficit</span><span class="lang-zh" style="display:none">供給結構性赤字</span></h4>
+      <p><span class="lang-en">Only 34K completions vs 49K target. 5K+ homes on Airbnb.</span><span class="lang-zh" style="display:none">完工34K vs 目標49K。逾5K套被Airbnb劫持。</span></p>
+    </div>
+    <div class="summary-card orange" style="grid-column:span 2;">
+      <h4><span class="lang-en">Price Ratchet</span><span class="lang-zh" style="display:none">價格棘輪</span></h4>
+      <p><span class="lang-en">Median house broke A$1M. "Blanket floor" A$1.1M within 20km.</span><span class="lang-zh" style="display:none">中位價突破A$100萬。20公里內統一底價A$110萬。</span></p>
+    </div>
+  </div>
+
+  <div class="source-footer">
+    <span class="lang-en">CoreLogic Q1 2026 &middot; SQM Research 2026 &middot; QGSO Regional Labour Force Dec 2025 &middot; ABS Building Approvals Jan 2026 &middot; Adept Economics Population Jan 2026 &middot; RPM Group SEQ Apartments May 2025 &middot; Domain 2026 &middot; Q Shelter / AHURI &middot; Brisbane City Council Economic Profile Dec 2025 &middot; Not investment advice.</span>
+    <span class="lang-zh" style="display:none">CoreLogic 2026年Q1 &middot; SQM Research 2026 &middot; QGSO地區勞動力2025年12月 &middot; ABS建築批准2026年1月 &middot; Adept Economics人口2026年1月 &middot; RPM Group &middot; Domain 2026 &middot; Q Shelter/AHURI &middot; 非投資建議。</span>
+  </div>
+</main>
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtAUD(v){if(v>=1000000)return 'A$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return 'A$'+(v/1000).toFixed(0)+'K';return 'A$'+v;}
+function fmtAUDShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}
+function fmtK(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}
+  initCharts(lang);
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+
+function initCharts(lang){
+  allCharts.length=0;
+  var en=lang==='en';
+
+  /* Chart 1: chartBNEMigration */
+  var c1=echarts.init(document.getElementById('chartBNEMigration'));allCharts.push(c1);
+  c1.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['2021','2022','2023','2024','2025']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+    series:[
+      {name:en?'Natural':'自然增長',type:'bar',stack:'pop',color:C.green,data:[18000,19200,20100,19800,20400],barMaxWidth:35},
+      {name:en?'Interstate':'跨州移民',type:'bar',stack:'pop',color:C.navy,data:[22000,35000,38000,32000,29910],barMaxWidth:35},
+      {name:en?'Overseas':'海外移民',type:'bar',stack:'pop',color:C.orange,data:[3000,52000,68000,74932,54600],barMaxWidth:35}
+    ]
+  });
+
+  /* Chart 2: chartBNEPopShare */
+  var c2=echarts.init(document.getElementById('chartBNEPopShare'));allCharts.push(c2);
+  c2.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['1985','1995','2005','2015','2025','2035E','2045E','2065E']}),
+    yAxis:mkAxis({type:'value',min:14,max:28,axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[{name:en?'QLD Share':'昆士蘭佔比',type:'line',color:C.navy,data:[16.3,17.5,18.8,19.8,20.5,21.8,23.2,26.0],symbol:'circle',symbolSize:5,lineStyle:{width:2},
+      markPoint:{data:[
+        {coord:['2025',20.5],label:{formatter:'20.5%',fontSize:9,color:'#fff'},itemStyle:{color:C.navy}},
+        {coord:['2065E',26.0],label:{formatter:'26.0%',fontSize:9,color:'#fff'},itemStyle:{color:C.orange}}
+      ]}}
+    ]
+  });
+
+  /* Chart 3: chartBNELabour */
+  var c3=echarts.init(document.getElementById('chartBNELabour'));allCharts.push(c3);
+  c3.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:en?['Brisbane South','Brisbane East','Brisbane City','QLD avg','AU avg']:['布里斯本南','布里斯本東','布里斯本市','昆州均值','全國均值']}),
+    yAxis:[mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'K';}})}),mkAxis({type:'value',min:0,max:6,axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}}),splitLine:{show:false}})],
+    series:[
+      {name:en?'Employment (K)':'就業人數(千)',type:'bar',color:C.navy,data:[231,141.6,380,null,null],barMaxWidth:35},
+      {name:en?'Unemployment %':'失業率%',type:'line',yAxisIndex:1,color:C.orange,data:[3.9,3.6,3.5,4.1,4.3],symbol:'circle',symbolSize:5}
+    ]
+  });
+
+  /* Chart 4: chartBNEDistressed */
+  var c4=echarts.init(document.getElementById('chartBNEDistressed'));allCharts.push(c4);
+  c4.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['Jan 25','Mar 25','May 25','Jul 25','Sep 25','Nov 25','Jan 26','Mar 26']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[
+      {name:en?'National':'全國',type:'line',color:C.red,data:[-5,-8,-12,-18,-22,-25,-29,-29],symbol:'circle',symbolSize:5,lineStyle:{width:2}},
+      {name:en?'Brisbane':'布里斯本',type:'line',color:C.navy,data:[-2,-5,-8,-12,-16,-21,-26,-28],symbol:'circle',symbolSize:5,lineStyle:{width:2,type:'dashed'}}
+    ]
+  });
+
+  /* Chart 5: chartBNEApprovals */
+  var c5=echarts.init(document.getElementById('chartBNEApprovals'));allCharts.push(c5);
+  c5.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['Jan 25','Mar 25','May 25','Jul 25','Sep 25','Nov 25','Jan 26']}),
+    yAxis:mkAxis({type:'value'}),
+    series:[
+      {name:en?'Total':'總計',type:'bar',color:C.navy,data:[4200,3980,3850,3700,3820,3680,3555],barMaxWidth:30,
+        markLine:{silent:true,lineStyle:{type:'dashed',color:C.green},data:[{yAxis:4083}],label:{formatter:en?'Monthly target':'月度目標',color:C.green,fontSize:10}}},
+      {name:en?'Apartments':'公寓',type:'bar',color:C.orange,data:[1800,1650,1520,1400,1480,1350,1050],barMaxWidth:30}
+    ]
+  });
+
+  /* Chart 6: chartBNEConstCost */
+  var c6=echarts.init(document.getElementById('chartBNEConstCost'));allCharts.push(c6);
+  var ccData=[420000,498000,560000,690045,730000];
+  c6.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){return p[0].name+'<br>'+fmtAUD(p[0].value);}}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2021','2022','2023','2024','2025E']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtAUDShort(v);}})}),
+    series:[{type:'bar',data:ccData.map(function(v){return{value:v,itemStyle:{color:v>=690000?C.red:v>=560000?C.orange:C.navy}};}),barMaxWidth:35,
+      label:{show:true,position:'top',formatter:function(p){return fmtAUDShort(p.value);},fontSize:10,fontFamily:'JetBrains Mono'}}
+    ]
+  });
+
+  /* Chart 7: chartBNEDevPivot */
+  var c7=echarts.init(document.getElementById('chartBNEDevPivot'));allCharts.push(c7);
+  var dpLabels=en?['Luxury riverfront\n(>$1.5M)','Premium inner-city\n($1-1.5M)','Mid-market\n($700K-1M)','Affordable\n(<$700K)']:['頂奢河畔\n(>150萬)','優質內城\n(100-150萬)','中端市場\n(70-100萬)','可負擔\n(<70萬)'];
+  var dpData=[42,35,18,5];
+  c7.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+    grid:{left:120,right:30,top:20,bottom:20,containLabel:false},
+    yAxis:mkAxis({type:'category',data:dpLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+    xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[{type:'bar',data:dpData.map(function(v){return{value:v,itemStyle:{color:v>=40?C.orange:v>=30?C.navy:C.muted,borderRadius:[0,4,4,0]}};}),barMaxWidth:28,
+      label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:10,fontFamily:'JetBrains Mono'}}
+    ]
+  });
+
+  /* Chart 8: chartBNESTRA */
+  var c8=echarts.init(document.getElementById('chartBNESTRA'));allCharts.push(c8);
+  var straLabels=en?['Long-term\nrent/yr','Short-term\nrent/yr','Annual\ntarget','STA units\nremoved']:['長租\n年收入','短租\n年收入','年度\n目標','短租\n抽走套數'];
+  c8.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:straLabels,axisLabel:Object.assign({},baseText,{interval:0})}),
+    yAxis:[mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return 'A$'+fmtK(v);}})}),mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}}),splitLine:{show:false}})],
+    series:[{type:'bar',data:[
+      {value:28000,itemStyle:{color:C.navy}},
+      {value:70000,itemStyle:{color:C.orange}},
+      {value:49000,itemStyle:{color:C.green}},
+      {value:5200,itemStyle:{color:C.red}}
+    ],barMaxWidth:35,
+      label:{show:true,position:'top',formatter:function(p){return p.dataIndex<2?'A$'+fmtK(p.value):fmtK(p.value);},fontSize:10,fontFamily:'JetBrains Mono'}}
+    ]
+  });
+
+  /* Chart 9: chartBNEPrice */
+  var c9=echarts.init(document.getElementById('chartBNEPrice'));allCharts.push(c9);
+  c9.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025','2026F']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtAUDShort(v);}})}),
+    series:[
+      {name:en?'Houses':'獨棟',type:'line',color:C.navy,data:[560000,570000,750000,900000,870000,980000,1050000,1080000],symbol:'circle',symbolSize:5,lineStyle:{width:2},
+        markPoint:{data:[{coord:['2026F',1080000],label:{formatter:'A$1.08M',fontSize:9,color:'#fff'},itemStyle:{color:C.navy}}]}},
+      {name:en?'Units':'公寓',type:'line',color:C.orange,data:[340000,345000,420000,520000,490000,560000,640000,680000],symbol:'circle',symbolSize:5,lineStyle:{width:2,type:'dashed'}}
+    ]
+  });
+
+  /* Chart 10: chartBNESuburb */
+  var c10=echarts.init(document.getElementById('chartBNESuburb'));allCharts.push(c10);
+  var subLabels=['New Farm','Paddington','Ashgrove','Taringa','Indooroopilly','Carindale','Springfield','Ipswich'];
+  var subData=[2100000,1650000,1550000,1380000,1320000,1100000,750000,620000];
+  c10.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+'<br>'+fmtAUD(p[0].value);}}),
+    grid:{left:100,right:40,top:20,bottom:20,containLabel:false},
+    yAxis:mkAxis({type:'category',data:subLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+    xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtAUDShort(v);}})}),
+    series:[{type:'bar',data:subData.map(function(v){return{value:v,itemStyle:{color:v>=2000000?C.red:v>=1500000?C.orange:v>=1000000?C.navy:C.green,borderRadius:[0,4,4,0]}};}),barMaxWidth:28,
+      label:{show:true,position:'right',formatter:function(p){return fmtAUDShort(p.value);},fontSize:10,fontFamily:'JetBrains Mono'},
+      markLine:{silent:true,lineStyle:{type:'dashed',color:C.red},data:[{xAxis:1100000}],label:{formatter:en?'"Blanket" floor $1.1M':'統一底價$110萬',color:C.red,fontSize:10}}}
+    ]
+  });
+
+  /* Chart 11: chartBNEClearance */
+  var c11=echarts.init(document.getElementById('chartBNEClearance'));allCharts.push(c11);
+  c11.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26']}),
+    yAxis:mkAxis({type:'value',min:45,max:70,axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[
+      {name:en?'Brisbane':'布里斯本',type:'line',color:C.navy,data:[62,64,65,61,59,63,59],symbol:'circle',symbolSize:5,lineStyle:{width:2}},
+      {name:en?'Sydney':'雪梨',type:'line',color:C.orange,data:[65,63,60,58,54,58,55],symbol:'circle',symbolSize:5,lineStyle:{width:2,type:'dashed'}},
+      {name:en?'Melbourne':'墨爾本',type:'line',color:C.muted,data:[58,56,55,52,50,54,52],symbol:'circle',symbolSize:5,lineStyle:{width:2,type:'dashed'}}
+    ]
+  });
+
+  /* Chart 12: chartBNEPolicy */
+  var c12=echarts.init(document.getElementById('chartBNEPolicy'));allCharts.push(c12);
+  var polLabels=en?['QLD stamp\nexempt (existing)','QLD stamp\nexempt (new)','FHG price\ncap','Market\nblanket floor']:['昆州印花稅\n豁免(現房)','昆州印花稅\n豁免(新房)','FHG價格\n上限','市場\n統一底價'];
+  var polData=[700000,999999,1000000,1100000];
+  var polColors=[C.green,C.green,C.orange,C.red];
+  c12.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){return p[0].name+'<br>'+fmtAUD(p[0].value);}}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:polLabels,axisLabel:Object.assign({},baseText,{interval:0})}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtAUDShort(v);}})}),
+    series:[{type:'bar',data:polData.map(function(v,i){return{value:v,itemStyle:{color:polColors[i]}};}),barMaxWidth:35,
+      label:{show:true,position:'top',formatter:function(p){return fmtAUDShort(p.value);},fontSize:10,fontFamily:'JetBrains Mono'}}
+    ]
+  });
+
+  /* Chart 13: chartBNEVacancy */
+  var c13=echarts.init(document.getElementById('chartBNEVacancy'));allCharts.push(c13);
+  c13.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026']}),
+    yAxis:mkAxis({type:'value',min:0,max:4,axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    visualMap:{show:false,pieces:[{lte:1.0,color:C.red},{gt:1.0,lte:2.0,color:C.orange},{gt:2.0,color:C.navy}],dimension:1},
+    series:[{type:'line',data:[3.2,3.0,2.8,2.4,2.0,1.8,1.2,0.7,1.0,1.1,0.9,0.9],symbol:'circle',symbolSize:5,lineStyle:{width:2},
+      markLine:{silent:true,lineStyle:{type:'dashed',color:C.green},data:[{yAxis:3.0}],label:{formatter:en?'Equilibrium':'均衡水位',color:C.green,fontSize:10}},
+      areaStyle:{opacity:0.08}}
+    ]
+  });
+
+  /* Chart 14: chartBNERent */
+  var c14=echarts.init(document.getElementById('chartBNERent'));allCharts.push(c14);
+  c14.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025','2026 Q1']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return 'A$'+v;}})}),
+    series:[
+      {name:en?'Houses':'獨棟',type:'line',color:C.navy,data:[400,410,450,520,580,620,650],symbol:'circle',symbolSize:5,lineStyle:{width:2}},
+      {name:en?'Units':'公寓',type:'line',color:C.orange,data:[350,360,395,450,510,560,600],symbol:'circle',symbolSize:5,lineStyle:{width:2,type:'dashed'}}
+    ]
+  });
+
+  /* Chart 15: chartBNERentYoY */
+  var c15=echarts.init(document.getElementById('chartBNERentYoY'));allCharts.push(c15);
+  c15.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['2022','2023','2024','2025','2026 YTD']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[
+      {name:en?'Rent YoY':'租金年增',type:'bar',color:C.red,data:[12.5,18.2,22.1,24.8,18.5],barMaxWidth:30},
+      {name:en?'CPI Rent':'CPI租金',type:'bar',color:C.navy,data:[6.1,7.3,8.9,9.2,7.8],barMaxWidth:30,
+        markLine:{silent:true,lineStyle:{color:C.muted},data:[{yAxis:0}],label:{show:false}}}
+    ]
+  });
+
+  /* Chart 16: chartBNEDisplacement */
+  var c16=echarts.init(document.getElementById('chartBNEDisplacement'));allCharts.push(c16);
+  var disLabels=en?['Inner Brisbane','Middle Brisbane','Logan','Outer QLD']:['布里斯本內城','布里斯本中環','Logan','昆州外圍'];
+  var disCRA=[-8,-3,22,12];
+  var disHomeless=[0,5,31,18];
+  c16.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:disLabels,axisLabel:Object.assign({},baseText,{interval:0})}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[
+      {name:en?'CRA Change %':'CRA變動%',type:'bar',data:disCRA.map(function(v){return{value:v,itemStyle:{color:v<0?C.green:C.red}};}),barMaxWidth:25},
+      {name:en?'Homelessness %':'無家可歸%',type:'bar',data:disHomeless.map(function(v){return{value:v,itemStyle:{color:v<=0?C.green:C.red}};}),barMaxWidth:25}
+    ]
+  });
+
+  /* Chart 17: chartBNEOlympicZone */
+  var c17=echarts.init(document.getElementById('chartBNEOlympicZone'));allCharts.push(c17);
+  var ozLabels=en?['Bowen Hills\n(Athletes Village)','Herston/\nKelvin Grove','Woolloongabba','Kangaroo Pt','Spring Hill','Tennyson','East Brisbane']:['Bowen Hills\n(選手村)','Herston/\nKelvin Grove','Woolloongabba','Kangaroo Pt','Spring Hill','Tennyson','East Brisbane'];
+  var ozData=[28,25,20,18,15,14,16];
+  c17.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+    grid:{left:110,right:30,top:20,bottom:20,containLabel:false},
+    yAxis:mkAxis({type:'category',data:ozLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+    xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[{type:'bar',data:ozData.map(function(v){return{value:v,itemStyle:{color:v>=25?C.orange:v>=15?C.navy:C.muted,borderRadius:[0,4,4,0]}};}),barMaxWidth:28,
+      label:{show:true,position:'right',formatter:function(p){return '+'+p.value+'%';},fontSize:10,fontFamily:'JetBrains Mono'}}
+    ]
+  });
+
+  /* Chart 18: chartBNEOlympicHistory */
+  var c18=echarts.init(document.getElementById('chartBNEOlympicHistory'));allCharts.push(c18);
+  c18.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['Sydney\n2000','Athens\n2004','Beijing\n2008','London\n2012','Tokyo\n2020','Brisbane\n2032E']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[
+      {name:en?'Pre-Games Annual':'賽前年均',type:'bar',color:C.navy,data:[7.7,5.2,9.8,4.1,3.8,14.5],barMaxWidth:25},
+      {name:en?'Post-Games Annual':'賽後年均',type:'bar',color:C.orange,data:[12.8,-2.1,4.5,5.9,6.2,null],barMaxWidth:25,
+        markLine:{silent:true,lineStyle:{color:C.muted},data:[{yAxis:0}],label:{show:false}}}
+    ]
+  });
+
+  /* Chart 19: chartBNEInfra */
+  var c19=echarts.init(document.getElementById('chartBNEInfra'));allCharts.push(c19);
+  c19.setOption({
+    grid:{left:50,right:20,top:20,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:['2025','2026','2027','2028','2029','2030','2031','2032']}),
+    yAxis:mkAxis({type:'value',show:false,min:0,max:1}),
+    series:[{type:'scatter',symbolSize:20,color:C.green,
+      data:[
+        {value:['2026',0.3],label:{show:true,formatter:en?'Cross River\nRail open':'跨河鐵路\n通車',position:'top',fontSize:9,color:C.navy}},
+        {value:['2027',0.6],label:{show:true,formatter:en?'Brisbane Metro\nPhase 1':'布里斯本\n地鐵一期',position:'top',fontSize:9,color:C.navy}},
+        {value:['2029',0.4],label:{show:true,formatter:en?'Victoria Park\nStadium':'Victoria Park\n體育場',position:'top',fontSize:9,color:C.navy}},
+        {value:['2031',0.7],label:{show:true,formatter:en?'Athletes\nVillage':'選手村',position:'top',fontSize:9,color:C.navy}},
+        {value:['2032',0.5],label:{show:true,formatter:en?'Olympics\nOpening':'奧運\n開幕',position:'top',fontSize:9,color:C.orange}}
+      ]
+    }]
+  });
+
+  /* Chart 20: chartBNEForecast */
+  var c20=echarts.init(document.getElementById('chartBNEForecast'));allCharts.push(c20);
+  c20.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:baseLegend,
+    xAxis:mkAxis({type:'category',data:['SQM Base','SQM Bull','PropTrack','CoreLogic','ANZ','Westpac']}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}})}),
+    series:[
+      {name:'2026',type:'bar',color:C.navy,data:[12,17,10,11,9,8],barMaxWidth:25},
+      {name:'2027E',type:'bar',color:C.orange,data:[8,14,7,8,7,6],barMaxWidth:25}
+    ]
+  });
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

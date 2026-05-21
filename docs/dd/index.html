@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DD Library | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/tw/tw.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+/* ══════════════════════════════════════════════
+   DD LIBRARY — LOCAL STYLES
+   Design tokens: border-radius:4px, border:0.5px solid #ccd9e8
+   JetBrains Mono for numbers, Inter for text
+══════════════════════════════════════════════ */
+
+/* ── Filter Panel ── */
+.filter-panel {
+  background: #fff;
+  border: 0.5px solid #ccd9e8;
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin-bottom: 0;
+}
+.filter-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.filter-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.filter-label {
+  font-size: 9.5px;
+  letter-spacing: .13em;
+  color: #5a7a9a;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-top: 6px;
+  min-width: 52px;
+}
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.pill-opt {
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #4a6080;
+  background: #eef3f9;
+  border: 1px solid #ccd9e8;
+  cursor: pointer;
+  user-select: none;
+  transition: all .12s;
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
+  line-height: 1;
+}
+.pill-opt:hover { background: #dde8f2; color: #1e3a5f; }
+.pill-opt.active {
+  background: #1e3a5f;
+  color: #fff;
+  border-color: #1e3a5f;
+  box-shadow: 0 1px 4px rgba(30,58,95,.22);
+}
+
+/* Search input */
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+  max-width: 320px;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #94a3b8;
+}
+.search-input {
+  width: 100%;
+  padding: 6px 10px 6px 30px;
+  border: 1px solid #ccd9e8;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  color: #1e3a5f;
+  background: #f8fafc;
+  outline: none;
+  transition: border-color .12s, background .12s;
+  box-sizing: border-box;
+}
+.search-input:focus {
+  border-color: #2563eb;
+  background: #fff;
+}
+.search-input::placeholder { color: #94a3b8; }
+
+/* ── Table Wrapper ── */
+.table-wrap {
+  background: #fff;
+  border: 0.5px solid #ccd9e8;
+  border-radius: 4px;
+  overflow: auto;
+  margin-bottom: 0;
+}
+
+/* ── DD Library Table ── */
+.cmp-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+}
+.cmp-tbl thead { position: sticky; top: 0; z-index: 3; }
+.cmp-tbl th {
+  background: #f0f6ff;
+  font-size: 9px;
+  letter-spacing: .09em;
+  color: #5a7a9a;
+  font-weight: 600;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid #dce8f5;
+  white-space: nowrap;
+  user-select: none;
+  text-transform: uppercase;
+}
+.cmp-tbl th.col-r { text-align: right; }
+.cmp-tbl th.col-c { text-align: center; }
+.cmp-tbl td {
+  padding: 11px 14px;
+  font-size: 12.5px;
+  border-bottom: 1px solid #f0f5fb;
+  color: #1e3a5f;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+.cmp-tbl td.col-r { text-align: right; }
+.cmp-tbl td.col-c { text-align: center; }
+.cmp-tbl tbody tr:nth-child(even) td { background: #fafcfe; }
+.cmp-tbl tbody tr:hover td { background: #f3f8ff !important; cursor: pointer; }
+.cmp-tbl tr:last-child td { border-bottom: none; }
+
+/* Sticky Summary rows get a subtle tint */
+.cmp-tbl tbody tr.row-summary td { background: #f5f9ff; }
+.cmp-tbl tbody tr.row-summary:hover td { background: #eaf2ff !important; }
+
+/* ── Project cell ── */
+.proj-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e3a5f;
+  line-height: 1.3;
+}
+.proj-file {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+/* ── Region chips ── */
+.region-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: .01em;
+}
+.chip-klcc    { background: #dbeafe; color: #1d4ed8; }
+.chip-dpc     { background: #dcfce7; color: #166534; }
+.chip-montkiara { background: #ede9fe; color: #6d28d9; }
+.chip-bbcc    { background: #ffedd5; color: #c2410c; }
+.chip-bukitbintang { background: #fee2e2; color: #991b1b; }
+.chip-pavilion { background: #cffafe; color: #0e7490; }
+.chip-bangsar { background: #fce7f3; color: #9d174d; }
+.chip-trx     { background: #f0fdf4; color: #14532d; border: 1px solid #86efac; }
+.chip-other   { background: #f1f5f9; color: #475569; }
+
+/* ── Type badges ── */
+.type-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.badge-summary { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.badge-project { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+
+/* ── Mono cells ── */
+.num-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.val-muted { color: #cbd5e1; }
+
+/* ── Yield coloring ── */
+.yield-high { color: #16a34a; font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.yield-mid  { color: #1e3a5f; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.yield-low  { color: #dc2626; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+/* ── Score coloring ── */
+.score-high { color: #16a34a; font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.score-mid  { color: #1e3a5f; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.score-low  { color: #dc2626; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+/* ── Signal emoji ── */
+.signal-cell { font-size: 17px; line-height: 1; }
+
+/* ── Action button ── */
+.btn-view {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid #1e3a5f;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: #1e3a5f;
+  background: transparent;
+  text-decoration: none;
+  transition: all .12s;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn-view:hover {
+  background: #1e3a5f;
+  color: #fff;
+}
+
+/* ── Count label ── */
+.count-label {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: #5a7a9a;
+  margin-left: 6px;
+}
+
+/* ── Empty state ── */
+.empty-state {
+  padding: 36px 20px;
+  text-align: center;
+}
+.empty-state p {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.btn-reset {
+  display: inline-block;
+  padding: 6px 16px;
+  border: 1px solid #ccd9e8;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  color: #5a7a9a;
+  background: #eef3f9;
+  cursor: pointer;
+  transition: all .12s;
+}
+.btn-reset:hover { background: #dde8f2; color: #1e3a5f; border-color: #a0b8cf; }
+
+/* ── Error state ── */
+.error-box {
+  background: #fff5f5;
+  border: 0.5px solid #fecaca;
+  border-left: 3px solid #dc2626;
+  border-radius: 0 4px 4px 0;
+  padding: 14px 18px;
+  font-size: 12.5px;
+  color: #991b1b;
+  margin: 16px 0;
+}
+
+/* ── Section header row ── */
+.section-header-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 28px;
+  margin-bottom: 10px;
+}
+
+/* ── Source footer ── */
+.source-footer {
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin-top: 14px;
+  line-height: 1.6;
+}
+
+/* ── Mobile ── */
+@media (max-width: 560px) {
+  .filter-group { flex-direction: column; gap: 6px; }
+  .filter-label { padding-top: 0; min-width: auto; }
+  .table-wrap { border-radius: 0; border-left: none; border-right: none; }
+  .search-wrap { max-width: 100%; }
+}
+@media (max-width: 860px) {
+  .filter-group { gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<main class="container">
+
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <span class="updated">
+      <span class="lang-en">LAST UPDATED: <span id="maxDate">—</span></span>
+      <span class="lang-zh" style="display:none">最後更新：<span id="maxDateZh">—</span></span>
+    </span>
+    <h1>
+      <span class="lang-en">📚 DD Library</span>
+      <span class="lang-zh" style="display:none">📚 深度報告索引</span>
+    </h1>
+    <p class="subtitle">
+      <span class="lang-en"><span id="totalCountEn">24</span> reports · KL focused · due-diligence archive</span>
+      <span class="lang-zh" style="display:none"><span id="totalCountZh">24</span> 份報告 · 吉隆坡深度研究彙整</span>
+    </p>
+  </div>
+
+  <!-- ══ INSIGHT BOX ══ -->
+  <div class="insight-box accent" style="margin-bottom:0">
+    <span class="lang-en"><strong>How to use:</strong> Click any row to open the report in a new tab. Summary reports (market-wide overviews) are always pinned to the top. Use filters to narrow by region, price range, or signal.</span>
+    <span class="lang-zh" style="display:none"><strong>使用說明：</strong>點任何 row 即可在新分頁開啟報告。Summary 報告（市場總覽）永遠固定在最上方。使用篩選條件依區域、價格範圍或訊號燈縮小範圍。</span>
+  </div>
+
+  <!-- ══ FILTER PANEL ══ -->
+  <div class="section-label" style="margin-top:28px">
+    <span class="lang-en">FILTERS</span>
+    <span class="lang-zh" style="display:none">篩選條件</span>
+  </div>
+  <div class="filter-panel">
+    <div class="filter-groups">
+
+      <!-- Search -->
+      <div class="filter-group">
+        <span class="filter-label">
+          <span class="lang-en">SEARCH</span>
+          <span class="lang-zh" style="display:none">搜尋</span>
+        </span>
+        <div class="search-wrap">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="search" id="searchInput" class="search-input"
+            placeholder="Search project name or file…"
+            autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+
+      <!-- Region -->
+      <div class="filter-group">
+        <span class="filter-label">
+          <span class="lang-en">REGION</span>
+          <span class="lang-zh" style="display:none">區域</span>
+        </span>
+        <div class="pill-row" id="pillsRegion">
+          <button class="pill-opt active" data-val="All">All</button>
+          <button class="pill-opt" data-val="KLCC">KLCC</button>
+          <button class="pill-opt" data-val="DPC">DPC</button>
+          <button class="pill-opt" data-val="Mont Kiara">Mont Kiara</button>
+          <button class="pill-opt" data-val="BBCC">BBCC</button>
+          <button class="pill-opt" data-val="Bukit Bintang">Bukit Bintang</button>
+          <button class="pill-opt" data-val="Pavilion">Pavilion</button>
+          <button class="pill-opt" data-val="Bangsar">Bangsar</button>
+          <button class="pill-opt" data-val="TRX">TRX</button>
+          <button class="pill-opt" data-val="Other">Other</button>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="filter-group">
+        <span class="filter-label">
+          <span class="lang-en">PRICE</span>
+          <span class="lang-zh" style="display:none">總價</span>
+        </span>
+        <div class="pill-row" id="pillsPrice">
+          <button class="pill-opt active" data-val="All">All</button>
+          <button class="pill-opt" data-val="&lt;1M">&lt;1M</button>
+          <button class="pill-opt" data-val="1-2M">1-2M</button>
+          <button class="pill-opt" data-val="2-5M">2-5M</button>
+          <button class="pill-opt" data-val="5M+">5M+</button>
+        </div>
+      </div>
+
+      <!-- Signal -->
+      <div class="filter-group">
+        <span class="filter-label">
+          <span class="lang-en">SIGNAL</span>
+          <span class="lang-zh" style="display:none">訊號</span>
+        </span>
+        <div class="pill-row" id="pillsSignal">
+          <button class="pill-opt active" data-val="All">All</button>
+          <button class="pill-opt" data-val="🟢">🟢</button>
+          <button class="pill-opt" data-val="🟡">🟡</button>
+          <button class="pill-opt" data-val="🟠">🟠</button>
+          <button class="pill-opt" data-val="🔴">🔴</button>
+          <button class="pill-opt" data-val="—">—</button>
+        </div>
+      </div>
+
+      <!-- Sort -->
+      <div class="filter-group">
+        <span class="filter-label">
+          <span class="lang-en">SORT</span>
+          <span class="lang-zh" style="display:none">排序</span>
+        </span>
+        <div class="pill-row" id="pillsSort">
+          <button class="pill-opt active" data-val="date-desc">
+            <span class="lang-en">Date↓</span>
+            <span class="lang-zh" style="display:none">日期↓</span>
+          </button>
+          <button class="pill-opt" data-val="score-desc">
+            <span class="lang-en">Score↓</span>
+            <span class="lang-zh" style="display:none">評分↓</span>
+          </button>
+          <button class="pill-opt" data-val="yield-desc">
+            <span class="lang-en">Yield↓</span>
+            <span class="lang-zh" style="display:none">殖利率↓</span>
+          </button>
+          <button class="pill-opt" data-val="price-asc">
+            <span class="lang-en">Price↑</span>
+            <span class="lang-zh" style="display:none">總價↑</span>
+          </button>
+          <button class="pill-opt" data-val="name-asc">
+            <span class="lang-en">Name↑</span>
+            <span class="lang-zh" style="display:none">名稱↑</span>
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /filter-groups -->
+  </div><!-- /filter-panel -->
+
+  <!-- ══ FULL LIST ══ -->
+  <div class="section-header-row">
+    <div class="section-label" style="margin:0">
+      <span class="lang-en">FULL LIST</span>
+      <span class="lang-zh" style="display:none">完整清單</span>
+    </div>
+    <span class="count-label" id="countLabel">
+      <span class="lang-en">Showing <span id="shownCount">—</span> of <span id="totalCount">—</span></span>
+      <span class="lang-zh" style="display:none">顯示 <span id="shownCountZh">—</span> / <span id="totalCountZh2">—</span></span>
+    </span>
+  </div>
+
+  <!-- Error state (hidden by default) -->
+  <div id="errorBox" class="error-box" style="display:none">
+    <span class="lang-en">⚠ Failed to load report index. Please refresh the page.</span>
+    <span class="lang-zh" style="display:none">⚠ 無法載入報告索引，請重新整理頁面。</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="cmp-tbl" id="ddTable">
+      <thead>
+        <tr>
+          <th style="min-width:200px">
+            <span class="lang-en">Project</span>
+            <span class="lang-zh" style="display:none">項目</span>
+          </th>
+          <th>
+            <span class="lang-en">Region</span>
+            <span class="lang-zh" style="display:none">區域</span>
+          </th>
+          <th class="col-c">
+            <span class="lang-en">Type</span>
+            <span class="lang-zh" style="display:none">類型</span>
+          </th>
+          <th class="col-r">
+            <span class="lang-en">Total</span>
+            <span class="lang-zh" style="display:none">總價</span>
+          </th>
+          <th class="col-r">psf</th>
+          <th class="col-r">
+            <span class="lang-en">Yield</span>
+            <span class="lang-zh" style="display:none">殖利率</span>
+          </th>
+          <th class="col-c">
+            <span class="lang-en">Signal</span>
+            <span class="lang-zh" style="display:none">訊號</span>
+          </th>
+          <th class="col-r">
+            <span class="lang-en">Score</span>
+            <span class="lang-zh" style="display:none">評分</span>
+          </th>
+          <th class="col-r">
+            <span class="lang-en">Date</span>
+            <span class="lang-zh" style="display:none">日期</span>
+          </th>
+          <th class="col-c">
+            <span class="lang-en">Action</span>
+            <span class="lang-zh" style="display:none">開啟</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="ddTbody">
+        <tr>
+          <td colspan="10" style="text-align:center;color:#94a3b8;padding:36px;font-size:12px">
+            <span class="lang-en">Loading reports…</span>
+            <span class="lang-zh" style="display:none">載入中…</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="source-footer" style="margin-top:14px">
+    <span class="lang-en"><strong>Source:</strong> All reports are proprietary due-diligence analyses. Scores use an 11-dimension property scoring framework. Signal: 🟢 Buy / 🟡 Hold / 🟠 Caution / 🔴 Avoid. psf = price per square foot (built-up).</span>
+    <span class="lang-zh" style="display:none"><strong>資料來源：</strong>所有報告均為自有深度盡職調查分析。評分採用 11 維度房產評分框架。訊號：🟢 買進 / 🟡 持有 / 🟠 謹慎 / 🔴 迴避。psf = 每平方呎售價（實用面積）。</span>
+  </div>
+
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+/* ══════════════════════════════════════════════
+   DD LIBRARY — CLIENT-SIDE LOGIC
+   - fetch dd_index.json (same dir)
+   - filter: search + region + price + signal
+   - sort: date / score / yield / price / name
+   - Summary rows always pinned to top
+   - Bilingual UI
+══════════════════════════════════════════════ */
+
+/* ── State ── */
+var allData = [];
+var filterRegion = 'All';
+var filterPrice  = 'All';
+var filterSignal = 'All';
+var filterSearch = '';
+var sortMode     = 'date-desc';
+
+/* ── Region chip class map ── */
+var REGION_CLASS = {
+  'KLCC':         'chip-klcc',
+  'DPC':          'chip-dpc',
+  'Mont Kiara':   'chip-montkiara',
+  'BBCC':         'chip-bbcc',
+  'Bukit Bintang':'chip-bukitbintang',
+  'Pavilion':     'chip-pavilion',
+  'Bangsar':      'chip-bangsar',
+  'TRX':          'chip-trx',
+  'Other':        'chip-other'
+};
+
+/* ── Price bucket sort order ── */
+var PRICE_ORDER = {'<1M':1,'1-2M':2,'2-5M':3,'5M+':4,'—':99};
+
+/* ── Parse numeric values for sorting (returns Infinity for "—") ── */
+function parseScore(s){ return s === '—' ? -Infinity : parseFloat(s); }
+function parseYield(s){ return s === '—' ? -Infinity : parseFloat(s); }
+function parsePriceBucket(s){ return PRICE_ORDER[s] || 99; }
+
+/* ── Fuzzy search ── */
+function matchesSearch(row, q) {
+  if (!q) return true;
+  var lq = q.toLowerCase();
+  return row.title.toLowerCase().indexOf(lq) !== -1 ||
+         row.file.toLowerCase().indexOf(lq) !== -1;
+}
+
+/* ── Get filtered + sorted rows ── */
+function getRows() {
+  var rows = allData.filter(function(r) {
+    if (filterRegion !== 'All' && r.region !== filterRegion) return false;
+    if (filterPrice  !== 'All' && r.priceBucket !== filterPrice) return false;
+    if (filterSignal !== 'All' && r.signal !== filterSignal) return false;
+    if (!matchesSearch(r, filterSearch)) return false;
+    return true;
+  });
+
+  /* Split summary vs project */
+  var summaries = rows.filter(function(r){ return r.type === 'Summary'; });
+  var projects  = rows.filter(function(r){ return r.type !== 'Summary'; });
+
+  /* Sort projects */
+  projects.sort(function(a, b) {
+    switch (sortMode) {
+      case 'date-desc':
+        return b.date.localeCompare(a.date) || a.title.localeCompare(b.title);
+      case 'score-desc':
+        return parseScore(b.score) - parseScore(a.score) || b.date.localeCompare(a.date);
+      case 'yield-desc':
+        return parseYield(b.yield) - parseYield(a.yield) || b.date.localeCompare(a.date);
+      case 'price-asc':
+        return parsePriceBucket(a.priceBucket) - parsePriceBucket(b.priceBucket) || a.title.localeCompare(b.title);
+      case 'name-asc':
+        return a.title.localeCompare(b.title);
+      default:
+        return 0;
+    }
+  });
+
+  /* Summaries sorted by date desc, then concatenated above projects */
+  summaries.sort(function(a, b){ return b.date.localeCompare(a.date); });
+
+  return summaries.concat(projects);
+}
+
+/* ── Render "—" value ── */
+function dash() {
+  return '<span class="val-muted">—</span>';
+}
+
+/* ── Render yield with color ── */
+function renderYield(y) {
+  if (y === '—') return dash();
+  var v = parseFloat(y);
+  var cls = v >= 5 ? 'yield-high' : (v >= 3 ? 'yield-mid' : 'yield-low');
+  return '<span class="' + cls + '">' + y + '</span>';
+}
+
+/* ── Render score with color ── */
+function renderScore(s) {
+  if (s === '—') return dash();
+  var v = parseFloat(s);
+  var cls = v >= 8 ? 'score-high' : (v >= 6 ? 'score-mid' : 'score-low');
+  return '<span class="' + cls + '">' + s + '</span>';
+}
+
+/* ── Render table body ── */
+function renderTable() {
+  var rows = getRows();
+  var tbody = document.getElementById('ddTbody');
+  var lang = localStorage.getItem('lang') || 'en';
+
+  /* Update count labels */
+  var shown = rows.length;
+  var total = allData.length;
+  document.getElementById('shownCount').textContent = shown;
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('shownCountZh').textContent = shown;
+  document.getElementById('totalCountZh2').textContent = total;
+
+  if (rows.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="10">' +
+        '<div class="empty-state">' +
+          '<p>' +
+            '<span class="lang-en">No matching reports</span>' +
+            '<span class="lang-zh" style="display:' + (lang==='zh'?'':'none') + '">沒有符合的報告</span>' +
+          '</p>' +
+          '<button class="btn-reset" onclick="resetFilters()">' +
+            '<span class="lang-en">Reset filters</span>' +
+            '<span class="lang-zh" style="display:' + (lang==='zh'?'':'none') + '">清除篩選</span>' +
+          '</button>' +
+        '</div>' +
+      '</td></tr>';
+    applyLangToElement(tbody, lang);
+    return;
+  }
+
+  var html = '';
+  rows.forEach(function(r) {
+    var isSummary = r.type === 'Summary';
+    var rowCls = isSummary ? ' class="row-summary"' : '';
+    var typeBadge = isSummary
+      ? '<span class="type-badge badge-summary"><span class="lang-en">Summary</span><span class="lang-zh" style="display:none">總覽</span></span>'
+      : '<span class="type-badge badge-project"><span class="lang-en">Project</span><span class="lang-zh" style="display:none">個案</span></span>';
+
+    var regionCls = REGION_CLASS[r.region] || 'chip-other';
+    var regionChip = '<span class="region-chip ' + regionCls + '">' + escHtml(r.region) + '</span>';
+
+    var totalCell = r.totalPrice === '—' ? dash() : '<span class="num-mono">' + escHtml(r.totalPrice) + '</span>';
+    var psfCell   = r.psf === '—' ? dash() : '<span class="num-mono">' + escHtml(r.psf) + '</span>';
+    var signalCell = r.signal === '—' ? dash() : '<span class="signal-cell">' + r.signal + '</span>';
+
+    html +=
+      '<tr' + rowCls + ' data-href="' + escHtml(r.file) + '">' +
+        '<td>' +
+          '<div class="proj-title">' + escHtml(r.title) + '</div>' +
+          '<span class="proj-file">' + escHtml(r.file) + '</span>' +
+        '</td>' +
+        '<td>' + regionChip + '</td>' +
+        '<td class="col-c">' + typeBadge + '</td>' +
+        '<td class="col-r">' + totalCell + '</td>' +
+        '<td class="col-r">' + psfCell + '</td>' +
+        '<td class="col-r">' + renderYield(r.yield) + '</td>' +
+        '<td class="col-c">' + signalCell + '</td>' +
+        '<td class="col-r">' + renderScore(r.score) + '</td>' +
+        '<td class="col-r"><span class="num-mono" style="font-size:10.5px;color:#94a3b8">' + escHtml(r.date) + '</span></td>' +
+        '<td class="col-c" onclick="event.stopPropagation()">' +
+          '<a class="btn-view" href="' + escHtml(r.file) + '" target="_blank" rel="noopener">' +
+            '<span class="lang-en">View →</span>' +
+            '<span class="lang-zh" style="display:none">開啟 →</span>' +
+          '</a>' +
+        '</td>' +
+      '</tr>';
+  });
+
+  tbody.innerHTML = html;
+
+  /* Wire row click (open report in new tab) */
+  tbody.querySelectorAll('tr[data-href]').forEach(function(tr) {
+    tr.addEventListener('click', function(e) {
+      /* Don't intercept clicks on the action column (handled by the <a>) */
+      if (e.target.closest('td:last-child')) return;
+      window.open(tr.getAttribute('data-href'), '_blank', 'noopener');
+    });
+  });
+
+  /* Apply current lang to newly rendered cells */
+  applyLangToElement(tbody, lang);
+}
+
+/* ── HTML escape ── */
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ── Apply lang visibility to a subtree ── */
+function applyLangToElement(el, lang) {
+  el.querySelectorAll('.lang-en').forEach(function(e){ e.style.display = lang === 'en' ? '' : 'none'; });
+  el.querySelectorAll('.lang-zh').forEach(function(e){ e.style.display = lang === 'zh' ? '' : 'none'; });
+}
+
+/* ── Reset all filters ── */
+function resetFilters() {
+  filterRegion = 'All';
+  filterPrice  = 'All';
+  filterSignal = 'All';
+  filterSearch = '';
+  sortMode     = 'date-desc';
+
+  document.getElementById('searchInput').value = '';
+
+  setPillActive('pillsRegion', 'All');
+  setPillActive('pillsPrice',  'All');
+  setPillActive('pillsSignal', 'All');
+  setPillActive('pillsSort',   'date-desc');
+
+  renderTable();
+}
+
+/* ── Set active pill in a group ── */
+function setPillActive(groupId, val) {
+  document.querySelectorAll('#' + groupId + ' .pill-opt').forEach(function(btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-val') === val);
+  });
+}
+
+/* ── Wire pill groups ── */
+function wirePills(groupId, onSelect) {
+  document.querySelectorAll('#' + groupId + ' .pill-opt').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      setPillActive(groupId, btn.getAttribute('data-val'));
+      onSelect(btn.getAttribute('data-val'));
+      renderTable();
+    });
+  });
+}
+
+wirePills('pillsRegion', function(v){ filterRegion = v; });
+wirePills('pillsPrice',  function(v){ filterPrice  = v; });
+wirePills('pillsSignal', function(v){ filterSignal = v; });
+wirePills('pillsSort',   function(v){ sortMode     = v; });
+
+/* ── Search input ── */
+var searchTimer;
+document.getElementById('searchInput').addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  var val = this.value;
+  searchTimer = setTimeout(function() {
+    filterSearch = val.trim();
+    renderTable();
+  }, 120);
+});
+
+/* ── Bilingual setLang (no charts) ── */
+function setLang(lang) {
+  document.querySelectorAll('.lang-en').forEach(function(e){ e.style.display = lang === 'en' ? '' : 'none'; });
+  document.querySelectorAll('.lang-zh').forEach(function(e){ e.style.display = lang === 'zh' ? '' : 'none'; });
+  document.querySelectorAll('.lang-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.lang === lang); });
+  localStorage.setItem('lang', lang);
+  /* Re-render to update inline lang nodes inside dynamically built rows */
+  renderTable();
+}
+
+/* ── Load data ── */
+function loadData() {
+  fetch('./dd_index.json')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      allData = data;
+
+      /* Total count in header */
+      var total = data.length;
+      document.getElementById('totalCountEn').textContent = total;
+      document.getElementById('totalCountZh').textContent = total;
+
+      /* Max date */
+      var maxDate = data.reduce(function(acc, r) {
+        return r.date > acc ? r.date : acc;
+      }, '');
+      document.getElementById('maxDate').textContent = maxDate;
+      document.getElementById('maxDateZh').textContent = maxDate;
+
+      renderTable();
+    })
+    .catch(function(err) {
+      console.error('DD Library: failed to load dd_index.json', err);
+      document.getElementById('errorBox').style.display = '';
+      document.getElementById('ddTbody').innerHTML =
+        '<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:36px;font-size:12px">' +
+          '<span class="lang-en">Failed to load index</span>' +
+          '<span class="lang-zh">無法載入索引</span>' +
+        '</td></tr>';
+    });
+}
+
+window.addEventListener('load', function() {
+  var lang = localStorage.getItem('lang') || 'en';
+  setLang(lang);
+  loadData();
+});
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

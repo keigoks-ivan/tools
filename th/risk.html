@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Risk Monitor | Thailand Property Monitor</title>
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+  <h1 class="page-title"><span class="lang-en">Risk Monitor</span><span class="lang-zh" style="display:none">風險監測</span></h1>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Household Debt/GDP</span><span class="lang-zh" style="display:none">家庭負債/GDP</span></div>
+      <div class="kpi-value">90.6%</div>
+      <div class="kpi-delta negative"><span class="lang-en">Among highest in Asia</span><span class="lang-zh" style="display:none">亞洲最高之一</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Mortgage Rejection</span><span class="lang-zh" style="display:none">房貸拒貸率</span></div>
+      <div class="kpi-value">70%</div>
+      <div class="kpi-delta negative"><span class="lang-en">&lt; THB 3M units</span><span class="lang-zh" style="display:none">300萬泰銖以下</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Unsold Inventory</span><span class="lang-zh" style="display:none">未售庫存</span></div>
+      <div class="kpi-value" style="font-size:18px">235,000</div>
+      <div class="kpi-delta negative"><span class="lang-en">BKK condos &mdash; record</span><span class="lang-zh" style="display:none">曼谷公寓 &mdash; 歷史新高</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Foreign Ownership Cap</span><span class="lang-zh" style="display:none">外國人持有上限</span></div>
+      <div class="kpi-value">49%</div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Condo only</span><span class="lang-zh" style="display:none">僅限公寓</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Political Stability</span><span class="lang-zh" style="display:none">政治穩定度</span></div>
+      <div class="kpi-value" style="font-size:18px"><span class="lang-en">Moderate</span><span class="lang-zh" style="display:none">中等</span></div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Coalition government</span><span class="lang-zh" style="display:none">聯合政府</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Flood Risk</span><span class="lang-zh" style="display:none">洪水風險</span></div>
+      <div class="kpi-value" style="font-size:18px"><span class="lang-en">Elevated</span><span class="lang-zh" style="display:none">偏高</span></div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Bangkok low-lying</span><span class="lang-zh" style="display:none">曼谷地勢低窪</span></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Risk Radar</span><span class="lang-zh" style="display:none">風險雷達圖</span></h3>
+      <div class="radar-wrap">
+        <div id="chartThRisk" style="width:100%;height:320px"></div>
+      </div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">Rate Sensitivity Analysis</span><span class="lang-zh" style="display:none">利率敏感度分析</span></h3>
+      <div id="chartThRateSensitivity" style="height:220px"></div>
+    </div>
+  </div>
+
+  <!-- Policy Timeline -->
+  <h2 class="section-heading"><span class="lang-en">Policy Timeline</span><span class="lang-zh" style="display:none">政策時間軸</span></h2>
+  <div class="timeline">
+    <div class="timeline-item green">
+      <div class="tl-date">2020 May</div>
+      <div class="tl-text"><span class="lang-en">BoT cuts rate to 0.50% (COVID response)</span><span class="lang-zh" style="display:none">泰央行降息至0.50%（COVID應對）</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2022 Aug</div>
+      <div class="tl-text"><span class="lang-en">Rate hike cycle begins</span><span class="lang-zh" style="display:none">升息循環開始</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2023 Sep</div>
+      <div class="tl-text"><span class="lang-en">Rate peaks at 2.50%</span><span class="lang-zh" style="display:none">利率升至2.50%高峰</span></div>
+    </div>
+    <div class="timeline-item green">
+      <div class="tl-date">2024 Oct</div>
+      <div class="tl-text"><span class="lang-en">First cut to 2.25%</span><span class="lang-zh" style="display:none">首次降息至2.25%</span></div>
+    </div>
+    <div class="timeline-item green">
+      <div class="tl-date">2025 H1</div>
+      <div class="tl-text"><span class="lang-en">Quick Big Win stimulus &mdash; transfer fees reduced to 0.01%</span><span class="lang-zh" style="display:none">Quick Big Win刺激方案 &mdash; 過戶費降至0.01%</span></div>
+    </div>
+    <div class="timeline-item green">
+      <div class="tl-date">2025 H2</div>
+      <div class="tl-text"><span class="lang-en">LTV relaxation &mdash; 100% for 1st &amp; 2nd homes</span><span class="lang-zh" style="display:none">LTV放寬 &mdash; 第1及第2套房可貸100%</span></div>
+    </div>
+    <div class="timeline-item gray">
+      <div class="tl-date">2026</div>
+      <div class="tl-text"><span class="lang-en">Market watching for further rate cuts</span><span class="lang-zh" style="display:none">市場關注進一步降息</span></div>
+    </div>
+  </div>
+
+  <!-- Key Risk Factors -->
+  <h2 class="section-heading"><span class="lang-en">Key Risk Factors</span><span class="lang-zh" style="display:none">主要風險因素</span></h2>
+  <div class="summary-grid">
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">Household Debt</span><span class="lang-zh" style="display:none">家庭負債</span></h4>
+      <p><span class="lang-en">At 90.6% of GDP, Thailand's household debt constrains domestic demand significantly. The 70% mortgage rejection rate for properties under THB 3 million highlights the affordability crisis in the affordable segment, limiting market breadth and recovery potential.</span><span class="lang-zh" style="display:none">家庭負債佔GDP 90.6%，嚴重制約國內需求。300萬泰銖以下房產70%的拒貸率凸顯平價住宅的負擔能力危機，限制了市場廣度與復甦潛力。</span></p>
+    </div>
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">Oversupply</span><span class="lang-zh" style="display:none">供給過剩</span></h4>
+      <p><span class="lang-en">Bangkok has 235,000 unsold condo units at record levels. Developers are shifting to low-rise products, but absorption continues to lag new launches. The oversupply is concentrated in mid-range condos along new transit lines where speculative buying was heaviest.</span><span class="lang-zh" style="display:none">曼谷有23.5萬戶未售公寓，創歷史新高。開發商正轉向低層住宅，但去化速度仍落後新推案。供給過剩集中在新捷運沿線的中價位公寓，該區域投機購買最為密集。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Foreign Dependency</span><span class="lang-zh" style="display:none">外資依賴</span></h4>
+      <p><span class="lang-en">The market is increasingly reliant on foreign buyers, with Chinese nationals accounting for 48% of foreign condo transfers. Geopolitical shifts or regulatory changes in China could significantly impact demand. The 49% foreign ownership cap per building adds structural constraints.</span><span class="lang-zh" style="display:none">市場日益依賴外國買家，中國籍買家佔外國人公寓過戶的48%。中國的地緣政治變化或監管政策調整可能顯著影響需求。每棟建築49%的外國人持有上限增加了結構性限制。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Currency Risk</span><span class="lang-zh" style="display:none">匯率風險</span></h4>
+      <p><span class="lang-en">Thai baht volatility affects foreign investor returns. Strong USD periods reduce the purchasing power of Chinese and Russian buyers, who represent the largest foreign buyer cohorts. Currency depreciation can trigger capital outflows from property holdings.</span><span class="lang-zh" style="display:none">泰銖波動影響外國投資者回報。美元走強時期削弱中國及俄羅斯買家的購買力，而他們是最大的外國買家群體。貨幣貶值可能引發房產持有的資金外流。</span></p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  // Risk Radar
+  var c1=echarts.init(document.getElementById('chartThRisk'));allCharts.push(c1);
+  c1.setOption({
+    legend:{bottom:0,textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11},icon:'circle',itemWidth:8,itemHeight:8,data:['Current Risk','2023 Baseline']},
+    radar:{
+      center:['50%','52%'],radius:'58%',nameGap:8,
+      name:{textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:10}},
+      indicator:[
+        {name:'Liquidity\n/\u6d41\u52d5\u6027',max:10},
+        {name:'Credit\n/\u4fe1\u8cb8',max:10},
+        {name:'Supply\n/\u4f9b\u7d66',max:10},
+        {name:'Macro\n/\u7e3d\u7d93',max:10},
+        {name:'Policy\n/\u653f\u7b56',max:10},
+        {name:'Currency\n/\u532f\u7387',max:10}
+      ],
+      shape:'polygon',splitNumber:5,
+      splitLine:{lineStyle:{color:C.grid}},
+      splitArea:{areaStyle:{color:['rgba(238,243,249,0.3)','rgba(255,255,255,0.3)']}},
+      axisLine:{lineStyle:{color:C.grid}}
+    },
+    series:[{type:'radar',data:[
+      {name:'Current Risk',value:[7,8,8,6,5,6],lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},areaStyle:{color:'rgba(220,38,38,0.1)'},symbol:'circle',symbolSize:5},
+      {name:'2023 Baseline',value:[5,6,6,5,5,5],lineStyle:{color:C.muted,type:'dashed',width:1.5},itemStyle:{color:C.muted},areaStyle:{color:'rgba(139,163,192,0.08)'},symbol:'circle',symbolSize:4}
+    ]}]
+  });
+
+  // Rate Sensitivity Analysis
+  var c2=echarts.init(document.getElementById('chartThRateSensitivity'));allCharts.push(c2);
+  c2.setOption({
+    tooltip:baseTooltip,
+    legend:{top:8,textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11},icon:'circle',itemWidth:8,itemHeight:8,data:['Yield Spread','Affordability Index']},
+    grid:{left:15,right:15,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:['BoT 1.5%','BoT 2.0%','BoT 2.25%','BoT 2.5%','BoT 3.0%']}),
+    yAxis:[
+      mkAxis({type:'value',axisLabel:{formatter:'{value}%',color:'#5a7a9a',fontSize:10},splitLine:{lineStyle:{color:'#e8f0f9'}}}),
+      mkAxis({type:'value',position:'right',axisLabel:{formatter:'{value}',color:'#5a7a9a',fontSize:10},splitLine:{show:false}})
+    ],
+    series:[
+      {name:'Yield Spread',type:'line',smooth:0.2,data:[3.5,3.0,2.75,2.5,2.0],lineStyle:{color:C.green},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.navy,type:'dashed',width:1},data:[{xAxis:'BoT 2.25%',label:{formatter:'Current',position:'insideStartTop',fontSize:9,color:'#5a7a9a'}}]}
+      },
+      {name:'Affordability Index',type:'line',smooth:0.2,yAxisIndex:1,data:[75,70,68,65,60],lineStyle:{color:C.orange},itemStyle:{color:C.orange},symbol:'circle',symbolSize:6}
+    ]
+  });
+}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

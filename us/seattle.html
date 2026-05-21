@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Seattle Deep Dive | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+  .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+  .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+  .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+  .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+  .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+  .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+  .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+  .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+  .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+  .chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+  .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+  .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+  .report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+  .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+  .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+  .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+  .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+  .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+  .toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+  .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+  .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+  .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+  .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+  .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+  .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+  .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+  .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}
+  @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-supply" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Supply &amp; Demand</span><span class="side-nav-label lang-zh" style="display:none">供需</span></a>
+    <a href="#sec-tech" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Tech Concentration</span><span class="side-nav-label lang-zh" style="display:none">科技集中度</span></a>
+    <a href="#sec-geo" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Geography</span><span class="side-nav-label lang-zh" style="display:none">地理與分區</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">HB 1217</span><span class="side-nav-label lang-zh" style="display:none">HB 1217租管</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+
+  <div class="report-header">
+    <div class="lang-en"><h1>SEATTLE &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: Case-Shiller SEXRSA / NWMLS / Zillow / Redfin / WA Dept. of Commerce</div></div>
+    <div class="lang-zh" style="display:none"><h1>西雅圖——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：Case-Shiller SEXRSA / NWMLS / Zillow / Redfin / 華盛頓州商務部</div></div>
+  </div>
+
+  <div class="report-body">
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend: Peak, Correction &amp; Stabilization</span><span class="lang-zh" style="display:none">2. 房價走勢：峰值、修正與穩定</span></a>
+        <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">3. Supply &amp; Demand: Inventory Recovery</span><span class="lang-zh" style="display:none">3. 供需：庫存回升</span></a>
+        <a href="#sec-tech" onclick="closeTocMobile()"><span class="lang-en">4. Tech Employment: Amazon, Microsoft &amp; Concentration Risk</span><span class="lang-zh" style="display:none">4. 科技就業：亞馬遜、微軟與集中度風險</span></a>
+        <a href="#sec-geo" onclick="closeTocMobile()"><span class="lang-en">5. Geographic Constraint: Water, Mountains &amp; Zoning</span><span class="lang-zh" style="display:none">5. 地理約束：水域、山脈與分區</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">6. WA HB 1217: Washington&rsquo;s New Rent Cap</span><span class="lang-zh" style="display:none">6. WA HB 1217：華州新租管上限</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Seattle's housing market in 2026 presents the clearest expression of the supply-constrained tech-employment model among all U.S. markets in this monitor. The Seattle-Tacoma-Bellevue MSA's combination of geographic confinement (Puget Sound to the west, Cascade Mountains to the east, tight city limits between), zoning restrictions, and a uniquely high concentration of the highest-paid tech workers in the world &mdash; Amazon alone employs 50,000+ in Seattle &mdash; has produced a market where median home prices remain at <strong>$780,000&ndash;$848,000</strong> despite the most severe rate cycle in 40 years. The Case-Shiller Seattle index (SEXRSA) peaked at 414 in May 2022 and had corrected only to 391 by February 2025 &mdash; a peak-to-trough of <strong>5.6%</strong>, the shallowest correction of any West Coast market. Phoenix corrected 30%+, Austin 25%, Denver 20%; Seattle, 5.6%.</p>
+      <p>The shallow correction is no accident &mdash; it reflects a structural supply floor that prevents inventory from clearing at lower prices. Seattle's geography physically limits outward expansion: the city is bounded by water on three sides and mountains on a fourth, and King County zoning has historically restricted infill density. New single-family permits averaged approximately 500/month in 2024&ndash;2025, far below the demand implied by population growth. Against this supply backdrop, even the significant demand reduction caused by rate lock-in and tech-sector layoffs has not produced the price clearing that affordability math would suggest. December 2025 inventory reached <strong>6,356</strong> active listings &mdash; the highest winter level since 2019, but still a fraction of the 12,000&ndash;15,000 listings typical of balanced pre-Amazon markets.</p>
+      <p>The most consequential new development for Seattle's rental and investment market is Washington State's HB 1217, which took effect May 7, 2025 &mdash; making Washington the third U.S. state to adopt statewide rent stabilization. HB 1217 caps annual rent increases for existing tenants at <strong>7% plus local CPI, or 10%</strong>, whichever is lower. Seattle City Council has additionally banned the use of algorithmic rent-setting software &mdash; a direct response to the RealPage/Department of Justice antitrust case. For investors, this represents a structural change from Washington's previously landlord-favorable regulatory environment.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2026年西雅圖住宅市場在本監測所有美國市場中最清晰地體現了供給受限的科技就業模型。西雅圖-塔科馬-貝爾維尤都會區的地理圍合（西臨普吉特灣、東臨喀斯喀特山脈、城市邊界緊湊）、分區限制，以及全球最高薪科技工作者的獨特高度集中——僅亞馬遜在西雅圖就僱用50,000名以上工人——造就了一個即使在40年來最嚴峻的利率週期中，房屋中位數仍維持在<strong>780,000至848,000美元</strong>的市場。Case-Shiller西雅圖指數（SEXRSA）在2022年5月達到414的峰值，到2025年2月僅修正至391——峰值至谷值<strong>5.6%</strong>，是所有西海岸市場中最淺的修正。鳳凰城修正30%以上、奧斯丁25%、丹佛20%；西雅圖，5.6%。</p>
+      <p>這一淺度修正並非偶然——它反映了阻止庫存在較低價格出清的結構性供給底部。西雅圖的地理條件從物理上限制了向外擴張：城市三面環水、一面靠山，金縣分區法歷史上限制了城市填充密度。2024至2025年新獨棟住宅許可月均約500件，遠低於人口增長所隱含的需求。在此供給背景下，即便是利率鎖定和科技行業裁員造成的顯著需求減少，也未能產生可負擔性算術所預示的價格出清。2025年12月庫存達到<strong>6,356</strong>套活躍掛牌——2019年以來最高冬季水平，但仍遠少於均衡的前亞馬遜市場典型的12,000至15,000套掛牌。</p>
+      <p>西雅圖租賃和投資市場最重要的新發展是華盛頓州HB 1217，於2025年5月7日生效——使華盛頓州成為美國第三個採用州級租金穩定化的州。HB 1217將現有租戶的年度漲租上限設為<strong>當地CPI加7%或10%</strong>，取低者。西雅圖市議會還額外禁止使用算法租金設定軟件——這是對RealPage/司法部反壟斷案的直接回應。對投資者而言，這代表華盛頓州從之前有利於房東的監管環境發生的結構性變化。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">CS SEATTLE INDEX (FEB 2025)</span><span class="lang-zh" style="display:none">CS西雅圖指數（2025年2月）</span></div><div class="kpi-value">391</div><span class="kpi-badge badge-orange"><span class="lang-en">SEXRSA Jan 2000=100 &middot; Peak: 414 (May 2022) &middot; YoY -1.0%</span><span class="lang-zh" style="display:none">SEXRSA 2000年1月=100 &middot; 峰值：414（2022年5月）&middot; 年增-1.0%</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">ZILLOW MEDIAN (FEB 2026)</span><span class="lang-zh" style="display:none">Zillow中位數（2026年2月）</span></div><div class="kpi-value">$848K</div><span class="kpi-badge badge-orange"><span class="lang-en">Seattle city &middot; YoY -1.7% &middot; Dec 2025: $780K</span><span class="lang-zh" style="display:none">西雅圖市 &middot; 年降1.7% &middot; 2025年12月：$780K</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">PEAK DECLINE</span><span class="lang-zh" style="display:none">峰值跌幅</span></div><div class="kpi-value">-5.6% CS</div><span class="kpi-badge badge-orange"><span class="lang-en">May 2022 peak 414 &rarr; Feb 2025 391 &middot; Shallowest West Coast</span><span class="lang-zh" style="display:none">2022年5月峰值414→2025年2月391 &middot; 西海岸最淺</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">METRO ACTIVE LISTINGS (DEC 2025)</span><span class="lang-zh" style="display:none">都會區活躍掛牌（2025年12月）</span></div><div class="kpi-value">6,356</div><span class="kpi-badge badge-green"><span class="lang-en">Highest winter since 2019 &middot; Giving buyers more choice</span><span class="lang-zh" style="display:none">2019年以來最高冬季 &middot; 給予買家更多選擇</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">HB 1217 RENT CAP</span><span class="lang-zh" style="display:none">HB 1217租管上限</span></div><div class="kpi-value">7%+CPI / 10%</div><span class="kpi-badge badge-orange"><span class="lang-en">Eff. May 7, 2025 &middot; WA first statewide rent cap</span><span class="lang-zh" style="display:none">2025年5月7日生效 &middot; 華州首個州級租管</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">TECH EMPLOYMENT SHARE</span><span class="lang-zh" style="display:none">科技就業佔比</span></div><div class="kpi-value">~25%</div><span class="kpi-badge badge-red"><span class="lang-en">Seattle MSA &middot; Amazon 50K+ &middot; Top 2 employers</span><span class="lang-zh" style="display:none">西雅圖MSA &middot; 亞馬遜50K+ &middot; 前2大雇主</span></span></div>
+    </div>
+
+    <!-- 2 -->
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND: PEAK, CORRECTION &amp; STABILIZATION</span><span class="lang-zh" style="display:none">房價走勢：峰值、修正與穩定</span></h2>
+    <div class="lang-en">
+      <p>Seattle's price history over the decade 2015&ndash;2025 divides into three distinct regimes. The Amazon Effect era (2015&ndash;2018) saw the most rapid price appreciation of any major U.S. city, as Amazon's headcount in Seattle grew from approximately 25,000 to 50,000 and the secondary economic multiplier drew waves of ancillary tech workers. The CS Seattle index appreciated from approximately 230 to 335 over this period &mdash; 46% in four years. The 2018&ndash;2019 correction was triggered by Amazon's New York HQ2 announcement and preceded the pandemic by 18 months; prices moderated 5&ndash;8% before rebounding. The pandemic surge (2020&ndash;2022) accelerated to a CS peak of 414 and a city median above $900,000 before the rate shock produced the shallowest correction in the West Coast peer group.</p>
+      <p>Current data shows the market stabilizing well above long-run trend: the Zillow home value index for Seattle city stands at <strong>$848,000</strong> as of February 2026 (down 1.7% YoY), while the December 2025 median sale price was $780,000. The price-per-square-foot in Seattle averages approximately $550, ranging from $700&ndash;800 in Belltown and Capitol Hill to $400&ndash;500 in Renton and Rainier Valley. The ARM share of Seattle-area originations is approximately <strong>28%</strong> &mdash; among the highest in the nation, as buyers stretch to reach affordability in a market where the 30-year fixed payment on a median home at 6.38% exceeds $4,000/month.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>西雅圖2015至2025年的十年房價歷史分為三個截然不同的制度。「亞馬遜效應」時代（2015至2018年）見證了任何主要美國城市中最快速的房價升值，隨著亞馬遜在西雅圖的員工數從約25,000人增至50,000人，CS西雅圖指數從約230升至335——四年漲幅46%。2018至2019年的修正由亞馬遜紐約HQ2宣告觸發，價格溫和回調5至8%後反彈。疫情漲幅（2020至2022年）加速至CS峰值414和城市中位數900,000美元以上，隨後利率衝擊產生了西海岸同儕群體中最淺的修正。</p>
+      <p>當前數據顯示市場在遠高於長期趨勢的水平穩定：截至2026年2月，西雅圖城市Zillow房屋價值指數為<strong>848,000美元</strong>（年降1.7%），2025年12月中位數成交價為780,000美元。西雅圖每平方英尺均價約550美元。ARM佔房貸發放量約<strong>28%</strong>——全國最高之列，因為買家在中位數房屋30年固定月供以6.38%利率超過4,000美元的市場中勉強達到可負擔性。</p>
+    </div>
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">CS Seattle Index + YoY% (2015&ndash;2025)</span><span class="lang-zh" style="display:none">CS西雅圖指數 + 年增率（2015&ndash;2025）</span></h4>
+        <p><span class="lang-en">SA, Jan 2000=100 &middot; FRED SEXRSA</span><span class="lang-zh" style="display:none">季調，2000年1月=100 &middot; FRED SEXRSA</span></p>
+        <div id="chartSEAPrice" style="height:220px"></div>
+        <p class="chart-note orange"><span class="lang-en">Peak: 414 (May 2022). Recovery to 391 by Feb 2025. Shallowest West Coast correction at only -5.6% CS from peak</span><span class="lang-zh" style="display:none">峰值：414（2022年5月）。2025年2月回升至391。西海岸最淺修正，CS較峰值僅-5.6%</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Seattle City Median Sale Price 2015&ndash;2025</span><span class="lang-zh" style="display:none">西雅圖城市中位數成交價 2015&ndash;2025</span></h4>
+        <p><span class="lang-en">Source: NWMLS / Zillow</span><span class="lang-zh" style="display:none">來源：NWMLS / Zillow</span></p>
+        <div id="chartSEAMedian" style="height:220px"></div>
+        <p class="chart-note navy"><span class="lang-en">Seattle city median: $848K (Zillow Feb 2026). ARM share ~28% as buyers stretch affordability. 30Y payment on median home: $4,000+/mo</span><span class="lang-zh" style="display:none">西雅圖城市中位數：$848K（Zillow 2026年2月）。ARM佔比約28%。中位數房屋30年月供：$4,000+/月</span></p>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <h2 id="sec-supply"><span class="lang-en">SUPPLY &amp; DEMAND: INVENTORY RECOVERY</span><span class="lang-zh" style="display:none">供需：庫存回升</span></h2>
+    <div class="lang-en">
+      <p>Seattle's supply dynamics are among the most constrained of any U.S. market, driven by a combination of geographic limits and regulatory barriers. Single-family permits have averaged approximately 500/month since March 2023 &mdash; well below the 700&ndash;900/month of 2022 and the decade prior. King County's Comprehensive Plan debate has constrained infill density decisions. The December 2025 active listings of 6,356 for the metro represent the highest winter inventory since 2019 but remain far below what would characterize a balanced market for a metro of 4+ million.</p>
+      <p>Demand remains supported by the income profile of the buyer pool. Amazon employs 50,000+ workers in Seattle at a median compensation exceeding <strong>$200,000</strong>; Microsoft's Redmond campus employs approximately 55,000 with similar compensation profiles. Boeing employs approximately 30,000. This employer composition &mdash; concentrated in the top 5% of the U.S. income distribution &mdash; creates a buyer pool that is partially insulated from rate impacts via cash purchasing (Seattle's cash buyer share is approximately 25&ndash;30% in the $1M+ segment). The market segments sharply by income: sub-$700K properties face genuine affordability headwinds, while $1M+ properties are competed for by a pool of highly compensated cash-capable buyers who are less rate-sensitive.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>西雅圖的供給動態是美國任何市場中最受限的，由地理限制和監管壁壘的組合驅動。自2023年3月以來，獨棟住宅許可月均約500件——遠低於2022年及此前十年的700至900件/月。金縣綜合計劃辯論制約了城市填充密度決策。都會區2025年12月的6,356套活躍掛牌代表2019年以來最高冬季庫存，但仍遠低於400萬以上人口都會區均衡市場的特徵水平。</p>
+      <p>需求仍由買家群體的收入構成支撐。亞馬遜在西雅圖僱用50,000名以上工人，薪酬中位數超過<strong>200,000美元</strong>；微軟雷德蒙德園區僱用約55,000人，薪酬構成相似。波音僱用約30,000人。這種雇主構成——集中在美國收入分布的前5%——創造了一個通過現金購買部分免疫利率影響的買家群體。市場按收入急劇分層：70萬美元以下房產面臨利率算術的真實可負擔性逆風，而100萬美元以上房產由高薪現金能力買家競購。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Seattle Metro Active Listings 2019&ndash;2025</span><span class="lang-zh" style="display:none">西雅圖都會區活躍掛牌 2019&ndash;2025</span></h4>
+      <div id="chartSEAInventory" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">Dec 2025 = 6,356 active listings (highest winter since 2019). Still far below pre-Amazon balanced market of 12,000&ndash;15,000 units</span><span class="lang-zh" style="display:none">2025年12月=6,356套活躍掛牌（2019年以來最高冬季）。仍遠低於前亞馬遜均衡市場的12,000至15,000套</span></p>
+    </div>
+
+    <!-- 4 -->
+    <h2 id="sec-tech"><span class="lang-en">TECH EMPLOYMENT: AMAZON, MICROSOFT &amp; CONCENTRATION RISK</span><span class="lang-zh" style="display:none">科技就業：亞馬遜、微軟與集中度風險</span></h2>
+    <div class="lang-en">
+      <p>Seattle's housing market has a single-employer concentration risk that is unmatched in any other U.S. metro of comparable size. Amazon and Microsoft together directly employ approximately <strong>105,000</strong> workers in the greater Seattle area &mdash; accounting for an estimated 8&ndash;10% of the total employed workforce. When indirect and multiplier jobs are included, these two companies are estimated to support 20&ndash;25% of total metro employment. No major U.S. market of Seattle's size has this level of corporate concentration; the closest analogue is Detroit's historical dependence on the auto industry.</p>
+      <p>The practical risk manifested between 2022 and 2024. Amazon announced multiple rounds of layoffs totaling approximately 27,000 positions globally, with Seattle operations disproportionately affected. Microsoft conducted several rounds totaling approximately 10,000+ positions globally. These layoffs contributed to the CS index correction of 5.6% from peak. The more consequential risk is a scenario in which AI-driven productivity improvements allow Amazon or Microsoft to maintain or grow revenue with meaningfully fewer employees. If tech employment in Seattle contracts by 15&ndash;20% &mdash; a scenario within the range of AI-impact estimates for software engineering employment &mdash; the demand anchor for Seattle's high-priced market would be substantially weakened.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>西雅圖住宅市場擁有同等規模任何其他美國大都市中無可比擬的單一雇主集中度風險。亞馬遜和微軟在大西雅圖地區合計直接僱用約<strong>105,000</strong>名工人——估計佔都會區總就業勞動力的8至10%。當考慮間接和乘數就業時，這兩家公司估計支撐都會區總就業的20至25%。沒有任何同等規模的主要美國市場有此水平的企業集中度；最接近的類比是底特律歷史上對汽車業的依賴。</p>
+      <p>實際風險在2022至2024年間顯現。亞馬遜宣佈多輪裁員，全球合計約27,000個職位，西雅圖業務受到不成比例的影響。微軟進行了幾輪全球合計約10,000個以上職位的裁減。這些裁員促成了CS指數較峰值5.6%的修正。更重要的風險是AI驅動的生產力提升使亞馬遜或微軟能夠以明顯更少的員工維持或增長收入。若西雅圖科技就業收縮15至20%——一個在軟件工程就業AI影響估算範圍內的情境——西雅圖高價市場的需求錨點將大幅削弱。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Amazon + Microsoft Employment in Seattle Metro 2015&ndash;2025</span><span class="lang-zh" style="display:none">亞馬遜+微軟西雅圖都會區就業 2015&ndash;2025</span></h4>
+      <div id="chartSEATech" style="height:220px"></div>
+      <p class="chart-note red"><span class="lang-en">Amazon+Microsoft = 105K direct workers = ~8&ndash;10% of metro workforce. AI-driven efficiency risk: if headcount falls 15&ndash;20%, demand anchor weakens materially</span><span class="lang-zh" style="display:none">亞馬遜+微軟=105K直接工人=都會區勞動力約8至10%。AI效率風險：若員工數降15至20%，需求錨點實質弱化</span></p>
+    </div>
+
+    <!-- 5 -->
+    <h2 id="sec-geo"><span class="lang-en">GEOGRAPHIC CONSTRAINT: WATER, MOUNTAINS &amp; ZONING</span><span class="lang-zh" style="display:none">地理約束：水域、山脈與分區</span></h2>
+    <div class="lang-en">
+      <p>Seattle's physical geography is the most constrained of any major U.S. West Coast city. The City of Seattle sits on a narrow isthmus between Puget Sound (to the west) and Lake Washington (to the east), with a hilly topography that limits flat, buildable land. Unlike Phoenix or Austin, where urban sprawl can absorb demand indefinitely in flat terrain, Seattle cannot build its way out of supply constraints without significant upzoning of existing residential neighborhoods.</p>
+      <p>The zoning landscape is shifting slowly. Seattle's One Seattle Comprehensive Plan (20-year framework) proposes expanded multifamily zones, increased ADU capacity, and density increases near transit stations. However, neighborhood opposition and legal challenges have historically slowed implementation. The new rent cap (HB 1217) creates additional uncertainty for multifamily investment returns, potentially slowing the apartment pipeline at exactly the moment when new supply is needed. Construction costs in Seattle average <strong>$450&ndash;600/sq ft</strong> for multifamily &mdash; making sub-$400,000 new construction economically nonviable without significant land subsidies.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>西雅圖的地理條件是主要美國西海岸城市中最受限的。西雅圖市坐落於普吉特灣和華盛頓湖之間的狹窄地峽上，丘陵地形限制了平坦可建設用地。與鳳凰城或奧斯丁平坦地形可無限吸納需求不同，西雅圖在不對現有住宅社區進行大規模提高容積率的情況下，無法通過建設解決供給約束。</p>
+      <p>分區格局正在緩慢轉變。西雅圖《一個西雅圖綜合計劃》（20年框架）提議擴大多戶住宅區和交通站點附近密度。然而，社區反對和法律挑戰歷史上拖慢了實施進度。新租管上限（HB 1217）為多戶住宅投資回報創造了額外不確定性。西雅圖多戶住宅建設成本平均每平方英尺<strong>450至600美元</strong>——使40萬美元以下新建項目缺乏經濟可行性。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Seattle Single-Family vs Multifamily Monthly Permits 2022&ndash;2025</span><span class="lang-zh" style="display:none">西雅圖獨棟 vs 多戶住宅月度許可 2022&ndash;2025</span></h4>
+      <div id="chartSEAPermits" style="height:220px"></div>
+      <p class="chart-note orange"><span class="lang-en">MF permits volatile: 460 (Aug 2024) to 1,800 (Mar 2024). HB 1217 rent cap uncertainty suppressing new multifamily investment decisions in 2025</span><span class="lang-zh" style="display:none">多戶住宅許可波動：460件（2024年8月）至1,800件（2024年3月）。HB 1217租管不確定性壓制2025年新多戶住宅投資決策</span></p>
+    </div>
+
+    <!-- 6 -->
+    <h2 id="sec-rent"><span class="lang-en">WA HB 1217: WASHINGTON&rsquo;S NEW RENT CAP</span><span class="lang-zh" style="display:none">WA HB 1217：華州新租管上限</span></h2>
+    <div class="lang-en">
+      <p>Washington State's HB 1217, signed into law and effective May 7, 2025, makes Washington the third U.S. state (after California and Oregon) to enact statewide rent stabilization. The law caps annual rent increases for existing tenants at 7% plus local CPI, or 10% &mdash; whichever is lower. Key provisions: (1) applies to residential tenancies, not commercial; (2) exempts new construction for the first 10 years; (3) does not include vacancy decontrol &mdash; landlords can reset to market on tenant turnover; (4) applies statewide, preempting any local ordinance from setting a lower cap.</p>
+      <p>For Seattle landlords, the 10% cap is relevant primarily when market conditions would otherwise support larger increases &mdash; which in Seattle's high-demand environment means the cap was binding in 2021&ndash;2022 (when market rents rose 15&ndash;20% YoY) and becomes relevant again in any future demand surge. Under normal 3&ndash;5% annual market rent growth, the cap is not binding. The Seattle City Council's additional ban on algorithmic rent-setting software (effective July 2025) responds to the national RealPage/DOJ antitrust litigation. For investors, the combination of HB 1217 and the algorithmic ban requires a shift from revenue-maximization to cash-flow-optimization strategies.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2025年5月7日生效的華盛頓州HB 1217使華盛頓成為美國第三個頒布州級租金穩定化的州。該法律將現有租戶的年度漲租上限設為當地CPI加7%或10%——取低者。關鍵條款：（1）適用於住宅租賃；（2）新建住宅在前10年豁免；（3）不包含空置解管制——房東在租戶換租時可重置為市場租金；（4）在全州適用。</p>
+      <p>對西雅圖房東而言，10%上限主要在市場條件本可支持更大漲幅時才相關——在2021至2022年（市場租金年漲15至20%）時具有約束力。在正常的年均3至5%市場租金增長下，上限沒有約束力。西雅圖市議會禁止算法租金設定軟件（2025年7月生效），回應全國RealPage/司法部反壟斷訴訟。對投資者而言，HB 1217和算法禁令的組合要求從收入最大化向現金流優化策略轉變。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Seattle Market Rent Growth vs HB 1217 Cap 2019&ndash;2025</span><span class="lang-zh" style="display:none">西雅圖市場租金增長 vs HB 1217上限 2019&ndash;2025</span></h4>
+      <div id="chartSEARent" style="height:220px"></div>
+      <p class="chart-note orange"><span class="lang-en">2021&ndash;22: market rents +18&ndash;15% &rarr; above any cap. 2025: cap not binding at +4.5%. Risk scenario: demand surge in 2027 makes 10% cap binding again</span><span class="lang-zh" style="display:none">2021至22年：市場租金+18至15%→超過任何上限。2025年：上限對+4.5%無約束力。風險情境：2027年需求激增使10%上限再次具有約束力</span></p>
+    </div>
+
+    <!-- 7 -->
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+    <div class="lang-en">
+      <p>Seattle's 2026&ndash;2028 outlook is binary in a way that no other market in this monitor is. The base case (<strong>55%</strong> probability) projects modest appreciation of 2&ndash;4% annually, driven by continued supply constraint, stable Amazon/Microsoft employment, and gradual rate relief toward 5.5&ndash;6.0%. In this scenario, the CS Seattle index advances from 391 toward 415&ndash;430 by end-2027, modestly exceeding the May 2022 all-time high.</p>
+      <p>The bull case (<strong>20%</strong> probability) requires AI to accelerate tech hiring rather than replacing it &mdash; a scenario where the AI infrastructure buildout generates enough new high-compensated engineering roles to offset efficiency-driven headcount reduction. In this scenario, Seattle's market would see strong appreciation toward 450&ndash;470 on the CS index by end-2027.</p>
+      <p>The bear case (<strong>25%</strong> probability) is uniquely Seattle-specific: AI-driven workforce reduction at Amazon and Microsoft that shrinks tech employment by 15&ndash;20%. A 15&ndash;20% contraction in the two companies' Seattle headcount would remove approximately 15,000&ndash;20,000 high-compensated buyers from the market. Absent supply flexibility (which Seattle lacks by geography), prices would decline 15&ndash;20% over 2&ndash;3 years. The CS index could fall to 315&ndash;330, a level last seen in 2018&ndash;2019 but achievable without a macroeconomic crisis if the tech-employment reduction is concentrated enough.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>西雅圖2026至2028年的展望以本監測任何其他市場都不具備的方式呈現二元性。基本情境（概率<strong>55%</strong>）預計每年溫和升值2至4%，CS西雅圖指數推進至2027年底的415至430，小幅超越2022年5月的歷史高點。</p>
+      <p>樂觀情境（概率<strong>20%</strong>）需要AI加速科技招聘而非取代它——AI基礎設施建設產生足夠多的新高薪工程職位以抵消效率驅動的員工削減。CS指數到2027年底向450至470強勁升值。</p>
+      <p>悲觀情境（概率<strong>25%</strong>）是西雅圖獨有的：AI驅動的勞動力削減使亞馬遜和微軟科技就業收縮15至20%。兩家公司西雅圖員工數收縮15至20%將從市場中移除約15,000至20,000名高薪買家。在沒有供給彈性的情況下，價格將在2至3年內下跌15至20%。CS指數可能降至315至330。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">CS Seattle Index Forecast 2026&ndash;2028</span><span class="lang-zh" style="display:none">CS西雅圖指數預測 2026&ndash;2028</span></h4>
+      <div id="chartSEAForecast" style="height:220px"></div>
+      <p class="chart-note red"><span class="lang-en">Bear case unique to Seattle: AI reduces Amazon/Microsoft headcount 15&ndash;20% = demand anchor collapse. No geographic escape valve unlike Phoenix/Austin</span><span class="lang-zh" style="display:none">悲觀情境為西雅圖獨有：AI使亞馬遜/微軟員工數降15至20%=需求錨點崩潰。不像鳳凰城/奧斯丁有地理疏散閥</span></p>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: S&amp;P Cotality Case-Shiller WA-Seattle Home Price Index (FRED SEXRSA/SEXRNSA) &middot; NWMLS Monthly Market Statistics &middot; Zillow Seattle Home Value Index (Feb 2026) &middot; Redfin Seattle Housing Market Data &middot; Washington State HB 1217 Legislative Text (eff. May 7, 2025) &middot; Seattle City Council Resolution &mdash; Algorithmic Rent-Setting Ban (July 2025) &middot; U.S. News Housing Market Index Seattle Forecast &middot; Norada Real Estate Seattle Analysis (2025&ndash;2026). All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：S&amp;P Cotality Case-Shiller華州西雅圖房價指數（FRED SEXRSA/SEXRNSA）&middot; NWMLS月度市場統計 &middot; Zillow西雅圖房屋價值指數（2026年2月）&middot; Redfin西雅圖住宅市場數據 &middot; 華盛頓州HB 1217立法文本（2025年5月7日生效）&middot; 西雅圖市議會決議——算法租金設定禁令（2025年7月）&middot; U.S. News住房市場指數西雅圖預測 &middot; Norada房地產西雅圖分析（2025至2026年）。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawSEAPrice(lang);drawSEAMedian(lang);drawSEAInventory(lang);drawSEATech(lang);drawSEAPermits(lang);drawSEARent(lang);drawSEAForecast(lang);
+}
+
+function drawSEAPrice(lang){
+  var dom=document.getElementById('chartSEAPrice');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var index=[228,258,296,331,308,326,383,410,358,375,391];
+  var yoy=[10.5,13.2,14.7,11.8,-6.9,5.8,17.5,7.0,-12.7,4.7,4.3];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:[mkAxis({type:'value',min:200,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),mkAxis({type:'value',min:-15,max:20,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'CS Seattle Index':'CS西雅圖指數',type:'bar',data:index,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,
+        markLine:{data:[{yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1},label:{show:false}}]}}]
+  });
+}
+
+function drawSEAMedian(lang){
+  var dom=document.getElementById('chartSEAMedian');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var data=[435,525,625,730,680,710,820,905,780,810,820];
+  var colors=data.map(function(v){return v>=900?C.red:v>=750?C.orange:C.navy;});
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:350,max:1000,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+    series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:28,itemStyle:{borderRadius:[3,3,0,0]},
+      markLine:{data:[{yAxis:900,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'$900K peak 2022':'2022年峰值$900K',fontSize:8,color:C.red}}]}}]
+  });
+}
+
+function drawSEAInventory(lang){
+  var dom=document.getElementById('chartSEAInventory');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','Jan 24','Jun 24','Dec 24','Dec 25'];
+  var data=[9800,6200,2100,4800,8200,7200,8100,5800,6356];
+  var colors=data.map(function(v){return v<=3000?C.red:v<=6000?C.orange:C.navy;});
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis:mkAxis({type:'value',min:0,max:14000,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/1000).toFixed(0)+'K';}}}),
+    series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:28,itemStyle:{borderRadius:[3,3,0,0]},
+      label:{show:true,position:'top',formatter:function(p){return(p.value/1000).toFixed(1)+'K';},fontSize:9,color:C.muted},
+      markLine:{data:[{yAxis:12000,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Pre-Amazon balanced ~12K':'前亞馬遜均衡~1.2萬',fontSize:8,color:C.muted}}]}}]
+  });
+}
+
+function drawSEATech(lang){
+  var dom=document.getElementById('chartSEATech');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var amazon=[25,28,35,40,45,55,65,75,65,55,52];
+  var msft=[42,43,45,48,50,55,60,65,60,57,55];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:0,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),
+    series:[{name:'Amazon',type:'bar',data:amazon,barMaxWidth:20,itemStyle:{color:C.orange,borderRadius:[3,3,0,0]},barGap:'20%'},
+      {name:'Microsoft',type:'bar',data:msft,barMaxWidth:20,itemStyle:{color:C.blue,borderRadius:[3,3,0,0]}}]
+  });
+}
+
+function drawSEAPermits(lang){
+  var dom=document.getElementById('chartSEAPermits');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['Jan 22','Jul 22','Jan 23','Jul 23','Jan 24','Apr 24','Jul 24','Oct 24','Jan 25','Jul 25'];
+  var sf=[850,780,352,600,520,601,480,387,490,500];
+  var mf=[1200,1100,900,1400,1208,1800,900,460,850,700];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:8,rotate:45}}),
+    yAxis:mkAxis({type:'value',min:0,axisLabel:{color:C.muted,fontSize:9}}),
+    series:[{name:en?'Single-Family':'獨棟',type:'bar',data:sf,barMaxWidth:16,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},
+      {name:en?'Multifamily':'多戶',type:'bar',data:mf,barMaxWidth:16,itemStyle:{color:'rgba(37,99,235,0.6)',borderRadius:[3,3,0,0]}}]
+  });
+}
+
+function drawSEARent(lang){
+  var dom=document.getElementById('chartSEARent');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];
+  var mktGrowth=[4.2,0.8,18.5,15.0,-5.2,3.1,4.5];
+  var colors=mktGrowth.map(function(v){return v>10?C.red:v>5?C.orange:v<0?C.blue:C.navy;});
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:-10,max:22,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{type:'bar',data:mktGrowth.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:28,itemStyle:{borderRadius:[3,3,0,0]},
+      label:{show:true,position:function(p){return p[1]>=0?'top':'bottom';},formatter:function(p){return(p.value>0?'+':'')+p.value+'%';},fontSize:9,color:C.muted},
+      markLine:{data:[{yAxis:10,lineStyle:{color:C.red,type:'dashed',width:2},label:{formatter:en?'HB 1217 cap (May 2025)':'HB 1217上限（2025年5月）',fontSize:8,color:C.red}},
+        {yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1},label:{show:false}}]}}]
+  });
+}
+
+function drawSEAForecast(lang){
+  var dom=document.getElementById('chartSEAForecast');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var periods=['Feb 2025','2026E','2027E','2028E'];
+  var bull=[391,405,445,470];var base=[391,400,415,428];var bear=[391,375,345,320];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:290,max:490,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[
+      {name:en?'Bull (20%) — AI hiring':'樂觀(20%)—AI招聘',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+      {name:en?'Base (55%) — stable':'基本(55%)—穩定',type:'line',data:base,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+      {name:en?'Bear (25%) — AI layoffs':'悲觀(25%)—AI裁員',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5},
+      {type:'line',markLine:{data:[{yAxis:414,lineStyle:{color:C.muted,type:'dotted',width:1},label:{formatter:en?'May 2022 peak 414':'2022年5月峰值414',fontSize:8,color:C.muted}}]}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);initAllCharts(lang);
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+function toggleCityMenu(){document.getElementById('cityDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}if(!e.target.closest('.city-dropdown')){var d2=document.getElementById('cityDropdown');if(d2)d2.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

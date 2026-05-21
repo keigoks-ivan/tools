@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWNK Houze @ BBCC｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* Leasehold warning */
+.lh-box{background:#FEE2E2;border:2px solid #dc2626;border-radius:8px;padding:16px 20px;margin-bottom:20px}
+.lh-title{font-size:13px;font-weight:700;color:#991B1B;margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+/* Score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:640px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-r{background:#FEE2E2;color:#991B1B;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #dc2626}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+.print-btn:hover{background:#166634}
+@media(max-width:680px){.score-cols,.dual-col{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：SWNK Houze @ BBCC Jalan Hang Tuah ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 依據：KL 供需 Overhang 報告（2026-04-01）+ KL RM1M+ 報告 + iRumah + brickz</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>SWNK Houze @ BBCC</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&price=1000000&yield=4.56&from=SWNKHouze_BBCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=SWNKHouze_BBCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Hang Tuah，Bukit Bintang City Centre（BBCC）｜ EcoWorld × UDA Holdings × EPF 三方 JV｜ Leasehold 87年（到期 2110年）商業地契 ｜ 441單位，31層 ｜ 竣工目標 2026年12月（官方：3 Dec 2026）</div>
+  <div class="badge-row">
+    <span class="badge">⚠️ Leasehold——本系列唯一非Freehold建案</span>
+    <span class="badge">⚠️ DBKL同意限制——轉讓需 Dewan Bandaraya KL 批准</span>
+    <span class="badge">✅ 三大頂級開發商 JV（EcoWorld+UDA+EPF）</span>
+    <span class="badge">✅ BBCC Transit Hub 直連三站（Monorail+LRT+MRT）</span>
+    <span class="badge">📡 管理費 RM0.60 psf</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- Leasehold 警示 -->
+<div class="lh-box">
+  <div class="lh-title">🚨 外籍投資者進場前必讀：Leasehold + DBKL 同意限制雙重障礙</div>
+  <p style="font-size:13px;color:#991B1B;margin:0">
+  <strong>① Leasehold（87年，到期 2110年）：</strong>本系列八個分析建案中唯一的非 Freehold 建案。Leasehold 對外籍買家的影響：剩餘年限隨時間遞減影響估值；銀行貸款通常對剩餘年限有要求（通常至少 30–40 年以上才能貸款）；二手轉讓時年限遞減會壓低買家願付價格。目前剩餘 84 年（2026竣工至2110年），目前貸款可行，但長期持有後剩餘年限縮短。<br><br>
+  <strong>② DBKL（Dewan Bandaraya KL）同意限制：</strong>官方 HDA 文件明確記載「土地不能在未獲 Dewan Bandaraya Kuala Lumpur 同意的情況下轉讓、出租或變更」——外籍買家除了需要 State Consent，還需要另一層 DBKL 核批，增加轉讓複雜度和時間成本。<br><br>
+  <strong>③ MM2H Gold 合規問題：</strong>MM2H Gold 要求購置 RM100萬+ 物業並持有 10 年。Leasehold 商業地契在 MM2H 持有合規框架下存在不確定性，且 DBKL 同意限制可能影響 MM2H 審批。強烈建議事前向律師確認。<br><br>
+  <strong>總結：SWNK Houze 對外籍投資者而言，Leasehold + 商業地契 + DBKL 同意限制是三重不利因素。若以 MM2H 合規為目的，不建議選擇此建案。</strong>
+  </p>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-v">RM1,200</div><div class="kpi-l">發售均價 PSF（iRumah 引用）</div><div class="kpi-s neu">官方 SPA 範圍 RM805,200–2,482,800</div></div>
+      <div class="kpi-card"><div class="kpi-v">RM1,317–1,676</div><div class="kpi-l">掛牌 PSF（iProperty 2026）</div><div class="kpi-s neu">40筆掛牌售；4筆掛牌租</div></div>
+      <div class="kpi-card"><div class="kpi-v">RM1,390</div><div class="kpi-l">2BR/818sf 掛牌中位 PSF</div><div class="kpi-s neu">iRumah 最熱門型號；待 brickz 確認</div></div>
+      <div class="kpi-card"><div class="kpi-v">Leasehold</div><div class="kpi-l">地契（87年，到期 2110）</div><div class="kpi-s down">本系列唯一非 Freehold，商業地契</div></div>
+      <div class="kpi-card"><div class="kpi-v">3站</div><div class="kpi-l">BBCC Transit Hub 直連</div><div class="kpi-s up">Monorail + LRT + MRT——本系列最強</div></div>
+      <div class="kpi-card"><div class="kpi-v">RM0.60</div><div class="kpi-l">管理費（psf）</div><div class="kpi-s up">本系列管理費第二低（R22 RM0.34最低）</div></div>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商 JV</div><div class="spec-v">BBCC Development Sdn Bhd = EcoWorld Development Group（Bursa 上市）+ UDA Holdings Berhad（政府機構）+ EPF/KWSP（大馬公積金）——三方 JV，本系列信用最高</div></div>
+      <div class="spec-item"><div class="spec-l">地段</div><div class="spec-v">Jalan Hang Tuah，BBCC（前 Pudu 監獄舊址），19.4 英畝 TOD 整合開發</div></div>
+      <div class="spec-item"><div class="spec-l">地契</div><div class="spec-v">Leasehold 87年（至 2110年12月）｜ 商業地契（Commercial Strata）｜ DBKL 同意限制（轉讓/出租/變更均需 DBKL 批准）</div></div>
+      <div class="spec-item"><div class="spec-l">規模</div><div class="spec-v">31層，441單位（官方 HDA 文件：Parcel 5，441單位）；BBCC Phase 2</div></div>
+      <div class="spec-item"><div class="spec-l">坪數 / 房型</div><div class="spec-v">463 sqft（Studio）｜549 sqft（1BR）｜657 sqft（1+1BR）｜818/861 sqft（2BR/2BR Dual-Key）｜1,227/1,238 sqft（3BR Dual-Key）</div></div>
+      <div class="spec-item"><div class="spec-l">Transit Hub</div><div class="spec-v">BBCC Transit Hub 直連（步行橋）→ Hang Tuah Monorail + Hang Tuah LRT + Merdeka MRT 三站；KL Sentral 一站之距</div></div>
+      <div class="spec-item"><div class="spec-l">LaLaport BBCC</div><div class="spec-v">東南亞首家 Mitsui LaLaport 1 分鐘步行；Zepp Hall（首個東南亞 Sony 音樂廳）相鄰；BBCC Gourmet Street 30+ 餐廳</div></div>
+      <div class="spec-item"><div class="spec-l">管理費</div><div class="spec-v">RM0.60 psf（含沉沒基金）——本系列建案中第二低</div></div>
+      <div class="spec-item"><div class="spec-l">前案（直接對照）</div><div class="spec-v">Lucentia Residences（BBCC Phase 1，666戶，2021完工）：發售 RM1,650→ 成交中位 RM1,598（-3.2%，維持穩定）；Yield 4.56%（2022）→ 3.89%（2025，下行）</div></div>
+      <div class="spec-item"><div class="spec-l">MAPLEHOME 管理</div><div class="spec-v">代理聲稱 MAPLEHOME（Boutique Hotel 定位）負責運營管理——需確認是開發商保證還是代理行銷話術</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜SWNK Houze 解決什麼需求？——與 TS2 武吉免登的比較框架</h3>
+    <p>SWNK Houze 的投資論點核心是 <strong>BBCC 整合開發的 TOD（Transit-Oriented Development）效應</strong>——三站捷運直連、LaLaport 1 分鐘步行、Gourmet Street、Zepp Hall、BBCC Phase 3 Signature Tower 持續升值，形成一個「越成熟越有價值」的整合生態圈。</p>
+    <p>這個論點有其合理性，但有一個關鍵問題：<strong>Leasehold 商業地契</strong>。BBCC 的 TOD 生態圈確實成熟，但這個價值不能以 Freehold 的方式持有——每一年的持有，剩餘年限就少一年，理論上對外籍長期投資者而言，資產的「真實」年限遞減是財務上無法忽視的隱性成本。</p>
+    <p>以 KL RM1M+ 深度報告的框架對照：SWNK Houze 最類似「TS2 武吉免登」的定位——功能性 TOD 建案，商業地契，適合「偶爾自住 + 短租 + 接受增值弱」的持有邏輯，但 SWNK Houze 更多加了 Leasehold 的一層結構性折扣。</p>
+
+    <div class="callout">
+      <strong>關鍵定位問題：SWNK Houze vs TS2 武吉免登</strong><br><br>
+      TS2 武吉免登：商業地契（Freehold）+ 較高功能性（天橋直連 Berjaya Times Square）+ RM100萬+ MM2H 合規<br>
+      SWNK Houze：Leasehold 商業地契 + 更強的 TOD 連接（三站 vs Monorail 一站）+ LaLaport 生態圈 + 起步價更低（RM74.5萬）<br><br>
+      <strong>若已持有 TS2，SWNK Houze 在功能定位上高度重疊但地契更弱。對現有 TS2 持有者而言，SWNK Houze 提供的增量價值有限。</strong>
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Lucentia Residences——SWNK Houze 最直接的市場預覽</h3>
+    <p>Lucentia（BBCC Phase 1，同一 JV 開發商，同一地塊，2021完工）是 SWNK Houze 最有說服力的歷史對照組：</p>
+    <table>
+      <thead><tr><th>指標</th><th>Lucentia（Phase 1，對照）</th><th>SWNK Houze（Phase 2，本案）</th></tr></thead>
+      <tbody>
+        <tr><td>開發商 JV</td><td>EcoWorld + UDA + EPF（相同）</td><td>相同</td></tr>
+        <tr><td>地契</td><td>Leasehold 商業地契（相同）</td><td>相同</td></tr>
+        <tr><td>發售 PSF</td><td>RM1,650 psf（2018年）</td><td>RM1,200 psf（iRumah），官方 SPA RM805k+</td></tr>
+        <tr><td>現成交 PSF（brickz）</td><td>RM1,598 psf 中位（2023–2024，9筆）</td><td>—（期房/剛竣工，待追蹤）</td></tr>
+        <tr><td>vs 發售</td><td><span class="down">-3.2%（略跌）</span></td><td>—</td></tr>
+        <tr><td>Gross Yield</td><td>3.89%（2025，且從峰值 4.56% 下行）</td><td>預計類似或略低</td></tr>
+        <tr><td>二手掛牌 PSF</td><td>RM1,400–1,820 psf（iRumah各型號）</td><td>RM1,317–1,676 psf（iProperty，SWNK）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-yellow">
+      <strong>Lucentia 告訴我們的故事：</strong>BBCC Leasehold 商業地契 SR，4 年後發售價略跌（-3.2%），Yield 從峰值 4.56% 下行至 3.89%。SWNK Houze 的起步 PSF 比 Lucentia 低（RM1,200 vs RM1,650），但這可能只是「更小坪數單位」拉低平均的結果，而非更好的性價比。BBCC 作為整合 TOD 開發的「成熟紅利」尚在積累中，但目前資本增值論點尚不突出。
+    </div>
+
+    <hr class="dv">
+    <h3>C｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Leasehold 年限遞減</strong></td><td>每持有一年，剩餘年限少一年（2026竣工時 84 年，2036 時 74 年）；長期持有後年限縮短影響再融資、二手流動性和估值</td><td><span class="tag t-r">確定（固有成本）</span></td><td>外籍長期持有者需計入年限貶值；RPGT 6 年節點（2032）時剩餘 78 年——仍可融資但二手流動略受影響</td></tr>
+          <tr><td><strong>DBKL 同意限制額外層</strong></td><td>轉讓/出租需 DBKL 同意（除 State Consent 外的額外審批），增加退出時間和成本；外籍買家二手轉讓耗時可能達 6–9 個月</td><td><span class="tag t-y">中高</span></td><td>退出流動性最差的建案之一（Leasehold + DBKL + 商業地契三重）</td></tr>
+          <tr><td><strong>Leasehold 對 MM2H 合規不確定</strong></td><td>MM2H Gold 要求「持有物業」，Leasehold 商業地契是否符合 MM2H 持有標準目前不確定；建議向移民廳書面確認</td><td><span class="tag t-y">中</span></td><td>若 MM2H 不認可，需更換持有資產</td></tr>
+          <tr><td><strong>Yield 繼續下行（Lucentia 歷史）</strong></td><td>Lucentia Yield 從 4.56%（2022）→ 3.89%（2025），下行趨勢持續；SWNK Houze 竣工後面對同一租客池競爭，加劇此壓力</td><td><span class="tag t-y">中高</span></td><td>外籍 Net Yield 可能僅 2.3–2.8%</td></tr>
+          <tr><td><strong>BBCC Phase 3 Signature Tower 80層的建設期影響</strong></td><td>BBCC Phase 3 為 80 層 Signature Tower，建設期間可能影響 SWNK Houze 的景觀、施工噪音和環境質量</td><td><span class="tag t-y">中</span></td><td>竣工後數年仍在建設環境中，自住體驗打折</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場概況（上游報告框架）</div>
+  <div class="section-body">
+    <h3>1.1 上游報告與 SWNK Houze 的關係</h3>
+    <p>SWNK Houze 在上游 KL 供需 Overhang 報告和 KL RM1M+ 深度報告中均<strong>未直接點名</strong>（上游報告主要覆蓋 KL Freehold 建案和 KLCC 高端 SR）。但其所屬品類在 KL RM1M+ 報告中有明確定性：</p>
+    <table>
+      <thead><tr><th>上游報告框架</th><th>SWNK Houze 的對應</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>「武吉免登/KLCC 中端 SR 積壓最嚴重品類」</td><td>SWNK Houze 在武吉免登/Pudu 地段，商業地契 SR——與積壓品類高度重合</td><td><span class="tag t-r">負面框架</span></td></tr>
+        <tr><td>「跌的共同點：商業地契 + 高持有成本」</td><td>Leasehold 商業地契是雙重負面因素；但 DBKL TOD 整合提供部分補償</td><td><span class="tag t-r">部分負面</span></td></tr>
+        <tr><td>「武吉免登 TS2 在功能性自住框架下是正確決策」（KL RM1M+ 個案研究）</td><td>SWNK Houze 有更強的 TOD 連接，但 Leasehold 使功能性定位折扣更深</td><td><span class="tag t-y">中性</span></td></tr>
+        <tr><td>「供給積壓問題：商業地契持有成本高，水電商業費率」</td><td>SWNK Houze 商業地契，電費費率為商業費率（需確認是否可轉換）</td><td><span class="tag t-r">負面</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 BBCC 地段市場數據</h3>
+    <table>
+      <thead><tr><th>指標</th><th>數值</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>Lucentia（前案）成交中位 PSF</td><td>RM1,598 psf（9筆，2023–2024 brickz）</td><td>比發售 RM1,650 跌 -3.2%；直接對照組</td></tr>
+        <tr><td>Lucentia Gross Yield</td><td>3.89%（2025），從 4.56%（2022）下行</td><td>Yield 下行趨勢，預測 SWNK 類似</td></tr>
+        <tr><td>Lucentia 二手掛牌</td><td>94筆掛牌售 + 108筆掛牌租（iProperty 2026）</td><td>666戶中 202筆活躍掛牌 = 30%掛牌率（健康）</td></tr>
+        <tr><td>SWNK Houze 掛牌 PSF（期房/新竣工）</td><td>RM1,317–1,676 psf（iProperty 40筆掛牌）</td><td>發售 PSF RM1,200 推算，掛牌略有溢價</td></tr>
+        <tr><td>SWNK Houze 2BR/818sf 中位</td><td>RM1,390 psf（iRumah）</td><td>未有 brickz 政府登記成交確認</td></tr>
+        <tr><td>武吉免登 SR（代表：Sky Suites）</td><td>-6.6%（2024）</td><td>中端 SR 代表跌幅；BBCC 有 TOD 生態圈補償</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：brickz（Lucentia，9筆，2023-08至2024-07）；iRumah.co；iProperty 2026-04；KL RM1M+ 深度報告（2026-03）</p>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構——BBCC TOD 生態圈 vs KL 武吉免登 SR 積壓</div>
+  <div class="section-body">
+    <h3>2.1 BBCC 生態圈的正面供需邏輯</h3>
+    <table>
+      <thead><tr><th>正面因素</th><th>說明</th><th>對 SWNK Houze 的影響</th></tr></thead>
+      <tbody>
+        <tr><td>TOD 三站直連（唯一性）</td><td>Hang Tuah Monorail + LRT + Merdeka MRT，KL 三站以上直連的住宅建案極少</td><td>租客池不限於有車族；短租吸引力高；外籍通勤族首選</td></tr>
+        <tr><td>LaLaport BBCC（1分鐘步行）</td><td>東南亞首家 Mitsui LaLaport，日系精品購物中心，定期吸引日本品牌首店</td><td>強化 BBCC「生態圈」吸引力，遠期提升地段附加值</td></tr>
+        <tr><td>Zepp Hall（Sony 音樂廳）</td><td>東南亞首個，2,500容量，吸引演唱會和商務活動</td><td>短租/Airbnb 需求的波段性催化（演出日期週邊需求）</td></tr>
+        <tr><td>BBCC Phase 3 Signature Tower（80層）</td><td>未來 80 層地標，含酒店和辦公，成熟後提升整體地段估值</td><td>長期 10 年+ 催化劑，但建設期為逆風</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 負面供給壓力</h3>
+    <table>
+      <thead><tr><th>負面因素</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>KL 廣義 SR 積壓（8,000–9,000 戶）</td><td>上游報告廣義庫存壓力；BBCC 雖有差異化但不完全隔離</td></tr>
+        <tr><td>Lucentia 108筆掛牌租（94筆掛牌售）</td><td>BBCC 現有出租競爭；SWNK Houze 竣工後再加 441 戶，競爭更激烈</td></tr>
+        <tr><td>BBCC Phase 3 施工期</td><td>SWNK Houze 竣工後，Phase 3（80 層 Signature Tower）仍在施工，景觀受阻，噪音和施工車輛影響生活</td></tr>
+        <tr><td>Leasehold 二手流動性折扣</td><td>Leasehold + DBKL 同意使二手買家池更窄，有效吸收能力低於 Freehold 建案</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <strong>供需平衡：BBCC 的 TOD 生態圈是 KL 武吉免登地段中最強的供需差異化因素，但 Leasehold 商業地契永久折扣使其無法與 Freehold 建案等量齊觀。合理定位：優質租賃收益產品（TOD 吸引穩定租客），而非資本增值工具。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="section">
+  <div class="section-header">§4｜定價分析（FIX-01/02/03/04）</div>
+  <div class="section-body">
+    <div class="alert a-orange">
+      <strong>FIX-01/03：</strong>SWNK Houze 竣工目標 2026年12月，目前接近竣工或剛完工，brickz 可能已有少量首批成交記錄但尚無公開大樣本。以 Lucentia（同地塊同 JV 前案）作為 FIX-01 最強參照。
+    </div>
+
+    <h3>4.1 同類競品比較（FIX-01）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>SWNK Houze（本案）</th><th>Lucentia（直接對照）</th><th>TS2 武吉免登</th><th>Stonor 3 KLCC（另一對照）</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td><span class="tag t-r">Leasehold 商業地契</span></td><td><span class="tag t-r">Leasehold 商業地契</span></td><td><span class="tag t-y">Freehold 商業地契</span></td><td><span class="tag t-y">Freehold 商業地契 HDA</span></td></tr>
+        <tr><td>捷運</td><td>✅ 三站直連（本系列最強）</td><td>✅ 三站直連</td><td>Monorail 100m</td><td>Conlay MRT 500m</td></tr>
+        <tr><td>PSF（成交/發售）</td><td>RM1,200（發售），掛牌 RM1,317–1,676</td><td>RM1,598（成交中位，-3.2% vs 發售）</td><td>估 RM1,475 psf</td><td>RM1,320（成交中位，-34% vs 發售）</td></tr>
+        <tr><td>Yield</td><td>預計 3.5–4.5%（參照 Lucentia 趨勢）</td><td>3.89%（下行中）</td><td>估 3–4%</td><td>4.23%（下行中）</td></tr>
+        <tr><td>二手流動性</td><td>差（Leasehold + DBKL 三重限制）</td><td>中等（Leasehold + DBKL）</td><td>中（Freehold 商業地契）</td><td>中（商業地契，69%掛牌率）</td></tr>
+        <tr><td>開發商信用</td><td>✅✅ EcoWorld + UDA + EPF（本系列最高）</td><td>相同</td><td>Berjaya Times Square（中等）</td><td>Tan&Tan × 三菱（頂級）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率</div>
+  <div class="section-body">
+    <h3>5.1 BBCC 地段租金行情</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租範圍（估）</th><th>Gross Yield（@RM1,200 psf）</th></tr></thead>
+      <tbody>
+        <tr><td>Studio</td><td>463 sqft</td><td>RM 2,500–3,500/月</td><td>~5.4–7.6%</td></tr>
+        <tr><td>1BR</td><td>549 sqft</td><td>RM 2,800–4,000/月</td><td>~5.1–7.3%</td></tr>
+        <tr><td>2BR（最熱門）</td><td>818 sqft</td><td>RM 3,500–5,500/月</td><td>~4.3–6.7%</td></tr>
+        <tr><td>2BR Dual-Key</td><td>861 sqft</td><td>RM 4,000–6,000/月（雙間可分租）</td><td>~4.7–7.0%</td></tr>
+      </tbody>
+    </table>
+    <p class="src">參照 Lucentia 掛牌月租 RM3,200–5,200（rentkl.com）；SWNK Houze 位置更新（Phase 2），稍有溢價</p>
+
+    <h3>5.2 外國人現金流試算（2BR/818sqft，RM98萬入場 @ RM1,200 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租收入（RM4,000 × 12）</td><td>RM 48,000</td><td>2BR 中位，含 Lucentia 競爭，保守估計</td></tr>
+        <tr><td>管理費（RM0.60 × 818 × 12）</td><td><span class="down">-RM 5,890</span></td><td>RM0.60 psf，本系列第二低</td></tr>
+        <tr><td>地稅 + 門牌稅（估）</td><td><span class="down">-RM 1,500</span></td><td></td></tr>
+        <tr><td>空置期（2個月，BBCC Lucentia競爭）</td><td><span class="down">-RM 8,000</span></td><td>Lucentia 108筆掛牌租，競爭激烈</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 9,783</span></td><td>（48,000–15,390）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 3,840</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 18,987/年</strong></td><td>Net Yield ≈ 1.94%（RM98萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 22,827/年</td><td>Net Yield ≈ 2.33%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-yellow">
+      <strong>外籍 Net Yield 約 1.9–2.3%——偏低，與 Stonor 3 相近水平。</strong>主因是商業地契+Leasehold 的持有成本結構（商業電費若無法轉換，實際更低）。但若以 Airbnb 短租定位（代理聲稱 MAPLEHOME Boutique Hotel 管理），月均收益可能提升至 RM5,000–7,000，使 Gross Yield 達 6–8%——但短租的空置波動風險更高，且需確認 BBCC 管委會是否允許。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規——Leasehold + DBKL 雙重門檻詳析</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>法規項目</th><th>說明</th><th>對外籍買家影響</th></tr></thead>
+      <tbody>
+        <tr><td>最低購置門檻</td><td>RM 1,000,000（KL 外籍）</td><td>⚠️ SWNK Houze 發售起 RM74.5萬，外籍需購 RM100萬+ 單位（2BR Dual-Key 或大坪數）</td></tr>
+        <tr><td>印花稅</td><td>4% 統一稅率</td><td>RM98萬物業：RM39,200</td></tr>
+        <tr><td>State Consent</td><td>必須申請（KL 外籍標準）</td><td>第一層審批，約 1–3 個月</td></tr>
+        <tr><td><strong>DBKL 同意（額外層）</strong></td><td>官方文件：「轉讓/出租/變更需 Dewan Bandaraya KL 同意」</td><td>⚠️ 第二層審批，在 State Consent 之外；退出時間 6–9 個月（估）</td></tr>
+        <tr><td>Leasehold 貸款</td><td>銀行通常要求剩餘年限 > 30–40 年以上；2026 竣工剩 84 年，目前可融資</td><td>現在可融資，2046 年後剩 64 年仍可，長期無問題；但再融資時買家池縮小</td></tr>
+        <tr><td>RPGT（第6年後）</td><td>10%（外籍永久）</td><td>SPA 日期起算；若 SPA 約 2024–2025，第6年約 2030–2031</td></tr>
+        <tr><td>MM2H 合規</td><td>需確認 Leasehold 商業地契是否符合 MM2H 持有資產要求</td><td>⚠️ 風險：Leasehold 可能不符合或有附帶條件</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-red">
+      <strong>退出流動性警示：SWNK Houze 是本系列退出流動性最差的建案。</strong>Leasehold + 商業地契 + DBKL 同意限制 = 三重退出障礙。每一次外籍轉讓都需要 State Consent + DBKL 同意兩層審批，潛在買家也要符合外籍購買資格（RM100萬+）或本地買家（二手買家池相對寬）。若以本地買家為主，Leasehold 折扣存在，但本地買家接受 Leasehold 的心理門檻也更低。
+    </div>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設——BBCC Transit Hub 是本系列最強公共交通組合</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>基建</th><th>狀態</th><th>SWNK Houze 受益</th></tr></thead>
+      <tbody>
+        <tr><td><strong>BBCC Transit Hub（三站直連）</strong></td><td>已運營（Hang Tuah Monorail + LRT + Merdeka MRT）</td><td>✅✅ 本系列唯一三站直連建案；步行橋直達；KL Sentral 一站之距（KLIA Express 可達）</td></tr>
+        <tr><td>LaLaport BBCC</td><td>已開業（Mitsui × 日本品牌）</td><td>✅ 1 分鐘步行；日本生活消費品牌；吸引外籍日本族群</td></tr>
+        <tr><td>Zepp Hall（Sony）</td><td>已開業，2,500容量</td><td>✅ 演出日週邊短租需求；品牌知名度拉高 BBCC 地址等級</td></tr>
+        <tr><td>BBCC Gourmet Street</td><td>已開業，30+ 餐廳</td><td>✅ 步行 3 分鐘；F&B 多元化，填租吸引力</td></tr>
+        <tr><td>BBCC Phase 3 Signature Tower（80層）</td><td>未建（Phase 3），施工期不確定</td><td>⚠️ 施工期逆風；完工後（估 2030+）成為地段地標，長期正面</td></tr>
+        <tr><td>Berjaya Times Square（鄰近）</td><td>已有，步行 5 分鐘</td><td>✅ 購物娛樂補充；TS2 武吉免登的優勢 SWNK 也部分共享</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>BBCC Transit Hub 三站直連是 SWNK Houze 最真實且最強的競爭優勢——比本系列任何其他建案都更強的公共交通。</strong>這個優勢在「不開車的租客」（尤其是年輕外籍專業人士、日本族群、背包客）中非常突出，是短租和長租市場的核心賣點。
+    </div>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="section">
+  <div class="section-header">§11｜進場時機與持有策略</div>
+  <div class="section-body">
+    <h3>11.1 適合的持有框架</h3>
+    <table>
+      <thead><tr><th>持有框架</th><th>說明</th><th>適合度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>短租（Airbnb/MAPLEHOME 管理）</strong></td><td>BBCC TOD + LaLaport + Zepp Hall 地段，短租需求較強；若管委會允許，Gross Yield 可達 6–8%</td><td>✅ 最適合框架（需確認管委會政策）</td></tr>
+        <tr><td><strong>長租（外籍通勤族）</strong></td><td>三站直連吸引日本族群、金融業外籍人士；月租 RM3,500–5,500（2BR）；穩定但 Yield 中等</td><td>✅ 適合（需接受外籍 Net Yield 2–2.5%）</td></tr>
+        <tr><td><strong>自住（偶爾或長期）</strong></td><td>TOD 生活便利性在 KL 同預算中最強；LaLaport + Transit Hub 步行圈；日本式生活體驗</td><td>✅ 功能性自住框架（本地或常來 KL 的外籍）</td></tr>
+        <tr><td><strong>資本增值</strong></td><td>Lucentia 4 年僅 -3.2%（幾乎平盤）；Leasehold 年限遞減；BBCC Phase 3 完成後（2030+）有一定催化，但時間長</td><td>🟡 弱（接受平盤，不指望大幅增值）</td></tr>
+        <tr><td><strong>MM2H 合規錨點</strong></td><td>Leasehold 商業地契 MM2H 合規不確定；不推薦作為 MM2H 主要持有資產</td><td>❌ 不推薦（建議以 Freehold 建案作 MM2H 合規）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.2 進場條件</h3>
+    <table>
+      <thead><tr><th>條件</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr><td>外籍進場最低門檻</td><td>選擇 RM100萬+ 單位（2BR Dual-Key 約 RM104萬起，或 3BR Dual-Key RM150萬+）</td></tr>
+        <tr><td>必須確認</td><td>① DBKL 同意的實際時間和成本；② 商業電費是否可轉換民用費率；③ MAPLEHOME 短租管理是否有合約義務；④ MM2H 合規是否被認可</td></tr>
+        <tr><td>議價目標</td><td>從掛牌中位 RM1,390 psf 向 RM1,250–1,300 psf 議價（-7–9%）</td></tr>
+        <tr><td>持有框架</td><td>以「功能性自住 + 短租/長租輔助」而非「資本增值」定性；接受 Leasehold 折扣的長期代價</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">最適合者</td><td>本地買家（無 Leasehold / DBKL 外籍限制）；不需要 MM2H 合規的外籍；以短租定位的小額投資者（RM74.5–100萬起步）</td></tr>
+            <tr><td>不適合者</td><td>以 MM2H 合規為目的的外籍；以資本增值為主要目標；長期持有超過 20 年（年限遞減影響增大）</td></tr>
+            <tr><td>最大優勢</td><td>BBCC Transit Hub 三站直連（本系列最強公交）+ LaLaport + 低起步價（RM74.5萬）+ EcoWorld+UDA+EPF 開發商信用（本系列最高）</td></tr>
+            <tr><td>最大顧慮</td><td>Leasehold + 商業地契 + DBKL 同意 = 本系列退出流動性最差；外籍 MM2H 合規不確定</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟡 BBCC TOD 差異化部分抵消 KL SR 積壓壓力；Lucentia 競爭 108筆掛牌租是主要逆風</td></tr>
+            <tr><td>價格趨勢</td><td>🟡 Lucentia 前案幾乎平盤（-3.2%，4年）；不指望大幅增值</td></tr>
+            <tr><td>租金市場</td><td>🟡 Gross Yield 4–7%（依定位）；外籍 Net Yield 約 1.9–2.3%</td></tr>
+            <tr><td>法規環境</td><td>🔴 Leasehold + 商業地契 + DBKL 同意 = 本系列最複雜外籍持有結構</td></tr>
+            <tr><td>進場估值</td><td>🟡 RM1,200 psf 發售（或 RM1,317–1,390 psf 掛牌）——相比 Freehold 建案有明確 Leasehold 折扣，但地段交通彌補部分差距</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-y" style="margin-top:16px">
+      <strong>🟡 條件性觀望——本地買家相對友好；外籍 MM2H 投資者不推薦</strong><br><br>
+      <strong>本地買家邏輯（較清晰）：</strong>BBCC TOD 三站直連 + LaLaport + 低起步價 + EcoWorld+UDA+EPF 頂級 JV 信用 + 管理費合理（RM0.60 psf）。對以「短租收益 + 自住 + 接受平盤增值」框架的本地買家而言，SWNK Houze 是武吉免登地段 RM74.5萬–130萬預算中 TOD 連接性最強的選項。<br><br>
+      <strong>外籍投資者邏輯（偏弱）：</strong>Leasehold + 商業地契 + DBKL 同意 + MM2H 合規不確定，是四重結構性不利因素。若以 MM2H 合規為目標，強烈建議選 Freehold Serviced Apartment（如 TS2、Stonor 3 SOHO 棟）而非 SWNK Houze。若純粹以「小額短租投資（RM74.5–100萬）」框架且接受 Leasehold，在確認管委會允許短租後有一定吸引力。<br><br>
+      <strong>關鍵等待信號：</strong>① brickz 首批實際成交 PSF（確認市場定價）；② 確認商業電費是否可轉換民用費率；③ DBKL 同意的實際辦理時間（向律師確認）；④ MAPLEHOME 短租管理合約義務確認。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分【v1.2 建案評分模組】</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">SWNK Houze @ BBCC ｜ 建案綜合評分卡</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%，武吉免登/BBCC 作為 KL 商業娛樂核心，需求穩定；但武吉免登 SR 積壓是系統逆風</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">BBCC TOD 生態圈是真實差異化（+）；但武吉免登/Pudu 中端 SR 積壓（-）；Lucentia 108筆掛牌租競爭（-）。整體中性偏弱</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">2026年12月竣工，恰在 KL SR 竣工高峰期（2025–2027）；周期不利；但 Phase 3 長期催化前景存在</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">BBCC Transit Hub 三站直連（本系列最強 A4）+ LaLaport 1 分鐘 + Zepp Hall + BBCC Phase 3 Signature Tower（長期催化）。基建組合是此建案最突出的優勢</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>3.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:30%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Leasehold + 商業地契 + DBKL 同意 + MM2H 合規不確定 = 本系列最低 A5 分。外籍持有框架最不友好的建案</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">6.0/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.0×.2 + 5.5×.25 + 5.5×.2 + 9.5×.2 + 3.0×.15 = 6.00</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">EcoWorld（Bursa 上市，119個完工項目）+ UDA Holdings（政府機構）+ EPF/KWSP（大馬公積金）= 本系列開發商信用最高，交屋零風險；Lucentia 2021 準時完工有案可查</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>6.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:60%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">發售 RM1,200 psf，掛牌 RM1,317–1,390 psf；Lucentia 前案同地段成交 RM1,598 psf，Freehold 竟未能守住發售價（-3.2%）；SWNK Leasehold 必然有額外折扣，估值中性</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>6.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:60%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Gross Yield 估 4–7%（視長短租定位）；外籍 Net Yield 1.9–2.3%（偏低）；短租定位可達 6–8%（若允許）；管理費 RM0.60 psf 合理（助力 Yield）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">BBCC Transit Hub 三站直連（步行橋）+ LaLaport 1 分鐘 + BBCC Gourmet Street 3 分鐘 + Berjaya Times Square 5 分鐘；B4 並列本系列最高分（與 Orion Residence 9.0 相比更強）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">441戶中等密度（有利於設施使用體驗）；Dual-Key 設計靈活（獨立短租）；MAPLEHOME Boutique Hotel 管理定位（若成立）；BBCC Gourmet Street 步行直達</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>2.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:25%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Leasehold 商業地契 + DBKL 同意限制 = 本系列最低 B6 分。三重法律障礙（Leasehold + 商業地契 + DBKL）使外籍持有框架最複雜、退出最困難</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>3.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:30%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Leasehold + 商業地契 + DBKL 同意 = 本系列最差退出流動性；但本地買家池仍存在（Leasehold 本地接受度高於外籍）；Lucentia 成交量尚可（9筆，12個月）</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">6.3/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">9.5×.2+6.0×.2+6.0×.15+9.5×.15+6.5×.1+2.5×.1+3.0×.1 = 6.35</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 6.0 × 40% + B 類 6.3 × 60%</div>
+        <div class="score-big">6.2<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#FEF9C3;color:#92400E">⭐⭐⭐ 中等——交通最強，產權最弱；本地買家 > 外籍 MM2H</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">2.40 + 3.78 = 6.18 → 四捨五入 6.2</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>BBCC Transit Hub 三站直連（B4 9.5/10，本系列最高）+ EcoWorld × UDA × EPF 三大頂級 JV 信用（B1 9.5/10，本系列最高）+ LaLaport 1 分鐘步行 + 低起步價（RM74.5萬）+ 管理費 RM0.60 psf 合理。<br>
+          <strong style="color:#fca5a5">最大風險：</strong>Leasehold 商業地契 + DBKL 同意限制（B6 2.5/10，本系列最低）= 外籍持有框架最複雜；MM2H 合規不確定；外籍 Net Yield 僅 1.9–2.3%；Lucentia 前案 4 年幾乎平盤（-3.2%）是資本增值的現實預期。
+        </div>
+      </div>
+    </div>
+
+    <h3>八個建案完整評分對比（最終完整版）</h3>
+    <table>
+      <thead><tr><th>建案</th><th>評分</th><th>地契</th><th>外籍 Net Yield</th><th>A4 基建</th><th>B6 產權</th><th>建議</th></tr></thead>
+      <tbody>
+        <tr><td>R22 Mont Kiara</td><td><span class="tag t-g">7.7</span></td><td>Freehold 住宅</td><td>~3.0–3.2%</td><td>8.5</td><td>9.5</td><td>🟢 進場</td></tr>
+        <tr><td>Park Place DPC</td><td><span class="tag t-g">7.7</span></td><td>Freehold 住宅</td><td>~3.0–3.4%</td><td>6.5</td><td>9.5</td><td>🟢 進場</td></tr>
+        <tr><td>CloutHaus KLCC</td><td><span class="tag t-y">6.7</span></td><td>Freehold 商業</td><td>~1.9–2.2%</td><td>9.0</td><td>5.5</td><td>🟡 觀望</td></tr>
+        <tr><td><strong>SWNK Houze BBCC</strong></td><td><span class="tag t-y">6.2</span></td><td><span class="down">Leasehold 商業</span></td><td>~1.9–2.3%</td><td><strong>9.5</strong></td><td><span class="down">2.5</span></td><td>🟡 本地可；🔴 外籍MM2H不推</td></tr>
+        <tr><td>Armani Hallson（SOHO）</td><td><span class="tag t-y">5.7</span></td><td>SOHO HDA商業</td><td>SOHO 2.8–3.4%</td><td>8.0</td><td>6.0</td><td>🟡 SOHO條件性</td></tr>
+        <tr><td>Stonor 3 KLCC</td><td><span class="tag t-y">5.7</span></td><td>商業地契 HDA</td><td>~1.9–2.3%</td><td>8.0</td><td>5.0</td><td>🔴 暫緩</td></tr>
+        <tr><td>Orion Residence BB</td><td><span class="tag t-r">5.2</span></td><td>Freehold 商業</td><td>~1.2–1.5%</td><td>9.0</td><td>5.5</td><td>🔴 暫緩</td></tr>
+      </tbody>
+    </table>
+    <p class="src">注：SWNK Houze 在 A4 基建（9.5）和 B1 開發商信用（9.5）同列本系列最高，但 B6 產權（2.5）和 A5 法規（3.0）是本系列最低——「基建最強，產權最弱」是 SWNK Houze 最準確的一句話概括。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL 供需 Overhang 深度分析報告（2026-04-01）｜KL RM1M+ 高端住宅市場深度研究（2026-03）｜iRumah.co（Lucentia Yield；SWNK Houze PSF）｜brickz.my（Lucentia 9筆成交，2023-08至2024-07）｜iProperty.com.my（SWNK 掛牌 2026-04）｜PropertyGuru（建案資料）｜BBCC 官方 HDA 文件（Parcel 5，地契/DBKL 同意確認）<br>
+  本報告中 Leasehold 年限、DBKL 同意流程、MM2H 合規細節需向律師個別確認。外籍 MM2H 投資者在進場前必須書面確認 Leasehold 商業地契是否符合 MM2H 持有要求。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>{% block title %}{% endblock %} | {{ meta.market_en }} Property Monitor</title>
+<link rel="stylesheet" href="{{ depth }}css/style.css">
+<link rel="stylesheet" href="{{ depth }}tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}
+.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}
+.market-btn:hover{background:#dde8f2}
+.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.1);min-width:155px;z-index:100}
+.market-dropdown.open{display:block}
+.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}
+.market-dropdown a:hover{background:#f4f7fc}
+.market-dropdown a.active{font-weight:600}
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<header class="navbar">
+  <a href="{{ depth }}index.html" class="logo">PROPERTY MONITOR</a>
+  <div class="market-selector">
+    <button class="market-btn" onclick="toggleMarketMenu()">
+      {{ meta.flag }}
+      <span class="lang-en">{{ meta.market_en }}</span>
+      <span class="lang-zh" style="display:none">{{ meta.market_zh }}</span>
+      ▾
+    </button>
+    <div class="market-dropdown" id="marketDropdown">
+      {% for m in all_markets %}
+      <a href="{{ depth }}{{ m.path }}"
+         {% if (m.id == 'my' and meta.dir == '') or m.id == meta.dir %}class="active"{% endif %}>
+        {{ m.flag }}
+        <span class="lang-en">{{ m.name_en }}</span>
+        <span class="lang-zh" style="display:none">{{ m.name_zh }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  <nav>
+    {% for page in meta.nav_pages %}
+    <a href="{{ page.file }}"{% if current_page == page.id %} class="active"{% endif %}>
+      <span class="lang-en">{{ page.en }}</span>
+      <span class="lang-zh" style="display:none">{{ page.zh }}</span>
+    </a>
+    {% endfor %}
+  </nav>
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+  </div>
+  <span class="opr-badge">{{ meta.badge_label }}: {{ meta.badge_value }} {{ meta.badge_trend }}</span>
+  <button class="hamburger" onclick="document.querySelector('.mobile-menu').classList.toggle('open')">&#9776;</button>
+</header>
+
+<div class="mobile-menu">
+  {% for page in meta.nav_pages %}
+  <a href="{{ page.file }}">
+    <span class="lang-en">{{ page.en }}</span>
+    <span class="lang-zh" style="display:none">{{ page.zh }}</span>
+  </a>
+  {% endfor %}
+  <div class="mobile-meta">
+    <span class="opr-badge">{{ meta.badge_label }}: {{ meta.badge_value }}</span>
+    <div class="lang-switcher">
+      <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</div>
+
+{% block content %}{% endblock %}
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+function mkAxis(o){return Object.assign({axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}},o||{});}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');});
+function switchTab(cid,tab){var w=document.getElementById(cid);if(!w)return;w.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});w.querySelectorAll('.tab-bar button').forEach(function(b){b.classList.remove('active');});var p=w.querySelector('#tab-'+tab);if(p)p.classList.add('active');w.querySelectorAll('.tab-bar button').forEach(function(b){if(b.dataset.tab===tab)b.classList.add('active');});setTimeout(function(){allCharts.forEach(function(c){if(c)c.resize();});},100);}
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}
+  if(typeof initCharts==='function')initCharts(lang);
+}
+var allCharts=[];
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+{% block base_scripts %}{% endblock %}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

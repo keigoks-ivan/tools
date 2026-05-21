@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Dashboard | U.S. Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer}</style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body h2:first-child{margin-top:0}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .chart-note.red{color:#dc2626}
+    .chart-note.navy{color:#1e3a5f}
+    .city-card-link{display:block;text-decoration:none;color:inherit}
+    .city-card-link:hover .kpi-card{box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+    .topic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+    .topic-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:20px;text-align:center;text-decoration:none;color:#1e3a5f;font-family:Inter,sans-serif;font-size:13px;font-weight:600;transition:box-shadow .2s}
+    .topic-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    @media(max-width:768px){.kpi-grid{grid-template-columns:1fr!important}.topic-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+    @media(max-width:1024px){.kpi-grid{grid-template-columns:repeat(2,1fr)!important}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="container">
+
+  <!-- Page Header -->
+  <div class="report-header" style="margin-bottom:0;border-radius:4px">
+    <div class="lang-en">
+      <h1>U.S. REAL ESTATE &mdash; MARKET DASHBOARD</h1>
+      <div class="report-meta">April 2026 &middot; 12-City Monitor &middot; Data: Case-Shiller / CAR / Zillow / FHFA</div>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <h1>美國房地產——市場儀表板</h1>
+      <div class="report-meta">2026年4月 &middot; 12城市監測 &middot; 數據：Case-Shiller / CAR / Zillow / FHFA</div>
+    </div>
+  </div>
+
+  <!-- Section 1: 12 City Cards -->
+  <div class="section-label" style="margin-top:32px"><span class="lang-en">12-CITY OVERVIEW</span><span class="lang-zh" style="display:none">十二城市總覽</span></div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+
+    <a href="nyc.html" class="city-card-link">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">New York</span><span class="lang-zh" style="display:none">紐約</span></div>
+        <div class="kpi-value">CS 324 <span style="color:#16a34a;font-size:13px">+4.9%</span></div>
+        <span class="kpi-badge badge-blue">$880K</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">Supply-constrained, cash-buyer market</span><span class="lang-zh" style="display:none">供給受限，現金買家市場</span></div>
+      </div>
+    </a>
+
+    <a href="la.html" class="city-card-link">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Los Angeles</span><span class="lang-zh" style="display:none">洛杉磯</span></div>
+        <div class="kpi-value">CS 445 <span style="color:#16a34a;font-size:13px">+2.1%</span></div>
+        <span class="kpi-badge badge-orange">$975K</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">Wildfire + AB 1482 + ARM risk</span><span class="lang-zh" style="display:none">野火+AB 1482+ARM風險</span></div>
+      </div>
+    </a>
+
+    <a href="sf.html" class="city-card-link">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">San Francisco</span><span class="lang-zh" style="display:none">舊金山</span></div>
+        <div class="kpi-value">CS 364 <span style="color:#16a34a;font-size:13px">+2.2%</span></div>
+        <span class="kpi-badge badge-orange">$1.65M</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">AI-driven revival, condo lag</span><span class="lang-zh" style="display:none">AI驅動復甦，公寓滯後</span></div>
+      </div>
+    </a>
+
+    <a href="sv.html" class="city-card-link">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Silicon Valley</span><span class="lang-zh" style="display:none">矽谷</span></div>
+        <div class="kpi-value">FHFA ~568 <span style="color:#16a34a;font-size:13px">+1.2%</span></div>
+        <span class="kpi-badge badge-blue">$1.64M</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">304 listings, auction dynamics</span><span class="lang-zh" style="display:none">304套掛牌，拍賣動態</span></div>
+      </div>
+    </a>
+
+    <a href="sandiego.html" class="city-card-link">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">San Diego</span><span class="lang-zh" style="display:none">聖地牙哥</span></div>
+        <div class="kpi-value">CS 446 <span style="color:#16a34a;font-size:13px">+3.2%</span></div>
+        <span class="kpi-badge badge-green">$1.0M</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">3-engine economy, all-time high</span><span class="lang-zh" style="display:none">三引擎經濟，歷史高點</span></div>
+      </div>
+    </a>
+
+    <a href="miami.html" class="city-card-link">
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">Miami</span><span class="lang-zh" style="display:none">邁阿密</span></div>
+        <div class="kpi-value">CS 442 <span style="color:#dc2626;font-size:13px">-1.0%</span></div>
+        <span class="kpi-badge badge-red">$600K</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">SB 4-D condo crisis, 14mo supply</span><span class="lang-zh" style="display:none">SB 4-D公寓危機，14個月供給</span></div>
+      </div>
+    </a>
+
+    <a href="austin.html" class="city-card-link">
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">Austin</span><span class="lang-zh" style="display:none">奧斯汀</span></div>
+        <div class="kpi-value">City $540K <span style="color:#dc2626;font-size:13px">-2.7%</span></div>
+        <span class="kpi-badge badge-red">$412K MSA</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">25% correction, Samsung anchor</span><span class="lang-zh" style="display:none">25%修正，三星錨點</span></div>
+      </div>
+    </a>
+
+    <a href="seattle.html" class="city-card-link">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Seattle</span><span class="lang-zh" style="display:none">西雅圖</span></div>
+        <div class="kpi-value">CS 391 <span style="color:#16a34a;font-size:13px">+4.3%</span></div>
+        <span class="kpi-badge badge-blue">$848K</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">Amazon/MSFT concentration, HB 1217</span><span class="lang-zh" style="display:none">亞馬遜/微軟集中度，HB 1217</span></div>
+      </div>
+    </a>
+
+    <a href="chicago.html" class="city-card-link">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">Chicago</span><span class="lang-zh" style="display:none">芝加哥</span></div>
+        <div class="kpi-value">CS 258 <span style="color:#16a34a;font-size:13px">+4.6%</span></div>
+        <span class="kpi-badge badge-green">$365K</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">Cheapest Tier-1, IL property tax risk</span><span class="lang-zh" style="display:none">最可負擔一線，伊州財產稅風險</span></div>
+      </div>
+    </a>
+
+    <a href="boston.html" class="city-card-link">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Boston</span><span class="lang-zh" style="display:none">波士頓</span></div>
+        <div class="kpi-value">CS 348 <span style="color:#16a34a;font-size:13px">+2.4%</span></div>
+        <span class="kpi-badge badge-blue">$857K</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">ATH, supply cliff, biotech demand</span><span class="lang-zh" style="display:none">歷史高點，供給懸崖，生技需求</span></div>
+      </div>
+    </a>
+
+    <a href="phoenix.html" class="city-card-link">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Phoenix</span><span class="lang-zh" style="display:none">鳳凰城</span></div>
+        <div class="kpi-value">CS 330 <span style="color:#16a34a;font-size:13px">+2.5%</span></div>
+        <span class="kpi-badge badge-orange">$444K</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">Water risk, TSMC, neighborhood divergence</span><span class="lang-zh" style="display:none">水資源風險，台積電，社區分化</span></div>
+      </div>
+    </a>
+
+    <a href="denver.html" class="city-card-link">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Denver</span><span class="lang-zh" style="display:none">丹佛</span></div>
+        <div class="kpi-value">CS 322 <span style="color:#16a34a;font-size:13px">+1.6%</span></div>
+        <span class="kpi-badge badge-orange">$539K</span>
+        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif"><span class="lang-en">Insurance shock, condo correction</span><span class="lang-zh" style="display:none">保險衝擊，公寓修正</span></div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Section 2: CS Index Comparison -->
+  <div class="section-label" style="margin-top:36px"><span class="lang-en">CASE-SHILLER / HPI INDEX COMPARISON</span><span class="lang-zh" style="display:none">Case-Shiller / HPI 指數比較</span></div>
+  <div class="chart-inline">
+    <h4><span class="lang-en">CS/HPI Index by City (Latest)</span><span class="lang-zh" style="display:none">各城市 CS/HPI 指數（最新）</span></h4>
+    <div id="chartDashCS" style="height:320px"></div>
+  </div>
+
+  <!-- Section 3: Median Price Bar -->
+  <div class="section-label" style="margin-top:36px"><span class="lang-en">MEDIAN PRICE COMPARISON</span><span class="lang-zh" style="display:none">中位數房價比較</span></div>
+  <div class="chart-inline">
+    <h4><span class="lang-en">Median Home Price by City</span><span class="lang-zh" style="display:none">各城市中位數房價</span></h4>
+    <div id="chartDashMedian" style="height:320px"></div>
+  </div>
+
+  <!-- Section 4: Risk/Opportunity Matrix -->
+  <div class="section-label" style="margin-top:36px"><span class="lang-en">RISK / OPPORTUNITY MATRIX</span><span class="lang-zh" style="display:none">風險/機會矩陣</span></div>
+  <div class="chart-inline">
+    <h4><span class="lang-en">Appreciation Momentum vs Structural Risk</span><span class="lang-zh" style="display:none">增值動能 vs 結構性風險</span></h4>
+    <div id="chartDashMatrix" style="height:380px"></div>
+    <div class="chart-note navy"><span class="lang-en">Bubble size = median price. Green = low risk, Navy = moderate, Red = high risk.</span><span class="lang-zh" style="display:none">氣泡大小 = 中位數房價。綠 = 低風險，深藍 = 中等，紅 = 高風險。</span></div>
+  </div>
+
+  <!-- Section 5: Quick Links -->
+  <div class="section-label" style="margin-top:36px"><span class="lang-en">EXPLORE BY TOPIC</span><span class="lang-zh" style="display:none">按主題瀏覽</span></div>
+  <div class="topic-grid">
+    <a href="supply.html" class="topic-card"><span class="lang-en">&#x1F4E6; Supply Analysis</span><span class="lang-zh" style="display:none">&#x1F4E6; 供給分析</span></a>
+    <a href="demand.html" class="topic-card"><span class="lang-en">&#x1F4C8; Demand Analysis</span><span class="lang-zh" style="display:none">&#x1F4C8; 需求分析</span></a>
+    <a href="valuation.html" class="topic-card"><span class="lang-en">&#x1F4B0; Valuation Monitor</span><span class="lang-zh" style="display:none">&#x1F4B0; 估值監測</span></a>
+    <a href="risk.html" class="topic-card"><span class="lang-en">&#x26A0;&#xFE0F; Risk Monitor</span><span class="lang-zh" style="display:none">&#x26A0;&#xFE0F; 風險監測</span></a>
+    <a href="report.html" class="topic-card"><span class="lang-en">&#x1F4DD; US Market Report</span><span class="lang-zh" style="display:none">&#x1F4DD; 美國市場報告</span></a>
+    <a href="../report.html" class="topic-card"><span class="lang-en">&#x1F30F; Global Overview</span><span class="lang-zh" style="display:none">&#x1F30F; 全球總覽</span></a>
+  </div>
+
+  <!-- Source Footer -->
+  <div class="source-footer" style="margin-top:32px">
+    <span class="lang-en">Source: S&amp;P CoreLogic Case-Shiller, FHFA HPI, Zillow, CAR, Redfin, FRED &middot; Updated April 2026</span>
+    <span class="lang-zh" style="display:none">資料來源：S&amp;P CoreLogic Case-Shiller、FHFA HPI、Zillow、CAR、Redfin、FRED &middot; 2026年4月更新</span>
+  </div>
+
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts=[];
+
+function drawDashCS(lang){
+  var cities=['SV','SD','LA','Miami','SF','Seattle','Boston','Phoenix','NYC','Denver','Chicago','Austin'];
+  var vals=[568,446,445,442,391,391,348,330,324,322,258,412];
+  var labels_zh=['矽谷','聖地牙哥','洛杉磯','邁阿密','舊金山','西雅圖','波士頓','鳳凰城','紐約','丹佛','芝加哥','奧斯汀'];
+  var sorted=cities.map(function(c,i){return{name:c,name_zh:labels_zh[i],val:vals[i]};}).sort(function(a,b){return a.val-b.val;});
+  var c=echarts.init(document.getElementById('chartDashCS'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}},
+    grid:{left:80,right:30,top:10,bottom:20,containLabel:false},
+    xAxis:mkAxis({type:'value',name:lang==='zh'?'指數':'Index'}),
+    yAxis:mkAxis({type:'category',data:sorted.map(function(d){return lang==='zh'?d.name_zh:d.name;})}),
+    series:[{type:'bar',data:sorted.map(function(d){return d.val;}),itemStyle:{color:C.navy,borderRadius:[0,3,3,0]},barMaxWidth:35,label:{show:true,position:'right',fontSize:10,color:C.navy,fontFamily:'JetBrains Mono, monospace'}}]
+  });
+}
+
+function drawDashMedian(lang){
+  var data=[
+    {name:'SF',name_zh:'舊金山',val:1650000},
+    {name:'SV',name_zh:'矽谷',val:1640000},
+    {name:'SD',name_zh:'聖地牙哥',val:1000000},
+    {name:'LA',name_zh:'洛杉磯',val:975000},
+    {name:'NYC',name_zh:'紐約',val:880000},
+    {name:'Boston',name_zh:'波士頓',val:857000},
+    {name:'Seattle',name_zh:'西雅圖',val:848000},
+    {name:'Miami',name_zh:'邁阿密',val:600000},
+    {name:'Denver',name_zh:'丹佛',val:539000},
+    {name:'Austin',name_zh:'奧斯汀',val:540000},
+    {name:'Phoenix',name_zh:'鳳凰城',val:444000},
+    {name:'Chicago',name_zh:'芝加哥',val:365000}
+  ].sort(function(a,b){return a.val-b.val;});
+  var c=echarts.init(document.getElementById('chartDashMedian'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'},formatter:function(p){return p[0].name+': $'+(p[0].value/1000).toFixed(0)+'K';}},
+    grid:{left:80,right:40,top:10,bottom:20,containLabel:false},
+    xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return '$'+(v/1000)+'K';}}}),
+    yAxis:mkAxis({type:'category',data:data.map(function(d){return lang==='zh'?d.name_zh:d.name;})}),
+    series:[{type:'bar',data:data.map(function(d){return d.val;}),itemStyle:{color:C.blue,borderRadius:[0,3,3,0]},barMaxWidth:35,label:{show:true,position:'right',fontSize:10,color:C.navy,fontFamily:'JetBrains Mono, monospace',formatter:function(p){return '$'+(p.value>=1000000?(p.value/1000000).toFixed(2)+'M':(p.value/1000).toFixed(0)+'K');}}}]
+  });
+}
+
+function drawDashMatrix(lang){
+  var cities=[
+    {name:'NYC',name_zh:'紐約',x:4.9,y:3,price:880000},
+    {name:'LA',name_zh:'洛杉磯',x:2.1,y:7,price:975000},
+    {name:'SF',name_zh:'舊金山',x:2.2,y:6,price:1650000},
+    {name:'SV',name_zh:'矽谷',x:1.2,y:5,price:1640000},
+    {name:'SD',name_zh:'聖地牙哥',x:3.2,y:3,price:1000000},
+    {name:'Miami',name_zh:'邁阿密',x:-1.0,y:8,price:600000},
+    {name:'Austin',name_zh:'奧斯汀',x:-2.7,y:4,price:412000},
+    {name:'Seattle',name_zh:'西雅圖',x:4.3,y:5,price:848000},
+    {name:'Chicago',name_zh:'芝加哥',x:4.6,y:6,price:365000},
+    {name:'Boston',name_zh:'波士頓',x:2.4,y:3,price:857000},
+    {name:'Phoenix',name_zh:'鳳凰城',x:2.5,y:7,price:444000},
+    {name:'Denver',name_zh:'丹佛',x:1.6,y:5,price:539000}
+  ];
+  var c=echarts.init(document.getElementById('chartDashMatrix'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:{trigger:'item',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'},formatter:function(p){var d=p.data;return '<b>'+(lang==='zh'?d[4]:d[3])+'</b><br>'+(lang==='zh'?'年增率':'YoY')+': '+d[0]+'%<br>'+(lang==='zh'?'風險':'Risk')+': '+d[1]+'/10<br>'+(lang==='zh'?'中位價':'Median')+': $'+(d[2]>=1000000?(d[2]/1000000).toFixed(2)+'M':(d[2]/1000).toFixed(0)+'K');}},
+    grid:{left:50,right:30,top:30,bottom:50,containLabel:true},
+    xAxis:mkAxis({type:'value',name:lang==='zh'?'增值動能（YoY%）':'Appreciation Momentum (YoY%)',nameLocation:'middle',nameGap:30,min:-4,max:6}),
+    yAxis:mkAxis({type:'value',name:lang==='zh'?'結構性風險':'Structural Risk',nameLocation:'middle',nameGap:40,min:0,max:10}),
+    series:[{type:'scatter',symbolSize:function(d){return Math.max(16,Math.sqrt(d[2]/1000)*1.6);},data:cities.map(function(c){return{value:[c.x,c.y,c.price,c.name,c.name_zh],itemStyle:{color:c.y<4?C.green:c.y<=6?C.navy:C.red,opacity:0.75}};}),label:{show:true,formatter:function(p){return lang==='zh'?p.data.value[4]:p.data.value[3];},fontSize:10,color:C.navy,fontFamily:'Inter, sans-serif',position:'top'}}]
+  });
+}
+
+function initCharts(lang){
+  allCharts.length=0;
+  drawDashCS(lang);
+  drawDashMedian(lang);
+  drawDashMatrix(lang);
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}
+  initCharts(lang);
+}
+
+function toggleMarketMenu(){
+  document.getElementById('marketDropdown').classList.toggle('open');
+  var city=document.getElementById('cityDropdown');if(city)city.classList.remove('open');
+}
+function toggleCityMenu(){
+  document.getElementById('cityDropdown').classList.toggle('open');
+  document.getElementById('marketDropdown').classList.remove('open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');
+  if(!e.target.closest('.city-dropdown')){var cd=document.getElementById('cityDropdown');if(cd)cd.classList.remove('open');}
+});
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+</script>
+
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

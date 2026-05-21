@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Valuation Monitor | South Korea Property Monitor</title>
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+  <h1 class="page-title"><span class="lang-en">Valuation Monitor</span><span class="lang-zh" style="display:none">估值監測</span></h1>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Seoul P/R Ratio</span><span class="lang-zh" style="display:none">首爾租金比</span></div>
+      <div class="kpi-value">40x</div>
+      <div class="kpi-delta negative"><span class="lang-en">Severely overvalued</span><span class="lang-zh" style="display:none">嚴重高估</span></div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">Busan P/R</span><span class="lang-zh" style="display:none">釜山租金比</span></div>
+      <div class="kpi-value">22x</div>
+      <div class="kpi-delta"><span class="lang-en">Neutral</span><span class="lang-zh" style="display:none">中性</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Seoul PTI</span><span class="lang-zh" style="display:none">首爾房價所得比</span></div>
+      <div class="kpi-value">15.0x</div>
+      <div class="kpi-delta negative"><span class="lang-en">Among world's highest</span><span class="lang-zh" style="display:none">全球最高之一</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Seoul Gross Yield</span><span class="lang-zh" style="display:none">首爾毛租金收益率</span></div>
+      <div class="kpi-value">2.5%</div>
+      <div class="kpi-delta negative"><span class="lang-en">Below BOK rate</span><span class="lang-zh" style="display:none">低於央行利率</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Busan Gross Yield</span><span class="lang-zh" style="display:none">釜山毛租金收益率</span></div>
+      <div class="kpi-value">4.5%</div>
+      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Above BOK rate</span><span class="lang-zh" style="display:none">高於央行利率</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Yield Spread (Seoul)</span><span class="lang-zh" style="display:none">利差（首爾）</span></div>
+      <div class="kpi-value">-0.5%</div>
+      <div class="kpi-delta negative"><span class="lang-en">Negative carry</span><span class="lang-zh" style="display:none">負利差</span></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">PTI by City</span><span class="lang-zh" style="display:none">各城市房價所得比</span></h3>
+      <div id="chartKrPTI" style="height:280px"></div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">APAC Price-to-Rent Comparison</span><span class="lang-zh" style="display:none">亞太租金比比較</span></h3>
+      <div id="chartKrAPAC" style="height:280px"></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Yield vs BOK Rate</span><span class="lang-zh" style="display:none">租金收益率 vs 央行利率</span></h3>
+      <div id="chartKrYieldSpread" style="height:220px"></div>
+      <div class="insight-box" style="border-left-color:#dc2626">
+        <span class="lang-en">Seoul yields deeply negative vs BOK rate, pure capital appreciation play. Leveraged investors face negative carry of -0.5%, making rental income alone insufficient to cover borrowing costs.</span>
+        <span class="lang-zh" style="display:none">首爾租金收益率遠低於央行利率，純屬資本增值博弈。槓桿投資者面臨 -0.5% 的負利差，單靠租金收入不足以覆蓋借貸成本。</span>
+      </div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">Seoul Price Index (Nominal vs Real)</span><span class="lang-zh" style="display:none">首爾價格指數（名目 vs 實質）</span></h3>
+      <div id="chartKrPriceReal" style="height:220px"></div>
+    </div>
+  </div>
+
+  <!-- Summary Framework -->
+  <h2 class="section-heading"><span class="lang-en">Valuation Framework</span><span class="lang-zh" style="display:none">估值框架</span></h2>
+  <div class="summary-grid">
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">Price-to-Income</span><span class="lang-zh" style="display:none">房價所得比</span></h4>
+      <p><span class="lang-en">Seoul PTI 15x among world's worst, requires 15+ years household income. Gangnam at 22x virtually inaccessible for ordinary households, rivaling Hong Kong's unaffordability levels.</span><span class="lang-zh" style="display:none">首爾房價所得比 15 倍為全球最高之一，需 15 年以上家庭收入。江南區高達 22 倍，對普通家庭幾乎不可企及，堪比香港的不可負擔水平。</span></p>
+    </div>
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">Price-to-Rent</span><span class="lang-zh" style="display:none">房價租金比</span></h4>
+      <p><span class="lang-en">P/R 40x implies 2.5% gross yield, deeply below BOK 3.0%. Negative carry for leveraged investors makes Seoul a pure capital appreciation bet, with rental income failing to cover borrowing costs.</span><span class="lang-zh" style="display:none">租金比 40 倍意味著 2.5% 的毛收益率，遠低於韓國央行 3.0% 的利率。槓桿投資者面臨負利差，首爾純屬資本增值博弈，租金收入無法覆蓋借貸成本。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Jeonse Factor</span><span class="lang-zh" style="display:none">全租房因素</span></h4>
+      <p><span class="lang-en">Unique jeonse system distorts traditional valuation metrics. Declining jeonse ratio may gradually normalize P/R closer to regional peers. As the system unwinds, rental yields could improve but at the cost of price support erosion.</span><span class="lang-zh" style="display:none">獨特的全租房制度扭曲了傳統估值指標。全租比率下降可能使租金比逐漸正常化至接近區域同儕水平。隨著制度轉變，租金收益率可能改善，但代價是價格支撐的削弱。</span></p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  var c;
+
+  /* Chart: PTI by City */
+  var cities=['Busan','Daejeon','Incheon','Sejong','Seoul Avg','Gangnam'];
+  var ptiVals=[7.0,7.5,8.0,9.0,15.0,22.0];
+  var ptiColors=ptiVals.map(function(v){return v>=15?C.red:v>=9?C.orange:C.navy;});
+  c=echarts.init(document.getElementById('chartKrPTI'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'x';}}),
+    grid:{left:90,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false}),
+    yAxis:mkAxis({type:'category',data:cities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:ptiVals.map(function(v,i){return{value:v,itemStyle:{color:ptiColors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}x',fontSize:11,color:C.navy,fontFamily:'Inter'},
+      markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:1},data:[{xAxis:10,label:{formatter:'10x',fontSize:9,color:C.red,position:'insideEndTop'}}]}
+    }]
+  });
+
+  /* Chart: APAC Price-to-Rent */
+  var apacCities=['HCMC','KL','Bangkok','Tokyo','Seoul','HK','Taipei'];
+  var apacVals=[18,22,31,37,40,45,75];
+  var apacColors=apacVals.map(function(v,i){
+    if(apacCities[i]==='Seoul') return C.red;
+    if(v<=25) return C.green;
+    if(v<=38) return C.navy;
+    return C.orange;
+  });
+  c=echarts.init(document.getElementById('chartKrAPAC'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'x';}}),
+    grid:{left:80,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false}),
+    yAxis:mkAxis({type:'category',data:apacCities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:apacVals.map(function(v,i){return{value:v,itemStyle:{color:apacColors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}x',fontSize:11,color:C.navy,fontFamily:'Inter'}
+    }]
+  });
+
+  /* Chart: Yield vs BOK Rate */
+  c=echarts.init(document.getElementById('chartKrYieldSpread'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:baseTooltip,
+    legend:Object.assign({},baseLegend,{data:['Rental Yield','BOK Rate']}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+    yAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+    series:[
+      {name:'Rental Yield',type:'line',smooth:0.3,data:[2.8,2.5,2.2,2.3,2.4,2.5,2.5],lineStyle:{color:C.green},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(22,163,74,0.15)'},{offset:1,color:'rgba(22,163,74,0.02)'}]}}},
+      {name:'BOK Rate',type:'line',step:'end',data:[1.75,0.50,1.00,3.50,3.50,3.25,3.00],lineStyle:{color:C.red,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+    ]
+  });
+
+  /* Chart: Nominal vs Real Price Index */
+  c=echarts.init(document.getElementById('chartKrPriceReal'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:baseTooltip,
+    legend:Object.assign({},baseLegend,{data:['Nominal Index','Real Index']}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+    yAxis:mkAxis({type:'value'}),
+    series:[
+      {name:'Nominal Index',type:'line',smooth:0.2,data:[100,108,121,116,113,116,123],lineStyle:{color:C.navy},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5},
+      {name:'Real Index',type:'line',smooth:0.2,data:[100,106,115,107,103,104,108],lineStyle:{color:C.muted,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:5}
+    ]
+  });
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

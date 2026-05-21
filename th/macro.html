@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | Thailand Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">Thailand — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">泰國 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q1 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q1</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:2;background:#6b7280">
+        <div class="cs-title">GFC</div>
+        <div class="cs-year">08–09</div>
+      </div>
+      <div class="cycle-seg" style="flex:5;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Recovery Boom</span><span class="lang-zh" style="display:none">復甦榮景</span></div>
+        <div class="cs-year">10–18</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Pre-COVID Cool</span><span class="lang-zh" style="display:none">COVID前降溫</span></div>
+        <div class="cs-year">19</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Tourism Collapse</span><span class="lang-zh" style="display:none">觀光崩盤</span></div>
+        <div class="cs-year">20–22</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Slow Recovery</span><span class="lang-zh" style="display:none">緩慢復甦</span></div>
+        <div class="cs-year">23–25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">BoT at 2.00% (Apr 2025) — tourism recovery incomplete; condo oversupply persists; HPI recovering slowly from 2020–22 trough</span>
+        <span class="lang-zh" style="display:none">BoT利率2.00%（2025年4月）——觀光復甦未完成；公寓供過於求持續；HPI緩慢從2020–22谷底回升</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">BoT Policy Rate</span><span class="lang-zh" style="display:none">BoT政策利率</span></div>
+      <div class="kpi-value">2.00%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Cut Feb 2025</span><span class="lang-zh" style="display:none">2025年2月降息</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">BoT Housing Price Index</span><span class="lang-zh" style="display:none">BoT住宅價格指數</span></div>
+      <div class="kpi-value">~162</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Base: 2012=100 (est.)</span><span class="lang-zh" style="display:none">基期：2012=100（估算）</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CPI YoY</span><span class="lang-zh" style="display:none">通膨 YoY</span></div>
+      <div class="kpi-value">0.8%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Deflation risk lingers</span><span class="lang-zh" style="display:none">通縮風險持續</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">2.5%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Below potential</span><span class="lang-zh" style="display:none">低於潛力增速</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Unemployment</span><span class="lang-zh" style="display:none">失業率</span></div>
+      <div class="kpi-value">0.9%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Structural low (informal)</span><span class="lang-zh" style="display:none">結構性低位（含非正規就業）</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Tourist Arrivals</span><span class="lang-zh" style="display:none">旅客入境</span></div>
+      <div class="kpi-value">~35M</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">vs. 40M pre-COVID</span><span class="lang-zh" style="display:none">對比COVID前4,000萬人次</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">BoT Rate Range (17yr)</span><span class="lang-zh" style="display:none">BoT歷史區間</span></div>
+      <div class="ctx-val">0.50%–2.75%</div>
+      <div class="ctx-sub"><span class="lang-en">Low: 2009 / 2020–21 · High: 2006–08</span><span class="lang-zh" style="display:none">低點：2009/2020–21 · 高點：2006–08</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">HPI Gain Since 2008</span><span class="lang-zh" style="display:none">HPI自2008累計</span></div>
+      <div class="ctx-val" style="color:#16a34a">~+60%</div>
+      <div class="ctx-sub"><span class="lang-en">Approx. est. from BoT trend data</span><span class="lang-zh" style="display:none">基於BoT趨勢資料估算</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+7.5% / −6.1%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2012 rebound · Worst: 2020 COVID</span><span class="lang-zh" style="display:none">最佳：2012反彈 · 最差：2020 COVID</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Tourist Arrivals Peak</span><span class="lang-zh" style="display:none">旅客入境高峰</span></div>
+      <div class="ctx-val" style="color:#d97706">39.8M</div>
+      <div class="ctx-sub"><span class="lang-en">2019 — pre-COVID record</span><span class="lang-zh" style="display:none">2019年 — COVID前歷史紀錄</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × House Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Thailand's HPI is closely tied to Bangkok condo supply cycles driven by Chinese buyer demand (2016–19) and then the COVID tourism wipeout. BoT held rates flat at 0.50% for three years (2020–22) while other central banks hiked — this shows Thailand's inflation stayed subdued. The 2024 rate cut reflects growth concerns, not overheating.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>泰國HPI與曼谷公寓供給週期緊密相關，2016–19年由中國買家需求驅動，隨後遭COVID觀光業重創。BoT在2020–22年其他央行升息期間，利率維持在0.50%不變——這顯示泰國通膨保持溫和。2024年的降息反映的是成長擔憂，而非過熱。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">BoT Rate / Lending Rate / CPI vs Housing Price Index (2008–2025)</span>
+      <span class="lang-zh" style="display:none">BoT利率 / 貸款利率 / CPI vs 住宅價格指數（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × House Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Tourism accounts for ~20% of Thai GDP — the 2020 collapse (−6.1% GDP) was the worst shock. The incomplete recovery (35M vs 40M arrivals) explains weak domestic demand. LTV policy tightening in 2019 (3rd property: LTV capped 70%) contributed to 2019–20 condo market correction before COVID hit.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>觀光業佔泰國GDP約20%——2020年崩盤（GDP衰退6.1%）是最大衝擊。復甦不完整（3,500萬 vs 4,000萬旅客）解釋了國內需求疲軟。2019年LTV政策收緊（第三套房：LTV上限70%）在COVID來襲前已引發2019–20年公寓市場修正。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">GDP / Unemployment / Tourist Arrivals vs Housing Price Index (2008–2025)</span>
+      <span class="lang-zh" style="display:none">GDP / 失業率 / 旅客入境 vs 住宅價格指數（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #6b7280">
+      <div class="ev-year" style="color:#6b7280"><span class="lang-en">2008–2009 · GFC SHOCK</span><span class="lang-zh" style="display:none">2008–2009 · GFC衝擊</span></div>
+      <div class="ev-title"><span class="lang-en">BoT Cuts to 1.25% — Economy Contracts</span><span class="lang-zh" style="display:none">BoT降至1.25%，經濟萎縮</span></div>
+      <div class="ev-desc"><span class="lang-en">Export collapse and political turmoil (PAD airport seizure, Dec 2008) hit the economy. GDP contracts −2.3% in 2009. BoT cuts from 3.75% to 1.25%. HPI dips mildly. Recovery is quick as global trade rebounds and tourism returns rapidly.</span><span class="lang-zh" style="display:none">出口崩潰加上政治動盪（PAD佔機場事件，2008年12月）衝擊經濟，2009年GDP萎縮2.3%。BoT從3.75%降至1.25%，HPI輕微下跌。隨著全球貿易和觀光業迅速反彈，復甦來得很快。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2010–2014 · PROPERTY BOOM</span><span class="lang-zh" style="display:none">2010–2014 · 房產榮景</span></div>
+      <div class="ev-title"><span class="lang-en">Condo Supply Surge — Domestic Demand Drives Market</span><span class="lang-zh" style="display:none">公寓供給激增，國內需求驅動市場</span></div>
+      <div class="ev-desc"><span class="lang-en">Post-GFC recovery and tourism growth fuel property boom. Bangkok condo launches surge. BoT raises rate to 2.75% (2011) to combat inflation. HPI gains steadily +4–6%/yr. Developer launches concentrate in Bangkok mid-segment (2–5M THB). Rural-urban migration underpins demand.</span><span class="lang-zh" style="display:none">後GFC復甦加觀光業成長帶動房產榮景。曼谷公寓推盤激增，BoT升息至2.75%（2011年）對抗通膨。HPI每年穩定上漲4–6%，開發商推盤集中在曼谷中端市場（200–500萬泰銖），城鄉移民支撐需求。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">AUG–OCT 2011 · GREAT FLOOD</span><span class="lang-zh" style="display:none">2011年8–10月 · 世紀大洪災</span></div>
+      <div class="ev-title"><span class="lang-en">Flooding Destroys Industrial Estates — GDP Hit −10%</span><span class="lang-zh" style="display:none">洪水摧毀工業區，GDP衝擊達−10%</span></div>
+      <div class="ev-desc"><span class="lang-en">Worst flooding in 70 years inundates 7 central Thai provinces. Major industrial parks (Ayutthaya, Pathum Thani) submerged — global supply chains disrupted. Ayutthaya and northern Bangkok property values temporarily plunge. Government fast-tracks flood-free zone development in eastern seaboard.</span><span class="lang-zh" style="display:none">70年來最嚴重洪災淹沒泰國中部7個府，大城及巴吞他尼主要工業園區被淹——全球供應鏈中斷。大城和曼谷北部房產價值暫時重挫。政府快速推進東部海岸防洪工業區開發。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2016–2018 · CHINESE BUYER WAVE</span><span class="lang-zh" style="display:none">2016–2018 · 中國買家浪潮</span></div>
+      <div class="ev-title"><span class="lang-en">Chinese Investment Fuels Pattaya & Phuket Condos</span><span class="lang-zh" style="display:none">中國投資推動芭提雅和普吉島公寓</span></div>
+      <div class="ev-desc"><span class="lang-en">Chinese capital outflow restrictions ease post-2015 stock crash. Chinese buyers dominate Pattaya (50%+ of condo sales), Phuket, and central Bangkok. Developers target Chinese market with THB-denominated offshore marketing. HPI accelerates +6–8%. Government imposes developer restrictions on foreign-targeted projects in 2018.</span><span class="lang-zh" style="display:none">2015年股災後中國資本外流管制鬆動，中國買家主導芭提雅（超過50%公寓銷售）、普吉島和曼谷市中心。開發商以泰銖計價的境外行銷瞄準中國市場，HPI加速上漲6–8%。2018年政府對外資主導項目施加限制。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #8b5cf6">
+      <div class="ev-year" style="color:#8b5cf6"><span class="lang-en">JAN 2019 · LTV TIGHTENING</span><span class="lang-zh" style="display:none">2019年1月 · LTV收緊</span></div>
+      <div class="ev-title"><span class="lang-en">BoT Caps 3rd Property LTV at 70% — Condo Sales Drop</span><span class="lang-zh" style="display:none">BoT限制第三套房LTV上限70%，公寓銷售下滑</span></div>
+      <div class="ev-desc"><span class="lang-en">Bank of Thailand implements LTV limits: 2nd property = 90% LTV; 3rd+ = 70% LTV. Target: reduce speculative presale purchases and investment condos. Bangkok condo new launches drop 30% in H1 2019. Inventory overhang builds. Chinese buyer pullback (trade war + capital control tightening) compounds the correction.</span><span class="lang-zh" style="display:none">泰國銀行實施LTV上限：第二套房90%，第三套房以上70%。目標：減少預售投機和投資型公寓。2019年上半年曼谷公寓新推盤量減少30%，庫存積壓累積。中國買家撤退（貿易戰+資本管制收緊）加劇修正。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">2020–2021 · COVID — TOURISM COLLAPSES</span><span class="lang-zh" style="display:none">2020–2021 · COVID觀光崩盤</span></div>
+      <div class="ev-title"><span class="lang-en">39.8M Tourists → 6.7M — GDP −6.1%</span><span class="lang-zh" style="display:none">旅客從3,980萬→670萬，GDP衰退6.1%</span></div>
+      <div class="ev-desc"><span class="lang-en">Thailand's borders close March 2020. Tourism collapses −83% in arrivals. GDP −6.1% — worst since 1997 AFC. BoT cuts to historic low 0.50% (May 2020). HPI flat to mild negative. Phuket, Koh Samui, Pattaya property market virtually frozen. Bangkok mid-range condos see quiet secondary market.</span><span class="lang-zh" style="display:none">泰國2020年3月關閉邊境，旅客入境量崩跌83%，GDP衰退6.1%——為1997年亞洲金融危機以來最差。BoT降至歷史低點0.50%（2020年5月）。HPI持平至輕微負成長。普吉島、蘇梅島、芭提雅房市幾乎凍結，曼谷中端公寓二手市場也趨於平靜。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2022–2023 · TOURISM REOPENING</span><span class="lang-zh" style="display:none">2022–2023 · 觀光重開邊境</span></div>
+      <div class="ev-title"><span class="lang-en">11.1M (2022) → 28M (2023) — Resort Markets Revive</span><span class="lang-zh" style="display:none">旅客1,110萬（2022）→2,800萬（2023），度假市場復甦</span></div>
+      <div class="ev-desc"><span class="lang-en">Thailand fully reopens Nov 2022. Tourist arrivals recover to 28M in 2023 — still 70% of pre-COVID peak. BoT hikes to 2.50% (2023) — first hike since 2018. HPI recovers slowly. Chinese tourists remain weak (8M vs 11M in 2019) as China economic slowdown damps outbound. EEC (Eastern Economic Corridor) drives Chonburi/Rayong demand.</span><span class="lang-zh" style="display:none">泰國於2022年11月全面重開邊境，旅客2023年回升至2,800萬——仍僅達COVID前高峰的70%。BoT升息至2.50%（2023年），為2018年以來首次升息。HPI緩慢回升。中國旅客依然疲弱（800萬 vs 2019年的1,100萬），因中國經濟放緩壓抑出境旅遊。東部經濟走廊（EEC）帶動春武里/羅勇需求。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">FEB 2025 · BoT SURPRISE CUT</span><span class="lang-zh" style="display:none">2025年2月 · BoT意外降息</span></div>
+      <div class="ev-title"><span class="lang-en">Rate Cut to 2.00% on Growth Concerns</span><span class="lang-zh" style="display:none">因應成長憂慮降息至2.00%</span></div>
+      <div class="ev-desc"><span class="lang-en">BoT cuts 25bp to 2.00% citing weak domestic demand, subdued inflation (0.8%), and tourism recovery still below target. LTV measures partially relaxed for 2024–25 to support market. Bangkok luxury segment gains traction from HNW Southeast Asians. Chinese developers (e.g., Country Garden JVs) pause projects on parent distress. US tariff threat adds export headwind.</span><span class="lang-zh" style="display:none">BoT降息25bp至2.00%，原因是國內需求疲弱、通膨溫和（0.8%），觀光復甦仍低於目標。2024–25年部分放寬LTV措施以支撐市場。曼谷豪宅區受東南亞高淨值人士追捧而有所提振。中國開發商（如碧桂園合資項目）因母公司困境而暫停項目。美國關稅威脅帶來出口逆風。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#d97706;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#d97706;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook — Trough → Recovery</span><span class="lang-zh" style="display:none">當前週期展望 — 谷底→復甦</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">BoT rate cut (2.00%) — easing financing conditions</span><span class="lang-zh" style="display:none">BoT降息（2.00%）——融資條件改善</span></li>
+          <li><span class="lang-en">LTV relaxation for 2024–25 supports entry-level buyers</span><span class="lang-zh" style="display:none">2024–25年LTV放寬支撐首購族</span></li>
+          <li><span class="lang-en">EEC investment driving Chonburi/Rayong industrial property</span><span class="lang-zh" style="display:none">EEC投資帶動春武里/羅勇工業房產</span></li>
+          <li><span class="lang-en">Luxury segment supported by wealthy regional buyers</span><span class="lang-zh" style="display:none">豪宅區受地區富裕買家支撐</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Bangkok condo oversupply — high unsold inventory in 2020–23 launches</span><span class="lang-zh" style="display:none">曼谷公寓供過於求，2020–23年推盤未銷庫存高企</span></li>
+          <li><span class="lang-en">Chinese buyer absence — structural, not just cyclical</span><span class="lang-zh" style="display:none">中國買家缺席——結構性而非僅週期性</span></li>
+          <li><span class="lang-en">GDP growth 2.5% — well below Thailand's 4–5% potential</span><span class="lang-zh" style="display:none">GDP成長2.5%，遠低於泰國4–5%潛力</span></li>
+          <li><span class="lang-en">US tariffs threatening manufacturing export sector</span><span class="lang-zh" style="display:none">美國關稅威脅製造業出口部門</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: Bank of Thailand (BoT policy rate, Housing Price Index — bot.or.th), NESDC (GDP, economic outlook — nesdc.go.th), NSO Thailand (CPI, Labour Force Survey — nso.go.th), Tourism Authority of Thailand (tourist arrivals — tat.or.th). Note: BoT Housing Price Index series (base 2012=100) — 2008–2011 back-interpolated from confirmed 2012 base; full verified series from 2012. HPI values are approximate due to limited historical public release. 2025 data are Q1 actuals or trend estimates.</span>
+    <span class="lang-zh" style="display:none">來源：泰國銀行（BoT政策利率、住宅價格指數 · bot.or.th）、NESDC（GDP及經濟展望 · nesdc.go.th）、泰國NSO（CPI、勞動力調查 · nso.go.th）、泰國觀光局（旅客入境 · tat.or.th）。注意：BoT住宅價格指數序列（2012=100基期）——2008–2011為從2012確認基期回溯內插，完整驗證序列從2012年起。因歷史公開資料有限，HPI值為近似值。2025年數據為Q1實際值或趨勢估算。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, sources: BoT / NESDC / NSO) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+/* BoT Housing Price Index (approx, base 2012=100) */
+/* Confirmed: 2012=100; trend from BoT reports. 2008–2011 back-interpolated. Post-2019 softening per BoT data. */
+var hpi = [83,85,88,94,100,105,110,116,120,127,135,138,136,137,140,146,155,162];
+
+/* Chart 1: Monetary */
+/* BoT policy rate (year-end) — bot.or.th */
+var botRate    = [2.75,1.25,2.00,3.50,2.75,2.25,2.00,1.50,1.50,1.50,1.75,1.25,0.50,0.50,0.50,2.50,2.50,2.00];
+/* Thai commercial bank average MLR (approximate) */
+var mortRate   = [6.50,5.50,5.50,6.00,6.00,6.00,5.75,5.50,5.25,5.00,5.25,5.00,4.50,4.00,4.00,5.00,5.50,5.25];
+/* NSO CPI YoY% annual avg — nso.go.th */
+var cpiYoy     = [5.5,-0.9,3.3,3.8,3.0,2.2,1.9,-0.9,0.2,0.7,1.1,0.7,-0.8,1.2,6.1,1.2,0.4,0.8];
+
+/* Chart 2: Real Economy */
+/* NESDC real GDP YoY% */
+var gdpGrowth  = [2.5,-2.3,7.5,0.1,7.2,2.8,1.0,3.1,3.4,4.2,4.2,2.4,-6.1,1.5,2.6,1.9,2.7,2.5];
+/* NSO Labour Force unemployment % (formal sector, traditionally very low in Thailand) */
+var unemployRate = [1.4,1.5,1.0,0.7,0.6,0.7,0.8,0.9,1.0,1.2,1.1,1.0,1.9,1.5,1.2,1.0,1.0,0.9];
+/* Tourist arrivals in millions — TAT */
+var touristM   = [14.6,14.1,15.9,19.2,22.4,26.5,24.8,29.9,32.6,35.4,38.3,39.8,6.7,0.4,11.1,28.2,34.8,35.0];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × HPI ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC Shock',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(22,163,74,0.07)'},  label:{formatter:isZh?'復甦榮景':'Recovery Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2018'}],
+    [{xAxis:'2019',itemStyle:{color:'rgba(217,119,6,0.07)'}, label:{formatter:isZh?'LTV收緊':'LTV Tighten',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(220,38,38,0.08)'},  label:{formatter:isZh?'COVID觀光崩盤':'COVID Shock',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2022'}],
+    [{xAxis:'2023',itemStyle:{color:'rgba(217,119,6,0.07)'},  label:{formatter:isZh?'緩慢復甦':'Slow Recovery',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2011',label:{formatter:isZh?'世紀洪災':'Great Flood',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2019',label:{formatter:isZh?'BoT LTV收緊':'LTV Tighten',color:'#8b5cf6',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#8b5cf6',type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'COVID降息':'COVID Cut',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2025',label:{formatter:isZh?'BoT降息':'BoT Cut',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:80,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-4,max:10,interval:2,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:70,max:180,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'住宅價格指數':'Housing Price Index',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'BoT政策利率':'BoT Policy Rate',type:'line',data:botRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'商業銀行貸款利率':'Lending Rate (MLR)',type:'line',data:mortRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpiYoy,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'住宅價格指數':'Housing Price Index',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy × HPI ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gdpBarData = gdpGrowth.map(function(v){return {value:v,itemStyle:{color:v>=0?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(22,163,74,0.07)'},  label:{formatter:isZh?'復甦榮景':'Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2018'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(220,38,38,0.08)'},  label:{formatter:isZh?'COVID崩盤':'COVID',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2022'}]
+  ];
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:80,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:-10,max:50,interval:10,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'GDP%/旅客(百萬)':'GDP%/Tourists(M)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:70,max:180,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'住宅價格指數':'Housing Price Index',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GDP YoY%':'GDP YoY%',type:'bar',data:gdpBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'失業率%':'Unemployment%',type:'line',data:unemployRate,yAxisIndex:0,lineStyle:{color:C.red,width:1.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'旅客入境(百萬)':'Tourist Arrivals (M)',type:'line',data:touristM,yAxisIndex:0,lineStyle:{color:C.muted,width:1.5,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'住宅價格指數':'Housing Price Index',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

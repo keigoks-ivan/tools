@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valuation Monitor | Malaysia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}</style>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q3 2025 / Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2025年Q3 / 2026年Q1</span></span>
+      <h1><span class="lang-en">Valuation Monitor</span><span class="lang-zh" style="display:none">估值監測</span></h1>
+      <p class="subtitle"><span class="lang-en">Is Malaysian Property Cheap or Expensive?</span><span class="lang-zh" style="display:none">馬來西亞房產是便宜還是昂貴？多框架估值分析</span></p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">Median Multiple</span><span class="lang-zh" style="display:none">房價所得比</span></div>
+        <div class="kpi-value">4.3x</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Seriously Unaffordable</span><span class="lang-zh" style="display:none">嚴重不可負擔</span></span>
+        <div class="kpi-source">DOSM 2022</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">Gross Rental Yield</span><span class="lang-zh" style="display:none">租金收益率</span></div>
+        <div class="kpi-value">5.19%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">↑ vs Q1 2025</span><span class="lang-zh" style="display:none">↑ 較Q1上升</span></span>
+        <div class="kpi-source">GPG Q1 2026</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">Yield Spread vs OPR</span><span class="lang-zh" style="display:none">利差（收益率-OPR）</span></div>
+        <div class="kpi-value">+2.44%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">relative value</span><span class="lang-zh" style="display:none">相對價值</span></span>
+        <div class="kpi-source">Calculated</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Real Price Growth</span><span class="lang-zh" style="display:none">實質房價增長率</span></div>
+        <div class="kpi-value">−1.39%</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Q3 2025</span><span class="lang-zh" style="display:none">2025年Q3</span></span>
+        <div class="kpi-source">JPPH/DOSM</div>
+      </div>
+    </div>
+
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Yield Spread History</span><span class="lang-zh" style="display:none">利差歷史走勢</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Rental Yield minus OPR — Positive = relative value</span><span class="lang-zh" style="display:none">租金收益率減OPR——正值=相對價值</span></p>
+        <div style="position:relative;height:220px;"><div id="chart-spread" style="width:100%;height:100%"></div></div>
+        <div class="insight-box"><span class="lang-en">Spread &gt; 2% historically indicates relative value for yield investors. Current +2.44% is positive but compressed vs 2020–2021 peak.</span><span class="lang-zh" style="display:none">歷史上利差超過2%通常顯示收益型投資的相對價值。當前+2.44%為正向但較2020至2021年高峰有所收窄。</span></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Median Multiple by State (2022)</span><span class="lang-zh" style="display:none">各州房價所得比（2022年）</span></h3>
+        <div style="position:relative;height:280px;"><div id="chart-median-mult" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Price-to-Rent Ratio by City</span><span class="lang-zh" style="display:none">各城市房價租金比</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-p2r" style="width:100%;height:100%"></div></div>
+        <div class="insight-box"><span class="lang-en">P/R &gt; 25 = renting preferred; P/R &lt; 15 = buying preferred. KL at 21.7 is in the neutral zone.</span><span class="lang-zh" style="display:none">房價租金比&gt;25=租賃優先；&lt;15=購買優先。吉隆坡21.7處於中性區間。</span></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">MHPI Nominal vs Real</span><span class="lang-zh" style="display:none">房價指數：名義 vs 實質</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-mhpi-real" style="width:100%;height:100%"></div></div>
+        <div class="insight-box"><span class="lang-en">MHPI at 229.1 (Q3 2025, +0.1% YoY). Real house prices flat/declining since 2022 — no bubble signal.</span><span class="lang-zh" style="display:none">房價指數229.1點（2025年Q3，年增+0.1%）。2022年後實質房價停滯或下跌，無泡沫訊號。</span></div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">KL vs Asia Pacific Price-to-Rent</span><span class="lang-zh" style="display:none">吉隆坡 vs 亞太城市房價租金比</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Lower = more attractive for buyers</span><span class="lang-zh" style="display:none">越低=對買家越有吸引力</span></p>
+        <div style="position:relative;height:280px;"><div id="chart-apac" style="width:100%;height:100%"></div></div>
+        <div class="insight-box"><span class="lang-en">KL remains significantly undervalued vs regional peers on a price-to-rent basis.</span><span class="lang-zh" style="display:none">以房價租金比衡量，吉隆坡相對區域同儕仍顯著低估。</span></div>
+      </div>
+    </div>
+
+    <h2 class="section-heading"><span class="lang-en">Valuation Framework Summary</span><span class="lang-zh" style="display:none">估值框架總結</span></h2>
+    <div class="summary-grid">
+      <div class="summary-card green-left">
+        <h4><span class="lang-en">Framework 1: Yield Spread</span><span class="lang-zh" style="display:none">框架一：利差分析</span></h4>
+        <p><span class="lang-en">Spread +2.44% → <strong>Relative Value</strong><br>Rental yield exceeds borrowing cost proxy. Positive carry for leveraged investors.</span><span class="lang-zh" style="display:none">利差+2.44% → <strong>相對價值</strong><br>租金收益率超過借貸成本代理指標。槓桿投資者可獲正向持有收益。</span></p>
+      </div>
+      <div class="summary-card red-left">
+        <h4><span class="lang-en">Framework 2: Affordability</span><span class="lang-zh" style="display:none">框架二：可負擔性</span></h4>
+        <p><span class="lang-en">National 4.3x → <strong>Structural Pressure</strong><br>Above Demographia "seriously unaffordable" threshold. Income growth needed to close gap.</span><span class="lang-zh" style="display:none">全國4.3倍 → <strong>結構性壓力</strong><br>超過Demographia「嚴重不可負擔」標準。需要收入增長來縮小差距。</span></p>
+      </div>
+      <div class="summary-card green-left">
+        <h4><span class="lang-en">Framework 3: Regional P/R</span><span class="lang-zh" style="display:none">框架三：區域房價租金比</span></h4>
+        <p><span class="lang-en">KL 21.7 vs HK 50, SG 40 → <strong>Undervalued Regionally</strong><br>Malaysia offers significantly better value per rent-dollar vs APAC peers.<br>New 8% stamp duty from Jan 2026 reduces foreign demand at the margin.</span><span class="lang-zh" style="display:none">吉隆坡21.7 vs 香港50、新加坡40 → <strong>區域估值偏低</strong><br>馬來西亞每單位租金的房價在亞太同儕中顯著更具價值。<br>2026年1月起實施外國買家8%印花稅，邊際性抑制外需。</span></p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">Global Property Guide Q1 2026 &middot; DOSM 2022 &middot; JPPH Q3 2025 &middot; BNM &middot; Numbeo 2025<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">Global Property Guide 2026年Q1 &middot; DOSM 2022 &middot; JPPH 2025年Q3 &middot; BNM &middot; Numbeo 2025<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:   '#1e3a5f',
+    green:  '#16a34a',
+    orange: '#d97706',
+    red:    '#dc2626',
+    blue:   '#2563eb',
+    muted:  '#5a7a9a',
+    grid:   '#e8f0f9',
+    text:   '#1e3a5f'
+  };
+
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+
+  var baseGrid = { left: 50, right: 20, top: 40, bottom: 30, containLabel: true };
+
+  var baseTooltip = {
+    trigger: 'axis',
+    backgroundColor: '#fff',
+    borderColor: '#ccd9e8',
+    borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+
+  var baseLegend = {
+    top: 8,
+    textStyle: baseText,
+    icon: 'circle',
+    itemWidth: 8,
+    itemHeight: 8
+  };
+
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+  }
+
+  var charts = [];
+
+  window.addEventListener('load', function(){
+    // chart-spread: Yield Spread History (Rental Yield vs OPR)
+    var cSpread = echarts.init(document.getElementById('chart-spread'));
+    charts.push(cSpread);
+    cSpread.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Rental Yield %','OPR %'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025Q3']
+      }),
+      yAxis: mkAxis({ type: 'value', min: 1, max: 6, axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) }),
+      series: [
+        {
+          name: 'Rental Yield %',
+          type: 'line',
+          data: [5.1,5.0,4.9,4.9,4.8,4.6,4.7,4.9,5.16,5.24,5.19],
+          lineStyle: { color: C.green, width: 2 },
+          itemStyle: { color: C.green },
+          smooth: 0.3,
+          areaStyle: { color: 'rgba(22,163,74,0.08)' },
+          symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'OPR %',
+          type: 'line',
+          data: [3.25,3.0,3.0,3.25,3.0,1.75,1.75,2.75,3.0,3.0,2.75],
+          lineStyle: { color: C.red, width: 2, type: 'dashed' },
+          itemStyle: { color: C.red },
+          step: 'end',
+          symbol: 'circle', symbolSize: 4
+        }
+      ]
+    });
+
+    // chart-median-mult: Median Multiple by State
+    var cMM = echarts.init(document.getElementById('chart-median-mult'));
+    charts.push(cMM);
+    var mmLabels = ['Sabah','Sarawak','Kedah','Johor','Melaka','National','Penang','Kelantan','KL'];
+    var mmValues = [2.8, 3.1, 3.2, 3.8, 3.9, 4.3, 4.8, 5.1, 5.6];
+    cMM.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: { left: 80, right: 40, top: 10, bottom: 20, containLabel: false },
+      xAxis: mkAxis({ type: 'value', min: 0, max: 7 }),
+      yAxis: mkAxis({
+        type: 'category',
+        data: mmLabels,
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      }),
+      series: [{
+        type: 'bar',
+        data: mmValues.map(function(v){
+          var clr = v > 4.0 ? C.red : v > 3.0 ? C.orange : C.green;
+          return { value: v, itemStyle: { color: clr, borderRadius: [0,4,4,0] } };
+        }),
+        barMaxWidth: 25,
+        label: { show: true, position: 'right', formatter: '{c}x', fontSize: 10, fontFamily: 'Inter' },
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          lineStyle: { color: C.red, type: 'dashed', width: 1 },
+          label: { formatter: 'Unaffordable threshold', fontSize: 9, color: C.red },
+          data: [{ xAxis: 4.0 }]
+        }
+      }]
+    });
+
+    // chart-p2r: Price-to-Rent Ratio by City
+    var cP2R = echarts.init(document.getElementById('chart-p2r'));
+    charts.push(cP2R);
+    var p2rLabels = ['KL City','Penang','JB','Subang Jaya'];
+    var p2rValues = [21.7, 18.5, 15.2, 19.8];
+    cP2R.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: { left: 80, right: 40, top: 10, bottom: 20, containLabel: false },
+      xAxis: mkAxis({ type: 'value', min: 0, max: 30 }),
+      yAxis: mkAxis({
+        type: 'category',
+        data: p2rLabels.slice().reverse(),
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      }),
+      series: [{
+        type: 'bar',
+        data: p2rValues.slice().reverse().map(function(v){
+          return { value: v, itemStyle: { color: C.navy, borderRadius: [0,4,4,0] } };
+        }),
+        barMaxWidth: 30,
+        label: { show: true, position: 'right', formatter: '{c}', fontSize: 10, fontFamily: 'Inter' }
+      }]
+    });
+
+    // chart-mhpi-real: MHPI Nominal vs Real
+    var cMHPI = echarts.init(document.getElementById('chart-mhpi-real'));
+    charts.push(cMHPI);
+    cMHPI.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Nominal MHPI','Real MHPI'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025Q3']
+      }),
+      yAxis: mkAxis({ type: 'value' }),
+      series: [
+        {
+          name: 'Nominal MHPI',
+          type: 'line',
+          data: [165,174,180,187,194,195,197,208,218,229,234],
+          lineStyle: { color: C.navy, width: 2 },
+          itemStyle: { color: C.navy },
+          symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'Real MHPI',
+          type: 'line',
+          data: [128,133,135,137,140,142,142,147,152,157,159],
+          lineStyle: { color: C.muted, width: 2, type: 'dashed' },
+          itemStyle: { color: C.muted },
+          symbol: 'circle', symbolSize: 6
+        }
+      ]
+    });
+
+    // chart-apac: APAC Price-to-Rent
+    var cAPAC = echarts.init(document.getElementById('chart-apac'));
+    charts.push(cAPAC);
+    var apacLabels = ['Ho Chi Minh','KL','Bangkok','Tokyo','Singapore','Taipei','Hong Kong','Shanghai'];
+    var apacValues = [18, 21.7, 25, 37, 40, 47, 50, 59];
+    cAPAC.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: { left: 90, right: 50, top: 10, bottom: 20, containLabel: false },
+      xAxis: mkAxis({ type: 'value', min: 0, max: 65 }),
+      yAxis: mkAxis({
+        type: 'category',
+        data: apacLabels,
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      }),
+      series: [{
+        type: 'bar',
+        data: apacValues.map(function(v, i){
+          var clr;
+          if (apacLabels[i] === 'KL') clr = C.green;
+          else if (v <= 25) clr = C.green;
+          else if (v <= 40) clr = C.navy;
+          else if (v <= 50) clr = C.orange;
+          else clr = C.red;
+          return { value: v, itemStyle: { color: clr, borderRadius: [0,4,4,0] } };
+        }),
+        barMaxWidth: 25,
+        label: { show: true, position: 'right', formatter: '{c}x', fontSize: 10, fontFamily: 'Inter', fontWeight: 'bold', color: C.navy }
+      }]
+    });
+
+    setLang(localStorage.getItem('lang')||'en');
+  });
+
+  window.addEventListener('resize', function(){
+    charts.forEach(function(c){ c.resize(); });
+  });
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

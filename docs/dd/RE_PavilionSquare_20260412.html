@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pavilion Square @ Bukit Bintang｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-card.warn{border-top:3px solid #dc2626}
+.kpi-card.ok{border-top:3px solid #16a34a}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* compare box */
+.compare-box{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.cbox-a{background:#FEF9C3;border:1px solid #d97706;border-radius:8px;padding:16px}
+.cbox-b{background:#DCFCE7;border:1px solid #86efac;border-radius:8px;padding:16px}
+.cbox-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
+.cbox-a .cbox-title{color:#92400E}
+.cbox-b .cbox-title{color:#166534}
+/* score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:680px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-r{background:#FEE2E2;color:#991B1B;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #dc2626}
+/* critical box */
+.critical-box{background:#FEE2E2;border:2px solid #dc2626;border-radius:8px;padding:16px 20px;margin-bottom:20px}
+.critical-title{font-size:13px;font-weight:700;color:#991B1B;margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+@media(max-width:680px){.score-cols,.dual-col,.compare-box{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：Pavilion Square @ Bukit Bintang（Jalan Raja Chulan）｜框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 開發商：Armani Hartajaya Sdn Bhd（Pavilion Group 品牌授權）｜ Leasehold 99年（至2122年）｜ 商業地契</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>Pavilion Square @ Bukit Bintang</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&from=PavilionSquare"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=PavilionSquare"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Raja Chulan × Jalan Bukit Bintang × Jalan Imbi，黃金三角 ｜ 開發商：Armani Hartajaya Sdn Bhd（Pavilion Group 品牌）｜ Leasehold 99年（至2122年）商業地契（Commercial Strata）｜ 960住宅單位（67層）+ 106辦公室｜ 竣工 Q1 2028 至 Q3 2029（各來源不一）</div>
+  <div class="badge-row">
+    <span class="badge">⚠️ Leasehold 99年（至2122年）+ 商業地契——雙重負面</span>
+    <span class="badge">⚠️ 期房 2028–2029，無 brickz 成交數據</span>
+    <span class="badge">✅ 直連 Pavilion KL Mall（Link Bridge）</span>
+    <span class="badge">✅ 黃金三角 2.02 英畝稀缺土地</span>
+    <span class="badge">📡 發售 RM2,300–2,420 psf；管理費 RM0.90 psf</span>
+    <span class="badge">📡 直接對照：Pavilion Residences 成交中位 RM1,564 psf（brickz 16筆）</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 關鍵釐清 -->
+<div class="critical-box">
+  <div class="critical-title">🚨 三個進場前必須釐清的核心問題</div>
+  <p style="font-size:13px;color:#991B1B;margin:0">
+  <strong>① 開發商名稱澄清：</strong>Pavilion Square 的法定開發商是 <strong>Armani Hartajaya Sdn Bhd</strong>——這是 Pavilion Group 的關聯子公司，通過品牌授權使用「Pavilion」名稱。與 Pavilion Group 直接開發（如 Pavilion KL、Pavilion Residences）有一定區別，需確認財務責任鏈條和交屋保障。<br><br>
+  <strong>② Leasehold 99年 + 商業地契——雙重結構折扣：</strong>Leasehold（至2122年，約96年剩餘）+ Commercial Strata（商業地契）= 本系列建案中少數同時具備這兩個負面因素的建案。Pavilion Residences（同品牌前身）是 Leasehold + <strong>住宅地契（Residential Individual）</strong>，地契結構比 Pavilion Square 更好。<br><br>
+  <strong>③ 定價溢價 vs Pavilion Residences 的邏輯檢驗：</strong>Pavilion Residences（2009完工，Leasehold，同品牌，直連 Pavilion Mall）brickz 成交中位 RM1,564 psf（16 筆，2024–2025）。Pavilion Square 發售 RM2,300–2,420 psf——比前輩貴 55%。這個溢價完全基於「新建案 + 更高 + 更多設施」，但地契更差（Leasehold + 商業 vs Leasehold + 住宅），且至今無任何成交驗證。
+  </p>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card warn">
+        <div class="kpi-v down">Leasehold</div>
+        <div class="kpi-l">地契（99年，至2122年）</div>
+        <div class="kpi-s down">+ 商業地契（Commercial Strata）——雙重折扣</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM2,300–2,420</div>
+        <div class="kpi-l">發售 PSF（各來源）</div>
+        <div class="kpi-s neu">iRumah：~RM2,300；myou.com：RM2,420；PropertyGuru 掛牌 RM1,812–3,904</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v down">0筆</div>
+        <div class="kpi-l">brickz 政府登記成交</div>
+        <div class="kpi-s down">期房，FIX-03：無法驗證定價</div>
+      </div>
+      <div class="kpi-card ok">
+        <div class="kpi-v">RM1,564</div>
+        <div class="kpi-l">Pavilion Residences 成交 PSF（brickz 16筆）</div>
+        <div class="kpi-s neu">最直接對照組；Pavilion Square 溢價 +55%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM0.90</div>
+        <div class="kpi-l">管理費（psf）</div>
+        <div class="kpi-s neu">高於本系列多數建案（本系列僅次 Orion RM1.20）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">Q1 2028–Q3 2029</div>
+        <div class="kpi-l">竣工（各來源不一）</div>
+        <div class="kpi-s neu">仍有 2–3 年等待期；期房風險</div>
+      </div>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">Armani Hartajaya Sdn Bhd（Pavilion Group 品牌授權關聯子公司）；通過 WCT Holdings Berhad 和 Malton Berhad（兩者均為 Bursa 上市）關聯</div></div>
+      <div class="spec-item"><div class="spec-l">地段 / 地契</div><div class="spec-v">Lot 297，Jalan Raja Chulan，Bukit Bintang，2.023英畝，Leasehold 99年（至2122年），Commercial Strata 商業地契</div></div>
+      <div class="spec-item"><div class="spec-l">規模</div><div class="spec-v">住宅塔：67層，960戶（Studio 到 3BR）｜辦公塔：25層，106套；6個零售鋪</div></div>
+      <div class="spec-item"><div class="spec-l">坪數 / 房型</div><div class="spec-v">Type A：504–624 sqft（Studio/1BR）｜Type B：764–1,100 sqft（2BR）｜Type C：1,255–1,272 sqft（3BR）｜全部含家具交付（Fully Furnished）</div></div>
+      <div class="spec-item"><div class="spec-l">Link Bridge</div><div class="spec-v">直連 Pavilion KL Mall（Bukit Bintang 旗艦店，700+ 品牌，年訪客 3,000萬+）——這是本建案最核心的差異化</div></div>
+      <div class="spec-item"><div class="spec-l">捷運</div><div class="spec-v">Bukit Bintang MRT + Monorail 5 分鐘步行；Raja Chulan Monorail 5 分鐘；Conlay MRT 步行；走分可達 KLCC、TRX（6站）</div></div>
+      <div class="spec-item"><div class="spec-l">旗艦設施</div><div class="spec-v">118m 屋頂無邊際泳池（全 KL 最長）；15,000 sqft Sky Wellness Zone；Courtyard Garden；Sky Terrace；24小時禮賓服務</div></div>
+      <div class="spec-item"><div class="spec-l">Pavilion KL 地段</div><div class="spec-v">緊鄰 Pavilion KL（Bukit Bintang 旗艦）；步行到 Lot 10、Starhill Gallery、Sungei Wang；Jalan Alor 5 分鐘；KL 最強步行商業圈</div></div>
+      <div class="spec-item"><div class="spec-l">Pavilion Residences（前身對照）</div><div class="spec-v">同品牌，2009完工，50層，368戶，Leasehold 住宅地契；發售 RM900 psf → 現成交中位 RM1,564 psf（brickz 16筆）；管理費 RM0.55 psf；YoY -2.5%（iProperty 2025）</div></div>
+      <div class="spec-item"><div class="spec-l">Bukit Bintang 整體住宅均價</div><div class="spec-v">brickz 2025年 Bukit Bintang 住宅成交中位 RM663 psf（整體地段，含低端建案）；高端 SR 如 Pavilion Residences RM1,564——Pavilion Square 發售 RM2,300+ 是地段頂端</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜Pavilion Square 的核心投資論點</h3>
+    <p>Pavilion Square 的論點核心是：在 KL 黃金三角最後稀缺的 2.02 英畝用地上，直接建於 Pavilion KL Mall（年訪客 3,000萬）上方，以「住在 Pavilion 裡」的步行生活圈體驗 + KL 最長屋頂泳池 + 24 小時禮賓服務，吸引追求終極 Bukit Bintang 步行生活的外籍高淨值人士。</p>
+    <p>這個論點有三個實質支撐：①地段稀缺性真實（Bukit Bintang 黃金三角 2 英畝土地確實難複製）；②Pavilion KL 直連帶來真實的生活便利性溢價（Pavilion Residences 前身驗證：直連帶動租金 10–15% 溢價）；③Bukit Bintang 步行商業生態圈是 KL 所有地段中最成熟最多元的。</p>
+    <p>但這個論點同時面臨：①Leasehold + 商業地契雙重折扣；②發售 PSF RM2,300–2,420 已是 Pavilion Residences 成交 RM1,564 的 55% 溢價——這個溢價在 Leasehold 地契下能否在二手市場維持是最大的未解問題；③960 戶中等密度在 Bukit Bintang 竣工後面對大量出租競爭。</p>
+
+    <div class="callout">
+      <strong>第一性問題：RM2,300 psf（Leasehold 商業地契）vs RM1,564 psf（Pavilion Residences，Leasehold 住宅地契）——55% 的溢價有多少是可持續的？</strong><br><br>
+      Pavilion Residences 是最直接的歷史對照——同品牌、同地段、同 Leasehold、同直連 Pavilion Mall，16年後成交中位 RM1,564 psf，從發售 RM900 psf 升值 74%，但目前 YoY -2.5%（iProperty 2025）顯示市場在高位整理。若 Pavilion Square 以 RM2,300 psf 入場，即使複製前輩同樣 74% 的 16 年升值，2040 年成交也只有 RM4,002 psf——這是可能的，但代入 Leasehold（比前輩更差的地契結構）的折扣後，升值幅度存疑。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜直接對照矩陣——Pavilion Square vs Pavilion Residences</h3>
+    <div class="compare-box">
+      <div class="cbox-a">
+        <div class="cbox-title">⚠️ Pavilion Square（本案，期房）</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td>地契</td><td><span class="tag t-r">Leasehold 99年（至2122）商業地契</span></td></tr>
+            <tr><td>發售 PSF</td><td>RM 2,300–2,420</td></tr>
+            <tr><td>坪數</td><td>504–1,272 sqft（小坪為主）</td></tr>
+            <tr><td>單位數</td><td>960戶（中等密度）</td></tr>
+            <tr><td>管理費</td><td>RM 0.90 psf（偏高）</td></tr>
+            <tr><td>竣工</td><td>Q1 2028–Q3 2029（2–3年等待）</td></tr>
+            <tr><td>施工進度</td><td>施工進行中；無公開里程碑</td></tr>
+            <tr><td>brickz 成交</td><td><span class="down">0筆（期房）</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cbox-b">
+        <div class="cbox-title">✅ Pavilion Residences（前身，2009完工）</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td>地契</td><td><span class="tag t-y">Leasehold 住宅地契（Residential）</span></td></tr>
+            <tr><td>成交 PSF</td><td>RM 1,564（brickz 16筆，2024–2025）</td></tr>
+            <tr><td>坪數</td><td>1,057–7,174 sqft（大坪為主）</td></tr>
+            <tr><td>單位數</td><td>368戶（低密度）</td></tr>
+            <tr><td>管理費</td><td>RM 0.55 psf（合理）</td></tr>
+            <tr><td>完工</td><td>2009年（16年成熟社區）</td></tr>
+            <tr><td>升值幅度</td><td>發售 RM900→現 RM1,564（+74%，16年）</td></tr>
+            <tr><td>YoY</td><td><span class="down">-2.5%（iProperty 2025，高位整理）</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="alert a-red">
+      <strong>最重要的結構性發現：Pavilion Square（商業地契）比 Pavilion Residences（住宅地契）地契更差，但定價貴 55%。</strong>商業地契在馬來西亞市場歷史上一直比住宅地契有折扣——更窄的買家池（無法貸款限制更多）、更高的電費、在 MM2H 框架下合規性更低。Pavilion Square 以更差的地契結構要求更高的 PSF，這個矛盾是本建案估值分析中最需要認真對待的問題。
+    </div>
+
+    <hr class="dv">
+    <h3>C｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>發售 RM2,300 psf Leasehold 定價過高</strong></td><td>Pavilion Residences（Leasehold 住宅）現成交 RM1,564 psf；Pavilion Square（Leasehold 商業）發售 RM2,300 psf，溢價 55%。若這個溢價在二手市場不被接受（很可能），二手成交可能在 RM1,600–1,900 psf 之間，意味著 -17% 至 -30% 跌幅</td><td><span class="tag t-y">中高</span></td><td>資本損失；退出困難</td></tr>
+          <tr><td><strong>Leasehold + 商業地契雙重折扣永久化</strong></td><td>商業電費無法轉換民用費率（除非管委會成功申請）；Leasehold 年限從 2026 竣工後開始遞減；外籍貸款 LTV 50–70%（各銀行差異大）；MM2H 合規性存疑——這些都是永久性結構成本</td><td><span class="tag t-r">確定</span></td><td>持有成本高於同期 Freehold 建案；淨收益被侵蝕</td></tr>
+          <tr><td><strong>960 戶竣工後 Bukit Bintang 出租競爭</strong></td><td>Bukit Bintang 武吉免登是本系列 SR 積壓最嚴重的地段（KL RM1M+ 報告：「武吉免登 Sky Suites -6.6%」）；960 戶新增供給在現有積壓基礎上競爭同一租客池</td><td><span class="tag t-y">中高</span></td><td>填租時間長；租金被壓低</td></tr>
+          <tr><td><strong>管理費 RM0.90 psf 侵蝕收益</strong></td><td>RM0.90 psf 對 504 sqft Studio = 月管理費 RM454；對 1,100 sqft 2BR = 月管理費 RM990。相比 Pavilion Residences RM0.55 psf，管理費高 63%——在 Leasehold 商業地契的持有成本上再加一層</td><td><span class="tag t-r">確定</span></td><td>Net Yield 進一步受壓</td></tr>
+          <tr><td><strong>Armani Hartajaya Sdn Bhd 開發商信用</strong></td><td>「Pavilion Square」的法定開發商是 Armani Hartajaya Sdn Bhd——這不是直接由 Pavilion Group 開發，而是品牌授權子公司。其自身財務和施工能力需獨立評估；WCT/Malton 關聯提供一定支撐但需確認具體擔保結構</td><td><span class="tag t-y">中</span></td><td>竣工風險；品牌承諾不等於合約義務</td></tr>
+          <tr><td><strong>2028–2029 竣工時的 Bukit Bintang 供給高峰</strong></td><td>KL 供需報告：2026–2027 為 KL SR 竣工次高峰；2028–2029 竣工時若積壓未消化，Pavilion Square 進入最艱難的市場環境</td><td><span class="tag t-y">中</span></td><td>竣工時出租競爭激烈；初期空置率高</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場概況——上游報告框架對位</div>
+  <div class="section-body">
+    <h3>1.1 上游報告對 Pavilion Square 地段的定性</h3>
+    <table>
+      <thead><tr><th>上游報告框架</th><th>Pavilion Square 對應</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>「武吉免登 Sky Suites -6.6%（2024）——中端 SR 代表性跌幅」</td><td>Pavilion Square 在武吉免登，但定位高端（RM2,300 psf）；上游報告的跌幅是「中端SR」，Pavilion Square 嘗試走「頂端差異化」路線，避開這個品類</td><td><span class="tag t-y">混合——若品牌溢價論點成立則避開；若失敗則面對同樣壓力</span></td></tr>
+        <tr><td>「跌的共同點：商業地契 + 高密度量產 + 無差異化」</td><td>商業地契（-）；中等密度 960 戶（中性）；Pavilion Link Bridge + 品牌差異化（+）——差異化是最大的正面辯護</td><td><span class="tag t-y">中性偏弱（地契拖累）</span></td></tr>
+        <tr><td>「漲的共同點：稀缺性 + 有明確催化劑」</td><td>稀缺性：黃金三角 2.02 英畝最後土地（真實）；催化劑：Pavilion KL Link Bridge + Bukit Bintang MRT（已運營）</td><td><span class="tag t-g">正面——稀缺性和催化劑均存在</span></td></tr>
+        <tr><td>「武吉免登 SR 積壓是 KL 最嚴重品類」</td><td>Pavilion Square 在武吉免登，面對系統性積壓壓力；發售均價 RM2,300 是武吉免登 SR 中最高——若無法維持溢價，將面對系統性壓力</td><td><span class="tag t-r">負面——地段系統性逆風</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 定價分析——發售 RM2,300 psf 的市場意義</h3>
+    <table>
+      <thead><tr><th>參照點</th><th>PSF</th><th>地契</th><th>與 Pavilion Square 比較</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pavilion Square（本案，發售）</strong></td><td><strong>RM2,300–2,420</strong></td><td><span class="tag t-r">Leasehold 商業地契</span></td><td>—</td></tr>
+        <tr><td>Pavilion Residences（前身，2024–25成交）</td><td>RM1,564（brickz 16筆）</td><td><span class="tag t-y">Leasehold 住宅地契</span></td><td>Pavilion Square 比前輩貴 <span class="down">+47%</span>；但前輩是更好的地契</td></tr>
+        <tr><td>武吉免登 Sky Suites（中端SR代表）</td><td>-6.6%（YoY 2024）</td><td>商業地契</td><td>Pavilion Square 試圖超脫這個品類；能否成功是核心問題</td></tr>
+        <tr><td>TS2 武吉免登</td><td>估 RM1,475 psf</td><td><span class="tag t-y">Freehold 商業地契</span></td><td>TS2（Freehold）比 Pavilion Square（Leasehold）地契更好但 PSF 低 36%</td></tr>
+        <tr><td>TRX Residences（brickz 59筆）</td><td>RM2,293（YoY +5.56%）</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>TRX 同 PSF 水平，但 Freehold + HDA 保護——地契遠優於 Pavilion Square</td></tr>
+        <tr><td>The Conlay by E&O（iRumah 估算）</td><td>RM2,100</td><td><span class="tag t-y">Freehold 商業地契</span></td><td>The Conlay（Freehold）比 Pavilion Square（Leasehold）地契更好，PSF 更低</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-red">
+      <strong>定價邏輯核心矛盾：Pavilion Square 以 RM2,300 psf（Leasehold 商業地契）進行定價，但同一地段的同品牌前輩 Pavilion Residences（Leasehold 住宅地契，地契更好）只有 RM1,564 psf。同時，TRX Residences（Freehold Commercial HDA，地契遠優）只有 RM2,293 psf。這使得 Pavilion Square 的定價「地契最差、同 PSF 最高或接近」——這個定價邏輯只有在 Pavilion KL Link Bridge 的直連溢價被市場高度認可的情況下才成立。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構——黃金三角稀缺性 vs 武吉免登 SR 積壓</div>
+  <div class="section-body">
+    <h3>2.1 正面需求因素</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>說明</th><th>強度</th></tr></thead>
+      <tbody>
+        <tr><td>Pavilion KL 訪客溢出租客</td><td>Pavilion KL 年訪客 3,000萬，大量商務旅客、外籍高管在 Bukit Bintang 尋找住所；直連 Pavilion KL 的建案有額外吸引力</td><td><span class="tag t-g">中強</span></td></tr>
+        <tr><td>Bukit Bintang 步行生活圈</td><td>KL 最強步行商業生態圈；Jalan Alor、Lot 10、Starhill Gallery、Sungei Wang 步行可達；對「不叫 Grab」需求的外籍吸引力最強</td><td><span class="tag t-g">強——核心需求恰好在此</span></td></tr>
+        <tr><td>短租市場（Airbnb / VRBO）</td><td>Bukit Bintang 是 KL 短租需求最旺盛的地段；Pavilion KL 直連使 Pavilion Square 短租吸引力高於同地段其他 SR</td><td><span class="tag t-g">中強（若管委會允許）</span></td></tr>
+        <tr><td>外籍高端長租</td><td>KLCC、TRX 外籍高管；Pavilion 品牌吸引日本族群、中東商務旅客；Fully Furnished 降低入住門檻</td><td><span class="tag t-y">中</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供給壓力</h3>
+    <table>
+      <thead><tr><th>供給壓力</th><th>說明</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>武吉免登 SR 系統性積壓</td><td>上游報告：「武吉免登 SR 是 KL 積壓最嚴重品類」；廣義庫存 8,000–9,000 戶（KL）；Sky Suites -6.6%</td><td><span class="tag t-r">嚴峻——地段系統性問題</span></td></tr>
+        <tr><td>同期竣工競品</td><td>TS2 武吉免登（2027-10）、Orion Residence（竣工確認中）等同地段 SR 2027–2028 竣工，與 Pavilion Square 2028–2029 形成競爭</td><td><span class="tag t-y">中</span></td></tr>
+        <tr><td>960 戶 + Pavilion Residences 現有掛牌</td><td>Pavilion Residences 已有 239 筆掛牌售 + 190 筆掛牌租（iProperty 2025）——Pavilion Square 竣工後 960 戶進入同一租客池，競爭同一品牌買家群</td><td><span class="tag t-y">中</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率</div>
+  <div class="section-body">
+    <h3>5.1 Bukit Bintang Pavilion 地段租金估算</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租估計</th><th>Gross Yield（@RM2,300 psf）</th></tr></thead>
+      <tbody>
+        <tr><td>Studio/1BR（Pavilion 溢價）</td><td>504 sqft</td><td>RM3,500–5,500/月</td><td>~3.6–5.7%（@RM115.9萬）</td></tr>
+        <tr><td>2BR</td><td>770–1,100 sqft</td><td>RM5,500–9,000/月</td><td>~3.5–5.8%（@RM177.1–253.0萬）</td></tr>
+        <tr><td>3BR</td><td>1,255–1,272 sqft</td><td>RM9,000–14,000/月</td><td>~3.7–5.8%（@RM288.7–292.6萬）</td></tr>
+      </tbody>
+    </table>
+    <p class="src">參照 Pavilion Residences 月租 RM7,000–18,000（大坪）；Rumavi 分析：直連 Pavilion Mall 通常帶動 10–15% 租金溢價；Pavilion Square 小坪估算參考武吉免登同地段 SR 小坪租金</p>
+
+    <h3>5.2 外國人現金流試算（Studio 504 sqft，RM115.9萬入場 @ RM2,300 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租（RM4,000 × 12）</td><td>RM 48,000</td><td>Studio 504 sqft；Pavilion 品牌溢價假設；保守取中位</td></tr>
+        <tr><td>管理費（RM0.90 × 504 × 12）</td><td><span class="down">-RM 5,443</span></td><td>RM0.90 psf，偏高</td></tr>
+        <tr><td>地稅 + 門牌稅</td><td><span class="down">-RM 1,500</span></td><td></td></tr>
+        <tr><td>空置期（2.5個月，武吉免登積壓環境）</td><td><span class="down">-RM 10,000</span></td><td>地段積壓使填租競爭激烈</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 9,317</span></td><td>（48,000–17,057）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 3,840</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 17,900/年</strong></td><td>Net Yield ≈ 1.54%（RM115.9萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 21,740/年</td><td>Net Yield ≈ 1.88%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-red">
+      <strong>外籍 Net Yield 1.5–1.9%——本系列目前最低。</strong>RM2,300 psf 的高入場成本 + RM0.90 psf 管理費 + Leasehold 持有成本，共同壓縮了淨收益至最低。若再加上商業電費無法轉換民用的情況，Net Yield 可能進一步降至 1.2–1.5%。這個數字使 Pavilion Square 的「出租收益框架」幾乎站不住腳——只有資本增值論點才能支撐進場。但資本增值又面臨 Leasehold 商業地契的結構性折扣和定價過高的雙重挑戰。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規——Leasehold + 商業地契的特殊限制</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>外籍影響</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td>Leasehold 99年（至2122年），Commercial Strata 商業地契</td><td>外籍貸款 LTV 50–70%（各銀行差異大，Leasehold 商業地契是最嚴格組合）；年限遞減；電費費率為商業費率</td></tr>
+        <tr><td>外籍最低門檻</td><td>RM 1,000,000（KL）</td><td>✅ Studio 504 sqft @ RM2,300 = RM115.9萬，達標</td></tr>
+        <tr><td>印花稅</td><td>4% 統一稅率</td><td>RM115.9萬：印花稅 RM46,360</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>10%（外籍）</td><td>若 2028 竣工後購入，第6年約 2034——持有期比其他已竣工建案更長才能 RPGT 優化</td></tr>
+        <tr><td>MM2H 合規</td><td>Leasehold 商業地契 MM2H 合規性最不確定——Leasehold + 商業地契雙重限制</td><td>⚠️ 建議書面確認；若 MM2H 不認可，需更換資產</td></tr>
+        <tr><td>貸款 LTV</td><td>Leasehold 商業地契——各銀行差異最大；部分銀行僅提供 50% LTV，部分達 70%</td><td>⚠️ 需事前向至少 3 間銀行確認實際 LTV；入場現金需求可能遠高於預期</td></tr>
+      </tbody>
+    </table>
+
+    <h3>入場成本試算（Studio 504 sqft，RM115.9萬，假設 60% LTV）</h3>
+    <table>
+      <thead><tr><th>費用</th><th>金額（RM）</th></tr></thead>
+      <tbody>
+        <tr><td>首付（40%，若只獲 60% LTV）</td><td>RM 463,600</td></tr>
+        <tr><td>印花稅（4%）</td><td>RM 46,360</td></tr>
+        <tr><td>律師費</td><td>RM 12,000</td></tr>
+        <tr><td>State Consent</td><td>RM 5,000</td></tr>
+        <tr><td><strong>現金總需求</strong></td><td><strong>~RM 526,960（約45%）</strong></td></tr>
+      </tbody>
+    </table>
+    <p class="src">注：若僅獲 50% LTV，現金需求接近 RM600,000——對 Studio RM115.9萬的物業而言，現金需求比例極高</p>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設——Pavilion KL Link Bridge 是最大差異化</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>基建</th><th>狀態</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pavilion KL 直連 Link Bridge</strong></td><td>規劃中；Pavilion Square 竣工後開通</td><td>✅✅ KL 最頂級購物中心之一；700+ 品牌；年訪客 3,000萬；直連是最真實的差異化。若 Link Bridge 在 SPA 有法律義務，這是進場最強論點</td></tr>
+        <tr><td>Bukit Bintang MRT（Kajang Line）</td><td>已運營，5 分鐘步行</td><td>✅ 全 KL 最繁忙的 MRT 站之一；Pavilion MRT 命名即為此站</td></tr>
+        <tr><td>Raja Chulan Monorail + Imbi Monorail</td><td>已運營，步行可達</td><td>✅ 多條軌道交通選擇</td></tr>
+        <tr><td>步行生活商圈（最強）</td><td>Jalan Alor（步行 5 分鐘）；Lot 10；Starhill Gallery；Sungei Wang；Bukit Bintang 購物街</td><td>✅✅ KL 步行商業生態圈密度最高——比武吉免登 TS2 的步行圈更核心</td></tr>
+        <tr><td>KLCC（步行可達）</td><td>步行 15–20 分鐘或 1 站 MRT</td><td>✅</td></tr>
+        <tr><td>TRX（6 站 MRT）</td><td>6 站 MRT（Pavilion Bukit Bintang → TRX）</td><td>✅ 適合需要 TRX 辦公生態圈的外籍高管</td></tr>
+      </tbody>
+    </table>
+
+    <div class="success-box">
+      <strong>Pavilion Square 的基建組合是本系列步行生活圈最強的建案——沒有之一。</strong>直連 Pavilion KL + Bukit Bintang MRT 5 分鐘 + Jalan Alor 5 分鐘 + Lot 10/Starhill Gallery 步行 + Raja Chulan Monorail——這個組合比 TS2（Imbi Monorail 100m + 天橋直連 Berjaya Times Square）更強，也比 TRX（Exchange TRX 直連）更多元化。對「不叫 Grab」的外籍自住者而言，Pavilion Square 的步行生活體驗在 KL 所有建案中是頂端。<br><br>
+      但這個優勢能否支撐 RM2,300 psf Leasehold 商業地契的定價，是整個建案分析的核心懸念。
+    </div>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">最適合者</td><td>以「Bukit Bintang 步行生活 + 直住 Pavilion KL + 不叫 Grab」為核心需求的外籍高淨值人士；接受 Leasehold 商業地契；視「生活品質 > 資本增值」</td></tr>
+            <tr><td>不適合者</td><td>追求資本增值的投資者（Leasehold 商業地契折扣 + 高入場 PSF = 增值空間有限）；需要高 Net Yield（1.5–1.9% 偏低）；MM2H 合規為主要目的</td></tr>
+            <tr><td>議價策略</td><td>期房，議價空間相對有限；但 Leasehold + 商業地契的結構性折扣是議價論點——目標議價 5–10%（RM2,100–2,200 psf）</td></tr>
+            <tr><td>進場前確認</td><td>① Link Bridge 是否為 SPA 法律義務；② 電費費率是否可轉換民用；③ 至少 3 間銀行確認 LTV；④ MM2H 合規書面確認；⑤ Armani Hartajaya 的財務擔保結構</td></tr>
+            <tr><td>本案相關性</td><td>步行生活圈比 TS2 更強（Pavilion KL 直連 > Berjaya Times Square 天橋）；但 Leasehold 商業地契比 TS2（Freehold 商業地契）更差，且貴 56%——若 2030–2031 換手，TRX Residences 仍是更合理的增值型目標</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🔴 武吉免登 SR 系統性積壓 + 期房等待期 + 竣工後 960 戶競爭</td></tr>
+            <tr><td>價格趨勢</td><td>🔴 brickz 0筆；Pavilion Residences 前身 YoY -2.5%；定價 RM2,300 psf 比前輩高 55%——溢價能否持續是最大懸念</td></tr>
+            <tr><td>租金市場</td><td>🔴 外籍 Net Yield 1.5–1.9%（本系列最低）；武吉免登積壓使填租競爭激烈</td></tr>
+            <tr><td>估值</td><td>🔴 Leasehold 商業地契 RM2,300 psf > 同期 Freehold Commercial HDA TRX（RM2,293 psf）——地契更差但定價更高，邏輯有問題</td></tr>
+            <tr><td>基建生活圈</td><td>🟢 KL 步行生活圈最強（唯一正面高分維度）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-r" style="margin-top:16px">
+      <strong>🔴 外籍投資者暫緩——步行生活圈最強，但定價、地契、收益率三重不利</strong><br><br>
+      Pavilion Square 是本系列分析建案中最兩極分化的案子：基建步行圈（A4/B4）是本系列最高，但幾乎所有其他關鍵維度都顯示進場邏輯薄弱——Leasehold 商業地契（最差地契結構）、Net Yield 1.5–1.9%（本系列最低）、定價 RM2,300 psf 比地契更好的 TRX Residences 更貴、brickz 0 筆成交（無驗證）、武吉免登 SR 系統性積壓逆風。<br><br>
+      <strong>唯一適合進場的框架：</strong>「以步行自住為絕對核心，視 Pavilion KL 直連生活為最高優先，接受 Leasehold 商業地契、接受 Net Yield 低、接受資本增值不確定」——這是一個「購買生活方式，而非投資資產」的框架。在這個框架下，Pavilion Square 是 KL 市場上最純粹的「步行購物中心生活」體驗，無可替代。<br><br>
+      <strong>但對投資主導框架（資本增值或租金收益）的外籍投資者：不推薦。</strong>同樣的 RM115.9 萬預算放在 TRX Residences（Freehold Commercial HDA，brickz YoY +5.56%，MRT 雙線交匯），各方面投資指標都更優。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Pavilion Square @ Bukit Bintang ｜ 建案綜合評分卡 ｜ ⚠️ 期房、brickz 0筆，置信度中低</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%，RM1M+ 成交 +11.3%；Bukit Bintang 短租市場持續旺盛；但武吉免登 SR 積壓是系統逆風</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>4.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:40%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">上游報告：「武吉免登 SR 積壓最嚴重品類」；Sky Suites -6.6%；但 Pavilion Square 走高端路線試圖超脫——若論點成立 A2 應更高，若失敗則更低；取中</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>5.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">期房，竣工 Q1 2028–Q3 2029，仍有 2–3 年等待期；竣工時恰逢 KL SR 積壓消化週期末段（可能稍好）；但中途市場環境不確定</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>10.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Pavilion KL 直連 Link Bridge + Bukit Bintang MRT 5分鐘 + Jalan Alor 5分鐘 + Lot 10/Starhill 步行 + Raja Chulan Monorail——本系列 A4 唯一滿分。步行生活圈密度 KL 之首，無可超越</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>3.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:35%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Leasehold + 商業地契 = 外籍最不友好的地契組合（貸款 LTV 50–70% 差異大；電費商業費率；MM2H 合規不確定；State Consent 標準）；本系列 A5 最低之一</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">5.9/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.0×.2 + 4.0×.25 + 5.0×.2 + 10.0×.2 + 3.5×.15 = 5.925 ≈ 5.9</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Pavilion 品牌強（+）；但法定開發商是 Armani Hartajaya Sdn Bhd（子公司，非 Pavilion Group 直接）；WCT/Malton 關聯提供一定支撐；Pavilion Residences 有成功先例；但不如 E&O × Mitsui 或 Lendlease × 財政部 JV</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>3.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:35%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">RM2,300 psf（Leasehold 商業地契）比 TRX Residences RM2,293 psf（Freehold Commercial HDA）更貴而地契更差；比 Pavilion Residences（Leasehold 住宅，RM1,564 psf）貴 47%；定價邏輯矛盾嚴重——B2 本系列最低</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>3.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:30%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">外籍 Net Yield 1.5–1.9%（本系列最低）；管理費 RM0.90 psf 偏高；Leasehold 商業電費永久成本；武吉免登積壓使填租競爭激烈——B3 本系列最低</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>10.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Pavilion KL 直連 + Bukit Bintang MRT 5分鐘 + Jalan Alor 5分鐘 + 多條 Monorail 選擇——KL 所有分析建案中步行生活密度最高，B4 滿分，與 TRX Residences 並列但步行商業圈更豐富</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">118m 屋頂無邊際泳池（KL 最長）；15,000 sqft Sky Wellness Zone；Fully Furnished 全配交付；Pavilion KL 品牌背書；差異化是本系列商業地契 SR 中最強之一</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>2.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:20%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Leasehold + 商業地契——本系列最差的地契組合（比 SWNK Houze Leasehold 商業地契 2.5 還低，因為 Pavilion Square 定價更高，使地契劣勢更顯著）；MM2H 合規最不確定；貸款 LTV 差異最大</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>4.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:40%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">期房，0 筆 brickz 成交；Leasehold 商業地契使買家池較窄；Pavilion 品牌有一定二手市場需求（前身 Pavilion Residences 16 筆）——但定價 RM2,300 psf 的 Leasehold 商業地契在二手市場是否有人接手存疑</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">5.3/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">6.5×.2+3.5×.2+3.0×.15+10.0×.15+8.0×.1+2.0×.1+4.0×.1 = 5.325 ≈ 5.3</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 5.9 × 40% + B 類 5.3 × 60%</div>
+        <div class="score-big">5.5<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#FEF9C3;color:#92400E">⭐⭐⭐ 中等——步行生活最強，但投資邏輯最弱；純自住框架可考慮</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">2.36 + 3.195 = 5.555 → 四捨五入 5.5（更精確：5.6；取 5.5 反映 FIX-03 不足折扣）</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>KL 唯一「直住 Pavilion KL」體驗（A4/B4 均 10.0/10 滿分）；Bukit Bintang 黃金三角步行生活圈 KL 第一；118m 屋頂泳池差異化；Fully Furnished 降低入住門檻；2.02 英畝黃金地段稀缺性真實。純自住框架（接受 Leasehold 商業地契 + 低收益率）合理。<br>
+          <strong style="color:#fca5a5">最大問題：</strong>Leasehold + 商業地契雙重折扣（B6 2.0/10，本系列最低）；Net Yield 1.5–1.9%（B3 3.0/10，本系列最低）；定價 RM2,300 psf 比 TRX Residences（地契更好）更貴（B2 3.5/10，本系列最低）；brickz 0筆成交無市場驗證；武吉免登 SR 積壓逆風。投資框架不成立，只有純自住框架才能合理化進場。
+        </div>
+      </div>
+    </div>
+
+    <h3>十二個建案（含 Pavilion Square）完整最終排序</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>外籍 Net Yield</th>
+          <th>A4 基建</th>
+          <th>B2 估值</th>
+          <th>建議</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="font-weight:700;color:#ca8a04">1</td><td><strong>R22 Mont Kiara</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.2%</td><td>8.5</td><td>8.0</td><td>🟢 進場</td></tr>
+        <tr><td style="font-weight:700;color:#64748b">2</td><td><strong>Park Place DPC</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.4%</td><td>6.5</td><td>7.5</td><td>🟢 進場</td></tr>
+        <tr><td>3</td><td><strong>TRX Residences</strong></td><td style="font-weight:700;color:#16a34a">7.6</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>~1.9–2.3%（增值主導）</td><td>10.0</td><td>6.5</td><td>🟢 增值框架積極考慮</td></tr>
+        <tr><td>4</td><td><strong>The Conlay by E&O</strong></td><td style="font-weight:700;color:#16a34a">7.4</td><td><span class="tag t-y">Freehold 商業</span></td><td>~2.5–3.0%</td><td>9.0</td><td>6.5</td><td>🟢 審慎積極考慮</td></tr>
+        <tr><td>5</td><td><strong>CloutHaus KLCC</strong></td><td style="font-weight:700;color:#d97706">6.7</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.9–2.2%</td><td>9.0</td><td>6.0</td><td>🟡 觀望</td></tr>
+        <tr><td>6</td><td><strong>SWNK Houze BBCC</strong></td><td style="font-weight:700;color:#d97706">6.2</td><td><span class="tag t-r">Leasehold 商業</span></td><td>~1.9–2.3%</td><td>9.5</td><td>6.0</td><td>🟡 本地可；🔴 外籍不推</td></tr>
+        <tr><td>7</td><td><strong>TS2 武吉免登 🔵</strong></td><td style="font-weight:700;color:#3b82f6">6.0</td><td><span class="tag t-y">Freehold 商業</span></td><td>功能性定位</td><td>8.5</td><td>5.5</td><td>🔵 功能性持有</td></tr>
+        <tr><td>8</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="font-weight:700;color:#f97316">5.7</td><td><span class="tag t-g">SOHO HDA 商業</span></td><td>SOHO 2.8–3.4%</td><td>8.0</td><td>5.5</td><td>🟡 SOHO條件性；🔴 SOVO迴避</td></tr>
+        <tr><td>9</td><td><strong>Stonor 3 KLCC</strong></td><td style="font-weight:700;color:#dc2626">5.7</td><td><span class="tag t-y">商業地契 HDA</span></td><td>~1.9–2.3%</td><td>8.0</td><td>4.5</td><td>🔴 暫緩</td></tr>
+        <tr><td>10</td><td><strong>Pavilion DH</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.7–2.1%</td><td>7.5</td><td>4.5</td><td>🟡 觀望（brickz 待確認）</td></tr>
+        <tr style="background:#FEF9C3"><td>11</td><td><strong>Pavilion Square 🆕</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-r">Leasehold 商業地契</span></td><td style="color:#dc2626">~1.5–1.9%（最低）</td><td style="font-weight:700;color:#16a34a">10.0 ✅</td><td style="color:#dc2626">3.5（最低）</td><td>🔴 投資框架暫緩；🟡 純自住可考慮</td></tr>
+        <tr><td>12</td><td><strong>Orion Residence BB</strong></td><td style="font-weight:700;color:#dc2626">5.2</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.2–1.5%</td><td>9.0</td><td>4.0</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">🔑 Pavilion Square（5.5）排名第11，與 Pavilion DH 並列，但兩者問題性質不同：Pavilion DH 的問題是「50% 掛牌率 + brickz 不足」（市場流動性危機），Pavilion Square 的問題是「Leasehold 商業地契 + 定價邏輯矛盾 + Net Yield 最低」（結構性定價問題）。兩者均需「觀望」，但 Pavilion Square 在「純自住框架」下因為 A4/B4 10.0/10 步行生活優勢，比 Pavilion DH 更有自住合理性。注意：A4/B4 10.0 的高分完全靠基建，並不能彌補 B2、B3、B6 三個維度的結構性弱點。⚠️ 本評分 FIX-03 不足（0 筆 brickz），所有估值為中低置信度，竣工後需重新評估。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL RM1M+ 高端住宅市場深度研究（2026-03）｜KL 供需 Overhang 深度分析（2026-04-01）｜iRumah.co（Pavilion Square 發售均價；Pavilion Residences 成交 PSF）｜brickz.my（Pavilion Residences：16筆，2024–2025，中位 RM1,564 psf；Pavilion Square：0筆）｜PropertyGuru（掛牌 PSF RM1,812–3,904）｜myou.com.my（管理費 RM0.90 psf；竣工 Q4 2029）｜pavilionsqre.com（地契：Leasehold 99年至2122；開發商：Armani Hartajaya Sdn Bhd）｜klresidence.com（MM2H 和外籍法規說明）｜Rumavi.com（Pavilion Residences 對照分析）<br>
+  ⚠️ 本報告 FIX-03：brickz 政府登記成交 0 筆，所有 PSF 和 Yield 估值均為中低置信度，需等竣工後真實成交量驗證。Armani Hartajaya Sdn Bhd 與 Pavilion Group 的法律關係和財務擔保結構需向律師確認。Link Bridge SPA 法律義務需確認。電費費率轉換可行性需向管委會確認。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

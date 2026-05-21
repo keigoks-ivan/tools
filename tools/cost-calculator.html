@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full-Cycle Cost Calculator | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════
+   TOOL LAYOUT
+══════════════════════════════════════════════ */
+.tool-layout{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:20px;
+  align-items:start;
+  margin-top:0;
+}
+@media(max-width:900px){.tool-layout{grid-template-columns:1fr}}
+
+/* ══════════════════════════════════════════════
+   INPUT PANEL
+══════════════════════════════════════════════ */
+.input-panel{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  padding:0;
+  position:sticky;
+  top:60px;
+  overflow:hidden;
+}
+.input-section{
+  padding:14px 16px;
+  border-bottom:1px solid #f0f5fb;
+}
+.input-section:last-child{border-bottom:none}
+
+.input-sec-label{
+  font-size:9px;
+  letter-spacing:.13em;
+  color:#5a7a9a;
+  font-weight:600;
+  text-transform:uppercase;
+  margin-bottom:10px;
+  display:block;
+}
+
+/* Market preset pills */
+.market-pills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+}
+.market-pill{
+  padding:4px 9px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:500;
+  color:#4a6080;
+  background:#eef3f9;
+  border:1px solid #ccd9e8;
+  cursor:pointer;
+  user-select:none;
+  transition:all .12s;
+  white-space:nowrap;
+  font-family:'Inter',sans-serif;
+  line-height:1.4;
+}
+.market-pill:hover{background:#dde8f2;color:#1e3a5f}
+.market-pill.active{
+  background:#1e3a5f;
+  color:#fff;
+  border-color:#1e3a5f;
+  box-shadow:0 1px 4px rgba(30,58,95,.22);
+}
+
+/* Pill row (resident/foreigner/horizon) */
+.pill-row{display:flex;flex-wrap:wrap;gap:5px;}
+.pill-opt{
+  padding:5px 11px;
+  border-radius:20px;
+  font-size:11.5px;
+  font-weight:500;
+  color:#4a6080;
+  background:#eef3f9;
+  border:1px solid #ccd9e8;
+  cursor:pointer;
+  user-select:none;
+  transition:all .12s;
+  white-space:nowrap;
+  font-family:'Inter',sans-serif;
+}
+.pill-opt:hover{background:#dde8f2;color:#1e3a5f}
+.pill-opt.active{
+  background:#1e3a5f;
+  color:#fff;
+  border-color:#1e3a5f;
+  box-shadow:0 1px 4px rgba(30,58,95,.22);
+}
+
+/* Form rows */
+.form-row{display:flex;flex-direction:column;gap:3px;margin-bottom:9px}
+.form-row:last-child{margin-bottom:0}
+.form-label{
+  font-size:10.5px;
+  color:#5a7a9a;
+  font-weight:500;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:4px;
+}
+.form-label .val{
+  color:#1e3a5f;
+  font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;
+}
+input[type=range].form-ctrl{
+  width:100%;
+  padding:0;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  accent-color:#1e3a5f;
+  height:18px;
+}
+input[type=number].form-ctrl{
+  width:100%;
+  padding:6px 9px;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  font-size:11.5px;
+  color:#1e3a5f;
+  font-family:'JetBrains Mono',monospace;
+  background:#fff;
+  transition:border-color .15s;
+}
+input[type=number].form-ctrl:focus{outline:none;border-color:#1e3a5f}
+
+/* Foreign notice */
+.foreign-note{
+  font-size:10px;
+  color:#d97706;
+  background:#fffbeb;
+  border:0.5px solid #fde68a;
+  border-radius:4px;
+  padding:5px 8px;
+  margin-top:6px;
+  display:none;
+  line-height:1.45;
+}
+.foreign-note.visible{display:block}
+
+/* Toggle */
+.toggle-pill{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  user-select:none;
+}
+.toggle-pill input[type=checkbox]{
+  accent-color:#1e3a5f;
+  width:14px;height:14px;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.toggle-pill-label{font-size:11px;color:#4a6080;font-weight:500}
+
+/* ══════════════════════════════════════════════
+   RESULT PANEL
+══════════════════════════════════════════════ */
+.result-panel{min-width:0}
+
+/* Hero summary card */
+.cost-hero{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  border-left:4px solid #2563eb;
+  padding:18px 20px;
+  margin-bottom:0;
+  transition:border-left-color .3s;
+}
+.cost-hero.hero-green {border-left-color:#16a34a}
+.cost-hero.hero-yellow{border-left-color:#ca8a04}
+.cost-hero.hero-red   {border-left-color:#dc2626}
+
+.hero-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin-bottom:16px;
+}
+@media(max-width:700px){.hero-row{grid-template-columns:1fr 1fr}}
+@media(max-width:440px){.hero-row{grid-template-columns:1fr}}
+
+.hero-stat{display:flex;flex-direction:column;gap:3px}
+.hero-stat-lbl{
+  font-size:9px;
+  letter-spacing:.1em;
+  color:#5a7a9a;
+  font-weight:600;
+  text-transform:uppercase;
+}
+.hero-stat-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:20px;
+  font-weight:700;
+  color:#1e3a5f;
+  font-variant-numeric:tabular-nums;
+  line-height:1.15;
+}
+.hero-stat-val.big{font-size:26px}
+.hero-verdict{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 12px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:600;
+  margin-top:6px;
+  width:fit-content;
+}
+.verdict-green {background:#dcfce7;color:#166534}
+.verdict-yellow{background:#fef9c3;color:#854d0e}
+.verdict-red   {background:#fee2e2;color:#991b1b}
+
+/* Cost breakdown tables */
+.cost-section{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  overflow:hidden;
+}
+.cost-section-head{
+  background:#f0f6ff;
+  padding:10px 16px;
+  font-size:9px;
+  letter-spacing:.12em;
+  color:#5a7a9a;
+  font-weight:600;
+  text-transform:uppercase;
+  border-bottom:1px solid #dce8f5;
+}
+.cost-tbl{width:100%;border-collapse:collapse}
+.cost-tbl td{
+  padding:9px 14px;
+  font-size:12px;
+  border-bottom:1px solid #f0f5fb;
+  color:#1e3a5f;
+  font-variant-numeric:tabular-nums;
+}
+.cost-tbl td:first-child{color:#5a7a9a;font-size:11.5px}
+.cost-tbl td:nth-child(2){text-align:center;font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace}
+.cost-tbl td:nth-child(3){text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600}
+.cost-tbl td:nth-child(4){text-align:left;font-size:10px;color:#94a3b8;padding-left:6px;max-width:160px;line-height:1.3}
+.cost-tbl tr:last-child td{border-bottom:none}
+.cost-tbl tbody tr:nth-child(even) td{background:#fafcfe}
+.cost-tbl .subtotal td{
+  background:#f0f6ff!important;
+  font-weight:700;
+  color:#1e3a5f;
+  border-top:1px solid #dce8f5;
+  padding:10px 14px;
+}
+.cost-tbl .subtotal td:first-child{color:#1e3a5f}
+.cost-zero td:nth-child(3){color:#b0c4d8}
+
+/* Chart row */
+.chart-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:0;
+}
+@media(max-width:800px){.chart-row{grid-template-columns:1fr}}
+
+/* Verdict pill (table cell) */
+.verdict-pill{
+  display:inline-block;
+  padding:3px 10px;
+  border-radius:12px;
+  font-size:10.5px;
+  font-weight:600;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+.pill-green {background:#dcfce7;color:#166534}
+.pill-yellow{background:#fef9c3;color:#854d0e}
+.pill-red   {background:#fee2e2;color:#991b1b}
+
+/* Cross-market table */
+.table-wrap{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  overflow:auto;
+  margin-bottom:0;
+}
+.cmp-tbl{width:100%;border-collapse:collapse;min-width:680px}
+.cmp-tbl thead{position:sticky;top:0;z-index:3}
+.cmp-tbl th{
+  background:#f0f6ff;
+  font-size:9px;
+  letter-spacing:.09em;
+  color:#5a7a9a;
+  font-weight:600;
+  padding:10px 14px;
+  text-align:right;
+  border-bottom:1px solid #dce8f5;
+  white-space:nowrap;
+}
+.cmp-tbl th:first-child{text-align:left}
+.cmp-tbl td{
+  padding:9px 14px;
+  font-size:12px;
+  border-bottom:1px solid #f0f5fb;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  color:#1e3a5f;
+  white-space:nowrap;
+}
+.cmp-tbl td:first-child{text-align:left;font-weight:600}
+.cmp-tbl tbody tr:nth-child(even) td{background:#fafcfe}
+.cmp-tbl tr:hover td{background:#f3f8ff!important}
+.cmp-tbl tr:last-child td{border-bottom:none}
+.num-mono{font-family:'JetBrains Mono',monospace;font-size:11.5px}
+.pl-pos{color:#16a34a;font-weight:700}
+.pl-neg{color:#dc2626;font-weight:700}
+.pl-zero{color:#ca8a04;font-weight:700}
+
+/* Active row highlight in cross-market table */
+.cmp-tbl tr.active-market td{background:#eff6ff!important;border-left:3px solid #2563eb}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<main class="container">
+
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">DECISION TOOL</span><span class="lang-zh" style="display:none">決策工具</span></span>
+    <h1><span class="lang-en">💰 Full-Cycle Cost Calculator</span><span class="lang-zh" style="display:none">💰 全週期成本計算器</span></h1>
+    <p class="subtitle"><span class="lang-en">From keys to exit — every dollar of friction across 12 markets. Acquisition + Holding + Exit = true total cost of ownership.</span><span class="lang-zh" style="display:none">從拿鑰匙到脫手，12 市場每一分錢的摩擦成本。買進成本 + 持有成本 + 退出成本 = 真實持有總成本。</span></p>
+  </div>
+
+  <!-- ══ INSIGHT BOX ══ -->
+  <div class="insight-box accent" style="margin-bottom:20px">
+    <span class="lang-en"><strong>How to read:</strong> Enter a property price → select your market → toggle Resident/Foreigner. The three cost sections (Acquisition / Holding / Exit) break down every fee and tax. The cross-market comparison at the bottom shows the same price across all 12 markets ranked by Net P&amp;L. Costs are in local currency of the selected market.</span>
+    <span class="lang-zh" style="display:none"><strong>如何解讀：</strong>輸入房價 → 選市場 → 切換自住/外國人身分。三個成本區塊（買進/持有/退出）逐項列出所有費用與稅金。下方跨市場對比以相同金額列出 12 個市場，依淨損益排序。成本以所選市場本地幣別呈現。</span>
+  </div>
+
+  <div class="tool-layout">
+    <!-- ═══ LEFT: INPUT PANEL ═══ -->
+    <div class="input-panel">
+
+      <!-- Market Preset -->
+      <div class="input-section">
+        <span class="input-sec-label"><span class="lang-en">MARKET PRESET</span><span class="lang-zh" style="display:none">市場預設</span></span>
+        <div class="market-pills" id="marketPills">
+          <button class="market-pill active" data-mkt="my">🇲🇾 MY</button>
+          <button class="market-pill" data-mkt="tw">🇹🇼 TW</button>
+          <button class="market-pill" data-mkt="jp">🇯🇵 JP</button>
+          <button class="market-pill" data-mkt="au">🇦🇺 AU</button>
+          <button class="market-pill" data-mkt="nz">🇳🇿 NZ</button>
+          <button class="market-pill" data-mkt="uk">🇬🇧 UK</button>
+          <button class="market-pill" data-mkt="us">🇺🇸 US</button>
+          <button class="market-pill" data-mkt="th">🇹🇭 TH</button>
+          <button class="market-pill" data-mkt="vn">🇻🇳 VN</button>
+          <button class="market-pill" data-mkt="kr">🇰🇷 KR</button>
+          <button class="market-pill" data-mkt="ca">🇨🇦 CA</button>
+          <button class="market-pill" data-mkt="ie">🇮🇪 IE</button>
+        </div>
+      </div>
+
+      <!-- Property Price -->
+      <div class="input-section">
+        <div class="form-row">
+          <label class="form-label">
+            <span><span class="lang-en">Property Price</span><span class="lang-zh" style="display:none">房屋售價</span></span>
+            <span class="val" id="priceDisplay">RM 1,200,000</span>
+          </label>
+          <input type="number" class="form-ctrl" id="priceInput" value="1200000" min="50000" step="10000">
+        </div>
+      </div>
+
+      <!-- Resident Status -->
+      <div class="input-section">
+        <span class="input-sec-label"><span class="lang-en">RESIDENT STATUS</span><span class="lang-zh" style="display:none">居住身分</span></span>
+        <div class="pill-row" id="pillsResident">
+          <button class="pill-opt active" data-val="resident"><span class="lang-en">Resident / Citizen</span><span class="lang-zh" style="display:none">本地居民/公民</span></button>
+          <button class="pill-opt" data-val="foreigner"><span class="lang-en">Foreigner</span><span class="lang-zh" style="display:none">外國人</span></button>
+        </div>
+        <div class="foreign-note" id="foreignNote"></div>
+      </div>
+
+      <!-- Holding Horizon -->
+      <div class="input-section">
+        <span class="input-sec-label"><span class="lang-en">HOLDING HORIZON</span><span class="lang-zh" style="display:none">持有年限</span></span>
+        <div class="pill-row" id="pillsHorizon">
+          <button class="pill-opt" data-val="5">5y</button>
+          <button class="pill-opt" data-val="7">7y</button>
+          <button class="pill-opt active" data-val="10">10y</button>
+          <button class="pill-opt" data-val="15">15y</button>
+          <button class="pill-opt" data-val="20">20y</button>
+        </div>
+      </div>
+
+      <!-- Sliders -->
+      <div class="input-section">
+        <div class="form-row">
+          <label class="form-label">
+            <span><span class="lang-en">Annual Appreciation</span><span class="lang-zh" style="display:none">年增值率</span></span>
+            <span class="val" id="apprDisplay">3.0%</span>
+          </label>
+          <input type="range" class="form-ctrl" id="apprSlider" min="0" max="10" step="0.5" value="3">
+        </div>
+        <div class="form-row">
+          <label class="form-label">
+            <span><span class="lang-en">Annual Maintenance</span><span class="lang-zh" style="display:none">年維護費</span></span>
+            <span class="val" id="maintDisplay">1.0%</span>
+          </label>
+          <input type="range" class="form-ctrl" id="maintSlider" min="0.2" max="3" step="0.1" value="1">
+        </div>
+        <div class="form-row">
+          <label class="form-label">
+            <span><span class="lang-en">Annual Property Tax</span><span class="lang-zh" style="display:none">年房產稅</span></span>
+            <span class="val" id="ptaxDisplay">0.1%</span>
+          </label>
+          <input type="range" class="form-ctrl" id="ptaxSlider" min="0" max="3" step="0.05" value="0.1">
+        </div>
+        <div class="form-row">
+          <label class="form-label">
+            <span><span class="lang-en">Seller Agent Fee</span><span class="lang-zh" style="display:none">賣方仲介費</span></span>
+            <span class="val" id="agentDisplay">2.5%</span>
+          </label>
+          <input type="range" class="form-ctrl" id="agentSlider" min="0" max="6" step="0.5" value="2.5">
+        </div>
+      </div>
+
+      <!-- Toggles -->
+      <div class="input-section">
+        <span class="input-sec-label"><span class="lang-en">OPTIONS</span><span class="lang-zh" style="display:none">選項</span></span>
+        <label class="toggle-pill">
+          <input type="checkbox" id="toggleRentalTax">
+          <span class="toggle-pill-label"><span class="lang-en">Include rental income tax (estimated)</span><span class="lang-zh" style="display:none">含租金收入稅（估算）</span></span>
+        </label>
+      </div>
+
+    </div><!-- /input-panel -->
+
+    <!-- ═══ RIGHT: RESULT PANEL ═══ -->
+    <div class="result-panel" id="resultPanel">
+
+      <!-- Hero -->
+      <div class="cost-hero" id="costHero">
+        <div class="hero-row">
+          <div class="hero-stat">
+            <span class="hero-stat-lbl"><span class="lang-en">TOTAL CASH OUT</span><span class="lang-zh" style="display:none">總現金支出</span></span>
+            <span class="hero-stat-val big" id="heroCashOut">—</span>
+            <span style="font-size:10px;color:#5a7a9a;margin-top:2px"><span class="lang-en">acq. + holding frictions</span><span class="lang-zh" style="display:none">買進 + 持有摩擦</span></span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-lbl"><span class="lang-en">NET PROCEEDS AT EXIT</span><span class="lang-zh" style="display:none">退出淨回款</span></span>
+            <span class="hero-stat-val big" id="heroProceeds">—</span>
+            <span style="font-size:10px;color:#5a7a9a;margin-top:2px"><span class="lang-en">sale price − all exit costs</span><span class="lang-zh" style="display:none">售價扣除所有退出成本</span></span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-lbl"><span class="lang-en">NET P&amp;L</span><span class="lang-zh" style="display:none">淨損益</span></span>
+            <span class="hero-stat-val big" id="heroNetPL">—</span>
+            <div class="hero-verdict" id="heroVerdict">—</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;padding-top:12px;border-top:1px solid #f0f5fb">
+          <div class="hero-stat">
+            <span class="hero-stat-lbl"><span class="lang-en">PURCHASE PRICE</span><span class="lang-zh" style="display:none">買入價</span></span>
+            <span class="hero-stat-val" id="heroPurchase">—</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-lbl"><span class="lang-en">EXIT PRICE</span><span class="lang-zh" style="display:none">退出價</span></span>
+            <span class="hero-stat-val" id="heroExit">—</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-lbl"><span class="lang-en">ACQN. FRICTION</span><span class="lang-zh" style="display:none">買進摩擦</span></span>
+            <span class="hero-stat-val" id="heroAcqn">—</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-lbl"><span class="lang-en">HOLDING COST</span><span class="lang-zh" style="display:none">持有總成本</span></span>
+            <span class="hero-stat-val" id="heroHolding">—</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-lbl"><span class="lang-en">EXIT FRICTION</span><span class="lang-zh" style="display:none">退出摩擦</span></span>
+            <span class="hero-stat-val" id="heroExitFee">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 1: Acquisition -->
+      <div class="section-label" style="margin-top:20px">
+        <span class="lang-en">ACQUISITION COSTS — one-time at purchase</span>
+        <span class="lang-zh" style="display:none">買進成本 — 購買時一次性支出</span>
+      </div>
+      <div class="cost-section">
+        <table class="cost-tbl" id="acqTable">
+          <thead><tr>
+            <th style="text-align:left;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Item</span><span class="lang-zh" style="display:none">項目</span></th>
+            <th style="text-align:center;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Rate</span><span class="lang-zh" style="display:none">稅率</span></th>
+            <th style="text-align:right;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Amount</span><span class="lang-zh" style="display:none">金額</span></th>
+            <th style="text-align:left;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Note</span><span class="lang-zh" style="display:none">備註</span></th>
+          </tr></thead>
+          <tbody id="acqBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Section 2: Holding -->
+      <div class="section-label" style="margin-top:20px">
+        <span class="lang-en">HOLDING COSTS — annual × horizon</span>
+        <span class="lang-zh" style="display:none">持有成本 — 年費 × 持有年限</span>
+      </div>
+      <div class="cost-section">
+        <table class="cost-tbl" id="holdTable">
+          <thead><tr>
+            <th style="text-align:left;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Item</span><span class="lang-zh" style="display:none">項目</span></th>
+            <th style="text-align:center;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Annual</span><span class="lang-zh" style="display:none">年費</span></th>
+            <th style="text-align:right;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Total (Nyr)</span><span class="lang-zh" style="display:none">總額</span></th>
+            <th style="text-align:left;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Note</span><span class="lang-zh" style="display:none">備註</span></th>
+          </tr></thead>
+          <tbody id="holdBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Section 3: Exit -->
+      <div class="section-label" style="margin-top:20px">
+        <span class="lang-en">EXIT COSTS — one-time at sale</span>
+        <span class="lang-zh" style="display:none">退出成本 — 賣出時一次性支出</span>
+      </div>
+      <div class="cost-section">
+        <table class="cost-tbl" id="exitTable">
+          <thead><tr>
+            <th style="text-align:left;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Item</span><span class="lang-zh" style="display:none">項目</span></th>
+            <th style="text-align:center;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Rate</span><span class="lang-zh" style="display:none">稅率</span></span></th>
+            <th style="text-align:right;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Amount</span><span class="lang-zh" style="display:none">金額</span></th>
+            <th style="text-align:left;padding:8px 14px;font-size:9px;letter-spacing:.09em;color:#5a7a9a;font-weight:600;background:#f0f6ff;border-bottom:1px solid #dce8f5"><span class="lang-en">Note</span><span class="lang-zh" style="display:none">備註</span></th>
+          </tr></thead>
+          <tbody id="exitBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Charts -->
+      <div class="section-label" style="margin-top:20px"><span class="lang-en">COST VISUALISATION</span><span class="lang-zh" style="display:none">成本視覺化</span></div>
+      <div class="chart-row">
+        <div class="chart-card">
+          <h3><span class="lang-en">Cost Breakdown Stack</span><span class="lang-zh" style="display:none">成本拆解堆疊</span></h3>
+          <p class="chart-subtitle"><span class="lang-en">Acquisition friction / Holding / Exit friction vs. capital gain</span><span class="lang-zh" style="display:none">買進摩擦 / 持有 / 退出摩擦 vs. 資本利得</span></p>
+          <div id="chartStack" style="height:220px;width:100%"></div>
+        </div>
+        <div class="chart-card">
+          <h3><span class="lang-en">Annual Holding Cost</span><span class="lang-zh" style="display:none">年持有成本</span></h3>
+          <p class="chart-subtitle"><span class="lang-en">Property tax + maintenance + insurance per year</span><span class="lang-zh" style="display:none">每年房產稅 + 維護費 + 保險</span></p>
+          <div id="chartHolding" style="height:220px;width:100%"></div>
+        </div>
+      </div>
+
+      <!-- Cross-market comparison -->
+      <div class="section-label" style="margin-top:20px"><span class="lang-en">CROSS-MARKET COMPARISON — same price, all 12 markets</span><span class="lang-zh" style="display:none">跨市場對比 — 相同金額，12 市場同比</span></div>
+      <div class="insight-box" style="margin-bottom:10px">
+        <span class="lang-en">Using your input price converted to each market's median price equivalent (shown in local currency). Appreciation rate and horizon remain the same. This answers: "Would the same money do better elsewhere?"</span>
+        <span class="lang-zh" style="display:none">以您輸入的房價換算至各市場等值金額（以當地幣別顯示）。增值率與持有年限保持不變。這回答的問題是：「同樣的錢在其他地方表現會更好嗎？」</span>
+      </div>
+      <div class="chart-card" style="margin-bottom:12px">
+        <h3><span class="lang-en">Net P&amp;L Ranking — 12 Markets</span><span class="lang-zh" style="display:none">淨損益排名 — 12 市場</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Net P&L as % of purchase price (green = profit, red = loss after all costs)</span><span class="lang-zh" style="display:none">淨損益佔買入價百分比（綠=獲利，紅=扣除所有成本後虧損）</span></p>
+        <div id="chartRanking" style="height:320px;width:100%"></div>
+      </div>
+      <div class="table-wrap">
+        <table class="cmp-tbl" id="crossTbl">
+          <thead><tr>
+            <th><span class="lang-en">Market</span><span class="lang-zh" style="display:none">市場</span></th>
+            <th><span class="lang-en">Acqn. Friction</span><span class="lang-zh" style="display:none">買進摩擦</span></th>
+            <th><span class="lang-en">Holding Total</span><span class="lang-zh" style="display:none">持有總額</span></th>
+            <th><span class="lang-en">Exit Friction</span><span class="lang-zh" style="display:none">退出摩擦</span></th>
+            <th><span class="lang-en">Net P&L</span><span class="lang-zh" style="display:none">淨損益</span></th>
+            <th><span class="lang-en">P&L %</span><span class="lang-zh" style="display:none">損益率</span></th>
+            <th><span class="lang-en">Verdict</span><span class="lang-zh" style="display:none">評級</span></th>
+          </tr></thead>
+          <tbody id="crossBody"></tbody>
+        </table>
+      </div>
+
+      <div class="source-footer" style="margin-top:16px">
+        <span class="lang-en"><strong>Sources &amp; notes:</strong> MY: LHDN RPGT Act, Stamp Duty Act 2024 rates. TW: 房地合一稅 2.0 (2021-), 契稅 Act. JP: Nozeisho published rates 2024, 不動産取得税 fixed 3%. AU: OSR NSW/VIC/QLD 2024-25, FIRB fee schedule (FIRB.gov.au). NZ: Overseas Investment Act 2018 ban; Land Transfer Tax Statement Act (brightline 2yr as of Apr 2024). UK: HMRC SDLT calculator 2024, non-resident surcharge 2%. US: State-level estimates (NY, CA, TX); IRS §1250/§1221 LTCG. TH: Revenue Department Thailand. VN: Circular 111/2013, Law on Housing 2023 foreign ownership. KR: MOLIT acquisition tax, comprehensive real estate tax (종합부동산세). CA: BC PTT Act, Ontario Land Transfer Tax Act, federal Non-Resident Speculation Tax. IE: Revenue.ie Stamp Duty, CGT manual. Rental income tax: estimated marginal rate, opt-in only. CGT: simplification — actual liability depends on individual tax position; consult a tax adviser.</span>
+        <span class="lang-zh" style="display:none"><strong>來源與備註：</strong>MY: 印花稅法、RPGT法2024稅率。TW: 房地合一稅2.0 (2021起)。JP: 2024年國稅廳公告稅率。AU: NSW/VIC/QLD印花稅2024-25、FIRB費用表。NZ: 2018年外國人購房禁令；明線測試2024年縮短為2年。UK: HMRC 2024 SDLT，非居民附加2%。US: 州級估算；IRS長期資本利得。TH: 泰國稅務局。VN: 111/2013號通知，2023年住房法外國人持有規定。KR: 國土部取得稅、綜合不動產稅。CA: BC省及安省土地轉讓稅、非居民投機稅。IE: 稅務局印花稅。租金稅：估算邊際稅率，需手動開啟。資本利得稅：簡化計算，實際稅負視個人情況而異，請諮詢稅務顧問。</span>
+      </div>
+
+    </div><!-- /result-panel -->
+  </div><!-- /tool-layout -->
+
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+/* ══════════════════════════════════════════════
+   COLOR PALETTE & CHART HELPERS
+══════════════════════════════════════════════ */
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){o=o||{};var m=Object.assign({axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},splitLine:{lineStyle:{color:C.grid}}},o);m.axisLabel=Object.assign({},baseText,o.axisLabel||{});return m;}
+
+var allCharts=[];
+
+/* ══════════════════════════════════════════════
+   CURRENCY FORMATTER
+══════════════════════════════════════════════ */
+function fmtAmt(v,cur){
+  var abs=Math.abs(v);var sign=v<0?'−':'';
+  if(abs>=1000000000)return sign+cur+(abs/1000000000).toFixed(2)+'B';
+  if(abs>=1000000)return sign+cur+(abs/1000000).toFixed(2)+'M';
+  if(abs>=10000)return sign+cur+Math.round(abs/1000)+'K';
+  if(abs>=1000)return sign+cur+(abs/1000).toFixed(1)+'K';
+  return sign+cur+Math.round(abs).toLocaleString();
+}
+function fmtPct(v){return (v>=0?'+':'')+v.toFixed(1)+'%';}
+function fmtNum(v){return Math.round(v).toLocaleString();}
+
+/* ══════════════════════════════════════════════
+   12 MARKET DATA TABLE
+   Sources verified against primary sources (2024-2025).
+   "est" marked items are estimates where exact rules vary by locality.
+
+   Fields:
+   - cur: currency symbol
+   - curCode: ISO
+   - flag / en / zh: display
+   - defPrice: default price in local currency
+   - defPtax: default annual property tax % (of purchase price)
+   - defAgent: default seller agent fee %
+   - defLegalBuy: buyer legal fee %
+   - defLegalSell: seller legal fee %
+   - insurance: annual insurance % of price
+   - stampDutyFn(price,foreigner): returns {amount, label, note}
+   - foreignSurchargeFn(price): returns {amount, label, note} — 0 for residents
+   - firbFn(price): returns {amount, label, note} — AU only
+   - cgtFn(gain, horizon, foreigner): returns {rate, amount, note}
+   - foreignNote: warning text for foreigner
+   - foreignAllowed: bool or 'restricted'
+══════════════════════════════════════════════ */
+
+var MKTDATA = {
+
+  /* ─── MALAYSIA ──────────────────────────────
+     Stamp Duty: 1% ≤RM100K, 2% RM100K-500K, 3% RM500K-1M, 4% >RM1M (residents/PRs)
+     Foreigners: 8% flat (Budget 2026, effective 1 Jan 2026; was 4% flat Jan 2024-Dec 2025)
+     Source: Stamp Duty Act 1949, Finance Act 2024, Budget 2026 (effective 1 Jan 2026)
+     RPGT: Individuals — Yr1-3: 30%, Yr4: 20%, Yr5: 15%, Yr6+: 5% (citizens)
+     Foreigners: Yr1-5: 30%, Yr6+: 10%
+     Source: RPGT Act 1976 as amended; hasil.gov.my 2025
+     ─────────────────────────────────────────── */
+  my:{
+    key:'my',flag:'🇲🇾',cur:'RM ',curCode:'MYR',
+    en:'Malaysia (KL)',zh:'馬來西亞（吉隆坡）',
+    defPrice:1200000,defPtax:0.10,defAgent:2.5,defLegalBuy:1.0,defLegalSell:0.5,
+    insurance:0.08,
+    foreignAllowed:true,
+    foreignNote_en:'Foreigners pay 8% flat stamp duty (Budget 2026, effective 1 Jan 2026). Minimum purchase: RM1M (KL/Selangor/Penang); varies by state. MM2H Silver tier: RM600K min. EPU approval may be required for certain properties.',
+    foreignNote_zh:'外國人繳8%統一印花稅（2026預算案，2026年1月1日起）。最低購屋門檻：吉隆坡/雪蘭莪/檳城 RM100萬；各州不同。MM2H白銀組：最低 RM60萬。特定房產需州EPU批准。',
+    stampDutyFn:function(price,foreigner){
+      /* Foreigners: 8% flat (replaces progressive entirely, Budget 2026, eff. 1 Jan 2026) */
+      if(foreigner){
+        return {amount:price*0.08,label:'8% flat',note_en:'Foreigner: 8% flat (Budget 2026, eff. 1 Jan 2026)',note_zh:'外國人：8%統一稅率（2026預算案，2026-01-01起）'};
+      }
+      /* Resident/PR: Progressive 1% on first RM100K, 2% on RM100K-500K, 3% on RM500K-1M, 4% above RM1M */
+      var duty=0;
+      var b1=Math.min(price,100000);
+      duty+=b1*0.01;
+      if(price>100000){var b2=Math.min(price-100000,400000);duty+=b2*0.02;}
+      if(price>500000){var b3=Math.min(price-500000,500000);duty+=b3*0.03;}
+      if(price>1000000){duty+=(price-1000000)*0.04;}
+      var effRate=(duty/price*100).toFixed(2);
+      return {amount:duty,label:effRate+'% eff.',note_en:'Progressive 1-4% (Stamp Duty Act)',note_zh:'累進 1-4%（印花稅法）'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      /* MY: 8% flat replaces resident progressive entirely (handled in stampDutyFn). No separate surcharge row. */
+      if(!foreigner)return {amount:0,label:'—',note_en:'Resident/PR',note_zh:'居民/永久居民'};
+      return {amount:0,label:'—',note_en:'Already in stamp duty (8% flat replaces progressive)',note_zh:'已併入印花稅（8%統一稅率取代累進）'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* RPGT rates */
+      var rate;
+      if(foreigner){
+        if(horizon<=5)rate=0.30;/* Yr1-5: 30% flat for foreigners */
+        else rate=0.10;/* Yr6+: 10% */
+      } else {
+        if(horizon<=3)rate=0.30;
+        else if(horizon===4)rate=0.20;
+        else if(horizon===5)rate=0.15;
+        else rate=0.05;
+      }
+      var amount=Math.max(0,gain)*rate;
+      var note_en='RPGT '+Math.round(rate*100)+'% (yr '+(horizon<=5?horizon:'6+')+')' +(foreigner?' [foreigner: 30% yr1-5, 10% yr6+]':'');
+      var note_zh='RPGT '+Math.round(rate*100)+'%（第'+(horizon<=5?horizon:'6+')+'年）'+(foreigner?' [外國人：1-5年30%，6年+10%]':'');
+      return {rate:rate,amount:amount,note_en:note_en,note_zh:note_zh};
+    }
+  },
+
+  /* ─── TAIWAN ─────────────────────────────────
+     契稅 6% on assessed value (≈3% on market for secondary; primary uses assessed)
+     We model 3% of price for secondary market
+     房地合一稅 2.0 (2021-):
+       ≤2yr: 45%; 2-5yr: 35%; 5-10yr: 20%; >10yr: 15% (residents)
+       Foreigners same brackets but no basic exemption
+     Property tax (房屋稅): 1.2% residential, non-primary 2-3.6%
+     Agent: 4% total, typically 2% each side
+     Source: MOF 財政部, 房地合一稅申報手冊
+     ─────────────────────────────────────────── */
+  tw:{
+    key:'tw',flag:'🇹🇼',cur:'NT$',curCode:'TWD',
+    en:'Taiwan (Taipei)',zh:'台灣（台北）',
+    defPrice:25000000,defPtax:1.2,defAgent:2.0,defLegalBuy:0.1,defLegalSell:0.1,
+    insurance:0.05,
+    foreignAllowed:true,
+    foreignNote_en:'Foreigners can generally purchase (except agricultural/forest land). Approval required for restricted categories. Reciprocity rules apply.',
+    foreignNote_zh:'外國人一般可購房（農業/林業用地除外）。部分限制類別需申請許可。適用互惠原則。',
+    stampDutyFn:function(price){
+      /* 契稅 6% on assessed value (model as 3% of price for resale) + 印花稅 0.1% */
+      var chingChi=price*0.03;/* simplified — assessed value typically 40-60% of market */
+      var stamp=price*0.001;
+      var total=chingChi+stamp;
+      return {amount:total,label:'~3.1%',note_en:'契稅 ~3% + 印花稅 0.1% (assessed val.)',note_zh:'契稅約3% + 印花稅0.1%（公告現值）'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      return {amount:0,label:'—',note_en:'No foreign surcharge',note_zh:'無外國人附加稅'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* 房地合一稅 2.0: ≤2yr 45%, 2-5yr 35%, 5-10yr 20%, >10yr 15% */
+      var rate;
+      if(horizon<=2)rate=0.45;
+      else if(horizon<=5)rate=0.35;
+      else if(horizon<=10)rate=0.20;
+      else rate=0.15;
+      var amount=Math.max(0,gain)*rate;
+      return {rate:rate,amount:amount,note_en:'房地合一稅2.0 '+Math.round(rate*100)+'% (yr '+horizon+')',note_zh:'房地合一稅2.0 '+Math.round(rate*100)+'%（持有'+horizon+'年）'};
+    }
+  },
+
+  /* ─── JAPAN ──────────────────────────────────
+     不動産取得税: 3% (reduced from 4%; residential 2025)
+     登録免許税: 0.4% (registration) — often 1.5-2% for mortgaged
+     印紙税: variable, ~¥200K for ¥100M+
+     固定資産税: 1.4% of assessed (≈70-80% of market)
+     都市計画税: 0.3% of assessed (urban areas)
+     Effective combined ≈ 1.2% of market price
+     譲渡所得税: <5yr (short-term) 39.63%; ≥5yr (long-term) 20.315%
+     Agent: 3% + ¥60K (capped by law)
+     Source: 国税庁 (NTA), 総務省 (MIC) 2024
+     ─────────────────────────────────────────── */
+  jp:{
+    key:'jp',flag:'🇯🇵',cur:'¥',curCode:'JPY',
+    en:'Japan (Tokyo)',zh:'日本（東京）',
+    defPrice:80000000,defPtax:1.2,defAgent:3.0,defLegalBuy:0.5,defLegalSell:0.2,
+    insurance:0.05,
+    foreignAllowed:true,
+    foreignNote_en:'Japan has no foreign ownership restrictions. Non-residents can purchase freely. Note: no mortgage typically available for non-residents without Japanese income.',
+    foreignNote_zh:'日本無外國人購房限制，非居民可自由購買。注意：無日本收入的非居民通常無法取得本地貸款。',
+    stampDutyFn:function(price){
+      /* 不動産取得税 3% + 登録免許税 0.4% + 印紙税 ~¥200K for large transactions */
+      var inshutoku=price*0.03;
+      var toroki=price*0.004;
+      var inshi=200000;/* ¥200K for contract ¥100M+ */
+      var total=inshutoku+toroki+inshi;
+      var effRate=(total/price*100).toFixed(2);
+      return {amount:total,label:effRate+'% eff.',note_en:'不動産取得税3% + 登録免許税0.4% + 印紙税',note_zh:'不動産取得稅3% + 登録免許稅0.4% + 印紙稅'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      return {amount:0,label:'—',note_en:'No foreign surcharge in Japan',note_zh:'日本無外國人附加稅'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* <5yr: 39.63% (所得税30.63%+住民税9%); ≥5yr: 20.315% (所得税15.315%+住民税5%) */
+      var rate=horizon<5?0.3963:0.20315;
+      var amount=Math.max(0,gain)*rate;
+      return {rate:rate,amount:amount,note_en:'譲渡所得税 '+(horizon<5?'39.6%':'20.3%')+' ('+(horizon<5?'<5yr':'≥5yr')+')',note_zh:'讓渡所得稅 '+(horizon<5?'39.6%':'20.3%')+' ('+(horizon<5?'未滿5年':'5年以上')+')'};
+    }
+  },
+
+  /* ─── AUSTRALIA ──────────────────────────────
+     Stamp duty (NSW rates 2024-25): progressive 1.25%-5.5%
+     Foreign surcharge: +9% NSW (from 1 Jan 2025; was 8% Jul 2017-Dec 2024), +8% VIC, +8% QLD
+     FIRB approval fee (new dwellings only; established dwellings BANNED 1 Apr 2025-31 Mar 2027):
+       A$15,100 (≤A$1M), A$30,300 (A$1M-2M), A$90,900 (A$2M-4M) [2025-26 schedule]
+     (We model NSW — most common market for foreign buyers)
+     Property tax: Land tax varies; council rates ~0.3-0.5% of land value
+     CGT: 50% discount if held >12mo; effective marginal rate ~23.5% (resident)
+     Non-resident: no CGT discount; withholding 12.5% of sale price applies
+     Source: Revenue NSW, ATO, FIRB.gov.au / foreigninvestment.gov.au 2025-26
+     ─────────────────────────────────────────── */
+  au:{
+    key:'au',flag:'🇦🇺',cur:'A$',curCode:'AUD',
+    en:'Australia (Sydney)',zh:'澳洲（雪梨）',
+    defPrice:1400000,defPtax:0.4,defAgent:2.5,defLegalBuy:0.2,defLegalSell:0.1,
+    insurance:0.06,
+    foreignAllowed:'restricted',
+    foreignNote_en:'IMPORTANT: Foreign buyers BANNED from established (existing) dwellings 1 Apr 2025 – 31 Mar 2027. New builds still permitted with FIRB approval. NSW +9% foreign stamp surcharge (from 1 Jan 2025; was 8%). FIRB fee: A$15,100 (≤A$1M), A$30,300 (A$1M-2M), A$90,900 (A$2M-4M). Non-residents lose 50% CGT discount.',
+    foreignNote_zh:'注意：外國人禁止購買現有住宅（2025年4月1日-2027年3月31日）。新建樓盤仍可憑FIRB批准購買。NSW 附加 9% 外國人印花稅（2025年1月起；原為8%）。FIRB費：A$15,100（≤A$100萬）、A$30,300（A$100-200萬）、A$90,900（A$200-400萬）。非居民不適用50% CGT折扣。',
+    stampDutyFn:function(price){
+      /* NSW 2024-25 progressive stamp duty (residential):
+         ≤$17,000: $1.25 per $100
+         $17K-$35K: $212 + $1.50 per $100 over $17K
+         $35K-$93K: $482 + $1.75 per $100 over $35K
+         $93K-$351K: $1,497 + $3.50 per $100 over $93K
+         $351K-$1.168M: $10,530 + $4.50 per $100 over $351K
+         >$1.168M: $47,295 + $5.50 per $100 over $1.168M
+      */
+      var duty=0;
+      if(price<=17000){duty=price*0.0125;}
+      else if(price<=35000){duty=212+(price-17000)*0.015;}
+      else if(price<=93000){duty=482+(price-35000)*0.0175;}
+      else if(price<=351000){duty=1497+(price-93000)*0.035;}
+      else if(price<=1168000){duty=10530+(price-351000)*0.045;}
+      else{duty=47295+(price-1168000)*0.055;}
+      var effRate=(duty/price*100).toFixed(2);
+      return {amount:duty,label:effRate+'% eff.',note_en:'NSW stamp duty progressive (Revenue NSW 2024-25)',note_zh:'NSW 累進印花稅（Revenue NSW 2024-25）'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      if(!foreigner)return {amount:0,label:'—',note_en:'Resident — no surcharge',note_zh:'本地居民 — 無附加稅'};
+      /* NSW: 9% foreign purchaser duty surcharge from 1 Jan 2025 (was 8% Jul 2017-Dec 2024) */
+      var surcharge=price*0.09;
+      /* FIRB fee (new dwellings; established dwellings banned 1 Apr 2025-31 Mar 2027)
+         2025-26 schedule: foreigninvestment.gov.au */
+      var firb;
+      if(price<=1000000)firb=15100;
+      else if(price<=2000000)firb=30300;
+      else if(price<=4000000)firb=90900;
+      else firb=181800;/* est. for >$4M, schedule tiers up */
+      return {amount:surcharge+firb,label:'9%+FIRB',note_en:'NSW +9% foreign surcharge (Jan 2025) + FIRB A$'+Math.round(firb/1000)+'K (new dwellings only)',note_zh:'NSW 外國人附加9%（2025年1月起）+ FIRB費A$'+Math.round(firb/1000)+'K（新建樓盤）'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      if(foreigner){
+        /* Non-resident: no 50% discount; marginal rate ~32.5% (est. bracket) */
+        var rate=0.325;
+        return {rate:rate,amount:Math.max(0,gain)*rate,note_en:'CGT non-resident 32.5% (no 50% discount)',note_zh:'CGT 非居民32.5%（無50%折扣）'};
+      } else {
+        /* Resident: 50% discount if >12mo; effective ~23.5% at 47% marginal */
+        var disc=horizon>=1?0.5:1.0;
+        var marginal=0.47;
+        var rate=marginal*disc;
+        return {rate:rate,amount:Math.max(0,gain)*rate,note_en:'CGT resident '+(horizon>=1?'50% disc. ≈':'')+'~'+Math.round(rate*100)+'% (est.)',note_zh:'CGT 居民'+(horizon>=1?'50%折扣≈':'')+'~'+Math.round(rate*100)+'%（估）'};
+      }
+    }
+  },
+
+  /* ─── NEW ZEALAND ────────────────────────────
+     Stamp duty: 0% (abolished)
+     Foreign buyers: Overseas Investment Act 2018 — non-residents BANNED from
+       buying existing residential property. Partial liberalisation 2025 for
+       high-value condo (≥NZ$2M) with conditions.
+     Brightline: 2yr (from Apr 2024 Budget; was 10yr 2021-2024)
+     Agent fee: ~3.5-4%
+     Source: LINZ, IRD, OIO 2024-25
+     ─────────────────────────────────────────── */
+  nz:{
+    key:'nz',flag:'🇳🇿',cur:'NZ$',curCode:'NZD',
+    en:'New Zealand (Auckland)',zh:'紐西蘭（奧克蘭）',
+    defPrice:1050000,defPtax:0.40,defAgent:3.5,defLegalBuy:0.2,defLegalSell:0.15,
+    insurance:0.07,
+    foreignAllowed:'restricted',
+    foreignNote_en:'Non-resident foreigners are BANNED from buying existing residential property (Overseas Investment Act 2018). Limited exceptions for new builds ≥NZ$2M (partial liberalisation 2025 under discussion). This calculator shows resident scenario only for NZ.',
+    foreignNote_zh:'非居民外國人禁止購買現有住宅（2018年海外投資法）。部分例外：NZ$200萬以上新建房。本計算器 NZ 僅顯示居民情境。',
+    stampDutyFn:function(price){
+      return {amount:0,label:'0%',note_en:'No stamp duty in NZ (abolished)',note_zh:'紐西蘭無印花稅（已廢除）'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      if(!foreigner)return {amount:0,label:'—',note_en:'No surcharge',note_zh:'無附加稅'};
+      return {amount:0,label:'N/A',note_en:'Foreign purchase effectively prohibited for resale',note_zh:'外國人購買現有住宅實際上被禁止'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* Brightline: 2yr (Apr 2024+). If sold within 2yr, taxed at marginal rate ~33%.
+         After 2yr: 0% (NZ has no CGT for long-term) */
+      if(horizon<=2){
+        var rate=0.33;
+        return {rate:rate,amount:Math.max(0,gain)*rate,note_en:'Brightline 2yr rule 33% marginal (≤2yr hold)',note_zh:'明線測試2年：33%邊際稅率（2年內）'};
+      }
+      return {rate:0,amount:0,note_en:'No CGT after 2yr brightline (NZ)',note_zh:'超過2年持有：無資本利得稅'};
+    }
+  },
+
+  /* ─── UK ─────────────────────────────────────
+     SDLT (England): 0% ≤£125K, 2% £125K-250K, 5% £250K-925K, 10% £925K-1.5M, 12% >£1.5M
+     (Thresholds reverted from Apr 1 2025; nil-rate band was £250K during 2022-2025 holiday)
+     Additional dwelling surcharge: +5% (from Oct 31 2024; was +3% before Autumn Budget 2024)
+     Non-resident surcharge: +2% (from Apr 2021, still in force 2025)
+     CGT: 18% (basic rate) / 24% (higher rate) residential — from Apr 2024 Budget (was 28%)
+          Non-residents: same 18%/24% brackets (no additional non-resident rate)
+     Agent: 1-2%
+     Source: HMRC SDLT guidance gov.uk, HMRC CGT guidance 2024-25; gov.uk/guidance/capital-gains-tax-rates-and-allowances
+     ─────────────────────────────────────────── */
+  uk:{
+    key:'uk',flag:'🇬🇧',cur:'£',curCode:'GBP',
+    en:'United Kingdom (London)',zh:'英國（倫敦）',
+    defPrice:525000,defPtax:0.20,defAgent:1.5,defLegalBuy:0.3,defLegalSell:0.2,
+    insurance:0.08,
+    foreignAllowed:true,
+    foreignNote_en:'Non-residents pay +2% SDLT surcharge (from Apr 2021). Additional dwelling surcharge now +5% (from Oct 31 2024; was +3%). Combined non-resident + additional = +7% on top of standard rates. SDLT nil-rate threshold reverted to £125K from Apr 2025.',
+    foreignNote_zh:'非居民額外支付2% SDLT附加稅（2021年4月起）。額外住宅附加稅現為+5%（2024年10月31日起；原+3%）。非居民+額外住宅合計+7%。SDLT免稅門檻2025年4月起恢復至£125K。',
+    stampDutyFn:function(price,foreigner){
+      /* England SDLT from Apr 1 2025: 0% ≤£125K, 2% £125K-250K, 5% £250K-925K, 10% £925K-1.5M, 12% >£1.5M
+         Nil-rate threshold reverted from £250K to £125K on 1 Apr 2025.
+         For investment: +5% additional dwelling surcharge on full amount (from Oct 31 2024) */
+      var duty=0;
+      if(price<=125000)duty=0;
+      else if(price<=250000)duty=(price-125000)*0.02;
+      else if(price<=925000)duty=125000*0.02+(price-250000)*0.05;
+      else if(price<=1500000)duty=125000*0.02+(925000-250000)*0.05+(price-925000)*0.10;
+      else duty=125000*0.02+(925000-250000)*0.05+(1500000-925000)*0.10+(price-1500000)*0.12;
+      /* +5% additional dwelling (from Oct 31 2024; was 3%) */
+      var addl=price*0.05;
+      duty+=addl;
+      var effRate=((duty)/price*100).toFixed(2);
+      return {amount:duty,label:effRate+'% eff.',note_en:'SDLT progressive (Apr 2025 thresholds) +5% addl. dwelling surcharge (Oct 2024)',note_zh:'SDLT累進稅率（2025年4月門檻）+5%額外住宅附加（2024年10月起）'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      if(!foreigner)return {amount:0,label:'—',note_en:'Resident — no non-resident surcharge',note_zh:'居民 — 無非居民附加稅'};
+      return {amount:price*0.02,label:'+2%',note_en:'Non-resident SDLT surcharge +2% (HMRC, from Apr 2021)',note_zh:'非居民SDLT附加稅+2%（HMRC，2021年4月起）'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* From Apr 2024: residents 18% (basic) / 24% (higher) on residential
+         Non-residents: 24% or 28% depending on income. Use 24% est. */
+      var rate=foreigner?0.24:0.24;
+      var amount=Math.max(0,gain)*rate;
+      return {rate:rate,amount:amount,note_en:'CGT residential 24% (higher rate, est.)',note_zh:'CGT住宅24%（高稅率，估算）'};
+    }
+  },
+
+  /* ─── US ─────────────────────────────────────
+     NYC mansion tax: 1% ≥$1M, 1.25% ≥$2M, ... up to 3.9% ≥$25M
+     NY transfer tax: 0.4% + NYC 1.425% (>$500K)
+     Property tax: NYC ~0.9-1.4% assessed (~0.6-0.9% market); we model 1.1%
+     Federal LTCG: 15% (married <$583K), 20% (>$583K) + 3.8% NIIT non-resident
+     Non-resident FIRPTA withholding: 15% of sale price (credit against tax)
+     State LTCG (NY): up to 10.9% additional (est.)
+     Agent: 5-6% (US typically both sides)
+     Source: NYC DOF, IRS Publication 544, FIRPTA rules 2024
+     ─────────────────────────────────────────── */
+  us:{
+    key:'us',flag:'🇺🇸',cur:'$',curCode:'USD',
+    en:'United States (NYC)',zh:'美國（紐約）',
+    defPrice:800000,defPtax:1.10,defAgent:5.0,defLegalBuy:0.25,defLegalSell:0.25,
+    insurance:0.07,
+    foreignAllowed:true,
+    foreignNote_en:'No blanket restriction on foreign ownership. FIRPTA: non-residents subject to 15% withholding on sale price at closing (credited against actual CGT). Some states (FL, TX) have CFIUS-adjacent restrictions on ≥25 ac. agricultural near bases.',
+    foreignNote_zh:'美國無全面外國人購房限制。FIRPTA：非居民出售時需預扣15%售價（可抵扣實際CGT）。部分州對軍事基地附近農業用地有限制。',
+    stampDutyFn:function(price){
+      /* NYC transfer tax 1.425% (>$500K) + NYS 0.4% + mansion tax */
+      var transfer=price>500000?price*0.01825:price*0.01;/* NYC 1.425 + NYS 0.4 */
+      var mansion=0;
+      if(price>=1000000&&price<2000000)mansion=price*0.01;
+      else if(price>=2000000&&price<3000000)mansion=price*0.0125;
+      else if(price>=3000000&&price<5000000)mansion=price*0.0225;
+      else if(price>=5000000&&price<10000000)mansion=price*0.0325;
+      else if(price>=10000000)mansion=price*0.039;
+      var total=transfer+mansion;
+      var effRate=(total/price*100).toFixed(2);
+      return {amount:total,label:effRate+'% eff.',note_en:'NYC+NYS transfer tax + mansion tax',note_zh:'NYC+NYS過戶稅 + mansion稅'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      return {amount:0,label:'—',note_en:'No federal foreign surcharge (FIRPTA at exit)',note_zh:'無聯邦外國人附加稅（FIRPTA於出售時'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* Federal LTCG 15-20% + NIIT 3.8% + NY state ~10.9% est.
+         Short-term (<1yr): ordinary income ~37%
+         Long-term: federal 20% + NIIT 3.8% + NY 10.9% = ~34.7% combined est. */
+      var rate;
+      if(horizon<1)rate=0.37;
+      else rate=foreigner?0.348:0.348;/* combined fed+state est. high bracket */
+      var amount=Math.max(0,gain)*rate;
+      return {rate:rate,amount:amount,note_en:'LTCG+NIIT+NYS est. combined ~35% (high bracket)',note_zh:'聯邦LTCG+NIIT+NYS合計約35%（高稅率，估）'};
+    }
+  },
+
+  /* ─── THAILAND ────────────────────────────────
+     Transfer fee: 2% (Land Dept.)
+     Business tax (SBT): 3.3% if held <5yr (replaces stamp duty)
+     Stamp duty: 0.5% if held ≥5yr (instead of SBT)
+     WHT at source: 1% of sale or assessed (corporations); individuals: progressive
+     Foreigners: can only buy condos + 49% foreign quota rule
+     Property tax: Land & Building Tax 0.02-0.3% (residential, new 2020 law)
+     Agent: 3% (est.)
+     Source: Revenue Dept. Thailand, Land Dept. 2024
+     ─────────────────────────────────────────── */
+  th:{
+    key:'th',flag:'🇹🇭',cur:'฿',curCode:'THB',
+    en:'Thailand (Bangkok)',zh:'泰國（曼谷）',
+    defPrice:8000000,defPtax:0.10,defAgent:3.0,defLegalBuy:0.5,defLegalSell:0.25,
+    insurance:0.05,
+    foreignAllowed:'restricted',
+    foreignNote_en:'Foreigners can ONLY buy condominiums (not landed property). Foreign quota: max 49% of a condo project. 50-year leasehold only for landed. Note: condo prices here reflect Bangkok CBD condos.',
+    foreignNote_zh:'外國人只能購買公寓（不能買土地/獨立屋）。外國人配額：每個公寓項目最多49%。土地只能50年租賃。此處價格反映曼谷市中心公寓。',
+    stampDutyFn:function(price,foreigner,horizon){
+      /* Transfer fee 2% + SBT 3.3% (if <5yr) OR stamp 0.5% (if ≥5yr)
+         At purchase: just transfer 2% + stamp 0.5% (split with seller sometimes) */
+      var transfer=price*0.02;
+      var stamp=price*0.005;
+      var total=transfer+stamp;
+      var effRate=(total/price*100).toFixed(2);
+      return {amount:total,label:'2.5%',note_en:'Land Dept. transfer 2% + stamp 0.5%',note_zh:'土地廳過戶費2% + 印花稅0.5%'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      return {amount:0,label:'—',note_en:'No extra surcharge (quota restriction instead)',note_zh:'無附加稅（但有49%配額限制）'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* Thailand individual: SBT 3.3% on sale price (if held <5yr) instead of CGT
+         If held ≥5yr: withholding tax based on appraised value × years owned × marginal
+         Simplified: model as ~10% of gain for ≥5yr, 3.3% of sale price for <5yr */
+      if(horizon<5){
+        /* SBT 3.3% on SALE PRICE, not gain */
+        return {rate:0.033,amount:0,note_en:'SBT 3.3% on sale price (if <5yr, shown in exit)',note_zh:'SBT 3.3%（5年內，列於退出成本）',sbtOnPrice:true};
+      }
+      var rate=0.10;
+      return {rate:rate,amount:Math.max(0,gain)*rate,note_en:'Withholding tax ~10% of gain est. (≥5yr)',note_zh:'預扣稅約10%（持有5年以上，估）'};
+    }
+  },
+
+  /* ─── VIETNAM ─────────────────────────────────
+     Registration: 0.5% of assessed value (≈0.3% of market)
+     VAT: 10% (primary/developer sales only — resale exempt)
+     Personal income tax on property sale: 2% of sale price (final withholding)
+     Foreign ownership: condos only; max 30% of condo block; 50yr leasehold (renewable)
+     Land & Building Tax: no annual property tax in VN (only on >$1M properties in discussion)
+     Agent: 1-2%
+     Source: Law on Housing 2023, Circular 111/2013, MOF Vietnam
+     ─────────────────────────────────────────── */
+  vn:{
+    key:'vn',flag:'🇻🇳',cur:'₫',curCode:'VND',
+    en:'Vietnam (HCMC)',zh:'越南（胡志明市）',
+    defPrice:6000000000,defPtax:0.0,defAgent:1.5,defLegalBuy:0.5,defLegalSell:0.25,
+    insurance:0.05,
+    foreignAllowed:'restricted',
+    foreignNote_en:'Foreigners can ONLY buy apartments in approved projects. Max 30% foreign ownership per condo block. 50-year leasehold (renewable once). Cannot buy landed property. Resale to another foreigner is permitted.',
+    foreignNote_zh:'外國人只能購買核准項目的公寓。每棟公寓樓外國人持有上限30%。50年租賃（可續一次）。不能購買土地/獨棟房。可轉售給其他外國人。',
+    stampDutyFn:function(price){
+      /* Registration 0.5% of assessed value (≈50% of market) = 0.25% of market price */
+      var regFee=price*0.005;
+      return {amount:regFee,label:'0.5%',note_en:'Registration tax 0.5% of assessed value',note_zh:'登記稅0.5%（按評估價值）'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      return {amount:0,label:'—',note_en:'No foreign surcharge (leasehold restriction instead)',note_zh:'無附加稅（但為50年租賃）'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* PIT on property sale: 2% of sale price (final withholding) — regardless of gain */
+      return {rate:0.02,amount:0,note_en:'PIT 2% of sale price (shown in exit costs)',note_zh:'個人所得稅2%（以售價計算，列於退出成本）',onPrice:true};
+    }
+  },
+
+  /* ─── SOUTH KOREA ─────────────────────────────
+     취득세 (Acquisition tax): 1-3% depending on price + education + rural taxes ≈1.1-3.3%
+       ≤600M KRW: 1.1%; 600M-900M: 2.2%; >900M: 3.3%
+     보유세 (Holding tax): 재산세 (property tax) 0.1-0.4% + 종합부동산세 (comprehensive RE tax)
+     종부세: only above KRW 900M (공시지가); est. ~0.6-1.6% of assessed for high value
+     양도소득세 (Transfer income tax): 6-45% marginal + local 10% surtax
+       Short-term (<1yr): 70-77%; 1-2yr: 60-66%; >2yr: normal bracket 6-45%
+       Multiple homes: additional 20-30pp
+     No foreign surcharge per se, but LTV restriction for foreigners
+     Source: MOLIT, NTS Korea 2024
+     ─────────────────────────────────────────── */
+  kr:{
+    key:'kr',flag:'🇰🇷',cur:'₩',curCode:'KRW',
+    en:'South Korea (Seoul)',zh:'韓國（首爾）',
+    defPrice:1200000000,defPtax:0.70,defAgent:0.5,defLegalBuy:0.3,defLegalSell:0.1,
+    insurance:0.05,
+    foreignAllowed:true,
+    foreignNote_en:'Foreign individuals can purchase with no extra surcharge, but face LTV limits (50%). Real estate acquisition must be reported to the Bank of Korea within 60 days. 종부세 (comprehensive RE tax) applies to high-value properties.',
+    foreignNote_zh:'外國個人可購房，無附加稅，但LTV上限50%。購房後60天內需向韓國銀行申報。持有高價房產需繳納綜合不動產稅（종부세）。',
+    stampDutyFn:function(price){
+      /* 취득세: ≤600M: 1%; 600M-900M: 2%; >900M: 3% + 교육세 0.1% + 농특세 0.2% */
+      var base;
+      if(price<=600000000)base=0.01;
+      else if(price<=900000000)base=0.02;
+      else base=0.03;
+      var edu=base*0.1;
+      var agri=price>600000000?0.002:0;
+      var total=price*(base+edu+agri);
+      var effRate=((base+edu+agri)*100).toFixed(2);
+      return {amount:total,label:effRate+'% eff.',note_en:'취득세+교육세+농특세 (MOLIT 2024)',note_zh:'取得稅+教育稅+農漁村特別稅'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      return {amount:0,label:'—',note_en:'No foreign surcharge (LTV 50% limit)',note_zh:'無外國人附加稅（LTV上限50%）'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* 양도소득세: >2yr holding → marginal tax. For high-value gains est. ~42% + 10% surtax */
+      var rate;
+      if(horizon<1)rate=0.77;/* 70% + 10% surtax */
+      else if(horizon<2)rate=0.66;/* 60% + 10% surtax */
+      else rate=0.462;/* est. top marginal 42% + 10% local = 46.2% */
+      var amount=Math.max(0,gain)*rate;
+      return {rate:rate,amount:amount,note_en:'양도소득세 est. '+(Math.round(rate*100))+'% ('+(horizon<1?'<1yr':horizon<2?'1-2yr':'>2yr')+')',note_zh:'讓渡所得稅估算'+(Math.round(rate*100))+'%（'+( horizon<1?'1年內':horizon<2?'1-2年':'2年以上')+'）'};
+    }
+  },
+
+  /* ─── CANADA ──────────────────────────────────
+     BC: PPT 1% ≤$200K, 2% $200K-$2M, 3% $2M+ residential
+     Ontario: LTT 0.5% ≤$55K, 1% $55K-$250K, 1.5% $250K-$400K, 2% $400K+
+               (+ Toronto MLTT doubles Ontario rates)
+     Foreign buyer: BC +20% NRST; Ontario +25% NRST (we model Toronto = ON+MLTT)
+     Annual property tax: ~0.7% of assessed (Toronto est.)
+     Vacancy tax: 1% (federal), 3% (Vancouver city for EHT), 2% (Toronto VHT)
+     CGT: 50% inclusion (50% of gain added to income); effective ~26.5% at 53% marginal
+         2024 Budget: inclusion rate ↑ to 2/3 (66.7%) for gains >$250K
+     Agent: 5% (buyer+seller combined in Canada)
+     Source: BCREA, OREA, CRA, CMHC 2024
+     ─────────────────────────────────────────── */
+  ca:{
+    key:'ca',flag:'🇨🇦',cur:'C$',curCode:'CAD',
+    en:'Canada (Toronto)',zh:'加拿大（多倫多）',
+    defPrice:1100000,defPtax:0.70,defAgent:4.0,defLegalBuy:0.25,defLegalSell:0.15,
+    insurance:0.07,
+    foreignAllowed:'restricted',
+    foreignNote_en:'Canadian federal ban on foreign residential purchases (Jan 2023, extended to Jan 2027). If eligible (work permit / PR): ON +25% NRST province-wide; Toronto city adds +10% MNRST (total 35% in Toronto, effective Jan 1 2025). BC +20% NRST. Vancouver empty home tax 3%/yr.',
+    foreignNote_zh:'加拿大聯邦禁止外國人購買住宅（2023年1月起，延至2027年1月）。若符合資格（工作簽/永居）：安省+25% NRST（全省）；多倫多市另加+10% MNRST（多倫多市合計35%，2025年1月起）。BC省+20% NRST。溫哥華空屋稅每年3%。',
+    stampDutyFn:function(price){
+      /* Ontario LTT + Toronto MLTT (doubles ON rates for Toronto purchases) */
+      function ontarioLTT(p){
+        var t=0;
+        if(p<=55000)t=p*0.005;
+        else if(p<=250000)t=55000*0.005+(p-55000)*0.01;
+        else if(p<=400000)t=55000*0.005+195000*0.01+(p-250000)*0.015;
+        else if(p<=2000000)t=55000*0.005+195000*0.01+150000*0.015+(p-400000)*0.02;
+        else t=55000*0.005+195000*0.01+150000*0.015+1600000*0.02+(p-2000000)*0.025;
+        return t;
+      }
+      var on=ontarioLTT(price);
+      var mltt=ontarioLTT(price);/* Toronto MLTT mirrors ON rates */
+      var total=on+mltt;
+      var effRate=(total/price*100).toFixed(2);
+      return {amount:total,label:effRate+'% eff.',note_en:'Ontario LTT + Toronto MLTT (combined)',note_zh:'安省土地轉讓稅 + 多倫多市土地轉讓稅'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      if(!foreigner)return {amount:0,label:'—',note_en:'Resident — no NRST',note_zh:'居民 — 無NRST'};
+      /* Ontario NRST +25% */
+      return {amount:price*0.25,label:'+25%',note_en:'Ontario Non-Resident Speculation Tax (NRST) 25%',note_zh:'安省非居民投機稅（NRST）25%'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      /* 2024 Budget: gains >$250K: 2/3 inclusion; below $250K: 1/2 inclusion
+         Est. at top marginal 53.5% (ON+Fed):
+         effective CGT: 53.5%×2/3 = ~35.7% for large gains */
+      var inclRate=gain>250000?0.667:0.50;
+      var marginal=0.535;
+      var rate=inclRate*marginal;
+      var amount=Math.max(0,gain)*rate;
+      return {rate:rate,amount:amount,note_en:'CGT: '+(inclRate===0.667?'2/3':'1/2')+' inclusion × 53.5% = ~'+Math.round(rate*100)+'%',note_zh:'CGT：'+(inclRate===0.667?'2/3':'1/2')+'計入 × 53.5% ≈ '+Math.round(rate*100)+'%'};
+    }
+  },
+
+  /* ─── IRELAND ─────────────────────────────────
+     Stamp: 1% ≤€1M, 2% €1M-€1.5M, 6% >€1.5M residential (Budget 2025, from 2 Oct 2024)
+     CGT: 33% (standard rate)
+     Annual LPT (Local Property Tax): 0.1% ≤€1.05M, 0.25% portion >€1.05M
+     No foreign surcharge
+     Agent: 1-2% + VAT 23% = net ~1.2-2.5%
+     Source: Revenue.ie stamp duty rates (revenue.ie/en/property/stamp-duty), Budget 2025 (Oct 2024)
+     ─────────────────────────────────────────── */
+  ie:{
+    key:'ie',flag:'🇮🇪',cur:'€',curCode:'EUR',
+    en:'Ireland (Dublin)',zh:'愛爾蘭（都柏林）',
+    defPrice:420000,defPtax:0.12,defAgent:1.5,defLegalBuy:0.5,defLegalSell:0.25,
+    insurance:0.08,
+    foreignAllowed:true,
+    foreignNote_en:'No foreign buyer restrictions in Ireland. EU right of movement applies. Non-EU nationals face no extra stamp duty but may have mortgage restrictions. Note: Golden Visa scheme closed Feb 2024.',
+    foreignNote_zh:'愛爾蘭無外國人購房限制。歐盟居民享有遷移自由。非歐盟國民無額外印花稅，但可能有貸款限制。注意：黃金簽證計劃已於2024年2月關閉。',
+    stampDutyFn:function(price){
+      /* Revenue.ie: 1% ≤€1M, 2% €1M-€1.5M, 6% >€1.5M (from 2 Oct 2024, Budget 2025) */
+      var duty;
+      if(price<=1000000)duty=price*0.01;
+      else if(price<=1500000)duty=1000000*0.01+(price-1000000)*0.02;
+      else duty=1000000*0.01+500000*0.02+(price-1500000)*0.06;
+      var effRate=(duty/price*100).toFixed(2);
+      return {amount:duty,label:effRate+'% eff.',note_en:'Stamp duty 1% ≤€1M, 2% €1M-1.5M, 6% >€1.5M (Revenue.ie Budget 2025)',note_zh:'印花稅1%（≤€100萬）/ 2%（€100-150萬）/ 6%（>€150萬）（2024年10月起）'};
+    },
+    foreignSurchargeFn:function(price,foreigner){
+      return {amount:0,label:'—',note_en:'No foreign surcharge in Ireland',note_zh:'愛爾蘭無外國人附加稅'};
+    },
+    cgtFn:function(gain,horizon,foreigner){
+      var rate=0.33;
+      var amount=Math.max(0,gain)*rate;
+      return {rate:rate,amount:amount,note_en:'CGT 33% (Revenue.ie standard rate)',note_zh:'CGT 33%（愛爾蘭稅局標準稅率）'};
+    }
+  }
+
+};/* end MKTDATA */
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+var state={
+  mkt:'my',
+  price:1200000,
+  foreigner:false,
+  horizon:10,
+  appr:3.0,
+  maint:1.0,
+  ptax:0.10,
+  agent:2.5,
+  rentalTax:false
+};
+
+/* ══════════════════════════════════════════════
+   CORE CALCULATION
+══════════════════════════════════════════════ */
+function calcMarket(mktKey,price,foreigner,horizon,appr,maint,ptax,agentPct,rentalTax){
+  var m=MKTDATA[mktKey];
+  if(!m)return null;
+
+  var lang=localStorage.getItem('lang')||'en';
+  var en=lang==='en';
+
+  /* ── Acquisition ── */
+  var sd=m.stampDutyFn(price,foreigner,horizon);
+  var fs=m.foreignSurchargeFn(price,foreigner);
+  var legalBuy=price*m.defLegalBuy/100;
+
+  /* For buyer agent: most markets 0 (buyer side included in seller or convention) except US */
+  var buyerAgent=mktKey==='us'?0:0;/* US: seller pays all; buyer agent convention changing */
+
+  var acqItems=[
+    {label_en:'Property Price',label_zh:'房屋售價',rate:'100%',amount:price,note_en:'Base',note_zh:'基準',zeroOk:true},
+    {label_en:'Stamp Duty / Transfer Tax',label_zh:'印花稅 / 過戶稅',rate:sd.label,amount:sd.amount,note_en:sd.note_en,note_zh:sd.note_zh},
+    {label_en:'Foreign Surcharge',label_zh:'外國人附加稅',rate:fs.label,amount:fs.amount,note_en:fs.note_en,note_zh:fs.note_zh,zeroOk:true},
+    {label_en:'Buyer Legal Fee',label_zh:'買方律師費',rate:m.defLegalBuy.toFixed(1)+'%',amount:legalBuy,note_en:'Legal/conveyancing',note_zh:'律師/過戶費'},
+    {label_en:'Buyer Agent Fee',label_zh:'買方仲介費',rate:'0%',amount:buyerAgent,note_en:'Typically 0 (paid by seller)',note_zh:'通常由賣方支付',zeroOk:true}
+  ];
+
+  /* FIRB for AU */
+  if(mktKey==='au'&&foreigner){
+    /* Already included in foreignSurchargeFn amount, separate display */
+    var furbAmt;
+    if(price<=1000000)furbAmt=15100;
+    else if(price<=2000000)furbAmt=30300;
+    else if(price<=4000000)furbAmt=90900;
+    else furbAmt=181800;/* est. >$4M */
+    /* Don't double-count — foreignSurcharge already includes FIRB */
+    /* We split display */
+    acqItems[2]={label_en:'NSW Foreign Stamp Surcharge',label_zh:'NSW外國人印花附加稅',rate:'9%',amount:price*0.09,note_en:'NSW +9% foreign purchaser duty (from 1 Jan 2025; was 8%)',note_zh:'NSW外國人購買者附加稅9%（2025年1月起；原為8%）'};
+    acqItems.push({label_en:'FIRB Fee (new dwellings only)',label_zh:'FIRB費（新建樓盤）',rate:'fixed',amount:furbAmt,note_en:'foreigninvestment.gov.au 2025-26; established dwellings banned Apr 2025-Mar 2027',note_zh:'FIRB費用表2025-26；現有住宅2025年4月至2027年3月禁止'});
+  }
+
+  var acqFriction=0;
+  acqItems.forEach(function(it,i){if(i>0)acqFriction+=it.amount;});/* exclude price itself */
+
+  var acqSubtotal=price+acqFriction;
+
+  /* ── Holding ── */
+  var annualPtax=price*ptax/100;
+  var annualMaint=price*maint/100;
+  var annualInsurance=price*m.insurance/100;
+  var annualRentalTax=0;
+  if(rentalTax){
+    /* Estimate rental income tax: assume yield ~4%, marginal rate 20% */
+    var estRentalIncome=price*0.04;
+    annualRentalTax=estRentalIncome*0.20;
+  }
+  var totalAnnual=annualPtax+annualMaint+annualInsurance+annualRentalTax;
+  var totalHolding=totalAnnual*horizon;
+
+  var holdItems=[
+    {label_en:'Property Tax / Rates',label_zh:'房產稅/地方稅',annual:annualPtax,total:annualPtax*horizon,note_en:ptax.toFixed(2)+'% of price p.a.',note_zh:ptax.toFixed(2)+'% / 年'},
+    {label_en:'Maintenance / Service Charge',label_zh:'維護費/管理費',annual:annualMaint,total:annualMaint*horizon,note_en:maint.toFixed(1)+'% of price p.a.',note_zh:maint.toFixed(1)+'% / 年'},
+    {label_en:'Insurance',label_zh:'保險費',annual:annualInsurance,total:annualInsurance*horizon,note_en:m.insurance.toFixed(2)+'% of price p.a. (est.)',note_zh:m.insurance.toFixed(2)+'% / 年（估）'},
+    {label_en:'Rental Income Tax',label_zh:'租金收入稅',annual:annualRentalTax,total:annualRentalTax*horizon,note_en:rentalTax?'~20% on 4% yield (est.)':'Opt-in only',note_zh:rentalTax?'租金收益約4%，稅率20%（估）':'需手動開啟'}
+  ];
+
+  /* ── Exit ── */
+  var salePrice=price*Math.pow(1+appr/100,horizon);
+  var gain=salePrice-price;
+  var cgtResult=m.cgtFn(gain,horizon,foreigner);
+
+  /* Special cases: VN and TH may tax sale price not gain */
+  var cgtAmount=cgtResult.amount;
+  if(cgtResult.sbtOnPrice){/* Thailand SBT */
+    cgtAmount=salePrice*0.033;
+    cgtResult.note_en='SBT 3.3% of sale price (held <5yr)';
+    cgtResult.note_zh='SBT 3.3%（以售價計算，持有<5年）';
+  } else if(cgtResult.onPrice){/* Vietnam PIT */
+    cgtAmount=salePrice*0.02;
+    cgtResult.note_en='PIT 2% of sale price';
+    cgtResult.note_zh='個人所得稅2%（以售價計算）';
+  }
+
+  var sellerAgent=salePrice*agentPct/100;
+  var legalSell=salePrice*m.defLegalSell/100;
+  var exitFriction=sellerAgent+cgtAmount+legalSell;
+
+  var exitItems=[
+    {label_en:'Sale Price (after appreciation)',label_zh:'售價（含增值）',rate:'—',amount:salePrice,note_en:appr.toFixed(1)+'% p.a. × '+horizon+'yr',note_zh:appr.toFixed(1)+'%/年 × '+horizon+'年',zeroOk:true},
+    {label_en:'Seller Agent Fee',label_zh:'賣方仲介費',rate:agentPct.toFixed(1)+'%',amount:sellerAgent,note_en:'of sale price',note_zh:'以售價計算'},
+    {label_en:'Capital Gains / Transfer Tax',label_zh:'資本利得稅/過戶稅',rate:Math.round((cgtResult.rate||0)*100)+'%',amount:cgtAmount,note_en:cgtResult.note_en,note_zh:cgtResult.note_zh,zeroOk:true},
+    {label_en:'Seller Legal Fee',label_zh:'賣方律師費',rate:m.defLegalSell.toFixed(1)+'%',amount:legalSell,note_en:'of sale price',note_zh:'以售價計算'}
+  ];
+
+  var netProceeds=salePrice-exitFriction;
+
+  /* ── Summary ── */
+  /* netPL = netProceeds − (price + acqFriction + totalHolding) */
+  var totalCashOut=price+acqFriction+totalHolding;/* total money in */
+  var netPL=netProceeds-totalCashOut;
+  var netPLpct=netPL/price*100;
+
+  return {
+    cur:m.cur,
+    price:price,
+    salePrice:salePrice,
+    acqFriction:acqFriction,
+    acqSubtotal:acqSubtotal,
+    totalHolding:totalHolding,
+    totalAnnual:totalAnnual,
+    exitFriction:exitFriction,
+    netProceeds:netProceeds,
+    totalCashOut:totalCashOut,
+    netPL:netPL,
+    netPLpct:netPLpct,
+    acqItems:acqItems,
+    holdItems:holdItems,
+    exitItems:exitItems,
+    gain:gain
+  };
+}
+
+/* ══════════════════════════════════════════════
+   RENDER HELPERS
+══════════════════════════════════════════════ */
+function fmtA(v){return fmtAmt(v,MKTDATA[state.mkt].cur);}
+
+function renderTable(tbodyId,items,mode,res){
+  var en=localStorage.getItem('lang')!=='zh';
+  var cur=res.cur;
+  var rows='';
+  items.forEach(function(it,i){
+    var isLast=(i===items.length-1);
+    var zeroClass=(it.amount===0&&!it.zeroOk)?'cost-zero':'';
+
+    if(mode==='acq'||mode==='exit'){
+      var isSubtotal=false;
+      rows+='<tr class="'+zeroClass+'"><td>'+(en?it.label_en:it.label_zh)+'</td>'+
+        '<td>'+it.rate+'</td>'+
+        '<td class="num-mono">'+fmtAmt(it.amount,cur)+'</td>'+
+        '<td>'+(en?it.note_en:it.note_zh)+'</td></tr>';
+      if(isLast){
+        /* Subtotal row */
+        var subAmt,subLabel;
+        if(mode==='acq'){subAmt=res.acqSubtotal;subLabel=en?'Subtotal (all-in)':'小計（總買入）';}
+        else{subAmt=res.netProceeds;subLabel=en?'Net Proceeds':'淨回款';}
+        rows+='<tr class="subtotal"><td>'+subLabel+'</td><td>—</td><td class="num-mono">'+fmtAmt(subAmt,cur)+'</td><td></td></tr>';
+      }
+    } else {/* hold */
+      rows+='<tr class="'+zeroClass+'"><td>'+(en?it.label_en:it.label_zh)+'</td>'+
+        '<td class="num-mono">'+fmtAmt(it.annual,cur)+'/yr</td>'+
+        '<td class="num-mono">'+fmtAmt(it.total,cur)+'</td>'+
+        '<td>'+(en?it.note_en:it.note_zh)+'</td></tr>';
+      if(isLast){
+        rows+='<tr class="subtotal"><td>'+(en?'Total Holding':'持有總成本')+'</td><td class="num-mono">'+fmtAmt(res.totalAnnual,cur)+'/yr</td><td class="num-mono">'+fmtAmt(res.totalHolding,cur)+'</td><td></td></tr>';
+      }
+    }
+  });
+  document.getElementById(tbodyId).innerHTML=rows;
+}
+
+function renderHero(res){
+  var en=localStorage.getItem('lang')!=='zh';
+  var cur=res.cur;
+  var pct=res.netPLpct;
+  var heroEl=document.getElementById('costHero');
+  heroEl.classList.remove('hero-green','hero-yellow','hero-red');
+  var verdictClass,verdictText;
+  if(pct>=0){heroEl.classList.add('hero-green');verdictClass='verdict-green';verdictText=en?'Net Positive':'淨收益';}
+  else if(pct>=-5){heroEl.classList.add('hero-yellow');verdictClass='verdict-yellow';verdictText=en?'Marginal':'邊際虧損';}
+  else{heroEl.classList.add('hero-red');verdictClass='verdict-red';verdictText=en?'Net Loss > 5%':'淨虧損 > 5%';}
+
+  document.getElementById('heroCashOut').textContent=fmtAmt(res.acqFriction+res.totalHolding,cur);
+  document.getElementById('heroProceeds').textContent=fmtAmt(res.netProceeds,cur);
+  var plSign=res.netPL>=0?'+':'';
+  document.getElementById('heroNetPL').textContent=plSign+fmtAmt(res.netPL,cur);
+  document.getElementById('heroNetPL').style.color=pct>=0?C.green:C.red;
+  document.getElementById('heroVerdict').className='hero-verdict '+verdictClass;
+  document.getElementById('heroVerdict').textContent=plSign+pct.toFixed(1)+'% — '+verdictText;
+  document.getElementById('heroPurchase').textContent=fmtAmt(res.price,cur);
+  document.getElementById('heroExit').textContent=fmtAmt(res.salePrice,cur);
+  document.getElementById('heroAcqn').textContent=fmtAmt(res.acqFriction,cur);
+  document.getElementById('heroHolding').textContent=fmtAmt(res.totalHolding,cur);
+  document.getElementById('heroExitFee').textContent=fmtAmt(res.exitFriction,cur);
+}
+
+function renderCharts(res,lang){
+  allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  var en=lang!=='zh';
+  var cur=res.cur;
+
+  /* Chart 1: Stacked bar — cost components */
+  var c1=echarts.init(document.getElementById('chartStack'));
+  c1.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},
+      backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:C.navy,fontSize:11},
+      formatter:function(params){
+        var lines=params[0].name+'<br>';
+        params.forEach(function(p){
+          if(p.value!==0)lines+=p.marker+p.seriesName+': '+fmtAmt(p.value,cur)+'<br>';
+        });
+        return lines;
+      }
+    },
+    grid:{left:10,right:20,top:40,bottom:10,containLabel:true},
+    legend:{top:4,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    xAxis:mkAxis({type:'category',data:[en?'Cost Breakdown':'成本拆解'],axisTick:{show:false}}),
+    yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtAmt(v,cur);}}}),
+    series:[
+      {name:en?'Acquisition Friction':'買進摩擦',type:'bar',stack:'cost',data:[res.acqFriction],
+        itemStyle:{color:'#2563eb',borderRadius:[0,0,0,0]},barMaxWidth:80},
+      {name:en?'Holding Costs':'持有成本',type:'bar',stack:'cost',data:[res.totalHolding],
+        itemStyle:{color:'#d97706'},barMaxWidth:80},
+      {name:en?'Exit Friction':'退出摩擦',type:'bar',stack:'cost',data:[res.exitFriction],
+        itemStyle:{color:'#dc2626'},barMaxWidth:80},
+      {name:en?'Capital Gain':'資本利得',type:'bar',stack:'cost',data:[-res.gain],
+        itemStyle:{color:'#16a34a'},barMaxWidth:80}
+    ]
+  });
+  allCharts.push(c1);
+
+  /* Chart 2: Per-year holding cost bar */
+  var years=[];var vals=[];
+  for(var y=1;y<=state.horizon;y++){years.push(en?'Yr '+y:'第'+y+'年');vals.push(res.totalAnnual);}
+  var c2=echarts.init(document.getElementById('chartHolding'));
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(params){return params[0].name+'<br>'+fmtAmt(params[0].value,cur)+'/yr';}}),
+    grid:{left:10,right:20,top:10,bottom:10,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,axisLabel:{fontSize:9,rotate:years.length>10?30:0}}),
+    yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtAmt(v,cur);}}}),
+    series:[{
+      type:'bar',
+      data:vals,
+      itemStyle:{color:C.orange,borderRadius:[3,3,0,0]},
+      barMaxWidth:35
+    }]
+  });
+  allCharts.push(c2);
+
+  /* Chart 3: Cross-market Net P&L % ranking */
+  renderCrossMarket(lang);
+}
+
+/* ══════════════════════════════════════════════
+   CROSS-MARKET COMPARISON
+══════════════════════════════════════════════ */
+function renderCrossMarket(lang){
+  var en=lang!=='zh';
+  /* Use user's price in USD equivalent, then scale to each market's default price ratio */
+  /* Simple approach: use same appreciation, horizon, maint, ptax but each market's own
+     default ptax, agent fee, legal fee, CGT, stamp duty — price is scaled to market default */
+  var basePrice=state.price;
+  var baseMkt=MKTDATA[state.mkt];
+
+  var rows=[];
+  Object.keys(MKTDATA).forEach(function(k){
+    var m=MKTDATA[k];
+    /* Scale price: user's price is in base market currency; for cross comparison
+       we use each market's defPrice as the reference (same % of market) */
+    var mktPrice=m.defPrice;
+    var r=calcMarket(k,mktPrice,false,state.horizon,state.appr,state.maint,m.defPtax,m.defAgent,false);
+    if(!r)return;
+    rows.push({key:k,flag:m.flag,en:m.en,zh:m.zh,cur:m.cur,res:r});
+  });
+  rows.sort(function(a,b){return b.res.netPLpct-a.res.netPLpct;});
+
+  /* ECharts bar */
+  var chartLabels=rows.map(function(r){return r.flag+' '+(en?r.en:r.zh);});
+  var chartVals=rows.map(function(r){return parseFloat(r.res.netPLpct.toFixed(1));});
+  var chartColors=rows.map(function(r){return r.res.netPLpct>=0?C.green:C.red;});
+
+  /* Dispose existing cross chart if any */
+  if(allCharts.length>=3){var old=allCharts[2];if(old)old.dispose();allCharts[2]=null;}
+
+  var c3=echarts.init(document.getElementById('chartRanking'));
+  c3.setOption({
+    tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:C.navy,fontSize:11},
+      formatter:function(params){
+        var d=rows[params[0].dataIndex];
+        return (en?d.en:d.zh)+'<br>'+(en?'Net P&L':'淨損益')+': '+fmtPct(params[0].value);
+      }},
+    grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+    xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%';}}}),
+    yAxis:mkAxis({type:'category',data:chartLabels,axisLabel:{fontSize:10}}),
+    series:[{
+      type:'bar',
+      data:chartVals,
+      itemStyle:{color:function(p){return chartColors[p.dataIndex];},borderRadius:[0,3,3,0]},
+      barMaxWidth:22,
+      label:{show:true,position:'right',fontSize:10,color:C.navy,formatter:function(p){return p.value+'%';}}
+    }]
+  });
+  if(allCharts.length>=3)allCharts[2]=c3;else allCharts.push(c3);
+
+  /* Table */
+  var tbody='';
+  rows.forEach(function(r){
+    var isActive=r.key===state.mkt?'active-market':'';
+    var pct=r.res.netPLpct;
+    var plClass=pct>=0?'pl-pos':pct>=-5?'pl-zero':'pl-neg';
+    var pillCls=pct>=0?'pill-green':pct>=-5?'pill-yellow':'pill-red';
+    var verdictEn=pct>=0?'Positive':pct>=-5?'Marginal':'Loss';
+    var verdictZh=pct>=0?'獲利':pct>=-5?'邊際':'虧損';
+    tbody+='<tr class="'+isActive+'">'+
+      '<td>'+r.flag+' <span class="lang-en">'+(en?r.en:'')+'</span><span class="lang-zh" style="display:'+(en?'none':'')+'">'+r.zh+'</span>'+
+        '<span style="display:block;font-size:10px;color:#94a3b8;font-family:\'JetBrains Mono\',monospace">'+r.cur.trim()+'</span></td>'+
+      '<td class="num-mono">'+fmtAmt(r.res.acqFriction,r.cur)+'</td>'+
+      '<td class="num-mono">'+fmtAmt(r.res.totalHolding,r.cur)+'</td>'+
+      '<td class="num-mono">'+fmtAmt(r.res.exitFriction,r.cur)+'</td>'+
+      '<td class="num-mono '+plClass+'">'+(pct>=0?'+':'')+fmtAmt(r.res.netPL,r.cur)+'</td>'+
+      '<td class="'+plClass+'">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</td>'+
+      '<td><span class="verdict-pill '+pillCls+'"><span class="lang-en">'+verdictEn+'</span><span class="lang-zh" style="display:none">'+verdictZh+'</span></span></td>'+
+    '</tr>';
+  });
+  document.getElementById('crossBody').innerHTML=tbody;
+
+  /* Re-apply lang in tbody */
+  var curLang=lang;
+  document.querySelectorAll('#crossBody .lang-en').forEach(function(e){e.style.display=curLang!=='zh'?'':'none';});
+  document.querySelectorAll('#crossBody .lang-zh').forEach(function(e){e.style.display=curLang==='zh'?'':'none';});
+}
+
+/* ══════════════════════════════════════════════
+   MAIN RECALC
+══════════════════════════════════════════════ */
+function recalc(){
+  var lang=localStorage.getItem('lang')||'en';
+  var en=lang!=='zh';
+  var m=MKTDATA[state.mkt];
+
+  /* Update price display */
+  document.getElementById('priceDisplay').textContent=m.cur+fmtNum(state.price);
+
+  /* Foreign note */
+  var noteEl=document.getElementById('foreignNote');
+  if(state.foreigner&&m.foreignAllowed!==true){
+    noteEl.textContent=en?m.foreignNote_en:m.foreignNote_zh;
+    noteEl.classList.add('visible');
+  } else if(state.foreigner){
+    noteEl.textContent=en?m.foreignNote_en:m.foreignNote_zh;
+    noteEl.classList.add('visible');
+  } else {
+    noteEl.classList.remove('visible');
+  }
+
+  var res=calcMarket(state.mkt,state.price,state.foreigner,state.horizon,state.appr,state.maint,state.ptax,state.agent,state.rentalTax);
+  if(!res)return;
+
+  renderHero(res);
+  renderTable('acqBody',res.acqItems,'acq',res);
+  renderTable('holdBody',res.holdItems,'hold',res);
+  renderTable('exitBody',res.exitItems,'exit',res);
+  renderCharts(res,lang);
+}
+
+/* ══════════════════════════════════════════════
+   MARKET PRESET SELECT
+══════════════════════════════════════════════ */
+function setMarket(key){
+  state.mkt=key;
+  var m=MKTDATA[key];
+  state.price=m.defPrice;
+  state.ptax=m.defPtax;
+  state.agent=m.defAgent;
+  /* Reset foreigner if market banned */
+  if(m.foreignAllowed===false&&state.foreigner){
+    state.foreigner=false;
+    document.querySelectorAll('#pillsResident .pill-opt').forEach(function(b){
+      b.classList.toggle('active',b.getAttribute('data-val')==='resident');
+    });
+  }
+  /* Update inputs */
+  document.getElementById('priceInput').value=m.defPrice;
+  document.getElementById('ptaxSlider').value=m.defPtax;
+  document.getElementById('agentSlider').value=m.defAgent;
+  document.getElementById('ptaxDisplay').textContent=m.defPtax.toFixed(2)+'%';
+  document.getElementById('agentDisplay').textContent=m.defAgent.toFixed(1)+'%';
+  recalc();
+}
+
+/* ══════════════════════════════════════════════
+   WIRING
+══════════════════════════════════════════════ */
+/* Market pills */
+document.querySelectorAll('#marketPills .market-pill').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('#marketPills .market-pill').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    setMarket(btn.getAttribute('data-mkt'));
+  });
+});
+
+/* Resident pills */
+document.querySelectorAll('#pillsResident .pill-opt').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('#pillsResident .pill-opt').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    state.foreigner=(btn.getAttribute('data-val')==='foreigner');
+    recalc();
+  });
+});
+
+/* Horizon pills */
+document.querySelectorAll('#pillsHorizon .pill-opt').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('#pillsHorizon .pill-opt').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    state.horizon=parseInt(btn.getAttribute('data-val'));
+    recalc();
+  });
+});
+
+/* Price input */
+document.getElementById('priceInput').addEventListener('input',function(){
+  var v=parseFloat(this.value)||0;
+  if(v>=1000){state.price=v;recalc();}
+});
+
+/* Sliders */
+document.getElementById('apprSlider').addEventListener('input',function(){
+  state.appr=parseFloat(this.value);
+  document.getElementById('apprDisplay').textContent=state.appr.toFixed(1)+'%';
+  recalc();
+});
+document.getElementById('maintSlider').addEventListener('input',function(){
+  state.maint=parseFloat(this.value);
+  document.getElementById('maintDisplay').textContent=state.maint.toFixed(1)+'%';
+  recalc();
+});
+document.getElementById('ptaxSlider').addEventListener('input',function(){
+  state.ptax=parseFloat(this.value);
+  document.getElementById('ptaxDisplay').textContent=state.ptax.toFixed(2)+'%';
+  recalc();
+});
+document.getElementById('agentSlider').addEventListener('input',function(){
+  state.agent=parseFloat(this.value);
+  document.getElementById('agentDisplay').textContent=state.agent.toFixed(1)+'%';
+  recalc();
+});
+
+/* Rental tax toggle */
+document.getElementById('toggleRentalTax').addEventListener('change',function(){
+  state.rentalTax=this.checked;
+  recalc();
+});
+
+/* ══════════════════════════════════════════════
+   LANG
+══════════════════════════════════════════════ */
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  recalc();
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang=localStorage.getItem('lang')||'en';
+  setLang(lang);
+});
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

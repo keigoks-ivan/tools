@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloutHaus Residences @ KLCC｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* upstream callout box */
+.upstream-box{background:#EFF6FF;border:2px solid #3B82F6;border-radius:8px;padding:16px 20px;margin:16px 0}
+.upstream-box-title{font-size:12px;font-weight:700;color:#1e40af;margin-bottom:8px;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em}
+/* Score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:640px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-r{background:#FEE2E2;color:#991B1B;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #dc2626}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+.print-btn:hover{background:#166634}
+@media(max-width:680px){.score-cols,.dual-col{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span>📍 建案分析：CloutHaus Residences @ KLCC Jalan P. Ramlee ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 依據：KL 供需 Overhang 報告（2026-04-01）+ The Edge Malaysia + PropertyGuru</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>CloutHaus Residences @ KLCC</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&from=CloutHaus_KLCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=CloutHaus_KLCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">28 Jalan P. Ramlee，KLCC 核心 ｜ TA Global Berhad（TA First Credit Sdn Bhd）｜ Freehold 商業地契（Commercial）｜ GDV RM30億（兩棟合計）｜ Tower 2：615單位，66層｜竣工目標 Q2 2029</div>
+  <div class="badge-row">
+    <span class="badge">📂 上游報告直接點名：「新精品稀缺供給管道」代表案例</span>
+    <span class="badge">📡 均價 RM2,900 psf（Tower 2 SA），管理費 RM0.80 psf</span>
+    <span class="badge">📡 上游報告 Overhang 風險評級：🟡 中（高定價 RM2,900 psf）</span>
+    <span class="badge">⚠️ 期房：2025年5月動工，2029 Q2 竣工</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 上游報告直引 -->
+<div class="upstream-box">
+  <div class="upstream-box-title">📂 上游 KL 供需 Overhang 報告（2026-04-01）對 CloutHaus 的直接記錄</div>
+  <p style="font-size:13px;color:#1e40af;margin:0">
+  <strong>§3（供需分化）：</strong>「RM100萬以上庫存主要為舊 SR 積壓，而真正的精品住宅地契低密度公寓供給管道有限（<strong>The MINH、CloutHaus、Core Residence @ TRX 等</strong>），需求端外資持續湧入。此段為雙層分化：舊高端積壓 vs 新精品稀缺。」<br><br>
+  <strong>§6（2026–2029 主要新供給管道）：</strong>「CloutHaus KLCC（TA Global）｜KLCC/Jalan P. Ramlee｜GDV RM15.15億｜2029｜<strong>商業地契｜Overhang 風險：中（高定價 RM2,900 psf）</strong>」<br><br>
+  <strong>解讀：</strong>上游報告將 CloutHaus 定位於「新精品稀缺」那一側（正面基調），但同時標注「商業地契 + 高定價」為 Overhang 風險中等的原因。這是本系列分析中唯一一個被上游報告在兩個框架下同時提及的建案——值得深入拆解。
+  </p>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-v">RM2,900</div>
+        <div class="kpi-l">均價 PSF（Tower 2 SA）</div>
+        <div class="kpi-s neu">The Edge 2024官方數據，GDV RM15.15億</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM1.55M起</div>
+        <div class="kpi-l">Tower 2 起步價</div>
+        <div class="kpi-s neu">549 sqft Studio；至 RM400萬+（1,216 sqft 3BR）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM0.80</div>
+        <div class="kpi-l">管理費（psf，含沉沒基金）</div>
+        <div class="kpi-s up">遠優於 Orion RM1.20，合理範圍</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">615</div>
+        <div class="kpi-l">Tower 2 服務式公寓</div>
+        <div class="kpi-s neu">+ Tower 1：242私宅 + 548鍵 Paradox 酒店</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">55m</div>
+        <div class="kpi-l">至 Petronas Twin Towers</div>
+        <div class="kpi-s up">KLCC 最後稀缺地塊之一</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">Q2 2029</div>
+        <div class="kpi-l">竣工目標</div>
+        <div class="kpi-s neu">2025年5月已動工，HAB Construction 主包</div>
+      </div>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">TA Global Berhad（TA Group，1989年成立，Bursa 上市，30年跡錄）｜旗下持有 Radisson BLU Sydney、Westin Melbourne、Swissotel Singapore 等國際酒店</div></div>
+      <div class="spec-item"><div class="spec-l">地段 / 地契</div><div class="spec-v">28 Jalan P. Ramlee，KLCC 核心，2.259英畝 Freehold 商業地契</div></div>
+      <div class="spec-item"><div class="spec-l">GDV</div><div class="spec-v">兩棟合計 RM30億（上游報告引 SmartInvestMalaysia）；Tower 2 SA 單獨 RM15.15億</div></div>
+      <div class="spec-item"><div class="spec-l">Tower 1</div><div class="spec-v">58層，242戶 Private Residences + 548鍵 Paradox KLCC Hotel（品牌酒店錨定）</div></div>
+      <div class="spec-item"><div class="spec-l">Tower 2（本分析主體）</div><div class="spec-v">66層，615戶 Serviced Apartments；均價 RM2,900 psf；549–1,216 sqft；Studio 至 3BR Dual-Key</div></div>
+      <div class="spec-item"><div class="spec-l">設施（70,000 sqft）</div><div class="spec-v">50m 無邊際天空泳池、Sky Bar / DJ Deck、Karaoke Lounge、Golf Simulator、Mahjong Room、Pilates Studio、Theatre、Music Room</div></div>
+      <div class="spec-item"><div class="spec-l">永續認證</div><div class="spec-v">計畫申請 GreenRE Provisional；自動泊車、虹吸雨水系統、氣動廢物收集</div></div>
+      <div class="spec-item"><div class="spec-l">捷運交通</div><div class="spec-v">KLCC LRT（步行）｜Ampang Park LRT/MRT（步行）｜Raja Chulan Monorail（步行）｜Bukit Bintang MRT（步行 10–15 分）</div></div>
+      <div class="spec-item"><div class="spec-l">施工進度</div><div class="spec-v">2019年完成打樁地基 → COVID 停工 → 2024 Q4 正式發售 → 2025年5月動工上部結構（TA Global 動工典禮已舉行）</div></div>
+      <div class="spec-item"><div class="spec-l">Hotel 品牌</div><div class="spec-v">Paradox Hotels &amp; Resorts（TA Global 自有品牌，加拿大發跡，六家酒店 1,350+ 客房）；馬來西亞首家 Paradox</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜CloutHaus 解決什麼不可替代的長期需求？</h3>
+    <p>CloutHaus 的定位核心有兩個獨特支柱，是本系列六個建案中最接近「KLCC 精品稀缺」論點的商業地契 SR：</p>
+    <p><strong>第一支柱：KLCC 最後一塊正面朝向 Petronas Twin Towers 的開發地塊。</strong>TA Global CEO 明確表達這一點：「Rising from one of the last parcels of land facing Kuala Lumpur's Petronas Twin Towers.」28 Jalan P. Ramlee 的特殊性在於稀缺而非可複製——KLCC 的前排土地已幾乎開發殆盡，後續在相同地址提交新項目的機會極低。這是真實的地緣稀缺性。</p>
+    <p><strong>第二支柱：Paradox Hotel 品牌酒店整合。</strong>Tower 1 的 548 鍵 Paradox KLCC 不僅是設施的一部分，更是 Tower 2 SA 持有者可使用的酒店式服務基礎設施——客房服務、管家服務、會議室、Fine Dining。這種「住宅 + 品牌酒店服務」的整合在 KL 只有少數建案有（Binjai @ KLCC、Four Seasons Residences 等頂奢才有類似結構），CloutHaus 以 RM2,900 psf 均價提供類似框架，定價顯著低於 Binjai（RM2,660 psf 住宅地契）的邏輯。</p>
+
+    <div class="callout">
+      <strong>關鍵第一性問題：CloutHaus 是「精品 SR 陷阱」還是「KLCC 稀缺地標」？</strong><br><br>
+      這是本案分析的核心二元分歧。上游報告在同一段話中給出了兩個不同信號：①將 CloutHaus 列入「新精品稀缺」正面清單；②在供給管道表中標注「商業地契｜Overhang 風險：中」。這兩個信號的共存，代表 CloutHaus 是一個具有真實稀缺性優勢、但商業地契帶來結構折扣的矛盾建案。投資者需要自行判斷哪個力量更強——而本報告的分析將指出，答案很大程度上取決於入場 PSF 水平和持有週期設定。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Munger 逆向推演——什麼讓 CloutHaus 失敗？</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險維度</th><th>具體情境</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>RM2,900 psf 定價的商業地契市場承受度</strong></td><td>RM2,900 psf 是 KL 商業地契 SR 定價新高，接近或超過 Binjai 住宅地契均價；若 KLCC 高端買家不願為商業地契支付住宅地契頂奢的 PSF，市場清貨壓力大</td><td><span class="tag t-y">中</span></td><td>去化率偏低，2029 竣工後出現積壓</td></tr>
+          <tr><td><strong>615 單位 SA（Tower 2）的密度過高</strong></td><td>Tower 2 共 615 戶，雖分散於 66 層但密度仍顯著高於 Binjai（171戶）、Park Place（537戶/54層）；2029 竣工後大量單位同時進入租售市場，出租競爭激烈</td><td><span class="tag t-y">中</span></td><td>短期（2029–2031）租金壓力，填租周期拉長</td></tr>
+          <tr><td><strong>2029 竣工恰逢 KL Overhang 次高峰後期</strong></td><td>上游報告預測 KL Overhang 2026–2027 為次高峰期，2028 後開始回落；CloutHaus 2029 Q2 竣工，恰好在回落起點，但仍面對當時的存量消化壓力</td><td><span class="tag t-b">低中</span></td><td>竣工時機稍晚可能反而是優勢（供給高峰已過）</td></tr>
+          <tr><td><strong>商業地契永久結構折扣</strong></td><td>即使 RM2,900 psf 的地段有稀缺性，商業地契的買家池窄、銀行貸款較嚴、外籍 State Consent 複雜——這些因素在 2029 退出時仍然存在，壓低二手流動性</td><td><span class="tag t-r">高（確定）</span></td><td>退出時必須接受地契折扣；難以對標住宅地契建案</td></tr>
+          <tr><td><strong>Paradox Hotel 品牌風險</strong></td><td>Paradox 是 TA Global 自有品牌，全球六家酒店。相比 Four Seasons、Mandarin Oriental 等國際頂級品牌，Paradox 的品牌效應對 SA 持有者的租金溢價有限</td><td><span class="tag t-y">中</span></td><td>Hotel 品牌錨定的租金和增值效應未必如預期強</td></tr>
+          <tr><td><strong>期房 3 年持有風險（2026→2029）</strong></td><td>需持有期房3年，期間無法出租，每月需繳交建築期付款；市場環境若在 2027–2028 惡化，竣工後面對更差的市場</td><td><span class="tag t-y">中</span></td><td>資金成本高，持有期不確定性大</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px"><strong>最大尾部風險：</strong>CloutHaus 在 2029 竣工時，如果 KL 廣義 SR 庫存未能如上游報告基本情境預測般回落（20% 概率的悲觀情境——庫存至 6,000–7,000 戶），那麼 RM2,900 psf 的 615 個 SA 單位將面臨嚴峻去化挑戰。即使地段稀缺，在廣義市場積壓的背景下，早期買家的帳面回報將非常有限。</p>
+    </div>
+
+    <hr class="dv">
+    <h3>C｜投資論點錨定</h3>
+    <table>
+      <thead><tr><th>項目</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>核心多方論點</strong></td><td>KLCC 最後一塊正面孖鑽地塊的稀缺性 + TA Global 30年上市開發商信用 + Paradox Hotel 品牌酒店整合 + 管理費 RM0.80 psf 合理 + 2029 竣工時 KL 供給高峰已過</td></tr>
+        <tr><td><strong>主要假設 H1</strong></td><td>KL 高端 SR 市場在 2029 年後進入「新精品稀缺」周期，RM2,900 psf 的地段論點被市場接受，二手 PSF 得以維持甚至提升</td></tr>
+        <tr><td><strong>主要假設 H2</strong></td><td>Paradox Hotel 和酒店式服務能為 Tower 2 SA 帶來顯著的租金溢價，使月租支撐 RM8,000–15,000 範圍（依坪數）</td></tr>
+        <tr><td><strong>關鍵監測指標</strong></td><td>① 2026–2027 的建築進度（是否按時進行上部結構）；② KL 廣義 SR 庫存在 2027 後的實際走勢；③ KLCC 同地段頂奢建案（Binjai、TRX Residences）的二手 PSF 是否持守，為 CloutHaus 2029 竣工後提供定價參考</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場概況（直接應用上游 KL 報告框架）</div>
+  <div class="section-body">
+    <h3>1.1 上游報告的雙重定性——「新精品稀缺」vs「商業地契風險中」</h3>
+    <table>
+      <thead><tr><th>上游報告定位</th><th>對 CloutHaus 的直接影響</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>§3：「新精品稀缺供給管道代表案例（與 The MINH、TRX Core Residence 並列）」</td><td>CloutHaus 被歸入「稀缺新精品」這一正面框架，而非「舊 SR 積壓」的負面框架。這是本系列最重要的定性差異</td><td><span class="tag t-g">正面</span></td></tr>
+        <tr><td>§6 供給管道表：「Overhang 風險：中（高定價 RM2,900 psf）」</td><td>高定價是最大不確定性來源——市場能否以 RM2,900 psf 的商業地契定價清貨，決定 Overhang 風險是否兌現</td><td><span class="tag t-y">中性警示</span></td></tr>
+        <tr><td>§4 基本情境：「2028 後隨供給緊縮，Overhang 回落」</td><td>CloutHaus 2029 竣工，恰在上游報告預測的「供給回落期」起點後，時機相對有利於去化</td><td><span class="tag t-g">正面</span></td></tr>
+        <tr><td>§3 廣義庫存：「全馬 SR 廣義庫存 17,900 戶，KL 估 8,000–9,000 戶」</td><td>整體 KL SR 市場的廣義供給壓力仍存；CloutHaus 需以「稀缺地段 + 品牌差異化」抵禦此壓力</td><td><span class="tag t-y">中性</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 KLCC 同地段 PSF 對標（FIX-01 應用框架）</h3>
+    <table>
+      <thead><tr><th>建案</th><th>地契</th><th>PSF 水平</th><th>距孖鑽</th><th>CloutHaus 的相對定位</th></tr></thead>
+      <tbody>
+        <tr><td>Binjai on the Park</td><td><span class="tag t-g">Freehold 住宅</span></td><td>RM2,660 psf（2024成交）</td><td>150m</td><td>CloutHaus RM2,900 psf 比 Binjai 住宅地契貴 9%——商業地契不應高於住宅地契，這是定價合理性的最大挑戰</td></tr>
+        <tr><td>Four Seasons Residences KLCC</td><td><span class="tag t-g">Freehold 住宅</span></td><td>RM2,950–3,500 psf</td><td>300m</td><td>CloutHaus 定價接近 Four Seasons，但品牌（Paradox vs Four Seasons）和地契（商業 vs 住宅）均劣</td></tr>
+        <tr><td>TRX Core Residence</td><td><span class="tag t-g">Freehold 住宅</span></td><td>RM2,293 psf（2024成交）</td><td>2.3km</td><td>TRX 距孖鑽更遠、有 MRT 但住宅地契，成交 RM2,293——CloutHaus 商業地契定 RM2,900 需要補充理由</td></tr>
+        <tr><td>Stonor 3（KLCC 舊SR）</td><td><span class="tag t-y">商業地契 HDA</span></td><td>RM1,320 psf（成交中位）vs 發售 RM2,000</td><td>700m</td><td>最有意義的歷史警示：同為 KLCC 商業地契 SR，2016年發售 RM2,000 psf，現跌至 RM1,320（-34%）</td></tr>
+        <tr><td><strong>CloutHaus（本案，Tower 2 SA）</strong></td><td><span class="tag t-y">Freehold 商業地契</span></td><td><strong>RM2,900 psf（發售均價，期房）</strong></td><td><strong>55m</strong></td><td>最近孖鑽距離 + TA Global 品牌 + Paradox Hotel 整合——這是能否突破商業地契天花板的核心變數</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：The Edge Malaysia（2024-09-30）；JLL Q2 2025；brickz；KL RM1M+ 深度報告</p>
+
+    <div class="alert a-yellow">
+      <strong>⚠️ 定價核心矛盾：</strong>CloutHaus Tower 2 SA 以 RM2,900 psf 均價定價，高於同地段的 Binjai 住宅地契頂奢（RM2,660 psf）。在上游 KL 報告框架下，「漲的共同點：Freehold 住宅地契 + 稀缺性 + 明確催化劑」——CloutHaus 有稀缺性（最後地塊），有催化劑（Paradox Hotel + TRX 擴散），但商業地契是無法消除的結構折扣。因此，RM2,900 psf 的商業地契 SA 定價需要比同地段住宅地契建案表現出「更強的稀缺性論點」才能站穩。
+    </div>
+
+    <h3>1.3 Tower 1 Private Residences vs Tower 2 SA——關鍵區分</h3>
+    <div class="alert a-blue">
+      <strong>重要提示：本分析聚焦 Tower 2（615 戶 Serviced Apartments，SA）。</strong><br>
+      Tower 1（242 戶 Private Residences）的定價、地契細節、目標買家均不同，兩棟應分開評估。Tower 1 Private Residences 的單位尺寸更大、定位更頂端，可能有不同的稀缺性論點。本報告以 Tower 2 SA 為分析主體，因為 Tower 2 是主要行銷推廣的對象（GDV RM15.15億，615 戶），且對一般投資者的相關性更高。
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構分析</div>
+  <div class="section-body">
+    <h3>2.1 需求面——誰能在 RM2,900 psf 買 CloutHaus？</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>占比估計</th><th>趨勢</th><th>關鍵驅動</th></tr></thead>
+      <tbody>
+        <tr><td>高淨值外籍自住 / 酒店式第二居所</td><td>~35–45%</td><td>↑</td><td>孖鑽直視景觀 + Paradox 酒店服務；KLCC 核心地址；MM2H 外籍家庭</td></tr>
+        <tr><td>MM2H 外籍買家（以台灣、中國為主）</td><td>~25–30%</td><td>↑↑</td><td>上游報告：2,637 待購 MM2H 買家；台灣 17%（449人）；KLCC 核心地址是 MM2H 最高優先之一</td></tr>
+        <tr><td>本地高收入投資者（出租 / 資本增值）</td><td>~15–20%</td><td>→</td><td>RM2,900 psf 對本地投資者入場門檻高；需要長線視野</td></tr>
+        <tr><td>國際投資者（港、新、歐）</td><td>~10–15%</td><td>↑</td><td>馬來西亞房地產相對「便宜」敘事；KLCC 孖鑽地址有國際辨識度</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供給面——2029 竣工時的競爭格局</h3>
+    <table>
+      <thead><tr><th>維度</th><th>CloutHaus 的優勢</th><th>CloutHaus 的劣勢</th></tr></thead>
+      <tbody>
+        <tr><td>KLCC 稀缺地段供給</td><td>Jalan P. Ramlee 正面孖鑽最後地塊，無法複製；上游報告定性為「精品稀缺供給」</td><td>Tower 2 有 615 戶，竣工後短期供給集中</td></tr>
+        <tr><td>KL 整體 SR 積壓</td><td>2029 竣工時機在上游報告預測的「供給高峰後回落期」——比 2026–2027 竣工的建案更有利</td><td>廣義 SR 庫存 8,000–9,000 戶（KL），整體環境仍有壓力</td></tr>
+        <tr><td>競品新案</td><td>KLCC 同地段未來幾乎無類似地塊；TRX 方向的新案（Core Residence）是住宅地契但離孖鑽更遠</td><td>2026–2029 期間 KL 其他精品新案（The Ashwood、MINH 等）陸續竣工，競爭租客池</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>供需結論：「新精品稀缺」論點有實質支撐，但期房折扣和商業地契折扣是兩道必須跨越的門檻。</strong>CloutHaus 是本系列分析中唯一被上游報告明確定位於「精品稀缺供給」正面框架的 SR 建案，這與 Stonor 3（「舊積壓」）的處境截然不同。差異在於地段稀缺性的真實性——55m 距孖鑽的「最後地塊」論點確實是硬核支撐，但商業地契的結構折扣使得這個支撐無法以住宅地契的方式完全定價。
+    </div>
+  </div>
+</div>
+
+<!-- §3 -->
+<div class="section">
+  <div class="section-header">§3｜地段定位——CloutHaus 在 KL 精品版圖中的位置</div>
+  <div class="section-body">
+    <h3>3.1 KL 頂奢地段層級</h3>
+    <table>
+      <thead><tr><th>層級</th><th>代表建案</th><th>PSF</th><th>地契</th><th>CloutHaus 相對位置</th></tr></thead>
+      <tbody>
+        <tr><td>Layer 0 頂奢稀缺</td><td>Binjai on the Park（171戶，湖景，住宅地契）</td><td>RM2,660 psf</td><td>Freehold 住宅</td><td>CloutHaus 定價 RM2,900 超越 Binjai，但地契劣；地段更近孖鑽</td></tr>
+        <tr><td>Layer 0 頂奢稀缺</td><td>Four Seasons Residences（208戶）</td><td>RM2,950–3,500 psf</td><td>Freehold 住宅</td><td>CloutHaus 定價範圍重疊，但品牌和地契均劣</td></tr>
+        <tr><td><strong>CloutHaus（本案）</strong></td><td>CloutHaus Tower 2 SA（615戶，商業地契，Paradox Hotel整合）</td><td><strong>RM2,900 psf 均價</strong></td><td>Freehold 商業地契</td><td>試圖突破商業地契天花板的新定價實驗；比住宅地契同地段貴但體量大（615戶）</td></tr>
+        <tr><td>Layer 1 精品新案</td><td>TRX Core Residence、The Ashwood @ U-Thant</td><td>RM1,400–2,293 psf</td><td>Freehold 住宅</td><td>住宅地契、MRT 可達，CloutHaus 貴出 30–50%</td></tr>
+        <tr><td>Layer 2 舊 SR 積壓</td><td>Stonor 3、Sky Suites 等</td><td>RM1,200–1,500 psf</td><td>商業地契（HDA）</td><td>CloutHaus 試圖避免淪為此類別——核心在於能否用「稀缺性」突破「商業地契 SR 定價天花板」</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Stonor 3 的歷史警示：</strong>Stonor 3 2016 年以 RM2,000 psf 發售，2025 年成交中位 RM1,320 psf（-34%）。CloutHaus 以 RM2,900 psf 發售——高出 Stonor 3 發售價 45%。兩者都是商業地契 KLCC SR。<br><br>
+      然而，有兩個關鍵差異：① CloutHaus 的地塊距孖鑽僅 55m（Stonor 3 距 KLCC Park 步行 10 分鐘，差異顯著）；② CloutHaus 有 Paradox Hotel 整合和 TA Global 30 年信用（Stonor 3 有 Tan & Tan × 三菱，也是一流，但沒有品牌酒店整合）。這兩個差異是否足以支撐 RM2,900 vs RM2,000 的 45% 溢價，是市場最終需要回答的問題。
+    </div>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="section">
+  <div class="section-header">§4｜FIX-01/02/03/04——期房定價分析</div>
+  <div class="section-body">
+    <div class="alert a-orange">
+      <strong>FIX-01/03 說明：</strong>CloutHaus 為期房（2025年5月動工，2029 Q2 竣工），無實際成交數據，無法進行 FIX-03 標準化。以下分析採用 FIX-01 同類期房比較 + FIX-02/04 定價結構評估。所有結論均需在竣工後以 brickz 實際成交數據重新驗證。
+    </div>
+
+    <h3>4.1 同期 KLCC 精品期房比較（FIX-01）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>CloutHaus T2 SA</th><th>TRX Core Residence</th><th>The Ashwood @ U-Thant</th><th>Stonor 3（已完工歷史）</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td><span class="tag t-y">Freehold 商業</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-y">Freehold 商業 HDA</span></td></tr>
+        <tr><td>竣工時間</td><td>Q2 2029</td><td>2026–2027首批</td><td>2026</td><td>2019（已完工，對照組）</td></tr>
+        <tr><td>發售均價 PSF</td><td>RM2,900</td><td>RM2,200（推算）</td><td>RM1,800–2,000（推算）</td><td>RM2,000（2016發售）→ RM1,320（2025成交）</td></tr>
+        <tr><td>酒店品牌整合</td><td>✅ Paradox Hotel（自有品牌）</td><td>❌ 無</td><td>❌ 無</td><td>❌ 無</td></tr>
+        <tr><td>至孖鑽距離</td><td>55m（最近）</td><td>2.3km</td><td>1.5km（U-Thant）</td><td>500m（KLCC Park）</td></tr>
+        <tr><td>上游報告定性</td><td>「新精品稀缺」+ 商業地契風險中</td><td>「低 Overhang 風險，高取購率」</td><td>「住宅地契，中等 Overhang 風險」</td><td>「舊積壓，空置率高」（歷史對照）</td></tr>
+        <tr><td>管理費 psf</td><td>RM0.80（含沉沒基金）</td><td>未公開</td><td>未公開</td><td>RM0.40–0.55（已知）</td></tr>
+        <tr><td>開發商信用</td><td>✅ TA Global（30年，Bursa上市）</td><td>✅ 政府主導 TRX</td><td>✅ 知名開發商</td><td>✅ Tan&Tan×三菱（已完工）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>4.2 FIX-02 定價結構評估（期房折扣）</h3>
+    <p>CloutHaus 在 2024 Q4 發售，代理 2026 年仍提供「額外折扣（additional rebate）」選項。依 v1.3 FIX-02，折扣結構未從公開資料確認確切百分比，標記「未確認」。但有一個重要信號：</p>
+    <div class="alert a-blue">
+      <strong>FIX-02 觀察：</strong>PropertyGuru 代理掛牌中存在「RM1,500,000 / RM2,732 psf」的起始價（Studio 549 sqft），比官方均價 RM2,900 psf 低 5.8%。另有掛牌「RM3,100,000 / RM2,823 psf」（1,098 sqft Dual-Key）。掛牌 PSF 在 RM2,732–2,900 範圍內，尚未出現大幅折讓信號（不同於 Orion Residence 的 -20% 急售盤）。代理仍以接近均價掛牌，市場對此定價仍有基本支撐。
+    </div>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率（含 Paradox Hotel 溢價估算）</div>
+  <div class="section-body">
+    <h3>5.1 CloutHaus 租金潛力——KLCC 核心地段 + Paradox Hotel 加持</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>樂觀月租</th><th>保守月租</th><th>Gross Yield（@RM2,900 psf）</th></tr></thead>
+      <tbody>
+        <tr><td>Studio（Type C/D/E/F）</td><td>549–588 sqft</td><td>RM4,500–6,000</td><td>RM3,500–4,500</td><td>~2.8–4.4%</td></tr>
+        <tr><td>2BR</td><td>680–746 sqft</td><td>RM6,000–9,000</td><td>RM4,500–6,500</td><td>~3.0–5.1%</td></tr>
+        <tr><td>2BR 大坪數</td><td>838–1,186 sqft</td><td>RM8,000–14,000</td><td>RM6,000–10,000</td><td>~2.6–4.9%</td></tr>
+        <tr><td>3BR Dual-Key（Type B）</td><td>1,098–1,216 sqft</td><td>RM10,000–18,000</td><td>RM8,000–12,000</td><td>~2.7–5.1%</td></tr>
+      </tbody>
+    </table>
+    <p class="src">租金估算基於 KLCC 地段行情（Stonor 3 RM4,500–8,000/月）加上 Paradox Hotel 和孖鑽地址的 10–20% 溢價假設；RM2,900 psf 基準計算</p>
+
+    <h3>5.2 外國人現金流試算（2BR 746 sqft，假設 RM216萬入場 @ RM2,900 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租收入（RM7,500 × 12）</td><td>RM 90,000</td><td>2BR 746 sqft，KLCC 核心中位偏樂觀估計</td></tr>
+        <tr><td>管理費（RM0.80 × 746 × 12）</td><td><span class="down">-RM 7,162</span></td><td>RM0.80 psf 含沉沒基金，相對合理</td></tr>
+        <tr><td>地稅 + 門牌稅（估）</td><td><span class="down">-RM 2,500</span></td><td></td></tr>
+        <tr><td>空置期（1.5個月/年）</td><td><span class="down">-RM 11,250</span></td><td>KLCC 地段外籍需求相對穩定，假設 87.5% 入住率</td></tr>
+        <tr><td>非居民租金所得稅（30%）</td><td><span class="down">-RM 20,666</span></td><td>（90,000–20,912）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 7,200</span></td><td>若遠程管理</td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 41,222/年</strong></td><td>Net Yield ≈ 1.91%（RM216萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 48,422/年</td><td>Net Yield ≈ 2.24%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-yellow">
+      <strong>外國人 Net Yield 約 1.9–2.2%——中等偏低，但管理費結構合理。</strong>RM0.80 psf 管理費是 Orion Residence（RM1.20）的 67%，是本系列建案中比較合理的水平（比 R22 MK 的 RM0.34 仍高，但比較中等偏高的 Stonor 3 RM0.50 稍高）。Net Yield 偏低的主因是 RM2,900 psf 的高入場成本——這是一個以資本增值為主、租金回報為輔的建案，不適合「以租金現金流定義投資邏輯」的持有者。
+    </div>
+  </div>
+</div>
+
+<!-- §6-7 -->
+<div class="section">
+  <div class="section-header">§6-7｜外資法規與貸款</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>法規項目</th><th>外國買家情況</th><th>對 CloutHaus 的影響</th></tr></thead>
+      <tbody>
+        <tr><td>最低購置門檻（KL）</td><td>RM 1,000,000</td><td>✅ Studio 起 RM155萬，符合；主流 2BR RM200–280萬</td></tr>
+        <tr><td>印花稅</td><td>4% 統一稅率</td><td>RM216萬 2BR：印花稅 RM86,400</td></tr>
+        <tr><td>RPGT（第6年後）</td><td>10%</td><td>SPA 2024–2025 簽署者，第6年約 2030–2031（剛好竣工後 1–2 年，需規劃）</td></tr>
+        <tr><td>商業地契貸款</td><td>可申請（HDA 保護，但需確認銀行 LTV）</td><td>⚠️ 可能 LTV 60–70%，需頭期款 30–40%；月供壓力大</td></tr>
+        <tr><td>MM2H 合規</td><td>RM100萬+，持有10年</td><td>✅ 金額符合；商業地契 MM2H 合規待確認（建議法律意見）</td></tr>
+        <tr><td>OPR（BNM 2025年降至 2.75%）</td><td>月供降低</td><td>降息環境利好貸款方，但商業地契可能不完全受益</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設與催化劑</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>狀態</th><th>對 CloutHaus 影響</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Petronas Twin Towers 55m 距離</strong></td><td>永久存在</td><td>✅ KL 最重要的地址品牌——Jalan P. Ramlee 28 號正面朝向孖鑽是不可複製的地段，持有者終生受益</td></tr>
+        <tr><td><strong>TRX 金融區（2km）</strong></td><td>2024年開業，企業持續進駐</td><td>✅ 外籍高管需求擴散至 KLCC 廊帶，帶動 Jalan P. Ramlee 地段的長期租賃需求</td></tr>
+        <tr><td>KLCC LRT 站</td><td>已運營，步行可達</td><td>✅ 即時公共交通可及</td></tr>
+        <tr><td>Ampang Park LRT / MRT</td><td>已運營，步行可達</td><td>✅ 雙線交匯</td></tr>
+        <tr><td>Raja Chulan Monorail</td><td>已運營</td><td>✅ 補充連接</td></tr>
+        <tr><td>Paradox KLCC Hotel（Tower 1）</td><td>2029 Q2 竣工（與 Tower 2 同步）</td><td>✅ 馬來西亞首家 Paradox Hotel，帶動品牌知名度和酒店式服務溢價；但 Paradox 不是五星頂奢品牌，溢價效應需謹慎估計</td></tr>
+        <tr><td>KLCC Park 步行</td><td>永久存在，更新維護</td><td>✅ 20公頃綠地 + 噴水池景觀，直接提升高層景觀資產</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>基建組合是 CloutHaus 的最大優勢之一：</strong>KLCC LRT、Ampang Park MRT、Raja Chulan Monorail 三站步行可達，加上 TRX 2km、Bukit Bintang MRT 步行 15 分——CloutHaus 的公共交通連接性在 KL 所有分析建案中幾乎是最全面的，雖然沒有任何一個站在 100m 以內，但三站步行圈的組合實際上比只有一個遠站的建案更便利。
+    </div>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="section">
+  <div class="section-header">§11｜進場時機、估值判斷與持有策略</div>
+  <div class="section-body">
+    <h3>11.1 估值判斷</h3>
+    <table>
+      <thead><tr><th>估值角度</th><th>當前狀況</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>vs 同地段住宅地契（Binjai RM2,660）</td><td>CloutHaus SA RM2,900 高出 9%</td><td><span class="tag t-r">商業地契不應高於住宅地契——定價偏貴</span></td></tr>
+        <tr><td>vs 同類期房（TRX Core RM2,293）</td><td>CloutHaus 高出 27%</td><td><span class="tag t-y">需要孖鑽稀缺性補充合理，有一定邏輯但偏貴</span></td></tr>
+        <tr><td>管理費 RM0.80 psf</td><td>相對合理（vs Orion RM1.20）</td><td><span class="tag t-g">正常範圍，不構成額外財務負擔</span></td></tr>
+        <tr><td>2029 竣工時機</td><td>恰在上游報告預測的「供給高峰後回落期」</td><td><span class="tag t-g">時機相對有利，比 2026–2027 竣工案更安全</span></td></tr>
+        <tr><td>Gross Yield（@RM2,900 psf）</td><td>~2.8–5.1%（依坪數和租金假設）</td><td><span class="tag t-y">偏低（資本增值為主的建案）</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.2 持有策略</h3>
+    <table>
+      <thead><tr><th>持有框架</th><th>說明</th><th>適合性</th></tr></thead>
+      <tbody>
+        <tr><td><strong>資本增值（主）+ 租金（輔）</strong></td><td>進場均價 RM2,900，若 2032 年後 KLCC 稀缺地段達 RM3,500–4,000 psf 成熟定價，則 20–38% 資本增值；同時收取 RM7,000–12,000/月租金</td><td>✅ 最合理的持有邏輯</td></tr>
+        <tr><td><strong>純租金回報</strong></td><td>外籍 Net Yield 1.9–2.2%，不適合以租金現金流計算的投資者</td><td>❌ 不適合</td></tr>
+        <tr><td><strong>RPGT 節點套利</strong></td><td>2025 年 SPA 簽署者 → 第6年約 2031 → RPGT 降至 10%；恰在 2029 竣工後 2 年，剛好是社區成熟初期，可考慮 2031–2033 出售</td><td>✅ 時間點合理</td></tr>
+        <tr><td><strong>MM2H 合規持有</strong></td><td>RM155萬+ 符合 MM2H 最低要求；KLCC 地址是 MM2H 最高認可的持有地段；但商業地契合規性需確認</td><td>🟡 需確認商業地契合規性</td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.3 持有期情境分析</h3>
+    <table>
+      <thead><tr><th>持有期</th><th>樂觀（KLCC稀缺定價被認可）</th><th>基本（商業地契部分折扣）</th><th>悲觀（SR廣義積壓蔓延）</th></tr></thead>
+      <tbody>
+        <tr><td>2025→2029（期房持有）</td><td>市場預期升溫，二手轉讓 PSF RM3,200+</td><td>PSF 維持 RM2,700–3,000</td><td>買盤沉寂，PSF 折讓 RM2,400–2,600</td></tr>
+        <tr><td>2029→2032（竣工初期）</td><td>PSF RM3,300–3,800（稀缺性定價兌現）</td><td>PSF RM2,700–3,100</td><td>PSF RM2,000–2,500（Stonor 3 模式）</td></tr>
+        <tr><td>2032→2035（成熟期）</td><td>PSF RM4,000+（Binjai 水平）</td><td>PSF RM3,000–3,500</td><td>PSF RM2,200–2,800</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點（雙視角）</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】投資決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:130px;font-weight:600">適合買家</td><td>①追求 KLCC 孖鑽地址 + Paradox Hotel 品牌生活方式的高淨值買家；②以資本增值（5–10年）為主要目標的長線投資者；③台灣 / 香港 MM2H 買家尋求頂尖地址</td></tr>
+            <tr><td>不適合買家</td><td>以租金現金流為主要目標的外籍投資者（Net Yield 1.9–2.2%）；預算有限需要高 LTV 貸款的買家（商業地契 LTV 較低）</td></tr>
+            <tr><td>議價空間</td><td>期房，代理已在提供「額外折扣」；目標議價 5–10%（目標 RM2,600–2,750 psf 入場），改善安全邊際</td></tr>
+            <tr><td>持有週期</td><td>最少 6 年（RPGT 10% 節點）；理想 8–10 年（社區成熟、品牌效應顯現）</td></tr>
+            <tr><td>關鍵行動前</td><td>①確認商業地契 MM2H 合規性；②確認銀行 LTV 和貸款類別；③比較 Tower 1 Private Residences 定價（如未公開則等公告）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】純分析結論</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟡 中性——上游報告「新精品稀缺」正面定性 vs 商業地契 + 615 戶體量的去化壓力，兩力並存</td></tr>
+            <tr><td>價格趨勢</td><td>🟡 中性——RM2,900 psf 期房定價無成交驗證；商業地契理論上應有折扣，但稀缺地段有溢價論點</td></tr>
+            <tr><td>租金市場</td><td>🟡 中性——KLCC 外籍需求有支撐，但 Gross Yield 偏低（2.8–5.1%），Paradox 溢價效應待驗證</td></tr>
+            <tr><td>法規環境</td><td>🟡 中性——商業地契（HDA），外籍可購，但需確認 MM2H 合規和貸款條件</td></tr>
+            <tr><td>進場估值</td><td>🟠 偏高——RM2,900 psf 超過同地段住宅地契 Binjai，商業地契折扣未能反映；需 5–10% 議價改善</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;padding:8px;background:#f1f5f9;border-radius:4px;font-size:12px">
+          <strong>市場研究一句話：</strong>CloutHaus 是本系列分析中唯一真正站在上游報告「新精品稀缺」那一側的 SR，KLCC 最後地塊 + TA Global 信用 + Paradox Hotel 整合是真實的差異化。問題是 RM2,900 psf 商業地契定價過於激進——若能議價 5–10% 入場（目標 RM2,600–2,750 psf），風報比明顯改善。
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px">最終進場建議</h3>
+    <div class="verdict-y">
+      <strong>🟡 觀望等待（發售均價）｜🟡 審慎可考慮（議價 5–10% 後入場，長線持有）</strong><br><br>
+      <strong>核心邏輯：</strong>CloutHaus 是本系列六個建案中最「有趣」的矛盾案例——上游報告將其與住宅地契精品案（The MINH、TRX Core Residence）並列為「新精品稀缺」，但同時標注「商業地契 + 高定價 RM2,900 psf」為 Overhang 風險中等來源。這個矛盾的核心在於：地段稀缺性（KLCC 最後地塊，55m 距孖鑽）確實是真實的，但商業地契的結構性折扣是永久的制約。<br><br>
+      <strong>條件性進場邏輯（若決定進場）：</strong>①議價至 RM2,600–2,750 psf（降低 5–10%），改善安全邊際；②選擇坪數相對大的戶型（838 sqft+ 2BR 或 Dual-Key），有利於出租靈活性；③以「KLCC 地址資本增值為主，長線 8–10 年」而非「租金現金流」作為投資定性；④事前確認 MM2H 商業地契合規性和銀行貸款可行性。<br><br>
+      <strong>核心等待信號：</strong>2029 竣工前追蹤 ① KL 廣義 SR 庫存走勢是否如上游報告基本情境回落；② KLCC 同地段（Binjai、TRX）二手 PSF 是否持守；③ CloutHaus 施工進度（是否按計畫 2025→2029）。
+    </div>
+
+    <h3>最關鍵監測指標</h3>
+    <table>
+      <thead><tr><th>#</th><th>監測指標</th><th>觸發重新評估閾值</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>KL 廣義 SR 庫存（2026–2028）</td><td>若 2028 末庫存回落至 5,000 戶以下（上游報告基本情境）→ CloutHaus 2029 竣工時機絕佳，轉為積極考慮</td></tr>
+        <tr><td>2</td><td>KLCC 同地段二手 PSF（Binjai、Stonor 3）</td><td>若 Binjai 持守 RM2,600+，Stonor 3 回升至 RM1,500+，為 CloutHaus 提供定價下錨信號</td></tr>
+        <tr><td>3</td><td>CloutHaus 施工進度</td><td>若 2026 年施工明顯滯後（按超高層進度，2025 動工後應在 2026 明顯可見施工進展）→ 延期風險升高</td></tr>
+        <tr><td>4</td><td>Tower 1 Private Residences 定價公開</td><td>若 Tower 1 定價 RM3,500+ psf，則 Tower 2 SA 的 RM2,900 有相對合理的內部錨定</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分【v1.2 建案評分模組】</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">CloutHaus Residences @ KLCC ｜ 建案綜合評分卡</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%，KL RM100萬+ 成交 +31%，MM2H 2,637 待購買家，TRX 企業進駐帶動外籍需求，KLCC 廊帶整體需求升溫</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">上游報告「新精品稀缺」正面定性（+）；但商業地契 SR 廣義庫存壓力（KL 8,000–9,000 戶）仍存；2029 竣工時機優於 2026–2027 竣工的競品（供給高峰後）</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">期房，現在是 KL SR 供給高峰期（2025–2027），2029 才竣工；若上游報告基本情境成立（2028+ 供給緊縮），竣工時機相對有利；但現在進場需耐受 3 年期房等待</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KLCC 最後地塊、55m 距孖鑽（不可複製）；KLCC LRT + Ampang Park MRT + Raja Chulan Monorail 三站步行圈；TRX 2km 擴散效應；永久 KLCC Park 景觀。A4 本輪最高分之一</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">商業地契（外籍 State Consent 較複雜，貸款 LTV 可能偏低）；4% 印花稅；RPGT 外籍 10%（第6年後）；MM2H 合規需確認</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">7.1/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.5×.2 + 6.5×.25 + 6.5×.2 + 9.0×.2 + 5.5×.15 = 7.10</div>
+          </div>
+        </div>
+
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">TA Global Berhad（TA Group，1989年成立，Bursa 上市，30年跡錄，全球酒店組合）——信用顯著高於 Welton（Orion）；主包 HAB Construction 已於 2025年5月正式動工。主要扣分：本案規模（GDV RM30億）是 TA Global 歷來最大，有一定執行複雜度</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>5.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">RM2,900 psf 均價期房，超過同地段住宅地契 Binjai（RM2,660）約 9%；商業地契不應高於住宅地契。稀缺地段有一定支撐論點，但偏高。若議價 5–10% 至 RM2,600–2,750，評分可提升至 6.5</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">外籍 Net Yield 1.9–2.2%，偏低（比 R22、Park Place 低）；Gross Yield 2.8–5.1%；Paradox Hotel 可帶來租金溢價但幅度有限；以資本增值為主的建案定性</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KLCC 核心，55m 距孖鑽（KL 頂奢地址）；KLCC LRT + Ampang Park MRT + Raja Chulan Monorail 三站步行圈；Suria KLCC 購物步行可達；TRX 2km。本輪分析建案中 B4 並列最高</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Paradox Hotel 整合（品牌酒店式服務）+ 70,000 sqft 設施 + 兩棟合計 GDV RM30億的標誌性地標；276m 高度帶來全城最佳孖鑽和 KLCC 景觀；設計「timeless luxury」而非標新立異</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 商業地契——比純住宅地契（Binjai、Park Place、R22）弱；但比 Stonor 3 的舊 SR 處境好（地段稀缺性更強）；HDA 保護在此無實際意義（已動工，非爛尾風險）</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">期房，無成交數據；KLCC 核心地段理論上流動性高，但商業地契 615 戶的體量在竣工初期可能出現供過於求；77筆代理掛牌（建設中）顯示有一定市場關注度</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">6.4/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">8.0×.2 + 5.0×.2 + 5.5×.15 + 9.0×.15 + 7.5×.1 + 5.5×.1 + 5.5×.1 = 6.40</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 7.1 × 40%&nbsp;+&nbsp;B 類 6.4 × 60%</div>
+        <div class="score-big">6.7<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#FEF9C3;color:#92400E">⭐⭐⭐ 中等偏優——有真實稀缺性，但定價偏激進，觀望等待</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">2.84 + 3.84 = 6.68 → 四捨五入 6.7</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>上游 KL 報告明確將 CloutHaus 定位於「新精品稀缺供給管道」正面清單；KLCC 最後地塊 55m 距孖鑽的地緣稀缺性是真實且不可複製的；TA Global 30年 Bursa 上市信用 + Paradox Hotel 整合 + 2025年5月已動工 = 開發商風險最低的 SR 期房之一；RM0.80 psf 管理費合理；2029 竣工時機在供給高峰後。<br>
+          <strong style="color:#fca5a5">最大風險：</strong>RM2,900 psf 商業地契定價超過同地段 Binjai 住宅地契頂奢（RM2,660），在 KL SR 歷史上極少成功先例；商業地契永久折扣使流動性和退出成本偏高；615 戶 SA 體量在 2029 竣工後短期出租競爭激烈；外籍 Net Yield 僅 1.9–2.2%，租金回報弱。
+        </div>
+      </div>
+    </div>
+
+    <h3>評分說明——為什麼 CloutHaus 在六個建案中取得最高「非住宅地契」評分？</h3>
+    <p>CloutHaus 的 6.7 分是本系列商業地契 SR 建案中最高（高於 Stonor 3 的 5.7、Armani Hallson 的 5.7、Orion 的 5.2），核心原因是上游報告明確將其定位於「新精品稀缺」框架，而非「舊 SR 積壓」框架。</p>
+    <p>A 類 7.1 分的關鍵驅動是 A4 基建（9.0）——55m 距孖鑽 + KLCC 三站步行圈是 KL 所有分析建案中最頂尖的地段組合。A2 供需（6.5）反映「新精品稀缺」正面信號與商業地契廣義庫存壓力的並存。</p>
+    <p>B 類 6.4 分中，B1 開發商（8.0）是 TA Global 信用的直接體現，B4 地段（9.0）並列本輪最高。主要扣分是 B2 估值（5.0）——RM2,900 psf 商業地契期房在沒有實際成交數據前難以為此定價辯護，這是 CloutHaus 最大的進場顧慮。</p>
+
+    <h3>六個建案最終完整對比</h3>
+    <table>
+      <thead><tr><th>建案</th><th>評分</th><th>地契</th><th>PSF（發售/成交）</th><th>外籍 Net Yield</th><th>管理費 psf</th><th>建議</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Residensi 22 MK</strong></td><td><span class="tag t-g">7.7/10</span></td><td>Freehold 住宅</td><td>RM1,208（31筆成交）</td><td>~3.0–3.2%</td><td>RM0.34</td><td>🟢 審慎積極進場</td></tr>
+        <tr><td><strong>Park Place DPC</strong></td><td><span class="tag t-g">7.7/10</span></td><td>Freehold 住宅</td><td>RM1,461（89筆成交）</td><td>~3.0–3.4%</td><td>RM0.44</td><td>🟢 審慎積極進場</td></tr>
+        <tr><td><strong>CloutHaus KLCC</strong></td><td><span class="tag t-y">6.7/10</span></td><td>Freehold 商業</td><td>RM2,900（發售均價，期房）</td><td>~1.9–2.2%</td><td>RM0.80</td><td>🟡 觀望（或議價5–10%後）</td></tr>
+        <tr><td><strong>Armani Hallson</strong></td><td><span class="tag t-y">5.7/10</span></td><td>SOVO 商業</td><td>RM1,636–2,300（發售）</td><td>~1.4–1.8%</td><td>RM0.95</td><td>🟡 觀望</td></tr>
+        <tr><td><strong>Stonor 3 KLCC</strong></td><td><span class="tag t-y">5.7/10</span></td><td>商業地契 HDA</td><td>RM1,320（成交中位）</td><td>~1.9–2.3%</td><td>RM0.50</td><td>🔴 暫緩（投資）</td></tr>
+        <tr><td><strong>Orion Residence BB</strong></td><td><span class="tag t-r">5.2/10</span></td><td>Freehold 商業</td><td>RM2,707–3,750（發售）</td><td>~1.2–1.5%</td><td>RM1.20</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL 供需 Overhang 深度分析報告（2026-04-01，上游報告）｜The Edge Malaysia（2024-09-30 CloutHaus 發售報導；2025-05-23 動工典禮）｜The Edge Malaysia｜Savills Klang Valley Monitor 1Q2025（2025-07）｜PropertyGuru（2026-04）｜IQI Global｜TA Global 官網｜EdgeProp.my<br>
+  本報告基於公開資料及上游研究，不構成投資建議。期房分析不確定性較高，所有數據需在竣工後重新驗證。商業地契 MM2H 合規性、貸款條件需向律師及銀行個別確認。
+</div>
+</div>
+
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

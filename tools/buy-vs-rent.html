@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buy vs Rent | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════
+   TOP PICKS STRIP
+══════════════════════════════════════════════ */
+.picks-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:0;
+}
+@media(max-width:680px){.picks-grid{grid-template-columns:1fr}}
+
+.pick-card{
+  background:#fff;
+  border-radius:4px;
+  padding:14px 16px;
+  border:0.5px solid #ccd9e8;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  transition:box-shadow .15s;
+}
+.pick-card:hover{box-shadow:0 2px 8px rgba(30,58,95,.07)}
+
+.pick-medal{
+  font-size:22px;
+  flex-shrink:0;
+  line-height:1;
+}
+.pick-body{flex:1;min-width:0}
+.pick-city{
+  font-size:13px;
+  font-weight:600;
+  color:#1e3a5f;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.pick-be{
+  font-family:'JetBrains Mono',monospace;
+  font-size:18px;
+  font-weight:500;
+  color:#1e3a5f;
+  line-height:1.25;
+}
+.pick-verdict{
+  display:inline-block;
+  font-size:10px;
+  font-weight:600;
+  padding:2px 8px;
+  border-radius:10px;
+  margin-top:4px;
+}
+
+.pick-card.gold  {border-left:3px solid #fbbf24}
+.pick-card.silver{border-left:3px solid #cbd5e1}
+.pick-card.bronze{border-left:3px solid #b45309}
+
+/* ══════════════════════════════════════════════
+   ASSUMPTIONS CONTROL PANEL
+══════════════════════════════════════════════ */
+.assumptions-panel{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  padding:16px 20px;
+  margin-bottom:0;
+}
+.assumptions-groups{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:20px;
+  align-items:start;
+}
+@media(max-width:860px){.assumptions-groups{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.assumptions-groups{grid-template-columns:1fr}}
+
+.asm-group{display:flex;flex-direction:column;gap:6px}
+.asm-label{
+  font-size:9.5px;
+  letter-spacing:.13em;
+  color:#5a7a9a;
+  font-weight:600;
+  text-transform:uppercase;
+  margin-bottom:2px;
+}
+.pill-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+.pill-opt{
+  padding:5px 11px;
+  border-radius:20px;
+  font-size:11.5px;
+  font-weight:500;
+  color:#4a6080;
+  background:#eef3f9;
+  border:1px solid #ccd9e8;
+  cursor:pointer;
+  user-select:none;
+  transition:all .12s;
+  white-space:nowrap;
+  font-family:'Inter',sans-serif;
+}
+.pill-opt:hover{background:#dde8f2;color:#1e3a5f}
+.pill-opt.active{
+  background:#1e3a5f;
+  color:#fff;
+  border-color:#1e3a5f;
+  box-shadow:0 1px 4px rgba(30,58,95,.22);
+}
+
+/* Toggle checkboxes styled as pill */
+.toggle-pills{display:flex;flex-direction:column;gap:6px;padding-top:4px}
+.toggle-pill{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  user-select:none;
+}
+.toggle-pill input[type=checkbox]{
+  accent-color:#1e3a5f;
+  width:14px;height:14px;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.toggle-pill-label{font-size:11.5px;color:#4a6080;font-weight:500}
+
+/* Hidden real selects (values kept for JS compatibility) */
+.asm-hidden-select{display:none}
+
+/* ══════════════════════════════════════════════
+   COMPARISON TABLE
+══════════════════════════════════════════════ */
+.table-wrap{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  overflow:auto;
+  margin-bottom:0;
+}
+.cmp-tbl{width:100%;border-collapse:collapse;min-width:860px}
+.cmp-tbl thead{position:sticky;top:0;z-index:3}
+.cmp-tbl th{
+  background:#f0f6ff;
+  font-size:9px;
+  letter-spacing:.09em;
+  color:#5a7a9a;
+  font-weight:600;
+  padding:10px 14px;
+  text-align:right;
+  border-bottom:1px solid #dce8f5;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:background .15s;
+  user-select:none;
+}
+.cmp-tbl th:hover{background:#e4eefb;color:#1e3a5f}
+.cmp-tbl th:first-child{text-align:left;cursor:default}
+.cmp-tbl th.sorted{background:#ddeeff;color:#1e3a5f}
+.cmp-tbl th.sorted::after{content:' ↓';font-size:9px}
+.cmp-tbl th.sorted.asc::after{content:' ↑'}
+/* sort hint on hover for sortable headers */
+.cmp-tbl th[data-key]:not(.sorted):hover::after{content:' ↕';font-size:8px;color:#94a3b8}
+
+.cmp-tbl td{
+  padding:11px 14px;
+  font-size:12.5px;
+  border-bottom:1px solid #f0f5fb;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  color:#1e3a5f;
+  white-space:nowrap;
+  transition:background .1s;
+}
+.cmp-tbl td:first-child{text-align:left;font-weight:600}
+.cmp-tbl tbody tr:nth-child(even) td{background:#fafcfe}
+.cmp-tbl tbody tr:nth-child(even):hover td{background:#f3f8ff}
+.cmp-tbl tr:last-child td{border-bottom:none}
+.cmp-tbl tr:hover td{background:#f3f8ff !important}
+
+/* City cell */
+.city-flag{margin-right:5px;font-size:13px}
+.city-name{font-size:12.5px;color:#1e3a5f}
+.city-sub{
+  display:block;
+  font-size:10px;
+  color:#94a3b8;
+  font-weight:400;
+  margin-top:1px;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* B/E year colors */
+.be-green{color:#16a34a;font-weight:700}
+.be-yellow{color:#ca8a04;font-weight:700}
+.be-red{color:#dc2626;font-weight:700}
+
+/* B/E inline bar */
+.be-cell{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.be-bar-wrap{
+  width:44px;height:6px;
+  background:#e8f0f9;
+  border-radius:3px;
+  overflow:hidden;
+  flex-shrink:0;
+}
+.be-bar-fill{
+  height:100%;
+  border-radius:3px;
+  transition:width .3s;
+}
+
+/* Verdict pill */
+.verdict-pill{
+  display:inline-block;
+  padding:3px 10px;
+  border-radius:12px;
+  font-size:10.5px;
+  font-weight:600;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+.pill-green {background:#dcfce7;color:#166534}
+.pill-yellow{background:#fef9c3;color:#854d0e}
+.pill-red   {background:#fee2e2;color:#991b1b}
+
+/* Yield / rate coloring */
+.carry-pos{color:#16a34a;font-weight:600}
+.carry-neg{color:#dc2626}
+
+/* Currency with mono font */
+.num-mono{font-family:'JetBrains Mono',monospace;font-size:12px}
+
+/* ══════════════════════════════════════════════
+   CHART SECTION
+══════════════════════════════════════════════ */
+.chart-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:0;
+}
+@media(max-width:800px){.chart-row{grid-template-columns:1fr}}
+
+/* Use global .chart-card from style.css — override only chart-internal p */
+.chart-card .chart-subtitle{margin-bottom:12px}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<main class="container">
+
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">DECISION TOOL</span><span class="lang-zh" style="display:none">決策工具</span></span>
+    <h1><span class="lang-en">🔁 Buy vs Rent</span><span class="lang-zh" style="display:none">🔁 買 vs 租</span></h1>
+    <p class="subtitle"><span class="lang-en">Compare break-even horizon across 12 markets — adjust assumptions to find when buying beats renting</span><span class="lang-zh" style="display:none">12 市場一次比較買 vs 租，調整假設找出何時買優於租</span></p>
+  </div>
+
+  <!-- ══ SECTION: TOP PICKS ══ -->
+  <div class="section-label" style="margin-top:24px"><span class="lang-en">TOP PICKS · CURRENT ASSUMPTIONS</span><span class="lang-zh" style="display:none">推薦排行 · 當前參數</span></div>
+  <div class="picks-grid" id="topPicksGrid">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- ══ INSIGHT BOX ══ -->
+  <div class="insight-box accent" style="margin-top:14px;margin-bottom:0">
+    <span class="lang-en"><strong>How to read this:</strong> Shorter break-even = low rate, high yield, light tax. Longer break-even = opportunity cost of capital beats owning. Adjust the parameters below to see rankings update instantly.</span>
+    <span class="lang-zh" style="display:none"><strong>如何解讀：</strong>回本年越短 = 利率低、收益高、稅負輕。回本年越長 = 資本機會成本勝過持有。調整下方參數可即時看排名重排。</span>
+  </div>
+
+  <!-- ══ SECTION: ASSUMPTIONS ══ -->
+  <div class="section-label" style="margin-top:28px"><span class="lang-en">ASSUMPTIONS</span><span class="lang-zh" style="display:none">參數設定</span></div>
+  <div class="assumptions-panel">
+    <div class="assumptions-groups">
+
+      <!-- Holding Horizon -->
+      <div class="asm-group">
+        <span class="asm-label"><span class="lang-en">Holding Horizon</span><span class="lang-zh" style="display:none">持有年限</span></span>
+        <div class="pill-row" id="pillsHorizon">
+          <button class="pill-opt" data-val="5">5y</button>
+          <button class="pill-opt" data-val="7">7y</button>
+          <button class="pill-opt active" data-val="10">10y</button>
+          <button class="pill-opt" data-val="15">15y</button>
+          <button class="pill-opt" data-val="20">20y</button>
+        </div>
+        <select id="bvrHorizon" class="asm-hidden-select">
+          <option value="5">5 yr</option>
+          <option value="7">7 yr</option>
+          <option value="10" selected>10 yr</option>
+          <option value="15">15 yr</option>
+          <option value="20">20 yr</option>
+        </select>
+      </div>
+
+      <!-- Down Payment -->
+      <div class="asm-group">
+        <span class="asm-label"><span class="lang-en">Down Payment</span><span class="lang-zh" style="display:none">頭期款</span></span>
+        <div class="pill-row" id="pillsDown">
+          <button class="pill-opt" data-val="10">10%</button>
+          <button class="pill-opt active" data-val="20">20%</button>
+          <button class="pill-opt" data-val="30">30%</button>
+          <button class="pill-opt" data-val="50">50%</button>
+        </div>
+        <select id="bvrDown" class="asm-hidden-select">
+          <option value="10">10%</option>
+          <option value="20" selected>20%</option>
+          <option value="30">30%</option>
+          <option value="50">50%</option>
+        </select>
+      </div>
+
+      <!-- Alt Return -->
+      <div class="asm-group">
+        <span class="asm-label"><span class="lang-en">Alt Return</span><span class="lang-zh" style="display:none">機會成本</span></span>
+        <div class="pill-row" id="pillsAlt">
+          <button class="pill-opt" data-val="3">3%</button>
+          <button class="pill-opt active" data-val="5">5%</button>
+          <button class="pill-opt" data-val="7">7%</button>
+          <button class="pill-opt" data-val="10">10%</button>
+        </div>
+        <select id="bvrAlt" class="asm-hidden-select">
+          <option value="3">3%</option>
+          <option value="5" selected>5%</option>
+          <option value="7">7%</option>
+          <option value="10">10%</option>
+        </select>
+      </div>
+
+      <!-- Toggles -->
+      <div class="asm-group">
+        <span class="asm-label"><span class="lang-en">Toggles</span><span class="lang-zh" style="display:none">開關</span></span>
+        <div class="toggle-pills">
+          <label class="toggle-pill">
+            <input type="checkbox" id="bvrTax" checked>
+            <span class="toggle-pill-label"><span class="lang-en">Include transaction tax</span><span class="lang-zh" style="display:none">含交易稅</span></span>
+          </label>
+          <label class="toggle-pill">
+            <input type="checkbox" id="bvrLocalRate" checked>
+            <span class="toggle-pill-label"><span class="lang-en">Apply local mortgage rate</span><span class="lang-zh" style="display:none">套用各地貸款利率</span></span>
+          </label>
+        </div>
+      </div>
+
+    </div><!-- /assumptions-groups -->
+  </div><!-- /assumptions-panel -->
+
+  <!-- ══ SECTION: FULL COMPARISON ══ -->
+  <div class="section-label" style="margin-top:28px"><span class="lang-en">FULL COMPARISON</span><span class="lang-zh" style="display:none">完整對照</span></div>
+  <div class="table-wrap">
+    <table class="cmp-tbl" id="cmpTbl">
+      <thead>
+        <tr>
+          <th><span class="lang-en">City</span><span class="lang-zh" style="display:none">城市</span></th>
+          <th data-key="price"><span class="lang-en">Mid Price</span><span class="lang-zh" style="display:none">中位房價</span></th>
+          <th data-key="rentMo"><span class="lang-en">Rent/mo</span><span class="lang-zh" style="display:none">月租金</span></th>
+          <th data-key="yield"><span class="lang-en">Yield</span><span class="lang-zh" style="display:none">收益率</span></th>
+          <th data-key="mrate"><span class="lang-en">M.Rate</span><span class="lang-zh" style="display:none">貸款利率</span></th>
+          <th data-key="buyNPV"><span class="lang-en">Buy NPV</span><span class="lang-zh" style="display:none">買入 NPV</span></th>
+          <th data-key="rentNPV"><span class="lang-en">Rent NPV</span><span class="lang-zh" style="display:none">租屋 NPV</span></th>
+          <th data-key="beYear"><span class="lang-en">B/E Year</span><span class="lang-zh" style="display:none">回本年</span></th>
+          <th data-key="verdict"><span class="lang-en">Verdict</span><span class="lang-zh" style="display:none">評級</span></th>
+        </tr>
+      </thead>
+      <tbody id="cmpTbody">
+        <tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:28px;font-size:12px">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══ SECTION: VISUALIZATIONS ══ -->
+  <div class="section-label" style="margin-top:28px"><span class="lang-en">VISUALIZATIONS</span><span class="lang-zh" style="display:none">視覺化分析</span></div>
+  <div class="chart-row">
+    <div class="chart-card">
+      <h3><span class="lang-en">Break-even Year Ranking</span><span class="lang-zh" style="display:none">回本年排名</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Shorter = buying beats renting sooner (sorted best to worst)</span><span class="lang-zh" style="display:none">年數越短表示買入越快划算</span></p>
+      <div id="chartBVRRanking" style="height:320px;width:100%"></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Yield vs Mortgage Rate</span><span class="lang-zh" style="display:none">收益率 vs 貸款利率</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Above diagonal = positive carry (yield &gt; borrowing cost)</span><span class="lang-zh" style="display:none">對角線上方 = 正向套利</span></p>
+      <div id="chartBVRScatter" style="height:320px;width:100%"></div>
+    </div>
+  </div>
+
+  <div class="source-footer">
+    <span class="lang-en"><strong>Methodology:</strong> Buy NPV = PV of all buying costs (mortgage + maintenance 1% + opportunity cost on equity − exit proceeds) discounted at alt return rate. Rent NPV = PV of all rents over horizon. Break-even = year when cumulative buy cost ≤ cumulative rent cost. Defaults are mid-market estimates as of 2026.</span>
+    <span class="lang-zh" style="display:none"><strong>方法說明：</strong>買入NPV = 買入總成本現值（房貸+維護費1%+股權機會成本－賣出所得），以替代報酬率折現。租屋NPV = 持有期間租金現值。回本年 = 累積買入成本首次低於累積租金的年份。預設值為2026年市場估計值。</span>
+  </div>
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+/* ── Color palette ── */
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+function mkAxis(o){o=o||{};var m=Object.assign({axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},splitLine:{lineStyle:{color:C.grid}}},o);m.axisLabel=Object.assign({},baseText,o.axisLabel||{});return m;}
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+
+/* ── Market data ── */
+var MARKETS=[
+  {key:'my',flag:'🇲🇾',en:'Kuala Lumpur',zh:'吉隆坡',cur:'RM',price:800000,rentMo:3500,yield:5.2,mrate:4.30,appr:2.5,txTax:4.0,maint:1.0},
+  {key:'tw',flag:'🇹🇼',en:'Taipei',zh:'台北',cur:'NT$',price:25000000,rentMo:38000,yield:1.8,mrate:2.30,appr:3.0,txTax:6.0,maint:1.0},
+  {key:'jp',flag:'🇯🇵',en:'Tokyo',zh:'東京',cur:'¥',price:80000000,rentMo:280000,yield:4.2,mrate:1.80,appr:2.0,txTax:7.0,maint:1.0},
+  {key:'au',flag:'🇦🇺',en:'Sydney',zh:'雪梨',cur:'A$',price:1400000,rentMo:3100,yield:2.7,mrate:6.30,appr:4.0,txTax:5.5,maint:1.0},
+  {key:'nz',flag:'🇳🇿',en:'Auckland',zh:'奧克蘭',cur:'NZ$',price:1050000,rentMo:2820,yield:3.2,mrate:6.85,appr:3.5,txTax:0,maint:1.0},
+  {key:'uk',flag:'🇬🇧',en:'London',zh:'倫敦',cur:'£',price:525000,rentMo:2400,yield:5.5,mrate:5.25,appr:2.5,txTax:5.0,maint:1.0},
+  {key:'us',flag:'🇺🇸',en:'NYC',zh:'紐約',cur:'$',price:800000,rentMo:4500,yield:6.8,mrate:7.10,appr:3.0,txTax:2.5,maint:1.2},
+  {key:'th',flag:'🇹🇭',en:'Bangkok',zh:'曼谷',cur:'฿',price:8000000,rentMo:28000,yield:4.2,mrate:5.50,appr:2.5,txTax:6.3,maint:1.0},
+  {key:'vn',flag:'🇻🇳',en:'Ho Chi Minh',zh:'胡志明市',cur:'₫',price:6000000000,rentMo:25000000,yield:5.0,mrate:9.50,appr:4.0,txTax:2.0,maint:1.0},
+  {key:'kr',flag:'🇰🇷',en:'Seoul',zh:'首爾',cur:'₩',price:1200000000,rentMo:2500000,yield:2.5,mrate:4.80,appr:2.0,txTax:4.6,maint:1.0},
+  {key:'ca',flag:'🇨🇦',en:'Toronto',zh:'多倫多',cur:'C$',price:1100000,rentMo:2800,yield:3.1,mrate:6.20,appr:3.0,txTax:5.5,maint:1.2},
+  {key:'ie',flag:'🇮🇪',en:'Dublin',zh:'都柏林',cur:'€',price:420000,rentMo:2200,yield:6.3,mrate:4.30,appr:3.0,txTax:7.5,maint:1.0}
+];
+
+/* ── Currency formatter (abbreviated) ── */
+function fmtCur(v,cur){
+  var abs=Math.abs(v);var sign=v<0?'−':'';
+  if(abs>=1000000000)return sign+cur+(abs/1000000000).toFixed(1)+'B';
+  if(abs>=1000000)return sign+cur+(abs/1000000).toFixed(1)+'M';
+  if(abs>=10000)return sign+cur+Math.round(abs/1000)+'K';
+  if(abs>=1000)return sign+cur+(abs/1000).toFixed(1)+'K';
+  return sign+cur+Math.round(abs).toLocaleString();
+}
+
+/* ── Monthly mortgage payment ── */
+function monthlyPmt(principal,annualRate,termYr){
+  var r=annualRate/12/100;var n=termYr*12;
+  if(r===0)return principal/n;
+  return principal*r/(1-Math.pow(1+r,-n));
+}
+
+/* ── Remaining principal ── */
+function remPrincipal(principal,annualRate,termYr,elapsedYr){
+  var r=annualRate/12/100;var n=termYr*12;var k=elapsedYr*12;
+  if(r<1e-9)return principal*(1-k/n);
+  var pmt=monthlyPmt(principal,annualRate,termYr);
+  return pmt*(1-Math.pow(1+r,-(n-k)))/r;
+}
+
+/* ── Compute buy vs rent for one market ── */
+function computeBVR(m,opts){
+  var horizon=opts.horizon;
+  var downPct=opts.downPct;
+  var altReturn=opts.altReturn/100;
+  var includeTax=opts.includeTax;
+  var useLocalRate=opts.useLocalRate;
+  var term=25;
+
+  var price=m.price;
+  var rentMo=m.rentMo;
+  var mrate=useLocalRate?m.mrate:5.0;
+  var txTaxAmt=includeTax?(price*m.txTax/100):0;
+  var maintRate=m.maint/100;
+  var appr=m.appr/100;
+
+  var downAmt=price*downPct/100;
+  var loanAmt=price-downAmt;
+  var annualMortgage=monthlyPmt(loanAmt,mrate,term)*12;
+  var annualMaint=price*maintRate;
+
+  var buyNPV=txTaxAmt;
+  buyNPV+=downAmt;
+
+  var cumBuyCost=txTaxAmt+downAmt;
+  var cumRentCost=0;
+  var beYear=null;
+  var buyCosts=[];
+  var rentCosts=[];
+
+  for(var y=1;y<=horizon;y++){
+    var equityAtY=(price*Math.pow(1+appr,y-1))-remPrincipal(loanAmt,mrate,term,y-1);
+    var oppCostEquity=equityAtY*altReturn;
+    var annualBuyCost=annualMortgage+annualMaint+oppCostEquity;
+    buyCosts.push(annualBuyCost);
+
+    var annualRent=rentMo*12;
+    annualRent*=Math.pow(1.02,y-1);
+    rentCosts.push(annualRent);
+
+    if(y===horizon){
+      var exitPrice=price*Math.pow(1+appr,horizon);
+      var exitProceeds=exitPrice*(1-0.035)-remPrincipal(loanAmt,mrate,term,horizon);
+      cumBuyCost+=annualBuyCost-exitProceeds;
+    } else {
+      cumBuyCost+=annualBuyCost;
+    }
+    cumRentCost+=annualRent;
+    if(beYear===null&&cumBuyCost<=cumRentCost)beYear=y;
+  }
+
+  var buyNPVTotal=txTaxAmt+downAmt;
+  var rentNPVTotal=0;
+  for(var i=0;i<horizon;i++){
+    var disc=Math.pow(1+altReturn,i+1);
+    buyNPVTotal+=buyCosts[i]/disc;
+    rentNPVTotal+=rentCosts[i]/disc;
+  }
+  var exitPriceF=price*Math.pow(1+appr,horizon);
+  var exitProceedsF=exitPriceF*(1-0.035)-remPrincipal(loanAmt,mrate,term,horizon);
+  buyNPVTotal-=exitProceedsF/Math.pow(1+altReturn,horizon);
+
+  if(beYear===null)beYear='>'+horizon;
+
+  return {buyNPV:buyNPVTotal,rentNPV:rentNPVTotal,beYear:beYear};
+}
+
+/* ── Table state ── */
+var sortKey='beYear',sortAsc=true;
+var tableData=[];
+
+/* ── Get options from controls ── */
+function getOpts(){
+  return{
+    horizon:parseInt(document.getElementById('bvrHorizon').value)||10,
+    downPct:parseInt(document.getElementById('bvrDown').value)||20,
+    altReturn:parseInt(document.getElementById('bvrAlt').value)||5,
+    includeTax:document.getElementById('bvrTax').checked,
+    useLocalRate:document.getElementById('bvrLocalRate').checked
+  };
+}
+
+/* ── Sort helper ── */
+function numericBE(v){return typeof v==='string'?999:v;}
+
+/* ── Render top picks ── */
+function renderTopPicks(lang){
+  var en=lang==='en';
+  /* sorted by beYear ascending — take top 3 */
+  var sorted=[].concat(tableData).sort(function(a,b){return numericBE(a.beYear)-numericBE(b.beYear);});
+  var medals=['🥇','🥈','🥉'];
+  var rankClass=['gold','silver','bronze'];
+
+  var html='';
+  for(var i=0;i<3&&i<sorted.length;i++){
+    var d=sorted[i];
+    var beNum=numericBE(d.beYear);
+    var beTxt=typeof d.beYear==='number'?d.beYear+' yr':d.beYear;
+    var pillCls=beNum<=7?'pill-green':beNum<=12?'pill-yellow':'pill-red';
+    var verdictEn=beNum<=7?'✓ Buy':beNum<=12?'~ Marginal':'✗ Rent';
+    var verdictZh=beNum<=7?'✓ 買入':beNum<=12?'~ 邊際':'✗ 租屋';
+
+    html+='<div class="pick-card '+rankClass[i]+'">'+
+      '<div class="pick-medal">'+medals[i]+'</div>'+
+      '<div class="pick-body">'+
+        '<div class="pick-city">'+d.flag+' <span class="lang-en">'+(en?d.en:'')+'</span><span class="lang-zh" style="display:'+(en?'none':'')+'">'+d.zh+'</span></div>'+
+        '<div class="pick-be">'+beTxt+' <span style="font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">B/E</span></div>'+
+        '<span class="pick-verdict '+pillCls+'"><span class="lang-en">'+verdictEn+'</span><span class="lang-zh" style="display:none">'+verdictZh+'</span></span>'+
+      '</div>'+
+    '</div>';
+  }
+  document.getElementById('topPicksGrid').innerHTML=html;
+
+  /* Re-apply lang visibility inside picks */
+  var curLang=lang;
+  document.querySelectorAll('#topPicksGrid .lang-en').forEach(function(e){e.style.display=curLang==='en'?'':'none';});
+  document.querySelectorAll('#topPicksGrid .lang-zh').forEach(function(e){e.style.display=curLang==='zh'?'':'none';});
+}
+
+/* ── All charts ── */
+var allCharts=[];
+
+function renderAll(){
+  var opts=getOpts();
+  opts_cache=opts;
+  var lang=localStorage.getItem('lang')||'en';
+  var en=lang==='en';
+
+  /* Compute all rows */
+  tableData=MARKETS.map(function(m){
+    var r=computeBVR(m,opts);
+    return Object.assign({},m,r);
+  });
+
+  /* Sort */
+  tableData.sort(function(a,b){
+    var aVal=a[sortKey],bVal=b[sortKey];
+    if(sortKey==='beYear'){aVal=numericBE(aVal);bVal=numericBE(bVal);}
+    var r=0;
+    if(typeof aVal==='number'&&typeof bVal==='number')r=aVal-bVal;
+    else r=String(aVal).localeCompare(String(bVal));
+    return sortAsc?r:-r;
+  });
+
+  /* Max beYear for bar scaling */
+  var maxBE=0;
+  tableData.forEach(function(d){var n=numericBE(d.beYear);if(n<900)maxBE=Math.max(maxBE,n);});
+  maxBE=maxBE||opts.horizon;
+
+  /* Build rows */
+  var html='';
+  tableData.forEach(function(d){
+    var beTxt;
+    var beCls;
+    var beNum=numericBE(d.beYear);
+    if(beNum<=7){beCls='be-green';beTxt=typeof d.beYear==='number'?d.beYear+' yr':d.beYear;}
+    else if(beNum<=12){beCls='be-yellow';beTxt=typeof d.beYear==='number'?d.beYear+' yr':d.beYear;}
+    else{beCls='be-red';beTxt=typeof d.beYear==='string'?d.beYear:d.beYear+' yr';}
+
+    var pillCls=beNum<=7?'pill-green':beNum<=12?'pill-yellow':'pill-red';
+    var verdictEn,verdictZh;
+    if(beNum<=7){verdictEn='Buy';verdictZh='買入划算';}
+    else if(beNum<=12){verdictEn='Marginal';verdictZh='邊際';}
+    else{verdictEn='Rent';verdictZh='繼續租';}
+
+    /* Inline bar width (capped at 100%) */
+    var barPct=beNum<900?Math.min(100,Math.round(beNum/maxBE*100)):100;
+    var barColor=beNum<=7?C.green:beNum<=12?C.orange:C.red;
+
+    /* Positive carry coloring */
+    var effectiveMrate=(opts.useLocalRate?d.mrate:5.00);
+    var yieldCls=d.yield>effectiveMrate?'carry-pos':'carry-neg';
+
+    html+='<tr>'+
+      '<td>'+
+        '<span class="city-flag">'+d.flag+'</span>'+
+        '<span class="city-name"><span class="lang-en">'+d.en+'</span><span class="lang-zh" style="display:none">'+d.zh+'</span></span>'+
+        '<span class="city-sub num-mono">'+d.cur+'</span>'+
+      '</td>'+
+      '<td class="num-mono">'+fmtCur(d.price,d.cur)+'</td>'+
+      '<td class="num-mono">'+fmtCur(d.rentMo,d.cur)+'/mo</td>'+
+      '<td class="'+yieldCls+'">'+d.yield.toFixed(1)+'%</td>'+
+      '<td>'+effectiveMrate.toFixed(2)+'%</td>'+
+      '<td class="num-mono">'+fmtCur(d.buyNPV,d.cur)+'</td>'+
+      '<td class="num-mono">'+fmtCur(d.rentNPV,d.cur)+'</td>'+
+      '<td>'+
+        '<div class="be-cell">'+
+          '<span class="'+beCls+'">'+beTxt+'</span>'+
+          '<div class="be-bar-wrap"><div class="be-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div></div>'+
+        '</div>'+
+      '</td>'+
+      '<td><span class="verdict-pill '+pillCls+'"><span class="lang-en">'+verdictEn+'</span><span class="lang-zh" style="display:none">'+verdictZh+'</span></span></td>'+
+    '</tr>';
+  });
+  document.getElementById('cmpTbody').innerHTML=html;
+
+  /* Sort indicator */
+  document.querySelectorAll('.cmp-tbl th[data-key]').forEach(function(th){
+    th.classList.remove('sorted','asc');
+    if(th.getAttribute('data-key')===sortKey){
+      th.classList.add('sorted');
+      if(sortAsc)th.classList.add('asc');
+    }
+  });
+
+  /* Re-apply lang in tbody */
+  document.querySelectorAll('#cmpTbody .lang-en').forEach(function(e){e.style.display=en?'':'none';});
+  document.querySelectorAll('#cmpTbody .lang-zh').forEach(function(e){e.style.display=en?'none':'';});
+
+  renderTopPicks(lang);
+  renderCharts(lang);
+}
+
+function renderCharts(lang){
+  allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  var en=lang==='en';
+
+  /* ── Chart 1: B/E Ranking horizontal bar ── */
+  var ranked=[].concat(tableData).sort(function(a,b){return numericBE(a.beYear)-numericBE(b.beYear);});
+  var rLabels=ranked.map(function(d){return d.flag+' '+(en?d.en:d.zh);});
+  var rValues=ranked.map(function(d){return Math.min(numericBE(d.beYear),opts_cache.horizon+2);});
+  var rColors=ranked.map(function(d){
+    var n=numericBE(d.beYear);
+    return n<=7?C.green:n<=12?C.orange:C.red;
+  });
+
+  var c1=echarts.init(document.getElementById('chartBVRRanking'));
+  c1.setOption({
+    tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:C.navy,fontSize:11},
+      formatter:function(params){
+        var d=ranked[params[0].dataIndex];
+        var be=d.beYear;var beTxt=typeof be==='string'?be:be+(en?' yr':'年');
+        return params[0].name+'<br>'+(en?'B/E Year':'回本年')+': '+beTxt;
+      }},
+    grid:{left:10,right:50,top:10,bottom:10,containLabel:true},
+    xAxis:mkAxis({type:'value',min:0,max:opts_cache.horizon+2,axisLabel:{formatter:function(v){return v+(en?'yr':'年');}}}),
+    yAxis:mkAxis({type:'category',data:rLabels,axisLabel:{fontSize:10}}),
+    series:[{
+      type:'bar',
+      data:rValues,
+      itemStyle:{color:function(p){return rColors[p.dataIndex];},borderRadius:[0,3,3,0]},
+      barMaxWidth:22,
+      label:{show:true,position:'right',fontSize:10,color:C.navy,
+        formatter:function(p){var d=ranked[p.dataIndex];return typeof d.beYear==='string'?d.beYear:d.beYear+(en?'yr':'年');}}
+    }]
+  });
+  allCharts.push(c1);
+
+  /* ── Chart 2: Yield vs Mortgage Rate scatter ── */
+  var scatterData=MARKETS.map(function(m){
+    return{
+      value:[opts_cache.useLocalRate?m.mrate:5,m.yield],
+      name:m.flag+' '+(en?m.en:m.zh)
+    };
+  });
+  var maxVal=Math.max.apply(null,MARKETS.map(function(m){return Math.max(m.mrate,m.yield);}));
+  maxVal=Math.ceil(maxVal)+1;
+
+  var c2=echarts.init(document.getElementById('chartBVRScatter'));
+  c2.setOption({
+    tooltip:{trigger:'item',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:C.navy,fontSize:11},
+      formatter:function(p){
+        return p.name+'<br>'+(en?'M.Rate':'貸款利率')+': '+p.value[0].toFixed(2)+'%<br>'+(en?'Yield':'收益率')+': '+p.value[1].toFixed(1)+'%';
+      }},
+    grid:{left:10,right:20,top:30,bottom:20,containLabel:true},
+    xAxis:mkAxis({type:'value',name:en?'Mortgage Rate %':'貸款利率%',nameTextStyle:baseText,min:0,max:maxVal,axisLabel:{formatter:'{value}%'}}),
+    yAxis:mkAxis({type:'value',name:en?'Yield %':'收益率%',nameTextStyle:baseText,min:0,max:maxVal,axisLabel:{formatter:'{value}%'}}),
+    series:[
+      {
+        name:en?'y=x (breakeven)':'y=x（平衡線）',
+        type:'line',
+        data:[[0,0],[maxVal,maxVal]],
+        symbol:'none',
+        lineStyle:{color:'#94a3b8',width:1,type:'dashed'},
+        itemStyle:{color:'#94a3b8'}
+      },
+      {
+        name:en?'Markets':'市場',
+        type:'scatter',
+        data:scatterData,
+        symbolSize:10,
+        itemStyle:{color:function(p){
+          return p.value[1]>p.value[0]?C.green:C.red;
+        }},
+        label:{show:true,position:'top',fontSize:9,color:C.navy,
+          formatter:function(p){
+            var m=MARKETS[p.dataIndex];
+            return m.flag;
+          }
+        }
+      }
+    ],
+    legend:{top:0,right:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8,
+      data:[en?'y=x (breakeven)':'y=x（平衡線）',en?'Markets':'市場']}
+  });
+  allCharts.push(c2);
+}
+
+var opts_cache=getOpts();
+
+/* ── Pill group wiring ── */
+function wirePillGroup(groupId,selectId){
+  var pills=document.querySelectorAll('#'+groupId+' .pill-opt');
+  var sel=document.getElementById(selectId);
+  pills.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      pills.forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      sel.value=btn.getAttribute('data-val');
+      opts_cache=getOpts();
+      renderAll();
+    });
+  });
+}
+wirePillGroup('pillsHorizon','bvrHorizon');
+wirePillGroup('pillsDown','bvrDown');
+wirePillGroup('pillsAlt','bvrAlt');
+
+/* ── Sort click ── */
+document.querySelectorAll('.cmp-tbl th[data-key]').forEach(function(th){
+  th.addEventListener('click',function(){
+    var key=th.getAttribute('data-key');
+    if(sortKey===key){sortAsc=!sortAsc;}else{sortKey=key;sortAsc=true;}
+    renderAll();
+  });
+});
+
+/* ── Toggle controls change ── */
+['bvrTax','bvrLocalRate'].forEach(function(id){
+  document.getElementById(id).addEventListener('change',function(){
+    opts_cache=getOpts();
+    renderAll();
+  });
+});
+
+/* ── setLang ── */
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  renderAll();
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  opts_cache=getOpts();
+  var lang=localStorage.getItem('lang')||'en';
+  setLang(lang);
+});
+
+/* ── Query string highlight (from DD reports) ── */
+(function(){
+  var params = new URLSearchParams(location.search);
+  if (!params.toString()) return;
+
+  var city = params.get('city');
+  var from = params.get('from');
+
+  // Wait for initial renderAll to finish
+  setTimeout(function(){
+    if (city) {
+      // Find the row index in tableData (which reflects current sort order)
+      var targetIdx = -1;
+      for (var k = 0; k < tableData.length; k++) {
+        if (tableData[k].key === city) { targetIdx = k; break; }
+      }
+      if (targetIdx >= 0) {
+        var targetRow = document.querySelectorAll('#cmpTbody tr')[targetIdx];
+        if (targetRow) {
+          targetRow.style.background = '#fef3c7';
+          targetRow.style.boxShadow = 'inset 0 0 0 2px #f59e0b';
+          targetRow.scrollIntoView({behavior:'smooth', block:'center'});
+        }
+      }
+    }
+
+    if (from) {
+      var hdr = document.querySelector('.page-header');
+      if (hdr && !document.getElementById('dd-source-banner')) {
+        var b = document.createElement('div');
+        b.id = 'dd-source-banner';
+        b.style.cssText = 'background:#eff6ff;border:0.5px solid #bfdbfe;border-left:3px solid #2563eb;border-radius:4px;padding:8px 14px;margin-top:10px;font-size:12px;color:#1e3a5f;display:flex;align-items:center;gap:8px';
+        b.innerHTML = '<span style="font-size:14px">&#128203;</span><span><strong>From DD report:</strong> ' + String(from).replace(/[&<>]/g,'') + ' &middot; <a href="/docs/dd/index.html" style="color:#2563eb;text-decoration:underline;margin-left:4px">Browse all DDs</a></span>';
+        hdr.appendChild(b);
+      }
+    }
+  }, 300); // Wait for initial renderAll
+})();
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

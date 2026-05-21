@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kiaramas deDaun @ Mont Kiara｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:linear-gradient(135deg,#14532D 0%,#1a5230 50%,#0f3d1f 100%);color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-card.top{border-top:3px solid #16a34a;background:#F0FDF4}
+.kpi-card.warn{border-top:3px solid #d97706}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* Kiaramas series track */
+.series-track{background:linear-gradient(90deg,#14532D,#1a5c3a);border-radius:8px;padding:16px 20px;margin:12px 0;color:#fff}
+.series-title{font-size:11px;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.6);margin-bottom:10px;letter-spacing:.05em}
+.series-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.s-node{text-align:center;padding:8px 4px;background:rgba(255,255,255,.1);border-radius:4px;font-size:10px}
+.s-node.active{background:rgba(134,239,172,.25);border:1px solid rgba(134,239,172,.5)}
+.s-node-name{font-weight:700;color:#86efac;margin-bottom:2px}
+.s-node-yr{color:rgba(255,255,255,.55);font-family:'IBM Plex Mono',monospace;font-size:9px}
+/* brickz block */
+.brickz-compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:12px 0}
+.bc-card{border-radius:8px;padding:14px;border:1px solid}
+.bc-new{background:#F0FDF4;border-color:#86efac}
+.bc-prev{background:#EFF6FF;border-color:#93c5fd}
+.bc-mkt{background:#F8FAFC;border-color:#e2e8f0}
+.bc-title{font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
+.bc-new .bc-title{color:#166534}.bc-prev .bc-title{color:#1e40af}.bc-mkt .bc-title{color:#475569}
+.bc-num{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;margin-bottom:2px}
+.bc-new .bc-num{color:#166534}.bc-prev .bc-num{color:#1e40af}.bc-mkt .bc-num{color:#64748b}
+/* score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:680px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+@media(max-width:680px){.score-cols,.dual-col,.brickz-compare,.series-grid{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：Kiaramas deDaun @ Jalan Desa Kiara，Mont Kiara ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ Freehold 住宅地契 ｜ 竣工 2028-05 ｜ Block A 97% 取購率 ｜ 管理費 RM0.36 psf</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>Kiaramas deDaun @ Mont Kiara</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&price=1160000&yield=4.17&from=KiaramasDeDaun"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=KiaramasDeDaun"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Desa Kiara，Mont Kiara，KL ｜ 開發商：Kiaramas Development Sdn Bhd（Asia Quest Group，1991年成立）｜ Freehold 住宅地契（Condominium）｜ 三棟 40 層，661 戶（Phase 1：Block A 223戶 + Block B 213戶；Phase 2：Block C 225戶）｜ 8.54 英畝｜ 竣工：2028年5月</div>
+  <div class="badge-row">
+    <span class="badge">✅ Freehold 住宅地契（Condominium）——本系列最佳地契結構</span>
+    <span class="badge">✅ Block A 97% 取購率（軟發售後）；Phase 1 累計 95% 非土著售出</span>
+    <span class="badge">✅ 管理費 RM0.36 psf（含沉沒基金）——本系列最低</span>
+    <span class="badge">✅ Kiaramas Collection 第六個；前五個全部成功交付且保值</span>
+    <span class="badge">✅ GDV RM9.8億；8.54英畝；77戶/英畝（低密度）</span>
+    <span class="badge">✅ Mont Kiara YoY +6.4%（上游報告本系列最高增速地段 ⭐）</span>
+    <span class="badge">⚠️ 期房，竣工 2028-05——2年+ 等待</span>
+    <span class="badge">⚠️ 無直接軌道交通（MRT3 催化，2032 通車）</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- Kiaramas 系列追蹤 -->
+<div class="series-track">
+  <div class="series-title">🏆 KIARAMAS COLLECTION @ MONT KIARA——Asia Quest Group 30年品牌積累（1991–2028）</div>
+  <div class="series-grid">
+    <div class="s-node"><div class="s-node-name">Sutera</div><div class="s-node-yr">1997</div><div style="color:rgba(255,255,255,.4);font-size:9px">完工</div></div>
+    <div class="s-node"><div class="s-node-name">Cendana</div><div class="s-node-yr">2001</div><div style="color:rgba(255,255,255,.4);font-size:9px">完工</div></div>
+    <div class="s-node"><div class="s-node-name">Ayuria</div><div class="s-node-yr">2009</div><div style="color:rgba(255,255,255,.4);font-size:9px">完工</div></div>
+    <div class="s-node"><div class="s-node-name">Gateway</div><div class="s-node-yr">2010</div><div style="color:rgba(255,255,255,.4);font-size:9px">完工</div></div>
+    <div class="s-node"><div class="s-node-name">Danai</div><div class="s-node-yr">2013</div><div style="color:rgba(255,255,255,.4);font-size:9px">完工</div></div>
+    <div class="s-node active"><div class="s-node-name">deDaun ★</div><div class="s-node-yr">2028</div><div style="color:rgba(134,239,172,.7);font-size:9px">在建</div></div>
+  </div>
+  <div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,.5)">前五個建案合計 26 英畝，GDV RM13.5億，全部完工交付，成為 MK 知名精品社區。deDaun 是 10 年來首個新案，GDV RM9.8億，是前五個建案的延續。</div>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card top">
+        <div class="kpi-v up">97%</div>
+        <div class="kpi-l">Block A 取購率（軟發售後）</div>
+        <div class="kpi-s up">本系列最高銷售信號；Phase 1 累計 95% 非土著售出</div>
+      </div>
+      <div class="kpi-card top">
+        <div class="kpi-v">RM844–918</div>
+        <div class="kpi-l">發售 PSF（Phase 1+2）</div>
+        <div class="kpi-s up">Phase 1：RM1.1M–4.17M；Phase 2：RM1.16M–4.31M（微漲）</div>
+      </div>
+      <div class="kpi-card top">
+        <div class="kpi-v">RM0.36</div>
+        <div class="kpi-l">管理費 psf（含沉沒基金）</div>
+        <div class="kpi-s up">本系列最低（R22 RM0.34 略低）；Phase 2 官方確認</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM865</div>
+        <div class="kpi-l">Kiaramas Danai 成交中位 PSF（brickz 6筆）</div>
+        <div class="kpi-s up">最直接對照組（同開發商，鄰接，已完工 13 年）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">661戶</div>
+        <div class="kpi-l">總戶數（三棟 40 層）</div>
+        <div class="kpi-s neu">8.54英畝；77戶/英畝（低密度）；無 Studio</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v">2028-05</div>
+        <div class="kpi-l">官方竣工（HDA 確認）</div>
+        <div class="kpi-s neu">期房約 2 年等待；無 MRT（MRT3 2032 催化）</div>
+      </div>
+    </div>
+
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">Kiaramas Development Sdn Bhd（Asia Quest Group，1991年）；Kiaramas Collection 第六個；前五個全部成功交付；10 年來首個新案；鄰接 Kiaramas Danai 的延伸地塊</div></div>
+      <div class="spec-item"><div class="spec-l">地段 / 地契</div><div class="spec-v">Jalan Desa Kiara，Mont Kiara；8.54 英畝；Freehold 住宅地契（Condominium）——本系列最佳地契；DBKL 核准；海拔 420 呎（城景+自然景觀）</div></div>
+      <div class="spec-item"><div class="spec-l">Phase 1 規模</div><div class="spec-v">Block A（223戶）+ Block B（213戶）= 436 戶；各 40 層；坪數 1,313–4,693 sqft；Type A（148戶）、B（252戶）、C（2戶）、D（4戶）、E（28戶）、F（2戶）</div></div>
+      <div class="spec-item"><div class="spec-l">Phase 2 規模</div><div class="spec-v">Block C（225戶估算）= 合計 661 戶；坪數 1,389–4,693 sqft；定價 RM844–918 psf（RM116萬–431萬）；Phase 2 已 61% 預訂（截至 2025 年報道）</div></div>
+      <div class="spec-item"><div class="spec-l">坪數 / 設計</div><div class="spec-v">Type A：1,313–1,378 sqft（3BR，主力戶型）｜Type B：1,884–2,126 sqft（3BR）｜Type E：4,693 sqft（大坪）；全無 Studio；私人電梯大堂；大坪石材廚房島台</div></div>
+      <div class="spec-item"><div class="spec-l">旗艦設施</div><div class="spec-v">760 呎蜿蜒泳池（MK 最長，連通三棟）；50m 標準泳池；各棟屋頂 Sky Lounge + Sky Private Dining；REZ（居民娛樂區）；Aqua Gym；10 個 EV 快充；中央氣力廢物收集系統</div></div>
+      <div class="spec-item"><div class="spec-l">上游報告定性</div><div class="spec-v">Mont Kiara：「YoY +6.4% ⭐ 本系列最高增速地段」；「精品住宅地契低密度公寓（Mont Kiara 最新建案），供給管道有限」；Gross Yield 5–6%，Net Yield 3.5–4.5%；外籍家庭 + MM2H</div></div>
+      <div class="spec-item"><div class="spec-l">MRT3 催化劑</div><div class="spec-v">MRT3 Circle Line 2025-07 政府核准；Mont Kiara 站規劃中；土地收購 2026 年底；施工 2027 年；竣工 2032 年——deDaun 竣工（2028）後 4 年即有 MRT；目前已開始前置定價</div></div>
+      <div class="spec-item"><div class="spec-l">Kiaramas Danai 對照</div><div class="spec-v">同開發商，鄰接，2013完工；274戶；Freehold 住宅地契；brickz 成交中位 RM865 psf（6筆，2024–25）；Gross Yield 4.17%（iRumah）；月租 RM5,500–9,500；掛牌 RM795–971 psf</div></div>
+      <div class="spec-item"><div class="spec-l">國際學校</div><div class="spec-v">Mont Kiara International School（車程）；Garden International School（車程）；French International School（車程）——MK 是 KL 國際學校密度最高的地段，外籍家庭租客核心吸引力</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜Kiaramas deDaun 的核心投資論點</h3>
+    <p>Kiaramas deDaun 的投資論點是本系列中邏輯最清晰的：在 KL 增速最高的外籍聚居地段（Mont Kiara YoY +6.4%），以「Freehold 住宅地契 + 低密度 + 知名精品系列開發商（Asia Quest，第六個 Kiaramas）+ 最低管理費（RM0.36 psf）+ 本系列最強銷售紀錄（97% 取購率）」的組合，定價 RM844–918 psf，比直接對照組 Kiaramas Danai（同開發商，鄰接，成交中位 RM865 psf）幾乎持平——即用「等同二手成交 PSF 的價格買入新案期房」。</p>
+
+    <div class="success-box">
+      <strong>🟢 本系列最強核心發現：Kiaramas deDaun 的發售 PSF（RM844–918）與同開發商鄰接已完工建案 Kiaramas Danai 的 brickz 成交中位（RM865）幾乎完全一致——這意味著買家以「二手市場驗證價」買入新建案，在同等品質 Freehold 住宅地契的框架下，幾乎沒有任何定價溢價風險。</strong>加上 Phase 2 定價微漲至 RM918 psf，形成正面錨點。這個定價邏輯在本系列所有建案中是最穩健的。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Kiaramas Danai 直接對照——市場最可靠的定價錨點</h3>
+    <div class="brickz-compare">
+      <div class="bc-card bc-new">
+        <div class="bc-title">🆕 Kiaramas deDaun（本案）</div>
+        <div class="bc-num">RM844–918</div>
+        <div style="font-size:11px;color:#166534;margin-bottom:6px">發售 PSF（Phase 1+2）</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td>地契</td><td><strong>Freehold 住宅</strong></td></tr>
+            <tr><td>竣工</td><td>2028-05（期房）</td></tr>
+            <tr><td>密度</td><td>77戶/英畝（低密度）</td></tr>
+            <tr><td>管理費</td><td><strong>RM0.36 psf（最低）</strong></td></tr>
+            <tr><td>取購率</td><td><strong>97%（Block A）</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="bc-card bc-prev">
+        <div class="bc-title">📊 Kiaramas Danai（同開發商對照）</div>
+        <div class="bc-num">RM865</div>
+        <div style="font-size:11px;color:#1e40af;margin-bottom:6px">成交中位 PSF（brickz 6筆，2024–25）</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td>地契</td><td>Freehold 住宅</td></tr>
+            <tr><td>完工</td><td>2013（成熟 13 年）</td></tr>
+            <tr><td>管理費</td><td>RM0.24 psf</td></tr>
+            <tr><td>月租</td><td>RM5,500–9,500</td></tr>
+            <tr><td>Gross Yield</td><td>4.17%（iRumah）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="bc-card bc-mkt">
+        <div class="bc-title">🏘️ Mont Kiara 地段整體（brickz）</div>
+        <div class="bc-num">RM718</div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:6px">成交中位 PSF（brickz 2024–25 整體）</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td>YoY</td><td><strong>+6.4%（上游 ⭐）</strong></td></tr>
+            <tr><td>月租</td><td>RM3,500–5,000</td></tr>
+            <tr><td>Gross Yield</td><td>5–6%</td></tr>
+            <tr><td>供給壓力</td><td>低（外籍需求強）</td></tr>
+            <tr><td>主要需求</td><td>外籍家庭、MM2H</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="src">關鍵洞察：deDaun（RM844–918 psf 新案）比地段均值（RM718 psf）貴 18–28%，但與同開發商鄰接老案 Danai（RM865 psf）幾乎持平——說明定價有充分的市場錨點支撐，溢價邏輯合理（新建 vs 已用 13 年）</p>
+
+    <hr class="dv">
+    <h3>C｜Munger 逆向推演——核心風險矩陣</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>期房風險（2028-05 竣工）</strong></td><td>仍有約 2 年等待；MRT3 遠在 2032；期間需支付進度款；若 2028 竣工前市場出現重大下行，二手退出困難。但 Asia Quest 前五個全部按時交付，執行風險低</td><td><span class="tag t-b">低（開發商記錄清晰）</span></td><td>進度款壓力；若市場下行，短期難退出</td></tr>
+          <tr><td><strong>無直接軌道交通（MRT3 前）</strong></td><td>Mont Kiara 目前無 LRT/MRT；高度依賴私家車；部分外籍租客因此選擇 KLCC/TRX 廊帶；MRT3 預計 2032 才通車——deDaun 竣工到 MRT3 通車有 4 年空窗</td><td><span class="tag t-y">中（已知結構性弱點）</span></td><td>限制了對「純公交依賴者」的吸引力；租客池略窄於 LRT/MRT 直達建案</td></tr>
+          <tr><td><strong>大坪數流動性</strong></td><td>最小 1,313 sqft（約 RM138萬入場），買家池相對 Studio/1BR 更窄；1,884–4,693 sqft 大坪流動性更受外籍企業租賃需求支撐，但單次交易金額大，買家需篩選</td><td><span class="tag t-y">中（大坪市場特性）</span></td><td>成交週期可能較長；但 Danai 6 筆 brickz 成交顯示有穩定買盤</td></tr>
+          <tr><td><strong>Block C 未來供給</strong></td><td>Block C（Phase 2，~225 戶）2028 年同期竣工，短期加入同地段出租市場競爭；但同開發商同品質，互為錨點而非競爭</td><td><span class="tag t-b">低（同品牌不同樓，互補為主）</span></td><td>影響有限——外籍租客通常預訂整棟建案品牌，非特定樓</td></tr>
+          <tr><td><strong>MRT3 時間表延遲風險</strong></td><td>MRT3 政府 2025-07 核准，但馬來西亞基建工程延期前例多（如 LRT3 一再延期）；若 2032 無法按時通車，MRT3 前置溢價面臨修正</td><td><span class="tag t-y">中（馬來西亞基建慣性）</span></td><td>短期（2028–2032）資本增值預期受壓；但長期（2032+）論點不變</td></tr>
+          <tr><td><strong>管理費 RM0.36 vs Danai RM0.24</strong></td><td>deDaun 管理費（RM0.36 psf）比 Danai（RM0.24 psf）高 50%——因為更多設施（760 呎泳池、REZ、Sky Lounge、EV充電站等）；但 RM0.36 仍是本系列最低之一，不構成嚴重問題</td><td><span class="tag t-b">低（已被接受，取購率 97% 驗證）</span></td><td>略增持有成本，但 Gross Yield 仍可達 4.5–5.5%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場概況——上游報告最強地段定性</div>
+  <div class="section-body">
+    <h3>1.1 上游報告對 Mont Kiara 的完整定性</h3>
+    <table>
+      <thead><tr><th>上游報告維度</th><th>Mont Kiara 數據</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>YoY 均價漲幅</td><td><strong>+6.4%（⭐ 上游報告本系列地段最高）</strong></td><td><span class="tag t-g">本系列最強增速地段</span></td></tr>
+        <tr><td>月租行情</td><td>RM3,500–5,000（2BR–3BR）</td><td><span class="tag t-g">穩健；高於 Bangsar（+2.6%，RM3,500–4,500）</span></td></tr>
+        <tr><td>Gross Yield</td><td>5–6%（上游報告確認）</td><td><span class="tag t-g">本系列地段 Gross Yield 最高（並列 Bangsar South）</span></td></tr>
+        <tr><td>Net Yield（外籍）</td><td>3.5–4.5%（上游報告確認）</td><td><span class="tag t-g">本系列所有地段中最高</span></td></tr>
+        <tr><td>供給壓力</td><td>「低」（Overhang 壓力低；外籍需求強）</td><td><span class="tag t-g">供需最健康的 KL 地段</span></td></tr>
+        <tr><td>主要需求</td><td>外籍家庭、MM2H</td><td><span class="tag t-g">國際學校生態圈支撐租客池深度</span></td></tr>
+        <tr><td>MRT3 催化</td><td>「Mont Kiara、Sentul 等站點周邊需求激增 -500–1,000戶（2027–2030）」</td><td><span class="tag t-g">MRT3 是 MK 最大未來催化劑</span></td></tr>
+        <tr><td>上游框架直接點名</td><td>「精品住宅地契低密度公寓（Mont Kiara 最新建案），供給管道有限」——The MINH 和 Kiaramas deDaun 並列點名</td><td><span class="tag t-g">直接正面框架</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 Mont Kiara 完整 brickz 生態系定價矩陣</h3>
+    <table>
+      <thead><tr><th>建案</th><th>年份</th><th>地契</th><th>成交 PSF（brickz）</th><th>對照 deDaun</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Kiaramas deDaun（本案）</strong></td><td>2028（期）</td><td><span class="tag t-g">Freehold 住宅</span></td><td><strong>RM844–918 psf（發售）</strong></td><td>—</td></tr>
+        <tr><td>Kiaramas Danai（同開發商，鄰接）</td><td>2013</td><td><span class="tag t-g">Freehold 住宅</span></td><td><strong>RM865 psf（brickz 6筆）</strong></td><td><span class="up">deDaun ≈ Danai（絕佳定價錨點）</span></td></tr>
+        <tr><td>Kiaramas Cendana（同開發商）</td><td>2001</td><td><span class="tag t-g">Freehold 住宅</span></td><td>RM578 psf（brickz 6筆）</td><td>更老舊，合理折扣</td></tr>
+        <tr><td>Mont Kiara 整體（brickz 均值）</td><td>—</td><td>混合</td><td>RM718 psf</td><td>deDaun 高 18–28%（新建+精品溢價）</td></tr>
+        <tr><td>R22 Mont Kiara（本系列已分析）</td><td>已完工</td><td><span class="tag t-g">Freehold 住宅</span></td><td>brickz 31 筆，市場驗證</td><td>本系列並列第一（7.7/10）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>🟢 最強定價邏輯驗證：</strong>Kiaramas deDaun 發售 RM844–918 psf，Kiaramas Danai（同開發商、鄰接、Freehold 住宅地契）brickz 成交中位 RM865 psf——兩者幾乎完全一致。這意味著買入 deDaun 期房，按目前市場成交價，幾乎沒有定價溢價。加上 deDaun 是新建案（全新設施、更大泳池、EV 充電站），理論上新建溢價應使 deDaun 竣工後 PSF 高於 Danai 現有成交——這是 B2 估值論點的最強支撐。
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構——MK 最健康供需 + MRT3 長期催化</div>
+  <div class="section-body">
+    <h3>2.1 Mont Kiara 需求面——全 KL 最穩健的外籍居住需求</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>說明</th><th>強度</th></tr></thead>
+      <tbody>
+        <tr><td>外籍家庭（國際學校帶動）</td><td>MKIS、GIS、French International School 均在 MK；外籍員工帶小孩的「家庭套裝」選擇 MK 是文化慣性；3BR+ 大坪是外籍家庭租賃的標準配置</td><td><span class="tag t-g">強——deDaun 坪數（1,313–4,693 sqft）精準命中外籍家庭需求</span></td></tr>
+        <tr><td>MM2H 持有者</td><td>MK 是 MM2H 第一或第二首選地段；Freehold 住宅地契 MM2H 合規最清晰；deDaun 起步 RM138 萬（1,313 sqft × RM1,050 估）超外籍門檻</td><td><span class="tag t-g">強——MM2H 框架最適合</span></td></tr>
+        <tr><td>企業租賃（Corporate Housing）</td><td>跨國企業為外派員工提供住房津貼；MK 是 KL 公認的外派員工居住首選；deDaun 大坪設計符合「家庭尺寸」的企業租賃要求</td><td><span class="tag t-g">中強</span></td></tr>
+        <tr><td>MRT3 前置買盤</td><td>上游報告：「Mont Kiara MRT3 前置，新案 PSF RM778+ 開始定價」；Wing Tai（新加坡）2026-03 以 RM45 萬購入 MK 土地——機構買家的信心驗證</td><td><span class="tag t-g">中——MRT3 前置溢價已開始滲透</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供給壓力評估</h3>
+    <table>
+      <thead><tr><th>供給來源</th><th>說明</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>Kiaramas deDaun 本身供給</td><td>661 戶在 2028 年集中竣工；Phase 1（436戶）和 Phase 2（225戶）幾乎同期——但 95%+ 非土著已售出，買家多為自住或長線投資者</td><td><span class="tag t-g">可控——高取購率顯示投機性空置極少</span></td></tr>
+        <tr><td>MK 地段整體新供給</td><td>上游報告：「精品住宅地契低密度公寓（MK 最新建案），供給管道有限」；SkyWorld 創紀錄 RM833 psf 土地成本迫使後續案走超高端定位；Miranda Hill（BRDB，7.84 英畝）2027 竣工</td><td><span class="tag t-y">中——有新供給，但均為高端精品，非量產SR競爭</span></td></tr>
+        <tr><td>舊 MK 存貨</td><td>KL RM1M+ 報告：MK 中位 RM778 psf（含各年代舊案）；部分 2010–2015 舊案仍在積壓；但 deDaun 定位（新建 Freehold 住宅，大坪低密度）與舊存貨不同市場</td><td><span class="tag t-b">低——deDaun 不與舊 SR 積壓競爭</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率——MK 本系列最高 Net Yield 潛力</div>
+  <div class="section-body">
+    <h3>5.1 Kiaramas deDaun 租金估算（以 Kiaramas Danai 為錨點）</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租估計</th><th>月租 psf</th><th>Gross Yield（@RM880 psf 平均）</th></tr></thead>
+      <tbody>
+        <tr><td>Type A（3BR）</td><td>1,313–1,378 sqft</td><td>RM5,500–7,500/月</td><td>RM4.0–5.4</td><td>~4.5–6.2%（@RM115.5–121.3萬）</td></tr>
+        <tr><td>Type B（3BR 大坪）</td><td>1,884–2,126 sqft</td><td>RM7,500–11,000/月</td><td>RM3.5–5.2</td><td>~4.4–6.5%（@RM165.8–187.1萬）</td></tr>
+        <tr><td>Type E（超大坪）</td><td>~4,693 sqft</td><td>RM15,000–22,000/月</td><td>RM3.2–4.7</td><td>~3.8–5.6%（@RM413萬）</td></tr>
+      </tbody>
+    </table>
+    <p class="src">參照：Kiaramas Danai 月租 RM5,500–9,500（iProperty）；上游報告 MK Gross Yield 5–6%；PropCashflow：「MK 外籍租客 RM4,000–6,000/月，2年+ 穩定」</p>
+
+    <h3>5.2 外國人現金流試算（Type A，1,313 sqft，RM115.5 萬入場 @ RM880 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租（RM6,000 × 12）</td><td>RM 72,000</td><td>Type A 1,313 sqft；外籍企業租賃；Kiaramas 品牌溢價</td></tr>
+        <tr><td>管理費（RM0.36 × 1,313 × 12）</td><td><span class="down">-RM 5,672</span></td><td>本系列最低管理費（RM0.36 psf 含沉沒基金）</td></tr>
+        <tr><td>地稅 + 門牌稅</td><td><span class="down">-RM 2,200</span></td><td></td></tr>
+        <tr><td>空置期（1.5個月，MK 需求穩健）</td><td><span class="down">-RM 9,000</span></td><td>MK 外籍租客忠誠度高；企業合約 2 年+</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 16,538</span></td><td>（72,000–17,128）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 5,760</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 32,830/年</strong></td><td>Net Yield ≈ 2.84%（RM115.5萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 38,590/年</td><td>Net Yield ≈ 3.34%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>外籍 Net Yield 2.8–3.3%——本系列期房（Freehold 住宅地契）中最高。</strong>關鍵驅動因素：①管理費最低（RM0.36 psf）；②住宅地契民用電費（無商業電費折扣）；③MK 外籍租客忠誠度高（企業合約 2 年+，空置期短）；④Freehold 住宅地契使非居民稅基計算正常（無商業地契特殊成本）。若免代管費自行管理，Net Yield 接近 3.4%——是本系列住宅 Freehold 期房中最高水平。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規——Freehold 住宅地契最優框架</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>外籍影響</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td>Freehold 住宅地契（Condominium）——本系列最好地契組合</td><td>✅ 住宅貸款 LTV 80–90%；民用電費；MM2H 合規最清晰；買家池最廣</td></tr>
+        <tr><td>外籍最低門檻</td><td>RM 1,000,000（KL）</td><td>✅ Type A 1,313 sqft × RM880 = RM115.5萬——超外籍門檻</td></tr>
+        <tr><td>印花稅</td><td>4% 統一稅率</td><td>RM115.5萬物業：印花稅 RM46,200</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>10%（外籍永久）</td><td>若 2028 竣工後入場，第6年約 2034；持有至 2034+ 再賣最優</td></tr>
+        <tr><td>MM2H 合規</td><td>Freehold 住宅地契最適合 MM2H；MK 是 MM2H 黃金地段</td><td>✅ 合規性本系列最高；外籍 10 年持有要求與長線投資邏輯完全一致</td></tr>
+        <tr><td>貸款 LTV</td><td>住宅 Condominium：80–90% LTV（標準）</td><td>✅ 外籍現金需求最低（10–20% 首付）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>外籍入場成本試算（Type A 1,313 sqft，RM115.5 萬，80% LTV）</h3>
+    <table>
+      <thead><tr><th>費用</th><th>金額（RM）</th></tr></thead>
+      <tbody>
+        <tr><td>首付（20%，80% LTV 住宅貸款）</td><td>RM 231,000</td></tr>
+        <tr><td>印花稅（4%）</td><td>RM 46,200</td></tr>
+        <tr><td>律師費</td><td>RM 12,000</td></tr>
+        <tr><td>State Consent</td><td>RM 5,000</td></tr>
+        <tr><td><strong>現金總需求</strong></td><td><strong>~RM 294,200（約 25.5%）</strong></td></tr>
+      </tbody>
+    </table>
+    <p class="src">注：Freehold 住宅地契 LTV 通常 80–90%，現金需求比商業地契低 15–25 個百分點。這是本系列外籍進場現金需求最低的建案（相對入場成本）之一。</p>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設——MRT3 前置 + MK 成熟生活圈</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>基建</th><th>狀態</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td><strong>MRT3 Circle Line（Mont Kiara 站）</strong></td><td>2025-07 政府最終核准；土地收購 2026 年底；施工 2027 年；全線 2032 年通車</td><td>✅✅ 最強長期催化劑——deDaun 竣工（2028）後 4 年 MRT3 通車，是「買入催化劑前」的最佳窗口；Wing Tai 2026-03 購地 RM45 萬驗證機構信心</td></tr>
+        <tr><td>Sprint Highway / NKVE</td><td>已連通；Jalan Desa Kiara 直通 Sprint</td><td>✅ 有車族便利；直達 KLCC 15 分鐘、KL Sentral 20 分鐘</td></tr>
+        <tr><td>MKIS / GIS / French School</td><td>車程 5–10 分鐘</td><td>✅✅ 外籍家庭租客核心選擇因素；決定 MK 租客池深度的最關鍵變量</td></tr>
+        <tr><td>Publika / Solaris MK / 1 Mont Kiara</td><td>步行/短車程</td><td>✅ 生活商圈成熟——Jaya Grocer、精品餐廳、診所</td></tr>
+        <tr><td>KLGCC（高爾夫球場）</td><td>Bukit Kiara，鄰近</td><td>✅ 高淨值居民生活配套；蜿蜒球場 + 馬術俱樂部</td></tr>
+        <tr><td>Bukit Kiara 自然保護區</td><td>鄰接（正後方）</td><td>✅ 蜿蜒泳池景觀 + 自然景觀的核心 B5 差異化</td></tr>
+        <tr><td>目前軌道交通缺口</td><td>無 LRT/MRT（MRT3 前）；需開車或轉乘巴士</td><td>❌ 唯一結構性弱點；限制非駕車人口進入；MRT3 後解決</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <strong>MRT3 前置溢價的買入窗口邏輯：</strong>上游報告指出「Mont Kiara MRT3 前置，新案 PSF RM778+ 開始定價」。2025–2026 年是 MRT3 前置買盤的黃金窗口——在 MRT3 確認（2025-07 政府核准）但尚未動工（2027）的期間，前置溢價仍未充分反映。deDaun 竣工（2028）→ MRT3 通車（2032）的 4 年持有期，恰好跨越 MRT3 從「期待」到「現實」的最大溢價釋放階段。
+    </div>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="section">
+  <div class="section-header">§11｜進場時機與情境分析</div>
+  <div class="section-body">
+    <h3>三情境 PSF 預測（deDaun 竣工後，2028–2032）</h3>
+    <table>
+      <thead><tr><th>情境</th><th>概率</th><th>竣工後 PSF（2028）</th><th>MRT3 通車後 PSF（2032）</th><th>投資論點</th></tr></thead>
+      <tbody>
+        <tr><td style="color:#16a34a;font-weight:700">🟢 樂觀</td><td>25%</td><td>RM950–1,050</td><td>RM1,200–1,500</td><td>MRT3 準時通車；MK 成為 KL 首選外籍地段；Type A YoY +10%+</td></tr>
+        <tr><td style="color:#1e40af;font-weight:700">🔵 基本</td><td>55%</td><td>RM880–950</td><td>RM1,000–1,200</td><td>MRT3 基本按計畫；MK 維持 +5–6%/年；deDaun 跑贏 Danai 30%+ 的 10 年回報</td></tr>
+        <tr><td style="color:#dc2626;font-weight:700">🔴 悲觀</td><td>20%</td><td>RM800–880</td><td>RM880–1,000</td><td>MRT3 大幅延期；MK 需求放緩；deDaun 持平或微跌 5–10% vs 發售</td></tr>
+      </tbody>
+    </table>
+
+    <div class="success-box">
+      <strong>安全邊際分析：</strong>即使在悲觀情境（MRT3 延期，MK 需求放緩），deDaun 竣工後 PSF 約 RM800–880，與發售均價 RM880 psf 幾乎持平或略跌。考慮到 Kiaramas Danai（同開發商，13 年老案）當前仍成交 RM865 psf，一個全新的 deDaun 在竣工時 PSF 跌破 Danai 的概率極低——這是本系列期房中「下行保護」最強的建案。
+    </div>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">最適合者</td><td>外籍家庭 MM2H 持有者（MK 最佳自住定位）；長線投資者以「Freehold 住宅 + MRT3 催化 + 3–5 年持有」為框架；高淨值本地家庭升級居住</td></tr>
+            <tr><td>最佳進場單位</td><td>Type A 1,313–1,378 sqft（RM115–121 萬）：外籍門檻以上最小坪；月租 RM5,500–7,500；流動性最強</td></tr>
+            <tr><td>議價策略</td><td>95%+ 已售出，開發商議價空間有限（供不應求）；Block C Phase 2 早鳥可爭取樓層選擇和家裝升級，而非 PSF 折讓</td></tr>
+            <tr><td>持有框架</td><td>2028 竣工→租給外籍家庭→2032 MRT3 通車後 12–18 個月賣出（最優資本增值窗口）</td></tr>
+            <tr><td>進場前確認</td><td>① Block C（Phase 2）是否仍有單位；② 施工進度公開報告；③ MRT3 選址更精確位置（影響步行距離）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟢 最健康——97% 取購率；MK Overhang 壓力低；外籍需求結構性強</td></tr>
+            <tr><td>價格趨勢</td><td>🟢 定價與 Danai 對照 RM865 psf 幾乎持平；Phase 2 微漲；MRT3 前置溢價已開始滲透</td></tr>
+            <tr><td>租金市場</td><td>🟢 外籍 Net Yield 2.8–3.3%；MK Gross Yield 5–6%（上游最高）；企業租賃穩定</td></tr>
+            <tr><td>資本增值</td><td>🟢 MK YoY +6.4%（最高）+ MRT3 催化（2032）= 本系列資本增值論點最清晰</td></tr>
+            <tr><td>法規友好度</td><td>🟢 Freehold 住宅地契：最優 LTV、民用電費、MM2H 合規最強</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-g" style="margin-top:16px">
+      <strong>🟢 積極進場——本系列期房建案中最強；Freehold 住宅地契 + MRT3 催化 + 97% 取購率驗證</strong><br><br>
+      Kiaramas deDaun 是本系列 14 個分析建案中，在「期房」框架下各維度最均衡的一個：Freehold 住宅地契（最佳地契）+ MK YoY +6.4%（最高增速地段）+ 97% 取購率（最強市場認可）+ 管理費 RM0.36 psf（最低）+ 定價等同 Danai 對照（最強安全邊際）+ MRT3 2032 催化（最清晰資本增值時間表）+ Asia Quest 前五個 Kiaramas Collection 全部成功交付（最佳開發商執行信用記錄）。<br><br>
+      <strong>核心投資決策邏輯：</strong>以 RM844–918 psf 的「等同 13 年舊案二手成交價」買入全新 Freehold 住宅地契期房，在 MRT3 確認但尚未動工的前置窗口期進場，持有至 2032 MRT3 通車後 12–18 個月賣出，是本系列分析所有建案中最清晰的「資本增值 + 租金收益」複合框架。<br><br>
+      <strong>主要保留：</strong>① 期房 2 年等待期（2028-05 竣工）；② 無直接軌道交通（MRT3 前）；③ 大坪（1,313 sqft 起）流動性比 Studio/1BR 略低；④ MRT3 時間表延期風險（馬來西亞基建慣性）；⑤ 管理費 RM0.36 psf 比 Danai（RM0.24）高 50%（但仍是本系列最低之一）。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Kiaramas deDaun @ Mont Kiara ｜ 建案綜合評分卡 ｜ Freehold 住宅地契 + MRT3 + 97% 取購率</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%；MK YoY +6.4%（本系列最高）；MM2H 2,637 待購；上游「精品住宅地契，供給有限」正面框架直接點名；Wing Tai 機構買入 MK 土地驗證信心</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">上游報告：MK Overhang 壓力「低」；97% 取購率自身供給全被吸收；外籍家庭國際學校帶動租賃需求持久；MK 新供給均走高端精品定位，非量產 SR 競爭——本系列 A2 最高分</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">MRT3 確認（2025-07）但施工在 2027 後——正處於「前置期最優窗口」；deDaun 竣工（2028）正好在 MRT3 施工高峰，市場關注度最高；Phase 2 61% 預訂顯示需求持續</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">MRT3 Mont Kiara 站（2032）是最強長期催化劑；Sprint/NKVE 直達；MKIS/GIS 國際學校；Publika/Solaris 生活圈；Bukit Kiara 自然保護區；KLGCC；扣分：目前無直接軌道交通</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契：LTV 80–90%；民用電費；MM2H 合規最清晰；4% 印花稅；外籍門檻 RM100萬（1,313 sqft 超越）；本系列 A5 最高分</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">8.1/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">8.0×.2 + 8.5×.25 + 7.5×.2 + 8.0×.2 + 8.5×.15 = 8.1</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Asia Quest Group（1991年）；前五個 Kiaramas Collection（Sutera、Cendana、Ayuria、Gateway、Danai）全部按時交付；10 年來首個新案顯示謹慎而非過度擴張；同地塊延伸，土地熟悉；B1 本系列最高（並列 R22 的 UEM Sunrise）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">發售 RM844–918 psf ≈ Kiaramas Danai brickz 成交中位 RM865 psf（最直接對照組）；以「已竣工 13 年老案二手成交價」買入全新期房；安全邊際最強；Phase 2 微漲是正面錨點——B2 本系列最高</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">外籍 Net Yield 2.8–3.3%（Freehold 住宅期房最高）；上游報告 MK Gross Yield 5–6%（最高）；管理費 RM0.36 psf（最低）大幅降低淨收益侵蝕；外籍企業租賃 2 年+ 合約，空置率低</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Sprint/NKVE 直達（有車族便利）；MKIS/GIS 外籍學校帶動租客池；MRT3 2032 大幅提升連通性；扣分：目前無 MRT/LRT（唯一明確弱點）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">760 呎蜿蜒泳池（MK 最長，跨三棟）；各棟屋頂 Sky Lounge + Sky Private Dining；REZ 浮橋通道；全大坪設計（1,313 sqft 起）；石材廚房島台；EV 充電；氣力廢物收集；私人電梯大堂——差異化清晰且非行銷噱頭</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契（Condominium）——本系列最佳地契；永久業權；民用電費；HDA 完整保護（SPA、仲裁庭）；MM2H 最適合；買家池最廣；B6 本系列並列最高（R22、Park Place）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Kiaramas Danai（直接對照）brickz 6 筆——小樣本但有穩定買盤；97% 取購率顯示市場認可度極高；Freehold 住宅地契買家池最廣；扣分：大坪（1,313 sqft 起）單次交易金額大，成交週期可能較長</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">8.5/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">9.0×.2+9.0×.2+8.0×.15+7.0×.15+8.5×.1+9.5×.1+7.5×.1 = 8.475 ≈ 8.5</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 8.1 × 40% + B 類 8.5 × 60%</div>
+        <div class="score-big">8.34<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#DCFCE7;color:#166534">⭐⭐⭐⭐⭐ 卓越——本系列期房最高分；MRT3 + Freehold 住宅 + 97% 取購率三重加持</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">3.24 + 5.10 = 8.34 → 展示原始計算值（FIX-03：期房，brickz 成交為 Danai 對照而非本案，整體置信度高）</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>發售 PSF（RM844–918）≈ 同開發商鄰接老案 Kiaramas Danai brickz 成交中位（RM865），安全邊際最強（B2 9.0）；MK YoY +6.4% 本系列最高增速 + MRT3 2032 最強長期催化劑（A2 8.5）；97% 取購率最強市場認可信號；管理費 RM0.36 psf 最低；Freehold 住宅地契最佳結構（B6 9.5）；Asia Quest 前五個 Kiaramas 全交付執行信用最強（B1 9.0）。<br>
+          <strong style="color:#fca5a5">主要保留：</strong>期房 2 年等待（2028 竣工）；目前無 MRT/LRT（B4 7.0，本系列最大扣分點）；大坪（1,313 sqft 起）流動性比小坪略低；MRT3 延期風險；管理費比 Danai 高 50%（但絕對值仍低）。
+        </div>
+      </div>
+    </div>
+
+    <h3>十四個建案完整最終排序</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>外籍 Net Yield</th>
+          <th>A2 供需</th>
+          <th>B2 估值</th>
+          <th>B6 產權</th>
+          <th>建議</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#F0FDF4"><td style="font-weight:700;color:#d97706">1</td><td><strong>Kiaramas deDaun 🆕</strong></td><td style="font-weight:700;color:#16a34a;font-size:16px">8.34</td><td><span class="tag t-g">Freehold 住宅</span></td><td style="color:#16a34a">~2.8–3.3%（期房）</td><td style="font-weight:700;color:#16a34a">8.5</td><td style="font-weight:700;color:#16a34a">9.0</td><td style="font-weight:700;color:#16a34a">9.5</td><td>🟢 積極進場</td></tr>
+        <tr><td>2</td><td><strong>R22 Mont Kiara</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.2%</td><td>8.5</td><td>8.0</td><td>9.5</td><td>🟢 進場</td></tr>
+        <tr><td>3</td><td><strong>Park Place DPC</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.4%</td><td>8.0</td><td>7.5</td><td>9.5</td><td>🟢 進場</td></tr>
+        <tr><td>4</td><td><strong>TRX Residences</strong></td><td style="font-weight:700;color:#16a34a">7.6</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>~1.9–2.3%</td><td>7.0</td><td>6.5</td><td>7.0</td><td>🟢 增值框架積極考慮</td></tr>
+        <tr><td>5</td><td><strong>The Conlay by E&O</strong></td><td style="font-weight:700;color:#16a34a">7.4</td><td><span class="tag t-y">Freehold 商業</span></td><td>~2.5–3.0%</td><td>6.5</td><td>6.5</td><td>5.5</td><td>🟢 審慎積極考慮</td></tr>
+        <tr><td>6</td><td><strong>Bangsar Hill Park</strong></td><td style="font-weight:700;color:#16a34a">6.96</td><td><span class="tag t-y">Leasehold 住宅</span></td><td>~2.5–2.9%</td><td>6.5</td><td>6.5</td><td>7.0</td><td>🟡 審慎考慮（brickz 待確認）</td></tr>
+        <tr><td>7</td><td><strong>CloutHaus KLCC</strong></td><td style="font-weight:700;color:#d97706">6.7</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.9–2.2%</td><td>6.5</td><td>6.0</td><td>5.0</td><td>🟡 觀望</td></tr>
+        <tr><td>8</td><td><strong>SWNK Houze BBCC</strong></td><td style="font-weight:700;color:#d97706">6.2</td><td><span class="tag t-r">Leasehold 商業</span></td><td>~1.9–2.3%</td><td>5.5</td><td>6.0</td><td>2.5</td><td>🟡 本地可；🔴 外籍不推</td></tr>
+        <tr><td>9</td><td><strong>TS2 武吉免登 🔵</strong></td><td style="font-weight:700;color:#3b82f6">6.0</td><td><span class="tag t-y">Freehold 商業</span></td><td>功能性定位</td><td>3.5</td><td>5.5</td><td>6.5</td><td>🔵 功能性持有</td></tr>
+        <tr><td>10</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="font-weight:700;color:#f97316">5.7</td><td><span class="tag t-g">SOHO HDA 商業</span></td><td>SOHO 2.8–3.4%</td><td>3.5</td><td>5.5</td><td>5.0</td><td>🟡 SOHO條件性；🔴 SOVO迴避</td></tr>
+        <tr><td>11</td><td><strong>Stonor 3 KLCC</strong></td><td style="font-weight:700;color:#dc2626">5.7</td><td><span class="tag t-y">商業地契 HDA</span></td><td>~1.9–2.3%</td><td>4.0</td><td>4.5</td><td>4.5</td><td>🔴 暫緩</td></tr>
+        <tr><td>12</td><td><strong>Pavilion DH</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.7–2.1%</td><td>4.0</td><td>4.5</td><td>5.5</td><td>🟡 觀望</td></tr>
+        <tr><td>13</td><td><strong>Pavilion Square</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-r">Leasehold 商業</span></td><td>~1.5–1.9%</td><td>4.0</td><td>3.5</td><td>2.0</td><td>🔴 投資暫緩；🟡 純自住可</td></tr>
+        <tr><td>14</td><td><strong>Orion Residence BB</strong></td><td style="font-weight:700;color:#dc2626">5.2</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.2–1.5%</td><td>3.5</td><td>4.0</td><td>4.0</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">🔑 Kiaramas deDaun（8.34）超越 R22（7.7）和 Park Place（7.7）成為本系列新第一。核心優勢：①A2 供需 8.5（並列本系列最高）②B2 估值 9.0（本系列最高，等同 Danai 二手成交）③B6 產權 9.5（並列最高）。唯一低於 R22/Park Place 的維度是 B4 地段交通（7.0 vs 8.5/6.5），因 MRT3 2028 前不通車。若 MRT3 通車，B4 可升至 9.0+，總評分理論上可達 8.7+。⚠️ 因是期房，brickz 本案住宅成交為零；評分依據 Kiaramas Danai（對照組）brickz 6 筆數據，整體置信度中高（非中低）。2028 竣工後建議以實際 brickz 成交更新評分。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL RM1M+ 高端住宅市場深度研究（2026-03）｜KL 供需 Overhang 深度分析（2026-04-01）｜kiaramasdedaun.com.my 官方 HDA（Freehold；竣工 2028-05；Block A 223戶 + Block B 213戶）｜The Edge Malaysia（Block A 97% 取購率；2024-06-20；Phase 2 發布 2025-05-22；管理費 RM0.36 psf 含沉沒基金；GDV RM9.8億）｜brickz.my（Kiaramas Danai：6 筆，2024-05至2025-04，成交中位 RM865 psf；Kiaramas Cendana：6 筆，RM578 psf；Mont Kiara 整體：RM718 psf）｜iRumah（Kiaramas Danai：Gross Yield 4.17%，月租 RM5,500–9,500）｜EdgeProp（Wing Tai RM45 萬購入 MK 土地 2026-03-24）｜BambooRoutes（MRT3 最新狀態 2026-01）<br>
+  期房分析注意事項：本案尚無 brickz 政府登記住宅成交（期房），所有定價估算基於 Kiaramas Danai 對照組和上游報告數據。2028 竣工後建議以實際 brickz 成交數據更新評分。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

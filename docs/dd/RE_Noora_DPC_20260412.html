@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noöra @ Desa ParkCity｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#166534;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:linear-gradient(135deg,#166534 0%,#15803d 50%,#0d5f28 100%);color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+/* Critical land title warning */
+.title-warn{background:#FEF9C3;border:2px solid #d97706;border-radius:8px;padding:18px 22px;margin-bottom:20px}
+.title-warn-head{font-size:15px;font-weight:700;color:#92400E;margin-bottom:8px}
+.title-warn-body{font-size:13px;color:#78350F;line-height:1.7}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#166534;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #22c55e}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #166534}
+.kpi-card.top{border-top:3px solid #16a34a;background:#F0FDF4}
+.kpi-card.warn{border-top:3px solid #d97706;background:#FEF9C3}
+.kpi-card.bad{border-top:3px solid #dc2626;background:#FEF2F2}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#166534;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#166534;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#166534;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#166534;line-height:1.4}
+/* Noora vs OCP */
+.compare-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+.cn-noora{background:#FEF9C3;border:2px solid #d97706;border-radius:8px;padding:16px}
+.cn-ocp{background:#F0FDF4;border:2px solid #16a34a;border-radius:8px;padding:16px}
+.cn-t{font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
+.cn-noora .cn-t{color:#92400E}.cn-ocp .cn-t{color:#166534}
+.cn-n{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;margin-bottom:6px}
+.cn-noora .cn-n{color:#92400E}.cn-ocp .cn-n{color:#166534}
+/* score */
+.score-wrap{background:#166534;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:680px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#166534;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+@media(max-width:680px){.score-cols,.dual-col,.compare-2{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：Noöra @ Desa ParkCity｜框架 v1.3</span>
+  <span>2026-04-12 ｜ ⚠️ Serviced Residence（非住宅地契）｜ 期房 2026 竣工 ｜ 1,156 戶 ｜ RM900 psf 發售 ｜ 管理費 RM0.50 psf（已確認）</span>
+</div>
+
+<div class="container">
+
+<!-- 地契警告框 -->
+<div class="title-warn">
+  <div class="title-warn-head">⚠️ 重要地契聲明：Noöra 是 Serviced Residence（服務式住宅），非 Residential Condominium</div>
+  <div class="title-warn-body">
+    iProperty、PropertyGuru 均將 Noöra 分類為「<strong>Freehold Serviced Residence</strong>」，而非 Residential Strata Condominium。這個地契分類帶來三個關鍵差異：<br><br>
+    ①<strong>電費（商業電費率）</strong>：Serviced Residence 通常被評定為商業用途，電費比住宅電費高 30–50%，直接侵蝕租金收益。<br>
+    ②<strong>貸款 LTV 較低</strong>：Serviced Residence 通常 LTV 70%（vs 住宅地契 80–90%），首付現金需求更高。<br>
+    ③<strong>外籍購買框架不同</strong>：Serviced Residence 在外籍購房中屬於商業地契類別——雖然 KL 的外籍門檻同樣是 RM100 萬，但在 MM2H 合規性和貸款結構上比住宅地契複雜。<br><br>
+    <strong>注意：本系列框架對「商業地契建案」的評估標準比住宅地契建案更嚴格（參見 B6 評分差異）。</strong>Noöra 的所有現金流分析均以商業電費率計算。
+  </div>
+</div>
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出 ｜ 期房（2026 竣工）</div>
+  <h1>Noöra @ Desa ParkCity</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&from=Noora_DPC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=Noora_DPC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Residen Utama，Desa ParkCity 南端，Kepong，KL ｜ 開發商：Perdana ParkCity Sdn Bhd（DPC Master Developer，同 One Central Park 開發商）｜ <strong>⚠️ Freehold Serviced Residence（商業地契框架）</strong>｜ 2 棟 52 層，1,156 戶 ｜ 6.63 英畝 ｜ 發售：2022-11 ｜ 竣工：2026｜ 坪數：520–1,282 sqft（1BR–3+1BR）｜ DPC 首個整合發展（含 Noöra Walk 5 萬 sqft 零售商廊）</div>
+  <div class="badge-row">
+    <span class="badge">✅ Freehold 地契（但 Serviced Residence，非住宅地契）</span>
+    <span class="badge">✅ Perdana ParkCity 開發商（DPC Master Developer，保值策略）</span>
+    <span class="badge">✅ 發售前 4,500+ 登記人數（2022年市場高需求信號）</span>
+    <span class="badge">✅ Noöra Walk——50,000 sqft 零售商廊（DPC 首個 Live-Work-Play 整合）</span>
+    <span class="badge">✅ DPC 生態系（ISP + ParkCity Medical + Plaza Arkadia，開車或步行可達）</span>
+    <span class="badge">✅ GDV RM10億（DPC 最大規模單次建案）</span>
+    <span class="badge">⚠️ Serviced Residence——商業電費；LTV 70%；外籍框架更複雜</span>
+    <span class="badge">⚠️ 管理費 RM0.50 psf（官方確認，本系列最高）</span>
+    <span class="badge">⚠️ 1,156 戶——本系列最大規模，竣工後供給最重</span>
+    <span class="badge">⚠️ brickz 零成交（期房），FIX-03 完全不通過</span>
+    <span class="badge">⚠️ 最小坪 520 sqft 遠低於外籍門檻 RM100 萬</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-v">RM850–900</div>
+        <div class="kpi-l">發售 PSF（2022 發售）</div>
+        <div class="kpi-s up">iRumah：RM900 psf；EdgeProp：「發售 RM850 psf，預期竣工後升至 RM1,000 psf」</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM700–1,488</div>
+        <div class="kpi-l">二手掛牌 PSF 範圍（PropertyGuru）</div>
+        <div class="kpi-s neu">掛牌 63 筆（iProperty）；實際成交無 brickz 驗證；範圍極大</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v">RM0.50</div>
+        <div class="kpi-l">管理費 psf（官方確認，本系列最高）</div>
+        <div class="kpi-s down">520 sqft = 月 RM260；1,282 sqft = 月 RM641；正式確認，無估算不確定性</div>
+      </div>
+      <div class="kpi-card bad">
+        <div class="kpi-v down">0筆</div>
+        <div class="kpi-l">brickz 政府登記成交</div>
+        <div class="kpi-s down">期房，FIX-03 完全不通過；無任何市場定價驗證</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">1,156</div>
+        <div class="kpi-l">總戶數（本系列最大）</div>
+        <div class="kpi-s down">2 棟 52 層；174 戶/英畝（本系列最高密度之一）；竣工後供給壓力最大</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">2026</div>
+        <div class="kpi-l">預計竣工年份</div>
+        <div class="kpi-s neu">2022-11 發售；預計 2026 竣工（未確認具體月份）；仍屬期房</div>
+      </div>
+    </div>
+
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">地契類型（關鍵）</div><div class="spec-v">Freehold <strong>Serviced Residence</strong>（服務式住宅）——非住宅地契 Condominium。後果：商業電費率（高 30–50%）；LTV 通常 70%（非 80–90%）；外籍貸款框架更複雜</div></div>
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">Perdana ParkCity Sdn Bhd（DPC Master Developer，ParkCity Group 子公司）；同 One Central Park 開發商；「不折扣清貨」保值策略；GDV RM10億（最大）</div></div>
+      <div class="spec-item"><div class="spec-l">規模</div><div class="spec-v">2 棟 52 層；1,156 住宅單位 + Noöra Walk 50,000 sqft 零售商廊（3 層，開發商管理租客）；6.63 英畝；DPC 單次建案最大規模</div></div>
+      <div class="spec-item"><div class="spec-l">坪數結構</div><div class="spec-v">Type A：520 sqft（1BR，最小）｜ Type B：604–651 sqft（1+1BR）｜ Type C：1,010–1,084 sqft（2+1BR）｜ Type D：1,282 sqft（3+1BR，最大）</div></div>
+      <div class="spec-item"><div class="spec-l">外籍門檻分析</div><div class="spec-v">KL 外籍最低 RM100 萬；520 sqft × RM1,923 psf = RM100 萬（不可能，發售僅 RM900 psf）；1,282 sqft × RM780 psf = RM100 萬（臨界）；<strong>外籍最低需買 1,282 sqft（最大坪，且議價至 RM780 psf 以下）</strong></div></div>
+      <div class="spec-item"><div class="spec-l">DPC 位置</div><div class="spec-v">DPC 南端邊緣（south fringes）；Central Park 步行約 800m（vs OCP 緊鄰）；ISP + ParkCity Medical 約 1km；Plaza Arkadia 步行可達；NKVE 旁——較 OCP 位置遜色</div></div>
+      <div class="spec-item"><div class="spec-l">設施亮點</div><div class="spec-v">Level 8：無邊際泳池 + 兒童泳池 + BBQ + Forest Trail｜ Level 9：Work Loft + Makers' Studio｜ Level 37：Sky Lounge｜ Level 48：Sky Garden（露營 + 星空觀測）｜ 浮動瑜珈甲板；「Fourth Place」共創空間</div></div>
+      <div class="spec-item"><div class="spec-l">Noöra Walk 零售</div><div class="spec-v">50,000 sqft（3 層）；開發商管理並策展租客（類似 DPC 的 Village Grocer 模式）；設計容納雜貨店、餐廳等日常需求；DPC 首個在住宅塔樓下設有大型零售的整合建案</div></div>
+      <div class="spec-item"><div class="spec-l">市場反應</div><div class="spec-v">發售前 4,500+ 登記人數（隔夜排隊）；2022 年發售反應極熱烈；但 2022 年是 COVID 後需求爆發期，不完全代表今天市場深度</div></div>
+      <div class="spec-item"><div class="spec-l">SuperHomes 定性</div><div class="spec-v">SuperHomes 2026-02：「Noöra 是 2026 投資者焦點，適合追求租金收益和年輕租客的建案；Westside / Northshore 適合家庭自住」；明確區分 Noöra（Yield 型）vs 老牌 DPC（自住型）</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜Noöra 的核心投資論點</h3>
+    <p>Noöra 的論點建立在一個有趣的混合定位：以 DPC Master Developer 的品牌和 DPC 生態系（ISP、ParkCity Medical、Plaza Arkadia、Central Park 800m 步行）為背書，在更小的坪數（520–1,282 sqft）和更低的入場金額（RM520K–RM182 萬）上，提供比 OCP（RM160 萬起）更易進場的 DPC 選擇，同時搭載 Noöra Walk 零售商廊的「一棟解決所有需求」定位。</p>
+
+    <p>然而，相比 OCP，Noöra 面臨四個系統性劣勢：①Serviced Residence 地契（商業電費 + 低 LTV）；②管理費 RM0.50 psf（本系列最高，且 1,156 戶攤分基數大但設施更多）；③1,156 戶的超大規模在竣工後帶來最重的出租競爭；④DPC 南端邊緣位置（vs OCP 緊鄰 Central Park）。</p>
+
+    <div class="callout">
+      <strong>核心定位判斷：Noöra 是「DPC 版的 Serviced Residence 入場票」，而不是「DPC 旗艦投資標的」。</strong>它讓預算有限的買家以 RM520K 起進入 DPC 生態，獲得 DPC 品牌光環和完整生活圈。但 Serviced Residence 地契、最高管理費、最大規模、最弱的 DPC 內部位置，使它在外籍投資框架下的吸引力顯著低於 OCP（8.10/10）。對比本系列其他 Serviced Residence 建案（如 Armani Hallson），Noöra 的 DPC 品牌和完整生態是真實差異化。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Noöra vs One Central Park——同開發商、同地段、完全不同的定位</h3>
+    <div class="compare-2">
+      <div class="cn-noora">
+        <div class="cn-t">⚠️ Noöra（本案，期房）</div>
+        <div class="cn-n">RM850–900 psf</div>
+        <div style="font-size:11px;color:#78350F;margin-bottom:8px">發售 PSF（2022年）｜brickz 0筆</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td>地契</td><td><strong class="down">Serviced Residence（商業）</strong></td></tr>
+            <tr><td>坪數</td><td>520–1,282 sqft（極小坪）</td></tr>
+            <tr><td>管理費</td><td class="down"><strong>RM0.50 psf（最高）</strong></td></tr>
+            <tr><td>戶數</td><td class="down"><strong>1,156 戶（本系列最多）</strong></td></tr>
+            <tr><td>位置</td><td>DPC 南端邊緣（Central Park 800m）</td></tr>
+            <tr><td>電費</td><td class="down">商業電費率</td></tr>
+            <tr><td>LTV</td><td class="down">通常 70%</td></tr>
+            <tr><td>竣工</td><td>2026（期房）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cn-ocp">
+        <div class="cn-t">🟢 One Central Park（已完工，8.10/10）</div>
+        <div class="cn-n">RM1,180 psf</div>
+        <div style="font-size:11px;color:#166534;margin-bottom:8px">brickz 成交中位｜19筆（2024–25）</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td>地契</td><td><strong class="up">住宅地契 Condominium</strong></td></tr>
+            <tr><td>坪數</td><td>1,034–3,153 sqft（中至大坪）</td></tr>
+            <tr><td>管理費</td><td class="up">估 RM0.35–0.45 psf（未確認）</td></tr>
+            <tr><td>戶數</td><td class="up">359 戶（低密度）</td></tr>
+            <tr><td>位置</td><td class="up">Central Park 旁（唯一 Parkfront）</td></tr>
+            <tr><td>電費</td><td class="up">民用電費率</td></tr>
+            <tr><td>LTV</td><td class="up">80–90%</td></tr>
+            <tr><td>竣工</td><td class="up">2017（成熟社區）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="src">洞察：OCP（RM1,180 psf）比 Noöra（RM850–900 psf）貴 31–39%，但地契更佳（住宅 vs 商業）、管理費更低（估 RM0.40 vs 確認 RM0.50）、戶數更少（359 vs 1,156）、位置更好（Parkfront vs 南端邊緣）、已完工有 brickz 驗證（19 筆 vs 0 筆）、LTV 更高（80–90% vs 70%）。若 RM1,180 是 OCP 的「正確定價」，則 Noöra 的 RM850–900 的折扣已在地契、規模和位置劣勢中被消耗。</p>
+
+    <hr class="dv">
+    <h3>C｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Serviced Residence 商業電費</strong></td><td>商業電費比住宅高 30–50%；對小坪（520 sqft）租客的持有成本影響最大；例如月電費從 RM150 升至 RM200–225——年額外成本 RM600–900；對投資者的 Net Yield 也有侵蝕</td><td><span class="tag t-r">確定（已知）</span></td><td>外籍租客偏好住宅地契（民用電費）；商業電費降低競爭力</td></tr>
+          <tr><td><strong>1,156 戶竣工後出租競爭</strong></td><td>1,156 戶在 2026 年集中竣工，是 OCP（359 戶）的 3.2 倍；若 30–40% 業主同時出租（346–462 戶同時掛牌），DPC 南端出租市場在竣工後 1–2 年將面臨嚴重供給衝擊；Noöra 周邊（SouthLake、The Breezeway）本身需求較弱</td><td><span class="tag t-r">高（幾乎確定）</span></td><td>竣工後 1–2 年填租困難；空置率偏高；月租下行壓力</td></tr>
+          <tr><td><strong>外籍最低門檻限制（事實上）</strong></td><td>KL 外籍門檻 RM100 萬；520 sqft × 發售 RM900 = RM46.8 萬（遠低於門檻）；1,282 sqft × RM780 psf = RM100 萬（勉強）；1,282 sqft 是唯一外籍可進場坪數，但需議價至 RM780 psf 以下——而發售已是 RM900 psf，二手掛牌 RM1,000–1,326 psf。<strong>外籍實際上幾乎無法進場</strong></td><td><span class="tag t-r">高</span></td><td>外籍買家池幾乎消失；買家僅限本地；MM2H 框架無法適用</td></tr>
+          <tr><td><strong>管理費 RM0.50 psf 最高</strong></td><td>官方確認 RM0.50 psf；1,282 sqft（最大坪）月管理費 RM641；1,084 sqft（2+1BR）月管理費 RM542——比 Pentamont（RM0.41，2,057 sqft = RM844）更高（但 Pentamont 坪數更大，所以月管理費更高。真正的問題是：RM0.50 × 1,084 sqft 月費 RM542，比同類建案高）</td><td><span class="tag t-y">中（已知）</span></td><td>持有成本上升；壓縮 Net Yield；對小坪出租影響最大</td></tr>
+          <tr><td><strong>期房風險（2026 竣工）</strong></td><td>2022 年發售，預計 2026 年竣工（3–4 年等待）；Perdana ParkCity 前 27 個建案全部準時交付（正面）；但市場環境 2022 vs 2026 有變（利率環境、外籍需求）</td><td><span class="tag t-b">低（開發商記錄清晰）</span></td><td>交付風險低；但竣工時機若遇市場下行，二手退出困難</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率——商業電費框架</div>
+  <div class="section-body">
+    <h3>5.1 Noöra 租金估算（基於 DPC 地段和 OCP 參照，竣工後）</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租估算（竣工後）</th><th>月租 psf</th><th>Gross Yield（@RM900 psf）</th></tr></thead>
+      <tbody>
+        <tr><td>Type A（1BR，本地可；外籍不達門檻）</td><td>520 sqft</td><td>RM2,100–2,800/月</td><td>RM4.0–5.4</td><td>~5.4–7.2%（@RM46.8 萬）</td></tr>
+        <tr><td>Type B（1+1BR）</td><td>604–651 sqft</td><td>RM2,500–3,500/月</td><td>RM3.8–5.4</td><td>~4.9–6.8%（@RM54.4–58.6 萬）</td></tr>
+        <tr><td>Type C（2+1BR）</td><td>1,010–1,084 sqft</td><td>RM4,000–5,800/月</td><td>RM3.7–5.7</td><td>~4.9–7.1%（@RM90.9–97.6 萬）</td></tr>
+        <tr><td>Type D（3+1BR，外籍最低可達）</td><td>1,282 sqft</td><td>RM5,000–7,000/月</td><td>RM3.9–5.5</td><td>~4.6–6.5%（@RM115.4 萬）</td></tr>
+      </tbody>
+    </table>
+    <p class="src">注：竣工後第一年出租競爭可能導致月租比估算低 15–20%；DPC 南端邊緣位置租金比 OCP（Parkfront）低 20–30%；所有估算基於 DPC 地段整體水平調整</p>
+
+    <h3>5.2 外國人現金流試算——Type D 1,282 sqft（外籍唯一可進場坪，@議價後 RM750 psf = RM96.2 萬）</h3>
+    <div class="alert a-yellow">
+      <strong>⚠️ 前提說明：</strong>外籍進場 Type D 1,282 sqft 需要 PSF 低於 RM780（RM100 萬門檻）。當前二手掛牌 RM1,014–1,326 psf，遠超外籍門檻。以下試算假設議價至 RM750 psf（RM96.2 萬）——這在目前掛牌市場幾乎不可能實現。這個計算主要用於理論框架說明，實際外籍進場可行性極低。
+    </div>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租（RM5,500 × 12）</td><td>RM 66,000</td><td>Type D 1,282 sqft；DPC 生態吸引力；但位置非 Parkfront</td></tr>
+        <tr><td>管理費（RM0.50 × 1,282 × 12）</td><td><span class="down">-RM 7,692</span></td><td>官方確認最高管理費；無估算不確定性</td></tr>
+        <tr><td>商業電費估算（+40% vs 住宅）</td><td><span class="down">-RM 2,400</span></td><td>Serviced Residence 商業電費率，比住宅高約 RM200/月</td></tr>
+        <tr><td>地稅 + 門牌稅（商業較高）</td><td><span class="down">-RM 3,500</span></td><td>商業地契評估較高</td></tr>
+        <tr><td>空置期（2.5 個月，竣工後競爭激烈）</td><td><span class="down">-RM 13,750</span></td><td>1,156 戶竣工後第一年，出租市場競爭最嚴峻</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 11,624</span></td><td>（66,000–27,342）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 5,280</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 21,754/年</strong></td><td>Net Yield ≈ 2.26%（假設 RM96.2 萬入場）</td></tr>
+        <tr><td>若以 RM1,153 psf 市場價入場（RM147.8 萬）</td><td>Net Yield ≈ 1.47%</td><td>外籍完全無法以市場價入場（不達 RM100 萬門檻）；此為本地買家的 Net Yield</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-red">
+      <strong>外籍 Net Yield 分析：Noöra 對外籍買家幾乎不可行。</strong>①外籍門檻 RM100 萬在當前掛牌（RM1,014–1,326 psf）下，1,282 sqft 的 Type D 市值約 RM130–170 萬，已大幅超過 RM100 萬門檻——但門檻要求<em>最低</em> RM100 萬，意思是外籍可以買更貴的，只是不能買低於 RM100 萬的。所以外籍實際上可以以市場價（RM130–170 萬）買 Type D，但選擇 Serviced Residence 而非住宅地契，意味著商業電費 + LTV 70%（首付更高）。②綜合所有成本，外籍 Net Yield 約 1.5–2.0%——是本系列最低之一（僅優於 Orion Residence BB 的估算）。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規——Serviced Residence 框架的限制</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>vs 住宅地契（OCP）</th></tr></thead>
+      <tbody>
+        <tr><td>地契類型</td><td>Freehold Serviced Residence（商業地契框架）</td><td>❌ OCP 是 Freehold 住宅地契——更優</td></tr>
+        <tr><td>電費</td><td>商業電費率（高 30–50% vs 住宅）</td><td>❌ OCP 民用電費</td></tr>
+        <tr><td>LTV</td><td>通常 70%（Serviced Residence）</td><td>❌ OCP LTV 80–90%</td></tr>
+        <tr><td>外籍最低門檻</td><td>RM 1,000,000（KL）</td><td>⚠️ Type D 1,282 sqft @ 市場 RM1,100 psf = RM141 萬（超門檻）；但 Serviced Residence 框架使外籍需求較低</td></tr>
+        <tr><td>MM2H 合規性</td><td>Serviced Residence 在 MM2H 框架下屬於商業地契類別，合規性比住宅地契複雜</td><td>❌ OCP 住宅地契 MM2H 最清晰</td></tr>
+        <tr><td>首付現金需求（Type D 1,282 sqft @ RM141 萬，70% LTV）</td><td>30% 首付 = RM423,000；印花稅 4% = RM56,400；律師費 RM14,000；合計 RM493,400</td><td>❌ OCP 80% LTV：同等物業現金需求低約 RM100K</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <strong>Serviced Residence 對外籍投資者的實際障礙：</strong>除了商業電費和低 LTV，最重要的是：Serviced Residence 在馬來西亞銀行體系中通常被視為商業物業，部分銀行不向外籍提供 Serviced Residence 貸款，或利率更高。建議進場前向至少 3 家銀行確認貸款條件和利率。
+    </div>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【誰適合 Noöra？】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">最適合者</td><td>本地年輕專業人士（可享受 DPC 生態系 + Noöra Walk 便利，入場 RM46.8 萬起）；本地 DPC 投資者以「DPC 品牌光環 + 低入場門檻 + 出租年輕上班族」為框架；追求 DPC 但預算有限（RM50–130 萬）</td></tr>
+            <tr><td>不適合者（外籍）</td><td>外籍 MM2H 持有者：商業電費 + LTV 70% + 高管理費使 Net Yield 過低（1.5–2%）；外籍家庭：坪數小（最大 1,282 sqft，不適合大家庭）；若有 RM130–160 萬預算，OCP 的住宅地契更優</td></tr>
+            <tr><td>vs OCP（外籍框架）</td><td>若有 RM130–160 萬預算，OCP Type A（1,034 sqft）= RM122 萬 vs Noöra Type D（1,282 sqft）= RM140 萬；OCP 住宅地契 + 已完工 + 資本增值 +10.09% vs Noöra 商業地契 + 期房 + brickz 零驗證——OCP 在幾乎所有外籍投資維度上都更優</td></tr>
+            <tr><td>議價策略</td><td>掛牌 RM700–1,488 psf（極大範圍）；若進場，以低端 RM700–800 psf 議價最有利；發售價 RM900 psf，現掛牌低端已接近發售價（RM700）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">地契</td><td>🟡 Freehold（永久業權正面）但 Serviced Residence（商業框架，對外籍負面）</td></tr>
+            <tr><td>規模供給</td><td>🔴 1,156 戶竣工後出租競爭最嚴峻——本系列最大風險之一</td></tr>
+            <tr><td>管理費</td><td>🔴 RM0.50 psf——本系列最高，官方確認，無估算不確定性</td></tr>
+            <tr><td>DPC 品牌</td><td>🟢 Perdana ParkCity Master Developer 保值策略；DPC 生態完整；SuperHomes 正面評定</td></tr>
+            <tr><td>外籍適合度</td><td>🔴 Serviced Residence + 商業電費 + LTV 70% + brickz 零驗證 = 本系列外籍最不友善之一</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-y" style="margin-top:16px">
+      <strong>🟡 觀望——本地買家條件性；外籍買家明確不推薦</strong><br><br>
+      Noöra 是 DPC 生態系的「入門票」——Perdana ParkCity 開發商品牌、Noöra Walk 便利零售、DPC 自給自足生活圈的大部分優勢均可享受，但以 Serviced Residence 地契（商業電費 + LTV 70%）、本系列最高管理費（RM0.50 psf）、本系列最大規模（1,156 戶）、以及 brickz 零成交（期房，完全無市場定價驗證）的代價換取。<br><br>
+      <strong>外籍買家明確不推薦：</strong>①Serviced Residence 商業電費直接增加租客持有成本，使租金競爭力低於住宅地契建案；②LTV 70% 增加現金需求；③Net Yield 1.5–2.0%（本系列最低）；④若有相同預算，OCP（住宅地契，+10.09% 資本成長，已完工）是遠比 Noöra 更好的 DPC 選擇。<br><br>
+      <strong>本地買家的條件性框架：</strong>若主要目的是「以最低成本進入 DPC 生態系、以年輕本地租客為出租目標」，Type A 1BR（520 sqft，~RM47 萬）或 Type B（604 sqft，~RM54 萬）是 DPC 最低門檻的切入點。但需接受商業電費和高管理費，並做好竣工後 12–24 個月的填租陣痛期準備。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Noöra @ Desa ParkCity ｜ 建案綜合評分卡 ｜ Serviced Residence ｜ 期房 2026 ｜ brickz 0 筆</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">DPC YoY +6.06% PSF；+16.55% 成交量（SuperHomes 2026）；稀缺土地；KL 地址；Master Developer 保值——地段基本面強；但 Noöra 是 Serviced Residence，享受地段優勢打折</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">DPC 整體健康；但 Noöra 自身 1,156 戶在 2026 年集中竣工 = 本系列最重供給壓力；63 筆掛牌售（期房）= 5.4% 流通率（合理但期房性質）；竣工後出租競爭幾乎確定嚴峻</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">2022 年發售反應熱烈（4,500+ 登記）；DPC 地段升值加速；但 Serviced Residence 期房，竣工時機（2026）下沒有MRT3 這類單一催化劑；Noöra 的論點是「DPC 地段升值」而非「個案催化劑」</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">DPC 自給自足生態（ISP + ParkCity Medical + Plaza Arkadia + Central Park）；LDP/DUKE/MRR2/NKVE；但 Central Park 800m（vs OCP 直接旁邊）；無直接 MRT；DPC 南端位置交通便利性略遜 OCP</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>5.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Serviced Residence：LTV 70%（非 80–90%）；商業電費；MM2H 框架複雜；外籍銀行貸款可能有額外障礙；KL 地址正面；A5 本系列最低分維度之一</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">6.5/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">8.0×.2 + 5.5×.25 + 6.5×.2 + 6.5×.2 + 5.0×.15 = 6.475 ≈ 6.5</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Perdana ParkCity（DPC 473 英畝 Master Developer）；27 個建案全部成功交付；「不折扣清貨」保值策略；GDV RM10億是迄今最大建案，但開發商財力雄厚；期房交付風險低——B1 本系列同 OCP 並列最高</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz 0 筆（FIX-03 完全不通過）——無市場定價驗證；發售 RM850–900 psf（2022）；掛牌 RM700–1,488 psf（範圍極大，可信度低）；Serviced Residence 折扣是否充分體現在 RM850–900 vs OCP RM1,180？不確定——B2 是最弱維度</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>5.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">外籍 Net Yield 1.5–2.0%（本系列最低）；商業電費 + RM0.50 psf 管理費 + 竣工後供給衝擊三重壓縮；本地投資者 Gross Yield 可能達 5–6%（小坪），但外籍框架差；B3 本系列商業地契框架下最弱</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">DPC 自給自足生態（步行/短距離）；LDP/DUKE/MRR2/NKVE；但 DPC 南端邊緣（Central Park 800m）；無直接 MRT；Noöra Walk 零售商廊提升日常便利——B4 比 OCP 低（OCP 緊鄰 Central Park）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Noöra Walk（50,000 sqft 零售，開發商策展）；DPC 首個 Live-Work-Play 整合建案；Level 8–48 設施覆蓋廣（無邊際泳池、Work Loft、Sky Garden）；Scandinavian 設計語言；「Fourth Place」共創概念——設計差異化比本系列多數商業地契建案更清晰</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold（永久業權，正面）；但 Serviced Residence（商業框架：商業電費、LTV 70%、MM2H 複雜）——B6 在本系列住宅地契框架下屬於「中等」，比住宅地契（9.5）低 4 分，但比純商業地契（2.5–5.0）略好</td></tr>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>4.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:45%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz 0 筆（期房，完全無流動性驗證）；1,156 戶竣工後大量賣家同時競爭；Serviced Residence 買家池比住宅地契窄；外籍買家幾乎消失——B7 本系列最低之一</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">6.2/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">8.5×.2+5.5×.2+5.0×.15+6.5×.15+7.5×.1+5.5×.1+4.5×.1 = 6.25 ≈ 6.2</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 6.5 × 40% + B 類 6.2 × 60%</div>
+        <div class="score-big">6.32<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#FEF9C3;color:#92400E">⭐⭐⭐ 中等偏低——DPC 品牌 + 開發商強；但 Serviced Residence 地契 + 最高管理費 + 最大規模拖累</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">2.60 + 3.72 = 6.32 → 期房，brickz 0 筆，FIX-03 完全不通過；評分置信度低；僅供參考框架</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>Perdana ParkCity Master Developer 保值策略（B1 8.5，同 OCP）+ DPC 自給自足生態完整（「步行完整生活圈」的買家部分適用）+ Noöra Walk 零售整合（B5 7.5）+ DPC 地段升值 +6.06% YoY + 最低入場門檻切入 DPC（520 sqft RM47 萬起，本地買家）。<br>
+          <strong style="color:#fca5a5">主要問題：</strong>Serviced Residence 商業電費 + LTV 70%（A5 5.0）；管理費 RM0.50 psf 最高（B3 5.0）；1,156 戶竣工後供給衝擊（A2 5.5）；brickz 0 筆無市場驗證（B2 5.5，B7 4.5）；外籍 Net Yield 1.5–2%（本系列最低）。若有 RM130+ 萬預算，OCP（8.10/10）在外籍框架下的所有維度都優於 Noöra。
+        </div>
+      </div>
+    </div>
+
+    <h3>二十個建案完整最終排序</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>狀態</th>
+          <th>brickz</th>
+          <th>外籍 Net Yield</th>
+          <th>建議</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><strong>Kiaramas deDaun</strong></td><td style="font-weight:700;color:#16a34a">8.34</td><td><span class="tag t-g">Freehold 住宅</span></td><td>期房 2028</td><td>0（期房）</td><td>~2.8–3.3%</td><td>🟢 積極進場</td></tr>
+        <tr><td>2</td><td><strong>One Central Park DPC</strong></td><td style="font-weight:700;color:#16a34a">8.10</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2017</td><td>19 筆</td><td>~2.3–2.7%</td><td>🟢 審慎積極（資本增值框架）</td></tr>
+        <tr><td>3</td><td><strong>28 Mont' Kiara</strong></td><td style="font-weight:700;color:#16a34a">8.04</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2012</td><td>28 筆</td><td>~2.7–3.2%</td><td>🟢 審慎積極（確認管理費）</td></tr>
+        <tr><td>4</td><td><strong>Sunway Mont Residences</strong></td><td style="font-weight:700;color:#16a34a">7.88</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2020</td><td>8 筆</td><td>~2.5–2.9%</td><td>🟢 審慎積極（GIS 步行）</td></tr>
+        <tr><td>5</td><td><strong>Trinity Pentamont</strong></td><td style="font-weight:700;color:#16a34a">7.84</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2022</td><td>27 筆</td><td>~2.9–3.4%</td><td>🟢 審慎積極（Net Yield 最高）</td></tr>
+        <tr><td>6</td><td><strong>R22 Mont Kiara</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>已完工</td><td>31 筆</td><td>~3.0–3.2%</td><td>🟢 進場</td></tr>
+        <tr><td>7</td><td><strong>Park Place DPC</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>已完工</td><td>有</td><td>~3.0–3.4%</td><td>🟢 進場</td></tr>
+        <tr><td>8</td><td><strong>TRX Residences</strong></td><td style="font-weight:700;color:#16a34a">7.6</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>已完工</td><td>59 筆</td><td>~1.9–2.3%</td><td>🟢 增值框架</td></tr>
+        <tr><td>9</td><td><strong>The Conlay by E&O</strong></td><td style="font-weight:700;color:#16a34a">7.4</td><td><span class="tag t-y">Freehold 商業</span></td><td>已完工</td><td>有</td><td>~2.5–3.0%</td><td>🟢 審慎積極</td></tr>
+        <tr><td>10</td><td><strong>Bangsar Hill Park</strong></td><td style="font-weight:700;color:#16a34a">6.96</td><td><span class="tag t-y">Leasehold 住宅</span></td><td>完工 2025</td><td>~0</td><td>~2.5–2.9%</td><td>🟡 審慎考慮</td></tr>
+        <tr><td>11</td><td><strong>CloutHaus KLCC</strong></td><td style="font-weight:700;color:#d97706">6.7</td><td><span class="tag t-y">Freehold 商業</span></td><td>期房 2029</td><td>0</td><td>~1.9–2.2%</td><td>🟡 觀望</td></tr>
+        <tr><td>12</td><td><strong>Pavilion Hilltop</strong></td><td style="font-weight:700;color:#d97706">6.64</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2017</td><td>21 筆</td><td>~2.1–2.6%</td><td>🟡 觀望（投資性價比最低）</td></tr>
+        <tr style="background:#FEF9C3"><td>13</td><td><strong>Noöra DPC 🆕</strong></td><td style="font-weight:700;color:#d97706">6.32</td><td><span class="tag t-y">Freehold SR（商業）</span></td><td>期房 2026</td><td style="color:#dc2626"><strong>0筆（FIX-03 完全不通過）</strong></td><td style="color:#dc2626">~1.5–2.0%（最低）</td><td>🟡 本地條件性；🔴 外籍不推</td></tr>
+        <tr><td>14</td><td><strong>SWNK Houze BBCC</strong></td><td style="font-weight:700;color:#d97706">6.2</td><td><span class="tag t-r">Leasehold 商業</span></td><td>期房</td><td>0</td><td>~1.9–2.3%</td><td>🔴 外籍不推</td></tr>
+        <tr><td>15</td><td><strong>TS2 武吉免登 🔵</strong></td><td style="font-weight:700;color:#3b82f6">6.0</td><td><span class="tag t-y">Freehold 商業</span></td><td>期房 2027</td><td>0</td><td>功能性</td><td>🔵 功能性持有</td></tr>
+        <tr><td>16</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="font-weight:700;color:#f97316">5.7</td><td><span class="tag t-g">SOHO HDA</span></td><td>期房</td><td>0</td><td>SOHO 2.8–3.4%</td><td>🟡 條件性</td></tr>
+        <tr><td>17</td><td><strong>Stonor 3 KLCC</strong></td><td style="font-weight:700;color:#dc2626">5.7</td><td><span class="tag t-y">商業地契 HDA</span></td><td>完工</td><td>有</td><td>~1.9–2.3%</td><td>🔴 暫緩</td></tr>
+        <tr><td>18</td><td><strong>Pavilion DH</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-y">Freehold 商業</span></td><td>完工 2025</td><td>~1筆</td><td>~1.7–2.1%</td><td>🟡 觀望</td></tr>
+        <tr><td>19</td><td><strong>Pavilion Square</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-r">Leasehold 商業</span></td><td>期房 2028–29</td><td>0</td><td>~1.5–1.9%</td><td>🔴 投資暫緩</td></tr>
+        <tr><td>20</td><td><strong>Orion Residence BB</strong></td><td style="font-weight:700;color:#dc2626">5.2</td><td><span class="tag t-y">Freehold 商業</span></td><td>竣工確認中</td><td>~0</td><td>~1.2–1.5%</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">🔑 Noöra DPC（6.32）排名第13。相比 OCP（8.10，第2），Noöra 的差距主要在：①A2 供需（5.5 vs 9.0）——1,156 戶 vs 359 戶；②A5 法規（5.0 vs 8.5）——Serviced Residence vs 住宅地契；③B2 估值（5.5 vs 7.5）——brickz 0 筆 vs 19 筆；④B3 Yield（5.0 vs 7.0）——外籍 Net Yield 1.5–2.0% vs 2.3–2.7%；⑤B6 產權（5.5 vs 9.5）——SR vs Residential Strata。開發商信用（B1 8.5，兩者相同）是唯一持平維度。<strong>如果買家選 DPC 建案，OCP 是明確優先選擇，Noöra 不在外籍投資框架的推薦範圍內。</strong>⚠️ 評分置信度：因期房 brickz 0 筆，此評分僅供框架參考，竣工後需以實際成交數據更新。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL RM1M+ 高端住宅市場深度研究（2026-03）｜KL 供需 Overhang 深度分析（2026-04-01）｜iProperty.com.my（Noöra 分類：Freehold Serviced Residence；63 筆掛牌售；管理費 RM0.50 psf 官方確認；竣工 2026；發售 2022-11）｜PropertyGuru（掛牌 PSF RM700–1,488；掛牌售 RM70萬–148萬）｜iRumah.co（發售 RM900 psf；1,156 戶；竣工 2026）｜EdgeProp（4,500+ 發售前登記；「發售 RM850 psf，預期竣工後升至 RM1,000 psf」）｜kopiandproperty.com（管理費 RM0.50 psf；坪數 520–1,282 sqft；發售 RM40萬–140萬）｜desaparkcity.com 官方（發售 2022-11；DPC 首個整合建案）｜SuperHomes（DPC 2026 展望：「Noöra 適合追求租金收益和年輕租客；Westside/Northshore 適合家庭自住」；2026-02）｜propertyguru.com.my（GDV RM10億；6.63 英畝；「DPC 南端邊緣」；Central Park 800m）<br>
+  ⚠️ brickz 0 筆（期房），FIX-03 完全不通過，本報告所有 PSF 估算和 Yield 計算均為預測性質，不具市場驗證。Serviced Residence 地契的商業電費和 LTV 差異需在進場前向開發商及銀行確認。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

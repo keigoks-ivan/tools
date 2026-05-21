@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Zealand Property Market Report</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+    .toc-box{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;margin:0 0 24px;font-family:'Inter',sans-serif;overflow:hidden}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;font-size:12px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none;background:#f4f7fc}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:13px;cursor:pointer;padding:0;line-height:1;transition:transform .2s}
+    .toc-list{padding:8px 16px 12px;display:flex;flex-direction:column;gap:2px}
+    .toc-list a{font-size:12px;color:#2c3e50;text-decoration:none;padding:5px 8px 5px 10px;border-radius:4px;border-left:2px solid transparent;display:block;transition:all .15s;font-family:Georgia,serif}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;color:#1e3a5f}
+    .toc-collapsed .toc-list{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    /* -- Side Progress Nav -- */
+    .side-nav{position:fixed;top:50%;right:max(16px, calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-inline .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:8px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .chart-note.red{color:#dc2626}
+    .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+    .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+    .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+    .report-chart-card .chart-meta{font-family:'Inter',sans-serif;font-size:11px;color:#d97706;margin-bottom:8px}
+    .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+    .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+    @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script>
+  function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+  function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+  </script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <div class="report-container">
+    <nav class="side-nav" id="sideNav">
+      <a href="#sec-exec" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Exec Summary</span>
+        <span class="side-nav-label lang-zh" style="display:none">執行摘要</span>
+      </a>
+      <a href="#sec-policy" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">RBNZ Policy</span>
+        <span class="side-nav-label lang-zh" style="display:none">央行政策</span>
+      </a>
+      <a href="#sec-supply" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Supply</span>
+        <span class="side-nav-label lang-zh" style="display:none">供給面</span>
+      </a>
+      <a href="#sec-demand" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Demand</span>
+        <span class="side-nav-label lang-zh" style="display:none">需求面</span>
+      </a>
+      <a href="#sec-valuation" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Valuation</span>
+        <span class="side-nav-label lang-zh" style="display:none">估值</span>
+      </a>
+      <a href="#sec-auckland" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Auckland</span>
+        <span class="side-nav-label lang-zh" style="display:none">奧克蘭</span>
+      </a>
+      <a href="#sec-christchurch" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Christchurch</span>
+        <span class="side-nav-label lang-zh" style="display:none">基督城</span>
+      </a>
+      <a href="#sec-policy-reg" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Foreign Ban / DTI</span>
+        <span class="side-nav-label lang-zh" style="display:none">禁外購/DTI</span>
+      </a>
+      <a href="#sec-outlook" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Outlook</span>
+        <span class="side-nav-label lang-zh" style="display:none">展望</span>
+      </a>
+    </nav>
+    <div class="report-header">
+      <div class="lang-en">
+        <h1>NEW ZEALAND PROPERTY MARKET REPORT</h1>
+        <div class="report-meta">May 2026 &middot; Market Research</div>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <h1>紐西蘭住宅房地產市場報告</h1>
+        <div class="report-meta">2026年5月 &middot; 市場研究</div>
+      </div>
+    </div>
+    <div class="report-body">
+
+      <!-- 1. EXECUTIVE SUMMARY -->
+      <div class="toc-box" id="tocBox">
+        <div class="toc-header" onclick="toggleToc()">
+          <span class="lang-en">In This Report</span><span class="lang-zh" style="display:none">本報告涵蓋</span>
+          <button class="toc-toggle">&#9650;</button>
+        </div>
+        <div class="toc-list">
+          <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+          <a href="#sec-policy" onclick="closeTocMobile()"><span class="lang-en">2. OCR at 2.25% — Hike Cycle Now Priced In</span><span class="lang-zh" style="display:none">2. OCR 2.25% — 市場已 price in 升息週期</span></a>
+          <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">3. Supply: Listings Up, Rental Glut</span><span class="lang-zh" style="display:none">3. 供給：掛牌增加，租賃過剩</span></a>
+          <a href="#sec-demand" onclick="closeTocMobile()"><span class="lang-en">4. Demand: Sales Recover, Rents Fall</span><span class="lang-zh" style="display:none">4. 需求：成交回升，租金下滑</span></a>
+          <a href="#sec-valuation" onclick="closeTocMobile()"><span class="lang-en">5. Valuation: City Divergence</span><span class="lang-zh" style="display:none">5. 估值：城市分化</span></a>
+          <a href="#sec-auckland" onclick="closeTocMobile()"><span class="lang-en">6. Auckland: High Inventory Suppression</span><span class="lang-zh" style="display:none">6. 奧克蘭：高庫存壓制</span></a>
+          <a href="#sec-christchurch" onclick="closeTocMobile()"><span class="lang-en">7. Christchurch: Strongest Resilience</span><span class="lang-zh" style="display:none">7. 基督城：最強韌性</span></a>
+          <a href="#sec-policy-reg" onclick="closeTocMobile()"><span class="lang-en">8. Policy: Foreign Ban / DTI / LVR / CGT</span><span class="lang-zh" style="display:none">8. 政策：禁外購/DTI/LVR/CGT</span></a>
+          <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">9. Outlook &amp; Key Risks</span><span class="lang-zh" style="display:none">9. 展望與主要風險</span></a>
+        </div>
+      </div>
+
+      <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+
+      <div class="lang-en">
+        <p>New Zealand's housing market is at a <strong>fragile inflection</strong> in May 2026. The RBNZ cut the OCR from <strong>5.50% to 2.25%</strong> (a <strong>325 basis-point</strong> easing cycle) between August 2024 and early 2026, then held at <strong>2.25%</strong> on 8 April 2026. The next OCR decision lands on <strong>27 May 2026</strong> — and ANZ, ASB and Infometrics now expect <strong>three OCR hikes</strong> this year (potentially taking the rate back to <strong>3.00%</strong>), driven by Middle East energy-price spillover into headline inflation. Banks have already moved: ANZ's two-year fixed rose to <strong>5.29%</strong> and ASB to <strong>5.25%</strong>, well above the late-2025 lows. According to REINZ March 2026 data, Auckland's HPI is down <strong>-1.21%</strong> YoY, while regional markets surprise: Canterbury sales <strong>+23.6%</strong>, Marlborough <strong>+18.9%</strong>, West Coast <strong>+18.6%</strong>, Southland <strong>+18.2%</strong>. The rental market is softening — national median rent fell <strong>-1.6%</strong> to <strong>NZ$610/week</strong>, and rental listing stock surged <strong>+21.2%</strong>, compressing investor yields just as borrowing costs are rising again.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>紐西蘭住宅市場2026年5月處於<strong>脆弱的轉折點</strong>。RBNZ自2024年8月至2026年初將OCR從<strong>5.50%降至2.25%</strong>（累計降息<strong>325個基點</strong>），並於2026年4月8日將利率維持於<strong>2.25%</strong>。下次OCR決議落在<strong>2026年5月27日</strong>——ANZ、ASB 與 Infometrics 現在預期 2026 年將<strong>升息三次</strong>（可能把利率推回<strong>3.00%</strong>），主因中東能源價格傳導至通膨。銀行已先行動作：ANZ 兩年期固定房貸升至<strong>5.29%</strong>、ASB 升至<strong>5.25%</strong>，遠高於 2025 年末低點。REINZ 2026 年 3 月資料顯示：奧克蘭 HPI 年減<strong>-1.21%</strong>，但區域市場令人意外——坎特伯雷成交<strong>+23.6%</strong>、馬爾堡<strong>+18.9%</strong>、西海岸<strong>+18.6%</strong>、南地<strong>+18.2%</strong>。租賃市場走軟——全國週租中位數下降<strong>-1.6%</strong>至<strong>NZ$610</strong>，出租房源激增<strong>+21.2%</strong>，借款成本回升之際，投資人收益率受擠壓。</p>
+      </div>
+
+      <!-- Exec Summary Mini Charts -->
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">NZ National Median 10Y + YoY%</span><span class="lang-zh" style="display:none">紐西蘭10年全國中位價 + 年增率</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">NZ$ &middot; Source: REINZ</span><span class="lang-zh" style="display:none">紐幣 &middot; 來源：REINZ</span></p>
+          <div id="rChartNzPrice10y" style="height:220px;min-height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">OCR Rate Trajectory</span><span class="lang-zh" style="display:none">OCR利率走勢</span></h4>
+          <div class="chart-meta orange"><span class="lang-en">Cuts done — hike cycle priced in</span><span class="lang-zh" style="display:none">降息結束——市場 price in 升息</span></div>
+          <div id="chart-r-nz-ocr" style="height:220px;min-height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Rental Yield vs OCR</span><span class="lang-zh" style="display:none">租金報酬率 vs OCR</span></h4>
+          <div class="chart-meta orange"><span class="lang-en">Yield spread widening</span><span class="lang-zh" style="display:none">利差擴大中</span></div>
+          <div id="chart-r-nz-yield" style="height:220px;min-height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">City Price Comparison</span><span class="lang-zh" style="display:none">三城市均價比較</span></h4>
+          <div class="chart-meta orange"><span class="lang-en">Auckland vs Wellington vs Christchurch</span><span class="lang-zh" style="display:none">奧克蘭 vs 威靈頓 vs 基督城</span></div>
+          <div id="chart-r-nz-city" style="height:220px;min-height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- 2. OCR AT 2.25% — HIKE CYCLE PRICED IN -->
+      <h2 id="sec-policy"><span class="lang-en">OCR AT 2.25% — HIKE CYCLE NOW PRICED IN</span><span class="lang-zh" style="display:none">OCR 2.25%——市場已 PRICE IN 升息週期</span></h2>
+
+      <div class="lang-en">
+        <p>The RBNZ delivered <strong>325 basis points</strong> of cumulative cuts (from <strong>5.50%</strong> to <strong>2.25%</strong>) between August 2024 and the start of 2026, then held the OCR at <strong>2.25%</strong> on 8 April 2026 — calling explicit attention to Middle East inflation upside risks. Mortgage rates have stopped following the OCR down: the two-year fixed troughed in late 2025 and is now <strong>back at 5.25–5.29%</strong> (ASB / ANZ) as wholesale curves price in hikes. For a <strong>NZ$700,000</strong> loan, monthly repayments that bottomed near <strong>$3,650</strong> have climbed back to roughly <strong>$4,200</strong>. ANZ, ASB and Infometrics now publicly forecast <strong>three OCR hikes in 2026</strong>, most likely starting in July, taking the OCR back to <strong>3.00%</strong>. A May 27 hike is not ruled out. The cycle has flipped from easing tailwind to tightening headwind in just two quarters.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>RBNZ自2024年8月至2026年初累計降息<strong>325個基點</strong>（從<strong>5.50%</strong>降至<strong>2.25%</strong>），並於2026年4月8日將OCR維持於<strong>2.25%</strong>——明確指出中東地緣引發的通膨上行風險。房貸利率已停止跟隨OCR下行：兩年期固定房貸於2025年末觸底，目前回升至<strong>5.25–5.29%</strong>（ASB / ANZ），因批發市場已 price in 升息。以<strong>NZ$70萬</strong>貸款為例，月供從低點<strong>$3,650</strong>反彈至約<strong>$4,200</strong>。ANZ、ASB 與 Infometrics 現公開預估 2026 年將<strong>升息三次</strong>，最可能 7 月起步，把 OCR 推回<strong>3.00%</strong>。5 月 27 日升息也非完全排除。短短兩季，週期從寬鬆順風翻轉為緊縮逆風。</p>
+      </div>
+
+      <div class="chart-inline">
+        <h4><span class="lang-en">OCR Rate Trajectory (Cuts Complete — Hikes Priced In)</span><span class="lang-zh" style="display:none">OCR 走勢（降息完成——市場 price in 升息）</span></h4>
+        <div class="chart-note orange"><span class="lang-en">5.50% → 2.25% delivered; ANZ/ASB/Infometrics now forecast 3 hikes to 3.00% in 2026</span><span class="lang-zh" style="display:none">5.50% → 2.25% 已完成；ANZ/ASB/Infometrics 預估 2026 升息三次至 3.00%</span></div>
+        <div id="chart-r-nz-ocr-detail" style="height:260px;min-height:180px;"></div>
+      </div>
+
+      <!-- 3. SUPPLY -->
+      <h2 id="sec-supply"><span class="lang-en">SUPPLY: LISTINGS UP, RENTAL GLUT</span><span class="lang-zh" style="display:none">供給：掛牌增加，租賃過剩</span></h2>
+
+      <div class="lang-en">
+        <p>New listings rose <strong>+5.5%</strong> year-on-year nationally, adding to an already elevated stock of homes for sale. Auckland's inventory has ballooned to <strong>31 weeks</strong> of supply &mdash; firmly in buyer's market territory. The rental market is experiencing a structural oversupply: rental listing stock surged <strong>+21.2%</strong>, with new rental listings up <strong>+11.4%</strong>. On the construction side, September building consents jumped <strong>+27%</strong> month-on-month to <strong>3,747</strong> units, suggesting the development pipeline is re-accelerating even as existing inventory remains high.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>全國新增掛牌量年增<strong>+5.5%</strong>，進一步推高本已偏高的待售房源。奧克蘭庫存膨脹至<strong>31週</strong>供給量，穩居買方市場。租賃市場正經歷結構性供過於求：出租房源存量激增<strong>+21.2%</strong>，新增出租掛牌量增<strong>+11.4%</strong>。建設端方面，9月建築許可環比大增<strong>+27%</strong>至<strong>3,747</strong>套，顯示開發管線正在重新加速，儘管現有庫存仍居高不下。</p>
+      </div>
+
+      <!-- 4. DEMAND -->
+      <h2 id="sec-demand"><span class="lang-en">DEMAND: SALES RECOVER, RENTS FALL</span><span class="lang-zh" style="display:none">需求：成交回升，租金下滑</span></h2>
+
+      <div class="lang-en">
+        <p>REINZ data confirms the volume recovery: <strong>80,655</strong> sales over the past year, up <strong>+10.3%</strong>. But the picture has bifurcated since: in March 2026, <strong>Canterbury sales rose +23.6% YoY</strong> (busiest March since 2021), Marlborough +18.9%, West Coast +18.6%, Southland +18.2% — the strongest regional bid in years. Meanwhile <strong>mortgage rates have re-risen to 5.25–5.29%</strong>, well above the pre-COVID norm of ~3% and rising, threatening the affordability arithmetic that drove the recent recovery. Buyer uncertainty is most acute in Auckland, where elevated inventory plus rising rates discourages aggressive bidding. The political landscape adds a layer of risk: the capital gains tax (CGT) debate has resurfaced ahead of the election, potentially dampening investor sentiment. On the positive side, the RBNZ eased LVR restrictions in <strong>December 2025</strong>, reducing deposit requirements and broadening access for first-home buyers.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>REINZ數據確認成交量回升：過去一年共<strong>80,655</strong>宗成交，年增<strong>+10.3%</strong>。但從那之後格局已分化：2026 年 3 月，<strong>坎特伯雷成交年增 +23.6%</strong>（2021 年以來最忙的 3 月）、馬爾堡 +18.9%、西海岸 +18.6%、南地 +18.2%，區域市場買盤是多年來最強。同時<strong>房貸利率已回升至 5.25–5.29%</strong>，遠高於疫情前約 3% 的常態且仍在上行，威脅近期復甦所仰賴的可負擔性算式。買家不確定性在奧克蘭最為明顯，高庫存疊加房貸利率回升抑制積極出價。政治面增添風險層：資本利得稅（CGT）議題在大選前重新浮現，可能打壓投資者情緒。正面因素方面，RBNZ於<strong>2025年12月</strong>放寬LVR限制，降低首付要求，擴大首購族入場渠道。</p>
+      </div>
+
+      <div class="chart-inline">
+        <h4><span class="lang-en">Rent &amp; Rental Stock</span><span class="lang-zh" style="display:none">租金與出租房源</span></h4>
+        <div class="chart-note orange"><span class="lang-en">Rents falling as rental stock surges +21.2%</span><span class="lang-zh" style="display:none">房源激增+21.2%，租金承壓下行</span></div>
+        <div id="chart-r-nz-rental" style="height:280px;min-height:180px;"></div>
+      </div>
+
+      <!-- 5. VALUATION -->
+      <h2 id="sec-valuation"><span class="lang-en">VALUATION: CITY DIVERGENCE</span><span class="lang-zh" style="display:none">估值：城市分化</span></h2>
+
+      <div class="lang-en">
+        <p>The national median of <strong>NZ$786,977</strong> produces a gross yield of <strong>4.12%</strong> against the OCR of <strong>2.25%</strong>, a positive spread of <strong>+1.87%</strong> — the widest in years. But this OCR-based spread <strong>flatters the picture</strong>: actual leveraged investors borrow at the 2-yr fixed of <strong>5.25–5.29%</strong>, so the operative carry against borrowing cost is <strong>-1.13% to -1.17%</strong> (negative). Auckland at <strong>NZ$1.014M</strong> yields just <strong>3.96%</strong>, well below the 5.25%+ mortgage rate — leveraged investors face deeply negative carry. Auckland remains <strong>-18%</strong> from its 2021 peak. Christchurch at <strong>NZ$697,000</strong> delivers <strong>4.8%</strong> gross, with select suburbs reaching <strong>5.5&ndash;6%</strong>, offering the closest-to-breakeven risk-adjusted carry in the country.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>全國中位價<strong>NZ$786,977</strong>對應毛收益率<strong>4.12%</strong>，扣除OCR <strong>2.25%</strong>後利差<strong>+1.87%</strong>——多年來最寬。但此 OCR 基礎之利差<strong>美化了實況</strong>：實際槓桿投資人以 2 年期固定<strong>5.25–5.29%</strong>借款，相對借款成本的有效持有差為<strong>-1.13% 至 -1.17%</strong>（負）。奧克蘭<strong>NZ$101.4萬</strong>收益率僅<strong>3.96%</strong>，遠低於 5.25%+ 房貸利率——槓桿投資人面臨深度負持有差，且距 2021 年高峰仍跌<strong>-18%</strong>。基督城<strong>NZ$69.7萬</strong>毛收益率<strong>4.8%</strong>，部分郊區達<strong>5.5至6%</strong>，是全國最接近損益兩平的風險調整後持有差。</p>
+      </div>
+
+      <div class="chart-inline">
+        <h4><span class="lang-en">Yield vs OCR vs Mortgage Rate</span><span class="lang-zh" style="display:none">收益率 vs OCR vs 房貸利率</span></h4>
+        <div class="chart-note orange"><span class="lang-en">+1.87% vs OCR (2.25%) but -1.13% vs mortgage (5.29%) — borrowing cost beats OCR spread</span><span class="lang-zh" style="display:none">vs OCR (2.25%) +1.87% 但 vs 房貸 (5.29%) -1.13%——借款成本壓過 OCR 利差</span></div>
+        <div id="chart-r-nz-yield-detail" style="height:280px;min-height:180px;"></div>
+      </div>
+
+      <!-- 6. AUCKLAND -->
+      <h2 id="sec-auckland"><span class="lang-en">AUCKLAND: HIGH INVENTORY SUPPRESSION</span><span class="lang-zh" style="display:none">奧克蘭：高庫存壓制</span></h2>
+
+      <div class="lang-en">
+        <p>Auckland's median peaked at <strong>NZ$1.35M</strong> in late 2021 and has since corrected <strong>-24.9%</strong> to <strong>NZ$1.014M</strong>. Inventory sits at <strong>31 weeks</strong> of supply, the highest among major cities and well into buyer's market territory. South Auckland offers entry-level opportunities, but the apartment segment faces acute oversupply with new builds competing against existing stock. Net migration, which surged to <strong>30%</strong> of Auckland's population growth, is moderating &mdash; removing a key demand pillar. Recovery depends on inventory normalizing below <strong>20 weeks</strong>, which is unlikely before late 2026 at current absorption rates.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>奧克蘭中位價在2021年末觸及<strong>NZ$135萬</strong>高峰，此後累計下跌<strong>-24.9%</strong>至<strong>NZ$101.4萬</strong>。庫存高達<strong>31週</strong>，為各主要城市之最，深陷買方市場。南奧克蘭提供入門級機會，但公寓板塊面臨嚴重供過於求——新建項目與存量房源直接競爭。淨移民曾佔奧克蘭人口增長的<strong>30%</strong>，如今正在放緩，削弱了一根重要的需求支柱。復甦取決於庫存正常化至<strong>20週</strong>以下，按當前去化速度，最早2026年末方可實現。</p>
+      </div>
+
+      <!-- 7. CHRISTCHURCH -->
+      <h2 id="sec-christchurch"><span class="lang-en">CHRISTCHURCH: STRONGEST RESILIENCE</span><span class="lang-zh" style="display:none">基督城：最強韌性</span></h2>
+
+      <div class="lang-en">
+        <p>Christchurch stands apart as New Zealand's most resilient market, underpinned by the post-2011 earthquake rebuild that created one of the youngest housing stocks in the country. The median of <strong>NZ$697,000</strong> is <strong>31%</strong> cheaper than Auckland and has risen <strong>+4.03%</strong> year-on-year, sitting just <strong>$4,000</strong> below its all-time peak. Six suburbs &mdash; Shirley, Addington, Sydenham, Riccarton, Papanui, and Halswell &mdash; deliver gross yields of <strong>4.3&ndash;6%</strong>, the best in the country. The key risk is earthquake insurance cost, which remains elevated and can erode net returns by <strong>0.5&ndash;1%</strong> annually.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>基督城是紐西蘭最具韌性的市場，得益於2011年地震後重建所形成的全國最年輕住宅存量。中位價<strong>NZ$69.7萬</strong>較奧克蘭便宜<strong>31%</strong>，年漲<strong>+4.03%</strong>，距歷史高峰僅差<strong>$4,000</strong>。六個郊區——Shirley、Addington、Sydenham、Riccarton、Papanui和Halswell——毛收益率達<strong>4.3至6%</strong>，為全國之最。主要風險是地震保險成本偏高，可年削淨回報<strong>0.5至1%</strong>。</p>
+      </div>
+
+      <div class="chart-inline">
+        <h4><span class="lang-en">Christchurch Suburb Price &amp; Yield</span><span class="lang-zh" style="display:none">基督城郊區價格與收益率</span></h4>
+        <div class="chart-note green"><span class="lang-en">6 suburbs: 4.3&ndash;6% gross yield</span><span class="lang-zh" style="display:none">6個郊區：毛收益率4.3至6%</span></div>
+        <div id="chart-r-nz-christchurch" style="height:300px;min-height:180px;"></div>
+      </div>
+
+      <!-- 8. POLICY & REGULATION -->
+      <h2 id="sec-policy-reg"><span class="lang-en">POLICY: FOREIGN BAN / DTI / LVR / CGT</span><span class="lang-zh" style="display:none">政策：禁外購 / DTI / LVR / CGT</span></h2>
+
+      <div class="lang-en">
+        <p>New Zealand has the <strong>strictest foreign buyer regime in the OECD</strong>. The <strong>Overseas Investment Amendment Act 2018</strong> (effective 22 Oct 2018) classified residential land as "sensitive," effectively <strong>banning non-resident foreigners</strong> from purchasing existing homes outright. Only permanent residents, Australian citizens, and Singaporean citizens (under the 2016 Singapore FTA) retain full purchase rights. Non-residents may buy <strong>new apartment developments</strong> only under specific hotel-style / build-to-rent carve-outs. Pre-2018, foreign buyers accounted for ~3% of national transactions (higher in Auckland Central at ~10%). Post-ban, the number is <strong>&lt;0.5% nationally</strong>.</p>
+        <p>Macroprudential stack: <strong>LVR (Loan-to-Value Ratio)</strong> restrictions cap owner-occupier lending at 80% LTV for &gt;20% of a bank's new lending (eased Dec 2025), and investor lending at 70% LTV for &gt;5% of new lending. <strong>DTI (Debt-to-Income) limits</strong> were introduced July 2024 &mdash; banks must limit owner-occupier lending at DTI &gt;6x to &lt;20% of new flow, investor at DTI &gt;7x to &lt;20%. <strong>Capital gains tax</strong>: NZ has no general CGT (only the 10-year bright-line test for residential property, tightened to 5 years under the 2024 government reversal, with intent-based deemed sales). The <strong>CGT debate remains a tail risk</strong>: Labour-led coalitions have repeatedly tabled CGT proposals, though the current National-led government has shelved them through 2026.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>紐西蘭擁有<strong>OECD最嚴格的外資買家制度</strong>。<strong>2018年海外投資修訂法</strong>（2018年10月22日生效）將住宅土地分類為「敏感資產」，實質<strong>禁止非居民外國人購買</strong>既有住宅。僅永久居民、澳洲公民、新加坡公民（依2016年星紐FTA）保留完整購買權。非居民僅可在特定飯店式/建租型豁免下購買<strong>新公寓開發</strong>。2018年前，外資買家佔全國交易約3%（奧克蘭中心區約10%）。禁令後降至<strong>全國&lt;0.5%</strong>。</p>
+        <p>宏觀審慎堆疊：<strong>LVR（貸款成數）</strong>限制自住者按揭80%LTV佔銀行新貸款&gt;20%（2025年12月放寬），投資者70%LTV佔新貸款&gt;5%。<strong>DTI（負債所得比）限制</strong>於2024年7月引入——銀行自住者DTI&gt;6倍須佔新貸款流&lt;20%，投資者DTI&gt;7倍&lt;20%。<strong>資本利得稅</strong>：紐西蘭無一般CGT（僅住宅物業10年明線測試，2024年政府逆轉收緊至5年、含意圖基礎擬制銷售）。<strong>CGT議題仍為尾部風險</strong>：工黨聯盟曾多次提出CGT方案，但現任國家黨政府2026年前已擱置。</p>
+      </div>
+
+      <div class="chart-inline">
+        <h4><span class="lang-en">Foreign Buyer Share of NZ Transactions 2015–2025</span><span class="lang-zh" style="display:none">外資買家佔紐西蘭交易比例 2015-2025</span></h4>
+        <div class="chart-note red"><span class="lang-en">Ban effective Oct 2018. Auckland Central dropped from 10% → &lt;0.5%</span><span class="lang-zh" style="display:none">禁令2018年10月生效。奧克蘭中心從10%→&lt;0.5%</span></div>
+        <div id="chart-r-nz-foreign" style="height:240px;min-height:180px;"></div>
+      </div>
+
+      <!-- 9. OUTLOOK -->
+      <h2 id="sec-outlook"><span class="lang-en">OUTLOOK AND KEY RISKS</span><span class="lang-zh" style="display:none">展望與主要風險</span></h2>
+
+      <div class="lang-en">
+        <p><strong>Bull case (+3&ndash;6%, prob 25%):</strong> Middle East tensions de-escalate, inflation cools, RBNZ holds at <strong>2.25%</strong> through 2026, mortgage rates drift back toward 4.5%. Inventory normalizes; Christchurch breaks to new highs, Auckland recovers 3&ndash;5%, regional markets continue +8&ndash;12%.</p>
+        <p><strong>Base case (-1 to +2%, prob 45%):</strong> ANZ/ASB/Infometrics consensus plays out — RBNZ delivers <strong>two hikes</strong> in H2 2026 to <strong>2.75%</strong>, mortgage rates stay at <strong>5.25–5.50%</strong>. Volume recovery stalls; regional markets give back gains; Auckland flat to -2%, Christchurch +2&ndash;3%, regionals +3&ndash;6% (off elevated base).</p>
+        <p><strong>Bear case (-4 to -7%, prob 30%):</strong> Iran shock persists, headline CPI re-accelerates past 4%; RBNZ delivers <strong>three hikes to 3.00%</strong> (or front-loads at May 27); CGT debate intensifies pre-election. Mortgage rates push to 5.75–6.0%. Auckland -7&ndash;10% (negative wealth feedback), Christchurch -2&ndash;4%, regionals -3&ndash;6%.</p>
+        <p>Key variables to monitor: <strong>27 May 2026 RBNZ decision</strong> (imminent — first chance to hike), <strong>CPI prints</strong> (Q2 release dictates July hike), <strong>2-yr swap rate</strong> (banks pre-position via wholesale), <strong>CGT/election positioning</strong>, and <strong>net migration</strong>.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p><strong>樂觀情境（+3 至 6%，機率 25%）：</strong>中東緊張降溫、通膨退潮，RBNZ 2026 年全年維持<strong>2.25%</strong>，房貸利率漂回 4.5%。庫存正常化；基督城突破新高、奧克蘭回升 3 至 5%、區域市場續漲 8 至 12%。</p>
+        <p><strong>基本情境（-1 至 +2%，機率 45%）：</strong>ANZ/ASB/Infometrics 共識成真——RBNZ 於 2026 H2 升息<strong>兩次</strong>至<strong>2.75%</strong>，房貸利率維持<strong>5.25–5.50%</strong>。量能復甦停滯；區域市場吐回漲幅；奧克蘭持平至 -2%、基督城 +2 至 3%、區域 +3 至 6%（自高基期）。</p>
+        <p><strong>悲觀情境（-4 至 -7%，機率 30%）：</strong>伊朗衝擊延續，整體 CPI 重新加速突破 4%；RBNZ 升息<strong>三次至 3.00%</strong>（或 5 月 27 日提前出手）；CGT 議題在大選前升溫。房貸利率衝至 5.75–6.0%。奧克蘭 -7 至 -10%（負財富效應反饋）、基督城 -2 至 -4%、區域 -3 至 -6%。</p>
+        <p>需密切追蹤的關鍵變數：<strong>2026 年 5 月 27 日 RBNZ 決議</strong>（即將公布——首次升息可能時點）、<strong>CPI 數據</strong>（Q2 公佈定義 7 月升息）、<strong>2 年期 swap 利率</strong>（銀行先行 price in）、<strong>CGT／大選定位</strong>、<strong>淨移民</strong>。</p>
+      </div>
+
+      <div class="report-footer">
+        <p><span class="lang-en">Data sources: REINZ (March 2026 HPI, released 16 Apr 2026) &middot; RBNZ (OCR decision 8 Apr 2026) &middot; Stats NZ &middot; ANZ / ASB / Infometrics rate forecasts &middot; CoreLogic NZ &middot; Trade Me Property. All data as of May 2026.</span><span class="lang-zh" style="display:none">數據來源：REINZ（2026 年 3 月 HPI，4 月 16 日發布）&middot; 紐西蘭儲備銀行 RBNZ（OCR 決議 2026 年 4 月 8 日）&middot; 紐西蘭統計局 &middot; ANZ / ASB / Infometrics 利率預測 &middot; CoreLogic NZ &middot; Trade Me Property。所有數據截至 2026 年 5 月。</span></p>
+        <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:'#1e3a5f', green:'#16a34a', orange:'#d97706',
+    red:'#dc2626', blue:'#2563eb', muted:'#5a7a9a',
+    grid:'#e8f0f9', text:'#1e3a5f'
+  };
+  function fmtNZD(v){if(v>=1000000)return 'NZ$'+(v/1000000).toFixed(1)+'M';if(v>=1000)return 'NZ$'+(v/1000).toFixed(0)+'K';return 'NZ$'+v;}
+  function fmtNZDShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return ''+v;}
+  function fmtK(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+  var baseTooltip = {
+    trigger: 'axis', backgroundColor: '#fff',
+    borderColor: '#ccd9e8', borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+  var baseLegend = { top: 8, textStyle: baseText, icon: 'circle', itemWidth: 8, itemHeight: 8 };
+
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts = [];
+
+  function initAllCharts(lang) {
+    allCharts.forEach(function(c){ if(c) c.dispose(); });
+    allCharts = [];
+    drawNzPrice10y(lang);
+    drawOCR(lang);
+    drawOCRDetail(lang);
+    drawYield(lang);
+    drawYieldDetail(lang);
+    drawCity(lang);
+    drawRental(lang);
+    drawChristchurch(lang);
+    drawForeign(lang);
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+    initAllCharts(lang);
+  }
+
+  /* 0. NZ National Median 10Y + YoY% */
+  function drawNzPrice10y(lang){
+    var en=lang==='en';
+    var c = echarts.init(document.getElementById('rChartNzPrice10y'));
+    allCharts.push(c);
+    var yrs=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','Dec 2025'];
+    var price=[450000,490000,540000,570000,590000,650000,810000,870000,780000,775000,786977];
+    var yoy=[15.4,8.9,10.2,5.6,3.5,10.2,24.6,7.4,-10.3,-0.6,1.4];
+    c.setOption({
+      tooltip:baseTooltip,
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8,data:['YoY %',en?'National Median':'全國中位價']},
+      grid:{left:12,right:12,top:16,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:7,rotate:30}}),
+      yAxis:[
+        mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:8,formatter:function(v){return fmtNZDShort(v);}}}),
+        mkAxis({type:'value',splitLine:{show:false},axisLabel:{color:C.muted,fontSize:8,formatter:function(v){return v+'%';}}})
+      ],
+      series:[
+        {name:'YoY %',type:'bar',yAxisIndex:1,data:yoy.map(function(v){return{value:v,itemStyle:{color:v>=0?'rgba(22,163,74,0.7)':'rgba(220,38,38,0.7)'}}}),barMaxWidth:18,itemStyle:{borderRadius:[2,2,0,0]}},
+        {name:en?'National Median':'全國中位價',type:'line',data:price,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.08)'},symbol:'circle',symbolSize:4}
+      ]
+    });
+  }
+
+  /* 1. OCR Rate Cut Trajectory */
+  function drawOCR(lang){
+    var el = document.getElementById('chart-r-nz-ocr');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    c.setOption({
+      tooltip: baseTooltip,
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['Jan 2024','Aug 2024','Nov 2024','Feb 2025','May 2025','Q4 2025','Apr 2026','May 2026'], axisLabel:{ color:C.muted, fontSize:7 } }),
+      yAxis: mkAxis({ type:'value', min:2, max:6, axisLabel:{ color:C.muted, fontSize:9, formatter:'{value}%' } }),
+      series: [
+        { name:'OCR', type:'line', data:[5.5,5.25,4.25,3.5,3.25,2.5,2.25,2.25], lineStyle:{color:C.green,width:2}, itemStyle:{color:C.green}, areaStyle:{color:'rgba(22,163,74,0.10)'}, symbol:'circle', symbolSize:4,
+          markPoint:{data:[{coord:['May 2026',2.25],symbol:'pin',symbolSize:35,label:{formatter:'2.25%\n-325bps',fontSize:7},itemStyle:{color:C.green}}]}
+        }
+      ]
+    });
+  }
+
+  /* 2. National Median Price */
+  function drawPrice(lang){
+    var el = document.getElementById('chart-r-nz-price');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    c.setOption({
+      tooltip: baseTooltip,
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['2019','2020','2021','2022 Peak','2023','2024','Dec 2025'], axisLabel:{ color:C.muted, fontSize:7 } }),
+      yAxis: mkAxis({ type:'value', min:500000, axisLabel:{ color:C.muted, fontSize:9, formatter:function(v){return fmtNZDShort(v);} } }),
+      series: [
+        { name:lang==='zh'?'全國中位價':'National Median', type:'line', data:[590000,650000,810000,870000,760000,775000,786977], lineStyle:{color:C.navy,width:2}, itemStyle:{color:C.navy}, areaStyle:{color:'rgba(30,58,95,0.08)'}, symbol:'circle', symbolSize:4, smooth:0.2,
+          markPoint:{data:[{coord:['2022 Peak',870000],symbol:'pin',symbolSize:40,label:{formatter:'NZ$870K\nPeak',fontSize:7},itemStyle:{color:C.red}}]}
+        }
+      ]
+    });
+  }
+
+  /* 3. 3-City Comparison Bar */
+  function drawCity(lang){
+    var el = document.getElementById('chart-r-nz-city');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    var labels = lang==='zh'?['基督城 +4.03%','全國 +1.4%','奧克蘭 -1.09%']:['Christchurch +4.03%','National +1.4%','Auckland -1.09%'];
+    var prices = [697000,786977,1014000];
+    var colors = [C.green, C.navy, C.orange];
+    c.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(params){var p=params[0];return p.name+': '+fmtNZD(p.value);}}),
+      grid:{left:12,right:12,top:10,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:labels, axisLabel:{ color:C.muted, fontSize:7 } }),
+      yAxis: mkAxis({ type:'value', min:0, axisLabel:{ color:C.muted, fontSize:9, formatter:function(v){return fmtNZDShort(v);} } }),
+      series:[{type:'bar',data:prices.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[4,4,0,0]}};}),barMaxWidth:36,label:{show:true,position:'top',formatter:function(p){return fmtNZD(p.value);},fontSize:8,fontFamily:'JetBrains Mono',color:C.navy}}]
+    });
+  }
+
+  /* 4. Yield vs OCR Dual Line */
+  function drawYield(lang){
+    var el = document.getElementById('chart-r-nz-yield');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    c.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: [lang==='zh'?'毛收益率':'Gross Yield', lang==='zh'?'OCR利率':'OCR Rate'] }),
+      grid:{left:50,right:20,top:36,bottom:30,containLabel:false},
+      xAxis: mkAxis({ type:'category', data:['2021','2022','2023','2024 Peak','2025 Jan','2025 May','2026 Q1','May 2026'], axisLabel:{ color:C.muted, fontSize:9, rotate:20 } }),
+      yAxis: mkAxis({ type:'value', min:0, max:6.5, axisLabel:{ color:C.muted, fontSize:9, formatter:'{value}%' } }),
+      series: [
+        { name:lang==='zh'?'毛收益率':'Gross Yield', type:'line', data:[3.2,3.0,3.5,4.2,4.1,4.0,4.12,4.12], lineStyle:{color:C.green,width:2}, itemStyle:{color:C.green}, areaStyle:{color:'rgba(22,163,74,0.08)'}, symbol:'circle', symbolSize:5, smooth:0.2 },
+        { name:lang==='zh'?'OCR利率':'OCR Rate', type:'line', data:[0.25,3.0,5.5,5.5,4.25,3.25,2.50,2.25], lineStyle:{color:C.red,width:1.5,type:'dashed'}, itemStyle:{color:C.red}, step:'end', symbol:'circle', symbolSize:4 }
+      ]
+    });
+  }
+
+  /* 5. Rental: Rent + Rental Stock Dual-Axis */
+  function drawRental(lang){
+    var el = document.getElementById('chart-r-nz-rental');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    c.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger:'axis' }),
+      legend: Object.assign({}, baseLegend, { data: [lang==='zh'?'奧克蘭租金':'Auckland Rent', lang==='zh'?'基督城租金':'Christchurch Rent', lang==='zh'?'出租房源YoY%':'Rental Stock YoY%'] }),
+      grid:{left:50,right:55,top:40,bottom:30,containLabel:false},
+      xAxis: mkAxis({ type:'category', data:['2021','2022','2023','2024','2025 Oct'], axisLabel:{ color:C.muted, fontSize:9 } }),
+      yAxis: [
+        mkAxis({ type:'value', name:lang==='zh'?'週租 NZ$':'Weekly Rent NZ$', nameTextStyle:{fontSize:9,color:C.muted}, min:350, max:750, axisLabel:{ color:C.muted, fontSize:9, formatter:'${value}' } }),
+        mkAxis({ type:'value', name:lang==='zh'?'房源YoY%':'Stock YoY%', nameTextStyle:{fontSize:9,color:C.muted}, min:-10, max:25, position:'right', axisLabel:{ color:C.muted, fontSize:9, formatter:'{value}%' }, splitLine:{show:false} })
+      ],
+      series: [
+        { name:lang==='zh'?'奧克蘭租金':'Auckland Rent', type:'line', data:[560,620,660,685,650], lineStyle:{color:C.orange,width:2}, itemStyle:{color:C.orange}, symbol:'circle', symbolSize:5, smooth:0.2 },
+        { name:lang==='zh'?'基督城租金':'Christchurch Rent', type:'line', data:[440,500,540,570,580], lineStyle:{color:C.green,width:2}, itemStyle:{color:C.green}, symbol:'circle', symbolSize:5, smooth:0.2 },
+        { name:lang==='zh'?'出租房源YoY%':'Rental Stock YoY%', type:'line', yAxisIndex:1, data:[-5,3,8,18,21], lineStyle:{color:C.navy,width:1.5,type:'dashed'}, itemStyle:{color:C.navy}, symbol:'diamond', symbolSize:6 }
+      ]
+    });
+  }
+
+  /* 1b. OCR Detail — full rate-cut path with markers */
+  function drawOCRDetail(lang){
+    var el = document.getElementById('chart-r-nz-ocr-detail');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    var en = lang==='en';
+    c.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: [en?'OCR':'OCR利率', en?'2Y Fixed Mortgage':'兩年期固定房貸'] }),
+      grid:{left:50,right:20,top:40,bottom:30,containLabel:false},
+      xAxis: mkAxis({ type:'category', data:['2022','2023 Peak','Jan 2024','Aug 2024','Nov 2024','Feb 2025','May 2025','Q4 2025','Q1 2026','May 2026'], axisLabel:{ color:C.muted, fontSize:9, rotate:20 } }),
+      yAxis: mkAxis({ type:'value', min:0, max:8, axisLabel:{ color:C.muted, fontSize:9, formatter:'{value}%' } }),
+      series:[
+        { name:en?'OCR':'OCR利率', type:'line', data:[3.0,5.5,5.5,5.25,4.25,3.5,3.25,2.50,2.25,2.25], lineStyle:{color:C.green,width:2.5}, itemStyle:{color:C.green}, areaStyle:{color:'rgba(22,163,74,0.10)'}, symbol:'circle', symbolSize:5, step:'end',
+          markPoint:{data:[{coord:['May 2026',2.25],symbol:'pin',symbolSize:36,label:{formatter:'2.25%\n-325bps',fontSize:8},itemStyle:{color:C.green}}]}
+        },
+        { name:en?'2Y Fixed Mortgage':'兩年期固定房貸', type:'line', data:[4.5,7.0,7.0,6.8,6.3,5.8,5.2,4.85,4.85,5.29], lineStyle:{color:C.red,width:2,type:'dashed'}, itemStyle:{color:C.red}, symbol:'circle', symbolSize:5 }
+      ]
+    });
+  }
+
+  /* 4b. Yield vs OCR vs Mortgage — valuation section detail */
+  function drawYieldDetail(lang){
+    var el = document.getElementById('chart-r-nz-yield-detail');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    var en = lang==='en';
+    c.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data:[en?'Auckland Yield':'奧克蘭收益率', en?'Christchurch Yield':'基督城收益率', en?'National Yield':'全國收益率', en?'OCR':'OCR', en?'Mortgage 2Y':'房貸2年'] }),
+      grid:{left:50,right:20,top:40,bottom:30,containLabel:false},
+      xAxis: mkAxis({ type:'category', data:['2021','2022','2023','2024','2025 Q1','2025 May','Q4 2025','May 2026'], axisLabel:{ color:C.muted, fontSize:9, rotate:20 } }),
+      yAxis: mkAxis({ type:'value', min:0, max:8, axisLabel:{ color:C.muted, fontSize:9, formatter:'{value}%' } }),
+      series:[
+        { name:en?'Christchurch Yield':'基督城收益率', type:'line', data:[4.2,4.0,4.4,4.7,4.75,4.8,4.8,4.8], lineStyle:{color:C.green,width:2}, itemStyle:{color:C.green}, symbol:'circle', symbolSize:5 },
+        { name:en?'National Yield':'全國收益率', type:'line', data:[3.5,3.3,3.7,4.0,4.05,4.1,4.12,4.12], lineStyle:{color:C.navy,width:2}, itemStyle:{color:C.navy}, symbol:'circle', symbolSize:5 },
+        { name:en?'Auckland Yield':'奧克蘭收益率', type:'line', data:[3.1,2.9,3.3,3.7,3.85,3.95,3.96,3.96], lineStyle:{color:C.orange,width:2}, itemStyle:{color:C.orange}, symbol:'circle', symbolSize:5 },
+        { name:en?'OCR':'OCR', type:'line', data:[0.25,3.0,5.5,5.5,3.75,3.25,2.50,2.25], lineStyle:{color:C.muted,width:1.5,type:'dashed'}, itemStyle:{color:C.muted}, symbol:'diamond', symbolSize:5, step:'end' },
+        { name:en?'Mortgage 2Y':'房貸2年', type:'line', data:[3.0,4.5,7.0,6.3,5.2,4.85,4.85,5.29], lineStyle:{color:C.red,width:1.5,type:'dashed'}, itemStyle:{color:C.red}, symbol:'diamond', symbolSize:5 }
+      ]
+    });
+  }
+
+  /* 7. Foreign Buyer Share 2015-2025 */
+  function drawForeign(lang){
+    var el = document.getElementById('chart-r-nz-foreign');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    var en = lang==='en';
+    c.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data:[en?'Auckland Central':'奧克蘭中心', en?'National Avg':'全國平均'] }),
+      grid:{left:40,right:20,top:36,bottom:30,containLabel:false},
+      xAxis: mkAxis({ type:'category', data:['2015','2016','2017','2018 Ban','2019','2020','2022','2024','2025'], axisLabel:{ color:C.muted, fontSize:9, rotate:20 } }),
+      yAxis: mkAxis({ type:'value', min:0, max:12, axisLabel:{ color:C.muted, fontSize:9, formatter:'{value}%' } }),
+      series:[
+        { name:en?'Auckland Central':'奧克蘭中心', type:'line', data:[9.5,10.2,10.0,6.5,1.2,0.7,0.5,0.4,0.4], lineStyle:{color:C.red,width:2}, itemStyle:{color:C.red}, symbol:'circle', symbolSize:5,
+          markPoint:{data:[{coord:['2018 Ban',6.5],symbol:'pin',symbolSize:32,label:{formatter:'Ban',fontSize:8},itemStyle:{color:C.red}}]}
+        },
+        { name:en?'National Avg':'全國平均', type:'line', data:[3.0,3.2,3.3,2.1,0.7,0.4,0.3,0.2,0.3], lineStyle:{color:C.navy,width:2}, itemStyle:{color:C.navy}, symbol:'circle', symbolSize:5 }
+      ]
+    });
+  }
+
+  /* 6. Christchurch Suburb Price + Yield */
+  function drawChristchurch(lang){
+    var el = document.getElementById('chart-r-nz-christchurch');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    var labels = ['Shirley','Addington','Sydenham','Riccarton','Papanui','Halswell'];
+    var prices = [560000,595000,585000,680000,750000,820000];
+    var yields = [5.8,5.5,5.4,5.2,4.8,4.3];
+    c.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(params){var p=params[0];return p.name+'<br/>'+fmtNZD(p.value)+' · '+yields[p.dataIndex]+'% yield';}}),
+      grid:{left:60,right:20,top:20,bottom:30,containLabel:false},
+      xAxis: mkAxis({ type:'category', data:labels, axisLabel:{ color:C.muted, fontSize:10 } }),
+      yAxis: mkAxis({ type:'value', min:400000, axisLabel:{ color:C.muted, fontSize:9, formatter:function(v){return fmtNZDShort(v);} } }),
+      series:[{type:'bar',data:prices.map(function(v,i){return{value:v,itemStyle:{color:C.navy,borderRadius:[4,4,0,0]}};}),barMaxWidth:40,label:{show:true,position:'top',formatter:function(p){return fmtNZD(p.value)+'\n'+yields[p.dataIndex]+'%';},fontSize:9,fontFamily:'JetBrains Mono',color:C.navy,lineHeight:14}}]
+    });
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+    // -- Side Nav ScrollSpy --
+  (function(){
+    function initScrollSpy(){
+      var items = document.querySelectorAll('.side-nav-item');
+      if(!items.length) return;
+      var sections = [];
+      items.forEach(function(a){
+        var id = a.getAttribute('href').replace('#','');
+        var el = document.getElementById(id);
+        if(el) sections.push({el:el, a:a});
+      });
+      function onScroll(){
+        var scrollY = window.scrollY + window.innerHeight * 0.25;
+        var current = sections[0];
+        sections.forEach(function(s){
+          if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s;
+        });
+        items.forEach(function(a){ a.classList.remove('active'); });
+        if(current) current.a.classList.add('active');
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', initScrollSpy);
+    } else {
+      initScrollSpy();
+    }
+  })();
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

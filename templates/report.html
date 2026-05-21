@@ -1,0 +1,288 @@
+{% extends "_base.html" %}
+
+{% block title %}Report{% endblock %}
+
+{% block extra_head %}
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+  .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+  .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+  .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+  .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+  .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+  .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+  .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+  .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+  .chart-inline .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:8px}
+  .chart-note.green{color:#16a34a}
+  .chart-note.orange{color:#d97706}
+  .chart-note.red{color:#dc2626}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+  .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+  .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+  .report-chart-card .chart-meta{font-family:'Inter',sans-serif;font-size:11px;color:#d97706;margin-bottom:8px}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+  .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+  @media(max-width:1024px) and (min-width:769px){.report-chart-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-container">
+  <div class="report-header">
+    <div class="lang-en">
+      <h1>{{ report.header_en }}</h1>
+      <div class="report-meta">{{ report.meta_en }}</div>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <h1>{{ report.header_zh }}</h1>
+      <div class="report-meta">{{ report.meta_zh }}</div>
+    </div>
+  </div>
+  <div class="report-body">
+
+    {% for section in report.sections %}
+    {# ── Section heading ── #}
+    <h2><span class="lang-en">{{ section.title_en }}</span><span class="lang-zh" style="display:none">{{ section.title_zh }}</span></h2>
+
+    {# ── Narrative body (bilingual HTML) ── #}
+    {% if section.body_en %}
+    <div class="lang-en">{{ section.body_en | safe }}</div>
+    {% endif %}
+    {% if section.body_zh %}
+    <div class="lang-zh" style="display:none">{{ section.body_zh | safe }}</div>
+    {% endif %}
+
+    {# ── Chart grid (3-column report cards) ── #}
+    {% if section.chart_grid %}
+    <div class="report-chart-grid">
+      {% for card in section.chart_grid %}
+      <div class="report-chart-card">
+        <h4><span class="lang-en">{{ card.title_en }}</span><span class="lang-zh" style="display:none">{{ card.title_zh }}</span></h4>
+        {% if card.subtitle_en %}
+        <div class="chart-meta {{ card.subtitle_color | default('') }}"><span class="lang-en">{{ card.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ card.subtitle_zh }}</span></div>
+        {% endif %}
+        <div id="{{ card.id }}" style="height:{{ card.height | default(180) }}px;min-height:180px;"></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {# ── Inline charts (single featured charts within body) ── #}
+    {% if section.inline_charts %}
+    {% for ic in section.inline_charts %}
+    <div class="chart-inline">
+      <h4><span class="lang-en">{{ ic.title_en }}</span><span class="lang-zh" style="display:none">{{ ic.title_zh }}</span></h4>
+      {% if ic.note_en %}
+      <div class="chart-note {{ ic.note_color | default('orange') }}"><span class="lang-en">{{ ic.note_en }}</span><span class="lang-zh" style="display:none">{{ ic.note_zh }}</span></div>
+      {% endif %}
+      <div id="{{ ic.id }}" style="height:{{ ic.height | default(200) }}px;min-height:180px;"></div>
+      {% if ic.insight_en %}
+      <div class="insight-box" style="margin-top:10px;">
+        <div class="lang-en">{{ ic.insight_en | safe }}</div>
+        <div class="lang-zh" style="display:none">{{ ic.insight_zh | safe }}</div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+
+    {# ── Report footer (data sources) ── #}
+    {% if report.footer %}
+    <div class="report-footer">
+      <p><span class="lang-en">{{ report.footer.sources_en | safe }}</span><span class="lang-zh" style="display:none">{{ report.footer.sources_zh | safe }}</span></p>
+      {% if report.footer.disclaimer_en %}
+      <p><span class="lang-en">{{ report.footer.disclaimer_en }}</span><span class="lang-zh" style="display:none">{{ report.footer.disclaimer_zh }}</span></p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block base_scripts %}
+function fmtK(v){return v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v;}
+function fmtRM(v){if(v>=1000000)return'RM '+(v/1000000).toFixed(1)+'M';if(v>=1000)return'RM '+(v/1000).toFixed(0)+'K';return'RM '+v;}
+function fmtNum(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+function initCharts(lang){
+  var DATA = {{ charts | tojson }};
+  var en = lang !== 'zh';
+
+  function initChart(id){
+    var el = document.getElementById(id);
+    if(!el) return null;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    return c;
+  }
+
+  function dsColor(ds, idx){
+    var palette = [C.navy, C.green, C.orange, C.red, C.blue, C.muted];
+    return ds.color || palette[idx % palette.length];
+  }
+
+  function buildLineStyle(ds, idx){
+    var style = { color: dsColor(ds, idx), width: ds.width || 2 };
+    if(ds.lineType) style.type = ds.lineType;
+    return style;
+  }
+
+  function buildMarkLine(cfg){
+    if(!cfg) return undefined;
+    var ml = {
+      silent: true, symbol: 'none',
+      lineStyle: { color: C.red, type: 'dashed', width: 1 },
+      label: { formatter: cfg.label || '', fontSize: 10, color: C.red },
+      data: []
+    };
+    if(cfg.xAxis !== undefined) ml.data.push({ xAxis: cfg.xAxis });
+    if(cfg.yAxis !== undefined) ml.data.push({ yAxis: cfg.yAxis });
+    return ml;
+  }
+
+  function buildMarkPoint(cfg){
+    if(!cfg) return undefined;
+    var items = Array.isArray(cfg) ? cfg : [cfg];
+    var mpData = items.map(function(mp){
+      var d = {};
+      if(mp.type) d.type = mp.type;
+      if(mp.coord) d.coord = mp.coord;
+      if(mp.label) d.label = { formatter: mp.label, fontSize: 9, fontWeight: 'bold' };
+      d.symbolSize = mp.symbolSize || 50;
+      if(mp.color) d.itemStyle = { color: mp.color };
+      else if(mp.type === 'max') d.itemStyle = { color: C.green };
+      else if(mp.type === 'min') d.itemStyle = { color: C.red };
+      return d;
+    });
+    return { data: mpData };
+  }
+
+  /* Iterate over all charts belonging to page 'report' */
+  Object.keys(DATA).forEach(function(chartId){
+    var info = DATA[chartId];
+    if(info.page !== 'report') return;
+
+    var chart = initChart(chartId);
+    if(!chart) return;
+
+    var chartType = (info.type || '').toLowerCase();
+    var isHorizontal = chartType.indexOf('horizontal') >= 0;
+    var hasDualAxis = chartType.indexOf('dual') >= 0 ||
+                      (info.datasets && info.datasets.some(function(ds){ return ds.yAxisIndex === 1; }));
+
+    /* Use localized labels if available */
+    var labels = info.labels;
+    if(en && info.labels_en) labels = info.labels_en;
+    if(!en && info.labels_zh) labels = info.labels_zh;
+
+    var legendNames = (info.datasets || []).map(function(ds){
+      return en ? (ds.name_en || ds.name || '') : (ds.name_zh || ds.name || '');
+    });
+
+    /* Build series */
+    var series = (info.datasets || []).map(function(ds, idx){
+      var name = en ? (ds.name_en || ds.name || '') : (ds.name_zh || ds.name || '');
+      var s = { name: name, type: ds.type || 'line' };
+      var clr = dsColor(ds, idx);
+
+      if(ds.colors && Array.isArray(ds.colors)){
+        s.data = ds.data.map(function(v, i){
+          return { value: v, itemStyle: { color: ds.colors[i], borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] } };
+        });
+      } else {
+        s.data = ds.data;
+      }
+
+      if(ds.type === 'bar'){
+        s.barMaxWidth = isHorizontal ? 22 : 55;
+        if(!ds.colors) s.itemStyle = { color: clr, borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] };
+        if(ds.color_positive){
+          s.itemStyle = {
+            color: function(p){ return p.value >= 0 ? ds.color_positive : (ds.color_negative || C.red); },
+            borderRadius: [3,3,0,0]
+          };
+          s.label = { show: true, position: 'top', fontFamily: 'JetBrains Mono, monospace', fontSize: 9, formatter: function(p){ return p.value + '%'; } };
+        }
+        if(isHorizontal){
+          s.label = { show: true, position: 'right', formatter: '{c}', fontSize: 10, fontFamily: 'Inter', fontWeight: 'bold', color: C.navy };
+        } else if(!ds.color_positive && idx === 0){
+          s.label = { show: true, position: 'top', fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            formatter: function(p){ return typeof p.value === 'number' && p.value >= 1000 ? fmtNum(p.value) : p.value; } };
+        }
+      }
+
+      if(ds.type === 'line'){
+        s.lineStyle = buildLineStyle(ds, idx);
+        s.itemStyle = { color: clr };
+        s.symbol = 'circle';
+        s.symbolSize = ds.symbolSize || 4;
+        if(ds.step) s.step = ds.step;
+        if(ds.areaStyle) s.areaStyle = { color: 'rgba(' + hexToRgb(clr) + ',0.08)' };
+        if(ds.smooth !== undefined) s.smooth = ds.smooth;
+        else s.smooth = 0.2;
+        if(ds.yAxisIndex === 1) s.yAxisIndex = 1;
+      }
+
+      if(ds.markPoint) s.markPoint = buildMarkPoint(ds.markPoint);
+      if(ds.markLine) s.markLine = buildMarkLine(ds.markLine);
+      return s;
+    });
+
+    if(info.markLine && series.length > 0){
+      var lastS = series[series.length - 1];
+      if(!lastS.markLine) lastS.markLine = buildMarkLine(info.markLine);
+    }
+
+    /* Build axes */
+    var xAxisCfg, yAxisCfg;
+    var compactLabel = { color: C.muted, fontSize: 9 };
+
+    if(isHorizontal){
+      xAxisCfg = mkAxis({ type: 'value', min: 0 });
+      yAxisCfg = mkAxis({ type: 'category', data: (labels || []).slice().reverse(), axisLabel: { color: C.navy, fontSize: 10, fontFamily: 'Inter' } });
+      series.forEach(function(s){ if(Array.isArray(s.data)) s.data = s.data.slice().reverse(); });
+    } else {
+      xAxisCfg = mkAxis({ type: 'category', data: labels, axisLabel: compactLabel });
+      if(hasDualAxis){
+        yAxisCfg = [
+          mkAxis({ type: 'value', axisLabel: compactLabel }),
+          mkAxis({ type: 'value', splitLine: { show: false }, axisLabel: Object.assign({}, compactLabel, { formatter: '{value}%' }) })
+        ];
+      } else {
+        yAxisCfg = mkAxis({ type: 'value', axisLabel: compactLabel });
+      }
+    }
+
+    var grid = isHorizontal
+      ? { left: 90, right: 50, top: 10, bottom: 15, containLabel: false }
+      : { left: 12, right: 12, top: 28, bottom: 20, containLabel: true };
+
+    var option = {
+      tooltip: isHorizontal
+        ? Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } })
+        : baseTooltip,
+      grid: grid,
+      xAxis: xAxisCfg,
+      yAxis: yAxisCfg,
+      series: series
+    };
+
+    if(legendNames.length > 1){
+      option.legend = Object.assign({}, baseLegend, { top: 8, data: legendNames, textStyle: { fontSize: 8, color: C.muted } });
+    }
+
+    chart.setOption(option);
+  });
+}
+
+/* Helper: hex color to rgb string */
+function hexToRgb(hex){
+  if(!hex || hex.charAt(0) !== '#') return '30,58,95';
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return r+','+g+','+b;
+}
+{% endblock %}

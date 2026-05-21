@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demand Analysis | Malaysia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}</style>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <h1><span class="lang-en">Demand Analysis</span><span class="lang-zh" style="display:none">需求分析</span></h1>
+    </div>
+
+    <!-- KPIs -->
+    <div class="section-label"><span class="lang-en">KEY INDICATORS</span><span class="lang-zh" style="display:none">關鍵指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">2024 TRANSACTIONS</span><span class="lang-zh" style="display:none">2024年交易量</span></div>
+        <div class="kpi-value">420,525</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">10-Year High</span><span class="lang-zh" style="display:none">十年新高</span></span>
+        <div class="kpi-source">NAPIC 2024</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Q3 2025 TRANSACTIONS</span><span class="lang-zh" style="display:none">2025年Q3交易量</span></div>
+        <div class="kpi-value">108,250</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">+12.5% value, -3.5% vol</span><span class="lang-zh" style="display:none">價值+12.5%，量-3.5%</span></span>
+        <div class="kpi-source">JPPH Q3 2025</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">FOREIGN BUYER SHARE</span><span class="lang-zh" style="display:none">外國買家佔比</span></div>
+        <div class="kpi-value">~8-12%</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">est.</span><span class="lang-zh" style="display:none">估計值</span></span>
+        <div class="kpi-source">Juwai IQI</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">LOAN APPROVAL RATE</span><span class="lang-zh" style="display:none">貸款核准率</span></div>
+        <div class="kpi-value">42.6%</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Below pre-COVID</span><span class="lang-zh" style="display:none">低於疫情前水準</span></span>
+        <div class="kpi-source">Q3 2024 BNM</div>
+      </div>
+    </div>
+
+    <!-- Chart 1: Transaction Volume Trend -->
+    <div class="section-heading"><span class="lang-en">Transaction Trends</span><span class="lang-zh" style="display:none">交易趨勢</span></div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">Transaction Volume Trend</span><span class="lang-zh" style="display:none">交易量趨勢</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Annual residential property transactions</span><span class="lang-zh" style="display:none">年度住宅交易量</span></p>
+        <div style="position:relative;height:220px;"><div id="chartTxnVol" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Chart 2 & 3 side by side -->
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">State YoY Growth</span><span class="lang-zh" style="display:none">各州年增率</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Transaction volume change by state</span><span class="lang-zh" style="display:none">各州交易量變化</span></p>
+        <div style="position:relative;height:220px;"><div id="chartStateGrowth" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Primary vs Secondary Market</span><span class="lang-zh" style="display:none">一手 vs 二手市場</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Market share trend (%)</span><span class="lang-zh" style="display:none">市場佔比趨勢 (%)</span></p>
+        <div style="position:relative;height:220px;"><div id="chartPriSec" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Chart 4 & 5 side by side -->
+    <div class="section-heading"><span class="lang-en">Financing &amp; Absorption</span><span class="lang-zh" style="display:none">融資與去化</span></div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Loan Approval Rate Trend</span><span class="lang-zh" style="display:none">貸款核准率趨勢</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Approval rate (%)</span><span class="lang-zh" style="display:none">核准率 (%)</span></p>
+        <div style="position:relative;height:220px;"><div id="chartLoan" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Take-up Rate by Type</span><span class="lang-zh" style="display:none">依類型去化率</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Day-1 take-up rate (%)</span><span class="lang-zh" style="display:none">首日去化率 (%)</span></p>
+        <div style="position:relative;height:260px;"><div id="chartTakeUp" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Source -->
+    <div class="source-footer">
+      <span class="lang-en"><strong>Sources:</strong> NAPIC, JPPH, BNM, Juwai IQI. Data as of Q3 2025 unless stated otherwise.</span>
+      <span class="lang-zh" style="display:none"><strong>資料來源：</strong>NAPIC、JPPH、BNM、Juwai IQI。除另行標註外，資料截至2025年第三季。</span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:   '#1e3a5f',
+    green:  '#16a34a',
+    orange: '#d97706',
+    red:    '#dc2626',
+    blue:   '#2563eb',
+    muted:  '#5a7a9a',
+    grid:   '#e8f0f9',
+    text:   '#1e3a5f'
+  };
+
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+
+  var baseGrid = { left: 50, right: 20, top: 40, bottom: 30, containLabel: true };
+
+  var baseTooltip = {
+    trigger: 'axis',
+    backgroundColor: '#fff',
+    borderColor: '#ccd9e8',
+    borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+
+  var baseLegend = {
+    top: 8,
+    textStyle: baseText,
+    icon: 'circle',
+    itemWidth: 8,
+    itemHeight: 8
+  };
+
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+  }
+  function switchTab(cid,tab){
+    var w=document.getElementById(cid);if(!w)return;
+    w.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+    w.querySelectorAll('.tab-bar button').forEach(function(b){b.classList.remove('active');});
+    var p=w.querySelector('#tab-'+tab);if(p)p.classList.add('active');
+    w.querySelectorAll('.tab-bar button').forEach(function(b){if(b.dataset.tab===tab)b.classList.add('active');});
+  }
+
+  var charts = [];
+
+  window.addEventListener('load', function(){
+    // chartTxnVol
+    var cTx = echarts.init(document.getElementById('chartTxnVol'));
+    charts.push(cTx);
+    cTx.setOption({
+      tooltip: baseTooltip,
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025 Q1-Q3']
+      }),
+      yAxis: mkAxis({
+        type: 'value',
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return v >= 1000 ? (v/1000).toFixed(0)+'K' : v; } })
+      }),
+      series: [{
+        type: 'line',
+        data: [307498,319988,313394,313199,328000,295000,295000,389770,398000,420525,308000],
+        lineStyle: { color: C.navy, width: 2 },
+        itemStyle: { color: C.navy },
+        areaStyle: { color: 'rgba(30,58,95,0.08)' },
+        smooth: 0.2,
+        symbol: 'circle', symbolSize: 6,
+        markPoint: {
+          data: [{ type: 'max', name: 'Max' }],
+          label: { formatter: 'Decade\nHigh', fontSize: 10, fontWeight: 'bold' },
+          symbolSize: 50,
+          itemStyle: { color: C.green }
+        }
+      }]
+    });
+
+    // chartStateGrowth
+    var cState = echarts.init(document.getElementById('chartStateGrowth'));
+    charts.push(cState);
+    var stateLabels = ['Kelantan','Melaka','Pahang','Selangor','KL','Perlis','N. Sembilan'];
+    var stateValues = [12.3, 8.7, 6.2, 4.1, -4.3, 2.8, 3.5];
+    cState.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: { left: 90, right: 50, top: 10, bottom: 20, containLabel: false },
+      xAxis: mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) }),
+      yAxis: mkAxis({
+        type: 'category',
+        data: stateLabels.slice().reverse(),
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      }),
+      series: [{
+        type: 'bar',
+        data: stateValues.slice().reverse().map(function(v){
+          return { value: v, itemStyle: { color: v >= 0 ? C.green : C.red, borderRadius: v >= 0 ? [0,4,4,0] : [4,0,0,4] } };
+        }),
+        barMaxWidth: 25,
+        label: {
+          show: true,
+          position: 'right',
+          formatter: function(p){ return (p.value >= 0 ? '+' : '') + p.value + '%'; },
+          fontSize: 10, fontFamily: 'Inter'
+        }
+      }]
+    });
+
+    // chartPriSec
+    var cPri = echarts.init(document.getElementById('chartPriSec'));
+    charts.push(cPri);
+    cPri.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Primary','Secondary'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2019','2020','2021','2022','2023','2024','2025 H1']
+      }),
+      yAxis: mkAxis({
+        type: 'value', max: 100,
+        axisLabel: Object.assign({}, baseText, { formatter: '{value}%' })
+      }),
+      series: [
+        {
+          name: 'Primary',
+          type: 'line',
+          data: [28,26,24,22,21,21,20.6],
+          lineStyle: { color: C.navy, width: 2 },
+          itemStyle: { color: C.navy },
+          symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'Secondary',
+          type: 'line',
+          data: [72,74,76,78,79,79,79.4],
+          lineStyle: { color: C.muted, width: 2 },
+          itemStyle: { color: C.muted },
+          symbol: 'circle', symbolSize: 6
+        }
+      ]
+    });
+
+    // chartLoan
+    var cLoan = echarts.init(document.getElementById('chartLoan'));
+    charts.push(cLoan);
+    cLoan.setOption({
+      tooltip: baseTooltip,
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025Q3']
+      }),
+      yAxis: mkAxis({
+        type: 'value',
+        axisLabel: Object.assign({}, baseText, { formatter: '{value}%' })
+      }),
+      series: [{
+        type: 'line',
+        data: [51,50,50,49,48,44,46,46,44,43,43],
+        lineStyle: { color: C.orange, width: 2 },
+        itemStyle: { color: C.orange },
+        smooth: 0.2,
+        symbol: 'circle', symbolSize: 6,
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          lineStyle: { color: C.red, type: 'dashed', width: 1 },
+          label: { formatter: '43% Current', fontSize: 10, color: C.red, position: 'insideEndTop' },
+          data: [{ yAxis: 43 }]
+        }
+      }]
+    });
+
+    // chartTakeUp
+    var cTake = echarts.init(document.getElementById('chartTakeUp'));
+    charts.push(cTake);
+    cTake.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['Landed / \u6709\u5730\u4f4f\u5b85', 'High-Rise / \u9ad8\u5c64\u4f4f\u5b85']
+      }),
+      yAxis: mkAxis({
+        type: 'value', max: 20,
+        axisLabel: Object.assign({}, baseText, { formatter: '{value}%' })
+      }),
+      series: [{
+        type: 'bar',
+        data: [
+          { value: 14, itemStyle: { color: C.green, borderRadius: [4,4,0,0] } },
+          { value: 5.1, itemStyle: { color: C.orange, borderRadius: [4,4,0,0] } }
+        ],
+        barMaxWidth: 100,
+        label: {
+          show: true, position: 'top',
+          formatter: '{c}%', fontSize: 12, fontFamily: 'JetBrains Mono, monospace'
+        }
+      }]
+    });
+
+    setLang(localStorage.getItem('lang')||'en');
+  });
+
+  window.addEventListener('resize', function(){
+    charts.forEach(function(c){ c.resize(); });
+  });
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

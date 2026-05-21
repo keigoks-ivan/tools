@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hsinchu Deep Dive | Taiwan Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q3 2025</span><span class="lang-zh" style="display:none">最後更新：2025年Q3</span></span>
+      <h1><span class="lang-en">Hsinchu: The TSMC Effect</span><span class="lang-zh" style="display:none">新竹：台積電效應</span></h1>
+    </div>
+
+    <div class="section-label"><span class="lang-en">KEY METRICS</span><span class="lang-zh" style="display:none">關鍵指標</span></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">HSINCHU AVG PRICE</span><span class="lang-zh" style="display:none">新竹平均房價</span></div>
+        <div class="kpi-value">NT$42–45<span style="font-size:13px"><span class="lang-en">W/ping</span><span class="lang-zh" style="display:none">萬/坪</span></span></div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">H1 vol -41% YoY</span><span class="lang-zh" style="display:none">H1成交量年減41%</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">5Y APPRECIATION</span><span class="lang-zh" style="display:none">五年漲幅</span></div>
+        <div class="kpi-value">+58.4%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Highest in Taiwan</span><span class="lang-zh" style="display:none">全台最高</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">TSMC EFFECT</span><span class="lang-zh" style="display:none">台積電效應</span></div>
+        <div class="kpi-value" style="font-size:20px;"><span class="lang-en">HSP Demand</span><span class="lang-zh" style="display:none">竹科需求</span></div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Employee-driven</span><span class="lang-zh" style="display:none">員工驅動</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">RENTAL YIELD</span><span class="lang-zh" style="display:none">租金收益率</span></div>
+        <div class="kpi-value">1.9%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Low due to price surge</span><span class="lang-zh" style="display:none">因房價飆漲偏低</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">MEDIAN MULTIPLE</span><span class="lang-zh" style="display:none">房價所得比</span></div>
+        <div class="kpi-value">12.5x</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Severely unaffordable</span><span class="lang-zh" style="display:none">嚴重不可負擔</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">ZHUBEI PEAK</span><span class="lang-zh" style="display:none">竹北高點</span></div>
+        <div class="kpi-value">~55<span style="font-size:13px"><span class="lang-en">W/ping</span><span class="lang-zh" style="display:none">萬/坪</span></span></div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Redevelopment area</span><span class="lang-zh" style="display:none">重劃區</span></span>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">MARKET OVERVIEW</span><span class="lang-zh" style="display:none">市場概覽</span></div>
+    <div class="summary-card" style="border-left:4px solid #2563eb;">
+      <p><span class="lang-en">Hsinchu's property market is primarily driven by TSMC and the broader semiconductor industry. The Hsinchu Science Park (HSP) employs over 160,000 workers, creating sustained housing demand that has pushed prices up 58.4% over five years &mdash; the highest appreciation rate of any major city in Taiwan.</span><span class="lang-zh" style="display:none">新竹房地產市場主要受台積電及半導體產業驅動。新竹科學園區（竹科）僱用超過16萬名員工，持續創造住房需求，推動房價五年內上漲58.4% — 為全台主要城市中最高漲幅。</span></p>
+      <p style="margin-top:10px;"><span class="lang-en">The Zhubei redevelopment area has emerged as the hottest corridor, with new high-rise developments catering to HSP families seeking modern amenities and school districts. Spillover demand has extended south to Toufen and Zhunan in Miaoli County, where prices remain 30-40% below Zhubei levels.</span><span class="lang-zh" style="display:none">竹北重劃區已成為最熱門的走廊，新建高層社區滿足竹科家庭對現代設施和學區的需求。外溢需求已向南延伸至苗栗縣的頭份和竹南，當地價格仍低於竹北30-40%。</span></p>
+      <p style="margin-top:10px;"><span class="lang-en"><strong>Key Risk:</strong> Concentration in a single industry. Any significant downturn in the global semiconductor cycle could impact employment and housing demand simultaneously.</span><span class="lang-zh" style="display:none"><strong>主要風險：</strong>單一產業集中度高。全球半導體周期若出現重大下行，可能同時衝擊就業及住房需求。</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">KEY ZONES</span><span class="lang-zh" style="display:none">主要區域</span></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+      <div class="micro-card">
+        <h4><span class="lang-en">Zone 1: Zhubei Redevelopment</span><span class="lang-zh" style="display:none">第一區：竹北重劃區</span></h4>
+        <div class="kpi-value" style="font-size:18px;">40–55<span style="font-size:12px"><span class="lang-en">W/ping</span><span class="lang-zh" style="display:none">萬/坪</span></span></div>
+        <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">HSP families. New high-rise developments, top school districts, and premium amenities.</span><span class="lang-zh" style="display:none">竹科家庭。新建高層社區、頂尖學區及優質生活機能。</span></p>
+      </div>
+      <div class="micro-card">
+        <h4><span class="lang-en">Zone 2: East District / HSP</span><span class="lang-zh" style="display:none">第二區：東區／竹科</span></h4>
+        <div class="kpi-value" style="font-size:18px;">35–45<span style="font-size:12px"><span class="lang-en">W/ping</span><span class="lang-zh" style="display:none">萬/坪</span></span></div>
+        <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Tech workers. Closest proximity to HSP with established commercial infrastructure.</span><span class="lang-zh" style="display:none">科技工作者。最鄰近竹科，商業基礎設施成熟。</span></p>
+      </div>
+      <div class="micro-card">
+        <h4><span class="lang-en">Zone 3: Xiangshan / Baoshan</span><span class="lang-zh" style="display:none">第三區：香山／寶山</span></h4>
+        <div class="kpi-value" style="font-size:18px;">25–35<span style="font-size:12px"><span class="lang-en">W/ping</span><span class="lang-zh" style="display:none">萬/坪</span></span></div>
+        <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Spillover demand. Affordable alternative with improving transport links to HSP.</span><span class="lang-zh" style="display:none">外溢需求。價格實惠的替代選擇，往竹科交通持續改善中。</span></p>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">CHARTS</span><span class="lang-zh" style="display:none">圖表</span></div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Price Trend 5Y</span><span class="lang-zh" style="display:none">五年房價趨勢</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Hsinchu Avg Price · NT$ 10K per ping</span><span class="lang-zh" style="display:none">新竹平均房價 · 萬元/坪</span></p>
+        <div style="position:relative;height:220px;"><div id="chartHsinchuPrice" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">HSP Investment Trend</span><span class="lang-zh" style="display:none">竹科投資趨勢</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Annual Investment · NT$ 100M</span><span class="lang-zh" style="display:none">年投資額 · 億元</span></p>
+        <div style="position:relative;height:220px;"><div id="chartHsinchuFDI" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">KEY INSIGHTS</span><span class="lang-zh" style="display:none">關鍵洞察</span></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);">
+      <div class="summary-card" style="border-left:4px solid #16a34a;">
+        <h4><span class="lang-en">TSMC Drive</span><span class="lang-zh" style="display:none">台積電驅動</span></h4>
+        <p><span class="lang-en">Semiconductor investment sustains demand. TSMC's continued capex expansion in Hsinchu anchors long-term housing fundamentals.</span><span class="lang-zh" style="display:none">半導體投資持續支撐需求。台積電在新竹持續擴大資本支出，為長期住房基本面提供穩固支撐。</span></p>
+      </div>
+      <div class="summary-card" style="border-left:4px solid #2563eb;">
+        <h4><span class="lang-en">Zhubei Premium</span><span class="lang-zh" style="display:none">竹北溢價</span></h4>
+        <p><span class="lang-en">Redevelopment area commands a significant premium over older districts, driven by new supply quality and lifestyle positioning.</span><span class="lang-zh" style="display:none">重劃區相對舊市區享有顯著溢價，受新建案品質及生活定位驅動。</span></p>
+      </div>
+      <div class="summary-card" style="border-left:4px solid #d97706;">
+        <h4><span class="lang-en">Yield Compression</span><span class="lang-zh" style="display:none">收益率壓縮</span></h4>
+        <p><span class="lang-en">Low yields at 1.9% due to rapid price appreciation outpacing rental growth. Negative carry after mortgage costs.</span><span class="lang-zh" style="display:none">因房價漲幅遠超租金成長，收益率僅1.9%。扣除房貸成本後為負現金流。</span></p>
+      </div>
+      <div class="summary-card" style="border-left:4px solid #d97706;">
+        <h4><span class="lang-en">Concentration Risk</span><span class="lang-zh" style="display:none">集中度風險</span></h4>
+        <p><span class="lang-en">Single-industry dependency on semiconductors. A cyclical downturn could trigger simultaneous job losses and price declines.</span><span class="lang-zh" style="display:none">對半導體產業的單一依賴。景氣循環下行可能同步引發失業及房價下跌。</span></p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">Sinyi Realty &middot; MOI 2024 &middot; CBC &middot; HSP Bureau &middot; Global Property Guide Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">信義房屋 &middot; 內政部 2024 &middot; 中央銀行 &middot; 竹科管理局 &middot; Global Property Guide 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  function fmtPrice(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return 'NT$'+v+'\u842c';if(a>=1000000)return 'NT$'+(a/1000000).toFixed(2)+'M';return 'NT$'+Math.round(a/1000)+'K';}
+  function fmtPriceShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return v+'\u842c';if(a>=1000000)return(a/1000000).toFixed(1)+'M';return Math.round(a/1000)+'K';}
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    // chartHsinchuPrice — line
+    var c1=echarts.init(document.getElementById('chartHsinchuPrice'));allCharts.push(c1);
+    c1.setOption({
+      tooltip:baseTooltip,grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025Q3']}),
+      yAxis:mkAxis({type:'value',min:20,axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtPriceShort(v,lang);}})}),
+      series:[{type:'line',data:[26.5,30,35,38,41,42],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.08)'},smooth:0.2,symbol:'circle',symbolSize:6,
+        markPoint:{data:[{coord:['2025Q3',42],symbol:'pin',symbolSize:50,label:{formatter:'+58.4% in 5Y',fontSize:9},itemStyle:{color:C.green}}]}
+      }]
+    });
+
+    // chartHsinchuFDI — bar
+    var c2=echarts.init(document.getElementById('chartHsinchuFDI'));allCharts.push(c2);
+    var fdiLabels=['2020','2021','2022','2023','2024'];
+    var fdiData=[4500,5200,6800,7200,8100];
+    c2.setOption({
+      tooltip:baseTooltip,grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:fdiLabels}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return 'NT$'+(v/100)+'B';}})}),
+      series:[{type:'bar',data:fdiData.map(function(v,i){return{value:v,itemStyle:{color:i===fdiData.length-1?C.green:C.navy,borderRadius:[4,4,0,0]}};}),barMaxWidth:45,label:{show:true,position:'top',formatter:function(p){return 'NT$'+(p.value/100)+'B';},fontSize:10,fontFamily:'JetBrains Mono'},
+        markPoint:{data:[{type:'max',name:'Max',label:{formatter:'Max',fontSize:9},itemStyle:{color:C.green}}]}
+      }]
+    });
+  }
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

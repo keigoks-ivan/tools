@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Dashboard | Malaysia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}</style>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <header class="navbar">
+    <a href="home.html" class="logo">PROPERTY MONITOR</a>
+    <div class="market-selector">
+      <button class="market-btn" onclick="toggleMarketMenu()">🇲🇾 <span class="lang-en">Malaysia</span><span class="lang-zh" style="display:none">馬來西亞</span> ▾</button>
+      <div class="market-dropdown" id="marketDropdown">
+        <a href="index.html" class="active">🇲🇾 <span class="lang-en">Malaysia</span><span class="lang-zh" style="display:none">馬來西亞</span></a>
+        <a href="tw/report.html">🇹🇼 <span class="lang-en">Taiwan</span><span class="lang-zh" style="display:none">台灣</span></a>
+        <a href="jp/report.html">🇯🇵 <span class="lang-en">Japan</span><span class="lang-zh" style="display:none">日本</span></a>
+        <a href="au/report.html">🇦🇺 <span class="lang-en">Australia</span><span class="lang-zh" style="display:none">澳洲</span></a>
+        <a href="nz/report.html">🇳🇿 <span class="lang-en">New Zealand</span><span class="lang-zh" style="display:none">紐西蘭</span></a>
+        <a href="uk/report.html">🇬🇧 <span class="lang-en">United Kingdom</span><span class="lang-zh" style="display:none">英國</span></a>
+        <a href="th/report.html">🇹🇭 <span class="lang-en">Thailand</span><span class="lang-zh" style="display:none">泰國</span></a>
+        <a href="us/report.html">🇺🇸 <span class="lang-en">United States</span><span class="lang-zh" style="display:none">美國</span></a>
+      </div>
+    </div>
+    <nav>
+      <a href="report.html"><span class="lang-en">Report</span><span class="lang-zh" style="display:none">報告</span></a>
+      <a href="index.html" class="active"><span class="lang-en">Dashboard</span><span class="lang-zh" style="display:none">市場總覽</span></a>
+      <a href="supply.html"><span class="lang-en">Supply</span><span class="lang-zh" style="display:none">供給分析</span></a>
+      <a href="demand.html"><span class="lang-en">Demand</span><span class="lang-zh" style="display:none">需求分析</span></a>
+      <a href="valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh" style="display:none">估值監測</span></a>
+      <a href="risk.html"><span class="lang-en">Risk</span><span class="lang-zh" style="display:none">風險監測</span></a>
+      <a href="kl.html"><span class="lang-en">KL</span><span class="lang-zh" style="display:none">吉隆坡</span></a>
+      <a href="penang.html"><span class="lang-en">Penang</span><span class="lang-zh" style="display:none">檳城</span></a>
+    </nav>
+    <div class="lang-switcher">
+      <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+    </div>
+    <span class="opr-badge">OPR: 2.75% ▼</span>
+    <button class="hamburger" onclick="document.querySelector('.mobile-menu').classList.toggle('open')">&#9776;</button>
+  </header>
+  <div class="mobile-menu">
+    <a href="report.html"><span class="lang-en">Report</span><span class="lang-zh" style="display:none">報告</span></a>
+    <a href="index.html" class="active"><span class="lang-en">Dashboard</span><span class="lang-zh" style="display:none">市場總覽</span></a>
+    <a href="supply.html"><span class="lang-en">Supply</span><span class="lang-zh" style="display:none">供給分析</span></a>
+    <a href="demand.html"><span class="lang-en">Demand</span><span class="lang-zh" style="display:none">需求分析</span></a>
+    <a href="valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh" style="display:none">估值監測</span></a>
+    <a href="risk.html"><span class="lang-en">Risk</span><span class="lang-zh" style="display:none">風險監測</span></a>
+    <a href="kl.html"><span class="lang-en">KL</span><span class="lang-zh" style="display:none">吉隆坡</span></a>
+    <a href="penang.html"><span class="lang-en">Penang</span><span class="lang-zh" style="display:none">檳城</span></a>
+    <div class="mobile-meta">
+      <span class="opr-badge">OPR: 2.75% ▼</span>
+      <div class="lang-switcher"><button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button><button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button></div>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q3 2025 / Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2025年Q3 / 2026年Q1</span></span>
+      <h1><span class="lang-en">Market Dashboard</span><span class="lang-zh" style="display:none">市場儀表板</span></h1>
+      <p class="subtitle">Institutional-Grade Analytics · Malaysia Residential Property</p>
+    </div>
+
+    <!-- Row 1: Market Temperature -->
+    <div class="section-label"><span class="lang-en">MARKET TEMPERATURE</span><span class="lang-zh" style="display:none">市場溫度指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">GROSS RENTAL YIELD</span><span class="lang-zh" style="display:none">全國租金收益率</span></div>
+        <div class="kpi-value">5.19%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">↑ vs 5.10% Q1 2025</span><span class="lang-zh" style="display:none">↑ 較2025年Q1的5.10%上升</span></span>
+        <div class="kpi-source">Global Property Guide Q1 2026</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">HIGH-RISE ABSORPTION</span><span class="lang-zh" style="display:none">高層去化月數</span></div>
+        <div class="kpi-value">18–24m</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">⚠ 12.9% take-up</span><span class="lang-zh" style="display:none">⚠ 去化率12.9%</span></span>
+        <div class="kpi-source">NAPIC 2025</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">MHPI YoY</span><span class="lang-zh" style="display:none">房價指數年增率</span></div>
+        <div class="kpi-value">+0.1%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">−1.39% real</span><span class="lang-zh" style="display:none">實質−1.39%</span></span>
+        <div class="kpi-source">Q3 2025 JPPH</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">NATIONAL AVG PRICE</span><span class="lang-zh" style="display:none">全國平均房價</span></div>
+        <div class="kpi-value">RM 494,384</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">+0.1% YoY</span><span class="lang-zh" style="display:none">年增+0.1%</span></span>
+        <div class="kpi-source">Q3 2025 JPPH</div>
+      </div>
+    </div>
+
+    <!-- Row 2: Supply Pressure -->
+    <div class="section-label"><span class="lang-en">SUPPLY PRESSURE</span><span class="lang-zh" style="display:none">供給壓力指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">RESIDENTIAL OVERHANG</span><span class="lang-zh" style="display:none">住宅待售餘屋</span></div>
+        <div class="kpi-value">28,672</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">↑ +30.5% YoY</span><span class="lang-zh" style="display:none">↑ 年增+30.5%</span></span>
+        <div class="kpi-source">Q3 2025 NAPIC</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">TOTAL OVERHANG (incl. SA)</span><span class="lang-zh" style="display:none">總積壓（含服務式公寓）</span></div>
+        <div class="kpi-value">44,794</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">incl. serviced apts</span><span class="lang-zh" style="display:none">含服務式公寓</span></span>
+        <div class="kpi-source">Q3 2025 NAPIC</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">NEW COMPLETIONS</span><span class="lang-zh" style="display:none">新完工交屋量</span></div>
+        <div class="kpi-value">69,303</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">↑ +25.3% YoY</span><span class="lang-zh" style="display:none">↑ 年增+25.3%</span></span>
+        <div class="kpi-source">Q1–Q3 2025</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">DEVELOPER CONFIDENCE</span><span class="lang-zh" style="display:none">開發商信心指數</span></div>
+        <div class="kpi-value">19%</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Optimistic only</span><span class="lang-zh" style="display:none">僅19%樂觀</span></span>
+        <div class="kpi-source">REHDA 2H2025</div>
+      </div>
+    </div>
+
+    <!-- Row 3: Demand Momentum -->
+    <div class="section-label"><span class="lang-en">DEMAND MOMENTUM</span><span class="lang-zh" style="display:none">需求動能指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">2024 TRANSACTIONS</span><span class="lang-zh" style="display:none">2024年交易量</span></div>
+        <div class="kpi-value">420,525</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">10-Year High</span><span class="lang-zh" style="display:none">十年新高</span></span>
+        <div class="kpi-source">NAPIC 2024</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Q3 2025 TRANSACTIONS</span><span class="lang-zh" style="display:none">2025年Q3交易量</span></div>
+        <div class="kpi-value">108,250</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">+12.5% value, -3.5% vol</span><span class="lang-zh" style="display:none">成交值+12.5%，量-3.5%</span></span>
+        <div class="kpi-source">JPPH Q3 2025</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">LOAN APPROVAL RATE</span><span class="lang-zh" style="display:none">貸款批准率</span></div>
+        <div class="kpi-value">42.6%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Below pre-COVID</span><span class="lang-zh" style="display:none">低於疫情前水平</span></span>
+        <div class="kpi-source">Q3 2024 BNM</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">OPR</span><span class="lang-zh" style="display:none">隔夜政策利率</span></div>
+        <div class="kpi-value">2.75%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Cut Jul 2025</span><span class="lang-zh" style="display:none">2025年7月降息</span></span>
+        <div class="kpi-source">BNM</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">MHPI YoY (2025Q3)</span><span class="lang-zh" style="display:none">房價指數年增率（2025Q3）</span></div>
+        <div class="kpi-value">+0.14%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Near-flat in real terms</span><span class="lang-zh" style="display:none">實質持平</span></span>
+        <div class="kpi-source">JPPH Q3 2025</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">KL Avg Price YoY</span><span class="lang-zh" style="display:none">吉隆坡平均房價年增率</span></div>
+        <div class="kpi-value">−4.3%</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Q3 2025 · Supply-driven</span><span class="lang-zh" style="display:none">2025年Q3 · 供給驅動</span></span>
+        <div class="kpi-source">JPPH Q3 2025</div>
+      </div>
+    </div>
+
+    <!-- Charts: Row 1 - MHPI + City Price -->
+    <div class="chart-grid two-col" style="margin-top:20px;">
+      <div class="chart-card">
+        <h3><span class="lang-en">Malaysia House Price Index (MHPI)</span><span class="lang-zh" style="display:none">馬來西亞房價指數（MHPI）</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Nominal vs Real · YoY% Change</span><span class="lang-zh" style="display:none">名義 vs 實質 · 年增率</span></p>
+        <div style="position:relative;height:240px;"><div id="chart-mhpi-dash" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Average Price by Major City</span><span class="lang-zh" style="display:none">主要城市平均房價</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Q3 2025 · RM · YoY% Change</span><span class="lang-zh" style="display:none">2025年Q3 · 令吉 · 年增率</span></p>
+        <div style="position:relative;height:240px;"><div id="chart-city-price" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Charts: Row 2 - Yield Spread + Overhang + Yield City + Tx Trend -->
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Yield Spread Monitor</span><span class="lang-zh" style="display:none">利差監測儀</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Gross Rental Yield vs OPR</span><span class="lang-zh" style="display:none">租金收益率 vs OPR</span></p>
+        <div style="position:relative;height:220px;"><div id="chart-yield-spread" style="width:100%;height:100%"></div></div>
+        <div class="insight-box">
+          <span class="lang-en">Current spread +2.44% — Positive but compressed vs 2020–2021 peak (+2.95%).</span>
+          <span class="lang-zh" style="display:none">當前利差+2.44%——正向但相較2020至2021年高峰（+2.95%）有所收窄。</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Overhang Pipeline &amp; Forecast</span><span class="lang-zh" style="display:none">待售餘屋趨勢與預測</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Residential overhang units · Historical + Forecast</span><span class="lang-zh" style="display:none">住宅待售餘屋 · 歷史+預測</span></p>
+        <div style="position:relative;height:280px;"><div id="chart-overhang-pipeline" style="width:100%;height:100%"></div></div>
+        <div class="insight-box">
+          <span class="lang-en">Base case (absorption 85,000/yr): overhang peaks at ~47,000 units in 2027, normalising to ~14,000 by 2029. Bull case (90,000/yr): peak ~42,000, clears faster to ~8,000. Bear case (75,000/yr, OPR reversal): peak ~57,000, still elevated at ~28,000 in 2029.</span>
+          <span class="lang-zh" style="display:none">基本情境（年均吸收85,000套）：待售餘屋在2027年高峰約47,000套，2029年回落至約14,000套。樂觀情境（吸收90,000套）：高峰約42,000套，2029年降至約8,000套。保守情境（吸收75,000套，OPR逆轉）：高峰約57,000套，2029年仍達28,000套。</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Rental Yield by City (Q1 2026)</span><span class="lang-zh" style="display:none">各城市租金收益率（2026年Q1）</span></h3>
+        <div style="position:relative;height:240px;"><div id="chart-yield-city" style="width:100%;height:100%"></div></div>
+        <p class="chart-footnote"><span class="lang-en">Green = above OPR (2.75%) = positive carry | Orange = below OPR</span><span class="lang-zh" style="display:none">綠色 = 高於OPR（2.75%）= 正向利差 | 橙色 = 低於OPR</span></p>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Transaction Volume Trend</span><span class="lang-zh" style="display:none">交易量趨勢</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-tx-trend" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">NAPIC 2024 &middot; NAPIC Q3 2025 &middot; JPPH Q3 2025 &middot; Global Property Guide Q1 2026 &middot; BNM 2023–2025 &middot; DOSM 2022 &middot; Juwai IQI 2025 &middot; REHDA 2H2025<br><em>Estimates marked * are directional approximations. Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">NAPIC 2024 &middot; NAPIC 2025年Q3 &middot; JPPH 2025年Q3 &middot; Global Property Guide 2026年Q1 &middot; BNM 2023–2025 &middot; DOSM 2022 &middot; Juwai IQI 2025 &middot; REHDA 2H2025<br><em>標示 * 為方向性估算，非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:   '#1e3a5f',
+    green:  '#16a34a',
+    orange: '#d97706',
+    red:    '#dc2626',
+    blue:   '#2563eb',
+    muted:  '#5a7a9a',
+    grid:   '#e8f0f9',
+    text:   '#1e3a5f'
+  };
+
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+
+  var baseGrid = { left: 50, right: 20, top: 40, bottom: 30, containLabel: true };
+
+  var baseTooltip = {
+    trigger: 'axis',
+    backgroundColor: '#fff',
+    borderColor: '#ccd9e8',
+    borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+
+  var baseLegend = {
+    top: 8,
+    textStyle: baseText,
+    icon: 'circle',
+    itemWidth: 8,
+    itemHeight: 8
+  };
+
+  function fmtRM(v) {
+    if (v >= 1000000) return 'RM ' + (v/1000000).toFixed(1) + 'M';
+    if (v >= 1000) return 'RM ' + (v/1000).toFixed(0) + 'K';
+    return 'RM ' + v;
+  }
+
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+  }
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}});
+
+  var charts = [];
+
+  window.addEventListener('load', function(){
+    var cMhpi = echarts.init(document.getElementById('chart-mhpi-dash'));
+    charts.push(cMhpi);
+    cMhpi.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['YoY %','Nominal Index','Real Index'] }),
+      grid: { left: 50, right: 50, top: 45, bottom: 30, containLabel: true },
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025Q3']
+      }),
+      yAxis: [
+        mkAxis({ type: 'value', name: 'Index', nameTextStyle: baseText }),
+        mkAxis({ type: 'value', name: 'YoY %', nameTextStyle: baseText, splitLine: { show: false }, axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) })
+      ],
+      series: [
+        {
+          name: 'YoY %',
+          type: 'bar',
+          yAxisIndex: 1,
+          data: [5.8,5.5,3.4,3.9,3.7,0.5,1.0,5.6,4.8,5.0,2.2],
+          barMaxWidth: 35,
+          itemStyle: {
+            color: function(p){ return p.value >= 0 ? 'rgba(22,163,74,0.7)' : C.red; },
+            borderRadius: [3,3,0,0]
+          },
+          label: {
+            show: true, position: 'top',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
+            formatter: function(p){ return p.value + '%'; }
+          }
+        },
+        {
+          name: 'Nominal Index',
+          type: 'line',
+          data: [165,174,180,187,194,195,197,208,218,229,234],
+          lineStyle: { color: C.navy, width: 2 },
+          itemStyle: { color: C.navy },
+          symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'Real Index',
+          type: 'line',
+          data: [128,133,135,137,140,142,142,147,152,157,159],
+          lineStyle: { color: C.muted, width: 2, type: 'dashed' },
+          itemStyle: { color: C.muted },
+          symbol: 'circle', symbolSize: 6
+        }
+      ]
+    });
+
+    var cCity = echarts.init(document.getElementById('chart-city-price'));
+    charts.push(cCity);
+    var cityLabels = ['National Avg','Penang','Selangor','KL','Johor'];
+    var cityPrices = [494384, 504845, 510000, 804642, 380000];
+    var cityColors = [C.navy, C.green, C.navy, C.orange, C.navy];
+    var cityYoY = [3.2, 5.7, 2.1, -4.3, 1.8];
+    cCity.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Avg Price','YoY %'] }),
+      grid: { left: 50, right: 50, top: 45, bottom: 30, containLabel: true },
+      xAxis: mkAxis({ type: 'category', data: cityLabels }),
+      yAxis: [
+        mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtRM(v); } }) }),
+        mkAxis({ type: 'value', splitLine: { show: false }, min: -8, max: 10, axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) })
+      ],
+      series: [
+        {
+          name: 'Avg Price',
+          type: 'bar',
+          data: cityPrices.map(function(v,i){ return { value: v, itemStyle: { color: cityColors[i], borderRadius: [4,4,0,0] } }; }),
+          barMaxWidth: 55,
+          label: {
+            show: true, position: 'top',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            formatter: function(p){ return fmtRM(p.value); }
+          }
+        },
+        {
+          name: 'YoY %',
+          type: 'line',
+          yAxisIndex: 1,
+          data: cityYoY.map(function(v){ return { value: v, itemStyle: { color: v >= 0 ? C.green : C.red } }; }),
+          lineStyle: { color: C.red, width: 2 },
+          symbol: 'circle', symbolSize: 8,
+          label: {
+            show: true, position: 'top',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            formatter: function(p){ return (p.value >= 0 ? '+' : '') + p.value + '%'; }
+          }
+        }
+      ]
+    });
+
+    var cYield = echarts.init(document.getElementById('chart-yield-spread'));
+    charts.push(cYield);
+    cYield.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Rental Yield %','OPR %'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025Q3']
+      }),
+      yAxis: mkAxis({ type: 'value', min: 1, max: 6, axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) }),
+      series: [
+        {
+          name: 'Rental Yield %',
+          type: 'line',
+          data: [5.1,5.0,4.9,4.9,4.8,4.6,4.7,4.9,5.16,5.24,5.19],
+          lineStyle: { color: C.green, width: 2 },
+          itemStyle: { color: C.green },
+          smooth: 0.3,
+          areaStyle: { color: 'rgba(22,163,74,0.08)' },
+          symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'OPR %',
+          type: 'line',
+          data: [3.25,3.0,3.0,3.25,3.0,1.75,1.75,2.75,3.0,3.0,2.75],
+          lineStyle: { color: C.red, width: 2, type: 'dashed' },
+          itemStyle: { color: C.red },
+          step: 'end',
+          symbol: 'circle', symbolSize: 4
+        }
+      ]
+    });
+
+    var cOverhang = echarts.init(document.getElementById('chart-overhang-pipeline'));
+    charts.push(cOverhang);
+    cOverhang.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Historical','Bull (90K)','Base (85K)','Bear (75K)'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2018','2019','2020','2021','2022','2023','24H1','25*','26E','27E','28E','29E'],
+        axisLabel: Object.assign({}, baseText, { rotate: 0, interval: 0 })
+      }),
+      yAxis: mkAxis({
+        type: 'value', min: 0,
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return v >= 1000 ? (v/1000).toFixed(0)+'K' : v; } })
+      }),
+      series: [
+        {
+          name: 'Historical',
+          type: 'line',
+          data: [32313,36863,31092,26424,27746,25816,22642,28672,null,null,null,null],
+          lineStyle: { color: C.navy, width: 2 },
+          itemStyle: { color: C.navy },
+          areaStyle: { color: 'rgba(30,58,95,0.08)' },
+          symbol: 'circle', symbolSize: 5
+        },
+        {
+          name: 'Bull (90K)',
+          type: 'line',
+          data: [null,null,null,null,null,null,null,28672,43000,42000,22000,8000],
+          lineStyle: { color: C.green, width: 1.5, type: [4,2] },
+          itemStyle: { color: C.green },
+          symbol: 'circle', symbolSize: 4
+        },
+        {
+          name: 'Base (85K)',
+          type: 'line',
+          data: [null,null,null,null,null,null,null,28672,46000,47000,28000,14000],
+          lineStyle: { color: C.orange, width: 2, type: [6,3] },
+          itemStyle: { color: C.orange },
+          symbol: 'circle', symbolSize: 5
+        },
+        {
+          name: 'Bear (75K)',
+          type: 'line',
+          data: [null,null,null,null,null,null,null,28672,51000,57000,42000,28000],
+          lineStyle: { color: C.red, width: 1.5, type: [8,4] },
+          itemStyle: { color: C.red },
+          symbol: 'circle', symbolSize: 4
+        }
+      ]
+    });
+
+    var cYieldCity = echarts.init(document.getElementById('chart-yield-city'));
+    charts.push(cYieldCity);
+    var ycCities = ['Iskandar Puteri','JB City','Subang Jaya','National Avg','KL City','Penang GT'];
+    var ycValues = [5.60, 5.47, 5.40, 5.19, 4.60, 3.77];
+    cYieldCity.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: { left: 110, right: 50, top: 20, bottom: 20, containLabel: false },
+      xAxis: mkAxis({
+        type: 'value', min: 0, max: 7,
+        axisLabel: Object.assign({}, baseText, { formatter: '{value}%' })
+      }),
+      yAxis: mkAxis({
+        type: 'category',
+        data: ycCities.slice().reverse(),
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      }),
+      series: [{
+        type: 'bar',
+        data: ycValues.slice().reverse().map(function(v){
+          return { value: v, itemStyle: { color: v > 2.75 ? C.green : C.orange, borderRadius: [0,4,4,0] } };
+        }),
+        barMaxWidth: 30,
+        label: { show: true, position: 'right', formatter: '{c}%', fontSize: 11, fontFamily: 'Inter' },
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          lineStyle: { color: C.red, type: 'dashed', width: 1 },
+          label: { formatter: 'OPR 2.75%', fontSize: 10, color: C.red },
+          data: [{ xAxis: 2.75 }]
+        }
+      }]
+    });
+
+    var cTx = echarts.init(document.getElementById('chart-tx-trend'));
+    charts.push(cTx);
+    cTx.setOption({
+      tooltip: baseTooltip,
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025 Q1-Q3']
+      }),
+      yAxis: mkAxis({
+        type: 'value',
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return v >= 1000 ? (v/1000).toFixed(0)+'K' : v; } })
+      }),
+      series: [{
+        type: 'line',
+        data: [307498,319988,313394,313199,328000,295000,295000,389770,398000,420525,308000],
+        lineStyle: { color: C.navy, width: 2 },
+        itemStyle: { color: C.navy },
+        areaStyle: { color: 'rgba(30,58,95,0.08)' },
+        smooth: 0.2,
+        symbol: 'circle', symbolSize: 6,
+        markPoint: {
+          data: [
+            { type: 'max', name: 'Max', label: { formatter: 'Decade\nHigh', fontSize: 10, fontWeight: 'bold' } },
+            { type: 'min', name: 'Min', label: { formatter: 'COVID\nLow', fontSize: 10, fontWeight: 'bold' } }
+          ],
+          symbolSize: 50,
+          itemStyle: { color: C.green }
+        }
+      }]
+    });
+
+    setLang(localStorage.getItem('lang')||'en');
+  });
+
+  window.addEventListener('resize', function(){
+    charts.forEach(function(c){ c.resize(); });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>28 Mont' Kiara（MK28）@ Jalan Kiara｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:linear-gradient(135deg,#1e3a5f 0%,#14532D 100%);color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-card.top{border-top:3px solid #16a34a;background:#F0FDF4}
+.kpi-card.warn{border-top:3px solid #d97706}
+.kpi-card.red{border-top:3px solid #dc2626}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+.brickz-hero{background:linear-gradient(135deg,#1e3a5f,#14532D);border-radius:8px;padding:20px 24px;margin:12px 0;color:#fff}
+.brickz-t{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.6);margin-bottom:10px;letter-spacing:.05em}
+.brickz-g{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.brickz-s{text-align:center}
+.brickz-n{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:#86efac}
+.brickz-l{font-size:10px;color:rgba(255,255,255,.6);margin-top:3px}
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+.cg-card{border-radius:8px;padding:14px;border:1px solid}
+.cg-a{background:#F0FDF4;border-color:#86efac}
+.cg-b{background:#EFF6FF;border-color:#93c5fd}
+.cg-c{background:#FEF9C3;border-color:#d97706}
+.cg-t{font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:6px}
+.cg-a .cg-t{color:#166534}.cg-b .cg-t{color:#1e40af}.cg-c .cg-t{color:#92400E}
+.cg-n{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700}
+.cg-a .cg-n{color:#166534}.cg-b .cg-n{color:#1e40af}.cg-c .cg-n{color:#92400E}
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:680px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+@media(max-width:680px){.score-cols,.dual-col,.compare-grid,.brickz-g{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：28 Mont' Kiara（MK28）@ Jalan Kiara，Mont Kiara｜框架 v1.3</span>
+  <span>資料：2026-04-12 ｜ brickz 28筆（最多）RM774 psf ｜ Gross Yield 6.44%（創新高）｜ Freehold 住宅 ｜ 完工 2012</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出 ｜ 二手已完工建案</div>
+  <h1>28 Mont' Kiara（MK28）</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&price=2000000&yield=6.44&from=28MontKiara"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=28MontKiara"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Kiara，Mont Kiara，KL ｜ 開發商：UEM Sunrise Berhad（Bursa 主板，前身 Sunrise Bhd）｜ Freehold 住宅地契（Residential Strata）｜ 2 棟 40 層，460 戶，6 戶/層 ｜ 5.81 英畝 ｜ 竣工：2012 年底（已完工 13 年）｜ 坪數：2,535–3,000 sqft（全大坪豪宅）</div>
+  <div class="badge-row">
+    <span class="badge">✅ Freehold 住宅地契——最佳地契</span>
+    <span class="badge">✅ brickz 28筆（本系列最多）RM774 psf ｜置信度最高</span>
+    <span class="badge">✅ Gross Yield 6.44%（iRumah 2025，歷史最高）</span>
+    <span class="badge">✅ YoY +6.7%（iProperty，完全吻合上游報告 MK +6.4%）</span>
+    <span class="badge">✅ 全大坪（2,535–3,000 sqft）外籍家庭豪宅定位</span>
+    <span class="badge">✅ 6 戶/層私人電梯大堂——MK 最低密度之一</span>
+    <span class="badge">⚠️ 成交 PSF RM774 低於同地段新案（資本升值偏弱）</span>
+    <span class="badge">⚠️ 管理費估 RM0.40–0.50 psf（13 年舊樓設施老化）</span>
+    <span class="badge">⚠️ 超大坪流動性較低（外籍門檻 RM100 萬遠低於實際入場）</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 最大驚喜 -->
+<div class="success-box">
+  <strong>🌟 本系列最大數據驚喜：28 Mont Kiara 的 Gross Yield 6.44%（iRumah 2025）創下建案歷史新高，且從 2024 年的 5.1% 急升——說明租金增速（RM9,500–15,000/月）大幅跑贏 PSF 增速。</strong>這是「入場 PSF 低（RM774）但大坪租金強勁」的罕見組合——月租 RM9,500–15,000 除以 RM200 萬入場價，Gross Yield 接近 7%。本系列 Gross Yield 排名：28 MK（6.44%）> Sunway Mont（4.9%）> Kiaramas Danai（4.17%）> Bangsar Hill Park（4–5%，上游報告）。
+</div>
+
+<!-- KPI + brickz -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="brickz-hero">
+      <div class="brickz-t">🏛️ BRICKZ 政府登記成交數據（2024-10 至 2025-09，12 個月）——本系列 brickz 成交量最多，置信度最高</div>
+      <div class="brickz-g">
+        <div class="brickz-s"><div class="brickz-n">28</div><div class="brickz-l">政府登記成交筆數（本系列最多）</div></div>
+        <div class="brickz-s"><div class="brickz-n">RM774</div><div class="brickz-l">成交中位 PSF</div></div>
+        <div class="brickz-s"><div class="brickz-n">RM200萬</div><div class="brickz-l">中位成交總價</div></div>
+        <div class="brickz-s"><div class="brickz-n">6.44%</div><div class="brickz-l">Gross Yield（iRumah 2025，歷史最高）</div></div>
+        <div class="brickz-s"><div class="brickz-n">+6.7%</div><div class="brickz-l">YoY PSF 增幅（iProperty）</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,.5);font-family:'IBM Plex Mono',monospace">
+        P25–P75：RM191萬–229萬 ｜ 掛牌月租 RM9,500–15,000 ｜ 發售 RM721 psf（2009）→ 成交 RM774（2025），13年升值 +7.4% ｜ iProperty 資本增值 3.75%
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card top">
+        <div class="kpi-v up">6.44%</div>
+        <div class="kpi-l">Gross Yield（iRumah 2025，歷史新高）</div>
+        <div class="kpi-s up">vs 2024年 5.1%（急升 +1.34%）；歷史最低 4.2%（2014）</div>
+      </div>
+      <div class="kpi-card top">
+        <div class="kpi-v">RM774</div>
+        <div class="kpi-l">成交中位 PSF（brickz 28 筆）</div>
+        <div class="kpi-s neu">中位總價 RM200萬；P25–P75：RM191–229萬</div>
+      </div>
+      <div class="kpi-card top">
+        <div class="kpi-v up">+6.7%</div>
+        <div class="kpi-l">YoY PSF 增幅（iProperty）</div>
+        <div class="kpi-s up">iProperty 中位 RM755.9 psf，YoY +6.7%——上升動能存在</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">2,535–3,000</div>
+        <div class="kpi-l">坪數 sqft（全大坪，無小坪）</div>
+        <div class="kpi-s neu">3+1BR 至 4+1BR；6 戶/層私人電梯大堂；5.81 英畝 79 戶/英畝</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v">RM0.40–0.50</div>
+        <div class="kpi-l">管理費估算 psf（老舊建案）</div>
+        <div class="kpi-s neu">PropCashflow：「老舊 MK 建案 RM0.40–0.50 psf」；需向管委會確認</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v">23%</div>
+        <div class="kpi-l">掛牌售率（106/460）</div>
+        <div class="kpi-s up">健康水平（vs Sunway Mont 59%）；28 筆年度成交消化速度良好</div>
+      </div>
+    </div>
+
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">UEM Sunrise Berhad（前身 Sunrise Bhd）；Bursa 主板上市；76 個建案；2010 年國際建案大獎（International Property Award 最佳國際高層住宅）</div></div>
+      <div class="spec-item"><div class="spec-l">地段 / 地契</div><div class="spec-v">Jalan Kiara，Mont Kiara；5.81 英畝；Freehold 住宅地契（Residential Strata）；78% 土地用於景觀綠化；海拔較高，城市景觀優</div></div>
+      <div class="spec-item"><div class="spec-l">規模</div><div class="spec-v">2 棟 40 層；460 戶；6 戶/層（極低密度）；坪數 2,535–3,000 sqft（3+1BR）；6 個頂樓複式 5,790–6,465 sqft；各單位私人電梯大堂</div></div>
+      <div class="spec-item"><div class="spec-l">竣工</div><div class="spec-v">2012 年底（已完工 13 年）；設施老化風險；但 UEM Sunrise 建案品質基底好；管委會管理能力是關鍵</div></div>
+      <div class="spec-item"><div class="spec-l">iRumah PSF 分型</div><div class="spec-v">3BR/2,535sf：成交中位 RM790 psf；1BR/1,514sf（較少）：RM890 psf；最便宜：3BR/2,535sf（RM790）——大坪 PSF 低，Yield 高</div></div>
+      <div class="spec-item"><div class="spec-l">月租行情</div><div class="spec-v">PropertyGuru：RM9,500–15,000/月；iProperty：RM3.47–5.50 psf/月（即 2,535sf 約 RM8,800–13,900）；PropCashflow：外籍租客企業合約 2 年穩定</div></div>
+      <div class="spec-item"><div class="spec-l">設施</div><div class="spec-v">全配廚房（電磁爐、烤箱、抽油煙機、冰箱）；洗衣機 + 烘乾機；各房間冷氣；6 層地下停車場（3 個車位/標準戶）；游泳池、Jacuzzi、桑拿、網球場、壁球場、羽球場、Club House</div></div>
+      <div class="spec-item"><div class="spec-l">PropCashflow 直接點名</div><div class="spec-v">「10 Mont Kiara 和 28 Mont Kiara 命中甜蜜點——合理定價、穩健 Yield、深度家庭需求。外籍租客月租 RM4,000–6,000（企業補貼），2 年外交條款合約」</div></div>
+      <div class="spec-item"><div class="spec-l">獎項</div><div class="spec-v">2010：International Property Award 最佳國際高層住宅；亞太區最佳高層住宅；馬來西亞最佳高層住宅（三個最高殊榮）</div></div>
+      <div class="spec-item"><div class="spec-l">關鍵風險</div><div class="spec-v">大坪（RM200萬+）外籍門檻遠超 RM100 萬，外籍進場現金需求高；設施老化（2012 年建）；管理費可能偏高（RM0.40–0.50 psf 估算）；流動性偏低（大坪買家池窄）</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜28 Mont Kiara 的核心投資論點</h3>
+    <p>28 Mont Kiara（MK28）的投資論點是本系列所有建案中最獨特的組合：<strong>「入場 PSF 最低（RM774，低於地段 brickz 均值 RM778）但 Gross Yield 最高（6.44%，歷史新高）」</strong>。這個看似矛盾的組合源自一個結構特徵：MK28 全部是大坪（2,535–3,000 sqft），PSF 受大坪折扣拖累偏低，但外籍企業租賃的月租（RM9,500–15,000）並不隨坪數線性縮減——大坪租金未充分反映於資本價格，形成 Yield 套利空間。</p>
+
+    <p>PropCashflow（2026年2月）直接點名：「10 Mont Kiara 和 28 Mont Kiara 命中甜蜜點——合理定價、穩健 Yield、深度家庭需求。」這與上游報告「MK YoY +6.4%，外籍家庭 + MM2H 核心租客」的框架完全對齊。</p>
+
+    <div class="success-box">
+      <strong>🟢 最關鍵的定價套利邏輯：</strong>MK28 成交中位 RM774 psf（brickz 28 筆）≈ Mont Kiara 地段整體均值 RM778 psf（brickz 511 筆，2024–25）——即 MK28 這個「13 年前三項國際大獎豪宅」以地段均值定價成交，但月租 RM9,500–15,000 明顯高於地段均值水平。大坪的 PSF 折扣被高租金效率補償，創造了本系列最高的 Gross Yield（6.44%）。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Mont Kiara 完整定價生態系——MK28 在哪個位置？</h3>
+    <div class="compare-grid">
+      <div class="cg-card cg-a">
+        <div class="cg-t">📊 28 Mont Kiara（本案）</div>
+        <div class="cg-n">RM774</div>
+        <div style="font-size:11px;color:#166534;margin-bottom:6px">brickz 成交中位 PSF（28 筆，最多）</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td>坪數</td><td><strong>2,535–3,000 sqft（全大坪）</strong></td></tr>
+            <tr><td>中位總價</td><td><strong>RM200萬</strong></td></tr>
+            <tr><td>月租</td><td>RM9,500–15,000</td></tr>
+            <tr><td>Gross Yield</td><td><strong>6.44%（歷史最高）</strong></td></tr>
+            <tr><td>YoY</td><td>+6.7%（iProperty）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cg-card cg-b">
+        <div class="cg-t">📊 Sunway Mont Residences（比較）</div>
+        <div class="cg-n">RM938</div>
+        <div style="font-size:11px;color:#1e40af;margin-bottom:6px">brickz 成交中位 PSF（8 筆，2025）</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td>坪數</td><td>1,122–1,906 sqft（中坪）</td></tr>
+            <tr><td>中位總價</td><td>RM118萬</td></tr>
+            <tr><td>月租</td><td>RM3,800–7,800</td></tr>
+            <tr><td>Gross Yield</td><td>4.9%</td></tr>
+            <tr><td>GIS 步行</td><td>✅ 步行可達</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cg-card cg-c">
+        <div class="cg-t">📊 MK 地段整體（brickz）</div>
+        <div class="cg-n">RM778</div>
+        <div style="font-size:11px;color:#92400E;margin-bottom:6px">brickz 成交中位 PSF（511筆，59個建案）</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td>範圍</td><td>RM376 psf（Lanai）至 RM1,062（Arcoris）</td></tr>
+            <tr><td>MK YoY</td><td>+6.4%（上游報告）</td></tr>
+            <tr><td>Residensi Astrea</td><td>RM874 psf（13 筆）</td></tr>
+            <tr><td>Kiaramas Danai</td><td>RM865 psf（6 筆）</td></tr>
+            <tr><td>Kiaramas Cendana</td><td>RM578 psf（6 筆）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="src">定價洞察：MK28（RM774 psf）低於 Residensi Astrea（RM874）、Kiaramas Danai（RM865）、Sunway Mont（RM938）——主要因為大坪折扣（2,535+ sqft 的 PSF 系統性低於中小坪）。但月租遠高於這些建案（RM9,500–15,000 vs RM3,800–9,500），形成最高 Gross Yield。</p>
+
+    <hr class="dv">
+    <h3>C｜Munger 逆向推演——核心風險矩陣</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>大坪流動性——退出最大挑戰</strong></td><td>中位總價 RM200 萬，最大痛點：外籍門檻 RM100 萬（MK28 遠超，達 RM191–229 萬，需外籍高淨值買家）；本地買家池也窄（RM200 萬+ 換屋者）；28 筆年度成交在 460 戶中是 6.1% 換手率，尚可但非高流動性</td><td><span class="tag t-y">中（大坪系統性問題）</span></td><td>退出需等待；若急售，折讓幅度可能 5–15%</td></tr>
+          <tr><td><strong>設施老化（2012 年建，13 年）</strong></td><td>游泳池、健身房、電梯、外牆等設施已用 13 年；管委會財務狀況和大廈基金積累影響維修品質；PropCashflow 提示：「老舊 MK 建案管理費 RM0.40–0.50 psf，需查大廈基金餘額」</td><td><span class="tag t-y">中（13 年老樓）</span></td><td>管理費可能繼續上升；設施若維護不善直接影響租金溢價</td></tr>
+          <tr><td><strong>管理費偏高（RM0.40–0.50 psf 估算）</strong></td><td>對 2,535 sqft 單位 = 月管理費 RM1,014–1,268——比 deDaun（RM0.36 × 1,313 = RM472）貴一倍以上；直接侵蝕 Net Yield；確認管理費是進場前最重要的盡職調查</td><td><span class="tag t-r">確定（需確認）</span></td><td>若管理費 RM0.50 psf，2,535 sf 月費 RM1,268，年 RM15,216——淨收益顯著被侵蝕</td></tr>
+          <tr><td><strong>Gross Yield 6.44% 的可持續性</strong></td><td>2024 年突然從 5.1% 急升至 6.44%——需確認是結構性改善還是一次性數據點；若月租上升，是積極信號；若是因為入場 PSF 下跌（RM774 低於前期），則 Yield 升是估值下跌的反映</td><td><span class="tag t-y">中（需追蹤 2026 數據）</span></td><td>若 Yield 升因月租上升，長期持有有利；若因 PSF 下跌，需重評</td></tr>
+          <tr><td><strong>無直接 MRT（MRT3 前）</strong></td><td>同 MK 其他建案——目前無 LRT/MRT；MRT3 2032 催化；但外籍家庭（MK28 核心租客）通常有車或有企業接送，影響較小</td><td><span class="tag t-b">低（外籍家庭有車）</span></td><td>對特定無車租客有影響；MRT3 後改善</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場定位——RM774 psf 大坪豪宅的特殊邏輯</div>
+  <div class="section-body">
+    <h3>1.1 大坪 PSF 折扣的結構性解釋</h3>
+    <p>MK28 的 RM774 psf（brickz 成交中位）看似低於同地段精品建案（Residensi Astrea RM874、Kiaramas Danai RM865、Sunway Mont RM938），但這主要是<strong>大坪折扣（大坪物業的 PSF 系統性低於中小坪）</strong>的正常反映，而非建案品質問題：</p>
+    <table>
+      <thead><tr><th>說明</th><th>細節</th></tr></thead>
+      <tbody>
+        <tr><td>大坪 PSF 折扣原理</td><td>RM200 萬 / 2,535 sqft = RM789 psf；若同地段換一個 1,200 sqft 中坪成交 RM150 萬，PSF = RM1,250——同地段、同品質，大坪 PSF 通常低 20–40%</td></tr>
+        <tr><td>iRumah 分型驗證</td><td>MK28 1BR/1,514sf = RM890 psf；3BR/2,535sf = RM790 psf——自身內部也顯示大坪折扣 RM100 psf</td></tr>
+        <tr><td>月租不同步折扣</td><td>大坪月租（RM9,500–15,000）並非坪數 × 月租 psf——外籍家庭租 3BR 大坪的整體支付意願相對 2BR 中坪並不是 2 倍，但也不是 1 倍。租金效率（月租/入場價）對大坪更有利</td></tr>
+        <tr><td>Yield 套利結論</td><td>正是大坪 PSF 折扣 + 月租相對堅挺 = Gross Yield 6.44%——這個 Yield 套利空間是結構性的，除非大坪 PSF 大幅上升（消除折扣）才會消失</td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 Yield 急升從 5.1%→6.44% 的深層原因分析</h3>
+    <table>
+      <thead><tr><th>假設</th><th>驗證方式</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>月租上升（積極）</td><td>若 2024→2025 月租從 RM9,000→RM11,000+，Yield 自然上升</td><td><span class="tag t-g">若屬實，是持有的最強正面信號</span></td></tr>
+        <tr><td>入場 PSF 下降（中性偏負）</td><td>若 brickz 成交 PSF 下跌，Yield 分母縮小，Yield 數字上升</td><td><span class="tag t-y">若屬此因，需謹慎</span></td></tr>
+        <tr><td>MRT3 前置外籍需求增加</td><td>MK 外籍家庭提前佈局，租需求上升，推高月租</td><td><span class="tag t-g">正面且可持續</span></td></tr>
+        <tr><td>iProperty YoY PSF +6.7%</td><td>成交 PSF 上升 +6.7%——如果 PSF 在漲，Yield 上升就純粹來自租金上升，這是最強組合</td><td><span class="tag t-g">最理想情境——PSF 漲 + Yield 漲 = 雙贏</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>最強情境判斷：iProperty 顯示 YoY PSF +6.7%，同時 Gross Yield 從 5.1%→6.44%——這意味著月租增速（+26%+）快於 PSF 增速（+6.7%）。這是 MK28 持有者最期待的組合，說明大坪外籍家庭租需求正在強力復甦，且租金定價權回到業主手中。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率——本系列 Gross Yield 最高</div>
+  <div class="section-body">
+    <h3>5.1 28 Mont Kiara 租金行情</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租行情</th><th>月租 psf</th><th>Gross Yield（@RM774 psf 成交）</th></tr></thead>
+      <tbody>
+        <tr><td>3+1BR（主力，79% 戶型）</td><td>2,535–2,700 sqft</td><td>RM9,500–13,000/月</td><td>RM3.5–5.1</td><td>~5.7–7.8%（@RM196–209萬）</td></tr>
+        <tr><td>4+1BR（大坪）</td><td>3,000 sqft</td><td>RM11,000–15,000/月</td><td>RM3.7–5.0</td><td>~5.5–7.5%（@RM232萬）</td></tr>
+        <tr><td>Penthouse</td><td>5,790–6,465 sqft</td><td>RM20,000–35,000/月</td><td>RM3.1–5.4</td><td>個案</td></tr>
+      </tbody>
+    </table>
+    <p class="src">PropertyGuru：掛牌租 RM9,500–15,000；iProperty：RM3.47–5.50 psf/月；iRumah：Gross Yield 6.44%（2025）；PropCashflow：「外籍租客企業補貼 RM3,000–8,000/月，2 年外交條款合約」</p>
+
+    <h3>5.2 外國人現金流試算（3+1BR 2,535 sqft，RM196.2 萬入場 @ RM774 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租（RM11,000 × 12）</td><td>RM 132,000</td><td>3+1BR 2,535 sqft；外籍企業合約；MK28 品牌溢價；含家具</td></tr>
+        <tr><td>管理費（RM0.45 × 2,535 × 12）</td><td><span class="down">-RM 13,689</span></td><td>估 RM0.45 psf（老舊建案，需確認）；若 RM0.40 = RM12,168；若 RM0.50 = RM15,210</td></tr>
+        <tr><td>地稅 + 門牌稅</td><td><span class="down">-RM 3,500</span></td><td>大坪稅率較高</td></tr>
+        <tr><td>空置期（2個月，大坪租客難找）</td><td><span class="down">-RM 22,000</span></td><td>大坪租客池窄；每次換租需 2–3 個月 vs 中坪 1–2 個月</td></tr>
+        <tr><td>家具維護/更換（RM2,000/年）</td><td><span class="down">-RM 2,000</span></td><td>大坪設備多，維護成本較高</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 27,244</span></td><td>（132,000–40,811）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 10,560</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 53,007/年</strong></td><td>Net Yield ≈ 2.70%（RM196.2 萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 63,567/年</td><td>Net Yield ≈ 3.24%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-yellow">
+      <strong>外籍 Net Yield 2.7–3.2%——高於本系列商業地契建案，但低於預期（主因管理費偏高 + 大坪空置期長）。</strong>儘管 Gross Yield 達到 6.44%，但大坪物業的較高管理費（RM0.45 × 2,535 = 月 RM1,141）+ 較長空置期 + 非居民稅，使 Net Yield 被壓縮至 2.7–3.2%——比 Sunway Mont（2.5–2.9%）略高，但優勢並不像 Gross Yield 那麼懸殊。管理費確認是進場前最關鍵的盡職調查——若管理費高達 RM0.55 psf，Net Yield 會進一步壓縮至 2.3–2.7%。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規——高入場金額是主要外籍障礙</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>外籍影響</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td>Freehold 住宅地契（Residential Strata）</td><td>✅ LTV 80–90%；民用電費；MM2H 合規最清晰</td></tr>
+        <tr><td>外籍最低門檻</td><td>RM 1,000,000（KL）</td><td>✅ 滿足（MK28 最低 RM191 萬，遠超外籍門檻）——但入場金額大，需較多現金</td></tr>
+        <tr><td>入場成本</td><td>3+1BR 2,535 sqft @ RM774 psf = RM196.2 萬</td><td>20% 首付 = RM392,400；印花稅（4%）= RM78,480；現金需求約 RM490,000（本系列最高）</td></tr>
+        <tr><td>RPGT</td><td>已完工 13 年（2012）；若立即買入，第6年約 2032——與 MRT3 通車完美對齊</td><td>✅ RPGT 優化時機與 MRT3 催化一致</td></tr>
+        <tr><td>MM2H 特殊考量</td><td>MM2H Gold 持有者：RM100 萬門檻；MK28 入場 RM196 萬——若 MM2H 要求持有 10 年，流動性問題需認真評估</td><td>⚠️ MM2H 10 年持有 + 大坪流動性偏低 = 需長期持有心理準備</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">最適合者</td><td>有大坪需求的外籍高管家庭（4+1BR，子女讀國際學校）；高淨值投資者以「高 Gross Yield 大坪套利 + MRT3 催化」為框架；企業法人置產（一戶服務整個外派家庭）</td></tr>
+            <tr><td>不適合者</td><td>預算有限（RM100–150 萬）的外籍 MM2H 持有者；追求高流動性（可快速退出）；需要步行 GIS 的外籍租客（MK28 位置需確認與 GIS 步行距離）</td></tr>
+            <tr><td>最重要盡職調查</td><td>① 向管委會索取：管理費精確 psf + 大廈基金（Sinking Fund）餘額（決定未來 5 年維修重大費用風險）；② MRT3 Mont Kiara 站規劃位置確認（Jalan Kiara 距離）；③ 近 3 年月租實際合約價格（驗證 Yield 6.44% 的月租組成）</td></tr>
+            <tr><td>議價策略</td><td>掛牌 RM761–944 psf；brickz 中位 RM774 psf；掛牌低端已接近成交中位；目標 RM760–790 psf（P25 附近）；大坪急售「Fire Sale」單位（如 REALTAG RM702 psf 案例）是特殊機會</td></tr>
+            <tr><td>持有框架</td><td>2026 買入 → 企業租賃 2 年合約（RM11,000+/月）→ 2032 MRT3 通車 + RPGT 第6年 → 最優退出窗口</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟢 掛牌售率 23%（健康）；brickz 28 筆年度成交（最高流量）；外籍大坪需求穩健</td></tr>
+            <tr><td>價格趨勢</td><td>🟢 YoY +6.7%（iProperty，完全吻合 MK +6.4% 上游報告）；Gross Yield 達 6.44% 歷史新高</td></tr>
+            <tr><td>租金趨勢</td><td>🟢 6.44% 歷史新高（若因月租上升而非 PSF 下跌），是本系列最強租金信號</td></tr>
+            <tr><td>估值</td><td>🟢 RM774 psf 成交 ≈ MK 地段均值 RM778 psf——「2010 年三大國際豪宅大獎建案」以均值定價，估值合理甚至偏低</td></tr>
+            <tr><td>主要風險</td><td>🟡 管理費偏高（老舊設施）；大坪流動性偏低；Yield 組成需確認</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-y" style="margin-top:16px">
+      <strong>🟢 審慎積極——Gross Yield 最高 + brickz 成交量最大 + 估值合理；但大坪流動性和管理費是最重要的進場前確認</strong><br><br>
+      28 Mont Kiara 在「租金效益」和「市場成交量」兩個維度都是本系列最強——Gross Yield 6.44%（歷史最高）和 brickz 28 筆成交（本系列最多，置信度最高）。估值 RM774 psf 等同 MK 地段均值，對一個 2010 年獲得三項國際最高榮譽的豪宅建案而言，是一個有吸引力的入場點。<br><br>
+      <strong>三個進場前必須確認的事項：</strong>①管理費精確數字（估 RM0.40–0.50 psf，對 Net Yield 影響極大）；②大廈基金餘額（決定未來是否有重大維修特別分攤）；③月租實際成交確認（驗證 Yield 6.44% 的可持續性）。這三個數據在看房過程中都可以向管委會或現任業主確認，是標準的二手大坪住宅盡職調查流程。<br><br>
+      <strong>與 Sunway Mont 的選擇框架：</strong>28 MK（RM196 萬入場，Gross Yield 6.44%，大坪企業租賃）vs Sunway Mont（RM105 萬入場，Gross Yield 4.9%，GIS 步行中坪）——兩者服務完全不同的買家：28 MK 適合「高淨值、追求最高 Yield 效率、能接受大坪流動性」；Sunway Mont 適合「外籍家庭自住、GIS 優先、較低入場門檻」。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">28 Mont' Kiara（MK28）@ Jalan Kiara，Mont Kiara ｜ 建案綜合評分卡 ｜ brickz 28 筆（本系列最多）</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">MK YoY +6.4%（本系列最高）；brickz 自身 YoY +6.7%（完全吻合）；Gross Yield 6.44% 歷史新高；PropCashflow 直接點名 MK28 為「甜蜜點建案」；外籍家庭持續需求</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">掛牌售率 23%（健康，vs Sunway Mont 59%）；brickz 28 筆年度成交（460 戶 6.1% 換手率）；外籍大坪租需求從企業住房補貼驅動；MK Overhang 壓力「低」（上游）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">已完工 13 年成熟社區；Gross Yield 和 PSF 同步上升（最理想組合）；RPGT 2032 與 MRT3 通車完美對齊；租金定價權回到業主</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">MRT3 Mont Kiara 站（2032）；Sprint/NKVE；MKIS/GIS/French School 車程；Publika/Solaris 生活圈；KLGCC；5.81 英畝 78% 景觀綠化；扣分：無直接 MRT（2032 前）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契：LTV 80–90%；民用電費；MM2H 最清晰；扣分：入場 RM196+ 萬，現金需求 RM490,000+（本系列最高），部分外籍資本量有限者難以達成</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">7.8/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">8.0×.2 + 8.0×.25 + 7.5×.2 + 7.5×.2 + 7.5×.15 = 7.825 ≈ 7.8</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">UEM Sunrise（Bursa 主板，76 個建案）；已完工 13 年——交屋風險零；2010 年三大國際豪宅大獎；頂級開發商信用。扣分：非現役 Sunrise 旗艦（現主推 R22/Residensi Sefina）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz 成交 RM774 psf ≈ MK 地段均值 RM778 psf——「三項國際大獎豪宅」以均值定價，具有明確安全邊際；Gross Yield 6.44% 是本系列最高，進一步支撐估值合理性；大坪折扣結構性，不代表建案品質問題</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Gross Yield 6.44%（本系列最高，歷史新高）；月租 RM9,500–15,000（本系列最高月租）；外籍企業合約 2 年穩定性；YoY 從 5.1%→6.44% 說明租金定價權回歸業主——B3 本系列最高</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Jalan Kiara 核心地段；MKIS/GIS 近（車程）；Solaris/Publika 近；KLGCC；Sprint/NKVE；扣分：無直接 MRT（2032 前）；GIS 非步行（vs Sunway Mont）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">6 戶/層私人電梯大堂（極低密度）；78% 土地景觀化；全配廚房 + 洗烘衣機；3 個車位/標準戶；5,790–6,465 sqft 複式頂樓；2010 國際大獎設計；扣分：2012 年建，設施老化 13 年</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契——本系列最佳地契；永久業權；民用電費；HDA 完整保護；已完工 13 年，地契無任何爭議</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz 28 筆（本系列最多，流量最大）；但絕對入場 RM191–229 萬，買家池窄；掛牌售 106 筆（23%，健康但數量多）；大坪退出需等待特定外籍高淨值買家——B7 是唯一明顯弱點</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">8.2/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">8.5×.2+8.0×.2+9.0×.15+7.0×.15+8.5×.1+9.5×.1+6.5×.1 = 8.175 ≈ 8.2</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 7.8 × 40% + B 類 8.2 × 60%</div>
+        <div class="score-big">8.04<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#DCFCE7;color:#166534">⭐⭐⭐⭐ 優質——本系列 Gross Yield 最高；brickz 置信度最高；大坪企業租賃甜蜜點</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">3.12 + 4.92 = 8.04 → 已完工二手分析，brickz 28 筆置信度最高（本系列第一）</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>Gross Yield 6.44%（本系列最高，歷史新高）+ brickz 28 筆成交（本系列最多，置信度最高）+ 估值 RM774 psf ≈ MK 地段均值（三項國際大獎豪宅以均值定價）+ Freehold 住宅地契 B6 9.5 + 6 戶/層極低密度設計 + PropCashflow 直接點名「MK 甜蜜點」。<br>
+          <strong style="color:#fca5a5">主要保留：</strong>管理費估 RM0.40–0.50 psf（進場前必確認）+ 大坪流動性偏低（B7 6.5）+ 入場現金需求最高（RM490,000+）+ 設施老化 13 年 + MRT3 前無直接軌道交通。Net Yield 2.7–3.2%（非 Gross Yield 6.44%），受管理費壓縮。
+        </div>
+      </div>
+    </div>
+
+    <h3>十六個建案完整最終排序</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>狀態</th>
+          <th>brickz 筆數</th>
+          <th>Gross Yield</th>
+          <th>建議</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><strong>Kiaramas deDaun</strong></td><td style="font-weight:700;color:#16a34a">8.34</td><td><span class="tag t-g">Freehold 住宅</span></td><td>期房 2028</td><td>0（期房）</td><td>估 4.5–5.5%</td><td>🟢 積極進場</td></tr>
+        <tr style="background:#F0FDF4"><td>2</td><td><strong>28 Mont' Kiara 🆕</strong></td><td style="font-weight:700;color:#16a34a">8.04</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2012</td><td style="font-weight:700;color:#16a34a">28筆（最多）</td><td style="font-weight:700;color:#16a34a">6.44%（最高）</td><td>🟢 審慎積極（確認管理費 + Yield 組成）</td></tr>
+        <tr><td>3</td><td><strong>Sunway Mont Residences</strong></td><td style="font-weight:700;color:#16a34a">7.88</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2020</td><td>8 筆</td><td>4.9%↑</td><td>🟢 審慎積極（GIS 步行）</td></tr>
+        <tr><td>4</td><td><strong>R22 Mont Kiara</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>已完工</td><td>31 筆</td><td>估 4.5%</td><td>🟢 進場</td></tr>
+        <tr><td>5</td><td><strong>Park Place DPC</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>已完工</td><td>有</td><td>估 5%</td><td>🟢 進場</td></tr>
+        <tr><td>6</td><td><strong>TRX Residences</strong></td><td style="font-weight:700;color:#16a34a">7.6</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>已完工</td><td>59 筆</td><td>估 3.5%</td><td>🟢 增值框架</td></tr>
+        <tr><td>7</td><td><strong>The Conlay by E&O</strong></td><td style="font-weight:700;color:#16a34a">7.4</td><td><span class="tag t-y">Freehold 商業</span></td><td>已完工</td><td>有</td><td>估 4%</td><td>🟢 審慎積極</td></tr>
+        <tr><td>8</td><td><strong>Bangsar Hill Park</strong></td><td style="font-weight:700;color:#16a34a">6.96</td><td><span class="tag t-y">Leasehold 住宅</span></td><td>完工 2025</td><td>~0筆</td><td>估 4–5%</td><td>🟡 審慎考慮</td></tr>
+        <tr><td>9</td><td><strong>CloutHaus KLCC</strong></td><td style="font-weight:700;color:#d97706">6.7</td><td><span class="tag t-y">Freehold 商業</span></td><td>期房 2029</td><td>0</td><td>估 3%</td><td>🟡 觀望</td></tr>
+        <tr><td>10</td><td><strong>SWNK Houze BBCC</strong></td><td style="font-weight:700;color:#d97706">6.2</td><td><span class="tag t-r">Leasehold 商業</span></td><td>期房</td><td>0</td><td>估 3%</td><td>🔴 外籍不推</td></tr>
+        <tr><td>11</td><td><strong>TS2 武吉免登 🔵</strong></td><td style="font-weight:700;color:#3b82f6">6.0</td><td><span class="tag t-y">Freehold 商業</span></td><td>期房 2027</td><td>0</td><td>功能性</td><td>🔵 功能性持有</td></tr>
+        <tr><td>12</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="font-weight:700;color:#f97316">5.7</td><td><span class="tag t-g">SOHO HDA</span></td><td>期房</td><td>0</td><td>SOHO 3%+</td><td>🟡 條件性</td></tr>
+        <tr><td>13</td><td><strong>Stonor 3 KLCC</strong></td><td style="font-weight:700;color:#dc2626">5.7</td><td><span class="tag t-y">商業地契 HDA</span></td><td>完工</td><td>有</td><td>估 3%</td><td>🔴 暫緩</td></tr>
+        <tr><td>14</td><td><strong>Pavilion DH</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-y">Freehold 商業</span></td><td>完工 2025</td><td>~1 筆</td><td>估 2.5%</td><td>🟡 觀望</td></tr>
+        <tr><td>15</td><td><strong>Pavilion Square</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-r">Leasehold 商業</span></td><td>期房 2028–29</td><td>0</td><td>估 1.5%</td><td>🔴 投資暫緩</td></tr>
+        <tr><td>16</td><td><strong>Orion Residence BB</strong></td><td style="font-weight:700;color:#dc2626">5.2</td><td><span class="tag t-y">Freehold 商業</span></td><td>竣工確認中</td><td>~0</td><td>估 1.5%</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">🔑 28 Mont Kiara（8.04）排名第2，是本系列「純 Yield 效率」最強建案，也是 brickz 置信度最高（28 筆，本系列最多）的建案。主要優勢：B3 Gross Yield 9.0（本系列最高）+ brickz 28 筆成交（最可靠定價）+ B2 估值 8.0（地段均值定價）+ B5 產品設計 8.5（6 戶/層 + 78% 景觀 + 國際大獎）。 主要限制：入場金額 RM196 萬+（本系列最高），現金需求 RM490K+，適合高淨值買家。管理費確認是最關鍵盡職調查，直接決定 Net Yield 區間（2.3%–3.2%）。⚠️ 強烈建議進場前向管委會確認：①管理費精確 psf；②大廈基金餘額；③近 12 個月月租成交均值。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL RM1M+ 高端住宅市場深度研究（2026-03）｜KL 供需 Overhang 深度分析（2026-04-01）｜brickz.my（28 MONT KIARA：28 筆，2024-10至2025-09，成交中位 RM774 psf，P25–P75：RM191萬–229萬；Mont Kiara 整體：511 筆，中位 RM778 psf）｜iRumah.co（Gross Yield 6.44%，2025；vs 5.1%，2024；最高 6.44%；最低 4.2%（2014）；3BR/2,535sf RM790 psf；1BR/1,514sf RM890 psf）｜iProperty.com.my（106 筆掛牌售，22 筆掛牌租；YoY +6.7%，iProperty 中位 RM755.9 psf；掛牌 PSF RM769–963）｜PropertyGuru（月租 RM9,500–15,000；掛牌售 RM193–270 萬）｜PropCashflow.my（直接點名 MK28 為「甜蜜點」；管理費老舊 MK 建案 RM0.40–0.50 psf 估算；2026-02）｜UEM Sunrise 官方（5.81 英畝 Freehold，78% 景觀，460 戶，6 戶/層，2010 三大國際豪宅大獎）<br>
+  ⚠️ 管理費 RM0.40–0.50 psf 為 PropCashflow 基於老舊 MK 建案的估算，需向 Perbadanan Pengurusan（管委會）直接確認精確數字及大廈基金餘額。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

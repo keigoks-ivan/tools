@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global REITs Comparison | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f0f5fb;color:#1e3a5f}
+
+.navbar{background:#fff;border-bottom:1px solid #dce8f5;height:52px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-left{display:flex;align-items:center;gap:12px}
+.nav-brand{font-size:12px;font-weight:700;letter-spacing:.12em;color:#1e3a5f;text-decoration:none}
+.nav-brand:hover{color:#3b82f6}
+.nav-sep{color:#dce8f5;font-size:14px}
+.nav-page{font-size:11px;font-weight:600;letter-spacing:.08em;color:#3b82f6}
+.lang-btns{display:flex;gap:4px}
+.lang-btn{padding:4px 10px;border:1px solid #dce8f5;border-radius:4px;font-size:11px;cursor:pointer;background:#fff;color:#5a7a9a;font-family:inherit}
+.lang-btn.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+
+.hero{background:#fff;border-bottom:1px solid #dce8f5;padding:44px 32px 36px}
+.hero-inner{max-width:min(1400px,96vw);margin:0 auto}
+.hero-eyebrow{font-size:10px;letter-spacing:.18em;color:#3b82f6;font-weight:600;margin-bottom:14px}
+.hero-h1{font-size:34px;font-weight:600;color:#0f2a45;line-height:1.2;margin-bottom:10px}
+.hero-sub{font-size:14px;color:#5a7a9a;line-height:1.65;margin-bottom:28px;max-width:640px}
+.stats-row{display:flex;gap:28px}
+.stat-num{font-size:24px;font-weight:700;color:#1e3a5f;font-variant-numeric:tabular-nums}
+.stat-lbl{font-size:10px;color:#7fa3c4;letter-spacing:.08em;margin-top:3px}
+
+.section{max-width:min(1400px,96vw);margin:0 auto;padding:36px 32px}
+.section-hdr{display:flex;align-items:baseline;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.section-title{font-size:10px;letter-spacing:.16em;color:#3b82f6;font-weight:600}
+.section-desc{font-size:12px;color:#94a3b8}
+
+.compare-wrap{background:#fff;border:1px solid #dce8f5;border-radius:12px;overflow:auto;max-height:75vh;-webkit-overflow-scrolling:touch}
+.compare-tbl{width:100%;border-collapse:collapse;min-width:1100px;table-layout:fixed}
+.compare-tbl thead{position:sticky;top:0;z-index:3}
+.compare-tbl th{background:#f0f6ff;font-size:9px;letter-spacing:.08em;color:#5a7a9a;font-weight:600;padding:7px 10px;text-align:right;border-bottom:1px solid #dce8f5;white-space:nowrap;cursor:pointer;user-select:none}
+.compare-tbl th:hover{background:#e4eefb;color:#1e3a5f}
+.compare-tbl th:first-child{text-align:left;position:sticky;left:0;background:#f0f6ff;z-index:4;min-width:180px;width:180px;border-right:1px solid #dce8f5;cursor:pointer}
+.compare-tbl td{padding:6px 10px;font-size:11px;border-bottom:1px solid #f0f5fb;text-align:right;font-variant-numeric:tabular-nums;color:#1e3a5f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compare-tbl td:first-child{text-align:left;font-weight:600;position:sticky;left:0;background:#fff;z-index:2;border-right:1px solid #f0f5fb}
+.compare-tbl tr:last-child td{border-bottom:none}
+.compare-tbl tr:hover td{background:#f8fbff}
+
+.sort-arrow{font-size:9px;color:#94a3b8;margin-left:2px}
+.badge{display:inline-block;font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;letter-spacing:.02em}
+.note{font-size:10px;color:#94a3b8;margin-top:10px;line-height:1.5}
+
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:20px}
+.card-title{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:12px}
+.card p,.card li{font-size:11px;color:#475569;line-height:1.7;margin-bottom:6px}
+.card ul{padding-left:16px}
+.card strong{color:#1e3a5f}
+
+.footer{border-top:1px solid #dce8f5;padding:18px 32px;max-width:min(1400px,96vw);margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.footer-l{font-size:11px;font-weight:700;letter-spacing:.08em;color:#1e3a5f}
+.footer-r{font-size:10px;color:#94a3b8}
+
+.lang-en{}.lang-zh{display:none}
+
+@media(max-width:900px){
+  .hero-h1{font-size:26px}
+  .stats-row{flex-wrap:wrap;gap:16px}
+  .navbar{padding:0 16px;height:auto;min-height:52px;padding-top:8px;padding-bottom:8px}
+  .nav-left{flex-wrap:wrap;gap:6px}
+  .nav-left a[href]{font-size:9px!important;padding:2px 6px!important}
+  .section{padding:24px 16px}
+  .hero{padding:28px 16px 24px}
+  .cards-grid{grid-template-columns:1fr}
+  .footer{flex-direction:column;gap:8px;text-align:center}
+}
+@media(max-width:768px){
+  .nav-left{flex-wrap:wrap;gap:4px}
+  .nav-left a[href]{font-size:8px!important;padding:2px 5px!important}
+  .nav-brand{font-size:10px}
+  .hero-h1{font-size:20px}
+  .section div[style*="repeat(3"]{grid-template-columns:repeat(2,1fr)!important}
+}
+@media(max-width:500px){
+  .hero-h1{font-size:18px}
+  .section div[style*="repeat(3"]{grid-template-columns:1fr!important}
+  .section div[style*="repeat(2"]{grid-template-columns:1fr!important}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<section class="hero" style="padding:28px 32px 22px">
+  <div class="hero-inner" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+    <div>
+      <h1 class="hero-h1" style="font-size:24px;margin-bottom:6px"><span class="lang-en">Global REITs Comparison</span><span class="lang-zh">全球 REITs 比較</span></h1>
+      <p class="hero-sub" style="margin-bottom:0"><span class="lang-en">54 REITs &middot; 6 markets &middot; All columns sortable &middot; 2026-05</span><span class="lang-zh">54 檔 REITs &middot; 6 大市場 &middot; 所有欄位可排序 &middot; 2026-05</span></p>
+    </div>
+  </div>
+</section>
+
+<section style="background:#f0f5fb">
+  <div class="section">
+    <div class="section-hdr">
+      <span class="section-title lang-en">REIT COMPARISON TABLE</span>
+      <span class="section-title lang-zh">REITs&#x6BD4;&#x8F03;&#x8868;</span>
+      <span class="section-desc lang-en">Click any column header to sort</span>
+      <span class="section-desc lang-zh">&#x9EDE;&#x64CA;&#x6B04;&#x4F4D;&#x6A19;&#x984C;&#x5373;&#x53EF;&#x6392;&#x5E8F;</span>
+    </div>
+    <div class="compare-wrap">
+      <table class="compare-tbl">
+        <thead><tr id="thead-row"></tr></thead>
+        <tbody id="reit-tbody"></tbody>
+      </table>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px 20px;font-size:9px;line-height:1.55;color:#94a3b8;margin-top:8px">
+      <span class="lang-en" style="grid-column:span 2;font-weight:600;color:#5a7a9a;margin-bottom:2px">Column Definitions</span>
+      <span class="lang-zh" style="display:none;grid-column:span 2;font-weight:600;color:#5a7a9a;margin-bottom:2px">欄位定義</span>
+      <span class="lang-en"><strong>Cap</strong> &mdash; Market capitalisation. Displayed in local currency; sorted by USD equivalent.</span>
+      <span class="lang-zh" style="display:none"><strong>市值</strong> &mdash; 市場資本額。顯示當地貨幣；按美元等值排序。</span>
+      <span class="lang-en"><strong>Yield</strong> &mdash; Trailing 12-month dividend yield (annual distributions &divide; current price).</span>
+      <span class="lang-zh" style="display:none"><strong>殖利</strong> &mdash; 過去12個月殖利率（年度配息 &divide; 現價）。</span>
+      <span class="lang-en"><strong>Spread</strong> &mdash; Yield minus 10-year government bond of listing country. Positive = REIT pays more than risk-free.</span>
+      <span class="lang-zh" style="display:none"><strong>利差</strong> &mdash; 殖利率減去上市國10年期公債殖利率。正值=REIT派息高於無風險利率。</span>
+      <span class="lang-en"><strong>P/NAV</strong> &mdash; Price &divide; Net Asset Value. &lt;1.0 = discount to assets; &gt;1.0 = premium.</span>
+      <span class="lang-zh" style="display:none"><strong>P/NAV</strong> &mdash; 市價 &divide; 淨資產價值。&lt;1.0=折價；&gt;1.0=溢價。</span>
+      <span class="lang-en"><strong>YoY</strong> &mdash; 1-year price return (capital gain/loss only, excludes dividends).</span>
+      <span class="lang-zh" style="display:none"><strong>年漲</strong> &mdash; 一年價格報酬（僅資本利得/損失，不含配息）。</span>
+      <span class="lang-en"><strong>5yr</strong> &mdash; 5-year total return (price change + reinvested dividends).</span>
+      <span class="lang-zh" style="display:none"><strong>5年</strong> &mdash; 五年總報酬（價格變動+股息再投入）。</span>
+      <span class="lang-en"><strong>Gear</strong> &mdash; Gearing ratio (total debt &divide; total assets). SG REITs capped at 50% by MAS.</span>
+      <span class="lang-zh" style="display:none"><strong>槓桿</strong> &mdash; 槓桿率（總負債 &divide; 總資產）。新加坡REIT受MAS規定上限50%。</span>
+      <span class="lang-en"><strong>Pay%</strong> &mdash; Payout ratio (dividends &divide; distributable income). Most REITs must distribute 90%+.</span>
+      <span class="lang-zh" style="display:none"><strong>派息</strong> &mdash; 配息率（股息 &divide; 可分配收入）。多數REIT須分配90%以上。</span>
+      <span class="lang-en"><strong>Bond rates</strong> &mdash; US 4.25% &middot; SG 3.10% &middot; JP 1.05% &middot; AU 4.35% &middot; MY 3.85% &middot; UK 4.20% &middot; EU 2.65% (German Bund)</span>
+      <span class="lang-zh" style="display:none"><strong>公債利率</strong> &mdash; 美國4.25% &middot; 新加坡3.10% &middot; 日本1.05% &middot; 澳洲4.35% &middot; 馬來西亞3.85% &middot; 英國4.20% &middot; 歐元區2.65%（德國Bund）</span>
+      <span class="lang-en" style="grid-column:span 2;margin-top:4px">Sources: Bloomberg, SGX, TSE, ASX, Bursa, Euronext, LSE &middot; 2026-05 &middot; Not investment advice. Past performance &ne; future results.</span>
+      <span class="lang-zh" style="display:none;grid-column:span 2;margin-top:4px">來源：Bloomberg, SGX, TSE, ASX, Bursa, Euronext, LSE &middot; 2026年5月 &middot; 非投資建議。過去表現不代表未來結果。</span>
+    </div>
+  </div>
+</section>
+
+<!-- Knowledge Section -->
+<section style="background:#fff">
+  <div class="section" style="max-width:min(1400px,96vw);margin:0 auto">
+    <div class="section-hdr">
+      <span class="section-title lang-en">REIT INVESTMENT FUNDAMENTALS</span>
+      <span class="section-title lang-zh">REITs投資基本知識</span>
+      <span class="section-desc lang-en">Essential knowledge for REIT investors &mdash; from metrics to strategy</span>
+      <span class="section-desc lang-zh">REIT投資人必備知識——從指標到策略</span>
+    </div>
+    <div class="cards-grid">
+
+      <!-- Row 1: Core Metrics -->
+      <div class="card">
+        <div class="card-title"><span class="lang-en">P/NAV Deep Dive</span><span class="lang-zh">P/NAV 深度解讀</span></div>
+        <ul>
+          <li><span class="lang-en"><strong>&lt;0.7x</strong> &mdash; Deep discount. Either deep value or structural distress. Check: is occupancy falling? Is gearing rising? If yes = value trap. If no = opportunity. Examples: Vonovia 0.55x, Unibail 0.50x.</span><span class="lang-zh"><strong>&lt;0.7倍</strong> &mdash; 深度折價。要嘛是深度價值，要嘛是結構性困境。確認：出租率在降嗎？槓桿在升嗎？是=價值陷阱。否=機會。例：Vonovia 0.55倍、Unibail 0.50倍。</span></li>
+          <li><span class="lang-en"><strong>0.7-0.95x</strong> &mdash; Moderate discount. Most common for office and diversified REITs in rate-hike cycle. Usually reverts to NAV when rates stabilize.</span><span class="lang-zh"><strong>0.7-0.95倍</strong> &mdash; 適度折價。升息週期中辦公和多元化REIT最常見。利率穩定後通常回歸NAV。</span></li>
+          <li><span class="lang-en"><strong>0.95-1.1x</strong> &mdash; Near NAV. Fair value. The market trusts the property valuation.</span><span class="lang-zh"><strong>0.95-1.1倍</strong> &mdash; 接近NAV。公允價值。市場信任資產估值。</span></li>
+          <li><span class="lang-en"><strong>1.1-1.5x</strong> &mdash; Growth premium. Market expects acquisition pipeline or rental growth to lift NAV. Justified for logistics/DC sector.</span><span class="lang-zh"><strong>1.1-1.5倍</strong> &mdash; 成長溢價。市場預期收購管道或租金成長將提升NAV。物流/資料中心可合理。</span></li>
+          <li><span class="lang-en"><strong>&gt;1.5x</strong> &mdash; Extreme premium. Only Goodman (2.8x) and Equinix (2.1x) sustain this. Very risky if growth disappoints.</span><span class="lang-zh"><strong>&gt;1.5倍</strong> &mdash; 極端溢價。僅Goodman（2.8倍）和Equinix（2.1倍）能持續。成長不如預期時風險極高。</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="lang-en">Yield vs Bond Spread Strategy</span><span class="lang-zh">殖利率 vs 公債利差策略</span></div>
+        <ul>
+          <li><span class="lang-en"><strong>Spread &gt;+2%</strong> &mdash; Attractive. REIT pays meaningfully more than risk-free bonds. Sweet spot for income investors. J-REITs and SG-REITs dominate this zone.</span><span class="lang-zh"><strong>利差&gt;+2%</strong> &mdash; 有吸引力。REIT派息明顯高於無風險公債。收入型投資者的甜蜜點。日本REIT和新加坡REIT主導此區間。</span></li>
+          <li><span class="lang-en"><strong>Spread 0 to +2%</strong> &mdash; Fair compensation for real estate risk. Acceptable if growth catalysts present.</span><span class="lang-zh"><strong>利差0至+2%</strong> &mdash; 對房地產風險的合理補償。若有成長催化劑則可接受。</span></li>
+          <li><span class="lang-en"><strong>Spread negative</strong> &mdash; Bonds beat REIT on income. You must believe in capital appreciation to justify holding. Most US REITs are here because UST 10yr = 4.25%.</span><span class="lang-zh"><strong>利差為負</strong> &mdash; 公債收入勝過REIT。必須相信資本增值才合理。多數美國REIT在此，因美債10年期=4.25%。</span></li>
+          <li><span class="lang-en"><strong>Key:</strong> When 10yr bond yields fall, REIT spreads widen automatically = price appreciation. This is why REITs rally hard in rate-cut cycles.</span><span class="lang-zh"><strong>關鍵：</strong>10年期公債殖利率下降時，REIT利差自動擴大=價格上漲。這是降息週期中REIT大漲的原因。</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="lang-en">Gearing &amp; Interest Cover</span><span class="lang-zh">槓桿率與利息保障</span></div>
+        <ul>
+          <li><span class="lang-en"><strong>&lt;25%</strong> gearing &mdash; Conservative. Goodman at 10% is the gold standard. Lots of firepower for acquisitions.</span><span class="lang-zh"><strong>&lt;25%</strong>槓桿 &mdash; 保守。Goodman 10%是黃金標準。有充足收購火力。</span></li>
+          <li><span class="lang-en"><strong>25-40%</strong> &mdash; Normal range. Most healthy REITs operate here. Comfortable debt servicing.</span><span class="lang-zh"><strong>25-40%</strong> &mdash; 正常區間。多數健康REIT在此運作。債務償付舒適。</span></li>
+          <li><span class="lang-en"><strong>40-50%</strong> &mdash; Elevated. Each 25bp rate hike visibly impacts DPU. Check: % of debt on fixed vs floating rates. High fixed = protected.</span><span class="lang-zh"><strong>40-50%</strong> &mdash; 偏高。每升25bp明顯衝擊DPU。檢查：固定vs浮動利率債務比例。高固定=受保護。</span></li>
+          <li><span class="lang-en"><strong>Interest cover ratio</strong> &mdash; EBITDA &divide; interest expense. &gt;4x = comfortable. 3-4x = monitor. &lt;3x = refinancing risk. &lt;2x = DPU cut imminent.</span><span class="lang-zh"><strong>利息保障倍數</strong> &mdash; EBITDA &divide; 利息支出。&gt;4倍=舒適。3-4倍=需監測。&lt;3倍=再融資風險。&lt;2倍=DPU削減在即。</span></li>
+          <li><span class="lang-en"><strong>SG rule:</strong> MAS caps REIT gearing at 50%. Exceeding 45% requires higher interest cover ratio disclosure.</span><span class="lang-zh"><strong>新加坡規則：</strong>MAS將REIT槓桿上限設在50%。超過45%需更高的利息保障揭露。</span></li>
+        </ul>
+      </div>
+
+      <!-- Row 2: Sectors & Tax -->
+      <div class="card">
+        <div class="card-title"><span class="lang-en">Sector Outlook 2026</span><span class="lang-zh">2026年產業展望</span></div>
+        <ul>
+          <li><span class="lang-en"><strong>&#128994; Data Center / Industrial</strong> &mdash; AI capex driving unprecedented demand. Equinix, Digital Realty, Prologis all expanding. Expect 5-8% rental growth. Best structural tailwind of any sector.</span><span class="lang-zh"><strong>&#128994; 資料中心/工業</strong> &mdash; AI資本支出帶動前所未有的需求。Equinix、Digital Realty、Prologis全面擴張。預期租金成長5-8%。所有產業中最強結構性順風。</span></li>
+          <li><span class="lang-en"><strong>&#128993; Healthcare / Residential</strong> &mdash; Aging demographics (Welltower) and housing shortage (AvalonBay, Invitation Homes) provide durable demand. Defensive in downturns.</span><span class="lang-zh"><strong>&#128993; 醫療/住宅</strong> &mdash; 老齡化人口（Welltower）和住房短缺（AvalonBay、Invitation Homes）提供持久需求。下行時具防禦性。</span></li>
+          <li><span class="lang-en"><strong>&#128993; Retail</strong> &mdash; Prime malls with experiential tenants recovering. Grocery-anchored stable. Suburban/secondary struggling. Unibail deep value but high risk.</span><span class="lang-zh"><strong>&#128993; 零售</strong> &mdash; 體驗型頂級商場復甦中。生鮮超市為錨的穩定。郊區/次級仍掙扎。Unibail深度價值但高風險。</span></li>
+          <li><span class="lang-en"><strong>&#128308; Office</strong> &mdash; Hybrid work structural headwind. US/EU worst affected. Japan/SG more resilient (cultural WFH resistance). Deep discounts may signal entry for contrarians.</span><span class="lang-zh"><strong>&#128308; 辦公</strong> &mdash; 混合辦公結構性逆風。美/歐受創最深。日/新較有韌性（文化上抗拒WFH）。深度折價可能是逆向投資者的進場信號。</span></li>
+          <li><span class="lang-en"><strong>&#128994; Hospitality</strong> &mdash; Tourism fully recovered. Japan inbound boom. Las Vegas resilient (VICI). Risk: next recession = immediate occupancy hit.</span><span class="lang-zh"><strong>&#128994; 酒店</strong> &mdash; 觀光業完全復甦。日本入境旅遊潮。拉斯維加斯具韌性（VICI）。風險：下次衰退=出租率立即受衝擊。</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="lang-en">Country Tax Quick Reference</span><span class="lang-zh">各國股息預扣稅速查</span></div>
+        <div style="font-size:10px;line-height:1.6">
+          <table style="width:100%;border-collapse:collapse;font-size:9.5px">
+            <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 0;font-weight:600">&#x1F1F8;&#x1F1EC; <span class="lang-en">SG</span><span class="lang-zh">新加坡</span></td><td style="padding:3px 6px;color:#16a34a;font-weight:600"><span class="lang-en">0% withholding</span><span class="lang-zh">0%預扣</span></td><td style="padding:3px 0;color:#94a3b8"><span class="lang-en">Best for foreigners</span><span class="lang-zh">對外國人最友善</span></td></tr>
+            <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 0;font-weight:600">&#x1F1F2;&#x1F1FE; <span class="lang-en">MY</span><span class="lang-zh">馬來西亞</span></td><td style="padding:3px 6px">10%</td><td style="padding:3px 0;color:#94a3b8"><span class="lang-en">Low; transparent</span><span class="lang-zh">低；透明</span></td></tr>
+            <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 0;font-weight:600">&#x1F1EF;&#x1F1F5; <span class="lang-en">JP</span><span class="lang-zh">日本</span></td><td style="padding:3px 6px">15.315%</td><td style="padding:3px 0;color:#94a3b8"><span class="lang-en">Treaty may reduce</span><span class="lang-zh">租稅協定可降低</span></td></tr>
+            <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 0;font-weight:600">&#x1F1E6;&#x1F1FA; <span class="lang-en">AU</span><span class="lang-zh">澳洲</span></td><td style="padding:3px 6px">15% <span style="font-size:8px">(MIT)</span></td><td style="padding:3px 0;color:#94a3b8"><span class="lang-en">May include tax-deferred</span><span class="lang-zh">可能含遞延部分</span></td></tr>
+            <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:3px 0;font-weight:600">&#x1F1EC;&#x1F1E7; <span class="lang-en">UK</span><span class="lang-zh">英國</span></td><td style="padding:3px 6px">20%</td><td style="padding:3px 0;color:#94a3b8"><span class="lang-en">Basic rate default</span><span class="lang-zh">基本稅率預設</span></td></tr>
+            <tr><td style="padding:3px 0;font-weight:600">&#x1F1FA;&#x1F1F8; <span class="lang-en">US</span><span class="lang-zh">美國</span></td><td style="padding:3px 6px;color:#dc2626;font-weight:600">30%</td><td style="padding:3px 0;color:#94a3b8"><span class="lang-en">Treaty may reduce to 15%</span><span class="lang-zh">租稅協定可降至15%</span></td></tr>
+          </table>
+          <div style="margin-top:8px;font-size:9px;color:#94a3b8"><span class="lang-en"><em>Net yield after tax: SG 5.3% REIT = 5.3% net. US 5.5% REIT = 3.85% net (at 30% withholding). Always compare after-tax yields.</em></span><span class="lang-zh"><em>稅後淨殖利率：新加坡5.3% REIT=淨5.3%。美國5.5% REIT=淨3.85%（以30%預扣計）。永遠比較稅後收益率。</em></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="lang-en">REIT vs Direct Property</span><span class="lang-zh">REIT vs 直接持有房產</span></div>
+        <table style="width:100%;border-collapse:collapse;font-size:9.5px">
+          <tr style="background:#f0f6ff"><td style="padding:4px 6px;font-weight:600;color:#5a7a9a"></td><td style="padding:4px 6px;font-weight:600;color:#5a7a9a">REIT</td><td style="padding:4px 6px;font-weight:600;color:#5a7a9a"><span class="lang-en">Direct</span><span class="lang-zh">直接持有</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 6px;font-weight:600"><span class="lang-en">Liquidity</span><span class="lang-zh">流動性</span></td><td style="padding:4px 6px;color:#16a34a"><span class="lang-en">Sell in seconds</span><span class="lang-zh">秒賣</span></td><td style="padding:4px 6px;color:#dc2626"><span class="lang-en">3-6 months</span><span class="lang-zh">3-6個月</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 6px;font-weight:600"><span class="lang-en">Min. invest</span><span class="lang-zh">最低門檻</span></td><td style="padding:4px 6px;color:#16a34a"><span class="lang-en">$100</span><span class="lang-zh">$100</span></td><td style="padding:4px 6px;color:#dc2626"><span class="lang-en">$50K-500K+</span><span class="lang-zh">$5萬-50萬+</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 6px;font-weight:600"><span class="lang-en">Diversify</span><span class="lang-zh">分散性</span></td><td style="padding:4px 6px;color:#16a34a"><span class="lang-en">50-200 assets</span><span class="lang-zh">50-200個資產</span></td><td style="padding:4px 6px;color:#dc2626"><span class="lang-en">1 asset</span><span class="lang-zh">1個資產</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 6px;font-weight:600"><span class="lang-en">Leverage</span><span class="lang-zh">槓桿</span></td><td style="padding:4px 6px"><span class="lang-en">Manager decides</span><span class="lang-zh">經理人決定</span></td><td style="padding:4px 6px;color:#16a34a"><span class="lang-en">You decide LTV</span><span class="lang-zh">你決定LTV</span></td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0"><td style="padding:4px 6px;font-weight:600"><span class="lang-en">Volatility</span><span class="lang-zh">波動</span></td><td style="padding:4px 6px;color:#dc2626"><span class="lang-en">Stock market swings</span><span class="lang-zh">隨股市波動</span></td><td style="padding:4px 6px;color:#16a34a"><span class="lang-en">Stable (illiquid)</span><span class="lang-zh">穩定（不流動）</span></td></tr>
+          <tr><td style="padding:4px 6px;font-weight:600"><span class="lang-en">Tax</span><span class="lang-zh">稅務</span></td><td style="padding:4px 6px"><span class="lang-en">Withholding tax</span><span class="lang-zh">預扣稅</span></td><td style="padding:4px 6px"><span class="lang-en">CGT + stamp duty</span><span class="lang-zh">CGT+印花稅</span></td></tr>
+        </table>
+      </div>
+
+      <!-- Row 3: Practical -->
+      <div class="card">
+        <div class="card-title"><span class="lang-en">DPU Analysis Framework</span><span class="lang-zh">DPU分析框架</span></div>
+        <ul>
+          <li><span class="lang-en"><strong>DPU = Distribution Per Unit</strong> &mdash; the actual cash paid to you. This is the REIT equivalent of EPS. Track quarterly.</span><span class="lang-zh"><strong>DPU = 每單位配息</strong> &mdash; 實際付給你的現金。相當於REIT版的EPS。每季追蹤。</span></li>
+          <li><span class="lang-en"><strong>DPU growth drivers:</strong> rental reversion (rent renewal at higher rate) + acquisitions + organic occupancy improvement + cost reduction.</span><span class="lang-zh"><strong>DPU成長動力：</strong>租金調升（續約時提高租金）+收購+有機出租率改善+成本削減。</span></li>
+          <li><span class="lang-en"><strong>DPU threats:</strong> vacancies, negative rental reversion, rising interest costs, dilutive equity raises, currency depreciation (for cross-border portfolios).</span><span class="lang-zh"><strong>DPU威脅：</strong>空置、負向租金調整、利息成本上升、稀釋性增資、匯率貶值（跨境組合）。</span></li>
+          <li><span class="lang-en"><strong>Golden rule:</strong> If DPU has grown every year for 5+ years, the manager is doing their job. If DPU has fallen 2+ consecutive periods, investigate immediately.</span><span class="lang-zh"><strong>黃金法則：</strong>若DPU連續5年以上每年成長，管理層在做事。若DPU連續2期以上下滑，立即調查。</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="lang-en">WALE &amp; Occupancy</span><span class="lang-zh">WALE與出租率</span></div>
+        <ul>
+          <li><span class="lang-en"><strong>WALE</strong> (Weighted Average Lease Expiry) &mdash; how many years until all leases need renewing. &gt;5yr = very safe. 3-5yr = OK. &lt;3yr = renewal risk.</span><span class="lang-zh"><strong>WALE</strong>（加權平均租約到期年）&mdash; 所有租約還有多久要續約。&gt;5年=非常安全。3-5年=尚可。&lt;3年=續約風險。</span></li>
+          <li><span class="lang-en"><strong>Occupancy &gt;95%</strong> = healthy. <strong>90-95%</strong> = normal for diversified. <strong>&lt;90%</strong> = structural problem (sector or location).</span><span class="lang-zh"><strong>出租率&gt;95%</strong>=健康。<strong>90-95%</strong>=多元化型正常。<strong>&lt;90%</strong>=結構性問題（產業或地點）。</span></li>
+          <li><span class="lang-en"><strong>Tenant concentration:</strong> If top tenant = 20%+ of income, that one lease renewal defines DPU. Prefer top 10 tenants &lt;50%.</span><span class="lang-zh"><strong>租客集中度：</strong>若最大租客佔收入20%+，那一份續約就決定了DPU。偏好前10大租客佔&lt;50%。</span></li>
+          <li><span class="lang-en"><strong>Rental reversion:</strong> Positive = organic growth. Negative = the REIT is losing pricing power. Track this quarterly.</span><span class="lang-zh"><strong>租金調升率：</strong>正值=有機成長。負值=REIT正在失去定價能力。每季追蹤。</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="lang-en">Red Flags &amp; Warning Signs</span><span class="lang-zh">紅旗與警訊</span></div>
+        <ul>
+          <li><span class="lang-en"><strong>&#128308; DPU cut</strong> &mdash; Typically triggers 10-20% price drop. Exit immediately unless you understand the reason and it is temporary.</span><span class="lang-zh"><strong>&#128308; DPU削減</strong> &mdash; 通常觸發10-20%暴跌。除非你理解原因且是暫時性的，否則立即退出。</span></li>
+          <li><span class="lang-en"><strong>&#128308; Gearing &gt;45% + floating rate debt &gt;50%</strong> = double exposure to rate hikes. Interest costs can double in 12 months.</span><span class="lang-zh"><strong>&#128308; 槓桿&gt;45%+浮動利率債務&gt;50%</strong>=對升息雙重曝險。利息成本可在12個月內翻倍。</span></li>
+          <li><span class="lang-en"><strong>&#128308; Payout &gt;100%</strong> = distributing more than earned. Funded by debt or capital returns. Unsustainable beyond 2-3 quarters.</span><span class="lang-zh"><strong>&#128308; 配息率&gt;100%</strong>=分配超過賺取。靠債務或資本回饋支撐。超過2-3季不可持續。</span></li>
+          <li><span class="lang-en"><strong>&#128308; Negative spread + gearing &gt;40% + YoY negative</strong> = triple warning signal. All three simultaneously = sell.</span><span class="lang-zh"><strong>&#128308; 負利差+槓桿&gt;40%+YoY負數</strong>=三重警訊。三者同時發生=賣出。</span></li>
+          <li><span class="lang-en"><strong>&#128308; Manager equity raise at deep discount (&gt;10% below market)</strong> = dilution. Your unit value drops immediately. Check if acquisition is truly accretive.</span><span class="lang-zh"><strong>&#128308; 管理層大幅折價增資（低於市價&gt;10%）</strong>=稀釋。你的單位價值立即下降。確認收購是否真正增值。</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Buy-to-Sell: REIT Investor Checklist -->
+<section style="background:#f0f5fb">
+  <div class="section" style="max-width:min(1400px,96vw);margin:0 auto;padding-top:28px;padding-bottom:28px">
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+      <div style="background:#1e3a5f;padding:14px 20px">
+        <div style="font-size:14px;font-weight:700;color:#fff"><span class="lang-en">Buy-to-Sell: Professional REIT Investor Checklist</span><span class="lang-zh">從買到賣：專業REITs投資人追蹤清單</span></div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:3px"><span class="lang-en">What to check before buying, while holding, and when to exit</span><span class="lang-zh">買入前該查什麼、持有期該追蹤什麼、何時該退場</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);font-size:10px;font-family:Inter,sans-serif;color:#334155;line-height:1.6">
+
+        <!-- Phase 1 -->
+        <div style="padding:16px 18px;border-right:1px solid #f0f5fb">
+          <div style="font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #60a5fa"><span class="lang-en">PHASE 1: Before You Buy</span><span class="lang-zh">階段一：買入前研究</span></div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px;margin-top:8px"><span class="lang-en">&#9312; Fundamental Screening</span><span class="lang-zh">&#9312; 基本面篩選</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Spread &gt; +1.5% vs 10yr bond (income justification)<br>&#9744; P/NAV &lt; 1.0 for value; &gt;1.0 only if growth justified<br>&#9744; Gearing &lt; 40% (below 35% preferred in rate-hike cycle)<br>&#9744; Interest cover ratio &gt; 3x (can service debt comfortably)<br>&#9744; Payout ratio 85-95% (sustainable; &gt;100% = red flag)<br>&#9744; DPU growth trend — rising or at least stable over 5yr</span>
+            <span class="lang-zh">&#9744; 利差 &gt;+1.5% vs 10年期公債（收入正當性）<br>&#9744; P/NAV &lt;1.0找價值；&gt;1.0僅在成長性合理時<br>&#9744; 槓桿率 &lt;40%（升息週期偏好低於35%）<br>&#9744; 利息保障倍數 &gt;3倍（能輕鬆償債）<br>&#9744; 配息率85-95%（可持續；&gt;100%=紅旗）<br>&#9744; DPU成長趨勢——5年內上升或至少穩定</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9313; Portfolio Quality</span><span class="lang-zh">&#9313; 投資組合品質</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Tenant concentration — top tenant &lt;20% of income<br>&#9744; WALE (weighted avg lease expiry) &gt; 4 years<br>&#9744; Occupancy rate &gt; 93% (below 90% = structural issue)<br>&#9744; Geographic diversification — single-city risk?<br>&#9744; Asset age — capex needs rising for old portfolios<br>&#9744; Sector headwind/tailwind — office vs logistics vs DC</span>
+            <span class="lang-zh">&#9744; 租客集中度——最大租客佔收入&lt;20%<br>&#9744; WALE（加權平均租約到期）&gt;4年<br>&#9744; 出租率 &gt;93%（低於90%=結構性問題）<br>&#9744; 地理分散性——是否單一城市風險？<br>&#9744; 資產屋齡——老舊組合的資本支出需求上升<br>&#9744; 產業順逆風——辦公 vs 物流 vs 資料中心</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9314; Manager &amp; Governance</span><span class="lang-zh">&#9314; 管理層與治理</span></div>
+          <div>
+            <span class="lang-en">&#9744; External vs internal management (internal = aligned)<br>&#9744; Manager fee structure — AUM-based vs performance-based<br>&#9744; Sponsor strength — parent company balance sheet<br>&#9744; Rights-of-first-refusal pipeline from sponsor<br>&#9744; Track record of accretive vs dilutive acquisitions<br>&#9744; Insider ownership — manager eating own cooking?</span>
+            <span class="lang-zh">&#9744; 外部 vs 內部管理（內部=利益一致）<br>&#9744; 管理費結構——按AUM vs 按績效<br>&#9744; 發起人實力——母公司資產負債表<br>&#9744; 發起人優先購買權管道<br>&#9744; 收購紀錄——增值型 vs 稀釋型<br>&#9744; 內部人持股——管理層自己有沒有買？</span>
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div style="padding:16px 18px;border-right:1px solid #f0f5fb">
+          <div style="font-size:11px;font-weight:700;color:#f59e0b;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f59e0b"><span class="lang-en">PHASE 2: While You Hold</span><span class="lang-zh">階段二：持有期追蹤</span></div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px;margin-top:8px"><span class="lang-en">&#9312; Quarterly Earnings Watch</span><span class="lang-zh">&#9312; 季度財報追蹤</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; DPU trend — is it growing, flat, or declining?<br>&#9744; Occupancy change — even 1% drop = early warning<br>&#9744; Rental reversion rate — positive = organic growth<br>&#9744; Gearing direction — rising gearing = acquisitions or refi risk<br>&#9744; Weighted avg cost of debt — rising = margin squeeze<br>&#9744; NAV per unit change — write-downs = asset impairment</span>
+            <span class="lang-zh">&#9744; DPU趨勢——在成長、持平還是下降？<br>&#9744; 出租率變化——即使跌1%也是預警<br>&#9744; 租金調升率——正值=有機成長<br>&#9744; 槓桿方向——上升=收購或再融資風險<br>&#9744; 加權平均債務成本——上升=利潤擠壓<br>&#9744; 每單位NAV變化——減記=資產減損</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9313; Macro Monitoring</span><span class="lang-zh">&#9313; 總經監測</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; Central bank rate direction — each 25bp hike ≈ 3-5% REIT price drop<br>&#9744; 10-year bond yield — rising bond = REIT spread compresses<br>&#9744; Sector-specific demand — WFH impact on office, e-commerce on logistics<br>&#9744; Currency if invested cross-border — FX moves eat dividends<br>&#9744; Credit market stress — widening credit spreads = refi risk</span>
+            <span class="lang-zh">&#9744; 央行利率方向——每升25bp≈REIT跌3-5%<br>&#9744; 10年期公債殖利率——上升=REIT利差收窄<br>&#9744; 產業特定需求——遠距辦公對辦公、電商對物流<br>&#9744; 跨境投資匯率——匯率波動吃掉股息<br>&#9744; 信用市場壓力——信用利差擴大=再融資風險</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9314; Dividend Reinvestment</span><span class="lang-zh">&#9314; 股息再投資策略</span></div>
+          <div>
+            <span class="lang-en">&#9744; DRIP availability — automatic reinvestment at discount?<br>&#9744; Scrip dividend option — stock vs cash payout<br>&#9744; Tax-loss harvesting — sell losers to offset gains<br>&#9744; Rebalancing — sector rotation as cycles shift<br>&#9744; Withholding tax optimization — correct treaty form filed?</span>
+            <span class="lang-zh">&#9744; DRIP可用性——自動以折價再投資？<br>&#9744; 以股代息選項——股票 vs 現金配發<br>&#9744; 稅損收割——出售虧損部位抵消利得<br>&#9744; 再平衡——隨週期輪動產業配置<br>&#9744; 預扣稅優化——是否已提交正確的稅務協定表格？</span>
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div style="padding:16px 18px">
+          <div style="font-size:11px;font-weight:700;color:#22c55e;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #22c55e"><span class="lang-en">PHASE 3: When to Sell</span><span class="lang-zh">階段三：退場時機</span></div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px;margin-top:8px"><span class="lang-en">&#9312; Sell Signals</span><span class="lang-zh">&#9312; 出場信號</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; DPU cut announced — usually triggers 10-20% drop<br>&#9744; Gearing exceeds 45% with no clear deleveraging plan<br>&#9744; WALE drops below 3 years — tenant flight risk<br>&#9744; Occupancy below 88% for 2+ consecutive quarters<br>&#9744; Manager announces dilutive equity raise at deep discount<br>&#9744; Spread turns negative AND gearing &gt;40% simultaneously</span>
+            <span class="lang-zh">&#9744; 宣布DPU削減——通常觸發10-20%暴跌<br>&#9744; 槓桿超過45%且無明確去槓桿計畫<br>&#9744; WALE跌破3年——租客流失風險<br>&#9744; 出租率連續2+季低於88%<br>&#9744; 管理層宣布大幅折價增資（稀釋性）<br>&#9744; 利差轉負且槓桿&gt;40%同時發生</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9313; Take-Profit Signals</span><span class="lang-zh">&#9313; 獲利了結信號</span></div>
+          <div style="margin-bottom:8px">
+            <span class="lang-en">&#9744; P/NAV exceeds 1.5x with no growth catalyst remaining<br>&#9744; Yield compresses below 10yr bond (negative spread)<br>&#9744; Sector peak — all analysts bullish = contrarian exit<br>&#9744; Better risk-adjusted opportunity elsewhere<br>&#9744; Position exceeds 15% of your total portfolio</span>
+            <span class="lang-zh">&#9744; P/NAV超過1.5倍且無剩餘成長催化劑<br>&#9744; 殖利率壓縮至低於10年期公債（負利差）<br>&#9744; 產業高峰——所有分析師都看多=反向退場<br>&#9744; 其他地方出現更好的風險調整後機會<br>&#9744; 部位超過你總投資組合的15%</span>
+          </div>
+
+          <div style="font-weight:600;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">&#9314; Total Return Calculation</span><span class="lang-zh">&#9314; 總報酬計算</span></div>
+          <div style="padding:10px;background:#f0fdf4;border-radius:6px;border-left:3px solid #16a34a;font-size:9.5px">
+            <span class="lang-en"><strong>REIT Total Return =</strong><br>Capital gain/loss (buy vs sell price)<br>+ Cumulative dividends received<br>&minus; Withholding tax on dividends<br>&minus; Brokerage &amp; platform fees<br>&plusmn; FX gain/loss (cross-border)<br><br><em>Compare this to: simply holding the 10yr bond of the same country for the same period. If the bond wins, the REIT wasn't worth the risk.</em></span>
+            <span class="lang-zh"><strong>REIT總報酬 =</strong><br>資本利得/損失（買入 vs 賣出價）<br>+ 累計收到的股息<br>&minus; 股息預扣稅<br>&minus; 券商與平台手續費<br>&plusmn; 匯率損益（跨境投資）<br><br><em>對比：同期間持有同國10年期公債。如果公債贏了，REIT就不值得承擔那個風險。</em></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Professional REIT Picks: 1yr & 3yr -->
+<section style="background:#f0f5fb">
+  <div class="section" style="max-width:min(1400px,96vw);margin:0 auto;padding-top:28px;padding-bottom:28px">
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+      <div style="background:#1e3a5f;padding:14px 20px">
+        <div style="font-size:14px;font-weight:700;color:#fff"><span class="lang-en">Professional REIT Picks: 1-Year & 3-Year Horizon</span><span class="lang-zh">專業 REIT 精選：1年期與3年期投資視角</span></div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:3px"><span class="lang-en">Multi-factor scoring &mdash; avoiding value traps by weighting fundamentals, momentum, and structural catalysts</span><span class="lang-zh">多因子評分——以基本面、動能、結構性催化劑加權，避開價值陷阱</span></div>
+      </div>
+      <div style="padding:20px;font-family:Inter,sans-serif">
+
+        <!-- Scoring methodology -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;margin-bottom:18px;font-size:9.5px;color:#475569;line-height:1.7">
+          <div style="font-weight:700;color:#1e3a5f;margin-bottom:6px;font-size:10px"><span class="lang-en">Scoring Methodology (6 factors, max 100 pts)</span><span class="lang-zh">評分方法（6大因子，滿分100分）</span></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px 16px">
+            <div><span class="lang-en"><strong>Yield Quality 25pts</strong> &mdash; Yield level + spread over 10yr bond + payout sustainability (&lt;90% preferred)</span><span class="lang-zh"><strong>殖利率品質 25分</strong>——殖利率水準+超過10年期公債利差+派息可持續性（&lt;90%為佳）</span></div>
+            <div><span class="lang-en"><strong>Valuation 20pts</strong> &mdash; P/NAV relative to sector norm. Extreme discounts get penalized (likely fundamental issues)</span><span class="lang-zh"><strong>估值 20分</strong>——P/NAV相對於板塊常態。極端折價會被扣分（可能有基本面問題）</span></div>
+            <div><span class="lang-en"><strong>Momentum 15pts</strong> &mdash; YoY price + 5yr total return. Confirms market validates the thesis</span><span class="lang-zh"><strong>動能 15分</strong>——年漲幅+5年總報酬。確認市場驗證投資邏輯</span></div>
+            <div><span class="lang-en"><strong>Balance Sheet 15pts</strong> &mdash; Gearing &lt;35% ideal. High gearing + high payout = fragile in rate hikes</span><span class="lang-zh"><strong>資產負債表 15分</strong>——槓桿率&lt;35%理想。高槓桿+高派息=升息時脆弱</span></div>
+            <div><span class="lang-en"><strong>Sector Tailwind 15pts</strong> &mdash; Structural demand drivers (AI, aging, housing shortage) vs cyclical headwinds (office glut)</span><span class="lang-zh"><strong>板塊順風 15分</strong>——結構性需求驅動（AI、老齡化、住房短缺）vs 週期性逆風（辦公過剩）</span></div>
+            <div><span class="lang-en"><strong>Value Trap Filter 10pts</strong> &mdash; Deducted when: yield &gt;6% + negative YoY + gearing &gt;40% + payout &gt;90%</span><span class="lang-zh"><strong>價值陷阱過濾 10分</strong>——扣分條件：殖利率&gt;6%+年漲幅為負+槓桿&gt;40%+派息率&gt;90%</span></div>
+          </div>
+        </div>
+
+        <!-- 1-Year Picks -->
+        <div style="margin-bottom:22px">
+          <div style="font-size:11px;font-weight:700;color:#1e3a5f;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #3b82f6">
+            <span class="lang-en">TOP 5 &mdash; 1-YEAR TACTICAL PICKS</span><span class="lang-zh">TOP 5——1年期戰術型精選</span>
+            <span style="font-weight:400;font-size:9px;color:#5a7a9a;margin-left:8px"><span class="lang-en">Near-term catalysts + momentum confirmation + reasonable entry</span><span class="lang-zh">近期催化劑+動能確認+合理進場點</span></span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:10px">
+            <thead>
+              <tr style="background:#f0f6ff">
+                <th style="padding:6px 8px;text-align:left;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:5%">#</th>
+                <th style="padding:6px 8px;text-align:left;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:15%">REIT</th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:7%"><span class="lang-en">Score</span><span class="lang-zh">分數</span></th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:6%"><span class="lang-en">Yld</span><span class="lang-zh">殖利率</span></th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:6%"><span class="lang-en">Sprd</span><span class="lang-zh">利差</span></th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:6%">P/NAV</th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:6%">YoY</th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:6%"><span class="lang-en">Gear</span><span class="lang-zh">槓桿</span></th>
+                <th style="padding:6px 8px;text-align:left;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:43%"><span class="lang-en">Catalyst & Thesis</span><span class="lang-zh">催化劑與投資邏輯</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #f0f5fb">
+                <td style="padding:8px;font-weight:700;color:#3b82f6">1</td>
+                <td style="padding:8px;font-weight:600">&#x1F1FA;&#x1F1F8; VICI Properties<br><span style="font-size:8px;color:#94a3b8">VICI &middot; NYSE</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#16a34a;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">84</span></td>
+                <td style="padding:8px;text-align:center;color:#16a34a">6.5%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+2.3%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">0.85x</td>
+                <td style="padding:8px;text-align:center;color:#dc2626">-10.0%</td>
+                <td style="padding:8px;text-align:center">35%</td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>Highest quality yield in US REITs.</strong> 6.5% yield at P/NAV 0.85x = buying Las Vegas Strip assets at 15% discount. YoY -10% creates entry point — the selloff is rate-driven, not fundamental. Triple-net leases with CPI escalators protect income. Payout ratio 67% = sustainable. 7 consecutive years of dividend increases. Rate cut = immediate rerating catalyst.</span><span class="lang-zh"><strong>美國REIT中最高品質的殖利率。</strong>6.5%殖利率+P/NAV 0.85倍=以85折買入拉斯維加斯大道資產。年跌-10%創造進場點——賣壓是利率驅動，非基本面。三淨租約+CPI掛鈎保護收入。派息率67%=可持續。連續7年增派。降息=立即重估催化劑。</span></td>
+              </tr>
+              <tr style="border-bottom:1px solid #f0f5fb;background:#f9fbfd">
+                <td style="padding:8px;font-weight:700;color:#3b82f6">2</td>
+                <td style="padding:8px;font-weight:600">&#x1F1FA;&#x1F1F8; Digital Realty<br><span style="font-size:8px;color:#94a3b8">DLR &middot; NYSE</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#16a34a;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">80</span></td>
+                <td style="padding:8px;text-align:center">2.7%</td>
+                <td style="padding:8px;text-align:center;color:#dc2626">-1.6%</td>
+                <td style="padding:8px;text-align:center">1.15x</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+24.1%</td>
+                <td style="padding:8px;text-align:center">32%</td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>AI capex → real leasing revenue.</strong> YoY +24% confirms market conviction. $3.25B hyperscale fund closed; bookings converting to signed leases at record pace. 2.7% yield is low, but 24%+ total return compensates. Negative spread vs Treasury = this is a growth REIT, not income.</span><span class="lang-zh"><strong>AI資本支出→實際租賃營收。</strong>年漲+24%確認市場信心。$32.5億超大規模基金已關閉；預訂以破紀錄速度轉化為簽約。2.7%殖利率偏低，但24%+總報酬補償。殖利率低於國債=這是成長型REIT，非收益型。</span></td>
+              </tr>
+              <tr style="border-bottom:1px solid #f0f5fb">
+                <td style="padding:8px;font-weight:700;color:#3b82f6">3</td>
+                <td style="padding:8px;font-weight:600">&#x1F1EF;&#x1F1F5; Japan Hotel REIT<br><span style="font-size:8px;color:#94a3b8">JHR &middot; TSE</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#16a34a;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">76</span></td>
+                <td style="padding:8px;text-align:center;color:#16a34a">5.5%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+4.5%</td>
+                <td style="padding:8px;text-align:center">1.10x</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+12.0%</td>
+                <td style="padding:8px;text-align:center">42%</td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>Inbound tourism breaking records.</strong> 5.5% yield + 4.5% spread over JGB = best risk-adjusted income in Japan. Weak JPY + visa relaxation = tourist spending surge. 51 properties, ¥453B portfolio. Gearing 42% is the key risk — monitor BOJ rate path. Best 1yr play on Japan tourism thesis.</span><span class="lang-zh"><strong>入境觀光破紀錄。</strong>5.5%殖利率+超過JGB 4.5%利差=日本最佳風險調整收益。日圓弱勢+簽證放寬=觀光消費爆發。51物件、¥4530億組合。槓桿42%是主要風險——需監控BOJ利率路徑。日本觀光主題最佳1年期標的。</span></td>
+              </tr>
+              <tr style="border-bottom:1px solid #f0f5fb;background:#f9fbfd">
+                <td style="padding:8px;font-weight:700;color:#3b82f6">4</td>
+                <td style="padding:8px;font-weight:600">&#x1F1E6;&#x1F1FA; Stockland<br><span style="font-size:8px;color:#94a3b8">SGP &middot; ASX</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#16a34a;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">74</span></td>
+                <td style="padding:8px;text-align:center">4.5%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+0.2%</td>
+                <td style="padding:8px;text-align:center">0.90x</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+8.0%</td>
+                <td style="padding:8px;text-align:center">25%</td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>AU housing shortage is acute.</strong> Residential land bank + logistics pivot = dual growth engine. Low gearing 25% gives acquisition firepower. RBA rate cut cycle = direct catalyst for residential demand. P/NAV 0.9 with positive momentum = not a value trap.</span><span class="lang-zh"><strong>澳洲住房短缺嚴峻。</strong>住宅土地儲備+物流轉型=雙引擎成長。低槓桿25%提供收購火力。RBA降息週期=住宅需求直接催化劑。P/NAV 0.9且動能為正=非價值陷阱。</span></td>
+              </tr>
+              <tr>
+                <td style="padding:8px;font-weight:700;color:#3b82f6">5</td>
+                <td style="padding:8px;font-weight:600">&#x1F1F8;&#x1F1EC; CapitaLand Integ.<br><span style="font-size:8px;color:#94a3b8">CICT &middot; SGX</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#16a34a;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">73</span></td>
+                <td style="padding:8px;text-align:center;color:#16a34a">5.0%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+1.9%</td>
+                <td style="padding:8px;text-align:center">0.95x</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+3.2%</td>
+                <td style="padding:8px;text-align:center">39%</td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>SG retail dominance + yield safety.</strong> Largest SG REIT with S$27B portfolio. 5.0% yield + 1.9% spread over SG 10yr = attractive risk-adjusted income. 2026E DPU S$0.12 (+6% growth). Gearing 39% is manageable. Defensive pick — won't outperform in a bull market but protects capital.</span><span class="lang-zh"><strong>新加坡零售主導地位+殖利率安全。</strong>新加坡最大REIT，S$270億組合。5.0%殖利率+超過新加坡10年期1.9%利差=有吸引力的風險調整收益。2026E DPU S$0.12（+6%成長）。槓桿39%可控。防禦型——牛市不會跑贏但保護資本。</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 3-Year Picks -->
+        <div style="margin-bottom:22px">
+          <div style="font-size:11px;font-weight:700;color:#1e3a5f;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #16a34a">
+            <span class="lang-en">TOP 5 &mdash; 3-YEAR STRUCTURAL PICKS</span><span class="lang-zh">TOP 5——3年期結構型精選</span>
+            <span style="font-weight:400;font-size:9px;color:#5a7a9a;margin-left:8px"><span class="lang-en">Secular megatrends + sustainable fundamentals + NAV rerating potential</span><span class="lang-zh">長期大趨勢+可持續基本面+NAV重估潛力</span></span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:10px">
+            <thead>
+              <tr style="background:#f0f6ff">
+                <th style="padding:6px 8px;text-align:left;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:5%">#</th>
+                <th style="padding:6px 8px;text-align:left;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:15%">REIT</th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:7%"><span class="lang-en">Score</span><span class="lang-zh">分數</span></th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:6%"><span class="lang-en">Yld</span><span class="lang-zh">殖利率</span></th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:6%">5yr</th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:6%">P/NAV</th>
+                <th style="padding:6px 8px;text-align:center;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:6%"><span class="lang-en">Gear</span><span class="lang-zh">槓桿</span></th>
+                <th style="padding:6px 8px;text-align:left;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:8%"><span class="lang-en">Megatrend</span><span class="lang-zh">大趨勢</span></th>
+                <th style="padding:6px 8px;text-align:left;font-weight:600;color:#5a7a9a;border-bottom:2px solid #dce8f5;width:41%"><span class="lang-en">3-Year Thesis</span><span class="lang-zh">3年投資邏輯</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #f0f5fb">
+                <td style="padding:8px;font-weight:700;color:#16a34a">1</td>
+                <td style="padding:8px;font-weight:600">&#x1F1FA;&#x1F1F8; Welltower<br><span style="font-size:8px;color:#94a3b8">WELL &middot; NYSE</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#1e3a5f;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">86</span></td>
+                <td style="padding:8px;text-align:center">1.5%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+90%</td>
+                <td style="padding:8px;text-align:center;color:#d97706">2.20x</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">28%</td>
+                <td style="padding:8px;font-size:9px;white-space:normal"><span class="lang-en">Aging population</span><span class="lang-zh">老齡化</span></td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>Demographics are destiny.</strong> $115B market cap — largest healthcare REIT. 5yr +90% total return is the best among all major REITs. YoY +32%. 1.5% yield is low because stock price surged — this is a pure growth REIT. Baby boomers entering 80+ bracket 2026-2030. Senior housing supply constrained post-COVID. Occupancy recovering toward 90%+. P/NAV 2.2x is expensive but justified by the only certainty in real estate: aging demographics.</span><span class="lang-zh"><strong>人口結構即命運。</strong>$1150億市值——最大醫療REIT。5年+90%總報酬是所有大型REIT中最佳。年漲+32%。1.5%殖利率低是因為股價飆升——這是純成長型REIT。嬰兒潮世代2026-2030進入80+歲。COVID後高齡住房供給受限。出租率恢復至90%+。P/NAV 2.2倍偏貴但由房地產唯一確定性支撐：老齡化人口。</span></td>
+              </tr>
+              <tr style="border-bottom:1px solid #f0f5fb;background:#f9fbfd">
+                <td style="padding:8px;font-weight:700;color:#16a34a">2</td>
+                <td style="padding:8px;font-weight:600">&#x1F1FA;&#x1F1F8; Prologis<br><span style="font-size:8px;color:#94a3b8">PLD &middot; NYSE</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#1e3a5f;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">85</span></td>
+                <td style="padding:8px;text-align:center">3.2%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+62%</td>
+                <td style="padding:8px;text-align:center">1.25x</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">28%</td>
+                <td style="padding:8px;font-size:9px;white-space:normal"><span class="lang-en">AI + logistics</span><span class="lang-zh">AI+物流</span></td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>Owns the global logistics backbone.</strong> 3.2% yield with 13 consecutive years of dividend increases. AI data centers need adjacent logistics. E-commerce + reshoring = structural warehouse demand. 1B sq ft portfolio, 97% occupancy. Low gearing 28%. Premium P/NAV justified by irreplaceable land bank.</span><span class="lang-zh"><strong>擁有全球物流基礎設施骨幹。</strong>3.2%殖利率+連續13年增派。AI資料中心需要鄰近物流。電商+回流=結構性倉儲需求。10億平方呎組合、97%出租率。低槓桿28%。P/NAV溢價由不可替代的土地儲備支撐。</span></td>
+              </tr>
+              <tr style="border-bottom:1px solid #f0f5fb">
+                <td style="padding:8px;font-weight:700;color:#16a34a">3</td>
+                <td style="padding:8px;font-weight:600">&#x1F1FA;&#x1F1F8; Equinix<br><span style="font-size:8px;color:#94a3b8">EQIX &middot; NASDAQ</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#1e3a5f;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">76</span></td>
+                <td style="padding:8px;text-align:center">2.1%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+85%</td>
+                <td style="padding:8px;text-align:center;color:#d97706">2.10x</td>
+                <td style="padding:8px;text-align:center">35%</td>
+                <td style="padding:8px;font-size:9px;white-space:normal"><span class="lang-en">AI infrastructure</span><span class="lang-zh">AI基礎設施</span></td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>Interconnection moat is the edge.</strong> Not just any data center — Equinix's 260+ facilities form a global network where customers interconnect. This creates switching costs that commodity DC operators lack. P/NAV 2.1x is rich, but justified by 15%+ FFO growth. The risk is overpaying — but AI infrastructure demand is a multi-decade cycle.</span><span class="lang-zh"><strong>互聯護城河是核心優勢。</strong>不只是資料中心——Equinix的260+設施形成全球互聯網路，創造客戶轉換成本，這是商品化DC營運商所缺乏的。P/NAV 2.1倍偏貴，但15%+ FFO成長支撐。風險是買貴——但AI基礎設施需求是數十年週期。</span></td>
+              </tr>
+              <tr style="border-bottom:1px solid #f0f5fb;background:#f9fbfd">
+                <td style="padding:8px;font-weight:700;color:#16a34a">4</td>
+                <td style="padding:8px;font-weight:600">&#x1F1E9;&#x1F1EA; Vonovia<br><span style="font-size:8px;color:#94a3b8">VNA.DE &middot; XETRA</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#1e3a5f;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">73</span></td>
+                <td style="padding:8px;text-align:center">4.0%</td>
+                <td style="padding:8px;text-align:center;color:#dc2626">-30%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a;font-weight:600">0.50x</td>
+                <td style="padding:8px;text-align:center;color:#d97706">45%</td>
+                <td style="padding:8px;font-size:9px;white-space:normal"><span class="lang-en">Housing crisis</span><span class="lang-zh">住房危機</span></td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>Buy &euro;1 of German housing for &euro;0.50.</strong> Price &euro;22.30, P/NAV 0.50 is the deepest discount in major REITs. NOT a value trap because: (1) German rent growth mandated 3-4%/yr, (2) 700K+ unit shortage, (3) 52-week low &euro;20 suggests floor forming. Risk: gearing 45%, YoY -5%. Needs ECB rate cuts. 3yr reversion bet — if rates normalize, P/NAV re-rates to 0.7-0.8 = 40-60% upside.</span><span class="lang-zh"><strong>用0.50歐元買1歐元的德國住宅。</strong>股價€22.30，P/NAV 0.50是大型REIT中最深折價。非價值陷阱：(1)德國租金政府規定年增3-4%，(2)短缺70萬+戶，(3)52週低€20顯示底部形成。風險：槓桿45%，年跌-5%。需ECB降息。3年均值回歸——利率正常化後P/NAV重估至0.7-0.8=40-60%上行。</span></td>
+              </tr>
+              <tr>
+                <td style="padding:8px;font-weight:700;color:#16a34a">5</td>
+                <td style="padding:8px;font-weight:600">&#x1F1EC;&#x1F1E7; Segro<br><span style="font-size:8px;color:#94a3b8">SGRO.L &middot; LSE</span></td>
+                <td style="padding:8px;text-align:center"><span style="background:#1e3a5f;color:#fff;padding:2px 6px;border-radius:3px;font-weight:700">74</span></td>
+                <td style="padding:8px;text-align:center">4.5%</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">+55%</td>
+                <td style="padding:8px;text-align:center">0.90x</td>
+                <td style="padding:8px;text-align:center;color:#16a34a">25%</td>
+                <td style="padding:8px;font-size:9px;white-space:normal"><span class="lang-en">EU logistics</span><span class="lang-zh">歐洲物流</span></td>
+                <td style="padding:8px;font-size:9px;line-height:1.5;white-space:normal"><span class="lang-en"><strong>Europe's Prologis — at a discount.</strong> 4.5% yield + P/NAV 0.9 vs Prologis' 1.25. Low gearing 25%, 5yr +55% track record. Nearshoring + e-commerce + last-mile logistics = structural demand. BoE/ECB rate cuts = double tailwind (UK + EU exposure). Best risk/reward in European logistics.</span><span class="lang-zh"><strong>歐洲版Prologis——但有折價。</strong>4.5%殖利率+P/NAV 0.9 vs Prologis的1.25。低槓桿25%，5年+55%績效。近岸外包+電商+最後一哩物流=結構性需求。BoE/ECB降息=雙重順風（英國+歐盟曝險）。歐洲物流最佳風險/報酬。</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Why not INA/LIC -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 14px;margin-bottom:18px;font-size:9px;color:#5a7a9a;line-height:1.6">
+          <span class="lang-en"><strong>Why aren't Ingenia (INA, 70pts) or Lifestyle Communities (LIC, 68pts) in the Top 5?</strong> Both are quality AU residential plays with strong 5yr track records (+65%, +55%). But: P/NAV premiums (1.3x, 1.5x) are rich for small-caps, negative yield spread vs AU 10yr bond, single-country concentration, and limited liquidity (A$1.6-1.9B market cap). For AU housing exposure, Stockland (1yr #4) offers better risk-adjusted entry — larger, cheaper (P/NAV 0.9x), with dual residential + logistics engines. INA/LIC are better as satellite positions (5-10% of REIT allocation), not core holdings.</span>
+          <span class="lang-zh"><strong>為何 Ingenia (INA, 70分) 和 Lifestyle Communities (LIC, 68分) 未入選 Top 5？</strong>兩者都是優質的澳洲住宅標的，5年績效佳（+65%、+55%）。但：P/NAV 溢價偏高（1.3x、1.5x）對小型股而言偏貴、殖利率低於澳洲10年期公債（負利差）、單一國家集中度、流動性有限（市值 A$16-19億）。澳洲住宅曝險首選 Stockland（1年期 #4）——規模更大、更便宜（P/NAV 0.9x）、住宅+物流雙引擎。INA/LIC 更適合作為衛星部位（REIT配置的5-10%），而非核心持倉。</span>
+        </div>
+
+        <!-- Value Traps Warning -->
+        <div style="margin-bottom:18px">
+          <div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #dc2626">
+            <span class="lang-en">VALUE TRAP ALERT &mdash; High Yield ≠ Good Investment</span><span class="lang-zh">價值陷阱警報——高殖利率 ≠ 好投資</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:9.5px">
+            <div style="padding:12px;background:#fef2f2;border-radius:6px;border-left:3px solid #dc2626;line-height:1.6">
+              <div style="font-weight:700;color:#dc2626;margin-bottom:6px"><span class="lang-en">Crown Castle (CCI) &mdash; Yield 5.2%</span><span class="lang-zh">Crown Castle (CCI)——殖利率 5.2%</span></div>
+              <span class="lang-en">Looks: infrastructure play with 5%+ yield. Reality: gearing <strong>58%</strong> (highest in our list), payout <strong>90%</strong> (no safety margin), YoY <strong>-8.5%</strong>, 5yr return only <strong>+5%</strong>. Already cut quarterly dividend from $1.565 to $1.0625. 5G rollout slower than expected. More cuts likely if rates stay high.</span>
+              <span class="lang-zh">表面：5%+殖利率的基建標的。現實：槓桿<strong>58%</strong>（全列表最高）、派息率<strong>90%</strong>（無安全邊際）、年跌<strong>-8.5%</strong>、5年報酬僅<strong>+5%</strong>。已從每季$1.565減派至$1.0625。5G建設慢於預期。利率維持高檔則可能繼續減派。</span>
+            </div>
+            <div style="padding:12px;background:#fef2f2;border-radius:6px;border-left:3px solid #dc2626;line-height:1.6">
+              <div style="font-weight:700;color:#dc2626;margin-bottom:6px"><span class="lang-en">Unibail-Rodamco (URW) &mdash; Yield 7.5%</span><span class="lang-zh">Unibail-Rodamco (URW)——殖利率 7.5%</span></div>
+              <span class="lang-en">Looks: deepest value in all REITs, P/NAV <strong>0.50</strong>. Reality: 5yr return <strong>-40%</strong>, gearing <strong>42%</strong>, payout <strong>85%</strong>. European mega-mall model structurally challenged by e-commerce. Deleveraging means selling assets at discounts. "Cheap" for 5 years running — discount may be permanent.</span>
+              <span class="lang-zh">表面：所有REIT中最深的價值，P/NAV <strong>0.50</strong>。現實：5年報酬<strong>-40%</strong>、槓桿<strong>42%</strong>、派息率<strong>85%</strong>。歐洲大型商場模式被電商結構性挑戰。去槓桿意味著折價賣資產。「便宜」已經5年——折價可能是永久的。</span>
+            </div>
+            <div style="padding:12px;background:#fef2f2;border-radius:6px;border-left:3px solid #dc2626;line-height:1.6">
+              <div style="font-weight:700;color:#dc2626;margin-bottom:6px"><span class="lang-en">Dexus (DXS) &mdash; Yield 6.5%</span><span class="lang-zh">Dexus (DXS)——殖利率 6.5%</span></div>
+              <span class="lang-en">Looks: high yield at deep discount, P/NAV <strong>0.70</strong>. Reality: office sector is in <strong>structural</strong> decline (WFH permanent), YoY <strong>-8%</strong>, 5yr <strong>-10%</strong>, payout <strong>90%</strong>. Australian CBD vacancy rates still rising. The yield is compensating you for capital destruction — total return is negative.</span>
+              <span class="lang-zh">表面：深度折價的高殖利率，P/NAV <strong>0.70</strong>。現實：辦公板塊處於<strong>結構性</strong>衰退（WFH永久化）、年跌<strong>-8%</strong>、5年<strong>-10%</strong>、派息率<strong>90%</strong>。澳洲CBD空置率仍在上升。殖利率是在補償你的資本損失——總報酬是負的。</span>
+            </div>
+            <div style="padding:12px;background:#fef2f2;border-radius:6px;border-left:3px solid #dc2626;line-height:1.6">
+              <div style="font-weight:700;color:#dc2626;margin-bottom:6px"><span class="lang-en">Keppel REIT (KREIT) &mdash; Yield 6.2%</span><span class="lang-zh">吉寶 REIT (KREIT)——殖利率 6.2%</span></div>
+              <span class="lang-en">Looks: SG brand name, 6%+ yield, "recovering" office market. Reality: P/NAV <strong>0.72</strong>, payout <strong>98%</strong> (unsustainable — distributing almost all income), gearing <strong>40%</strong>, YoY <strong>-2.8%</strong>. Market isn't pricing in recovery because fundamentals don't support it. One bad quarter and the dividend gets cut.</span>
+              <span class="lang-zh">表面：新加坡品牌、6%+殖利率、辦公市場「復甦」。現實：P/NAV <strong>0.72</strong>、派息率<strong>98%</strong>（不可持續——幾乎分光所有收入）、槓桿<strong>40%</strong>、年跌<strong>-2.8%</strong>。市場沒有定價復甦，因為基本面不支持。一個壞季度股息就會被砍。</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick filter: how to spot value traps -->
+        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:14px 16px;font-size:9.5px;color:#475569;line-height:1.7">
+          <div style="font-weight:700;color:#d97706;margin-bottom:6px;font-size:10px"><span class="lang-en">Quick Value Trap Checklist (if 3+ flags = avoid)</span><span class="lang-zh">快速價值陷阱檢查表（3項以上命中=迴避）</span></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px">
+            <div><span class="lang-en">&#x1F6A9; Yield &gt;6% but P/NAV &lt;0.75 (market is saying NAV is overstated)</span><span class="lang-zh">&#x1F6A9; 殖利率&gt;6%但P/NAV&lt;0.75（市場認為NAV被高估）</span></div>
+            <div><span class="lang-en">&#x1F6A9; Payout &gt;90% (no buffer for bad quarters or capex)</span><span class="lang-zh">&#x1F6A9; 派息率&gt;90%（壞季度或資本支出無緩衝）</span></div>
+            <div><span class="lang-en">&#x1F6A9; Gearing &gt;40% + rising interest rates</span><span class="lang-zh">&#x1F6A9; 槓桿率&gt;40%+利率上升環境</span></div>
+            <div><span class="lang-en">&#x1F6A9; Negative 5yr total return (the market has spoken)</span><span class="lang-zh">&#x1F6A9; 5年總報酬為負（市場已經給出答案）</span></div>
+            <div><span class="lang-en">&#x1F6A9; Sector in structural decline (office, secondary retail)</span><span class="lang-zh">&#x1F6A9; 板塊處於結構性衰退（辦公、二線零售）</span></div>
+            <div><span class="lang-en">&#x1F6A9; Management selling shares or diluting aggressively</span><span class="lang-zh">&#x1F6A9; 管理層賣股或積極稀釋股權</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Teaser linking to dedicated REIT vs Direct page -->
+<section style="background:#f0f5fb">
+  <div class="section" style="max-width:min(1400px,96vw);margin:0 auto;padding-top:28px;padding-bottom:28px">
+    <a href="/reit-vs-direct.html" style="display:block;text-decoration:none;color:inherit">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:22px 26px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;transition:all .15s" onmouseover="this.style.borderColor='#1e3a5f';this.style.boxShadow='0 4px 14px rgba(30,58,95,.08)'" onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
+        <div style="font-size:32px;line-height:1">&#x2696;&#xFE0F;</div>
+        <div style="flex:1;min-width:240px">
+          <div style="font-size:10px;letter-spacing:.16em;color:#3b82f6;font-weight:700;margin-bottom:5px"><span class="lang-en">DEDICATED COMPARISON TOOL</span><span class="lang-zh">獨立比較工具</span></div>
+          <div style="font-size:16px;font-weight:700;color:#1e3a5f;margin-bottom:4px"><span class="lang-en">Direct Property vs REITs &mdash; Now with Local / Foreign Toggle</span><span class="lang-zh">實體房產 vs REITs &mdash; 現支援本國 / 外國身分切換</span></div>
+          <div style="font-size:12px;color:#5a7a9a;line-height:1.55"><span class="lang-en">Pick your tax residency at the top &mdash; ABSD, FIRB, SDLT surcharges and non-resident withholding redraw the table for foreign buyers. 7 markets &times; 3 LTV scenarios.</span><span class="lang-zh">頂部先選稅務身分 &mdash; ABSD、FIRB、SDLT 附加稅與非居民預扣會把外國買家的數字重畫一次。7 個市場 &times; 3 種槓桿情境。</span></div>
+        </div>
+        <div style="font-size:13px;color:#1e3a5f;font-weight:600;display:inline-flex;align-items:center;gap:6px"><span class="lang-en">Open tool</span><span class="lang-zh">開啟工具</span> &rarr;</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer">
+    <div class="footer-l">PROPERTY MONITOR</div>
+    <div class="footer-r"><span class="lang-en">Data for reference only &middot; Not investment advice &middot; &copy; 2026 InvestMQuest</span><span class="lang-zh">&#x8CC7;&#x6599;&#x50C5;&#x4F9B;&#x53C3;&#x8003; &middot; &#x975E;&#x6295;&#x8CC7;&#x5EFA;&#x8B70; &middot; &copy; 2026 InvestMQuest</span></div>
+  </div>
+</footer>
+
+<script>
+var C = {navy:'#1e3a5f', green:'#16a34a', orange:'#d97706', red:'#dc2626', muted:'#64748b'};
+
+var SECTOR_COLORS = {
+  'Industrial': C.navy, 'Data Center': '#7c3aed', 'Office': C.muted, 'Retail': C.orange,
+  'Residential': C.green, 'Healthcare': '#0891b2', 'Hospitality': '#d97706',
+  'Infrastructure': '#1d4ed8', 'Diversified': '#475569', 'Self-Storage': '#16a34a',
+  'Life Science': '#059669', 'Gaming': '#d97706', 'Net Lease': C.orange,
+  'Industrial/DC': '#7c3aed', 'Fund Manager': '#475569', 'SFR Residential': C.green,
+  'Hotel/Resi': '#d97706', 'Office/Retail': C.muted, 'Retail/Office': C.orange,
+  'Office/Resi': C.muted, 'Logistics': C.navy, 'Data Center/Storage': '#7c3aed'
+};
+
+var SECTOR_ZH = {
+  'Industrial':'\u5DE5\u696D','Data Center':'\u8CC7\u6599\u4E2D\u5FC3','Office':'\u8FA6\u516C',
+  'Retail':'\u96F6\u552E','Residential':'\u4F4F\u5B85','Healthcare':'\u91AB\u7642',
+  'Hospitality':'\u9152\u5E97','Infrastructure':'\u57FA\u7840\u8A2D\u65BD',
+  'Diversified':'\u591A\u5143\u5316','Self-Storage':'\u5009\u5132','Life Science':'\u751F\u547D\u79D1\u5B78',
+  'Gaming':'\u535A\u5F69','Net Lease':'\u6DE8\u79DF\u8CC3','Industrial/DC':'\u5DE5\u696D/\u8CC7\u6599\u4E2D\u5FC3',
+  'Fund Manager':'\u57FA\u91D1\u7BA1\u7406','SFR Residential':'\u55AE\u6236\u51FA\u79DF',
+  'Hotel/Resi':'\u9152\u5E97/\u4F4F\u5B85','Office/Retail':'\u8FA6\u516C/\u96F6\u552E',
+  'Retail/Office':'\u96F6\u552E/\u8FA6\u516C','Office/Resi':'\u8FA6\u516C/\u4F4F\u5B85',
+  'Logistics':'\u7269\u6D41','Data Center/Storage':'\u8CC7\u6599\u4E2D\u5FC3/\u5009\u5132'
+};
+
+var REITS = [
+  // US
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Prologis',nameZh:'Prologis',ticker:'PLD',sector:'Industrial',mktCapUSD:131.0,mktCap:115,mktCapDisp:'$115B',divYield:3.0,pnav:1.25,yoy:8.2,ret5y:62,gearing:28,payout:72,outlook2026:{en:'AI/logistics demand strong',zh:'AI/物流需求強勁'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Equinix',nameZh:'Equinix',ticker:'EQIX',sector:'Data Center',mktCapUSD:104.5,mktCap:98,mktCapDisp:'$98B',divYield:1.9,pnav:2.1,yoy:15.5,ret5y:85,gearing:35,payout:55,outlook2026:{en:'AI data center boom',zh:'AI資料中心爆發'},currency:'USD',exchange:'NASDAQ'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'American Tower',nameZh:'American Tower',ticker:'AMT',sector:'Infrastructure',mktCapUSD:79.5,mktCap:95,mktCapDisp:'$95B',divYield:4.0,pnav:1.8,yoy:5.1,ret5y:35,gearing:55,payout:65,outlook2026:{en:'5G rollout continues',zh:'5G建設持續'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Realty Income',nameZh:'Realty Income',ticker:'O',sector:'Net Lease',mktCapUSD:57.0,mktCap:48,mktCapDisp:'$48B',divYield:5.3,pnav:0.95,yoy:-2.3,ret5y:22,gearing:32,payout:82,outlook2026:{en:'Defensive; rate cut tailwind',zh:'防禦型；降息順風'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Simon Property',nameZh:'Simon Property',ticker:'SPG',sector:'Retail',mktCapUSD:76.0,mktCap:52,mktCapDisp:'$52B',divYield:4.4,pnav:1.05,yoy:6.8,ret5y:45,gearing:38,payout:75,outlook2026:{en:'Prime malls recovering',zh:'頂級商場復甦'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Public Storage',nameZh:'Public Storage',ticker:'PSA',sector:'Self-Storage',mktCapUSD:51.3,mktCap:55,mktCapDisp:'$55B',divYield:4.1,pnav:1.3,yoy:3.5,ret5y:48,gearing:18,payout:78,outlook2026:{en:'Steady; supply moderating',zh:'穩定；供給趨緩'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Digital Realty',nameZh:'Digital Realty',ticker:'DLR',sector:'Data Center',mktCapUSD:67.4,mktCap:56,mktCapDisp:'$56B',divYield:2.6,pnav:1.15,yoy:24.1,ret5y:55,gearing:32,payout:68,outlook2026:{en:'AI capex driving demand',zh:'AI資本支出帶動需求'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Welltower',nameZh:'Welltower',ticker:'WELL',sector:'Healthcare',mktCapUSD:150.9,mktCap:115,mktCapDisp:'$115B',divYield:1.4,pnav:2.2,yoy:32.0,ret5y:90,gearing:28,payout:45,outlook2026:{en:'Aging population tailwind; growth REIT',zh:'老齡化人口順風；成長型REIT'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'VICI Properties',nameZh:'VICI Properties',ticker:'VICI',sector:'Gaming',mktCapUSD:30.0,mktCap:28,mktCapDisp:'$28B',divYield:6.4,pnav:0.85,yoy:-10.0,ret5y:45,gearing:35,payout:67,outlook2026:{en:'High yield; rate sensitive',zh:'高殖利率；利率敏感'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'AvalonBay',nameZh:'AvalonBay',ticker:'AVB',sector:'Residential',mktCapUSD:25.2,mktCap:30,mktCapDisp:'$30B',divYield:3.9,pnav:1.1,yoy:7.5,ret5y:30,gearing:25,payout:70,outlook2026:{en:'Housing shortage supports',zh:'住房短缺支撐'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Iron Mountain',nameZh:'Iron Mountain',ticker:'IRM',sector:'Data Center/Storage',mktCapUSD:37.2,mktCap:28,mktCapDisp:'$28B',divYield:2.8,pnav:2.5,yoy:25.0,ret5y:120,gearing:48,payout:60,outlook2026:{en:'Data center pivot working',zh:'資料中心轉型奏效'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Crown Castle',nameZh:'Crown Castle',ticker:'CCI',sector:'Infrastructure',mktCapUSD:37.8,mktCap:35,mktCapDisp:'$35B',divYield:4.9,pnav:0.85,yoy:-8.5,ret5y:5,gearing:58,payout:90,outlook2026:{en:'Tower pressure; dividend cut risk',zh:'基站壓力；減派風險'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Extra Space',nameZh:'Extra Space',ticker:'EXR',sector:'Self-Storage',mktCapUSD:30.2,mktCap:35,mktCapDisp:'$35B',divYield:4.7,pnav:1.2,yoy:2.8,ret5y:52,gearing:30,payout:76,outlook2026:{en:'Self-storage normalizing',zh:'倉儲回歸正常'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Alexandria RE',nameZh:'Alexandria RE',ticker:'ARE',sector:'Life Science',mktCapUSD:7.8,mktCap:20,mktCapDisp:'$20B',divYield:9.1,pnav:0.8,yoy:-12.0,ret5y:-5,gearing:30,payout:72,outlook2026:{en:'Life science demand mixed',zh:'生命科學需求分化'},currency:'USD',exchange:'NYSE'},
+  {flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Invitation Homes',nameZh:'Invitation Homes',ticker:'INVH',sector:'SFR Residential',mktCapUSD:16.6,mktCap:22,mktCapDisp:'$22B',divYield:4.2,pnav:1.15,yoy:5.8,ret5y:42,gearing:28,payout:68,outlook2026:{en:'SFR demand structural',zh:'獨棟租賃需求結構性'},currency:'USD',exchange:'NYSE'},
+
+  // Singapore
+  {flag:'\uD83C\uDDF8\uD83C\uDDEC',name:'CapitaLand Integrated',nameZh:'\u51F1\u5FB7\u7D9C\u5408',ticker:'CICT',sector:'Diversified',mktCapUSD:17.9,mktCap:14,mktCapDisp:'S$14B',divYield:6.8,pnav:0.95,yoy:3.2,ret5y:18,gearing:39,payout:95,outlook2026:{en:'SG retail resilient; DPU growing',zh:'新加坡零售有韌性；DPU成長中'},currency:'SGD',exchange:'SGX'},
+  {flag:'\uD83C\uDDF8\uD83C\uDDEC',name:'Mapletree Logistics',nameZh:'\u8C50\u6A39\u7269\u6D41',ticker:'MLT',sector:'Logistics',mktCapUSD:6.0,mktCap:7,mktCapDisp:'S$7B',divYield:6.2,pnav:0.88,yoy:-4.5,ret5y:8,gearing:38,payout:96,outlook2026:{en:'Asia logistics growth',zh:'亞洲物流成長'},currency:'SGD',exchange:'SGX'},
+  {flag:'\uD83C\uDDF8\uD83C\uDDEC',name:'Mapletree Industrial',nameZh:'\u8C50\u6A39\u5DE5\u696D',ticker:'MINT',sector:'Industrial/DC',mktCapUSD:5.5,mktCap:6.5,mktCapDisp:'S$6.5B',divYield:6.6,pnav:1.05,yoy:2.0,ret5y:25,gearing:37,payout:92,outlook2026:{en:'DC expansion accretive',zh:'資料中心擴張增值'},currency:'SGD',exchange:'SGX'},
+  {flag:'\uD83C\uDDF8\uD83C\uDDEC',name:'Ascendas REIT',nameZh:'\u9A30\u98DB REIT',ticker:'CLAR',sector:'Industrial',mktCapUSD:12.3,mktCap:11,mktCapDisp:'S$11B',divYield:7.6,pnav:1.0,yoy:1.5,ret5y:20,gearing:36,payout:94,outlook2026:{en:'Diversified; stable',zh:'多元化；穩定'},currency:'SGD',exchange:'SGX'},
+  {flag:'\uD83C\uDDF8\uD83C\uDDEC',name:'Keppel REIT',nameZh:'\u5409\u5BF6 REIT',ticker:'KREIT',sector:'Office',mktCapUSD:4.3,mktCap:3.5,mktCapDisp:'S$3.5B',divYield:6.0,pnav:0.72,yoy:-2.8,ret5y:2,gearing:40,payout:98,outlook2026:{en:'SG office recovering slowly',zh:'新加坡辦公緩慢復甦'},currency:'SGD',exchange:'SGX'},
+  {flag:'\uD83C\uDDF8\uD83C\uDDEC',name:'Frasers Logistics',nameZh:'\u8F1D\u76DB\u7269\u6D41',ticker:'FLT',sector:'Logistics',mktCapUSD:3.6,mktCap:4,mktCapDisp:'S$4B',divYield:6.3,pnav:0.82,yoy:-3.5,ret5y:12,gearing:32,payout:96,outlook2026:{en:'AU/EU logistics solid',zh:'澳洲/歐洲物流穩健'},currency:'SGD',exchange:'SGX'},
+  {flag:'\uD83C\uDDF8\uD83C\uDDEC',name:'Parkway Life',nameZh:'\u767E\u6C47\u751F\u547D',ticker:'PREIT',sector:'Healthcare',mktCapUSD:2.6,mktCap:2.5,mktCapDisp:'S$2.5B',divYield:4.4,pnav:1.6,yoy:8.0,ret5y:45,gearing:35,payout:90,outlook2026:{en:'JP healthcare defensive',zh:'日本醫療防禦型'},currency:'SGD',exchange:'SGX'},
+  {flag:'\uD83C\uDDF8\uD83C\uDDEC',name:'Mapletree Pan Asia',nameZh:'\u8C50\u6A39\u6CF0\u4E9E',ticker:'MPACT',sector:'Diversified',mktCapUSD:6.6,mktCap:8,mktCapDisp:'S$8B',divYield:6.4,pnav:0.78,yoy:-5.2,ret5y:5,gearing:40,payout:95,outlook2026:{en:'China drag easing',zh:'中國拖累減輕'},currency:'SGD',exchange:'SGX'},
+
+  // Japan
+  {flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Nippon Building Fund',nameZh:'\u65E5\u672C\u5927\u5EC8\u57FA\u91D1',ticker:'NBF',sector:'Office',mktCapUSD:1110.7,mktCap:1100,mktCapDisp:'\u00A51.1T',divYield:3.9,pnav:0.85,yoy:2.0,ret5y:15,gearing:42,payout:98,outlook2026:{en:'Tokyo office bottoming',zh:'東京辦公觸底'},currency:'JPY',exchange:'TSE'},
+  {flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Japan Real Estate',nameZh:'\u65E5\u672C\u4E0D\u52D5\u7522',ticker:'JRE',sector:'Office',mktCapUSD:845.6,mktCap:850,mktCapDisp:'\u00A5850B',divYield:4.3,pnav:0.88,yoy:1.5,ret5y:12,gearing:40,payout:97,outlook2026:{en:'Grade A demand stable',zh:'甲級辦公需求穩定'},currency:'JPY',exchange:'TSE'},
+  {flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'GLP J-REIT',nameZh:'GLP\u65E5\u672C',ticker:'GLP',sector:'Logistics',mktCapUSD:648.2,mktCap:950,mktCapDisp:'\u00A5950B',divYield:5.0,pnav:0.92,yoy:3.5,ret5y:28,gearing:38,payout:95,outlook2026:{en:'Logistics demand secular',zh:'物流需求長期趨勢'},currency:'JPY',exchange:'TSE'},
+  {flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Nippon Prologis',nameZh:'\u65E5\u672C\u666E\u6D1B\u65AF',ticker:'NPR',sector:'Logistics',mktCapUSD:737.4,mktCap:650,mktCapDisp:'\u00A5650B',divYield:4.4,pnav:1.05,yoy:4.0,ret5y:32,gearing:35,payout:96,outlook2026:{en:'E-commerce logistics',zh:'電商物流'},currency:'JPY',exchange:'TSE'},
+  {flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Japan Hotel REIT',nameZh:'\u65E5\u672C\u9152\u5E97REIT',ticker:'JHR',sector:'Hospitality',mktCapUSD:451.1,mktCap:438,mktCapDisp:'\u00A5438B',divYield:6.8,pnav:1.1,yoy:12.0,ret5y:35,gearing:42,payout:92,outlook2026:{en:'Inbound tourism boom',zh:'入境觀光潮'},currency:'JPY',exchange:'TSE'},
+  {flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Advance Residence',nameZh:'\u524D\u9032\u4F4F\u5B85',ticker:'ADR',sector:'Residential',mktCapUSD:449.2,mktCap:400,mktCapDisp:'\u00A5400B',divYield:4.0,pnav:1.15,yoy:5.5,ret5y:22,gearing:30,payout:94,outlook2026:{en:'Tokyo rental tight',zh:'東京租賃緊張'},currency:'JPY',exchange:'TSE'},
+  {flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Industrial & Infra',nameZh:'\u7522\u696D\u57FA\u76E4',ticker:'IIF',sector:'Industrial',mktCapUSD:361.8,mktCap:280,mktCapDisp:'\u00A5280B',divYield:5.9,pnav:0.95,yoy:2.2,ret5y:18,gearing:38,payout:96,outlook2026:{en:'Infra demand steady',zh:'基建需求穩定'},currency:'JPY',exchange:'TSE'},
+  {flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Invincible Investment',nameZh:'\u7121\u6575\u6295\u8CC7',ticker:'INV',sector:'Hotel/Resi',mktCapUSD:464.9,mktCap:200,mktCapDisp:'\u00A5200B',divYield:6.7,pnav:1.0,yoy:8.0,ret5y:30,gearing:45,payout:95,outlook2026:{en:'Hotel recovery play',zh:'飯店復甦標的'},currency:'JPY',exchange:'TSE'},
+
+  // Australia
+  {flag:'\uD83C\uDDE6\uD83C\uDDFA',name:'Goodman Group',nameZh:'Goodman',ticker:'GMG',sector:'Industrial',mktCapUSD:61.9,mktCap:65,mktCapDisp:'A$65B',divYield:1.0,pnav:2.8,yoy:22.0,ret5y:180,gearing:10,payout:40,outlook2026:{en:'Global logistics leader',zh:'全球物流龍頭'},currency:'AUD',exchange:'ASX'},
+  {flag:'\uD83C\uDDE6\uD83C\uDDFA',name:'Scentre Group',nameZh:'Scentre',ticker:'SCG',sector:'Retail',mktCapUSD:19.2,mktCap:18,mktCapDisp:'A$18B',divYield:4.8,pnav:0.85,yoy:5.5,ret5y:20,gearing:28,payout:85,outlook2026:{en:'Westfield malls steady',zh:'Westfield商場穩定'},currency:'AUD',exchange:'ASX'},
+  {flag:'\uD83C\uDDE6\uD83C\uDDFA',name:'Stockland',nameZh:'Stockland',ticker:'SGP',sector:'Diversified',mktCapUSD:9.7,mktCap:12,mktCapDisp:'A$12B',divYield:6.6,pnav:0.9,yoy:8.0,ret5y:25,gearing:25,payout:82,outlook2026:{en:'Resi + logistics pivot',zh:'住宅+物流轉型'},currency:'AUD',exchange:'ASX'},
+  {flag:'\uD83C\uDDE6\uD83C\uDDFA',name:'Dexus',nameZh:'Dexus',ticker:'DXS',sector:'Office',mktCapUSD:6.4,mktCap:8,mktCapDisp:'A$8B',divYield:6.2,pnav:0.7,yoy:-8.0,ret5y:-10,gearing:30,payout:90,outlook2026:{en:'Office under pressure',zh:'辦公承壓'},currency:'AUD',exchange:'ASX'},
+  {flag:'\uD83C\uDDE6\uD83C\uDDFA',name:'Mirvac',nameZh:'Mirvac',ticker:'MGR',sector:'Diversified',mktCapUSD:6.8,mktCap:9,mktCapDisp:'A$9B',divYield:5.3,pnav:0.75,yoy:3.0,ret5y:10,gearing:22,payout:80,outlook2026:{en:'Mixed; BTR growing',zh:'分化；BTR成長'},currency:'AUD',exchange:'ASX'},
+  {flag:'\uD83C\uDDE6\uD83C\uDDFA',name:'Charter Hall',nameZh:'Charter Hall',ticker:'CHC',sector:'Fund Manager',mktCapUSD:9.3,mktCap:7,mktCapDisp:'A$7B',divYield:2.5,pnav:1.1,yoy:10.0,ret5y:40,gearing:15,payout:65,outlook2026:{en:'Fund mgmt fees stable',zh:'基金管理費穩定'},currency:'AUD',exchange:'ASX'},
+  {flag:'\uD83C\uDDE6\uD83C\uDDFA',name:'GPT Group',nameZh:'GPT',ticker:'GPT',sector:'Diversified',mktCapUSD:9.1,mktCap:9,mktCapDisp:'A$9B',divYield:5.0,pnav:0.78,yoy:2.5,ret5y:8,gearing:28,payout:88,outlook2026:{en:'Office drag; logistics OK',zh:'辦公拖累；物流尚可'},currency:'AUD',exchange:'ASX'},
+  {flag:'\uD83C\uDDE6\uD83C\uDDFA',name:'Ingenia Communities',nameZh:'Ingenia社區',ticker:'INA',sector:'Residential/Lifestyle',mktCapUSD:1.6,mktCap:1.9,mktCapDisp:'A$1.9B',divYield:2.4,pnav:1.3,yoy:15.0,ret5y:65,gearing:22,payout:60,outlook2026:{en:'Lifestyle villages + housing crisis',zh:'生活社區+住房危機'},currency:'AUD',exchange:'ASX'},
+  {flag:'\uD83C\uDDE6\uD83C\uDDFA',name:'Lifestyle Communities',nameZh:'Lifestyle社區',ticker:'LIC',sector:'Residential/Lifestyle',mktCapUSD:0.6,mktCap:1.6,mktCapDisp:'A$1.6B',divYield:2.5,pnav:1.5,yoy:12.0,ret5y:55,gearing:18,payout:50,outlook2026:{en:'VIC downsizer demand strong',zh:'維州退休換屋需求強'},currency:'AUD',exchange:'ASX'},
+
+  // Malaysia
+  {flag:'\uD83C\uDDF2\uD83C\uDDFE',name:'KLCC Stapled',nameZh:'KLCC',ticker:'KLCCSS',sector:'Office/Retail',mktCapUSD:16.8,mktCap:15,mktCapDisp:'RM15B',divYield:8.2,pnav:0.9,yoy:4.0,ret5y:15,gearing:20,payout:92,outlook2026:{en:'Trophy asset; stable',zh:'頂級資產；穩定'},currency:'MYR',exchange:'Bursa'},
+  {flag:'\uD83C\uDDF2\uD83C\uDDFE',name:'IGB REIT',nameZh:'IGB REIT',ticker:'IGBREIT',sector:'Retail',mktCapUSD:13.7,mktCap:6,mktCapDisp:'RM6B',divYield:5.1,pnav:1.1,yoy:6.5,ret5y:22,gearing:22,payout:90,outlook2026:{en:'Mid Valley dominant',zh:'中谷主導地位'},currency:'MYR',exchange:'Bursa'},
+  {flag:'\uD83C\uDDF2\uD83C\uDDFE',name:'Pavilion REIT',nameZh:'\u67CF\u5A01\u5E74;REIT',ticker:'PAVREIT',sector:'Retail/Office',mktCapUSD:7.5,mktCap:5,mktCapDisp:'RM5B',divYield:7.8,pnav:0.85,yoy:3.0,ret5y:10,gearing:35,payout:95,outlook2026:{en:'Tourist spend recovery',zh:'觀光消費復甦'},currency:'MYR',exchange:'Bursa'},
+  {flag:'\uD83C\uDDF2\uD83C\uDDFE',name:'Sunway REIT',nameZh:'\u96D9\u5A01 REIT',ticker:'SUNREIT',sector:'Diversified',mktCapUSD:8.7,mktCap:8,mktCapDisp:'RM8B',divYield:7.7,pnav:0.95,yoy:5.0,ret5y:18,gearing:32,payout:92,outlook2026:{en:'Diversified; theme park',zh:'多元化；主題樂園'},currency:'MYR',exchange:'Bursa'},
+  {flag:'\uD83C\uDDF2\uD83C\uDDFE',name:'Axis REIT',nameZh:'Axis REIT',ticker:'AXREIT',sector:'Industrial',mktCapUSD:4.3,mktCap:3,mktCapDisp:'RM3B',divYield:4.7,pnav:1.05,yoy:4.5,ret5y:28,gearing:28,payout:94,outlook2026:{en:'Industrial demand solid',zh:'工業需求紮實'},currency:'MYR',exchange:'Bursa'},
+  {flag:'\uD83C\uDDF2\uD83C\uDDFE',name:'YTL Hospitality',nameZh:'YTL\u9152\u5E97',ticker:'YTLREIT',sector:'Hospitality',mktCapUSD:1.8,mktCap:4,mktCapDisp:'RM4B',divYield:6.2,pnav:0.8,yoy:8.5,ret5y:20,gearing:30,payout:90,outlook2026:{en:'MY tourism rebound',zh:'馬來西亞觀光反彈'},currency:'MYR',exchange:'Bursa'},
+
+  // Europe
+  {flag:'\uD83C\uDDE9\uD83C\uDDEA',name:'Vonovia',nameZh:'Vonovia',ticker:'VNA.DE',sector:'Residential',mktCapUSD:18.4,mktCap:18,mktCapDisp:'\u20AC18B',divYield:5.6,pnav:0.50,yoy:-5.0,ret5y:-30,gearing:45,payout:70,outlook2026:{en:'German resi bottoming; rate sensitive',zh:'德國住宅觸底；利率敏感'},currency:'EUR',exchange:'XETRA'},
+  {flag:'\uD83C\uDDEC\uD83C\uDDE7',name:'Segro',nameZh:'Segro',ticker:'SGRO.L',sector:'Industrial',mktCapUSD:9.2,mktCap:12,mktCapDisp:'\u00A312B',divYield:4.4,pnav:0.9,yoy:6.0,ret5y:55,gearing:25,payout:72,outlook2026:{en:'EU logistics strong',zh:'歐洲物流強勁'},currency:'GBP',exchange:'LSE'},
+  {flag:'\uD83C\uDDEB\uD83C\uDDF7',name:'Unibail-Rodamco',nameZh:'Unibail-Rodamco',ticker:'URW.AS',sector:'Retail',mktCapUSD:13.0,mktCap:12,mktCapDisp:'\u20AC12B',divYield:7.5,pnav:0.5,yoy:15.0,ret5y:-40,gearing:42,payout:85,outlook2026:{en:'Deep value; deleveraging',zh:'深度價值；去槓桿'},currency:'EUR',exchange:'Euronext'},
+  {flag:'\uD83C\uDDEC\uD83C\uDDE7',name:'Land Securities',nameZh:'Land Securities',ticker:'LAND.L',sector:'Diversified',mktCapUSD:4.3,mktCap:5,mktCapDisp:'\u00A35B',divYield:15.2,pnav:0.7,yoy:4.0,ret5y:-8,gearing:30,payout:88,outlook2026:{en:'London mixed-use pivot',zh:'倫敦複合用途轉型'},currency:'GBP',exchange:'LSE'},
+  {flag:'\uD83C\uDDEC\uD83C\uDDE7',name:'British Land',nameZh:'British Land',ticker:'BLND.L',sector:'Diversified',mktCapUSD:3.8,mktCap:4,mktCapDisp:'\u00A34B',divYield:6.0,pnav:0.65,yoy:3.5,ret5y:-12,gearing:32,payout:86,outlook2026:{en:'Campus office demand',zh:'園區辦公需求'},currency:'GBP',exchange:'LSE'},
+  {flag:'\uD83C\uDDEB\uD83C\uDDF7',name:'Gecina',nameZh:'Gecina',ticker:'GFC.PA',sector:'Office/Resi',mktCapUSD:5.3,mktCap:8,mktCapDisp:'\u20AC8B',divYield:7.7,pnav:0.75,yoy:5.0,ret5y:-5,gearing:35,payout:82,outlook2026:{en:'Paris office premium',zh:'巴黎辦公溢價'},currency:'EUR',exchange:'Euronext'},
+  {flag:'\uD83C\uDDE9\uD83C\uDDEA',name:'LEG Immobilien',nameZh:'LEG Immobilien',ticker:'LEG.DE',sector:'Residential',mktCapUSD:4.2,mktCap:6,mktCapDisp:'\u20AC6B',divYield:5.1,pnav:0.5,yoy:18.0,ret5y:-30,gearing:48,payout:65,outlook2026:{en:'German rent growth',zh:'德國租金成長'},currency:'EUR',exchange:'XETRA'},
+  {flag:'\uD83C\uDDF3\uD83C\uDDF1',name:'CTP',nameZh:'CTP',ticker:'CTPNV.AS',sector:'Industrial',mktCapUSD:7.7,mktCap:7,mktCapDisp:'\u20AC7B',divYield:4.0,pnav:0.85,yoy:8.0,ret5y:15,gearing:40,payout:58,outlook2026:{en:'CEE logistics growth',zh:'中東歐物流成長'},currency:'EUR',exchange:'Euronext'}
+];
+
+var COLS = [
+  {key:'name',    en:'REIT',       zh:'REITs',     align:'left', w:'110px'},
+  {key:'mktCapUSD',en:'Cap',      zh:'\u5E02\u503C',     align:'right',w:'58px'},
+  {key:'divYield',en:'Yld',      zh:'\u6B96\u5229',   align:'right',w:'42px'},
+  {key:'spread',  en:'Sprd',     zh:'\u5229\u5DEE',   align:'right',w:'46px'},
+  {key:'pnav',    en:'P/NAV',     zh:'P/NAV',     align:'right',w:'48px'},
+  {key:'yoy',     en:'YoY',       zh:'\u5E74\u6F32',     align:'right',w:'46px'},
+  {key:'ret5y',   en:'5yr',       zh:'5\u5E74',   align:'right',w:'46px'},
+  {key:'gearing', en:'Gear',      zh:'\u69D3\u687F',     align:'right',w:'42px'},
+  {key:'outlook2026',en:'2026',   zh:'2026\u5C55\u671B',align:'left',w:'105px'},
+  {key:'payout',  en:'Pay',       zh:'\u6D3E\u606F',   align:'right',w:'40px'},
+  {key:'currency',en:'Ccy',       zh:'\u5E63',     align:'right',w:'34px'},
+  {key:'exchange',en:'Exch',      zh:'\u4E0A\u5E02',  align:'right',w:'40px'}
+];
+
+// 10-year government bond yields by country (2026-05)
+var BOND10Y = {
+  'USD': 4.38,  // US 10yr Treasury
+  'SGD': 2.08,  // Singapore 10yr
+  'JPY': 2.48,  // Japan 10yr JGB (BOJ hikes lifted long end)
+  'AUD': 5.00,  // Australia 10yr (curve steepening despite RBA cuts)
+  'MYR': 3.56,  // Malaysia 10yr MGS
+  'GBP': 4.92,  // UK 10yr Gilt (curve steepening despite BOE cuts)
+  'EUR': 2.85   // German 10yr Bund (proxy for Eurozone)
+};
+
+var currentLang = localStorage.getItem('lang') || 'en';
+var sortKey = 'mktCapUSD';
+var sortAsc = false;
+
+function pnavColor(v) {
+  if (v < 0.7) return C.green;
+  if (v < 0.95) return C.navy;
+  if (v <= 1.05) return C.muted;
+  if (v <= 1.5) return C.orange;
+  return C.red;
+}
+
+function gearingColor(v) {
+  if (v < 25) return C.green;
+  if (v <= 40) return C.navy;
+  if (v <= 50) return C.orange;
+  return C.red;
+}
+
+function yoyColor(v) {
+  if (v > 0) return C.green;
+  if (v < 0) return C.red;
+  return C.muted;
+}
+
+function sectorBadge(sector) {
+  var c = SECTOR_COLORS[sector] || C.muted;
+  var label = currentLang === 'zh' ? (SECTOR_ZH[sector] || sector) : sector;
+  return '<span class="badge" style="background:'+c+'15;color:'+c+';border:1px solid '+c+'30">'+label+'</span>';
+}
+
+function renderHeader() {
+  var tr = document.getElementById('thead-row');
+  tr.innerHTML = '';
+  COLS.forEach(function(col) {
+    var th = document.createElement('th');
+    th.setAttribute('data-key', col.key);
+    th.style.textAlign = col.align;
+    th.style.width = col.w;
+    if (col.key === 'name') {
+      th.style.minWidth = '100px';
+    }
+    th.onclick = function() { sortBy(col.key); };
+    var label = currentLang === 'zh' ? col.zh : col.en;
+    var arrow = sortKey === col.key ? (sortAsc ? ' \u2191' : ' \u2193') : ' \u2195';
+    th.innerHTML = label + '<span class="sort-arrow">' + arrow + '</span>';
+    tr.appendChild(th);
+  });
+}
+
+function renderTable() {
+  var data = REITS.slice().sort(function(a, b) {
+    var va = a[sortKey], vb = b[sortKey];
+    if (sortKey === 'spread') {
+      va = a.divYield - (BOND10Y[a.currency] || 3);
+      vb = b.divYield - (BOND10Y[b.currency] || 3);
+    }
+    if (sortKey === 'name' || sortKey === 'sector' || sortKey === 'currency') {
+      va = String(va).toLowerCase();
+      vb = String(vb).toLowerCase();
+      if (va < vb) return sortAsc ? -1 : 1;
+      if (va > vb) return sortAsc ? 1 : -1;
+      return 0;
+    }
+    return sortAsc ? (va - vb) : (vb - va);
+  });
+
+  var tbody = document.getElementById('reit-tbody');
+  tbody.innerHTML = '';
+
+  data.forEach(function(r) {
+    var tr = document.createElement('tr');
+    var nameDisplay = r.flag + ' ' + r.name + ' <span style="font-weight:400;color:#94a3b8;font-size:10px">' + r.ticker + '</span>';
+
+    var yoyStr = (r.yoy >= 0 ? '+' : '') + r.yoy.toFixed(1) + '%';
+    var ret5yStr = (r.ret5y >= 0 ? '+' : '') + r.ret5y + '%';
+
+    tr.innerHTML =
+      '<td>' + nameDisplay + '<br>' + sectorBadge(r.sector) + '</td>' +
+      '<td>' + r.mktCapDisp + '<br><span style="font-size:8px;color:#94a3b8">$' + r.mktCapUSD.toFixed(0) + 'B</span></td>' +
+      '<td style="font-weight:600;color:' + (r.divYield >= 5 ? C.green : r.divYield >= 3 ? C.navy : C.muted) + '">' + r.divYield.toFixed(1) + '%</td>' +
+      (function(){var bond=BOND10Y[r.currency]||3;var sp=+(r.divYield-bond).toFixed(2);var sc=sp>=2?C.green:sp>=0.5?C.navy:sp>=0?C.muted:'#dc2626';return '<td style="font-weight:700;color:'+sc+'">'+(sp>0?'+':'')+sp.toFixed(1)+'%</td>';})()+
+      '<td style="font-weight:600;color:' + pnavColor(r.pnav) + '">' + r.pnav.toFixed(2) + 'x</td>' +
+      '<td style="color:' + yoyColor(r.yoy) + '">' + yoyStr + '</td>' +
+      '<td style="color:' + yoyColor(r.ret5y) + '">' + ret5yStr + '</td>' +
+      '<td style="font-weight:600;color:' + gearingColor(r.gearing) + '">' + r.gearing + '%</td>' +
+      '<td style="font-size:9px;color:#475569;white-space:normal;text-align:left">' + (r.outlook2026 ? (currentLang==='zh'?r.outlook2026.zh:r.outlook2026.en) : '') + '</td>' +
+      '<td>' + r.payout + '%</td>' +
+      '<td style="color:#94a3b8;font-size:10px">' + r.currency + '</td>' +
+      '<td style="color:#94a3b8;font-size:10px">' + r.exchange + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function sortBy(key) {
+  if (sortKey === key) {
+    sortAsc = !sortAsc;
+  } else {
+    sortKey = key;
+    sortAsc = (key === 'name' || key === 'sector' || key === 'currency');
+  }
+  renderHeader();
+  renderTable();
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  document.querySelectorAll('.lang-en').forEach(function(el) { el.style.display = lang === 'en' ? 'inline' : 'none'; });
+  document.querySelectorAll('.lang-zh').forEach(function(el) { el.style.display = lang === 'zh' ? 'inline' : 'none'; });
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', (btn.textContent === 'EN' && lang === 'en') || (btn.textContent !== 'EN' && lang === 'zh'));
+  });
+  renderHeader();
+  renderTable();
+}
+
+// Init
+setLang(currentLang);
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

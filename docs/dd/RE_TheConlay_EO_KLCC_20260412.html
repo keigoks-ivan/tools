@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Conlay by E&O @ KLCC｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:640px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-r{background:#FEE2E2;color:#991B1B;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #dc2626}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+.print-btn:hover{background:#166634}
+@media(max-width:680px){.score-cols,.dual-col{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：The Conlay by E&O @ Jalan Conlay, KLCC ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 依據：KL 供需 Overhang 報告（2026-04-01）+ KL RM1M+ 深度報告 + iRumah + PropertyGuru</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>The Conlay by E&O @ KLCC</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&from=TheConlay_EO_KLCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=TheConlay_EO_KLCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Conlay，KLCC 黃金三角 ｜ E&O（Eastern &amp; Oriental Berhad，Bursa 上市）× Mitsui Fudosan（日本最大房地產商）JV ｜ 設計師：Kerry Hill Architects（Aman Tokyo、The Datai）｜ Freehold 商業地契 ｜ 491單位，51–54層 ｜ 1.44英畝</div>
+  <div class="badge-row">
+    <span class="badge">✅ iRumah 成交：1BR 中位 RM2,100 psf（vs 發售 RM1,800，+17%）</span>
+    <span class="badge">✅ E&O × Mitsui Fudosan × Kerry Hill（本系列最強品牌組合）</span>
+    <span class="badge">📡 竣工：Q3 2024（某些來源）/ 2025（其他來源）——已完工或接近完工</span>
+    <span class="badge">⚠️ 商業地契（Commercial Strata）</span>
+    <span class="badge">📡 213筆掛牌售（iProperty 2026）</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 最重要正面信號 -->
+<div class="success-box">
+  <strong>🟢 最重要的正面信號——iRumah 成交數據顯示 The Conlay 是本系列唯一「二手成交超越發售價」的商業地契 SR：</strong><br><br>
+  • 1BR / 743 sqft：成交中位 <strong>RM2,100 psf</strong>（vs 發售 RM1,800 psf，<strong>+17%</strong>）<br>
+  • 2BR / 1,206 sqft：成交中位 <strong>RM2,030 psf</strong><br>
+  • 3BR / 1,335 sqft：成交中位 <strong>RM2,500 psf</strong><br><br>
+  這與 Stonor 3（-34%）、Orion（無成交）形成鮮明對比，說明 E&O × Kerry Hill 的品牌差異化在市場上確實得到了溢價認可。這是進場邏輯的核心支撐數據，但需要 brickz 政府登記成交量交叉驗證（iRumah 數據基於掛牌估算）。
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-v">RM2,100</div>
+        <div class="kpi-l">1BR 成交中位 PSF</div>
+        <div class="kpi-s up">iRumah；vs 發售 RM1,800，+17%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM1,800</div>
+        <div class="kpi-l">發售均價 PSF</div>
+        <div class="kpi-s neu">iRumah 引用；現掛牌 RM1,552–3,617 sqft 範圍</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">213</div>
+        <div class="kpi-l">掛牌售（iProperty 2026）</div>
+        <div class="kpi-s neu">vs 491 戶 = 43% 掛牌率（中等偏高）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">491</div>
+        <div class="kpi-l">總單位（1棟51–54層）</div>
+        <div class="kpi-s neu">1.44英畝，341戶/英畝（中等密度）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">743–1,335</div>
+        <div class="kpi-l">坪數範圍（sqft）</div>
+        <div class="kpi-s up">本系列最大坪數起點（無 Studio 小單位）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">Q3 2024</div>
+        <div class="kpi-l">竣工（PVIP 資料）</div>
+        <div class="kpi-s up">已完工或接近完工，無延期風險</div>
+      </div>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商 JV</div><div class="spec-v">E&O（Eastern &amp; Oriental Berhad，Bursa 上市，30年+跡錄）× Mitsui Fudosan（日本最大房地產商，三菱地所競爭對手）——本系列最高端 JV 組合</div></div>
+      <div class="spec-item"><div class="spec-l">設計師</div><div class="spec-v">Kerry Hill Architects（英國建築師事務所）——代表作：Aman Tokyo、Amanemu、The Datai Langkawi。Kerry Hill Architects 設計的 KL 建案只有這一個</div></div>
+      <div class="spec-item"><div class="spec-l">地段 / 地契</div><div class="spec-v">Jalan Conlay × Jalan Kia Peng 交匯，1.44英畝，Freehold 商業地契（Commercial Strata）</div></div>
+      <div class="spec-item"><div class="spec-l">竣工</div><div class="spec-v">Q3 2024（PVIP）/ Q1 2025（其他來源）——無論哪個版本均已完工，最少 1 年真實運營期</div></div>
+      <div class="spec-item"><div class="spec-l">坪數 / 房型</div><div class="spec-v">743 sqft（1BR）｜ 840–1,066 sqft（2BR）｜ 904–1,335 sqft（2+1BR）｜ 3,617 sqft（Penthouse）；全無小於 700 sqft 的單位</div></div>
+      <div class="spec-item"><div class="spec-l">捷運</div><div class="spec-v">Conlay MRT（Putrajaya Line PY22）步行距離；Raja Chulan Monorail 步行；Persiaran KLCC MRT（PY21）可達；Bukit Bintang MRT 步行 10–15 分</div></div>
+      <div class="spec-item"><div class="spec-l">服務標準</div><div class="spec-v">24小時全禮賓服務（訂車、訂餐、報紙、行前採買）｜個人廚師｜日常管家｜E&O 自有品牌被褥換洗——KL 精品 SR 中服務等級最高之一</div></div>
+      <div class="spec-item"><div class="spec-l">設施</div><div class="spec-v">兩個加熱泳池｜Sky Lounge（孖鑽景觀）｜Sky Garden｜兩個健身中心｜Jacuzzi｜Sauna｜音樂室、撞球室、多媒體室（11樓）｜泳池甲板 + 兒童池（36樓）</div></div>
+      <div class="spec-item"><div class="spec-l">E&O 管理服務</div><div class="spec-v">E&O 自行提供物業管理 + 出租管理 + 禮賓服務——類似酒店式管理（Branded Residence 框架），比純自管高一個級別</div></div>
+      <div class="spec-item"><div class="spec-l">GDV / 規模</div><div class="spec-v">未公開 GDV；發售 RM1,800 psf × 491 戶 × 平均 ~1,000 sqft 估 = 約 RM8.8億；屬中型精品項目</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜The Conlay 在 KL 精品 SR 市場的真實定位</h3>
+    <p>The Conlay 是 KL 市場上極少數同時具備以下三個條件的商業地契 SR：<strong>①頂級品牌建築師（Kerry Hill）②頂級開發商 JV（E&O × Mitsui Fudosan）③可驗證的二手成交溢價（+17% vs 發售）</strong>。</p>
+    <p>在本系列八個分析建案的商業地契 SR 中，The Conlay 是唯一已完工且二手市場驗證了「品牌差異化可以溢價」的案例。這使它成為一個可以與住宅地契建案（Park Place、R22）進行更接近比較的商業地契 SR——儘管地契結構劣勢仍存在。</p>
+    <p>定位對標：Kerry Hill Architects 在全球設計的物業均為 Aman、Alila 等超頂奢酒店品牌。The Conlay 是 Kerry Hill 在 KL 唯一的住宅設計作品——這種獨一無二性在 KL 高端 SR 市場中是真實且不可複製的差異化。</p>
+
+    <div class="success-box">
+      <strong>上游報告框架的重要例外：</strong>上游 KL RM1M+ 報告指出「跌的共同點：商業地契 + 高密度量產 + 無差異化」。The Conlay 商業地契（弱點）+ 中等密度（491戶/1.44英畝，中性）+ <strong>極度差異化（Kerry Hill + E&O Branded Residence）</strong>——在「差異化」這個維度上，The Conlay 是整個 KL 商業地契 SR 市場中差異化程度最高的案例。iRumah RM2,100 psf 的成交數據是這個差異化論點的市場驗證。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>商業地契永久折扣</strong></td><td>Freehold 商業地契——買家池窄於住宅地契，銀行貸款條件更嚴，外籍 State Consent 複雜；即使有 Kerry Hill 品牌溢價，商業地契折扣永久存在</td><td><span class="tag t-y">確定存在，但已被市場部分定價</span></td><td>相比住宅地契同品質建案，退出時有 10–20% 結構折扣</td></tr>
+          <tr><td><strong>43% 掛牌率偏高</strong></td><td>213筆掛牌售 / 491 戶 = 43%——比健康市場（&lt;20%）偏高，顯示一定數量的投資者試圖退出；但比 Stonor 3（69%）好很多</td><td><span class="tag t-y">中性偏弱</span></td><td>退出競爭較 R22/Park Place 大，但遠優於 Stonor 3</td></tr>
+          <tr><td><strong>iRumah 數據未經 brickz 驗證</strong></td><td>iRumah RM2,100 psf 成交中位數基於估算，尚無法確認是否有足夠的政府登記成交量支撐；若實際成交量極少（5 筆以下），統計意義有限</td><td><span class="tag t-y">中</span></td><td>若 brickz 確認成交稀少，正面信號可信度降低</td></tr>
+          <tr><td><strong>Conlay MRT 帶動 vs 周邊競爭加劇</strong></td><td>Conlay MRT 同時帶動 Jalan Conlay 地段整體升值，但也帶來更多新競品（8 Conlay 雖有問題，但未來仍可能有其他開發案）</td><td><span class="tag t-b">低中</span></td><td>The Conlay 的 MRT 步行優勢可能被周邊新案稀釋</td></tr>
+          <tr><td><strong>坪數偏大，入場門檻高</strong></td><td>最小單位 743 sqft，發售 RM1,800 psf = 起步 RM133萬+；二手掛牌從 RM155萬（1BR）至 RM1,200萬（Penthouse）。流動性集中在 RM150–300萬段，買家池較窄</td><td><span class="tag t-y">中</span></td><td>入場成本較高，適合高淨值投資者，非首次 KL 買家</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場概況與上游報告框架對位</div>
+  <div class="section-body">
+    <h3>1.1 The Conlay 在上游報告框架中的定位</h3>
+    <p>上游報告（KL 供需 Overhang + KL RM1M+）並未直接點名 The Conlay，但可以用框架定位：</p>
+    <table>
+      <thead><tr><th>上游報告框架</th><th>The Conlay 對應</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>「跌的共同點：商業地契 + 高密度量產 + 無差異化」</td><td>商業地契（弱）+ 中等密度（中性）+ <strong>Kerry Hill 極高差異化（強）</strong></td><td><span class="tag t-y">混合——差異化抵消部分商業地契折扣</span></td></tr>
+        <tr><td>「漲的共同點：稀缺性 + 明確催化劑」</td><td>稀缺性：Kerry Hill 唯一 KL 住宅設計（真實稀缺）；催化劑：Conlay MRT 已運營，TRX 2.3km</td><td><span class="tag t-g">正面——稀缺性論點成立</span></td></tr>
+        <tr><td>「KL 2015–18 量產 SR 積壓」</td><td>The Conlay 不屬於「量產」範疇——491 戶精品定位、E&O 品牌、Kerry Hill 設計，是差異化最強的 SR</td><td><span class="tag t-g">正面——不屬於問題品類</span></td></tr>
+        <tr><td>「MM2H 2,637 待購買家幾乎全針對 RM100萬+ 段」</td><td>The Conlay 起步 RM133萬+，完全在 MM2H 目標段內</td><td><span class="tag t-g">正面——MM2H 需求高度相關</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 二手市場數據——The Conlay vs 同類 KLCC SR</h3>
+    <table>
+      <thead><tr><th>建案</th><th>地契</th><th>發售 PSF</th><th>現成交中位 PSF</th><th>vs 發售</th><th>Yield 趨勢</th></tr></thead>
+      <tbody>
+        <tr><td><strong>The Conlay（本案）</strong></td><td><span class="tag t-y">Freehold 商業</span></td><td>RM 1,800</td><td><strong>RM 2,100（1BR 中位）</strong></td><td><span class="up">+17% ✅ 上漲</span></td><td>未有 iRumah Yield 追蹤（新竣工）</td></tr>
+        <tr><td>Stonor 3 KLCC（Tan&Tan×三菱）</td><td><span class="tag t-y">商業 HDA</span></td><td>RM 2,000</td><td>RM 1,320</td><td><span class="down">-34% ❌</span></td><td>4.73%→4.23%（下行）</td></tr>
+        <tr><td>Binjai on the Park（住宅地契）</td><td><span class="tag t-g">Freehold 住宅</span></td><td>—</td><td>RM 2,660</td><td><span class="up">+59.1% YoY ✅</span></td><td>穩健（超低密度頂奢）</td></tr>
+        <tr><td>TRX Core Residence（住宅地契）</td><td><span class="tag t-g">Freehold 住宅</span></td><td>—</td><td>RM 2,293</td><td><span class="up">+5.56% YoY ✅</span></td><td>新竣工，成交活躍</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：iRumah.co（The Conlay 成交中位）；KL RM1M+ 深度報告（Binjai、TRX 數據）；brickz（Stonor 3）</p>
+
+    <div class="alert a-green">
+      <strong>🟢 關鍵市場定位發現：The Conlay RM2,100 psf 成交中位在「商業地契 SR」中是 KL 最高的——甚至超過大部分住宅地契新案（僅次於 Binjai RM2,660 和 TRX RM2,293 的住宅地契案）。</strong>這說明市場對 E&O × Kerry Hill 的品牌溢價有實質定價，The Conlay 成功突破了「商業地契 SR 的定價天花板」。這是整個本系列分析中最正面的市場驗證數據。
+    </div>
+
+    <h3>1.3 掛牌分析（FIX-03/04）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>狀況</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>掛牌售</td><td>213筆（iProperty 2026）；33筆（EdgeProp）——兩平台合計估 150–213 個不重複掛牌</td><td>43% 掛牌率（偏高，但遠優於 Stonor 3 的 69%）</td></tr>
+        <tr><td>掛牌 PSF 範圍</td><td>起步 RM1,552,000（635sqft，RM2,444 psf）；最貴 RM12,000,000（3,617sqft Penthouse）</td><td>掛牌 PSF RM2,200–2,800 為主流，高於 iRumah 成交 RM2,100——賣家心理價高於成交</td></tr>
+        <tr><td>FIX-04（起價排除）</td><td>iProperty 提到「RM1,500–2,500 depending on unit type」——低端 RM1,500 不代表市場中位，以 iRumah RM2,100 psf（1BR）作基準</td><td>已排除異常低端</td></tr>
+        <tr><td>整體信號</td><td><span class="tag t-g">正面偏中</span>——成交高於發售（+17%），掛牌集中在合理 PSF 範圍；掛牌率 43% 偏高但非恐慌性</td><td>可繼續追蹤</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §3 -->
+<div class="section">
+  <div class="section-header">§3｜地段定位——The Conlay 在 KLCC 精品版圖中的座標</div>
+  <div class="section-body">
+    <h3>Jalan Conlay 地段的戰略意義</h3>
+    <p>Jalan Conlay 是 KL 黃金三角的「中樞神經」——北接 KLCC（孖鑽、Suria KLCC）、南接 Bukit Bintang（Pavilion）、東接 TRX 金融區（2.3km）、西接 Raja Chulan（Monorail）。Conlay MRT 站的命名本身就是以這條路命名，說明這個地段的 MRT 開發意圖是明確的地段錨定。</p>
+    <table>
+      <thead><tr><th>層級</th><th>建案</th><th>PSF</th><th>地契</th><th>The Conlay 相對位置</th></tr></thead>
+      <tbody>
+        <tr><td>頂奢住宅地契</td><td>Binjai（171戶）、Four Seasons</td><td>RM2,660–3,500</td><td>Freehold 住宅</td><td>The Conlay RM2,100（商業地契）約相差 25–35%，此折讓屬商業地契正常範圍</td></tr>
+        <tr><td><strong>精品商業地契（本案）</strong></td><td><strong>The Conlay</strong></td><td><strong>RM2,100 psf（成交中位）</strong></td><td>Freehold 商業</td><td>商業地契 SR 中成交 PSF 最高；Kerry Hill 品牌有效突破商業地契天花板</td></tr>
+        <tr><td>新精品期房</td><td>CloutHaus（TA Global）</td><td>RM2,900 psf（發售，未驗證）</td><td>Freehold 商業</td><td>CloutHaus 定價高於 The Conlay，但無成交驗證；The Conlay 有市場驗證優勢</td></tr>
+        <tr><td>同地段 Branded SR</td><td>8 Conlay Yoo8（KSK Land）</td><td>RM1,278–3,293 psf（掛牌）</td><td>Freehold 商業</td><td>8 Conlay 因開發商財務困難（接管）嚴重折扣；The Conlay 因 E&O 信用形成正面對比</td></tr>
+        <tr><td>舊 SR 積壓</td><td>Stonor 3</td><td>RM1,320（成交，-34%）</td><td>商業 HDA</td><td>The Conlay 的「差異化 = 品牌溢價可維持」的最佳反例驗證</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <strong>8 Conlay（KSK Land）的財務困境對 The Conlay 形成意外利多：</strong>8 Conlay 因開發商財務問題被接管、招標，使 Jalan Conlay 地段的「問題建案」標籤貼到了競品而非 The Conlay。若 8 Conlay 最終以低折扣被新開發商接手，Jalan Conlay 的地段形象長期不受影響，甚至因為 8 Conlay 清盤後重新由實力更強的開發商接手而受益。
+    </div>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率</div>
+  <div class="section-body">
+    <h3>5.1 The Conlay 租金行情估算</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租估計（E&O管理框架）</th><th>Gross Yield（@RM2,100 psf 成交）</th></tr></thead>
+      <tbody>
+        <tr><td>1BR</td><td>743 sqft</td><td>RM 6,500–10,000/月</td><td>~5.0–7.7%（@RM156萬入場）</td></tr>
+        <tr><td>2BR</td><td>840–1,066 sqft</td><td>RM 9,000–14,000/月</td><td>~4.9–7.6%（@RM176–224萬入場）</td></tr>
+        <tr><td>2+1BR</td><td>904–1,335 sqft</td><td>RM 12,000–18,000/月</td><td>~5.2–7.8%（@RM190–280萬入場）</td></tr>
+      </tbody>
+    </table>
+    <p class="src">代理數據：「RM10–12 psf」月租；E&O 提供物業管理 + 禮賓服務可帶動額外 15–20% 租金溢價</p>
+
+    <h3>5.2 外國人現金流試算（1BR 743 sqft，假設 RM156萬入場 @ RM2,100 psf 成交）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租收入（RM8,000 × 12）</td><td>RM 96,000</td><td>1BR 743 sqft，E&O Branded Residence 溢價，保守中位估計</td></tr>
+        <tr><td>管理費（估 RM1.00 psf × 743 × 12）</td><td><span class="down">-RM 8,916</span></td><td>E&O 品牌服務管理費略高（估 RM1.00 psf，未公開確認）</td></tr>
+        <tr><td>地稅 + 門牌稅</td><td><span class="down">-RM 2,500</span></td><td></td></tr>
+        <tr><td>空置期（1.5個月，E&O管理填租較快）</td><td><span class="down">-RM 12,000</span></td><td>E&O 提供出租管理，假設較一般 SR 填租更快</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 21,478</span></td><td>（96,000–23,416）×30%</td></tr>
+        <tr><td>E&O 出租管理費（12%，含禮賓溢價）</td><td><span class="down">-RM 11,520</span></td><td>品牌 SR 管理費通常高於一般代管（8%）</td></tr>
+        <tr><td><strong>淨現金流（含E&O管理）</strong></td><td><strong>~RM 39,586/年</strong></td><td>Net Yield ≈ 2.54%（RM156萬入場）</td></tr>
+        <tr><td>淨現金流（不使用E&O管理，自行代管8%）</td><td>~RM 46,706/年</td><td>Net Yield ≈ 2.99%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-yellow">
+      <strong>外籍 Net Yield 約 2.5–3.0%——本系列商業地契 SR 中最高，但管理費（未確認）是最大變數。</strong>The Conlay 的 E&O Branded Residence 服務模式（管家、禮賓、出租管理）帶來更高的月租，但也意味著更高的管理成本。若使用 E&O 全服務管理（估 12%），Net Yield 約 2.5%；若自行代管（8%），Net Yield 接近 3.0%。與 R22（3.0–3.2%）差距縮小，與 Stonor 3（1.9–2.3%）顯著更好。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6-7｜外資法規與貸款</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>影響</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td>Freehold 商業地契（Commercial Strata）——非 HDA（服務式公寓，已完工，HDA 保護已無實際意義）</td><td>銀行按商業貸款處理（LTV 可能 70–80%）；需確認各銀行立場</td></tr>
+        <tr><td>最低購置門檻</td><td>RM 1,000,000（KL 外籍）</td><td>✅ 1BR 起步 RM133萬，完全符合</td></tr>
+        <tr><td>印花稅</td><td>4% 統一稅率</td><td>RM156萬物業：印花稅 RM62,400</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>10%（外籍永久）</td><td>若 2025 年竣工後購入，第6年約 2031</td></tr>
+        <tr><td>MM2H 合規</td><td>RM100萬+，商業地契（Freehold）</td><td>✅ 金額達標；商業地契 MM2H 合規性需向律師確認（建議書面確認）</td></tr>
+        <tr><td>E&O 支援</td><td>E&O 聲稱提供物業管理、出租代管、禮賓——包括外籍買家全程支援</td><td>✅ 開發商服務支援是真實優勢，降低遠程持有摩擦</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設——Conlay MRT 直連 + TRX 雙重催化</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>基建</th><th>狀態</th><th>對 The Conlay 的影響</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Conlay MRT（Putrajaya Line PY22）</strong></td><td>2023年3月運營；The Conlay 步行直達</td><td>✅✅ 建案名字本身就是以 MRT 站命名；步行連接 TRX（2站）、Bukit Bintang、KL Sentral；本系列唯一「建案以最近 MRT 站命名」的</td></tr>
+        <tr><td>TRX 金融區（2.3km）</td><td>2024年開業，HSBC、德勤等進駐</td><td>✅ TRX 外籍高管租賃需求直接外溢至 Jalan Conlay 廊帶；The Conlay 是 TRX 外籍族群最自然的居住選擇之一</td></tr>
+        <tr><td>Raja Chulan Monorail</td><td>已運營，步行可達</td><td>✅ 補充連接，到 KL 市中心歷史區</td></tr>
+        <tr><td>Pavilion KL（Bukit Bintang）</td><td>步行 10–15 分</td><td>✅ 購物娛樂需求完整覆蓋</td></tr>
+        <tr><td>8 Conlay（同地段競品）</td><td>⚠️ 接管/招標中（2026年2月 The Edge 確認）</td><td>🟡 短期：競爭減少（8 Conlay 問題影響地段形象）。長期：若被實力強的開發商接手並成功完成，可能再帶動整個 Jalan Conlay 地段升值</td></tr>
+        <tr><td>Conlay MRT 站旁整合開發（Conlay Station ID）</td><td>計畫中（3棟辦公塔 + 商場 + 零售）</td><td>✅ 長期催化：MRT 站整合開發帶來辦公人流，直接支撐 The Conlay 的外籍高管出租需求</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>Conlay MRT + TRX 雙重催化是本系列最清晰的中長期需求故事：</strong>KL 外籍高管選擇居所的邏輯往往是「辦公地點（TRX）→ 步行/捷運距離（Conlay MRT）→ 生活商圈（Jalan Conlay 廊帶）」。The Conlay 正好站在這條需求鏈的最優節點上——TRX 2.3km + Conlay MRT 步行 + Pavilion 10 分鐘 + Kerry Hill 品質保證 + E&O 禮賓服務。
+    </div>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="section">
+  <div class="section-header">§11｜進場時機與估值</div>
+  <div class="section-body">
+    <h3>11.1 估值判斷</h3>
+    <table>
+      <thead><tr><th>維度</th><th>分析</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>成交 PSF vs 發售</td><td>iRumah 1BR 成交 RM2,100（+17% vs 發售 RM1,800）</td><td><span class="tag t-g">正面——市場認可品牌溢價</span></td></tr>
+        <tr><td>vs 住宅地契同地段</td><td>Binjai RM2,660（住宅）vs The Conlay RM2,100（商業），折讓約 21%——這在商業地契「應該折讓」的正常範疇內</td><td><span class="tag t-y">合理折讓，非過度折讓</span></td></tr>
+        <tr><td>掛牌 PSF</td><td>代理掛牌 RM2,200–2,800（高於成交中位 RM2,100）——賣家心理有溢價，買家可議價至 RM2,100–2,200</td><td><span class="tag t-y">議價空間存在但有限（5–10%）</span></td></tr>
+        <tr><td>入場總成本（1BR RM156萬）</td><td>印花稅 RM62,400 + 律師費 RM15,000 + State Consent RM5,000 = 約 RM82,400（5.3%）</td><td><span class="tag t-y">入場成本中等</span></td></tr>
+        <tr><td>安全邊際</td><td>成交高於發售提供正向安全邊際；但商業地契的結構折扣使得這個「+17%」不能和住宅地契的 +17% 等量齊觀</td><td><span class="tag t-g">相對其他商業地契 SR，估值最合理</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.2 持有策略</h3>
+    <table>
+      <thead><tr><th>策略</th><th>說明</th><th>適合度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>高端長租（外籍高管）</strong></td><td>TRX + KLCC 外籍需求 + E&O 禮賓服務吸引高付租力租客；月租 RM8,000–12,000；Net Yield 2.5–3.0%</td><td>✅ 最合理框架</td></tr>
+        <tr><td><strong>資本增值（中長期）</strong></td><td>iRumah 成交已超發售 +17%；若 KLCC/TRX 廊帶持續升值，The Conlay 是商業地契 SR 中最可能跟上節奏的</td><td>✅ 商業地契 SR 中最佳資本增值候選</td></tr>
+        <tr><td><strong>自住（高品質生活）</strong></td><td>Kerry Hill 設計 + E&O 禮賓 + Conlay MRT 直達；對追求品質自住的外籍高淨值人士有真實吸引力</td><td>✅ 自住定位合理</td></tr>
+        <tr><td><strong>MM2H 合規持有</strong></td><td>RM100萬+ 達標；Freehold 商業地契合規性需確認；E&O 支援降低摩擦</td><td>🟡 需書面確認</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">適合買家</td><td>高淨值外籍投資者（TRX/KLCC 外籍高管出租）；追求 KL 最高端 SR 自住體驗；二手 RM2,100 psf 成交顯示品牌保值</td></tr>
+            <tr><td>議價目標</td><td>掛牌 RM2,200–2,800 psf；目標議價至 RM2,100–2,200 psf（接近 iRumah 成交中位）</td></tr>
+            <tr><td>持有框架</td><td>以「高端長租 + 資本增值」為主；E&O 管理服務降低遠程持有摩擦</td></tr>
+            <tr><td>關鍵行動前</td><td>① 要求代理提供 brickz 實際政府登記成交量；② 確認管理費 psf；③ MM2H 商業地契合規確認</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟡 KLCC 廣義 SR 積壓存在，但 The Conlay 差異化明顯——43% 掛牌率 vs Stonor 3 的 69%，市場更健康</td></tr>
+            <tr><td>價格趨勢</td><td>🟢 iRumah 成交 +17% vs 發售——本系列最正面的二手市場信號；需 brickz 驗證量</td></tr>
+            <tr><td>租金市場</td><td>🟡 外籍 Net Yield 2.5–3.0%，商業地契 SR 中最高；E&O 服務可帶來租金溢價</td></tr>
+            <tr><td>估值</td><td>🟡 RM2,100 psf 成交合理；比住宅地契頂奢折讓 21%——折讓幅度正常</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-g" style="margin-top:16px">
+      <strong>🟢 審慎積極考慮（商業地契 SR 中最佳）——本系列商業地契建案排名第一</strong><br><br>
+      The Conlay 是本系列分析九個建案中，唯一一個商業地契 SR 同時做到：①有 E&O × Mitsui Fudosan × Kerry Hill 三重頂級品牌背書；②二手市場驗證超越發售價（+17%）；③已完工 1–2 年，無交屋風險；④有 E&O 自行管理服務，降低遠程持有摩擦；⑤直接受益於 Conlay MRT 和 TRX 雙重催化劑。<br><br>
+      <strong>進場條件：</strong>① 取得代理提供的 brickz 實際政府登記成交數據，確認 RM2,100 psf 成交具備足夠樣本量（建議至少 10 筆以上）；② 確認管理費 PSF（若高於 RM1.20 psf，需重新計算 Yield）；③ MM2H 合規書面確認；④ 目標議價 RM2,100–2,200 psf 進場（比掛牌折讓 5–8%）。<br><br>
+      <strong>主要保留：</strong>商業地契結構性折扣永久存在；掛牌率 43% 偏高（但遠優於 Stonor 3）；管理費未公開確認；iRumah 成交數據需 brickz 交叉驗證量。在確認以上四點後，The Conlay 是本系列商業地契建案中最值得進場的選擇。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">The Conlay by E&O @ KLCC ｜ 建案綜合評分卡</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%，RM1M+ 成交 +31%，MM2H 2,637 待購買家；TRX 帶動 KLCC 廊帶整體需求升溫</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KLCC 廣義 SR 積壓壓力存在（-）；但 The Conlay 差異化使其供需更接近精品稀缺段（+）；43% 掛牌率比 Stonor 3 69% 健康得多（+）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">已完工 1–2 年，度過了最差的期房和交屋初期風險期；iRumah 成交 +17% 顯示定價正在上行；TRX 成熟化持續帶動外籍需求</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Conlay MRT 步行直達（建案以此站命名）+ TRX 2.3km + Raja Chulan Monorail + Pavilion 10 分；本系列 A4 最高分之一</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>6.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:60%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 商業地契（State Consent 需申請）；E&O 提供外籍全程支援降低摩擦（+）；4% 印花稅；MM2H 合規需確認</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">7.2/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.5×.2 + 6.5×.25 + 7.0×.2 + 9.0×.2 + 6.0×.15 = 7.225 ≈ 7.2</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">E&O（Eastern &amp; Oriental，30年+，Bursa 上市，KL/Penang 頂奢地址建立者）× Mitsui Fudosan（日本最大房地產商）= 本系列最強 JV 信用組合；已完工 1–2 年，交屋零風險；Kerry Hill 設計師品牌背書</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">iRumah 成交 RM2,100 psf（+17% vs 發售）是正面信號；掛牌 RM2,200–2,800 比成交高 5–33%，議價空間存在；商業地契使估值論點不如住宅地契建案清晰</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">外籍 Net Yield 2.5–3.0%（商業地契 SR 中本系列最高）；Gross Yield 估 5–7.7%；E&O 出租管理溢價 15–20%；管理費未公開確認是最大不確定性</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Conlay MRT 步行（以站命名）+ TRX 外籍高管需求直線 + Raja Chulan Monorail + Pavilion 10 分；黃金三角中樞地段，本系列並列 A4 最高</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Kerry Hill Architects（Aman Tokyo 設計師）在 KL 唯一住宅作品；E&O Branded Residence 禮賓服務（24小時管家、個人廚師）；最小坪數 743 sqft 確保品質下限；這是本系列 B5 最高分——真正頂奢差異化</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 商業地契——比 SWNK Leasehold 強，比 Park Place/R22 住宅地契弱；商業地契買家池窄是永久折扣；但已完工，HDA 交屋風險已無</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>6.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:60%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">43% 掛牌率（偏高但不如 Stonor 3 的 69% 嚴峻）；iRumah 成交數據顯示有買盤支撐；商業地契買家池窄制約流動性；E&O 品牌吸引的外籍買家池相對稀缺 SR 更廣</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">7.6/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">9.5×.2+6.5×.2+6.5×.15+9.0×.15+9.5×.1+5.5×.1+6.0×.1 = 7.625 ≈ 7.6</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 7.2 × 40% + B 類 7.6 × 60%</div>
+        <div class="score-big">7.4<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#DCFCE7;color:#166534">⭐⭐⭐⭐ 優質——本系列商業地契 SR 評分最高，接近住宅地契建案水平</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">2.88 + 4.575 = 7.455 → 四捨五入 7.4（或更精確 7.5）</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>本系列唯一二手成交超越發售價（+17%）的商業地契 SR；E&O × Mitsui Fudosan × Kerry Hill 三重頂奢品牌背書（B1 9.5 + B5 9.5 並列本系列最高）；已完工 1–2 年、交屋零風險；Conlay MRT 步行 + TRX 2.3km 雙重催化；E&O 自行出租管理降低遠程持有摩擦。<br>
+          <strong style="color:#fca5a5">最大保留：</strong>商業地契結構折扣永久存在（vs 住宅地契）；iRumah 成交數據需 brickz 政府登記數量驗證；管理費 psf 未公開確認（若 RM1.20+，Yield 大幅降低）；43% 掛牌率偏高；外籍 Net Yield 2.5–3.0% 仍低於 R22/Park Place（3.0–3.4%）。
+        </div>
+      </div>
+    </div>
+
+    <h3>九個建案（含 The Conlay）完整排序</h3>
+    <table>
+      <thead><tr><th>#</th><th>建案</th><th>評分</th><th>地契</th><th>外籍 Net Yield</th><th>建議</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><strong>R22 Mont Kiara</strong></td><td style="color:#16a34a;font-weight:700">7.7</td><td>Freehold 住宅</td><td>~3.0–3.2%</td><td>🟢 進場</td></tr>
+        <tr><td>2</td><td><strong>Park Place DPC</strong></td><td style="color:#16a34a;font-weight:700">7.7</td><td>Freehold 住宅</td><td>~3.0–3.4%</td><td>🟢 進場</td></tr>
+        <tr><td><strong>3</strong></td><td><strong>The Conlay by E&O</strong></td><td style="color:#16a34a;font-weight:700">7.4</td><td>Freehold 商業</td><td>~2.5–3.0%</td><td>🟢 審慎積極考慮</td></tr>
+        <tr><td>4</td><td><strong>CloutHaus KLCC</strong></td><td style="color:#d97706;font-weight:700">6.7</td><td>Freehold 商業</td><td>~1.9–2.2%</td><td>🟡 觀望</td></tr>
+        <tr><td>5</td><td><strong>SWNK Houze BBCC</strong></td><td style="color:#d97706;font-weight:700">6.2</td><td>Leasehold 商業</td><td>~1.9–2.3%</td><td>🟡 本地可；🔴 外籍 MM2H 不推</td></tr>
+        <tr><td>6</td><td><strong>TS2 武吉免登</strong></td><td style="color:#3b82f6;font-weight:700">6.0</td><td>Freehold 商業</td><td>功能性定位</td><td>🔵 功能性持有</td></tr>
+        <tr><td>7</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="color:#f97316;font-weight:700">5.7</td><td>SOHO HDA 商業</td><td>SOHO 2.8–3.4%</td><td>🟡 SOHO 條件性；🔴 SOVO 迴避</td></tr>
+        <tr><td>8</td><td><strong>Stonor 3 KLCC</strong></td><td style="color:#dc2626;font-weight:700">5.7</td><td>商業地契 HDA</td><td>~1.9–2.3%</td><td>🔴 暫緩</td></tr>
+        <tr><td>9</td><td><strong>Orion Residence BB</strong></td><td style="color:#dc2626;font-weight:700">5.2</td><td>Freehold 商業</td><td>~1.2–1.5%</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">注：The Conlay 以 7.4/10 排名第3，是本系列商業地契 SR 中唯一接近住宅地契建案（R22/Park Place 7.7）水平的建案。這個排名的核心依據是市場已驗證的二手成交溢價（+17%）+ 頂奢品牌組合（B1 9.5 + B5 9.5）。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL 供需 Overhang 深度分析報告（2026-04-01）｜KL RM1M+ 高端住宅市場深度研究（2026-03）｜iRumah.co（The Conlay 成交中位）｜iProperty.com.my（213筆掛牌售）｜PropertyGuru（掛牌數據）｜PVIP（地契確認：Commercial Strata，Q3 2024竣工）｜The Edge Malaysia（8 Conlay 接管報導 2026-02）<br>
+  iRumah 成交數據需 brickz.my 政府登記成交量交叉驗證後方可作為確定性依據。管理費 psf 需向 E&O 官方確認。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

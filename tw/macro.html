@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | Taiwan Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">Taiwan — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">台灣 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q3 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q3</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:2;background:#6b7280">
+        <div class="cs-title">GFC</div>
+        <div class="cs-year">08–09</div>
+      </div>
+      <div class="cycle-seg" style="flex:6;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Post-GFC Boom</span><span class="lang-zh" style="display:none">後GFC榮景</span></div>
+        <div class="cs-year">10–15</div>
+      </div>
+      <div class="cycle-seg" style="flex:4;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Tax Reform</span><span class="lang-zh" style="display:none">稅改冷卻</span></div>
+        <div class="cs-year">16–19</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#2563eb">
+        <div class="cs-title">COVID</div>
+        <div class="cs-year">20–21</div>
+      </div>
+      <div class="cycle-seg" style="flex:4;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Rate Hike</span><span class="lang-zh" style="display:none">升息</span></div>
+        <div class="cs-year">22–25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">CBC at 2.00% — rate plateau with active selective credit controls; HPI softening from 2023 peak</span>
+        <span class="lang-zh" style="display:none">CBC維持2.00%，選擇性信用管制持續收緊；HPI從2023高點小幅回落</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">CBC Rate</span><span class="lang-zh" style="display:none">CBC利率</span></div>
+      <div class="kpi-value">2.00%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">+87.5bp from low</span><span class="lang-zh" style="display:none">距低點+87.5bp</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">House Price Index</span><span class="lang-zh" style="display:none">房價指數</span></div>
+      <div class="kpi-value">145</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Base: 2015=100</span><span class="lang-zh" style="display:none">基期：2015=100</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CPI</span><span class="lang-zh" style="display:none">通膨</span></div>
+      <div class="kpi-value">1.66%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Cooling</span><span class="lang-zh" style="display:none">降溫中</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">8.68%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">AI-driven</span><span class="lang-zh" style="display:none">AI驅動</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Mortgage Credit Growth</span><span class="lang-zh" style="display:none">房貸成長</span></div>
+      <div class="kpi-value">8.0%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Moderating</span><span class="lang-zh" style="display:none">趨緩中</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Population</span><span class="lang-zh" style="display:none">人口</span></div>
+      <div class="kpi-value">23.0M</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">−0.8% YoY</span><span class="lang-zh" style="display:none">−0.8% YoY</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">CBC Rate Range (17yr)</span><span class="lang-zh" style="display:none">CBC歷史區間</span></div>
+      <div class="ctx-val">1.125%–2.125%</div>
+      <div class="ctx-sub"><span class="lang-en">Low: 2020–21 · High: 2008 / 2011–14</span><span class="lang-zh" style="display:none">低點：2020–21 · 高點：2008/2011–14</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">HPI Since 2008</span><span class="lang-zh" style="display:none">HPI自2008累計</span></div>
+      <div class="ctx-val" style="color:#16a34a">+108%</div>
+      <div class="ctx-sub"><span class="lang-en">70 → 145 (peak 151 in 2023)</span><span class="lang-zh" style="display:none">70 → 145（2023高峰151）</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+10.2% / −1.6%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2010 rebound · Worst: 2009 GFC</span><span class="lang-zh" style="display:none">最佳：2010反彈 · 最差：2009 GFC</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Mortgage Credit Peak</span><span class="lang-zh" style="display:none">房貸成長高峰</span></div>
+      <div class="ctx-val" style="color:#d97706">11.5%</div>
+      <div class="ctx-sub"><span class="lang-en">2021 — COVID stimulus + low rates</span><span class="lang-zh" style="display:none">2021年 — COVID刺激加低利率</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × House Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Taiwan's HPI barely responded to GFC (2008–09) — domestic demand is resilient. The real inflection came from the 2020 COVID rate cut plus M2 surge to 8.7%, launching a multi-year price surge that outlasted the rate hike cycle.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>台灣HPI對GFC幾乎無感，顯示內需韌性極強。真正的轉折點來自2020年COVID降息加上M2暴增至8.7%，啟動了超越升息週期的多年房價上漲。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">CBC Rate / Mortgage Rate / CPI / M2 vs HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">CBC利率 / 房貸利率 / CPI / M2 vs HPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × House Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Building permits (dashed) turned sharply negative in 2015–16 after the 房地合一稅, constraining new supply — explaining why prices barely fell despite cooling demand. Today, permits are contracting again (−19% in 2023), setting up another supply squeeze.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>建照核發量（虛線）在房地合一稅後2015–16年急劇轉負，壓縮新供給——這解釋了為何即使需求降溫，房價跌幅有限。目前建照再度收縮（2023年−19%），醞釀另一波供給緊縮。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">GDP / Unemployment / Mortgage Credit / Build Permits vs HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">GDP / 失業率 / 房貸成長 / 建照 vs HPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #6b7280">
+      <div class="ev-year" style="color:#6b7280"><span class="lang-en">2008–2009 · GFC SHOCK</span><span class="lang-zh" style="display:none">2008–2009 · GFC衝擊</span></div>
+      <div class="ev-title"><span class="lang-en">CBC Cuts to 1.25% — HPI Holds</span><span class="lang-zh" style="display:none">CBC降息至1.25%，HPI撐住</span></div>
+      <div class="ev-desc"><span class="lang-en">Global crisis triggers CBC rate cuts. GDP falls −1.6% in 2009. Unlike most markets, Taiwan's HPI only dips −3% — domestic end-user demand provides a floor. Recovery begins swiftly in 2010.</span><span class="lang-zh" style="display:none">全球危機觸發CBC降息，2009年GDP衰退1.6%。不同於多數市場，台灣HPI僅跌3%——自用需求提供了支撐，2010年迅速展開反彈。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2010–2015 · POST-GFC BOOM</span><span class="lang-zh" style="display:none">2010–2015 · 後GFC榮景</span></div>
+      <div class="ev-title"><span class="lang-en">CBC Hikes, HPI Surges +46%</span><span class="lang-zh" style="display:none">CBC升息，HPI累漲46%</span></div>
+      <div class="ev-desc"><span class="lang-en">Low global rates fuel speculative buying. CBC hikes to 1.875% (2011) to curb speculation. Luxury Tax (奢侈稅) introduced Jun 2011 — short-term resale suppressed, not prices. HPI rises from 68 to near 100.</span><span class="lang-zh" style="display:none">全球低利率帶動投機買盤。CBC升息至1.875%以抑制投機，2011年6月實施奢侈稅——壓制短期轉手，並非房價本身。HPI從68升至近100。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">JUL 2016 · TAX REFORM</span><span class="lang-zh" style="display:none">2016年7月 · 稅制改革</span></div>
+      <div class="ev-title"><span class="lang-en">房地合一稅 Cools Transaction Volume</span><span class="lang-zh" style="display:none">房地合一稅冷卻成交量</span></div>
+      <div class="ev-desc"><span class="lang-en">Combined House & Land Tax replaces the Luxury Tax. Capital gains taxed up to 45% for short-term sellers. Volume collapses to historic lows. HPI plateaus near 100 for 4 years — quantity adjusts, not price.</span><span class="lang-zh" style="display:none">房地合一稅取代奢侈稅，短期賣方資本利得稅率高達45%。成交量跌至歷史低位，HPI在100附近盤整近4年——調整的是量，不是價。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">MAR 2020 · COVID STIMULUS</span><span class="lang-zh" style="display:none">2020年3月 · COVID刺激</span></div>
+      <div class="ev-title"><span class="lang-en">CBC Cuts to 1.125%, M2 Surges 8.7%</span><span class="lang-zh" style="display:none">CBC降至1.125%，M2激增8.7%</span></div>
+      <div class="ev-desc"><span class="lang-en">Taiwan's COVID impact is mild (GDP +3.1%) but rate cut floods market with liquidity. Repatriated overseas Taiwanese capital seeks property. HPI accelerates +7.8% in 2020, +8.5% in 2021 — the fastest pace since 2013.</span><span class="lang-zh" style="display:none">台灣COVID衝擊有限（GDP+3.1%），但降息釋放大量流動性。回台台商資金湧入房市，HPI 2020年漲7.8%、2021年漲8.5%，為2013年以來最快升速。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">2021 · SUPPLY SURGE</span><span class="lang-zh" style="display:none">2021年 · 供給衝高</span></div>
+      <div class="ev-title"><span class="lang-en">Building Permits +13.8%, HPI +8.5%</span><span class="lang-zh" style="display:none">建照核發+13.8%，HPI+8.5%</span></div>
+      <div class="ev-desc"><span class="lang-en">Developers rush to meet demand. New building permits surge to decade highs. Despite supply response, prices keep rising — demand from domestic buyers, overseas Taiwanese, and TSMC-region workers absorbs all new units.</span><span class="lang-zh" style="display:none">開發商搶供應需求，建照核發衝至十年高點。儘管供給回應，房價仍持續上漲——內需、回台台商及台積電園區員工消化所有新建單位。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">MAR 2022 · RATE HIKE CYCLE</span><span class="lang-zh" style="display:none">2022年3月 · 升息週期</span></div>
+      <div class="ev-title"><span class="lang-en">CBC First Hike in 11 Years + Credit Controls</span><span class="lang-zh" style="display:none">CBC 11年來首次升息 + 選擇性信用管制</span></div>
+      <div class="ev-desc"><span class="lang-en">CBC raises OPR four times in 2022 (1.125%→1.75%). Simultaneous 6th round of Selective Credit Controls restricts bank LTV for second homes. HPI peaks at 151 in 2023 — 4 hikes fail to break the bull trend.</span><span class="lang-zh" style="display:none">CBC 2022年升息4次（1.125%→1.75%）。同期第六次選擇性信用管制限制第二戶LTV。HPI於2023年見頂151——4次升息仍未打破多頭趨勢。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">2023–2024 · PRICE PEAK & RETREAT</span><span class="lang-zh" style="display:none">2023–2024 · 房價見頂回落</span></div>
+      <div class="ev-title"><span class="lang-en">HPI Peaks 151 → Softens to 149</span><span class="lang-zh" style="display:none">HPI見頂151後回落至149</span></div>
+      <div class="ev-desc"><span class="lang-en">Transaction volume collapses to historic low. Build permits −19% in 2023. HPI slips −1.3% in 2024 — first annual decline since 2016. CBC holds rate at 2.00%. Quantity continues adjusting, price holds near highs.</span><span class="lang-zh" style="display:none">成交量跌至歷史低位，建照2023年減少19%。HPI 2024年微跌1.3%，為2016年以來首次年度下跌。CBC利率維持2.00%，量縮價穩局面持續。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2025 · AI & SEMICONDUCTOR CATALYST</span><span class="lang-zh" style="display:none">2025年 · AI與半導體催化</span></div>
+      <div class="ev-title"><span class="lang-en">GDP +8.68% Driven by AI Exports</span><span class="lang-zh" style="display:none">AI出口驅動GDP+8.68%</span></div>
+      <div class="ev-desc"><span class="lang-en">Taiwan's GDP surges on AI chip demand — TSMC Hsinchu/Taichung fabs at full capacity. Hsinchu Science Park area sees fierce demand from TSMC engineers. HPI at 145 (Q3 2025), Hsinchu area significantly outperforms.</span><span class="lang-zh" style="display:none">AI晶片需求帶動台灣GDP爆發，台積電竹科/台中廠產能滿載。竹科周邊因台積電工程師搶房需求旺盛，HPI達145（2025 Q3），竹科區域顯著跑贏大盤。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#d97706;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#d97706;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook</span><span class="lang-zh" style="display:none">當前週期展望</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">AI/semiconductor boom drives GDP +8.7% and Hsinchu demand</span><span class="lang-zh" style="display:none">AI/半導體榮景推動GDP+8.7%及竹科需求</span></li>
+          <li><span class="lang-en">Build permit contraction −19% limits new supply pipeline</span><span class="lang-zh" style="display:none">建照減少19%，新供給管線受限</span></li>
+          <li><span class="lang-en">CPI cooling to 1.66% — no further rate hike pressure</span><span class="lang-zh" style="display:none">CPI降至1.66%，無進一步升息壓力</span></li>
+          <li><span class="lang-en">Unemployment at 3.35% — full employment supports demand</span><span class="lang-zh" style="display:none">失業率3.35%，接近完全就業支撐需求</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Affordability worst in APAC — price-to-income ratio 15–20×</span><span class="lang-zh" style="display:none">可負擔性為亞太最差，房價所得比15–20倍</span></li>
+          <li><span class="lang-en">Transaction volume at historic lows — thin market, volatile</span><span class="lang-zh" style="display:none">成交量歷史低位，市場薄弱易波動</span></li>
+          <li><span class="lang-en">Population declining −0.8% YoY — long-term demand headwind</span><span class="lang-zh" style="display:none">人口年減0.8%，長期需求逆風</span></li>
+          <li><span class="lang-en">Geopolitical risk premium not fully priced into HPI</span><span class="lang-zh" style="display:none">地緣政治風險溢價尚未充分反映於HPI</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: CBC (Central Bank of the Republic of China · cbc.gov.tw), DGBAS (OpenData · stat.gov.tw — GDP, CPI), Ministry of the Interior Real Estate Information Platform (HPI), FSC Banking Bureau (mortgage credit). 2025 HPI = Q3 2025 actual (MOIR).</span>
+    <span class="lang-zh" style="display:none">來源：CBC（中央銀行 · cbc.gov.tw）、DGBAS（主計總處 · stat.gov.tw — GDP、CPI）、內政部不動產資訊平台（房價指數）、金管會銀行局（房貸信用）。2025年HPI為2025 Q3實際值（內政部）。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, actual figures from CBC / DGBAS / MOI) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+var hpi   = [70.0,68.0,74.0,80.0,90.77,99.07,99.60,99.09,100.60,100.80,104.14,108.17,117.50,127.51,136.20,150.98,149.03,145.46];
+
+/* Chart 1: Monetary Cycle */
+var cbcRate  = [2.00,1.25,1.625,1.875,1.875,1.875,1.875,1.625,1.375,1.375,1.375,1.375,1.125,1.125,1.75,1.875,2.00,2.00];
+var mortRate = [2.35,2.20,1.90,1.85,1.80,1.80,1.75,1.70,1.65,1.62,1.62,1.60,1.50,1.50,1.70,2.00,2.30,2.44];
+var cpi      = [3.50,-0.90,1.00,1.40,1.90,0.80,1.20,-0.30,1.40,1.22,-0.06,1.15,0.04,2.63,2.71,2.70,2.10,1.66];
+var m2Growth = [2.0,5.5,5.5,3.7,4.2,4.0,5.0,5.5,4.5,3.75,3.52,3.46,5.84,8.72,7.55,6.60,5.94,4.50];
+
+/* Chart 2: Real Economy + Supply */
+var gdp          = [0.8,-1.6,10.2,3.7,2.2,2.5,4.7,1.5,2.2,3.7,2.9,3.1,3.11,6.53,2.43,1.31,4.27,8.68];
+var unemp        = [4.14,5.85,5.21,4.39,4.24,4.18,3.96,3.78,3.92,3.76,3.76,3.66,3.85,3.95,3.67,3.67,3.40,3.35];
+var mortCredit   = [2.3,2.0,4.0,6.0,5.5,5.0,5.0,4.5,4.0,4.5,4.5,5.0,7.0,9.3,7.0,5.56,11.0,8.0];
+var buildPermits = [null,-15.0,32.7,15.7,16.2,14.3,10.2,-25.5,-25.6,15.7,32.3,22.1,7.7,6.5,6.0,-19.1,7.3,null];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × HPI ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC Shock',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(22,163,74,0.07)'},  label:{formatter:isZh?'後GFC榮景':'Post-GFC Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2015'}],
+    [{xAxis:'2016',itemStyle:{color:'rgba(217,119,6,0.07)'}, label:{formatter:isZh?'稅改冷卻':'Tax Reform',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(37,99,235,0.07)'},  label:{formatter:isZh?'COVID寬鬆':'COVID Easing',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},  label:{formatter:isZh?'升息週期':'Rate Hike Cycle',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2008',label:{formatter:isZh?'GFC/CBC降息':'GFC/CBC Cut',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#6b7280',type:'dashed',width:1}},
+    {xAxis:'2011',label:{formatter:isZh?'奢侈稅':'Luxury Tax',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}},
+    {xAxis:'2016',label:{formatter:isZh?'房地合一稅':'Tax Reform',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'CBC降息':'CBC Cut',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'CBC首升':'First Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-2,max:12,interval:2,axisLabel:{formatter:'{value}%',color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:60,max:175,interval:20,axisLabel:{formatter:'{value}',color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'房價指數':'HPI',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'CBC政策利率':'CBC Policy Rate',type:'line',data:cbcRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'房貸利率':'Mortgage Rate',type:'line',data:mortRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpi,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'M2 YoY%':'M2 YoY%',type:'line',data:m2Growth,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'房價指數':'House Price Index',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy + Supply × HPI ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gdpBarData = gdp.map(function(v){return {value:v,itemStyle:{color:v>=0?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC Shock',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(22,163,74,0.07)'},  label:{formatter:isZh?'後GFC榮景':'Post-GFC Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2015'}],
+    [{xAxis:'2016',itemStyle:{color:'rgba(217,119,6,0.07)'}, label:{formatter:isZh?'稅改冷卻':'Tax Reform',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(37,99,235,0.07)'},  label:{formatter:isZh?'COVID寬鬆':'COVID Easing',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},  label:{formatter:isZh?'升息週期':'Rate Hike Cycle',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData2 = [
+    {xAxis:'2008',label:{formatter:isZh?'GFC/CBC降息':'GFC/CBC Cut',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#6b7280',type:'dashed',width:1}},
+    {xAxis:'2011',label:{formatter:isZh?'奢侈稅':'Luxury Tax',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}},
+    {xAxis:'2016',label:{formatter:isZh?'房地合一稅':'Tax Reform',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'CBC降息':'CBC Cut',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'CBC首升':'First Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}}
+  ];
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:-30,max:40,interval:10,axisLabel:{formatter:'{value}%',color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:60,max:175,interval:20,axisLabel:{formatter:'{value}',color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'房價指數':'HPI',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GDP YoY%':'GDP YoY%',type:'bar',data:gdpBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'失業率%':'Unemployment%',type:'line',data:unemp,yAxisIndex:0,lineStyle:{color:C.red,width:1.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'房貸成長%':'Mortgage Credit%',type:'line',data:mortCredit,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'建照年增%':'Build Permits%',type:'line',data:buildPermits,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false,connectNulls:false},
+      {name:isZh?'房價指數':'House Price Index',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2},markLine:{silent:true,symbol:'none',data:markLineData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

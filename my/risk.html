@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk Monitor | Malaysia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}</style>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q3 2025</span><span class="lang-zh" style="display:none">最後更新：2025年Q3</span></span>
+      <h1><span class="lang-en">Risk Monitor</span><span class="lang-zh" style="display:none">風險監測</span></h1>
+      <p class="subtitle"><span class="lang-en">Supply, Policy, Macro &amp; Developer Risk Dashboard</span><span class="lang-zh" style="display:none">供給、政策、總體及開發商風險儀表板</span></p>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">Risk Radar — 6 Dimensions</span><span class="lang-zh" style="display:none">風險雷達——6維度</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">1 = Low Risk, 10 = Extreme Risk</span><span class="lang-zh" style="display:none">1 = 低風險，10 = 極高風險</span></p>
+        <div class="radar-wrap"><div id="chart-radar" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <h2 class="section-heading"><span class="lang-en">Policy Timeline</span><span class="lang-zh" style="display:none">政策時間線</span></h2>
+    <div class="chart-card">
+      <div class="timeline">
+        <div class="timeline-item" style="--dot-color:var(--warning)">
+          <span class="tl-date">2022 Q3</span>
+          <span class="tl-text"><span class="lang-en">OPR raised to 2.75% — mortgage costs increase</span><span class="lang-zh" style="display:none">OPR升至2.75%——房貸成本上升</span></span>
+        </div>
+        <div class="timeline-item" style="--dot-color:var(--warning)">
+          <span class="tl-date">2024 Jan</span>
+          <span class="tl-text"><span class="lang-en">Foreign stamp duty 4% introduced</span><span class="lang-zh" style="display:none">外國買家4%印花稅實施</span></span>
+        </div>
+        <div class="timeline-item">
+          <span class="tl-date">2024</span>
+          <span class="tl-text"><span class="lang-en">MM2H three-tier Silver/Gold/Platinum restructured</span><span class="lang-zh" style="display:none">MM2H重組為銀/金/白金三層制</span></span>
+        </div>
+        <div class="timeline-item green">
+          <span class="tl-date">2025 Jan</span>
+          <span class="tl-text"><span class="lang-en">JS-SEZ (Johor-Singapore Special Economic Zone) launched</span><span class="lang-zh" style="display:none">JS-SEZ（柔新經濟特區）啟動</span></span>
+        </div>
+        <div class="timeline-item green">
+          <span class="tl-date">2025 Jul</span>
+          <span class="tl-text"><span class="lang-en">OPR cut to 2.75% — first cut since COVID, monthly savings ~RM70 per RM500k loan</span><span class="lang-zh" style="display:none">OPR降至2.75%——疫情以來首次降息，50萬令吉貸款月供約省RM70</span></span>
+        </div>
+        <div class="timeline-item green">
+          <span class="tl-date">2025</span>
+          <span class="tl-text"><span class="lang-en">MRT3 Circle Line approved — substantial completion by 2030–2031</span><span class="lang-zh" style="display:none">MRT3環線獲批——預計2030至2031年主體完工</span></span>
+        </div>
+        <div class="timeline-item red">
+          <span class="tl-date">2026 Jan</span>
+          <span class="tl-text"><span class="lang-en">Foreign stamp duty raised to 8% — affects purchases above RM1M</span><span class="lang-zh" style="display:none">外國買家印花稅升至8%——影響100萬令吉以上購置</span></span>
+        </div>
+        <div class="timeline-item green">
+          <span class="tl-date">2026 End</span>
+          <span class="tl-text"><span class="lang-en">RTS Link target operations — JB's biggest demand catalyst</span><span class="lang-zh" style="display:none">RTS Link目標通車——新山最大需求催化劑</span></span>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-heading"><span class="lang-en">Developer Health Tracker</span><span class="lang-zh" style="display:none">開發商健康度追蹤</span></h2>
+    <div class="chart-card">
+      <div class="table-scroll"><table class="data-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Developer</span><span class="lang-zh" style="display:none">開發商</span></th>
+            <th><span class="lang-en">Net Debt/Equity</span><span class="lang-zh" style="display:none">淨負債/股東權益</span></th>
+            <th><span class="lang-en">Gross Margin</span><span class="lang-zh" style="display:none">毛利率</span></th>
+            <th><span class="lang-en">Overhang</span><span class="lang-zh" style="display:none">積壓</span></th>
+            <th><span class="lang-en">Rating</span><span class="lang-zh" style="display:none">評級</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sime Darby Property</td>
+            <td>0.32x</td>
+            <td>26%</td>
+            <td><span class="lang-en">Low</span><span class="lang-zh" style="display:none">低</span></td>
+            <td class="cell-green">&#9733;&#9733;&#9733;&#9733;</td>
+          </tr>
+          <tr>
+            <td>IOI Properties</td>
+            <td>0.28x</td>
+            <td>31%</td>
+            <td><span class="lang-en">Low</span><span class="lang-zh" style="display:none">低</span></td>
+            <td class="cell-green">&#9733;&#9733;&#9733;&#9733;</td>
+          </tr>
+          <tr>
+            <td>SP Setia</td>
+            <td>0.61x</td>
+            <td>22%</td>
+            <td><span class="lang-en">Medium</span><span class="lang-zh" style="display:none">中等</span></td>
+            <td class="cell-orange">&#9733;&#9733;&#9733;</td>
+          </tr>
+          <tr>
+            <td>Eco World</td>
+            <td>0.45x</td>
+            <td>28%</td>
+            <td><span class="lang-en">Low</span><span class="lang-zh" style="display:none">低</span></td>
+            <td class="cell-green">&#9733;&#9733;&#9733;&#9733;</td>
+          </tr>
+          <tr>
+            <td>Mah Sing</td>
+            <td>0.18x</td>
+            <td>24%</td>
+            <td><span class="lang-en">Low</span><span class="lang-zh" style="display:none">低</span></td>
+            <td class="cell-green">&#9733;&#9733;&#9733;&#9733;</td>
+          </tr>
+          <tr>
+            <td>UEM Sunrise</td>
+            <td>0.78x</td>
+            <td>19%</td>
+            <td><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></td>
+            <td class="cell-red">&#9733;&#9733;</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p class="chart-footnote"><span class="lang-en">*Directional estimates based on public annual reports. Not investment advice.</span><span class="lang-zh" style="display:none">*基於公開年報的方向性估算，非投資建議。</span></p>
+    </div>
+
+    <h2 class="section-heading"><span class="lang-en">Interest Rate Sensitivity</span><span class="lang-zh" style="display:none">利率敏感度分析</span></h2>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">Monthly Payment vs OPR (RM500k, 30yr loan)</span><span class="lang-zh" style="display:none">月供 vs OPR（50萬令吉、30年期貸款）</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-rate-sensitivity" style="width:100%;height:100%"></div></div>
+        <div class="insight-box"><span class="lang-en">OPR +0.25% ≈ +RM70–75/month on a RM500k loan. Current OPR at 2.75% after Jul 2025 cut.</span><span class="lang-zh" style="display:none">OPR每升0.25% ≈ 50萬令吉貸款月供增加RM70–75。目前OPR於2025年7月降息後為2.75%。</span></div>
+      </div>
+    </div>
+
+    <h2 class="section-heading"><span class="lang-en">Key Risk Factors</span><span class="lang-zh" style="display:none">主要風險因素</span></h2>
+    <div class="summary-grid">
+      <div class="summary-card orange-left">
+        <h4><span class="lang-en">Interest Rate Sensitivity</span><span class="lang-zh" style="display:none">利率敏感度</span></h4>
+        <p><span class="lang-en">OPR +0.25% adds ~RM70/month on RM500k loan. Current 2.75% is supportive, but any reversal would pressure affordability and transaction volume. BNM likely to hold or cut further in 2026.</span><span class="lang-zh" style="display:none">OPR每升0.25%，50萬令吉貸款月供增加約RM70。目前2.75%具支撐性，但任何反轉將對可負擔性及交易量構成壓力。BNM可能在2026年維持或進一步降息。</span></p>
+      </div>
+      <div class="summary-card blue-left">
+        <h4><span class="lang-en">FX Risk</span><span class="lang-zh" style="display:none">匯率風險</span></h4>
+        <p><span class="lang-en">MYR/USD: 4.20–4.70 (2025–2026 range)<br>MYR/SGD: ~3.40<br><br>SGD 1M ≈ RM3.4M — KL prime condos relatively cheap for Singaporeans. Weak MYR is both a foreign buyer catalyst and an import cost inflator.</span><span class="lang-zh" style="display:none">MYR/USD: 4.20–4.70（2025–2026年區間）<br>MYR/SGD: ~3.40<br><br>SGD 1M ≈ RM3.4M——吉隆坡高端公寓對新加坡人而言相對便宜。令吉疲弱既是外國買家催化劑，也是進口成本推升因素。</span></p>
+      </div>
+      <div class="summary-card green-left">
+        <h4><span class="lang-en">Infrastructure Catalysts</span><span class="lang-zh" style="display:none">基礎建設催化劑</span></h4>
+        <p><span class="lang-en"><strong>JB-SG RTS</strong> — Targeting operations end-2026 → JB's biggest demand catalyst<br><strong>JS-SEZ</strong> — 2025 launch → Johor industrial/residential demand<br><strong>MRT3 Circle Line</strong> — KL circle line → specific corridor demand uplift<br><strong>Penang LRT</strong> — Slower progress, timeline uncertain</span><span class="lang-zh" style="display:none"><strong>JB-SG RTS</strong>——目標2026年底通車 → 新山最大需求催化劑<br><strong>JS-SEZ</strong>——2025年推進 → 柔佛工業/住宅需求<br><strong>MRT3環線</strong>——吉隆坡環線 → 特定走廊需求提升<br><strong>檳城LRT</strong>——進度較慢，時間線不確定</span></p>
+      </div>
+      <div class="summary-card orange-left">
+        <h4><span class="lang-en">Industrial Property Divergence</span><span class="lang-zh" style="display:none">工業地產分化</span></h4>
+        <p><span class="lang-en">Industrial property value surged 21.3% in 2025, driven by data centers and E&amp;E manufacturing. Capital is rotating out of residential high-rise into industrial and logistics.</span><span class="lang-zh" style="display:none">工業地產成交總值2025年年增21.3%，數據中心與電子電機製造業帶動。資金正從高層住宅輪動至工業與物流地產。</span></p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">BNM Monetary Policy 2023–2025 &middot; REHDA 2H2025 &middot; Developer Annual Reports &middot; NAPIC Q3 2025<br><em>Estimates marked * are directional approximations. Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">BNM 貨幣政策 2023–2025 &middot; REHDA 2H2025 &middot; 開發商年報 &middot; NAPIC 2025年Q3<br><em>標示 * 為方向性估算，非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:'#1e3a5f', green:'#16a34a', orange:'#d97706',
+    red:'#dc2626', blue:'#2563eb', muted:'#5a7a9a',
+    grid:'#e8f0f9', text:'#1e3a5f'
+  };
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+  var baseGrid = { left: 50, right: 20, top: 40, bottom: 30, containLabel: true };
+  var baseTooltip = {
+    trigger: 'axis', backgroundColor: '#fff',
+    borderColor: '#ccd9e8', borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+  var baseLegend = { top: 8, textStyle: baseText, icon: 'circle', itemWidth: 8, itemHeight: 8 };
+
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+  }
+
+  var allCharts = [];
+
+  window.addEventListener('load', function(){
+    // chart-radar: ECharts radar chart
+    var cRadar = echarts.init(document.getElementById('chart-radar'));
+    allCharts.push(cRadar);
+    cRadar.setOption({
+      tooltip: { trigger: 'item' },
+      legend: { bottom: 0, textStyle: { color: '#5a7a9a', fontFamily: 'Inter, sans-serif', fontSize: 11 }, icon: 'circle', itemWidth: 8, itemHeight: 8, data: ['Current Risk','2023 Baseline'] },
+      radar: {
+        center: ['50%', '52%'],
+        radius: '58%',
+        nameGap: 8,
+        name: { textStyle: { color: '#5a7a9a', fontFamily: 'Inter, sans-serif', fontSize: 10 } },
+        indicator: [
+          { name: '\u6d41\u52d5\u6027 / Liquidity', max: 10 },
+          { name: '\u4fe1\u8cb8 / Credit', max: 10 },
+          { name: '\u4f9b\u7d66 / Supply', max: 10 },
+          { name: '\u7e3d\u7d93 / Macro', max: 10 },
+          { name: '\u653f\u7b56 / Policy', max: 10 },
+          { name: '\u5916\u8cc7 / Foreign', max: 10 }
+        ],
+        shape: 'polygon',
+        splitLine: { lineStyle: { color: C.grid } },
+        splitArea: { show: false },
+        axisLine: { lineStyle: { color: C.grid } }
+      },
+      series: [{
+        type: 'radar',
+        data: [
+          {
+            name: 'Current Risk',
+            value: [6,7,8,5,6,5],
+            lineStyle: { color: C.red, width: 2 },
+            itemStyle: { color: C.red },
+            areaStyle: { color: 'rgba(220,38,38,0.1)' }
+          },
+          {
+            name: '2023 Baseline',
+            value: [5,6,5,5,4,4],
+            lineStyle: { color: C.muted, width: 2, type: 'dashed' },
+            itemStyle: { color: C.muted },
+            areaStyle: { color: 'rgba(139,163,192,0.08)' }
+          }
+        ]
+      }]
+    });
+
+    // chart-rate-sensitivity: dual-axis line
+    var cRate = echarts.init(document.getElementById('chart-rate-sensitivity'));
+    allCharts.push(cRate);
+    cRate.setOption({
+      tooltip: baseTooltip,
+      legend: { top: 8, textStyle: { color: '#5a7a9a', fontFamily: 'Inter, sans-serif', fontSize: 11 }, icon: 'circle', itemWidth: 8, itemHeight: 8, data: ['Yield Spread','Affordability Index'] },
+      grid: { left: 15, right: 15, top: 40, bottom: 30, containLabel: true },
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['OPR 2.0%','OPR 2.5%','OPR 2.75%','OPR 3.0%','OPR 3.5%']
+      }),
+      yAxis: [
+        mkAxis({ type: 'value', axisLabel: { formatter: '{value}%', color: '#5a7a9a', fontSize: 10 }, splitLine: { lineStyle: { color: '#e8f0f9' } } }),
+        mkAxis({ type: 'value', axisLabel: { formatter: '{value}', color: '#5a7a9a', fontSize: 10 }, splitLine: { show: false } })
+      ],
+      series: [
+        {
+          name: 'Yield Spread', type: 'line',
+          data: [3.19, 2.69, 2.44, 2.19, 1.69],
+          lineStyle: { color: C.green, width: 2 },
+          itemStyle: { color: C.green },
+          symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'Affordability Index', type: 'line',
+          yAxisIndex: 1,
+          data: [88, 82, 79, 75, 68],
+          lineStyle: { color: C.orange, width: 2 },
+          itemStyle: { color: C.orange },
+          symbol: 'circle', symbolSize: 6,
+          markLine: {
+            silent: true,
+            symbol: 'none',
+            lineStyle: { color: C.navy, type: 'dashed', width: 1 },
+            label: { formatter: 'Current', position: 'insideStartTop', fontSize: 9, color: '#5a7a9a' },
+            data: [{ xAxis: 'OPR 2.75%' }]
+          }
+        }
+      ]
+    });
+
+    setLang(localStorage.getItem('lang')||'en');
+  });
+
+  window.addEventListener('resize', function(){
+    allCharts.forEach(function(c){ if(c) c.resize(); });
+  });
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

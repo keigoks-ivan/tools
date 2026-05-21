@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Report | Malaysia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}</style>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-inline .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:8px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+    .report-chart-grid-3{grid-template-columns:repeat(3,1fr)}
+    .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+    .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+    .report-chart-card .chart-meta{font-family:'Inter',sans-serif;font-size:11px;color:#d97706;margin-bottom:8px}
+    .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+    .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+    .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif;max-width:100%}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+    .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+    .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+    .toc-collapsed #tocList{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}.toc-box{margin-bottom:20px}}
+    /* -- Side Progress Nav -- */
+    .side-nav{position:fixed;top:50%;right:max(16px, calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <div class="report-container">
+    <nav class="side-nav" id="sideNav">
+      <a href="#sec-exec" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Exec Summary</span>
+        <span class="side-nav-label lang-zh" style="display:none">執行摘要</span>
+      </a>
+      <a href="#sec-supply" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Supply</span>
+        <span class="side-nav-label lang-zh" style="display:none">供給面</span>
+      </a>
+      <a href="#sec-demand" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Demand</span>
+        <span class="side-nav-label lang-zh" style="display:none">需求面</span>
+      </a>
+      <a href="#sec-valuation" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Valuation</span>
+        <span class="side-nav-label lang-zh" style="display:none">估值</span>
+      </a>
+      <a href="#sec-kl" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Kuala Lumpur</span>
+        <span class="side-nav-label lang-zh" style="display:none">吉隆坡</span>
+      </a>
+      <a href="#sec-penang" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Penang</span>
+        <span class="side-nav-label lang-zh" style="display:none">檳城</span>
+      </a>
+      <a href="#sec-jb" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Johor Bahru</span>
+        <span class="side-nav-label lang-zh" style="display:none">新山</span>
+      </a>
+      <a href="#sec-national" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">National</span>
+        <span class="side-nav-label lang-zh" style="display:none">全國圖景</span>
+      </a>
+      <a href="#sec-infra" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Infrastructure</span>
+        <span class="side-nav-label lang-zh" style="display:none">基礎建設</span>
+      </a>
+      <a href="#sec-outlook" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Outlook</span>
+        <span class="side-nav-label lang-zh" style="display:none">展望</span>
+      </a>
+    </nav>
+    <div class="report-header">
+      <div class="lang-en">
+        <h1>MALAYSIA PROPERTY MARKET REPORT</h1>
+        <div class="report-meta">May 2026 · Institutional Research</div>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <h1>馬來西亞住宅房地產市場報告</h1>
+        <div class="report-meta">2026年5月 · 機構研究</div>
+      </div>
+    </div>
+    <div class="report-body">
+
+      <div class="toc-box" id="tocBox">
+        <div class="toc-header" onclick="toggleToc()">
+          <span class="lang-en">In This Report</span>
+          <span class="lang-zh" style="display:none">本報告涵蓋</span>
+          <button class="toc-toggle" id="tocToggleBtn">&#9650;</button>
+        </div>
+        <div class="toc-list" id="tocList">
+          <a href="#sec-exec" onclick="closeTocOnMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+          <a href="#sec-supply" onclick="closeTocOnMobile()"><span class="lang-en">2. Supply: The Delivery Wave</span><span class="lang-zh" style="display:none">2. 供給面：完工交屋潮</span></a>
+          <a href="#sec-demand" onclick="closeTocOnMobile()"><span class="lang-en">3. Demand: Intent Without Access</span><span class="lang-zh" style="display:none">3. 需求面：想買的人很多</span></a>
+          <a href="#sec-valuation" onclick="closeTocOnMobile()"><span class="lang-en">4. Valuation: Two Frameworks</span><span class="lang-zh" style="display:none">4. 估值：兩個框架</span></a>
+          <a href="#sec-kl" onclick="closeTocOnMobile()"><span class="lang-en">5. Kuala Lumpur</span><span class="lang-zh" style="display:none">5. 吉隆坡</span></a>
+          <a href="#sec-penang" onclick="closeTocOnMobile()"><span class="lang-en">6. Penang</span><span class="lang-zh" style="display:none">6. 檳城</span></a>
+          <a href="#sec-jb" onclick="closeTocOnMobile()"><span class="lang-en">7. Johor Bahru</span><span class="lang-zh" style="display:none">7. 新山</span></a>
+          <a href="#sec-national" onclick="closeTocOnMobile()"><span class="lang-en">8. Malaysia: National Picture</span><span class="lang-zh" style="display:none">8. 全馬：全國圖景</span></a>
+          <a href="#sec-infra" onclick="closeTocOnMobile()"><span class="lang-en">9. Infrastructure Catalysts</span><span class="lang-zh" style="display:none">9. 基礎建設催化劑</span></a>
+          <a href="#sec-outlook" onclick="closeTocOnMobile()"><span class="lang-en">10. Outlook &amp; Key Risks</span><span class="lang-zh" style="display:none">10. 展望與主要風險</span></a>
+        </div>
+      </div>
+
+      <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+
+      <div class="lang-en">
+        <p>Malaysia's residential property market entered 2026 carrying the most complex supply overhang since the 2016&ndash;2019 peak cycle. The headline numbers tell a bifurcated story: gross rental yields of <strong>5.19%</strong> on residential property continue to produce a positive carry spread of <strong>+2.44%</strong> above the OPR of <strong>2.75%</strong> (held by Bank Negara at the 7 May 2026 MPC meeting; unchanged since July 2025), making Malaysia one of the few Asian markets where property still generates positive real income. Yet the same quarter &mdash; Q3 2025 &mdash; saw national residential Overhang surge <strong>30.5%</strong> year-on-year to <strong>28,672 units</strong>, reversing three consecutive years of improvement. When Malaysia's commercial-classified serviced apartment Overhang of <strong>17,892 units</strong> is added, the wide-definition national completed-unsold inventory reaches <strong>46,564 units</strong> &mdash; a level that has no modern precedent.</p>
+        <p>The most important analytical correction is the serviced apartment reclassification of 2016. When NAPIC moved serviced apartments from the residential to the commercial property category, the official residential Overhang statistic became systematically understated. A market observer looking only at the residential Overhang figure of 28,672 would conclude that Johor's position &mdash; at 3,293 residential units &mdash; is problematic but manageable. Adding the SA Overhang of <strong>9,018 units</strong> (50.4% of the national total) reveals that Johor's combined completed-unsold exposure of <strong>12,688 units</strong> is more than 56% larger than Kuala Lumpur's combined figure of <strong>8,101 units</strong>, which is the second most stressed market. This single misreading &mdash; treating residential Overhang as the whole picture &mdash; is the most common analytical error in Malaysian property research.</p>
+        <p>The structural dichotomy is product-based, not geography-based. Across all three major markets covered in this report &mdash; Kuala Lumpur, Penang, and Johor Bahru &mdash; the demand failure is almost exclusively a high-rise condominium and serviced apartment problem. Landed residential (terraced houses, semi-detached) consistently shows Overhang rates below 10% in all three cities, supported by genuine owner-occupier demand that is structurally indifferent to the investment cycle. The investment framework is therefore straightforward: <strong>avoid high-rise in oversupplied segments, favour landed in under-supplied zones, and monitor the three catalysts</strong> &mdash; RTS Link commissioning, JS-SEZ enterprise deployment, and KL serviced apartment NC pipeline approval decisions &mdash; that will determine whether the current supply stress self-corrects by 2028 or persists into the next decade.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>馬來西亞住宅市場進入 2026 年時，背負著 2016 至 2019 年景氣高峰以來最複雜的供給壓力。表面數字呈現兩極走勢：住宅毛租金收益率 <strong>5.19%</strong>，仍高於 OPR（<strong>2.75%</strong>，BNM 於 2026 年 5 月 7 日 MPC 會議維持，自 2025 年 7 月起持平）達 <strong>+2.44%</strong>，讓馬來西亞成為亞洲少數靠收租還能有正現金流的市場。但同一個季度（2025 年 Q3），全國住宅餘屋（Overhang）年增 <strong>30.5%</strong>，衝到 <strong>28,672 戶</strong>，終結了連續三年的改善趨勢。若再加上被歸類為商業物件的服務式公寓餘屋 <strong>17,892 戶</strong>，全國已完工未售庫存達 <strong>46,564 戶</strong>，這是現代史上前所未見的水準。</p>
+        <p>理解這份數據最關鍵的修正，是 2016 年服務式公寓的重新分類。NAPIC 把服務式公寓從住宅類移到商業物業類之後，官方住宅餘屋數字就開始系統性低估。光看 28,672 戶這個住宅餘屋，會以為柔佛 3,293 戶問題「嚴重但還能管理」；但加計服務式公寓餘屋 <strong>9,018 戶</strong>（佔全國 50.4%）後，柔佛合計已完工未售庫存達 <strong>12,688 戶</strong>，比排第二的吉隆坡（合計 <strong>8,101 戶</strong>）還多出 56%。把住宅餘屋當成完整數據來看，是馬來西亞房地產研究最常見的誤判。</p>
+        <p>真正的結構性分化不在地區，而在產品類型。本報告涵蓋的三個主要市場——吉隆坡、檳城、新山——需求疲弱幾乎全部集中在高層公寓和服務式公寓；有地住宅（排屋、半獨立式）在這三個城市的餘屋率都低於 10%，有穩定的自住需求撐住，不太受投資循環影響。投資框架因此很清楚：<strong>避開供給過剩的高層物件，鎖定供給不足地段的有地住宅，並追蹤三個關鍵催化劑</strong>——新柔捷運（RTS Link）通車、JS-SEZ 招商落地、以及吉隆坡服務式公寓規劃案（NC）是否獲准動工。這三者決定了目前的供給壓力能不能在 2028 年前消化掉，還是會延續到下個十年。</p>
+      </div>
+
+      <!-- Exec Summary Charts -->
+      <div class="report-chart-grid report-chart-grid-3">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Malaysia House Price 10Y Trend + YoY%</span><span class="lang-zh" style="display:none">馬來西亞10年房價趨勢 + 年增率</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">RM K &middot; Source: NAPIC</span><span class="lang-zh" style="display:none">令吉千元 &middot; 來源：NAPIC</span></p>
+          <div id="rChartMyPrice" style="height:220px;min-height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Yield Spread vs OPR</span><span class="lang-zh" style="display:none">收益率利差 vs OPR</span></h4>
+          <div class="chart-meta green"><span class="lang-en">National yield 4.8% vs OPR 2.75%</span><span class="lang-zh" style="display:none">全國收益率4.8% vs OPR 2.75%</span></div>
+          <div id="chart-r-yield-spread" style="height:220px;min-height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Demand vs Supply Mismatch</span><span class="lang-zh" style="display:none">供需錯配</span></h4>
+          <div class="chart-meta orange"><span class="lang-en">Affordable segment undersupplied</span><span class="lang-zh" style="display:none">可負擔價位供給不足</span></div>
+          <div id="chart-r-mismatch" style="height:220px;min-height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Transaction Wave</span><span class="lang-zh" style="display:none">成交量趨勢</span></h4>
+          <div class="chart-meta orange"><span class="lang-en">Completions vs absorption</span><span class="lang-zh" style="display:none">完工量 vs 吸納量</span></div>
+          <div id="chart-r-wave" style="height:220px;min-height:220px;"></div>
+        </div>
+      </div>
+
+      <h2 id="sec-supply"><span class="lang-en">SUPPLY: THE DELIVERY WAVE</span><span class="lang-zh" style="display:none">供給面：完工交屋潮尚未退去</span></h2>
+
+      <div class="lang-en">
+        <p>The supply challenge facing Malaysia's residential market is best understood through the lens of a time-lagged system with locked-in consequences. A residential project commenced in 2024 cannot be un-built. The <strong>106,236 units</strong> started that year — a 20.6% increase over 2023 — will arrive in the market between 2026 and 2028 regardless of what happens to demand in the interim. This is the completion wave, and it is the single most important supply-side variable for the next two years.</p>
+        <p>The 2025 data shows the absorption system already under stress. In Q1–Q3 2025, <strong>69,303 units</strong> were completed and received their Certificate of Completion and Compliance, a 25.3% year-on-year increase. High-rise developments now take <strong>18–24 months</strong> to achieve meaningful sales penetration — three to four times the six-month benchmark. The unsold completed stock reached <strong>28,672 residential units</strong> worth RM17.25 billion as of Q3 2025, rising to <strong>44,794 units</strong> when serviced apartments are included, up 30.5% year-on-year.</p>
+        <p>The developer response has been rational and relatively swift. New residential launches in the first nine months of 2025 fell <strong>31.8% year-on-year</strong> to 24,913 units. New planned supply contracted <strong>31.7%</strong>. Only <strong>41% of developers</strong> planned new launches in H2 2025. This pullback is the necessary precondition for eventual supply tightening — but the units already under construction cannot be recalled. The completion wave is locked in through 2027.</p>
+        <p>The serviced apartment segment deserves specific attention. Developers historically favored this format because commercial land classification exempts them from affordable housing quota requirements. The result was a sustained wave of supply in the RM500,000–RM1,000,000 band across KL, JB, and Penang that bears limited relationship to actual demand. The <strong>17,892 unsold serviced apartment units</strong> as of Q3 2025 carry commercial utility rates typically four to six times higher than residential tariffs, complex financing conditions, and maintenance cost structures that erode the yield advantage used to market these units. Clearing this inventory will require either extended time or significant structural repricing.</p>
+        <p>The outlook for overhang depends critically on absorption. Under the <strong>base case</strong> (absorption held at 85,000 units/year, consistent with the five-year average), overhang peaks at approximately <strong>47,000 units in 2027</strong> before declining to around 14,000 by 2029 — a level consistent with healthy market inventory of roughly two months' supply. The <strong>bull case</strong> (absorption rising to 90,000/year on sustained OPR stability and GDP above 5%) sees the peak contained at 42,000 units and a faster recovery to approximately 8,000 units by 2029. The <strong>bear case</strong> (absorption falling to 75,000/year under OPR reversal or economic deceleration below 4% GDP) produces a peak of 57,000 units in 2027 that remains stubbornly elevated at 28,000 through 2029. All three scenarios share the same completion curve, derived from lagged 2024–2025 starts data — what differs is only the demand side.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>2024 年動工 <strong>106,236 戶</strong>，這批在建物件躲不掉，2026 到 2028 年都會陸續推出。光 2025 年前三季就完工交屋 <strong>69,303 戶</strong>，比去年多 25.3%。高層住宅從推案到清盤，目前平均要 <strong>18 至 24 個月</strong>，是正常標準的三到四倍。截至 2025 年 Q3，含服務式公寓的總餘屋已經堆到 <strong>44,794 戶</strong>，年增 30.5%。</p>
+        <p>服務式公寓是最大的地雷。建商喜歡蓋是因為可以繞開可負擔房屋配額，結果在吉隆坡、新山、檳城 RM50 至 100 萬價格帶，堆出一大堆沒人要的庫存。目前積壓的 <strong>17,892 戶</strong>服務式公寓不只定價過高，商業水電費率還比住宅貴 4 至 6 倍，貸款條件也更嚴。這批庫存要清，不是降價就是等時間，短期都不會是利多。</p>
+        <p>但建商已經在踩煞車了：2025 年前三季新推案量年減 <strong>31.8%</strong>、規劃量也減了 <strong>31.7%</strong>，只有 41% 的業者說下半年還會推案。這代表 2028 年之後新供給會明顯減少，市場有機會重新平衡。</p>
+        <p><strong>這對你的影響是什麼？</strong>未來兩年的交屋潮躲不掉，但最壞的時候快過了。基本情境下，餘屋在 2027 年觸頂約 <strong>47,000 戶</strong>之後開始下滑。如果你打算 2027 年之後才進場，屆時的供給壓力會比現在輕很多。如果你現在就要買，就要挑對產品：避開服務式公寓和外圍高層，改選成熟走廊的有地住宅或中價位公寓。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <!-- 左上 -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Annual Supply Pipeline</span><span class="lang-zh" style="display:none">每年推案與完工概況</span></h4>
+          <p class="chart-note orange"><span class="lang-en">2024 starts +20.6% — locked-in future supply</span><span class="lang-zh" style="display:none">2024年開工激增20.6%——未來供給已鎖定</span></p>
+          <div id="chart-r-supply" style="height:220px;"></div>
+        </div>
+        <!-- 右上 -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Completion Wave vs Absorption</span><span class="lang-zh" style="display:none">完工交屋潮 vs 吸收量</span></h4>
+          <p class="chart-note orange"><span class="lang-en">Supply exceeds absorption through 2027</span><span class="lang-zh" style="display:none">供給量將超過吸收量直到2027年</span></p>
+          <div id="chart-r-wave-s" style="height:220px;"></div>
+        </div>
+        <!-- 左下 -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Overhang Forecast 2015–2029</span><span class="lang-zh" style="display:none">待售餘屋預測 2015–2029年</span></h4>
+          <p class="chart-note orange"><span class="lang-en">Historical 2015–2025 + 3-scenario forecast</span><span class="lang-zh" style="display:none">歷史2015–2025 + 三情境預測</span></p>
+          <div id="chart-r-oh-forecast" style="height:220px;"></div>
+        </div>
+        <!-- 右下：新增 chartOhSeverityR -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Overhang Severity: % of Annual Completions</span><span class="lang-zh" style="display:none">餘屋嚴重度：佔當年完工量%</span></h4>
+          <p class="chart-note orange"><span class="lang-en">2025Q3: 41% — back near 2019 peak</span><span class="lang-zh" style="display:none">2025Q3：41%——接近2019年峰值</span></p>
+          <div id="chartOhSeverityR" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">NATIONAL SUPPLY PIPELINE: THE SERVICED APARTMENT BLIND SPOT</span>
+        <span class="lang-zh" style="display:none">全國在建供給：服務式公寓的統計盲點</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>Malaysia's total unsold property supply pipeline as of Q3 2025 reaches <strong>209,380 units</strong> across all categories &mdash; residential, serviced apartments, SOHO, and commercial shophouses. The residential segment accounts for 53.7% (112,411 units across Overhang, under-construction, and not-yet-started). The serviced apartment pipeline at 74,836 units represents 35.7% of the total &mdash; a structurally significant share for a product type that has been reclassified as "commercial" since 2016 and therefore disappears from residential Overhang statistics. The critical embedded risk is the serviced apartment under-construction pipeline: 44,035 SA units are currently under construction nationally, representing 63.5% of the equivalent residential figure. Selangor alone accounts for <strong>18,116 units</strong> of SA under-construction, while KL's SA pipeline (8,212 under-construction + 9,415 planned = 17,627 units) represents the most concentrated future supply pressure in a single urban area anywhere in Malaysia.</p>
+        <p>The serviced apartment Overhang has a structural clearing problem that residential Overhang does not share. Residential units benefit from first-home buyer schemes, stamp duty exemptions, 90% LTV mortgages for owner-occupiers, and Bumiputera quota absorption. Serviced apartments &mdash; commercially titled &mdash; are ineligible for all of these. The average SA Overhang clearing cycle documented in Malaysian academic research is <strong>3&ndash;5 years</strong> versus 1&ndash;2 years for residential. Nationally, <strong>60% of SA Overhang is priced above RM500,000</strong>, a level that exceeds the organic purchasing power of the local salaried market and makes the SA clearing mechanism almost entirely dependent on foreign investors and expatriate tenants.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>截至 2025 年 Q3，馬來西亞所有類別未售物件加起來共 <strong>209,380 戶</strong>，包括住宅、服務式公寓、SOHO 和商業店舖。住宅佔 53.7%（餘屋、在建、未動工合計 112,411 戶）；服務式公寓則佔 35.7%（74,836 戶）——這對一個 2016 年起已被改劃為「商業」、不再計入住宅餘屋統計的產品類型來說，比例高得相當驚人。真正的隱形風險是服務式公寓的在建量：全國有 <strong>44,035 戶</strong>服務式公寓正在施工，相當於住宅在建量的 63.5%。光雪蘭莪就有 <strong>18,116 戶</strong>在建；吉隆坡的服務式公寓供給線（在建 8,212 戶＋規劃 9,415 戶＝17,627 戶）是全馬單一城市最集中的未來供給壓力。</p>
+        <p>服務式公寓餘屋的消化難度，遠高於一般住宅。它有三項先天不利：住宅戶可以申請首購補助、印花稅減免、自住 90% 成數房貸、以及土著配額吸收；但商業地契的服務式公寓，這些全部都沒有。馬來西亞學術研究紀錄的服務式公寓餘屋平均消化週期是 <strong>3 至 5 年</strong>，住宅則只需 1 至 2 年。全國 <strong>60% 的服務式公寓餘屋定價超過 RM50 萬</strong>，已經超出本地薪資族群的實質負擔能力，消化機制幾乎完全依賴外國投資人和外籍租客。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">National Supply Pipeline by Category &mdash; Q3 2025</span><span class="lang-zh" style="display:none">全國在建供給各類別分解 &mdash; Q3 2025</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units (10K) &middot; OH+UC+NC &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">戶數（萬）&middot; OH+在建+規劃 &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartMyPipeline" style="height:220px"></div>
+          <p class="chart-note red"><span class="lang-en">SA total pipeline 74,836 = 35.7% of national &mdash; invisible in residential Overhang stats since 2016</span><span class="lang-zh" style="display:none">SA總在建供給74,836戶=全國35.7%——自2016年重分類後不計入住宅Overhang統計</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Residential Overhang by State &mdash; Q3 2025</span><span class="lang-zh" style="display:none">各州住宅Overhang &mdash; Q3 2025</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; Resi+SA+SOHO stacked &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">戶數 &middot; 住宅+SA+SOHO堆疊 &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartMyStateOh" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">Johor combined (resi+SA+SOHO) = 12,688 units, 57% larger than KL's 8,101</span><span class="lang-zh" style="display:none">柔佛合計（住宅+SA+SOHO）=12,688戶，比KL的8,101戶大57%</span></p>
+        </div>
+      </div>
+
+      <h2 id="sec-demand"><span class="lang-en">DEMAND: INTENT WITHOUT ACCESS</span><span class="lang-zh" style="display:none">需求面：想買的人很多，能成交的不夠</span></h2>
+
+      <div class="lang-en">
+        <p>The demand picture for Malaysian residential property is more nuanced than either the headline transaction figures or the overhang statistics suggest. The <strong>420,525</strong> transactions recorded in 2024 represent the highest annual volume in a decade, demonstrating that underlying purchase intent is real and persistent. The cooling in Q3 2025 to <strong>108,250 transactions</strong> does not represent demand destruction — it represents the progressive exhaustion of the most financially capable segment of latent demand, as the remaining buyers increasingly fail the financing filter.</p>
+        <p>The most revealing indicator is not transaction volume but take-up rate at new launches. In Q1 2025, only <strong>10.8%</strong> of new residential units launched were sold on launch day. For high-rise projects in Q3 2025, that figure was <strong>5.1%</strong>. Landed properties performed better at <strong>14%</strong>. The divergence maps almost exactly onto loan approval rates: landed buyers have stronger financial profiles and clearer income documentation. A take-up rate below 10% at launch is not a sign of disinterest — it is a sign that the majority of potential participants have been structurally filtered out by the financing system.</p>
+        <p>The loan approval rate of <strong>42.6%</strong> means that more than half of all mortgage applications are declined. Malaysia's household debt-to-GDP ratio of <strong>81.9%</strong> is among the highest in ASEAN, and debt-service ratios in Klang Valley and Penang are at their practical limits for M40 households. The government's SJKP guarantee scheme — with RM10 billion in guarantees targeting approximately 20,000 first-time buyers — provides incremental improvement but addresses financing access at the margin rather than the underlying affordability gap.</p>
+        <p>The K-shaped structure of demand defines the opportunity set. In the sub-RM300,000 segment, genuine undersupply exists in locations with real employment anchors. The RM300,000–RM500,000 band shows the healthiest primary market take-up. Above RM500,000 in high-rise and serviced apartment formats, demand is institutionally constrained by the financing filter. The secondary market's <strong>79.4%</strong> share of H1 2025 residential transactions is the direct expression of buyers gravitating toward segments where value, location quality, and financing accessibility intersect most favorably.</p>
+        <p>Kuala Lumpur's transaction market shows resilience at the top end — <strong>18,913 units</strong> changed hands in 2024, a decade high, with the above-RM1 million segment recording the fastest growth at <strong>+31% year-on-year</strong> to 3,079 transactions. This bifurcation — record luxury volumes alongside a stuck loan approval rate of <strong>42.6%</strong> — captures the structural inequality at the heart of the KL market: those with equity can transact; those relying on credit cannot.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>2024 年吉隆坡賣出 <strong>18,913 戶</strong>、創十年新高，但別高興太早：貸款核准率只有 <strong>42.6%</strong>，超過一半的申請人被銀行打槍。全國 420,525 件的成交量看起來漂亮，但 2025 年 Q3 已經降到 108,250 件；不是大家不想買，而是財務條件好的那批人已經買完了。</p>
+        <p>新建案首日去化率最能看出問題。2025 年 Q3 的高層住宅首日只賣出 <strong>5.1%</strong>，有地住宅好一些是 <strong>14%</strong>。去化率這麼低不是沒人要，而是大多數想買的人被貸款門檻擋住。全國家庭負債佔 GDP 高達 <strong>81.9%</strong>，很多家庭現有月付已經到極限，再借一筆房貸銀行不可能過。政府的信用保證計畫（SJKP）方向對，但 RM100 億只能幫到大約兩萬人，杯水車薪。</p>
+        <p>更值得注意的是市場的 K 型分化。RM100 萬以上的豪宅成交年增 <strong>31%</strong> 至 3,079 件、創紀錄；但同時貸款核准率卡在 <strong>42.6%</strong>——有資產的人在買，靠貸款的人買不起。中古屋佔成交量 <strong>79.4%</strong>，是因為買家知道：成熟地段的二手市場，才最容易找到划算又貸得到款的選擇。</p>
+        <p>真正的需求在 RM30 萬以下（佔所有買方的 <strong>53.1%</strong>），供給卻最少。RM30 至 50 萬中間帶需求最健康；RM50 萬以上的高層則被貸款門檻卡死。<strong>對你的影響：</strong>不要追高價位新建案，除非你是現金買家或財務條件特別強。一般投資人最好的機會在 RM30 至 80 萬的中古屋市場。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <!-- 左上：現有 -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">New Launch Take-up Rate Q3 2025</span><span class="lang-zh" style="display:none">新推案即時去化率 2025年Q3</span></h4>
+          <p class="chart-note orange"><span class="lang-en">High-rise: only 5.1% sold on launch day</span><span class="lang-zh" style="display:none">高層住宅：推出當日僅5.1%售出</span></p>
+          <div id="chart-r-takeup" style="height:180px;"></div>
+        </div>
+        <!-- 右上：新增 -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Loan Approval Rate Trend</span><span class="lang-zh" style="display:none">貸款核准率趨勢</span></h4>
+          <p class="chart-note orange"><span class="lang-en">42.6% — over half of applicants rejected</span><span class="lang-zh" style="display:none">42.6%——超過一半申請人被拒</span></p>
+          <div id="chart-r-loan-approval" style="height:180px;"></div>
+        </div>
+        <!-- 左下：新增 -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">KL Transaction Volume</span><span class="lang-zh" style="display:none">吉隆坡成交量趨勢</span></h4>
+          <p class="chart-note green"><span class="lang-en">2024: 18,913 units +5.5% YoY · decade high</span><span class="lang-zh" style="display:none">2024年：18,913套 年增5.5% · 十年新高</span></p>
+          <div id="chart-r-tx-vol" style="height:180px;"></div>
+        </div>
+        <!-- 右下：新增 -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">KL Transactions by Price Band 2024</span><span class="lang-zh" style="display:none">吉隆坡2024年成交依價格帶</span></h4>
+          <p class="chart-note orange"><span class="lang-en">RM1M+ fastest growing segment +31% YoY</span><span class="lang-zh" style="display:none">RM1M以上成長最快，年增31%</span></p>
+          <div id="chart-r-price-band" style="height:180px;"></div>
+        </div>
+      </div>
+
+      <h2 id="sec-valuation"><span class="lang-en">VALUATION: TWO FRAMEWORKS, TWO CONCLUSIONS</span><span class="lang-zh" style="display:none">估值：兩個框架，兩個結論</span></h2>
+
+      <div class="lang-en">
+        <p>Malaysian residential property presents a bifurcated valuation picture that produces diametrically opposed conclusions depending on the analytical framework applied — and both conclusions are simultaneously correct for different buyer populations.</p>
+        <p>From a yield and regional comparison perspective, the investment case is reasonably compelling. The gross rental yield of <strong>5.19%</strong> against an OPR of <strong>2.75%</strong> produces a positive carry spread of <strong>+2.44%</strong> — historically a signal of relative value. Against regional peers, Kuala Lumpur's price-to-rent ratio of <strong>21.7x</strong> is the lowest in this eight-city comparison — below Bangkok (25x), Tokyo (37x), Singapore (40x), Taipei (47x), Hong Kong (50x), and Shanghai (59x). Even Ho Chi Minh City at 18x is the only market that edges KL out on this metric. For yield-seeking capital rotating out of overpriced Asian markets, the relative value case is unambiguous.</p>
+        <p>From a domestic affordability perspective, however, the picture is materially less favorable. At <strong>4.3x</strong> median annual household income nationally — rising to <strong>5.6x</strong> for terrace houses in Kuala Lumpur — Malaysian housing is classified as "severely unaffordable" by the Demographia methodology. This ceiling is structural and will not be meaningfully moved by OPR adjustments alone.</p>
+        <p>The real house price picture adds important context. The MHPI has grown modestly in nominal terms — approximately 1–3% annually — but adjusted for CPI inflation, real house prices have been effectively flat to slightly declining since 2022. This is not a bubble profile; it is a market adjusting real valuations downward through inflation erosion while maintaining nominal stability.</p>
+        <p>The price-to-income lens tells a more sobering story. At <strong>5.6x</strong> the median annual household income, Kuala Lumpur housing remains technically unaffordable by international benchmarks — though it still compares favorably against Taipei (12.1x), Tokyo (13.5x), and Singapore (14.2x). The more telling signal is the divergence between nominal and real house prices: the nominal MHPI has risen <strong>42% since 2015</strong>, but the real inflation-adjusted index has moved only <strong>24%</strong> over the same period. In the last five years, real prices have been essentially flat — meaning the affordability pain has been driven entirely by income stagnation and financing costs, not by house price appreciation.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>外資看吉隆坡是便宜的：房價租金比（P/R）<strong>21.7 倍</strong>，新加坡 40 倍、香港 50 倍、上海 59 倍。租金報酬率 <strong>5.19%</strong> 比銀行利率高出 <strong>2.44 個百分點</strong>，買來收租有正現金流。以整個亞洲比較，吉隆坡和胡志明市（18 倍）是少數還划算的兩個城市。</p>
+        <p>但本地人的感受完全不同。吉隆坡房價相當於家庭年收入中位數的 <strong>5.6 倍</strong>，按國際標準超過 4 倍就算「嚴重不可負擔」。這不是單純的統計問題，而是直接反映在貸款核准率只有 <strong>42.6%</strong>。相較台北（12.1 倍）、東京（13.5 倍）、新加坡（14.2 倍），吉隆坡的房價所得比其實還算溫和；但對當地受薪族來說，買不起就是買不起。</p>
+        <p>過去五年的實質房價幾乎沒漲。名義房價指數（MHPI）從 2015 年以來漲了 <strong>42%</strong>，但扣掉通膨後實質只漲 <strong>24%</strong>。換句話說，可負擔性惡化不是房價飆漲造成的，而是薪資停滯和融資成本上升造成的。這不是泡沫，是一個靠通膨侵蝕在悄悄修正實質價格的市場。</p>
+        <p><strong>對收租型投資人的意義：</strong>房價沒漲但租金一直在漲，房價租金比壓縮到近年最具吸引力的水準。如果你的策略是買來收租、不指望增值，現在是五年來最好的進場環境。但如果是當地首購族，除非收入在前 20%，否則在目前的貸款條件下買房會很辛苦。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <!-- 左上：現有 chart-r-apac -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">KL vs Asia Pacific Price-to-Rent</span><span class="lang-zh" style="display:none">吉隆坡 vs 亞太城市房價租金比</span></h4>
+          <p class="chart-note green"><span class="lang-en">KL 21.7x — most affordable in Asia after Ho Chi Minh</span><span class="lang-zh" style="display:none">吉隆坡21.7倍——亞洲最低租金比之一</span></p>
+          <div id="chart-r-apac" style="height:280px;"></div>
+        </div>
+        <!-- 右上：新增 chart-r-apac-pi -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">KL vs Asia Pacific Price-to-Income</span><span class="lang-zh" style="display:none">吉隆坡 vs 亞太城市房價所得比</span></h4>
+          <p class="chart-note green"><span class="lang-en">KL 5.6x — high but mid-range vs Asia</span><span class="lang-zh" style="display:none">吉隆坡5.6倍——偏高但亞洲中屬中等</span></p>
+          <div id="chart-r-apac-pi" style="height:280px;"></div>
+        </div>
+        <!-- 左下：新增 chart-r-mhpi-real -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">MHPI Nominal vs Real (2010=100)</span><span class="lang-zh" style="display:none">房價指數：名義 vs 實質（2010=100）</span></h4>
+          <p class="chart-note orange"><span class="lang-en">Real prices nearly flat since 2019 — affordability eroded by inflation</span><span class="lang-zh" style="display:none">實質房價自2019年後幾乎停滯——通膨侵蝕可負擔性</span></p>
+          <div id="chart-r-mhpi-real" style="height:220px;"></div>
+        </div>
+        <!-- 右下：chart-r-mismatch-val -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Demand vs Supply Mismatch</span><span class="lang-zh" style="display:none">供需錯配</span></h4>
+          <p class="chart-note orange"><span class="lang-en">53% of demand at sub-RM300k where supply is scarce</span><span class="lang-zh" style="display:none">53%需求集中在30萬以下，但供給最少</span></p>
+          <div id="chart-r-mismatch-val" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <h2 id="sec-kl"><span class="lang-en">KUALA LUMPUR: CORRECTION AND OPPORTUNITY</span><span class="lang-zh" style="display:none">吉隆坡：修正即機會</span></h2>
+
+      <div class="lang-en">
+        <p>Kuala Lumpur's residential market in 2025–2026 is defined by a structural bifurcation that aggregate data consistently obscures. The headline Overhang figure of <strong>2,287 units</strong> as of Q3 2025 — down <strong>37.2%</strong> from H1 2025's 3,643 units — appears to signal recovery. It does not. The official Overhang number counts only freehold residential-titled completed units unsold for over nine months. It excludes the estimated <strong>8,000–9,000 units</strong> of serviced apartment inventory under commercial title — a product category that accounts for the majority of KL's actual unsold high-rise stock. The true wide-definition Overhang across KL is estimated at <strong>10,300–11,300 units</strong>, a figure that tells a very different story.</p>
+        <p>At the same time, KL's demand fundamentals are structurally improving at the high end. Total residential transactions reached <strong>18,913 units</strong> in 2024 — up <strong>5.5%</strong> year-on-year — but the value of those transactions rose <strong>16.6%</strong> to RM17.46 billion, indicating buyers are systematically upgrading to higher price points. The RM1 million-plus segment grew <strong>31%</strong> in volume to 3,079 units, driven by an emerging institutional demand channel: the MM2H programme, which has <strong>2,637 pre-approved buyers</strong> representing an estimated RM2.3 billion in latent purchasing power yet to be deployed. KL's price advantage versus Singapore — where equivalent quality high-rise stock trades at a <strong>87% premium</strong> — continues to attract USD and SGD capital seeking Asian real estate exposure at a relative discount.</p>
+        <p>The critical analytical framework is not "supply vs demand in aggregate" but rather three distinct market layers operating simultaneously. The sub-RM500K segment suffers from structural undersupply of genuine residential-titled product as developers exit uneconomic price points. The RM500K–RM1M segment is the most stressed, dominated by legacy commercial-title serviced apartments with structural buyer resistance from commercial utility rates and absence of HDA protection. The RM1M-plus segment shows the healthiest supply-demand dynamics, with limited premium residential-titled pipeline in KLCC, Bangsar, and Mont Kiara facing genuine scarcity against growing foreign demand. Understanding these three layers is the prerequisite for any credible KL market assessment.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>吉隆坡 2025 至 2026 年的住宅市場，核心特徵是一種被總體數字掩蓋的結構性分化。2025 年 Q3 官方餘屋 <strong>2,287 戶</strong>，比 2025 年上半年的 3,643 戶大減 <strong>37.2%</strong>，表面看像是在復甦。但這個數字嚴重低估：官方只統計住宅地契、完工超過 9 個月未售的單位，完全沒算進估計 <strong>8,000 至 9,000 戶</strong>的服務式公寓——而那些商業地契的物件，才是吉隆坡實際高層未售庫存的大宗。把這些加進來，廣義吉隆坡餘屋估計有 <strong>10,300 至 11,300 戶</strong>，畫面完全不一樣。</p>
+        <p>與此同時，吉隆坡高端市場的需求面正在改善。2024 年全市住宅成交量 <strong>18,913 戶</strong>，年增 <strong>5.5%</strong>；但成交金額年增 <strong>16.6%</strong> 至 RM174.6 億，代表買方正系統性地往更高價格段移動。RM100 萬以上的成交量年增 <strong>31%</strong> 至 3,079 戶，背後是一條逐漸成型的機構型買盤：MM2H 計劃截至 2025 年底已有 <strong>2,637 位預核准買家</strong>，尚未執行的潛在購買力估計達 RM23 億。吉隆坡相對新加坡的價格優勢（同等級高層物件新加坡要貴 <strong>87%</strong>）也持續吸引以美元和新幣計價的資金，把吉隆坡當成亞洲房地產的折價入場機會。</p>
+        <p>正確的分析方式不是「供需總量」，而是要拆成三個同時運作的市場層次：RM50 萬以下，開發商因為這個價位不划算而退出，導致住宅地契產品結構性供給不足；RM50 至 100 萬，壓力最大，主要是商業地契服務式公寓的歷史庫存，商業水電費高、又沒有 HDA 保護，買方抗拒明顯；RM100 萬以上供需最健康，KLCC、Bangsar、Mont Kiara 的高端住宅地契推案有限，面對持續增加的外籍買家已經出現稀缺效應。搞清楚這三個層次，才能對吉隆坡市場做出站得住腳的判斷。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <!-- 左上：現有 chart-r-zone -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">KL Zone Average PSF</span><span class="lang-zh" style="display:none">吉隆坡三區平均呎價</span></h4>
+          <p class="chart-note green"><span class="lang-en">Zone 2 Mid Valley/OKR — best risk-reward</span><span class="lang-zh" style="display:none">第二區中谷/OKR——最佳風險回報</span></p>
+          <div id="chart-r-zone" style="height:200px;"></div>
+        </div>
+        <!-- 右上：新增 chart-r-kl-overhang -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">KL Overhang Trend</span><span class="lang-zh" style="display:none">吉隆坡待售餘屋趨勢</span></h4>
+          <p class="chart-note orange"><span class="lang-en">2024 peak 4,234 · Q3 2025 easing to 2,287</span><span class="lang-zh" style="display:none">2024年峰值4,234套 · 2025Q3降至2,287套</span></p>
+          <div id="chart-r-kl-overhang" style="height:200px;"></div>
+        </div>
+        <!-- 左下：新增 chart-r-kl-launches -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">KL New Launches & Take-up</span><span class="lang-zh" style="display:none">吉隆坡新推案量與去化率</span></h4>
+          <p class="chart-note orange"><span class="lang-en">2022 spike (10,324 units) drove current overhang</span><span class="lang-zh" style="display:none">2022年推案激增（10,324套）是當前餘屋主因</span></p>
+          <div id="chart-r-kl-launches" style="height:200px;"></div>
+        </div>
+        <!-- 右下：新增 chart-r-kl-rental -->
+        <div class="report-chart-card">
+          <h4><span class="lang-en">KL Average Monthly Rent</span><span class="lang-zh" style="display:none">吉隆坡平均月租趨勢</span></h4>
+          <p class="chart-note green"><span class="lang-en">RM2,901 in 2025 — +6.1% while prices fell 4.3%</span><span class="lang-zh" style="display:none">2025年RM2,901 — 租金漲6.1%同時房價跌4.3%</span></p>
+          <div id="chart-r-kl-rental" style="height:200px;"></div>
+        </div>
+      </div>
+
+      <!-- KL Sub-section A: Overhang Deep Dive -->
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">OVERHANG STRUCTURE: PRICE BAND BREAKDOWN</span>
+        <span class="lang-zh" style="display:none">OVERHANG 結構：價格段拆解</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>The composition of KL's official 2,287-unit Overhang as of Q3 2025 reveals a market with two structurally distinct problems. The first is legacy affordable stock: the RM300K–500K band accounts for <strong>900 units (39.3%)</strong> of total Overhang, primarily commercial-title condominium projects in Cheras, Kepong, and Setapak built during the 2016–2019 affordable high-rise construction wave. These units suffer from the structural triple-penalty of commercial utility rates, no HDA buyer protection, and neighbourhood over-concentration. Take-up rates in this band sit at <strong>60–75%</strong>, significantly below the market average of 86.2%. The second problem is high-end stagnation: the RM1M-plus band carries <strong>478 units</strong> at an average unit value of approximately RM1.05 million, representing <strong>63% of total Overhang value</strong> (RM15.1 billion of RM24 billion total). These are predominantly KLCC and Bangsar luxury units where buyer selectivity — not lack of demand — drives the extended marketing period. The clearing dynamic here is time, not price: developers with adequate financing will hold rather than discount.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>2025 年 Q3 吉隆坡官方餘屋 2,287 戶的組成，其實是兩種截然不同問題疊在一起。第一是可負擔段的歷史遺留：RM30 至 50 萬段合計 <strong>900 戶（39.3%）</strong>，主要是 2016 至 2019 年可負擔高層公寓建設潮期間，蓋在 Cheras、Kepong、Setapak 的商業地契公寓。這類物件同時承受三項不利條件：商業水電費率、沒有 HDA 買方保護、區域過度集中。這個價格段去化率只有 <strong>60 至 75%</strong>，遠低於全市平均的 86.2%。第二是高端滯銷：RM100 萬以上共 <strong>478 戶</strong>，單價平均約 RM105 萬，佔餘屋總金額 <strong>63%</strong>（RM151 億 / RM240 億）。這些多數是 KLCC 和 Bangsar 的豪宅，拖長銷售週期的是買方挑剔，不是沒有需求。這段要清的不是價格而是時間：資金充裕的開發商寧可守價等買家上門，也不會降價。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Overhang by Price Band — Q3 2025</span><span class="lang-zh" style="display:none">各價格段Overhang戶數 — 2025年Q3</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; 100% high-rise condominiums &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">戶數 &middot; 全數為高層共管公寓 &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartKLOhBand" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">RM300&ndash;500K: 39% of Overhang but lowest take-up (60&ndash;75%) &mdash; structural commercial-title drag</span><span class="lang-zh" style="display:none">RM30&ndash;50萬：佔Overhang 39%但去化率最低（60&ndash;75%）——商業地契結構性阻力</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Overhang Historical Trend 2019&ndash;2029E</span><span class="lang-zh" style="display:none">Overhang 歷史走勢 2019&ndash;2029E</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; Q3 2025 actual + base case forecast &middot; Source: NAPIC / Research</span><span class="lang-zh" style="display:none">戶數 &middot; Q3 2025實際值 + 基本情境預測 &middot; 來源：NAPIC / 研究估算</span></p>
+          <div id="chartKLOhTrend" style="height:220px"></div>
+          <p class="chart-note red"><span class="lang-en">2026&ndash;2027: next Overhang peak as under-construction pipeline delivers &mdash; base case 3,500&ndash;4,500 units</span><span class="lang-zh" style="display:none">2026&ndash;2027：在建供給完工推升下一波Overhang高峰——基本情境3,500&ndash;4,500戶</span></p>
+        </div>
+      </div>
+
+      <!-- KL Sub-section B: Broad Inventory -->
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">BROAD INVENTORY: THE SERVICED APARTMENT OVERHANG</span>
+        <span class="lang-zh" style="display:none">廣義庫存：服務式公寓的隱形壓力</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>The most important number missing from Malaysia's official property statistics is the serviced apartment Overhang. Under NAPIC's classification, serviced apartments — which are commercially titled high-rise units marketed as residential — are tracked separately under commercial property statistics. As of Q3 2025, national serviced apartment inventory stands at <strong>17,900 units</strong>. Based on KL's historical share of approximately 45% of total national serviced apartment stock, KL's implied exposure is <strong>8,000–9,000 units</strong> — more than three times the official residential Overhang figure. Adding these to the official 2,287-unit residential Overhang gives a wide-definition KL Overhang of approximately <strong>10,300–11,300 units</strong>.</p>
+        <p>The serviced apartment overhang is structurally the hardest to clear. Three permanent disadvantages create persistent buyer resistance: commercial utility rates that run approximately <strong>six times</strong> higher than residential rates; the absence of Housing Development Act protection, leaving buyers with no statutory recourse in defect or abandonment scenarios; and the inability to access government-subsidised home financing schemes. For the RM500K–RM1M segment in particular — which represents 53% of the national serviced apartment inventory — these structural penalties are likely permanent unless a commercial-to-residential title conversion policy is implemented, which remains speculative. Investors holding legacy serviced apartment units should model cash flows assuming rental income as the only exit, not capital appreciation.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>馬來西亞官方物業統計最關鍵的缺口，就是服務式公寓的餘屋。NAPIC 的分類裡，服務式公寓——以商業地契登記、用住宅方式銷售的高層物件——被放進商業物業統計，不算住宅。2025 年 Q3 全國服務式公寓庫存 <strong>17,900 戶</strong>。以吉隆坡歷來約佔全國服務式公寓庫存 45% 推算，吉隆坡的實際曝險為 <strong>8,000 至 9,000 戶</strong>，超過官方住宅餘屋的三倍。加上官方住宅餘屋 2,287 戶，吉隆坡廣義餘屋估計達 <strong>10,300 至 11,300 戶</strong>。</p>
+        <p>服務式公寓的餘屋最難消化。三項結構性劣勢讓買方一直卻步：商業水電費率比住宅高約 <strong>6 倍</strong>；不受《住宅發展法》保護，遇到瑕疵或建案爛尾沒有法律後盾；也無法使用政府補貼的住宅貸款方案。對 RM50 至 100 萬段（佔全國服務式公寓庫存的 53%）來說，這些劣勢在可預見的未來都是常態，除非政策允許商業地契轉成住宅地契——而這目前還只是空想。手上持有這類服務式公寓的投資人，現金流模型應該只用租金收入來算，不要指望資本增值。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Broad KL Inventory Breakdown — Q3 2025</span><span class="lang-zh" style="display:none">KL廣義庫存拆解 — 2025年Q3</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; Official + serviced apt estimate &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">戶數 &middot; 官方 + 服務式公寓估算 &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartKLBroadInv" style="height:220px"></div>
+          <p class="chart-note red"><span class="lang-en">Official 2,287 units = only 18% of estimated true KL-wide unsold high-rise inventory</span><span class="lang-zh" style="display:none">官方2,287戶僅佔估算KL實際高層未售庫存的18%</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">KL Supply Pipeline 2024&ndash;2028E</span><span class="lang-zh" style="display:none">KL在建供給 2024&ndash;2028E</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Completions (units) &middot; Source: JPPH / Research estimates</span><span class="lang-zh" style="display:none">完工量（戶）&middot; 來源：JPPH / 研究估算</span></p>
+          <div id="chartKLPipeline" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">Starts -14.9% in 2025 &rarr; completion relief from 2027 onward; structural tightening from 2028</span><span class="lang-zh" style="display:none">2025年開工量-14.9%→2027年起完工壓力緩解；2028年起結構性供給趨緊</span></p>
+        </div>
+      </div>
+
+      <!-- KL Sub-section C: Three Scenarios -->
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">OUTLOOK: THREE SCENARIOS FOR 2026&ndash;2028</span>
+        <span class="lang-zh" style="display:none">展望：2026&ndash;2028三情境</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>The base case (55% probability) sees KL's official Overhang rising to <strong>3,500–4,500 units</strong> by end-2027 as the remaining under-construction pipeline of 5,356 units delivers, with a 35–45% conversion rate to Overhang. This is not a crisis level — Malaysia's national Overhang-to-annual-completions ratio at these numbers remains below the 2018–2019 peak. The recovery catalyst is baked in: new housing starts fell <strong>14.9%</strong> in Q1–Q3 2025, which will mechanically reduce completions from 2027 onward. If MM2H's 2,637 pre-approved buyers deploy on schedule in 2026–2027, the upside absorption could keep Overhang closer to the <strong>2,500–3,500</strong> range. The bull case (25% probability) requires accelerated MM2H absorption plus geopolitical safe-haven flows from China, which cannot be forecast reliably but remains plausible. The bear case (20% probability) is triggered by MM2H pipeline stagnation combined with a global risk-off event, potentially pushing official Overhang to <strong>6,000–7,000 units</strong> by 2027 and wide-definition Overhang above 15,000. The key variable to monitor is MM2H monthly purchase completions — this is the single best leading indicator of whether KL's premium residential market is absorbing or accumulating.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>基本情境（機率 55%）預估吉隆坡官方餘屋會在 2027 年底升到 <strong>3,500 至 4,500 戶</strong>，原因是剩下 5,356 戶在建供給陸續完工，轉成餘屋的比例大約 35 至 45%。這還不算危機——以這個規模，全國餘屋佔年度完工量的比例仍低於 2018 至 2019 年的高點。復甦的催化劑已經在供給端發酵：2025 年前三季新開工量下降 <strong>14.9%</strong>，機制上會壓低 2027 年之後的完工量。如果 MM2H 的 2,637 名預核准買家在 2026 至 2027 年如期完成購屋，額外的吸收可以把餘屋控制在 <strong>2,500 至 3,500 戶</strong>左右。樂觀情境（機率 25%）需要 MM2H 消化加速、加上中國地緣政治避險資金流入——後者無法預測但合理可能。悲觀情境（機率 20%）則是 MM2H 買盤停滯遇上全球風險規避，2027 年官方餘屋可能衝到 <strong>6,000 至 7,000 戶</strong>，廣義餘屋突破 15,000 戶。最關鍵的追蹤指標是 MM2H 每月實際完成購屋的件數——這是判斷吉隆坡高端住宅市場是在消化還是在堆積的最佳領先指標。</p>
+      </div>
+
+      <h2 id="sec-penang"><span class="lang-en">PENANG: THE INDUSTRIAL THESIS</span><span class="lang-zh" style="display:none">檳城：工業驅動的房市論點</span></h2>
+
+      <div class="lang-en">
+        <p>Penang's residential market presents a more complex supply risk profile than its headline Overhang figure of <strong>2,730 units</strong> (Q3 2025) suggests. The official number is manageable in isolation. The problem lies in the pipeline: under-construction unsold inventory stands at <strong>7,804 units</strong> &mdash; larger than Kuala Lumpur's equivalent figure despite Penang's substantially smaller market. Annual condo transactions in Penang run at approximately <strong>3,252 units</strong> on an annualised basis (Q3 2025: 813 units &times; 4). The under-construction pipeline alone represents <strong>2.4 years</strong> of condo absorption capacity. The conversion risk is concentrated in a single price band: the RM400K&ndash;500K segment accounts for <strong>3,169 units</strong> of under-construction inventory &mdash; 40.6% of the total &mdash; and is the segment most likely to convert to Overhang as completions accelerate through 2026&ndash;2027.</p>
+        <p>The structural duality of Penang's market is sharper than any other Malaysian state. Penang Island &mdash; specifically Timur Laut (George Town northeast) and Barat Daya (southwest) &mdash; carries <strong>71.9% of all Overhang</strong> despite being a constrained land market with genuine scarcity fundamentals. The island's gross supply pipeline is physically limited by geography, and premium locations such as Gurney Drive, Tanjung Tokong, and the E&amp;O Andaman Island development represent genuinely non-replicable addresses. Yet the majority of the Overhang and pending pipeline is concentrated in mid-market condominiums in these same areas &mdash; units priced at RM400K&ndash;700K that face direct competition from the resale market without the scarcity argument that protects premium stock. Seberang Perai (the mainland) carries only 28% of Overhang but is absorbing new FDI employment from Intel, NXP, and the emerging Silicon Island development &mdash; making it the market segment most likely to surprise to the upside in demand terms over the next three years.</p>
+        <p>Penang's investment thesis is ultimately a story of two markets forced to share the same address. The Overhang risk is real and concentrated in the RM400K&ndash;700K condo segment on the island; the appreciation thesis is intact and concentrated in the sub-RM500K landed segment in Seberang Perai and in premium island residential above RM1 million. The LRT &mdash; with civil works commenced in October 2025 and an estimated 2031 completion &mdash; represents the single most important medium-term demand catalyst for the Jelutong&ndash;Gelugor corridor. For investors entering ahead of the LRT timeline, the risk is execution delay; for those entering after, the concept premium will likely already be priced in.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>檳城住宅市場的供給風險，比官方 2,730 戶餘屋（2025 年 Q3）看起來的還要複雜。單看這個數字，其實還能應付；真正的問題在後段：在建未售庫存高達 <strong>7,804 戶</strong>，比規模大得多的吉隆坡還多。檳城公寓年化成交量約 <strong>3,252 戶</strong>（2025 年 Q3：813 戶 × 4），光是在建供給就等於 <strong>2.4 年</strong>的消化量。風險高度集中在單一價格段：RM40 至 50 萬段佔在建庫存 <strong>3,169 戶</strong>（40.6%），是 2026 至 2027 年完工潮來臨後，最可能轉成餘屋的價格帶。</p>
+        <p>檳城市場的雙城結構，比馬來西亞任何一州都更鮮明。檳城島——尤其是東北區（喬治市）和西南區——扛下了全州 <strong>71.9% 的餘屋</strong>，儘管它其實是一個土地供給有限、稀缺基本面真實存在的市場。島的整體供給受地理天然限制，Gurney Drive、Tanjung Tokong 以及 E&amp;O Andaman Island 等優質地段，都是真正無法複製的地址。但餘屋和在建供給的大宗，卻集中在這些區域的中價位公寓——定價 RM40 至 70 萬，沒有豪宅的稀缺性可以撐價，直接面對二手市場競爭。對岸的 Seberang Perai（北海大陸省）只佔餘屋 28%，卻正靠 Intel、恩智浦、矽島開發等 FDI 就業吸收新住民，是未來三年需求面最可能給驚喜的區塊。</p>
+        <p>檳城的投資邏輯，其實是兩個被迫共用同一個地址的市場。餘屋風險真實存在，集中在島上 RM40 至 70 萬的公寓；增值故事還完整，集中在 Seberang Perai RM50 萬以下的有地住宅，以及島上 RM100 萬以上的高端物件。LRT 已於 2025 年 10 月動工，預計 2031 年通車，是 Jelutong 至 Gelugor 走廊最重要的中期需求催化劑。在 LRT 通車前進場的風險是工程延誤；等通車後才進場，概念溢價大概已經反映在價格裡了。</p>
+      </div>
+
+      <div class="chart-inline">
+        <h4><span class="lang-en">Penang Manufacturing FDI</span><span class="lang-zh" style="display:none">檳城製造業外資</span></h4>
+        <div class="chart-note green"><span class="lang-en">+150% YoY in H1 2025 — Malaysia's top manufacturing FDI destination</span><span class="lang-zh" style="display:none">2025年上半年年增150%——馬來西亞首要製造業外資目的地</span></div>
+        <div id="chart-r-fdi" style="height:180px;min-height:180px;"></div>
+      </div>
+
+      <!-- Penang Sub-section A: Overhang & Pipeline -->
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">OVERHANG STRUCTURE &amp; SUPPLY PIPELINE</span>
+        <span class="lang-zh" style="display:none">OVERHANG 結構與在建供給</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>Penang's Q3 2025 Overhang of 2,730 units is overwhelmingly a high-rise condominium problem: <strong>78.6% (2,146 units)</strong> are condo/apartment type. By price band, two distinct stress points emerge. The large-mass segment &mdash; RM200K&ndash;500K &mdash; accounts for <strong>53.1% (1,449 units)</strong> of Overhang, reflecting the legacy of the 2018&ndash;2022 affordable high-rise construction cycle. The luxury segment &mdash; above RM1 million &mdash; accounts for a surprisingly high <strong>23.3% (637 units)</strong>; however, this segment benefits from genuine demand support from MM2H foreign buyers (RM1 million minimum threshold on the island) and should clear faster once the MM2H purchase pipeline deploys. The true structural risk sits in the RM400K&ndash;500K band: 378 units currently in Overhang, plus an additional <strong>3,169 units</strong> under construction &mdash; creating a combined exposure of 3,547 units in a segment with annual absorption of only approximately 500&ndash;600 units. Even in the base case, this segment will not clear before 2028.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>2025 年 Q3 檳城餘屋 2,730 戶，絕大多數是高層公寓問題：<strong>78.6%（2,146 戶）</strong>為公寓類。按價格帶看有兩個壓力點。大眾段 RM20 至 50 萬佔餘屋 <strong>53.1%（1,449 戶）</strong>，是 2018 至 2022 年可負擔高層公寓建設週期的遺留。豪宅段 RM100 萬以上意外佔了 <strong>23.3%（637 戶）</strong>；但這個價格帶有 MM2H 外籍買家（島上 RM100 萬最低門檻）撐底，只要 MM2H 買盤釋放出來就能較快消化。真正的結構性風險在 RM40 至 50 萬段：目前餘屋 378 戶，加上在建 <strong>3,169 戶</strong>，合計潛在庫存 3,547 戶；但這個價格帶年吸收量只有約 500 至 600 戶。即使在基本情境下，要消化完也得等到 2028 年。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Penang Overhang by Price Band &mdash; Q3 2025</span><span class="lang-zh" style="display:none">檳城Overhang價格帶分布 &mdash; 2025年Q3</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; 78.6% condo type &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">戶數 &middot; 78.6%為Condo類型 &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartPgOhBand" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">RM400&ndash;500K: 378 Overhang + 3,169 under construction = 3,547 units combined exposure</span><span class="lang-zh" style="display:none">RM40&ndash;50萬：378戶Overhang + 3,169戶在建 = 合計3,547戶敞口</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Penang Supply Pipeline: Three Layers</span><span class="lang-zh" style="display:none">檳城在建供給三層結構</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; Source: NAPIC Table 2/4/6, Q3 2025</span><span class="lang-zh" style="display:none">戶數 &middot; 來源：NAPIC Table 2/4/6，Q3 2025</span></p>
+          <div id="chartPgPipeline" style="height:220px"></div>
+          <p class="chart-note red"><span class="lang-en">Under-construction 7,804 units = 2.4 years of condo absorption at current pace</span><span class="lang-zh" style="display:none">在建未售7,804戶 = 以當前速度消化需2.4年</span></p>
+        </div>
+      </div>
+
+      <!-- Penang Sub-section B: District Breakdown -->
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">DISTRICT SUPPLY-DEMAND DYNAMICS</span>
+        <span class="lang-zh" style="display:none">分地區供需格局</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>The island-mainland divide is Penang's defining market characteristic. Timur Laut (George Town northeast) is the highest-demand district &mdash; Q3 2025 condo transactions of 397 units represent the strongest in the state &mdash; yet its Overhang of <strong>968 units</strong> is also the second-highest, reflecting the gap between aspirational supply and effective purchasing power at prevailing prices. The median condo price in Timur Laut of <strong>RM600,000</strong> compares to a statewide median of RM480,000; at current OPR and bank lending standards, this price point requires a household income of approximately <strong>RM9,000&ndash;10,000 per month</strong> to service a 90% LTV mortgage. Barat Daya carries the <strong>highest Overhang</strong> at 993 units, concentrated in the RM400K&ndash;500K condo segment. In contrast, Seberang Perai's three districts collectively carry only 769 units of Overhang (28.2%) while benefiting from real employment-driven demand anchored by Intel's Batu Kawan campus and the emerging Silicon Island development, where a reported <strong>RM26 billion in committed investment</strong> positions the area as Malaysia's most significant new industrial employment centre outside Greater KL.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>島與對岸的分野，是檳城市場最核心的特徵。東北區（喬治市）需求最強，2025 年 Q3 公寓成交 397 戶全州最高；但餘屋也有 <strong>968 戶</strong>，全州第二，反映出開發商推案定價與當前購買力之間的落差。東北區公寓中位價 <strong>RM60 萬</strong>，對比全州中位價 RM48 萬；以目前利率和銀行放貸標準，這個價位大概要月收入 <strong>RM9,000 至 10,000</strong> 的家庭，才負擔得起 90% 成數房貸。西南區餘屋最高 993 戶，集中在 RM40 至 50 萬公寓。相較之下，Seberang Perai 三省合計只佔餘屋 769 戶（28.2%），還因為 Intel 峇都加灣廠區與新興矽島開發，吃到實打實的就業紅利；矽島據報已獲 <strong>RM260 億確定性投資承諾</strong>，定位是大吉隆坡以外馬來西亞最重要的新工業就業中心。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Overhang vs Condo Transactions by District &mdash; Q3 2025</span><span class="lang-zh" style="display:none">各地區Overhang vs Condo成交 &mdash; 2025年Q3</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">戶數 &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartPgDistrict" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">Barat Daya: highest Overhang (993) but only 192 quarterly condo sales &mdash; over 5 quarters to clear</span><span class="lang-zh" style="display:none">西南區：最高Overhang（993戶）但季度Condo成交僅192戶——需5季以上消化</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Penang Overhang Forecast 2025&ndash;2029 (Base Case)</span><span class="lang-zh" style="display:none">檳城Overhang預測 2025&ndash;2029（基本情境）</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; Base case: 2,000 units annual absorption &middot; Source: NAPIC / Research</span><span class="lang-zh" style="display:none">戶數 &middot; 基本情境：年度吸收2,000戶 &middot; 來源：NAPIC / 研究估算</span></p>
+          <div id="chartPgOhForecast" style="height:220px"></div>
+          <p class="chart-note red"><span class="lang-en">Peak ~4,070 units end-2026; recovery to below 2,500 by 2028&ndash;2029 as starts pipeline thins</span><span class="lang-zh" style="display:none">高峰約4,070戶（2026年底）；隨開工在建供給收窄，2028&ndash;2029年回落至2,500戶以下</span></p>
+        </div>
+      </div>
+
+      <!-- Penang Sub-section C: Outlook -->
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">OUTLOOK 2026&ndash;2028: SEGMENT-BY-SEGMENT</span>
+        <span class="lang-zh" style="display:none">2026&ndash;2028展望：各細分市場</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>The base case (55% probability) projects Penang's official Overhang peaking at approximately <strong>4,070 units</strong> by end-2026 as the under-construction pipeline delivers, then declining to below 2,500 units by 2028&ndash;2029 as the construction pipeline thins. This trajectory assumes annual absorption of 2,000 units. The RM400K&ndash;500K segment is the key swing factor: if weekly site attendance and progressive payment rates in this band deteriorate, the conversion rate from under-construction to Overhang could exceed the base case assumption of 80%, pushing the 2026 peak above 5,000 units. The bull case (25% probability) requires LRT construction milestones to trigger speculative upgrader demand in the Jelutong&ndash;Gelugor corridor, combined with accelerated MM2H deployments. The bear case (20% probability) is a simultaneous stress of MM2H pipeline stagnation, a broader Malaysia economic slowdown, and a Ringgit depreciation that increases the real financing cost for foreign buyers &mdash; in which case the 2027 Overhang could test <strong>6,000&ndash;7,000 units</strong>. The three indicators to monitor quarterly are: (1) condo transactions in Barat Daya and Timur Laut as a leading indicator of island absorption; (2) RM400K&ndash;500K progressive payment progress as a predictor of Overhang conversion; and (3) LRT civil works milestones as the demand catalyst confirmation signal for the Jelutong corridor.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>基本情境（機率 55%）預估檳城官方餘屋會在 2026 年底見頂約 <strong>4,070 戶</strong>，隨在建供給陸續完工而達高點；之後隨新開工收斂，到 2028 至 2029 年降回 2,500 戶以下。這條路徑假設年吸收量 2,000 戶。RM40 至 50 萬段是關鍵變因：如果該價格帶的看屋率和分期繳款進度變差，在建轉成餘屋的比例可能超過基本情境的 80% 假設，把 2026 年高峰推到 5,000 戶以上。樂觀情境（機率 25%）需要 LRT 施工進度觸發 Jelutong 至 Gelugor 走廊的換屋需求、再疊加 MM2H 加速進場。悲觀情境（機率 20%）是 MM2H 買盤停滯、大馬經濟整體放緩、馬幣貶值推升外籍買家融資成本同時發生——2027 年餘屋可能觸及 <strong>6,000 至 7,000 戶</strong>。每季要追蹤的三個指標：（1）西南區和東北區的公寓成交量；（2）RM40 至 50 萬段的分期繳款進度；（3）LRT 土木工程里程碑。</p>
+      </div>
+
+      <h2 id="sec-jb"><span class="lang-en">JOHOR BAHRU</span><span class="lang-zh" style="display:none">新山</span></h2>
+
+      <div class="lang-en">
+        <p>Johor Bahru occupies a structurally unique position in Southeast Asian real estate: it is the only city in the world with pedestrian and short-form land access to one of the most expensive residential markets on earth. Singapore's median private residential price exceeds SGD2,000 per square foot; Johor Bahru's high-rise residential market averages RM450&ndash;500 per square foot &mdash; approximately SGD150&ndash;165 &mdash; a gap of over <strong>12 times</strong>. Singapore's median employee income exceeds RM20,000 per month equivalent; JB's median is approximately RM3,000&ndash;4,000. This wage and price arbitrage, combined with the impending RTS Link that will compress the cross-border commute from 60&ndash;90 minutes to <strong>5&ndash;6 minutes</strong>, is the single structural force that distinguishes JB from every other Malaysian market and justifies the premium now being paid in the Zone 1 RTS corridor.</p>
+        <p>The demand case is supported by three additional structural pillars. The Johor-Singapore Special Economic Zone (JS-SEZ), formally launched in January 2025 across a 3,288 km&sup2; footprint, is Malaysia's most significant industrial policy in a generation &mdash; with committed investment already exceeding the government's initial targets. The Forest City Special Financial Zone (SFZ), offering a 15-year zero income tax incentive for financial sector participants, creates a separate demand anchor for high-value professional tenants independent of the RTS commuter thesis. And Johor's manufacturing corridor &mdash; already hosting Intel, Western Digital, and a growing semiconductor supply chain &mdash; provides stable employment-driven demand that does not depend on the Singapore arbitrage at all.</p>
+        <p>The risk register, however, is equally distinctive. Johor carries the <strong>largest residential Overhang of any Malaysian state</strong> at 3,293 units as of Q3 2025, with an Overhang rate of <strong>21%</strong> &mdash; nearly double the national average. The under-construction pipeline adds a further <strong>8,183 units</strong> of residential unsold inventory, plus 1,316 units of commercial serviced apartments, for a combined supply pipeline of <strong>14,627 units</strong>. JB City Centre alone accounts for 51% of state Overhang (1,683 units) and 51% of under-construction unsold (4,161 units). The structural issue is product mismatch: the oversupply is almost entirely in high-rise condominiums and serviced apartments, while the landed residential market (terraced and semi-detached houses) shows healthy demand and low Overhang pressure. The market is simultaneously in expansion in Zone 1 landed and in correction in peripheral high-rise &mdash; two cycle positions sharing the same city boundary.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>新山在東南亞房地產裡的定位獨一無二：它是全球唯一一座能用步行或短途陸路，直通全球最貴住宅市場之一的廉價替代城市。新加坡私宅均價超過每平方呎 SGD2,000；新山高層住宅均價約 RM450 至 500/呎，換算約 SGD150 至 165，差距超過 <strong>12 倍</strong>。新加坡受薪族月薪中位數折算超過 RM20,000；新山約 RM3,000 至 4,000。這種薪資與房價的套利空間，加上即將通車的新柔捷運（RTS Link）把跨境通勤時間從 60 至 90 分鐘壓縮到 <strong>5 至 6 分鐘</strong>，就是讓新山與馬來西亞其他市場完全不同的結構性力量，也是第一區 RTS 走廊溢價的根本支撐。</p>
+        <p>需求面還有三根支柱在撐。2025 年 1 月正式啟動、涵蓋 3,288 平方公里的柔新特別經濟區（JS-SEZ），是馬來西亞一代人以來最重大的產業政策，已確認投資額超越政府原訂目標。森林城市特別金融區（SFZ）為金融從業者提供 15 年零所得稅，帶出一條獨立於 RTS 通勤邏輯的高薪專業租客需求。柔佛的製造業走廊——Intel、Western Digital 和不斷擴張的半導體供應鏈已進駐——則提供完全不靠新加坡套利的就業驅動需求。</p>
+        <p>風險同樣獨特。2025 年 Q3 柔佛餘屋 3,293 戶，是<strong>全馬各州最高</strong>，餘屋率 <strong>21%</strong>，將近全國平均的兩倍。在建未售還有 <strong>8,183 戶</strong>住宅加 1,316 戶商業服務式公寓，總供給線達 <strong>14,627 戶</strong>。光新山市區就佔全州餘屋 51%（1,683 戶）和在建未售 51%（4,161 戶）。結構性問題是產品錯配：供給過剩幾乎全部集中在高層公寓和服務式公寓，有地住宅（排屋、半獨立）需求健康、餘屋壓力低。這個市場同時走在第一區有地住宅的擴張期、和外圍高層住宅的修正期——兩種完全相反的景氣位置，共用同一座城市。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">JB / Johor Price Trend 2020&ndash;2025</span><span class="lang-zh" style="display:none">新山/柔佛房價趨勢 2020&ndash;2025</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">RM median price &middot; Source: NAPIC/JPPH Q3 2025</span><span class="lang-zh" style="display:none">令吉中位數房價 &middot; 來源：NAPIC/JPPH Q3 2025</span></p>
+          <div id="chartJBPrice" style="height:220px;min-height:220px;"></div>
+          <p class="chart-note green"><span class="lang-en">JB City +15.3% YoY &middot; Bukit Chagar RTS zone +20&ndash;28% &mdash; fastest appreciating micro-market in Malaysia</span><span class="lang-zh" style="display:none">新山市區年增+15.3% &middot; 武吉查卡RTS區+20&ndash;28%——全馬升值最快的微型市場</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Johor Overhang vs Under-Construction Pipeline</span><span class="lang-zh" style="display:none">柔佛Overhang vs 在建供給</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; Residential + Commercial SA &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">戶數 &middot; 住宅+商業服務公寓 &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartJBPipeline" style="height:220px;min-height:220px;"></div>
+          <p class="chart-note red"><span class="lang-en">JB City holds 51% of state Overhang (1,683) and 51% of under-construction unsold (4,161)</span><span class="lang-zh" style="display:none">新山市區佔全州Overhang 51%（1,683戶）及在建未售51%（4,161戶）</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Overhang by Price Band &mdash; Johor Q3 2025</span><span class="lang-zh" style="display:none">各價格段Overhang &mdash; 柔佛Q3 2025</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Overhang rate % &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">Overhang率% &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartJBOhBand" style="height:220px;min-height:220px;"></div>
+          <p class="chart-note orange"><span class="lang-en">RM300&ndash;400K highest rate (29.4%) &middot; RM500&ndash;600K largest absolute volume (600 units)</span><span class="lang-zh" style="display:none">RM30&ndash;40萬Overhang率最高（29.4%）&middot; RM50&ndash;60萬絕對量最大（600戶）</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Johor Overhang Forecast 2025&ndash;2029</span><span class="lang-zh" style="display:none">柔佛Overhang預測 2025&ndash;2029</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; 3-scenario model &middot; Source: NAPIC / Research</span><span class="lang-zh" style="display:none">戶數 &middot; 三情境模型 &middot; 來源：NAPIC / 研究估算</span></p>
+          <div id="chartJBOhForecast" style="height:220px;min-height:220px;"></div>
+          <p class="chart-note orange"><span class="lang-en">Base case: peak ~3,800 in 2026, declining to 600&ndash;1,200 by 2029 if RTS catalyses absorption</span><span class="lang-zh" style="display:none">基本情境：2026年見頂約3,800戶，若RTS催化吸收2029年回落至600&ndash;1,200戶</span></p>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">OVERHANG ANATOMY: THE PRODUCT MISMATCH PROBLEM</span>
+        <span class="lang-zh" style="display:none">OVERHANG 解剖：產品錯配問題</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>Johor's Overhang problem is fundamentally a product mismatch, not a demand failure. The 21% Overhang rate is entirely a high-rise phenomenon: Condo and apartment units account for <strong>1,029 units</strong> of the 3,293-unit residential Overhang, and the RM500K&ndash;600K band alone carries <strong>600 units</strong> at a 21% Overhang rate. The RM1M-plus segment carries <strong>652 units</strong> at a 23.2% Overhang rate, reflecting the specific failure of Forest City and Medini luxury high-rise projects to find buyers at developer pricing. By contrast, the landed residential market shows Overhang rates well below 10%. The most dangerous band is RM300K&ndash;400K, where the Overhang rate reaches <strong>29.4%</strong> with an under-construction absorption rate of only <strong>39.9%</strong> &mdash; meaning the majority of in-progress units in this band will very likely join the Overhang upon completion.</p>
+        <p>The serviced apartment dimension adds a further layer. NAPIC's commercial category records an additional <strong>1,074 units</strong> of completed unsold serviced apartments and <strong>1,316 under construction</strong> in Johor. The combined wide-definition Overhang &mdash; residential plus commercial SA &mdash; stands at approximately <strong>4,367 completed unsold units</strong>, against an under-construction pipeline of <strong>9,499 units</strong>. This total supply pressure is the central reason why selective entry discipline is essential in JB: the average statistics mask a bifurcation where one product type is deeply oversupplied and another is genuinely scarce.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>柔佛的餘屋問題本質上是產品錯配，不是需求失靈。21% 的餘屋率完全是高層住宅現象：公寓類在 3,293 戶住宅餘屋中就佔 <strong>1,029 戶</strong>，光 RM50 至 60 萬段就有 <strong>600 戶</strong>，餘屋率 21%。RM100 萬以上有 <strong>652 戶</strong>、餘屋率 23.2%，反映 Forest City 和 Medini 高端高層案以開發商原本定價找不到買家的事實。相較之下，有地住宅餘屋率遠低於 10%。最危險的是 RM30 至 40 萬段，餘屋率高達 <strong>29.4%</strong>，在建吸納率只有 <strong>39.9%</strong>——意思是這個價格帶的在建物件，大部分在完工後都會直接變成餘屋。</p>
+        <p>服務式公寓再加一層壓力。NAPIC 商業類另外記錄柔佛 <strong>1,074 戶</strong>已完工未售服務式公寓、<strong>1,316 戶</strong>在建未售。廣義柔佛餘屋（住宅加商業服務式公寓）合計已完工未售約 <strong>4,367 戶</strong>，在建供給 <strong>9,499 戶</strong>。這麼大的總體供給壓力，就是為什麼在新山買房一定要選對產品：平均數字掩蓋了一個事實——某些產品已經嚴重過剩，某些還真的稀缺。</p>
+      </div>
+
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">THE RTS &amp; JS-SEZ THESIS: WHAT'S PRICED IN, WHAT'S NOT</span>
+        <span class="lang-zh" style="display:none">RTS與JS-SEZ論點：哪些已定價，哪些尚未</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>The RTS Link is simultaneously Johor Bahru's most powerful demand catalyst and its most significant source of speculative risk. Bukit Chagar &mdash; the JB terminus station &mdash; has already seen surrounding properties appreciate from RM600&ndash;900 per square foot to RM1,100&ndash;1,300 per square foot, implying land value has more than doubled on RTS anticipation alone. At RM1,300 per square foot, JB's premier addresses are approaching the lower end of Singapore's suburban mass-market. The base case assumption is RTS completion in 2026&ndash;2027; the risk case is a further delay beyond 18 months, which would trigger a meaningful correction in the Bukit Chagar premium. Investors buying above RM1,100 per square foot in the RTS zone are effectively long the construction timeline.</p>
+        <p>The JS-SEZ thesis is more durable but slower to monetise. The SEZ encompasses 3,288 km&sup2; across seven economic corridors. The employment-to-housing demand chain typically has an 18&ndash;36 month lag. For investors with a 3&ndash;5 year horizon, the JS-SEZ employment anchor provides a structural floor for the Skudai&ndash;Tampoi&ndash;Senai&ndash;Kulai corridor that does not depend on Singapore buyers at all. This is the underappreciated part of the JB thesis: even in a scenario where the Singapore arbitrage partially deflates, the domestic employment-driven market would continue to absorb Zone 2 landed product at yields of 5.5&ndash;6.5%.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>RTS Link 既是新山最強的需求催化劑，也是最顯著的投機風險來源。武吉查卡（Bukit Chagar）——新山端點站——周邊物件已從 RM600 至 900/呎漲到 RM1,100 至 1,300/呎，等於光靠 RTS 的預期，土地價值就漲了一倍。以每呎 RM1,300 的水準來看，新山頂級地段已經接近新加坡郊區大眾住宅的下限。基本情境假設 RTS 在 2026 至 2027 年完工；若進一步延誤超過 18 個月，武吉查卡的溢價會出現明顯修正。在 RTS 區用每呎超過 RM1,100 買進的投資人，等於是在押注工程進度。</p>
+        <p>JS-SEZ 的故事更有持久性，但變現比較慢。特區橫跨 7 個經濟走廊、共 3,288 平方公里。從就業到住宅需求的傳導鏈通常有 18 至 36 個月的時間差。對持有 3 至 5 年的投資人來說，JS-SEZ 就業基盤為 Skudai–Tampoi–Senai–Kulai 走廊提供了不依賴新加坡買家的結構性底部。這是新山故事中最被低估的部分：就算新加坡套利空間縮窄，靠在地就業的市場仍會以 5.5 至 6.5% 的收益率持續消化第二區的有地住宅。</p>
+      </div>
+
+      <h3 style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #eef3f9;padding-bottom:6px;margin:28px 0 14px">
+        <span class="lang-en">OUTLOOK &amp; ENTRY FRAMEWORK 2026&ndash;2028</span>
+        <span class="lang-zh" style="display:none">展望與進場框架 2026&ndash;2028</span>
+      </h3>
+
+      <div class="lang-en">
+        <p>The base case (55% probability) projects Johor's residential Overhang peaking at approximately <strong>3,800 units</strong> in 2026 as the 8,183-unit under-construction pipeline completes, then declining steadily to <strong>600&ndash;1,200 units</strong> by 2029 if the RTS commences operations and JS-SEZ employment scales. Developer starts have already self-corrected: new housing starts fell <strong>21.7%</strong> in 2025. The bull case (25% probability) requires RTS operating on schedule and JS-SEZ employment reaching 50,000+ by 2028, driving Overhang below <strong>500 units</strong> by 2029. The bear case (20% probability) is RTS delayed beyond 2029 and JS-SEZ investment below RM20 billion by end-2027, potentially pushing Overhang to <strong>4,100 units</strong> by 2027.</p>
+        <p>The entry framework is product and zone specific. Zone 1 RTS-adjacent high-rise above RM1,000 per square foot: <strong>wait for a better entry point</strong>. Zone 1 and Zone 2 landed residential (terraced houses RM400K&ndash;700K): <strong>active entry</strong> &mdash; Overhang pressure is minimal, local owner-occupier demand is genuine, gross yields of 5&ndash;6.5% are achievable. Peripheral high-rise and Forest City serviced apartments: <strong>avoid</strong>. The three monitoring indicators are: (1) quarterly NAPIC Overhang data for Johor District; (2) RTS construction milestone confirmations; and (3) JS-SEZ enterprise registration data.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>基本情境（機率 55%）預估柔佛住宅餘屋會在 2026 年 8,183 戶在建供給陸續完工後見頂約 <strong>3,800 戶</strong>；只要 RTS 通車且 JS-SEZ 就業規模擴張，2029 年會穩步降到 <strong>600 至 1,200 戶</strong>。供給端已自我修正，2025 年新屋開工量下降 <strong>21.7%</strong>。樂觀情境（機率 25%）需要 RTS 準時通車、JS-SEZ 就業在 2028 年突破 50,000 人，2029 年餘屋可壓到 <strong>500 戶</strong>以下。悲觀情境（機率 20%）則是 RTS 延至 2029 年後、JS-SEZ 到 2027 年底投資落地不到 RM200 億，2027 年餘屋可能達 <strong>4,100 戶</strong>。</p>
+        <p>進場策略要看產品和地區。第一區 RTS 旁、每呎 RM1,000 以上的高層：<strong>等更好的價位</strong>。第一區和第二區的有地住宅（排屋 RM40 至 70 萬）：<strong>積極進場</strong>——餘屋壓力極低、在地自住需求真實、毛收益率 5 至 6.5% 做得到。外圍高層和森林城市的服務式公寓：<strong>不碰</strong>。三個要追蹤的指標：（1）NAPIC 柔佛市區季度餘屋數據；（2）RTS 施工進度里程碑；（3）JS-SEZ 企業進駐登記數據。</p>
+      </div>
+
+      <h2 id="sec-national"><span class="lang-en">MALAYSIA OVERHANG: NATIONAL PICTURE</span><span class="lang-zh" style="display:none">全馬OVERHANG：全國圖景</span></h2>
+
+      <div class="lang-en">
+        <p>Viewed at the national level, Malaysia's property Overhang problem has three distinct structural layers that require separate analysis. The first layer is the headline residential Overhang of 28,672 units, which is meaningfully concentrated in five states: Perak (3,300), Johor (3,293), Sabah (2,771), Selangor (2,757), and Penang (2,730). Perak's Overhang is predominantly low-to-mid cost housing in a market with limited new demand catalysts &mdash; it is structural rather than cyclical and will clear slowly. Sabah's Overhang reflects the persistent mismatch between developer ambitions and local purchasing power in a frontier market. Selangor presents the paradox of simultaneously having the largest residential under-construction pipeline of any state (13,448 units) and a healthy transaction market anchored by Klang Valley tech employment &mdash; a state where the Overhang risk is real but the demand floor is structural.</p>
+        <p>The second layer &mdash; and the one most systematically ignored &mdash; is the SA Overhang of 17,892 units, where the concentration pattern is even more extreme: Johor accounts for 50.4% (9,018 units), KL 26.2% (4,687), and Selangor 11.7% (2,095). The third layer is the forward-looking supply pipeline. Selangor's SA under-construction inventory of 18,116 units will complete into a market where the existing SA Overhang is already 2,095 units. KL's planned SA inventory of 9,415 NC units represents 72.9% of the national NC total &mdash; a concentration of future supply commitment in a single market that, if approved for construction, will create a structural SA Overhang problem in KL that dwarfs the current situation. The single most important policy decision that Malaysian real estate investors should monitor is whether these 9,415 KL SA planned units receive construction approval or are withdrawn.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>從全國角度看，馬來西亞的物業餘屋問題有三個結構層次。第一層是 28,672 戶的表面住宅餘屋，集中在五個州：霹靂（3,300）、柔佛（3,293）、沙巴（2,771）、雪蘭莪（2,757）、檳城（2,730）。霹靂的餘屋以中低價住宅為主，市場缺少新的需求催化劑，是結構性而非週期性的，會清得很慢。沙巴的餘屋則反映開發商推案規模與在地購買力長期錯配。雪蘭莪呈現矛盾：一方面擁有全國最大住宅在建供給（13,448 戶），另一方面靠巴生谷的科技業就業撐起健康的交易量——是一個餘屋風險真實、但需求底部扎實的州份。</p>
+        <p>第二層是被系統性忽視的 17,892 戶服務式公寓餘屋，集中度更極端：柔佛佔 50.4%（9,018 戶）、吉隆坡 26.2%（4,687 戶）、雪蘭莪 11.7%（2,095 戶）。第三層是未來的在建供給。雪蘭莪 18,116 戶服務式公寓在建庫存，會完工進入一個現有服務式公寓餘屋已達 2,095 戶的市場。吉隆坡規劃中（NC）的 9,415 戶服務式公寓更是全國 NC 總量的 72.9%——若獲准動工，會在吉隆坡製造出遠比現況嚴峻的服務式公寓餘屋問題。馬來西亞房地產投資人最應該盯住的單一政策決定，就是這 9,415 戶吉隆坡規劃案到底會被核准、還是撤回。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Three-City Overhang Comparison (All Categories)</span><span class="lang-zh" style="display:none">三城Overhang對比（全類別）</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; Resi+SA+SOHO+SHOP &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">戶數 &middot; 住宅+SA+SOHO+SHOP &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartMyCityOh" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">JB total: 13,762 completed-unsold across all categories &mdash; most complex multi-layer Overhang in Malaysia</span><span class="lang-zh" style="display:none">新山全類別已完工未售合計13,762戶——馬來西亞最複雜的多層Overhang</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">SA Overhang by State &mdash; Q3 2025</span><span class="lang-zh" style="display:none">各州服務式公寓Overhang &mdash; Q3 2025</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; SA OH + SA UC &middot; Source: NAPIC Q3 2025</span><span class="lang-zh" style="display:none">戶數 &middot; SA OH + SA在建 &middot; 來源：NAPIC Q3 2025</span></p>
+          <div id="chartMySaOh" style="height:220px"></div>
+          <p class="chart-note red"><span class="lang-en">Selangor SA UC 18,116 units &mdash; largest under-construction SA pipeline nationally</span><span class="lang-zh" style="display:none">雪蘭莪SA在建18,116戶——全國最大SA在建供給</span></p>
+        </div>
+      </div>
+
+      <h2 id="sec-infra"><span class="lang-en">INFRASTRUCTURE CATALYSTS</span><span class="lang-zh" style="display:none">基礎建設催化劑</span></h2>
+
+      <div class="lang-en">
+        <p>Three infrastructure projects have moved from speculative to confirmed timelines over the past 12 months, with demand effects already measurable in transaction and rental data.</p>
+        <p>The <strong>JB–Singapore RTS</strong>, targeting operations by end-2026, has produced the most immediate impact. Rental yields in the JB Sentral corridor have risen to <strong>5.47–5.60%</strong>, the highest in peninsular Malaysia.</p>
+        <p>The <strong>MRT3 Circle Line</strong> received final government approval in 2025, with substantial completion targeted for 2030–2031. Currently underserved corridors along the alignment (Sentul, Wangsa Maju, Seputeh, Bukit Jalil) represent the earliest-stage catalyst opportunity.</p>
+        <p>The <strong>data center investment wave</strong> — Microsoft's USD2.2 billion, Google's USD2 billion — is producing measurable spillover rental demand. Industrial property value surged <strong>21.3%</strong> in 2025.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>過去一年，有三個基礎建設項目從「說說而已」變成了「有具體時間表」，而且效果已經開始在數據裡看到了。</p>
+        <p><strong>新山至新加坡輕軌系統（Johor Bahru–Singapore Rapid Transit System，RTS Link）</strong>，目標2026年底通車。新山中央走廊的租金報酬率已升至<strong>5.47到5.60%</strong>，是馬來西亞半島最高水準，背後是新加坡人跨境買房的需求，以及柔佛-新加坡特別經濟區（Johor-Singapore Special Economic Zone，JS-SEZ）帶動的真實就業和居住需求。曾經一度看起來快變成空城的森林城市（Forest City），也因為SEZ開始出現了早期去化的跡象。</p>
+        <p><strong>捷運三號環線（MRT3 Circle Line）</strong>在2025年拿到政府最終核准，目標2030到2031年完工。從MRT1和MRT2的經驗來看，站點周邊500公尺的物件，通常在時間表確定後12到18個月內就會開始把交通增值（Transit Premium）反映在房價上。環線沿線目前比較冷門的吉隆坡走廊——善南（Sentul）、旺沙瑪朱（Wangsa Maju）、士拍（Seputeh）、武吉加里爾（Bukit Jalil）——可能是現在最早期的布局機會。</p>
+        <p><strong>資料中心投資潮（Data Center Wave）</strong>——微軟（Microsoft）22億美元、谷歌（Google）20億美元，加上多家雲端大廠在柔佛和雪蘭莪的大規模進駐——正在帶動周邊地區的租屋需求。2025年工業地產（Industrial Property）的成交總值年增<strong>21.3%</strong>。這個需求跟住宅景氣週期無關，持續性更有保障。</p>
+      </div>
+
+      <h2 id="sec-outlook"><span class="lang-en">OUTLOOK AND KEY RISKS</span><span class="lang-zh" style="display:none">展望與主要風險</span></h2>
+
+      <div class="lang-en">
+        <p>The national Overhang trajectory through 2029 is determined by three structural variables operating on different timelines. The RTS Link (2026&ndash;2027 expected commissioning) is the fastest-acting catalyst: each month of delay removes approximately 1,000&ndash;2,000 units of latent Johor absorption capacity, while commissioning would trigger the release of pent-up Singapore buyer demand. The JS-SEZ employment ramp (18&ndash;36 month lag) will define whether the 2027&ndash;2028 supply peak in Johor is met by genuine demand or accumulates further into Overhang. And the KL SA planned pipeline decision (9,415 NC units) is the longest-dated but potentially largest single risk: if approved, it would extend KL's SA Overhang problem from the current 4,687 units toward 15,000+ units by 2030.</p>
+        <p>The base case (50% probability) projects national residential Overhang stabilising near <strong>29,500 units</strong> in 2026 before declining to approximately <strong>18,000 units</strong> by 2029, as the UC pipeline completes and new starts remain disciplined. SA Overhang follows a similar but slower trajectory, remaining above <strong>17,000 units</strong> through 2027 before declining toward 11,000 by 2029. The bull case (25% probability) requires RTS to commission on schedule and JS-SEZ to attract RM50 billion-plus, driving Overhang toward <strong>10,000 residential units</strong> and <strong>6,500 SA units</strong> by 2029. The bear case (20% probability) &mdash; RTS delayed, KL SA pipeline approved, global risk-off &mdash; would see national residential Overhang reach <strong>38,000&ndash;40,000 units</strong> by 2028 and SA Overhang approaching <strong>25,000 units</strong>. The key variable to monitor is not price &mdash; prices in Malaysia are sticky downward &mdash; but transaction volume: a sustained decline below 90,000 units quarterly would be the clearest leading indicator that the bear case trajectory is being entered.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>全國餘屋到 2029 年的走勢，由三個時間尺度不同的結構性變數決定。RTS Link（預計 2026 至 2027 年通車）速效最強：每延誤一個月，約減少 1,000 至 2,000 戶的柔佛潛在吸收能力；順利通車則會觸發累積已久的新加坡買盤釋放。JS-SEZ 的就業擴張（18 至 36 個月遞延）會決定 2027 至 2028 年柔佛供給高峰是否對得上真實需求。吉隆坡服務式公寓規劃案（NC 9,415 戶）是時間最遠、但潛在影響最大的單一風險：若獲批，吉隆坡服務式公寓餘屋會從目前 4,687 戶擴大到 2030 年逾 15,000 戶。</p>
+        <p>基本情境（機率 50%）預估全國住宅餘屋在 2026 年穩定在 <strong>29,500 戶</strong>左右，到 2029 年降至約 <strong>18,000 戶</strong>。服務式公寓餘屋走類似但更慢的路徑，2027 年前維持在 <strong>17,000 戶</strong>以上，之後才降至 2029 年的 11,000 戶。樂觀情境（機率 25%）需要 RTS 準時通車、JS-SEZ 吸引超過 RM500 億投資，把 2029 年的餘屋壓到 <strong>住宅 10,000 戶</strong>和 <strong>服務式公寓 6,500 戶</strong>。悲觀情境（機率 20%）——RTS 延誤、吉隆坡服務式公寓規劃案獲批、全球避險——全國住宅餘屋在 2028 年可能達 <strong>38,000 至 40,000 戶</strong>，服務式公寓餘屋接近 <strong>25,000 戶</strong>。最關鍵的指標不是價格（馬來西亞房價向下很僵固），而是成交量：全國季度成交量如果持續低於 90,000 戶，就是進入悲觀情境最明確的領先指標。</p>
+      </div>
+
+      <div class="report-chart-grid" style="grid-template-columns:1fr">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">National Overhang Forecast 2025&ndash;2029: Three Scenarios (Residential + SA)</span><span class="lang-zh" style="display:none">全國Overhang預測 2025&ndash;2029：三情境（住宅+SA）</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Units &middot; Base case model &middot; Source: NAPIC Q3 2025 / Research estimates</span><span class="lang-zh" style="display:none">戶數 &middot; 基本情境模型 &middot; 來源：NAPIC Q3 2025 / 研究估算</span></p>
+          <div id="chartMyOhForecast" style="height:240px"></div>
+          <p class="chart-note orange"><span class="lang-en">Bear case trigger: RTS delay + KL SA NC 9,415 units approved &rarr; residential OH 38&ndash;40K by 2028; SA OH approaching 25K</span><span class="lang-zh" style="display:none">悲觀情境觸發：RTS延誤+KL SA NC 9,415戶獲批→住宅OH 2028年達38&ndash;40K；SA OH接近25K</span></p>
+        </div>
+      </div>
+
+      <div class="report-footer">
+        <p><span class="lang-en">Data sources: NAPIC Q3 2025 · NAPIC H1 2025 · Global Property Guide Q1 2026 · BNM · DOSM · REHDA 2H2025 · Juwai IQI · PropCashflow</span><span class="lang-zh" style="display:none">數據來源：NAPIC 2025年Q3 · NAPIC 2025年H1 · Global Property Guide 2026年Q1 · 馬來西亞國家銀行 · 統計局 · 房地產發展商協會 2H2025</span></p>
+        <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:'#1e3a5f', green:'#16a34a', orange:'#d97706',
+    red:'#dc2626', blue:'#2563eb', muted:'#5a7a9a',
+    grid:'#e8f0f9', text:'#1e3a5f'
+  };
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+  var baseTooltip = {
+    trigger: 'axis', backgroundColor: '#fff',
+    borderColor: '#ccd9e8', borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+  var baseLegend = { top: 8, textStyle: baseText, icon: 'circle', itemWidth: 8, itemHeight: 8 };
+
+  function fmtNum(v) { return v >= 1000 ? (v/1000).toFixed(0)+'K' : v; }
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+
+  var allCharts = [];
+
+  function initAllCharts(lang) {
+    allCharts.forEach(function(c){ if(c) c.dispose(); });
+    allCharts = [];
+    drawMyPrice(lang);
+    drawYieldSpread(lang);
+    drawMismatch(lang);
+    drawCompletionWave(lang);
+    drawSupplyPipeline(lang);
+    drawOhForecast(lang);
+    drawOhSeverity(lang);
+    drawWaveSupply(lang);
+    drawTakeup(lang);
+    drawLoanApproval(lang);
+    drawTxVol(lang);
+    drawPriceBand(lang);
+    drawAPAC(lang);
+    drawApacPi(lang);
+    drawMhpiReal(lang);
+    drawMismatchVal(lang);
+    drawZonePSF(lang);
+    drawKlOverhang(lang);
+    drawKlLaunches(lang);
+    drawKlRental(lang);
+    drawKLOhBand(lang);
+    drawKLOhTrend(lang);
+    drawKLBroadInv(lang);
+    drawKLPipeline(lang);
+    drawFDI(lang);
+    drawPgOhBand(lang);
+    drawPgPipeline(lang);
+    drawPgDistrict(lang);
+    drawPgOhForecast(lang);
+    drawJBPrice(lang);
+    drawJBPipeline(lang);
+    drawJBOhBand(lang);
+    drawJBOhForecast(lang);
+    drawMyPipeline(lang);
+    drawMyStateOh(lang);
+    drawMyCityOh(lang);
+    drawMySaOh(lang);
+    drawMyOhForecast(lang);
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+    initAllCharts(lang);
+  }
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}});
+
+  function drawMyPrice(lang){
+    var en=lang==='en';
+    var c = echarts.init(document.getElementById('rChartMyPrice'));
+    allCharts.push(c);
+    var yrs=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    var price=[289,295,308,316,322,316,328,340,385,398,408];
+    var yoy=[3.6,2.1,4.4,2.6,1.9,-1.9,3.8,3.7,13.2,3.4,2.5];
+    c.setOption({
+      tooltip:baseTooltip,
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8,data:['YoY %',en?'Avg Price':'均價']},
+      grid:{left:12,right:12,top:16,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:7,rotate:30}}),
+      yAxis:[
+        mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:8,formatter:function(v){return 'RM'+v+'K';}}}),
+        mkAxis({type:'value',splitLine:{show:false},axisLabel:{color:C.muted,fontSize:8,formatter:function(v){return v+'%';}}})
+      ],
+      series:[
+        {name:'YoY %',type:'bar',yAxisIndex:1,data:yoy.map(function(v){return{value:v,itemStyle:{color:v>=0?'rgba(22,163,74,0.7)':'rgba(220,38,38,0.7)'}}}),barMaxWidth:18,itemStyle:{borderRadius:[2,2,0,0]}},
+        {name:en?'Avg Price':'均價',type:'line',data:price,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.08)'},symbol:'circle',symbolSize:4}
+      ]
+    });
+  }
+
+  function drawYieldSpread(lang){
+    var c = echarts.init(document.getElementById('chart-r-yield-spread'));
+    allCharts.push(c);
+    c.setOption({
+      tooltip: baseTooltip,
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025Q3'], axisLabel:{ color:C.muted, fontSize:8 } }),
+      yAxis: mkAxis({ type:'value', min:1, max:6, axisLabel:{ color:C.muted, fontSize:9, formatter:'{value}%' } }),
+      series: [
+        { type:'line', data:[5.1,5.0,4.9,4.9,4.8,4.6,4.7,4.9,5.16,5.24,5.19], lineStyle:{color:C.green,width:1.5}, itemStyle:{color:C.green}, smooth:0.3, areaStyle:{color:'rgba(22,163,74,0.08)'}, symbol:'circle', symbolSize:4 },
+        { type:'line', data:[3.25,3.0,3.0,3.25,3.0,1.75,1.75,2.75,3.0,3.0,2.75], lineStyle:{color:C.red,width:1,type:'dashed'}, itemStyle:{color:C.red}, step:'end', symbol:'circle', symbolSize:3 }
+      ]
+    });
+  }
+
+  function drawMismatch(lang){
+    var c = echarts.init(document.getElementById('chart-r-mismatch'));
+    allCharts.push(c);
+    var labels = lang==='zh' ? ['<30\u842c','30-50\u842c','50\u842c-1M','>1M'] : ['<RM300k','300-500k','500k-1M','>RM1M'];
+    c.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data:[lang==='zh'?'\u9700\u6c42%':'Demand %', lang==='zh'?'\u4f9b\u7d66%':'Supply %'], textStyle:{fontSize:8,color:C.muted} }),
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:labels, axisLabel:{fontSize:8,color:C.muted} }),
+      yAxis: mkAxis({ type:'value', axisLabel:{fontSize:9,color:C.muted, formatter:'{value}%'} }),
+      series: [
+        { name:lang==='zh'?'\u9700\u6c42%':'Demand %', type:'bar', data:[53.1,27.3,13.8,5.8], itemStyle:{color:C.navy,borderRadius:[3,3,0,0]}, barMaxWidth:30 },
+        { name:lang==='zh'?'\u4f9b\u7d66%':'Supply %', type:'bar', data:[18,25,38,19], itemStyle:{color:C.orange,borderRadius:[3,3,0,0]}, barMaxWidth:30 }
+      ]
+    });
+  }
+
+  function drawCompletionWave(lang){
+    var c = echarts.init(document.getElementById('chart-r-wave'));
+    allCharts.push(c);
+    c.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data:[lang==='zh'?'\u5b8c\u5de5\u91cf':'Completions', lang==='zh'?'\u5438\u6536\u91cf':'Absorption'], textStyle:{fontSize:8,color:C.muted} }),
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2026E','2027E'], axisLabel:{fontSize:8,color:C.muted} }),
+      yAxis: mkAxis({ type:'value', axisLabel:{fontSize:9,color:C.muted, formatter:function(v){return fmtNum(v);}} }),
+      series: [
+        { name:lang==='zh'?'\u5b8c\u5de5\u91cf':'Completions', type:'line', data:[95000,92000,85000,78000,78000,72000,76393,71981,74893,82135,95000,85000], lineStyle:{color:C.orange,width:1.5}, itemStyle:{color:C.orange}, smooth:0.2, symbol:'circle', symbolSize:4 },
+        { name:lang==='zh'?'\u5438\u6536\u91cf':'Absorption', type:'line', data:[82000,82000,82000,82000,82000,72000,82000,82000,83000,85000,85000,85000], lineStyle:{color:C.green,width:1,type:'dashed'}, itemStyle:{color:C.green}, symbol:'none' }
+      ]
+    });
+  }
+
+  function drawSupplyPipeline(lang){
+    var c = echarts.init(document.getElementById('chart-r-supply'));
+    allCharts.push(c);
+    var lastLabel = lang==='zh' ? '2025\u524d\u4e09\u5b63' : '2025 Q1-Q3';
+    c.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data:[lang==='zh'?'\u898f\u5283\u91cf':'Planned', lang==='zh'?'\u958b\u5de5\u6236\u6578':'Starts', lang==='zh'?'\u5b8c\u5de5\u91cf':'Completions'] }),
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024',lastLabel], axisLabel:{fontSize:9,color:C.muted} }),
+      yAxis: mkAxis({ type:'value', axisLabel:{fontSize:9,color:C.muted, formatter:function(v){return fmtNum(v);}} }),
+      series: [
+        { name:lang==='zh'?'\u898f\u5283\u91cf':'Planned', type:'line', data:[110000,108000,95000,85000,85000,60000,77585,89111,80964,100461,49602], lineStyle:{color:C.muted,width:2,type:'dashed'}, itemStyle:{color:C.muted}, smooth:0.2, symbol:'circle', symbolSize:4 },
+        { name:lang==='zh'?'\u958b\u5de5\u6236\u6578':'Starts', type:'line', data:[105000,102000,92000,82000,82000,65000,86258,97804,88114,106236,64843], lineStyle:{color:C.navy,width:2}, itemStyle:{color:C.navy}, smooth:0.2, symbol:'circle', symbolSize:4 },
+        { name:lang==='zh'?'\u5b8c\u5de5\u91cf':'Completions', type:'line', data:[95000,92000,85000,78000,78000,72000,76393,71981,74893,82135,69303], lineStyle:{color:C.green,width:2}, itemStyle:{color:C.green}, smooth:0.2, symbol:'circle', symbolSize:4 }
+      ]
+    });
+  }
+
+  function drawOhForecast(lang){
+    var c = echarts.init(document.getElementById('chart-r-oh-forecast'));
+    allCharts.push(c);
+    var en=lang==='en';
+    c.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data:[en?'Historical':'\u6b77\u53f2', en?'Bull':'\u6a02\u89c0', en?'Base':'\u57fa\u672c', en?'Bear':'\u4fdd\u5b88'] }),
+      grid:{left:12,right:12,top:28,bottom:30,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024H1','25*','26E','27E','28E','29E'], axisLabel:{fontSize:7,color:C.muted,rotate:30,interval:0} }),
+      yAxis: mkAxis({ type:'value', min:0, axisLabel:{fontSize:9,color:C.muted, formatter:function(v){return fmtNum(v);}} }),
+      series: [
+        { name:en?'Historical':'\u6b77\u53f2', type:'line', data:[11316,14762,20876,32313,36863,31092,26424,27746,25816,22642,28672,null,null,null,null], lineStyle:{color:C.navy,width:2}, itemStyle:{color:C.navy}, areaStyle:{color:'rgba(30,58,95,0.08)'}, symbol:'circle', symbolSize:4,
+          markPoint:{data:[{coord:['2018',32313],symbol:'pin',symbolSize:36,label:{formatter:'Peak 32K',fontSize:8},itemStyle:{color:C.red}},{coord:['2024H1',22642],symbol:'pin',symbolSize:36,label:{formatter:'Low 22.6K',fontSize:8},itemStyle:{color:C.green}}]}
+        },
+        { name:en?'Bull':'\u6a02\u89c0', type:'line', data:[null,null,null,null,null,null,null,null,null,null,28672,43000,42000,22000,8000], lineStyle:{color:C.green,width:1.5,type:[4,2]}, itemStyle:{color:C.green}, symbol:'circle', symbolSize:4 },
+        { name:en?'Base':'\u57fa\u672c', type:'line', data:[null,null,null,null,null,null,null,null,null,null,28672,46000,47000,28000,14000], lineStyle:{color:C.orange,width:2,type:[6,3]}, itemStyle:{color:C.orange}, symbol:'circle', symbolSize:5 },
+        { name:en?'Bear':'\u4fdd\u5b88', type:'line', data:[null,null,null,null,null,null,null,null,null,null,28672,51000,57000,42000,28000], lineStyle:{color:C.red,width:1.5,type:[8,4]}, itemStyle:{color:C.red}, symbol:'circle', symbolSize:4 }
+      ]
+    });
+  }
+
+  function drawTakeup(lang){
+    var c = echarts.init(document.getElementById('chart-r-takeup'));
+    allCharts.push(c);
+    var labels = lang==='zh' ? ['\u6709\u5730\u4f4f\u5b85','\u9ad8\u5c64\u4f4f\u5b85'] : ['Landed','High-Rise'];
+    c.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger:'axis', axisPointer:{type:'shadow'} }),
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:labels }),
+      yAxis: mkAxis({ type:'value', max:20, axisLabel:{fontSize:9,color:C.muted, formatter:'{value}%'} }),
+      series: [{
+        type:'bar',
+        data:[
+          { value:14, itemStyle:{color:C.green,borderRadius:[4,4,0,0]} },
+          { value:5.1, itemStyle:{color:C.orange,borderRadius:[4,4,0,0]} }
+        ],
+        barMaxWidth:120,
+        label:{ show:true, position:'top', formatter:'{c}%', fontSize:11, fontFamily:'JetBrains Mono, monospace' }
+      }]
+    });
+  }
+
+  function drawAPAC(lang){
+    var c = echarts.init(document.getElementById('chart-r-apac'));
+    allCharts.push(c);
+    var labels = lang==='zh'
+      ? ['\u80e1\u5fd7\u660e\u5e02','\u5409\u9686\u5761','\u66fc\u8c37','\u6771\u4eac\uff08\u5168\u5e02\uff09','\u65b0\u52a0\u5761','\u53f0\u5317','\u9999\u6e2f','\u4e0a\u6d77']
+      : ['Ho Chi Minh','KL','Bangkok','Tokyo','Singapore','Taipei','Hong Kong','Shanghai'];
+    var values = [18, 21.7, 25, 37, 40, 47, 50, 59];
+    var colors = [C.green, C.green, C.navy, C.navy, C.navy, C.orange, C.orange, C.red];
+    c.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger:'axis', axisPointer:{type:'shadow'} }),
+      grid: { left:90, right:50, top:10, bottom:15, containLabel:false },
+      xAxis: mkAxis({ type:'value', min:0, max:65 }),
+      yAxis: mkAxis({ type:'category', data:labels, axisLabel:{color:C.navy,fontSize:10,fontFamily:'Inter'} }),
+      series: [{
+        type:'bar',
+        data: values.map(function(v,i){ return { value:v, itemStyle:{color:colors[i],borderRadius:[0,4,4,0]} }; }),
+        barMaxWidth:22,
+        label:{ show:true, position:'right', formatter:'{c}x', fontSize:10, fontFamily:'Inter', fontWeight:'bold', color:C.navy }
+      }]
+    });
+  }
+
+  function drawZonePSF(lang){
+    var c = echarts.init(document.getElementById('chart-r-zone'));
+    allCharts.push(c);
+    var labels = lang==='zh'
+      ? ['\u7b2c\u4e00\u5340\nKLCC/BB','\u7b2c\u4e8c\u5340\n\u4e2d\u8c37/OKR','\u7b2c\u4e09\u5340\n\u5916\u570d']
+      : ['Zone 1\nKLCC/BB','Zone 2\nMid Valley/OKR','Zone 3\nOuter Ring'];
+    c.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger:'axis', axisPointer:{type:'shadow'} }),
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:labels }),
+      yAxis: mkAxis({ type:'value', min:0, axisLabel:{fontSize:9,color:C.muted, formatter:function(v){return 'RM '+v.toLocaleString();}} }),
+      series: [{
+        type:'bar',
+        data:[
+          { value:1800, itemStyle:{color:C.orange,borderRadius:[4,4,0,0]} },
+          { value:700, itemStyle:{color:C.green,borderRadius:[4,4,0,0]} },
+          { value:490, itemStyle:{color:C.red,borderRadius:[4,4,0,0]} }
+        ],
+        barMaxWidth:100,
+        label:{ show:true, position:'top', formatter:'RM {c} psf', fontSize:10, fontFamily:'JetBrains Mono, monospace' }
+      }]
+    });
+  }
+
+  function drawOhSeverity(lang){
+    var en = lang==='en';
+    var domSevR = document.getElementById('chartOhSeverityR');
+    if(!domSevR) return;
+    var cSevR = echarts.init(domSevR);
+    allCharts.push(cSevR);
+    var sevLabels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024H1','2025Q3'];
+    var sevData = [11.9,16.0,24.6,41.4,47.3,43.2,34.6,38.5,34.5,27.6,41.4];
+    cSevR.setOption({
+      tooltip: Object.assign({},baseTooltip,{formatter:function(p){return p[0].axisValue+'<br/>'+(en?'% of Completions':'佔完工量%')+': <b>'+p[0].data+'%</b>';}}),
+      grid:{left:50,right:20,top:36,bottom:40,containLabel:true},
+      xAxis: mkAxis({type:'category',data:sevLabels,axisLabel:Object.assign({},baseText,{rotate:30,interval:0})}),
+      yAxis: mkAxis({type:'value',min:0,max:55,axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11}}),
+      series:[{
+        type:'bar',
+        data:sevData.map(function(v){return{value:v,itemStyle:{color:v>=40?C.red:v>=33?C.orange:v>=20?C.navy:C.green,borderRadius:[3,3,0,0]}};}),
+        barMaxWidth:35,
+        label:{show:true,position:'top',formatter:function(p){return p.value+'%';},fontSize:9,fontFamily:'Inter,sans-serif'},
+        markLine:{silent:true,lineStyle:{type:'dashed',color:C.orange,width:1.5},data:[{yAxis:33}],label:{formatter:en?'1-in-3':'每3戶1戶滯銷',color:C.orange,fontFamily:'Inter,sans-serif',fontSize:10}}
+      }]
+    });
+  }
+
+  function drawWaveSupply(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-wave-s');
+    if(!dom) return;
+    var c = echarts.init(dom);
+    allCharts.push(c);
+    c.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data:[en?'Completions':'完工量', en?'Absorption':'吸收量'], textStyle:{fontSize:8,color:C.muted} }),
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['2021','2022','2023','2024','2026E','2027E'], axisLabel:{fontSize:8,color:C.muted} }),
+      yAxis: mkAxis({ type:'value', axisLabel:{fontSize:9,color:C.muted, formatter:function(v){return fmtNum(v);}} }),
+      series: [
+        { name:en?'Completions':'完工量', type:'line', data:[76393,71981,74893,82135,95000,85000], lineStyle:{color:C.orange,width:1.5}, itemStyle:{color:C.orange}, smooth:0.2, symbol:'circle', symbolSize:4 },
+        { name:en?'Absorption':'吸收量', type:'line', data:[82000,82000,83000,85000,85000,85000], lineStyle:{color:C.green,width:1,type:'dashed'}, itemStyle:{color:C.green}, symbol:'none' }
+      ]
+    });
+  }
+
+  function drawLoanApproval(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-loan-approval');
+    if(!dom) return;
+    var cLoan = echarts.init(dom);
+    allCharts.push(cLoan);
+    cLoan.setOption({
+      tooltip: baseTooltip,
+      grid:{left:50,right:20,top:30,bottom:30,containLabel:true},
+      xAxis: mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025Q3']}),
+      yAxis: mkAxis({type:'value',min:40,max:50,axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11}}),
+      series:[{
+        type:'line',color:C.orange,
+        data:[43.2,44.1,46.3,45.8,44.2,43.1,42.6],
+        symbol:'circle',symbolSize:6,lineStyle:{width:2},
+        markLine:{silent:true,lineStyle:{type:'dashed',color:C.orange},
+          data:[{yAxis:42.6}],
+          label:{formatter:en?'42.6% Current':'42.6% 當前水平',color:C.orange,fontSize:10}}
+      }]
+    });
+  }
+
+  function drawTxVol(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-tx-vol');
+    if(!dom) return;
+    var cTx = echarts.init(dom);
+    allCharts.push(cTx);
+    var txData = [14200,15800,16900,17928,18913];
+    cTx.setOption({
+      tooltip: baseTooltip,
+      grid:{left:50,right:20,top:30,bottom:30,containLabel:true},
+      xAxis: mkAxis({type:'category',data:['2020','2021','2022','2023','2024']}),
+      yAxis: mkAxis({type:'value',axisLabel:{formatter:function(v){return (v/1000).toFixed(0)+'K';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11}}),
+      series:[{
+        type:'bar',barMaxWidth:40,
+        data:txData.map(function(v){return{value:v,itemStyle:{color:v>=18000?C.green:C.navy,borderRadius:[3,3,0,0]}};}),
+        label:{show:true,position:'top',formatter:function(p){return (p.value/1000).toFixed(1)+'K';},fontSize:9,fontFamily:'Inter,sans-serif'},
+        markPoint:{data:[{type:'max',label:{formatter:en?'Decade High':'十年新高',fontSize:9}}]}
+      }]
+    });
+  }
+
+  function drawPriceBand(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-price-band');
+    if(!dom) return;
+    var cBand = echarts.init(dom);
+    allCharts.push(cBand);
+    var bandLabels = en?['<RM300k','RM300-500k','RM500k-1M','>RM1M']:['30萬以下','30-50萬','50萬-1M','逾1M'];
+    cBand.setOption({
+      tooltip: baseTooltip,
+      grid:{left:80,right:50,top:20,bottom:20,containLabel:true},
+      xAxis: mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11}}),
+      yAxis: mkAxis({type:'category',data:bandLabels,axisLabel:{color:C.navy,fontFamily:'Inter,sans-serif',fontSize:10}}),
+      series:[{
+        type:'bar',barMaxWidth:30,
+        data:[
+          {value:52.5,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:24.5,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:17.5,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]}},
+          {value:5.5,itemStyle:{color:C.orange,borderRadius:[0,3,3,0]}}
+        ],
+        label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:10,fontFamily:'Inter,sans-serif'}
+      }]
+    });
+  }
+
+  function drawApacPi(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-apac-pi');
+    if(!dom) return;
+    var cPi = echarts.init(dom);
+    allCharts.push(cPi);
+    var piLabels = en
+      ? ['Ho Chi Minh','Bangkok','KL','Jakarta','Manila','Taipei','Tokyo','Singapore','Hong Kong','Shanghai']
+      : ['胡志明市','曼谷','吉隆坡','雅加達','馬尼拉','台北','東京','新加坡','香港','上海'];
+    var piData = [4.2,5.1,5.6,6.8,7.2,12.1,13.5,14.2,19.8,22.4];
+    cPi.setOption({
+      tooltip: baseTooltip,
+      grid:{left:90,right:60,top:20,bottom:30,containLabel:true},
+      xAxis: mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'x';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11}}),
+      yAxis: mkAxis({type:'category',data:piLabels,axisLabel:{color:C.navy,fontFamily:'Inter,sans-serif',fontSize:10}}),
+      series:[{
+        type:'bar',barMaxWidth:22,
+        data:piData.map(function(v){return{value:v,itemStyle:{color:v<=5?C.green:v<=7?C.navy:v<=12?C.orange:C.red,borderRadius:[0,3,3,0]}};}),
+        label:{show:true,position:'right',formatter:function(p){return p.value+'x';},fontSize:10,fontFamily:'Inter,sans-serif'},
+        markLine:{silent:true,lineStyle:{type:'dashed',color:C.navy,width:1},
+          data:[{xAxis:5.6}],label:{formatter:'KL',color:C.navy,fontSize:10}}
+      }]
+    });
+  }
+
+  function drawMhpiReal(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-mhpi-real');
+    if(!dom) return;
+    var cMhpiR = echarts.init(dom);
+    allCharts.push(cMhpiR);
+    cMhpiR.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:[en?'Nominal':'名義',en?'Real (inflation-adj)':'實質（通膨調整）']}),
+      grid:{left:50,right:20,top:36,bottom:30,containLabel:true},
+      xAxis: mkAxis({type:'category',data:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025Q3']}),
+      yAxis: mkAxis({type:'value',min:100}),
+      series:[
+        {name:en?'Nominal':'名義',type:'line',color:C.navy,data:[165,174,180,187,194,195,197,208,218,229,234],symbol:'circle',symbolSize:4,lineStyle:{width:2}},
+        {name:en?'Real (inflation-adj)':'實質（通膨調整）',type:'line',color:C.muted,data:[128,133,135,137,140,142,142,147,152,157,159],lineStyle:{type:'dashed',width:1.5},symbol:'circle',symbolSize:4}
+      ]
+    });
+  }
+
+  function drawMismatchVal(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-mismatch-val');
+    if(!dom) return;
+    var cMV = echarts.init(dom);
+    allCharts.push(cMV);
+    var labels = en ? ['<RM300k','300-500k','500k-1M','>RM1M'] : ['<30萬','30-50萬','50萬-1M','>1M'];
+    cMV.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data:[en?'Demand %':'需求%', en?'Supply %':'供給%'], textStyle:{fontSize:8,color:C.muted} }),
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:labels, axisLabel:{fontSize:8,color:C.muted} }),
+      yAxis: mkAxis({ type:'value', axisLabel:{fontSize:9,color:C.muted, formatter:'{value}%'} }),
+      series: [
+        { name:en?'Demand %':'需求%', type:'bar', data:[53.1,27.3,13.8,5.8], itemStyle:{color:C.navy,borderRadius:[3,3,0,0]}, barMaxWidth:30 },
+        { name:en?'Supply %':'供給%', type:'bar', data:[18,25,38,19], itemStyle:{color:C.orange,borderRadius:[3,3,0,0]}, barMaxWidth:30 }
+      ]
+    });
+  }
+
+  function drawKlOverhang(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-kl-overhang');
+    if(!dom) return;
+    var cKlOh = echarts.init(dom);
+    allCharts.push(cKlOh);
+    cKlOh.setOption({
+      tooltip: baseTooltip,
+      grid:{left:50,right:20,top:36,bottom:30,containLabel:true},
+      xAxis: mkAxis({type:'category',data:['2019','2021H1','2022','2023','2024','H1 2025','Q3 2025'],axisLabel:Object.assign({},baseText,{rotate:30,interval:0})}),
+      yAxis: mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtNum(v);}})}),
+      series:[{
+        type:'line',color:C.navy,
+        data:[2605,4535,3429,3535,4234,3643,2287],
+        symbol:'circle',symbolSize:6,lineStyle:{width:2},
+        areaStyle:{color:'rgba(30,58,95,0.08)'},
+        markPoint:{data:[{coord:['2024',4234],value:4234,label:{formatter:'4,234\nPeak',fontSize:9,color:'#fff'},itemStyle:{color:C.red}}]}
+      }]
+    });
+  }
+
+  function drawKlLaunches(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-kl-launches');
+    if(!dom) return;
+    var cKlLaunch = echarts.init(dom);
+    allCharts.push(cKlLaunch);
+    cKlLaunch.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({},baseLegend,{data:[en?'Launches':'推案量',en?'Take-up %':'去化率%']}),
+      grid:{left:50,right:50,top:36,bottom:30,containLabel:true},
+      xAxis: mkAxis({type:'category',data:['2020','2021','2022','2023','2024']}),
+      yAxis:[
+        mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return (v/1000).toFixed(0)+'K';}})}),
+        mkAxis({type:'value',min:0,max:60,axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11},splitLine:{show:false}})
+      ],
+      series:[
+        {name:en?'Launches':'推案量',type:'bar',barMaxWidth:35,color:C.navy,
+         data:[3200,2800,10324,5927,7840].map(function(v){return{value:v,itemStyle:{borderRadius:[3,3,0,0]}};}),
+         label:{show:true,position:'top',formatter:function(p){return (p.value/1000).toFixed(1)+'K';},fontSize:9}},
+        {name:en?'Take-up %':'去化率%',type:'line',yAxisIndex:1,color:C.orange,
+         data:[28.7,39.3,47.2,28.7,38.0],symbol:'circle',symbolSize:5,lineStyle:{width:2}}
+      ]
+    });
+  }
+
+  function drawKlRental(lang){
+    var en = lang==='en';
+    var dom = document.getElementById('chart-r-kl-rental');
+    if(!dom) return;
+    var cKlRent = echarts.init(dom);
+    allCharts.push(cKlRent);
+    cKlRent.setOption({
+      tooltip: baseTooltip,
+      grid:{left:55,right:20,top:36,bottom:30,containLabel:true},
+      xAxis: mkAxis({type:'category',data:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'],axisLabel:Object.assign({},baseText,{rotate:30,interval:0})}),
+      yAxis: mkAxis({type:'value',min:1500,axisLabel:Object.assign({},baseText,{formatter:function(v){return 'RM'+fmtNum(v);}})}),
+      series:[{
+        type:'line',color:C.green,
+        data:[1800,1850,1900,1980,2100,2000,2000,2100,2350,2730,2901],
+        symbol:'circle',symbolSize:5,lineStyle:{width:2},
+        areaStyle:{color:'rgba(22,163,74,0.08)'},
+        markPoint:{data:[{coord:['2025',2901],value:2901,label:{formatter:'RM 2,901\n+6.1% YoY',fontSize:9,color:'#fff'},itemStyle:{color:C.green}}]}
+      }]
+    });
+  }
+
+  function drawKLOhBand(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartKLOhBand');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var bands=['<300K','300-400K','400-500K','500-600K','600-700K','700-800K','800K-1M','1M+'];
+    var units=[181,469,431,391,236,75,47,478];
+    var takeup=[72,60.4,74.2,79.2,70.8,94.2,96.0,69.8];
+    var colors=units.map(function(v,i){return takeup[i]<70?C.red:takeup[i]<80?C.orange:takeup[i]<90?C.navy:C.green;});
+    c.setOption({
+      tooltip:{trigger:'axis',formatter:function(params){return params[0].name+'<br>'+(en?'Overhang: ':'庫存：')+params[0].value+(en?' units':'戶')+'<br>'+(en?'Take-up: ':'去化率：')+takeup[params[0].dataIndex]+'%';}},
+      grid:{left:12,right:12,top:16,bottom:40,containLabel:true},
+      xAxis:mkAxis({type:'category',data:bands.map(function(b){return 'RM'+b;}),axisLabel:{color:C.muted,fontSize:8,rotate:30}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9}}),
+      series:[{type:'bar',data:units.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[3,3,0,0]}};}),barMaxWidth:36,
+        label:{show:true,position:'top',formatter:function(p){return takeup[p.dataIndex]+'%';},fontSize:9,color:C.muted}}]
+    });
+  }
+
+  function drawKLOhTrend(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartKLOhTrend');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var years=['2019','2021H1','2022','2023','2024','H1 2025','Q3 2025','2026E','2027E','2028E','2029E'];
+    var actual=[2605,4535,3429,3535,4234,3643,2287,null,null,null,null];
+    var forecast=[null,null,null,null,null,null,2287,3000,4000,3100,2200];
+    c.setOption({
+      tooltip:baseTooltip,
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:16,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:years,axisLabel:{color:C.muted,fontSize:8,rotate:20}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return (v/1000).toFixed(1)+'K';}}}),
+      series:[
+        {name:en?'Actual':'實際值',type:'line',data:actual,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,connectNulls:false,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+        {name:en?'Base Case':'基本情境',type:'line',data:forecast,lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,connectNulls:false,
+          markArea:{data:[[{name:en?'Forecast':'預測',xAxis:'2026E',itemStyle:{color:'rgba(217,119,6,0.05)'}},{xAxis:'2029E'}]]}},
+        {type:'line',markLine:{silent:true,data:[
+          {yAxis:4535,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'2021H1 Peak':'2021H1高峰',fontSize:9,color:C.red}},
+          {yAxis:2287,lineStyle:{color:C.green,type:'dotted',width:1},label:{formatter:en?'Q3 2025':'Q3 2025',fontSize:9,color:C.green}}
+        ]}}
+      ]
+    });
+  }
+
+  function drawKLBroadInv(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartKLBroadInv');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    c.setOption({
+      tooltip:{trigger:'item',formatter:function(p){return p.name+': '+p.value.toLocaleString()+(en?' units':'戶')+' ('+p.percent+'%)';}},
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      series:[{
+        type:'pie',radius:['32%','62%'],center:['50%','44%'],
+        data:[
+          {value:2287,name:en?'Official Residential\nOverhang':'官方住宅Overhang',itemStyle:{color:C.navy}},
+          {value:8500,name:en?'Serviced Apt\nInventory (est.)':'服務式公寓\n庫存（估）',itemStyle:{color:C.red}},
+          {value:5356,name:en?'Under Construction\nUnsold':'在建未售',itemStyle:{color:C.orange}},
+          {value:3925,name:en?'Not Yet Started\nUnsold':'未建未售',itemStyle:{color:C.muted}}
+        ],
+        label:{formatter:function(p){return p.name+'\n'+p.value.toLocaleString();},fontSize:9},
+        emphasis:{itemStyle:{shadowBlur:8,shadowColor:'rgba(0,0,0,0.1)'}}
+      }]
+    });
+  }
+
+  function drawKLPipeline(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartKLPipeline');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var years=['2022','2023','2024','2025E','2026E','2027E','2028E'];
+    var completions=[7500,5589,10712,9890,9000,7000,5500];
+    var isEst=[false,false,false,true,true,true,true];
+    c.setOption({
+      tooltip:baseTooltip,
+      grid:{left:12,right:12,top:16,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'category',data:years,axisLabel:{color:C.muted,fontSize:9}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return (v/1000).toFixed(0)+'K';}}}),
+      series:[{type:'bar',
+        data:completions.map(function(v,i){return{value:v,itemStyle:{color:v>=10000?C.red:v>=8000?C.orange:C.navy,borderRadius:[3,3,0,0],opacity:isEst[i]?0.65:1}};}),
+        barMaxWidth:40,
+        label:{show:true,position:'top',formatter:function(p){return (p.value/1000).toFixed(1)+'K';},fontSize:9,color:C.muted},
+        markLine:{silent:true,data:[
+          {yAxis:10712,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'2024 peak':'2024高峰',fontSize:9,color:C.red}},
+          {yAxis:6500,lineStyle:{color:C.muted,type:'dotted',width:1},label:{formatter:en?'Hist avg ~6.5K':'歷史均值~6.5K',fontSize:9,color:C.muted}}
+        ]}
+      }]
+    });
+  }
+
+  function drawFDI(lang){
+    var c = echarts.init(document.getElementById('chart-r-fdi'));
+    allCharts.push(c);
+    var lastLabel = lang==='zh' ? '2025\u4e0a\u534a\u5e74' : '2025 H1';
+    c.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger:'axis', axisPointer:{type:'shadow'} }),
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['2021','2022','2023','2024',lastLabel], axisLabel:{fontSize:9,color:C.muted} }),
+      yAxis: mkAxis({ type:'value', min:0 }),
+      series: [{
+        type:'bar',
+        data:[
+          { value:12, itemStyle:{color:C.navy,borderRadius:[4,4,0,0]} },
+          { value:18, itemStyle:{color:C.navy,borderRadius:[4,4,0,0]} },
+          { value:15, itemStyle:{color:C.navy,borderRadius:[4,4,0,0]} },
+          { value:25, itemStyle:{color:C.navy,borderRadius:[4,4,0,0]} },
+          { value:12.5, itemStyle:{color:C.green,borderRadius:[4,4,0,0]} }
+        ],
+        barMaxWidth:50,
+        label:{ show:true, position:'top', formatter:'RM {c}B', fontSize:10, fontFamily:'JetBrains Mono, monospace' },
+        markPoint:{
+          data:[{ coord:[lastLabel,12.5], symbol:'pin', symbolSize:40, label:{formatter:'+150%\nYoY',fontSize:8}, itemStyle:{color:C.green} }]
+        }
+      }]
+    });
+  }
+
+  function drawPgOhBand(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartPgOhBand');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var bands=['<100K','100-200K','200-300K','300-400K','400-500K','500-700K','700K-1M','>1M'];
+    var units=[51,6,593,480,378,200,385,637];
+    var colors=[C.green,C.green,C.orange,C.orange,C.red,C.navy,C.navy,C.blue];
+    c.setOption({
+      tooltip:baseTooltip,
+      grid:{left:12,right:12,top:16,bottom:40,containLabel:true},
+      xAxis:mkAxis({type:'category',data:bands.map(function(b){return 'RM'+b;}),axisLabel:{color:C.muted,fontSize:8,rotate:30}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9}}),
+      series:[{type:'bar',data:units.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[3,3,0,0]}};}),barMaxWidth:36,
+        label:{show:true,position:'top',formatter:function(p){return p.value;},fontSize:9,color:C.muted},
+        markLine:{silent:true,data:[{yAxis:378,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'RM400-500K\n+3,169 UC':'RM40-50萬\n+3,169在建',fontSize:8,color:C.red}}]}}]
+    });
+  }
+
+  function drawPgPipeline(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartPgPipeline');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var cats=en?['Not Constructed\nUnsold','Under Construction\nUnsold','Overhang\n(Completed)']:['未建未售','在建未售','已完工未售\n(Overhang)'];
+    var vals=[639,7804,2730];
+    var clrs=[C.green,C.orange,C.red];
+    c.setOption({
+      tooltip:baseTooltip,
+      grid:{left:12,right:12,top:16,bottom:24,containLabel:true},
+      xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9,lineHeight:14}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return (v/1000).toFixed(1)+'K';}}}),
+      series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:clrs[i],borderRadius:[3,3,0,0]}};}),barMaxWidth:80,
+        label:{show:true,position:'top',formatter:function(p){return p.value.toLocaleString()+(en?' u':'戶');},fontSize:10,color:C.muted}}]
+    });
+  }
+
+  function drawPgDistrict(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartPgDistrict');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var districts=en?['SP Selatan','SP Tengah','SP Utara','Timur Laut','Barat Daya']:['南省','中省','北省','東北區','西南區'];
+    var overhang=[254,239,276,968,993];
+    var txQ3=[17,112,95,397,192];
+    c.setOption({
+      tooltip:baseTooltip,
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:districts,axisLabel:{color:C.muted,fontSize:9,rotate:15}}),
+      yAxis:[mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9}}),mkAxis({type:'value',splitLine:{show:false},axisLabel:{color:C.muted,fontSize:9}})],
+      series:[
+        {name:en?'Overhang':'Overhang（戶）',type:'bar',data:overhang.map(function(v,i){return{value:v,itemStyle:{color:i>=3?C.red:C.navy,borderRadius:[3,3,0,0]}};}),barMaxWidth:36,label:{show:true,position:'top',formatter:function(p){return p.value;},fontSize:9}},
+        {name:en?'Q3 Condo Sales':'Q3 Condo成交',type:'line',yAxisIndex:1,data:txQ3,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,label:{show:true,position:'top',formatter:function(p){return p.value;},fontSize:9,color:C.green}}
+      ]
+    });
+  }
+
+  function drawMyPipeline(lang){
+    var en=lang==='en';var dom=document.getElementById('chartMyPipeline');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var cats=en?['Residential','Serviced Apt\n(SA)','SOHO','Commercial\nShop']:['住宅','服務式公寓\n(SA)','SOHO','商業\n店舖'];
+    var oh=[28672,17892,2864,6447];var uc=[69356,44035,6199,5006];var nc=[14383,12909,1023,594];
+    c.setOption({
+      tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9,lineHeight:14}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/1000).toFixed(0)+'K';}}}),
+      series:[
+        {name:en?'Overhang':'Overhang',type:'bar',stack:'s',data:oh.map(function(v){return{value:v,itemStyle:{color:C.red}}}),barMaxWidth:60},
+        {name:en?'Under Const.':'在建未售',type:'bar',stack:'s',data:uc.map(function(v){return{value:v,itemStyle:{color:C.orange}}}),barMaxWidth:60},
+        {name:en?'Planned':'規劃未售',type:'bar',stack:'s',data:nc.map(function(v){return{value:v,itemStyle:{color:C.blue,borderRadius:[3,3,0,0]}}}),barMaxWidth:60,
+          label:{show:true,position:'top',formatter:function(p){var t=oh[p.dataIndex]+uc[p.dataIndex]+nc[p.dataIndex];return(t/1000).toFixed(1)+'K';},fontSize:9,color:C.muted}}
+      ]
+    });
+  }
+
+  function drawMyStateOh(lang){
+    var en=lang==='en';var dom=document.getElementById('chartMyStateOh');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var states=en?['Perak','Johor','Sabah','Selangor','Penang','Kelantan','KL','N.Sembilan']:['霹靂','柔佛','沙巴','雪蘭莪','檳城','吉蘭丹','吉隆坡','森美蘭'];
+    var rOh=[3300,3293,2771,2757,2730,2599,2287,2205];var sOh=[121,9018,181,2095,272,225,4687,783];var soOh=[6,377,0,209,1007,0,1127,0];
+    c.setOption({
+      tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:16,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:states,axisLabel:{color:C.muted,fontSize:8,rotate:20}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/1000).toFixed(1)+'K';}}}),
+      series:[
+        {name:en?'Residential':'住宅',type:'bar',stack:'s',data:rOh.map(function(v){return{value:v,itemStyle:{color:C.navy}}}),barMaxWidth:40},
+        {name:'SA',type:'bar',stack:'s',data:sOh.map(function(v){return{value:v,itemStyle:{color:C.red}}}),barMaxWidth:40},
+        {name:'SOHO',type:'bar',stack:'s',data:soOh.map(function(v){return{value:v,itemStyle:{color:C.orange,borderRadius:[3,3,0,0]}}}),barMaxWidth:40}
+      ]
+    });
+  }
+
+  function drawMyCityOh(lang){
+    var en=lang==='en';var dom=document.getElementById('chartMyCityOh');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var cities=en?['Johor Bahru','Kuala Lumpur','Penang']:['新山/柔佛','吉隆坡','檳城'];
+    var r=[3293,2287,2730];var s=[9018,4687,272];var so=[377,1127,1007];var sh=[1074,10,193];
+    c.setOption({
+      tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:cities,axisLabel:{color:C.muted,fontSize:10}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/1000).toFixed(1)+'K';}}}),
+      series:[
+        {name:en?'Residential':'住宅',type:'bar',stack:'s',data:r.map(function(v){return{value:v,itemStyle:{color:C.navy}}}),barMaxWidth:80},
+        {name:'SA',type:'bar',stack:'s',data:s.map(function(v){return{value:v,itemStyle:{color:C.red}}}),barMaxWidth:80},
+        {name:'SOHO',type:'bar',stack:'s',data:so.map(function(v){return{value:v,itemStyle:{color:C.orange}}}),barMaxWidth:80},
+        {name:en?'Shop':'商業',type:'bar',stack:'s',data:sh.map(function(v){return{value:v,itemStyle:{color:C.muted,borderRadius:[3,3,0,0]}}}),barMaxWidth:80,
+          label:{show:true,position:'top',formatter:function(p){var t=[r,s,so,sh].reduce(function(a,b){return a+b[p.dataIndex];},0);return(t/1000).toFixed(1)+'K';},fontSize:10,color:C.navy}}
+      ]
+    });
+  }
+
+  function drawMySaOh(lang){
+    var en=lang==='en';var dom=document.getElementById('chartMySaOh');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var states=en?['Johor','KL','Selangor','N.Sembilan','Penang','Sarawak','Sabah']:['柔佛','吉隆坡','雪蘭莪','森美蘭','檳城','砂拉越','沙巴'];
+    var saOh=[9018,4687,2095,783,272,62,181];var saUC=[5592,8212,18116,658,3150,2106,1408];
+    c.setOption({
+      tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:states,axisLabel:{color:C.muted,fontSize:9,rotate:15}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/1000).toFixed(0)+'K';}}}),
+      series:[
+        {name:en?'SA Overhang':'SA OH',type:'bar',data:saOh.map(function(v,i){return{value:v,itemStyle:{color:i<=1?C.red:i===2?C.orange:C.navy}}}),barMaxWidth:36,stack:'ss'},
+        {name:en?'SA Under Const.':'SA在建',type:'bar',data:saUC.map(function(v,i){return{value:v,itemStyle:{color:i<=1?'rgba(220,38,38,0.4)':i===2?'rgba(217,119,6,0.4)':'rgba(30,58,95,0.35)',borderRadius:[3,3,0,0]}}}),barMaxWidth:36,stack:'ss',
+          label:{show:true,position:'top',formatter:function(p){return((saOh[p.dataIndex]+saUC[p.dataIndex])/1000).toFixed(1)+'K';},fontSize:9,color:C.muted}}
+      ]
+    });
+  }
+
+  function drawMyOhForecast(lang){
+    var en=lang==='en';var dom=document.getElementById('chartMyOhForecast');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var periods=['Q3 2025','2026E','2027E','2028E','2029E'];
+    var rBull=[28672,25000,20000,15000,10000];var rBase=[28672,29500,27000,23000,18000];var rBear=[28672,34000,38000,40000,38000];var sBase=[17892,18500,17000,14000,11000];
+    c.setOption({
+      tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:9}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/1000).toFixed(0)+'K';}}}),
+      series:[
+        {name:en?'Resi Bull(25%)':'住宅樂觀',type:'line',data:rBull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:4},
+        {name:en?'Resi Base(50%)':'住宅基本',type:'line',data:rBase,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.05)'}},
+        {name:en?'Resi Bear(20%)':'住宅悲觀',type:'line',data:rBear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:4},
+        {name:en?'SA Base':'SA基本',type:'line',data:sBase,lineStyle:{color:C.orange,width:2,type:'dotted'},itemStyle:{color:C.orange},symbol:'diamond',symbolSize:6},
+        {type:'line',markLine:{silent:true,data:[{yAxis:46564,lineStyle:{color:C.muted,type:'dotted',width:1},label:{formatter:en?'Combined 46,564':'合計46,564',fontSize:8,color:C.muted}}]}}
+      ]
+    });
+  }
+
+  function drawJBPrice(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartJBPrice');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var yrs=['2020','2021','2022','2023','2024','Q3 2025'];
+    var jbCity=[430000,435000,455000,490000,510000,588000];
+    var johorAvg=[340000,345000,360000,390000,420000,471485];
+    c.setOption({
+      tooltip:baseTooltip,
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:16,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:9}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return (v/1000).toFixed(0)+'K';}}}),
+      series:[
+        {name:en?'JB City Median':'新山市區中位數',type:'line',data:jbCity,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.07)'},symbol:'circle',symbolSize:5,
+          markPoint:{data:[{coord:['Q3 2025',588000],symbol:'pin',symbolSize:32,label:{formatter:en?'+15.3%\nYoY':'+15.3%\n年增',fontSize:8},itemStyle:{color:C.green}}]}},
+        {name:en?'Johor State Avg':'柔佛州均值',type:'line',data:johorAvg,lineStyle:{color:C.blue,width:1.5,type:'dashed'},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4}
+      ]
+    });
+  }
+
+  function drawJBPipeline(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartJBPipeline');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var cats=en?['Resi\nOverhang','Resi\nUnder Const.','Resi\nNot Started','SA\nOverhang','SA\nUnder Const.']:['住宅\nOverhang','住宅\n在建未售','住宅\n未建未售','服務公寓\nOverhang','服務公寓\n在建未售'];
+    var vals=[3293,8183,706,1074,1316];
+    var clrs=[C.red,C.orange,C.blue,'#f43f5e','#fb923c'];
+    c.setOption({
+      tooltip:baseTooltip,
+      grid:{left:12,right:12,top:16,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:8,lineHeight:14}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return (v/1000).toFixed(1)+'K';}}}),
+      series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:clrs[i],borderRadius:[3,3,0,0]}};}),barMaxWidth:50,
+        label:{show:true,position:'top',formatter:function(p){return vals[p.dataIndex].toLocaleString();},fontSize:9,color:C.muted}}]
+    });
+  }
+
+  function drawJBOhBand(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartJBOhBand');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var bands=['<100K','100-200K','200-300K','300-400K','400-500K','500-600K','600-700K','700-800K','800K-1M','>1M'];
+    var ohRate=[25.6,15.3,18.3,29.4,24.3,21.0,18.5,19.0,18.5,23.2];
+    var ohVol=[135,134,208,302,236,600,286,228,512,652];
+    c.setOption({
+      tooltip:{trigger:'axis',formatter:function(p){return 'RM'+bands[p[0].dataIndex]+'<br>'+(en?'OH rate: ':'Overhang率：')+ohRate[p[0].dataIndex]+'%<br>'+(en?'Units: ':'戶數：')+ohVol[p[0].dataIndex];}},
+      grid:{left:12,right:12,top:16,bottom:40,containLabel:true},
+      xAxis:mkAxis({type:'category',data:bands.map(function(b){return 'RM'+b;}),axisLabel:{color:C.muted,fontSize:8,rotate:35}}),
+      yAxis:mkAxis({type:'value',max:35,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+      series:[{type:'bar',data:ohRate.map(function(v){return{value:v,itemStyle:{color:v>=25?C.red:v>=20?C.orange:C.navy,borderRadius:[3,3,0,0]}};}),barMaxWidth:30,
+        label:{show:true,position:'top',formatter:function(p){return p.value+'%';},fontSize:9,color:C.muted},
+        markLine:{silent:true,data:[{yAxis:21,lineStyle:{color:C.orange,type:'dashed',width:1.5},label:{formatter:en?'State avg 21%':'全州均值21%',fontSize:9,color:C.orange}}]}}]
+    });
+  }
+
+  function drawJBOhForecast(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartJBOhForecast');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var periods=['Q3 2025','2026E','2027E','2028E','2029E'];
+    var base=[3293,3800,2100,1200,800];
+    var bull=[3293,2300,1300,500,100];
+    var bear=[3293,3800,4100,3900,3500];
+    c.setOption({
+      tooltip:baseTooltip,
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:16,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:9}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return (v/1000).toFixed(1)+'K';}}}),
+      series:[
+        {name:en?'Base (55%)':'基本(55%)',type:'line',data:base,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+        {name:en?'Bull (25%)':'樂觀(25%)',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:4},
+        {name:en?'Bear (20%)':'悲觀(20%)',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:4},
+        {type:'line',markLine:{silent:true,data:[{yAxis:3800,lineStyle:{color:C.orange,type:'dotted',width:1},label:{formatter:en?'Base peak ~3,800':'基本峰值~3,800',fontSize:8,color:C.orange}}]}}
+      ]
+    });
+  }
+
+  function drawPgOhForecast(lang){
+    var en=lang==='en';
+    var dom=document.getElementById('chartPgOhForecast');if(!dom)return;
+    var c=echarts.init(dom);allCharts.push(c);
+    var periods=['Q3 2025','2025E','2026E','2027E','2028E','2029E'];
+    var base=[2730,2900,4070,3800,2800,2200];
+    var bull=[2730,2600,3200,2700,1900,1500];
+    var bear=[2730,3100,5200,6500,5800,4500];
+    c.setOption({
+      tooltip:baseTooltip,
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+      grid:{left:12,right:12,top:16,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:9}}),
+      yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return (v/1000).toFixed(1)+'K';}}}),
+      series:[
+        {name:en?'Base (55%)':'基本(55%)',type:'line',data:base,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+        {name:en?'Bull (25%)':'樂觀(25%)',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:4},
+        {name:en?'Bear (20%)':'悲觀(20%)',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:4},
+        {type:'line',markLine:{silent:true,data:[{yAxis:4070,lineStyle:{color:C.orange,type:'dotted',width:1},label:{formatter:en?'Base peak ~4,070':'基本峰值~4,070',fontSize:8,color:C.orange}}]}}
+      ]
+    });
+  }
+
+  function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+  function closeTocOnMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+
+  window.addEventListener('load', function(){
+    var lang = localStorage.getItem('lang') || 'en';
+    setLang(lang);
+  });
+
+  window.addEventListener('resize', function(){
+    allCharts.forEach(function(c){ if(c) c.resize(); });
+  });
+    // -- Side Nav ScrollSpy --
+  (function(){
+    function initScrollSpy(){
+      var items = document.querySelectorAll('.side-nav-item');
+      if(!items.length) return;
+      var sections = [];
+      items.forEach(function(a){
+        var id = a.getAttribute('href').replace('#','');
+        var el = document.getElementById(id);
+        if(el) sections.push({el:el, a:a});
+      });
+      function onScroll(){
+        var scrollY = window.scrollY + window.innerHeight * 0.25;
+        var current = sections[0];
+        sections.forEach(function(s){
+          if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s;
+        });
+        items.forEach(function(a){ a.classList.remove('active'); });
+        if(current) current.a.classList.add('active');
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', initScrollSpy);
+    } else {
+      initScrollSpy();
+    }
+  })();
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

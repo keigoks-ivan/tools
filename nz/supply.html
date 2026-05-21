@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Analysis | NZ Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+      <h1><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
+      <p class="subtitle"><span class="lang-en">Building Consents, Listings &amp; Rental Inventory</span><span class="lang-zh" style="display:none">建築許可、上架量與租賃庫存</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">SUPPLY INDICATORS</span><span class="lang-zh" style="display:none">供給指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">SEP CONSENTS</span><span class="lang-zh" style="display:none">9月建築許可</span></div>
+        <div class="kpi-value">3,747</div>
+        <span class="kpi-badge badge-green">+27% YoY</span>
+        <div class="kpi-source">Stats NZ Sep 2025</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">RENTAL LISTINGS</span><span class="lang-zh" style="display:none">租賃上架量</span></div>
+        <div class="kpi-value">+21.2%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">YoY growth</span><span class="lang-zh" style="display:none">年增率</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">NEW LISTINGS</span><span class="lang-zh" style="display:none">新增上架量</span></div>
+        <div class="kpi-value">+5.5%</div>
+        <span class="kpi-badge badge-green">YoY 2025</span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">AUCKLAND INVENTORY</span><span class="lang-zh" style="display:none">奧克蘭庫存</span></div>
+        <div class="kpi-value">31 wk</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Elevated</span><span class="lang-zh" style="display:none">偏高</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">CONSTRUCTION COSTS</span><span class="lang-zh" style="display:none">建築成本</span></div>
+        <div class="kpi-value">High</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Labour + materials</span><span class="lang-zh" style="display:none">勞動力+材料</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">CHRISTCHURCH</span><span class="lang-zh" style="display:none">基督城</span></div>
+        <div class="kpi-value">New Dev</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Active pipeline</span><span class="lang-zh" style="display:none">活躍開發</span></span>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid two-col" style="margin-top:20px;">
+      <div class="chart-card">
+        <h3><span class="lang-en">Annual Building Consents</span><span class="lang-zh" style="display:none">年度建築許可</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Total residential consents issued</span><span class="lang-zh" style="display:none">住宅建築許可總數</span></p>
+        <div style="position:relative;height:260px;"><div id="chartNzConsents" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">New Listings Growth (YoY %)</span><span class="lang-zh" style="display:none">新增上架量年增率 (%)</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Annual change in new listings</span><span class="lang-zh" style="display:none">新增上架量年度變化</span></p>
+        <div style="position:relative;height:260px;"><div id="chartNzListings" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">Rental Listings Growth (YoY %)</span><span class="lang-zh" style="display:none">租賃上架量年增率 (%)</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Annual change in rental stock on market</span><span class="lang-zh" style="display:none">市場租賃存量年度變化</span></p>
+        <div style="position:relative;height:260px;"><div id="chartNzRentalStock" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">Stats NZ &middot; REINZ &middot; Trade Me Property Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">紐西蘭統計局 &middot; REINZ &middot; Trade Me Property 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  function fmtNZD(v){if(v>=1000000)return 'NZ$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return 'NZ$'+Math.round(v/1000)+'K';return 'NZ$'+v;}
+  function fmtNZDShort(v){if(v>=1000000)return(v/1000000).toFixed(2)+'M';if(v>=1000)return Math.round(v/1000)+'K';return v.toString();}
+  var baseText={color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+
+    // chartNzConsents: Line area with markPoint max
+    var c1=echarts.init(document.getElementById('chartNzConsents'));allCharts.push(c1);
+    c1.setOption({
+      tooltip:baseTooltip,grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025E']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+      series:[{
+        type:'line',data:[39000,48000,50000,37000,33000,38000],
+        lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},
+        areaStyle:{color:'rgba(217,119,6,0.12)'},smooth:0.2,symbol:'circle',symbolSize:6,
+        markPoint:{data:[{type:'max',name:'Peak',label:{formatter:lang==='zh'?'高峰':'Peak',fontSize:9},itemStyle:{color:C.orange}}]}
+      }]
+    });
+
+    // chartNzListings: Bar positive/negative
+    var c2=echarts.init(document.getElementById('chartNzListings'));allCharts.push(c2);
+    c2.setOption({
+      tooltip:baseTooltip,grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
+      series:[{
+        type:'bar',data:[-15,8,12,5.5].map(function(v){return{value:v,itemStyle:{color:v>=0?C.green:C.red,borderRadius:v>=0?[4,4,0,0]:[0,0,4,4]}};}),
+        barMaxWidth:45,
+        label:{show:true,position:'top',fontFamily:'JetBrains Mono',fontSize:10,formatter:function(p){return(p.value>=0?'+':'')+p.value+'%';}}
+      }]
+    });
+
+    // chartNzRentalStock: Line
+    var c3=echarts.init(document.getElementById('chartNzRentalStock'));allCharts.push(c3);
+    c3.setOption({
+      tooltip:baseTooltip,grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
+      series:[{
+        type:'line',data:[-5,8,18,21.2],
+        lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},
+        areaStyle:{color:'rgba(30,58,95,0.08)'},smooth:0.2,symbol:'circle',symbolSize:6,
+        label:{show:true,position:'top',fontFamily:'JetBrains Mono',fontSize:10,formatter:function(p){return(p.value>=0?'+':'')+p.value+'%';}}
+      }]
+    });
+  }
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | New Zealand Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">New Zealand — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">紐西蘭 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q2 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q2</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:2;background:#6b7280">
+        <div class="cs-title">GFC</div>
+        <div class="cs-year">08–09</div>
+      </div>
+      <div class="cycle-seg" style="flex:6;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Post-GFC Boom</span><span class="lang-zh" style="display:none">後GFC榮景</span></div>
+        <div class="cs-year">10–21</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Rate Hike + Correction</span><span class="lang-zh" style="display:none">升息+修正</span></div>
+        <div class="cs-year">22–23</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Trough → Recovery</span><span class="lang-zh" style="display:none">底部→復甦</span></div>
+        <div class="cs-year">24–25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">RBNZ cutting aggressively (5.50%→3.50% Oct 2024 to Apr 2025); HPI down ~20% from 2021 peak, showing early stabilisation signals</span>
+        <span class="lang-zh" style="display:none">RBNZ積極降息（2024年10月至2025年4月從5.50%降至3.50%）；HPI從2021年高點下跌約20%，呈現初步企穩訊號</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">RBNZ OCR</span><span class="lang-zh" style="display:none">RBNZ官方現金利率</span></div>
+      <div class="kpi-value">3.50%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">−200bp from peak</span><span class="lang-zh" style="display:none">距高峰降200bp</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">REINZ HPI YoY</span><span class="lang-zh" style="display:none">REINZ HPI YoY</span></div>
+      <div class="kpi-value">−3.5%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Still declining (Q1 2025)</span><span class="lang-zh" style="display:none">仍在下跌中（2025 Q1）</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CPI YoY</span><span class="lang-zh" style="display:none">通膨 YoY</span></div>
+      <div class="kpi-value">2.5%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Back in 1–3% band</span><span class="lang-zh" style="display:none">回落至1–3%目標帶</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">0.7%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">2024 full year</span><span class="lang-zh" style="display:none">2024全年</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Unemployment</span><span class="lang-zh" style="display:none">失業率</span></div>
+      <div class="kpi-value">5.1%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">4-yr high Q4 2024</span><span class="lang-zh" style="display:none">2024 Q4四年高點</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">1-yr Fixed Mortgage Rate</span><span class="lang-zh" style="display:none">1年期固定房貸利率</span></div>
+      <div class="kpi-value">5.8%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Falling from 7.4% peak</span><span class="lang-zh" style="display:none">從7.4%高峰回落中</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">OCR Range (17yr)</span><span class="lang-zh" style="display:none">OCR歷史區間</span></div>
+      <div class="ctx-val">0.25%–5.50%</div>
+      <div class="ctx-sub"><span class="lang-en">Low: Mar 2020–Aug 2021 · High: May 2023</span><span class="lang-zh" style="display:none">低點：2020年3月–2021年8月 · 高點：2023年5月</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">REINZ HPI Since 2008</span><span class="lang-zh" style="display:none">REINZ HPI自2008累計</span></div>
+      <div class="ctx-val" style="color:#16a34a">+155%</div>
+      <div class="ctx-sub"><span class="lang-en">2008→2021 peak +200%; then −20% correction</span><span class="lang-zh" style="display:none">2008→2021高峰+200%；隨後修正20%</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+5.7% / −3.7%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2021 rebound · Worst: 2020 COVID</span><span class="lang-zh" style="display:none">最佳：2021反彈 · 最差：2020 COVID</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Peak-to-Trough HPI Drop</span><span class="lang-zh" style="display:none">HPI峰谷跌幅</span></div>
+      <div class="ctx-val" style="color:#dc2626">−20.8%</div>
+      <div class="ctx-sub"><span class="lang-en">Nov 2021 peak → Jun 2023 trough (REINZ)</span><span class="lang-zh" style="display:none">2021年11月高峰→2023年6月低谷（REINZ）</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × House Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> New Zealand was the first OECD central bank to hike in Oct 2021 — 7 months ahead of the Fed. This early-mover advantage meant NZ also entered and exited the correction cycle ahead of peers. The HPI drop of −20.8% peak-to-trough is the deepest in the developed world for this cycle (exceeding Sweden −20% and Canada −18%), reflecting NZ's extreme valuation and short-term fixed mortgage structure (most mortgages refix every 1–2 years). RBNZ is now cutting aggressively — OCR at 3.50% (Apr 2025), with market pricing a further 25–50bp.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>紐西蘭於2021年10月成為首個升息的OECD央行，比聯準會早7個月。這一先行優勢意味著紐西蘭也比同儕更早進入並走出修正週期。HPI峰谷跌幅20.8%是本輪週期中已開發國家最深的跌幅（超過瑞典-20%和加拿大-18%），反映了紐西蘭極端的估值水位和短期固定利率房貸結構（多數房貸每1–2年重新定價）。RBNZ目前正積極降息——2025年4月OCR達3.50%，市場預期還有25–50bp降息空間。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">OCR / 1-yr Fixed Mortgage / CPI / M2 vs REINZ HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">OCR / 1年期固定房貸 / CPI / M2 vs REINZ HPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × House Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> New Zealand's housing market is hyper-sensitive to net migration — the country has only 5M people and immigration swings of 50–80k/yr represent 1–2% of population. The COVID border closure (2020–22) caused a net migration deficit that paradoxically amplified the price boom (domestic demand with no new supply). The reopening surge of 130k+ net arrivals (2023) then competed with sharply higher mortgage rates, creating a "collision" — prices fell despite population growth, as affordability broke.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>紐西蘭房市對淨移民數量極為敏感——全國人口僅500萬，每年5–8萬人的移民波動相當於人口的1–2%。COVID邊境關閉（2020–22年）造成淨移民赤字，矛盾的是反而加劇了房價繁榮（內需強勁但無新供給）。邊境重開後2023年淨移民激增逾13萬人，卻與急速上升的房貸利率相遇，形成「碰撞」——可負擔性崩潰使房價在人口增長的背景下仍然下跌。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">GDP / Unemployment / Credit Growth / Net Migration vs REINZ HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">GDP / 失業率 / 信貸成長 / 淨移民 vs REINZ HPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #6b7280">
+      <div class="ev-year" style="color:#6b7280"><span class="lang-en">2008–2009 · GFC SHOCK</span><span class="lang-zh" style="display:none">2008–2009 · GFC衝擊</span></div>
+      <div class="ev-title"><span class="lang-en">RBNZ Cuts 575bp — HPI Falls 10%</span><span class="lang-zh" style="display:none">RBNZ降息575bp，HPI跌10%</span></div>
+      <div class="ev-desc"><span class="lang-en">RBNZ cuts OCR aggressively from 8.25% to 2.50% — 575bp in 12 months. GDP contracts −2.1% in 2009. National house prices fall ~10% peak to trough. Canterbury earthquakes (Sep 2010, Feb 2011) destroy 10,000+ homes, creating acute Christchurch housing shortage. Recovery begins 2010 with rate stabilisation.</span><span class="lang-zh" style="display:none">RBNZ大幅降息，12個月內從8.25%降至2.50%，降幅575bp。2009年GDP衰退2.1%，全國房價峰谷跌約10%。坎特伯雷地震（2010年9月、2011年2月）摧毀逾1萬套房屋，造成基督城急性住房短缺。2010年利率穩定後展開復甦。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2010–2014 · RECOVERY BOOM</span><span class="lang-zh" style="display:none">2010–2014 · 復甦榮景</span></div>
+      <div class="ev-title"><span class="lang-en">Auckland Prices Surge; LVR Restrictions Begin</span><span class="lang-zh" style="display:none">奧克蘭房價急漲，LVR限制開始實施</span></div>
+      <div class="ev-desc"><span class="lang-en">Auckland rapidly emerges as OECD's most unaffordable city. Net migration accelerates to record +69k (2014). RBNZ introduces loan-to-value restrictions (LVR) in Oct 2013 — first central bank in world to use macroprudential tools at scale. OCR hiked 100bp (2.50%→3.50%) in 2014. HPI rises +45% nationally 2010–14, Auckland +70%.</span><span class="lang-zh" style="display:none">奧克蘭迅速成為OECD可負擔性最差的城市。淨移民加速至創紀錄的6.9萬人（2014年）。RBNZ於2013年10月引入貸款價值比（LVR）限制——成為全球首個大規模使用宏觀審慎工具的央行。2014年OCR升息100bp（2.50%→3.50%）。全國HPI於2010–14年累漲45%，奧克蘭漲70%。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #8b5cf6">
+      <div class="ev-year" style="color:#8b5cf6"><span class="lang-en">2018 · FOREIGN BUYER BAN</span><span class="lang-zh" style="display:none">2018年 · 外國買家禁令</span></div>
+      <div class="ev-title"><span class="lang-en">Overseas Investment Amendment Act — No Foreign Buyers</span><span class="lang-zh" style="display:none">境外投資修正法令禁止外國人置業</span></div>
+      <div class="ev-desc"><span class="lang-en">Labour government bans most foreign nationals from purchasing existing homes (Oct 2018) — one of the most radical demand-side interventions globally. HPI cools sharply: Auckland −4% in 2018. Capital gains tax proposal (later abandoned) further dampens sentiment. RBNZ holds OCR at 1.75% as CPI stays subdued. Migration running at +50k/yr keeps long-term demand floor.</span><span class="lang-zh" style="display:none">工黨政府禁止大多數外國人購買現有住宅（2018年10月）——全球最激進的需求側干預之一。HPI急速降溫：奧克蘭2018年跌4%。資本利得稅提案（後被放棄）進一步打壓市場情緒。RBNZ維持OCR在1.75%，CPI持續溫和。每年逾5萬人的移民為長期需求提供支撐。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">MAR 2020 · COVID EMERGENCY CUT</span><span class="lang-zh" style="display:none">2020年3月 · COVID緊急降息</span></div>
+      <div class="ev-title"><span class="lang-en">OCR to Historic Low 0.25%; QE + FLP</span><span class="lang-zh" style="display:none">OCR降至歷史低點0.25%；QE+FLP</span></div>
+      <div class="ev-desc"><span class="lang-en">RBNZ cuts emergency 75bp to 0.25% in Mar 2020. Launches NZ$100bn Large-Scale Asset Purchase (LSAP) program. Funding for Lending Programme (FLP) gives banks access to cheap RBNZ funding at 0.25%. Borders close — immigration plunges from +50k to near zero. Counter-intuitively, house prices rocket: GDP rebounds +5.7% in 2021; fiscal stimulus (Wage Subsidy Scheme) prevents income loss; ultra-cheap credit floods property.</span><span class="lang-zh" style="display:none">RBNZ於2020年3月緊急降息75bp至0.25%，啟動1000億紐元大規模資產購買計劃（LSAP）。融資貸款計劃（FLP）使銀行以0.25%的極低成本從RBNZ融資。邊境關閉，移民從5萬多人驟降至近零。但房價卻反直覺地大幅上漲：2021年GDP反彈5.7%；財政刺激（薪資補貼計劃）防止收入損失；超廉價信貸大舉湧入房市。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2020–2021 · PANDEMIC PRICE BOOM</span><span class="lang-zh" style="display:none">2020–2021 · 疫情房價榮景</span></div>
+      <div class="ev-title"><span class="lang-en">National HPI +31% in 12 Months — OECD Record</span><span class="lang-zh" style="display:none">全國HPI 12個月+31%，創OECD紀錄</span></div>
+      <div class="ev-desc"><span class="lang-en">Peak annual HPI growth of +31.1% in Oct 2021 — among the highest ever recorded in the OECD. Median Auckland house price hits NZ$1.3M. RBNZ temporarily removes LVR restrictions (May 2020, restored March 2021). Government's Bright-Line Test extended to 10 years (Mar 2021) to cool investment demand. Investor interest-only lending tightened. First-home buyer share hits 30% — FOMO at peak.</span><span class="lang-zh" style="display:none">HPI年漲幅於2021年10月達+31.1%峰值——OECD史上最高紀錄之一。奧克蘭房屋中位價達130萬紐元。RBNZ暫時取消LVR限制（2020年5月，2021年3月恢復）。政府將光明線測試延長至10年（2021年3月）以冷卻投資需求。首次置業者比例達30%，FOMO情緒見頂。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">OCT 2021 · FIRST HIKE — 7 MONTHS AHEAD OF FED</span><span class="lang-zh" style="display:none">2021年10月 · 首次升息——比聯準會提前7個月</span></div>
+      <div class="ev-title"><span class="lang-en">RBNZ Hikes 525bp: 0.25%→5.50% (2021–2023)</span><span class="lang-zh" style="display:none">RBNZ升息525bp：0.25%→5.50%（2021–2023）</span></div>
+      <div class="ev-desc"><span class="lang-en">RBNZ first G10 central bank to hike post-COVID — Oct 2021. 12 consecutive hikes to 5.50% by May 2023. 1-yr fixed mortgage rate peaks at 7.4% (2023). National HPI falls −20.8% peak-to-trough (Nov 2021–Jun 2023) — deepest correction of any major market. Auckland −25%. Affordability stress: debt-service ratio hits 50%+ for recent buyers. REINZ sales volumes fall to 30-yr lows.</span><span class="lang-zh" style="display:none">RBNZ成為COVID後首個升息的G10央行——2021年10月。連續升息12次至2023年5月的5.50%。1年期固定房貸利率於2023年達7.4%峰值。全國HPI峰谷跌20.8%（2021年11月–2023年6月），為任何主要市場中最深的修正。奧克蘭跌25%。可負擔性壓力：近期買家的還款收入比突破50%。REINZ銷售量跌至30年低點。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2024 · AGGRESSIVE RBNZ EASING</span><span class="lang-zh" style="display:none">2024年 · RBNZ積極降息</span></div>
+      <div class="ev-title"><span class="lang-en">200bp Cuts in 6 Months: 5.50%→3.50%</span><span class="lang-zh" style="display:none">6個月降息200bp：5.50%→3.50%</span></div>
+      <div class="ev-desc"><span class="lang-en">RBNZ pivots sharply — 50bp cuts in Oct and Nov 2024, then 25bp in Feb and Apr 2025. CPI returns to 2.5% target band. GDP weak (+0.7% 2024). Unemployment rising (5.1% Q4 2024). Government repeals foreign buyer ban (Apr 2024), allowing non-resident purchases again. HPI YoY still negative but monthly rate of decline slowing. Market expects RBNZ to reach 3.00% neutral rate by mid-2025.</span><span class="lang-zh" style="display:none">RBNZ急劇轉向——2024年10月及11月各降息50bp，2025年2月及4月各降25bp。CPI回落至2.5%目標帶。GDP疲弱（2024年+0.7%）。失業率上升（2024年Q4達5.1%）。政府廢除外國買家禁令（2024年4月），允許非居民再度購屋。HPI年率仍為負，但月度跌速放緩。市場預期RBNZ將於2025年中達3.00%中性利率。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2025 · TROUGH → RECOVERY TRANSITION</span><span class="lang-zh" style="display:none">2025年 · 底部→復甦過渡</span></div>
+      <div class="ev-title"><span class="lang-en">Foreign Buyers Return; Building Consents Collapse</span><span class="lang-zh" style="display:none">外國買家回歸；建築許可量崩跌</span></div>
+      <div class="ev-desc"><span class="lang-en">Government scrapped foreign buyer ban (Apr 2024) — first Asian buyers (Singapore, Hong Kong, Taiwan) returning, particularly in Auckland and Queenstown. Building consents collapsed −25% in 2024 — lowest in 10 years, constraining future supply. Mortgage rates falling (1-yr fixed at 5.8% and declining). Net migration moderating to ~40k (2025 est.). Market expected to transition from correction to early recovery H2 2025.</span><span class="lang-zh" style="display:none">政府廢除外國買家禁令（2024年4月）——首批亞洲買家（新加坡、香港、台灣）回歸，尤其是奧克蘭和皇后鎮。2024年建築許可量崩跌25%——10年新低，限制未來供給。房貸利率下行（1年期固定利率降至5.8%且仍在下行）。淨移民趨緩至約4萬人（2025年估）。市場預期於2025年下半年從修正過渡至早期復甦。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#d97706;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#d97706;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook — Trough → Early Recovery</span><span class="lang-zh" style="display:none">當前週期展望 — 底部→早期復甦</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">RBNZ aggressive cutting cycle — OCR likely reaching 3.00% by mid-2025</span><span class="lang-zh" style="display:none">RBNZ積極降息週期——OCR可能於2025年中達3.00%</span></li>
+          <li><span class="lang-en">Building consents −25% — supply pipeline drying up, future shortage likely</span><span class="lang-zh" style="display:none">建築許可量減25%——供給管線枯竭，未來可能出現短缺</span></li>
+          <li><span class="lang-en">Foreign buyer ban removed — Asian capital returning to Auckland/Queenstown</span><span class="lang-zh" style="display:none">外國買家禁令解除——亞洲資金回流奧克蘭/皇后鎮</span></li>
+          <li><span class="lang-en">Prices now −20% from peak — valuation normalised vs income</span><span class="lang-zh" style="display:none">價格從高峰下跌20%——估值相對收入已恢復正常</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Unemployment rising (5.1%) — household income stress could deepen</span><span class="lang-zh" style="display:none">失業率上升（5.1%）——家庭收入壓力可能加劇</span></li>
+          <li><span class="lang-en">Global trade risk — NZ's dairy/agri exports sensitive to China slowdown</span><span class="lang-zh" style="display:none">全球貿易風險——紐西蘭乳製品/農產品出口對中國放緩敏感</span></li>
+          <li><span class="lang-en">GDP near stall (+0.7%) — recession risk if external demand falters</span><span class="lang-zh" style="display:none">GDP接近停滯（+0.7%）——若外需放緩存在衰退風險</span></li>
+          <li><span class="lang-en">RBNZ may re-introduce macroprudential tools if prices recover too fast</span><span class="lang-zh" style="display:none">若房價復甦過快，RBNZ可能重新引入宏觀審慎工具</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: RBNZ (OCR decisions, monetary policy statements, FSR · rbnz.govt.nz), REINZ (House Price Index, monthly sales data · reinz.co.nz), Stats NZ (GDP, CPI, Labour Force Survey, net migration · stats.govt.nz). REINZ HPI rebased for trend display (2008=100); absolute level data from REINZ monthly publications. Mortgage rate = 1-yr fixed special rate (major bank avg). Net migration from Stats NZ International Travel and Migration series.</span>
+    <span class="lang-zh" style="display:none">來源：RBNZ（OCR決策、貨幣政策聲明、FSR · rbnz.govt.nz）、REINZ（房價指數、每月銷售數據 · reinz.co.nz）、Stats NZ（GDP、CPI、勞動力調查、淨移民 · stats.govt.nz）。REINZ HPI已重新基期化顯示趨勢（2008=100）；絕對水平數據來自REINZ月度出版物。房貸利率=1年期固定優惠利率（主要銀行平均）。淨移民來自Stats NZ國際旅行和移民系列。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, RBNZ / REINZ / Stats NZ sources) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+/* REINZ House Price Index, rebased 2008=100 for display.
+   Key confirmed anchors: 2021 peak (+200% from GFC trough), 2023 trough −20.8% from peak.
+   2024–25 estimated from REINZ monthly data (YoY still slightly negative Q1 2025). */
+var hpi = [100,92,95,102,108,118,138,162,178,195,190,198,220,288,268,240,232,228];
+
+/* Chart 1: Monetary Cycle */
+/* RBNZ OCR (year-end) — rbnz.govt.nz/monetary-policy/official-cash-rate-decisions */
+var ocrRate = [5.00,2.50,3.00,2.50,2.50,2.50,3.50,2.50,1.75,1.75,1.75,1.00,0.25,0.25,4.25,5.50,4.25,3.50];
+/* 1-yr fixed mortgage rate (major bank avg, estimated from RBNZ/interest.co.nz data) */
+var mortRate = [8.40,5.50,6.00,5.90,5.50,5.40,6.50,5.50,4.50,4.40,4.20,3.50,2.80,2.85,6.00,7.40,6.50,5.80];
+/* CPI YoY% — Stats NZ, annual average */
+var cpiYoy = [4.0,2.1,2.3,4.0,1.1,1.1,1.2,0.3,0.6,1.9,1.9,1.6,1.7,3.9,7.2,5.7,3.3,2.5];
+/* M2 YoY% — RBNZ money supply (estimated from RBNZ Statistical Release) */
+var m2Growth = [6.5,7.0,6.0,7.5,6.0,7.0,8.0,8.5,8.0,6.5,5.0,5.5,13.5,12.0,6.5,4.0,3.0,3.5];
+
+/* Chart 2: Real Economy */
+/* GDP YoY% — Stats NZ National Accounts */
+var gdpGrowth = [-1.0,-2.1,2.0,1.8,2.5,2.5,3.5,3.6,4.1,3.2,3.5,2.3,-3.7,5.7,2.7,0.6,0.7,1.2];
+/* Unemployment % — Stats NZ Household Labour Force Survey */
+var unempRate = [4.7,6.1,6.5,6.5,6.8,6.2,5.8,5.4,5.1,4.8,4.3,4.1,4.9,3.8,3.3,4.0,5.1,5.3];
+/* Housing credit growth YoY% — RBNZ C5 table (estimated) */
+var creditGrowth = [9.0,2.5,4.0,4.5,5.5,6.5,8.5,10.0,11.0,8.0,5.5,4.5,8.5,12.5,7.0,1.5,-0.5,1.5];
+/* Net migration ('000, positive = net inflow) — Stats NZ, scaled for chart */
+var netMig = [3.5,5.0,4.0,1.5,4.0,11.5,27.0,58.0,69.0,70.0,51.0,52.0,-5.0,-15.0,10.0,130.0,60.0,40.0];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × HPI ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC Shock',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'後GFC榮景':'Post-GFC Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},label:{formatter:isZh?'升息+修正':'Rate Hike+Correction',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'底部→復甦':'Trough→Recovery',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2013',label:{formatter:isZh?'LVR限制':'LVR Rules',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'OCR 0.25%':'OCR 0.25%',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2021',label:{formatter:isZh?'RBNZ首次升息':'RBNZ 1st Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2024',label:{formatter:isZh?'RBNZ降息':'RBNZ Cuts',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-2,max:14,interval:2,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:80,max:340,interval:40,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'HPI(2008=100)':'HPI(2008=100)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'RBNZ OCR':'RBNZ OCR',type:'line',data:ocrRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'1年期固定房貸':'1-yr Fixed Mortgage',type:'line',data:mortRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpiYoy,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'M2 YoY%':'M2 YoY%',type:'line',data:m2Growth,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'REINZ HPI':'REINZ HPI',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy × HPI ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gdpBarData = gdpGrowth.map(function(v){return {value:v,itemStyle:{color:v>=0?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC':'GFC',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'後GFC榮景':'Post-GFC Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},label:{formatter:isZh?'升息+修正':'Rate Hike+Correction',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'底部→復甦':'Trough→Recovery',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData2 = [
+    {xAxis:'2011',label:{formatter:isZh?'坎特伯雷地震':'Canterbury EQ',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#6b7280',type:'dashed',width:1}},
+    {xAxis:'2018',label:{formatter:isZh?'外國買家禁令':'Foreign Buyer Ban',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'COVID':'COVID',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2021',label:{formatter:isZh?'RBNZ首升':'RBNZ Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}}
+  ];
+
+  /* Scale net migration to % of population for overlay */
+  var netMigPct = netMig.map(function(v){return parseFloat((v/5000*100).toFixed(1));});
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:-10,max:20,interval:5,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:80,max:340,interval:40,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'HPI(2008=100)':'HPI(2008=100)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GDP YoY%':'GDP YoY%',type:'bar',data:gdpBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'失業率%':'Unemployment%',type:'line',data:unempRate,yAxisIndex:0,lineStyle:{color:C.red,width:1.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'住房信貸YoY%':'Housing Credit%',type:'line',data:creditGrowth,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'淨移民(人口%)':'Net Mig(%pop)',type:'line',data:netMigPct,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'REINZ HPI':'REINZ HPI',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2},markLine:{silent:true,symbol:'none',data:markLineData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

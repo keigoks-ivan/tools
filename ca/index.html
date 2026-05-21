@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Dashboard | Canada Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: 2025 Full Year / Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2025年全年 / 2026年Q1</span></span>
+      <h1><span class="lang-en">Market Dashboard</span><span class="lang-zh" style="display:none">市場儀表板</span></h1>
+      <p class="subtitle"><span class="lang-en">Canada Residential Property Analytics</span><span class="lang-zh" style="display:none">加拿大住宅房地產分析</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">MARKET TEMPERATURE</span><span class="lang-zh" style="display:none">市場溫度指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">TORONTO AVG HOME</span><span class="lang-zh" style="display:none">多倫多平均房價</span></div>
+        <div class="kpi-value">C$1.08M <span style="font-size:13px">($780K)</span></div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">-1.5% YoY</span><span class="lang-zh" style="display:none">年減1.5%</span></span>
+        <div class="kpi-source">CREA 2025</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">VANCOUVER AVG HOME</span><span class="lang-zh" style="display:none">溫哥華平均房價</span></div>
+        <div class="kpi-value">C$1.28M <span style="font-size:13px">($920K)</span></div>
+        <span class="kpi-badge badge-red"><span class="lang-en">-2.5% YoY</span><span class="lang-zh" style="display:none">年減2.5%</span></span>
+        <div class="kpi-source">CREA 2025</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">2025 SALES</span><span class="lang-zh" style="display:none">2025年銷售量</span></div>
+        <div class="kpi-value">~480,000</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">+8% YoY</span><span class="lang-zh" style="display:none">年增8%</span></span>
+        <div class="kpi-source">CREA</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">GROSS YIELD TORONTO</span><span class="lang-zh" style="display:none">多倫多毛租金收益率</span></div>
+        <div class="kpi-value">3.8%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Condo avg</span><span class="lang-zh" style="display:none">公寓均值</span></span>
+        <div class="kpi-source">CMHC</div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">AFFORDABILITY &amp; CREDIT</span><span class="lang-zh" style="display:none">負擔能力與信貸</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">TORONTO PTI</span><span class="lang-zh" style="display:none">多倫多房價收入比</span></div>
+        <div class="kpi-value">10.5x</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Severely unaffordable</span><span class="lang-zh" style="display:none">嚴重不可負擔</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">VANCOUVER PTI</span><span class="lang-zh" style="display:none">溫哥華房價收入比</span></div>
+        <div class="kpi-value">12.5x</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Canada's most expensive</span><span class="lang-zh" style="display:none">加拿大最昂貴</span></span>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">BOC POLICY RATE</span><span class="lang-zh" style="display:none">加拿大銀行基準利率</span></div>
+        <div class="kpi-value">3.25%</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Cutting cycle</span><span class="lang-zh" style="display:none">降息週期</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">5Y FIXED MORTGAGE</span><span class="lang-zh" style="display:none">5年固定房貸利率</span></div>
+        <div class="kpi-value">4.8%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Declining</span><span class="lang-zh" style="display:none">下降趨勢</span></span>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">POLICY &amp; MARKET</span><span class="lang-zh" style="display:none">政策與市場</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">FOREIGN BUYER BAN</span><span class="lang-zh" style="display:none">外國買家禁令</span></div>
+        <div class="kpi-value"><span class="lang-en">Active</span><span class="lang-zh" style="display:none">生效中</span></div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Extended to 2027</span><span class="lang-zh" style="display:none">延長至2027年</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">STRESS TEST</span><span class="lang-zh" style="display:none">壓力測試</span></div>
+        <div class="kpi-value">5.25% <span style="font-size:13px">floor</span></div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Qualifying rate</span><span class="lang-zh" style="display:none">合格利率</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">IMMIGRATION TARGET</span><span class="lang-zh" style="display:none">移民目標</span></div>
+        <div class="kpi-value">500K/yr</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Demand driver</span><span class="lang-zh" style="display:none">需求驅動力</span></span>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">HOUSING STARTS 2025</span><span class="lang-zh" style="display:none">2025年住房開工量</span></div>
+        <div class="kpi-value">~240,000</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Below target</span><span class="lang-zh" style="display:none">低於目標</span></span>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid two-col" style="margin-top:20px;">
+      <div class="chart-card">
+        <h3><span class="lang-en">Canada Home Price Index</span><span class="lang-zh" style="display:none">加拿大房價指數</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">National Index (2019=100) + YoY%</span><span class="lang-zh" style="display:none">全國指數（2019=100）+ 年增率</span></p>
+        <div style="position:relative;height:240px;"><div id="chart-ca-price-index" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Home Price by City</span><span class="lang-zh" style="display:none">各城市房價</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">C$ thousands &middot; 2025</span><span class="lang-zh" style="display:none">加元千元 &middot; 2025年</span></p>
+        <div style="position:relative;height:280px;"><div id="chart-ca-city-price" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Annual Sales Volume</span><span class="lang-zh" style="display:none">年度銷售量趨勢</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-ca-sales" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Rental Yield by City</span><span class="lang-zh" style="display:none">各城市租金收益率</span></h3>
+        <div style="position:relative;height:240px;"><div id="chart-ca-yield" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Immigration vs Housing Starts</span><span class="lang-zh" style="display:none">移民 vs 住房開工量</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-ca-immi" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">New Listings vs Sales</span><span class="lang-zh" style="display:none">新掛牌 vs 銷售量</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-ca-listings" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">CREA &middot; CMHC &middot; Statistics Canada &middot; BOC &middot; Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">CREA &middot; CMHC &middot; 加拿大統計局 &middot; 加拿大銀行 &middot; 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    // chart-ca-price-index — Canada Home Price Index
+    var c1=echarts.init(document.getElementById('chart-ca-price-index'));allCharts.push(c1);
+    c1.setOption({
+      tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:['YoY %',lang==='zh'?'價格指數':'Price Index']}),
+      grid:{left:50,right:50,top:45,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+      yAxis:[mkAxis({type:'value',name:'Index',min:90}),mkAxis({type:'value',name:'YoY %',splitLine:{show:false},axisLabel:Object.assign({},baseText,{formatter:'{value}%'})})],
+      series:[
+        {name:'YoY %',type:'bar',yAxisIndex:1,data:[1.5,8.0,21.0,-7.5,-3.8,1.5,-1.5],barMaxWidth:35,itemStyle:{color:function(p){return p.value>=0?'rgba(22,163,74,0.7)':C.red;},borderRadius:[3,3,0,0]},label:{show:true,position:'top',fontFamily:'JetBrains Mono',fontSize:9,formatter:function(p){return p.value+'%';}}},
+        {name:lang==='zh'?'價格指數':'Price Index',type:'line',data:[100,108,131,121,116,118,116],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6}
+      ]
+    });
+
+    // chart-ca-city-price — Home Price by City
+    var c2=echarts.init(document.getElementById('chart-ca-city-price'));allCharts.push(c2);
+    var cityLabels=lang==='zh'?['溫哥華','多倫多','渥太華','卡加利','蒙特婁','艾德蒙頓']:['Vancouver','Toronto','Ottawa','Calgary','Montreal','Edmonton'];
+    var cityPrices=[1280,1080,650,580,520,420];
+    var cityColors=[C.red,C.orange,C.navy,C.navy,C.navy,C.green];
+    c2.setOption({
+      tooltip:Object.assign({},baseTooltip,{formatter:function(p){return p[0]?p[0].name+': C$'+p[0].value+'K':'';}}),
+      grid:{left:50,right:40,top:30,bottom:50,containLabel:true},
+      xAxis:mkAxis({type:'category',data:cityLabels,axisLabel:Object.assign({},baseText,{rotate:30,interval:0})}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:'C${value}K'})}),
+      series:[{type:'bar',data:cityPrices.map(function(v,i){return{value:v,itemStyle:{color:cityColors[i],borderRadius:[4,4,0,0]}};}),barMaxWidth:55,label:{show:true,position:'top',fontFamily:'JetBrains Mono',fontSize:10,formatter:function(p){return 'C$'+p.value+'K';}}}]
+    });
+
+    // chart-ca-sales — Annual Sales Volume
+    var c3=echarts.init(document.getElementById('chart-ca-sales'));allCharts.push(c3);
+    c3.setOption({
+      tooltip:baseTooltip,grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+      series:[{type:'line',data:[486000,552000,667000,500000,440000,445000,480000],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.08)'},smooth:0.2,symbol:'circle',symbolSize:6,
+        markPoint:{data:[{coord:['2021',667000],symbol:'pin',symbolSize:40,label:{formatter:lang==='zh'?'COVID高峰':'COVID Boom\nPeak',fontSize:8},itemStyle:{color:C.green}},{coord:['2023',440000],symbol:'pin',symbolSize:40,label:{formatter:lang==='zh'?'升息衝擊低點':'Rate Shock\nLow',fontSize:8},itemStyle:{color:C.red}}]}
+      }]
+    });
+
+    // chart-ca-yield — Rental Yield by City
+    var c4=echarts.init(document.getElementById('chart-ca-yield'));allCharts.push(c4);
+    var yLabels=lang==='zh'?['艾德蒙頓','卡加利','蒙特婁','渥太華','多倫多','溫哥華']:['Edmonton','Calgary','Montreal','Ottawa','Toronto','Vancouver'];
+    var yVals=[5.5,5.0,4.2,4.0,3.8,3.2];
+    c4.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:80,right:50,top:20,bottom:20,containLabel:false},
+      xAxis:mkAxis({type:'value',min:0,max:7,axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
+      yAxis:mkAxis({type:'category',data:yLabels.slice().reverse(),axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+      series:[{type:'bar',data:yVals.slice().reverse().map(function(v){return{value:v,itemStyle:{color:v>=5?C.green:v>=4?C.orange:C.red,borderRadius:[0,4,4,0]}};}),barMaxWidth:22,label:{show:true,position:'right',formatter:'{c}%',fontSize:11},
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:'BOC 2.25%',fontSize:10,color:C.red},data:[{xAxis:2.25}]}
+      }]
+    });
+
+    // chart-ca-immi — Immigration vs Housing Starts
+    var c5=echarts.init(document.getElementById('chart-ca-immi'));allCharts.push(c5);
+    c5.setOption({
+      tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[lang==='zh'?'移民(千)':'Immigration (K)',lang==='zh'?'開工量(千)':'Starts (K)']}),
+      grid:{left:50,right:50,top:45,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025']}),
+      yAxis:[mkAxis({type:'value',name:lang==='zh'?'移民(千)':'Immigration (K)',min:0}),mkAxis({type:'value',name:lang==='zh'?'開工(千)':'Starts (K)',min:0,splitLine:{show:false}})],
+      series:[
+        {name:lang==='zh'?'移民(千)':'Immigration (K)',type:'line',data:[185,405,437,472,500,500],lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue},symbol:'circle',symbolSize:6,yAxisIndex:0},
+        {name:lang==='zh'?'開工量(千)':'Starts (K)',type:'line',data:[220,270,260,240,245,240],lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:6,yAxisIndex:1}
+      ]
+    });
+
+    // chart-ca-listings — New Listings vs Sales
+    var c6=echarts.init(document.getElementById('chart-ca-listings'));allCharts.push(c6);
+    c6.setOption({
+      tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[lang==='zh'?'新掛牌':'Listings',lang==='zh'?'銷售量':'Sales']}),grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+      series:[
+        {name:lang==='zh'?'新掛牌':'Listings',type:'bar',data:[580000,620000,550000,570000,590000],itemStyle:{color:C.orange,borderRadius:[4,4,0,0]},barMaxWidth:40},
+        {name:lang==='zh'?'銷售量':'Sales',type:'bar',data:[667000,500000,440000,445000,480000],itemStyle:{color:C.navy,borderRadius:[4,4,0,0]},barMaxWidth:40}
+      ]
+    });
+
+  }
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

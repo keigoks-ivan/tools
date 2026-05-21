@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Mrs. Chung uses Property Monitor to time her Tokyo exit | Walkthrough | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="../../css/style.css">
+<style>
+.lang-zh{display:none}
+
+/* ── Persona Card (top) ── */
+.persona-card{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#e2ecf8;border-radius:8px;padding:26px 28px;margin:0 0 24px;position:relative;overflow:hidden}
+.persona-card::after{content:'🇯🇵';position:absolute;top:-20px;right:-10px;font-size:140px;opacity:.06}
+.persona-card .pc-eyebrow{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.persona-card .pc-title{font-size:22px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:8px;letter-spacing:-.01em}
+.persona-card .pc-tag{font-size:13px;color:#a8c0d8;line-height:1.6;max-width:780px;margin-bottom:18px}
+.pc-profile{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);margin-bottom:14px}
+.pc-profile-item .lbl{font-size:9px;letter-spacing:.10em;color:#5a8ab5;font-weight:600;text-transform:uppercase}
+.pc-profile-item .val{font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-weight:500;margin-top:3px}
+.pc-questions{font-size:11.5px;line-height:1.65;color:#a8c0d8}
+.pc-questions strong{color:#f59e0b;font-weight:600;display:block;margin-bottom:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pc-questions ol{margin:0;padding:0 0 0 18px}
+.pc-questions li{margin-bottom:3px}
+
+/* Context banner — SELL-SIDE framing (amber/yellow, not red) */
+.context-banner{background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);border:1.5px solid #d97706;border-radius:8px;padding:14px 18px;margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+.context-banner .cb-icon{font-size:24px;line-height:1;margin-top:2px}
+.context-banner .cb-text{font-size:12.5px;color:#78350f;line-height:1.55}
+.context-banner .cb-text strong{color:#92400e;font-weight:700;display:block;margin-bottom:3px;font-size:13px}
+
+/* Tax cliff callout — calm, informational */
+.tax-cliff-bar{background:#eff6ff;border:1.5px solid #2563eb;border-radius:8px;padding:12px 16px;margin:0 0 20px;font-size:12px;color:#1e3a5f;line-height:1.6}
+.tax-cliff-bar strong{font-weight:700;color:#1e40af}
+.tax-cliff-bar .tc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.tax-cliff-bar .tc-cell{background:#dbeafe;border-radius:4px;padding:6px 10px;text-align:center}
+.tax-cliff-bar .tc-cell .tc-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#1e3a5f}
+.tax-cliff-bar .tc-cell .tc-lbl{font-size:10px;color:#3b82f6;margin-top:2px}
+.tc-cell.safe{background:#dcfce7}
+.tc-cell.safe .tc-val{color:#166534}
+.tc-cell.safe .tc-lbl{color:#16a34a}
+.tc-cell.danger{background:#fee2e2}
+.tc-cell.danger .tc-val{color:#991b1b}
+.tc-cell.danger .tc-lbl{color:#dc2626}
+
+/* ── Section heading ── */
+.demo-section{margin:32px 0 8px}
+.demo-section .sec-no{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:.08em}
+.demo-section h2{font-size:18px;font-weight:700;color:#1e3a5f;line-height:1.3;margin:2px 0 4px;letter-spacing:-.005em}
+.demo-section .sec-sub{font-size:12px;color:#5a7a9a;line-height:1.6;max-width:780px}
+
+/* Phase divider */
+.phase-divider{margin:20px 0 10px;padding:8px 14px;background:#f4f7fc;border-left:4px solid #1e3a5f;border-radius:0 4px 4px 0}
+.phase-divider .ph-label{font-size:10px;letter-spacing:.12em;font-weight:700;color:#5a7a9a;text-transform:uppercase}
+.phase-divider .ph-title{font-size:14px;font-weight:700;color:#1e3a5f;margin-top:2px}
+.phase-divider .ph-sub{font-size:11.5px;color:#4a6080;line-height:1.5;margin-top:2px}
+
+/* ── Demo Step ── */
+.demo-step{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:36px 1fr;gap:16px}
+.demo-step .step-no{width:32px;height:32px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;font-family:'JetBrains Mono',monospace}
+.demo-step .step-content h4{font-size:14px;font-weight:600;color:#1e3a5f;margin-bottom:4px;line-height:1.35}
+.demo-step .step-url{font-family:'JetBrains Mono',monospace;font-size:11px;margin-bottom:10px}
+.demo-step .step-url a{color:#2563eb;text-decoration:none}
+.demo-step .step-url a:hover{text-decoration:underline}
+.demo-step .step-action{background:#eff6ff;border-left:3px solid #2563eb;padding:9px 12px;font-size:11.5px;color:#1e3a5f;line-height:1.6;margin-bottom:10px;border-radius:0 4px 4px 0}
+.demo-step .step-action strong{color:#1e3a5f;font-weight:600;display:inline-block;margin-right:4px}
+.demo-step .step-see{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:8px}
+.demo-step .step-see strong{color:#1e3a5f;font-weight:600}
+.demo-step .step-meaning{background:#fffbeb;border-left:3px solid #d97706;padding:9px 12px;font-size:11.5px;color:#78350f;line-height:1.6;margin-top:6px;border-radius:0 4px 4px 0}
+.demo-step .step-meaning strong{color:#92400e;font-weight:600}
+.demo-step .step-screenshot{background:#f4f7fc;border:1px solid #ccd9e8;border-radius:4px;margin-top:12px;overflow:hidden;line-height:0}
+.demo-step .step-screenshot img{display:block;width:100%;height:auto}
+
+/* ── Cheat sheet ── */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.cheat-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:14px 18px}
+.cheat-card h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cheat-card .ck-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#eef3f9;color:#1e3a5f;font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.cheat-card p{font-size:11.5px;color:#4a6080;line-height:1.6}
+.cheat-card .ck-tip{margin-top:6px;font-size:11px;color:#5a7a9a;font-style:italic}
+.cheat-card code{background:#eef3f9;color:#1e3a5f;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.color-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.color-legend .cl-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#4a6080;background:#f4f7fc;padding:6px 10px;border-radius:3px}
+.color-legend .cl-dot{width:10px;height:10px;border-radius:50%}
+.color-legend .cl-green{background:#16a34a}
+.color-legend .cl-orange{background:#d97706}
+.color-legend .cl-red{background:#dc2626}
+.color-legend .cl-blue{background:#2563eb}
+
+/* ── Takeaway box ── */
+.takeaway{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.takeaway-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px}
+.takeaway-card.answered{border-left:4px solid #16a34a}
+.takeaway-card.outsource{border-left:4px solid #d97706}
+.takeaway-card h4{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;letter-spacing:-.005em}
+.takeaway-card ul{list-style:none;padding:0;margin:0}
+.takeaway-card li{font-size:12px;color:#4a6080;line-height:1.6;padding:5px 0 5px 22px;position:relative}
+.takeaway-card.answered li::before{content:'✓';position:absolute;left:0;top:5px;color:#16a34a;font-weight:700}
+.takeaway-card.outsource li::before{content:'→';position:absolute;left:0;top:5px;color:#d97706;font-weight:700}
+.takeaway-card li strong{color:#1e3a5f;font-weight:600}
+
+/* ── PDF button ── */
+.pdf-bar{display:flex;gap:10px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap}
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;background:#1e3a5f;color:#fff;border:none;padding:12px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{background:#0f1e33}
+.pdf-btn.ghost{background:#fff;color:#1e3a5f;border:1px solid #ccd9e8}
+.pdf-btn.ghost:hover{border-color:#1e3a5f}
+
+/* ── Best Option Block ── */
+.best-option{margin:6px 0 16px}
+.bo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.bo-card{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #d97706;border-radius:4px;padding:14px 16px}
+.bo-card .bo-lbl{font-size:9px;letter-spacing:.1em;color:#5a7a9a;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.bo-card .bo-val{font-size:14px;font-weight:600;color:#1e3a5f;line-height:1.35;margin-bottom:6px;letter-spacing:-.005em}
+.bo-card .bo-note{font-size:11px;color:#5a7a9a;line-height:1.5}
+.bo-section{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:16px 20px;margin-bottom:10px}
+.bo-section h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:10px;line-height:1.35}
+.bo-checklist ul,.bo-next ol{margin:0;padding-left:18px}
+.bo-checklist li,.bo-next li{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:6px}
+.bo-bottomline{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#fff;border-radius:6px;padding:20px 24px;margin-top:14px}
+.bo-bottomline .bo-bl-label{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;display:block;margin-bottom:8px;text-transform:uppercase}
+.bo-bottomline p{font-size:14px;line-height:1.6;color:#fff;margin:0}
+@media (max-width:720px){.bo-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Print ── */
+@media print {
+  @page{size:A4;margin:14mm}
+  body{background:#fff!important}
+  #nav-root,.lang-switcher,.pdf-bar,.demo-back{display:none!important}
+  .bo-grid{grid-template-columns:repeat(4,1fr)!important}
+  .bo-bottomline{background:#1e3a5f!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .container{max-width:100%!important;padding:0!important}
+  .persona-card,.demo-step,.cheat-card,.takeaway-card,.context-banner,.tax-cliff-bar,.phase-divider{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  .persona-card::after{display:none}
+  .demo-section{break-after:avoid;page-break-after:avoid}
+  a{color:#1e3a5f!important;text-decoration:none}
+}
+
+@media (max-width:760px){
+  .pc-profile{grid-template-columns:repeat(2,1fr);gap:10px}
+  .demo-step{grid-template-columns:1fr;gap:10px}
+  .demo-step .step-no{margin-bottom:-4px}
+  .persona-card{padding:20px 18px}
+  .persona-card .pc-title{font-size:18px}
+  .cheat-grid,.takeaway,.color-legend{grid-template-columns:1fr}
+  .context-banner{grid-template-columns:1fr}
+  .tax-cliff-bar .tc-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="container">
+
+  <!-- Breadcrumb -->
+  <div class="demo-back" style="font-size:11px;color:#5a7a9a;margin-bottom:12px;font-family:'JetBrains Mono',monospace">
+    <a href="/demo/" style="color:#2563eb;text-decoration:none">← <span class="lang-en">All walkthroughs</span><span class="lang-zh">所有導覽</span></a>
+    <span style="color:#aabdd4;margin:0 8px">/</span>
+    <span><span class="lang-en">Mrs. Chung times her Tokyo exit using the site sell-side</span><span class="lang-zh">鍾女士用本站研究東京退場時機</span></span>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 1 — PERSONA CARD                       -->
+  <!-- ============================================== -->
+  <div class="persona-card">
+    <div class="pc-eyebrow"><span class="lang-en">USE CASE WALKTHROUGH · SELL-SIDE · A SITE TOUR THROUGH MRS. CHUNG'S EYES</span><span class="lang-zh">情境導覽 · 賣方視角 · 跟著鍾女士逛這個網站</span></div>
+    <div class="pc-title">
+      <span class="lang-en">Meet Mrs. Chung — she already owns a Tokyo condo and is deciding whether to sell it now</span>
+      <span class="lang-zh">認識鍾女士 — 她已經擁有一戶東京公寓，現在考慮是否賣出</span>
+    </div>
+    <p class="pc-tag">
+      <span class="lang-en">Mrs. Chung (鍾女士, 60, Taipei, retired) bought a Tokyo 1-bed condo 8 years ago. The unit has appreciated and she is now considering selling to fund her Taiwan retirement. This is the <strong>first time she's using Property Monitor as a seller</strong>, not a buyer. This walkthrough shows you <strong>which pages tell you "is now a good time to exit," what the exit costs you, and where to redeploy proceeds</strong> — using Mrs. Chung's questions as the lens. It is <strong>not</strong> investment advice, tax advice, or property recommendations.</span>
+      <span class="lang-zh">鍾女士，60 歲，台北人，已退休，8 年前在東京買了一戶一房公寓。物件已增值，她現在考慮賣出、取回資金供台灣退休生活使用。這是她<strong>第一次以賣方身分使用 Property Monitor</strong>，不是買方。這份導覽用鍾女士的問題當主軸，<strong>告訴你哪幾頁能看出「現在是好的退場時機嗎」、退場要付哪些成本、賣出後資金怎麼再配置</strong>。本文<strong>不是</strong>投資建議、稅務建議或不動產推薦。</span>
+    </p>
+
+    <div class="pc-profile">
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Seller</span><span class="lang-zh">使用者</span></div><div class="val">Mrs. Chung · 60y · Taipei</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Asset</span><span class="lang-zh">資產</span></div><div class="val"><span class="lang-en">Tokyo 1-bed condo</span><span class="lang-zh">東京一房公寓</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Held</span><span class="lang-zh">持有年數</span></div><div class="val">8 years · ≥5yr ✓</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Goal</span><span class="lang-zh">目標</span></div><div class="val"><span class="lang-en">Exit + redeploy</span><span class="lang-zh">退場 + 再配置</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Language</span><span class="lang-zh">語言</span></div><div class="val"><span class="lang-en">Reads 中文</span><span class="lang-zh">讀中文</span></div></div>
+    </div>
+
+    <div class="pc-questions">
+      <strong><span class="lang-en">Questions Mrs. Chung came to answer</span><span class="lang-zh">鍾女士想在這個網站找到答案的問題</span></strong>
+      <ol>
+        <li><span class="lang-en">Where on the site does the cycle position tell me "now is a peak — sell"?</span><span class="lang-zh">哪一頁能讓我看出「現在是週期高點 — 該賣了」？</span></li>
+        <li><span class="lang-en">How do I know if Tokyo's carry is compressing — has the buy-side advantage faded?</span><span class="lang-zh">怎麼看東京的 carry 是否正在壓縮 — 買方優勢是否已消退？</span></li>
+        <li><span class="lang-en">Is there a future supply wave that would compress my exit price?</span><span class="lang-zh">未來有供給潮將壓低我的出售價格嗎？</span></li>
+        <li><span class="lang-en">What does my Tokyo property actually net me at exit (taxes + agent fees + FX)?</span><span class="lang-zh">東京物件賣出後，扣完稅、仲介費、匯差，我實際到手多少？</span></li>
+        <li><span class="lang-en">I've held 8 years — am I in the 譲渡所得税 lower bracket?</span><span class="lang-zh">持有 8 年了 — 我在 譲渡所得税 低稅率那一檔嗎？</span></li>
+        <li><span class="lang-en">If I sell, where do I redeploy — back to TW, into J-REITs, into cash?</span><span class="lang-zh">賣出後，資金怎麼再配置 — 台灣不動產、J-REIT、還是現金？</span></li>
+        <li><span class="lang-en">How do I switch the site to 中文? Where do I download a PDF for my Japanese 稅理士?</span><span class="lang-zh">怎麼切到中文？怎麼下載 PDF 給我的日本稅理士看？</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SELL-SIDE FRAMING CONTEXT BANNER               -->
+  <!-- ============================================== -->
+  <div class="context-banner">
+    <div class="cb-icon">🔄</div>
+    <div class="cb-text">
+      <strong><span class="lang-en">This walkthrough's framing is sell-side, not buy-side.</span><span class="lang-zh">本導覽是賣方視角，不是買方視角。</span></strong>
+      <span class="lang-en">Mrs. Chung is checking whether NOW is a good time to exit a property she's already held for 8 years. Every tool on the site — carry heatmap, pipeline cliff, cost calculator's Exit Costs section, REIT vs Direct rotation — supports sell-side decisions equally well. This walkthrough teaches HOW to read them in reverse: supply tight is good for a buyer but signals exit pressure for a future buyer of her unit; carry expanding is good on the way in but compressing carry signals a cycle peak; entry tax is irrelevant now, but the EXIT tax bracket (20.3% if ≥5yr vs 39.6% if &lt;5yr) is her most important number.</span>
+      <span class="lang-zh">鍾女士在確認現在是否是好的退場時機 — 她已持有 8 年。站上每個工具 — carry heatmap、pipeline cliff、cost calculator 的 Exit Costs 區、REIT vs Direct 輪動 — 都同樣支援賣方決策。本導覽教你<strong>如何反向解讀它們</strong>：供給緊張對買方是利多，但也是「她的物件能賣好價」的信號；carry 擴張對進場有利，但 carry 壓縮代表週期頂部接近；取得稅已無關，但<strong>退場稅率</strong>（持有 ≥5 年 20.3% vs &lt;5 年 39.6%）是她最重要的數字。</span>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 譲渡所得税 CLIFF CALLOUT                         -->
+  <!-- ============================================== -->
+  <div class="tax-cliff-bar">
+    <strong><span class="lang-en">譲渡所得税 (Japanese Capital Gains Tax) — the 5-year cliff every foreign seller must know</span><span class="lang-zh">譲渡所得税（日本資產增值稅）— 每位外國賣家必須知道的 5 年分水嶺</span></strong>
+    <span class="lang-en"><br>Japan taxes property capital gains at different rates depending on how long you held the asset. The cliff is sharp. Mrs. Chung held 8 years — she is safely past it and in the lower bracket. New property owners who are still inside 5 years should know this before deciding when to sell.</span>
+    <span class="lang-zh"><br>日本按持有年限對資產增值課稅，稅率有明顯差異。鍾女士持有 8 年，已穩妥落在低稅率區間。尚在 5 年內的物件持有人，在決定何時賣出前應先了解這條分水嶺。</span>
+    <div class="tc-grid">
+      <div class="tc-cell danger">
+        <div class="tc-val">39.6%</div>
+        <div class="tc-lbl"><span class="lang-en">Held &lt; 5 years (short-term)</span><span class="lang-zh">持有不足 5 年（短期）</span></div>
+      </div>
+      <div class="tc-cell safe">
+        <div class="tc-val">20.3%</div>
+        <div class="tc-lbl"><span class="lang-en">Held ≥ 5 years (long-term)</span><span class="lang-zh">持有 5 年以上（長期）</span></div>
+      </div>
+      <div class="tc-cell safe">
+        <div class="tc-val">8 years</div>
+        <div class="tc-lbl"><span class="lang-en">Mrs. Chung — in lower bracket</span><span class="lang-zh">鍾女士持有年數 — 低稅率</span></div>
+      </div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:#5a7a9a">
+      <span class="lang-en"><em>Rates are illustrative — confirm with a Japanese 稅理士 (zeirishi). Other taxes (住民税, 復興特別所得税) may also apply. The Cost Calculator on this site (Step 9 of this walkthrough) models these brackets automatically.</em></span>
+      <span class="lang-zh"><em>數字為示意 — 請向日本稅理士確認。住民税、復興特別所得税等可能另計。本站 Cost Calculator（本導覽第 9 站）已將這些稅率自動帶入計算。</em></span>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 2 — OPERATIONS JOURNEY                 -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 02</div>
+    <h2><span class="lang-en">Mrs. Chung's click-by-click tour — 12 stops</span><span class="lang-zh">鍾女士的逐步點擊旅程 — 12 個停靠點</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">Each stop is a real page on the site. For each, you'll see what Mrs. Chung clicks, what she sees on the screen, and how that screen relates to her sell-side decision. Follow along in another tab — every URL works.</span>
+      <span class="lang-zh">每個停靠點都是站上的一頁實際畫面。每站告訴你鍾女士點什麼、螢幕出現什麼、這個畫面跟她的退場決策有什麼關係。建議另開分頁跟著走 — 所有連結都能直接點。</span>
+    </p>
+  </div>
+
+  <!-- ── PHASE A ── -->
+  <div class="phase-divider">
+    <div class="ph-label"><span class="lang-en">Phase A · Where am I in the cycle?</span><span class="lang-zh">Phase A · 我在週期哪個位置？</span></div>
+    <div class="ph-title"><span class="lang-en">Decide: sell now or hold longer?</span><span class="lang-zh">決策：現在賣，還是再等等？</span></div>
+    <div class="ph-sub"><span class="lang-en">Stops 1–3 build the overall narrative before Mrs. Chung looks at any data signals.</span><span class="lang-zh">第 1–3 站在她看任何數據信號前，先建立整體市場敘述脈絡。</span></div>
+  </div>
+
+  <!-- STOP 1 — Home yield persona -->
+  <div class="demo-step">
+    <div class="step-no">1</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Land on the home page and pick the "yield" persona — she still thinks like an income holder</span><span class="lang-zh">進入首頁，選「收租」persona — 她還是以收入持有人的角度看市場</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">opens the home page, scrolls past the dark hero, sees three persona cards labelled "I want yield / I want growth / I want a passport" and clicks <strong>"I want yield / 我要收租"</strong>. Even though she's selling, she spent 8 years as a rental income holder — she thinks like one and wants to see how other yield-seekers are reading the same Tokyo market she's about to exit.</span>
+        <span class="lang-zh">打開首頁，往下捲過深色 hero，看到三張 persona 卡：「我要收租／我要增值／我要身分」，點 <strong>「我要收租 / I want yield」</strong>。雖然她正打算賣，但她 8 年來是以收租持有人身分存在 — 她習慣從這個角度看市場，也想了解其他收租追求者怎麼看她即將退出的東京市場。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> the chosen card lights up amber with a checkmark. Below the hero, a scatter chart <em>"Carry × 10-year growth, every city plotted"</em> highlights yield-first cities — she can see where Tokyo sits relative to competing yield markets. The question she's asking herself: "are buyers still coming into Tokyo at the same pace, or is the yield story fading?"</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>選中的卡片變琥珀色亮起並打勾。Hero 下方散點圖《利差 × 10 年漲幅，每城一點》高亮收租類城市 — 她能看到東京相對其他收租市場的位置。她問自己：「買家仍以同樣節奏進場東京，還是收租故事已在淡化？」</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">the persona filter is a market temperature gauge. If Tokyo still shows up as a top-tier yield city on the scatter, demand is intact — sell conditions are favourable. If it has dropped in rank or its yield spread has compressed, buyers are recalibrating — she should read faster.</span><span class="lang-zh">persona 濾鏡是市場溫度計。如果東京在散點圖上仍是頂級收租城市，需求完好 — 出售條件有利。如果排名下滑或 yield spread 壓縮，買家正在重新校準 — 她應該加快行動。</span></div>
+      <div class="step-screenshot"><img src="img/01-home-persona.png" alt="Home page with I-want-yield persona active, scatter chart visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 2 — Home world map Tokyo -->
+  <div class="demo-step">
+    <div class="step-no">2</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Use the world map to see where Tokyo sits — current yield, 10yr trend, carry, pipeline</span><span class="lang-zh">用世界地圖看東京的位置 — 當前 yield、10 年趨勢、carry、供給管道</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a> · <span class="lang-en">map section</span><span class="lang-zh">地圖區段</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">scrolls down to the world map. She uses the metric toggle above the map to cycle through all four lenses: <strong>Yield</strong> (how the market pays today) → <strong>Carry</strong> (yield minus cost-of-capital, the real spread) → <strong>10yr</strong> (long-run capital growth) → <strong>Pipeline</strong> (forward supply pressure). She hovers over the Tokyo dot; the tooltip pops with all four numbers plus PTI and Vacancy.</span>
+        <span class="lang-zh">捲到世界地圖。地圖上方有四個指標切換按鈕，她依序切換：<strong>Yield</strong>（市場當前報酬）→ <strong>Carry</strong>（yield 扣掉資金成本的真實利差）→ <strong>10yr</strong>（長期資本增值）→ <strong>Pipeline</strong>（未來供給壓力）。把游標停在東京點上 → tooltip 顯示四個數字加 PTI 和 Vacancy。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> the Tokyo dot's color intensity changes with each metric toggle — showing Tokyo's relative position against 40+ other cities. The Top 5 strip below the map shows which cities lead the current metric; Tokyo's rank here is a proxy for how attractive it looks to today's buyer pool.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>東京點的顏色深度隨指標切換而變 — 顯示東京相對 40+ 城市的位置。地圖下方 Top 5 顯示當前指標的領先城市；東京在 Top 5 的位置，代表它在今日買家眼中的吸引力。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">she's not choosing a market — she's assessing whether her EXIT market (Tokyo) still has a deep pool of incoming buyers. Strong Yield and Carry scores mean buyers are motivated. A declining Pipeline score (more forward supply) means competing listings are coming. She wants to see high Yield/Carry + manageable Pipeline — that's the setup that maximises her sale price.</span><span class="lang-zh">她不是在選市場 — 她在評估自己的退出市場（東京）是否還有充足的潛在買家。高 Yield 和 Carry 分數代表買方有動力。Pipeline 分數惡化（更多未來供給）代表競爭賣盤即將湧現。她想看到高 Yield/Carry + 可控 Pipeline — 這個組合最大化她的售出價格。</span></div>
+      <div class="step-screenshot"><img src="img/02-home-map.png" alt="Home world map with Tokyo highlighted, metric toggle visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 3 — JP Report long-form thesis -->
+  <div class="demo-step">
+    <div class="step-no">3</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Read the Japan market report — understand the 2–3 year outlook before looking at any data signals</span><span class="lang-zh">先讀日本市場報告 — 在看任何數據信號前，先了解未來 2–3 年的展望</span></h4>
+      <div class="step-url"><a href="/jp/report.html">myproperty.investmquest.com/jp/report</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">navbar 🇯🇵 → <strong>Report / 報告</strong>. She reads the <strong>Executive Summary</strong> first. Then she jumps to three sections that matter most for a seller: <em>BOJ Rate Normalization</em> (rising rates compress carry, eventually soften prices), <em>Demand: Foreign Capital and Resale Boom</em> (is foreign demand still strong — she needs it to absorb her unit), and <em>Outlook</em> (the site's 2–3 year forward view).</span>
+        <span class="lang-zh">navbar 🇯🇵 → <strong>Report / 報告</strong>。先讀 <strong>Executive Summary</strong>。然後跳到三個對賣家最關鍵的章節：<em>BOJ Rate Normalization</em>（升息壓縮 carry，最終軟化價格）、<em>Demand: Foreign Capital and Resale Boom</em>（外國需求還強嗎 — 她需要外國買家來承接她的物件）、<em>Outlook</em>（網站的 2–3 年展望）。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> a 9-section analyst report in plain prose — Executive Summary, BOJ Rate Normalization, Supply (Shrinking Starts and the Akiya Paradox), Demand (Foreign Capital and Resale Boom), Valuation, Tokyo 23 Wards, Osaka, Fukuoka, Outlook. The Outlook section in particular tells her whether the analyst view is "still a seller's market for 12–24 months" or "supply wave imminent, act soon."</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>9 章節的分析師白話文報告 — Executive Summary、BOJ Rate Normalization、Supply（開工萎縮與空屋悖論）、Demand（外資湧入與中古屋榮景）、Valuation（估值）、Tokyo 23 Wards、Osaka、Fukuoka、Outlook（展望）。她特別看 Outlook 章節，確認分析師觀點是「賣方市場還有 12–24 個月」還是「供給潮快來了，快點行動」。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">the Report is the narrative spine of everything she'll check in Phases B and C. Without reading it, the data signals she sees later — a 5yr carry compression bar, a pipeline bar climbing — have no frame. With it, she knows what the analyst thinks is coming and can judge whether the heatmap and pipeline data confirm or contradict that view.</span><span class="lang-zh">報告是她 Phase B 和 C 所有數據查核的敘述主幹。沒讀它，後面看到的數據信號 — 5 年 carry 壓縮橫條、pipeline 攀升 — 都沒有脈絡。讀了之後，她知道分析師認為即將發生什麼，可以判斷 heatmap 和 pipeline 的數據是印證還是否定那個觀點。</span></div>
+      <div class="step-screenshot"><img src="img/03-jp-report.png" alt="JP Market Report long-form with 9 sections visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ── PHASE B ── -->
+  <div class="phase-divider">
+    <div class="ph-label"><span class="lang-en">Phase B · Cycle signals</span><span class="lang-zh">Phase B · 週期信號</span></div>
+    <div class="ph-title"><span class="lang-en">Does the data say "exit now"?</span><span class="lang-zh">數據說「現在退場」嗎？</span></div>
+    <div class="ph-sub"><span class="lang-en">Stops 4–8 work through the KPI grids, macro context, carry trajectory, and forward supply — all read through the exit lens.</span><span class="lang-zh">第 4–8 站逐一檢視 KPI 格、總經脈絡、carry 走勢與未來供給 — 全部以退場角度解讀。</span></div>
+  </div>
+
+  <!-- STOP 4 — JP Dashboard KPI grids -->
+  <div class="demo-step">
+    <div class="step-no">4</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Japan dashboard — three KPI grids read sell-side: is the market at or near peak?</span><span class="lang-zh">日本儀表板 — 三排 KPI 以賣方角度解讀：市場是否在或接近高點？</span></h4>
+      <div class="step-url"><a href="/jp/">myproperty.investmquest.com/jp</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">opens /jp/. She reads top-to-bottom — three KPI grids of 4 cards each. Her sell-side attention goes to: the <strong>Tokyo new condo average price</strong> (her resale comp), the <strong>national rental yield</strong> (if yields are compressing, prices have run up — sell signal), the <strong>BOJ rate</strong> (rising = carry shrinking = buyer affordability eroding = window closing), and the <strong>yield spread vs BOJ</strong> (is the margin still comfortable or squeezed?).</span>
+        <span class="lang-zh">打開 /jp/。由上往下讀三排 KPI。她以賣方視角關注：<strong>東京新建公寓均價</strong>（她的轉售比較基準）、<strong>全國租金收益率</strong>（yield 壓縮代表價格已跑高 — 賣出信號）、<strong>BOJ 利率</strong>（升息 = carry 縮水 = 買方負擔能力降低 = 窗口收窄）、<strong>yield spread vs BOJ</strong>（利差是否還充裕或已被壓縮？）。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> the same 12 KPI cards that a buyer sees — but she reads each in the opposite direction. National YoY up = good sale price comp. BOJ rate rising = carry compressing = buyers' time sensitivity growing. Foreign buyer share elevated = deep demand pool for her listing. Housing starts declining = her unit faces less competition from new supply. Below the KPIs, six ECharts charts show price index, city price comparison, resale volume, yield by city, FX vs foreign inflow, housing starts.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>同樣 12 張 KPI 卡，但她反向解讀每一張。全國 YoY 上升 = 售價基準良好。BOJ 升息 = carry 壓縮 = 買方時間壓力增加。外國買家比例高 = 她的物件有充裕的承接需求。住宅開工下降 = 她的物件面對的新供給競爭減少。KPI 下方 6 張 ECharts：價格指數、城市比較、二手成交量、城市 yield、FX vs 外資流入、住宅開工趨勢。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">the resale volume chart is her most important chart — rising volume means active buyers, meaning she can sell faster and with less discount. A flattening or falling resale volume curve is an early warning to act before liquidity dries up.</span><span class="lang-zh">二手成交量圖是她最重要的圖 — 成交量攀升代表買盤活躍，代表她能更快以更少折讓賣出。成交量曲線若持平或下滑，是在流動性枯竭前行動的早期預警。</span></div>
+      <div class="step-screenshot"><img src="img/04-jp-dashboard.png" alt="Japan dashboard top with three KPI grids" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 5 — JP Macro BOJ trajectory + JPY -->
+  <div class="demo-step">
+    <div class="step-no">5</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Japan Macro — BOJ rate path + JPY trajectory: the two numbers that define her exit proceeds in NT$</span><span class="lang-zh">日本總經 — BOJ 升息路徑 + 日圓走勢：決定她以台幣計算的退場收益的兩個數字</span></h4>
+      <div class="step-url"><a href="/jp/macro.html">myproperty.investmquest.com/jp/macro</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">navbar 🇯🇵 → <strong>Macro / 總經</strong>. She looks at the cycle bar (is NOW tagged as late-expansion or peak?), then focuses on two KPI cards: <strong>BOJ rate</strong> (how far has the normalization gone? how far to go?) and the dual-axis chart showing <strong>monetary cycle vs property prices</strong> (the rate-vs-price relationship tells her how much price compression to expect if BOJ hikes further). She also reads the Key Cycle Events timeline at the bottom.</span>
+        <span class="lang-zh">navbar 🇯🇵 → <strong>Macro / 總經</strong>。看週期軸（NOW 是否標在「擴張末期」或「頂部」？），然後重點看兩張 KPI 卡：<strong>BOJ 利率</strong>（正常化走了多遠？還剩多少？）和雙軸圖《貨幣週期 vs 房價》（利率 vs 房價的關係，告訴她如果 BOJ 繼續升息，該預期多少價格壓縮）。她也讀底部的關鍵週期事件時間軸。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> the cycle bar segments 2008–2025 into eras with a NOW marker. Six macro KPI cards (BOJ rate, urban land YoY, CPI, GDP, unemployment, avg mortgage rate). Two dual-axis line charts (monetary cycle vs property prices; real economy vs property prices). Key Cycle Events timeline ending with recent BOJ moves and forward-looking calendar items.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>2008–2025 週期軸含 NOW 標記。6 張 macro KPI 卡（BOJ 利率、都市地價 YoY、CPI、GDP、失業率、平均房貸利率）。兩張雙軸折線圖（貨幣週期 vs 房價；實體經濟 vs 房價）。關鍵週期事件時間軸，結尾是最近 BOJ 動作與前瞻日曆事項。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">FX is the silent cost she rarely models. A weak JPY at entry was a bonus for her (she bought more yen-denominated asset per NT$); but at EXIT, a weak JPY means she converts yen back into fewer NT$. If the macro page shows JPY is still historically weak and BOJ is still tightening (which would eventually strengthen JPY), she faces a choice: sell now at a weak JPY and bank the property profit, or wait for JPY to rebound and amplify her NT$ proceeds. The site surfaces the macro data; the FX call is hers to make.</span><span class="lang-zh">匯率是她很少計算的無聲成本。進場時日圓弱勢是她的利多（每台幣能換更多日元計價資產）；但<strong>退場時</strong>，日圓弱勢代表換回台幣的量減少。如果總經頁顯示日圓仍在歷史低位、BOJ 仍在升息（最終會強化日圓），她面臨選擇：現在賣出、以弱日圓鎖定房產利潤；還是等日圓回彈、放大台幣收益？網站提供宏觀數據，FX 判斷是她自己的決定。</span></div>
+      <div class="step-screenshot"><img src="img/05-jp-macro.png" alt="JP Macro page with cycle bar and monetary cycle vs property prices chart" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 6 — JP Tokyo ward-level pricing -->
+  <div class="demo-step">
+    <div class="step-no">6</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Tokyo deep-dive — ward-level ¥/sqm and yield as exit pricing comps</span><span class="lang-zh">東京深度頁 — 區級 ¥/sqm 與 yield 作為退場定價參考基準</span></h4>
+      <div class="step-url"><a href="/jp/tokyo.html">myproperty.investmquest.com/jp/tokyo</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">navbar 🇯🇵 → <strong>Tokyo 東京</strong>. She looks at the 6 KEY METRICS cards (new condo avg, resale median, ¥/sqm, yield, rent YoY, land YoY) — these are her pricing comps. She checks the <strong>Three Zones</strong> micro-cards to confirm which tier her unit sits in. Then she scrolls to the horizontal bar chart <em>"Ward Land Price Comparison"</em> to see how her specific ward is trending relative to the 23 wards average.</span>
+        <span class="lang-zh">navbar 🇯🇵 → <strong>Tokyo 東京</strong>。看 6 張 KEY METRICS 卡（新建均價、二手中位、¥/坪、yield、租金 YoY、地價 YoY）— 這些是她的定價比較基準。查 <strong>Three Zones</strong> 三張 micro 卡，確認她的物件落在哪個層級。再往下捲到橫向長條圖《區地價比較》，看她所在的區相對 23 區均值的走勢。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> three zone micro-cards (Center 5, Yamanote Outer, Outer Wards) with ¥/sqm ranges. Ward Land Price Comparison bar chart. Tokyo Rent Trend line. Four colored summary cards at the bottom (Center 5 Premium, Yamanote Value, Outer Opportunity, Foreign Capital).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>三張 zone micro 卡（Center 5、Yamanote Outer、Outer Wards）含 ¥/sqm 範圍。區地價比較橫向長條圖。東京租金趨勢折線圖。底部四張彩色 summary 卡（Center 5 溢價、Yamanote 價值、Outer 機會、外資）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">the Three Zones cards tell her what today's buyers expect to pay for each tier — that's her ceiling. The Foreign Capital summary card tells her whether foreign demand (the most price-insensitive pool that supported the run-up she benefited from) is still active. If foreign capital is flowing in, she can ask a premium; if it's pulling back, she competes on local buyer terms.</span><span class="lang-zh">Three Zones 卡告訴她今天的買家預計為每個層級支付多少 — 那是她的天花板。Foreign Capital summary 卡告訴她外國需求（她享受漲幅的最大功臣，也是最不在乎價格的買家池）是否仍然活躍。外資持續流入，她可以要求溢價；外資退場，她就要在本地買家條件上競爭。</span></div>
+      <div class="step-screenshot"><img src="img/06-jp-tokyo.png" alt="Tokyo page with KEY METRICS and Three Zones cards" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 7 — Carry Heatmap sort by 5yr change -->
+  <div class="demo-step">
+    <div class="step-no">7</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Carry Heatmap sorted by 5yr change — has Tokyo's carry compressed to cycle-peak levels?</span><span class="lang-zh">Carry Heatmap 按 5 年變化排序 — 東京的 carry 是否已壓縮至週期頂部水準？</span></h4>
+      <div class="step-url"><a href="/carry-heatmap.html">myproperty.investmquest.com/carry-heatmap</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Carry Heatmap / 利差熱力圖</strong>. She uses the sort toggle at the top and switches to <strong>"5yr change"</strong> — this re-ranks cities by how much their carry has moved over 5 years. Cities at the TOP of this list are where carry compressed most (possible cycle peak). She finds Tokyo's row and checks its relative position. She then clicks the <strong>Tokyo row label</strong> to open the detail panel with the 5-year carry line chart.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Carry Heatmap / 利差熱力圖</strong>。用頂部排序按鈕切到 <strong>「5yr change」</strong>排序 — 這會依 5 年 carry 變化量重新排序城市。列表頂部是 carry 壓縮最多的城市（可能是週期頂部）。她找到東京那一列，看它的相對位置。接著點 <strong>Tokyo 列名</strong>開啟 detail panel，看 5 年 carry 折線圖。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> a 41-city × 20-quarter heatmap (5 years), cells colored red→gray→green from −4% to +5% carry. The sort by 5yr change puts cities where carry collapsed at the top in red. Two Top Movers cards: TOP 5 Compressed (red list) and TOP 5 Expanded (green list). After clicking Tokyo, a detail panel shows: 5-year carry line chart, 21Q2 vs 26Q1 carry, 5yr change figure, current yield and rate side-by-side.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>41 城 × 20 季的熱力圖（5 年），顏色從紅 → 灰 → 綠（carry −4% 到 +5%）。按 5 年變化排序，carry 崩落最多的城市排在最上方呈紅色。兩張 Top Movers 卡：TOP 5 壓縮（紅色清單）、TOP 5 擴張（綠色清單）。點 Tokyo 後，detail panel 顯示：5 年 carry 折線圖、21Q2 vs 26Q1 carry、5 年變化量、當前 yield 與利率並排。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">carry compression is the most reliable sell signal on this site. When carry shrinks over 5 years — yield stayed flat but financing costs rose — buyers earn less net-of-cost. That erodes the investment case and eventually softens prices. If Tokyo's 5yr carry line is trending down and now sits in the "compressed" Top 5, she is closer to a cycle peak than a trough. The urgency to exit increases. If Tokyo still shows healthy or expanding carry, she has more time.</span><span class="lang-zh">carry 壓縮是本站最可靠的賣出信號。5 年來 carry 縮水 — yield 持平但融資成本上升 — 代表買方扣掉成本後的淨報酬縮少。這侵蝕投資邏輯，最終軟化價格。如果東京的 5 年 carry 走勢向下、且已進入「壓縮」Top 5，她比低谷更接近週期頂部。退場的迫切性增加。如果東京 carry 仍然健康或擴張，她還有更多時間。</span></div>
+      <div class="step-screenshot"><img src="img/07-carry-heatmap.png" alt="Carry Heatmap sorted by 5yr change with Tokyo row visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 8 — Pipeline Cliff forward supply -->
+  <div class="demo-step">
+    <div class="step-no">8</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Pipeline Cliff — is a supply wave incoming? Exit before competing listings hit the market</span><span class="lang-zh">Pipeline Cliff — 未來供給潮要來了嗎？在競爭賣盤湧現前先出場</span></h4>
+      <div class="step-url"><a href="/pipeline-cliff.html">myproperty.investmquest.com/pipeline-cliff</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Pipeline Cliff / 供給日曆</strong>. She scans for Tokyo's risk bucket (🔴 DANGER · 🟡 WATCH · 🟢 EASING). She then looks at the quarterly delivery chart to see whether the bars are climbing in the next 4–8 quarters — that would indicate a supply wave arriving during her intended selling window.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Pipeline Cliff / 供給日曆</strong>。掃描東京的風險桶（🔴 DANGER · 🟡 WATCH · 🟢 EASING）。再看逐季交付圖，確認未來 4–8 季的柱子是否攀升 — 那代表在她預期出售窗口內將有供給潮到來。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> a quarterly delivery chart titled <em>"Quarterly delivery as % of existing stock"</em> for all cities, with forward supply bars city-by-city and colored risk badges (DANGER / WATCH / EASING). The chart shows 8 quarters of forward supply data.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>所有城市的逐季交付圖《季度交付占既有存量百分比》，各城市有前瞻供給柱和彩色風險標籤（DANGER / WATCH / EASING）。圖表顯示未來 8 季的供給數據。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">a buyer reads "Tokyo in EASING" as good entry timing. She reads the same signal differently: EASING now means fewer competing listings — it's a window to sell before a supply wave arrives. If the forward bars are rising sharply, she wants to list and close BEFORE that wave lands. DANGER is no longer "don't buy" — it's "the window after which selling gets harder." The pipeline page is identical; only the interpretation flips.</span><span class="lang-zh">買方把「東京在 EASING」讀成好的進場時機。她對同樣信號的解讀不同：EASING 代表現在賣盤競爭少 — 這是在供給潮到來前出售的窗口。如果前瞻柱急速攀升，她想在那波供給到位之前掛牌並完成交易。DANGER 不再是「別買」— 而是「賣出變難的時間點之後」。Pipeline 頁面是一模一樣的；只是解讀方向翻轉了。</span></div>
+      <div class="step-screenshot"><img src="img/08-pipeline-cliff.png" alt="Pipeline Cliff with quarterly delivery bars and risk badges" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ── PHASE C ── -->
+  <div class="phase-divider">
+    <div class="ph-label"><span class="lang-en">Phase C · What does the exit cost?</span><span class="lang-zh">Phase C · 退場要付多少？</span></div>
+    <div class="ph-title"><span class="lang-en">Model the net proceeds before deciding to sell</span><span class="lang-zh">決定賣出前，先算清楚淨到手金額</span></div>
+    <div class="ph-sub"><span class="lang-en">Stops 9–10 quantify the actual exit: taxes, agent fees, and the risks that could compress value if she waits.</span><span class="lang-zh">第 9–10 站量化實際退場成本：稅務、仲介費，以及等待可能壓縮價值的風險。</span></div>
+  </div>
+
+  <!-- STOP 9 — Cost Calculator exit costs -->
+  <div class="demo-step">
+    <div class="step-no">9</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Cost Calculator — use the Exit Costs section to model what she actually nets after tax and fees</span><span class="lang-zh">Cost Calculator — 使用 Exit Costs 區，計算扣完稅和費用後她的實際到手金額</span></h4>
+      <div class="step-url"><a href="/tools/cost-calculator.html">myproperty.investmquest.com/tools/cost-calculator</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Cost Calc / 成本計算</strong>. She sets: <strong>Market = 🇯🇵 JP</strong>, <strong>Resident Status = Foreigner</strong>, <strong>Holding Horizon = 10y</strong> (8 years held + her 2-year planning horizon if she decides to wait), then enters the <strong>estimated current market value of her unit</strong> in the price field (she uses the Tokyo ¥/sqm from the previous step as a sense-check). She does <em>not</em> need to enter the original purchase price — the calculator models exit net proceeds from the current value forward.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Cost Calc / 成本計算</strong>。設定：<strong>Market = 🇯🇵 JP</strong>、<strong>Resident Status = Foreigner</strong>、<strong>Holding Horizon = 10y</strong>（已持有 8 年 + 如果她決定再等兩年的規劃年限），再輸入她物件的<strong>估計現值</strong>（她用上一站的東京 ¥/sqm 做合理性確認）。她<em>不需要</em>輸入原始買入價 — 計算機是以現值為起點模擬退場淨到手金額。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> a hero KPI dashboard with <em>TOTAL CASH OUT / NET PROCEEDS AT EXIT / NET P&amp;L verdict</em> and 5 supporting stats. Below: three breakdown tables — Acquisition (already paid, shown for context), Holding (ongoing cost + remaining years), and most importantly the <strong>Exit table</strong>: seller agent fee (~3%), <em>譲渡所得税 (CGT) — automatically switches between 39.6% (&lt;5yr) and 20.3% (≥5yr) based on holding horizon input</em>. Since she set 10y, the calculator shows the 20.3% rate — the lower bracket. A stacked bar chart visualises the cost breakdown, and a 12-market comparison table at the bottom shows how JP exit costs compare to AU, MY, UK, etc.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>hero KPI 儀表板顯示 <em>TOTAL CASH OUT／NET PROCEEDS AT EXIT／Net P&amp;L 判決</em>加 5 張輔助統計。下方三張明細表 — Acquisition（已支付，僅供參考）、Holding（持續成本 + 剩餘年數），以及最重要的 <strong>Exit 表</strong>：賣方仲介費（約 3%）、<em>譲渡所得税（自動依持有年限切換：&lt;5 年 39.6%、≥5 年 20.3%）</em>。因為她設定 10y，計算機顯示 20.3% — 低稅率區間。堆疊長條圖視覺化成本分解，底部 12 市場比較表顯示 JP 退場成本與 AU、MY、UK 等市場的對比。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">the most important line in the Exit table is the 譲渡所得税 row — and the most important fact she sees is that it shows <strong>20.3%</strong>, not 39.6%. Because she's held ≥5 years, she's already past the tax cliff. The difference between the two rates on, say, a ¥20M capital gain would be roughly ¥3.9M in additional tax — that's the value of holding longer she already captured. She also reads the agent fee line (3% of sale price) and makes sure her mental model of "net proceeds" is correct before calling an agent.</span><span class="lang-zh">Exit 表中最重要的一行是 譲渡所得税 — 她看到的最重要事實是：顯示 <strong>20.3%</strong>，不是 39.6%。因為她持有 ≥5 年，已越過稅務懸崖。以 ¥2,000 萬資本利得來說，兩個稅率的差約是 ¥390 萬的額外稅 — 這是她靠持有更長已經鎖定的價值。她也看仲介費那一行（售價的 3%），確認在打電話給仲介之前，她對「淨到手金額」的心理模型是正確的。</span></div>
+      <div class="step-screenshot"><img src="img/09-cost-calc.png" alt="Cost Calculator with JP, Foreigner, 10y showing Exit Costs section with 20.3% CGT" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 10 — JP Risk: what could go wrong if she waits -->
+  <div class="demo-step">
+    <div class="step-no">10</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Japan Risk Monitor — what could compress her exit value if she waits too long?</span><span class="lang-zh">日本風險監測 — 如果她等太久，哪些風險可能壓低退場價值？</span></h4>
+      <div class="step-url"><a href="/jp/risk.html">myproperty.investmquest.com/jp/risk</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">navbar 🇯🇵 → <strong>Risk / 風險</strong>. She looks at the 6-axis Risk Radar and the 4 colored Risk Factor cards, paying special attention to: <strong>Macro risk</strong> (BOJ surprise hike), <strong>Geopolitical risk</strong> (any foreign-buyer surcharge proposals), and the Policy timeline items that could land in the 2–3 year horizon.</span>
+        <span class="lang-zh">navbar 🇯🇵 → <strong>Risk / 風險</strong>。看 6 軸 Risk Radar 和 4 張彩色 Risk Factor 卡，特別注意：<strong>宏觀風險</strong>（BOJ 意外大幅升息）、<strong>地緣政治風險</strong>（任何外國買家附加費提案），以及可能在未來 2–3 年落地的政策時間軸事項。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> a 6-axis Risk Radar (Liquidity / Credit / Supply / Macro / Geopolitical / Demographics — current reading vs 2020 baseline). Four colored Risk Factor cards. A vertical policy timeline from 2013 Abenomics forward to current-year and forward-looking items. Any "orange or red" item on the radar or cards represents a risk that, if materialised, would compress her exit value.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>6 軸 Risk Radar（流動性／信用／供給／宏觀／地緣／人口 — 當前讀數 vs 2020 基準）。4 張彩色 Risk Factor 卡。從 2013 年 Abenomics 往後到當年度及前瞻事項的垂直政策時間軸。Radar 或卡片上任何「橙色或紅色」項目，代表一旦成真就會壓縮她退場價值的風險。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">the Risk page answers the question "what do I lose by waiting?" Each orange/red risk item is a potential price compressor: a foreign-buyer surcharge would reduce her buyer pool; a BOJ hike beyond expectations would compress buyer affordability; a JPY rebound (good for NT$ conversion) comes paired with higher rates (bad for prices). She's not reading this page to decide whether to buy — she's reading it to calibrate how long she can afford to wait before risks outweigh the benefits of delaying her exit.</span><span class="lang-zh">Risk 頁回答了「等待的代價是什麼？」這個問題。每個橙色/紅色風險項目都是潛在的價格壓縮因素：外國買家附加費會縮小她的買家池；BOJ 超預期升息會壓縮買家負擔能力；日圓反彈（利好台幣換算）往往伴隨升息（利空房價）。她不是在讀這頁決定是否買進 — 她是在校準在風險超過延遲退場利益之前，她還能等多久。</span></div>
+      <div class="step-screenshot"><img src="img/10-jp-risk.png" alt="JP Risk page with Risk Radar and Risk Factor cards" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ── PHASE D ── -->
+  <div class="phase-divider">
+    <div class="ph-label"><span class="lang-en">Phase D · Where to redeploy?</span><span class="lang-zh">Phase D · 賣出後資金怎麼再配置？</span></div>
+    <div class="ph-title"><span class="lang-en">Compare redeployment options for the proceeds</span><span class="lang-zh">比較退場後資金再配置的選項</span></div>
+    <div class="ph-sub"><span class="lang-en">Stops 11–12 help Mrs. Chung compare her options: J-REITs vs direct property vs cash, and verify the data sources behind her entire analysis.</span><span class="lang-zh">第 11–12 站幫鍾女士比較她的選項：J-REIT vs 實體不動產 vs 現金，並驗證她整個分析背後的數據來源。</span></div>
+  </div>
+
+  <!-- STOP 11 — REIT vs Direct rotation -->
+  <div class="demo-step">
+    <div class="step-no">11</div>
+    <div class="step-content">
+      <h4><span class="lang-en">REIT vs Direct — should she rotate from direct Tokyo property into J-REITs, TW property, or pure cash?</span><span class="lang-zh">REIT vs Direct — 她該把東京實體轉成 J-REIT、台灣不動產，還是純現金？</span></h4>
+      <div class="step-url"><a href="/reit-vs-direct.html">myproperty.investmquest.com/reit-vs-direct</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>REIT vs Direct / REIT vs 實體</strong>. She sets three toggles: Residency = <strong>Foreign</strong>, Period = <strong>10yr</strong>, Home Country chip = <strong>🇹🇼 TW</strong>. She clicks the <strong>"All Cash"</strong> scenario tab (her proceeds are cash, not leveraged). She reads the JP row to compare: "if I reinvest these proceeds into J-REITs vs another JP direct property, what's the 10yr expected outcome, net of WHT and treaty relief?"</span>
+        <span class="lang-zh">navbar → Tools → <strong>REIT vs Direct / REIT vs 實體</strong>。切三個 toggle：Residency = <strong>Foreign</strong>、Period = <strong>10yr</strong>、母國 chip 選 <strong>🇹🇼 TW</strong>。點 <strong>「All Cash」</strong> 場景 tab（她的退場資金是現金，非槓桿）。讀 JP 那一列：「如果我把這筆退場資金投入 J-REIT vs 另一戶日本實體，扣掉預扣稅和租稅協定優惠後，10 年的預期結果是什麼？」</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> a 7-row comparison table (US/SG/JP/AU/MY/UK/EU). Columns: Direct Income / Direct Total / REIT Income / REIT Total / Gap / Winner. Below: an endpoint bar chart <em>"$100K, after 10 years"</em> comparing direct vs REIT paths for each market. To the right: three context cards explaining Foreign mode, foreign-friendly markets, and Treaty Relief for Taiwan. The JP row and the TW treaty card together answer her redeployment question.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>七列比較表（美／新／日／澳／馬／英／歐）。欄位：Direct Income／Direct Total／REIT Income／REIT Total／Gap／Winner。下方終值長條圖《$100K, after 10 years》比較各市場兩條路徑。右側三張說明卡：Foreign 模式說明、對外國人友善的市場、台灣租稅協定優惠。JP 那一列加上 TW treaty 卡合起來回答她的再配置問題。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">this is the redeployment comparison she came for. At 60, retiring, she doesn't need the headaches of a second direct property purchase (property management, PM company, tenant screening, maintenance calls at 2am). J-REITs offer daily liquidity, no management overhead, and passable yields — but she trades away capital appreciation upside and takes on WHT drag. The table gives her the numbers; the decision between "simple income + liquidity" and "higher upside + management burden" is personal. She can also look at MY or AU rows if she's considering a different market for her next property (many Taiwanese retirees diversify into Malaysia after exiting Japan).</span><span class="lang-zh">這是她真正需要的再配置比較。60 歲退休，她不需要再背負另一套實體不動產的麻煩（物業管理、PM 公司、租客篩選、凌晨 2 點的維修電話）。J-REIT 提供每日流動性、零管理負擔、還算過得去的 yield — 但她放棄資本增值的上行空間，同時承擔預扣稅拖累。表格給她數字；「簡單收入 + 流動性」與「更高上行 + 管理負擔」之間的選擇是個人決定。她也可以看 MY 或 AU 列，如果她考慮下一個物件換一個市場（許多台灣退休人士在退出日本後轉向馬來西亞）。</span></div>
+      <div class="step-screenshot"><img src="img/11-reit-vs-direct.png" alt="REIT vs Direct with Foreign, TW chip, 10yr, All Cash toggles showing JP row" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 12 — Methodology -->
+  <div class="demo-step">
+    <div class="step-no">12</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Methodology — verify the data sources behind everything she used for exit timing</span><span class="lang-zh">Methodology — 確認她用於決定退場時機的所有數據來源</span></h4>
+      <div class="step-url"><a href="/methodology.html">myproperty.investmquest.com/methodology</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mrs. Chung does:</span><span class="lang-zh">鍾女士動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Methodology / 方法論</strong>. She goes straight to the Japan row of the <em>"Primary Data Sources by Market"</em> table and reads which organisation each metric is sourced from. She also reads the glossary cards at the top to confirm the definitions of Carry Spread, Pipeline %, and the WHT rates used in REIT vs Direct.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Methodology / 方法論</strong>。直接跳到《Primary Data Sources by Market》表的日本那一列，確認每個指標的來源機構。她也讀頂部的術語定義卡，確認 Carry Spread、Pipeline %，以及 REIT vs Direct 所用的預扣稅率定義。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What she sees:</strong> a 20-row market data sources table. Japan row: Price Index = Kantei (resale) · Rent / Vacancy = At Home + Suumo · Pipeline = MLIT housing starts · Central Bank = BoJ. Above the table: a 10-card glossary of derived metrics (Carry Spread, PTI, P/R, Vacancy Rate, Pipeline %, 10yr Cumulative, etc.) with threshold definitions. She can share this page URL with her 稅理士 as a reference for where the macro data she used comes from.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>20 列市場資料來源表。日本那一列：Price Index = Kantei（二手）· Rent / Vacancy = At Home + Suumo · Pipeline = MLIT 住宅開工 · Central Bank = BoJ。表格上方 10 張衍生指標卡（Carry Spread、PTI、P/R、Vacancy Rate、Pipeline % 等）含閾值定義。她可以把這頁 URL 傳給她的稅理士，作為她使用的宏觀數據來源的參照。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mrs. Chung (sell-side read):</span><span class="lang-zh">對鍾女士（賣方角度）：</span></strong> <span class="lang-en">when she brings the carry heatmap screenshot or cost calculator output to a Japanese real estate agent or her 稅理士, she'll be asked "where do these numbers come from?" The Methodology page is the answer. It also tells her the data refresh cadence — quarterly — so she knows whether the numbers she's acting on are current or 6 months old. After this final stop, she has done all the structured analysis the site can do for her. The remaining decisions — when to list, what price to set, which agent to use, how to hedge the FX — require licensed professionals in Japan.</span><span class="lang-zh">當她把 carry heatmap 截圖或 cost calculator 結果帶給日本房仲或稅理士時，對方會問「這些數字從哪來的？」Methodology 頁就是答案。它也告訴她數據刷新週期 — 季度 — 讓她知道她依據的數字是最新的還是 6 個月前的。走完最後這一站，她完成了本站能為她做的所有結構化分析。剩餘決策 — 何時掛牌、定什麼價、找哪家仲介、如何對沖匯率 — 需要日本當地的有牌照專業人士。</span></div>
+      <div class="step-screenshot"><img src="img/12-methodology.png" alt="Methodology page with Japan data sources row visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 3 — SITE CHEAT SHEET (SELL-SIDE)       -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 03</div>
+    <h2><span class="lang-en">Sell-side reading guide — how the same tools flip when you already own</span><span class="lang-zh">賣方閱讀指引 — 當你已經持有時，同樣的工具如何反向解讀</span></h2>
+    <p class="sec-sub"><span class="lang-en">Every chart, heatmap, and KPI on this site was designed with buyers in mind — but each one has a mirror reading for sellers. These patterns apply across all markets.</span><span class="lang-zh">站上每張圖、熱力圖和 KPI 都是以買方視角設計的 — 但每一個都有對賣方的鏡像解讀。以下規律適用於所有市場。</span></p>
+  </div>
+
+  <div class="cheat-grid">
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">↕</span> <span class="lang-en">Carry Heatmap — flip the read</span><span class="lang-zh">Carry Heatmap — 反向解讀</span></h4>
+      <p><span class="lang-en"><strong>Buyer read:</strong> green = positive carry → good entry. <strong>Seller read:</strong> green = carry still healthy → buyers still motivated → good time to list. A red row (carry compressed) is a buyer's warning; for a seller it means the market has already re-priced — act before it re-prices further down.</span><span class="lang-zh"><strong>買方解讀：</strong>綠色 = 正 carry → 好的進場點。<strong>賣方解讀：</strong>綠色 = carry 仍健康 → 買方仍有動力 → 好的掛牌時機。紅色（carry 壓縮）對買方是警示；對賣方代表市場已經重新定價 — 在繼續向下定價前行動。</span></p>
+      <p class="ck-tip"><span class="lang-en">Sort by "5yr change" to find your city's compression trajectory — not just the current snapshot.</span><span class="lang-zh">按「5 年變化」排序，找到你的城市的壓縮軌跡 — 不只是當前快照。</span></p>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">📦</span> <span class="lang-en">Pipeline Cliff — urgency signal for sellers</span><span class="lang-zh">Pipeline Cliff — 賣方的緊迫信號</span></h4>
+      <p><span class="lang-en"><strong>Buyer read:</strong> EASING bucket → low competition, good entry timing. <strong>Seller read:</strong> EASING now → low competing listings today — sell before the pipeline delivers. Rising forward bars mean competing supply arrives in 2–4 quarters: that's your sell-before deadline.</span><span class="lang-zh"><strong>買方解讀：</strong>EASING 桶 → 低競爭、好的進場時機。<strong>賣方解讀：</strong>現在 EASING → 今天競爭賣盤少 — 在 pipeline 交付前賣出。前瞻柱攀升代表 2–4 季後競爭供給到來：那就是你的「賣出截止日期」。</span></p>
+      <p class="ck-tip"><span class="lang-en">DANGER is not "don't exit." It means "exit window is closing — you have less time."</span><span class="lang-zh">DANGER 不是「不要退場」，而是「退場窗口正在關閉 — 你的時間不多了」。</span></p>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">¥</span> <span class="lang-en">Cost Calculator — focus on the Exit table</span><span class="lang-zh">Cost Calculator — 重點看 Exit 表</span></h4>
+      <p><span class="lang-en">A buyer uses the Acquisition section most. A seller uses the <strong>Exit section</strong> most: agent fee (3%) + 譲渡所得税 (20.3% if ≥5yr). Set your holding horizon correctly — the CGT rate flips at the 5-year mark. Check the 12-market comparison row to see how JP exit costs compare to other markets.</span><span class="lang-zh">買方最常用 Acquisition 區。賣方最常用 <strong>Exit 區</strong>：仲介費（3%）+ 譲渡所得税（≥5 年 20.3%）。正確設定持有年限 — CGT 在 5 年時翻轉。看 12 市場比較列，了解 JP 退場成本與其他市場的對比。</span></p>
+      <p class="ck-tip"><span class="lang-en">Enter your unit's estimated current value, not your original purchase price.</span><span class="lang-zh">輸入物件的估計現值，不是原始買入價。</span></p>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🔄</span> <span class="lang-en">REIT vs Direct — the redeployment tool</span><span class="lang-zh">REIT vs Direct — 再配置工具</span></h4>
+      <p><span class="lang-en">Buyers use this to compare "buy direct" vs "buy REIT." Sellers use it to decide <em>where to put proceeds</em>: another direct property (same or different market), a REIT basket (liquidity + no management), or pure cash. Set Residency = Foreign, Period = 10yr, Home Country = TW for Mrs. Chung's exact profile.</span><span class="lang-zh">買方用這個工具比較「買實體」vs「買 REIT」。賣方用它決定<em>退場資金去哪</em>：另一套實體（同市場或不同市場）、REIT 組合（流動性 + 零管理），或純現金。設定 Residency = Foreign、Period = 10yr、母國 = TW，即是鍾女士的精確條件。</span></p>
+      <p class="ck-tip"><span class="lang-en">At retirement age, many property owners rotate from direct to REITs for the same exposure with zero management overhead.</span><span class="lang-zh">退休年齡時，許多房產持有人從實體轉向 REIT，獲得相似曝險但無管理負擔。</span></p>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">EN</span> <span class="lang-en">Language toggle + PDF for advisors</span><span class="lang-zh">語言切換 + PDF 給顧問</span></h4>
+      <p><span class="lang-en">Top-right of every page: <code>EN</code> / <code>中文</code>. Switch to 中文 first, then download PDF — gives a 中文 printout for Mrs. Chung's Japanese 稅理士 to review alongside. Press <code>⌘ + P</code> → Save as PDF. Navbar hides in print mode for a clean output.</span><span class="lang-zh">每頁右上角：<code>EN</code> / <code>中文</code>。先切到中文再下載 PDF — 給鍾女士日本稅理士一份中文版對照查閱。按 <code>⌘ + P</code> → 另存 PDF。列印模式下 navbar 自動隱藏，版面乾淨。</span></p>
+      <p class="ck-tip"><span class="lang-en">Language choice persists across pages via localStorage — switch once, browse in Chinese everywhere.</span><span class="lang-zh">語言選擇透過 localStorage 跨頁記住 — 切換一次，全站中文。</span></p>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🟢</span> <span class="lang-en">KPI card colors — sell-side meaning</span><span class="lang-zh">KPI 卡顏色 — 賣方含義</span></h4>
+      <p><span class="lang-en">Left border colors read the same way — but the <em>implication</em> flips. A <strong>green</strong> resale volume card means market is active — ideal exit timing. A <strong>red</strong> yield card (yield falling) actually means prices ran up — your unit is worth more. Context matters.</span><span class="lang-zh">左邊框顏色判讀相同 — 但<em>含義</em>翻轉。<strong>綠色</strong>的二手成交量卡代表市場活躍 — 理想退場時機。<strong>紅色</strong>的 yield 卡（yield 下降）實際上代表價格已漲 — 你的物件更值錢了。脈絡決定判斷。</span></p>
+      <div class="color-legend">
+        <div class="cl-item"><span class="cl-dot cl-green"></span><span class="lang-en">favourable</span><span class="lang-zh">有利</span></div>
+        <div class="cl-item"><span class="cl-dot cl-orange"></span><span class="lang-en">watch</span><span class="lang-zh">留意</span></div>
+        <div class="cl-item"><span class="cl-dot cl-red"></span><span class="lang-en">risk</span><span class="lang-zh">風險</span></div>
+        <div class="cl-item"><span class="cl-dot cl-blue"></span><span class="lang-en">neutral</span><span class="lang-zh">中性</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 4 — TAKEAWAY                            -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 04</div>
+    <h2><span class="lang-en">What Mrs. Chung walks away with — and what she must take outside this site</span><span class="lang-zh">鍾女士帶走什麼 — 以及哪些必須拿到站外去問</span></h2>
+    <p class="sec-sub"><span class="lang-en">After the 12-stop tour, she has a clear separation between "questions the site answered" and "questions the site flagged but cannot answer."</span><span class="lang-zh">走完 12 站後，她能清楚分開「網站已回答的問題」與「網站幫她點出但不能回答的問題」。</span></p>
+  </div>
+
+  <div class="takeaway">
+    <div class="takeaway-card answered">
+      <h4><span class="lang-en">✓ The site answered these for her</span><span class="lang-zh">✓ 網站已回答的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Where in the market cycle Tokyo sits</strong> — the macro page cycle bar and Report Outlook section together give the analyst's view</span><span class="lang-zh"><strong>東京目前在市場週期的哪個位置</strong> — 總經頁週期軸與 Report Outlook 章節一起給出分析師觀點</span></li>
+        <li><span class="lang-en"><strong>Whether Tokyo's carry is compressing</strong> — Carry Heatmap 5yr change sort, Tokyo row + detail panel</span><span class="lang-zh"><strong>東京 carry 是否在壓縮</strong> — Carry Heatmap 按 5 年變化排序，東京列 + detail panel</span></li>
+        <li><span class="lang-en"><strong>Whether a future supply wave is incoming in her sell window</strong> — Pipeline Cliff forward bars for Tokyo</span><span class="lang-zh"><strong>在她預期出售窗口內是否有供給潮</strong> — Pipeline Cliff 東京的前瞻柱</span></li>
+        <li><span class="lang-en"><strong>What her exit actually costs</strong> — Cost Calculator Exit section: agent fee + 譲渡所得税 at the correct bracket (20.3% since she held ≥5yr)</span><span class="lang-zh"><strong>她的退場實際成本</strong> — Cost Calculator Exit 區：仲介費 + 正確稅率區間的 譲渡所得税（持有 ≥5 年 20.3%）</span></li>
+        <li><span class="lang-en"><strong>That she's safely in the lower tax bracket</strong> — 8 years held = past the 5-year cliff = 20.3% not 39.6%</span><span class="lang-zh"><strong>她安全落在低稅率區間</strong> — 持有 8 年 = 越過 5 年分水嶺 = 20.3% 而非 39.6%</span></li>
+        <li><span class="lang-en"><strong>Whether J-REITs beat another direct purchase</strong> for a retired foreigner with TW tax treaty (REIT vs Direct tool)</span><span class="lang-zh"><strong>對台灣租稅協定的已退休外國人而言，J-REIT 是否優於另一套實體</strong>（REIT vs Direct 工具）</span></li>
+        <li><span class="lang-en"><strong>Which policy/macro risks could compress exit value</strong> if she waits (JP Risk page radar + timeline)</span><span class="lang-zh"><strong>等待期間哪些政策/宏觀風險可能壓縮退場價值</strong>（JP Risk 頁 radar + 時間軸）</span></li>
+        <li><span class="lang-en"><strong>Where every number she relied on comes from</strong> — Methodology Japan row (Kantei, MLIT, BoJ, Suumo)</span><span class="lang-zh"><strong>她所依據的每個數字的來源</strong> — Methodology 日本列（Kantei、MLIT、BoJ、Suumo）</span></li>
+      </ul>
+    </div>
+
+    <div class="takeaway-card outsource">
+      <h4><span class="lang-en">→ Questions for advisors outside this site</span><span class="lang-zh">→ 必須拿到站外問專業人士的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Actual capital gains tax liability on her specific unit</strong> — the cost calculator uses indicative brackets; her actual taxable gain (original cost + depreciation adjustments) and residency status → 稅理士 (zeirishi) in Japan</span><span class="lang-zh"><strong>她這套物件的實際資本利得稅負</strong> — 計算機使用示意稅率；她的實際應稅所得（原始成本 + 折舊調整）與居住身分 → 日本稅理士</span></li>
+        <li><span class="lang-en"><strong>Taiwan income tax treatment</strong> of the repatriated proceeds → 台灣會計師</span><span class="lang-zh"><strong>匯回台灣的退場收益在台灣的所得稅處理</strong> → 台灣會計師</span></li>
+        <li><span class="lang-en"><strong>FX execution</strong> — when and how to convert JPY → TWD at exit: spot vs forward contract → her bank's FX desk</span><span class="lang-zh"><strong>匯率執行</strong> — 退場時 JPY → TWD 何時如何換匯：即期 vs 遠期合約 → 往來銀行 FX 部門</span></li>
+        <li><span class="lang-en"><strong>Listing price, timing, and agent selection</strong> for her specific unit in her specific ward → licensed Tokyo real estate agent (宅地建物取引士)</span><span class="lang-zh"><strong>她的物件在該區的掛牌價、時機與仲介選擇</strong> → 有牌照的東京不動產仲介（宅地建物取引士）</span></li>
+        <li><span class="lang-en"><strong>Inheritance and estate planning</strong> around the proceeds (she's 60, retired) → 稅理士 for Japan inheritance (相続税) implications + Taiwan estate planning attorney</span><span class="lang-zh"><strong>退場資金的繼承與遺產規劃</strong>（她 60 歲、已退休）→ 日本稅理士了解相続税含義 + 台灣遺產規劃律師</span></li>
+        <li><span class="lang-en"><strong>Property management company severance</strong> — terminating the PM contract and any tenant notice obligations → the current PM company</span><span class="lang-zh"><strong>物業管理公司解約</strong> — 終止 PM 合約與任何租客通知義務 → 現有 PM 公司</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 5 — DOWNLOAD PDF                        -->
+  <!-- ============================================== -->
+  <!-- ============================================== -->
+  <!-- SECTION 5 — BEST OPTION                         -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 05</div>
+    <h2><span class="lang-en">The site's best-supported call for Mrs. Chung</span><span class="lang-zh">站上資料能支持的最佳選項 — 給鍾太太</span></h2>
+    <p class="sec-sub"><span class="lang-en">Not a personalized recommendation — a single, opinionated call assembled only from data this site already shows in SECTIONS 01–04.</span><span class="lang-zh">非個人化推薦 — 是從 SECTION 01–04 站上資料推導出的單一明確建議。</span></p>
+  </div>
+
+  <div class="best-option">
+    <div class="bo-grid">
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">CITY / AREA</span><span class="lang-zh">城市 / 區域</span></div>
+        <div class="bo-val">Tokyo · exit window</div>
+        <div class="bo-note"><span class="lang-en">Sell, don't buy. Site data supports listing within next 6 months while supply pressure is still building.</span><span class="lang-zh">賣，不買。站上資料支持在未來 6 個月內掛盤，趁供給壓力尚未全部到位。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">PRODUCT</span><span class="lang-zh">產品類型</span></div>
+        <div class="bo-val">Sell · no replacement</div>
+        <div class="bo-note"><span class="lang-en">Exit fully — no 1031-style swap; capital recycles to liquid instruments or back to TWD.</span><span class="lang-zh">完全 exit — 不做 1031 換屋；資金回到流動工具或 TWD。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">PRICE / NET</span><span class="lang-zh">售價 / 稅後</span></div>
+        <div class="bo-val">List at 8-year cap-rate band · post-tax net = JPY received − 20% non-resident WHT − exit cost</div>
+        <div class="bo-note"><span class="lang-en">Site's exit calculator gives the post-tax net; broker commission ~3% + 居住性 / 修繕 fees included.</span><span class="lang-zh">站上 exit 試算給出稅後淨額；仲介費約 3% + 居住性 / 修繕費已內建。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">TIMING</span><span class="lang-zh">時機</span></div>
+        <div class="bo-val">List within 6 months</div>
+        <div class="bo-note"><span class="lang-en">Carry Heatmap + Pipeline Cliff together = relatively good exit window in this 8-year cycle.</span><span class="lang-zh">Carry Heatmap + Pipeline Cliff 合看 = 8 年週期中相對好的 exit 窗口。</span></div>
+      </div>
+    </div>
+
+    <div class="bo-section bo-checklist">
+      <h4><span class="lang-en">✓ Pre-list checklist (from site data)</span><span class="lang-zh">✓ 掛盤前 checklist（站上資料能驗證的）</span></h4>
+      <ul>
+        <li><span class="lang-en">Carry Heatmap Tokyo: rolling carry trending flat or down → confirms exit thesis.</span><span class="lang-zh">Tokyo Carry Heatmap：rolling carry 持平或下行 → 確認 exit 論點。</span></li>
+        <li><span class="lang-en">Pipeline Cliff Tokyo for her sub-tier: 24-month forward supply not in EASING (i.e., supply still loading).</span><span class="lang-zh">她那個 sub-tier 的 Tokyo Pipeline Cliff：未來 24 個月供給不在 EASING（仍在累積）。</span></li>
+        <li><span class="lang-en">Exit Cost Calculator: post-tax net + 20% non-resident WHT + ¥-NTD FX cleared her after-cost hurdle.</span><span class="lang-zh">Exit Cost Calculator：稅後淨額 + 20% 非居住者預扣 + ¥-NTD 匯率，仍通過扣成本後門檻。</span></li>
+        <li><span class="lang-en">Risk page Japan: BOJ policy + immigration / rental rule changes won't shift demand in her favour in next 12 months.</span><span class="lang-zh">Japan Risk 頁：BOJ 政策 + 移民/租賃法規變動，未來 12 個月不會替她推升需求。</span></li>
+        <li><span class="lang-en">Methodology Japan row: comp set is from BOJ / MLIT / 統計局 (not broker estimates) — gives realistic, not aspirational price guidance.</span><span class="lang-zh">Methodology 日本那列：comp set 來自 BOJ / MLIT / 統計局（非仲介估價）— 給的是務實價而非理想價。</span></li>
+      </ul>
+    </div>
+
+    <div class="bo-section bo-next">
+      <h4><span class="lang-en">→ Off-site next steps (the site cannot answer)</span><span class="lang-zh">→ 走出站外的下一步（站上無法回答的）</span></h4>
+      <ol>
+        <li><span class="lang-en"><strong>2-3 仲介 price guidance</strong> — comp-based listing price; do not anchor on her own purchase cost.</span><span class="lang-zh"><strong>2-3 家仲介 price guidance</strong> — 用 comp 訂價；不要 anchor 在自己當初買價。</span></li>
+        <li><span class="lang-en"><strong>稅理士 (zeirishi) + Taiwan 會計師</strong> — non-resident exit: 20% WHT on gross sale price, then refund mechanism if eligible; coordinate with TW basic income tax.</span><span class="lang-zh"><strong>日本稅理士 + 台灣會計師</strong> — 非居住者賣方：售價 20% 預扣，事後若合格申請退稅；協調 TW 基本所得稅。</span></li>
+        <li><span class="lang-en"><strong>司法書士</strong> — title transfer, mortgage discharge (if any), foreign-seller documentation.</span><span class="lang-zh"><strong>司法書士</strong> — 過戶、塗銷抵押（若有）、外籍賣方文件。</span></li>
+        <li><span class="lang-en"><strong>FX desk</strong> — JPY→TWD repatriation: spread / timing strategy; consider staged conversion.</span><span class="lang-zh"><strong>銀行 FX desk</strong> — JPY→TWD 匯回：價差/時點策略；考慮分階段換匯。</span></li>
+        <li><span class="lang-en"><strong>Reinvestment plan</strong> — site supports exit, but the next deployment (cash / bond / domestic property / REIT) needs separate analysis.</span><span class="lang-zh"><strong>再投資計畫</strong> — 站上支持 exit，但下一步配置（現金 / 債券 / 國內房 / REIT）需另作分析。</span></li>
+      </ol>
+    </div>
+
+    <div class="bo-bottomline">
+      <span class="bo-bl-label"><span class="lang-en">BOTTOM LINE</span><span class="lang-zh">底線</span></span>
+      <p><span class="lang-en">Listing within the next 6 months is the single call most consistent with the 12 stops. Hesitating 12 months exposes her to softer carry + heavier supply — and the site shows exactly why. The site cannot, however, pick the specific broker or time the FX swap.</span><span class="lang-zh">未來 6 個月內掛盤是 12 站走完後最一致的選項。再拖 12 個月會遇到 carry 走弱 + 供給壓力 — 站上有完整圖表說明為什麼。但具體找哪家仲介、何時換匯 — 站上無法幫她決定。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 6 — DOWNLOAD PDF                        -->
+  <!-- ============================================== -->
+  <div class="pdf-bar">
+    <button type="button" class="pdf-btn" onclick="window.print()">
+      <span>📄</span>
+      <span class="lang-en">Download this walkthrough as PDF</span><span class="lang-zh">下載這份導覽為 PDF</span>
+    </button>
+    <a class="pdf-btn ghost" href="/demo/">
+      <span>←</span>
+      <span class="lang-en">Back to all walkthroughs</span><span class="lang-zh">回所有導覽</span>
+    </a>
+  </div>
+
+  <div class="source-footer" style="margin-top:24px">
+    <span class="lang-en"><em>This walkthrough teaches you how to navigate Property Monitor for a specific sell-side use case. The fictional persona "Mrs. Chung" is a storytelling device only — the page descriptions, button labels, and navigation paths reflect the actual site as of Q1 2026. UI may change over time; if a screenshot looks out of date, the site itself is the source of truth.</em></span>
+    <span class="lang-zh"><em>本導覽教你如何在特定退場情境下使用 Property Monitor。虛構人物「鍾女士」只是敘述工具 — 頁面描述、按鈕名稱、導覽路徑反映 2026 Q1 實際網站。UI 可能隨時間變動，截圖若與現況不符，請以網站本身為準。</em></span>
+    <br><br>
+    <span class="lang-en"><strong>Not investment / tax / legal / property advice.</strong> 譲渡所得税 brackets shown are illustrative — confirm with a Japanese 稅理士. See <a href="/methodology.html" style="color:#2563eb">/methodology</a> for data sources.</span>
+    <span class="lang-zh"><strong>本文不構成投資、稅務、法律或不動產建議。</strong>所示 譲渡所得税 稅率為示意 — 請向日本稅理士確認。資料來源見 <a href="/methodology.html" style="color:#2563eb">/methodology</a>。</span>
+  </div>
+
+</main>
+
+<script src="/js/navbar.js" defer></script>
+<script>
+function getLang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function applyLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+}
+window.addEventListener('load',function(){applyLang(getLang());
+  setTimeout(function(){applyLang(getLang());},120);
+});
+window.addEventListener('storage',function(e){if(e.key==='lang')applyLang(getLang());});
+</script>
+
+</body>
+</html>

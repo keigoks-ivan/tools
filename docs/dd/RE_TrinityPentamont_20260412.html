@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trinity Pentamont @ Jalan Kiara 5，Mont Kiara｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:linear-gradient(135deg,#2d1b69 0%,#14532D 100%);color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-card.top{border-top:3px solid #16a34a;background:#F0FDF4}
+.kpi-card.warn{border-top:3px solid #d97706}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+.brickz-hero{background:linear-gradient(135deg,#2d1b69,#14532D);border-radius:8px;padding:20px 24px;margin:12px 0;color:#fff}
+.brickz-t{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.6);margin-bottom:10px;letter-spacing:.05em}
+.brickz-g{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.brickz-s{text-align:center}
+.brickz-n{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:#c4b5fd}
+.brickz-l{font-size:10px;color:rgba(255,255,255,.6);margin-top:3px}
+.compare-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.c4-card{border-radius:8px;padding:12px;border:1px solid}
+.c4-a{background:#F0FDF4;border-color:#86efac}
+.c4-b{background:#EFF6FF;border-color:#93c5fd}
+.c4-c{background:#FEF9C3;border-color:#d97706}
+.c4-d{background:#F8FAFC;border-color:#e2e8f0}
+.c4-t{font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:6px}
+.c4-a .c4-t{color:#166534}.c4-b .c4-t{color:#1e40af}.c4-c .c4-t{color:#92400E}.c4-d .c4-t{color:#475569}
+.c4-n{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700}
+.c4-a .c4-n{color:#166534}.c4-b .c4-n{color:#1e40af}.c4-c .c4-n{color:#92400E}.c4-d .c4-n{color:#64748b}
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:680px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+@media(max-width:680px){.score-cols,.dual-col,.compare-4,.brickz-g{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：Trinity Pentamont @ Jalan Kiara 5，Mont Kiara｜框架 v1.3</span>
+  <span>資料：2026-04-12 ｜ brickz 27筆 RM811 psf ｜ Gross Yield 6.38% ｜ 管理費 RM0.34 psf ｜ GIS 步行 ｜ 完工 2022/2023</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出 ｜ 已完工二手建案</div>
+  <h1>Trinity Pentamont（Pentamont）</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&yield=6.38&from=TrinityPentamont"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=TrinityPentamont"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Kiara 5，Mont Kiara，KL ｜ 開發商：Modern Pandora Sdn Bhd（Trinity Group，私人控股）｜ Freehold 住宅地契（Residential Strata）｜ 1 棟 41 層，330 戶 ｜ 2.9 英畝 ｜ 竣工：2022 年 8 月（官方）/ 實際入住約 2022–2023 ｜ 坪數：2,057–4,115 sqft（全大坪，「Penthouse-style」）</div>
+  <div class="badge-row">
+    <span class="badge">✅ Freehold 住宅地契——最佳地契</span>
+    <span class="badge">✅ brickz 27筆（2024-09至2025-08）RM811 psf ｜FIX-03 通過</span>
+    <span class="badge">✅ Gross Yield 6.38%（本系列第二高，僅次 28 MK）</span>
+    <span class="badge">✅ 管理費 RM0.34 psf（含沉沒基金，官方確認）——本系列最低之一</span>
+    <span class="badge">✅ GIS + MKIS 步行 1km 內 ｜ Jaya Grocer 步行</span>
+    <span class="badge">✅ 雙入口（Jalan Kiara 5 + Jalan Kiara 3）</span>
+    <span class="badge">⚠️ Trinity Group 是私人中型開發商（非 Sunway/UEM 等 Bursa 上市大廠）</span>
+    <span class="badge">⚠️ 掛牌租 128 筆（39% 出租掛牌率，偏高）</span>
+    <span class="badge">⚠️ 成交中位 RM166.7 萬（外籍門檻 RM100 萬已達，但大坪流動性偏低）</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 框架釐清 -->
+<div class="insight">
+  <strong>📌 建案釐清：Trinity Pentamont ≠ 上游報告點名的「The MINH」</strong><br><br>
+  上游 KL 供需報告提及「精品住宅地契低密度公寓（KLCC、Bangsar、Mont Kiara 最新建案）供給管道有限，The MINH、CloutHaus、Core Residence @ TRX 等」。Trinity Pentamont 是一個更早完工（2022）、規模更大（330 戶）的建案，定位不同於近年「超精品小批量」新案，而是「大坪 Penthouse-style 大眾豪宅」——入場門檻 RM160 萬+，以外籍家庭自住 + 租金套利為主要框架。
+</div>
+
+<!-- KPI + brickz -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="brickz-hero">
+      <div class="brickz-t">🏛️ BRICKZ 政府登記成交數據（2024-09 至 2025-08）——27 筆，FIX-03 通過，本系列第二多</div>
+      <div class="brickz-g">
+        <div class="brickz-s"><div class="brickz-n">27</div><div class="brickz-l">成交筆數（本系列第二多）</div></div>
+        <div class="brickz-s"><div class="brickz-n">RM811</div><div class="brickz-l">成交中位 PSF</div></div>
+        <div class="brickz-s"><div class="brickz-n">RM166.7萬</div><div class="brickz-l">中位成交總價</div></div>
+        <div class="brickz-s"><div class="brickz-n">6.38%</div><div class="brickz-l">Gross Yield（本系列第二高）</div></div>
+        <div class="brickz-s"><div class="brickz-n">RM0.34</div><div class="brickz-l">管理費 psf（官方，含沉沒基金）</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,.5);font-family:'IBM Plex Mono',monospace">
+        P25–P75：RM138萬–340萬（極大範圍，反映多種坪數混合）｜掛牌租 RM3.83–6.30 psf/月 ｜ 發售 RM600–650 psf（2018）→ 成交 RM811（2025），7 年升值 +24.8–35.2%
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card top">
+        <div class="kpi-v up">+24.8–35.2%</div>
+        <div class="kpi-l">7年資本升值（RM600–650 psf→RM811 psf）</div>
+        <div class="kpi-s up">比 28 MK（+7.4%，13年）升值幅度更強，時間更短</div>
+      </div>
+      <div class="kpi-card top">
+        <div class="kpi-v">6.38%</div>
+        <div class="kpi-l">Gross Yield（本系列第二高）</div>
+        <div class="kpi-s up">歷史最高 6.54%（Q1 2024）；最低 5.6%（Q2 2023）；穩定在 6%+ 區間</div>
+      </div>
+      <div class="kpi-card top">
+        <div class="kpi-v">RM0.34</div>
+        <div class="kpi-l">管理費 psf（官方，含沉沒基金）</div>
+        <div class="kpi-s up">官方確認——非估算；首年開發商補貼 RM0.07（正常費率 RM0.41 psf）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM826–1,119</div>
+        <div class="kpi-l">掛牌售 PSF（iProperty 2026）</div>
+        <div class="kpi-s neu">113 筆掛牌售（34% 掛牌率）；128 筆掛牌租（39%）</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v">39%</div>
+        <div class="kpi-l">掛牌租比率（128/330）</div>
+        <div class="kpi-s neu">偏高但 27 筆 brickz + 6.38% Yield 說明租金市場在消化</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">GIS 1km</div>
+        <div class="kpi-l">Garden International School 1km 內</div>
+        <div class="kpi-s up">官方：GIS 和 MKIS 均在 1km 內；同 Sunway Mont 的 GIS 優勢</div>
+      </div>
+    </div>
+
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">Modern Pandora Sdn Bhd（Trinity Group，私人控股）；Datuk Neoh Soo Keat 創辦人；中型開發商，約 9 個已完成建案（Z Residence、Aquata、Lemanja 等）；首次進軍 Mont Kiara 高端市場；已按時竣工（正面信用）</div></div>
+      <div class="spec-item"><div class="spec-l">地段 / 地契</div><div class="spec-v">Jalan Kiara 5，Mont Kiara；2.9 英畝；Freehold 住宅地契（Residential Strata）；113 戶/英畝（中等偏高密度）；GDV RM5.03 億（官方）</div></div>
+      <div class="spec-item"><div class="spec-l">規模</div><div class="spec-v">1 棟 41 層；330 戶（含 5 層平台 + 2 層地下室）；坪數 2,057–4,115 sqft（90% 單位）；6 個大坪特殊戶型；最小 1,379 sqft（iRumah 記錄）；3BR+ 起步，全無 Studio</div></div>
+      <div class="spec-item"><div class="spec-l">竣工</div><div class="spec-v">官方 HDA 竣工：2022 年 8 月；brickz 成交從 2024-09 有量，說明實際入住約 2023 年（部分延遲）；已完工約 2–3 年，較新社區，設施老化風險低</div></div>
+      <div class="spec-item"><div class="spec-l">主力戶型 iRumah</div><div class="spec-v">4BR/2,064sf：成交中位 RM760 psf（最便宜，大坪折扣）｜ 3BR/1,379sf：RM870 psf（最貴，小坪溢價）</div></div>
+      <div class="spec-item"><div class="spec-l">月租行情</div><div class="spec-v">iProperty：RM3.83–6.30 psf/月 ｜ 2,057 sqft 估算：RM7,884–12,959/月 ｜ PropSocial 實際掛牌：RM4.62 psf（2,057 sqft = RM9,505）｜ 外籍企業合約 2 年</div></div>
+      <div class="spec-item"><div class="spec-l">設施（主題化）</div><div class="spec-v">「Adventure-themed」首款 KL：Hanging Tree Nest（吊掛鳥巢）；Starlight Theatre（星光劇場）；Celebrity Kitchen；Junior Rock Climbing；Infinity Pool；7m 瀑布；MoonLight Forest；Stargaze Podium；半配裝修（廚具 + 冷氣）</div></div>
+      <div class="spec-item"><div class="spec-l">Jalan Kiara 5 同街優勢</div><div class="spec-v">同街：Sunway Mont Residences（7.88/10）、Casa Kiara 2、VERVE Suites（Jaya Grocer 步行）；GIS 和 MKIS 均在 1km 內（官方確認）；Global Doctors Hospital 0.3km；雙入口（JK5 + JK3）</div></div>
+      <div class="spec-item"><div class="spec-l">開發商定位說明</div><div class="spec-v">Trinity Group 定位：「首次進軍高端市場；此前以中端建案為主」；發售時明確表示以本地自住升級為主（「Upgraders、Migrants、Downgraders」）；外籍需求後來居上，驗證了 MK 地段強度</div></div>
+      <div class="spec-item"><div class="spec-l">關鍵 vs 同街競品</div><div class="spec-v">vs Sunway Mont（RM938 psf，2020完工）：Pentamont 更新（2022）、更大坪（2,057+ sqft）、更低 PSF（RM811）、更高 Yield（6.38% vs 4.9%）、但 GIS 步行距離 Sunway Mont 更近；vs 28 MK（RM774 psf）：Pentamont 更新（少老化）、更高 PSF 但更低 Gross Yield（6.38% vs 6.44%）</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜Trinity Pentamont 的核心投資論點</h3>
+    <p>Trinity Pentamont 的論點是本系列中最有趣的混合型案例：在「Jalan Kiara 5 同街 Sunway Mont（RM938 psf）」的環境下，以更低的 PSF（RM811）、更大的坪數（2,057 sqft 起）、更高的 Gross Yield（6.38%），提供一個「相對低估的大坪 Penthouse-style 外籍家庭租賃資產」。</p>
+
+    <p>發售 RM600–650 psf（2018）→ 成交 RM811 psf（2025）= 7 年升值 24.8–35.2%——比 28 MK（13 年 +7.4%）的資本增值速度更快。結合官方確認管理費 RM0.34 psf（比 28 MK 估算的 RM0.40–0.50 psf 更低且更確定），Pentamont 在「持有成本可控性」上明顯優於 28 MK。</p>
+
+    <div class="success-box">
+      <strong>🟢 Pentamont 的「三低一高」核心優勢：低 PSF（RM811，低於同街 Sunway Mont RM938）+ 低管理費（RM0.34 psf 官方確認，比 28 MK 更確定）+ 低入場門檻（最小 2,057 sqft × RM811 ≈ RM166.9 萬，比 28 MK 中位 RM200 萬低）+ 高 Gross Yield（6.38%，本系列第二高）。這個組合使 Pentamont 在「Jalan Kiara 5 大坪 Freehold 住宅地契」的細分市場中，是比 28 MK 更新（2022 vs 2012）、更低持有成本、更高資本升值速度的替代方案。</strong>
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Jalan Kiara 5 建案矩陣——Pentamont 的精確定位</h3>
+    <div class="compare-4">
+      <div class="c4-card c4-a">
+        <div class="c4-t">📊 Trinity Pentamont（本案）</div>
+        <div class="c4-n">RM811</div>
+        <div style="font-size:11px;color:#166534;margin-bottom:6px">brickz 27筆，2025</div>
+        <table style="font-size:11px"><tbody>
+          <tr><td>完工</td><td><strong>2022（3年新）</strong></td></tr>
+          <tr><td>坪數</td><td>2,057–4,115 sqft</td></tr>
+          <tr><td>Gross Yield</td><td><strong>6.38%</strong></td></tr>
+          <tr><td>管理費</td><td><strong>RM0.34（官方）</strong></td></tr>
+          <tr><td>GIS</td><td>1km 內</td></tr>
+        </tbody></table>
+      </div>
+      <div class="c4-card c4-b">
+        <div class="c4-t">📊 Sunway Mont（同街，2020）</div>
+        <div class="c4-n">RM938</div>
+        <div style="font-size:11px;color:#1e40af;margin-bottom:6px">brickz 8筆，2025</div>
+        <table style="font-size:11px"><tbody>
+          <tr><td>完工</td><td>2020（5年）</td></tr>
+          <tr><td>坪數</td><td>1,122–1,906 sqft</td></tr>
+          <tr><td>Gross Yield</td><td>4.9%</td></tr>
+          <tr><td>管理費</td><td>RM0.33（含沉沒）</td></tr>
+          <tr><td>GIS</td><td><strong>步行可達 ✅</strong></td></tr>
+        </tbody></table>
+      </div>
+      <div class="c4-card c4-c">
+        <div class="c4-t">📊 28 Mont Kiara（同地段，2012）</div>
+        <div class="c4-n">RM774</div>
+        <div style="font-size:11px;color:#92400E;margin-bottom:6px">brickz 28筆，2025</div>
+        <table style="font-size:11px"><tbody>
+          <tr><td>完工</td><td>2012（13年舊）</td></tr>
+          <tr><td>坪數</td><td>2,535–3,000 sqft</td></tr>
+          <tr><td>Gross Yield</td><td>6.44%</td></tr>
+          <tr><td>管理費</td><td>估RM0.40–0.50</td></tr>
+          <tr><td>GIS</td><td>車程</td></tr>
+        </tbody></table>
+      </div>
+      <div class="c4-card c4-d">
+        <div class="c4-t">📊 MK 地段均值（brickz）</div>
+        <div class="c4-n">RM778</div>
+        <div style="font-size:11px;color:#475569;margin-bottom:6px">brickz 511筆，59建案</div>
+        <table style="font-size:11px"><tbody>
+          <tr><td>YoY</td><td>+6.4%（上游）</td></tr>
+          <tr><td>Astrea</td><td>RM874 psf（13筆）</td></tr>
+          <tr><td>Danai</td><td>RM865 psf（6筆）</td></tr>
+          <tr><td>Cendana</td><td>RM578 psf（6筆）</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <p class="src">洞察：Pentamont（RM811 psf）在 Jalan Kiara 5 的定位是「比 Sunway Mont（RM938）便宜 14%、比 28 MK（RM774）貴 5%」。但比 Sunway Mont 新 2 年、管理費幾乎一樣低（RM0.34 vs RM0.33）、Gross Yield 更高（6.38% vs 4.9%）——這個組合使 Pentamont 成為「Jalan Kiara 5 最具性價比的大坪 Yield 標的」。</p>
+
+    <hr class="dv">
+    <h3>C｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Trinity Group 私人中型開發商</strong></td><td>Trinity Group 是私人控股中型開發商（非 Sunway/UEM Sunrise 等 Bursa 上市大廠）；「首次進軍高端市場」——以往主打中端；但已按時竣工且 brickz 27 筆實際成交驗證市場接受度；最大風險是品牌長期支撐力</td><td><span class="tag t-y">中（已竣工後風險降低）</span></td><td>品牌溢價長期支撐力未知；但已完工 + 27 筆成交，當下風險可控</td></tr>
+          <tr><td><strong>128 筆掛牌租偏高（39%）</strong></td><td>330 戶中 128 筆掛牌租 = 39% 出租掛牌率；竣工 2022 後業主大量嘗試出租是正常現象；但 6.38% Gross Yield 說明有租金市場支撐</td><td><span class="tag t-y">中（竣工後 2–3 年的正常陣痛）</span></td><td>填租時間可能 2–4 個月；租金競爭激烈；但 MK 外籍家庭租客池相對深</td></tr>
+          <tr><td><strong>大坪流動性偏低</strong></td><td>中位入場 RM166.7 萬（P75 達 RM340 萬）；買家池比 Sunway Mont（RM118 萬）更窄；外籍門檻 RM100 萬已達，但需要外籍高淨值買家</td><td><span class="tag t-y">中（大坪系統性問題）</span></td><td>退出需等待；急售折讓 5–15%；但 27 筆 brickz 說明有一定流量</td></tr>
+          <tr><td><strong>P25–P75 範圍極大（RM138萬–340萬）</strong></td><td>P75 達 RM340 萬，遠超中位 RM166.7 萬——說明有大坪 Penthouse 成交拉高 P75；中位數（RM166.7 萬）比 P75（RM340 萬）可信，但上下分散大，定價估算複雜</td><td><span class="tag t-b">低（特殊戶型造成分散，不影響主力 2,057 sqft 估算）</span></td><td>需分型分析；2,057 sqft 主力戶型成交約 RM157–168 萬</td></tr>
+          <tr><td><strong>正常管理費 RM0.41 psf（非首年補貼後）</strong></td><td>首年開發商補貼 RM0.07 psf → 實際正常費率 RM0.41 psf（官方確認）；對 2,057 sqft = 月 RM844——比 deDaun（RM0.36 × 2,057 sqft 不適用，因 deDaun 最小 1,313 sqft）更高；但仍在合理範圍</td><td><span class="tag t-b">低（已知，官方確認）</span></td><td>月管理費 RM844（2,057 sqft）；年 RM10,128——透明可預測，不算嚴重</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場定位——RM811 的精確估值邏輯</div>
+  <div class="section-body">
+    <h3>1.1 Pentamont RM811 psf 是高估、低估還是合理？</h3>
+    <table>
+      <thead><tr><th>比較維度</th><th>結論</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>vs MK 地段均值 RM778 psf（brickz）</td><td>Pentamont（RM811）比地段均值高 4.2%——僅微幅溢價</td><td><span class="tag t-g">合理——新建（2022）且大坪，微幅溢價正常</span></td></tr>
+        <tr><td>vs 同街 Sunway Mont RM938 psf</td><td>Pentamont（RM811）比同街老案低 14%——儘管比 Sunway Mont 更新 2 年</td><td><span class="tag t-g">潛在低估——更新的建案通常比舊案貴，但 Pentamont 更便宜，可能因坪數更大</span></td></tr>
+        <tr><td>vs 28 MK RM774 psf（更舊 13 年）</td><td>Pentamont（RM811）比 28 MK 貴 5%——合理（新 10 年的溢價）</td><td><span class="tag t-g">合理——年齡折扣已被適當定價</span></td></tr>
+        <tr><td>vs Residensi Astrea RM874 psf（brickz 13 筆）</td><td>Pentamont（RM811）比 Astrea 便宜 7%——Astrea 是中坪，PSF 理應更高</td><td><span class="tag t-g">合理——大坪折扣正常現象</span></td></tr>
+        <tr><td>資本升值速度比較</td><td>Pentamont：7年升值 +25–35%（RM600→RM811）；28 MK：13年升值 +7.4%（RM721→RM774）；Sunway Mont：6年升值 +20%（RM780→RM938）</td><td><span class="tag t-g">Pentamont 升值速度最快——7 年 +25–35% 是三者中最強</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>估值結論：Pentamont RM811 psf 在 Jalan Kiara 5 生態系中處於「合理偏低」的位置。</strong>比更舊的 Sunway Mont 便宜 14%，比 13 年的 28 MK 只貴 5%——考慮到 Pentamont 比兩者都更新（2022），這個 PSF 定價相對保守，給未來 MRT3 催化（2032）留下了一定的升值空間。
+    </div>
+
+    <h3>1.2 掛牌數據解讀</h3>
+    <table>
+      <thead><tr><th>指標</th><th>數值</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>brickz 成交（2024-09至2025-08）</td><td>27 筆，RM811 psf，RM166.7 萬中位</td><td><span class="tag t-g">FIX-03 通過（27 筆）；本系列第二多；置信度高</span></td></tr>
+        <tr><td>掛牌售（iProperty 2026）</td><td>113 筆，RM826–1,119 psf（34% 掛牌率）</td><td>掛牌高端 RM1,119 比成交中位 RM811 高 38%——賣家要價偏高；議價空間大，目標 RM800–840 psf</td></tr>
+        <tr><td>掛牌租（iProperty 2026）</td><td>128 筆，RM3.83–6.30 psf/月（39%）</td><td>偏高（39%），但 Gross Yield 6.38% 說明租金市場有吸收力；竣工後 2–3 年的正常陣痛</td></tr>
+        <tr><td>brickz P75 異常高（RM340 萬）</td><td>P75 RM340萬 vs 中位 RM166.7 萬——差距 2 倍</td><td>大坪 Penthouse（4,115 sqft × RM826 = RM339.7 萬）成交拉高 P75；主力 2,057 sqft 戶型成交約 RM157–168 萬</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率</div>
+  <div class="section-body">
+    <h3>5.1 Trinity Pentamont 租金行情</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租估算</th><th>月租 psf</th><th>Gross Yield（@RM811 psf）</th></tr></thead>
+      <tbody>
+        <tr><td>4+1BR（主力，多數戶型）</td><td>2,057–2,064 sqft</td><td>RM7,900–13,000/月</td><td>RM3.8–6.3</td><td>~5.5–9.3%（@RM166.9萬）</td></tr>
+        <tr><td>4+1BR 大坪</td><td>2,057–4,115 sqft</td><td>RM8,000–12,000/月</td><td>RM3.8–5.8</td><td>~5.8–8.6%（@RM166.9–333.7萬）</td></tr>
+        <tr><td>3BR（較小，iRumah 記錄）</td><td>1,379 sqft</td><td>RM5,500–7,500/月</td><td>RM4.0–5.4</td><td>~5.6–7.7%（@RM119.8萬）</td></tr>
+      </tbody>
+    </table>
+    <p class="src">iRumah：Gross Yield 6.38%（當前）；歷史最高 6.54%（Q1 2024）；iProperty：RM3.83–6.30 psf/月；PropSocial 實際掛牌：RM4.62 psf（2,057 sqft = RM9,505/月）</p>
+
+    <h3>5.2 外國人現金流試算（4+1BR 2,057 sqft，RM166.9 萬入場 @ RM811 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租（RM9,500 × 12）</td><td>RM 114,000</td><td>4+1BR 2,057 sqft；外籍家庭合約；GIS 1km + MKIS 1km 帶動需求</td></tr>
+        <tr><td>管理費（RM0.41 × 2,057 × 12）</td><td><span class="down">-RM 10,120</span></td><td>正常費率 RM0.41 psf（首年後，補貼結束）；官方確認</td></tr>
+        <tr><td>地稅 + 門牌稅</td><td><span class="down">-RM 3,000</span></td><td></td></tr>
+        <tr><td>空置期（2 個月，大坪）</td><td><span class="down">-RM 19,000</span></td><td>大坪換租較慢；2 個月空置</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 24,564</span></td><td>（114,000–32,120）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 9,120</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 48,196/年</strong></td><td>Net Yield ≈ 2.89%（RM166.9 萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 57,316/年</td><td>Net Yield ≈ 3.43%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>外籍 Net Yield 2.9–3.4%——本系列已完工 Freehold 住宅建案中最高。</strong>相比 28 MK（2.7–3.2%）稍高，相比 Sunway Mont（2.5–2.9%）明顯更高，主因：①管理費 RM0.41 psf（雖比 Sunway Mont RM0.33 貴，但比 28 MK 估算更低且確定）；②較低入場 PSF（RM811 vs RM938）使分母更小；③大坪月租效率接近 28 MK。這個 Net Yield 在本系列中是已完工 Freehold 住宅的最高點。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>外籍影響</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td>Freehold 住宅地契（Residential Strata）</td><td>✅ LTV 80–90%；民用電費；MM2H 合規最清晰</td></tr>
+        <tr><td>外籍最低門檻</td><td>RM 1,000,000（KL）</td><td>✅ 主力 2,057 sqft × RM811 psf = RM166.9 萬，超外籍門檻</td></tr>
+        <tr><td>RPGT</td><td>竣工 2022；若 2026 買入，第6年約 2032——與 MRT3 通車完美對齊</td><td>✅ RPGT 優化時機與 MRT3 催化一致</td></tr>
+        <tr><td>入場成本（2,057 sqft，RM166.9 萬，80% LTV）</td><td>首付 20% = RM333,800；印花稅 4% = RM66,760；律師費 RM14,000；State Consent RM5,000</td><td>現金需求約 RM419,560（25% 入場）</td></tr>
+        <tr><td>MM2H 合規</td><td>Freehold 住宅地契 + RM166.9 萬（超 RM100 萬門檻）</td><td>✅ MM2H 框架最適合；但 MM2H 10 年持有要求與大坪流動性需評估</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">最適合者</td><td>有子女在 GIS/MKIS 就讀的外籍家庭（GIS/MKIS 均 1km 內）；追求「已完工 + 最高 Net Yield（2.9–3.4%）+ Freehold 住宅地契」的組合；高淨值投資者以「2026 買入 → 租 2 年 → 2032 MRT3 + RPGT 第6年賣出」為框架</td></tr>
+            <tr><td>Pentamont vs Sunway Mont</td><td>Sunway Mont（RM938，GIS 步行更近）vs Pentamont（RM811，GIS 1km 車程）——選擇標準：若有小孩在 GIS 且無車，選 Sunway Mont；若主要關心 Yield 和性價比，選 Pentamont（Net Yield 更高 0.4–0.5%，入場低 RM50 萬）</td></tr>
+            <tr><td>Pentamont vs 28 MK</td><td>28 MK（RM774，Gross Yield 6.44%，13 年老案）vs Pentamont（RM811，Gross Yield 6.38%，3 年新）——選擇標準：若管理費不確定（28 MK 估算偏高）是主要顧慮，Pentamont 官方 RM0.34/0.41 psf 更透明；若追求更高 Yield，28 MK 仍稍高（6.44% vs 6.38%）</td></tr>
+            <tr><td>議價策略</td><td>掛牌 RM826–1,119 psf；brickz 中位 RM811 psf；掛牌高端比成交高 38%——買方市場；目標 RM800–820 psf（brickz 中位附近）；4+1BR 2,057 sqft = RM164.7–168.7 萬</td></tr>
+            <tr><td>持有框架</td><td>2026 買入 → 租給 GIS/MKIS 外籍家庭（2 年企業合約）→ 2032 MRT3 + RPGT 第6年 → 賣出</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟡 掛牌租 39%（偏高）；但 27 筆 brickz + 6.38% Yield 說明有市場消化；MK 外籍租需求支撐</td></tr>
+            <tr><td>價格趨勢</td><td>🟢 發售 RM600 → 現成交 RM811（+35%，7年）；升值速度是同比較組中最快</td></tr>
+            <tr><td>租金趨勢</td><td>🟢 6.38% Gross Yield（歷史最高 6.54%），穩定在 6%+ 區間；租金定價權穩健</td></tr>
+            <tr><td>估值</td><td>🟢 RM811 在同街（Sunway Mont RM938）偏低 14%；在地段均值（RM778）之上僅 4%——相對低估</td></tr>
+            <tr><td>管理費確定性</td><td>🟢 RM0.34 psf 官方確認（RM0.41 psf 正常費率）——比 28 MK 更透明</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-g" style="margin-top:16px">
+      <strong>🟢 審慎積極進場——Jalan Kiara 5 最佳 Net Yield 已完工大坪；管理費透明，升值速度最快</strong><br><br>
+      Trinity Pentamont 是本系列在「已完工大坪 Freehold 住宅地契」細分市場中，性價比最高的建案：比同街 Sunway Mont 便宜 14% PSF、比 28 MK 新 10 年、管理費官方確認 RM0.34 psf（比 28 MK 更透明更低）、資本升值速度最快（7 年 +25–35%）、Net Yield 最高（2.9–3.4%）。GIS/MKIS 1km 內的位置，對外籍家庭有強烈的吸引力。<br><br>
+      <strong>最優進場策略：</strong>① 鎖定主力 4+1BR 2,057 sqft（RM164–169 萬），外籍門檻達標 + 流動性最佳的大坪戶型；② 以 brickz 中位 RM811 psf 為議價錨點，目標 RM800–820 psf；③ 租給 GIS/MKIS 外籍家庭（2 年企業合約）→ 2032 MRT3 + RPGT 第6年最優退出。<br><br>
+      <strong>主要保留：</strong>Trinity Group 是私人中型開發商（非 Bursa 上市大廠），品牌長期支撐力未知但已竣工風險已消除；128 筆掛牌租的出租競爭；大坪（RM166 萬+）流動性偏低；正常管理費 RM0.41 psf（非首年補貼的 RM0.34）需確認。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Trinity Pentamont @ Jalan Kiara 5，Mont Kiara ｜ 建案綜合評分卡 ｜ brickz 27 筆 RM811 psf</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">MK YoY +6.4%（本系列最高）；Pentamont 自身 7 年升值 +25–35%（最快）；brickz 27 筆確認市場接受度；GIS/MKIS 外籍家庭需求持久；Gross Yield 6.38% 歷史高位</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">MK 整體 Overhang 壓力「低」；但 Pentamont 自身 39% 掛牌租偏高（竣工後 2–3 年陣痛）；27 筆 brickz 成交說明有消化；34% 掛牌售（中等）；比 BHP（39%）但比 Sunway Mont（25%）高</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">竣工 2022，3 年新（設施狀況良好）；Gross Yield 接近歷史最高（6.38% vs 最高 6.54%）；2026 買入 → 2032 RPGT + MRT3 完美對齊；MRT3 前置溢價開始滲透 MK</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">GIS + MKIS 1km 內（強外籍催化）；Global Doctors Hospital 0.3km；Jaya Grocer + Verve Shops 步行；雙入口（JK5+JK3）；Sprint/NKVE；MRT3 2032；扣分：目前無直接 MRT</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契：LTV 80–90%；民用電費；MM2H 合規最清晰；RM166.9 萬（主力戶型）超外籍門檻；2026買入→2032 RPGT 優化</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">7.6/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">8.0×.2 + 7.0×.25 + 7.5×.2 + 7.5×.2 + 8.0×.15 = 7.575 ≈ 7.6</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Trinity Group 私人控股中型開發商；首次進軍高端 MK 市場（「Out of comfort zone」）；已按時竣工（正面）；95% 取購率（正面）；但非 Bursa 上市大廠，品牌長期支撐力低於 Sunway/UEM Sunrise；B1 本系列最低的 Freehold 住宅建案</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz 27 筆確認 RM811 psf；比同街 Sunway Mont（RM938）低 14%，且 Pentamont 更新；7 年升值 +25–35%（最快）；掛牌高端 RM1,119 比成交高 38%，議價空間大——B2 高分</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Gross Yield 6.38%（本系列第二高）；Net Yield 2.9–3.4%（本系列已完工 Freehold 住宅最高）；管理費 RM0.34/0.41 psf 官方確認（透明）；外籍企業合約 2 年穩定性——B3 並列本系列最高</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">GIS + MKIS 1km（強外籍催化，但非步行）；Global Doctors 0.3km；Jaya Grocer + Verve 步行；雙入口；Sprint/NKVE；扣分：GIS 非步行（vs Sunway Mont 步行），無直接 MRT（2032 前）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">「Adventure-themed」首款 KL（Hanging Tree Nest、Starlight Theatre、Celebrity Kitchen、Junior Rock Climbing）；Infinity Pool；7m 瀑布；半配裝修；雙入口設計；全大坪（2,057 sqft 起）；但主題設施概念較噱頭，長期吸引力待觀察</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契——本系列最佳地契；永久業權；民用電費；HDA 完整保護；已完工 3 年，地契無任何爭議；B6 並列本系列最高</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz 27 筆（本系列第二多，良好流量）；中位 RM166.7 萬（比 28 MK RM200 萬更易成交）；但大坪買家池仍比中坪窄；Trinity Group 品牌支撐力未知影響流動性預期</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">8.0/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.0×.2+8.0×.2+9.0×.15+7.5×.15+8.0×.1+9.5×.1+7.0×.1 = 7.975 ≈ 8.0</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 7.6 × 40% + B 類 8.0 × 60%</div>
+        <div class="score-big">7.84<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#DCFCE7;color:#166534">⭐⭐⭐⭐ 優質——已完工 Freehold 住宅 Net Yield 最高；管理費官方透明；升值速度最快</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">3.04 + 4.80 = 7.84 → 已完工分析，brickz 27 筆置信度高</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>Net Yield 2.9–3.4%（本系列已完工 Freehold 住宅最高）+ brickz 27 筆（本系列第二多，高置信度）+ 管理費 RM0.34 psf 官方確認（透明，比 28 MK 更確定）+ 7 年升值 +25–35%（本系列最快升值速度）+ 同街 Sunway Mont（RM938）便宜 14% PSF（更新 2 年的建案卻更便宜）+ GIS/MKIS 1km + Freehold 住宅地契最佳結構。<br>
+          <strong style="color:#fca5a5">主要保留：</strong>Trinity Group 私人中型開發商（B1 7.0，本系列 Freehold 住宅最低）；128 筆掛牌租（39%，競爭大）；GIS 非步行距離（vs Sunway Mont 步行可達）；大坪（RM166 萬+）流動性偏低；正常管理費 RM0.41 psf（首年補貼後上升）。評分（7.84）略低於 Sunway Mont（7.88）主因 B1 開發商信用（7.0 vs 9.0）差距。
+        </div>
+      </div>
+    </div>
+
+    <h3>十七個建案完整最終排序</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>狀態</th>
+          <th>brickz</th>
+          <th>Gross Yield</th>
+          <th>建議</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><strong>Kiaramas deDaun</strong></td><td style="font-weight:700;color:#16a34a">8.34</td><td><span class="tag t-g">Freehold 住宅</span></td><td>期房 2028</td><td>0</td><td>估 4.5–5.5%</td><td>🟢 積極進場</td></tr>
+        <tr><td>2</td><td><strong>28 Mont' Kiara</strong></td><td style="font-weight:700;color:#16a34a">8.04</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2012</td><td>28筆（最多）</td><td>6.44%（最高）</td><td>🟢 審慎積極（確認管理費）</td></tr>
+        <tr><td>3</td><td><strong>Sunway Mont Residences</strong></td><td style="font-weight:700;color:#16a34a">7.88</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2020</td><td>8 筆</td><td>4.9%↑</td><td>🟢 審慎積極（GIS 步行）</td></tr>
+        <tr style="background:#F0FDF4"><td>4</td><td><strong>Trinity Pentamont 🆕</strong></td><td style="font-weight:700;color:#16a34a">7.84</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2022</td><td>27筆（第二多）</td><td>6.38%（第二高）</td><td>🟢 審慎積極（Net Yield 最高）</td></tr>
+        <tr><td>5</td><td><strong>R22 Mont Kiara</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>已完工</td><td>31 筆</td><td>估 4.5%</td><td>🟢 進場</td></tr>
+        <tr><td>6</td><td><strong>Park Place DPC</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>已完工</td><td>有</td><td>估 5%</td><td>🟢 進場</td></tr>
+        <tr><td>7</td><td><strong>TRX Residences</strong></td><td style="font-weight:700;color:#16a34a">7.6</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>已完工</td><td>59 筆</td><td>估 3.5%</td><td>🟢 增值框架</td></tr>
+        <tr><td>8</td><td><strong>The Conlay by E&O</strong></td><td style="font-weight:700;color:#16a34a">7.4</td><td><span class="tag t-y">Freehold 商業</span></td><td>已完工</td><td>有</td><td>估 4%</td><td>🟢 審慎積極</td></tr>
+        <tr><td>9</td><td><strong>Bangsar Hill Park</strong></td><td style="font-weight:700;color:#16a34a">6.96</td><td><span class="tag t-y">Leasehold 住宅</span></td><td>完工 2025</td><td>~0</td><td>估 4–5%</td><td>🟡 審慎考慮</td></tr>
+        <tr><td>10</td><td><strong>CloutHaus KLCC</strong></td><td style="font-weight:700;color:#d97706">6.7</td><td><span class="tag t-y">Freehold 商業</span></td><td>期房 2029</td><td>0</td><td>估 3%</td><td>🟡 觀望</td></tr>
+        <tr><td>11</td><td><strong>SWNK Houze BBCC</strong></td><td style="font-weight:700;color:#d97706">6.2</td><td><span class="tag t-r">Leasehold 商業</span></td><td>期房</td><td>0</td><td>估 3%</td><td>🔴 外籍不推</td></tr>
+        <tr><td>12</td><td><strong>TS2 武吉免登 🔵</strong></td><td style="font-weight:700;color:#3b82f6">6.0</td><td><span class="tag t-y">Freehold 商業</span></td><td>期房 2027</td><td>0</td><td>功能性</td><td>🔵 功能性持有</td></tr>
+        <tr><td>13</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="font-weight:700;color:#f97316">5.7</td><td><span class="tag t-g">SOHO HDA</span></td><td>期房</td><td>0</td><td>SOHO 3%+</td><td>🟡 條件性</td></tr>
+        <tr><td>14</td><td><strong>Stonor 3 KLCC</strong></td><td style="font-weight:700;color:#dc2626">5.7</td><td><span class="tag t-y">商業地契 HDA</span></td><td>完工</td><td>有</td><td>估 3%</td><td>🔴 暫緩</td></tr>
+        <tr><td>15</td><td><strong>Pavilion DH</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-y">Freehold 商業</span></td><td>完工 2025</td><td>~1筆</td><td>估 2.5%</td><td>🟡 觀望</td></tr>
+        <tr><td>16</td><td><strong>Pavilion Square</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-r">Leasehold 商業</span></td><td>期房 2028–29</td><td>0</td><td>估 1.5%</td><td>🔴 投資暫緩</td></tr>
+        <tr><td>17</td><td><strong>Orion Residence BB</strong></td><td style="font-weight:700;color:#dc2626">5.2</td><td><span class="tag t-y">Freehold 商業</span></td><td>竣工確認中</td><td>~0</td><td>估 1.5%</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">🔑 Trinity Pentamont（7.84）排名第4，是本系列「Net Yield 最高的已完工 Freehold 住宅建案」（2.9–3.4%）。主要優勢：B3 9.0（Gross Yield 6.38%，第二高）+ B2 8.0（RM811 psf，同街 Sunway Mont 便宜 14%）+ B6 9.5（Freehold 住宅）+ 管理費官方透明（RM0.34/0.41 psf）。主要差距 vs Sunway Mont（7.88）：B1 開發商（7.0 vs 9.0）——Trinity Group 私人中型開發商 vs Sunway Group Bursa 上市。主要差距 vs 28 MK（8.04）：A2 供需（7.0 vs 8.0）——28 MK 掛牌率更健康（23% vs 34%）。⚠️ 進場前確認：①管理費正常費率（RM0.41 psf 確認）；②大廈基金餘額；③月租實際成交驗證 Yield 6.38%。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL RM1M+ 高端住宅市場深度研究（2026-03）｜KL 供需 Overhang 深度分析（2026-04-01）｜brickz.my（TRINITY PENTAMONT MONT KIARA：27 筆，2024-09至2025-08，中位 RM811 psf，P25–P75：RM138萬–340萬）｜iRumah.co（Gross Yield 6.38%；歷史最高 6.54% Q1 2024；最低 5.6% Q2 2023；4BR/2,064sf RM760 psf；3BR/1,379sf RM870 psf）｜iProperty.com.my（113 筆掛牌售 RM826–1,119 psf；128 筆掛牌租 RM3.83–6.30 psf/月）｜pentamont.com.my 官方 HDA（Freehold；竣工 August 2022；330 戶；管理費 RM0.34 psf 含沉沒基金，首年補貼 RM0.07 psf）｜TheMalaysianReserve（GDV RM5.03億；95% 取購率）｜EdgeProp（發售 RM600–650 psf，2018）｜PropertyGuru（GIS + MKIS 1km 內；Global Doctors 0.3km；雙入口 JK5+JK3）<br>
+  ⚠️ 正常管理費（首年補貼結束後）為 RM0.41 psf，比官方宣傳的 RM0.34 psf 高 20%——需向管委會確認當前實際管理費。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

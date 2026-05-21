@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Denver Deep Dive | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}.report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}.report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}.report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}.report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}.report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}.report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}.report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}.chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}.chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}.chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}.report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}.report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}.toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}.toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}.toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}.toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}.toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}.toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}.report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}.side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}.side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}.side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}.side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}.side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600}.side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}@media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-correction" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Correction</span><span class="side-nav-label lang-zh" style="display:none">修正解析</span></a>
+    <a href="#sec-insurance" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Insurance &amp; HOA</span><span class="side-nav-label lang-zh" style="display:none">保險與管理費</span></a>
+    <a href="#sec-segment" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">SF vs Condo</span><span class="side-nav-label lang-zh" style="display:none">獨棟vs公寓</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rent Control</span><span class="side-nav-label lang-zh" style="display:none">租管</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+  <div class="report-header">
+    <div class="lang-en"><h1>DENVER &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: Case-Shiller DNXRSA / REcolorado / DMAR / Colorado REALTORS&reg; / NBER</div></div>
+    <div class="lang-zh" style="display:none"><h1>丹佛——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：Case-Shiller DNXRSA / REcolorado / DMAR / 科羅拉多房地產商協會 / NBER</div></div>
+  </div>
+  <div class="report-body">
+    <div class="toc-box" id="tocBox"><div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend: Shallow CS Decline, Median Still Holding</span><span class="lang-zh" style="display:none">2. 房價走勢：CS淺度下跌，中位數仍穩</span></a>
+        <a href="#sec-correction" onclick="closeTocMobile()"><span class="lang-en">3. The Correction: Inventory Surge &amp; Buyer&rsquo;s Market</span><span class="lang-zh" style="display:none">3. 修正：庫存激增與買方市場</span></a>
+        <a href="#sec-insurance" onclick="closeTocMobile()"><span class="lang-en">4. Insurance &amp; HOA: The Hidden Affordability Crisis</span><span class="lang-zh" style="display:none">4. 保險與管理費：隱藏的可負擔性危機</span></a>
+        <a href="#sec-segment" onclick="closeTocMobile()"><span class="lang-en">5. Single-Family vs Condo: A Market Splitting in Two</span><span class="lang-zh" style="display:none">5. 獨棟 vs 公寓：一分為二的市場</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">6. Rent Control: Colorado Preemption</span><span class="lang-zh" style="display:none">6. 租管：科州先占</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div></div>
+
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Denver's housing market in 2026 occupies an ambiguous position among the sunbelt correctors: more corrected than Phoenix (on a median price basis), less corrected than Austin (on a peak-to-trough basis), and facing a more complex set of headwinds than either. The Case-Shiller Denver index (DNXRSA) peaked at <strong>325</strong> in May 2022 and has declined only modestly to approximately 322 by February 2025, a peak-to-trough of less than 2%. The city of Denver median sale price was <strong>$538,950</strong> in January 2026, down 1.11% YoY, with homes sitting on market for 81 days. The DMAR 2026 Economic Summit consensus: metro median will remain approximately $585,000 through 2026, representing flat-to-minimal appreciation.</p>
+      <p>The disconnect between the shallow CS decline and the buyer experience is explained by inventory. Active listings reached <strong>17,107</strong> in late 2025 &mdash; the most in over a decade, 50%+ above pre-pandemic levels. Denver ranks second nationally for delistings. Approximately 41.9% of Denver County listings have seen price cuts. The market has definitively shifted from seller-dominated to buyer-favorable conditions.</p>
+      <p>The most structurally significant headwind is Colorado's insurance crisis. The average homeowner insurance premium reached approximately <strong>$4,100/year</strong> by 2025 &mdash; a 137% increase over the prior decade, driven by the state's uniquely severe hail and wildfire risk profile. For condos, HOA fee surges have materially impaired buyer qualifications, contributing to condo sales falling 8% YoY and condo median prices declining 3.7% to $395,000.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2026年丹佛住宅市場在陽光地帶修正城市中處於模糊位置。Case-Shiller丹佛指數（DNXRSA）在2022年5月達到<strong>325</strong>的峰值，到2025年2月僅小幅下跌至約322，峰值至谷值不足2%。丹佛市2026年1月中位數成交價為<strong>538,950美元</strong>，年降1.11%，在市天數81天。DMAR 2026年經濟峰會共識：都會區中位數將全年維持在約585,000美元。</p>
+      <p>CS淺度下跌與買家實地體驗之間的脫節由庫存解釋。活躍掛牌在2025年底達到<strong>17,107套</strong>——十年多以來最多，比疫情前水平高出50%以上。丹佛在全國撤牌排名第二。約41.9%的丹佛縣掛牌已進行價格削減。</p>
+      <p>最具結構性意義的逆風是科羅拉多州的保險危機。平均房主保險費達到約<strong>4,100美元/年</strong>——過去十年漲幅137%，由州的獨特嚴峻冰雹和野火風險特徵驅動。對公寓而言，HOA費用激增實質損害了買家資格，使公寓銷量年降8%，中位數跌幅3.7%至395,000美元。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">CS DENVER (FEB 2025)</span><span class="lang-zh" style="display:none">CS丹佛指數（2025年2月）</span></div><div class="kpi-value">322</div><span class="kpi-badge badge-orange"><span class="lang-en">DNXRSA &middot; Peak: 325 (May 2022) &middot; Shallowest sunbelt CS decline</span><span class="lang-zh" style="display:none">DNXRSA &middot; 峰值：325（2022年5月）&middot; 陽光地帶CS最淺跌幅</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">DENVER CITY MEDIAN (JAN 2026)</span><span class="lang-zh" style="display:none">丹佛市中位數（2026年1月）</span></div><div class="kpi-value">$539K</div><span class="kpi-badge badge-orange"><span class="lang-en">Houzeo &middot; YoY -1.11% &middot; 81 days on market</span><span class="lang-zh" style="display:none">Houzeo &middot; 年降1.11% &middot; 上市81天</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">METRO SF MEDIAN (2025)</span><span class="lang-zh" style="display:none">都會區獨棟中位數（2025年）</span></div><div class="kpi-value">$625K</div><span class="kpi-badge badge-orange"><span class="lang-en">REcolorado Denver Metro &middot; Flat YoY</span><span class="lang-zh" style="display:none">REcolorado丹佛都會區 &middot; 年增持平</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">METRO ACTIVE LISTINGS (DEC 2025)</span><span class="lang-zh" style="display:none">都會區活躍掛牌（2025年12月）</span></div><div class="kpi-value">17,107</div><span class="kpi-badge badge-red"><span class="lang-en">Decade high &middot; +50% vs pre-pandemic &middot; #2 delistings</span><span class="lang-zh" style="display:none">十年高點 &middot; 較疫情前+50% &middot; 撤牌全國第二</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">CO HOME INSURANCE AVG</span><span class="lang-zh" style="display:none">科州房主保險均值</span></div><div class="kpi-value">$4,100/yr</div><span class="kpi-badge badge-red"><span class="lang-en">+137% over past decade &middot; Hail + wildfire risk</span><span class="lang-zh" style="display:none">過去十年+137% &middot; 冰雹+野火風險</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">CONDO MEDIAN DECLINE (2025)</span><span class="lang-zh" style="display:none">公寓中位數跌幅（2025年）</span></div><div class="kpi-value">-3.7%</div><span class="kpi-badge badge-red"><span class="lang-en">Denver metro condos $395K &middot; HOA/insurance squeezing</span><span class="lang-zh" style="display:none">丹佛都會區公寓$395K &middot; HOA/保險擠壓</span></span></div>
+    </div>
+
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND: SHALLOW CS DECLINE, MEDIAN STILL HOLDING</span><span class="lang-zh" style="display:none">房價走勢：CS淺度下跌，中位數仍穩</span></h2>
+    <div class="lang-en">
+      <p>Denver's price history is the quietest of the four sunbelt correctors. The CS Denver index rose from approximately 200 in January 2015 to 325 at the May 2022 peak &mdash; a <strong>63%</strong> increase over 7.5 years, well below Phoenix's 121% or Austin's 116%. The pandemic surge was the most dramatic phase: the index rose 51% from January 2020 to May 2022. The correction from peak has been almost invisible on the CS metric (&minus;2%).</p>
+      <p>The Denver metro SF median of approximately <strong>$625,000</strong> (2025) represents roughly flat appreciation since 2022 in nominal terms. The city of Denver median was $583,000 in late 2025 before seasonal softening to $539,000 in January 2026. The 10-year appreciation (2015 to 2025) has been approximately 75% &mdash; strong in absolute terms but below Phoenix, Miami, and Austin. Denver's appreciation story is solid rather than spectacular, mapping to a diversified economic base across aerospace, energy, healthcare, and a growing tech cluster.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>丹佛的房價歷史是四個陽光地帶修正城市中最平靜的。CS丹佛指數從2015年1月的約200升至2022年5月峰值的325——7.5年漲幅<strong>63%</strong>，遠低於鳳凰城的121%或奧斯丁的116%。疫情漲幅是最戲劇性的階段：指數上漲51%。從峰值的修正在CS指標上幾乎無形（-2%）。</p>
+      <p>丹佛都會區獨棟住宅約<strong>625,000美元</strong>的中位數（2025年）在名義上自2022年以來幾乎持平。丹佛市中位數在2025年底為約583,000美元，季節性軟化至2026年1月的539,000美元。10年升值約75%——在絕對意義上強勁，但低於鳳凰城、邁阿密和奧斯丁。丹佛的升值故事穩健而非壯觀，映射了跨航空航天、能源、醫療和不斷增長的科技群聚的多元化經濟基礎。</p>
+    </div>
+    <div class="report-chart-grid">
+      <div class="report-chart-card"><h4><span class="lang-en">CS Denver Index + YoY% (2015&ndash;2025)</span><span class="lang-zh" style="display:none">CS丹佛指數 + 年增率（2015&ndash;2025）</span></h4><p><span class="lang-en">SA, Jan 2000=100 &middot; FRED DNXRSA</span><span class="lang-zh" style="display:none">季調，2000年1月=100 &middot; FRED DNXRSA</span></p><div id="chartDENPrice" style="height:220px"></div><p class="chart-note orange"><span class="lang-en">CS Denver: +63% (2015&rarr;peak), shallowest sunbelt pandemic surge. Peak-to-current: only -2% CS</span><span class="lang-zh" style="display:none">CS丹佛：+63%（2015→峰值），陽光地帶疫情漲幅最淺。峰值至今：CS僅-2%</span></p></div>
+      <div class="report-chart-card"><h4><span class="lang-en">Denver Metro SF vs Condo Median 2019&ndash;2025</span><span class="lang-zh" style="display:none">丹佛都會區獨棟 vs 公寓中位數 2019&ndash;2025</span></h4><p><span class="lang-en">Source: DMAR / REcolorado</span><span class="lang-zh" style="display:none">來源：DMAR / REcolorado</span></p><div id="chartDENMedian" style="height:220px"></div><p class="chart-note red"><span class="lang-en">SF flat at $625K (2025). Condo -3.7% to $395K &mdash; HOA/insurance creating 2-speed market</span><span class="lang-zh" style="display:none">獨棟持平$625K。公寓-3.7%至$395K——HOA/保險製造雙速市場</span></p></div>
+    </div>
+
+    <h2 id="sec-correction"><span class="lang-en">THE CORRECTION: INVENTORY SURGE &amp; BUYER&rsquo;S MARKET ARRIVAL</span><span class="lang-zh" style="display:none">修正：庫存激增與買方市場到來</span></h2>
+    <div class="lang-en">
+      <p>Denver's correction manifests primarily through inventory expansion and time-on-market extension rather than dramatic price declines. Active listings reached <strong>17,107</strong> in December 2025 &mdash; the highest in more than a decade, 50%+ above pre-pandemic norms. Denver ranks second nationally for delistings. Approximately <strong>41.9%</strong> of Denver County listings have had price reductions. The sale-to-list ratio has softened to below 98%.</p>
+      <p>The buyer's market arrival is evidenced by: 81 days on market (city, January 2026) versus 10&ndash;15 days at the 2021 peak; November 2025 closed sales down 23% MoM; active listings up 8.64% YoY in January 2026. The Colorado Association of REALTORS&reg; characterizes the current environment as &ldquo;recalibration rather than downturn.&rdquo;</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>丹佛的修正主要通過庫存擴張和在市時間延長顯現。活躍掛牌在2025年12月達到<strong>17,107套</strong>——十年多以來最高。丹佛在全國撤牌排名第二。約<strong>41.9%</strong>的丹佛縣掛牌已進行價格削減。成交與報價比率軟化至98%以下。</p>
+      <p>買方市場的到來由以下跡象證明：81天在市（城市，2026年1月）vs 2021年高峰時10至15天；2025年11月成交量環比下降23%；2026年1月活躍掛牌年增8.64%。科羅拉多州房地產商協會將當前環境定性為「重新校準而非下行」。</p>
+    </div>
+    <div class="chart-inline"><h4><span class="lang-en">Denver Metro Active Listings + Days on Market 2020&ndash;2026</span><span class="lang-zh" style="display:none">丹佛都會區活躍掛牌 + 在市天數 2020&ndash;2026</span></h4><div id="chartDENInventory" style="height:220px"></div><p class="chart-note orange"><span class="lang-en">Listings Dec 2025 = 17,107 (decade high, +50% vs pre-pandemic). DOM Jan 2026 = 81 days (vs 9 at 2021 peak). Denver #2 nationally for delistings</span><span class="lang-zh" style="display:none">2025年12月掛牌=17,107套（十年高點，較疫情前+50%）。2026年1月在市81天（vs 2021年高峰9天）。丹佛全國撤牌排名第二</span></p></div>
+
+    <h2 id="sec-insurance"><span class="lang-en">INSURANCE &amp; HOA: THE HIDDEN AFFORDABILITY CRISIS</span><span class="lang-zh" style="display:none">保險與管理費：隱藏的可負擔性危機</span></h2>
+    <div class="lang-en">
+      <p>Colorado's insurance crisis is the most acute of any landlocked U.S. state. The average Colorado homeowner insurance premium reached approximately <strong>$4,100/year</strong> by 2025 &mdash; a 137% increase over the preceding decade, and approximately 2.7x the national average of $1,500. The drivers are Colorado-specific: the state has the highest frequency of severe hail events of any U.S. state, combined with significant wildfire risk in the Front Range urban-wildland interface.</p>
+      <p>For Denver proper, the practical impact is most visible in the condo/townhome market. HOA fees surged 20&ndash;35% in 2024&ndash;2025. A buyer qualifying for a $395,000 condo (metro median) at 6.38% (20% down) faces a monthly P&amp;I of approximately $1,970. Adding HOA fees of $400&ndash;$700/month, the total monthly housing payment reaches <strong>$2,500&ndash;$2,800</strong> &mdash; a front-end DTI of 37&ndash;42% for a $80,000 income household. This explains the 8% condo sales decline and 3.7% median price decline.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>科羅拉多州的保險危機是任何內陸美國州中最嚴峻的。平均房主保險費達到約<strong>4,100美元/年</strong>——過去十年漲幅137%，約為全國平均1,500美元的2.7倍。驅動因素具有科羅拉多州特殊性：最高頻率嚴重冰雹事件加上前山脊顯著野火風險。</p>
+      <p>對丹佛本市而言，實際影響在公寓/聯排別墅市場中最為明顯。HOA費在2024至2025年激增20至35%。以6.38%購買395,000美元公寓，月供加HOA，總月供達<strong>2,500至2,800美元</strong>——對年收入80,000美元的家庭負債收入比37至42%。這解釋了公寓銷量8%的下降和中位數3.7%的跌幅。</p>
+    </div>
+    <div class="report-chart-grid">
+      <div class="report-chart-card"><h4><span class="lang-en">CO vs National Avg Home Insurance ($/yr)</span><span class="lang-zh" style="display:none">科州 vs 全國房主保險均值（$/年）</span></h4><p><span class="lang-en">Source: NBER</span><span class="lang-zh" style="display:none">來源：NBER</span></p><div id="chartDENInsuranceTrend" style="height:220px"></div></div>
+      <div class="report-chart-card"><h4><span class="lang-en">Denver Condo Monthly Costs 2025 ($395K)</span><span class="lang-zh" style="display:none">丹佛公寓月成本2025（$395K中位數）</span></h4><p><span class="lang-en">6.38%, 20% down</span><span class="lang-zh" style="display:none">6.38%，20%首付</span></p><div id="chartDENCondo" style="height:220px"></div></div>
+    </div>
+    <p class="chart-note red"><span class="lang-en">CO insurance +137% in 10 years = $4,100/yr avg. Condo HOA surging 20&ndash;35%. Total condo monthly cost ~$2,690 &rarr; 40% DTI for $80K income</span><span class="lang-zh" style="display:none">科州保險10年+137%=年均$4,100。公寓HOA激增20至35%。公寓總月成本約$2,690→$80K收入者負債收入比40%</span></p>
+
+    <h2 id="sec-segment"><span class="lang-en">SINGLE-FAMILY VS CONDO: A MARKET SPLITTING IN TWO</span><span class="lang-zh" style="display:none">獨棟 VS 公寓：一分為二的市場</span></h2>
+    <div class="lang-en">
+      <p>Denver's 2025&ndash;2026 market is defined by the widening divergence between the SF and attached housing sectors. DMAR year-end data confirms: SF sales rose <strong>3%</strong> YoY while median prices held flat at approximately $624,990. Condo/townhome sales fell <strong>8%</strong> YoY with median prices declining 3.7% to $395,000. The divergence is driven by insurance cost escalation hitting condos disproportionately via HOA pass-through, stronger lock-in effect for SF homeowners, and entry-level buyers facing the most acute affordability headwinds.</p>
+      <p>Within the SF segment, Denver's mountain-adjacent neighborhoods (Washington Park, Capitol Hill, Cheesman Park) retain strong demand. Growth corridors like RiNo, West Colfax, and Central Park outperform the metro average. Outer suburbs &mdash; Aurora, Centennial &mdash; experience sluggish conditions. The luxury mountain resort segment (Telluride, Vail, Steamboat Springs) operates in an entirely separate market, posting <strong>$868 million</strong> in Telluride sales in 2025 despite broader metro softness.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>丹佛2025至2026年市場由獨棟住宅和附屬住宅板塊之間不斷擴大的分化定義。DMAR年終數據確認：獨棟銷量年增<strong>3%</strong>，中位數持平於約624,990美元。公寓/聯排銷量年降<strong>8%</strong>，中位數跌至395,000美元。分化由保險成本不成比例衝擊公寓、獨棟業主更強的鎖定效應，以及入門級買家面臨最嚴峻可負擔性逆風驅動。</p>
+      <p>在獨棟住宅板塊內，丹佛山地毗鄰社區（Washington Park、Capitol Hill）保持強勁需求。RiNo、West Colfax等增長走廊表現優於都會區平均水平。外圍郊區條件停滯。豪華山地度假板塊（特盧賴德、韋爾）在獨立市場中運作，2025年特盧賴德錄得<strong>8.68億美元</strong>銷售額。</p>
+    </div>
+    <div class="report-chart-grid">
+      <div class="report-chart-card"><h4><span class="lang-en">Sales Volume YoY % Change</span><span class="lang-zh" style="display:none">銷量年增率%</span></h4><p><span class="lang-en">Denver Metro SF vs Condo 2023&ndash;2025</span><span class="lang-zh" style="display:none">丹佛都會區獨棟 vs 公寓 2023&ndash;2025</span></p><div id="chartDENSalesYoY" style="height:220px"></div></div>
+      <div class="report-chart-card"><h4><span class="lang-en">Median Price YoY % Change</span><span class="lang-zh" style="display:none">中位數房價年增率%</span></h4><p><span class="lang-en">Denver Metro SF vs Condo 2023&ndash;2025</span><span class="lang-zh" style="display:none">丹佛都會區獨棟 vs 公寓 2023&ndash;2025</span></p><div id="chartDENPriceYoY" style="height:220px"></div></div>
+    </div>
+    <p class="chart-note orange"><span class="lang-en">2025 divergence: SF sales +3% / condo -8%. SF price flat / condo -3.7%. Insurance/HOA surge hitting attached housing disproportionately</span><span class="lang-zh" style="display:none">2025年分化：獨棟+3% / 公寓-8%。獨棟價格持平 / 公寓-3.7%。保險/HOA激增不成比例衝擊附屬住宅</span></p>
+
+    <h2 id="sec-rent"><span class="lang-en">RENT CONTROL: COLORADO PREEMPTION</span><span class="lang-zh" style="display:none">租管：科州先占</span></h2>
+    <div class="lang-en">
+      <p>Colorado has historically preempted local rent control, re-confirmed in a 2021 state bill. Denver cannot enact rent control or rent stabilization ordinances. Denver has debated renter protection measures but rent control itself remains legally unavailable. This creates a direct pass-through relationship between market conditions and rental prices.</p>
+      <p>Denver's rental market in 2025 reflects the moderated demand environment. Average two-bedroom rents were approximately <strong>$2,100/month</strong>, with vacancy rates at approximately 4.2%. Annual rent growth in 2025 was approximately 3&ndash;4%. For investors, the absence of rent control combined with Denver's high home prices (keeping many would-be buyers as renters) creates favorable structural fundamentals, though the insurance cost surge has compressed net yields.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>科羅拉多州歷史上先占地方租管，在2021年州法案中被再次確認。丹佛不能頒布租管或租金穩定化條例。這在市場條件和租金價格之間創造了直接的傳導關係。</p>
+      <p>丹佛2025年兩居室平均租金約為<strong>2,100美元/月</strong>，空置率約4.2%。年度租金增長約3至4%。對投資者而言，缺乏租管加上丹佛高房價創造了有利的結構性基本面，儘管保險成本激增壓縮了淨收益率。</p>
+    </div>
+    <div class="chart-inline"><h4><span class="lang-en">Denver Avg 2BR Rent + Vacancy Rate 2019&ndash;2025</span><span class="lang-zh" style="display:none">丹佛平均兩居室租金 + 空置率 2019&ndash;2025</span></h4><div id="chartDENRent" style="height:220px"></div><p class="chart-note navy"><span class="lang-en">Denver rents moderated to +3&ndash;4% YoY (2025) after 18&ndash;20% surges in 2021&ndash;22. Vacancy 4.2% = healthy. No rent control = full market pass-through</span><span class="lang-zh" style="display:none">丹佛租金在2021至22年+18至20%激增後緩和至+3至4%年增（2025年）。空置率4.2%=健康。無租管=完全市場傳導</span></p></div>
+
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+    <div class="lang-en">
+      <p>Denver's 2026&ndash;2028 outlook is the most balanced of the four sunbelt correctors. The base case (<strong>60%</strong> probability): metro median approximately $585,000, flat appreciation of 0&ndash;2% annually, continued buyer's market for condos, and modest SF appreciation of 2&ndash;3%. The CS Denver index advances from 322 toward 330&ndash;335 by end-2027. Colorado's diversified economy (aerospace, energy, healthcare, tech, tourism) provides a resilient employment floor.</p>
+      <p>The bull case (<strong>20%</strong> probability) requires meaningful rate relief (below 5.5%) to unlock the inventory standoff. This could produce 5&ndash;7% annual appreciation in 2026&ndash;2027. The SF market would benefit most; condo appreciation remains muted until insurance cost stabilization occurs.</p>
+      <p>The bear case (<strong>20%</strong> probability) centers on two compounding risks: sustained deterioration in Colorado's insurance market combined with a tech-sector recession reducing Denver's growing fintech/tech cluster employment. Condo median prices could decline 10&ndash;15% from current levels. The CS Denver index could fall to 295&ndash;305, returning to early 2023 trough levels. The key distinguishing feature: this bear case is driven by cost-of-ownership structure (insurance + HOA) rather than fundamental demand collapse &mdash; more amenable to policy intervention.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>丹佛2026至2028年的展望是四個陽光地帶修正城市中最均衡的。基本情境（概率<strong>60%</strong>）：都會區中位數約585,000美元，每年0至2%持平升值，公寓持續買方市場，獨棟住宅溫和升值2至3%。CS丹佛指數從322推進至2027年底的330至335。科羅拉多州多元化經濟提供有韌性的就業底部。</p>
+      <p>樂觀情境（概率<strong>20%</strong>）需要利率緩解至5.5%以下以解除庫存僵局。可能產生5至7%年度升值。獨棟住宅市場受益最多。</p>
+      <p>悲觀情境（概率<strong>20%</strong>）以科州保險市場持續惡化加上科技行業衰退為中心。公寓中位數可能從當前水平下跌10至15%。CS指數可能降至295至305。關鍵區別：此悲觀情境由持有成本結構驅動——更易於政策干預。</p>
+    </div>
+    <div class="chart-inline"><h4><span class="lang-en">CS Denver Index Forecast 2026&ndash;2028</span><span class="lang-zh" style="display:none">CS丹佛指數預測 2026&ndash;2028</span></h4><div id="chartDENForecast" style="height:220px"></div><p class="chart-note orange"><span class="lang-en">DMAR 2026 consensus: &lsquo;more of the same&rsquo; at ~$585K metro median. Bear driven by insurance + tech slowdown. Bull: rate &lt;5.5% unlocks locked-in sellers</span><span class="lang-zh" style="display:none">DMAR 2026年共識：都會區中位數約$585K「更多相同」。悲觀由保險+科技放緩驅動。樂觀：利率&lt;5.5%解鎖被鎖定賣家</span></p></div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: S&amp;P Cotality Case-Shiller CO-Denver Home Price Index (FRED DNXRSA) &middot; Denver Metro Association of REALTORS&reg; (DMAR) 2026 Economic Summit &middot; REcolorado 2025 Year-End Market Report &middot; Colorado Association of REALTORS&reg; Monthly Market Reports &middot; National Bureau of Economic Research (NBER) &mdash; Colorado Insurance Premium Data &middot; Houzeo Denver Housing Market (Jan 2026) &middot; ColoradoBiz &mdash; Colorado Housing Market Reset 2025 (Jan 2026) &middot; JVM Lending Denver Market Forecasts. All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：S&amp;P Cotality Case-Shiller科州丹佛房價指數（FRED DNXRSA）&middot; 丹佛都會區房地產商協會（DMAR）2026年經濟峰會 &middot; REcolorado 2025年年終市場報告 &middot; 科羅拉多州房地產商協會月度市場報告 &middot; 美國國家經濟研究局（NBER）——科州保險費數據 &middot; Houzeo丹佛住宅市場（2026年1月）&middot; ColoradoBiz——科羅拉多州住宅市場重置2025（2026年1月）&middot; JVM Lending丹佛市場預測。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawDENPrice(lang);drawDENMedian(lang);drawDENInventory(lang);drawDENInsuranceTrend(lang);drawDENCondo(lang);drawDENSalesYoY(lang);drawDENPriceYoY(lang);drawDENRent(lang);drawDENForecast(lang);}
+
+function drawDENPrice(lang){var dom=document.getElementById('chartDENPrice');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];var index=[200,218,233,246,250,268,316,323,305,317,322];var yoy=[10.5,9.0,6.9,5.6,1.6,7.2,17.9,2.2,-5.6,3.9,1.6];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:[mkAxis({type:'value',min:180,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),mkAxis({type:'value',min:-8,max:20,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'CS Denver Index':'CS丹佛指數',type:'bar',data:index,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0,markLine:{data:[{yAxis:325,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'May 2022 peak 325':'2022年5月峰值325',fontSize:8,color:C.red}}]}},{name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,markLine:{data:[{yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1},label:{show:false}}]}}]});}
+
+function drawDENMedian(lang){var dom=document.getElementById('chartDENMedian');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];var sf=[410,435,520,580,560,615,625];var condo=[310,325,375,430,405,410,395];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:250,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+    series:[{name:en?'Single-Family ($K)':'獨棟($K)',type:'bar',data:sf,barMaxWidth:24,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},{name:en?'Condo ($K)':'公寓($K)',type:'bar',data:condo,barMaxWidth:24,itemStyle:{color:C.orange,borderRadius:[3,3,0,0]}}]});}
+
+function drawDENInventory(lang){var dom=document.getElementById('chartDENInventory');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['Jan 20','Jan 21','Jan 22','Jan 23','Jan 24','Dec 25','Jan 26'];var listings=[11.2,4.8,6.5,15.3,15.8,17.1,14.8];var dom_=[28,9,12,41,38,36,81];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),yAxis:[mkAxis({type:'value',min:0,max:20,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),mkAxis({type:'value',min:0,max:90,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}d'},splitLine:{show:false}})],
+    series:[{name:en?'Active Listings (K)':'活躍掛牌(K)',type:'line',data:listings,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,yAxisIndex:0,markLine:{data:[{yAxis:11,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Pre-pandemic norm':'疫情前常態',fontSize:8,color:C.muted}}]}},{name:en?'Days on Market':'在市天數',type:'line',data:dom_,lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1}]});}
+
+function drawDENInsuranceTrend(lang){var dom=document.getElementById('chartDENInsuranceTrend');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2017','2019','2021','2023','2025'];var co=[1730,1980,2200,2650,3500,4100];var nat=[1100,1200,1280,1350,1450,1500];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:800,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v;}}}),
+    series:[{name:en?'Colorado Avg':'科州均值',type:'bar',data:co,barMaxWidth:24,itemStyle:{color:C.red,borderRadius:[3,3,0,0]},barGap:'20%'},{name:en?'National Avg':'全國均值',type:'bar',data:nat,barMaxWidth:24,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]}}]});}
+
+function drawDENCondo(lang){var dom=document.getElementById('chartDENCondo');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var cats=en?['Mortgage P&I\n($395K, 20% dn)','HOA fees\n(est avg)','Insurance\n(monthly)','Total']:['按揭本息\n($395K, 20%首付)','HOA費\n（估算均值）','保險\n（月）','合計'];
+  var vals=[1970,550,170,2690];var colors=[C.navy,C.red,C.orange,C.muted];
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},grid:{left:12,right:60,top:8,bottom:8,containLabel:true},yAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9}}),xAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v;}}}),
+    series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:18,itemStyle:{borderRadius:[0,3,3,0]},label:{show:true,position:'right',formatter:function(p){return '$'+p.value;},fontSize:9,color:C.muted}}]});}
+
+function drawDENSalesYoY(lang){var dom=document.getElementById('chartDENSalesYoY');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2023','2024','2025'];var sf=[-8,5,3];var condo=[-15,2,-8];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:-18,max:8,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{name:en?'SF Sales YoY':'獨棟銷量',type:'bar',data:sf,barMaxWidth:28,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},{name:en?'Condo Sales YoY':'公寓銷量',type:'bar',data:condo,barMaxWidth:28,itemStyle:{color:C.orange,borderRadius:[3,3,0,0]}}]});}
+
+function drawDENPriceYoY(lang){var dom=document.getElementById('chartDENPriceYoY');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2023','2024','2025'];var sf=[-4.2,5.8,0.2];var condo=[-6.1,1.2,-3.7];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:-8,max:8,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{name:en?'SF Price YoY':'獨棟價格',type:'bar',data:sf,barMaxWidth:28,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},{name:en?'Condo Price YoY':'公寓價格',type:'bar',data:condo,barMaxWidth:28,itemStyle:{color:C.red,borderRadius:[3,3,0,0]}}]});}
+
+function drawDENRent(lang){var dom=document.getElementById('chartDENRent');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];var rent=[1680,1620,1900,2250,2180,2080,2100];var vac=[4.8,5.5,3.8,3.2,4.0,4.5,4.2];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:[mkAxis({type:'value',min:1400,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return'$'+v;}}}),mkAxis({type:'value',min:0,max:7,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'Avg 2BR Rent ($)':'平均兩居室租金($)',type:'bar',data:rent,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.25)',borderRadius:[3,3,0,0]},yAxisIndex:0},{name:en?'Vacancy %':'空置率%',type:'line',data:vac,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,markLine:{data:[{yAxis:5,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Balanced ~5%':'均衡約5%',fontSize:8,color:C.muted}}]}}]});}
+
+function drawDENForecast(lang){var dom=document.getElementById('chartDENForecast');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var periods=['Feb 2025','2026E','2027E','2028E'];var bull=[322,335,348,362];var base=[322,326,332,335];var bear=[322,312,300,295];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:280,max:370,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[{name:en?'Bull (20%) — rate relief':'樂觀(20%)—利率緩解',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+      {name:en?'Base (60%) — flat':'基本(60%)—持平',type:'line',data:base,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+      {name:en?'Bear (20%) — insurance+tech':'悲觀(20%)—保險+科技',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5},
+      {type:'line',markLine:{data:[{yAxis:325,lineStyle:{color:C.muted,type:'dotted',width:1},label:{formatter:en?'May 2022 peak 325':'2022年5月峰值325',fontSize:8,color:C.muted}}]}}]});}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}function toggleCityMenu(){document.getElementById('cityDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}if(!e.target.closest('.city-dropdown')){var d2=document.getElementById('cityDropdown');if(d2)d2.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | Australia Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">Australia — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">澳洲 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q2 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q2</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:2;background:#6b7280">
+        <div class="cs-title">GFC</div>
+        <div class="cs-year">08–09</div>
+      </div>
+      <div class="cycle-seg" style="flex:5;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Post-GFC Boom</span><span class="lang-zh" style="display:none">後GFC榮景</span></div>
+        <div class="cs-year">10–17</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Credit Tightening</span><span class="lang-zh" style="display:none">信貸收緊</span></div>
+        <div class="cs-year">18–20</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#2563eb">
+        <div class="cs-title">COVID</div>
+        <div class="cs-year">20–21</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Rate Hike</span><span class="lang-zh" style="display:none">升息</span></div>
+        <div class="cs-year">22–23</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Late Cycle</span><span class="lang-zh" style="display:none">週期晚期</span></div>
+        <div class="cs-year">24–25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">RBA easing cycle begun Feb 2025 (4.35%→4.10%); HPI rebounded from 2023 trough but growth moderating; affordability at historic stress</span>
+        <span class="lang-zh" style="display:none">RBA於2025年2月啟動降息週期（4.35%→4.10%）；房價從2023低點反彈但漲速趨緩；可負擔性達歷史壓力水位</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">RBA Cash Rate</span><span class="lang-zh" style="display:none">RBA現金利率</span></div>
+      <div class="kpi-value">4.10%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">−25bp Feb 2025</span><span class="lang-zh" style="display:none">2025年2月降25bp</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Residential Property Price Index</span><span class="lang-zh" style="display:none">住宅房價指數</span></div>
+      <div class="kpi-value">185</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Base: 2011–12=100</span><span class="lang-zh" style="display:none">基期：2011–12=100</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CPI YoY</span><span class="lang-zh" style="display:none">通膨 YoY</span></div>
+      <div class="kpi-value">2.4%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Q1 2025</span><span class="lang-zh" style="display:none">2025 Q1</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">1.3%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">2024 full year</span><span class="lang-zh" style="display:none">2024全年</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Unemployment</span><span class="lang-zh" style="display:none">失業率</span></div>
+      <div class="kpi-value">4.1%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Edging higher</span><span class="lang-zh" style="display:none">緩步上升</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Standard Variable Rate</span><span class="lang-zh" style="display:none">標準浮動房貸利率</span></div>
+      <div class="kpi-value">6.50%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Avg owner-occ</span><span class="lang-zh" style="display:none">自住房貸平均</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">RBA Rate Range (17yr)</span><span class="lang-zh" style="display:none">RBA歷史區間</span></div>
+      <div class="ctx-val">0.10%–4.35%</div>
+      <div class="ctx-sub"><span class="lang-en">Low: Nov 2020 · High: Nov 2023</span><span class="lang-zh" style="display:none">低點：2020年11月 · 高點：2023年11月</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">HPI Since 2008</span><span class="lang-zh" style="display:none">HPI自2008累計</span></div>
+      <div class="ctx-val" style="color:#16a34a">+140%</div>
+      <div class="ctx-sub"><span class="lang-en">~77 → 185 (2011–12=100 base)</span><span class="lang-zh" style="display:none">~77 → 185（2011–12=100基期）</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+6.0% / −1.9%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2021 rebound · Worst: 2020 COVID</span><span class="lang-zh" style="display:none">最佳：2021反彈 · 最差：2020 COVID</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Mortgage Rate Peak</span><span class="lang-zh" style="display:none">房貸利率高峰</span></div>
+      <div class="ctx-val" style="color:#d97706">6.70%</div>
+      <div class="ctx-sub"><span class="lang-en">Late 2023 — 13-year high SVR</span><span class="lang-zh" style="display:none">2023年底 — 13年高位標準浮動利率</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × House Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Australia's RBA cut rates to a record-low 0.10% in Nov 2020, triggering the fastest property price surge in decades — national HPI rose ~28% in under two years. The subsequent 425bp hike cycle (May 2022 – Nov 2023) was the fastest since 1994 yet only produced a ~9% peak-to-trough correction, highlighting extreme supply inelasticity and record immigration.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>RBA於2020年11月將利率降至歷史低點0.10%，觸發數十年來最快的房價飆升——全國HPI在不到兩年內上漲約28%。隨後425bp的升息週期（2022年5月至2023年11月）為1994年以來最快，但僅造成約9%的高峰至低谷修正，凸顯了極度的供給剛性以及創紀錄的移民潮。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">RBA Cash Rate / SVR / CPI / M2 vs ABS RPPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">RBA現金利率 / 標準浮動利率 / CPI / M2 vs ABS RPPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × House Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> The 2018 Banking Royal Commission forced mortgage lending standards sharply higher — credit growth cratered from ~7% to near 2%, directly causing the 2018–19 house price correction of ~10%. Immigration (net overseas arrivals, dashed) is now running at record ~600k/yr, structurally overwhelming new housing supply and preventing sustained price falls.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>2018年銀行皇家委員會迫使房貸標準大幅提升——信貸成長從約7%跌至近2%，直接造成2018–19年房價約10%的修正。目前移民人數（淨海外抵達，虛線）年達創紀錄約60萬人，從結構上壓倒新房供給，阻止了持續性房價下跌。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">GDP / Unemployment / Credit Growth / Net Migration vs ABS RPPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">GDP / 失業率 / 信貸成長 / 淨移民 vs ABS RPPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #6b7280">
+      <div class="ev-year" style="color:#6b7280"><span class="lang-en">2008–2009 · GFC SHOCK</span><span class="lang-zh" style="display:none">2008–2009 · GFC衝擊</span></div>
+      <div class="ev-title"><span class="lang-en">RBA Cuts 425bp — Australia Avoids Recession</span><span class="lang-zh" style="display:none">RBA降息425bp，澳洲躲過衰退</span></div>
+      <div class="ev-desc"><span class="lang-en">RBA slashes cash rate from 7.25% to 3.00% in 7 months — fastest easing since 1990. Federal government's A$42bn stimulus package. Australia avoids technical recession (GDP −0.5% Q4 2008 but rebounds in 2009). HPI falls only ~3% before recovering. First Home Owner Boost doubling grant to A$21k supercharges demand.</span><span class="lang-zh" style="display:none">RBA在7個月內將現金利率從7.25%急降至3.00%，為1990年以來最快降息。聯邦政府推出420億澳元刺激計劃，澳洲避免技術性衰退。HPI僅跌約3%即反彈，首次置業補助金提升至2.1萬澳元大力刺激需求。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2010–2017 · POST-GFC BOOM</span><span class="lang-zh" style="display:none">2010–2017 · 後GFC榮景</span></div>
+      <div class="ev-title"><span class="lang-en">Sydney & Melbourne Led +80% HPI surge</span><span class="lang-zh" style="display:none">悉尼墨爾本領漲，HPI累升80%</span></div>
+      <div class="ev-desc"><span class="lang-en">China-driven mining boom sustains employment and income growth. RBA holds rates low (1.50% by Aug 2016). Investor lending surges, with interest-only loans peaking at 40% of new mortgages in 2015. APRA imposes 10% investor loan growth cap in Dec 2014 — slowing but not stopping price gains. Sydney peaks +75% from 2012 trough.</span><span class="lang-zh" style="display:none">中國帶動礦業繁榮，支撐就業與收入增長。RBA維持低利率（2016年8月降至1.50%）。投資者貸款激增，只付利息貸款於2015年達新房貸40%高峰。APRA於2014年12月實施投資者貸款10%增長上限，放緩但未能阻止房價上漲。悉尼從2012低點累漲75%。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #8b5cf6">
+      <div class="ev-year" style="color:#8b5cf6"><span class="lang-en">2017–2019 · ROYAL COMMISSION</span><span class="lang-zh" style="display:none">2017–2019 · 皇家委員會</span></div>
+      <div class="ev-title"><span class="lang-en">Banking Royal Commission Triggers Credit Crunch</span><span class="lang-zh" style="display:none">銀行皇家委員會引發信貸緊縮</span></div>
+      <div class="ev-desc"><span class="lang-en">Sep 2017: APRA 30% cap on interest-only lending. Apr 2018: Banking Royal Commission interim report exposes systemic misconduct. Banks sharply tighten lending standards. Credit growth craters from 6.5% to 2.5%. Sydney HPI falls −15%, Melbourne −10% (2017 peak to 2019 trough). APRA removes IO lending cap in Dec 2018 after damage done.</span><span class="lang-zh" style="display:none">2017年9月：APRA限制只付利息貸款佔比30%上限。2018年4月：銀行皇家委員會中期報告揭露系統性失當行為，銀行大幅收緊放貸標準，信貸成長從6.5%跌至2.5%。悉尼HPI從2017高點跌15%，墨爾本跌10%。2018年12月APRA取消IO上限，但損害已成。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">MAR 2020 · COVID EMERGENCY</span><span class="lang-zh" style="display:none">2020年3月 · COVID緊急應對</span></div>
+      <div class="ev-title"><span class="lang-en">RBA to Historic Low 0.10%; GDP −1.9%</span><span class="lang-zh" style="display:none">RBA降至歷史低點0.10%；GDP衰退1.9%</span></div>
+      <div class="ev-desc"><span class="lang-en">RBA cuts to 0.10% in Nov 2020 — lowest ever. A$319bn QE bond purchase program launched (yield curve control). GDP contracts −1.9% (2020 annual). HPI falls −3% but bottoms quickly. Immigration borders closed — rental vacancy plunges, setting up structural shortage. JobKeeper wage subsidy prevents mass unemployment.</span><span class="lang-zh" style="display:none">RBA於2020年11月降至0.10%歷史低點，啟動3190億澳元QE購債計劃（殖利率曲線控制）。GDP年衰退1.9%，HPI跌3%後迅速見底。移民邊境關閉導致租屋空置率暴跌，埋下結構性短缺。政府支薪補貼防止大規模失業。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2021 · COVID PRICE SURGE</span><span class="lang-zh" style="display:none">2021年 · COVID後房價飆升</span></div>
+      <div class="ev-title"><span class="lang-en">National HPI +22% — Fastest Since 1980s</span><span class="lang-zh" style="display:none">全國HPI+22%，為1980年代以來最快</span></div>
+      <div class="ev-desc"><span class="lang-en">Ultra-low rates, A$25k HomeBuilder grant, stamp duty waivers and pandemic-driven space demand combine for the strongest house price surge in 40+ years. Every capital city records double-digit annual gains. Regional areas surge even faster as remote work enables migration away from CBDs. Credit growth rebounds to 7%+.</span><span class="lang-zh" style="display:none">超低利率、2.5萬澳元HomeBuilder補助、印花稅豁免及疫情帶動的居住空間需求，共同造就40年來最強的房價飆升。每個首府城市均錄得雙位數年漲幅，偏遠地區因遠端工作趨勢漲速更快。信貸成長反彈至7%以上。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">MAY 2022 · RATE HIKE SHOCK</span><span class="lang-zh" style="display:none">2022年5月 · 升息衝擊</span></div>
+      <div class="ev-title"><span class="lang-en">13 Hikes: 0.10% → 4.35% in 18 Months</span><span class="lang-zh" style="display:none">18個月13次升息：0.10%→4.35%</span></div>
+      <div class="ev-desc"><span class="lang-en">RBA begins hike cycle May 2022 after insisting rates won't rise until 2024. 13 consecutive hikes by Nov 2023 — 425bp in 18 months, fastest since 1994. National HPI falls −9% peak-to-trough. Sydney −14%, Melbourne −10%. Mortgage stress spikes: avg new borrower pays 43% of income on mortgage. RBA forward guidance credibility damaged.</span><span class="lang-zh" style="display:none">RBA於2022年5月啟動升息週期，此前曾堅稱2024年前不會升息。2023年11月前共升息13次，18個月累計425bp，為1994年以來最快。全國HPI峰谷修正9%，悉尼跌14%，墨爾本跌10%。房貸壓力激增：平均新借款人需用43%收入還款。RBA前瞻指引公信力受損。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2023–2024 · REBOUND ON RECORD MIGRATION</span><span class="lang-zh" style="display:none">2023–2024 · 創紀錄移民帶動反彈</span></div>
+      <div class="ev-title"><span class="lang-en">Net Overseas Migration 620k — HPI Rebounds</span><span class="lang-zh" style="display:none">淨海外移民62萬人，HPI反彈</span></div>
+      <div class="ev-desc"><span class="lang-en">Despite RBA holding at 4.35%, national HPI rebounds +8.5% in 2023 and +5.6% in 2024 — driven by record 620,000 net overseas arrivals (2022–23) creating acute rental and purchase demand. National vacancy rate drops to 1%. Rental CPI running at 7%+ YoY. Government housing supply target (1.2M homes by 2029) widely seen as unachievable.</span><span class="lang-zh" style="display:none">儘管RBA維持4.35%，全國HPI於2023年反彈8.5%、2024年再漲5.6%——創紀錄的62萬淨海外移民（2022–23年）製造急迫的租房與購房需求。全國空置率跌至1%，租金CPI以每年7%以上速度上漲。政府到2029年供應120萬套住宅目標被廣泛認為無法達成。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">FEB 2025 · RBA EASING BEGINS</span><span class="lang-zh" style="display:none">2025年2月 · RBA降息開始</span></div>
+      <div class="ev-title"><span class="lang-en">First Cut Since 2020; CPI Back in Band</span><span class="lang-zh" style="display:none">2020年以來首次降息；CPI回落目標帶</span></div>
+      <div class="ev-desc"><span class="lang-en">RBA cuts 25bp to 4.10% in Feb 2025 — first rate cut since Nov 2020. CPI returns to 2–3% target band (2.4% Q1 2025). Market pricing 2–3 further cuts in 2025. Immigration moderating from record highs (still ~450k net). Labour market softening (unemployment 4.1%). HPI growth moderating but no significant correction expected given supply deficit.</span><span class="lang-zh" style="display:none">RBA於2025年2月降息25bp至4.10%，為2020年11月以來首次降息。CPI回落至2–3%目標帶（2025年Q1為2.4%）。市場預期2025年再降息2–3次。移民從歷史高點趨緩（仍約45萬淨移民）。就業市場軟化（失業率4.1%）。受供給缺口支撐，HPI漲速趨緩但預計不會大幅修正。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#d97706;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#d97706;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook — Late Cycle / Early Easing</span><span class="lang-zh" style="display:none">當前週期展望 — 週期晚期 / 降息初期</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">RBA easing cycle begun — rate cuts typically reignite HPI within 6 months</span><span class="lang-zh" style="display:none">RBA降息週期啟動——降息通常在6個月內重燃HPI</span></li>
+          <li><span class="lang-en">Chronic undersupply: housing completions 180k/yr vs demand 240k+</span><span class="lang-zh" style="display:none">長期供不應求：新屋完工18萬套/年 vs 需求24萬+</span></li>
+          <li><span class="lang-en">Net immigration still 450k+/yr — structural demand floor</span><span class="lang-zh" style="display:none">淨移民仍逾45萬人/年，構成需求結構性支撐</span></li>
+          <li><span class="lang-en">Unemployment near full employment (4.1%)</span><span class="lang-zh" style="display:none">失業率接近充分就業水位（4.1%）</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Affordability at historic worst — median house/income 8–12× nationally</span><span class="lang-zh" style="display:none">可負擔性達歷史最差——全國中位房價/收入比8–12倍</span></li>
+          <li><span class="lang-en">GDP growth anaemic at 1.3% — per-capita recession since 2023</span><span class="lang-zh" style="display:none">GDP成長疲弱僅1.3%——人均GDP自2023年即呈衰退</span></li>
+          <li><span class="lang-en">Mortgage cliff: 800k+ fixed-rate loans rolling to variable 2023–25</span><span class="lang-zh" style="display:none">房貸懸崖：2023–25年逾80萬筆固定利率貸款到期轉浮動</span></li>
+          <li><span class="lang-en">China slowdown risk — AU exports and iron ore price sensitivity</span><span class="lang-zh" style="display:none">中國放緩風險——澳洲出口及鐵礦石價格敏感</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: RBA (Cash Rate Target decisions · rba.gov.au), ABS (Residential Property Price Indexes cat. 6416.0, GDP cat. 5206.0, CPI cat. 6401.0, Labour Force cat. 6202.0 · abs.gov.au), APRA (Monthly Authorised Deposit-taking Institution Statistics). ABS RPPI index rebased to 2011–12=100; 2008 estimated from CoreLogic trend. SVR = average standard variable rate for owner-occupier P&amp;I loans. Net migration 2020–22 estimated from ABS NOM series.</span>
+    <span class="lang-zh" style="display:none">來源：RBA（現金利率目標決策 · rba.gov.au）、ABS（住宅房價指數 cat. 6416.0、GDP cat. 5206.0、CPI cat. 6401.0、勞動力 cat. 6202.0 · abs.gov.au）、APRA（月度授權存款機構統計）。ABS RPPI指數以2011–12=100為基期；2008年從CoreLogic趨勢估算。SVR=自住業主本息還款標準浮動平均利率。2020–22年淨移民從ABS NOM系列估算。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, ABS / RBA sources) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+/* ABS Residential Property Price Index (8 capital cities, 2011-12=100).
+   2008-2010 estimated from CoreLogic annual. 2011-2025 from ABS cat.6416.0 */
+var hpi = [77,75,83,91,94,98,105,113,118,128,119,120,118,143,165,179,189,185];
+
+/* Chart 1: Monetary Cycle */
+/* RBA cash rate (year-end) — rba.gov.au/statistics/cash-rate/ */
+var rbaRate = [4.25,3.75,4.75,4.25,3.00,2.50,2.50,2.00,1.50,1.50,1.50,0.75,0.10,0.10,3.10,4.35,4.35,4.10];
+/* Average standard variable rate (owner-occ) — RBA F5 indicator lending rates */
+var svrRate = [8.55,5.80,7.40,7.80,6.60,5.95,5.45,5.25,5.25,5.22,5.37,4.55,3.45,3.45,5.85,6.70,6.65,6.50];
+/* CPI YoY% — ABS cat.6401.0 annual avg */
+var cpiYoy = [4.4,1.8,2.8,3.4,1.8,2.4,2.5,1.5,1.3,1.9,2.0,1.6,-0.3,2.8,6.1,5.4,3.4,2.4];
+/* M2 YoY% — RBA D3 money supply (est from RBA Statistical Tables) */
+var m2Growth = [12.5,4.5,8.5,7.5,7.0,6.5,7.0,6.0,5.5,6.5,4.5,4.0,10.0,10.5,7.0,4.5,3.5,3.8];
+
+/* Chart 2: Real Economy */
+/* GDP YoY% — ABS cat.5206.0 */
+var gdpGrowth = [2.7,-0.1,2.3,2.6,3.6,2.1,2.6,2.3,2.8,2.5,2.8,1.8,-1.9,5.2,3.7,2.0,1.3,1.8];
+/* Unemployment % annual avg — ABS cat.6202.0 */
+var unempRate = [4.2,5.6,5.2,5.1,5.2,5.7,6.1,6.1,5.7,5.6,5.3,5.2,6.5,5.1,3.7,3.7,4.0,4.1];
+/* Housing credit growth YoY% — RBA Financial Aggregates D2 */
+var creditGrowth = [8.5,3.0,7.2,7.0,5.5,5.0,6.8,7.2,6.5,6.7,5.2,3.0,3.5,6.5,8.0,4.5,4.0,4.5];
+/* Net overseas migration '000 (estimated from ABS NOM) — scaled to % of population for chart */
+var migScaled = [0.9,0.7,0.8,0.9,0.9,1.0,1.0,1.0,0.9,0.9,0.8,0.6,-0.1,0.2,1.3,2.4,1.7,1.5];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × HPI ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC Shock',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'後GFC榮景':'Post-GFC Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2017'}],
+    [{xAxis:'2018',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'皇家委員會':'Royal Commission',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(37,99,235,0.07)'},label:{formatter:isZh?'COVID寬鬆':'COVID Easing',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},label:{formatter:isZh?'升息週期':'Rate Hike Cycle',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'週期晚期':'Late Cycle',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2009',label:{formatter:isZh?'RBA 3.00%底部':'RBA 3.00% Floor',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#6b7280',type:'dashed',width:1}},
+    {xAxis:'2018',label:{formatter:isZh?'皇家委員會':'Royal Comm.',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'RBA 0.10%':'RBA 0.10%',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'首次升息':'First Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2025',label:{formatter:isZh?'降息啟動':'Easing Begins',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-2,max:16,interval:2,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:60,max:220,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'房價指數':'HPI',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'RBA現金利率':'RBA Cash Rate',type:'line',data:rbaRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'標準浮動利率':'Std Variable Rate',type:'line',data:svrRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpiYoy,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'M2 YoY%':'M2 YoY%',type:'line',data:m2Growth,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'房價指數(ABS RPPI)':'House Price Index(ABS)',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy + Migration × HPI ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gdpBarData = gdpGrowth.map(function(v){return {value:v,itemStyle:{color:v>=0?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC Shock',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'後GFC榮景':'Post-GFC Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2017'}],
+    [{xAxis:'2018',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'皇家委員會':'Royal Commission',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(37,99,235,0.07)'},label:{formatter:isZh?'COVID寬鬆':'COVID Easing',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},label:{formatter:isZh?'升息週期':'Rate Hike Cycle',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'週期晚期':'Late Cycle',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData2 = [
+    {xAxis:'2018',label:{formatter:isZh?'皇家委員會':'Royal Comm.',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'COVID':'COVID',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'RBA升息':'RBA Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2025',label:{formatter:isZh?'RBA降息':'RBA Cut',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:-5,max:15,interval:5,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:60,max:220,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'房價指數':'HPI',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GDP YoY%':'GDP YoY%',type:'bar',data:gdpBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'失業率%':'Unemployment%',type:'line',data:unempRate,yAxisIndex:0,lineStyle:{color:C.red,width:1.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'住房信貸成長%':'Housing Credit%',type:'line',data:creditGrowth,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'淨移民(人口%)':'Net Migration(%pop)',type:'line',data:migScaled,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false,connectNulls:false},
+      {name:isZh?'房價指數(ABS)':'House Price Index(ABS)',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2},markLine:{silent:true,symbol:'none',data:markLineData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

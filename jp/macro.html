@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | Japan Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">Japan — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">日本 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q2 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q2</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:2;background:#6b7280">
+        <div class="cs-title">GFC</div>
+        <div class="cs-year">08–09</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Deflation Stagnation</span><span class="lang-zh" style="display:none">通縮停滯</span></div>
+        <div class="cs-year">10–12</div>
+      </div>
+      <div class="cycle-seg" style="flex:5;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Abenomics / QQE</span><span class="lang-zh" style="display:none">安倍經濟學/QQE</span></div>
+        <div class="cs-year">13–19</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#2563eb">
+        <div class="cs-title">COVID</div>
+        <div class="cs-year">20–21</div>
+      </div>
+      <div class="cycle-seg" style="flex:4;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Recovery / Expansion</span><span class="lang-zh" style="display:none">復甦/擴張</span></div>
+        <div class="cs-year">22–25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">BOJ ended NIRP Mar 2024 (+0.10%), hiked to 0.50% Jan 2025; Tokyo condo prices at all-time highs driven by weak yen + foreign demand + supply constraints</span>
+        <span class="lang-zh" style="display:none">BOJ於2024年3月終止NIRP（升至+0.10%），2025年1月再升至0.50%；東京公寓價格因日圓弱勢+外資需求+供給受限而屢創新高</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">BOJ Policy Rate</span><span class="lang-zh" style="display:none">BOJ政策利率</span></div>
+      <div class="kpi-value">0.50%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Jan 2025 hike</span><span class="lang-zh" style="display:none">2025年1月升息</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Urban Land Price Index YoY</span><span class="lang-zh" style="display:none">城市地價指數 YoY</span></div>
+      <div class="kpi-value">+9.8%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">6 Major Cities 2024</span><span class="lang-zh" style="display:none">六大都市2024年</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">CPI YoY</span><span class="lang-zh" style="display:none">通膨 YoY</span></div>
+      <div class="kpi-value">3.5%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Core ex-energy</span><span class="lang-zh" style="display:none">核心（不含能源）</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">0.1%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">2024 full year</span><span class="lang-zh" style="display:none">2024全年</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Unemployment</span><span class="lang-zh" style="display:none">失業率</span></div>
+      <div class="kpi-value">2.5%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Near full employment</span><span class="lang-zh" style="display:none">接近充分就業</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Avg Mortgage Rate</span><span class="lang-zh" style="display:none">平均房貸利率</span></div>
+      <div class="kpi-value">1.2%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Variable (est. 2025)</span><span class="lang-zh" style="display:none">浮動利率（2025估）</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">BOJ Rate Range (17yr)</span><span class="lang-zh" style="display:none">BOJ歷史區間</span></div>
+      <div class="ctx-val">−0.10%–0.50%</div>
+      <div class="ctx-sub"><span class="lang-en">NIRP: Feb 2016–Mar 2024 · High: 0.50% Jan 2025</span><span class="lang-zh" style="display:none">NIRP：2016年2月–2024年3月 · 高點：2025年1月0.50%</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Urban Land Price (6-City) Since 2008</span><span class="lang-zh" style="display:none">六大都市地價自2008累計</span></div>
+      <div class="ctx-val" style="color:#16a34a">+70%</div>
+      <div class="ctx-sub"><span class="lang-en">Declined 2008–12, then Abenomics reversal</span><span class="lang-zh" style="display:none">2008–12年下跌，安倍經濟學後逆轉</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+4.4% / −4.3%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2021 rebound · Worst: 2009 GFC</span><span class="lang-zh" style="display:none">最佳：2021反彈 · 最差：2009 GFC</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Tokyo Condo Price Peak</span><span class="lang-zh" style="display:none">東京公寓價格高峰</span></div>
+      <div class="ctx-val" style="color:#d97706">¥91M</div>
+      <div class="ctx-sub"><span class="lang-en">2024 avg new condo — 30-yr high (REINS)</span><span class="lang-zh" style="display:none">2024年新建公寓平均價——30年新高（REINS）</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × Property Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房產價格</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Japan is unique: BOJ maintained NIRP (−0.10%) from Feb 2016 to Mar 2024 — 8 years of negative rates. Despite deflationary pressure in the 2010s, urban property prices rose steadily from 2013 driven by Abenomics QQE (¥80tn/yr bond buying), weak yen driving inbound tourism/investment, and a structural supply constraint in central Tokyo. The Mar 2024 NIRP exit and Jan 2025 hike to 0.50% mark Japan's most significant policy shift in 25 years.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>日本獨特之處在於：BOJ從2016年2月至2024年3月維持NIRP（-0.10%）長達8年負利率。儘管2010年代存在通縮壓力，城市房產價格從2013年在安倍經濟學QQE（每年80兆日圓購債）、日圓弱勢帶動的入境觀光/投資，以及東京市中心結構性供給受限等因素驅動下穩步上漲。2024年3月終止NIRP及2025年1月升息至0.50%，標誌著日本25年來最重大的政策轉變。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">BOJ Policy Rate / Mortgage Rate / CPI / M2 vs Urban Land Price Index (2008–2025)</span>
+      <span class="lang-zh" style="display:none">BOJ政策利率 / 房貸利率 / CPI / M2 vs 都市地價指數（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × Property Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房產價格</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Japan's real GDP growth has been structurally anaemic — averaging 0.5%/yr since 2008. Yet urban property prices have risen, especially in Tokyo, driven by ultra-low borrowing costs and inbound capital rather than domestic income growth. Wage growth has finally turned positive in 2023–24 (Shunto +5.3% in 2024), a critical structural shift that, if sustained, could justify the ongoing price rally and BOJ normalisation path.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>日本實質GDP成長結構上長期疲弱——2008年以來平均僅0.5%/年。然而城市房產價格卻持續上漲，尤其是東京，主要由超低借貸成本和境外資金驅動，而非國內收入增長。2023–24年薪資成長終於轉正（2024年春鬥升幅+5.3%），這是一個關鍵的結構性轉變，若能持續，可為當前的房價上漲和BOJ正常化路徑提供支撐。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">GDP / Unemployment / Housing Loans vs Urban Land Price Index (2008–2025)</span>
+      <span class="lang-zh" style="display:none">GDP / 失業率 / 住宅貸款 vs 都市地價指數（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #6b7280">
+      <div class="ev-year" style="color:#6b7280"><span class="lang-en">2008–2009 · GFC SHOCK</span><span class="lang-zh" style="display:none">2008–2009 · GFC衝擊</span></div>
+      <div class="ev-title"><span class="lang-en">GDP −4.3%; Urban Land Prices Slide</span><span class="lang-zh" style="display:none">GDP衰退4.3%；都市地價滑落</span></div>
+      <div class="ev-desc"><span class="lang-en">Global financial crisis hits Japan hard — GDP contracts −4.3% in 2009, worst since WWII. BOJ holds near-zero (0.10%). Urban land prices fall −5% in 2008 and another −6% in 2009. The yen surges to 75/USD (safe haven), crushing export earnings. Japan's export-led economy disproportionately impacted vs domestic-demand markets.</span><span class="lang-zh" style="display:none">全球金融危機重創日本——2009年GDP衰退4.3%，為二戰以來最差。BOJ維持近零利率（0.10%）。都市地價2008年跌5%，2009年再跌6%。日圓升至75日圓/美元（避險），重創出口收益。日本出口導向型經濟受衝擊程度遠超內需主導型市場。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2010–2012 · DEFLATION STAGNATION</span><span class="lang-zh" style="display:none">2010–2012 · 通縮停滯</span></div>
+      <div class="ev-title"><span class="lang-en">CPI Negative; Mar 2011 Tōhoku Earthquake</span><span class="lang-zh" style="display:none">CPI為負；2011年3月東日本大地震</span></div>
+      <div class="ev-desc"><span class="lang-en">Japan trapped in deflationary spiral — CPI −0.7% avg 2010–12. Mar 2011 Tōhoku earthquake &amp; tsunami (magnitude 9.0) devastates NE Japan, causes Fukushima nuclear disaster. GDP falls −1.5% in 2011 but rebounds on reconstruction. Urban land prices stagnate. BOJ expands asset purchase program to ¥80tn. Yen remains strong (75–85/USD), making Tokyo assets cheap for foreign buyers.</span><span class="lang-zh" style="display:none">日本陷入通縮螺旋——2010–12年CPI平均-0.7%。2011年3月東日本大地震及海嘯（9.0級）重創東北，造成福島核電廠事故。GDP 2011年衰退1.5%，但因重建而反彈。都市地價停滯。BOJ擴大資產購買計劃至80兆日圓。日圓持續強勢（75–85日圓/美元），使東京資產對外國買家而言相對便宜。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">APR 2013 · ABENOMICS / QQE</span><span class="lang-zh" style="display:none">2013年4月 · 安倍經濟學/QQE</span></div>
+      <div class="ev-title"><span class="lang-en">BOJ Launches ¥80tn/yr QQE — Yen Weakens</span><span class="lang-zh" style="display:none">BOJ啟動每年80兆日圓QQE——日圓貶值</span></div>
+      <div class="ev-desc"><span class="lang-en">PM Abe launches "Three Arrows": fiscal stimulus, monetary easing (QQE), structural reform. BOJ under Kuroda commits to ¥80tn/yr bond buying (later expanded). Yen weakens from 80 to 125/USD by 2015. Nikkei nearly doubles 2013–15. Tokyo urban land prices begin multi-year ascent. Negative interest rate policy (NIRP at −0.10%) adopted Feb 2016 — further compresses mortgage rates.</span><span class="lang-zh" style="display:none">安倍首相推出「三支箭」：財政刺激、貨幣寬鬆（QQE）、結構改革。黑田日銀承諾每年購買80兆日圓國債（後進一步擴大）。日圓從80貶至2015年的125日圓/美元。日經指數2013–15年近乎翻倍。東京都市地價開始多年上升趨勢。2016年2月實施負利率政策（NIRP為-0.10%）——進一步壓低房貸利率。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">2020 · COVID LOCKDOWNS</span><span class="lang-zh" style="display:none">2020年 · COVID封鎖</span></div>
+      <div class="ev-title"><span class="lang-en">GDP −4.1%; BOJ Expands ETF/REIT Purchases</span><span class="lang-zh" style="display:none">GDP衰退4.1%；BOJ擴大ETF/REIT購買</span></div>
+      <div class="ev-desc"><span class="lang-en">Japan enters first recession since GFC — GDP −4.1% as tourism (pre-pandemic record 31.9M visitors) collapses to near zero. BOJ maintains NIRP, expands purchases of ETFs (¥12tn/yr) and J-REITs. Urban property prices hold +0.5% — minimal impact vs other markets. Remote work drives suburban demand. Tokyo vacancy remains tight.</span><span class="lang-zh" style="display:none">日本進入GFC以來首次衰退——GDP衰退4.1%，疫情前創紀錄的3190萬入境觀光客數字幾乎歸零。BOJ維持NIRP，擴大購買ETF（每年12兆日圓）及J-REIT。都市房產價格基本持平+0.5%，受衝擊遠低於其他市場。遠端工作帶動郊區需求，東京空置率持續偏緊。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2022–2023 · YEN CRASH + PROPERTY SURGE</span><span class="lang-zh" style="display:none">2022–2023 · 日圓暴跌+房產飆升</span></div>
+      <div class="ev-title"><span class="lang-en">Yen hits 150/USD; Tokyo Condos at 30-yr High</span><span class="lang-zh" style="display:none">日圓貶至150/USD；東京公寓創30年新高</span></div>
+      <div class="ev-desc"><span class="lang-en">While global central banks hike, BOJ holds YCC (yield curve control) — yen craters to 152/USD by Oct 2022, weakest since 1990. This makes Tokyo property extraordinarily cheap in USD/EUR terms. Foreign capital (HK, Taiwan, Singapore, US) floods into Tokyo residential. New condo prices in Tokyo surpass 1990 bubble-era highs. Inbound tourism fully recovers; hospitality REIT demand surges.</span><span class="lang-zh" style="display:none">全球央行升息之際，BOJ維持YCC（殖利率曲線控制）——日圓於2022年10月暴跌至152日圓/美元，為1990年以來最弱。這使東京房產以美元/歐元計算極為便宜。來自香港、台灣、新加坡、美國的外資大量湧入東京住宅市場。東京新建公寓價格超越1990年泡沫時代高點。入境旅遊全面復甦，酒店類REIT需求急升。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #8b5cf6">
+      <div class="ev-year" style="color:#8b5cf6"><span class="lang-en">MAR 2024 · END OF NIRP</span><span class="lang-zh" style="display:none">2024年3月 · NIRP終結</span></div>
+      <div class="ev-title"><span class="lang-en">BOJ Exits Negative Rates After 8 Years</span><span class="lang-zh" style="display:none">BOJ結束8年負利率時代</span></div>
+      <div class="ev-desc"><span class="lang-en">BOJ raises policy rate from −0.10% to +0.10% in Mar 2024 — ending the world's last negative interest rate experiment. YCC abolished. Shunto wage negotiations deliver +5.3% (largest in 33 years). BOJ hikes again to 0.25% in Jul 2024, then 0.50% in Jan 2025. Property prices continue rising — market prices in gradual normalisation, not rate shock. Mortgage rates still low relative to other markets.</span><span class="lang-zh" style="display:none">BOJ於2024年3月將政策利率從-0.10%升至+0.10%，終結全球最後一個負利率實驗。YCC廢除。春鬥薪資談判達成+5.3%漲幅（33年來最大）。BOJ於2024年7月再升至0.25%，2025年1月升至0.50%。房產價格持續上漲——市場定價反映漸進式正常化，而非利率衝擊。房貸利率相對其他市場仍低。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">2024 · AFFORDABILITY ALARM</span><span class="lang-zh" style="display:none">2024年 · 可負擔性警報</span></div>
+      <div class="ev-title"><span class="lang-en">Tokyo New Condo ¥91M — Price/Income Ratio 15×</span><span class="lang-zh" style="display:none">東京新建公寓9100萬日圓，房價/收入比達15倍</span></div>
+      <div class="ev-desc"><span class="lang-en">Average new condominium price in Greater Tokyo hits ¥91.6M (approx. A$870k / US$580k) — 15× average annual household income. Resale condo market also at record highs. First-time buyer market essentially closed in central Tokyo; buyers pushed to outer suburbs or give up ownership. Government considers restricting foreign purchases (no policy enacted yet).</span><span class="lang-zh" style="display:none">大東京區新建公寓平均價格達9160萬日圓（約58萬美元）——相當於家庭年收入的15倍。二手公寓市場亦創歷史新高。首次置業市場在東京市中心已近乎封閉，買家被迫前往郊區或放棄置業。政府考慮限制外資購房（目前尚未頒布政策）。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2025 · GRADUAL NORMALISATION</span><span class="lang-zh" style="display:none">2025年 · 漸進式正常化</span></div>
+      <div class="ev-title"><span class="lang-en">BOJ at 0.50%; Wage-Price Virtuous Cycle Forming</span><span class="lang-zh" style="display:none">BOJ升至0.50%；薪資-物價良性循環成形</span></div>
+      <div class="ev-desc"><span class="lang-en">Japan is in early Recovery/Expansion phase — the first sustainable inflation in 30 years (+3.5% core CPI). BOJ signals further gradual hikes (0.75%–1.0% by end 2025 market expectation). Wage growth +5%+ for second consecutive Shunto. Urban land prices continue rising — especially in central Tokyo, Osaka, and Fukuoka which benefit from inbound and domestic investment. Suburban/rural land prices still declining.</span><span class="lang-zh" style="display:none">日本處於復甦/擴張初期——30年來首次可持續通膨（核心CPI+3.5%）。BOJ釋出信號將進一步漸進式升息（市場預期2025年底達0.75%–1.0%）。春鬥薪資連續第二年漲幅+5%以上。都市地價持續上漲，尤其是受境內外投資雙重利多的東京市中心、大阪及福岡。郊區/農村地價仍持續下跌。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#16a34a;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#16a34a;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook — Recovery → Early Expansion</span><span class="lang-zh" style="display:none">當前週期展望 — 復甦→擴張初期</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">First sustainable wage-price cycle in 30 years — structural demand uplift</span><span class="lang-zh" style="display:none">30年來首次可持續薪資-物價循環，結構性提升需求</span></li>
+          <li><span class="lang-en">BOJ hiking gradually — mortgage rates still low (1%–2% vs 6%+ elsewhere)</span><span class="lang-zh" style="display:none">BOJ漸進式升息——房貸利率仍低（1%–2%，其他地區逾6%）</span></li>
+          <li><span class="lang-en">Yen weakness keeps Tokyo assets cheap in USD/EUR terms for foreigners</span><span class="lang-zh" style="display:none">日圓弱勢使東京資產以美元/歐元計算對外國人仍相對便宜</span></li>
+          <li><span class="lang-en">Record inbound tourism driving hospitality &amp; Airbnb demand</span><span class="lang-zh" style="display:none">創紀錄的入境旅遊推動住宿及民宿需求</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Yen reversal risk — rapid appreciation could reprice Tokyo assets sharply</span><span class="lang-zh" style="display:none">日圓反轉風險——日圓快速升值可能大幅重定東京資產價格</span></li>
+          <li><span class="lang-en">Demographics: shrinking population, 8.49M vacant homes (akiya) outside cities</span><span class="lang-zh" style="display:none">人口問題：人口萎縮，城外849萬棟空屋（空き家）</span></li>
+          <li><span class="lang-en">Government debt 260% of GDP — fiscal normalisation risk if rates keep rising</span><span class="lang-zh" style="display:none">政府債務達GDP的260%——若利率持續上升存在財政正常化風險</span></li>
+          <li><span class="lang-en">Construction cost inflation +30% since 2020 squeezing development margins</span><span class="lang-zh" style="display:none">建築成本通膨自2020年累升30%，擠壓開發利潤</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: BOJ (Policy Rate, Financial System Report · boj.or.jp), Ministry of Land Infrastructure Transport and Tourism (Urban Land Price Index, Real Estate Price Index · mlit.go.jp), Cabinet Office (GDP, SNA data · cao.go.jp), Statistics Bureau Japan (CPI, Unemployment · stat.go.jp), REINS (Tokyo condo transaction data). Urban Land Price Index (6 Major Cities residential) rebased. 2008–2012 CPI / unemployment from Statistics Bureau annual survey. Mortgage rate estimated from BOJ financial data.</span>
+    <span class="lang-zh" style="display:none">來源：BOJ（政策利率、金融系統報告 · boj.or.jp）、國土交通省（都市地價指數、不動產價格指數 · mlit.go.jp）、內閣府（GDP、SNA數據 · cao.go.jp）、總務省統計局（CPI、失業率 · stat.go.jp）、REINS（東京公寓交易數據）。都市地價指數（六大都市住宅）已重新基期化。2008–2012年CPI/失業率來自統計局年度調查。房貸利率從BOJ金融數據估算。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, BOJ / Cabinet Office / MLIT sources) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+/* Urban Land Price Index — 6 Major Cities (Residential), MLIT.
+   Base: 2000=100 normalised to show relative movement.
+   Confirmed trend: declined 2008–12, inflected 2013, accelerated 2016-2024.
+   Index values estimated from MLIT annual survey YoY% data. */
+var hpi = [82,76,73,72,70,72,77,82,88,96,104,108,110,116,126,141,158,165];
+
+/* Chart 1: Monetary Cycle */
+/* BOJ policy rate (year-end) — boj.or.jp */
+var bojRate = [0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,-0.10,-0.10,-0.10,-0.10,-0.10,-0.10,-0.10,0.10,0.25,0.50];
+/* Average new mortgage rate (variable, estimated) — BOJ financial data */
+var mortRate = [2.85,2.80,2.70,2.60,2.50,2.40,2.30,1.80,0.80,0.65,0.63,0.62,0.60,0.55,0.60,0.70,0.90,1.20];
+/* CPI YoY% — Statistics Bureau Japan */
+var cpiYoy = [1.4,-1.4,-0.7,-0.3,-0.1,0.4,2.7,0.8,-0.1,0.5,1.0,0.5,-0.1,-0.2,2.5,3.3,2.7,3.5];
+/* M2 YoY% — BOJ money supply statistics */
+var m2Growth = [2.2,2.8,2.9,2.8,2.1,3.5,3.1,3.3,3.3,3.6,2.7,2.7,8.0,4.2,3.0,2.0,1.2,1.8];
+
+/* Chart 2: Real Economy */
+/* GDP YoY% — Cabinet Office national accounts */
+var gdpGrowth = [-1.0,-4.3,3.7,-1.5,1.4,2.0,-0.4,1.5,0.8,1.6,0.6,-0.7,-4.1,2.1,1.0,1.9,0.1,1.2];
+/* Unemployment % — Statistics Bureau (Labour Force Survey) */
+var unempRate = [4.0,5.1,5.1,4.6,4.3,4.0,3.6,3.4,3.1,2.8,2.4,2.4,2.8,2.8,2.6,2.6,2.5,2.5];
+/* Housing loan growth YoY% — BOJ Financial System Report (estimated) */
+var housingLoan = [2.0,1.0,1.5,2.0,2.5,3.5,4.5,3.5,3.5,3.8,3.5,3.0,3.5,2.5,2.0,2.0,2.5,2.8];
+/* Inbound tourist growth YoY% (pre-2019 and post-2022) — scaled for chart */
+var touristGrowth = [0,null,null,null,10,24,29,47,22,19,9,-14,-87,-2,103,145,47,20];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × Urban Land Price ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC Shock',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'通縮停滯':'Deflation Stagnation',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2012'}],
+    [{xAxis:'2013',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'安倍經濟學':'Abenomics/QQE',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(37,99,235,0.07)'},label:{formatter:isZh?'COVID寬鬆':'COVID',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'復甦/擴張':'Recovery/Expansion',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2013',label:{formatter:isZh?'安倍QQE':'Abe QQE',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}},
+    {xAxis:'2016',label:{formatter:isZh?'NIRP開始':'NIRP Starts',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'COVID':'COVID',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2024',label:{formatter:isZh?'NIRP終結':'NIRP Exit',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-2,max:10,interval:2,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:60,max:200,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'地價指數':'Land Price Idx',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'BOJ政策利率':'BOJ Policy Rate',type:'line',data:bojRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'平均房貸利率':'Avg Mortgage Rate',type:'line',data:mortRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpiYoy,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'M2 YoY%':'M2 YoY%',type:'line',data:m2Growth,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'都市地價指數':'Urban Land Price Idx',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy × Land Price ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gdpBarData = gdpGrowth.map(function(v){return {value:v,itemStyle:{color:v>=0?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC':'GFC',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2013',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'安倍經濟學':'Abenomics',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(37,99,235,0.07)'},label:{formatter:isZh?'COVID':'COVID',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'復甦/擴張':'Recovery',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData2 = [
+    {xAxis:'2011',label:{formatter:isZh?'東日本大地震':'Tōhoku EQ',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#6b7280',type:'dashed',width:1}},
+    {xAxis:'2013',label:{formatter:isZh?'安倍QQE':'Abe QQE',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'COVID':'COVID',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2024',label:{formatter:isZh?'NIRP終結':'NIRP Exit',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.orange,type:'dashed',width:1}}
+  ];
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:-10,max:10,interval:2,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:60,max:200,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'地價指數':'Land Price Idx',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GDP YoY%':'GDP YoY%',type:'bar',data:gdpBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'失業率%':'Unemployment%',type:'line',data:unempRate,yAxisIndex:0,lineStyle:{color:C.red,width:1.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'住宅貸款YoY%':'Housing Loan%',type:'line',data:housingLoan,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'都市地價指數':'Urban Land Price Idx',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2},markLine:{silent:true,symbol:'none',data:markLineData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

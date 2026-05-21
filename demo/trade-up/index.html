@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Mr. Chen uses Property Monitor to Trade Up — Sell Hsinchu, Buy Taipei | Walkthrough | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="../../css/style.css">
+<style>
+.lang-zh{display:none}
+
+/* ── Persona Card ── */
+.persona-card{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#e2ecf8;border-radius:8px;padding:26px 28px;margin:0 0 24px;position:relative;overflow:hidden}
+.persona-card::after{content:'🇹🇼';position:absolute;top:-20px;right:-10px;font-size:140px;opacity:.06}
+.persona-card .pc-eyebrow{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.persona-card .pc-title{font-size:22px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:8px;letter-spacing:-.01em}
+.persona-card .pc-tag{font-size:13px;color:#a8c0d8;line-height:1.6;max-width:780px;margin-bottom:18px}
+.pc-profile{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);margin-bottom:14px}
+.pc-profile-item .lbl{font-size:9px;letter-spacing:.10em;color:#5a8ab5;font-weight:600;text-transform:uppercase}
+.pc-profile-item .val{font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-weight:500;margin-top:3px}
+.pc-questions{font-size:11.5px;line-height:1.65;color:#a8c0d8}
+.pc-questions strong{color:#f59e0b;font-weight:600;display:block;margin-bottom:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pc-questions ol{margin:0;padding:0 0 0 18px}
+.pc-questions li{margin-bottom:3px}
+
+/* Context banner — BLUE */
+.context-banner{background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:1.5px solid #2563eb;border-radius:8px;padding:14px 18px;margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+.context-banner .cb-icon{font-size:24px;line-height:1;margin-top:2px}
+.context-banner .cb-text{font-size:12.5px;color:#1e3a5f;line-height:1.55}
+.context-banner .cb-text strong{color:#1d4ed8;font-weight:700;display:block;margin-bottom:3px;font-size:13px}
+
+/* Phase badge */
+.phase-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:8px}
+.phase-a{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.phase-b{background:#fef9ee;color:#b45309;border:1px solid #fcd34d}
+.phase-c{background:#f0fdf4;color:#15803d;border:1px solid #86efac}
+.phase-d{background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5}
+
+/* ── Section heading ── */
+.demo-section{margin:32px 0 8px}
+.demo-section .sec-no{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:.08em}
+.demo-section h2{font-size:18px;font-weight:700;color:#1e3a5f;line-height:1.3;margin:2px 0 4px;letter-spacing:-.005em}
+.demo-section .sec-sub{font-size:12px;color:#5a7a9a;line-height:1.6;max-width:780px}
+
+/* ── Demo Step ── */
+.demo-step{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:36px 1fr;gap:16px}
+.demo-step .step-no{width:32px;height:32px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;font-family:'JetBrains Mono',monospace}
+.demo-step .step-content h4{font-size:14px;font-weight:600;color:#1e3a5f;margin-bottom:4px;line-height:1.35}
+.demo-step .step-url{font-family:'JetBrains Mono',monospace;font-size:11px;margin-bottom:10px}
+.demo-step .step-url a{color:#2563eb;text-decoration:none}
+.demo-step .step-url a:hover{text-decoration:underline}
+.demo-step .step-action{background:#eff6ff;border-left:3px solid #2563eb;padding:9px 12px;font-size:11.5px;color:#1e3a5f;line-height:1.6;margin-bottom:10px;border-radius:0 4px 4px 0}
+.demo-step .step-action strong{color:#1e3a5f;font-weight:600;display:inline-block;margin-right:4px}
+.demo-step .step-see{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:8px}
+.demo-step .step-see strong{color:#1e3a5f;font-weight:600}
+.demo-step .step-meaning{background:#fffbeb;border-left:3px solid #d97706;padding:9px 12px;font-size:11.5px;color:#78350f;line-height:1.6;margin-top:6px;border-radius:0 4px 4px 0}
+.demo-step .step-meaning strong{color:#92400e;font-weight:600}
+.demo-step .step-screenshot{background:#f4f7fc;border:1px solid #ccd9e8;border-radius:4px;margin-top:12px;overflow:hidden;line-height:0}
+.demo-step .step-screenshot img{display:block;width:100%;height:auto}
+
+/* ── Cheat sheet ── */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.cheat-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:14px 18px}
+.cheat-card h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cheat-card .ck-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#eef3f9;color:#1e3a5f;font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.cheat-card p{font-size:11.5px;color:#4a6080;line-height:1.6}
+.cheat-card .ck-tip{margin-top:6px;font-size:11px;color:#5a7a9a;font-style:italic}
+.cheat-card code{background:#eef3f9;color:#1e3a5f;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px}
+
+/* ── Color code legend ── */
+.color-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.color-legend .cl-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#4a6080;background:#f4f7fc;padding:6px 10px;border-radius:3px}
+.color-legend .cl-dot{width:10px;height:10px;border-radius:50%}
+.color-legend .cl-green{background:#16a34a}
+.color-legend .cl-orange{background:#d97706}
+.color-legend .cl-red{background:#dc2626}
+.color-legend .cl-blue{background:#2563eb}
+
+/* ── Takeaway box ── */
+.takeaway{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.takeaway-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px}
+.takeaway-card.answered{border-left:4px solid #16a34a}
+.takeaway-card.outsource{border-left:4px solid #d97706}
+.takeaway-card h4{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;letter-spacing:-.005em}
+.takeaway-card ul{list-style:none;padding:0;margin:0}
+.takeaway-card li{font-size:12px;color:#4a6080;line-height:1.6;padding:5px 0 5px 22px;position:relative}
+.takeaway-card.answered li::before{content:'✓';position:absolute;left:0;top:5px;color:#16a34a;font-weight:700}
+.takeaway-card.outsource li::before{content:'→';position:absolute;left:0;top:5px;color:#d97706;font-weight:700}
+.takeaway-card li strong{color:#1e3a5f;font-weight:600}
+
+/* ── PDF button ── */
+.pdf-bar{display:flex;gap:10px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap}
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;background:#1e3a5f;color:#fff;border:none;padding:12px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{background:#0f1e33}
+.pdf-btn.ghost{background:#fff;color:#1e3a5f;border:1px solid #ccd9e8}
+.pdf-btn.ghost:hover{border-color:#1e3a5f}
+
+/* ── Best Option Block ── */
+.best-option{margin:6px 0 16px}
+.bo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.bo-card{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #d97706;border-radius:4px;padding:14px 16px}
+.bo-card .bo-lbl{font-size:9px;letter-spacing:.1em;color:#5a7a9a;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.bo-card .bo-val{font-size:14px;font-weight:600;color:#1e3a5f;line-height:1.35;margin-bottom:6px;letter-spacing:-.005em}
+.bo-card .bo-note{font-size:11px;color:#5a7a9a;line-height:1.5}
+.bo-section{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:16px 20px;margin-bottom:10px}
+.bo-section h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:10px;line-height:1.35}
+.bo-checklist ul,.bo-next ol{margin:0;padding-left:18px}
+.bo-checklist li,.bo-next li{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:6px}
+.bo-bottomline{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#fff;border-radius:6px;padding:20px 24px;margin-top:14px}
+.bo-bottomline .bo-bl-label{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;display:block;margin-bottom:8px;text-transform:uppercase}
+.bo-bottomline p{font-size:14px;line-height:1.6;color:#fff;margin:0}
+@media (max-width:720px){.bo-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Print ── */
+@media print {
+  @page{size:A4;margin:14mm}
+  body{background:#fff!important}
+  #nav-root,.lang-switcher,.pdf-bar,.demo-back{display:none!important}
+  .bo-grid{grid-template-columns:repeat(4,1fr)!important}
+  .bo-bottomline{background:#1e3a5f!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .container{max-width:100%!important;padding:0!important}
+  .persona-card,.demo-step,.cheat-card,.takeaway-card,.context-banner{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  .persona-card::after{display:none}
+  .demo-section{break-after:avoid;page-break-after:avoid}
+  a{color:#1e3a5f!important;text-decoration:none}
+}
+
+@media (max-width:760px){
+  .pc-profile{grid-template-columns:repeat(2,1fr);gap:10px}
+  .demo-step{grid-template-columns:1fr;gap:10px}
+  .demo-step .step-no{margin-bottom:-4px}
+  .persona-card{padding:20px 18px}
+  .persona-card .pc-title{font-size:18px}
+  .cheat-grid,.takeaway,.color-legend{grid-template-columns:1fr}
+  .context-banner{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="container">
+
+  <!-- Breadcrumb -->
+  <div class="demo-back" style="font-size:11px;color:#5a7a9a;margin-bottom:12px;font-family:'JetBrains Mono',monospace">
+    <a href="/demo/" style="color:#2563eb;text-decoration:none">← <span class="lang-en">All walkthroughs</span><span class="lang-zh">所有導覽</span></a>
+    <span style="color:#aabdd4;margin:0 8px">/</span>
+    <span><span class="lang-en">Mr. Chen trades up — sell Hsinchu, buy Taipei</span><span class="lang-zh">陳先生換屋：賣新竹、買台北</span></span>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- CONTEXT BANNER — BLUE                           -->
+  <!-- ============================================== -->
+  <div class="context-banner">
+    <div class="cb-icon">&#8645;</div>
+    <div class="cb-text">
+      <strong>
+        <span class="lang-en">This is the only walkthrough that is both sell-side AND buy-side. Mr. Chen sells his Hsinchu unit (Phase B) and buys a Taipei unit (Phase C) in close sequence.</span>
+        <span class="lang-zh" style="display:none">這是唯一一份同時涵蓋賣方與買方的導覽。陳先生先賣出新竹房（Phase B），再買入台北房（Phase C），兩步驟緊接進行。</span>
+      </strong>
+      <span class="lang-en">The <strong>5-year self-occupied 房地合一稅 cliff</strong> and <strong>CBC's 2nd-home LTV rules</strong> are the two silent pillars of trade-up timing. He has held 10 years — safely in the lower tax bracket. But if he buys Taipei before completing the Hsinchu sale, the bank may classify Taipei as a 2nd home, triggering a lower LTV ceiling and higher rate. Always confirm both with a TW mortgage broker and 會計師 before signing anything.</span>
+      <span class="lang-zh" style="display:none"><strong>房地合一稅自住 5 年門檻</strong>與<strong>央行第二戶 LTV 規定</strong>是換屋時機的兩大隱形支柱。他已持有 10 年，安全落在較低稅率區間。但若在新竹完成交割前先買台北，銀行可能將台北認定為第二戶，觸發較低的房貸成數上限與較高利率。簽約前，務必先與台灣房貸仲介及會計師確認這兩點。</span>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 1 — PERSONA CARD                        -->
+  <!-- ============================================== -->
+  <div class="persona-card">
+    <div class="pc-eyebrow"><span class="lang-en">USE CASE WALKTHROUGH · 11 · A SITE TOUR THROUGH MR. CHEN'S EYES</span><span class="lang-zh">情境導覽 · 11 · 跟著陳先生逛這個網站</span></div>
+    <div class="pc-title">
+      <span class="lang-en">Meet Mr. Chen — a TSMC engineer trading up: selling Hsinchu (10yr hold), buying Taipei (4-bed, NT$45M target)</span>
+      <span class="lang-zh">認識陳先生 — 台積電工程師換屋：賣新竹（持有10年），買台北（4房，目標NT$45M）</span>
+    </div>
+    <p class="pc-tag">
+      <span class="lang-en">Mr. Chen (45, Hsinchu, TSMC senior engineer) bought his 3-bed Hsinchu condo in 2015 for NT$12M — it is now worth roughly NT$25M. Two kids (ages 10 &amp; 12) are outgrowing the unit and need a better Taipei school district. His plan: sell Hsinchu (remaining mortgage ~NT$5M, so net equity ~NT$20M cash) then buy a 4-bed Taipei unit around NT$45M, taking a new mortgage of ~NT$25M. He is <strong>both a seller and a buyer</strong> — the only persona on this site doing a full two-step transaction. This walkthrough shows him exactly <strong>which page to open, what to click, and how each tool relates to his specific trade-up situation</strong>. It is not investment advice, tax advice, or property recommendations.</span>
+      <span class="lang-zh">陳先生，45歲，新竹台積電資深工程師，2015年以NT$1,200萬買入新竹3房，現值約NT$2,500萬。兩個孩子（10歲、12歲）已漸漸嫌小，他們想要更好的台北學區和更大的空間。計畫：賣掉新竹（剩餘房貸約NT$500萬，淨權益約NT$2,000萬現金）後，購入台北4房約NT$4,500萬，需新貸款約NT$2,500萬。他是<strong>賣家也是買家</strong>，本站唯一進行完整兩步驟交易的使用者。本導覽示範<strong>他該先打開哪頁、點什麼、每個工具如何對應他的換屋情境</strong>。本文不是投資建議、稅務建議或不動產推薦。</span>
+    </p>
+
+    <div class="pc-profile">
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Profile</span><span class="lang-zh">基本資料</span></div><div class="val">Mr. Chen · 45y · Hsinchu</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Sell (Hsinchu)</span><span class="lang-zh">出售（新竹）</span></div><div class="val">~NT$25M · held 10y</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Buy (Taipei)</span><span class="lang-zh">購入（台北）</span></div><div class="val">~NT$45M target</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">New Mortgage</span><span class="lang-zh">新房貸</span></div><div class="val">~NT$25M needed</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Tax bracket</span><span class="lang-zh">稅率區間</span></div><div class="val">10y hold — lower</div></div>
+    </div>
+
+    <div class="pc-questions">
+      <strong><span class="lang-en">Questions Mr. Chen came to answer</span><span class="lang-zh">陳先生想在這個網站找到答案的問題</span></strong>
+      <ol>
+        <li><span class="lang-en">Where do I check if Hsinchu has peaked — is now a good time to sell?</span><span class="lang-zh">去哪裡確認新竹是否已到頂，現在是好的出售時機嗎？</span></li>
+        <li><span class="lang-en">Where do I compare Taipei vs New Taipei for the upgrade target?</span><span class="lang-zh">去哪裡比較台北和新北，作為換屋目標的選擇？</span></li>
+        <li><span class="lang-en">What does my Hsinchu sale net me after 房地合一稅 and agent fees — 10-year self-occupied bracket?</span><span class="lang-zh">新竹賣掉後扣除房地合一稅和仲介費，我能拿到多少？（自住10年稅率區間）</span></li>
+        <li><span class="lang-en">What does my Taipei purchase actually cost me end-to-end (acquisition costs + holding costs)?</span><span class="lang-zh">台北的購入實際上從頭到尾要花多少錢（取得成本＋持有成本）？</span></li>
+        <li><span class="lang-en">Can I handle the new ~NT$25M mortgage if CBC raises rates?</span><span class="lang-zh">如果央行升息，我能承受新的約NT$2,500萬房貸嗎？</span></li>
+        <li><span class="lang-en">What is the LTV trap if I buy Taipei before selling Hsinchu — the 2nd-home rules?</span><span class="lang-zh">如果在賣掉新竹前先買台北，「第二戶」規定的成數陷阱是什麼？</span></li>
+        <li><span class="lang-en">How do I switch the site to 中文? Where do I download a PDF?</span><span class="lang-zh">怎麼切換到中文？怎麼下載 PDF？</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 2 — 12-STOP JOURNEY                     -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 02</div>
+    <h2><span class="lang-en">Mr. Chen's click-by-click tour — 12 stops across 4 phases</span><span class="lang-zh">陳先生的逐步點擊旅程 — 4個階段共12個停靠點</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">Phase A (should I trade up at all?) → Phase B (sell-side: Hsinchu exit) → Phase C (buy-side: Taipei target) → Phase D (risks specific to trade-up). Every URL is a real page — open in another tab and follow along.</span>
+      <span class="lang-zh">Phase A（該不該換屋？）→ Phase B（賣方：新竹出場）→ Phase C（買方：台北目標）→ Phase D（換屋特有風險）。每個網址都是真實頁面，建議另開分頁跟著走。</span>
+    </p>
+  </div>
+
+  <!-- ── PHASE A ── -->
+
+  <!-- STOP 1 — Home persona -->
+  <div class="demo-step">
+    <div class="step-no">1</div>
+    <div class="step-content">
+      <div class="phase-badge phase-a"><span class="lang-en">Phase A — Should I trade up at all?</span><span class="lang-zh">Phase A — 該不該換屋？</span></div>
+      <h4><span class="lang-en">Home page — pick the "I want growth" persona to orient the site toward capital appreciation</span><span class="lang-zh">首頁 — 選「我要增值」persona，讓網站導向資本增值框架</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">opens the home page, scrolls past the dark hero, sees three persona cards and clicks <strong>"I want growth / 我要增值"</strong> — because his goal is Taipei capital appreciation over the next decade, not rental yield.</span>
+        <span class="lang-zh">打開首頁，捲過深色 hero，看到三張 persona 卡，點 <strong>「我要增值 / I want growth」</strong> — 因為他的目標是台北未來十年的資本增值，不是租金收益。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> the "I want growth" card activates amber. The scatter chart below reweights toward cities with strong 10-year appreciation histories — Taiwan cities (especially Taipei and Hsinchu) appear prominently in the growth-weighted view, validating both his existing asset and his target city.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>「我要增值」卡變琥珀色亮起。下方的散點圖重新排序，凸顯10年漲幅強勁的城市 — 台灣城市（尤其台北和新竹）在增值視角下顯眼排前，同時印證他的現有資產和目標城市。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen:</span><span class="lang-zh">對陳先生：</span></strong> <span class="lang-en">unlike a first-time buyer primarily concerned with affordability, Mr. Chen is asking "is the Taipei upgrade worth the cost delta?" The growth persona reweights the entire site toward this lens. If Taipei shows compelling 10-year appreciation vs Hsinchu, the upgrade price gap can be justified. If not, he might stay put and invest the equity elsewhere. This is his starting hypothesis test.</span><span class="lang-zh">與主要考量負擔能力的首購族不同，陳先生在問的是「台北的換屋增值潛力值得多付那些錢嗎？」增值 persona 讓全站都朝這個角度重新排序。若台北的10年漲幅明顯優於新竹，換屋的價差就有依據；若不然，他可以考慮守住現有資產並把權益投入其他標的。這是他的起點假設驗證。</span></div>
+      <div class="step-screenshot"><img src="img/01-home-growth.png" alt="Home page with growth persona active" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 2 — TW Report: read the cycle -->
+  <div class="demo-step">
+    <div class="step-no">2</div>
+    <div class="step-content">
+      <div class="phase-badge phase-a"><span class="lang-en">Phase A — Should I trade up at all?</span><span class="lang-zh">Phase A — 該不該換屋？</span></div>
+      <h4><span class="lang-en">Taiwan long-form report — gauge the cycle: am I selling at a peak AND buying at a peak?</span><span class="lang-zh">台灣長篇報告 — 判斷市場週期：我是在高點賣、也在高點買嗎？</span></h4>
+      <div class="step-url"><a href="/tw/report.html">myproperty.investmquest.com/tw/report</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">navbar 🇹🇼 dropdown → <strong>Report / 報告</strong>. He reads the Executive Summary first for the overall thesis, then jumps to the <em>Valuation</em> and <em>City chapters</em> (Hsinchu, Taipei). He is specifically looking for: (1) whether Hsinchu has peaked — good for selling; (2) whether Taipei is entering a consolidation or still has runway — relevant for buying.</span>
+        <span class="lang-zh">navbar 🇹🇼 下拉 → <strong>Report / 報告</strong>。先讀執行摘要，掌握整體論點，再跳到<em>估值</em>和<em>城市章節</em>（新竹、台北）。他特別在找：(1) 新竹是否已到頂（有利出售）；(2) 台北是否進入整固，還是仍有空間（攸關買入決策）。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> the report has named sections — Executive Summary, Policy Impact (CBC 7th wave credit controls), Supply, Demand, Valuation, City chapters. The Valuation section compares PIR trends across cities; the Hsinchu chapter discusses TSMC-driven premium and whether the appreciation wave has plateaued; the Taipei chapter discusses district-level pricing and relative affordability. The demand section notes structural demand (upgraders, school-district driven) remains even as speculative demand has been structurally removed by 房地合一稅 2.0.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>報告有多個章節 — 執行摘要、政策衝擊（央行第七波信用管制）、供給、需求、估值、城市章節。估值章節比較各城市的房價所得比趨勢；新竹章節討論台積電溢價是否已趨緩；台北章節討論行政區層級的房價和相對負擔能力。需求章節指出，在房地合一稅2.0結構性消除投機需求後，換屋和學區需求等結構性需求仍然持續。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — the unique two-sided read:</span><span class="lang-zh">對陳先生 — 獨特的雙向閱讀：</span></strong> <span class="lang-en">most buyers read the report with one question: "is now a good time to buy?" Mr. Chen has to read it with two: "is now a good time to sell Hsinchu?" AND "is now a good time to buy Taipei?" If both markets are at cycle peaks, he's doing a symmetric trade — selling high, buying high. The question then becomes whether Taipei's <em>relative</em> value vs Hsinchu justifies the upgrade cost. The report's city chapters give him the thesis for both cities before he drills into the data pages.</span><span class="lang-zh">大多數買家讀報告只問一個問題：「現在是買進的好時機嗎？」陳先生需要問兩個：「現在是賣出新竹的好時機嗎？」以及「現在是買入台北的好時機嗎？」若兩個市場都在週期高點，他在做的是對稱性交易 — 高價賣、高價買。問題就成為：台北相對新竹的價值，是否足以合理化換屋成本差額？報告的城市章節在他深入各資料頁之前，先給他兩座城市的整體論點。</span></div>
+      <div class="step-screenshot"><img src="img/02-tw-report.png" alt="TW Market Report with Executive Summary and city chapters" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ── PHASE B ── -->
+
+  <!-- STOP 3 — Hsinchu city page -->
+  <div class="demo-step">
+    <div class="step-no">3</div>
+    <div class="step-content">
+      <div class="phase-badge phase-b"><span class="lang-en">Phase B — Sell-side: Hsinchu exit</span><span class="lang-zh">Phase B — 賣方：新竹出場</span></div>
+      <h4><span class="lang-en">Hsinchu city page — read the current market for his unit: price index, TSMC demand signal, supply</span><span class="lang-zh">新竹城市頁 — 了解他的物件目前市況：房價指數、台積電需求訊號、供給</span></h4>
+      <div class="step-url"><a href="/tw/hsinchu.html">myproperty.investmquest.com/tw/hsinchu</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">navbar 🇹🇼 → <strong>Hsinchu / 新竹</strong>. He reads the KEY METRICS at the top (5Y appreciation, TSMC Effect KPI, Zhubei peak indicator), then scrolls to the KEY ZONES section to locate his condo in the right sub-market tier, then reviews the 5Y Price Trend chart and the HSP (Hsinchu Science Park) Investment Trend chart.</span>
+        <span class="lang-zh">navbar 🇹🇼 → <strong>Hsinchu / 新竹</strong>。讀最上方的 KEY METRICS（5年漲幅、台積電效應 KPI、竹北高點指標），再捲到 KEY ZONES 確認他的公寓屬於哪個次市場層級，最後看5年房價趨勢圖和竹科投資趨勢圖。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong><br>
+        ▸ <strong>KEY METRICS</strong> — Hsinchu Avg Price, 5Y Appreciation, TSMC Effect KPI, Rental Yield, Median Multiple, Zhubei Peak indicator. The 5Y Appreciation figure tells him how much of his NT$13M gain is driven by structural demand vs rate cycle.<br>
+        ▸ <strong>KEY ZONES</strong> — Zhubei (closest to HSP, highest per-ping), Hsinchu City (mid-tier), Hsinchu County (suburban). His 2015 purchase in a TSMC-adjacent zone likely falls in the Zhubei or Hsinchu City tier.<br>
+        ▸ <strong>HSP Investment Trend chart</strong> — is TSMC capex still accelerating? A plateau or decline in HSP investment is a leading signal that the TSMC demand wave that drove Hsinchu prices may be maturing — a seller's timing cue.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong><br>
+        ▸ <strong>KEY METRICS</strong> — 新竹均價、5年漲幅、台積電效應 KPI、租金收益率、房價所得比、竹北高點。5年漲幅數字能讓他判斷NT$1,300萬的獲利有多少來自結構性需求、有多少來自利率週期。<br>
+        ▸ <strong>KEY ZONES</strong> — 竹北（最近竹科、每坪最高）、新竹市（中階）、新竹縣（郊區）。他2015年在台積電周邊購入，很可能落在竹北或新竹市層級。<br>
+        ▸ <strong>竹科投資趨勢圖</strong> — 台積電資本支出是否仍在加速？竹科投資趨緩或下滑，是帶動新竹漲價的台積電需求浪可能趨於成熟的領先訊號 — 是賣方的時機線索。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — reading Hsinchu as a seller:</span><span class="lang-zh">對陳先生 — 以賣家角度讀新竹：</span></strong> <span class="lang-en">a buyer reads the Hsinchu page asking "is there still upside?" — a seller reads it asking "has it peaked, and is supply building?" The same charts answer opposite questions depending on your position. The HSP Investment chart is the most actionable sell-side signal: when TSMC's Hsinchu capex plateaus and new supply from presale completions hits the market, the TSMC premium that drove his property from NT$12M to NT$25M could erode. Selling before a supply surge is the rational exit timing.</span><span class="lang-zh">買家看新竹頁是在問「還有多少上漲空間？」賣家看同一頁是在問「是否已到頂，供給是否在增加？」同樣的圖表，根據你的立場回答截然相反的問題。竹科投資趨勢圖是最可操作的賣方訊號：當台積電在新竹的資本支出趨緩，加上預售案交屋供給涌入市場，讓他的房產從NT$1,200萬漲到NT$2,500萬的台積電溢價可能開始消蝕。在供給浪潮前賣出，才是理性的出場時機。</span></div>
+      <div class="step-screenshot"><img src="img/03-tw-hsinchu.png" alt="Hsinchu city page with KEY METRICS, KEY ZONES, and HSP Investment Trend" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 4 — Cost Calculator: Hsinchu exit -->
+  <div class="demo-step">
+    <div class="step-no">4</div>
+    <div class="step-content">
+      <div class="phase-badge phase-b"><span class="lang-en">Phase B — Sell-side: Hsinchu exit</span><span class="lang-zh">Phase B — 賣方：新竹出場</span></div>
+      <h4><span class="lang-en">Cost Calculator — Hsinchu exit: 房地合一稅 bracket for 10-year self-occupied holder, plus seller agent fee</span><span class="lang-zh">成本計算機 — 新竹出場：10年自住持有人的房地合一稅稅率，加上賣方仲介費</span></h4>
+      <div class="step-url"><a href="/tools/cost-calculator.html">myproperty.investmquest.com/tools/cost-calculator</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Cost Calc</strong>. He clicks <strong>🇹🇼 TW</strong>, toggles Resident Status to <strong>Resident / Citizen</strong>, sets Holding Horizon to <strong>10y</strong>, and enters a Property Price matching his Hsinchu current value (~NT$25M). He focuses on the <strong>Exit table</strong> — specifically the 房地合一稅 (CGT) row and the seller agent fee row.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Cost Calc</strong>。點 <strong>🇹🇼 TW</strong>，Resident Status 切 <strong>Resident / Citizen</strong>，Holding Horizon 設 <strong>10y</strong>，輸入新竹現值物件價格（約NT$2,500萬）。他的重點是<strong>Exit（退出）表</strong> — 特別是房地合一稅那行和賣方仲介費那行。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees — the 房地合一稅 cliff explained in the Exit table:</strong><br>
+        The Exit table shows CGT brackets by hold duration. For a 10-year self-occupied holder, Mr. Chen is in the most favorable tax bracket — the tool shows the applicable rate for long self-occupied hold vs the sharp cliff at shorter durations:<br>
+        ▸ &lt;2yr hold: 45% CGT on gain<br>
+        ▸ 2–5yr hold: 35% CGT on gain<br>
+        ▸ &gt;5yr self-occupied: lower bracket (the specific rate the tool shows for his inputs)<br>
+        The calculator also shows seller agent fee (typically ~2% of transaction price) and any other exit costs. The hero KPI "NET PROCEEDS AT EXIT" shows his estimated take-home after all exit costs are applied to the NT$25M sale price.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼 — Exit 表說明房地合一稅斷崖：</strong><br>
+        Exit 表依持有期間顯示 CGT 稅率級距。對於自住持有10年的陳先生，他落在最優惠的稅率區間 — 工具顯示長期自住持有適用的稅率，同時對比較短持有期的明顯斷崖：<br>
+        ▸ 持有未滿2年：獲利的45% CGT<br>
+        ▸ 持有2–5年：獲利的35% CGT<br>
+        ▸ 自住持有超過5年：較低級距（工具依他的輸入條件顯示適用稅率）<br>
+        計算機也顯示賣方仲介費（通常約為成交價2%）及其他退出成本。最上方「NET PROCEEDS AT EXIT」的 KPI 數字，是扣除所有退出成本後，他從NT$2,500萬出售能拿到手的估算金額。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — the 5-year cliff is his silent windfall:</span><span class="lang-zh">對陳先生 — 5年門檻是他的隱形紅利：</span></strong> <span class="lang-en">he bought in 2015 and is now (2026) 11 years into ownership. His 10-year hold puts him firmly in the lower self-occupied CGT bracket. Had he sold in 2019 (4 years after purchase), he would have been in the 35% bracket — on a NT$13M gain, that bracket difference alone represents several million NT$ more in tax. <strong>New 5-year holders in a similar position should be especially attentive to this cliff — crossing the 5-year self-occupied threshold changes their exit economics dramatically.</strong> The calculator makes this concrete and quantified, not abstract.</span><span class="lang-zh">他2015年買入，現在（2026年）已持有11年。10年持有讓他穩穩落在較低的自住稅率區間。若他在2019年出售（持有4年），將落在35%級距 — 光是這個級距差異，在NT$1,300萬的獲利上就代表多繳好幾百萬元的稅。<strong>同樣情況但只持有接近5年的屋主，應特別注意這個門檻 — 跨越5年自住門檻，出場的稅後收益會大幅改變。</strong>計算機讓這個差異具體量化，不再抽象。</span></div>
+      <div class="step-screenshot"><img src="img/04-cost-calc-hsinchu-exit.png" alt="Cost Calculator TW / Resident / 10y showing Exit table with CGT bracket" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 5 — TW Valuation: is Hsinchu peak-valued? -->
+  <div class="demo-step">
+    <div class="step-no">5</div>
+    <div class="step-content">
+      <div class="phase-badge phase-b"><span class="lang-en">Phase B — Sell-side: Hsinchu exit</span><span class="lang-zh">Phase B — 賣方：新竹出場</span></div>
+      <h4><span class="lang-en">Valuation page — is Hsinchu peak-valued? P/R ratio and Mortgage Burden Rate signal seller's advantage</span><span class="lang-zh">估值頁 — 新竹估值是否已到頂？P/R 比和房貸負擔率傳遞賣方優勢訊號</span></h4>
+      <div class="step-url"><a href="/tw/valuation.html">myproperty.investmquest.com/tw/valuation</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">navbar 🇹🇼 → <strong>Valuation / 估值</strong>. He reads the 6 KPI cards (PIR, P/R Ratio, Gross Yield, CPI Rent, Yield Spread), then focuses on the <strong>PIR by City</strong> and <strong>Mortgage Burden Rate by City</strong> charts — looking for where Hsinchu sits relative to its own history and relative to Taipei.</span>
+        <span class="lang-zh">navbar 🇹🇼 → <strong>Valuation / 估值</strong>。讀6張 KPI 卡（PIR、P/R Ratio、毛租金收益率、CPI 租金、利差），再重點看<strong>各城市 PIR 圖</strong>和<strong>各城市房貸負擔率圖</strong> — 觀察新竹相對自身歷史及相對台北的位置。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong><br>
+        ▸ <strong>PIR by City chart</strong> — price-to-income ratio across TW cities. A high and rising PIR for Hsinchu = buyers are stretched = potential demand softening = seller's window. If Hsinchu's PIR is at multi-year highs vs Taipei, the relative valuation premium may be historically elevated.<br>
+        ▸ <strong>Mortgage Burden Rate by City chart</strong> — % of household income going to mortgage. High burden rate = buyers will resist further price increases = demand ceiling. Selling at high burden rate is timing the top of the affordability constraint.<br>
+        ▸ <strong>Yield Spread vs CBC KPI</strong> — if rental yield is below CBC policy rate, the marginal investor is underwater on new purchases, removing a buyer segment from the market — another seller signal.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong><br>
+        ▸ <strong>各城市 PIR 圖</strong> — 台灣各城市房價所得比。新竹 PIR 高且持續上升 = 買方負擔拉緊 = 需求可能軟化 = 賣方視窗。若新竹 PIR 相對台北處於多年高位，這個相對估值溢價可能已達歷史高點。<br>
+        ▸ <strong>各城市房貸負擔率圖</strong> — 家庭收入用於房貸的比例。負擔率高 = 買方會抵制繼續漲價 = 需求天花板。在高負擔率時出售，等於在負擔能力限制的頂點布局。<br>
+        ▸ <strong>利差 vs 央行利率 KPI</strong> — 若租金收益率低於央行政策利率，邊際投資者在新購時財務倒掛，一個買方群體退場 — 又一個賣方訊號。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — high P/R is a seller's signal, not a buyer's:</span><span class="lang-zh">對陳先生 — 高P/R是賣方訊號，不是買方訊號：</span></strong> <span class="lang-en">the same valuation metrics that warn buyers "the market is expensive" tell sellers "this is the favourable exit window." A high Mortgage Burden Rate means the marginal new buyer is stretched — they need the market to cool or income to rise before more buyers can absorb existing inventory. Selling before that cooling happens is exit timing optimization. If Hsinchu's burden rate is at or near historical highs, Mr. Chen is in a strong seller's position.</span><span class="lang-zh">同樣的估值指標，對買家是「市場太貴」的警告，對賣家則意味著「現在是有利的出場視窗」。高房貸負擔率代表邊際新買家已捉襟見肘 — 需要市場降溫或收入提升，才能消化現有庫存。在這個降溫發生之前出售，是出場時機的最佳化。若新竹的負擔率在或接近歷史高點，陳先生處於強勢賣方地位。</span></div>
+      <div class="step-screenshot"><img src="img/05-tw-valuation.png" alt="TW Valuation page with PIR by City and Mortgage Burden Rate charts" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ── PHASE C ── -->
+
+  <!-- STOP 6 — Taipei city page -->
+  <div class="demo-step">
+    <div class="step-no">6</div>
+    <div class="step-content">
+      <div class="phase-badge phase-c"><span class="lang-en">Phase C — Buy-side: Taipei target</span><span class="lang-zh">Phase C — 買方：台北目標</span></div>
+      <h4><span class="lang-en">Taipei city page — market overview, district price ranges, where does NT$45M land?</span><span class="lang-zh">台北城市頁 — 市場總覽、行政區價格區間，NT$4,500萬能買到什麼？</span></h4>
+      <div class="step-url"><a href="/tw/taipei.html">myproperty.investmquest.com/tw/taipei</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">navbar 🇹🇼 → <strong>Taipei / 台北</strong>. He reads KEY METRICS (Presale Avg Price, Housing Price Index, Rent Index, Avg LTV, PIR, 1-Person Households), scrolls to the <strong>District Price Map</strong> (2026 Q1, price per ping by admin district), and reviews the supply section to understand delivery risk.</span>
+        <span class="lang-zh">navbar 🇹🇼 → <strong>Taipei / 台北</strong>。讀 KEY METRICS（預售屋均價、住宅價格指數、租金指數、平均貸款成數、PIR、一人家戶），捲到<strong>行政區房價地圖</strong>（2026 Q1，各行政區每坪均價），再看供給章節了解交屋風險。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong><br>
+        ▸ <strong>KEY METRICS</strong> — Taipei presale avg price, HPI, rent index contextualize the NT$45M budget. A 4-bed in Taipei at NT$45M implies a specific per-ping price — the KEY METRICS tell him if this budget is mid-market, premium, or entry-level for different districts.<br>
+        ▸ <strong>District Price Map</strong> — 2026 Q1 price per ping across all Taipei admin districts (Da'an, Xinyi, Songshan, Zhongshan, etc.). This is the most direct budget-to-district mapping tool on the page — a NT$45M 4-bed translates to roughly 40–55 ping at various price-per-ping levels, and the map shows which districts that buys into.<br>
+        ▸ <strong>Supply charts</strong> — New Launches vs Transactions and presale contraction data show whether near-term supply will support or soften his purchase price.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong><br>
+        ▸ <strong>KEY METRICS</strong> — 台北預售屋均價、HPI、租金指數，為NT$4,500萬預算提供背景脈絡。台北NT$4,500萬的4房，意味著特定的每坪單價 — KEY METRICS讓他知道這個預算在各區屬於中段市場、高端還是入門。<br>
+        ▸ <strong>行政區房價地圖</strong> — 2026 Q1 台北各行政區每坪均價（大安、信義、松山、中山等）。這是頁面上最直接的預算對應工具 — NT$4,500萬的4房大約是40–55坪，按各區每坪單價換算，地圖直接顯示這個預算能落在哪些行政區。<br>
+        ▸ <strong>供給圖表</strong> — 新推案 vs 成交量及預售市場收縮數據，顯示近期供給是否能支撐或軟化他的買入價。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — reading Taipei as a buyer:</span><span class="lang-zh">對陳先生 — 以買家角度讀台北：</span></strong> <span class="lang-en">the district map is his most actionable output. NT$45M for a 4-bed in Da'an (largest and most expensive central district) vs Zhongshan vs Neihu vs Wenshan yields very different school district quality, commute, and future appreciation profiles. The page lets him see — before speaking to any agent — which districts are financially accessible at his budget and which require compromise. He's not a first-time buyer — he has clear school district and lifestyle requirements, so district-level precision matters more than city-level averages.</span><span class="lang-zh">行政區地圖是他最可操作的資訊。同樣的NT$4,500萬4房，在大安（最大且最貴的核心區）、中山、內湖、文山，能換到截然不同的學區品質、通勤距離和未來增值潛力。在跟任何仲介接觸之前，這頁讓他先看清楚哪些行政區在他的預算範圍內、哪些需要妥協。他不是首購族 — 他對學區和生活機能有明確需求，因此行政區層級的精確度比城市層級的平均數更重要。</span></div>
+      <div class="step-screenshot"><img src="img/06-tw-taipei.png" alt="Taipei city page with District Price Map and KEY METRICS" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 7 — New Taipei triage -->
+  <div class="demo-step">
+    <div class="step-no">7</div>
+    <div class="step-content">
+      <div class="phase-badge phase-c"><span class="lang-en">Phase C — Buy-side: Taipei target</span><span class="lang-zh">Phase C — 買方：台北目標</span></div>
+      <h4><span class="lang-en">New Taipei city page — triage Taipei vs New Taipei: lower price, MRT access, also good schools</span><span class="lang-zh">新北城市頁 — 台北 vs 新北比較：更低單價、捷運可達、學區也不差</span></h4>
+      <div class="step-url"><a href="/tw/newtaipei.html">myproperty.investmquest.com/tw/newtaipei</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">keeps /tw/taipei open in one tab, opens <strong>/tw/newtaipei</strong> in another for direct comparison. He looks at New Taipei KEY METRICS (avg price per ping, 5Y appreciation, PIR, transit access), KEY ZONES (which New Taipei districts have MRT and school district quality comparable to Taipei), and reviews the supply pipeline chart to check if the lower price comes with higher delivery risk.</span>
+        <span class="lang-zh">保留 /tw/taipei 在一個分頁，在另一個分頁開啟 <strong>/tw/newtaipei</strong> 直接比較。他看新北 KEY METRICS（每坪均價、5年漲幅、PIR、交通可及性）、KEY ZONES（哪些新北行政區有捷運且學區品質接近台北），以及供給管線圖 — 確認較低的單價是否伴隨較高的交屋風險。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What the side-by-side shows:</strong><br>
+        ▸ <strong>Taipei vs New Taipei avg price per ping</strong> — the differential shows the "discount" for crossing the Xindian/Danshui/Banqiao border. For a 4-bed at a similar size, the same NT$45M buys meaningfully more space in certain New Taipei MRT districts (Banqiao, Zhonghe, Yonghe) vs core Taipei.<br>
+        ▸ <strong>New Taipei KEY ZONES</strong> — MRT-adjacent zones with school infrastructure: Banqiao / Yonghe / Zhonghe / Xinzhuang all have direct Taipei MRT lines and established school ecosystems. Tamsui has newer supply but longer commute.<br>
+        ▸ <strong>5Y appreciation comparison</strong> — has New Taipei kept pace with Taipei over 5 years? If appreciation rates are similar, New Taipei offers better value per ping with comparable capital preservation.</span>
+        <span class="lang-zh"><strong>並排比較顯示什麼：</strong><br>
+        ▸ <strong>台北 vs 新北每坪均價</strong> — 差距顯示越過新店／淡水／板橋邊界的「折扣」幅度。同樣NT$4,500萬，在捷運直達的新北行政區（板橋、中和、永和），能買到比台北核心區明顯更大的坪數。<br>
+        ▸ <strong>新北 KEY ZONES</strong> — 有學校基礎設施的捷運周邊區域：板橋／永和／中和／新莊都有直接通往台北的捷運線，學校生態健全。淡水有較新的供給但通勤較遠。<br>
+        ▸ <strong>5年漲幅比較</strong> — 新北過去5年是否跟上台北的漲幅腳步？若漲幅相近，新北在每坪價值更佳的同時提供相近的資本保值能力。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — two-tab triage, not just one city:</span><span class="lang-zh">對陳先生 — 兩個分頁比較，不只看一座城市：</span></strong> <span class="lang-en">his kids' ages (10 and 12) mean they'll be in junior and senior high school for the next 4–6 years — school district quality matters for a defined window, not forever. If certain New Taipei districts have equivalent school ecosystems at NT$30–35M for the same 4-bed size (vs NT$45M in Taipei), he has a genuine trade-off to examine. The New Taipei page makes this concrete. He can also consider: buying in New Taipei saves NT$10M+ budget → lower new mortgage → less rate sensitivity risk (addressed at Stop 9).</span><span class="lang-zh">他的孩子分別10歲和12歲，代表未來4–6年都在讀國中和高中 — 學區品質只在特定窗口期重要，不是永遠。若某些新北行政區有同等水準的學校生態，同樣4房卻只需NT$3,000–3,500萬（相比台北的NT$4,500萬），這是值得認真評估的取捨。新北頁讓這個比較具體可見。他也可以考慮：在新北買省下NT$1,000萬以上的預算 → 較低的新房貸 → 較小的利率敏感度風險（第9站會說明）。</span></div>
+      <div class="step-screenshot"><img src="img/07-tw-newtaipei.png" alt="New Taipei city page with KEY ZONES and 5Y appreciation data" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 8 — Cost Calculator: Taipei acquisition -->
+  <div class="demo-step">
+    <div class="step-no">8</div>
+    <div class="step-content">
+      <div class="phase-badge phase-c"><span class="lang-en">Phase C — Buy-side: Taipei target</span><span class="lang-zh">Phase C — 買方：台北目標</span></div>
+      <h4><span class="lang-en">Cost Calculator — Taipei acquisition: what does NT$45M actually cost to buy and hold for 10 years?</span><span class="lang-zh">成本計算機 — 台北購入：NT$4,500萬持有10年的實際總成本是多少？</span></h4>
+      <div class="step-url"><a href="/tools/cost-calculator.html">myproperty.investmquest.com/tools/cost-calculator</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">returns to Cost Calc. <strong>🇹🇼 TW</strong> pill, <strong>Resident / Citizen</strong>, <strong>10y</strong> horizon. This time he enters the BUY-SIDE price — NT$45,000,000 (Taipei target). He focuses on the <strong>Acquisition table</strong> (what does it cost to get in?) and the <strong>Holding table</strong> (what does it cost per year while he lives there with 2 kids?).</span>
+        <span class="lang-zh">回到成本計算機。<strong>🇹🇼 TW</strong> 膠囊、<strong>Resident / Citizen</strong>、<strong>10y</strong> 持有期。這次輸入<strong>買入側</strong>的價格 — NT$4,500萬（台北目標）。他重點看<strong>Acquisition（取得成本）表</strong>（進場要付多少？）和<strong>Holding（持有成本）表</strong>（帶兩個孩子住的每年成本？）。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees — NT$45M acquisition cost breakdown:</strong><br>
+        ① <strong>Acquisition table</strong> — 契稅 (deed tax, ~3% of assessed value), registration fees, buyer agent fee (~2% of transaction price), legal / documentation costs. No foreign surcharge (he's a TW citizen). On a NT$45M property, the acquisition transaction costs shown give him the cash-on-top-of-purchase-price he needs to budget before touching the mortgage.<br>
+        ② <strong>Holding table</strong> — annual 房屋稅 (house tax on assessed value for primary residence), 地價稅 (land value tax), maintenance estimate, insurance — accumulated over 10 years. For a larger Taipei unit, these are meaningfully higher than his Hsinchu condo.<br>
+        ③ <strong>Hero KPI: TOTAL CASH OUT</strong> — acquisition + 10-year holding costs combined, before mortgage interest (which the stress test tool handles separately).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼 — NT$4,500萬取得成本明細：</strong><br>
+        ① <strong>Acquisition 表</strong> — 契稅（約為公告現值3%）、登記費、買方仲介費（約為成交價2%）、法律/文件費用。無外國人附加稅（他是台灣公民）。NT$4,500萬物件的取得交易成本，讓他在房貸之外需要預備的現金一目了然。<br>
+        ② <strong>Holding 表</strong> — 年度房屋稅（自用住宅按課稅現值計算）、地價稅、維護費估算、保險 — 10年累計。比他新竹的公寓，更大的台北單位這些費用明顯更高。<br>
+        ③ <strong>Hero KPI：TOTAL CASH OUT</strong> — 取得成本 + 10年持有成本合計（房貸利息由壓力測試工具另行處理）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — this is his second use of the same tool, from the opposite side:</span><span class="lang-zh">對陳先生 — 這是他第二次使用同一個工具，但站在相反的立場：</span></strong> <span class="lang-en">at Stop 4, he used Cost Calc to model his Hsinchu <em>exit</em> — what the NT$25M sale nets him. Here, he uses the same tool to model his Taipei <em>entry</em> — what the NT$45M purchase costs him in acquisition and holding. The difference between NT$20M net proceeds from Hsinchu (after CGT and agent fees) and the NT$45M Taipei purchase cost — minus acquisition costs — defines his required new mortgage. This is the key financial bridge between the sell-side and buy-side phases: <strong>Hsinchu net proceeds + new mortgage = Taipei total cost</strong>.</span><span class="lang-zh">在第4站，他用成本計算機模擬新竹的<em>出場</em>成本 — NT$2,500萬出售後的淨所得。這裡，他用同一個工具模擬台北的<em>進場</em>成本 — NT$4,500萬購入的取得和持有成本。新竹扣除房地合一稅和仲介費後的淨所得（約NT$2,000萬）與台北NT$4,500萬購入成本（再加取得成本）之間的差額，決定他所需的新房貸金額。這是賣出和買入兩個階段之間的關鍵財務橋梁：<strong>新竹淨所得 + 新房貸 = 台北總成本</strong>。</span></div>
+      <div class="step-screenshot"><img src="img/08-cost-calc-taipei-buy.png" alt="Cost Calculator TW / Resident / 10y / NT$45M showing Acquisition and Holding tables" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 9 — Stress Test: new NT$25M mortgage -->
+  <div class="demo-step">
+    <div class="step-no">9</div>
+    <div class="step-content">
+      <div class="phase-badge phase-c"><span class="lang-en">Phase C — Buy-side: Taipei target</span><span class="lang-zh">Phase C — 買方：台北目標</span></div>
+      <h4><span class="lang-en">Stress Test — new NT$25M mortgage: can he handle Rate +100bp on top of a TSMC engineer salary?</span><span class="lang-zh">壓力測試 — 新NT$2,500萬房貸：台積電工程師薪資能承受升息100bp嗎？</span></h4>
+      <div class="step-url"><a href="/tools/stress-test.html">myproperty.investmquest.com/tools/stress-test</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Stress Test</strong>. He selects the <strong>🇹🇼 TW</strong> market preset (loads Taiwan defaults: NT$ currency, ~2.3% mortgage rate). He sets Property Price → NT$45,000,000, Down Payment slider → ~55% (reflecting his NT$20M equity from Hsinchu sale + ~NT$5M buffer → approximately NT$25M mortgage → ~55% LTV), Term → 20 years. He then reads the <strong>Rate +100bp scenario card</strong> directly.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Stress Test</strong>。選 <strong>🇹🇼 TW</strong> 市場預設（載入台灣預設值：NT$、約2.3%房貸利率）。設定物件價格 → NT$4,500萬，頭期款滑塊 → 約55%（反映新竹賣出的NT$2,000萬權益 + 約NT$500萬緩衝 → 新房貸約NT$2,500萬 → 約55% LTV），年期 → 20年。接著直接讀<strong>利率+100bp情境卡</strong>。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong><br>
+        ▸ <strong>Base case card</strong> — monthly payment at current ~2.3% CBC rate for a NT$25M 20-year mortgage. His engineer salary should be well above the minimum income needed to service this comfortably at base rate.<br>
+        ▸ <strong>Rate +100bp scenario card</strong> — if CBC raises rates by 1%, the new monthly payment and revised IRR are shown. The color coding (green / yellow / red) tells him if a 100bp rise still leaves him in comfortable territory.<br>
+        ▸ <strong>Sensitivity table</strong> — shows IRR delta for Rate ±1%, giving him a quick read on how rate-sensitive the Taipei investment is at this LTV.<br>
+        ▸ <strong>Combined stress scenario</strong> — Rate+100bp + Rent−20% combined worst case (relevant if he ever rents out the Taipei unit or if he needs to move back to Hsinchu for work).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong><br>
+        ▸ <strong>基本情境卡</strong> — NT$2,500萬20年期房貸在現行約2.3%央行利率下的月付金額。他的工程師薪資在基本利率下應遠高於舒適還款所需的最低收入。<br>
+        ▸ <strong>利率+100bp情境卡</strong> — 若央行升息1%，顯示新的月付金額和修正後的IRR。顏色標示（綠／黃／紅）告訴他升息100bp後是否仍在舒適範圍。<br>
+        ▸ <strong>敏感度分析表</strong> — 顯示利率±1%對IRR的影響，快速判斷台北投資在此LTV下的利率敏感度。<br>
+        ▸ <strong>綜合壓力情境</strong> — 利率+100bp加上租金−20%的最壞情境合併（若他日後出租台北物件，或因工作需要遷回新竹時適用）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — the new mortgage is his largest remaining financial risk:</span><span class="lang-zh">對陳先生 — 新房貸是他最大的剩餘財務風險：</span></strong> <span class="lang-en">he's selling a paid-down property and taking on a ~NT$25M loan at 45. Unlike a 28-year-old first-time buyer with 30+ years of earnings runway, Mr. Chen is 16–17 years from a typical retirement age. A 20-year mortgage takes him to 65. The stress test tells him two things: (1) can he service the mortgage today on his TSMC salary? (2) if CBC raises rates, does the monthly payment still fit his budget without forcing him to choose between the mortgage and other financial goals? He can also toggle the property price down to NT$40M (if he chooses a less expensive Taipei district or New Taipei) to see how much the stress test improves.</span><span class="lang-zh">他在45歲時賣掉一個已大量攤還的資產，重新背負約NT$2,500萬的貸款。不像28歲的首購族還有30年以上的收入跑道，陳先生距一般退休年齡只有16–17年。20年期房貸會延伸到他65歲。壓力測試告訴他兩件事：(1) 以他目前台積電的薪資，能否順利服務這筆貸款？(2) 若央行升息，月付金額是否仍在他的預算範圍內，不會被迫在房貸和其他財務目標之間取捨？他也可以把物件價格調低到NT$4,000萬（若選擇台北較便宜的行政區或新北），看看壓力測試結果改善多少。</span></div>
+      <div class="step-screenshot"><img src="img/09-stress-test-taipei.png" alt="Stress Test with TW preset, NT$45M / 55% down, Rate+100bp scenario card visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ── PHASE D ── -->
+
+  <!-- STOP 10 — TW Macro: CBC rate trajectory -->
+  <div class="demo-step">
+    <div class="step-no">10</div>
+    <div class="step-content">
+      <div class="phase-badge phase-d"><span class="lang-en">Phase D — Risks specific to trade-up</span><span class="lang-zh">Phase D — 換屋特有風險</span></div>
+      <h4><span class="lang-en">Macro page — CBC rate trajectory: his new NT$25M mortgage is rate-sensitive, where is the cycle?</span><span class="lang-zh">總經頁 — 央行利率走勢：新的NT$2,500萬房貸利率敏感，現在在週期哪個位置？</span></h4>
+      <div class="step-url"><a href="/tw/macro.html">myproperty.investmquest.com/tw/macro</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">navbar 🇹🇼 → <strong>Macro / 總經</strong>. He focuses on the CBC rate cycle timeline at the top, the KPI card showing current CBC Policy Rate, and the dual-axis chart showing rate trajectory vs property prices. He wants to know: is CBC in a tightening cycle (rates likely going higher = bad for new mortgage), on hold, or easing?</span>
+        <span class="lang-zh">navbar 🇹🇼 → <strong>Macro / 總經</strong>。他重點看最上方的央行利率週期時間軸、顯示現行 CBC 政策利率的 KPI 卡，以及利率走勢 vs 房價的雙軸圖。他想知道：央行現在是在升息週期（利率可能繼續上升 = 對新房貸不利），還是按兵不動，或是降息？</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> the cycle timeline bar across the top of the page shows Taiwan's rate eras — easing, on-hold, and tightening periods. The KPI strip shows CBC Rate alongside GDP Growth, CPI, Mortgage Credit Growth. The dual-axis line charts show how past rate moves transmitted into property prices with a lag. Key cycle event cards note CBC hike dates, credit control wave activations, and loan approval volume responses — the historical record of how each policy action affected the mortgage market Mr. Chen is about to re-enter.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>頁面頂部的週期時間軸顯示台灣的利率時代 — 寬鬆、按兵不動、緊縮各時期。KPI 條包含 CBC 利率、GDP 成長、CPI、房貸成長。雙軸折線圖顯示過去的利率變動如何在滯後一段時間後傳導至房價。關鍵週期事件卡片記錄了央行升息日期、信用管制波次啟動、以及房貸核准量的反應 — 是每次政策行動如何影響房貸市場的歷史記錄，而陳先生即將重新進入這個市場。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — rate timing matters more for a trade-up than for a first buy:</span><span class="lang-zh">對陳先生 — 利率時機對換屋者比首購者更重要：</span></strong> <span class="lang-en">a first-time buyer who stretches to NT$15M has limited exposure to rate moves. Mr. Chen's new NT$25M mortgage at age 45 has significantly more rate sensitivity — each 100bp matters more in absolute NT$ and more as a % of his remaining earnings horizon. If CBC is mid-tightening cycle, he may want to negotiate a fixed-rate offer from his bank rather than variable, or stagger his Hsinchu sale timeline to buy Taipei when rates plateau. The Macro page gives him the rate cycle context to inform this timing conversation with his bank.</span><span class="lang-zh">一個勉強買NT$1,500萬的首購族，對利率變動的曝露有限。陳先生在45歲背負新的NT$2,500萬房貸，利率敏感度顯著更高 — 每100bp在NT$絕對金額上影響更大，占他剩餘收入跑道的比例也更高。若央行正處於緊縮週期中段，他可能想向銀行爭取固定利率報價而非浮動利率，或是調整新竹出售的時間表，等到台北利率高峰期再進場。總經頁給了他利率週期脈絡，輔助他與銀行進行時機規劃的對話。</span></div>
+      <div class="step-screenshot"><img src="img/10-tw-macro.png" alt="TW Macro page with CBC rate cycle timeline and mortgage credit growth KPI" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 11 — TW Risk: LTV 2nd-home trap -->
+  <div class="demo-step">
+    <div class="step-no">11</div>
+    <div class="step-content">
+      <div class="phase-badge phase-d"><span class="lang-en">Phase D — Risks specific to trade-up</span><span class="lang-zh">Phase D — 換屋特有風險</span></div>
+      <h4><span class="lang-en">Risk page — CBC LTV rules for 2nd home: the critical sequencing risk of buying Taipei before selling Hsinchu</span><span class="lang-zh">風險頁 — 央行第二戶LTV規定：在賣掉新竹前先買台北的關鍵順序風險</span></h4>
+      <div class="step-url"><a href="/tw/risk.html">myproperty.investmquest.com/tw/risk</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">navbar 🇹🇼 → <strong>Risk / 風險</strong>. He reads the <strong>7th Wave Credit Controls KPI card</strong> and the <strong>Policy Timeline</strong> section. He is specifically looking for: CBC's differentiated LTV rules for 1st home (self-occupied) vs 2nd home, and the implications for his sequencing decision.</span>
+        <span class="lang-zh">navbar 🇹🇼 → <strong>Risk / 風險</strong>。讀<strong>第七波信用管制 KPI 卡</strong>和<strong>政策時間軸</strong>章節。他特別在找：央行對第一戶（自住）與第二戶的差別化 LTV 規定，以及這對他的交易順序決策有什麼影響。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong><br>
+        ▸ <strong>7th Wave Credit Controls KPI card</strong> — current status of the LTV cap regime: differentiated ceilings for (a) 1st home self-occupied, (b) 2nd home, (c) investment / non-self-occupied. The 2nd home LTV ceiling is meaningfully lower than the 1st-home ceiling.<br>
+        ▸ <strong>Policy Timeline</strong> — chronological CBC actions including the specific waves where 2nd-home LTV caps were tightened. Dates and LTV values for each wave are documented — the current applicable rules can be read directly.<br>
+        ▸ <strong>Risk Radar chart</strong> — 6-dimension risk score showing Policy risk dimension vs 2023 baseline.<br>
+        ▸ <strong>Key Risk Factors section</strong> — CBC credit constraint narrative explains the differentiated LTV framework in plain language.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong><br>
+        ▸ <strong>第七波信用管制 KPI 卡</strong> — 現行 LTV 上限制度：針對 (a) 第一戶自住、(b) 第二戶、(c) 投資/非自住，分別設定不同的貸款成數天花板。第二戶的 LTV 上限明顯低於第一戶。<br>
+        ▸ <strong>政策時間軸</strong> — 依時間順序記錄的央行行動，包含第二戶 LTV 上限被調緊的具體波次。每波次的日期和 LTV 數值都有記載 — 可直接讀取目前適用的規定。<br>
+        ▸ <strong>風險雷達圖</strong> — 6 維度風險評分，顯示政策風險維度相對2023年基準的變化。<br>
+        ▸ <strong>主要風險因素章節</strong> — 用白話文說明 CBC 信用管制限制，解釋差別化 LTV 框架的含義。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — the 2nd-home LTV trap is the highest-stakes risk in his trade-up:</span><span class="lang-zh">對陳先生 — 第二戶LTV陷阱是他換屋交易中風險最高的一環：</span></strong>
+        <span class="lang-en"><strong>The critical rule:</strong> if Mr. Chen signs the Taipei purchase contract while still owning the Hsinchu property, his bank will classify Taipei as his "2nd home" — triggering the 2nd-home LTV ceiling (lower than 1st-home). This means: (1) he gets a lower mortgage amount than planned; (2) the mortgage rate for 2nd homes is typically higher; (3) he may need more cash bridging than his Hsinchu net proceeds provide.<br><br>
+        The safe sequencing: <strong>complete the Hsinchu sale (or at minimum sign a binding sale agreement) BEFORE signing the Taipei purchase contract.</strong> Same-day or close-sequence transactions are possible with a TW mortgage broker coordinating both banks — but this requires professional arrangement, not DIY.<br><br>
+        The Policy Timeline documents the specific CBC rules; Mr. Chen should read the 7th-wave entry for the exact current LTV differentials between 1st and 2nd home classifications.</span>
+        <span class="lang-zh"><strong>關鍵規定：</strong>若陳先生在仍持有新竹房產時簽署台北的買賣契約，銀行將把台北認定為他的「第二戶」— 觸發第二戶 LTV 上限（低於第一戶）。這代表：(1) 他能貸到的金額低於計畫；(2) 第二戶的房貸利率通常較高；(3) 他可能需要比新竹淨所得更多的現金作為過渡資金。<br><br>
+        安全的交易順序：<strong>在簽署台北買賣契約「之前」，完成新竹的出售（或至少簽定具約束力的買賣合約）。</strong>同日或緊接著進行的兩步驟交易，需要台灣房貸仲介協調兩家銀行才能執行 — 這需要專業安排，無法自行處理。<br><br>
+        政策時間軸記載了具體的央行規定；陳先生應讀取第七波條目，確認目前第一戶和第二戶認定之間的確切 LTV 差距數值。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/11-tw-risk.png" alt="TW Risk page with 7th Wave Credit Controls KPI and Policy Timeline" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 12 — Methodology -->
+  <div class="demo-step">
+    <div class="step-no">12</div>
+    <div class="step-content">
+      <div class="phase-badge phase-d"><span class="lang-en">Phase D — Risks specific to trade-up</span><span class="lang-zh">Phase D — 換屋特有風險</span></div>
+      <h4><span class="lang-en">Methodology — TW data sources and verification: where does every number come from?</span><span class="lang-zh">方法論 — 台灣資料來源與驗證：每個數字從哪裡來？</span></h4>
+      <div class="step-url"><a href="/methodology.html">myproperty.investmquest.com/methodology</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chen does:</span><span class="lang-zh">陳先生動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Methodology / 方法論</strong>. He finds the Taiwan row in the 20-market source table. He reads the data sources and update frequency for each metric type used across the TW pages he just toured.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Methodology / 方法論</strong>。在20市場來源表中找到台灣那列。讀他剛才逛過的各台灣頁面所使用的每種指標類型的資料來源和更新頻率。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees — Taiwan row in the source table:</strong><br>
+        ▸ <strong>Price Index</strong> — 內政部不動產資訊平台 (RICS) HPI + 實價登錄 (actual transaction registry)<br>
+        ▸ <strong>Rent / Vacancy</strong> — 內政部租屋資料 + 591 rental platform<br>
+        ▸ <strong>Pipeline / Supply</strong> — 建管資料 (construction permit data) + presale registration<br>
+        ▸ <strong>Central Bank Rate</strong> — CBC policy decision announcements<br>
+        ▸ <strong>Credit / LTV data</strong> — CBC Financial Stability Report + 金管會 banking stats<br>
+        ▸ <strong>City-level data</strong> — each city's 地政局 (Land Administration Bureau) transaction records</span>
+        <span class="lang-zh"><strong>螢幕出現什麼 — 台灣來源表列：</strong><br>
+        ▸ <strong>價格指數</strong> — 內政部不動產資訊平台（RICS）HPI + 實價登錄（實際交易登記）<br>
+        ▸ <strong>租金 / 空置率</strong> — 內政部租屋資料 + 591 租屋平台<br>
+        ▸ <strong>管線 / 供給</strong> — 建管資料（建築許可）+ 預售屋登記<br>
+        ▸ <strong>央行利率</strong> — CBC 政策決議公告<br>
+        ▸ <strong>信用 / LTV 資料</strong> — CBC 金融穩定報告 + 金管會銀行統計<br>
+        ▸ <strong>城市層級資料</strong> — 各城市地政局交易記錄</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chen — source verification matters more for a NT$45M decision:</span><span class="lang-zh">對陳先生 — 來源驗證對NT$4,500萬的決策更重要：</span></strong> <span class="lang-en">his trade-up involves more capital than most people ever transact in property in their lifetime. The Methodology page lets him verify that each metric used in his 12-stop tour has a named, traceable government or institutional source — not an estimate or model output. The 實價登錄 source for city-level prices is particularly important: it is actual registered transaction data, not asking prices or appraisals. For a seller (Hsinchu) and a buyer (Taipei), knowing the price data is actual transaction registry gives him the confidence to use these figures in his negotiation research.</span><span class="lang-zh">他的換屋交易涉及的資本，超過大多數人一生在不動產交易中動用的總額。方法論頁讓他確認在12站旅程中使用的每個指標，都有具名、可追溯的政府或機構來源 — 不是估算或模型輸出。城市層級房價的實價登錄來源尤其重要：它是實際登記的成交資料，不是開價或鑑價。作為賣家（新竹）和買家（台北），知道價格資料來自實際成交登記，讓他有信心在議價研究中使用這些數字。</span></div>
+      <div class="step-screenshot"><img src="img/12-methodology.png" alt="Methodology page with Taiwan row in 20-market source table" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 3 — CHEAT SHEET                        -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 03</div>
+    <h2><span class="lang-en">Trade-up cheat sheet — the 6 patterns Mr. Chen needs to remember</span><span class="lang-zh">換屋小抄 — 陳先生需要記住的6個關鍵規則</span></h2>
+    <p class="sec-sub"><span class="lang-en">Two of these are unique to trade-up — not covered in first-home or investment walkthroughs.</span><span class="lang-zh">其中兩條是換屋特有的 — 首購或投資導覽中不會提到。</span></p>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4><span class="ck-icon">税</span> <span class="lang-en">房地合一稅 cliff — 5-year self-occupied threshold</span><span class="lang-zh">房地合一稅斷崖 — 自住5年門檻</span></h4>
+      <p>
+        <span class="lang-en">The CGT rate for a self-occupied property drops sharply after 5 years of ownership. Holders like Mr. Chen (10 years) are in the most favorable bracket. Anyone considering selling before the 5-year mark faces a significantly higher CGT rate on any gain — this cliff can represent several million NT$ on a mid-market Hsinchu or Taipei unit. Always check your purchase date against the exact hold duration before deciding to trade up.</span>
+        <span class="lang-zh">自住房地合一稅率在持有5年後大幅下降。像陳先生這樣持有10年的屋主，落在最優惠的稅率區間。考慮在5年前出售的人，對任何增值都面臨高得多的稅率 — 這個斷崖在新竹或台北的中段市場物件上，可能代表數百萬元的差距。在決定換屋前，務必核對您的購入日期和確切持有期間。</span>
+        <p class="ck-tip"><span class="lang-en">Use Cost Calculator → TW / Resident / Exit table to see the specific bracket for your hold duration.</span><span class="lang-zh">使用成本計算機 → TW / Resident / Exit 表，查看您的持有期間所對應的具體稅率級距。</span></p>
+      </p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">LTV</span> <span class="lang-en">2nd-home LTV trap — sell first, buy second</span><span class="lang-zh">第二戶LTV陷阱 — 先賣後買</span></h4>
+      <p>
+        <span class="lang-en">CBC's credit control rules apply different LTV ceilings to 1st-home (self-occupied, higher LTV) vs 2nd-home (lower LTV, higher rate). If you buy Taipei while still owning Hsinchu, the bank classifies Taipei as a 2nd home — your mortgage is smaller and more expensive than you planned. Safe sequence: complete or bind the Hsinchu sale BEFORE signing the Taipei contract. If you need to do both simultaneously, engage a TW mortgage broker to coordinate both banks — do not attempt this without professional coordination.</span>
+        <span class="lang-zh">央行信用管制規定對第一戶（自住，較高成數）和第二戶（較低成數、較高利率）設定不同的 LTV 上限。若在仍持有新竹的情況下買進台北，銀行會將台北認定為第二戶 — 你的房貸比計畫少、成本也比計畫高。安全順序：在簽署台北合約「之前」，完成或綁定新竹的出售。若兩邊需要同時進行，請委託台灣房貸仲介協調兩家銀行 — 沒有專業協調不要嘗試自行處理。</span>
+        <p class="ck-tip"><span class="lang-en">See /tw/risk Policy Timeline for current 1st vs 2nd home LTV differentials.</span><span class="lang-zh">詳見 /tw/risk 政策時間軸，查看現行第一戶與第二戶的 LTV 差額。</span></p>
+      </p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">2×</span> <span class="lang-en">Use Cost Calc twice — once for the exit, once for the entry</span><span class="lang-zh">成本計算機用兩次 — 一次算出場、一次算進場</span></h4>
+      <p>
+        <span class="lang-en">The Cost Calculator is designed for one transaction, but Mr. Chen's trade-up is two. Use it once for the Hsinchu sale (focus: Exit table — CGT + agent fee → what is his net proceeds?) and once for the Taipei purchase (focus: Acquisition + Holding tables → what cash does he need on top of the mortgage?). The difference between the two is his required new mortgage principal.</span>
+        <span class="lang-zh">成本計算機是為單筆交易設計的，但陳先生的換屋是兩筆。分別用一次：一次算新竹出售（重點：Exit 表 — 房地合一稅 + 仲介費 → 淨所得是多少？），一次算台北購入（重點：Acquisition + Holding 表 → 除了房貸，他還需要準備多少現金？）。兩者之差就是他所需的新房貸本金。</span>
+        <p class="ck-tip"><span class="lang-en">The calculator models all-cash. Mortgage interest is handled separately by the Stress Test tool.</span><span class="lang-zh">計算機模擬的是全現金。房貸利息由壓力測試工具另行處理。</span></p>
+      </p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🗂</span> <span class="lang-en">City comparison — two-tab triage for buy-side</span><span class="lang-zh">城市比較 — 買入側的雙分頁比較</span></h4>
+      <p>
+        <span class="lang-en">For the buy-side city decision (Taipei vs New Taipei), open both <code>/tw/taipei</code> and <code>/tw/newtaipei</code> in separate tabs. Compare: avg price per ping, KEY ZONES with school and MRT access, 5Y appreciation. A NT$45M Taipei budget buys meaningfully more space in MRT-adjacent New Taipei zones (Banqiao, Yonghe, Zhonghe) — potentially enough to reconsider the city choice and reduce the required new mortgage by NT$5–10M.</span>
+        <span class="lang-zh">面對買入側的城市決策（台北 vs 新北），分別在兩個分頁開啟 <code>/tw/taipei</code> 和 <code>/tw/newtaipei</code>。比較：每坪均價、有學校和捷運的 KEY ZONES、5年漲幅。NT$4,500萬的台北預算，在捷運直達的新北行政區（板橋、永和、中和）能買到明顯更大的坪數 — 這個差異或許足以重新考慮城市選擇，並將所需的新房貸降低NT$500–1,000萬。</span>
+        <p class="ck-tip"><span class="lang-en">A smaller new mortgage = lower rate sensitivity = better stress test outcome.</span><span class="lang-zh">較低的新房貸 = 較低的利率敏感度 = 壓力測試結果更好。</span></p>
+      </p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🟢</span> <span class="lang-en">KPI card colors</span><span class="lang-zh">KPI 卡顏色</span></h4>
+      <p><span class="lang-en">Left border color tells you the read at a glance.</span><span class="lang-zh">左邊框顏色一眼告訴你判讀。</span></p>
+      <div class="color-legend">
+        <div class="cl-item"><span class="cl-dot cl-green"></span><span class="lang-en">positive</span><span class="lang-zh">正向</span></div>
+        <div class="cl-item"><span class="cl-dot cl-orange"></span><span class="lang-en">caution</span><span class="lang-zh">注意</span></div>
+        <div class="cl-item"><span class="cl-dot cl-red"></span><span class="lang-en">risk</span><span class="lang-zh">風險</span></div>
+        <div class="cl-item"><span class="cl-dot cl-blue"></span><span class="lang-en">neutral</span><span class="lang-zh">中性</span></div>
+      </div>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">C</span> <span class="lang-en">Language toggle &amp; PDF export</span><span class="lang-zh">語言切換與 PDF 匯出</span></h4>
+      <p>
+        <span class="lang-en">Every page has <strong>EN / 中文</strong> toggle buttons in the navbar (top-right, next to the rate badge). Click <strong>中文</strong> to switch all text on the current page — preference saves across sessions.<br>
+        To save any page as PDF: <strong>Ctrl+P / Cmd+P</strong> → Save as PDF. The print stylesheet hides the navbar and buttons — producing a clean document for sharing with a mortgage broker or 會計師.</span>
+        <span class="lang-zh">每頁 navbar 右側（匯率 badge 旁）都有 <strong>EN / 中文</strong> 切換按鈕。點 <strong>中文</strong> 即可切換當頁所有文字，設定會在各頁面間保存。<br>
+        要存 PDF：<strong>Ctrl+P / Cmd+P</strong> → 儲存為 PDF。列印版式會隱藏 navbar 和按鈕，輸出乾淨的文件，適合分享給房貸仲介或會計師。</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 4 — TAKEAWAY                            -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 04</div>
+    <h2><span class="lang-en">What this site answers vs. what Mr. Chen must outsource</span><span class="lang-zh">本站能回答什麼 vs. 陳先生必須外部諮詢什麼</span></h2>
+  </div>
+
+  <div class="takeaway">
+    <div class="takeaway-card answered">
+      <h4><span class="lang-en">Answered by this site</span><span class="lang-zh">本站可以回答</span></h4>
+      <ul>
+        <li><strong><span class="lang-en">Hsinchu market conditions for selling</span><span class="lang-zh">新竹出售市況</span></strong> — <span class="lang-en">TSMC demand signal, HSP investment trend, PIR, supply pipeline, whether conditions favor a seller now vs 12 months later</span><span class="lang-zh">台積電需求訊號、竹科投資趨勢、PIR、供給管線，現在 vs 12個月後何者更利賣方</span></li>
+        <li><strong><span class="lang-en">房地合一稅 bracket framework for 10-year self-occupied holders</span><span class="lang-zh">10年自住持有者的房地合一稅稅率框架</span></strong> — <span class="lang-en">Cost Calculator Exit table shows the bracket and contrast with shorter hold durations</span><span class="lang-zh">成本計算機 Exit 表顯示稅率級距及與較短持有期的對比</span></li>
+        <li><strong><span class="lang-en">Taipei district price map and budget-to-district mapping</span><span class="lang-zh">台北行政區房價地圖與預算對應</span></strong> — <span class="lang-en">/tw/taipei District Price Map shows where NT$45M lands across all Taipei admin districts</span><span class="lang-zh">/tw/taipei 行政區地圖顯示NT$4,500萬在所有台北行政區的對應位置</span></li>
+        <li><strong><span class="lang-en">Taipei vs New Taipei triage for upgrade target</span><span class="lang-zh">換屋目標的台北 vs 新北比較</span></strong> — <span class="lang-en">side-by-side KEY ZONES, price per ping, 5Y appreciation on both city pages</span><span class="lang-zh">兩個城市頁並排的 KEY ZONES、每坪單價、5年漲幅</span></li>
+        <li><strong><span class="lang-en">End-to-end cost modeling for both sides of the transaction</span><span class="lang-zh">兩筆交易的完整成本模型</span></strong> — <span class="lang-en">Cost Calculator used twice: once for Hsinchu exit costs, once for Taipei acquisition + holding costs</span><span class="lang-zh">成本計算機用兩次：一次算新竹出場成本，一次算台北取得 + 持有成本</span></li>
+        <li><strong><span class="lang-en">New mortgage stress test at Rate +100bp</span><span class="lang-zh">新房貸在升息100bp下的壓力測試</span></strong> — <span class="lang-en">Stress Test with TW preset and NT$25M mortgage shows monthly payment impact and IRR delta</span><span class="lang-zh">壓力測試使用TW預設和NT$2,500萬房貸，顯示月付金額影響和IRR變動</span></li>
+        <li><strong><span class="lang-en">CBC LTV rules: 2nd-home classification risk and Policy Timeline</span><span class="lang-zh">央行LTV規定：第二戶認定風險與政策時間軸</span></strong> — <span class="lang-en">/tw/risk documents current LTV differentials and the sequencing implication</span><span class="lang-zh">/tw/risk 記載現行LTV差額及交易順序的含義</span></li>
+        <li><strong><span class="lang-en">Where every number comes from</span><span class="lang-zh">每個數字的來源</span></strong> — <span class="lang-en">Methodology: RICS HPI, 實價登錄, 591 rent, CBC stats, 金管會 banking data</span><span class="lang-zh">方法論：RICS HPI、實價登錄、591租屋、CBC統計、金管會銀行資料</span></li>
+      </ul>
+    </div>
+
+    <div class="takeaway-card outsource">
+      <h4><span class="lang-en">Must outsource to professionals</span><span class="lang-zh">必須諮詢專業人士</span></h4>
+      <ul>
+        <li><strong><span class="lang-en">TW mortgage broker — 2nd-home vs 1st-home LTV coordination</span><span class="lang-zh">台灣房貸仲介 — 第二戶 vs 第一戶LTV的協調</span></strong> — <span class="lang-en">to manage the simultaneous or close-sequence sell/buy without triggering 2nd-home classification, and to get the best rate quote for the ~NT$25M new mortgage</span><span class="lang-zh">管理同時或緊接的賣出/買入，避免觸發第二戶認定；以及為約NT$2,500萬的新房貸取得最佳利率報價</span></li>
+        <li><strong><span class="lang-en">TW 會計師 — exact 房地合一稅 calculation for Hsinchu sale</span><span class="lang-zh">台灣會計師 — 新竹出售的確切房地合一稅試算</span></strong> — <span class="lang-en">the actual taxable gain depends on his 2015 purchase price, registered cost basis, improvement costs, and applicable exemptions — must be calculated by a licensed accountant before signing any sale agreement</span><span class="lang-zh">實際應稅增益取決於他2015年的購入價、登記成本基礎、改善費用及可適用的豁免項目 — 在簽署任何買賣合約前，必須由持牌會計師試算</span></li>
+        <li><strong><span class="lang-en">TW property agent (Hsinchu + Taipei) — listing strategy and buyer network</span><span class="lang-zh">台灣不動產仲介（新竹 + 台北）— 上架策略和買方網絡</span></strong> — <span class="lang-en">actual listing price, comparable transaction research (實價登錄), timing of Hsinchu listing relative to Taipei signing, and coordination of both transactions</span><span class="lang-zh">實際掛牌價格、實價登錄可比成交研究、新竹上架時機相對台北簽約的配合，以及兩筆交易的協調</span></li>
+        <li><strong><span class="lang-en">School district registration confirmation</span><span class="lang-zh">學區劃分確認</span></strong> — <span class="lang-en">Taiwan school district boundaries shift periodically and are enforced at the household registration (戶籍) level; verify the specific district for any Taipei unit with the local 區公所 before purchase</span><span class="lang-zh">台灣的學區邊界會定期調整，以戶籍地址執行認定；購入前，請向當地區公所確認特定台北物件的實際學區劃分</span></li>
+        <li><strong><span class="lang-en">Bridge financing or sale-linked conditional clauses</span><span class="lang-zh">過渡性融資或附條件條款</span></strong> — <span class="lang-en">if Hsinchu takes longer to sell than expected, he may need short-term bridge financing to complete the Taipei purchase — structure of this must be confirmed with a bank and lawyer before the Taipei purchase contract is signed</span><span class="lang-zh">若新竹的出售時間比預期長，他可能需要短期過渡性融資才能完成台北的購入 — 這個架構必須在簽署台北買賣契約前先與銀行和律師確認</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- PDF bar                                         -->
+  <!-- ============================================== -->
+  <!-- ============================================== -->
+  <!-- SECTION 5 — BEST OPTION                         -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 05</div>
+    <h2><span class="lang-en">The site's best-supported call for Mr. Chen</span><span class="lang-zh">站上資料能支持的最佳選項 — 給陳先生</span></h2>
+    <p class="sec-sub"><span class="lang-en">Not a personalized recommendation — a single, opinionated call assembled only from data this site already shows in SECTIONS 01–04.</span><span class="lang-zh">非個人化推薦 — 是從 SECTION 01–04 站上資料推導出的單一明確建議。</span></p>
+  </div>
+
+  <div class="best-option">
+    <div class="bo-grid">
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">CITY / AREA</span><span class="lang-zh">城市 / 區域</span></div>
+        <div class="bo-val">Sell Hsinchu → Buy Taipei Da'an / Xinyi</div>
+        <div class="bo-note"><span class="lang-en">Hsinchu near cycle peak; Taipei Da'an / Xinyi in stable mid-band per /tw/valuation.html.</span><span class="lang-zh">新竹近週期高點；台北大安/信義據 /tw/valuation.html 處於穩定中段。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">PRODUCT</span><span class="lang-zh">產品類型</span></div>
+        <div class="bo-val">3-bed · new build or 5–10 yr old</div>
+        <div class="bo-note"><span class="lang-en">Avoid pre-1999 (pre-921 quake code); avoid ultra-new presale premium at this entry size.</span><span class="lang-zh">避開 1999 前（921 前建管）；避開超新預售溢價。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">BUDGET MIX</span><span class="lang-zh">預算配置</span></div>
+        <div class="bo-val">NT$25M sell + NT$20M down/loan = NT$45M</div>
+        <div class="bo-note"><span class="lang-en">Sell first (or pre-sale lock-in), then buy; bridge financing only if unavoidable.</span><span class="lang-zh">先賣（或預售 lock-in）後買；非萬不得已不用 bridge 短期融資。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">HOLD</span><span class="lang-zh">持有期</span></div>
+        <div class="bo-val">10+ years</div>
+        <div class="bo-note"><span class="lang-en">Transaction friction + CBC credit-control review cycles favour long hold.</span><span class="lang-zh">交易摩擦 + 央行信用管制 review 週期都偏好長期持有。</span></div>
+      </div>
+    </div>
+
+    <div class="bo-section bo-checklist">
+      <h4><span class="lang-en">✓ Pre-trade checklist (from site data)</span><span class="lang-zh">✓ 換屋前 checklist（站上資料能驗證的）</span></h4>
+      <ul>
+        <li><span class="lang-en"><code>/tw/valuation.html</code> Hsinchu vs Taipei: spread between cycle stages confirms trade-up rationale.</span><span class="lang-zh"><code>/tw/valuation.html</code> 新竹 vs 台北：週期階段價差確認換屋邏輯。</span></li>
+        <li><span class="lang-en">Pipeline Cliff Taipei Da'an / Xinyi not DANGER; Hsinchu Pipeline showing peak supply absorption stress.</span><span class="lang-zh">台北大安/信義 Pipeline Cliff 不在 DANGER；新竹 Pipeline 顯示供給去化壓力到頂。</span></li>
+        <li><span class="lang-en">Carry Heatmap Taipei: 5-year direction stable; Hsinchu Carry trending negative.</span><span class="lang-zh">台北 Carry Heatmap：5 年方向穩定；新竹 Carry 走負。</span></li>
+        <li><span class="lang-en">CBC credit-control tier for both cities monitored — fresh tightening could re-price the sell-side.</span><span class="lang-zh">兩市的央行信用管制等級已追蹤 — 新一輪緊縮可能 re-price 賣方。</span></li>
+        <li><span class="lang-en">Methodology TW row: every figure sourced from MOI 實價登錄 + CBC + DGBAS, not aggregator/agency data.</span><span class="lang-zh">Methodology TW 那列：每個數字都來自 MOI 實價登錄 + CBC + 主計處，非聚合/仲介資料。</span></li>
+      </ul>
+    </div>
+
+    <div class="bo-section bo-next">
+      <h4><span class="lang-en">→ Off-site next steps (the site cannot answer)</span><span class="lang-zh">→ 走出站外的下一步（站上無法回答的）</span></h4>
+      <ol>
+        <li><span class="lang-en"><strong>Lock the sell price first</strong> — 2-3 仲介 + 1 quick auction firm to test real bid; do not anchor on listing.</span><span class="lang-zh"><strong>先 lock 賣價</strong> — 2-3 家仲介 + 1 家拍賣公司測試實際出價；不要 anchor 在開價。</span></li>
+        <li><span class="lang-en"><strong>Sequence the transaction</strong> — sell-first (no bridge) or simultaneous close (bridge 1-3 months max); never buy-first without conditional contract.</span><span class="lang-zh"><strong>排定交易順序</strong> — 先賣後買（無 bridge）或同時交割（bridge 最多 1-3 個月）；絕不無附條件先買。</span></li>
+        <li><span class="lang-en"><strong>Mortgage shopping (3+ banks)</strong> — LTV ceiling for second home / trade-up; CBC credit-control band for target city.</span><span class="lang-zh"><strong>3+ 家銀行貸款比較</strong> — 第二屋/換屋的 LTV 上限；央行信用管制對目標城市的等級。</span></li>
+        <li><span class="lang-en"><strong>地政士 + 律師 (peguam)</strong> — for both sides: title, tax, transfer, special tax (奢侈稅 / 房地合一) eligibility.</span><span class="lang-zh"><strong>地政士 + 律師</strong> — 雙邊：產權、稅、過戶、特別稅（奢侈稅 / 房地合一）資格。</span></li>
+        <li><span class="lang-en"><strong>Pre-purchase inspection</strong> — even for newer Taipei stock: leakage, structure, building registration vs use match.</span><span class="lang-zh"><strong>看屋前檢查</strong> — 即使是較新台北案：漏水、結構、建物登記 vs 實際使用一致性。</span></li>
+      </ol>
+    </div>
+
+    <div class="bo-bottomline">
+      <span class="bo-bl-label"><span class="lang-en">BOTTOM LINE</span><span class="lang-zh">底線</span></span>
+      <p><span class="lang-en">Selling Hsinchu near cycle peak and buying Taipei Da'an / Xinyi in stable mid-band is the single call most consistent with the 12 stops. The trade only works if the sell price is locked first — the site shows the cycle, but cannot guarantee the realised sell.</span><span class="lang-zh">趁新竹近高點賣、買進穩定中段的台北大安/信義，是 12 站走完後最一致的選項。但這個換屋邏輯只有在「先 lock 賣價」時才成立 — 站上有週期圖，但無法保證實際成交價。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 6 — DOWNLOAD PDF                        -->
+  <!-- ============================================== -->
+  <div class="pdf-bar">
+    <button type="button" class="pdf-btn" onclick="window.print()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <span class="lang-en">Save as PDF</span><span class="lang-zh">儲存為 PDF</span>
+    </button>
+    <a class="pdf-btn ghost" href="/demo/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span class="lang-en">All walkthroughs</span><span class="lang-zh">所有導覽</span>
+    </a>
+  </div>
+
+  <div class="source-footer" style="margin-top:24px">
+    <span class="lang-en"><strong>Sources used in this walkthrough:</strong> 內政部不動產資訊平台 (RICS) HPI, 實價登錄 (transaction registry), 591 rental platform, CBC Financial Stability Report, 金管會 banking statistics, 竹科管理局 (HSP investment data). Last data refresh: Q1 2026. See <a href="/methodology.html" style="color:#2563eb">/methodology</a> for per-metric source and known limitations.</span>
+    <span class="lang-zh"><strong>本導覽使用的資料來源：</strong>內政部不動產資訊平台（RICS）HPI、實價登錄、591租屋平台、CBC金融穩定報告、金管會銀行統計、竹科管理局（竹科投資資料）。最後刷新：2026 Q1。逐指標來源與已知限制見 <a href="/methodology.html" style="color:#2563eb">/methodology</a>。</span>
+    <br><br>
+    <span class="lang-en"><em>Disclaimer: This walkthrough demonstrates how to use Property Monitor for a specific two-step sell + buy decision flow. It is not investment, tax, legal, or property advice. 房地合一稅 rates, CBC LTV caps, and policy details shown reflect what is currently documented on this site; all must be independently confirmed with a TW licensed 會計師 and mortgage broker before any transaction. School district boundaries, bridge financing, and transaction sequencing require professional legal and banking coordination not provided by this site.</em></span>
+    <span class="lang-zh"><em>免責聲明：本導覽示範如何使用 Property Monitor 支援特定的「先賣後買」兩步驟決策流程，並非投資、稅務、法律或不動產建議。頁面上顯示的房地合一稅稅率、央行 LTV 上限與政策細節，以本站目前記載的內容為準；所有數據必須在任何交易前，向台灣持牌會計師和房貸仲介獨立確認。學區劃分、過渡性融資及交易順序，需要本站無法提供的專業法律及銀行協調。</em></span>
+  </div>
+
+</main>
+
+<script src="/js/navbar.js" defer></script>
+<script>
+function getLang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function applyLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+}
+window.addEventListener('load',function(){applyLang(getLang());
+  setTimeout(function(){applyLang(getLang());},120);
+});
+window.addEventListener('storage',function(e){if(e.key==='lang')applyLang(getLang());});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,279 @@
+{% extends "_base.html" %}
+
+{% block title %}Valuation Analysis{% endblock %}
+
+{% block extra_head %}
+<style>
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:12px}
+.summary-card{background:#fff;border:1px solid #ccd9e8;border-radius:10px;padding:18px 22px}
+.summary-card h4{margin:0 0 8px;font-size:13px;color:#1e3a5f;font-family:Inter,sans-serif}
+.summary-card p{margin:0;font-size:12px;color:#5a7a9a;line-height:1.6;font-family:Inter,sans-serif}
+.green-left{border-left:4px solid #16a34a}
+.red-left{border-left:4px solid #dc2626}
+.orange-left{border-left:4px solid #d97706}
+.blue-left{border-left:4px solid #2563eb}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="container">
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">LAST UPDATED: {{ meta.data_asof_en }}</span><span class="lang-zh" style="display:none">最後更新：{{ meta.data_asof_zh }}</span></span>
+    <h1><span class="lang-en">Valuation Monitor</span><span class="lang-zh" style="display:none">估值監測</span></h1>
+    <p class="subtitle"><span class="lang-en">{{ meta.market_en }} Residential Property Valuation</span><span class="lang-zh" style="display:none">{{ meta.market_zh }}住宅房地產估值</span></p>
+  </div>
+
+  {# KPI Cards #}
+  {% if kpis is defined and kpis | length > 0 %}
+  <div class="kpi-grid">
+    {% for kpi in kpis %}
+    <div class="kpi-card {{ kpi.color | default('blue') }}">
+      <div class="kpi-label">
+        <span class="lang-en">{{ kpi.label_en }}</span>
+        <span class="lang-zh" style="display:none">{{ kpi.label_zh | default(kpi.label_en) }}</span>
+      </div>
+      <div class="kpi-value"{% if kpi.value | length > 6 %} style="font-size:18px"{% endif %}>
+        {% if kpi.value_zh is defined %}
+        <span class="lang-en">{{ kpi.value }}</span>
+        <span class="lang-zh" style="display:none">{{ kpi.value_zh }}</span>
+        {% else %}
+        {{ kpi.value }}
+        {% endif %}
+      </div>
+      {% if kpi.sub_en is defined and kpi.sub_en %}
+      <span class="kpi-badge {{ kpi.badge_class | default('') }}">
+        <span class="lang-en">{{ kpi.sub_en }}</span>
+        <span class="lang-zh" style="display:none">{{ kpi.sub_zh | default(kpi.sub_en) }}</span>
+      </span>
+      {% endif %}
+      {% if kpi.source is defined %}
+      <div class="kpi-source">{{ kpi.source }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Chart sections — rendered dynamically from charts data #}
+  {% for chart_id, chart in charts.items() %}
+  {% if chart.page == 'valuation' %}
+
+  {# Full-width charts get their own chart-grid, two-col charts are paired #}
+  {% if chart.layout is defined and chart.layout == 'full' %}
+  <div class="chart-grid">
+  {% elif chart.layout is defined and chart.layout == 'half-start' %}
+  <div class="chart-grid two-col">
+  {% endif %}
+
+    <div class="chart-card">
+      <h3>
+        <span class="lang-en">{{ chart.title_en }}</span>
+        <span class="lang-zh" style="display:none">{{ chart.title_zh | default(chart.title_en) }}</span>
+      </h3>
+      {% if chart.subtitle_en is defined %}
+      <p class="chart-subtitle">
+        <span class="lang-en">{{ chart.subtitle_en }}</span>
+        <span class="lang-zh" style="display:none">{{ chart.subtitle_zh | default(chart.subtitle_en) }}</span>
+      </p>
+      {% endif %}
+      <div style="position:relative;height:{{ chart.height | default(220) }}px;">
+        <div id="{{ chart_id }}" style="width:100%;height:100%"></div>
+      </div>
+      {% if chart.insight_en is defined %}
+      <div class="insight-box"{% if chart.insight_color is defined %} style="border-left-color:{{ chart.insight_color }}"{% endif %}>
+        <span class="lang-en">{{ chart.insight_en }}</span>
+        <span class="lang-zh" style="display:none">{{ chart.insight_zh | default(chart.insight_en) }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+  {% if chart.layout is defined and (chart.layout == 'full' or chart.layout == 'half-end') %}
+  </div>
+  {% endif %}
+
+  {% endif %}
+  {% endfor %}
+
+  {# Valuation Framework Summary #}
+  {% if data.valuation_framework is defined and data.valuation_framework | length > 0 %}
+  <h2 class="section-heading">
+    <span class="lang-en">Valuation Framework Summary</span>
+    <span class="lang-zh" style="display:none">估值框架總結</span>
+  </h2>
+  <div class="summary-grid">
+    {% for card in data.valuation_framework %}
+    <div class="summary-card {{ card.color | default('green') }}-left">
+      <h4>
+        <span class="lang-en">{{ card.title_en }}</span>
+        <span class="lang-zh" style="display:none">{{ card.title_zh | default(card.title_en) }}</span>
+      </h4>
+      <p>
+        <span class="lang-en">{{ card.text_en }}</span>
+        <span class="lang-zh" style="display:none">{{ card.text_zh | default(card.text_en) }}</span>
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Source Footer #}
+  {% if data.source_footer is defined %}
+  <div class="source-footer">
+    <span class="lang-en">{{ data.source_footer.en }}</span>
+    <span class="lang-zh" style="display:none">{{ data.source_footer.zh | default(data.source_footer.en) }}</span>
+  </div>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block base_scripts %}
+var DATA = {{ charts | tojson }};
+
+function initCharts(lang) {
+  var page = 'valuation';
+
+  Object.keys(DATA).forEach(function(id) {
+    var cfg = DATA[id];
+    if (cfg.page !== page) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+
+    var chart = echarts.init(el);
+    allCharts.push(chart);
+
+    /* Radar chart */
+    if (cfg.type === 'radar') {
+      var indicators = (cfg.indicators || []).map(function(ind) {
+        return { name: (lang === 'zh' ? (ind.name_zh || ind.name_en) : ind.name_en) + '\n/ ' + (lang === 'zh' ? ind.name_en : (ind.name_zh || '')), max: ind.max || 10 };
+      });
+      var seriesData = (cfg.datasets || []).map(function(ds) {
+        var obj = {
+          name: ds.name,
+          value: ds.data,
+          lineStyle: { color: ds.color, width: 2 },
+          itemStyle: { color: ds.color },
+          areaStyle: { color: ds.color.replace(')', ',0.1)').replace('rgb', 'rgba') },
+          symbol: 'circle', symbolSize: 5
+        };
+        if (ds.lineType === 'dashed') obj.lineStyle.type = 'dashed';
+        return obj;
+      });
+      chart.setOption({
+        tooltip: { trigger: 'item' },
+        legend: Object.assign({}, baseLegend, { data: cfg.datasets.map(function(d){ return d.name; }) }),
+        radar: {
+          center: ['50%','52%'], radius: '58%', nameGap: 8,
+          name: { textStyle: { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 10 } },
+          indicator: indicators,
+          shape: 'polygon',
+          splitLine: { lineStyle: { color: C.grid } },
+          splitArea: { show: false },
+          axisLine: { lineStyle: { color: C.grid } }
+        },
+        series: [{ type: 'radar', data: seriesData }]
+      });
+      return;
+    }
+
+    /* Standard charts: line, bar, bar+line */
+    var labels = cfg.labels || [];
+    if (cfg.labels_en && cfg.labels_zh) {
+      labels = lang === 'zh' ? cfg.labels_zh : cfg.labels_en;
+    }
+
+    var isHorizontalBar = (cfg.type || '').indexOf('horizontal') >= 0 ||
+                          (cfg.type || '').indexOf('bar (horizontal') >= 0;
+
+    var series = (cfg.datasets || []).map(function(ds, i) {
+      var s = {
+        name: ds.name_en ? (lang === 'zh' ? (ds.name_zh || ds.name_en) : ds.name_en) : ds.name,
+        type: ds.type || 'line',
+        data: ds.data
+      };
+
+      if (ds.color) {
+        s.lineStyle = { color: ds.color, width: 2 };
+        s.itemStyle = { color: ds.color };
+      }
+      if (ds.lineType === 'dashed') {
+        s.lineStyle = s.lineStyle || {};
+        s.lineStyle.type = 'dashed';
+      }
+      if (ds.step) s.step = ds.step;
+      if (ds.yAxisIndex !== undefined) s.yAxisIndex = ds.yAxisIndex;
+      if (ds.smooth) s.smooth = ds.smooth;
+
+      if (s.type === 'line') {
+        s.symbol = 'circle';
+        s.symbolSize = 6;
+        if (ds.areaStyle) s.areaStyle = ds.areaStyle;
+      }
+      if (s.type === 'bar') {
+        s.barMaxWidth = 25;
+        /* Color-code bar data by value thresholds if provided */
+        if (cfg.barColorThresholds) {
+          var thr = cfg.barColorThresholds;
+          s.data = ds.data.map(function(v) {
+            var clr = v > (thr.red || 999) ? C.red : v > (thr.orange || 999) ? C.orange : (ds.color || C.navy);
+            return { value: v, itemStyle: { color: clr, borderRadius: isHorizontalBar ? [0,4,4,0] : [4,4,0,0] } };
+          });
+        }
+        if (ds.showLabel !== false) {
+          s.label = { show: true, position: isHorizontalBar ? 'right' : 'top', formatter: cfg.labelFormat || '{c}', fontSize: 10, fontFamily: 'Inter' };
+        }
+      }
+
+      return s;
+    });
+
+    var option = {
+      tooltip: Object.assign({}, baseTooltip, isHorizontalBar ? { trigger: 'axis', axisPointer: { type: 'shadow' } } : {}),
+      grid: isHorizontalBar
+        ? { left: 90, right: 50, top: 10, bottom: 20, containLabel: false }
+        : baseGrid
+    };
+
+    /* Legend */
+    if (series.length > 1) {
+      option.legend = Object.assign({}, baseLegend, { data: series.map(function(s){ return s.name; }) });
+    }
+
+    /* Axes */
+    if (isHorizontalBar) {
+      option.xAxis = mkAxis({ type: 'value', min: cfg.xMin || 0, max: cfg.xMax || undefined });
+      option.yAxis = mkAxis({
+        type: 'category',
+        data: labels,
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      });
+    } else {
+      option.xAxis = mkAxis({ type: 'category', data: labels });
+      var yAxes = [];
+      var hasSecondY = series.some(function(s){ return s.yAxisIndex === 1; });
+      yAxes.push(mkAxis({ type: 'value', axisLabel: cfg.yFormat ? Object.assign({}, baseText, { formatter: cfg.yFormat }) : baseText }));
+      if (hasSecondY) {
+        yAxes.push(mkAxis({ type: 'value', position: 'right', axisLabel: baseText, splitLine: { show: false } }));
+      }
+      option.yAxis = yAxes.length === 1 ? yAxes[0] : yAxes;
+      if (cfg.yMin !== undefined) option.yAxis.min = cfg.yMin;
+      if (cfg.yMax !== undefined) option.yAxis.max = cfg.yMax;
+    }
+
+    /* Mark lines */
+    if (cfg.markLine && series.length > 0) {
+      var mlIdx = cfg.markLine.seriesIndex || 0;
+      if (!series[mlIdx].markLine) {
+        series[mlIdx].markLine = {
+          silent: true, symbol: 'none',
+          lineStyle: { color: cfg.markLine.color || C.red, type: 'dashed', width: 1 },
+          label: { formatter: cfg.markLine.label || '', fontSize: 9, color: cfg.markLine.color || C.red },
+          data: [isHorizontalBar ? { xAxis: cfg.markLine.xAxis } : { yAxis: cfg.markLine.yAxis || cfg.markLine.xAxis }]
+        };
+      }
+    }
+
+    option.series = series;
+    chart.setOption(option);
+  });
+}
+{% endblock %}

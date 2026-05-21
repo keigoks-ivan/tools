@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taoyuan Deep Dive | Taiwan Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+    .toc-box{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;margin:0 0 24px;font-family:'Inter',sans-serif;overflow:hidden}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;font-size:12px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none;background:#f4f7fc}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:13px;cursor:pointer;padding:0;line-height:1;transition:transform .2s}
+    .toc-list{padding:8px 16px 12px;display:flex;flex-direction:column;gap:2px}
+    .toc-list a{font-size:12px;color:#2c3e50;text-decoration:none;padding:5px 8px 5px 10px;border-radius:4px;border-left:2px solid transparent;display:block;transition:all .15s;font-family:Georgia,serif}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;color:#1e3a5f}
+    .toc-collapsed .toc-list{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    /* -- Side Progress Nav -- */
+    .side-nav{position:fixed;top:50%;right:max(16px, calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-inline .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:8px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .chart-note.red{color:#dc2626}
+    .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+    .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+    .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+    .report-chart-card .chart-meta{font-family:'Inter',sans-serif;font-size:11px;color:#d97706;margin-bottom:8px}
+    .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+    .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+    @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+    .kpi-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+    .kpi-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:14px 16px;border-left:3px solid #1e3a5f}
+    .kpi-card.blue{border-left-color:#2563eb}.kpi-card.green{border-left-color:#16a34a}.kpi-card.orange{border-left-color:#d97706}.kpi-card.red{border-left-color:#dc2626}
+    .kpi-label{font-family:'Inter',sans-serif;font-size:11px;color:#5a7a9a;margin-bottom:4px}
+    .kpi-value{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:#1e3a5f;margin-bottom:2px}
+    .kpi-badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 6px;border-radius:3px;display:inline-block}
+    .badge-red{background:#fef2f2;color:#dc2626}.badge-orange{background:#fffbeb;color:#d97706}.badge-green{background:#f0fdf4;color:#16a34a}.badge-blue{background:#eff6ff;color:#2563eb}
+    .city-card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+    .city-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;border-left:3px solid #1e3a5f}
+    .city-card h4{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#1e3a5f;margin:0 0 6px}
+    .city-card .city-price{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+    .city-card .city-yield{font-family:'JetBrains Mono',monospace;font-size:11px;color:#16a34a;margin-bottom:6px}
+    .city-card p{font-family:Georgia,serif;font-size:13px;line-height:1.6;color:#2c3e50;margin:0}
+    .infra-table{width:100%;border-collapse:collapse;margin:20px 0;font-family:'Inter',sans-serif;font-size:12px}
+    .infra-table th{background:#f4f7fc;color:#1e3a5f;font-weight:600;padding:8px 10px;border:1px solid #dde8f2;text-align:left;font-size:11px}
+    .infra-table td{padding:7px 10px;border:1px solid #dde8f2;color:#2c3e50}
+    .infra-table tr:hover{background:#f9fbfd}
+    .status-done{color:#16a34a;font-weight:600}.status-wip{color:#d97706;font-weight:600}.status-plan{color:#5a7a9a;font-weight:600}
+    .scenario-table{width:100%;border-collapse:collapse;margin:16px 0;font-family:'Inter',sans-serif;font-size:12px}
+    .scenario-table th{background:#f4f7fc;color:#1e3a5f;font-weight:600;padding:8px 10px;border:1px solid #dde8f2;text-align:center;font-size:11px}
+    .scenario-table td{padding:7px 10px;border:1px solid #dde8f2;text-align:center;color:#2c3e50}
+    .scenario-table .opt{background:#f0fdf4;color:#16a34a;font-weight:600}
+    .scenario-table .base{background:#eff6ff;color:#2563eb;font-weight:600}
+    .scenario-table .pess{background:#fef2f2;color:#dc2626;font-weight:600}
+    .monitor-table{width:100%;border-collapse:collapse;margin:16px 0;font-family:'Inter',sans-serif;font-size:12px}
+    .monitor-table th{background:#f4f7fc;color:#1e3a5f;font-weight:600;padding:8px 10px;border:1px solid #dde8f2;text-align:left;font-size:11px}
+    .monitor-table td{padding:7px 10px;border:1px solid #dde8f2;color:#2c3e50}
+    .monitor-table tr:hover{background:#f9fbfd}
+    @media(max-width:768px){.kpi-grid-3{grid-template-columns:1fr}.city-card-grid{grid-template-columns:1fr}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script>
+  function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+  function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+  </script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <div class="report-container">
+    <nav class="side-nav" id="sideNav">
+      <a href="#sec-exec" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Exec Summary</span>
+        <span class="side-nav-label lang-zh" style="display:none">執行摘要</span>
+      </a>
+      <a href="#sec-population" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Population</span>
+        <span class="side-nav-label lang-zh" style="display:none">人口磁鐵</span>
+      </a>
+      <a href="#sec-districts" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Key Districts</span>
+        <span class="side-nav-label lang-zh" style="display:none">重點區域</span>
+      </a>
+      <a href="#sec-qingpu" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Qingpu Zone</span>
+        <span class="side-nav-label lang-zh" style="display:none">青埔特區</span>
+      </a>
+      <a href="#sec-supply" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Supply-Demand</span>
+        <span class="side-nav-label lang-zh" style="display:none">供需平衡</span>
+      </a>
+      <a href="#sec-forecast" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Price Forecast</span>
+        <span class="side-nav-label lang-zh" style="display:none">價格預測</span>
+      </a>
+      <a href="#sec-policy" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Policy Impact</span>
+        <span class="side-nav-label lang-zh" style="display:none">政策影響</span>
+      </a>
+      <a href="#sec-outlook" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Outlook</span>
+        <span class="side-nav-label lang-zh" style="display:none">展望</span>
+      </a>
+    </nav>
+    <div class="report-header">
+      <div class="lang-en">
+        <h1>TAOYUAN &mdash; DEEP DIVE</h1>
+        <div class="report-meta">April 2026 &middot; Data: MOI / Taoyuan Civil Affairs / Leju / Yongqing / CBC</div>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <h1>桃園&mdash;&mdash;深度分析</h1>
+        <div class="report-meta">2026年4月 &middot; 資料來源：內政部 / 桃園市民政局 / 樂居 / 永慶 / 央行</div>
+      </div>
+    </div>
+    <div class="report-body">
+
+      <div class="toc-box" id="tocBox">
+        <div class="toc-header" onclick="toggleToc()">
+          <span class="lang-en">In This Report</span><span class="lang-zh" style="display:none">本報告涵蓋</span>
+          <button class="toc-toggle">&#9650;</button>
+        </div>
+        <div class="toc-list">
+          <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+          <a href="#sec-population" onclick="closeTocMobile()"><span class="lang-en">2. Population Magnet</span><span class="lang-zh" style="display:none">2. 人口磁鐵效應</span></a>
+          <a href="#sec-districts" onclick="closeTocMobile()"><span class="lang-en">3. Key Districts</span><span class="lang-zh" style="display:none">3. 重點行政區</span></a>
+          <a href="#sec-qingpu" onclick="closeTocMobile()"><span class="lang-en">4. Qingpu Special Zone</span><span class="lang-zh" style="display:none">4. 青埔高鐵特區</span></a>
+          <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">5. Supply-Demand Balance</span><span class="lang-zh" style="display:none">5. 供需平衡</span></a>
+          <a href="#sec-forecast" onclick="closeTocMobile()"><span class="lang-en">6. Price Forecast</span><span class="lang-zh" style="display:none">6. 價格預測</span></a>
+          <a href="#sec-policy" onclick="closeTocMobile()"><span class="lang-en">7. Policy Impact</span><span class="lang-zh" style="display:none">7. 政策影響</span></a>
+          <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">8. Outlook</span><span class="lang-zh" style="display:none">8. 展望</span></a>
+        </div>
+      </div>
+
+      <!-- ===== 1. EXECUTIVE SUMMARY ===== -->
+      <h2 id="sec-exec"><span class="lang-en">1. EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">1. 執行摘要</span></h2>
+
+      <div class="lang-en">
+        <p>Taoyuan is Taiwan's fastest-growing city by population (<strong>+21,203</strong> net migration/year, highest nationally) and the most affordable among six cities (<strong>PIR 8.65x</strong>, lowest). Average age ~<strong>37.5 years</strong> (youngest). But it faces the highest new construction supply pressure &mdash; old housing share is only <strong>40.7%</strong> (lowest, meaning most supply is pure new build, not replacement). Unsold inventory: <strong>1.9万 units</strong>. 2025 transactions <strong>-20% YoY</strong>.</p>
+        <p>The Qingpu HSR special zone is the market's bellwether: pre-sale volume crashed <strong>-93.4%</strong> at A18, new case sales progress only <strong>21%</strong>. Short-term oversupply is severe, but long-term fundamentals (population growth, HSR 19min to Taipei, Airport MRT, Cathay NT$26B station-front project) remain compelling.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>桃園是台灣人口增長最快的城市（年淨遷入<strong>+21,203</strong>人，全國最高）且六都中最可負擔（<strong>PIR 8.65倍</strong>，最低）。平均年齡約<strong>37.5歲</strong>（最年輕）。但面臨最高的新建供給壓力&mdash;&mdash;老屋比例僅<strong>40.7%</strong>（最低，意味大部分供給是純新建而非替換）。餘屋<strong>1.9萬戶</strong>。2025年成交<strong>-20%</strong>。</p>
+        <p>青埔高鐵特區是市場風向球：A18預售量暴跌<strong>-93.4%</strong>，新案銷售進度僅<strong>21%</strong>。短期供過於求嚴重，但長期基本面（人口增長、高鐵19分鐘到台北、機場捷運、國泰260億站前計畫）仍具說服力。</p>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid-3">
+        <div class="kpi-card green">
+          <div class="kpi-label"><span class="lang-en">POP NET INFLOW</span><span class="lang-zh" style="display:none">人口淨遷入</span></div>
+          <div class="kpi-value">+21,203<span style="font-size:12px">/yr</span></div>
+          <span class="kpi-badge badge-green"><span class="lang-en">Highest nationally</span><span class="lang-zh" style="display:none">全國最高</span></span>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label"><span class="lang-en">PIR</span><span class="lang-zh" style="display:none">房價所得比</span></div>
+          <div class="kpi-value">8.65x</div>
+          <span class="kpi-badge badge-green"><span class="lang-en">Six-city lowest</span><span class="lang-zh" style="display:none">六都最低</span></span>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-label"><span class="lang-en">AVG AGE</span><span class="lang-zh" style="display:none">平均年齡</span></div>
+          <div class="kpi-value">37.5<span style="font-size:12px">yr</span></div>
+          <span class="kpi-badge badge-blue"><span class="lang-en">Youngest city</span><span class="lang-zh" style="display:none">六都最年輕</span></span>
+        </div>
+        <div class="kpi-card orange">
+          <div class="kpi-label"><span class="lang-en">UNSOLD INVENTORY</span><span class="lang-zh" style="display:none">餘屋庫存</span></div>
+          <div class="kpi-value">1.9<span style="font-size:12px">万</span></div>
+          <span class="kpi-badge badge-orange"><span class="lang-en">High supply pressure</span><span class="lang-zh" style="display:none">高供給壓力</span></span>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-label"><span class="lang-en">QINGPU A18 VOLUME</span><span class="lang-zh" style="display:none">青埔A18成交量</span></div>
+          <div class="kpi-value">-93.4%</div>
+          <span class="kpi-badge badge-red">YoY</span>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label"><span class="lang-en">7YR CUMULATIVE MIGRATION</span><span class="lang-zh" style="display:none">7年累計淨遷入</span></div>
+          <div class="kpi-value">+126K</div>
+          <span class="kpi-badge badge-green"><span class="lang-en">Structural inflow</span><span class="lang-zh" style="display:none">結構性流入</span></span>
+        </div>
+      </div>
+
+      <!-- ===== 2. POPULATION MAGNET ===== -->
+      <h2 id="sec-population"><span class="lang-en">2. POPULATION MAGNET</span><span class="lang-zh" style="display:none">2. 人口磁鐵效應</span></h2>
+
+      <div class="lang-en">
+        <p>Taoyuan's 7-year cumulative net migration: <strong>+126,000</strong> people. Population <strong>2,355,512</strong> (Feb 2026). The primary driver: Taipei price refugees seeking HSR-commutable affordable housing. Taoyuan PIR <strong>8.65x</strong> vs Taipei <strong>16.43x</strong> &mdash; nearly half the burden. Average age <strong>37.5</strong> (youngest among six cities, elderly share only <strong>14&ndash;15%</strong>). Population projected to continue growing through 2035+.</p>
+        <p>This demographic advantage is Taoyuan's single most important structural support: a growing, young, working-age population creates persistent baseline demand that no other Taiwanese city can match outside of Hsinchu's tech corridor.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>桃園7年累計淨遷入：<strong>+126,000</strong>人。人口<strong>2,355,512</strong>（2026年2月）。主要驅動力：台北房價難民尋找高鐵通勤可負擔住宅。桃園PIR <strong>8.65倍</strong> vs 台北<strong>16.43倍</strong>&mdash;&mdash;負擔幾乎減半。平均年齡<strong>37.5歲</strong>（六都最年輕，老年比僅<strong>14&ndash;15%</strong>）。人口預計持續增長至2035年+。</p>
+        <p>這項人口優勢是桃園最重要的結構性支撐：持續增長的年輕工作人口創造基本面需求，在新竹科技走廊以外，台灣沒有其他城市能匹及。</p>
+      </div>
+
+      <!-- Population Migration Chart -->
+      <div class="report-chart-grid">
+        <div class="report-chart-card" style="grid-column:span 2">
+          <h4><span class="lang-en">Taoyuan Population Net Migration (K)</span><span class="lang-zh" style="display:none">桃園人口淨遷入（千人）</span></h4>
+          <div class="chart-meta"><span class="lang-en">Source: Taoyuan Civil Affairs, 2019&ndash;2025</span><span class="lang-zh" style="display:none">資料：桃園市民政局，2019&ndash;2025</span></div>
+          <div style="position:relative;height:220px;"><div id="chartTYMigration" style="width:100%;height:100%"></div></div>
+        </div>
+      </div>
+
+      <!-- ===== 3. KEY DISTRICTS ===== -->
+      <h2 id="sec-districts"><span class="lang-en">3. KEY DISTRICTS</span><span class="lang-zh" style="display:none">3. 重點行政區</span></h2>
+
+      <div class="lang-en">
+        <p>Taoyuan's property market is geographically segmented into four distinct zones, each with different price dynamics, buyer profiles, and risk levels.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>桃園房市在地理上分為四個不同區域，各有不同的價格動態、買方結構及風險水準。</p>
+      </div>
+
+      <div class="city-card-grid">
+        <div class="city-card" style="border-left-color:#2563eb">
+          <h4><span class="lang-en">Zhongli / Industrial Hub</span><span class="lang-zh" style="display:none">中壢 / 工業重鎮</span></h4>
+          <div class="city-price">NT$30&ndash;38<span style="font-size:12px">万/坪</span></div>
+          <div class="city-yield"><span class="lang-en">Yield ~3.2%</span><span class="lang-zh" style="display:none">租金報酬率 ~3.2%</span></div>
+          <p><span class="lang-en">Zhongli Industrial Zone anchors employment. Stable rental demand from factory workers and tech employees. Moderate oversupply risk.</span><span class="lang-zh" style="display:none">中壢工業區支撐就業。工廠員工與科技從業人員帶來穩定租賃需求。供過於求風險中等。</span></p>
+        </div>
+        <div class="city-card" style="border-left-color:#1e3a5f">
+          <h4><span class="lang-en">Taoyuan District / City Center</span><span class="lang-zh" style="display:none">桃園區 / 市中心</span></h4>
+          <div class="city-price">NT$28&ndash;35<span style="font-size:12px">万/坪</span></div>
+          <div class="city-yield"><span class="lang-en">Yield ~3.0%</span><span class="lang-zh" style="display:none">租金報酬率 ~3.0%</span></div>
+          <p><span class="lang-en">Administrative center with mature infrastructure. MRT Green Line (2028) will boost connectivity. Price upside limited by older housing stock.</span><span class="lang-zh" style="display:none">行政中心，基礎設施成熟。捷運綠線（2028年）將提升聯通性。老屋多限制價格上行空間。</span></p>
+        </div>
+        <div class="city-card" style="border-left-color:#16a34a">
+          <h4><span class="lang-en">Guishan / A7 / Affordable Entry</span><span class="lang-zh" style="display:none">龜山 / A7 / 平價入場</span></h4>
+          <div class="city-price">NT$25&ndash;32<span style="font-size:12px">万/坪</span></div>
+          <div class="city-yield"><span class="lang-en">Yield ~3.5%</span><span class="lang-zh" style="display:none">租金報酬率 ~3.5%</span></div>
+          <p><span class="lang-en">Linkou spillover zone. A7 new town attracts young families priced out of New Taipei. Strong first-time buyer demand. Most affordable entry among HSR-corridor zones.</span><span class="lang-zh" style="display:none">林口外溢區。A7新市鎮吸引被新北房價擠出的年輕家庭。首購需求強勁。高鐵走廊中最可負擔的入場點。</span></p>
+        </div>
+        <div class="city-card" style="border-left-color:#dc2626">
+          <h4><span class="lang-en">Bade / Yangmei / Peripheral</span><span class="lang-zh" style="display:none">八德 / 楊梅 / 外圍區</span></h4>
+          <div class="city-price">NT$18&ndash;25<span style="font-size:12px">万/坪</span></div>
+          <div class="city-yield"><span class="lang-en">Yield ~4.0%</span><span class="lang-zh" style="display:none">租金報酬率 ~4.0%</span></div>
+          <p><span class="lang-en">Peripheral districts with HIGH oversupply risk. Low-price speculative builds. Liquidity thin. Distressed sales most likely to emerge here first.</span><span class="lang-zh" style="display:none">外圍區域，供過於求風險高。低價投機建案多。流動性薄弱。法拍屋最可能先從此區浮現。</span></p>
+        </div>
+      </div>
+
+      <!-- ===== 4. QINGPU SPECIAL ZONE ===== -->
+      <h2 id="sec-qingpu"><span class="lang-en">4. QINGPU HSR SPECIAL ZONE</span><span class="lang-zh" style="display:none">4. 青埔高鐵特區</span></h2>
+
+      <div class="lang-en">
+        <p>Qingpu HSR Special Zone (<strong>490 hectares</strong>, A17/A18/A19 MRT stations) is Taiwan's most closely watched new development area. After a <strong>70&ndash;80%</strong> price surge in 5 years (2021 avg 30&ndash;38万 &rarr; 2025 avg 51&ndash;54万/ping), the market has entered correction phase.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>青埔高鐵特區（<strong>490公頃</strong>，A17/A18/A19捷運站）是台灣最受關注的新開發區。經歷5年<strong>70&ndash;80%</strong>漲幅（2021年均價30&ndash;38萬 &rarr; 2025年均價51&ndash;54萬/坪），市場已進入修正階段。</p>
+      </div>
+
+      <!-- Price Data -->
+      <div class="chart-inline">
+        <h4><span class="lang-en">QINGPU PRICE DATA (ACTUAL TRANSACTION REGISTRY)</span><span class="lang-zh" style="display:none">青埔價格數據（實價登錄）</span></h4>
+        <div class="chart-note orange"><span class="lang-en">All figures from MOI real-price registration system</span><span class="lang-zh" style="display:none">所有數據來自內政部實價登錄系統</span></div>
+        <table class="infra-table">
+          <tr>
+            <th><span class="lang-en">Metric</span><span class="lang-zh" style="display:none">指標</span></th>
+            <th><span class="lang-en">Value</span><span class="lang-zh" style="display:none">數值</span></th>
+          </tr>
+          <tr>
+            <td><span class="lang-en">2026 Q1 pre-sale avg</span><span class="lang-zh" style="display:none">2026 Q1 預售均價</span></td>
+            <td><strong>55&ndash;65</strong> <span style="font-size:11px">万/坪</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">A18 recent 1yr avg</span><span class="lang-zh" style="display:none">A18 近一年均價</span></td>
+            <td><strong>54.09</strong> <span style="font-size:11px">万/坪</span> <span style="color:#dc2626;font-size:11px">YoY -1.39% (first annual negative)</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">Area record high</span><span class="lang-zh" style="display:none">區域歷史高點</span></td>
+            <td><strong>79.05</strong> <span style="font-size:11px">万/坪</span> <span style="color:#5a7a9a;font-size:11px">(Li Pu Shui Yu penthouse, 2025 H1)</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">Resale (5yr new)</span><span class="lang-zh" style="display:none">中古屋（5年新）</span></td>
+            <td><strong>35&ndash;45</strong> <span style="font-size:11px">万/坪</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">Construction cost floor</span><span class="lang-zh" style="display:none">營建成本底線</span></td>
+            <td><strong>42&ndash;45</strong> <span style="font-size:11px">万/坪</span> <span style="color:#d97706;font-size:11px">(below this, builders delay)</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Volume Collapse -->
+      <div class="chart-inline">
+        <h4><span class="lang-en">VOLUME COLLAPSE</span><span class="lang-zh" style="display:none">成交量崩跌</span></h4>
+        <div class="chart-note red"><span class="lang-en">Market activity has effectively frozen</span><span class="lang-zh" style="display:none">市場活動實質凍結</span></div>
+        <table class="infra-table">
+          <tr>
+            <th><span class="lang-en">Metric</span><span class="lang-zh" style="display:none">指標</span></th>
+            <th><span class="lang-en">Value</span><span class="lang-zh" style="display:none">數值</span></th>
+          </tr>
+          <tr><td><span class="lang-en">A18 pre-sale volume YoY</span><span class="lang-zh" style="display:none">A18預售量YoY</span></td><td style="color:#dc2626;font-weight:600">-93.4%</td></tr>
+          <tr><td><span class="lang-en">New case sales progress</span><span class="lang-zh" style="display:none">新案銷售進度</span></td><td style="color:#dc2626;font-weight:600">~21% <span style="font-size:11px;color:#5a7a9a">(healthy &gt;50%)</span></td></tr>
+          <tr><td><span class="lang-en">Weekly visitors</span><span class="lang-zh" style="display:none">每週來客組數</span></td><td>~3&ndash;8 <span style="font-size:11px;color:#5a7a9a">(was 20+ at peak)</span></td></tr>
+          <tr><td><span class="lang-en">2025 estimated deliveries</span><span class="lang-zh" style="display:none">2025年預估交屋</span></td><td><strong>~3,336</strong> <span style="font-size:11px">units</span></td></tr>
+        </table>
+      </div>
+
+      <!-- Demand Structure -->
+      <div class="chart-inline">
+        <h4><span class="lang-en">DEMAND STRUCTURE</span><span class="lang-zh" style="display:none">需求結構</span></h4>
+        <table class="infra-table">
+          <tr>
+            <th><span class="lang-en">Buyer Segment</span><span class="lang-zh" style="display:none">買方類型</span></th>
+            <th><span class="lang-en">Share</span><span class="lang-zh" style="display:none">佔比</span></th>
+            <th><span class="lang-en">Trend</span><span class="lang-zh" style="display:none">趨勢</span></th>
+          </tr>
+          <tr><td><span class="lang-en">Local Taoyuan first-time</span><span class="lang-zh" style="display:none">桃園本地首購</span></td><td>~30%</td><td style="color:#d97706"><span class="lang-en">Declining</span><span class="lang-zh" style="display:none">下降中</span></td></tr>
+          <tr><td><span class="lang-en">Taipei spillover upgraders</span><span class="lang-zh" style="display:none">台北外溢換屋族</span></td><td>~25%</td><td style="color:#dc2626"><span class="lang-en">Down sharply (2nd home LTV 60%, no grace)</span><span class="lang-zh" style="display:none">大幅下降（第二戶LTV 60%，無寬限期）</span></td></tr>
+          <tr><td><span class="lang-en">Investment</span><span class="lang-zh" style="display:none">投資</span></td><td>~15%</td><td style="color:#dc2626"><span class="lang-en">Killed (unified tax 45% within 2yr)</span><span class="lang-zh" style="display:none">已被消滅（2年內房地合一45%）</span></td></tr>
+          <tr><td><span class="lang-en">Tech employment</span><span class="lang-zh" style="display:none">科技業就業</span></td><td>~15%</td><td style="color:#5a7a9a"><span class="lang-en">Flat</span><span class="lang-zh" style="display:none">持平</span></td></tr>
+          <tr><td><span class="lang-en">Aerotropolis plan</span><span class="lang-zh" style="display:none">航空城計畫</span></td><td>~15%</td><td style="color:#d97706"><span class="lang-en">HIGH uncertainty</span><span class="lang-zh" style="display:none">高度不確定</span></td></tr>
+        </table>
+      </div>
+
+      <!-- Infrastructure Scorecard -->
+      <div class="chart-inline">
+        <h4><span class="lang-en">INFRASTRUCTURE SCORECARD</span><span class="lang-zh" style="display:none">基礎建設計分卡</span></h4>
+        <table class="infra-table">
+          <tr>
+            <th><span class="lang-en">Status</span><span class="lang-zh" style="display:none">狀態</span></th>
+            <th><span class="lang-en">Infrastructure</span><span class="lang-zh" style="display:none">基礎建設</span></th>
+            <th><span class="lang-en">Assessment</span><span class="lang-zh" style="display:none">評估</span></th>
+          </tr>
+          <tr>
+            <td class="status-done"><span class="lang-en">COMPLETED</span><span class="lang-zh" style="display:none">已完工</span></td>
+            <td><span class="lang-en">Gloria Outlets, IKEA, Xpark, Shin Kong Cinema, COZZI Blu</span><span class="lang-zh" style="display:none">華泰名品城、IKEA、Xpark、新光影城、和逸飯店</span></td>
+            <td style="color:#5a7a9a"><span class="lang-en">Fully priced in</span><span class="lang-zh" style="display:none">已完全反映於價格</span></td>
+          </tr>
+          <tr>
+            <td class="status-wip"><span class="lang-en">UNDER CONSTR.</span><span class="lang-zh" style="display:none">施工中</span></td>
+            <td><span class="lang-en">Cathay Land Plaza B (2026), Taoyuan Museum of Art (2026 H2), Convention Center</span><span class="lang-zh" style="display:none">國泰置地廣場B棟（2026）、桃園市立美術館（2026下半年）、會展中心</span></td>
+            <td style="color:#d97706"><span class="lang-en">Partial pricing</span><span class="lang-zh" style="display:none">部分反映</span></td>
+          </tr>
+          <tr>
+            <td class="status-plan"><span class="lang-en">KEY LONG-TERM</span><span class="lang-zh" style="display:none">關鍵長期</span></td>
+            <td><span class="lang-en">Cathay Station Front Plaza (NT$26B, 7 towers office+hotel, Phase 1: 2030&ndash;31)</span><span class="lang-zh" style="display:none">國泰站前廣場（260億，7棟辦公+飯店，第一期：2030&ndash;31）</span></td>
+            <td style="color:#1e3a5f;font-weight:600"><span class="lang-en">BIGGEST catalyst</span><span class="lang-zh" style="display:none">最大催化劑</span></td>
+          </tr>
+          <tr>
+            <td class="status-wip"><span class="lang-en">TRANSIT</span><span class="lang-zh" style="display:none">交通</span></td>
+            <td><span class="lang-en">MRT Green Line (2028 sectional opening)</span><span class="lang-zh" style="display:none">捷運綠線（2028年部分通車）</span></td>
+            <td style="color:#d97706"><span class="lang-en">Moderate catalyst</span><span class="lang-zh" style="display:none">中度催化</span></td>
+          </tr>
+          <tr>
+            <td class="status-plan"><span class="lang-en">UNCERTAIN</span><span class="lang-zh" style="display:none">不確定</span></td>
+            <td><span class="lang-en">Asia Silicon Valley R&amp;D Center (under revision)</span><span class="lang-zh" style="display:none">亞洲矽谷研發中心（修正中）</span></td>
+            <td style="color:#dc2626"><span class="lang-en">HIGH uncertainty</span><span class="lang-zh" style="display:none">高度不確定</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="lang-en">
+        <p><strong>Assessment:</strong> All completed facilities are already fully priced in. No major new catalyst in the next 3 years. The Cathay Station Front Plaza (2030&ndash;31) is the key long-term driver that could justify current pre-sale premiums &mdash; but that is 4&ndash;5 years away.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p><strong>評估：</strong>所有已完工設施均已完全反映於價格。未來3年無重大新催化劑。國泰站前廣場（2030&ndash;31）是能支撐當前預售溢價的關鍵長期驅動力&mdash;&mdash;但還要4&ndash;5年。</p>
+      </div>
+
+      <!-- Mortgage Burden Test -->
+      <div class="chart-inline">
+        <h4><span class="lang-en">MORTGAGE BURDEN TEST</span><span class="lang-zh" style="display:none">房貸負擔壓力測試</span></h4>
+        <div class="chart-note red"><span class="lang-en">Main product: 30-35 ping 3BR + parking</span><span class="lang-zh" style="display:none">主力產品：30-35坪3房+車位</span></div>
+        <table class="infra-table">
+          <tr>
+            <th><span class="lang-en">Item</span><span class="lang-zh" style="display:none">項目</span></th>
+            <th><span class="lang-en">Value</span><span class="lang-zh" style="display:none">數值</span></th>
+          </tr>
+          <tr><td><span class="lang-en">Total price range</span><span class="lang-zh" style="display:none">總價區間</span></td><td><strong>NT$1,800&ndash;2,200万</strong></td></tr>
+          <tr><td><span class="lang-en">75% LTV monthly payment (2.3%)</span><span class="lang-zh" style="display:none">75%貸款月付（2.3%利率）</span></td><td><strong>NT$52,000&ndash;63,500</strong></td></tr>
+          <tr><td><span class="lang-en">Dual-income household income</span><span class="lang-zh" style="display:none">雙薪家庭月收入</span></td><td>~NT$120,000&ndash;150,000</td></tr>
+          <tr><td><span class="lang-en">Payment/income ratio</span><span class="lang-zh" style="display:none">房貸收入比</span></td><td style="color:#dc2626;font-weight:600">35&ndash;53% <span style="font-size:11px;color:#5a7a9a">(tight to high pressure)</span></td></tr>
+        </table>
+      </div>
+
+      <!-- ===== 5. SUPPLY-DEMAND BALANCE ===== -->
+      <h2 id="sec-supply"><span class="lang-en">5. SUPPLY-DEMAND BALANCE</span><span class="lang-zh" style="display:none">5. 供需平衡</span></h2>
+
+      <div class="lang-en">
+        <p>Taoyuan's supply-demand imbalance is the most severe among six cities. The combination of highest new construction ratio (lowest old housing share) and frozen transaction volume creates a prolonged digestion cycle.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>桃園的供需失衡是六都中最嚴重的。最高的新建比例（最低老屋佔比）加上凍結的交易量，造成漫長的去化週期。</p>
+      </div>
+
+      <table class="monitor-table">
+        <tr>
+          <th><span class="lang-en">Indicator</span><span class="lang-zh" style="display:none">指標</span></th>
+          <th><span class="lang-en">Value</span><span class="lang-zh" style="display:none">數值</span></th>
+          <th><span class="lang-en">Benchmark</span><span class="lang-zh" style="display:none">基準</span></th>
+          <th><span class="lang-en">Judgment</span><span class="lang-zh" style="display:none">判斷</span></th>
+        </tr>
+        <tr>
+          <td><span class="lang-en">A18 pre-sale YoY</span><span class="lang-zh" style="display:none">A18預售YoY</span></td>
+          <td style="color:#dc2626;font-weight:600">-93.4%</td>
+          <td><span class="lang-en">Stable</span><span class="lang-zh" style="display:none">穩定</span></td>
+          <td style="color:#dc2626;font-weight:600"><span class="lang-en">Frozen</span><span class="lang-zh" style="display:none">凍結</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Sales progress</span><span class="lang-zh" style="display:none">銷售進度</span></td>
+          <td style="color:#dc2626;font-weight:600">~21%</td>
+          <td>&gt;50%</td>
+          <td style="color:#dc2626;font-weight:600"><span class="lang-en">Severely low</span><span class="lang-zh" style="display:none">嚴重偏低</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">2025 deliveries</span><span class="lang-zh" style="display:none">2025交屋量</span></td>
+          <td>~3,336</td>
+          <td><span class="lang-en">Match demand</span><span class="lang-zh" style="display:none">匹配需求</span></td>
+          <td style="color:#d97706;font-weight:600"><span class="lang-en">Oversupply</span><span class="lang-zh" style="display:none">供過於求</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Builder pullback</span><span class="lang-zh" style="display:none">建商縮手</span></td>
+          <td style="color:#d97706">-30%+</td>
+          <td>&mdash;</td>
+          <td style="color:#d97706;font-weight:600"><span class="lang-en">Adjusting</span><span class="lang-zh" style="display:none">調整中</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Pop inflow</span><span class="lang-zh" style="display:none">人口流入</span></td>
+          <td style="color:#16a34a"><span class="lang-en">Positive</span><span class="lang-zh" style="display:none">正值</span></td>
+          <td>&mdash;</td>
+          <td style="color:#16a34a;font-weight:600"><span class="lang-en">Long-term support</span><span class="lang-zh" style="display:none">長期支撐</span></td>
+        </tr>
+      </table>
+
+      <!-- ===== 6. PRICE FORECAST ===== -->
+      <h2 id="sec-forecast"><span class="lang-en">6. PRICE FORECAST (3 SCENARIOS)</span><span class="lang-zh" style="display:none">6. 價格預測（三情境）</span></h2>
+
+      <div class="lang-en">
+        <p>Based on current transaction data, policy trajectory, and demographic trends, we project three scenarios for Qingpu pre-sale pricing. The base case (55% probability) anticipates a 5&ndash;8% correction through 2027H1, followed by gradual recovery as Cathay Station Front visibility increases.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>基於當前成交數據、政策走向及人口趨勢，我們對青埔預售價格提出三種情境預測。基本情境（55%機率）預期2027上半年前修正5&ndash;8%，隨後國泰站前廣場能見度提升，逐步復甦。</p>
+      </div>
+
+      <!-- Pre-sale Forecast Table -->
+      <div class="chart-inline">
+        <h4><span class="lang-en">PRE-SALE FORECAST (万/PING)</span><span class="lang-zh" style="display:none">預售價格預測（萬/坪）</span></h4>
+        <table class="scenario-table">
+          <tr>
+            <th><span class="lang-en">Period</span><span class="lang-zh" style="display:none">期間</span></th>
+            <th class="opt"><span class="lang-en">Optimistic</span><span class="lang-zh" style="display:none">樂觀</span></th>
+            <th class="base"><span class="lang-en">Base (55%)</span><span class="lang-zh" style="display:none">基本 (55%)</span></th>
+            <th class="pess"><span class="lang-en">Pessimistic</span><span class="lang-zh" style="display:none">悲觀</span></th>
+          </tr>
+          <tr>
+            <td>2026H2&ndash;2027H1</td>
+            <td>50&ndash;55 <span style="font-size:10px">(-3%~+2%)</span></td>
+            <td>47&ndash;52 <span style="font-size:10px">(-5%~-8%)</span></td>
+            <td>42&ndash;48 <span style="font-size:10px">(-10%~-15%)</span></td>
+          </tr>
+          <tr>
+            <td>2027H2&ndash;2028H1</td>
+            <td>52&ndash;58 <span style="font-size:10px">(+3%)</span></td>
+            <td>46&ndash;52 <span style="font-size:10px">(consolidation)</span></td>
+            <td>40&ndash;46 <span style="font-size:10px">(-5%)</span></td>
+          </tr>
+          <tr>
+            <td>2028H2&ndash;2029</td>
+            <td>55&ndash;62 <span style="font-size:10px">(+5~8%)</span></td>
+            <td>50&ndash;55 <span style="font-size:10px">(moderate recovery)</span></td>
+            <td>42&ndash;48 <span style="font-size:10px">(L-shaped)</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Resale forecast -->
+      <div class="chart-inline">
+        <h4><span class="lang-en">RESALE (5YR NEW) BASE CASE</span><span class="lang-zh" style="display:none">中古屋（5年新）基本情境</span></h4>
+        <div class="chart-note orange"><span class="lang-en">2026&ndash;27: 38&ndash;45万/ping, distressed may hit below 35万 | 2028&ndash;29: 40&ndash;48万/ping</span><span class="lang-zh" style="display:none">2026&ndash;27：38&ndash;45萬/坪，急售可能跌破35萬 | 2028&ndash;29：40&ndash;48萬/坪</span></div>
+      </div>
+
+      <!-- Trigger Conditions -->
+      <div class="lang-en">
+        <p><strong>Trigger conditions &mdash; Optimistic:</strong> LTV restored to 70%+, CBC rate cut, GDP growth 7%+, aerotropolis progress. <strong>Pessimistic:</strong> No loosening, developer defaults, distressed selling wave, recession.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p><strong>觸發條件&mdash;&mdash;樂觀：</strong>LTV恢復至70%+、央行降息、GDP成長7%+、航空城有進展。<strong>悲觀：</strong>政策不鬆綁、建商違約、法拍潮、經濟衰退。</p>
+      </div>
+
+      <!-- Forecast Chart -->
+      <div class="report-chart-grid">
+        <div class="report-chart-card" style="grid-column:span 2">
+          <h4><span class="lang-en">Qingpu Price Forecast (万/ping)</span><span class="lang-zh" style="display:none">青埔價格預測（萬/坪）</span></h4>
+          <div class="chart-meta"><span class="lang-en">3 scenarios: Optimistic / Base / Pessimistic, 2025&ndash;2029</span><span class="lang-zh" style="display:none">三情境：樂觀 / 基本 / 悲觀，2025&ndash;2029</span></div>
+          <div style="position:relative;height:260px;"><div id="chartTYForecast" style="width:100%;height:100%"></div></div>
+        </div>
+      </div>
+
+      <!-- ===== 7. POLICY IMPACT ===== -->
+      <h2 id="sec-policy"><span class="lang-en">7. POLICY IMPACT</span><span class="lang-zh" style="display:none">7. 政策影響</span></h2>
+
+      <div class="lang-en">
+        <p>Latest CBC update (<strong>2026/03/19</strong>): rate frozen 8th consecutive time. First loosening measure: 2nd home LTV <strong>50% &rarr; 60%</strong> (still no grace period). New Youth Loan expires <strong>Jul 2026</strong> (exit shock risk). Top-5 bank mortgage rate: <strong>2.327%</strong> (17-year high).</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>央行最新動態（<strong>2026/03/19</strong>）：連續第8次凍結利率。首次放寬措施：第二戶LTV <strong>50% &rarr; 60%</strong>（仍無寬限期）。新青安貸款<strong>2026年7月</strong>到期（退場衝擊風險）。五大銀行房貸利率：<strong>2.327%</strong>（17年新高）。</p>
+      </div>
+
+      <!-- Monitoring Indicators -->
+      <div class="chart-inline">
+        <h4><span class="lang-en">MONITORING INDICATORS</span><span class="lang-zh" style="display:none">監測指標</span></h4>
+        <table class="monitor-table">
+          <tr>
+            <th>#</th>
+            <th><span class="lang-en">Indicator</span><span class="lang-zh" style="display:none">指標</span></th>
+            <th><span class="lang-en">Signal</span><span class="lang-zh" style="display:none">訊號</span></th>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td><span class="lang-en">Qingpu quarterly pre-sale volume</span><span class="lang-zh" style="display:none">青埔季度預售量</span></td>
+            <td style="color:#16a34a"><span class="lang-en">2 consecutive quarters &gt;200 txn = turn positive</span><span class="lang-zh" style="display:none">連續2季&gt;200筆 = 轉正訊號</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><span class="lang-en">CBC LTV restored to 70%+</span><span class="lang-zh" style="display:none">央行LTV恢復至70%+</span></td>
+            <td style="color:#16a34a"><span class="lang-en">Clear upgrader return signal</span><span class="lang-zh" style="display:none">明確換屋族回歸訊號</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><span class="lang-en">Same-building resale price drop &gt;15%</span><span class="lang-zh" style="display:none">同棟中古跌幅&gt;15%</span></td>
+            <td style="color:#dc2626"><span class="lang-en">Risk alarm</span><span class="lang-zh" style="display:none">風險警報</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Buyer Recommendation -->
+      <div class="chart-inline">
+        <h4><span class="lang-en">BUYER RECOMMENDATION</span><span class="lang-zh" style="display:none">買方建議</span></h4>
+        <table class="infra-table">
+          <tr>
+            <th><span class="lang-en">Profile</span><span class="lang-zh" style="display:none">類型</span></th>
+            <th><span class="lang-en">Recommendation</span><span class="lang-zh" style="display:none">建議</span></th>
+          </tr>
+          <tr>
+            <td style="font-weight:600"><span class="lang-en">Self-use</span><span class="lang-zh" style="display:none">自用</span></td>
+            <td><span class="lang-en"><strong>2026&ndash;2027</strong> is the best bargaining window in 5 years. Start viewing and negotiating now. Target 8&ndash;12% below asking.</span><span class="lang-zh" style="display:none"><strong>2026&ndash;2027</strong>是5年來最佳議價窗口。立即開始看屋談判。目標比開價低8&ndash;12%。</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600"><span class="lang-en">Investment</span><span class="lang-zh" style="display:none">投資</span></td>
+            <td><span class="lang-en">Short-term (2&ndash;5yr) unworkable due to 35&ndash;45% tax. Hold 5yr+ (tax 20%): base case after-tax gain ~5&ndash;12%. Wait for 2027H2&ndash;2028H1 bottom confirmation.</span><span class="lang-zh" style="display:none">短期（2&ndash;5年）不可行，稅率35&ndash;45%。持有5年+（稅率20%）：基本情境稅後獲利約5&ndash;12%。等待2027下半年&ndash;2028上半年底部確認。</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ===== 8. OUTLOOK ===== -->
+      <h2 id="sec-outlook"><span class="lang-en">8. OUTLOOK</span><span class="lang-zh" style="display:none">8. 展望</span></h2>
+
+      <div class="lang-en">
+        <p><strong>Short-term (2026&ndash;2027):</strong> Qingpu oversupply persists for 1&ndash;2 years. Price correction <strong>5&ndash;15%</strong> depending on scenario. Base case 55% probability. Builder pullback of -30%+ in new launches partially self-corrects supply, but 3,336 unit delivery wave must be absorbed first.</p>
+        <p><strong>Long-term (2028&ndash;2032):</strong> Population growth + Cathay Station Front Plaza (Phase 1: 2030&ndash;31) + MRT Green Line (2028) = recovery to new highs by 2030&ndash;2032. Taoyuan as a whole: short-term pressure from supply overhang, long-term positive from population and affordability advantage. The city's structural edge &mdash; youngest demographics, lowest PIR, HSR connectivity &mdash; ensures it will outperform peripheral cities in the recovery cycle.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p><strong>短期（2026&ndash;2027）：</strong>青埔供過於求持續1&ndash;2年。價格修正<strong>5&ndash;15%</strong>視情境而定。基本情境55%機率。建商推案縮減-30%+部分自我修正供給，但3,336戶交屋潮須先消化。</p>
+        <p><strong>長期（2028&ndash;2032）：</strong>人口增長 + 國泰站前廣場（第一期：2030&ndash;31）+ 捷運綠線（2028）= 2030&ndash;2032年回復新高。桃園整體：短期承受供給壓力，長期受惠人口與可負擔優勢。這座城市的結構性優勢&mdash;&mdash;最年輕人口、最低PIR、高鐵聯通性&mdash;&mdash;確保它在復甦週期中將跑贏外圍城市。</p>
+      </div>
+
+      <div class="report-footer">
+        <p><span class="lang-en">Data sources: MOI Real Price Registration &middot; Taoyuan City Civil Affairs Bureau &middot; Leju &middot; Yongqing Research &middot; CBC &middot; 2025&ndash;2026</span><span class="lang-zh" style="display:none">數據來源：內政部實價登錄 &middot; 桃園市民政局 &middot; 樂居 &middot; 永慶研究院 &middot; 中央銀行 &middot; 2025&ndash;2026</span></p>
+        <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:'#1e3a5f', green:'#16a34a', orange:'#d97706',
+    red:'#dc2626', blue:'#2563eb', muted:'#5a7a9a',
+    grid:'#e8f0f9', text:'#1e3a5f'
+  };
+  function fmtPrice(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return 'NT$'+v+'\u842c';if(a>=1000000)return 'NT$'+(a/1000000).toFixed(2)+'M';return 'NT$'+Math.round(a/1000)+'K';}
+  function fmtPriceShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return v+'\u842c';if(a>=1000000)return(a/1000000).toFixed(1)+'M';return Math.round(a/1000)+'K';}
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+  var baseGrid = { left: 50, right: 20, top: 40, bottom: 30, containLabel: true };
+  var baseTooltip = {
+    trigger: 'axis', backgroundColor: '#fff',
+    borderColor: '#ccd9e8', borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+  var baseLegend = { top: 8, textStyle: baseText, icon: 'circle', itemWidth: 8, itemHeight: 8 };
+    function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+  var allCharts = [];
+
+  function toggleMarketMenu(){ document.getElementById('marketDropdown').classList.toggle('open'); }
+  document.addEventListener('click', function(e){ if(!e.target.closest('.market-selector')) document.getElementById('marketDropdown').classList.remove('open'); });
+
+  function setLang(lang){
+    localStorage.setItem('lang', lang);
+    document.querySelectorAll('.lang-en').forEach(function(el){ el.style.display = lang==='en' ? '' : 'none'; });
+    document.querySelectorAll('.lang-zh').forEach(function(el){ el.style.display = lang==='zh' ? '' : 'none'; });
+    document.querySelectorAll('.lang-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.lang===lang); });
+    allCharts.forEach(function(c){ c.dispose(); });
+    allCharts = [];
+    initCharts(lang);
+  }
+
+  function initCharts(lang){
+    var en = lang === 'en';
+
+    // 1. chartTYMigration - Population Net Migration Bar
+    (function(){
+      var dom = document.getElementById('chartTYMigration'); if(!dom) return;
+      var ch = echarts.init(dom); allCharts.push(ch);
+      var years = ['2019','2020','2021','2022','2023','2024','2025'];
+      var data = [15, 18, 20, 19, 21, 22, 21];
+      ch.setOption({
+        tooltip: baseTooltip,
+        grid: Object.assign({}, baseGrid, {bottom:36}),
+        xAxis: mkAxis({type:'category', data:years}),
+        yAxis: mkAxis({type:'value', name: en ? 'Net Migration (K)' : '淨遷入（千人）'}),
+        series: [{
+          type: 'bar',
+          data: data.map(function(v){
+            return {value:v, itemStyle:{color: v>=21 ? C.green : v>=19 ? C.navy : C.muted, borderRadius:[3,3,0,0]}};
+          }),
+          barMaxWidth: 35,
+          label: {show:true, position:'top', formatter:function(p){return p.value+'K';}, fontSize:10, color:C.navy}
+        }]
+      });
+    })();
+
+    // 2. chartTYForecast - Qingpu Price Forecast 3-scenario
+    (function(){
+      var dom = document.getElementById('chartTYForecast'); if(!dom) return;
+      var ch = echarts.init(dom); allCharts.push(ch);
+      var years = ['2025 H1','2025 H2','2026 H1','2026 H2','2027 H1','2027 H2','2028 H1','2028 H2','2029'];
+      // Optimistic scenario
+      var opt  = [54, 53, 52, 52.5, 53, 55, 56, 58, 60];
+      // Base case
+      var base = [54, 52, 50, 49, 48, 49, 49, 51, 53];
+      // Pessimistic
+      var pess = [54, 50, 47, 45, 44, 43, 43, 44, 45];
+      ch.setOption({
+        tooltip: baseTooltip,
+        legend: Object.assign({}, baseLegend, {
+          data: [
+            en ? 'Optimistic' : '樂觀',
+            en ? 'Base (55%)' : '基本 (55%)',
+            en ? 'Pessimistic' : '悲觀'
+          ]
+        }),
+        grid: Object.assign({}, baseGrid, {top:44, bottom:36}),
+        xAxis: mkAxis({type:'category', data:years, axisLabel: Object.assign({}, baseText, {rotate:25})}),
+        yAxis: mkAxis({type:'value', name: en ? '万/ping' : '萬/坪', min:38, max:65}),
+        series: [
+          {
+            name: en ? 'Optimistic' : '樂觀',
+            type: 'line',
+            data: opt,
+            lineStyle: {color:C.green, width:2},
+            itemStyle: {color:C.green},
+            symbol: 'circle', symbolSize: 5,
+            areaStyle: {color:'rgba(22,163,74,0.06)'}
+          },
+          {
+            name: en ? 'Base (55%)' : '基本 (55%)',
+            type: 'line',
+            data: base,
+            lineStyle: {color:C.blue, width:2.5},
+            itemStyle: {color:C.blue},
+            symbol: 'circle', symbolSize: 6
+          },
+          {
+            name: en ? 'Pessimistic' : '悲觀',
+            type: 'line',
+            data: pess,
+            lineStyle: {color:C.red, width:2, type:'dashed'},
+            itemStyle: {color:C.red},
+            symbol: 'circle', symbolSize: 5,
+            areaStyle: {color:'rgba(220,38,38,0.06)'}
+          }
+        ]
+      });
+    })();
+  }
+
+  window.addEventListener('load', function(){
+    var lang = localStorage.getItem('lang') || 'en';
+    setLang(lang);
+  });
+
+  window.addEventListener('resize', function(){
+    allCharts.forEach(function(c){ if(c) c.resize(); });
+  });
+
+  // -- Side Nav ScrollSpy --
+  (function(){
+    function initScrollSpy(){
+      var items = document.querySelectorAll('.side-nav-item');
+      if(!items.length) return;
+      var sections = [];
+      items.forEach(function(a){
+        var id = a.getAttribute('href').replace('#','');
+        var el = document.getElementById(id);
+        if(el) sections.push({el:el, a:a});
+      });
+      function onScroll(){
+        var scrollY = window.scrollY + window.innerHeight * 0.25;
+        var current = sections[0];
+        sections.forEach(function(s){
+          if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s;
+        });
+        items.forEach(function(a){ a.classList.remove('active'); });
+        if(current) current.a.classList.add('active');
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', initScrollSpy);
+    } else {
+      initScrollSpy();
+    }
+  })();
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

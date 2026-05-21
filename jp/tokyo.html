@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Tokyo Deep Dive | Japan Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="container">
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">LAST UPDATED: Q4 2024</span><span class="lang-zh" style="display:none">最後更新：2024年Q4</span></span>
+    <h1><span class="lang-en">Tokyo 23 Wards &mdash; Deep Dive</span><span class="lang-zh" style="display:none">東京23區深度分析</span></h1>
+    <p class="subtitle"><span class="lang-en">The World's Most Active Urban Property Market</span><span class="lang-zh" style="display:none">全球最活躍的都市房地產市場</span></p>
+  </div>
+
+  <div class="section-label"><span class="lang-en">KEY METRICS</span><span class="lang-zh" style="display:none">關鍵指標</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">NEW CONDO AVG</span><span class="lang-zh" style="display:none">新建公寓均價</span></div>
+      <div class="kpi-value"><span class="lang-en">&yen;94M</span><span class="lang-zh" style="display:none">9,400万円</span></div>
+      <span class="kpi-badge badge-blue"><span class="lang-en">23-Ward Average</span><span class="lang-zh" style="display:none">23區平均</span></span>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">RESALE MEDIAN</span><span class="lang-zh" style="display:none">中古成交中位數</span></div>
+      <div class="kpi-value"><span class="lang-en">&yen;92M</span><span class="lang-zh" style="display:none">9,200万円</span></div>
+      <span class="kpi-badge badge-blue"><span class="lang-en">23-Ward Median</span><span class="lang-zh" style="display:none">23區中位數</span></span>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">AVG PER SQM</span><span class="lang-zh" style="display:none">每平米均價</span></div>
+      <div class="kpi-value"><span class="lang-en">&yen;1.54M/sqm</span><span class="lang-zh" style="display:none">154万円/sqm</span></div>
+      <span class="kpi-badge badge-blue"><span class="lang-en">New Build</span><span class="lang-zh" style="display:none">新建</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">RENTAL YIELD</span><span class="lang-zh" style="display:none">租金收益率</span></div>
+      <div class="kpi-value">3.59%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Gross</span><span class="lang-zh" style="display:none">毛收益</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">RENT YoY</span><span class="lang-zh" style="display:none">租金年增率</span></div>
+      <div class="kpi-value">+6.4%</div>
+      <span class="kpi-badge badge-green">Q4 2024</span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">LAND PRICE YoY</span><span class="lang-zh" style="display:none">地價年增率</span></div>
+      <div class="kpi-value">+7.9%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Official Land Price</span><span class="lang-zh" style="display:none">公示地價</span></span>
+    </div>
+  </div>
+
+  <div class="section-label"><span class="lang-en">THREE ZONES</span><span class="lang-zh" style="display:none">三大分區</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="micro-card">
+      <h4><span class="lang-en">Zone 1: Center 5 (Minato/Chiyoda/Chuo/Shibuya/Shinjuku)</span><span class="lang-zh" style="display:none">第一區：都心5區（港／千代田／中央／渋谷／新宿）</span></h4>
+      <div class="kpi-value" style="font-size:18px;"><span class="lang-en">230&ndash;450</span><span class="lang-zh" style="display:none">230&ndash;450</span><span style="font-size:12px"><span class="lang-en"> &yen;M/sqm</span><span class="lang-zh" style="display:none"> 万円/sqm</span></span></div>
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Japan's most prestigious addresses. Global capital flows, trophy assets, ultra-prime luxury.</span><span class="lang-zh" style="display:none">日本最頂級地段。全球資本流入，頂級豪宅與稀缺資產。</span></p>
+    </div>
+    <div class="micro-card">
+      <h4><span class="lang-en">Zone 2: Yamanote Outer (Setagaya/Meguro/Nakano)</span><span class="lang-zh" style="display:none">第二區：山手線外側（世田谷／目黑／中野）</span></h4>
+      <div class="kpi-value" style="font-size:18px;">100&ndash;180<span style="font-size:12px"><span class="lang-en"> &yen;M/sqm</span><span class="lang-zh" style="display:none"> 万円/sqm</span></span></div>
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Residential quality areas with strong family demand. Best value within central Tokyo.</span><span class="lang-zh" style="display:none">高品質住宅區，家庭需求強勁。中央東京最佳性價比。</span></p>
+    </div>
+    <div class="micro-card">
+      <h4><span class="lang-en">Zone 3: Outer Wards (Adachi/Edogawa/Katsushika)</span><span class="lang-zh" style="display:none">第三區：外圍區（足立／江戸川／葛飾）</span></h4>
+      <div class="kpi-value" style="font-size:18px;">70&ndash;110<span style="font-size:12px"><span class="lang-en"> &yen;M/sqm</span><span class="lang-zh" style="display:none"> 万円/sqm</span></span></div>
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Affordable entry points with improving infrastructure. Yield-focused investors' target zone.</span><span class="lang-zh" style="display:none">入門價位區域，基礎建設持續改善。收益導向投資者目標區。</span></p>
+    </div>
+  </div>
+
+  <div class="section-label"><span class="lang-en">CHARTS</span><span class="lang-zh" style="display:none">圖表</span></div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Ward Land Price Comparison</span><span class="lang-zh" style="display:none">各區地價比較</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">万円/sqm &middot; Official Land Price 2025</span><span class="lang-zh" style="display:none">万円/sqm &middot; 2025年公示地價</span></p>
+      <div style="position:relative;height:280px;"><div id="chartTokyoWard" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Tokyo Rent Trend</span><span class="lang-zh" style="display:none">東京租金趨勢</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Average Rent &yen;/sqm</span><span class="lang-zh" style="display:none">平均租金 円/sqm</span></p>
+      <div style="position:relative;height:220px;"><div id="chartTokyoRent" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <div class="section-label"><span class="lang-en">SUMMARY</span><span class="lang-zh" style="display:none">總結</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div class="summary-card" style="border-left:4px solid #dc2626;">
+      <h4><span class="lang-en">Center 5 Premium</span><span class="lang-zh" style="display:none">都心5區溢價</span></h4>
+      <p><span class="lang-en">The Center 5 wards command a 3-5x premium over outer wards. Global institutional capital continues to flow into Minato, Chiyoda, and Shibuya trophy assets.</span><span class="lang-zh" style="display:none">都心5區對外圍區溢價達3至5倍。全球機構資本持續流入港區、千代田及渋谷頂級資產。</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #16a34a;">
+      <h4><span class="lang-en">Yamanote Value</span><span class="lang-zh" style="display:none">山手線價值帶</span></h4>
+      <p><span class="lang-en">Setagaya and Meguro offer strong residential fundamentals at 40-60% below center ward pricing. Family-oriented demand remains resilient.</span><span class="lang-zh" style="display:none">世田谷及目黑提供堅實住宅基本面，價格僅為都心區的40-60%。家庭導向需求持續穩健。</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #d97706;">
+      <h4><span class="lang-en">Outer Opportunity</span><span class="lang-zh" style="display:none">外圍區機會</span></h4>
+      <p><span class="lang-en">Adachi and Edogawa wards offer the highest yields in the 23-ward area. Infrastructure upgrades are narrowing the convenience gap with inner wards.</span><span class="lang-zh" style="display:none">足立及江戸川區提供23區內最高收益率。基礎建設升級正在縮小與內區的便利性差距。</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #2563eb;">
+      <h4><span class="lang-en">Foreign Capital</span><span class="lang-zh" style="display:none">外資動向</span></h4>
+      <p><span class="lang-en">Weak yen and BOJ rate normalization have attracted record foreign investment. Cross-border capital accounts for 30%+ of central Tokyo transactions above &yen;100M.</span><span class="lang-zh" style="display:none">日圓貶值及BOJ利率正常化吸引創紀錄外資。跨境資本佔中央東京1億円以上交易的30%以上。</span></p>
+    </div>
+  </div>
+
+  <div class="source-footer">
+    <span class="lang-en">REINS &middot; MLIT Land Price Survey &middot; Tokyo Kantei &middot; CBRE Japan Q4 2024<br><em>Not investment advice.</em></span>
+    <span class="lang-zh" style="display:none">REINS &middot; 國土交通省地價調査 &middot; 東京カンテイ &middot; CBRE Japan 2024年Q4<br><em>非投資建議。</em></span>
+  </div>
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtJPY(v,lang){lang=lang||localStorage.getItem('lang')||'en';if(lang==='zh'){if(v>=10000)return(v/10000).toFixed(0)+'\u5104\u5186';return v+'\u4e07\u5186';}var a=v*10000;if(a>=100000000)return '\u00a5'+(a/100000000).toFixed(1)+'B';if(a>=1000000)return '\u00a5'+(a/1000000).toFixed(1)+'M';return '\u00a5'+Math.round(a/1000)+'K';}
+function fmtJPYShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh'){if(v>=10000)return(v/10000).toFixed(1)+'\u5104';return v+'\u4e07';}if(a>=100000000)return(a/100000000).toFixed(1)+'B';if(a>=1000000)return(a/1000000).toFixed(0)+'M';return Math.round(a/1000)+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  allCharts.length=0;
+
+  /* chartTokyoWard — horizontal bar */
+  var c1=echarts.init(document.getElementById('chartTokyoWard'));allCharts.push(c1);
+  var wardLabels=['Adachi','Edogawa','Itabashi','Suginami','Nakano','Shinjuku','Meguro','Shibuya','Minato','Chuo'];
+  var wardData=[85,90,105,140,155,180,200,250,380,450];
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+    grid:{left:80,right:60,top:20,bottom:20,containLabel:false},
+    xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtJPYShort(v,lang);}})}),
+    yAxis:mkAxis({type:'category',data:wardLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+    series:[{type:'bar',data:wardData.map(function(v){return{value:v,itemStyle:{color:v>=300?C.red:v>=150?C.orange:C.navy,borderRadius:[0,4,4,0]}};}),barMaxWidth:22,label:{show:true,position:'right',formatter:function(p){return fmtJPY(p.value,lang);},fontSize:10,fontFamily:'JetBrains Mono'}}]
+  });
+
+  /* chartTokyoRent — line */
+  var c2=echarts.init(document.getElementById('chartTokyoRent'));allCharts.push(c2);
+  var rentLabels=['2020','2021','2022','2023','2024','2025'];
+  var rentData=[3600,3650,3700,3900,4200,4332];
+  c2.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:rentLabels}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return '\u00a5'+v.toLocaleString();}})}),
+    series:[{type:'line',data:rentData,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},areaStyle:{color:'rgba(22,163,74,0.08)'},smooth:0.2,symbol:'circle',symbolSize:6,
+      markPoint:{data:[{coord:['2025',4332],symbol:'pin',symbolSize:50,label:{formatter:'\u00a54,332/sqm\n+6.4% YoY',fontSize:9,lineHeight:13},itemStyle:{color:C.green}}]}
+    }]
+  });
+}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Dashboard | Taiwan Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: 2025 Full Year / Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2025年全年 / 2026年Q1</span></span>
+      <h1><span class="lang-en">Market Dashboard</span><span class="lang-zh" style="display:none">市場儀表板</span></h1>
+      <p class="subtitle"><span class="lang-en">Taiwan Residential Property Analytics</span><span class="lang-zh" style="display:none">台灣住宅房地產分析</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">MARKET TEMPERATURE</span><span class="lang-zh" style="display:none">市場溫度指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">2025 TRANSACTIONS</span><span class="lang-zh" style="display:none">2025年成交量</span></div>
+        <div class="kpi-value">263,000</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">-25% YoY</span><span class="lang-zh" style="display:none">年減25%</span></span>
+        <div class="kpi-source">MOI 2025</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">TAIPEI PRESALE AVG</span><span class="lang-zh" style="display:none">台北預售屋均價</span></div>
+        <div class="kpi-value">NT$118<span style="font-size:13px"><span class="lang-en">W/ping</span><span class="lang-zh" style="display:none">萬/坪</span></span></div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">2025 +1.9% YoY</span><span class="lang-zh" style="display:none">2025年 +1.9%</span></span>
+        <div class="kpi-source">MOI 2025</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">LOAN APPROVAL RATE</span><span class="lang-zh" style="display:none">房貸核准率</span></div>
+        <div class="kpi-value">62%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">2025 H1</span><span class="lang-zh" style="display:none">2025上半年</span></span>
+        <div class="kpi-source">CBC</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">GROSS RENTAL YIELD</span><span class="lang-zh" style="display:none">租金收益率</span></div>
+        <div class="kpi-value">2.24%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">National avg</span><span class="lang-zh" style="display:none">全國均值</span></span>
+        <div class="kpi-source">GPG Q1 2026</div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">AFFORDABILITY PRESSURE</span><span class="lang-zh" style="display:none">負擔壓力指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">YIELD SPREAD vs CBS</span><span class="lang-zh" style="display:none">利差 vs CBS</span></div>
+        <div class="kpi-value">+0.24%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Near zero carry</span><span class="lang-zh" style="display:none">幾乎無正向現金流</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">TAIPEI MEDIAN MULTIPLE</span><span class="lang-zh" style="display:none">台北房價所得比</span></div>
+        <div class="kpi-value">15.41x</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Globally unaffordable</span><span class="lang-zh" style="display:none">全球最難負擔之一</span></span>
+        <div class="kpi-source">MOI 2025 Q2</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">NATIONAL MEDIAN MULTIPLE</span><span class="lang-zh" style="display:none">全國房價所得比</span></div>
+        <div class="kpi-value">9.89x</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Severely unaffordable</span><span class="lang-zh" style="display:none">嚴重不可負擔</span></span>
+        <div class="kpi-source">MOI 2025 Q2</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">VACANCY RATE</span><span class="lang-zh" style="display:none">空屋率</span></div>
+        <div class="kpi-value">9.6%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Low-power method</span><span class="lang-zh" style="display:none">低電量認定</span></span>
+        <div class="kpi-source">MOI 2024</div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">DEMAND MOMENTUM</span><span class="lang-zh" style="display:none">需求動能指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">HSINCHU 5Y APPRECIATION</span><span class="lang-zh" style="display:none">新竹5年漲幅</span></div>
+        <div class="kpi-value">+58.4%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">2020–2025</span><span class="lang-zh" style="display:none">2020至2025</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">2024 TRANSACTIONS</span><span class="lang-zh" style="display:none">2024年成交量</span></div>
+        <div class="kpi-value">350,000</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">11-Year High</span><span class="lang-zh" style="display:none">11年新高</span></span>
+        <div class="kpi-source">MOI 2024</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">TAIPEI MORTGAGE RATIO</span><span class="lang-zh" style="display:none">台北房貸負擔率</span></div>
+        <div class="kpi-value">68%</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">of household income</span><span class="lang-zh" style="display:none">家庭月收入</span></span>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">CBS POLICY RATE</span><span class="lang-zh" style="display:none">央行基準利率</span></div>
+        <div class="kpi-value">2.0%</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Sep 2024</span><span class="lang-zh" style="display:none">2024年9月</span></span>
+        <div class="kpi-source">CBC</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid two-col" style="margin-top:20px;">
+      <div class="chart-card">
+        <h3><span class="lang-en">Taiwan House Price Index</span><span class="lang-zh" style="display:none">台灣房價指數趨勢</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Nominal Index + YoY% Change</span><span class="lang-zh" style="display:none">名義指數 + 年增率</span></p>
+        <div style="position:relative;height:240px;"><div id="chart-tw-price-index" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Average Price by Major City</span><span class="lang-zh" style="display:none">六都平均房價比較</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">NT$ 10K per ping · Q3 2025</span><span class="lang-zh" style="display:none">萬元/坪 · 2025年Q3</span></p>
+        <div style="position:relative;height:280px;"><div id="chart-tw-city-price" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Transaction Volume Trend</span><span class="lang-zh" style="display:none">成交量趨勢</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-tw-transactions" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Rental Yield by City</span><span class="lang-zh" style="display:none">各城市租金收益率</span></h3>
+        <div style="position:relative;height:240px;"><div id="chart-tw-yield" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Mortgage Burden Ratio</span><span class="lang-zh" style="display:none">房貸負擔率趨勢</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-tw-mortgage" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">New Launches vs Transactions</span><span class="lang-zh" style="display:none">新推案 vs 成交量</span></h3>
+        <div style="position:relative;height:220px;"><div id="chart-tw-supply-demand" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">MOI 2024 &middot; Sinyi Realty &middot; CBC &middot; Global Property Guide Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">內政部 2024 &middot; 信義房屋 &middot; 中央銀行 &middot; Global Property Guide 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  function fmtPrice(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return 'NT$'+v+'\u842c';if(a>=1000000)return 'NT$'+(a/1000000).toFixed(2)+'M';return 'NT$'+Math.round(a/1000)+'K';}
+  function fmtPriceShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return v+'\u842c';if(a>=1000000)return(a/1000000).toFixed(1)+'M';return Math.round(a/1000)+'K';}
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    // chart-tw-price-index
+    var c1=echarts.init(document.getElementById('chart-tw-price-index'));allCharts.push(c1);
+    c1.setOption({
+      tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:['YoY %','Nominal Index']}),
+      grid:{left:50,right:50,top:45,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025Q3','2026Q1']}),
+      yAxis:[mkAxis({type:'value',name:'Index'}),mkAxis({type:'value',name:'YoY %',splitLine:{show:false},axisLabel:Object.assign({},baseText,{formatter:'{value}%'})})],
+      series:[
+        {name:'YoY %',type:'bar',yAxisIndex:1,data:[2.1,2.0,5.9,9.3,8.5,15.6,0.14,-2.51],barMaxWidth:35,itemStyle:{color:function(p){return p.value>=0?'rgba(22,163,74,0.7)':C.red;},borderRadius:[3,3,0,0]},label:{show:true,position:'top',fontFamily:'JetBrains Mono',fontSize:9,formatter:function(p){return p.value+'%';}}},
+        {name:'Nominal Index',type:'line',data:[100,102,108,118,128,148,149,147],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6}
+      ]
+    });
+
+    // chart-tw-city-price
+    var c2=echarts.init(document.getElementById('chart-tw-city-price'));allCharts.push(c2);
+    var cityLabels=['Taipei','New Taipei','Taichung','Tainan','Kaohsiung','Taoyuan'];
+    var cityPrices=[118,70,43,41,33,35];
+    var cityYoY=[1.9,14.5,12.0,14.6,8.0,8.6];
+    var cityColors=[C.orange,C.red,C.navy,C.navy,C.navy,C.navy];
+    c2.setOption({
+      tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:['Avg Price','YoY %']}),
+      grid:{left:50,right:60,top:45,bottom:50,containLabel:true},
+      xAxis:mkAxis({type:'category',data:cityLabels,axisLabel:Object.assign({},baseText,{rotate:30,interval:0})}),
+      yAxis:[mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtPriceShort(v,lang);}})}),mkAxis({type:'value',splitLine:{show:false},min:-2,max:18,axisLabel:Object.assign({},baseText,{formatter:'{value}%'})})],
+      series:[
+        {name:'Avg Price',type:'bar',data:cityPrices.map(function(v,i){return{value:v,itemStyle:{color:cityColors[i],borderRadius:[4,4,0,0]}};}),barMaxWidth:55,label:{show:true,position:'top',fontFamily:'JetBrains Mono',fontSize:10,formatter:function(p){return fmtPrice(p.value,lang);}}},
+        {name:'YoY %',type:'line',yAxisIndex:1,data:cityYoY.map(function(v){return{value:v,itemStyle:{color:v>=0?C.green:C.red}};}),lineStyle:{color:C.red,width:2},symbol:'circle',symbolSize:8,label:{show:true,position:'bottom',fontFamily:'JetBrains Mono',fontSize:10,formatter:function(p){return(p.value>=0?'+':'')+p.value+'%';}}}
+      ]
+    });
+
+    // chart-tw-transactions
+    var c3=echarts.init(document.getElementById('chart-tw-transactions'));allCharts.push(c3);
+    c3.setOption({
+      tooltip:baseTooltip,grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+      series:[{type:'line',data:[290000,310000,340000,280000,300000,350000,263000],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.08)'},smooth:0.2,symbol:'circle',symbolSize:6,
+        markPoint:{data:[{type:'max',name:'Max',label:{formatter:'11Y High',fontSize:9},itemStyle:{color:C.green}},{coord:['2025',263000],symbol:'pin',symbolSize:40,label:{formatter:'8Y Low',fontSize:9},itemStyle:{color:C.red}}]}
+      }]
+    });
+
+    // chart-tw-yield
+    var c4=echarts.init(document.getElementById('chart-tw-yield'));allCharts.push(c4);
+    var ycLabels=['Kaohsiung','Tainan','Taichung','Taoyuan','National','New Taipei','Taipei','Hsinchu'];
+    var ycVals=[3.1,2.9,2.8,2.6,2.24,2.2,2.11,1.9];
+    c4.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:80,right:50,top:20,bottom:20,containLabel:false},
+      xAxis:mkAxis({type:'value',min:0,max:4,axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
+      yAxis:mkAxis({type:'category',data:ycLabels.slice().reverse(),axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+      series:[{type:'bar',data:ycVals.slice().reverse().map(function(v){return{value:v,itemStyle:{color:v>2.0?C.green:C.orange,borderRadius:[0,4,4,0]}};}),barMaxWidth:22,label:{show:true,position:'right',formatter:'{c}%',fontSize:11},
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:'CBS 2.0%',fontSize:10,color:C.red},data:[{xAxis:2.0}]}
+      }]
+    });
+
+    // chart-tw-mortgage
+    var c5=echarts.init(document.getElementById('chart-tw-mortgage'));allCharts.push(c5);
+    c5.setOption({
+      tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:['Taipei','National']}),grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025H1']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
+      series:[
+        {name:'Taipei',type:'line',data:[52,54,58,62,65,68,68],lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},symbol:'circle',symbolSize:6},
+        {name:'National',type:'line',data:[30,31,33,36,38,40,41],lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:6,
+          markLine:{silent:true,symbol:'none',lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:'Warning 40%',fontSize:9,color:C.muted},data:[{yAxis:40}]}
+        }
+      ]
+    });
+
+    // chart-tw-supply-demand
+    var c6=echarts.init(document.getElementById('chart-tw-supply-demand'));allCharts.push(c6);
+    c6.setOption({
+      tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:['New Launches','Transactions']}),grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+      series:[
+        {name:'New Launches',type:'bar',data:[120000,130000,115000,145000,90000],itemStyle:{color:C.orange,borderRadius:[4,4,0,0]},barMaxWidth:40},
+        {name:'Transactions',type:'bar',data:[340000,280000,300000,350000,263000],itemStyle:{color:C.navy,borderRadius:[4,4,0,0]},barMaxWidth:40}
+      ]
+    });
+
+  }
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

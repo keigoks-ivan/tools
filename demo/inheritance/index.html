@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr. Chou learns the site from scratch | Walkthrough | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="../../css/style.css">
+<style>
+.lang-zh{display:none}
+
+/* ── Educational banner ── */
+.edu-banner{background:linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%);color:#dcfce7;border-radius:6px;padding:14px 18px;margin:0 0 20px;display:flex;align-items:flex-start;gap:12px}
+.edu-banner .edu-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.edu-banner .edu-text{font-size:12.5px;line-height:1.6}
+.edu-banner .edu-text strong{color:#bbf7d0;font-weight:700}
+
+/* ── Persona Card (top) ── */
+.persona-card{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#e2ecf8;border-radius:8px;padding:26px 28px;margin:0 0 24px;position:relative;overflow:hidden}
+.persona-card::after{content:'📚';position:absolute;top:-20px;right:-10px;font-size:140px;opacity:.06}
+.persona-card .pc-eyebrow{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.persona-card .pc-title{font-size:22px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:8px;letter-spacing:-.01em}
+.persona-card .pc-tag{font-size:13px;color:#a8c0d8;line-height:1.6;max-width:780px;margin-bottom:18px}
+.pc-profile{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);margin-bottom:14px}
+.pc-profile-item .lbl{font-size:9px;letter-spacing:.10em;color:#5a8ab5;font-weight:600;text-transform:uppercase}
+.pc-profile-item .val{font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-weight:500;margin-top:3px}
+.pc-questions{font-size:11.5px;line-height:1.65;color:#a8c0d8}
+.pc-questions strong{color:#f59e0b;font-weight:600;display:block;margin-bottom:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pc-questions ol{margin:0;padding:0 0 0 18px}
+.pc-questions li{margin-bottom:3px}
+
+/* ── Phase heading ── */
+.phase-heading{margin:28px 0 6px;display:flex;align-items:center;gap:10px}
+.phase-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:9.5px;font-weight:700;letter-spacing:.10em;text-transform:uppercase}
+.phase-a{background:#dbeafe;color:#1d4ed8}
+.phase-b{background:#ede9fe;color:#6d28d9}
+.phase-c{background:#fef3c7;color:#92400e}
+.phase-d{background:#dcfce7;color:#14532d}
+.phase-heading p{font-size:12px;color:#5a7a9a;line-height:1.5;margin:0}
+
+/* ── Section heading ── */
+.demo-section{margin:32px 0 8px}
+.demo-section .sec-no{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:.08em}
+.demo-section h2{font-size:18px;font-weight:700;color:#1e3a5f;line-height:1.3;margin:2px 0 4px;letter-spacing:-.005em}
+.demo-section .sec-sub{font-size:12px;color:#5a7a9a;line-height:1.6;max-width:780px}
+
+/* ── Demo Step ── */
+.demo-step{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:36px 1fr;gap:16px}
+.demo-step .step-no{width:32px;height:32px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.demo-step .step-content h4{font-size:14px;font-weight:600;color:#1e3a5f;margin-bottom:4px;line-height:1.35}
+.demo-step .step-url{font-family:'JetBrains Mono',monospace;font-size:11px;margin-bottom:10px}
+.demo-step .step-url a{color:#2563eb;text-decoration:none}
+.demo-step .step-url a:hover{text-decoration:underline}
+.demo-step .step-action{background:#eff6ff;border-left:3px solid #2563eb;padding:9px 12px;font-size:11.5px;color:#1e3a5f;line-height:1.6;margin-bottom:10px;border-radius:0 4px 4px 0}
+.demo-step .step-action strong{color:#1e3a5f;font-weight:600;display:inline-block;margin-right:4px}
+.demo-step .step-see{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:8px}
+.demo-step .step-see strong{color:#1e3a5f;font-weight:600}
+.demo-step .step-meaning{background:#fffbeb;border-left:3px solid #d97706;padding:9px 12px;font-size:11.5px;color:#78350f;line-height:1.6;margin-top:6px;border-radius:0 4px 4px 0}
+.demo-step .step-meaning strong{color:#92400e;font-weight:600}
+.demo-step .step-screenshot{background:#f4f7fc;border:1px solid #ccd9e8;border-radius:4px;margin-top:12px;overflow:hidden;line-height:0}
+.demo-step .step-screenshot img{display:block;width:100%;height:auto}
+
+/* ── Concept pill ── */
+.concept-pill{display:inline-block;background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:600;color:#0369a1;margin:0 2px 4px;font-family:'JetBrains Mono',monospace}
+
+/* ── KPI decoder grid ── */
+.kpi-decoder{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}
+.kd-card{background:#f4f7fc;border-radius:4px;padding:12px 14px;border:0.5px solid #ccd9e8}
+.kd-card .kd-term{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#1e3a5f;margin-bottom:4px}
+.kd-card .kd-def{font-size:11.5px;color:#4a6080;line-height:1.55}
+.kd-card .kd-signal{font-size:10.5px;color:#5a7a9a;margin-top:4px;font-style:italic}
+
+/* ── Cheat sheet ── */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.cheat-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:14px 18px}
+.cheat-card h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cheat-card .ck-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#eef3f9;color:#1e3a5f;font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.cheat-card p{font-size:11.5px;color:#4a6080;line-height:1.6}
+.cheat-card .ck-tip{margin-top:6px;font-size:11px;color:#5a7a9a;font-style:italic}
+.cheat-card code{background:#eef3f9;color:#1e3a5f;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.color-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.color-legend .cl-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#4a6080;background:#f4f7fc;padding:6px 10px;border-radius:3px}
+.color-legend .cl-dot{width:10px;height:10px;border-radius:50%}
+.color-legend .cl-green{background:#16a34a}
+.color-legend .cl-orange{background:#d97706}
+.color-legend .cl-red{background:#dc2626}
+.color-legend .cl-blue{background:#2563eb}
+
+/* ── Takeaway box ── */
+.takeaway{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.takeaway-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px}
+.takeaway-card.answered{border-left:4px solid #16a34a}
+.takeaway-card.outsource{border-left:4px solid #d97706}
+.takeaway-card h4{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;letter-spacing:-.005em}
+.takeaway-card ul{list-style:none;padding:0;margin:0}
+.takeaway-card li{font-size:12px;color:#4a6080;line-height:1.6;padding:5px 0 5px 22px;position:relative}
+.takeaway-card.answered li::before{content:'✓';position:absolute;left:0;top:5px;color:#16a34a;font-weight:700}
+.takeaway-card.outsource li::before{content:'→';position:absolute;left:0;top:5px;color:#d97706;font-weight:700}
+.takeaway-card li strong{color:#1e3a5f;font-weight:600}
+
+/* ── Learning Plan card ── */
+.learning-plan{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:6px;padding:20px 22px;margin:14px 0}
+.learning-plan h4{font-size:13px;font-weight:700;color:#14532d;margin-bottom:12px}
+.lp-row{display:grid;grid-template-columns:80px 1fr;gap:10px;margin-bottom:10px;align-items:start}
+.lp-week{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#15803d;background:#dcfce7;padding:3px 8px;border-radius:4px;white-space:nowrap;text-align:center}
+.lp-text{font-size:11.5px;color:#166534;line-height:1.55}
+
+/* ── PDF button ── */
+.pdf-bar{display:flex;gap:10px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap}
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;background:#1e3a5f;color:#fff;border:none;padding:12px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{background:#0f1e33}
+.pdf-btn.ghost{background:#fff;color:#1e3a5f;border:1px solid #ccd9e8}
+.pdf-btn.ghost:hover{border-color:#1e3a5f}
+
+/* ── Best Option Block ── */
+.best-option{margin:6px 0 16px}
+.bo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.bo-card{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #d97706;border-radius:4px;padding:14px 16px}
+.bo-card .bo-lbl{font-size:9px;letter-spacing:.1em;color:#5a7a9a;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.bo-card .bo-val{font-size:14px;font-weight:600;color:#1e3a5f;line-height:1.35;margin-bottom:6px;letter-spacing:-.005em}
+.bo-card .bo-note{font-size:11px;color:#5a7a9a;line-height:1.5}
+.bo-section{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:16px 20px;margin-bottom:10px}
+.bo-section h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:10px;line-height:1.35}
+.bo-checklist ul,.bo-next ol{margin:0;padding-left:18px}
+.bo-checklist li,.bo-next li{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:6px}
+.bo-bottomline{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#fff;border-radius:6px;padding:20px 24px;margin-top:14px}
+.bo-bottomline .bo-bl-label{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;display:block;margin-bottom:8px;text-transform:uppercase}
+.bo-bottomline p{font-size:14px;line-height:1.6;color:#fff;margin:0}
+@media (max-width:720px){.bo-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Print ── */
+@media print {
+  @page{size:A4;margin:14mm}
+  body{background:#fff!important}
+  #nav-root,.lang-switcher,.pdf-bar,.demo-back{display:none!important}
+  .bo-grid{grid-template-columns:repeat(4,1fr)!important}
+  .bo-bottomline{background:#1e3a5f!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .container{max-width:100%!important;padding:0!important}
+  .persona-card,.demo-step,.cheat-card,.takeaway-card{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  .persona-card::after{display:none}
+  .demo-section{break-after:avoid;page-break-after:avoid}
+  .step-screenshot{padding:18px;font-size:10px}
+  a{color:#1e3a5f!important;text-decoration:none}
+}
+
+@media (max-width:760px){
+  .pc-profile{grid-template-columns:repeat(2,1fr);gap:10px}
+  .demo-step{grid-template-columns:1fr;gap:10px}
+  .demo-step .step-no{margin-bottom:-4px}
+  .persona-card{padding:20px 18px}
+  .persona-card .pc-title{font-size:18px}
+  .cheat-grid,.takeaway,.color-legend,.kpi-decoder{grid-template-columns:1fr}
+  .lp-row{grid-template-columns:1fr;gap:4px}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="container">
+
+  <!-- Breadcrumb -->
+  <div class="demo-back" style="font-size:11px;color:#5a7a9a;margin-bottom:12px;font-family:'JetBrains Mono',monospace">
+    <a href="/demo/" style="color:#2563eb;text-decoration:none">← <span class="lang-en">All walkthroughs</span><span class="lang-zh">所有導覽</span></a>
+    <span style="color:#aabdd4;margin:0 8px">/</span>
+    <span><span class="lang-en">Mr. Chou learns the site from scratch — inheritor's orientation walkthrough</span><span class="lang-zh">周先生從零開始學會用這個網站 — 繼承財產者入門導覽</span></span>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- EDUCATIONAL BANNER                              -->
+  <!-- ============================================== -->
+  <div class="edu-banner">
+    <div class="edu-icon">📖</div>
+    <div class="edu-text">
+      <span class="lang-en"><strong>This walkthrough is for users brand-new to property investing.</strong> It teaches site navigation and concept literacy first, before any buying decision. There is no purchase at the end. Use this if a friend gave you this site link and you don't know where to start.</span>
+      <span class="lang-zh"><strong>這份導覽專為房地產投資零基礎的讀者設計。</strong>先教你認識網站架構與基本概念，再談任何投資決策。結尾不會做出任何買入決定。如果朋友傳了這個網站連結給你、你完全不知道從哪裡開始，這份導覽就是為你而寫的。</span>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 1 — PERSONA CARD                       -->
+  <!-- ============================================== -->
+  <div class="persona-card">
+    <div class="pc-eyebrow"><span class="lang-en">USE CASE WALKTHROUGH · 07 · SITE ORIENTATION FOR A COMPLETE BEGINNER</span><span class="lang-zh">情境導覽 · 07 · 完全新手的網站入門</span></div>
+    <div class="pc-title">
+      <span class="lang-en">Meet Mr. Chou — 42, Kaohsiung, NT$ 30M inheritance, zero real estate experience</span>
+      <span class="lang-zh">認識周先生 — 42 歲，高雄，繼承 NT$ 3,000 萬，房地產投資零經驗</span>
+    </div>
+    <p class="pc-tag">
+      <span class="lang-en">Mr. Chou (周先生, 42, mid-level government employee in Kaohsiung) recently lost both parents. Their estate left him NT$ 30M in liquid assets. He has never owned property, never invested in REITs, and has never visited a property data website before. A colleague forwarded him this site. He is <strong>paralyzed by choice</strong> and afraid of making a mistake with money he didn't earn himself. This walkthrough doesn't teach him what to buy. It teaches him <strong>how to use this site to stop being paralyzed</strong> — first by understanding the interface, then by understanding the concepts, and finally by building a personal learning plan that stretches over months, not minutes. <strong>He does not make a purchase decision at the end.</strong></span>
+      <span class="lang-zh">周先生，42 歲，高雄市公務員，父母近期相繼離世，留下 NT$ 3,000 萬現金遺產。他從未擁有過房產、從未購買 REIT，甚至從未瀏覽過任何房地產資訊網站。一位同事把這個網站連結傳給他。面對這麼大一筆「自己沒賺到」的錢，他<strong>不知道該如何是好，動彈不得</strong>。這份導覽不告訴他買什麼。它告訴他<strong>如何用這個網站打破那種癱瘓感</strong> — 先認識介面，再理解概念，最後建立一個橫跨數個月的個人學習計畫。<strong>他在結尾不做任何購買決定。</strong></span>
+    </p>
+
+    <div class="pc-profile">
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">User</span><span class="lang-zh">使用者</span></div><div class="val">Mr. Chou · 42y</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">City</span><span class="lang-zh">城市</span></div><div class="val">Kaohsiung, TW</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Budget</span><span class="lang-zh">遺產金額</span></div><div class="val">NT$ 30M</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">RE experience</span><span class="lang-zh">房產經驗</span></div><div class="val"><span class="lang-en">None</span><span class="lang-zh">零</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Outcome</span><span class="lang-zh">結果</span></div><div class="val"><span class="lang-en">Literacy + plan</span><span class="lang-zh">學會讀懂 + 計畫</span></div></div>
+    </div>
+
+    <div class="pc-questions">
+      <strong><span class="lang-en">The 7 questions Mr. Chou came to answer</span><span class="lang-zh">周先生想在這個網站找到答案的 7 個問題</span></strong>
+      <ol>
+        <li><span class="lang-en">Where do I even start? What does this site actually do?</span><span class="lang-zh">我從哪裡開始？這個網站到底在做什麼？</span></li>
+        <li><span class="lang-en">Can I trust the numbers — where do they come from, who compiled them?</span><span class="lang-zh">這些數字我可以相信嗎 — 從哪裡來的？誰整理的？</span></li>
+        <li><span class="lang-en">What's a REIT? What does "yield" mean? What is "carry"? Where are these concepts explained?</span><span class="lang-zh">什麼是 REIT？「收益率」是什麼意思？「利差」又是什麼？哪裡有解釋這些概念？</span></li>
+        <li><span class="lang-en">How do I see the global picture before locking onto one market?</span><span class="lang-zh">怎麼先看全球大圖，再鎖定特定市場？</span></li>
+        <li><span class="lang-en">How do I navigate between countries and switch tools?</span><span class="lang-zh">怎麼在各國之間切換？工具列在哪裡？</span></li>
+        <li><span class="lang-en">Should I buy something today — or is there a smarter sequence of steps?</span><span class="lang-zh">我今天就應該買東西嗎 — 還是有更聰明的步驟順序？</span></li>
+        <li><span class="lang-en">How do I switch the site to 中文? Can I download anything to share with my financial planner?</span><span class="lang-zh">怎麼切換成中文？有什麼可以下載、拿去給理財規劃師看的嗎？</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 2 — JOURNEY MAP                         -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 02</div>
+    <h2><span class="lang-en">Mr. Chou's orientation tour — 12 stops across 4 phases</span><span class="lang-zh">周先生的入門旅程 — 4 個階段，12 個停靠點</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">Each stop is a real page on the site. The journey is deliberately slow and literacy-first: Phase A orients him to the site's structure; Phase B explains the concepts the site uses; Phase C gives him a first unstructured browsing session; Phase D ends with a learning plan. He does not pick a city or asset to buy.</span>
+      <span class="lang-zh">每個停靠點都是站上的一頁實際畫面。旅程故意放慢、以識讀能力為優先：A 階段讓他認識網站架構；B 階段解釋站上使用的概念；C 階段給他第一次無壓力的瀏覽體驗；D 階段以學習計畫作結。他不選定任何城市或資產買入。</span>
+    </p>
+  </div>
+
+  <!-- ======== PHASE A ======== -->
+  <div class="phase-heading">
+    <span class="phase-pill phase-a"><span class="lang-en">Phase A</span><span class="lang-zh">A 階段</span></span>
+    <p><span class="lang-en">Site orientation — where things live</span><span class="lang-zh">認識網站結構 — 東西在哪裡</span></p>
+  </div>
+
+  <!-- STOP 1 -->
+  <div class="demo-step">
+    <div class="step-no">1</div>
+    <div class="step-content">
+      <h4><span class="lang-en">The home page tour — what this site is, who it's for, and what the 81-city scatter means</span><span class="lang-zh">首頁完整導覽 — 這個網站是什麼、給誰用的、81 城市散點圖代表什麼</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">opens the home page for the very first time. He reads the hero headline slowly. He notices three cards labelled <strong>"I want yield / I want growth / I want a passport"</strong>. He doesn't know which one applies to him — so he clicks all three in turn to see what changes. He notices the scatter chart below the hero shifts each time, and different city dots light up. He does not commit to any card. He just watches the screen respond to his clicks.</span>
+        <span class="lang-zh">第一次打開首頁。慢慢讀頁面最上方的大標題。注意到三張標有<strong>「我要收租／我要增值／我要身分」</strong>的卡片。他不確定自己屬於哪一類——所以三張都點一遍，看看畫面有什麼變化。注意到下方散點圖每次切換都不一樣，不同城市的點會亮起。他不選定任何一張卡片，只是觀察螢幕如何回應他的點擊。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> the <strong>hero section</strong> explains "81 cities monitored, 6 real estate markets." Three persona cards — each represents an investor goal. The <strong>scatter chart</strong> plots every monitored city as a dot: the X axis is carry (yield minus mortgage cost), the Y axis is 10-year price appreciation. Dots in the upper-right are the dream: positive carry AND strong capital growth. Dots in the lower-left are traps. Below the chart, the <strong>world map</strong> shows the same data geographically, with dots color-coded by performance. A <strong>Top 5 strip</strong> shows the leading cities for whichever persona is active. A <strong>demo strip</strong> shows the six other walkthroughs — Mr. Chou sees he is not alone; others have started from zero too.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong><strong>Hero 區</strong>說明「監測 81 城市、6 個房地產市場」。三張 persona 卡各代表一種投資目標。<strong>散點圖</strong>把每個受監測城市畫成一個點：X 軸是利差（收益率減房貸成本），Y 軸是 10 年房價漲幅。右上角的點是夢幻組合：正利差 + 強勁增值。左下角的點是陷阱。圖表下方是<strong>世界地圖</strong>，用顏色標示同一份數據的地理分布。<strong>Top 5 條</strong>顯示目前啟用 persona 下的領先城市。<strong>導覽示範條</strong>展示另外六份導覽——周先生看到他並不孤單，其他人也從零開始過。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">this single page answers his first question: "What does this site do?" It monitors global real estate markets with consistent data so that individual investors can compare apples to apples across countries. The persona cards are a learning shortcut — not a commitment. He doesn't need to know which persona he is yet. He just needs to know the cards exist.</span><span class="lang-zh">這一頁回答了他的第一個問題：「這個網站在做什麼？」它用一致的數據監測全球房地產市場，讓個人投資者能跨國蘋果比蘋果地比較。Persona 卡是一個學習捷徑，不是承諾。他現在不需要知道自己是哪一類——他只需要知道這些卡片的存在。</span></div>
+      <div class="step-screenshot"><img src="img/01-home-overview.png" alt="Home page hero, three persona cards, scatter chart, world map" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 2 -->
+  <div class="demo-step">
+    <div class="step-no">2</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Navbar anatomy — the Tools dropdown, market flags, language toggle, rate badge</span><span class="lang-zh">導覽列解剖 — Tools 下拉、市場旗幟、語言切換、利率標籤</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a> · <span class="lang-en">navbar focus</span><span class="lang-zh">導覽列焦點</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">stays on the home page and methodically examines every element in the top navbar. He hovers over <strong>Tools</strong> to see what dropdown items appear. He hovers over each market flag (MY / TW / AU / JP / NZ / UK). He clicks <strong>"中文"</strong> to switch languages, then switches back to EN to continue reading. He locates the small grey badge that says "CBC: 2.00%" — his country's current central bank rate.</span>
+        <span class="lang-zh">停留在首頁，有條理地檢視最上方導覽列的每個元素。把游標移到 <strong>Tools</strong>，看看下拉選單出現哪些項目。把游標移到每個市場旗幟（MY / TW / AU / JP / NZ / UK）。點 <strong>「中文」</strong>切換語言，再切回 EN 繼續閱讀。找到顯示「CBC: 2.00%」的小灰色標籤——那是台灣目前的央行利率。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees in the navbar (left to right):</strong>
+        <br>• <strong>Logo "Property Monitor"</strong> — clicking it always returns to the home page of whichever market you're in.
+        <br>• <strong>Market flag dropdowns</strong> (MY 🇲🇾 · TW 🇹🇼 · AU 🇦🇺 · JP 🇯🇵 · NZ 🇳🇿 · UK 🇬🇧) — each flag is a dropdown; hovering reveals links to Supply / Demand / Valuation / Risk / Report pages for that market.
+        <br>• <strong>Tools dropdown</strong> — contains: Dashboard (84-city comparison table), Carry Heatmap, Pipeline Cliff, REITs, REIT vs Direct, Playbook, Methodology. These are the cross-market analytical tools.
+        <br>• <strong>Language toggle</strong> (EN / 中文) — switches every word on every page. The preference is saved in your browser.
+        <br>• <strong>Rate badge</strong> (CBC: 2.00% for Taiwan) — the current central bank policy rate. Relevant for carry calculations.
+        </span>
+        <span class="lang-zh"><strong>導覽列的東西（由左至右）：</strong>
+        <br>• <strong>Logo「Property Monitor」</strong> — 點它永遠回到你所在市場的首頁。
+        <br>• <strong>市場旗幟下拉</strong>（MY 🇲🇾 · TW 🇹🇼 · AU 🇦🇺 · JP 🇯🇵 · NZ 🇳🇿 · UK 🇬🇧）— 每個旗幟都是下拉選單；移上去會看到該市場的「供給 / 需求 / 估值 / 風險 / 報告」頁連結。
+        <br>• <strong>Tools 下拉</strong> — 包含：Dashboard（84 城市比較表）、Carry Heatmap、Pipeline Cliff、REITs、REIT vs Direct、Playbook、Methodology。這些是跨市場分析工具。
+        <br>• <strong>語言切換</strong>（EN / 中文）— 切換每個頁面上的所有文字。偏好設定存在你的瀏覽器裡。
+        <br>• <strong>利率標籤</strong>（台灣：CBC: 2.00%）— 目前央行政策利率。與利差計算相關。
+        </span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">the navbar is the entire site map. Two entry points: (1) go deep into one market via its flag, (2) use a cross-market tool via the Tools dropdown. He can switch to 中文 at any time — this matters because his financial planner reads Chinese and he wants to print a page to share. The rate badge tells him how expensive borrowing is today in his home country.</span><span class="lang-zh">導覽列就是整個網站地圖。兩個入口：（1）透過市場旗幟深入某個市場，（2）透過 Tools 下拉使用跨市場工具。他可以隨時切換中文——這很重要，因為他的理財規劃師看中文，他想列印頁面分享。利率標籤告訴他現在台灣的借貸成本。</span></div>
+      <div class="step-screenshot"><img src="img/02-navbar-anatomy.png" alt="Navbar with Tools dropdown open, market flags, language toggle visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 3 -->
+  <div class="demo-step">
+    <div class="step-no">3</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Methodology — where every number comes from, and why you can trust it</span><span class="lang-zh">Methodology — 每個數字從哪來的，以及為何值得信任</span></div></h4>
+      <div class="step-url"><a href="/methodology.html">myproperty.investmquest.com/methodology</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">opens navbar → Tools → <strong>Methodology</strong>. He reads this page carefully — because before he trusts any number in this site, he wants to know who compiled it and where it came from. He reads the formula section, then scrolls through the source table row by row.</span>
+        <span class="lang-zh">打開 navbar → Tools → <strong>Methodology</strong>。他仔細閱讀這一頁——因為在信任站上任何數字之前，他想知道是誰整理的、從哪裡來的。讀完公式區後，逐行捲過資料來源表格。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees (4 sections):</strong>
+        <br>• <strong>DERIVED METRIC FORMULAS</strong> — exact formulas for Carry, PTI, P/R Ratio, Pipeline%, and Vacancy. No black boxes.
+        <br>• <strong>PRIMARY DATA SOURCES BY MARKET</strong> — a ~20-row table listing the exact government agency, index, or research firm behind each data point for each country (e.g., Taiwan MOI for transactions, Global Property Guide for yields, BIS for price indices).
+        <br>• <strong>TAX, STAMP DUTY &amp; FOREIGN-BUYER POLICY SOURCES</strong> — every tax rate has a cited source and a date.
+        <br>• <strong>VERSION &amp; UPDATE LOG</strong> — when data was last updated.
+        </span>
+        <span class="lang-zh"><strong>他看到的（4 個區塊）：</strong>
+        <br>• <strong>衍生指標計算公式</strong> — Carry、PTI、P/R 比、Pipeline%、空置率的精確公式。沒有黑盒子。
+        <br>• <strong>各市場一手資料來源</strong> — 約 20 列的表格，列出每個國家每個數據點背後的確切政府機關、指數或研究機構（例如：台灣交易量來自內政部、收益率來自 Global Property Guide、房價指數來自 BIS）。
+        <br>• <strong>稅務、印花稅與外國買家政策來源</strong> — 每個稅率都有引用來源和日期。
+        <br>• <strong>版本與更新記錄</strong> — 數據最後更新時間。
+        </span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">this page answers his second question: "Can I trust the numbers?" Yes — because every single number has a traceable government or institutional source. He can click any source and verify it himself. The formulas mean there's no subjective scoring — it's math applied to public data. He bookmarks this page to share with his financial planner as evidence of the site's rigor.</span><span class="lang-zh">這一頁回答了他的第二個問題：「我可以信任這些數字嗎？」可以——因為每一個數字都有可追溯的政府或機構來源。他可以點任何來源自行驗證。公式代表沒有主觀評分——是把公開數據套公式計算出來的。他把這一頁加入書籤，準備分享給理財規劃師作為網站嚴謹性的佐證。</span></div>
+      <div class="step-screenshot"><img src="img/03-methodology.png" alt="Methodology page showing formula section and source table" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ======== PHASE B ======== -->
+  <div class="phase-heading">
+    <span class="phase-pill phase-b"><span class="lang-en">Phase B</span><span class="lang-zh">B 階段</span></span>
+    <p><span class="lang-en">Concept literacy — what the words mean</span><span class="lang-zh">概念識讀 — 那些詞彙是什麼意思</span></p>
+  </div>
+
+  <!-- STOP 4 -->
+  <div class="demo-step">
+    <div class="step-no">4</div>
+    <div class="step-content">
+      <h4><span class="lang-en">REITs page — educational knowledge cards: what is a REIT, what is WHT, gross vs net yield</span><span class="lang-zh">REITs 頁 — 教育型知識卡：什麼是 REIT、什麼是預扣稅、毛收益 vs 淨收益</span></h4>
+      <div class="step-url"><a href="/reits.html">myproperty.investmquest.com/reits</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">opens navbar → Tools → <strong>REITs</strong>. He ignores the comparison table at the top (too many numbers for now) and <strong>scrolls past it</strong> to the section labelled <strong>"REIT INVESTMENT FUNDAMENTALS"</strong>. He reads every knowledge card carefully. He is not trying to pick a REIT today — he is learning what these things ARE.</span>
+        <span class="lang-zh">打開 navbar → Tools → <strong>REITs</strong>。先忽略最上方的比較表（現在數字太多了），<strong>直接往下捲</strong>到標有 <strong>「REITs 投資基本知識」</strong>的區塊。仔細閱讀每張知識卡。他今天不是在挑 REIT——他在學這些東西<strong>是什麼</strong>。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he reads in the knowledge cards:</strong>
+        <br>• <strong>What is a REIT?</strong> — a company that owns income-producing real estate and must distribute 90%+ of profits to investors as dividends. You can buy a REIT like a stock — no mortgage, no tenant management.
+        <br>• <strong>P/NAV</strong> — price ÷ Net Asset Value. Below 1.0 means you're buying the property portfolio at a discount.
+        <br>• <strong>Spread</strong> — REIT yield minus the government bond yield. The higher the spread, the more you're being compensated for owning real estate risk vs risk-free bonds.
+        <br>• <strong>Gearing</strong> — how much debt the REIT carries. Below 35% is safe; above 45% in a rate-hike cycle is dangerous.
+        <br>• <strong>Sector cards</strong> — different REIT types (Office / Retail / Industrial / Data Centre / Healthcare) behave very differently.
+        <br>• <strong>REIT vs Direct Property comparison table</strong> — liquidity, volatility, entry cost, tenant management side-by-side.
+        </span>
+        <span class="lang-zh"><strong>知識卡的內容：</strong>
+        <br>• <strong>什麼是 REIT？</strong> — 一家擁有創收房地產的公司，必須把 90% 以上的利潤以股息形式分配給投資人。你可以像買股票一樣買 REIT——不需要房貸，不需要管租客。
+        <br>• <strong>P/NAV</strong> — 市價 ÷ 淨資產價值。低於 1.0 代表你以折扣價買入房地產組合。
+        <br>• <strong>利差</strong> — REIT 殖利率減政府公債殖利率。利差越高，代表你持有房地產風險（對比無風險公債）所獲得的補償越多。
+        <br>• <strong>槓桿率</strong> — REIT 持有多少債務。35% 以下算安全；升息週期中超過 45% 很危險。
+        <br>• <strong>板塊卡片</strong> — 不同類型的 REIT（辦公室 / 零售 / 工業 / 資料中心 / 醫療）行為差異很大。
+        <br>• <strong>REIT vs 實體房產比較表</strong> — 流動性、波動性、進場成本、租客管理，並排比較。
+        </span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">this page answers his third question: "What's a REIT?" He now understands that real estate investing has two completely different tracks — buying a physical property (illiquid, leveraged, requires management) vs buying a REIT (stock-like liquidity, no management, but subject to market volatility). With NT$ 30M, he has the budget for either. But he's not choosing today — he's building vocabulary.</span><span class="lang-zh">這一頁回答了他的第三個問題：「什麼是 REIT？」他現在理解房地產投資有兩條截然不同的路——買實體房產（流動性低、需要槓桿、要管租客）vs 買 REIT（像股票一樣流動、不用管租、但受市場波動影響）。NT$ 3,000 萬的預算兩條路都走得通。但他今天不做選擇——他在建立詞彙庫。</span></div>
+      <div class="step-screenshot"><img src="img/04-reits-knowledge.png" alt="REITs page knowledge cards — REIT fundamentals, P/NAV, spread, gearing" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 5 -->
+  <div class="demo-step">
+    <div class="step-no">5</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Playbook — investment archetypes, time horizons, carry/PTI/pipeline explained with examples</span><span class="lang-zh">Playbook — 投資類型、時間軸，以及用真實例子解釋 carry / PTI / pipeline</span></h4>
+      <div class="step-url"><a href="/playbook.html">myproperty.investmquest.com/playbook</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">opens navbar → Tools → <strong>Playbook</strong>. He reads the hero tagline ("From buy to hold to sell") and then works through the <strong>PROPERTY INVESTMENT FUNDAMENTALS</strong> section. He reads the carry interpretation table, the PTI table, and the pipeline table. He reads the case studies (Manila, Singapore ABSD, Sydney negative-carry). He reads the pre-buy, hold, and exit checklists.</span>
+        <span class="lang-zh">打開 navbar → Tools → <strong>Playbook</strong>。閱讀 hero 標語（「從買入到持有到賣出」），然後逐一讀完 <strong>房產投資基本知識</strong> 區塊。讀完利差解讀表、PTI 表、pipeline 表。讀完案例研究（馬尼拉、新加坡 ABSD、悉尼負利差）。讀完買入前、持有中、退場的檢查清單。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>Concepts unlocked in this single page:</strong>
+        </span>
+        <div class="kpi-decoder">
+          <div class="kd-card"><div class="kd-term">Carry</div><div class="kd-def">Yield minus mortgage rate. Positive = rent covers debt service (your tenant pays the mortgage). Negative = you top up from salary every month.</div><div class="kd-signal">+2% = income property · 0 to +2% = hold · below −3% = cash buyers only</div></div>
+          <div class="kd-card"><div class="kd-term">PTI</div><div class="kd-def">Price-to-Income. How many years of household income to buy a median apartment. A city with PTI 15× is 3× harder to afford than one with PTI 5×.</div><div class="kd-signal">&lt;5× affordable · 5–10× stretched · &gt;10× severely unaffordable</div></div>
+          <div class="kd-card"><div class="kd-term">Pipeline%</div><div class="kd-def">Units under construction as % of existing housing stock. A big pipeline = new supply coming that could depress rents and prices.</div><div class="kd-signal">&lt;1% low supply risk · 1–2.5% moderate · &gt;2.5% high supply risk</div></div>
+          <div class="kd-card"><div class="kd-term">P/R Ratio</div><div class="kd-def">Median price ÷ gross annual rent of a comparable unit. Tells you if buying is cheap or expensive relative to renting in the same market.</div><div class="kd-signal">&lt;20× buy favored · 20–30× neutral · &gt;30× rent favored</div></div>
+        </div>
+        <span class="lang-en">The page also contains the <strong>full professional due-diligence checklists</strong>: 8 macro factors to check, 8 market factors, 8 property-level factors, 7 legal/financing factors, 5 hold-period monitoring signals, and 6 exit timing factors. Mr. Chou will NOT work through these checklists today — but he understands they exist and where to find them when he's ready.</span>
+        <span class="lang-zh">這一頁還包含<strong>完整的專業盡職調查清單</strong>：8 項總體因素、8 項市場因素、8 項物件層面因素、7 項法律/融資因素、5 項持有期間監控信號，以及 6 項退場時機因素。周先生今天不會逐條過清單——但他知道這些清單存在、知道要用的時候在哪裡找。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">before this page, "carry" was just a word he'd seen in a colleague's WeChat forward. Now he knows it's a precise formula with a table of thresholds. He can look at any market in this site and immediately interpret whether it's income-positive or a drag. The case studies (Sydney: negative carry for a decade, yet +65% capital gain) also teach him that real estate is not simple — multiple forces interact. This is why rushing is dangerous.</span><span class="lang-zh">在這一頁之前，「利差」只是他在同事 Line 訊息裡看過的詞。現在他知道這是個有門檻表格的精確公式。他可以看站上任何市場，立刻判斷它是正現金流還是負擔。案例研究（悉尼：整個十年負利差，但資本增值 +65%）也讓他理解房地產並不簡單——多種力量交互影響。這就是為何倉促決定很危險。</span></div>
+      <div class="step-screenshot"><img src="img/05-playbook.png" alt="Playbook page — investment fundamentals, carry/PTI/pipeline tables and case studies" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 6 -->
+  <div class="demo-step">
+    <div class="step-no">6</div>
+    <div class="step-content">
+      <h4><span class="lang-en">TW Valuation page — what P/R ratio means in practice, and how to read a KPI card</span><span class="lang-zh">TW 估值頁 — P/R 比在實際中代表什麼，以及如何閱讀 KPI 卡片</span></h4>
+      <div class="step-url"><a href="/tw/valuation.html">myproperty.investmquest.com/tw/valuation</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">opens navbar → TW flag → <strong>Valuation</strong>. He's choosing Taiwan because it's his home market — the numbers feel real. He spends time on each KPI card in the row at the top: reading the label, the value, the badge, and the source line. He tries to interpret each one using what he learned on the Playbook page.</span>
+        <span class="lang-zh">打開 navbar → TW 旗幟 → <strong>估值</strong>。選台灣是因為這是他的本地市場——數字感覺比較真實。他在最上方每張 KPI 卡片上停留：閱讀標籤、數值、徽章和資料來源行。他嘗試用在 Playbook 頁學到的東西來解讀每一張卡。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>The KPI card anatomy — using "Taipei P/R Ratio: 75×" as the example:</strong>
+        <br>• <strong>Label</strong> ("Taipei P/R Ratio") — what metric this is.
+        <br>• <strong>Value</strong> ("75×") — the current reading.
+        <br>• <strong>Badge color</strong> (🔴 RED) — fast signal: red = danger/stress, orange = watch/elevated, blue = neutral/informational, green = healthy/positive.
+        <br>• <strong>Badge text</strong> ("Numbeo 34.3× PTI = global #1 tied Shanghai") — context that makes the number meaningful.
+        <br>• <strong>Source line</strong> (small grey text) — which report or dataset produced this number and when.
+        <br><br>Other KPIs on this page: <strong>National PIR 10.76×</strong> (severely unaffordable), <strong>Taipei PIR 16.43×</strong> (global top-tier unaffordability), <strong>Gross Yield 1.1–2.5%</strong> (below bank deposit rate), <strong>CPI Rent YoY +2.66%</strong> (28.5-year high), <strong>Yield Spread vs CBC +0.11%</strong> (near-zero carry).
+        </span>
+        <span class="lang-zh"><strong>KPI 卡片解剖——以「台北 P/R 比：75 倍」為例：</strong>
+        <br>• <strong>標籤</strong>（「台北 P/R 比」）— 這是什麼指標。
+        <br>• <strong>數值</strong>（「75 倍」）— 目前的讀數。
+        <br>• <strong>徽章顏色</strong>（🔴 紅色）— 快速信號：紅色 = 危險/壓力，橙色 = 警示/偏高，藍色 = 中性/資訊，綠色 = 健康/正向。
+        <br>• <strong>徽章文字</strong>（「Numbeo 34.3 倍 PTI 全球第一，並列上海」）— 讓數字有意義的背景脈絡。
+        <br>• <strong>資料來源行</strong>（小灰字）— 哪份報告或數據集產生了這個數字、什麼時候的。
+        <br><br>本頁其他 KPI：<strong>全國房價所得比 10.76 倍</strong>（嚴重不可負擔）、<strong>台北 PIR 16.43 倍</strong>（全球頂級不可負擔）、<strong>毛收益率 1.1–2.5%</strong>（低於銀行存款利率）、<strong>CPI 租金年增率 +2.66%</strong>（28.5 年新高）、<strong>利差 vs 央行 +0.11%</strong>（接近零利差）。
+        </span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">KPI cards are the site's "vital signs" display. Every market page leads with a row of KPI cards. Now that he can read one, he can read them all — the label/value/badge/source structure is identical everywhere. Taipei's P/R of 75× means: if you buy a median Taipei apartment, it would take 75 years of rent to recover the purchase price. The playbook said &gt;30× means "rent is favored." At 75×, buying in Taipei purely for rental income doesn't pencil out without meaningful capital appreciation. This is not a reason to never buy in Taiwan — it's a reason to understand what you're betting on.</span><span class="lang-zh">KPI 卡片是網站的「生命徵象」顯示器。每個市場頁面都以一列 KPI 卡片開頭。現在他能讀懂一張，就能讀懂所有的——標籤/數值/徽章/來源的結構在每個地方都一樣。台北 P/R 比 75 倍意味著：買一戶中位台北公寓，要 75 年的租金才能回收購入成本。Playbook 說 &gt;30 倍代表「租屋有利」。在 75 倍的情況下，純粹為了租金收入買台北房，如果沒有顯著的資本增值是算不過去的。這不是「永遠不要在台灣買」的理由——而是讓你理解自己在押注什麼。</span></div>
+      <div class="step-screenshot"><img src="img/06-tw-valuation.png" alt="Taiwan valuation page — KPI cards row with P/R, PIR, yield, spread explained" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ======== PHASE C ======== -->
+  <div class="phase-heading">
+    <span class="phase-pill phase-c"><span class="lang-en">Phase C</span><span class="lang-zh">C 階段</span></span>
+    <p><span class="lang-en">First exploration — browsing without buying</span><span class="lang-zh">第一次探索 — 瀏覽，但不做決定</span></p>
+  </div>
+
+  <!-- STOP 7 -->
+  <div class="demo-step">
+    <div class="step-no">7</div>
+    <div class="step-content">
+      <h4><span class="lang-en">84-city Dashboard — Mr. Chou browses to see the spread of yields and carry across the world</span><span class="lang-zh">84 城市 Dashboard — 周先生瀏覽，看全球收益率與利差的分布</span></h4>
+      <div class="step-url"><a href="/dashboard.html">myproperty.investmquest.com/dashboard</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">opens navbar → Tools → <strong>Dashboard</strong>. He scrolls past the market coverage cards and arrives at the 84-city table. He clicks the <strong>Yield</strong> column header to sort by highest yield. He looks at what comes to the top. He then clicks <strong>Carry</strong> to sort by carry. He does not filter by region, does not shortlist anything. He just wants to feel the range — "what does 7% yield look like vs 1%? Which markets have positive carry?"</span>
+        <span class="lang-zh">打開 navbar → Tools → <strong>Dashboard</strong>。捲過市場覆蓋卡片，到達 84 城市表格。點 <strong>Yield</strong>（收益率）欄頭，按最高收益率排序。看哪些城市排到最前面。再點 <strong>Carry</strong>（利差）排序。他不篩選地區，不建立任何名單。他只想感受一下範圍——「7% 收益率看起來是什麼樣子？哪些市場有正利差？」</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees in the table (11 sortable columns):</strong> City · 10yr cumulative price change · YoY price change · <span class="concept-pill">Yield</span> · <span class="concept-pill">Carry</span> · <span class="concept-pill">PTI</span> · <span class="concept-pill">P/R</span> · Vacancy% · Transaction YoY · <span class="concept-pill">Now</span> (supply tightness: 🔴 tight / 🟡 balanced / 🟢 loose) · <span class="concept-pill">Pipeline</span> · Apt Price · Mortgage Rate. Each column header has a hover tooltip that explains the metric in plain language — he hovers over each one to read the definition. He notices some cities have red KPIs across the board (very stressed), some have a mix, some are almost all green (very healthy). He doesn't know these cities yet, but he's learning that the world has enormous variety.</span>
+        <span class="lang-zh"><strong>表格中的東西（11 個可排序欄位）：</strong>城市 · 10 年累計房價變化 · 年增率 · <span class="concept-pill">Yield</span> · <span class="concept-pill">Carry</span> · <span class="concept-pill">PTI</span> · <span class="concept-pill">P/R</span> · 空置率 · 成交量年增率 · <span class="concept-pill">Now</span>（供需緊張度：🔴 緊張 / 🟡 平衡 / 🟢 寬鬆）· <span class="concept-pill">Pipeline</span> · 公寓房價 · 房貸利率。每個欄頭都有 hover tooltip，用白話文解釋該指標——他把每個都 hover 一遍讀定義。他注意到有些城市的 KPI 全紅（非常緊張），有些紅橙混合，有些幾乎全綠（非常健康）。他還不認識這些城市，但他在學習：世界的多樣性遠超他的想像。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">this is the most important stop in Phase C. The dashboard teaches him scale: there are cities with 8% rental yield and positive carry, and there are cities with 1% yield and deeply negative carry. Both exist. Without this context, he would have no basis for judging whether the single number a property agent quotes him is good or bad. The dashboard is his calibration tool.</span><span class="lang-zh">這是 C 階段最重要的停靠點。Dashboard 讓他感受規模：有城市的租金收益率高達 8% 且利差為正，也有城市收益率僅 1% 且利差深度為負。兩者都存在。沒有這個背景，他就沒有判斷房仲報給他的單一數字好不好的基準。Dashboard 是他的校準工具。</span></div>
+      <div class="step-screenshot"><img src="img/07-dashboard.png" alt="84-city dashboard sorted by yield — showing global spread of yields and carry" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 8 -->
+  <div class="demo-step">
+    <div class="step-no">8</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Home world map — switching metrics (Yield / Carry / 10yr / Pipeline) to see different market shapes</span><span class="lang-zh">首頁世界地圖 — 切換指標（收益率 / 利差 / 10 年漲幅 / Pipeline）看不同市場輪廓</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a> · <span class="lang-en">map section</span><span class="lang-zh">地圖區段</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">returns to the home page and scrolls down to the world map. He uses the 4-button toggle above the map to switch between metrics — <strong>Yield, Carry, 10yr, Pipeline</strong> — one by one. He watches the map re-color after each switch. He hovers over a few Asian cities (Tokyo, Kuala Lumpur, Sydney) to see the tooltip showing all five metrics at once.</span>
+        <span class="lang-zh">返回首頁，捲到世界地圖。用地圖上方的 4 個切換按鈕逐一切換指標——<strong>收益率、利差、10 年漲幅、Pipeline</strong>。他觀察地圖在每次切換後的重新上色。他把游標停在幾個亞洲城市（東京、吉隆坡、悉尼）上，看 tooltip 一次顯示所有五個指標。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he discovers:</strong>
+        <br>• On <strong>Yield</strong> mode: Southeast Asia and some emerging markets light up brightest. Western Europe and major Japanese cities are dimmer.
+        <br>• On <strong>Carry</strong> mode: the map looks different — high carry requires both high yield AND low mortgage rates. Some yield leaders flip to negative carry when rates are high.
+        <br>• On <strong>10yr</strong> mode: long-run appreciation leaders emerge — often different cities from the yield leaders.
+        <br>• On <strong>Pipeline</strong> mode: cities with heavy construction pipelines glow — supply risk visible geographically.
+        <br>Each city's tooltip shows: Yield, Carry, 10yr, PTI, Vacancy — a compressed 5-metric summary.
+        </span>
+        <span class="lang-zh"><strong>他發現的事：</strong>
+        <br>• <strong>收益率</strong>模式：東南亞和部分新興市場最亮。西歐和日本主要城市較暗。
+        <br>• <strong>利差</strong>模式：地圖看起來不一樣——高利差需要同時滿足高收益率 AND 低房貸利率。部分高收益城市在利率偏高時反而變成負利差。
+        <br>• <strong>10 年漲幅</strong>模式：長期增值領先城市浮現——往往和收益率領先的城市不同。
+        <br>• <strong>Pipeline</strong> 模式：在建量大的城市發亮——供給風險在地圖上一目了然。
+        <br>每個城市的 tooltip 顯示：收益率、利差、10 年漲幅、PTI、空置率——5 個指標的壓縮摘要。
+        </span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">this is the most visual step in the whole walkthrough. He now understands that the same map can tell four completely different stories depending on which lens (metric) you use. Real estate analysis requires holding multiple lenses at once. No single metric tells the whole story. The toggle trains his mental habit: always ask "which metric am I optimizing for, and what does the market look like on ALL the others?"</span><span class="lang-zh">這是整個導覽中最視覺化的一步。他現在理解同一張地圖，用不同的鏡頭（指標）可以講出四個完全不同的故事。房地產分析需要同時持有多個鏡頭。沒有任何單一指標能說完整個故事。這個切換按鈕訓練他的思維習慣：永遠要問「我在優化哪個指標，而其他所有指標這個市場看起來如何？」</span></div>
+      <div class="step-screenshot"><img src="img/08-home-map-carry.png" alt="Home world map in Carry mode — market dots colored by carry spread" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 9 -->
+  <div class="demo-step">
+    <div class="step-no">9</div>
+    <div class="step-content">
+      <h4><span class="lang-en">REIT vs Direct — Local mode, no foreign complications — understanding the comparison table</span><span class="lang-zh">REIT vs 實體 — 本國模式，不涉及外國複雜稅務 — 理解比較表格</span></h4>
+      <div class="step-url"><a href="/reit-vs-direct.html">myproperty.investmquest.com/reit-vs-direct</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">opens navbar → Tools → <strong>REIT vs Direct</strong>. He <strong>leaves the residency toggle on "Local"</strong> — his default as a Taiwan resident. He reads the tool description: "Same USD 100K — REIT or direct? Depends on residency, leverage, and how long you hold." He reads the comparison table. He does not toggle to "Foreign" mode — that's for later when he understands more. He scrolls down to see the endpoint bar chart showing what NT$ 100K becomes after 10 years in each market, via each vehicle.</span>
+        <span class="lang-zh">打開 navbar → Tools → <strong>REIT vs 實體</strong>。<strong>把身分切換保留在「本國」</strong>——作為台灣居民的預設值。閱讀工具說明：「同一筆 USD 100K — 買 REIT 還是實體？取決於身分、槓桿，以及你打算持有多久。」閱讀比較表格。他不切換到「外國」模式——那是等他理解更多之後的事。往下捲，看終值長條圖，顯示 10 年後每個市場、每種工具分別讓 $100K 變成多少。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he reads:</strong>
+        <br>• <strong>Residency toggle (Local / Foreign)</strong> — "Local = baseline. Foreign = local + foreign-buyer surcharges + non-resident withholding + foreigner CGT." He's Local for now.
+        <br>• <strong>Holding period toggle (5 / 10 / 15 / 20 yr)</strong> — different holding periods dramatically change the math. Entry costs are amortized over more years if you hold longer.
+        <br>• <strong>Comparison table rows</strong> — 7 markets: US, SG, JP, AU, MY, UK, EU. For each: Direct annualized return range vs REIT annualized return range. Color-coded: green = outperforms, red = underperforms.
+        <br>• <strong>$100K endpoint bar chart</strong> — the most visual output. After 10 years at the midpoint return, where does $100K end up? Direct vs REIT side-by-side, with the $100K reference line making gains/losses immediately legible.
+        </span>
+        <span class="lang-zh"><strong>他讀到的：</strong>
+        <br>• <strong>身分切換（本國 / 外國）</strong> — 「本國 = 基線。外國 = 本國 + 外資附加稅 + 非居民預扣稅 + 外國人 CGT。」他現在是本國。
+        <br>• <strong>持有期切換（5 / 10 / 15 / 20 年）</strong> — 不同持有期間對計算結果影響巨大。持有越久，進場成本攤銷越多年。
+        <br>• <strong>比較表格列</strong> — 7 個市場：美、新、日、澳、馬、英、歐。每個市場：實體年化報酬區間 vs REIT 年化報酬區間。顏色編碼：綠色 = 表現較優，紅色 = 表現較差。
+        <br>• <strong>$100K 終值長條圖</strong> — 最直觀的輸出。以中位報酬計算 10 年後 $100K 變成多少？實體 vs REIT 並排，以 $100K 參考線讓盈虧一目了然。
+        </span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">this tool shows him that the REIT vs direct question doesn't have one answer — it depends on which market, how long you hold, and your tax status. As a Taiwan local, he's in the most favorable scenario (no foreign-buyer surcharges). But he also sees that with NT$ 30M, he could fund a diversified REIT basket OR one direct property — they are genuinely different risk/return profiles. He's not choosing today. He's understanding the decision architecture.</span><span class="lang-zh">這個工具讓他看到 REIT vs 實體的問題沒有唯一答案——取決於哪個市場、持有多久、以及你的稅務身分。作為台灣本地人，他處於最有利的情境（沒有外資附加稅）。但他也看到，NT$ 3,000 萬可以用來建立分散的 REIT 組合，或買一戶實體房產——兩者的風險/報酬結構確實不同。他今天不做選擇。他在理解決策架構。</span></div>
+      <div class="step-screenshot"><img src="img/09-reit-vs-direct-local.png" alt="REIT vs Direct page in Local mode — comparison table and $100K endpoint bars" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ======== PHASE D ======== -->
+  <div class="phase-heading">
+    <span class="phase-pill phase-d"><span class="lang-en">Phase D</span><span class="lang-zh">D 階段</span></span>
+    <p><span class="lang-en">A learning plan — not a buying plan</span><span class="lang-zh">建立學習計畫 — 不是買入計畫</span></p>
+  </div>
+
+  <!-- STOP 10 -->
+  <div class="demo-step">
+    <div class="step-no">10</div>
+    <div class="step-content">
+      <h4><span class="lang-en">TW Market Dashboard — his home market. He reads all KPIs and understands what each means</span><span class="lang-zh">台灣市場儀表板 — 他的本地市場。閱讀所有 KPI，理解每個指標的意義</span></h4>
+      <div class="step-url"><a href="/tw/index.html">myproperty.investmquest.com/tw</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">opens navbar → TW flag → top link (Market Dashboard). He goes through every KPI card section: <strong>MARKET TEMPERATURE</strong>, <strong>AFFORDABILITY PRESSURE</strong>, <strong>DEMAND MOMENTUM</strong>. For each card he reads: the label (what is measured), the value (what the reading is), the badge (is it red/orange/green), and the source. He no longer needs to look up what carry means or what P/R means. He can now read this page fluently.</span>
+        <span class="lang-zh">打開 navbar → TW 旗幟 → 最上方連結（市場儀表板）。逐一看過每個 KPI 卡片區：<strong>市場溫度指標</strong>、<strong>負擔壓力指標</strong>、<strong>需求動能指標</strong>。每張卡片他都讀：標籤（測量什麼）、數值（讀數是多少）、徽章（紅橙綠？）、資料來源。他不再需要查 carry 是什麼、P/R 是什麼。他現在可以流暢地讀這一頁。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>MARKET TEMPERATURE:</strong> 2025 transactions 263,000 (−25% YoY · MOI) · Taipei presale avg NT$118万/ping (+1.9% YoY) · Loan approval rate 62% · Gross rental yield 2.24%.
+        <br><strong>AFFORDABILITY PRESSURE:</strong> Yield spread vs CBC +0.24% (near-zero carry) · Taipei median multiple 15.41× · National median multiple 9.89× (both 🔴 red) · Vacancy 9.6%.
+        <br><strong>DEMAND MOMENTUM:</strong> Hsinchu 5Y appreciation +58.4% · 2024 transactions 350,000 (11-year high) · Taipei mortgage ratio 68%.
+        <br>Below the KPIs: market overview charts. He doesn't need to analyze the charts deeply today — he just reads the titles and notes what's being tracked: PIR by city, mortgage burden rate, yield vs CBC rate, national PIR trend.
+        </span>
+        <span class="lang-zh"><strong>市場溫度：</strong>2025 年成交量 263,000（年減 25% · 內政部）· 台北預售屋均價 NT$118 萬/坪（+1.9% YoY）· 房貸核准率 62% · 毛租金收益率 2.24%。
+        <br><strong>負擔壓力：</strong>利差 vs 央行 +0.24%（幾乎無正向現金流）· 台北中位倍數 15.41 倍 · 全國中位倍數 9.89 倍（兩者皆 🔴 紅色）· 空屋率 9.6%。
+        <br><strong>需求動能：</strong>新竹 5 年漲幅 +58.4% · 2024 年成交量 350,000（11 年新高）· 台北房貸負擔率 68%。
+        <br>KPI 下方是市場總覽圖表。他今天不需要深入分析圖表——他只是讀標題，記下在追蹤什麼：各城市 PIR、房貸負擔率、收益率 vs 央行利率、全國 PIR 趨勢。
+        </span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">this is the moment he feels competent for the first time. He could not have read this page two hours ago. Now he can. The Taiwan KPI picture tells a coherent story: high PTI, near-zero carry, 9.6% vacancy, −25% transaction volume — this is a stressed, expensive market. That doesn't mean it's wrong to invest in Taiwan. But it means anyone selling him "Taiwan is safe and always goes up" is leaving out a lot of context. He's no longer ignorant. He can push back.</span><span class="lang-zh">這是他第一次感到自己有能力的時刻。兩小時前他根本看不懂這一頁。現在他可以了。台灣 KPI 畫面說的是一個連貫的故事：高 PTI、接近零利差、9.6% 空屋率、成交量年減 25%——這是一個壓力大、昂貴的市場。這不代表在台灣投資是錯的。但這意味著，任何跟他說「台灣很安全，一定會漲」的人都省略了大量背景脈絡。他不再是一無所知。他可以反問了。</span></div>
+      <div class="step-screenshot"><img src="img/10-tw-dashboard.png" alt="TW market dashboard — three KPI rows: market temperature, affordability, demand" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 11 -->
+  <div class="demo-step">
+    <div class="step-no">11</div>
+    <div class="step-content">
+      <h4><span class="lang-en">TW Risk page — what risks exist before any purchase, and why Day 1 is too soon to buy</span><span class="lang-zh">台灣風險頁 — 任何買入前存在哪些風險，以及為何第一天太快了</span></h4>
+      <div class="step-url"><a href="/tw/risk.html">myproperty.investmquest.com/tw/risk</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">opens navbar → TW flag → <strong>Risk</strong>. He reads all six KPI cards at the top. He reads the Risk Radar chart description and the Rate Sensitivity section. He reads the Policy Timeline and the Key Risk Factors narrative section. This is his first encounter with "structured risk thinking" applied to property.</span>
+        <span class="lang-zh">打開 navbar → TW 旗幟 → <strong>風險</strong>。讀最上方全部六張 KPI 卡片。讀風險雷達圖說明和利率敏感度分析。讀政策時間軸和主要風險因素敘述區塊。這是他第一次接觸應用在房地產的「結構化風險思考」。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>Risk KPIs he reads:</strong>
+        <br>• <strong>7th Wave Credit Controls: Active</strong> 🔴 ("Most aggressive in history") — the government is actively cooling the market.
+        <br>• <strong>Bank Mortgage Concentration: 36.7%</strong> 🔴 ("Near ceiling") — banks are near their regulatory limit for property loans.
+        <br>• <strong>Birth Rate: 0.72</strong> 🔴 ("World's lowest maybe") — long-run structural demand risk.
+        <br>• <strong>Delivery Wave: 40 wan+ units 2025–2027</strong> 🔴 — a multi-year supply surge.
+        <br>• <strong>Vacancy: 91.4 wan (9.79%)</strong> 🟡 ("Near record") — existing unused stock is already elevated.
+        <br>• <strong>Earthquake Risk: High</strong> 🟡 — physical risk, especially older buildings.
+        <br><br>Key Risk Factors section: Supply wave three-phase risk (transfer → cancellation → foreclosure), cross-strait geopolitical overhang, credit controls limiting buyer pool.
+        </span>
+        <span class="lang-zh"><strong>他讀到的風險 KPI：</strong>
+        <br>• <strong>第七波信用管制：實施中</strong> 🔴（「史上最嚴厲」）— 政府正在主動打壓市場。
+        <br>• <strong>銀行房貸集中度：36.7%</strong> 🔴（「接近上限」）— 銀行的房貸監管上限快到了。
+        <br>• <strong>出生率：0.72</b> 🔴（「可能全球最低」）— 長期結構性需求風險。
+        <br>• <strong>交屋潮：40 萬+ 戶 2025–2027</strong> 🔴 — 多年期供給衝擊。
+        <br>• <strong>空屋：91.4 萬（9.79%）</strong> 🟡（「接近紀錄」）— 現有未使用存量已偏高。
+        <br>• <strong>地震風險：高</strong> 🟡 — 實體風險，尤其老舊建物。
+        <br><br>主要風險因素區塊：供給波三階段風險（交屋潮 → 退戶潮 → 法拍潮）、台海地緣政治隱憂、信用管制限縮買方資格。
+        </span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">this page makes explicit what every experienced investor knows but seldom says out loud: every market has structural risks that don't show up in last year's price appreciation. The Taiwan risk picture is not a reason to avoid Taiwan forever — but it is a very strong argument against buying in the first week after inheriting money. The smartest move with a large inheritance is to do nothing with it for the first 90 days, park it in a money market fund, and spend that time learning. This site is the learning tool.</span><span class="lang-zh">這一頁明確說出了每個有經驗的投資者都知道但很少大聲說的事：每個市場都有結構性風險，不會出現在去年的房價漲幅中。台灣的風險圖景不是「永遠不要買台灣」的理由——但這是繼承後第一週就買入的非常有力的反對論據。繼承一大筆錢後最聰明的做法，是在頭 90 天什麼都不做，把錢放在貨幣市場基金，用這段時間好好學習。這個網站就是學習工具。</span></div>
+      <div class="step-screenshot"><img src="img/11-tw-risk.png" alt="TW risk page — six risk KPI cards including credit controls, delivery wave, birth rate" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 12 -->
+  <div class="demo-step">
+    <div class="step-no">12</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Mr. Chou's learning plan — a 3-month calendar to become literate before committing anything</span><span class="lang-zh">周先生的學習計畫 — 在承諾任何決定之前的 3 個月學習日曆</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a> · <span class="lang-en">back to start</span><span class="lang-zh">回到起點</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chou does:</span><span class="lang-zh">周先生動作：</span></strong>
+        <span class="lang-en">returns to the home page. He reads the page one more time — this time it looks completely different. He understands the scatter, the persona cards, the map toggles. He opens the site in 中文 and prints this walkthrough to share with his financial planner. He does not call a real estate agent. He does not make a wire transfer. He opens a notebook and writes down a 3-month learning plan.</span>
+        <span class="lang-zh">返回首頁。再讀一次這一頁——這次感覺完全不同了。他理解散點圖、persona 卡片、地圖切換鍵。他把網站切換到中文，列印這份導覽分享給理財規劃師。他沒有打電話給房仲。他沒有匯款。他打開筆記本，寫下 3 個月的學習計畫。</span>
+      </div>
+      <p class="step-see">
+        <div class="learning-plan">
+          <h4><span class="lang-en">Mr. Chou's 3-month learning plan (not a buying plan)</span><span class="lang-zh">周先生的 3 個月學習計畫（不是買入計畫）</span></h4>
+          <div class="lp-row">
+            <div class="lp-week"><span class="lang-en">Month 1</span><span class="lang-zh">第 1 個月</span></div>
+            <div class="lp-text"><span class="lang-en">Read every page of the TW market section (Supply, Demand, Valuation, Risk, Report). Visit the site once per week. Re-read Playbook. Park NT$ 30M in a money market fund or short-term government bonds while learning — do NOT let it sit in a current account at zero rate, but also do NOT invest in anything until Month 3 at the earliest.</span><span class="lang-zh">讀完台灣市場區塊每一頁（供給、需求、估值、風險、報告）。每週到網站看一次。重讀 Playbook。把 NT$ 3,000 萬放入貨幣市場基金或短期公債——不要讓錢放在零利率活存，但也不要在第 3 個月前投資任何東西。</span></div>
+          </div>
+          <div class="lp-row">
+            <div class="lp-week"><span class="lang-en">Month 2</span><span class="lang-zh">第 2 個月</span></div>
+            <div class="lp-text"><span class="lang-en">Read one other market section in full (suggestion: JP, because the JPY entry discount and low entry costs make it a common Taiwanese investor destination — then you can evaluate it with data rather than hearsay). Read the REITs page in full. Use the Dashboard to compare 10 cities that interest you. Talk to a certified financial planner (CFP) about how NT$ 30M fits into your overall financial plan across all asset classes — real estate is only one slice.</span><span class="lang-zh">完整讀一個其他市場區塊（建議讀日本——日圓折扣與低進場成本讓它成為台灣投資人的常見目的地——這樣你可以用數據而非道聽途說來評估）。完整讀 REITs 頁。用 Dashboard 比較 10 個你感興趣的城市。和認證理財規劃師（CFP）談談 NT$ 3,000 萬在你整體財務計畫中如何配置——房地產只是其中一個切片。</span></div>
+          </div>
+          <div class="lp-row">
+            <div class="lp-week"><span class="lang-en">Month 3</span><span class="lang-zh">第 3 個月</span></div>
+            <div class="lp-text"><span class="lang-en">Only now consider narrowing to 1–2 markets and 1 vehicle type (direct property OR REIT, not both yet). Use REIT vs Direct in Foreign mode (since buying overseas means you ARE a foreign buyer). Attend one in-person or online property seminar — not to buy, but to hear a different perspective and ask informed questions. Re-read the TW Risk page. Decide: am I ready to engage a real estate agent for a viewing, or do I need 3 more months?</span><span class="lang-zh">到這時才考慮縮小到 1–2 個市場和 1 種工具（實體房產 OR REIT，還不是兩者都做）。在外國模式下使用 REIT vs 實體（因為買海外就代表你是外國買家）。參加一個線下或線上房產研討會——不是去買，而是聽不同觀點並提出有根據的問題。重讀台灣風險頁。做個決定：我準備好請房仲帶我看房了嗎，還是我需要再 3 個月？</span></div>
+          </div>
+          <div class="lp-row">
+            <div class="lp-week"><span class="lang-en">Ongoing</span><span class="lang-zh">持續進行</span></div>
+            <div class="lp-text"><span class="lang-en">Return to this site monthly. Data is refreshed quarterly. Check what changed. By Month 6, Mr. Chou will have enough context to have a substantive conversation with a property agent, a mortgage broker, or a tax accountant — without being talked into anything he doesn't understand.</span><span class="lang-zh">每月回到這個網站。數據每季更新。看看哪些變了。到第 6 個月，周先生將有足夠的背景知識，能夠與房仲、房貸顧問或稅務會計師進行有實質內容的對話——而不會被說服同意他看不懂的東西。</span></div>
+          </div>
+        </div>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Chou:</span><span class="lang-zh">對周先生：</span></strong> <span class="lang-en">the walkthrough ends here. No property has been selected. No REIT has been shortlisted. No offer has been made. This is intentional and correct. NT$ 30M is a large sum — the cost of one bad property decision could easily be NT$ 3–5M (10–17% of the inheritance) in entry fees, bad pricing, and wrong market timing. Three months of learning costs nothing and protects everything. Mr. Chou closes his laptop with a clear, actionable plan for the next 90 days.</span><span class="lang-zh">導覽在這裡結束。沒有選定任何房產。沒有篩選出任何 REIT。沒有出價。這是刻意且正確的。NT$ 3,000 萬是一筆大金額——一個糟糕的房產決定所帶來的損失，光是進場費用、錯誤定價和錯誤的市場時機，就很容易達到 NT$ 300–500 萬（繼承金額的 10–17%）。三個月的學習不花任何成本，卻保護了一切。周先生闔上筆電，手上有一份未來 90 天清晰、可執行的計畫。</span></div>
+      <div class="step-screenshot"><img src="img/12-home-final.png" alt="Home page — the same page Mr. Chou started on, now seen through literate eyes" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 3 — CONCEPT CHEAT SHEET                -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 03</div>
+    <h2><span class="lang-en">Concept cheat sheet — everything Mr. Chou learned in one page</span><span class="lang-zh">概念速查表 — 周先生在這次導覽中學到的所有東西</span></h2>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4><span class="ck-icon">Y</span> <span class="lang-en">Yield</span><span class="lang-zh">收益率</span></h4>
+      <p><span class="lang-en">Annual rent ÷ purchase price. Gross = before costs. Net = after vacancy, management fees, maintenance. The site shows gross; actual net is typically 60–80% of gross.</span><span class="lang-zh">年租 ÷ 購買價格。毛 = 扣費前。淨 = 扣除空置、管理費、維護後。網站顯示毛值；實際淨值通常為毛值的 60–80%。</span></p>
+      <p class="ck-tip"><span class="lang-en">Taipei gross yield: 1.1–2.5%. Tokyo: ~3.5%. Kuala Lumpur: ~5.5%.</span><span class="lang-zh">台北毛收益率：1.1–2.5%。東京：約 3.5%。吉隆坡：約 5.5%。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">C</span> <span class="lang-en">Carry</span><span class="lang-zh">利差</span></h4>
+      <p><span class="lang-en">Yield minus mortgage rate. Positive = rent covers more than interest. Negative = you subsidize the property from salary. Taiwan's carry is near zero (+0.24%), meaning buying for rent barely covers financing.</span><span class="lang-zh">收益率減房貸利率。正值 = 租金超過利息支出。負值 = 你用薪水補貼物件。台灣利差接近零（+0.24%），意味著買房收租幾乎只夠付利息。</span></p>
+      <p class="ck-tip"><span class="lang-en">Positive carry markets: KL, Bangkok, some AU regional cities.</span><span class="lang-zh">正利差市場：吉隆坡、曼谷、部分澳洲地區城市。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">P</span> <span class="lang-en">PTI / PIR</span><span class="lang-zh">房價收入比</span></h4>
+      <p><span class="lang-en">Median apartment price ÷ median annual household income. How many years of full income to buy. Taipei is 15.41× — in one of the world's least affordable buckets. Global average is ~8×.</span><span class="lang-zh">公寓中位價 ÷ 家庭年收入中位數。全薪收入要多少年才買得起。台北 15.41 倍——全球最難負擔之列。全球平均約 8 倍。</span></p>
+      <p class="ck-tip"><span class="lang-en">&lt;5× affordable · 5–10× stretched · &gt;10× severely unaffordable.</span><span class="lang-zh">&lt;5 倍可負擔 · 5–10 倍偏高 · &gt;10 倍嚴重不可負擔。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">R</span> <span class="lang-en">P/R Ratio</span><span class="lang-zh">房租比</span></h4>
+      <p><span class="lang-en">Median price ÷ annual rent. How many years of rent to recover purchase price. Taipei is 75× — meaning at current rents, it takes 75 years. The Playbook threshold of 30× for "rent is better" is dramatically exceeded.</span><span class="lang-zh">中位房價 ÷ 年租。幾年租金回收購入成本。台北 75 倍——意味著按現行租金，要 75 年。Playbook 的 30 倍門檻（「租屋更有利」）被大幅超越。</span></p>
+      <p class="ck-tip"><span class="lang-en">&lt;20× buy favored · 20–30× neutral · &gt;30× rent favored.</span><span class="lang-zh">&lt;20 倍買有利 · 20–30 倍中性 · &gt;30 倍租屋有利。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">N</span> <span class="lang-en">REIT</span><span class="lang-zh">不動產投資信託</span></h4>
+      <p><span class="lang-en">Real Estate Investment Trust. A company that owns income-producing property and must pay 90%+ as dividends. You invest like buying a stock — daily liquidity, no tenant management, but exposed to stock market volatility.</span><span class="lang-zh">Real Estate Investment Trust（不動產投資信託）。持有創收房地產的公司，必須把 90% 以上利潤以股息支付。你像買股票一樣投資——每日流動性、不用管租客，但受股市波動影響。</span></p>
+      <p class="ck-tip"><span class="lang-en">WHT = Withholding Tax on dividends. Varies by market and your residency status.</span><span class="lang-zh">WHT = 股息預扣稅。依市場和你的稅務居民身分而異。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">W</span> <span class="lang-en">Navbar map</span><span class="lang-zh">導覽列地圖</span></h4>
+      <p><span class="lang-en">Logo → home. Market flag → that country (Supply / Demand / Valuation / Risk / Report). Tools → cross-market tools (Dashboard, REITs, REIT vs Direct, Carry Heatmap, Pipeline Cliff, Playbook, Methodology). Language toggle → switches every word site-wide.</span><span class="lang-zh">Logo → 首頁。市場旗幟 → 該國（供給 / 需求 / 估值 / 風險 / 報告）。Tools → 跨市場工具（Dashboard、REITs、REIT vs Direct、Carry Heatmap、Pipeline Cliff、Playbook、Methodology）。語言切換 → 切換全站所有文字。</span></p>
+      <p class="ck-tip"><span class="lang-en">CBC: 2.00% badge = Taiwan central bank rate today. Relevant for carry.</span><span class="lang-zh">CBC: 2.00% 標籤 = 台灣今日央行利率。與利差計算相關。</span></p>
+    </div>
+  </div>
+
+  <!-- Color legend -->
+  <div style="background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:14px 18px;margin-bottom:10px">
+    <div style="font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:8px"><span class="lang-en">KPI card color system</span><span class="lang-zh">KPI 卡片顏色系統</span></div>
+    <div class="color-legend">
+      <div class="cl-item"><span class="cl-dot cl-red"></span><span class="lang-en">Red = danger / stress</span><span class="lang-zh">紅 = 危險 / 壓力</span></div>
+      <div class="cl-item"><span class="cl-dot cl-orange"></span><span class="lang-en">Orange = watch / elevated</span><span class="lang-zh">橙 = 警示 / 偏高</span></div>
+      <div class="cl-item"><span class="cl-dot cl-blue"></span><span class="lang-en">Blue = neutral / info</span><span class="lang-zh">藍 = 中性 / 資訊</span></div>
+      <div class="cl-item"><span class="cl-dot cl-green"></span><span class="lang-en">Green = healthy / positive</span><span class="lang-zh">綠 = 健康 / 正向</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 4 — TAKEAWAYS                          -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 04</div>
+    <h2><span class="lang-en">What this site answers vs what to outsource</span><span class="lang-zh">這個網站能回答什麼 vs 需要外部專業的問題</span></h2>
+  </div>
+
+  <div class="takeaway">
+    <div class="takeaway-card answered">
+      <h4><span class="lang-en">Answered by this site</span><span class="lang-zh">這個網站能回答</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Site structure</strong> — navbar, markets, tools dropdown, every page's purpose</span><span class="lang-zh"><strong>網站結構</strong> — 導覽列、市場、工具下拉、每頁的用途</span></li>
+        <li><span class="lang-en"><strong>Data provenance</strong> — where every number comes from (Methodology page)</span><span class="lang-zh"><strong>數據來源</strong> — 每個數字從哪裡來（Methodology 頁）</span></li>
+        <li><span class="lang-en"><strong>Concept glossary</strong> — yield, carry, PTI, P/R, pipeline, REIT, WHT, P/NAV, gearing</span><span class="lang-zh"><strong>概念詞彙表</strong> — 收益率、利差、PTI、P/R、Pipeline、REIT、WHT、P/NAV、槓桿率</span></li>
+        <li><span class="lang-en"><strong>KPI card literacy</strong> — how to read every card on every market page</span><span class="lang-zh"><strong>KPI 卡片識讀</strong> — 如何讀每個市場頁上的每張卡片</span></li>
+        <li><span class="lang-en"><strong>Global market range</strong> — what 1% yield vs 8% yield looks like; positive vs negative carry markets</span><span class="lang-zh"><strong>全球市場範圍</strong> — 1% 收益率 vs 8% 收益率是什麼樣子；正 vs 負利差市場</span></li>
+        <li><span class="lang-en"><strong>Taiwan market picture</strong> — high PTI, near-zero carry, 9.6% vacancy, policy risk, delivery wave</span><span class="lang-zh"><strong>台灣市場圖景</strong> — 高 PTI、接近零利差、9.6% 空屋、政策風險、交屋潮</span></li>
+        <li><span class="lang-en"><strong>REIT vs direct framework</strong> — how to compare the two vehicles using the same $100K basis</span><span class="lang-zh"><strong>REIT vs 實體框架</strong> — 如何用同一 $100K 基準比較兩種工具</span></li>
+        <li><span class="lang-en"><strong>Risk literacy</strong> — what credit controls, supply pipeline, birth rate, and earthquake risk mean for property</span><span class="lang-zh"><strong>風險識讀</strong> — 信用管制、供給 Pipeline、出生率、地震風險對房地產意味著什麼</span></li>
+      </ul>
+    </div>
+    <div class="takeaway-card outsource">
+      <h4><span class="lang-en">Outsource to professionals (especially for Mr. Chou)</span><span class="lang-zh">交給專業人士（對周先生尤其重要）</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Inheritance &amp; estate tax planning (遺產稅)</strong> — Taiwan imposes estate tax on inherited assets above NT$ 13.33M. A tax lawyer is non-optional.</span><span class="lang-zh"><strong>繼承與遺產稅規劃</strong> — 台灣對超過 NT$ 1,333 萬的繼承資產課遺產稅。稅務律師是必要的。</span></li>
+        <li><span class="lang-en"><strong>CFP / financial planner</strong> — map NT$ 30M across ALL asset classes (bonds, equities, real estate, insurance, emergency fund) before committing any to property.</span><span class="lang-zh"><strong>CFP / 理財規劃師</strong> — 在投入任何資金到房地產前，先把 NT$ 3,000 萬跨所有資產類別（債券、股票、房地產、保險、緊急備用金）做整體規劃。</span></li>
+        <li><span class="lang-en"><strong>Estate lawyer</strong> — verify there are no continuing liabilities or obligations attached to the inherited assets.</span><span class="lang-zh"><strong>遺產律師</strong> — 確認繼承資產上沒有持續的負債或義務。</span></li>
+        <li><span class="lang-en"><strong>Tax accountant</strong> — if he later invests in overseas REITs or property, cross-border income reporting obligations apply.</span><span class="lang-zh"><strong>稅務會計師</strong> — 如果他之後投資海外 REIT 或房產，有境外收入申報義務。</span></li>
+        <li><span class="lang-en"><strong>Mortgage broker</strong> — when ready: understand what LTV foreigners (or domestic buyers) can get, and at what cost.</span><span class="lang-zh"><strong>房貸顧問</strong> — 準備好時：了解外國人（或本地買家）能取得的 LTV 和成本。</span></li>
+        <li><span class="lang-en"><strong>Trusted real estate agent</strong> — when he has spent 3 months on this site and can ask informed questions, not before.</span><span class="lang-zh"><strong>值得信任的房仲</strong> — 等他在這個網站上花了 3 個月、能提出有根據的問題之後，再聯絡房仲，而不是現在。</span></li>
+        <li><span class="lang-en"><strong>Grief counseling</strong> — losing both parents is a major life event. Rushing large financial decisions immediately after bereavement is one of the most common and costliest mistakes in personal finance.</span><span class="lang-zh"><strong>心理諮商</strong> — 雙親離世是重大人生事件。在哀傷期立即倉促做出重大財務決定，是個人理財中最常見、代價最高的錯誤之一。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- PDF BAR                                         -->
+  <!-- ============================================== -->
+  <!-- ============================================== -->
+  <!-- SECTION 5 — BEST OPTION                         -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 05</div>
+    <h2><span class="lang-en">The site's best-supported call for Mr. Chou</span><span class="lang-zh">站上資料能支持的最佳選項 — 給周先生</span></h2>
+    <p class="sec-sub"><span class="lang-en">Not a personalized recommendation — a single, opinionated call assembled only from data this site already shows in SECTIONS 01–04.</span><span class="lang-zh">非個人化推薦 — 是從 SECTION 01–04 站上資料推導出的單一明確建議。</span></p>
+  </div>
+
+  <div class="best-option">
+    <div class="bo-grid">
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">CITY / AREA</span><span class="lang-zh">城市 / 區域</span></div>
+        <div class="bo-val">None (no direct buy in year 1)</div>
+        <div class="bo-note"><span class="lang-en">The site's strongest signal for an inheritance newbie is: don't deploy capital into a single direct asset before building mental models.</span><span class="lang-zh">對繼承新手，站上最強訊號是：在建立 mental model 前不要把資金壓進單一直接資產。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">PRODUCT</span><span class="lang-zh">產品類型</span></div>
+        <div class="bo-val">Year-1 REIT learn-by-doing</div>
+        <div class="bo-note"><span class="lang-en">Liquid REIT exposure to observe yield, drawdown, dividend tax in real life — not paper.</span><span class="lang-zh">流動性 REIT 曝險，實際觀察 yield、回檔、配息稅 — 不要紙上模擬。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">BUDGET MIX</span><span class="lang-zh">預算配置</span></div>
+        <div class="bo-val">NT$3M REIT pilot + NT$27M cash / short-term</div>
+        <div class="bo-note"><span class="lang-en">10% deployed to learn; 90% in short-term instruments while he reads SECTIONS / reports / methodology.</span><span class="lang-zh">10% 投入學習；90% 在短期工具，趁讀完 SECTIONS / report / methodology。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">HOLD</span><span class="lang-zh">持有期</span></div>
+        <div class="bo-val">Dynamic · yearly review</div>
+        <div class="bo-note"><span class="lang-en">Earliest direct-buy decision: month 7+ of education; before that, optionality &gt; commitment.</span><span class="lang-zh">最早直接投資決策：教育期第 7 個月後；在那之前，保留選擇權 &gt; 押注。</span></div>
+      </div>
+    </div>
+
+    <div class="bo-section bo-checklist">
+      <h4><span class="lang-en">✓ Pre-commit checklist (from site data)</span><span class="lang-zh">✓ 進場前 checklist（站上資料能驗證的）</span></h4>
+      <ul>
+        <li><span class="lang-en">Has read the 9-section market reports for at least 3 markets — not 1.</span><span class="lang-zh">已讀完至少 3 個市場的 9 章節報告 — 不是 1 個。</span></li>
+        <li><span class="lang-en">Has run Cost Calculator for 2 different markets to see how tax / FX / cycle change the answer.</span><span class="lang-zh">已用 Cost Calculator 跑過 2 個市場，看到稅 / FX / 週期如何改變答案。</span></li>
+        <li><span class="lang-en">Has experienced 1 full dividend cycle on the REIT pilot (saw the tax bill in real life).</span><span class="lang-zh">REIT 試水已經歷 1 個完整配息週期（在現實看過稅單）。</span></li>
+        <li><span class="lang-en">Has used the Personal Fit tool with 2+ different origin/destination combinations to feel the trade-offs.</span><span class="lang-zh">已用 Personal Fit 工具測試 2+ 種不同 origin / destination 組合，感受 trade-off。</span></li>
+        <li><span class="lang-en">Methodology page understood: knows which numbers are official, which are estimates, which are off-site.</span><span class="lang-zh">已讀懂 Methodology 頁：知道哪些數字是官方、哪些是估算、哪些必須去站外查。</span></li>
+      </ul>
+    </div>
+
+    <div class="bo-section bo-next">
+      <h4><span class="lang-en">→ Off-site next steps (the site cannot answer)</span><span class="lang-zh">→ 走出站外的下一步（站上無法回答的）</span></h4>
+      <ol>
+        <li><span class="lang-en"><strong>Inheritance attorney + 會計師</strong> — settle the inherited estate first: tax position, beneficiary structure, future estate planning.</span><span class="lang-zh"><strong>繼承律師 + 會計師</strong> — 先把繼承資產處理好：稅務、受益人結構、後續遺產規劃。</span></li>
+        <li><span class="lang-en"><strong>Independent fee-only financial planner</strong> — NOT a sales-driven banker; this is the single most important guardrail against being talked into a bad deal.</span><span class="lang-zh"><strong>獨立收費式財務規劃師</strong> — 不是業績導向的理財專員；這是避免被話術帶最重要的一道防線。</span></li>
+        <li><span class="lang-en"><strong>Brokerage account setup</strong> — for REIT pilot; choose by fee + reputation, not by who referred him to the most aggressive product.</span><span class="lang-zh"><strong>券商帳戶開設</strong> — 為 REIT 試水；用手續費 + 聲譽選，不要因為誰介紹哪個積極產品就選誰。</span></li>
+        <li><span class="lang-en"><strong>Network of 3+ people who have done this</strong> — talk to friends who've bought overseas property; the site shows the math but not the lived experience.</span><span class="lang-zh"><strong>找 3+ 個做過的人</strong> — 跟買過海外房的朋友聊；站上有數學，但沒有實際走過一遍的體驗。</span></li>
+        <li><span class="lang-en"><strong>Decision deadline</strong> — write down a year-1 decision protocol: "I will not commit &gt; X% of inheritance to any direct asset before month Y."</span><span class="lang-zh"><strong>決策 deadline</strong> — 寫下第 1 年決策規則：「在第 Y 月前，不會把超過 X% 的繼承資金壓進任何單一直接資產。」</span></li>
+      </ol>
+    </div>
+
+    <div class="bo-bottomline">
+      <span class="bo-bl-label"><span class="lang-en">BOTTOM LINE</span><span class="lang-zh">底線</span></span>
+      <p><span class="lang-en">For an inheritance newbie, the single most defensible call is: don't commit to a direct asset in year 1. Use REIT exposure + the site's reports to build mental models, then revisit. The biggest risk is not "missing the cycle" — it's being talked into the wrong product at the wrong time.</span><span class="lang-zh">對繼承新手，最能站得住的決策是：第 1 年不要押注任何直接資產。用 REIT 曝險 + 站上報告建立 mental model，再重新評估。最大風險不是「錯過週期」 — 是在錯的時間被話術帶進錯的產品。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 6 — DOWNLOAD PDF                        -->
+  <!-- ============================================== -->
+  <div class="pdf-bar">
+    <button class="pdf-btn" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <span class="lang-en">Print / Save PDF</span><span class="lang-zh">列印 / 存 PDF</span>
+    </button>
+    <a href="/demo/" class="pdf-btn ghost">
+      <span class="lang-en">← All walkthroughs</span><span class="lang-zh">← 所有導覽</span>
+    </a>
+    <a href="/methodology.html" class="pdf-btn ghost">
+      <span class="lang-en">Data sources</span><span class="lang-zh">資料來源</span>
+    </a>
+  </div>
+
+</main>
+
+<script src="../../js/nav.js"></script>
+<script>
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.textContent.trim()===(lang==='en'?'EN':'中文'));});
+  localStorage.setItem('lang',lang);
+}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+</script>
+</body>
+</html>

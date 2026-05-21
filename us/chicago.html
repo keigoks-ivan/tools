@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Chicago Deep Dive | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+  .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+  .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+  .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+  .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+  .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+  .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+  .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+  .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+  .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+  .chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+  .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+  .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+  .report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+  .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+  .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+  .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+  .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+  .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+  .toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+  .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+  .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+  .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+  .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+  .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+  .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+  .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+  .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}
+  @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-value" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">The Value Case</span><span class="side-nav-label lang-zh" style="display:none">相對價值論</span></a>
+    <a href="#sec-supply" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Supply &amp; Demand</span><span class="side-nav-label lang-zh" style="display:none">供需</span></a>
+    <a href="#sec-fiscal" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Fiscal Risk</span><span class="side-nav-label lang-zh" style="display:none">財政風險</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rent Control</span><span class="side-nav-label lang-zh" style="display:none">租管</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+
+  <div class="report-header">
+    <div class="lang-en"><h1>CHICAGO &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: Case-Shiller CHXRSA / Illinois REALTORS&reg; / Zillow / DePaul IHS / Cook County Assessor</div></div>
+    <div class="lang-zh" style="display:none"><h1>芝加哥——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：Case-Shiller CHXRSA / 伊利諾州房地產商協會 / Zillow / 德保羅IHS / 庫克縣稅務官</div></div>
+  </div>
+
+  <div class="report-body">
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend: Steady Appreciation vs National Volatility</span><span class="lang-zh" style="display:none">2. 房價走勢：穩定升值 vs 全國波動</span></a>
+        <a href="#sec-value" onclick="closeTocMobile()"><span class="lang-en">3. The Value Case: Why Chicago Keeps Leading</span><span class="lang-zh" style="display:none">3. 相對價值論：芝加哥為何持續領跑</span></a>
+        <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">4. Supply &amp; Demand: Inventory Crisis in Plain Sight</span><span class="lang-zh" style="display:none">4. 供需：明擺著的庫存危機</span></a>
+        <a href="#sec-fiscal" onclick="closeTocMobile()"><span class="lang-en">5. Fiscal Risk: Property Tax &amp; Illinois Finances</span><span class="lang-zh" style="display:none">5. 財政風險：財產稅與伊州財務</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">6. Rent Control: Illinois Preemption &amp; Chicago Debate</span><span class="lang-zh" style="display:none">6. 租管：伊州先占與芝加哥辯論</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Chicago's housing market in 2026 is the closest thing to a consensus anomaly in U.S. residential real estate: the most affordable major metro in the country by median price, with the most consistently leading Case-Shiller appreciation score in the 20-city composite, located in a state with the nation's highest effective property tax rate and a fiscal reputation that has deterred investment for two decades. The CS Chicago index (CHXRSA) has led or tied for first in the 20-city composite for three consecutive months through January 2026, posting <strong>+4.6%</strong> YoY &mdash; ahead of New York (+4.9%, essentially tied), Boston, and every other major U.S. metro. The city of Chicago median sale price reached <strong>$365,000</strong> by December 2025, up 4% YoY. The Illinois REALTORS&reg; 2026 forecast projects the nine-county Chicago metro area to see 5.1% growth in closed sales and nearly 5% median price appreciation in 2026.</p>
+      <p>The mechanics of Chicago's sustained appreciation are counterintuitive but robust. The statewide inventory of homes for sale in Illinois fell <strong>58%</strong> between December 2019 and December 2025 &mdash; the most severe supply contraction of any state in the Midwest and among the most severe nationally. Chicago's housing stock is old (median age over 60 years), geographically constrained by Lake Michigan and suburban sprawl, and subject to a regulatory environment that makes new residential construction economically challenging. At $365,000 city median and $345,000 in the broader metro, Chicago is the most affordable major tech-presence city in the continental U.S. &mdash; and this affordability gap relative to coastal peers continues to attract in-migration from higher-cost markets.</p>
+      <p>The counterweight to this appreciation story is Illinois's fiscal situation, which represents the most significant structural overhang of any market in this monitor. Illinois carries approximately <strong>$200+ billion</strong> in total state obligations (including unfunded pension liabilities of $230+ billion), the worst pension funding ratio of any U.S. state, and the highest effective property tax rate in the nation at <strong>1.83%</strong>. Cook County homeowners pay $7,000&ndash;$9,000+ annually in property taxes on median-priced homes. The fiscal risk is not that it will cause a housing crash &mdash; Chicago's supply constraint prevents that &mdash; but that it suppresses demand in a way that makes Chicago's appreciation persistently slower than its affordability would otherwise predict.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2026年芝加哥住宅市場是美國住宅房地產中最接近公認異常的存在：全國主要大都市中中位數最可負擔的城市，Case-Shiller升值排名最穩定領先20城複合指數的城市，坐落在全國有效財產稅率最高、財政聲譽在過去二十年阻嚇投資的州。CS芝加哥指數（CHXRSA）在截至2026年1月的三個連續月份領先或並列20城複合指數第一，年增<strong>+4.6%</strong>——領先紐約（+4.9%，基本持平）、波士頓和所有其他主要美國大都市。芝加哥市2025年12月中位數成交價達到<strong>365,000美元</strong>，年增4%。伊利諾州房地產商協會2026年預測顯示，芝加哥九縣都會區2026年成交量將增長5.1%，中位數房價升值近5%。</p>
+      <p>芝加哥持續升值的機制是反直覺的，但卻是強健的。伊利諾州掛牌待售住宅數量在2019至2025年12月間下降<strong>58%</strong>——是中西部任何州最嚴重的供給收縮之一，在全國也屬最嚴峻之列。芝加哥的住宅存量老舊（中位樓齡超過60年），受密歇根湖和郊區蔓延的地理制約，監管環境使新建住宅難以實現經濟可行性。以365,000美元的城市中位數和345,000美元的更廣泛都會區中位數，芝加哥是北美大陸有科技業存在的主要城市中最可負擔的——相對於沿海同儕的這一可負擔性差距繼續吸引來自高成本市場的遷入人口。</p>
+      <p>這一升值故事的對立面是伊利諾州的財政狀況，這是本監測任何市場中最重要的結構性懸頂。伊利諾州承擔約<strong>2,000億美元以上</strong>的州級總義務（包括2,300億美元以上的未撥備退休金負債）、全美最差的退休金撥備比例，以及全國最高的<strong>1.83%</strong>有效財產稅率。庫克縣業主在中位數房屋上每年支付7,000至9,000美元以上的財產稅。財政風險不在於它將引發住宅市場崩潰——芝加哥的供給約束阻止了這一點——而在於它以一種使芝加哥升值持續慢於其可負擔性本應預示的方式抑制了需求。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">CS CHICAGO INDEX (JAN 2026)</span><span class="lang-zh" style="display:none">CS芝加哥指數（2026年1月）</span></div><div class="kpi-value">~258</div><span class="kpi-badge badge-green"><span class="lang-en">CHXRSA &middot; 3rd consecutive month leading 20-city &middot; YoY +4.6%</span><span class="lang-zh" style="display:none">CHXRSA &middot; 連續三個月領漲20城 &middot; 年增+4.6%</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">CITY MEDIAN (DEC 2025)</span><span class="lang-zh" style="display:none">城市中位數（2025年12月）</span></div><div class="kpi-value">$365K</div><span class="kpi-badge badge-green"><span class="lang-en">Chicago city &middot; YoY +4%</span><span class="lang-zh" style="display:none">芝加哥市 &middot; 年增+4%</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">METRO MEDIAN FORECAST 2026</span><span class="lang-zh" style="display:none">都會區中位數預測2026</span></div><div class="kpi-value">+5% YoY</div><span class="kpi-badge badge-green"><span class="lang-en">IL REALTORS&reg; 9-county forecast &middot; Sales +5.1%</span><span class="lang-zh" style="display:none">伊州房地產商協會九縣預測 &middot; 成交+5.1%</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">IL LISTING COUNT CHANGE</span><span class="lang-zh" style="display:none">伊州掛牌量變化</span></div><div class="kpi-value">-58%</div><span class="kpi-badge badge-orange"><span class="lang-en">Dec 2019 &rarr; Dec 2025 statewide &middot; Supply crisis</span><span class="lang-zh" style="display:none">2019年12月→2025年12月全州 &middot; 供給危機</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">IL PROPERTY TAX RATE</span><span class="lang-zh" style="display:none">伊州財產稅率</span></div><div class="kpi-value">1.83%</div><span class="kpi-badge badge-red"><span class="lang-en">Highest effective rate in U.S. &middot; Cook Co. avg $7&ndash;9K/yr</span><span class="lang-zh" style="display:none">全美最高有效稅率 &middot; 庫克縣年均$7–9K</span></span></div>
+      <div class="kpi-card blue"><div class="kpi-label"><span class="lang-en">CHICAGO RENT GROWTH (DEC 2025)</span><span class="lang-zh" style="display:none">芝加哥租金漲幅（2025年12月）</span></div><div class="kpi-value">+6.3% YoY</div><span class="kpi-badge badge-blue"><span class="lang-en">IL preempts local rent control &middot; No cap</span><span class="lang-zh" style="display:none">伊州先占地方租管 &middot; 無上限</span></span></div>
+    </div>
+
+    <!-- 2 -->
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND: STEADY APPRECIATION VS NATIONAL VOLATILITY</span><span class="lang-zh" style="display:none">房價走勢：穩定升值 VS 全國波動</span></h2>
+    <div class="lang-en">
+      <p>Chicago's price trajectory from 2015 to 2025 is the most stable of any major U.S. market &mdash; a characteristic that reads as boring relative to the drama of Austin or Miami, but that has produced genuinely strong risk-adjusted returns. The CS Chicago index rose from approximately 138 in January 2015 to approximately 258 by late 2024 &mdash; an <strong>87%</strong> increase over the decade, comparable to the national average of 93% but with dramatically lower volatility. Chicago did not experience a pandemic-era blow-off top; the index rose steadily at 8&ndash;12% annually through 2021&ndash;2022, then continued its trajectory through 2023 and 2024 while Phoenix, Austin, and Miami were correcting sharply.</p>
+      <p>The city of Chicago median sale price rose from approximately $232,000 in 2015 to $375,000 by end-2025 &mdash; a 62% increase over the decade. Between March 2020 and November 2025, Chicago home prices jumped <strong>43%</strong> (Resiclub data) &mdash; a significant number that rarely generates headlines because it was achieved through steady accumulation rather than a boom-bust cycle. The 2026 WBEZ peak-season median projection of $385,000 would represent a 45% gain from the 2019 pre-pandemic level of $265,000 &mdash; in a city widely perceived as stagnant.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>芝加哥2015至2025年的房價走勢是所有主要美國市場中最穩定的——相對於奧斯丁或邁阿密的戲劇性，這一特徵顯得乏味，但產生了真正強勁的風險調整後回報。CS芝加哥指數從2015年1月的約138升至2024年底的約258——十年漲幅<strong>87%</strong>，與全國93%的平均水平相當，但波動性戲劇性更低。芝加哥沒有經歷疫情時期的泡沫頂部；指數在2021至2022年以年均8至12%穩步上升，在鳳凰城、奧斯丁和邁阿密急劇修正的2023和2024年繼續其走勢。</p>
+      <p>芝加哥市中位數成交價從2015年的約232,000美元升至2025年底的375,000美元——十年漲幅62%。2020年3月至2025年11月間，芝加哥房價上漲<strong>43%</strong>（Resiclub數據）——這一重要數字很少引發關注，因為它是通過穩定積累而非繁榮破滅週期實現的。2026年WBEZ旺季中位數預測的385,000美元將代表較2019年疫情前265,000美元漲幅45%——在一座被廣泛視為停滯的城市中。</p>
+    </div>
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">CS Chicago Index + YoY% (2015&ndash;2025)</span><span class="lang-zh" style="display:none">CS芝加哥指數 + 年增率（2015&ndash;2025）</span></h4>
+        <p><span class="lang-en">SA, Jan 2000=100 &middot; FRED CHXRSA</span><span class="lang-zh" style="display:none">季調，2000年1月=100 &middot; FRED CHXRSA</span></p>
+        <div id="chartCHIPrice" style="height:220px"></div>
+        <p class="chart-note green"><span class="lang-en">CS Chicago: +87% over decade with near-zero correction. Led 20-city composite for 3 consecutive months (+4.6% YoY). No boom-bust</span><span class="lang-zh" style="display:none">CS芝加哥：十年累計+87%，幾乎零修正。連續三個月領漲20城複合指數（+4.6%年增率）。無繁榮破滅</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Chicago City vs National Median 2015&ndash;2025</span><span class="lang-zh" style="display:none">芝加哥市 vs 全國中位數 2015&ndash;2025</span></h4>
+        <p><span class="lang-en">Source: Zillow / NAR</span><span class="lang-zh" style="display:none">來源：Zillow / NAR</span></p>
+        <div id="chartCHIMedian" style="height:220px"></div>
+        <p class="chart-note navy"><span class="lang-en">Chicago median $375K (2025) vs national $408K &mdash; 8% discount despite comparable CS appreciation. Most affordable major metro</span><span class="lang-zh" style="display:none">芝加哥中位數$375K（2025）vs 全國$408K——與全國相比有8%折扣，儘管CS升值幅度相當。最可負擔主要大都市</span></p>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <h2 id="sec-value"><span class="lang-en">THE VALUE CASE: WHY CHICAGO KEEPS LEADING</span><span class="lang-zh" style="display:none">相對價值論：芝加哥為何持續領跑</span></h2>
+    <div class="lang-en">
+      <p>The investment case for Chicago is one of relative value within the U.S. market system. At a city median of $365,000&ndash;$375,000, Chicago offers the lowest entry price of any major metro with: (1) a $1 trillion+ GDP metro economy anchored in finance, healthcare, logistics, manufacturing, and a growing tech cluster; (2) a world-class transit network (CTA elevated rail, extensive bus, Metra commuter rail); (3) world-class cultural infrastructure (Art Institute, Lyric Opera, Chicago Symphony, 77 distinct neighborhoods); and (4) access to Big Ten university talent pipelines (Northwestern, U. of Illinois at Chicago, Loyola, DePaul).</p>
+      <p>The income-to-price ratio in Chicago is the most favorable of any Tier-1 U.S. market. The Chicago MSA median household income is approximately $78,000&ndash;$82,000; the city median home price of $365,000 implies a PTI of <strong>4.5x</strong> &mdash; far below NYC (14.75x), LA (~12x), or Seattle (~10x). For a buyer earning $120,000, Chicago's affordability is genuinely accessible: a $365,000 home with 20% down at 6.38% carries a monthly P&amp;I of $1,820, implying a front-end DTI of <strong>18.2%</strong> &mdash; the only major U.S. metro where the conventional 28% guideline is meaningfully undershot for this income bracket.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>芝加哥的投資論點是美國市場體系內的相對價值之一。以365,000至375,000美元的城市中位數，芝加哥在以下主要大都市中提供最低入門價格：（1）以金融、醫療、物流、製造業和不斷增長的科技集群為支柱的1萬億美元以上GDP都會區經濟；（2）世界級交通網絡（CTA高架鐵路、廣泛公交、Metra通勤鐵路）；（3）世界級文化基礎設施（芝加哥藝術博物館、抒情歌劇院、芝加哥交響樂團、77個獨特社區）；（4）Big Ten大學人才管道（西北大學、伊利諾大學芝加哥分校、洛約拉大學、德保羅大學）。</p>
+      <p>芝加哥的收入與房價比是任何一線美國市場中最有利的。芝加哥都會區家庭中位數收入約78,000至82,000美元；365,000美元的城市中位數房價意味著PTI倍數為<strong>4.5倍</strong>——遠低於紐約（14.75倍）、洛杉磯（約12倍）或西雅圖（約10倍）。對於年收入120,000美元的買家，以6.38%利率20%首付購買365,000美元房屋，月供本息為1,820美元，前端負債收入比為<strong>18.2%</strong>——唯一一個這一收入段的主要美國大都市月供顯著低於傳統28%指引。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Price-to-Income Ratio: 6 Major U.S. Metros (2026)</span><span class="lang-zh" style="display:none">房價收入比：6大美國大都市（2026年）</span></h4>
+      <div id="chartCHIValue" style="height:220px"></div>
+      <p class="chart-note green"><span class="lang-en">Chicago PTI 4.5&times; = most affordable Tier-1 U.S. metro. $120K household: Chicago P&amp;I is only 18% of income vs 40%+ in NYC/LA/SF</span><span class="lang-zh" style="display:none">芝加哥PTI 4.5倍=最可負擔一線美國大都市。年收入12萬美元家庭：芝加哥月供僅佔收入18%，紐約/洛杉磯/舊金山則超40%</span></p>
+    </div>
+
+    <!-- 4 -->
+    <h2 id="sec-supply"><span class="lang-en">SUPPLY &amp; DEMAND: INVENTORY CRISIS IN PLAIN SIGHT</span><span class="lang-zh" style="display:none">供需：明擺著的庫存危機</span></h2>
+    <div class="lang-en">
+      <p>Chicago's supply crisis is chronic and deepening. Illinois statewide home-for-sale inventory fell <strong>58%</strong> from December 2019 to December 2025. In the Chicago metro, active listings in May 2025 stood at 13,195. Despite year-over-year improvements, the February 2026 data from Houzeo shows only 2,048 homes available in the city proper with just <strong>0.72 months</strong> of supply &mdash; the definition of an extreme seller's market by any metric.</p>
+      <p>Demand is diversified. Chicago's $1 trillion GDP economy covers finance (CME Group, major trading firms), healthcare (the largest Midwest healthcare cluster), logistics (O'Hare is the 6th busiest airport globally; Chicago is the largest U.S. rail hub), and an emerging tech sector. The Chicago metro added approximately <strong>71,000</strong> people between 2023 and 2024, reversing the population loss years of 2018&ndash;2022, driven primarily by net international migration. Rental demand has strengthened: Chicago rents rose 6.3% YoY through December 2025.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>芝加哥的供給危機是長期性且持續深化的。伊利諾州全州掛牌待售住宅從2019至2025年12月下降<strong>58%</strong>。芝加哥都會區2025年5月活躍掛牌為13,195套。儘管有這些年度同期改善，2026年2月Houzeo數據顯示城市本身僅有2,048套可購，供給月數僅<strong>0.72個月</strong>——按任何指標均屬極端賣方市場。</p>
+      <p>需求面是多元化的。芝加哥1萬億美元GDP經濟涵蓋金融、醫療、物流和新興科技板塊。芝加哥都會區2023至2024年新增約<strong>71,000</strong>人，扭轉了2018至2022年的人口減少，主要由淨國際移民驅動。租賃需求也有所增強：芝加哥租金在截至2025年12月的一年內上漲6.3%。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Chicago Metro Active Listings + Months Supply 2019&ndash;2026</span><span class="lang-zh" style="display:none">芝加哥都會區活躍掛牌 + 供給月數 2019&ndash;2026</span></h4>
+      <div id="chartCHISupply" style="height:220px"></div>
+      <p class="chart-note orange"><span class="lang-en">Feb 2026 city: 0.72 months supply = extreme seller's market. IL statewide listings -58% from 2019 peak. Structural, not cyclical</span><span class="lang-zh" style="display:none">2026年2月城市：0.72個月供給=極端賣方市場。伊州全州掛牌量較2019年峰值-58%。結構性的，而非週期性的</span></p>
+    </div>
+
+    <!-- 5 -->
+    <h2 id="sec-fiscal"><span class="lang-en">FISCAL RISK: PROPERTY TAX &amp; ILLINOIS FINANCES</span><span class="lang-zh" style="display:none">財政風險：財產稅與伊州財務</span></h2>
+    <div class="lang-en">
+      <p>Illinois carries the most significant fiscal overhang of any U.S. state with a major metro real estate market. The state's unfunded pension liability exceeds <strong>$230 billion</strong> &mdash; the largest in the nation as a percentage of state GDP. Illinois has the lowest pension funding ratio of any U.S. state, at approximately 38&ndash;40% funded. The practical consequence for homeowners is the nation's highest effective property tax rate: <strong>1.83%</strong> statewide, with Cook County rates averaging 1.73&ndash;2.0%. On a $365,000 Chicago home, this implies annual property taxes of approximately $6,300&ndash;$7,300 &mdash; a carrying cost that pushes PITI to approximately $2,900&ndash;$3,000/month for a median-priced home. This PITI is still dramatically lower than any coastal peer, but it is a structural drag on affordability improvement.</p>
+      <p>The fiscal risk is not imminent catastrophe &mdash; Illinois has managed through modest revenue growth, periodic tax increases, and bond issuance &mdash; but it creates a persistent ceiling on how much property tax relief buyers can expect. Chicago property taxes have historically increased 3&ndash;5% annually regardless of market conditions. Allstate announced Illinois homeowner insurance rate increases of more than <strong>8%</strong> effective February 2026, adding another layer of carrying cost pressure.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>伊利諾州承擔著擁有主要大都市房地產市場的任何美國州中最重要的財政懸頂。州的未撥備退休金負債超過<strong>2,300億美元</strong>——以佔州GDP比例計算是全美最大。伊利諾州的退休金撥備比率是所有美國州中最低的，約為38至40%。對業主而言的實際後果是全國最高的有效財產稅率：全州<strong>1.83%</strong>，庫克縣平均1.73至2.0%。在365,000美元的芝加哥房屋上，這意味著年財產稅約6,300至7,300美元——將中位數房屋的PITI推至每月約2,900至3,000美元。這一PITI仍然遠低於任何沿海同儕，但它是可負擔性改善的結構性拖累。</p>
+      <p>財政風險不是迫在眉睫的災難——伊利諾州通過適度的收入增長、定期的稅率提高和債券發行管理其退休金義務——但它對買家可期待的財產稅緩解程度造成了持久的上限。芝加哥財產稅歷史上每年增長3至5%。Allstate宣佈2026年2月起伊利諾州房主保險費率提高超過<strong>8%</strong>，增加了另一層持有成本壓力。</p>
+    </div>
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Effective Property Tax Rate (2025)</span><span class="lang-zh" style="display:none">有效財產稅率（2025年）</span></h4>
+        <p><span class="lang-en">Top U.S. states &middot; Source: Tax Foundation</span><span class="lang-zh" style="display:none">美國各州前列 &middot; 來源：Tax Foundation</span></p>
+        <div id="chartCHIPropTax" style="height:220px"></div>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Monthly Cost: $365K Chicago Home</span><span class="lang-zh" style="display:none">月總成本：$365K芝加哥房屋</span></h4>
+        <p><span class="lang-en">6.38%, 20% down &middot; PITI breakdown</span><span class="lang-zh" style="display:none">6.38%，20%首付 &middot; PITI分解</span></p>
+        <div id="chartCHICost" style="height:220px"></div>
+      </div>
+    </div>
+    <p class="chart-note red"><span class="lang-en">IL 1.83% = highest in Midwest. $567/mo property tax adds ~$170K over 25yr mortgage. Still: PITI $2,507 vs NYC $4,800 / LA $5,400</span><span class="lang-zh" style="display:none">伊州1.83%=中西部最高。每月$567財產稅在25年房貸中額外支付約17萬美元。但：PITI $2,507 vs 紐約$4,800 / 洛杉磯$5,400</span></p>
+
+    <!-- 6 -->
+    <h2 id="sec-rent"><span class="lang-en">RENT CONTROL: ILLINOIS PREEMPTION &amp; CHICAGO DEBATE</span><span class="lang-zh" style="display:none">租管：伊州先占與芝加哥辯論</span></h2>
+    <div class="lang-en">
+      <p>Illinois state law preempts local governments from enacting rent control ordinances &mdash; a legal framework that has historically applied to Chicago despite the city's progressive political orientation. This preemption is established under 765 ILCS 720 (Landlord and Tenant Act). Chicago has periodically debated circumventing the preemption, but no binding local rent control has survived legal challenge.</p>
+      <p>The absence of rent control has enabled Chicago's landlord community to pass through cost increases &mdash; including property tax escalation, rising insurance costs, and utility cost growth &mdash; directly to tenants. Chicago rents rose <strong>6.3%</strong> YoY through December 2025, significantly above the 3&ndash;4% growth of controlled markets. For investors, this creates a clean pass-through relationship between operating costs and rental income. The investor return profile for Chicago multifamily is complex &mdash; property tax is the single largest cost factor &mdash; but rent growth has more than compensated at the portfolio level over the past decade.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>伊利諾州法律先占地方政府頒布租管條例的能力——這一法律框架儘管芝加哥的進步派政治傾向，一直適用於該城市。此先占規定在765 ILCS 720（房東租戶法）下確立。芝加哥定期辯論繞過先占，但沒有具有約束力的地方租管通過法律挑戰。</p>
+      <p>租管的缺失使芝加哥房東群體能夠將成本增加——包括財產稅上漲、保險成本上升和公用事業成本增長——直接轉嫁給租戶。截至2025年12月，芝加哥租金年增<strong>6.3%</strong>，顯著高於管制市場的3至4%增長。對投資者而言，這創造了運營成本與租金收入之間清晰的傳導關係。芝加哥多戶住宅的投資回報結構複雜——財產稅是最大的單一成本因素——但租金增長在過去十年中在投資組合層面已充分補償。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Chicago Rent Growth vs Property Tax Escalation 2019&ndash;2025</span><span class="lang-zh" style="display:none">芝加哥租金增長 vs 財產稅上漲 2019&ndash;2025</span></h4>
+      <div id="chartCHIRent" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">No rent control: Chicago rents +6.3% YoY (Dec 2025). Property tax grows 3.5&ndash;5% annually regardless of market. Pass-through intact for landlords</span><span class="lang-zh" style="display:none">無租管：芝加哥租金年增+6.3%（2025年12月）。財產稅每年增長3.5至5%。房東成本傳導關係完整</span></p>
+    </div>
+
+    <!-- 7 -->
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+    <div class="lang-en">
+      <p>Chicago's 2026&ndash;2028 outlook is the most predictable of any market in this monitor &mdash; steady, low-drama appreciation driven by structural supply constraint, relative affordability, and a diversified employment base. The base case (<strong>65%</strong> probability) projects CS Chicago appreciation of 4&ndash;6% annually, extending the decade-long trend. Illinois REALTORS&reg; projects a 5% median price gain and 5.1% volume increase for 2026. The base case projects the CS Chicago index advancing from approximately 258 to approximately 285&ndash;295 by end-2027.</p>
+      <p>The bull case (<strong>20%</strong> probability) requires rate decline below 5.5% to unlock demand from the significant pool of income-qualified but payment-constrained households. Combined with Chicago's 2026 momentum, a rate catalyst could produce 8&ndash;10% annual appreciation in this scenario.</p>
+      <p>The bear case (<strong>15%</strong> probability) centers on Illinois fiscal escalation &mdash; specifically, a state constitutional amendment enabling a graduated income tax or a property tax structure change that increases the effective burden. In this scenario, Chicago's appreciation rate reverts to 1&ndash;2% annually &mdash; still positive, but no longer the CS composite leader. This is a low-probability, long-horizon risk rather than a near-term catalyst.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>芝加哥2026至2028年的展望是本監測任何市場中最可預測的——穩定、低戲劇性的升值。基本情境（概率<strong>65%</strong>）預計CS芝加哥每年升值4至6%，延續十年長期趨勢。伊利諾州房地產商協會預測2026年中位數房價漲幅5%、成交量增長5.1%。基本情境預計CS芝加哥指數從約258升至2027年底的約285至295。</p>
+      <p>樂觀情境（概率<strong>20%</strong>）需要利率下降至5.5%以下，以釋放有收入資格但受月供約束的大量家庭的需求。結合芝加哥2026年的勢頭，利率催化劑可能產生年均8至10%的升值。</p>
+      <p>悲觀情境（概率<strong>15%</strong>）以伊利諾州財政升級為中心——具體是允許累進所得稅的州憲法修正案或提高財產稅有效負擔的結構變化。在此情境下，芝加哥升值率回落至每年1至2%——仍為正，但不再是CS複合指數領漲者。這是低概率、長期限的風險。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">CS Chicago Index Forecast 2026&ndash;2028</span><span class="lang-zh" style="display:none">CS芝加哥指數預測 2026&ndash;2028</span></h4>
+      <div id="chartCHIForecast" style="height:220px"></div>
+      <p class="chart-note green"><span class="lang-en">Base: +4&ndash;6%/yr, extending decade trend. Bull: rate &lt;5.5% unlocks supply-constrained demand. Bear: IL fiscal escalation only &mdash; no demand crash scenario</span><span class="lang-zh" style="display:none">基本：+4至6%/年，延續十年趨勢。樂觀：利率&lt;5.5%釋放供給受限需求。悲觀：僅伊州財政升級——無需求崩潰情境</span></p>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: S&amp;P Cotality Case-Shiller IL-Chicago Home Price Index (FRED CHXRSA) &middot; Illinois REALTORS&reg; 2026 Annual Forecast (Dec 2025) &middot; DePaul University Institute for Housing Studies (IHS) &middot; WBEZ Chicago Housing Market Report (Jan 2026) &middot; Zillow Chicago Home Value Index (Feb 2026) &middot; Houzeo Chicago Market Data (Feb 2026) &middot; JVM Lending Illinois Real Estate Market Forecast (Jan 2026) &middot; Cook County Assessor Property Tax Data &middot; Illinois Pension Obligation Data (Wirepoints / COGFA). All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：S&amp;P Cotality Case-Shiller伊利諾州芝加哥房價指數（FRED CHXRSA）&middot; 伊利諾州房地產商協會2026年年度預測（2025年12月）&middot; 德保羅大學住房研究所（IHS）&middot; WBEZ芝加哥住宅市場報告（2026年1月）&middot; Zillow芝加哥房屋價值指數（2026年2月）&middot; Houzeo芝加哥市場數據（2026年2月）&middot; JVM Lending伊利諾州房地產市場預測（2026年1月）&middot; 庫克縣稅務官財產稅數據 &middot; 伊利諾州退休金義務數據（Wirepoints / COGFA）。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawCHIPrice(lang);drawCHIMedian(lang);drawCHIValue(lang);drawCHISupply(lang);
+  drawCHIPropTax(lang);drawCHICost(lang);drawCHIRent(lang);drawCHIForecast(lang);
+}
+
+function drawCHIPrice(lang){
+  var dom=document.getElementById('chartCHIPrice');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var index=[138,147,156,164,168,178,202,232,240,250,260];
+  var yoy=[4.0,6.5,6.1,5.1,2.4,5.9,13.5,14.9,3.4,4.2,4.6];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:[mkAxis({type:'value',min:120,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),mkAxis({type:'value',min:0,max:18,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'CS Chicago Index':'CS芝加哥指數',type:'bar',data:index,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,yAxisIndex:1}]
+  });
+}
+
+function drawCHIMedian(lang){
+  var dom=document.getElementById('chartCHIMedian');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var chi=[232,245,258,264,265,278,320,355,350,360,375];
+  var nat=[222,235,248,261,271,296,353,392,389,407,408];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:200,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+    series:[{name:en?'Chicago ($K)':'芝加哥($K)',type:'bar',data:chi,barMaxWidth:22,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},
+      {name:en?'National ($K)':'全國($K)',type:'bar',data:nat,barMaxWidth:22,itemStyle:{color:'rgba(90,122,154,0.5)',borderRadius:[3,3,0,0]}}]
+  });
+}
+
+function drawCHIValue(lang){
+  var dom=document.getElementById('chartCHIValue');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var cities=en?['San Francisco','New York','Los Angeles','Seattle','Chicago','Austin (reset)']:['舊金山','紐約','洛杉磯','西雅圖','芝加哥','奧斯丁（重置後）'];
+  var pti=[18.0,14.75,12.0,10.5,4.5,3.5];
+  var colors=pti.map(function(v){return v>=10?C.red:v>=6?C.orange:C.green;});
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+    grid:{left:12,right:50,top:16,bottom:16,containLabel:true},
+    yAxis:mkAxis({type:'category',data:cities,axisLabel:{color:C.muted,fontSize:9}}),
+    xAxis:mkAxis({type:'value',min:0,max:20,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}×'}}),
+    series:[{type:'bar',data:pti.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:22,itemStyle:{borderRadius:[0,3,3,0]},
+      label:{show:true,position:'right',formatter:function(p){return p.value+'×';},fontSize:10,color:C.muted}}]
+  });
+}
+
+function drawCHISupply(lang){
+  var dom=document.getElementById('chartCHISupply');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['Dec 19','Dec 20','Dec 21','Dec 22','Dec 23','May 25','Feb 26'];
+  var listings=[31.5,18.2,9.8,15.2,13.5,13.2,2.0];
+  var months=[4.2,2.8,1.5,2.8,2.5,2.1,0.72];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis:[mkAxis({type:'value',min:0,max:35,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),mkAxis({type:'value',min:0,max:5,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}mo'},splitLine:{show:false}})],
+    series:[{name:en?'Active Listings (K)':'活躍掛牌(K)',type:'line',data:listings,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,yAxisIndex:0},
+      {name:en?'Months Supply':'供給月數',type:'line',data:months,lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,
+        markLine:{data:[{yAxis:4.5,lineStyle:{color:C.green,type:'dashed',width:1},label:{formatter:en?'Balanced':'均衡',fontSize:8,color:C.green}}]}}]
+  });
+}
+
+function drawCHIPropTax(lang){
+  var dom=document.getElementById('chartCHIPropTax');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var states=en?['New Jersey','Illinois','Connecticut','New Hampshire','Vermont','Texas','National Avg']:['紐澤西','伊利諾','康乃狄克','新罕布夏','佛蒙特','德州','全國均值'];
+  var rates=[2.21,1.83,1.79,1.77,1.76,1.63,1.07];
+  var colors=rates.map(function(v){return v>=1.75?C.red:v>=1.40?C.orange:C.navy;});
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+    grid:{left:12,right:50,top:8,bottom:8,containLabel:true},
+    yAxis:mkAxis({type:'category',data:states,axisLabel:{color:C.muted,fontSize:9}}),
+    xAxis:mkAxis({type:'value',min:0,max:2.5,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{type:'bar',data:rates.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:18,itemStyle:{borderRadius:[0,3,3,0]},
+      label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:9,color:C.muted}}]
+  });
+}
+
+function drawCHICost(lang){
+  var dom=document.getElementById('chartCHICost');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var cats=en?['Mortgage\n(P&I)','Property Tax\n(monthly)','Insurance\n(monthly)','Total PITI']:['按揭\n（本息）','財產稅\n（月）','保險\n（月）','PITI合計'];
+  var vals=[1820,567,120,2507];
+  var colors=[C.navy,C.red,C.orange,C.muted];
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+    grid:{left:12,right:50,top:8,bottom:8,containLabel:true},
+    yAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9}}),
+    xAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v;}}}),
+    series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:18,itemStyle:{borderRadius:[0,3,3,0]},
+      label:{show:true,position:'right',formatter:function(p){return '$'+p.value;},fontSize:9,color:C.muted}}]
+  });
+}
+
+function drawCHIRent(lang){
+  var dom=document.getElementById('chartCHIRent');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];
+  var rent=[3.5,-1.2,10.2,12.5,2.8,4.5,6.3];
+  var tax=[3.8,2.1,4.2,5.0,3.5,4.1,4.5];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:-3,max:14,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{name:en?'Rent Growth %':'租金增長%',type:'bar',data:rent,barMaxWidth:22,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},
+      {name:en?'Prop Tax Growth %':'財產稅增長%',type:'bar',data:tax,barMaxWidth:22,itemStyle:{color:C.red,borderRadius:[3,3,0,0]}}]
+  });
+}
+
+function drawCHIForecast(lang){
+  var dom=document.getElementById('chartCHIForecast');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var periods=['Jan 2026','2026E','2027E','2028E'];
+  var bull=[258,272,295,315];var base=[258,268,283,295];var bear=[258,262,265,268];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:245,max:325,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[
+      {name:en?'Bull (20%) — rate <5.5%':'樂觀(20%)—利率<5.5%',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+      {name:en?'Base (65%) — steady':'基本(65%)—穩定',type:'line',data:base,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+      {name:en?'Bear (15%) — fiscal risk':'悲觀(15%)—財政風險',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}]
+  });
+}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+function toggleCityMenu(){document.getElementById('cityDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}if(!e.target.closest('.city-dropdown')){var d2=document.getElementById('cityDropdown');if(d2)d2.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Residensi 22 @ Mont Kiara｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:640px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-r{background:#FEE2E2;color:#991B1B;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #dc2626}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+.print-btn:hover{background:#166534}
+@media(max-width:680px){.two-col,.score-cols,.dual-col{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}.section{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span>📍 建案分析：Residensi 22 @ Mont Kiara ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 依據：KL 供需 Overhang 報告（2026-04-01）+ brickz 31筆實際成交（2025全年）</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>Residensi 22 @ Mont Kiara</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&price=1430000&yield=4.92&from=Residensi22_MontKiara"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=Residensi22_MontKiara"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Kiara 3，Mont Kiara ｜ UEM Sunrise Berhad（Khazanah 子公司）｜ Freehold 住宅地契 ｜ 2017年完工 ｜ 534單位，2棟，38層，每層4戶（低密度）</div>
+  <div class="badge-row">
+    <span class="badge">📂 KL 供需 Overhang 深度分析 2026-04-01（上游報告）</span>
+    <span class="badge">📡 brickz 31筆實際成交（Jan–Dec 2025）</span>
+    <span class="badge">📡 iRumah / iProperty / BambooRoutes 2026</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-v">RM1,208</div>
+        <div class="kpi-l">成交中位 PSF（2025全年）</div>
+        <div class="kpi-s neu">brickz 31筆實際成交</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">+61%</div>
+        <div class="kpi-l">發售→現況資本增值</div>
+        <div class="kpi-s up">RM750→RM1,208 psf（2013→2025）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">4.92%</div>
+        <div class="kpi-l">現時 Gross Yield</div>
+        <div class="kpi-s up">iRumah 2026（vs 4.86% 去年）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">4–6</div>
+        <div class="kpi-l">每層單位數（低密度）</div>
+        <div class="kpi-s neu">534戶 / 2棟38層</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">1,878–3,061</div>
+        <div class="kpi-l">坪數範圍（sqft）</div>
+        <div class="kpi-s neu">3+1 至 4+1 房型</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">5–10%</div>
+        <div class="kpi-l">Mont Kiara 空置率</div>
+        <div class="kpi-s up">KL 最低空置率區域之一</div>
+      </div>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">UEM Sunrise Bhd（前身 Sunrise）｜Bursa上市，Khazanah 子公司，已完工77個項目</div></div>
+      <div class="spec-item"><div class="spec-l">地段</div><div class="spec-v">Jalan Kiara 3，Mont Kiara 核心區，5.43英畝 Freehold</div></div>
+      <div class="spec-item"><div class="spec-l">完工年份</div><div class="spec-v">2017年中竣工，已運營8年，社區成熟</div></div>
+      <div class="spec-item"><div class="spec-l">發售均價</div><div class="spec-v">RM750 psf（2013年發售），發售總價 RM143萬起</div></div>
+      <div class="spec-item"><div class="spec-l">現掛牌售價</div><div class="spec-v">RM1,076–1,387 psf（iProperty，54筆掛牌）</div></div>
+      <div class="spec-item"><div class="spec-l">管理費</div><div class="spec-v">RM0.34 psf（PropertyGuru用戶確認）｜RM0.22 psf（早期資料）</div></div>
+      <div class="spec-item"><div class="spec-l">鄰近國際學校</div><div class="spec-v">Garden International School（1km內）｜Mont Kiara International School（1km內）</div></div>
+      <div class="spec-item"><div class="spec-l">公共交通（現況）</div><div class="spec-v">無步行可達捷運；最近 MRT Sri Damansara Sentral（需開車/Grab）</div></div>
+      <div class="spec-item"><div class="spec-l">MRT3 催化劑</div><div class="spec-v">Mont Kiara 站列入 MRT3 Circle Line，2025-07 政府正式核准，2032 預計通車</div></div>
+      <div class="spec-item"><div class="spec-l">資本增值記錄</div><div class="spec-v">iProperty 顯示 10.44% 資本增值（近年）；自2013發售 +61% 累積</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜Mont Kiara 解決了什麼不可替代的長期需求？</h3>
+    <p>Mont Kiara（MK）在 KL 房地產版圖的地位，幾乎是專屬外籍高管家庭生態圈的全球孤本：在一個 3km² 的範圍內，聚集了 Garden International School、Mont Kiara International School、Sayfol International School 等多所頂級國際學校，同時提供外籍社群的食、衣、娛樂服務鏈（1 Mont Kiara、Hartamas、Solaris Dutamas、Publika）。這形成了一個對外籍家庭（特別是有子女的）幾乎不可替代的「一站式外籍生活圈」。</p>
+    <p>Residensi 22（R22）在 MK 生態圈內的定位是「低密度精品住宅地契」的代表案例——每層4戶、534戶共2棟、UEM Sunrise（Khazanah 旗下）開發、Freehold 住宅地契、坪數段 1,878–3,061 sqft 完全面向外籍家庭。這種低密度定位在 MK 越來越稀缺（新案如 Kiaramas DeDaun 也走低密度，但總量有限）。</p>
+    <p>值得注意的是，R22 與上游報告的結構性論點高度吻合：<strong>「KL 精品住宅地契稀缺，與中端 SR/SOVO 積壓形成雙軌格局」</strong>——R22 作為住宅地契、低密度、外籍租客池剛需的成熟已完工建案，完全位於那條「稀缺」軌道上。</p>
+
+    <hr class="dv">
+    <h3>B｜Munger 逆向推演——什麼會讓 R22 投資失敗？</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險維度</th><th>具體情境</th><th>概率</th><th>對 R22 影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>無捷運（最大結構弱點）</strong></td><td>現階段 MK 沒有步行可達的 MRT/LRT 站，完全依賴私家車或 Grab；若 MRT3 持續延期，R22 的「交通不便」問題長期存在</td><td><span class="tag t-r">中高（現況）</span></td><td>租客池局限有車外籍家庭；部分潛在買家因此排除</td></tr>
+          <tr><td><strong>楼齡與競爭新案</strong></td><td>R22 2017年完工，樓齡 8年；MK 不斷有新精品案推出（The MINH、Kiaramas DeDaun 等），若這些新案定價相近，R22 的相對吸引力下降</td><td><span class="tag t-y">中</span></td><td>租金溢價空間收窄；二手流動性需與新案競爭</td></tr>
+          <tr><td><strong>外籍需求結構性風險</strong></td><td>若跨國企業縮減馬來西亞外派員工（如全球衰退、馬來西亞吸引力下降），MK 租客池基礎動搖</td><td><span class="tag t-b">低（中長期）</span></td><td>空置率上升；月租從 RM8,000+ 向下修正</td></tr>
+          <tr><td><strong>大坪數流動性風險</strong></td><td>R22 最小單位 1,878 sqft，最大 3,061 sqft；買賣門檻高（RM200–350萬），買家池相對窄；若市場降溫，大坪數單位比小坪數更難出手</td><td><span class="tag t-y">中</span></td><td>退出時間拉長，需給予更多議價空間</td></tr>
+          <tr><td><strong>MK 整體供給增加</strong></td><td>上游報告中 The MINH（2027–2028）、Kiaramas DeDaun（2026–2027）等新案即將完工；雖非同質競爭，但整體 MK 住宅供給量短期上升</td><td><span class="tag t-y">中</span></td><td>短期（2026–2027）出租市場競爭略增</td></tr>
+          <tr><td><strong>RPGT 外國人永遠 10%</strong></td><td>外國投資者無論持有多久，RPGT 最低 10%；6年前 30%</td><td><span class="tag t-b">已知成本</span></td><td>退出稅費需提前規劃；最佳退出窗口 SPA 起第6年後</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px"><strong>最大尾部風險：</strong>MK 的整個投資邏輯建立在「外籍高管家庭持續湧入、國際學校學生需求持穩」的假設上。這個假設在過去 20 年從未根本動搖，但若馬來西亞跨國企業外派政策或 MM2H 框架出現重大不利變化，MK 的高租金支撐邏輯會受到最直接衝擊。目前這個概率較低，但它是整個 MK 投資論點的核心假設，需要持續監測。</p>
+    </div>
+
+    <hr class="dv">
+    <h3>C｜投資論點錨定</h3>
+    <table>
+      <thead><tr><th>項目</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>核心驅動力</strong></td><td>MK 外籍生態圈稀缺性（國際學校集群）+ R22 低密度住宅地契在 MK 的稀缺定位 + MRT3 Mont Kiara 站（2032）前置溢價 + UEM Sunrise 品牌信用與 Khazanah 資本背書</td></tr>
+        <tr><td><strong>主要假設 H1</strong></td><td>MK 外籍長租月租維持 RM7,000–12,000（3BR/4BR），支撐 Gross Yield 4.5–5.5%</td></tr>
+        <tr><td><strong>主要假設 H2</strong></td><td>MRT3 Mont Kiara 站按計畫 2032 年通車，解除「需開車」弱點，帶動 10–20% 的站點溢價</td></tr>
+        <tr><td><strong>關鍵監測指標</strong></td><td>① MK 外籍租客月租 YoY 走勢（若連跌 2 季超 5% → 租金論點動搖）；② MRT3 Mont Kiara 站施工進度；③ R22 本棟掛牌 PSF 是否持守 RM1,100+ 水位</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜總體市場概況（依據上游 KL Overhang 報告）</div>
+  <div class="section-body">
+    <p style="font-size:12px;color:#64748b;margin-bottom:14px">資料抓取：2026-04-12 ｜ 分析建案：Residensi 22 @ Mont Kiara ｜ 資料時間範圍：NAPIC Q3 2025 / brickz 2025全年 / BambooRoutes Jan 2026 / Savills Q1 2025</p>
+
+    <h3>1.1 Mont Kiara 區域價格趨勢（與 KL 整體對比）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>當前值</th><th>YoY</th><th>來源</th></tr></thead>
+      <tbody>
+        <tr><td>KL 全市公寓中位數（NAPIC）</td><td>RM 510,000</td><td><span class="down">-4.3%</span>（受低價二手拖累）</td><td>NAPIC Q3 2025</td></tr>
+        <tr><td>Mont Kiara 均價 PSF（上游報告）</td><td>RM 900–1,300 psf</td><td><span class="up">+6.4% YoY</span>（上游報告 Q1 2025）</td><td>Savills Q1 2025 / KL Overhang 報告 §5</td></tr>
+        <tr><td>R22 成交中位 PSF（2025全年）</td><td><strong>RM 1,208 psf</strong></td><td>—（首次完整年統計）</td><td>brickz 31筆，Jan–Dec 2025</td></tr>
+        <tr><td>R22 P25 成交總價</td><td>RM 2,100,000</td><td>—</td><td>brickz 2025</td></tr>
+        <tr><td>R22 P75 成交總價</td><td>RM 4,200,000</td><td>—</td><td>brickz 2025</td></tr>
+        <tr><td>R22 掛牌 PSF 範圍（iProperty）</td><td>RM 1,076–1,387 psf</td><td>—</td><td>iProperty 54筆掛牌，2026-04</td></tr>
+        <tr><td>R22 Gross Yield（iRumah）</td><td>4.92%</td><td><span class="up">+0.06pp vs 2024</span></td><td>iRumah 2026</td></tr>
+        <tr><td>MK 整體資本增值（10年）</td><td>10.44%（R22 本棟）</td><td>持續</td><td>iProperty 建案頁面 2026</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：NAPIC Q3 2025；brickz.my；iRumah.co；iProperty.com.my；Savills KL Q1 2025（引自 KL Overhang 報告）</p>
+
+    <div class="alert a-green">
+      <strong>與上游報告的連結：</strong>上游 KL 報告明確記錄 Mont Kiara Q1 2025 價格 YoY +6.4%，是 KL 各區域中漲幅第二强（僅次於獨棟住宅的 +64%）。這印證了報告核心論點：「MK 精品住宅地契因外籍需求支撐而呈現稀缺邏輯」。R22 作為 MK 最具代表性的成熟低密度住宅建案，正是這個稀缺邏輯的直接受益者。
+    </div>
+
+    <h3>1.2 R22 實際成交數據（FIX-03 標準化應用）</h3>
+    <div class="alert a-blue">
+      <strong>⚠ FIX-03 / FIX-04 應用說明：</strong>依 v1.3 方法論，以下數據為 brickz 政府登記的 31 筆實際成交（非掛牌起價），樣本量符合 5–10 筆最低要求，可進行信號判斷。R22 坪數段跨度大（1,878–3,061 sqft），成交總價 P25–P75（RM210–420萬）的跨度主要反映坪數差異而非異常值。
+    </div>
+    <table>
+      <thead><tr><th>FIX-03 步驟</th><th>R22 狀況</th></tr></thead>
+      <tbody>
+        <tr><td>Step 1 樣本收集</td><td>✅ brickz 31筆政府登記成交，Jan–Dec 2025</td></tr>
+        <tr><td>Step 2 樓層標準化</td><td>掛牌 PSF RM1,076–1,387 的範圍，考慮樓層溢價後，中位 PSF RM1,208 代表各類型混合均衡基準</td></tr>
+        <tr><td>Step 3 異常值</td><td>P25=RM210萬（1,878 sqft 低樓層）至 P75=RM420萬（3,061 sqft 高樓層），區間合理，無需剔除</td></tr>
+        <tr><td>Step 4 標準化中位 PSF</td><td><strong>RM1,208 psf</strong>（31筆成交中位，可信度高）</td></tr>
+        <tr><td>FIX-02 發售成本</td><td>發售均價 RM750 psf（2013年），現二手成交均有顯著溢價；折扣結構已過時（2013年購入者成本遠低於現掛牌）</td></tr>
+        <tr><td>Step 5 信號判斷</td><td>✅ <strong>偏多信號</strong>：掛牌中位高於發售價 +61%，成交量穩定（31筆），無明顯拋壓；Yield 同步小幅提升 (+0.06pp)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.3 市場週期定位</h3>
+    <div class="alert a-blue" style="border-color:#3B82F6;background:#EFF6FF;color:#1e40af">
+      <strong>MK / R22 週期定位：擴張期中段，MRT3 前置溢價定價中。</strong>信心程度：高。<br>
+      理由：①MK 全區 YoY +6.4%（上游報告 Q1 2025）；② Gross Yield 升至 4.92%（量、價、租同步健康）；③ MRT3 核准後買家預期升溫；④ 外籍租市場空置率維持 5–10%（KL 最低之一）。但 R22 樓齡 8 年，與新精品案的競爭加劇，增值空間逐步轉向「MRT3 催化」而非「純地段稀缺」。
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構分析（直接應用上游 KL 報告框架）</div>
+  <div class="section-body">
+    <h3>2.1 R22 的需求面——為何與 KL 整體供需脫鉤？</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>占比估計</th><th>趨勢</th><th>關鍵驅動因素</th></tr></thead>
+      <tbody>
+        <tr><td>外籍高管長租（2–3年合約）</td><td>~55–65%</td><td>↑</td><td>GIS、MKIS 等國際學校；MK 外籍社群黏性；企業租賃合約</td></tr>
+        <tr><td>本地高收入自住</td><td>~15–20%</td><td>→</td><td>低密度精品生活品質；MK 升級換屋族群</td></tr>
+        <tr><td>MM2H 外國買家</td><td>~10–15%</td><td>↑</td><td>上游報告：2,637 待購 MM2H 買家（台灣 17%），MK 是首選地段之一</td></tr>
+        <tr><td>本地投資者（出租持有）</td><td>~10%</td><td>→</td><td>Yield 4.92%，穩定現金流；MRT3 資本利得預期</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供給面——MK 的供給結構遠優於 KL 整體</h3>
+    <table>
+      <thead><tr><th>KL 整體（上游報告數據）</th><th>R22 / MK 精品住宅段對比</th></tr></thead>
+      <tbody>
+        <tr><td>全馬 SR 廣義庫存 17,900 戶（另計）</td><td>R22 Freehold 住宅地契，完全隔離 SR 積壓問題</td></tr>
+        <tr><td>KL Overhang Q3 2025 = 2,287 戶（RM1M+ 去化率 69.8%）</td><td>MK 精品低密度段無 Overhang 問題；外籍租賃吸收持穩</td></tr>
+        <tr><td>KL 廣義管道 11,568 戶待完工</td><td>MK 新供給以精品住宅地契為主（The MINH、Kiaramas DeDaun），非 SOVO；且量有限</td></tr>
+        <tr><td>MK 整體（上游報告）：需求最強，庫存最健康，Overhang 壓力：低</td><td>R22 作為 MK 代表性低密度案，直接繼承此結論</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：KL 供需 Overhang 報告 §5，NAPIC Q3 2025</p>
+
+    <div class="alert a-green">
+      <strong>上游報告直接結論：</strong>「Mont Kiara 需求最強，庫存最健康，Overhang 壓力：低；主要需求來源：外籍家庭（國際學校帶動）、MM2H」。這是上游報告中對 MK 的精確描述，R22 作為該區最具代表性的精品低密度建案，是此論點的核心標的。
+    </div>
+
+    <h3>2.3 供需平衡指標（MK 精品住宅段）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>MK / R22 估計值</th><th>健康基準</th><th>判斷</th></tr></thead>
+      <tbody>
+        <tr><td>精品住宅空置率</td><td>5–10%（BambooRoutes 2026，KL最低）</td><td>&lt;15% 健康</td><td><span class="tag t-g">優秀</span></td></tr>
+        <tr><td>出租天數（days on market）</td><td>2–5週（快速填租）</td><td>&lt;6週健康</td><td><span class="tag t-g">健康</span></td></tr>
+        <tr><td>Gross Yield</td><td>4.6–5.4%（BambooRoutes）；R22 個案 4.92%</td><td>4%+ 精品住宅合理</td><td><span class="tag t-g">達標</span></td></tr>
+        <tr><td>PSF 增速（MK 全區）</td><td>YoY +6.4%（Q1 2025）</td><td>5–8% 長期均速</td><td><span class="tag t-g">健康</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §3 -->
+<div class="section">
+  <div class="section-header">§3｜區域細分——R22 在 MK 及 KL 的定位</div>
+  <div class="section-body">
+    <h3>3.1 MK 內部建案分層——R22 的定位</h3>
+    <table>
+      <thead><tr><th>建案</th><th>定位</th><th>PSF 估計</th><th>vs R22</th></tr></thead>
+      <tbody>
+        <tr><td>10 Mont Kiara / Seni Mont Kiara</td><td>頂奢（品牌連結、湖景、極低密度）</td><td>RM1,500–2,500+ psf</td><td>R22 低 20–50%，定位低一層</td></tr>
+        <tr><td>Kiaramas DeDaun（新案）</td><td>精品低密度（上游報告：Overhang 風險低）</td><td>新案定價更高</td><td>R22 是二手選項，性價比較高</td></tr>
+        <tr><td>The MINH, Mont Kiara（SkyWorld）</td><td>中高端，外籍需求強（上游報告）</td><td>2027–2028 完工</td><td>競品新案，未來供給方，暫無二手</td></tr>
+        <tr><td><strong>Residensi 22（本案）</strong></td><td><strong>精品主流——低密度、已完工、住宅 Freehold、外籍租客成熟</strong></td><td><strong>RM1,208 psf（成交中位）</strong></td><td>MK 二手精品住宅最具代表性標的</td></tr>
+        <tr><td>28 Mont Kiara / Arcoris</td><td>中端量產（比 R22 密度更高）</td><td>RM700–900 psf</td><td>R22 高 30–40%，有低密度溢價</td></tr>
+        <tr><td>Agile Mont Kiara</td><td>中端高密度（商業地契疑問）</td><td>RM700–950 psf</td><td>R22 住宅地契有明確結構優勢</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 KL Zone 分級中的定位</h3>
+    <p>依據上游報告的 Zone 分析，MK 屬 <strong>Zone 1 核心</strong>（與 KLCC 並列 KL 最高需求地段，但供給結構健康得多）：</p>
+    <table>
+      <thead><tr><th>Zone</th><th>代表區域</th><th>PSF 範圍</th><th>Yield</th><th>R22 定位</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Zone 1 精品</strong></td><td><strong>Mont Kiara（R22所在）</strong></td><td>RM900–1,300 psf</td><td>4.6–5.4%（最優）</td><td>✅ 本案——低密度、Freehold、外籍最愛</td></tr>
+        <tr><td>Zone 1 核心</td><td>KLCC / Jalan Ampang</td><td>RM1,400–2,660 psf</td><td>3–4%</td><td>地段更中心，但 Yield 更低，SR 積壓更重</td></tr>
+        <tr><td>Zone 2</td><td>TRX / Bangsar South</td><td>RM700–1,500 psf</td><td>4–5%</td><td>新興，社區成熟度不及 MK</td></tr>
+        <tr><td>Zone 2</td><td>Desa ParkCity</td><td>RM994–1,461 psf</td><td>3.5–4.5%</td><td>比 R22 略低 Yield，但社區更完整（有DPC生態圈）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="section">
+  <div class="section-header">§4｜同期競品比較與二手市場信號（FIX-01/02/03/04）</div>
+  <div class="section-body">
+    <div class="alert a-orange">
+      <strong>FIX-01 說明：</strong>R22 2017年完工，已是二手市場物業。比較基準採用同區同類型（MK 住宅 Freehold 低密度）的現有競品或近年完工新案。不與 2005 年前舊案比較。
+    </div>
+
+    <h3>4.1 同類競品比較（FIX-01）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>R22（本案）</th><th>Park Place（DPC）</th><th>The MINH（MK新案）</th><th>Kiaramas DeDaun（MK新案）</th></tr></thead>
+      <tbody>
+        <tr><td>地段</td><td>Mont Kiara 核心</td><td>Desa ParkCity</td><td>Mont Kiara</td><td>Mont Kiara</td></tr>
+        <tr><td>地契</td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td></tr>
+        <tr><td>完工狀態</td><td>✅ 2017完工，成熟</td><td>✅ 2024完工，交屋</td><td>2027–2028（期房）</td><td>2026–2027（期房）</td></tr>
+        <tr><td>PSF（成交/發售）</td><td>RM1,208（brickz 31筆）</td><td>RM1,461（brickz 89筆）</td><td>新案定價，未公開二手</td><td>新案定價中</td></tr>
+        <tr><td>Gross Yield</td><td><span class="up">4.92%（最高）</span></td><td>3.5–4.5%</td><td>估 4–5%（成熟後）</td><td>估 4–5%</td></tr>
+        <tr><td>外籍 Net Yield（稅後）</td><td><strong>~3.3–3.8%</strong></td><td>~3.0–3.4%</td><td>N/A（未交屋）</td><td>N/A</td></tr>
+        <tr><td>密度</td><td>✅ 每層4戶（低）</td><td>✅ 537戶1棟（低）</td><td>中低（精品）</td><td>精品低密度</td></tr>
+        <tr><td>MRT3 催化</td><td>✅ Mont Kiara 站（2032）</td><td>✅ Taman Sri Sinar（2032）</td><td>✅ 同受益</td><td>✅ 同受益</td></tr>
+        <tr><td>步行生活圈</td><td>🔶 需開車（1 MK Mall 可步行，但非高密度商圈）</td><td>✅ DPC鎮中心5–11分鐘步行</td><td>同MK，需開車</td><td>同MK，需開車</td></tr>
+        <tr><td>資本增值記錄</td><td>+61%（2013→2025，iRumah）</td><td>+76–102%（2020→2025）</td><td>N/A</td><td>N/A</td></tr>
+        <tr><td>綜合評分（v1.3）</td><td><strong>7.5/10</strong></td><td>7.7/10</td><td>TBD</td><td>TBD</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <strong>FIX-01 比較結論：</strong>R22 最大的競爭優勢是 Gross Yield（4.92%）和「已完工、社區成熟」，可立即出租；最大的相對劣勢是樓齡（8年），與新案（Kiaramas DeDaun、The MINH）相比設施稍舊，但定價相對合理（RM1,208 vs 新案更高）。相比 DPC Park Place，R22 的 Yield 更高（4.92% vs 3.5–4.5%），但 Park Place 有更完整的步行生活圈和更短的資本增值時間（5年 vs 12年累積）。
+    </div>
+
+    <h3>4.2 二手掛牌信號（FIX-03/04）</h3>
+    <table>
+      <thead><tr><th>FIX-03 步驟</th><th>R22 狀況</th></tr></thead>
+      <tbody>
+        <tr><td>樣本量</td><td>✅ 31筆官方成交（2025全年）；iProperty 54筆掛牌（2026-04）</td></tr>
+        <tr><td>PSF 標準化</td><td>brickz 中位 RM1,208 psf；掛牌 RM1,076–1,387 psf（高端為大坪數頂層）；中位 RM1,129 psf（iProperty 顯示），與 brickz 一致</td></tr>
+        <tr><td>異常值</td><td>P25=RM210萬（小坪數低樓層）至 P75=RM420萬（大坪數高樓層）——差距反映坪數差異，非市場異常</td></tr>
+        <tr><td>FIX-02 折扣</td><td>2013年發售 RM750 psf，現二手掛牌 RM1,076–1,387 psf，無折讓——所有持有者均有帳面盈利，無急售壓力</td></tr>
+        <tr><td>信號判斷</td><td>✅ <strong>偏多信號（中高信心）</strong>：31筆成交量穩定，中位 RM1,208 PSF，Yield 4.92% 且微升，無拋壓；但 54 筆掛牌 vs 31 筆成交比值偏高（約 1.7:1），顯示部分持有者觀望出售但非急迫</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率分析</div>
+  <div class="section-body">
+    <h3>5.1 R22 租金行情</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租範圍</th><th>Gross Yield（估）</th><th>外國人 Net Yield</th></tr></thead>
+      <tbody>
+        <tr><td>3+1 BR（最小）</td><td>1,878 sqft</td><td>RM 7,000–10,000/月</td><td>~4.5–5.3%</td><td>~3.0–3.6%（扣30%租金稅）</td></tr>
+        <tr><td>3+1 BR（C型）</td><td>2,038 sqft</td><td>RM 8,000–12,000/月</td><td>~4.4–5.2%</td><td>~3.0–3.5%</td></tr>
+        <tr><td>4+1 BR（E型）</td><td>2,973 sqft</td><td>RM 10,000–16,000/月</td><td>~4.0–5.0%</td><td>~2.7–3.3%</td></tr>
+        <tr><td>4+1 BR（F/G型，最大）</td><td>3,041–3,061 sqft</td><td>RM 12,000–20,000/月</td><td>~3.8–4.5%</td><td>~2.5–3.0%</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：iProperty 掛牌 RM4.02–6.08/sqft；iRumah 4.92% Gross Yield；PropCashflow 2026；BambooRoutes 2026（MK外籍3BR RM7,000–12,000）</p>
+
+    <div class="alert a-blue">
+      <strong>重要補充——軟裝溢價：</strong>PropCashflow 2026 研究顯示，MK 精品住宅的軟裝（家具）投入 RM35,000–50,000，可帶來每年額外 RM12,000 租金收入（相當於 Yield 多 0.5–0.6%）。R22 的外籍租客（企業客戶）對軟裝要求極高，投入優質軟裝是提升 Net Yield 的最直接手段，且回本週期僅 3–4 年。
+    </div>
+
+    <h3>5.2 外國人現金流試算（3+1BR 1,878 sqft，假設 RM200萬入場）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租收入（RM8,500 × 12）</td><td>RM 102,000</td><td>3BR 中位保守估計；軟裝完備版</td></tr>
+        <tr><td>管理費（RM0.34 × 1,878 × 12）</td><td><span class="down">-RM 7,662</span></td><td>依PropertyGuru用戶確認費率</td></tr>
+        <tr><td>地稅 + 門牌稅（估）</td><td><span class="down">-RM 3,000</span></td><td></td></tr>
+        <tr><td>住宅電費（民用費率）</td><td>✅ 無超額</td><td>Freehold 住宅地契，享住宅費率</td></tr>
+        <tr><td>非居民租金所得稅（30%，外國人）</td><td><span class="down">-RM 27,401</span></td><td>（102,000–10,662）× 30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 8,160</span></td><td>遠程管理，非必要</td></tr>
+        <tr><td><strong>淨現金流（含代管，外國人）</strong></td><td><strong>~RM 55,777/年</strong></td><td>Net Yield ≈ 2.79%（RM200萬入場）</td></tr>
+        <tr><td>淨現金流（無代管，外國人）</td><td>~RM 63,937/年</td><td>Net Yield ≈ 3.20%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>與競品對比：</strong>R22 外籍 Net Yield（2.8–3.2%）與 DPC Park Place（3.0–3.4%）相近。R22 的優勢在於 Gross Yield 更高（4.92% vs 3.5–4.5%），劣勢在於大坪數（1,878 sqft）的入場總價更高（RM200萬+），分母更大，Net Yield 結果接近。整體而言，R22 的租金現金流在 KL 精品住宅中屬第一梯隊。
+    </div>
+
+    <h3>5.3 租客結構</h3>
+    <table>
+      <thead><tr><th>租客類型</th><th>占比</th><th>需求穩定度</th><th>特徵</th></tr></thead>
+      <tbody>
+        <tr><td>外籍高管長租（企業租賃）</td><td>~55–65%</td><td>很高（2–3年合約，企業付租）</td><td>GIS/MKIS 子女就讀；月租 RM8,000–15,000</td></tr>
+        <tr><td>本地高收入長租</td><td>~20%</td><td>高</td><td>自住型租客，穩定</td></tr>
+        <tr><td>MM2H 外籍家庭</td><td>~10%</td><td>高（MM2H 持有 10 年要求）</td><td>台灣/中國 MM2H 家庭偏好 MK；月租需求 RM8,000+</td></tr>
+        <tr><td>短租（若管委會允許）</td><td>~5–10%</td><td>中</td><td>需管委會核准，住宅社區管委會多數不鼓勵</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規（引用上游 KL 報告數據）</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>法規項目</th><th>本地買家</th><th>外國買家</th><th>對 R22 的影響</th></tr></thead>
+      <tbody>
+        <tr><td>最低購置門檻（KL）</td><td>無限制</td><td>RM 1,000,000</td><td>✅ R22 最低入場 RM200萬+（1,878 sqft），遠超門檻</td></tr>
+        <tr><td>印花稅（2026年）</td><td>1–4% 階梯</td><td>4% 統一稅率</td><td>RM200萬物業：外國人 RM80,000；本地人 RM44,000</td></tr>
+        <tr><td>RPGT（5年內）</td><td>30%</td><td>30%</td><td>持有需謹慎規劃 SPA 起算時間</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>0%</td><td>10%</td><td>外國人最優退出：持有6年後（SPA日起算）</td></tr>
+        <tr><td>MM2H Gold 合規</td><td>N/A</td><td>RM100萬+，持有10年</td><td>✅ R22 住宅 Freehold，完全符合 MM2H 持有規定，地契最乾淨</td></tr>
+        <tr><td>OPR（馬來西亞基準利率）</td><td colspan="2">BNM 降至 2.75%（2025年中）</td><td>貸款成本下降，房貸月供更低，利好買家</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6.1 外國人完整入場成本（RM220萬 3BR 單位）</h3>
+    <table>
+      <thead><tr><th>費用</th><th>金額（RM）</th></tr></thead>
+      <tbody>
+        <tr><td>印花稅（4% flat）</td><td>RM 88,000</td></tr>
+        <tr><td>律師費</td><td>RM 18,000</td></tr>
+        <tr><td>State Consent</td><td>RM 5,000</td></tr>
+        <tr><td><strong>入場總成本</strong></td><td><strong>~RM 111,000（約5.0%）</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>外資友好度：🟡 中性（住宅地契最優結構，稅費需規劃）</strong><br>
+      Freehold 住宅地契是外資在 KL 最乾淨的持有結構——無商業地契超額水電費、無 HDA 以外的額外法律風險。主要制約是 RPGT 外籍人士永遠 10%，以及 4% 統一印花稅。BNM 降息至 2.75%（2025年中）是 2026 年入場的正面時機訊號，住宅房貸月供顯著降低。
+    </div>
+  </div>
+</div>
+
+<!-- §7 -->
+<div class="section">
+  <div class="section-header">§7｜貸款環境</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>本地買家</th><th>外國買家</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>OPR（BNM 基準）</td><td colspan="2">2.75%（2025年中降息）</td><td>降息後，住宅房貸月供顯著下降</td></tr>
+        <tr><td>住宅房貸利率</td><td>3.4–4.0%（降息後）</td><td>外國人可申請，需額外文件</td><td>R22 住宅地契，可申請一般住宅貸款</td></tr>
+        <tr><td>LTV</td><td>90%（首套）</td><td>60–70%</td><td>RM220萬物業，外國人頭期款約 RM66–88萬</td></tr>
+        <tr><td>月供估算（80% LTV，RM220萬）</td><td>RM 8,200/月（30年，4%）</td><td>同（若獲批）</td><td>月供 vs 月租 RM8,500 = 接近打平，槓桿效應可用</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設——MRT3 是 R22 最重要的中期催化劑</div>
+  <div class="section-body">
+    <h3>8.1 R22 的關鍵基建催化劑</h3>
+    <table>
+      <thead><tr><th>項目</th><th>狀態</th><th>對 R22 受益程度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>MRT3 Circle Line — Mont Kiara 站</strong></td><td>2025-07 政府正式核准✅；土地收購 2026，建設 2027+，預計全線 2032 通車</td><td>🔴 最重大催化劑：Mont Kiara 地下站直接服務 MK 核心，R22 預計步行可達。徹底解除 MK「需開車」最大弱點。上游報告提及「Mont Kiara 受 MRT3 催化，前置溢價已在定價」。</td></tr>
+        <tr><td>MRT3 路線對 MK 的影響</td><td>MRT3：Sri Hartamas → Mont Kiara → Bukit Segambut → Dutamas → Jalan Kuching</td><td>MK 站設計為地下站（Bukit Kiara 段全地下），品質更高，施工難度更大；已反映進2025年的 +6.4% YoY</td></tr>
+        <tr><td>MK 商業配套持續成熟</td><td>1 Mont Kiara Mall 擴建；潛在新 Sunway Mall（傳聞）</td><td>強化 MK 步行商業密度，進一步提升外籍生活便利性</td></tr>
+        <tr><td>TRX 金融區成熟化</td><td>2026–2027 更多企業進駐</td><td>增加 KL 整體外籍高管數量，MK 的外籍租客池間接受益</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>MRT3 Mont Kiara 站的歷史溢價參考（引用外部研究）：</strong>BambooRoutes 2026 引用歷史數據：KL 捷運站旁物業在「核准公告後 10–20% 溢價，通車完成後再 15–30% 溢價」。若 MRT3 Mont Kiara 站如期 2032 通車，並以此框架估算，R22 的潛在累積資本增值在現有基礎上可再增加 15–30%（通車前置溢價 10–20% 已在 2025 年 YoY +6.4% 中開始定價）。
+    </div>
+  </div>
+</div>
+
+<!-- §9 -->
+<div class="section">
+  <div class="section-header">§9｜人口結構與移入移出趨勢</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>數值 / 趨勢</th><th>對 R22 的關聯</th></tr></thead>
+      <tbody>
+        <tr><td>MM2H 待購買家</td><td>2,637人（截至2025-12），估 RM23億確定性需求（上游報告）</td><td>台灣 17%（約449人）+ 中國 51%；MK 是台灣 MM2H 買家最偏好的地段之一，R22 Freehold 住宅地契是最佳 MM2H 錨點</td></tr>
+        <tr><td>外籍高管 Expat 居住偏好</td><td>MK + DPC 長期前兩名；MK 空置率 5–10%（KL 最低）</td><td>ISP+GIS+MKIS 國際學校帶動外籍家庭對大坪數單位的剛性需求</td></tr>
+        <tr><td>KL 外籍人口增長</td><td>TRX 企業進駐 + MM2H 持續引入</td><td>MK 外籍租客池的基礎在 2026–2027 持續擴大</td></tr>
+        <tr><td>KL 城市人口</td><td>約200萬，緩升</td><td>整體需求基礎穩定</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §10 -->
+<div class="section">
+  <div class="section-header">§10｜橫向比較——R22 vs KL 主要精品住宅競品</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>R22（MK）</th><th>Park Place（DPC）</th><th>TRX Residences</th><th>TS2（武吉免登）</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-y">商業地契</span></td></tr>
+        <tr><td>完工狀態</td><td>✅ 2017，8年成熟</td><td>✅ 2024，新交屋</td><td>首批 2026–2027</td><td>2027年10月</td></tr>
+        <tr><td>PSF（成交）</td><td>RM1,208（31筆）</td><td>RM1,461（89筆）</td><td>RM2,293（2024）</td><td>估 RM1,475</td></tr>
+        <tr><td>Gross Yield</td><td><span class="up">4.92% ⭐</span></td><td>3.5–4.5%</td><td>估 4–5%（成熟後）</td><td>~3.6%</td></tr>
+        <tr><td>外籍 Net Yield</td><td><strong>~3.0–3.2%</strong></td><td>~3.0–3.4%</td><td>~2.5–3.0%</td><td>~1.8–2.2%</td></tr>
+        <tr><td>步行生活圈</td><td>🔶 需開車（MK商圈步行可達，但非密集型）</td><td>✅ DPC 鎮中心完整</td><td>✅ Exchange TRX 最強</td><td>✅ 武吉免登全KL最強</td></tr>
+        <tr><td>MRT3 催化</td><td>✅ Mont Kiara 站（地下站）</td><td>✅ Taman Sri Sinar</td><td>✅ MRT 已有</td><td>✅ Monorail 已有</td></tr>
+        <tr><td>外籍租客剛需</td><td><span class="up">✅ 最強（三所國際學校1km內）</span></td><td>✅ 強（ISP）</td><td>🔶 中（金融業）</td><td>🔶 中（商務型）</td></tr>
+        <tr><td>MM2H 合規</td><td>✅ 住宅 Freehold 最乾淨</td><td>✅ 同</td><td>✅</td><td>✅（已確認）</td></tr>
+        <tr><td>入場總價（3BR）</td><td>RM 200–280萬</td><td>RM 168–300萬</td><td>RM 140萬+（較小）</td><td>RM 100萬+</td></tr>
+        <tr><td>綜合評分（v1.3）</td><td><strong>7.5/10</strong></td><td>7.7/10</td><td>~7.5/10</td><td>6.2/10</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <strong>橫向比較結論：</strong>R22 的最大競爭優勢是 Gross Yield（4.92%，KL 精品住宅中最高之一）和外籍租客池最剛性（三所國際學校 1km 內）。相比 DPC Park Place，R22 Yield 更高但資本增值速度稍慢（+61% 12年 vs +76–102% 5年）。整體風報比與 Park Place、TRX Residences 並列為 KL 精品住宅最優第一梯隊，三者各有側重。
+    </div>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="section">
+  <div class="section-header">§11｜進場時機與估值判斷</div>
+  <div class="section-body">
+    <h3>11.1 估值指標</h3>
+    <table>
+      <thead><tr><th>估值指標</th><th>當前值</th><th>歷史均值</th><th>分位</th><th>解讀</th></tr></thead>
+      <tbody>
+        <tr><td>R22 PSF vs 發售（RM750）</td><td>RM1,208（成交中位）</td><td>—</td><td>+61%累積</td><td><span class="tag t-y">中高位，但 12 年漲幅合理（+4.1%/年）</span></td></tr>
+        <tr><td>MK 全區均值 PSF（上游報告）</td><td>RM900–1,300 psf</td><td>RM600–800（2015–2019）</td><td>75–80%</td><td><span class="tag t-y">歷史中高位，但 MRT3 催化支撐</span></td></tr>
+        <tr><td>R22 Gross Yield</td><td>4.92%</td><td>4–5%（MK 歷史區間）</td><td>50%（合理中位）</td><td><span class="tag t-g">合理，租金與資產價值同步增長</span></td></tr>
+        <tr><td>MK 空置率</td><td>5–10%</td><td>10–15%（2019–2021 峰值）</td><td>&lt;25%（歷史低位）</td><td><span class="tag t-g">優秀，需求強勁</span></td></tr>
+        <tr><td>R22 PSF 增速（+6.4% YoY）</td><td>RM1,208→估 RM1,290（+6.4% YoY 趨勢）</td><td>4–6%/年（MK 長期均值）</td><td>50–60%</td><td><span class="tag t-g">健康，未超速</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.2 進場時機矩陣</h3>
+    <table>
+      <thead><tr><th></th><th>趨勢向上</th><th>趨勢持平</th><th>趨勢向下</th></tr></thead>
+      <tbody>
+        <tr><td><strong>估值便宜</strong></td><td>🟢 最佳</td><td>🟢 分批</td><td>🟡 等待</td></tr>
+        <tr><td><strong>估值合理</strong></td><td>🟡 可進場，控制倉位</td><td>🟡 觀望</td><td>🔴 避免</td></tr>
+        <tr><td><strong>估值偏貴</strong></td><td>🟡 短線可，長線謹慎</td><td>🔴 避免</td><td>🔴 絕對避免</td></tr>
+      </tbody>
+    </table>
+    <p><strong>R22 當前落點：估值中等偏合理（PSF +4.1%/年 12年累積，Yield 健康）+ 趨勢持續向上（MRT3前置定價中）→ 對應：🟡 可進場，控制倉位，長線持有（6年+ RPGT節點）。</strong></p>
+
+    <h3>11.3 持有期情境分析（外國投資者，RM220萬入場）</h3>
+    <table>
+      <thead><tr><th>持有期</th><th>樂觀（MRT3按時+外籍需求持續）</th><th>基本（溫和成長）</th><th>悲觀（MRT3延期+外籍萎縮）</th></tr></thead>
+      <tbody>
+        <tr><td>3年（至2029）</td><td>資本 +20–30%（前置溢價增強）+ 租金 RM170,000+</td><td>資本 +12–18% + 租金穩定</td><td>資本 +3–8%（外籍需求護底）</td></tr>
+        <tr><td>6年（至2032，RPGT 10%，MRT3通車）</td><td>資本 +40–60%（通車溢價兌現）</td><td>資本 +25–35%</td><td>資本 +10–18%</td></tr>
+        <tr><td>10年（至2036）</td><td>資本 +70–100%（MK升格為全MRT連通地段）</td><td>資本 +40–60%</td><td>資本 +20–35%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點（雙視角）</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】投資決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:130px;font-weight:600">市場性質</td><td>輕微賣方市場（精品住宅地契稀缺，外籍需求持穩）；但大坪數買方議價空間存在</td></tr>
+            <tr><td>議價空間</td><td>5–12%（大坪數 3,000sqft+ 或樓層較低單位）；1,878 sqft 熱門戶型議價空間較小</td></tr>
+            <tr><td>最佳入場戶型</td><td>3+1BR 1,878 sqft（最熱門）或 3+1BR 2,038 sqft（性價比最優）；外籍租客偏好 3BR+</td></tr>
+            <tr><td>最大進場風險</td><td>樓齡 8 年競爭新案（The MINH 2028 完工）；現無捷運步行可達，依賴 MRT3 2032</td></tr>
+            <tr><td>建議持有期</td><td>最少 6 年（RPGT 降至10%）；理想 2032+ 配合 MRT3 通車後出售</td></tr>
+            <tr><td>槓桿建議</td><td>住宅地契可申請住宅房貸（降息後 3.4–4.0%），BNM 2025 中降息後月供更低；外國人可申請但需文件</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】純分析結論</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟢 稀缺——MK 精品住宅地契 Overhang 壓力：低（上游報告直接結論）</td></tr>
+            <tr><td>價格趨勢</td><td>🟢 上行——MK YoY +6.4%，MRT3前置溢價定價中，基本面支撐強</td></tr>
+            <tr><td>租金市場</td><td>🟢 強勁——MK 空置率 5–10%（KL最低），填租 2–5週，Gross Yield 4.92%</td></tr>
+            <tr><td>法規環境</td><td>🟡 中性——住宅 Freehold 最優結構；4%印花稅+RPGT外籍10%是主要制約</td></tr>
+            <tr><td>進場估值</td><td>🟡 合理——PSF RM1,208，12年均速 +4.1%/年，未超速；Yield 健康；BNM降息改善月供</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;padding:8px;background:#f1f5f9;border-radius:4px;font-size:12px">
+          <strong>市場研究一句話：</strong>MK 是上游 KL 報告中供需最健康的精品住宅地段（直接點名），R22 是此地段最有代表性的低密度已完工住宅 Freehold 標的——Yield 4.92%、MRT3 催化確定、外籍租客剛需最強，是 KL 精品住宅市場中風報比最均衡的選項之一。
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px">最終進場建議</h3>
+    <div class="verdict-g">
+      <strong>🟢 審慎積極進場——Yield 最優、外籍租客最剛性、MRT3 催化明確</strong><br><br>
+      <strong>核心邏輯：</strong>上游 KL 報告明確標注 Mont Kiara 為「需求最強，庫存最健康，Overhang 壓力：低，外籍需求主力」。R22 在此地段的定位是：低密度（每層4戶）、住宅 Freehold 地契、UEM Sunrise（Khazanah）品牌、三所國際學校 1km 內，且已完工 8 年、社區完全成熟。Gross Yield 4.92% 是本輪分析三個建案中最高，外籍 Net Yield 3.0–3.2% 與 Park Place 相近但入場 PSF 顯著更低（RM1,208 vs RM1,461）。MRT3 Mont Kiara 站（地下站）是最確定的中期催化劑。<br><br>
+      <strong>進場策略：</strong>目標 3+1BR（1,878–2,038 sqft）中層單位，議價 5–8%，爭取 RM200–230萬以下入場（RM1,060–1,150 psf，接近 P25 區間）。投入 RM35,000–50,000 軟裝後月租可達 RM8,500–10,000，提升 Yield 額外 0.5–0.6%。持有至 SPA 第6年後（RPGT 10%）且 MRT3 通車前後擇機退出。
+    </div>
+
+    <h3>最關鍵監測指標</h3>
+    <table>
+      <thead><tr><th>#</th><th>監測指標</th><th>觸發重新評估閾值</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>MK 外籍長租月租 YoY 走勢</td><td>若連跌 2 季超 5%（外籍高管流出信號）→ 租金論點動搖</td></tr>
+        <tr><td>2</td><td>MRT3 Mont Kiara 站施工進度</td><td>若 2028 年仍無動工（核准後 3 年）→ 前置催化劑時間大幅推後</td></tr>
+        <tr><td>3</td><td>R22 成交中位 PSF 走勢</td><td>若跌破 RM1,100 psf（約 -9%）→ 市場信心轉弱，需重評</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分【v1.2 建案評分模組】</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Residensi 22 @ Mont Kiara ｜ 建案綜合評分卡</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">馬來西亞 GDP 4–5%；KL RM100萬+ 成交 +31%；MM2H 2,637 待購買家（台灣17%）；BNM降息至2.75%，貸款成本下降</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">上游報告直接標注「MK 需求最強、庫存最健康、Overhang 低」；空置率 5–10%（KL最低）；與 SR/SOVO 積壓完全隔離</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">擴張期中段；MK YoY +6.4%（健康，未超速）；MRT3前置溢價正在定價；R22 入場 PSF 估值合理（12年均速 +4.1%/年）</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">MRT3 Mont Kiara 站（地下站）2025-07正式核准，2032通車；三所國際學校1km內的硬基建；TRX擴散效應帶動外籍需求</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">住宅 Freehold 最優結構；BNM降息改善融資成本；4%統一印花稅+RPGT外籍永遠10%是主要制約</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">7.8/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.5×.2 + 8.5×.25 + 7.0×.2 + 8.5×.2 + 6.5×.15 = 7.80</div>
+          </div>
+        </div>
+
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">UEM Sunrise（Khazanah 子公司，Bursa上市）——馬來西亞最大上市開發商之一，已完工77個項目；R22 2017年交屋，零交屋風險，社區運營8年穩定</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">RM1,208 PSF（成交中位）vs 發售 RM750（+61%，12年均速 +4.1%/年）——增值合理，未超速；相比新案有二手折讓；比同區量產高密度案有低密度溢價</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Gross Yield 4.92%（三個建案中最高）；外籍 Net Yield 3.0–3.2%；軟裝後可再增 0.5–0.6%；外籍租客剛需最強（三所國際學校1km）</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>6.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:60%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">MK 核心，1 MK Mall 步行可達；但現無步行到達 MRT/LRT，完全依賴私家車或 Grab。MRT3 Mont Kiara 站 2032 通車後此項大幅提升（屆時估 8.0+）</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">低密度（每層4戶）；大坪數段（1,878–3,061 sqft）外籍家庭最愛；設施三層分佈（泳池、網球場、Gym 等）；8年樓齡略降分（vs 新案設施更新）</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契——外資持有最乾淨的結構；MM2H Gold 完全合規；State Consent 核批最易；無任何商業地契衍生問題</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">31筆 brickz 成交（2025全年），流動性中等（vs Park Place 89筆）；大坪數（RM200–420萬）買家池相對窄；RPGT第6年後外籍10%是已知成本；54筆掛牌中有一定觀望賣家</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">7.7/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">9.5×.2 + 7.0×.2 + 8.0×.15 + 6.0×.15 + 7.5×.1 + 9.5×.1 + 7.0×.1 = 7.70</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 7.8 × 40%&nbsp;+&nbsp;B 類 7.7 × 60%</div>
+        <div class="score-big">7.7<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#DCFCE7;color:#166534">⭐⭐⭐⭐ 優質——基本面紮實，可審慎進場</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">3.12 + 4.62 = 7.74 → 四捨五入 7.7</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>上游 KL 報告直接背書「MK 需求最強、庫存最健康、外籍需求主力」；R22 Gross Yield 4.92%（三個分析建案最高）；UEM Sunrise（Khazanah）開發商信用最頂；MRT3 Mont Kiara 地下站 2032 確定通車；Freehold 住宅地契最乾淨；RM1,208 PSF 估值合理（+4.1%/年均速，未超速）。<br>
+          <strong style="color:#fca5a5">最大風險：</strong>現無步行可達捷運（B4 6.0 最低分），完全依賴私家車，MRT3 延期將推遲最大催化劑；8年樓齡面臨新案競爭；大坪數（RM200–420萬）流動性相對窄，退出需給更多時間。
+        </div>
+      </div>
+    </div>
+
+    <h3>A 類評分說明</h3>
+    <p>大環境評分 7.8 是三個分析建案中最高，核心原因是上游 KL 報告對 MK 的直接正面表述：「Mont Kiara 需求最強，庫存最健康，Overhang 壓力：低」（§5 供需分析）。MRT3 正式核准（A4 8.5）和 MK 空置率 5–10%（A2 8.5）是主要加分項。唯一明顯制約是法規環境（A5 6.5），4% 統一印花稅和外籍 RPGT 永遠 10% 是整個 KL 市場的共同限制。</p>
+
+    <h3>B 類評分說明</h3>
+    <p>開發商（B1 9.5）和地契（B6 9.5）是全場最高，UEM Sunrise 作為 Khazanah 旗下上市公司，是馬來西亞信用最高的開發商之一；R22 住宅 Freehold 地契是外資持有最乾淨的結構。租金回報（B3 8.0）也是高分項——Gross Yield 4.92% 在三個分析建案中最高，外籍租客池最剛性（三所國際學校 1km）。最大扣分是交通連接（B4 6.0）：現階段無捷運步行可達是 MK 整個區域的結構性弱點，但 MRT3 2032 通車後此項將大幅提升。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：NAPIC Q3 2025（KL 供需 Overhang 深度分析報告 2026-04-01，上游報告）｜brickz.my（31筆政府登記成交 Jan–Dec 2025）｜iRumah.co（Gross Yield 4.92%）｜iProperty.com.my（掛牌數據 2026-04）｜BambooRoutes（Jan 2026, KL Rental Yields）｜PropCashflow.my（Feb 2026, MK Investment Analysis）｜MRT Corp Circle Line（mrt.com.my）｜paultan.org MRT3核准（2025-07）｜Savills KL Q1 2025（引用自上游報告）<br>
+  本報告基於公開資料及上游研究，不構成投資建議。稅費、地契細節需向律師確認。
+</div>
+</div>
+
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

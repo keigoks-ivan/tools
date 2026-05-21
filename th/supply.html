@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Analysis | Thailand Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="dashboard">
+    <h1 class="page-title"><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">New Launches 2025</span><span class="lang-zh" style="display:none">2025年新推案量</span></div>
+        <div class="kpi-value">~65,000 <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta negative">-10% YoY</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">Unsold BKK Condos</span><span class="lang-zh" style="display:none">曼谷未售公寓</span></div>
+        <div class="kpi-value">235,000 <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta negative">Record high</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">BKK Condo Pipeline</span><span class="lang-zh" style="display:none">曼谷公寓在建量</span></div>
+        <div class="kpi-value">~95,000 <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta" style="color:#2563eb">Under construction</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">Absorption Rate</span><span class="lang-zh" style="display:none">去化率</span></div>
+        <div class="kpi-value">~55%</div>
+        <div class="kpi-delta" style="color:#d97706">Below historical avg</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">National Housing Stock</span><span class="lang-zh" style="display:none">全國住宅總量</span></div>
+        <div class="kpi-value">~24M <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta" style="color:#2563eb">National</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">Developer Confidence</span><span class="lang-zh" style="display:none">開發商信心</span></div>
+        <div class="kpi-value" style="font-size:20px">Cautious</div>
+        <div class="kpi-delta" style="color:#d97706">Selective launches</div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card full">
+        <h3><span class="lang-en">New Launches vs Completions vs Absorption</span><span class="lang-zh" style="display:none">新推案 vs 完工 vs 去化量</span></h3>
+        <div id="chartThPipeline" style="height:370px"></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">Unsold Inventory by Segment</span><span class="lang-zh" style="display:none">各價位段未售庫存</span></h3>
+        <div id="chartThInventory" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">Bangkok Condo Unsold Trend</span><span class="lang-zh" style="display:none">曼谷公寓未售趨勢</span></h3>
+        <div id="chartThUnsold" style="height:370px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>A project by InvestMQuest.</p>
+  </footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    allCharts.length=0;
+
+    /* Chart: New Launches vs Completions vs Absorption */
+    var c1=echarts.init(document.getElementById('chartThPipeline'));
+    c1.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'新推案':'New Launches',lang==='zh'?'完工':'Completions',lang==='zh'?'去化量':'Absorption']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[
+        {name:lang==='zh'?'新推案':'New Launches',type:'line',smooth:0.2,data:[72000,58000,75000,68000,72000,65000],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6},
+        {name:lang==='zh'?'完工':'Completions',type:'line',smooth:0.2,data:[55000,48000,62000,58000,65000,70000],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6},
+        {name:lang==='zh'?'去化量':'Absorption',type:'line',smooth:0.2,data:[48000,40000,55000,45000,50000,38000],lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:6,
+          markPoint:{data:[{coord:['2025',38000],symbol:'pin',symbolSize:40,label:{formatter:lang==='zh'?'低點':'Low',fontSize:9},itemStyle:{color:C.red}}]}
+        }
+      ]
+    });
+    allCharts.push(c1);
+
+    /* Chart: Unsold Inventory by Segment (horizontal bar) */
+    var segLabels=lang==='zh'?['< 200萬','200-300萬','300-500萬','500萬-1000萬','> 1000萬']:['< THB 2M','2-3M','3-5M','5-10M','> 10M'];
+    var segVals=[45000,68000,52000,42000,28000];
+    var segColors=segVals.map(function(v){
+      if(v===68000) return C.red;
+      if(v>45000) return C.orange;
+      return C.navy;
+    });
+    var c2=echarts.init(document.getElementById('chartThInventory'));
+    c2.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      yAxis:mkAxis({type:'category',data:segLabels,inverse:true}),
+      series:[{
+        type:'bar',
+        data:segVals.map(function(v,i){return{value:v,itemStyle:{color:segColors[i],borderRadius:[0,4,4,0]}};}),
+        label:{show:true,position:'right',formatter:'{c}',fontSize:11,fontFamily:'Inter, sans-serif',color:C.navy},
+        barWidth:20
+      }]
+    });
+    allCharts.push(c2);
+
+    /* Chart: Bangkok Condo Unsold Trend */
+    var c3=echarts.init(document.getElementById('chartThUnsold'));
+    c3.setOption({
+      tooltip:baseTooltip,
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',min:150000,axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[{
+        type:'line',
+        data:[185000,200000,195000,210000,220000,228000,235000],
+        smooth:0.2,
+        lineStyle:{color:C.red,width:2},
+        itemStyle:{color:C.red},
+        symbol:'circle',
+        symbolSize:7,
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(220,38,38,0.15)'},{offset:1,color:'rgba(220,38,38,0)'}])},
+        markLine:{
+          silent:true,
+          symbol:'none',
+          lineStyle:{color:C.green,type:'dashed',width:1},
+          label:{formatter:lang==='zh'?'健康水準':'Healthy level',fontSize:10,color:C.green,fontFamily:'Inter, sans-serif'},
+          data:[{yAxis:180000}]
+        },
+        markPoint:{data:[{coord:['2025',235000],symbol:'pin',symbolSize:40,label:{formatter:lang==='zh'?'新高':'Record',fontSize:9},itemStyle:{color:C.red}}]}
+      }]
+    });
+    allCharts.push(c3);
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

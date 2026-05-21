@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KL 建案完整評分排行榜｜2026-04-13 v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#F8FAFC;--card:#FFFFFF;
+    --gd:#14532D;--ga:#16A34A;--gl:#F0FDF4;
+    --yb:#FEF9C3;--yt:#92400E;
+    --rb:#FEE2E2;--rt:#991B1B;
+    --tb:#DCFCE7;--tt:#166534;
+    --bb:#EFF6FF;--bl:#3B82F6;
+    --ob:#FFF0E6;--ol:#F97316;--ot:#C2410C;
+    --tx:#1E293B;--tm:#64748B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.75}
+
+  .hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--gd);color:#fff;padding:8px 24px;display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+  .hdr-t{font-weight:700;font-size:13px}
+
+  .wrap{max-width:1240px;margin:0 auto;padding:72px 24px 80px}
+
+  .hero{background:var(--gd);color:#fff;border-radius:10px;padding:28px 32px;margin-bottom:28px}
+  .hero h1{font-size:22px;font-weight:700;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,.2);padding-bottom:12px}
+  .hero p{font-size:13px;opacity:.85;line-height:1.9;margin-bottom:0}
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:20px}
+  .stat{background:rgba(255,255,255,.1);border-radius:6px;padding:12px 14px}
+  .stat-l{font-size:11px;opacity:.7;margin-bottom:4px}
+  .stat-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600}
+
+  .sec{background:var(--card);border-radius:8px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .sec-hd{background:var(--gd);color:#fff;padding:11px 20px;border-left:4px solid var(--ga);font-size:14.5px;font-weight:700}
+  .sec-bd{padding:18px 22px}
+
+  h3{color:var(--gd);font-size:13px;font-weight:700;margin:16px 0 8px;border-bottom:1px solid #E2E8F0;padding-bottom:4px}
+  h3:first-child{margin-top:0}
+  p{margin-bottom:10px;font-size:13.5px}
+
+  /* ── TIER LABELS ── */
+  .tier-hd{padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;letter-spacing:.04em;border-top:3px solid;margin-top:2px}
+  .t1{background:#DCFCE7;color:#14532D;border-color:#16A34A}
+  .t2{background:#D1FAE5;color:#065F46;border-color:#059669}
+  .t3{background:#FEF9C3;color:#78350F;border-color:#D97706}
+  .t4{background:#FFF0E6;color:#9A3412;border-color:#EA580C}
+  .t5{background:#FEE2E2;color:#7F1D1D;border-color:#DC2626}
+
+  /* ── MAIN TABLE ── */
+  .main-table{width:100%;border-collapse:collapse;font-size:13px}
+  .main-table thead tr{background:var(--gd);color:#fff}
+  .main-table thead th{padding:9px 12px;text-align:left;font-weight:600;white-space:nowrap}
+  .main-table tbody td{padding:9px 12px;border-bottom:1px solid #E8EDF2;vertical-align:top}
+
+  .r-t1 td{background:#F0FDF4}
+  .r-t2 td{background:#F0FDF4}
+  .r-t3 td{background:#FFFBEB}
+  .r-t4 td{background:#FFF7ED}
+  .r-t5 td{background:#FFF1F2}
+  .main-table tbody tr:hover td{filter:brightness(.96)}
+
+  .score{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:15px}
+  .s-t1{color:#14532D}
+  .s-t2{color:#065F46}
+  .s-t3{color:#92400E}
+  .s-t4{color:#C2410C}
+  .s-t5{color:#991B1B}
+
+  .tg{background:var(--tb);color:var(--tt);padding:1.5px 7px;border-radius:4px;font-size:11px;font-weight:700;display:inline-block;white-space:nowrap}
+  .ty{background:var(--yb);color:var(--yt);padding:1.5px 7px;border-radius:4px;font-size:11px;font-weight:700;display:inline-block;white-space:nowrap}
+  .tr{background:var(--rb);color:var(--rt);padding:1.5px 7px;border-radius:4px;font-size:11px;font-weight:700;display:inline-block;white-space:nowrap}
+  .tb2{background:var(--bb);color:#1D4ED8;padding:1.5px 7px;border-radius:4px;font-size:11px;font-weight:700;display:inline-block;white-space:nowrap}
+  .warn-t{background:#FFF0E6;color:#9A3412;padding:1.5px 7px;border-radius:4px;font-size:11px;font-weight:700;display:inline-block;white-space:nowrap}
+
+  .project-name{font-weight:700;font-size:13.5px;color:var(--tx)}
+  .project-sub{font-size:11.5px;color:var(--tm);margin-top:2px}
+
+  .bar-wrap{display:flex;align-items:center;gap:6px}
+  .bar-bg{width:90px;height:8px;background:#E2E8F0;border-radius:4px;overflow:hidden;flex-shrink:0}
+  .bar-fill{height:100%;border-radius:4px}
+
+  .note-box{background:var(--bb);border-left:3px solid var(--bl);padding:11px 14px;border-radius:0 5px 5px 0;margin:12px 0;font-size:12.5px}
+  .warn-box{background:var(--ob);border-left:3px solid var(--ol);padding:11px 14px;border-radius:0 5px 5px 0;margin:12px 0;font-size:12.5px}
+
+  /* index table */
+  .idx-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .idx-table thead tr{background:var(--gd);color:#fff}
+  .idx-table thead th{padding:7px 11px;text-align:left;font-weight:600}
+  .idx-table tbody tr:nth-child(even){background:var(--gl)}
+  .idx-table tbody td{padding:7px 11px;border-bottom:1px solid #E8EDF2;vertical-align:middle}
+
+  /* legend */
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0;font-size:12px}
+  .lg-item{display:flex;align-items:center;gap:6px}
+  .lg-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+
+  .pbtn{position:fixed;bottom:24px;right:24px;z-index:200;background:var(--gd);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+
+  @media print{.hdr,.pbtn{display:none!important}.sec{break-inside:avoid;box-shadow:none}.wrap{padding-top:20px}}
+  @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}.bar-bg{display:none}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-t">KL 建案完整評分排行榜</div>
+  <div>2026-04-13 v3｜21 個建案｜框架 A×40%＋B×60%｜investmquest.com Research</div>
+</div>
+
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Kuala Lumpur 建案完整評分排行榜</h1>
+  <p>本排行榜收錄 2026-03 至 2026-04 間完成深度分析（DD）之全部 KL 個別建案，共 21 個。評分框架統一採用 A 類大環境（40%）× B 類建案本身（60%）加權公式，分數直接取自各建案報告末尾「最終排序」比較表之加權總分。NAPIC Q3 2025 官方數據整合。本排行榜不含未完成 DD 報告之建案。</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">建案總數</div><div class="stat-v">21</div></div>
+    <div class="stat"><div class="stat-l">評分範圍</div><div class="stat-v">5.2–8.34</div></div>
+    <div class="stat"><div class="stat-l">8.0+ 頂級建案</div><div class="stat-v">4</div></div>
+    <div class="stat"><div class="stat-l">Freehold 住宅建案</div><div class="stat-v">10</div></div>
+    <div class="stat"><div class="stat-l">資料更新</div><div class="stat-v">2026-04-13</div></div>
+  </div>
+</div>
+
+<!-- FRAMEWORK NOTE -->
+<div class="sec">
+  <div class="sec-hd">評分框架說明</div>
+  <div class="sec-bd">
+    <div class="note-box">
+      <strong>評分架構</strong>：A 類大環境（城市經濟 × 供需平衡 × 市場週期 × 基建催化劑 × 法規外資友好度）× 40%，加上 B 類建案本身（開發商信用 × 估值合理性 × 租金報酬率 × 地段交通 × 產品設計 × 產權結構 × 流動性退出）× 60%，合計滿分 10 分，精確至小數點後一位。數據來源：NAPIC JPPH Q3 2025、Brickz 成交、PropertyGuru / iProperty 掛牌、JLL Q2 2025、Savills Q1 2025、BambooRoutes Jan 2026、各開發商官方資料。
+    </div>
+    <div class="legend">
+      <div class="lg-item"><div class="lg-dot" style="background:#14532D"></div><span>8.0–10.0 頂級 Tier 1</span></div>
+      <div class="lg-item"><div class="lg-dot" style="background:#059669"></div><span>7.5–7.9 優質 Tier 2</span></div>
+      <div class="lg-item"><div class="lg-dot" style="background:#D97706"></div><span>7.0–7.4 觀察 Tier 3</span></div>
+      <div class="lg-item"><div class="lg-dot" style="background:#EA580C"></div><span>6.0–6.9 謹慎 Tier 4</span></div>
+      <div class="lg-item"><div class="lg-dot" style="background:#DC2626"></div><span>&lt;6.0 迴避 Tier 5</span></div>
+    </div>
+    <div class="warn-box">
+      <strong>版本說明（v1→v3 修正）</strong>：v1 從報告中誤抓子項分數而非加權總分；v2 修正為加權總分並確認 21 建案一致框架；v3 新增 Centrix The Station KLCC（系列 #23，6.1），移除所有個人持倉標注，重新排序修正 SWNK Houze（6.2）等分類錯誤，全部建案以純客觀投資評分呈現。<strong>本報告不構成投資建議。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN RANKING TABLE -->
+<div class="sec">
+  <div class="sec-hd">完整評分排行榜（21 建案，依分數高至低）</div>
+  <div class="sec-bd" style="padding:0">
+
+    <!-- TIER 1 -->
+    <div class="tier-hd t1">▌ TIER 1　8.0 分以上　頂級——稀缺優質標的，基本面紮實</div>
+    <table class="main-table">
+      <thead>
+        <tr>
+          <th style="width:32px">#</th>
+          <th style="min-width:200px">建案</th>
+          <th>地區</th>
+          <th>評分</th>
+          <th style="min-width:100px">進度條</th>
+          <th>地契</th>
+          <th>PSF（Brickz / 發售）</th>
+          <th>竣工</th>
+          <th>建議</th>
+          <th style="min-width:220px">核心評語</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="r-t1">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">1</td>
+          <td>
+            <div class="project-name">Kiaramas deDaun</div>
+            <div class="project-sub">UEM Sunrise × Sunrise · Mont Kiara</div>
+          </td>
+          <td>Mont Kiara</td>
+          <td><span class="score s-t1">8.34</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:83.4%;background:#14532D"></div></div></div></td>
+          <td><span class="tg">Freehold 住宅</span></td>
+          <td>RM844–918（發售）</td>
+          <td>2028 期房</td>
+          <td><span class="tg">🟢 積極進場</span></td>
+          <td>本系列最高分（並列）；Block A 97% 取購；管理費 RM0.36 psf 最低；外籍家庭首選；MRT 3 長期催化</td>
+        </tr>
+        <tr class="r-t1">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">1</td>
+          <td>
+            <div class="project-name">Park Regent @ Desa ParkCity</div>
+            <div class="project-sub">ParkCity × CapitaLand · Desa ParkCity</div>
+          </td>
+          <td>Desa ParkCity</td>
+          <td><span class="score s-t1">8.34</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:83.4%;background:#14532D"></div></div></div></td>
+          <td><span class="tg">Freehold 住宅</span></td>
+          <td>RM1,541（Brickz 70筆中位，最高置信度）</td>
+          <td>2023 完工</td>
+          <td><span class="tg">🟢 積極進場</span></td>
+          <td>Brickz 70 筆最高置信度；DPC 地塊封頂稀缺性最確定；ParkCity × CapitaLand 完工現房零風險；5年+40% 實證</td>
+        </tr>
+        <tr class="r-t1">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">3</td>
+          <td>
+            <div class="project-name">One Central Park @ Desa ParkCity</div>
+            <div class="project-sub">ParkCity Group · Desa ParkCity</div>
+          </td>
+          <td>Desa ParkCity</td>
+          <td><span class="score s-t1">8.10</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:81%;background:#14532D"></div></div></div></td>
+          <td><span class="tg">Freehold 住宅</span></td>
+          <td>RM1,180（Brickz 19筆中位）</td>
+          <td>2017 完工</td>
+          <td><span class="tg">🟢 審慎積極</span></td>
+          <td>資本成長 +10.09% 本系列最強；掛牌率 22% 最健康；DPC Parkfront 稀缺；完工現房</td>
+        </tr>
+        <tr class="r-t1">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">4</td>
+          <td>
+            <div class="project-name">28 Mont' Kiara (MK28)</div>
+            <div class="project-sub">UEM Sunrise · Mont Kiara</div>
+          </td>
+          <td>Mont Kiara</td>
+          <td><span class="score s-t1">8.04</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:80.4%;background:#14532D"></div></div></div></td>
+          <td><span class="tg">Freehold 住宅</span></td>
+          <td>RM774（Brickz 28筆中位，本系列最多）</td>
+          <td>2012 完工</td>
+          <td><span class="tg">🟢 審慎積極</span></td>
+          <td>Brickz 28 筆最高置信度；Gross Yield 6.44% 本系列最高；完工現房；外籍現金需求 RM196萬+</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- TIER 2 -->
+    <div class="tier-hd t2">▌ TIER 2　7.5–7.9　優質——基本面紮實，可審慎進場</div>
+    <table class="main-table">
+      <thead>
+        <tr>
+          <th style="width:32px">#</th>
+          <th style="min-width:200px">建案</th>
+          <th>地區</th>
+          <th>評分</th>
+          <th style="min-width:100px">進度條</th>
+          <th>地契</th>
+          <th>PSF（Brickz / 發售）</th>
+          <th>竣工</th>
+          <th>建議</th>
+          <th style="min-width:220px">核心評語</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="r-t2">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">5</td>
+          <td>
+            <div class="project-name">Sunway Mont Residences</div>
+            <div class="project-sub">Sunway · Mont Kiara</div>
+          </td>
+          <td>Mont Kiara</td>
+          <td><span class="score s-t2">7.88</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:78.8%;background:#059669"></div></div></div></td>
+          <td><span class="tg">Freehold 住宅</span></td>
+          <td>RM938（Brickz 8筆，2025全年）</td>
+          <td>2019/20 完工</td>
+          <td><span class="tg">🟢 審慎積極</span></td>
+          <td>6年升值 +20%（RM780→938）；管理費 RM0.33 最低；Gross Yield 4.9%↑；GIS 步行優勢</td>
+        </tr>
+        <tr class="r-t2">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">6</td>
+          <td>
+            <div class="project-name">Trinity Pentamont</div>
+            <div class="project-sub">Trinity Group · Mont Kiara</div>
+          </td>
+          <td>Mont Kiara</td>
+          <td><span class="score s-t2">7.84</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:78.4%;background:#059669"></div></div></div></td>
+          <td><span class="tg">Freehold 住宅</span></td>
+          <td>RM811（Brickz 27筆中位）</td>
+          <td>2022/23 完工</td>
+          <td><span class="tg">🟢 審慎積極</span></td>
+          <td>7年升值 +25–35%；Net Yield 本系列最高；管理費 RM0.34；GIS 步行 MK 核心</td>
+        </tr>
+        <tr class="r-t2">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">7</td>
+          <td>
+            <div class="project-name">Residensi 22 @ Mont Kiara</div>
+            <div class="project-sub">UEM Sunrise · Mont Kiara</div>
+          </td>
+          <td>Mont Kiara</td>
+          <td><span class="score s-t2">7.70</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:77%;background:#059669"></div></div></div></td>
+          <td><span class="tg">Freehold 住宅</span></td>
+          <td>Brickz 31筆成交（PSF 待查）</td>
+          <td>完工</td>
+          <td><span class="tg">🟢 進場</span></td>
+          <td>成熟 MK 社區；住宅地契；管理費 RM0.34；Gross Yield 3.0–3.2%</td>
+        </tr>
+        <tr class="r-t2">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">7</td>
+          <td>
+            <div class="project-name">Park Place @ Desa ParkCity</div>
+            <div class="project-sub">ParkCity Group · Desa ParkCity</div>
+          </td>
+          <td>Desa ParkCity</td>
+          <td><span class="score s-t2">7.70</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:77%;background:#059669"></div></div></div></td>
+          <td><span class="tg">Freehold 住宅</span></td>
+          <td>DPC 地段（PSF 待查）</td>
+          <td>完工</td>
+          <td><span class="tg">🟢 進場</span></td>
+          <td>DPC 住宅地契；Gross Yield 3.0–3.4%；社區成熟；ParkCity 物業管理</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- TIER 3 -->
+    <div class="tier-hd t3">▌ TIER 3　7.0–7.4　觀察——有亮點，需謹慎評估特定風險</div>
+    <table class="main-table">
+      <thead>
+        <tr>
+          <th style="width:32px">#</th>
+          <th style="min-width:200px">建案</th>
+          <th>地區</th>
+          <th>評分</th>
+          <th style="min-width:100px">進度條</th>
+          <th>地契</th>
+          <th>PSF（Brickz / 發售）</th>
+          <th>竣工</th>
+          <th>建議</th>
+          <th style="min-width:220px">核心評語</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="r-t3">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">9</td>
+          <td>
+            <div class="project-name">TRX Residences</div>
+            <div class="project-sub">Lendlease · TRX 金融城</div>
+          </td>
+          <td>TRX</td>
+          <td><span class="score s-t3">7.60</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:76%;background:#D97706"></div></div></div></td>
+          <td><span class="ty">Freehold 商業 HDA</span></td>
+          <td>RM2,293（Brickz 59筆中位；YoY +5.56%）</td>
+          <td>2024 完工</td>
+          <td><span class="tg">🟢 增值框架</span></td>
+          <td>KL 唯一 TRX 金融城敘事；TRX MRT 直達；Lendlease 開發商低風險；商業地契 HDA；外籍現金需求 RM164萬+</td>
+        </tr>
+        <tr class="r-t3">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">10</td>
+          <td>
+            <div class="project-name">The Conlay by E&amp;O @ KLCC</div>
+            <div class="project-sub">Eastern &amp; Oriental × Mitsui · KLCC</div>
+          </td>
+          <td>KLCC</td>
+          <td><span class="score s-t3">7.40</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:74%;background:#D97706"></div></div></div></td>
+          <td><span class="ty">Freehold 商業 HDA</span></td>
+          <td>RM2,030–2,100（iRumah 成交；vs 發售 RM1,800，+17%）</td>
+          <td>~2025 完工</td>
+          <td><span class="tg">🟢 審慎積極</span></td>
+          <td>+17% 升值已驗證；E&amp;O × Mitsui 品牌；HDA 保護；本系列商業地契中最值得考慮</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- TIER 4 -->
+    <div class="tier-hd t4">▌ TIER 4　6.0–6.9　謹慎——有明確缺陷，需設定停損條件</div>
+    <table class="main-table">
+      <thead>
+        <tr>
+          <th style="width:32px">#</th>
+          <th style="min-width:200px">建案</th>
+          <th>地區</th>
+          <th>評分</th>
+          <th style="min-width:100px">進度條</th>
+          <th>地契</th>
+          <th>PSF（Brickz / 發售）</th>
+          <th>竣工</th>
+          <th>建議</th>
+          <th style="min-width:220px">核心評語</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="r-t4">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">11</td>
+          <td>
+            <div class="project-name">Bangsar Hill Park (Verdura Ph.1)</div>
+            <div class="project-sub">Pavilion Group · Bangsar</div>
+          </td>
+          <td>Bangsar</td>
+          <td><span class="score s-t4">6.96</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:69.6%;background:#EA580C"></div></div></div></td>
+          <td><span class="warn-t">Leasehold 住宅 ⚠</span></td>
+          <td>RM910–1,083（發售；地段均值 RM765）</td>
+          <td>2025 完工</td>
+          <td><span class="ty">🟡 審慎考慮</span></td>
+          <td>Bangsar 精品山景；Leasehold 外籍貸款限制；20–40% 定價溢價待市場驗證；Bangsar 住宅需求健康</td>
+        </tr>
+        <tr class="r-t4">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">12</td>
+          <td>
+            <div class="project-name">CloutHaus Residences @ KLCC</div>
+            <div class="project-sub">TA Global · KLCC / P. Ramlee</div>
+          </td>
+          <td>KLCC</td>
+          <td><span class="score s-t4">6.70</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:67%;background:#EA580C"></div></div></div></td>
+          <td><span class="ty">Freehold 商業 SA</span></td>
+          <td>RM2,900（發售均價；本系列最高 PSF）</td>
+          <td>2029 期房</td>
+          <td><span class="ty">🟡 觀望</span></td>
+          <td>KLCC 核心地段；P. Ramlee 站步行可達；RM2,900 psf 定價最高，進場門檻最高；管理費 RM0.80 偏高</td>
+        </tr>
+        <tr class="r-t4">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">13</td>
+          <td>
+            <div class="project-name">Pavilion Hilltop @ Mont Kiara</div>
+            <div class="project-sub">Pavilion Group · Mont Kiara</div>
+          </td>
+          <td>Mont Kiara</td>
+          <td><span class="score s-t4">6.64</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:66.4%;background:#EA580C"></div></div></div></td>
+          <td><span class="tg">Freehold 住宅</span></td>
+          <td>RM985（Brickz 21筆；MK 完工最高 PSF）</td>
+          <td>2020 完工</td>
+          <td><span class="ty">🟡 觀望</span></td>
+          <td>MK 完工最高 PSF；YoY -0.1% 資本停滯；掛牌積壓嚴重；Freehold 住宅地契是加分項</td>
+        </tr>
+        <tr class="r-t4">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">14</td>
+          <td>
+            <div class="project-name">Noöra @ Desa ParkCity</div>
+            <div class="project-sub">ParkCity Group · Desa ParkCity</div>
+          </td>
+          <td>Desa ParkCity</td>
+          <td><span class="score s-t4">6.32</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:63.2%;background:#EA580C"></div></div></div></td>
+          <td><span class="warn-t">Freehold Serviced Res ⚠</span></td>
+          <td>RM850–900（發售；Brickz 0筆期房）</td>
+          <td>2026 期房</td>
+          <td><span class="ty">🟡 本地條件性</span><br><span class="tr">🔴 外籍不推</span></td>
+          <td>DPC 品牌加分；Serviced Residence 商業電費；1,156 戶規模大；管理費 RM0.50 最高；外籍非居民稅後 Net Yield 本系列最低（1.5–2.0%）</td>
+        </tr>
+        <tr class="r-t4">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">15</td>
+          <td>
+            <div class="project-name">SWNK Houze @ BBCC</div>
+            <div class="project-sub">EcoWorld × Lendlease · BBCC / Chow Kit</div>
+          </td>
+          <td>BBCC</td>
+          <td><span class="score s-t4">6.20</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:62%;background:#EA580C"></div></div></div></td>
+          <td><span class="warn-t">Leasehold 商業 SA ⚠⚠</span></td>
+          <td>RM1,200（發售均價）</td>
+          <td>2026 期房</td>
+          <td><span class="tr">🔴 外籍不推</span></td>
+          <td>LaLaport 直連加分；Leasehold + 商業地契雙重不利（本系列最差地契組合）；Chow Kit 地段治安問題；外籍淨 Yield 1.9–2.3%</td>
+        </tr>
+        <tr class="r-t4">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">16</td>
+          <td>
+            <div class="project-name">Centrix The Station @ Dang Wangi LRT</div>
+            <div class="project-sub">Crest Builder × Prasarana · KLCC / Dang Wangi</div>
+          </td>
+          <td>KLCC / Dang Wangi</td>
+          <td><span class="score s-t4">6.10</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:61%;background:#EA580C"></div></div></div></td>
+          <td><span class="warn-t">Leasehold 99年 商業 SOHO ⚠⚠</span></td>
+          <td>RM1,593–1,665（發售；Brickz 0筆期房）</td>
+          <td>2028–29 期房</td>
+          <td><span class="ty">🟡 條件性觀望</span></td>
+          <td>LRT Dang Wangi 正上方（本系列最強捷運條件）；KLCC 治安最佳；Leasehold + 商業地契雙重劣勢；Crest Builder 財務脆弱（16 季連虧剛轉盈）；Brickz 零成交</td>
+        </tr>
+        <tr class="r-t4">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">17</td>
+          <td>
+            <div class="project-name">Times Square 2 (TS2)</div>
+            <div class="project-sub">Berjaya Times Square Sdn Bhd · Bukit Bintang / Imbi</div>
+          </td>
+          <td>Bukit Bintang</td>
+          <td><span class="score s-t4">6.00</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:60%;background:#EA580C"></div></div></div></td>
+          <td><span class="ty">Freehold 商業 SA</span></td>
+          <td>RM1,500 起（發售 Phase 1）；掛牌 RM1,138–1,869</td>
+          <td>2027-10 期房</td>
+          <td><span class="ty">🟡 條件性觀望</span></td>
+          <td>Imbi Monorail 100m（本系列最短步行距離）；Bukit Bintang 步行商圈 KL 最強；Airbnb 地段最適配；Freehold 是 SA 中最優地契；Berjaya Corp FY2025 歷史最大年虧 RM5.56億需追蹤；商業地契 SA 積壓 22,314 戶</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- TIER 5 -->
+    <div class="tier-hd t5">▌ TIER 5　6.0 以下　迴避——結構性問題明顯，不建議進場</div>
+    <table class="main-table">
+      <thead>
+        <tr>
+          <th style="width:32px">#</th>
+          <th style="min-width:200px">建案</th>
+          <th>地區</th>
+          <th>評分</th>
+          <th style="min-width:100px">進度條</th>
+          <th>地契</th>
+          <th>PSF（Brickz / 發售）</th>
+          <th>竣工</th>
+          <th>建議</th>
+          <th style="min-width:220px">核心評語</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="r-t5">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">18</td>
+          <td>
+            <div class="project-name">Armani Hallson @ KLCC（SOHO 棟）</div>
+            <div class="project-sub">Armani Group × Magna Prima · KLCC</div>
+          </td>
+          <td>KLCC</td>
+          <td><span class="score s-t5">5.70</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:57%;background:#DC2626"></div></div></div></td>
+          <td><span class="warn-t">SOHO HDA 商業</span></td>
+          <td>管理費 RM0.95 psf（本系列最高）</td>
+          <td>2029 期房</td>
+          <td><span class="ty">🟡 SOHO 棟條件性</span><br><span class="tr">🔴 SOVO 棟迴避</span></td>
+          <td>KLCC 地段加分；SOHO 條件性；SOVO 棟完全迴避；管理費 RM0.95 本系列最高；2,215 戶規模最大；規模帶來自我競爭風險</td>
+        </tr>
+        <tr class="r-t5">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">18</td>
+          <td>
+            <div class="project-name">Stonor 3 @ KLCC</div>
+            <div class="project-sub">Tan &amp; Tan × Mitsubishi Estate · KLCC</div>
+          </td>
+          <td>KLCC</td>
+          <td><span class="score s-t5">5.70</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:57%;background:#DC2626"></div></div></div></td>
+          <td><span class="ty">Freehold 商業 HDA</span></td>
+          <td>RM1,320（2BR 成交中位）；發售 RM2,000（−34%）</td>
+          <td>2019 完工</td>
+          <td><span class="tr">🔴 暫緩</span></td>
+          <td>⚠ 完工 9 年後成交比發售跌 34%——資本升值已失敗；Tan &amp; Tan × Mitsubishi 品牌；KLCC 核心地段；但高位發售定價是永久性傷害</td>
+        </tr>
+        <tr class="r-t5">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">20</td>
+          <td>
+            <div class="project-name">Pavilion Damansara Heights</div>
+            <div class="project-sub">Pavilion Group · Damansara Heights</div>
+          </td>
+          <td>Damansara Heights</td>
+          <td><span class="score s-t5">5.50</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:55%;background:#DC2626"></div></div></div></td>
+          <td><span class="ty">Freehold 商業</span></td>
+          <td>Brickz 住宅幾乎 0 筆；1 筆商業成交（不通過 FIX-03）</td>
+          <td>2025 完工</td>
+          <td><span class="ty">🟡 觀望</span></td>
+          <td>50% 掛牌率本系列最高；Brickz 幾乎零成交；成交數據信心度極低；Damansara Heights 地段尚可但流動性不明</td>
+        </tr>
+        <tr class="r-t5">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">20</td>
+          <td>
+            <div class="project-name">Pavilion Square @ Bukit Bintang</div>
+            <div class="project-sub">Pavilion Group · Bukit Bintang</div>
+          </td>
+          <td>Bukit Bintang</td>
+          <td><span class="score s-t5">5.50</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:55%;background:#DC2626"></div></div></div></td>
+          <td><span class="warn-t">Leasehold 商業 ⚠⚠</span></td>
+          <td>RM2,300–2,420（發售期房 2028–29）</td>
+          <td>2028–29 期房</td>
+          <td><span class="tr">🔴 投資暫緩</span></td>
+          <td>Leasehold + 商業地契雙重不利；直連 Pavilion Mall 地段加分；RM2,300+ psf 高定價；Brickz 0筆；2028 期房長等待</td>
+        </tr>
+        <tr class="r-t5">
+          <td style="color:var(--tm);font-family:'IBM Plex Mono',monospace">21</td>
+          <td>
+            <div class="project-name">Orion Residence @ Bukit Bintang</div>
+            <div class="project-sub">Orion Tower Sdn Bhd · Bukit Bintang</div>
+          </td>
+          <td>Bukit Bintang</td>
+          <td><span class="score s-t5">5.20</span></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:52%;background:#DC2626"></div></div></div></td>
+          <td><span class="ty">Freehold 商業</span></td>
+          <td>RM2,165–3,851（PropertyGuru 掛牌；未確認成交）</td>
+          <td>2025 延遲</td>
+          <td><span class="tr">🔴 暫緩迴避</span></td>
+          <td>⚠ 管理費 RM1.20 psf 本系列最高；Gross Yield 僅 1.2–1.5%（本系列最低）；開發商完工延遲；本系列最低分</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- QUICK STATS TABLE -->
+<div class="sec">
+  <div class="sec-hd">統計摘要</div>
+  <div class="sec-bd">
+    <div class="dg2" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <h3>地契分布</h3>
+        <table class="idx-table">
+          <thead><tr><th>地契類型</th><th>建案數</th><th>評分範圍</th><th>說明</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tg">Freehold 住宅</span></td><td>10</td><td>6.96–8.34</td><td>本系列最優；外籍住宅貸款優惠</td></tr>
+            <tr><td><span class="ty">Freehold 商業（HDA / SA）</span></td><td>7</td><td>5.7–7.6</td><td>商業電費；買家池較窄</td></tr>
+            <tr><td><span class="warn-t">Leasehold 商業</span></td><td>3</td><td>5.5–6.2</td><td>雙重劣勢；外籍不推</td></tr>
+            <tr><td><span class="warn-t">Leasehold 住宅</span></td><td>1</td><td>6.96</td><td>外籍貸款限制；仍優於 Leasehold 商業</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:18px">地區分布</h3>
+        <table class="idx-table">
+          <thead><tr><th>地區</th><th>建案數</th><th>最高評分</th><th>特色</th></tr></thead>
+          <tbody>
+            <tr><td>Desa ParkCity</td><td>5</td><td>8.34（Park Regent）</td><td>住宅地契稀缺；DPC 封頂供給</td></tr>
+            <tr><td>Mont Kiara</td><td>5</td><td>8.34（deDaun）</td><td>外籍聚集；國際學校生態</td></tr>
+            <tr><td>KLCC / 金三角</td><td>5</td><td>7.4（Conlay）</td><td>SA 積壓；部分商業 HDA</td></tr>
+            <tr><td>Bukit Bintang / BBCC</td><td>4</td><td>6.0（TS2）</td><td>步行商圈強；SA 商業地契集中</td></tr>
+            <tr><td>TRX / Bangsar</td><td>2</td><td>7.6（TRX）</td><td>新興 / 成熟各一</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>評分分層快覽</h3>
+        <table class="idx-table">
+          <thead><tr><th>Tier</th><th>分數段</th><th>建案數</th><th>代表建案</th></tr></thead>
+          <tbody>
+            <tr><td style="color:#14532D;font-weight:700">T1 頂級</td><td>8.0–8.34</td><td>4</td><td>deDaun、Park Regent、OCP、28MK</td></tr>
+            <tr><td style="color:#065F46;font-weight:700">T2 優質</td><td>7.5–7.9</td><td>4</td><td>Sunway Mont、Trinity、R22、Park Place</td></tr>
+            <tr><td style="color:#92400E;font-weight:700">T3 觀察</td><td>7.0–7.4</td><td>2</td><td>TRX、The Conlay</td></tr>
+            <tr><td style="color:#C2410C;font-weight:700">T4 謹慎</td><td>6.0–6.9</td><td>7</td><td>Bangsar HP、CloutHaus、TS2……</td></tr>
+            <tr><td style="color:#991B1B;font-weight:700">T5 迴避</td><td>&lt;6.0</td><td>4</td><td>Armani、Stonor 3、Pavilion DH/Sq、Orion</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:18px">本系列最高／最低紀錄</h3>
+        <table class="idx-table">
+          <thead><tr><th>類別</th><th>最高</th><th>最低</th></tr></thead>
+          <tbody>
+            <tr><td>評分</td><td>8.34（deDaun / Park Regent）</td><td>5.20（Orion）</td></tr>
+            <tr><td>Brickz 成交數</td><td>70筆（Park Regent）</td><td>0 筆（多個期房建案）</td></tr>
+            <tr><td>Gross Yield</td><td>6.44%（28MK）</td><td>1.2–1.5%（Orion）</td></tr>
+            <tr><td>管理費</td><td>RM1.20 psf（Orion）</td><td>RM0.33 psf（Sunway Mont）</td></tr>
+            <tr><td>成交 PSF 最高</td><td>RM2,293（TRX，59筆）</td><td>RM663 地段中位（BB 舊樓）</td></tr>
+            <tr><td>發售 PSF 最高</td><td>RM2,900（CloutHaus）</td><td>RM844（deDaun）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INDEX -->
+<div class="sec">
+  <div class="sec-hd">建案報告索引（21 個別建案 DD 報告）</div>
+  <div class="sec-bd">
+    <table class="idx-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案名稱</th>
+          <th>地區</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>報告檔名</th>
+          <th>備注</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Kiaramas deDaun</td><td>Mont Kiara</td><td>8.34</td><td>Freehold 住宅</td><td>RE_KiaramasDeDaun_20260412.html</td><td>—</td></tr>
+        <tr><td>2</td><td>Park Regent @ DPC</td><td>Desa ParkCity</td><td>8.34</td><td>Freehold 住宅</td><td>RE_ParkRegent_DPC_20260413.html</td><td>最新版（NAPIC Q3 2025 整合）</td></tr>
+        <tr><td>3</td><td>One Central Park @ DPC</td><td>Desa ParkCity</td><td>8.10</td><td>Freehold 住宅</td><td>RE_OneCentralPark_DPC_20260412.html</td><td>—</td></tr>
+        <tr><td>4</td><td>28 Mont' Kiara (MK28)</td><td>Mont Kiara</td><td>8.04</td><td>Freehold 住宅</td><td>RE_28MontKiara_20260412.html</td><td>—</td></tr>
+        <tr><td>5</td><td>Sunway Mont Residences</td><td>Mont Kiara</td><td>7.88</td><td>Freehold 住宅</td><td>RE_SunwayMontResidences_20260412.html</td><td>—</td></tr>
+        <tr><td>6</td><td>Trinity Pentamont</td><td>Mont Kiara</td><td>7.84</td><td>Freehold 住宅</td><td>RE_TrinityPentamont_20260412.html</td><td>—</td></tr>
+        <tr><td>7</td><td>Residensi 22 @ Mont Kiara</td><td>Mont Kiara</td><td>7.70</td><td>Freehold 住宅</td><td>RE_Residensi22_MontKiara_20260412.html</td><td>原始報告損毀，分數沿用比較表</td></tr>
+        <tr><td>8</td><td>Park Place @ DPC</td><td>Desa ParkCity</td><td>7.70</td><td>Freehold 住宅</td><td>RE_ParkPlace_DesaParkCity_20260412.html</td><td>原始報告損毀，分數沿用比較表</td></tr>
+        <tr><td>9</td><td>TRX Residences</td><td>TRX</td><td>7.60</td><td>Freehold 商業 HDA</td><td>RE_TRXResidences_20260412.html</td><td>—</td></tr>
+        <tr><td>10</td><td>The Conlay by E&O @ KLCC</td><td>KLCC</td><td>7.40</td><td>Freehold 商業 HDA</td><td>RE_TheConlay_EO_KLCC_20260412.html</td><td>—</td></tr>
+        <tr><td>11</td><td>Bangsar Hill Park (Verdura Ph.1)</td><td>Bangsar</td><td>6.96</td><td>Leasehold 住宅</td><td>RE_BangsarHillPark_20260412.html</td><td>—</td></tr>
+        <tr><td>12</td><td>CloutHaus Residences @ KLCC</td><td>KLCC</td><td>6.70</td><td>Freehold 商業 SA</td><td>RE_CloutHaus_KLCC_20260412.html</td><td>—</td></tr>
+        <tr><td>13</td><td>Pavilion Hilltop @ Mont Kiara</td><td>Mont Kiara</td><td>6.64</td><td>Freehold 住宅</td><td>RE_PavilionHilltop_20260412.html</td><td>—</td></tr>
+        <tr><td>14</td><td>Noöra @ Desa ParkCity</td><td>Desa ParkCity</td><td>6.32</td><td>Freehold Serviced Res</td><td>RE_Noora_DPC_20260412.html</td><td>—</td></tr>
+        <tr><td>15</td><td>SWNK Houze @ BBCC</td><td>BBCC</td><td>6.20</td><td>Leasehold 商業 SA</td><td>RE_SWNKHouze_BBCC_20260412.html</td><td>—</td></tr>
+        <tr><td>16</td><td>Centrix The Station KLCC</td><td>KLCC / Dang Wangi</td><td>6.10</td><td>Leasehold 商業 SOHO</td><td>RE_CentrixKLCC_20260413.html</td><td>系列 #23，新增</td></tr>
+        <tr><td>17</td><td>Times Square 2 (TS2)</td><td>Bukit Bintang</td><td>6.00</td><td>Freehold 商業 SA</td><td>RE_TimesSquare2_KL_20260413.html</td><td>v3 客觀版（移除個人資訊）</td></tr>
+        <tr><td>18</td><td>Armani Hallson @ KLCC（SOHO棟）</td><td>KLCC</td><td>5.70</td><td>SOHO HDA</td><td>RE_ArmaniHallson_20260412.html</td><td>原始報告損毀，分數沿用比較表</td></tr>
+        <tr><td>19</td><td>Stonor 3 @ KLCC</td><td>KLCC</td><td>5.70</td><td>Freehold 商業 HDA</td><td>RE_Stonor3_KLCC_20260412.html</td><td>—</td></tr>
+        <tr><td>20</td><td>Pavilion Damansara Heights</td><td>Damansara Heights</td><td>5.50</td><td>Freehold 商業</td><td>RE_PavilionDH_20260412.html</td><td>—</td></tr>
+        <tr><td>20</td><td>Pavilion Square @ Bukit Bintang</td><td>Bukit Bintang</td><td>5.50</td><td>Leasehold 商業</td><td>RE_PavilionSquare_20260412.html</td><td>—</td></tr>
+        <tr><td>21</td><td>Orion Residence @ Bukit Bintang</td><td>Bukit Bintang</td><td>5.20</td><td>Freehold 商業</td><td>RE_OrionResidence_BukitBintang_20260412.html</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note-box" style="margin-top:16px">
+      <strong>資料來源</strong>：所有加權總分直接取自各建案報告末尾「最終排序」比較表（框架：A類×40%＋B類×60%）。主要來源：RE_Noora_DPC_20260412（最完整比較表，20建案）、RE_OneCentralPark_DPC_20260412（19建案）、RE_ParkRegent_DPC_20260413（最新版，含 NAPIC Q3 2025 整合）。R22、Park Place、Armani Hallson 原始報告損毀，分數沿用跨報告比較表標注值，框架一致，可直接比較。<br><br>
+      <strong>免責聲明</strong>：本排行榜為純研究分析性文件，所有評分均基於公開數據及分析框架，不構成投資建議。投資者應自行進行盡職調查並諮詢專業意見後作出決策。｜投資風險自負。｜investmquest.com Research · 2026-04-13 v3
+    </div>
+  </div>
+</div>
+
+</div>
+
+<button class="pbtn" onclick="window.print()">列印為 PDF</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.bar-fill').forEach(function(bar) {
+    var w = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(function() { bar.style.transition = 'width 0.6s ease'; bar.style.width = w; }, 400);
+  });
+});
+</script>
+</body>
+</html>

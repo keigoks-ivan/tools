@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demand Analysis | Thailand Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="dashboard">
+    <h1 class="page-title"><span class="lang-en">Demand Analysis</span><span class="lang-zh" style="display:none">需求分析</span></h1>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">2025 Transfers</span><span class="lang-zh" style="display:none">2025年過戶量</span></div>
+        <div class="kpi-value">322,500</div>
+        <div class="kpi-delta negative"><span class="lang-en">-7.3% YoY, 7Y Low</span><span class="lang-zh" style="display:none">年減7.3%，7年新低</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">Foreign Condo Transfers</span><span class="lang-zh" style="display:none">外國人公寓過戶</span></div>
+        <div class="kpi-value">11,011</div>
+        <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Jan-Sep 2025</span><span class="lang-zh" style="display:none">2025年1-9月</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">Mortgage Rejection Rate</span><span class="lang-zh" style="display:none">房貸拒貸率</span></div>
+        <div class="kpi-value">70%</div>
+        <div class="kpi-delta negative"><span class="lang-en">&lt; THB 3M segment</span><span class="lang-zh" style="display:none">300萬泰銖以下</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">Chinese Buyer Share</span><span class="lang-zh" style="display:none">中國買家占比</span></div>
+        <div class="kpi-value">48%</div>
+        <div class="kpi-delta" style="color:#2563eb"><span class="lang-en">of foreign transfers</span><span class="lang-zh" style="display:none">外國人過戶占比</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">Tourist Arrivals 2025</span><span class="lang-zh" style="display:none">2025年觀光人次</span></div>
+        <div class="kpi-value">~36M</div>
+        <div class="kpi-delta positive"><span class="lang-en">Recovery driver</span><span class="lang-zh" style="display:none">復甦動力</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span class="lang-en">Domestic Buyer Sentiment</span><span class="lang-zh" style="display:none">國內買家情緒</span></div>
+        <div class="kpi-value"><span class="lang-en">Weak</span><span class="lang-zh" style="display:none">疲弱</span></div>
+        <div class="kpi-delta negative"><span class="lang-en">High debt burden</span><span class="lang-zh" style="display:none">債務負擔沉重</span></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">Transfer Volume Trend</span><span class="lang-zh" style="display:none">過戶量趨勢</span></h3>
+        <div id="chartThTransfer" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">Foreign Buyer by Nationality (%)</span><span class="lang-zh" style="display:none">外國買家國籍分布 (%)</span></h3>
+        <div id="chartThForeign" style="height:370px"></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">Domestic vs Foreign Demand</span><span class="lang-zh" style="display:none">國內 vs 外國需求</span></h3>
+        <div id="chartThDomFor" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">Mortgage Loan Growth (YoY %)</span><span class="lang-zh" style="display:none">房貸成長率 (年增%)</span></h3>
+        <div id="chartThMortgage" style="height:370px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>A project by InvestMQuest.</p>
+  </footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    allCharts.length=0;
+
+    /* Chart 1: Transfer Volume Trend (line) */
+    var c1=echarts.init(document.getElementById('chartThTransfer'));
+    c1.setOption({
+      tooltip:baseTooltip,
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[{
+        type:'line',
+        data:[392000,310000,325000,365000,348000,348000,322500],
+        smooth:0.2,
+        lineStyle:{color:C.navy,width:2},
+        itemStyle:{color:C.navy},
+        symbol:'circle',
+        symbolSize:7,
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(30,58,95,0.15)'},{offset:1,color:'rgba(30,58,95,0)'}])},
+        markPoint:{
+          data:[
+            {type:'max',name:'Max',symbolSize:50,label:{fontSize:10,fontFamily:'Inter'}},
+            {type:'min',name:'Min',symbolSize:50,label:{fontSize:10,fontFamily:'Inter'}}
+          ],
+          itemStyle:{color:C.navy}
+        }
+      }]
+    });
+    allCharts.push(c1);
+
+    /* Chart 2: Foreign Buyer by Nationality (horizontal bar) */
+    var labels2=lang==='zh'?['其他','日本','俄羅斯','緬甸','中國']:['Other','Japanese','Russian','Myanmar','Chinese'];
+    var vals2=[26,6,8,12,48];
+    var c2=echarts.init(document.getElementById('chartThForeign'));
+    c2.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': '+p[0].value+'%';}}),
+      grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+      yAxis:mkAxis({type:'category',data:labels2}),
+      series:[{
+        type:'bar',
+        data:vals2.map(function(v){return {value:v,itemStyle:{color:v>=40?C.red:v>=10?C.orange:C.navy}};}),
+        label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:11,fontFamily:'Inter, sans-serif',color:C.navy},
+        barWidth:20,
+        itemStyle:{borderRadius:[0,3,3,0]}
+      }]
+    });
+    allCharts.push(c2);
+
+    /* Chart 3: Domestic vs Foreign Demand (stacked bar) */
+    var c3=echarts.init(document.getElementById('chartThDomFor'));
+    c3.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'國內':'Domestic',lang==='zh'?'外國':'Foreign']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[
+        {name:lang==='zh'?'國內':'Domestic',type:'bar',stack:'total',data:[312000,350000,333000,333000,308000],itemStyle:{color:C.navy,borderRadius:[0,0,0,0]},barMaxWidth:40},
+        {name:lang==='zh'?'外國':'Foreign',type:'bar',stack:'total',data:[13000,15000,15000,15000,14500],itemStyle:{color:C.orange,borderRadius:[3,3,0,0]},barMaxWidth:40}
+      ]
+    });
+    allCharts.push(c3);
+
+    /* Chart 4: Mortgage Loan Growth YoY % (line) */
+    var c4=echarts.init(document.getElementById('chartThMortgage'));
+    c4.setOption({
+      tooltip:Object.assign({},baseTooltip,{formatter:function(p){return p[0].name+': '+p[0].value+'%';}}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+      series:[{
+        type:'line',
+        data:[5.2,8.1,6.5,3.8,2.1,0.5],
+        smooth:0.2,
+        lineStyle:{color:C.navy,width:2},
+        itemStyle:{color:function(p){return p.value<=2?C.red:p.value<=4?C.orange:C.green;}},
+        symbol:'circle',
+        symbolSize:7,
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(30,58,95,0.12)'},{offset:1,color:'rgba(30,58,95,0)'}])},
+        label:{show:true,position:'top',formatter:function(p){return p.value+'%';},fontSize:10,fontFamily:'Inter, sans-serif',color:C.navy},
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:lang==='zh'?'警戒':'Warning',fontSize:9,color:C.red},data:[{yAxis:2}]}
+      }]
+    });
+    allCharts.push(c4);
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

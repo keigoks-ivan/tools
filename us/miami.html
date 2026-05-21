@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Miami Deep Dive | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+  .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+  .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+  .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+  .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+  .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+  .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+  .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+  .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+  .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+  .chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+  .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+  .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+  .report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+  .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+  .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+  .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+  .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+  .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+  .toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+  .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+  .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+  .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+  .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+  .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+  .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+  .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+  .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}
+  @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="report-container">
+
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-condo" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Condo Crisis</span><span class="side-nav-label lang-zh" style="display:none">公寓危機</span></a>
+    <a href="#sec-insurance" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Insurance &amp; HOA</span><span class="side-nav-label lang-zh" style="display:none">保險與管理費</span></a>
+    <a href="#sec-migration" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Migration Cycle</span><span class="side-nav-label lang-zh" style="display:none">遷移週期</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rent Control</span><span class="side-nav-label lang-zh" style="display:none">租管</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+
+  <div class="report-header">
+    <div class="lang-en">
+      <h1>MIAMI / SOUTH FLORIDA &mdash; DEEP DIVE</h1>
+      <div class="report-meta">April 2026 &middot; Data: Case-Shiller MIXRSA / Miami Realtors / CondoBlackBook / Florida Dept. of Insurance</div>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <h1>邁阿密／南佛羅里達——深度分析</h1>
+      <div class="report-meta">2026年4月 &middot; 數據：Case-Shiller MIXRSA / 邁阿密房地產商協會 / CondoBlackBook / 佛州保險局</div>
+    </div>
+  </div>
+
+  <div class="report-body">
+
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()">
+        <span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span>
+        <button class="toc-toggle" id="tocToggle">&#x25B2;</button>
+      </div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend: Case-Shiller &amp; Bifurcation</span><span class="lang-zh" style="display:none">2. 房價走勢：Case-Shiller與分化</span></a>
+        <a href="#sec-condo" onclick="closeTocMobile()"><span class="lang-en">3. The Condo Crisis: SB 4-D &amp; Structural Repricing</span><span class="lang-zh" style="display:none">3. 公寓危機：SB 4-D與結構性重定價</span></a>
+        <a href="#sec-insurance" onclick="closeTocMobile()"><span class="lang-en">4. Insurance &amp; HOA: The True Cost of Ownership</span><span class="lang-zh" style="display:none">4. 保險與管理費：真實持有成本</span></a>
+        <a href="#sec-migration" onclick="closeTocMobile()"><span class="lang-en">5. Migration Cycle: From Boom to Slowdown</span><span class="lang-zh" style="display:none">5. 遷移週期：從繁榮到放緩</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">6. Rent Control: Florida&rsquo;s Total Preemption</span><span class="lang-zh" style="display:none">6. 租管：佛州完全先占</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div>
+    </div>
+
+    <!-- 1. EXECUTIVE SUMMARY -->
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+
+    <div class="lang-en">
+      <p>Miami's housing market in 2026 is defined by the sharpest bifurcation of any major U.S. metro: a single-family market that remains relatively resilient, supported by continued international capital and wealthy domestic migration, sitting alongside a condo market in active distress. The Case-Shiller Miami index (MIXRSA) peaked at 444 in July 2024 and had softened to 442 by February 2025 &mdash; a marginal headline number that masks a violent underlying divergence. Miami-Dade single-family homes are effectively a seller's market with 4&ndash;6 months of supply, while condo/townhome inventory has expanded to <strong>14 months</strong> &mdash; the most buyer-friendly reading in over a decade, and the highest condo inventory of any major U.S. metro as of mid-2025.</p>
+      <p>The condo correction is not a demand story &mdash; it is a structural repricing of carrying costs. The 2021 Surfside condominium collapse triggered Florida Senate Bill 4-D (enacted 2022), which requires milestone structural inspections for all buildings 3+ stories that are 30+ years old, and &mdash; critically &mdash; mandates fully funded structural reserves effective January 1, 2025. The financial impact is historic: <strong>40%</strong> of Florida condo owners have faced special assessments in the last three years, ranging from $30,000 to $400,000 per unit. HOA fees in Miami-Dade high-rises jumped nearly $500/month in 2025, with insurance alone averaging $377/month. Total monthly carrying costs (mortgage + HOA + insurance) in older Miami towers can now reach <strong>$4,000&ndash;$6,000+</strong>/month on a median-priced unit &mdash; levels that have triggered distressed selling and buyer flight to newer construction.</p>
+      <p>The macro tailwind that drove Miami's pandemic boom &mdash; the great domestic migration from high-tax, high-cost states &mdash; has collapsed. Net domestic in-migration to Florida fell from 310,892 in 2022 to just <strong>22,517</strong> in the year ending June 2025, a 93% decline. The cost advantage that drew remote workers and retirees has been largely eroded by insurance premiums averaging $7,136/year, rising HOA fees, and utility costs. International migration (178,674 net in FY2024&ndash;25) and international buyer capital ($10.4 billion in residential purchases in 2024, up 46% YoY) provide a demand floor &mdash; particularly for luxury waterfront condos and single-family homes &mdash; that prevents a full market collapse. The investment thesis for Miami has therefore bifurcated: luxury waterfront single-family and ultra-luxury condos (&gt;$10M) remain in a global capital game, while mid-tier condos ($300K&ndash;$1M) in aging buildings are experiencing the most pronounced correction of any asset class in South Florida.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2026年邁阿密住宅市場以主要美國大都市中最鮮明的分化為特徵：一個相對韌性的獨棟住宅市場，由持續的國際資本和富裕的國內遷移支撐；旁邊是一個陷入主動困境的公寓市場。Case-Shiller邁阿密指數（MIXRSA）於2024年7月達到444的峰值，到2025年2月已回落至442——這一邊際標題數字掩蓋了劇烈的底層分化。邁阿密-戴德獨棟住宅實際上是4至6個月供給的賣方市場，而公寓/聯排別墅庫存已擴張至<strong>14個月</strong>——十年多來最有利於買方的讀數，也是2025年中所有主要美國大都市中最高的公寓庫存。</p>
+      <p>公寓修正不是需求故事——它是持有成本的結構性重新定價。2021年的衝浪島公寓倒塌事件引發了佛羅里達州《參議院第4-D號法案》（2022年通過），要求對所有樓齡超過30年的3層以上建築進行里程碑結構檢查，並——關鍵是——強制自2025年1月1日起為結構構件提供全額儲備金。財務影響是歷史性的：過去三年<strong>40%</strong>的佛羅里達公寓業主面臨特別攤款，每套從3萬美元到40萬美元不等。2025年邁阿密-戴德高層公寓月度HOA費幾乎跳升500美元，僅保險一項月均377美元。舊型邁阿密塔樓的總月度持有成本（按揭+HOA+保險）現在可達中位數單位每月<strong>4,000至6,000美元以上</strong>——這一水平引發了拋售潮，買家紛紛轉向新建公寓。</p>
+      <p>推動邁阿密疫情繁榮的宏觀順風——從高稅、高成本州的大規模國內遷移——已崩潰。佛羅里達州淨國內遷入人口從2022年的310,892人降至2025年6月止年度的<strong>22,517</strong>人，降幅93%。吸引遠程工作者和退休人員的成本優勢已基本被年均7,136美元的保險費、上漲的HOA費和公用事業費用所侵蝕。國際移民（FY2024-25年淨178,674人）和國際買家資本（2024年住宅購置104億美元，年增46%）提供了需求底部——尤其對豪華海濱獨棟住宅和超豪華公寓（1,000萬美元以上）——阻止市場全面崩潰。因此，邁阿密的投資論點已分化：豪華海濱獨棟住宅和超豪華公寓仍在全球資本博弈中，而老樓中的中端公寓（30萬至100萬美元）正經歷南佛羅里達所有資產類別中最顯著的修正。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">CS MIAMI INDEX (FEB 2025)</span><span class="lang-zh" style="display:none">CS邁阿密指數（2025年2月）</span></div>
+        <div class="kpi-value">442</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">MIXRSA Jan 2000=100 &middot; ATH: 444 (Jul 2024) &middot; YoY -1.0%</span><span class="lang-zh" style="display:none">MIXRSA 2000年1月=100 &middot; 歷史高位：444（2024年7月）&middot; 年增-1.0%</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">OVERALL MEDIAN (OCT 2025)</span><span class="lang-zh" style="display:none">整體中位數（2025年10月）</span></div>
+        <div class="kpi-value">$600K</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Miami-Dade &middot; YoY -4.2% &middot; DOM: 127 days</span><span class="lang-zh" style="display:none">邁阿密-戴德 &middot; 年降4.2% &middot; 上市天數：127天</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">CONDO MEDIAN (2025)</span><span class="lang-zh" style="display:none">公寓中位數（2025年）</span></div>
+        <div class="kpi-value">$375K</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Miami-Dade condos &middot; YoY -8.5% &middot; Buyer's market</span><span class="lang-zh" style="display:none">邁阿密-戴德公寓 &middot; 年降8.5% &middot; 買方市場</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">CONDO MONTHS SUPPLY</span><span class="lang-zh" style="display:none">公寓供給月數</span></div>
+        <div class="kpi-value">14 mo</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Oct 2025 &middot; vs 4&ndash;6 balanced &middot; 10M+ = buyer's mkt</span><span class="lang-zh" style="display:none">2025年10月 &middot; 對比平衡4–6 &middot; 10月+=買方市場</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">SB 4-D SPECIAL ASSESSMENT</span><span class="lang-zh" style="display:none">SB 4-D特別攤款</span></div>
+        <div class="kpi-value">Up to $400K</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Per unit in some buildings &middot; Cricket Club: $134K/unit</span><span class="lang-zh" style="display:none">部分建築每戶 &middot; Cricket Club：$134K/戶</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">NET DOMESTIC MIGRATION</span><span class="lang-zh" style="display:none">淨國內遷入</span></div>
+        <div class="kpi-value">22,517</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">FY2024&ndash;25 &middot; Down 93% from 310,892 (2022) &middot; Still +178K intl</span><span class="lang-zh" style="display:none">FY2024–25 &middot; 較2022年310,892降93% &middot; 仍+178K國際</span></span>
+      </div>
+    </div>
+
+    <!-- 2. PRICE TREND -->
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND: CASE-SHILLER &amp; BIFURCATION</span><span class="lang-zh" style="display:none">房價走勢：CASE-SHILLER與分化</span></h2>
+
+    <div class="lang-en">
+      <p>The Case-Shiller Miami index (MIXRSA, SA) achieved a peak appreciation of 58% from its January 2020 level to the July 2024 all-time high of 444 &mdash; the second-largest pandemic-era appreciation of any CS metro, exceeded only by Phoenix. This surge reflected an extraordinary confluence of factors: Florida's zero income tax made it the default destination for high-income remote workers fleeing New York and California; ultra-low mortgage rates enabled leveraged buyers to enter at unprecedented prices; and international capital from Latin America (particularly Venezuela, Brazil, Colombia, and Argentina) provided a cash-buying floor insulated from U.S. rate policy. The pandemic appreciation was so extreme that Miami, historically a mid-tier U.S. market by CS index, briefly exceeded Los Angeles on a percentage-gain basis in 2022.</p>
+      <p>The correction since mid-2024 is entirely concentrated in the condo sector. Single-family prices in Miami-Dade have held broadly flat to modestly positive. Miami-Dade condo median fell from $385,000 (peak 2022) to $375,000 by 2025 &mdash; a headline decline of 2.6%, but with specific older buildings seeing 20&ndash;40% haircuts as SB 4-D assessment risk is priced in. The overall Miami median (single-family + condo combined) fell to <strong>$600,000</strong> by October 2025, down 4.2% YoY.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>Case-Shiller邁阿密指數（MIXRSA，季調）從2020年1月水平到2024年7月歷史最高點444，累計升值58%——是任何CS大都市疫情時期升幅第二大的，僅次於鳳凰城。這一漲幅反映了非凡的因素匯合：佛羅里達州零所得稅使其成為逃離紐約和加州的高收入遠程工作者的默認目的地；超低按揭利率使槓桿買家能夠以前所未有的價格入市；來自拉丁美洲（尤其是委內瑞拉、巴西、哥倫比亞和阿根廷）的國際資本提供了與美國利率政策隔離的現金購買底部。疫情升值之劇烈，使邁阿密這個歷史上CS指數中等水平的美國市場，在2022年短暫超越了洛杉磯的百分比漲幅。</p>
+      <p>2024年中以來的修正完全集中在公寓板塊。邁阿密-戴德獨棟住宅價格整體持平至小幅正增長。邁阿密-戴德公寓中位數從2022年峰值385,000美元降至2025年的375,000美元——標題降幅2.6%，但隨著SB 4-D攤款風險被計入定價，部分老樓出現20至40%的折扣。整體邁阿密中位數（獨棟+公寓合計）到2025年10月降至<strong>600,000美元</strong>，年降4.2%。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Case-Shiller Miami Index + YoY% (2015&ndash;2025)</span><span class="lang-zh" style="display:none">Case-Shiller邁阿密指數 + 年增率（2015&ndash;2025）</span></h4>
+        <p><span class="lang-en">SA, Jan 2000=100 &middot; Source: FRED MIXRSA</span><span class="lang-zh" style="display:none">季調，2000年1月=100 &middot; 來源：FRED MIXRSA</span></p>
+        <div id="chartMIPrice" style="height:220px"></div>
+        <p class="chart-note red"><span class="lang-en">Miami surged +58% from Jan 2020 to peak (Jul 2024) &mdash; fastest pandemic appreciation of any Tier-1 U.S. metro. Condo-led correction since mid-2024</span><span class="lang-zh" style="display:none">邁阿密自2020年1月至峰值（2024年7月）漲幅+58%——一線美國大都市疫情升幅最快。2024年中起由公寓主導修正</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Single-Family vs Condo Median Price 2019&ndash;2025</span><span class="lang-zh" style="display:none">獨棟住宅 vs 公寓中位數 2019&ndash;2025</span></h4>
+        <p><span class="lang-en">Miami-Dade &middot; Source: Miami Realtors</span><span class="lang-zh" style="display:none">邁阿密-戴德 &middot; 來源：邁阿密房地產商協會</span></p>
+        <div id="chartMISplit" style="height:220px"></div>
+        <p class="chart-note orange"><span class="lang-en">Single-family held firm (+49% since 2019). Condo median -2.6% from peak, but select older buildings -20 to -40% with SB 4-D assessment risk</span><span class="lang-zh" style="display:none">獨棟住宅穩守（自2019年+49%）。公寓中位數較峰值-2.6%，但部分老樓帶SB 4-D攤款風險下跌20至40%</span></p>
+      </div>
+    </div>
+
+    <!-- 3. CONDO CRISIS -->
+    <h2 id="sec-condo"><span class="lang-en">THE CONDO CRISIS: SB 4-D &amp; STRUCTURAL REPRICING</span><span class="lang-zh" style="display:none">公寓危機：SB 4-D與結構性重定價</span></h2>
+
+    <div class="lang-en">
+      <p>The June 2021 collapse of the Champlain Towers South in Surfside &mdash; 98 deaths &mdash; was the catalytic event that triggered the most consequential regulatory change in Florida real estate history. Florida SB 4-D (enacted May 2022) and subsequent SB 154 established: (1) mandatory milestone structural inspections for all buildings 3+ stories and 30+ years old (25 years if within 3 miles of coastline); (2) mandatory reserve funding for structural components, with reserve waiver prohibited effective January 1, 2025; (3) inspection timelines that forced the oldest buildings to complete Phase 1 by December 31, 2024.</p>
+      <p>The financial reckoning is ongoing. Nearly 600,000 of Florida's 1.4 million condos are over 40 years old, and as of mid-2025, fewer than 25% of condo associations had confirmed compliance. The special assessment burden is staggering: the Cricket Club in North Miami levied up to <strong>$134,000</strong> per unit for a $30 million repair program; Mediterranean Village in Aventura assessed up to <strong>$400,000</strong> per unit. Across Miami-Dade, 40% of condo owners faced special assessments in 2022&ndash;2025. The market mechanism is creating a bifurcation within the condo sector itself: post-2000 buildings with modern construction standards and funded reserves are trading at modest premiums, while pre-1990 buildings in the $300K&ndash;$800K range face the most severe buyer resistance. Pending sales for Florida condos fell 21% YoY (June 2025) and the Miami metro leads all U.S. markets with 8,317 active condo listings.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2021年6月衝浪島Champlain Towers South的倒塌——98人罹難——是觸發佛羅里達州房地產史上最深遠監管變革的催化事件。《佛羅里達州參議院第4-D號法案》（2022年5月通過）和後續的SB 154建立了：（1）對所有樓齡超過30年（距海岸3英里內為25年）的3層以上建築強制進行里程碑結構檢查；（2）強制為結構構件提供儲備金，自2025年1月1日起禁止豁免儲備；（3）強制最老建築在2024年12月31日前完成第一階段檢查的時間表。</p>
+      <p>財務清算正在進行中。佛羅里達州140萬套公寓中近60萬套已超過40年樓齡，截至2025年中，不到25%的公寓業主協會確認合規。特別攤款負擔驚人：北邁阿密的Cricket Club向每套業主徵收高達<strong>134,000美元</strong>，用於3,000萬美元的修繕計劃；亞芬圖拉的Mediterranean Village向每套業主徵收高達<strong>400,000美元</strong>。整個邁阿密-戴德，40%的公寓業主在2022至2025年間面臨特別攤款。市場機制正在公寓板塊內部製造分化：建設標準現代且儲備充足的2000年後建築以小幅溢價交易，而30萬至80萬美元範圍的1990年前建築面臨最嚴峻的買家抵觸。佛羅里達公寓待成交量年降21%（2025年6月），邁阿密大都市以8,317套活躍公寓掛牌領先全美所有市場。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Miami Condo: Months of Supply + Pending Sales Index 2020&ndash;2025</span><span class="lang-zh" style="display:none">邁阿密公寓：供給月數 + 待成交指數 2020&ndash;2025</span></h4>
+      <div id="chartSB4D" style="height:220px"></div>
+      <p class="chart-note red"><span class="lang-en">14 months supply (Oct 2025) = most of any major U.S. metro. SB 4-D enforcement drove the inflection: older buildings dumping inventory</span><span class="lang-zh" style="display:none">14個月供給（2025年10月）=主要美國大都市之最。SB 4-D執行推動拐點：老樓拋售庫存</span></p>
+    </div>
+
+    <!-- 4. INSURANCE & HOA -->
+    <h2 id="sec-insurance"><span class="lang-en">INSURANCE &amp; HOA: THE TRUE COST OF OWNERSHIP</span><span class="lang-zh" style="display:none">保險與管理費：真實持有成本</span></h2>
+
+    <div class="lang-en">
+      <p>Florida's insurance crisis is the most severe of any U.S. state and has become the defining carrying-cost variable in Miami real estate underwriting. Insurance premiums in Florida average <strong>$7,136/year</strong> for homeowners &mdash; 181% above the national average. Major carriers have progressively restricted or exited the Florida market: State Farm, Allstate, Farmers, and others have ceased writing new policies in high-risk coastal zones or statewide. The Florida Citizens Property Insurance Corporation (the state's insurer of last resort) has grown from a market backstop to the largest single insurer in the state, covering approximately 1.3 million policies.</p>
+      <p>For condo owners in Miami high-rises, the insurance burden compounds with HOA fees. Monthly HOA fees in Miami-Dade high-rises increased by approximately <strong>$500/month</strong> in 2025, with the insurance component alone averaging $377/month. Professional management fees rose 40%+. Some buildings now charge over $2,000/month in total HOA. For a buyer financing a $500,000 condo at 6.38% (30-year fixed, 20% down), the monthly mortgage payment is approximately $2,500; add $2,000+ in HOA, $600/month in property taxes and insurance, and the true monthly cost exceeds <strong>$5,100</strong> &mdash; a front-end DTI of 76%+ for a household earning $80K. Even households earning $200K face a 30%+ DTI on the HOA/insurance components alone. This math explains why condo pending sales fell 21% YoY and why the buyer pool for non-luxury condos has effectively collapsed.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>佛羅里達州的保險危機是美國所有州中最嚴峻的，已成為邁阿密房地產核保中決定性的持有成本變量。佛羅里達州房主保險費年均<strong>7,136美元</strong>——高於全國平均181%。主要承保商已逐步限制或退出佛羅里達市場：State Farm、Allstate、Farmers等已停止在高風險沿海區或全州範圍內承保新保單。佛羅里達公民財產保險公司（州立後備保險商）已從市場後盾發展為全州最大的單一保險商，覆蓋約130萬份保單。</p>
+      <p>對邁阿密高層公寓業主而言，保險負擔疊加HOA費用。2025年邁阿密-戴德高層公寓月HOA費增加約<strong>500美元</strong>。僅保險部分月均377美元。物業管理費上漲40%以上。部分建築月HOA費現已超過2,000美元。對以6.38%利率（30年固定，20%首付）融資購買50萬美元公寓的買家而言，月按揭約2,500美元；加上2,000美元以上HOA、每月600美元的房產稅和保險，真實月成本超過<strong>5,100美元</strong>——對年收入8萬美元家庭的前端負債收入比超過76%。即使年收入20萬美元的家庭也面臨僅HOA/保險部分就超過30%的負債收入比。這一算術解釋了為何公寓待成交量年降21%，以及為何非豪華公寓的買家群體實際上已崩潰。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Monthly Ownership Cost Breakdown: Miami Condo 2021 vs 2025</span><span class="lang-zh" style="display:none">月度持有成本分解：邁阿密公寓 2021年 vs 2025年</span></h4>
+      <div id="chartHOACost" style="height:220px"></div>
+      <p class="chart-note red"><span class="lang-en">Total monthly cost: $3,470 (2021) &rarr; $5,377 (2025). HOA alone rose $1,200/mo. For median-income buyer: DTI went from 52% to 81%</span><span class="lang-zh" style="display:none">總月成本：3,470美元（2021）→5,377美元（2025）。HOA單項月漲1,200美元。對中位收入買家：負債收入比從52%升至81%</span></p>
+    </div>
+
+    <!-- 5. MIGRATION CYCLE -->
+    <h2 id="sec-migration"><span class="lang-en">MIGRATION CYCLE: FROM BOOM TO SLOWDOWN</span><span class="lang-zh" style="display:none">遷移週期：從繁榮到放緩</span></h2>
+
+    <div class="lang-en">
+      <p>Miami's pandemic boom was fundamentally a migration story. Between 2020 and 2022, Florida received net domestic in-migration of approximately 800,000 people &mdash; the most of any state. The Miami-Fort Lauderdale-West Palm Beach MSA was the primary destination, attracting high-income remote workers from New York, California, and New Jersey who could afford Miami's rising prices and capture the tax arbitrage of Florida's zero income tax. This migration wave drove a 70% increase in Miami prices from 2019 to 2022.</p>
+      <p>By 2025, the migration driver has inverted. Net domestic in-migration to Florida fell 93% &mdash; from 310,892 to 22,517 annually. The cost arbitrage has largely closed: a household moving from New York now faces insurance premiums averaging $7,136/year and HOA fees that narrow or eliminate the tax savings. International migration has partially compensated: Florida received 178,674 net international migrants in FY2024&ndash;25, and foreign buyers purchased <strong>$10.4 billion</strong> in Florida residential properties in 2024 (+46% YoY) &mdash; with 45% concentrated in the Miami MSA. Sixty percent of these buyers paid all-cash, providing a demand floor for luxury product. Latin American capital (Venezuela, Brazil, Colombia, Argentina) and European buyers (attracted by USD strength and Miami's lifestyle) remain the most active international buyer cohorts.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>邁阿密疫情繁榮從根本上是一個遷移故事。2020至2022年間，佛羅里達州獲得淨國內遷入約80萬人——全美最多。邁阿密-勞德代爾堡-西棕櫚灘都會區是主要目的地，吸引了從紐約、加州和紐澤西遷來的高收入遠程工作者，他們能夠承擔邁阿密的漲價並套利佛羅里達零所得稅。這一遷移浪潮推動2019至2022年邁阿密房價上漲70%。</p>
+      <p>到2025年，遷移驅動力已逆轉。佛羅里達州淨國內遷入下降93%——從年均310,892人降至22,517人。成本套利空間已基本關閉：從紐約遷來的家庭現在面臨年均7,136美元的保險費和HOA費，這縮小甚至消除了稅收節省。國際遷移部分補償：佛羅里達州在FY2024-25年淨獲得178,674名國際移民，外國買家2024年在佛羅里達住宅購置<strong>104億美元</strong>（年增46%）——其中45%集中在邁阿密都會區。這些買家中60%以全現金支付，為豪華產品提供了需求底部。拉丁美洲資本（委內瑞拉、巴西、哥倫比亞、阿根廷）和歐洲買家（受美元走強和邁阿密生活方式吸引）仍是最活躍的國際買家群體。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Florida Net Domestic Migration 2018&ndash;2025</span><span class="lang-zh" style="display:none">佛羅里達州淨國內遷移 2018&ndash;2025</span></h4>
+      <div id="chartMIMigration" style="height:220px"></div>
+      <p class="chart-note orange"><span class="lang-en">Net domestic migration: 311K peak (2022) &rarr; 23K (2025). International buyers ($10.4B, 2024 +46% YoY) fill the demand gap in luxury segments</span><span class="lang-zh" style="display:none">淨國內遷移：峰值311K（2022）→23K（2025）。國際買家（104億美元，2024年+46%）填補豪華板塊需求缺口</span></p>
+    </div>
+
+    <!-- 6. RENT CONTROL -->
+    <h2 id="sec-rent"><span class="lang-en">RENT CONTROL: FLORIDA&rsquo;S TOTAL PREEMPTION</span><span class="lang-zh" style="display:none">租管：佛州完全先占</span></h2>
+
+    <div class="lang-en">
+      <p>Florida is a rent control preemption state &mdash; a 2023 constitutional amendment confirmed that no local government may enact, continue, or enforce any ordinance or regulation that controls the price of rent on existing private residential property. This is the most absolute rent control preemption of any U.S. state, eliminating even the ability of municipalities to pass local ordinances. For investors, this creates a favorable rental income environment: there are no caps on rent increases between tenancies, and landlords can raise rents to market rate upon lease expiration. The practical effect has been visible in the data: Miami rents rose astronomically in 2021&ndash;2022 (20&ndash;30% annually), partially retraced in 2023, and are now stabilizing at <strong>$2,800&ndash;$2,900/month</strong> average in Miami-Dade as the new apartment supply pipeline (16,000 units expected in South Florida in 2025) delivers inventory. Approximately 5,300 new units were expected to complete in Miami alone by end-2025. The supply response is real &mdash; but the demand floor from international buyers and wealthy migrants keeps the floor from falling through.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>佛羅里達州是租管先占州——2023年憲法修正案確認，任何地方政府不得頒布、維持或執行任何控制現有私人住宅租金價格的條例或法規。這是美國所有州中最絕對的租管先占，甚至消除了市政當局通過地方條例的能力。對投資者而言，這創造了有利的租金收入環境：租期之間不存在漲租上限，房東可在租約到期時將租金提升至市場價。實際效果在數據中清晰可見：邁阿密租金在2021至2022年漲幅驚人（年漲20至30%），2023年部分回調，隨著新公寓在建供給（2025年南佛羅里達預計16,000套）入市，現正穩定在邁阿密-戴德月均<strong>2,800至2,900美元</strong>。僅邁阿密市就預計2025年底前完成約5,300套新建。供給反應是真實的——但國際買家和富裕移民的需求底部阻止了樓底下穿。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Miami-Dade Average Asking Rent + YoY% 2019&ndash;2025</span><span class="lang-zh" style="display:none">邁阿密-戴德平均要價租金 + 年增率 2019&ndash;2025</span></h4>
+      <div id="chartMIRent" style="height:220px"></div>
+      <p class="chart-note green"><span class="lang-en">No rent control: landlords captured full 2021&ndash;22 surge (+52% over 2019). 2025 rent $2,850/mo stabilizing as 16,000 new units enter South Florida market</span><span class="lang-zh" style="display:none">無租管：房東完全捕獲2021至22年漲幅（較2019年+52%）。2025年租金2,850美元/月穩定，因南佛羅里達16,000套新房入市</span></p>
+    </div>
+
+    <!-- 7. OUTLOOK -->
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+
+    <div class="lang-en">
+      <p>Miami's outlook is uniquely bifurcated between an internationally-anchored luxury tier and a regulation-burdened mid-tier condo market. The base case (<strong>55%</strong> probability) projects overall CS Miami index flat to -3% through 2027, as the SB 4-D assessment cycle continues to pressure older buildings and the domestic migration tailwind remains subdued. Within this aggregate, single-family and luxury condos (+$2M waterfront) are projected to appreciate 3&ndash;5%, offset by continued mid-tier condo correction of 5&ndash;8% from current levels. This is a divergent, not directional, market.</p>
+      <p>The bull case (<strong>20%</strong> probability) requires two catalysts: a meaningful decline in Florida insurance premiums (the Dept. of Insurance's regulatory reforms have begun attracting new carriers, which could reduce premiums 15&ndash;25% over 2026&ndash;2027) and sustained Latin American capital inflows driven by a strong U.S. dollar and regional political instability. Under this scenario, the international buyer demand floor expands and the CS Miami index could recover to 450+ by end-2027.</p>
+      <p>The bear case (<strong>25%</strong> probability) envisions a compounding of existing pressures: a major hurricane season (the long-term NOAA forecast for 2026 is above-normal activity), additional SB 4-D-triggered assessments as the Phase 2 inspection cycle hits more buildings, and a meaningful slowdown in Latin American capital (whether from dollar weakening, U.S. trade restrictions, or origin-country stabilization). In this scenario, the mid-tier condo market enters outright distress &mdash; 15&ndash;25% declines from current levels for pre-1990 buildings, with some forced liquidations. The overall CS Miami index could fall to 395&ndash;410 by end-2027, returning to pre-pandemic levels in nominal terms.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>邁阿密的展望在國際主導的豪華層級和監管負擔的中端公寓市場之間具有獨特的分化特徵。基本情境（概率<strong>55%</strong>）預計CS邁阿密整體指數到2027年持平至-3%，因SB 4-D攤款週期持續壓制老樓，且國內遷移順風仍受壓制。在這一整體中，獨棟住宅和豪華公寓（200萬美元以上海濱）預計升值3至5%，被中端公寓從當前水平繼續修正5至8%所抵消。這是一個分化市場，而非方向性市場。</p>
+      <p>樂觀情境（概率<strong>20%</strong>）需要兩個催化劑：佛羅里達州保險費的有意義下降（保險局監管改革已開始吸引新的承保商進入，可能在2026至2027年間將保費降低15至25%）和由強美元及地區政治不穩定驅動的持續拉丁美洲資本流入。在此情境下，國際買家需求底部擴大，CS邁阿密指數到2027年底可能回升至450以上。</p>
+      <p>悲觀情境（概率<strong>25%</strong>）設想現有壓力的疊加：重大颶風季（NOAA 2026年長期預報為高於正常活動）、第二階段檢查週期波及更多建築引發的額外SB 4-D攤款，以及拉丁美洲資本的實質性放緩（無論是美元走弱、美國貿易限制還是來源國政治穩定）。在此情境下，中端公寓市場進入全面困境——1990年前建築從當前水平下跌15至25%，部分出現被迫清算。CS邁阿密整體指數到2027年底可能降至395至410，名義上回到疫情前水平。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">CS Miami Index Forecast 2026&ndash;2028</span><span class="lang-zh" style="display:none">CS邁阿密指數預測 2026&ndash;2028</span></h4>
+      <div id="chartMIForecast" style="height:220px"></div>
+      <p class="chart-note orange"><span class="lang-en">Bear case driven by hurricane + SB 4-D wave 2 + LatAm capital slowdown. Key support: zero income tax + international buyer floor</span><span class="lang-zh" style="display:none">悲觀情境由颶風+SB 4-D第二波+拉丁美洲資本放緩驅動。關鍵支撐：零所得稅+國際買家底部</span></p>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: S&amp;P Cotality Case-Shiller FL-Miami Home Price Index (FRED MIXRSA) &middot; Miami Realtors Monthly Market Reports &middot; CondoBlackBook Q3 2025 Luxury Condo Market Summary &middot; Florida Senate SB 4-D / SB 154 Legislative Text &middot; Florida Department of Insurance &mdash; Citizens Property Insurance Data &middot; U.S. Census Bureau State-to-State Migration Data &middot; NAR International Transactions in U.S. Residential Real Estate 2024 &middot; Redfin South Florida Market Reports &middot; LongYield Research &mdash; Florida Housing in 2026 (Feb 2026). All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：S&amp;P Cotality Case-Shiller佛州邁阿密房價指數（FRED MIXRSA）&middot; 邁阿密房地產商協會月度市場報告 &middot; CondoBlackBook 2025年Q3豪華公寓市場總結 &middot; 佛州《參議院第4-D號/第154號法案》立法文本 &middot; 佛州保險局——公民財產保險數據 &middot; 美國人口普查局州際遷移數據 &middot; NAR 2024年美國住宅房地產國際交易報告 &middot; Redfin南佛羅里達市場報告 &middot; LongYield Research——2026年佛羅里達住房（2026年2月）。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts=[];
+
+function initAllCharts(lang){
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  drawMIPrice(lang);drawMISplit(lang);drawSB4D(lang);drawHOACost(lang);
+  drawMIMigration(lang);drawMIRent(lang);drawMIForecast(lang);
+}
+
+function drawMIPrice(lang){
+  var dom=document.getElementById('chartMIPrice');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var index=[207,224,237,248,256,273,342,420,430,442,438];
+  var yoy=[8.5,8.2,5.8,4.6,3.2,6.6,25.3,22.8,2.4,2.8,-1.0];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:[mkAxis({type:'value',min:180,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),mkAxis({type:'value',min:-5,max:30,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[
+      {name:en?'CS Miami Index':'CS邁阿密指數',type:'bar',data:index,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,
+        markLine:{data:[{yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1},label:{show:false}}]}}
+    ]
+  });
+}
+
+function drawMISplit(lang){
+  var dom=document.getElementById('chartMISplit');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];
+  var sf=[420,430,565,650,635,620,625];
+  var condo=[260,270,340,385,380,380,375];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:200,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+    series:[
+      {name:en?'Single-Family ($K)':'獨棟住宅($K)',type:'bar',data:sf,barMaxWidth:26,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'30%'},
+      {name:en?'Condo ($K)':'公寓($K)',type:'bar',data:condo,barMaxWidth:26,itemStyle:{color:C.red,borderRadius:[3,3,0,0]}}
+    ]
+  });
+}
+
+function drawSB4D(lang){
+  var dom=document.getElementById('chartSB4D');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2020','2021','2022','2023','2024','Jan 25','Oct 25'];
+  var months=[5.2,3.8,4.5,7.2,8.1,11.4,14.0];
+  var pending=[100,125,118,90,72,65,55];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis:[mkAxis({type:'value',min:0,max:16,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}mo'}}),mkAxis({type:'value',min:40,max:140,axisLabel:{color:C.muted,fontSize:9},splitLine:{show:false}})],
+    series:[
+      {name:en?'Months Supply':'供給月數',type:'line',data:months,lineStyle:{color:C.red,width:2.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:5,yAxisIndex:0,
+        markLine:{data:[{yAxis:6,lineStyle:{color:C.green,type:'dashed',width:1},label:{formatter:en?'Balanced':'平衡',fontSize:8,color:C.green}},{yAxis:10,lineStyle:{color:C.orange,type:'dashed',width:1},label:{formatter:en?"Buyer's mkt":'買方市場',fontSize:8,color:C.orange}}]}},
+      {name:en?'Pending Index (2020=100)':'待成交指數(2020=100)',type:'line',data:pending,lineStyle:{color:C.navy,width:2,type:'dashed'},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,yAxisIndex:1}
+    ]
+  });
+}
+
+function drawHOACost(lang){
+  var dom=document.getElementById('chartHOACost');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var cats=en?['Mortgage','HOA Fees','Insurance\n(monthly)','Property Tax\n(monthly)']:['按揭','HOA費','保險\n（月）','房產稅\n（月）'];
+  var y2021=[2100,800,150,420];
+  var y2025=[2500,2000,377,500];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:60,top:16,bottom:36,containLabel:true},
+    yAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9}}),
+    xAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v;}}}),
+    series:[
+      {name:'2021',type:'bar',data:y2021,barMaxWidth:16,itemStyle:{color:C.navy,borderRadius:[0,3,3,0]},barGap:'30%'},
+      {name:'2025',type:'bar',data:y2025,barMaxWidth:16,itemStyle:{color:C.red,borderRadius:[0,3,3,0]},
+        label:{show:true,position:'right',formatter:function(p){return '$'+p.value;},fontSize:9,color:C.muted}}
+    ]
+  });
+}
+
+function drawMIMigration(lang){
+  var dom=document.getElementById('chartMIMigration');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2018','2019','2020','2021','2022','2023','2024','2025'];
+  var data=[134000,151000,252000,283000,311000,187000,86000,23000];
+  var colors=data.map(function(v){if(v>=250000)return C.green;if(v>=100000)return C.navy;if(v>=50000)return C.orange;return C.red;});
+  c.setOption({
+    tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11},formatter:function(p){return p[0].name+'<br/>'+(p[0].value/1000).toFixed(0)+'K';}},
+    grid:{left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:0,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/1000).toFixed(0)+'K';}}}),
+    series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:28,itemStyle:{borderRadius:[3,3,0,0]},
+      label:{show:true,position:'top',formatter:function(p){return(p.value/1000).toFixed(0)+'K';},fontSize:9,color:C.muted}}]
+  });
+}
+
+function drawMIRent(lang){
+  var dom=document.getElementById('chartMIRent');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];
+  var rent=[1650,1680,2050,2680,2750,2820,2850];
+  var yoy=[3.0,1.8,22.0,30.7,2.6,2.5,1.1];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:[mkAxis({type:'value',min:1400,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return'$'+v;}}}),mkAxis({type:'value',min:-5,max:35,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[
+      {name:en?'Avg Rent ($)':'平均租金($)',type:'bar',data:rent,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0,
+        markLine:{data:[{yAxis:2000,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Pre-pandemic avg':'疫情前均值',fontSize:8,color:C.muted}}]}},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1}
+    ]
+  });
+}
+
+function drawMIForecast(lang){
+  var dom=document.getElementById('chartMIForecast');if(!dom)return;
+  var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var periods=['Feb 2025','2026E','2027E','2028E'];
+  var bull=[442,448,455,465];var base=[442,435,428,430];var bear=[442,420,405,398];
+  c.setOption({
+    tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:380,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[
+      {name:en?'Bull (20%) — insurance reform':'樂觀(20%)—保險改革',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+      {name:en?'Base (55%) — bifurcated':'基本(55%)—分化',type:'line',data:base,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+      {name:en?'Bear (25%) — hurricane+SB4D':'悲觀(25%)—颶風+SB4D',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);initAllCharts(lang);
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+function toggleCityMenu(){document.getElementById('cityDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}
+  if(!e.target.closest('.city-dropdown')){var d2=document.getElementById('cityDropdown');if(d2)d2.classList.remove('open');}
+});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+
+(function(){
+  function initScrollSpy(){
+    var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;
+    var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});
+    function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}
+    window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}
+})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

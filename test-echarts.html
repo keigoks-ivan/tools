@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECharts Test | Malaysia Property Monitor</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div style="max-width:900px;margin:40px auto;padding:0 20px;">
+    <h1 style="font-family:Inter,sans-serif;color:#1e3a5f;margin-bottom:8px;">ECharts Style Test</h1>
+    <p style="color:#5a7a9a;font-size:13px;margin-bottom:32px;">Testing chart styles before full migration</p>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3>Test 1: Line Chart — Yield Spread</h3>
+      <div id="t1" style="height:260px;"></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3>Test 2: Bar + Line — City Price + YoY%</h3>
+      <div id="t2" style="height:280px;"></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3>Test 3: Horizontal Bar — Rental Yield by City</h3>
+      <div id="t3" style="height:280px;"></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3>Test 4: Multi-line — Overhang 3-Scenario Forecast</h3>
+      <div id="t4" style="height:280px;"></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3>Test 5: Radar — Risk Monitor</h3>
+      <div id="t5" style="height:300px;"></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3>Test 6: Mixed — MHPI Index + YoY%</h3>
+      <div id="t6" style="height:280px;"></div>
+    </div>
+  </div>
+
+  <script>
+  window.addEventListener('load', function() {
+    var baseTextStyle = { color: '#5a7a9a', fontFamily: 'Inter, sans-serif', fontSize: 11 };
+    var baseAxisLine = { lineStyle: { color: '#e8f0f9' } };
+    var baseSplitLine = { lineStyle: { color: '#e8f0f9', type: 'solid' } };
+
+    // Test 1: Line Chart — Yield Spread
+    var t1 = echarts.init(document.getElementById('t1'));
+    t1.setOption({
+      backgroundColor: 'transparent',
+      textStyle: baseTextStyle,
+      legend: { top: 8, textStyle: baseTextStyle, icon: 'circle', itemWidth: 8, itemHeight: 8 },
+      grid: { left: 40, right: 20, top: 40, bottom: 30 },
+      tooltip: { trigger: 'axis', backgroundColor: '#fff', borderColor: '#ccd9e8', borderWidth: 1, textStyle: { color: '#1e3a5f', fontSize: 11 } },
+      xAxis: { type: 'category', data: ['2019','2020','2021','2022','2023Q1','2023Q3','2024Q1','2024Q3','2025Q1','2025Q3'], axisLine: baseAxisLine, axisTick: { show: false }, axisLabel: baseTextStyle, splitLine: { show: false } },
+      yAxis: { type: 'value', min: 1, max: 6, axisLabel: Object.assign({}, baseTextStyle, { formatter: '{value}%' }), splitLine: baseSplitLine, axisLine: { show: false }, axisTick: { show: false } },
+      series: [
+        {
+          name: 'Rental Yield %', type: 'line',
+          data: [4.80,4.60,4.70,4.90,5.16,5.20,5.16,5.24,5.10,5.19],
+          lineStyle: { color: '#16a34a', width: 2.5 }, itemStyle: { color: '#16a34a' },
+          symbol: 'circle', symbolSize: 5, smooth: 0.2,
+          areaStyle: { color: { type: 'linear', x:0,y:0,x2:0,y2:1, colorStops: [{offset:0,color:'rgba(22,163,74,0.15)'},{offset:1,color:'rgba(22,163,74,0)'}] } }
+        },
+        {
+          name: 'OPR %', type: 'line',
+          data: [3.00,1.75,1.75,2.75,3.00,3.00,3.00,3.00,3.00,2.75],
+          lineStyle: { color: '#dc2626', width: 2, type: 'dashed' }, itemStyle: { color: '#dc2626' },
+          symbol: 'circle', symbolSize: 5, step: 'end'
+        }
+      ]
+    });
+
+    // Test 2: Bar + Line — City Price + YoY%
+    var t2 = echarts.init(document.getElementById('t2'));
+    t2.setOption({
+      backgroundColor: 'transparent',
+      textStyle: baseTextStyle,
+      legend: { top: 8, textStyle: baseTextStyle, icon: 'circle', itemWidth: 8 },
+      grid: { left: 60, right: 50, top: 45, bottom: 30 },
+      tooltip: { trigger: 'axis', backgroundColor: '#fff', borderColor: '#ccd9e8', borderWidth: 1, textStyle: { color: '#1e3a5f', fontSize: 11 } },
+      xAxis: { type: 'category', data: ['National Avg','Penang','Selangor','KL','Johor'], axisLine: baseAxisLine, axisTick: { show: false }, axisLabel: baseTextStyle, splitLine: { show: false } },
+      yAxis: [
+        { type: 'value', name: 'RM', nameTextStyle: baseTextStyle, axisLabel: Object.assign({}, baseTextStyle, { formatter: function(v){ return v>=1000?(v/1000).toFixed(0)+'K':v; } }), splitLine: baseSplitLine, axisLine: { show: false }, axisTick: { show: false } },
+        { type: 'value', name: 'YoY %', nameTextStyle: baseTextStyle, axisLabel: Object.assign({}, baseTextStyle, { formatter: '{value}%' }), splitLine: { show: false }, axisLine: { show: false }, axisTick: { show: false }, min: -8, max: 10 }
+      ],
+      series: [
+        {
+          name: 'Avg Price (RM)', type: 'bar', yAxisIndex: 0,
+          data: [
+            { value: 494384, itemStyle: { color: '#1e3a5f', borderRadius: [4,4,0,0] } },
+            { value: 504845, itemStyle: { color: '#16a34a', borderRadius: [4,4,0,0] } },
+            { value: 510000, itemStyle: { color: '#1e3a5f', borderRadius: [4,4,0,0] } },
+            { value: 804642, itemStyle: { color: '#d97706', borderRadius: [4,4,0,0] } },
+            { value: 380000, itemStyle: { color: '#1e3a5f', borderRadius: [4,4,0,0] } }
+          ],
+          barMaxWidth: 55,
+          label: { show: true, position: 'top', formatter: function(p){ var v=p.value; return v>=1000?'RM '+(v/1000).toFixed(0)+'K':'RM '+v; }, color: '#1e3a5f', fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 600 }
+        },
+        {
+          name: 'YoY %', type: 'line', yAxisIndex: 1,
+          data: [3.2, 5.7, 2.1, -4.3, 1.8],
+          lineStyle: { color: '#5a7a9a', width: 1.5, type: 'dashed' },
+          itemStyle: { color: function(p){ return p.data >= 0 ? '#16a34a' : '#dc2626'; } },
+          symbol: 'circle', symbolSize: 8,
+          label: { show: true, position: 'top', formatter: function(p){ return (p.data > 0 ? '+' : '') + p.data + '%'; }, color: function(p){ return p.data >= 0 ? '#16a34a' : '#dc2626'; }, fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700 }
+        }
+      ]
+    });
+
+    // Test 3: Horizontal Bar — Rental Yield by City
+    var cities = ['Iskandar Puteri','JB City','Subang Jaya','National Avg','KL City','Penang GT'];
+    var yields = [5.60, 5.47, 5.40, 5.19, 4.60, 3.77];
+    var OPR = 2.75;
+    var t3 = echarts.init(document.getElementById('t3'));
+    t3.setOption({
+      backgroundColor: 'transparent',
+      textStyle: baseTextStyle,
+      grid: { left: 110, right: 60, top: 20, bottom: 20 },
+      tooltip: { trigger: 'axis', backgroundColor: '#fff', borderColor: '#ccd9e8', borderWidth: 1, textStyle: { color: '#1e3a5f', fontSize: 11 }, formatter: function(p){ return p[0].name + '<br/>Yield: ' + p[0].value + '%'; } },
+      xAxis: { type: 'value', min: 0, max: 7, axisLabel: Object.assign({}, baseTextStyle, { formatter: '{value}%' }), splitLine: baseSplitLine, axisLine: { show: false }, axisTick: { show: false } },
+      yAxis: { type: 'category', data: cities, axisLine: { show: false }, axisTick: { show: false }, axisLabel: baseTextStyle, splitLine: { show: false } },
+      series: [
+        {
+          type: 'bar',
+          data: yields.map(function(v){ return { value: v, itemStyle: { color: v > OPR ? '#16a34a' : '#d97706', borderRadius: [0,4,4,0] } }; }),
+          barMaxWidth: 30,
+          label: { show: true, position: 'right', formatter: '{c}%', color: '#1e3a5f', fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 600 }
+        },
+        {
+          type: 'line',
+          markLine: { silent: true, symbol: 'none', lineStyle: { color: '#dc2626', type: 'dashed', width: 1.5 }, label: { formatter: 'OPR 2.75%', color: '#dc2626', fontSize: 10, fontFamily: 'JetBrains Mono, monospace' }, data: [{ xAxis: OPR }] },
+          data: []
+        }
+      ]
+    });
+
+    // Test 4: Multi-line — Overhang 3-Scenario Forecast
+    var t4 = echarts.init(document.getElementById('t4'));
+    t4.setOption({
+      backgroundColor: 'transparent',
+      textStyle: baseTextStyle,
+      legend: { top: 8, textStyle: baseTextStyle, icon: 'circle', itemWidth: 8 },
+      grid: { left: 50, right: 20, top: 45, bottom: 30 },
+      tooltip: {
+        trigger: 'axis', backgroundColor: '#fff', borderColor: '#ccd9e8', borderWidth: 1, textStyle: { color: '#1e3a5f', fontSize: 11 },
+        formatter: function(params){ var s = params[0].axisValue + '<br/>'; params.forEach(function(p){ if(p.value != null) s += p.marker + p.seriesName + ': ' + (p.value/1000).toFixed(0) + 'K<br/>'; }); return s; }
+      },
+      xAxis: { type: 'category', data: ['2018','2019','2020','2021','2022','2023','24H1','25*','26E','27E','28E','29E'], axisLine: baseAxisLine, axisTick: { show: false }, axisLabel: baseTextStyle, splitLine: { show: false } },
+      yAxis: { type: 'value', axisLabel: Object.assign({}, baseTextStyle, { formatter: function(v){ return v>=1000?(v/1000).toFixed(0)+'K':v; } }), splitLine: baseSplitLine, axisLine: { show: false }, axisTick: { show: false } },
+      series: [
+        { name: 'Historical', type: 'line', data: [32313,36863,31092,26424,27746,25816,22642,28672,null,null,null,null], lineStyle: { color: '#1e3a5f', width: 2.5 }, itemStyle: { color: '#1e3a5f' }, symbol: 'circle', symbolSize: 5, areaStyle: { color: { type:'linear',x:0,y:0,x2:0,y2:1, colorStops:[{offset:0,color:'rgba(30,58,95,0.12)'},{offset:1,color:'rgba(30,58,95,0)'}] } }, connectNulls: false },
+        { name: 'Bull (90K)', type: 'line', data: [null,null,null,null,null,null,null,28672,43000,42000,22000,8000], lineStyle: { color: '#16a34a', width: 1.5, type: 'dashed' }, itemStyle: { color: '#16a34a' }, symbol: 'circle', symbolSize: 4, connectNulls: false },
+        { name: 'Base (85K)', type: 'line', data: [null,null,null,null,null,null,null,28672,46000,47000,28000,14000], lineStyle: { color: '#d97706', width: 2, type: 'dashed' }, itemStyle: { color: '#d97706' }, symbol: 'circle', symbolSize: 5, connectNulls: false },
+        { name: 'Bear (75K)', type: 'line', data: [null,null,null,null,null,null,null,28672,51000,57000,42000,28000], lineStyle: { color: '#dc2626', width: 1.5, type: 'dashed' }, itemStyle: { color: '#dc2626' }, symbol: 'circle', symbolSize: 4, connectNulls: false }
+      ]
+    });
+
+    // Test 5: Radar — Risk Monitor
+    var t5 = echarts.init(document.getElementById('t5'));
+    t5.setOption({
+      backgroundColor: 'transparent',
+      textStyle: baseTextStyle,
+      legend: { bottom: 0, textStyle: baseTextStyle, icon: 'circle', itemWidth: 8 },
+      radar: {
+        indicator: [ { name: 'Liquidity', max: 10 }, { name: 'Credit', max: 10 }, { name: 'Supply', max: 10 }, { name: 'Macro', max: 10 }, { name: 'Policy', max: 10 }, { name: 'Foreign', max: 10 } ],
+        shape: 'polygon', splitNumber: 4,
+        axisName: { color: '#5a7a9a', fontSize: 11, fontFamily: 'Inter, sans-serif' },
+        splitLine: { lineStyle: { color: '#e8f0f9' } },
+        splitArea: { show: false },
+        axisLine: { lineStyle: { color: '#e8f0f9' } }
+      },
+      series: [{
+        type: 'radar',
+        data: [
+          { name: 'Current Risk', value: [6, 7, 8, 5, 6, 5], lineStyle: { color: '#dc2626', width: 2 }, itemStyle: { color: '#dc2626' }, areaStyle: { color: 'rgba(220,38,38,0.1)' } },
+          { name: '2023 Baseline', value: [5, 6, 5, 5, 4, 4], lineStyle: { color: '#5a7a9a', width: 1.5, type: 'dashed' }, itemStyle: { color: '#5a7a9a' }, areaStyle: { color: 'rgba(139,163,192,0.08)' } }
+        ]
+      }]
+    });
+
+    // Test 6: Mixed — MHPI Index + YoY%
+    var t6 = echarts.init(document.getElementById('t6'));
+    t6.setOption({
+      backgroundColor: 'transparent',
+      textStyle: baseTextStyle,
+      legend: { top: 8, textStyle: baseTextStyle, icon: 'circle', itemWidth: 8 },
+      grid: { left: 50, right: 50, top: 45, bottom: 30 },
+      tooltip: { trigger: 'axis', backgroundColor: '#fff', borderColor: '#ccd9e8', borderWidth: 1, textStyle: { color: '#1e3a5f', fontSize: 11 } },
+      xAxis: { type: 'category', data: ['2019','2020','2021','2022','2023','2024','2025Q3'], axisLine: baseAxisLine, axisTick: { show: false }, axisLabel: baseTextStyle, splitLine: { show: false } },
+      yAxis: [
+        { type: 'value', name: 'Index', nameTextStyle: baseTextStyle, axisLabel: baseTextStyle, splitLine: baseSplitLine, axisLine: { show: false }, axisTick: { show: false }, min: 140, max: 250 },
+        { type: 'value', name: 'YoY %', nameTextStyle: baseTextStyle, axisLabel: Object.assign({}, baseTextStyle, { formatter: '{value}%' }), splitLine: { show: false }, axisLine: { show: false }, axisTick: { show: false }, min: -2, max: 10 }
+      ],
+      series: [
+        { name: 'Nominal Index', type: 'line', yAxisIndex: 0, data: [194, 195, 197, 200, 207, 224, 229.1], lineStyle: { color: '#1e3a5f', width: 2.5 }, itemStyle: { color: '#1e3a5f' }, symbol: 'circle', symbolSize: 5, smooth: 0.2 },
+        { name: 'Real Index', type: 'line', yAxisIndex: 0, data: [160, 160, 159, 156, 157, 165, 167], lineStyle: { color: '#5a7a9a', width: 2, type: 'dashed' }, itemStyle: { color: '#5a7a9a' }, symbol: 'circle', symbolSize: 4, smooth: 0.2 },
+        {
+          name: 'YoY % (Nominal)', type: 'bar', yAxisIndex: 1,
+          data: [1.1, 0.5, 1.0, 1.5, 3.5, 8.2, 0.14].map(function(v){ return { value: v, itemStyle: { color: v >= 0 ? 'rgba(22,163,74,0.6)' : 'rgba(220,38,38,0.6)', borderRadius: v >= 0 ? [3,3,0,0] : [0,0,3,3] } }; }),
+          barMaxWidth: 30,
+          label: { show: true, position: 'top', formatter: function(p){ return (p.data.value > 0 ? '+' : '') + p.data.value + '%'; }, fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#1e3a5f' }
+        }
+      ]
+    });
+
+    // Resize handler
+    window.addEventListener('resize', function(){ t1.resize(); t2.resize(); t3.resize(); t4.resize(); t5.resize(); t6.resize(); });
+  });
+  </script>
+</body>
+</html>

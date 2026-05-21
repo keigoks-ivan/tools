@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demand Analysis | Australia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}</style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+      <h1><span class="lang-en">Demand Analysis</span><span class="lang-zh" style="display:none">需求分析</span></h1>
+      <p class="subtitle"><span class="lang-en">Transactions, Migration &amp; Buyer Composition</span><span class="lang-zh" style="display:none">交易量、移民與買家結構</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">KEY METRICS</span><span class="lang-zh" style="display:none">關鍵指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">PROPERTY TRANSFERS</span><span class="lang-zh" style="display:none">不動產移轉</span></div>
+        <div class="kpi-value">565,073</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">+2.6% YoY</span><span class="lang-zh" style="display:none">年增2.6%</span></span>
+        <div class="kpi-source">ABS 2025</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">FIRST-HOME BUYERS</span><span class="lang-zh" style="display:none">首購族</span></div>
+        <div class="kpi-value">~30%</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Of new loans</span><span class="lang-zh" style="display:none">新貸款佔比</span></span>
+        <div class="kpi-source">ABS/APRA</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">NET MIGRATION</span><span class="lang-zh" style="display:none">淨移民</span></div>
+        <div class="kpi-value"><span class="lang-en">High</span><span class="lang-zh" style="display:none">高位</span></div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Demand driver</span><span class="lang-zh" style="display:none">需求驅動力</span></span>
+        <div class="kpi-source">ABS 2025</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">INVESTOR SHARE</span><span class="lang-zh" style="display:none">投資者佔比</span></div>
+        <div class="kpi-value">42%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Rising</span><span class="lang-zh" style="display:none">上升中</span></span>
+        <div class="kpi-source">APRA 2025</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">RENTER SHARE</span><span class="lang-zh" style="display:none">租客佔比</span></div>
+        <div class="kpi-value">35%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Of households</span><span class="lang-zh" style="display:none">家庭佔比</span></span>
+        <div class="kpi-source">Census</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">FIRST HOME GUARANTEE</span><span class="lang-zh" style="display:none">首購保障計畫</span></div>
+        <div class="kpi-value"><span class="lang-en">Expanded</span><span class="lang-zh" style="display:none">已擴大</span></div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Policy support</span><span class="lang-zh" style="display:none">政策支持</span></span>
+        <div class="kpi-source">NHFIC</div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">DEMAND CHARTS</span><span class="lang-zh" style="display:none">需求圖表</span></div>
+
+    <div class="chart-card">
+      <h3><span class="lang-en">Property Transfers (Annual)</span><span class="lang-zh" style="display:none">年度不動產移轉量</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">National residential transactions</span><span class="lang-zh" style="display:none">全國住宅交易量</span></p>
+      <div class="chart-wrap tall"><div id="chartAuTxn" style="width:100%;height:100%"></div></div>
+    </div>
+
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Migration vs Price Growth</span><span class="lang-zh" style="display:none">移民 vs 房價成長</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Net overseas migration &amp; price YoY</span><span class="lang-zh" style="display:none">海外淨移民與房價年增率</span></p>
+        <div style="position:relative;height:280px;"><div id="chartAuMigration" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Buyer Type Composition</span><span class="lang-zh" style="display:none">買家類型結構</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Owner-occupier vs Investor loan share</span><span class="lang-zh" style="display:none">自住 vs 投資者貸款佔比</span></p>
+        <div style="position:relative;height:280px;"><div id="chartAuBuyerType" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en"><strong>Sources:</strong> ABS, APRA, CoreLogic, NHFIC. Data as of Q1 2026 unless stated otherwise.</span>
+      <span class="lang-zh" style="display:none"><strong>資料來源：</strong>ABS、APRA、CoreLogic、NHFIC。除另行標註外，資料截至2026年Q1。</span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  function fmtAUD(v){if(v>=1000000)return 'A$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return 'A$'+Math.round(v/1000)+'K';return 'A$'+v;}
+  function fmtAUDShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return Math.round(v/1000)+'K';return v.toString();}
+  var baseText={color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+  var allCharts=[];
+
+  function initCharts(lang){
+    var en=lang==='en';
+    var years=['2019','2020','2021','2022','2023','2024','2025'];
+
+    // Chart 1: Property Transfers
+    var c1=echarts.init(document.getElementById('chartAuTxn'));
+    c1.setOption({
+      tooltip:Object.assign({},baseTooltip,{formatter:function(p){return p[0].axisValue+'<br/>'+(en?'Transfers':'移轉')+': '+fmtK(p[0].value);}}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:years}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[{
+        name:en?'Transfers':'移轉量',
+        type:'line',
+        data:[470000,450000,580000,510000,490000,550000,565073],
+        smooth:true,
+        symbol:'circle',symbolSize:6,
+        lineStyle:{color:C.navy,width:2},
+        itemStyle:{color:C.navy},
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(30,58,95,0.2)'},{offset:1,color:'rgba(30,58,95,0.02)'}])},
+        markPoint:{
+          data:[{type:'max',name:'Max',label:{formatter:function(p){return fmtK(p.value);},fontSize:10,color:'#fff'},itemStyle:{color:C.navy}}],
+          symbol:'circle',symbolSize:36
+        }
+      }]
+    });
+    allCharts.push(c1);
+
+    // Chart 2: Migration vs Price Growth (dual-axis)
+    var c2=echarts.init(document.getElementById('chartAuMigration'));
+    c2.setOption({
+      tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}},
+      legend:Object.assign({},baseLegend,{data:[en?'Net Migration (K)':'淨移民(千)',en?'Price YoY %':'房價年增%']}),
+      grid:{left:50,right:50,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:years}),
+      yAxis:[
+        mkAxis({type:'value',name:en?'Migration (K)':'移民(千)',position:'left',axisLabel:{formatter:'{value}K'}}),
+        mkAxis({type:'value',name:en?'Price YoY %':'房價%',position:'right',splitLine:{show:false},axisLabel:{formatter:'{value}%'}})
+      ],
+      series:[
+        {
+          name:en?'Net Migration (K)':'淨移民(千)',
+          type:'bar',
+          yAxisIndex:0,
+          data:[240,-96,-85,320,510,490,450],
+          itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},
+          barWidth:'40%'
+        },
+        {
+          name:en?'Price YoY %':'房價年增%',
+          type:'line',
+          yAxisIndex:1,
+          data:[3.2,3.8,20.2,7.3,-4.5,13.0,5.9],
+          smooth:true,
+          symbol:'circle',symbolSize:6,
+          lineStyle:{color:C.orange,width:2},
+          itemStyle:{color:C.orange}
+        }
+      ]
+    });
+    allCharts.push(c2);
+
+    // Chart 3: Buyer Type Composition
+    var buyerYears=['2021','2022','2023','2024','2025'];
+    var c3=echarts.init(document.getElementById('chartAuBuyerType'));
+    c3.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Owner-Occupier':'自住',en?'Investor':'投資者']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:buyerYears}),
+      yAxis:mkAxis({type:'value',max:100,axisLabel:{formatter:'{value}%'}}),
+      series:[
+        {
+          name:en?'Owner-Occupier':'自住',
+          type:'line',
+          data:[68,70,65,62,58],
+          smooth:true,
+          symbol:'circle',symbolSize:6,
+          lineStyle:{color:C.navy,width:2},
+          itemStyle:{color:C.navy}
+        },
+        {
+          name:en?'Investor':'投資者',
+          type:'line',
+          data:[32,30,35,38,42],
+          smooth:true,
+          symbol:'circle',symbolSize:6,
+          lineStyle:{color:C.orange,width:2},
+          itemStyle:{color:C.orange}
+        }
+      ]
+    });
+    allCharts.push(c3);
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

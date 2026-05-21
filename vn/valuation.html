@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Valuation Monitor | Vietnam Property Monitor</title>
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+  <h1 class="page-title"><span class="lang-en">Valuation Monitor</span><span class="lang-zh" style="display:none">估值監測</span></h1>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">HCMC P/R Ratio</span><span class="lang-zh" style="display:none">胡志明市租金比</span></div>
+      <div class="kpi-value">18x</div>
+      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Buy favored</span><span class="lang-zh" style="display:none">有利購買</span></div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">Hanoi P/R</span><span class="lang-zh" style="display:none">河內租金比</span></div>
+      <div class="kpi-value">20x</div>
+      <div class="kpi-delta"><span class="lang-en">Neutral</span><span class="lang-zh" style="display:none">中性</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">HCMC PTI</span><span class="lang-zh" style="display:none">胡志明市房價所得比</span></div>
+      <div class="kpi-value">10.0x</div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Moderately stretched</span><span class="lang-zh" style="display:none">中度偏高</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Gross Yield HCMC</span><span class="lang-zh" style="display:none">胡志明市毛租金收益率</span></div>
+      <div class="kpi-value">5.5%</div>
+      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Above SBV</span><span class="lang-zh" style="display:none">高於央行利率</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Gross Yield Hanoi</span><span class="lang-zh" style="display:none">河內毛租金收益率</span></div>
+      <div class="kpi-value">5.0%</div>
+      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Positive carry</span><span class="lang-zh" style="display:none">正利差</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Yield Spread vs SBV</span><span class="lang-zh" style="display:none">利差 vs 央行利率</span></div>
+      <div class="kpi-value">+1.0%</div>
+      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Positive carry</span><span class="lang-zh" style="display:none">正利差</span></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">PTI by City</span><span class="lang-zh" style="display:none">各城市房價所得比</span></h3>
+      <div id="chartVnPTI" style="height:280px"></div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">ASEAN Price-to-Rent Comparison</span><span class="lang-zh" style="display:none">東盟租金比比較</span></h3>
+      <div id="chartVnASEAN" style="height:280px"></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Yield vs SBV Rate</span><span class="lang-zh" style="display:none">租金收益率 vs 央行利率</span></h3>
+      <div id="chartVnYieldSpread" style="height:220px"></div>
+      <div class="insight-box" style="border-left-color:#16a34a">
+        <span class="lang-en">Vietnam yields provide positive carry vs policy rate, unlike HK/TW/Seoul where yields are near or below borrowing costs. Cash buyers benefit most given 9% mortgage rates.</span>
+        <span class="lang-zh" style="display:none">越南租金收益率相對於政策利率提供正利差，不同於香港、台灣、首爾等地的收益率接近或低於借貸成本。鑑於9%的房貸利率，現金買家獲益最多。</span>
+      </div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">HCMC Price Index (Nominal vs Real)</span><span class="lang-zh" style="display:none">胡志明市價格指數（名目 vs 實質）</span></h3>
+      <div id="chartVnPriceReal" style="height:220px"></div>
+    </div>
+  </div>
+
+  <!-- Summary Framework -->
+  <h2 class="section-heading"><span class="lang-en">Valuation Framework</span><span class="lang-zh" style="display:none">估值框架</span></h2>
+  <div class="summary-grid">
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Price-to-Income</span><span class="lang-zh" style="display:none">房價所得比</span></h4>
+      <p><span class="lang-en">HCMC PTI 10x moderate for emerging market, but 9% mortgage makes leveraged buying expensive. Domestic buyers face significant affordability pressure despite lower absolute prices compared to regional peers.</span><span class="lang-zh" style="display:none">胡志明市房價所得比10倍在新興市場屬中等水平，但9%的房貸利率使槓桿購房成本高昂。儘管絕對價格低於區域同儕，國內買家仍面臨顯著的負擔壓力。</span></p>
+    </div>
+    <div class="summary-card green-left">
+      <h4><span class="lang-en">Price-to-Rent</span><span class="lang-zh" style="display:none">房價租金比</span></h4>
+      <p><span class="lang-en">P/R 18x among most attractive in APAC, rental yields 5.5% comfortably above SBV. Vietnam offers compelling rental income for cash investors compared to mature markets where yields have compressed below policy rates.</span><span class="lang-zh" style="display:none">租金比18倍為亞太區最具吸引力之一，租金收益率5.5%明顯高於央行利率。對現金投資者而言，越南提供極具吸引力的租金收入，相比成熟市場收益率已壓縮至政策利率以下。</span></p>
+    </div>
+    <div class="summary-card green-left">
+      <h4><span class="lang-en">Yield Spread</span><span class="lang-zh" style="display:none">利差分析</span></h4>
+      <p><span class="lang-en">+1.0% spread positive but compressed by high mortgage rates; cash buyers benefit most. The spread is modest compared to Thailand (+2.75%) but meaningful versus negative spreads in HK and near-zero in Taiwan (+0.11%).</span><span class="lang-zh" style="display:none">+1.0%的利差為正但受高房貸利率壓縮，現金買家獲益最多。利差相比泰國（+2.75%）較低，但相對於香港的負利差和台灣（+0.11%）的近零利差仍具意義。</span></p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  var c;
+
+  /* Chart: PTI by City */
+  var cities=['Da Nang','Nha Trang','Hanoi West','HCMC D2','Hanoi CBD','HCMC D1'];
+  var ptiVals=[6.0,7.0,7.5,8.5,9.0,12.0];
+  var ptiColors=ptiVals.map(function(v){return v>=10?C.red:v>=8?C.orange:C.green;});
+  c=echarts.init(document.getElementById('chartVnPTI'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'x';}}),
+    grid:{left:90,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false}),
+    yAxis:mkAxis({type:'category',data:cities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:ptiVals.map(function(v,i){return{value:v,itemStyle:{color:ptiColors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}x',fontSize:11,color:C.navy,fontFamily:'Inter'},
+      markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:1},data:[{xAxis:10,label:{formatter:'Stretched',fontSize:9,color:C.red,position:'insideEndTop'}}]}
+    }]
+  });
+
+  /* Chart: ASEAN Price-to-Rent */
+  var aseanCities=['Dubai','Mexico City','HCMC','KL','Jakarta','Singapore','Bangkok'];
+  var aseanVals=[15,17,18,22,25,29,31];
+  var aseanColors=aseanVals.map(function(v,i){
+    if(aseanCities[i]==='HCMC') return C.green;
+    if(v<=20) return C.navy;
+    if(v<=28) return C.muted;
+    return C.orange;
+  });
+  c=echarts.init(document.getElementById('chartVnASEAN'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'x';}}),
+    grid:{left:90,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false}),
+    yAxis:mkAxis({type:'category',data:aseanCities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:aseanVals.map(function(v,i){return{value:v,itemStyle:{color:aseanColors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}x',fontSize:11,color:C.navy,fontFamily:'Inter'}
+    }]
+  });
+
+  /* Chart: Yield vs SBV Rate */
+  c=echarts.init(document.getElementById('chartVnYieldSpread'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:baseTooltip,
+    legend:Object.assign({},baseLegend,{data:['Rental Yield','SBV Rate']}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+    yAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+    series:[
+      {name:'Rental Yield',type:'line',smooth:0.3,data:[6.5,5.0,4.5,5.0,5.5,5.5,5.5],lineStyle:{color:C.green},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(22,163,74,0.15)'},{offset:1,color:'rgba(22,163,74,0.02)'}]}}},
+      {name:'SBV Rate',type:'line',step:'end',data:[6.25,4.00,4.00,4.00,4.50,4.50,4.50],lineStyle:{color:C.red,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+    ]
+  });
+
+  /* Chart: Nominal vs Real Price Index */
+  c=echarts.init(document.getElementById('chartVnPriceReal'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:baseTooltip,
+    legend:Object.assign({},baseLegend,{data:['Nominal Index','Real Index']}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+    yAxis:mkAxis({type:'value'}),
+    series:[
+      {name:'Nominal Index',type:'line',smooth:0.2,data:[100,102,108,121,125,133,143],lineStyle:{color:C.navy},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5},
+      {name:'Real Index',type:'line',smooth:0.2,data:[100,100,103,112,113,117,123],lineStyle:{color:C.muted,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:5}
+    ]
+  });
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

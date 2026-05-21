@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pavilion Damansara Heights｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-card.warn{border-top:3px solid #dc2626}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* Timeline */
+.timeline{margin:12px 0}
+.tl-item{display:flex;gap:14px;margin-bottom:10px;align-items:flex-start}
+.tl-dot{width:12px;height:12px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.tl-red{background:#dc2626}.tl-yellow{background:#d97706}.tl-green{background:#16a34a}.tl-blue{background:#3b82f6}
+.tl-content{font-size:13px;line-height:1.6}
+.tl-date{font-family:'IBM Plex Mono',monospace;font-weight:700;color:#475569;margin-right:8px}
+/* score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:680px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-r{background:#FEE2E2;color:#991B1B;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #dc2626}
+/* phase breakdown */
+.phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+.phase-card{border-radius:8px;padding:16px;border:1px solid}
+.p1-card{background:#F0FDF4;border-color:#86efac}
+.p2-card{background:#EFF6FF;border-color:#93c5fd}
+.p1-title{font-weight:700;font-size:12px;font-family:'IBM Plex Mono',monospace;color:#166534;margin-bottom:8px}
+.p2-title{font-weight:700;font-size:12px;font-family:'IBM Plex Mono',monospace;color:#1e40af;margin-bottom:8px}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+@media(max-width:680px){.score-cols,.dual-col,.phase-grid{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：Pavilion Damansara Heights @ Bukit Damansara ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 竣工時間線：Crown VP 2025-03（The Edge 確認）｜ MRT 直連天橋 2025-07-15 開通</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>Pavilion Damansara Heights</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&price=1600000&from=PavilionDH"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=PavilionDH"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Damanlela，Bukit Damansara，KL 最矜貴地址 ｜ Pavilion Group × CPPIB（加拿大養老金）JV ｜ Freehold 商業地契（Commercial Strata）｜ 16 英畝整合開發 ｜ Phase 1：1,314住宅單位（Windsor 568 + Regent 581 + Crown 165）｜ Crown VP 2025年3月（The Edge 確認）</div>
+  <div class="badge-row">
+    <span class="badge">⚠️ 商業地契（Commercial Strata）——非住宅地契</span>
+    <span class="badge">⚠️ brickz 住宅成交極稀薄（1–3筆）——FIX-03 警示</span>
+    <span class="badge">⚠️ 掛牌率50%（661售/~1,314戶）——本系列最高</span>
+    <span class="badge">✅ Pavilion Group × CPPIB（全球十大退休基金）</span>
+    <span class="badge">✅ MRT 直連天橋 2025年7月正式開通</span>
+    <span class="badge">✅ 管理費 RM0.67 psf（合理）</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 關鍵警示 -->
+<div class="alert a-red">
+  <strong>🚨 FIX-03 資料不足警示——進場前必讀</strong><br><br>
+  本報告面臨的最大分析限制：<strong>brickz 政府登記住宅成交量極度稀薄</strong>。brickz 顯示 Pavilion Damansara Heights 僅有 1 筆非住宅（商業）成交（2025-03，RM160萬，RM1,472 psf，疑似辦公類別）；另一資料庫顯示全周期僅 3 筆，中位 RM315萬（主要為辦公室）。<br><br>
+  iRumah 的住宅估算（1BR/605sf 中位 RM1,810 psf 等）是基於掛牌估算而非政府登記成交——在 FIX-03 框架下，此數據的統計信心度低。掛牌 661 筆售雖有市場信號意義，但無法代替真實的成交量驗證。<br><br>
+  <strong>本報告在不確定性較高的狀態下分析；所有估值判斷需等待真實成交量累積後才能作為高置信度依據。</strong>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-v">RM1,800</div>
+        <div class="kpi-l">Phase 1 發售均價 PSF</div>
+        <div class="kpi-s neu">PropertyGuru 確認；起步 1BR RM110萬+</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM1,408–2,249</div>
+        <div class="kpi-l">掛牌 PSF 範圍（iProperty 2026）</div>
+        <div class="kpi-s neu">661筆掛牌售；374筆掛牌租</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v down">1筆</div>
+        <div class="kpi-l">brickz 登記成交（全年）</div>
+        <div class="kpi-s down">FIX-03 警示：樣本不足；辦公類別</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v down">50%</div>
+        <div class="kpi-l">掛牌售比率（661/~1,314）</div>
+        <div class="kpi-s down">本系列最高；大量投資者急於退出信號</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM0.67</div>
+        <div class="kpi-l">管理費（psf，含沉沒基金）</div>
+        <div class="kpi-s up">合理；本系列中等水平</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">2025-03</div>
+        <div class="kpi-l">Crown VP（The Edge 確認）</div>
+        <div class="kpi-s down">原訂 Q4 2022——足足延期 2.5 年</div>
+      </div>
+    </div>
+
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商 JV</div><div class="spec-v">Pavilion Group（Pavilion KL、Pavilion Bukit Jalil 開發商）× CPPIB（Canada Pension Plan Investment Board，全球十大退休基金）——B1 機構信用最頂級，但 2.5 年嚴重延期損傷執行信用</div></div>
+      <div class="spec-item"><div class="spec-l">地段 / 地契</div><div class="spec-v">Jalan Damanlela，Bukit Damansara，16 英畝，Freehold 商業地契（Commercial Strata）——KL 最矜貴地址之一，前身為 Damansara Town Centre（JCorp 政府土地）</div></div>
+      <div class="spec-item"><div class="spec-l">Phase 1 住宅</div><div class="spec-v">Windsor Suites（568戶，57層，605–1,878 sqft）+ Regent Suites（581戶，57層，614–1,831 sqft）+ Crown Residences（165戶，50層，2,303–2,803 sqft）= 共 1,314 戶</div></div>
+      <div class="spec-item"><div class="spec-l">Phase 2 住宅</div><div class="spec-v">Imperial Residences（大坪數，3,369–4,090 sqft）+ Royal Suites（452–1,679 sqft）——已在行銷中；Phase 2 零售商場 Phase 1 延伸預計開業中</div></div>
+      <div class="spec-item"><div class="spec-l">竣工時間線</div><div class="spec-v">原訂 Q4 2022（SPA）→ Windsor/Regent VP 估 2024 年底 / 2025 年 Q1；Crown Residences VP 2025 年 3 月（The Edge × EdgeProp 確認）。延期約 2.5 年</div></div>
+      <div class="spec-item"><div class="spec-l">MRT 連接</div><div class="spec-v">Pusat Bandar Damansara MRT（Kajang Line KG13）；直連有蓋天橋 2025 年 7 月 15 日才正式開通（之前為 5 分鐘臨時外走道）。MRT 距 KL Sentral 2 站</div></div>
+      <div class="spec-item"><div class="spec-l">Pavilion DH Mall</div><div class="spec-v">Phase 1 Mall（533,361 sqft NLA，80% 開業率）於 2023 年 10 月開業；Phase 2 Mall 延伸（529,353 sqft NLA）開業中；1.2 百萬 sqft 總面積目標是 KL 主要購物中心之一</div></div>
+      <div class="spec-item"><div class="spec-l">服務</div><div class="spec-v">24小時禮賓服務（管家、物業管理、機場接送）；所有單位半配裝修（Semi-furnished）；設施 Level 3A 共享花園；頂層泳池、Sky Terrace、Jacuzzi</div></div>
+      <div class="spec-item"><div class="spec-l">坪數範圍</div><div class="spec-v">605 sqft（Windsor 1BR）至 2,803 sqft（Crown 4+2BR）；Phase 2 Imperial 最大 4,090 sqft；全無露台（All units without balcony）</div></div>
+      <div class="spec-item"><div class="spec-l">鄰近設施</div><div class="spec-v">Royal Selangor Golf Club（車程）；Bukit Kiara Equestrian Club；Bangsar Shopping Centre 5分鐘車程；Cempaka International School 5分鐘；KPJ Hospital 10分鐘；Pantai Hospital 15分鐘</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜Pavilion DH 的核心投資論點——「KL 最矜貴地址的整合 TOD 生活圈」</h3>
+    <p>Pavilion Damansara Heights 的投資論點是：在 KL 地位最崇高的居住地址之一（Damansara Heights / Bukit Damansara）建造一個 16 英畝的完全整合開發案——居住於 Pavilion 購物中心正上方，出門直連 Pavilion DH Mall，有蓋走道直達 MRT，周邊是 Royal Selangor Golf Club、頂奢醫療機構和頂尖國際學校。</p>
+    <p>這個論點在「外籍高淨值家庭自住」框架下有其合理性——尤其對追求 Damansara Heights 地址、Pavilion 購物便利性、MRT 連通性三者兼得的外籍高管而言。Pavilion Group × CPPIB 的品牌背書也提供了頂級機構信用。</p>
+
+    <div class="callout">
+      <strong>最關鍵的反問：為什麼掛牌率高達 50%（661筆售/1,314戶）？</strong><br><br>
+      如果 Pavilion Damansara Heights 真的如論點所說是「KL 最矜貴地址的完美整合開發」，為什麼竣工後會有一半的業主掛牌出售？<br><br>
+      可能的解釋：①大量投資者（非自住者）在期房階段購入，竣工後試圖獲利出場；②原訂 Q4 2022 完工嚴重延期至 2025，部分業主資金壓力增加；③有蓋 MRT 天橋到 2025 年 7 月才開通（比 VP 晚了幾個月），早期業主面對「走 5 分鐘外走道」的失望；④商業地契帶來的持有成本（商業電費）是部分業主未預期的。50% 掛牌率是本系列所有建案中最高，需要認真對待。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜竣工時間線——2.5 年嚴重延期的完整記錄</h3>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot tl-blue"></div>
+        <div class="tl-content"><span class="tl-date">2020 年發售</span>Phase 1 SPA 簽署；原訂竣工 Q4 2022</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot tl-red"></div>
+        <div class="tl-content"><span class="tl-date">2022 Q4</span>原訂竣工日期——<strong>未達成</strong>，啟動延期</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot tl-yellow"></div>
+        <div class="tl-content"><span class="tl-date">2023年10月</span>Pavilion DH Mall Phase 1 開業（533,361 sqft，80% 進駐）；辦公塔已交付；「住宅交付即將到來」的聲明</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot tl-yellow"></div>
+        <div class="tl-content"><span class="tl-date">2024年</span>Windsor Suites 和 Regent Suites VP 估計在 2024 年底至 2025 年 Q1 間；PVIP 標注竣工 2024</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot tl-green"></div>
+        <div class="tl-content"><span class="tl-date">2025年3月</span>Crown Residences VP 達成（The Edge × EdgeProp 確認）；brickz 記錄 1 筆商業成交</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot tl-green"></div>
+        <div class="tl-content"><span class="tl-date">2025年7月15日</span>Pavilion DH Mall 與 MRT 站有蓋行人天橋正式開通（Wikipedia 確認）；之前業主只能走 5 分鐘外走道</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot tl-blue"></div>
+        <div class="tl-content"><span class="tl-date">2026年（進行中）</span>Phase 2 Mall 延伸開業中；Phase 2 住宅（Imperial + Royal）行銷中</div>
+      </div>
+    </div>
+
+    <div class="alert a-yellow">
+      <strong>延期的財務影響：</strong>SPA 約 2020 年，原訂 Q4 2022 竣工。Crown Residences VP 至 2025 年 3 月，實際延期約 28 個月。依據 HDA Schedule H 規定，遲交超過 36 個月開發商須支付每日 LAD（Liquidated Ascertained Damages）補償——但若延期在 36 個月以內，業主可能無法獲得賠償。已入住業主的實際持有成本因此被稀釋。進場二手時需向代理確認原始 SPA 日期和延期是否獲得 LAD 補償。
+    </div>
+
+    <hr class="dv">
+    <h3>C｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>50% 掛牌率——潛在二手積壓</strong></td><td>661 筆掛牌售 / 1,314 戶 = 50%，本系列最高。若大量投資者同時行銷，壓低成交 PSF 和填租競爭力；「Pavilion 品牌溢價」是否足以抵抗這個供應壓力是最核心的不確定性</td><td><span class="tag t-r">高（確定存在）</span></td><td>二手成交 PSF 可能低於 RM1,800 發售均價；退出時間拉長</td></tr>
+          <tr><td><strong>商業地契（商業電費）持有成本</strong></td><td>Commercial Strata 電費為商業費率（比民用貴 30–60%）；需向管委會確認是否可轉換民用費率（部分商業地契可，部分不可）。這是 50% 高掛牌率的可能原因之一</td><td><span class="tag t-y">中高</span></td><td>持有成本超預期；出租時難以說服租客承擔商業電費</td></tr>
+          <tr><td><strong>Phase 2 住宅供給（Imperial + Royal）</strong></td><td>Phase 2 住宅（Imperial 大坪數 + Royal Suites 452 sqft 起）將繼續加入 Pavilion DH 地段的出租和出售供給，稀釋 Phase 1 的稀缺性</td><td><span class="tag t-y">中（Phase 2 已在行銷）</span></td><td>Phase 1 的退出流動性和租金進一步受壓</td></tr>
+          <tr><td><strong>MRT 天橋到 2025 年 7 月才開通</strong></td><td>MRT 直連天橋比 VP（2025 年 3 月）晚了 4 個月才開通——早期業主的核心賣點「MRT 直連」在入住初期實際上是「5 分鐘外走道」</td><td><span class="tag t-b">已解決（2025-07-15 後）</span></td><td>影響已消；但早期的失望情緒可能加速部分業主掛牌出售</td></tr>
+          <tr><td><strong>Damansara Heights 地段無步行商業生活圈</strong></td><td>除了 Pavilion DH Mall 本身，Damansara Heights 不是步行商圈（無 Jalan Alor 式街道生活）；需要開車才能到達 Bangsar、Mont Kiara 等；對追求步行生活的外籍（如 「步行生活圈」買家需求）不適合</td><td><span class="tag t-r">確定劣勢</span></td><td>自住買家群體更侷限（必須有車或接受 Pavilion DH Mall 為主要生活圈）</td></tr>
+          <tr><td><strong>brickz 成交量稀薄，定價依據不足</strong></td><td>住宅二手市場的政府登記成交量極低（FIX-03 不足），使得「真實市場成交 PSF」目前難以可靠確認；iRumah RM1,810 psf 估算樣本不足</td><td><span class="tag t-y">中</span></td><td>估值判斷置信度低；真實二手 PSF 可能低於或高於 RM1,800 發售均價，無法確定</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場概況與上游報告框架</div>
+  <div class="section-body">
+    <h3>1.1 上游報告對 Pavilion DH 地段的直接記載</h3>
+    <p>上游兩份報告均未直接點名 Pavilion Damansara Heights，但有相關地段定性：</p>
+    <table>
+      <thead><tr><th>上游報告框架</th><th>Pavilion DH 對應</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>KL RM1M+ 報告：「Damansara Heights 獨棟 +37% YoY 2024，土地稀缺性驅動，均價 RM520 萬」</td><td>這是指 Damansara Heights 的獨棟有地房，非 Pavilion DH 的 SR——兩者市場完全不同；不可混為一談</td><td><span class="tag t-y">無直接關聯</span></td></tr>
+        <tr><td>KL RM1M+ 報告：「跌的共同點：高密度量產 + 商業地契 + 無差異化」</td><td>Pavilion DH：商業地契（-）；但 Pavilion 品牌 + CPPIB + 整合 TOD 有差異化（+）；密度 1,314 戶中等（中性）</td><td><span class="tag t-y">混合</span></td></tr>
+        <tr><td>KL RM1M+ 報告：「漲的共同點：稀缺性 + 有明確催化劑」</td><td>稀缺性：16 英畝 Damansara Heights Freehold 開發用地（真實稀缺）；催化劑：MRT + Pavilion Mall 已成熟</td><td><span class="tag t-g">正面——稀缺性論點成立</span></td></tr>
+        <tr><td>KL 供需報告：「KLCC / 金三角 Overhang 壓力：中–高（舊存貨多）」</td><td>Pavilion DH 在 Damansara Heights，非 KLCC 廊帶，積壓壓力更低；但商業地契 SR 的系統性問題仍存在</td><td><span class="tag t-g">正面——非 KLCC 積壓最嚴重品類</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 Damansara Heights 地段房市數據</h3>
+    <table>
+      <thead><tr><th>指標</th><th>數值</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>Damansara Heights 有地房（2024）</td><td>均價 RM520萬，YoY +37%（上游報告）</td><td>地段有地房市場極強，但與 Pavilion DH SR 不同產品線</td></tr>
+        <tr><td>Damansara Heights 非有地公寓均價（2024）</td><td>RM1,400 psf（EdgeProp EPIQ 數據）</td><td>非有地公寓均價比 Pavilion DH 發售均價 RM1,800 低 29%</td></tr>
+        <tr><td>Pavilion DH 掛牌 PSF（iProperty 2026）</td><td>RM1,408–2,249</td><td>掛牌低端已低於發售均價 RM1,800——部分業主願意折讓</td></tr>
+        <tr><td>iRumah 住宅估算 PSF</td><td>1BR/605sf：RM1,810；1BR/826sf：RM2,240；4BR/2,803sf：RM1,590</td><td>FIX-03 警示：樣本不足，為估算非政府登記成交</td></tr>
+        <tr><td>brickz 登記成交</td><td>1 筆（商業類別，2025-03，RM160萬，RM1,472 psf）</td><td>幾乎無法作為可靠定價依據（單筆，類別為辦公）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-orange">
+      <strong>掛牌 PSF 低端 RM1,408（已跌破發售均價 RM1,800）是重要警示信號。</strong>掛牌低端低於發售，說明部分業主願意以低於發售價的折讓求售——在 FIX-03 數據不足的情況下，這是目前最能說明市場情緒的信號。掛牌中端 RM1,700–1,900 仍在發售均價附近，但 50% 掛牌率使得競爭極度激烈，真實成交最終可能低於掛牌中端。
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構</div>
+  <div class="section-body">
+    <h3>2.1 正面需求因素</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>說明</th><th>強度</th></tr></thead>
+      <tbody>
+        <tr><td>Damansara Heights 既有高淨值居民</td><td>地段均價 RM520萬+有地房；外籍高管、企業主、高淨值本地家庭——這個群體有一定的 PDH 住宅需求</td><td><span class="tag t-g">中強</span></td></tr>
+        <tr><td>MRT 通勤族（KL Sentral 2站）</td><td>MRT 2025-07 後有蓋直連；2 站到 KL Sentral = KLIA Express 直達機場；吸引需要頻繁出差的高管</td><td><span class="tag t-y">中</span></td></tr>
+        <tr><td>Pavilion DH Mall 生態圈</td><td>1.2 百萬 sqft 零售目標；Phase 1 已 80% 進駐；Damansara Heights 原本缺乏大型購物中心，PDH 填補了空白</td><td><span class="tag t-g">中強</span></td></tr>
+        <tr><td>KL 西部外籍族群溢出</td><td>Mont Kiara / TTDI 外籍族群需要 KL 城市配套但不想在 KLCC 核心的選項；PDH 地段更「靜謐奢華」</td><td><span class="tag t-y">中</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供給壓力——Phase 1 大量掛牌 + Phase 2 持續供給</h3>
+    <div class="phase-grid">
+      <div class="phase-card p1-card">
+        <div class="p1-title">Phase 1（竣工）</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td>Windsor Suites</td><td>568戶，57層</td></tr>
+            <tr><td>Regent Suites</td><td>581戶，57層</td></tr>
+            <tr><td>Crown Residences</td><td>165戶，50層（VP 2025-03）</td></tr>
+            <tr><td style="font-weight:700">Phase 1 合計</td><td style="font-weight:700">1,314 戶</td></tr>
+            <tr><td>掛牌售</td><td><span class="down">661筆（50%掛牌率）⚠️</span></td></tr>
+            <tr><td>掛牌租</td><td>374筆（28%出租掛牌率，尚可）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="phase-card p2-card">
+        <div class="p2-title">Phase 2（進行中）</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td>Imperial Residences</td><td>3,369–4,090 sqft 大坪豪宅</td></tr>
+            <tr><td>Royal Suites</td><td>452–1,679 sqft（競爭 Phase 1 小坪數）</td></tr>
+            <tr><td>Phase 2 Mall</td><td>529,353 sqft 延伸（開業中）</td></tr>
+            <tr><td>Phase 2 Corporate Tower</td><td>辦公供給持續</td></tr>
+            <tr><td style="font-weight:700">Phase 2 影響</td><td style="color:#1e40af;font-weight:700">Royal Suites 452 sqft 起，比 Windsor 605 sqft 更小更便宜——直接競爭 Phase 1 小單位出租市場</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="alert a-red">
+      <strong>供需核心判斷：🔴 短期供給嚴重過剩——50% 掛牌率 + Phase 2 持續供給 = 本系列最嚴峻的短期供需壓力。</strong>661 筆掛牌售意味著 661 個業主在等待買家，當他們與同樣正在行銷的 Phase 2 Royal Suites 競爭時，定價壓力極大。這個供需結構短期（1–3 年）內非常不利於新進場的買家。
+    </div>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="section">
+  <div class="section-header">§4｜定價分析（FIX-03 嚴重不足警示）</div>
+  <div class="section-body">
+    <div class="alert a-red">
+      <strong>FIX-03 嚴格不通過：brickz 政府登記住宅成交量為 0–1 筆（不含辦公室）。</strong>本系列評分框架要求至少 5–10 筆政府登記成交才能作為可靠定價依據。目前 Pavilion DH 的所有 PSF 估算均基於：①代理掛牌（661 筆，非成交）；②iRumah 估算（非政府登記）；③FIX-04 排除後的掛牌中位。這些數據提供方向參考，但缺乏高置信度。
+    </div>
+
+    <h3>可取得的定價信號（置信度排序）</h3>
+    <table>
+      <thead><tr><th>數據來源</th><th>數值</th><th>置信度</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>brickz 政府登記（商業類）</td><td>1 筆，RM160萬，RM1,472 psf（2025-03）</td><td><span class="tag t-r">極低——單筆，辦公類別</span></td><td>無法作為住宅二手定價依據</td></tr>
+        <tr><td>iProperty 掛牌低端（FIX-04 後）</td><td>RM1,408 psf 起（已低於發售 RM1,800）</td><td><span class="tag t-y">中——方向信號</span></td><td>掛牌低端跌破發售，部分業主願折讓；議價空間大</td></tr>
+        <tr><td>iProperty 掛牌中端</td><td>RM1,700–1,900 psf（多數掛牌集中）</td><td><span class="tag t-y">中——方向信號</span></td><td>靠近發售均價；但 661 筆競爭使真實成交可能更低</td></tr>
+        <tr><td>iRumah 估算（住宅各型號）</td><td>1BR/605sf：RM1,810；4BR/2,803sf：RM1,590</td><td><span class="tag t-y">中低——估算非實際成交</span></td><td>大坪 4BR 反而 PSF 更低（RM1,590），說明大坪需求相對弱</td></tr>
+        <tr><td>Damansara Heights 地段公寓均價（EdgeProp）</td><td>RM1,400 psf（2024，所有非有地公寓）</td><td><span class="tag t-y">中——地段參考</span></td><td>PDH 發售均價 RM1,800 比地段整體均價高 29%——品牌溢價是否可持續需驗證</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>最重要的定價觀察：</strong>Damansara Heights 地段既有公寓均價約 RM1,400 psf（EdgeProp 2024 數據），而 Pavilion DH 發售均價 RM1,800 psf 要求買家為「Pavilion 品牌整合開發溢價」額外支付 29%。這個溢價是否能在二手市場持續維持，需要真實成交量（brickz）驗證——目前這個驗證數據幾乎不存在。
+    </div>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率</div>
+  <div class="section-body">
+    <h3>5.1 租金行情（掛牌數據）</h3>
+    <table>
+      <thead><tr><th>型號</th><th>坪數</th><th>月租掛牌（iProperty）</th><th>月租 psf</th><th>Gross Yield（@RM1,800 psf 發售）</th></tr></thead>
+      <tbody>
+        <tr><td>Windsor 1BR</td><td>605–826 sqft</td><td>RM3,800–6,500/月</td><td>RM6.5–7.9 psf</td><td>~4.2–5.5%（@RM108.9–148.7萬）</td></tr>
+        <tr><td>Regent 1BR</td><td>614–780 sqft</td><td>RM4,000–6,500/月</td><td>RM6.5–8.4 psf</td><td>~4.4–5.8%</td></tr>
+        <tr><td>Windsor 2BR</td><td>1,042–1,200 sqft</td><td>RM6,500–9,500/月</td><td>RM6.2–7.9 psf</td><td>~4.3–5.5%</td></tr>
+        <tr><td>Crown 3BR+</td><td>2,303–2,803 sqft</td><td>RM15,000–25,000/月</td><td>RM6.5–8.9 psf</td><td>~4.3–5.9%</td></tr>
+      </tbody>
+    </table>
+    <p class="src">iProperty 掛牌租 374 筆（2026-04）；掛牌 psf 約 RM6.51–10.74（iProperty 建案頁面）；實際成交月租可能低於掛牌 10–15%</p>
+
+    <h3>5.2 外國人現金流試算（Windsor 1BR 826 sqft，RM148.7萬入場 @ RM1,800 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租收入（RM5,500 × 12）</td><td>RM 66,000</td><td>1BR 826sqft，保守取掛牌中位；Pavilion 品牌溢價假設</td></tr>
+        <tr><td>管理費（RM0.67 × 826 × 12）</td><td><span class="down">-RM 6,641</span></td><td>RM0.67 psf（合理）</td></tr>
+        <tr><td>地稅 + 門牌稅</td><td><span class="down">-RM 2,000</span></td><td></td></tr>
+        <tr><td>空置期（2.5個月，661 筆競爭）</td><td><span class="down">-RM 13,750</span></td><td>50% 掛牌率環境填租競爭激烈，空置期偏長</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 12,948</span></td><td>（66,000–23,391）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 5,280</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 25,381/年</strong></td><td>Net Yield ≈ 1.71%（RM148.7萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 30,661/年</td><td>Net Yield ≈ 2.06%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-red">
+      <strong>外籍 Net Yield 1.7–2.1%——本系列最低之一，且商業電費問題尚未計入。</strong>若管委會無法將電費轉換為民用費率，商業電費（比民用貴 30–60%）將進一步侵蝕租金吸引力——出租競爭中，租客會比較 PDH（商業電費）與同地段其他建案（民用電費），PDH 可能需要讓租金折讓來補償電費差異。這使得估算的 Net Yield 1.7–2.1% 可能進一步下調。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>外籍影響</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td>Freehold 商業地契（Commercial Strata）——確認非 HDA 保護（Serviced Residence，非 SOHO 框架）</td><td>State Consent 需申請；商業貸款 LTV 70–85%；電費費率需確認</td></tr>
+        <tr><td>最低門檻</td><td>RM 1,000,000（KL）</td><td>✅ Windsor 1BR 起步 RM108.9萬，勉強達標；Regent 1BR 起步 RM110.5萬</td></tr>
+        <tr><td>印花稅</td><td>4% 統一稅率</td><td>RM148.7萬：印花稅 RM59,480</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>10%（外籍）</td><td>若 2025 年入住，第6年約 2031</td></tr>
+        <tr><td>電費費率</td><td>商業地契——需向管委會確認是否可申請民用費率轉換</td><td>⚠️ 若無法轉換，持有成本顯著高於同類建案；這也可能是 50% 掛牌率的原因之一</td></tr>
+        <tr><td>MM2H 合規</td><td>RM100萬+；Freehold 商業地契</td><td>金額勉強達標（1BR 起步）；商業地契 MM2H 合規性需向律師書面確認</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設——Pavilion Mall 整合 + MRT 天橋（2025-07 正式開通）</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>基建</th><th>狀態</th><th>對 PDH 的影響</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pusat Bandar Damansara MRT（KG13）</strong></td><td>已運營；有蓋直連天橋 2025-07-15 正式開通</td><td>✅ MRT 連接已實現；KL Sentral 2 站 = KLIA Express；Bukit Bintang 5 站；TRX 6 站。但 MRT 天橋比 VP 晚了幾個月</td></tr>
+        <tr><td>Pavilion DH Mall（Phase 1）</td><td>2023-10 開業，80% 進駐；Phase 2 開業中</td><td>✅ 直接建於購物中心上方；餐飲、零售、生活服務全整合</td></tr>
+        <tr><td>Pavilion DH Mall（Phase 2 延伸）</td><td>進行中；原 Phase 2 Mall 計畫 Q4 2024 開業</td><td>✅ 全規模 1.2 百萬 sqft 完成後，成為 KL 重要購物中心</td></tr>
+        <tr><td>周邊道路</td><td>SPRINT Highway 直達；新建 Bangsar-Damansara 高架道路</td><td>🟡 有車族便利；但 Damansara Heights 整體不是步行商圈</td></tr>
+        <tr><td>無步行商業街</td><td>Damansara Heights 沒有 Jalan Alor / Bangsar Village 式的步行美食街</td><td>❌ 除了 Pavilion DH Mall，沒有步行可達的外部商業生態圈——對「不叫 Grab」需求的外籍不適合</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>Pavilion DH Mall 是建案最強的真實加分：</strong>直接建於 1.2 百萬 sqft 購物中心上方，是 KL 所有居住建案中唯一「走出門就在 Pavilion Mall 裡」的體驗。對以「一站式生活便利」為核心需求的高淨值家庭而言，這是真實的差異化——但前提是接受「Pavilion DH Mall 即為生活圈」而非需要外出的多樣化生活型態。
+    </div>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">適合的買家</td><td>以「Pavilion Mall 直上、有車自住、Damansara Heights 地址」為核心需求的高淨值家庭；不依賴步行商圈；接受商業地契框架</td></tr>
+            <tr><td>不適合的買家</td><td>追求步行商業生活圈的外籍（如 「步行生活圈」買家需求）；需要高 Net Yield（1.7–2.1% 偏低）的投資者；預算有限（1BR RM108.9萬勉強達外籍門檻）</td></tr>
+            <tr><td>議價策略</td><td>50% 掛牌率 = 賣家競爭激烈，買家有強議價空間；目標從掛牌中位 RM1,700–1,900 psf 議至 RM1,500–1,600 psf（-10–15%）；掛牌低端 RM1,408 顯示有賣家願意折讓</td></tr>
+            <tr><td>進場前確認</td><td>① 電費是否可轉換民用費率；② 延期 LAD 補償情況；③ Phase 2 Royal Suites 定價（是否競爭 Phase 1 小單位）；④ 管委會允許短租政策</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🔴 50% 掛牌率 + Phase 2 持續供給 = 短期最嚴峻供需壓力</td></tr>
+            <tr><td>價格趨勢</td><td>🔴 掛牌低端跌破發售價；brickz 住宅成交量極稀薄——無可靠正面信號</td></tr>
+            <tr><td>租金市場</td><td>🟡 Gross Yield 4–6% 尚可；但 Net Yield 1.7–2.1% 偏低（商業電費未計入）</td></tr>
+            <tr><td>估值</td><td>🔴 發售均價 RM1,800 比地段均價 RM1,400 高 29%——品牌溢價缺乏成交驗證</td></tr>
+            <tr><td>地段長期論點</td><td>🟡 Damansara Heights 有地房 +37%——但 SR 市場與有地房完全不同；長期地段論點較 KLCC/TRX 弱</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-y" style="margin-top:16px">
+      <strong>🟡 觀望等待——短期多項逆風需消化；中長期地段論點有一定吸引力但缺乏成交驗證</strong><br><br>
+      Pavilion Damansara Heights 的問題是多層疊加的：①50% 掛牌率（本系列最高）顯示大量投資者試圖退出，短期供給嚴重過剩；②brickz 住宅成交量幾乎為零（FIX-03 嚴重不通過），真實市場 PSF 無法確認；③掛牌低端已跌破發售均價；④商業地契電費問題尚未確認；⑤MRT 天橋到 2025 年 7 月才開通，延期 2.5 年損傷開發商執行信用。<br><br>
+      <strong>觀望等待的理由：</strong>待 brickz 住宅政府登記成交量積累至至少 20–30 筆（估計 2026–2027 年可達），才能確認真實二手市場 PSF。若屆時 Phase 1 的 50% 掛牌率有所消化（降至 25% 以下），且成交 PSF 在 RM1,600–1,800 psf 範圍維持，Pavilion DH 的「Damansara Heights 整合 TOD 自住」論點才有更清晰的市場支撐。<br><br>
+      <strong>適合進場的時機：</strong>若急於進場，在 50% 掛牌率環境下，買家有強議價空間。以 RM1,500–1,600 psf（比發售折讓 11–17%）進場，安全邊際更合理。以自住（非出租）框架持有，接受現金流不高但享受 Pavilion DH Mall 直上生活便利的論點成立。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Pavilion Damansara Heights ｜ 建案綜合評分卡 ｜ ⚠️ FIX-03 嚴重不足，評分置信度中等</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%，RM1M+ 成交 +11.3%；Damansara Heights 地段有地房 +37%；但 Damansara Heights SR 市場與有地房完全不同，謹慎外推</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>4.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:40%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">50% 掛牌率（661筆售）= 本系列最嚴峻的二手供給過剩；Phase 2 持續供給雪上加霜；商業地契 SR 的系統性積壓壓力；Damansara Heights 非 KLCC 積壓重災區但 PDH 自身創造了大量供給</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>5.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Crown VP 2025-03；MRT 天橋 2025-07 才開通；社區剛開始成熟。本系列建案中「剛竣工成熟最慢」——短期 1–2 年仍是最困難的消化期</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Pusat Bandar Damansara MRT（2025-07 有蓋天橋直連）+ Pavilion DH Mall 1.2 百萬 sqft + SPRINT Highway 直達；弱點：沒有步行商業街、地段缺乏外部步行生活圈</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 商業地契（State Consent 正常，無 DBKL 額外層）；電費費率未確認；MM2H 合規需書面確認；1BR 起步勉強達 RM100 萬外籍門檻</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">5.6/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.0×.2 + 4.0×.25 + 5.0×.2 + 7.5×.2 + 5.5×.15 = 5.625 ≈ 5.6</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Pavilion Group（Pavilion KL 開發商，品牌頂級）× CPPIB（全球十大退休基金）= 機構信用頂級（+）；但 Q4 2022 → 2025 延期 2.5 年損傷執行信用（-2.5 分）；最終已交屋（+）。平衡後 7.0</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>4.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:45%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">發售均價 RM1,800 比 Damansara Heights 地段公寓均價（RM1,400）高 29%；掛牌低端已跌破發售；brickz 住宅成交量近零（FIX-03）；估值論點缺乏市場成交驗證——B2 偏低</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>4.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:45%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">外籍 Net Yield 1.7–2.1%（本系列最低之一）；Gross Yield 4–6% 尚可但被高 PSF 入場成本和商業電費侵蝕；374 筆掛牌租競爭激烈使填租難度偏高</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Pusat Bandar Damansara MRT（2025-07 有蓋直連）+ Pavilion DH Mall 直上（真實步行便利）；弱點：非步行外部商業圈、需要開車才能到達其他生活目的地</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Pavilion DH Mall 直上（KL 唯一「住在 Pavilion 裡」體驗）；24小時禮賓服務；16 英畝整合開發規模；Crown Residences 大坪豪宅差異化；弱點：全無露台（All without balcony）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 商業地契——比 SWNK Houze Leasehold 強；比 TRX Residences（Commercial HDA）弱（無 HDA 標準 SPA 保護）；電費費率未確認</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>3.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:35%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">50% 掛牌率 = 661 個賣家等待買家；brickz 住宅成交量近零；這是本系列流動性最差的建案——目前退出幾乎不可行，需等社區成熟後才能改善</td></tr>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">5.5/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.0×.2+4.5×.2+4.5×.15+7.0×.15+7.0×.1+5.5×.1+3.5×.1 = 5.525 ≈ 5.5</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 5.6 × 40% + B 類 5.5 × 60%</div>
+        <div class="score-big">5.5<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#FEF9C3;color:#92400E">⭐⭐⭐ 中等——品牌一流，執行延期，供給過剩，成交不足；觀望等待</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">2.24 + 3.315 = 5.555 → 四捨五入 5.5（或更精確 5.6）取 5.5 以反映 FIX-03 的資料不確定性折扣</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>Pavilion Group × CPPIB 機構頂級信用（B1 7.0）；16 英畝 Freehold 整合開發在 KL 最矜貴地址之一（稀缺性真實）；Pavilion DH Mall 直上（B5 7.0，KL 唯一體驗）；50% 掛牌率環境使買家有強議價空間（目標 RM1,500–1,600 psf）；MRT 有蓋天橋 2025-07 已開通。<br>
+          <strong style="color:#fca5a5">最大風險：</strong>50% 掛牌率（B7 3.5/10，本系列最差流動性）；brickz 住宅成交量近零（FIX-03 嚴重不通過）；2.5 年嚴重延期損傷執行信用；Net Yield 1.7–2.1%（偏低）；商業電費未確認；Phase 2 持續供給；無外部步行商業生活圈（不適合「不叫 Grab」需求）。
+        </div>
+      </div>
+    </div>
+
+    <h3>十一個建案（含 Pavilion DH）完整最終排序</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>外籍 Net Yield</th>
+          <th>A2 供需</th>
+          <th>B7 流動性</th>
+          <th>建議</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="font-weight:700;color:#ca8a04">1</td><td><strong>R22 Mont Kiara</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.2%</td><td>8.5</td><td>8.5</td><td>🟢 進場</td></tr>
+        <tr><td style="font-weight:700;color:#64748b">2</td><td><strong>Park Place DPC</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.4%</td><td>8.0</td><td>8.0</td><td>🟢 進場</td></tr>
+        <tr><td>3</td><td><strong>TRX Residences</strong></td><td style="font-weight:700;color:#16a34a">7.6</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>~1.9–2.3%</td><td>7.0</td><td>7.5</td><td>🟢 增值框架積極考慮</td></tr>
+        <tr><td>4</td><td><strong>The Conlay by E&O</strong></td><td style="font-weight:700;color:#16a34a">7.4</td><td><span class="tag t-y">Freehold 商業</span></td><td>~2.5–3.0%</td><td>6.5</td><td>6.0</td><td>🟢 審慎積極考慮</td></tr>
+        <tr><td>5</td><td><strong>CloutHaus KLCC</strong></td><td style="font-weight:700;color:#d97706">6.7</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.9–2.2%</td><td>6.5</td><td>6.0</td><td>🟡 觀望</td></tr>
+        <tr><td>6</td><td><strong>SWNK Houze BBCC</strong></td><td style="font-weight:700;color:#d97706">6.2</td><td><span class="tag t-r">Leasehold 商業</span></td><td>~1.9–2.3%</td><td>5.5</td><td>3.0</td><td>🟡 本地可；🔴 外籍不推</td></tr>
+        <tr><td>7</td><td><strong>TS2 武吉免登 🔵</strong></td><td style="font-weight:700;color:#3b82f6">6.0</td><td><span class="tag t-y">Freehold 商業</span></td><td>功能性定位</td><td>3.5</td><td>5.5</td><td>🔵 功能性持有</td></tr>
+        <tr><td>8</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="font-weight:700;color:#f97316">5.7</td><td><span class="tag t-g">SOHO HDA 商業</span></td><td>SOHO 2.8–3.4%</td><td>3.5</td><td>5.0</td><td>🟡 SOHO條件性；🔴 SOVO迴避</td></tr>
+        <tr><td>9</td><td><strong>Stonor 3 KLCC</strong></td><td style="font-weight:700;color:#dc2626">5.7</td><td><span class="tag t-y">商業地契 HDA</span></td><td>~1.9–2.3%</td><td>4.0</td><td>4.0</td><td>🔴 暫緩</td></tr>
+        <tr style="background:#FEF9C3"><td>10</td><td><strong>Pavilion DH 🆕</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.7–2.1%</td><td style="color:#dc2626;font-weight:700">4.0</td><td style="color:#dc2626;font-weight:700">3.5</td><td>🟡 觀望等待（brickz待確認）</td></tr>
+        <tr><td>11</td><td><strong>Orion Residence BB</strong></td><td style="font-weight:700;color:#dc2626">5.2</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.2–1.5%</td><td>3.5</td><td>4.0</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">🔑 Pavilion DH（5.5）排名第10，比 Stonor 3（5.7）低，略高於 Orion Residence（5.2）。評分如此低的核心原因：A2 供需（4.0，50% 掛牌率）和 B7 流動性（3.5，brickz 近零成交）是本系列最差的兩個維度。品牌論點（B1 7.0）和地段基建（A4 7.5、B4 7.0）提供了底部支撐，但市場現況的多重逆風壓制了整體評分。⚠️ 本評分在 FIX-03 不足的情況下作出，置信度中等，待 brickz 住宅成交量積累後需重新評估。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL RM1M+ 高端住宅市場深度研究（2026-03）｜KL 供需 Overhang 深度分析（2026-04-01）｜brickz.my（1 筆商業成交，2025-03，RM1,472 psf）｜iRumah.co（住宅 PSF 估算，FIX-03：置信度中低）｜iProperty.com.my（661筆掛牌售，374筆掛牌租，2026-04）｜The Edge Malaysia（Mall Phase 1 開業，2023-10-11）｜EdgeProp（Crown VP 2025-03；Damansara Heights 地段數據）｜Wikipedia（MRT 天橋 2025-07-15 開通）｜PVIP（Windsor 568戶，Regent 581戶，Crown 165戶；竣工 2024；商業地契）<br>
+  ⚠️ 本報告 FIX-03 數據不足警示：brickz 住宅政府登記成交量極稀薄（0–1 筆），所有 PSF 估值均屬中低置信度，需等待真實成交量積累後重新驗證。電費費率、Phase 2 定價、延期 LAD 補償情況需向律師 / 管委會確認。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

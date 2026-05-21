@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property Monitor | Find your global property</title>
+<meta name="color-scheme" content="light">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e3a5f;line-height:1.5}
+a{color:inherit;text-decoration:none}
+
+/* NAV */
+.navbar{background:#fff;border-bottom:1px solid #dce8f5;height:52px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-l{display:flex;align-items:center;gap:14px}
+.nav-brand{font-size:12px;font-weight:700;letter-spacing:.12em;color:#1e3a5f}
+.nav-r{display:flex;align-items:center;gap:14px}
+.nav-link{font-size:11px;color:#5a7a9a;font-weight:500}
+.nav-link:hover{color:#3b82f6}
+.lang-btns{display:flex;gap:4px}
+.lang-btn{padding:4px 10px;border:1px solid #dce8f5;border-radius:4px;font-size:11px;cursor:pointer;background:#fff;color:#5a7a9a;font-family:inherit}
+.lang-btn.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+
+/* HERO + persona */
+.hero{background:linear-gradient(180deg,#0a1726 0%,#0f1e33 60%,#162e4d 100%);color:#e2ecf8;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-30%;left:-10%;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 60%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-30%;right:-10%;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,0.10) 0%,transparent 60%);pointer-events:none}
+.hero-inner{max-width:min(1280px,96vw);margin:0 auto;padding:64px 32px 36px;position:relative}
+.hero-eyebrow{font-size:10px;letter-spacing:.18em;font-weight:700;color:#f59e0b;margin-bottom:14px}
+.hero-h1{font-size:48px;font-weight:800;color:#fff;line-height:1.1;letter-spacing:-.02em;margin-bottom:14px;max-width:840px}
+.hero-h1 em{color:#f59e0b;font-style:normal}
+.hero-sub{font-size:15px;color:#94a3b8;line-height:1.6;max-width:680px;margin-bottom:32px}
+.hero-stats{display:flex;gap:34px;padding:14px 0;margin-bottom:34px;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08)}
+.hero-stat .lbl{font-size:9px;letter-spacing:.12em;color:#5a8ab5;font-weight:600;margin-bottom:2px}
+.hero-stat .val{font-size:18px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+
+.persona-q{font-size:11px;letter-spacing:.10em;font-weight:700;color:#3b82f6;margin-bottom:18px}
+.persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.persona{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.10);border-radius:14px;padding:24px 22px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:10px;position:relative;color:inherit}
+.persona:hover{background:rgba(255,255,255,0.07);border-color:rgba(245,158,11,0.4);transform:translateY(-2px)}
+.persona.active{background:linear-gradient(135deg,rgba(245,158,11,0.18),rgba(245,158,11,0.06));border-color:#f59e0b;box-shadow:0 8px 28px rgba(245,158,11,0.18)}
+.persona.active .persona-icon{color:#f59e0b}
+.persona-icon{width:30px;height:30px;color:#3b82f6;transition:color .15s}
+.persona-h{font-size:18px;font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.2}
+.persona-d{font-size:11.5px;color:#94a3b8;line-height:1.55}
+.persona-meta{font-size:9.5px;letter-spacing:.06em;color:#5a8ab5;font-weight:600;margin-top:auto;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between}
+.persona-meta strong{color:#fff;font-weight:700}
+.persona-check{position:absolute;top:14px;right:14px;width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.25);background:transparent;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;transition:all .15s}
+.persona.active .persona-check{background:#f59e0b;border-color:#f59e0b;color:#0f1e33;font-weight:800}
+
+@media(max-width:920px){
+  .hero-inner{padding:36px 18px 24px}
+  .hero-h1{font-size:30px}
+  .persona-grid{grid-template-columns:1fr}
+  .hero-stats{flex-wrap:wrap;gap:18px}
+}
+
+/* SECTION wrappers */
+.section{max-width:min(1280px,96vw);margin:0 auto;padding:48px 32px}
+.section-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px}
+.section-eye{font-size:10px;letter-spacing:.18em;font-weight:700;color:#3b82f6}
+.section-h2{font-size:22px;font-weight:700;color:#0f1e33;letter-spacing:-.01em;margin-top:4px;line-height:1.2}
+.section-sub{font-size:13px;color:#5a7a9a;margin-top:6px;max-width:680px;line-height:1.55}
+
+/* SCATTER (D) — light */
+.scatter-wrap{display:grid;grid-template-columns:1.7fr 1fr;gap:24px;align-items:start}
+.scatter-card{background:#fff;border:1px solid #dce8f5;border-radius:14px;padding:14px 16px 18px;color:#1e3a5f;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,30,51,0.04)}
+.scatter-svg{width:100%;height:auto;display:block}
+.scatter-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:10px;color:#5a7a9a;padding:0 6px}
+.scatter-legend span{display:inline-flex;align-items:center;gap:5px}
+.scatter-legend .sw{width:10px;height:10px;border-radius:50%;display:inline-block}
+.scatter-side{display:flex;flex-direction:column;gap:12px}
+.q-card{background:#fff;border:1px solid #dce8f5;border-left:4px solid var(--qc);border-radius:8px;padding:12px 14px;font-size:11.5px}
+.q-card-h{font-size:12px;font-weight:700;color:#1e3a5f;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.q-card-h .q-pill{font-size:8px;font-weight:800;letter-spacing:.06em;background:var(--qc);color:#fff;padding:2px 6px;border-radius:3px}
+.q-card-d{color:#5a7a9a;line-height:1.5;font-size:11px}
+.q-card-d strong{color:#0f1e33}
+.q-card-cities{font-size:10px;color:#3b82f6;margin-top:6px;font-weight:600}
+@media(max-width:920px){.scatter-wrap{grid-template-columns:1fr}}
+
+/* MAP (C) — light */
+.map-wrap{background:#fff;border:1px solid #dce8f5;border-radius:14px;padding:20px;color:#1e3a5f;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,30,51,0.04)}
+.map-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.map-toggle{display:flex;background:#f0f6ff;border:1px solid #dce8f5;border-radius:6px;padding:2px}
+.map-toggle button{background:transparent;border:none;color:#5a7a9a;font-size:11px;font-family:inherit;padding:5px 12px;border-radius:4px;cursor:pointer;font-weight:600;letter-spacing:.04em}
+.map-toggle button.on{background:#3b82f6;color:#fff}
+.map-toggle button:hover:not(.on){color:#1e3a5f}
+.map-meta{margin-left:auto;font-size:10px;color:#94a3b8;letter-spacing:.04em}
+.map-svg-wrap{position:relative;background:#eaf2fb;border-radius:10px;overflow:hidden;border:1px solid #dce8f5}
+.map-svg{width:100%;height:auto;display:block}
+.map-tip{position:absolute;background:#fff;color:#1e3a5f;border-radius:8px;padding:10px 14px;font-size:11px;box-shadow:0 6px 20px rgba(15,30,51,0.18);min-width:180px;pointer-events:none;display:none;z-index:5;border:1px solid #dce8f5}
+.map-tip.show{display:block}
+.map-tip h4{font-size:13px;color:#0f1e33;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.map-tip table{width:100%;font-size:10.5px;font-variant-numeric:tabular-nums}
+.map-tip td{padding:1px 0;color:#5a7a9a}
+.map-tip td:last-child{text-align:right;color:#0f1e33;font-weight:600}
+.map-tip td .green{color:#16a34a}.map-tip td .red{color:#dc2626}
+.map-tip a{display:block;margin-top:8px;font-size:10px;color:#3b82f6;font-weight:600;pointer-events:auto}
+.map-foot{display:flex;justify-content:space-between;margin-top:12px;font-size:10px;color:#94a3b8;flex-wrap:wrap;gap:8px;align-items:center}
+.map-foot .scale{display:flex;align-items:center;gap:6px}
+.map-foot .scale .gradbar{width:120px;height:8px;border-radius:4px}
+
+/* MAP — top 5 strip */
+.map-top5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+.map-top5-item{background:#f8fbff;border:1px solid #dce8f5;border-radius:6px;padding:8px 10px;font-size:10px}
+.map-top5-rank{font-size:9px;color:#f59e0b;font-weight:700;letter-spacing:.06em}
+.map-top5-name{font-size:11.5px;color:#0f1e33;font-weight:600;margin:2px 0 4px;display:flex;align-items:center;gap:4px}
+.map-top5-val{font-size:13px;font-weight:700;color:#16a34a;font-variant-numeric:tabular-nums}
+.map-top5-val.red{color:#dc2626}
+@media(max-width:760px){
+  .map-top5{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+  .map-wrap{padding:14px}
+  .map-svg-wrap{margin:0 -4px}
+}
+
+/* CTA */
+.cta-band{background:#fff;border-top:1px solid #dce8f5;padding:48px 0}
+.cta-inner{max-width:min(1280px,96vw);margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1.5fr 1fr;gap:32px;align-items:center}
+.cta-h2{font-size:28px;font-weight:800;color:#0f1e33;letter-spacing:-.015em;line-height:1.2;margin-bottom:10px}
+.cta-h2 em{color:#3b82f6;font-style:normal}
+.cta-sub{font-size:13px;color:#5a7a9a;line-height:1.6;max-width:520px}
+.cta-actions{display:flex;flex-direction:column;gap:10px}
+.cta-btn{padding:14px 22px;border-radius:10px;font-size:13px;font-weight:700;text-align:center;display:flex;align-items:center;justify-content:space-between;gap:10px;transition:all .15s}
+.cta-btn.primary{background:#1e3a5f;color:#fff;border:1px solid #1e3a5f}
+.cta-btn.primary:hover{background:#0f1e33;transform:translateX(2px)}
+.cta-btn.secondary{background:#fff;color:#1e3a5f;border:1px solid #dce8f5}
+.cta-btn.secondary:hover{border-color:#3b82f6;color:#3b82f6}
+.cta-btn .meta{font-size:10px;color:#94a3b8;font-weight:500;display:block;margin-top:2px}
+.cta-btn.primary .meta{color:#94a3b8}
+@media(max-width:760px){.cta-inner{grid-template-columns:1fr;padding:0 18px}.cta-h2{font-size:22px}}
+
+footer.foot{background:#0f1e33;color:#94a3b8;padding:22px 0;font-size:11px}
+footer.foot .inner{max-width:min(1280px,96vw);margin:0 auto;padding:0 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+footer.foot .brand{font-weight:700;letter-spacing:.12em;color:#cbd5e1}
+footer.foot a{color:#5a8ab5}footer.foot a:hover{color:#3b82f6}
+
+.lang-zh{display:none}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<!-- ===== HERO + PERSONAS (B) ===== -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="lang-en">GLOBAL REAL ESTATE INTELLIGENCE</span><span class="lang-zh">全球房地產情報</span></div>
+    <h1 class="hero-h1">
+      <span class="lang-en">Find <em>your</em> global property.</span>
+      <span class="lang-zh">找出<em>適合你的</em>全球房產。</span>
+    </h1>
+    <p class="hero-sub">
+      <span class="lang-en">81 cities across 25 countries, scored on yield, growth, supply, currency, taxes &amp; visa pathways. Tell us what you're looking for — we'll show you the shortlist.</span>
+      <span class="lang-zh">25 國家、81 個城市，依收益、成長、供給、匯率、稅務與簽證路徑全面評分。告訴我們你的目標 — 我們給你篩選清單。</span>
+    </p>
+
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">CITIES</span><span class="lang-zh">城市</span></div><div class="val">81</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">MARKETS</span><span class="lang-zh">市場</span></div><div class="val">18</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">COUNTRIES</span><span class="lang-zh">國家</span></div><div class="val">25</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">UPDATED</span><span class="lang-zh">更新</span></div><div class="val">Q1 2026</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">SOURCES</span><span class="lang-zh">來源</span></div><div class="val">22+</div></div>
+    </div>
+
+    <div class="persona-q"><span class="lang-en">WHAT MATTERS MOST TO YOU?</span><span class="lang-zh">你最在意什麼？</span></div>
+    <div class="persona-grid">
+      <div class="persona active" data-p="income" onclick="setPersona('income')">
+        <span class="persona-check">✓</span>
+        <svg class="persona-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M5 8c0-2 2-4 7-4s7 2 7 4-2 3-7 4-7 2-7 4 2 4 7 4 7-2 7-4"/></svg>
+        <div class="persona-h"><span class="lang-en">I want yield</span><span class="lang-zh">我要收租</span></div>
+        <div class="persona-d"><span class="lang-en">Rent covers mortgage with surplus. Cities where carry &gt; 0% and tenants are easy to find.</span><span class="lang-zh">租金能養房貸還有餘。利差正、租客好找的城市。</span></div>
+        <div class="persona-meta"><span><span class="lang-en">Filter</span><span class="lang-zh">條件</span></span><strong>Carry &gt; +1% · Yield ≥ 5% · Vac &lt; 3%</strong></div>
+      </div>
+      <div class="persona" data-p="growth" onclick="setPersona('growth')">
+        <span class="persona-check">✓</span>
+        <svg class="persona-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3,17 9,11 13,15 21,7"/><polyline points="14,7 21,7 21,14"/></svg>
+        <div class="persona-h"><span class="lang-en">I want growth</span><span class="lang-zh">我要增值</span></div>
+        <div class="persona-d"><span class="lang-en">Capital appreciation over 10 years. Cities with structural supply scarcity and strong track record.</span><span class="lang-zh">看 10 年資本增值。結構性供給稀缺、歷史紀錄強的城市。</span></div>
+        <div class="persona-meta"><span><span class="lang-en">Filter</span><span class="lang-zh">條件</span></span><strong>10yr ≥ 70% · Pipeline &lt; 1.5%</strong></div>
+      </div>
+      <div class="persona" data-p="visa" onclick="setPersona('visa')">
+        <span class="persona-check">✓</span>
+        <svg class="persona-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="14" x2="11" y2="14"/></svg>
+        <div class="persona-h"><span class="lang-en">I want a passport</span><span class="lang-zh">我要身分</span></div>
+        <div class="persona-d"><span class="lang-en">Property purchase that earns residency or citizenship. UAE, Turkey, Malaysia, Indonesia routes.</span><span class="lang-zh">買房順帶取得居留／公民身份。阿聯、土耳其、馬來西亞、印尼路徑。</span></div>
+        <div class="persona-meta"><span><span class="lang-en">Filter</span><span class="lang-zh">條件</span></span><strong>Visa-linked countries</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ONE-CHART STORY (D): CARRY × GROWTH SCATTER ===== -->
+<section class="section">
+  <div class="section-hdr">
+    <div>
+      <div class="section-eye"><span class="lang-en">THE BIG PICTURE</span><span class="lang-zh">全局視角</span></div>
+      <h2 class="section-h2"><span class="lang-en">Carry × 10-year growth, every city plotted</span><span class="lang-zh">利差 × 10 年漲幅，每城一點</span></h2>
+      <p class="section-sub"><span class="lang-en">The single chart that shows where you're paying more than you earn — and where capital growth pays you back. Highlighted dots match your selected persona above.</span><span class="lang-zh">一張圖看清「付出 vs 收回」的全景。亮起的點即符合你上方選的目標。</span></p>
+    </div>
+  </div>
+  <div class="scatter-wrap">
+    <div class="scatter-card">
+      <svg class="scatter-svg" id="scatterSvg" viewBox="0 0 800 480"></svg>
+      <div class="scatter-legend">
+        <span><span class="sw" style="background:#16a34a"></span><span class="lang-en">Match (your persona)</span><span class="lang-zh">符合所選目標</span></span>
+        <span><span class="sw" style="background:#94a3b8;opacity:0.7"></span><span class="lang-en">Other cities</span><span class="lang-zh">其他城市</span></span>
+        <span style="margin-left:auto;color:#94a3b8"><span class="lang-en">Dot size = price (USD) · hover any dot</span><span class="lang-zh">點大小＝美元房價 · 滑鼠移上看細節</span></span>
+      </div>
+    </div>
+    <div class="scatter-side">
+      <div class="q-card" data-q="a" onmouseenter="setHoverQuad('a')" onmouseleave="setHoverQuad(null)" style="--qc:#16a34a">
+        <div class="q-card-h"><span class="q-pill">SWEET SPOT</span></div>
+        <div class="q-card-d"><span class="lang-en"><strong>Positive carry + high growth.</strong> Both income and capital. Rare combination.</span><span class="lang-zh"><strong>正利差 + 高成長。</strong>租金加增值雙收。罕見組合。</span></div>
+        <div class="q-card-cities" id="qcCitiesA">—</div>
+      </div>
+      <div class="q-card" data-q="b" onmouseenter="setHoverQuad('b')" onmouseleave="setHoverQuad(null)" style="--qc:#2563eb">
+        <div class="q-card-h"><span class="q-pill">GROWTH BET</span></div>
+        <div class="q-card-d"><span class="lang-en"><strong>Negative carry, high growth.</strong> Cover the gap from salary; let appreciation pay you back.</span><span class="lang-zh"><strong>負利差但高成長。</strong>用薪水補缺口，讓增值還你錢。</span></div>
+        <div class="q-card-cities" id="qcCitiesB">—</div>
+      </div>
+      <div class="q-card" data-q="c" onmouseenter="setHoverQuad('c')" onmouseleave="setHoverQuad(null)" style="--qc:#b45309">
+        <div class="q-card-h"><span class="q-pill">PURE INCOME</span></div>
+        <div class="q-card-d"><span class="lang-en"><strong>Positive carry, low growth.</strong> Cash flow today, no big upside. Suits retirees.</span><span class="lang-zh"><strong>正利差但低成長。</strong>當下現金流，無大增值。適合退休族。</span></div>
+        <div class="q-card-cities" id="qcCitiesC">—</div>
+      </div>
+      <div class="q-card" data-q="d" onmouseenter="setHoverQuad('d')" onmouseleave="setHoverQuad(null)" style="--qc:#dc2626">
+        <div class="q-card-h"><span class="q-pill">TRAP ZONE</span></div>
+        <div class="q-card-d"><span class="lang-en"><strong>Negative carry + low growth.</strong> Pay every month, no payback. Avoid unless special thesis.</span><span class="lang-zh"><strong>負利差 + 低成長。</strong>每月貼錢、毫無回報。除非特殊命題否則避開。</span></div>
+        <div class="q-card-cities" id="qcCitiesD">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INTERACTIVE WORLD MAP (C) ===== -->
+<section class="section" style="padding-top:0">
+  <div class="section-hdr">
+    <div>
+      <div class="section-eye"><span class="lang-en">EXPLORE BY GEOGRAPHY</span><span class="lang-zh">地理探索</span></div>
+      <h2 class="section-h2"><span class="lang-en">81 cities, one map. Toggle the metric.</span><span class="lang-zh">81 城市同框。切換指標即時上色。</span></h2>
+      <p class="section-sub"><span class="lang-en">Hover any dot to see metrics. Selected persona dims non-matching cities. Top 5 by selected metric shown below.</span><span class="lang-zh">滑鼠移上任何點看細節。所選 persona 會淡化不符合的城市。下方顯示所選指標的前 5 名。</span></p>
+    </div>
+  </div>
+
+  <div class="map-wrap">
+    <div class="map-controls">
+      <div class="map-toggle">
+        <button class="on" data-m="yield" onclick="setMapMetric('yield')"><span class="lang-en">Yield</span><span class="lang-zh">收益率</span></button>
+        <button data-m="carry" onclick="setMapMetric('carry')"><span class="lang-en">Carry</span><span class="lang-zh">利差</span></button>
+        <button data-m="d10y" onclick="setMapMetric('d10y')"><span class="lang-en">10yr Growth</span><span class="lang-zh">10年漲幅</span></button>
+        <button data-m="pti" onclick="setMapMetric('pti')"><span class="lang-en">PTI</span><span class="lang-zh">房價收入比</span></button>
+      </div>
+      <div class="map-meta" id="mapMeta">—</div>
+    </div>
+
+    <div class="map-svg-wrap">
+      <svg class="map-svg" id="mapSvg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="map-tip" id="mapTip"></div>
+    </div>
+
+    <div class="map-foot">
+      <span><span class="lang-en">Mercator projection · highlighted dots match persona</span><span class="lang-zh">麥卡托投影 · 亮起的點符合所選 persona</span></span>
+      <div class="scale">
+        <span id="scaleMin">—</span>
+        <span class="gradbar" id="scaleBar"></span>
+        <span id="scaleMax">—</span>
+      </div>
+    </div>
+
+    <div class="map-top5" id="mapTop5"></div>
+  </div>
+</section>
+
+<!-- ===== DEMO STRIP — link to use-case walkthroughs ===== -->
+<style>
+.demo-strip{background:linear-gradient(135deg,#fffaf2 0%,#fff6e6 100%);border-top:1px solid #fde4be;border-bottom:1px solid #fde4be;padding:24px 0}
+.demo-strip-inner{max-width:min(1280px,96vw);margin:0 auto;padding:0 32px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center}
+.demo-strip-icon{width:46px;height:46px;border-radius:50%;background:#fff;border:1.5px solid #f59e0b;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.demo-strip-text .ds-eyebrow{font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#d97706;margin-bottom:3px}
+.demo-strip-text .ds-h{font-size:15px;font-weight:700;color:#0f1e33;letter-spacing:-.005em;line-height:1.3;margin-bottom:3px}
+.demo-strip-text .ds-sub{font-size:12px;color:#5a7a9a;line-height:1.5;max-width:640px}
+.demo-strip-cta{background:#1e3a5f;color:#fff;padding:11px 20px;border-radius:6px;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;white-space:nowrap;transition:all .15s}
+.demo-strip-cta:hover{background:#0f1e33;transform:translateX(2px)}
+@media(max-width:760px){
+  .demo-strip-inner{grid-template-columns:1fr;text-align:left;padding:0 18px;gap:14px}
+  .demo-strip-icon{display:none}
+  .demo-strip-cta{justify-self:start}
+}
+</style>
+<section class="demo-strip">
+  <div class="demo-strip-inner">
+    <div class="demo-strip-icon">📖</div>
+    <div class="demo-strip-text">
+      <div class="ds-eyebrow"><span class="lang-en">FIRST TIME HERE?</span><span class="lang-zh">第一次使用？</span></div>
+      <div class="ds-h"><span class="lang-en">Walk through the site as a real buyer would</span><span class="lang-zh">用真實買家視角，走一遍這個網站</span></div>
+      <p class="ds-sub"><span class="lang-en">Follow Mr. Lin (Taipei, Japan Business Manager visa, planning a Tokyo rental) through 11 stops — which page to open, what to click, what each chart means, and what the site can't answer for him.</span><span class="lang-zh">跟著林先生（台北、日本經管簽、預計東京收租）走 11 站 — 該打開哪一頁、點哪裡、每張圖代表什麼、這個網站不能告訴他什麼。</span></p>
+    </div>
+    <a class="demo-strip-cta" href="/demo/">
+      <span class="lang-en">Open walkthroughs</span><span class="lang-zh">打開導覽</span>
+      <span>→</span>
+    </a>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-band">
+  <div class="cta-inner">
+    <div>
+      <h2 class="cta-h2">
+        <span class="lang-en">This is the <em>10,000-foot view.</em><br>Drill into any city.</span>
+        <span class="lang-zh">這只是<em>俯瞰圖</em>。<br>每個城市都可深挖。</span>
+      </h2>
+      <p class="cta-sub"><span class="lang-en">Each city has its own deep-dive page with charts, supply/demand analysis, and risk dashboard. The full 84-city dashboard adds filters, sparklines, pin-and-compare, and a cross-border cost calculator.</span><span class="lang-zh">每個城市都有獨立深度頁，含圖表、供需分析與風險儀表。完整 84 城儀表板還有篩選、走勢線、釘選比較、跨境成本計算機。</span></p>
+    </div>
+    <div class="cta-actions">
+      <a class="cta-btn primary" href="/dashboard"><span><span class="lang-en">Open the dashboard</span><span class="lang-zh">打開儀表板</span><span class="meta"><span class="lang-en">84 cities · sortable · filterable</span><span class="lang-zh">84 城市 · 可排序 · 可篩選</span></span></span><span>→</span></a>
+      <a class="cta-btn secondary" href="/methodology.html"><span><span class="lang-en">Methodology &amp; sources</span><span class="lang-zh">方法論與資料來源</span></span><span>→</span></a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="inner">
+    <span class="brand">INVESTMQUEST · PROPERTY MONITOR</span>
+    <span><a href="/methodology.html"><span class="lang-en">Methodology</span><span class="lang-zh">方法論</span></a> · <a href="/dashboard"><span class="lang-en">Dashboard</span><span class="lang-zh">儀表板</span></a> · <span class="lang-en">Updated Q1 2026</span><span class="lang-zh">2026Q1 更新</span></span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+
+<script>
+/* =========================================================
+   CITY DATA (curated subset, with lat/lng + visa flag)
+   yield, mortgage → carry computed; d10y is 10yr cumulative %
+   ========================================================= */
+var DATA=[
+  // North America
+  {n:'NYC',z:'紐約',f:'\u{1F1FA}\u{1F1F8}',lat:40.7,lng:-74.0,y:2.8,m:6.30,d10:58,pti:14.75,vac:2.8,pip:0.9,price:1225000,visa:false,link:'/us/nyc.html'},
+  {n:'LA',z:'洛杉磯',f:'\u{1F1FA}\u{1F1F8}',lat:34.1,lng:-118.2,y:4.5,m:6.30,d10:80,pti:12.0,vac:4.6,pip:0.8,price:910000,visa:false,link:'/us/la.html'},
+  {n:'SF',z:'舊金山',f:'\u{1F1FA}\u{1F1F8}',lat:37.8,lng:-122.4,y:3.5,m:6.30,d10:40,pti:18.0,vac:5.2,pip:0.6,price:1290000,visa:false,link:'/us/sf.html'},
+  {n:'Silicon Valley',z:'矽谷',f:'\u{1F1FA}\u{1F1F8}',lat:37.4,lng:-122.0,y:3.2,m:6.30,d10:80,pti:19.5,vac:1.8,pip:0.4,price:1500000,visa:false,link:'/us/sv.html'},
+  {n:'Seattle',z:'西雅圖',f:'\u{1F1FA}\u{1F1F8}',lat:47.6,lng:-122.3,y:5.5,m:6.30,d10:100,pti:10.5,vac:2.8,pip:1.2,price:840000,visa:false,link:'/us/seattle.html'},
+  {n:'Boston',z:'波士頓',f:'\u{1F1FA}\u{1F1F8}',lat:42.4,lng:-71.1,y:4.5,m:6.30,d10:70,pti:10.0,vac:2.3,pip:0.5,price:868000,visa:false,link:'/us/boston.html'},
+  {n:'Chicago',z:'芝加哥',f:'\u{1F1FA}\u{1F1F8}',lat:41.9,lng:-87.6,y:8.3,m:6.30,d10:48,pti:4.5,vac:3.5,pip:0.7,price:411000,visa:false,link:'/us/chicago.html'},
+  {n:'Miami',z:'邁阿密',f:'\u{1F1FA}\u{1F1F8}',lat:25.8,lng:-80.2,y:6.5,m:6.30,d10:115,pti:7.0,vac:7.5,pip:3.5,price:674000,visa:false,link:'/us/miami.html'},
+  {n:'Austin',z:'奧斯丁',f:'\u{1F1FA}\u{1F1F8}',lat:30.3,lng:-97.7,y:5.7,m:6.30,d10:85,pti:3.5,vac:4.8,pip:2.5,price:426000,visa:false,link:'/us/austin.html'},
+  {n:'Denver',z:'丹佛',f:'\u{1F1FA}\u{1F1F8}',lat:39.7,lng:-105.0,y:6.0,m:6.30,d10:72,pti:6.8,vac:3.9,pip:2.1,price:590000,visa:false,link:'/us/denver.html'},
+  {n:'Phoenix',z:'鳳凰城',f:'\u{1F1FA}\u{1F1F8}',lat:33.4,lng:-112.1,y:5.5,m:6.30,d10:130,pti:5.2,vac:3.3,pip:2.8,price:455000,visa:false,link:'/us/phoenix.html'},
+  {n:'Toronto',z:'多倫多',f:'\u{1F1E8}\u{1F1E6}',lat:43.7,lng:-79.4,y:3.8,m:4.04,d10:50,pti:10.5,vac:3.0,pip:2.0,price:690000,visa:false,link:'/ca/toronto.html'},
+  {n:'Vancouver',z:'溫哥華',f:'\u{1F1E8}\u{1F1E6}',lat:49.3,lng:-123.1,y:4.0,m:4.04,d10:60,pti:12.5,vac:3.7,pip:1.4,price:810000,visa:false,link:'/ca/vancouver.html'},
+  {n:'Mexico City',z:'墨西哥城',f:'\u{1F1F2}\u{1F1FD}',lat:19.4,lng:-99.1,y:6.0,m:11.0,d10:55,pti:7.0,vac:4.0,pip:2.0,price:260000,visa:false,link:'#'},
+  {n:'São Paulo',z:'聖保羅',f:'\u{1F1E7}\u{1F1F7}',lat:-23.5,lng:-46.6,y:6.3,m:10.3,d10:25,pti:8.0,vac:5.0,pip:2.5,price:135000,visa:false,link:'#'},
+  {n:'Buenos Aires',z:'布宜諾',f:'\u{1F1E6}\u{1F1F7}',lat:-34.6,lng:-58.4,y:4.8,m:10.0,d10:-12,pti:12.0,vac:8.0,pip:1.5,price:147000,visa:false,link:'#'},
+  // UK / Ireland
+  {n:'London',z:'倫敦',f:'\u{1F1EC}\u{1F1E7}',lat:51.5,lng:-0.13,y:3.8,m:5.42,d10:15,pti:8.6,vac:1.2,pip:0.6,price:858000,visa:false,link:'/uk/london.html'},
+  {n:'Manchester',z:'曼徹斯特',f:'\u{1F1EC}\u{1F1E7}',lat:53.5,lng:-2.2,y:6.1,m:4.35,d10:40,pti:6.8,vac:1.0,pip:0.8,price:320000,visa:false,link:'/uk/manchester.html'},
+  {n:'Edinburgh',z:'愛丁堡',f:'\u{1F1EC}\u{1F1E7}',lat:55.9,lng:-3.2,y:5.7,m:4.35,d10:35,pti:8.0,vac:0.8,pip:0.4,price:370000,visa:false,link:'/uk/edinburgh.html'},
+  {n:'Birmingham',z:'伯明翰',f:'\u{1F1EC}\u{1F1E7}',lat:52.5,lng:-1.9,y:5.6,m:4.35,d10:30,pti:5.5,vac:1.5,pip:1.1,price:291000,visa:false,link:'/uk/birmingham.html'},
+  {n:'Newcastle',z:'紐卡斯爾',f:'\u{1F1EC}\u{1F1E7}',lat:55.0,lng:-1.6,y:6.0,m:4.35,d10:28,pti:5.0,vac:1.8,pip:0.5,price:261000,visa:false,link:'/uk/newcastle.html'},
+  {n:'Dublin',z:'都柏林',f:'\u{1F1EE}\u{1F1EA}',lat:53.4,lng:-6.3,y:3.5,m:3.50,d10:70,pti:8.5,vac:0.5,pip:1.5,price:486000,visa:false,link:'/ie/dublin.html'},
+  {n:'Cork',z:'科克',f:'\u{1F1EE}\u{1F1EA}',lat:51.9,lng:-8.5,y:7.0,m:3.50,d10:65,pti:6.2,vac:0.6,pip:1.2,price:373000,visa:false,link:'/ie/cork.html'},
+  // Europe
+  {n:'Paris',z:'巴黎',f:'\u{1F1EB}\u{1F1F7}',lat:48.9,lng:2.3,y:3.5,m:3.25,d10:10,pti:14.0,vac:2.5,pip:0.5,price:511000,visa:false,link:'#'},
+  {n:'Berlin',z:'柏林',f:'\u{1F1E9}\u{1F1EA}',lat:52.5,lng:13.4,y:3.8,m:3.75,d10:60,pti:7.5,vac:1.2,pip:1.0,price:358000,visa:false,link:'#'},
+  {n:'Munich',z:'慕尼黑',f:'\u{1F1E9}\u{1F1EA}',lat:48.1,lng:11.6,y:2.5,m:3.75,d10:55,pti:12.0,vac:0.8,pip:0.4,price:620000,visa:false,link:'#'},
+  {n:'Amsterdam',z:'阿姆斯特丹',f:'\u{1F1F3}\u{1F1F1}',lat:52.4,lng:4.9,y:3.5,m:4.05,d10:85,pti:10.0,vac:1.5,pip:0.8,price:641000,visa:false,link:'#'},
+  {n:'Madrid',z:'馬德里',f:'\u{1F1EA}\u{1F1F8}',lat:40.4,lng:-3.7,y:5.1,m:2.85,d10:35,pti:7.5,vac:1.8,pip:1.2,price:508000,visa:false,link:'#'},
+  {n:'Barcelona',z:'巴塞隆納',f:'\u{1F1EA}\u{1F1F8}',lat:41.4,lng:2.2,y:5.6,m:2.85,d10:30,pti:9.0,vac:1.5,pip:0.8,price:443000,visa:false,link:'#'},
+  {n:'Valencia',z:'瓦倫西亞',f:'\u{1F1EA}\u{1F1F8}',lat:39.5,lng:-0.4,y:6.2,m:2.85,d10:45,pti:5.5,vac:1.2,pip:1.5,price:307000,visa:false,link:'#'},
+  {n:'Malaga',z:'馬拉加',f:'\u{1F1EA}\u{1F1F8}',lat:36.7,lng:-4.4,y:6.6,m:2.85,d10:70,pti:6.0,vac:1.0,pip:1.8,price:378000,visa:false,link:'#'},
+  {n:'Lisbon',z:'里斯本',f:'\u{1F1F5}\u{1F1F9}',lat:38.7,lng:-9.1,y:4.3,m:4.00,d10:95,pti:12.0,vac:1.8,pip:1.2,price:429000,visa:false,link:'#'},
+  {n:'Zurich',z:'蘇黎世',f:'\u{1F1E8}\u{1F1ED}',lat:47.4,lng:8.5,y:2.5,m:1.81,d10:25,pti:8.5,vac:0.1,pip:0.3,price:1231000,visa:false,link:'#'},
+  {n:'Milan',z:'米蘭',f:'\u{1F1EE}\u{1F1F9}',lat:45.5,lng:9.2,y:5.3,m:3.50,d10:10,pti:8.5,vac:2.5,pip:1.5,price:454000,visa:false,link:'#'},
+  {n:'Florence',z:'佛羅倫斯',f:'\u{1F1EE}\u{1F1F9}',lat:43.8,lng:11.3,y:6.2,m:3.50,d10:20,pti:9.0,vac:2.0,pip:0.3,price:408000,visa:false,link:'#'},
+  {n:'Warsaw',z:'華沙',f:'\u{1F1F5}\u{1F1F1}',lat:52.2,lng:21.0,y:5.0,m:7.50,d10:75,pti:7.5,vac:2.0,pip:2.5,price:251000,visa:false,link:'#'},
+  {n:'Prague',z:'布拉格',f:'\u{1F1E8}\u{1F1FF}',lat:50.1,lng:14.4,y:4.0,m:4.89,d10:90,pti:11.0,vac:1.5,pip:1.0,price:378000,visa:false,link:'#'},
+  // Mid East
+  {n:'Dubai',z:'杜拜',f:'\u{1F1E6}\u{1F1EA}',lat:25.2,lng:55.3,y:6.6,m:3.70,d10:80,pti:5.5,vac:8.5,pip:6.5,price:572000,visa:true,link:'#'},
+  {n:'Istanbul',z:'伊斯坦堡',f:'\u{1F1F9}\u{1F1F7}',lat:41.0,lng:28.9,y:7.0,m:36.0,d10:180,pti:6.0,vac:3.0,pip:3.5,price:99000,visa:true,link:'#'},
+  // Asia (East)
+  {n:'Tokyo',z:'東京',f:'\u{1F1EF}\u{1F1F5}',lat:35.6,lng:139.7,y:3.3,m:2.08,d10:110,pti:12.0,vac:3.5,pip:0.3,price:812000,visa:false,link:'/jp/tokyo.html'},
+  {n:'Osaka',z:'大阪',f:'\u{1F1EF}\u{1F1F5}',lat:34.7,lng:135.5,y:3.3,m:2.08,d10:75,pti:12.0,vac:2.0,pip:0.5,price:259000,visa:false,link:'/jp/osaka.html'},
+  {n:'Fukuoka',z:'福岡',f:'\u{1F1EF}\u{1F1F5}',lat:33.6,lng:130.4,y:5.0,m:0.80,d10:120,pti:11.0,vac:1.5,pip:0.4,price:342000,visa:false,link:'/jp/fukuoka.html'},
+  {n:'Sapporo',z:'札幌',f:'\u{1F1EF}\u{1F1F5}',lat:43.1,lng:141.4,y:4.7,m:2.08,d10:85,pti:8.0,vac:2.2,pip:0.5,price:388000,visa:false,link:'#'},
+  {n:'Seoul',z:'首爾',f:'\u{1F1F0}\u{1F1F7}',lat:37.6,lng:127.0,y:3.0,m:4.19,d10:60,pti:15.0,vac:2.8,pip:0.6,price:917000,visa:false,link:'/kr/seoul.html'},
+  {n:'Busan',z:'釜山',f:'\u{1F1F0}\u{1F1F7}',lat:35.2,lng:129.1,y:4.5,m:4.19,d10:25,pti:7.0,vac:4.0,pip:1.2,price:435000,visa:false,link:'/kr/busan.html'},
+  {n:'Hong Kong',z:'香港',f:'\u{1F1ED}\u{1F1F0}',lat:22.3,lng:114.2,y:3.4,m:3.75,d10:-10,pti:16.7,vac:4.5,pip:0.4,price:897000,visa:false,link:'#'},
+  {n:'Singapore',z:'新加坡',f:'\u{1F1F8}\u{1F1EC}',lat:1.4,lng:103.8,y:3.3,m:2.70,d10:30,pti:15.0,vac:3.2,pip:1.5,price:1330000,visa:false,link:'#'},
+  {n:'Taipei',z:'台北',f:'\u{1F1F9}\u{1F1FC}',lat:25.0,lng:121.5,y:1.8,m:2.32,d10:35,pti:15.4,vac:7.1,pip:0.3,price:580000,visa:false,link:'/tw/taipei.html'},
+  {n:'Hsinchu',z:'新竹',f:'\u{1F1F9}\u{1F1FC}',lat:24.8,lng:120.9,y:2.3,m:2.32,d10:58,pti:12.5,vac:2.0,pip:0.8,price:310000,visa:false,link:'/tw/hsinchu.html'},
+  {n:'Kaohsiung',z:'高雄',f:'\u{1F1F9}\u{1F1FC}',lat:22.6,lng:120.3,y:3.0,m:2.32,d10:40,pti:10.1,vac:3.0,pip:1.5,price:220000,visa:false,link:'/tw/kaohsiung.html'},
+  {n:'Bangkok',z:'曼谷',f:'\u{1F1F9}\u{1F1ED}',lat:13.7,lng:100.5,y:6.0,m:3.00,d10:40,pti:8.5,vac:12.0,pip:3.0,price:240000,visa:false,link:'/th/bangkok.html'},
+  {n:'KL',z:'吉隆坡',f:'\u{1F1F2}\u{1F1FE}',lat:3.1,lng:101.7,y:4.9,m:4.25,d10:10,pti:6.2,vac:18.0,pip:2.8,price:181000,visa:true,link:'/my/kl.html'},
+  {n:'Penang',z:'檳城',f:'\u{1F1F2}\u{1F1FE}',lat:5.4,lng:100.3,y:5.7,m:4.25,d10:25,pti:5.8,vac:12.0,pip:1.5,price:113000,visa:true,link:'/my/penang.html'},
+  {n:'HCMC',z:'胡志明市',f:'\u{1F1FB}\u{1F1F3}',lat:10.8,lng:106.7,y:4.0,m:13.0,d10:100,pti:10.0,vac:6.0,pip:2.5,price:295000,visa:false,link:'/vn/hochiminh.html'},
+  {n:'Manila',z:'馬尼拉',f:'\u{1F1F5}\u{1F1ED}',lat:14.6,lng:120.98,y:5.8,m:7.50,d10:40,pti:12.0,vac:26.0,pip:2.5,price:134000,visa:false,link:'#'},
+  {n:'Jakarta',z:'雅加達',f:'\u{1F1EE}\u{1F1E9}',lat:-6.2,lng:106.8,y:5.5,m:8.60,d10:15,pti:8.0,vac:40.0,pip:1.5,price:120000,visa:true,link:'#'},
+  // South Asia
+  {n:'Mumbai',z:'孟買',f:'\u{1F1EE}\u{1F1F3}',lat:19.1,lng:72.9,y:3.8,m:7.70,d10:20,pti:12.0,vac:5.0,pip:3.5,price:240000,visa:false,link:'#'},
+  {n:'Delhi',z:'德里',f:'\u{1F1EE}\u{1F1F3}',lat:28.6,lng:77.2,y:5.8,m:7.70,d10:80,pti:8.0,vac:8.0,pip:6.0,price:105000,visa:false,link:'#'},
+  {n:'Bangalore',z:'班加羅爾',f:'\u{1F1EE}\u{1F1F3}',lat:12.97,lng:77.6,y:4.5,m:7.70,d10:55,pti:7.5,vac:4.5,pip:4.5,price:130000,visa:false,link:'#'},
+  // Oceania
+  {n:'Sydney',z:'雪梨',f:'\u{1F1E6}\u{1F1FA}',lat:-33.9,lng:151.2,y:3.0,m:5.49,d10:65,pti:13.5,vac:1.1,pip:0.8,price:817000,visa:false,link:'/au/sydney.html'},
+  {n:'Melbourne',z:'墨爾本',f:'\u{1F1E6}\u{1F1FA}',lat:-37.8,lng:145.0,y:3.8,m:5.49,d10:15,pti:10.2,vac:1.6,pip:1.5,price:522000,visa:false,link:'/au/melbourne.html'},
+  {n:'Brisbane',z:'布里斯本',f:'\u{1F1E6}\u{1F1FA}',lat:-27.5,lng:153.0,y:4.4,m:5.49,d10:93,pti:9.5,vac:1.2,pip:0.9,price:694000,visa:false,link:'/au/brisbane.html'},
+  {n:'Gold Coast',z:'黃金海岸',f:'\u{1F1E6}\u{1F1FA}',lat:-28.0,lng:153.4,y:4.5,m:5.49,d10:100,pti:11.2,vac:1.1,pip:0.5,price:851000,visa:false,link:'/au/goldcoast.html'},
+  {n:'Perth',z:'伯斯',f:'\u{1F1E6}\u{1F1FA}',lat:-31.9,lng:115.9,y:4.8,m:6.29,d10:90,pti:7.5,vac:0.7,pip:0.6,price:644000,visa:false,link:'#'},
+  {n:'Adelaide',z:'阿德萊德',f:'\u{1F1E6}\u{1F1FA}',lat:-34.9,lng:138.6,y:3.3,m:6.29,d10:75,pti:8.0,vac:0.9,pip:0.5,price:593000,visa:false,link:'#'},
+  {n:'Auckland',z:'奧克蘭',f:'\u{1F1F3}\u{1F1FF}',lat:-36.8,lng:174.8,y:4.0,m:4.89,d10:45,pti:9.8,vac:2.5,pip:2.5,price:589000,visa:false,link:'/nz/auckland.html'}
+];
+DATA.forEach(function(c){c.carry=+(c.y-c.m).toFixed(2);});
+
+var personaState='income';
+var mapMetric='yield';
+var hoverQuad=null;
+var QUAD_COLOR={a:'#16a34a',b:'#2563eb',c:'#b45309',d:'#dc2626'};
+function inQuadrant(c,q){
+  if(q==='a')return c.carry>0&&c.d10>=70;
+  if(q==='b')return c.carry<=0&&c.d10>=70;
+  if(q==='c')return c.carry>0&&c.d10<70;
+  if(q==='d')return c.carry<=0&&c.d10<70;
+  return false;
+}
+function setHoverQuad(q){hoverQuad=q;drawScatter();drawMap();}
+
+/* persona match logic */
+function personaMatch(c,p){
+  if(p==='income') return c.carry>=1 && c.y>=5 && c.vac<=3;
+  if(p==='growth') return c.d10>=70 && c.pip<=1.5;
+  if(p==='visa')   return c.visa===true;
+  return false;
+}
+function setPersona(p){
+  personaState=p;
+  document.querySelectorAll('.persona').forEach(function(el){el.classList.toggle('active',el.dataset.p===p);});
+  drawScatter(); drawMap(); fillQuadrants(); fillTop5();
+}
+
+/* =========================================================
+   SCATTER (D)
+   X=carry (-3 to +5%), Y=10yr growth (-20 to 130%)
+   Quadrants split at carry=0% and d10y=70%
+   ========================================================= */
+function drawScatter(){
+  var W=800,H=480,padL=60,padR=20,padT=28,padB=44;
+  var plotW=W-padL-padR, plotH=H-padT-padB;
+  var xMin=-3,xMax=5; // carry
+  var yMin=-20,yMax=130; // d10y
+  function px(c){return padL+((c-xMin)/(xMax-xMin))*plotW;}
+  function py(g){return padT+(1-(g-yMin)/(yMax-yMin))*plotH;}
+  var svg='';
+  // quadrant fills (more saturated for light bg)
+  var x0=px(0),y0=py(70);
+  svg+='<rect x="'+x0+'" y="'+padT+'" width="'+(padL+plotW-x0)+'" height="'+(y0-padT)+'" fill="#16a34a" opacity="0.10"/>';
+  svg+='<rect x="'+padL+'" y="'+padT+'" width="'+(x0-padL)+'" height="'+(y0-padT)+'" fill="#3b82f6" opacity="0.08"/>';
+  svg+='<rect x="'+x0+'" y="'+y0+'" width="'+(padL+plotW-x0)+'" height="'+(padT+plotH-y0)+'" fill="#d97706" opacity="0.07"/>';
+  svg+='<rect x="'+padL+'" y="'+y0+'" width="'+(x0-padL)+'" height="'+(padT+plotH-y0)+'" fill="#dc2626" opacity="0.08"/>';
+  // axes
+  svg+='<line x1="'+padL+'" y1="'+(padT+plotH)+'" x2="'+(padL+plotW)+'" y2="'+(padT+plotH)+'" stroke="#1e3a5f" stroke-opacity="0.22"/>';
+  svg+='<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(padT+plotH)+'" stroke="#1e3a5f" stroke-opacity="0.22"/>';
+  // zero/threshold lines (orange dashed)
+  svg+='<line x1="'+x0+'" y1="'+padT+'" x2="'+x0+'" y2="'+(padT+plotH)+'" stroke="#d97706" stroke-opacity="0.55" stroke-dasharray="4,3"/>';
+  svg+='<line x1="'+padL+'" y1="'+y0+'" x2="'+(padL+plotW)+'" y2="'+y0+'" stroke="#d97706" stroke-opacity="0.55" stroke-dasharray="4,3"/>';
+  // axis ticks + labels
+  for(var x=xMin;x<=xMax;x++){
+    var xx=px(x);
+    svg+='<line x1="'+xx+'" y1="'+(padT+plotH)+'" x2="'+xx+'" y2="'+(padT+plotH+4)+'" stroke="#1e3a5f" stroke-opacity="0.15"/>';
+    svg+='<text x="'+xx+'" y="'+(padT+plotH+18)+'" fill="#5a7a9a" font-size="10" text-anchor="middle" font-weight="500">'+(x>0?'+':'')+x+'%</text>';
+  }
+  for(var g=-20;g<=130;g+=30){
+    var yy=py(g);
+    svg+='<line x1="'+padL+'" y1="'+yy+'" x2="'+(padL+plotW)+'" y2="'+yy+'" stroke="#1e3a5f" stroke-opacity="0.05"/>';
+    svg+='<text x="'+(padL-8)+'" y="'+(yy+3)+'" fill="#5a7a9a" font-size="10" text-anchor="end" font-weight="500">'+(g>0?'+':'')+g+'%</text>';
+  }
+  // axis titles
+  svg+='<text x="'+(padL+plotW/2)+'" y="'+(padT+plotH+38)+'" fill="#1e3a5f" font-size="11" text-anchor="middle" font-weight="700" letter-spacing="1.2">CARRY SPREAD →</text>';
+  svg+='<text x="14" y="'+(padT+plotH/2)+'" fill="#1e3a5f" font-size="11" text-anchor="middle" font-weight="700" letter-spacing="1.2" transform="rotate(-90 14 '+(padT+plotH/2)+')">10-YEAR GROWTH →</text>';
+  // quadrant labels
+  svg+='<text x="'+(x0+12)+'" y="'+(padT+18)+'" fill="#16a34a" font-size="11" font-weight="800" letter-spacing="1.8">SWEET SPOT</text>';
+  svg+='<text x="'+(x0-12)+'" y="'+(padT+18)+'" fill="#2563eb" font-size="11" font-weight="800" letter-spacing="1.8" text-anchor="end">GROWTH BET</text>';
+  svg+='<text x="'+(x0+12)+'" y="'+(padT+plotH-10)+'" fill="#b45309" font-size="11" font-weight="800" letter-spacing="1.8">PURE INCOME</text>';
+  svg+='<text x="'+(x0-12)+'" y="'+(padT+plotH-10)+'" fill="#dc2626" font-size="11" font-weight="800" letter-spacing="1.8" text-anchor="end">TRAP ZONE</text>';
+  // determine which set to highlight: hover-quadrant takes precedence over persona
+  var highlightFn=hoverQuad
+    ?function(c){return inQuadrant(c,hoverQuad);}
+    :function(c){return personaMatch(c,personaState);};
+  var highlightColor=hoverQuad?QUAD_COLOR[hoverQuad]:'#16a34a';
+  // brighten the hovered quadrant rect
+  if(hoverQuad){
+    var rx=hoverQuad==='a'||hoverQuad==='c'?x0:padL;
+    var ry=hoverQuad==='a'||hoverQuad==='b'?padT:y0;
+    var rw=hoverQuad==='a'||hoverQuad==='c'?padL+plotW-x0:x0-padL;
+    var rh=hoverQuad==='a'||hoverQuad==='b'?y0-padT:padT+plotH-y0;
+    svg+='<rect x="'+rx+'" y="'+ry+'" width="'+rw+'" height="'+rh+'" fill="'+highlightColor+'" opacity="0.10" pointer-events="none"/>';
+    svg+='<rect x="'+rx+'" y="'+ry+'" width="'+rw+'" height="'+rh+'" fill="none" stroke="'+highlightColor+'" stroke-width="2" stroke-opacity="0.45" pointer-events="none"/>';
+  }
+  // pick labels — within highlight set, prioritize cities matching active persona for variety
+  var pool=DATA.filter(highlightFn);
+  var scored=pool.slice().sort(function(a,b){
+    if(hoverQuad){
+      // emphasize persona-match within the hovered quadrant; then by combined score
+      var pa=personaMatch(a,personaState)?100:0;
+      var pb=personaMatch(b,personaState)?100:0;
+      return (pb+b.carry+b.d10/30)-(pa+a.carry+a.d10/30);
+    }
+    if(personaState==='income')return (b.y+b.carry*2)-(a.y+a.carry*2);
+    if(personaState==='growth')return (b.d10+(2-b.pip)*5)-(a.d10+(2-a.pip)*5);
+    if(personaState==='visa')return b.y-b.m-(a.y-a.m);
+    return 0;
+  });
+  var isMobile=window.innerWidth<640;
+  var labelLimit=isMobile?4:7;
+  var labelSet={};
+  scored.slice(0,labelLimit).forEach(function(c){labelSet[c.n]=true;});
+  // dots — background (non-highlight) first, then highlights on top
+  var bgHtml='';
+  var hlHtml='';
+  var labelsHtml='';
+  DATA.forEach(function(c){
+    var hl=highlightFn(c);
+    var cx=px(Math.max(xMin,Math.min(xMax,c.carry)));
+    var cy=py(Math.max(yMin,Math.min(yMax,c.d10)));
+    var r=Math.max(3.5,Math.min(9,Math.sqrt(c.price/1000)/11));
+    var tip=c.n+' · carry '+(c.carry>=0?'+':'')+c.carry+'% · 10yr +'+c.d10+'%';
+    if(hl){
+      // when hover-quadrant active, persona match adds dark stroke
+      var personaAlso=hoverQuad?personaMatch(c,personaState):false;
+      var stroke=personaAlso?'#0f1e33':'#fff';
+      var sw=personaAlso?2:1.8;
+      hlHtml+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+(r+1).toFixed(1)+'" fill="'+highlightColor+'" stroke="'+stroke+'" stroke-width="'+sw+'" opacity="1"><title>'+tip+'</title></circle>';
+      if(labelSet[c.n]){
+        labelsHtml+='<text x="'+cx.toFixed(1)+'" y="'+(cy-r-5).toFixed(1)+'" font-size="11" text-anchor="middle" font-weight="700" pointer-events="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke" fill="#0f1e33">'+c.n+'</text>';
+      }
+    }else{
+      var dimOp=hoverQuad?0.30:0.55;
+      bgHtml+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="#94a3b8" stroke="#fff" stroke-width="0.6" opacity="'+dimOp+'"><title>'+tip+'</title></circle>';
+    }
+  });
+  svg+=bgHtml+hlHtml+labelsHtml;
+  document.getElementById('scatterSvg').innerHTML=svg;
+}
+function fillQuadrants(){
+  var lang=getLang();
+  // Filter by active persona — q-cards now stay in sync with green dots
+  var pool=DATA.filter(function(c){return personaMatch(c,personaState);});
+  var qa=pool.filter(function(c){return c.carry>0&&c.d10>=70;}).sort(function(a,b){return (b.carry+b.d10/30)-(a.carry+a.d10/30);}).slice(0,4);
+  var qb=pool.filter(function(c){return c.carry<=0&&c.d10>=70;}).sort(function(a,b){return b.d10-a.d10;}).slice(0,4);
+  var qc=pool.filter(function(c){return c.carry>0&&c.d10<70;}).sort(function(a,b){return b.carry-a.carry;}).slice(0,4);
+  var qd=pool.filter(function(c){return c.carry<=0&&c.d10<70;}).sort(function(a,b){return a.carry-b.carry;}).slice(0,4);
+  function nm(c){return lang==='zh'?c.z:c.n;}
+  var emp=lang==='zh'?'（無符合）':'(no matches)';
+  document.getElementById('qcCitiesA').textContent=qa.length?qa.map(nm).join(' · '):emp;
+  document.getElementById('qcCitiesB').textContent=qb.length?qb.map(nm).join(' · '):emp;
+  document.getElementById('qcCitiesC').textContent=qc.length?qc.map(nm).join(' · '):emp;
+  document.getElementById('qcCitiesD').textContent=qd.length?qd.map(nm).join(' · '):emp;
+}
+
+/* =========================================================
+   WORLD MAP (C)
+   Equirectangular: x=(lng+180)/360 * W, y=(90-lat)/180 * H
+   Continents: simplified blob paths
+   ========================================================= */
+var MAP_W=1000,MAP_H=500;
+var WORLD_DATA=null;
+var WORLD_PROJ=null;
+var WORLD_PATH_GEN=null;
+var COUNTRY_PATHS_HTML='';
+function loadWorld(){
+  if(typeof d3==='undefined'||typeof topojson==='undefined')return Promise.resolve(null);
+  return fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')
+    .then(function(r){return r.json();})
+    .then(function(world){
+      WORLD_DATA=topojson.feature(world,world.objects.countries);
+      WORLD_PROJ=d3.geoNaturalEarth1().fitSize([MAP_W,MAP_H],{type:'Sphere'});
+      WORLD_PATH_GEN=d3.geoPath(WORLD_PROJ);
+      var paths='';
+      WORLD_DATA.features.forEach(function(f){
+        var d=WORLD_PATH_GEN(f);
+        if(d)paths+='<path d="'+d+'" fill="#dbe6f0" stroke="#b9cee0" stroke-width="0.4"/>';
+      });
+      COUNTRY_PATHS_HTML=paths;
+      return WORLD_DATA;
+    }).catch(function(){return null;});
+}
+function project(lat,lng){
+  if(WORLD_PROJ){var p=WORLD_PROJ([lng,lat]);return {x:p[0],y:p[1]};}
+  // fallback equirectangular before world loads
+  return {x:(lng+180)/360*MAP_W, y:(90-lat)/180*MAP_H};
+}
+function metricVal(c,m){
+  if(m==='yield')return c.y;
+  if(m==='carry')return c.carry;
+  if(m==='d10y')return c.d10;
+  if(m==='pti')return c.pti;
+  return c.y;
+}
+function metricCfg(m){
+  var lang=getLang();
+  // Single-family gradients (light → mid → dark within the same hue)
+  // Higher value = darker. PTI: high PTI = darker red (more concerning).
+  if(m==='yield')return {label:lang==='zh'?'毛收益率':'Gross yield',hue:'#3b82f6',unit:'%',fmt:function(v){return v.toFixed(1)+'%';},lo:1,hi:9,lowGood:false,grad:['#dbeafe','#60a5fa','#1e40af']};
+  if(m==='carry')return {label:lang==='zh'?'利差':'Carry spread',hue:'#d97706',unit:'%',fmt:function(v){return (v>=0?'+':'')+v.toFixed(1)+'%';},lo:-3,hi:5,lowGood:false,grad:['#fef3c7','#f59e0b','#92400e']};
+  if(m==='d10y')return {label:lang==='zh'?'10 年漲幅':'10yr growth',hue:'#16a34a',unit:'%',fmt:function(v){return (v>=0?'+':'')+v+'%';},lo:0,hi:130,lowGood:false,grad:['#dcfce7','#22c55e','#14532d']};
+  if(m==='pti') return {label:lang==='zh'?'房價收入比':'Price-to-income',hue:'#dc2626',unit:'×',fmt:function(v){return v+'×';},lo:3,hi:18,lowGood:true,grad:['#fee2e2','#ef4444','#7f1d1d']};
+}
+function lerpColor(a,b,t){
+  function p(s){return [parseInt(s.slice(1,3),16),parseInt(s.slice(3,5),16),parseInt(s.slice(5,7),16)];}
+  function h(c){return c.toString(16).padStart(2,'0');}
+  var x=p(a),y=p(b);
+  return '#'+h(Math.round(x[0]+(y[0]-x[0])*t))+h(Math.round(x[1]+(y[1]-x[1])*t))+h(Math.round(x[2]+(y[2]-x[2])*t));
+}
+function gradColor(grad,t){
+  t=Math.max(0,Math.min(1,t));
+  if(t<0.5)return lerpColor(grad[0],grad[1],t*2);
+  return lerpColor(grad[1],grad[2],(t-0.5)*2);
+}
+function drawMap(){
+  var cfg=metricCfg(mapMetric);
+  var svg='';
+  // graticule from D3 if available, else simple grid
+  if(WORLD_PROJ&&typeof d3!=='undefined'){
+    var grat=d3.geoGraticule().step([30,30])();
+    var gd=WORLD_PATH_GEN(grat);
+    if(gd)svg+='<path d="'+gd+'" fill="none" stroke="#b9cee0" stroke-opacity="0.25" stroke-width="0.5"/>';
+  }
+  // real countries
+  svg+=COUNTRY_PATHS_HTML;
+  // city dots — uniform style. Color depth = metric value (single color family).
+  // Persona context is shown via ★ in the Top 5 list below the map (not as dot border).
+  DATA.forEach(function(c){
+    var p=project(c.lat,c.lng);
+    var v=metricVal(c,mapMetric);
+    var tRaw=(v-cfg.lo)/(cfg.hi-cfg.lo);
+    var t=Math.max(0,Math.min(1,tRaw));
+    var color=gradColor(cfg.grad,t);
+    // size grows with metric extremity so high-value cities pop
+    var r=4.5+t*4.5;
+    var idx=DATA.indexOf(c);
+    svg+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+color+'" stroke="#fff" stroke-width="1" opacity="0.95" style="cursor:pointer" onmouseover="showTip(event,'+idx+')" onmouseout="hideTip()" ontouchstart="showTip(event,'+idx+')" onclick="goCity('+idx+')"/>';
+  });
+  document.getElementById('mapSvg').innerHTML=svg;
+  // metric meta + scale
+  var lang=getLang();
+  document.getElementById('mapMeta').innerHTML=cfg.label+' · '+(lang==='zh'?'點擊任一點查看':'click any dot');
+  document.getElementById('scaleMin').textContent=cfg.fmt(cfg.lo);
+  document.getElementById('scaleMax').textContent=cfg.fmt(cfg.hi);
+  document.getElementById('scaleBar').style.background='linear-gradient(90deg,'+cfg.grad[0]+','+cfg.grad[1]+','+cfg.grad[2]+')';
+}
+function showTip(ev,idx){
+  var c=DATA[idx];var lang=getLang();
+  var tip=document.getElementById('mapTip');
+  var rect=document.getElementById('mapSvg').getBoundingClientRect();
+  var x=ev.clientX-rect.left+12;
+  var y=ev.clientY-rect.top+12;
+  if(x>rect.width-200)x=ev.clientX-rect.left-200;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+  var nm=lang==='zh'?c.z:c.n;
+  var carryClr=c.carry>=1?'green':c.carry>=0?'':'red';
+  tip.innerHTML='<h4>'+c.f+' '+nm+'</h4>'+
+    '<table>'+
+    '<tr><td>'+(lang==='zh'?'收益':'Yield')+'</td><td>'+c.y.toFixed(1)+'%</td></tr>'+
+    '<tr><td>'+(lang==='zh'?'利差':'Carry')+'</td><td><span class="'+carryClr+'">'+(c.carry>=0?'+':'')+c.carry+'%</span></td></tr>'+
+    '<tr><td>'+(lang==='zh'?'10 年':'10yr')+'</td><td>'+(c.d10>=0?'+':'')+c.d10+'%</td></tr>'+
+    '<tr><td>PTI</td><td>'+c.pti+'×</td></tr>'+
+    '<tr><td>'+(lang==='zh'?'空置':'Vacancy')+'</td><td>'+c.vac+'%</td></tr>'+
+    '</table>'+
+    (c.link!=='#'?'<a href="'+c.link+'">'+(lang==='zh'?'看深度頁 →':'Deep dive →')+'</a>':'');
+  tip.classList.add('show');
+}
+function hideTip(){document.getElementById('mapTip').classList.remove('show');}
+function goCity(idx){var c=DATA[idx];if(c.link&&c.link!=='#')location.href=c.link;}
+function setMapMetric(m){
+  mapMetric=m;
+  document.querySelectorAll('.map-toggle button').forEach(function(b){b.classList.toggle('on',b.dataset.m===m);});
+  drawMap();fillTop5();
+}
+
+function fillTop5(){
+  var cfg=metricCfg(mapMetric);
+  var lang=getLang();
+  var sorted=DATA.slice().sort(function(a,b){
+    var va=metricVal(a,mapMetric),vb=metricVal(b,mapMetric);
+    return cfg.lowGood?(va-vb):(vb-va);
+  }).slice(0,5);
+  document.getElementById('mapTop5').innerHTML=sorted.map(function(c,i){
+    var v=metricVal(c,mapMetric);
+    var nm=lang==='zh'?c.z:c.n;
+    var match=personaMatch(c,personaState);
+    return '<div class="map-top5-item">'+
+      '<div class="map-top5-rank">#'+(i+1)+(match?' ★':'')+'</div>'+
+      '<div class="map-top5-name">'+c.f+' '+nm+'</div>'+
+      '<div class="map-top5-val" style="color:'+cfg.hue+'">'+cfg.fmt(v)+'</div>'+
+      '</div>';
+  }).join('');
+}
+
+/* lang helpers */
+function getLang(){var l='en';try{l=localStorage.getItem('lang')||localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.textContent.trim()===(lang==='en'?'EN':'中文'));});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+  drawScatter();drawMap();fillQuadrants();fillTop5();
+}
+window.addEventListener('load',function(){
+  setLang(getLang());
+  loadWorld().then(function(d){if(d)drawMap();});
+});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

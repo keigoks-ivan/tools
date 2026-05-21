@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Supply Analysis | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}.report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}.report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}.report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}.report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}.report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}.report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}.report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}.chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}.chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}.chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}.report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}.report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}.toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}.toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}.toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}.toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}.toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}.toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}.report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}.side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}.side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}.side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}.side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}.side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600}.side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  .data-table{width:100%;border-collapse:collapse;font-family:Inter,sans-serif;font-size:12px;margin:20px 0}.data-table th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em}.data-table td{padding:7px 10px;border-bottom:1px solid #eef3f9}.data-table tr:nth-child(even){background:#f8fafc}
+  @media(max-width:1100px){.side-nav{display:none}}@media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-inventory" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Inventory</span><span class="side-nav-label lang-zh" style="display:none">庫存</span></a>
+    <a href="#sec-permits" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Permits</span><span class="side-nav-label lang-zh" style="display:none">建照</span></a>
+    <a href="#sec-lockin" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Lock-in Effect</span><span class="side-nav-label lang-zh" style="display:none">鎖定效應</span></a>
+    <a href="#sec-cliff" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Supply Cliffs</span><span class="side-nav-label lang-zh" style="display:none">供給斷崖</span></a>
+    <a href="#sec-comparison" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Comparison</span><span class="side-nav-label lang-zh" style="display:none">城市對比</span></a>
+  </nav>
+  <div class="report-header">
+    <div class="lang-en"><h1>U.S. REAL ESTATE &mdash; SUPPLY ANALYSIS</h1><div class="report-meta">April 2026 &middot; 12-City Monitor</div></div>
+    <div class="lang-zh" style="display:none"><h1>美國房地產——供給分析</h1><div class="report-meta">2026年4月 &middot; 12城市監測</div></div>
+  </div>
+  <div class="report-body">
+    <div class="toc-box" id="tocBox"><div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-inventory" onclick="closeTocMobile()"><span class="lang-en">1. Inventory Levels</span><span class="lang-zh" style="display:none">1. 庫存水準</span></a>
+        <a href="#sec-permits" onclick="closeTocMobile()"><span class="lang-en">2. Building Permits</span><span class="lang-zh" style="display:none">2. 建築許可</span></a>
+        <a href="#sec-lockin" onclick="closeTocMobile()"><span class="lang-en">3. Lock-in Effect</span><span class="lang-zh" style="display:none">3. 利率鎖定效應</span></a>
+        <a href="#sec-cliff" onclick="closeTocMobile()"><span class="lang-en">4. Supply Cliffs</span><span class="lang-zh" style="display:none">4. 供給斷崖</span></a>
+        <a href="#sec-comparison" onclick="closeTocMobile()"><span class="lang-en">5. 12-City Comparison</span><span class="lang-zh" style="display:none">5. 12城市對比</span></a>
+      </div></div>
+
+    <!-- SECTION 1: INVENTORY LEVELS -->
+    <h2 id="sec-inventory"><span class="lang-en">INVENTORY LEVELS</span><span class="lang-zh" style="display:none">庫存水準</span></h2>
+    <div class="lang-en">
+      <p>The U.S. housing inventory crisis remains fundamentally structural. Despite a modest recovery in national active listings from 2024 lows, the majority of monitored metros remain far below the <strong>6.0 months</strong> threshold that defines a balanced market. The most constrained markets are concentrated in tech-driven coastal metros: Silicon Valley sits at just <strong>0.8 months</strong> of supply, San Francisco at <strong>0.8 months</strong> (SF homes only), and Chicago city proper at <strong>0.72 months</strong> &mdash; all effectively representing sub-30-day theoretical clearing times. Even traditionally well-supplied markets like Boston have tightened to <strong>1.5&ndash;2.0 months</strong>.</p>
+      <p>The least constrained markets tell an equally important story. Miami condos have surged to <strong>14.0 months</strong> of supply &mdash; deep into buyer&rsquo;s market territory &mdash; driven by a glut of speculative condo construction and rising insurance costs. Austin has reached <strong>6.1 months</strong>, finally crossing the balanced threshold after years of overbuilding. Denver&rsquo;s metro carries <strong>17,107</strong> active listings, representing one of the highest inventory-to-sales ratios among Sun Belt metros.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>美國住宅庫存危機本質上仍屬結構性問題。儘管全國活躍掛牌量從2024年低點溫和復甦，大多數受監測的都會區仍遠低於定義均衡市場的<strong>6.0個月</strong>門檻。最受約束的市場集中在科技驅動的沿海都會區：矽谷僅有<strong>0.8個月</strong>供給，舊金山<strong>0.8個月</strong>（僅獨棟），芝加哥市區<strong>0.72個月</strong>——均實質代表不到30天的理論出清時間。即使是傳統供給充足的市場如波士頓也已收緊至<strong>1.5至2.0個月</strong>。</p>
+      <p>供給最寬鬆的市場同樣值得關注。邁阿密公寓已飆升至<strong>14.0個月</strong>供給——深入買方市場——由投機性公寓建設過剩和保險成本上升推動。奧斯丁已達<strong>6.1個月</strong>，在多年過度建設後終於越過均衡門檻。丹佛都會區攜帶<strong>17,107</strong>套活躍掛牌，代表陽光帶都會區中最高的庫存銷售比之一。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Months of Supply by City</span><span class="lang-zh" style="display:none">各城市供給月數</span></h4>
+      <div id="chartSupplyMonths" style="width:100%;height:340px;"></div>
+      <p class="chart-note navy"><span class="lang-en">Red &le;1.5mo (severe shortage) &middot; Orange &le;3.0mo &middot; Navy &le;6.0mo &middot; Green &gt;6.0mo (oversupply)</span><span class="lang-zh" style="display:none">紅色&le;1.5月（嚴重短缺）&middot; 橙色&le;3.0月 &middot; 深藍&le;6.0月 &middot; 綠色&gt;6.0月（供過於求）</span></p>
+    </div>
+
+    <!-- SECTION 2: BUILDING PERMITS -->
+    <h2 id="sec-permits"><span class="lang-en">BUILDING PERMITS</span><span class="lang-zh" style="display:none">建築許可</span></h2>
+    <div class="lang-en">
+      <p>Building permit issuance across the 12-city monitor has declined meaningfully from the 2021&ndash;2022 pandemic boom peaks. Higher interest rates, elevated construction costs, and tightening credit conditions have combined to slow the pipeline. The national single-family permit count fell <strong>~12%</strong> from the 2022 peak, while multifamily starts have dropped even more sharply &mdash; down <strong>~35%</strong> from the 2022 high as developers face refinancing walls and reduced institutional appetite.</p>
+      <p>The decline is uneven. Austin, which led the nation in per-capita permitting during 2021&ndash;2022, has pulled back <strong>~28%</strong> from its peak indexed level as the local market digests oversupply. Phoenix similarly retreated from its 2022 highs. In contrast, Boston and Chicago &mdash; markets with historically lower permit volumes &mdash; have seen permits stabilise closer to pre-pandemic levels rather than experiencing dramatic swings, as these metros never participated in the Sun Belt building boom.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>12城市監測中的建築許可發放量已從2021至2022年疫情繁榮峰值顯著下降。更高的利率、升高的建設成本和收緊的信貸條件共同減緩了管道。全國獨棟建築許可數量從2022年峰值下降約<strong>12%</strong>，多戶住宅開工更急劇下降——從2022年高點下降約<strong>35%</strong>，因開發商面臨再融資牆和機構投資意願降低。</p>
+      <p>下降幅度不均。奧斯丁在2021至2022年期間人均許可量領先全國，但已從峰值指數水準回撤約<strong>28%</strong>，因本地市場消化供給過剩。鳳凰城同樣從2022年高點回落。相比之下，波士頓和芝加哥——歷來許可量較低的市場——許可量穩定在接近疫情前水準而非經歷劇烈波動，因這些都會區從未參與陽光帶建設潮。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Building Permits Index (2019 = 100)</span><span class="lang-zh" style="display:none">建築許可指數（2019年=100）</span></h4>
+      <div id="chartSupplyPermits" style="width:100%;height:280px;"></div>
+      <p class="chart-note navy"><span class="lang-en">Indexed to 2019 baseline &middot; Dashed line = pre-pandemic level</span><span class="lang-zh" style="display:none">以2019年為基線 &middot; 虛線=疫情前水準</span></p>
+    </div>
+
+    <!-- SECTION 3: LOCK-IN EFFECT -->
+    <h2 id="sec-lockin"><span class="lang-en">LOCK-IN EFFECT</span><span class="lang-zh" style="display:none">利率鎖定效應</span></h2>
+    <div class="lang-en">
+      <p>The mortgage rate lock-in effect remains the single most powerful force suppressing existing-home supply. With an estimated <strong>~60%</strong> of outstanding U.S. mortgages carrying rates below 4%, and the current 30-year fixed rate at <strong>6.38%</strong>, homeowners face a punishing monthly payment penalty for selling and repurchasing at today&rsquo;s rates. This dynamic has effectively removed an estimated <strong>~33%</strong> of normal annual resale supply from the market &mdash; roughly 1.5 million transactions that would have occurred under stable-rate conditions.</p>
+      <p>The penalty is starkest for borrowers who locked in at <strong>3.0%</strong> during the 2020&ndash;2021 trough. On a $400,000 mortgage, upgrading from 3.0% to 6.38% adds <strong>$1,729/month</strong> in payment &mdash; a de facto cost of mobility that freezes households in place. Even a more moderate scenario of moving from 3.0% to 5.5% imposes <strong>$1,343/month</strong> in additional cost. Until rates fall meaningfully below 5%, the lock-in effect will continue to distort supply across all 12 monitored cities.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>抵押貸款利率鎖定效應仍是抑制現有住宅供給的最強大單一力量。估計約<strong>60%</strong>的美國現有抵押貸款利率低於4%，而當前30年固定利率為<strong>6.38%</strong>，屋主在以今日利率出售並重新購買時面臨懲罰性的月供增加。這一動態已有效從市場移除約<strong>33%</strong>的正常年度轉售供給——大約150萬筆在利率穩定條件下本會發生的交易。</p>
+      <p>對於在2020至2021年低谷期間鎖定<strong>3.0%</strong>利率的借款人，懲罰最為嚴重。以40萬美元抵押貸款計，從3.0%升至6.38%每月增加<strong>1,729美元</strong>——實質上是凍結家庭不動的流動性成本。即使是從3.0%升至5.5%的較溫和情境也增加<strong>1,343美元</strong>月供。在利率顯著降至5%以下之前，鎖定效應將繼續扭曲所有12個受監測城市的供給。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Monthly Payment Penalty: 3% Legacy Rate vs. New Rates ($400K Mortgage)</span><span class="lang-zh" style="display:none">月供懲罰：3%舊利率 vs. 新利率（$40萬抵押貸款）</span></h4>
+      <div id="chartSupplyLockin" style="width:100%;height:220px;"></div>
+      <p class="chart-note red"><span class="lang-en">Based on $400,000 30-year fixed mortgage &middot; Principal + interest only</span><span class="lang-zh" style="display:none">基於40萬美元30年固定抵押貸款 &middot; 僅本金+利息</span></p>
+    </div>
+
+    <!-- SECTION 4: SUPPLY CLIFFS -->
+    <h2 id="sec-cliff"><span class="lang-en">SUPPLY CLIFFS</span><span class="lang-zh" style="display:none">供給斷崖</span></h2>
+    <div class="lang-en">
+      <p>Several markets face impending supply cliffs as the multifamily construction pipeline &mdash; initiated during the 2021&ndash;2022 boom &mdash; delivers its final wave and new starts fail to replace it. Boston is the most vulnerable: the metro&rsquo;s multifamily pipeline peaked in 2023 with approximately <strong>18,000</strong> units under construction, but new permit issuance has dropped to levels that imply a <strong>~45%</strong> decline in deliveries by 2027.</p>
+      <p>Denver faces a similar trajectory. The metro&rsquo;s apartment completion rate peaked in 2024 at approximately <strong>14,500 units</strong>, but the pipeline thins dramatically into 2026&ndash;2027 as developers pulled back amid rising cap rates and falling rents. Austin&rsquo;s cliff is the most immediate: after delivering a record <strong>~28,000</strong> multifamily units in 2023&ndash;2024, new starts have collapsed and 2027 deliveries are projected at less than half the peak. These supply cliffs will eventually tighten rental markets and, by extension, redirect demand pressure back toward the for-sale market.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>數個市場面臨即將到來的供給斷崖，因為在2021至2022年繁榮期啟動的多戶住宅建設在建量交付最後一波，而新開工未能替代。波士頓最脆弱：該都會區多戶住宅管道在2023年達到峰值，約有<strong>18,000</strong>套在建，但新許可發放量已降至暗示2027年交付量將下降約<strong>45%</strong>的水準。</p>
+      <p>丹佛面臨相似軌跡。該都會區公寓竣工率在2024年達到約<strong>14,500套</strong>的峰值，但管道在2026至2027年急劇萎縮，因開發商在資本化率上升和租金下降中收縮。奧斯丁的斷崖最為迫切：在2023至2024年交付創紀錄的約<strong>28,000</strong>套多戶住宅後，新開工已崩潰，2027年交付預計不到峰值的一半。這些供給斷崖最終將收緊租賃市場，並由此將需求壓力重新導向待售市場。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Multifamily Pipeline Delivery Index (2022 = 100)</span><span class="lang-zh" style="display:none">多戶住宅在建交付指數（2022年=100）</span></h4>
+      <div id="chartSupplyCliff" style="width:100%;height:260px;"></div>
+      <p class="chart-note orange"><span class="lang-en">Projected deliveries indexed to 2022 baseline &middot; 2026&ndash;2027E are estimates</span><span class="lang-zh" style="display:none">交付預測以2022年為基線 &middot; 2026至2027E為預估值</span></p>
+    </div>
+
+    <!-- SECTION 5: 12-CITY COMPARISON -->
+    <h2 id="sec-comparison"><span class="lang-en">12-CITY COMPARISON</span><span class="lang-zh" style="display:none">12城市對比</span></h2>
+
+    <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th><span class="lang-en">City</span><span class="lang-zh" style="display:none">城市</span></th>
+          <th><span class="lang-en">Months Supply</span><span class="lang-zh" style="display:none">供給月數</span></th>
+          <th><span class="lang-en">Active Listings</span><span class="lang-zh" style="display:none">活躍掛牌</span></th>
+          <th><span class="lang-en">Permit Trend</span><span class="lang-zh" style="display:none">許可趨勢</span></th>
+          <th><span class="lang-en">Lock-in Severity</span><span class="lang-zh" style="display:none">鎖定嚴重度</span></th>
+          <th><span class="lang-en">Supply Outlook</span><span class="lang-zh" style="display:none">供給展望</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>New York</td>
+          <td>2.5</td>
+          <td><span class="lang-en">~18,200</span><span class="lang-zh" style="display:none">~18,200</span></td>
+          <td><span class="lang-en">Stable</span><span class="lang-zh" style="display:none">穩定</span></td>
+          <td><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></td>
+          <td><span class="lang-en" style="color:#d97706;font-weight:600;">Tight</span><span class="lang-zh" style="display:none;color:#d97706;font-weight:600;">緊張</span></td>
+        </tr>
+        <tr>
+          <td>Los Angeles</td>
+          <td>2.8</td>
+          <td><span class="lang-en">~9,500</span><span class="lang-zh" style="display:none">~9,500</span></td>
+          <td><span class="lang-en">Declining</span><span class="lang-zh" style="display:none">下降</span></td>
+          <td><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></td>
+          <td><span class="lang-en" style="color:#d97706;font-weight:600;">Tight</span><span class="lang-zh" style="display:none;color:#d97706;font-weight:600;">緊張</span></td>
+        </tr>
+        <tr>
+          <td>San Francisco</td>
+          <td>0.8</td>
+          <td><span class="lang-en">148 (SF homes)</span><span class="lang-zh" style="display:none">148（獨棟）</span></td>
+          <td><span class="lang-en">Low &amp; flat</span><span class="lang-zh" style="display:none">低且平穩</span></td>
+          <td><span class="lang-en">Extreme</span><span class="lang-zh" style="display:none">極高</span></td>
+          <td><span class="lang-en" style="color:#dc2626;font-weight:600;">Severe shortage</span><span class="lang-zh" style="display:none;color:#dc2626;font-weight:600;">嚴重短缺</span></td>
+        </tr>
+        <tr>
+          <td>Silicon Valley</td>
+          <td>0.8</td>
+          <td><span class="lang-en">~420</span><span class="lang-zh" style="display:none">~420</span></td>
+          <td><span class="lang-en">Low &amp; flat</span><span class="lang-zh" style="display:none">低且平穩</span></td>
+          <td><span class="lang-en">Extreme</span><span class="lang-zh" style="display:none">極高</span></td>
+          <td><span class="lang-en" style="color:#dc2626;font-weight:600;">Severe shortage</span><span class="lang-zh" style="display:none;color:#dc2626;font-weight:600;">嚴重短缺</span></td>
+        </tr>
+        <tr>
+          <td>San Diego</td>
+          <td>2.2</td>
+          <td><span class="lang-en">~3,800</span><span class="lang-zh" style="display:none">~3,800</span></td>
+          <td><span class="lang-en">Declining</span><span class="lang-zh" style="display:none">下降</span></td>
+          <td><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></td>
+          <td><span class="lang-en" style="color:#d97706;font-weight:600;">Tight</span><span class="lang-zh" style="display:none;color:#d97706;font-weight:600;">緊張</span></td>
+        </tr>
+        <tr>
+          <td>Miami</td>
+          <td>14.0</td>
+          <td><span class="lang-en">~22,500 (condos)</span><span class="lang-zh" style="display:none">~22,500（公寓）</span></td>
+          <td><span class="lang-en">Elevated</span><span class="lang-zh" style="display:none">偏高</span></td>
+          <td><span class="lang-en">Low</span><span class="lang-zh" style="display:none">低</span></td>
+          <td><span class="lang-en" style="color:#16a34a;font-weight:600;">Oversupplied</span><span class="lang-zh" style="display:none;color:#16a34a;font-weight:600;">供過於求</span></td>
+        </tr>
+        <tr>
+          <td>Austin</td>
+          <td>6.1</td>
+          <td><span class="lang-en">~8,400</span><span class="lang-zh" style="display:none">~8,400</span></td>
+          <td><span class="lang-en">Retreating</span><span class="lang-zh" style="display:none">回落</span></td>
+          <td><span class="lang-en">Moderate</span><span class="lang-zh" style="display:none">中等</span></td>
+          <td><span class="lang-en" style="color:#16a34a;font-weight:600;">Balanced / softening</span><span class="lang-zh" style="display:none;color:#16a34a;font-weight:600;">均衡/軟化</span></td>
+        </tr>
+        <tr>
+          <td>Seattle</td>
+          <td>2.8</td>
+          <td><span class="lang-en">~4,200</span><span class="lang-zh" style="display:none">~4,200</span></td>
+          <td><span class="lang-en">Stable</span><span class="lang-zh" style="display:none">穩定</span></td>
+          <td><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></td>
+          <td><span class="lang-en" style="color:#d97706;font-weight:600;">Tight</span><span class="lang-zh" style="display:none;color:#d97706;font-weight:600;">緊張</span></td>
+        </tr>
+        <tr>
+          <td>Chicago</td>
+          <td>0.72</td>
+          <td><span class="lang-en">~5,100 (city)</span><span class="lang-zh" style="display:none">~5,100（市區）</span></td>
+          <td><span class="lang-en">Low &amp; flat</span><span class="lang-zh" style="display:none">低且平穩</span></td>
+          <td><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></td>
+          <td><span class="lang-en" style="color:#dc2626;font-weight:600;">Severe shortage</span><span class="lang-zh" style="display:none;color:#dc2626;font-weight:600;">嚴重短缺</span></td>
+        </tr>
+        <tr>
+          <td>Boston</td>
+          <td>1.8</td>
+          <td><span class="lang-en">~2,900</span><span class="lang-zh" style="display:none">~2,900</span></td>
+          <td><span class="lang-en">Declining</span><span class="lang-zh" style="display:none">下降</span></td>
+          <td><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></td>
+          <td><span class="lang-en" style="color:#dc2626;font-weight:600;">Tightening</span><span class="lang-zh" style="display:none;color:#dc2626;font-weight:600;">收緊中</span></td>
+        </tr>
+        <tr>
+          <td>Phoenix</td>
+          <td>1.59</td>
+          <td><span class="lang-en">~12,800 (city)</span><span class="lang-zh" style="display:none">~12,800（市區）</span></td>
+          <td><span class="lang-en">Retreating</span><span class="lang-zh" style="display:none">回落</span></td>
+          <td><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></td>
+          <td><span class="lang-en" style="color:#d97706;font-weight:600;">Tight</span><span class="lang-zh" style="display:none;color:#d97706;font-weight:600;">緊張</span></td>
+        </tr>
+        <tr>
+          <td>Denver</td>
+          <td>1.63</td>
+          <td><span class="lang-en">17,107 (metro)</span><span class="lang-zh" style="display:none">17,107（都會區）</span></td>
+          <td><span class="lang-en">Retreating</span><span class="lang-zh" style="display:none">回落</span></td>
+          <td><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></td>
+          <td><span class="lang-en" style="color:#d97706;font-weight:600;">Loosening</span><span class="lang-zh" style="display:none;color:#d97706;font-weight:600;">寬鬆化</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: Case-Shiller &middot; NAR &middot; Houzeo &middot; DMAR &middot; ABoR &middot; GBAR &middot; CAR &middot; NWMLS. All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：Case-Shiller &middot; NAR &middot; Houzeo &middot; DMAR &middot; ABoR &middot; GBAR &middot; CAR &middot; NWMLS。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawSupplyMonths(lang);drawSupplyPermits(lang);drawSupplyLockin(lang);drawSupplyCliff(lang);}
+
+function drawSupplyMonths(lang){var dom=document.getElementById('chartSupplyMonths');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var cities=['Chicago','SV','SF','Phoenix city','Denver','Boston','NYC','LA','Seattle','Phoenix metro','Austin','Miami condos'];
+  var vals=[0.72,0.8,0.8,1.59,1.63,1.8,2.5,2.8,2.8,4.4,6.1,14.0];
+  var colors=vals.map(function(v){return v<=1.5?C.red:v<=3.0?C.orange:v<=6.0?C.navy:C.green;});
+  c.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'},formatter:function(p){return p[0].name+': <b>'+p[0].value+'</b> '+(en?'months':'個月');}},grid:{left:12,right:40,top:12,bottom:12,containLabel:true},xAxis:mkAxis({type:'value',max:16,axisLabel:{color:C.muted,fontSize:10,formatter:'{value}mo'}}),yAxis:mkAxis({type:'category',data:cities,axisLabel:{color:C.muted,fontSize:10},inverse:true}),
+    series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[0,3,3,0]}};}),barMaxWidth:18,label:{show:true,position:'right',formatter:'{c}',fontSize:10,color:C.muted},markLine:{data:[{xAxis:6.0,lineStyle:{color:C.green,type:'dashed',width:1.5},label:{formatter:en?'Balanced market':'均衡市場',fontSize:9,color:C.green,position:'end'}}],symbol:'none'}}]});}
+
+function drawSupplyPermits(lang){var dom=document.getElementById('chartSupplyPermits');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025E'];
+  var boston= [100,88,95,108,102,96,90];
+  var austin= [100,92,148,162,135,118,105];
+  var phoenix=[100,90,138,155,128,112,100];
+  var denver= [100,85,130,142,118,105,95];
+  var seattle=[100,82,115,125,110,100,92];
+  var chicago=[100,78,92,98,95,90,88];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:40,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:60,max:180,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[
+      {name:en?'Boston':'波士頓',type:'bar',data:boston,barMaxWidth:12,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'10%'},
+      {name:en?'Austin':'奧斯丁',type:'bar',data:austin,barMaxWidth:12,itemStyle:{color:C.green,borderRadius:[3,3,0,0]}},
+      {name:en?'Phoenix':'鳳凰城',type:'bar',data:phoenix,barMaxWidth:12,itemStyle:{color:C.orange,borderRadius:[3,3,0,0]}},
+      {name:en?'Denver':'丹佛',type:'bar',data:denver,barMaxWidth:12,itemStyle:{color:C.blue,borderRadius:[3,3,0,0]}},
+      {name:en?'Seattle':'西雅圖',type:'bar',data:seattle,barMaxWidth:12,itemStyle:{color:C.muted,borderRadius:[3,3,0,0]}},
+      {name:en?'Chicago':'芝加哥',type:'bar',data:chicago,barMaxWidth:12,itemStyle:{color:C.red,borderRadius:[3,3,0,0]}},
+      {type:'line',data:[100,100,100,100,100,100,100],lineStyle:{color:C.muted,type:'dashed',width:1},symbol:'none',tooltip:{show:false},markLine:{data:[{yAxis:100,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'2019 baseline':'2019年基線',fontSize:8,color:C.muted}}],symbol:'none'}}
+    ]});}
+
+function drawSupplyLockin(lang){var dom=document.getElementById('chartSupplyLockin');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var scenarios=en?['3% → 5.5%','3% → 6.0%','3% → 6.38%']:['3% → 5.5%','3% → 6.0%','3% → 6.38%'];
+  var vals=[1343,1552,1729];
+  var colors=[C.green,C.orange,C.red];
+  c.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'},formatter:function(p){return p[0].name+'<br/>'+(en?'Monthly penalty':'月供增加')+': <b>$'+p[0].value.toLocaleString()+'</b>';}},grid:{left:12,right:20,top:20,bottom:12,containLabel:true},xAxis:mkAxis({type:'category',data:scenarios,axisLabel:{color:C.muted,fontSize:11}}),yAxis:mkAxis({type:'value',min:0,max:2000,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v.toLocaleString();}}}),
+    series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[3,3,0,0]}};}),barMaxWidth:60,label:{show:true,position:'top',formatter:function(p){return '$'+p.value.toLocaleString();},fontSize:11,fontWeight:600,color:C.navy}}]});}
+
+function drawSupplyCliff(lang){var dom=document.getElementById('chartSupplyCliff');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2022','2023','2024','2025E','2026E','2027E'];
+  var boston= [100,128,135,115,88,72];
+  var denver= [100,118,145,125,95,78];
+  var austin= [100,142,155,120,82,65];
+  var national=[100,112,120,108,95,88];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:40,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:50,max:170,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[
+      {name:en?'Boston':'波士頓',type:'line',data:boston,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5},
+      {name:en?'Denver':'丹佛',type:'line',data:denver,lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue},symbol:'circle',symbolSize:5},
+      {name:en?'Austin':'奧斯丁',type:'line',data:austin,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5},
+      {name:en?'National':'全國',type:'line',data:national,lineStyle:{color:C.muted,width:1.5,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,areaStyle:{color:'rgba(90,122,154,0.05)'}}
+    ]});}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}function toggleCityMenu(){document.getElementById('cityDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}if(!e.target.closest('.city-dropdown')){var d2=document.getElementById('cityDropdown');if(d2)d2.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

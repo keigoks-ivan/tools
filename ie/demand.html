@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Demand Analysis | Ireland Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="main-content">
+  <section class="hero-section">
+    <h1><span class="lang-en">Ireland &mdash; Demand Analysis</span><span class="lang-zh" style="display:none">愛爾蘭 &mdash; 需求分析</span></h1>
+    <p class="subtitle"><span class="lang-en">Population growth and migration</span><span class="lang-zh" style="display:none">人口成長與移民趨勢</span></p>
+  </section>
+
+  <section class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 20px 24px">
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Population</span><span class="lang-zh" style="display:none">人口</span></div><div class="kpi-value">5.38M</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Net Migration</span><span class="lang-zh" style="display:none">淨移民</span></div><div class="kpi-value">+68,900</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Tech Employment</span><span class="lang-zh" style="display:none">科技就業</span></div><div class="kpi-value">120K+</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">FTB Share</span><span class="lang-zh" style="display:none">首購族比例</span></div><div class="kpi-value">52%</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Mortgage Drawdowns</span><span class="lang-zh" style="display:none">房貸撥款</span></div><div class="kpi-value">&euro;14.2B</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Affordability PTI</span><span class="lang-zh" style="display:none">房價收入比</span></div><div class="kpi-value">6.5x</div></div>
+  </section>
+
+  <section class="section-block">
+    <h2 class="section-title"><span class="lang-en">MIGRATION</span><span class="lang-zh" style="display:none">移民趨勢</span></h2>
+    <div class="chart-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin:0 20px">
+      <div class="chart-card"><h3><span class="lang-en">Net Migration (Annual)</span><span class="lang-zh" style="display:none">年度淨移民</span></h3><div id="chartMigration" style="width:100%;height:300px"></div></div>
+      <div class="chart-card"><h3><span class="lang-en">Population Growth</span><span class="lang-zh" style="display:none">人口成長</span></h3><div id="chartPopGrowth" style="width:100%;height:300px"></div></div>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <h2 class="section-title"><span class="lang-en">BUYER PROFILE</span><span class="lang-zh" style="display:none">買家結構</span></h2>
+    <div class="chart-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin:0 20px">
+      <div class="chart-card"><h3><span class="lang-en">Mortgage Drawdowns by Buyer Type</span><span class="lang-zh" style="display:none">各類買家房貸撥款</span></h3><div id="chartBuyerType" style="width:100%;height:300px"></div></div>
+      <div class="chart-card"><h3><span class="lang-en">Annual Mortgage Value</span><span class="lang-zh" style="display:none">年度房貸金額</span></h3><div id="chartMortgageVal" style="width:100%;height:300px"></div></div>
+    </div>
+  </section>
+
+  <footer class="source-footer" style="text-align:center;padding:20px;font-size:11px;color:#5a7a9a">
+    <span class="lang-en">Sources: CSO Ireland, Central Bank of Ireland, BPFI &middot; Updated Q1 2026</span>
+    <span class="lang-zh" style="display:none">資料來源：愛爾蘭中央統計局、愛爾蘭中央銀行、BPFI &middot; 更新於 2026 年第一季</span>
+  </footer>
+</main>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts=[];
+function initCharts(){
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+  var years=['2018','2019','2020','2021','2022','2023','2024','2025'];
+
+  // Net Migration
+  var c1=echarts.init(document.getElementById('chartMigration'));
+  c1.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Persons'}),series:[{name:'Net Migration',type:'bar',data:[34000,33700,28900,-4500,61100,77600,72300,68900],itemStyle:{color:function(p){return p.value<0?C.red:C.blue;}}}]});
+  allCharts.push(c1);
+
+  // Population Growth
+  var c2=echarts.init(document.getElementById('chartPopGrowth'));
+  c2.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Million'}),series:[{name:'Population',type:'line',smooth:true,areaStyle:{color:'rgba(37,99,235,0.1)'},data:[4.86,4.92,4.98,5.01,5.12,5.26,5.33,5.38],lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue}}]});
+  allCharts.push(c2);
+
+  // Buyer type pie
+  var c3=echarts.init(document.getElementById('chartBuyerType'));
+  c3.setOption({tooltip:{trigger:'item',backgroundColor:'#fff',borderColor:'#ccd9e8',textStyle:{color:C.navy,fontSize:11}},series:[{type:'pie',radius:['35%','65%'],center:['50%','55%'],data:[
+    {value:52,name:'First-Time Buyers',itemStyle:{color:C.blue}},
+    {value:28,name:'Mover Purchasers',itemStyle:{color:C.green}},
+    {value:12,name:'Buy-to-Let',itemStyle:{color:C.orange}},
+    {value:8,name:'Non-Mortgage/Cash',itemStyle:{color:C.muted}}
+  ],label:{fontSize:11,color:C.navy}}]});
+  allCharts.push(c3);
+
+  // Mortgage value
+  var c4=echarts.init(document.getElementById('chartMortgageVal'));
+  c4.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'EUR Billion'}),series:[{name:'Drawdowns',type:'bar',data:[8.9,9.5,7.8,9.2,12.1,13.5,13.8,14.2],itemStyle:{color:C.green}}]});
+  allCharts.push(c4);
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(el){el.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(el){el.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+  initCharts();
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');});
+
+initCharts();
+window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

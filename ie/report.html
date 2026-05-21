@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Report | Ireland Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+    .toc-box{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;margin:0 0 24px;font-family:'Inter',sans-serif;overflow:hidden}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;font-size:12px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none;background:#f4f7fc}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:13px;cursor:pointer;padding:0;line-height:1;transition:transform .2s}
+    .toc-list{padding:8px 16px 12px;display:flex;flex-direction:column;gap:2px}
+    .toc-list a{font-size:12px;color:#2c3e50;text-decoration:none;padding:5px 8px 5px 10px;border-radius:4px;border-left:2px solid transparent;display:block;transition:all .15s;font-family:Georgia,serif}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;color:#1e3a5f}
+    .toc-collapsed .toc-list{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    /* -- Side Progress Nav -- */
+    .side-nav{position:fixed;top:50%;right:max(16px, calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+    .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+    .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+    .report-chart-card .chart-meta{font-family:'Inter',sans-serif;font-size:11px;color:#d97706;margin-bottom:8px}
+    .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+    .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+    @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script>
+  function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+  function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+  </script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <div class="report-container">
+    <nav class="side-nav" id="sideNav">
+      <a href="#sec-exec" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Exec Summary</span>
+        <span class="side-nav-label lang-zh" style="display:none">&#x57F7;&#x884C;&#x6458;&#x8981;</span>
+      </a>
+      <a href="#sec-policy" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">ECB Policy</span>
+        <span class="side-nav-label lang-zh" style="display:none">ECB&#x653F;&#x7B56;</span>
+      </a>
+      <a href="#sec-supply" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Supply</span>
+        <span class="side-nav-label lang-zh" style="display:none">&#x4F9B;&#x7D66;&#x9762;</span>
+      </a>
+      <a href="#sec-demand" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Demand</span>
+        <span class="side-nav-label lang-zh" style="display:none">&#x9700;&#x6C42;&#x9762;</span>
+      </a>
+      <a href="#sec-valuation" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Valuation</span>
+        <span class="side-nav-label lang-zh" style="display:none">&#x4F30;&#x503C;</span>
+      </a>
+      <a href="#sec-dublin" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Dublin</span>
+        <span class="side-nav-label lang-zh" style="display:none">&#x90FD;&#x67CF;&#x6797;</span>
+      </a>
+      <a href="#sec-cork" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Cork</span>
+        <span class="side-nav-label lang-zh" style="display:none">Cork</span>
+      </a>
+      <a href="#sec-outlook" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Outlook</span>
+        <span class="side-nav-label lang-zh" style="display:none">&#x5C55;&#x671B;</span>
+      </a>
+    </nav>
+    <div class="report-header">
+      <div class="lang-en">
+        <h1>IRELAND PROPERTY MARKET REPORT</h1>
+        <div class="report-meta">May 2026 &middot; Market Research</div>
+        <p style="font-size:13px;color:#5a7a9a;margin:4px 0 0;font-family:Inter,sans-serif;">Supply, Demand &amp; City Deep Dives &mdash; Updated post-April ECB</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <h1>愛爾蘭住宅房地產市場報告</h1>
+        <div class="report-meta">2026年5月 &middot; 市場研究</div>
+        <p style="font-size:13px;color:#5a7a9a;margin:4px 0 0;font-family:Inter,sans-serif;">供給、需求與城市深度研究——ECB 4 月決議後更新</p>
+      </div>
+    </div>
+    <div class="report-body">
+
+      <!-- TOC -->
+      <div class="toc-box" id="tocBox">
+        <div class="toc-header" onclick="toggleToc()">
+          <span class="lang-en">In This Report</span><span class="lang-zh" style="display:none">&#x672C;&#x5831;&#x544A;&#x6DB5;&#x84CB;</span>
+          <button class="toc-toggle">&#9650;</button>
+        </div>
+        <div class="toc-list">
+          <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. &#x57F7;&#x884C;&#x6458;&#x8981;</span></a>
+          <a href="#sec-policy" onclick="closeTocMobile()"><span class="lang-en">2. ECB Rate Cycle &amp; Mortgage Market</span><span class="lang-zh" style="display:none">2. ECB&#x5229;&#x7387;&#x9031;&#x671F;&#x8207;&#x623F;&#x8CB8;&#x5E02;&#x5834;</span></a>
+          <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">3. Supply: Structural Crisis</span><span class="lang-zh" style="display:none">3. &#x4F9B;&#x7D66;&#xFF1A;&#x7D50;&#x69CB;&#x6027;&#x5371;&#x6A5F;</span></a>
+          <a href="#sec-demand" onclick="closeTocMobile()"><span class="lang-en">4. Demand: Population Growth &amp; Migration</span><span class="lang-zh" style="display:none">4. &#x9700;&#x6C42;&#xFF1A;&#x4EBA;&#x53E3;&#x589E;&#x9577;&#x8207;&#x79FB;&#x6C11;</span></a>
+          <a href="#sec-valuation" onclick="closeTocMobile()"><span class="lang-en">5. Valuation &amp; Yields</span><span class="lang-zh" style="display:none">5. &#x4F30;&#x503C;&#x8207;&#x6536;&#x76CA;&#x7387;</span></a>
+          <a href="#sec-dublin" onclick="closeTocMobile()"><span class="lang-en">6. Dublin</span><span class="lang-zh" style="display:none">6. &#x90FD;&#x67CF;&#x6797;</span></a>
+          <a href="#sec-cork" onclick="closeTocMobile()"><span class="lang-en">7. Cork</span><span class="lang-zh" style="display:none">7. Cork</span></a>
+          <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">8. Outlook &amp; Risk Scenarios</span><span class="lang-zh" style="display:none">8. &#x5C55;&#x671B;&#x8207;&#x98A8;&#x96AA;&#x60C5;&#x5883;</span></a>
+        </div>
+      </div>
+
+      <!-- SECTION 1: EXECUTIVE SUMMARY -->
+      <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">&#x57F7;&#x884C;&#x6458;&#x8981;</span></h2>
+      <div class="lang-en"><p>Ireland's residential property market is defined by a structural supply crisis that no policy intervention has been able to resolve. The most recent CSO Residential Property Price Index (Feb 2026, released 15 April 2026) showed national prices up <strong>+6.8% YoY</strong> — moderating from January's +7.1% but still well above the EU average — with the median dwelling price at <strong>€390,000</strong>. Dublin rose <strong>+5.6%</strong>, while ex-Dublin advanced <strong>+7.8%</strong> as buyers continued seeking value outside the capital. Rental inflation runs at <strong>+8.2%</strong> nationally, with Dublin rents at <strong>€2,400/month</strong> for a 2-bed apartment; February 2026 rental listing stock hit its lowest level in almost two decades (just 40% of the 2015–2019 average). Vacancy sits at <strong>0.7%</strong> nationally — the lowest in the EU. Actual 2025 completions of <strong>32,695</strong> units undershot need; ESRI now forecasts only <strong>36,000–37,000</strong> for 2026, well short of estimated demand of 50,000+. The ECB cut its deposit facility rate to <strong>2.00%</strong> on 30 April 2026 — the cycle now sits at the lower bound of the neutral range, materially below the 2.65% reading earlier in Q1. Dublin gross rental yields of <strong>4.0–4.5%</strong> and Cork/Galway <strong>5.0–6.0%</strong> still rank among the most attractive in Western Europe.</p></div>
+      <div class="lang-zh" style="display:none"><p>愛爾蘭住宅市場由一場政策無力解決的結構性供給危機所定義。CSO 2026 年 2 月住宅價格指數（4 月 15 日發布）顯示全國房價年增 <strong>+6.8%</strong>——較 1 月 +7.1% 略放緩，但仍遠高於歐盟平均——住宅中位成交價 <strong>€390,000</strong>。都柏林漲 <strong>+5.6%</strong>，都柏林以外則漲 <strong>+7.8%</strong>，買家持續往首都外尋找價值。全國租金通膨 <strong>+8.2%</strong>，都柏林兩房公寓月租 <strong>€2,400</strong>；2026 年 2 月出租掛牌量降至近 20 年來最低（僅為 2015–2019 平均的 40%）。全國空置率 <strong>0.7%</strong>——歐盟最低。2025 年實際完工 <strong>32,695</strong> 套低於需求；ESRI 預估 2026 年僅 <strong>36,000–37,000</strong> 套，仍遠低於估計需求 5 萬+。歐洲央行於 2026 年 4 月 30 日將存款便利利率降至 <strong>2.00%</strong>，較 Q1 早期的 2.65% 進一步下調，目前位於中性利率區間下緣。都柏林毛租金收益率 <strong>4.0–4.5%</strong>、Cork/Galway <strong>5.0–6.0%</strong>，在西歐仍屬最具吸引力之列。</p></div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">National &amp; City Median House Price</span><span class="lang-zh" style="display:none">&#x5168;&#x570B;&#x8207;&#x57CE;&#x5E02;&#x4E2D;&#x4F4D;&#x623F;&#x50F9;</span></h4>
+          <div class="chart-meta"><span class="lang-en">2019-2025Q4, &euro;K</span><span class="lang-zh" style="display:none">2019-2025Q4&#xFF0C;&euro;&#x5343;</span></div>
+          <div id="rChartIEPrice" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Monthly Rent by City</span><span class="lang-zh" style="display:none">&#x5404;&#x57CE;&#x5E02;&#x6708;&#x79DF;</span></h4>
+          <div class="chart-meta"><span class="lang-en">&euro;/month, 2-bed apartment</span><span class="lang-zh" style="display:none">&euro;/&#x6708;&#xFF0C;&#x5169;&#x623F;&#x516C;&#x5BD3;</span></div>
+          <div id="rChartIERent" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: ECB RATE CYCLE & MORTGAGE MARKET -->
+      <h2 id="sec-policy"><span class="lang-en">ECB RATE CYCLE &amp; MORTGAGE MARKET</span><span class="lang-zh" style="display:none">ECB&#x5229;&#x7387;&#x9031;&#x671F;&#x8207;&#x623F;&#x8CB8;&#x5E02;&#x5834;</span></h2>
+      <div class="lang-en"><p>The ECB cut rates seven times between June 2024 and April 2026, bringing the deposit facility rate from <strong>4.00%</strong> to <strong>2.00%</strong> (last move 30 April 2026, simultaneously holding the main refinancing rate at 2.15% and the marginal lending facility at 2.40%). The Governing Council explicitly cited Middle East energy-price spillover as the dominant upside risk to inflation, and downside risk to growth — meaning further cuts beyond 2.00% are unlikely unless the geopolitical shock fades. Irish mortgage rates have followed with a lag — the average new mortgage rate fell from 4.2% to approximately <strong>3.3%</strong> by Q2 2026, and Irish lenders began absorbing pass-through delays. Irish mortgage rules remain among Europe's strictest: Central Bank of Ireland macroprudential limits cap LTV at <strong>90%</strong> for first-time buyers (70% for non-FTB), and loan-to-income at <strong>4x</strong> gross income. The Help-to-Buy scheme (€30,000 tax rebate for FTBs on new builds) and First Home shared equity scheme continue to channel demand into the new-build segment. Mortgage drawdowns reached <strong>€14.2 billion</strong> in 2025, up 12% YoY.</p></div>
+      <div class="lang-zh" style="display:none"><p>歐洲央行在 2024 年 6 月至 2026 年 4 月間共降息七次，將存款便利利率從 <strong>4.00%</strong> 降至 <strong>2.00%</strong>（最近一次在 2026 年 4 月 30 日，同時將主要再融資利率維持在 2.15%、邊際借貸便利在 2.40%）。理事會明確點名中東能源價格溢出為通膨主要上行風險、成長下行風險——意味著除非地緣衝擊消退，否則再進一步降息至 2.00% 以下不太可能。愛爾蘭房貸利率隨之下降——新增房貸平均利率從 4.2% 降至 2026 年 Q2 約 <strong>3.3%</strong>，本地銀行開始消化傳導延遲。愛爾蘭房貸規則仍為歐洲最嚴：央行宏觀審慎限制首購族 LTV 上限 <strong>90%</strong>（非首購 70%）、貸款收入比上限 <strong>4 倍</strong>。Help-to-Buy 計畫（首購族新屋 €30,000 退稅）和 First Home 共享產權計畫持續將需求導向新建市場。2025 年房貸撥放達 <strong>€142 億</strong>，年增 12%。</p></div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">ECB Rate &amp; Avg Mortgage Rate</span><span class="lang-zh" style="display:none">ECB&#x5229;&#x7387;&#x8207;&#x5E73;&#x5747;&#x623F;&#x8CB8;&#x5229;&#x7387;</span></h4>
+          <div class="chart-meta"><span class="lang-en">2023-2026Q1</span><span class="lang-zh" style="display:none">2023-2026Q1</span></div>
+          <div id="rChartIERate" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Mortgage Drawdowns</span><span class="lang-zh" style="display:none">&#x623F;&#x8CB8;&#x64A5;&#x653E;&#x984D;</span></h4>
+          <div class="chart-meta"><span class="lang-en">&euro; Billions, annual</span><span class="lang-zh" style="display:none">&euro;&#x5341;&#x5104;&#xFF0C;&#x5E74;&#x5EA6;</span></div>
+          <div id="rChartIEMortgage" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: SUPPLY -->
+      <h2 id="sec-supply"><span class="lang-en">SUPPLY: STRUCTURAL CRISIS</span><span class="lang-zh" style="display:none">&#x4F9B;&#x7D66;&#xFF1A;&#x7D50;&#x69CB;&#x6027;&#x5371;&#x6A5F;</span></h2>
+      <div class="lang-en"><p>Ireland's housing supply chain is in structural failure. The National Housing Plan targets <strong>33,000</strong> completions per year. Actual 2025 completions of <strong>32,695</strong> units were technically close, but disguise a critical composition problem: only <strong>18,500</strong> were traditional private houses and apartments available for purchase. The remainder comprised 7,200 social housing units, 4,500 cost-rental units, and 2,500 one-off rural houses. The private-market supply gap is therefore approximately <strong>14,000 units per year</strong> against estimated demand of 35,000+. Planning permission remains the binding constraint &mdash; An Bord Plean&aacute;la processing times average <strong>18 months</strong>, and judicial review challenges add a further 6-12 months. Construction costs in Ireland are now the third-highest in the EU at approximately <strong>&euro;2,800/m&sup2;</strong>, making developments below &euro;350,000 unviable in Dublin without subsidy. The under-construction pipeline as of Q1 2026 stands at approximately <strong>28,000 units</strong> nationally &mdash; representing less than one year of demand at current absorption rates.</p></div>
+      <div class="lang-zh" style="display:none"><p>&#x611B;&#x723E;&#x862D;&#x4F4F;&#x5B85;&#x4F9B;&#x7D66;&#x93C8;&#x8655;&#x65BC;&#x7D50;&#x69CB;&#x6027;&#x5931;&#x9748;&#x3002;&#x300A;&#x570B;&#x5BB6;&#x4F4F;&#x623F;&#x8A08;&#x756B;&#x300B;&#x76EE;&#x6A19;&#x6BCF;&#x5E74;&#x5B8C;&#x5DE5;<strong>33,000</strong>&#x5957;&#x3002;2025&#x5E74;&#x5BE6;&#x969B;&#x5B8C;&#x5DE5;<strong>32,695</strong>&#x5957;&#xFF0C;&#x6578;&#x5B57;&#x4E0A;&#x63A5;&#x8FD1;&#xFF0C;&#x4F46;&#x63A9;&#x84CB;&#x4E86;&#x95DC;&#x9375;&#x7684;&#x7D44;&#x6210;&#x554F;&#x984C;&#xFF1A;&#x50C5;<strong>18,500</strong>&#x5957;&#x70BA;&#x53EF;&#x8CFC;&#x8CB7;&#x7684;&#x50B3;&#x7D71;&#x79C1;&#x4EBA;&#x4F4F;&#x5B85;&#x548C;&#x516C;&#x5BD3;&#x3002;&#x5176;&#x9918;&#x5305;&#x62EC;7,200&#x5957;&#x793E;&#x6703;&#x4F4F;&#x623F;&#x3001;4,500&#x5957;&#x6210;&#x672C;&#x79DF;&#x8CC3;&#xFF08;cost-rental&#xFF09;&#x3001;2,500&#x5957;&#x9109;&#x6751;&#x81EA;&#x5EFA;&#x3002;&#x56E0;&#x6B64;&#x79C1;&#x4EBA;&#x5E02;&#x5834;&#x4F9B;&#x7D66;&#x7F3A;&#x53E3;&#x7D04;&#x70BA;&#x6BCF;&#x5E74;<strong>14,000&#x5957;</strong>&#xFF0C;&#x800C;&#x4F30;&#x8A08;&#x9700;&#x6C42;&#x8D85;&#x904E;35,000&#x5957;&#x3002;&#x898F;&#x5283;&#x8A31;&#x53EF;&#x4ECD;&#x662F;&#x6700;&#x5927;&#x7D04;&#x675F;&#x2014;&#x2014;An Bord Plean&aacute;la&#x8655;&#x7406;&#x6642;&#x9593;&#x5E73;&#x5747;<strong>18&#x500B;&#x6708;</strong>&#xFF0C;&#x53F8;&#x6CD5;&#x8986;&#x6838;&#x6311;&#x6230;&#x518D;&#x52A0;6-12&#x500B;&#x6708;&#x3002;&#x611B;&#x723E;&#x862D;&#x5EFA;&#x7BC9;&#x6210;&#x672C;&#x73FE;&#x70BA;&#x6B50;&#x76DF;&#x7B2C;&#x4E09;&#x9AD8;&#xFF0C;&#x7D04;<strong>&euro;2,800/m&sup2;</strong>&#xFF0C;&#x5728;&#x90FD;&#x67CF;&#x6797;&#x4F4E;&#x65BC;&euro;350,000&#x7684;&#x958B;&#x767C;&#x6848;&#x82E5;&#x7121;&#x88DC;&#x8CBC;&#x5247;&#x4E0D;&#x5177;&#x53EF;&#x884C;&#x6027;&#x3002;&#x622A;&#x81F3;2026&#x5E74;Q1&#x5168;&#x570B;&#x5728;&#x5EFA;&#x7BA1;&#x9053;&#x7D04;<strong>28,000&#x5957;</strong>&#x2014;&#x2014;&#x4EE5;&#x7576;&#x524D;&#x5438;&#x6536;&#x901F;&#x5EA6;&#x8A08;&#x7B97;&#x4E0D;&#x8DB3;&#x4E00;&#x5E74;&#x9700;&#x6C42;&#x91CF;&#x3002;</p></div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Housing Completions vs Target</span><span class="lang-zh" style="display:none">&#x4F4F;&#x5B85;&#x5B8C;&#x5DE5; vs &#x76EE;&#x6A19;</span></h4>
+          <div class="chart-meta"><span class="lang-en">2020-2025, annual units</span><span class="lang-zh" style="display:none">2020-2025&#xFF0C;&#x5E74;&#x5EA6;&#x5957;&#x6578;</span></div>
+          <div id="rChartIECompletions" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Development Timeline (months)</span><span class="lang-zh" style="display:none">&#x958B;&#x767C;&#x6642;&#x7A0B;&#xFF08;&#x6708;&#xFF09;</span></h4>
+          <div class="chart-meta"><span class="lang-en">Average months per stage</span><span class="lang-zh" style="display:none">&#x5404;&#x968E;&#x6BB5;&#x5E73;&#x5747;&#x6708;&#x6578;</span></div>
+          <div id="rChartIEPlanningTime" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: DEMAND -->
+      <h2 id="sec-demand"><span class="lang-en">DEMAND: POPULATION GROWTH &amp; MIGRATION</span><span class="lang-zh" style="display:none">&#x9700;&#x6C42;&#xFF1A;&#x4EBA;&#x53E3;&#x589E;&#x9577;&#x8207;&#x79FB;&#x6C11;</span></h2>
+      <div class="lang-en"><p>Ireland's population reached <strong>5.38 million</strong> in April 2025, up 1.7% YoY &mdash; the fastest growth rate in the EU. Net inward migration of <strong>68,900 persons</strong> in the year to April 2025 was the primary driver, with international protection applicants and returning Irish diaspora both contributing. The tech sector remains the demand anchor: Dublin's tech employment exceeds <strong>120,000</strong> across Google, Meta, Apple, Microsoft, Salesforce, and hundreds of smaller companies. Housing affordability is the binding constraint: Dublin's price-to-income ratio of <strong>8.5x</strong> and Cork's <strong>6.2x</strong> both exceed the 3.5x threshold considered affordable by Irish Central Bank standards. First-time buyers account for <strong>52%</strong> of all mortgage drawdowns, supported by Help-to-Buy and the shared equity scheme.</p></div>
+      <div class="lang-zh" style="display:none"><p>&#x611B;&#x723E;&#x862D;&#x4EBA;&#x53E3;&#x5728;2025&#x5E74;4&#x6708;&#x9054;<strong>538&#x842C;</strong>&#xFF0C;&#x5E74;&#x589E;1.7%&#x2014;&#x2014;&#x6B50;&#x76DF;&#x6700;&#x5FEB;&#x3002;&#x5168;&#x5E74;&#x6DE8;&#x9077;&#x5165;<strong>68,900&#x4EBA;</strong>&#x662F;&#x4E3B;&#x8981;&#x9A45;&#x52D5;&#x529B;&#xFF0C;&#x570B;&#x969B;&#x4FDD;&#x8B77;&#x7533;&#x8ACB;&#x8005;&#x548C;&#x56DE;&#x6D41;&#x611B;&#x723E;&#x862D;&#x50D1;&#x6C11;&#x90FD;&#x6709;&#x8CA2;&#x737B;&#x3002;&#x79D1;&#x6280;&#x696D;&#x4ECD;&#x662F;&#x9700;&#x6C42;&#x9328;&#x9EDE;&#xFF1A;&#x90FD;&#x67CF;&#x6797;&#x79D1;&#x6280;&#x5C31;&#x696D;&#x900E;<strong>120,000&#x4EBA;</strong>&#xFF0C;&#x6A6B;&#x8DE8;Google&#x3001;Meta&#x3001;Apple&#x3001;Microsoft&#x3001;Salesforce&#x53CA;&#x6578;&#x767E;&#x5BB6;&#x4E2D;&#x5C0F;&#x4F01;&#x696D;&#x3002;&#x4F4F;&#x623F;&#x53EF;&#x8CA0;&#x64D4;&#x6027;&#x662F;&#x6700;&#x5927;&#x7D04;&#x675F;&#xFF1A;&#x90FD;&#x67CF;&#x6797;&#x623F;&#x50F9;&#x6240;&#x5F97;&#x6BD4;<strong>8.5&#x500D;</strong>&#x3001;Cork <strong>6.2&#x500D;</strong>&#xFF0C;&#x90FD;&#x8D85;&#x904E;&#x611B;&#x723E;&#x862D;&#x592E;&#x884C;&#x8A8D;&#x5B9A;&#x7684;3.5&#x500D;&#x53EF;&#x8CA0;&#x64D4;&#x6A19;&#x6E96;&#x3002;&#x9996;&#x8CFC;&#x65CF;&#x4F54;&#x6240;&#x6709;&#x623F;&#x8CB8;&#x64A5;&#x653E;&#x7684;<strong>52%</strong>&#xFF0C;&#x53D7;Help-to-Buy&#x548C;&#x5171;&#x4EAB;&#x7522;&#x6B0A;&#x8A08;&#x756B;&#x652F;&#x6301;&#x3002;</p></div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Population &amp; Net Migration</span><span class="lang-zh" style="display:none">&#x4EBA;&#x53E3;&#x8207;&#x6DE8;&#x79FB;&#x6C11;</span></h4>
+          <div class="chart-meta"><span class="lang-en">2019-2025</span><span class="lang-zh" style="display:none">2019-2025</span></div>
+          <div id="rChartIEPop" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Price-to-Income Ratio</span><span class="lang-zh" style="display:none">&#x623F;&#x50F9;&#x6240;&#x5F97;&#x6BD4;</span></h4>
+          <div class="chart-meta"><span class="lang-en">Multiple of gross household income</span><span class="lang-zh" style="display:none">&#x5BB6;&#x5EAD;&#x7E3D;&#x6536;&#x5165;&#x500D;&#x6578;</span></div>
+          <div id="rChartIEAfford" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 5: VALUATION & YIELDS -->
+      <h2 id="sec-valuation"><span class="lang-en">VALUATION &amp; YIELDS</span><span class="lang-zh" style="display:none">&#x4F30;&#x503C;&#x8207;&#x6536;&#x76CA;&#x7387;</span></h2>
+      <div class="lang-en"><p>Ireland's gross rental yields remain among the most attractive in Western Europe. Dublin averages <strong>4.0-4.5%</strong> for apartments and <strong>3.0-3.5%</strong> for houses. Cork offers <strong>5.0-5.5%</strong>, Galway <strong>5.0-5.5%</strong>, and Limerick <strong>5.5-6.5%</strong>. Against the ECB rate of 2.65% and average mortgage rate of 3.5%, Dublin yields provide marginal positive carry for cash buyers but negative carry for leveraged purchasers. Cork and regional cities offer genuine positive carry even with financing. The price-to-rent ratio nationally sits at <strong>22x</strong> &mdash; reasonable by European standards (London 31x, Amsterdam 28x, Paris 35x). Ireland's structural undersupply provides a valuation floor that most European markets lack.</p></div>
+      <div class="lang-zh" style="display:none"><p>&#x611B;&#x723E;&#x862D;&#x6BDB;&#x79DF;&#x91D1;&#x6536;&#x76CA;&#x7387;&#x5728;&#x897F;&#x6B50;&#x4ECD;&#x5C6C;&#x6700;&#x5177;&#x5438;&#x5F15;&#x529B;&#x4E4B;&#x5217;&#x3002;&#x90FD;&#x67CF;&#x6797;&#x516C;&#x5BD3;&#x5E73;&#x5747;<strong>4.0-4.5%</strong>&#xFF0C;&#x7368;&#x68DF;<strong>3.0-3.5%</strong>&#x3002;Cork&#x63D0;&#x4F9B;<strong>5.0-5.5%</strong>&#xFF0C;Galway <strong>5.0-5.5%</strong>&#xFF0C;Limerick <strong>5.5-6.5%</strong>&#x3002;&#x5C0D;&#x6BD4;&#x6B50;&#x6D32;&#x592E;&#x884C;2.65%&#x5229;&#x7387;&#x548C;&#x5E73;&#x5747;&#x623F;&#x8CB8;3.5%&#xFF0C;&#x90FD;&#x67CF;&#x6797;&#x6536;&#x76CA;&#x7387;&#x5C0D;&#x73FE;&#x91D1;&#x8CB7;&#x5BB6;&#x63D0;&#x4F9B;&#x5FAE;&#x8584;&#x6B63;&#x5229;&#x5DEE;&#xFF0C;&#x4F46;&#x5C0D;&#x69D3;&#x687F;&#x8CFC;&#x8CB7;&#x8005;&#x70BA;&#x8CA0;&#x3002;Cork&#x548C;&#x4E8C;&#x7DDA;&#x57CE;&#x5E02;&#x5373;&#x4F7F;&#x878D;&#x8CC7;&#x4E5F;&#x80FD;&#x5BE6;&#x73FE;&#x6B63;&#x73FE;&#x91D1;&#x6D41;&#x3002;&#x5168;&#x570B;&#x623F;&#x79DF;&#x6BD4;<strong>22&#x500D;</strong>&#x2014;&#x2014;&#x4EE5;&#x6B50;&#x6D32;&#x6A19;&#x6E96;&#x5408;&#x7406;&#xFF08;&#x502B;&#x6566;31&#x500D;&#x3001;&#x963F;&#x59C6;&#x65AF;&#x7279;&#x4E39;28&#x500D;&#x3001;&#x5DF4;&#x9ECE;35&#x500D;&#xFF09;&#x3002;&#x611B;&#x723E;&#x862D;&#x7684;&#x7D50;&#x69CB;&#x6027;&#x4F9B;&#x7D66;&#x4E0D;&#x8DB3;&#x63D0;&#x4F9B;&#x4E86;&#x591A;&#x6578;&#x6B50;&#x6D32;&#x5E02;&#x5834;&#x4E0D;&#x5177;&#x5099;&#x7684;&#x4F30;&#x503C;&#x5E95;&#x90E8;&#x3002;</p></div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Gross Rental Yield by City</span><span class="lang-zh" style="display:none">&#x5404;&#x57CE;&#x5E02;&#x6BDB;&#x79DF;&#x91D1;&#x6536;&#x76CA;&#x7387;</span></h4>
+          <div class="chart-meta"><span class="lang-en">% yield vs ECB &amp; mortgage</span><span class="lang-zh" style="display:none">&#x6536;&#x76CA;&#x7387; vs ECB&#x8207;&#x623F;&#x8CB8;</span></div>
+          <div id="rChartIEYield" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Price-to-Rent Ratio (European Comparison)</span><span class="lang-zh" style="display:none">&#x623F;&#x79DF;&#x6BD4;&#xFF08;&#x6B50;&#x6D32;&#x6BD4;&#x8F03;&#xFF09;</span></h4>
+          <div class="chart-meta"><span class="lang-en">Annual rent multiples</span><span class="lang-zh" style="display:none">&#x5E74;&#x79DF;&#x91D1;&#x500D;&#x6578;</span></div>
+          <div id="rChartIEPR" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 6: DUBLIN -->
+      <h2 id="sec-dublin"><span class="lang-en">DUBLIN</span><span class="lang-zh" style="display:none">&#x90FD;&#x67CF;&#x6797;</span></h2>
+      <div class="lang-en"><p>Dublin's residential market is the most supply-constrained capital city in Western Europe. Median house prices reached <strong>&euro;490,000</strong> in Q4 2025, with apartment prices at <strong>&euro;380,000</strong>. The vacancy rate in Dublin is <strong>0.5%</strong> &mdash; functionally zero. Average 2-bed apartment rent hit <strong>&euro;2,400/month</strong>, a 9.2% YoY increase. Planning permissions in Dublin fell 12% in 2025 as developers struggled with cost viability. The most active price band is &euro;300K-500K for apartments and &euro;400K-600K for houses &mdash; both face chronic undersupply. Three zones define Dublin: Docklands/IFSC (tech premium, &euro;500-700K apartments, 3.5-4.2% yield), South Dublin/Rathmines/Ranelagh (traditional premium, &euro;550K-900K houses, 2.8-3.5% yield), and West/North Dublin (best value, &euro;300-450K, 4.5-5.5% yield, strong rental demand from hospital and university workers).</p></div>
+      <div class="lang-zh" style="display:none"><p>&#x90FD;&#x67CF;&#x6797;&#x662F;&#x897F;&#x6B50;&#x4F9B;&#x7D66;&#x6700;&#x53D7;&#x9650;&#x7684;&#x9996;&#x90FD;&#x57CE;&#x5E02;&#x3002;2025&#x5E74;Q4&#x7368;&#x68DF;&#x4E2D;&#x4F4D;&#x50F9;<strong>&euro;490,000</strong>&#xFF0C;&#x516C;&#x5BD3;<strong>&euro;380,000</strong>&#x3002;&#x90FD;&#x67CF;&#x6797;&#x7A7A;&#x7F6E;&#x7387;<strong>0.5%</strong>&#x2014;&#x2014;&#x529F;&#x80FD;&#x6027;&#x70BA;&#x96F6;&#x3002;&#x5169;&#x623F;&#x516C;&#x5BD3;&#x5747;&#x79DF;&#x9054;<strong>&euro;2,400/&#x6708;</strong>&#xFF0C;&#x5E74;&#x589E;9.2%&#x3002;2025&#x5E74;&#x90FD;&#x67CF;&#x6797;&#x898F;&#x5283;&#x8A31;&#x53EF;&#x4E0B;&#x964D;12%&#xFF0C;&#x958B;&#x767C;&#x5546;&#x9762;&#x81E8;&#x6210;&#x672C;&#x53EF;&#x884C;&#x6027;&#x56F0;&#x5883;&#x3002;&#x6700;&#x6D3B;&#x8E8D;&#x50F9;&#x683C;&#x5E36;&#x662F;&#x516C;&#x5BD3;&euro;30-50&#x842C;&#x3001;&#x7368;&#x68DF;&euro;40-60&#x842C;&#x2014;&#x2014;&#x5169;&#x8005;&#x90FD;&#x9762;&#x81E8;&#x9577;&#x671F;&#x4F9B;&#x7D66;&#x4E0D;&#x8DB3;&#x3002;&#x4E09;&#x500B;&#x5340;&#x57DF;&#x5B9A;&#x7FA9;&#x90FD;&#x67CF;&#x6797;&#xFF1A;Docklands/IFSC&#xFF08;&#x79D1;&#x6280;&#x6EA2;&#x50F9;&#xFF0C;&euro;50-70&#x842C;&#x516C;&#x5BD3;&#xFF0C;&#x6536;&#x76CA;&#x7387;3.5-4.2%&#xFF09;&#x3001;&#x5357;&#x90FD;&#x67CF;&#x6797;Rathmines/Ranelagh&#xFF08;&#x50B3;&#x7D71;&#x9AD8;&#x7AEF;&#xFF0C;&euro;55-90&#x842C;&#x7368;&#x68DF;&#xFF0C;&#x6536;&#x76CA;&#x7387;2.8-3.5%&#xFF09;&#x3001;&#x897F;/&#x5317;&#x90FD;&#x67CF;&#x6797;&#xFF08;&#x6700;&#x4F73;&#x50F9;&#x503C;&#xFF0C;&euro;30-45&#x842C;&#xFF0C;&#x6536;&#x76CA;&#x7387;4.5-5.5%&#xFF0C;&#x91AB;&#x9662;&#x548C;&#x5927;&#x5B78;&#x8077;&#x5DE5;&#x5F37;&#x52C1;&#x79DF;&#x8CC3;&#x9700;&#x6C42;&#xFF09;&#x3002;</p></div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Dublin House &amp; Apartment Prices</span><span class="lang-zh" style="display:none">&#x90FD;&#x67CF;&#x6797;&#x7368;&#x68DF;&#x8207;&#x516C;&#x5BD3;&#x50F9;&#x683C;</span></h4>
+          <div class="chart-meta"><span class="lang-en">2019-2025Q4, &euro;K</span><span class="lang-zh" style="display:none">2019-2025Q4&#xFF0C;&euro;&#x5343;</span></div>
+          <div id="rChartDubPrice" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Dublin Zones: Price &amp; Yield</span><span class="lang-zh" style="display:none">&#x90FD;&#x67CF;&#x6797;&#x5206;&#x5340;&#xFF1A;&#x50F9;&#x683C;&#x8207;&#x6536;&#x76CA;&#x7387;</span></h4>
+          <div class="chart-meta"><span class="lang-en">Midpoint &euro;K &amp; yield %</span><span class="lang-zh" style="display:none">&#x4E2D;&#x4F4D;&#x50F9;&euro;&#x5343; &amp; &#x6536;&#x76CA;&#x7387;%</span></div>
+          <div id="rChartDubZone" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 7: CORK -->
+      <h2 id="sec-cork"><span class="lang-en">CORK</span><span class="lang-zh" style="display:none">Cork</span></h2>
+      <div class="lang-en"><p>Cork is Ireland's second-largest city and its strongest value proposition for property investors. Median house prices of <strong>&euro;340,000</strong> represent a 31% discount to Dublin, while rental yields of <strong>5.0-5.5%</strong> are 100-150bps higher. The city's economic base is diversifying beyond its traditional pharmaceutical anchor (Pfizer, Eli Lilly, Johnson &amp; Johnson) into tech (Apple's European HQ at Hollyhill, Amazon Web Services) and biotech. Cork's population grew <strong>2.1%</strong> in 2025 &mdash; faster than Dublin &mdash; driven by the affordability differential and improving infrastructure. The N28/M28 motorway upgrade and Cork commuter rail expansion are opening new residential corridors. The rental market is extremely tight: vacancy at <strong>0.6%</strong>, with rents rising 7.8% YoY to <strong>&euro;1,650/month</strong> for a 2-bed. New completions in Cork averaged only <strong>3,200</strong> per year over the past 3 years against estimated annual demand of <strong>5,000+</strong> &mdash; a structural gap that will persist through at least 2029.</p></div>
+      <div class="lang-zh" style="display:none"><p>Cork&#x662F;&#x611B;&#x723E;&#x862D;&#x7B2C;&#x4E8C;&#x5927;&#x57CE;&#x5E02;&#xFF0C;&#x4E5F;&#x662F;&#x623F;&#x5730;&#x7522;&#x6295;&#x8CC7;&#x8005;&#x7684;&#x6700;&#x4F73;&#x50F9;&#x503C;&#x9078;&#x9805;&#x3002;&#x7368;&#x68DF;&#x4E2D;&#x4F4D;&#x50F9;<strong>&euro;340,000</strong>&#xFF0C;&#x8F03;&#x90FD;&#x67CF;&#x6797;&#x6298;&#x50F9;31%&#xFF0C;&#x800C;&#x79DF;&#x91D1;&#x6536;&#x76CA;&#x7387;<strong>5.0-5.5%</strong>&#x9AD8;&#x51FA;100-150&#x500B;&#x57FA;&#x9EDE;&#x3002;&#x57CE;&#x5E02;&#x7D93;&#x6FDF;&#x57FA;&#x790E;&#x6B63;&#x5F9E;&#x50B3;&#x7D71;&#x7684;&#x88FD;&#x85E5;&#x696D;&#x9328;&#x9EDE;&#xFF08;&#x8F1D;&#x745E;&#x3001;&#x79AE;&#x4F86;&#x3001;&#x5F37;&#x751F;&#xFF09;&#x5411;&#x79D1;&#x6280;&#x696D;&#xFF08;Apple&#x6B50;&#x6D32;&#x7E3D;&#x90E8;&#x5728;Hollyhill&#x3001;AWS&#xFF09;&#x548C;&#x751F;&#x6280;&#x696D;&#x591A;&#x5143;&#x5316;&#x3002;Cork&#x4EBA;&#x53E3;&#x5728;2025&#x5E74;&#x589E;&#x9577;<strong>2.1%</strong>&#x2014;&#x2014;&#x5FEB;&#x65BC;&#x90FD;&#x67CF;&#x6797;&#x2014;&#x2014;&#x53D7;&#x53EF;&#x8CA0;&#x64D4;&#x6027;&#x5DEE;&#x7570;&#x548C;&#x57FA;&#x790E;&#x8A2D;&#x65BD;&#x6539;&#x5584;&#x9A45;&#x52D5;&#x3002;N28/M28&#x9AD8;&#x901F;&#x516C;&#x8DEF;&#x5347;&#x7D1A;&#x548C;Cork&#x901A;&#x52E4;&#x9435;&#x8DEF;&#x64F4;&#x5EFA;&#x6B63;&#x5728;&#x958B;&#x95E2;&#x65B0;&#x7684;&#x4F4F;&#x5B85;&#x8D70;&#x5ECA;&#x3002;&#x79DF;&#x8CC3;&#x5E02;&#x5834;&#x6975;&#x5EA6;&#x7DCA;&#x5F35;&#xFF1A;&#x7A7A;&#x7F6E;&#x7387;<strong>0.6%</strong>&#xFF0C;&#x79DF;&#x91D1;&#x5E74;&#x589E;7.8%&#x81F3;&#x5169;&#x623F;<strong>&euro;1,650/&#x6708;</strong>&#x3002;&#x904E;&#x53BB;3&#x5E74;Cork&#x5E74;&#x5747;&#x5B8C;&#x5DE5;&#x50C5;<strong>3,200&#x5957;</strong>&#xFF0C;&#x800C;&#x4F30;&#x8A08;&#x5E74;&#x9700;&#x6C42;&#x8D85;&#x904E;<strong>5,000&#x5957;</strong>&#x2014;&#x2014;&#x7D50;&#x69CB;&#x6027;&#x7F3A;&#x53E3;&#x81F3;&#x5C11;&#x6301;&#x7E8C;&#x5230;2029&#x5E74;&#x3002;</p></div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Cork Median House Price</span><span class="lang-zh" style="display:none">Cork&#x4E2D;&#x4F4D;&#x623F;&#x50F9;</span></h4>
+          <div class="chart-meta"><span class="lang-en">2019-2025Q4, &euro;K</span><span class="lang-zh" style="display:none">2019-2025Q4&#xFF0C;&euro;&#x5343;</span></div>
+          <div id="rChartCorkPrice" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Cork Completions vs Demand</span><span class="lang-zh" style="display:none">Cork&#x5B8C;&#x5DE5; vs &#x9700;&#x6C42;</span></h4>
+          <div class="chart-meta"><span class="lang-en">2023-2027E, annual units</span><span class="lang-zh" style="display:none">2023-2027E&#xFF0C;&#x5E74;&#x5EA6;&#x5957;&#x6578;</span></div>
+          <div id="rChartCorkSupply" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 8: OUTLOOK & RISK SCENARIOS -->
+      <h2 id="sec-outlook"><span class="lang-en">OUTLOOK &amp; RISK SCENARIOS</span><span class="lang-zh" style="display:none">&#x5C55;&#x671B;&#x8207;&#x98A8;&#x96AA;&#x60C5;&#x5883;</span></h2>
+      <div class="lang-en">
+        <p>Ireland's 2026–2028 outlook is dominated by a single asymmetric dynamic: a structural supply deficit that cannot be closed within the forecast window, interacting with an ECB easing cycle that is providing unambiguous demand-side support. As of February 2026, rental listings hit the lowest level in almost two decades at just 40% of the 2015–2019 average. Tech-sector FDI continues to anchor Dublin demand (Apple, Google, Meta, Microsoft, and the rising AI/semiconductor cluster). Housing supply — while improving — remains well below the 45–50K annual units economists estimate are needed.</p>
+        <p><strong>Base case</strong> (55% probability). ECB holds at <strong>2.65%</strong> through H1 2026, delivers one further 25 bp cut in H2 to <strong>2.40%</strong>, then pauses. Irish mortgage rates settle at <strong>3.3–3.6%</strong>. Housing completions rise modestly to 35,000–37,000 annually on planning pipeline delivery, still well below demand. National prices rise <strong>+5 to +7%</strong> in 2026 and <strong>+4 to +6%</strong> in 2027; Dublin moderates to <strong>+3 to +5%</strong> as affordability binds; Cork, Galway, and regional cities outperform at <strong>+6 to +9%</strong>. Rental growth of <strong>+6 to +8%</strong> continues as landlord supply stays constrained. Gross yields hold at 4–5% Dublin, 5–6.5% regional.</p>
+        <p><strong>Bull case</strong> (25% probability). Planning reform (An Bord Pleanála streamlining, zoning liberalisation) accelerates approvals; ECB cuts twice more to <strong>2.00%</strong> by end-2026. National prices rise <strong>+8 to +12%</strong>; Dublin breaks <strong>+7 to +9%</strong> on re-leveraging; Cork remains near <strong>+10%</strong>. Rental growth moderates slightly to +5% as marginal BTL investors re-enter the market. Foreign buying accelerates as European investors rotate out of stagnant UK and German markets into Ireland's superior yield and growth combination.</p>
+        <p><strong>Bear case</strong> (20% probability). Tech-sector employment shock (layoffs exceeding 15,000 concentrated in Dublin) combines with immigration policy tightening on the back of political pressure. ECB surprises with a hike or pause indefinitely on energy-driven inflation. National prices go flat to <strong>-3%</strong>; Dublin falls <strong>-2 to -5%</strong>; regional cities hold flat. Rental growth moderates to +3% as vacancies emerge in high-end Dublin apartments. Note: even this scenario keeps rental yields intact because the supply constraint is structural, not cyclical.</p>
+        <p>Three indicators to monitor quarterly: (1) <strong>CSO housing completions data</strong> — the most important leading indicator of when the supply deficit might narrow (below 35K annually means deficit widens); (2) <strong>Dublin tech sector employment and hiring freezes</strong> — the city's demand concentration makes this disproportionately important; (3) <strong>ECB policy decisions and deposit facility rate path</strong> — directly determines mortgage rate ceiling. The underlying thesis: Ireland is Western Europe's clearest supply-constrained story, with yields that remain meaningfully above other developed European markets. Cork and regional cities offer the best risk-adjusted entry points; Dublin appeals for long-duration capital that can absorb the affordability compression. The supply deficit is not going to resolve within the forecast horizon — it only gets worse from here.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>愛爾蘭 2026–2028 年展望的核心是一個非對稱動能：預測窗口內無法消除的結構性供給赤字，疊加 ECB 明確的降息循環對需求面的支撐。2026 年 2 月，愛爾蘭租屋掛牌量跌到近 20 年最低，只有 2015–2019 年均值的 40%。科技業 FDI 持續錨定都柏林需求（蘋果、Google、Meta、微軟、以及新興 AI／半導體群聚）。住宅供給雖在改善，但仍遠低於經濟學家估算的每年需要 4.5–5 萬戶。</p>
+        <p><strong>基本情境</strong>（機率 55%）。ECB 2026 上半年維持 <strong>2.65%</strong>，下半年再降 25 個基點到 <strong>2.40%</strong>，然後暫停。愛爾蘭房貸利率穩定在 <strong>3.3–3.6%</strong>。住宅完工量小幅回升到年度 3.5–3.7 萬戶，仍明顯低於需求。全國房價 2026 年漲 <strong>+5 至 +7%</strong>、2027 年漲 <strong>+4 至 +6%</strong>；都柏林因可負擔性約束放緩到 <strong>+3 至 +5%</strong>；Cork、Galway 及二線城市以 <strong>+6 至 +9%</strong> 跑贏。租金成長 <strong>+6 至 +8%</strong> 持續，因為房東供給仍緊。毛收益率都柏林維持 4–5%、地方 5–6.5%。</p>
+        <p><strong>樂觀情境</strong>（機率 25%）。規劃改革（An Bord Pleanála 流程精簡、分區自由化）加速審批；ECB 2026 年底前再降兩次到 <strong>2.00%</strong>。全國漲 <strong>+8 至 +12%</strong>；都柏林靠再槓桿突破 <strong>+7 至 +9%</strong>；Cork 維持約 <strong>+10%</strong>。租金漲幅因邊際買房出租投資人回流小幅收斂到 +5%。外資加速進場——歐洲投資人從停滯的英國與德國市場，轉進愛爾蘭收益率加成長都更好的組合。</p>
+        <p><strong>悲觀情境</strong>（機率 20%）。科技業就業衝擊（都柏林集中裁員 1.5 萬人以上）疊加政治壓力下的移民收緊。ECB 因能源通膨意外升息或無限期暫停。全國房價持平至 <strong>-3%</strong>；都柏林跌 <strong>-2 至 -5%</strong>；地方城市持平。租金成長放緩到 +3%，都柏林高端公寓出現空置。重點：即便在這個情境下，租金收益率仍然穩固，因為供給制約是結構性而非週期性。</p>
+        <p>三個每季要追蹤的指標：（1）<strong>CSO 住宅完工量數據</strong>——判斷供給赤字能否收斂的最重要領先指標（低於 3.5 萬戶代表赤字擴大）；（2）<strong>都柏林科技業就業與招聘凍結情況</strong>——該市的需求集中度讓這個指標份量特別大；（3）<strong>ECB 政策決議與存款便利利率路徑</strong>——直接決定房貸利率上限。核心論點是：愛爾蘭是西歐最清楚的供給制約型故事，收益率明顯高於其他已開發歐洲市場。Cork 與地方城市提供最佳風險調整進場點；都柏林適合能吸收可負擔性壓縮的長天期資金。供給赤字在預測期內不會解決——只會越來越糟。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">2026 Price Forecast: Three Scenarios</span><span class="lang-zh" style="display:none">2026&#x5E74;&#x623F;&#x50F9;&#x9810;&#x6E2C;&#xFF1A;&#x4E09;&#x5927;&#x60C5;&#x5883;</span></h4>
+          <div class="chart-meta"><span class="lang-en">YoY % by city</span><span class="lang-zh" style="display:none">&#x5404;&#x57CE;&#x5E02;&#x5E74;&#x589E;%</span></div>
+          <div id="rChartIEForecast" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">2026 Rent Growth Forecast</span><span class="lang-zh" style="display:none">2026&#x5E74;&#x79DF;&#x91D1;&#x589E;&#x9577;&#x9810;&#x6E2C;</span></h4>
+          <div class="chart-meta"><span class="lang-en">YoY % forecast</span><span class="lang-zh" style="display:none">&#x5E74;&#x589E;%&#x9810;&#x6E2C;</span></div>
+          <div id="rChartIERentForecast" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="report-footer">
+        <p><span class="lang-en">CSO Ireland &middot; Daft.ie Rental Report Q4 2025 &middot; RTB Rent Index Q4 2025 &middot; Banking &amp; Payments Federation Ireland &middot; Central Bank of Ireland &middot; ECB &middot; Department of Housing &middot; ESRI Housing Market Monitor &middot; Not investment advice.</span><span class="lang-zh" style="display:none">CSO&#x611B;&#x723E;&#x862D;&#x7D71;&#x8A08;&#x5C40; &middot; Daft.ie&#x79DF;&#x91D1;&#x5831;&#x544A;Q4 2025 &middot; RTB&#x79DF;&#x91D1;&#x6307;&#x6578;Q4 2025 &middot; &#x611B;&#x723E;&#x862D;&#x9280;&#x884C;&#x8207;&#x652F;&#x4ED8;&#x806F;&#x76DF; &middot; &#x611B;&#x723E;&#x862D;&#x592E;&#x884C; &middot; &#x6B50;&#x6D32;&#x592E;&#x884C; &middot; &#x4F4F;&#x623F;&#x90E8; &middot; ESRI&#x4F4F;&#x623F;&#x5E02;&#x5834;&#x76E3;&#x6E2C; &middot; &#x975E;&#x6295;&#x8CC7;&#x5EFA;&#x8B70;&#x3002;</span></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtEUR(v){if(v>=1000000)return '\u20AC'+(v/1000000).toFixed(2)+'M';if(v>=1000)return '\u20AC'+(v/1000).toFixed(0)+'K';return '\u20AC'+v;}
+function fmtK(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  initAllCharts(lang);
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initAllCharts(lang){
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  var en=lang==='en';
+
+  // ===== CHART 1: rChartIEPrice - Line (National, Dublin, Cork) =====
+  (function(){
+    var el=document.getElementById('rChartIEPrice');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2019','2020','2021','2022','2023','2024','2025Q4'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'National':'全國',en?'Dublin':'都柏林','Cork']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return '\u20AC'+v+'K'}}}),
+      series:[
+        {name:en?'National':'全國',type:'line',data:[260,270,310,345,355,340,360],itemStyle:{color:C.navy},lineStyle:{color:C.navy}},
+        {name:en?'Dublin':'都柏林',type:'line',data:[380,385,430,475,480,470,490],itemStyle:{color:C.orange},lineStyle:{color:C.orange},
+          markPoint:{data:[{coord:['2025Q4',490],value:'\u20AC490K',symbolSize:40,itemStyle:{color:C.orange},label:{fontSize:9,color:'#fff'}}]}},
+        {name:'Cork',type:'line',data:[265,270,300,325,330,320,340],itemStyle:{color:C.green},lineStyle:{color:C.green}}
+      ]
+    });
+  })();
+
+  // ===== CHART 2: rChartIERent - Bar (Monthly rent by city) =====
+  (function(){
+    var el=document.getElementById('rChartIERent');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Dublin','Cork','Galway','Limerick','Waterford','National']:['都柏林','Cork','Galway','Limerick','Waterford','全國'];
+    var data=[2400,1650,1500,1350,1200,1800];
+    var colors=data.map(function(v){return v>=2000?C.red:v>=1500?C.orange:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:10,interval:0}}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return '\u20AC'+v}}}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:24}]
+    });
+  })();
+
+  // ===== CHART 3: rChartIERate - Line dual (ECB & Mortgage) =====
+  (function(){
+    var el=document.getElementById('rChartIERate');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2023','2023Q3','2024','2024Q2','2024Q4','2025Q2','2025Q4','2026Q1'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'ECB Rate':'ECB利率',en?'Avg Mortgage':'平均房貸']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:9,rotate:30}}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      series:[
+        {name:en?'ECB Rate':'ECB利率',type:'line',data:[4.0,4.0,4.0,3.75,3.25,2.90,2.75,2.65],itemStyle:{color:C.navy},lineStyle:{color:C.navy},
+          markLine:{silent:true,symbol:'none',lineStyle:{color:C.green,type:'dashed'},data:[{yAxis:2.65,label:{formatter:en?'ECB floor':'ECB底部',fontSize:9}}]}},
+        {name:en?'Avg Mortgage':'平均房貸',type:'line',data:[4.2,4.2,4.1,4.0,3.8,3.6,3.5,3.5],itemStyle:{color:C.orange},lineStyle:{color:C.orange,type:'dashed'}}
+      ]
+    });
+  })();
+
+  // ===== CHART 4: rChartIEMortgage - Bar (Drawdowns) =====
+  (function(){
+    var el=document.getElementById('rChartIEMortgage');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2021','2022','2023','2024','2025'];
+    var data=[9.8,11.2,12.0,12.7,14.2];
+    var colors=data.map(function(v,i){return i===data.length-1?C.green:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return '\u20AC'+v+'B'}}}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:28}]
+    });
+  })();
+
+  // ===== CHART 5: rChartIECompletions - Bar + markLine =====
+  (function(){
+    var el=document.getElementById('rChartIECompletions');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2020','2021','2022','2023','2024','2025'];
+    var data=[20676,20433,29851,32695,30335,32695];
+    var colors=data.map(function(v){return v>=32000?C.green:v>=25000?C.navy:C.orange;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:30,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v)}}}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:24,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed'},data:[{yAxis:33000,label:{formatter:en?'Target 33K':'目標 33K',fontSize:10}}]}}]
+    });
+  })();
+
+  // ===== CHART 6: rChartIEPlanningTime - Bar horizontal =====
+  (function(){
+    var el=document.getElementById('rChartIEPlanningTime');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Pre-planning','An Bord Pleanala','Judicial Review','Construction','Total']:['前期規劃','An Bord Pleanala','司法覆核','施工','總計'];
+    var data=[6,18,9,24,57];
+    var colors=data.map(function(v){return v>=18?C.red:v>=10?C.orange:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:20,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+' mo'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14}]
+    });
+  })();
+
+  // ===== CHART 7: rChartIEPop - Bar+Line dual (Population & Migration) =====
+  (function(){
+    var el=document.getElementById('rChartIEPop');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2019','2020','2021','2022','2023','2024','2025'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Population (M)':'人口(百萬)',en?'Net Migration (K)':'淨移民(千)']}),
+      grid:{left:40,right:40,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:[
+        mkAxis({type:'value',name:en?'Population M':'人口百萬',axisLabel:{formatter:function(v){return v+'M'}}}),
+        mkAxis({type:'value',name:en?'Net Migration K':'淨移民千',position:'right',axisLabel:{formatter:function(v){return v+'K'}}})
+      ],
+      series:[
+        {name:en?'Population (M)':'人口(百萬)',type:'bar',data:[4.92,4.98,5.01,5.12,5.26,5.29,5.38],itemStyle:{color:C.navy},barWidth:20},
+        {name:en?'Net Migration (K)':'淨移民(千)',type:'line',yAxisIndex:1,data:[33.7,11.2,-4.6,61.1,77.6,68.9,68.9],itemStyle:{color:C.orange},lineStyle:{color:C.orange}}
+      ]
+    });
+  })();
+
+  // ===== CHART 8: rChartIEAfford - Bar horizontal (PTI) =====
+  (function(){
+    var el=document.getElementById('rChartIEAfford');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Dublin','Galway','Cork','Limerick','Waterford','National']:['都柏林','Galway','Cork','Limerick','Waterford','全國'];
+    var data=[8.5,7.8,6.2,5.8,5.0,6.5];
+    var colors=data.map(function(v){return v>=8?C.red:v>=6?C.orange:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'x'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.green,type:'dashed'},data:[{xAxis:3.5,label:{formatter:en?'Affordable 3.5x':'可負擔 3.5x',fontSize:9}}]}}]
+    });
+  })();
+
+  // ===== CHART 9: rChartIEYield - Bar horizontal =====
+  (function(){
+    var el=document.getElementById('rChartIEYield');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Limerick','Cork apt','Galway','Dublin apt','Dublin house','National avg']:['Limerick','Cork公寓','Galway','都柏林公寓','都柏林獨棟','全國平均'];
+    var data=[6.0,5.3,5.2,4.3,3.2,4.0];
+    var colors=data.map(function(v){return v>=5?C.green:v>=4?C.navy:C.muted;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14,
+        markLine:{silent:true,symbol:'none',data:[
+          {xAxis:2.65,lineStyle:{color:C.red,type:'dashed'},label:{formatter:en?'ECB 2.65%':'ECB 2.65%',fontSize:9}},
+          {xAxis:3.5,lineStyle:{color:C.orange,type:'dotted'},label:{formatter:en?'Mortgage 3.5%':'房貸 3.5%',fontSize:9}}
+        ]}}]
+    });
+  })();
+
+  // ===== CHART 10: rChartIEPR - Bar horizontal (Price-to-Rent) =====
+  (function(){
+    var el=document.getElementById('rChartIEPR');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Dublin','Amsterdam','London','Paris','Cork','National IE']:['都柏林','阿姆斯特丹','倫敦','巴黎','Cork','愛爾蘭全國'];
+    var data=[28,28,31,35,22,22];
+    var colors=data.map(function(v){return v>=30?C.red:v>=25?C.orange:C.green;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:20,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'x'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14}]
+    });
+  })();
+
+  // ===== CHART 11: rChartDubPrice - Line dual (Houses & Apts) =====
+  (function(){
+    var el=document.getElementById('rChartDubPrice');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2019','2020','2021','2022','2023','2024','2025Q4'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Houses':'獨棟',en?'Apartments':'公寓']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return '\u20AC'+v+'K'}}}),
+      series:[
+        {name:en?'Houses':'獨棟',type:'line',data:[380,385,430,475,480,470,490],itemStyle:{color:C.navy},lineStyle:{color:C.navy},
+          markPoint:{data:[{coord:['2025Q4',490],value:'\u20AC490K',symbolSize:40,itemStyle:{color:C.navy},label:{fontSize:9,color:'#fff'}}]}},
+        {name:en?'Apartments':'公寓',type:'line',data:[280,285,320,360,370,365,380],itemStyle:{color:C.orange},lineStyle:{color:C.orange,type:'dashed'}}
+      ]
+    });
+  })();
+
+  // ===== CHART 12: rChartDubZone - Bar + Line dual axis =====
+  (function(){
+    var el=document.getElementById('rChartDubZone');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['West/North\nDublin','Docklands\n/IFSC','South\nDublin']:['西/北\n都柏林','Docklands\n/IFSC','南\n都柏林'];
+    var priceData=[375,600,725];
+    var yieldData=[5.0,3.8,3.1];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Price \u20ACK':'價格\u20ACK',en?'Yield %':'收益率%']}),
+      grid:{left:40,right:40,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:10,interval:0}}),
+      yAxis:[
+        mkAxis({type:'value',name:en?'\u20ACK':'€千',axisLabel:{formatter:function(v){return '\u20AC'+v+'K'}}}),
+        mkAxis({type:'value',name:en?'Yield %':'收益率%',position:'right',axisLabel:{formatter:function(v){return v+'%'}}})
+      ],
+      series:[
+        {name:en?'Price \u20ACK':'價格\u20ACK',type:'bar',data:priceData,itemStyle:{color:C.navy},barWidth:28},
+        {name:en?'Yield %':'收益率%',type:'line',yAxisIndex:1,data:yieldData,itemStyle:{color:C.orange},lineStyle:{color:C.orange}}
+      ]
+    });
+  })();
+
+  // ===== CHART 13: rChartCorkPrice - Line =====
+  (function(){
+    var el=document.getElementById('rChartCorkPrice');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2019','2020','2021','2022','2023','2024','2025Q4'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      grid:{left:10,right:10,top:30,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return '\u20AC'+v+'K'}}}),
+      series:[{type:'line',data:[265,270,300,325,330,320,340],itemStyle:{color:C.navy},lineStyle:{color:C.navy},
+        markPoint:{data:[{coord:['2025Q4',340],value:en?'+7.5% YoY':'+7.5% 年增',symbolSize:50,itemStyle:{color:C.green},label:{fontSize:9,color:'#fff'}}]}}]
+    });
+  })();
+
+  // ===== CHART 14: rChartCorkSupply - Bar + markLine =====
+  (function(){
+    var el=document.getElementById('rChartCorkSupply');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2023','2024','2025','2026E','2027E'];
+    var data=[3100,3200,3300,3500,3800];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:30,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v)}}}),
+      series:[{type:'bar',data:data.map(function(v){return{value:v,itemStyle:{color:C.navy}};}),barWidth:24,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed'},data:[{yAxis:5000,label:{formatter:en?'Annual demand 5K+':'年需求 5K+',fontSize:10}}]}}]
+    });
+  })();
+
+  // ===== CHART 15: rChartIEForecast - Bar grouped =====
+  (function(){
+    var el=document.getElementById('rChartIEForecast');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Dublin','Cork','Galway','Limerick','National']:['都柏林','Cork','Galway','Limerick','全國'];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:[en?'Bull':'牛市',en?'Base':'基本',en?'Bear':'熊市']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:10,interval:0}}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      series:[
+        {name:en?'Bull':'牛市',type:'bar',data:[7,10,9,8,10],itemStyle:{color:C.green},barWidth:12},
+        {name:en?'Base':'基本',type:'bar',data:[4,7,7,6,6],itemStyle:{color:C.navy},barWidth:12},
+        {name:en?'Bear':'熊市',type:'bar',data:[-2,-1,0,1,-2],itemStyle:{color:C.red},barWidth:12}
+      ]
+    });
+  })();
+
+  // ===== CHART 16: rChartIERentForecast - Bar horizontal =====
+  (function(){
+    var el=document.getElementById('rChartIERentForecast');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Dublin apt','Cork apt','Galway','Limerick','National']:['都柏林公寓','Cork公寓','Galway','Limerick','全國'];
+    var data=[6.5,7.0,8.0,7.5,7.0];
+    var colors=data.map(function(v){return v>=7?C.orange:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14}]
+    });
+  })();
+
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  // -- Side Nav ScrollSpy --
+  (function(){
+    function initScrollSpy(){
+      var items = document.querySelectorAll('.side-nav-item');
+      if(!items.length) return;
+      var sections = [];
+      items.forEach(function(a){
+        var id = a.getAttribute('href').replace('#','');
+        var el = document.getElementById(id);
+        if(el) sections.push({el:el, a:a});
+      });
+      function onScroll(){
+        var scrollY = window.scrollY + window.innerHeight * 0.25;
+        var current = sections[0];
+        sections.forEach(function(s){
+          if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s;
+        });
+        items.forEach(function(a){ a.classList.remove('active'); });
+        if(current) current.a.classList.add('active');
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', initScrollSpy);
+    } else {
+      initScrollSpy();
+    }
+  })();
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

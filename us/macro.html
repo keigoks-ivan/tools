@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | US Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">United States — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">美國 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q2 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q2</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:2;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Subprime Crisis</span><span class="lang-zh" style="display:none">次貸危機</span></div>
+        <div class="cs-year">08–09</div>
+      </div>
+      <div class="cycle-seg" style="flex:7;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Post-GFC Recovery / QE Era</span><span class="lang-zh" style="display:none">後GFC復甦/QE時代</span></div>
+        <div class="cs-year">10–21</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Rate Hike</span><span class="lang-zh" style="display:none">升息</span></div>
+        <div class="cs-year">22–23</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Late Cycle / Lock-in</span><span class="lang-zh" style="display:none">週期晚期/鎖倉</span></div>
+        <div class="cs-year">24–25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">Fed cutting (5.50%→4.25–4.50% by Jan 2025); "lock-in effect" trapping low-rate homeowners; FHFA HPI still near all-time highs despite 7%+ mortgage rates</span>
+        <span class="lang-zh" style="display:none">聯準會降息（2025年1月前從5.50%降至4.25–4.50%）；「鎖倉效應」困住低利率屋主；儘管房貸利率逾7%，FHFA HPI仍接近歷史高位</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Fed Funds Rate</span><span class="lang-zh" style="display:none">聯邦基金利率</span></div>
+      <div class="kpi-value">4.25–4.50%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">−100bp from peak</span><span class="lang-zh" style="display:none">距高峰降100bp</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">FHFA HPI YoY</span><span class="lang-zh" style="display:none">FHFA HPI YoY</span></div>
+      <div class="kpi-value">+4.7%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Q4 2024 (FHFA)</span><span class="lang-zh" style="display:none">2024 Q4（FHFA）</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">CPI YoY</span><span class="lang-zh" style="display:none">通膨 YoY</span></div>
+      <div class="kpi-value">2.8%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Mar 2025</span><span class="lang-zh" style="display:none">2025年3月</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">2.8%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">2024 full year</span><span class="lang-zh" style="display:none">2024全年</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Unemployment</span><span class="lang-zh" style="display:none">失業率</span></div>
+      <div class="kpi-value">4.2%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Near full employment</span><span class="lang-zh" style="display:none">接近充分就業</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">30-yr Fixed Mortgage Rate</span><span class="lang-zh" style="display:none">30年期固定房貸利率</span></div>
+      <div class="kpi-value">6.8%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">vs 2.65% Jan 2021 low</span><span class="lang-zh" style="display:none">對比2021年1月低點2.65%</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">FFR Range (17yr)</span><span class="lang-zh" style="display:none">FFR歷史區間</span></div>
+      <div class="ctx-val">0–0.25%–5.50%</div>
+      <div class="ctx-sub"><span class="lang-en">ZLB: Dec 2008–Dec 2015 &amp; Mar 2020–Mar 2022 · High: Jul 2023</span><span class="lang-zh" style="display:none">零利率下限：2008年12月–2015年12月及2020年3月–2022年3月 · 高點：2023年7月</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">FHFA HPI Since 2008</span><span class="lang-zh" style="display:none">FHFA HPI自2008累計</span></div>
+      <div class="ctx-val" style="color:#16a34a">+140%</div>
+      <div class="ctx-sub"><span class="lang-en">2012 trough to 2025 est (after GFC −20% correction)</span><span class="lang-zh" style="display:none">從2012年低谷至2025年估（GFC後跌20%修正）</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+5.9% / −2.8%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2021 rebound · Worst: 2009 GFC</span><span class="lang-zh" style="display:none">最佳：2021反彈 · 最差：2009 GFC</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">30-yr Mortgage Rate Low</span><span class="lang-zh" style="display:none">30年期房貸利率低點</span></div>
+      <div class="ctx-val" style="color:#2563eb">2.65%</div>
+      <div class="ctx-sub"><span class="lang-en">Jan 2021 all-time low (Freddie Mac)</span><span class="lang-zh" style="display:none">2021年1月歷史低點（Freddie Mac）</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × House Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> The US has a unique mortgage structure — 85%+ of mortgages are 30-year fixed rate. When rates fell to 2.65% (Jan 2021), millions locked in at historic lows. When the Fed raised rates to 5.50% (2022–23), these homeowners are trapped — selling means giving up their 3% mortgage and taking a 7% one. This "lock-in effect" has frozen inventory to record lows and prevented the price correction that higher rates would normally cause. Existing home sales hit 30-yr lows despite strong demand.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>美國擁有獨特的房貸結構——逾85%的房貸為30年期固定利率。當利率於2021年1月跌至2.65%時，數百萬屋主以歷史低位鎖定了利率。聯準會升息至5.50%（2022–23年）後，這些屋主陷入困境——賣房意味著放棄3%的房貸，再承受7%的利率。這種「鎖倉效應」將庫存凍結在歷史低位，阻止了高利率通常會帶來的房價修正。儘管需求強勁，現有住宅銷量仍降至30年低位。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">Fed Funds Rate / 30-yr Mortgage / CPI / M2 vs FHFA HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">聯邦基金利率 / 30年期房貸 / CPI / M2 vs FHFA HPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × House Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> The 2008 subprime crisis created a decade-long repair process — deleveraging, lending standard tightening (QM rules 2014), shadow banking reform. The post-2012 recovery was the longest housing bull market in US history (10 years+). Now, the single-family housing starts (dashed) tell the story: new construction collapsed 70% from 2005 to 2009, barely recovered through 2020, then surged +30% as builders rushed to fill the void left by locked-in sellers — but rising material costs and labour shortages are capping this response.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>2008年次貸危機製造了長達十年的修復過程——去槓桿、放貸標準收緊（2014年QM規則）、影子銀行改革。2012年後的復甦是美國歷史上最長的住房牛市（超過10年）。現在，單戶住宅新開工量（虛線）說明了問題：新建築從2005年至2009年崩跌70%，到2020年才勉強恢復，隨後激增30%——建商搶填鎖倉賣家留下的空缺，但建材成本上漲和勞動力短缺正在限制這一響應。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">GDP / Unemployment / Mortgage Originations / Housing Starts vs FHFA HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">GDP / 失業率 / 房貸發放量 / 新屋開工 vs FHFA HPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">2008–2009 · SUBPRIME CRISIS</span><span class="lang-zh" style="display:none">2008–2009 · 次貸危機</span></div>
+      <div class="ev-title"><span class="lang-en">Lehman Falls; HPI −20%; Fed to Zero</span><span class="lang-zh" style="display:none">雷曼兄弟倒閉；HPI跌20%；聯準會降至零利率</span></div>
+      <div class="ev-desc"><span class="lang-en">Lehman Brothers collapses Sep 15, 2008 — largest bankruptcy in US history. Bear Stearns bailed out Mar 2008. Fannie Mae and Freddie Mac placed in conservatorship Sep 2008. Fed emergency cuts to 0–0.25% (Dec 2008). QE1: $1.75tn MBS/Treasury purchases. National HPI falls −20% peak-to-trough (Case-Shiller 2006–2012). Foreclosures hit record 2.8M (2010). GDP −2.8% (2009). Unemployment peaks 10% (Oct 2009).</span><span class="lang-zh" style="display:none">2008年9月15日雷曼兄弟倒閉——美國歷史上最大的破產案。貝爾斯登於2008年3月獲救助。房利美和房地美於2008年9月被政府接管。聯準會緊急降息至0–0.25%（2008年12月）。QE1：購買1.75兆美元MBS/國債。全國HPI峰谷跌20%（Case-Shiller 2006–2012年）。法拍屋創紀錄達280萬件（2010年）。2009年GDP衰退2.8%，失業率於2009年10月見頂10%。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">2009–2014 · QE RECOVERY</span><span class="lang-zh" style="display:none">2009–2014 · QE復甦</span></div>
+      <div class="ev-title"><span class="lang-en">QE1–QE3: $4.5tn Balance Sheet; HPI Recovers</span><span class="lang-zh" style="display:none">QE1–QE3：4.5兆美元資產負債表；HPI復甦</span></div>
+      <div class="ev-desc"><span class="lang-en">Fed launches QE2 (Nov 2010, $600bn Treasuries) and QE3 (Sep 2012, open-ended $85bn/month). Fed balance sheet expands from $900bn to $4.5tn. 30-yr mortgage rates fall to record low 3.31% (Nov 2012). Case-Shiller HPI bottoms in Jan 2012 (national), starts steady recovery. Dodd-Frank Act (Jul 2010) and Qualified Mortgage rules (Jan 2014) reform lending. Institutional investors (Blackstone, etc.) buy foreclosed homes at scale — accelerating recovery.</span><span class="lang-zh" style="display:none">聯準會推出QE2（2010年11月，6000億美元國債）和QE3（2012年9月，開放式每月850億美元）。聯準會資產負債表從9000億擴至4.5兆美元。30年期房貸利率降至3.31%歷史低點（2012年11月）。Case-Shiller HPI於2012年1月見底（全國），開始穩步復甦。陶德-法蘭克法案（2010年7月）和合格房貸規則（2014年1月）改革放貸標準。貝萊德等機構投資者大規模收購法拍屋，加速復甦。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">DEC 2015 · FIRST HIKE IN 7 YEARS</span><span class="lang-zh" style="display:none">2015年12月 · 七年來首次升息</span></div>
+      <div class="ev-title"><span class="lang-en">Gradual Normalisation; No Shock to HPI</span><span class="lang-zh" style="display:none">漸進式正常化；對HPI無衝擊</span></div>
+      <div class="ev-desc"><span class="lang-en">Fed raises FFR to 0.25–0.50% (Dec 2015) — first hike since Jun 2006. Nine gradual hikes to 2.25–2.50% (Dec 2018). Housing market absorbs normalisation well: HPI continues rising +5–7%/yr. "Taper tantrum" episode (2013) briefly disrupts mortgage market. Tax Cuts and Jobs Act (Dec 2017) caps SALT deduction at $10k — hurts high-tax states (NY, CA, NJ). International buyers (Chinese) peak in 2017 ($31.7bn), then decline.</span><span class="lang-zh" style="display:none">聯準會將FFR升至0.25–0.50%（2015年12月）——自2006年6月以來首次升息。漸進升息9次至2.25–2.50%（2018年12月）。房市消化正常化良好：HPI持續每年上漲5–7%。「縮減恐慌」（2013年）短暫擾動房貸市場。減稅及就業法案（2017年12月）將SALT扣除額上限設為1萬美元，衝擊高稅州（紐約、加州、新澤西）。外國買家（中國人）於2017年達峰（317億美元），隨後下降。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">MAR 2020 · COVID EMERGENCY</span><span class="lang-zh" style="display:none">2020年3月 · COVID緊急應對</span></div>
+      <div class="ev-title"><span class="lang-en">Fed to Zero; QE4 ($120bn/month); 30-yr hits 2.65%</span><span class="lang-zh" style="display:none">聯準會降至零；QE4（每月1200億）；30年期達2.65%</span></div>
+      <div class="ev-desc"><span class="lang-en">Fed cuts emergency 150bp in two weeks to 0–0.25% (Mar 2020). QE4: $120bn/month ($80bn Treasuries + $40bn MBS). Fed balance sheet surpasses $9tn by 2022. 30-yr fixed rate hits all-time low 2.65% (Jan 2021). CARES Act: $2.2tn stimulus, $1,200 checks, $600/week UI boost. Forbearance program protects 7.2M homeowners. HPI surges +18.8% (2021) — driven by record low rates + pandemic demand for space + supply collapse.</span><span class="lang-zh" style="display:none">聯準會在兩週內緊急降息150bp至0–0.25%（2020年3月）。QE4：每月1200億美元（800億美元國債+400億MBS）。聯準會資產負債表至2022年突破9兆美元。30年期固定利率達歷史最低2.65%（2021年1月）。CARES法案：2.2兆美元刺激計劃，每人1200美元支票，失業補助每週加600美元。延期還款計劃保護720萬屋主。HPI 2021年激增18.8%——由歷史低利率+疫情帶動的居住空間需求+供給崩潰共同驅動。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">MAR 2022 · FASTEST HIKE CYCLE IN 40 YEARS</span><span class="lang-zh" style="display:none">2022年3月 · 40年來最快升息週期</span></div>
+      <div class="ev-title"><span class="lang-en">11 Hikes: 0%→5.50%; 30-yr Mortgage Hits 8%</span><span class="lang-zh" style="display:none">11次升息：0%→5.50%；30年期房貸達8%</span></div>
+      <div class="ev-desc"><span class="lang-en">Fed raises rates 11 times (Mar 2022–Jul 2023) — 525bp in 16 months, fastest since 1981. 30-yr fixed mortgage rate hits 8.01% (Oct 2023) — 23-yr high. Yet national HPI falls only −5% peak-to-trough (mid-2022 to early-2023) then rebounds — lock-in effect freezes supply. Existing home sales fall to 30-yr low (3.83M, 2023). New home sales relatively resilient: builders cut prices, offer rate buydowns. SVB collapse (Mar 2023): regional bank stress does not spread to mortgage market.</span><span class="lang-zh" style="display:none">聯準會升息11次（2022年3月–2023年7月）——16個月累計525bp，為1981年以來最快。30年期固定房貸利率於2023年10月達8.01%，為23年高位。然而全國HPI峰谷僅跌5%（2022年中至2023年初），隨後反彈——鎖倉效應凍結供給。現有住宅銷量跌至30年低位（383萬套，2023年）。新屋銷量相對韌性：建商降價並提供利率補貼。矽谷銀行倒閉（2023年3月）：地區銀行壓力未蔓延至房貸市場。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2023–2024 · "HIGHER FOR LONGER" + LOCK-IN</span><span class="lang-zh" style="display:none">2023–2024 · 「更高更久」+鎖倉效應</span></div>
+      <div class="ev-title"><span class="lang-en">HPI at Record High Despite 7%+ Rates</span><span class="lang-zh" style="display:none">儘管利率逾7%，HPI仍創歷史新高</span></div>
+      <div class="ev-desc"><span class="lang-en">Paradox: Fed holds FFR at 5.50% (highest since 2001) yet FHFA HPI reaches all-time high in 2024. Lock-in effect reduces active listings by 30% vs pre-pandemic norms. Affordability hits 40-yr worst: median home price-to-income ratio 7×+ nationally, 10–15× in coastal metros. "Mortgage rate lock" traps 90M+ homeowners who locked in at 3% or below. New home market outperforms: builders offering 2-1 rate buydowns; Toll Brothers, DR Horton at record profits.</span><span class="lang-zh" style="display:none">矛盾現象：聯準會將FFR維持在5.50%（2001年以來最高），FHFA HPI卻於2024年創歷史新高。鎖倉效應使在售房源減少30%（對比疫情前常態）。可負擔性達40年最差：全國房價/收入中位比超7倍，沿海大城市達10–15倍。「房貸利率鎖倉」困住9000萬+屋主（已鎖定3%或以下利率）。新屋市場表現相對優越：建商提供2-1利率補貼；托爾兄弟、DR霍頓創紀錄利潤。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">SEP 2024 · FED PIVOT — 50BP CUT</span><span class="lang-zh" style="display:none">2024年9月 · 聯準會轉向——降息50bp</span></div>
+      <div class="ev-title"><span class="lang-en">FFR to 4.25–4.50%; 3 Cuts in 2024</span><span class="lang-zh" style="display:none">FFR降至4.25–4.50%；2024年降息3次</span></div>
+      <div class="ev-desc"><span class="lang-en">Fed cuts 50bp in Sep 2024 — first cut since Mar 2020. Two further 25bp cuts (Nov and Dec 2024) bring FFR to 4.25–4.50%. CPI at 2.8% — heading toward 2% target. Unemployment stabilises at 4.2%. 30-yr mortgage rate moves little (6.8%) despite cuts — market had already priced easing. FHFA HPI +4.7% YoY (Q4 2024). Existing home sales picking up slightly. Trump election (Nov 2024) — market pricing tariff inflation risk, potentially delaying further cuts.</span><span class="lang-zh" style="display:none">聯準會於2024年9月降息50bp——2020年3月以來首次降息。2024年11月和12月各再降25bp，FFR降至4.25–4.50%。CPI達2.8%，走向2%目標。失業率穩定在4.2%。儘管降息，30年期房貸利率變動不大（6.8%）——市場已提前定價寬鬆預期。FHFA HPI年漲4.7%（2024年Q4）。現有住宅銷量略有回升。特朗普當選（2024年11月）——市場定價關稅通膨風險，可能延遲進一步降息。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2025 · LATE CYCLE — TARIFF + POLICY UNCERTAINTY</span><span class="lang-zh" style="display:none">2025年 · 週期晚期——關稅+政策不確定性</span></div>
+      <div class="ev-title"><span class="lang-en">HPI at Record; Fed Pauses; Tariff Inflation Risk</span><span class="lang-zh" style="display:none">HPI創歷史新高；聯準會暫停；關稅通膨風險</span></div>
+      <div class="ev-desc"><span class="lang-en">US in Late Cycle: extremely high valuations, affordability worst since 1980s, rates still elevated at 6.8%, but no major price collapse due to structural supply deficit and lock-in effect. Fed pauses easing in early 2025 — Trump tariffs threatening inflation re-acceleration. 30-yr mortgage rates sticky at 6.8%+ even as FFR is at 4.25%. Deregulation agenda (DOGE, EPA rollback) may boost construction long-term. Sun Belt markets (Phoenix, Miami, Austin) showing slight softening vs primary markets.</span><span class="lang-zh" style="display:none">美國處於週期晚期：估值極高，可負擔性為1980年代以來最差，利率仍在6.8%高位，但受結構性供給赤字和鎖倉效應支撐，未出現大幅下跌。聯準會於2025年初暫停降息——特朗普關稅威脅通膨再加速。30年期房貸利率黏性維持在6.8%+，即使FFR已在4.25%。放鬆監管議程（DOGE、EPA回滾）可能長期促進建設。陽光帶市場（鳳凰城、邁阿密、奧斯丁）相較一線市場略顯軟化。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#d97706;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#d97706;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook — Late Cycle / Lock-in Stasis</span><span class="lang-zh" style="display:none">當前週期展望 — 週期晚期/鎖倉停滯</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Lock-in effect keeps inventory historically low — price floor resilient</span><span class="lang-zh" style="display:none">鎖倉效應保持庫存歷史低位——房價底部具韌性</span></li>
+          <li><span class="lang-en">GDP still growing +2.8% — economy outperforming other DM peers</span><span class="lang-zh" style="display:none">GDP仍增長2.8%——優於其他已開發市場同儕</span></li>
+          <li><span class="lang-en">Structural housing deficit: 4–7M units short nationwide</span><span class="lang-zh" style="display:none">住房結構性赤字：全國短缺400–700萬套</span></li>
+          <li><span class="lang-en">Millennials (largest generation) entering prime buying age 30–40</span><span class="lang-zh" style="display:none">千禧世代（最大世代）進入30–40歲置業黃金年齡</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Tariff inflation may force Fed pause/reversal — mortgage rates staying high</span><span class="lang-zh" style="display:none">關稅通膨可能迫使聯準會暫停/逆轉——房貸利率維持高位</span></li>
+          <li><span class="lang-en">Affordability at worst since 1980s — demand destruction risk for first-timers</span><span class="lang-zh" style="display:none">可負擔性為1980年代以來最差——首次置業者需求破壞風險</span></li>
+          <li><span class="lang-en">Sun Belt oversupply: Phoenix, Austin markets showing modest softening</span><span class="lang-zh" style="display:none">陽光帶供給過剩：鳳凰城、奧斯丁市場呈輕微軟化</span></li>
+          <li><span class="lang-en">Recession risk if tariffs cause material slowdown in 2025</span><span class="lang-zh" style="display:none">若關稅於2025年造成實質放緩，存在衰退風險</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: Federal Reserve (FFR decisions, H.15 mortgage rates · federalreserve.gov), FHFA (House Price Index, quarterly · fhfa.gov), S&amp;P/Case-Shiller (20-City Composite, St. Louis FRED), BEA (GDP, NIPA tables · bea.gov), BLS (CPI, Unemployment · bls.gov), Freddie Mac (PMMS 30-yr mortgage rate weekly survey). FHFA HPI (purchase-only, all-transactions) used as primary national price index. M2 from Federal Reserve H.6 release. Net migration from US Census Bureau. SVR = standard variable rate; US uses 30-yr conforming rate as benchmark.</span>
+    <span class="lang-zh" style="display:none">來源：聯準會（FFR決策、H.15房貸利率 · federalreserve.gov）、FHFA（房價指數，季度 · fhfa.gov）、S&amp;P/Case-Shiller（20城市綜合指數，聖路易斯FRED）、BEA（GDP，NIPA表格 · bea.gov）、BLS（CPI、失業率 · bls.gov）、Freddie Mac（PMMS 30年期房貸利率週度調查）。FHFA HPI（僅購買，所有交易）用作全國主要價格指數。M2來自聯準會H.6公告。淨移民來自美國人口普查局。SVR=標準浮動利率；美國以30年期符合貸款利率為基準。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, Fed / FHFA / BEA / BLS sources) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+/* FHFA House Price Index (all-transactions, purchase-only, seasonally adjusted).
+   Rebased 2008=100. Key confirmed: 2012=96 trough, 2021=145, 2022=155 peak, 2023 slight dip, 2024 new ATH.
+   Source: FHFA HPI published data (fhfa.gov). */
+var hpi = [100,96,94,97,103,112,118,123,130,138,146,155,163,187,196,194,204,212];
+
+/* Chart 1: Monetary Cycle */
+/* FFR (target midpoint, year-end) — federalreserve.gov */
+var ffrRate = [0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.50,0.66,1.50,2.50,1.75,0.25,0.25,4.50,5.50,4.38,4.38];
+/* 30-yr fixed mortgage rate (annual avg) — Freddie Mac PMMS */
+var mortRate = [6.03,5.04,4.69,4.45,3.66,3.98,4.17,3.85,3.65,3.99,4.54,3.94,3.11,2.96,5.34,6.81,6.72,6.80];
+/* CPI YoY% — BLS annual average */
+var cpiYoy = [3.8,-0.4,1.6,3.2,2.1,1.5,1.6,0.1,1.3,2.1,2.4,1.8,1.2,4.7,8.0,4.1,2.9,2.8];
+/* M2 YoY% — Federal Reserve H.6 (annual avg) */
+var m2Growth = [6.0,8.0,4.5,9.5,8.5,6.5,6.0,5.5,6.0,5.5,4.5,6.5,25.0,13.0,-1.5,-3.0,3.0,4.0];
+
+/* Chart 2: Real Economy */
+/* GDP YoY% — BEA NIPA tables */
+var gdpGrowth = [-0.1,-2.8,2.7,1.5,2.3,1.8,2.5,3.0,1.8,2.3,2.9,2.3,-2.8,5.9,2.1,2.5,2.8,2.3];
+/* Unemployment % — BLS annual avg */
+var unempRate = [5.8,9.3,9.6,8.9,8.1,7.4,6.2,5.3,4.9,4.4,3.9,3.7,8.1,5.4,3.6,3.6,4.1,4.2];
+/* Single-family housing starts (millions) — US Census Bureau */
+var housingStarts = [0.62,0.45,0.47,0.43,0.53,0.62,0.65,0.71,0.78,0.85,0.86,0.89,0.99,1.12,1.00,0.94,1.00,1.02];
+/* Existing home sales (millions) — NAR annual */
+var homeSales = [4.90,5.16,4.19,4.26,4.66,5.09,4.94,5.26,5.45,5.51,5.34,5.34,5.64,6.12,5.03,4.09,4.06,4.20];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × HPI ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(220,38,38,0.10)'},label:{formatter:isZh?'次貸危機':'Subprime Crisis',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(37,99,235,0.07)'},label:{formatter:isZh?'QE復甦':'QE Recovery',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2015'}],
+    [{xAxis:'2016',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'漸進升息':'Gradual Hikes',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(37,99,235,0.07)'},label:{formatter:isZh?'COVID寬鬆':'COVID Easing',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},label:{formatter:isZh?'升息週期':'Rate Hike Cycle',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'週期晚期':'Late Cycle',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2009',label:{formatter:isZh?'QE1':'QE1',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2012',label:{formatter:isZh?'QE3/HPI底':'QE3/HPI Trough',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'COVID降息':'COVID Cut',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'首次升息':'First Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2024',label:{formatter:isZh?'聯準會降息':'Fed Cuts',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-2,max:14,interval:2,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:85,max:250,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'FHFA HPI(2008=100)':'FHFA HPI(2008=100)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'聯邦基金利率':'Fed Funds Rate',type:'line',data:ffrRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'30年期固定房貸':'30-yr Fixed Mortgage',type:'line',data:mortRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpiYoy,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'M2 YoY%':'M2 YoY%',type:'line',data:m2Growth,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'FHFA HPI':'FHFA HPI',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy × HPI ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gdpBarData = gdpGrowth.map(function(v){return {value:v,itemStyle:{color:v>=0?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+  /* Scale housing starts to comparable % axis: starts in millions, scale factor ×5 for visibility */
+  var startsScaled = housingStarts.map(function(v){return parseFloat((v*5).toFixed(1));});
+  /* Scale existing home sales similarly */
+  var salesScaled = homeSales.map(function(v){return parseFloat((v).toFixed(1));});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(220,38,38,0.10)'},label:{formatter:isZh?'次貸危機':'Subprime Crisis',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(37,99,235,0.07)'},label:{formatter:isZh?'QE時代':'QE Era',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(37,99,235,0.07)'},label:{formatter:isZh?'COVID':'COVID',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},label:{formatter:isZh?'升息週期':'Rate Hikes',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'週期晚期':'Late Cycle',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData2 = [
+    {xAxis:'2012',label:{formatter:isZh?'HPI底部':'HPI Trough',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'COVID':'COVID',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'首次升息':'First Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2023',label:{formatter:isZh?'SVB倒閉':'SVB Failure',color:'#8b5cf6',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#8b5cf6',type:'dashed',width:1}}
+  ];
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:-5,max:15,interval:5,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標/M':'% Indicators/M',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:85,max:250,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'FHFA HPI':'FHFA HPI',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GDP YoY%':'GDP YoY%',type:'bar',data:gdpBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'失業率%':'Unemployment%',type:'line',data:unempRate,yAxisIndex:0,lineStyle:{color:C.red,width:1.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'現有屋銷量(M)':'Exist.Home Sales(M)',type:'line',data:salesScaled,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'新屋開工×5(M)':'Housing Starts×5(M)',type:'line',data:startsScaled,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'FHFA HPI':'FHFA HPI',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2},markLine:{silent:true,symbol:'none',data:markLineData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

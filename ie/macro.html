@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | Ireland Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">Ireland — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">愛爾蘭 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q1 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q1</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:5;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">GFC Crash</span><span class="lang-zh" style="display:none">GFC崩盤</span></div>
+        <div class="cs-year">08–12</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Trough / NAMA</span><span class="lang-zh" style="display:none">谷底/NAMA</span></div>
+        <div class="cs-year">13–15</div>
+      </div>
+      <div class="cycle-seg" style="flex:5;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Recovery Boom</span><span class="lang-zh" style="display:none">復甦榮景</span></div>
+        <div class="cs-year">16–21</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Rate Pause</span><span class="lang-zh" style="display:none">利率暫停</span></div>
+        <div class="cs-year">22–23</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#eab308">
+        <div class="cs-title"><span class="lang-en">Late Cycle</span><span class="lang-zh" style="display:none">週期末段</span></div>
+        <div class="cs-year">24–25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">ECB at 2.65% (Apr 2025, deposit rate) — cutting cycle supports demand; RPPI at all-time highs driven by chronic supply shortage</span>
+        <span class="lang-zh" style="display:none">ECB存款利率2.65%（2025年4月）——降息週期支撐需求；RPPI創歷史新高，慢性供給短缺驅動</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">ECB Deposit Rate</span><span class="lang-zh" style="display:none">ECB存款利率</span></div>
+      <div class="kpi-value">2.65%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">−175bp from peak</span><span class="lang-zh" style="display:none">距高點−175bp</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">RPPI YoY</span><span class="lang-zh" style="display:none">RPPI年增</span></div>
+      <div class="kpi-value">+9.8%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">At all-time high</span><span class="lang-zh" style="display:none">歷史新高</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CPI YoY</span><span class="lang-zh" style="display:none">通膨 YoY</span></div>
+      <div class="kpi-value">2.1%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Cooling</span><span class="lang-zh" style="display:none">降溫中</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">1.2%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Modified GNI +4%</span><span class="lang-zh" style="display:none">修正GNI +4%</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Unemployment</span><span class="lang-zh" style="display:none">失業率</span></div>
+      <div class="kpi-value">4.4%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Near historical low</span><span class="lang-zh" style="display:none">接近歷史低點</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Avg Mortgage Rate</span><span class="lang-zh" style="display:none">平均房貸利率</span></div>
+      <div class="kpi-value">~4.0%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Down from 4.5% peak</span><span class="lang-zh" style="display:none">從4.5%高點下降</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">ECB Rate Range (17yr)</span><span class="lang-zh" style="display:none">ECB歷史區間</span></div>
+      <div class="ctx-val">0%–4.50%</div>
+      <div class="ctx-sub"><span class="lang-en">Low: 2016–21 (0%) · High: Sep 2023</span><span class="lang-zh" style="display:none">低點：2016–21（0%） · 高點：2023年9月</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">RPPI Since 2012 Trough</span><span class="lang-zh" style="display:none">RPPI自2012谷底累計</span></div>
+      <div class="ctx-val" style="color:#16a34a">+150%</div>
+      <div class="ctx-sub"><span class="lang-en">From −54% crash low back to ATH</span><span class="lang-zh" style="display:none">從崩跌−54%的低點反彈至歷史高位</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+25% / −5.5%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2015 (MNC repatriation) · Worst: 2009</span><span class="lang-zh" style="display:none">最佳：2015年（跨國企業回流） · 最差：2009年</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Housing Completions</span><span class="lang-zh" style="display:none">住宅落成數</span></div>
+      <div class="ctx-val" style="color:#d97706">33,000</div>
+      <div class="ctx-sub"><span class="lang-en">2024 — still below 50K target per yr</span><span class="lang-zh" style="display:none">2024年 — 仍低於每年5萬套目標</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × House Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Ireland shares ECB monetary policy with 19 other eurozone nations — it cannot set rates independently. This means Irish property absorbed a decade of near-zero ECB rates despite domestic prices already surging, amplifying the boom. The 2022–23 ECB hike to 4.50% barely dented Irish prices because supply is so constrained (completions vs. household formation gap of ~20K/yr).
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>愛爾蘭與19個歐元區國家共用ECB貨幣政策，無法自行設定利率。這意味著愛爾蘭房市在國內房價已急漲的情況下，仍吸收了十年近零利率的刺激，放大了繁榮程度。2022–23年ECB升息至4.50%幾乎未能壓制愛爾蘭房價，因為供給嚴重不足（每年住宅落成量vs家庭形成數差距約2萬套）。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">ECB Rate / Mortgage Rate / CPI vs RPPI Index (2008–2025)</span>
+      <span class="lang-zh" style="display:none">ECB利率 / 房貸利率 / CPI vs RPPI指數（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × House Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Ireland's official GDP is distorted by multinational tax arrangements — Modified GNI (GNI*) is the better domestic measure. Employment has been the strongest prop for housing: unemployment fell from 15.1% (2012) to 4.4% (2025), directly expanding the mortgage-eligible population despite affordability stress.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>愛爾蘭官方GDP因跨國企業稅務安排而失真——修正後GNI（GNI*）是更佳的國內衡量指標。就業是支撐房市的最強支柱：失業率從2012年的15.1%降至2025年的4.4%，直接擴大了可申請按揭的人口基礎，儘管可負擔性仍面臨壓力。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">Modified GNI / Unemployment / Housing Completions vs RPPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">修正GNI / 失業率 / 住宅落成 vs RPPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">2008–2012 · THE CRASH</span><span class="lang-zh" style="display:none">2008–2012 · 大崩盤</span></div>
+      <div class="ev-title"><span class="lang-en">RPPI Falls −54% — Worst in Developed World</span><span class="lang-zh" style="display:none">RPPI暴跌−54%，發達國家最慘</span></div>
+      <div class="ev-desc"><span class="lang-en">Celtic Tiger property bubble bursts. GDP contracts −5.5% in 2009. Bank sector collapses — Anglo Irish Bank, Allied Irish Banks receive state bailout. Unemployment surges 5%→15%. Ireland requests EU/IMF bailout (€85bn, Nov 2010). Negative equity traps 200,000+ households.</span><span class="lang-zh" style="display:none">凱爾特之虎房產泡沫破裂，2009年GDP衰退5.5%。銀行業崩潰——盎格魯愛爾蘭銀行、聯合愛爾蘭銀行獲政府救助。失業率從5%飆升至15%。2010年11月愛爾蘭申請EU/IMF救助（850億歐元）。超過20萬戶家庭陷入負資產困境。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #8b5cf6">
+      <div class="ev-year" style="color:#8b5cf6"><span class="lang-en">2009–2014 · NAMA ESTABLISHED</span><span class="lang-zh" style="display:none">2009–2014 · NAMA成立</span></div>
+      <div class="ev-title"><span class="lang-en">Bad Bank Absorbs €74bn in Distressed Loans</span><span class="lang-zh" style="display:none">壞帳銀行吸收740億歐元不良貸款</span></div>
+      <div class="ev-desc"><span class="lang-en">National Asset Management Agency (NAMA) takes over toxic property loans from Irish banks at discount. Manages wind-down of distressed assets 2009–2020. Enables gradual price stabilisation. Exits most positions by 2017 with eventual profit of ~€4bn — rare success among bad banks globally.</span><span class="lang-zh" style="display:none">全國資產管理局（NAMA）以折扣價從愛爾蘭銀行接管有毒房產貸款。2009–2020年管理不良資產清算，幫助房價逐步穩定。2017年前清退大部分倉位，最終獲利約40億歐元——全球壞帳銀行中罕見的成功案例。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2013–2017 · RECOVERY BEGINS</span><span class="lang-zh" style="display:none">2013–2017 · 復甦啟動</span></div>
+      <div class="ev-title"><span class="lang-en">MNC FDI Boom + Dublin Property Surge</span><span class="lang-zh" style="display:none">跨國企業FDI榮景+都柏林房價急升</span></div>
+      <div class="ev-desc"><span class="lang-en">Google, Facebook, Apple, LinkedIn establish European HQs in Dublin. Tech employment booms. ECB holds rates near zero (0.05% by 2014). RPPI rebounds — Dublin leads, up 50%+ from trough by 2017. CSO introduces Central Bank LTV/LTI lending limits in 2015 to cool excesses.</span><span class="lang-zh" style="display:none">谷歌、臉書、蘋果、領英在都柏林設立歐洲總部，科技就業大幅擴張。ECB利率接近零（2014年降至0.05%）。RPPI反彈——都柏林領漲，到2017年較谷底回升逾50%。2015年央行引入LTV/LTI貸款上限以抑制過熱。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2018–2019 · SUPPLY CONSTRAINT CRISIS</span><span class="lang-zh" style="display:none">2018–2019 · 供給短缺危機</span></div>
+      <div class="ev-title"><span class="lang-en">Completions Only 18K/yr vs. 35K+ Needed</span><span class="lang-zh" style="display:none">每年落成僅1.8萬套，需求超3.5萬套</span></div>
+      <div class="ev-desc"><span class="lang-en">Construction capacity destroyed during crash fails to recover fast enough. Homelessness reaches record 10,500. Government launches Rebuilding Ireland action plan (2016). Dublin rents +50% vs 2012. Foreign institutional funds (REITs, cuckoo funds) bulk-buy new builds — political controversy erupts.</span><span class="lang-zh" style="display:none">崩盤期間建築業產能被摧毀，復甦遲緩。無家可歸人數創新高達10,500人。政府推出「重建愛爾蘭」行動計劃（2016年）。都柏林租金較2012年上漲50%。外資機構基金（REITs、布穀鳥基金）批量購入新樓——政治爭議爆發。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">2020–2021 · COVID — PRICES HOLD</span><span class="lang-zh" style="display:none">2020–2021 · COVID房價撐住</span></div>
+      <div class="ev-title"><span class="lang-en">ECB Emergency PEPP + Construction Stops</span><span class="lang-zh" style="display:none">ECB緊急PEPP+建築業停擺</span></div>
+      <div class="ev-desc"><span class="lang-en">GDP falls −5.5% but housing completions halt (construction sites closed). Pent-up demand accumulates. ECB's €1.85tn PEPP keeps rates at zero. RPPI flat in 2020 then explodes +7% in 2021. WFH triggers demand for houses over apartments. Cork, Galway, Limerick join the surge.</span><span class="lang-zh" style="display:none">GDP衰退5.5%，但住宅落成停擺（工地關閉），積壓需求累積。ECB 1.85兆歐元PEPP維持零利率。RPPI 2020年持平，2021年爆漲+7%。在家工作帶動對獨立屋需求，科克、戈爾韋、利默里克跟進上漲。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">JUL 2022 – SEP 2023 · ECB HIKE CYCLE</span><span class="lang-zh" style="display:none">2022年7月–2023年9月 · ECB升息週期</span></div>
+      <div class="ev-title"><span class="lang-en">10 Hikes: 0% → 4.50% — Supply Still the Binding Constraint</span><span class="lang-zh" style="display:none">10次升息：0% → 4.50%，供給仍是主要約束</span></div>
+      <div class="ev-desc"><span class="lang-en">Fastest ECB tightening since euro creation. Variable mortgage costs soar for Irish households. Yet RPPI keeps rising: +6.5% (2022), +2.5% (2023). Supply shortage overwhelms rate effect. New build completions reach 29K in 2022 — still far short of demand. Government bans institutional bulk-buying of new houses.</span><span class="lang-zh" style="display:none">歐元誕生以來ECB最快緊縮。愛爾蘭家庭浮動利率房貸成本飆升。然而RPPI仍持續上漲：2022年+6.5%，2023年+2.5%。供給短缺壓倒利率效果。2022年新屋落成達2.9萬套，仍遠低於需求。政府禁止機構批量購入新建住宅。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2024 · ECB CUTS + PRICES HIT ATH</span><span class="lang-zh" style="display:none">2024年 · ECB降息+房價創歷史新高</span></div>
+      <div class="ev-title"><span class="lang-en">RPPI +9.8% YoY — Help-to-Buy Scheme Extended</span><span class="lang-zh" style="display:none">RPPI年增+9.8%，購屋補助計劃延長</span></div>
+      <div class="ev-desc"><span class="lang-en">ECB starts cutting June 2024. Irish RPPI surges as lower rates + persistent supply deficit combine. Dublin median house exceeds €400K. Help-to-Buy scheme extended to 2029. Government Housing for All plan targets 33K completions/yr — achieved partially. Net immigration +80K fuels continued demand.</span><span class="lang-zh" style="display:none">ECB於2024年6月開始降息。愛爾蘭RPPI急漲，利率下降加上持續供給缺口雙重驅動。都柏林房價中位數突破40萬歐元。購屋補助計劃延長至2029年。政府「全民住房」計劃目標每年3.3萬套落成——部分達成。淨移入8萬人持續帶動需求。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #8b5cf6">
+      <div class="ev-year" style="color:#8b5cf6"><span class="lang-en">2025 · LATE CYCLE — POLICY RESPONSE</span><span class="lang-zh" style="display:none">2025年 · 週期末段——政策回應</span></div>
+      <div class="ev-title"><span class="lang-en">Stamp Duty on Bulk Purchases; Affordability at Crisis Level</span><span class="lang-zh" style="display:none">批量購屋印花稅；可負擔性達危機水準</span></div>
+      <div class="ev-desc"><span class="lang-en">Government introduces 15% stamp duty on bulk purchases (10+ units) from 2024. Price-to-income ratio in Dublin reaches 9–11× — worst in EU outside Luxembourg. ECB deposit rate at 2.65% (Apr 2025). Completions projected 33K in 2025. Housing remains top political priority after 2025 general election.</span><span class="lang-zh" style="display:none">政府對批量購屋（10套以上）徵收15%印花稅（自2024年起）。都柏林房價所得比達9–11倍——為盧森堡以外歐盟最高。ECB存款利率2.65%（2025年4月）。2025年預計落成3.3萬套。住房問題在2025年大選後仍是最優先政治議題。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#eab308;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#ca8a04;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook — Late Cycle</span><span class="lang-zh" style="display:none">當前週期展望 — 週期末段</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">ECB in cutting cycle — lower mortgage costs supporting buyers</span><span class="lang-zh" style="display:none">ECB處於降息週期，按揭成本下降支撐買家</span></li>
+          <li><span class="lang-en">Unemployment at 4.4% — near full employment, wages growing 5%+</span><span class="lang-zh" style="display:none">失業率4.4%接近完全就業，薪資成長5%以上</span></li>
+          <li><span class="lang-en">MNC tech sector still expanding Dublin employment base</span><span class="lang-zh" style="display:none">跨國企業科技部門持續擴大都柏林就業基礎</span></li>
+          <li><span class="lang-en">Chronic supply deficit (20K units/yr shortfall) underpins prices</span><span class="lang-zh" style="display:none">慢性供給缺口（每年缺2萬套）支撐房價</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Affordability in Dublin at EU crisis levels — price/income 9–11×</span><span class="lang-zh" style="display:none">都柏林可負擔性達歐盟危機水準，房價所得比9–11倍</span></li>
+          <li><span class="lang-en">US tariff shock could trigger MNC restructuring in Ireland</span><span class="lang-zh" style="display:none">美國關稅衝擊可能引發跨國企業在愛爾蘭重組</span></li>
+          <li><span class="lang-en">Concentration risk: ~20% of corporation tax from Big Tech</span><span class="lang-zh" style="display:none">集中風險：約20%企業稅來自大型科技公司</span></li>
+          <li><span class="lang-en">Political pressure growing — housing a dominant election issue</span><span class="lang-zh" style="display:none">政治壓力上升，住房成為主要選舉議題</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: ECB (deposit rate, ecb.europa.eu), CSO Ireland (Residential Property Price Index RPPI, GDP/GNI*, CPI, Labour Force Survey — cso.ie), NAMA (National Asset Management Agency, nama.ie), DHLGH (Housing completions, gov.ie). Note: Ireland's official GDP distorted by MNC profit repatriations — Modified GNI (GNI*) used for real economy chart. 2025 data are Q1 2025 actuals or trend estimates.</span>
+    <span class="lang-zh" style="display:none">來源：ECB（存款利率 · ecb.europa.eu）、愛爾蘭CSO（RPPI住宅價格指數、GDP/GNI*、CPI、勞動力調查 · cso.ie）、NAMA（全國資產管理局 · nama.ie）、DHLGH（住宅落成 · gov.ie）。注意：愛爾蘭官方GDP因跨國企業利潤回流而失真，實體經濟圖表使用修正後GNI（GNI*）。2025年數據為2025 Q1實際值或趨勢估算。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, sources: ECB / CSO / NAMA) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+/* CSO RPPI Index (Jan 2015 = 100, national all residential) */
+/* Key confirmed points: 2012 trough ~53; 2015=100; 2019~136; 2021~150; 2022~162; 2023~166; 2024~182 */
+/* 2008–2011 back-calculated from crash: peak ~165 in 2007, fell to 53 by Q1 2012 (−54%) */
+var hpi = [145,125,108,90,75,72,78,100,110,122,130,136,141,150,162,166,182,200];
+
+/* Chart 1: Monetary */
+/* ECB main refinancing rate (year-end) — used pre-2022; post-2022 deposit rate more relevant */
+var ecbRate    = [2.50,1.00,1.00,1.25,0.75,0.25,0.05,0.05,0.00,0.00,0.00,0.00,0.00,0.00,2.00,4.00,3.15,2.65];
+/* Irish average new mortgage rate (BPFI data) */
+var mortRate   = [4.50,3.00,2.80,3.20,3.50,3.40,3.20,3.10,3.00,3.00,2.90,2.80,2.70,2.60,3.50,4.20,4.50,4.00];
+/* CSO CPI YoY% annual avg */
+var cpiYoy     = [4.1,-4.5,-1.0,1.2,1.7,0.5,0.3,0.0,-0.2,0.4,0.7,1.3,-0.4,2.4,7.8,5.0,2.6,2.1];
+
+/* Chart 2: Real Economy */
+/* CSO Modified GNI YoY% (more representative than headline GDP) */
+/* Headline GDP 2015 was +25% due to IP repatriation — using GNI* */
+var gniGrowth  = [null,-8.0,-1.0,3.0,-2.5,0.5,5.0,4.5,6.8,5.0,7.0,3.5,-4.5,12.0,5.0,3.2,4.0,3.5];
+/* CSO Labour Force Survey unemployment % annual avg */
+var unemployRate = [6.4,12.0,14.0,14.7,15.1,13.1,11.3,9.4,7.9,6.7,5.8,5.0,5.9,6.2,4.5,4.3,4.4,4.4];
+/* Housing completions (000s) — DHLGH */
+var completions = [26.0,5.9,14.6,9.9,4.7,4.7,5.5,12.7,14.9,19.3,18.0,21.0,20.7,20.4,29.9,32.7,33.0,33.0];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × RPPI ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(220,38,38,0.10)'},label:{formatter:isZh?'GFC崩盤':'GFC Crash',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2012'}],
+    [{xAxis:'2013',itemStyle:{color:'rgba(217,119,6,0.07)'},  label:{formatter:isZh?'NAMA谷底':'NAMA Trough',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2015'}],
+    [{xAxis:'2016',itemStyle:{color:'rgba(22,163,74,0.07)'},  label:{formatter:isZh?'復甦榮景':'Recovery Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},  label:{formatter:isZh?'ECB升息':'ECB Hikes',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(234,179,8,0.08)'},  label:{formatter:isZh?'週期末段':'Late Cycle',color:'#ca8a04',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2010',label:{formatter:isZh?'EU/IMF救助':'EU/IMF Bailout',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2015',label:{formatter:isZh?'央行LTV上限':'CB LTV Limits',color:'#8b5cf6',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#8b5cf6',type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'ECB首升':'First ECB Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2024',label:{formatter:isZh?'ECB首降':'First ECB Cut',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:80,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-8,max:10,interval:2,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:50,max:230,interval:30,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'RPPI (2015=100)':'RPPI (2015=100)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'ECB利率':'ECB Rate',type:'line',data:ecbRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'房貸利率':'Mortgage Rate',type:'line',data:mortRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpiYoy,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'RPPI (2015=100)':'RPPI (2015=100)',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy × RPPI ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gniBarData = gniGrowth.map(function(v){return {value:v,itemStyle:{color:(v===null||v>=0)?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(220,38,38,0.10)'},label:{formatter:isZh?'GFC崩盤':'GFC Crash',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2012'}],
+    [{xAxis:'2013',itemStyle:{color:'rgba(217,119,6,0.07)'},  label:{formatter:isZh?'NAMA谷底':'Trough',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2015'}],
+    [{xAxis:'2016',itemStyle:{color:'rgba(22,163,74,0.07)'},  label:{formatter:isZh?'復甦榮景':'Boom',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},  label:{formatter:isZh?'升息':'Rate Hike',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}]
+  ];
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:80,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:-20,max:20,interval:5,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:50,max:230,interval:30,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'RPPI (2015=100)':'RPPI (2015=100)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GNI* YoY%':'GNI* YoY%',type:'bar',data:gniBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'失業率%':'Unemployment%',type:'line',data:unemployRate,yAxisIndex:0,lineStyle:{color:C.red,width:1.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'住宅落成(千套)':'Completions (000s)',type:'line',data:completions,yAxisIndex:0,lineStyle:{color:C.muted,width:1.5,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'RPPI (2015=100)':'RPPI (2015=100)',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

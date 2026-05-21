@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Economist Style Test</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+  <div style="max-width:900px;margin:40px auto;padding:0 20px;">
+
+    <h1 style="font-family:Inter,sans-serif;color:#1e3a5f;margin-bottom:4px;">
+      Economist Colour Style Test
+    </h1>
+    <p style="color:#999;font-size:12px;margin-bottom:32px;font-family:Inter,sans-serif;">
+      Chart colours only · Page background unchanged
+    </p>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3 style="font-family:Inter,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#3d3d3d;border-bottom:2px solid #e3120b;padding-bottom:6px;margin-bottom:12px;">
+        Rental Yield vs OPR
+      </h3>
+      <div id="c1" style="height:240px;"></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3 style="font-family:Inter,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#3d3d3d;border-bottom:2px solid #e3120b;padding-bottom:6px;margin-bottom:12px;">
+        Demand vs Supply Mismatch
+      </h3>
+      <div id="c2" style="height:220px;"></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3 style="font-family:Inter,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#3d3d3d;border-bottom:2px solid #e3120b;padding-bottom:6px;margin-bottom:12px;">
+        Asia Pacific Price-to-Rent
+      </h3>
+      <div id="c3" style="height:280px;"></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3 style="font-family:Inter,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#3d3d3d;border-bottom:2px solid #e3120b;padding-bottom:6px;margin-bottom:12px;">
+        Overhang Forecast 2025–2029
+      </h3>
+      <div id="c4" style="height:260px;"></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <h3 style="font-family:Inter,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#3d3d3d;border-bottom:2px solid #e3120b;padding-bottom:6px;margin-bottom:12px;">
+        Average Price by City + YoY%
+      </h3>
+      <div id="c5" style="height:260px;"></div>
+    </div>
+
+  </div>
+
+  <script>
+  google.charts.load('current', {packages:['corechart']});
+  google.charts.setOnLoadCallback(function() {
+
+    var EC = {
+      red:'#e3120b', blue:'#2166ac', lblue:'#6baed6',
+      orange:'#d94801', green:'#74c476',
+      grid:'#d9d9d9', text:'#3d3d3d', muted:'#999999'
+    };
+
+    var baseOpts = {
+      backgroundColor: 'transparent',
+      fontName: 'Inter',
+      chartArea: { width:'78%', height:'72%' },
+      legend: { textStyle:{ color:'#3d3d3d', fontSize:11 } },
+      hAxis: {
+        textStyle: { color:'#999999', fontSize:10 },
+        gridlines: { color:'transparent' },
+        baselineColor: '#d9d9d9'
+      },
+      vAxis: {
+        textStyle: { color:'#999999', fontSize:10 },
+        gridlines: { color:'#d9d9d9', count:4 },
+        baselineColor: '#d9d9d9',
+        minorGridlines: { count:0 }
+      }
+    };
+
+    // Chart 1: Yield Spread
+    var d1 = google.visualization.arrayToDataTable([
+      ['Year','Rental Yield %','OPR %'],
+      ['2019',4.80,3.00],['2020',4.60,1.75],['2021',4.70,1.75],
+      ['2022',4.90,2.75],['23Q1',5.16,3.00],['23Q3',5.20,3.00],
+      ['24Q1',5.16,3.00],['24Q3',5.24,3.00],
+      ['25Q1',5.10,3.00],['25Q3',5.19,2.75]
+    ]);
+    new google.visualization.LineChart(document.getElementById('c1'))
+      .draw(d1, Object.assign({}, baseOpts, {
+        colors: [EC.red, EC.blue],
+        vAxis: Object.assign({}, baseOpts.vAxis, { format:"#.##'%'" }),
+        series: { 1: { lineDashStyle:[4,2] } },
+        lineWidth: 2.5,
+        pointSize: 4
+      }));
+
+    // Chart 2: Mismatch
+    var d2 = google.visualization.arrayToDataTable([
+      ['Price Band','Demand %','Supply %'],
+      ['<RM300k',53.1,18],['RM300-500k',27.3,25],
+      ['RM500k-1M',13.8,38],['>RM1M',5.8,19]
+    ]);
+    new google.visualization.ColumnChart(document.getElementById('c2'))
+      .draw(d2, Object.assign({}, baseOpts, {
+        colors: [EC.blue, EC.red],
+        vAxis: Object.assign({}, baseOpts.vAxis, { format:"#'%'" }),
+        bar: { groupWidth:'68%' }
+      }));
+
+    // Chart 3: APAC P/R
+    var d3 = google.visualization.arrayToDataTable([
+      ['City','P/R Ratio',{role:'style'},{role:'annotation'}],
+      ['Ho Chi Minh',18, EC.orange,'18x'],
+      ['KL',21.7, EC.red,'21.7x'],
+      ['Bangkok',25, EC.blue,'25x'],
+      ['Tokyo',37, EC.blue,'37x'],
+      ['Singapore',40, EC.blue,'40x'],
+      ['Taipei',47, EC.lblue,'47x'],
+      ['Hong Kong',50, EC.lblue,'50x'],
+      ['Shanghai',59, EC.muted,'59x']
+    ]);
+    new google.visualization.BarChart(document.getElementById('c3'))
+      .draw(d3, Object.assign({}, baseOpts, {
+        legend: 'none',
+        chartArea: { width:'55%', height:'85%' },
+        hAxis: Object.assign({}, baseOpts.hAxis, { minValue:0, maxValue:65 }),
+        annotations: {
+          alwaysOutside: true,
+          textStyle: { fontSize:10, color:'#3d3d3d', bold:true }
+        }
+      }));
+
+    // Chart 4: Overhang Forecast
+    var d4 = new google.visualization.DataTable();
+    d4.addColumn('string','Year');
+    d4.addColumn('number','Historical');
+    d4.addColumn('number','Bull');
+    d4.addColumn('number','Base');
+    d4.addColumn('number','Bear');
+    d4.addRows([
+      ['2023',25816,null,null,null],
+      ['2024H1',22642,null,null,null],
+      ['2025*',28672,28672,28672,28672],
+      ['2026E',null,43000,46000,51000],
+      ['2027E',null,42000,47000,57000],
+      ['2028E',null,22000,28000,42000],
+      ['2029E',null,8000,14000,28000]
+    ]);
+    new google.visualization.LineChart(document.getElementById('c4'))
+      .draw(d4, Object.assign({}, baseOpts, {
+        colors: [EC.blue, EC.green, EC.red, EC.muted],
+        vAxis: Object.assign({}, baseOpts.vAxis, { format:'#,###', minValue:0 }),
+        hAxis: Object.assign({}, baseOpts.hAxis, {
+          slantedText: true, slantedTextAngle: 30,
+          showTextEvery: 1
+        }),
+        series: {
+          0: { lineWidth:2.5, pointSize:5 },
+          1: { lineDashStyle:[4,2], lineWidth:1.5, pointSize:3 },
+          2: { lineDashStyle:[6,3], lineWidth:2, pointSize:4 },
+          3: { lineDashStyle:[8,4], lineWidth:1.5, pointSize:3 }
+        }
+      }));
+
+    // Chart 5: City Price + YoY
+    var d5 = new google.visualization.DataTable();
+    d5.addColumn('string','City');
+    d5.addColumn('number','Avg Price (RM)');
+    d5.addColumn({type:'string', role:'style'});
+    d5.addColumn('number','YoY %');
+    d5.addRows([
+      ['National Avg', 494384, EC.blue,  3.2],
+      ['Penang',       504845, EC.green, 5.7],
+      ['Selangor',     510000, EC.blue,  2.1],
+      ['KL',           804642, EC.orange,-4.3],
+      ['Johor',        380000, EC.blue,  1.8]
+    ]);
+    new google.visualization.ComboChart(document.getElementById('c5'))
+      .draw(d5, Object.assign({}, baseOpts, {
+        seriesType: 'bars',
+        series: { 1: { type:'line', targetAxisIndex:1,
+                       color: EC.red, lineWidth:2, pointSize:6 } },
+        vAxes: {
+          0: { textStyle:{color:'#999',fontSize:10},
+               gridlines:{color:'#d9d9d9'},
+               format:'RM#,###' },
+          1: { textStyle:{color:'#999',fontSize:10},
+               gridlines:{color:'transparent'},
+               format:"#'%'", minValue:-8, maxValue:10 }
+        },
+        bar: { groupWidth:'60%' }
+      }));
+
+  });
+  </script>
+</body>
+</html>

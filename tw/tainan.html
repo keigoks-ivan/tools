@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tainan Deep Dive | Taiwan Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: APRIL 2026</span><span class="lang-zh" style="display:none">最後更新：2026年4月</span></span>
+      <h1><span class="lang-en">TAINAN &mdash; DEEP DIVE</span><span class="lang-zh" style="display:none">台南——深度分析</span></h1>
+      <p class="subtitle"><span class="lang-en">April 2026 &middot; Data: MOI / STSP / NCCU / Sinyi</span><span class="lang-zh" style="display:none">2026年4月 &middot; 資料來源：內政部 / 南科 / 政大 / 信義</span></p>
+    </div>
+
+    <!-- SECTION 1: EXEC SUMMARY -->
+    <div class="section-label"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Tainan is TSMC's advanced packaging hub, anchored by the Southern Taiwan Science Park (STSP). Average home price ~NT$6M. Unsold inventory: 1.1万 units (second lowest among six cities). However, 2025 transactions fell -28.8% YoY &mdash; the second deepest decline nationally. Price-to-income ratio ~9x. Old housing: 57.9% over 30 years. The TSMC/STSP effect drove a massive 5-year price surge, but the market is now entering correction territory. Notably, STSP revenue has surpassed Hsinchu Science Park. Population shows TSMC-driven inflow in science park-adjacent districts.</span>
+      <span class="lang-zh" style="display:none">台南是台積電先進封裝重鎮，以南部科學園區（南科）為核心。平均房價約NT$600萬。待售庫存1.1萬戶（六都第二低）。然而2025年交易量年減-28.8%——全國第二大跌幅。房價所得比約9倍。老屋比例：57.9%屋齡逾30年。台積電/南科效應驅動了5年的大幅漲勢，但市場正進入修正階段。值得注意的是，南科營收已超越竹科。人口在園區鄰近區域呈現台積電驅動的淨流入。</span>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">AVG HOME PRICE</span><span class="lang-zh" style="display:none">平均房價</span></div>
+        <div class="kpi-value">~NT$6M</div>
+        <span class="badge badge-blue"><span class="lang-en">TSMC hub city</span><span class="lang-zh" style="display:none">台積電重鎮</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">UNSOLD INVENTORY</span><span class="lang-zh" style="display:none">待售庫存</span></div>
+        <div class="kpi-value">1.1萬</div>
+        <span class="badge badge-green"><span class="lang-en">Second lowest</span><span class="lang-zh" style="display:none">六都第二低</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">2025 TXN YoY</span><span class="lang-zh" style="display:none">2025年交易量年增</span></div>
+        <div class="kpi-value">-28.8%</div>
+        <span class="badge badge-red"><span class="lang-en">2nd deepest decline</span><span class="lang-zh" style="display:none">全國第二大跌幅</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">PRICE-TO-INCOME</span><span class="lang-zh" style="display:none">房價所得比</span></div>
+        <div class="kpi-value">~9x</div>
+        <span class="badge badge-green"><span class="lang-en">More affordable vs north</span><span class="lang-zh" style="display:none">較北部可負擔</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">OLD HOUSING (30yr+)</span><span class="lang-zh" style="display:none">老屋比例（30年+）</span></div>
+        <div class="kpi-value">57.9%</div>
+        <span class="badge badge-orange"><span class="lang-en">High aging ratio</span><span class="lang-zh" style="display:none">高老化比率</span></span>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">STSP REVENUE</span><span class="lang-zh" style="display:none">南科營收</span></div>
+        <div class="kpi-value">&gt;HSP</div>
+        <span class="badge badge-blue"><span class="lang-en">Surpassed Hsinchu SP</span><span class="lang-zh" style="display:none">已超越竹科</span></span>
+      </div>
+    </div>
+
+    <!-- SECTION 2: TSMC EFFECT -->
+    <div class="section-label"><span class="lang-en">THE TSMC EFFECT</span><span class="lang-zh" style="display:none">台積電效應</span></div>
+    <div class="insight-box">
+      <span class="lang-en">STSP houses TSMC's advanced packaging operations (CoWoS), the most critical bottleneck in the global AI supply chain. STSP revenue has surpassed Hsinchu Science Park, making Tainan the de facto center of Taiwan's semiconductor industry. Engineering salary premiums run 30&ndash;50% above the Tainan average, creating a "dual economy": TSMC workers can afford NT$40&ndash;50万/ping while local workers are stuck at NT$20&ndash;25万/ping. Shanhua, Shanshang, and Xinshi districts around STSP saw 80&ndash;100%+ price increases in just 3 years.</span>
+      <span class="lang-zh" style="display:none">南科是台積電先進封裝（CoWoS）的生產基地——全球AI供應鏈最關鍵的瓶頸。南科營收已超越竹科，使台南實質成為台灣半導體產業中心。工程師薪資溢價達台南平均水準的30-50%，形成「雙元經濟」：台積電員工可負擔NT$40-50萬/坪，當地工人卻只能承擔NT$20-25萬/坪。園區周邊的善化、山上、新市區域在3年內房價飆漲80-100%以上。</span>
+    </div>
+
+    <!-- SECTION 3: KEY DISTRICTS -->
+    <div class="section-label"><span class="lang-en">KEY DISTRICTS</span><span class="lang-zh" style="display:none">重點行政區</span></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">East District / North District &mdash; Old CBD</span><span class="lang-zh" style="display:none">東區 / 北區——舊市中心</span></div>
+        <div class="micro-value">NT$25&ndash;30萬/坪</div>
+        <p><span class="lang-en">Tainan's traditional CBD and cultural core. Yield ~3.0%. Established infrastructure, heritage appeal. Stable but limited upside. Driven by local demand rather than TSMC spillover.</span><span class="lang-zh" style="display:none">台南傳統市中心與文化核心。毛收益率約3.0%。基礎設施成熟、文化底蘊深厚。穩定但上漲空間有限。主要由在地需求驅動，非台積電外溢。</span></p>
+      </div>
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Anping &mdash; Waterfront Premium</span><span class="lang-zh" style="display:none">安平——水岸溢價</span></div>
+        <div class="micro-value">NT$30&ndash;35萬/坪</div>
+        <p><span class="lang-en">Waterfront lifestyle district with premium positioning. Yield ~2.8%. Popular with higher-income families and retirees. New developments command significant premiums over older stock.</span><span class="lang-zh" style="display:none">水岸生活區，定位高端。毛收益率約2.8%。受高收入家庭及退休族群青睞。新案較舊屋有顯著溢價。</span></p>
+      </div>
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Shanhua / Xinshi &mdash; STSP Zone</span><span class="lang-zh" style="display:none">善化 / 新市——南科園區</span></div>
+        <div class="micro-value">NT$25&ndash;35萬/坪</div>
+        <p><span class="lang-en">TSMC-adjacent zone with the strongest price momentum in Tainan. Yield ~3.2%. New development dominates. Prices driven by engineer purchasing power. Risk: oversupply if TSMC expansion slows.</span><span class="lang-zh" style="display:none">台積電鄰近區域，台南價格動能最強。毛收益率約3.2%。以新建案為主。價格由工程師購買力驅動。風險：若台積電擴張放緩則供給過剩。</span></p>
+      </div>
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Yongkang &mdash; Residential Hub</span><span class="lang-zh" style="display:none">永康——住宅核心</span></div>
+        <div class="micro-value">NT$22&ndash;28萬/坪</div>
+        <p><span class="lang-en">Tainan's largest residential hub with mature community infrastructure. Yield ~3.5%. Popular with families. Balanced supply-demand. Gateway between old Tainan and STSP corridor.</span><span class="lang-zh" style="display:none">台南最大住宅區，社區基礎設施成熟。毛收益率約3.5%。家庭首選。供需平衡。連接舊台南與南科走廊的門戶。</span></p>
+      </div>
+    </div>
+
+    <!-- SECTION 4: SUPPLY-DEMAND -->
+    <div class="section-label"><span class="lang-en">SUPPLY-DEMAND DYNAMICS</span><span class="lang-zh" style="display:none">供需動態</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Unsold inventory at 1.1万 units is manageable &mdash; second lowest among six cities. Pre-sale volume collapsed -80%+ YoY as developers pulled back aggressively. However, STSP employment creates steady absorption for well-located projects near the science park. The key risk lies in non-STSP peripheral areas with no industrial support, where absorption rates are collapsing. The market has bifurcated into "STSP-supported" and "everything else."</span>
+      <span class="lang-zh" style="display:none">待售庫存1.1萬戶尚屬可控——六都第二低。預售量年減逾-80%，開發商大幅縮手。然而，南科就業持續為園區附近優質建案創造穩定去化。關鍵風險在於無產業支撐的非南科外圍區域，去化率正在崩跌。市場已分裂為「南科支撐區」和「其他區域」。</span>
+    </div>
+
+    <!-- SECTION 5: PRICE TREND -->
+    <div class="section-label"><span class="lang-en">PRICE TREND: BENEFIT CYCLE ENDING</span><span class="lang-zh" style="display:none">價格趨勢：紅利週期尾聲</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Tainan experienced a 5-year price surge driven entirely by TSMC expansion. Chiayi Taibao (STSP-adjacent) saw +113% appreciation. The market is now correcting: 2025 average price fell -4.32%. Tainan is entering its "benefit cycle end" phase. Prices are unlikely to return to pre-TSMC levels, but a 5&ndash;10% correction from peak is expected before stabilization. The dual-axis chart below illustrates the tight correlation between STSP revenue growth and local housing prices.</span>
+      <span class="lang-zh" style="display:none">台南經歷了完全由台積電擴張驅動的5年房價飆升。嘉義太保（鄰近南科）漲幅達+113%。市場正在修正：2025年均價下跌-4.32%。台南正進入「紅利週期尾聲」。價格不太可能回到台積電進駐前的水準，但預期從高點修正5-10%後才會穩定。下方雙軸圖展示南科營收成長與在地房價的緊密相關性。</span>
+    </div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Price by District (万/ping)</span><span class="lang-zh" style="display:none">各區均價（萬/坪）</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTNDistrict" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Tainan Price Index + STSP Revenue</span><span class="lang-zh" style="display:none">台南房價指數 + 南科營收</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTNDualAxis" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: RENTAL MARKET -->
+    <div class="section-label"><span class="lang-en">RENTAL MARKET</span><span class="lang-zh" style="display:none">租賃市場</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Tainan yields range from ~2.8&ndash;3.5% &mdash; meaningfully better than Taipei. STSP employee rental demand is strong and relatively inelastic. 2BR near STSP rents at NT$15,000&ndash;22,000/month. Dormitory and company housing programs also absorb a portion of demand, somewhat capping market rents near the science park. The rental market is healthiest in STSP-adjacent areas and weakest in traditional Tainan districts where population continues to age.</span>
+      <span class="lang-zh" style="display:none">台南收益率約2.8-3.5%——明顯優於台北。南科員工租賃需求強勁且相對缺乏彈性。南科附近兩房月租NT$15,000-22,000。宿舍及企業住房也吸收部分需求，在一定程度上限制了園區附近的市場租金。租賃市場在南科鄰近區域最健康，在人口持續老化的傳統台南區域最為疲弱。</span>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">GROSS YIELD</span><span class="lang-zh" style="display:none">毛收益率</span></div>
+        <div class="kpi-value">2.8&ndash;3.5%</div>
+        <span class="badge badge-blue"><span class="lang-en">Better than Taipei</span><span class="lang-zh" style="display:none">優於台北</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">2BR NEAR STSP</span><span class="lang-zh" style="display:none">南科附近兩房月租</span></div>
+        <div class="kpi-value">NT$15K&ndash;22K</div>
+        <span class="badge badge-green"><span class="lang-en">Strong engineer demand</span><span class="lang-zh" style="display:none">工程師需求強勁</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">STSP IMPACT</span><span class="lang-zh" style="display:none">南科影響</span></div>
+        <div class="kpi-value"><span class="lang-en">Dual Economy</span><span class="lang-zh" style="display:none">雙元經濟</span></div>
+        <span class="badge badge-orange"><span class="lang-en">30-50% salary premium</span><span class="lang-zh" style="display:none">薪資溢價30-50%</span></span>
+      </div>
+    </div>
+
+    <!-- SECTION 7: OUTLOOK -->
+    <div class="section-label"><span class="lang-en">OUTLOOK</span><span class="lang-zh" style="display:none">展望</span></div>
+    <div class="summary-grid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="summary-card orange">
+        <div class="summary-title"><span class="lang-en">Short-Term: 5&ndash;8% Correction</span><span class="lang-zh" style="display:none">短期：修正5-8%</span></div>
+        <p><span class="lang-en">The TSMC-driven benefit cycle is ending. Pre-sale volume has collapsed. Credit controls restrict investor activity. Expect 5&ndash;8% price correction across Tainan, with steeper declines in non-STSP peripheral zones and more resilience near the science park.</span><span class="lang-zh" style="display:none">台積電驅動的紅利週期正在結束。預售量崩跌。信用管制限制投資客活動。預期台南整體修正5-8%，非南科外圍區域跌幅更大，園區附近較具韌性。</span></p>
+      </div>
+      <div class="summary-card green">
+        <div class="summary-title"><span class="lang-en">STSP Expansion: Long-Term Positive</span><span class="lang-zh" style="display:none">南科擴張：長期正面</span></div>
+        <p><span class="lang-en">Advanced packaging demand (CoWoS) remains insatiable globally. STSP expansion continues with new fab capacity. Long-term fundamentals are positive for STSP-adjacent areas. Engineer migration provides a structural demand floor that non-STSP Tainan lacks.</span><span class="lang-zh" style="display:none">全球先進封裝（CoWoS）需求仍供不應求。南科持續擴充產能。南科鄰近區域長期基本面正向。工程師移入提供結構性需求下檔，這是非南科台南所缺乏的。</span></p>
+      </div>
+      <div class="summary-card red">
+        <div class="summary-title"><span class="lang-en">Non-STSP Tainan: Slower Recovery</span><span class="lang-zh" style="display:none">非南科台南：復甦較慢</span></div>
+        <p><span class="lang-en">Traditional Tainan districts face population outflow in rural areas, aging demographics, and no industrial catalyst. Recovery will lag STSP zones by 1&ndash;2 years. Old housing stock (57.9% over 30yr) limits quality supply but also caps buyer enthusiasm.</span><span class="lang-zh" style="display:none">傳統台南區域面臨鄉村人口外流、人口老化、缺乏產業催化劑。復甦將落後南科區域1-2年。老屋存量高（57.9%逾30年）限制優質供給，也抑制買氣。</span></p>
+      </div>
+      <div class="summary-card navy">
+        <div class="summary-title"><span class="lang-en">Watch: TSMC Global Allocation Shifts</span><span class="lang-zh" style="display:none">觀察：台積電全球產能配置變化</span></div>
+        <p><span class="lang-en">TSMC's Arizona and Kumamoto fabs represent production diversification. Any material shift in advanced packaging allocation away from STSP would fundamentally alter Tainan's demand equation. Monitor TSMC capex announcements and STSP hiring trends as leading indicators.</span><span class="lang-zh" style="display:none">台積電亞利桑那和熊本廠代表產能分散化。若先進封裝產能配置顯著移出南科，將根本改變台南的需求方程式。追蹤台積電資本支出公告和南科徵才趨勢作為領先指標。</span></p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">MOI Property Platform 2025 &middot; STSP Administration &middot; NCCU Housing Index &middot; Sinyi Research &middot; CBC Credit Controls 2024 &middot; Tainan City Land Bureau &middot; Global Property Guide Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">內政部不動產資訊平台2025 &middot; 南科管理局 &middot; 政大住宅指數 &middot; 信義房屋研究 &middot; 央行信用管制2024 &middot; 台南市地政局 &middot; Global Property Guide 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtPrice(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return 'NT$'+v+'\u842c';if(a>=1000000)return 'NT$'+(a/1000000).toFixed(2)+'M';return 'NT$'+Math.round(a/1000)+'K';}
+function fmtPriceShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return v+'\u842c';if(a>=1000000)return(a/1000000).toFixed(1)+'M';return Math.round(a/1000)+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts=[];
+
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');});
+
+function setLang(lang){
+  localStorage.setItem('lang',lang);
+  document.querySelectorAll('.lang-en').forEach(function(el){el.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(el){el.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+function initCharts(lang){
+  var en=lang==='en';
+
+  // 1. chartTNDistrict — Price by District horizontal bar
+  (function(){
+    var dom=document.getElementById('chartTNDistrict');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=en?['Guanmiao','Yongkang','Xinshi','East Dist','Shanhua','Anping']:['關廟','永康','新市','東區','善化','安平'];
+    var data=[18,25,28,28,30,32];
+    var colors=data.map(function(v){return v>=30?C.red:v>=25?C.orange:C.muted;});
+    ch.setOption({tooltip:baseTooltip,grid:Object.assign({},baseGrid,{left:80}),xAxis:mkAxis({type:'value',name:en?'万/ping':'萬/坪'}),yAxis:mkAxis({type:'category',data:labels}),series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:16,label:{show:true,position:'right',formatter:'{c}',textStyle:baseText}}]});
+  })();
+
+  // 2. chartTNDualAxis — Price Index + STSP Revenue
+  (function(){
+    var dom=document.getElementById('chartTNDualAxis');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2019','2020','2021','2022','2023','2024','2025'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Price Index':'房價指數',en?'STSP Revenue (B NTD)':'南科營收(十億)']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:[mkAxis({type:'value',name:en?'Price Index':'房價指數',min:90,max:160}),mkAxis({type:'value',name:en?'B NTD':'十億NTD',min:300,max:800,splitLine:{show:false}})],series:[{name:en?'Price Index':'房價指數',type:'line',data:[100,105,115,135,148,155,148],itemStyle:{color:C.navy},smooth:true,areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(30,58,95,0.1)'},{offset:1,color:'rgba(30,58,95,0)'}]}}},{name:en?'STSP Revenue (B NTD)':'南科營收(十億)',type:'bar',yAxisIndex:1,data:[380,420,500,580,650,720,750],itemStyle:{color:C.orange},barWidth:18,label:{show:true,position:'top',formatter:'{c}',textStyle:{fontSize:9,color:C.muted}}}]});
+  })();
+
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+}
+
+// Init on load
+(function(){
+  var lang=localStorage.getItem('lang')||'en';
+  setLang(lang);
+})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

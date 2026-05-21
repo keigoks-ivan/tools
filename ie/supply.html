@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Supply Analysis | Ireland Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="main-content">
+  <section class="hero-section">
+    <h1><span class="lang-en">Ireland &mdash; Supply Analysis</span><span class="lang-zh" style="display:none">愛爾蘭 &mdash; 供給分析</span></h1>
+    <p class="subtitle"><span class="lang-en">Housing completions and planning pipeline</span><span class="lang-zh" style="display:none">住宅完工量與規劃管線</span></p>
+  </section>
+
+  <section class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 20px 24px">
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Completions</span><span class="lang-zh" style="display:none">完工量</span></div><div class="kpi-value">32,695</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Gov Target</span><span class="lang-zh" style="display:none">政府目標</span></div><div class="kpi-value">33,000</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Private Market</span><span class="lang-zh" style="display:none">私人市場</span></div><div class="kpi-value">18,500</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Under Construction</span><span class="lang-zh" style="display:none">在建中</span></div><div class="kpi-value">28,000</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Planning Time</span><span class="lang-zh" style="display:none">審批時間</span></div><div class="kpi-value">18 mo</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Construction Cost</span><span class="lang-zh" style="display:none">建造成本</span></div><div class="kpi-value">&euro;2,800/m&sup2;</div></div>
+  </section>
+
+  <section class="section-block">
+    <h2 class="section-title"><span class="lang-en">PIPELINE FLOW</span><span class="lang-zh" style="display:none">管線流量</span></h2>
+    <div class="chart-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin:0 20px">
+      <div class="chart-card"><h3><span class="lang-en">Planning Permissions vs Completions</span><span class="lang-zh" style="display:none">規劃許可 vs 完工量</span></h3><div id="chartPipeline" style="width:100%;height:300px"></div></div>
+      <div class="chart-card"><h3><span class="lang-en">Units Under Construction</span><span class="lang-zh" style="display:none">在建住宅數量</span></h3><div id="chartUnderConst" style="width:100%;height:300px"></div></div>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <h2 class="section-title"><span class="lang-en">COMPLETIONS BY TYPE</span><span class="lang-zh" style="display:none">完工類型分布</span></h2>
+    <div class="chart-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin:0 20px">
+      <div class="chart-card"><h3><span class="lang-en">Completions by Type (2025)</span><span class="lang-zh" style="display:none">完工類型分布 (2025)</span></h3><div id="chartCompType" style="width:100%;height:300px"></div></div>
+      <div class="chart-card"><h3><span class="lang-en">Regional Completions</span><span class="lang-zh" style="display:none">各區域完工量</span></h3><div id="chartRegional" style="width:100%;height:300px"></div></div>
+    </div>
+  </section>
+
+  <footer class="source-footer" style="text-align:center;padding:20px;font-size:11px;color:#5a7a9a">
+    <span class="lang-en">Sources: CSO Ireland, Department of Housing &middot; Updated Q1 2026</span>
+    <span class="lang-zh" style="display:none">資料來源：愛爾蘭中央統計局、住房部 &middot; 更新於 2026 年第一季</span>
+  </footer>
+</main>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts=[];
+function initCharts(){
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+  var years=['2018','2019','2020','2021','2022','2023','2024','2025'];
+
+  // Pipeline: permissions vs completions
+  var c1=echarts.init(document.getElementById('chartPipeline'));
+  c1.setOption({tooltip:baseTooltip,legend:baseLegend,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Units'}),series:[
+    {name:'Permissions',type:'bar',data:[28553,29504,23536,29854,34177,40537,38200,36500],itemStyle:{color:C.muted}},
+    {name:'Completions',type:'bar',data:[18021,21241,20526,20433,29851,32695,30335,32695],itemStyle:{color:C.blue}}
+  ]});
+  allCharts.push(c1);
+
+  // Under construction
+  var c2=echarts.init(document.getElementById('chartUnderConst'));
+  c2.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Units'}),series:[{name:'Under Construction',type:'line',smooth:true,areaStyle:{color:'rgba(37,99,235,0.12)'},data:[16000,18500,17200,19800,23400,26100,27200,28000],lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue}}]});
+  allCharts.push(c2);
+
+  // Completions by type - pie
+  var c3=echarts.init(document.getElementById('chartCompType'));
+  c3.setOption({tooltip:{trigger:'item',backgroundColor:'#fff',borderColor:'#ccd9e8',textStyle:{color:C.navy,fontSize:11}},series:[{type:'pie',radius:['35%','65%'],center:['50%','55%'],data:[
+    {value:18500,name:'Private',itemStyle:{color:C.blue}},
+    {value:8200,name:'Social',itemStyle:{color:C.green}},
+    {value:3995,name:'Affordable',itemStyle:{color:C.orange}},
+    {value:2000,name:'Cost Rental',itemStyle:{color:C.muted}}
+  ],label:{fontSize:11,color:C.navy}}]});
+  allCharts.push(c3);
+
+  // Regional completions
+  var c4=echarts.init(document.getElementById('chartRegional'));
+  c4.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'value',name:'Units'}),yAxis:mkAxis({type:'category',data:['Dublin','Rest of Leinster','Munster','Connacht-Ulster']}),series:[{name:'Completions',type:'bar',data:[10250,9800,8200,4445],itemStyle:{color:C.blue}}]});
+  allCharts.push(c4);
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(el){el.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(el){el.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+  initCharts();
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');});
+
+initCharts();
+window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

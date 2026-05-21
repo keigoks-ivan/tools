@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Market Dashboard | United Kingdom Property Monitor</title>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}
+.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}
+.market-btn:hover{background:#dde8f2}
+.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}
+.market-dropdown.open{display:block}
+.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}
+.market-dropdown a:hover{background:#f4f7fc}
+.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="container">
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">LAST UPDATED: 2025 Full Year / Dec 2025</span><span class="lang-zh" style="display:none">&#26368;&#24460;&#26356;&#26032;&#65306;2025&#24180;&#20840;&#24180; / 2025&#24180;12&#26376;</span></span>
+    <h1><span class="lang-en">United Kingdom Property Monitor &middot; Dashboard</span><span class="lang-zh" style="display:none">&#33521;&#22283;&#25151;&#22320;&#29986;&#30435;&#28204; &middot; &#24066;&#22580;&#32317;&#35261;</span></h1>
+  </div>
+
+  <!-- KPI Section 1: Market Overview -->
+  <div class="section-label"><span class="lang-en">MARKET OVERVIEW</span><span class="lang-zh" style="display:none">&#24066;&#22580;&#27010;&#35261;</span></div>
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">NATIONAL AVG HOUSE PRICE</span><span class="lang-zh" style="display:none">&#20840;&#22283;&#24179;&#22343;&#25151;&#20729;</span></div>
+      <div class="kpi-value">&pound;268,000</div>
+      <div class="kpi-sub"><span class="lang-en">Dec 2025 &middot; +2.4% YoY</span><span class="lang-zh" style="display:none">2025&#24180;12&#26376; &middot; &#24180;&#22686;+2.4%</span></div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">BoE BASE RATE</span><span class="lang-zh" style="display:none">&#22522;&#28310;&#21033;&#29575;</span></div>
+      <div class="kpi-value">3.75%</div>
+      <div class="kpi-sub"><span class="lang-en">Dec 2025 &middot; cutting cycle</span><span class="lang-zh" style="display:none">2025&#24180;12&#26376; &middot; &#38477;&#24687;&#36913;&#26399;</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">NATIONAL RENTAL YIELD</span><span class="lang-zh" style="display:none">&#20840;&#22283;&#31199;&#37329;&#22577;&#37228;&#29575;</span></div>
+      <div class="kpi-value">5.37%</div>
+      <div class="kpi-sub"><span class="lang-en">2024 national avg</span><span class="lang-zh" style="display:none">2024&#24180;&#20840;&#22283;&#22343;&#20540;</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">YIELD SPREAD vs BoE</span><span class="lang-zh" style="display:none">&#21033;&#24046; vs &#22522;&#28310;&#21033;&#29575;</span></div>
+      <div class="kpi-value">+1.62%</div>
+      <div class="kpi-sub"><span class="lang-en">Positive carry nationally</span><span class="lang-zh" style="display:none">&#20840;&#22283;&#27491;&#21521;&#21033;&#24046;</span></div>
+    </div>
+  </div>
+
+  <!-- KPI Section 2: Regional Metrics -->
+  <div class="section-label"><span class="lang-en">REGIONAL METRICS</span><span class="lang-zh" style="display:none">&#21312;&#22495;&#25351;&#27161;</span></div>
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">NORTH EAST YoY</span><span class="lang-zh" style="display:none">&#26481;&#21271;&#22320;&#21312;&#24180;&#22686;&#29575;</span></div>
+      <div class="kpi-value">+6.8%</div>
+      <div class="kpi-sub"><span class="lang-en">Nov 2025 &middot; highest in England</span><span class="lang-zh" style="display:none">2025&#24180;11&#26376; &middot; &#33521;&#26684;&#34349;&#26368;&#39640;</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">LONDON YoY</span><span class="lang-zh" style="display:none">&#20523;&#25958;&#24180;&#22686;&#29575;</span></div>
+      <div class="kpi-value">&minus;1.2%</div>
+      <div class="kpi-sub"><span class="lang-en">Nov 2025 &middot; lowest in England</span><span class="lang-zh" style="display:none">2025&#24180;11&#26376; &middot; &#33521;&#26684;&#34349;&#26368;&#20302;</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">LONDON AVG PRICE</span><span class="lang-zh" style="display:none">&#20523;&#25958;&#24179;&#22343;&#25151;&#20729;</span></div>
+      <div class="kpi-value">&pound;547,000</div>
+      <div class="kpi-sub">Oct 2025 &middot; &minus;2.4% YoY</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">NEWCASTLE AVG PRICE</span><span class="lang-zh" style="display:none">&#32016;&#21345;&#26031;&#29246;&#24179;&#22343;&#25151;&#20729;</span></div>
+      <div class="kpi-value">&pound;208,000</div>
+      <div class="kpi-sub">Dec 2025 &middot; +6.1% YoY</div>
+    </div>
+  </div>
+
+  <!-- KPI Section 3: Investment & Policy -->
+  <div class="section-label"><span class="lang-en">INVESTMENT &amp; POLICY</span><span class="lang-zh" style="display:none">&#25237;&#36039;&#33287;&#25919;&#31574;</span></div>
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">NEWCASTLE RENTAL GROWTH</span><span class="lang-zh" style="display:none">&#32016;&#21345;&#26031;&#29246;&#31199;&#37329;&#24180;&#22686;&#29575;</span></div>
+      <div class="kpi-value">+15.5%</div>
+      <div class="kpi-sub"><span class="lang-en">Jan 2026 &middot; fastest in UK</span><span class="lang-zh" style="display:none">2026&#24180;1&#26376; &middot; &#20840;&#33521;&#26368;&#24555;</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">MANCHESTER RENTAL YIELD</span><span class="lang-zh" style="display:none">&#26364;&#24505;&#26031;&#29305;&#31199;&#37329;&#22577;&#37228;&#29575;</span></div>
+      <div class="kpi-value">6.5%</div>
+      <div class="kpi-sub"><span class="lang-en">City centre avg &middot; up to 12%</span><span class="lang-zh" style="display:none">&#24066;&#20013;&#24515;&#22343;&#20540; &middot; &#26368;&#39640;&#36948;12%</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">MONTHLY TRANSACTIONS</span><span class="lang-zh" style="display:none">&#26376;&#22343;&#25104;&#20132;&#37327;</span></div>
+      <div class="kpi-value">~101,000</div>
+      <div class="kpi-sub">2025 avg &middot; +3% vs 5yr avg</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">RENTERS RIGHTS ACT</span><span class="lang-zh" style="display:none">&#31199;&#23458;&#27402;&#30410;&#27861;&#26696;</span></div>
+      <div class="kpi-value">May 2026</div>
+      <div class="kpi-sub"><span class="lang-en">Section 21 abolished</span><span class="lang-zh" style="display:none">&#28961;&#36942;&#22833;&#39493;&#36880;&#20196;&#24290;&#38500;</span></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-grid two-col">
+    <div class="chart-card"><div id="chartUkPriceTrend" style="width:100%;height:370px"></div></div>
+    <div class="chart-card"><div id="chartUkCityPrice" style="width:100%;height:370px"></div></div>
+    <div class="chart-card"><div id="chartUkYield" style="width:100%;height:370px"></div></div>
+    <div class="chart-card"><div id="chartUkNorthSouth" style="width:100%;height:370px"></div></div>
+    <div class="chart-card"><div id="chartUkBoERate" style="width:100%;height:370px"></div></div>
+    <div class="chart-card"><div id="chartUkTransactions" style="width:100%;height:370px"></div></div>
+  </div>
+
+  <div class="source-footer">
+    <span class="lang-en">ONS &middot; HMRC &middot; BoE &middot; Land Registry &middot; Dec 2025 / Not investment advice.</span>
+    <span class="lang-zh" style="display:none">ONS &middot; HMRC &middot; BoE &middot; Land Registry &middot; 2025&#24180;12&#26376; / &#38750;&#25237;&#36039;&#24314;&#35696;&#12290;</span>
+  </div>
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtGBP(v){if(v>=1000000)return '\u00a3'+(v/1000000).toFixed(2)+'M';if(v>=1000)return '\u00a3'+Math.round(v/1000)+'K';return '\u00a3'+v;}
+function fmtGBPShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return Math.round(v/1000)+'K';return String(v);}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}
+  initCharts(lang);
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  var en=lang==='en';
+
+  /* Chart 1 — National House Price Trend */
+  (function(){
+    var dom=document.getElementById('chartUkPriceTrend');
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','Dec 2025'];
+    var prices=[194000,204000,220000,228000,235000,250000,271000,295000,285000,265000,268000];
+    var yoy=[5.4,5.2,7.8,3.6,3.1,6.4,8.4,8.9,-3.4,-7.0,2.4];
+    ch.setOption({
+      title:{text:en?'National House Price Trend':'\u5168\u570b\u623f\u50f9\u8da8\u52e2',subtext:en?'Avg price (\u00a3) + YoY% Change':'\u5747\u50f9\uff08\u82f1\u938e\uff09+ \u5e74\u589e\u7387',left:'center',textStyle:{color:C.navy,fontSize:15,fontWeight:700},subtextStyle:{color:C.muted,fontSize:11}},
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Avg Price':'\u5747\u50f9',en?'YoY%':'\u5e74\u589e\u7387']}),
+      grid:{left:60,right:60,top:70,bottom:40,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:[
+        mkAxis({type:'value',name:en?'Price (\u00a3)':'\u50f9\u683c(\u00a3)',axisLabel:{formatter:function(v){return fmtGBPShort(v);}}}),
+        mkAxis({type:'value',name:en?'YoY%':'\u5e74\u589e%',splitLine:{show:false},axisLabel:{formatter:'{value}%'}})
+      ],
+      series:[
+        {name:en?'Avg Price':'\u5747\u50f9',type:'line',data:prices,smooth:true,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6},
+        {name:en?'YoY%':'\u5e74\u589e\u7387',type:'bar',yAxisIndex:1,data:yoy.map(function(v){return{value:v,itemStyle:{color:v>=0?C.green:C.red}};}),barWidth:'40%'}
+      ]
+    });
+  })();
+
+  /* Chart 2 — City Price Comparison */
+  (function(){
+    var dom=document.getElementById('chartUkCityPrice');
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labelsEn=['Newcastle','Birmingham','Manchester','Edinburgh','London'];
+    var labelsZh=['\u7d10\u5361\u65af\u723e','\u4f2f\u660e\u7f55','\u66fc\u5fb9\u65af\u7279','\u611b\u4e01\u5821','\u502b\u6566'];
+    var labels=en?labelsEn:labelsZh;
+    var prices=[208000,265000,260000,340000,547000];
+    var yoy=[6.1,7.7,3.2,3.7,-4.4];
+    var barColors=[C.green,C.green,C.navy,C.navy,C.red];
+    ch.setOption({
+      title:{text:en?'City Price Comparison':'\u4e94\u57ce\u5e02\u5747\u50f9\u6bd4\u8f03',left:'center',textStyle:{color:C.navy,fontSize:15,fontWeight:700}},
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Avg Price':'\u5747\u50f9',en?'YoY%':'\u5e74\u589e\u7387']}),
+      grid:{left:60,right:60,top:55,bottom:40,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:[
+        mkAxis({type:'value',name:en?'Price (\u00a3)':'\u50f9\u683c(\u00a3)',axisLabel:{formatter:function(v){return fmtGBPShort(v);}}}),
+        mkAxis({type:'value',name:en?'YoY%':'\u5e74\u589e%',splitLine:{show:false},axisLabel:{formatter:'{value}%'}})
+      ],
+      series:[
+        {name:en?'Avg Price':'\u5747\u50f9',type:'bar',data:prices.map(function(v,i){return{value:v,itemStyle:{color:barColors[i]}};}),barWidth:'40%',label:{show:true,position:'top',formatter:function(p){return fmtGBP(p.value);},fontSize:10,color:C.navy}},
+        {name:en?'YoY%':'\u5e74\u589e\u7387',type:'line',yAxisIndex:1,data:yoy,smooth:true,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:6}
+      ]
+    });
+  })();
+
+  /* Chart 3 — Rental Yield by City */
+  (function(){
+    var dom=document.getElementById('chartUkYield');
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labelsEn=['London','Edinburgh','National','Birmingham','Manchester','Newcastle'];
+    var labelsZh=['\u502b\u6566','\u611b\u4e01\u5821','\u5168\u570b\u5747\u503c','\u4f2f\u660e\u7f55','\u66fc\u5fb9\u65af\u7279','\u7d10\u5361\u65af\u723e'];
+    var data=[3.5,5.0,5.37,6.5,6.5,7.0];
+    ch.setOption({
+      title:{text:en?'Gross Rental Yield by City':'\u5404\u57ce\u5e02\u79df\u91d1\u5831\u916c\u7387',left:'center',textStyle:{color:C.navy,fontSize:15,fontWeight:700}},
+      tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+      grid:{left:90,right:40,top:55,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+      yAxis:mkAxis({type:'category',data:en?labelsEn:labelsZh}),
+      series:[{
+        type:'bar',
+        data:data.map(function(v){return{value:v,itemStyle:{color:v<3.75?C.orange:C.green}};}),
+        barWidth:'55%',
+        label:{show:true,position:'right',formatter:'{c}%',fontSize:11,color:C.navy},
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:1.5},data:[{xAxis:3.75,label:{formatter:'BoE 3.75%',position:'end',fontSize:10,color:C.red}}]}
+      }]
+    });
+  })();
+
+  /* Chart 4 — North-South Price Growth Divide */
+  (function(){
+    var dom=document.getElementById('chartUkNorthSouth');
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labelsEn=['London','South East','East','South West','East Mids','West Mids','Yorks','North West','North East'];
+    var labelsZh=['\u502b\u6566','\u6771\u5357','\u6771\u90e8','\u897f\u5357','\u6771\u4e2d\u90e8','\u897f\u4e2d\u90e8','\u7d04\u514b\u90e1','\u897f\u5317','\u6771\u5317'];
+    var data=[-1.2,0.8,1.5,1.9,2.8,3.2,4.5,4.8,6.8];
+    ch.setOption({
+      title:{text:en?'Regional Price Growth':'\u5357\u5317\u623f\u50f9\u6f32\u5e45\u5206\u5316',left:'center',textStyle:{color:C.navy,fontSize:15,fontWeight:700}},
+      tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+      grid:{left:90,right:40,top:55,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+      yAxis:mkAxis({type:'category',data:en?labelsEn:labelsZh}),
+      series:[{
+        type:'bar',
+        data:data.map(function(v){return{value:v,itemStyle:{color:v<0?C.red:v<3?C.navy:C.green}};}),
+        barWidth:'55%',
+        label:{show:true,position:'right',formatter:'{c}%',fontSize:11,color:C.navy}
+      }]
+    });
+  })();
+
+  /* Chart 5 — BoE Base Rate & Mortgage Rate */
+  (function(){
+    var dom=document.getElementById('chartUkBoERate');
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2015','2016','2017','2018','2019','2020','2021','Aug 2022','Dec 2022','Aug 2023','Aug 2024','Nov 2024','Dec 2025'];
+    var boe=[0.50,0.25,0.50,0.75,0.75,0.10,0.10,1.75,3.50,5.25,5.00,4.75,3.75];
+    var mortgage=[2.5,2.3,2.3,2.5,2.4,1.8,2.0,3.5,5.8,6.4,5.5,4.8,4.5];
+    ch.setOption({
+      title:{text:en?'BoE Rate & Mortgage Rate History':'BoE\u57fa\u6e96\u5229\u7387\u8207\u623f\u8cb8\u5229\u7387\u6b77\u7a0b',left:'center',textStyle:{color:C.navy,fontSize:15,fontWeight:700}},
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'BoE Base Rate':'BoE\u57fa\u6e96\u5229\u7387',en?'2yr Mortgage':'2\u5e74\u671f\u623f\u8cb8']}),
+      grid:{left:50,right:20,top:55,bottom:40,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{rotate:30,fontSize:10}}),
+      yAxis:mkAxis({type:'value',name:'%',axisLabel:{formatter:'{value}%'}}),
+      series:[
+        {name:en?'BoE Base Rate':'BoE\u57fa\u6e96\u5229\u7387',type:'line',data:boe,smooth:true,lineStyle:{color:C.red,width:2.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:5,areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(220,38,38,0.18)'},{offset:1,color:'rgba(220,38,38,0.01)'}])}},
+        {name:en?'2yr Mortgage':'2\u5e74\u671f\u623f\u8cb8',type:'line',data:mortgage,smooth:true,lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5}
+      ]
+    });
+  })();
+
+  /* Chart 6 — Annual Transactions */
+  (function(){
+    var dom=document.getElementById('chartUkTransactions');
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    var data=[1220000,1176000,1212000,1190000,1175000,735000,1480000,1090000,1010000,1050000,1212000];
+    ch.setOption({
+      title:{text:en?'Annual Transactions':'\u5e74\u6210\u4ea4\u91cf\u8da8\u52e2',left:'center',textStyle:{color:C.navy,fontSize:15,fontWeight:700}},
+      tooltip:baseTooltip,
+      grid:{left:60,right:20,top:55,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',name:en?'Transactions':'\u6210\u4ea4\u91cf',axisLabel:{formatter:function(v){return fmtGBPShort(v);}}}),
+      series:[{
+        type:'line',data:data,smooth:true,
+        lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6,
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(30,58,95,0.18)'},{offset:1,color:'rgba(30,58,95,0.01)'}])},
+        markPoint:{data:[{type:'min',name:'Min',label:{formatter:en?'COVID low':'COVID\u4f4e\u9ede',fontSize:10,color:C.red},itemStyle:{color:C.red}},{type:'max',name:'Max',label:{formatter:en?'SDLT holiday':'SDLT\u5047\u671f',fontSize:10,color:C.green},itemStyle:{color:C.green}}]}
+      }]
+    });
+  })();
+
+  /* Resize handler */
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c&&!c.isDisposed())c.resize();});});
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

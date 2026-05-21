@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Valuation Monitor | Canada Property Monitor</title>
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+  <h1 class="page-title"><span class="lang-en">Valuation Monitor</span><span class="lang-zh" style="display:none">估值監測</span></h1>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Toronto P/R Ratio</span><span class="lang-zh" style="display:none">多倫多租金比</span></div>
+      <div class="kpi-value">26x</div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Moderately overvalued</span><span class="lang-zh" style="display:none">中度高估</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Vancouver P/R Ratio</span><span class="lang-zh" style="display:none">溫哥華租金比</span></div>
+      <div class="kpi-value">32x</div>
+      <div class="kpi-delta negative"><span class="lang-en">Overvalued</span><span class="lang-zh" style="display:none">高估</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Toronto PTI</span><span class="lang-zh" style="display:none">多倫多房價所得比</span></div>
+      <div class="kpi-value">10.5x</div>
+      <div class="kpi-delta negative"><span class="lang-en">Severely unaffordable</span><span class="lang-zh" style="display:none">嚴重不可負擔</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Vancouver PTI</span><span class="lang-zh" style="display:none">溫哥華房價所得比</span></div>
+      <div class="kpi-value">12.5x</div>
+      <div class="kpi-delta negative"><span class="lang-en">Canada's worst</span><span class="lang-zh" style="display:none">加拿大最差</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Toronto Yield</span><span class="lang-zh" style="display:none">多倫多收益率</span></div>
+      <div class="kpi-value">3.8%</div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Near BOC rate</span><span class="lang-zh" style="display:none">接近央行利率</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Yield Spread vs BOC</span><span class="lang-zh" style="display:none">利差 vs 央行利率</span></div>
+      <div class="kpi-value">+0.55%</div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Thin carry</span><span class="lang-zh" style="display:none">微薄利差</span></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">PTI by City</span><span class="lang-zh" style="display:none">各城市房價所得比</span></h3>
+      <div id="chartCaPTI" style="height:280px"></div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">G7 Price-to-Rent Comparison</span><span class="lang-zh" style="display:none">G7租金比比較</span></h3>
+      <div id="chartCaG7" style="height:280px"></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Yield vs BOC Rate</span><span class="lang-zh" style="display:none">租金收益率 vs 央行利率</span></h3>
+      <div id="chartCaYieldSpread" style="height:220px"></div>
+      <div class="insight-box" style="border-left-color:#dc2626">
+        <span class="lang-en">Canada experienced negative carry during 2023 when the BOC rate peaked at 5.00%, exceeding rental yields. The spread has since recovered to +0.55% following rate cuts, but remains thin compared to historical norms of +1.5&ndash;2.0%.</span>
+        <span class="lang-zh" style="display:none">2023年BOC利率升至5.00%高峰時，加拿大經歷負利差，超過租金收益率。降息後利差已恢復至+0.55%，但相較歷史常態+1.5至2.0%仍然微薄。</span>
+      </div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">Toronto Price Index (Nominal vs Real)</span><span class="lang-zh" style="display:none">多倫多價格指數（名目 vs 實質）</span></h3>
+      <div id="chartCaPriceReal" style="height:220px"></div>
+    </div>
+  </div>
+
+  <!-- Summary Framework -->
+  <h2 class="section-heading"><span class="lang-en">Valuation Framework</span><span class="lang-zh" style="display:none">估值框架</span></h2>
+  <div class="summary-grid">
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">Price-to-Income</span><span class="lang-zh" style="display:none">房價所得比</span></h4>
+      <p><span class="lang-en">Vancouver's PTI of 12.5x is the worst in Canada and among the highest in the G7. Toronto at 10.5x is also severely unaffordable. Edmonton (4.5x) and Calgary (5.0x) remain the most accessible markets, near the national historical average of 5.1x. The prairie cities offer a stark contrast to the coastal unaffordability crisis.</span><span class="lang-zh" style="display:none">溫哥華房價所得比12.5倍為加拿大最差，也是G7中最高之一。多倫多10.5倍同樣嚴重不可負擔。艾德蒙頓（4.5倍）和卡加利（5.0倍）仍是最可負擔市場，接近全國歷史平均5.1倍。草原城市與沿海負擔能力危機形成鮮明對比。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Price-to-Rent</span><span class="lang-zh" style="display:none">房價租金比</span></h4>
+      <p><span class="lang-en">Vancouver's P/R of 32x places it alongside London (31x) among the most overvalued G7 cities on a rental income basis. Toronto at 26x is comparable to Berlin. Both Canadian markets offer yields that barely cover borrowing costs at current BOC rates, making pure rental income strategies challenging without capital appreciation assumptions.</span><span class="lang-zh" style="display:none">溫哥華租金比32倍與倫敦（31倍）並列G7中租金收入角度最被高估的城市。多倫多26倍與柏林相當。兩個加拿大市場的收益率在當前央行利率下勉強覆蓋借貸成本，純租金收入策略在不假設資本增值的情況下充滿挑戰。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Yield Spread</span><span class="lang-zh" style="display:none">利差分析</span></h4>
+      <p><span class="lang-en">The +0.55% spread is a significant improvement from the -1.0% negative carry during the 2023 rate peak, but remains well below the +2.0% spread that characterized the pre-pandemic era. Further BOC cuts toward 2.5% would restore meaningful positive carry. Variable-rate mortgage holders are the primary beneficiaries of the easing cycle.</span><span class="lang-zh" style="display:none">+0.55%的利差相較2023年利率高峰時的-1.0%負利差有顯著改善，但仍遠低於疫情前+2.0%的利差水平。BOC進一步降息至2.5%將恢復有意義的正利差。浮動利率房貸持有者是降息週期的主要受益者。</span></p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  var c;
+
+  /* Chart: PTI by City */
+  var cities=['Edmonton','Calgary','Montreal','Ottawa','Toronto','Vancouver'];
+  var ptiVals=[4.5,5.0,6.5,7.0,10.5,12.5];
+  var ptiColors=ptiVals.map(function(v){return v>=10?C.red:v>=6?C.orange:C.green;});
+  c=echarts.init(document.getElementById('chartCaPTI'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'x';}}),
+    grid:{left:90,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false}),
+    yAxis:mkAxis({type:'category',data:cities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:ptiVals.map(function(v,i){return{value:v,itemStyle:{color:ptiColors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}x',fontSize:11,color:C.navy,fontFamily:'Inter'},
+      markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:1},data:[{xAxis:5.1,label:{formatter:'Avg 5.1x',fontSize:9,color:C.red,position:'insideEndTop'}}]}
+    }]
+  });
+
+  /* Chart: G7 Price-to-Rent */
+  var g7Cities=['Sydney','Toronto','Berlin','London','Vancouver','Tokyo'];
+  var g7Vals=[21,26,26,31,32,37];
+  var g7Colors=g7Vals.map(function(v,i){
+    if(g7Cities[i]==='Toronto'||g7Cities[i]==='Vancouver') return C.red;
+    if(v<=25) return C.green;
+    if(v<=35) return C.navy;
+    return C.orange;
+  });
+  c=echarts.init(document.getElementById('chartCaG7'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'x';}}),
+    grid:{left:80,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false}),
+    yAxis:mkAxis({type:'category',data:g7Cities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:g7Vals.map(function(v,i){return{value:v,itemStyle:{color:g7Colors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}x',fontSize:11,color:C.navy,fontFamily:'Inter'}
+    }]
+  });
+
+  /* Chart: Yield vs BOC Rate */
+  c=echarts.init(document.getElementById('chartCaYieldSpread'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:baseTooltip,
+    legend:Object.assign({},baseLegend,{data:['Rental Yield','BOC Rate']}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+    yAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+    series:[
+      {name:'Rental Yield',type:'line',smooth:0.3,data:[4.5,4.2,3.5,3.8,3.8,3.8,3.8],lineStyle:{color:C.green},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(22,163,74,0.15)'},{offset:1,color:'rgba(22,163,74,0.02)'}]}}},
+      {name:'BOC Rate',type:'line',step:'end',data:[1.75,0.25,0.25,4.25,5.00,4.25,3.25],lineStyle:{color:C.red,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+    ]
+  });
+
+  /* Chart: Nominal vs Real Price Index */
+  c=echarts.init(document.getElementById('chartCaPriceReal'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:baseTooltip,
+    legend:Object.assign({},baseLegend,{data:['Nominal Index','Real Index']}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+    yAxis:mkAxis({type:'value'}),
+    series:[
+      {name:'Nominal Index',type:'line',smooth:0.2,data:[100,108,131,121,116,118,116],lineStyle:{color:C.navy},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5},
+      {name:'Real Index',type:'line',smooth:0.2,data:[100,106,124,110,104,104,101],lineStyle:{color:C.muted,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:5}
+    ]
+  });
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

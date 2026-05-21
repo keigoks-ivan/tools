@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Risk Monitor | Japan Property Monitor</title>
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="dashboard">
+  <h1 class="page-title"><span class="lang-en">Risk Monitor</span><span class="lang-zh" style="display:none">風險監測</span></h1>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">BOJ Rate Risk</span><span class="lang-zh" style="display:none">BOJ 利率風險</span></div>
+      <div class="kpi-value" style="font-size:18px"><span class="lang-en">Key risk</span><span class="lang-zh" style="display:none">關鍵風險</span></div>
+      <div class="kpi-delta negative"><span class="lang-en">Normalization cycle</span><span class="lang-zh" style="display:none">正常化週期</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Earthquake</span><span class="lang-zh" style="display:none">地震風險</span></div>
+      <div class="kpi-value" style="font-size:16px"><span class="lang-en">Nankai Trough</span><span class="lang-zh" style="display:none">南海海槽</span></div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Mega-quake risk zone</span><span class="lang-zh" style="display:none">超級地震風險區</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Aging Population</span><span class="lang-zh" style="display:none">高齡化</span></div>
+      <div class="kpi-value" style="font-size:16px"><span class="lang-en">Birth rate 0.72</span><span class="lang-zh" style="display:none">出生率 0.72</span></div>
+      <div class="kpi-delta negative"><span class="lang-en">World's lowest</span><span class="lang-zh" style="display:none">全球最低</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Akiya Problem</span><span class="lang-zh" style="display:none">空屋問題</span></div>
+      <div class="kpi-value" style="font-size:16px">900<span class="lang-en">&#19975; vacant</span><span class="lang-zh" style="display:none">萬戶空屋</span></div>
+      <div class="kpi-delta negative"><span class="lang-en">Structural oversupply</span><span class="lang-zh" style="display:none">結構性供過於求</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Bubble Risk</span><span class="lang-zh" style="display:none">泡沫風險</span></div>
+      <div class="kpi-value" style="font-size:16px"><span class="lang-en">Tokyo overheating</span><span class="lang-zh" style="display:none">東京過熱</span></div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Warning</span><span class="lang-zh" style="display:none">警告</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Foreign Dependency</span><span class="lang-zh" style="display:none">外資依賴</span></div>
+      <div class="kpi-value" style="font-size:18px"><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Yen-driven inflows</span><span class="lang-zh" style="display:none">日圓驅動資金流入</span></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Risk Radar</span><span class="lang-zh" style="display:none">風險雷達圖</span></h3>
+      <div class="radar-wrap">
+        <div id="chartJpRisk" style="width:100%;height:320px"></div>
+      </div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">Rate Sensitivity Analysis</span><span class="lang-zh" style="display:none">利率敏感度分析</span></h3>
+      <div id="chartJpRateSensitivity" style="height:220px"></div>
+    </div>
+  </div>
+
+  <!-- Policy Timeline -->
+  <h2 class="section-heading"><span class="lang-en">Policy Timeline</span><span class="lang-zh" style="display:none">政策時間軸</span></h2>
+  <div class="timeline">
+    <div class="timeline-item green">
+      <div class="tl-date">2013</div>
+      <div class="tl-text"><span class="lang-en">Abenomics begins &mdash; BOJ launches massive monetary easing program</span><span class="lang-zh" style="display:none">安倍經濟學啟動 &mdash; BOJ 推出大規模貨幣寬鬆計劃</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2022</div>
+      <div class="tl-text"><span class="lang-en">Yen weakens past 150 &mdash; foreign buying surge into Japanese real estate</span><span class="lang-zh" style="display:none">日圓跌破 150 &mdash; 外資大舉湧入日本房地產</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2024 Mar</div>
+      <div class="tl-text"><span class="lang-en">BOJ ends negative rates &mdash; first rate hike in 17 years, historic policy shift</span><span class="lang-zh" style="display:none">BOJ 結束負利率 &mdash; 17 年來首次升息，歷史性政策轉向</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2024 Jul</div>
+      <div class="tl-text"><span class="lang-en">BOJ raises policy rate to 0.25%</span><span class="lang-zh" style="display:none">BOJ 將政策利率上調至 0.25%</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2025 Jan</div>
+      <div class="tl-text"><span class="lang-en">BOJ raises policy rate to 0.5% &mdash; fastest normalization pace since 2006</span><span class="lang-zh" style="display:none">BOJ 將政策利率上調至 0.5% &mdash; 2006 年以來最快正常化步伐</span></div>
+    </div>
+    <div class="timeline-item gray">
+      <div class="tl-date">2026</div>
+      <div class="tl-text"><span class="lang-en">Market watching for next hike signal &mdash; consensus expects 0.75&ndash;1.0% by year-end</span><span class="lang-zh" style="display:none">市場關注下一次升息信號 &mdash; 共識預期年底前升至 0.75&ndash;1.0%</span></div>
+    </div>
+  </div>
+
+  <!-- Key Risk Factors -->
+  <h2 class="section-heading"><span class="lang-en">Key Risk Factors</span><span class="lang-zh" style="display:none">主要風險因素</span></h2>
+  <div class="summary-grid">
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">BOJ Normalization</span><span class="lang-zh" style="display:none">BOJ 正常化</span></h4>
+      <p><span class="lang-en">After decades of zero/negative rates, BOJ's normalization cycle is the single biggest risk to Japan property. Each 50bp hike compresses the yield spread by ~50bp. At BOJ 1.5%, the carry trade that underpins foreign investment largely disappears, potentially triggering a repricing across all segments.</span><span class="lang-zh" style="display:none">在數十年零/負利率後，BOJ 正常化週期是日本房地產最大的單一風險。每次升息 50 個基點壓縮利差約 50bp。當 BOJ 利率達 1.5%，支撐外資投資的套利交易將基本消失，可能觸發全面重新定價。</span></p>
+    </div>
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">Demographics</span><span class="lang-zh" style="display:none">人口結構</span></h4>
+      <p><span class="lang-en">Japan's birth rate of 0.72 is the world's lowest. The population is shrinking by ~500,000 annually, with rural areas already experiencing demand collapse. The 9 million vacant homes (akiya) problem will worsen. Only Tokyo and select metro areas are insulated from demographic headwinds.</span><span class="lang-zh" style="display:none">日本出生率 0.72 為全球最低。人口每年減少約 50 萬，農村地區已出現需求崩潰。900 萬戶空屋問題將持續惡化。只有東京和部分都會區能免受人口結構逆風影響。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Earthquake</span><span class="lang-zh" style="display:none">地震風險</span></h4>
+      <p><span class="lang-en">The Nankai Trough mega-earthquake (M8&ndash;9) has a 70&ndash;80% probability within 30 years according to Japan's Earthquake Research Committee. Osaka, Nagoya, and coastal cities face tsunami risk. Insurance costs are rising and could materially impact property economics in affected zones.</span><span class="lang-zh" style="display:none">根據日本地震調查委員會，南海海槽超級地震（M8&ndash;9）在 30 年內發生機率為 70&ndash;80%。大阪、名古屋及沿海城市面臨海嘯風險。保險成本上升，可能嚴重影響受災區域的房產經濟。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Foreign Capital Reversal</span><span class="lang-zh" style="display:none">外資反轉</span></h4>
+      <p><span class="lang-en">Much of Tokyo's price surge has been driven by foreign capital exploiting yen weakness. If the yen strengthens materially (e.g., below 130/USD), the currency-adjusted return advantage evaporates. A synchronized BOJ tightening + yen appreciation scenario could trigger significant foreign selling pressure.</span><span class="lang-zh" style="display:none">東京房價飆升很大程度由外資利用日圓疲弱推動。若日圓大幅升值（如跌破 130/美元），匯率調整後的回報優勢將消失。BOJ 緊縮 + 日圓升值的同步情境可能觸發外資大規模拋售壓力。</span></p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtJPY(v,lang){lang=lang||localStorage.getItem('lang')||'en';if(lang==='zh')return '\u00a5'+v+'\u4e07';if(v>=100)return '\u00a5'+(v/100).toFixed(1)+'M';return '\u00a5'+v+'K';}
+function fmtJPYShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';if(lang==='zh')return v+'\u4e07';if(v>=100)return(v/100).toFixed(1)+'M';return v+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+
+  /* Chart: Risk Radar */
+  var c1=echarts.init(document.getElementById('chartJpRisk'));allCharts.push(c1);
+  c1.setOption({
+    legend:{bottom:0,textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11},icon:'circle',itemWidth:8,itemHeight:8,data:['Current Risk','2020 Baseline']},
+    radar:{
+      center:['50%','52%'],radius:'58%',nameGap:8,
+      name:{textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:10}},
+      indicator:[
+        {name:'Liquidity\n/\u6d41\u52d5\u6027',max:10},
+        {name:'Credit\n/\u4fe1\u8cb8',max:10},
+        {name:'Supply\n/\u4f9b\u7d66',max:10},
+        {name:'Macro\n/\u7e3d\u7d93',max:10},
+        {name:'Geopolitical\n/\u5730\u7de3',max:10},
+        {name:'Demographics\n/\u4eba\u53e3',max:10}
+      ],
+      shape:'polygon',splitNumber:5,
+      splitLine:{lineStyle:{color:C.grid}},
+      splitArea:{areaStyle:{color:['rgba(238,243,249,0.3)','rgba(255,255,255,0.3)']}},
+      axisLine:{lineStyle:{color:C.grid}}
+    },
+    series:[{type:'radar',data:[
+      {name:'Current Risk',value:[3,4,7,5,5,9],lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},areaStyle:{color:'rgba(220,38,38,0.1)'},symbol:'circle',symbolSize:5},
+      {name:'2020 Baseline',value:[2,2,5,3,3,7],lineStyle:{color:C.muted,type:'dashed',width:1.5},itemStyle:{color:C.muted},areaStyle:{color:'rgba(139,163,192,0.08)'},symbol:'circle',symbolSize:4}
+    ]}]
+  });
+
+  /* Chart: Rate Sensitivity */
+  var c2=echarts.init(document.getElementById('chartJpRateSensitivity'));allCharts.push(c2);
+  c2.setOption({
+    tooltip:baseTooltip,
+    legend:{top:8,textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11},icon:'circle',itemWidth:8,itemHeight:8,data:['Yield Spread','Affordability']},
+    grid:{left:15,right:15,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:['BOJ 0.5%','BOJ 1.0%','BOJ 1.5%','BOJ 2.0%']}),
+    yAxis:[
+      mkAxis({type:'value',axisLabel:{formatter:'{value}%',color:'#5a7a9a',fontSize:10},splitLine:{lineStyle:{color:'#e8f0f9'}}}),
+      mkAxis({type:'value',position:'right',axisLabel:{formatter:'{value}',color:'#5a7a9a',fontSize:10},splitLine:{show:false}})
+    ],
+    series:[
+      {name:'Yield Spread',type:'line',smooth:0.2,data:[3.84,3.34,2.84,2.34],lineStyle:{color:C.green},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.navy,type:'dashed',width:1},data:[{xAxis:'BOJ 0.5%',label:{formatter:'Current',position:'insideStartTop',fontSize:9,color:'#5a7a9a'}}]}
+      },
+      {name:'Affordability',type:'line',smooth:0.2,yAxisIndex:1,data:[75,70,64,58],lineStyle:{color:C.orange},itemStyle:{color:C.orange},symbol:'circle',symbolSize:6}
+    ]
+  });
+}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

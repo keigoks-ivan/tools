@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bangsar Hill Park（Verdura）@ Lorong Maarof｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:linear-gradient(135deg,#14532D 0%,#1a5c3a 100%);color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-card.ok{border-top:3px solid #16a34a;background:#F0FDF4}
+.kpi-card.warn{border-top:3px solid #d97706}
+.kpi-card.bad{border-top:3px solid #dc2626}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* phase grid */
+.phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0}
+.p-card{border-radius:8px;padding:16px;border:1px solid}
+.p1{background:#F0FDF4;border-color:#86efac}
+.p2{background:#FEF9C3;border-color:#d97706}
+.p-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
+.p1 .p-title{color:#166534}.p2 .p-title{color:#92400E}
+/* score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:680px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+@media(max-width:680px){.score-cols,.dual-col,.phase-grid{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：Bangsar Hill Park（Verdura Phase 1）@ Lorong Maarof，Bangsar ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 官方 HDA：Leasehold 99年至2119 ｜ 住宅地契（Residential Strata）｜ 竣工 2025年3月</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>Bangsar Hill Park（Verdura Phase 1）</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&from=BangsarHillPark"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=BangsarHillPark"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Lorong Maarof，Bangsar，KL ｜ 開發商：Bangsar Hill Park Development Sdn Bhd（Sunsuria Bhd 51% × Suez Capital Sdn Bhd）｜ Leasehold 99年（至2119年10月）｜ <strong>住宅地契（Residential Strata）</strong> ｜ Phase 1（Verdura）：812 戶，Block D + E 各 406 戶，57 層 ｜ 竣工：2025年3月</div>
+  <div class="badge-row">
+    <span class="badge">✅ 住宅地契（Residential Strata）——本系列 Leasehold 建案中最好地類</span>
+    <span class="badge">✅ 竣工 2025-03，無交屋風險</span>
+    <span class="badge">✅ LRT Bank Rakyat-Bangsar 步行約 400–600m</span>
+    <span class="badge">✅ Bangsar 成熟生活圈：BSC、Bangsar Village、Jaya Grocer、Telawi</span>
+    <span class="badge">⚠️ Leasehold 99年（至2119年）</span>
+    <span class="badge">⚠️ Phase 2（Block B+C，802戶）竣工 2028-01——未來供給壓力</span>
+    <span class="badge">⚠️ brickz 住宅成交量極稀薄（竣工後首年）——FIX-03 中低置信度</span>
+    <span class="badge">📡 掛牌：122筆售 + 427筆租（iProperty 2026）</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 地契釐清 -->
+<div class="insight">
+  <strong>⚠️ 地契名詞釐清——必讀：</strong>市場上對 Bangsar Hill Park 的地契描述混亂，需要分層理解。<br><br>
+  <strong>土地年期（Tenure）</strong>：Leasehold 99年，至 2119年10月13日（約 93 年剩餘）——官方 HDA 文件確認<br>
+  <strong>地類（Land Title / Strata）</strong>：住宅地契（<strong>Residential Strata</strong>）——PropertyGuru 確認「fully residential-titled development」；iProperty 確認「Residential Strata property」<br><br>
+  這意味著：Bangsar Hill Park 是「<strong>Leasehold 住宅地契</strong>」——比商業地契（Commercial Strata）好得多，接近 Pavilion Residences 的結構。民用電費費率適用，MM2H 合規性強，銀行貸款 LTV 通常 80–90%（住宅標準）。但仍是 Leasehold，比 Freehold（R22、Park Place）有折扣。
+</div>
+
+<!-- iRumah 數據警告 -->
+<div class="alert a-yellow">
+  <strong>📊 FIX-03 資料混淆警告：</strong>iRumah 的「Bangsar Hill Park」條目（顯示 3,257 units，RM750 psf 發售，2022 完工）實際上是舊版 Pangsapuri Sri Pahang 政府組屋翻新案，<strong>不是</strong>本報告分析的 Verdura Phase 1（812 units，Block D+E，RM910 psf，2025 完工）。兩者名稱相同但完全不同建案。本報告以官方 HDA 文件（bangsarhillpark.com）和 PropertyGuru 掛牌數據為主要定價參照，iRumah 的 RM740–1,100 psf 估算因命名混淆而不可靠。
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card ok">
+        <div class="kpi-v">住宅地契</div>
+        <div class="kpi-l">Residential Strata（Leasehold 99年）</div>
+        <div class="kpi-s up">本系列 Leasehold 建案中最佳地類結構</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM910–1,083</div>
+        <div class="kpi-l">發售 PSF（Block D/E）</div>
+        <div class="kpi-s neu">Block D：RM835K–1,472K；Block E：RM928K–1,599K；坪數 917–1,478 sqft</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">122 / 427</div>
+        <div class="kpi-l">掛牌售 / 掛牌租（iProperty）</div>
+        <div class="kpi-s neu">售：15%掛牌率（健康）；租：52%出租掛牌率（偏高）</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v">~0筆</div>
+        <div class="kpi-l">brickz 政府登記成交（Verdura）</div>
+        <div class="kpi-s neu">竣工後首年；FIX-03 中低置信度；待積累</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM4,200+</div>
+        <div class="kpi-l">掛牌租起（962 sqft）</div>
+        <div class="kpi-s up">iProperty：RM4.36–4.49 psf/月；Bangsar 地段支撐</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v">802戶</div>
+        <div class="kpi-l">Phase 2（Block B+C）竣工 2028-01</div>
+        <div class="kpi-s down">未來同地段供給壓力；定價 RM934K–RM1,807K（漲）</div>
+      </div>
+    </div>
+
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">Bangsar Hill Park Development Sdn Bhd：Sunsuria Bhd（Bursa 上市，51%）× Suez Capital Sdn Bhd（私人，KL Gateway 開發商）；Phase 1 竣工按時，執行信用良好</div></div>
+      <div class="spec-item"><div class="spec-l">地段 / 地契</div><div class="spec-v">Lorong Maarof，Bangsar，KL；5.87 英畝（Phase 1 佔地）；Leasehold 99年（至 2119年10月13日）；住宅地契（Residential Strata）</div></div>
+      <div class="spec-item"><div class="spec-l">Phase 1（Verdura）規模</div><div class="spec-v">Block D（406戶）+ Block E（406戶）= 812 戶；57 層；8 戶/樓層（低密度感）；坪數 917–1,478 sqft；2BR/2BA 至 3+1BR/4BA</div></div>
+      <div class="spec-item"><div class="spec-l">Phase 2（Talisa）</div><div class="spec-v">Block B（410戶）+ Block C（392戶）= 802 戶；竣工 2028年1月；定價 RM934K–RM1,807K（Block B）；RM914K–RM1,749K（Block C）；坪數 803–1,478 sqft（含更小坪數）</div></div>
+      <div class="spec-item"><div class="spec-l">整體 GDV 規模</div><div class="spec-v">全區 GDV RM30.1 億（Sunsuria 官方）；9.82 英畝整體規劃；Phase 1+2 共 1,614 住宅戶；另有 DBKL 社會住宅 Block A、H（不在本建案範圍）</div></div>
+      <div class="spec-item"><div class="spec-l">LRT 連接</div><div class="spec-v">Bank Rakyat-Bangsar LRT（KJ16）步行約 400–600m（各來源不一）；1 站到 KL Sentral；Bangsar LRT 整條 Kelang Lama 線終點</div></div>
+      <div class="spec-item"><div class="spec-l">Bangsar 生活圈</div><div class="spec-v">Bangsar Shopping Centre（BSC，步行）；Bangsar Village I & II（步行）；Jaya Grocer；Bangsar Telawi 美食街（KL 頂級美食 destination）；BTS Bangsar（咖啡館區）；步行圈成熟度 KL 第二（僅次 Bukit Bintang）</div></div>
+      <div class="spec-item"><div class="spec-l">設施</div><div class="spec-v">500m 跑道；多泳池（主池、兒童池、SPA 池）；屋頂設施（Whirlpool、觀景台）；羽球館、籃球場；瑜珈台、桑拿、Zen Garden；共享辦公室；Sunsuria Care 護理站；接駁巴士到 LRT 和商場</div></div>
+      <div class="spec-item"><div class="spec-l">上游報告定性</div><div class="spec-v">「Bangsar：YoY +2.6%，本地專業人士 + 外籍」；「精品住宅地契低密度公寓（Bangsar 最新建案），供給管道有限」（上游 §3 正面清單）；Bangsar 租金月 RM3,500–4,500，Gross Yield 4–5%</div></div>
+      <div class="spec-item"><div class="spec-l">Bangsar 地段均值</div><div class="spec-v">brickz Bangsar 2024–25：229 筆，中位 RM765 psf（49 個建案混合）；高端 Bukit Bandaraya：22 筆，中位 RM788 psf；Bangsar Hill Park 發售 RM910–1,083 psf 屬地段頂端定價</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜Bangsar Hill Park 的核心投資論點</h3>
+    <p>Bangsar Hill Park 的投資論點建立在上游報告明確正面定性的框架上：「精品住宅地契低密度公寓（Bangsar 最新建案），供給管道有限，需求端外資持續湧入」。在 Leasehold 住宅地契的結構下，Bangsar Hill Park 提供的是：① Bangsar 成熟生活圈（KL 最精緻的中產外籍聚居地之一）；② LRT 步行可達（KL Sentral 1 站）；③ 新竣工現代設施（500m 跑道、護理站等差異化）；④ Bangsar 地段租金撐底（RM3,500–4,500/月，Gross Yield 4–5%）。</p>
+
+    <p>最關鍵的定位問題：Bangsar Hill Park 的 RM910–1,083 psf 發售均價，相對 Bangsar 地段整體均值 RM765 psf 高出約 20–40%，這個溢價是否能在二手市場和租金市場中持續，是評分的核心懸念。</p>
+
+    <div class="success-box">
+      <strong>🟢 本系列最值得關注的「Leasehold 住宅地契」亮點：</strong>Bangsar Hill Park 是本系列 12 個分析建案中，少數同時具備①住宅地契（Residential Strata）②已竣工③LRT 步行可達④Bangsar 成熟生活圈⑤Gross Yield 4–5% 上游報告支撐的建案。相較 SWNK Houze（Leasehold 商業）和 Pavilion Square（Leasehold 商業），BHP 的地契結構是 Leasehold 框架中最優的。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Phase 2 供給——最重要的風險因子</h3>
+    <div class="phase-grid">
+      <div class="p-card p1">
+        <div class="p-title">✅ Phase 1 Verdura（已竣工）</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td>Block D</td><td>406 戶，RM835K–1,472K</td></tr>
+            <tr><td>Block E</td><td>406 戶，RM928K–1,599K</td></tr>
+            <tr><td style="font-weight:700">合計</td><td style="font-weight:700">812 戶，竣工 2025-03</td></tr>
+            <tr><td>掛牌售</td><td>122 筆（15% 掛牌率，健康）</td></tr>
+            <tr><td>掛牌租</td><td>427 筆（52% 出租掛牌率）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="p-card p2">
+        <div class="p-title">⚠️ Phase 2 Talisa（竣工 2028-01）</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td>Block B</td><td>410 戶，RM934K–1,807K</td></tr>
+            <tr><td>Block C</td><td>392 戶，RM914K–1,749K</td></tr>
+            <tr><td style="font-weight:700">合計</td><td style="font-weight:700">802 戶，竣工 2028年1月</td></tr>
+            <tr><td>定價趨勢</td><td><span class="up">比 Phase 1 上漲約 2–10%（漲幅提升）</span></td></tr>
+            <tr><td>坪數差異</td><td>Phase 2 最小 803 sqft（比 Phase 1 的 917 sqft 小）——更小坪數更入手，競爭 Phase 1 出租市場</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Phase 2 的雙重影響：</strong>正面——Phase 2 定價比 Phase 1 上漲 2–10%，直接為 Phase 1 業主的二手估值提供向上錨點（開發商自己的新案定更高價格，是 Phase 1 升值的最強訊號）。負面——802 戶新增出租供給於 2028 年湧入同一地段租客池，2026–2027 填租的競爭壓力增加；Phase 2 最小 803 sqft（比 Phase 1 917 sqft 更小）意味著更低入場門檻，吸引部分原本會租 Phase 1 的小預算租客。
+    </div>
+
+    <hr class="dv">
+    <h3>C｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>brickz 成交量稀薄（FIX-03）</strong></td><td>竣工後首年，Verdura 政府登記住宅成交量幾乎為零——定價論點尚未有市場成交驗證。427 筆掛牌租顯示大量業主嘗試填租，但成交速度未知</td><td><span class="tag t-y">當前狀態；待 2025–2026 成交積累</span></td><td>估值置信度中低；需等 6–12 個月後 brickz 數據</td></tr>
+          <tr><td><strong>427 筆出租掛牌——初期填租競爭</strong></td><td>812 戶中 427 筆掛牌租 = 52% 出租掛牌率——新社區竣工後投資者集中進入出租市場的「初期陣痛」；實際填租時間可能 2–4 個月；Bangsar 租金需求有一定吸收力</td><td><span class="tag t-y">中（正在消化中）</span></td><td>短期租金競爭；2026 下半年隨 Phase 2 行銷期望租金可能穩定</td></tr>
+          <tr><td><strong>Leasehold 結構折扣</strong></td><td>住宅 Leasehold（93 年剩餘）雖比商業地契好，但仍比 Freehold 有折扣；銀行貸款 LTV 通常 80–90%（住宅，合理）；但 Leasehold 在二手市場相比 Freehold 仍有 5–15% 折扣</td><td><span class="tag t-b">低中——已知風險，市場已定價</span></td><td>二手 PSF 比同品質 Freehold 低 5–15%，但 Bangsar 住宅 Leasehold 歷史上折扣窄於郊區</td></tr>
+          <tr><td><strong>Lorong Maarof 交通</strong></td><td>LRT 步行 400–600m 但非「直連」；無有蓋通道；高峰時間步行需時 7–10 分鐘；未來接駁巴士服務穩定性依賴管委會維持</td><td><span class="tag t-b">低中</span></td><td>比直連 MRT 的建案（TRX、Pavilion Square）步行體驗差；但 Bangsar LRT 區域接受度歷史良好</td></tr>
+          <tr><td><strong>Phase 1+2 共 1,614 戶在同一地段</strong></td><td>Phase 1（812 戶）+ Phase 2（802 戶）= 共 1,614 戶；加上 DBKL 社會住宅 Block A、H——在 Lorong Maarof 地段集中竣工大規模住宅供給</td><td><span class="tag t-y">中（Phase 2 是中期風險）</span></td><td>2028 年後出租市場競爭加劇；但 Bangsar 整體需求具備足夠深度</td></tr>
+          <tr><td><strong>Bangsar YoY +2.6%（最慢地段）</strong></td><td>上游報告：Bangsar YoY +2.6%——在本系列地段中是最低的（KLCC +3.5%、MK +6.4%、Bangsar South +4–6%）；Bangsar 的升值靠的是需求穩定而非高速增值</td><td><span class="tag t-b">低（已知，接受）</span></td><td>Bangsar 不是資本增值最強的地段，而是「穩健收益」的代表；換手框架需設定合理預期</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場概況——上游報告框架全面正面對位</div>
+  <div class="section-body">
+    <h3>1.1 上游報告對 Bangsar Hill Park 地段的直接記載</h3>
+    <table>
+      <thead><tr><th>報告</th><th>引用</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>KL 供需報告（§3 租金表）</td><td>「Bangsar：月租 RM3,500–4,500，Gross Yield 4–5%，Net Yield 3–3.8%，YoY +2.6%，本地專業人士 + 外籍」</td><td><span class="tag t-g">正面——Bangsar 租金市場有系統性支撐</span></td></tr>
+        <tr><td>KL 供需報告（§3 稀缺段）</td><td>「精品住宅地契低密度公寓（KLCC、Bangsar、Mont Kiara 最新建案），供給管道有限，需求端外資持續湧入」</td><td><span class="tag t-g">正面——Bangsar Hill Park 直接被框架點名</span></td></tr>
+        <tr><td>KL RM1M+ 報告（供給稀缺正面清單）</td><td>「Bangsar South Freehold，LRT 直達，Yield 5–6%」被列入漲力清單；廣義 Bangsar 廊帶受益</td><td><span class="tag t-g">正面——地段整體在漲力框架內</span></td></tr>
+        <tr><td>KL RM1M+ 報告（漲的共同點）</td><td>「稀缺性（低密度/土地不可複製）+ 住宅地契 + 有明確催化劑」</td><td><span class="tag t-g">正面——BHP 住宅地契 ✅；低密度（8戶/層）✅；LRT 催化劑 ✅</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 Bangsar 地段定價矩陣</h3>
+    <table>
+      <thead><tr><th>建案 / 參照點</th><th>PSF</th><th>地契</th><th>brickz</th><th>對照信號</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bangsar Hill Park（本案，Phase 1）</strong></td><td>RM 910–1,083（發售）</td><td><span class="tag t-y">Leasehold 住宅</span></td><td>~0 筆（FIX-03）</td><td>—</td></tr>
+        <tr><td>Bangsar Hill Park（Phase 2，2028）</td><td>RM 934K–1,807K；約 RM1,000–1,200 psf（估）</td><td><span class="tag t-y">Leasehold 住宅</span></td><td>期房</td><td><span class="up">Phase 1 升值正面錨點</span></td></tr>
+        <tr><td>Bangsar 整體地段（brickz 2024–25）</td><td>中位 RM 765 psf（229 筆，49 建案）</td><td>混合</td><td>229 筆</td><td>BHP Phase 1 比地段均值高 19–41%——需品牌和新建溢價支撐</td></tr>
+        <tr><td>Bukit Bandaraya 高端住宅（brickz）</td><td>中位 RM 788 psf（22 筆）</td><td>混合</td><td>22 筆</td><td>BHP Phase 1 比高端 Bangsar 住宅仍高 16–37%</td></tr>
+        <tr><td>KL Gateway Premium Residences（同開發商 Suez Capital）</td><td>RM 540 psf（二手估算）</td><td>部分 Freehold 住宅</td><td>有成交</td><td>同開發商在 Bangsar South 的前作；Bangsar Hill Park 大幅溢價</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-yellow">
+      <strong>定價核心懸念：</strong>Bangsar Hill Park Phase 1 發售 RM910–1,083 psf，比 Bangsar 地段整體均值（RM765 psf）高 19–41%。目前 brickz 幾乎無住宅成交可驗證。Phase 2 定價上漲（RM1,000–1,200 psf 估算）是最強的正面錨點——若 Phase 2 成功銷售且定價更高，Phase 1 業主的升值邏輯成立。但若 Phase 2 出現折讓促銷，則 Phase 1 估值面臨下修壓力。
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構——Bangsar 需求深度 vs Phase 2 供給增量</div>
+  <div class="section-body">
+    <h3>2.1 Bangsar 地段正面需求</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>說明</th><th>強度</th></tr></thead>
+      <tbody>
+        <tr><td>本地專業人士（核心客群）</td><td>Bangsar 是 KL 本地中產和專業人士最嚮往的居住地段之一；BSC、Telawi 的社群文化深度根植；本地買家具備住宅 Leasehold 接受度</td><td><span class="tag t-g">強——本地需求穩定且深厚</span></td></tr>
+        <tr><td>外籍高管（次要客群）</td><td>Bangsar 是 HSBC、德勤等外籍高管的傳統居住選擇；KL Sentral 1 站直達；附近有 Sri Dasmesh International School 等</td><td><span class="tag t-y">中——外籍偏好 KLCC 廊帶，Bangsar 是第二選擇</span></td></tr>
+        <tr><td>MM2H 持有者</td><td>上游報告：Bangsar 是 MM2H 待購買家的目標地段之一；住宅地契增強 MM2H 合規性</td><td><span class="tag t-y">中——MM2H 金額（RM100萬）與 BHP 起步（RM835K–928K）接近但略低；需較大坪數才超 RM100萬</span></td></tr>
+        <tr><td>年輕高收入家庭（自住）</td><td>917 sqft 起、2BR 設計合理；Bangsar 名校（BSK、SMK Bangsar）和醫療（Pantai Hospital）；適合有小孩的雙薪家庭</td><td><span class="tag t-g">中強——家庭自住需求穩定</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供需平衡判斷</h3>
+    <table>
+      <thead><tr><th>指標</th><th>現狀</th><th>2026–2028 預測</th></tr></thead>
+      <tbody>
+        <tr><td>Phase 1 掛牌售率</td><td>122筆 / 812戶 = 15%（健康，非恐慌性拋售）</td><td>隨社區成熟（18–24個月），預期降至 10% 以下</td></tr>
+        <tr><td>Phase 1 出租掛牌率</td><td>427筆 / 812戶 = 52%（偏高，竣工初期正常）</td><td>Bangsar 租客需求有深度，預期 12–18 個月內消化至 25–30%</td></tr>
+        <tr><td>Phase 2 供給</td><td>2028年1月竣工 802 戶（新增 99%）</td><td>2027年開始出售掛牌，2028 竣工後出租競爭加劇</td></tr>
+        <tr><td>整體 Bangsar 供需</td><td>上游報告：新開工 -14.9% YoY；Bangsar 新建供給管道「有限」；住宅地契精品段稀缺</td><td>2028 後整體供給趨緊，Bangsar Hill Park 位置優勢長期成立</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率</div>
+  <div class="section-body">
+    <h3>5.1 Bangsar Hill Park 租金行情</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租掛牌</th><th>月租 psf</th><th>Gross Yield（@RM1,000 psf 入場）</th></tr></thead>
+      <tbody>
+        <tr><td>2BR</td><td>917–978 sqft</td><td>RM4,200–5,500/月</td><td>RM4.3–5.6</td><td>~5.1–6.7%（@RM91.7–97.8萬）</td></tr>
+        <tr><td>3BR</td><td>1,100–1,200 sqft</td><td>RM5,500–7,500/月</td><td>RM4.6–6.3</td><td>~5.5–7.5%（@RM110–120萬）</td></tr>
+        <tr><td>3+1BR</td><td>1,300–1,478 sqft</td><td>RM7,000–9,500/月</td><td>RM4.7–6.4</td><td>~5.7–7.7%（@RM130–147.8萬）</td></tr>
+      </tbody>
+    </table>
+    <p class="src">iProperty：427 筆掛牌租，起步 RM4,200（962 sqft）；上游報告：Bangsar Gross Yield 4–5%；SmartInvest：「2BR 達 RM3,500–4,500/月（5–6% Gross Yield）」</p>
+
+    <h3>5.2 外國人現金流試算（2BR 978 sqft，RM97.8萬入場 @ RM1,000 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租（RM4,500 × 12）</td><td>RM 54,000</td><td>2BR 978 sqft；Bangsar 地段中位；外籍本地混合租客群</td></tr>
+        <tr><td>管理費（估 RM0.40 psf × 978 × 12）</td><td><span class="down">-RM 4,694</span></td><td>住宅地契公寓管理費通常 RM0.35–0.50 psf；具體需確認</td></tr>
+        <tr><td>地稅 + 門牌稅</td><td><span class="down">-RM 2,000</span></td><td></td></tr>
+        <tr><td>空置期（1.5 個月，Bangsar 需求穩定）</td><td><span class="down">-RM 6,750</span></td><td>Bangsar 填租速度優於武吉免登 SR；但 427 筆掛牌競爭</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 12,167</span></td><td>（54,000–13,444）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 4,320</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 24,069/年</strong></td><td>Net Yield ≈ 2.46%（RM97.8萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 28,389/年</td><td>Net Yield ≈ 2.90%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>外籍 Net Yield 2.5–2.9%——本系列住宅地契（Leasehold）建案中最高。</strong>Bangsar 地段的租金支撐（上游報告確認 Gross Yield 4–5%）+ 住宅地契（非居民租金稅基數正常）+ 相對合理的入場 PSF（約 RM1,000 psf），使 BHP 的 Net Yield 顯著優於所有商業地契建案（SWNK Houze、Pavilion Square、TRX 等）。這是本系列唯一以 Leasehold 住宅地契實現接近 3% Net Yield 的建案。
+    </div>
+
+    <h3>5.3 住宅地契 vs 商業地契租金優勢</h3>
+    <table>
+      <thead><tr><th>項目</th><th>BHP（住宅地契）</th><th>商業地契 SR</th><th>優勢</th></tr></thead>
+      <tbody>
+        <tr><td>電費費率</td><td>✅ 民用費率（Residential tariff）</td><td>❌ 商業費率（30–60% 更貴）</td><td>BHP 電費更低；租客更易接受</td></tr>
+        <tr><td>貸款 LTV</td><td>✅ 住宅貸款，80–90% LTV</td><td>❌ 商業貸款，50–80% LTV</td><td>BHP 入場現金需求更低</td></tr>
+        <tr><td>MM2H 合規</td><td>✅ 住宅地契 MM2H 最清晰</td><td>⚠️ 商業地契需書面確認</td><td>BHP 外籍合規最明確</td></tr>
+        <tr><td>買家池</td><td>✅ 更廣（本地 + 外籍，無特殊限制）</td><td>❌ 較窄（State Consent 更複雜）</td><td>BHP 二手流動性更好</td></tr>
+        <tr><td>租金接受度</td><td>✅ 租客無電費顧慮</td><td>❌ 商業電費可能導致租金談判折讓</td><td>BHP 月租報價可直接對比</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規——住宅 Leasehold 是本系列外籍最友好框架之一</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>外籍影響</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td>Leasehold 99年（至2119年）；住宅地契（Residential Strata）</td><td>✅ 住宅 Leasehold：LTV 80–90%；民用電費；MM2H 最清晰框架</td></tr>
+        <tr><td>外籍最低門檻</td><td>RM 1,000,000（KL）</td><td>⚠️ Block D 起步 RM835K（低於門檻）；Block E 起步 RM928K（仍低於）；需選擇 RM100萬+ 單位（約 1,100 sqft+ 的 2BR 或 3BR）</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>10%（外籍永久）</td><td>若 2025–2026 入場，第6年約 2031–2032</td></tr>
+        <tr><td>印花稅</td><td>4% 統一稅率</td><td>RM110萬物業：印花稅 RM44,000</td></tr>
+        <tr><td>MM2H 合規</td><td>RM100萬+ 住宅 Leasehold 最符合 MM2H 要求</td><td>✅ 住宅地契框架最清晰；需確認具體政策（2026年版 MM2H 細則）</td></tr>
+        <tr><td>外籍進場最佳單位</td><td>3BR 1,100–1,200 sqft，RM110–120萬（恰好超外籍門檻）；或 3+1BR 1,300+ sqft，RM130–140萬</td><td>外籍買家必須選擇 RM100萬+ 單位——限制了小坪數選擇，但也聚焦在更大坪的更好投資</td></tr>
+      </tbody>
+    </table>
+
+    <h3>外籍進場成本試算（3BR 1,100 sqft，RM110萬入場）</h3>
+    <table>
+      <thead><tr><th>費用</th><th>金額（RM）</th></tr></thead>
+      <tbody>
+        <tr><td>首付（20%，假設 80% LTV 住宅貸款）</td><td>RM 220,000</td></tr>
+        <tr><td>印花稅（4%）</td><td>RM 44,000</td></tr>
+        <tr><td>律師費</td><td>RM 12,000</td></tr>
+        <tr><td>State Consent（住宅，標準）</td><td>RM 5,000</td></tr>
+        <tr><td><strong>現金總需求</strong></td><td><strong>~RM 281,000（約25.5%）</strong></td></tr>
+      </tbody>
+    </table>
+    <p class="src">注：住宅地契 LTV 通常 80–90%，比商業地契（50–70%）更高，大幅降低現金需求比例</p>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設——Bangsar 成熟生活圈 + LRT 直達 KL Sentral</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>基建</th><th>狀態</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bank Rakyat-Bangsar LRT（KJ16）</strong></td><td>已運營；步行約 400–600m；1 站到 KL Sentral（KLIA Express 換乘）</td><td>✅ LRT 連接已確認；KL Sentral 1 站是最強的基建優勢（機場直達）；但非「直連有蓋」，步行需一定時間</td></tr>
+        <tr><td>Bangsar Shopping Centre（BSC）</td><td>步行可達；老牌精品商場；BSC Food Court</td><td>✅ 成熟生活商圈</td></tr>
+        <tr><td>Bangsar Village I & II</td><td>步行可達；精品購物 + 餐飲</td><td>✅ 外籍租客高度偏好</td></tr>
+        <tr><td>Bangsar Telawi（美食街）</td><td>步行可達；KL 最受歡迎的餐飲目的地之一</td><td>✅ 租客吸引力極強；外籍家庭週末聚點</td></tr>
+        <tr><td>Sprint 高速公路 / NPE</td><td>直達 Damansara、PJ、KLCC；私家車通勤友好</td><td>✅ 有車族便利</td></tr>
+        <tr><td>Mid Valley Megamall / The Gardens</td><td>約 5 分鐘車程</td><td>✅ 大型購物中心近在咫尺</td></tr>
+        <tr><td>醫療</td><td>Pantai Hospital（5 分鐘車程）；Bangsar Medical Centre（步行圈）</td><td>✅ 高端醫療配套完整</td></tr>
+        <tr><td>國際學校</td><td>Sri Dasmesh（近）；GIS（車程）；Alice Smith（車程）</td><td>✅ 外籍家庭教育配套</td></tr>
+      </tbody>
+    </table>
+
+    <div class="success-box">
+      <strong>Bangsar 生活圈是 KL 最成熟的中產精英社區之一：</strong>與 Bukit Bintang（消費娛樂）、Mont Kiara（外籍子彈）不同，Bangsar 的生活圈特點是「精緻成熟、多元文化、本地高端與外籍共居」——Telawi 的咖啡館、BSC 的週六市集、Bangsar Village 的下午茶，構成了一個有機成長的城市生活生態，而非開發商人工製造的環境。這是 Bangsar Hill Park 作為「居住地段」的最大不可複製資產。
+    </div>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">最適合者</td><td>外籍 MM2H 持有者尋求住宅 Leasehold 合規資產；追求 Bangsar 成熟生活圈的本地高淨值家庭；投資者以「穩健收益（Net Yield ~2.5–2.9%）+ 中等資本增值」為框架</td></tr>
+            <tr><td>不適合者</td><td>需要最高資本增值（Bangsar YoY +2.6% 是本系列最低增速之一）；預算低於 RM100萬（外籍門檻限制）；對 Leasehold 有原則性排斥</td></tr>
+            <tr><td>外籍最佳進場單位</td><td>3BR / 1,100–1,200 sqft（RM110–120 萬）：恰好超外籍門檻 + 坪數合理 + 租金 RM5,500–7,500/月（Gross Yield ~5.5–6%）</td></tr>
+            <tr><td>議價策略</td><td>掛牌售 122 筆（15%），相對健康；議價空間 3–8%（從發售均價 RM1,000 psf 議至 RM930–960 psf 合理）；Phase 2 定價上漲是議價的反向因素（不利壓價）</td></tr>
+            <tr><td>進場前確認</td><td>① 管理費 psf 精確數字（估 RM0.35–0.50）；② Phase 2 具體定價策略；③ LRT 步行道路安全性（Lorong Maarof 無有蓋通道）；④ brickz 成交量積累後（6–12 個月）重新驗證</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟡 Phase 1 掛牌售率 15%（健康）；掛牌租率 52%（初期陣痛，預期消化）；Phase 2 802戶是 2028 中期不確定性</td></tr>
+            <tr><td>價格趨勢</td><td>🟡 brickz 近零；但 Phase 2 定價上漲是正面錨點；掛牌售起 RM922,500（約 RM943 psf），接近發售</td></tr>
+            <tr><td>租金市場</td><td>🟢 上游報告確認 Bangsar Gross Yield 4–5%；外籍 Net Yield 2.5–2.9%（本系列住宅地契最高）</td></tr>
+            <tr><td>地段定性</td><td>🟢 上游報告明確列入「精品住宅地契低密度公寓，供給管道有限」正面框架</td></tr>
+            <tr><td>資本增值</td><td>🟡 Bangsar YoY +2.6%（穩健但非最高）；Phase 2 漲價是近中期催化劑</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-y" style="margin-top:16px">
+      <strong>🟡 審慎積極考慮（住宅 Leasehold 框架下；外籍 MM2H 自住最合適）——觀望 brickz 成交量積累後確認</strong><br><br>
+      Bangsar Hill Park 是本系列分析建案中地契結構最合理的 Leasehold 建案（住宅地契 vs 其他 Leasehold 商業地契），上游報告明確正面定性，Bangsar 生活圈成熟度高，租金撐底力強，外籍 Net Yield 2.5–2.9% 是本系列 Leasehold 建案最高。對 MM2H 持有者尋求 RM100萬+ 住宅資產、或家庭自住選擇 Bangsar 生活圈，Bangsar Hill Park 是當前 KL 市場中少數值得認真考慮的新案之一。<br><br>
+      <strong>主要保留事項：</strong>① brickz 住宅成交幾乎為零（FIX-03，竣工後首年），定價論點需待 6–12 個月後成交量積累驗證；② 427 筆出租掛牌的初期陣痛需觀察填租速度；③ Leasehold 結構相比 Freehold（R22、Park Place）有 5–15% 的二手折扣；④ Phase 2 在 2028 年帶入 802 戶新增供給是中期不確定性；⑤ LRT 步行 400–600m 非「直連」（需步行）。<br><br>
+      <strong>外籍進場建議：</strong>選 3BR 1,100–1,200 sqft（RM110–120萬，剛超外籍門檻）；持有框架以「穩健住宅租金收益（2.5–2.9% Net）+ 中等資本增值」為主；待 2026 年 brickz 成交量積累 10 筆+ 後重新驗證定價（建議 2026 年底重評）。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Bangsar Hill Park（Verdura Phase 1）@ Lorong Maarof，Bangsar ｜ 建案綜合評分卡</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%；RM1M+ 成交 +11.3%；Bangsar 是 KL 最穩健的高端居住地段之一；外資需求持續；上游報告列入「精品住宅地契，供給有限」正面框架</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Phase 1 掛牌售率 15%（健康）；出租掛牌率 52%（初期，預期改善）；Phase 2 802戶是中期壓力（-1 分）；但 Bangsar 地段租金需求深度優於武吉免登</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">竣工 2025年3月，交屋零風險；Phase 2 定價上漲是近期最強正面催化劑；brickz 成交尚未積累（未到最佳進場信號）；處於「竣工後社區成熟期起點」</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Bank Rakyat-Bangsar LRT（400–600m）+ KL Sentral 1 站（KLIA Express）+ BSC / Bangsar Village 步行 + Telawi 美食街 + Pantai Hospital；Bangsar 成熟生活圈是 KL 最有機生長的精英社區</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">住宅 Leasehold：LTV 80–90%（最寬鬆）；民用電費；MM2H 合規最清晰；4% 印花稅；唯一弱點：外籍門檻 RM100萬（起步 RM835K 略低，需選較大坪數）</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">7.1/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.0×.2 + 6.5×.25 + 7.0×.2 + 8.0×.2 + 7.5×.15 = 7.1</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Sunsuria Bhd（Bursa 上市，多元化）× Suez Capital（KL Gateway 開發商，私人但有實績）；Phase 1 按時竣工（2025年3月）執行信用良好；非頂奢機構 JV（E&O × Mitsui、Lendlease × 財政部）但實績具體</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">發售 RM910–1,083 psf 比 Bangsar 均值 RM765 psf 高 20–40%；Phase 2 漲價是正面錨點；brickz 幾乎無成交（FIX-03 中低置信度）；住宅地契定價合理性比商業地契更容易辯護</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">外籍 Net Yield 2.5–2.9%（本系列住宅 Leasehold 最高；高於多數商業地契建案）；Gross Yield 5–7%；Bangsar 租金有系統性支撐（上游報告）；住宅地契民用電費大幅提升租客接受度</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">LRT 400–600m + KL Sentral 1 站 + Bangsar 成熟生活圈（BSC、Telawi）+ Mid Valley 5 分鐘車程；弱點：LRT 非直連有蓋（步行），非捷運 MRT 雙線</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">8 戶/層（低密度感）；500m 跑道（差異化）；Sunsuria Care 護理站（獨特設施）；接駁巴士；坪數合理（917–1,478 sqft，無超小 Studio）；全無露台是扣分點</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Leasehold 住宅地契——本系列 Leasehold 建案最好地類（vs Pavilion Square、SWNK Houze 的 Leasehold 商業）；93 年剩餘足夠；民用電費；MM2H 最清晰；仍比 Freehold（R22、Park Place）有結構性折扣</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz 住宅成交近零（竣工首年）；掛牌售率 15%（健康，非積壓）；住宅地契買家池廣於商業地契；Bangsar 地段有深度需求基礎；Phase 2 漲價反作用加速 Phase 1 買家進場</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">7.0/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.5×.2+6.5×.2+7.0×.15+7.5×.15+7.0×.1+7.0×.1+6.5×.1 = 7.025 ≈ 7.0</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 7.1 × 40% + B 類 7.0 × 60%</div>
+        <div class="score-big">6.96<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#DCFCE7;color:#166534">⭐⭐⭐⭐ 優質——本系列 Leasehold 建案最高分；Bangsar MM2H 首選</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">2.84 + 4.20 = 7.04 → 取 6.96（FIX-03 brickz 不足折扣）；展示 6.96 反映置信度調整</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>住宅 Leasehold（本系列最優 Leasehold 地類）+ 上游報告明確正面框架（精品住宅地契供給有限）+ Bangsar 成熟生活圈 + 竣工無風險 + 外籍 Net Yield 2.5–2.9%（本系列住宅地契最高）+ Phase 2 漲價正面錨點 + MM2H 合規最清晰。<br>
+          <strong style="color:#fca5a5">主要保留：</strong>Leasehold 比 Freehold 有 5–15% 結構折扣；brickz 住宅成交近零（FIX-03，待 2026 積累）；427 筆出租掛牌的初期陣痛；Phase 2 802戶是 2028 中期供給壓力；Bangsar YoY +2.6%（本系列最低增速地段）；LRT 非直連有蓋（步行 400–600m）。
+        </div>
+      </div>
+    </div>
+
+    <h3>十三個建案完整最終排序</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>外籍 Net Yield</th>
+          <th>B3 Yield</th>
+          <th>B6 產權</th>
+          <th>建議</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="font-weight:700;color:#ca8a04">1</td><td><strong>R22 Mont Kiara</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.2%</td><td>8.5</td><td>9.5</td><td>🟢 進場</td></tr>
+        <tr><td>2</td><td><strong>Park Place DPC</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.4%</td><td>8.5</td><td>9.5</td><td>🟢 進場</td></tr>
+        <tr><td>3</td><td><strong>TRX Residences</strong></td><td style="font-weight:700;color:#16a34a">7.6</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>~1.9–2.3%</td><td>5.0</td><td>7.0</td><td>🟢 增值框架積極考慮</td></tr>
+        <tr><td>4</td><td><strong>The Conlay by E&O</strong></td><td style="font-weight:700;color:#16a34a">7.4</td><td><span class="tag t-y">Freehold 商業</span></td><td>~2.5–3.0%</td><td>6.5</td><td>5.5</td><td>🟢 審慎積極考慮</td></tr>
+        <tr style="background:#F0FDF4"><td>5</td><td><strong>Bangsar Hill Park 🆕</strong></td><td style="font-weight:700;color:#16a34a">6.96</td><td><span class="tag t-y">Leasehold 住宅</span></td><td style="color:#16a34a"><strong>~2.5–2.9%（最高）</strong></td><td style="font-weight:700">7.0</td><td style="font-weight:700">7.0</td><td>🟡 審慎積極考慮（brickz 待確認）</td></tr>
+        <tr><td>6</td><td><strong>CloutHaus KLCC</strong></td><td style="font-weight:700;color:#d97706">6.7</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.9–2.2%</td><td>5.5</td><td>5.0</td><td>🟡 觀望</td></tr>
+        <tr><td>7</td><td><strong>SWNK Houze BBCC</strong></td><td style="font-weight:700;color:#d97706">6.2</td><td><span class="tag t-r">Leasehold 商業</span></td><td>~1.9–2.3%</td><td>5.0</td><td>2.5</td><td>🟡 本地可；🔴 外籍不推</td></tr>
+        <tr><td>8</td><td><strong>TS2 武吉免登 🔵</strong></td><td style="font-weight:700;color:#3b82f6">6.0</td><td><span class="tag t-y">Freehold 商業</span></td><td>功能性定位</td><td>3.5</td><td>6.5</td><td>🔵 功能性持有</td></tr>
+        <tr><td>9</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="font-weight:700;color:#f97316">5.7</td><td><span class="tag t-g">SOHO HDA 商業</span></td><td>SOHO 2.8–3.4%</td><td>6.0</td><td>5.0</td><td>🟡 SOHO條件性；🔴 SOVO迴避</td></tr>
+        <tr><td>10</td><td><strong>Stonor 3 KLCC</strong></td><td style="font-weight:700;color:#dc2626">5.7</td><td><span class="tag t-y">商業地契 HDA</span></td><td>~1.9–2.3%</td><td>4.0</td><td>4.5</td><td>🔴 暫緩</td></tr>
+        <tr><td>11</td><td><strong>Pavilion DH</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.7–2.1%</td><td>4.5</td><td>5.5</td><td>🟡 觀望</td></tr>
+        <tr><td>12</td><td><strong>Pavilion Square</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-r">Leasehold 商業</span></td><td>~1.5–1.9%</td><td>3.0</td><td>2.0</td><td>🔴 投資框架暫緩；🟡 純自住可</td></tr>
+        <tr><td>13</td><td><strong>Orion Residence BB</strong></td><td style="font-weight:700;color:#dc2626">5.2</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.2–1.5%</td><td>2.5</td><td>4.0</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">🔑 Bangsar Hill Park（6.96，四捨五入約 7.0）排名第5，成為本系列第一個以 Leasehold 住宅地契進入前五的建案。其核心優勢是住宅地契結構（B6 7.0）+ Bangsar 成熟地段（A4 8.0）+ 租金撐底力（B3 7.0）的組合，完全符合上游報告「精品住宅地契低密度公寓，供給有限，外資持續湧入」的正面框架。與 The Conlay（7.4）差距 0.4 分的主因：Leasehold 折扣（vs Freehold）+ brickz FIX-03 資料不足 + Bangsar YoY +2.6% 增速較低。⚠️ 建議 2026 下半年 brickz 成交量積累後重新驗證，若積累至 10 筆+ 且 PSF 在 RM900–1,050 範圍，評分可上調至 7.1–7.2。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL RM1M+ 高端住宅市場深度研究（2026-03）｜KL 供需 Overhang 深度分析（2026-04-01）｜bangsarhillpark.com 官方 HDA 文件（Leasehold 至2119-10-13；住宅地契；Block D+E 812 戶；Block B+C 802 戶竣工 2028-01）｜PropertyGuru（122 筆掛牌售，起 RM922,500；住宅地契確認）｜iProperty.com.my（427 筆掛牌租，起 RM4,200）｜brickz.my（Bangsar 地段 229 筆，中位 RM765 psf；Bangsar Hill Park Verdura 住宅成交近零，FIX-03 中低置信度）｜The Edge Malaysia（GDV RM30.1億）｜SmartInvest Malaysia（Top 10 KL Projects 2026）<br>
+  ⚠️ iRumah 「Bangsar Hill Park」條目（RM750 psf，3,257 units）為舊版 Pangsapuri Sri Pahang，非本報告 Verdura Phase 1。管理費 psf 未公開確認（估 RM0.35–0.50）。外籍進場需選 RM100萬+ 單位（約 3BR 1,100 sqft+）。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

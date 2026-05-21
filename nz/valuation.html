@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valuation Monitor | NZ Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+      <h1><span class="lang-en">Valuation Monitor</span><span class="lang-zh" style="display:none">估值監測</span></h1>
+      <p class="subtitle"><span class="lang-en">Yields, Spreads &amp; Peak Discount Analysis</span><span class="lang-zh" style="display:none">收益率、利差與高峰折價分析</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">VALUATION METRICS</span><span class="lang-zh" style="display:none">估值指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">AUCKLAND P/R RATIO</span><span class="lang-zh" style="display:none">奧克蘭房價租金比</span></div>
+        <div class="kpi-value">~21x</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Elevated</span><span class="lang-zh" style="display:none">偏高</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">NATIONAL YIELD</span><span class="lang-zh" style="display:none">全國收益率</span></div>
+        <div class="kpi-value">4.12%</div>
+        <span class="kpi-badge badge-green">2025</span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">YIELD SPREAD vs OCR</span><span class="lang-zh" style="display:none">利差 vs OCR</span></div>
+        <div class="kpi-value">+0.87%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Positive</span><span class="lang-zh" style="display:none">正利差</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">AUCKLAND vs PEAK</span><span class="lang-zh" style="display:none">奧克蘭 vs 高峰</span></div>
+        <div class="kpi-value">-18%</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">From Nov 2021 peak</span><span class="lang-zh" style="display:none">距2021年11月高峰</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">CHRISTCHURCH vs PEAK</span><span class="lang-zh" style="display:none">基督城 vs 高峰</span></div>
+        <div class="kpi-value">-NZ$4K</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Near peak</span><span class="lang-zh" style="display:none">接近高峰</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">NATIONAL vs PEAK</span><span class="lang-zh" style="display:none">全國 vs 高峰</span></div>
+        <div class="kpi-value">-9%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Recovering</span><span class="lang-zh" style="display:none">復甦中</span></span>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid two-col" style="margin-top:20px;">
+      <div class="chart-card">
+        <h3><span class="lang-en">Distance from Peak Price</span><span class="lang-zh" style="display:none">距高峰價格差距</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">% below peak median by region</span><span class="lang-zh" style="display:none">各區中位價距高峰跌幅 (%)</span></p>
+        <div style="position:relative;height:260px;"><div id="chartNzPeakDiscount" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Yield vs OCR</span><span class="lang-zh" style="display:none">收益率 vs OCR</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Gross rental yield vs Official Cash Rate</span><span class="lang-zh" style="display:none">毛租金收益率 vs 官方現金利率</span></p>
+        <div style="position:relative;height:260px;"><div id="chartNzYieldSpread" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">APAC Price-to-Income Ratio</span><span class="lang-zh" style="display:none">亞太房價收入比</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Median house price / median household income</span><span class="lang-zh" style="display:none">中位房價 / 中位家庭收入</span></p>
+        <div style="position:relative;height:320px;"><div id="chartNzAPAC" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">REINZ &middot; RBNZ &middot; Demographia &middot; CoreLogic NZ Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">REINZ &middot; RBNZ &middot; Demographia &middot; CoreLogic NZ 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  function fmtNZD(v){if(v>=1000000)return 'NZ$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return 'NZ$'+Math.round(v/1000)+'K';return 'NZ$'+v;}
+  function fmtNZDShort(v){if(v>=1000000)return(v/1000000).toFixed(2)+'M';if(v>=1000)return Math.round(v/1000)+'K';return v.toString();}
+  var baseText={color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+
+    // chartNzPeakDiscount: Horizontal bar
+    var c1=echarts.init(document.getElementById('chartNzPeakDiscount'));allCharts.push(c1);
+    var pdLabels=['Christchurch','National','Auckland','Wellington'];
+    var pdVals=[-0.6,-9.0,-18.0,-24.6];
+    c1.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': '+p[0].value+'%';}}),
+      grid:{left:20,right:50,top:20,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
+      yAxis:mkAxis({type:'category',data:pdLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+      series:[{
+        type:'bar',
+        data:pdVals.map(function(v){
+          var col=C.orange;
+          if(Math.abs(v)<2)col=C.green;
+          else if(v<=-15)col=C.red;
+          return{value:v,itemStyle:{color:col,borderRadius:v>=0?[0,4,4,0]:[4,0,0,4]}};
+        }),
+        barMaxWidth:24,
+        label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:11,fontFamily:'JetBrains Mono'}
+      }]
+    });
+
+    // chartNzYieldSpread: Dual line yield vs OCR
+    var c2=echarts.init(document.getElementById('chartNzYieldSpread'));allCharts.push(c2);
+    c2.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'毛收益率':'Gross Yield','OCR']}),
+      grid:{left:50,right:20,top:45,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:['2021','2022 H1','2022 H2','2023','2024','2025','2026 Jan']}),
+      yAxis:mkAxis({type:'value',min:0,max:6,axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
+      series:[
+        {name:lang==='zh'?'毛收益率':'Gross Yield',type:'line',data:[3.2,3.0,3.5,4.2,4.1,4.0,4.12],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},areaStyle:{color:'rgba(22,163,74,0.08)'},symbol:'circle',symbolSize:5},
+        {name:'OCR',type:'line',data:[0.25,3.0,5.5,5.5,4.25,3.25,3.25],lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red},step:'middle',symbol:'circle',symbolSize:5}
+      ]
+    });
+
+    // chartNzAPAC: Horizontal bar P/I ratio
+    var c3=echarts.init(document.getElementById('chartNzAPAC'));allCharts.push(c3);
+    var apLabels=['Christchurch','Auckland','Melbourne','Sydney','Tokyo','Taipei','Singapore','Hong Kong'];
+    var apVals=[7.2,11.0,12.0,13.5,15.1,15.4,22.0,47.0];
+    c3.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': '+p[0].value+'x';}}),
+      grid:{left:20,right:50,top:20,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:'{value}x'})}),
+      yAxis:mkAxis({type:'category',data:apLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+      series:[{
+        type:'bar',
+        data:apVals.map(function(v){
+          var col=C.navy;
+          if(v<10)col=C.green;
+          else if(v>=15)col=C.red;
+          return{value:v,itemStyle:{color:col,borderRadius:[0,4,4,0]}};
+        }),
+        barMaxWidth:22,
+        label:{show:true,position:'right',formatter:function(p){return p.value+'x';},fontSize:10,fontFamily:'JetBrains Mono'}
+      }]
+    });
+  }
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

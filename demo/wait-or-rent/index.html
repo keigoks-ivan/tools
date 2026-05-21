@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Should Mr. Chang buy or keep renting? | Walkthrough | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="../../css/style.css">
+<style>
+.lang-zh{display:none}
+
+/* ── Reverse-outcome banner ── */
+.outcome-banner{
+  background:linear-gradient(135deg,#1e40af 0%,#1d4ed8 60%,#2563eb 100%);
+  color:#dbeafe;
+  border-radius:8px;
+  padding:16px 22px;
+  margin-bottom:18px;
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+}
+.outcome-banner .ob-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.outcome-banner .ob-body{flex:1}
+.outcome-banner .ob-label{font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#93c5fd;text-transform:uppercase;margin-bottom:4px}
+.outcome-banner .ob-title{font-size:14px;font-weight:700;color:#fff;line-height:1.35;margin-bottom:4px}
+.outcome-banner .ob-sub{font-size:12px;color:#bfdbfe;line-height:1.6}
+
+/* ── Persona Card (top) ── */
+.persona-card{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#e2ecf8;border-radius:8px;padding:26px 28px;margin:0 0 24px;position:relative;overflow:hidden}
+.persona-card::after{content:'🏠';position:absolute;top:-20px;right:-10px;font-size:140px;opacity:.06}
+.persona-card .pc-eyebrow{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.persona-card .pc-title{font-size:22px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:8px;letter-spacing:-.01em}
+.persona-card .pc-tag{font-size:13px;color:#a8c0d8;line-height:1.6;max-width:780px;margin-bottom:18px}
+.pc-profile{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);margin-bottom:14px}
+.pc-profile-item .lbl{font-size:9px;letter-spacing:.10em;color:#5a8ab5;font-weight:600;text-transform:uppercase}
+.pc-profile-item .val{font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-weight:500;margin-top:3px}
+.pc-questions{font-size:11.5px;line-height:1.65;color:#a8c0d8}
+.pc-questions strong{color:#f59e0b;font-weight:600;display:block;margin-bottom:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pc-questions ol{margin:0;padding:0 0 0 18px}
+.pc-questions li{margin-bottom:3px}
+
+/* ── Section heading ── */
+.demo-section{margin:32px 0 8px}
+.demo-section .sec-no{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:.08em}
+.demo-section h2{font-size:18px;font-weight:700;color:#1e3a5f;line-height:1.3;margin:2px 0 4px;letter-spacing:-.005em}
+.demo-section .sec-sub{font-size:12px;color:#5a7a9a;line-height:1.6;max-width:780px}
+
+/* ── Phase label ── */
+.phase-label{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:#f0f6ff;
+  border:1px solid #bfdbfe;
+  border-radius:20px;
+  padding:5px 14px;
+  font-size:11px;
+  font-weight:700;
+  color:#1d4ed8;
+  letter-spacing:.05em;
+  margin:18px 0 8px;
+}
+.phase-label.phase-b{background:#fff8f0;border-color:#fed7aa;color:#c2410c}
+.phase-label.phase-c{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+
+/* ── Demo Step ── */
+.demo-step{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:36px 1fr;gap:16px}
+.demo-step .step-no{width:32px;height:32px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;font-family:'JetBrains Mono',monospace}
+.demo-step .step-content h4{font-size:14px;font-weight:600;color:#1e3a5f;margin-bottom:4px;line-height:1.35}
+.demo-step .step-url{font-family:'JetBrains Mono',monospace;font-size:11px;margin-bottom:10px}
+.demo-step .step-url a{color:#2563eb;text-decoration:none}
+.demo-step .step-url a:hover{text-decoration:underline}
+.demo-step .step-action{background:#eff6ff;border-left:3px solid #2563eb;padding:9px 12px;font-size:11.5px;color:#1e3a5f;line-height:1.6;margin-bottom:10px;border-radius:0 4px 4px 0}
+.demo-step .step-action strong{color:#1e3a5f;font-weight:600;display:inline-block;margin-right:4px}
+.demo-step .step-see{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:8px}
+.demo-step .step-see strong{color:#1e3a5f;font-weight:600}
+.demo-step .step-meaning{background:#fffbeb;border-left:3px solid #d97706;padding:9px 12px;font-size:11.5px;color:#78350f;line-height:1.6;margin-top:6px;border-radius:0 4px 4px 0}
+.demo-step .step-meaning strong{color:#92400e;font-weight:600}
+.demo-step .step-screenshot{background:#f4f7fc;border:1px solid #ccd9e8;border-radius:4px;margin-top:12px;overflow:hidden;line-height:0}
+.demo-step .step-screenshot img{display:block;width:100%;height:auto}
+
+/* Signal pill inline in step titles */
+.signal-pill{
+  display:inline-block;
+  padding:2px 9px;
+  border-radius:10px;
+  font-size:10px;
+  font-weight:700;
+  margin-left:6px;
+  vertical-align:middle;
+}
+.signal-wait{background:#fee2e2;color:#991b1b}
+.signal-caution{background:#fef9c3;color:#854d0e}
+.signal-check{background:#dcfce7;color:#166534}
+
+/* ── Cheat sheet ── */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.cheat-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:14px 18px}
+.cheat-card h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cheat-card .ck-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#eef3f9;color:#1e3a5f;font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.cheat-card p{font-size:11.5px;color:#4a6080;line-height:1.6}
+.cheat-card .ck-tip{margin-top:6px;font-size:11px;color:#5a7a9a;font-style:italic}
+.cheat-card code{background:#eef3f9;color:#1e3a5f;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px}
+
+/* ── Takeaway box ── */
+.takeaway{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.takeaway-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px}
+.takeaway-card.answered{border-left:4px solid #16a34a}
+.takeaway-card.outsource{border-left:4px solid #d97706}
+.takeaway-card h4{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;letter-spacing:-.005em}
+.takeaway-card ul{list-style:none;padding:0;margin:0}
+.takeaway-card li{font-size:12px;color:#4a6080;line-height:1.6;padding:5px 0 5px 22px;position:relative}
+.takeaway-card.answered li::before{content:'✓';position:absolute;left:0;top:5px;color:#16a34a;font-weight:700}
+.takeaway-card.outsource li::before{content:'→';position:absolute;left:0;top:5px;color:#d97706;font-weight:700}
+.takeaway-card li strong{color:#1e3a5f;font-weight:600}
+
+/* ── Revisit conditions card ── */
+.revisit-card{background:#fff;border:0.5px solid #ccd9e8;border-left:4px solid #2563eb;border-radius:4px;padding:16px 20px;margin:14px 0}
+.revisit-card h4{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px}
+.revisit-card ul{list-style:none;padding:0;margin:0}
+.revisit-card li{font-size:12px;color:#4a6080;line-height:1.6;padding:4px 0 4px 22px;position:relative}
+.revisit-card li::before{content:'◇';position:absolute;left:0;top:4px;color:#2563eb;font-weight:700;font-size:11px}
+.revisit-card li strong{color:#1e3a5f;font-weight:600}
+
+/* ── PDF button ── */
+.pdf-bar{display:flex;gap:10px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap}
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;background:#1e3a5f;color:#fff;border:none;padding:12px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{background:#0f1e33}
+.pdf-btn.ghost{background:#fff;color:#1e3a5f;border:1px solid #ccd9e8}
+.pdf-btn.ghost:hover{border-color:#1e3a5f}
+
+/* ── Best Option Block ── */
+.best-option{margin:6px 0 16px}
+.bo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.bo-card{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #d97706;border-radius:4px;padding:14px 16px}
+.bo-card .bo-lbl{font-size:9px;letter-spacing:.1em;color:#5a7a9a;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.bo-card .bo-val{font-size:14px;font-weight:600;color:#1e3a5f;line-height:1.35;margin-bottom:6px;letter-spacing:-.005em}
+.bo-card .bo-note{font-size:11px;color:#5a7a9a;line-height:1.5}
+.bo-section{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:16px 20px;margin-bottom:10px}
+.bo-section h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:10px;line-height:1.35}
+.bo-checklist ul,.bo-next ol{margin:0;padding-left:18px}
+.bo-checklist li,.bo-next li{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:6px}
+.bo-bottomline{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#fff;border-radius:6px;padding:20px 24px;margin-top:14px}
+.bo-bottomline .bo-bl-label{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;display:block;margin-bottom:8px;text-transform:uppercase}
+.bo-bottomline p{font-size:14px;line-height:1.6;color:#fff;margin:0}
+@media (max-width:720px){.bo-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Print ── */
+@media print {
+  @page{size:A4;margin:14mm}
+  body{background:#fff!important}
+  #nav-root,.lang-switcher,.pdf-bar,.demo-back{display:none!important}
+  .bo-grid{grid-template-columns:repeat(4,1fr)!important}
+  .bo-bottomline{background:#1e3a5f!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .container{max-width:100%!important;padding:0!important}
+  .persona-card,.demo-step,.cheat-card,.takeaway-card{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  .persona-card::after{display:none}
+  .demo-section{break-after:avoid;page-break-after:avoid}
+  .step-screenshot{padding:18px;font-size:10px}
+  a{color:#1e3a5f!important;text-decoration:none}
+}
+
+@media (max-width:760px){
+  .pc-profile{grid-template-columns:repeat(2,1fr);gap:10px}
+  .demo-step{grid-template-columns:1fr;gap:10px}
+  .demo-step .step-no{margin-bottom:-4px}
+  .persona-card{padding:20px 18px}
+  .persona-card .pc-title{font-size:18px}
+  .cheat-grid,.takeaway{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="container">
+
+  <!-- Breadcrumb -->
+  <div class="demo-back" style="font-size:11px;color:#5a7a9a;margin-bottom:12px;font-family:'JetBrains Mono',monospace">
+    <a href="/demo/" style="color:#2563eb;text-decoration:none">← <span class="lang-en">All walkthroughs</span><span class="lang-zh">所有導覽</span></a>
+    <span style="color:#aabdd4;margin:0 8px">/</span>
+    <span><span class="lang-en">Mr. Chang reality-checks buying a Taipei apartment — and the site says: not yet</span><span class="lang-zh">張先生用數據檢驗「現在買台北房」— 結論：先等等</span></span>
+  </div>
+
+  <!-- ── REVERSE-OUTCOME BANNER ── -->
+  <div class="outcome-banner">
+    <div class="ob-icon">&#x2139;</div>
+    <div class="ob-body">
+      <div class="ob-label"><span class="lang-en">Reverse-outcome walkthrough</span><span class="lang-zh">反向結論導覽</span></div>
+      <div class="ob-title">
+        <span class="lang-en">This walkthrough's conclusion is "don't buy now" — and that's a valid use of the site.</span>
+        <span class="lang-zh">這份導覽的結論是「先不要買」— 這是本站完全合理的用途。</span>
+      </div>
+      <div class="ob-sub">
+        <span class="lang-en">Other walkthroughs assume the user has already decided to buy and use this site to find <em>what</em> to buy. This one helps you decide whether to start at all. The site's job here is <strong>honest assessment</strong>, not selling. Mr. Chang walks away keeping his NT$5M invested — and with a clear list of conditions that would change his mind in 18–24 months.</span>
+        <span class="lang-zh">其他導覽假設使用者已決定要買，並用本站找「買什麼」。這份導覽幫你決定「要不要開始」。本站在這裡的角色是<strong>誠實評估</strong>，而非推銷。張先生最後決定繼續租，並把 NT$500 萬保留在投資組合裡——同時列出一份清單，記錄哪些條件改變時他會重新評估。</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 1 — PERSONA CARD                       -->
+  <!-- ============================================== -->
+  <div class="persona-card">
+    <div class="pc-eyebrow"><span class="lang-en">USE CASE WALKTHROUGH · 06 · A SITE TOUR THROUGH MR. CHANG'S EYES</span><span class="lang-zh">情境導覽 · 06 · 跟著張先生逛這個網站</span></div>
+    <div class="pc-title">
+      <span class="lang-en">Meet Mr. Chang — Taipei software engineer, NT$5M saved, wondering if he should finally stop renting</span>
+      <span class="lang-zh">認識張先生 — 台北軟體工程師，存款 NT$500 萬，在想是不是該停止租屋了</span>
+    </div>
+    <p class="pc-tag">
+      <span class="lang-en">張先生 (Mr. Chang, 35, Taipei, mid-career software engineer) has NT$5M in savings, and his parents may contribute another NT$3M. His friends and family have been telling him for years to "stop renting and buy" — the classic Taiwanese homeownership pressure. He arrives at Property Monitor <strong>not to find which apartment to buy</strong>, but to <strong>reality-check whether buying now makes sense at all</strong>. Does the data support buying a Taipei apartment in 2026? Or does it say wait, keep renting, and put the NT$5M to work somewhere else? This walkthrough shows how each site tool reads for his specific situation — and the cumulative answer is <em>not yet</em>. It is <strong>not</strong> investment advice, tax advice, or a property recommendation.</span>
+      <span class="lang-zh">張先生，35 歲，台北，科技業中階工程師，存款 NT$500 萬，父母可能再補助 NT$300 萬。身邊的朋友、家人多年來一直叫他「別再租、趕快買」—— 典型的台灣購屋壓力。他來到 Property Monitor <strong>不是為了找哪間房子買</strong>，而是要<strong>用數據檢驗現在買房究竟合不合理</strong>。2026 年買台北房，數據支持嗎？還是說應該先等、繼續租、把 NT$500 萬投在別的地方？這份導覽展示站上各工具如何對應他的處境——累積結果是<em>先等等</em>。本文<strong>不是</strong>投資建議、稅務建議或特定房產推薦。</span>
+    </p>
+
+    <div class="pc-profile">
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Persona</span><span class="lang-zh">使用者</span></div><div class="val">Mr. Chang · 35y</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Location</span><span class="lang-zh">所在地</span></div><div class="val">Taipei · TW</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Savings</span><span class="lang-zh">存款</span></div><div class="val">NT$5M own</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Decision</span><span class="lang-zh">決策</span></div><div class="val"><span class="lang-en">Buy NOW?</span><span class="lang-zh">現在買？</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Outcome</span><span class="lang-zh">結果</span></div><div class="val" style="color:#fbbf24"><span class="lang-en">Wait + REIT</span><span class="lang-zh">等待＋REIT</span></div></div>
+    </div>
+
+    <div class="pc-questions">
+      <strong><span class="lang-en">Questions Mr. Chang came to answer</span><span class="lang-zh">張先生想在這個網站找到答案的問題</span></strong>
+      <ol>
+        <li><span class="lang-en">Where do I check if the Taipei property cycle is actually a good entry point right now?</span><span class="lang-zh">在哪裡確認台北房市目前是否真的是好的進場時機？</span></li>
+        <li><span class="lang-en">Where is the analyst narrative on Taiwan's market timing and valuation extremes?</span><span class="lang-zh">哪裡有分析師對台灣市場時機和估值極端的敘述？</span></li>
+        <li><span class="lang-en">Where's the buy-vs-rent calculator — and how do I read its breakeven output for Taipei?</span><span class="lang-zh">買 vs 租的計算機在哪？怎麼解讀台北的回本年試算結果？</span></li>
+        <li><span class="lang-en">What's the carry math saying — if I borrow to buy, am I paying to hold or earning from it?</span><span class="lang-zh">利差數學怎麼說 — 如果我貸款買，是在付錢持有還是賺錢持有？</span></li>
+        <li><span class="lang-en">Is there a supply wave coming in Taiwan that would compress my future sale price?</span><span class="lang-zh">台灣未來有供給浪潮嗎？這會壓低我將來的賣出價格嗎？</span></li>
+        <li><span class="lang-en">If the answer is "wait," where should my NT$5M go in the meantime — can this site show me REIT alternatives?</span><span class="lang-zh">如果答案是「等等」，那 NT$500 萬這段時間要放哪裡？這個網站能讓我看到 REIT 替代方案嗎？</span></li>
+        <li><span class="lang-en">What specific conditions would make me reconsider buying in 12–24 months — so I know when to return to the site and re-run this analysis?</span><span class="lang-zh">哪些具體條件改變後我應該重新考慮買房——讓我知道什麼時候回到這個網站重新評估？</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 2 — THE JOURNEY                        -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 02</div>
+    <h2><span class="lang-en">Mr. Chang's reality-check tour — 12 stops</span><span class="lang-zh">張先生的現實核查旅程 — 12 個停靠點</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">Each stop is a real page on the site. The arc: Phase A uses buy-side market tools and finds mounting caution signals. Phase B runs cross-market tools that confirm negative carry, an incoming supply wave, and a long buy-vs-rent breakeven. Phase C shows what to do instead — REIT allocation and a watchlist for when to revisit. Follow along in another tab — every URL works.</span>
+      <span class="lang-zh">每個停靠點都是站上的一頁實際畫面。三階段弧線：Phase A 用買方市場工具，發現越來越多謹慎訊號；Phase B 運行跨市場工具，確認負 carry、即將來臨的供給浪潮、以及漫長的買 vs 租回本期；Phase C 展示替代方案——REIT 配置，以及重新評估的觀察清單。建議另開分頁跟著走——所有連結都能直接點。</span>
+    </p>
+  </div>
+
+  <!-- ════════════════════════════════ -->
+  <!-- PHASE A — "Hopeful" entry         -->
+  <!-- ════════════════════════════════ -->
+  <div class="phase-label">
+    <span>A</span>
+    <span class="lang-en">Phase A — Hopeful entry (buy-side tools, mounting signals)</span>
+    <span class="lang-zh">Phase A — 帶著期待進來（買方工具，訊號開始累積）</span>
+  </div>
+
+  <!-- STOP 1 -->
+  <div class="demo-step">
+    <div class="step-no">1</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Home page — "I want yield" persona, world scatter</span>
+        <span class="lang-zh">首頁 — 選「我要收租」persona，世界散點圖</span>
+        <span class="signal-check">entry point</span>
+      </h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">opens the home page. He's framing his decision as an investment — "will this apartment yield me more than just leaving the money in savings?" He sees three persona cards: <strong>"I want yield / I want growth / I want a passport."</strong> He clicks <strong>"I want yield / 我要收租"</strong> to orient the site toward the income-vs-cost lens he needs for the buy-or-wait decision.</span>
+        <span class="lang-zh">打開首頁。他把這個決策框架定位為投資——「這間房能讓我比把錢放定存賺得更多嗎？」看到三張 persona 卡：<strong>「我要收租 / 我要增值 / 我要身分」</strong>。點 <strong>「我要收租 / I want yield」</strong>，讓網站切換到他需要的「收入 vs 成本」角度。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> the chosen card lights up amber with a checkmark. The world scatter chart beneath the hero — "Carry × 10-year growth, every city plotted" — highlights yield-leading dots. He can visually see where Taipei sits relative to high-yield markets globally. The Top-5 strip reweights to yield-leading cities. This is his first orientation: which markets earn more than they cost to hold.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>選中的卡片變琥珀色亮起並打勾。Hero 下方的世界散點圖「利差 × 10 年漲幅，每城一點」高亮 yield 領先的點。他可以視覺上看到台北相對於全球高 yield 市場的位置。下方 Top-5 列表重新以 yield 領先城市排序。這是他的第一次定向：哪些市場賺得比持有成本多。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">the persona pick sets the whole page to yield-first mode. He's not just asking "can I afford it?" — he's asking "does the income math work?" If the site consistently shows Taipei in the low-yield cluster, that's the first signal against buying now.</span>
+        <span class="lang-zh">persona 選擇把整頁切換到以 yield 為先的模式。他不只問「我負擔得起嗎？」——他問的是「收入數學成立嗎？」如果網站一直把台北放在低 yield 群組，那就是反對現在買的第一個訊號。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/01-home-yield.png" alt="Home page with yield persona active and world scatter" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 2 -->
+  <div class="demo-step">
+    <div class="step-no">2</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Home — world map scatter, find Taipei's coordinates</span>
+        <span class="lang-zh">首頁 — 世界地圖散點，找台北的位置</span>
+        <span class="signal-caution">first caution</span>
+      </h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a> · <span class="lang-en">map section</span><span class="lang-zh">地圖區段</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">scrolls to the world map. He uses the metric toggle above the map to switch between <strong>Yield / Carry / 10yr / Pipeline</strong>. He hovers over the Taiwan dot; a tooltip appears with Taipei's Yield, Carry, 10yr price return, PTI (price-to-income), and Vacancy numbers. He notes: Taipei's yield is low relative to other cities in the scatter. He clicks <em>"Deep dive →"</em> in the tooltip to go to the Taiwan market section.</span>
+        <span class="lang-zh">捲到世界地圖。用地圖上方的指標切換鍵在 <strong>Yield / Carry / 10yr / Pipeline</strong> 之間切換。將游標移到台灣的點上；tooltip 彈出台北的 Yield、Carry、10 年漲幅、PTI（房價所得比）、空屋率數字。他注意到：台北的 yield 在散點圖中相對其他城市偏低。點 tooltip 內的 <em>「Deep dive →」</em> 進入台灣市場區段。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> the scatter places Taipei in the lower-left quadrant — low carry, moderate 10yr growth. The metric toggle lets him check all four dimensions: Yield (how much income the property generates), Carry (yield minus mortgage cost — does the property pay for itself?), 10yr (historical price appreciation), Pipeline (supply wave risk). He can see at a glance how Taipei compares across all 81 tracked cities.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>散點把台北放在左下象限 — 低 carry、中等 10 年漲幅。指標切換鍵讓他一次查看四個維度：Yield（房產能產生多少收入）、Carry（yield 減房貸成本 — 物件能自我支付嗎？）、10yr（歷史房價增幅）、Pipeline（供給浪潮風險）。他可以一目了然地看到台北在 81 個追蹤城市中的相對位置。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">the scatter diagram is his global reality check before he drills into Taiwan data. If Taipei consistently appears in the low-yield / negative-carry zone, that's not a site bias — it's the market math. His question now becomes: is the 10yr appreciation story strong enough to compensate for earning almost nothing from rent income?</span>
+        <span class="lang-zh">散點圖是他深入台灣數據之前的全球現實核查。如果台北始終出現在低 yield / 負 carry 區，那不是網站偏見——而是市場數學的結果。他現在的問題是：10 年增幅的故事夠強嗎？能補償幾乎賺不到租金收入的損失嗎？</span>
+      </div>
+      <div class="step-screenshot"><img src="img/02-home-scatter.png" alt="World scatter map with Taipei tooltip showing yield and carry" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 3 -->
+  <div class="demo-step">
+    <div class="step-no">3</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Taiwan Dashboard — market temperature KPIs</span>
+        <span class="lang-zh">台灣 Dashboard — 市場溫度 KPI 總覽</span>
+        <span class="signal-caution">caution signals</span>
+      </h4>
+      <div class="step-url"><a href="/tw/">myproperty.investmquest.com/tw/</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">navigates to the Taiwan market dashboard. He reads through the three KPI rows: <strong>Market Temperature</strong> (transaction volume, presale average price, loan approval rate, gross yield), <strong>Affordability Pressure</strong> (yield spread vs CBC rate, Taipei median multiple, national median multiple, vacancy rate), and <strong>Demand Momentum</strong> (regional appreciation, mortgage burden ratio, CBC policy rate). He notes the badge colors — green means favorable, orange means watch, red means stress.</span>
+        <span class="lang-zh">進入台灣市場 dashboard。閱讀三列 KPI：<strong>市場溫度</strong>（成交量、預售屋均價、房貸核准率、租金收益率）、<strong>負擔壓力</strong>（利差 vs 央行利率、台北中位倍數、全國中位倍數、空屋率）、<strong>需求動能</strong>（區域漲幅、房貸負擔率、央行政策利率）。他注意到徽章顏色 — 綠色表示有利，橙色表示觀察，紅色表示壓力。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees (6 KPI sections):</strong> Market Temperature with current transaction counts and presale price benchmarks; Affordability Pressure showing yield spread near zero and a Taipei median multiple in severely unaffordable territory; Demand Momentum showing the CBC rate and regional price variance. Six charts below the KPIs cover: House Price Index trend, average price by major city, transaction volume trend, rental yield by city, mortgage burden ratio trend, and new launches vs transactions.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼（6 組 KPI）：</strong>市場溫度含成交量與預售屋均價基準；負擔壓力顯示利差趨近於零、台北中位倍數在嚴重不可負擔區間；需求動能顯示央行利率和各地價差。KPI 下方 6 張圖涵蓋：房價指數趨勢、六都均價比較、成交量趨勢、各城市租金收益率、房貸負擔率趨勢、新推案 vs 成交量。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">the dashboard gives him the market-wide context. He's looking for green badges — signals that buying conditions have normalized. If most KPIs are red or orange, that's the site telling him: the macro setup isn't favorable for a new buyer entering now. He reads the charts as a professional would: not "is it going up?" but "at what cost, and for whom?"</span>
+        <span class="lang-zh">dashboard 給了他市場整體背景。他在尋找綠色徽章——表示購買條件已正常化的訊號。如果大部分 KPI 是紅色或橙色，那就是網站告訴他：宏觀環境對現在進場的新買家並不友善。他像專業人士一樣讀圖：不問「它在漲嗎？」而是問「要付多少代價？對誰有利？」</span>
+      </div>
+      <div class="step-screenshot"><img src="img/03-tw-dashboard.png" alt="Taiwan market dashboard with KPI rows" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 4 -->
+  <div class="demo-step">
+    <div class="step-no">4</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Taiwan Valuation Monitor — P/R ratio and affordability extremes</span>
+        <span class="lang-zh">台灣估值監測 — 租金比與負擔能力極端值</span>
+        <span class="signal-wait">wait signal</span>
+      </h4>
+      <div class="step-url"><a href="/tw/valuation.html">myproperty.investmquest.com/tw/valuation</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">clicks to the Valuation Monitor page. This is the most critical stop for his buy-or-wait question. He reads the six KPI cards: <strong>Taipei P/R Ratio</strong>, <strong>National PIR</strong>, <strong>Taipei PIR</strong>, <strong>Taipei Gross Yield</strong>, <strong>CPI Rent YoY</strong>, and <strong>Yield Spread vs CBC</strong>. Then he examines the four charts: PIR by City (bar chart), Mortgage Burden Rate by City, Yield vs CBC Rate trend, and National PIR Trend.</span>
+        <span class="lang-zh">進入估值監測頁面。這是買或等問題最關鍵的停靠點。他讀取六張 KPI 卡：<strong>台北租金比（P/R）</strong>、<strong>全國房價所得比</strong>、<strong>台北房價所得比</strong>、<strong>台北毛收益率</strong>、<strong>CPI 租金年增率</strong>、<strong>利差 vs 央行</strong>。然後閱讀四張圖：各城市房價所得比（橫條圖）、各城市房貸負擔率、租金回報率 vs 央行利率趨勢、全國房價所得比趨勢。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> The P/R ratio KPI card reads <strong>75x</strong> for Taipei — meaning it takes 75 months of rent income to equal the property price. The Gross Yield KPI shows <strong>1.1–2.5%</strong>, with the badge flagging it is below bank deposit rate. The Yield Spread vs CBC card shows near-zero carry. The insight box on the Yield vs CBC Rate chart reads: "Spread near zero — Taiwan property yields barely cover borrowing cost. Capital appreciation is the sole return driver for leveraged investors." The Valuation Framework cards below explain Managed Bubble, Rental Catch-Up, and Construction Cost Floor dynamics.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>台北的 P/R 比 KPI 卡顯示 <strong>75 倍</strong>——意思是要 75 個月的租金收入才能等於房產價格。毛收益率 KPI 顯示 <strong>1.1–2.5%</strong>，徽章標記低於銀行存款利率。利差 vs 央行卡顯示近乎零的利差。租金回報率 vs 央行利率圖下方的洞察框寫道：「利差趨近於零——台灣房產收益幾乎無法覆蓋借貸成本。資本增值是槓桿投資者唯一的回報驅動力。」下方估值框架卡說明管理型泡沫、租金追趕、營建成本底部的動態。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">a P/R ratio above 25 is generally considered "renting is financially better than buying." Taipei at 75x is deep into rent-is-better territory. This doesn't mean prices will fall — the Valuation Framework card explains why structural pillars prevent a crash. But for a new buyer in 2026, the income math is not working. His NT$5M down payment would earn more elsewhere than the rental income would repay it.</span>
+        <span class="lang-zh">P/R 比超過 25 倍通常被認為「租房比買房在財務上更划算」。台北 75 倍已經深入租屋更合算的區域。這不代表房價會下跌——估值框架卡解釋為何結構性支柱阻止崩盤。但對 2026 年的新買家來說，收入數學不成立。他 NT$500 萬的頭期款投在別處能賺得比租金回報更多。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/04-tw-valuation.png" alt="Taiwan valuation page showing P/R ratio and PIR extremes" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 5 -->
+  <div class="demo-step">
+    <div class="step-no">5</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Taipei City Deep Dive — district price map and supply data</span>
+        <span class="lang-zh">台北市深度分析 — 各行政區價格地圖與供給數據</span>
+        <span class="signal-caution">supply caution</span>
+      </h4>
+      <div class="step-url"><a href="/tw/taipei.html">myproperty.investmquest.com/tw/taipei</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">navigates to the Taipei city deep-dive page. He scrolls through the five section labels: <strong>Macro &amp; Policy Framework</strong>, <strong>Supply: Presale Contraction &amp; New Inventory Wave</strong>, <strong>Demographics: Paper Migration &amp; Micro-Households</strong>, <strong>Transaction Market: Volume Collapse &amp; Buyer's Market</strong>, and <strong>District Price Map — 2026 Q1</strong>. He pays particular attention to the supply section and the district price map, since he needs to decide which area he'd even consider buying in.</span>
+        <span class="lang-zh">進入台北市深度分析頁面。他捲過五個區段標題：<strong>總體經濟與調控政策框架</strong>、<strong>供給面：預售市場收縮與新屋供給浪潮</strong>、<strong>人口結構：帳面遷徙與一人家戶崛起</strong>、<strong>買賣市場：量縮探底與買方定價時代</strong>、<strong>各行政區房價地圖——2026 年 Q1</strong>。他特別關注供給區段和行政區價格地圖，因為他需要決定他甚至願意考慮哪個區域。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> KPI cards at the top show Presale Avg Price, Housing Price Index, Rent Index, Avg LTV, Price-to-Income, and 1-Person Household share. The district price map (colored by price per ping) shows the stark variance between Da'an/Zhongzheng and outer districts. The supply section charts show presale contraction alongside the incoming new inventory wave — units that were pre-sold years ago are now completing delivery. The Summary section at the bottom consolidates the narrative.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>頂部 KPI 卡顯示預售屋均價、住宅價格指數、住宅租金指數、平均房貸成數、房價所得比、一人家戶佔比。依每坪價格著色的行政區價格地圖顯示大安 / 中正與外圍行政區之間的巨大差異。供給區段圖表顯示預售市場收縮，同時展示即將到來的新屋供給浪潮——數年前預售的房子正在陸續完工交屋。底部摘要區段整合了整個敘述。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">this deep dive shows him that even within Taipei, the story is uneven — some districts are supply-constrained luxury, others face an incoming delivery wave. He's a software engineer, not a property analyst — the site does the district disaggregation for him. The key takeaway: the transaction market is described as "Volume Collapse &amp; Buyer's Market" — meaning if he waits, he may get better pricing. The urgency to buy now is not supported by the data.</span>
+        <span class="lang-zh">這個深度分析讓他看到即便在台北市內，情況也是不均勻的——有些行政區供給受限、走豪宅路線，其他地區面臨即將到來的交屋浪潮。他是軟體工程師，不是房產分析師——網站替他做了行政區拆解。關鍵要點：買賣市場被描述為「量縮探底與買方定價時代」——意思是如果他等待，可能會拿到更好的價格。現在急著買並不被數據支持。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/05-taipei-deepdive.png" alt="Taipei city deep dive with district price map and supply section" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ -->
+  <!-- PHASE B — Reality check           -->
+  <!-- ════════════════════════════════ -->
+  <div class="phase-label phase-b">
+    <span>B</span>
+    <span class="lang-en">Phase B — Reality check (cross-market tools confirm: not yet)</span>
+    <span class="lang-zh">Phase B — 現實核查（跨市場工具確認：先等等）</span>
+  </div>
+
+  <!-- STOP 6 -->
+  <div class="demo-step">
+    <div class="step-no">6</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Carry Heatmap — is Taipei paying you to hold or costing you?</span>
+        <span class="lang-zh">Carry 熱力圖 — 台北讓你持有時賺錢還是付錢？</span>
+        <span class="signal-wait">negative carry</span>
+      </h4>
+      <div class="step-url"><a href="/carry-heatmap.html">myproperty.investmquest.com/carry-heatmap</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">opens the Carry Heatmap. He finds the <strong>Taipei row</strong> in the heatmap. The heatmap toggle buttons at the top let him sort by <strong>current carry</strong> or <strong>5yr change</strong>. He clicks the "5yr change" toggle to see which cities have seen the biggest carry compression (rent yield eroded relative to borrowing cost). The right-side hero stats show the global carry summary — how many of 81 cities have positive vs negative carry right now.</span>
+        <span class="lang-zh">打開 Carry 熱力圖。在熱力圖中找到<strong>台北那一列</strong>。頂部切換按鈕讓他以<strong>當前 carry</strong> 或 <strong>5 年變化</strong>排序。他點「5 年變化」切換鍵查看哪些城市的 carry 壓縮最嚴重（租金收益率相對借貸成本侵蝕最多）。右側英雄統計卡顯示全球 carry 摘要——81 個城市中現在有多少是正 carry、多少是負 carry。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> a 20-quarter heatmap grid (columns = quarters, rows = cities). Each cell is color-coded: green = positive carry (yield &gt; mortgage cost), red = negative carry (yield &lt; mortgage cost). The Taipei row shows its carry history — consistently in red or near-zero territory. The "Who lost the most carry" panel on the left shows the <strong>Top 5 Carry Compressed</strong> and <strong>Top 5 Carry Expanded</strong> city movers. A detail panel below the heatmap shows Taipei's current yield, current mortgage rate, and current carry number in a stat box.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>20 季熱力圖格（欄 = 季度，列 = 城市）。每個格子都有顏色編碼：綠色 = 正 carry（yield &gt; 房貸成本），紅色 = 負 carry（yield &lt; 房貸成本）。台北那一列顯示其 carry 歷史——持續在紅色或趨零區。左側「誰損失了最多 carry」面板顯示 <strong>carry 壓縮前 5 名</strong>和 <strong>carry 擴張前 5 名</strong>城市。熱力圖下方的詳情面板在統計框中顯示台北當前 yield、當前房貸利率、當前 carry 數值。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">negative carry means: if he buys a Taipei apartment and rents it out (or accounts for the rent he saves by living there), the rental income does <em>not</em> cover his mortgage payment + opportunity cost on the equity he locks up. He is, in effect, <strong>paying to hold</strong> the property — subsidizing it from his salary — and hoping capital appreciation compensates. The carry math has been consistently negative for Taipei over the full 20-quarter window. This is the single most powerful signal for a yield-oriented investor: the property does not pay for itself.</span>
+        <span class="lang-zh">負 carry 意味著：如果他買了台北公寓並出租（或計算他住在那裡節省下來的租金），租金收入<em>無法</em>覆蓋他的房貸還款加上他鎖定的股權機會成本。他實際上是在<strong>付錢持有</strong>這個物件——用薪水補貼它——並希望資本增值能補償。台北在完整的 20 季窗口內 carry 一直是負的。這是對以 yield 為導向的投資者最有力的單一訊號：這個物件無法自我支付。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/06-carry-heatmap.png" alt="Carry heatmap showing Taipei row in negative carry territory" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 7 -->
+  <div class="demo-step">
+    <div class="step-no">7</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Pipeline Cliff — Taiwan supply wave incoming 2025–2027</span>
+        <span class="lang-zh">Pipeline Cliff — 台灣供給浪潮 2025–2027</span>
+        <span class="signal-wait">supply headwind</span>
+      </h4>
+      <div class="step-url"><a href="/pipeline-cliff.html">myproperty.investmquest.com/pipeline-cliff</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">opens the Pipeline Cliff page. He finds <strong>Taipei</strong> and <strong>New Taipei</strong> in the supply calendar grid or in the EASING / Supply-Constrained badges at the bottom. The page's toggle buttons let him switch the calendar sort by <strong>Peak %</strong> or <strong>Total supply</strong>. He reads the risk cards at the top: <strong>DANGER · supply wave</strong>, <strong>WATCH · selective stress</strong>, and <strong>EASING / SUPPLY-CONSTRAINED</strong>.</span>
+        <span class="lang-zh">打開 Pipeline Cliff 頁面。在供給行事曆格或底部的 EASING / 供給受限徽章中找到<strong>台北</strong>和<strong>新北</strong>。頁面的切換按鈕讓他在 <strong>Peak %</strong> 或 <strong>Total supply</strong> 之間切換行事曆排序。他閱讀頂部風險卡：<strong>紅燈 · 供給浪潮</strong>、<strong>黃燈 · 選擇性壓力</strong>、<strong>綠燈 / 供給受限</strong>。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> Taipei and New Taipei appear in the green "EASING / SUPPLY-CONSTRAINED" badge section — pipeline is only 0.3–0.4% of stock, which at face value looks benign. BUT the note for Taipei reads: <em>"Vacancy 7.1% but pipeline tiny — sales-driven story"</em> and New Taipei: <em>"TW pre-sale model masks pipeline; spillover from Taipei."</em> The page's risk breakdown explains: Taiwan's pre-sale construction model means completed units often hit the resale market 2–3 years after being sold off-plan, creating a "hidden wave" that the quarterly delivery stats undercount. The calendar view for the broader region shows a delivery wave peaking in 2025–2027 nationally.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>台北和新北出現在綠色「EASING / 供給受限」徽章區——在建 pipeline 只佔存量 0.3–0.4%，表面上看起來溫和。但台北的備注寫著：<em>「空置率 7.1% 但在建極少——成交驅動的故事」</em>，新北：<em>「台灣預售制隱藏在建；接收台北外溢需求」</em>。頁面的風險說明解釋：台灣的預售建設模式意味著完工單位往往在預售後 2–3 年才上到轉售市場，形成季度交屋統計低估的「隱性浪潮」。更廣泛區域的行事曆視圖顯示全國交屋浪潮在 2025–2027 年間達到高峰。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">the headline pipeline number for Taipei looks small — but the site's note warns him about the pre-sale model masking the true wave. Taiwan's risk.html (Stop 12) will add more context: the Risk Monitor shows 40+ wan units delivering nationally in 2025–2027. More supply means more competition for resale buyers — which puts a ceiling on price appreciation for anyone buying now. This is not a reason to panic, but it is an argument for patience: the supply wave arriving over the next 18 months may create better entry prices.</span>
+        <span class="lang-zh">台北的 pipeline 頭條數字看起來小——但網站備注警告他注意預售模式掩蓋真正的浪潮。台灣的 risk.html（停靠點 12）將提供更多脈絡：風險監測顯示 2025–2027 年全國交屋 40 萬戶以上。更多供給意味著轉售買家面臨更多競爭——這對現在買入的任何人的房價增幅形成上限。這不是恐慌的理由，但確實是耐心等待的論點：未來 18 個月到來的供給浪潮可能創造更好的進場價格。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/07-pipeline-cliff.png" alt="Pipeline cliff showing Taiwan supply data and Taipei note" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 8 — THE CENTERPIECE -->
+  <div class="demo-step">
+    <div class="step-no">8</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Buy vs Rent Calculator — the centerpiece decision tool for Mr. Chang</span>
+        <span class="lang-zh">買 vs 租 計算機 — 張先生的核心決策工具</span>
+        <span class="signal-wait">breakeven &gt; 5yr</span>
+      </h4>
+      <div class="step-url"><a href="/tools/buy-vs-rent.html">myproperty.investmquest.com/tools/buy-vs-rent</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">navigates to the Buy vs Rent tool. He sets the four assumption controls: <strong>Holding Horizon</strong> (he selects <strong>5y</strong> — realistic for a mid-career move; he might relocate), <strong>Down Payment</strong> (he selects <strong>20%</strong> — reflecting his NT$5M savings against a typical Taipei asking price), <strong>Alt Return</strong> (he selects <strong>5–7%</strong> — what his NT$5M could reasonably earn in a diversified REIT/equity basket), and <strong>Toggles</strong> (includes transaction tax, applies local mortgage rate). He then locates the <strong>Taipei row</strong> in the full comparison table and reads three columns: <strong>B/E Year</strong> (break-even year), <strong>Verdict</strong> pill, and the Buy NPV vs Rent NPV comparison.</span>
+        <span class="lang-zh">進入買 vs 租工具。設定四組假設控制項：<strong>持有年限</strong>（選 <strong>5 年</strong>——對中階工程師來說現實；他可能會搬遷）、<strong>頭期款</strong>（選 <strong>20%</strong>——反映他 NT$500 萬存款對應的典型台北開價）、<strong>機會成本</strong>（選 <strong>5–7%</strong>——他 NT$500 萬放在多元化 REIT / 股票組合中能合理賺到的報酬）、<strong>開關</strong>（含交易稅、套用本地貸款利率）。然後在完整比較表中找到<strong>台北那一列</strong>，閱讀三欄：<strong>回本年</strong>、<strong>評級</strong>小藥丸、買入 NPV vs 租屋 NPV 比較。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees (table columns):</strong> City · Mid Price · Rent/mo · Yield · M.Rate · Buy NPV · Rent NPV · B/E Year · Verdict. The <strong>B/E Year</strong> column shows a color-coded number: green (&lt;8 yrs) = buying makes sense early, yellow (8–14 yrs) = borderline, red (&gt;15 yrs or N/A) = renting is structurally better for the chosen horizon. The two chart panels at the bottom show: <strong>Break-even Year Ranking</strong> (horizontal bars, all 12 cities sorted best-to-worst) and <strong>Yield vs Mortgage Rate</strong> scatter (above diagonal = positive carry, below = negative). Taipei will appear visibly below the diagonal in the scatter and toward the long end in the ranking bar chart.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼（表格欄位）：</strong>城市 · 中位房價 · 月租金 · 收益率 · 貸款利率 · 買入 NPV · 租屋 NPV · 回本年 · 評級。<strong>回本年</strong>欄顯示顏色編碼數字：綠色（&lt;8 年）= 買房較早合算，黃色（8–14 年）= 邊界，紅色（&gt;15 年或 N/A）= 在選定的時間範圍內租屋在結構上更好。底部兩個圖表面板顯示：<strong>回本年排名</strong>（水平條，12 個城市從最佳到最差排序）和 <strong>收益率 vs 貸款利率</strong>散點（對角線上方 = 正 carry，以下 = 負）。台北在散點圖中會明顯出現在對角線以下，在排名條形圖中靠近最長端。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">this is the most direct answer to his question. The break-even year is the year at which cumulative buy costs finally fall below cumulative rent costs. If that year is longer than his realistic holding horizon (5–7 years for a mid-career engineer who might move), the tool is saying: <strong>for your situation, renting is the financially smarter choice</strong>. The Alt Return assumption is critical — at 5–7%, his NT$5M invested in a REIT basket grows meaningfully over 5 years, while the property barely breaks even on a cost basis. The tool doesn't tell him not to buy for emotional reasons — it tells him not to buy because the numbers say wait.</span>
+        <span class="lang-zh">這是他問題最直接的答案。回本年是累積買入成本最終低於累積租屋成本的那一年。如果那一年比他現實的持有期（對可能搬遷的中階工程師來說是 5–7 年）更長，工具就是在說：<strong>對你的情況而言，租屋在財務上是更聰明的選擇</strong>。機會成本假設至關重要——以 5–7%，他 NT$500 萬投入 REIT 組合在 5 年內有可觀增長，而房產在成本基礎上勉強持平。工具不是出於情感告訴他不要買——而是因為數字說先等等。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/08-buy-vs-rent.png" alt="Buy vs Rent tool showing Taipei row with long breakeven and verdict" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ -->
+  <!-- PHASE C — What to do instead      -->
+  <!-- ════════════════════════════════ -->
+  <div class="phase-label phase-c">
+    <span>C</span>
+    <span class="lang-en">Phase C — What to do instead (REIT allocation + revisit conditions)</span>
+    <span class="lang-zh">Phase C — 替代方案（REIT 配置＋重新評估的條件）</span>
+  </div>
+
+  <!-- STOP 9 -->
+  <div class="demo-step">
+    <div class="step-no">9</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Global REITs — where the NT$5M could go instead</span>
+        <span class="lang-zh">全球 REITs — NT$500 萬可以轉投哪裡</span>
+        <span class="signal-check">alternative path</span>
+      </h4>
+      <div class="step-url"><a href="/reits.html">myproperty.investmquest.com/reits</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">having concluded he shouldn't buy now, he opens the REITs page to explore what a REIT basket could look like for his NT$5M. He uses the sortable table (54 REITs × 9 columns) to sort first by <strong>Yield</strong>, then by <strong>Spread</strong> (yield minus 10yr gov bond — positive = REIT pays more than risk-free), and finally by <strong>P/NAV</strong> (below 1.0 = trading at a discount to net asset value). He's thinking: if I allocate the NT$5M here instead of locking it in Taipei, what income and total return could I realistically expect?</span>
+        <span class="lang-zh">已經得出不應該現在買的結論後，他打開 REITs 頁面，探索 NT$500 萬的 REIT 組合可以是什麼樣子。他用可排序的表格（54 檔 × 9 欄）先依 <strong>Yield</strong> 排序，再依 <strong>Spread</strong>（yield 減 10 年期公債——正值代表 REIT 派息超過無風險利率），最後依 <strong>P/NAV</strong>（低於 1.0 = 以低於淨資產價值的折扣交易）。他在想：如果我把 NT$500 萬配置在這裡，而不是鎖定在台北，我能合理預期什麼樣的收入和總報酬？</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees (9-column REIT table):</strong> REIT name / ticker / market · Cap (market cap) · Yield (trailing 12m dividend yield) · Spread (yield minus 10yr gov bond of listing country) · P/NAV (price ÷ NAV) · YoY (1yr price return) · 5yr (5yr total return incl. dividends) · Gear (gearing ratio) · Pay% (payout ratio). Green/red badges highlight favorable vs unfavorable readings. All 54 rows cover US, SG, JP, AU, MY, UK markets. He can sort any column to find REITs that combine high yield, positive spread, discount NAV, and conservative gearing — the ideal combination for a capital-preservation-plus-income strategy.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼（9 欄 REIT 表格）：</strong>REIT 名稱 / 代碼 / 市場 · 市值 · 殖利率（過去 12 月配息收益率）· 利差（殖利率減上市國 10 年期公債）· P/NAV（市價 ÷ NAV）· 年漲（1 年價格報酬）· 5 年（5 年含配息總報酬）· 槓桿（槓桿率）· 派息（配息率）。綠 / 紅徽章高亮有利 vs 不利讀數。54 列涵蓋美、新、日、澳、馬、英市場。他可以排序任何欄位，找到結合高 yield、正利差、折價 NAV、保守槓桿的 REIT——這是資本保值加收入策略的理想組合。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">the REIT table reframes the NT$5M as "working capital" rather than "down payment." Instead of locking it into a single illiquid Taipei apartment with negative carry, he can see how to distribute it across 3–5 REITs in different markets — getting daily liquidity, diversification, and a yield that almost certainly exceeds 1.8% Taipei gross yield. He's not making a final allocation decision here — the site isn't a brokerage — but he can see exactly which instruments the platform tracks and what their metrics look like.</span>
+        <span class="lang-zh">REIT 表格讓他把 NT$500 萬重新框架為「工作資本」而非「頭期款」。他不用把它鎖定在單一無流動性的台北公寓（負 carry），而是可以看到如何分配到不同市場的 3–5 檔 REIT——獲得每日流動性、分散投資，以及幾乎肯定超過台北 1.8% 毛 yield 的殖利率。他在這裡不是在做最終配置決策——網站不是券商——但他可以確切看到平台追蹤哪些工具及其指標。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/09-reits-table.png" alt="Global REIT comparison table sorted by yield and spread" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 10 -->
+  <div class="demo-step">
+    <div class="step-no">10</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">REIT vs Direct — Local mode, see if TW REIT beats TW direct over 10 years</span>
+        <span class="lang-zh">REIT vs 直接持有 — 本國模式，看 TW REIT 在 10 年內是否優於 TW 直接持有</span>
+        <span class="signal-check">alternative confirmed</span>
+      </h4>
+      <div class="step-url"><a href="/reit-vs-direct.html">myproperty.investmquest.com/reit-vs-direct</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">navigates to the REIT vs Direct comparison page. Since Mr. Chang is a Taiwan resident (not a foreign buyer), he keeps the residency toggle on <strong>Local</strong> (the default). He sets the <strong>Holding Period toggle</strong> to <strong>10 years</strong>. He reads the 7-market comparison table and the <strong>$100K endpoint bar chart</strong> to see where direct property vs REIT ends up after 10 years — for a local resident (no foreign buyer surcharges, no non-resident WHT). Then he uses the <strong>Scenario tabs</strong> (Cash / 50% LTV / 70% LTV) to model his actual situation with a 20% down payment (80% LTV, so nearest to 70% LTV leveraged).</span>
+        <span class="lang-zh">進入 REIT vs 直接持有比較頁面。由於張先生是台灣居民（非外國買家），他把居住地切換保持在 <strong>本國</strong>（預設值）。把<strong>持有年限切換</strong>設為 <strong>10 年</strong>。閱讀 7 市場比較表和 <strong>$100K 終值長條圖</strong>，看 10 年後直接持有 vs REIT 的結果——對本地居民來說（無外資附加、無非居民預扣）。然後用<strong>情境分頁</strong>（現金 / 50% LTV / 70% LTV）模擬他頭期款 20%（即 80% LTV，最接近 70% LTV 槓桿）的實際情況。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> Three main controls at the top: <strong>Residency toggle</strong> (Local / Foreign), <strong>Holding Period toggle</strong> (5 / 10 / 15 / 20 yr), and a <strong>Home Country selector</strong> (relevant mainly for Foreign mode). The comparison table has columns: Market · REIT (annualized %) · Direct cash (annualized %) · Direct 50% LTV · Direct 70% LTV · Notes. The "$100K, after 10 Years" bar chart at the bottom plots endpoint values for each market under the current settings. The insight cards explain the key dynamics — positive vs negative carry contexts, when leverage helps vs hurts. He can also toggle to the <strong>Mother Country Treaty toggle</strong> (Step 3 in the page's treaty section) if he wants to model Taiwan's tax treaty implications for dividends from overseas REITs.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>頂部三個主要控制項：<strong>居住地切換</strong>（本國 / 外國）、<strong>持有年限切換</strong>（5 / 10 / 15 / 20 年）、以及<strong>母國選擇器</strong>（主要在外國模式下相關）。比較表有欄位：市場 · REIT（年化 %）· 直接現金（年化 %）· 直接 50% LTV · 直接 70% LTV · 備注。底部的「你的 $100K，10 年後」長條圖繪製當前設定下每個市場的終值。洞察卡解釋關鍵動態——正 vs 負 carry 的脈絡、槓桿何時有幫助 vs 何時有害。如果他想模擬台灣的租稅協定對境外 REIT 股息的影響，也可以切換到<strong>母國條款切換</strong>（頁面租稅協定區段的第 3 步）。</span>
+      </div>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">as a Taiwan local, he avoids the severe foreign-buyer surcharges that would apply to non-residents in Singapore (ABSD 60%) or Australia (FIRB). But the local data still shows a crucial tension: Taiwan property has appreciated meaningfully over 10 years, but the yield is so low that even with leverage, the total return is squeezed by borrowing cost and near-zero carry. The REIT column offers a different trade: lower capital appreciation potential, but actual income distributed quarterly, daily liquidity, and no landlord headaches. For someone at 35 who might move cities in 5–7 years, the liquidity premium of REITs over illiquid property is a real factor.</span>
+        <span class="lang-zh">作為台灣本地人，他避免了非居民在新加坡（ABSD 60%）或澳洲（FIRB）面臨的嚴苛外資附加稅。但本地數據仍顯示一個關鍵張力：台灣房產在 10 年內有可觀增幅，但 yield 太低，即使加槓桿，總報酬也被借貸成本和近乎零的 carry 壓縮。REIT 欄位提供不同的取捨：較低的資本增值潛力，但實際收入按季分配、每日流動性、沒有業主煩惱。對 35 歲可能在 5–7 年內換城市的人來說，REIT 相對無流動性房產的流動性溢價是真實的因素。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/10-reit-vs-direct.png" alt="REIT vs Direct in Local mode 10-year comparison with Taiwan row" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 11 -->
+  <div class="demo-step">
+    <div class="step-no">11</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Playbook — strategy framework: when NOT to buy, and how to think about waiting</span>
+        <span class="lang-zh">投資手冊 — 策略框架：什麼時候「不買」，如何思考等待</span>
+        <span class="signal-check">strategy anchor</span>
+      </h4>
+      <div class="step-url"><a href="/playbook.html">myproperty.investmquest.com/playbook</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">opens the Playbook page. This page is the site's strategic foundation — it explains how to read carry/PTI/vacancy numbers, contains the country tax tables, the cross-border cost calculator, and the full pre-buy / hold / exit checklist. He reads the <strong>Carry interpretation table</strong> (what different carry levels mean for investors), the <strong>Tax Tables</strong> (Taiwan's relevant taxes for a local buyer), the <strong>Pre-buy Checklist</strong>, and the <strong>Case Studies</strong> section. The Negative Carry case study (Sydney) is particularly instructive: it shows how negative carry can be rational if capital appreciation more than compensates — but only if you have the income to subsidize it and a long enough horizon.</span>
+        <span class="lang-zh">打開投資手冊頁面。這個頁面是網站的策略基礎——解釋如何解讀 carry / PTI / 空置率數字，包含國家稅務表、跨境成本計算器、完整的購前 / 持有 / 退場清單。他閱讀 <strong>Carry 解讀表</strong>（不同 carry 水平對投資者的意義）、<strong>稅務表</strong>（台灣本地買家的相關稅負）、<strong>購前清單</strong>、<strong>案例研究</strong>區段。負 carry 案例（雪梨）特別具有啟發性：它展示負 carry 在資本增值超額補償時可以是合理的——但前提是你有足夠的收入補貼它，且有夠長的持有期。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> the page is organized into reading guides, tax tables (pre-acquisition, holding period, and exit taxes by country), the cross-border cost calculator (interactive), case studies with narrative explanations, the pre-buy macro checklist (9 items covering central bank rate, inflation, GDP, buyer restrictions, visa pathways, currency, political stability, capital controls), and the tenant risk checklist. This is the "expert framework" section — it shows him how professional investors think about entry, hold, and exit conditions, not just whether a number is high or low today.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>頁面組織為閱讀指南、稅務表（各國購置前、持有期、退場稅負）、跨境成本計算器（互動式）、附敘述解釋的案例研究、購前總體清單（9 項，涵蓋央行利率、通膨、GDP、買家限制、簽證管道、匯率、政治穩定性、資本管制）、租客風險清單。這是「專家框架」區段——它展示專業投資者如何思考進場、持有和退場條件，而不僅僅是某個數字今天高還是低。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">the Playbook converts the data from earlier stops into a structured decision framework. The Carry table tells him that near-zero carry means "hold and wait for appreciation — suits long-term owner-occupiers." He is not planning to be a long-term Taipei owner-occupier — he's a 35-year-old software engineer who might leave for Hsinchu, Taichung, or Singapore in 5 years. The pre-buy checklist helps him identify exactly what conditions need to change before the calculus tips in favor of buying. He leaves this page with a framework, not just a gut feeling.</span>
+        <span class="lang-zh">投資手冊把前面幾個停靠點的數據轉換為結構化決策框架。Carry 表告訴他，接近零的 carry 意味著「持有等增值——適合長期自住兼投資者」。他不是在計劃成為長期台北自住者——他是 35 歲的軟體工程師，可能在 5 年內前往新竹、台中或新加坡。購前清單幫助他確切識別哪些條件需要改變，才能讓計算偏向買房。他帶著框架而不只是直覺離開這個頁面。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/11-playbook.png" alt="Playbook strategy page with carry interpretation table and pre-buy checklist" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 12 -->
+  <div class="demo-step">
+    <div class="step-no">12</div>
+    <div class="step-content">
+      <h4>
+        <span class="lang-en">Taiwan Risk Monitor — what conditions to watch for; when to revisit</span>
+        <span class="lang-zh">台灣風險監測 — 要觀察哪些條件；什麼時候重新評估</span>
+        <span class="signal-check">watchlist set</span>
+      </h4>
+      <div class="step-url"><a href="/tw/risk.html">myproperty.investmquest.com/tw/risk</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Chang does:</span><span class="lang-zh">張先生動作：</span></strong>
+        <span class="lang-en">navigates to the Taiwan Risk Monitor — his final stop. Rather than looking for reasons to buy, he's now reading this page to build his <strong>watchlist</strong>: the specific signals that would change the "don't buy yet" conclusion. He reads the six KPI cards (CBC Credit Controls, Bank Mortgage Concentration, Birth Rate, Delivery Wave, Vacancy, Earthquake Risk) and the risk charts below: CBC policy rate history, credit control rounds, delivery wave by year, vacancy trend, and demographic trends.</span>
+        <span class="lang-zh">進入台灣風險監測——他的最後一個停靠點。他不再尋找買入的理由，而是在閱讀這個頁面來建立他的<strong>觀察清單</strong>：哪些具體訊號會改變「先不要買」的結論。他閱讀六張 KPI 卡（第七波信用管制、銀行房貸集中度、出生率、交屋潮、空屋率、地震風險）和下方的風險圖表：央行政策利率歷史、信用管制輪次、各年交屋潮、空屋率趨勢、人口趨勢。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> KPI cards flagged red for: 7th Wave Credit Controls (active, most aggressive in history), Bank Mortgage Concentration (near ceiling), Birth Rate (world's lowest), and Delivery Wave (40+ wan units 2025–2027). Orange flags for Vacancy (near record high) and Earthquake Risk (seismic zone). The risk charts show how multiple tightening cycles have not meaningfully corrected valuations — the "managed bubble" thesis is real. This page also confirms the scale of the delivery wave he first saw on the Pipeline Cliff page — this is risk monitor context, not just a supply forecast.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>標記為紅色的 KPI 卡：第七波信用管制（實施中，史上最嚴厲）、銀行房貸集中度（接近上限）、出生率（可能全球最低）、交屋潮（2025–2027 年 40 萬戶以上）。橙色標記：空屋率（接近歷史高位）和地震風險（地震帶）。風險圖表顯示多輪緊縮循環如何未能有效糾正估值——「管理型泡沫」論點是真實的。這個頁面也確認了他在 Pipeline Cliff 頁面首次看到的交屋浪潮規模——這是風險監測脈絡，不只是供給預測。</span>
+      </p>
+      <div class="step-meaning">
+        <strong><span class="lang-en">For Mr. Chang:</span><span class="lang-zh">對張先生：</span></strong>
+        <span class="lang-en">this final stop gives him the conditions to put on his revisit watchlist. He will return to the site in 12–18 months and re-run this same analysis if: (1) CBC credit controls are relaxed (reducing mortgage concentration ceiling → easier borrowing), (2) the delivery wave of 2025–2027 has cleared and vacancy begins declining, (3) CBC raises the policy rate significantly (compressing prices — making entry valuations cheaper), or (4) Taipei P/R ratio drops from 75x toward a more sustainable level (below ~50x would change the valuation framework). Until one or more of these conditions changes, the site's data consistently says: wait, rent, invest the NT$5M in a REIT basket with daily liquidity, and come back when the signals shift.</span>
+        <span class="lang-zh">這個最後的停靠點給他提供了可以加入觀察清單的條件。他會在 12–18 個月後回到網站，在以下情況發生時重新做同樣的分析：(1) 央行信用管制放鬆（降低房貸集中度上限 → 更容易借貸）；(2) 2025–2027 年的交屋浪潮已消化，空屋率開始下降；(3) 央行大幅升息（壓縮房價——讓進場估值更便宜）；或 (4) 台北 P/R 比從 75 倍下降到更可持續的水準（低於約 50 倍會改變估值框架）。在這些條件中的一個或多個改變之前，網站數據始終如一地說：等等、繼續租、把 NT$500 萬投入具每日流動性的 REIT 組合，訊號轉變時再回來。</span>
+      </div>
+      <div class="step-screenshot"><img src="img/12-tw-risk.png" alt="Taiwan Risk Monitor showing delivery wave and credit control KPIs" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 3 — TOOL CHEAT SHEET                   -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 03</div>
+    <h2><span class="lang-en">What each tool's output means for buy-or-wait decisions</span><span class="lang-zh">每個工具的輸出對買或等決策代表什麼</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">Quick reference for interpreting the signals Mr. Chang encountered.</span>
+      <span class="lang-zh">快速解讀張先生遇到的訊號。</span>
+    </p>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4><div class="ck-icon">V</div> <span class="lang-en">Valuation Monitor → P/R Ratio</span><span class="lang-zh">估值監測 → P/R 比</span></h4>
+      <p>
+        <span class="lang-en">Price-to-Rent ratio = property price ÷ annual rent income. A ratio above ~25 means buying costs more than renting on a pure cashflow basis. Above 50 means capital appreciation must carry almost all the return — very high risk for a finite holding period. Taipei's P/R ratio is displayed as a red KPI card on /tw/valuation.html.</span>
+        <span class="lang-zh">租金比 = 房產價格 ÷ 年租金收入。比值超過約 25 倍意味著在純現金流基礎上買入比租賃成本更高。超過 50 倍意味著資本增值必須承擔幾乎所有回報——對有限持有期而言風險極高。台北的 P/R 比在 /tw/valuation.html 上顯示為紅色 KPI 卡。</span>
+      </p>
+      <div class="ck-tip"><span class="lang-en">Threshold: below 20 = buying makes cashflow sense; 20–40 = gray zone; above 40 = renting structurally better</span><span class="lang-zh">門檻：低於 20 倍 = 買入在現金流上合理；20–40 倍 = 灰色地帶；超過 40 倍 = 租屋在結構上更好</span></div>
+    </div>
+
+    <div class="cheat-card">
+      <h4><div class="ck-icon">C</div> <span class="lang-en">Carry Heatmap → Net Carry %</span><span class="lang-zh">Carry 熱力圖 → 淨 Carry %</span></h4>
+      <p>
+        <span class="lang-en">Carry = gross rental yield minus local mortgage rate. Positive = the property income covers your borrowing cost (you earn to hold). Negative = you pay out-of-pocket to hold the property above the rent it earns. Taipei's carry is displayed on the heatmap row; the right-side detail stat box shows current carry for the selected city. Green cell = positive; red cell = negative. 20 quarters of history let you see if the situation is improving or worsening.</span>
+        <span class="lang-zh">Carry = 租金毛收益率 - 本地房貸利率。正值 = 房產收入覆蓋借貸成本（你賺錢持有）。負值 = 你要從口袋掏錢持有，超出租金賺取的部分。台北的 carry 在熱力圖列中顯示；右側詳情統計框顯示所選城市的當前 carry。綠色格 = 正；紅色格 = 負。20 季歷史讓你看到情況是在改善還是惡化。</span>
+      </p>
+      <div class="ck-tip"><span class="lang-en">Rule of thumb: any negative carry position requires salary subsidization + a long enough horizon to recover through capital gains</span><span class="lang-zh">經驗法則：任何負 carry 部位都需要薪資補貼加上足夠長的持有期，才能通過資本利得回收</span></div>
+    </div>
+
+    <div class="cheat-card">
+      <h4><div class="ck-icon">B</div> <span class="lang-en">Buy vs Rent → B/E Year (Break-even)</span><span class="lang-zh">買 vs 租 → 回本年</span></h4>
+      <p>
+        <span class="lang-en">The tool computes: year at which cumulative buy costs (mortgage + maintenance + opportunity cost on equity − exit proceeds) first fall below cumulative rent costs (with 2% annual rent inflation). Green = &lt;8yr (buying beats renting quickly), Yellow = 8–14yr, Red = &gt;15yr or never within your horizon. The Taipei row shows B/E Year as a red or yellow number; the bar chart ranks all 12 tracked cities. Key inputs: Holding Horizon pill, Down Payment pill, Alt Return pill, transaction tax toggle, local rate toggle.</span>
+        <span class="lang-zh">工具計算：累積買入成本（房貸 + 維護費 + 股權機會成本 - 賣出所得）首次低於累積租屋成本（租金年增 2%）的年份。綠色 = &lt;8 年（買入很快優於租屋），黃色 = 8–14 年，紅色 = &gt;15 年或在你的持有期內從不。台北列顯示回本年為紅色或黃色數字；條形圖為所有 12 個追蹤城市排名。關鍵輸入：持有年限小藥丸、頭期款小藥丸、機會成本小藥丸、交易稅開關、本地利率開關。</span>
+      </p>
+      <div class="ck-tip"><span class="lang-en">Critical: the Alt Return assumption changes everything — at 7% alt return, almost no city's property justifies a 5yr horizon</span><span class="lang-zh">關鍵：機會成本假設改變一切——7% 機會成本下，幾乎沒有城市的房產能在 5 年持有期內合理</span></div>
+    </div>
+
+    <div class="cheat-card">
+      <h4><div class="ck-icon">R</div> <span class="lang-en">REIT vs Direct → Local mode endpoint bars</span><span class="lang-zh">REIT vs 直接持有 → 本國模式終值長條</span></h4>
+      <p>
+        <span class="lang-en">Three controls drive every number: Residency (Local / Foreign), Holding Period (5 / 10 / 15 / 20yr), and Scenario (Cash / 50% LTV / 70% LTV). Local mode = baseline with no foreign surcharges or non-resident WHT. The $100K endpoint bar chart at the bottom shows the terminal value of $100K invested under each combination. For a TW local in Local mode at 10yr: compare the TW REIT column vs TW direct cash column vs direct 70% LTV column. The notes column explains structural factors (Taiwan's low REIT yield, capital appreciation dominance, leverage mechanics).</span>
+        <span class="lang-zh">三個控制項決定每個數字：居住地（本國 / 外國）、持有年限（5 / 10 / 15 / 20 年）、情境（現金 / 50% LTV / 70% LTV）。本國模式 = 基線，無外資附加或非居民預扣。底部 $100K 終值長條圖顯示在每種組合下投入 $100K 的最終價值。台灣本地居民在本國模式 10 年的情況：比較 TW REIT 欄 vs TW 直接現金欄 vs 直接 70% LTV 欄。備注欄解釋結構性因素（台灣低 REIT yield、資本增值主導、槓桿機制）。</span>
+      </p>
+      <div class="ck-tip"><span class="lang-en">Note: TW direct at 70% LTV amplifies both upside (if prices rise) and downside (if prices stall + negative carry eats the equity). At near-zero carry, leverage is a risk-amplifier, not a return-enhancer.</span><span class="lang-zh">注意：台灣直接持有 70% LTV 放大上行（若房價上漲）和下行（若房價停滯 + 負 carry 侵蝕股權）。在接近零的 carry 下，槓桿是風險放大器，而非報酬增強器。</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 4 — TAKEAWAY                           -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 04</div>
+    <h2><span class="lang-en">What Mr. Chang learns from this walkthrough</span><span class="lang-zh">張先生從這份導覽學到什麼</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">This site answered the questions it could answer. The remaining decisions require professionals.</span>
+      <span class="lang-zh">這個網站回答了它能回答的問題。剩下的決策需要專業人士。</span>
+    </p>
+  </div>
+
+  <div class="takeaway">
+    <div class="takeaway-card answered">
+      <h4><span class="lang-en">Questions this site answered for Mr. Chang</span><span class="lang-zh">這個網站為張先生回答的問題</span></h4>
+      <ul>
+        <li><strong><span class="lang-en">When NOT to buy:</span><span class="lang-zh">什麼時候不要買：</span></strong> <span class="lang-en">when P/R &gt; 50, carry is negative, delivery wave is incoming, and buy-vs-rent breakeven exceeds your realistic holding horizon</span><span class="lang-zh">當 P/R &gt; 50 倍、carry 為負、交屋浪潮即將來臨、買 vs 租回本年超過你的現實持有期時</span></li>
+        <li><strong><span class="lang-en">How buy-vs-rent breakeven works:</span><span class="lang-zh">買 vs 租回本年如何運作：</span></strong> <span class="lang-en">it's not just mortgage vs rent — it's mortgage + maintenance + opportunity cost on equity vs total rent paid over the horizon, with exit proceeds netted at the end</span><span class="lang-zh">不只是房貸 vs 租金——而是房貸 + 維護費 + 股權機會成本 vs 整個持有期間支付的租金，最後扣除賣出所得</span></li>
+        <li><strong><span class="lang-en">What carry actually means:</span><span class="lang-zh">carry 實際上代表什麼：</span></strong> <span class="lang-en">yield minus mortgage rate — when negative, you're subsidizing the property from salary, betting on appreciation to compensate</span><span class="lang-zh">yield 減房貸利率——當為負時，你在用薪水補貼房產，押注增值來補償</span></li>
+        <li><strong><span class="lang-en">REIT alternative path:</span><span class="lang-zh">REIT 替代路徑：</span></strong> <span class="lang-en">the NT$5M can be allocated to a 3–5 REIT basket with daily liquidity, earning a yield that exceeds Taipei's 1.8% gross yield, while preserving optionality to buy later</span><span class="lang-zh">NT$500 萬可以配置到具每日流動性的 3–5 檔 REIT 組合，賺取超過台北 1.8% 毛 yield 的殖利率，同時保留之後買入的選擇權</span></li>
+        <li><strong><span class="lang-en">What to watch for in 12–24 months:</span><span class="lang-zh">12–24 個月要觀察什麼：</span></strong> <span class="lang-en">CBC credit control relaxation, delivery wave clearing, P/R ratio moving toward 50x or below, mortgage rate cuts that flip carry toward zero or positive</span><span class="lang-zh">央行信用管制放鬆、交屋浪潮消化、P/R 比向 50 倍以下移動、降息後 carry 翻向零或正值</span></li>
+        <li><strong><span class="lang-en">How to frame the social pressure:</span><span class="lang-zh">如何框架社會壓力：</span></strong> <span class="lang-en">the Playbook's carry interpretation table shows "near-zero carry = suits long-term owner-occupiers" — if he's not planning to be a 20-year Taipei owner-occupier, the typical homeownership advice doesn't apply to his situation</span><span class="lang-zh">投資手冊的 carry 解讀表顯示「接近零 carry = 適合長期自住兼投資」——如果他不打算成為 20 年的台北自住者，典型的購屋建議不適用於他的情況</span></li>
+      </ul>
+    </div>
+    <div class="takeaway-card outsource">
+      <h4><span class="lang-en">Questions to take to professionals</span><span class="lang-zh">要帶給專業人士的問題</span></h4>
+      <ul>
+        <li><strong><span class="lang-en">Personal financial planner:</span><span class="lang-zh">個人理財規劃師：</span></strong> <span class="lang-en">optimal allocation of NT$5M across REIT basket, bond ladder, and cash reserve — the site shows what's available, not how to size each position</span><span class="lang-zh">NT$500 萬在 REIT 組合、債券梯、現金儲備之間的最佳配置——網站展示可選項目，不告訴你每個倉位如何定規模</span></li>
+        <li><strong><span class="lang-en">Tax planner (TW):</span><span class="lang-zh">稅務規劃師（台灣）：</span></strong> <span class="lang-en">income tax treatment of TW REIT dividends, whether overseas REIT dividends trigger CFC or TW foreign income rules, and whether NT$3M parental contribution has gift tax implications</span><span class="lang-zh">台灣 REIT 股息的所得稅處理方式、境外 REIT 股息是否觸發 CFC 或台灣境外所得規定、以及父母 NT$300 萬贈與是否有贈與稅影響</span></li>
+        <li><strong><span class="lang-en">Property agent (for when he revisits):</span><span class="lang-zh">房仲（當他重新評估時）：</span></strong> <span class="lang-en">specific building quality, floor plan pricing, district desirability, and negotiability — the site provides market-level data, not unit-level due diligence</span><span class="lang-zh">具體建築品質、格局定價、行政區適居性、議價空間——網站提供市場層級的數據，不提供單位層級的盡職調查</span></li>
+        <li><strong><span class="lang-en">Mortgage advisor:</span><span class="lang-zh">房貸顧問：</span></strong> <span class="lang-en">actual LTV available to him given CBC's 7th-wave restrictions, whether his NT$5M plus NT$3M parental contribution would qualify for preferred rate programs, and current loan approval odds at his income level</span><span class="lang-zh">在央行第七波信用管制下他實際能拿到的 LTV、NT$500 萬加上父母 NT$300 萬是否符合優惠利率方案、以及他的收入水準下當前的房貸核准機率</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── Revisit conditions card ── -->
+  <div class="revisit-card">
+    <h4><span class="lang-en">Mr. Chang's watchlist: conditions to monitor on this site in 12–24 months</span><span class="lang-zh">張先生的觀察清單：12–24 個月內在這個網站監測的條件</span></h4>
+    <ul>
+      <li><strong><span class="lang-en">/tw/valuation.html — P/R Ratio KPI card:</span><span class="lang-zh">/tw/valuation.html — P/R 比 KPI 卡：</span></strong> <span class="lang-en">watch for Taipei P/R moving below 50x (from current 75x) — this would indicate the rent-buy gap has narrowed meaningfully</span><span class="lang-zh">觀察台北 P/R 比是否跌破 50 倍（從目前 75 倍）——這將表示租 vs 買的差距已有意義地縮窄</span></li>
+      <li><strong><span class="lang-en">/carry-heatmap.html — Taipei row:</span><span class="lang-zh">/carry-heatmap.html — 台北列：</span></strong> <span class="lang-en">watch for Taipei carry turning from deep red to yellow (near zero) or green (positive) — this signals mortgage rates have fallen or yields have risen enough to flip the cashflow math</span><span class="lang-zh">觀察台北 carry 是否從深紅轉黃（近零）或綠色（正值）——這表示房貸利率已下降或 yield 已上升到足以翻轉現金流數學</span></li>
+      <li><strong><span class="lang-en">/tw/risk.html — Delivery Wave KPI:</span><span class="lang-zh">/tw/risk.html — 交屋潮 KPI：</span></strong> <span class="lang-en">watch for the 40+ wan delivery wave to taper — when the 2025–2027 wave has cleared, vacancy pressure eases and the supply headwind diminishes</span><span class="lang-zh">觀察 40 萬戶以上交屋潮何時趨緩——2025–2027 年浪潮消退後，空屋壓力減輕，供給逆風消散</span></li>
+      <li><strong><span class="lang-en">/tw/risk.html — 7th Wave Credit Controls KPI:</span><span class="lang-zh">/tw/risk.html — 第七波信用管制 KPI：</span></strong> <span class="lang-en">watch for this card to change from red "Active" to orange "Easing" — any relaxation of CBC credit controls would expand borrowing capacity and restore demand</span><span class="lang-zh">觀察此卡從紅色「實施中」變為橙色「緩和中」——任何央行信用管制的放寬都會擴大借貸能力並恢復需求</span></li>
+      <li><strong><span class="lang-en">/tools/buy-vs-rent.html — Taipei B/E Year:</span><span class="lang-zh">/tools/buy-vs-rent.html — 台北回本年：</span></strong> <span class="lang-en">re-run with his actual down payment and a 7-year horizon when revisiting — watch for the verdict to flip from red to yellow (breakeven within his realistic timeline)</span><span class="lang-zh">重新評估時以實際頭期款和 7 年持有期重新試算——觀察評級是否從紅色翻為黃色（在他的現實時間線內達到回本）</span></li>
+    </ul>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- PDF / PRINT ACTIONS                            -->
+  <!-- ============================================== -->
+  <!-- ============================================== -->
+  <!-- SECTION 5 — BEST OPTION                         -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 05</div>
+    <h2><span class="lang-en">The site's best-supported call for Mr. Chang</span><span class="lang-zh">站上資料能支持的最佳選項 — 給張先生</span></h2>
+    <p class="sec-sub"><span class="lang-en">Not a personalized recommendation — a single, opinionated call assembled only from data this site already shows in SECTIONS 01–04. This walkthrough's answer is the one most users don't want to hear.</span><span class="lang-zh">非個人化推薦 — 是從 SECTION 01–04 站上資料推導出的單一明確建議。這個情境的答案是大多數人不想聽到的。</span></p>
+  </div>
+
+  <div class="best-option">
+    <div class="bo-grid">
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">CITY / AREA</span><span class="lang-zh">城市 / 區域</span></div>
+        <div class="bo-val">Don't buy (keep renting)</div>
+        <div class="bo-note"><span class="lang-en">Site's affordability + carry tools converge on: renting + investing is the better path at his current entry size.</span><span class="lang-zh">站上 affordability + carry 工具都指向：以他目前的自備規模，租屋 + 投資是更好的路徑。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">PRODUCT</span><span class="lang-zh">產品類型</span></div>
+        <div class="bo-val">Rent + index / REIT portfolio</div>
+        <div class="bo-note"><span class="lang-en">Continue renting his current setup; deploy down-payment capital into liquid index / REIT exposure instead.</span><span class="lang-zh">維持現行租屋；把原本要當自備款的資金投入流動的指數 / REIT。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">BUDGET MIX</span><span class="lang-zh">預算配置</span></div>
+        <div class="bo-val">NT$5M into index / REIT (not down-payment)</div>
+        <div class="bo-note"><span class="lang-en">Same NT$5M, different vehicle: low-cost broad index 60% + REIT 30% + cash 10% for opportunism.</span><span class="lang-zh">同樣 NT$5M、不同工具：低成本廣泛指數 60% + REIT 30% + 現金 10% 做機會留白。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">HOLD</span><span class="lang-zh">持有期</span></div>
+        <div class="bo-val">10+ years (asset accumulation phase)</div>
+        <div class="bo-note"><span class="lang-en">Revisit when down-payment can support &lt; 4:1 leverage with monthly payment ≤ 30% of net income.</span><span class="lang-zh">當自備款能支持 &lt; 4:1 槓桿、月付 ≤ 月收 30% 時再評估。</span></div>
+      </div>
+    </div>
+
+    <div class="bo-section bo-checklist">
+      <h4><span class="lang-en">✓ Why the site's data says "don't buy yet"</span><span class="lang-zh">✓ 站上資料為什麼說「現在還不要買」</span></h4>
+      <ul>
+        <li><span class="lang-en">First-home Cost Calculator: at NT$5M down + 5:1 leverage, monthly payment exceeds 40% of his net income under stress test.</span><span class="lang-zh">首購 Cost Calculator：NT$5M 自備 + 5:1 槓桿，壓力測試下月付超過月收 40%。</span></li>
+        <li><span class="lang-en"><code>/tw/valuation.html</code>: target submarket's price-to-income ratio in top quartile of historical range.</span><span class="lang-zh"><code>/tw/valuation.html</code>：目標區段房價/所得比在歷史前 25%。</span></li>
+        <li><span class="lang-en">Long-horizon IRR comparison: rent + index portfolio beats his entry-leverage own-home scenario over 10 years.</span><span class="lang-zh">長期 IRR 比較：他這個槓桿等級的自有房，10 年 IRR 輸給租屋 + 指數組合。</span></li>
+        <li><span class="lang-en">CBC credit-control current tier + risk page: rate / policy headwinds make high-leverage entry more fragile.</span><span class="lang-zh">央行信用管制現行等級 + Risk 頁：利率/政策逆風讓高槓桿進場更脆弱。</span></li>
+        <li><span class="lang-en">REIT vs Direct toggle for TW + global: liquidity, dividend reinvestment, exit flexibility all favour REIT at his size.</span><span class="lang-zh">REIT vs Direct toggle（TW + 全球）：流動性、配息再投資、exit 彈性都因他的規模偏好 REIT。</span></li>
+      </ul>
+    </div>
+
+    <div class="bo-section bo-next">
+      <h4><span class="lang-en">→ Off-site next steps (the site cannot answer)</span><span class="lang-zh">→ 走出站外的下一步（站上無法回答的）</span></h4>
+      <ol>
+        <li><span class="lang-en"><strong>Independent fee-only financial planner</strong> — not a banker, not an insurance agent; run his actual income / expense / dependent scenarios against the rent-vs-buy answer.</span><span class="lang-zh"><strong>獨立收費式財務規劃師</strong> — 不是理專、不是保險業務；用他真實的收入/支出/扶養情境檢驗租買決策。</span></li>
+        <li><span class="lang-en"><strong>Brokerage account setup</strong> — for index + REIT deployment; fee structure matters more than referral.</span><span class="lang-zh"><strong>券商帳戶開設</strong> — 用於指數 + REIT 投入；費用結構比誰介紹更重要。</span></li>
+        <li><span class="lang-en"><strong>Rental contract review</strong> — for his current rental: lock favourable terms, anti-eviction clauses; renting strategy = stable housing too.</span><span class="lang-zh"><strong>租約 review</strong> — 現行租屋：lock 有利條款、防驅趕條款；租屋策略 = 穩定居住也要設計。</span></li>
+        <li><span class="lang-en"><strong>Define the "buy trigger"</strong> — write down concrete conditions (income, savings, family) that would change the answer. Otherwise emotion overrides math.</span><span class="lang-zh"><strong>寫下「買的觸發條件」</strong> — 明確的條件（所得、儲蓄、家庭狀況）會改變這個答案。否則情緒會壓倒數學。</span></li>
+        <li><span class="lang-en"><strong>Annual review</strong> — re-run this walkthrough each year; the answer can flip when income / market / cycle changes.</span><span class="lang-zh"><strong>每年 review</strong> — 每年跑一次這份 walkthrough；所得 / 市場 / 週期變動時答案可能翻轉。</span></li>
+      </ol>
+    </div>
+
+    <div class="bo-bottomline">
+      <span class="bo-bl-label"><span class="lang-en">BOTTOM LINE</span><span class="lang-zh">底線</span></span>
+      <p><span class="lang-en">"Don't buy yet — rent and invest the down-payment instead" is the single call most consistent with the 12 stops at his current entry size. This is the answer the site is willing to give and most agents are not. The trigger for re-evaluation is mechanical, not emotional — write it down and check it yearly.</span><span class="lang-zh">「現在還不要買 — 把自備款投入指數 / REIT」是 12 站走完後對他目前自備規模最一致的選項。這是站上願意給、但多數仲介不會給的答案。重新評估的觸發條件是「機械的、不是情緒的」 — 寫下來，每年檢視。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 6 — DOWNLOAD PDF                        -->
+  <!-- ============================================== -->
+  <div class="pdf-bar">
+    <button class="pdf-btn" onclick="window.print()">
+      &#x2193; <span class="lang-en">Save as PDF</span><span class="lang-zh">存成 PDF</span>
+    </button>
+    <a href="/demo/" class="pdf-btn ghost">
+      <span class="lang-en">← All walkthroughs</span><span class="lang-zh">← 所有導覽</span>
+    </a>
+  </div>
+
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script src="/js/nav.js" defer></script>
+<script>
+/* ── Language switcher ── */
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+</script>
+</body>
+</html>

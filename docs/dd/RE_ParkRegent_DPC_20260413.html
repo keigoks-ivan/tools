@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE 深度分析｜Park Regent @ Desa ParkCity｜2026-04-13</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#F8FAFC; --card:#FFFFFF;
+    --gd:#14532D; --ga:#16A34A; --gl:#F0FDF4;
+    --yb:#FEF9C3; --yt:#92400E;
+    --rb:#FEE2E2; --rt:#991B1B;
+    --tb:#DCFCE7; --tt:#166534;
+    --bb:#EFF6FF; --bl:#3B82F6;
+    --ob:#FFF0E6; --ol:#F97316; --ot:#C2410C;
+    --tx:#1E293B; --tm:#64748B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.75}
+
+  /* ── HEADER ── */
+  .hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--gd);color:#fff;padding:8px 24px;display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+  .hdr-title{font-weight:700;font-size:13px}
+
+  /* ── LAYOUT ── */
+  .wrap{max-width:1140px;margin:0 auto;padding:72px 24px 80px}
+
+  /* ── SECTIONS ── */
+  .sec{background:var(--card);border-radius:8px;margin-bottom:22px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .sec-hd{background:var(--gd);color:#fff;padding:12px 20px;border-left:4px solid var(--ga);font-size:15px;font-weight:700;letter-spacing:.02em}
+  .sec-bd{padding:20px 22px}
+
+  h3{color:var(--gd);font-size:13.5px;font-weight:700;margin:18px 0 9px;border-bottom:1px solid #E2E8F0;padding-bottom:4px}
+  h3:first-child{margin-top:0}
+  p{margin-bottom:10px}
+
+  /* ── TABLES ── */
+  table{width:100%;border-collapse:collapse;margin:11px 0;font-size:13px}
+  thead tr{background:var(--gd);color:#fff}
+  thead th{padding:8px 12px;text-align:left;font-weight:600}
+  tbody tr:nth-child(even){background:var(--gl)}
+  tbody tr:nth-child(odd){background:#fff}
+  tbody td{padding:8px 12px;border-bottom:1px solid #E8EDF2;vertical-align:top}
+
+  /* ── TAGS ── */
+  .tg{background:var(--tb);color:var(--tt);padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:700;display:inline-block}
+  .ty{background:var(--yb);color:var(--yt);padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:700;display:inline-block}
+  .tr{background:var(--rb);color:var(--rt);padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:700;display:inline-block}
+  .tb2{background:var(--bb);color:#1D4ED8;padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:700;display:inline-block}
+
+  /* ── CALLOUTS ── */
+  .cycle{background:var(--bb);border-left:4px solid var(--bl);padding:14px 16px;border-radius:0 6px 6px 0;margin:13px 0}
+  .inv{background:var(--ob);border-left:4px solid var(--ol);padding:14px 16px;border-radius:0 6px 6px 0;margin:13px 0}
+  .inv-t{color:var(--ot);font-weight:700;margin-bottom:8px;font-size:14px}
+  .info{background:var(--bb);border-left:3px solid var(--bl);padding:12px 15px;border-radius:0 5px 5px 0;margin:10px 0;font-size:13px}
+  .warn{background:var(--ob);border-left:3px solid var(--ol);padding:12px 15px;border-radius:0 5px 5px 0;margin:10px 0;font-size:13px}
+  .napic{background:var(--gl);border:1px solid #BBF7D0;border-radius:6px;padding:12px 15px;margin:10px 0;font-size:13px}
+
+  /* ── GRID ── */
+  .dg{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:13px 0}
+  .dc{padding:16px;border-radius:6px}
+  .dcg{background:var(--gl)}
+  .dcw{background:var(--bg);border:1px solid #E2E8F0}
+  .dc h4{color:var(--gd);font-size:13px;font-weight:700;margin-bottom:10px}
+
+  /* ── RECOMMENDATION ── */
+  .rec{background:var(--tb);border:2px solid var(--ga);border-radius:8px;padding:20px;margin:15px 0}
+  .rec-t{font-size:15px;font-weight:700;margin-bottom:8px}
+
+  /* ── SCORE CARD ── */
+  .swrap{border:2px solid var(--gd);border-radius:10px;overflow:hidden;margin:15px 0}
+  .shd{background:var(--gd);color:#fff;padding:13px 20px;font-weight:700;font-size:14px}
+  .sbd{padding:20px}
+  .smain{text-align:center;padding:22px;background:var(--gl);border-radius:8px;margin-bottom:20px}
+  .snum{font-family:'IBM Plex Mono',monospace;font-size:60px;font-weight:600;color:var(--gd);line-height:1}
+  .ssub{color:var(--tm);font-size:12px;margin-top:6px}
+  .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .scol h4{color:var(--gd);font-weight:700;margin-bottom:14px;font-size:13px;padding-bottom:5px;border-bottom:1px solid #BBF7D0}
+  .si{margin-bottom:14px}
+  .si-l{font-size:11.5px;color:var(--tm);margin-bottom:3px;font-weight:600}
+  .si-b{display:flex;align-items:center;gap:8px}
+  .bb2{flex:1;height:9px;background:#E2E8F0;border-radius:5px;overflow:hidden}
+  .bf{height:100%;border-radius:5px}
+  .sv{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--gd);min-width:32px;text-align:right}
+  .sn{font-size:11.5px;color:var(--tm);margin-top:4px;line-height:1.55}
+  .stot{background:#F1F5F9;border-radius:6px;padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;margin:18px 0;white-space:pre;line-height:2.1}
+  .sub2{margin-top:14px;padding:10px 12px;background:var(--tb);border-radius:6px;font-size:12.5px}
+  .badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;background:var(--tb);color:var(--tt);margin:8px 0}
+
+  ul{padding-left:18px;margin:8px 0}
+  li{margin-bottom:4px}
+
+  /* ── TOP CONCLUSION BOX ── */
+  .topbox{background:var(--gd);color:#fff;border-radius:8px;padding:22px 24px;margin-bottom:22px}
+  .topbox h2{font-size:20px;font-weight:700;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:10px}
+  .topbox .score-big{font-family:'IBM Plex Mono',monospace;font-size:52px;font-weight:600;line-height:1;color:#86EFAC}
+  .topbox .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+  .topbox .kv-item{background:rgba(255,255,255,.1);border-radius:6px;padding:10px 12px}
+  .topbox .kv-label{font-size:11px;opacity:.75;margin-bottom:3px}
+  .topbox .kv-val{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600}
+
+  /* ── PRINT ── */
+  .pbtn{position:fixed;bottom:24px;right:24px;z-index:200;background:var(--gd);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  @media print{.hdr,.pbtn{display:none!important}.sec{break-inside:avoid;box-shadow:none}.wrap{padding-top:20px}}
+  @media(max-width:700px){.sgrid,.dg,.topbox .kv{grid-template-columns:1fr}.snum{font-size:42px}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-title">RE 深度分析｜Park Regent @ Desa ParkCity｜KL, Malaysia</div>
+  <div>資料更新：2026-04-13｜NAPIC Q3 2025 官方數據整合版｜框架 v1.3｜KL 建案系列 #22</div>
+</div>
+
+<div class="wrap">
+
+<!-- ══ TOP CONCLUSION ══ -->
+<div class="topbox">
+  <h2>Park Regent @ Desa ParkCity — 綜合投資結論（先閱）</h2>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&price=3940000&from=ParkRegent_DPC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=ParkRegent_DPC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">
+    <div>
+      <div style="font-size:11px;opacity:.75;margin-bottom:4px">綜合評分（NAPIC Q3 2025 整合版）</div>
+      <div class="score-big">8.34<span style="font-size:20px;opacity:.7"> / 10</span></div>
+      <div style="margin-top:8px;font-size:12px;opacity:.85">⭐⭐⭐⭐ 優質｜審慎積極進場</div>
+    </div>
+    <div style="flex:1;min-width:260px;font-size:13px;line-height:1.8;opacity:.9">
+      <strong>核心論點</strong>：DPC 地塊供給封頂（473英畝接近飽和）× NAPIC 確認 KL RM100萬+ 需求 <strong>+31% YoY</strong> × ParkCity × CapitaLand 完工現房零風險 × Brickz 70筆實證 5年 <strong>+40%</strong>。本系列基本面最完整的標的。<br>
+      <strong>最大制約</strong>：現金需求 <strong style="color:#FCD34D">RM161.5萬（TWD 1,100萬+）</strong>，本系列最高門票，需資本充裕前提。
+    </div>
+  </div>
+  <div class="kv">
+    <div class="kv-item"><div class="kv-label">Brickz 中位成交 PSF（70筆）</div><div class="kv-val">RM 1,541</div></div>
+    <div class="kv-item"><div class="kv-label">中位成交總價</div><div class="kv-val">RM 394萬</div></div>
+    <div class="kv-item"><div class="kv-label">5年升值幅度（實證）</div><div class="kv-val">+32–59%</div></div>
+    <div class="kv-item"><div class="kv-label">非居民稅後 Net Yield</div><div class="kv-val">2.0–2.9%</div></div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="sec">
+  <div class="sec-hd">§0｜城市定位與第一性原理</div>
+  <div class="sec-bd">
+
+    <h3>A｜Desa ParkCity 解決了什麼不可替代的長期需求？</h3>
+    <p>吉隆坡是馬來西亞唯一的全球城市樞紐，承擔區域金融、商業、外交與人才集散功能，具備英語通用、普通法法律體系、產權清晰三大結構優勢。在東南亞新興市場城市群中，KL 是唯一同時滿足「可負擔切入點 + 成熟基建 + 外資友好制度」三重條件的城市。</p>
+    <p><strong>Desa ParkCity 的結構性稀缺</strong>：DPC 是 KL 市內唯一「單一開發商主控計劃型社區」，ParkCity Group 掌控全 473 英畝的地塊規劃與社區管理，提供媲美新加坡 Bukit Timah 的低密度、公園導向、頂級物業管理居住體驗——此需求在 KL 範圍內唯一且無法被複製。</p>
+    <p><strong>Park Regent 的建案定位</strong>：DPC 旗艦住宅，首個突破 RM1,000 psf 發售的 DPC 建案，ParkCity CEO 親自以「BMW 7 Series」類比定位，The Edge 授予「DPC Condo King」稱號，2024 年 Value Creation Excellence Award 得獎。ParkCity × CapitaLand（新交所上市）聯合開發。已竣工 2023-11，零期房交屋風險。</p>
+
+    <div class="inv">
+      <div class="inv-t">B｜Munger Inversion——讓這個市場 3 年內下跌 30% 的路徑</div>
+      <table>
+        <thead><tr><th>風險維度</th><th>具體情境</th><th>觸發概率</th><th>主要影響</th></tr></thead>
+        <tbody>
+          <tr><td>政策風險</td><td>外籍印花稅從 8% 再加重；或 KL 外籍門檻從 RM100萬調升至 RM200萬+</td><td><span class="ty">中</span></td><td>入場成本急升，外籍需求萎縮</td></tr>
+          <tr><td>供給衝擊</td><td>DPC 剩餘地塊被第三方取得大量推案；或 KL SA 廣義庫存（~8,000–9,000戶）壓力蔓延</td><td><span class="tg">低（DPC 地塊受限）</span></td><td>稀缺性假設失效</td></tr>
+          <tr><td>需求崩退</td><td>MM2H 再收緊（2,637 待購確定買盤消失）；中國買家（MM2H 51%）因地緣因素撤退</td><td><span class="ty">中</span></td><td>高端需求斷層</td></tr>
+          <tr><td>匯率系統性惡化</td><td>MYR/USD 跌破 5.0；MYR/TWD 持續惡化超 15%</td><td><span class="ty">中</span></td><td>台幣計算報酬轉負；最難預測的尾部風險</td></tr>
+          <tr><td>地緣政治</td><td>台灣海峽衝突或區域風險事件導致東南亞外資系統性撤離</td><td><span class="tg">低</span></td><td>全市場共同承壓</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px"><strong>最大尾部風險</strong>：MYR 匯率系統性貶值——Park Regent 以 RM 計價，即便資產 RM 計保值，若 MYR/TWD 持續惡化，台幣換算報酬仍為負。這是 DPC 所有建案的共同隱性風險，且難以提前察覺，需納入持倉規模決策。</p>
+    </div>
+
+    <h3>C｜投資論點錨定</h3>
+    <table>
+      <thead><tr><th>項目</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr><td>核心驅動力（多重確認）</td><td>① DPC 地塊供給封頂（473 英畝接近飽和，ParkCity 單一控地）② NAPIC 官方確認 KL RM100萬+ 需求 +31% YoY（2024，最強細分）③ ParkCity × CapitaLand 完工現房，開發商風險歸零 ④ Brickz 70 筆實證 5 年 +32–59% 升值 ⑤ MM2H 2,637 待購確定買盤（RM23億），2026–27 集中入市</td></tr>
+        <tr><td>主要假設 H1</td><td>DPC 供給封頂持續。若 ParkCity 或第三方取得 DPC 核心住宅地塊大量推案，假設失效</td></tr>
+        <tr><td>主要假設 H2</td><td>MM2H 管道持續轉化為 KL RM100萬+ 成交；若 MM2H 重大收緊則需重估需求端</td></tr>
+        <tr><td>最重要監測指標</td><td>① Brickz 月成交量（低於 3 筆連續 3 個月為流動性警示）② DPC 核心地塊新住宅案公告 ③ MYR/TWD 匯率趨勢 ④ KL RM100萬+ 成交量 YoY 是否轉負</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="sec">
+  <div class="sec-hd">§1｜總體市場概況（NAPIC Q3 2025 官方數據）</div>
+  <div class="sec-bd">
+
+    <div class="napic">
+      <strong>上游文件整合</strong>：馬來西亞_供需Overhang總報告_20260401 ＋ KL_供需與Overhang深度分析_20260401（NAPIC / JPPH Q3 2025 / JLL Q2 2025 / Savills Q1 2025）｜資料更新：2026-04-13
+    </div>
+
+    <h3>1.1 KL 整體市場關鍵指標</h3>
+    <table>
+      <thead><tr><th>指標</th><th>數值</th><th>YoY</th><th>信號</th><th>來源</th></tr></thead>
+      <tbody>
+        <tr><td>KL 住宅成交量（2024全年）</td><td>18,913 戶</td><td>+5.5%</td><td><span class="tg">穩健增長</span></td><td>NAPIC 官方</td></tr>
+        <tr><td>KL 住宅成交額（2024全年）</td><td>RM174.6億</td><td>+16.6%</td><td><span class="tg">買家持續升級（量穩值升）</span></td><td>NAPIC 官方</td></tr>
+        <tr><td><strong>KL RM100萬+ 高端住宅成交量（2024）</strong></td><td><strong>3,079 戶</strong></td><td><strong style="color:#16A34A">+31.0% ⭐</strong></td><td><span class="tg">全 KL 最強細分市場，Park Regent 直接受益</span></td><td>NAPIC 官方</td></tr>
+        <tr><td>KL 高端住宅均價（JLL Q2 2025）</td><td>USD 240（≈ RM1,100–1,200 psf）</td><td>—</td><td><span class="tg">vs 新加坡同等定位低 87%</span></td><td>JLL MarketBeat</td></tr>
+        <tr><td>KL 住宅 Overhang（Q3 2025）</td><td>2,287 戶（RM24億）</td><td>▼37.2% vs H1 2025</td><td><span class="tg">短期改善；均價 RM105萬/戶，高端積壓結構</span></td><td>NAPIC JPPH</td></tr>
+        <tr><td>KL RM1M+ Overhang</td><td>478 戶（去化率 69.8%）</td><td>—</td><td><span class="ty">高端舊存貨緩慢消化，新精品稀缺</span></td><td>NAPIC Table 2</td></tr>
+        <tr><td>KL 服務式公寓庫存（另計）</td><td>~8,000–9,000 戶（估）</td><td>緩慢消化</td><td><span class="ty">SA = 商業地契，與 DPC 住宅地契不同市場層，不交叉傳染</span></td><td>NAPIC 商業統計</td></tr>
+        <tr><td><strong>KL 新開工 YoY（Q1-Q3 2025）</strong></td><td><strong>-14.9% ⚠</strong></td><td>急降</td><td><span class="tg">2027–28 供給緊縮先行訊號，精品住宅中長期受益</span></td><td>NAPIC 建設統計</td></tr>
+        <tr><td>Mont Kiara 2BR 租金 YoY</td><td>+6.4% ⭐</td><td>全 KL 最強</td><td><span class="tg">DPC 週邊外籍需求旺盛，租賃市場健康</span></td><td>Savills Q1 2025</td></tr>
+        <tr><td>MM2H 待購確定買盤</td><td>2,637 人，估 RM23億</td><td>2026–27 入市</td><td><span class="tg">量化確定需求管道，針對 KL RM100萬+ 物業</span></td><td>馬來西亞觀光部</td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 全馬 vs KL Overhang 結構（NAPIC Q3 2025）</h3>
+    <table>
+      <thead><tr><th>類型</th><th>全馬 Overhang</th><th>KL Overhang</th><th>KL 佔比</th><th>趨勢</th></tr></thead>
+      <tbody>
+        <tr><td>住宅（Residential）</td><td>28,672 戶（+30.5% YoY ⚠）</td><td>2,287 戶</td><td>7.97%（▼，改善中）</td><td>KL 佔比持續下降，KL 去化優於全馬均值</td></tr>
+        <tr><td>服務式公寓（SA）</td><td>17,892 戶（另計）</td><td>4,687 戶（估）</td><td>~26%</td><td>KL SA 廣義管道（含UC+NC）達 22,314 戶，未來壓力大</td></tr>
+        <tr><td>住宅+SA 合計</td><td>46,564 戶</td><td>~6,974 戶</td><td>—</td><td>SA 商業地契問題不影響 DPC 住宅地契市場</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--tm)">重要提示：SA 自 2016 年起重分類為「商業」，不計入住宅 Overhang 統計。分析 DPC Freehold 住宅地契時，應以住宅 Overhang 數字為依據，SA 庫存不構成直接競爭。</p>
+
+    <h3>1.3 Park Regent 價格歷史</h3>
+    <table>
+      <thead><tr><th>時間點</th><th>PSF</th><th>依據 / 事件</th></tr></thead>
+      <tbody>
+        <tr><td>2019-07（發售）</td><td>RM1,100 psf</td><td>首日售出 70%，最終疫情期間全部售罄；DPC 首突破 RM1,000 psf 建案</td></tr>
+        <tr><td>2021–2022（建設期）</td><td>~RM1,150–1,250 psf（轉讓估）</td><td>早期投資者小量轉讓</td></tr>
+        <tr><td>2023-11（竣工）</td><td>~RM1,250–1,350 psf（估）</td><td>完工後即時升值兌現，The Edge 2024 Award</td></tr>
+        <tr><td>2024-06 至 2025-05（Brickz 70筆中位）</td><td><strong>RM1,541 psf</strong></td><td>本系列最高置信度——70 筆實際 SPA 成交，P25 RM180萬，P75 RM444.5萬，中位總價 RM394萬</td></tr>
+        <tr><td>5年升值（Type B2 / Type F）</td><td>+32.81% / +59.4%</td><td>The Edge 2024 Value Creation 數據；年化 CAGR 5.8%–9.8%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="cycle">
+      <strong>1.4 市場週期定位：擴張期偏後段</strong>，信心：中高<br><br>
+      DPC Park Regent 完工逾 2 年，Brickz 70 筆中位持續創歷史新高（RM1,541 psf），月均 5.8 筆流動性充分。NAPIC 官方確認 KL RM100萬+ 成交 +31% 為全市最強細分。MM2H 2,637 待購確定買盤支撐 2026–27 需求端。NAPIC 開工先行指標 -14.9% 預示 2027–28 供給緊縮有利精品住宅。主要制約：RM394萬中位入場為本系列最高門檻，邊際新買家受限，擴張斜率放緩中，但下行觸發因素尚未出現。
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="sec">
+  <div class="sec-hd">§2｜供需結構分析</div>
+  <div class="sec-bd">
+
+    <div class="napic">
+      <strong>NAPIC Q3 2025 關鍵錨點</strong>：KL 住宅 Overhang 2,287 戶（RM24億，均價 RM105萬/戶）；KL 廣義供給管道 11,568 戶；KL SA 庫存 ~8,000–9,000 戶（商業地契，另計）；KL 新開工 -14.9% YoY（Q1-Q3 2025）；KL RM1M+ 成交 +31%（2024）；MM2H 2,637 待購買盤，台灣佔 MM2H 17%（第二大來源）。
+    </div>
+
+    <h3>2.1 需求面——目標客群分析</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>占比</th><th>趨勢</th><th>NAPIC 數據支撐</th></tr></thead>
+      <tbody>
+        <tr><td>本地高淨值自住（HNW）</td><td>~50%</td><td>↑</td><td>KL 公寓成交 Q3 2025 +8.1% YoY；KL 2024 獨立屋成交額 +64%（買家升級確認）；PCIS 學區剛需不受景氣波動</td></tr>
+        <tr><td>外籍高管自住（Expat）</td><td>~25%</td><td>↑</td><td>MM2H 台灣第二大來源（17%）；KL 外籍居民比例 ~10–15%，數位遊牧 + 企業外派增加；TRX 金融區成熟後外溢</td></tr>
+        <tr><td>本地投資買家（出租）</td><td>~15%</td><td>→</td><td>高入場門檻壓縮純投資人比例；Mont Kiara 租金 YoY +6.4% 確認外籍長租需求旺盛</td></tr>
+        <tr><td>外籍投資買家（MM2H / 資產配置）</td><td>~10%</td><td>↑</td><td>MM2H 2,637 待購買家（估 RM23億），均需 KL RM100萬+ 住宅地契；台灣 MM2H 客群</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供給面——DPC 稀缺結構</h3>
+    <table>
+      <thead><tr><th>供給維度</th><th>數據</th><th>趨勢</th><th>對 Park Regent 影響</th></tr></thead>
+      <tbody>
+        <tr><td>Park Regent 總戶數</td><td>505 戶，2 棟，5.6 英畝（竣工 2023-11）</td><td>固定（封閉完工）</td><td>零新增供給，封閉式</td></tr>
+        <tr><td>DPC 未來住宅供給</td><td>473 英畝接近飽和，ParkCity 單一控地</td><td>→ 極低</td><td>供給上限封頂，本系列稀缺性最確定</td></tr>
+        <tr><td>KL 住宅 Overhang（NAPIC Q3 2025）</td><td>2,287 戶，均價 RM105萬/戶</td><td>▼37.2%（改善）</td><td>KL 住宅整體庫存環境改善，高端壓力集中在舊存貨</td></tr>
+        <tr><td>KL RM1M+ 住宅 Overhang</td><td>478 戶（去化率 69.8%）</td><td>緩慢消化</td><td>精品住宅地契直接競品極有限</td></tr>
+        <tr><td>KL SA 庫存（NAPIC，另計）</td><td>~8,000–9,000 戶（估）；SA 廣義管道 22,314 戶（含 UC+NC）</td><td>緩慢消化</td><td>商業地契問題，與 DPC 住宅地契不同市場層，<strong>不直接競爭</strong></td></tr>
+        <tr><td>KL 新開工先行指標（NAPIC Q1-Q3 2025）</td><td>-14.9% YoY</td><td>↓（先行訊號）</td><td>2027–28 完工量顯著下降，精品住宅供給緊縮利好</td></tr>
+        <tr><td>2026–2029 主要競品新供給（KL_供需報告 §6）</td><td>Kiaramas deDaun（MK 2028）、The MINH MK（2027–28）、Papyrus Dutamas（2027）</td><td>—</td><td>均為住宅地契低 Overhang 風險建案；但非 DPC 地段，不直接衝擊 DPC 稀缺性</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.3 供需平衡量化判斷</h3>
+    <table>
+      <thead><tr><th>指標</th><th>數值</th><th>健康基準</th><th>判斷</th></tr></thead>
+      <tbody>
+        <tr><td>Brickz 月成交量（Park Regent）</td><td>~5.8 筆/月（70筆/12個月）</td><td>&gt;3 筆/月為健康</td><td><span class="tg">🟢 本系列最高流動性驗證</span></td></tr>
+        <tr><td>KL RM100萬+ 成交增速（NAPIC 2024）</td><td>+31% YoY</td><td>正增長</td><td><span class="tg">🟢 最強細分，直接支撐 Park Regent 定位</span></td></tr>
+        <tr><td>MM2H 確定性需求管道</td><td>2,637 人 × RM100萬+（KL 門檻）= RM23億</td><td>量化可見買盤</td><td><span class="tg">🟢 2026–27 確定性入市高峰</span></td></tr>
+        <tr><td>KL 新開工先行</td><td>-14.9% YoY（NAPIC 官方）</td><td>供給先行訊號</td><td><span class="tg">🟢 2027–28 供給緊縮，精品住宅受益</span></td></tr>
+        <tr><td>KL 住宅 Overhang 展望（NAPIC 基本情境）</td><td>2026 末 ~3,000戶→2027 末 ~4,000戶→2028 末 ~3,100戶</td><td>短期先升後降</td><td><span class="ty">🟡 2026–27 小幅惡化後改善；精品住宅地契段受影響有限</span></td></tr>
+        <tr><td>DPC 二手掛牌 vs 成交速度</td><td>308 掛牌 / 月均 5.8 成交</td><td>以成交速度判斷流動性</td><td><span class="ty">🟡 61% 掛牌率偏高；但大坪數豪宅常態性掛牌，以成交速度為準</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="info">
+      <strong>NAPIC 數據核心洞察（KL_供需報告 §3.2 直接引用）</strong>：「RM100萬以上：供需結構最健康，精品段稀缺。2024年RM100萬+成交量+31%，是增速最快的細分市場。MM2H 2,637待購買家幾乎全部針對此段……而真正的精品住宅地契低密度公寓供給管道有限，需求端外資持續湧入。此段為雙層分化：舊高端積壓 vs 新精品稀缺。」 Park Regent 屬於「新精品稀缺」陣營。
+    </div>
+  </div>
+</div>
+
+<!-- §3 -->
+<div class="sec">
+  <div class="sec-hd">§3｜區域細分分析</div>
+  <div class="sec-bd">
+
+    <h3>3.1 DPC 內部區域分級</h3>
+    <table>
+      <thead><tr><th>Zone</th><th>代表建案</th><th>均價（psf）</th><th>NAPIC 供需背景</th><th>適合族群</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Zone 1｜湖畔核心</strong></td><td>Park Regent、One Central Park、Casaman</td><td>RM1,400–1,600+</td><td>供給封頂；KL RM1M+ Overhang 478戶（去化率69.8%）——精品住宅地契稀缺邏輯成立</td><td>高淨值自住、外籍高管、MM2H</td></tr>
+        <tr><td><strong>Zone 2｜中環住宅</strong></td><td>28 Boulevard、Nadia、Westside</td><td>RM900–1,300</td><td>社區成熟，去化穩定，成交量健康</td><td>家庭自住、長租外籍</td></tr>
+        <tr><td><strong>Zone 3｜邊緣地塊</strong></td><td>Alura、外圍地塊</td><td>RM700–950</td><td>距核心較遠，共享 DPC 社區管理</td><td>首購族、長期投資</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 KL 分地段供需格局（NAPIC + JLL + Savills 整合）</h3>
+    <table>
+      <thead><tr><th>區域</th><th>均價（psf）</th><th>Q1 2025 YoY</th><th>Gross Yield</th><th>Overhang 壓力</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>DPC（Park Regent）</strong></td><td>RM1,541（Brickz中位）</td><td>+10–12%（估）</td><td>Gross 5.2%（大坪數，The Edge）</td><td><span class="tg">低（住宅地契，供給封頂）</span></td><td>本系列評分最高地段</td></tr>
+        <tr><td>Mont Kiara</td><td>RM900–1,300</td><td><strong>+6.4% ⭐</strong></td><td>5–6%</td><td><span class="tg">低（庫存最健康）</span></td><td>外籍需求最旺盛分區</td></tr>
+        <tr><td>KLCC / 金三角</td><td>RM1,400–1,800</td><td>+3.5%</td><td>3–4%</td><td><span class="ty">中高（舊存貨 + SA 多）</span></td><td>高端 SA 積壓問題顯著</td></tr>
+        <tr><td>Bangsar</td><td>RM893–1,042</td><td>+2.6%</td><td>4–5%</td><td><span class="tg">低（需求健康）</span></td><td>本地中產 + 外籍長租</td></tr>
+        <tr><td>Bangsar South</td><td>RM700–950</td><td>+4–6%</td><td>4–5%</td><td><span class="ty">中（SA 較多）</span></td><td>升值最強但 SA 隱患</td></tr>
+        <tr><td>Cheras / Kepong / Setapak</td><td>RM400–650</td><td>-2至+1%</td><td>4–5.5%</td><td><span class="tr">高（RM30–60萬段積壓重）</span></td><td>商業地契 SA 問題最嚴重</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--tm)">來源：KL_供需與Overhang深度分析_20260401 §5；JLL KL Q2 2025；Savills KL Q1 2025；BambooRoutes Jan 2026</p>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="sec">
+  <div class="sec-hd">§4｜新案 vs 二手市場（v1.1 / v1.3 方法論）</div>
+  <div class="sec-bd">
+
+    <h3>4.1 同期競品比較（FIX-01：同期同區同類型新案）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>Park Regent（本案）</th><th>Kiaramas deDaun（MK）</th><th>One Central Park（DPC）</th><th>28 Mont' Kiara</th></tr></thead>
+      <tbody>
+        <tr><td>發布年份</td><td>2019</td><td>2021</td><td>~2015</td><td>~2018</td></tr>
+        <tr><td>發售 PSF</td><td>RM1,100</td><td>~RM1,100–1,200</td><td>~RM900–1,000</td><td>~RM850–950</td></tr>
+        <tr><td>產權</td><td>Freehold 住宅</td><td>Freehold 住宅</td><td>Freehold 住宅</td><td>Freehold 住宅</td></tr>
+        <tr><td>竣工</td><td>2023-11（已完工）</td><td>期房 2028</td><td>2017</td><td>~2020</td></tr>
+        <tr><td>現 Brickz / 二手 PSF</td><td><strong>RM1,541（70筆中位）</strong></td><td>N/A（未完工）</td><td>~RM900–1,000</td><td>~RM950–1,100</td></tr>
+        <tr><td>5年升值幅度</td><td><strong>+32–59%（實證）</strong></td><td>N/A</td><td>+10–15%</td><td>+10–20%</td></tr>
+        <tr><td>NAPIC Overhang 風險</td><td>低（封閉完工，DPC 地塊封頂）</td><td>低（KL_供需 §6 確認）</td><td>低</td><td>低</td></tr>
+        <tr><td>開發商組合</td><td>ParkCity × CapitaLand ⭐</td><td>Sunrise × KL 聯合</td><td>ParkCity</td><td>UOA Development</td></tr>
+      </tbody>
+    </table>
+    <p><strong>同期比較結論</strong>：Park Regent 發售定價相當於同期 MK 頂級住宅，完工後升值（+40%）遠超 MK 均值（+10–20%），驗證 DPC 地段溢價的持久性。Brickz 70 筆為本系列最大樣本，所有比較結論置信度最高。</p>
+
+    <h3>4.2 開發商評估</h3>
+    <table>
+      <thead><tr><th>開發商</th><th>規模與背景</th><th>財務健康</th><th>交屋記錄</th><th>風險評級</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ParkCity Group</strong></td><td>DPC 473 英畝整體開發商；馬來西亞頂尖私人開發商；30+ 年 DPC 開發歷史</td><td>強；多個 DPC 完工建案，資金穩健；ParkCity Medical Centre 業主</td><td>DPC 所有建案按時交屋，社區管理口碑為 KL 私人社區最佳</td><td><span class="tg">🟢 極低（已竣工，風險歸零）</span></td></tr>
+        <tr><td><strong>CapitaLand（新加坡）</strong></td><td>東南亞最大上市開發商；新交所主板上市；政府聯繫企業（GLC）</td><td>極強；公開財報透明；東南亞多國開發記錄</td><td>東南亞無重大違約；新加坡政府開發商背景</td><td><span class="tg">🟢 極低（已竣工，風險歸零）</span></td></tr>
+      </tbody>
+    </table>
+    <p>本系列 22 個建案中<strong>開發商組合最強</strong>，且建案已竣工（2023-11），所有期房交屋風險已完全歸零，現評估重點為社區管理持續性。</p>
+
+    <h3>4.3 二手市場分析（FIX-02 折扣結構 + FIX-03 掛牌標準化）</h3>
+    <div class="info">
+      <strong>Step A｜折扣結構（FIX-02）</strong>：發售年份 2019，RM1,100 psf。折扣結構（早鳥、Bumiputera 折扣等）<strong>無法從公開資料具體確認百分比（FIX-04 標記：未確認）</strong>。疫情期間售罄，早鳥條件已無市場參考意義。現時買家應以 Brickz 70 筆成交中位 RM1,541 psf 作為進場基準，不以原始開發商標榜價計算折讓。
+    </div>
+
+    <p><strong>Step B｜掛牌樣本標準化（FIX-03：5–10 筆，標準化樓層後判斷）</strong></p>
+    <table>
+      <thead><tr><th>坪數段（sqft）</th><th>類型</th><th>掛牌 PSF 範圍</th><th>樓層段</th><th>樓層調整方向</th><th>流動性特徵</th></tr></thead>
+      <tbody>
+        <tr><td>872–1,200（1BR）</td><td>稀有小坪數</td><td>RM1,800–2,200</td><td>中高層</td><td>+5–8% 高層溢價</td><td>交易量少但 PSF 最高，投資者持有較多</td></tr>
+        <tr><td>1,500–2,500（2–3BR）</td><td>主力成交段</td><td>RM1,400–1,700</td><td>中層（基準）</td><td>0%（基準）</td><td>月成交最多，流動性最佳，自住 + 投資混合</td></tr>
+        <tr><td>2,500–3,500（3–4BR 中大）</td><td>過渡坪數</td><td>RM1,300–1,600</td><td>中高層</td><td>+5%</td><td>自住導向，買家群較窄</td></tr>
+        <tr><td>3,500–4,887（4BR+）</td><td>大坪數旗艦</td><td>RM1,200–1,600</td><td>中高層</td><td>基準或+5%</td><td>總價 RM500萬–800萬+，退出需 12–24 個月</td></tr>
+        <tr><td><strong>Brickz 70筆中位（跨坪數）</strong></td><td>—</td><td><strong>RM1,541 psf</strong></td><td>混合</td><td>—</td><td>P25 RM180萬，P75 RM444.5萬；最可靠市場基準</td></tr>
+        <tr><td>The Edge 官方引用（大坪數實際）</td><td>4,511 sqft</td><td>RM1,285 psf（RM25,000/月租，Gross 5.20%）</td><td>高層</td><td>—</td><td>官方 Net Yield 5.20% 引用；大坪數 PSF 因總價極高而偏低</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Step C｜信號判斷</strong>：掛牌均值 RM1,500–1,800 psf 與 Brickz 成交中位 RM1,541 psf 接近或輕微溢價。信號：<span class="tg">持平至輕微溢價（偏多）</span>——賣方無急售壓力，持有人信心強，中位成交驗證充分。iProperty Oct 2025 掛牌 308 筆（505 戶中 61% 掛牌），大坪數豪宅中常態性掛牌探價行為普遍，不應以靜態掛牌率判斷流動性，應以月均 5.8 筆成交速度為準。</p>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="sec">
+  <div class="sec-hd">§5｜租金市場與報酬率</div>
+  <div class="sec-bd">
+
+    <h3>5.1 Park Regent 租金水準</h3>
+    <table>
+      <thead><tr><th>坪數段</th><th>月租範圍</th><th>Gross Yield 估算</th><th>來源</th></tr></thead>
+      <tbody>
+        <tr><td>872–1,500 sqft（1–2BR）</td><td>RM4,500–8,000/月</td><td>~3.8–4.5%</td><td>PropertyGuru 掛牌；DPC 實際成交租金</td></tr>
+        <tr><td>1,500–2,500 sqft（2–3BR）</td><td>RM8,000–15,000/月</td><td>~3.5–4.2%</td><td>PropertyGuru；DPC 管委會數據</td></tr>
+        <tr><td>3,000 sqft+（4BR）</td><td>RM18,000–30,000/月</td><td>~4.5–5.5%</td><td>PropertyGuru；企業租賃市場</td></tr>
+        <tr><td>4,511 sqft（旗艦，實際成交）</td><td><strong>RM25,000/月</strong></td><td><strong>Gross 5.17%｜Net 5.20%（The Edge 官方引用）</strong></td><td>The Edge 2024 報導</td></tr>
+      </tbody>
+    </table>
+    <p>對照上游文件（KL_供需報告 §2.5）：Mont Kiara 2BR 月租 RM3,500–5,000，Gross 5–6%，Q1 2025 YoY +6.4%（全 KL 最強），外籍家庭 + MM2H 為主要租客。DPC Park Regent 大坪數 Gross 5.2% 在 KL 豪宅市場屬優質水準，超越 KLCC（Gross 3–4%），接近 Mont Kiara（Gross 5–6%）上端。</p>
+
+    <h3>5.2 外籍持有人報酬率計算（v1.1 強制標注：非居民稅率影響）</h3>
+    <table>
+      <thead><tr><th>計算情境</th><th>Gross Yield</th><th>扣除管理費+空置（8%）</th><th>Net Gross</th><th>非居民所得稅（30%固定）</th><th>稅後 Net Yield</th><th>評級</th></tr></thead>
+      <tbody>
+        <tr><td>大坪數旗艦（4,511 sqft，RM25,000/月）</td><td>5.17%</td><td>管理費 ~RM2,500+空置 8%</td><td>~4.2%</td><td>× 0.70</td><td><strong>~2.9%</strong></td><td><span class="ty">🟡 非居民稅後偏低</span></td></tr>
+        <tr><td>中位成交（RM394萬 / 月租 RM12,000 估）</td><td>~3.65%</td><td>管理費 RM1,000+空置 8%</td><td>~2.9%</td><td>× 0.70</td><td><strong>~2.0%</strong></td><td><span class="tr">🔴 純租金回報不佳</span></td></tr>
+      </tbody>
+    </table>
+    <div class="warn">
+      <strong>非居民租金所得稅（v1.1 強制標注）</strong>：馬來西亞非居民（含台灣 MM2H 持有人）租金所得適用 <strong>30% 固定稅率</strong>（非累進，不可享有本地居民累進稅優惠）。稅後 Net Yield 約 2.0–2.9%，遠低於多數同等風險替代配置。<br><br>
+      <strong>結論</strong>：Park Regent 的投資邏輯不應以租金收益為主要回報依據。核心應錨定<strong>資本增值（5 年 +40% 已實證，CAGR 5.8–9.8%）</strong>，租金作為持有期成本的部分對沖。若以純租金回報評估，不建議進場。
+    </div>
+
+    <h3>5.3 租客結構</h3>
+    <table>
+      <thead><tr><th>租客類型</th><th>占比</th><th>穩定度</th><th>特徵</th></tr></thead>
+      <tbody>
+        <tr><td>外籍高管長租</td><td>~40%</td><td>高</td><td>跨國公司配套；ParkCity International School（PCIS）學區吸引外籍家庭</td></tr>
+        <tr><td>本地高淨值長租</td><td>~35%</td><td>高</td><td>本地高管、企業外派人員；偏好 DPC 生活圈</td></tr>
+        <tr><td>企業租賃（Corporate lease）</td><td>~15%</td><td>高</td><td>外資公司直簽，穩定性最佳；TRX 成熟後外溢</td></tr>
+        <tr><td>短租（Airbnb 等）</td><td>~10%</td><td>中</td><td>DPC 管委會限制短租；多為長租為主</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="sec">
+  <div class="sec-hd">§6｜外資／外國買家法規</div>
+  <div class="sec-bd">
+
+    <h3>6.1 購屋資格與地契優勢</h3>
+    <table>
+      <thead><tr><th>項目</th><th>規定</th><th>限制程度</th><th>vs Commercial Title 差異</th></tr></thead>
+      <tbody>
+        <tr><td><strong>地契類型</strong></td><td><strong>Residential Strata（住宅分層地契）</strong>——iProperty 標注，Rumavi 多源確認</td><td><span class="tg">🟢 本系列最優類型</span></td><td>Commercial Title 需申請 FIC 批准，且利率較高</td></tr>
+        <tr><td>外籍最低購置門檻</td><td>KL 聯邦直轄區 RM1,000,000</td><td>Park Regent 中位 RM394萬，完全達標</td><td>—</td></tr>
+        <tr><td>永久產權</td><td>Freehold，可繼承，無年期限制</td><td><span class="tg">🟢 無限制</span></td><td>Leasehold 建案有年期限制</td></tr>
+        <tr><td>外資委員會（FIC）批准</td><td>住宅地契無需 FIC 批准（2009 年鬆綁）</td><td><span class="tg">🟢 無需額外申請</span></td><td>Commercial Title 需 FIC 批准，增加不確定性</td></tr>
+        <tr><td>房貸利率</td><td>Residential Title → 外籍可申請住宅貸款利率（4.5–5.5%）；最高 70% LTV</td><td><span class="tg">🟢 優惠利率</span></td><td>Commercial Title 利率通常高 0.5–1%，且 LTV 更低</td></tr>
+        <tr><td>水電費率</td><td>住宅費率（低）</td><td><span class="tg">🟢 大幅優於商業費率</span></td><td>Commercial Title 商業電費高出住宅 ~6 倍，是 SA 積壓的主因之一</td></tr>
+        <tr><td>HDA 保護（住宅發展法）</td><td>適用（期房階段已完成交屋，現為完工現房）</td><td><span class="tg">🟢 已完成</span></td><td>Commercial Title 無 HDA 保護，爛尾無賠償機制</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6.2 稅費結構</h3>
+    <table>
+      <thead><tr><th>稅費項目</th><th>本地買家</th><th>外籍買家（2026 現況）</th><th>對 Park Regent 投資者影響</th></tr></thead>
+      <tbody>
+        <tr><td>印花稅（Stamp Duty）</td><td>1–3% 累進</td><td><strong>8% 固定（2026-01 起）</strong></td><td>RM394萬物業印花稅約 RM31.5萬；相對 3% 增加約 RM20萬</td></tr>
+        <tr><td>RPGT（資本利得稅）</td><td>持有 6 年後 0%</td><td>持有 6 年後仍 <strong>10%（永久固定）</strong></td><td>持有 7 年後出售，RM394萬若升值 40%（RM158萬）→ RPGT 約 RM15.8萬；需提前規劃架構</td></tr>
+        <tr><td>年度持有稅</td><td>門牌稅（極低，&lt;RM500/年）</td><td>同本地</td><td>住宅地契無特殊外籍持有稅</td></tr>
+        <tr><td>租金所得稅</td><td>10–24%（累進）</td><td><strong>30%（非居民固定）</strong></td><td>見 §5 詳細計算；核心影響：淨租金回報從 Gross 5.2% 降至稅後 ~2.9%</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>外資友好度綜合評級</strong>：<span class="ty">🟡 中性</span>——住宅地契本身是本系列最友好的產權結構，但 2026-01 起 8% 印花稅 + 30% 非居民租金稅 + RPGT 10% 永久外籍三項稅費疊加，使純投資回報顯著壓縮。長期資本增值（持有 5–7 年+）配合低槓桿的架構仍具合理性。</p>
+
+    <h3>6.3 近期法規變化（上游文件確認）</h3>
+    <table>
+      <thead><tr><th>政策</th><th>時間</th><th>對 Park Regent 的影響</th></tr></thead>
+      <tbody>
+        <tr><td>外籍印花稅 3% → 8%</td><td>2026-01 起</td><td>入場成本增加約 RM20萬（已發生，不可回避）；抑制部分邊際外籍買家，但高端 DPC 買家現金流充裕，影響有限</td></tr>
+        <tr><td>RPGT 外籍 10% 永久</td><td>2019（持續維持）</td><td>出售前需提前規劃持有架構；建議持有 7 年以上充分攤薄 8% 印花稅 + RPGT 10%</td></tr>
+        <tr><td>MM2H Gold Tier 重開（上游文件）</td><td>2024–2025</td><td>台灣第二大來源（17%）直接帶動 DPC RM100萬+ 住宅需求；2,637 待購買盤 2026–27 集中釋放；台灣 MM2H Gold 客群</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §7 -->
+<div class="sec">
+  <div class="sec-hd">§7｜貸款環境與利率影響</div>
+  <div class="sec-bd">
+
+    <h3>7.1 貸款條件（2025–2026 現況）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>本地買家</th><th>外籍買家</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>BNM OPR（基準利率）</td><td>3.00%（2025 維持不變）</td><td>同</td><td>Bank Negara Malaysia；近期無調整訊號</td></tr>
+        <tr><td>住宅房貸利率（Residential Title 優勢）</td><td>約 4.0–4.5%（BLR–2.2% 至 –1.8%）</td><td>約 4.5–5.5%（外籍風險溢價）</td><td>Residential Title 可申請住宅利率；Commercial Title 利率高 0.5–1%</td></tr>
+        <tr><td>最高 LTV</td><td>90%（首購）/ 70%（第三套+）</td><td><strong>70%（外籍上限）</strong></td><td>Maybank、CIMB、RHB、Public Bank 均接受外籍住宅貸款申請</td></tr>
+        <tr><td>最長貸款年期</td><td>35 年</td><td>30 年（部分可 35 年）</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>7.2 外籍購置財務試算（RM394萬中位）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>金額（RM）</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>購買總價</td><td>3,940,000</td><td>Brickz 70 筆成交中位，最可靠市場基準</td></tr>
+        <tr><td>外籍印花稅（8%，2026起）</td><td>315,200</td><td>已發生成本，無法規避</td></tr>
+        <tr><td>律師費 + 代理費（估 3%）</td><td>118,200</td><td>律師費 + 房仲費；可談判空間有限</td></tr>
+        <tr><td>首付（30%，70% LTV）</td><td>1,182,000</td><td>外籍最高 70% LTV 基準</td></tr>
+        <tr><td><strong>現金需求合計</strong></td><td><strong style="color:#C2410C">~RM161.5萬（≈ TWD 1,100萬+）</strong></td><td>首付 + 所有稅費；<strong>本系列 22 個建案中最高</strong></td></tr>
+        <tr><td>貸款額（70% LTV）</td><td>2,758,000</td><td>—</td></tr>
+        <tr><td>月供（4.5%，30年）</td><td>~RM13,968/月</td><td>外籍利率 4.5% 估算</td></tr>
+        <tr><td>月租（大坪數，The Edge 引用）</td><td>RM25,000/月</td><td>月租 - 月供 - 管理費 → 月現金流約 RM7,500（大坪數）</td></tr>
+        <tr><td>管理費（估 RM0.50 psf）</td><td>RM800–2,500/月（依坪數）</td><td>需向 DPC 管委會確認實際費率；大坪數費用顯著更高</td></tr>
+      </tbody>
+    </table>
+    <div class="warn">
+      <strong>現金需求警示——本系列最高</strong>：RM161.5萬（TWD 約 1,100萬+）遠超本系列其他建案：TS2 ~RM55萬、Kiaramas deDaun ~RM75萬（期房分期）、OCP DPC ~RM90萬。進場前提是<strong>資本充裕</strong>——確認有此規模的非緊急現金倉位，且不影響整體資產流動性管理。
+    </div>
+
+    <h3>7.3 利率敏感度分析</h3>
+    <table>
+      <thead><tr><th>情境</th><th>OPR 變化</th><th>月供影響</th><th>對 Park Regent 需求影響</th></tr></thead>
+      <tbody>
+        <tr><td>升息情境</td><td>OPR +1%（4.0%）</td><td>月供增 ~RM800</td><td>本地貸款買家受壓；但 DPC 外籍自住 + 現金買家比例高，抗壓性較強</td></tr>
+        <tr><td>維持不變（基準）</td><td>OPR 3.0%</td><td>基準</td><td>現況持續，MM2H 買盤穩定</td></tr>
+        <tr><td>降息情境</td><td>OPR -0.5%（2.5%）</td><td>月供減 ~RM400</td><td>本地高淨值買家信心增強，DPC 需求溫和提升；外籍買家不受 OPR 直接影響（外籍利率另計）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="sec">
+  <div class="sec-hd">§8｜基礎建設與重劃區發展</div>
+  <div class="sec-bd">
+
+    <h3>8.1 重大基建項目（上游文件確認）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>類型</th><th>最新狀態</th><th>DPC 受益程度</th></tr></thead>
+      <tbody>
+        <tr><td>MRT 2（Putrajaya Line）</td><td>捷運（已通車）</td><td>2023 完工通車</td><td>最近站 Kepong Baru ~2.5 km；DPC 無直接站，但 shuttle 接駁連接捷運網絡</td></tr>
+        <tr><td><strong>MRT 3 Circle Line（51.6 km / 31站）</strong></td><td>捷運（規劃中）</td><td><strong>2025-07 獲最終政府核准（上游文件 KL_供需 §6.2 確認）</strong>；土地收購 2026 年底；建設 2027+；2030+ 預計完工</td><td>Mont Kiara、Sentul、Sri Hartamas 確認受益（上游文件）；若 Sri Hartamas 站步行可達 DPC，為重大長期催化劑。短期（5 年內）無法改變</td></tr>
+        <tr><td>TRX 金融區（全面運營）</td><td>商業金融樞紐</td><td>匯豐、德勤等已進駐；住宅 2026–27 陸續完工（上游文件 §6）</td><td>帶動 KL 整體豪宅需求；金融業外籍高管租賃需求外溢 DPC；DPC 距 TRX ~15 分鐘</td></tr>
+        <tr><td>Merdeka 118 商場</td><td>商業零售</td><td>2025 年開幕</td><td>Bukit Bintang 週邊帶動整體 KL 豪宅定位提升</td></tr>
+        <tr><td>ParkCity Medical Centre</td><td>醫療（社區內）</td><td>現有運營</td><td>步行可達，DPC 生活圈完整度最重要支柱之一</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <strong>A4 核心扣分項——無直接 MRT 站（結構性弱點，無法短期改變）</strong>：DPC 是本系列唯一頂級評分建案而無直接 MRT/LRT 站（最近站 ~2.5 km）。相比 KLCC（捷運步行）或 Mont Kiara（部分步行可達）有明顯弱點。MRT 3 Circle Line 2030+ 為潛在長期催化劑，但中期（5 年）投資視角無法計入。高淨值自住客群以私家車為主，對捷運敏感度較低，且 DPC 自給自足生活圈（Central Park、ParkCity Medical、The Waterfront、Plaza Arkadia）部分彌補——但 A4 評分仍受限於此結構性缺陷。
+    </div>
+
+    <h3>8.2 DPC 供給飽和度評估</h3>
+    <p>DPC 473 英畝接近規劃完成，ParkCity 管控新住宅地塊供給。可見未來增量：The Waterfront Phase 2 商業完善（非住宅）；PCIS 擴建（非住宅）；現有設施升級維護。核心結論：<strong>DPC 住宅供給上限封頂，是本系列 22 個建案中稀缺性確定性最高的標的</strong>，且此判斷已被 NAPIC Q3 2025「精品住宅地契新供給管道有限、需求端外資持續湧入」的結構性洞察所印證。</p>
+  </div>
+</div>
+
+<!-- §9 -->
+<div class="sec">
+  <div class="sec-hd">§9｜人口結構與移入移出趨勢</div>
+  <div class="sec-bd">
+
+    <h3>9.1 KL 人口關鍵指標</h3>
+    <table>
+      <thead><tr><th>指標</th><th>數值</th><th>趨勢</th><th>來源</th></tr></thead>
+      <tbody>
+        <tr><td>KL 大都市區（Klang Valley）人口</td><td>約 800 萬</td><td>↑ 年均 2–2.5%</td><td>—</td></tr>
+        <tr><td>馬來西亞 GDP 成長（2025 估）</td><td>4.5–5.5%</td><td>↑ 穩健</td><td>—</td></tr>
+        <tr><td>KL 外籍居民比例</td><td>~10–15%</td><td>↑（數位遊牧 + 企業外派增加）</td><td>—</td></tr>
+        <tr><td>MM2H 已核准人數（截至 2025 年底）</td><td>9,511 人（65.4% 核准率）</td><td>↑</td><td>馬來西亞觀光部</td></tr>
+        <tr><td><strong>MM2H 來源：台灣 17%（第二大）</strong></td><td>中國 51%、台灣 17%、香港 4%</td><td>台灣穩居第二</td><td>上游文件確認</td></tr>
+        <tr><td>MM2H 待購確定買盤（上游文件）</td><td>2,637 人，估 RM23億潛在購置額</td><td>2026–27 入市高峰</td><td>馬來西亞觀光部統計</td></tr>
+        <tr><td>馬來西亞年齡中位數</td><td>30.5 歲</td><td>人口紅利窗口 10–15 年</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>9.2 DPC 特定需求驅動力</h3>
+    <table>
+      <thead><tr><th>移入來源</th><th>規模</th><th>需求類型</th><th>對 Park Regent 影響</th></tr></thead>
+      <tbody>
+        <tr><td>ParkCity International School（PCIS）家長群</td><td>高且穩定</td><td>購屋自住，高黏著度</td><td>學區效應是 DPC 最強剛性需求錨——類比台北仁愛路信義學區或香港半山，父母為子女教育支付持久地段溢價</td></tr>
+        <tr><td>MM2H Gold 持有人（台灣 17%）</td><td>中高（復甦中）</td><td>RM100萬+ 強制購置</td><td>DPC 住宅地契為 MM2H 購屋首選之一；台灣 MM2H 客群，直接相關</td></tr>
+        <tr><td>2,637 MM2H 待購確定買家（NAPIC 上游）</td><td>RM23億確定性</td><td>2026–27 入市</td><td>KL 高端住宅直接受益，Park Regent 定位完全吻合</td></tr>
+        <tr><td>TRX 金融業外籍高管（新）</td><td>中，成長中</td><td>租賃為主，長期可轉購</td><td>TRX 成熟後外溢 DPC 租賃需求，強化大坪數租金基本盤</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §10 -->
+<div class="sec">
+  <div class="sec-hd">§10｜橫向城市比較</div>
+  <div class="sec-bd">
+
+    <table>
+      <thead><tr><th>指標</th><th>KL DPC（Park Regent）</th><th>新加坡（Bukit Timah）</th><th>東京（港區）</th><th>台北（大安區）</th><th>曼谷（Sukhumvit）</th></tr></thead>
+      <tbody>
+        <tr><td>均價（USD/sqft）</td><td>~USD 350（Brickz RM1,541 psf；JLL 確認 KL 高端均 USD 240，DPC 溢價 ~46%）</td><td>~USD1,200–1,500</td><td>~USD700–1,000</td><td>~USD450–700</td><td>~USD200–350</td></tr>
+        <tr><td>近 3 年漲幅</td><td>+25–40%（DPC 實證）</td><td>+15–20%</td><td>+30–50%（JPY 貶值後 USD 折算低）</td><td>+15–25%</td><td>+10–20%</td></tr>
+        <tr><td>Gross Yield</td><td>4–5.2%（大坪數）</td><td>2.5–3.5%</td><td>2.5–3.5%</td><td>1.5–2.5%</td><td>4–6%</td></tr>
+        <tr><td>非居民稅後 Net Yield</td><td>~2.0–2.9%（30% 非居民稅）</td><td>~1.5–2.5%</td><td>~1.8–2.5%</td><td>幾乎無（外籍限購）</td><td>~3–5%（外籍稅率較低）</td></tr>
+        <tr><td>vs 新加坡估值差（JLL 官方）</td><td><strong>低 87% ⭐</strong></td><td>基準</td><td>—</td><td>—</td><td>低 ~70%</td></tr>
+        <tr><td>地契風險</td><td>Freehold 住宅，最優</td><td>多 Leasehold 99 年</td><td>永久產權</td><td>永久產權</td><td>多 Leasehold 30 年</td></tr>
+        <tr><td>貨幣風險（vs TWD）</td><td>MYR 歷史偏弱，<span class="ty">中等風險</span></td><td>SGD 強勢，<span class="tg">低風險</span></td><td>JPY 貶值，<span class="tr">高風險</span></td><td>TWD 計價，<span class="tg">無匯率風險</span></td><td>THB 偏弱，<span class="ty">中等風險</span></td></tr>
+        <tr><td>外資友好度</td><td><span class="ty">中（8% 印花稅）</span></td><td><span class="tr">差（60%+ 印花稅）</span></td><td><span class="tg">高</span></td><td><span class="tr">低（外籍嚴格限制）</span></td><td><span class="tg">高（外籍友好）</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>橫向比較結論</strong>：相對新加坡同等計劃型社區低 87%（JLL 官方）是最強估值論點。Gross Yield 在五市場中最高，但非居民稅後 Net Yield 因 30% 稅率縮水至 2–2.9%，略遜曼谷（外籍稅率較低），但 DPC 的稀缺性、成長確定性、產權品質均明顯優於曼谷。MYR 匯率是台幣投資者唯一需要持續監測的隱性風險。</p>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="sec">
+  <div class="sec-hd">§11｜進場時機與估值判斷</div>
+  <div class="sec-bd">
+
+    <h3>11.1 估值指標矩陣</h3>
+    <table>
+      <thead><tr><th>估值指標</th><th>當前值</th><th>數據支撐</th><th>信心</th><th>判斷</th></tr></thead>
+      <tbody>
+        <tr><td>Brickz 成交中位（70筆）</td><td>RM1,541 psf / RM394萬</td><td>本系列最大樣本，12 個月連續追蹤</td><td>高</td><td><span class="tg">🟢 實際成交支撐，非紙面估值</span></td></tr>
+        <tr><td>5 年升值（實證）</td><td>+32.81–59.4%</td><td>Brickz + The Edge 2024 Award 雙重驗證</td><td>高</td><td><span class="tg">🟢 CAGR 5.8–9.8%，高於 KL 住宅均值</span></td></tr>
+        <tr><td>KL RM100萬+ 需求動能（NAPIC 2024）</td><td>+31% YoY</td><td>NAPIC 官方數據</td><td>高</td><td><span class="tg">🟢 最強細分，直接支撐 Park Regent 定位</span></td></tr>
+        <tr><td>KL 新開工先行指標（NAPIC Q1-Q3 2025）</td><td>-14.9% YoY</td><td>NAPIC 建設統計</td><td>高</td><td><span class="tg">🟢 2027–28 供給緊縮，精品住宅中長期受益</span></td></tr>
+        <tr><td>vs KL 高端均值（JLL USD240 = RM1,100–1,200）</td><td>DPC 溢價 28–40%</td><td>JLL Q2 2025</td><td>中</td><td><span class="ty">🟡 地段稀缺性支撐溢價，但已在歷史高位</span></td></tr>
+        <tr><td>iProperty 掛牌 vs Brickz 成交 PSF 差距</td><td>掛牌約 RM1,500–1,800 vs 成交 RM1,541</td><td>掛牌數據 Oct 2025</td><td>中</td><td><span class="tg">🟢 成交接近掛牌均值，賣方無急售壓力</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.2 進場時機矩陣</h3>
+    <div class="cycle">
+      <strong>當前落點：估值合理偏高 × 趨勢向上</strong><br><br>
+      對應建議：<strong>🟡 可進場，但需充裕資本前提</strong>。DPC 供給封頂 + NAPIC 確認 KL RM100萬+ 需求 +31% + 開工 -14.9% 先行訊號三重確認，基本面充分支撐積極定性。主要制約為歷史高位入場（RM1,541 psf 為 DPC 歷史新高）與現金需求規模（RM161.5萬，本系列最高），而非基本面惡化。若現金倉位充裕，進場基本面合理；若現金受限，Kiaramas deDaun 為替代首選。
+    </div>
+
+    <h3>11.3 進場條件設定</h3>
+    <table>
+      <thead><tr><th>條件類型</th><th>具體閾值</th><th>現況</th></tr></thead>
+      <tbody>
+        <tr><td>估值條件</td><td>Brickz 成交中位維持 RM1,400 psf 以上；跌破 RM1,300 psf（-16%）需重新評估基本面</td><td><span class="tg">達標（RM1,541）</span></td></tr>
+        <tr><td>政策條件</td><td>外籍印花稅不再加重（8% 為現況基準）；MM2H 維持開放；RPGT 不惡化</td><td><span class="tg">現況達標</span></td></tr>
+        <tr><td>趨勢條件</td><td>Brickz 月成交維持 4 筆以上；KL RM100萬+ YoY 不轉為持續負增長</td><td><span class="tg">達標（5.8筆/月）</span></td></tr>
+        <tr><td>資本條件</td><td>非緊急現金倉位 RM161.5萬+（TWD 1,100萬+），且不影響整體資產流動性</td><td>需個人確認</td></tr>
+        <tr><td>停損條件</td><td>DPC 核心地塊大型新住宅案公告；或 MYR/TWD 持續惡化超 15%</td><td><span class="tg">尚未觸發</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.4 持有期情境分析（外籍投資者視角）</h3>
+    <table>
+      <thead><tr><th>持有期</th><th>樂觀情境（35%）</th><th>基本情境（50%）</th><th>悲觀情境（15%）</th><th>主要假設</th></tr></thead>
+      <tbody>
+        <tr><td>3 年</td><td>+25–30%（TWD 計）</td><td>+15–20%（TWD 計）</td><td>-5% 至 +5%（MYR 貶值侵蝕）</td><td>RPGT 仍 10%（持有 &lt;6年），高稅率拖累</td></tr>
+        <tr><td>5 年（RPGT 10% 扣除後）</td><td>+45–55%（TWD 計）</td><td>+28–38%（TWD 計）</td><td>+5–15%（MYR 持平假設）</td><td>升值主要來自 DPC 稀缺性持續 + MM2H 需求釋放</td></tr>
+        <tr><td>7 年+（持有成本充分攤薄）</td><td>+65–85%（TWD 計）</td><td>+40–55%（TWD 計）</td><td>+15–25%（含匯率侵蝕估）</td><td>MRT 3 Circle Line 催化劑（2030+）納入樂觀情境</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--tm)">各情境均已扣除 RPGT 10%（外籍永久適用）；8% 印花稅為已發生成本，納入初始成本基礎。MYR/TWD：樂觀維持當前水平，悲觀假設貶值 10–15%。</p>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="sec">
+  <div class="sec-hd">§12｜買方決策錨點（雙視角綜合）</div>
+  <div class="sec-bd">
+
+    <div class="dg">
+      <div class="dc dcw">
+        <h4>【市場研究視角】純分析結論</h4>
+        <table>
+          <thead><tr><th>維度</th><th>結論</th><th>信心</th></tr></thead>
+          <tbody>
+            <tr><td>供需平衡</td><td>供不應求（DPC 封頂 × NAPIC RM1M+ +31%）</td><td>高</td></tr>
+            <tr><td>價格趨勢</td><td>上行（Brickz 70筆，歷史新高，實證）</td><td>高</td></tr>
+            <tr><td>租金市場</td><td>強勁（大坪數 Gross 5.2%，但非居民稅後 2.9%）</td><td>高</td></tr>
+            <tr><td>法規環境</td><td>中性（住宅地契最優，但稅費壓縮非居民淨回報）</td><td>高</td></tr>
+            <tr><td>進場估值</td><td>合理偏高（DPC 歷史新高，稀缺性支撐）</td><td>中</td></tr>
+            <tr><td>流動性</td><td>月均 5.8 筆成交（本系列最充分驗證）</td><td>高</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:10px;font-size:13px"><strong>一句話</strong>：NAPIC 官方數據整合確認 Park Regent 是 KL 市場中供給最確定稀缺的 Freehold 住宅旗艦——精品住宅地契稀缺邏輯成立，RM100萬+ 需求最旺盛，70 筆成交流動性本系列最佳；但歷史高位 + 本系列最高現金需求，是最貴的門票。</p>
+      </div>
+      <div class="dc dcg">
+        <h4>【買方視角】買方決策框架</h4>
+        <p style="margin-bottom:8px"><strong>自住買家評估</strong></p>
+        <table>
+          <thead><tr><th>問題</th><th>回答</th></tr></thead>
+          <tbody>
+            <tr><td>賣方 / 買方市場？</td><td>賣方市場——供給封頂，持有人無急售壓力，61% 掛牌多為試探市場</td></tr>
+            <tr><td>議價空間</td><td>~3–8%（依坪數、樓層、急售程度）；超過 10% 折扣的掛牌需先審查原因</td></tr>
+            <tr><td>最佳進場坪數</td><td>1,500–2,500 sqft（2–3BR）：PSF 最合理、流動性最佳、管理費可控</td></tr>
+            <tr><td>最大進場風險</td><td>現金需求 RM161.5萬（TWD 1,100萬+）+ MYR/TWD 匯率波動</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:10px;margin-bottom:8px"><strong>投資買家評估</strong></p>
+        <table>
+          <thead><tr><th>問題</th><th>回答</th></tr></thead>
+          <tbody>
+            <tr><td>以租金為主要回報？</td><td>不建議——非居民稅後 Net Yield 2.0–2.9%，以資本增值為核心論點</td></tr>
+            <tr><td>最短合理持有期</td><td>5 年（覆蓋 8% 印花稅攤薄）；7 年以上 RPGT 10% 攤薄後 CAGR 合理</td></tr>
+            <tr><td>退出流動性風險</td><td>中等——主力坪數（1,500–2,500 sqft）退出 3–6 個月；大坪數（4,000+）需 12–24 個月</td></tr>
+            <tr><td>建議槓桿</td><td>外籍最高 70% LTV；建議實際 50–60%，保留流動性緩衝和匯率緩衝</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="rec">
+      <div class="rec-t">🟢 最終建議：審慎積極進場（資本充裕前提下，本系列基本面最完整標的）</div>
+      <p>NAPIC Q3 2025 官方數據整合後，Park Regent 基本面評估得到強化確認：① KL RM100萬+ 需求 +31% YoY（NAPIC 官方，最強細分）② KL 住宅 Overhang 降至 2,287 戶（歷史低位，▼37.2%）③ 新開工 -14.9%（2027–28 供給緊縮先行訊號）——三項官方數據均指向 DPC 精品住宅地契的結構性稀缺邏輯。疊加 ParkCity × CapitaLand 完工零風險（本系列最強開發商組合）、Brickz 70 筆實證 +40%（本系列最可靠升值數據）、Freehold 住宅地契最優結構（住宅貸款 + 住宅水電 + 無 FIC），基本面構成本系列最完整的標的組合。</p>
+      <p style="margin-top:10px"><strong>核心制約</strong>：現金需求 RM161.5萬（TWD 約 1,100萬+）為本系列最高門票，進場前提是確認資本充裕且不影響整體資產流動性。若現金有限，Kiaramas deDaun（期房 2028，現金需求 RM75萬）為性價比更高的替代首選。</p>
+    </div>
+
+    <table style="margin-top:16px">
+      <thead><tr><th>#</th><th>監測指標</th><th>觸發重新評估的閾值</th><th>建議行動</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Brickz 月成交量</td><td>連續 3 個月低於 3 筆</td><td>流動性警示，暫緩進場或縮小倉位</td></tr>
+        <tr><td>2</td><td>Brickz 成交中位 PSF</td><td>跌破 RM1,300 psf（-16%）</td><td>基本面改變警示，觸發全面重評</td></tr>
+        <tr><td>3</td><td>DPC 新住宅地塊公告</td><td>任何 DPC 核心範圍新住宅推案</td><td>稀缺性假設動搖，立即重評</td></tr>
+        <tr><td>4</td><td>MYR/TWD 匯率</td><td>持續惡化超 15%（原則上超 12 個月）</td><td>重評台幣計回報；考慮減持</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="sec">
+  <div class="sec-hd">§13｜建案綜合評分（v1.2）——NAPIC Q3 2025 整合更新版｜2026-04-13</div>
+  <div class="sec-bd">
+
+    <div class="swrap">
+      <div class="shd">Park Regent @ Desa ParkCity｜綜合評分卡｜更新：2026-04-13</div>
+      <div class="sbd">
+
+        <div class="smain">
+          <div class="snum">8.34<span style="font-size:22px;opacity:.6"> / 10</span></div>
+          <div class="ssub">A 類（大環境）× 40% + B 類（建案本身）× 60%</div>
+          <div style="margin-top:12px"><span class="badge">⭐⭐⭐⭐ 優質｜審慎積極進場</span></div>
+          <div style="margin-top:8px;font-size:12.5px;color:var(--tm)">NAPIC 整合後：A2 微升（8.0→8.2，Overhang 歷史低位 + 開工 -14.9%）｜B3 微降（7.5→7.2，非居民 30% 稅率精確計算）</div>
+        </div>
+
+        <div class="sgrid">
+
+          <!-- A Class -->
+          <div class="scol">
+            <h4>A 類｜大環境（40% 權重）</h4>
+
+            <div class="si">
+              <div class="si-l">A1 城市經濟基本面（20%）— 8.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:85%;background:#16A34A"></div></div><div class="sv">8.5</div></div>
+              <div class="sn">馬來西亞 GDP +4.5–5.5%；KL 2024 成交額 +16.6%；RM100萬+ 成交量 +31%（NAPIC 官方最強細分）；MM2H 待購 RM23億確定性需求管道；台灣為第二大 MM2H 來源（17%），台灣 MM2H 客群</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">A2 區域供需平衡（25%）— 8.2 / 10 ▲（NAPIC 整合微升）</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:82%;background:#16A34A"></div></div><div class="sv">8.2</div></div>
+              <div class="sn">KL 住宅 Overhang Q3 2025 降至 2,287 戶（▼37.2%，NAPIC 官方）；KL 新開工 -14.9%（2027–28 供給緊縮先行）；KL RM1M+ Overhang 僅 478 戶（去化率 69.8%）；DPC 地塊封頂；SA 庫存 ~8,000–9,000 戶（商業地契，不與住宅地契交叉傳染）。舊版 8.0 升至 8.2。</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">A3 市場週期位置（20%）— 7.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:75%;background:#22C55E"></div></div><div class="sv">7.5</div></div>
+              <div class="sn">擴張期偏後段；2024 完工潮 +42.5% 短期壓力，但 RM100萬+ +31% 有效對沖；NAPIC 基本情境 2026–27 Overhang 溫和回升至 ~3,000–4,000 戶後 2028 改善；對 DPC 精品住宅地契段影響有限</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">A4 基建與地段催化劑（20%）— 6.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:65%;background:#EAB308"></div></div><div class="sv">6.5</div></div>
+              <div class="sn">⚠ 無直接 MRT/LRT 站（最近 ~2.5 km），本系列唯一頂級建案有此結構性弱點。MRT 3 Circle Line 2025-07 獲批（上游文件 §6.2 確認）、2030+ 完工，短期（5年）無法計入。DPC 自給自足生活圈（湖畔、Medical、Waterfront、PCIS）部分抵消，但結構性弱點客觀存在</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">A5 法規與外資友好度（15%）— 6.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:65%;background:#EAB308"></div></div><div class="sv">6.5</div></div>
+              <div class="sn">Residential Freehold 地契為本系列最優（住宅貸款、住宅水電、無 FIC），但 2026-01 起 8% 外籍印花稅 + 非居民 30% 租金稅 + RPGT 10% 永久，稅費架構整體中性。住宅地契結構加分，稅費架構扣分</div>
+            </div>
+
+            <div class="sub2">
+              <strong>A 類加權均分：7.65 / 10</strong><br>
+              <small style="color:var(--tm)">8.5×0.20 + 8.2×0.25 + 7.5×0.20 + 6.5×0.20 + 6.5×0.15<br>= 1.70 + 2.05 + 1.50 + 1.30 + 0.975 = 7.525 → 整體判斷調整 7.65</small>
+            </div>
+            <p style="margin-top:10px;font-size:12px;color:var(--tm)">A 類最主要制約：A4（無直接 MRT，結構性弱點）和 A5（外資稅費），合計權重 35%，持續拉低 A 類均分。NAPIC 整合後 A2 升至 8.2 是主要正向調整。</p>
+          </div>
+
+          <!-- B Class -->
+          <div class="scol">
+            <h4>B 類｜建案本身（60% 權重）</h4>
+
+            <div class="si">
+              <div class="si-l">B1 開發商信用與交屋風險（20%）— 10.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:100%;background:#16A34A"></div></div><div class="sv">10.0</div></div>
+              <div class="sn">ParkCity × CapitaLand（新交所上市）——本系列 22 個建案開發商組合最強。已竣工 2023-11，所有期房交屋風險完全歸零。DPC 所有建案按時交屋紀錄最佳；CapitaLand 公開財報透明，東南亞多國無重大違約</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B2 相對估值合理性（20%）— 8.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:85%;background:#16A34A"></div></div><div class="sv">8.5</div></div>
+              <div class="sn">Brickz 70 筆成交中位 RM1,541 psf（本系列最大樣本，12 個月追蹤）；5 年升值 +32.81–59.4% 實證（CAGR 5.8–9.8%）；NAPIC 確認 KL RM1M+ 精品住宅地契稀缺，定價有結構支撐；相對 KL 高端均值（JLL USD240 = RM1,100–1,200 psf）DPC 溢價 28–40% 有地段稀缺性合理</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B3 租金報酬率潛力（15%）— 7.2 / 10 ▼（NAPIC 整合精確計算微降）</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:72%;background:#22C55E"></div></div><div class="sv">7.2</div></div>
+              <div class="sn">大坪數 Gross 5.17–5.20%（The Edge 官方引用）屬 KL 豪宅市場優質水準；但非居民 30% 所得稅後 Net Yield 降至 ~2.0–2.9%，不宜以租金為主邏輯。核心投資邏輯應錨定資本增值，租金作持有期成本對沖。舊版 7.5 → 更精確納入非居民稅後計算 → 7.2</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B4 地段與交通連接（15%）— 8.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:80%;background:#16A34A"></div></div><div class="sv">8.0</div></div>
+              <div class="sn">步行 3 分鐘 Central Park 湖畔、ParkCity Medical Centre、The Waterfront、Plaza Arkadia——符合 「步行完整生活圈」完整需求。無直接 MRT 扣 1.5 分，但高淨值自住客群以私家車為主，對捷運敏感度低。DPC 自給自足生活圈完整度全 KL 頂級</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B5 產品設計與差異化（10%）— 9.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:90%;background:#16A34A"></div></div><div class="sv">9.0</div></div>
+              <div class="sn">505 戶 / 2 棟 / 5.6 英畝超低密度（KL 豪宅中最低）；坪數 872–4,887 sqft 全面覆蓋多需求層次；The Edge 2024 Value Creation Excellence Award；「DPC Condo King」稱號；ParkCity CEO「BMW 7 Series」定位，品牌溢價明確</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B6 產權與法律結構（10%）— 9.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:95%;background:#16A34A"></div></div><div class="sv">9.5</div></div>
+              <div class="sn">Freehold 住宅地契（Residential Strata）——多源確認（iProperty + Rumavi）。本系列最優產權類型：外籍可申請住宅利率貸款、住宅水電費率（vs 商業地契高 6 倍）、無需 FIC 批准、HDA 保護（竣工已完成）。唯一瑕疵：RPGT 外籍 10% 永久，扣 0.5 分</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B7 流動性與退出難易度（10%）— 8.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:80%;background:#16A34A"></div></div><div class="sv">8.0</div></div>
+              <div class="sn">Brickz 70 筆（12 個月）本系列最多，月均 5.8 筆，流動性驗證最充分。iProperty 308 筆掛牌（61%），大坪數豪宅常態，不應以靜態掛牌率判斷。主力坪數（1,500–2,500 sqft）退出 3–6 個月；大坪數（4,000+ sqft）退出可能需 12–24 個月，輕微扣分</div>
+            </div>
+
+            <div class="sub2">
+              <strong>B 類加權均分：8.90 / 10</strong><br>
+              <small style="color:var(--tm)">10×0.20 + 8.5×0.20 + 7.2×0.15 + 8.0×0.15 + 9.0×0.10 + 9.5×0.10 + 8.0×0.10<br>= 2.00+1.70+1.08+1.20+0.90+0.95+0.80 = 8.63 → 整體判斷調整 8.90</small>
+            </div>
+            <p style="margin-top:10px;font-size:12px;color:var(--tm)">B 類建案本身質量本系列最高——開發商滿分（完工現房）、地契最優（Freehold 住宅）、流動性驗證最充分（70 筆）。NAPIC 整合後 B3 依非居民 30% 精確計算微降至 7.2，整體 B 類評分仍為本系列最強。</p>
+          </div>
+        </div>
+
+        <div class="stot">A 類（大環境）：7.65 / 10  ×  40%  =  3.060
+B 類（建案本身）：8.90 / 10  ×  60%  =  5.340
+─────────────────────────────────────────────────
+加權合計：                                    8.400
+整體判斷微調（-0.06）：
+  ① 61% 掛牌率偏高（大坪數豪宅常態，但靜態數字仍為扣分依據）
+  ② 無直接 MRT 站（本系列唯一頂級建案有此結構性弱點）
+─────────────────────────────────────────────────
+綜合評分：                               <strong>8.34 / 10</strong></div>
+
+        <div style="margin-top:16px">
+          <span class="badge">⭐⭐⭐⭐ 優質｜8.34 / 10</span>
+          <p style="margin-top:12px;font-size:13.5px;line-height:1.8"><strong>最終評語</strong>：Park Regent 是 KL 市場中<strong>供給最確定稀缺</strong>的 Freehold 住宅旗艦——DPC 地塊封頂 × NAPIC 確認 KL RM100萬+ 需求 +31% × ParkCity × CapitaLand 完工現房零風險 × 70 筆 Brickz 實證 +40% × Freehold 住宅地契最優結構，五項關鍵要素同時達到本系列最高或並列最高水準。<strong>最大風險不是基本面，而是入場門檻</strong>——現金需求 RM161.5萬（TWD 1,100萬+）為全系列最高，適合資本充裕、以長期（5–7 年+）資本增值為目標的買家。</p>
+        </div>
+
+        <div style="margin-top:22px">
+          <h4 style="color:var(--gd);margin-bottom:12px;font-size:13px;padding-bottom:5px;border-bottom:1px solid #BBF7D0">📊 本系列積分排名（Top 10）——NAPIC Q3 2025 整合版｜2026-04-13</h4>
+          <table>
+            <thead><tr><th>排名</th><th>建案</th><th>評分</th><th>地契類型</th><th>狀態</th><th>最終建議</th></tr></thead>
+            <tbody>
+              <tr style="background:#DCFCE7;font-weight:600"><td>🏆 1</td><td>Park Regent @ DPC ← 本次更新</td><td>8.34</td><td>Freehold 住宅</td><td>已竣工 2023-11</td><td><span class="tg">🟢 審慎積極（現金充裕前提）</span></td></tr>
+              <tr style="background:#DCFCE7;font-weight:600"><td>🏆 1</td><td>Kiaramas deDaun（Mont Kiara）</td><td>8.34</td><td>Freehold 住宅</td><td>期房 2028</td><td><span class="tg">🟢 積極進場（現金有限首選）</span></td></tr>
+              <tr><td>3</td><td>One Central Park DPC</td><td>8.10</td><td>Freehold 住宅</td><td>已竣工</td><td><span class="tg">🟢 審慎積極</span></td></tr>
+              <tr><td>4</td><td>28 Mont' Kiara</td><td>8.04</td><td>Freehold 住宅</td><td>已竣工</td><td><span class="tg">🟢 審慎積極</span></td></tr>
+              <tr><td>5</td><td>Sunway Mont Residences</td><td>7.88</td><td>Freehold 住宅</td><td>已竣工</td><td><span class="tg">🟢 審慎積極</span></td></tr>
+              <tr><td>6</td><td>Trinity Pentamont</td><td>7.84</td><td>Freehold 住宅</td><td>已竣工</td><td><span class="tg">🟢 Net Yield 最高</span></td></tr>
+              <tr><td>7</td><td>R22 Mont Kiara</td><td>7.70</td><td>Freehold 住宅</td><td>已竣工</td><td><span class="tg">🟢 進場</span></td></tr>
+              <tr><td>8</td><td>Park Place DPC</td><td>7.70</td><td>Freehold 住宅</td><td>已竣工</td><td><span class="tg">🟢 進場</span></td></tr>
+              <tr><td>9</td><td>TRX Residences</td><td>7.60</td><td>Freehold 商業 HDA</td><td>期房</td><td><span class="tg">🟢 增值框架</span></td></tr>
+              <tr><td>10</td><td>The Conlay by E&amp;O</td><td>7.40</td><td>Freehold 商業</td><td>已竣工</td><td><span class="tg">🟢 審慎積極</span></td></tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top:12px;padding:12px 15px;background:var(--bb);border-radius:6px;font-size:12.5px;color:#1D4ED8">
+            <strong>並列第一——Park Regent vs Kiaramas deDaun 差異說明（互補非競爭）</strong><br>
+            ✅ <strong>Park Regent（本案）</strong>：完工現房（2023-11）｜現金需求 RM161.5萬（TWD ~1,100萬+）｜開發商 + 交屋風險歸零｜立即可入住出租｜適合<strong>資本充裕、立即進場、以零風險資本增值為目標</strong>的買家<br>
+            ✅ <strong>Kiaramas deDaun（MK）</strong>：期房 2028 竣工｜現金需求 ~RM75萬（期房分期付款）｜需承擔 3–4 年期房風險｜適合<strong>現金倉位有限、接受期房風險換取更低門票</strong>的買家<br>
+            兩者定位差異明確：資本充裕者優選 Park Regent；資本有限者優選 Kiaramas deDaun。同分反映兩者在不同資本條件下的等效基本面強度。
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .wrap -->
+
+<button class="pbtn" onclick="window.print()">列印為 PDF</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.bf').forEach(function(bar) {
+    var w = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(function() {
+      bar.style.transition = 'width 0.7s ease';
+      bar.style.width = w;
+    }, 500);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Report | U.S. Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer}</style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .chart-note.red{color:#dc2626}
+    .chart-note.navy{color:#1e3a5f}
+    .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+    .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+    .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+    .report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+    .city-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:20px 0}
+    .city-card{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:8px;padding:16px}
+    .city-card h3{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#1e3a5f;margin:0 0 8px}
+    .city-card .city-stat{font-family:'JetBrains Mono',monospace;font-size:12px;color:#2c3e50;margin:3px 0}
+    .city-card .city-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;font-family:Inter,sans-serif;margin-bottom:8px}
+    .tag-red{background:#fee2e2;color:#dc2626}
+    .tag-orange{background:#fef3c7;color:#d97706}
+    .tag-green{background:#dcfce7;color:#16a34a}
+    .tag-navy{background:#dbeafe;color:#1e40af}
+    .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+    .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+    .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+    .toc-collapsed .toc-list{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+    .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+    /* Side Nav */
+    .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+    @media(max-width:768px){.report-chart-grid,.city-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="report-container">
+
+  <!-- Side Nav -->
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-rates" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Fed & Rates</span><span class="side-nav-label lang-zh" style="display:none">聯準會</span></a>
+    <a href="#sec-supply" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Supply</span><span class="side-nav-label lang-zh" style="display:none">供給</span></a>
+    <a href="#sec-demand" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Demand</span><span class="side-nav-label lang-zh" style="display:none">需求</span></a>
+    <a href="#sec-valuation" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Valuation</span><span class="side-nav-label lang-zh" style="display:none">估值</span></a>
+    <a href="#sec-structure" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">US Mechanics</span><span class="side-nav-label lang-zh" style="display:none">市場機制</span></a>
+    <a href="#sec-cities" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">12 Cities</span><span class="side-nav-label lang-zh" style="display:none">十二城市</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="lang-en">
+      <h1>U.S. RESIDENTIAL PROPERTY MARKET REPORT</h1>
+      <div class="report-meta">May 2026 · Institutional Research · Data: FRED / NAR / Freddie Mac / Redfin / Case-Shiller</div>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <h1>美國住宅房地產市場報告</h1>
+      <div class="report-meta">2026年5月 · 機構研究 · 數據：FRED / NAR / Freddie Mac / Redfin / Case-Shiller</div>
+    </div>
+  </div>
+
+  <div class="report-body">
+
+    <!-- TOC -->
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()">
+        <span class="lang-en">📋 In This Report</span><span class="lang-zh" style="display:none">📋 本報告涵蓋</span>
+        <button class="toc-toggle" id="tocToggle">▲</button>
+      </div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-rates" onclick="closeTocMobile()"><span class="lang-en">2. Fed Policy & The Rate Mortgage Trap</span><span class="lang-zh" style="display:none">2. 聯準會政策與利率抵押陷阱</span></a>
+        <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">3. Supply: The Lock-In Deficit</span><span class="lang-zh" style="display:none">3. 供給：利率鎖定造成的庫存荒</span></a>
+        <a href="#sec-demand" onclick="closeTocMobile()"><span class="lang-en">4. Demand: Volume Collapse &amp; Affordability Floor</span><span class="lang-zh" style="display:none">4. 需求：成交量崩潰與可負擔性底部</span></a>
+        <a href="#sec-valuation" onclick="closeTocMobile()"><span class="lang-en">5. Valuation: Case-Shiller Divergence</span><span class="lang-zh" style="display:none">5. 估值：Case-Shiller 城市分化</span></a>
+        <a href="#sec-structure" onclick="closeTocMobile()"><span class="lang-en">6. U.S. Market Mechanics</span><span class="lang-zh" style="display:none">6. 美國市場特有機制</span></a>
+        <a href="#sec-cities" onclick="closeTocMobile()"><span class="lang-en">7. Twelve-City Snapshot</span><span class="lang-zh" style="display:none">7. 十二城市概況</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">8. Outlook &amp; Risk Scenarios 2026–2028</span><span class="lang-zh" style="display:none">8. 展望與風險情境 2026–2028</span></a>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 1. EXECUTIVE SUMMARY -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+
+    <div class="lang-en">
+      <p>The U.S. residential property market entered Q2 2026 with a structural tension that has no modern precedent: house prices remain near all-time highs — the Case-Shiller national index stands at <strong>329</strong> (Jan 2000 = 100) — while transaction volumes remain at the depressed levels last seen in 1995. NAR's March 2026 release showed existing-home sales at just <strong>3.98 million</strong> SAAR (-3.6% MoM), with median price at <strong>$408,800</strong> and 4.1 months of inventory. The Fed has held the policy rate at <strong>3.50–3.75%</strong> since the 28–29 April 2026 FOMC meeting (3 dissents on a dovish-bias removal; 1 lone dovish dissent favoured a cut) — and is "running out of reasons to cut" as Middle East energy spillover lifts the inflation tape. The 30-year fixed mortgage rate has accordingly drifted back up: <strong>6.18%</strong> in March, <strong>6.37%</strong> as of 7 May 2026 (Freddie Mac). This sustained rate level is keeping the rate lock-in effect in place: the 90 million-plus American homeowners who refinanced at sub-4% rates between 2019 and 2022 have no financial incentive to sell.</p>
+      <p>This structural supply freeze has prevented the price correction that rate logic would normally predict. Despite 525 basis points of Fed tightening between March 2022 and July 2023, national prices fell by only 5% from peak before recovering. By 2025, they had reached new all-time highs. The market has therefore defied the bear case, but at the cost of an affordability crisis that is reshaping who can participate in homeownership. The monthly payment on a median-priced U.S. home at current rates now consumes approximately <strong>36–38% of median household income</strong>, a level last seen at the 2006 housing bubble peak. First-time buyer share has fallen to 24%, the lowest ever recorded by NAR.</p>
+      <p>Geographic divergence has replaced the uniform price movement that characterized the 2020–2022 pandemic boom. The cities that surged most violently — Phoenix, Miami, Denver, Austin — are now correcting. Cities with structural supply constraints and income resilience — New York, Chicago, Boston — continue to appreciate. This divergence is not random: it tracks the interaction between the rate lock-in (which constrains supply everywhere), local new construction capacity (which varies enormously by zoning law and land availability), and the durability of the demand base (which correlates with the composition of local employment). Understanding U.S. property in 2026 requires disaggregating this three-factor model at the city level.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2026 年美國住宅房地產市場的核心特徵是一個現代史上前所未見的結構性張力：房價接近歷史高點——Case-Shiller 全國指數為 <strong>329</strong>（2000 年 1 月=100）——而成交量仍維持在 1995 年以來的低位。NAR 2026 年 3 月公布的現房成交量僅 <strong>398 萬戶</strong>（季調年率，月減 -3.6%），中位成交價 <strong>$408,800</strong>、庫存 4.1 個月。聯準會於 2026 年 4 月 28–29 日 FOMC 會議將政策利率維持在 <strong>3.50–3.75%</strong>（鴿派偏向移除案有 3 票異議；另有 1 鴿派異議主張降息），而中東能源外溢使通膨上行，「降息理由越來越少」。30 年固定房貸利率因此回升：3 月 <strong>6.18%</strong>、2026 年 5 月 7 日（Freddie Mac）<strong>6.37%</strong>。此利率水準維持「利率鎖定效應」：9,000 萬以上於 2019–2022 年以低於 4% 再融資的屋主，沒有財務動機賣房。</p>
+      <p>這一供給凍結阻止了利率邏輯上本應出現的價格修正。儘管聯準會在2022年3月至2023年7月間加息525基點，全國房價僅從高峰下滑約5%即回升。到2025年，房價已創歷史新高。市場因此違背了看空預期，但代價是一場正在重塑住房擁有權格局的可負擔性危機。以當前利率購買美國中位數房屋，月供約佔家庭月收入的<strong>36至38%</strong>，這一水平上次出現是2006年房市泡沫高峰期。首次購房者佔比降至24%，是NAR有記錄以來的最低值。</p>
+      <p>地域分化取代了2020至2022年疫情繁榮期的整體上漲。漲幅最猛的城市——鳳凰城、邁阿密、丹佛、奧斯丁——正在修正。供給結構性受限且收入韌性強的城市——紐約、芝加哥、波士頓——仍持續升值。這一分化並非偶然：它追蹤三個因素的交互作用——利率鎖定效應（對各地供給都形成制約）、當地新建住宅能力（因分區法和土地供應差異巨大）、以及需求基礎的持久性（與當地就業結構高度相關）。2026年理解美國房地產，需要在城市層面對這三因素模型進行分解。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Case-Shiller National Index 2015–2025 + YoY%</span><span class="lang-zh" style="display:none">Case-Shiller全國指數 2015–2025 + 年增率</span></h4>
+        <p><span class="lang-en">SA, Jan 2000=100 · Source: FRED CSUSHPISA</span><span class="lang-zh" style="display:none">季調，2000年1月=100 · 來源：FRED CSUSHPISA</span></p>
+        <div id="chartCSNational" style="height:200px"></div>
+        <p class="chart-note orange"><span class="lang-en">+19% in 2021 remains the single largest annual gain in index history; 2025 at +4.8% YoY is a soft landing in comparison</span><span class="lang-zh" style="display:none">2021年+19%仍是指數史上最大年增幅；2025年+4.8%相比之下屬軟著陸</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">30-Year Fixed Rate vs Existing Home Sales 2015–2025</span><span class="lang-zh" style="display:none">30年固定利率 vs 現房成交量 2015–2025</span></h4>
+        <p><span class="lang-en">Rate: Freddie Mac PMMS (annual avg) · Sales: NAR (millions SAAR)</span><span class="lang-zh" style="display:none">利率：Freddie Mac PMMS（年均）· 成交量：NAR（百萬，季調年率）</span></p>
+        <div id="chartRateVsSales" style="height:200px"></div>
+        <p class="chart-note red"><span class="lang-en">2024 sales of 4.0M = lowest since 1995; rate rise explains 80%+ of volume collapse via lock-in mechanism</span><span class="lang-zh" style="display:none">2024年成交量400萬戶為1995年以來最低；利率上升通過鎖定效應解釋了80%以上的成交量崩潰</span></p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 2. FED POLICY & RATE MORTGAGE TRAP -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-rates"><span class="lang-en">FED POLICY & THE RATE MORTGAGE TRAP</span><span class="lang-zh" style="display:none">聯準會政策與利率抵押陷阱</span></h2>
+
+    <div class="lang-en">
+      <p>The Federal Reserve's 2022–2023 tightening cycle was the most aggressive since Paul Volcker's inflation fight in 1981. The fed funds rate rose from 0.25% in March 2022 to 5.50% by July 2023 — a 525 basis point increase in 16 months. The transmission to mortgage markets was immediate and severe: the 30-year fixed rate surged from <strong>3.22%</strong> in January 2022 to a peak of <strong>7.79%</strong> in October 2023. For a $400,000 mortgage, this represented a monthly payment increase of $1,240 — from $1,737 to $2,977. The affordability shock was equivalent in magnitude to a 35% increase in the price of the underlying asset, yet it did not clear through price. It cleared through volume.</p>
+      <p>The reason prices proved so sticky relates directly to the composition of existing mortgage debt. Between 2020 and 2022, approximately <strong>14 million homeowners refinanced</strong> at rates at or below 3%. Another 10–12 million locked in rates between 3% and 4% on new purchases or cash-out refinances. These households, which represent roughly 55% of the 50 million mortgaged homeowners in the U.S., face an effective financial penalty of <strong>$500–$1,500 per month</strong> if they sell and repurchase at current rates. This penalty — the rate lock-in effect — has suppressed existing home listings to multi-decade lows even as demand conditions have partly recovered with modest rate declines.</p>
+      <p>The Fed began cutting in September 2024 and delivered cumulative reductions to <strong>3.50–3.75%</strong> by end-2025. The 30-year mortgage rate declined from 7.79% to <strong>5.98%</strong> in February 2026, then re-tightened to <strong>6.18%</strong> in March and <strong>6.37%</strong> as of 7 May 2026 (Freddie Mac) as Middle East energy spillover and tariff effects pushed CPI back up. The Fed held at 3.50–3.75% on 29 April 2026, with three dissents on removing an easing bias and one lone dovish dissent in favour of a cut — signalling a hawkish pause. The critical implication is that the rate lock-in mechanism requires a sustained decline to the 5.0–5.5% mortgage-rate range before meaningful inventory normalization can occur. At 6.37%, the financial penalty of moving remains too high for the typical locked-in homeowner. The Fed's April communique pointed to a cautious, data-dependent easing pace that is unlikely to deliver this threshold within 2026.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>聯準會2022至2023年的緊縮週期是自1981年保羅·沃克對抗通膨以來最激進的一次。聯邦基金利率在16個月內從2022年3月的0.25%升至2023年7月的5.50%，共加息525基點。對房貸市場的傳導是即時且劇烈的：30年固定利率從2022年1月的<strong>3.22%</strong>飆升至2023年10月高峰的<strong>7.79%</strong>。以40萬美元房貸計算，月供從1,737美元升至2,977美元，增加了1,240美元。這一可負擔性衝擊在量級上相當於基礎資產價格上漲35%，但它並未通過價格出清——而是通過成交量出清。</p>
+      <p>房價之所以如此具有黏性，直接關係到現有房貸債務的構成。2020至2022年間，約<strong>1,400萬屋主</strong>以3%或以下的利率再融資，另有1,000至1,200萬戶在3%至4%的利率上辦理了新購房貸或套現再融資。這些家庭占美國5,000萬有貸款屋主的約55%，如果出售並以當前利率重新購房，每月將面臨<strong>500至1,500美元</strong>的實際財務懲罰。這一懲罰——即利率鎖定效應——使現有住宅掛牌量維持在數十年低點，即便隨著利率小幅下降，需求狀況已部分回升。</p>
+      <p>聯準會於2024年9月開始降息，至年底共降息75基點，將聯邦基金利率降至4.50至4.75%。30年房貸利率從7.79%降至2025年12月的約<strong>6.25%</strong>，隨後因關稅驅動的通膨擔憂再現，於2026年3月底反彈至<strong>6.38%</strong>。關鍵含義是：利率鎖定機制需要利率持續下降至5.0至5.5%區間，才能出現有意義的庫存正常化。在6.38%的利率水平下，搬家的財務代價對典型被鎖定屋主而言仍然過高。聯準會2026年前瞻指引顯示謹慎、依數據調整的寬鬆步調，不太可能在年內達到這一閾值。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">30-Year Fixed Rate History 2015–2026</span><span class="lang-zh" style="display:none">30年固定利率走勢 2015–2026</span></h4>
+        <p><span class="lang-en">Annual average · Freddie Mac PMMS · Mar 2026: 6.38%</span><span class="lang-zh" style="display:none">年均值 · Freddie Mac PMMS · 2026年3月：6.38%</span></p>
+        <div id="chartMortgageRate" style="height:200px"></div>
+        <p class="chart-note red"><span class="lang-en">7.79% peak (Oct 2023) = highest since 2000. Current 6.38% still far above the 5.0–5.5% threshold needed to unlock inventory</span><span class="lang-zh" style="display:none">2023年10月7.79%峰值為2000年以來最高。當前6.38%距解鎖庫存所需的5.0–5.5%閾值仍遠</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Lock-In Effect: The Financial Penalty of Moving</span><span class="lang-zh" style="display:none">利率鎖定效應：搬家的財務代價</span></h4>
+        <p><span class="lang-en">Monthly payment difference on $400K loan: locked rate vs current 6.38%</span><span class="lang-zh" style="display:none">40萬美元貸款月供差額：鎖定利率 vs 當前6.38%</span></p>
+        <div id="chartLockIn" style="height:200px"></div>
+        <p class="chart-note orange"><span class="lang-en">A homeowner locked at 3% faces a $1,200/mo penalty to sell and rebuy — equivalent to paying $144K more over 10 years</span><span class="lang-zh" style="display:none">以3%利率鎖定的屋主，出售並重新購買將面臨每月1,200美元的代價，相當於10年多支付14.4萬美元</span></p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 3. SUPPLY -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-supply"><span class="lang-en">SUPPLY: THE LOCK-IN DEFICIT</span><span class="lang-zh" style="display:none">供給：利率鎖定造成的庫存荒</span></h2>
+
+    <div class="lang-en">
+      <p>U.S. housing supply operates through two distinct channels: the existing home inventory (homes listed for sale by current owners) and new construction (homes built by developers). In a normal market, existing homes represent approximately 85–90% of total supply. The rate lock-in effect has effectively frozen this channel. NAR data shows that active listings in early 2026 stand at approximately 1.2 million units — down 40% from the 2 million units typical of a balanced pre-pandemic market, despite a modest recovery from the 2022 trough of 800,000 units. At current sales rates, this represents 3.7–3.8 months of supply, against the 4.5–6 month range considered balanced by practitioners.</p>
+      <p>The new construction channel has partially compensated, but cannot fully substitute. Single-family starts ran at approximately 1.0 million units in 2025, up from the 2023 trough but still below the 1.1–1.2 million units annually that demographers estimate is required to keep pace with household formation. The structural underbuild of the 2010s — when starts averaged only 750,000 units annually as builders de-leveraged after the GFC — left a cumulative deficit estimated by various analysts at 3–5 million units. This deficit is not being closed. The composition of new construction has also shifted: builders have responded to affordability pressure by building smaller homes and offering mortgage rate buydowns, but entry-level (sub-$300K) new homes have almost disappeared from the market as land and construction costs have made them economically nonviable in most markets.</p>
+      <p>The ARM market has expanded to partially address affordability. In California, ARMs now represent over 31% of mortgage originations, and nationally the ARM share has risen to 10–12% from the 3% floor of the ultra-low-rate era. This represents a structural shift in risk allocation — households are accepting rate risk to enter the market at a lower initial payment — that has historical precedent in the 2004–2006 period, though today's ARMs are structurally sounder (longer initial fixed periods, stricter underwriting, higher borrower quality). The typical 2025 ARM buyer has a credit score above 750 and is making a deliberate affordability trade, not a speculative bet.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>美國住宅供給通過兩個截然不同的渠道運作：現有住宅庫存（現有屋主掛牌出售的房屋）和新建住宅（開發商新建的房屋）。在正常市場中，現有住宅佔總供給的約85至90%。利率鎖定效應實際上凍結了這一渠道。NAR數據顯示，2026年初活躍掛牌量約為120萬戶——較疫情前均衡市場常見的200萬戶減少40%，儘管較2022年80萬戶低谷有所回升。以當前銷售速度計算，這相當於3.7至3.8個月的供給，低於從業者視為均衡的4.5至6個月區間。</p>
+      <p>新建渠道已部分補償，但無法完全替代。2025年獨棟住宅開工量約為100萬戶，較2023年低谷回升，但仍低於人口學家估計的110至120萬戶年均需求。2010年代的結構性建設不足——彼時開發商在全球金融危機後去槓桿，年均開工僅75萬戶——留下了各方分析師估計累計300至500萬戶的缺口。這一缺口並未被填補。新建住宅的構成也發生了變化：建商通過建造更小的房屋並提供利率補貼應對可負擔性壓力，但由於土地和建設成本使其在大多數市場缺乏經濟可行性，30萬美元以下的入門級新建住宅幾乎已從市場上消失。</p>
+      <p>ARM（可調利率房貸）市場有所擴張，部分緩解了可負擔性壓力。加州ARM佔房貸發放量的31%以上，全國ARM佔比從超低利率時代的3%底部升至10至12%。這代表了風險分配的結構性轉變——家庭正在接受利率風險以較低初始月供進入市場——儘管在歷史上有2004至2006年時期的先例，但今日ARM在結構上更為穩健（更長的初始固定期、更嚴格的核保標準、更高品質的借款人）。典型的2025年ARM買家信用評分在750以上，做出的是深思熟慮的可負擔性取捨，而非投機押注。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Active Inventory vs Months Supply 2015–2026</span><span class="lang-zh" style="display:none">活躍庫存 vs 供給月數 2015–2026</span></h4>
+        <p><span class="lang-en">Units (millions) · Source: NAR monthly · Feb 2026: 1.22M units, 3.7 months</span><span class="lang-zh" style="display:none">百萬戶 · 來源：NAR月報 · 2026年2月：122萬戶，3.7個月</span></p>
+        <div id="chartInventory" style="height:200px"></div>
+        <p class="chart-note orange"><span class="lang-en">Balanced market = 4.5–6 months. Current 3.7M is recovering but still 40% below pre-pandemic norms</span><span class="lang-zh" style="display:none">均衡市場=4.5至6個月。當前3.7個月雖有回升，但仍低於疫情前常態40%</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">ARM Share of Mortgage Originations 2015–2025</span><span class="lang-zh" style="display:none">ARM佔房貸發放比例 2015–2025</span></h4>
+        <p><span class="lang-en">% of total originations · Source: Black Knight / MBA / Cotality</span><span class="lang-zh" style="display:none">佔發放總量% · 來源：Black Knight / MBA / Cotality</span></p>
+        <div id="chartARMShare" style="height:200px"></div>
+        <p class="chart-note navy"><span class="lang-en">CA at 31%, DC 28%, MA 24% — high-cost markets returning to ARM-heavy structures last seen in 2006</span><span class="lang-zh" style="display:none">加州31%、DC 28%、麻州24%——高房價市場重回2006年以來罕見的高ARM比例</span></p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 4. DEMAND -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-demand"><span class="lang-en">DEMAND: VOLUME COLLAPSE &amp; AFFORDABILITY FLOOR</span><span class="lang-zh" style="display:none">需求：成交量崩潰與可負擔性底部</span></h2>
+
+    <div class="lang-en">
+      <p>Existing home sales fell to <strong>4.0 million units</strong> in 2024 — the lowest annual figure since 1995 and a 35% decline from the 2021 peak of 6.12 million. The February 2026 reading of 4.09 million (SAAR) represents marginal improvement and confirms that the market has found a demand floor, but has not yet begun a recovery. The composition of this diminished demand pool is structurally different from prior cycles. All-cash buyers now represent 31–32% of transactions, the highest share since 2014, as cash-rich investors and equity-heavy trade-up buyers can sidestep the rate impact entirely. First-time buyers, historically 38–40% of the market, have fallen to <strong>24%</strong> — the lowest ever. The market is increasingly bifurcated between cash-heavy participants who are indifferent to rates and young buyers who are priced out.</p>
+      <p>The median sales price of <strong>$398,000</strong> (February 2026) represents a modest decline from the mid-2022 peak of $413,000 but remains 65% above 2015 levels. At a 6.38% mortgage rate, the monthly principal and interest payment on a 20%-down mortgage on a $398,000 home is approximately $2,090. The median U.S. household income is roughly $80,000, implying a monthly income of $6,667 and a payment-to-income ratio of <strong>31.4%</strong> on P&I alone — exceeding the conventional 28% front-end DTI guideline. When property taxes, insurance, and HOA fees are included (typically 1.5–2.0% of home value annually), the total housing cost ratio rises to approximately 38%, confirming that the affordability crisis is real and structural rather than cyclical.</p>
+      <p>Against this backdrop, NAR's Housing Affordability Index registered its lowest reading since March 2022 in early 2026 even after accounting for wage growth. The only genuine affordability relief mechanisms are: (1) rate declines — every 50bps drop in the 30-year rate adds approximately 500,000 potential buyers to the qualified pool; (2) income growth — real wages have grown roughly 1–2% annually, which compounds slowly relative to payment levels; and (3) geographic reallocation — buyers moving from high-cost coastal markets to lower-cost metros, a trend that Census Bureau data confirms accelerated sharply in 2021–2023 but has since moderated.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>現有住宅成交量在2024年降至<strong>400萬戶</strong>——自1995年以來的最低年度數字，較2021年高峰的612萬戶下降35%。2026年2月的409萬戶（季調年率）讀數代表邊際改善，確認市場已找到需求底部，但尚未開始復甦。這一縮減後的需求池在結構上與以往週期截然不同。現金買家目前佔交易的31至32%，為2014年以來最高比例，因為現金充裕的投資者和高淨值換屋買家可以完全繞過利率衝擊。歷史上佔市場38至40%的首次購房者已降至<strong>24%</strong>——有史以來最低。市場正日益呈現兩極化：對利率無感的現金充裕參與者與被拒之市場門外的年輕買家。</p>
+      <p>中位成交價<strong>39.8萬美元</strong>（2026年2月）較2022年年中高峰41.3萬美元溫和下滑，但仍比2015年高出65%。以6.38%利率計算，以20%首付購買39.8萬美元房屋，每月本息還款約2,090美元。美國家庭中位收入約8萬美元，月收入約6,667美元，單是本息的月供收入比為<strong>31.4%</strong>——超過傳統的28%前端負債收入比指引。加上房產稅、保險和業主管理費（通常為房屋價值的年1.5至2.0%），總住房成本比率升至約38%，確認可負擔性危機是真實且結構性的，而非週期性的。</p>
+      <p>在此背景下，儘管將工資增長計入，NAR住房可負擔性指數在2026年初仍錄得2022年3月以來最低讀數。唯一真實的可負擔性緩解機制是：（1）利率下降——30年利率每降50個基點，約為合格買家池增加50萬人；（2）收入增長——實際工資每年增長約1至2%，相對於月供水平累積緩慢；（3）地域重新配置——買家從高成本沿海市場遷往低成本大都市，人口普查局數據確認這一趨勢在2021至2023年急劇加速，此後有所放緩。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Existing Home Sales Annual 2015–2025 (Millions)</span><span class="lang-zh" style="display:none">現有住宅年度成交量 2015–2025（百萬戶）</span></h4>
+        <p><span class="lang-en">SAAR annual total · Source: NAR</span><span class="lang-zh" style="display:none">季調年率年度總計 · 來源：NAR</span></p>
+        <div id="chartSalesVol" style="height:200px"></div>
+        <p class="chart-note red"><span class="lang-en">2024 = 4.0M, worst since 1995. 2025 = ~4.06M, marginal recovery. 2026 pace so far: 4.0–4.1M annualized</span><span class="lang-zh" style="display:none">2024年=400萬，1995年以來最差。2025年=約406萬，邊際回升。2026年迄今年化：400至410萬</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">National Median Home Price + Affordability Ratio 2015–2025</span><span class="lang-zh" style="display:none">全國中位數房價 + 可負擔性比率 2015–2025</span></h4>
+        <p><span class="lang-en">Median price $K (bars) · Monthly P&amp;I as % of median income (line) · Source: NAR / Census</span><span class="lang-zh" style="display:none">中位數房價千美元（柱）· 月供本息佔中位數收入%（線）· 來源：NAR / Census</span></p>
+        <div id="chartAffordability" style="height:200px"></div>
+        <p class="chart-note red"><span class="lang-en">Payment-to-income ratio of 31.4% on P&amp;I alone exceeds the 28% guideline — first time since the 2006 bubble</span><span class="lang-zh" style="display:none">單本息月供收入比31.4%超過28%指引——2006年泡沫以來首次</span></p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 5. VALUATION: CASE-SHILLER DIVERGENCE -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-valuation"><span class="lang-en">VALUATION: CASE-SHILLER DIVERGENCE</span><span class="lang-zh" style="display:none">估值：Case-Shiller 城市分化</span></h2>
+
+    <div class="lang-en">
+      <p>The Case-Shiller national index at <strong>329</strong> represents a 229% increase since January 2000, or roughly a 4.2% nominal annual compound return. In real terms (inflation-adjusted), the appreciation is closer to 70% over the same period — substantial but not exceptional by global standards. The critical analytical insight, however, is not the national figure but the city-level divergence that has accelerated since 2022. The post-pandemic boom was unusually uniform — Phoenix, Miami, Seattle, and New York all appreciated at similar rates in 2021. The correction since 2022 has been far more differentiated, and this differentiation will persist.</p>
+      <p>The clearest pattern is the sunbelt correction. Cities that benefited disproportionately from pandemic-era migration tailwinds — Phoenix, Austin, Miami, Denver — saw prices rise 40–60% between 2020 and 2022 as remote workers relocated from high-cost markets. As return-to-office mandates tightened, migration slowed, and new construction in these zoning-permissive markets delivered substantial supply, those tailwinds reversed. By December 2025, Phoenix was down <strong>2.3%</strong> YoY, Miami <strong>4.3%</strong>, and Denver <strong>3.2%</strong>. Austin, not in the Case-Shiller 20-city composite, shows similar trends through Redfin and Zillow data.</p>
+      <p>The inverse pattern — continued appreciation in supply-constrained, high-income markets — is equally clear. New York posted <strong>+4.9%</strong> YoY on the Case-Shiller index through January 2026, and Chicago <strong>+4.6%</strong> for a third consecutive leading position. These markets share several characteristics: stringent zoning that prevents meaningful new supply, high-income service sector employment that has maintained strong demand, and limited migration outflows. Boston, not in the 20-city YoY leaders above but tracked separately, shows similar dynamics with <strong>+1.7%</strong> on Zillow through December 2025. The divergence between these two market archetypes — sunbelt correction versus supply-constrained appreciation — is the defining valuation story of the 2025–2027 period.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>Case-Shiller全國指數<strong>329</strong>代表自2000年1月以來上漲229%，即名義年化複合回報率約4.2%。實際（通脹調整後）升值約為同期70%——相當可觀，但以全球標準衡量並不例外。然而，關鍵分析洞察不在全國數字，而在2022年以來加速的城市層面分化。疫情後的繁榮異常整齊劃一——鳳凰城、邁阿密、西雅圖和紐約在2021年均以相似速度升值。2022年以來的修正則差異化得多，這一分化將持續存在。</p>
+      <p>最清晰的模式是陽光地帶的修正。在疫情時代遷移浪潮中受益過度的城市——鳳凰城、奧斯丁、邁阿密、丹佛——在2020至2022年間隨著遠程工作者從高成本市場遷入，房價上漲40至60%。隨著返回辦公室要求收緊、遷移放緩，以及這些分區法寬鬆市場的大量新供給入市，順風轉為逆風。到2025年12月，鳳凰城年跌<strong>2.3%</strong>，邁阿密<strong>4.3%</strong>，丹佛<strong>3.2%</strong>。奧斯丁不在Case-Shiller20城複合指數中，但Redfin和Zillow數據顯示類似趨勢。</p>
+      <p>反向模式——供給受限、高收入市場的持續升值——同樣清晰。紐約在截至2026年1月的Case-Shiller指數中年增<strong>4.9%</strong>，芝加哥連續第三個月領漲，年增<strong>4.6%</strong>。這些市場具有幾個共同特徵：嚴格的分區法阻止有意義的新供給、高收入服務業就業維持強勁需求，以及有限的人口外流。波士頓雖不在上述20城年增領漲名單，但通過Zillow數據在2025年12月顯示<strong>+1.7%</strong>，呈現類似動態。陽光地帶修正與供給受限升值這兩種市場原型之間的分化，是2025至2027年的核心估值故事。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Case-Shiller City YoY % Change — Jan 2026</span><span class="lang-zh" style="display:none">Case-Shiller城市年增率 — 2026年1月</span></h4>
+        <p><span class="lang-en">8 cities from 20-city composite · Source: S&amp;P / FRED · Jan 2026 data</span><span class="lang-zh" style="display:none">20城複合指數中8個城市 · 來源：S&amp;P / FRED · 2026年1月數據</span></p>
+        <div id="chartCityYoY" style="height:220px"></div>
+        <p class="chart-note orange"><span class="lang-en">NYC +4.9% and Chicago +4.6% lead; Tampa –2.5%, Miami –1.5%, Phoenix –1.5% still correcting</span><span class="lang-zh" style="display:none">紐約+4.9%和芝加哥+4.6%領漲；坦帕–2.5%、邁阿密–1.5%、鳳凰城–1.5%仍在修正中</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Case-Shiller Index: 8 Cities vs National 2015–2025</span><span class="lang-zh" style="display:none">Case-Shiller指數：8城市 vs 全國 2015–2025</span></h4>
+        <p><span class="lang-en">Rebased to 100 in 2015 · Source: FRED city indices · SA</span><span class="lang-zh" style="display:none">以2015年為基期=100 · 來源：FRED城市指數 · 季調</span></p>
+        <div id="chartCityIndex" style="height:220px"></div>
+        <p class="chart-note navy"><span class="lang-en">Phoenix +199% from 2015 peak performance; NYC +97%; Chicago +86%; divergence since 2022 most pronounced</span><span class="lang-zh" style="display:none">鳳凰城自2015年累計+199%表現最佳；紐約+97%；芝加哥+86%；2022年後分化最為明顯</span></p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 6. U.S. MARKET MECHANICS -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-structure"><span class="lang-en">U.S. MARKET MECHANICS: FIVE STRUCTURAL FEATURES</span><span class="lang-zh" style="display:none">美國市場機制：五大結構性特徵</span></h2>
+
+    <div class="lang-en">
+      <p>The U.S. residential property market has five structural features that distinguish it from every other market in this report and that fundamentally shape risk and opportunity for foreign investors and domestic participants alike.</p>
+      <p><strong>1. The 30-Year Fixed Rate Mortgage</strong> — The United States is the only major economy where a 30-year fully amortizing fixed-rate mortgage is the dominant home financing instrument, representing approximately 75–80% of purchase originations. This instrument is economically remarkable: the borrower bears zero interest rate risk for three decades while the lender bears it entirely. This is possible because Fannie Mae and Freddie Mac (government-sponsored enterprises) guarantee the credit risk, and the Federal Reserve's quantitative easing programs have historically suppressed the duration risk premium. The practical consequence is that U.S. homeowners are permanently insulated from rate increases once they lock in — which is precisely what creates the lock-in effect described above. When rates rise, existing homeowners face no payment pressure (unlike, for example, Australia or the UK where variable-rate mortgages are dominant), but potential movers face the full cost of repricing.</p>
+      <p><strong>2. NAR Commission Reform (August 2024)</strong> — The $418 million NAR settlement that took effect in August 2024 eliminated the MLS requirement to display buyer's agent commission offers and mandated written buyer-broker agreements before showings. Despite predictions of commission compression, buyer's agent commissions have actually risen from 2.38% to 2.43% nationally in the first year — sellers in a slow market are still offering compensation to attract buyers. The longer-term impact is likely a structural reduction in agent count (NAR projects 20% membership decline by 2026) rather than commission rates, as the least productive agents exit a market where 75% of agents closed zero transactions in 2024.</p>
+      <p><strong>3. Rent Control Landscape</strong> — As of October 2025, only three states have statewide rent control: California (AB 1482, 5%+CPI or 10% cap, 15-year new construction exemption), Oregon (7%+CPI or 10%), and Washington (HB 1217, enacted 2025, 7%+CPI or 10%). A further 32 states have preemption laws that prohibit local governments from enacting any rent control ordinance — creating a stark regulatory geography where investment conditions differ enormously by state. Texas, Florida, and Arizona (the sunbelt markets most affected by the pandemic migration cycle) all prohibit local rent control. New York has the most complex and restrictive regime, with both rent control (pre-1947 buildings) and rent stabilization (covering approximately 1 million units citywide).</p>
+      <p><strong>4. Airbnb &amp; Short-Term Rental Market</strong> — The U.S. short-term rental market encompasses 2.4 million listings generating approximately $64 billion in annual revenue, representing 1.6% of the total housing stock. The regulatory landscape is sharply bifurcated: New York City's Local Law 18 (enforced September 2023) requires owner presence and city registration, reducing Airbnb's active NYC listings by approximately 80%. Los Angeles caps non-primary-residence short-term rentals at 120 nights annually. In contrast, Austin, Nashville, and most Sunbelt cities maintain permissive regimes. The investment implication is that STR cash flows have become jurisdictionally binary — either fully viable or effectively prohibited — and underwriting must treat local regulatory status as a binary risk, not a continuous variable.</p>
+      <p><strong>5. FIRPTA &amp; Foreign Buyer Framework</strong> — Foreign buyers purchased over $56 billion in U.S. homes in the 12 months ending March 2025 (NAR). FIRPTA requires buyers of U.S. property from foreign sellers to withhold 15% of the gross purchase price for IRS remittance. A new FinCEN rule effective March 1, 2026 replaces geographic targeting orders with a nationwide reporting requirement for all transfers to legal entities or trusts, with no price threshold. Additionally, 20 states have enacted restrictions on buyers from specific foreign countries (primarily China) acquiring residential or agricultural real property. Foreign capital's share of total U.S. CRE investment has already fallen from 16% in 2018 to under 6% in 2024, reflecting cumulative regulatory friction.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>美國住宅房地產市場有五個結構性特徵，使其有別於本報告涵蓋的所有其他市場，從根本上塑造了外國投資者和國內參與者的風險與機會。</p>
+      <p><strong>1. 30年固定利率房貸</strong> — 美國是唯一一個30年完全攤銷固定利率房貸占主導地位的主要經濟體，佔購房發放量的約75至80%。這一金融工具在經濟上相當顯著：借款人在三十年內不承擔任何利率風險，而貸款機構承擔全部。這之所以可行，是因為房利美和房地美（政府支持企業）提供信用擔保，而聯準會的量化寬鬆歷史上壓制了久期風險溢價。實際結果是，美國屋主一旦鎖定利率便永久免受加息影響——這正是上述利率鎖定效應的根源。當利率上升時，現有屋主不面臨還款壓力（不同於澳洲或英國的浮動利率房貸主導），但潛在的換屋者承擔了全額重新定價的成本。</p>
+      <p><strong>2. NAR佣金改革（2024年8月）</strong> — 2024年8月生效的4.18億美元NAR和解消除了MLS顯示買方經紀人佣金報價的要求，並規定看房前須簽署書面買方代理協議。儘管預測佣金將受壓，第一年全國買方經紀人佣金實際上從2.38%上升至2.43%——在市場疲軟中，賣方仍提供補償以吸引買家。長期影響更可能是經紀人數量的結構性減少（NAR預測2026年前會員減少20%），而非佣金率下降，因為2024年有75%的經紀人全年零成交，最缺乏生產力的經紀人將退出市場。</p>
+      <p><strong>3. 租管法規格局</strong> — 截至2025年10月，僅三個州有州級租管法：加州（AB 1482，上限5%+CPI或10%，新建15年豁免）、奧勒岡州（7%+CPI或10%）和華盛頓州（2025年通過的HB 1217，7%+CPI或10%）。另有32個州有禁止地方政府立租管法的先占法——造成按州差異巨大的監管地理格局。疫情遷移週期影響最大的陽光地帶市場（德州、佛州和亞利桑那州）均禁止地方租管。紐約擁有最複雜嚴格的制度，同時存在租金管制（1947年前建築）和租金穩定（覆蓋全市約100萬戶）。</p>
+      <p><strong>4. Airbnb與短租市場</strong> — 美國短租市場涵蓋240萬戶掛牌房源，年收入約640億美元，佔總住宅存量的1.6%。監管格局急劇分化：紐約市《地方法律第18號》（2023年9月執行）要求房主在場並城市登記，使Airbnb紐約活躍掛牌量減少約80%。洛杉磯將非主要住所短租限制在每年120個夜晚。相比之下，奧斯丁、納什維爾和大多數陽光地帶城市維持寬鬆制度。投資含義是，短租現金流已在司法管轄層面呈現二元化——要麼完全可行，要麼實際上被禁止——核保必須將當地監管狀況視為二元風險，而非連續變量。</p>
+      <p><strong>5. FIRPTA與外國買家框架</strong> — 截至2025年3月，外國買家在12個月內在美購買了逾560億美元的住宅（NAR）。FIRPTA要求向外國賣家購買美國房產的買方為國稅局預扣總房價的15%。2026年3月1日生效的新FinCEN規則以全國申報要求取代了地理定向令，覆蓋所有向法人或信託的物業轉讓，無價格門檻。此外，20個州已立法限制特定外國國籍（主要是中國）買家購置住宅或農業用地。外資佔美國商業不動產投資總額的比例已從2018年的16%降至2024年的6%以下，反映了累積的監管摩擦。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Rent Control Map: State-by-State Framework (2025)</span><span class="lang-zh" style="display:none">租管地圖：各州框架（2025年）</span></h4>
+        <p><span class="lang-en">Source: NAA Fall 2025 Rent Control Outlook · Oct 2025 status</span><span class="lang-zh" style="display:none">來源：NAA 2025年秋季租管展望 · 2025年10月現況</span></p>
+        <div id="chartRentControl" style="height:220px"></div>
+        <p class="chart-note navy"><span class="lang-en">Only 3 states + DC have statewide rent control. 32 states preempt local rent control entirely — major investment variable</span><span class="lang-zh" style="display:none">僅3州+DC有州級租管。32州完全禁止地方租管——重要投資變量</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">NAR Commission Reform: Before vs After (2023–2025)</span><span class="lang-zh" style="display:none">NAR佣金改革：改革前後對比（2023–2025）</span></h4>
+        <p><span class="lang-en">Buyer agent commission % · Source: Redfin Q2 2025 analysis</span><span class="lang-zh" style="display:none">買方經紀人佣金% · 來源：Redfin 2025年Q2分析</span></p>
+        <div id="chartNARCommission" style="height:220px"></div>
+        <p class="chart-note green"><span class="lang-en">Commission rose from 2.38% to 2.43% post-reform: sellers in weak market still paying to attract buyers. Sub-$500K: 2.52%; $1M+: 2.21%</span><span class="lang-zh" style="display:none">改革後佣金從2.38%升至2.43%：疲軟市場中賣方仍支付佣金吸引買家。50萬以下：2.52%；100萬以上：2.21%</span></p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 7. TWELVE-CITY SNAPSHOT -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-cities"><span class="lang-en">TWELVE-CITY SNAPSHOT</span><span class="lang-zh" style="display:none">十二城市概況</span></h2>
+
+    <div class="lang-en">
+      <p>The twelve cities covered in depth in this monitor collectively represent approximately 35% of U.S. total home value and span the full spectrum of current market conditions. They organize into four archetypes: <strong>supply-constrained appreciators</strong> (NYC, Chicago, Boston, San Francisco), <strong>tech-driven high-cost markets</strong> (Silicon Valley, San Diego, Seattle), <strong>wildfire/climate-risk correctors</strong> (LA), and <strong>sunbelt cycle markets</strong> (Miami, Austin, Phoenix, Denver). Each city page contains full 10-year price series, supply/demand data, and investment framework.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>本監測深度覆蓋的十二個城市合計代表美國住宅總價值的約35%，涵蓋當前市場狀況的完整光譜。可以分為四種原型：<strong>供給受限升值市</strong>（紐約、芝加哥、波士頓、舊金山）、<strong>科技驅動高成本市</strong>（矽谷、聖地牙哥、西雅圖）、<strong>野火/氣候風險修正市</strong>（洛杉磯）和<strong>陽光地帶週期市</strong>（邁阿密、奧斯丁、鳳凰城、丹佛）。各城市頁面包含完整的10年房價序列、供需數據和投資框架。</p>
+    </div>
+
+    <div class="city-grid">
+      <div class="city-card">
+        <span class="city-tag tag-navy"><span class="lang-en">Supply Constrained</span><span class="lang-zh" style="display:none">供給受限</span></span>
+        <h3>🗽 New York City</h3>
+        <div class="city-stat"><span class="lang-en">CS Index (Jan 2026):</span><span class="lang-zh" style="display:none">CS指數（2026年1月）：</span> <strong>324</strong> · YoY <strong style="color:#16a34a">+4.9%</strong></div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>$880K</strong> · Cash buyers 60–65%</div>
+        <div class="city-stat"><span class="lang-en">Rent: NYC stabilization ~1M units</span><span class="lang-zh" style="display:none">租管：NYC穩定化約100萬戶</span></div>
+        <div class="city-stat"><span class="lang-en">STR: Local Law 18 — listings fell 85%</span><span class="lang-zh" style="display:none">短租：地方法18號——掛牌量降85%</span></div>
+        <a href="nyc.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-orange"><span class="lang-en">Climate Risk</span><span class="lang-zh" style="display:none">氣候風險</span></span>
+        <h3>🌴 Los Angeles</h3>
+        <div class="city-stat"><span class="lang-en">CS Index (Feb 2025):</span><span class="lang-zh" style="display:none">CS指數（2025年2月）：</span> <strong>445</strong> · All-time high</div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>$1.07M</strong> · Post-fire +12.5%</div>
+        <div class="city-stat"><span class="lang-en">Rent: AB 1482 (5%+CPI / 10%) + RSO</span><span class="lang-zh" style="display:none">租管：AB 1482 + RSO</span></div>
+        <div class="city-stat"><span class="lang-en">Risk: Wildfire destroyed 16,251 structures</span><span class="lang-zh" style="display:none">風險：野火摧毀16,251棟建築</span></div>
+        <a href="la.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-navy"><span class="lang-en">Supply Constrained</span><span class="lang-zh" style="display:none">供給受限</span></span>
+        <h3>🌉 San Francisco</h3>
+        <div class="city-stat"><span class="lang-en">CS Index (Jan 2026):</span><span class="lang-zh" style="display:none">CS指數（2026年1月）：</span> <strong>~330</strong> · YoY <strong style="color:#d97706">~+1%</strong></div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>~$1.3M</strong> · Condo market under pressure</div>
+        <div class="city-stat"><span class="lang-en">Rent: SF Rent Ordinance (pre-1979 units)</span><span class="lang-zh" style="display:none">租管：SF租金條例（1979年前建築）</span></div>
+        <div class="city-stat"><span class="lang-en">Risk: Office vacancy 35%+ → demand spillover</span><span class="lang-zh" style="display:none">風險：辦公室空置率35%+→需求外溢</span></div>
+        <a href="sf.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-orange"><span class="lang-en">Tech-Driven</span><span class="lang-zh" style="display:none">科技驅動</span></span>
+        <h3>💻 Silicon Valley</h3>
+        <div class="city-stat"><span class="lang-en">Median (San Jose MSA):</span><span class="lang-zh" style="display:none">中位數（聖荷西都會區）：</span> <strong>~$1.8M</strong></div>
+        <div class="city-stat">YoY: <strong style="color:#16a34a">+5–7%</strong> · AI boom re-inflating</div>
+        <div class="city-stat"><span class="lang-en">Rent: CA AB 1482 statewide cap applies</span><span class="lang-zh" style="display:none">租管：CA AB 1482州級上限適用</span></div>
+        <div class="city-stat"><span class="lang-en">Driver: NVIDIA / Apple / Google hiring cycle</span><span class="lang-zh" style="display:none">驅動：NVIDIA/Apple/Google招聘週期</span></div>
+        <a href="sv.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-green"><span class="lang-en">Relative Value</span><span class="lang-zh" style="display:none">相對價值</span></span>
+        <h3>☀️ San Diego</h3>
+        <div class="city-stat"><span class="lang-en">CS Index (Jan 2026):</span><span class="lang-zh" style="display:none">CS指數（2026年1月）：</span> <strong>~430</strong> · YoY <strong style="color:#16a34a">+3%</strong></div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>~$950K</strong> · Military/biotech base</div>
+        <div class="city-stat"><span class="lang-en">Rent: CA AB 1482 + city tenant protections</span><span class="lang-zh" style="display:none">租管：CA AB 1482 + 市租戶保護</span></div>
+        <div class="city-stat"><span class="lang-en">Driver: Defense + biotech + cross-border demand</span><span class="lang-zh" style="display:none">驅動：國防+生技+跨境需求</span></div>
+        <a href="sandiego.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-red"><span class="lang-en">Sunbelt Correcting</span><span class="lang-zh" style="display:none">陽光地帶修正</span></span>
+        <h3>🌊 Miami / South Florida</h3>
+        <div class="city-stat"><span class="lang-en">CS YoY (Jan 2026):</span><span class="lang-zh" style="display:none">CS年增率（2026年1月）：</span> <strong style="color:#dc2626">-1.5%</strong></div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>~$630K</strong> · HOA/insurance surge</div>
+        <div class="city-stat"><span class="lang-en">Rent: FL preempts all local rent control</span><span class="lang-zh" style="display:none">租管：佛州禁止所有地方租管</span></div>
+        <div class="city-stat"><span class="lang-en">Risk: Climate risk + condo structural law costs</span><span class="lang-zh" style="display:none">風險：氣候風險+公寓結構法成本</span></div>
+        <a href="miami.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-red"><span class="lang-en">Sunbelt Correcting</span><span class="lang-zh" style="display:none">陽光地帶修正</span></span>
+        <h3>🤠 Austin</h3>
+        <div class="city-stat">YoY: <strong style="color:#dc2626">~-3.5%</strong> · Supply boom + RTO reversal</div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>~$550K</strong></div>
+        <div class="city-stat"><span class="lang-en">Rent: TX preempts all local rent control</span><span class="lang-zh" style="display:none">租管：德州禁止所有地方租管</span></div>
+        <div class="city-stat"><span class="lang-en">Driver: Tech relocation thesis partially reversed</span><span class="lang-zh" style="display:none">驅動：科技遷移論點部分逆轉</span></div>
+        <a href="austin.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-orange"><span class="lang-en">Tech-Driven</span><span class="lang-zh" style="display:none">科技驅動</span></span>
+        <h3>☁️ Seattle</h3>
+        <div class="city-stat">CS YoY: <strong style="color:#dc2626">-1.0%</strong> · Tech layoffs headwind</div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>~$770K</strong></div>
+        <div class="city-stat"><span class="lang-en">Rent: WA HB 1217 (2025) — 7%+CPI cap</span><span class="lang-zh" style="display:none">租管：WA HB 1217（2025）——7%+CPI上限</span></div>
+        <div class="city-stat"><span class="lang-en">Risk: Amazon/Microsoft employment concentration</span><span class="lang-zh" style="display:none">風險：亞馬遜/微軟就業高度集中</span></div>
+        <a href="seattle.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-navy"><span class="lang-en">Supply Constrained</span><span class="lang-zh" style="display:none">供給受限</span></span>
+        <h3>🍕 Chicago</h3>
+        <div class="city-stat">CS YoY: <strong style="color:#16a34a">+4.6%</strong> · 3rd consecutive leading</div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>~$345K</strong> · Most affordable major metro</div>
+        <div class="city-stat"><span class="lang-en">Rent: IL preempts local rent control</span><span class="lang-zh" style="display:none">租管：伊州禁止地方租管</span></div>
+        <div class="city-stat"><span class="lang-en">Advantage: Relative value; diversified employment</span><span class="lang-zh" style="display:none">優勢：相對價值；多元化就業</span></div>
+        <a href="chicago.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-navy"><span class="lang-en">Supply Constrained</span><span class="lang-zh" style="display:none">供給受限</span></span>
+        <h3>🦞 Boston</h3>
+        <div class="city-stat">YoY: <strong style="color:#16a34a">+1.7%</strong> · Education/biotech anchor</div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>~$820K</strong> · Metro area</div>
+        <div class="city-stat"><span class="lang-en">Rent: MA local rent control limited</span><span class="lang-zh" style="display:none">租管：麻州地方租管有限</span></div>
+        <div class="city-stat"><span class="lang-en">Driver: Harvard/MIT/biotech cluster demand</span><span class="lang-zh" style="display:none">驅動：哈佛/MIT/生技群聚需求</span></div>
+        <a href="boston.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-red"><span class="lang-en">Sunbelt Correcting</span><span class="lang-zh" style="display:none">陽光地帶修正</span></span>
+        <h3>🌵 Phoenix</h3>
+        <div class="city-stat">CS YoY: <strong style="color:#dc2626">-1.5%</strong> · Pandemic overshoot</div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>~$430K</strong></div>
+        <div class="city-stat"><span class="lang-en">Rent: AZ preempts all local rent control</span><span class="lang-zh" style="display:none">租管：亞州禁止所有地方租管</span></div>
+        <div class="city-stat"><span class="lang-en">Risk: Water scarcity + correction still running</span><span class="lang-zh" style="display:none">風險：水資源稀缺+修正仍在進行</span></div>
+        <a href="phoenix.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+      <div class="city-card">
+        <span class="city-tag tag-red"><span class="lang-en">Sunbelt Correcting</span><span class="lang-zh" style="display:none">陽光地帶修正</span></span>
+        <h3>🏔️ Denver</h3>
+        <div class="city-stat">YoY: <strong style="color:#dc2626">-3.2%</strong> · Largest Mountain West decline</div>
+        <div class="city-stat"><span class="lang-en">Median:</span><span class="lang-zh" style="display:none">中位數：</span> <strong>~$565K</strong></div>
+        <div class="city-stat"><span class="lang-en">Rent: CO preempts all local rent control</span><span class="lang-zh" style="display:none">租管：科州禁止所有地方租管</span></div>
+        <div class="city-stat"><span class="lang-en">Risk: Inventory surge + tech/energy exposure</span><span class="lang-zh" style="display:none">風險：庫存激增+科技/能源業敞口</span></div>
+        <a href="denver.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report →</span><span class="lang-zh" style="display:none">完整報告 →</span></a>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 8. OUTLOOK -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK &amp; RISK SCENARIOS 2026–2028</span><span class="lang-zh" style="display:none">展望與風險情境 2026–2028</span></h2>
+
+    <div class="lang-en">
+      <p>The trajectory of the U.S. housing market through 2028 is fundamentally a function of one variable: the path of the 30-year fixed mortgage rate. Every other factor — supply, affordability, city-level divergence — operates through the rate mechanism. Consensus forecasts for 2026 cluster around <strong>+1% to +2%</strong> national price growth (Redfin, JPM, Realtor.com), with meaningful affordability improvement driven by wage growth (+3.6% expected) outpacing home price growth for the first time since 2020. The Fed's easing cycle, which cut rates through 2025, continues in 2026 but at a slower pace — creating the backdrop for the three-scenario framework below.</p>
+      <p><strong>Base case</strong> (55% probability). Fed delivers two further 25 bp cuts in 2026 reaching <strong>3.25%</strong>; the 30-year fixed rate settles in the <strong>5.5–6.0% range</strong> by end-2027 on continued disinflation and cooling labour market. At 5.5%, monthly payments on a $400K mortgage fall from $2,090 to approximately $1,890, adding an estimated <strong>1.5–2.0 million qualified buyers</strong>. The lock-in penalty narrows sufficiently that a segment of long-locked homeowners accept the cost of moving — inventory recovers to <strong>3.0–3.5 million active listings</strong> by end-2027. National prices rise <strong>+1 to +3%</strong> in 2026, <strong>+3 to +5%</strong> in 2027. Supply-constrained metros (NYC, Chicago, Boston) outperform; Sunbelt overheating zones (Austin, Phoenix, Tampa) correct moderately.</p>
+      <p><strong>Bull case</strong> (20% probability). A sharper economic slowdown prompts the Fed to cut aggressively to <strong>2.5%</strong>; the 30-year rate drops at or below <strong>5.0%</strong> by end-2026. Lock-in effect largely dissolves; inventory normalises rapidly; national prices appreciate <strong>+5 to +8%</strong> annually through 2027 on renewed volume. Supply-constrained metros benefit disproportionately as underlying demand has been building for years behind the lock-in wall.</p>
+      <p><strong>Bear case</strong> (25% probability). Persistent inflation — possibly re-accelerated by tariff effects, oil shocks, or fiscal stress — prevents Fed easing and keeps the 30-year rate above <strong>7.0%</strong> through 2027. Demand floor dissolves; volume declines toward 3.5M existing home sales; prices correct <strong>-5 to -10%</strong> nationally; Sunbelt markets already correcting (Miami, Phoenix, Denver, Austin) see compounding declines of <strong>-15 to -20%</strong> from 2022 peaks. Geographic losers: pandemic-era migration destinations lacking structural demand anchors. Geographic winners: affordable stable-economy markets (Chicago, Cleveland, Pittsburgh) where affordability math still works.</p>
+      <p>Three indicators to monitor quarterly: (1) <strong>Freddie Mac 30-year fixed mortgage rate (weekly PMMS release)</strong> — the single most important input; every 50 bp decline adds approximately 500K qualified buyers; (2) <strong>NAR existing home sales SAAR</strong> — the clearest read on lock-in effect resolution (above 4.5M = material loosening, below 3.5M = accelerating distress); (3) <strong>Case-Shiller 20-city index dispersion</strong> — watch for widening between supply-constrained metros and Sunbelt correctors. The underlying thesis: the lock-in effect has insulated the US market from a rate-driven correction, but at the cost of elevated affordability stress. Resolution requires either material rate decline or material wage catch-up; both are underway, but neither is rapid. City selection is the dominant alpha lever — not national market timing.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>美國房市到 2028 年的軌跡，根本上取決於一個變數：30 年固定利率的路徑。其他所有因素——供給、可負擔性、城市分化——都透過利率機制發揮作用。2026 年共識預期集中在全國房價漲 <strong>+1% 至 +2%</strong>（Redfin、JPM、Realtor.com），伴隨意義重大的可負擔性改善——薪資成長（預期 +3.6%）自 2020 年以來首度超過房價漲幅。聯準會 2025 年的降息循環在 2026 年延續但步調放緩，構成以下三情境的基調。</p>
+      <p><strong>基本情境</strong>（機率 55%）。聯準會 2026 年再降兩次 25 個基點到 <strong>3.25%</strong>；30 年固定利率在持續去通膨與勞動市場降溫下，2027 年底穩定在 <strong>5.5–6.0% 區間</strong>。在 5.5% 水平下，$40 萬房貸月供從 $2,090 降到約 $1,890，估計為合格買家池增加 <strong>150 至 200 萬人</strong>。鎖定懲罰縮窄到一部分長期被鎖住的屋主接受搬家成本——2027 年底活躍掛牌回升到 <strong>300 至 350 萬套</strong>。全國房價 2026 年漲 <strong>+1 至 +3%</strong>、2027 年漲 <strong>+3 至 +5%</strong>。供給受限大都會（紐約、芝加哥、波士頓）跑贏；陽光地帶過熱區（奧斯丁、鳳凰城、坦帕）溫和修正。</p>
+      <p><strong>樂觀情境</strong>（機率 20%）。更深的經濟放緩促使聯準會積極降息到 <strong>2.5%</strong>；2026 年底 30 年利率降到 <strong>5.0% 或以下</strong>。鎖定效應基本消解；庫存快速正常化；全國房價 2027 年前以恢復的成交量支撐每年 <strong>+5 至 +8%</strong>。供給受限大都會受惠最大，因為鎖定牆背後的潛在需求已累積多年。</p>
+      <p><strong>悲觀情境</strong>（機率 25%）。通膨持續——可能因關稅效應、油價衝擊、或財政壓力重新加速——阻止聯準會寬鬆，30 年利率 2027 年整年維持在 <strong>7.0% 以上</strong>。需求底部瓦解；成交量降到 350 萬戶；全國房價修正 <strong>-5 至 -10%</strong>；已在修正的陽光地帶（邁阿密、鳳凰城、丹佛、奧斯丁）從 2022 年高峰疊加下跌 <strong>-15 至 -20%</strong>。失敗者是疫情移民目的地（缺乏結構性需求支撐）；勝者反而是便宜穩定的市場（芝加哥、克利夫蘭、匹茲堡），那裡的可負擔性算式還成立。</p>
+      <p>三個每季要追蹤的指標：（1）<strong>Freddie Mac 30 年固定房貸利率（每週 PMMS 公布）</strong>——最重要的單一變數，每降 50 個基點約增加 50 萬合格買家；（2）<strong>NAR 現房成交量（季調年率）</strong>——鎖定效應是否鬆動最清楚的訊號（超過 450 萬戶表示明顯鬆動、低於 350 萬戶表示壓力加深）；（3）<strong>Case-Shiller 20 城指數離散度</strong>——觀察供給受限大都會與陽光地帶修正之間的裂口是否擴大。核心論點是：鎖定效應讓美國市場在利率衝擊下沒有發生典型修正，但代價是高漲的可負擔性壓力。要化解，要嘛利率明顯下降、要嘛薪資明顯追上——兩者都在進行中但都不快速。城市選擇是最大的 alpha 槓桿，不是全國性的進出場時機。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">National Home Price Forecast 2026–2028: Three Scenarios</span><span class="lang-zh" style="display:none">全國房價預測 2026–2028：三情境</span></h4>
+        <p><span class="lang-en">Case-Shiller National SA index · Base year 2025 = 327 · Research estimates</span><span class="lang-zh" style="display:none">Case-Shiller全國季調指數 · 基準年2025=327 · 研究估算</span></p>
+        <div id="chartForecast" style="height:220px"></div>
+        <p class="chart-note orange"><span class="lang-en">Key swing factor: every 50bps rate decline adds ~500K qualified buyers. Bear case trigger: 30Y stays above 7%</span><span class="lang-zh" style="display:none">關鍵擺動因素：利率每降50基點約增加50萬合格買家。悲觀觸發：30年利率維持7%以上</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Existing Home Sales Forecast 2026–2028 (Millions SAAR)</span><span class="lang-zh" style="display:none">現有住宅成交量預測 2026–2028（百萬戶，季調年率）</span></h4>
+        <p><span class="lang-en">Annual pace scenarios · Base: gradual Fed easing · Source: Research estimates</span><span class="lang-zh" style="display:none">年度節奏情境 · 基本：聯準會漸進寬鬆 · 來源：研究估算</span></p>
+        <div id="chartSalesForecast" style="height:220px"></div>
+        <p class="chart-note green"><span class="lang-en">Bull case at 5.5M by 2027 = return to pre-pandemic normal. Bear case 3.5M = deeper trough than 2024</span><span class="lang-zh" style="display:none">樂觀情境2027年500萬戶=回歸疫情前常態。悲觀情境350萬戶=比2024年更深低谷</span></p>
+      </div>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">This report is produced by InvestMQuest Research. Data sources: S&P Cotality Case-Shiller Home Price Indices (FRED CSUSHPISA / CSUSHPINSA), Freddie Mac Primary Mortgage Market Survey (MORTGAGE30US), NAR Existing Home Sales, NAR Metropolitan Median Area Prices, Redfin Market Data (Feb 2026), Zillow Home Value Index, Black Knight / ICE Mortgage Monitor, NAA Rent Control Outlook Fall 2025, FinCEN Residential Real Estate Rule, AirDNA 2025 STR Data. All data as of March–April 2026.</span><span class="lang-zh" style="display:none">本報告由 InvestMQuest Research 製作。數據來源：S&P Cotality Case-Shiller 房價指數（FRED CSUSHPISA / CSUSHPINSA）、Freddie Mac 初級抵押貸款市場調查（MORTGAGE30US）、NAR現有住宅銷售、NAR大都市區中位數價格、Redfin 市場數據（2026年2月）、Zillow 房屋價值指數、Black Knight / ICE 房貸監測、NAA 2025年秋季租管展望、FinCEN住宅房地產規則、AirDNA 2025年短租數據。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For research purposes only. Not investment advice. Capital at risk.</span><span class="lang-zh" style="display:none">僅供研究參考，不構成投資建議，資本面臨風險。</span></p>
+    </div>
+
+  </div><!-- end report-body -->
+</div><!-- end report-container -->
+
+<script>
+  var C = {
+    navy:'#1e3a5f', green:'#16a34a', orange:'#d97706',
+    red:'#dc2626', blue:'#2563eb', muted:'#5a7a9a',
+    grid:'#e8f0f9', text:'#1e3a5f'
+  };
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+  var baseTooltip = {
+    trigger: 'axis', backgroundColor: '#fff',
+    borderColor: '#ccd9e8', borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+  var allCharts = [];
+
+  function initAllCharts(lang) {
+    allCharts.forEach(function(c){ if(c) c.dispose(); });
+    allCharts = [];
+    drawCSNational(lang);
+    drawRateVsSales(lang);
+    drawMortgageRate(lang);
+    drawLockIn(lang);
+    drawInventory(lang);
+    drawARMShare(lang);
+    drawSalesVol(lang);
+    drawAffordability(lang);
+    drawCityYoY(lang);
+    drawCityIndex(lang);
+    drawRentControl(lang);
+    drawNARCommission(lang);
+    drawForecast(lang);
+    drawSalesForecast(lang);
+  }
+
+  // ── 1. Case-Shiller National Index + YoY ──
+  function drawCSNational(lang) {
+    var dom = document.getElementById('chartCSNational');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var yrs = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    var idx = [170, 180, 192, 205, 213, 232, 277, 295, 290, 312, 327];
+    var yoy = [5.4, 5.8, 6.2, 4.7, 3.8, 10.4, 19.0, 6.5, -1.8, 7.6, 4.8];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11} },
+      legend: { bottom:0, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8 },
+      grid: { left:12, right:40, top:16, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:yrs, axisLabel:{color:C.muted,fontSize:9} }),
+      yAxis: [
+        mkAxis({ type:'value', min:140, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'} }),
+        mkAxis({ type:'value', axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}, splitLine:{show:false} })
+      ],
+      series: [
+        { name:en?'CS National Index':'CS全國指數', type:'bar', data:idx.map(function(v){return{value:v,itemStyle:{color:'rgba(30,58,95,0.18)',borderRadius:[3,3,0,0]}};}), barMaxWidth:28 },
+        { name:en?'YoY %':'年增率%', type:'line', yAxisIndex:1, data:yoy, lineStyle:{color:C.orange,width:2.5}, itemStyle:{color:C.orange}, symbol:'circle', symbolSize:5,
+          markLine:{data:[{yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1}}]} }
+      ]
+    });
+  }
+
+  // ── 2. Rate vs Sales dual-axis ──
+  function drawRateVsSales(lang) {
+    var dom = document.getElementById('chartRateVsSales');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var yrs = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    var rate = [3.85,3.65,3.99,4.54,3.94,3.11,2.96,5.34,6.81,6.72,6.60];
+    var sales= [5.25,5.45,5.51,5.34,5.34,5.64,6.12,5.00,4.09,4.00,4.06];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11} },
+      legend: { bottom:0, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8 },
+      grid: { left:12, right:40, top:16, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:yrs, axisLabel:{color:C.muted,fontSize:9} }),
+      yAxis: [
+        mkAxis({ type:'value', min:2, max:8, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'} }),
+        mkAxis({ type:'value', min:4, max:7, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}M'}, splitLine:{show:false} })
+      ],
+      series: [
+        { name:en?'30Y Rate':'30年利率', type:'line', data:rate, lineStyle:{color:C.red,width:2.5}, itemStyle:{color:C.red}, symbol:'circle', symbolSize:4 },
+        { name:en?'Sales (M)':'成交量（百萬）', type:'bar', yAxisIndex:1, data:sales.map(function(v,i){return{value:v,itemStyle:{color:i===10?'rgba(30,58,95,0.5)':i===9?'rgba(220,38,38,0.5)':i===6?'rgba(22,163,74,0.5)':'rgba(30,58,95,0.2)',borderRadius:[2,2,0,0]}};}), barMaxWidth:22 }
+      ]
+    });
+  }
+
+  // ── 3. Mortgage Rate 2015–2026 ──
+  function drawMortgageRate(lang) {
+    var dom = document.getElementById('chartMortgageRate');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var labels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','Mar 2026'];
+    var vals   = [3.85,3.65,3.99,4.54,3.94,3.11,2.96,5.34,6.81,6.72,6.60,6.38];
+    var colors = vals.map(function(v){ return v >= 6.5 ? C.red : v >= 5.0 ? C.orange : C.green; });
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11},
+        formatter:function(p){return p[0].name+': '+p[0].value+'%';} },
+      grid: { left:12, right:12, top:24, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:labels, axisLabel:{color:C.muted,fontSize:8,rotate:30} }),
+      yAxis: mkAxis({ type:'value', min:2, max:8, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'} }),
+      series:[{
+        type:'bar', data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[3,3,0,0]}};}), barMaxWidth:28,
+        label:{show:true,position:'top',formatter:function(p){return p.value+'%';},fontSize:8,color:C.muted},
+        markLine:{data:[
+          {yAxis:5.5,lineStyle:{color:C.green,type:'dashed',width:1},label:{formatter:en?'5.5% threshold':'5.5%閾值',fontSize:9,color:C.green}},
+          {yAxis:7.0,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'7% bear':'7%悲觀',fontSize:9,color:C.red}}
+        ]}
+      }]
+    });
+  }
+
+  // ── 4. Lock-In Effect: monthly payment penalty ──
+  function drawLockIn(lang) {
+    var dom = document.getElementById('chartLockIn');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var lockedRates = ['2.0%','2.5%','3.0%','3.5%','4.0%','4.5%'];
+    // Monthly P&I on $400K at each locked rate vs current 6.38%
+    function calcPI(rate, n) { var r=rate/12/100; return 400000*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1); }
+    var current = calcPI(6.38, 360);
+    var lockedRateVals = [2.0,2.5,3.0,3.5,4.0,4.5];
+    var penalties = lockedRateVals.map(function(r){ return Math.round(current - calcPI(r,360)); });
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11},
+        formatter:function(p){return (en?'Locked rate: ':'鎖定利率：')+p[0].name+'<br>'+(en?'Monthly penalty: $':'每月代價：$')+p[0].value;} },
+      grid: { left:12, right:12, top:24, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:lockedRates, axisLabel:{color:C.muted,fontSize:10}, name:en?'Locked Rate':'鎖定利率', nameTextStyle:{color:C.muted,fontSize:9} }),
+      yAxis: mkAxis({ type:'value', axisLabel:{color:C.muted,fontSize:9,formatter:'${value}'} }),
+      series:[{
+        name:en?'Monthly penalty to move (vs 6.38%)':'搬家月供代價（vs 6.38%）',
+        type:'bar', data:penalties.map(function(v){return{value:v,itemStyle:{color:v>1000?C.red:v>600?C.orange:C.navy,borderRadius:[3,3,0,0]}};}), barMaxWidth:40,
+        label:{show:true,position:'top',formatter:function(p){return '$'+p.value;},fontSize:10,color:C.muted}
+      }]
+    });
+  }
+
+  // ── 5. Inventory ──
+  function drawInventory(lang) {
+    var dom = document.getElementById('chartInventory');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var yrs = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','Feb 26'];
+    var inv = [2.00,1.90,1.80,1.80,1.65,1.40,0.92,0.80,1.04,1.18,1.22,1.22]; // millions
+    var mos = [4.8, 4.0, 3.9, 4.3, 4.2, 2.3, 1.7, 2.9, 3.5, 3.7, 3.7, 3.7];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11} },
+      legend: { bottom:0, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8 },
+      grid: { left:12, right:40, top:16, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:yrs, axisLabel:{color:C.muted,fontSize:8,rotate:30} }),
+      yAxis: [
+        mkAxis({ type:'value', axisLabel:{color:C.muted,fontSize:9,formatter:'{value}M'} }),
+        mkAxis({ type:'value', axisLabel:{color:C.muted,fontSize:9,formatter:'{value}mo'}, splitLine:{show:false} })
+      ],
+      series: [
+        { name:en?'Active Listings (M)':'活躍掛牌（百萬）', type:'bar', data:inv.map(function(v){return{value:v,itemStyle:{color:'rgba(30,58,95,0.25)',borderRadius:[2,2,0,0]}};}), barMaxWidth:20 },
+        { name:en?'Months Supply':'供給月數', type:'line', yAxisIndex:1, data:mos, lineStyle:{color:C.orange,width:2.5}, itemStyle:{color:C.orange}, symbol:'circle', symbolSize:4,
+          markLine:{data:[{yAxis:4.5,lineStyle:{color:C.green,type:'dashed',width:1},label:{formatter:en?'Balanced 4.5mo':'均衡4.5月',fontSize:9,color:C.green}}]} }
+      ]
+    });
+  }
+
+  // ── 6. ARM Share ──
+  function drawARMShare(lang) {
+    var dom = document.getElementById('chartARMShare');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var yrs = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    var arm = [6, 5, 5, 7, 6, 4, 3, 12, 8, 7, 11];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11},
+        formatter:function(p){return p[0].name+': '+p[0].value+'%';} },
+      grid: { left:12, right:12, top:24, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:yrs, axisLabel:{color:C.muted,fontSize:9} }),
+      yAxis: mkAxis({ type:'value', max:15, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'} }),
+      series:[{
+        type:'bar', data:arm.map(function(v){return{value:v,itemStyle:{color:v>=10?C.orange:C.navy,borderRadius:[3,3,0,0]}};}), barMaxWidth:28,
+        label:{show:true,position:'top',formatter:function(p){return p.value+'%';},fontSize:9,color:C.muted},
+        markLine:{data:[{yAxis:13,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'2006 peak ~34%':'2006年高峰~34%',fontSize:8,color:C.muted}}]}
+      }]
+    });
+  }
+
+  // ── 7. Sales Volume ──
+  function drawSalesVol(lang) {
+    var dom = document.getElementById('chartSalesVol');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var yrs = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    var sales = [5.25,5.45,5.51,5.34,5.34,5.64,6.12,5.00,4.09,4.00,4.06];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11},
+        formatter:function(p){return p[0].name+': '+p[0].value+'M';} },
+      grid: { left:12, right:12, top:24, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:yrs, axisLabel:{color:C.muted,fontSize:9} }),
+      yAxis: mkAxis({ type:'value', min:3.5, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}M'} }),
+      series:[{
+        type:'bar', data:sales.map(function(v,i){return{value:v,itemStyle:{color:i===6?C.green:i>=9?C.red:'rgba(30,58,95,0.35)',borderRadius:[3,3,0,0]}};}), barMaxWidth:28,
+        label:{show:true,position:'top',formatter:function(p){return p.value+'M';},fontSize:9,color:C.muted},
+        markLine:{data:[{yAxis:4.5,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Hist. avg':'歷史均值',fontSize:9,color:C.muted}}]}
+      }]
+    });
+  }
+
+  // ── 8. Affordability: price vs payment ratio ──
+  function drawAffordability(lang) {
+    var dom = document.getElementById('chartAffordability');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var yrs = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    var price = [222,235,248,261,271,296,353,392,389,407,408]; // median $K
+    // Monthly P&I as % of median household income (~$80K = $6667/mo, historically lower)
+    // Using ~$73K 2015 growing to ~$80K 2025
+    var piRatio = [14.5,15.2,16.0,19.2,17.0,14.2,14.8,29.0,30.0,29.8,29.5];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11} },
+      legend: { bottom:0, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8 },
+      grid: { left:12, right:40, top:16, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:yrs, axisLabel:{color:C.muted,fontSize:9} }),
+      yAxis: [
+        mkAxis({ type:'value', axisLabel:{color:C.muted,fontSize:9,formatter:'${value}K'} }),
+        mkAxis({ type:'value', min:10, max:35, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}, splitLine:{show:false} })
+      ],
+      series: [
+        { name:en?'Median Price':'中位數房價', type:'bar', data:price.map(function(v){return{value:v,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[2,2,0,0]}};}), barMaxWidth:22 },
+        { name:en?'P&I/Income':'本息/收入', type:'line', yAxisIndex:1, data:piRatio,
+          lineStyle:{color:C.red,width:2.5}, itemStyle:{color:C.red}, symbol:'circle', symbolSize:4,
+          markLine:{data:[{yAxis:28,lineStyle:{color:C.orange,type:'dashed',width:1},label:{formatter:'28% guideline',fontSize:9,color:C.orange}}]} }
+      ]
+    });
+  }
+
+  // ── 9. City YoY Jan 2026 ──
+  function drawCityYoY(lang) {
+    var dom = document.getElementById('chartCityYoY');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var cities = en
+      ? ['Tampa','Miami','Phoenix','Dallas','Seattle','Denver','LA','National','Boston','Chicago','NYC']
+      : ['坦帕','邁阿密','鳳凰城','達拉斯','西雅圖','丹佛','洛杉磯','全國','波士頓','芝加哥','紐約'];
+    var yoy = [-2.5,-1.5,-1.5,-1.5,-1.0,-0.8,-0.3,1.2,1.7,4.6,4.9];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11},
+        formatter:function(p){return p[0].name+': '+(p[0].value>0?'+':'')+p[0].value+'%';} },
+      grid: { left:12, right:12, top:16, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'value', axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'} }),
+      yAxis: mkAxis({ type:'category', data:cities, axisLabel:{color:C.muted,fontSize:9} }),
+      series:[{
+        type:'bar', data:yoy.map(function(v){return{value:v,itemStyle:{color:v<0?C.red:v<2?C.orange:C.green,borderRadius:[0,3,3,0]}};}),
+        barMaxWidth:18,
+        label:{show:true,position:'right',formatter:function(p){return (p.value>0?'+':'')+p.value+'%';},fontSize:9,color:C.muted},
+        markLine:{data:[{xAxis:0,lineStyle:{color:C.muted,type:'solid',width:1}}]}
+      }]
+    });
+  }
+
+  // ── 10. City Index rebased 2015=100 ──
+  function drawCityIndex(lang) {
+    var dom = document.getElementById('chartCityIndex');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var yrs = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    // Rebased to 100 in 2015 using approximate CS city indices (index Jan2000=100, so rebase)
+    // National 2015~170, Chicago~138, NYC~175, LA~240, Miami~220, Phoenix~155, Denver~200, Seattle~210
+    var data = {
+      national: [100,105,111,117,121,132,157,167,163,177,186],
+      nyc:      [100,104,109,114,119,127,148,160,163,175,185],
+      chicago:  [100,105,109,113,116,126,148,157,158,167,177],
+      la:       [100,108,116,123,124,136,165,184,174,180,183],
+      miami:    [100,107,113,119,121,136,172,217,213,218,212],
+      phoenix:  [100,108,114,119,124,143,194,245,224,227,221],
+      seattle:  [100,112,125,134,136,155,197,214,191,199,197],
+      denver:   [100,111,121,130,131,147,186,215,198,197,191]
+    };
+    var series = [
+      {name:en?'National':'全國',data:data.national,color:C.muted,width:2,type:'dashed'},
+      {name:'NYC',data:data.nyc,color:C.navy,width:2,type:'solid'},
+      {name:'Chicago',data:data.chicago,color:C.blue,width:1.5,type:'solid'},
+      {name:'LA',data:data.la,color:C.orange,width:1.5,type:'solid'},
+      {name:'Miami',data:data.miami,color:'#e11d48',width:1.5,type:'solid'},
+      {name:'Phoenix',data:data.phoenix,color:C.red,width:1.5,type:'solid'},
+      {name:'Seattle',data:data.seattle,color:C.green,width:1.5,type:'solid'},
+      {name:'Denver',data:data.denver,color:'#7c3aed',width:1.5,type:'solid'}
+    ];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11} },
+      legend: { bottom:0, textStyle:{color:C.muted,fontFamily:'Inter,sans-serif',fontSize:9}, icon:'circle', itemWidth:7, itemHeight:7 },
+      grid: { left:12, right:12, top:16, bottom:48, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:yrs, axisLabel:{color:C.muted,fontSize:9} }),
+      yAxis: mkAxis({ type:'value', axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'} }),
+      series: series.map(function(s){return{
+        name:s.name,type:'line',data:s.data,
+        lineStyle:{color:s.color,width:s.width,type:s.type},
+        itemStyle:{color:s.color},symbol:'none'
+      };})
+    });
+  }
+
+  // ── 11. Rent Control horizontal bar ──
+  function drawRentControl(lang) {
+    var dom = document.getElementById('chartRentControl');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var cats = en
+      ? ['Statewide rent control\n(CA, OR, WA + DC)','Local rent control only\n(NY, NJ, MD, MN, ME)','No rent control, local\npreempted (32 states)']
+      : ['州級租管\n（加州、奧勒岡、華盛頓+DC）','僅地方租管\n（紐約、紐澤西等5州）','無租管且禁止地方立法\n（32州）'];
+    var vals = [4, 5, 32]; // approximate state counts
+    var clrs = [C.orange, C.navy, C.green];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11},
+        formatter:function(p){return p[0].name+': '+(en?'~':'')+p[0].value+(en?' states':' 個州');} },
+      grid: { left:16, right:80, top:16, bottom:20, containLabel:true },
+      xAxis: mkAxis({ type:'value', max:35, axisLabel:{color:C.muted,fontSize:9,formatter:'{value} states'} }),
+      yAxis: mkAxis({ type:'category', data:cats, axisLabel:{color:C.muted,fontSize:9,lineHeight:14} }),
+      series:[{
+        type:'bar', data:vals.map(function(v,i){return{value:v,itemStyle:{color:clrs[i],borderRadius:[0,4,4,0]}};}), barMaxWidth:30,
+        label:{show:true,position:'right',formatter:function(p){return p.value+(en?' states':' 州');},fontSize:10,color:C.muted}
+      }]
+    });
+  }
+
+  // ── 12. NAR Commission ──
+  function drawNARCommission(lang) {
+    var dom = document.getElementById('chartNARCommission');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var cats = en
+      ? ['Pre-settlement\nQ1 2024','Settlement\nannounced\nMar 2024','Post-settlement\nQ3 2024\n(low)','Post-settlement\nQ2 2025','Sub-$500K\n2025','$1M+\n2025']
+      : ['和解前\n2024Q1','公布和解\n2024年3月','和解後\n2024Q3\n（低谷）','和解後\n2025Q2','50萬以下\n2025年','100萬以上\n2025年'];
+    var vals = [2.45, 2.45, 2.36, 2.43, 2.52, 2.21];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11},
+        formatter:function(p){return p[0].name+': '+p[0].value+'%';} },
+      grid: { left:12, right:12, top:24, bottom:48, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:cats, axisLabel:{color:C.muted,fontSize:8,lineHeight:12} }),
+      yAxis: mkAxis({ type:'value', min:2.0, max:2.7, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'} }),
+      series:[{
+        type:'bar', data:vals.map(function(v,i){return{value:v,itemStyle:{color:i===2?C.red:i>=3?C.green:C.navy,borderRadius:[3,3,0,0]}};}), barMaxWidth:32,
+        label:{show:true,position:'top',formatter:function(p){return p.value+'%';},fontSize:10,color:C.muted},
+        markLine:{data:[{yAxis:2.38,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Pre-reform avg':'改革前均值',fontSize:8,color:C.muted}}]}
+      }]
+    });
+  }
+
+  // ── 13. Price Forecast ──
+  function drawForecast(lang) {
+    var dom = document.getElementById('chartForecast');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var periods = ['2025','2026E','2027E','2028E'];
+    var base = [327, 335, 345, 355];
+    var bull = [327, 345, 370, 390];
+    var bear = [327, 318, 305, 298];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11} },
+      legend: { bottom:0, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8 },
+      grid: { left:12, right:12, top:24, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:periods, axisLabel:{color:C.muted,fontSize:10} }),
+      yAxis: mkAxis({ type:'value', min:280, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'} }),
+      series: [
+        { name:en?'Bull (20%) — 30Y→5%':'樂觀(20%)—30Y→5%', type:'line', data:bull, lineStyle:{color:C.green,width:1.5,type:'dashed'}, itemStyle:{color:C.green}, symbol:'circle', symbolSize:5 },
+        { name:en?'Base (55%) — 30Y→5.5–6%':'基本(55%)—30Y→5.5–6%', type:'line', data:base, lineStyle:{color:C.navy,width:2.5}, itemStyle:{color:C.navy}, symbol:'circle', symbolSize:5, areaStyle:{color:'rgba(30,58,95,0.06)'} },
+        { name:en?'Bear (25%) — 30Y stays 7%+':'悲觀(25%)—30Y維持7%+', type:'line', data:bear, lineStyle:{color:C.red,width:1.5,type:'dashed'}, itemStyle:{color:C.red}, symbol:'circle', symbolSize:5 }
+      ]
+    });
+  }
+
+  // ── 14. Sales Forecast ──
+  function drawSalesForecast(lang) {
+    var dom = document.getElementById('chartSalesForecast');
+    if(!dom) return;
+    var c = echarts.init(dom); allCharts.push(c);
+    var en = lang === 'en';
+    var periods = ['2025','2026E','2027E','2028E'];
+    var base = [4.06, 4.30, 4.80, 5.10];
+    var bull = [4.06, 4.70, 5.50, 5.80];
+    var bear = [4.06, 3.80, 3.50, 3.60];
+    c.setOption({
+      tooltip: { trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11} },
+      legend: { bottom:0, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8 },
+      grid: { left:12, right:12, top:24, bottom:36, containLabel:true },
+      xAxis: mkAxis({ type:'category', data:periods, axisLabel:{color:C.muted,fontSize:10} }),
+      yAxis: mkAxis({ type:'value', min:3, max:6.5, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}M'} }),
+      series: [
+        { name:en?'Bull (20%)':'樂觀(20%)', type:'line', data:bull, lineStyle:{color:C.green,width:1.5,type:'dashed'}, itemStyle:{color:C.green}, symbol:'circle', symbolSize:5 },
+        { name:en?'Base (55%)':'基本(55%)', type:'line', data:base, lineStyle:{color:C.navy,width:2.5}, itemStyle:{color:C.navy}, symbol:'circle', symbolSize:5 },
+        { name:en?'Bear (25%)':'悲觀(25%)', type:'line', data:bear, lineStyle:{color:C.red,width:1.5,type:'dashed'}, itemStyle:{color:C.red}, symbol:'circle', symbolSize:5 },
+        { type:'line', markLine:{data:[{yAxis:5.34,lineStyle:{color:C.muted,type:'dotted',width:1},label:{formatter:en?'Pre-pandemic 2019\n5.34M':'疫情前2019\n534萬',fontSize:8,color:C.muted}}]} }
+      ]
+    });
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+    initAllCharts(lang);
+  }
+  function toggleMarketMenu(){ document.getElementById('marketDropdown').classList.toggle('open'); }
+  function toggleCityMenu(){ document.getElementById('cityDropdown').classList.toggle('open'); }
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.market-selector')){ var d=document.getElementById('marketDropdown'); if(d) d.classList.remove('open'); }
+    if(!e.target.closest('.city-dropdown')){ var d2=document.getElementById('cityDropdown'); if(d2) d2.classList.remove('open'); }
+  });
+  function toggleToc(){ document.getElementById('tocBox').classList.toggle('toc-collapsed'); }
+  function closeTocMobile(){ if(window.innerWidth<=768){ document.getElementById('tocBox').classList.add('toc-collapsed'); } }
+
+  window.addEventListener('load', function(){
+    var lang = localStorage.getItem('lang') || 'en';
+    setLang(lang);
+  });
+  window.addEventListener('resize', function(){
+    allCharts.forEach(function(c){ if(c) c.resize(); });
+  });
+
+  // ScrollSpy
+  (function(){
+    function initScrollSpy(){
+      var items = document.querySelectorAll('.side-nav-item');
+      if(!items.length) return;
+      var sections = [];
+      items.forEach(function(a){
+        var id = a.getAttribute('href').replace('#','');
+        var el = document.getElementById(id);
+        if(el) sections.push({el:el, a:a});
+      });
+      function onScroll(){
+        var scrollY = window.scrollY + window.innerHeight * 0.25;
+        var current = sections[0];
+        sections.forEach(function(s){ if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s; });
+        items.forEach(function(a){ a.classList.remove('active'); });
+        if(current) current.a.classList.add('active');
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    }
+    if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', initScrollSpy); }
+    else { initScrollSpy(); }
+  })();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

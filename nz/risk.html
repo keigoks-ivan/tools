@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk Monitor | NZ Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  .risk-card{background:#fff;border:1px solid #ccd9e8;border-radius:10px;padding:18px 20px;}.risk-card h4{margin:0 0 6px;font-size:13px;color:#1e3a5f;}.risk-card p{margin:0;font-size:12px;color:#5a7a9a;line-height:1.5;}
+  .risk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px;}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+      <h1><span class="lang-en">Risk Monitor</span><span class="lang-zh" style="display:none">風險監測</span></h1>
+      <p class="subtitle"><span class="lang-en">Policy, Macro &amp; Structural Risk Dashboard</span><span class="lang-zh" style="display:none">政策、總體經濟與結構性風險儀表板</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">KEY RISK SIGNALS</span><span class="lang-zh" style="display:none">關鍵風險信號</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">OCR REVERSAL RISK</span><span class="lang-zh" style="display:none">OCR逆轉風險</span></div>
+        <div class="kpi-value">ANZ</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Dec 2026 forecast</span><span class="lang-zh" style="display:none">2026年12月預測</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">CAPITAL GAINS TAX</span><span class="lang-zh" style="display:none">資本利得稅</span></div>
+        <div class="kpi-value">Election</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Policy debate</span><span class="lang-zh" style="display:none">政策辯論</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">WELLINGTON</span><span class="lang-zh" style="display:none">威靈頓</span></div>
+        <div class="kpi-value">Public Cuts</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Sector job losses</span><span class="lang-zh" style="display:none">公部門裁員</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">AUCKLAND OVERSUPPLY</span><span class="lang-zh" style="display:none">奧克蘭供過於求</span></div>
+        <div class="kpi-value">31 wk</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Inventory elevated</span><span class="lang-zh" style="display:none">庫存偏高</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">MIGRATION SLOWDOWN</span><span class="lang-zh" style="display:none">移民放緩</span></div>
+        <div class="kpi-value">Slowing</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">From 130K peak</span><span class="lang-zh" style="display:none">從13萬高峰回落</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">EARTHQUAKE RISK</span><span class="lang-zh" style="display:none">地震風險</span></div>
+        <div class="kpi-value">Structural</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Insurance costs</span><span class="lang-zh" style="display:none">保險成本</span></span>
+      </div>
+    </div>
+
+    <!-- Risk Radar Chart -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">Risk Radar &mdash; 6 Dimensions</span><span class="lang-zh" style="display:none">風險雷達——6維度</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">1 = Low Risk, 10 = Extreme Risk &middot; Current vs 2023</span><span class="lang-zh" style="display:none">1 = 低風險，10 = 極高風險 &middot; 現況 vs 2023</span></p>
+        <div class="radar-wrap"><div id="chartNzRisk" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- OCR Forecast Chart -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">OCR Forecast &mdash; RBNZ vs ANZ</span><span class="lang-zh" style="display:none">OCR預測——RBNZ vs ANZ</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Official Cash Rate path projections</span><span class="lang-zh" style="display:none">官方現金利率路徑預測</span></p>
+        <div style="position:relative;height:280px;"><div id="chartNzOcrForecast" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Policy Timeline -->
+    <h2 class="section-heading"><span class="lang-en">Policy Timeline</span><span class="lang-zh" style="display:none">政策時間線</span></h2>
+    <div class="chart-card">
+      <div class="timeline">
+        <div class="timeline-item green">
+          <span class="tl-date">Aug 2024</span>
+          <span class="tl-text"><span class="lang-en">RBNZ begins cutting cycle &mdash; first OCR reduction</span><span class="lang-zh" style="display:none">RBNZ開始降息周期——首次OCR下調</span></span>
+        </div>
+        <div class="timeline-item green">
+          <span class="tl-date">Nov 2024</span>
+          <span class="tl-text"><span class="lang-en">OCR cut to 4.25% &mdash; easing continues</span><span class="lang-zh" style="display:none">OCR降至4.25%——持續寬鬆</span></span>
+        </div>
+        <div class="timeline-item green">
+          <span class="tl-date">May 2025</span>
+          <span class="tl-text"><span class="lang-en">OCR reaches 3.25% &mdash; lowest since 2022</span><span class="lang-zh" style="display:none">OCR降至3.25%——2022年以來最低</span></span>
+        </div>
+        <div class="timeline-item green">
+          <span class="tl-date">Dec 2025</span>
+          <span class="tl-text"><span class="lang-en">LVR easing for first-home buyers &mdash; lower deposit requirements</span><span class="lang-zh" style="display:none">首購族LVR放寬——降低自備款要求</span></span>
+        </div>
+        <div class="timeline-item green">
+          <span class="tl-date">Q1 2026</span>
+          <span class="tl-text"><span class="lang-en">RBNZ cuts OCR to 2.25% &mdash; 325bp cumulative easing complete</span><span class="lang-zh" style="display:none">RBNZ 將 OCR 降至 2.25%——累計 325bp 寬鬆完成</span></span>
+        </div>
+        <div class="timeline-item" style="--dot-color:var(--warning)">
+          <span class="tl-date">Apr 2026</span>
+          <span class="tl-text"><span class="lang-en">OCR held at 2.25% &mdash; RBNZ flags Middle East inflation risk; 2Y mortgage re-rises to 5.29% (ANZ) / 5.25% (ASB)</span><span class="lang-zh" style="display:none">OCR 維持 2.25%——RBNZ 警示中東通膨風險；2 年期房貸回升至 5.29% (ANZ) / 5.25% (ASB)</span></span>
+        </div>
+        <div class="timeline-item red">
+          <span class="tl-date">2026 H2</span>
+          <span class="tl-text"><span class="lang-en">ANZ/ASB/Infometrics forecast 3 OCR hikes to 3.00% (likely starting July; May 27 not ruled out)</span><span class="lang-zh" style="display:none">ANZ/ASB/Infometrics 預估 OCR 升息三次至 3.00%（最可能 7 月起步；5 月 27 日亦未排除）</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Factor Cards -->
+    <h2 class="section-heading"><span class="lang-en">Key Risk Factors</span><span class="lang-zh" style="display:none">關鍵風險因素</span></h2>
+    <div class="risk-grid">
+      <div class="risk-card" style="border-left:4px solid #dc2626;">
+        <h4><span class="lang-en">OCR Reversal — Now Priced In</span><span class="lang-zh" style="display:none">OCR 升息——市場已 price in</span></h4>
+        <p><span class="lang-en">ANZ, ASB and Infometrics now publicly forecast 3 OCR hikes in 2026, taking the rate from 2.25% back to 3.00% (most likely starting July; May 27 not ruled out). 2-year fixed mortgage rates have already re-risen to 5.25–5.29%, reversing 2025's relief. This would dampen Auckland buyer sentiment further (already -1.21% YoY HPI) and risks giving back regional gains (Canterbury +23.6% YoY sales).</span><span class="lang-zh" style="display:none">ANZ、ASB 與 Infometrics 現公開預估 2026 年將升息三次，把利率從 2.25% 推回 3.00%（最可能 7 月起步；5 月 27 日亦未排除）。2 年期固定房貸已回升至 5.25–5.29%，逆轉 2025 年的減壓。將進一步打壓奧克蘭買氣（HPI 已年減 -1.21%），並威脅區域市場已累積之漲幅（坎特伯雷成交年增 +23.6%）。</span></p>
+      </div>
+      <div class="risk-card" style="border-left:4px solid #dc2626;">
+        <h4><span class="lang-en">Housing Policy</span><span class="lang-zh" style="display:none">住房政策</span></h4>
+        <p><span class="lang-en">Capital gains tax is back on the political agenda. Introduction would alter investor calculus significantly, potentially reducing demand from leveraged investors while improving first-home buyer access.</span><span class="lang-zh" style="display:none">資本利得稅重回政治議程。若實施將大幅改變投資者計算，可能減少槓桿投資者需求，但改善首購族入場機會。</span></p>
+      </div>
+      <div class="risk-card" style="border-left:4px solid #d97706;">
+        <h4><span class="lang-en">Auckland Oversupply</span><span class="lang-zh" style="display:none">奧克蘭供過於求</span></h4>
+        <p><span class="lang-en">Auckland inventory sits at 31 weeks, well above the balanced market benchmark of 16-20 weeks. Combined with falling rents (-3.4% YoY), landlords face compressed yields and longer vacancy periods.</span><span class="lang-zh" style="display:none">奧克蘭庫存達31週，遠高於均衡市場16-20週基準。加上租金下跌（年減3.4%），房東面臨收益壓縮和更長空置期。</span></p>
+      </div>
+      <div class="risk-card" style="border-left:4px solid #d97706;">
+        <h4><span class="lang-en">Demographic Shift</span><span class="lang-zh" style="display:none">人口結構轉變</span></h4>
+        <p><span class="lang-en">Net migration has dropped from the 130K peak in 2023 to an estimated 60K in 2025. Further slowdown would reduce rental demand and weaken the demand floor that supported prices during the downturn.</span><span class="lang-zh" style="display:none">淨移民從2023年13萬高峰降至2025年預估6萬。進一步放緩將減少租賃需求，削弱在下行期支撐房價的需求底部。</span></p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">RBNZ &middot; ANZ Research &middot; Stats NZ &middot; REINZ Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">RBNZ &middot; ANZ研究 &middot; 紐西蘭統計局 &middot; REINZ 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  function fmtNZD(v){if(v>=1000000)return 'NZ$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return 'NZ$'+Math.round(v/1000)+'K';return 'NZ$'+v;}
+  function fmtNZDShort(v){if(v>=1000000)return(v/1000000).toFixed(2)+'M';if(v>=1000)return Math.round(v/1000)+'K';return v.toString();}
+  var baseText={color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+
+    // chartNzRisk: Radar chart
+    var c1=echarts.init(document.getElementById('chartNzRisk'));allCharts.push(c1);
+    c1.setOption({
+      tooltip:{trigger:'item'},
+      legend:{bottom:0,textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11},icon:'circle',itemWidth:8,itemHeight:8,data:[lang==='zh'?'現況 2025':'Current 2025','2023']},
+      radar:{
+        center:['50%','52%'],radius:'58%',nameGap:8,
+        name:{textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:10}},
+        indicator:[
+          {name:lang==='zh'?'流動性':'Liquidity',max:10},
+          {name:lang==='zh'?'信用':'Credit',max:10},
+          {name:lang==='zh'?'供給':'Supply',max:10},
+          {name:lang==='zh'?'政策':'Policy',max:10},
+          {name:lang==='zh'?'人口':'Demographics',max:10},
+          {name:lang==='zh'?'地緣政治':'Geopolitical',max:10}
+        ],
+        shape:'polygon',
+        splitArea:{areaStyle:{color:['rgba(30,58,95,0.02)','rgba(30,58,95,0.05)']}},
+        axisLine:{lineStyle:{color:C.grid}},
+        splitLine:{lineStyle:{color:C.grid}}
+      },
+      series:[{
+        type:'radar',
+        data:[
+          {value:[4,5,5,7,5,4],name:lang==='zh'?'現況 2025':'Current 2025',lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},areaStyle:{color:'rgba(220,38,38,0.12)'}},
+          {value:[3,8,3,5,3,4],name:'2023',lineStyle:{color:C.navy,width:2,type:'dashed'},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.06)'}}
+        ]
+      }]
+    });
+
+    // chartNzOcrForecast: Dual line RBNZ vs ANZ
+    var c2=echarts.init(document.getElementById('chartNzOcrForecast'));allCharts.push(c2);
+    c2.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:['RBNZ ('+( lang==='zh'?'維持':'Hold')+')','ANZ ('+( lang==='zh'?'預測':'Forecast')+')']}),
+      grid:{left:50,right:20,top:45,bottom:40,containLabel:true},
+      xAxis:mkAxis({type:'category',data:['May 2025','Jun','Aug','Oct','Dec 2025','Feb 2026','Jun 2026','Dec 2026'],axisLabel:Object.assign({},baseText,{rotate:30,interval:0})}),
+      yAxis:mkAxis({type:'value',min:2.5,max:4.5,axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
+      series:[
+        {name:'RBNZ ('+( lang==='zh'?'維持':'Hold')+')',type:'line',data:[3.25,3.25,3.25,3.25,3.25,3.25,3.25,3.25],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5},
+        {name:'ANZ ('+( lang==='zh'?'預測':'Forecast')+')',type:'line',data:[3.25,3.25,3.25,3.25,3.25,3.25,3.5,3.75],lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5}
+      ]
+    });
+  }
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

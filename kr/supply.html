@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Analysis | South Korea Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="dashboard">
+    <h1 class="page-title"><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
+
+    <div class="kpi-row">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">2025 New Supply</span><span class="lang-zh" style="display:none">2025年新增供給</span></div>
+        <div class="kpi-value">~62,000 <span class="kpi-unit">units</span></div>
+        <span class="kpi-badge badge-green">+13% YoY</span>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Seoul New Supply</span><span class="lang-zh" style="display:none">首爾新增供給</span></div>
+        <div class="kpi-value">~25,000 <span class="kpi-unit">units</span></div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Reconstruction-led</span><span class="lang-zh" style="display:none">重建主導</span></span>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Reconstruction Pipeline</span><span class="lang-zh" style="display:none">重建計畫量</span></div>
+        <div class="kpi-value">120,000+ <span class="kpi-unit">units</span></div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Seoul 2026-2030</span><span class="lang-zh" style="display:none">首爾 2026-2030</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Unsold Inventory</span><span class="lang-zh" style="display:none">未售庫存</span></div>
+        <div class="kpi-value">~58,000 <span class="kpi-unit">units</span></div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Nationwide</span><span class="lang-zh" style="display:none">全國</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Permits Issued</span><span class="lang-zh" style="display:none">建照核發</span></div>
+        <div class="kpi-value">~45,000 <span class="kpi-unit">units</span></div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Below avg</span><span class="lang-zh" style="display:none">低於平均</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">Provincial Oversupply</span><span class="lang-zh" style="display:none">地方供過於求</span></div>
+        <div class="kpi-value"><span class="lang-en">Elevated</span><span class="lang-zh" style="display:none">偏高</span></div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Sejong, Daejeon risk</span><span class="lang-zh" style="display:none">世宗、大田風險</span></span>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card full">
+        <h3><span class="lang-en">Permits vs Starts vs Completions</span><span class="lang-zh" style="display:none">建照 vs 開工 vs 完工</span></h3>
+        <div id="chartKRPipeline" style="height:370px"></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">Unsold by Region</span><span class="lang-zh" style="display:none">各地區未售庫存</span></h3>
+        <div id="chartKRUnsold" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">Seoul Reconstruction Timeline</span><span class="lang-zh" style="display:none">首爾重建計畫時程</span></h3>
+        <div id="chartKRRecon" style="height:370px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>A project by InvestMQuest.</p>
+  </footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    allCharts.length=0;
+
+    /* Chart 1: Permits vs Starts vs Completions (line) */
+    var c1=echarts.init(document.getElementById('chartKRPipeline'));
+    c1.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'建照':'Permits',lang==='zh'?'開工':'Starts',lang==='zh'?'完工':'Completions']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[
+        {name:lang==='zh'?'建照':'Permits',type:'line',smooth:0.2,data:[52000,48000,38000,35000,42000,45000],lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue},symbol:'circle',symbolSize:6},
+        {name:lang==='zh'?'開工':'Starts',type:'line',smooth:0.2,data:[45000,42000,35000,30000,38000,40000],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6},
+        {name:lang==='zh'?'完工':'Completions',type:'line',smooth:0.2,data:[40000,45000,48000,55000,50000,48000],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6}
+      ]
+    });
+    allCharts.push(c1);
+
+    /* Chart 2: Unsold by Region (horizontal bar) */
+    var regLabels=lang==='zh'?['其他','世宗','釜山','仁川','京畿道','首爾']:['Other','Sejong','Busan','Incheon','Gyeonggi','Seoul'];
+    var regVals=[16000,8000,5000,6000,15000,8000];
+    var regColors=[C.navy,C.red,C.navy,C.navy,C.orange,C.blue];
+    var c2=echarts.init(document.getElementById('chartKRUnsold'));
+    c2.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      yAxis:mkAxis({type:'category',data:regLabels}),
+      series:[{
+        type:'bar',
+        data:regVals.map(function(v,i){return{value:v,itemStyle:{color:regColors[i],borderRadius:[0,3,3,0]}};}),
+        label:{show:true,position:'right',formatter:function(p){return p.value.toLocaleString();},fontSize:11,fontFamily:'Inter, sans-serif',color:C.navy},
+        barWidth:20
+      }]
+    });
+    allCharts.push(c2);
+
+    /* Chart 3: Seoul Reconstruction Timeline (bar) */
+    var reconLabels=lang==='zh'?['龍山','狎鷗亭','遁村','蠶室','盤浦']:['Yongsan','Apgujeong','Dunchon','Jamsil','Banpo'];
+    var reconVals=[22000,18000,20000,25000,35000];
+    var c3=echarts.init(document.getElementById('chartKRRecon'));
+    c3.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      yAxis:mkAxis({type:'category',data:reconLabels}),
+      series:[{
+        type:'bar',
+        data:reconVals.map(function(v){return{value:v,itemStyle:{color:C.blue,borderRadius:[0,3,3,0]}};}),
+        label:{show:true,position:'right',formatter:function(p){return p.value.toLocaleString();},fontSize:11,fontFamily:'Inter, sans-serif',color:C.navy},
+        barWidth:20
+      }]
+    });
+    allCharts.push(c3);
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

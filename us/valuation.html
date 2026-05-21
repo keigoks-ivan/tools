@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valuation Comparison | U.S. Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer}</style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .chart-note.red{color:#dc2626}
+    .chart-note.navy{color:#1e3a5f}
+    .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+    .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+    .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+    .toc-collapsed .toc-list{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    /* Side Nav */
+    .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+    @media(max-width:768px){.report-header,.report-body{padding:20px}}
+    .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .table-scroll .data-table{min-width:680px}
+    .grade-a{color:#16a34a;font-weight:700}.grade-b{color:#2563eb;font-weight:700}.grade-c{color:#d97706;font-weight:700}.grade-d{color:#dc2626;font-weight:700}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="report-container">
+
+  <!-- Side Nav -->
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-csi" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">CS Index</span><span class="side-nav-label lang-zh" style="display:none">CS指數</span></a>
+    <a href="#sec-pti" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">PTI Analysis</span><span class="side-nav-label lang-zh" style="display:none">房價收入比</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price-to-Rent</span><span class="side-nav-label lang-zh" style="display:none">租售比</span></a>
+    <a href="#sec-global" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Global Context</span><span class="side-nav-label lang-zh" style="display:none">全球比較</span></a>
+    <a href="#sec-summary" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Summary</span><span class="side-nav-label lang-zh" style="display:none">總結</span></a>
+  </nav>
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="lang-en">
+      <h1>U.S. REAL ESTATE &mdash; VALUATION COMPARISON</h1>
+      <div class="report-meta">April 2026 &middot; 12-City Monitor</div>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <h1>美國房地產——估值比較</h1>
+      <div class="report-meta">2026年4月 &middot; 十二城市監測</div>
+    </div>
+  </div>
+
+  <div class="report-body">
+
+    <!-- TOC -->
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()">
+        <span class="lang-en">Contents</span><span class="lang-zh" style="display:none">目錄</span>
+        <button class="toc-toggle" id="tocToggle">▲</button>
+      </div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-csi" onclick="closeTocMobile()"><span class="lang-en">1. Case-Shiller Index History</span><span class="lang-zh" style="display:none">1. Case-Shiller 指數歷史</span></a>
+        <a href="#sec-pti" onclick="closeTocMobile()"><span class="lang-en">2. Price-to-Income Analysis</span><span class="lang-zh" style="display:none">2. 房價收入比分析</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">3. Price-to-Rent Ratio</span><span class="lang-zh" style="display:none">3. 租售比</span></a>
+        <a href="#sec-global" onclick="closeTocMobile()"><span class="lang-en">4. Global Context</span><span class="lang-zh" style="display:none">4. 全球比較</span></a>
+        <a href="#sec-summary" onclick="closeTocMobile()"><span class="lang-en">5. Valuation Summary</span><span class="lang-zh" style="display:none">5. 估值總結</span></a>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 1. CS INDEX HISTORY -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-csi"><span class="lang-en">CS INDEX HISTORY</span><span class="lang-zh" style="display:none">CASE-SHILLER 指數歷史</span></h2>
+
+    <div class="lang-en">
+      <p>The S&amp;P/Case-Shiller Home Price Index remains the gold standard for tracking U.S. residential property values. The chart below traces 10 major metros from 2015 to 2025. San Diego and Miami have seen the most dramatic appreciation over the decade, while Chicago and Phoenix started from lower bases. Notably, the pandemic boom (2020&ndash;2022) pushed nearly every market to new highs, though the subsequent rate shock produced uneven corrections. Cities with strong tech or finance employment bases &mdash; San Francisco, Seattle &mdash; experienced sharper drawdowns before partially recovering.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>S&amp;P/Case-Shiller 房價指數仍是追蹤美國住宅房價的金標準。以下圖表追蹤了2015至2025年十大都會區的走勢。聖地牙哥和邁阿密在十年間漲幅最為顯著，而芝加哥和鳳凰城起點較低。疫情繁榮期（2020至2022年）幾乎將所有市場推向新高，但後續的利率衝擊導致不均勻的回調。擁有強大科技或金融就業基礎的城市——舊金山、西雅圖——經歷了更劇烈的回撤後才部分恢復。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Case-Shiller Index &mdash; 10 Cities (2015&ndash;2025)</span><span class="lang-zh" style="display:none">Case-Shiller 指數——十城市（2015&ndash;2025）</span></h4>
+      <div id="chartValCS" style="height:320px"></div>
+      <p class="chart-note navy"><span class="lang-en">Source: S&amp;P/Case-Shiller, FRED &middot; Jan 2000 = 100</span><span class="lang-zh" style="display:none">來源：S&amp;P/Case-Shiller, FRED &middot; 2000年1月=100</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 2. PTI ANALYSIS -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-pti"><span class="lang-en">PRICE-TO-INCOME ANALYSIS</span><span class="lang-zh" style="display:none">房價收入比分析</span></h2>
+
+    <div class="lang-en">
+      <p>Price-to-income (PTI) ratios measure the number of years of median household income required to purchase a median-priced home. A PTI above <strong>6.0</strong> is generally considered unaffordable by international standards. San Francisco and New York consistently exceed this threshold, while Chicago and Austin have returned to affordable territory following post-pandemic corrections. Austin&rsquo;s PTI fell from a peak of <strong>7.2x</strong> in 2022 to <strong>3.5x</strong> by 2025, reflecting a rapid supply response from new construction.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>房價收入比（PTI）衡量購買一套中位數價格住宅所需的家庭年收入年數。按國際標準，PTI超過<strong>6.0</strong>通常被視為不可負擔。舊金山和紐約持續超過這一門檻，而芝加哥和奧斯丁在疫情後回調中已恢復至可負擔區間。奧斯丁的PTI從2022年高峰的<strong>7.2倍</strong>降至2025年的<strong>3.5倍</strong>，反映了新建住宅的快速供給回應。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Price-to-Income Ratio &mdash; 4 Cities (2015&ndash;2025)</span><span class="lang-zh" style="display:none">房價收入比——四城市（2015&ndash;2025）</span></h4>
+      <div id="chartValPTI" style="height:280px"></div>
+      <p class="chart-note orange"><span class="lang-en">Red dashed line = 6.0x affordability threshold</span><span class="lang-zh" style="display:none">紅色虛線 = 6.0倍可負擔門檻</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 3. PRICE-TO-RENT -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-rent"><span class="lang-en">PRICE-TO-RENT RATIO</span><span class="lang-zh" style="display:none">租售比</span></h2>
+
+    <div class="lang-en">
+      <p>The price-to-rent (PTR) ratio estimates how many years of gross rent would equal the purchase price. A PTR above <strong>25</strong> generally favors renting over buying. Coastal markets &mdash; San Francisco (44), New York (42), Los Angeles (38) &mdash; are deep into &ldquo;rent territory,&rdquo; meaning investors face poor yields relative to purchase costs. Chicago (16) and Miami (18) remain the most favorable markets for buy-to-rent investors, offering reasonable yields that justify acquisition at current price levels.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>租售比（PTR）估算多少年的毛租金等於購買價格。PTR超過<strong>25</strong>通常意味著租房優於買房。沿海市場——舊金山（44）、紐約（42）、洛杉磯（38）——已深入「租房區」，表示投資者相對於購買成本面臨較差的收益率。芝加哥（16）和邁阿密（18）仍是最有利於租賃投資的市場，提供合理的收益率以證明在當前價格水準的購入合理性。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Price-to-Rent Ratio &mdash; 12 Cities</span><span class="lang-zh" style="display:none">租售比——十二城市</span></h4>
+      <div id="chartValPTR" style="height:340px"></div>
+      <p class="chart-note navy"><span class="lang-en">Dashed line = 25x buy vs rent break-even &middot; Source: Zillow / Census Bureau</span><span class="lang-zh" style="display:none">虛線 = 25倍租買損益平衡點 &middot; 來源：Zillow / Census Bureau</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 4. GLOBAL CONTEXT -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-global"><span class="lang-en">GLOBAL CONTEXT</span><span class="lang-zh" style="display:none">全球比較</span></h2>
+
+    <div class="lang-en">
+      <p>Compared to major global gateway cities, U.S. metros offer relatively reasonable price-to-income ratios. Hong Kong remains the world&rsquo;s least affordable market with a PTI of <strong>22x</strong>, followed by Singapore at <strong>18x</strong>. San Diego (<strong>11.5x</strong>) is the most expensive U.S. city on this measure but would rank in the middle tier globally. The median price in USD terms shows U.S. markets ranging from $720K (Tokyo) to $1.5M (Hong Kong/Singapore), with most U.S. cities clustering around the $850K&ndash;$1M range.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>與主要全球門戶城市相比，美國都會區的房價收入比相對合理。香港仍是全球最不可負擔的市場，PTI達<strong>22倍</strong>，其次是新加坡<strong>18倍</strong>。聖地牙哥（<strong>11.5倍</strong>）是美國最貴的城市，但在全球排名中僅屬中等水準。以美元計的中位數價格顯示，美國市場介於72萬美元（東京）至150萬美元（香港/新加坡）之間，大多數美國城市集中在85萬至100萬美元區間。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Global City Comparison &mdash; Median Price ($K) &amp; PTI</span><span class="lang-zh" style="display:none">全球城市比較——中位數價格（千美元）與房價收入比</span></h4>
+      <div id="chartValGlobal" style="height:300px"></div>
+      <p class="chart-note navy"><span class="lang-en">Source: Knight Frank / UBS Global RE Bubble Index / Census Bureau</span><span class="lang-zh" style="display:none">來源：Knight Frank / UBS全球房地產泡沫指數 / Census Bureau</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 5. VALUATION SUMMARY -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-summary"><span class="lang-en">VALUATION SUMMARY</span><span class="lang-zh" style="display:none">估值總結</span></h2>
+
+    <div class="lang-en">
+      <p>The table below synthesizes Case-Shiller index levels, price-to-income, price-to-rent, ten-year compound annual growth rates, and an overall valuation grade for each of the 12 monitored cities. Grade A markets offer the best risk-adjusted value; Grade D markets are the most overvalued relative to fundamentals.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>下表綜合了Case-Shiller指數水準、房價收入比、租售比、十年複合年增長率以及12個監測城市的整體估值評級。A級市場提供最佳風險調整價值；D級市場相對於基本面最被高估。</p>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">City</span><span class="lang-zh" style="display:none">城市</span></th>
+            <th>CS Index</th>
+            <th>PTI</th>
+            <th>PTR</th>
+            <th><span class="lang-en">10-yr CAGR</span><span class="lang-zh" style="display:none">十年CAGR</span></th>
+            <th><span class="lang-en">Grade</span><span class="lang-zh" style="display:none">評級</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Chicago</td><td>260</td><td>4.5</td><td>16</td><td>6.5%</td><td class="grade-a">A</td></tr>
+          <tr><td>Austin</td><td>&mdash;</td><td>3.5</td><td>24</td><td>&mdash;</td><td class="grade-a">A-</td></tr>
+          <tr><td>San Diego</td><td>446</td><td>11.5</td><td>32</td><td>7.1%</td><td class="grade-b">B+</td></tr>
+          <tr><td>Boston</td><td>348</td><td>10.0</td><td>34</td><td>6.5%</td><td class="grade-b">B</td></tr>
+          <tr><td>Miami</td><td>438</td><td>8.5</td><td>18</td><td>7.8%</td><td class="grade-b">B-</td></tr>
+          <tr><td>Denver</td><td>322</td><td>7.2</td><td>26</td><td>4.9%</td><td class="grade-b">B-</td></tr>
+          <tr><td>Phoenix</td><td>330</td><td>6.8</td><td>21</td><td>7.8%</td><td class="grade-c">C+</td></tr>
+          <tr><td>New York</td><td>320</td><td>14.75</td><td>42</td><td>4.8%</td><td class="grade-c">C</td></tr>
+          <tr><td>Seattle</td><td>391</td><td>9.5</td><td>37</td><td>5.5%</td><td class="grade-c">C</td></tr>
+          <tr><td>Los Angeles</td><td>442</td><td>12.0</td><td>38</td><td>5.0%</td><td class="grade-c">C-</td></tr>
+          <tr><td>San Francisco</td><td>368</td><td>18.0</td><td>44</td><td>3.1%</td><td class="grade-d">D+</td></tr>
+          <tr><td>Silicon Valley</td><td>&mdash;</td><td>16.5</td><td>35</td><td>&mdash;</td><td class="grade-d">D</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart-note navy" style="margin-top:12px">
+      <span class="lang-en">Austin &amp; Silicon Valley are not included in the Case-Shiller 20-City Composite; PTI &amp; PTR sourced from Zillow/Census.</span>
+      <span class="lang-zh" style="display:none">奧斯丁與矽谷不包含在Case-Shiller 20城市綜合指數中；PTI與PTR數據來自Zillow/Census Bureau。</span>
+    </div>
+
+  </div><!-- /report-body -->
+</div><!-- /report-container -->
+
+<script>
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText = {color:C.muted, fontFamily:'Inter, sans-serif', fontSize:11};
+var baseGrid = {left:50, right:20, top:40, bottom:30, containLabel:true};
+var baseTooltip = {trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy, fontSize:11, fontFamily:'Inter'}};
+var baseLegend = {top:8, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts = [];
+
+function initCharts(lang) {
+  allCharts.length = 0;
+  drawValCS(lang);
+  drawValPTI(lang);
+  drawValPTR(lang);
+  drawValGlobal(lang);
+}
+
+// ── 1. CS Index History ──
+function drawValCS(lang) {
+  var dom = document.getElementById('chartValCS');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang === 'en';
+  var years = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var cities = [
+    {name:'NYC',       data:[200,210,218,222,224,238,265,295,290,308,320], color:'#2563eb'},
+    {name:'LA',        data:[270,292,315,332,340,358,430,445,410,430,442], color:'#dc2626'},
+    {name:'SF',        data:[270,292,315,345,358,352,375,380,345,360,368], color:'#9333ea'},
+    {name:'San Diego', data:[225,247,268,284,290,318,393,438,403,432,446], color:'#16a34a'},
+    {name:'Miami',     data:[207,224,237,248,256,273,342,420,430,442,438], color:'#d97706'},
+    {name:'Boston',    data:[185,200,215,228,236,258,309,346,325,340,348], color:'#0891b2'},
+    {name:'Seattle',   data:[228,258,296,331,308,326,383,410,358,375,391], color:'#4f46e5'},
+    {name:'Chicago',   data:[138,147,156,164,168,178,202,232,240,250,260], color:'#64748b'},
+    {name:'Phoenix',   data:[155,168,182,195,202,233,306,340,303,322,330], color:'#ea580c'},
+    {name:'Denver',    data:[200,218,233,246,250,268,316,323,305,317,322], color:'#059669'}
+  ];
+  var series = cities.map(function(city){
+    return {
+      name:city.name, type:'line', data:city.data, symbol:'none',
+      lineStyle:{color:city.color, width:1.8},
+      itemStyle:{color:city.color}
+    };
+  });
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {top:4, textStyle:{fontSize:9,color:C.muted,fontFamily:'Inter,sans-serif'}, icon:'circle', itemWidth:6, itemHeight:6, itemGap:8},
+    grid: {left:12, right:12, top:48, bottom:20, containLabel:true},
+    xAxis: mkAxis({type:'category', data:years, axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis: mkAxis({type:'value', min:100, axisLabel:{color:C.muted,fontSize:9}}),
+    series: series
+  });
+}
+
+// ── 2. PTI Analysis ──
+function drawValPTI(lang) {
+  var dom = document.getElementById('chartValPTI');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang === 'en';
+  var labels = ['2015','2017','2019','2021','2022\npeak','2023','2024','2025'];
+  var series = [
+    {name:'Chicago', data:[3.2,3.4,3.5,4.2,4.8,4.5,4.4,4.5], color:'#64748b'},
+    {name:'Austin',  data:[3.5,3.8,4.0,5.5,7.2,5.8,4.8,3.5], color:'#16a34a'},
+    {name:'NYC',     data:[11.5,12.0,12.5,14.0,15.5,14.5,14.2,14.75], color:'#2563eb'},
+    {name:'SF',      data:[14.0,15.5,16.0,18.5,21.0,17.0,17.5,18.0], color:'#9333ea'}
+  ];
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {top:4, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8},
+    grid: {left:12, right:12, top:40, bottom:20, containLabel:true},
+    xAxis: mkAxis({type:'category', data:labels, axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis: mkAxis({type:'value', min:0, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}x'}}),
+    series: series.map(function(s){
+      return {
+        name:s.name, type:'line', data:s.data, symbol:'circle', symbolSize:5,
+        lineStyle:{color:s.color, width:2}, itemStyle:{color:s.color},
+        markLine: s.name==='Chicago' ? {
+          data:[{yAxis:6.0, lineStyle:{color:C.red, type:'dashed', width:1.5},
+            label:{formatter:en?'Affordability threshold 6.0x':'可負擔門檻 6.0x', fontSize:9, color:C.red, position:'insideEndTop'}}],
+          silent:true
+        } : undefined
+      };
+    })
+  });
+}
+
+// ── 3. Price-to-Rent ──
+function drawValPTR(lang) {
+  var dom = document.getElementById('chartValPTR');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang === 'en';
+  var cities = ['Chicago','Miami','Phoenix','Austin','Denver','San Diego','Boston','Silicon Valley','Seattle','LA','NYC','SF'];
+  var values = [16,18,21,24,26,32,34,35,37,38,42,44];
+  var colors = values.map(function(v){
+    if(v>=40) return C.red;
+    if(v>=30) return C.orange;
+    if(v>=20) return C.navy;
+    return C.green;
+  });
+  c.setOption({
+    tooltip: {trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11},
+      formatter:function(p){return p[0].name+': '+p[0].value+'x';}},
+    grid: {left:12, right:60, top:16, bottom:20, containLabel:true},
+    xAxis: mkAxis({type:'value', max:50, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}x'}}),
+    yAxis: mkAxis({type:'category', data:cities, axisLabel:{color:C.muted,fontSize:10}}),
+    series:[{
+      type:'bar',
+      data:values.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[0,3,3,0]}};}),
+      barMaxWidth:24,
+      label:{show:true,position:'right',formatter:function(p){return p.value+'x';},fontSize:10,color:C.muted},
+      markLine:{data:[{xAxis:25,lineStyle:{color:C.red,type:'dashed',width:1.5},label:{formatter:en?'Buy vs Rent\nbreak-even':'租買\n損益平衡',fontSize:8,color:C.red,position:'middle'}}],silent:true}
+    }]
+  });
+}
+
+// ── 4. Global Context ──
+function drawValGlobal(lang) {
+  var dom = document.getElementById('chartValGlobal');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang === 'en';
+  var cities = en
+    ? ['San Diego','Boston','NYC','London','Tokyo','Singapore','Sydney','Hong Kong']
+    : ['聖地牙哥','波士頓','紐約','倫敦','東京','新加坡','雪梨','香港'];
+  var medianUSD = [1000,857,880,900,720,1400,950,1500];
+  var pti = [11.5,10,14.75,14,12,18,14,22];
+  c.setOption({
+    tooltip: {trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy,fontSize:11}},
+    legend: {top:4, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8},
+    grid: {left:12, right:12, top:40, bottom:20, containLabel:true},
+    xAxis: mkAxis({type:'category', data:cities, axisLabel:{color:C.muted,fontSize:9,rotate:25}}),
+    yAxis: [
+      mkAxis({type:'value', name:en?'Median ($K)':'中位數(千美元)', nameTextStyle:{color:C.muted,fontSize:9}, axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+      mkAxis({type:'value', name:'PTI', nameTextStyle:{color:C.muted,fontSize:9}, axisLabel:{color:C.muted,fontSize:9,formatter:'{value}x'}, splitLine:{show:false}})
+    ],
+    series:[
+      {
+        name:en?'Median Price ($K)':'中位數價格(千美元)', type:'bar', yAxisIndex:0,
+        data:medianUSD.map(function(v,i){
+          var clr = i<3 ? C.navy : C.muted;
+          return {value:v, itemStyle:{color:clr, borderRadius:[3,3,0,0]}};
+        }),
+        barMaxWidth:35
+      },
+      {
+        name:'PTI', type:'line', yAxisIndex:1, data:pti,
+        lineStyle:{color:C.red, width:2}, itemStyle:{color:C.red},
+        symbol:'circle', symbolSize:6
+      }
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}
+  initCharts(lang);
+}
+
+function toggleMarketMenu(){ document.getElementById('marketDropdown').classList.toggle('open'); }
+function toggleCityMenu(){ document.getElementById('cityDropdown').classList.toggle('open'); }
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.market-selector')){ var d=document.getElementById('marketDropdown'); if(d) d.classList.remove('open'); }
+  if(!e.target.closest('.city-dropdown')){ var d2=document.getElementById('cityDropdown'); if(d2) d2.classList.remove('open'); }
+});
+function toggleToc(){ document.getElementById('tocBox').classList.toggle('toc-collapsed'); }
+function closeTocMobile(){ if(window.innerWidth<=768){ document.getElementById('tocBox').classList.add('toc-collapsed'); } }
+
+window.addEventListener('load', function(){
+  var lang = localStorage.getItem('lang') || 'en';
+  setLang(lang);
+});
+window.addEventListener('resize', function(){
+  allCharts.forEach(function(c){ if(c) c.resize(); });
+});
+
+// ScrollSpy
+(function(){
+  function initScrollSpy(){
+    var items = document.querySelectorAll('.side-nav-item');
+    if(!items.length) return;
+    var sections = [];
+    items.forEach(function(a){
+      var id = a.getAttribute('href').replace('#','');
+      var el = document.getElementById(id);
+      if(el) sections.push({el:el, a:a});
+    });
+    function onScroll(){
+      var scrollY = window.scrollY + window.innerHeight * 0.25;
+      var current = sections[0];
+      sections.forEach(function(s){ if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s; });
+      items.forEach(function(a){ a.classList.remove('active'); });
+      if(current) current.a.classList.add('active');
+    }
+    window.addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+  }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', initScrollSpy); }
+  else { initScrollSpy(); }
+})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

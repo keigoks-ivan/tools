@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the Wang Family uses Property Monitor for AU PR + City Selection | Walkthrough | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="../../css/style.css">
+<style>
+.lang-zh{display:none}
+
+/* ── Persona Card (top) ── */
+.persona-card{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#e2ecf8;border-radius:8px;padding:26px 28px;margin:0 0 24px;position:relative;overflow:hidden}
+.persona-card::after{content:'🇦🇺';position:absolute;top:-20px;right:-10px;font-size:140px;opacity:.06}
+.persona-card .pc-eyebrow{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.persona-card .pc-title{font-size:22px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:8px;letter-spacing:-.01em}
+.persona-card .pc-tag{font-size:13px;color:#a8c0d8;line-height:1.6;max-width:780px;margin-bottom:18px}
+.pc-profile{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);margin-bottom:14px}
+.pc-profile-item .lbl{font-size:9px;letter-spacing:.10em;color:#5a8ab5;font-weight:600;text-transform:uppercase}
+.pc-profile-item .val{font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-weight:500;margin-top:3px}
+.pc-questions{font-size:11.5px;line-height:1.65;color:#a8c0d8}
+.pc-questions strong{color:#f59e0b;font-weight:600;display:block;margin-bottom:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pc-questions ol{margin:0;padding:0 0 0 18px}
+.pc-questions li{margin-bottom:3px}
+
+/* Context banner — PR advantage (calm green, not urgency red) */
+.context-banner{background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border:1.5px solid #16a34a;border-radius:8px;padding:14px 18px;margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.context-banner .cb-icon{font-size:24px;line-height:1}
+.context-banner .cb-text{font-size:12.5px;color:#14532d;line-height:1.55}
+.context-banner .cb-text strong{color:#166534;font-weight:700;display:block;margin-bottom:3px;font-size:13px}
+
+/* ── Section heading ── */
+.demo-section{margin:32px 0 8px}
+.demo-section .sec-no{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:.08em}
+.demo-section h2{font-size:18px;font-weight:700;color:#1e3a5f;line-height:1.3;margin:2px 0 4px;letter-spacing:-.005em}
+.demo-section .sec-sub{font-size:12px;color:#5a7a9a;line-height:1.6;max-width:780px}
+
+/* ── Demo Step ── */
+.demo-step{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:36px 1fr;gap:16px}
+.demo-step .step-no{width:32px;height:32px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;font-family:'JetBrains Mono',monospace}
+.demo-step .step-content h4{font-size:14px;font-weight:600;color:#1e3a5f;margin-bottom:4px;line-height:1.35}
+.demo-step .step-url{font-family:'JetBrains Mono',monospace;font-size:11px;margin-bottom:10px}
+.demo-step .step-url a{color:#2563eb;text-decoration:none}
+.demo-step .step-url a:hover{text-decoration:underline}
+.demo-step .step-action{background:#eff6ff;border-left:3px solid #2563eb;padding:9px 12px;font-size:11.5px;color:#1e3a5f;line-height:1.6;margin-bottom:10px;border-radius:0 4px 4px 0}
+.demo-step .step-action strong{color:#1e3a5f;font-weight:600;display:inline-block;margin-right:4px}
+.demo-step .step-see{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:8px}
+.demo-step .step-see strong{color:#1e3a5f;font-weight:600}
+.demo-step .step-meaning{background:#fffbeb;border-left:3px solid #d97706;padding:9px 12px;font-size:11.5px;color:#78350f;line-height:1.6;margin-top:6px;border-radius:0 4px 4px 0}
+.demo-step .step-meaning strong{color:#92400e;font-weight:600}
+.demo-step .step-screenshot{background:#f4f7fc;border:1px solid #ccd9e8;border-radius:4px;margin-top:12px;overflow:hidden;line-height:0}
+.demo-step .step-screenshot img{display:block;width:100%;height:auto}
+
+/* ── Cheat sheet ── */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.cheat-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:14px 18px}
+.cheat-card h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cheat-card .ck-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#eef3f9;color:#1e3a5f;font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.cheat-card p{font-size:11.5px;color:#4a6080;line-height:1.6}
+.cheat-card .ck-tip{margin-top:6px;font-size:11px;color:#5a7a9a;font-style:italic}
+.cheat-card code{background:#eef3f9;color:#1e3a5f;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.color-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.color-legend .cl-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#4a6080;background:#f4f7fc;padding:6px 10px;border-radius:3px}
+.color-legend .cl-dot{width:10px;height:10px;border-radius:50%}
+.color-legend .cl-green{background:#16a34a}
+.color-legend .cl-orange{background:#d97706}
+.color-legend .cl-red{background:#dc2626}
+.color-legend .cl-blue{background:#2563eb}
+
+/* ── Takeaway box ── */
+.takeaway{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.takeaway-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px}
+.takeaway-card.answered{border-left:4px solid #16a34a}
+.takeaway-card.outsource{border-left:4px solid #d97706}
+.takeaway-card h4{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;letter-spacing:-.005em}
+.takeaway-card ul{list-style:none;padding:0;margin:0}
+.takeaway-card li{font-size:12px;color:#4a6080;line-height:1.6;padding:5px 0 5px 22px;position:relative}
+.takeaway-card.answered li::before{content:'✓';position:absolute;left:0;top:5px;color:#16a34a;font-weight:700}
+.takeaway-card.outsource li::before{content:'→';position:absolute;left:0;top:5px;color:#d97706;font-weight:700}
+.takeaway-card li strong{color:#1e3a5f;font-weight:600}
+
+/* ── PDF button ── */
+.pdf-bar{display:flex;gap:10px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap}
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;background:#1e3a5f;color:#fff;border:none;padding:12px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{background:#0f1e33}
+.pdf-btn.ghost{background:#fff;color:#1e3a5f;border:1px solid #ccd9e8}
+.pdf-btn.ghost:hover{border-color:#1e3a5f}
+
+/* ── Best Option Block ── */
+.best-option{margin:6px 0 16px}
+.bo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.bo-card{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #d97706;border-radius:4px;padding:14px 16px}
+.bo-card .bo-lbl{font-size:9px;letter-spacing:.1em;color:#5a7a9a;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.bo-card .bo-val{font-size:14px;font-weight:600;color:#1e3a5f;line-height:1.35;margin-bottom:6px;letter-spacing:-.005em}
+.bo-card .bo-note{font-size:11px;color:#5a7a9a;line-height:1.5}
+.bo-section{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:16px 20px;margin-bottom:10px}
+.bo-section h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:10px;line-height:1.35}
+.bo-checklist ul,.bo-next ol{margin:0;padding-left:18px}
+.bo-checklist li,.bo-next li{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:6px}
+.bo-bottomline{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#fff;border-radius:6px;padding:20px 24px;margin-top:14px}
+.bo-bottomline .bo-bl-label{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;display:block;margin-bottom:8px;text-transform:uppercase}
+.bo-bottomline p{font-size:14px;line-height:1.6;color:#fff;margin:0}
+@media (max-width:720px){.bo-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Print ── */
+@media print {
+  @page{size:A4;margin:14mm}
+  body{background:#fff!important}
+  #nav-root,.lang-switcher,.pdf-bar,.demo-back{display:none!important}
+  .bo-grid{grid-template-columns:repeat(4,1fr)!important}
+  .bo-bottomline{background:#1e3a5f!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .container{max-width:100%!important;padding:0!important}
+  .persona-card,.demo-step,.cheat-card,.takeaway-card,.context-banner{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  .persona-card::after{display:none}
+  .demo-section{break-after:avoid;page-break-after:avoid}
+  a{color:#1e3a5f!important;text-decoration:none}
+}
+
+@media (max-width:760px){
+  .pc-profile{grid-template-columns:repeat(2,1fr);gap:10px}
+  .demo-step{grid-template-columns:1fr;gap:10px}
+  .demo-step .step-no{margin-bottom:-4px}
+  .persona-card{padding:20px 18px}
+  .persona-card .pc-title{font-size:18px}
+  .cheat-grid,.takeaway,.color-legend{grid-template-columns:1fr}
+  .context-banner{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="container">
+
+  <!-- Breadcrumb -->
+  <div class="demo-back" style="font-size:11px;color:#5a7a9a;margin-bottom:12px;font-family:'JetBrains Mono',monospace">
+    <a href="/demo/" style="color:#2563eb;text-decoration:none">← <span class="lang-en">All walkthroughs</span><span class="lang-zh">所有導覽</span></a>
+    <span style="color:#aabdd4;margin:0 8px">/</span>
+    <span><span class="lang-en">The Wang family uses the site to choose a city for AU PR relocation</span><span class="lang-zh">王家使用本站研究澳洲 PR 搬遷城市選擇</span></span>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 1 — PERSONA CARD                       -->
+  <!-- ============================================== -->
+  <div class="persona-card">
+    <div class="pc-eyebrow"><span class="lang-en">USE CASE WALKTHROUGH · 03 · A SITE TOUR THROUGH THE WANGS' EYES</span><span class="lang-zh">情境導覽 · 03 · 跟著王家逛這個網站</span></div>
+    <div class="pc-title">
+      <span class="lang-en">Meet the Wang Family — Australian PR holders relocating from Taipei, choosing between Sydney, Melbourne, Brisbane &amp; Gold Coast</span>
+      <span class="lang-zh">認識王家 — 持澳洲 PR 從台北搬遷，在雪梨、墨爾本、布里斯本、黃金海岸之間做選擇</span>
+    </div>
+    <p class="pc-tag">
+      <span class="lang-en">Mr. &amp; Mrs. Wang (both 42, finance professionals from Taipei) hold Australian PR and are relocating with their two school-age kids. Budget A$1.8M, buying to <strong>live in + capital growth</strong> — not yield-focused. PR status means <strong>zero foreign-buyer surcharge</strong> in any Australian state — a significant cost advantage. They've never used Property Monitor. This walkthrough shows you <strong>which page to open first, what to click, what each chart means, and where to find each function</strong> — using the Wangs' questions as the lens. It is <strong>not</strong> investment advice, tax advice, or property recommendations.</span>
+      <span class="lang-zh">王先生夫婦，皆 42 歲，台北金融業，持澳洲 PR，攜兩名就學年齡孩子搬遷。預算 A$180 萬，目標<strong>自住 + 資本增值</strong> — 不以收益為主。PR 身分代表在澳洲任何一州都<strong>免外國買家附加稅</strong> — 顯著的成本優勢。他們從沒用過 Property Monitor。這份導覽用王家的問題當主軸，<strong>告訴你先打開哪一頁、點哪裡、每張圖代表什麼、各種功能藏在哪</strong>。本文<strong>不是</strong>投資建議、稅務建議或不動產推薦。</span>
+    </p>
+
+    <div class="pc-profile">
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Buyers</span><span class="lang-zh">使用者</span></div><div class="val">Wang family · 42y</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Visa</span><span class="lang-zh">簽證</span></div><div class="val"><span class="lang-en">AU PR (resident)</span><span class="lang-zh">澳洲 PR（居民）</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Budget</span><span class="lang-zh">預算</span></div><div class="val">A$1.8M</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Goal</span><span class="lang-zh">目標</span></div><div class="val"><span class="lang-en">Live + growth</span><span class="lang-zh">自住 + 增值</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Site experience</span><span class="lang-zh">網站經驗</span></div><div class="val"><span class="lang-en">First-time</span><span class="lang-zh">第一次</span></div></div>
+    </div>
+
+    <div class="pc-questions">
+      <strong><span class="lang-en">Questions the Wangs came to answer</span><span class="lang-zh">王家想在這個網站找到答案的問題</span></strong>
+      <ol>
+        <li><span class="lang-en">Where does Australia data live, and how do I navigate from the home page to city detail?</span><span class="lang-zh">澳洲資料在哪？怎麼從首頁一路鑽到城市深度頁？</span></li>
+        <li><span class="lang-en">Where is the long-form analyst narrative so I can understand the story before clicking charts?</span><span class="lang-zh">哪裡能讀到分析師長篇敘述，讓我在看圖之前先搞清楚「故事是什麼」？</span></li>
+        <li><span class="lang-en">Sydney vs Melbourne vs Brisbane vs Gold Coast — how do I triage four cities for schools, commute, and capital growth?</span><span class="lang-zh">雪梨 vs 墨爾本 vs 布里斯本 vs 黃金海岸 — 怎麼用學區、通勤和資本增值來篩選四個城市？</span></li>
+        <li><span class="lang-en">What does the Supply pipeline look like for my chosen city — will new stock dilute my growth?</span><span class="lang-zh">我選的城市供給管道長什麼樣子 — 新供給會稀釋增值嗎？</span></li>
+        <li><span class="lang-en">What does A$1.8M actually cost end-to-end as a <strong>resident</strong> (PR = no foreign surcharge)?</span><span class="lang-zh">身為<strong>居民</strong>（PR 免外國買家附加稅），A$180 萬含取得、持有、退場的實際總成本是多少？</span></li>
+        <li><span class="lang-en">Should I buy direct or buy A-REITs — what does the REIT vs Direct tool say in Local mode?</span><span class="lang-zh">直接買房 vs 買 A-REIT — REIT vs Direct 工具切到本地模式顯示什麼？</span></li>
+        <li><span class="lang-en">Where is the Carry Heatmap — does AU still make sense for a growth buyer vs other markets?</span><span class="lang-zh">Carry Heatmap 在哪 — 對成長型買家來說，澳洲相對其他市場還有吸引力嗎？</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- PR advantage context banner -->
+  <div class="context-banner">
+    <div class="cb-icon">🟢</div>
+    <div class="cb-text">
+      <strong><span class="lang-en">PR status = no foreign-buyer surcharge in any Australian state — a major cost advantage</span><span class="lang-zh">PR 身分 = 澳洲每一州都免外國買家附加稅 — 重大成本優勢</span></strong>
+      <span class="lang-en">Foreign buyers face stamp duty surcharges ranging from 7% (QLD) to 8% (NSW, VIC). On A$1.8M, that's A$126,000–144,000 in <em>extra</em> tax that the Wangs do <em>not</em> pay. The Cost Calculator's "Resident" mode reflects this. Confirm current surcharge rates with a licensed conveyancer as state rules change.</span>
+      <span class="lang-zh">外國買家面臨 7%（昆士蘭）到 8%（新南威爾斯、維多利亞）的印花稅附加。以 A$180 萬計算，王家<em>省去</em> A$12.6–14.4 萬的<em>額外</em>稅款。Cost Calculator 的「Resident」模式反映此情況。各州規則時有調整，請向持牌產權律師確認最新稅率。</span>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 2 — OPERATIONS JOURNEY                 -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 02</div>
+    <h2><span class="lang-en">The Wangs' click-by-click tour — 12 stops</span><span class="lang-zh">王家的逐步點擊旅程 — 12 個停靠點</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">Each stop is a real page on the site. For each, you'll see what they click, what the screen shows, and how that screen relates to the Wangs' PR-relocation situation. Follow along in another tab — every URL works.</span>
+      <span class="lang-zh">每個停靠點都是站上的一頁實際畫面。每站告訴你他們點什麼、螢幕出現什麼、這個畫面跟王家 PR 搬遷情境有什麼關係。建議另開分頁跟著走 — 所有連結都能直接點。</span>
+    </p>
+  </div>
+
+  <!-- STOP 1 — Home pick "growth" persona -->
+  <div class="demo-step">
+    <div class="step-no">1</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Land on the home page and pick the "growth" persona</span><span class="lang-zh">進入首頁，選「增值」persona 卡</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">open the home page, scroll past the dark hero, see three persona cards labelled <strong>"I want yield / I want growth / I want a passport"</strong>. They click <strong>"I want growth / 我要增值"</strong> because their priority is capital appreciation to fund their children's education, not rental income.</span>
+        <span class="lang-zh">打開首頁，往下捲過深色 hero，看到三張 persona 卡：<strong>「我要收租／我要增值／我要身分」</strong>。點 <strong>「我要增值 / I want growth」</strong>，因為他們優先考慮資本增值來支持孩子教育，而不是租金收入。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> the chosen card lights up amber with a checkmark. The growth persona filters the world map and scatter chart to highlight markets with strong capital growth track records — Australia features prominently, given its 10-year appreciation record. The Top-5 strip below the map reweights to "10-year capital growth" leaders.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>選中的卡片變琥珀色亮起並打勾。增值 persona 過濾世界地圖和散點圖，高亮強資本增值紀錄的市場 — 澳洲因十年增值紀錄而表現突出。地圖下方 Top-5 依「十年資本增值」重新排序。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">clicking "growth" once reconfigures the entire home-page view around capital appreciation rather than yield. Since they're buying to live in the property, yield is secondary — the site's persona filter immediately surfaces Australia (and within it, Brisbane and Gold Coast) as the standout performers on 10-year growth, setting the stage for the drill-down.</span><span class="lang-zh">點一次「增值」，整個首頁視角就圍繞資本增值而非收益重組。因為他們買來自住，收益率是次要的 — 站上 persona 濾鏡立即把澳洲（以及其中的布里斯本和黃金海岸）顯示為十年增值的突出表現者，為後續深入研究鋪路。</span></div>
+      <div class="step-screenshot"><img src="img/01-home-growth.png" alt="Home with I-want-growth persona active in amber" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 2 — Home world map → find Australia -->
+  <div class="demo-step">
+    <div class="step-no">2</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Use the world map to locate Australia and compare its metrics</span><span class="lang-zh">用世界地圖找到澳洲，比較指標</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a> · <span class="lang-en">map section</span><span class="lang-zh">地圖區段</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">scroll down to the world map. They toggle the metric button to <strong>10yr</strong> (10-year capital growth) to color dot intensity by long-run performance. They hover over Australian city dots (Sydney, Melbourne, Brisbane, Gold Coast) to read the tooltip: Yield, Carry, 10yr growth, PTI, Vacancy. They note Brisbane and Gold Coast are the brightest dots in growth mode.</span>
+        <span class="lang-zh">捲到世界地圖。將指標切換到 <strong>10yr</strong>（十年資本增值），讓點的亮度代表長期表現。游標停在澳洲城市點上（雪梨、墨爾本、布里斯本、黃金海岸），讀 tooltip：Yield、Carry、10yr、PTI、Vacancy。他們注意到布里斯本和黃金海岸在增值模式下是最亮的點。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> dot color depth = how strong the 10yr metric. The Top-5 strip below the map ranks cities by 10-year growth, with a ★ next to growth-persona matches. The city dots in Southeast Asia and Oceania are visible side-by-side — useful for cross-market comparison before committing to Australia.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>點顏色深度代表十年指標強度。地圖下方 Top-5 列表依十年增值排序，符合增值 persona 的旁邊有 ★。東南亞和大洋洲城市點並排可見 — 在確定澳洲之前，方便跨市場比較。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">the map tells them they're choosing the right market — Australia cities dominate the top-right of the 10-yr growth view. It also shows them they have four distinct cities to choose from within one country, which is unusually rich optionality. They note each city has a clickable "Deep dive →" link in the tooltip, which they'll use in stop 6.</span><span class="lang-zh">地圖告訴他們正在選對市場 — 澳洲城市在十年增值視角的右上角佔主導地位。也顯示他們在一個國家內有四個截然不同的城市可選，這是少見的豐富選項。他們注意到每個城市 tooltip 內都有「Deep dive →」連結，這在第 6 站會用到。</span></div>
+      <div class="step-screenshot"><img src="img/02-home-map-au.png" alt="World map showing Australian city dots in 10yr mode" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 3 — /au/report long-form thesis -->
+  <div class="demo-step">
+    <div class="step-no">3</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Read the Australia long-form market report first — get the narrative before the numbers</span><span class="lang-zh">先讀澳洲長篇市場報告 — 看完故事再看數字</span></h4>
+      <div class="step-url"><a href="/au/report.html">myproperty.investmquest.com/au/report</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">navbar 🇦🇺 → <strong>Report / 報告</strong>. They read the Executive Summary first, then use the left-side progress nav to jump to the city sections: <strong>§6 Sydney</strong>, <strong>§7 Brisbane</strong>, <strong>§8 Gold Coast</strong>. (Melbourne is not in the report side-nav — a useful signal that the report coverage reflects market priority.) They skim section headings: RBA &amp; Macro, Supply Deficit, Demand, Valuation, then the city deep dives.</span>
+        <span class="lang-zh">navbar 🇦🇺 → <strong>Report / 報告</strong>。先讀執行摘要，再用左側進度導航跳到城市段落：<strong>§6 雪梨</strong>、<strong>§7 布里斯本</strong>、<strong>§8 黃金海岸</strong>。（墨爾本不在報告側邊導航 — 這是報告覆蓋範圍反映市場優先順序的有用信號。）他們掃章節標題：RBA 與總經、供給缺口、需求、估值，再是城市深度研究。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> a long-form analyst report with paragraphs of narrative, embedded stats, and 4 inline ECharts (National Dwelling Value &amp; Avg Price, City House Price Growth YoY, Rental Vacancy Rate, Resale Profitability). A Table of Contents box at the top (collapsible) lists 9 sections. A fixed left-side progress nav (on desktop) lets them jump by dot-click. Section headings cover: Executive Summary · RBA &amp; Macro: March 2026 Rate Hike · Supply: Structural Deficit · Demand: Migration, Credit &amp; Wealth Effects · Valuation &amp; Affordability · Sydney: Affordability Ceiling · Brisbane: Olympic City Momentum · Gold Coast: Lifestyle Premium Logic · Outlook: Three Scenarios 2026–2027.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>長篇分析師報告，段落敘述配內嵌統計與四張內嵌 ECharts（全國住宅總值與均價、各城市年增率、空置率、轉售獲利率）。頂部可收合的目錄框列出 9 個章節。桌面版左側固定進度導航可點點跳轉。章節標題：執行摘要 · RBA 與總經：2026年3月升息 · 供給：結構性赤字 · 需求：移民、信貸與財富效應 · 估值與可負擔性 · 雪梨：可負擔性天花板 · 布里斯本：奧運城市動能 · 黃金海岸：生活方式溢價邏輯 · 展望：2026–2027年三大情境。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">reading the report before clicking charts means later when they see "Sydney clearance rate 55%" or "Brisbane vacancy 0.9%" those numbers have context — they've read the "why." The section titles themselves are clues: "Sydney: Affordability Ceiling" tells them Sydney may be a stretch at A$1.8M; "Brisbane: Olympic City Momentum" tells them there's a structural catalyst. They haven't made a city call yet — they're building context.</span><span class="lang-zh">先讀報告，後來看到「雪梨清盤率 55%」或「布里斯本空置率 0.9%」就有脈絡 — 他們讀過「為什麼」了。章節標題本身就是線索：「雪梨：可負擔性天花板」告訴他們 A$180 萬在雪梨可能很勉強；「布里斯本：奧運城市動能」告訴他們有結構性催化劑。他們還沒做城市決定 — 正在建立脈絡。</span></div>
+      <div class="step-screenshot"><img src="img/03-au-report.png" alt="AU market report long-form with TOC and city sections" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 4 — /au/ dashboard -->
+  <div class="demo-step">
+    <div class="step-no">4</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Read the Australia dashboard — three KPI grids and six charts</span><span class="lang-zh">讀澳洲儀表板 — 三排 KPI 與六張圖表</span></h4>
+      <div class="step-url"><a href="/au/">myproperty.investmquest.com/au</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">navbar 🇦🇺 → <strong>Overview / 總覽</strong>. They read top-to-bottom across three KPI grids: Market Temperature, Investment Metrics, Supply &amp; Demographics.</span>
+        <span class="lang-zh">navbar 🇦🇺 → <strong>Overview / 總覽</strong>。由上往下讀三排 KPI：市場溫度、投資指標、供給與人口。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong></span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong></span><br>
+        <span class="lang-en">① <strong>MARKET TEMPERATURE</strong> — National Median, Sydney Median House, RBA Cash Rate, National Rental Yield.<br>
+        ② <strong>INVESTMENT METRICS</strong> — Yield Spread vs RBA, National Weekly Rent, National Vacancy, Brisbane YoY.<br>
+        ③ <strong>SUPPLY &amp; DEMOGRAPHICS</strong> — Sydney Vacancy, Annual Transfers, Gold Coast Median, 5-Year Rent Growth.<br>
+        Below the KPIs: 6 ECharts — National Median Price Index (with YoY%), City Price Comparison, Gross Rental Yield by City, Weekly Rent Trend, Vacancy Rate by City, Annual Property Transfers.</span>
+        <span class="lang-zh">① <strong>市場溫度</strong> — 全國中位價、雪梨房屋中位價、RBA 現金利率、全國租金收益率。<br>
+        ② <strong>投資指標</strong> — 利差 vs RBA、全國每週租金、全國空置率、布里斯本年增率。<br>
+        ③ <strong>供給與人口</strong> — 雪梨空置率、年度交易量、黃金海岸中位價、五年租金增長。<br>
+        KPI 下方六張 ECharts — 全國中位價格指數（含 YoY%）、城市價格比較、各城市毛租金收益率、每週租金趨勢、各城市空置率、年度產權移轉量。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">the City Price Comparison and Gross Rental Yield by City charts are the most useful here — they can see all four candidate cities side-by-side before deep-diving. The Brisbane YoY KPI (the only city-specific KPI prominently placed in the Investment Metrics grid) is a subtle editorial signal that Brisbane is the growth story of the current cycle.</span><span class="lang-zh">城市價格比較和各城市毛租金收益率這兩張圖最有用 — 在深入研究前就能把四個候選城市並排看到。布里斯本年增率 KPI（投資指標 grid 中唯一有城市名的 KPI）是一個微妙的編輯信號：布里斯本是當前週期的增值故事。</span></div>
+      <div class="step-screenshot"><img src="img/04-au-dashboard.png" alt="AU dashboard with three KPI grids and city comparison charts" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 5 — /au/macro RBA cycle -->
+  <div class="demo-step">
+    <div class="step-no">5</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Open Macro × Cycle — where is the RBA rate cycle, and what does "Late Cycle" mean for buyers?</span><span class="lang-zh">開 Macro × Cycle 頁 — RBA 利率週期在哪個位置，「週期晚期」對買家意味著什麼？</span></h4>
+      <div class="step-url"><a href="/au/macro.html">myproperty.investmquest.com/au/macro</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">navbar 🇦🇺 → <strong>Macro / 總經</strong>. The page opens with a horizontal cycle bar at the top: GFC → Post-GFC Boom → Credit Tightening → COVID → Rate Hike → Late Cycle, with <strong>▶ NOW</strong> pointing at Late Cycle (24–25).</span>
+        <span class="lang-zh">navbar 🇦🇺 → <strong>Macro / 總經</strong>。頁面開啟，上方有橫向週期軸：GFC → 後GFC榮景 → 信貸收緊 → COVID → 升息 → 週期晚期，<strong>▶ NOW</strong> 指向週期晚期（24–25）。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> below the cycle bar, 5 KPI cards (RBA Cash Rate, Residential Property Price Index, CPI YoY, GDP Growth, Unemployment). Then 4 historical event cards (two columns). Then multi-line macro charts: RBA rate path, CPI vs RBA target, GDP growth trend, unemployment trajectory. Finally a macro insights section with summary cards connecting macro data to property implications.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>週期軸下方 5 張 KPI 卡（RBA 利率、住宅房價指數、CPI、GDP、失業率）。然後 4 張歷史事件卡（兩欄）。再來多條折線圖：RBA 利率路徑、CPI vs RBA 目標、GDP 增長趨勢、失業率走勢。最後是 macro insights，用摘要卡片把總經數據連接到房市含義。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">"Late Cycle" is the key read for growth buyers: RBA already hiked aggressively (2022–2023), is now easing cautiously, and property prices have not fully corrected in growth cities. This means the growth runway is not exhausted — but affordability is at historic stress. The Wangs' A$1.8M PR-resident budget avoids the affordability trap in the cities where it matters most (Brisbane, Gold Coast) where the median house price is still below their budget.</span><span class="lang-zh">「週期晚期」是增值型買家的關鍵解讀：RBA 2022–2023 年已積極升息，現在謹慎放鬆，而增值城市房價並未完全修正。這代表增值空間還沒耗盡 — 但可負擔性已達歷史壓力水位。王家 A$180 萬 PR 居民預算在最重要的城市（布里斯本、黃金海岸）避開了負擔能力陷阱，那裡的房屋中位價仍低於他們的預算。</span></div>
+      <div class="step-screenshot"><img src="img/05-au-macro.png" alt="AU macro cycle bar with Late Cycle NOW marker" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 6 — City triage (Sydney vs Melbourne vs Brisbane vs Gold Coast) -->
+  <div class="demo-step">
+    <div class="step-no">6</div>
+    <div class="step-content">
+      <h4><span class="lang-en">City triage — open all four city pages and compare KPIs side-by-side</span><span class="lang-zh">城市篩選 — 打開四個城市頁面，並排比較 KPI</span></h4>
+      <div class="step-url">
+        <a href="/au/sydney.html">/au/sydney</a> ·
+        <a href="/au/melbourne.html">/au/melbourne</a> ·
+        <a href="/au/brisbane.html">/au/brisbane</a> ·
+        <a href="/au/goldcoast.html">/au/goldcoast</a>
+      </div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">navbar 🇦🇺 → city name. They open each city deep-dive page in a separate browser tab and read the 6-card KPI grid at the top of each. Then they compare the <strong>Median House Price</strong>, <strong>Vacancy Rate</strong>, and <strong>YoY growth</strong> side-by-side across four tabs. They also check whether the city has a schools/zones section.</span>
+        <span class="lang-zh">navbar 🇦🇺 → 城市名稱。他們各開一個分頁讀每個城市深度頁，閱讀頂部六張 KPI 卡。然後並排比較四個分頁的<strong>房屋中位價</strong>、<strong>空置率</strong>和<strong>年增率</strong>。也確認城市頁面是否有學校/學區段落。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see across four tabs (KPI highlights):</strong><br>
+        ▸ <strong>Sydney</strong> — Median house A$1.6M (over budget for house), unit A$903K (within range), clearance rate 55% (weak), vacancy 1.5%, section labels: Macro &amp; Monetary Policy / Demographics &amp; Migration / Supply / Demand &amp; Auction Market / Suburb Deep Dive / Investment Landscape. School zone maps visible in suburb deep dive.<br>
+        ▸ <strong>Melbourne</strong> — Median house A$920K (within budget), gross yield 3.0–4.5%, land tax reform headwind (red badge), vacancy 1.4%, three zones: Inner (Fitzroy/South Yarra) / East (Box Hill/Glen Waverley, top school zones) / Outer West (Melton/Werribee). East zone explicitly flagged for school zones.<br>
+        ▸ <strong>Brisbane</strong> — Median house A$1.08M (within budget), +14.5% YoY (strongest in group), vacancy 0.9% (lowest), Cross River Rail 2026 (8 new stations), 2032 Olympics catalyst confirmed. Section: Population &amp; Migration Engine / Supply Pipeline / Investment Deep Dive / Suburb Scorecard.<br>
+        ▸ <strong>Gold Coast</strong> — Median house A$1.32M (within budget), +12.8% YoY, vacancy 0.9%, listings -40% vs 10Y avg. "From Holiday Destination to Premium Lifestyle Hub" — school proximity less explicit than Brisbane or Melbourne East.</span>
+        <span class="lang-zh"><strong>四個分頁看到的 KPI 重點：</strong><br>
+        ▸ <strong>雪梨</strong> — 房屋中位價 A$160萬（超預算），公寓 A$90.3萬（在範圍內），清盤率 55%（偏弱），空置率 1.5%，段落標題：總經與貨幣政策 / 人口與移民 / 供給 / 需求與拍賣市場 / 郊區深度研究 / 投資概覽。郊區深度研究中可見學區地圖。<br>
+        ▸ <strong>墨爾本</strong> — 房屋中位價 A$92萬（在預算內），毛收益率 3.0–4.5%，土地稅改革逆風（紅標），空置率 1.4%，三大分區：內城（費茲羅伊/南亞拉）/ 東區（博士山/格倫韋弗利，頂級學區）/ 外西區（梅爾頓/韋里比）。東區明確標記學區優勢。<br>
+        ▸ <strong>布里斯本</strong> — 房屋中位價 A$108萬（在預算內），年增 +14.5%（四城之最），空置率 0.9%（最低），跨河鐵路 2026（8座新站），2032奧運催化劑已確認。段落：人口爆炸與移民引擎 / 供給管道 / 投資深度研究 / 郊區評分卡。<br>
+        ▸ <strong>黃金海岸</strong> — 房屋中位價 A$132萬（在預算內），年增 +12.8%，空置率 0.9%，在售房源較十年均值少 40%。「從度假勝地到頂級生活方式樞紐」 — 學校毗鄰性不如布里斯本或墨爾本東區明確。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs — Brisbane emerges as the primary candidate:</span><span class="lang-zh">對王家 — 布里斯本成為首選：</span></strong> <span class="lang-en">their three filters are schools, commute, and capital growth. <strong>Sydney</strong> — median house exceeds A$1.8M budget; units at A$903K are in range but small. <strong>Melbourne East</strong> — school zones are excellent and price is within budget, but land tax reform is a headwind and 10yr growth lags Brisbane significantly. <strong>Gold Coast</strong> — lifestyle fits but school proximity is weaker and the city lacks Brisbane's structural catalyst. <strong>Brisbane</strong> — A$1.08M median house leaves headroom, top-tier YoY growth, Cross River Rail improving commute, established school corridors (Indooroopilly, Kenmore), AND 2032 Olympics infrastructure spending. <em>They proceed to drill into Brisbane in the next stop.</em></span><span class="lang-zh">他們的三個篩選標準是學區、通勤和資本增值。<strong>雪梨</strong> — 房屋中位價超過 A$180 萬預算；公寓 A$90.3 萬在範圍內但坪數小。<strong>墨爾本東區</strong> — 學區極佳、價格在預算內，但土地稅改革是逆風，十年增值明顯落後布里斯本。<strong>黃金海岸</strong> — 生活方式很適合，但學校毗鄰性較弱，缺乏布里斯本的結構性催化劑。<strong>布里斯本</strong> — A$108 萬中位房屋有預算空間、頂級年增率、跨河鐵路改善通勤、成熟學區走廊（Indooroopilly、Kenmore），加上 2032 奧運基建投入。<em>下一站他們深入布里斯本。</em></span></div>
+      <div class="step-screenshot"><img src="img/06-au-city-triage.png" alt="Brisbane deep dive KPI grid at top of city page" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 7 — /au/brisbane deep dive -->
+  <div class="demo-step">
+    <div class="step-no">7</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Drill into Brisbane — read the full deep dive for the chosen city</span><span class="lang-zh">深入布里斯本 — 閱讀選定城市的完整深度研究</span></h4>
+      <div class="step-url"><a href="/au/brisbane.html">myproperty.investmquest.com/au/brisbane</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">close the other three city tabs and focus on /au/brisbane. They scroll through all sections: <strong>Population &amp; Migration Engine</strong> (QLD population growth, NZ migration surge) → <strong>Supply Pipeline</strong> (completions, cliff analysis) → <strong>Investment Deep Dive</strong> (suburb scorecard, price tiers) → <strong>2032 Olympics Catalyst</strong> section with infrastructure maps. They pay specific attention to the chart <em>"QLD Population Growth by Component"</em> and the suburb scorecard.</span>
+        <span class="lang-zh">關閉其他三個城市分頁，專注在 /au/brisbane。他們瀏覽所有段落：<strong>人口爆炸與移民引擎</strong>（昆士蘭人口增長、紐西蘭移民激增）→ <strong>供給管道</strong>（完工量、供給懸崖分析）→ <strong>投資深度研究</strong>（郊區評分卡、價格層次）→ <strong>2032奧運催化劑</strong>含基建地圖。特別注意圖表「昆士蘭人口增長構成」和郊區評分卡。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> 6 KPI cards — Median House A$1.08M, Median Unit A$680K, Weekly Rent A$594 (+24.8% YoY), Vacancy 0.9% (2nd lowest on record), 2032 Olympics Catalyst, Cross River Rail 2026 (8 new stations). Charts: QLD Population Growth by Component · QLD Population Share · Brisbane Labour Market by Sub-region · Distressed Property Listings. Sections include an insight-box for each topic, plus a suburb scorecard table comparing key metrics across Brisbane submarkets.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>6 張 KPI 卡 — 房屋中位價 A$108萬、公寓中位價 A$68萬、每週租金 A$594（年增 +24.8%）、空置率 0.9%（歷史第二低）、2032奧運催化劑、跨河鐵路 2026（8 座新站）。圖表：昆士蘭人口增長構成 · 昆士蘭人口佔比 · 布里斯本各分區就業市場 · 不良資產上市量。每個主題各有一個 insight-box，以及比較布里斯本各子市場關鍵指標的郊區評分卡。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">the Cross River Rail 2026 infrastructure timeline tells them commute will improve materially in the near term — the line delivers 8 new underground stations connecting inner suburbs including the school corridor around South East Queensland schools. The population chart shows Queensland is now attracting interstate wealthy migrants who sell high-priced Sydney/Melbourne homes and arrive cash-rich — that's permanent structural demand, not speculative. And 0.9% vacancy means their future property faces no rental or resale headwind.</span><span class="lang-zh">跨河鐵路 2026 基建時間表告訴他們通勤將近期內大幅改善 — 這條線路新增 8 個地下車站，連接包括昆士蘭東南部學校走廊在內的內城郊區。人口圖表顯示昆士蘭正在吸引從雪梨/墨爾本出售高價住宅、現金充裕進入的跨州富裕移民 — 這是永久性結構需求，不是投機。0.9% 空置率意味著他們未來的物業在出租或轉售方面都沒有逆風。</span></div>
+      <div class="step-screenshot"><img src="img/07-au-brisbane.png" alt="Brisbane deep dive with population, Cross River Rail, and Olympics catalyst sections" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 8 — /pipeline-cliff for Brisbane -->
+  <div class="demo-step">
+    <div class="step-no">8</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Pipeline Cliff — check how many new units are coming for Brisbane</span><span class="lang-zh">Pipeline Cliff — 確認布里斯本新增供給量</span></h4>
+      <div class="step-url"><a href="/pipeline-cliff.html">myproperty.investmquest.com/pipeline-cliff</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Pipeline Cliff</strong>. The page opens with a multi-city heatmap. They find the <strong>Brisbane row</strong> and read each year column left to right: Near (0–2yr), Mid (3–5yr), Far (6–10yr), Outlook. They also check the Sydney row for comparison.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Pipeline Cliff</strong>。頁面開啟，顯示多城市熱力圖。找到<strong>布里斯本列</strong>，由左到右讀每個年度欄：近期（0–2年）、中期（3–5年）、遠期（6–10年）、展望。也比較雪梨列。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> a color-coded pipeline heatmap — green cells = low new supply (good for existing owners), orange/red = heavy pipeline. Each cell shows a percentage of existing stock. Below the heatmap, a vertical bar chart shows approved vs under-construction volume for each city. An insight card summarizes the "cliff" risk for each market — where the pipeline drops off sharply after near-term completions.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>顏色編碼的供給管道熱力圖 — 綠色格子 = 新供給低（對現有業主有利），橘/紅色 = 供給壓力重。每格顯示佔現有存量的百分比。熱力圖下方，垂直長條圖顯示每個城市的已核准 vs 興建中量。洞察卡匯總每個市場的「懸崖」風險 — 供給管道在近期完工後急劇萎縮的地方。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">the pipeline cliff is the "supply dilution risk" check for growth buyers. Brisbane's 5-year horizon is the critical window — if the pipeline is light in years 3–5 (mid-term), it confirms their chosen city can't be flooded with new stock mid-hold. National data backs this: completions are running below the Housing Accord target in every state. The Wangs are buying to live, not to flip, so a 7–10yr hold horizon means the near-term pipeline is less concerning than the structural deficit story they read in the report.</span><span class="lang-zh">Pipeline Cliff 是增值型買家的「供給稀釋風險」檢查。布里斯本的 5 年視野是關鍵窗口 — 如果中期（3–5年）管道偏少，確認他們選的城市在持有期中段不會被新供給淹沒。全國數據支持這一點：每個州的完工量都低於住房協議目標。王家買來自住，不是短翻，7–10 年持有期意味著近期管道比他們讀到的結構性赤字故事更不令人擔憂。</span></div>
+      <div class="step-screenshot"><img src="img/08-pipeline-cliff-brisbane.png" alt="Pipeline cliff heatmap with Brisbane row highlighted" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 9 — Cost Calculator AU / Resident / 10y / A$1.8M -->
+  <div class="demo-step">
+    <div class="step-no">9</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Cost Calculator — what does A$1.8M actually cost as a Resident over 10 years?</span><span class="lang-zh">Cost Calculator — 身為居民，A$180 萬 10 年總成本是多少？</span></h4>
+      <div class="step-url"><a href="/tools/cost-calculator.html">myproperty.investmquest.com/tools/cost-calculator</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Cost Calc / 成本計算</strong>. They set: <strong>Market = 🇦🇺 AU</strong>, <strong>Resident Status = Resident</strong> (PR = resident, no foreign surcharge), <strong>Holding Horizon = 10y</strong>, <strong>Property Price = A$1,800,000</strong>. They then toggle Resident vs Foreigner to see the surcharge difference.</span>
+        <span class="lang-zh">navbar → Tools 下拉 → <strong>Cost Calc / 成本計算</strong>。設定：<strong>Market = 🇦🇺 AU</strong>、<strong>Resident Status = Resident</strong>（PR = 居民，免外國買家附加稅）、<strong>Holding Horizon = 10y</strong>、<strong>Property Price = A$1,800,000</strong>。然後切換 Resident vs Foreigner，看附加稅差異。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> hero KPIs (TOTAL CASH OUT / NET PROCEEDS AT EXIT / NET P&amp;L verdict) + supporting stats. Three breakdown tables —<br>
+        ① <strong>Acquisition</strong> — price, stamp duty (resident rate, no foreign surcharge), buyer's agent, legal fees.<br>
+        ② <strong>Holding</strong> — council rates, strata/maintenance, insurance, land tax (if applicable).<br>
+        ③ <strong>Exit</strong> — seller agent fee, CGT (residents pay 50% discount if held 12m+, so effective rate on half the gain).<br>
+        Plus a stacked bar chart, annual holding-cost line, and 12-market comparison table (AU row highlighted).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>頂部 hero KPI（TOTAL CASH OUT／NET PROCEEDS AT EXIT／NET P&amp;L 判決）+ 輔助統計。三張明細表 —<br>
+        ① <strong>Acquisition</strong> — 物業價、印花稅（居民稅率，免外國買家附加稅）、買方仲介、律師費。<br>
+        ② <strong>Holding</strong> — 市政費、物業費/維護、保險、地稅（如適用）。<br>
+        ③ <strong>Exit</strong> — 賣方仲介費、資本利得稅（居民持有 12 個月以上享 50% 折扣，即以一半的增值課稅）。<br>
+        另有堆疊長條圖、年度持有成本折線、12 市場比較表（AU 列高亮）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs — three key insights:</span><span class="lang-zh">對王家 — 三個關鍵覺察：</span></strong> <span class="lang-en">(1) Toggling Resident → Foreigner reveals the surcharge they are NOT paying — concrete validation of the PR advantage. (2) The CGT 50% discount for residents held 12m+ means their capital growth is taxed at roughly half the headline rate — the site makes this explicit in the exit row. (3) The 12-market comparison table shows AU's total ownership cost vs SG (60% ABSD), JP (no CGT for non-residents but low growth), MY (foreign stamp duty 8% from 2026) — PR gives them cost parity with a local Australian buyer.</span><span class="lang-zh">(1) 切換 Resident → Foreigner 顯示他們「沒付」的附加稅 — 具體驗證了 PR 優勢。(2) 持有 12 個月以上居民的 CGT 50% 折扣意味著他們的資本增值大約以一半的稅率課稅 — 網站在退出欄位明確呈現此點。(3) 12 市場比較表顯示 AU 總持有成本 vs 新加坡（60% ABSD）、日本（非居民無 CGT 但增值低）、馬來西亞（外國人印花稅 2026 起 8%） — PR 讓他們與本地澳洲買家擁有相同成本。</span></div>
+      <div class="step-screenshot"><img src="img/09-cost-calc-au-resident.png" alt="Cost Calculator with AU / Resident / 10y / A$1.8M set" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 10 — REIT vs Direct (Local mode) -->
+  <div class="demo-step">
+    <div class="step-no">10</div>
+    <div class="step-content">
+      <h4><span class="lang-en">REIT vs Direct — Local mode: does buying Brisbane property beat A-REITs over 10 years?</span><span class="lang-zh">REIT vs Direct — 本地模式：買布里斯本房產 vs 買 A-REIT，10 年誰贏？</span></h4>
+      <div class="step-url"><a href="/reit-vs-direct.html">myproperty.investmquest.com/reit-vs-direct</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>REIT vs Direct</strong>. They set: Residency = <strong>Local</strong> (PR = resident = local tax treatment), Period = <strong>10yr</strong>. They read the <strong>AU row</strong> in the comparison table.</span>
+        <span class="lang-zh">navbar → Tools → <strong>REIT vs Direct</strong>。設定：Residency = <strong>Local</strong>（PR = 居民 = 本地稅務待遇）、Period = <strong>10yr</strong>。讀比較表中的 <strong>AU 列</strong>。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> a 7-row comparison table (US/SG/JP/AU/MY/UK/EU) — they read the <strong>AU row</strong>: Direct Income vs REIT Income, Direct Total vs REIT Total, Gap, Winner. In Local mode, the context cards on the right show "Local Mode" — no foreign WHT issues. A bar chart shows the USD terminal value for each market across 5/10/15/20-year horizons, toggleable by holding period. The Step 3 panel shows "Home Country" treaty effects (grayed out in Local mode since no treaty needed for domestic investors).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>7 列比較表（美/新/日/澳/馬/英/歐） — 讀 <strong>AU 那一列</strong>：Direct Income vs REIT Income、Direct Total vs REIT Total、Gap、Winner。本地模式下，右側脈絡卡顯示「Local Mode」 — 沒有外國預扣稅問題。長條圖顯示每個市場在 5/10/15/20 年持有期下的美元終值，可依持有期切換。Step 3 面板顯示「母國」協定效應（本地投資者不需要，因此在本地模式下為灰色）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">Local mode removes the withholding tax complexity that Foreign mode adds. In Local mode, A-REITs are taxed as ordinary income through the trust distribution; direct property income is taxed as rental income (similar treatment) but direct property retains the CGT 50% discount on capital gains. The REIT vs Direct tool quantifies this structural difference. Since the Wangs are buying to live — not as pure investment — their "direct property" effectively earns the capital gain while providing the lifestyle asset simultaneously. A-REIT can't do that.</span><span class="lang-zh">本地模式去除了外國模式中的預扣稅複雜性。本地模式下，A-REIT 通過信託分配作為普通收入課稅；直接房產收入作為租金收入課稅（類似待遇），但直接房產保留資本利得的 50% CGT 折扣。REIT vs Direct 工具量化了這個結構差異。由於王家買來自住 — 不是純投資 — 他們的「直接房產」在提供生活資產的同時獲得資本利得。A-REIT 無法做到這一點。</span></div>
+      <div class="step-screenshot"><img src="img/10-reit-vs-direct-au-local.png" alt="REIT vs Direct with Local / 10yr / AU row visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 11 — Carry Heatmap AU rows -->
+  <div class="demo-step">
+    <div class="step-no">11</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Carry Heatmap — does AU still offer positive carry relative to other markets?</span><span class="lang-zh">Carry Heatmap — 澳洲相對其他市場仍有正 carry 嗎？</span></h4>
+      <div class="step-url"><a href="/tools/carry-heatmap.html">myproperty.investmquest.com/tools/carry-heatmap</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Carry Heatmap</strong>. They scan the table and find the <strong>AU rows</strong> (one per city: Sydney, Melbourne, Brisbane, Gold Coast). They read each city's Gross Yield, Running Costs, Net Carry, and Growth Score columns, and compare the color heat to other markets (JP, MY, SG).</span>
+        <span class="lang-zh">navbar → Tools → <strong>Carry Heatmap</strong>。掃描表格，找到 <strong>AU 各列</strong>（每城市一列：雪梨、墨爾本、布里斯本、黃金海岸）。讀每個城市的毛收益率、持有成本、淨 carry 和增值評分欄，並與其他市場（日本、馬來西亞、新加坡）比較熱力顏色。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> a multi-city heatmap table where each cell is color-coded from deep green (strong) to red (weak). AU cities have lower gross yields than JP or MY, but the Growth Score column reflects strong capital appreciation track records. The net carry column (yield minus holding costs) may show negative or thin carry for Sydney and Melbourne, but Brisbane and Gold Coast tend to show better net figures due to higher rent growth. A bubble chart typically plots yield vs growth score by city, helping them visualize the trade-off.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>多城市熱力圖表，每個格子從深綠（強）到紅（弱）色碼標示。澳洲城市毛收益率低於日本或馬來西亞，但增值評分欄反映強勁的資本增值歷史紀錄。淨 carry 欄（收益率減持有成本）在雪梨和墨爾本可能顯示負值或偏薄，但布里斯本和黃金海岸因較高的租金增長通常顯示較好的淨值。氣泡圖通常按城市繪製收益率 vs 增值評分，幫助他們視覺化取捨。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">the Carry Heatmap answers the "why AU, not JP or MY" question with a cross-market visual. The Wangs are growth-focused, so the Growth Score column matters more than net carry to them — and Brisbane's growth score should be the highest among AU cities in this table. They also use this page to confirm there's no obvious "carry trap" (where yield barely covers costs, leaving them with negative cash flow on the investment portion), which would be painful for a family making a lifestyle purchase.</span><span class="lang-zh">Carry Heatmap 用跨市場視覺圖回答「為什麼選澳洲而非日本或馬來西亞」的問題。王家以增值為重，所以增值評分欄比淨 carry 更重要 — 布里斯本的增值評分在此表澳洲城市中應最高。他們也用這頁確認沒有明顯的「carry 陷阱」（收益率僅勉強覆蓋成本，讓投資部分產生負現金流），這對做生活方式購買的家庭會很痛苦。</span></div>
+      <div class="step-screenshot"><img src="img/11-carry-heatmap-au.png" alt="Carry heatmap with AU city rows visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 12 — /au/risk + /methodology -->
+  <div class="demo-step">
+    <div class="step-no">12</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Risk Monitor + Methodology — verify the data before acting</span><span class="lang-zh">Risk Monitor + Methodology — 行動前驗證資料來源</span></h4>
+      <div class="step-url"><a href="/au/risk.html">/au/risk</a> · <a href="/methodology.html">/methodology</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Wangs do:</span><span class="lang-zh">王家動作：</span></strong>
+        <span class="lang-en">navbar 🇦🇺 → <strong>Risk / 風險</strong>. They scan the 6 KPI risk cards (RBA Cash Rate, Affordability, Construction Gap, Migration Policy, US Tariff Risk, Climate Risk), then study the two side-by-side charts: <strong>Risk Radar: Current vs 2020</strong> and <strong>Rate Sensitivity Analysis</strong>. They read the Policy Timeline at the bottom. Final stop: navbar → Tools → <strong>Methodology / 方法論</strong> to find the Australia source row.</span>
+        <span class="lang-zh">navbar 🇦🇺 → <strong>Risk / 風險</strong>。掃 6 張 KPI 風險卡（RBA 利率、負擔能力、建設缺口、移民政策、美國關稅風險、氣候風險），再看兩張並排圖：<strong>風險雷達：目前 vs 2020</strong> 和<strong>利率敏感度分析</strong>。讀底部政策時間線。最後一站：navbar → Tools → <strong>Methodology / 方法論</strong>，找澳洲資料來源列。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see on Risk:</strong> 6 KPI cards — RBA Cash Rate (red), Affordability "Worst Since 1995" (red), Construction Gap "Below 300K Target" (orange), Migration Policy "Uncertain" (orange), US Tariff Risk "Elevated" (orange), Climate Risk "Rising / Flood &amp; Fire" (orange).<br>
+        Risk Radar chart: 6 axes (Macro / Credit / Supply / Affordability / Policy / Climate) — current reading vs 2020 baseline, showing where risk has increased most. Rate Sensitivity chart shows yield spread and affordability impact across RBA rate scenarios.<br>
+        Policy Timeline: 2022 rate hikes → 2023 peak 4.35% → 2024 held → 2025 held → Feb 2026 cut 3.85% (highlighted).<br>
+        <strong>On Methodology:</strong> the Australia row shows: Price Index = CoreLogic &middot; Rent / Vacancy = SQM Research &middot; Transactions = ABS &middot; Central Bank = RBA.</span>
+        <span class="lang-zh"><strong>Risk 頁出現什麼：</strong>6 張 KPI 卡 — RBA 利率（紅）、負擔能力「1995年以來最差」（紅）、建設缺口「低於30萬目標」（橘）、移民政策「不確定」（橘）、美國關稅風險「升高」（橘）、氣候風險「上升/洪水與火災」（橘）。<br>
+        風險雷達圖：6 軸（總經/信貸/供給/負擔能力/政策/氣候） — 當前讀數 vs 2020 基準，顯示哪裡風險增加最多。利率敏感度圖顯示不同 RBA 利率情境下的利差與負擔能力影響。<br>
+        政策時間線：2022 開始升息 → 2023 峰值 4.35% → 2024 維持 → 2025 維持 → 2026 年 2 月降至 3.85%（高亮）。<br>
+        <strong>Methodology：</strong>澳洲列：Price Index = CoreLogic · Rent / Vacancy = SQM Research · Transactions = ABS · Central Bank = RBA。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Wangs:</span><span class="lang-zh">對王家：</span></strong> <span class="lang-en">two risks in the Risk Radar are especially relevant to growth buyers: (1) <strong>Affordability</strong> — at historic stress, which caps how far prices can run on leverage, but PR buyers like the Wangs can likely deploy all-cash or high-LVR financing since they're residents, and the CGT discount insulates them on exit. (2) <strong>Climate Risk</strong> — flood &amp; fire is explicitly flagged; a Brisbane buyer should check flood zone maps (Council Flood Map) before committing to a suburb. <em>These are not showstoppers, but they're the two flags the site raises explicitly for AU that foreign buyers of other markets might miss.</em></span><span class="lang-zh">風險雷達中有兩個風險對增值型買家尤其相關：(1) <strong>負擔能力</strong> — 歷史壓力水位，限制房價能靠槓桿跑多遠，但王家這樣的 PR 買家可能以全現金或高 LVR 貸款切入（因為是居民），退出時 CGT 折扣也有保護。(2) <strong>氣候風險</strong> — 洪水與火災被明確標示；布里斯本買家在確定郊區前應查閱洪水區地圖（市政府洪水地圖）。<em>這些不是否決項，但這兩個標記是澳洲明確被列出、其他市場的外國買家可能忽視的。</em></span></div>
+      <div class="step-screenshot"><img src="img/12-au-risk.png" alt="AU Risk Monitor with Risk Radar and Policy Timeline" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 3 — SITE CHEAT SHEET                   -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 03</div>
+    <h2><span class="lang-en">Site cheat sheet — the 6 site-wide patterns the Wangs need to know</span><span class="lang-zh">網站小抄 — 王家要記得的 6 個全站通用規則</span></h2>
+    <p class="sec-sub"><span class="lang-en">These work the same way on every page across all markets — learn once, use everywhere.</span><span class="lang-zh">以下規則每一頁、每個市場都一致 — 學一次，整站通用。</span></p>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4><span class="ck-icon">EN</span> <span class="lang-en">Language toggle</span><span class="lang-zh">語言切換</span></h4>
+      <p><span class="lang-en">Top-right of every page: two pill buttons <code>EN</code> / <code>中文</code>. Choice is remembered across pages and visits via localStorage.</span><span class="lang-zh">每頁右上角：兩顆膠囊鈕 <code>EN</code> / <code>中文</code>。選擇會用 localStorage 跨頁、跨次造訪記住。</span></p>
+      <p class="ck-tip"><span class="lang-en">Tip: switch to 中文 first, then download PDF — the PDF will be in 中文.</span><span class="lang-zh">小技巧：先切到中文再下載 PDF，PDF 就會是中文版。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🇦🇺</span> <span class="lang-en">Market selector</span><span class="lang-zh">市場選擇</span></h4>
+      <p><span class="lang-en">Navbar second row: a country flag for each market. Hover 🇦🇺 to see: Overview / Supply / Demand / Valuation / Risk / Macro / Report + city sub-pages (Sydney · Melbourne · Brisbane · Gold Coast).</span><span class="lang-zh">Navbar 第二列：每個市場一面國旗。游標停在 🇦🇺 → 跳出下拉，含 Overview / Supply / Demand / Valuation / Risk / Macro / Report 與城市子頁（雪梨 · 墨爾本 · 布里斯本 · 黃金海岸）。</span></p>
+      <p class="ck-tip"><span class="lang-en">The Wangs use 🇦🇺 → Brisbane to jump straight to city detail after the triage decision.</span><span class="lang-zh">王家在城市篩選決策後，用 🇦🇺 → Brisbane 直接跳到城市深度頁。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">⚙</span> <span class="lang-en">Tools dropdown</span><span class="lang-zh">Tools 下拉選單</span></h4>
+      <p><span class="lang-en">All cross-market analytical tools: <code>Home</code>, <code>Dashboard</code>, <code>REIT vs Direct</code>, <code>Carry Heatmap</code>, <code>Pipeline Cliff</code>, <code>Cost Calculator</code>, <code>Methodology</code>, <code>Buy vs Rent</code>, <code>Stress Test</code>, <code>Yield Spread</code>.</span><span class="lang-zh">所有跨市場分析工具：<code>Home</code>、<code>Dashboard</code>、<code>REIT vs Direct</code>、<code>Carry Heatmap</code>、<code>Pipeline Cliff</code>、<code>Cost Calculator</code>、<code>Methodology</code>、<code>Buy vs Rent</code>、<code>Stress Test</code>、<code>Yield Spread</code>。</span></p>
+      <p class="ck-tip"><span class="lang-en">If a tool isn't market-specific, it's in here — including the Stress Test which lets Wangs model a rate-shock on their mortgage.</span><span class="lang-zh">非市場專屬工具都在這裡 — 包括 Stress Test，可讓王家模擬利率衝擊對房貸的影響。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🟢</span> <span class="lang-en">KPI card colors</span><span class="lang-zh">KPI 卡顏色</span></h4>
+      <p><span class="lang-en">Left border color tells you the read at a glance.</span><span class="lang-zh">左邊框顏色一眼告訴你判讀。</span></p>
+      <div class="color-legend">
+        <div class="cl-item"><span class="cl-dot cl-green"></span><span class="lang-en">positive</span><span class="lang-zh">正向</span></div>
+        <div class="cl-item"><span class="cl-dot cl-orange"></span><span class="lang-en">caution</span><span class="lang-zh">注意</span></div>
+        <div class="cl-item"><span class="cl-dot cl-red"></span><span class="lang-en">risk</span><span class="lang-zh">風險</span></div>
+        <div class="cl-item"><span class="cl-dot cl-blue"></span><span class="lang-en">neutral</span><span class="lang-zh">中性</span></div>
+      </div>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🏙</span> <span class="lang-en">Four city deep-dives</span><span class="lang-zh">四個城市深度頁</span></h4>
+      <p><span class="lang-en">AU has four city deep-dive pages: <code>/au/sydney</code>, <code>/au/melbourne</code>, <code>/au/brisbane</code>, <code>/au/goldcoast</code>. Each has its own KPI grid, section-by-section analysis, and ECharts. Open all four in tabs for the triage comparison.</span><span class="lang-zh">澳洲有四個城市深度頁：<code>/au/sydney</code>、<code>/au/melbourne</code>、<code>/au/brisbane</code>、<code>/au/goldcoast</code>。各有自己的 KPI grid、逐段分析和 ECharts。全部在分頁開啟做篩選比較。</span></p>
+      <p class="ck-tip"><span class="lang-en">Melbourne deep-dive explicitly flags East zone (Box Hill, Glen Waverley) for top school zones — useful if education is the #1 filter.</span><span class="lang-zh">墨爾本深度頁明確標示東區（博士山、格倫韋弗利）為頂級學區 — 如果教育是第一篩選標準，這很有用。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">📄</span> <span class="lang-en">Save any page as PDF</span><span class="lang-zh">把任何頁面存成 PDF</span></h4>
+      <p><span class="lang-en">Press <code>⌘ + P</code> (Mac) or <code>Ctrl + P</code> (Windows) → choose "Save as PDF". The print stylesheet hides the navbar so the PDF looks clean.</span><span class="lang-zh">按 <code>⌘ + P</code>（Mac）或 <code>Ctrl + P</code>（Windows）→ 選「另存為 PDF」。印刷樣式表會自動隱藏 navbar，PDF 版面乾淨。</span></p>
+      <p class="ck-tip"><span class="lang-en">This walkthrough has a dedicated "Download PDF" button at the bottom.</span><span class="lang-zh">本導覽底部有專屬「下載 PDF」按鈕。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 4 — TAKEAWAY                           -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 04</div>
+    <h2><span class="lang-en">What the Wangs walk away with — and what they must take outside this site</span><span class="lang-zh">王家帶走什麼 — 以及哪些必須拿到站外去問</span></h2>
+    <p class="sec-sub"><span class="lang-en">After the 12-stop tour, they have a clear separation between "questions the site answered" and "questions the site flagged but cannot answer."</span><span class="lang-zh">走完 12 站後，他們能清楚分開「網站已回答的問題」與「網站幫他們點出但不能回答的問題」。</span></p>
+  </div>
+
+  <div class="takeaway">
+    <div class="takeaway-card answered">
+      <h4><span class="lang-en">✓ The site answered these for them</span><span class="lang-zh">✓ 網站已回答的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Which persona to pick</strong> on /home ("growth") and how it reweights the map to highlight Brisbane and Gold Coast as the 10-year capital growth leaders</span><span class="lang-zh"><strong>首頁選哪個 persona</strong>（「增值」），以及它如何重新調整地圖，突出布里斯本和黃金海岸為十年資本增值領先者</span></li>
+        <li><span class="lang-en"><strong>The full market narrative</strong> in plain prose before they click any chart — AU report covers RBA cycle, structural supply deficit, city deep dives (§6–8)</span><span class="lang-zh"><strong>用白話文寫的完整市場敘述</strong>，在點任何圖之前先讀 — 澳洲報告涵蓋 RBA 週期、結構性供給赤字、城市深度研究（§6–8）</span></li>
+        <li><span class="lang-en"><strong>City triage logic</strong> — Sydney over-budget for house / Melbourne East school zones but land tax headwind / Gold Coast lifestyle but weaker school proximity / Brisbane: budget headroom + top YoY + Cross River Rail + 2032 Olympics</span><span class="lang-zh"><strong>城市篩選邏輯</strong> — 雪梨房屋超預算 / 墨爾本東區學區好但土地稅逆風 / 黃金海岸生活好但學校毗鄰較弱 / 布里斯本：預算有餘裕 + 頂級年增率 + 跨河鐵路 + 2032 奧運</span></li>
+        <li><span class="lang-en"><strong>Brisbane supply pipeline</strong> — via Pipeline Cliff, confirms mid-term supply is constrained (no flood of new units expected in years 3–5 of their hold)</span><span class="lang-zh"><strong>布里斯本供給管道</strong> — 透過 Pipeline Cliff，確認中期供給受限（持有 3–5 年期間預計不會出現新供給洪流）</span></li>
+        <li><span class="lang-en"><strong>What PR status saves them</strong> — Cost Calculator Resident mode shows no foreign surcharge; toggling Foreigner reveals the exact amount saved (varies by state; for QLD purchases it's 7% surcharge avoided)</span><span class="lang-zh"><strong>PR 身分幫他們省了多少</strong> — Cost Calculator 居民模式顯示免外國附加稅；切換到外國人模式顯示精確節省金額（因州而異；昆士蘭購房避免 7% 附加）</span></li>
+        <li><span class="lang-en"><strong>10-year total cost structure</strong> as a resident — acquisition (resident stamp duty), holding (council rates, strata, insurance, land tax), exit (CGT with 50% discount if held 12m+)</span><span class="lang-zh"><strong>居民身分的 10 年總成本結構</strong> — 取得（居民印花稅）、持有（市政費、物業費、保險、地稅）、退出（CGT，持有 12 個月以上享 50% 折扣）</span></li>
+        <li><span class="lang-en"><strong>Direct property vs A-REIT comparison</strong> in Local mode — REIT vs Direct confirms direct property retains CGT 50% discount (not available on REIT trust income) and provides the lifestyle asset simultaneously</span><span class="lang-zh"><strong>本地模式下直接房產 vs A-REIT 比較</strong> — REIT vs Direct 確認直接房產保留 CGT 50% 折扣（信託收入不享有），且同時提供生活資產</span></li>
+        <li><span class="lang-en"><strong>AU's position in cross-market carry</strong> — Carry Heatmap confirms Brisbane/Gold Coast growth score is the top AU entry; lower gross yield than JP/MY but superior capital growth trajectory and currency stability</span><span class="lang-zh"><strong>澳洲在跨市場 carry 中的位置</strong> — Carry Heatmap 確認布里斯本/黃金海岸增值評分是澳洲最高；毛收益率低於日本/馬來西亞，但資本增值軌跡和貨幣穩定性更佳</span></li>
+        <li><span class="lang-en"><strong>Two flagged risks for AU buyers</strong> — Affordability at historic stress (AU risk page) and Climate Risk (flood &amp; fire) — the site names both explicitly so they know what to verify with local advisors</span><span class="lang-zh"><strong>澳洲買家的兩個標記風險</strong> — 負擔能力達歷史壓力水位（澳洲 risk 頁）和氣候風險（洪水與火災） — 網站明確點名兩者，讓他們知道需要向當地顧問確認什麼</span></li>
+        <li><span class="lang-en"><strong>Where every number comes from</strong> — Methodology page AU row: CoreLogic · SQM Research · ABS · RBA</span><span class="lang-zh"><strong>每個數字的來源</strong> — Methodology 頁澳洲列：CoreLogic · SQM Research · ABS · RBA</span></li>
+      </ul>
+    </div>
+
+    <div class="takeaway-card outsource">
+      <h4><span class="lang-en">→ Questions for advisors outside this site</span><span class="lang-zh">→ 必須拿到站外問專業人士的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Suburb flood zone check</strong> — Brisbane Council flood maps before committing to a specific suburb; flood insurance availability and premium → Brisbane City Council flood overlay map + insurance broker</span><span class="lang-zh"><strong>郊區洪水區確認</strong> — 在確定具體郊區前查布里斯本市政府洪水地圖；洪水保險的可得性和保費 → 布里斯本市政府洪水覆蓋地圖 + 保險經紀</span></li>
+        <li><span class="lang-en"><strong>School zone catchment verification</strong> — state school catchments change annually; exact street-level enrolment eligibility must be confirmed with Queensland State Schools Office → QDET school catchment tool</span><span class="lang-zh"><strong>學區學籍資格確認</strong> — 公立學校學區每年變動；確切到街道級別的入學資格必須向昆士蘭州教育局確認 → QDET 學區查詢工具</span></li>
+        <li><span class="lang-en"><strong>CGT structuring and tax residency</strong> — if the Wangs have Taiwanese-source income, the AU-TW tax relationship (no formal DTA) and their AU tax residency status affect CGT, rental income, and offshore income reporting → AU-registered tax agent (CPA or CA)</span><span class="lang-zh"><strong>CGT 結構和稅務居民身分</strong> — 若王家有台灣來源收入，澳台關係（無正式租稅協定）和他們的澳洲稅務居民身分影響 CGT、租金收入和境外收入申報 → 澳洲註冊稅務代理（CPA 或 CA）</span></li>
+        <li><span class="lang-en"><strong>Strata/body corporate inspection</strong> — for units and townhouses, strata records (AGM minutes, sinking fund balance, levy history, insurance) must be physically inspected → licensed strata inspector in Brisbane</span><span class="lang-zh"><strong>分層產權/業主委員會記錄查驗</strong> — 公寓和連棟住宅的分層產權記錄（業主大會記錄、維修基金結餘、管理費歷史、保險）必須實物查閱 → 布里斯本持牌分層產權檢查員</span></li>
+        <li><span class="lang-en"><strong>Mortgage pre-approval as PR holders</strong> — lenders treat PRs differently from citizens on foreign income documentation; Taiwanese-sourced income requires assessment under APRA guidelines → major bank or mortgage broker (Westpac, CBA, ANZ or specialist broker)</span><span class="lang-zh"><strong>持 PR 的房貸預批</strong> — 貸款機構對持台灣來源收入的 PR 和公民有不同文件要求；台灣來源收入需依 APRA 指引評估 → 主要銀行或房貸經紀（西太平洋銀行、聯邦銀行、澳新銀行或專業經紀）</span></li>
+        <li><span class="lang-en"><strong>Building and pest inspection</strong> — mandatory before unconditional exchange; a property that looks clean on paper can have structural issues invisible to the market data → licensed inspector in Brisbane</span><span class="lang-zh"><strong>建築和蟲害檢查</strong> — 無條件交換前必做；表面上資料清晰的物業可能有市場數據看不到的結構問題 → 布里斯本持牌檢查員</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 5 — DOWNLOAD PDF                       -->
+  <!-- ============================================== -->
+  <!-- ============================================== -->
+  <!-- SECTION 5 — BEST OPTION                         -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 05</div>
+    <h2><span class="lang-en">The site's best-supported call for the Wang Family</span><span class="lang-zh">站上資料能支持的最佳選項 — 給王家</span></h2>
+    <p class="sec-sub"><span class="lang-en">Not a personalized recommendation — a single, opinionated call assembled only from data this site already shows in SECTIONS 01–04.</span><span class="lang-zh">非個人化推薦 — 是從 SECTION 01–04 站上資料推導出的單一明確建議。</span></p>
+  </div>
+
+  <div class="best-option">
+    <div class="bo-grid">
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">CITY / AREA</span><span class="lang-zh">城市 / 區域</span></div>
+        <div class="bo-val">Sydney Lower North Shore</div>
+        <div class="bo-note"><span class="lang-en">Chatswood / Lane Cove / Willoughby — strong public school catchment + train to CBD.</span><span class="lang-zh">Chatswood / Lane Cove / Willoughby — 公校學區強 + 火車直達 CBD。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">PRODUCT</span><span class="lang-zh">產品類型</span></div>
+        <div class="bo-val">3-bed house (not apartment)</div>
+        <div class="bo-note"><span class="lang-en">Standalone or semi-detached, land component for long-term value; apartments under-perform for family use.</span><span class="lang-zh">獨棟或半獨棟，土地比例支撐長期價值；公寓對家庭使用 under-perform。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">BUDGET MIX</span><span class="lang-zh">預算配置</span></div>
+        <div class="bo-val">A$1.6M asset + A$150K stamp duty + A$50K buffer</div>
+        <div class="bo-note"><span class="lang-en">PR rates (no FIRB surcharge); buffer covers first-year settlement + inspection contingency.</span><span class="lang-zh">PR 稅率（無 FIRB 附加）；buffer 覆蓋首年安置 + 檢查預備金。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">HOLD</span><span class="lang-zh">持有期</span></div>
+        <div class="bo-val">10–12 years</div>
+        <div class="bo-note"><span class="lang-en">Until kids finish high school + university decision window; CGT main residence exemption applies.</span><span class="lang-zh">至子女高中 + 大學決策窗口；適用 CGT 主要住所豁免。</span></div>
+      </div>
+    </div>
+
+    <div class="bo-section bo-checklist">
+      <h4><span class="lang-en">✓ Pre-commit checklist (from site data)</span><span class="lang-zh">✓ 進場前 checklist（站上資料能驗證的）</span></h4>
+      <ul>
+        <li><span class="lang-en"><code>/au/sydney.html</code> KPI metrics: median price for Lower North Shore stays within their A$1.8M ceiling at offer week.</span><span class="lang-zh"><code>/au/sydney.html</code> KPI：Lower North Shore 中位價在出價週仍在 A$1.8M 上限內。</span></li>
+        <li><span class="lang-en">Pipeline Cliff Sydney status not DANGER (next 2–3 years supply absorbable).</span><span class="lang-zh">Sydney Pipeline Cliff 不在 DANGER（未來 2-3 年供給可去化）。</span></li>
+        <li><span class="lang-en"><code>/au/</code> Carry Heatmap: Sydney 5-year direction not declining; rolling yield positive.</span><span class="lang-zh"><code>/au/</code> Carry Heatmap：Sydney 5 年方向不下行、rolling yield 為正。</span></li>
+        <li><span class="lang-en">Risk page macro/policy: RBA rate cycle past peak, NSW stamp duty regime stable.</span><span class="lang-zh">Risk 頁 macro/政策：RBA 升息週期過峰、NSW 印花稅制穩定。</span></li>
+        <li><span class="lang-en">Cost Calculator 10-year cost (PR rates, no FIRB surcharge) clears their education-priority budget.</span><span class="lang-zh">Cost Calculator 10 年成本（PR 稅率、無 FIRB）通過教育優先預算。</span></li>
+      </ul>
+    </div>
+
+    <div class="bo-section bo-next">
+      <h4><span class="lang-en">→ Off-site next steps (the site cannot answer)</span><span class="lang-zh">→ 走出站外的下一步（站上無法回答的）</span></h4>
+      <ol>
+        <li><span class="lang-en"><strong>MARA-registered migration agent</strong> — PR maintenance, citizenship pathway, residence requirements while child schooling.</span><span class="lang-zh"><strong>MARA 註冊移民顧問</strong> — PR 維持、入籍路徑、子女就學期間居住要求。</span></li>
+        <li><span class="lang-en"><strong>Australian tax accountant</strong> — TW/AU dual tax position, CGT main residence rule, super contribution strategy.</span><span class="lang-zh"><strong>澳洲稅務會計師</strong> — TW/AU 雙重稅務、CGT 主要住所規則、super 提撥策略。</span></li>
+        <li><span class="lang-en"><strong>Mortgage broker</strong> — PR borrower options, typically 80% LTV; lock fixed/variable mix before offer.</span><span class="lang-zh"><strong>房貸經紀</strong> — PR 借款方案、一般 LTV 80%；出價前先 lock 固定/浮動組合。</span></li>
+        <li><span class="lang-en"><strong>Building & pest inspector + conveyancer</strong> — single-house DD: termite history, drainage, council overlays, easements.</span><span class="lang-zh"><strong>建物 + 病蟲害檢查 + conveyancer</strong> — 單棟 DD：白蟻歷史、排水、市議會 overlay、地役權。</span></li>
+        <li><span class="lang-en"><strong>School zone verification</strong> with NSW Education + property certificate — site cannot guarantee catchment, only the official certificate does.</span><span class="lang-zh"><strong>學區驗證</strong> 透過 NSW Education + 房產證書 — 站上無法保證學區歸屬，只有官方證書能。</span></li>
+      </ol>
+    </div>
+
+    <div class="bo-bottomline">
+      <span class="bo-bl-label"><span class="lang-en">BOTTOM LINE</span><span class="lang-zh">底線</span></span>
+      <p><span class="lang-en">A 3-bed house in Sydney Lower North Shore is the single call most consistent with the 12 stops for a PR family prioritising schooling. The site cannot pick the exact suburb or school catchment — that is the off-site work that determines whether the call survives.</span><span class="lang-zh">Sydney Lower North Shore 的 3-bed 透天是 12 站走完後對「PR + 學區優先」家庭最一致的選項。但具體 suburb 與學區歸屬 — 站上無法替你選，那些才決定這個選項能不能執行。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 6 — DOWNLOAD PDF                        -->
+  <!-- ============================================== -->
+  <div class="pdf-bar">
+    <button type="button" class="pdf-btn" onclick="window.print()">
+      <span>📄</span>
+      <span class="lang-en">Download this walkthrough as PDF</span><span class="lang-zh">下載這份導覽為 PDF</span>
+    </button>
+    <a class="pdf-btn ghost" href="/demo/">
+      <span>←</span>
+      <span class="lang-en">Back to all walkthroughs</span><span class="lang-zh">回所有導覽</span>
+    </a>
+  </div>
+
+  <div class="source-footer" style="margin-top:24px">
+    <span class="lang-en"><strong>Sources used in this walkthrough:</strong> CoreLogic (median prices, YoY growth, clearance rates), SQM Research (vacancy, listings), ABS (transactions, migration, construction), RBA (cash rate), NHSAC (supply pipeline, Housing Accord). Last refresh: Q1 2026. See <a href="/methodology.html" style="color:#2563eb">/methodology</a> for per-metric source and known limitations. This walkthrough uses data visible on the site — all numbers are drawn from the AU pages; none are generated here independently.</span>
+    <span class="lang-zh"><strong>本導覽使用的資料來源：</strong>CoreLogic（中位價、年增率、清盤率）、SQM Research（空置率、掛牌量）、ABS（交易量、移民、建設）、RBA（現金利率）、NHSAC（供給管道、住房協議）。最後刷新：2026 Q1。逐指標來源與已知限制見 <a href="/methodology.html" style="color:#2563eb">/methodology</a>。本導覽使用站上可見數據 — 所有數字均來自 AU 頁面；本文不獨立生成任何數字。</span>
+    <br><br>
+    <span class="lang-en"><em>Disclaimer: This walkthrough demonstrates how to use Property Monitor for a specific decision flow. It is not investment, tax, property, or legal advice. PR status and tax treatment described reflects Australian law as of Q1 2026 and may change; confirm with a licensed AU tax agent and conveyancer. School zone eligibility must be verified directly with Queensland state school authorities. Flood zone risk must be checked with Brisbane City Council flood maps and a licensed building inspector. Personal tax, financing, and entity structure must be confirmed with licensed advisors in the relevant jurisdiction.</em></span>
+    <span class="lang-zh"><em>免責聲明：本導覽示範如何使用 Property Monitor 支援特定決策流程，並非投資、稅務、不動產或法律建議。描述的 PR 身分和稅務待遇反映 2026 年第一季澳洲法律現況，可能有所變動；請向持牌澳洲稅務代理和產權律師確認。學區入學資格必須直接向昆士蘭州立學校當局確認。洪水區風險必須向布里斯本市政府洪水地圖和持牌建築檢查員確認。個人稅務、融資和持有架構，請務必諮詢當地有牌照的專業人士。</em></span>
+  </div>
+
+</main>
+
+<script src="/js/navbar.js" defer></script>
+<script>
+function getLang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function applyLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+}
+window.addEventListener('load',function(){applyLang(getLang());
+  setTimeout(function(){applyLang(getLang());},120);
+});
+window.addEventListener('storage',function(e){if(e.key==='lang')applyLang(getLang());});
+</script>
+
+</body>
+</html>

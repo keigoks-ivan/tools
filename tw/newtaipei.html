@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Taipei Deep Dive | Taiwan Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: APRIL 2026</span><span class="lang-zh" style="display:none">最後更新：2026年4月</span></span>
+      <h1><span class="lang-en">NEW TAIPEI &mdash; DEEP DIVE</span><span class="lang-zh" style="display:none">新北市——深度分析</span></h1>
+      <p class="subtitle"><span class="lang-en">April 2026 &middot; Data: MOI / NCCU / Sinyi / CBC</span><span class="lang-zh" style="display:none">2026年4月 &middot; 資料來源：內政部 / 政大 / 信義 / 央行</span></p>
+    </div>
+
+    <!-- SECTION 1: EXEC SUMMARY -->
+    <div class="section-label"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></div>
+    <div class="insight-box">
+      <span class="lang-en">New Taipei is Taiwan's most populous city (4M+ residents). Average home price ~NT$12M. Unsold inventory stands at 2.0万 units &mdash; the highest among all six cities. 2025 transactions fell -22% YoY. Price-to-income ratio: 14.03x. Old housing stock: 51.1% over 30 years (94.8万 units &mdash; the absolute highest nationally). The market is deeply bifurcated: egg-yolk districts (Banqiao, Zhonghe, Yonghe) remain stable, while peripheral redevelopment zones (Wugu Zhouzaiyang, Yingge Fengming) face severe oversupply pressure. Population shows slight net inflow.</span>
+      <span class="lang-zh" style="display:none">新北市是台灣人口最多的城市（400萬+居民）。平均房價約NT$1,200萬。待售庫存達2.0萬戶——六都最高。2025年交易量年減-22%。房價所得比14.03倍。老屋比例：51.1%屋齡逾30年（94.8萬戶，全國絕對值最高）。市場呈現明顯兩極化：蛋黃區（板橋、中和、永和）穩定；外圍重劃區（五股洲子洋、鶯歌鳳鳴）面臨嚴重供給過剩壓力。人口呈現微幅淨流入。</span>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">AVG HOME PRICE</span><span class="lang-zh" style="display:none">平均房價</span></div>
+        <div class="kpi-value">~NT$12M</div>
+        <span class="badge badge-blue"><span class="lang-en">Most populous city</span><span class="lang-zh" style="display:none">台灣人口最多城市</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">UNSOLD INVENTORY</span><span class="lang-zh" style="display:none">待售庫存</span></div>
+        <div class="kpi-value">2.0萬</div>
+        <span class="badge badge-red"><span class="lang-en">Six-city HIGHEST</span><span class="lang-zh" style="display:none">六都最高</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">2025 TXN YoY</span><span class="lang-zh" style="display:none">2025年交易量年增</span></div>
+        <div class="kpi-value">-22%</div>
+        <span class="badge badge-red"><span class="lang-en">Volume contraction</span><span class="lang-zh" style="display:none">量縮明顯</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">PRICE-TO-INCOME</span><span class="lang-zh" style="display:none">房價所得比</span></div>
+        <div class="kpi-value">14.03x</div>
+        <span class="badge badge-orange"><span class="lang-en">Severely unaffordable</span><span class="lang-zh" style="display:none">嚴重不可負擔</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">OLD HOUSING (30yr+)</span><span class="lang-zh" style="display:none">老屋比例（30年+）</span></div>
+        <div class="kpi-value">51.1%</div>
+        <span class="badge badge-orange"><span class="lang-en">94.8万 units &middot; National highest</span><span class="lang-zh" style="display:none">94.8萬戶 &middot; 全國最高</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">POPULATION TREND</span><span class="lang-zh" style="display:none">人口趨勢</span></div>
+        <div class="kpi-value">4M+</div>
+        <span class="badge badge-green"><span class="lang-en">Slight net inflow</span><span class="lang-zh" style="display:none">微幅淨流入</span></span>
+      </div>
+    </div>
+
+    <!-- SECTION 2: MARKET STRUCTURE -->
+    <div class="section-label"><span class="lang-en">MARKET STRUCTURE: 29 DISTRICTS, 4-5 SUB-MARKETS</span><span class="lang-zh" style="display:none">市場結構：29區、4-5個次市場</span></div>
+    <div class="insight-box">
+      <span class="lang-en">New Taipei's 29 districts show extreme variation. Banqiao functions as a mini-Taipei (avg 55&ndash;65万/ping). Yonghe/Zhonghe are mature communities (45&ndash;55万/ping). Tucheng/Xindian represent mid-range options (35&ndash;45万/ping). Wugu/Linkou/Sanxia offer affordability but carry high supply risk (25&ndash;35万/ping). Key insight: New Taipei is NOT one market &mdash; it is 4&ndash;5 distinct sub-markets with fundamentally different risk-return profiles.</span>
+      <span class="lang-zh" style="display:none">新北市29個行政區呈現極端分化。板橋功能上等同「小台北」（均價55-65萬/坪）。永和/中和為成熟社區（45-55萬/坪）。土城/新店為中階選擇（35-45萬/坪）。五股/林口/三峽提供可負擔性但供給風險高（25-35萬/坪）。關鍵洞察：新北不是一個市場——而是4-5個風險報酬特性完全不同的次市場。</span>
+    </div>
+
+    <!-- SECTION 3: KEY DISTRICTS -->
+    <div class="section-label"><span class="lang-en">KEY DISTRICTS</span><span class="lang-zh" style="display:none">重點行政區</span></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Banqiao &mdash; CBD</span><span class="lang-zh" style="display:none">板橋——中心商業區</span></div>
+        <div class="micro-value">NT$55&ndash;65萬/坪</div>
+        <p><span class="lang-en">New Taipei's CBD and MRT hub. Yield ~2.5%. Stable pricing supported by strong transport connectivity and commercial infrastructure. Closest proxy to Taipei core within New Taipei.</span><span class="lang-zh" style="display:none">新北市中心商業區及捷運樞紐。毛收益率約2.5%。價格穩定，受惠於完善交通與商業基礎設施。新北市內最接近台北核心的區域。</span></p>
+      </div>
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Zhonghe / Yonghe &mdash; Mature</span><span class="lang-zh" style="display:none">中和 / 永和——成熟社區</span></div>
+        <div class="micro-value">NT$45&ndash;55萬/坪</div>
+        <p><span class="lang-en">Mature residential communities with limited new supply. Yield ~2.8%. High density, strong rental demand from Taipei commuters. Pricing anchored by scarcity of developable land.</span><span class="lang-zh" style="display:none">成熟住宅社區，新供給有限。毛收益率約2.8%。高密度、強勁的台北通勤族租賃需求。可開發土地稀缺支撐價格。</span></p>
+      </div>
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Tucheng / Xindian &mdash; Mid-Range</span><span class="lang-zh" style="display:none">土城 / 新店——中階</span></div>
+        <div class="micro-value">NT$35&ndash;45萬/坪</div>
+        <p><span class="lang-en">Mid-range residential with good MRT access. Yield ~3.0%. Balanced supply-demand dynamics. Popular with young families seeking space at lower total price points.</span><span class="lang-zh" style="display:none">中價位住宅區，捷運交通便利。毛收益率約3.0%。供需平衡。深受追求空間與較低總價的年輕家庭歡迎。</span></p>
+      </div>
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Wugu / Linkou &mdash; Suburban</span><span class="lang-zh" style="display:none">五股 / 林口——郊區</span></div>
+        <div class="micro-value">NT$25&ndash;35萬/坪</div>
+        <p><span class="lang-en">Suburban new development with HIGH oversupply risk (重劃區). Yield ~3.5%. Wugu Zhouzaiyang and surrounding redevelopment zones face the most severe inventory overhang in all of Taiwan.</span><span class="lang-zh" style="display:none">郊區新開發區，供給過剩風險極高（重劃區）。毛收益率約3.5%。五股洲子洋及周邊重劃區面臨全台最嚴重的庫存壓力。</span></p>
+      </div>
+    </div>
+
+    <!-- SECTION 4: SUPPLY PRESSURE -->
+    <div class="section-label"><span class="lang-en">SUPPLY PRESSURE</span><span class="lang-zh" style="display:none">供給壓力</span></div>
+    <div class="insight-box">
+      <span class="lang-en">New Taipei holds 2.0万 unsold units &mdash; the highest of all six cities. 2024 completion area reached 243万m&sup2;. Wugu Zhouzaiyang and Yingge Fengming are the two most oversupplied redevelopment zones in all of Taiwan. An expected 10%+ price correction in peripheral zones is already materializing. Developer concessions (free interior fit-out, parking upgrades, extended payment terms) are appearing with increasing frequency.</span>
+      <span class="lang-zh" style="display:none">新北市待售庫存達2.0萬戶——六都最高。2024年完工面積達243萬平方公尺。五股洲子洋和鶯歌鳳鳴是全台供給最過剩的兩個重劃區。外圍區域預期10%以上的價格修正已在發生。開發商讓利措施（免費裝潢、車位升級、延長付款期）出現頻率日益增加。</span>
+    </div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Price by District (万/ping)</span><span class="lang-zh" style="display:none">各區均價（萬/坪）</span></div>
+        <div style="position:relative;height:220px;"><div id="chartNTPEDistrict" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">New Taipei Transaction Trend</span><span class="lang-zh" style="display:none">新北市交易量趨勢</span></div>
+        <div style="position:relative;height:220px;"><div id="chartNTPETxn" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: DEMAND DRIVERS -->
+    <div class="section-label"><span class="lang-en">DEMAND DRIVERS</span><span class="lang-zh" style="display:none">需求驅動因素</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Primary demand driver: Taipei spillover &mdash; New Taipei is ~50% cheaper than Taipei core, making it the natural destination for priced-out buyers. MRT connectivity continues to improve (Circular Line, Sanying Line). The New Youth Loan program supports first-time buyers. However, the 7th wave credit controls suppress upgraders and investors, limiting transaction velocity. The result is a market sustained almost entirely by owner-occupier first-time buyer demand.</span>
+      <span class="lang-zh" style="display:none">主要需求驅動力：台北外溢效應——新北市價格約為台北核心區的50%，是被排擠買方的自然選擇。捷運持續擴展（環狀線、三鶯線）。新青安貸款支持首購族。然而，第七波信用管制壓抑換屋族和投資客，限制交易量。結果是市場幾乎完全依賴自住首購需求支撐。</span>
+    </div>
+
+    <!-- SECTION 6: RENTAL & YIELD -->
+    <div class="section-label"><span class="lang-en">RENTAL &amp; YIELD</span><span class="lang-zh" style="display:none">租賃與收益率</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Gross yield ranges from ~2.0&ndash;2.8% across New Taipei. Monthly rent for 2BR: NT$18,000&ndash;28,000 (Banqiao to Yonghe corridor). Vacancy is rising in new completions, particularly in peripheral redevelopment zones where rental demand is thin. CPI rent component increased +2.66% YoY, gradually catching up to price appreciation but from a very low base.</span>
+      <span class="lang-zh" style="display:none">新北市毛收益率約2.0-2.8%。兩房月租：NT$18,000-28,000（板橋至永和走廊）。新完工物件空置率上升，尤其是租賃需求薄弱的外圍重劃區。CPI租金分項年增+2.66%，逐步追趕房價漲幅，但基期偏低。</span>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">GROSS YIELD</span><span class="lang-zh" style="display:none">毛收益率</span></div>
+        <div class="kpi-value">2.0&ndash;2.8%</div>
+        <span class="badge badge-blue"><span class="lang-en">Varies by district</span><span class="lang-zh" style="display:none">依區域而異</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">2BR MONTHLY RENT</span><span class="lang-zh" style="display:none">兩房月租</span></div>
+        <div class="kpi-value">NT$18K&ndash;28K</div>
+        <span class="badge badge-green"><span class="lang-en">Banqiao&ndash;Yonghe corridor</span><span class="lang-zh" style="display:none">板橋至永和走廊</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">CPI RENT YoY</span><span class="lang-zh" style="display:none">CPI租金年增</span></div>
+        <div class="kpi-value">+2.66%</div>
+        <span class="badge badge-orange"><span class="lang-en">Catching up to prices</span><span class="lang-zh" style="display:none">逐步追趕房價</span></span>
+      </div>
+    </div>
+
+    <!-- SECTION 7: OUTLOOK -->
+    <div class="section-label"><span class="lang-en">OUTLOOK</span><span class="lang-zh" style="display:none">展望</span></div>
+    <div class="summary-grid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="summary-card green">
+        <div class="summary-title"><span class="lang-en">Egg-Yolk Districts: Stable</span><span class="lang-zh" style="display:none">蛋黃區：穩定</span></div>
+        <p><span class="lang-en">Banqiao, Zhonghe, Yonghe expected to hold within -5% to flat. Limited new supply, strong transport connectivity, and Taipei spillover demand provide a floor. These districts function as independent micro-markets insulated from peripheral oversupply.</span><span class="lang-zh" style="display:none">板橋、中和、永和預期維持在-5%至持平。新供給有限、交通便利、台北外溢需求提供價格下檔支撐。這些區域如同獨立的微型市場，不受外圍供給過剩影響。</span></p>
+      </div>
+      <div class="summary-card red">
+        <div class="summary-title"><span class="lang-en">Peripheral Zones: -10% to -15% Correction</span><span class="lang-zh" style="display:none">外圍重劃區：修正-10%至-15%</span></div>
+        <p><span class="lang-en">Wugu Zhouzaiyang, Yingge Fengming, and similar redevelopment zones face the steepest correction risk. Oversupply + thin rental demand + credit controls = inevitable price adjustment. Developer concessions signal the correction is underway.</span><span class="lang-zh" style="display:none">五股洲子洋、鶯歌鳳鳴等重劃區面臨最大修正風險。供給過剩+租賃需求薄弱+信用管制=不可避免的價格調整。開發商讓利訊號顯示修正已在進行。</span></p>
+      </div>
+      <div class="summary-card orange">
+        <div class="summary-title"><span class="lang-en">2027&ndash;2028: Supply Peak Passes</span><span class="lang-zh" style="display:none">2027-2028年：供給高峰過後</span></div>
+        <p><span class="lang-en">The current delivery wave peaks in 2026&ndash;2027. As the supply pipeline thins, gradual stabilization is expected. Markets that survive the current oversupply without forced selling will recover first.</span><span class="lang-zh" style="display:none">目前交屋潮高峰在2026-2027年。隨著供給管線減少，預期逐步穩定。能在當前供給過剩中不出現拋售的市場將率先復甦。</span></p>
+      </div>
+      <div class="summary-card navy">
+        <div class="summary-title"><span class="lang-en">Long-Term: Aging Stock = Replacement Demand</span><span class="lang-zh" style="display:none">長期：老屋 = 替代需求</span></div>
+        <p><span class="lang-en">With 94.8万 units aged 30+ years (national highest), New Taipei has massive long-term replacement demand. Urban renewal and reconstruction programs will create sustained development activity for decades, supporting the construction and real estate sectors structurally.</span><span class="lang-zh" style="display:none">擁有94.8萬戶30年以上老屋（全國最多），新北市有龐大的長期替代需求。都更和危老重建計畫將在未來數十年創造持續開發活動，對營建與不動產形成結構性支撐。</span></p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">MOI Property Platform 2025 &middot; NCCU Housing Index &middot; Sinyi Research &middot; CBC Credit Controls 2024 &middot; New Taipei City Land Bureau &middot; Global Property Guide Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">內政部不動產資訊平台2025 &middot; 政大住宅指數 &middot; 信義房屋研究 &middot; 央行信用管制2024 &middot; 新北市地政局 &middot; Global Property Guide 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtPrice(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return 'NT$'+v+'\u842c';if(a>=1000000)return 'NT$'+(a/1000000).toFixed(2)+'M';return 'NT$'+Math.round(a/1000)+'K';}
+function fmtPriceShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return v+'\u842c';if(a>=1000000)return(a/1000000).toFixed(1)+'M';return Math.round(a/1000)+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts=[];
+
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');});
+
+function setLang(lang){
+  localStorage.setItem('lang',lang);
+  document.querySelectorAll('.lang-en').forEach(function(el){el.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(el){el.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+function initCharts(lang){
+  var en=lang==='en';
+
+  // 1. chartNTPEDistrict — Price by District horizontal bar
+  (function(){
+    var dom=document.getElementById('chartNTPEDistrict');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=en?['Wugu','Sanxia','Tucheng','Xindian','Zhonghe','Yonghe','Banqiao']:['五股','三峽','土城','新店','中和','永和','板橋'];
+    var data=[28,30,38,42,48,50,60];
+    var colors=data.map(function(v){return v>=50?C.red:v>=40?C.orange:v>=35?C.navy:C.muted;});
+    ch.setOption({tooltip:baseTooltip,grid:Object.assign({},baseGrid,{left:70}),xAxis:mkAxis({type:'value',name:en?'万/ping':'萬/坪'}),yAxis:mkAxis({type:'category',data:labels}),series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:16,label:{show:true,position:'right',formatter:'{c}',textStyle:baseText}}]});
+  })();
+
+  // 2. chartNTPETxn — Transaction Trend line
+  (function(){
+    var dom=document.getElementById('chartNTPETxn');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2019','2020','2021','2022','2023','2024','2025'];
+    var data=[42000,46000,48000,40000,43000,46000,36000];
+    ch.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:mkAxis({type:'value',name:en?'Transactions':'交易量'}),series:[{type:'line',data:data,itemStyle:{color:C.navy},smooth:true,areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(30,58,95,0.15)'},{offset:1,color:'rgba(30,58,95,0)'}]}},markPoint:{data:[{type:'max',name:'Max',itemStyle:{color:C.green}},{type:'min',name:'Min',itemStyle:{color:C.red}}],symbolSize:36,label:{fontSize:9}},label:{show:true,position:'top',formatter:function(p){return(p.value/1000).toFixed(0)+'K';},textStyle:baseText}}]});
+  })();
+
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+}
+
+// Init on load
+(function(){
+  var lang=localStorage.getItem('lang')||'en';
+  setLang(lang);
+})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

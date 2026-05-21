@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Valuation Monitor | Taiwan Property Monitor</title>
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+  <div class="page-header">
+    <h1 class="page-title"><span class="lang-en">Valuation Monitor</span><span class="lang-zh" style="display:none">估值監測</span></h1>
+    <p class="updated"><span class="lang-en">Updated: 2026-04-04</span><span class="lang-zh" style="display:none">更新：2026-04-04</span></p>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Taipei P/R Ratio</span><span class="lang-zh" style="display:none">台北租金比</span></div>
+      <div class="kpi-value">75x</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Numbeo 34.3x PTI = global #1 tied Shanghai</span><span class="lang-zh" style="display:none">Numbeo 34.3x PTI 全球第一 並列上海</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">National PIR</span><span class="lang-zh" style="display:none">全國房價所得比</span></div>
+      <div class="kpi-value">10.76x</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">2024 Q4 historical peak</span><span class="lang-zh" style="display:none">2024 Q4 歷史新高</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Taipei PIR</span><span class="lang-zh" style="display:none">台北房價所得比</span></div>
+      <div class="kpi-value">16.43x</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Severely unaffordable</span><span class="lang-zh" style="display:none">嚴重不可負擔</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Taipei Gross Yield</span><span class="lang-zh" style="display:none">台北毛租金回報率</span></div>
+      <div class="kpi-value">1.1-2.5%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Below bank deposit rate</span><span class="lang-zh" style="display:none">低於銀行存款利率</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">CPI Rent YoY</span><span class="lang-zh" style="display:none">CPI 租金年增率</span></div>
+      <div class="kpi-value">+2.66%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">28.5-year high</span><span class="lang-zh" style="display:none">28.5年新高</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Yield Spread vs CBC</span><span class="lang-zh" style="display:none">利差 vs 央行利率</span></div>
+      <div class="kpi-value">+0.11%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Near zero carry</span><span class="lang-zh" style="display:none">接近零利差</span></span>
+    </div>
+  </div>
+
+  <!-- Charts 2x2 -->
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">PIR by City</span><span class="lang-zh" style="display:none">各城市房價所得比</span></h3>
+      <div id="chartTwPIR" style="height:280px"></div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">Mortgage Burden Rate by City (%)</span><span class="lang-zh" style="display:none">各城市房貸負擔率 (%)</span></h3>
+      <div id="chartTwBurden" style="height:280px"></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Yield vs CBC Rate</span><span class="lang-zh" style="display:none">租金回報率 vs 央行利率</span></h3>
+      <div id="chartTwYieldSpread" style="height:220px"></div>
+      <div class="insight-box" style="border-left-color:#d97706">
+        <span class="lang-en">Spread near zero &mdash; Taiwan property yields barely cover borrowing cost. Capital appreciation is the sole return driver for leveraged investors.</span>
+        <span class="lang-zh" style="display:none">利差趨近於零 &mdash; 台灣房產收益幾乎無法覆蓋借貸成本。資本增值是槓桿投資者唯一的回報驅動力。</span>
+      </div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">National PIR Trend</span><span class="lang-zh" style="display:none">全國房價所得比趨勢</span></h3>
+      <div id="chartTwPIRTrend" style="height:220px"></div>
+    </div>
+  </div>
+
+  <!-- Summary Framework -->
+  <h2 class="section-heading"><span class="lang-en">Valuation Framework</span><span class="lang-zh" style="display:none">估值框架</span></h2>
+  <div class="summary-grid">
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">Managed Bubble</span><span class="lang-zh" style="display:none">管理型泡沫</span></h4>
+      <p><span class="lang-en">All valuation indicators are at historic extremes, but four structural pillars prevent collapse: high down payment requirements (30-50% LTV for non-first homes), long-term fully-amortizing mortgages, continuous policy fine-tuning by CBC, and deeply ingrained cultural psychology favoring homeownership over renting.</span><span class="lang-zh" style="display:none">所有估值指標均處於歷史極端，但四大結構性支柱防止崩盤：高自備款要求（非首購 30-50% LTV）、長期完全攤還房貸、央行持續微調政策、以及根深蒂固的「有土斯有財」文化心理。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Rental Catch-Up</span><span class="lang-zh" style="display:none">租金追趕</span></h4>
+      <p><span class="lang-en">CPI rent surged +2.66% YoY, a 28.5-year high. Rents are accelerating toward prices, which may gradually improve price-to-rent ratios from their extreme levels. This narrowing dynamic suggests the market is self-correcting via rental inflation rather than price declines.</span><span class="lang-zh" style="display:none">CPI 租金年增 +2.66%，創 28.5 年新高。租金正加速追趕房價，可能逐步改善極端的租金比。這種收斂動態表明市場正透過租金通膨而非房價下跌進行自我修正。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Construction Cost Floor</span><span class="lang-zh" style="display:none">營建成本底部</span></h4>
+      <p><span class="lang-en">Labor and materials form a hard price floor at 25-27 wan/ping construction cost. Developers prefer to delay launches rather than sell below cost. This cost floor effectively limits downside risk in new construction pricing, creating a structural support level for the broader market.</span><span class="lang-zh" style="display:none">勞動力與建材形成每坪 25-27 萬的硬性價格底部。建商寧可延後推案也不願賠本出售。此營建成本底線有效限制了新建案價格下行風險，為整體市場提供結構性支撐。</span></p>
+    </div>
+  </div>
+
+  <div class="source-footer">
+    <span class="lang-en">Sources: MOI Housing Price Affordability Indicators, Numbeo, CBC, DGBAS CPI</span>
+    <span class="lang-zh" style="display:none">資料來源：內政部住宅價格負擔能力指標、Numbeo、中央銀行、主計總處 CPI</span>
+  </div>
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtPrice(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return 'NT$'+v+'\u842c';if(a>=1000000)return 'NT$'+(a/1000000).toFixed(2)+'M';return 'NT$'+Math.round(a/1000)+'K';}
+function fmtPriceShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return v+'\u842c';if(a>=1000000)return(a/1000000).toFixed(1)+'M';return Math.round(a/1000)+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  var c;
+
+  /* Chart 1: PIR by City — horizontal bar */
+  var pirCities=lang==='zh'?['桃園','台南','高雄','台中','新北','台北']:['Taoyuan','Tainan','Kaohsiung','Taichung','New Taipei','Taipei'];
+  var pirVals=[8.65,9.0,10.59,12.99,14.03,16.43];
+  var pirColors=pirVals.map(function(v){return v>12?C.red:v>10?C.orange:C.navy;});
+  c=echarts.init(document.getElementById('chartTwPIR'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'x';}}),
+    grid:{left:90,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false}),
+    yAxis:mkAxis({type:'category',data:pirCities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:pirVals.map(function(v,i){return{value:v,itemStyle:{color:pirColors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}x',fontSize:11,color:C.navy,fontFamily:'Inter'},
+      markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:1},data:[{xAxis:5.1,label:{formatter:lang==='zh'?'嚴重不可負擔':'Severely Unaffordable',fontSize:9,color:C.red,position:'insideEndTop'}}]}
+    }]
+  });
+
+  /* Chart 2: Mortgage Burden Rate by City — horizontal bar */
+  var burdenCities=lang==='zh'?['桃園','高雄','全國','台南','新北','台中','台北']:['Taoyuan','Kaohsiung','National','Tainan','New Taipei','Taichung','Taipei'];
+  var burdenVals=[37,41,42.4,42,53,56.3,68.8];
+  var burdenColors=burdenVals.map(function(v){return v>60?C.red:v>40?C.orange:C.navy;});
+  c=echarts.init(document.getElementById('chartTwBurden'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'%';}}),
+    grid:{left:90,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false,max:80}),
+    yAxis:mkAxis({type:'category',data:burdenCities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:burdenVals.map(function(v,i){return{value:v,itemStyle:{color:burdenColors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}%',fontSize:11,color:C.navy,fontFamily:'Inter'},
+      markLine:{silent:true,symbol:'none',lineStyle:{color:C.orange,type:'dashed',width:1},data:[{xAxis:40,label:{formatter:lang==='zh'?'警戒水準':'Warning Level',fontSize:9,color:C.orange,position:'insideEndTop'}}]}
+    }]
+  });
+
+  /* Chart 3: Yield vs CBC Rate — line */
+  c=echarts.init(document.getElementById('chartTwYieldSpread'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:baseTooltip,
+    legend:Object.assign({},baseLegend,{data:[lang==='zh'?'租金回報率':'Rental Yield',lang==='zh'?'央行利率':'CBC Rate']}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+    yAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+    series:[
+      {name:lang==='zh'?'租金回報率':'Rental Yield',type:'line',smooth:0.3,data:[2.8,2.6,2.4,2.3,2.2,2.15,2.24],lineStyle:{color:C.orange},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(217,119,6,0.15)'},{offset:1,color:'rgba(217,119,6,0.02)'}]}}},
+      {name:lang==='zh'?'央行利率':'CBC Rate',type:'line',step:'end',data:[1.375,1.125,1.125,1.625,1.875,2.0,2.0],lineStyle:{color:C.red,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+    ]
+  });
+
+  /* Chart 4: National PIR Trend — line */
+  c=echarts.init(document.getElementById('chartTwPIRTrend'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){return p[0].name+': '+p[0].value+'x';}}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024Q4','2025Q3']}),
+    yAxis:mkAxis({type:'value',min:8,axisLabel:{formatter:'{value}x'}}),
+    series:[{
+      name:'PIR',type:'line',smooth:0.3,data:[8.6,8.9,9.5,10.2,10.5,10.76,9.71],
+      lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},symbol:'circle',symbolSize:6,
+      areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(220,38,38,0.12)'},{offset:1,color:'rgba(220,38,38,0.02)'}]}},
+      markPoint:{data:[{type:'max',name:'Peak',label:{formatter:'{c}x',fontSize:10,color:C.red},itemStyle:{color:C.red}}],symbolSize:40}
+    }]
+  });
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

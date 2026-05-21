@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Boston Deep Dive | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}.report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}.report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}.report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}.report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}.report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}.report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}.report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}.chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}.chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}.chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}.report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}.report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}.toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}.toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}.toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}.toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}.toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}.toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}.report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}.side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}.side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}.side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}.side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}.side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}.side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}@media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-university" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">University Cluster</span><span class="side-nav-label lang-zh" style="display:none">大學群聚</span></a>
+    <a href="#sec-biotech" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Life Sciences</span><span class="side-nav-label lang-zh" style="display:none">生技生命科學</span></a>
+    <a href="#sec-supply" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Supply Cliff</span><span class="side-nav-label lang-zh" style="display:none">供給懸崖</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rent &amp; Regulation</span><span class="side-nav-label lang-zh" style="display:none">租金與法規</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+
+  <div class="report-header">
+    <div class="lang-en"><h1>BOSTON &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: Case-Shiller BOXRSA / GBAR / MAR / Greater Boston Housing Report Card 2025 / HousingWire</div></div>
+    <div class="lang-zh" style="display:none"><h1>波士頓——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：Case-Shiller BOXRSA / GBAR / MAR / 大波士頓住宅報告卡2025 / HousingWire</div></div>
+  </div>
+
+  <div class="report-body">
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend: All-Time Highs &amp; Structural Resilience</span><span class="lang-zh" style="display:none">2. 房價走勢：歷史高點與結構韌性</span></a>
+        <a href="#sec-university" onclick="closeTocMobile()"><span class="lang-en">3. The University Cluster: Harvard, MIT &amp; the Knowledge Economy</span><span class="lang-zh" style="display:none">3. 大學群聚：哈佛、MIT與知識經濟</span></a>
+        <a href="#sec-biotech" onclick="closeTocMobile()"><span class="lang-en">4. Life Sciences: The $200K Average Salary Demand Floor</span><span class="lang-zh" style="display:none">4. 生命科學：$200K均薪需求底部</span></a>
+        <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">5. Supply Cliff: Permits Down 44%, Starter Home Extinct</span><span class="lang-zh" style="display:none">5. 供給懸崖：許可下降44%，入門級住宅絕跡</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">6. Rent &amp; Regulation: Massachusetts Rent Control Debate</span><span class="lang-zh" style="display:none">6. 租金與法規：麻州租管辯論</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Boston entered 2026 having been named HousingWire's hottest large metro housing market &mdash; a designation supported by data rather than hype. The Case-Shiller Boston index (BOXRSA) reached an all-time high of <strong>348</strong> in February 2025, representing a 248% increase since January 2000. The city of Boston median home price stands at approximately <strong>$857,000&ndash;$875,000</strong>; the Greater Boston single-family median crossed $1 million for the first time in summer 2025. The market is chronically undersupplied, with fewer than 2,200 active listings in the city in mid-2025. The median days on market of 21&ndash;22 days is among the fastest of any major U.S. metro.</p>
+      <p>The structural demand driver in Boston is unique in the U.S. market: the world's highest concentration of research universities and teaching hospitals within a compact geography creates a self-reinforcing demand engine that is largely independent of the national rate cycle. Harvard, MIT, Tufts, Boston University, Boston College, Northeastern, and 40+ other institutions enroll approximately <strong>250,000</strong> students and employ over 100,000 faculty and staff. Life sciences companies &mdash; Moderna, Vertex, Biogen, AstraZeneca, Pfizer &mdash; have built their U.S. headquarters in the Kendall Square/Cambridge/Seaport triangle, employing <strong>143,000</strong> workers at an average salary approaching $200,000. This demand base does not move, shrink at the margin, or get replaced &mdash; it compounds.</p>
+      <p>The supply side presents the sharpest contradiction. Greater Boston added more than 70,000 housing units in five years 2020&ndash;2025 &mdash; but new housing permits as of July 2025 were down <strong>44%</strong> from July 2021 levels. The pipeline for 2026&ndash;2027 is drying up precisely as delivery of 2021-era projects concludes. The starter home has effectively vanished: in 2015, 57 Greater Boston municipalities had median single-family prices below $500,000; by 2025, only <strong>three</strong> remained &mdash; Brockton, Halifax, and Wareham.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>波士頓進入2026年，被HousingWire評選為最熱的大都市住宅市場——這一稱號有數據支撐而非炒作。Case-Shiller波士頓指數（BOXRSA）在2025年2月達到<strong>348</strong>的歷史高點，代表自2000年1月以來上漲248%。波士頓市房屋中位數約為<strong>857,000至875,000美元</strong>；大波士頓獨棟住宅中位數在2025年夏季首次突破100萬美元。市場長期供給不足，2025年中城市活躍掛牌不足2,200套。在市天數中位數21至22天是任何主要美國大都市中最快的之一。</p>
+      <p>波士頓的結構性需求驅動力在美國市場中是獨一無二的：在緊湊地理範圍內世界最高密度的研究型大學和教學醫院群聚，創造了很大程度上獨立於全國利率週期的自我強化需求引擎。哈佛、MIT、塔夫茨、波士頓大學、波士頓學院、東北大學和40多所其他院校招收約<strong>25萬</strong>名學生並僱用超過10萬名教職員工。生命科學公司——Moderna、Vertex、Biogen、阿斯利康、輝瑞——在Kendall Square/劍橋/海港三角建立了美國總部，僱用<strong>143,000</strong>名平均薪資接近200,000美元的工人。這一需求基礎不會移動、在邊際上收縮或被取代——它在複利增長。</p>
+      <p>供給面呈現最鮮明的矛盾。大波士頓在2020至2025年五年間新增70,000多套住宅——但截至2025年7月新建住宅許可較2021年7月下降<strong>44%</strong>。2026至2027年的管道恰好在2021年代批准項目的交付結束時乾涸。入門級住宅已實際消失：2015年有57個大波士頓城鎮獨棟住宅中位數低於500,000美元；到2025年僅剩<strong>三個</strong>——布羅克頓、哈利法克斯和韋爾弗利特。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">CS BOSTON (FEB 2025)</span><span class="lang-zh" style="display:none">CS波士頓指數（2025年2月）</span></div><div class="kpi-value">348</div><span class="kpi-badge badge-green"><span class="lang-en">BOXRSA &middot; All-time high &middot; YoY +1.7%</span><span class="lang-zh" style="display:none">BOXRSA &middot; 歷史高點 &middot; 年增+1.7%</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">CITY MEDIAN (JUN 2025)</span><span class="lang-zh" style="display:none">城市中位數（2025年6月）</span></div><div class="kpi-value">$857K</div><span class="kpi-badge badge-green"><span class="lang-en">Boston city &middot; +1.4% YoY &middot; Greater Boston Oct: $800K</span><span class="lang-zh" style="display:none">波士頓市 &middot; 年增+1.4% &middot; 大波士頓10月：$800K</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">SF MEDIAN HIT $1M</span><span class="lang-zh" style="display:none">獨棟住宅中位數突破$100萬</span></div><div class="kpi-value">$1M+</div><span class="kpi-badge badge-orange"><span class="lang-en">Greater Boston SF summer 2025 &middot; First time ever</span><span class="lang-zh" style="display:none">大波士頓獨棟2025夏 &middot; 史上首次</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">SUB-$500K MUNICIPALITIES</span><span class="lang-zh" style="display:none">中位數&lt;$50萬城鎮</span></div><div class="kpi-value">3 left</div><span class="kpi-badge badge-red"><span class="lang-en">Down from 57 in 2015 &middot; Starter home extinct</span><span class="lang-zh" style="display:none">較2015年57個減少 &middot; 入門級住宅絕跡</span></span></div>
+      <div class="kpi-card blue"><div class="kpi-label"><span class="lang-en">LIFE SCIENCES JOBS</span><span class="lang-zh" style="display:none">生命科學就業</span></div><div class="kpi-value">143,000</div><span class="kpi-badge badge-blue"><span class="lang-en">Boston metro &middot; avg ~$200K &middot; +16,633 by 2029</span><span class="lang-zh" style="display:none">波士頓都會區 &middot; 均薪~$200K &middot; 至2029年+16,633</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">PERMIT DROP</span><span class="lang-zh" style="display:none">建築許可降幅</span></div><div class="kpi-value">-44%</div><span class="kpi-badge badge-red"><span class="lang-en">Jul 2025 vs Jul 2021 &middot; Supply cliff looming</span><span class="lang-zh" style="display:none">2025年7月 vs 2021年7月 &middot; 供給懸崖迫近</span></span></div>
+    </div>
+
+    <!-- 2 -->
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND: ALL-TIME HIGHS &amp; STRUCTURAL RESILIENCE</span><span class="lang-zh" style="display:none">房價走勢：歷史高點與結構韌性</span></h2>
+    <div class="lang-en">
+      <p>Boston's price trajectory is characterized by steady, compounding appreciation without the boom-bust volatility of Austin, Miami, or Phoenix. The CS Boston index rose from approximately 185 in January 2015 to 348 by February 2025 &mdash; an <strong>88%</strong> increase over the decade, broadly consistent with national trends but with much lower variance. The pandemic surge was real but controlled: the index rose approximately 40% from January 2020 to peak, compared to 58% for Miami and 80% for Austin. The correction phase was minimal: the CS Boston index declined approximately 5&ndash;8% from its 2022 peak before recovering fully by late 2023.</p>
+      <p>The bifurcation between single-family and condominium markets is pronounced. Greater Boston single-family median crossed <strong>$1 million</strong> in summer 2025 &mdash; a psychological milestone. Condominiums have been more price-stable: the city condo median was approximately $725,000&ndash;$750,000 as of mid-2025 &mdash; making condos the only accessible entry point for non-wealthy buyers within the core city. The price appreciation forecast for 2026 is +2.5&ndash;4% overall, with single-family outperforming condominiums as the supply cliff reduces new inventory.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>波士頓的房價走勢以穩定、複利升值為特徵，沒有奧斯丁、邁阿密或鳳凰城那樣的繁榮破滅波動性。CS波士頓指數從2015年1月的約185升至2025年2月的348——十年漲幅<strong>88%</strong>，與全國趨勢大體一致，但方差低得多。疫情漲幅是真實的，但受到控制：指數從2020年1月至峰值上漲約40%。修正階段很小：CS波士頓指數從2022年峰值下滑約5至8%後，2023年底完全恢復。</p>
+      <p>獨棟住宅和公寓市場之間的分化很明顯。大波士頓獨棟住宅中位數在2025年夏季突破<strong>100萬美元</strong>——心理里程碑。公寓價格更穩定：截至2025年中，城市公寓中位數約725,000至750,000美元——使公寓成為核心城市內非富裕買家唯一可達的入市點。2026年的房價升值預測為整體+2.5至4%。</p>
+    </div>
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">CS Boston Index + YoY% (2015&ndash;2025)</span><span class="lang-zh" style="display:none">CS波士頓指數 + 年增率（2015&ndash;2025）</span></h4>
+        <p><span class="lang-en">SA, Jan 2000=100 &middot; FRED BOXRSA</span><span class="lang-zh" style="display:none">季調，2000年1月=100 &middot; FRED BOXRSA</span></p>
+        <div id="chartBOSPrice" style="height:220px"></div>
+        <p class="chart-note navy"><span class="lang-en">CS Boston all-time high 348 (Feb 2025). Decade +88%, minimal correction. HousingWire: hottest large metro entering 2026</span><span class="lang-zh" style="display:none">CS波士頓歷史高點348（2025年2月）。十年+88%，修正極小。HousingWire評：進入2026年最熱大都市</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Greater Boston SF vs Condo Median 2018&ndash;2025</span><span class="lang-zh" style="display:none">大波士頓獨棟 vs 公寓中位數 2018&ndash;2025</span></h4>
+        <p><span class="lang-en">Source: GBAR / MAR</span><span class="lang-zh" style="display:none">來源：GBAR / MAR</span></p>
+        <div id="chartBOSSFvsCondo" style="height:220px"></div>
+        <p class="chart-note orange"><span class="lang-en">SF median crossed $1M summer 2025. Condos more stable at $725K (slight -3.3% from $750K peak)</span><span class="lang-zh" style="display:none">獨棟2025年夏季突破$100萬。公寓更穩定，$725K（較$750K峰值小幅-3.3%）</span></p>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <h2 id="sec-university"><span class="lang-en">THE UNIVERSITY CLUSTER: HARVARD, MIT &amp; THE KNOWLEDGE ECONOMY</span><span class="lang-zh" style="display:none">大學群聚：哈佛、MIT與知識經濟</span></h2>
+    <div class="lang-en">
+      <p>Boston's most distinctive economic attribute is the density and permanence of its knowledge-economy institutions. Within a 15-mile radius of downtown Boston, there are more than 40 degree-granting institutions, including Harvard University (endowment $50+ billion), MIT (endowment $24 billion), Tufts University, Boston University, Boston College, Northeastern University, and Brandeis. These institutions collectively enroll approximately <strong>250,000</strong> students &mdash; a permanent, renewing demand source that is entirely insensitive to mortgage rates.</p>
+      <p>The housing implication is structural and multidimensional. Graduate and professional students (~100,000+ in the Boston metro) compete for housing in Allston, Brighton, Somerville, Cambridge, and Mission Hill. Faculty and staff &mdash; earning $150,000&ndash;$300,000+ at senior levels &mdash; form the premium buyer pool for Back Bay, Beacon Hill, Cambridge, and Newton. The Longwood Medical Area alone &mdash; comprising Harvard Medical School, Brigham and Women's, Mass General Hospital, and Dana-Farber &mdash; employs <strong>55,000+</strong> and drives consistent demand in Jamaica Plain, Roxbury, and surrounding neighborhoods.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>波士頓最鮮明的經濟特質是其知識經濟機構的密度和永久性。在波士頓市中心15英里半徑內，有超過40所授學位院校，包括哈佛大學（捐贈基金500億美元以上）、MIT（捐贈基金240億美元）、塔夫茨大學、波士頓大學、波士頓學院、東北大學和布蘭迪斯大學。這些機構合計招收約<strong>25萬</strong>名學生——這是一個完全不受房貸利率影響的永久性需求來源。</p>
+      <p>住宅影響是結構性且多維的。研究生和職業學生（波士頓都會區約10萬以上）爭奪Allston、Brighton、Somerville、劍橋和Mission Hill的住房。教職員工——高級職位年薪150,000至300,000美元以上——構成Back Bay、Beacon Hill、劍橋和牛頓的優質買家群體。僅Longwood醫療區——包括哈佛醫學院、布萊根婦女醫院、麻省總醫院和Dana-Farber——就僱用<strong>55,000</strong>人以上，持續推動Jamaica Plain、Roxbury和周邊社區的需求。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Major Institution Employment in Boston Metro (Estimated)</span><span class="lang-zh" style="display:none">波士頓都會區主要機構就業規模（估算）</span></h4>
+      <div id="chartBOSInstitutions" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">170K+ direct university/medical cluster jobs = permanent, rate-insensitive demand base. 250K students add transient rental demand across all price points</span><span class="lang-zh" style="display:none">17萬以上大學/醫療群聚直接就業=永久性、對利率不敏感的需求基礎。25萬名學生增加各價位段的過渡性租賃需求</span></p>
+    </div>
+
+    <!-- 4 -->
+    <h2 id="sec-biotech"><span class="lang-en">LIFE SCIENCES: THE $200K AVERAGE SALARY DEMAND FLOOR</span><span class="lang-zh" style="display:none">生命科學：$200K均薪需求底部</span></h2>
+    <div class="lang-en">
+      <p>Boston's Kendall Square/Cambridge biotech cluster is the most productive square mile in the world by patent output and venture capital investment. Life sciences employment in the Boston metro reached <strong>143,000</strong> by 2025, with an average salary approaching <strong>$200,000</strong>. Major employers include Moderna, Vertex Pharmaceuticals, Biogen, AstraZeneca U.S. HQ, Pfizer research operations, Takeda, and hundreds of VC-backed biotechs.</p>
+      <p>The CBRE 2026 Boston Outlook notes that the life science real estate sector faces oversupply in lab/office space, but this does not translate to employment contraction. The 16,633 new jobs projected for 2025&ndash;2029 represent 11.6% sector growth versus 3.4% for the overall Massachusetts economy. For housing demand, what matters is the stock: 143,000 workers earning ~$200,000 average salary creates a buyer pool of approximately 70,000&ndash;80,000 households capable of purchasing at the $800K&ndash;$1.2M range &mdash; the dominant price tier in the Boston ownership market.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>波士頓Kendall Square/劍橋生技群聚按專利產出和風險投資計算是世界上最具生產力的一平方英里。到2025年，波士頓都會區的生命科學就業達到<strong>143,000</strong>人，平均薪資接近<strong>200,000美元</strong>。主要雇主包括Moderna、Vertex製藥、Biogen、阿斯利康美國總部、輝瑞研究業務、武田和數百家風投支持的生技公司。</p>
+      <p>CBRE 2026年波士頓展望指出生命科學房地產行業實驗室/辦公空間面臨供給過剩，但這不轉化為就業收縮。2025至2029年預計新增的16,633個工作崗位代表11.6%的行業增長，而麻薩諸塞州整體經濟僅為3.4%。對住宅需求而言，重要的是存量：143,000名平均薪資約200,000美元的工人，創造了大約70,000至80,000戶能夠在80萬至120萬美元價格段購房的買家群體——波士頓購房市場的主導價格層。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Boston Life Sciences Employment + Avg Salary 2018&ndash;2025</span><span class="lang-zh" style="display:none">波士頓生命科學就業 + 均薪 2018&ndash;2025</span></h4>
+      <div id="chartBOSBiotech" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">143K life sci workers @ avg $200K = ~$28.6B annual payroll. 70&ndash;80K buying households in $800K&ndash;$1.2M tier. Sector growing 11.6% (2025&ndash;29)</span><span class="lang-zh" style="display:none">143K生命科學工作者@均薪$200K=年薪資總額約$286億。70至80K購房家庭在$80萬至$120萬層。行業增長11.6%（2025至29年）</span></p>
+    </div>
+
+    <!-- 5 -->
+    <h2 id="sec-supply"><span class="lang-en">SUPPLY CLIFF: PERMITS DOWN 44%, STARTER HOME EXTINCT</span><span class="lang-zh" style="display:none">供給懸崖：許可下降44%，入門級住宅絕跡</span></h2>
+    <div class="lang-en">
+      <p>Boston's supply crisis is structural and deepening. The Greater Boston Housing Report Card 2025 documents that while the region added 70,000+ units in 2020&ndash;2025, new housing permits as of July 2025 were down <strong>44%</strong> from July 2021 levels. High construction costs ($500&ndash;$700/sq ft for multifamily), zoning restrictions across Greater Boston's 351 municipalities, and developer uncertainty have combined to create a looming supply cliff for 2026&ndash;2027.</p>
+      <p>The starter home shortage is the most acute dimension. In 2015, 57 of Greater Boston's municipalities had median SF prices below $500,000. By 2025, only <strong>three</strong> remained: Brockton, Halifax, and Wareham &mdash; all distant from the employment core. July 2025 saw 2,164 active listings in the city &mdash; a 4.4% sequential decline. At current pace, approximately 1.5&ndash;2.0 months of supply. The concept of a balanced market (4.5&ndash;6 months) is theoretical in contemporary Boston.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>波士頓的供給危機是結構性的且持續深化。大波士頓住宅報告卡2025記錄了截至2025年7月新建住宅許可較2021年7月下降<strong>44%</strong>。高建設成本（多戶住宅每平方英尺500至700美元）、大波士頓351個市政當局的分區限制和開發商不確定性，共同創造了2026至2027年迫在眉睫的供給懸崖。</p>
+      <p>入門級住宅短缺是危機最嚴峻的維度。2015年有57個大波士頓城鎮獨棟住宅中位數低於500,000美元。到2025年只剩<strong>三個</strong>：布羅克頓、哈利法克斯和韋爾弗利特——都遠離就業核心。2025年7月城市有2,164套活躍掛牌——環比下降4.4%。以當前銷售速度約1.5至2.0個月的供給。均衡市場的概念在當代波士頓是理論性的。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Greater Boston New Housing Permits 2019&ndash;2025</span><span class="lang-zh" style="display:none">大波士頓新建住宅許可 2019&ndash;2025</span></h4>
+      <div id="chartBOSPermits" style="height:220px"></div>
+      <p class="chart-note red"><span class="lang-en">Permits -44% from Jul 2021 &rarr; supply cliff: fewer new units in 2026&ndash;27 than any post-GFC year. Zoning across 351 municipalities adds complexity</span><span class="lang-zh" style="display:none">許可較2021年7月-44%→供給懸崖：2026至27年新建住宅少於後GFC以來任何年份。351個市政當局分區增加複雜性</span></p>
+    </div>
+
+    <!-- 6 -->
+    <h2 id="sec-rent"><span class="lang-en">RENT &amp; REGULATION: MASSACHUSETTS RENT CONTROL DEBATE</span><span class="lang-zh" style="display:none">租金與法規：麻州租管辯論</span></h2>
+    <div class="lang-en">
+      <p>Massachusetts does not have statewide rent control. The previous preemption was repealed in 2020, technically allowing municipalities to enact rent stabilization. Boston and Cambridge have explored ordinances, but none have been passed as of April 2026. This regulatory uncertainty is a key variable for multifamily investors: the risk of rent control enactment in Boston or Cambridge is meaningfully higher than in Houston or Phoenix, though current law does not cap increases.</p>
+      <p>Boston is the 4th most expensive rental market nationally. Average rents as of Q1 2025: one-bedroom approximately <strong>$2,500/month</strong>, two-bedroom approximately $3,200/month. The student population creates an unusual seasonal cycle. For multifamily investors, the lack of rent control (currently) combined with near-zero vacancy rates (2&ndash;3% in core neighborhoods during academic year) creates a favorable income profile &mdash; but rent control risk remains the primary regulatory overhang.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>麻薩諸塞州沒有州級租管。之前的先占在2020年被廢除，技術上允許市政當局頒布租金穩定化條例。波士頓和劍橋探索了條例，但截至2026年4月均未通過。這一監管不確定性是多戶住宅投資者的關鍵變量。</p>
+      <p>波士頓是全國第四貴的租賃市場。2025年Q1平均租金：一居室約<strong>2,500美元/月</strong>，兩居室約3,200美元/月。學生群體創造了異常的季節性週期。對多戶住宅投資者而言，（目前）缺乏租管加上接近零的空置率（學年期間核心社區2至3%），創造了有利的收入狀況——但租管風險仍是主要的監管懸頂。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">Boston Avg 1BR Rent vs Vacancy Rate 2019&ndash;2025</span><span class="lang-zh" style="display:none">波士頓平均一居室租金 vs 空置率 2019&ndash;2025</span></h4>
+      <div id="chartBOSRent" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">Boston 4th most expensive rental market nationally. Vacancy 2.5% (academic year norm). No current rent control but legislative risk in progressive Boston/Cambridge</span><span class="lang-zh" style="display:none">波士頓全國第四貴租賃市場。空置率2.5%（學年常態）。目前無租管，但進步派波士頓/劍橋存在立法風險</span></p>
+    </div>
+
+    <!-- 7 -->
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+    <div class="lang-en">
+      <p>Boston's 2026&ndash;2028 outlook is among the most constructive in this monitor, driven by the structural supply cliff (permits down 44%), the permanent knowledge-economy demand base, and the psychological shift toward market acceptance. The base case (<strong>65%</strong> probability) projects CS Boston appreciation of 3&ndash;5% annually through 2027, pushing the CS index from 348 toward 375&ndash;385.</p>
+      <p>The bull case (<strong>20%</strong> probability) combines a rate decline below 5.5% with continued AI-driven expansion of Boston's tech ecosystem. Unlocking of rate-locked buyers combined with supply cliff conditions could produce 7&ndash;10% appreciation. The Greater Boston SF median could reach $1.1&ndash;$1.15M by end-2027.</p>
+      <p>The bear case (<strong>15%</strong> probability) centers on federal research funding &mdash; a unique Boston risk. If sustained NIH/NSF cuts reduce biotech/university hiring and slow the ~2,000 annual Harvard/MIT PhD-level in-migrations, demand in Cambridge, Somerville, and Longwood area could modestly weaken. This is a tail risk &mdash; federal research funding has never been cut dramatically in practice &mdash; but structurally unique to Boston.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>波士頓2026至2028年的展望在本監測中最具建設性之列。基本情境（概率<strong>65%</strong>）預計CS波士頓每年升值3至5%，將CS指數從348推向375至385。</p>
+      <p>樂觀情境（概率<strong>20%</strong>）將利率下降至5.5%以下與波士頓科技生態系統持續AI驅動擴張結合。可能產生7至10%的升值。大波士頓獨棟住宅中位數到2027年底可能達到110至115萬美元。</p>
+      <p>悲觀情境（概率<strong>15%</strong>）以聯邦研究資金為中心——波士頓獨特風險。若持續NIH/NSF削減減少生技/大學招聘，劍橋和Longwood區域需求可能溫和削弱。這是尾部風險——聯邦研究資金實際上從未被大幅削減——但在結構上對波士頓是獨特的。</p>
+    </div>
+    <div class="chart-inline">
+      <h4><span class="lang-en">CS Boston Index Forecast 2026&ndash;2028</span><span class="lang-zh" style="display:none">CS波士頓指數預測 2026&ndash;2028</span></h4>
+      <div id="chartBOSForecast" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">Base: +3&ndash;5%/yr. Supply cliff fully materializes 2026&ndash;27. Bear: unique risk = federal research funding cuts &rarr; NIH/NSF &rarr; biotech/university hiring slowdown</span><span class="lang-zh" style="display:none">基本：+3至5%/年。供給懸崖2026至27年完全顯現。悲觀：獨特風險=聯邦研究資金削減→NIH/NSF→生技/大學招聘放緩</span></p>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: S&amp;P Cotality Case-Shiller MA-Boston Home Price Index (FRED BOXRSA) &middot; Greater Boston Association of REALTORS&reg; (GBAR) Monthly Market Reports &middot; Massachusetts Association of REALTORS&reg; (MAR) 2026 Forecast &middot; Greater Boston Housing Report Card 2025 (Boston Indicators / DePaul University) &middot; HousingWire &mdash; Boston Hottest Large Metro (Dec 2025) &middot; CBRE 2026 Boston Real Estate Market Outlook &middot; Boston Globe / Boston.com Real Estate (Dec 2025&ndash;Jan 2026) &middot; Zillow Boston Home Values. All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：S&amp;P Cotality Case-Shiller麻州波士頓房價指數（FRED BOXRSA）&middot; 大波士頓房地產商協會（GBAR）月度市場報告 &middot; 麻薩諸塞州房地產商協會（MAR）2026年預測 &middot; 大波士頓住宅報告卡2025（Boston Indicators / 德保羅大學）&middot; HousingWire——波士頓最熱大都市（2025年12月）&middot; CBRE 2026年波士頓房地產市場展望 &middot; 波士頓環球報/Boston.com房地產（2025年12月至2026年1月）&middot; Zillow波士頓房屋價值。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawBOSPrice(lang);drawBOSSFvsCondo(lang);drawBOSInstitutions(lang);drawBOSBiotech(lang);drawBOSPermits(lang);drawBOSRent(lang);drawBOSForecast(lang);}
+
+function drawBOSPrice(lang){
+  var dom=document.getElementById('chartBOSPrice');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var index=[185,200,215,228,236,258,309,346,325,340,348];
+  var yoy=[5.8,8.1,7.5,6.0,3.5,9.3,19.8,12.0,-6.1,4.6,2.4];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:[mkAxis({type:'value',min:160,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),mkAxis({type:'value',min:-10,max:22,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'CS Boston Index':'CS波士頓指數',type:'bar',data:index,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,yAxisIndex:1,
+        markLine:{data:[{yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1},label:{show:false}}]}}]});
+}
+function drawBOSSFvsCondo(lang){
+  var dom=document.getElementById('chartBOSSFvsCondo');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2018','2019','2020','2021','2022','2023','2024','2025'];
+  var sf=[520,540,570,650,780,850,920,1000];var condo=[450,460,470,530,620,680,750,725];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:350,max:1100,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+    series:[{name:en?'Single-Family ($K)':'獨棟($K)',type:'bar',data:sf,barMaxWidth:24,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},
+      {name:en?'Condo ($K)':'公寓($K)',type:'bar',data:condo,barMaxWidth:24,itemStyle:{color:C.orange,borderRadius:[3,3,0,0]},
+        markLine:{data:[{yAxis:1000,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'$1M threshold':'$100萬門檻',fontSize:8,color:C.red}}]}}]});
+}
+function drawBOSInstitutions(lang){
+  var dom=document.getElementById('chartBOSInstitutions');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var cats=en?['Longwood Medical\nArea cluster','MIT +\nKendall Square','Other 40+\ninstitutions','Boston Univ. /\nBC / Northeastern','Harvard Univ.\n(all campuses)']:['Longwood醫療\n區群聚','MIT +\nKendall Square','其他40+\n院校','波士頓大學/\nBC/東北大學','哈佛大學\n（全部校區）'];
+  var emp=[55,22,40,35,18];var colors=[C.red,C.blue,C.muted,C.orange,C.navy];
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:50,top:8,bottom:8,containLabel:true},
+    yAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9}}),
+    xAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),
+    series:[{type:'bar',data:emp.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:20,itemStyle:{borderRadius:[0,3,3,0]},
+      label:{show:true,position:'right',formatter:function(p){return p.value+'K';},fontSize:9,color:C.muted}}]});
+}
+function drawBOSBiotech(lang){
+  var dom=document.getElementById('chartBOSBiotech');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2018','2019','2020','2021','2022','2023','2024','2025E'];
+  var emp=[105,112,118,128,138,141,142,143];var sal=[155,162,170,180,192,198,198,200];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis:[mkAxis({type:'value',min:90,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),mkAxis({type:'value',min:140,max:210,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}},splitLine:{show:false}})],
+    series:[{name:en?'Employment (K)':'就業(K)',type:'bar',data:emp,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.25)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'Avg Salary ($K)':'均薪($K)',type:'line',data:sal,lineStyle:{color:C.blue,width:2.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:5,yAxisIndex:1}]});
+}
+function drawBOSPermits(lang){
+  var dom=document.getElementById('chartBOSPermits');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','Jul 25'];
+  var permits=[18500,16200,22800,19500,15200,13800,12900];
+  var colors=permits.map(function(v){return v>=20000?C.green:v>=16000?C.navy:v>=14000?C.orange:C.red;});
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:10000,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/1000).toFixed(0)+'K';}}}),
+    series:[{type:'bar',data:permits.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:32,itemStyle:{borderRadius:[3,3,0,0]},
+      label:{show:true,position:'top',formatter:function(p){return(p.value/1000).toFixed(1)+'K';},fontSize:9,color:C.muted},
+      markLine:{data:[{yAxis:22800,lineStyle:{color:C.green,type:'dashed',width:1},label:{formatter:en?'Jul 2021 peak':'2021年7月峰值',fontSize:8,color:C.green}},
+        {yAxis:12900,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'Jul 2025: -44%':'2025年7月：-44%',fontSize:8,color:C.red}}]}}]});
+}
+function drawBOSRent(lang){
+  var dom=document.getElementById('chartBOSRent');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];
+  var rent=[2100,1950,2200,2600,2650,2500,2500];var vac=[3.5,6.2,3.1,2.2,2.5,2.8,2.5];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:[mkAxis({type:'value',min:1800,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return'$'+v;}}}),mkAxis({type:'value',min:0,max:8,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'Avg 1BR Rent ($)':'平均一居室租金($)',type:'bar',data:rent,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.25)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'Vacancy %':'空置率%',type:'line',data:vac,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,
+        markLine:{data:[{yAxis:5,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Balanced ~5%':'均衡約5%',fontSize:8,color:C.muted}}]}}]});
+}
+function drawBOSForecast(lang){
+  var dom=document.getElementById('chartBOSForecast');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var periods=['Feb 2025','2026E','2027E','2028E'];
+  var bull=[348,365,385,410];var base=[348,360,375,388];var bear=[348,345,338,332];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis:mkAxis({type:'value',min:320,max:420,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[
+      {name:en?'Bull (20%) — rate+AI':'樂觀(20%)—利率+AI',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+      {name:en?'Base (65%) — supply cliff':'基本(65%)—供給懸崖',type:'line',data:base,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+      {name:en?'Bear (15%) — NIH cuts':'悲觀(15%)—NIH削減',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}]});
+}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+function toggleCityMenu(){document.getElementById('cityDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}if(!e.target.closest('.city-dropdown')){var d2=document.getElementById('cityDropdown');if(d2)d2.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

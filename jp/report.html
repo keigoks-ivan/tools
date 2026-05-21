@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Report | Japan Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+    .toc-box{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;margin:0 0 24px;font-family:'Inter',sans-serif;overflow:hidden}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;font-size:12px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none;background:#f4f7fc}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:13px;cursor:pointer;padding:0;line-height:1;transition:transform .2s}
+    .toc-list{padding:8px 16px 12px;display:flex;flex-direction:column;gap:2px}
+    .toc-list a{font-size:12px;color:#2c3e50;text-decoration:none;padding:5px 8px 5px 10px;border-radius:4px;border-left:2px solid transparent;display:block;transition:all .15s;font-family:Georgia,serif}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;color:#1e3a5f}
+    .toc-collapsed .toc-list{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    /* -- Side Progress Nav -- */
+    .side-nav{position:fixed;top:50%;right:max(16px, calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-inline .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:8px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .chart-note.red{color:#dc2626}
+    .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+    .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+    .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+    .report-chart-card .chart-meta{font-family:'Inter',sans-serif;font-size:11px;color:#d97706;margin-bottom:8px}
+    .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+    .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+    @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script>
+  function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+  function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+  </script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <div class="report-container">
+    <nav class="side-nav" id="sideNav">
+      <a href="#sec-exec" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Exec Summary</span>
+        <span class="side-nav-label lang-zh" style="display:none">執行摘要</span>
+      </a>
+      <a href="#sec-policy" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">BOJ Policy</span>
+        <span class="side-nav-label lang-zh" style="display:none">BOJ政策</span>
+      </a>
+      <a href="#sec-supply" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Supply</span>
+        <span class="side-nav-label lang-zh" style="display:none">供給面</span>
+      </a>
+      <a href="#sec-demand" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Demand</span>
+        <span class="side-nav-label lang-zh" style="display:none">需求面</span>
+      </a>
+      <a href="#sec-valuation" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Valuation</span>
+        <span class="side-nav-label lang-zh" style="display:none">估值</span>
+      </a>
+      <a href="#sec-tokyo" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Tokyo</span>
+        <span class="side-nav-label lang-zh" style="display:none">東京</span>
+      </a>
+      <a href="#sec-osaka" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Osaka</span>
+        <span class="side-nav-label lang-zh" style="display:none">大阪</span>
+      </a>
+      <a href="#sec-fukuoka" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Fukuoka</span>
+        <span class="side-nav-label lang-zh" style="display:none">福岡</span>
+      </a>
+      <a href="#sec-outlook" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Outlook</span>
+        <span class="side-nav-label lang-zh" style="display:none">展望</span>
+      </a>
+    </nav>
+    <div class="report-header">
+      <div class="lang-en">
+        <h1>JAPAN PROPERTY MARKET REPORT</h1>
+        <div class="report-meta">May 2026 &middot; Market Research</div>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <h1>日本住宅房地產市場報告</h1>
+        <div class="report-meta">2026年5月 &middot; 市場研究</div>
+      </div>
+    </div>
+    <div class="report-body">
+
+      <!-- 1. EXECUTIVE SUMMARY -->
+      <div class="toc-box" id="tocBox">
+        <div class="toc-header" onclick="toggleToc()">
+          <span class="lang-en">In This Report</span><span class="lang-zh" style="display:none">本報告涵蓋</span>
+          <button class="toc-toggle">&#9650;</button>
+        </div>
+        <div class="toc-list">
+          <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+          <a href="#sec-policy" onclick="closeTocMobile()"><span class="lang-en">2. BOJ Rate Normalization</span><span class="lang-zh" style="display:none">2. BOJ升息正常化</span></a>
+          <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">3. Supply: Shrinking Starts &amp; Akiya Paradox</span><span class="lang-zh" style="display:none">3. 供給：開工萎縮與空屋悖論</span></a>
+          <a href="#sec-demand" onclick="closeTocMobile()"><span class="lang-en">4. Demand: Foreign Capital &amp; Resale Boom</span><span class="lang-zh" style="display:none">4. 需求：外資湧入與中古屋榮景</span></a>
+          <a href="#sec-valuation" onclick="closeTocMobile()"><span class="lang-en">5. Valuation</span><span class="lang-zh" style="display:none">5. 估值</span></a>
+          <a href="#sec-tokyo" onclick="closeTocMobile()"><span class="lang-en">6. Tokyo 23 Wards</span><span class="lang-zh" style="display:none">6. 東京23區</span></a>
+          <a href="#sec-osaka" onclick="closeTocMobile()"><span class="lang-en">7. Osaka</span><span class="lang-zh" style="display:none">7. 大阪</span></a>
+          <a href="#sec-fukuoka" onclick="closeTocMobile()"><span class="lang-en">8. Fukuoka</span><span class="lang-zh" style="display:none">8. 福岡</span></a>
+          <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">9. Outlook</span><span class="lang-zh" style="display:none">9. 展望</span></a>
+        </div>
+      </div>
+
+      <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+
+      <div class="lang-en">
+        <p>Japan's residential property market entered Q2 2026 with one of the most unusual combinations in developed-market real estate: a structurally undersupplied urban core sitting on top of a 9 million vacant-home rural overhang, the world's last ultra-loose monetary policy now in visible normalisation, and a weak yen that continues to attract record cross-border capital. Tokyo residential prices averaged approximately <strong>&yen;91.4 million</strong> in 2025 — a <strong>+10.7%</strong> year-on-year increase — with the three core wards (Chuo, Chiyoda, Minato) consistently above the <strong>&yen;100 million</strong> psychological threshold. The February 2026 existing-condominium transaction price rose 5.0% to <strong>&yen;41.15 million</strong>, and the average price per square metre climbed <strong>+8.2%</strong> to <strong>&yen;856,100</strong>.</p>
+        <p>The central bank story has moved decisively in 2025–2026. The BOJ raised rates to <strong>0.75%</strong> in December 2025 — the highest since September 1995 — and has held there across both the 19 March 2026 meeting and the <strong>28 April 2026</strong> meeting (6-3 vote), with Governor Ueda explicitly citing Iran-war energy price uncertainty as the reason for the pause. The hawkish dissent (3 of 9 favoured a hike) signals a near-term bias to resume normalisation. The latest <strong>Real Estate Economic Institute</strong> release (20 April 2026) put the Tokyo 23-wards new condo average at <strong>¥137.84M</strong>; greater Tokyo's March 2026 new condo price stayed above ¥100M for the second consecutive month at <strong>¥104.13M</strong>. The national rental yield of <strong>4.34%</strong> still produces a spread of <strong>+3.59%</strong> over the current 0.75% policy rate — by far the widest positive carry in developed Asia.</p>
+        <p>The market now shows a clear three-tier dynamic. <strong>Fukuoka</strong> leads with 13 consecutive years of price appreciation and residential land values up <strong>+9.0% YoY</strong>. <strong>Tokyo</strong> sustains record pricing on domestic upgrader demand plus foreign capital, which now represents an estimated <strong>27%</strong> of nationwide transactions and up to <strong>40%</strong> of central Tokyo new-build sales. <strong>Osaka</strong> benefits from Expo 2025 inbound tourism and Namba/Shinsaibashi overtaking Umeda for the first time in six years. The 9 million akiya figure makes headlines but is overwhelmingly rural — Tokyo's own vacancy rate is just <strong>10.3%</strong>, and only a small fraction of that is investment-relevant stock.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>日本住宅市場進入 2026 年第二季時，呈現已開發市場中罕見的組合：都會區結構性供給不足，但鄉下堆著 900 萬戶空屋；全球最後一個超寬鬆貨幣政策進入明顯正常化；弱勢日圓持續吸引跨境資金創新高。2025 年東京住宅均價約 <strong>9,140 萬日圓</strong>，年增 <strong>10.7%</strong>，都心三區（中央、千代田、港區）平均價格穩定在 <strong>1 億日圓</strong>的心理關口之上。2026 年 2 月中古公寓成交均價漲 5.0% 到 <strong>4,115 萬日圓</strong>，每平方公尺單價年增 <strong>8.2%</strong> 到 <strong>85.6 萬日圓</strong>。</p>
+        <p>央行政策在 2025 至 2026 年出現決定性轉向。日本銀行在 2025 年 12 月把政策利率升到 <strong>0.75%</strong>，是 1995 年 9 月以來最高；之後在 2026 年 3 月 19 日與 <strong>4 月 28 日</strong>會議連續維持（4 月為 6 比 3 表決），植田總裁明確以伊朗衝擊造成的能源價格不確定性為「暫停」理由。3 票鷹派異議顯示近期仍偏向重啟正常化。<strong>不動產經濟研究所</strong>最新（2026 年 4 月 20 日發布）東京 23 區新建公寓均價達 <strong>1.3784 億日圓</strong>；首都圈 2026 年 3 月新建公寓均價連續第 2 個月站上 1 億日圓，達 <strong>1.0413 億日圓</strong>。全國租金收益率 <strong>4.34%</strong>，對比目前 0.75% 政策利率仍有 <strong>+3.59%</strong> 正利差，是已開發亞洲最寬的。</p>
+        <p>市場目前呈現明顯的三階分化。<strong>福岡</strong>領跑，連續 13 年房價上漲、住宅地價年增 <strong>9.0%</strong>。<strong>東京</strong>在國內換屋族加上外資的雙重支撐下維持紀錄高價，外資目前估計佔全國成交 <strong>27%</strong>，東京都心新建案甚至高達 <strong>40%</strong>。<strong>大阪</strong>靠 2025 年世博帶動的觀光人潮，難波/心齋橋六年來首次超越梅田。900 萬戶空屋雖然經常上頭版，但絕大多數在鄉下——東京本身空置率只有 <strong>10.3%</strong>，其中有投資價值的比例更小。</p>
+      </div>
+
+      <!-- Charts 2x2 Grid -->
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Japan Condo Price 10Y + YoY%</span><span class="lang-zh" style="display:none">日本公寓10年房價 + 年增率</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">万円 &middot; Source: REINS</span><span class="lang-zh" style="display:none">萬日圓 &middot; 來源：REINS</span></p>
+          <div id="rChartJpPrice" style="height:220px;min-height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Tokyo vs Osaka vs Fukuoka</span><span class="lang-zh" style="display:none">東京 vs 大阪 vs 福岡</span></h4>
+          <div class="chart-meta orange"><span class="lang-en">City price comparison + YoY%</span><span class="lang-zh" style="display:none">城市均價比較 + 年增率</span></div>
+          <div id="chart-r-jp-city" style="height:220px;min-height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Yield Spread vs BOJ Rate</span><span class="lang-zh" style="display:none">收益率利差 vs BOJ利率</span></h4>
+          <div class="chart-meta green"><span class="lang-en">Yield spread remains positive</span><span class="lang-zh" style="display:none">利差仍為正值</span></div>
+          <div id="chart-r-jp-yield" style="height:220px;min-height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Foreign Buyer Share (Tokyo)</span><span class="lang-zh" style="display:none">外國買家佔比（東京）</span></h4>
+          <div class="chart-meta orange"><span class="lang-en">Luxury segment rising</span><span class="lang-zh" style="display:none">高端市場上升</span></div>
+          <div id="chart-r-jp-foreign" style="height:220px;min-height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- 2. BOJ RATE NORMALIZATION -->
+      <h2 id="sec-policy"><span class="lang-en">BOJ RATE NORMALIZATION</span><span class="lang-zh" style="display:none">BOJ升息正常化</span></h2>
+
+      <div class="lang-en">
+        <p>The Bank of Japan has moved from <strong>-0.1%</strong> to <strong>0.75%</strong> in four hikes, closing the chapter on the world's last ultra-loose monetary regime. The path has been deliberate and communicated: exit from negative rates in March 2024, lift to 0.25% in July 2024, move to 0.50% in January 2025, and the December 2025 hike to <strong>0.75%</strong> — the highest since September 1995. At the March 2026 meeting the BOJ held, citing Middle East tensions and energy-driven inflation uncertainty, but the policy board explicitly noted that "real interest rates remain significantly low" — a strong signal that further normalisation is coming.</p>
+        <p>The market is pricing a terminal rate of <strong>1.00% to 1.25%</strong> to be reached in late 2026 or 2027. A 35-year flat mortgage currently costs approximately <strong>1.7–2.1%</strong>, still extraordinarily cheap by any global standard. Against a national rental yield of <strong>4.34%</strong>, this leaves a positive carry spread of roughly <strong>+2.3% at the upper bound</strong> — comfortably above the breakeven threshold. The key risk is pace, not direction: a gradual path toward 1.0–1.25% by end-2027 is fully manageable, but any accelerated hiking schedule triggered by a sticky core CPI print would compress spreads materially.</p>
+        <p>The yen is the critical transmission variable for foreign investors. USD/JPY has traded in a 148–158 range through 2025–2026, versus 108–115 in the 2019–2021 period. This persistent discount has made Tokyo condominiums 25–30% cheaper in USD terms than pre-pandemic equivalents — the single most important factor behind record foreign buying. A yen recovery toward 130 would reduce foreign purchasing power by roughly 15%, compressing the cross-border bid and simultaneously signalling tighter BOJ policy. For USD-based investors the trade is conceptually straightforward: you are long Japanese real estate plus short a weak yen plus long a positive carry spread — a three-factor return structure that no other major Asian market can offer.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>日本銀行透過四次升息，把政策利率從 <strong>-0.1%</strong> 一路升到 <strong>0.75%</strong>，正式結束全球最後一個超寬鬆貨幣政策。升息節奏清楚可預期：2024 年 3 月退出負利率、7 月升到 0.25%、2025 年 1 月到 0.50%、2025 年 12 月升到 <strong>0.75%</strong>，是 1995 年 9 月以來最高。2026 年 3 月會議維持不變，主因是中東情勢與能源帶動的通膨不確定性；但政策理事會明確指出「實質利率仍顯著偏低」——相當於宣告正常化還沒結束。</p>
+        <p>市場目前反映 2026 年底到 2027 年終端利率會到 <strong>1.00% 至 1.25%</strong>。35 年期固定房貸目前約 <strong>1.7–2.1%</strong>，以任何全球標準來看仍極便宜。對比全國 <strong>4.34%</strong> 的租金收益率，在房貸利率上限下仍有約 <strong>+2.3% 的正利差</strong>，離損益平衡門檻還有明顯距離。關鍵風險是速度不是方向：如果到 2027 年底逐步升到 1.0–1.25%，市場完全消化得了；但若核心 CPI 再僵化、迫使央行加快升息節奏，利差會被大幅壓縮。</p>
+        <p>日圓是外資最關鍵的傳導變數。2025 至 2026 年間 USD/JPY 在 148–158 區間，相比 2019 至 2021 年的 108–115 仍大幅弱勢。這個持續性的折價讓東京公寓以美元計價比疫情前便宜 25–30%，也是外資買盤創紀錄的單一最大原因。日圓若回升到 130 附近，外資購買力會下降約 15%，既壓縮跨境買盤、又同時代表 BOJ 政策會更緊。對美元投資人來說，這筆交易概念很清楚：做多日本房地產、做空弱勢日圓、賺正利差——這種三因子報酬結構，亞洲其他主要市場都做不到。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">BOJ Policy Rate Path 2016&ndash;2027E</span><span class="lang-zh" style="display:none">日銀政策利率路徑 2016&ndash;2027E</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">% &middot; Source: BOJ / Market expectations</span><span class="lang-zh" style="display:none">% &middot; 來源：BOJ / 市場預期</span></p>
+          <div id="chartBojPath" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">Terminal rate expected 1.00&ndash;1.25% by late 2026 / 2027</span><span class="lang-zh" style="display:none">終端利率預期 1.00&ndash;1.25%，2026 底至 2027 到位</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">USD/JPY 7Y Trend</span><span class="lang-zh" style="display:none">USD/JPY 近七年走勢</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Month-end &middot; Source: BOJ / FX markets</span><span class="lang-zh" style="display:none">月底匯率 &middot; 來源：BOJ / 外匯市場</span></p>
+          <div id="chartUsdJpy" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">Tokyo condos ~25&ndash;30% cheaper in USD vs pre-2021 levels</span><span class="lang-zh" style="display:none">東京公寓以美元計比 2021 年前便宜 25&ndash;30%</span></p>
+        </div>
+      </div>
+
+      <!-- 3. SUPPLY -->
+      <h2 id="sec-supply"><span class="lang-en">SUPPLY: SHRINKING STARTS AND THE AKIYA PARADOX</span><span class="lang-zh" style="display:none">供給：開工萎縮與空屋悖論</span></h2>
+
+      <div class="lang-en">
+        <p>Japan's housing supply trajectory is the single most important structural feature of this market, and it is running in the opposite direction to demand. Nationally, housing starts have been in secular decline from <strong>905,000 units</strong> in 2019 to an estimated <strong>760,000</strong> in 2025 — a <strong>-4.6%</strong> year-on-year drop, and 16% below the 2019 peak. Construction costs have surged <strong>25–29%</strong> since 2021 due to a combination of materials inflation, yen-denominated import pressure, and a chronic labour shortage in building trades where the median worker age now exceeds 55. Developers across the three major metros have shifted decisively toward margin optimisation over volume.</p>
+        <p>In Tokyo, the supply squeeze is acute. New condominium supply for 2026 is projected at just <strong>23,000 units</strong> — the lowest in over 50 years, and down from approximately 35,000 in 2019. Used condominiums now account for about <strong>90%</strong> of all Tokyo-area condo transactions, as new-build inventory is systematically insufficient to meet demand. New condos cost approximately <strong>45% more</strong> than comparable existing homes — a premium reflecting not speculative froth but the reality that replacement cost has moved structurally higher and developers cannot price below it profitably.</p>
+        <p>The akiya (vacant home) crisis is widely cited but frequently misinterpreted. Nationally, approximately <strong>9 million units</strong> — around 13.8% of total housing stock — are classified as vacant. Yet this figure is overwhelmingly a rural and depopulating-area phenomenon. Tokyo's own vacancy rate is just <strong>10.3%</strong>, and most of that is concentrated in outer suburbs with limited investment relevance; the 23 central wards run materially lower. The akiya crisis is therefore a distraction from the real investment story: in the three major metros where demand and capital concentrate, supply is chronically insufficient and getting worse, not better. Construction cost escalation effectively floors new-build pricing, making a repricing lower very difficult absent a severe demand shock.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>日本的供給趨勢是這個市場最重要的結構特徵，而且方向跟需求完全相反。全國新建開工量從 2019 年的 <strong>90.5 萬戶</strong>持續下降到 2025 年預估的 <strong>76 萬戶</strong>，年減 <strong>4.6%</strong>，比 2019 年高峰少 16%。建材通膨、日圓計價的進口壓力、加上營造業長期缺工（技工中位數年齡已超過 55 歲）讓建設成本自 2021 年以來累計上漲 <strong>25–29%</strong>。三大都會區的開發商都明顯從「衝量」轉向「顧利潤」。</p>
+        <p>東京的供給緊縮特別明顯。2026 年東京新建公寓供給量預估只有 <strong>2.3 萬戶</strong>，是 50 多年來最低，比 2019 年的約 3.5 萬戶大幅萎縮。中古公寓目前佔東京都會區公寓成交約 <strong>90%</strong>，因為新建供給量系統性地不夠用。新建案價格比同等級中古屋貴約 <strong>45%</strong>——這個溢價反映的不是投機泡沫，而是重置成本已經結構性上升、開發商低於這個成本根本無法獲利交屋。</p>
+        <p>空屋問題（akiya）經常被提起，但也經常被誤解。全國約 <strong>900 萬戶</strong>空屋，約佔住宅總量 13.8%。但這個數字壓倒性地是鄉下與人口外流地區的現象。東京本身空置率只有 <strong>10.3%</strong>，其中大部分集中在外圍郊區、投資意義有限；都心 23 區的空置率明顯更低。空屋危機其實是個轉移焦點的話題：在投資需求和資金集中的三大都會，供給是長期性不足、而且越來越差。建設成本持續攀升為新建案價格撐起了地板，除非出現嚴重的需求衝擊，否則價格很難往下修。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">National Housing Starts 2015&ndash;2025</span><span class="lang-zh" style="display:none">全國新建住宅開工量 2015&ndash;2025</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">10K units &middot; Source: MLIT</span><span class="lang-zh" style="display:none">萬戶 &middot; 來源：國土交通省</span></p>
+          <div id="chartJpStarts" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">2025 est. 760K &mdash; 16% below 2019 peak, lowest in decade</span><span class="lang-zh" style="display:none">2025 預估 76 萬戶——比 2019 高峰低 16%，為十年來最低</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Tokyo New Condo Supply 2019&ndash;2026E</span><span class="lang-zh" style="display:none">東京新建公寓供給 2019&ndash;2026E</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">K units &middot; Source: Real Estate Economic Institute</span><span class="lang-zh" style="display:none">千戶 &middot; 來源：不動產經濟研究所</span></p>
+          <div id="chartTokyoNewSupply" style="height:220px"></div>
+          <p class="chart-note red"><span class="lang-en">2026E: only 23K units &mdash; lowest in 50+ years</span><span class="lang-zh" style="display:none">2026 預估僅 2.3 萬戶——50 多年來最低</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Vacancy Rate by Region</span><span class="lang-zh" style="display:none">各地空置率</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">% of stock &middot; Source: Housing &amp; Land Survey 2023</span><span class="lang-zh" style="display:none">佔存量% &middot; 來源：住宅土地統計調查 2023</span></p>
+          <div id="chartVacancySplit" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">Tokyo 10.3% vs rural 20&ndash;25% &mdash; the akiya gap is structural</span><span class="lang-zh" style="display:none">東京 10.3% 對比鄉下 20&ndash;25%——空屋落差是結構性的</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Tokyo Transaction Mix: New vs Resale</span><span class="lang-zh" style="display:none">東京成交結構：新建 vs 中古</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">% of transactions &middot; Source: REINS</span><span class="lang-zh" style="display:none">佔成交比 &middot; 來源：REINS</span></p>
+          <div id="chartTxMix" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">Resale now 90% &mdash; new-build premium 45% over comparable existing</span><span class="lang-zh" style="display:none">中古屋目前佔 90%；新建溢價達 45%</span></p>
+        </div>
+      </div>
+
+      <!-- 4. DEMAND -->
+      <h2 id="sec-demand"><span class="lang-en">DEMAND: FOREIGN CAPITAL AND RESALE BOOM</span><span class="lang-zh" style="display:none">需求：外資湧入與中古屋榮景</span></h2>
+
+      <div class="lang-en">
+        <p>Foreign capital has become the single most important marginal demand driver in Japan's urban property markets. The weak yen effect compounds the yield advantage: Japanese real estate is extraordinarily cheap in foreign-currency terms, and at the same time generates a positive carry that no other major Asian market can match. Foreign investors now account for an estimated <strong>27%</strong> of all Japanese residential transactions nationwide, and up to <strong>40%</strong> of new condominium sales in central Tokyo. In premium buildings such as Toyosu Tower, foreign buyer ratios have exceeded <strong>20%</strong>. The origin mix is dominated by Chinese (the largest cohort, ~40% of foreign buyers at major Tokyo agencies), followed by Taiwan, Hong Kong, Singapore, and more recently South Korea and US-based buyers.</p>
+        <p>Policy is beginning to respond. The Japanese government initiated a formal review of foreign-ownership rules in late 2025, with findings due in March 2026, benchmarking Japan's approach against Canada, Germany, South Korea, and Taiwan. The consultation signals that more restrictive rules are on the table for 2026–2027. A common consequence of such announcements elsewhere (Canada, Australia, New Zealand) has been a short-term acceleration in foreign purchases ahead of implementation — effectively a front-loading of demand that could temporarily extend the current price cycle.</p>
+        <p>The domestic resale market is surging in parallel. Pre-owned Greater Tokyo condominium prices rose <strong>+27.17%</strong> in H1 2025, and the February 2026 print was <strong>+5.0% YoY</strong> at <strong>&yen;41.15 million</strong> on a sustained upward trajectory. The underlying driver is dual-income upgrader demand in the 35–50 age band, where household incomes have materially outpaced CPI through 2024–2025. The weak yen acts as a double catalyst: it attracts foreign capital while simultaneously making imports more expensive — pushing domestic buyers toward existing stock rather than new-builds where 30–40% of materials cost is now import-linked. This dual demand channel (foreign inbound + domestic upgrader) is genuinely rare in Asian property markets and is the structural reason Tokyo prices have continued rising despite BOJ normalisation.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>外資已是日本都市房市最重要的邊際需求驅動力。弱勢日圓加上利差優勢形成雙重效應：日本房地產以外幣計價非常便宜，同時還能賺到亞洲其他主要市場做不到的正利差。外資目前估計佔全日本住宅成交 <strong>27%</strong>，東京都心新建公寓甚至達 <strong>40%</strong>。像豐洲 Tower 這類高端物件，外資買方比例已超過 <strong>20%</strong>。買方來源以中國為主（東京主要代銷約 40% 客戶），其次是台灣、香港、新加坡、近期還加入南韓和美國買家。</p>
+        <p>政策面開始出現回應。日本政府在 2025 年底啟動外資持有規範的全面檢討，結果預計 2026 年 3 月公布，會參考加拿大、德國、南韓、台灣的做法。這個公開諮詢本身就暗示 2026 至 2027 年可能出現更嚴格的規則。從其他國家（加拿大、澳洲、紐西蘭）的經驗看，這類宣布常常導致短期內外資搶購以趕在新規前進場——等於把未來需求往前挪，可能反而會暫時延長目前的價格週期。</p>
+        <p>國內中古屋市場同步上揚。首都圈中古公寓在 2025 年上半年漲 <strong>27.17%</strong>，2026 年 2 月公布數字年增 <strong>5.0%</strong>、均價 <strong>4,115 萬日圓</strong>，維持穩步向上。背後的驅動力是 35 至 50 歲雙薪家庭的換屋需求，這個族群的家庭所得在 2024–2025 年明顯跑贏 CPI。弱勢日圓形成雙重催化：既吸引外資，又因為新建案有 30–40% 的建材來自進口、成本被推高，國內買家自然轉向中古屋。外資加上國內換屋這兩股需求同時運作，在亞洲房市非常罕見，也是東京房價在 BOJ 升息下仍持續上漲的結構性原因。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Foreign Buyer Share in Japan Property</span><span class="lang-zh" style="display:none">外國買家佔比</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">% of transactions &middot; National &amp; central Tokyo</span><span class="lang-zh" style="display:none">佔成交比 &middot; 全國 &amp; 都心新建</span></p>
+          <div id="chartForeignShare" style="height:220px"></div>
+          <p class="chart-note navy"><span class="lang-en">National 27% &middot; Central Tokyo new-build up to 40%</span><span class="lang-zh" style="display:none">全國 27% &middot; 都心新建高達 40%</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Foreign Buyer Origin Mix</span><span class="lang-zh" style="display:none">外國買家來源分布</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">% of foreign transactions &middot; Major agencies 2025</span><span class="lang-zh" style="display:none">佔外資成交比 &middot; 主要代銷 2025</span></p>
+          <div id="chartForeignOrigin" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">China ~40% of foreign volume &middot; Taiwan + HK next</span><span class="lang-zh" style="display:none">中國約佔 40% &middot; 台灣與港為次大</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Greater Tokyo Resale Condo Price</span><span class="lang-zh" style="display:none">首都圈中古公寓價格</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Average price 万円 &middot; Source: REINS</span><span class="lang-zh" style="display:none">成交均價（萬円）&middot; 來源：REINS</span></p>
+          <div id="chartResalePrice" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">Feb 2026: &yen;41.15M (+5.0% YoY), sustained uptrend</span><span class="lang-zh" style="display:none">2026/2：4,115 萬 (+5.0% 年增)，穩步向上</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Household Income vs Condo Price (2015=100)</span><span class="lang-zh" style="display:none">家庭所得 vs 公寓房價指數（2015=100）</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Index &middot; Source: MIC / REINS</span><span class="lang-zh" style="display:none">指數 &middot; 來源：總務省 / REINS</span></p>
+          <div id="chartIncomePrice" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">Price outpacing income &mdash; affordability pressure rising</span><span class="lang-zh" style="display:none">房價漲幅超過所得——負擔能力壓力上升</span></p>
+        </div>
+      </div>
+
+
+      <!-- 5. VALUATION -->
+      <h2 id="sec-valuation"><span class="lang-en">VALUATION</span><span class="lang-zh" style="display:none">估值</span></h2>
+
+      <div class="lang-en">
+        <p>Japan's valuation anchor is the rental yield spread. The national gross rental yield of <strong>4.34%</strong> against a BOJ policy rate of <strong>0.75%</strong> produces a spread of <strong>+3.59%</strong> — the widest positive carry in developed Asia. This is the foundational fact for any Japanese real estate thesis: so long as the spread remains above roughly +2.0%, the income case holds regardless of capital appreciation trends. For comparison: Taiwan sits at a razor-thin <strong>+0.24%</strong>, Malaysia <strong>+2.44%</strong>, Australia at negative carry of approximately -300 bps. Japan is the only major Asia-Pacific market where a leveraged income strategy remains arithmetically sound at current rates.</p>
+        <p>Yields vary materially by city. Fukuoka leads at approximately <strong>4.98%</strong>, Osaka at <strong>4.20%</strong>, Tokyo central wards at around <strong>3.50%</strong>, and Tokyo greater metro at <strong>4.10%</strong>. The city ranking matches the population dynamics: faster-growing cities (Fukuoka, Sapporo, Naha) offer wider yields and stronger rent growth than mature mega-cities. In APAC price-to-rent terms, Tokyo at approximately <strong>37x</strong> is elevated on paper, but the near-zero financing cost environment justifies the multiple. Compared to Taipei (<strong>47x</strong>), Hong Kong (<strong>50x</strong>), and Shanghai (<strong>59x</strong>), Tokyo offers materially better value after accounting for cost of funds.</p>
+        <p>The critical risk to the valuation anchor is pace of BOJ normalisation. A terminal rate of 1.00% still leaves a spread of +3.34% — highly attractive. A terminal of 1.50% reduces the spread to +2.84% — still acceptable. Only a surprise acceleration to 2.00%+ (a tail scenario requiring sustained CPI above 3.5%) would compress the spread to the point of forcing investor repositioning. The base-case path, with a gradual climb to 1.00–1.25% by end-2027, keeps the income thesis intact.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>日本估值的根本錨點是租金利差。全國毛租金收益率 <strong>4.34%</strong> 減去 BOJ 政策利率 <strong>0.75%</strong>，利差達 <strong>+3.59%</strong>，是已開發亞洲最大的正利差。這是任何日本房地產投資邏輯的基礎：只要利差維持在大約 +2.0% 以上，收租邏輯就站得住，不論資本增值如何。對比：台灣只有 <strong>+0.24%</strong>、馬來西亞 <strong>+2.44%</strong>、澳洲甚至是負利差約 -300 bps。日本是亞太主要市場裡，唯一在目前利率下「槓桿收租」在數學上還說得通的市場。</p>
+        <p>各城市收益率差異明顯：福岡約 <strong>4.98%</strong>、大阪 <strong>4.20%</strong>、東京都心約 <strong>3.50%</strong>、東京都會區 <strong>4.10%</strong>。排名和人口動能一致：人口仍在成長的城市（福岡、札幌、那霸）收益率更高、租金成長也更強，勝過成熟的超大都會。以亞太房價租金比看，東京約 <strong>37 倍</strong>帳面上偏高，但在近零融資成本環境下合理。相比台北（<strong>47 倍</strong>）、香港（<strong>50 倍</strong>）、上海（<strong>59 倍</strong>），東京扣掉資金成本後價值明顯較好。</p>
+        <p>估值錨點最大的風險是 BOJ 升息速度。若終端利率到 1.00%，利差仍有 +3.34%，非常有吸引力；終端 1.50% 時利差 +2.84%，仍可接受；只有在意外加速升到 2.00% 以上（需要 CPI 持續在 3.5% 以上的尾部情境），利差才會壓縮到迫使投資人重新配置。基本情境是 2027 年底前緩步升到 1.00–1.25%，收租邏輯仍然完整。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Yield vs Policy Rate: APAC Comparison</span><span class="lang-zh" style="display:none">收益率 vs 政策利率：亞太比較</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Spread % &middot; 2026 Q1</span><span class="lang-zh" style="display:none">利差% &middot; 2026 Q1</span></p>
+          <div id="chartApacSpread" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">Japan +3.59% &mdash; widest positive carry in developed Asia</span><span class="lang-zh" style="display:none">日本 +3.59% &mdash; 已開發亞洲最大正利差</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Yield by Japanese City</span><span class="lang-zh" style="display:none">日本主要城市收益率</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Gross rental yield % &middot; 2025</span><span class="lang-zh" style="display:none">毛租金收益率% &middot; 2025</span></p>
+          <div id="chartCityYield" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">Fukuoka 4.98% &middot; Osaka 4.20% &middot; Tokyo central 3.50%</span><span class="lang-zh" style="display:none">福岡 4.98% &middot; 大阪 4.20% &middot; 東京都心 3.50%</span></p>
+        </div>
+      </div>
+
+
+      <!-- 6. TOKYO 23 WARDS -->
+      <h2 id="sec-tokyo"><span class="lang-en">TOKYO 23 WARDS</span><span class="lang-zh" style="display:none">東京23區</span></h2>
+
+      <div class="lang-en">
+        <p>Tokyo's 23-ward market continues to set records. The average new-build condominium price reached <strong>&yen;94 million</strong> in 2025, with peak monthly readings breaching the <strong>&yen;100 million</strong> psychological threshold. Residential prices averaged approximately <strong>&yen;91.4 million</strong> on a 12-month basis — a <strong>+10.7% YoY</strong> increase. In the three core wards (Chuo, Chiyoda, Minato), prices for new luxury condominiums have consistently stayed above &yen;100 million, with top-tier addresses in Minato pushing toward <strong>&yen;120 million+</strong>. Land prices across the 23 wards rose <strong>+7.9%</strong> year-on-year in the January 2026 MLIT Land Price Survey — the highest appreciation among Japan's major markets.</p>
+        <p>Sub-market dynamics are sharply differentiated. The <strong>central three wards</strong> (Chuo, Chiyoda, Minato) drive the luxury narrative at &yen;100–120M+, dominated by domestic ultra-HNW plus foreign capital. The <strong>next five wards</strong> (Shinjuku, Shibuya, Bunkyo, Meguro, Shinagawa) sit at &yen;75–95M and serve dual-income professional upgraders. The <strong>outer 15 wards</strong> at &yen;55–75M serve owner-occupied first-buyer demand, supported by Tokyo's dense transit network and the structural shift toward inner-ring living post-pandemic. Takeshiba, Toranomon, and the Shinjuku/Shibuya redevelopment corridors have each added multi-tower supply but remain undersupplied relative to demand.</p>
+        <p>The rental market is equally robust. Average asking rents reached <strong>&yen;4,332/sqm</strong>, up <strong>+6.4% YoY</strong>, driven by tight vacancy and strong demand from both domestic professionals and the growing expatriate population (reconstruction of pre-pandemic expat flows plus the recent influx of crypto and private-equity firms relocating regional offices to Tokyo). The combination of rising rents (6.4%), appreciating land (7.9%), and yen-denominated new-build pricing (10.7%) continues to underpin the total return case for central Tokyo, even as entry prices reach historically elevated levels and yields compress to the 3.5% range.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>東京 23 區持續刷新紀錄。2025 年新建公寓均價達 <strong>9,400 萬日圓</strong>，高峰月份突破 <strong>1 億日圓</strong>心理關口。住宅價格以 12 個月滾動計算約 <strong>9,140 萬日圓</strong>、年增 <strong>10.7%</strong>。都心三區（中央、千代田、港區）新建豪宅價格穩定在 1 億日圓以上，港區頂級地段已推到 <strong>1.2 億日圓以上</strong>。2026 年 1 月國土交通省公告地價，23 區地價年增 <strong>7.9%</strong>，為日本主要市場中最高漲幅。</p>
+        <p>各副市場差異極大。<strong>都心三區</strong>（中央、千代田、港區）9,100 萬至 1.2 億日圓以上帶動豪宅敘事，買家以國內超高淨值族群加外資為主。<strong>次圈五區</strong>（新宿、澀谷、文京、目黑、品川）7,500 至 9,500 萬日圓，服務雙薪專業換屋族。<strong>外圍 15 區</strong>5,500 至 7,500 萬日圓，由自住首購族支撐，背後是東京密集交通網絡、加上疫情後「回歸內圈居住」的結構轉變。竹芝、虎之門、新宿／澀谷改建走廊各自新增多棟供給，但相對需求仍然供不應求。</p>
+        <p>租賃市場同樣強勁。平均招租租金達 <strong>每平方公尺 4,332 日圓</strong>，年增 <strong>6.4%</strong>，受惠於空置率低、以及國內專業人士與日漸回流的外派人口（疫情前外派人流回復，加上加密貨幣與私募基金把區域辦公室搬回東京）。租金漲 6.4%、地價漲 7.9%、日圓計新建房價漲 10.7%，三者組合讓都心 23 區的總報酬故事仍然成立；即便入場價格創歷史新高、收益率壓縮到 3.5% 區間。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Tokyo 23-Ward Price by Tier</span><span class="lang-zh" style="display:none">東京 23 區價格分級</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">&yen;M average &middot; New-build 2025</span><span class="lang-zh" style="display:none">萬円均價 &middot; 2025 新建</span></p>
+          <div id="chartTokyoTiers" style="height:220px"></div>
+          <p class="chart-note navy"><span class="lang-en">Central 3 wards: &yen;100&ndash;120M &middot; Outer 15: &yen;55&ndash;75M</span><span class="lang-zh" style="display:none">都心三區 1&ndash;1.2 億 &middot; 外圍 15 區 5,500&ndash;7,500 萬</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Tokyo 23-Ward Land Price Growth</span><span class="lang-zh" style="display:none">東京 23 區地價年增率</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">YoY % &middot; Source: MLIT Land Price Survey</span><span class="lang-zh" style="display:none">年增% &middot; 來源：國土交通省地價調查</span></p>
+          <div id="chartTokyoLand" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">2026: +7.9% &mdash; highest among major Japanese markets</span><span class="lang-zh" style="display:none">2026：+7.9%——日本主要市場中最高</span></p>
+        </div>
+      </div>
+
+      <!-- 7. OSAKA -->
+      <h2 id="sec-osaka"><span class="lang-en">OSAKA</span><span class="lang-zh" style="display:none">大阪</span></h2>
+
+      <div class="lang-en">
+        <p>Osaka is Japan's most interesting relative-value story in 2026. Residential prices rose <strong>+4.2%</strong> on aggregate in 2025, but the sub-market dynamics tell a far richer story. For the first time in six years, the Minami district (Namba, Shinsaibashi) outpaced the Kita district (Umeda) in price growth, driven by inbound tourism demand crystallising around the Expo 2025 legacy. Average new-build condominium prices reached <strong>&yen;58.13 million</strong> — materially below Tokyo but with rental yields approximately <strong>70 basis points higher</strong> at 4.20%, and a far lower affordability ceiling relative to local incomes.</p>
+        <p>Expo 2025 is now in the rearview mirror but its effects continue to compound. Infrastructure upgrades (Metro Midosuji extension, Yumeshima artificial island development, MGM IR gaming complex targeting 2030 opening) have locked in a 5–10 year demand tailwind. Foreign buying is notably less concentrated than Tokyo: Taiwanese, Hong Kong, and increasingly Korean and Singaporean buyers dominate the Osaka foreign flow, attracted by the yield advantage and lower absolute entry prices. The typical foreign Osaka buyer is a yield-focused individual investor or family office, rather than the wealth-preservation Tokyo profile.</p>
+        <p>The underappreciated Osaka story is the IR (Integrated Resort) development. Japan's first integrated resort complex — led by MGM, with Japanese partners — is scheduled to open in 2030 at Yumeshima. This will be the largest single-site IR in Asia outside Macau, with an estimated 20,000+ direct jobs and 40,000+ indirect employment effects concentrated in the southwest Osaka bay area. Residential demand impact will be concentrated in the Minato, Nishi, and Bentencho corridors — currently pricing at a 15–25% discount to central Osaka. For investors with a 5-year+ horizon, this is the most visible catalyst in Japanese residential real estate.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>大阪是 2026 年日本最有趣的相對價值故事。2025 年住宅價格整體漲 <strong>4.2%</strong>，但副市場的動能比總量更精彩。難波／心齋橋所在的南區，六年來首次在漲幅上超越梅田所在的北區，背後是 2025 世博遺產帶動的觀光需求。大阪新建公寓均價達 <strong>5,813 萬日圓</strong>，明顯低於東京，但租金收益率高出約 <strong>70 個基點</strong>（4.20%），相對在地所得的負擔能力也更友善。</p>
+        <p>2025 世博雖然已經落幕，但餘波仍在發酵。基礎建設升級（地下鐵御堂筋線延伸、夢洲人工島開發、預計 2030 年開業的 MGM 整合度假村）把未來 5–10 年的需求鎖定住。外資結構也跟東京明顯不同：大阪的外資以台灣、香港、最近加入的韓國和新加坡買家為主，被收益率優勢與較低的絕對入場價吸引。典型的大阪外資買家是追收益的個人投資人或家族辦公室，不是東京那種以資產保值為主的配置型買家。</p>
+        <p>被低估的大阪主題是 IR（整合度假村）開發。日本第一座整合度假村——由 MGM 領銜、搭配日本合作夥伴——預計 2030 年在夢洲開業，是澳門以外亞洲最大單一 IR，預估直接就業 2 萬人以上、間接效益 4 萬人以上，集中在大阪灣西南區。住宅需求影響將集中在港區、西區、弁天町走廊，目前價格比大阪都心低 15–25%。對有 5 年以上投資期間的人來說，這是日本住宅房地產最明確可見的中期催化劑。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Osaka Price vs Tokyo &amp; Fukuoka</span><span class="lang-zh" style="display:none">大阪 vs 東京 vs 福岡均價</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">&yen;M new-build average 2025</span><span class="lang-zh" style="display:none">2025 新建均價（萬円）</span></p>
+          <div id="chartOsakaComp" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">Osaka &yen;58M + 4.20% yield vs Tokyo &yen;94M + 3.50% &mdash; better carry</span><span class="lang-zh" style="display:none">大阪 5,813 萬 / 4.20% vs 東京 9,400 萬 / 3.50% &mdash; 利差更佳</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Osaka District Growth: Kita vs Minami</span><span class="lang-zh" style="display:none">大阪分區漲幅：北區 vs 南區</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">YoY % growth 2020&ndash;2025</span><span class="lang-zh" style="display:none">年增率 2020&ndash;2025</span></p>
+          <div id="chartOsakaDistrict" style="height:220px"></div>
+          <p class="chart-note orange"><span class="lang-en">Minami overtook Kita in 2025 &mdash; first time in 6 years</span><span class="lang-zh" style="display:none">南區 2025 首度超越北區——六年來首次</span></p>
+        </div>
+      </div>
+
+      <!-- 8. FUKUOKA -->
+      <h2 id="sec-fukuoka"><span class="lang-en">FUKUOKA</span><span class="lang-zh" style="display:none">福岡</span></h2>
+
+      <div class="lang-en">
+        <p>Fukuoka has delivered <strong>13 consecutive years</strong> of price appreciation — the longest unbroken winning streak in Japan. The average new-build condominium price reached <strong>&yen;56 million</strong> in 2025, and residential land values rose <strong>+9.0%</strong> year-on-year in the 2026 MLIT survey — the highest land price growth of any major Japanese city. The city's population continues to grow on net migration; Fukuoka is one of the very few major Japanese cities with sustained positive net domestic migration, drawing young professionals from across Kyushu and the wider western half of Japan.</p>
+        <p>The underlying demand drivers are three-fold. First, a thriving startup ecosystem: Fukuoka operates Japan's largest "National Strategic Special Zone" for entrepreneurship with reduced corporate tax, streamlined visa processing, and public-private incubators that have attracted over 1,000 startups since 2014. Second, Kyushu's role as a semiconductor hub: TSMC's Kumamoto fab (operational since late 2024) is driving spillover supply-chain employment across Kyushu, with Fukuoka capturing the professional-services and back-office share. Third, quality of life: dense urban transit, international airport at city-centre distance, temperate climate, and a food culture that has made Fukuoka a premium domestic migration destination.</p>
+        <p>The investment case is the yield-growth combination that no other Japanese city offers. Fukuoka's gross rental yield of <strong>4.98%</strong> is the highest among major Japanese cities; combined with 13 consecutive years of appreciation, it delivers total returns that structurally outperform Tokyo. The Tenjin Big Bang urban renewal programme continues to transform the city centre with Grade-A office, retail, and mixed-use redevelopments through 2028. The primary risk is scale: Fukuoka is a &yen;56M market, not &yen;94M — individual investor capacity to absorb premium stock is more limited than in Tokyo. For scaled allocators, Fukuoka is complementary to Tokyo rather than a substitute.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>福岡連續 <strong>13 年</strong>房價上漲，是日本最長的連漲紀錄。2025 年新建公寓均價達 <strong>5,600 萬日圓</strong>，2026 年國土交通省地價調查住宅地價年增 <strong>9.0%</strong>，是日本主要城市中漲幅最高。福岡人口持續淨遷入，是日本少數維持正向淨國內移民的大城市之一，吸引九州和西日本的年輕專業人士。</p>
+        <p>需求動能有三重：第一，蓬勃的新創生態圈。福岡擁有日本最大的「國家戰略特區」，享有降低公司稅率、簽證加速、公私合營孵化器等優勢，自 2014 年以來已吸引超過 1,000 家新創進駐。第二，九州作為半導體產業基地的角色。TSMC 熊本廠於 2024 年底量產後，供應鏈相關就業在九州擴散，福岡則承接了專業服務與後台職能的份額。第三，生活品質：都會交通網絡密集、國際機場就在市中心、氣候溫和、美食文化讓福岡成為日本國內高端遷移的首選目的地。</p>
+        <p>投資邏輯是「收益率加成長」的組合，日本其他城市都做不到。福岡毛租金收益率 <strong>4.98%</strong> 是主要城市中最高；加上連續 13 年增值，總報酬結構性優於東京。天神 Big Bang 都市更新計畫持續到 2028 年，以甲級辦公、零售與複合用途改造市中心。主要風險是規模：福岡是一個 5,600 萬日圓的市場，不是 9,400 萬的東京——個別投資人能在高端存量中布局的空間有限。對較大規模的配置人來說，福岡是東京的互補，不是替代。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Fukuoka 13-Year Price Streak</span><span class="lang-zh" style="display:none">福岡 13 年連漲紀錄</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">&yen;M avg new-build &middot; 2013&ndash;2025</span><span class="lang-zh" style="display:none">新建均價（萬円）&middot; 2013&ndash;2025</span></p>
+          <div id="chartFukuokaStreak" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">Longest unbroken appreciation streak of any major Japanese city</span><span class="lang-zh" style="display:none">日本主要城市中最長連漲紀錄</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Fukuoka Yield vs Other Japanese Cities</span><span class="lang-zh" style="display:none">福岡 vs 其他日本城市收益率</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Gross yield % &middot; 2025</span><span class="lang-zh" style="display:none">毛收益率% &middot; 2025</span></p>
+          <div id="chartFukuokaYield" style="height:220px"></div>
+          <p class="chart-note green"><span class="lang-en">Fukuoka 4.98% &mdash; highest major-city yield in Japan</span><span class="lang-zh" style="display:none">福岡 4.98% &mdash; 日本主要城市最高</span></p>
+        </div>
+      </div>
+
+
+      <!-- 8. OUTLOOK -->
+      <h2 id="sec-outlook"><span class="lang-en">OUTLOOK</span><span class="lang-zh" style="display:none">展望</span></h2>
+
+      <div class="lang-en">
+        <p>Japan's 2026–2027 outlook is defined by an unusually clear interaction of three variables: the pace of BOJ normalisation, the trajectory of the yen, and the durability of foreign demand. Unlike Australia or Malaysia where supply dynamics dominate, Japan's structural supply shortage is essentially fixed over this horizon — Tokyo's 2026 new-build supply is already locked in at 23,000 units and cannot be materially expanded. The outlook is therefore primarily a demand-side exercise, with the critical question being whether the cross-border bid persists or retreats.</p>
+        <p><strong>Base case</strong> (55% probability). BOJ delivers one additional 25 bp hike in Q3 or Q4 2026, taking the policy rate to <strong>1.00%</strong>. USD/JPY drifts from 150 toward <strong>140–145</strong> on the hike and gradual US rate cuts. National residential prices rise <strong>+5% to +8%</strong>, with Tokyo 23 wards <strong>+6 to +9%</strong>, Osaka <strong>+4 to +6%</strong>, Fukuoka <strong>+8 to +12%</strong>. The yield spread narrows from +3.59% to approximately +3.34%, still comfortably above the +2.0% carry threshold. Foreign buying moderates but does not reverse; domestic upgrader demand continues. Tokyo new-build average stays above &yen;90M, central three wards continue above &yen;100M. This is the path most consistent with BOJ forward guidance and current market pricing.</p>
+        <p><strong>Bull case</strong> (25% probability). BOJ delivers the December 2025 hike and then holds at <strong>0.75%</strong> through 2026 as Middle East tensions and energy-driven inflation uncertainty prompt caution. USD/JPY drifts toward <strong>155+</strong> on the dovish hold, extending the cross-border discount. Foreign buying accelerates, particularly with Chinese and Taiwanese capital pulling forward purchases ahead of anticipated 2027 ownership restrictions. National prices rise <strong>+9% to +13%</strong>, with Tokyo sustaining above &yen;100M new-build average and Fukuoka pushing <strong>+15% to +18%</strong>. This scenario requires Japan-specific inflation to moderate (domestic CPI ex-energy below 2.5%) while the yen stays weak — a combination that is plausible but not central.</p>
+        <p><strong>Bear case</strong> (20% probability). Sustained domestic wage-inflation dynamics (the BOJ's stated precondition for further hikes) pull policy rates to <strong>1.25% or 1.50%</strong> by end-2027. USD/JPY recovers toward <strong>125–130</strong> on rate differential compression. The cross-border bid weakens materially — for a Taiwan/HK/SG investor, a yen move from 152 to 130 reduces purchasing power by roughly 17%. National prices go flat to <strong>-3%</strong>, with Tokyo luxury correcting <strong>-5% to -10%</strong> as foreign inflows reverse. However, even in this case, Fukuoka and Osaka — with their yield advantage and domestic demand base — grow marginally +1 to +3%. The yield spread narrows to +2.8% to +3.1%, still above the income-strategy threshold but less compelling than current levels.</p>
+        <p>The asymmetric proposition is this: in all three scenarios, rental income remains robust, supply stays constrained, and the yield spread stays positive. What differs is the capital appreciation trajectory and the yen-denominated total return for foreign investors. Three indicators to monitor quarterly: (1) <strong>BOJ monetary policy meeting statements</strong> — forward guidance language changes precede rate decisions by one meeting; (2) <strong>Q/Q foreign buyer share at Tokyo agencies</strong> — the single most sensitive leading indicator of Tokyo luxury pricing; (3) <strong>USD/JPY monthly average</strong> — the dominant factor in foreign purchasing power. For investors entering in 2026, the structural case remains: Japan offers the widest positive carry in developed Asia, the most supply-constrained major metros, and a yen that is unlikely to strengthen materially before BOJ policy normalises fully — a 5-year-plus horizon.</p>
+      </div>
+
+      <div class="lang-zh" style="display:none">
+        <p>日本 2026–2027 年展望的核心，是三個變數交織的結果：BOJ 升息步調、日圓走向、以及外資需求是否持續。跟澳洲或馬來西亞不同（那兩個市場是供給動能主導），日本在這個時間窗內的結構性供給短缺基本是固定的——東京 2026 年新建供給量已經鎖定在 2.3 萬戶，無法大幅擴張。所以展望主要是需求面的故事，關鍵問題只有一個：跨境買盤還在不在。</p>
+        <p><strong>基本情境</strong>（機率 55%）。BOJ 在 2026 年 Q3 或 Q4 再升一次 25 個基點，政策利率到 <strong>1.00%</strong>。USD/JPY 從 150 附近回到 <strong>140–145</strong>，反映升息與美國逐步降息的雙向動能。全國住宅房價漲 <strong>5 至 8%</strong>，東京 23 區漲 <strong>6 至 9%</strong>、大阪漲 <strong>4 至 6%</strong>、福岡漲 <strong>8 至 12%</strong>。利差從 +3.59% 收窄到約 +3.34%，仍明顯高於 +2.0% 的收租門檻。外資買盤放緩但不反轉，國內換屋需求持續。東京新建均價維持在 9,000 萬以上、都心三區穩站 1 億以上。這是最貼近 BOJ 前瞻指引與目前市場定價的路徑。</p>
+        <p><strong>樂觀情境</strong>（機率 25%）。BOJ 完成 2025 年 12 月那次升息後，整個 2026 年維持在 <strong>0.75%</strong>，因為中東情勢與能源通膨讓央行態度謹慎。USD/JPY 反而往 <strong>155 以上</strong>漂移，延長跨境折價窗口。外資加速進場，中國與台灣資金特別可能在預期 2027 年外資限制前搶購。全國房價漲 <strong>9 至 13%</strong>，東京新建均價穩站 1 億、福岡衝到 <strong>+15 至 +18%</strong>。這個情境需要兩個條件同時成立：日本本土通膨放緩（除能源核心 CPI 低於 2.5%），同時日圓持續弱勢——組合合理但不是主流預期。</p>
+        <p><strong>悲觀情境</strong>（機率 20%）。國內薪資通膨持續（這正是 BOJ 所設定的再升息前提），政策利率在 2027 年底拉到 <strong>1.25% 或 1.50%</strong>。利差收斂讓 USD/JPY 回升到 <strong>125–130</strong>。跨境買盤明顯走弱——對台灣／香港／新加坡投資人來說，日圓從 152 升到 130，購買力就減少約 17%。全國房價持平至 <strong>-3%</strong>，東京豪宅隨外資退潮修正 <strong>-5 至 -10%</strong>。但即便在這個情境下，福岡與大阪靠收益率優勢和國內需求基礎，仍小幅成長 +1 至 +3%。利差收斂到 +2.8% 至 +3.1%，雖仍在收租門檻之上，但吸引力比當前明顯下降。</p>
+        <p>非對稱性論點是這樣：三個情境下，租金收入都穩、供給都緊、利差都為正。差異的是「資本增值軌跡」與「外幣計價的總報酬」。三個每季要追蹤的指標：（1）<strong>BOJ 貨幣政策會議聲明</strong>——前瞻指引措辭的轉變，通常比利率決策領先一次會議；（2）<strong>東京代銷業者的外資季成交佔比</strong>——東京高端價格最敏感的單一領先指標；（3）<strong>USD/JPY 月均值</strong>——決定外資購買力的主導因子。對 2026 年要進場的投資人，結構性論點仍然成立：日本是已開發亞洲最寬正利差市場、主要都會區供給最緊、日圓在 BOJ 全面正常化之前不太可能強勢反彈——這是一個 5 年以上的投資視野題目。</p>
+      </div>
+
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Price Forecast: Three Scenarios 2026&ndash;2027</span><span class="lang-zh" style="display:none">房價預測：三情境 2026&ndash;2027</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">YoY % by city</span><span class="lang-zh" style="display:none">各城市年增%</span></p>
+          <div id="chartJpScenario" style="height:240px"></div>
+          <p class="chart-note orange"><span class="lang-en">Base case: national +5&ndash;8%, Tokyo +6&ndash;9%, Fukuoka +8&ndash;12%</span><span class="lang-zh" style="display:none">基本情境：全國 +5&ndash;8%、東京 +6&ndash;9%、福岡 +8&ndash;12%</span></p>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Yield Spread in Three Scenarios</span><span class="lang-zh" style="display:none">三情境下利差軌跡</span></h4>
+          <p style="font-size:10px;color:#5a7a9a;margin-bottom:8px;font-family:Inter,sans-serif"><span class="lang-en">Yield minus BOJ rate &middot; %</span><span class="lang-zh" style="display:none">收益率 &minus; BOJ 利率 &middot; %</span></p>
+          <div id="chartJpSpread" style="height:240px"></div>
+          <p class="chart-note green"><span class="lang-en">Spread stays above +2.0% income threshold in all scenarios</span><span class="lang-zh" style="display:none">三情境下利差皆維持在 +2.0% 收租門檻之上</span></p>
+        </div>
+      </div>
+
+      <div class="report-footer">
+        <p><span class="lang-en">Data sources: MLIT &middot; BOJ &middot; REINS &middot; Numbeo &middot; Global Property Guide (GPG)</span><span class="lang-zh" style="display:none">數據來源：國土交通省 (MLIT) &middot; 日本銀行 (BOJ) &middot; REINS &middot; Numbeo &middot; Global Property Guide (GPG)</span></p>
+        <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:'#1e3a5f', green:'#16a34a', orange:'#d97706',
+    red:'#dc2626', blue:'#2563eb', muted:'#5a7a9a',
+    grid:'#e8f0f9', text:'#1e3a5f'
+  };
+  function fmtJPY(v){if(v>=100000000)return '\u00a5'+(v/100000000).toFixed(1)+'B';if(v>=1000000)return '\u00a5'+(v/1000000).toFixed(1)+'M';if(v>=1000)return '\u00a5'+(v/1000).toFixed(0)+'K';return '\u00a5'+v;}
+  function fmtJPYShort(v){if(v>=100000000)return(v/100000000).toFixed(1)+'B';if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return ''+v;}
+  function fmtNum(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+  var baseTooltip = {
+    trigger: 'axis', backgroundColor: '#fff',
+    borderColor: '#ccd9e8', borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+  var baseLegend = { top: 8, textStyle: baseText, icon: 'circle', itemWidth: 8, itemHeight: 8 };
+
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts = [];
+
+  function initAllCharts(lang) {
+    allCharts.forEach(function(c){ if(c) c.dispose(); });
+    allCharts = [];
+    drawJpPrice(lang);
+    drawCity(lang);
+    drawYield(lang);
+    drawForeign(lang);
+    drawBojPath(lang);
+    drawUsdJpy(lang);
+    drawJpStarts(lang);
+    drawTokyoNewSupply(lang);
+    drawVacancySplit(lang);
+    drawTxMix(lang);
+    drawForeignShareDual(lang);
+    drawForeignOrigin(lang);
+    drawResalePrice(lang);
+    drawIncomePrice(lang);
+    drawApacSpread(lang);
+    drawCityYield(lang);
+    drawTokyoTiers(lang);
+    drawTokyoLand(lang);
+    drawOsakaComp(lang);
+    drawOsakaDistrict(lang);
+    drawFukuokaStreak(lang);
+    drawFukuokaYield(lang);
+    drawJpScenario(lang);
+    drawJpSpread(lang);
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+    initAllCharts(lang);
+  }
+
+  function drawJpPrice(lang){
+    var en=lang==='en';
+    var c = echarts.init(document.getElementById('rChartJpPrice'));
+    allCharts.push(c);
+    var yrs=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    var price=[4750,4650,4700,4800,4940,5090,5320,5870,6720,7700,7940];
+    var yoy=[-0.5,-2.1,1.1,2.1,2.9,3.0,4.5,10.3,14.5,14.6,3.1];
+    c.setOption({
+      tooltip:baseTooltip,
+      legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8,data:['YoY %',en?'Condo Price':'公寓均價']},
+      grid:{left:12,right:12,top:16,bottom:36,containLabel:true},
+      xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:7,rotate:30}}),
+      yAxis:[
+        mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:8,formatter:function(v){return v+'万';}}}),
+        mkAxis({type:'value',splitLine:{show:false},axisLabel:{color:C.muted,fontSize:8,formatter:function(v){return v+'%';}}})
+      ],
+      series:[
+        {name:'YoY %',type:'bar',yAxisIndex:1,data:yoy.map(function(v){return{value:v,itemStyle:{color:v>=0?'rgba(22,163,74,0.7)':'rgba(220,38,38,0.7)'}}}),barMaxWidth:18,itemStyle:{borderRadius:[2,2,0,0]}},
+        {name:en?'Condo Price':'公寓均價',type:'line',data:price,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.08)'},symbol:'circle',symbolSize:4}
+      ]
+    });
+  }
+
+  function drawYield(lang){
+    var c = echarts.init(document.getElementById('chart-r-jp-yield'));
+    allCharts.push(c);
+    c.setOption({
+      tooltip: baseTooltip,
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['2019','2020','2021','2022','2023','2024','2025'], axisLabel:{ color:C.muted, fontSize:8 } }),
+      yAxis: mkAxis({ type:'value', min:0, max:6, axisLabel:{ color:C.muted, fontSize:9, formatter:'{value}%' } }),
+      series: [
+        { name:lang==='zh'?'租金收益率':'Rental Yield', type:'line', data:[4.2,4.1,4.0,4.0,4.1,4.2,4.34], lineStyle:{color:C.green,width:1.5}, itemStyle:{color:C.green}, smooth:0.3, areaStyle:{color:'rgba(22,163,74,0.08)'}, symbol:'circle', symbolSize:4 },
+        { name:lang==='zh'?'BOJ利率':'BOJ Rate', type:'line', data:[0.0,0.0,0.0,0.0,0.0,0.1,0.5], lineStyle:{color:C.red,width:1,type:'dashed'}, itemStyle:{color:C.red}, step:'end', symbol:'circle', symbolSize:3 }
+      ]
+    });
+  }
+
+  function drawForeign(lang){
+    var el = document.getElementById('chart-r-jp-foreign');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    c.setOption({
+      tooltip: baseTooltip,
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:['2020','2021','2022','2023','2024','2025'], axisLabel:{ color:C.muted, fontSize:8 } }),
+      yAxis: mkAxis({ type:'value', min:0, max:35, axisLabel:{ color:C.muted, fontSize:9, formatter:'{value}%' } }),
+      series: [{
+        name:lang==='zh'?'外資佔比':'Foreign Share',
+        type:'bar',
+        data:[12,15,18,21,24,27],
+        itemStyle:{ color:C.navy, borderRadius:[3,3,0,0] },
+        barMaxWidth:25,
+        label:{ show:true, position:'top', formatter:'{c}%', fontSize:8, color:C.navy }
+      }]
+    });
+  }
+
+  function drawCity(lang){
+    var el = document.getElementById('chart-r-jp-city');
+    if(!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    var cities = lang==='zh' ? ['大阪','福岡','東京'] : ['Osaka','Fukuoka','Tokyo'];
+    var prices = [5813, 6800, 9400];
+    var yoy = [16.0, 21.8, 10.7];
+    var colors = [C.orange, C.green, C.navy];
+    c.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger:'axis', axisPointer:{type:'shadow'} }),
+      grid:{left:12,right:12,top:28,bottom:20,containLabel:true},
+      xAxis: mkAxis({ type:'category', data:cities, axisLabel:{ color:C.muted, fontSize:9 } }),
+      yAxis: [
+        mkAxis({ type:'value', min:0, max:12000, axisLabel:{ color:C.muted, fontSize:8, formatter:function(v){return (v/10000*10000/10000).toFixed(0);} } }),
+        mkAxis({ type:'value', min:0, max:30, splitLine:{show:false}, axisLabel:{ color:C.muted, fontSize:8, formatter:'{value}%' } })
+      ],
+      series: [
+        { name:lang==='zh'?'均價(萬円)':'Avg Price (万円)', type:'bar', data:prices.map(function(v,i){ return { value:v, itemStyle:{color:colors[i],borderRadius:[3,3,0,0]} }; }), barMaxWidth:30, label:{ show:true, position:'top', formatter:function(p){return p.value;}, fontSize:8, color:C.navy } },
+        { name:'YoY%', type:'line', yAxisIndex:1, data:yoy, lineStyle:{color:C.red,width:1.5,type:'dashed'}, itemStyle:{color:C.red}, symbol:'circle', symbolSize:5, label:{ show:true, position:'top', formatter:function(p){return '+'+p.value+'%';}, fontSize:8, color:C.red } }
+      ]
+    });
+  }
+
+  /* ===== NEW CHARTS (2026 rewrite) ===== */
+  function drawBojPath(lang){
+    var el=document.getElementById('chartBojPath');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var yrs=['2016','2018','2020','2022','24/3','24/7','25/1','25/12','26/3','27F'];
+    var rates=[-0.1,-0.1,-0.1,-0.1,0.0,0.25,0.50,0.75,0.75,1.25];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:8}}),yAxis:mkAxis({type:'value',min:-0.5,max:1.5,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{type:'line',step:'end',data:rates,lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},areaStyle:{color:'rgba(220,38,38,0.08)'},symbol:'circle',symbolSize:4}]});
+  }
+  function drawUsdJpy(lang){
+    var el=document.getElementById('chartUsdJpy');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var yrs=['2019','2020','2021','2022','2023','2024','2025','26Q1'];
+    var vals=[109,103,114,132,142,151,154,152];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',min:100,max:165,axisLabel:{color:C.muted,fontSize:9}}),series:[{type:'line',data:vals,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.08)'},symbol:'circle',symbolSize:4,markLine:{silent:true,lineStyle:{color:C.orange,type:'dashed'},data:[{yAxis:115,label:{formatter:'Pre-2022 avg',fontSize:9}}]}}]});
+  }
+  function drawJpStarts(lang){
+    var el=document.getElementById('chartJpStarts');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var yrs=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025E'];
+    var starts=[92.1,97.4,94.6,94.2,90.5,81.5,85.6,86.0,81.9,79.6,76.0];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:8,rotate:30}}),yAxis:mkAxis({type:'value',min:70,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+(en?'W':'萬');}}}),series:[{type:'bar',data:starts,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barMaxWidth:22,label:{show:true,position:'top',fontSize:8,color:C.navy,formatter:function(p){return p.value;}}}]});
+  }
+  function drawTokyoNewSupply(lang){
+    var el=document.getElementById('chartTokyoNewSupply');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var yrs=['2019','2020','2021','2022','2023','2024','2025','2026E'];
+    var vals=[31,27,33,30,26,24,23,23];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',min:15,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}K'}}),series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:i>=6?C.red:C.navy,borderRadius:[3,3,0,0]}};}),barMaxWidth:28,label:{show:true,position:'top',fontSize:9,formatter:function(p){return p.value+'K';},color:C.navy}}]});
+  }
+  function drawVacancySplit(lang){
+    var el=document.getElementById('chartVacancySplit');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var cats=en?['Tokyo','Osaka','Fukuoka','Regional avg','National','Rural avg']:['東京','大阪','福岡','地方均值','全國','鄉下均值'];
+    var vals=[10.3,12.5,11.8,15.2,13.8,23.5];
+    var colors=[C.green,C.green,C.green,C.orange,C.orange,C.red];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:8,rotate:20,interval:0}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[3,3,0,0]}};}),barMaxWidth:30,label:{show:true,position:'top',fontSize:9,formatter:'{c}%',color:C.navy}}]});
+  }
+  function drawTxMix(lang){
+    var el=document.getElementById('chartTxMix');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var yrs=['2015','2018','2021','2024','2025'];
+    var newB=[28,24,18,12,10];
+    var resale=[72,76,82,88,90];
+    c.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'New':'新建',en?'Resale':'中古']}),grid:{left:12,right:12,top:32,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',max:100,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{name:en?'New':'新建',type:'bar',stack:'mix',data:newB,itemStyle:{color:C.orange},barMaxWidth:40},{name:en?'Resale':'中古',type:'bar',stack:'mix',data:resale,itemStyle:{color:C.navy},barMaxWidth:40}]});
+  }
+  function drawForeignShareDual(lang){
+    var el=document.getElementById('chartForeignShare');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var yrs=['2020','2021','2022','2023','2024','2025'];
+    var nat=[12,15,18,21,24,27];
+    var tokyo=[20,24,28,32,36,40];
+    c.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'National':'全國',en?'Central Tokyo new-build':'東京都心新建']}),grid:{left:12,right:12,top:32,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',max:50,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{name:en?'National':'全國',type:'line',data:nat,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5},{name:en?'Central Tokyo new-build':'東京都心新建',type:'line',data:tokyo,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5}]});
+  }
+  function drawForeignOrigin(lang){
+    var el=document.getElementById('chartForeignOrigin');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var cats=en?['China','Taiwan','Hong Kong','Singapore','Korea','US/Other']:['中國','台灣','香港','新加坡','韓國','美國/其他'];
+    var vals=[40,18,14,10,8,10];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:8,rotate:20,interval:0}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{type:'bar',data:vals,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barMaxWidth:35,label:{show:true,position:'top',fontSize:9,formatter:'{c}%',color:C.navy}}]});
+  }
+  function drawResalePrice(lang){
+    var el=document.getElementById('chartResalePrice');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var yrs=['2019','2020','2021','2022','2023','2024','2025','26/2'];
+    var vals=[3400,3500,3700,3900,4150,4350,4550,4115];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',min:3000,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v/100+'万';}}}),series:[{type:'line',data:vals,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},areaStyle:{color:'rgba(22,163,74,0.08)'},symbol:'circle',symbolSize:4}]});
+  }
+  function drawIncomePrice(lang){
+    var el=document.getElementById('chartIncomePrice');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var yrs=['2015','2017','2019','2021','2023','2025'];
+    var income=[100,102,104,107,112,118];
+    var price=[100,108,115,130,155,180];
+    c.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Household Income':'家庭所得',en?'Condo Price':'公寓房價']}),grid:{left:12,right:12,top:32,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',min:90,axisLabel:{color:C.muted,fontSize:9}}),series:[{name:en?'Household Income':'家庭所得',type:'line',data:income,lineStyle:{color:C.muted,width:1.5},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4},{name:en?'Condo Price':'公寓房價',type:'line',data:price,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4}]});
+  }
+  function drawApacSpread(lang){
+    var el=document.getElementById('chartApacSpread');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var cats=en?['Japan','Malaysia','Thailand','Taiwan','Korea','Singapore','Australia']:['日本','馬來西亞','泰國','台灣','韓國','新加坡','澳洲'];
+    var vals=[3.59,2.44,1.5,0.24,0.1,-0.5,-3.05];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:8,interval:0}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{type:'bar',data:vals.map(function(v){return{value:v,itemStyle:{color:v>=2?C.green:v>=0?C.orange:C.red,borderRadius:v>=0?[3,3,0,0]:[0,0,3,3]}};}),barMaxWidth:32,label:{show:true,position:'top',fontSize:9,formatter:function(p){return(p.value>=0?'+':'')+p.value+'%';},color:C.navy}}]});
+  }
+  function drawCityYield(lang){
+    var el=document.getElementById('chartCityYield');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var cats=en?['Tokyo central','Tokyo metro','Osaka','Nagoya','Fukuoka','Sapporo']:['東京都心','東京都會','大阪','名古屋','福岡','札幌'];
+    var vals=[3.50,4.10,4.20,4.30,4.98,5.20];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:8,rotate:20,interval:0}}),yAxis:mkAxis({type:'value',min:3,max:6,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:v>=4.5?C.green:C.navy,borderRadius:[3,3,0,0]}};}),barMaxWidth:32,label:{show:true,position:'top',fontSize:9,formatter:'{c}%',color:C.navy}}]});
+  }
+  function drawTokyoTiers(lang){
+    var el=document.getElementById('chartTokyoTiers');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var cats=en?['Outer 15 Wards','Next 5 Wards','Central 3 Wards','Top Minato']:['外圍 15 區','次圈 5 區','都心 3 區','港區頂級'];
+    var vals=[6500,8500,11000,12500];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:8,interval:0,rotate:10}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/100)+'M';}}}),series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:[C.muted,C.navy,C.orange,C.red][i],borderRadius:[3,3,0,0]}};}),barMaxWidth:40,label:{show:true,position:'top',fontSize:9,formatter:function(p){return '\u00a5'+(p.value/100)+'M';},color:C.navy}}]});
+  }
+  function drawTokyoLand(lang){
+    var el=document.getElementById('chartTokyoLand');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var yrs=['2019','2020','2021','2022','2023','2024','2025','2026'];
+    var vals=[4.5,0.1,-0.5,2.9,3.6,5.4,7.0,7.9];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{type:'bar',data:vals.map(function(v){return{value:v,itemStyle:{color:v>=0?C.green:C.red,borderRadius:v>=0?[3,3,0,0]:[0,0,3,3]}};}),barMaxWidth:30,label:{show:true,position:'top',fontSize:9,formatter:function(p){return(p.value>=0?'+':'')+p.value+'%';},color:C.navy}}]});
+  }
+  function drawOsakaComp(lang){
+    var el=document.getElementById('chartOsakaComp');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var cats=en?['Fukuoka','Osaka','Tokyo']:['福岡','大阪','東京'];
+    var prices=[5600,5813,9400];
+    var yields=[4.98,4.20,3.50];
+    c.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Avg Price':'均價',en?'Yield':'收益率']}),grid:{left:12,right:12,top:32,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:10}}),yAxis:[mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:8,formatter:function(v){return(v/100)+'M';}}}),mkAxis({type:'value',splitLine:{show:false},min:3,max:6,axisLabel:{color:C.muted,fontSize:8,formatter:'{value}%'}})],series:[{name:en?'Avg Price':'均價',type:'bar',data:prices,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barMaxWidth:40,label:{show:true,position:'top',fontSize:8,formatter:function(p){return '\u00a5'+(p.value/100)+'M';},color:C.navy}},{name:en?'Yield':'收益率',type:'line',yAxisIndex:1,data:yields,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,label:{show:true,position:'top',fontSize:9,formatter:'{c}%',color:C.green}}]});
+  }
+  function drawOsakaDistrict(lang){
+    var el=document.getElementById('chartOsakaDistrict');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var yrs=['2020','2021','2022','2023','2024','2025'];
+    var kita=[2.0,2.5,3.8,4.5,4.2,3.8];
+    var minami=[1.0,1.8,2.5,3.0,3.8,4.6];
+    c.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Kita (Umeda)':'北區（梅田）',en?'Minami (Namba)':'南區（難波）']}),grid:{left:12,right:12,top:32,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{name:en?'Kita (Umeda)':'北區（梅田）',type:'line',data:kita,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:4},{name:en?'Minami (Namba)':'南區（難波）',type:'line',data:minami,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4}]});
+  }
+  function drawFukuokaStreak(lang){
+    var el=document.getElementById('chartFukuokaStreak');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var yrs=['13','14','15','16','17','18','19','20','21','22','23','24','25'];
+    var vals=[3100,3250,3400,3600,3800,4000,4200,4350,4550,4850,5150,5400,5600];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:yrs,axisLabel:{color:C.muted,fontSize:8}}),yAxis:mkAxis({type:'value',min:3000,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return(v/100)+'M';}}}),series:[{type:'line',data:vals,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},areaStyle:{color:'rgba(22,163,74,0.08)'},symbol:'circle',symbolSize:3}]});
+  }
+  function drawFukuokaYield(lang){
+    var el=document.getElementById('chartFukuokaYield');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var cats=en?['Tokyo C','Tokyo M','Osaka','Nagoya','Fukuoka']:['東京心','東京都會','大阪','名古屋','福岡'];
+    var vals=[3.50,4.10,4.20,4.30,4.98];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:8,interval:0}}),yAxis:mkAxis({type:'value',min:3,max:6,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:i===4?C.green:C.muted,borderRadius:[3,3,0,0]}};}),barMaxWidth:38,label:{show:true,position:'top',fontSize:9,formatter:'{c}%',color:C.navy}}]});
+  }
+  function drawJpScenario(lang){
+    var el=document.getElementById('chartJpScenario');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var cats=en?['National','Tokyo 23','Osaka','Fukuoka']:['全國','東京23','大阪','福岡'];
+    var bull=[11,10,8,16.5];
+    var base=[6.5,7.5,5,10];
+    var bear=[-1.5,-7.5,2,3];
+    c.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Bull (25%)':'樂觀(25%)',en?'Base (55%)':'基本(55%)',en?'Bear (20%)':'悲觀(20%)']}),grid:{left:12,right:12,top:32,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{name:en?'Bull (25%)':'樂觀(25%)',type:'bar',data:bull,itemStyle:{color:C.green,borderRadius:[3,3,0,0]},barMaxWidth:18},{name:en?'Base (55%)':'基本(55%)',type:'bar',data:base,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barMaxWidth:18},{name:en?'Bear (20%)':'悲觀(20%)',type:'bar',data:bear,itemStyle:{color:C.red,borderRadius:[3,3,0,0]},barMaxWidth:18}]});
+  }
+  function drawJpSpread(lang){
+    var el=document.getElementById('chartJpSpread');if(!el)return;
+    var c=echarts.init(el);allCharts.push(c);
+    var en=lang==='en';
+    var cats=en?['Bull','Base','Bear']:['樂觀','基本','悲觀'];
+    var vals=[3.59,3.34,2.95];
+    c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:2,max:4,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:[C.green,C.navy,C.orange][i],borderRadius:[3,3,0,0]}};}),barMaxWidth:50,label:{show:true,position:'top',fontSize:10,formatter:function(p){return '+'+p.value+'%';},color:C.navy},markLine:{silent:true,lineStyle:{color:C.red,type:'dashed'},data:[{yAxis:2.0,label:{formatter:'+2% income threshold',fontSize:9,color:C.red}}]}}]});
+  }
+
+  window.addEventListener('load', function(){
+    var lang = localStorage.getItem('lang') || 'en';
+    setLang(lang);
+  });
+
+  window.addEventListener('resize', function(){
+    allCharts.forEach(function(c){ if(c) c.resize(); });
+  });
+    // -- Side Nav ScrollSpy --
+  (function(){
+    function initScrollSpy(){
+      var items = document.querySelectorAll('.side-nav-item');
+      if(!items.length) return;
+      var sections = [];
+      items.forEach(function(a){
+        var id = a.getAttribute('href').replace('#','');
+        var el = document.getElementById(id);
+        if(el) sections.push({el:el, a:a});
+      });
+      function onScroll(){
+        var scrollY = window.scrollY + window.innerHeight * 0.25;
+        var current = sections[0];
+        sections.forEach(function(s){
+          if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s;
+        });
+        items.forEach(function(a){ a.classList.remove('active'); });
+        if(current) current.a.classList.add('active');
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', initScrollSpy);
+    } else {
+      initScrollSpy();
+    }
+  })();
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

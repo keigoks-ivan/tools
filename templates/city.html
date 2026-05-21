@@ -1,0 +1,424 @@
+{% extends "_base.html" %}
+
+{% block title %}{{ city.name_en }}{% endblock %}
+
+{% block content %}
+<main class="container">
+  {# ── Page Header ── #}
+  <div class="page-header">
+    {% if city.last_updated_en %}
+    <span class="updated"><span class="lang-en">LAST UPDATED: {{ city.last_updated_en }}</span><span class="lang-zh" style="display:none">最後更新：{{ city.last_updated_zh }}</span></span>
+    {% endif %}
+    <h1>
+      <span class="lang-en">{{ city.page_title_en | default(city.name_en + ' — Deep Dive') }}</span>
+      <span class="lang-zh" style="display:none">{{ city.page_title_zh | default(city.name_zh + '深度分析') }}</span>
+    </h1>
+    {% if city.subtitle_en %}
+    <p class="subtitle"><span class="lang-en">{{ city.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ city.subtitle_zh }}</span></p>
+    {% endif %}
+  </div>
+
+  {# ── City-level KPIs ── #}
+  {% if city.kpis %}
+  <div class="kpi-grid"{% if city.kpi_columns %} style="grid-template-columns:repeat({{ city.kpi_columns }},1fr);"{% endif %}>
+    {% for card in city.kpis %}
+    <div class="kpi-card {{ card.color }}">
+      <div class="kpi-label"><span class="lang-en">{{ card.label_en }}</span><span class="lang-zh" style="display:none">{{ card.label_zh }}</span></div>
+      <div class="kpi-value">{{ card.value }}{% if card.unit_en %}<span style="font-size:13px"><span class="lang-en">{{ card.unit_en }}</span><span class="lang-zh" style="display:none">{{ card.unit_zh }}</span></span>{% endif %}</div>
+      {% if card.sub_en %}
+      <span class="kpi-badge {{ card.badge_class | default('badge-' + card.color) }}"><span class="lang-en">{{ card.sub_en }}</span><span class="lang-zh" style="display:none">{{ card.sub_zh }}</span></span>
+      {% endif %}
+      {% if card.source %}<div class="kpi-source">{{ card.source }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Summary card (narrative text block, e.g. Penang) ── #}
+  {% if city.summary_en %}
+  <div class="summary-card">
+    <div class="lang-en">{{ city.summary_en | safe }}</div>
+    <div class="lang-zh" style="display:none">{{ city.summary_zh | safe }}</div>
+  </div>
+  {% endif %}
+
+  {# ── Zone Tabs (KL-style: tabbed panels with zone KPIs and charts) ── #}
+  {% if city.zone_tabs %}
+  <h2 class="section-heading"><span class="lang-en">{{ city.zone_tabs_heading_en | default('Micro-Markets') }}</span><span class="lang-zh" style="display:none">{{ city.zone_tabs_heading_zh | default('微型市場') }}</span></h2>
+  <div id="zone-tabs">
+    <div class="tab-bar">
+      {% for zt in city.zone_tabs %}
+      <button{% if loop.first %} class="active"{% endif %} data-tab="{{ zt.id }}" onclick="switchTab('zone-tabs','{{ zt.id }}')">
+        <span class="lang-en">{{ zt.label_en }}</span><span class="lang-zh" style="display:none">{{ zt.label_zh }}</span>
+      </button>
+      {% endfor %}
+    </div>
+
+    {% for zt in city.zone_tabs %}
+    <div id="tab-{{ zt.id }}" class="tab-panel{% if loop.first %} active{% endif %}">
+      {# Zone description #}
+      {% if zt.desc_en %}
+      <div class="framework-box" style="margin:12px 0;">
+        <span class="lang-en">{{ zt.desc_en }}</span>
+        <span class="lang-zh" style="display:none">{{ zt.desc_zh }}</span>
+      </div>
+      {% endif %}
+
+      {# Zone KPIs #}
+      {% if zt.kpis %}
+      <div class="kpi-grid" style="grid-template-columns:repeat({{ [zt.kpis | length, 4] | min }},1fr);">
+        {% for zk in zt.kpis %}
+        <div class="kpi-card {{ zk.color }}">
+          <div class="kpi-label"><span class="lang-en">{{ zk.label_en }}</span><span class="lang-zh" style="display:none">{{ zk.label_zh }}</span></div>
+          <div class="kpi-value">{{ zk.value }}</div>
+          {% if zk.sub_en %}
+          <span class="kpi-badge {{ zk.badge_class | default('badge-' + zk.color) }}"><span class="lang-en">{{ zk.sub_en }}</span><span class="lang-zh" style="display:none">{{ zk.sub_zh }}</span></span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {# Zone narrative text #}
+      {% if zt.narrative_en %}
+      <div class="chart-card" style="margin:12px 0;">
+        <div class="lang-en" style="font-size:13px;color:#4a6080;line-height:1.8;padding:8px 0;">{{ zt.narrative_en | safe }}</div>
+        <div class="lang-zh" style="display:none;font-size:13px;color:#4a6080;line-height:1.8;padding:8px 0;">{{ zt.narrative_zh | safe }}</div>
+      </div>
+      {% endif %}
+
+      {# Zone charts #}
+      {% if zt.charts %}
+      <div class="chart-grid two-col">
+        {% for zc in zt.charts %}
+        <div class="chart-card">
+          <h3><span class="lang-en">{{ zc.title_en }}</span><span class="lang-zh" style="display:none">{{ zc.title_zh }}</span></h3>
+          <div style="position:relative;height:220px;"><div id="{{ zc.id }}" style="width:100%;height:100%"></div></div>
+          {% if zc.footnote_en %}
+          <p class="chart-footnote"><span class="lang-en">{{ zc.footnote_en }}</span><span class="lang-zh" style="display:none">{{ zc.footnote_zh }}</span></p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Zones as cards (Penang/Taipei-style: no tabs, displayed as micro-cards) ── #}
+  {% if city.zones %}
+  <h2 class="section-heading"><span class="lang-en">{{ city.zones_heading_en | default('Key Zones') }}</span><span class="lang-zh" style="display:none">{{ city.zones_heading_zh | default('重點區域') }}</span></h2>
+  <div class="kpi-grid" style="grid-template-columns:repeat({{ [city.zones | length, 4] | min }},1fr);">
+    {% for zone in city.zones %}
+    <div class="micro-card">
+      <h3><span class="lang-en">{{ zone.name_en }}</span><span class="lang-zh" style="display:none">{{ zone.name_zh }}</span></h3>
+      {% if zone.psf %}
+      <div class="kpi-value" style="font-size:18px;">{{ zone.psf }}</div>
+      {% elif zone.price_range %}
+      <div class="kpi-value" style="font-size:18px;">{{ zone.price_range }}{% if zone.unit_en %}<span style="font-size:12px"><span class="lang-en">{{ zone.unit_en }}</span><span class="lang-zh" style="display:none">{{ zone.unit_zh }}</span></span>{% endif %}</div>
+      {% endif %}
+      {% if zone.badge_en %}
+      <span class="kpi-badge" style="margin-top:4px;"><span class="lang-en">{{ zone.badge_en }}</span><span class="lang-zh" style="display:none">{{ zone.badge_zh }}</span></span>
+      {% endif %}
+      {% if zone.desc_en %}
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">{{ zone.desc_en }}</span><span class="lang-zh" style="display:none">{{ zone.desc_zh }}</span></p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Charts ── #}
+  {% if city.charts %}
+  {% set chart_ids = city.charts.keys() | list %}
+
+  {% if city.chart_sections %}
+  {# Structured chart sections with headings #}
+  {% for cs in city.chart_sections %}
+  {% if cs.heading_en %}
+  <h2 class="section-heading"><span class="lang-en">{{ cs.heading_en }}</span><span class="lang-zh" style="display:none">{{ cs.heading_zh }}</span></h2>
+  {% endif %}
+  <div class="chart-grid{% if cs.layout == 'single' %}{% else %} two-col{% endif %}">
+    {% for cid in cs.chart_ids %}
+    {% if cid in city.charts %}
+    {% set c = city.charts[cid] %}
+    <div class="chart-card">
+      <h3><span class="lang-en">{{ c.title_en }}</span><span class="lang-zh" style="display:none">{{ c.title_zh }}</span></h3>
+      {% if c.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ c.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ c.subtitle_zh }}</span></p>{% endif %}
+      <div style="position:relative;height:{{ c.height | default(220) }}px;"><div id="{{ cid }}" style="width:100%;height:100%"></div></div>
+      {% if c.insight_en %}
+      <div class="insight-box" style="margin-top:12px;">
+        <div class="lang-en">{{ c.insight_en | safe }}</div>
+        <div class="lang-zh" style="display:none">{{ c.insight_zh | safe }}</div>
+      </div>
+      {% endif %}
+      {% if c.footnote_en %}
+      <p class="chart-footnote"><span class="lang-en">{{ c.footnote_en }}</span><span class="lang-zh" style="display:none">{{ c.footnote_zh }}</span></p>
+      {% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  {% else %}
+  {# Default: render all city charts in two-col grid #}
+  {% if chart_ids | length > 0 %}
+  <h2 class="section-heading"><span class="lang-en">Charts</span><span class="lang-zh" style="display:none">圖表</span></h2>
+  <div class="chart-grid two-col">
+    {% for cid in chart_ids %}
+    {% set c = city.charts[cid] %}
+    <div class="chart-card">
+      <h3><span class="lang-en">{{ c.title_en }}</span><span class="lang-zh" style="display:none">{{ c.title_zh }}</span></h3>
+      {% if c.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ c.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ c.subtitle_zh }}</span></p>{% endif %}
+      <div style="position:relative;height:{{ c.height | default(220) }}px;"><div id="{{ cid }}" style="width:100%;height:100%"></div></div>
+      {% if c.insight_en %}
+      <div class="insight-box" style="margin-top:12px;">
+        <div class="lang-en">{{ c.insight_en | safe }}</div>
+        <div class="lang-zh" style="display:none">{{ c.insight_zh | safe }}</div>
+      </div>
+      {% endif %}
+      {% if c.footnote_en %}
+      <p class="chart-footnote"><span class="lang-en">{{ c.footnote_en }}</span><span class="lang-zh" style="display:none">{{ c.footnote_zh }}</span></p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endif %}
+  {% endif %}
+
+  {# ── Insights / Summary cards ── #}
+  {% if city.insights %}
+  <h2 class="section-heading"><span class="lang-en">{{ city.insights_heading_en | default('Key Insights') }}</span><span class="lang-zh" style="display:none">{{ city.insights_heading_zh | default('關鍵洞察') }}</span></h2>
+  <div class="kpi-grid" style="grid-template-columns:repeat({{ [city.insights | length, 4] | min }},1fr);">
+    {% for ins in city.insights %}
+    <div class="summary-card" style="border-left:4px solid {{ ins.color | default('#1e3a5f') }};">
+      <h3><span class="lang-en">{{ ins.title_en }}</span><span class="lang-zh" style="display:none">{{ ins.title_zh }}</span></h3>
+      <p><span class="lang-en">{{ ins.desc_en }}</span><span class="lang-zh" style="display:none">{{ ins.desc_zh }}</span></p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Summary grid (KL-style summary cards) ── #}
+  {% if city.summary_cards %}
+  <h2 class="section-heading"><span class="lang-en">{{ city.summary_heading_en | default(city.name_en + ' Summary') }}</span><span class="lang-zh" style="display:none">{{ city.summary_heading_zh | default(city.name_zh + '總結') }}</span></h2>
+  <div class="summary-grid">
+    {% for sc in city.summary_cards %}
+    <div class="summary-card {{ sc.style_class | default('') }}" {% if sc.border_color %}style="border-left:4px solid {{ sc.border_color }};"{% endif %}>
+      <h4><span class="lang-en">{{ sc.title_en }}</span><span class="lang-zh" style="display:none">{{ sc.title_zh }}</span></h4>
+      <p><span class="lang-en">{{ sc.desc_en }}</span><span class="lang-zh" style="display:none">{{ sc.desc_zh }}</span></p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Source footer ── #}
+  {% if city.source_footer %}
+  <div class="source-footer">
+    <span class="lang-en">{{ city.source_footer.en | safe }}</span>
+    <span class="lang-zh" style="display:none">{{ city.source_footer.zh | safe }}</span>
+  </div>
+  {% elif source_footer %}
+  <div class="source-footer">
+    <span class="lang-en">{{ source_footer.en | safe }}</span>
+    <span class="lang-zh" style="display:none">{{ source_footer.zh | safe }}</span>
+  </div>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block base_scripts %}
+function fmtK(v){return v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v;}
+function fmtRM(v){if(v>=1000000)return'RM '+(v/1000000).toFixed(1)+'M';if(v>=1000)return'RM '+(v/1000).toFixed(0)+'K';return'RM '+v;}
+
+function initCharts(lang){
+  var DATA = {{ city.charts | default({}) | tojson }};
+  var en = lang !== 'zh';
+
+  function initChart(id){
+    var el = document.getElementById(id);
+    if(!el) return null;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    return c;
+  }
+
+  function dsColor(ds, idx){
+    var palette = [C.navy, C.green, C.orange, C.red, C.blue, C.muted];
+    return ds.color || palette[idx % palette.length];
+  }
+
+  function buildLineStyle(ds, idx){
+    var style = { color: dsColor(ds, idx), width: ds.width || 2 };
+    if(ds.lineType) style.type = ds.lineType;
+    return style;
+  }
+
+  function buildMarkLine(cfg){
+    if(!cfg) return undefined;
+    var ml = {
+      silent: true, symbol: 'none',
+      lineStyle: { color: C.red, type: 'dashed', width: 1 },
+      label: { formatter: cfg.label || '', fontSize: 10, color: C.red },
+      data: []
+    };
+    if(cfg.xAxis !== undefined) ml.data.push({ xAxis: cfg.xAxis });
+    if(cfg.yAxis !== undefined) ml.data.push({ yAxis: cfg.yAxis });
+    return ml;
+  }
+
+  function buildMarkPoint(cfg){
+    if(!cfg) return undefined;
+    var items = Array.isArray(cfg) ? cfg : [cfg];
+    var mpData = items.map(function(mp){
+      var d = {};
+      if(mp.type) d.type = mp.type;
+      if(mp.coord) d.coord = mp.coord;
+      if(mp.label) d.label = { formatter: mp.label, fontSize: 9, fontWeight: 'bold' };
+      d.symbolSize = mp.symbolSize || 50;
+      if(mp.color) d.itemStyle = { color: mp.color };
+      else if(mp.type === 'max') d.itemStyle = { color: C.green };
+      else if(mp.type === 'min') d.itemStyle = { color: C.red };
+      return d;
+    });
+    return { data: mpData };
+  }
+
+  /* Iterate over all city charts */
+  Object.keys(DATA).forEach(function(chartId){
+    var info = DATA[chartId];
+
+    var chart = initChart(chartId);
+    if(!chart) return;
+
+    var chartType = (info.type || '').toLowerCase();
+    var isHorizontal = chartType.indexOf('horizontal') >= 0;
+    var hasDualAxis = chartType.indexOf('dual') >= 0 ||
+                      (info.datasets && info.datasets.some(function(ds){ return ds.yAxisIndex === 1; }));
+
+    /* Use localized labels if available */
+    var labels = info.labels;
+    if(en && info.labels_en) labels = info.labels_en;
+    if(!en && info.labels_zh) labels = info.labels_zh;
+
+    var legendNames = (info.datasets || []).map(function(ds){
+      return en ? (ds.name_en || ds.name || '') : (ds.name_zh || ds.name || '');
+    });
+
+    /* Build series */
+    var series = (info.datasets || []).map(function(ds, idx){
+      var name = en ? (ds.name_en || ds.name || '') : (ds.name_zh || ds.name || '');
+      var s = { name: name, type: ds.type || 'line' };
+      var clr = dsColor(ds, idx);
+
+      if(ds.colors && Array.isArray(ds.colors)){
+        s.data = ds.data.map(function(v, i){
+          return { value: v, itemStyle: { color: ds.colors[i], borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] } };
+        });
+      } else if(ds.data && typeof ds.data[0] === 'object' && ds.data[0] !== null && ds.data[0].value !== undefined){
+        s.data = ds.data.map(function(d){
+          return { value: d.value, itemStyle: { color: d.color || clr, borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] } };
+        });
+      } else {
+        s.data = ds.data;
+      }
+
+      if(ds.type === 'bar'){
+        s.barMaxWidth = isHorizontal ? 22 : 55;
+        if(!ds.colors && !ds.color_positive){
+          s.itemStyle = { color: clr, borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] };
+        }
+        if(ds.color_positive){
+          s.itemStyle = {
+            color: function(p){ return p.value >= 0 ? ds.color_positive : (ds.color_negative || C.red); },
+            borderRadius: [3,3,0,0]
+          };
+          s.barMaxWidth = 35;
+          s.label = { show: true, position: 'top', fontFamily: 'JetBrains Mono, monospace', fontSize: 9, formatter: function(p){ return p.value + '%'; } };
+        }
+        if(!ds.color_positive && ds.type === 'bar' && !isHorizontal && idx === 0){
+          s.label = { show: true, position: 'top', fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            formatter: function(p){ return typeof p.value === 'number' && p.value >= 1000 ? fmtK(p.value) : p.value; } };
+        }
+        if(isHorizontal){
+          s.label = { show: true, position: 'right', formatter: '{c}', fontSize: 10, fontFamily: 'Inter', fontWeight: 'bold', color: C.navy };
+        }
+      }
+
+      if(ds.type === 'line'){
+        s.lineStyle = buildLineStyle(ds, idx);
+        s.itemStyle = { color: clr };
+        s.symbol = 'circle';
+        s.symbolSize = ds.symbolSize || 6;
+        if(ds.step) s.step = ds.step;
+        if(ds.areaStyle) s.areaStyle = { color: 'rgba(30,58,95,0.08)' };
+        if(ds.smooth !== undefined) s.smooth = ds.smooth;
+        else s.smooth = 0.2;
+        if(ds.yAxisIndex === 1){
+          s.yAxisIndex = 1;
+          s.symbolSize = 8;
+          s.label = { show: true, position: 'bottom', fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            formatter: function(p){ return (p.value >= 0 ? '+' : '') + p.value + '%'; } };
+        }
+      }
+
+      if(ds.markPoint) s.markPoint = buildMarkPoint(ds.markPoint);
+      if(ds.markLine) s.markLine = buildMarkLine(ds.markLine);
+      return s;
+    });
+
+    if(info.markLine && series.length > 0){
+      var lastS = series[series.length - 1];
+      if(!lastS.markLine) lastS.markLine = buildMarkLine(info.markLine);
+    }
+
+    /* Build axes */
+    var xAxisCfg, yAxisCfg;
+    if(isHorizontal){
+      var maxVal = 0;
+      (info.datasets || []).forEach(function(ds){ ds.data.forEach(function(v){ if(typeof v === 'number' && v > maxVal) maxVal = v; }); });
+      xAxisCfg = mkAxis({ type: 'value', min: 0 });
+      yAxisCfg = mkAxis({ type: 'category', data: (labels || []).slice().reverse(), axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 } });
+      series.forEach(function(s){ if(Array.isArray(s.data)) s.data = s.data.slice().reverse(); });
+    } else {
+      xAxisCfg = mkAxis({ type: 'category', data: labels });
+      if(hasDualAxis){
+        yAxisCfg = [
+          mkAxis({ type: 'value' }),
+          mkAxis({ type: 'value', splitLine: { show: false }, axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) })
+        ];
+      } else {
+        yAxisCfg = mkAxis({ type: 'value' });
+      }
+    }
+
+    var grid;
+    if(isHorizontal){
+      grid = { left: 110, right: 50, top: 20, bottom: 20, containLabel: false };
+    } else if(hasDualAxis){
+      grid = { left: 50, right: 50, top: 45, bottom: 30, containLabel: true };
+    } else {
+      grid = Object.assign({}, baseGrid);
+    }
+
+    var option = {
+      tooltip: isHorizontal
+        ? Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } })
+        : baseTooltip,
+      grid: grid,
+      xAxis: xAxisCfg,
+      yAxis: yAxisCfg,
+      series: series
+    };
+
+    if(legendNames.length > 1){
+      option.legend = Object.assign({}, baseLegend, { top: 8, data: legendNames });
+    }
+
+    chart.setOption(option);
+  });
+}
+{% endblock %}

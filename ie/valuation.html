@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Valuation Monitor | Ireland Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="main-content">
+  <section class="hero-section">
+    <h1><span class="lang-en">Ireland &mdash; Valuation</span><span class="lang-zh" style="display:none">愛爾蘭 &mdash; 估值分析</span></h1>
+    <p class="subtitle"><span class="lang-en">Yields, affordability &amp; city comparison</span><span class="lang-zh" style="display:none">收益率、可負擔性與城市比較</span></p>
+  </section>
+
+  <section class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 20px 24px">
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Gross Yield</span><span class="lang-zh" style="display:none">毛收益率</span></div><div class="kpi-value">4.0%</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Dublin PTI</span><span class="lang-zh" style="display:none">都柏林房價收入比</span></div><div class="kpi-value">8.5x</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Cork PTI</span><span class="lang-zh" style="display:none">科克房價收入比</span></div><div class="kpi-value">6.2x</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">ECB Rate</span><span class="lang-zh" style="display:none">歐央行利率</span></div><div class="kpi-value">2.65%</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Mortgage Rate</span><span class="lang-zh" style="display:none">房貸利率</span></div><div class="kpi-value">3.5%</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">P/R Ratio</span><span class="lang-zh" style="display:none">租售比</span></div><div class="kpi-value">22x</div></div>
+  </section>
+
+  <section class="section-block">
+    <h2 class="section-title"><span class="lang-en">YIELD MAP</span><span class="lang-zh" style="display:none">收益率分布</span></h2>
+    <div class="chart-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin:0 20px">
+      <div class="chart-card"><h3><span class="lang-en">Gross Yield by City</span><span class="lang-zh" style="display:none">各城市毛收益率</span></h3><div id="chartYieldCity" style="width:100%;height:300px"></div></div>
+      <div class="chart-card"><h3><span class="lang-en">Yield vs ECB Rate (Historical)</span><span class="lang-zh" style="display:none">收益率 vs 歐央行利率 (歷史)</span></h3><div id="chartYieldECB" style="width:100%;height:300px"></div></div>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <h2 class="section-title"><span class="lang-en">AFFORDABILITY</span><span class="lang-zh" style="display:none">可負擔性</span></h2>
+    <div class="chart-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin:0 20px">
+      <div class="chart-card"><h3><span class="lang-en">Price-to-Income by City</span><span class="lang-zh" style="display:none">各城市房價收入比</span></h3><div id="chartPTI" style="width:100%;height:300px"></div></div>
+      <div class="chart-card"><h3><span class="lang-en">Price-to-Rent Ratio Trend</span><span class="lang-zh" style="display:none">租售比趨勢</span></h3><div id="chartPRRatio" style="width:100%;height:300px"></div></div>
+    </div>
+  </section>
+
+  <footer class="source-footer" style="text-align:center;padding:20px;font-size:11px;color:#5a7a9a">
+    <span class="lang-en">Sources: CSO Ireland, Daft.ie, Central Bank of Ireland, ECB &middot; Updated Q1 2026</span>
+    <span class="lang-zh" style="display:none">資料來源：愛爾蘭中央統計局、Daft.ie、愛爾蘭中央銀行、歐洲央行 &middot; 更新於 2026 年第一季</span>
+  </footer>
+</main>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts=[];
+function initCharts(){
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+
+  // Yield by city
+  var c1=echarts.init(document.getElementById('chartYieldCity'));
+  c1.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:['Dublin','Cork','Galway','Limerick','Waterford','National']}),yAxis:mkAxis({type:'value',name:'%',min:2,max:6}),series:[{name:'Gross Yield',type:'bar',data:[3.4,4.1,4.3,5.0,5.2,4.0],itemStyle:{color:C.blue},label:{show:true,position:'top',fontSize:10,color:C.navy,formatter:'{c}%'}}]});
+  allCharts.push(c1);
+
+  // Yield vs ECB
+  var years=['2018','2019','2020','2021','2022','2023','2024','2025'];
+  var c2=echarts.init(document.getElementById('chartYieldECB'));
+  c2.setOption({tooltip:baseTooltip,legend:baseLegend,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'%'}),series:[
+    {name:'Gross Yield',type:'line',smooth:true,data:[5.2,5.0,4.8,4.5,4.2,3.9,3.9,4.0],lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue}},
+    {name:'ECB Rate',type:'line',smooth:true,data:[0.0,0.0,0.0,0.0,2.0,4.0,3.75,2.65],lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red}}
+  ]});
+  allCharts.push(c2);
+
+  // PTI by city
+  var c3=echarts.init(document.getElementById('chartPTI'));
+  c3.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:['Dublin','Cork','Galway','Limerick','Waterford','National']}),yAxis:mkAxis({type:'value',name:'Ratio',min:3,max:10}),series:[{name:'PTI',type:'bar',data:[8.5,6.2,6.0,5.1,4.8,6.5],itemStyle:{color:function(p){return p.value>7?C.red:p.value>5.5?C.orange:C.green;}},label:{show:true,position:'top',fontSize:10,color:C.navy,formatter:'{c}x'}}]});
+  allCharts.push(c3);
+
+  // P/R ratio trend
+  var c4=echarts.init(document.getElementById('chartPRRatio'));
+  c4.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Ratio'}),series:[{name:'P/R Ratio',type:'line',smooth:true,data:[18,19,19.5,20,21,21.5,21.8,22],lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},markLine:{silent:true,data:[{yAxis:20,label:{formatter:'Long-term avg',fontSize:10},lineStyle:{color:C.muted,type:'dashed'}}]}}]});
+  allCharts.push(c4);
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(el){el.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(el){el.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+  initCharts();
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');});
+
+initCharts();
+window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

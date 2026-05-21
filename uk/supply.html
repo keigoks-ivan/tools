@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Analysis | United Kingdom Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: 2025 Full Year</span><span class="lang-zh" style="display:none">最後更新：2025年全年</span></span>
+      <h1><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
+      <p class="subtitle"><span class="lang-en">Housing Completions, Landlord Confidence &amp; EPC Requirements</span><span class="lang-zh" style="display:none">住宅完工、房東信心與能源效率要求</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">SUPPLY OVERVIEW</span><span class="lang-zh" style="display:none">供給概況</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">GOVERNMENT HOUSING TARGET</span><span class="lang-zh" style="display:none">政府住宅目標</span></div>
+        <div class="kpi-value">1.5M homes</div>
+        <div class="kpi-source"><span class="lang-en">By end of Parliament &middot; far behind</span><span class="lang-zh" style="display:none">本屆國會結束前 &middot; 嚴重落後</span></div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">ANNUAL COMPLETIONS</span><span class="lang-zh" style="display:none">年完工量</span></div>
+        <div class="kpi-value">~220,000</div>
+        <div class="kpi-source"><span class="lang-en">Need 300K+ to meet target</span><span class="lang-zh" style="display:none">需30萬套以上</span></div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">LANDLORDS EXITING</span><span class="lang-zh" style="display:none">房東退出</span></div>
+        <div class="kpi-value"><span class="lang-en">Accelerating</span><span class="lang-zh" style="display:none">加速中</span></div>
+        <div class="kpi-source"><span class="lang-en">Tax hikes + Renters Rights Act</span><span class="lang-zh" style="display:none">稅收增加 + 租客權益法案</span></div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">BUILD-TO-RENT PIPELINE</span><span class="lang-zh" style="display:none">建後出租在建量</span></div>
+        <div class="kpi-value"><span class="lang-en">Growing</span><span class="lang-zh" style="display:none">增長中</span></div>
+        <div class="kpi-source"><span class="lang-en">Institutional appetite strong</span><span class="lang-zh" style="display:none">機構投資需求強勁</span></div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">PLANNING REFORM</span><span class="lang-zh" style="display:none">規劃改革</span></div>
+        <div class="kpi-value"><span class="lang-en">Underway</span><span class="lang-zh" style="display:none">進行中</span></div>
+        <div class="kpi-source"><span class="lang-en">Labour government pushing</span><span class="lang-zh" style="display:none">工黨政府推動中</span></div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">EPC UPGRADE REQUIREMENTS</span><span class="lang-zh" style="display:none">能源效率升級要求</span></div>
+        <div class="kpi-value">2026+</div>
+        <div class="kpi-source"><span class="lang-en">Landlord cost pressure</span><span class="lang-zh" style="display:none">房東成本壓力</span></div>
+      </div>
+    </div>
+
+    <!-- Chart 1: Full width -->
+    <div class="chart-card" style="margin-top:20px;">
+      <h3><span class="lang-en">Housing Supply vs Target</span><span class="lang-zh" style="display:none">住宅供給缺口</span></h3>
+      <div style="position:relative;height:280px;"><div id="chartUkSupplyGap" style="width:100%;height:100%"></div></div>
+    </div>
+
+    <!-- Charts 2 & 3: Two-col grid -->
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Landlord Confidence Index</span><span class="lang-zh" style="display:none">房東信心指數</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Net sentiment (negative = more exits)</span><span class="lang-zh" style="display:none">淨情緒指數（負值=退出居多）</span></p>
+        <div style="position:relative;height:260px;"><div id="chartUkLandlordExit" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">EPC Rating Distribution</span><span class="lang-zh" style="display:none">EPC能源評級分布</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">% of housing stock by EPC band</span><span class="lang-zh" style="display:none">各EPC等級佔住宅存量%</span></p>
+        <div style="position:relative;height:260px;"><div id="chartUkEPC" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">DLUHC &middot; ONS &middot; EPC Register &middot; 2025<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">DLUHC &middot; ONS &middot; EPC Register &middot; 2025<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  function fmtGBP(v){if(v>=1000000)return '\u00a3'+(v/1000000).toFixed(2)+'M';if(v>=1000)return '\u00a3'+Math.round(v/1000)+'K';return '\u00a3'+v;}
+  function fmtGBPShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return Math.round(v/1000)+'K';return String(v);}
+  var baseText={color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    var en=lang==='en';
+
+    // Chart 1: Housing Supply vs Target — bar with markLine
+    var c1=echarts.init(document.getElementById('chartUkSupplyGap'));allCharts.push(c1);
+    c1.setOption({
+      tooltip:baseTooltip,
+      grid:{left:60,right:20,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025E']}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
+      series:[{
+        name:en?'Completions':'完工量',type:'bar',
+        data:[170000,190000,217000,222000,241000,124000,216000,232000,234000,220000,220000],
+        barMaxWidth:50,
+        itemStyle:{color:C.navy,borderRadius:[4,4,0,0]},
+        label:{show:true,position:'top',fontFamily:'JetBrains Mono',fontSize:10,formatter:function(p){return fmtK(p.value);}},
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:2},label:{formatter:en?'Government Target 300K':'政府目標 30萬',fontSize:10,color:C.red,position:'insideEndTop'},data:[{yAxis:300000}]}
+      }]
+    });
+
+    // Chart 2: Landlord Confidence Index — bar chart
+    var c2=echarts.init(document.getElementById('chartUkLandlordExit'));allCharts.push(c2);
+    var llLabels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+    var llData=[8,5,2,-5,-8,-3,3,-8,-18,-22,-28];
+    c2.setOption({
+      tooltip:baseTooltip,
+      grid:{left:50,right:20,top:30,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:llLabels}),
+      yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:'{value}'})}),
+      series:[{
+        name:en?'Sentiment Index':'信心指數',
+        type:'bar',
+        data:llData.map(function(v){return{value:v,itemStyle:{color:v>=0?C.green:C.red,borderRadius:v>=0?[4,4,0,0]:[0,0,4,4]}};}),
+        barMaxWidth:40,
+        label:{show:true,position:'inside',fontFamily:'JetBrains Mono',fontSize:11,formatter:function(p){return(p.value>=0?'+':'')+p.value;}}
+      }]
+    });
+
+    // Chart 3: EPC Rating Distribution — horizontal bar
+    var c3=echarts.init(document.getElementById('chartUkEPC'));allCharts.push(c3);
+    var epcLabelsEn=['Band G (worst)','Band F','Band E','Band D','Band C (target)'];
+    var epcLabelsZh=['G級（最差）','F級','E級','D級','C級（目標）'];
+    var epcLabels=en?epcLabelsEn:epcLabelsZh;
+    var epcData=[4,8,18,35,22];
+    var epcColors=[C.red,C.red,C.red,C.navy,C.navy];
+    c3.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:110,right:50,top:20,bottom:20,containLabel:false},
+      xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
+      yAxis:mkAxis({type:'category',data:epcLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+      series:[{
+        type:'bar',
+        data:epcData.map(function(v,i){return{value:v,itemStyle:{color:epcColors[i],borderRadius:[0,4,4,0]}};}),
+        barMaxWidth:22,
+        label:{show:true,position:'right',formatter:'{c}%',fontSize:11}
+      }]
+    });
+
+  }
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

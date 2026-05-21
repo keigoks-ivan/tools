@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE 深度分析｜Centrix The Station @ KLCC｜2026-04-13</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#F8FAFC;--card:#FFFFFF;
+    --gd:#14532D;--ga:#16A34A;--gl:#F0FDF4;
+    --yb:#FEF9C3;--yt:#92400E;
+    --rb:#FEE2E2;--rt:#991B1B;
+    --tb:#DCFCE7;--tt:#166534;
+    --bb:#EFF6FF;--bl:#3B82F6;
+    --ob:#FFF0E6;--ol:#F97316;--ot:#C2410C;
+    --tx:#1E293B;--tm:#64748B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.75}
+  .hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--gd);color:#fff;padding:8px 24px;display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+  .hdr-t{font-weight:700;font-size:13px}
+  .wrap{max-width:1140px;margin:0 auto;padding:72px 24px 80px}
+  .sec{background:var(--card);border-radius:8px;margin-bottom:22px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .sec-hd{background:var(--gd);color:#fff;padding:12px 20px;border-left:4px solid var(--ga);font-size:15px;font-weight:700}
+  .sec-bd{padding:20px 22px}
+  h3{color:var(--gd);font-size:13.5px;font-weight:700;margin:18px 0 9px;border-bottom:1px solid #E2E8F0;padding-bottom:4px}
+  h3:first-child{margin-top:0}
+  p{margin-bottom:10px}
+  table{width:100%;border-collapse:collapse;margin:11px 0;font-size:13px}
+  thead tr{background:var(--gd);color:#fff}
+  thead th{padding:8px 12px;text-align:left;font-weight:600}
+  tbody tr:nth-child(even){background:var(--gl)}
+  tbody tr:nth-child(odd){background:#fff}
+  tbody td{padding:8px 12px;border-bottom:1px solid #E8EDF2;vertical-align:top}
+  .tg{background:var(--tb);color:var(--tt);padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:700;display:inline-block}
+  .ty{background:var(--yb);color:var(--yt);padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:700;display:inline-block}
+  .tr{background:var(--rb);color:var(--rt);padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:700;display:inline-block}
+  .cycle{background:var(--bb);border-left:4px solid var(--bl);padding:14px 16px;border-radius:0 6px 6px 0;margin:13px 0}
+  .inv{background:var(--ob);border-left:4px solid var(--ol);padding:14px 16px;border-radius:0 6px 6px 0;margin:13px 0}
+  .inv-t{color:var(--ot);font-weight:700;margin-bottom:8px;font-size:14px}
+  .info{background:var(--bb);border-left:3px solid var(--bl);padding:12px 15px;border-radius:0 5px 5px 0;margin:10px 0;font-size:13px}
+  .warn{background:var(--ob);border-left:3px solid var(--ol);padding:12px 15px;border-radius:0 5px 5px 0;margin:10px 0;font-size:13px}
+  .napic{background:var(--gl);border:1px solid #BBF7D0;border-radius:6px;padding:12px 15px;margin:10px 0;font-size:13px}
+  .dg{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:13px 0}
+  .dc{padding:16px;border-radius:6px}
+  .dcg{background:var(--gl)}
+  .dcw{background:var(--bg);border:1px solid #E2E8F0}
+  .dc h4{color:var(--gd);font-size:13px;font-weight:700;margin-bottom:10px}
+  .rec-y{background:var(--yb);border:2px solid #D97706;border-radius:8px;padding:20px;margin:15px 0}
+  .rec-r{background:var(--rb);border:2px solid #DC2626;border-radius:8px;padding:20px;margin:15px 0}
+  .rec-t{font-size:15px;font-weight:700;margin-bottom:8px}
+  /* score */
+  .swrap{border:2px solid var(--gd);border-radius:10px;overflow:hidden;margin:15px 0}
+  .shd{background:var(--gd);color:#fff;padding:13px 20px;font-weight:700;font-size:14px}
+  .sbd{padding:20px}
+  .smain{text-align:center;padding:22px;background:#FEF9C3;border-radius:8px;margin-bottom:20px}
+  .snum{font-family:'IBM Plex Mono',monospace;font-size:60px;font-weight:600;color:#92400E;line-height:1}
+  .ssub{color:var(--tm);font-size:12px;margin-top:6px}
+  .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .scol h4{color:var(--gd);font-weight:700;margin-bottom:14px;font-size:13px;padding-bottom:5px;border-bottom:1px solid #BBF7D0}
+  .si{margin-bottom:14px}
+  .si-l{font-size:11.5px;color:var(--tm);margin-bottom:3px;font-weight:600}
+  .si-b{display:flex;align-items:center;gap:8px}
+  .bb2{flex:1;height:9px;background:#E2E8F0;border-radius:5px;overflow:hidden}
+  .bf{height:100%;border-radius:5px}
+  .sv{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--gd);min-width:32px;text-align:right}
+  .sn{font-size:11.5px;color:var(--tm);margin-top:4px;line-height:1.55}
+  .stot{background:#F1F5F9;border-radius:6px;padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;margin:18px 0;white-space:pre;line-height:2.1}
+  .sub2{margin-top:14px;padding:10px 12px;background:var(--yb);border-radius:6px;font-size:12.5px}
+  .badge-y{display:inline-block;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;background:var(--yb);color:var(--yt);margin:8px 0}
+  /* top box */
+  .topbox{background:#92400E;color:#fff;border-radius:8px;padding:22px 24px;margin-bottom:22px}
+  .topbox h2{font-size:20px;font-weight:700;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:10px}
+  .score-big{font-family:'IBM Plex Mono',monospace;font-size:52px;font-weight:600;line-height:1;color:#FCD34D}
+  .topbox .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+  .topbox .kv-item{background:rgba(255,255,255,.1);border-radius:6px;padding:10px 12px}
+  .topbox .kv-label{font-size:11px;opacity:.75;margin-bottom:3px}
+  .topbox .kv-val{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600}
+  .pbtn{position:fixed;bottom:24px;right:24px;z-index:200;background:var(--gd);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  @media print{.hdr,.pbtn{display:none!important}.sec{break-inside:avoid;box-shadow:none}.wrap{padding-top:20px}}
+  @media(max-width:700px){.sgrid,.dg,.topbox .kv{grid-template-columns:1fr}.snum{font-size:42px}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-t">RE 深度分析｜Centrix The Station @ Dang Wangi LRT｜KL, Malaysia</div>
+  <div>資料抓取：2026-04-13｜NAPIC Q3 2025 + 即時搜尋｜框架 v1.3｜Ivan KL 系列 #23</div>
+</div>
+
+<div class="wrap">
+
+<!-- TOP BOX -->
+<div class="topbox">
+  <h2>Centrix The Station KLCC — 綜合投資結論（先閱）</h2>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&price=900000&from=CentrixKLCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=CentrixKLCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">
+    <div>
+      <div style="font-size:11px;opacity:.75;margin-bottom:4px">綜合評分</div>
+      <div class="score-big">6.1<span style="font-size:20px;opacity:.7"> / 10</span></div>
+      <div style="margin-top:8px;font-size:12px;opacity:.85">⭐⭐⭐ 中等｜條件性觀望</div>
+    </div>
+    <div style="flex:1;min-width:260px;font-size:13px;line-height:1.8;opacity:.9">
+      <strong>核心論點</strong>：捷運條件是全系列最強（LRT Dang Wangi 站正上方）× KLCC 核心地段治安最佳 × 發售 PSF ~RM1,600 在 RM120萬總價硬頂下剛好卡位（571 sqft Studio RM90萬起）。<br>
+      <strong>核心問題</strong>：<strong style="color:#FCD34D">Leasehold 99年 + 商業地契（SOHO）+ 開發商財務弱點 + 期房 2028–29 + Brickz 零成交記錄 + 857戶高密度</strong>——五個結構性缺陷同時存在。Ivan 的條件是商業地契可接受，但 Leasehold 是否也可接受需要確認。
+    </div>
+  </div>
+  <div class="kv">
+    <div class="kv-item"><div class="kv-label">發售 PSF</div><div class="kv-val">~RM1,593–1,665</div></div>
+    <div class="kv-item"><div class="kv-label">Studio 總價起（571 sqft）</div><div class="kv-val">RM 90.8萬起</div></div>
+    <div class="kv-item"><div class="kv-label">地契</div><div class="kv-val">Leasehold 99年⚠</div></div>
+    <div class="kv-item"><div class="kv-label">竣工</div><div class="kv-val">2028–29 期房⚠</div></div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="sec">
+  <div class="sec-hd">§0｜城市定位與第一性原理</div>
+  <div class="sec-bd">
+    <h3>A｜Centrix 解決了什麼需求？</h3>
+    <p>KL 作為東南亞金融、旅遊、醫療的樞紐城市，Dang Wangi 地段解決的是「在 KLCC 核心走路 2 分鐘就能上 LRT、不需要開車」的稀缺需求。Centrix 作為 TOD（Transit-Oriented Development），將 Prasarana（馬來西亞捷運公司）擁有的 LRT 站土地商業化，理論上應是 KL 捷運整合度最高的住宅項目。</p>
+    <p>但問題在於：Centrix 解決的是「交通便利」需求，而非「稀缺供給」需求。KLCC 走廊的 SOHO 類建案存在嚴重結構性過剩——NAPIC Q3 2025 上游文件確認 KL SA/SOHO 廣義庫存估計 ~8,000–9,000 戶，商業地契物業去化速度遠慢於住宅地契。</p>
+
+    <div class="inv">
+      <div class="inv-t">B｜Munger Inversion——讓 Centrix 在 5 年內損失 20–30% 的路徑</div>
+      <table>
+        <thead><tr><th>風險維度</th><th>具體情境</th><th>概率</th></tr></thead>
+        <tbody>
+          <tr><td>開發商風險</td><td>Crest Builder 16 季連虧後剛轉盈（2024 Q1 為首個獲利季），財務弱點明確。若建設期現金流出問題，可能延誤或影響建案品質</td><td><span class="ty">中</span></td></tr>
+          <tr><td>地契折扣</td><td>Leasehold 99年（至 2113 年），2028 竣工時剩 ~85 年。銀行對 Leasehold 物業估值保守，LTV 可能進一步受限，外籍買家貸款難度高</td><td><span class="ty">中高</span></td></tr>
+          <tr><td>商業地契 SA 積壓</td><td>KL SOHO/SA Overhang 廣義 ~8,000–9,000 戶，去化速度慢。Centrix 完工後加入此積壓市場，租金競爭激烈</td><td><span class="ty">中高</span></td></tr>
+          <tr><td>高密度高競爭</td><td>857 戶單一棟，Airbnb 操作者同時管理大量同類單位，租金被壓低；外溢供給（SWNK、BBCC 走廊等）持續</td><td><span class="ty">中</span></td></tr>
+          <tr><td>MYR 匯率</td><td>MYR/TWD 持續惡化超 15%，台幣計算報酬轉負</td><td><span class="ty">中</span></td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px"><strong>最大尾部風險</strong>：開發商 Crest Builder 財務脆弱性 + 期房 2028–29，是本系列迄今最高的開發商交屋風險。若建設過程出現資金問題，HDA 保護可覆蓋部分損失，但延誤甚至難以完全排除。</p>
+    </div>
+
+    <h3>C｜投資論點錨定</h3>
+    <table>
+      <thead><tr><th>項目</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr><td>核心驅動力</td><td>LRT Dang Wangi 站正上方（全系列最強捷運條件）× KLCC 核心地段治安最佳 × 發售 PSF ~RM1,600 為同地段競品最低 × 短租（Airbnb）官方允許</td></tr>
+        <tr><td>主要假設 H1</td><td>Crest Builder 財務維持穩定，能如期 2028–29 完工且品質不縮水</td></tr>
+        <tr><td>主要假設 H2</td><td>KL KLCC 走廊 SOHO 短租市場持續旺盛，Airbnb 收益能覆蓋商業電費 + 管理費 + 貸款月供</td></tr>
+        <tr><td>最重要監測指標</td><td>① Crest Builder 季度財報（連續獲利確認）② 建案施工進度（季度更新）③ Brickz 同地段 SOHO 二手成交 PSF 趨勢</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="sec">
+  <div class="sec-hd">§1｜總體市場概況</div>
+  <div class="sec-bd">
+    <div class="napic">
+      <strong>上游文件整合</strong>：NAPIC Q3 2025 官方數據（KL_供需與Overhang深度分析_20260401）｜資料更新：2026-04-13
+    </div>
+
+    <h3>1.1 KL 整體市場與 KLCC 走廊</h3>
+    <table>
+      <thead><tr><th>指標</th><th>數值</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>KL 住宅成交量（2024全年）</td><td>18,913 戶（+5.5% YoY）</td><td><span class="tg">穩健</span></td></tr>
+        <tr><td>KL City Centre Brickz 成交中位（Sep 2024–Aug 2025）</td><td>1,118 筆，中位 PSF RM1,252，中位總價 RM129萬</td><td><span class="ty">中等</span></td></tr>
+        <tr><td>KL City Centre 成交總價 P25–P75</td><td>RM78萬–RM171萬</td><td><span class="ty">寬幅，分化大</span></td></tr>
+        <tr><td>KL SA Overhang（NAPIC Q3 2025，另計）</td><td>~4,687 戶（KL 估）；全馬 SA 廣義管道 22,314 戶</td><td><span class="tr">中度至嚴重積壓</span></td></tr>
+        <tr><td>KL 新開工 YoY（Q1-Q3 2025）</td><td>-14.9%</td><td><span class="tg">2027–28 供給緊縮先行訊號</span></td></tr>
+        <tr><td>Bukit Bintang 一帶 Brickz PSF（Jan–Dec 2025）</td><td>中位 RM663 psf（含舊樓拖低）</td><td><span class="ty">地段中位低但新樓差異大</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 Centrix 發售價格定位</h3>
+    <table>
+      <thead><tr><th>單位類型</th><th>坪數（sqft）</th><th>發售 PSF（PropertyGuru）</th><th>總價範圍</th><th>外籍可購？</th></tr></thead>
+      <tbody>
+        <tr><td>Studio（Type A）</td><td>571–659</td><td>RM1,593–1,628</td><td>RM90.8萬–RM107.3萬</td><td><span class="ty">⚠ 最小坪數 RM90.8萬，接近外籍門檻 RM100萬，需確認</span></td></tr>
+        <tr><td>1+1BR（Type B）</td><td>578–871</td><td>RM1,593–1,665</td><td>RM92.1萬–RM145萬</td><td><span class="tg">✓（RM100萬以上）</span></td></tr>
+        <tr><td>Dual Key（Type C）</td><td>593–1,039</td><td>~RM1,600</td><td>RM94.9萬–RM166.2萬</td><td><span class="ty">⚠ 最小坪數接近門檻，需確認</span></td></tr>
+        <tr><td>2BR（Type D）</td><td>718–1,019</td><td>~RM1,600</td><td>RM114.9萬–RM163萬</td><td><span class="tg">✓</span></td></tr>
+        <tr><td>3BR（Type E）</td><td>1,001–1,187</td><td>~RM1,600</td><td>RM160.2萬–RM190萬</td><td><span class="tg">✓（超預算）</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Ivan 的 RM120萬硬頂</strong>：可進入的坪數段為 Studio（RM90.8萬起）和小坪數 1+1BR（RM92–120萬）。3BR 和大 2BR 超出預算。Studio 是否能確認達到外籍 RM100萬門檻需向開發商確認最小單位定價。</p>
+
+    <div class="cycle">
+      <strong>1.3 市場週期定位：KLCC SOHO 走廊——輕度至中度修正期</strong><br><br>
+      KLCC 走廊整體豪宅市場（住宅地契）處於擴張期，但 SOHO / SA 商業地契子市場呈現供給積壓。NAPIC Q3 2025 確認 KL SA 廣義管道 22,314 戶（含在建未售 + 規劃未售），遠超消化速度。Centrix 所在的 SOHO 細分市場在「量跌值升」大環境下屬於壓力較大的積壓端，與 DPC / MK 高分住宅地契建案所在的稀缺端處於完全不同的市場位置。
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="sec">
+  <div class="sec-hd">§2｜供需結構分析</div>
+  <div class="sec-bd">
+
+    <h3>2.1 需求面</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>占比</th><th>趨勢</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>短租（Airbnb）投資者</td><td>~50%</td><td>→</td><td>Centrix 官方允許 Airbnb，3 家酒店管理公司合作；但 KL Airbnb 市場競爭激烈，Bukit Bintang 一帶佔率最高但供給也最多</td></tr>
+        <tr><td>外籍高管長租</td><td>~25%</td><td>↑</td><td>Dang Wangi 地段 KLCC 治安最佳，企業外派偏好；但大企業長租偏好面積較大的住宅地契物業</td></tr>
+        <tr><td>本地年輕專業人士自住</td><td>~15%</td><td>↑</td><td>捷運通勤族；但 SOHO 商業電費是結構性阻力</td></tr>
+        <tr><td>MM2H 買家（台灣 17%）</td><td>~10%</td><td>↑</td><td>Centrix 明確標注 MM2H 友好；但 Leasehold 地契對 MM2H 要求的長期持有框架相對不利</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供給面——SOHO 積壓是核心問題</h3>
+    <table>
+      <thead><tr><th>供給指標</th><th>數據</th><th>對 Centrix 影響</th></tr></thead>
+      <tbody>
+        <tr><td>KL SA Overhang（NAPIC Q3 2025）</td><td>~4,687 戶（KL 估）；廣義管道 22,314 戶</td><td><span class="tr">直接競爭——Centrix 竣工後加入此積壓市場</span></td></tr>
+        <tr><td>Centrix 本身規模</td><td>857 戶，單一棟，2.39 英畝</td><td><span class="tr">高密度——每英畝 359 戶，是 Park Regent（90戶/英畝）的 4 倍</span></td></tr>
+        <tr><td>KLCC 走廊同類新供給</td><td>CloutHaus（2029）、Stonor 3（2019完工）、SWNK Houze（2026）</td><td><span class="ty">競爭持續；但 Centrix 捷運優勢是差異化</span></td></tr>
+        <tr><td>Brickz 成交記錄（Centrix）</td><td>0 筆（期房，SPA 尚未大量完成或登記）</td><td><span class="tr">零實際成交驗證，無法判斷市場接受度</span></td></tr>
+        <tr><td>KL SA 去化難度</td><td>NAPIC：商業地契 SA 平均去化週期 3–5 年（住宅 1–2 年）</td><td><span class="tr">結構性去化慢</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <strong>供需結論：SOHO 商業地契的結構性困境</strong><br>
+      Centrix 面臨的供需問題不是個案，而是整個 KL SOHO / SA 市場的系統性積壓。商業地契缺乏自住剛需（本地首購族優先選住宅地契）、銀行貸款條件較差、商業電費高 6 倍、HDA 保護較弱——這四個結構性障礙共同壓制去化速度。捷運優勢是真實的差異化，但能否完全抵消上述不利因素，需要完工後的實際市場驗證。
+    </div>
+  </div>
+</div>
+
+<!-- §3 -->
+<div class="sec">
+  <div class="sec-hd">§3｜區域細分分析</div>
+  <div class="sec-bd">
+
+    <h3>3.1 Dang Wangi 地段定位</h3>
+    <table>
+      <thead><tr><th>維度</th><th>Centrix（Dang Wangi）</th><th>TS2（Imbi Monorail）</th><th>TRX Residences</th></tr></thead>
+      <tbody>
+        <tr><td>捷運條件</td><td><strong>LRT Dang Wangi 正上方</strong>（全系列最強）</td><td>Imbi Monorail 100m</td><td>TRX MRT 站直達</td></tr>
+        <tr><td>KLCC 距離</td><td>2 LRT 站（7 分鐘車程）</td><td>步行 15–20 分鐘</td><td>5 LRT 站</td></tr>
+        <tr><td>治安</td><td><span class="tg">最佳（KLCC 核心走廊）</span></td><td><span class="ty">中等（觀光區）</span></td><td><span class="tg">最佳（金融區）</span></td></tr>
+        <tr><td>步行商圈</td><td>Sogo、Quill City Mall、Jalan Ampang 商圈；無 Bukit Bintang 等級</td><td>Bukit Bintang、Jalan Alor；KL 最強步行商圈</td><td>TRX Mall（Hermès、Louis Vuitton）；頂端消費</td></tr>
+        <tr><td>地段治安特點</td><td>使館區 / 企業區氛圍，夜間街道整潔</td><td>觀光人潮多，扒手偶發</td><td>全新金融區，保安最嚴</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 KL 分地段供需格局（上游文件）</h3>
+    <table>
+      <thead><tr><th>地段</th><th>Overhang 壓力</th><th>地契類型</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>KLCC / 金三角（Centrix 所在）</td><td><span class="ty">中高</span></td><td>SA / SOHO 商業地契為主</td><td>KL SA Overhang ~4,687戶，廣義管道 22,314戶，未來 3–5 年持續壓力</td></tr>
+        <tr><td>TRX（新金融區）</td><td><span class="ty">中（新供給集中）</span></td><td>商業 HDA</td><td>新興區域，形成期；金融業外籍高管需求帶動</td></tr>
+        <tr><td>DPC / Mont Kiara</td><td><span class="tg">低（住宅地契，供給封頂）</span></td><td>Freehold 住宅</td><td>精品稀缺邏輯，與 SA 市場完全分層</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="sec">
+  <div class="sec-hd">§4｜新案 vs 二手市場（v1.1 / v1.3 方法論）</div>
+  <div class="sec-bd">
+
+    <h3>4.1 同期競品比較（FIX-01：同期同區同類型）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>Centrix（本案）</th><th>SOHO Suites KLCC（同地段舊樓）</th><th>CloutHaus KLCC（同期新案）</th><th>TS2 Bukit Bintang（Ivan 持倉）</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td>Leasehold 99年 / 商業 SOHO</td><td>Freehold / 商業 SA</td><td>Freehold / 商業 SA</td><td>Freehold / 商業 SA</td></tr>
+        <tr><td>發售 / 成交 PSF</td><td>RM1,593–1,665（發售）</td><td>Brickz 中位 RM1,130–1,280 psf（成交）</td><td>RM2,900 psf（發售）</td><td>RM1,608 psf（買入）</td></tr>
+        <tr><td>竣工</td><td>2028–29 期房</td><td>2013（完工）</td><td>2029 期房</td><td>2027 期房</td></tr>
+        <tr><td>捷運條件</td><td>LRT 正上方（最強）</td><td>步行 5–10 分鐘</td><td>P. Ramlee 步行</td><td>Imbi Monorail 100m</td></tr>
+        <tr><td>Brickz 成交</td><td>0 筆（期房）</td><td>大量成交記錄</td><td>0 筆（期房）</td><td>—（買入價）</td></tr>
+        <tr><td>密度</td><td>857 戶，1 棟，2.39 英畝</td><td>中密度</td><td>高密度</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <strong>FIX-01 關鍵發現</strong>：Centrix 發售 PSF RM1,593–1,665 高於同地段已完工 SOHO（SOHO Suites KLCC Brickz 成交中位 RM1,130–1,280 psf）約 25–30%。期房溢價加上 Leasehold 地契折扣，買家實際上是在為「捷運在正上方」的位置屬性支付溢價。此溢價是否合理，取決於完工後捷運便利性是否真能帶來更強的租金和二手成交。目前無 Brickz 數據驗證。
+    </div>
+
+    <h3>4.2 開發商評估</h3>
+    <table>
+      <thead><tr><th>開發商</th><th>規模</th><th>財務健康</th><th>交屋記錄</th><th>風險評級</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Crest Builder Berhad（via Intan Sekitar）</strong></td><td>馬來西亞中型上市建商；承包商起家，近年進入房地產發展</td><td><strong>⚠ 警示</strong>：2019–2023 年連虧 16 季，2024 Q1 才首次轉盈（PATAMI RM73.5萬）。2025 全年 PATAMI +130% 但規模仍小（RM673M 收入）。ROCE 4.5%（行業均值 11%）</td><td>建案交屋記錄查無重大違約，但房地產發展業務規模尚小；主業仍為建築承包</td><td><span class="tr">🔴 中高風險（財務弱、剛轉盈、房產業務相對新）</span></td></tr>
+        <tr><td><strong>Prasarana Malaysia Bhd（地主）</strong></td><td>馬來西亞 100% 國有捷運公司；政府捷運基礎設施擁有者</td><td>國有企業，財務不透明但不太可能違約</td><td>地主角色，不直接參與建設交屋</td><td><span class="tg">🟢 地主身份加分（捷運基礎設施確定性）</span></td></tr>
+      </tbody>
+    </table>
+    <p>這是本系列迄今<strong>開發商風險最高的建案</strong>。Prasarana 作為地主是加分項（確認捷運連通性），但 Crest Builder 的財務弱點是實質建設和交屋風險，不可忽視。</p>
+
+    <h3>4.3 二手市場分析（FIX-02 / FIX-03）</h3>
+    <div class="warn">
+      <strong>FIX-03 強制標注</strong>：Centrix 為期房（預計竣工 2028–29），Brickz 記錄零 SPA 登記成交筆數。iProperty / PropertyGuru 顯示 21–33 筆「掛牌」均為開發商代理或早期買家轉售（非銀行貸款成交的 SPA 登記）。<strong>依 FIX-03 規則：樣本不足以判斷二手市場信號，無法輸出信號結論。</strong><br><br>
+      參考最接近的同地段已完工 SOHO 指標——SOHO Suites KLCC（Brickz 成交中位 RM1,130–1,280 psf）——Centrix 發售 PSF RM1,593–1,665 較已完工同地段 SOHO 溢價 ~25–30%。此為期房溢價 + 捷運直連溢價的組合定價，完工後是否能維持或超越此水平，是核心不確定性。
+    </div>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="sec">
+  <div class="sec-hd">§5｜租金市場與報酬率</div>
+  <div class="sec-bd">
+
+    <h3>5.1 租金參考（同地段可比物業）</h3>
+    <table>
+      <thead><tr><th>可比物業</th><th>坪數</th><th>月租</th><th>PSF 月租</th><th>Gross Yield 估算</th></tr></thead>
+      <tbody>
+        <tr><td>SOHO Suites KLCC（Brickz 成交 RM1,130–1,280 psf）</td><td>650–700 sqft</td><td>RM2,800–3,500/月</td><td>RM4.3–4.6 psf/月</td><td>~3.5–4.5%（以成交 PSF 計）</td></tr>
+        <tr><td>Centrix（預估，以發售 PSF 計）</td><td>571 sqft Studio</td><td>RM3,000–4,000/月（估）</td><td>RM5.2–7.0 psf/月（開發商引用）</td><td><strong>Gross 4.5–6.0%（開發商引用 6–7%，偏樂觀）</strong></td></tr>
+      </tbody>
+    </table>
+
+    <h3>5.2 外籍持有人報酬率（非居民稅率）</h3>
+    <table>
+      <thead><tr><th>情境</th><th>Gross Yield</th><th>扣管理費 + 空置</th><th>商業電費額外成本</th><th>非居民所得稅（30%）</th><th>稅後 Net Yield</th><th>評級</th></tr></thead>
+      <tbody>
+        <tr><td>樂觀（Airbnb 高出租率）</td><td>6.0%</td><td>-1.5%（管理費 RM0.44 psf）</td><td>-0.5%（商業電費比住宅高）</td><td>×0.70</td><td><strong>~2.8%</strong></td><td><span class="ty">🟡 邊緣</span></td></tr>
+        <tr><td>基本（長租 + 空置 15%）</td><td>4.5%</td><td>-1.5%</td><td>-0.5%</td><td>×0.70</td><td><strong>~1.7%</strong></td><td><span class="tr">🔴 不佳</span></td></tr>
+      </tbody>
+    </table>
+    <div class="warn">
+      <strong>商業電費警示（v1.1）</strong>：Centrix 為商業地契 SOHO，水電費適用商業費率，比住宅費率高約 5–6 倍。在非居民 30% 租金稅 + 商業電費雙重壓制下，基本情境 Net Yield 約 1.7%，遠低於 TS2 同樣框架下的預期（類似問題）。唯有 Airbnb 出租率極高的樂觀情境才能達到 ~2.8%，但此假設依賴 Airbnb 市場維持強勁且競爭不惡化。
+    </div>
+
+    <h3>5.3 Airbnb 市場評估</h3>
+    <p>KL Bukit Bintang / KLCC 走廊是馬來西亞 Airbnb 最活躍地段，平均 ADR（每日平均房費）RM140–240，佔率 41–51%（PropCashflow 2026 引用）。Centrix 的捷運直連優勢對 Airbnb 旅客具有真實吸引力，但 857 戶同棟大量單位同時 Airbnb 出租將造成自我競爭，且管理公司統一操作時議價空間受限。</p>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="sec">
+  <div class="sec-hd">§6｜外資／外國買家法規</div>
+  <div class="sec-bd">
+
+    <h3>6.1 購屋資格與地契問題</h3>
+    <table>
+      <thead><tr><th>項目</th><th>規定</th><th>風險評級</th></tr></thead>
+      <tbody>
+        <tr><td><strong>地契：Leasehold 99 年（至 2113）</strong></td><td>2028 竣工時剩 ~85 年租約；2028+30年持有後剩 ~55 年</td><td><span class="tr">🔴 重大劣勢——銀行估值保守，外籍貸款難度倍增，長期持有者面臨地契年限遞減折扣</span></td></tr>
+        <tr><td>地契類型：商業（SOHO）</td><td>商業地契，適用商業電費、無住宅 HDA 完整保護</td><td><span class="ty">🟡 中等——與 TS2 相同問題，Ivan 已接受此框架</span></td></tr>
+        <tr><td>外籍最低購置門檻</td><td>KL RM1,000,000；Studio 571 sqft 起價 RM908,300（PropertyGuru），部分單位低於門檻</td><td><span class="tr">⚠ 需向開發商確認外籍最小可購單位定價是否達 RM100萬</span></td></tr>
+        <tr><td>外籍印花稅</td><td>8%（2026-01 起）</td><td>同系列其他建案，已知成本</td></tr>
+        <tr><td>RPGT（外籍）</td><td>持有 6 年後仍 10%</td><td>同系列其他建案</td></tr>
+        <tr><td>MM2H 合規</td><td>開發商明確標注 MM2H 友好；但 Leasehold 對 MM2H 長期持有框架相對不利</td><td><span class="ty">🟡 條件性</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <strong>Leasehold 是本案最關鍵的結構性問題</strong><br>
+      Ivan 確認商業地契可接受（與 TS2 相同）。但 Leasehold 是另一個獨立的結構性劣勢：<br>
+      ① 外籍貸款銀行對 Leasehold 物業通常要求更高的首付（LTV 可能降至 60–65%，而非 70%）<br>
+      ② 隨著年限遞減，資本增值能力逐漸削弱，退出時買家池縮小<br>
+      ③ Prasarana 為地主，99 年租約到期後的延續條款不確定<br>
+      Leasehold 是否為 Ivan 可接受的條件，需要明確確認後才能推進。
+    </div>
+  </div>
+</div>
+
+<!-- §7 -->
+<div class="sec">
+  <div class="sec-hd">§7｜貸款環境與利率影響</div>
+  <div class="sec-bd">
+
+    <h3>7.1 外籍購置財務試算（以 1+1BR 578 sqft，~RM92萬為例）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>金額（RM）</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>購買總價</td><td>~920,000</td><td>578 sqft × RM1,600 psf（估）</td></tr>
+        <tr><td>外籍印花稅（8%）</td><td>73,600</td><td>—</td></tr>
+        <tr><td>律師費 + 代理費（~3%）</td><td>27,600</td><td>—</td></tr>
+        <tr><td>首付（30%，外籍 70% LTV；Leasehold 可能更低）</td><td>276,000–368,000</td><td>Leasehold 可能要求 65% LTV → 首付提高至 35%</td></tr>
+        <tr><td><strong>現金需求合計（估）</strong></td><td><strong>RM37.7–46.9萬（約 TWD 255–320 萬）</strong></td><td>本系列最低現金需求，但 Leasehold LTV 風險</td></tr>
+        <tr><td>月供（5.0% 商業貸款，30年）</td><td>~RM3,500–4,200/月</td><td>商業地契利率略高於住宅</td></tr>
+        <tr><td>管理費（RM0.40 psf + RM0.04 sinking fund）</td><td>~RM254/月（578 sqft）</td><td>相對同類建案合理</td></tr>
+      </tbody>
+    </table>
+    <p><strong>現金需求約 RM38–47 萬（TWD 255–320 萬）</strong>——是本系列最低的入場門票，明顯低於 TS2（~RM55萬）。但這是期房且 Leasehold，風險回報比需要重新衡量。</p>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="sec">
+  <div class="sec-hd">§8｜基礎建設與重劃區發展</div>
+  <div class="sec-bd">
+
+    <h3>8.1 Centrix 的核心賣點：LRT Dang Wangi 正上方</h3>
+    <table>
+      <thead><tr><th>基建</th><th>距離</th><th>重要性</th></tr></thead>
+      <tbody>
+        <tr><td><strong>LRT Dang Wangi（KJ12，Kelana Jaya Line）</strong></td><td><strong>0 米（直接電梯連接）</strong></td><td><span class="tg">全系列最強捷運條件——比 TS2 的 Imbi Monorail 100m 更優</span></td></tr>
+        <tr><td>Monorail Bukit Nanas</td><td>步行 ~5–8 分鐘</td><td>雙線換乘優勢</td></tr>
+        <tr><td>Monorail Medan Tuanku</td><td>步行 ~8 分鐘</td><td>—</td></tr>
+        <tr><td>KLCC LRT 站</td><td>2 站（約 5–7 分鐘車程）</td><td>直達 KLCC 核心</td></tr>
+        <tr><td>KL Sentral</td><td>3 站（約 10 分鐘）</td><td>KLIA Express 連接機場</td></tr>
+        <tr><td>TRX MRT 站</td><td>5 站（約 15 分鐘）</td><td>金融區連通</td></tr>
+        <tr><td>MRT 3 Circle Line（Sri Hartamas / 其他站）</td><td>2030+ 完工</td><td>長期催化劑，短期不影響</td></tr>
+      </tbody>
+    </table>
+    <p>Dang Wangi 站地段治安：使館區 / 企業區 Jalan Ampang 走廊，KLCC 核心，全 KL 治安最佳之一。步行環境整潔，無 Chow Kit 或 Imbi 的街頭治安隱憂。</p>
+
+    <h3>8.2 步行商圈評估</h3>
+    <p>步行商圈完整度優於 DPC / MK（無直接捷運），但不及 TS2 的 Bukit Bintang 步行商圈密度。主要步行可達：Sogo、Quill City Mall、Jalan Ampang 餐飲、SMK Convent Bukit Nanas。距 Pavilion / Bukit Bintang 核心約 1–2 個捷運站，實際生活便利度中等偏上。</p>
+  </div>
+</div>
+
+<!-- §9 -->
+<div class="sec">
+  <div class="sec-hd">§9｜人口結構與移入移出趨勢</div>
+  <div class="sec-bd">
+    <table>
+      <thead><tr><th>需求人口</th><th>規模</th><th>對 Centrix 影響</th></tr></thead>
+      <tbody>
+        <tr><td>短租旅客（Airbnb）</td><td>KL 年旅客人次持續增長；KLCC 地段是旅客首選</td><td>正面——Centrix 捷運直連對旅客極具吸引力，有效提升 Airbnb 住房率</td></tr>
+        <tr><td>外籍企業高管（長租）</td><td>TRX 金融區進駐企業帶動外籍高管增加</td><td>正面——Dang Wangi 地段便利 TRX 通勤；但大企業長租偏好住宅地契</td></tr>
+        <tr><td>本地年輕白領</td><td>KLCC 走廊 CBD 就業人口穩定增長</td><td>中性——SOHO 商業電費是阻力，本地首購族優先考慮住宅地契</td></tr>
+        <tr><td>MM2H 台灣買家（17%）</td><td>2,637 待購確定買盤；台灣第二大來源</td><td>條件性正面——Centrix 標注 MM2H 友好，但 Leasehold 對長期 MM2H 持有框架有疑慮</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §10 -->
+<div class="sec">
+  <div class="sec-hd">§10｜橫向比較（vs Ivan KL 系列其他建案）</div>
+  <div class="sec-bd">
+    <table>
+      <thead><tr><th>指標</th><th>Centrix KLCC（本案）</th><th>TS2（Ivan 持倉）</th><th>TRX Residences</th><th>The Conlay（KLCC）</th></tr></thead>
+      <tbody>
+        <tr><td>評分</td><td><strong>6.1</strong></td><td>6.0</td><td>7.6</td><td>7.4</td></tr>
+        <tr><td>捷運條件</td><td><span class="tg">LRT 正上方（最強）</span></td><td>Monorail 100m</td><td>TRX MRT 直達</td><td>KLCC / Conlay 步行</td></tr>
+        <tr><td>地契</td><td><span class="tr">Leasehold 99年 + 商業 SOHO</span></td><td>Freehold 商業 SA</td><td>Freehold 商業 HDA</td><td>Freehold 商業 HDA</td></tr>
+        <tr><td>開發商風險</td><td><span class="tr">中高（Crest Builder 剛轉盈）</span></td><td>Berjaya（中）</td><td>Lendlease（低）</td><td>E&O × Mitsui（低）</td></tr>
+        <tr><td>竣工</td><td>期房 2028–29</td><td>期房 2027</td><td>已竣工 2024</td><td>~2025 完工</td></tr>
+        <tr><td>發售 PSF</td><td>RM1,593–1,665</td><td>RM1,608（Ivan 買入）</td><td>RM2,293（Brickz中位）</td><td>RM2,030–2,100</td></tr>
+        <tr><td>外籍現金需求</td><td>~RM38–47萬</td><td>~RM55萬</td><td>~RM164萬</td><td>~RM120萬+</td></tr>
+        <tr><td>Brickz 成交記錄</td><td>0 筆</td><td>—（買入）</td><td>59 筆</td><td>有記錄</td></tr>
+        <tr><td>治安</td><td><span class="tg">KLCC 最佳</span></td><td>中等（觀光區）</td><td><span class="tg">金融區最佳</span></td><td><span class="tg">KLCC 最佳</span></td></tr>
+        <tr><td>vs TS2 評分差異</td><td>+0.1（與 TS2 幾乎持平）</td><td>基準 6.0</td><td>+1.6</td><td>+1.4</td></tr>
+      </tbody>
+    </table>
+    <p><strong>橫向比較結論</strong>：Centrix 的捷運條件確實全系列最強，但 Leasehold 地契 + 開發商財務弱點 + 零 Brickz 記錄三項結構性問題，使其評分僅比 TS2 高 0.1 分（6.1 vs 6.0）。捷運優勢幾乎完全被地契和開發商風險對沖掉。</p>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="sec">
+  <div class="sec-hd">§11｜進場時機與估值判斷</div>
+  <div class="sec-bd">
+
+    <h3>11.1 估值指標</h3>
+    <table>
+      <thead><tr><th>估值指標</th><th>當前值</th><th>判斷</th><th>信心</th></tr></thead>
+      <tbody>
+        <tr><td>發售 PSF vs 同地段已完工 SOHO（SOHO Suites）</td><td>RM1,600 vs RM1,130–1,280（溢價 ~25–30%）</td><td><span class="ty">🟡 期房 + 捷運直連溢價，是否合理待完工驗證</span></td><td>低（無 Brickz 驗證）</td></tr>
+        <tr><td>vs CloutHaus（同期新案）</td><td>RM1,600 vs RM2,900（Centrix 低 45%）</td><td><span class="tg">🟢 相對 CloutHaus 定價合理</span></td><td>中</td></tr>
+        <tr><td>Gross Yield（開發商引用）</td><td>6–7%（樂觀）；實際估算 4.5–6.0%</td><td><span class="ty">🟡 開發商數字偏樂觀，需以非居民稅後計算</span></td><td>低</td></tr>
+        <tr><td>稅後 Net Yield（非居民）</td><td>樂觀 ~2.8%；基本 ~1.7%</td><td><span class="tr">🔴 基本情境不佳</span></td><td>中</td></tr>
+        <tr><td>Leasehold 折扣</td><td>通常比同等 Freehold 低 10–20%（銀行估值保守）</td><td><span class="tr">🔴 長期持有者承擔年限遞減折扣</span></td><td>高</td></tr>
+      </tbody>
+    </table>
+
+    <div class="cycle">
+      <strong>11.2 進場時機矩陣：估值中等 × 趨勢不明（無 Brickz 數據）</strong><br><br>
+      當前落點：🟡 <strong>觀望等待</strong>。發售定價相對合理（vs CloutHaus），但 Leasehold + 開發商財務弱點 + 零 Brickz 驗證三重不確定性，使進場時機不成熟。若 Crest Builder 連續 4 季財報維持獲利且施工進度正常、同地段 SOHO Brickz 中位 PSF 升至 RM1,400+，則可重新評估。
+    </div>
+
+    <h3>11.3 持有期情境</h3>
+    <table>
+      <thead><tr><th>持有期</th><th>樂觀（25%）</th><th>基本（50%）</th><th>悲觀（25%）</th></tr></thead>
+      <tbody>
+        <tr><td>3 年（含期房等待）</td><td>+15–20%（Airbnb 強勁，捷運溢價兌現）</td><td>+5–10%（持平至輕微升值）</td><td>-5% 至 0%（SA 積壓拖累，Leasehold 折扣）</td></tr>
+        <tr><td>5 年</td><td>+25–35%</td><td>+10–18%</td><td>-5% 至 +5%（MYR 貶值侵蝕）</td></tr>
+        <tr><td>7 年+</td><td>+40–55%</td><td>+15–28%</td><td>+5% 至 +15%（Leasehold 年限折扣開始顯現）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="sec">
+  <div class="sec-hd">§12｜買方決策錨點（雙視角綜合）</div>
+  <div class="sec-bd">
+
+    <div class="dg">
+      <div class="dc dcw">
+        <h4>【市場研究視角】純分析結論</h4>
+        <table>
+          <thead><tr><th>維度</th><th>結論</th><th>信心</th></tr></thead>
+          <tbody>
+            <tr><td>供需平衡</td><td>供給積壓（SOHO SA 廣義管道 22,314 戶）</td><td>高</td></tr>
+            <tr><td>價格趨勢</td><td>不明（零 Brickz 記錄，期房市場）</td><td>低</td></tr>
+            <tr><td>租金市場</td><td>Airbnb 具潛力，長租稅後回報偏低</td><td>中</td></tr>
+            <tr><td>法規環境</td><td>Leasehold 商業地契——雙重劣勢</td><td>高</td></tr>
+            <tr><td>開發商風險</td><td>Crest Builder 財務脆弱，中高風險</td><td>高</td></tr>
+            <tr><td>捷運條件</td><td>全系列最強，真實且確定的差異化</td><td>高</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:10px;font-size:13px"><strong>市場研究一句話</strong>：捷運條件是真實且全系列最強的競爭優勢，但 Leasehold 地契 + 開發商財務弱點 + SOHO 積壓市場三重結構性問題，使這個優勢被大幅抵消。評分僅比你已持有的 TS2 高 0.1 分。</p>
+      </div>
+      <div class="dc dcg">
+        <h4>【買方視角】Ivan 決策框架</h4>
+        <table>
+          <thead><tr><th>問題</th><th>回答</th></tr></thead>
+          <tbody>
+            <tr><td>vs TS2 的優勢？</td><td>捷運更強（LRT 正上方 vs Monorail 100m）；現金需求更低（RM38–47萬 vs RM55萬）；治安同等最佳；KLCC 更近</td></tr>
+            <tr><td>vs TS2 的劣勢？</td><td>Leasehold（TS2 是 Freehold）；開發商財務更弱；無 Brickz 驗證；期房更晚（2028–29 vs 2027）</td></tr>
+            <tr><td>最大進場風險？</td><td>Crest Builder 建設延誤或品質問題；Leasehold 年限折扣長期侵蝕資本</td></tr>
+            <tr><td>Leasehold 可接受嗎？</td><td><strong>需要你確認</strong>——這是本案 vs TS2 的最關鍵差異</td></tr>
+            <tr><td>作為 TS2 的補倉選項？</td><td>若 Leasehold 可接受，Centrix 作為「捷運最強 + 現金需求最低」的補倉有一定合理性；但建議等竣工後再評估，或等 Crest Builder 財報穩定後</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="rec-y">
+      <div class="rec-t">🟡 最終建議：條件性觀望</div>
+      <p>Centrix 的捷運條件是真實且不可否認的最強優勢，治安和地段也符合 Ivan 的標準。但在以下兩個前提條件確認前，不建議進場：</p>
+      <ul style="padding-left:18px;margin-top:10px;line-height:2">
+        <li><strong>前提 1（必要）</strong>：確認 Ivan 是否接受 Leasehold 地契——若不接受，本案直接排除</li>
+        <li><strong>前提 2（建議）</strong>：等待 Crest Builder 連續 4 季（2025 全年 + 2026 Q1）維持獲利，確認財務轉型不是一次性現象</li>
+        <li>若以上兩點確認，可以小倉位（現金需求 RM38–47 萬）進場，定位為「捷運位置投機性持有」，而非「資本增值核心倉」</li>
+      </ul>
+    </div>
+
+    <table style="margin-top:16px">
+      <thead><tr><th>#</th><th>監測指標</th><th>觸發重新評估的閾值</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Crest Builder 季度財報</td><td>任何一季轉為虧損 → 立即重評開發商風險</td></tr>
+        <tr><td>2</td><td>施工進度</td><td>延誤超過 6 個月（相對 SPA 預計完工時間）→ 資金問題警示</td></tr>
+        <tr><td>3</td><td>同地段 SOHO Brickz 中位 PSF</td><td>跌破 RM1,000 psf → SA 積壓惡化，出場難度大增</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="sec">
+  <div class="sec-hd">§13｜建案綜合評分（v1.2）</div>
+  <div class="sec-bd">
+
+    <div class="swrap">
+      <div class="shd">Centrix The Station KLCC｜綜合評分卡｜2026-04-13</div>
+      <div class="sbd">
+
+        <div class="smain">
+          <div class="snum">6.1<span style="font-size:22px;opacity:.6"> / 10</span></div>
+          <div class="ssub">A 類（大環境）× 40% + B 類（建案本身）× 60%</div>
+          <div style="margin-top:12px"><span class="badge-y">⭐⭐⭐ 中等｜條件性觀望</span></div>
+          <div style="margin-top:6px;font-size:12px;color:var(--tm)">捷運條件全系列最強（B4 滿分），但 Leasehold + 開發商弱點 + SA 積壓三項拖累</div>
+        </div>
+
+        <div class="sgrid">
+          <div class="scol">
+            <h4>A 類｜大環境（40% 權重）</h4>
+
+            <div class="si">
+              <div class="si-l">A1 城市經濟基本面（20%）— 7.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:75%;background:#22C55E"></div></div><div class="sv">7.5</div></div>
+              <div class="sn">KL GDP +4.5–5.5%；RM100萬+ 成交 +31%；MM2H 2,637 待購。大環境整體正面，但 SOHO 細分市場積壓問題部分抵消</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">A2 區域供需平衡（25%）— 5.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:55%;background:#EAB308"></div></div><div class="sv">5.5</div></div>
+              <div class="sn">KL SA Overhang ~4,687戶；廣義 SA 管道 22,314 戶（含在建 + 規劃）；SA 去化週期 3–5 年（vs 住宅 1–2 年）。SOHO / SA 商業地契供給積壓是結構性問題，非週期性問題</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">A3 市場週期位置（20%）— 6.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:60%;background:#EAB308"></div></div><div class="sv">6.0</div></div>
+              <div class="sn">KLCC 住宅地契擴張期，但 SOHO / SA 子市場輕度修正期。Centrix 所在的商業地契細分市場週期位置弱於整體 KL 豪宅市場</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">A4 基建與地段催化劑（20%）— 9.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:95%;background:#16A34A"></div></div><div class="sv">9.5</div></div>
+              <div class="sn">LRT Dang Wangi 站正上方（0 米，直接電梯連接）——全系列最強捷運條件，真實且確定。KLCC 核心地段治安最佳。步行可及 Sogo、Quill City Mall。MRT 3 Circle Line 長期加持。這是 Centrix 的唯一真正頂級得分項</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">A5 法規與外資友好度（15%）— 5.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:50%;background:#EAB308"></div></div><div class="sv">5.0</div></div>
+              <div class="sn">Leasehold 99年 + 商業地契（SOHO）雙重劣勢：外籍貸款 LTV 可能更低（60–65%），銀行估值保守，長期持有者面臨地契年限折扣。外籍 8% 印花稅 + 30% 非居民租金稅 + RPGT 10% 三重稅費與系列其他建案相同</div>
+            </div>
+
+            <div class="sub2">
+              <strong>A 類加權平均：6.65 / 10</strong><br>
+              <small style="color:var(--tm)">7.5×0.20 + 5.5×0.25 + 6.0×0.20 + 9.5×0.20 + 5.0×0.15<br>= 1.50+1.375+1.20+1.90+0.75 = 6.725 → 整體判斷 6.65</small>
+            </div>
+          </div>
+
+          <div class="scol">
+            <h4>B 類｜建案本身（60% 權重）</h4>
+
+            <div class="si">
+              <div class="si-l">B1 開發商信用與交屋風險（20%）— 4.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:45%;background:#EF4444"></div></div><div class="sv">4.5</div></div>
+              <div class="sn">Crest Builder 2019–2023 年連虧 16 季，2024 Q1 才首次轉盈，ROCE 4.5%（行業均值 11%）。房地產業務相對新，Intan Sekitar 為其子公司。Prasarana 作地主加分但不負責建設。本系列開發商風險最高的建案，期房 2028–29 且財務弱點明確</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B2 相對估值合理性（20%）— 6.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:60%;background:#EAB308"></div></div><div class="sv">6.0</div></div>
+              <div class="sn">發售 RM1,600 psf 較同地段已完工 SOHO（RM1,130–1,280 psf）溢價 25–30%——期房 + 捷運直連溢價有部分合理性，但無 Brickz 成交驗證。零成交記錄是最大不確定性；估值信心極低</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B3 租金報酬率潛力（15%）— 5.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:55%;background:#EAB308"></div></div><div class="sv">5.5</div></div>
+              <div class="sn">Airbnb 樂觀情境 Gross 6%，稅後 Net ~2.8%；長租基本情境稅後 ~1.7%。商業電費是額外拖累（vs 住宅地契）。開發商引用 6–7% Gross 屬樂觀上限，非基本情境</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B4 地段與交通連接（15%）— 10.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:100%;background:#16A34A"></div></div><div class="sv">10.0</div></div>
+              <div class="sn">LRT Dang Wangi 正上方（直接電梯），2 停 KLCC，3 停 KL Sentral，5 停 TRX。全系列捷運條件最強，無需步行任何距離。KLCC 核心治安最佳。這是本案唯一毫無爭議的滿分項目</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B5 產品設計與差異化（10%）— 6.5 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:65%;background:#EAB308"></div></div><div class="sv">6.5</div></div>
+              <div class="sn">857 戶單棟，密度高（359戶/英畝，Park Regent 的 4 倍）；坪數 571–1,187 sqft；Dual-Key 設計適合 Airbnb；Sky Pool / Sky Gym 天台設施；管理費 RM0.44 psf 偏低。高密度是明確扣分點</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B6 產權與法律結構（10%）— 4.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:40%;background:#EF4444"></div></div><div class="sv">4.0</div></div>
+              <div class="sn">Leasehold 99年（至 2113）+ 商業地契（SOHO）雙重最差組合。銀行外籍貸款 LTV 更低，地契年限遞減長期侵蝕資本，退出時買家池縮小。本系列產權結構評分最低（vs Park Regent B6 9.5分）</div>
+            </div>
+
+            <div class="si">
+              <div class="si-l">B7 流動性與退出難易度（10%）— 5.0 / 10</div>
+              <div class="si-b"><div class="bb2"><div class="bf" style="width:50%;background:#EAB308"></div></div><div class="sv">5.0</div></div>
+              <div class="sn">Brickz 零成交記錄（期房），無法判斷實際流動性。同地段 SOHO Suites KLCC 的 Brickz 成交顯示 SA 市場尚有交易活動，但 Leasehold 地契使買家池縮小。退出流動性預期中等偏低</div>
+            </div>
+
+            <div class="sub2">
+              <strong>B 類加權平均：5.95 / 10</strong><br>
+              <small style="color:var(--tm)">4.5×0.20 + 6.0×0.20 + 5.5×0.15 + 10.0×0.15 + 6.5×0.10 + 4.0×0.10 + 5.0×0.10<br>= 0.90+1.20+0.825+1.50+0.65+0.40+0.50 = 5.975 → 整體判斷 5.95</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="stot">A 類（大環境）：6.65 / 10  ×  40%  =  2.66
+B 類（建案本身）：5.95 / 10  ×  60%  =  3.57
+─────────────────────────────────────────────
+加權合計：                                    6.23
+整體判斷微調（-0.13）：
+  ① Leasehold + 商業地契雙重劣勢在系列中最差
+  ② 開發商財務弱點（連虧 16 季剛轉盈）
+  ③ 零 Brickz 成交驗證
+─────────────────────────────────────────────
+綜合評分：                               <strong>6.1 / 10</strong></div>
+
+        <div style="margin-top:16px">
+          <span class="badge-y">⭐⭐⭐ 中等｜6.1 / 10</span>
+          <p style="margin-top:12px;font-size:13.5px;line-height:1.8"><strong>最終評語</strong>：Centrix 的捷運條件（LRT 正上方，B4 滿分 10/10）是全系列獨一無二的真實優勢，KLCC 地段治安最佳，現金需求最低（RM38–47 萬）——三項加分點都是真實的。但 <strong>Leasehold 地契 + 開發商財務脆弱（Crest Builder 16 季連虧剛轉盈）+ SOHO SA 廣義積壓 22,314 戶 + 零 Brickz 成交</strong>四項結構性問題同時存在，使最強捷運條件帶來的優勢幾乎完全被抵消——最終評分 6.1 僅比 Ivan 已持有的 TS2（6.0）高 0.1 分。<br><br>
+          進場前必須先確認：<strong>Leasehold 地契是否可接受</strong>。若否，本案排除。若是，可作為小倉位投機性進場，但不應作為資本增值核心倉位。</p>
+        </div>
+
+        <div style="margin-top:22px">
+          <h4 style="color:var(--gd);margin-bottom:12px;font-size:13px;padding-bottom:5px;border-bottom:1px solid #BBF7D0">📊 本系列積分排名更新（含 Centrix #23）</h4>
+          <table>
+            <thead><tr><th>排名</th><th>建案</th><th>評分</th><th>地契</th><th>建議</th></tr></thead>
+            <tbody>
+              <tr style="background:#DCFCE7;font-weight:600"><td>🏆 1</td><td>Park Regent @ DPC</td><td>8.34</td><td>Freehold 住宅</td><td><span class="tg">🟢 積極（現金充裕）</span></td></tr>
+              <tr style="background:#DCFCE7;font-weight:600"><td>🏆 1</td><td>Kiaramas deDaun（MK）</td><td>8.34</td><td>Freehold 住宅</td><td><span class="tg">🟢 積極</span></td></tr>
+              <tr><td>3</td><td>One Central Park DPC</td><td>8.10</td><td>Freehold 住宅</td><td><span class="tg">🟢 審慎積極</span></td></tr>
+              <tr><td>4</td><td>28 Mont' Kiara</td><td>8.04</td><td>Freehold 住宅</td><td><span class="tg">🟢 審慎積極</span></td></tr>
+              <tr><td>5</td><td>TRX Residences</td><td>7.60</td><td>Freehold 商業 HDA</td><td><span class="tg">🟢 增值框架</span></td></tr>
+              <tr><td>6</td><td>The Conlay E&O KLCC</td><td>7.40</td><td>Freehold 商業 HDA</td><td><span class="tg">🟢 審慎</span></td></tr>
+              <tr><td>7</td><td>Bangsar Hill Park</td><td>6.96</td><td>Leasehold 住宅</td><td><span class="ty">🟡 審慎</span></td></tr>
+              <tr><td>8</td><td>CloutHaus KLCC</td><td>6.70</td><td>Freehold 商業 SA</td><td><span class="ty">🟡 觀望</span></td></tr>
+              <tr><td>9</td><td>Pavilion Hilltop MK</td><td>6.64</td><td>Freehold 住宅</td><td><span class="ty">🟡 觀望</span></td></tr>
+              <tr style="background:#FEF9C3;font-weight:600"><td>10</td><td>Noöra @ DPC</td><td>6.32</td><td>Freehold Serviced Res</td><td><span class="ty">🟡 條件性</span></td></tr>
+              <tr style="background:#FEF9C3"><td>11</td><td>SWNK Houze BBCC</td><td>6.20</td><td>Leasehold 商業</td><td><span class="tr">🔴 外籍不推</span></td></tr>
+              <tr style="background:#FEF9C3;font-weight:600"><td>12</td><td><strong>Centrix The Station KLCC ← 本次新增</strong></td><td><strong>6.1</strong></td><td>Leasehold 商業 SOHO</td><td><span class="ty">🟡 條件性觀望</span></td></tr>
+              <tr style="background:#EFF6FF;font-weight:600"><td>⭐</td><td>TS2（Ivan 持倉）</td><td>6.0</td><td>Freehold 商業 SA</td><td><span class="tb2">🔵 功能性持有</span></td></tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top:12px;padding:12px 15px;background:var(--bb);border-radius:6px;font-size:12.5px;color:#1D4ED8">
+            <strong>Centrix vs TS2 直接比較</strong>：<br>
+            ✅ Centrix 優勢：LRT 正上方（更強）、現金需求更低（RM38–47萬 vs RM55萬）、治安同等最佳、KLCC 更近<br>
+            ❌ Centrix 劣勢：Leasehold（TS2 是 Freehold）、開發商財務更弱、期房更晚（2028–29 vs 2027）、零 Brickz 記錄<br>
+            評分差距：僅 0.1 分（6.1 vs 6.0）。<strong>捷運更強但地契更差，互相抵消</strong>。
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<button class="pbtn" onclick="window.print()">列印為 PDF</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.bf').forEach(function(bar) {
+    var w = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(function() { bar.style.transition = 'width 0.7s ease'; bar.style.width = w; }, 500);
+  });
+});
+</script>
+</body>
+</html>

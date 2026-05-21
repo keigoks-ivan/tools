@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City Comparison | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════
+   CITY PICKER
+══════════════════════════════════════════════ */
+.picker-bar {
+  background: #fff;
+  border: 0.5px solid #ccd9e8;
+  border-radius: 4px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.picker-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+.city-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 12px;
+  background: #eef3f9;
+  border: 1px solid #ccd9e8;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e3a5f;
+  white-space: nowrap;
+  cursor: default;
+  transition: background .12s;
+}
+.city-chip .chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ccd9e8;
+  color: #5a7a9a;
+  font-size: 10px;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  font-family: inherit;
+  transition: all .12s;
+  flex-shrink: 0;
+}
+.city-chip .chip-remove:hover {
+  background: #dc2626;
+  color: #fff;
+}
+.add-city-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all .12s;
+  white-space: nowrap;
+}
+.add-city-btn:hover { background: #dbeafe; border-color: #93c5fd; }
+.add-city-btn:disabled {
+  color: #94a3b8;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+.picker-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+/* ── City Picker Dropdown Modal ── */
+.picker-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.35);
+  z-index: 500;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 80px;
+}
+.picker-modal-overlay.open { display: flex; }
+.picker-modal {
+  background: #fff;
+  border: 0.5px solid #ccd9e8;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(30,58,95,.18);
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.picker-modal-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #eef3f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.picker-modal-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+.picker-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+.picker-modal-close:hover { color: #1e3a5f; }
+.picker-grid {
+  overflow-y: auto;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+@media(max-width:500px) { .picker-grid { grid-template-columns: 1fr; } }
+.picker-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e2eaf5;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .12s;
+  background: #fafcfe;
+}
+.picker-option:hover { background: #eef3f9; border-color: #ccd9e8; }
+.picker-option.selected { background: #eff6ff; border-color: #2563eb; }
+.picker-option.disabled { opacity: .45; cursor: not-allowed; pointer-events: none; }
+.picker-opt-flag { font-size: 20px; flex-shrink: 0; }
+.picker-opt-body { min-width: 0; }
+.picker-opt-city {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e3a5f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.picker-opt-country {
+  font-size: 10.5px;
+  color: #5a7a9a;
+  margin-top: 1px;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════
+   COMPARISON GRID
+══════════════════════════════════════════════ */
+.compare-grid {
+  display: grid;
+  gap: 12px;
+}
+.compare-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.compare-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+@media(max-width:680px) {
+  .compare-grid.cols-2,
+  .compare-grid.cols-3 { grid-template-columns: 1fr; }
+}
+
+/* City header card */
+.city-card {
+  background: #fff;
+  border: 0.5px solid #ccd9e8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.city-card-header {
+  background: #1e3a5f;
+  padding: 14px 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.city-card-flag { font-size: 28px; flex-shrink: 0; line-height: 1; }
+.city-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.city-card-country {
+  font-size: 11px;
+  color: rgba(255,255,255,.6);
+  margin-top: 2px;
+}
+.city-card-body { padding: 0; }
+
+/* Metric rows */
+.metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  border-bottom: 1px solid #f0f5fb;
+  cursor: pointer;
+  transition: background .1s;
+  gap: 8px;
+}
+.metric-row:last-child { border-bottom: none; }
+.metric-row:hover { background: #f7faff; }
+.metric-row.highlighted { background: #fef9c3 !important; }
+.metric-label {
+  font-size: 10.5px;
+  color: #5a7a9a;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  flex-shrink: 0;
+  min-width: 0;
+}
+.metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e3a5f;
+  text-align: right;
+}
+.metric-value.val-green { color: #16a34a; }
+.metric-value.val-orange { color: #d97706; }
+.metric-value.val-red { color: #dc2626; }
+
+/* Foreign access pills */
+.access-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.access-open   { background: #dcfce7; color: #15803d; }
+.access-restricted { background: #fef9c3; color: #92400e; }
+.access-banned { background: #fee2e2; color: #991b1b; }
+.access-quota  { background: #ede9fe; color: #5b21b6; }
+
+/* ══════════════════════════════════════════════
+   TOOLTIP for foreign note
+══════════════════════════════════════════════ */
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ccd9e8;
+  color: #5a7a9a;
+  font-size: 8px;
+  font-weight: 700;
+  cursor: help;
+  flex-shrink: 0;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  margin-left: 4px;
+}
+.info-icon:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  background: #1e3a5f;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 6px 10px;
+  border-radius: 4px;
+  width: 220px;
+  white-space: normal;
+  z-index: 200;
+  line-height: 1.45;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+
+/* ══════════════════════════════════════════════
+   CHARTS
+══════════════════════════════════════════════ */
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media(max-width:800px) { .chart-row { grid-template-columns: 1fr; } }
+
+.chart-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+@media(max-width:860px) { .chart-row-3 { grid-template-columns: 1fr; } }
+
+/* ══════════════════════════════════════════════
+   HIGHLIGHT ROW INTERACTION
+══════════════════════════════════════════════ */
+.metric-row-group { position: relative; }
+
+/* ══════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════ */
+.empty-state {
+  background: #fff;
+  border: 0.5px solid #ccd9e8;
+  border-radius: 4px;
+  padding: 48px 24px;
+  text-align: center;
+  color: #94a3b8;
+}
+.empty-state-icon { font-size: 36px; margin-bottom: 12px; }
+.empty-state-text { font-size: 14px; font-weight: 500; color: #5a7a9a; }
+.empty-state-sub { font-size: 12px; margin-top: 6px; }
+
+/* ══════════════════════════════════════════════
+   EXPORT BUTTON
+══════════════════════════════════════════════ */
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #fff;
+  border: 0.5px solid #ccd9e8;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a7a9a;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all .12s;
+}
+.export-btn:hover { background: #eef3f9; color: #1e3a5f; }
+
+/* ══════════════════════════════════════════════
+   RADAR CHART WRAPPER
+══════════════════════════════════════════════ */
+.radar-wrap { height: 300px; width: 100%; }
+
+/* ══════════════════════════════════════════════
+   COPY TOAST
+══════════════════════════════════════════════ */
+#copy-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1e3a5f;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all .25s;
+  pointer-events: none;
+}
+#copy-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<main class="container">
+
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">DECISION TOOL · LAST UPDATED: 2026-04-24</span><span class="lang-zh" style="display:none">決策工具 · 最後更新：2026-04-24</span></span>
+    <h1><span class="lang-en">🌏 City Comparison</span><span class="lang-zh" style="display:none">🌏 城市比較</span></h1>
+    <p class="subtitle"><span class="lang-en">Select 2–3 cities and compare 8 core metrics side-by-side — including foreign buyer access rules</span><span class="lang-zh" style="display:none">選擇 2–3 個城市，並排對比 8 大核心指標，含外國人購房規定</span></p>
+  </div>
+
+  <!-- ══ INSIGHT BOX ══ -->
+  <div class="insight-box accent" style="margin-bottom:0">
+    <span class="lang-en"><strong>How to use:</strong> Select up to 3 cities to compare. Click any metric row to highlight it across all columns. Foreign buyer access is colour-coded — green = open, yellow = restricted/surcharge, red = banned, purple = quota/leasehold only. Data as of 2025–2026; see source footer.</span>
+    <span class="lang-zh" style="display:none"><strong>使用說明：</strong>最多選 3 個城市比較。點擊指標列可跨欄位高亮顯示。外國人購房規定以顏色標示 — 綠色=開放、黃色=有限制/附加稅、紅色=禁止、紫色=配額/租賃制。資料截至 2025–2026 年，詳見資料來源。</span>
+  </div>
+
+  <!-- ══ CITY PICKER ══ -->
+  <div class="section-label" style="margin-top:24px">
+    <span class="lang-en">CITY PICKER</span><span class="lang-zh" style="display:none">城市選擇</span>
+  </div>
+  <div class="picker-bar">
+    <div class="picker-chips" id="pickerChips">
+      <!-- chips inserted by JS -->
+    </div>
+    <button class="add-city-btn" id="addCityBtn" onclick="openPicker()">
+      <span style="font-size:16px;line-height:1">+</span>
+      <span class="lang-en">Add city</span><span class="lang-zh" style="display:none">新增城市</span>
+    </button>
+    <span class="picker-hint lang-en">max 3</span>
+    <span class="picker-hint lang-zh" style="display:none">最多 3 個</span>
+    <button class="export-btn" onclick="exportMarkdown()" style="margin-left:auto">
+      📋 <span class="lang-en">Copy table</span><span class="lang-zh" style="display:none">複製表格</span>
+    </button>
+  </div>
+
+  <!-- ══ PICKER MODAL ══ -->
+  <div class="picker-modal-overlay" id="pickerOverlay" onclick="closePicker(event)">
+    <div class="picker-modal" onclick="event.stopPropagation()">
+      <div class="picker-modal-header">
+        <span class="picker-modal-title lang-en">Select a city to compare</span>
+        <span class="picker-modal-title lang-zh" style="display:none">選擇要比較的城市</span>
+        <button class="picker-modal-close" onclick="closePicker()">✕</button>
+      </div>
+      <div class="picker-grid" id="pickerGrid">
+        <!-- options inserted by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COMPARISON CARDS ══ -->
+  <div class="section-label" style="margin-top:24px">
+    <span class="lang-en">COMPARISON</span><span class="lang-zh" style="display:none">對比結果</span>
+  </div>
+  <div id="compareArea">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- ══ VISUALIZATIONS ══ -->
+  <div id="vizSection" style="display:none">
+    <div class="section-label" style="margin-top:28px">
+      <span class="lang-en">VISUALIZATIONS</span><span class="lang-zh" style="display:none">視覺化分析</span>
+    </div>
+
+    <div class="chart-row" style="margin-bottom:12px">
+      <!-- Radar chart -->
+      <div class="chart-card">
+        <h3><span class="lang-en">Multi-metric Radar</span><span class="lang-zh" style="display:none">多指標雷達圖</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Yield / 5yr growth / affordability (inv.) / population growth — normalized 0–10</span><span class="lang-zh" style="display:none">收益率 / 5年漲幅 / 可負擔性（反轉）/ 人口增長 — 標準化 0–10</span></p>
+        <div class="radar-wrap" id="chartCmpRadar"></div>
+      </div>
+      <!-- Yield vs Mortgage bar -->
+      <div class="chart-card">
+        <h3><span class="lang-en">Yield vs Mortgage Rate</span><span class="lang-zh" style="display:none">收益率 vs 房貸利率</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Gross rental yield vs resident mortgage rate — green = positive carry</span><span class="lang-zh" style="display:none">毛收益率 vs 房貸利率 — 綠色為正向套利</span></p>
+        <div id="chartCmpYieldMortgage" style="height:300px;width:100%"></div>
+      </div>
+    </div>
+
+    <!-- 5yr appreciation bar -->
+    <div class="chart-card">
+      <h3><span class="lang-en">5-Year Price Appreciation</span><span class="lang-zh" style="display:none">5 年房價漲幅</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Cumulative price change 2020–2025 (estimated, see sources)</span><span class="lang-zh" style="display:none">2020–2025 年累積漲幅（估計值，詳見資料來源）</span></p>
+      <div id="chartCmpAppr" style="height:220px;width:100%"></div>
+    </div>
+  </div>
+
+  <!-- ══ SOURCE FOOTER ══ -->
+  <div class="source-footer" style="margin-top:24px">
+    <span class="lang-en">
+      <strong>Data sources &amp; methodology (2025–2026):</strong>
+      Mid price: NAPIC (MY), Sinyi Realty (TW), REINS/Suumo (JP), CoreLogic (AU), REINZ (NZ), ONS (UK), StreetEasy (US), REIC (TH), CBRE Vietnam (VN), KB Bank (KR), TRREB (CA), CSO/Daft.ie (IE).
+      Yields: Global Property Guide Q4 2025, PropertyGuru.
+      Mortgage rates: central bank base rates + typical bank spreads (resident owner-occupier).
+      5yr appreciation: national HPI indexes 2020–2025; estimates where index unavailable.
+      Price/Income ratio: Numbeo, Demographia 2025, Global Property Guide.
+      Foreign access: verified against primary government/legal sources (see markets-summary.json). Last verified: 2025-08 (KR), 2025-12 (NZ/JP), 2025-04 (all others).
+      <strong>Disclaimer:</strong> For informational purposes only. Verify all figures before making investment decisions.
+    </span>
+    <span class="lang-zh" style="display:none">
+      <strong>資料來源與方法說明（2025–2026）：</strong>
+      中位房價：NAPIC（馬來西亞）、信義房屋（台灣）、REINS/Suumo（日本）、CoreLogic（澳洲）、REINZ（紐西蘭）、ONS（英國）、StreetEasy（美國）、REIC（泰國）、CBRE越南（越南）、KB銀行（韓國）、TRREB（加拿大）、CSO/Daft.ie（愛爾蘭）。
+      收益率：Global Property Guide 2025 Q4、PropertyGuru。
+      房貸利率：各國央行基準利率加計銀行利差（本國人自住房貸）。
+      5年漲幅：2020–2025年各國 HPI 指數；無指數者為估算值。
+      房價所得比：Numbeo、Demographia 2025、Global Property Guide。
+      外國人購房規定：對照各國政府及法律一手資料核實（詳見 markets-summary.json）。最後核實日期：韓國2025-08、紐西蘭/日本2025-12、其餘2025-04。
+      <strong>免責聲明：</strong>僅供資訊參考，投資決策前請自行核實所有數據。
+    </span>
+  </div>
+
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+<div id="copy-toast">
+  <span class="lang-en">✓ Copied to clipboard</span>
+  <span class="lang-zh" style="display:none">✓ 已複製到剪貼簿</span>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   COLOR + ECHARTS BASE (matches CLAUDE.md spec)
+═══════════════════════════════════════════════════ */
+var C = {
+  navy:   '#1e3a5f',
+  green:  '#16a34a',
+  orange: '#d97706',
+  red:    '#dc2626',
+  blue:   '#2563eb',
+  muted:  '#5a7a9a',
+  grid:   '#e8f0f9',
+  text:   '#1e3a5f',
+  purple: '#7c3aed'
+};
+var baseText    = {color:'#3a5275', fontFamily:'Inter, sans-serif', fontSize:11};
+var baseGrid    = {left:50, right:20, top:40, bottom:30, containLabel:true};
+var baseTooltip = {trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1,
+                   textStyle:{color:C.navy, fontSize:11, fontFamily:'Inter'}};
+function mkAxis(o) {
+  return Object.assign({
+    axisLine:{lineStyle:{color:C.grid}},
+    axisTick:{show:false},
+    axisLabel: Object.assign({}, baseText, (o||{}).axisLabel||{}),
+    splitLine:{lineStyle:{color:C.grid}}
+  }, o||{});
+}
+
+/* Chart color palette for up to 3 cities */
+var PALETTE = [C.blue, C.orange, C.green];
+
+/* ═══════════════════════════════════════════════════
+   MARKET DATA (embedded from markets-summary.json)
+═══════════════════════════════════════════════════ */
+var MARKETS_DATA = {
+  "my":{"key":"my","flag":"🇲🇾","city":"Kuala Lumpur","cityZh":"吉隆坡","country":"Malaysia","countryZh":"馬來西亞","currency":"RM","midPrice":750000,"yield":5.2,"mortgageRate":4.30,"appreciation5y":8,"vacancy":15,"populationGrowth":1.4,"priceIncomeRatio":11,"foreignAccess":"restricted","foreignNote":"Min RM 1M (KL/Selangor/Penang); foreigners pay 8% flat stamp duty (Budget 2026, eff. 1 Jan 2026; was 4% from Budget 2024); MM2H Silver tier RM600K min"},
+  "tw":{"key":"tw","flag":"🇹🇼","city":"Taipei","cityZh":"台北","country":"Taiwan","countryZh":"台灣","currency":"NT$","midPrice":25000000,"yield":1.8,"mortgageRate":2.30,"appreciation5y":45,"vacancy":10,"populationGrowth":0.1,"priceIncomeRatio":16,"foreignAccess":"restricted","foreignNote":"Foreigners need MOI approval for residential land; condos generally accessible but ARC required for mortgage. No surcharge but administrative hurdles."},
+  "jp":{"key":"jp","flag":"🇯🇵","city":"Tokyo","cityZh":"東京","country":"Japan","countryZh":"日本","currency":"¥","midPrice":90000000,"yield":4.3,"mortgageRate":1.80,"appreciation5y":55,"vacancy":8,"populationGrowth":-0.5,"priceIncomeRatio":15,"foreignAccess":"open","foreignNote":"No restrictions on foreign ownership. From fiscal 2026, nationality declaration required at registration (informational only). No surcharge."},
+  "au":{"key":"au","flag":"🇦🇺","city":"Sydney","cityZh":"雪梨","country":"Australia","countryZh":"澳洲","currency":"A$","midPrice":1550000,"yield":2.8,"mortgageRate":6.30,"appreciation5y":38,"vacancy":1.2,"populationGrowth":2.3,"priceIncomeRatio":13,"foreignAccess":"restricted","foreignNote":"1 Apr 2025–31 Mar 2027: ban on established (existing) dwellings. New builds still allowed with FIRB approval. NSW surcharge 9% (from Jan 2025; was 8%); VIC/QLD 8%. FIRB fees (new dwellings) A$15,100–A$90,900+ per 2025-26 schedule."},
+  "nz":{"key":"nz","flag":"🇳🇿","city":"Auckland","cityZh":"奧克蘭","country":"New Zealand","countryZh":"紐西蘭","currency":"NZ$","midPrice":950000,"yield":3.5,"mortgageRate":6.85,"appreciation5y":10,"vacancy":2.5,"populationGrowth":1.8,"priceIncomeRatio":10,"foreignAccess":"restricted","foreignNote":"General foreign ban remains. Exception from Dec 2025: investor visa holders (AI+/Investor 1&2) may buy NZ$5M+ properties. Mainstream buyers still banned."},
+  "uk":{"key":"uk","flag":"🇬🇧","city":"London","cityZh":"倫敦","country":"UK","countryZh":"英國","currency":"£","midPrice":540000,"yield":4.5,"mortgageRate":5.25,"appreciation5y":18,"vacancy":3.0,"populationGrowth":0.8,"priceIncomeRatio":9,"foreignAccess":"restricted","foreignNote":"Non-UK residents: +2% SDLT surcharge (Apr 2021+). Additional dwelling surcharge now +5% (from Oct 31 2024; was +3%). Combined non-resident + addl = +7%. SDLT nil-rate reverted to £125K (Apr 2025). No ownership ban."},
+  "us":{"key":"us","flag":"🇺🇸","city":"New York City","cityZh":"紐約","country":"US","countryZh":"美國","currency":"$","midPrice":800000,"yield":5.5,"mortgageRate":6.80,"appreciation5y":22,"vacancy":1.4,"populationGrowth":0.3,"priceIncomeRatio":12,"foreignAccess":"restricted","foreignNote":"No federal restriction. NYC co-ops often reject foreign buyers via board approval. FIRPTA withholding applies to foreign sellers. Mansion tax on $1M+."},
+  "th":{"key":"th","flag":"🇹🇭","city":"Bangkok","cityZh":"曼谷","country":"Thailand","countryZh":"泰國","currency":"฿","midPrice":7000000,"yield":6.5,"mortgageRate":7.00,"appreciation5y":15,"vacancy":18,"populationGrowth":0.5,"priceIncomeRatio":21,"foreignAccess":"quota-lease","foreignNote":"Condos: freehold up to 49% of building floor area. Foreigners cannot own land freehold. Foreign mortgage access very limited (developer financing only for most)."},
+  "vn":{"key":"vn","flag":"🇻🇳","city":"Ho Chi Minh City","cityZh":"胡志明市","country":"Vietnam","countryZh":"越南","currency":"₫","midPrice":5500000000,"yield":5.0,"mortgageRate":9.50,"appreciation5y":30,"vacancy":12,"populationGrowth":1.0,"priceIncomeRatio":20,"foreignAccess":"quota-lease","foreignNote":"50-yr renewable lease only (no freehold land). Condo quota: max 30% of units per project. Housing Law 2023 + Land Law 2024 in force."},
+  "kr":{"key":"kr","flag":"🇰🇷","city":"Seoul","cityZh":"首爾","country":"Korea","countryZh":"韓國","currency":"₩","midPrice":1000000000,"yield":4.3,"mortgageRate":4.80,"appreciation5y":20,"vacancy":3.0,"populationGrowth":-0.2,"priceIncomeRatio":15,"foreignAccess":"restricted","foreignNote":"From Aug 2025: permit required before buying in Seoul + Gyeonggi + 7 Incheon districts. Must occupy within 4 months, reside 2+ years. Penalty up to 10% of value."},
+  "ca":{"key":"ca","flag":"🇨🇦","city":"Toronto","cityZh":"多倫多","country":"Canada","countryZh":"加拿大","currency":"C$","midPrice":1050000,"yield":3.5,"mortgageRate":5.50,"appreciation5y":28,"vacancy":2.8,"populationGrowth":2.5,"priceIncomeRatio":12,"foreignAccess":"banned","foreignNote":"Foreign Buyer Ban extended to Jan 1 2027. If eligible (work permit/PR): ON +25% NRST province-wide; Toronto city adds +10% MNRST (total 35% in Toronto, from Jan 2025). BC +20% NRST. Limited exceptions (some students, refugees, temp workers)."},
+  "ie":{"key":"ie","flag":"🇮🇪","city":"Dublin","cityZh":"都柏林","country":"Ireland","countryZh":"愛爾蘭","currency":"€","midPrice":450000,"yield":6.5,"mortgageRate":3.80,"appreciation5y":35,"vacancy":1.5,"populationGrowth":1.5,"priceIncomeRatio":9,"foreignAccess":"open","foreignNote":"No nationality restrictions. Foreigners own freehold same as Irish citizens. No foreign surcharge. Stamp: 1% ≤€1M, 2% €1M-€1.5M, 6% >€1.5M (Budget 2025, from Oct 2024). Non-residents need 30–40% deposit. Golden visa closed Feb 2024."}
+};
+
+var MARKET_KEYS = ['my','tw','jp','au','nz','uk','us','th','vn','kr','ca','ie'];
+
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+var selectedKeys = [];
+var allCharts = [];
+var highlightedRow = null; /* index 0–7 */
+
+/* ═══════════════════════════════════════════════════
+   LOAD / SAVE (localStorage)
+═══════════════════════════════════════════════════ */
+function saveSelection() {
+  try { localStorage.setItem('cmp_selection', JSON.stringify(selectedKeys)); } catch(e) {}
+}
+function loadSelection() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('cmp_selection') || 'null');
+    if (Array.isArray(saved) && saved.length >= 2 && saved.length <= 3) {
+      var valid = saved.filter(function(k){ return MARKETS_DATA[k]; });
+      if (valid.length >= 2) return valid.slice(0, 3);
+    }
+  } catch(e) {}
+  return ['my', 'jp', 'au']; /* default */
+}
+
+/* ═══════════════════════════════════════════════════
+   CURRENCY FORMATTER
+═══════════════════════════════════════════════════ */
+function fmtPrice(v, cur) {
+  var abs = Math.abs(v);
+  if (abs >= 1000000000) return cur + (abs/1000000000).toFixed(1) + 'B';
+  if (abs >= 1000000)    return cur + (abs/1000000).toFixed(1) + 'M';
+  if (abs >= 10000)      return cur + Math.round(abs/1000) + 'K';
+  if (abs >= 1000)       return cur + (abs/1000).toFixed(1) + 'K';
+  return cur + Math.round(abs).toLocaleString();
+}
+
+/* ═══════════════════════════════════════════════════
+   FOREIGN ACCESS PILL
+═══════════════════════════════════════════════════ */
+var ACCESS_META = {
+  'open':       {cls:'access-open',      icon:'✅', labelEn:'Open',         labelZh:'開放'},
+  'restricted': {cls:'access-restricted',icon:'⚠️', labelEn:'Restricted',   labelZh:'有限制'},
+  'banned':     {cls:'access-banned',    icon:'🚫', labelEn:'Banned',        labelZh:'禁止'},
+  'quota-lease':{cls:'access-quota',     icon:'📜', labelEn:'Quota/Lease',   labelZh:'配額/租賃'}
+};
+
+function accessPill(m, lang) {
+  var am = ACCESS_META[m.foreignAccess] || ACCESS_META['restricted'];
+  var label = lang === 'zh' ? am.labelZh : am.labelEn;
+  return '<span class="access-pill ' + am.cls + '">' + am.icon + ' ' + label + '</span>' +
+    '<span class="info-icon" data-tip="' + m.foreignNote.replace(/"/g,'&quot;') + '">i</span>';
+}
+
+/* ═══════════════════════════════════════════════════
+   METRIC COLOR CLASS
+═══════════════════════════════════════════════════ */
+function yieldClass(y, mr) {
+  if (y > mr + 0.5) return 'val-green';
+  if (y < mr)       return 'val-red';
+  return 'val-orange';
+}
+function vacancyClass(v) {
+  if (v <= 3)  return 'val-green';
+  if (v <= 8)  return 'val-orange';
+  return 'val-red';
+}
+function pirClass(p) {
+  if (p <= 8)  return 'val-green';
+  if (p <= 13) return 'val-orange';
+  return 'val-red';
+}
+function appClass(a) {
+  if (a >= 30) return 'val-green';
+  if (a >= 10) return 'val-orange';
+  return 'val-red';
+}
+function popClass(p) {
+  if (p >= 1)  return 'val-green';
+  if (p >= 0)  return 'val-orange';
+  return 'val-red';
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER CHIPS
+═══════════════════════════════════════════════════ */
+function renderChips(lang) {
+  var en = lang === 'en';
+  var html = '';
+  selectedKeys.forEach(function(k) {
+    var m = MARKETS_DATA[k];
+    if (!m) return;
+    var label = en ? m.city : m.cityZh;
+    html += '<div class="city-chip">' +
+      '<span>' + m.flag + ' ' + label + '</span>' +
+      '<button class="chip-remove" onclick="removeCity(\'' + k + '\')" title="Remove">×</button>' +
+    '</div>';
+  });
+  document.getElementById('pickerChips').innerHTML = html;
+  var btn = document.getElementById('addCityBtn');
+  btn.disabled = selectedKeys.length >= 3;
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER PICKER GRID
+═══════════════════════════════════════════════════ */
+function renderPickerGrid(lang) {
+  var en = lang === 'en';
+  var html = '';
+  MARKET_KEYS.forEach(function(k) {
+    var m = MARKETS_DATA[k];
+    var isSelected = selectedKeys.indexOf(k) >= 0;
+    var isFull = selectedKeys.length >= 3 && !isSelected;
+    var cls = 'picker-option' + (isSelected ? ' selected' : '') + (isFull ? ' disabled' : '');
+    var onclick = isSelected ? '' : 'onclick="pickCity(\'' + k + '\')"';
+    var cityLabel = en ? m.city : m.cityZh;
+    var countryLabel = en ? m.country : m.countryZh;
+    html += '<div class="' + cls + '" ' + onclick + '>' +
+      '<span class="picker-opt-flag">' + m.flag + '</span>' +
+      '<div class="picker-opt-body">' +
+        '<div class="picker-opt-city">' + cityLabel + '</div>' +
+        '<div class="picker-opt-country">' + countryLabel + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  document.getElementById('pickerGrid').innerHTML = html;
+}
+
+function openPicker() {
+  if (selectedKeys.length >= 3) return;
+  var lang = (localStorage.getItem('lang') || 'en');
+  renderPickerGrid(lang);
+  document.getElementById('pickerOverlay').classList.add('open');
+}
+function closePicker(e) {
+  if (!e || e.target === document.getElementById('pickerOverlay')) {
+    document.getElementById('pickerOverlay').classList.remove('open');
+  }
+}
+function pickCity(k) {
+  if (selectedKeys.indexOf(k) >= 0 || selectedKeys.length >= 3) return;
+  selectedKeys.push(k);
+  saveSelection();
+  closePicker();
+  var lang = (localStorage.getItem('lang') || 'en');
+  render(lang);
+}
+function removeCity(k) {
+  selectedKeys = selectedKeys.filter(function(x){ return x !== k; });
+  saveSelection();
+  var lang = (localStorage.getItem('lang') || 'en');
+  render(lang);
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER METRIC ROW (across all city cards)
+═══════════════════════════════════════════════════ */
+/* Metric definitions: {key, labelEn, labelZh, fn(m,lang) → HTML} */
+function buildMetrics(lang) {
+  var en = lang === 'en';
+  return [
+    {
+      key: 'midPrice',
+      labelEn: 'Mid Price',
+      labelZh: '中位房價',
+      fn: function(m) {
+        return '<span class="metric-value">' + fmtPrice(m.midPrice, m.currency) + '</span>';
+      }
+    },
+    {
+      key: 'yield',
+      labelEn: 'Gross Yield',
+      labelZh: '毛收益率',
+      fn: function(m) {
+        var cls = yieldClass(m.yield, m.mortgageRate);
+        return '<span class="metric-value ' + cls + '">' + m.yield.toFixed(1) + '%</span>';
+      }
+    },
+    {
+      key: 'mortgageRate',
+      labelEn: 'Mortgage Rate',
+      labelZh: '房貸利率',
+      fn: function(m) {
+        return '<span class="metric-value">' + m.mortgageRate.toFixed(2) + '%</span>';
+      }
+    },
+    {
+      key: 'appreciation5y',
+      labelEn: '5yr Appreciation',
+      labelZh: '5年漲幅',
+      fn: function(m) {
+        var cls = appClass(m.appreciation5y);
+        return '<span class="metric-value ' + cls + '">+' + m.appreciation5y + '%</span>';
+      }
+    },
+    {
+      key: 'vacancy',
+      labelEn: 'Vacancy Rate',
+      labelZh: '空置率',
+      fn: function(m) {
+        var cls = vacancyClass(m.vacancy);
+        return '<span class="metric-value ' + cls + '">' + m.vacancy + '%</span>';
+      }
+    },
+    {
+      key: 'populationGrowth',
+      labelEn: 'Pop. Growth',
+      labelZh: '人口增長',
+      fn: function(m) {
+        var cls = popClass(m.populationGrowth);
+        var sign = m.populationGrowth > 0 ? '+' : '';
+        return '<span class="metric-value ' + cls + '">' + sign + m.populationGrowth.toFixed(1) + '% p.a.</span>';
+      }
+    },
+    {
+      key: 'priceIncomeRatio',
+      labelEn: 'Price/Income',
+      labelZh: '房價所得比',
+      fn: function(m) {
+        var cls = pirClass(m.priceIncomeRatio);
+        return '<span class="metric-value ' + cls + '">' + m.priceIncomeRatio + 'x</span>';
+      }
+    },
+    {
+      key: 'foreignAccess',
+      labelEn: 'Foreign Access',
+      labelZh: '外國人購房',
+      fn: function(m) {
+        return '<span style="display:flex;align-items:center;gap:4px;justify-content:flex-end">' + accessPill(m, lang) + '</span>';
+      }
+    }
+  ];
+}
+
+/* ═══════════════════════════════════════════════════
+   HIGHLIGHT ROW
+═══════════════════════════════════════════════════ */
+function highlightRow(idx) {
+  document.querySelectorAll('.metric-row').forEach(function(r) {
+    r.classList.remove('highlighted');
+    if (parseInt(r.getAttribute('data-row'), 10) === idx) {
+      r.classList.add('highlighted');
+    }
+  });
+  highlightedRow = idx;
+}
+function toggleHighlight(idx) {
+  if (highlightedRow === idx) {
+    document.querySelectorAll('.metric-row').forEach(function(r){ r.classList.remove('highlighted'); });
+    highlightedRow = null;
+  } else {
+    highlightRow(idx);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER COMPARISON CARDS
+═══════════════════════════════════════════════════ */
+function renderCards(lang) {
+  var en = lang === 'en';
+  var area = document.getElementById('compareArea');
+
+  if (selectedKeys.length === 0) {
+    area.innerHTML = '<div class="empty-state">' +
+      '<div class="empty-state-icon">🏙️</div>' +
+      '<div class="empty-state-text"><span class="lang-en">No cities selected</span><span class="lang-zh" style="display:none">尚未選擇城市</span></div>' +
+      '<div class="empty-state-sub"><span class="lang-en">Click "+ Add city" to start comparing</span><span class="lang-zh" style="display:none">點擊「新增城市」開始比較</span></div>' +
+    '</div>';
+    return;
+  }
+
+  var metrics = buildMetrics(lang);
+  var colClass = 'cols-' + Math.max(2, selectedKeys.length);
+
+  var html = '<div class="compare-grid ' + colClass + '">';
+
+  selectedKeys.forEach(function(k, ci) {
+    var m = MARKETS_DATA[k];
+    if (!m) return;
+    var cityName = en ? m.city : m.cityZh;
+    var countryName = en ? m.country : m.countryZh;
+
+    html += '<div class="city-card">';
+    html += '<div class="city-card-header">';
+    html += '<span class="city-card-flag">' + m.flag + '</span>';
+    html += '<div><div class="city-card-name">' + cityName + '</div><div class="city-card-country">' + countryName + '</div></div>';
+    html += '</div>';
+    html += '<div class="city-card-body">';
+
+    metrics.forEach(function(mt, ri) {
+      var label = en ? mt.labelEn : mt.labelZh;
+      var hlCls = (highlightedRow === ri) ? ' highlighted' : '';
+      html += '<div class="metric-row' + hlCls + '" data-row="' + ri + '" onclick="toggleHighlight(' + ri + ')">';
+      html += '<span class="metric-label">' + label + '</span>';
+      html += mt.fn(m);
+      html += '</div>';
+    });
+
+    html += '</div></div>';
+  });
+
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER CHARTS
+═══════════════════════════════════════════════════ */
+function renderCharts(lang) {
+  allCharts.forEach(function(c){ if(c) c.dispose(); });
+  allCharts = [];
+
+  var en = lang === 'en';
+  if (selectedKeys.length === 0) {
+    document.getElementById('vizSection').style.display = 'none';
+    return;
+  }
+  document.getElementById('vizSection').style.display = '';
+
+  var data = selectedKeys.map(function(k){ return MARKETS_DATA[k]; }).filter(Boolean);
+  var labels = data.map(function(m){ return m.flag + ' ' + (en ? m.city : m.cityZh); });
+  var colors = data.map(function(_, i){ return PALETTE[i] || C.muted; });
+
+  /* ── Chart 1: Radar ── */
+  /* Normalize metrics to 0–10 scale:
+     yield:           0% → 0,  10% → 10
+     appreciation5y:  0% → 0,  60% → 10
+     affordability:   PIR inverted: 25x → 0, 0x → 10 → (25 - PIR) / 25 * 10
+     populationGrowth: -1% → 0, 3% → 10 → (pop+1)/4*10
+  */
+  function normalize(val, min, max) {
+    return Math.max(0, Math.min(10, (val - min) / (max - min) * 10));
+  }
+  var radarIndicators = [
+    {name: en ? 'Yield %'       : '收益率 %',    max: 10},
+    {name: en ? '5yr Growth %'  : '5年漲幅 %',   max: 10},
+    {name: en ? 'Affordability' : '可負擔性',     max: 10},
+    {name: en ? 'Pop. Growth'   : '人口增長',     max: 10}
+  ];
+
+  var radarSeries = data.map(function(m, i) {
+    return {
+      name: labels[i],
+      value: [
+        normalize(m.yield, 0, 10),
+        normalize(m.appreciation5y, 0, 60),
+        normalize(25 - m.priceIncomeRatio, 0, 25),
+        normalize(m.populationGrowth, -1, 3)
+      ]
+    };
+  });
+
+  var c1 = echarts.init(document.getElementById('chartCmpRadar'));
+  c1.setOption({
+    backgroundColor: '#fff',
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: '#fff',
+      borderColor: '#ccd9e8',
+      borderWidth: 1,
+      textStyle: {color: C.navy, fontSize: 11, fontFamily: 'Inter'}
+    },
+    legend: {
+      top: 8,
+      data: labels,
+      textStyle: baseText,
+      icon: 'circle',
+      itemWidth: 8,
+      itemHeight: 8
+    },
+    radar: {
+      center: ['50%', '55%'],
+      radius: '60%',
+      indicator: radarIndicators,
+      axisName: {color: C.muted, fontSize: 11, fontFamily: 'Inter'},
+      splitLine: {lineStyle: {color: C.grid}},
+      axisLine:  {lineStyle: {color: C.grid}},
+      splitArea: {areaStyle: {color: ['#f8fbff', '#eef5ff']}}
+    },
+    series: [{
+      type: 'radar',
+      data: radarSeries.map(function(s, i) {
+        return {
+          name: s.name,
+          value: s.value,
+          symbol: 'circle',
+          symbolSize: 5,
+          lineStyle: {color: colors[i], width: 2},
+          areaStyle: {color: colors[i], opacity: 0.12},
+          itemStyle: {color: colors[i]}
+        };
+      })
+    }]
+  });
+  allCharts.push(c1);
+
+  /* ── Chart 2: Yield vs Mortgage grouped bar ── */
+  var c2 = echarts.init(document.getElementById('chartCmpYieldMortgage'));
+  c2.setOption({
+    backgroundColor: '#fff',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#fff',
+      borderColor: '#ccd9e8',
+      borderWidth: 1,
+      textStyle: {color: C.navy, fontSize: 11, fontFamily: 'Inter'},
+      formatter: function(params) {
+        var city = params[0].axisValue;
+        var lines = [city];
+        params.forEach(function(p) {
+          lines.push(p.marker + p.seriesName + ': ' + p.value.toFixed(2) + '%');
+        });
+        return lines.join('<br>');
+      }
+    },
+    legend: {
+      top: 8,
+      data: [
+        en ? 'Gross Yield' : '毛收益率',
+        en ? 'Mortgage Rate' : '房貸利率'
+      ],
+      textStyle: baseText,
+      icon: 'circle',
+      itemWidth: 8,
+      itemHeight: 8
+    },
+    grid: {left: 40, right: 20, top: 50, bottom: 20, containLabel: true},
+    xAxis: mkAxis({type: 'category', data: labels, axisLabel: {fontSize: 10, interval: 0}}),
+    yAxis: mkAxis({type: 'value', axisLabel: {formatter: '{value}%'}}),
+    series: [
+      {
+        name: en ? 'Gross Yield' : '毛收益率',
+        type: 'bar',
+        data: data.map(function(m, i) {
+          return {
+            value: m.yield,
+            itemStyle: {color: m.yield > m.mortgageRate ? C.green : C.red, borderRadius: [3,3,0,0]}
+          };
+        }),
+        barMaxWidth: 35
+      },
+      {
+        name: en ? 'Mortgage Rate' : '房貸利率',
+        type: 'bar',
+        data: data.map(function(m) { return m.mortgageRate; }),
+        itemStyle: {color: C.muted, borderRadius: [3,3,0,0]},
+        barMaxWidth: 35
+      }
+    ]
+  });
+  allCharts.push(c2);
+
+  /* ── Chart 3: 5yr appreciation bar ── */
+  var c3 = echarts.init(document.getElementById('chartCmpAppr'));
+  c3.setOption({
+    backgroundColor: '#fff',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#fff',
+      borderColor: '#ccd9e8',
+      borderWidth: 1,
+      textStyle: {color: C.navy, fontSize: 11, fontFamily: 'Inter'},
+      formatter: function(params) {
+        return params[0].name + '<br>' + (en ? '5yr appreciation' : '5年漲幅') + ': +' + params[0].value + '%';
+      }
+    },
+    grid: {left: 40, right: 20, top: 20, bottom: 20, containLabel: true},
+    xAxis: mkAxis({type: 'category', data: labels, axisLabel: {fontSize: 10}}),
+    yAxis: mkAxis({type: 'value', axisLabel: {formatter: '{value}%'}}),
+    series: [{
+      type: 'bar',
+      data: data.map(function(m, i) {
+        return {
+          value: m.appreciation5y,
+          itemStyle: {
+            color: colors[i],
+            borderRadius: [3, 3, 0, 0]
+          }
+        };
+      }),
+      barMaxWidth: 50,
+      label: {
+        show: true,
+        position: 'top',
+        fontSize: 11,
+        color: C.navy,
+        formatter: function(p) { return '+' + p.value + '%'; }
+      }
+    }]
+  });
+  allCharts.push(c3);
+}
+
+/* ═══════════════════════════════════════════════════
+   MASTER RENDER
+═══════════════════════════════════════════════════ */
+function render(lang) {
+  renderChips(lang);
+  renderCards(lang);
+  renderCharts(lang);
+  /* Re-apply lang visibility (for dynamically inserted content) */
+  var en = lang === 'en';
+  document.querySelectorAll('.lang-en').forEach(function(e){ e.style.display = en ? '' : 'none'; });
+  document.querySelectorAll('.lang-zh').forEach(function(e){ e.style.display = en ? 'none' : ''; });
+}
+
+/* ═══════════════════════════════════════════════════
+   EXPORT MARKDOWN
+═══════════════════════════════════════════════════ */
+function exportMarkdown() {
+  if (selectedKeys.length === 0) return;
+  var lang = (localStorage.getItem('lang') || 'en');
+  var en = lang === 'en';
+  var data = selectedKeys.map(function(k){ return MARKETS_DATA[k]; }).filter(Boolean);
+
+  var header = '| Metric |' + data.map(function(m){ return ' ' + m.flag + (en?m.city:m.cityZh) + ' |'; }).join('') + '\n';
+  var sep    = '|--------|' + data.map(function(){ return '--------|'; }).join('') + '\n';
+  var rows = [
+    [en?'Mid Price':'中位房價',       data.map(function(m){ return fmtPrice(m.midPrice, m.currency); })],
+    [en?'Gross Yield':'毛收益率',      data.map(function(m){ return m.yield.toFixed(1)+'%'; })],
+    [en?'Mortgage Rate':'房貸利率',    data.map(function(m){ return m.mortgageRate.toFixed(2)+'%'; })],
+    [en?'5yr Appreciation':'5年漲幅', data.map(function(m){ return '+'+m.appreciation5y+'%'; })],
+    [en?'Vacancy':'空置率',            data.map(function(m){ return m.vacancy+'%'; })],
+    [en?'Pop. Growth':'人口增長',      data.map(function(m){ return (m.populationGrowth>0?'+':'')+m.populationGrowth.toFixed(1)+'%'; })],
+    [en?'Price/Income':'房價所得比',   data.map(function(m){ return m.priceIncomeRatio+'x'; })],
+    [en?'Foreign Access':'外國人購房', data.map(function(m){ return ACCESS_META[m.foreignAccess].labelEn; })]
+  ];
+
+  var body = rows.map(function(r){
+    return '| ' + r[0] + ' |' + r[1].map(function(v){ return ' ' + v + ' |'; }).join('') + '\n';
+  }).join('');
+
+  var md = '## Property Comparison — ' + data.map(function(m){ return m.flag+(en?m.city:m.cityZh); }).join(' vs ') + '\n\n' +
+           '*Source: myproperty.investmquest.com — ' + (new Date().toISOString().slice(0,10)) + '*\n\n' +
+           header + sep + body;
+
+  try {
+    navigator.clipboard.writeText(md).then(function() {
+      var t = document.getElementById('copy-toast');
+      t.classList.add('show');
+      setTimeout(function(){ t.classList.remove('show'); }, 2500);
+    });
+  } catch(e) {
+    /* fallback: select a textarea */
+    var ta = document.createElement('textarea');
+    ta.value = md;
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    var t = document.getElementById('copy-toast');
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2500);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   setLang — standard pattern from CLAUDE.md
+═══════════════════════════════════════════════════ */
+function setLang(lang) {
+  document.querySelectorAll('.lang-en').forEach(function(e){ e.style.display = lang==='en' ? '' : 'none'; });
+  document.querySelectorAll('.lang-zh').forEach(function(e){ e.style.display = lang==='zh' ? '' : 'none'; });
+  document.querySelectorAll('.lang-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.lang===lang); });
+  localStorage.setItem('lang', lang);
+  allCharts.forEach(function(c){ if(c) c.dispose(); });
+  allCharts = [];
+  render(lang);
+}
+
+/* ═══════════════════════════════════════════════════
+   RESIZE
+═══════════════════════════════════════════════════ */
+window.addEventListener('resize', function() {
+  allCharts.forEach(function(c){ if(c) c.resize(); });
+});
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+window.addEventListener('load', function() {
+  selectedKeys = loadSelection();
+  var lang = localStorage.getItem('lang') || 'en';
+  setLang(lang);
+});
+
+/* close picker on ESC */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePicker();
+});
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

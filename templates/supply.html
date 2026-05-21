@@ -1,0 +1,357 @@
+{% extends "_base.html" %}
+
+{% block title %}Supply Analysis{% endblock %}
+
+{% block content %}
+<main class="container">
+  <div class="page-header">
+    <h1><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
+    <p class="subtitle"><span class="lang-en">{{ page_data.subtitle_en | default('Housing supply pipeline and inventory analysis') }}</span><span class="lang-zh" style="display:none">{{ page_data.subtitle_zh | default('住宅在建供給與庫存分析') }}</span></p>
+  </div>
+
+  {# ── Pipeline Flow (Malaysia only) ── #}
+  {% if supply_pipeline_flow is defined and supply_pipeline_flow %}
+  <div class="section-label"><span class="lang-en">PIPELINE FLOW</span><span class="lang-zh" style="display:none">在建供給流程</span></div>
+  <div class="pipeline-flow">
+    {% for node in supply_pipeline_flow.nodes %}
+    {% if not loop.first %}
+    <div class="pipeline-arrow"><span>&rarr;</span></div>
+    {% endif %}
+    <div class="pipeline-node"{% if node.alert %} style="border-left:3px solid #dc2626;"{% endif %}>
+      <div class="node-title"><span class="lang-en">{{ node.title_en }}</span><span class="lang-zh" style="display:none">{{ node.title_zh }}</span></div>
+      {% if node.value %}<div class="node-value">{{ node.value }}</div>{% endif %}
+      {% if node.sub %}<div class="node-sub">{{ node.sub }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── KPI Cards ── #}
+  {% if kpis.supply %}
+  <div class="section-label"><span class="lang-en">KEY INDICATORS</span><span class="lang-zh" style="display:none">關鍵指標</span></div>
+  <div class="kpi-grid">
+    {% for kpi in kpis.supply %}
+    <div class="kpi-card {{ kpi.color | default('') }}">
+      <div class="kpi-label"><span class="lang-en">{{ kpi.label_en }}</span><span class="lang-zh" style="display:none">{{ kpi.label_zh | default(kpi.label_en) }}</span></div>
+      <div class="kpi-value"{% if kpi.sub_color is defined %} style="color:{{ {'red':'#dc2626','orange':'#d97706','green':'#16a34a','blue':'#2563eb'}.get(kpi.sub_color, '') }}"{% endif %}>{{ kpi.value }}{% if kpi.unit %} <span class="kpi-unit">{{ kpi.unit }}</span>{% endif %}</div>
+      {% if kpi.badge_class is defined and kpi.sub_en %}
+      <span class="kpi-badge {{ kpi.badge_class }}"><span class="lang-en">{{ kpi.sub_en }}</span><span class="lang-zh" style="display:none">{{ kpi.sub_zh | default(kpi.sub_en) }}</span></span>
+      {% elif kpi.sub_en %}
+      <div class="kpi-delta"{% if kpi.sub_color is defined %} style="color:{{ {'red':'#dc2626','orange':'#d97706','green':'#16a34a','blue':'#2563eb'}.get(kpi.sub_color, '') }}"{% endif %}><span class="lang-en">{{ kpi.sub_en }}</span>{% if kpi.sub_zh %}<span class="lang-zh" style="display:none">{{ kpi.sub_zh }}</span>{% endif %}</div>
+      {% endif %}
+      {% if kpi.source %}<div class="kpi-source">{{ kpi.source }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Chart Sections ── #}
+  {# Collect supply charts, separating overhang-tab charts from normal charts #}
+  {% set oh_tab_ids = ['chartOhState', 'chartOhTrend', 'chartOhForecast', 'chartOhPrice', 'chartOhSA'] %}
+  {% set normal_charts = [] %}
+  {% set has_oh_tabs = false %}
+  {% for id, chart in charts.items() %}
+    {% if chart.page == 'supply' %}
+      {% if id in oh_tab_ids %}
+        {% if not has_oh_tabs %}{% set has_oh_tabs = true %}{% endif %}
+      {% else %}
+        {% if normal_charts.append({'id': id, 'chart': chart}) %}{% endif %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {% if normal_charts %}
+  <div class="section-heading"><span class="lang-en">{{ page_data.section1_en | default('Forward Projection') }}</span><span class="lang-zh" style="display:none">{{ page_data.section1_zh | default('前瞻預測') }}</span></div>
+
+  {# First normal chart: full width #}
+  {% if normal_charts | length > 0 %}
+  {% set first = normal_charts[0] %}
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3><span class="lang-en">{{ first.chart.title_en }}</span><span class="lang-zh" style="display:none">{{ first.chart.title_zh }}</span></h3>
+      {% if first.chart.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ first.chart.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ first.chart.subtitle_zh | default('') }}</span></p>{% endif %}
+      <div class="chart-wrap tall"><div id="{{ first.id }}" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Remaining normal charts: paired in two-col rows #}
+  {% set remaining = normal_charts[1:] %}
+  {% for i in range(0, remaining | length, 2) %}
+  <div class="chart-grid two-col">
+    {% set item_a = remaining[i] %}
+    <div class="chart-card">
+      <h3><span class="lang-en">{{ item_a.chart.title_en }}</span><span class="lang-zh" style="display:none">{{ item_a.chart.title_zh }}</span></h3>
+      {% if item_a.chart.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ item_a.chart.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ item_a.chart.subtitle_zh | default('') }}</span></p>{% endif %}
+      <div style="position:relative;height:220px;"><div id="{{ item_a.id }}" style="width:100%;height:100%"></div></div>
+    </div>
+    {% if i + 1 < remaining | length %}
+    {% set item_b = remaining[i + 1] %}
+    <div class="chart-card">
+      <h3><span class="lang-en">{{ item_b.chart.title_en }}</span><span class="lang-zh" style="display:none">{{ item_b.chart.title_zh }}</span></h3>
+      {% if item_b.chart.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ item_b.chart.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ item_b.chart.subtitle_zh | default('') }}</span></p>{% endif %}
+      <div style="position:relative;height:280px;"><div id="{{ item_b.id }}" style="width:100%;height:100%"></div></div>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {# ── Overhang Deep Dive (Malaysia-specific tabs) ── #}
+  {% if charts.chartOhState is defined %}
+  <div class="section-heading"><span class="lang-en">Overhang Deep Dive</span><span class="lang-zh" style="display:none">待售餘屋深入分析</span></div>
+  <div class="chart-card" id="ohTabs">
+    <div class="tab-bar">
+      <button class="active" data-tab="national" onclick="switchTab('ohTabs','national')"><span class="lang-en">National Overview</span><span class="lang-zh" style="display:none">全國概覽</span></button>
+      {% if charts.chartOhPrice is defined %}<button data-tab="price" onclick="switchTab('ohTabs','price')"><span class="lang-en">By Price Band</span><span class="lang-zh" style="display:none">依價格帶</span></button>{% endif %}
+      {% if charts.chartOhSA is defined %}<button data-tab="sa" onclick="switchTab('ohTabs','sa')"><span class="lang-en">Serviced Apartments</span><span class="lang-zh" style="display:none">服務式公寓</span></button>{% endif %}
+    </div>
+
+    {# Tab 1: National Overview #}
+    <div class="tab-panel active" id="tab-national">
+      <div class="chart-grid two-col">
+        <div>
+          <h3 style="font-size:13px;margin-bottom:8px;"><span class="lang-en">{{ charts.chartOhState.title_en }}</span><span class="lang-zh" style="display:none">{{ charts.chartOhState.title_zh }}</span></h3>
+          <div style="position:relative;height:240px;"><div id="chartOhState" style="width:100%;height:100%"></div></div>
+        </div>
+        {% if charts.chartOhTrend is defined %}
+        <div>
+          <h3 style="font-size:13px;margin-bottom:8px;"><span class="lang-en">{{ charts.chartOhTrend.title_en }}</span><span class="lang-zh" style="display:none">{{ charts.chartOhTrend.title_zh }}</span></h3>
+          <div style="position:relative;height:220px;"><div id="chartOhTrend" style="width:100%;height:100%"></div></div>
+        </div>
+        {% endif %}
+      </div>
+      {% if charts.chartOhForecast is defined %}
+      <div class="chart-card" style="margin-top:16px;">
+        <h3><span class="lang-en">{{ charts.chartOhForecast.title_en }}</span><span class="lang-zh" style="display:none">{{ charts.chartOhForecast.title_zh }}</span></h3>
+        {% if charts.chartOhForecast.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ charts.chartOhForecast.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ charts.chartOhForecast.subtitle_zh | default('') }}</span></p>{% endif %}
+        <div style="position:relative;height:280px;"><div id="chartOhForecast" style="width:100%;height:100%"></div></div>
+        {% if page_data.forecast_insight_en is defined %}
+        <div class="insight-box" style="margin-top:12px;">
+          <div class="lang-en">{{ page_data.forecast_insight_en }}</div>
+          <div class="lang-zh" style="display:none">{{ page_data.forecast_insight_zh | default('') }}</div>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {# Tab 2: By Price Band #}
+    {% if charts.chartOhPrice is defined %}
+    <div class="tab-panel" id="tab-price">
+      <h3 style="font-size:13px;margin-bottom:8px;"><span class="lang-en">{{ charts.chartOhPrice.title_en }}</span><span class="lang-zh" style="display:none">{{ charts.chartOhPrice.title_zh }}</span></h3>
+      <div style="position:relative;height:220px;"><div id="chartOhPrice" style="width:100%;height:100%"></div></div>
+    </div>
+    {% endif %}
+
+    {# Tab 3: Serviced Apartments #}
+    {% if charts.chartOhSA is defined %}
+    <div class="tab-panel" id="tab-sa">
+      <h3 style="font-size:13px;margin-bottom:8px;"><span class="lang-en">{{ charts.chartOhSA.title_en }}</span><span class="lang-zh" style="display:none">{{ charts.chartOhSA.title_zh }}</span></h3>
+      <div style="position:relative;height:220px;"><div id="chartOhSA" style="width:100%;height:100%"></div></div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ── Source Footer ── #}
+  <div class="source-footer">
+    <span class="lang-en"><strong>Sources:</strong> {{ page_data.source_en | default('Government statistical agencies. Data as of latest available quarter.') }}</span>
+    <span class="lang-zh" style="display:none"><strong>資料來源：</strong>{{ page_data.source_zh | default('各國政府統計機構。資料截至最新可取得季度。') }}</span>
+  </div>
+</main>
+{% endblock %}
+
+{% block base_scripts %}
+function fmtNum(v) {
+  if (v === null || v === undefined) return '';
+  return Math.abs(v) >= 1000 ? (v/1000).toFixed(0) + 'K' : v;
+}
+
+function buildChartOption(d, en) {
+  var isHorizontal = (d.type && d.type.indexOf('horizontal') >= 0);
+  var datasets = d.datasets || [];
+  var labels = d.labels || [];
+  var legendData = [];
+  var series = [];
+
+  datasets.forEach(function(ds, idx) {
+    var sType = ds.type || 'line';
+    var sColor = ds.color || [C.navy, C.green, C.orange, C.red, C.blue, C.muted][idx % 6];
+    var sName = ds.name || ('Series ' + (idx + 1));
+
+    if (datasets.length > 1) {
+      legendData.push(sName);
+    }
+
+    var seriesData;
+    // Handle data items that are objects with value/color
+    if (ds.data && ds.data.length > 0 && typeof ds.data[0] === 'object' && ds.data[0] !== null && !Array.isArray(ds.data[0]) && ds.data[0].value !== undefined) {
+      seriesData = ds.data.map(function(item) {
+        return {
+          value: item.value,
+          itemStyle: { color: item.color || sColor, borderRadius: sType === 'bar' ? (isHorizontal ? [0,4,4,0] : [4,4,0,0]) : undefined }
+        };
+      });
+    } else if (ds.colors) {
+      // Per-item colors array
+      seriesData = ds.data.map(function(v, i) {
+        return {
+          value: v,
+          itemStyle: { color: ds.colors[i] || sColor, borderRadius: sType === 'bar' ? (isHorizontal ? [0,4,4,0] : [4,4,0,0]) : undefined }
+        };
+      });
+    } else {
+      seriesData = ds.data;
+    }
+
+    var s = {
+      name: sName,
+      type: sType,
+      data: seriesData,
+      smooth: sType === 'line' ? 0.2 : undefined,
+      symbol: sType === 'line' ? 'circle' : undefined,
+      symbolSize: sType === 'line' ? 6 : undefined,
+      barMaxWidth: sType === 'bar' ? 50 : undefined
+    };
+
+    // Line style
+    if (sType === 'line') {
+      s.lineStyle = { color: sColor, width: 2 };
+      if (ds.lineType === 'dashed') {
+        s.lineStyle.type = 'dashed';
+      }
+      s.itemStyle = { color: sColor };
+      if (ds.areaStyle) {
+        s.areaStyle = { color: 'rgba(' + hexToRgb(sColor) + ',0.08)' };
+      }
+    }
+
+    // Bar style (single color, no per-item overrides)
+    if (sType === 'bar' && !ds.colors && !(ds.data && ds.data.length > 0 && typeof ds.data[0] === 'object' && ds.data[0] !== null && ds.data[0].value !== undefined)) {
+      s.itemStyle = { color: sColor, borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] };
+      if (ds.borderColor) {
+        s.itemStyle.borderColor = ds.borderColor;
+        s.itemStyle.borderWidth = 1;
+      }
+    }
+
+    // Bar labels
+    if (sType === 'bar') {
+      s.label = {
+        show: true,
+        position: isHorizontal ? 'right' : 'top',
+        fontSize: 10,
+        fontFamily: 'Inter',
+        formatter: function(p) {
+          if (p.value === null || p.value === undefined) return '';
+          return fmtNum(p.value);
+        }
+      };
+    }
+
+    // markPoint on dataset
+    if (ds.markPoint) {
+      if (Array.isArray(ds.markPoint)) {
+        s.markPoint = {
+          data: ds.markPoint.map(function(mp) {
+            var r = {};
+            if (mp.type) r.type = mp.type;
+            if (mp.name) r.name = mp.name;
+            if (mp.coord) r.coord = mp.coord;
+            if (mp.label) r.label = { formatter: mp.label, fontSize: 10, fontWeight: 'bold' };
+            return r;
+          }),
+          symbolSize: 50,
+          itemStyle: { color: sColor }
+        };
+      } else {
+        var mpData = [];
+        if (ds.markPoint.type) mpData.push({ type: ds.markPoint.type, name: ds.markPoint.type });
+        if (ds.markPoint.coord) mpData.push({ name: ds.markPoint.name || '', coord: ds.markPoint.coord, value: ds.markPoint.name || '' });
+        s.markPoint = {
+          data: mpData,
+          label: ds.markPoint.label ? { formatter: ds.markPoint.label, fontSize: 10, fontWeight: 'bold' } : undefined,
+          symbolSize: 50,
+          itemStyle: { color: ds.markPoint.color || sColor }
+        };
+      }
+    }
+
+    series.push(s);
+  });
+
+  // Build option object
+  var opt = {
+    tooltip: Object.assign({}, baseTooltip, isHorizontal ? { trigger: 'axis', axisPointer: { type: 'shadow' } } : {}),
+    grid: isHorizontal ? { left: 90, right: 50, top: 10, bottom: 20, containLabel: false } : baseGrid,
+    series: series
+  };
+
+  if (legendData.length > 1) {
+    opt.legend = Object.assign({}, baseLegend, { data: legendData });
+  }
+
+  // Axes
+  var valAxisLabel = Object.assign({}, baseText, {
+    formatter: function(v) { return fmtNum(v); }
+  });
+
+  if (isHorizontal) {
+    opt.xAxis = mkAxis({ type: 'value', axisLabel: valAxisLabel });
+    opt.yAxis = mkAxis({
+      type: 'category',
+      data: labels.slice().reverse(),
+      axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+    });
+    // Reverse series data to match reversed y-axis
+    opt.series.forEach(function(s) {
+      if (Array.isArray(s.data)) s.data = s.data.slice().reverse();
+    });
+  } else {
+    opt.xAxis = mkAxis({ type: 'category', data: labels });
+    opt.yAxis = mkAxis({ type: 'value', axisLabel: valAxisLabel });
+  }
+
+  // Chart-level markLine
+  if (d.markLine) {
+    var mlData = [];
+    if (d.markLine.yAxis !== undefined) mlData.push({ yAxis: d.markLine.yAxis });
+    if (d.markLine.xAxis !== undefined) mlData.push({ xAxis: d.markLine.xAxis });
+    if (series.length > 0) {
+      series[series.length - 1].markLine = {
+        silent: true,
+        symbol: 'none',
+        lineStyle: { color: C.red, type: 'dashed', width: 1 },
+        label: { formatter: d.markLine.label || '', fontSize: 10, color: C.red, position: 'insideEndTop' },
+        data: mlData
+      };
+    }
+  }
+
+  return opt;
+}
+
+function hexToRgb(hex) {
+  if (!hex || hex.indexOf('rgba') >= 0 || hex.indexOf('rgb') >= 0) return '30,58,95';
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? parseInt(result[1],16)+','+parseInt(result[2],16)+','+parseInt(result[3],16) : '30,58,95';
+}
+
+function initCharts(lang) {
+  var DATA = {{ charts | tojson }};
+  var en = lang !== 'zh';
+  var page = 'supply';
+
+  Object.keys(DATA).forEach(function(id) {
+    var d = DATA[id];
+    if (d.page !== page) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    var opt = buildChartOption(d, en);
+    c.setOption(opt);
+  });
+}
+{% endblock %}

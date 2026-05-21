@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property Monitor | InvestMQuest</title>
+<meta name="color-scheme" content="light">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e3a5f}
+
+.navbar{background:#fff;border-bottom:1px solid #dce8f5;height:52px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-brand{font-size:12px;font-weight:700;letter-spacing:.12em;color:#1e3a5f}
+.nav-sub{font-size:11px;color:#94a3b8;margin-left:8px}
+.lang-btns{display:flex;gap:4px}
+.lang-btn{padding:4px 10px;border:1px solid #dce8f5;border-radius:4px;font-size:11px;cursor:pointer;background:#fff;color:#5a7a9a;font-family:inherit}
+.lang-btn.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+
+.hero{background:#fff;border-bottom:1px solid #dce8f5;padding:14px 32px}
+.hero-inner{max-width:min(1400px,96vw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.hero-title-block{display:flex;align-items:baseline;gap:10px;min-width:0;flex-wrap:wrap}
+.hero-eyebrow{font-size:9.5px;letter-spacing:.15em;color:#3b82f6;font-weight:600;text-transform:uppercase;white-space:nowrap}
+.hero-h1{font-size:17px;font-weight:700;color:#0f2a45;line-height:1.2;margin:0;letter-spacing:-.01em;white-space:nowrap}
+.hero-sub{font-size:12px;color:#5a7a9a;line-height:1.4;margin:0;max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats-row{display:flex;gap:22px;flex-shrink:0}
+.stats-row > div{display:flex;align-items:baseline;gap:5px}
+.stat-num{font-size:15px;font-weight:700;color:#1e3a5f;font-variant-numeric:tabular-nums;line-height:1}
+.stat-lbl{font-size:10px;color:#7fa3c4;letter-spacing:.04em;margin-top:0}
+.hero-tools{display:flex;gap:10px;flex-shrink:0}
+.hero-tool{display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);border-radius:8px;text-decoration:none;color:#e2ecf8;transition:transform .15s,box-shadow .15s;border:1px solid rgba(59,130,246,.2)}
+.hero-tool:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(30,58,95,.2);border-color:#3b82f6}
+.hero-tool-icon{width:22px;height:22px;color:#3b82f6;flex-shrink:0}
+.hero-tool-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.hero-tool-title{font-size:12.5px;font-weight:700;color:#fff;line-height:1.2;white-space:nowrap}
+.hero-tool-sub{font-size:10px;color:#5a8ab5;line-height:1.2;white-space:nowrap}
+@media(max-width:820px){
+  .hero{padding:10px 14px}
+  .hero-inner{gap:10px}
+  .hero-sub{display:none}
+  .stats-row{gap:14px}
+  .stat-num{font-size:13px}
+  .stat-lbl{font-size:9px}
+  .hero-tools{gap:6px}
+  .hero-tool{padding:8px 10px}
+  .hero-tool-sub{display:none}
+}
+@media(max-width:560px){
+  .hero-tools{width:100%}
+  .hero-tool{flex:1}
+}
+
+.ticker{background:#0f1e33;border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:0}
+.ticker-hdr{font-size:9px;letter-spacing:.18em;color:#3b82f6;font-weight:600;margin-bottom:12px}
+.ticker-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1e3050}
+.ticker-row:last-child{border-bottom:none}
+.t-lbl{font-size:10px;color:#5a8ab5;letter-spacing:.04em}
+.t-right{display:flex;align-items:baseline;gap:6px}
+.t-val{font-size:13px;color:#e2ecf8;font-weight:600;font-variant-numeric:tabular-nums}
+.t-up{font-size:10px;color:#22c55e;font-weight:600}
+.t-dn{font-size:10px;color:#ef4444;font-weight:600}
+.t-flat{font-size:10px;color:#64748b}
+
+.section{max-width:min(1400px,96vw);margin:0 auto;padding:36px 32px}
+.section-hdr{display:flex;align-items:baseline;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.section-title{font-size:10px;letter-spacing:.16em;color:#3b82f6;font-weight:600}
+.section-desc{font-size:12px;color:#94a3b8}
+.upd-stamp{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:9.5px;color:#94a3b8;letter-spacing:.04em;white-space:nowrap}
+.upd-stamp a{color:#3b82f6;text-decoration:none}
+.upd-stamp a:hover{text-decoration:underline}
+.upd-dot{width:6px;height:6px;border-radius:50%;background:#16a34a;display:inline-block;animation:upd-pulse 2.5s infinite}
+@keyframes upd-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:560px){.upd-stamp{margin-left:0;width:100%;margin-top:4px}}
+
+.markets-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.mcard{background:#fff;border:1px solid #dce8f5;border-radius:10px;padding:14px 16px;display:block;text-decoration:none;position:relative;overflow:hidden;transition:border-color .18s,box-shadow .18s;color:#1e3a5f}
+.mcard:hover{border-color:#3b82f6;box-shadow:0 2px 10px rgba(59,130,246,.08)}
+.mcard::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:var(--accent)}
+.mcard-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #eef3f9}
+.mcard-flag{font-size:22px;flex-shrink:0;line-height:1}
+.mcard-info{min-width:0;flex:1}
+.mcard-name{font-size:14px;font-weight:700;color:#1e3a5f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcard-cities{font-size:10px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcard-report{font-size:10px;color:#3b82f6;font-weight:600;padding:3px 8px;border:1px solid #dce8f5;border-radius:4px;text-decoration:none;white-space:nowrap}
+.mcard-report:hover{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.mcard-sublinks{display:flex;flex-wrap:wrap;gap:3px 4px}
+.mcard-sublink{font-size:10.5px;color:#5a7a9a;text-decoration:none;padding:3px 7px;border-radius:4px;background:#f4f7fc;transition:all .12s;white-space:nowrap;display:inline-block}
+.mcard-sublink:hover{background:#3b82f6;color:#fff}
+.mcard-sublink.city{color:#1e3a5f;background:transparent;padding:3px 5px;font-weight:500}
+.mcard-sublink.city:hover{background:#eef3f9;color:#3b82f6}
+.mcard-divider{color:#dce8f5;padding:3px 2px;font-size:10px}
+.mcard-kpi-lbl,.mcard-kpi{display:none}
+.mcard-city-dd{position:relative;display:inline-block}
+.mcard-city-dd-btn{font-size:10.5px;color:#1e3a5f;background:#eef3f9;border:1px solid #dce8f5;padding:3px 9px;border-radius:4px;cursor:pointer;font-family:inherit;font-weight:500}
+.mcard-city-dd-btn:hover{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.mcard-city-dd-btn::after{content:' ▾';font-size:9px}
+.mcard-city-dd-menu{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #dce8f5;border-radius:6px;box-shadow:0 4px 16px rgba(30,58,95,.12);padding:6px;z-index:50;min-width:160px;max-height:280px;overflow-y:auto}
+.mcard-city-dd.open .mcard-city-dd-menu{display:grid;grid-template-columns:repeat(2,1fr);gap:2px}
+.mcard-city-dd-menu a{display:block;padding:5px 9px;font-size:11.5px;color:#1e3a5f;text-decoration:none;border-radius:4px;white-space:nowrap}
+.mcard-city-dd-menu a:hover{background:#3b82f6;color:#fff}
+@media(max-width:920px){.markets-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.markets-grid{grid-template-columns:1fr}}
+
+.compare-wrap{background:#fff;border:1px solid #dce8f5;border-radius:12px;overflow:auto;max-height:75vh;-webkit-overflow-scrolling:touch}
+.compare-tbl{width:100%;border-collapse:collapse;min-width:920px;table-layout:fixed}
+.compare-tbl thead{position:sticky;top:0;z-index:3}
+.compare-tbl th{background:#f0f6ff;font-size:9px;letter-spacing:.08em;color:#5a7a9a;font-weight:600;padding:7px 10px;text-align:right;border-bottom:1px solid #dce8f5;white-space:nowrap;transition:background .15s;overflow:hidden;resize:horizontal;position:relative}
+.compare-tbl th.th-tip:hover{overflow:visible;z-index:20}
+.compare-tbl th.th-tip{cursor:help}
+.tip-bubble{display:none;position:absolute;top:calc(100% + 6px);right:6px;background:#0f1e33;color:#e2ecf8;padding:9px 12px;border-radius:6px;font-size:10.5px;font-weight:400;letter-spacing:0;line-height:1.55;white-space:normal;width:240px;z-index:50;text-transform:none;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,.25);font-family:Inter,sans-serif}
+.tip-bubble::before{content:'';position:absolute;top:-5px;right:14px;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:5px solid #0f1e33}
+.tip-bubble strong{color:#3b82f6;font-weight:600}
+.tip-bubble em{color:#94a3b8;font-style:normal;font-size:10px}
+.compare-tbl th.th-tip:hover .tip-bubble{display:block}
+.compare-tbl th.th-tip:first-child .tip-bubble{right:auto;left:6px}
+.compare-tbl th.th-tip:first-child .tip-bubble::before{right:auto;left:14px}
+.compare-tbl th[data-key]:hover{background:#e4eefb;color:#1e3a5f}
+.compare-tbl th:first-child{text-align:left;position:sticky;left:0;background:#f0f6ff;z-index:4;min-width:100px;border-right:1px solid #dce8f5}
+.compare-tbl td{padding:6px 10px;font-size:11px;border-bottom:1px solid #f0f5fb;text-align:right;font-variant-numeric:tabular-nums;color:#1e3a5f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compare-tbl th::after{content:'';position:absolute;right:0;top:25%;height:50%;width:3px;cursor:col-resize;background:transparent;transition:background .15s}
+.compare-tbl th:hover::after{background:#ccd9e8}
+.compare-tbl td:first-child{text-align:left;font-weight:600}
+.compare-tbl tr:last-child td{border-bottom:none}
+.compare-tbl tr:hover td{background:#f8fbff;cursor:pointer}
+.note{font-size:10px;color:#94a3b8;margin-top:10px;line-height:1.5}
+
+/* City Comparison Filter Bar + Pin & Compare */
+.ct-filters{background:#fff;border:1px solid #dce8f5;border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;flex-direction:column;gap:10px}
+.ctf-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ctf-row > input[type=text]{flex:1;min-width:160px;padding:6px 10px;border:1px solid #dce8f5;border-radius:5px;font-size:11.5px;font-family:inherit;background:#fff;color:#1e3a5f;outline:none}
+.ctf-row > input[type=text]:focus{border-color:#3b82f6}
+.ctf-row > select{padding:6px 24px 6px 10px;border:1px solid #dce8f5;border-radius:5px;font-size:11.5px;font-family:inherit;background:#fff;color:#1e3a5f;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path d='M0 1l4 5 4-5z' fill='%235a7a9a'/></svg>");background-repeat:no-repeat;background-position:right 8px center}
+.ctf-chk{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#1e3a5f;cursor:pointer;user-select:none;padding:4px 8px;border:1px solid #dce8f5;border-radius:5px;background:#f8fbff;transition:all .12s}
+.ctf-chk:hover{border-color:#3b82f6;color:#3b82f6}
+.ctf-chk input{margin:0;cursor:pointer}
+.ctf-chk.on{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.ctf-btn{padding:5px 12px;font-size:10.5px;border:1px solid #dce8f5;background:#fff;color:#5a7a9a;border-radius:5px;cursor:pointer;font-family:inherit}
+.ctf-btn:hover{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.ctf-count{margin-left:auto;font-size:11px;color:#5a7a9a;font-variant-numeric:tabular-nums}
+.ctf-count strong{color:#1e3a5f;font-weight:700}
+.ctf-slider{display:flex;align-items:center;gap:8px;font-size:10.5px;color:#5a7a9a;font-weight:500}
+.ctf-slider .lbl{min-width:128px;display:flex;justify-content:space-between;gap:6px}
+.ctf-slider .lbl strong{color:#1e3a5f;font-weight:700;font-variant-numeric:tabular-nums}
+.ctf-slider input[type=range]{flex:1;cursor:pointer;accent-color:#3b82f6;min-width:120px}
+
+/* Pin star inside city cell */
+.ct-pin{display:inline-block;cursor:pointer;font-size:11px;line-height:1;margin-right:5px;color:#cbd5e1;transition:color .12s,transform .12s;user-select:none}
+.ct-pin:hover{color:#f59e0b;transform:scale(1.2)}
+.ct-pin.on{color:#f59e0b}
+.compare-tbl tr.pinned td{background:rgba(245,158,11,0.06)!important}
+.compare-tbl tr.pinned td:first-child{box-shadow:inset 3px 0 0 #f59e0b}
+
+/* Sparkline */
+.ct-spark{display:flex;align-items:center;justify-content:center;line-height:0}
+
+/* Compare panel */
+.ct-cmp-panel{margin-top:14px;background:#0f1e33;border-radius:10px;padding:14px 16px;color:#e2ecf8;display:none}
+.ct-cmp-panel.show{display:block}
+.ct-cmp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.ct-cmp-title{font-size:11px;font-weight:600;color:#3b82f6;letter-spacing:.06em}
+.ct-cmp-hint{font-size:10px;color:#94a3b8}
+.ct-cmp-clear{font-size:10px;padding:3px 8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:4px;cursor:pointer;font-family:inherit}
+.ct-cmp-clear:hover{background:#ef4444;color:#fff;border-color:#ef4444}
+.ct-cmp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.ct-cmp-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:10px 12px}
+.ct-cmp-card h4{font-size:13px;font-weight:700;color:#fff;margin:0 0 8px 0;display:flex;align-items:center;gap:6px}
+.ct-cmp-card table{width:100%;border-collapse:collapse;font-size:10px}
+.ct-cmp-card td{padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);color:#cbd5e1}
+.ct-cmp-card td:last-child{text-align:right;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+.ct-cmp-card td.best{color:#22c55e}
+.ct-cmp-card td.worst{color:#f87171}
+.ct-cmp-card .x-btn{position:absolute;top:6px;right:8px;cursor:pointer;color:#64748b;font-size:14px;line-height:1}
+.ct-cmp-card .x-btn:hover{color:#ef4444}
+.ct-cmp-card{position:relative}
+@media(max-width:760px){
+  .ctf-slider .lbl{min-width:100px}
+}
+.unit-note{font-size:9px;color:#b0c8e0;font-weight:400;margin-left:3px}
+
+.footer{border-top:1px solid #dce8f5;padding:18px 32px;max-width:min(1400px,96vw);margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.footer-l{font-size:11px;font-weight:700;letter-spacing:.08em;color:#1e3a5f}
+.footer-r{font-size:10px;color:#94a3b8}
+
+.lang-en{}.lang-zh{display:none}
+
+/* Top 5 Cities Slider */
+.t5-slider-block label{display:flex;justify-content:space-between;font-size:9.5px;color:#94a3b8;letter-spacing:.04em;margin-bottom:4px;font-weight:600}
+.t5-slider-block label .t5-val{color:#f59e0b;font-variant-numeric:tabular-nums}
+.t5-slider-block input[type=range]{width:100%;cursor:pointer;accent-color:#f59e0b}
+.t5-preset{font-size:9.5px;padding:4px 9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:#cbd5e1;border-radius:4px;cursor:pointer;font-family:inherit;transition:all .12s}
+.t5-preset:hover{background:rgba(245,158,11,0.15);border-color:#f59e0b;color:#f59e0b}
+.t5-preset.active{background:#f59e0b;color:#0f2a45;border-color:#f59e0b;font-weight:600}
+.t5-delta{position:absolute;top:-9px;right:12px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+@media(max-width:760px){#t5-controls > div:nth-child(2){grid-template-columns:repeat(2,1fr)!important}}
+@media(max-width:480px){#t5-controls > div:nth-child(2){grid-template-columns:1fr!important}}
+
+/* Cost Calculator */
+.cc-preset{font-size:10px;padding:4px 9px;background:#f0f6ff;border:1px solid #dce8f5;color:#5a7a9a;border-radius:4px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .12s}
+.cc-preset:hover{background:#3b82f6;color:#fff;border-color:#3b82f6}
+#cc-output .cc-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid #e8eef7}
+#cc-output .cc-row:last-of-type{border-bottom:none}
+#cc-output .cc-lbl{font-size:10.5px;color:#5a7a9a;font-weight:500}
+#cc-output .cc-amt{font-size:13px;font-weight:700;color:#1e3a5f;font-variant-numeric:tabular-nums}
+#cc-output .cc-pct{font-size:9.5px;color:#94a3b8;font-weight:500;margin-left:6px}
+#cc-output .cc-row.total{border-top:2px solid #1e3a5f;border-bottom:none;margin-top:6px;padding-top:10px}
+#cc-output .cc-row.total .cc-amt{font-size:16px;color:#0f1e33}
+#cc-output .cc-cliff{margin-top:10px;padding:8px 10px;border-radius:6px;font-size:10px;line-height:1.5}
+#cc-output .cc-cliff strong{font-weight:700}
+#cc-output .cc-be{margin-top:8px;padding:8px 10px;background:#eef6ff;border-radius:6px;font-size:10px;color:#1e3a5f;line-height:1.5;border-left:3px solid #3b82f6}
+@media(max-width:760px){
+  #costCalc > div:nth-child(2){grid-template-columns:1fr!important}
+}
+
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:24px}
+  .markets-grid{grid-template-columns:repeat(3,1fr)}
+  .hero-h1{font-size:26px}
+  .stats-row{flex-wrap:wrap;gap:16px}
+  .navbar{padding:0 16px;height:auto;min-height:52px;padding-top:8px;padding-bottom:8px}
+  .navbar>div:first-child{flex-wrap:wrap;gap:6px}
+  .navbar>div:first-child a{font-size:9px!important;padding:2px 6px!important}
+  .section{padding:24px 16px}
+  .hero{padding:28px 16px 24px}
+  .footer{flex-direction:column;gap:8px;text-align:center}
+}
+@media(max-width:768px){
+  .navbar>div:first-child{flex-wrap:wrap;gap:4px}
+  .navbar>div:first-child a{font-size:8px!important;padding:2px 5px!important}
+  .nav-brand{font-size:10px}
+  .nav-sub{font-size:9px;margin-left:4px}
+  .hero-h1{font-size:15px}
+  .section div[style*="repeat(3"]{grid-template-columns:repeat(2,1fr)!important}
+}
+@media(max-width:500px){
+  .markets-grid{grid-template-columns:repeat(2,1fr)}
+  .bar-wrap{width:80px}
+  .hero-h1{font-size:14px}
+  .section div[style*="repeat(4"]{grid-template-columns:1fr!important}
+  .section div[style*="repeat(3"]{grid-template-columns:1fr!important}
+  .section div[style*="repeat(2"]{grid-template-columns:1fr!important}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-title-block">
+      <h1 class="hero-h1 lang-en">Global Real Estate Intelligence</h1>
+      <h1 class="hero-h1 lang-zh">全球房地產智能監測</h1>
+      <span class="hero-eyebrow lang-en">· 18 markets · 81 cities · 25 countries</span>
+      <span class="hero-eyebrow lang-zh">· 18 市場 · 81 城市 · 25 國家</span>
+    </div>
+  </div>
+</section>
+
+<section style="background:#fff;border-bottom:1px solid #dce8f5">
+  <div class="section">
+    <div class="section-hdr">
+      <span class="section-title lang-en">MARKET COVERAGE</span>
+      <span class="section-title lang-zh">市場覆蓋</span>
+      <span class="section-desc lang-en">Click to enter any market</span>
+      <span class="section-desc lang-zh">點擊進入各市場</span>
+      <span class="upd-stamp"><span class="upd-dot"></span><span class="lang-en">Updated 2026-05 · <a href="/methodology.html">Methodology</a></span><span class="lang-zh">2026-05 更新 · <a href="/methodology.html">方法論</a></span></span>
+    </div>
+    <div class="markets-grid">
+      <div class="mcard" style="--accent:#e65100">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1F2;&#x1F1FE;</span><div class="mcard-info"><div class="mcard-name lang-en">Malaysia</div><div class="mcard-name lang-zh">馬來西亞</div></div><a class="mcard-report" href="my/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="my/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="my/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="my/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="my/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="my/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="my/kl.html"><span class="lang-en">KL</span><span class="lang-zh">吉隆坡</span></a>
+          <a class="mcard-sublink city" href="my/penang.html"><span class="lang-en">Penang</span><span class="lang-zh">檳城</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#1e3a5f">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1F9;&#x1F1FC;</span><div class="mcard-info"><div class="mcard-name lang-en">Taiwan</div><div class="mcard-name lang-zh">台灣</div></div><a class="mcard-report" href="tw/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="tw/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="tw/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="tw/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="tw/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="tw/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="tw/taipei.html"><span class="lang-en">Taipei</span><span class="lang-zh">台北</span></a>
+          <a class="mcard-sublink city" href="tw/newtaipei.html"><span class="lang-en">NT</span><span class="lang-zh">新北</span></a>
+          <a class="mcard-sublink city" href="tw/taoyuan.html"><span class="lang-en">Taoyuan</span><span class="lang-zh">桃園</span></a>
+          <a class="mcard-sublink city" href="tw/hsinchu.html"><span class="lang-en">Hsinchu</span><span class="lang-zh">新竹</span></a>
+          <a class="mcard-sublink city" href="tw/taichung.html"><span class="lang-en">Taichung</span><span class="lang-zh">台中</span></a>
+          <a class="mcard-sublink city" href="tw/tainan.html"><span class="lang-en">Tainan</span><span class="lang-zh">台南</span></a>
+          <a class="mcard-sublink city" href="tw/kaohsiung.html"><span class="lang-en">Kaohsiung</span><span class="lang-zh">高雄</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#dc2626">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1EF;&#x1F1F5;</span><div class="mcard-info"><div class="mcard-name lang-en">Japan</div><div class="mcard-name lang-zh">日本</div></div><a class="mcard-report" href="jp/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="jp/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="jp/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="jp/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="jp/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="jp/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="jp/tokyo.html"><span class="lang-en">Tokyo</span><span class="lang-zh">東京</span></a>
+          <a class="mcard-sublink city" href="jp/osaka.html"><span class="lang-en">Osaka</span><span class="lang-zh">大阪</span></a>
+          <a class="mcard-sublink city" href="jp/fukuoka.html"><span class="lang-en">Fukuoka</span><span class="lang-zh">福岡</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#16a34a">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1E6;&#x1F1FA;</span><div class="mcard-info"><div class="mcard-name lang-en">Australia</div><div class="mcard-name lang-zh">澳洲</div></div><a class="mcard-report" href="au/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="au/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="au/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="au/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="au/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="au/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="au/sydney.html"><span class="lang-en">Sydney</span><span class="lang-zh">雪梨</span></a>
+          <a class="mcard-sublink city" href="au/melbourne.html"><span class="lang-en">Melbourne</span><span class="lang-zh">墨爾本</span></a>
+          <a class="mcard-sublink city" href="au/brisbane.html"><span class="lang-en">Brisbane</span><span class="lang-zh">布里斯本</span></a>
+          <a class="mcard-sublink city" href="au/goldcoast.html"><span class="lang-en">Gold Coast</span><span class="lang-zh">黃金海岸</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#0891b2">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1F3;&#x1F1FF;</span><div class="mcard-info"><div class="mcard-name lang-en">New Zealand</div><div class="mcard-name lang-zh">紐西蘭</div></div><a class="mcard-report" href="nz/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="nz/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="nz/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="nz/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="nz/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="nz/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="nz/auckland.html"><span class="lang-en">Auckland</span><span class="lang-zh">奧克蘭</span></a>
+          <a class="mcard-sublink city" href="nz/christchurch.html"><span class="lang-en">Christchurch</span><span class="lang-zh">基督城</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#7c3aed">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1EC;&#x1F1E7;</span><div class="mcard-info"><div class="mcard-name lang-en">United Kingdom</div><div class="mcard-name lang-zh">英國</div></div><a class="mcard-report" href="uk/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="uk/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="uk/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="uk/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="uk/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="uk/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="uk/london.html"><span class="lang-en">London</span><span class="lang-zh">倫敦</span></a>
+          <a class="mcard-sublink city" href="uk/manchester.html"><span class="lang-en">Manchester</span><span class="lang-zh">曼徹斯特</span></a>
+          <a class="mcard-sublink city" href="uk/edinburgh.html"><span class="lang-en">Edinburgh</span><span class="lang-zh">愛丁堡</span></a>
+          <a class="mcard-sublink city" href="uk/newcastle.html"><span class="lang-en">Newcastle</span><span class="lang-zh">紐卡斯爾</span></a>
+          <a class="mcard-sublink city" href="uk/birmingham.html"><span class="lang-en">Birmingham</span><span class="lang-zh">伯明翰</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#2563eb">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1FA;&#x1F1F8;</span><div class="mcard-info"><div class="mcard-name lang-en">United States</div><div class="mcard-name lang-zh">美國</div></div><a class="mcard-report" href="us/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="us/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="us/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="us/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="us/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="us/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <div class="mcard-city-dd" onclick="event.stopPropagation();this.classList.toggle('open');">
+            <button class="mcard-city-dd-btn" type="button"><span class="lang-en">12 Cities</span><span class="lang-zh">12 城市</span></button>
+            <div class="mcard-city-dd-menu">
+              <a href="us/nyc.html"><span class="lang-en">NYC</span><span class="lang-zh">紐約</span></a>
+              <a href="us/la.html"><span class="lang-en">LA</span><span class="lang-zh">洛杉磯</span></a>
+              <a href="us/sf.html"><span class="lang-en">SF</span><span class="lang-zh">舊金山</span></a>
+              <a href="us/sv.html"><span class="lang-en">Silicon Valley</span><span class="lang-zh">矽谷</span></a>
+              <a href="us/sandiego.html"><span class="lang-en">San Diego</span><span class="lang-zh">聖地牙哥</span></a>
+              <a href="us/miami.html"><span class="lang-en">Miami</span><span class="lang-zh">邁阿密</span></a>
+              <a href="us/austin.html"><span class="lang-en">Austin</span><span class="lang-zh">奧斯丁</span></a>
+              <a href="us/seattle.html"><span class="lang-en">Seattle</span><span class="lang-zh">西雅圖</span></a>
+              <a href="us/chicago.html"><span class="lang-en">Chicago</span><span class="lang-zh">芝加哥</span></a>
+              <a href="us/boston.html"><span class="lang-en">Boston</span><span class="lang-zh">波士頓</span></a>
+              <a href="us/phoenix.html"><span class="lang-en">Phoenix</span><span class="lang-zh">鳳凰城</span></a>
+              <a href="us/denver.html"><span class="lang-en">Denver</span><span class="lang-zh">丹佛</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#d97706">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1F9;&#x1F1ED;</span><div class="mcard-info"><div class="mcard-name lang-en">Thailand</div><div class="mcard-name lang-zh">泰國</div></div><a class="mcard-report" href="th/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="th/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="th/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="th/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="th/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="th/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="th/bangkok.html"><span class="lang-en">Bangkok</span><span class="lang-zh">曼谷</span></a>
+          <a class="mcard-sublink city" href="th/chiangmai.html"><span class="lang-en">Chiang Mai</span><span class="lang-zh">清邁</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#ef4444">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1FB;&#x1F1F3;</span><div class="mcard-info"><div class="mcard-name lang-en">Vietnam</div><div class="mcard-name lang-zh">越南</div></div><a class="mcard-report" href="vn/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="vn/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="vn/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="vn/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="vn/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="vn/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="vn/hochiminh.html"><span class="lang-en">HCMC</span><span class="lang-zh">胡志明</span></a>
+          <a class="mcard-sublink city" href="vn/hanoi.html"><span class="lang-en">Hanoi</span><span class="lang-zh">河內</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#1d4ed8">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1F0;&#x1F1F7;</span><div class="mcard-info"><div class="mcard-name lang-en">South Korea</div><div class="mcard-name lang-zh">韓國</div></div><a class="mcard-report" href="kr/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="kr/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="kr/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="kr/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="kr/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="kr/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="kr/seoul.html"><span class="lang-en">Seoul</span><span class="lang-zh">首爾</span></a>
+          <a class="mcard-sublink city" href="kr/busan.html"><span class="lang-en">Busan</span><span class="lang-zh">釜山</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#b91c1c">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1E8;&#x1F1E6;</span><div class="mcard-info"><div class="mcard-name lang-en">Canada</div><div class="mcard-name lang-zh">加拿大</div></div><a class="mcard-report" href="ca/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="ca/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="ca/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="ca/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="ca/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="ca/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="ca/toronto.html"><span class="lang-en">Toronto</span><span class="lang-zh">多倫多</span></a>
+          <a class="mcard-sublink city" href="ca/vancouver.html"><span class="lang-en">Vancouver</span><span class="lang-zh">溫哥華</span></a>
+        </div>
+      </div>
+      <div class="mcard" style="--accent:#16a34a">
+        <div class="mcard-head"><span class="mcard-flag">&#x1F1EE;&#x1F1EA;</span><div class="mcard-info"><div class="mcard-name lang-en">Ireland</div><div class="mcard-name lang-zh">愛爾蘭</div></div><a class="mcard-report" href="ie/report.html"><span class="lang-en">Full Report</span><span class="lang-zh">深度報告</span></a></div>
+        <div class="mcard-sublinks">
+          <a class="mcard-sublink" href="ie/index.html"><span class="lang-en">Overview</span><span class="lang-zh">總覽</span></a>
+          <a class="mcard-sublink" href="ie/supply.html"><span class="lang-en">Supply</span><span class="lang-zh">供給</span></a>
+          <a class="mcard-sublink" href="ie/demand.html"><span class="lang-en">Demand</span><span class="lang-zh">需求</span></a>
+          <a class="mcard-sublink" href="ie/valuation.html"><span class="lang-en">Valuation</span><span class="lang-zh">估值</span></a>
+          <a class="mcard-sublink" href="ie/risk.html"><span class="lang-en">Risk</span><span class="lang-zh">風險</span></a>
+          <span class="mcard-divider">|</span>
+          <a class="mcard-sublink city" href="ie/dublin.html"><span class="lang-en">Dublin</span><span class="lang-zh">都柏林</span></a>
+          <a class="mcard-sublink city" href="ie/cork.html"><span class="lang-en">Cork</span><span class="lang-zh">科克</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#f8f9fc">
+  <div class="section">
+    <div class="section-hdr">
+      <span class="section-title lang-en">CITY COMPARISON</span>
+      <span class="section-title lang-zh">城市比較</span>
+      <span class="section-desc lang-en">84 cities &middot; Price &middot; YoY &middot; Yield &middot; PTI &middot; Supply &middot; P/R Ratio &middot; Pipeline &middot; Mortgage &middot; All columns sortable</span>
+      <span class="section-desc lang-zh">84 城市 &middot; 房價 &middot; 年增率 &middot; 收益率 &middot; 房價收入比 &middot; 現在供需 &middot; 房租比 &middot; 在建供給 &middot; 3年展望 &middot; 按揭利率 &middot; 所有欄位可排序</span>
+      <span class="upd-stamp"><span class="upd-dot"></span><span class="lang-en">Q1 2026 &middot; <a href="/methodology.html">Sources</a></span><span class="lang-zh">2026-Q1 &middot; <a href="/methodology.html">來源</a></span></span>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="ct-filters">
+      <div class="ctf-row">
+        <input type="text" id="ctf-search" placeholder="🔍 Search city / 搜尋城市…" oninput="ctfApply()">
+        <select id="ctf-region" onchange="ctfApply()">
+          <option value="">All regions / 全部地區</option>
+          <option value="asia">Asia / 亞洲</option>
+          <option value="europe">Europe / 歐洲</option>
+          <option value="americas">Americas / 美洲</option>
+          <option value="oceania">Oceania / 大洋洲</option>
+          <option value="mideast">Middle East / 中東</option>
+        </select>
+        <label class="ctf-chk"><input type="checkbox" id="ctf-foreign" onchange="ctfApply()"><span class="lang-en">🌏 Foreign-friendly</span><span class="lang-zh" style="display:none">🌏 外國人易買</span></label>
+        <label class="ctf-chk"><input type="checkbox" id="ctf-visa" onchange="ctfApply()"><span class="lang-en">🛂 Visa path</span><span class="lang-zh" style="display:none">🛂 有簽證路徑</span></label>
+        <button class="ctf-btn" onclick="ctfReset()"><span class="lang-en">Reset</span><span class="lang-zh" style="display:none">重設</span></button>
+        <span class="ctf-count"><span class="lang-en">Showing</span><span class="lang-zh" style="display:none">顯示</span> <strong id="ctf-shown">84</strong> / 84</span>
+      </div>
+      <div class="ctf-row">
+        <div class="ctf-slider">
+          <span class="lbl"><span><span class="lang-en">Yield</span><span class="lang-zh" style="display:none">收益率</span> ≥</span> <strong id="ctf-yield-v">0%</strong></span>
+          <input type="range" id="ctf-yield" min="0" max="9" step="0.5" value="0" oninput="ctfApply()">
+        </div>
+        <div class="ctf-slider">
+          <span class="lbl"><span><span class="lang-en">PTI</span><span class="lang-zh" style="display:none">房價收入比</span> ≤</span> <strong id="ctf-pti-v">20×</strong></span>
+          <input type="range" id="ctf-pti" min="3" max="20" step="1" value="20" oninput="ctfApply()">
+        </div>
+        <div class="ctf-slider">
+          <span class="lbl"><span><span class="lang-en">Carry</span><span class="lang-zh" style="display:none">利差</span> ≥</span> <strong id="ctf-carry-v">−5%</strong></span>
+          <input type="range" id="ctf-carry" min="-5" max="5" step="0.5" value="-5" oninput="ctfApply()">
+        </div>
+        <span style="font-size:10px;color:#94a3b8;margin-left:auto"><span class="lang-en">⭐ Click star to pin · 3 max</span><span class="lang-zh" style="display:none">⭐ 點星號釘選比較 · 最多 3 城</span></span>
+      </div>
+    </div>
+
+    <div class="compare-wrap">
+      <table class="compare-tbl">
+        <thead><tr>
+          <th class="th-tip" style="text-align:left;cursor:pointer;user-select:none;width:105px" data-key="name" onclick="sortBy('name')"><span class="lang-en">City</span><span class="lang-zh">城市</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>City</strong><br>Click to enter the city's deep-dive page. Click header to sort A-Z.</span><span class="lang-zh"><strong>城市</strong><br>點擊列進入深度分析頁。點擊欄頭按字母排序。</span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:72px" data-key="d10y" onclick="sortBy('d10y')"><span class="lang-en">10yr</span><span class="lang-zh">10年漲幅</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>10yr Cumulative</strong><br>Apartment price index Q1 2026 ÷ Q1 2016 − 100%. Local currency, not USD.<br><em>Source: country apartment-segment HPI</em></span><span class="lang-zh"><strong>10年累計漲幅</strong><br>公寓房價指數 2026Q1 ÷ 2016Q1 − 100%。當地貨幣計，非美元。<br><em>來源：各國公寓區段 HPI</em></span></span></th>
+          <th class="th-tip" style="text-align:center;width:70px"><span class="lang-en">5yr Trend</span><span class="lang-zh">5年走勢</span><span class="tip-bubble"><span class="lang-en"><strong>5-Year Indicative Trajectory</strong><br>Sparkline derived from 10yr cumulative + latest YoY. <em>Indicative shape only — not a precise quarterly path.</em> Green = positive YoY · Red = negative YoY.</span><span class="lang-zh"><strong>5 年走勢示意</strong><br>由 10 年累計與最新 YoY 推算。<em>僅示意形狀，不代表精確季度走勢。</em>綠 = 正成長 · 紅 = 衰退。</span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:72px" data-key="yoy" onclick="sortBy('yoy')"><span class="lang-en">YoY</span><span class="lang-zh">年增率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Year over Year</strong><br>Latest available quarter vs same quarter prior year. Apartment segment.</span><span class="lang-zh"><strong>年增率</strong><br>最新可得季度 vs 去年同季。公寓區段。</span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:72px" data-key="yield" onclick="sortBy('yield')"><span class="lang-en">Yield</span><span class="lang-zh">收益率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Gross Rental Yield</strong><br>Annual rent ÷ price, before tax, vacancy, and management fees. Actual net is typically 60–80% of gross.</span><span class="lang-zh"><strong>毛租金收益率</strong><br>年租 ÷ 房價，未扣稅、空置、管理費。實際淨值通常為毛值的 60–80%。</span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:72px" data-key="carry" onclick="sortBy('carry')"><span class="lang-en">Carry</span><span class="lang-zh">利差</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Carry Spread</strong><br>Yield − local mortgage rate. Positive = rent covers debt service.<br><em>+2% income · 0~+2% neutral · &lt;-3% deep negative</em></span><span class="lang-zh"><strong>利差</strong><br>收益率 − 當地房貸利率。正值代表租金可負擔利息。<br><em>+2% 收租 · 0~+2% 中性 · &lt;-3% 深度負利差</em></span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:62px" data-key="pti" onclick="sortBy('pti')"><span class="lang-en">PTI</span><span class="lang-zh">房價收入比</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Price-to-Income</strong><br>Median apartment price ÷ median annual household income.<br><em>&lt;5× affordable · 5–10× stretched · &gt;10× severely unaffordable</em></span><span class="lang-zh"><strong>房價收入比</strong><br>中位公寓房價 ÷ 中位家庭年收入。<br><em>&lt;5 倍可負擔 · 5–10 倍偏高 · &gt;10 倍嚴重不可負擔</em></span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:58px" data-key="pr" onclick="sortBy('pr')"><span class="lang-en">P/R</span><span class="lang-zh">房租比</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Price-to-Rent</strong><br>Median price ÷ gross annual rent of comparable unit.<br><em>&lt;20× buy favored · 20–30× neutral · &gt;30× rent favored</em></span><span class="lang-zh"><strong>房租比</strong><br>中位房價 ÷ 同類單位毛年租。<br><em>&lt;20 倍買有利 · 20–30 倍中性 · &gt;30 倍租有利</em></span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:55px" data-key="vacancy" onclick="sortBy('vacancy')"><span class="lang-en">Vac%</span><span class="lang-zh">空置率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Vacancy Rate</strong><br>Rental vacancy rate. Listings-to-stock proxy where unavailable.<br><em>&lt;1% crisis tight · 1–2% tight · 2–3.5% balanced · &gt;3.5% soft</em></span><span class="lang-zh"><strong>空置率</strong><br>租賃空置率。無資料時以掛牌／存量替代。<br><em>&lt;1% 危機緊張 · 1–2% 緊張 · 2–3.5% 平衡 · &gt;3.5% 鬆軟</em></span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:58px" data-key="txYoY" onclick="sortBy('txYoY')"><span class="lang-en">Tx YoY</span><span class="lang-zh">量增率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Transaction Volume YoY</strong><br>Number of completed sales vs same period prior year. Positive = rising activity, negative = cooling.</span><span class="lang-zh"><strong>成交量年增率</strong><br>完成交易筆數 vs 去年同期。正值=活絡，負值=降溫。</span></span></th>
+          <th class="th-tip" style="text-align:center;cursor:pointer;user-select:none;width:105px" data-key="supply" onclick="sortBy('supply')"><span class="lang-en">Now</span><span class="lang-zh">現在供需</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Current Supply Pressure</strong><br>Inventory level today. <strong style="color:#fca5a5">🔴Tight</strong> = sellers hold pricing power. <strong style="color:#fcd34d">🟡Balanced</strong>. <strong style="color:#86efac">🟢Loose</strong> = buyer leverage.</span><span class="lang-zh"><strong>當前供需</strong><br>當下庫存水位。<strong style="color:#fca5a5">🔴緊張</strong>=賣方掌握定價權。<strong style="color:#fcd34d">🟡平衡</strong>。<strong style="color:#86efac">🟢寬鬆</strong>=買方有議價空間。</span></span></th>
+          <th class="th-tip" style="text-align:center;cursor:pointer;user-select:none;width:105px" data-key="pipeline" onclick="sortBy('pipeline')"><span class="lang-en">Pipeline</span><span class="lang-zh">未來供給</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Construction Pipeline</strong><br>Units under construction as % of existing housing stock.<br><em>Low &lt;1% · Mod 1–2.5% · High &gt;2.5%</em></span><span class="lang-zh"><strong>在建供給</strong><br>在建單位 ÷ 現有住宅存量。<br><em>低 &lt;1% · 中 1–2.5% · 高 &gt;2.5%</em></span></span></th>
+          <th class="th-tip" style="text-align:left;width:200px"><span class="lang-en">3yr Outlook</span><span class="lang-zh">3年展望</span><span class="tip-bubble"><span class="lang-en"><strong>3-Year Forward Outlook</strong><br>Qualitative supply-demand assessment for the next 3 years, combining pipeline, vacancy, mortgage rate trajectory, and policy signals.</span><span class="lang-zh"><strong>3 年前瞻展望</strong><br>未來 3 年定性供需評估，綜合在建、空置、利率走勢與政策訊號。</span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:90px" data-key="priceUSD" onclick="sortBy('priceUSD')"><span class="lang-en">Apt Price</span><span class="lang-zh">公寓房價</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Apartment Median Price</strong><br>Local currency total price. Bangkok / Chiang Mai shown as price per m². Sorted by USD equivalent.</span><span class="lang-zh"><strong>公寓中位房價</strong><br>當地貨幣總價。曼谷／清邁顯示每平方米單價。按美元等值排序。</span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:55px" data-key="mortgage" onclick="sortBy('mortgage')"><span class="lang-en">Rate</span><span class="lang-zh">利率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Mortgage Rate</strong><br>Prevailing 2026 mortgage rate (typically 30yr fixed or country equivalent). Foreign-buyer rates may be 50–150bp higher.</span><span class="lang-zh"><strong>房貸利率</strong><br>2026 年現行房貸利率（通常為 30 年固定或當地對應期限）。外國買家利率可能加 50–150bp。</span></span></th>
+        </tr></thead>
+        <tbody id="city-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- COMPARE PANEL -->
+    <div id="ct-cmp-panel" class="ct-cmp-panel">
+      <div class="ct-cmp-hdr">
+        <span class="ct-cmp-title"><span class="lang-en">PINNED CITIES — SIDE BY SIDE</span><span class="lang-zh">釘選城市 — 並排比較</span></span>
+        <span class="ct-cmp-hint"><span class="lang-en">Best metric in each row highlighted green · click ✕ to unpin</span><span class="lang-zh">每列最優指標標綠 · 點 ✕ 取消釘選</span></span>
+        <button class="ct-cmp-clear" onclick="ctClearPins()"><span class="lang-en">Clear all</span><span class="lang-zh">全部取消</span></button>
+      </div>
+      <div class="ct-cmp-grid" id="ct-cmp-grid"></div>
+    </div>
+
+    <div class="note" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px 24px;font-size:9.5px;line-height:1.6">
+      <span class="lang-en" style="grid-column:span 2;font-weight:600;color:#1e3a5f;margin-bottom:2px">Column Definitions</span>
+      <span class="lang-zh" style="display:none;grid-column:span 2;font-weight:600;color:#1e3a5f;margin-bottom:2px">欄位定義</span>
+      <span class="lang-en"><strong>Apt Price</strong> &mdash; Apartment/condo median total price, local currency. Bangkok/Chiang Mai in THB/sqm. Sorted by USD equivalent.</span>
+      <span class="lang-zh" style="display:none"><strong>公寓房價</strong> &mdash; 公寓/大樓中位總價，當地貨幣顯示。曼谷/清邁為每平方米單價。按美元等值排序。</span>
+      <span class="lang-en"><strong>10yr</strong> &mdash; Cumulative apartment price change over 10 years (2016&ndash;2026).</span>
+      <span class="lang-zh" style="display:none"><strong>10年漲幅</strong> &mdash; 過去10年公寓累計漲跌幅（2016&ndash;2026）。</span>
+      <span class="lang-en"><strong>YoY</strong> &mdash; Latest available quarter vs same quarter prior year.</span>
+      <span class="lang-zh" style="display:none"><strong>YoY</strong> &mdash; 最新可得季度 vs 去年同季。</span>
+      <span class="lang-en"><strong>Yield</strong> &mdash; Gross rental yield, before tax and fees.</span>
+      <span class="lang-zh" style="display:none"><strong>收益率</strong> &mdash; 毛租金收益率，未扣稅費。</span>
+      <span class="lang-en"><strong>Carry</strong> &mdash; Yield minus mortgage rate. Positive = rental income covers debt.</span>
+      <span class="lang-zh" style="display:none"><strong>利差</strong> &mdash; 收益率減房貸利率。正數 = 租金養得起房貸。</span>
+      <span class="lang-en"><strong>PTI</strong> &mdash; Median price &divide; annual household income.</span>
+      <span class="lang-zh" style="display:none"><strong>PTI</strong> &mdash; 中位數房價 &divide; 年家庭收入。</span>
+      <span class="lang-en"><strong>P/R</strong> &mdash; Price &divide; annual rent. &lt;20&times; buy favored &middot; 20&ndash;30&times; neutral &middot; &gt;30&times; rent favored.</span>
+      <span class="lang-zh" style="display:none"><strong>房租比</strong> &mdash; 房價 &divide; 年租金。&lt;20&times; 買入有利 &middot; 20&ndash;30&times; 中性 &middot; &gt;30&times; 租賃有利。</span>
+      <span class="lang-en"><strong>Vac%</strong> &mdash; Rental vacancy rate. &lt;1% = crisis tight &middot; 1&ndash;2% = tight &middot; 2&ndash;3.5% = balanced &middot; &gt;3.5% = soft.</span>
+      <span class="lang-zh" style="display:none"><strong>空置率</strong> &mdash; 租賃空置率。&lt;1%=危機性緊張 &middot; 1&ndash;2%=緊張 &middot; 2&ndash;3.5%=平衡 &middot; &gt;3.5%=鬆軟。</span>
+      <span class="lang-en"><strong>Tx YoY</strong> &mdash; Transaction volume year-on-year change. Positive = rising activity &middot; Negative = cooling.</span>
+      <span class="lang-zh" style="display:none"><strong>量增率</strong> &mdash; 成交量年增率。正數=交易活絡 &middot; 負數=市場降溫。</span>
+      <span class="lang-en"><strong>Now</strong> &mdash; Current inventory level. 🔴 Tight &middot; 🟡 Balanced &middot; 🟢 Loose (buyer leverage).</span>
+      <span class="lang-zh" style="display:none"><strong>現在供需</strong> &mdash; 當前庫存水位。🔴 緊張 &middot; 🟡 平衡 &middot; 🟢 寬鬆（買方有議價空間）。</span>
+      <span class="lang-en"><strong>Pipeline</strong> &mdash; Units under construction as % of existing stock. Low &lt;1% &middot; Mod 1&ndash;2.5% &middot; High &gt;2.5%.</span>
+      <span class="lang-zh" style="display:none"><strong>未來供給</strong> &mdash; 在建單位佔現有存量%。低 &lt;1% &middot; 中 1&ndash;2.5% &middot; 高 &gt;2.5%。</span>
+      <span class="lang-en"><strong>3yr Outlook</strong> &mdash; Qualitative forward supply-demand assessment.</span>
+      <span class="lang-zh" style="display:none"><strong>3年展望</strong> &mdash; 定性前瞻供需評估。</span>
+      <span class="lang-en"><strong>Rate</strong> &mdash; Prevailing mortgage rate, 2026.</span>
+      <span class="lang-zh" style="display:none"><strong>利率</strong> &mdash; 2026年現行房貸利率。</span>
+      <span class="lang-en" style="grid-column:span 2;margin-top:4px;color:#94a3b8">Sources: Numbeo / Case-Shiller / CBRE / CoreLogic / REINZ / Land Registry / NAPIC / MOI / URA / DLD &middot; Updated Q2 2026 &middot; Not investment advice.</span>
+      <span class="lang-zh" style="display:none;grid-column:span 2;margin-top:4px;color:#94a3b8">來源：Numbeo / Case-Shiller / CBRE / CoreLogic / REINZ / 土地登記處 / NAPIC / 內政部 / URA / DLD &middot; 2026年Q2更新 &middot; 非投資建議。</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- Top 5 Cities: 5-Year Investment Picks -->
+<section style="background:#0f2a45">
+  <div class="section" style="max-width:min(1400px,96vw);margin:0 auto;padding-top:32px;padding-bottom:32px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:16px;font-weight:700;color:#fff;letter-spacing:.05em"><span class="lang-en">TOP 5 CITIES: 5-YEAR INVESTMENT OUTLOOK</span><span class="lang-zh" style="display:none">五年投資首選：前五大城市</span></div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:4px"><span class="lang-en">Ranked by composite score: carry spread &times; supply scarcity &times; vacancy &times; affordability &times; track record</span><span class="lang-zh" style="display:none">依綜合評分排名：利差 &times; 供給稀缺度 &times; 空置率 &times; 可負擔性 &times; 歷史紀錄</span></div>
+      <div style="font-size:9.5px;color:#94a3b8;margin-top:6px;letter-spacing:.04em"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#16a34a;vertical-align:middle;margin-right:5px"></span><span class="lang-en">Re-scored 2026-04-27 &middot; <a href="/methodology.html" style="color:#3b82f6;text-decoration:none">Methodology &amp; weights</a></span><span class="lang-zh" style="display:none">2026-04-27 重評 &middot; <a href="/methodology.html" style="color:#3b82f6;text-decoration:none">方法論與權重</a></span></div>
+    </div>
+    <!-- Slider Control Panel -->
+    <div id="t5-controls" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+        <div style="font-size:10px;color:#94a3b8;letter-spacing:.08em;font-weight:600"><span class="lang-en">ADJUST WEIGHTS &mdash; RANKINGS UPDATE LIVE</span><span class="lang-zh" style="display:none">調整權重 &mdash; 排名即時更新</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="t5-preset active" data-p="balanced" onclick="t5Preset('balanced')"><span class="lang-en">Default</span><span class="lang-zh" style="display:none">預設</span></button>
+          <button class="t5-preset" data-p="income" onclick="t5Preset('income')"><span class="lang-en">Pure Income</span><span class="lang-zh" style="display:none">純收租</span></button>
+          <button class="t5-preset" data-p="growth" onclick="t5Preset('growth')"><span class="lang-en">Capital Growth</span><span class="lang-zh" style="display:none">純增值</span></button>
+          <button class="t5-preset" data-p="safe" onclick="t5Preset('safe')"><span class="lang-en">Safe Haven</span><span class="lang-zh" style="display:none">避風港</span></button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+        <div class="t5-slider-block"><label><span><span class="lang-en">Income (carry)</span><span class="lang-zh" style="display:none">收租（利差）</span></span><span class="t5-val" id="t5-v-income">50</span></label><input type="range" min="0" max="100" value="50" id="t5-s-income" oninput="t5OnSlide()"></div>
+        <div class="t5-slider-block"><label><span><span class="lang-en">Growth (YoY+10yr)</span><span class="lang-zh" style="display:none">增值（年增+10年）</span></span><span class="t5-val" id="t5-v-growth">50</span></label><input type="range" min="0" max="100" value="50" id="t5-s-growth" oninput="t5OnSlide()"></div>
+        <div class="t5-slider-block"><label><span><span class="lang-en">Currency stability</span><span class="lang-zh" style="display:none">貨幣穩定</span></span><span class="t5-val" id="t5-v-stab">50</span></label><input type="range" min="0" max="100" value="50" id="t5-s-stab" oninput="t5OnSlide()"></div>
+        <div class="t5-slider-block"><label><span><span class="lang-en">Affordability (PTI)</span><span class="lang-zh" style="display:none">可負擔（PTI）</span></span><span class="t5-val" id="t5-v-aff">50</span></label><input type="range" min="0" max="100" value="50" id="t5-s-aff" oninput="t5OnSlide()"></div>
+      </div>
+    </div>
+
+    <div id="t5-5yr-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px"></div>
+
+    <div style="margin-top:20px;padding:14px 18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:9px;color:#94a3b8;line-height:1.6;font-family:Inter,sans-serif">
+      <span class="lang-en"><strong style="color:#f59e0b">5yr scoring:</strong> Composite = your slider weights &times; near-term factors. Carry weighted higher; structural scarcity (vacancy + pipeline) always counted. Top 5 + bench (#6 candidate). <strong>▲N / ▼N</strong> shows movement vs default ranking. <strong>Not investment advice</strong>; all property investment carries risk including total loss of capital.</span>
+      <span class="lang-zh" style="display:none"><strong style="color:#f59e0b">5 年評分：</strong>綜合分數 = slider 權重 &times; 近期因子。利差權重較高；結構稀缺（空置 + 在建）永遠納入。前 5 名 + 候選（第 6 名）。<strong>▲N / ▼N</strong> 為相對於預設排名的變動。<strong>非投資建議</strong>；所有房產投資均有風險。</span>
+    </div>
+
+    <!-- 10-Year Section -->
+    <div style="text-align:center;margin-top:32px;margin-bottom:24px">
+      <div style="font-size:16px;font-weight:700;color:#fff;letter-spacing:.05em"><span class="lang-en">TOP 5 CITIES: 10-YEAR STRUCTURAL BET</span><span class="lang-zh" style="display:none">十年結構性長線：前五大城市</span></div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:4px"><span class="lang-en">Same sliders &mdash; 10yr horizon applies higher weight to structural scarcity &amp; track record</span><span class="lang-zh" style="display:none">相同 slider &mdash; 10 年版對結構稀缺與歷史紀錄加大權重</span></div>
+    </div>
+
+    <div id="t5-10yr-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px"></div>
+
+    <div style="margin-top:20px;padding:14px 18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:9px;color:#94a3b8;line-height:1.6;font-family:Inter,sans-serif">
+      <span class="lang-en"><strong style="color:#f59e0b">10yr scoring:</strong> Same slider inputs as 5yr, but multiplied with horizon weights that favor supply scarcity, pipeline, 10yr track record, and affordability headroom. Carry weight halved &mdash; rates cycle multiple times over a decade. Favors cities where <em>geography or regulation permanently limits supply</em>.</span>
+      <span class="lang-zh" style="display:none"><strong style="color:#f59e0b">10 年評分：</strong>使用同一組 slider 輸入，但乘以時程權重：偏向供給稀缺、在建、10 年紀錄與可負擔餘裕。利差權重減半 &mdash; 利率十年內多次循環。偏好<em>地理或法規永久限制供給</em>的城市。</span>
+    </div>
+  </div>
+</section>
+
+<footer style="background:#fff;border-top:1px solid #dce8f5">
+  <div class="footer">
+    <span class="footer-l">INVESTMQUEST &middot; PROPERTY MONITOR</span>
+    <span class="footer-r">
+      <span class="lang-en">Data: CS / BOT / REIC / CAR / REINZ / Land Registry &middot; Updated Q2 2026</span>
+      <span class="lang-zh">數據來源：CS / BOT / REIC / CAR / REINZ / 土地登記處 &middot; 2026年Q2更新</span>
+    </span>
+  </div>
+</footer>
+
+<script>
+var CITIES=[
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Silicon Valley',nameZh:'矽谷',priceUSD:1500000,priceDisp:'$1.50M',d10y:80,yoy:-2.5,vacancy:1.8,txYoY:-5,yield:3.2,pti:19.5,supply:'tight',pr:30,pipeline:0.4,dom:15,mortgage:6.30,outlook:{en:'Santa Clara County ZHVI ~-1.6% · Low builds',zh:'Santa Clara ZHVI約-1.6% · 低建量'},link:'us/sv.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'San Francisco',nameZh:'舊金山',priceUSD:1290000,priceDisp:'$1.29M',d10y:40,yoy:2.1,vacancy:5.2,txYoY:-5,yield:3.5,pti:18.0,supply:'tight',pr:37,pipeline:0.6,dom:13,mortgage:6.30,outlook:{en:'Zillow ZHVI +2.1% · SFH house +18% YoY',zh:'Zillow ZHVI +2.1% · 獨棟房+18%'},link:'us/sf.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Los Angeles',nameZh:'洛杉磯',priceUSD:910000,priceDisp:'$910K',d10y:80,yoy:-1.6,vacancy:4.6,txYoY:-3,yield:4.5,pti:12.0,supply:'balanced',pr:40,pipeline:0.8,dom:35,mortgage:6.30,outlook:{en:'LA County median $910K · -1.6% YoY Redfin',zh:'LA郡中位$910K · Redfin年-1.6%'},link:'us/la.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'San Diego',nameZh:'聖地牙哥',priceUSD:950000,priceDisp:'$950K',d10y:95,yoy:-1.5,vacancy:3.2,txYoY:2,yield:4.0,pti:11.5,supply:'balanced',pr:30,pipeline:1.0,dom:27,mortgage:6.30,outlook:{en:'Redfin city $950K · +95% 10yr Case-Shiller',zh:'Redfin市$950K · Case-Shiller 10年+95%'},link:'us/sandiego.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'NYC',nameZh:'紐約',priceUSD:1225000,priceDisp:'$1.23M',d10y:58,yoy:5.2,vacancy:2.8,txYoY:5,yield:2.8,pti:14.75,supply:'balanced',pr:20,pipeline:0.9,dom:60,mortgage:6.30,outlook:{en:'Manhattan Q1 2026 +5.2% · Case-Shiller +4.9%',zh:'曼哈頓2026Q1 +5.2% · Case-Shiller +4.9%'},link:'us/nyc.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Boston',nameZh:'波士頓',priceUSD:868000,priceDisp:'$868K',d10y:70,yoy:3.3,vacancy:2.3,txYoY:-2,yield:4.5,pti:10.0,supply:'tight',pr:28,pipeline:0.5,dom:12,mortgage:6.30,outlook:{en:'Redfin city $868K · MA SFH +4.4% YoY',zh:'Redfin市$868K · 麻州獨棟+4.4%'},link:'us/boston.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Seattle',nameZh:'西雅圖',priceUSD:840000,priceDisp:'$840K',d10y:100,yoy:0.5,vacancy:2.8,txYoY:-3,yield:5.5,pti:10.5,supply:'tight',pr:34,pipeline:1.2,dom:18,mortgage:6.30,outlook:{en:'NWMLS $840K · listings +34.9% YoY King Co.',zh:'NWMLS $840K · King郡掛牌+34.9%'},link:'us/seattle.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Miami',nameZh:'邁阿密',priceUSD:674000,priceDisp:'$674K',d10y:115,yoy:10.6,vacancy:7.5,txYoY:-12,yield:6.5,pti:7.0,supply:'loose',pr:29,pipeline:3.5,dom:61,mortgage:6.30,outlook:{en:'Dade SFH +10.6% YoY · Condo 12mo inventory',zh:'Dade獨棟+10.6% · 公寓12個月庫存'},link:'us/miami.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Denver',nameZh:'丹佛',priceUSD:590000,priceDisp:'$590K',d10y:72,yoy:-3.6,vacancy:3.9,txYoY:-6,yield:6.0,pti:6.8,supply:'balanced',pr:24,pipeline:2.1,dom:38,mortgage:6.30,outlook:{en:'DMAR $590K all · Zillow ZHVI -3.6% YoY',zh:'DMAR全$590K · Zillow ZHVI年-3.6%'},link:'us/denver.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Phoenix',nameZh:'鳳凰城',priceUSD:455000,priceDisp:'$455K',d10y:130,yoy:-1.5,vacancy:3.3,txYoY:-4,yield:5.5,pti:5.2,supply:'balanced',pr:31,pipeline:2.8,dom:45,mortgage:6.30,outlook:{en:'ARMLS $455K · Case-Shiller -1.5%',zh:'ARMLS $455K · Case-Shiller -1.5%'},link:'us/phoenix.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Austin',nameZh:'奧斯丁',priceUSD:426000,priceDisp:'$426K',d10y:85,yoy:-3.0,vacancy:4.8,txYoY:-8,yield:5.7,pti:3.5,supply:'loose',pr:23,pipeline:2.5,dom:52,mortgage:6.30,outlook:{en:'Unlock MLS metro $426K · -24% from 2022 peak',zh:'Unlock MLS都會$426K · 較2022高峰-24%'},link:'us/austin.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Chicago',nameZh:'芝加哥',priceUSD:411000,priceDisp:'$411K',d10y:48,yoy:5.4,vacancy:3.5,txYoY:8,yield:8.3,pti:4.5,supply:'tight',pr:19,pipeline:0.7,dom:22,mortgage:6.30,outlook:{en:'Redfin $411K · Case-Shiller +4.6% · 8.3% yield',zh:'Redfin $411K · Case-Shiller +4.6% · 8.3%收益'},link:'us/chicago.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'London',nameZh:'倫敦',priceUSD:858000,priceDisp:'£681K',d10y:15,yoy:-3.0,vacancy:1.2,txYoY:5,yield:3.8,pti:8.6,supply:'balanced',pr:31,pipeline:0.6,dom:45,mortgage:4.85,outlook:{en:'Rightmove TTM -3% vs 2023 peak -8%',zh:'Rightmove TTM -3% · 較2023峰-8%'},link:'uk/london.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'Edinburgh',nameZh:'愛丁堡',priceUSD:370000,priceDisp:'£294K',d10y:35,yoy:3.9,vacancy:0.8,txYoY:3,yield:5.7,pti:8.0,supply:'tight',pr:16,pipeline:0.4,dom:22,mortgage:4.10,outlook:{en:'ONS +3.9% · EH3 compact up to 7.4% yield',zh:'ONS +3.9% · EH3緊湊單位收益率達7.4%'},link:'uk/edinburgh.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'Birmingham',nameZh:'伯明翰',priceUSD:291000,priceDisp:'£231K',d10y:30,yoy:0.0,vacancy:1.5,txYoY:8,yield:5.6,pti:5.5,supply:'tight',pr:21,pipeline:1.1,dom:32,mortgage:4.10,outlook:{en:'ONS flat · HS2 Curzon regen',zh:'ONS持平 · HS2 Curzon再造'},link:'uk/birmingham.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'Manchester',nameZh:'曼徹斯特',priceUSD:320000,priceDisp:'£254K',d10y:40,yoy:4.4,vacancy:1.0,txYoY:6,yield:6.1,pti:6.8,supply:'tight',pr:18,pipeline:0.8,dom:28,mortgage:4.10,outlook:{en:'ONS +4.4% · M11/13/14 yields 6.7-7.9%',zh:'ONS +4.4% · M11/13/14收益率6.7-7.9%'},link:'uk/manchester.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'Newcastle',nameZh:'紐卡斯爾',priceUSD:261000,priceDisp:'£207K',d10y:28,yoy:5.1,vacancy:1.8,txYoY:4,yield:6.0,pti:5.0,supply:'balanced',pr:15,pipeline:0.5,dom:35,mortgage:4.10,outlook:{en:'ONS +5.1% · NE1-NE6 HMO yields 7.6-9.5%',zh:'ONS +5.1% · NE1-NE6 HMO收益7.6-9.5%'},link:'uk/newcastle.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Sydney',nameZh:'雪梨',priceUSD:817000,priceDisp:'A$1.30M',d10y:65,yoy:0.0,vacancy:1.1,txYoY:-2,yield:3.0,pti:13.5,supply:'tight',pr:21,pipeline:0.8,dom:28,mortgage:4.85,outlook:{en:'Cotality HVI flat · vacancy 1.1% SQM',zh:'Cotality HVI持平 · SQM空置1.1%'},link:'au/sydney.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Gold Coast',nameZh:'黃金海岸',priceUSD:851000,priceDisp:'A$1.35M',d10y:100,yoy:10.5,vacancy:1.1,txYoY:5,yield:4.5,pti:11.2,supply:'tight',pr:33,pipeline:0.5,dom:28,mortgage:4.85,outlook:{en:'Cotality 2nd most expensive after Syd/Mel',zh:'Cotality 僅次於雪/墨的次貴市場'},link:'au/goldcoast.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Brisbane',nameZh:'布里斯本',priceUSD:694000,priceDisp:'A$1.10M',d10y:93,yoy:19.1,vacancy:1.2,txYoY:8,yield:4.4,pti:9.5,supply:'tight',pr:30,pipeline:0.9,dom:22,mortgage:4.85,outlook:{en:'Cotality +19.1% · strongest capital',zh:'Cotality +19.1% · 首都最強'},link:'au/brisbane.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Melbourne',nameZh:'墨爾本',priceUSD:522000,priceDisp:'A$828K',d10y:15,yoy:3.4,vacancy:1.6,txYoY:-5,yield:3.8,pti:10.2,supply:'balanced',pr:30,pipeline:1.5,dom:35,mortgage:4.85,outlook:{en:'Cotality +3.4% · recovery inflecting',zh:'Cotality +3.4% · 復甦拐點'},link:'au/melbourne.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Perth',nameZh:'伯斯',priceUSD:644000,priceDisp:'A$1.02M',d10y:90,yoy:24.3,vacancy:0.7,txYoY:12,yield:4.8,pti:7.5,supply:'tight',pr:22,pipeline:0.6,dom:12,mortgage:6.29,outlook:{en:'Cotality +24.3% · resources-driven',zh:'Cotality +24.3% · 礦業帶動'},link:'#'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Adelaide',nameZh:'阿德萊德',priceUSD:593000,priceDisp:'A$937K',d10y:75,yoy:11.4,vacancy:0.9,txYoY:10,yield:3.3,pti:8.0,supply:'tight',pr:24,pipeline:0.5,dom:15,mortgage:6.29,outlook:{en:'Cotality +11.4% · AUKUS + migration',zh:'Cotality +11.4% · AUKUS+移民'},link:'#'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Tokyo',nameZh:'東京',priceUSD:812000,priceDisp:'¥121M',d10y:110,yoy:20.0,vacancy:3.5,txYoY:3,yield:3.3,pti:12.0,supply:'tight',pr:43,pipeline:0.3,dom:30,mortgage:2.32,outlook:{en:'Kantei used 70㎡ Jan-26 · +34% peaking',zh:'Kantei二手70㎡ Jan-26 · +34%見頂'},link:'jp/tokyo.html'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Fukuoka',nameZh:'福岡',priceUSD:342000,priceDisp:'¥53M',d10y:120,yoy:9.0,vacancy:1.5,txYoY:15,yield:5.0,pti:11.0,supply:'tight',pr:71,pipeline:0.4,dom:25,mortgage:2.32,outlook:{en:'REEI ¥53M · land +9% 2nd year · 13yr gain',zh:'REEI ¥53M · 地價連2年+9% · 13年上漲'},link:'jp/fukuoka.html'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Osaka',nameZh:'大阪',priceUSD:259000,priceDisp:'¥40M',d10y:75,yoy:7.0,vacancy:2.0,txYoY:21,yield:3.3,pti:12.0,supply:'tight',pr:35,pipeline:0.5,dom:35,mortgage:2.32,outlook:{en:'Kinki REINS +21% sales · Expo legacy',zh:'近畿REINS成交+21% · 世博效應'},link:'jp/osaka.html'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Nagoya',nameZh:'名古屋',priceUSD:254000,priceDisp:'¥39M',d10y:50,yoy:4.25,vacancy:2.5,txYoY:4,yield:4.3,pti:8.5,supply:'balanced',pr:28,pipeline:0.4,dom:35,mortgage:2.32,outlook:{en:'REEI ¥39M new · MacroMicro +4.25%',zh:'REEI ¥39M新建 · MacroMicro +4.25%'},link:'#'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Sapporo',nameZh:'札幌',priceUSD:388000,priceDisp:'¥60M',d10y:85,yoy:17.0,vacancy:2.2,txYoY:6,yield:4.7,pti:8.0,supply:'tight',pr:22,pipeline:0.5,dom:30,mortgage:2.32,outlook:{en:'REEI ¥60M +17% · Shinkansen extension',zh:'REEI ¥60M +17% · 新幹線延伸'},link:'#'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Taipei',nameZh:'台北',priceUSD:580000,priceDisp:'NT$19M',d10y:35,yoy:-0.6,vacancy:7.1,txYoY:-56,yield:1.8,pti:15.4,supply:'tight',pr:75,pipeline:0.3,dom:35,mortgage:2.32,outlook:{en:'Sinyi HPI -0.6% · vacancy 7.1% MOI',zh:'信義HPI-0.6% · 空置7.1%內政部'},link:'tw/taipei.html'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Hsinchu',nameZh:'新竹',priceUSD:310000,priceDisp:'NT$10M',d10y:58,yoy:-2.3,vacancy:2.0,txYoY:-80,yield:2.3,pti:12.5,supply:'balanced',pr:51,pipeline:0.8,dom:35,mortgage:2.32,outlook:{en:'Sinyi HPI 242.57 (highest) -2.3% decel',zh:'信義HPI 242.57(最高) -2.3%減速'},link:'tw/hsinchu.html'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Taichung',nameZh:'台中',priceUSD:280000,priceDisp:'NT$9M',d10y:55,yoy:-6.8,vacancy:2.8,txYoY:-68,yield:2.5,pti:11.9,supply:'balanced',pr:60,pipeline:1.2,dom:40,mortgage:2.32,outlook:{en:'Sinyi -6.8% · Yungching Q1-26 only +0.1%',zh:'信義-6.8% · 永慶Q1-26僅+0.1%'},link:'tw/taichung.html'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Kaohsiung',nameZh:'高雄',priceUSD:220000,priceDisp:'NT$7M',d10y:40,yoy:-7.3,vacancy:3.0,txYoY:-71,yield:3.0,pti:10.1,supply:'loose',pr:45,pipeline:1.5,dom:40,mortgage:2.32,outlook:{en:'Sinyi -7.3% · new case -16% Q1-26',zh:'信義-7.3% · 新案Q1-26 -16%'},link:'tw/kaohsiung.html'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'New Taipei',nameZh:'新北市',priceUSD:370000,priceDisp:'NT$12M',d10y:30,yoy:-3.0,vacancy:7.5,txYoY:-60,yield:2.1,pti:14.0,supply:'balanced',pr:62,pipeline:1.0,dom:35,mortgage:2.32,outlook:{en:'Sinyi -3.0% · cumulative -5% vs peak',zh:'信義-3.0% · 累計較高峰-5%'},link:'#'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Tainan',nameZh:'台南',priceUSD:190000,priceDisp:'NT$6M',d10y:50,yoy:-2.6,vacancy:2.5,txYoY:-65,yield:2.9,pti:9.0,supply:'balanced',pr:50,pipeline:1.8,dom:42,mortgage:2.32,outlook:{en:'Sinyi -2.6% · cumulative -8 to -9% credit ctrl',zh:'信義-2.6% · 信用管制後累計-8至-9%'},link:'#'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Taoyuan',nameZh:'桃園',priceUSD:250000,priceDisp:'NT$8M',d10y:42,yoy:-3.7,vacancy:2.2,txYoY:-58,yield:2.4,pti:8.7,supply:'balanced',pr:55,pipeline:1.5,dom:38,mortgage:2.32,outlook:{en:'Sinyi -3.7% · cumulative -6 to -7%',zh:'信義-3.7% · 累計-6至-7%'},link:'#'},
+  {flag:'\u{1F1F3}\u{1F1FF}',name:'Auckland',nameZh:'奧克蘭',priceUSD:589000,priceDisp:'NZ$1.015M',d10y:45,yoy:-1.2,vacancy:2.5,txYoY:15,yield:4.0,pti:9.8,supply:'loose',pr:28,pipeline:2.5,dom:55,mortgage:4.25,outlook:{en:'REINZ median NZ$1.015M · HPI -1.2% YoY',zh:'REINZ中位 NZ$1.015M · HPI年-1.2%'},link:'nz/auckland.html'},
+  {flag:'\u{1F1F3}\u{1F1FF}',name:'Christchurch',nameZh:'基督城',priceUSD:426000,priceDisp:'NZ$735K',d10y:55,yoy:6.7,vacancy:2.3,txYoY:8,yield:4.4,pti:6.5,supply:'balanced',pr:25,pipeline:2.0,dom:38,mortgage:4.25,outlook:{en:'REINZ record NZ$735K · city +6.7%',zh:'REINZ紀錄 NZ$735K · 城+6.7%'},link:'nz/christchurch.html'},
+  {flag:'\u{1F1F2}\u{1F1FE}',name:'Kuala Lumpur',nameZh:'吉隆坡',priceUSD:181000,priceDisp:'RM 805K',d10y:10,yoy:-4.3,vacancy:18.0,txYoY:6,yield:4.9,pti:6.2,supply:'loose',pr:27,pipeline:2.8,dom:90,mortgage:4.25,outlook:{en:'NAPIC RM805K -4.3% · overhang 2,287 units',zh:'NAPIC RM805K -4.3% · 積壓2,287套'},link:'kl.html'},
+  {flag:'\u{1F1F2}\u{1F1FE}',name:'Penang',nameZh:'檳城',priceUSD:113000,priceDisp:'RM 505K',d10y:25,yoy:6.3,vacancy:12.0,txYoY:4,yield:5.7,pti:5.8,supply:'balanced',pr:23,pipeline:1.5,dom:75,mortgage:4.25,outlook:{en:'NAPIC RM505K +6.3% · overhang 2,730 units',zh:'NAPIC RM505K +6.3% · 積壓2,730套'},link:'penang.html'},
+  {flag:'\u{1F1F9}\u{1F1ED}',name:'Bangkok CBD',nameZh:'曼谷CBD',priceUSD:null,priceDisp:'THB 238K/m²',d10y:40,yoy:4.0,vacancy:12.0,txYoY:-5,yield:6.0,pti:8.5,supply:'loose',pr:31,pipeline:3.0,dom:120,mortgage:3.00,outlook:{en:'Knight Frank Q2-25 · CBD +3-5% · CBRE 2026 +15% fcst',zh:'萊坊Q2-25 · CBD +3-5% · CBRE 2026預測+15%'},link:'th/bangkok.html'},
+  {flag:'\u{1F1F9}\u{1F1ED}',name:'Chiang Mai',nameZh:'清邁',priceUSD:null,priceDisp:'THB 85K/m²',d10y:35,yoy:9.5,vacancy:8.0,txYoY:3,yield:5.5,pti:6.0,supply:'balanced',pr:21,pipeline:2.0,dom:90,mortgage:3.00,outlook:{en:'Nimman +9-10% · DTV visa demand',zh:'尼曼+9-10% · DTV簽證需求'},link:'th/chiangmai.html'},
+  // SG
+  {flag:'\u{1F1F8}\u{1F1EC}',name:'Singapore',nameZh:'新加坡',priceUSD:1330000,priceDisp:'S$1.80M',d10y:30,yoy:3.0,vacancy:3.2,txYoY:-40,yield:3.3,pti:15.0,supply:'tight',pr:29,pipeline:1.5,dom:25,mortgage:2.70,outlook:{en:'URA PPI +0.3% QoQ · slowest in 6Q · -41% resale vol',zh:'URA PPI +0.3% · 6季最慢 · 轉售量-41%'},link:'#'},
+  // HK
+  {flag:'\u{1F1ED}\u{1F1F0}',name:'Hong Kong',nameZh:'香港',priceUSD:897000,priceDisp:'HK$7.0M',d10y:-10,yoy:2.0,vacancy:4.5,txYoY:0,yield:3.4,pti:16.7,supply:'tight',pr:45,pipeline:0.4,dom:55,mortgage:3.75,outlook:{en:'Centaline CCL 11mo of gains · near 2yr high',zh:'中原CCL連11月升 · 近2年高'},link:'#'},
+  // KR
+  {flag:'\u{1F1F0}\u{1F1F7}',name:'Seoul',nameZh:'首爾',priceUSD:917000,priceDisp:'₩1.35B',d10y:60,yoy:9.0,vacancy:2.8,txYoY:8,yield:3.0,pti:15.0,supply:'tight',pr:40,pipeline:0.6,dom:30,mortgage:4.19,outlook:{en:'KREB median · 2025 YoY +8.98% highest since 2013',zh:'KREB中位 · 2025年增+8.98%自2013新高'},link:'kr/seoul.html'},
+  {flag:'\u{1F1F0}\u{1F1F7}',name:'Busan',nameZh:'釜山',priceUSD:435000,priceDisp:'₩640M',d10y:25,yoy:1.0,vacancy:4.0,txYoY:3,yield:4.5,pti:7.0,supply:'loose',pr:22,pipeline:1.2,dom:40,mortgage:4.19,outlook:{en:'MOLIT ₩7.5M/sqm · LH buyback 5K unsold',zh:'MOLIT ₩7.5M/sqm · LH回購5K未售'},link:'kr/busan.html'},
+  // AE
+  {flag:'\u{1F1E6}\u{1F1EA}',name:'Dubai',nameZh:'杜拜',priceUSD:572000,priceDisp:'AED 2.1M',d10y:80,yoy:12.5,vacancy:8.5,txYoY:25,yield:6.6,pti:5.5,supply:'loose',pr:15,pipeline:6.5,dom:35,mortgage:3.70,outlook:{en:'Property Finder +12.5% · 99K+ units 2026 pipeline',zh:'Property Finder +12.5% · 2026年99K+供應'},link:'#'},
+  // VN
+  {flag:'\u{1F1FB}\u{1F1F3}',name:'Ho Chi Minh City',nameZh:'胡志明市',priceUSD:295000,priceDisp:'$295K',d10y:100,yoy:23.0,vacancy:6.0,txYoY:82,yield:4.0,pti:10.0,supply:'tight',pr:18,pipeline:2.5,dom:45,mortgage:13.00,outlook:{en:'Cushman+W $4,222/m² +23% · Savills Q4 absorption 82%',zh:'C&W $4,222/m² +23% · Savills Q4吸收82%'},link:'vn/hochiminh.html'},
+  // ID
+  {flag:'\u{1F1EE}\u{1F1E9}',name:'Jakarta',nameZh:'雅加達',priceUSD:120000,priceDisp:'IDR 1.9B',d10y:15,yoy:2.0,vacancy:40.0,txYoY:2,yield:5.5,pti:8.0,supply:'loose',pr:25,pipeline:1.5,dom:90,mortgage:8.60,outlook:{en:'BI IHPR +0.83% · vacancy 40% · only 2.2K 2025 supply',zh:'BI IHPR +0.83% · 空置40% · 2025年僅2.2K供應'},link:'#'},
+  // IE
+  {flag:'\u{1F1EE}\u{1F1EA}',name:'Dublin',nameZh:'都柏林',priceUSD:486000,priceDisp:'€450K',d10y:70,yoy:4.8,vacancy:0.5,txYoY:5,yield:3.5,pti:8.5,supply:'tight',pr:28,pipeline:1.5,dom:25,mortgage:3.50,outlook:{en:'MyHome €450K asking · CSO RPPI +4.8% easing',zh:'MyHome €450K開價 · CSO RPPI +4.8%趨緩'},link:'ie/dublin.html'},
+  {flag:'\u{1F1EE}\u{1F1EA}',name:'Cork',nameZh:'科克',priceUSD:373000,priceDisp:'€345K',d10y:65,yoy:4.2,vacancy:0.6,txYoY:8,yield:7.0,pti:6.2,supply:'tight',pr:22,pipeline:1.2,dom:22,mortgage:3.50,outlook:{en:'CSO county €345K · SW region +4.2% · yield 7-9%',zh:'CSO郡 €345K · 西南+4.2% · 收益7-9%'},link:'ie/cork.html'},
+  // NL
+  {flag:'\u{1F1F3}\u{1F1F1}',name:'Amsterdam',nameZh:'阿姆斯特丹',priceUSD:641000,priceDisp:'€594K',d10y:85,yoy:3.6,vacancy:1.5,txYoY:12,yield:3.5,pti:10.0,supply:'tight',pr:28,pipeline:0.8,dom:20,mortgage:4.05,outlook:{en:'Amsterdam €594K +3.6% · NL shortage 350K homes',zh:'阿姆斯特丹€594K +3.6% · NL短缺35萬套'},link:'#'},
+  // DE
+  {flag:'\u{1F1E9}\u{1F1EA}',name:'Berlin',nameZh:'柏林',priceUSD:358000,priceDisp:'€331K',d10y:60,yoy:3.0,vacancy:1.2,txYoY:-3,yield:3.8,pti:7.5,supply:'balanced',pr:26,pipeline:1.0,dom:40,mortgage:3.75,outlook:{en:'vdp +4% 2025 · €5,100/m² Berlin · rent cap',zh:'vdp 2025 +4% · 柏林 €5,100/m² · 租金管制'},link:'#'},
+  // PT
+  {flag:'\u{1F1F5}\u{1F1F9}',name:'Lisbon',nameZh:'里斯本',priceUSD:429000,priceDisp:'€397K',d10y:95,yoy:4.0,vacancy:1.8,txYoY:8,yield:4.3,pti:12.0,supply:'tight',pr:22,pipeline:1.2,dom:30,mortgage:4.00,outlook:{en:'INE €397K · Lisbon +4% · Portugal nat +15%',zh:'INE €397K · 里斯本+4% · 葡萄牙全國+15%'},link:'#'},
+  // FR
+  {flag:'\u{1F1EB}\u{1F1F7}',name:'Paris',nameZh:'巴黎',priceUSD:511000,priceDisp:'€473K',d10y:10,yoy:2.0,vacancy:2.5,txYoY:-10,yield:3.5,pti:14.0,supply:'balanced',pr:35,pipeline:0.5,dom:50,mortgage:3.25,outlook:{en:'Notaires €10,523/m² +2% · rent cap active',zh:'公證 €10,523/m² +2% · 租金管制'},link:'#'},
+  {flag:'\u{1F1EB}\u{1F1F7}',name:'Lyon',nameZh:'里昂',priceUSD:351000,priceDisp:'€325K',d10y:25,yoy:0.0,vacancy:3.0,txYoY:-5,yield:4.1,pti:8.5,supply:'balanced',pr:25,pipeline:0.8,dom:40,mortgage:3.25,outlook:{en:'SeLoger €4,640/m² stabilizing · zone tendue',zh:'SeLoger €4,640/m²趨穩 · 緊張區'},link:'#'},
+  {flag:'\u{1F1EB}\u{1F1F7}',name:'Marseille',nameZh:'馬賽',priceUSD:272000,priceDisp:'€252K',d10y:25,yoy:-3.0,vacancy:3.5,txYoY:2,yield:5.4,pti:6.5,supply:'balanced',pr:19,pipeline:1.0,dom:45,mortgage:3.25,outlook:{en:'Investropa €3,604/m² -3% · DPE discount F/G',zh:'Investropa €3,604/m² -3% · DPE F/G折讓'},link:'#'},
+  // DE
+  {flag:'\u{1F1E9}\u{1F1EA}',name:'Munich',nameZh:'慕尼黑',priceUSD:620000,priceDisp:'€574K',d10y:55,yoy:3.5,vacancy:0.8,txYoY:-8,yield:2.5,pti:12.0,supply:'tight',pr:33,pipeline:0.4,dom:35,mortgage:3.75,outlook:{en:'vdp €8,200/m² +3-4% · vacancy <1%',zh:'vdp €8,200/m² +3-4% · 空置<1%'},link:'#'},
+  {flag:'\u{1F1E9}\u{1F1EA}',name:'Frankfurt',nameZh:'法蘭克福',priceUSD:524000,priceDisp:'€485K',d10y:45,yoy:3.5,vacancy:1.2,txYoY:-5,yield:2.8,pti:9.0,supply:'balanced',pr:28,pipeline:0.6,dom:38,mortgage:3.75,outlook:{en:'vdp €6,480/m² +3-4% · ECB/finance demand',zh:'vdp €6,480/m² +3-4% · 歐央行+金融需求'},link:'#'},
+  {flag:'\u{1F1E9}\u{1F1EA}',name:'Hamburg',nameZh:'漢堡',priceUSD:419000,priceDisp:'€388K',d10y:50,yoy:3.5,vacancy:2.0,txYoY:-2,yield:3.2,pti:8.0,supply:'balanced',pr:26,pipeline:0.7,dom:35,mortgage:3.75,outlook:{en:'vdp €5,970/m² · port+media · vacancy <2%',zh:'vdp €5,970/m² · 港口+媒體 · 空置<2%'},link:'#'},
+  // PL
+  {flag:'\u{1F1F5}\u{1F1F1}',name:'Warsaw',nameZh:'華沙',priceUSD:251000,priceDisp:'PLN 990K',d10y:75,yoy:2.0,vacancy:2.0,txYoY:15,yield:5.0,pti:7.5,supply:'tight',pr:20,pipeline:2.5,dom:30,mortgage:7.50,outlook:{en:'PLN 18K/m² +2% nominal (-1% real) · NBP 3.75%',zh:'PLN 18K/m² +2%名目(-1%實質) · NBP 3.75%'},link:'#'},
+  // CZ
+  {flag:'\u{1F1E8}\u{1F1FF}',name:'Prague',nameZh:'布拉格',priceUSD:378000,priceDisp:'CZK 8.7M',d10y:90,yoy:10.0,vacancy:1.5,txYoY:10,yield:4.0,pti:11.0,supply:'tight',pr:25,pipeline:1.0,dom:28,mortgage:4.89,outlook:{en:'CZK 145K/m² · Deloitte Real Index +15.3% YoY',zh:'CZK 145K/m² · Deloitte Real Index +15.3%'},link:'#'},
+  // ES
+  {flag:'\u{1F1EA}\u{1F1F8}',name:'Madrid',nameZh:'馬德里',priceUSD:508000,priceDisp:'€470K',d10y:35,yoy:14.0,vacancy:1.8,txYoY:18,yield:5.1,pti:7.5,supply:'tight',pr:22,pipeline:1.2,dom:25,mortgage:2.85,outlook:{en:'Idealista €5,820/m² +14% nominal · zona tensionada',zh:'Idealista €5,820/m² +14%名目 · 緊張區'},link:'#'},
+  {flag:'\u{1F1EA}\u{1F1F8}',name:'Barcelona',nameZh:'巴塞隆納',priceUSD:443000,priceDisp:'€410K',d10y:30,yoy:10.4,vacancy:1.5,txYoY:12,yield:5.6,pti:9.0,supply:'tight',pr:25,pipeline:0.8,dom:30,mortgage:2.85,outlook:{en:'Idealista €5,034/m² +10.35% · STR phase-out 2028',zh:'Idealista €5,034/m² +10.35% · 2028短租汰除'},link:'#'},
+  {flag:'\u{1F1EA}\u{1F1F8}',name:'Valencia',nameZh:'瓦倫西亞',priceUSD:307000,priceDisp:'€284K',d10y:45,yoy:14.4,vacancy:1.2,txYoY:22,yield:6.2,pti:5.5,supply:'balanced',pr:17,pipeline:1.5,dom:35,mortgage:2.85,outlook:{en:'Idealista €3,339/m² +14.4% · near historic peak',zh:'Idealista €3,339/m² +14.4% · 近歷史高'},link:'#'},
+  {flag:'\u{1F1EA}\u{1F1F8}',name:'Malaga',nameZh:'馬拉加',priceUSD:378000,priceDisp:'€350K',d10y:70,yoy:10.0,vacancy:1.0,txYoY:20,yield:6.6,pti:6.0,supply:'tight',pr:18,pipeline:1.8,dom:20,mortgage:2.85,outlook:{en:'E&V €4,111/m² +10% · Costa del Sol yield 6.3-7%',zh:'E&V €4,111/m² +10% · 太陽海岸收益6.3-7%'},link:'#'},
+  // CH
+  {flag:'\u{1F1E8}\u{1F1ED}',name:'Zurich',nameZh:'蘇黎世',priceUSD:1231000,priceDisp:'CHF 1.10M',d10y:25,yoy:4.3,vacancy:0.1,txYoY:-3,yield:2.5,pti:8.5,supply:'tight',pr:38,pipeline:0.3,dom:20,mortgage:1.81,outlook:{en:'Wüest CHF 16,900/m² +4.3% · 235 empty units',zh:'Wüest CHF 16,900/m² +4.3% · 僅235空屋'},link:'#'},
+  {flag:'\u{1F1E8}\u{1F1ED}',name:'Geneva',nameZh:'日内瓦',priceUSD:1128000,priceDisp:'CHF 1.01M',d10y:20,yoy:3.0,vacancy:0.3,txYoY:-2,yield:3.0,pti:9.0,supply:'tight',pr:42,pipeline:0.2,dom:18,mortgage:1.81,outlook:{en:'Neho CHF 15,494/m² +3% · intl org demand',zh:'Neho CHF 15,494/m² +3% · 國際組織需求'},link:'#'},
+  // IT
+  {flag:'\u{1F1EE}\u{1F1F9}',name:'Milan',nameZh:'米蘭',priceUSD:454000,priceDisp:'€420K',d10y:10,yoy:3.5,vacancy:2.5,txYoY:8,yield:5.3,pti:8.5,supply:'balanced',pr:24,pipeline:1.5,dom:35,mortgage:3.50,outlook:{en:'Immobiliare €5,100-5,500/m² +2-6% · decel',zh:'Immobiliare €5,100-5,500/m² +2-6% · 減速'},link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F9}',name:'Rome',nameZh:'羅馬',priceUSD:346000,priceDisp:'€320K',d10y:0,yoy:6.3,vacancy:4.0,txYoY:3,yield:7.0,pti:7.5,supply:'balanced',pr:22,pipeline:0.5,dom:55,mortgage:3.50,outlook:{en:'Immobiliare €3,759/m² +6.28% · Jubilee legacy',zh:'Immobiliare €3,759/m² +6.28% · 禧年遺產'},link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F9}',name:'Florence',nameZh:'佛羅倫斯',priceUSD:408000,priceDisp:'€378K',d10y:20,yoy:7.4,vacancy:2.0,txYoY:5,yield:6.2,pti:9.0,supply:'tight',pr:21,pipeline:0.3,dom:30,mortgage:3.50,outlook:{en:'Immobiliare €4,719/m² peak +7.4% · Airbnb ban',zh:'Immobiliare €4,719/m²高峰+7.4% · Airbnb禁'},link:'#'},
+  // TR
+  {flag:'\u{1F1F9}\u{1F1F7}',name:'Istanbul',nameZh:'伊斯坦堡',priceUSD:99000,priceDisp:'TRY 3.5M',d10y:180,yoy:27.8,vacancy:3.0,txYoY:30,yield:7.0,pti:6.0,supply:'balanced',pr:18,pipeline:3.5,dom:40,mortgage:36.00,outlook:{en:'TCMB +27.8% nominal / -3.4% real · TCMB 37%',zh:'TCMB +27.8%名目/-3.4%實質 · TCMB 37%'},link:'#'},
+  // IN
+  {flag:'\u{1F1EE}\u{1F1F3}',name:'Mumbai',nameZh:'孟買',priceUSD:240000,priceDisp:'INR 2.0Cr',d10y:20,yoy:11.0,vacancy:5.0,txYoY:18,yield:3.8,pti:12.0,supply:'balanced',pr:33,pipeline:3.5,dom:60,mortgage:7.70,outlook:{en:'ANAROCK +10-12% · Q1-26 32.8K sales',zh:'ANAROCK +10-12% · Q1-26 32.8K成交'},link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F3}',name:'Bangalore',nameZh:'班加羅爾',priceUSD:130000,priceDisp:'INR 1.1Cr',d10y:55,yoy:13.0,vacancy:4.5,txYoY:22,yield:4.5,pti:7.5,supply:'balanced',pr:28,pipeline:4.5,dom:45,mortgage:7.70,outlook:{en:'ANAROCK +13% · APAC office rent +14% Knight Frank',zh:'ANAROCK +13% · APAC辦公租金+14%'},link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F3}',name:'Delhi NCR',nameZh:'德里首都圈',priceUSD:105000,priceDisp:'INR 88L',d10y:80,yoy:15.0,vacancy:8.0,txYoY:15,yield:5.8,pti:8.0,supply:'loose',pr:30,pipeline:5.5,dom:75,mortgage:7.70,outlook:{en:'+81% 5yr · ANAROCK Q1-26 +15% highest',zh:'5年+81% · ANAROCK Q1-26 +15%最高'},link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F3}',name:'Hyderabad',nameZh:'海得拉巴',priceUSD:95000,priceDisp:'INR 80L',d10y:65,yoy:9.0,vacancy:3.5,txYoY:25,yield:3.5,pti:5.5,supply:'balanced',pr:25,pipeline:4.0,dom:40,mortgage:7.70,outlook:{en:'Outlook +9% Q1-26 · launches +46% QoQ',zh:'Outlook Q1-26 +9% · 推案QoQ+46%'},link:'#'},
+  // PH
+  {flag:'\u{1F1F5}\u{1F1ED}',name:'Manila',nameZh:'馬尼拉',priceUSD:134000,priceDisp:'PHP 7.5M',d10y:40,yoy:1.6,vacancy:26.0,txYoY:19,yield:5.8,pti:12.0,supply:'loose',pr:16,pipeline:2.5,dom:80,mortgage:7.50,outlook:{en:'BSP RPPI +1.6% (6yr low) · 30K unsold 8yr',zh:'BSP RPPI +1.6% (6年低) · 3萬未售8年消化'},link:'#'},
+  // CA
+  {flag:'\u{1F1E8}\u{1F1E6}',name:'Toronto',nameZh:'多倫多',priceUSD:690000,priceDisp:'C$942K',d10y:50,yoy:-7.4,vacancy:3.0,txYoY:-5,yield:3.8,pti:10.5,supply:'loose',pr:26,pipeline:2.0,dom:45,mortgage:4.04,outlook:{en:'TRREB HPI -7.4% · 3% vacancy highest since 2021',zh:'TRREB HPI -7.4% · 空置3%自2021新高'},link:'ca/toronto.html'},
+  {flag:'\u{1F1E8}\u{1F1E6}',name:'Vancouver',nameZh:'溫哥華',priceUSD:810000,priceDisp:'C$1.10M',d10y:60,yoy:-6.8,vacancy:3.7,txYoY:-3,yield:4.0,pti:12.5,supply:'loose',pr:32,pipeline:1.4,dom:50,mortgage:4.04,outlook:{en:'REBGV HPI -6.8% · 7.3mo inventory · vac 3.7%',zh:'REBGV HPI -6.8% · 7.3月庫存 · 空置3.7%'},link:'ca/vancouver.html'},
+  // LATAM
+  {flag:'\u{1F1F2}\u{1F1FD}',name:'Mexico City',nameZh:'墨西哥城',priceUSD:260000,priceDisp:'MXN 4.5M',d10y:55,yoy:4.6,vacancy:4.0,txYoY:10,yield:6.0,pti:7.0,supply:'balanced',pr:17,pipeline:2.0,dom:55,mortgage:11.00,outlook:{en:'SHF HPI +4.6% · nearshoring + DN',zh:'SHF HPI +4.6% · 近岸+數位遊民'},link:'#'},
+  {flag:'\u{1F1E7}\u{1F1F7}',name:'São Paulo',nameZh:'聖保羅',priceUSD:135000,priceDisp:'R$765K',d10y:25,yoy:5.0,vacancy:5.0,txYoY:8,yield:6.3,pti:8.0,supply:'balanced',pr:18,pipeline:2.5,dom:60,mortgage:10.30,outlook:{en:'FipeZap +5% · Selic 14.75% constrains',zh:'FipeZap +5% · Selic 14.75%制約'},link:'#'},
+  {flag:'\u{1F1E8}\u{1F1F1}',name:'Santiago',nameZh:'聖地牙哥',priceUSD:235000,priceDisp:'CLP 223M',d10y:30,yoy:2.0,vacancy:5.5,txYoY:3,yield:4.8,pti:8.5,supply:'balanced',pr:22,pipeline:1.8,dom:65,mortgage:4.10,outlook:{en:'BCCh 5,600 UF median · +2% UF · subsidy program',zh:'BCCh 5,600 UF中位 · UF +2% · 補貼計劃'},link:'#'},
+  {flag:'\u{1F1E6}\u{1F1F7}',name:'Buenos Aires',nameZh:'布宜諾斯艾利斯',priceUSD:147000,priceDisp:'USD 2,450/m²',d10y:-12,yoy:5.6,vacancy:8.0,txYoY:170,yield:4.8,pti:12.0,supply:'loose',pr:28,pipeline:1.5,dom:120,mortgage:10.00,outlook:{en:'Zonaprop USD +5.6% · Milei rental repeal +170% supply',zh:'Zonaprop USD +5.6% · Milei廢租金法+170%供應'},link:'#'},
+  {flag:'\u{1F1F5}\u{1F1EA}',name:'Lima',nameZh:'利馬',priceUSD:138000,priceDisp:'PEN 511K',d10y:20,yoy:4.0,vacancy:6.0,txYoY:5,yield:5.0,pti:7.5,supply:'balanced',pr:18,pipeline:2.2,dom:75,mortgage:6.30,outlook:{en:'BCRP PEN 511K +4% · credit +7.1% YoY',zh:'BCRP PEN 511K +4% · 信貸年+7.1%'},link:'#'},
+  {flag:'\u{1F1E8}\u{1F1F4}',name:'Bogotá',nameZh:'波哥大',priceUSD:120000,priceDisp:'COP 504M',d10y:15,yoy:6.0,vacancy:5.5,txYoY:4,yield:5.5,pti:8.0,supply:'balanced',pr:17,pipeline:2.0,dom:70,mortgage:12.00,outlook:{en:'Banrep national +5-7% · policy rate 11.25%',zh:'Banrep全國+5-7% · 政策利率11.25%'},link:'#'}
+];
+function supplyBadge(supply,lang){
+  var cfg={
+    tight:{en:'🔴 Tight',zh:'🔴 供給緊張',bg:'#fef2f2',cl:'#991b1b',bdr:'#fca5a5'},
+    balanced:{en:'🟡 Balanced',zh:'🟡 供需平衡',bg:'#fffbeb',cl:'#92400e',bdr:'#fcd34d'},
+    loose:{en:'🟢 Loose',zh:'🟢 供給寬鬆',bg:'#f0fdf4',cl:'#166534',bdr:'#86efac'}
+  };
+  var s=cfg[supply]||cfg['balanced'];
+  return '<span style="display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;background:'+s.bg+';color:'+s.cl+';border:1px solid '+s.bdr+';white-space:nowrap">'+(lang==='zh'?s.zh:s.en)+'</span>';
+}
+function pipelineBadge(v,lang){
+  var cl,bg,bdr,enL,zhL;
+  if(v<1.0){cl='#166534';bg='#f0fdf4';bdr='#86efac';enL='Low';zhL='低';}
+  else if(v<2.5){cl='#1e3a5f';bg='#eff6ff';bdr='#93c5fd';enL='Mod';zhL='中';}
+  else{cl='#92400e';bg='#fffbeb';bdr='#fcd34d';enL='High';zhL='高';}
+  return '<span style="display:inline-block;font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;background:'+bg+';color:'+cl+';border:1px solid '+bdr+';white-space:nowrap">'+(lang==='zh'?zhL:enL)+' '+v.toFixed(1)+'%</span>';
+}
+function sortBy(key){
+  if(sortKey===key){sortDir*=-1;}else{sortKey=key;sortDir=1;}
+  renderTable(currentLang);
+  document.querySelectorAll('.compare-tbl th[data-key]').forEach(function(th){
+    var arrow=th.querySelector('.sort-arrow');
+    if(!arrow)return;
+    if(th.dataset.key===sortKey){arrow.textContent=sortDir===1?' \u2193':' \u2191';th.style.color='#1e3a5f';}
+    else{arrow.textContent=' \u21F5';th.style.color='#5a7a9a';}
+  });
+}
+function renderTable(lang){
+  var sorted=CITIES.slice().sort(function(a,b){
+    var av=a[sortKey],bv=b[sortKey];
+    if(av===null||av===undefined)av=sortDir===1?-Infinity:Infinity;
+    if(bv===null||bv===undefined)bv=sortDir===1?-Infinity:Infinity;
+    if(sortKey==='carry'){av=a.yield-a.mortgage;bv=b.yield-b.mortgage;}
+    if(sortKey==='supply'){av=SUPPLY_ORDER[av]!==undefined?SUPPLY_ORDER[av]:1;bv=SUPPLY_ORDER[bv]!==undefined?SUPPLY_ORDER[bv]:1;}
+    if(typeof av==='string')return sortDir*(av.localeCompare(bv));
+    return sortDir*(bv-av);
+  });
+  var tbody=document.getElementById('city-tbody');
+  tbody.innerHTML=sorted.map(function(c){
+    var nm=lang==='zh'?c.nameZh:c.name;
+    var yoyH=c.yoy>0?'<span style="color:#16a34a;font-weight:600">+'+c.yoy+'%</span>':c.yoy<0?'<span style="color:#dc2626;font-weight:600">'+c.yoy+'%</span>':'<span style="color:#94a3b8">\u2014</span>';
+    var yClr=c.yield>=5?'#16a34a':c.yield>=3.5?'#1e3a5f':'#94a3b8';
+    var yW=c.yield>=5?700:600;
+    var pClr=c.pti<=5?'#16a34a':c.pti<=10?'#d97706':'#dc2626';
+    var prClr=c.pr<20?'#16a34a':c.pr<=30?'#1e3a5f':'#dc2626';
+    var prW=c.pr<20||c.pr>30?700:600;
+    var mClr=c.mortgage<=1.5?'#16a34a':c.mortgage<=3.5?'#1e3a5f':c.mortgage>5?'#dc2626':'#1e3a5f';
+    return '<tr onclick="location.href=\''+c.link+'\'" style="cursor:pointer">'+
+      '<td style="position:sticky;left:0;background:#fff;z-index:1;border-right:1px solid #f0f5fb;font-weight:600;min-width:90px"><span style="font-size:11px;margin-right:4px">'+c.flag+'</span><span style="font-size:10.5px">'+nm+'</span></td>'+
+      (function(){var d=c.d10y;var dc=d>=80?'#16a34a':d>=40?'#1e3a5f':d>=0?'#94a3b8':'#dc2626';return '<td style="color:'+dc+';font-weight:600">'+(d>0?'+':'')+d+'%</td>';})()+
+      '<td>'+yoyH+'</td>'+
+      '<td style="color:'+yClr+';font-weight:'+yW+'">'+c.yield.toFixed(1)+'%</td>'+
+      (function(){var cv=+(c.yield-c.mortgage).toFixed(2);var cc=cv>=1?'#16a34a':cv>=0?'#1e3a5f':'#dc2626';return '<td style="color:'+cc+';font-weight:700">'+(cv>0?'+':'')+cv.toFixed(1)+'%</td>';})()+
+      '<td style="color:'+pClr+';font-weight:600">'+c.pti+'\u00D7</td>'+
+      '<td style="color:'+prClr+';font-weight:'+prW+'">'+c.pr+'\u00D7</td>'+
+      (function(){var v=c.vacancy;var vc=v<=1?'#dc2626':v<=2?'#d97706':v<=3.5?'#1e3a5f':'#94a3b8';return '<td style="color:'+vc+';font-weight:600">'+v.toFixed(1)+'%</td>';})()+
+      (function(){var t=c.txYoY;var tc=t>=10?'#16a34a':t>=0?'#1e3a5f':'#dc2626';return '<td style="color:'+tc+';font-weight:600">'+(t>0?'+':'')+t+'%</td>';})()+
+      '<td style="text-align:center">'+supplyBadge(c.supply,lang)+'</td>'+
+      '<td style="text-align:center">'+pipelineBadge(c.pipeline,lang)+'</td>'+
+      '<td style="font-size:9.5px;color:#475569;line-height:1.35;font-family:Inter,sans-serif;white-space:normal;text-align:left">'+(c.outlook?(lang==='zh'?c.outlook.zh:c.outlook.en):'')+'</td>'+
+      '<td style="font-weight:600;color:#0f2a45;font-size:10px">'+c.priceDisp+'</td>'+
+      '<td style="color:'+mClr+';font-weight:600;font-size:10px">'+c.mortgage.toFixed(1)+'%</td>'+
+      '</tr>';
+  }).join('');
+}
+var sortKey='pipeline';
+var sortDir=-1; // 1=desc, -1=asc
+var SUPPLY_ORDER={tight:0,balanced:1,loose:2};
+var currentLang=localStorage.getItem('lang')||'en';
+
+/* ============================================
+   FILTER + SPARKLINE + PIN/COMPARE
+   Override renderTable below.
+   ============================================ */
+var FLAG_META={
+  '\u{1F1FA}\u{1F1F8}':{code:'us',region:'americas',foreignOK:true,visa:false},
+  '\u{1F1EC}\u{1F1E7}':{code:'gb',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1E6}\u{1F1FA}':{code:'au',region:'oceania',foreignOK:false,visa:false},
+  '\u{1F1EF}\u{1F1F5}':{code:'jp',region:'asia',foreignOK:true,visa:false},
+  '\u{1F1F9}\u{1F1FC}':{code:'tw',region:'asia',foreignOK:false,visa:false},
+  '\u{1F1F3}\u{1F1FF}':{code:'nz',region:'oceania',foreignOK:false,visa:false},
+  '\u{1F1F2}\u{1F1FE}':{code:'my',region:'asia',foreignOK:false,visa:true},
+  '\u{1F1F9}\u{1F1ED}':{code:'th',region:'asia',foreignOK:false,visa:false},
+  '\u{1F1F8}\u{1F1EC}':{code:'sg',region:'asia',foreignOK:false,visa:false},
+  '\u{1F1ED}\u{1F1F0}':{code:'hk',region:'asia',foreignOK:true,visa:false},
+  '\u{1F1F0}\u{1F1F7}':{code:'kr',region:'asia',foreignOK:false,visa:false},
+  '\u{1F1E6}\u{1F1EA}':{code:'ae',region:'mideast',foreignOK:true,visa:true},
+  '\u{1F1FB}\u{1F1F3}':{code:'vn',region:'asia',foreignOK:false,visa:false},
+  '\u{1F1EE}\u{1F1E9}':{code:'id',region:'asia',foreignOK:false,visa:true},
+  '\u{1F1EE}\u{1F1EA}':{code:'ie',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1F3}\u{1F1F1}':{code:'nl',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1E9}\u{1F1EA}':{code:'de',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1F5}\u{1F1F9}':{code:'pt',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1EB}\u{1F1F7}':{code:'fr',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1F5}\u{1F1F1}':{code:'pl',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1E8}\u{1F1FF}':{code:'cz',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1EA}\u{1F1F8}':{code:'es',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1E8}\u{1F1ED}':{code:'ch',region:'europe',foreignOK:false,visa:false},
+  '\u{1F1EE}\u{1F1F9}':{code:'it',region:'europe',foreignOK:true,visa:false},
+  '\u{1F1F9}\u{1F1F7}':{code:'tr',region:'mideast',foreignOK:true,visa:true},
+  '\u{1F1EE}\u{1F1F3}':{code:'in',region:'asia',foreignOK:false,visa:false},
+  '\u{1F1F5}\u{1F1ED}':{code:'ph',region:'asia',foreignOK:false,visa:false},
+  '\u{1F1E8}\u{1F1E6}':{code:'ca',region:'americas',foreignOK:false,visa:false},
+  '\u{1F1F2}\u{1F1FD}':{code:'mx',region:'americas',foreignOK:true,visa:false},
+  '\u{1F1E7}\u{1F1F7}':{code:'br',region:'americas',foreignOK:true,visa:false},
+  '\u{1F1E8}\u{1F1F1}':{code:'cl',region:'americas',foreignOK:true,visa:false},
+  '\u{1F1E6}\u{1F1F7}':{code:'ar',region:'americas',foreignOK:true,visa:false},
+  '\u{1F1F5}\u{1F1EA}':{code:'pe',region:'americas',foreignOK:true,visa:false},
+  '\u{1F1E8}\u{1F1F4}':{code:'co',region:'americas',foreignOK:true,visa:false}
+};
+var ctPinned=[];
+function ctSparkline(c){
+  var d10=c.d10y||0,yoy=c.yoy||0;
+  var pts=[d10*0.50,d10*0.62,d10*0.74,d10*0.85,d10-yoy,d10];
+  var min=Math.min.apply(null,pts),max=Math.max.apply(null,pts);
+  var range=max-min||1;
+  var w=58,h=18;
+  var line=pts.map(function(v,i){var x=(i/(pts.length-1))*w;var y=h-((v-min)/range)*(h-2)-1;return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+  var color=yoy>=2?'#16a34a':yoy>=-1?'#5a7a9a':'#dc2626';
+  var endX=w,endY=h-((pts[pts.length-1]-min)/range)*(h-2)-1;
+  return '<svg width="'+w+'" height="'+h+'" style="display:block;margin:0 auto"><polyline points="'+line+'" fill="none" stroke="'+color+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="'+endX.toFixed(1)+'" cy="'+endY.toFixed(1)+'" r="1.8" fill="'+color+'"/></svg>';
+}
+function ctfState(){
+  var $=function(id){return document.getElementById(id);};
+  if(!$('ctf-search'))return null;
+  return {
+    search:($('ctf-search').value||'').trim().toLowerCase(),
+    region:$('ctf-region').value,
+    yieldMin:parseFloat($('ctf-yield').value)||0,
+    ptiMax:parseFloat($('ctf-pti').value)||999,
+    carryMin:parseFloat($('ctf-carry').value)||-99,
+    foreign:$('ctf-foreign').checked,
+    visa:$('ctf-visa').checked
+  };
+}
+function ctfMatches(c,f){
+  if(!f)return true;
+  if(f.search){var nm=((c.name||'')+' '+(c.nameZh||'')).toLowerCase();if(nm.indexOf(f.search)===-1)return false;}
+  var meta=FLAG_META[c.flag]||{};
+  if(f.region && meta.region!==f.region)return false;
+  if(f.yieldMin>0 && (c.yield||0)<f.yieldMin)return false;
+  if(f.ptiMax<20 && (c.pti||0)>f.ptiMax)return false;
+  if(f.carryMin>-5 && ((c.yield||0)-(c.mortgage||0))<f.carryMin)return false;
+  if(f.foreign && !meta.foreignOK)return false;
+  if(f.visa && !meta.visa)return false;
+  return true;
+}
+function ctfApply(){
+  document.getElementById('ctf-yield-v').textContent=parseFloat(document.getElementById('ctf-yield').value).toFixed(1)+'%';
+  document.getElementById('ctf-pti-v').textContent=document.getElementById('ctf-pti').value+'×';
+  var cv=parseFloat(document.getElementById('ctf-carry').value);
+  document.getElementById('ctf-carry-v').textContent=(cv>=0?'+':'')+cv.toFixed(1)+'%';
+  document.querySelectorAll('.ctf-chk').forEach(function(l){var i=l.querySelector('input');if(i)l.classList.toggle('on',i.checked);});
+  renderTable(currentLang);
+}
+function ctfReset(){
+  document.getElementById('ctf-search').value='';
+  document.getElementById('ctf-region').value='';
+  document.getElementById('ctf-yield').value=0;
+  document.getElementById('ctf-pti').value=20;
+  document.getElementById('ctf-carry').value=-5;
+  document.getElementById('ctf-foreign').checked=false;
+  document.getElementById('ctf-visa').checked=false;
+  ctfApply();
+}
+function ctTogglePin(name,ev){
+  if(ev){ev.stopPropagation();}
+  var i=ctPinned.indexOf(name);
+  if(i>=0){ctPinned.splice(i,1);}
+  else if(ctPinned.length<3){ctPinned.push(name);}
+  else{ctPinned.shift();ctPinned.push(name);}
+  renderTable(currentLang);
+  ctRenderCompare(currentLang);
+}
+function ctClearPins(){ctPinned=[];renderTable(currentLang);ctRenderCompare(currentLang);}
+function ctRenderCompare(lang){
+  var panel=document.getElementById('ct-cmp-panel');
+  var grid=document.getElementById('ct-cmp-grid');
+  if(!panel||!grid)return;
+  if(ctPinned.length===0){panel.classList.remove('show');grid.innerHTML='';return;}
+  panel.classList.add('show');
+  var cities=ctPinned.map(function(n){return CITIES.find(function(c){return c.name===n;});}).filter(Boolean);
+  var lowerBetter=['pti','pr','vacancy','pipeline','mortgage'];
+  var higherBetter=['d10y','yoy','yield','carry','txYoY'];
+  var bestVal={},worstVal={};
+  [].concat(lowerBetter,higherBetter).forEach(function(k){
+    var vals=cities.map(function(c){return k==='carry'?(c.yield-c.mortgage):c[k];}).filter(function(v){return typeof v==='number'&&isFinite(v);});
+    if(!vals.length)return;
+    bestVal[k]=lowerBetter.indexOf(k)>=0?Math.min.apply(null,vals):Math.max.apply(null,vals);
+    worstVal[k]=lowerBetter.indexOf(k)>=0?Math.max.apply(null,vals):Math.min.apply(null,vals);
+  });
+  function cls(k,v){if(cities.length<2||v===undefined||v===null)return '';if(Math.abs(v-bestVal[k])<0.001)return 'best';if(Math.abs(v-worstVal[k])<0.001)return 'worst';return '';}
+  grid.innerHTML=cities.map(function(c){
+    var nm=lang==='zh'?c.nameZh:c.name;
+    var carry=+(c.yield-c.mortgage).toFixed(1);
+    return '<div class="ct-cmp-card">'+
+      '<span class="x-btn" onclick="ctTogglePin(\''+c.name.replace(/'/g,"\\'")+'\')">×</span>'+
+      '<h4>'+c.flag+' '+nm+'</h4>'+
+      '<table>'+
+        '<tr><td>'+(lang==='zh'?'10年':'10yr')+'</td><td class="'+cls('d10y',c.d10y)+'">'+(c.d10y>=0?'+':'')+c.d10y+'%</td></tr>'+
+        '<tr><td>'+(lang==='zh'?'年增':'YoY')+'</td><td class="'+cls('yoy',c.yoy)+'">'+(c.yoy>=0?'+':'')+c.yoy+'%</td></tr>'+
+        '<tr><td>'+(lang==='zh'?'收益':'Yield')+'</td><td class="'+cls('yield',c.yield)+'">'+c.yield.toFixed(1)+'%</td></tr>'+
+        '<tr><td>'+(lang==='zh'?'利差':'Carry')+'</td><td class="'+cls('carry',carry)+'">'+(carry>=0?'+':'')+carry.toFixed(1)+'%</td></tr>'+
+        '<tr><td>PTI</td><td class="'+cls('pti',c.pti)+'">'+c.pti+'×</td></tr>'+
+        '<tr><td>P/R</td><td class="'+cls('pr',c.pr)+'">'+c.pr+'×</td></tr>'+
+        '<tr><td>'+(lang==='zh'?'空置':'Vacancy')+'</td><td class="'+cls('vacancy',c.vacancy)+'">'+c.vacancy.toFixed(1)+'%</td></tr>'+
+        '<tr><td>'+(lang==='zh'?'在建':'Pipeline')+'</td><td class="'+cls('pipeline',c.pipeline)+'">'+c.pipeline.toFixed(1)+'%</td></tr>'+
+        '<tr><td>'+(lang==='zh'?'房貸':'Mortgage')+'</td><td class="'+cls('mortgage',c.mortgage)+'">'+c.mortgage.toFixed(1)+'%</td></tr>'+
+        '<tr><td>'+(lang==='zh'?'價格':'Price')+'</td><td>'+c.priceDisp+'</td></tr>'+
+      '</table></div>';
+  }).join('');
+}
+// Override renderTable with filter/sparkline/pin-aware version
+renderTable=function(lang){
+  var f=ctfState();
+  var src=f?CITIES.filter(function(c){return ctfMatches(c,f);}):CITIES.slice();
+  var sorted=src.sort(function(a,b){
+    var av=a[sortKey],bv=b[sortKey];
+    if(av===null||av===undefined)av=sortDir===1?-Infinity:Infinity;
+    if(bv===null||bv===undefined)bv=sortDir===1?-Infinity:Infinity;
+    if(sortKey==='carry'){av=a.yield-a.mortgage;bv=b.yield-b.mortgage;}
+    if(sortKey==='supply'){av=SUPPLY_ORDER[av]!==undefined?SUPPLY_ORDER[av]:1;bv=SUPPLY_ORDER[bv]!==undefined?SUPPLY_ORDER[bv]:1;}
+    if(typeof av==='string')return sortDir*(av.localeCompare(bv));
+    return sortDir*(bv-av);
+  });
+  var shownEl=document.getElementById('ctf-shown');if(shownEl)shownEl.textContent=sorted.length;
+  var tbody=document.getElementById('city-tbody');
+  tbody.innerHTML=sorted.map(function(c){
+    var nm=lang==='zh'?c.nameZh:c.name;
+    var yoyH=c.yoy>0?'<span style="color:#16a34a;font-weight:600">+'+c.yoy+'%</span>':c.yoy<0?'<span style="color:#dc2626;font-weight:600">'+c.yoy+'%</span>':'<span style="color:#94a3b8">—</span>';
+    var yClr=c.yield>=5?'#16a34a':c.yield>=3.5?'#1e3a5f':'#94a3b8';
+    var yW=c.yield>=5?700:600;
+    var pClr=c.pti<=5?'#16a34a':c.pti<=10?'#d97706':'#dc2626';
+    var prClr=c.pr<20?'#16a34a':c.pr<=30?'#1e3a5f':'#dc2626';
+    var prW=c.pr<20||c.pr>30?700:600;
+    var mClr=c.mortgage<=1.5?'#16a34a':c.mortgage<=3.5?'#1e3a5f':c.mortgage>5?'#dc2626':'#1e3a5f';
+    var pinned=ctPinned.indexOf(c.name)>=0;
+    var nameEsc=c.name.replace(/'/g,"\\'");
+    var stickyBg=pinned?'#fff8e6':'#fff';
+    return '<tr onclick="location.href=\''+c.link+'\'" style="cursor:pointer" class="'+(pinned?'pinned':'')+'">'+
+      '<td style="position:sticky;left:0;background:'+stickyBg+';z-index:1;border-right:1px solid #f0f5fb;font-weight:600;min-width:90px"><span class="ct-pin '+(pinned?'on':'')+'" onclick="ctTogglePin(\''+nameEsc+'\',event)" title="'+(lang==='zh'?'點擊釘選比較':'Click to pin')+'">'+(pinned?'★':'☆')+'</span><span style="font-size:11px;margin-right:4px">'+c.flag+'</span><span style="font-size:10.5px">'+nm+'</span></td>'+
+      (function(){var d=c.d10y;var dc=d>=80?'#16a34a':d>=40?'#1e3a5f':d>=0?'#94a3b8':'#dc2626';return '<td style="color:'+dc+';font-weight:600">'+(d>0?'+':'')+d+'%</td>';})()+
+      '<td style="text-align:center;padding:5px 6px">'+ctSparkline(c)+'</td>'+
+      '<td>'+yoyH+'</td>'+
+      '<td style="color:'+yClr+';font-weight:'+yW+'">'+c.yield.toFixed(1)+'%</td>'+
+      (function(){var cv=+(c.yield-c.mortgage).toFixed(2);var cc=cv>=1?'#16a34a':cv>=0?'#1e3a5f':'#dc2626';return '<td style="color:'+cc+';font-weight:700">'+(cv>0?'+':'')+cv.toFixed(1)+'%</td>';})()+
+      '<td style="color:'+pClr+';font-weight:600">'+c.pti+'×</td>'+
+      '<td style="color:'+prClr+';font-weight:'+prW+'">'+c.pr+'×</td>'+
+      (function(){var v=c.vacancy;var vc=v<=1?'#dc2626':v<=2?'#d97706':v<=3.5?'#1e3a5f':'#94a3b8';return '<td style="color:'+vc+';font-weight:600">'+v.toFixed(1)+'%</td>';})()+
+      (function(){var t=c.txYoY;var tc=t>=10?'#16a34a':t>=0?'#1e3a5f':'#dc2626';return '<td style="color:'+tc+';font-weight:600">'+(t>0?'+':'')+t+'%</td>';})()+
+      '<td style="text-align:center">'+supplyBadge(c.supply,lang)+'</td>'+
+      '<td style="text-align:center">'+pipelineBadge(c.pipeline,lang)+'</td>'+
+      '<td style="font-size:9.5px;color:#475569;line-height:1.35;font-family:Inter,sans-serif;white-space:normal;text-align:left">'+(c.outlook?(lang==='zh'?c.outlook.zh:c.outlook.en):'')+'</td>'+
+      '<td style="font-weight:600;color:#0f2a45;font-size:10px">'+c.priceDisp+'</td>'+
+      '<td style="color:'+mClr+';font-weight:600;font-size:10px">'+c.mortgage.toFixed(1)+'%</td>'+
+      '</tr>';
+  }).join('');
+};
+function setLang(lang){
+  currentLang=lang;localStorage.setItem('lang',lang);
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.textContent.trim()===(lang==='en'?'EN':'中文'));});
+  renderTable(lang);
+}
+window.addEventListener('load',function(){setLang(currentLang);ccInit();});
+// Close city dropdowns when clicking outside
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.mcard-city-dd')){
+    document.querySelectorAll('.mcard-city-dd.open').forEach(function(d){d.classList.remove('open');});
+  }
+});
+/* ============================================
+   TOP 5 CITIES — slider-driven dynamic ranking
+   ============================================ */
+var T5_POOL=[
+  // 5yr current top
+  {name:'Manchester',flag:'\u{1F1EC}\u{1F1E7}',sub:{en:'UK Northern Powerhouse',zh:'英國北部復興領頭羊'},fx:4,yieldV:6.1,mortgage:4.10,vacancy:1.0,pipeline:0.8,pti:6.8,yoy:4.4,d10y:40,ann:{en:'ONS +4.4%. BBC/ITV anchor. M11/M13/M14/M18 HMO yields 6.7-7.9%. Price = 1/3 of London.',zh:'ONS +4.4%。BBC/ITV 就業錨點。M11/M13/M14/M18 HMO 收益率 6.7-7.9%。房價僅倫敦 1/3。'}},
+  {name:'Fukuoka',flag:'\u{1F1EF}\u{1F1F5}',sub:{en:'Japan Semiconductor Gateway',zh:'日本半導體門戶'},fx:4,yieldV:5.0,mortgage:0.8,vacancy:1.5,pipeline:0.4,pti:11.0,yoy:9.0,d10y:120,ann:{en:'+4.2% carry, best globally. Land price +9% YoY (highest in JP). TSMC Kumamoto spillover. Risk: JPY weak.',zh:'+4.2% 利差，全球最強。地價年增 +9%（日本最高）。台積電熊本外溢。風險：日圓弱。'}},
+  {name:'Cork',flag:'\u{1F1EE}\u{1F1EA}',sub:{en:'Ireland Value Alternative',zh:'愛爾蘭價值替代品'},fx:5,yieldV:7.0,mortgage:3.5,vacancy:0.6,pipeline:1.2,pti:6.2,yoy:4.2,d10y:65,ann:{en:'GPG yield 7-9% (highest Ireland). Apple EU HQ + Pfizer + Lilly anchor.',zh:'GPG 收益率 7-9%（愛爾蘭最高）。Apple 歐洲總部+輝瑞+禮來錨點。'}},
+  {name:'Chicago',flag:'\u{1F1FA}\u{1F1F8}',sub:{en:'US Highest Gross Yield',zh:'美國最高毛收益'},fx:5,yieldV:8.3,mortgage:6.30,vacancy:3.5,pipeline:0.7,pti:4.5,yoy:5.4,d10y:48,ann:{en:'Lowest pipeline of any major US metro. Only US city with positive carry vs PMMS 6.30%.',zh:'美國主要都會最低在建量。PMMS 6.30% 下唯一正利差的美國城市。'}},
+  {name:'Malaga',flag:'\u{1F1EA}\u{1F1F8}',sub:{en:'Spain Digital Nomad Hub',zh:'西班牙數位遊牧樞紐'},fx:5,yieldV:6.6,mortgage:2.85,vacancy:1.0,pipeline:1.8,pti:6.0,yoy:10.0,d10y:70,ann:{en:'Costa del Sol yield 6.3-7%. Mortgage 2.85% + yield 6.6% = +3.8% carry.',zh:'太陽海岸收益率 6.3-7%。房貸 2.85% + 收益 6.6% = +3.8% 利差。'}},
+  {name:'Valencia',flag:'\u{1F1EA}\u{1F1F8}',sub:{en:'Spain Tech / DN Alternative',zh:'西班牙科技／數游替代'},fx:5,yieldV:6.2,mortgage:2.85,vacancy:1.2,pipeline:1.5,pti:5.5,yoy:14.4,d10y:45,ann:{en:'Idealista €3,339/m² +14.4% YoY. Cheaper than Malaga (-19%) with similar yield.',zh:'Idealista €3,339/m² 年增 +14.4%。比 Malaga 便宜 19%，收益率相當。'}},
+  // 10yr current top
+  {name:'Brisbane',flag:'\u{1F1E6}\u{1F1FA}',sub:{en:'2032 Olympics City',zh:'2032 奧運城市'},fx:4,yieldV:4.4,mortgage:4.85,vacancy:1.2,pipeline:0.9,pti:9.5,yoy:19.1,d10y:93,ann:{en:'Cotality +19.1% YoY · A$1.10M median. Strongest AU capital. Olympics 2032.',zh:'Cotality 年增 +19.1% · A$110 萬中位。首都最強。2032 奧運。'}},
+  {name:'Tokyo',flag:'\u{1F1EF}\u{1F1F5}',sub:{en:'Global Capital Magnet',zh:'全球資本磁鐵'},fx:5,yieldV:3.3,mortgage:2.32,vacancy:3.5,pipeline:0.3,pti:12.0,yoy:20.0,d10y:110,ann:{en:'Kantei 70㎡ ¥121M · +34% YoY peaking. Pipeline 0.3%. +1.2% carry. Watch JPY strength.',zh:'Kantei 70㎡ ¥121M · +34% 見頂中。在建 0.3%。+1.2% 利差。關注日圓走強。'}},
+  {name:'Gold Coast',flag:'\u{1F1E6}\u{1F1FA}',sub:{en:'Lifestyle Premium Play',zh:'生活方式溢價'},fx:4,yieldV:4.5,mortgage:4.85,vacancy:1.1,pipeline:0.5,pti:11.2,yoy:10.5,d10y:100,ann:{en:'Cotality A$1.35M · 10yr doubled. 2032 Olympics co-host. Carry -1.0% (improving).',zh:'Cotality A$135 萬 · 10 年翻倍。2032 奧運協辦。利差 -1.0%（改善中）。'}},
+  {name:'Perth',flag:'\u{1F1E6}\u{1F1FA}',sub:{en:'Mining Boom Structural Play',zh:'礦業榮景結構標的'},fx:4,yieldV:4.8,mortgage:6.29,vacancy:0.7,pipeline:0.6,pti:7.5,yoy:24.3,d10y:90,ann:{en:'Cotality +24.3% YoY · 5yr +91.2%. Vacancy 0.7%. Resources migration ~1K/week.',zh:'Cotality 年增 +24.3% · 5 年 +91.2%。空置 0.7%。礦業遷入每週約 1K 人。'}},
+  {name:'Amsterdam',flag:'\u{1F1F3}\u{1F1F1}',sub:{en:'European Tech &amp; Innovation Hub',zh:'歐洲科技創新樞紐'},fx:5,yieldV:3.5,mortgage:4.05,vacancy:1.5,pipeline:0.8,pti:10.0,yoy:3.6,d10y:85,ann:{en:'CBS +3.6% (cooling). NL shortage 350K homes · canal geography permanent cap. Booking/Adyen/ASML anchor.',zh:'CBS +3.6%（降溫）。NL 短缺 35 萬套 · 運河地理永久封頂。Booking/Adyen/ASML 錨點。'}},
+  // Additional candidates
+  {name:'Edinburgh',flag:'\u{1F1EC}\u{1F1E7}',sub:{en:'Scottish Capital Compounder',zh:'蘇格蘭首府複利'},fx:4,yieldV:5.7,mortgage:4.10,vacancy:0.8,pipeline:0.4,pti:8.0,yoy:3.9,d10y:35,ann:{en:'ONS +3.9%. EH3 compact units up to 7.4% yield. Vacancy 0.8%.',zh:'ONS +3.9%。EH3 緊湊單位收益率達 7.4%。空置 0.8%。'}},
+  {name:'Newcastle',flag:'\u{1F1EC}\u{1F1E7}',sub:{en:'UK High-Yield North',zh:'英國北部高收益'},fx:4,yieldV:6.0,mortgage:4.10,vacancy:1.8,pipeline:0.5,pti:5.0,yoy:5.1,d10y:28,ann:{en:'ONS +5.1%. NE1-NE6 HMO yields 7.6-9.5%. Cheapest capital city in this list.',zh:'ONS +5.1%。NE1-NE6 HMO 收益 7.6-9.5%。本榜最便宜首都級城市。'}},
+  {name:'Madrid',flag:'\u{1F1EA}\u{1F1F8}',sub:{en:'Iberian Capital Magnet',zh:'伊比利首都磁鐵'},fx:5,yieldV:5.1,mortgage:2.85,vacancy:1.8,pipeline:1.2,pti:7.5,yoy:14.0,d10y:35,ann:{en:'Idealista €5,820/m² +14% nominal · zona tensionada. Vacancy 1.8%.',zh:'Idealista €5,820/m² +14% 名目 · 緊張區。空置 1.8%。'}},
+  {name:'Lisbon',flag:'\u{1F1F5}\u{1F1F9}',sub:{en:'Atlantic Tax Haven',zh:'大西洋稅務窗口'},fx:5,yieldV:4.3,mortgage:4.0,vacancy:1.8,pipeline:1.2,pti:12.0,yoy:4.0,d10y:95,ann:{en:'INE €397K · Lisbon +4% · Portugal national +15%. NHR ended 2024.',zh:'INE €397K · 里斯本 +4% · 葡萄牙全國 +15%。NHR 2024 結束。'}},
+  {name:'Sydney',flag:'\u{1F1E6}\u{1F1FA}',sub:{en:'Pacific Gateway Scarcity',zh:'太平洋門戶稀缺'},fx:4,yieldV:3.0,mortgage:4.85,vacancy:1.1,pipeline:0.8,pti:13.5,yoy:0.0,d10y:65,ann:{en:'SQM vacancy 1.1%. Geographic constraint. -2.5% carry but +65% 10yr.',zh:'SQM 空置 1.1%。地理限制。-2.5% 利差但 10 年 +65%。'}},
+  {name:'Adelaide',flag:'\u{1F1E6}\u{1F1FA}',sub:{en:'AUKUS &amp; Migration Beneficiary',zh:'AUKUS 與移民受益'},fx:4,yieldV:3.3,mortgage:6.29,vacancy:0.9,pipeline:0.5,pti:8.0,yoy:11.4,d10y:75,ann:{en:'Cotality +11.4% · AUKUS submarine program + migration tailwind. Vacancy 0.9%.',zh:'Cotality +11.4% · AUKUS 潛艦計畫 + 移民順風。空置 0.9%。'}},
+  {name:'Birmingham',flag:'\u{1F1EC}\u{1F1E7}',sub:{en:'HS2 Regen Catalyst',zh:'HS2 再造催化'},fx:4,yieldV:5.6,mortgage:4.10,vacancy:1.5,pipeline:1.1,pti:5.5,yoy:0.0,d10y:30,ann:{en:'ONS flat · HS2 Curzon regen. PTI 5.5×. UK 2nd city.',zh:'ONS 持平 · HS2 Curzon 再造。PTI 5.5×。英國第二大都市。'}}
+];
+var T5_HORIZON={
+  '5':{income:1.5,growth:1.0,stab:1.0,aff:0.7,scar:1.0},
+  '10':{income:0.5,growth:1.5,stab:1.0,aff:1.5,scar:2.0}
+};
+function t5Lang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function t5Clamp01(x){return Math.max(0,Math.min(1,x));}
+function t5Score(c,w,h){
+  var carry=c.yieldV-c.mortgage;
+  var inc=t5Clamp01((carry+3)/8);
+  var growth=t5Clamp01((c.yoy+5)/30)*0.5+t5Clamp01(c.d10y/150)*0.5;
+  var stab=c.fx/5;
+  var aff=t5Clamp01((15-c.pti)/15);
+  var scar=t5Clamp01((2-c.vacancy)/2)*0.5+t5Clamp01((3-c.pipeline)/3)*0.5;
+  return inc*(w.income/100)*h.income
+       + growth*(w.growth/100)*h.growth
+       + stab*(w.stab/100)*h.stab
+       + aff*(w.aff/100)*h.aff
+       + scar*h.scar;
+}
+function t5Rank(horizonKey,weights){
+  var h=T5_HORIZON[horizonKey];
+  return T5_POOL.slice().map(function(c){return {city:c,score:t5Score(c,weights,h)};})
+    .sort(function(a,b){return b.score-a.score;});
+}
+var T5_DEFAULT={};
+function t5BuildDefault(){
+  var defW={income:50,growth:50,stab:50,aff:50};
+  ['5','10'].forEach(function(k){
+    var r=t5Rank(k,defW);
+    T5_DEFAULT[k]={};r.forEach(function(o,i){T5_DEFAULT[k][o.city.name]=i;});
+  });
+}
+function t5GetWeights(){
+  return {
+    income:parseInt(document.getElementById('t5-s-income').value)||0,
+    growth:parseInt(document.getElementById('t5-s-growth').value)||0,
+    stab:parseInt(document.getElementById('t5-s-stab').value)||0,
+    aff:parseInt(document.getElementById('t5-s-aff').value)||0
+  };
+}
+function t5Card(rk,idx,horizonKey,lang){
+  var c=rk.city;
+  var rankNum=idx+1;
+  var isBench=rankNum===6;
+  var defaultIdx=T5_DEFAULT[horizonKey][c.name];
+  var delta=(typeof defaultIdx==='number')?(defaultIdx-idx):0;
+  var deltaHTML='';
+  if(delta>0)deltaHTML='<span class="t5-delta" style="background:rgba(34,197,94,0.18);color:#22c55e;border:1px solid rgba(34,197,94,0.4)">▲'+delta+'</span>';
+  else if(delta<0)deltaHTML='<span class="t5-delta" style="background:rgba(248,113,113,0.18);color:#f87171;border:1px solid rgba(248,113,113,0.4)">▼'+(-delta)+'</span>';
+  var rankStyle, label;
+  if(isBench){rankStyle='background:#334155;color:#f59e0b;font-size:9px;letter-spacing:.05em;font-weight:800;padding:2px 8px;border-radius:4px';label=lang==='zh'?'✴ 候選':'✴ BENCH';}
+  else if(rankNum===1){rankStyle='background:#f59e0b;color:#0f2a45;font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px';label='\u{1F3C6} #1';}
+  else if(rankNum===2){rankStyle='background:#c0c0c0;color:#0f2a45;font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px';label='#2';}
+  else if(rankNum===3){rankStyle='background:#cd7f32;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px';label='#3';}
+  else{rankStyle='background:rgba(255,255,255,0.2);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px';label='#'+rankNum;}
+  var cardStyle=isBench
+    ?'background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.18)'
+    :'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12)';
+  var carry=(c.yieldV-c.mortgage);
+  var carryColor=carry>=1?'#22c55e':carry>=0?'#cbd5e1':'#f87171';
+  var yieldColor=c.yieldV>=5?'#22c55e':'#cbd5e1';
+  var vacColor=c.vacancy<=1?'#f59e0b':c.vacancy<=2?'#cbd5e1':'#94a3b8';
+  var pipColor=c.pipeline<=1?'#22c55e':c.pipeline<=2.5?'#cbd5e1':'#f87171';
+  var ptiColor=c.pti<=7?'#22c55e':c.pti<=10?'#cbd5e1':'#f87171';
+  var yoyColor=c.yoy>=5?'#22c55e':c.yoy>=0?'#cbd5e1':'#f87171';
+  var d10yColor=c.d10y>=70?'#22c55e':c.d10y>=40?'#cbd5e1':'#94a3b8';
+  var stabIcons=['','★','★★','★★★','★★★★','★★★★★'];
+  return '<div style="'+cardStyle+';border-radius:10px;padding:16px;position:relative">'+
+    '<div style="position:absolute;top:-10px;left:14px;'+rankStyle+'">'+label+'</div>'+
+    deltaHTML+
+    '<div style="font-size:18px;margin-bottom:6px">'+c.flag+'</div>'+
+    '<div style="font-size:14px;font-weight:700;color:#fff">'+c.name+'</div>'+
+    '<div style="font-size:10px;color:#94a3b8;margin-bottom:10px">'+(lang==='zh'?c.sub.zh:c.sub.en)+'</div>'+
+    '<table style="width:100%;font-size:9.5px;font-family:Inter,sans-serif;color:#cbd5e1;border-collapse:collapse">'+
+      '<tr><td style="padding:2px 0">'+(lang==='zh'?'收益':'Yield')+'</td><td style="padding:2px 0;text-align:right;font-weight:600;color:'+yieldColor+'">'+c.yieldV.toFixed(1)+'%</td></tr>'+
+      '<tr><td style="padding:2px 0">'+(lang==='zh'?'利差':'Carry')+'</td><td style="padding:2px 0;text-align:right;font-weight:600;color:'+carryColor+'">'+(carry>=0?'+':'')+carry.toFixed(1)+'%</td></tr>'+
+      '<tr><td style="padding:2px 0">'+(lang==='zh'?'空置':'Vacancy')+'</td><td style="padding:2px 0;text-align:right;color:'+vacColor+'">'+c.vacancy.toFixed(1)+'%</td></tr>'+
+      '<tr><td style="padding:2px 0">'+(lang==='zh'?'在建':'Pipeline')+'</td><td style="padding:2px 0;text-align:right;color:'+pipColor+'">'+c.pipeline.toFixed(1)+'%</td></tr>'+
+      '<tr><td style="padding:2px 0">PTI</td><td style="padding:2px 0;text-align:right;color:'+ptiColor+'">'+c.pti+'×</td></tr>'+
+      (horizonKey==='10'
+        ? '<tr><td style="padding:2px 0">'+(lang==='zh'?'10年':'10yr')+'</td><td style="padding:2px 0;text-align:right;font-weight:600;color:'+d10yColor+'">+'+c.d10y+'%</td></tr>'
+        : '<tr><td style="padding:2px 0">YoY</td><td style="padding:2px 0;text-align:right;font-weight:600;color:'+yoyColor+'">'+(c.yoy>=0?'+':'')+c.yoy.toFixed(1)+'%</td></tr>')+
+      '<tr><td style="padding:2px 0">'+(lang==='zh'?'幣值':'FX')+'</td><td style="padding:2px 0;text-align:right;color:#cbd5e1;font-size:8.5px">'+stabIcons[Math.round(c.fx)]+'</td></tr>'+
+    '</table>'+
+    '<div style="margin-top:10px;font-size:8.5px;color:#94a3b8;line-height:1.45;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px">'+(lang==='zh'?c.ann.zh:c.ann.en)+'</div>'+
+  '</div>';
+}
+function t5RenderGrid(horizonKey,gridId){
+  var w=t5GetWeights();
+  var ranked=t5Rank(horizonKey,w);
+  var top6=ranked.slice(0,6);
+  var lang=t5Lang();
+  document.getElementById(gridId).innerHTML=top6.map(function(r,i){return t5Card(r,i,horizonKey,lang);}).join('');
+}
+function t5RenderAll(){t5RenderGrid('5','t5-5yr-grid');t5RenderGrid('10','t5-10yr-grid');}
+function t5OnSlide(){
+  ['income','growth','stab','aff'].forEach(function(k){
+    var v=document.getElementById('t5-s-'+k).value;
+    document.getElementById('t5-v-'+k).textContent=v;
+  });
+  // clear preset active state when sliders moved manually
+  document.querySelectorAll('.t5-preset').forEach(function(b){b.classList.remove('active');});
+  t5RenderAll();
+}
+function t5SetSliders(vals){
+  ['income','growth','stab','aff'].forEach(function(k){
+    document.getElementById('t5-s-'+k).value=vals[k];
+    document.getElementById('t5-v-'+k).textContent=vals[k];
+  });
+  t5RenderAll();
+}
+function t5Preset(name){
+  var presets={
+    balanced:{income:50,growth:50,stab:50,aff:50},
+    income:{income:90,growth:20,stab:50,aff:60},
+    growth:{income:20,growth:90,stab:40,aff:30},
+    safe:{income:40,growth:30,stab:90,aff:50}
+  };
+  if(!presets[name])return;
+  document.querySelectorAll('.t5-preset').forEach(function(b){b.classList.toggle('active',b.dataset.p===name);});
+  t5SetSliders(presets[name]);
+}
+function t5Init(){
+  if(!document.getElementById('t5-5yr-grid'))return;
+  t5BuildDefault();
+  t5RenderAll();
+}
+
+// hook into setLang to refresh calc + top5 + compare on language toggle
+var _origSetLang=setLang;
+setLang=function(lang){_origSetLang(lang);if(typeof ccRender==='function')ccRender();if(typeof t5RenderAll==='function')t5RenderAll();if(typeof ctRenderCompare==='function')ctRenderCompare(lang);};
+window.addEventListener('load',function(){t5Init();});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

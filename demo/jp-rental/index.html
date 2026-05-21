@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Mr. Lin uses Property Monitor | Walkthrough | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="../../css/style.css">
+<style>
+.lang-zh{display:none}
+
+/* ── Persona Card (top) ── */
+.persona-card{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#e2ecf8;border-radius:8px;padding:26px 28px;margin:0 0 24px;position:relative;overflow:hidden}
+.persona-card::after{content:'🇯🇵';position:absolute;top:-20px;right:-10px;font-size:140px;opacity:.06}
+.persona-card .pc-eyebrow{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.persona-card .pc-title{font-size:22px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:8px;letter-spacing:-.01em}
+.persona-card .pc-tag{font-size:13px;color:#a8c0d8;line-height:1.6;max-width:780px;margin-bottom:18px}
+.pc-profile{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);margin-bottom:14px}
+.pc-profile-item .lbl{font-size:9px;letter-spacing:.10em;color:#5a8ab5;font-weight:600;text-transform:uppercase}
+.pc-profile-item .val{font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-weight:500;margin-top:3px}
+.pc-questions{font-size:11.5px;line-height:1.65;color:#a8c0d8}
+.pc-questions strong{color:#f59e0b;font-weight:600;display:block;margin-bottom:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pc-questions ol{margin:0;padding:0 0 0 18px}
+.pc-questions li{margin-bottom:3px}
+
+/* ── Section heading ── */
+.demo-section{margin:32px 0 8px}
+.demo-section .sec-no{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:.08em}
+.demo-section h2{font-size:18px;font-weight:700;color:#1e3a5f;line-height:1.3;margin:2px 0 4px;letter-spacing:-.005em}
+.demo-section .sec-sub{font-size:12px;color:#5a7a9a;line-height:1.6;max-width:780px}
+
+/* ── Demo Step ── */
+.demo-step{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:36px 1fr;gap:16px}
+.demo-step .step-no{width:32px;height:32px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;font-family:'JetBrains Mono',monospace}
+.demo-step .step-content h4{font-size:14px;font-weight:600;color:#1e3a5f;margin-bottom:4px;line-height:1.35}
+.demo-step .step-url{font-family:'JetBrains Mono',monospace;font-size:11px;margin-bottom:10px}
+.demo-step .step-url a{color:#2563eb;text-decoration:none}
+.demo-step .step-url a:hover{text-decoration:underline}
+.demo-step .step-action{background:#eff6ff;border-left:3px solid #2563eb;padding:9px 12px;font-size:11.5px;color:#1e3a5f;line-height:1.6;margin-bottom:10px;border-radius:0 4px 4px 0}
+.demo-step .step-action strong{color:#1e3a5f;font-weight:600;display:inline-block;margin-right:4px}
+.demo-step .step-see{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:8px}
+.demo-step .step-see strong{color:#1e3a5f;font-weight:600}
+.demo-step .step-meaning{background:#fffbeb;border-left:3px solid #d97706;padding:9px 12px;font-size:11.5px;color:#78350f;line-height:1.6;margin-top:6px;border-radius:0 4px 4px 0}
+.demo-step .step-meaning strong{color:#92400e;font-weight:600}
+.demo-step .step-screenshot{background:#f4f7fc;border:1px solid #ccd9e8;border-radius:4px;margin-top:12px;overflow:hidden;line-height:0}
+.demo-step .step-screenshot img{display:block;width:100%;height:auto}
+
+/* ── Cheat sheet ── */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.cheat-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:14px 18px}
+.cheat-card h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cheat-card .ck-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#eef3f9;color:#1e3a5f;font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.cheat-card p{font-size:11.5px;color:#4a6080;line-height:1.6}
+.cheat-card .ck-tip{margin-top:6px;font-size:11px;color:#5a7a9a;font-style:italic}
+.cheat-card code{background:#eef3f9;color:#1e3a5f;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px}
+
+/* ── Color code legend ── */
+.color-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.color-legend .cl-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#4a6080;background:#f4f7fc;padding:6px 10px;border-radius:3px}
+.color-legend .cl-dot{width:10px;height:10px;border-radius:50%}
+.color-legend .cl-green{background:#16a34a}
+.color-legend .cl-orange{background:#d97706}
+.color-legend .cl-red{background:#dc2626}
+.color-legend .cl-blue{background:#2563eb}
+
+/* ── Takeaway box ── */
+.takeaway{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.takeaway-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px}
+.takeaway-card.answered{border-left:4px solid #16a34a}
+.takeaway-card.outsource{border-left:4px solid #d97706}
+.takeaway-card h4{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;letter-spacing:-.005em}
+.takeaway-card ul{list-style:none;padding:0;margin:0}
+.takeaway-card li{font-size:12px;color:#4a6080;line-height:1.6;padding:5px 0 5px 22px;position:relative}
+.takeaway-card.answered li::before{content:'✓';position:absolute;left:0;top:5px;color:#16a34a;font-weight:700}
+.takeaway-card.outsource li::before{content:'→';position:absolute;left:0;top:5px;color:#d97706;font-weight:700}
+.takeaway-card li strong{color:#1e3a5f;font-weight:600}
+
+/* ── PDF button ── */
+.pdf-bar{display:flex;gap:10px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap}
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;background:#1e3a5f;color:#fff;border:none;padding:12px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{background:#0f1e33}
+.pdf-btn.ghost{background:#fff;color:#1e3a5f;border:1px solid #ccd9e8}
+.pdf-btn.ghost:hover{border-color:#1e3a5f}
+
+/* ── Best Option Block ── */
+.best-option{margin:6px 0 16px}
+.bo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.bo-card{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #d97706;border-radius:4px;padding:14px 16px}
+.bo-card .bo-lbl{font-size:9px;letter-spacing:.1em;color:#5a7a9a;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.bo-card .bo-val{font-size:14px;font-weight:600;color:#1e3a5f;line-height:1.35;margin-bottom:6px;letter-spacing:-.005em}
+.bo-card .bo-note{font-size:11px;color:#5a7a9a;line-height:1.5}
+.bo-section{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:16px 20px;margin-bottom:10px}
+.bo-section h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:10px;line-height:1.35}
+.bo-checklist ul,.bo-next ol{margin:0;padding-left:18px}
+.bo-checklist li,.bo-next li{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:6px}
+.bo-bottomline{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#fff;border-radius:6px;padding:20px 24px;margin-top:14px}
+.bo-bottomline .bo-bl-label{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;display:block;margin-bottom:8px;text-transform:uppercase}
+.bo-bottomline p{font-size:14px;line-height:1.6;color:#fff;margin:0}
+@media (max-width:720px){.bo-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Print ── */
+@media print {
+  @page{size:A4;margin:14mm}
+  body{background:#fff!important}
+  #nav-root,.lang-switcher,.pdf-bar,.demo-back{display:none!important}
+  .bo-grid{grid-template-columns:repeat(4,1fr)!important}
+  .bo-bottomline{background:#1e3a5f!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .container{max-width:100%!important;padding:0!important}
+  .persona-card,.demo-step,.cheat-card,.takeaway-card{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  .persona-card::after{display:none}
+  .demo-section{break-after:avoid;page-break-after:avoid}
+  .step-screenshot{padding:18px;font-size:10px}
+  a{color:#1e3a5f!important;text-decoration:none}
+}
+
+@media (max-width:760px){
+  .pc-profile{grid-template-columns:repeat(2,1fr);gap:10px}
+  .demo-step{grid-template-columns:1fr;gap:10px}
+  .demo-step .step-no{margin-bottom:-4px}
+  .persona-card{padding:20px 18px}
+  .persona-card .pc-title{font-size:18px}
+  .cheat-grid,.takeaway,.color-legend{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="container">
+
+  <!-- Breadcrumb -->
+  <div class="demo-back" style="font-size:11px;color:#5a7a9a;margin-bottom:12px;font-family:'JetBrains Mono',monospace">
+    <a href="/demo/" style="color:#2563eb;text-decoration:none">← <span class="lang-en">All walkthroughs</span><span class="lang-zh">所有導覽</span></a>
+    <span style="color:#aabdd4;margin:0 8px">/</span>
+    <span><span class="lang-en">Mr. Lin uses the site for Japan rental</span><span class="lang-zh">林先生用本站研究日本收租</span></span>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 1 — PERSONA CARD                       -->
+  <!-- ============================================== -->
+  <div class="persona-card">
+    <div class="pc-eyebrow"><span class="lang-en">USE CASE WALKTHROUGH · 01 · A SITE TOUR THROUGH MR. LIN'S EYES</span><span class="lang-zh">情境導覽 · 01 · 跟著林先生逛這個網站</span></div>
+    <div class="pc-title">
+      <span class="lang-en">Meet Mr. Lin — and follow him as he opens Property Monitor for the first time</span>
+      <span class="lang-zh">認識林先生 — 跟著他第一次打開 Property Monitor</span>
+    </div>
+    <p class="pc-tag">
+      <span class="lang-en">Mr. Lin (45, Taipei) just received his Japan Business Manager visa and plans to buy one Tokyo property for rental income. He has never used Property Monitor before. This walkthrough shows you <strong>which page to open first, what to click, what each chart means, and where to find each function</strong> — using Mr. Lin's questions as the lens. It is <strong>not</strong> investment advice, tax advice, or property recommendations.</span>
+      <span class="lang-zh">林先生，45 歲，台北人，剛取得日本經營管理簽證，預計在東京買一戶收租。他從沒用過 Property Monitor。這份導覽用林先生的問題當主軸，<strong>告訴你先打開哪一頁、點哪裡、每張圖代表什麼、各種功能藏在哪</strong>。這份文件<strong>不是</strong>投資建議、稅務建議或不動產推薦。</span>
+    </p>
+
+    <div class="pc-profile">
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Buyer</span><span class="lang-zh">使用者</span></div><div class="val">Mr. Lin · 45y · Taipei</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Visa</span><span class="lang-zh">簽證</span></div><div class="val"><span class="lang-en">JP BM visa approved</span><span class="lang-zh">經管簽已核發</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Goal</span><span class="lang-zh">目標</span></div><div class="val"><span class="lang-en">Tokyo rental</span><span class="lang-zh">東京收租</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Site experience</span><span class="lang-zh">網站經驗</span></div><div class="val"><span class="lang-en">First-time</span><span class="lang-zh">第一次</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Language</span><span class="lang-zh">語言</span></div><div class="val"><span class="lang-en">Reads 中文</span><span class="lang-zh">讀中文</span></div></div>
+    </div>
+
+    <div class="pc-questions">
+      <strong><span class="lang-en">Questions Mr. Lin came to answer</span><span class="lang-zh">林先生想在這個網站找到答案的問題</span></strong>
+      <ol>
+        <li><span class="lang-en">Where on this site does Japan data live, and how do I get there?</span><span class="lang-zh">日本的資料藏在哪？怎麼進去？</span></li>
+        <li><span class="lang-en">Where can I read the analyst narrative — what's the story behind the numbers — before I start clicking charts?</span><span class="lang-zh">在開始點圖之前，哪裡能讀到分析師的敘述、看「數字背後的故事」？</span></li>
+        <li><span class="lang-en">Which charts and KPIs matter for someone planning to rent out one Tokyo unit?</span><span class="lang-zh">想出租一戶東京物件，要看哪些 KPI 和圖？</span></li>
+        <li><span class="lang-en">How do I decide between Tokyo / Osaka / Fukuoka — which one fits my situation?</span><span class="lang-zh">Tokyo / Osaka / Fukuoka 三選一，怎麼判斷哪個適合我？</span></li>
+        <li><span class="lang-en">How do I drill from "Japan overall" down to "this specific Tokyo ward"?</span><span class="lang-zh">怎麼從「日本整體」鑽到「東京這個區」？</span></li>
+        <li><span class="lang-en">What does ¥80M actually cost me end-to-end (not just the sticker price) over 10 years?</span><span class="lang-zh">¥80M 含取得、持有、退場全週期 10 年的實際總成本是多少（不只是標價）？</span></li>
+        <li><span class="lang-en">Where is the tool that compares buying property vs buying J-REITs?</span><span class="lang-zh">比較「買實體 vs 買 J-REIT」的工具在哪裡？</span></li>
+        <li><span class="lang-en">How do I switch the site to 中文? Where do I download a PDF?</span><span class="lang-zh">怎麼切到中文？怎麼下載 PDF？</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 2 — OPERATIONS JOURNEY                 -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 02</div>
+    <h2><span class="lang-en">Mr. Lin's click-by-click tour — 12 stops</span><span class="lang-zh">林先生的逐步點擊旅程 — 12 個停靠點</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">Each stop is a real page on the site. For each, you'll see what Mr. Lin clicks, what he sees on the screen, and how that screen relates to his situation. Follow along in another tab — every URL works.</span>
+      <span class="lang-zh">每個停靠點都是站上的一頁實際畫面。每站告訴你林先生點什麼、螢幕出現什麼、這個畫面跟他有什麼關係。建議另開分頁跟著走 — 所有連結都能直接點。</span>
+    </p>
+  </div>
+
+  <!-- STOP 1 — Home -->
+  <div class="demo-step">
+    <div class="step-no">1</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Land on the home page and pick the right persona</span><span class="lang-zh">進入首頁，選對 persona 卡</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">opens the home page, scrolls past the dark hero, sees three persona cards labelled "I want yield / I want growth / I want a passport" and clicks <strong>"I want yield / 我要收租"</strong>.</span>
+        <span class="lang-zh">打開首頁，往下捲過深色 hero，看到三張 persona 卡：「我要收租／我要增值／我要身分」，他點 <strong>「我要收租 / I want yield」</strong>。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees on screen:</strong> the chosen card lights up amber with a checkmark. Below the hero, a scatter chart titled <em>"Carry × 10-year growth, every city plotted"</em> highlights the dots that match the yield persona — these are the cities the site thinks fit "yield-first" buyers.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>選中的卡片變琥珀色亮起並打勾。Hero 下方的散點圖《利差 × 10 年漲幅，每城一點》會把符合「收租」persona 的點亮起 — 這些就是網站判斷適合收租買家的城市。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">the persona pick acts as a global filter — every chart, map and Top-5 list further down the page will reweight to his lens. He doesn't need to manually filter anything else.</span><span class="lang-zh">這個 persona 選擇等於全站濾鏡 — 下方每張圖、地圖、Top-5 清單都會以他的角度重新排序。他不需要自己手動篩選任何東西。</span></div>
+      <div class="step-screenshot"><img src="img/01-home-persona.png" alt="Home page hero with I-want-yield persona active" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 2 — Home scatter + map -->
+  <div class="demo-step">
+    <div class="step-no">2</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Use the world map to locate Japan cities</span><span class="lang-zh">用世界地圖找到日本城市</span></h4>
+      <div class="step-url"><a href="/home.html#map">myproperty.investmquest.com/home</a> · <span class="lang-en">map section</span><span class="lang-zh">地圖區段</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">scrolls down to the world map. He uses the toggle above the map to switch the metric (Yield / Carry / 10yr / Pipeline). He hovers over Tokyo's dot in Japan; a tooltip pops with Yield, Carry, 10yr, PTI, Vacancy. He clicks the <em>"Deep dive →"</em> link in the tooltip.</span>
+        <span class="lang-zh">捲到世界地圖。地圖上方有切換按鈕（Yield / Carry / 10yr / Pipeline），他用來換顯示的指標。把游標停在日本的東京點上 → 浮出 tooltip 顯示 Yield、Carry、10yr、PTI、Vacancy。點 tooltip 內的 <em>「Deep dive →」</em>。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> dot color depth = how extreme the metric is for that city. Below the map, a "Top 5" strip lists the leading cities for the chosen metric, with a ★ next to ones matching his persona.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>點的顏色深度代表該指標在該城市的極端程度。地圖下方有 Top 5 列表顯示當前指標的領先城市，符合他 persona 的旁邊有 ★。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">the map is the visual shortcut into a city's deep page — no need to dig through navigation menus. One click takes him to /jp/tokyo.html.</span><span class="lang-zh">地圖是進入城市深度頁的視覺捷徑 — 不用翻 navbar。一鍵直達 /jp/tokyo.html。</span></div>
+      <div class="step-screenshot"><img src="img/02-home-map.png" alt="Home page world map section with metric toggle" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 3 — JP Report (read narrative first for context) -->
+  <div class="demo-step">
+    <div class="step-no">3</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Read the long-form market report first — get the narrative before the numbers</span><span class="lang-zh">先讀長篇市場報告 — 看完故事再看數字</span></h4>
+      <div class="step-url"><a href="/jp/report.html">myproperty.investmquest.com/jp/report</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">navbar 🇯🇵 → <strong>Report / 報告</strong>. He reads the <strong>Executive Summary</strong> first, then skims the section headings to know what's covered. He pays extra attention to the <em>BOJ Rate Normalization</em>, <em>Demand: Foreign Capital and Resale Boom</em>, and <em>Outlook</em> sections — these set the context for everything else he'll click later.</span>
+        <span class="lang-zh">navbar 🇯🇵 → <strong>Report / 報告</strong>。先讀 <strong>Executive Summary（執行摘要）</strong>，再掃 9 個章節標題知道涵蓋範圍。他特別注意 <em>BOJ Rate Normalization</em>、<em>Demand: Foreign Capital and Resale Boom</em>、<em>Outlook</em> 三章 — 這些設定了他後面所有點擊的脈絡。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> a long-form research report broken into <strong>9 named sections</strong> — Executive Summary, BOJ Rate Normalization, Supply: Shrinking Starts and the Akiya Paradox, Demand: Foreign Capital and Resale Boom, Valuation, Tokyo 23 Wards, Osaka, Fukuoka, Outlook. This page is mostly <em>prose</em>: paragraphs of analyst narrative with stats embedded in the text. No charts to interpret — just read top-to-bottom (or jump via the section anchor links).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>一份長篇研究報告，分成 <strong>9 個章節</strong> — Executive Summary、BOJ Rate Normalization、Supply（開工萎縮與空屋悖論）、Demand（外資湧入與中古屋榮景）、Valuation（估值）、Tokyo 23 Wards、Osaka、Fukuoka、Outlook（展望）。這頁主體是<em>敘述文字</em>：分析師段落配內嵌統計數字。沒有圖表要解讀 — 從上往下讀就好（或用章節連結跳）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">this is the <em>only</em> place on the site where someone explains "what's the story" in plain prose. Reading it FIRST means every chart he sees later has a frame. If he jumps straight into KPI grids without this 10-minute read, he sees numbers without narrative — and may misread them.</span><span class="lang-zh">這是站上<em>唯一</em>用白話文講「故事是什麼」的地方。先讀它，後面看任何圖表都會有脈絡。如果他跳過這 10 分鐘直接衝 KPI，就只是看到數字沒看到敘述 — 容易誤讀。</span></div>
+      <div class="step-screenshot"><img src="img/03-jp-report.png" alt="JP Market Report long-form research with 9 sections" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 4 — JP Dashboard -->
+  <div class="demo-step">
+    <div class="step-no">4</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Read the Japan dashboard — three KPI grids tell the whole market story</span><span class="lang-zh">讀日本儀表板 — 三排 KPI 把整個市場說完</span></h4>
+      <div class="step-url"><a href="/jp/">myproperty.investmquest.com/jp</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">opens /jp/ (he can also reach it from the navbar via the 🇯🇵 flag dropdown). He reads top-to-bottom — the page is structured as three KPI grids each labelled with a section header.</span>
+        <span class="lang-zh">打開 /jp/（也可以從 navbar 上的 🇯🇵 國旗下拉進來）。從上往下讀 — 頁面分成三排 KPI，每一排都有 section 標題。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> three KPI grids of 4 cards each —</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>三排 KPI、每排 4 張卡 —</span><br>
+        <span class="lang-en">① <strong>MARKET TEMPERATURE</strong> — national condo YoY, Tokyo new condo avg, BOJ rate, national rental yield (the 4 numbers everyone references first).<br>
+        ② <strong>INVESTMENT METRICS</strong> — yield spread vs BOJ, Tokyo 23-ward yield, Fukuoka yield, foreign buyer share. <em>This is the row built for Mr. Lin's situation.</em><br>
+        ③ <strong>SUPPLY &amp; DEMOGRAPHICS</strong> — vacant homes (akiya), Fukuoka YoY, Tokyo land price YoY, housing starts.<br>
+        Below the KPIs, six ECharts charts cover: condo price index, city price comparison, resale volume, yield by city, USD/JPY × foreign inflow, housing starts trend.</span>
+        <span class="lang-zh">① <strong>市場溫度</strong> — 全國公寓 YoY、東京新建均價、BOJ 利率、全國租金收益率（最常被引用的四個數字）。<br>
+        ② <strong>投資指標</strong> — yield spread vs BOJ、東京 23 區 yield、福岡 yield、外國買家比例。<em>這一排就是為林先生這種情境設計的。</em><br>
+        ③ <strong>供給與人口</strong> — 空屋（akiya）、福岡 YoY、東京地價 YoY、住宅開工。<br>
+        KPI 下方有 6 張 ECharts 圖：公寓價格指數、城市比較、二手成交量、城市 yield、USD/JPY × 外資流入、住宅開工趨勢。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">grid ② is his bread and butter — yield spread vs BOJ tells him the carry, and Tokyo 23W vs Fukuoka yield contrasts the two cities most discussed for foreign rental buyers. He doesn't need to read every grid in equal depth.</span><span class="lang-zh">第 ② 排是他主菜 — yield spread vs BOJ 是 carry，東京 23 區 vs 福岡 yield 是外國收租買家最常比較的兩座城市。他不需要每一排都讀同樣深度。</span></div>
+      <div class="step-screenshot"><img src="img/04-jp-dashboard.png" alt="Japan dashboard top with three KPI grids visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 5 — JP Macro -->
+  <div class="demo-step">
+    <div class="step-no">5</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Open the Macro × Cycle page to see "where in the cycle are we now"</span><span class="lang-zh">開 Macro × Cycle 頁，看「現在在週期哪個位置」</span></h4>
+      <div class="step-url"><a href="/jp/macro.html">myproperty.investmquest.com/jp/macro</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">in the navbar, hovers the 🇯🇵 dropdown and clicks <strong>Macro / 總經</strong>. The page opens with a horizontal cycle bar across the top.</span>
+        <span class="lang-zh">navbar 上把游標停在 🇯🇵 下拉，點 <strong>Macro / 總經</strong>。頁面開啟，最上方有一條橫向的週期軸。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> a colored bar segmenting 2008–2025 into eras (GFC → Deflation → Abenomics → COVID → Recovery / Expansion) with a "NOW" marker pinned to the current era. Below: 6 macro KPI cards (BOJ rate, urban land YoY, CPI, GDP, unemployment, avg mortgage rate), then dual-axis line charts for monetary cycle vs property prices and real economy vs property prices, then a column of <em>"Key Cycle Events"</em> cards covering specific dates (e.g. NIRP exit Mar 2024, BOJ to 0.5% Jan 2025).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>2008–2025 的彩色週期軸分為 GFC → 平成不景氣 → Abenomics → COVID → 復甦／擴張，當下時點用 「NOW」標記。下方有 6 張 macro KPI 卡（BOJ 利率、都市地價 YoY、CPI、GDP、失業率、平均房貸利率），接著兩張雙軸折線圖（貨幣週期 vs 房價、實體經濟 vs 房價），最後是《關鍵週期事件》卡片陳列具體事件日期（例如 2024/3 退出負利率、2025/1 BOJ 升至 0.5%）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">"now" cycle position frames everything else he reads. If the page tags Japan as "early expansion," the meaning of a 4% yield is different from "late expansion." He doesn't need to interpret macro from scratch — the page does it.</span><span class="lang-zh">「目前所在週期」決定了他後面讀任何東西的脈絡。如果頁面標記日本是「擴張前期」，4% yield 的意義跟「擴張末期」差很多。他不用自己從零解讀 macro — 頁面已經幫他標好了。</span></div>
+      <div class="step-screenshot"><img src="img/05-jp-macro.png" alt="JP Macro cycle bar with NOW marker" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 6 — Tokyo vs Osaka vs Fukuoka triage -->
+  <div class="demo-step">
+    <div class="step-no">6</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Tokyo vs Osaka vs Fukuoka — quick triage to pick the right city to drill into</span><span class="lang-zh">Tokyo vs Osaka vs Fukuoka — 快速判斷該鑽進哪一座城市</span></h4>
+      <div class="step-url"><a href="/jp/">/jp</a> · <a href="/jp/tokyo.html">/jp/tokyo</a> · <a href="/jp/osaka.html">/jp/osaka</a> · <a href="/jp/fukuoka.html">/jp/fukuoka</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">back on /jp/, he scrolls below the KPI grids to two horizontal bar charts: <em>"City Price Comparison"</em> and <em>"Rental Yield by City"</em> (with a dashed BOJ reference line at 0.5%). He also notes the INVESTMENT METRICS row already shows Tokyo 23W Yield (orange) vs Fukuoka Yield (green). Then he opens /jp/osaka and /jp/fukuoka in two new tabs to scan each city's KEY METRICS + summary cards side-by-side with /jp/tokyo.</span>
+        <span class="lang-zh">回到 /jp/，捲到 KPI 下方兩張橫向長條圖：《City Price Comparison》與《Rental Yield by City》（含 0.5% BOJ 虛線）。INVESTMENT METRICS 那排也已經對比 Tokyo 23W Yield（橘）vs Fukuoka Yield（綠）。再分別在新分頁打開 /jp/osaka 與 /jp/fukuoka，跟 /jp/tokyo 三個分頁並排掃 KEY METRICS 與 summary 卡。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees side-by-side:</strong></span>
+        <span class="lang-zh"><strong>三個分頁並排比較：</strong></span><br>
+        <span class="lang-en">▸ <strong>Fukuoka</strong> — highest gross yield, fastest population inflow. But its summary cards flag a <em>shallower tenant pool</em> and limited foreigner-friendly ecosystem (English agents / lawyers / PMs).<br>
+        ▸ <strong>Osaka</strong> — mid-yield, mid-tenant-pool. Expo 2025 demand boost noted in supply page.<br>
+        ▸ <strong>Tokyo 23W</strong> — lower yield, but the <em>Foreign Capital</em> summary card explicitly notes 30%+ of central transactions &gt;¥100M are foreign; deepest tenant pool, highest exit liquidity, mature English-speaking service ecosystem.</span>
+        <span class="lang-zh">▸ <strong>福岡</strong> — 毛利最高、人口流入最快。但 summary 卡標示<em>租客池較淺</em>、外國人友善生態有限（英語仲介／律師／PM）。<br>
+        ▸ <strong>大阪</strong> — yield 中等、租客池中等。供給頁標示 2025 大阪世博需求提振。<br>
+        ▸ <strong>東京 23 區</strong> — yield 較低，但 Foreign Capital summary 卡明白寫著：中心區 >¥100M 成交中外資佔 30%+；租客池最深、退場流動性最高、英語服務生態成熟。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin — Tokyo wins:</span><span class="lang-zh">對林先生 — 東京勝出：</span></strong> <span class="lang-en">he's a first-time non-resident landlord who doesn't speak Japanese. The "yield premium" Fukuoka offers gets eaten by ecosystem friction (finding an English-capable PM, lawyer, agent; longer re-lease cycles in a thinner market). Tokyo 23W trades 1–2 percentage points of yield for an ecosystem he can actually operate inside. <em>This is the call the site's summary cards are quietly making for him — he just needs to read them.</em> He proceeds to drill into Tokyo in the next stop.</span><span class="lang-zh">他是第一次當房東、不講日文的非居住者。福岡的「yield 溢價」會被生態摩擦吃掉（找會英文的 PM／律師／仲介、薄市場的更長 re-lease 週期）。東京 23 區用 1–2 個百分點的 yield 換到他真的能運轉的生態。<em>這就是站上 summary 卡幫他靜靜下的判斷 — 他只要讀就好。</em>他下一站直接鑽進東京。</span></div>
+      <div class="step-screenshot"><img src="img/06-jp-city-compare.png" alt="JP City Price Comparison and Rental Yield by City charts" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 7 — JP Tokyo -->
+  <div class="demo-step">
+    <div class="step-no">7</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Drill into Tokyo — find the "Three Zones" cards to see what his budget can buy</span><span class="lang-zh">鑽進東京 — 找「Three Zones」卡片看他的預算落在哪一區</span></h4>
+      <div class="step-url"><a href="/jp/tokyo.html">myproperty.investmquest.com/jp/tokyo</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">navbar 🇯🇵 dropdown → Tokyo 東京. He scrolls past the 6 KEY METRICS KPIs (new condo avg, resale median, ¥/sqm, yield, rent YoY, land YoY) and looks at the <strong>THREE ZONES</strong> micro-cards.</span>
+        <span class="lang-zh">navbar 🇯🇵 下拉 → Tokyo 東京。捲過 6 張 KEY METRICS（新建均價、二手中位、¥/坪、yield、租金 YoY、地價 YoY），看 <strong>THREE ZONES</strong> 三張 micro 卡。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> three zone cards showing the price-per-sqm range for each tier — Center 5 (Minato/Chiyoda/Chuo/Shibuya/Shinjuku), Yamanote Outer (Setagaya/Meguro/Nakano), Outer Wards (Adachi/Edogawa/Katsushika). Below: a horizontal bar chart "Ward Land Price Comparison" and a "Tokyo Rent Trend" line. At the bottom, four colored summary cards (Center 5 Premium / Yamanote Value / Outer Opportunity / Foreign Capital).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>三張 zone 卡顯示每層級的每坪價範圍 — Center 5（港／千代田／中央／渋谷／新宿）、Yamanote Outer（世田谷／目黒／中野）、Outer Wards（足立／江戶川／葛飾）。下方有橫向長條圖《區地價比較》與《東京租金趨勢》折線。最底有四張彩色 summary 卡（Center 5 溢價／Yamanote 價值／Outer 機會／外資）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">the Three Zones cards are the fastest reality check on what his budget can target. He doesn't need to compute anything — the price ranges are already laid out per zone.</span><span class="lang-zh">Three Zones 卡是他預算落點的最快查核。不需要自己算 — 每層級的價格範圍已經攤好。</span></div>
+      <div class="step-screenshot"><img src="img/07-jp-tokyo.png" alt="Tokyo deep-dive page with KEY METRICS and THREE ZONES section" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 8 — Cost Calculator -->
+  <div class="demo-step">
+    <div class="step-no">8</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Cost Calculator — what does ¥80M actually cost over 10 years, end-to-end?</span><span class="lang-zh">Cost Calculator — ¥80M 含取得、持有、退場 10 年總成本是多少？</span></h4>
+      <div class="step-url"><a href="/tools/cost-calculator.html">myproperty.investmquest.com/tools/cost-calculator</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">navbar → Tools dropdown → <strong>Cost Calc / 成本計算</strong>. He sets: <strong>Market = 🇯🇵 JP</strong>, <strong>Resident Status = Foreigner</strong>, <strong>Holding Horizon = 10y</strong>, <strong>Property Price = ¥80,000,000</strong>. Then he tweaks the four sliders if needed (annual appreciation, maintenance, property tax, seller agent fee) — defaults are reasonable starting points.</span>
+        <span class="lang-zh">navbar → Tools 下拉 → <strong>Cost Calc / 成本計算</strong>。設定：<strong>Market = 🇯🇵 JP</strong>、<strong>Resident Status = Foreigner</strong>、<strong>Holding Horizon = 10y</strong>、<strong>Property Price = ¥80,000,000</strong>。需要的話再微調四個 slider（年增值、維護費、固都税率、賣方仲介費）— 預設值已是合理起點。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> a hero KPI dashboard at the top with <em>TOTAL CASH OUT / NET PROCEEDS AT EXIT / NET P&amp;L verdict</em> (Net Positive / Marginal / Net Loss > 5%) plus 5 supporting stats. Below: three breakdown tables —</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>頂部 hero KPI 顯示 <em>TOTAL CASH OUT／NET PROCEEDS AT EXIT／NET P&amp;L 判決</em>（淨正／邊緣／淨虧 > 5%）加 5 張輔助統計。下方三張明細表 —</span><br>
+        <span class="lang-en">① <strong>Acquisition</strong> — price, 不動産取得税, 登録免許税, 印紙税, buyer agent fee (no foreign surcharge for JP).<br>
+        ② <strong>Holding</strong> — 固定資産税, maintenance, insurance, optional rental income tax, with annual + total-over-horizon columns.<br>
+        ③ <strong>Exit</strong> — seller agent fee, <em>譲渡所得税 (CGT) — 39.6% if held &lt;5yr / 20.3% if held ≥5yr</em>.<br>
+        Plus a stacked bar chart "Cost Breakdown Stack," an annual holding cost line chart, and a 12-market comparison table at the bottom (his JP row highlighted).</span>
+        <span class="lang-zh">① <strong>Acquisition</strong> — 物件価、不動産取得税、登録免許税、印紙税、買方仲介費（JP 對外國人沒有附加稅）。<br>
+        ② <strong>Holding</strong> — 固定資産税、維護費、保險、可選的房租所得稅，每列含年度 + 整個持有期累計欄。<br>
+        ③ <strong>Exit</strong> — 賣方仲介費、<em>譲渡所得税：持有 &lt; 5 年 39.6%、持有 ≥ 5 年 20.3%</em>。<br>
+        另有堆疊長條圖《Cost Breakdown Stack》、年度持有成本折線圖，最底是 12 市場比較表（他的 JP 列高亮）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">the ¥80M sticker price is just <em>one</em> column. The calculator translates it into Total Cash Out + Net Proceeds + a verdict — and it already encodes JP tax brackets so he doesn't need to memorize 不動産取得税 / 譲渡所得税 rates. The 譲渡所得税 cliff at 5 years is exactly why he set holding to 10y, not 3y. The 12-market row at the bottom is bonus context: "if I'd put the same money in MY / AU / UK, what's the verdict?"</span><span class="lang-zh">¥80M 的標價只是<em>其中一欄</em>。計算機把它翻譯成 Total Cash Out + Net Proceeds + 判決 — 而且已經把 JP 稅率寫進公式，他不用背 不動産取得税／譲渡所得税。譲渡所得税 在持有 5 年的懸崖正是他選 10 年持有期的原因，不是 3 年。底部的 12 市場列是 bonus context：「如果我把同樣金額放 MY／AU／UK，判決會是什麼？」</span></div>
+      <div class="step-screenshot"><img src="img/08-cost-calc.png" alt="Cost Calculator with JP market, Foreigner, 10y horizon, ¥80M price set" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 9 — Pipeline Cliff -->
+  <div class="demo-step">
+    <div class="step-no">9</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Pipeline Cliff — find Tokyo on the supply risk grid</span><span class="lang-zh">Pipeline Cliff — 在供給風險表格上找東京</span></h4>
+      <div class="step-url"><a href="/pipeline-cliff.html">myproperty.investmquest.com/pipeline-cliff</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">navbar → Tools dropdown → <strong>Pipeline Cliff / 供給日曆</strong>. The page lists cities under three risk buckets: 🔴 DANGER · 🟡 WATCH · 🟢 EASING. He scans for "Tokyo" to see which bucket it sits in.</span>
+        <span class="lang-zh">navbar → Tools 下拉 → <strong>Pipeline Cliff / 供給日曆</strong>。頁面把城市分到三個風險桶：🔴 DANGER · 🟡 WATCH · 🟢 EASING。他掃描「Tokyo」看落在哪一桶。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> a quarterly delivery chart titled <em>"Quarterly delivery as % of existing stock"</em> showing forward supply pressure city-by-city. Each city is tagged with a colored risk badge.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>逐季交付圖《季度交付占既有存量百分比》顯示各城市未來供給壓力。每座城市有一個彩色風險標籤。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">if Tokyo sits in 🟢 EASING he can proceed; if in 🔴 DANGER he should pause and revisit timing. The bucket label does the heavy lifting — he doesn't need to read raw quarterly numbers.</span><span class="lang-zh">如果東京在 🟢 EASING 桶，他可以進場；如果在 🔴 DANGER，他應該暫停並重看時機。桶的標籤已經做了判讀 — 他不用自己看原始季度數字。</span></div>
+      <div class="step-screenshot"><img src="img/09-pipeline-cliff.png" alt="Pipeline Cliff page with risk buckets" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 10 — REIT vs Direct -->
+  <div class="demo-step">
+    <div class="step-no">10</div>
+    <div class="step-content">
+      <h4><span class="lang-en">REIT vs Direct — toggle to "Foreign + TW + 10yr" to compare his alternatives</span><span class="lang-zh">REIT vs Direct — 切到「Foreign + TW + 10 年」比較替代方案</span></h4>
+      <div class="step-url"><a href="/reit-vs-direct.html">myproperty.investmquest.com/reit-vs-direct</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">navbar → Tools dropdown → <strong>REIT vs Direct / REIT vs 實體</strong>. On the page he flips three toggle bands: Residency = <strong>Foreign</strong>, Period = <strong>10yr</strong>, Home Country chip = <strong>🇹🇼 TW</strong>. He then taps the <strong>"All Cash"</strong> scenario tab (he's buying cash, not levered).</span>
+        <span class="lang-zh">navbar → Tools 下拉 → <strong>REIT vs Direct / REIT vs 實體</strong>。頁面上切三個 toggle 列：Residency 切到 <strong>Foreign</strong>、Period 切 <strong>10yr</strong>、母國 chip 選 <strong>🇹🇼 TW</strong>。然後點 <strong>「All Cash」</strong> 場景 tab（他全現金買，沒槓桿）。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> a 7-row comparison table for US/SG/JP/AU/MY/UK/EU markets. Columns: Direct Income / Direct Total / REIT Income / REIT Total / Gap / Winner. Below: an endpoint bar chart "$100K, after 10 years" comparing the two paths visually for each market. To the right: three context cards explaining "Foreign Mode Flips These," "Foreign-Friendly Markets," and "Treaty Relief · Taiwan."</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>美／新／日／澳／馬／英／歐 七列比較表。欄位：Direct Income／Direct Total／REIT Income／REIT Total／Gap／Winner。下方：終值長條圖《$100K, after 10 years》視覺化兩條路徑。右側三張說明卡：「Foreign 模式翻轉了什麼」「對外國買家友善的市場」「Treaty Relief · 台灣」。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">the JP row + the "Treaty Relief · Taiwan" card together tell him whether direct property still beats J-REIT for someone with his exact profile. The unit shown is USD 100K (not ¥80M) — he reads the comparison ratios, not the absolute number.</span><span class="lang-zh">JP 那一列 + 「Treaty Relief · 台灣」卡合起來告訴他，以他的身分條件而言，實體是否還勝過 J-REIT。表上單位是 USD 100K（不是 ¥80M） — 他讀的是比較<strong>比例</strong>，不是絕對數字。</span></div>
+      <div class="step-screenshot"><img src="img/10-reit-vs-direct.png" alt="REIT vs Direct with Foreign, TW chip, 10yr, All Cash toggles set" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 11 — Carry Heatmap -->
+  <div class="demo-step">
+    <div class="step-no">11</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Carry Heatmap — find Tokyo's row, then click for the 5-year trajectory</span><span class="lang-zh">Carry Heatmap — 找到東京那一列，點開看 5 年走勢</span></h4>
+      <div class="step-url"><a href="/carry-heatmap.html">myproperty.investmquest.com/carry-heatmap</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">navbar → Tools dropdown → <strong>Carry Heatmap / 利差熱力圖</strong>. He uses the sort toggle at the top of the heatmap to switch between "Region / Current carry / 5yr change" — Region groups Asia together. He scrolls to the Asia section and finds the Tokyo / Osaka / Fukuoka rows. He hovers cells for tooltips, then clicks the <strong>Tokyo row label</strong>.</span>
+        <span class="lang-zh">navbar → Tools 下拉 → <strong>Carry Heatmap / 利差熱力圖</strong>。熱力圖上方有排序切換（Region / Current carry / 5yr change）— Region 會把亞洲城市集中在一起。捲到亞洲區段，找 Tokyo / Osaka / Fukuoka 三列。游標停在格子上看 tooltip，再<strong>點 Tokyo 那一列的列名</strong>。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees:</strong> the heatmap is 41 cities × 20 quarters (5 years), cells coloured red→gray→green from −4% to +5% carry. Above, two "Top Movers" cards list TOP 5 Compressed (red) and TOP 5 Expanded (green). After clicking Tokyo, a detail panel opens with the 5-year carry line chart for that city, plus 21Q2 vs 26Q1 carry, 5yr change, current yield/rate.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>熱力圖 41 城 × 20 季（5 年），顏色從紅 → 灰 → 綠（carry −4% 到 +5%）。上方兩張 Top Movers 卡：TOP 5 壓縮（紅）、TOP 5 擴張（綠）。點 Tokyo 後跳出 detail panel：該城市 5 年 carry 走勢線圖，加上 21Q2 vs 26Q1 carry、5 年變化、當前 yield / 利率。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">the heatmap shows whether Tokyo's carry is shrinking, holding, or expanding — direction matters more than the absolute number. The yellow disclaimer at the bottom warns the quarterly numbers are back-cast and indicative — he should not quote these in negotiations.</span><span class="lang-zh">熱力圖讓他看出東京 carry 在縮、在守、在擴 — 方向比絕對值重要。底部黃色聲明提醒季度數字是回溯估算、僅供參考 — 他不應該在談判中引用這些。</span></div>
+      <div class="step-screenshot"><img src="img/11-carry-heatmap.png" alt="Carry Heatmap with Top Movers cards and 5-year heatmap" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 12 — JP Risk + Methodology -->
+  <div class="demo-step">
+    <div class="step-no">12</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Risk Monitor + Methodology — sanity check before he closes the laptop</span><span class="lang-zh">Risk Monitor + Methodology — 關電腦前的最後檢查</span></h4>
+      <div class="step-url"><a href="/jp/risk.html">/jp/risk</a> · <a href="/methodology.html">/methodology</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">Mr. Lin does:</span><span class="lang-zh">林先生動作：</span></strong>
+        <span class="lang-en">navbar 🇯🇵 → <strong>Risk / 風險</strong>. He looks at the 6-axis Risk Radar (Liquidity / Credit / Supply / Macro / Geopolitical / Demographics — current vs 2020 baseline) and reads the 4 colored Risk Factor cards. Then he scrolls down to the vertical Timeline (2013 Abenomics → 2025 BOJ to 0.5% → 2026 watching). Final stop: navbar → Tools → <strong>Methodology / 方法論</strong> to check which sources back the JP numbers.</span>
+        <span class="lang-zh">navbar 🇯🇵 → <strong>Risk / 風險</strong>。看 6 軸 Risk Radar（流動性／信用／供給／宏觀／地緣／人口 — 當前 vs 2020 基準）並讀 4 張彩色 Risk Factor 卡。捲到底看垂直時間軸（2013 Abenomics → 2025 BOJ 升至 0.5% → 2026 觀察中）。最後一站：navbar → Tools → <strong>Methodology / 方法論</strong> 確認 JP 數字背後的資料來源。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What he sees on Methodology:</strong> a 20-row "Primary Data Sources by Market" table. The Japan row shows: Price Index = Kantei (used) · Rent / Vacancy = At Home + Suumo · Pipeline = MLIT starts · Central Bank = BoJ. Above the table is a 10-card glossary of derived metrics (Carry Spread, PTI, P/R, Vacancy Rate, Pipeline %, 10yr Cumulative, etc.) with thresholds.</span>
+        <span class="lang-zh"><strong>Methodology 頁螢幕出現什麼：</strong>20 列《Primary Data Sources by Market》表。日本那一列：Price Index = Kantei（二手）· Rent / Vacancy = At Home + Suumo · Pipeline = MLIT 開工 · Central Bank = BoJ。表格上方是 10 張衍生指標卡（Carry Spread、PTI、P/R、Vacancy Rate、Pipeline % 等）含閾值定義。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For Mr. Lin:</span><span class="lang-zh">對林先生：</span></strong> <span class="lang-en">Risk page tells him what could go wrong; Methodology tells him whether to trust the numbers. After this step, he has done all the homework the website can do for him — anything else needs to come from a licensed advisor in Japan.</span><span class="lang-zh">Risk 頁告訴他可能出什麼錯；Methodology 告訴他要不要信這些數字。走完這站，網站能幫他做的功課就到頂了 — 之後的事情必須找日本當地的合格專業人士。</span></div>
+      <div class="step-screenshot"><img src="img/12-jp-risk.png" alt="JP Risk Monitor with Risk Radar and Risk Factor cards" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 3 — SITE CHEAT SHEET                   -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 03</div>
+    <h2><span class="lang-en">Site cheat sheet — the 6 site-wide patterns Mr. Lin needs to know</span><span class="lang-zh">網站小抄 — 林先生要記得的 6 個全站通用規則</span></h2>
+    <p class="sec-sub"><span class="lang-en">These work the same way on every page across all markets — learn once, use everywhere.</span><span class="lang-zh">以下規則每一頁、每個市場都一致 — 學一次，整站通用。</span></p>
+  </div>
+
+  <div class="cheat-grid">
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">EN</span> <span class="lang-en">Language toggle</span><span class="lang-zh">語言切換</span></h4>
+      <p><span class="lang-en">Top-right of every page: two pill buttons <code>EN</code> / <code>中文</code>. Choice is remembered across pages and visits via localStorage.</span><span class="lang-zh">每頁右上角：兩顆膠囊鈕 <code>EN</code> / <code>中文</code>。選擇會用 localStorage 跨頁、跨次造訪記住。</span></p>
+      <p class="ck-tip"><span class="lang-en">Tip: switch to 中文 first, then download PDF — the PDF will be in 中文.</span><span class="lang-zh">小技巧：先切到中文再下載 PDF，PDF 就會是中文版。</span></p>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🇯🇵</span> <span class="lang-en">Market selector</span><span class="lang-zh">市場選擇</span></h4>
+      <p><span class="lang-en">Navbar second row: a country flag for each market. Hover any flag to see a dropdown with Overview / Supply / Demand / Valuation / Risk / Report / Macro plus city sub-pages.</span><span class="lang-zh">Navbar 第二列：每個市場一面國旗。游標停留在任一面旗上 → 跳出下拉，包含 Overview / Supply / Demand / Valuation / Risk / Report / Macro 與各城市子頁。</span></p>
+      <p class="ck-tip"><span class="lang-en">Mr. Lin uses 🇯🇵 → Tokyo to jump straight to ward-level data.</span><span class="lang-zh">林先生用 🇯🇵 → Tokyo 直接跳到區級資料。</span></p>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">⚙</span> <span class="lang-en">Tools dropdown</span><span class="lang-zh">Tools 下拉選單</span></h4>
+      <p><span class="lang-en">All cross-market analytical tools live here: <code>Home</code>, <code>Dashboard</code>, <code>Playbook</code>, <code>REITs</code>, <code>REIT vs Direct</code>, <code>Carry Heatmap</code>, <code>Pipeline Cliff</code>, <code>Methodology</code>, plus calculators.</span><span class="lang-zh">所有跨市場分析工具都在這裡：<code>Home</code>、<code>Dashboard</code>、<code>Playbook</code>、<code>REITs</code>、<code>REIT vs Direct</code>、<code>Carry Heatmap</code>、<code>Pipeline Cliff</code>、<code>Methodology</code>，還有各種試算工具。</span></p>
+      <p class="ck-tip"><span class="lang-en">If a tool isn't market-specific, it's in here.</span><span class="lang-zh">如果某個工具不是特定市場專屬的，就在這裡。</span></p>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🟢</span> <span class="lang-en">KPI card colors</span><span class="lang-zh">KPI 卡顏色</span></h4>
+      <p><span class="lang-en">Left border color tells you the read at a glance.</span><span class="lang-zh">左邊框顏色一眼告訴你判讀。</span></p>
+      <div class="color-legend">
+        <div class="cl-item"><span class="cl-dot cl-green"></span><span class="lang-en">positive</span><span class="lang-zh">正向</span></div>
+        <div class="cl-item"><span class="cl-dot cl-orange"></span><span class="lang-en">caution</span><span class="lang-zh">注意</span></div>
+        <div class="cl-item"><span class="cl-dot cl-red"></span><span class="lang-en">risk</span><span class="lang-zh">風險</span></div>
+        <div class="cl-item"><span class="cl-dot cl-blue"></span><span class="lang-en">neutral</span><span class="lang-zh">中性</span></div>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">📊</span> <span class="lang-en">Chart hover tooltips</span><span class="lang-zh">圖表 hover 提示</span></h4>
+      <p><span class="lang-en">Every ECharts chart on the site shows the data values in a popup when you hover over points/bars. Map dots and heatmap cells work the same way.</span><span class="lang-zh">站上每一張 ECharts 圖，游標停在點／長條上時都會浮出實際數值。地圖的點、熱力圖的格子也一樣。</span></p>
+      <p class="ck-tip"><span class="lang-en">No need to read a separate legend — hover gets you the number.</span><span class="lang-zh">不需要對照外部圖例 — hover 就有數值。</span></p>
+    </div>
+
+    <div class="cheat-card">
+      <h4><span class="ck-icon">📄</span> <span class="lang-en">Save any page as PDF</span><span class="lang-zh">把任何頁面存成 PDF</span></h4>
+      <p><span class="lang-en">Press <code>⌘ + P</code> (Mac) or <code>Ctrl + P</code> (Windows) → choose "Save as PDF". The print stylesheet hides the navbar so the PDF looks clean.</span><span class="lang-zh">按 <code>⌘ + P</code>（Mac）或 <code>Ctrl + P</code>（Windows）→ 選「另存為 PDF」。印刷樣式表會自動隱藏 navbar，PDF 版面乾淨。</span></p>
+      <p class="ck-tip"><span class="lang-en">This walkthrough has a dedicated "Download PDF" button at the bottom.</span><span class="lang-zh">本導覽底部有專屬「下載 PDF」按鈕。</span></p>
+    </div>
+
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 4 — TAKEAWAY                            -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 04</div>
+    <h2><span class="lang-en">What Mr. Lin walks away with — and what he must take outside this site</span><span class="lang-zh">林先生帶走什麼 — 以及哪些必須拿到站外去問</span></h2>
+    <p class="sec-sub"><span class="lang-en">After the 12-stop tour, he has a clear separation between "questions the site answered" and "questions the site flagged but cannot answer."</span><span class="lang-zh">走完 12 站後，他能清楚分開「網站已回答的問題」與「網站幫他點出但不能回答的問題」。</span></p>
+  </div>
+
+  <div class="takeaway">
+    <div class="takeaway-card answered">
+      <h4><span class="lang-en">✓ The site answered these for him</span><span class="lang-zh">✓ 網站已回答的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Where Japan data lives</strong> and how to navigate from /home → /jp/ → /jp/tokyo</span><span class="lang-zh"><strong>日本資料在哪</strong>、怎麼從 /home → /jp/ → /jp/tokyo 一路鑽進去</span></li>
+        <li><span class="lang-en"><strong>The full market narrative in plain prose</strong> before he opens any chart (the 9-section report on /jp/report)</span><span class="lang-zh"><strong>用白話文寫的完整市場敘述</strong>，在他打開任何圖之前先讀（/jp/report 的 9 章節報告）</span></li>
+        <li><span class="lang-en"><strong>Which KPI grid matters most</strong> for a yield-first foreign buyer (the INVESTMENT METRICS row on /jp/)</span><span class="lang-zh"><strong>對收租外國買家最重要的 KPI 排</strong>（/jp/ 上的 INVESTMENT METRICS 那一排）</span></li>
+        <li><span class="lang-en"><strong>Why Tokyo over Osaka / Fukuoka</strong> for a non-Japanese-speaking first-time landlord (the ecosystem call hidden in the city summary cards)</span><span class="lang-zh"><strong>為什麼選東京而不是大阪或福岡</strong>（城市 summary 卡裡藏的生態判斷）</span></li>
+        <li><span class="lang-en"><strong>What budget tier his ¥80M lands in</strong> (Tokyo Three Zones cards)</span><span class="lang-zh"><strong>¥80M 落在東京哪個層級</strong>（Tokyo Three Zones 卡）</span></li>
+        <li><span class="lang-en"><strong>What ¥80M actually costs over 10 years end-to-end</strong> with JP tax brackets baked in (Cost Calculator)</span><span class="lang-zh"><strong>¥80M 在 10 年週期內的真實總成本</strong>，JP 稅率已內建公式（Cost Calculator）</span></li>
+        <li><span class="lang-en"><strong>Whether Tokyo supply is in DANGER / WATCH / EASING</strong> for his entry timing (Pipeline Cliff)</span><span class="lang-zh"><strong>東京供給目前是 DANGER / WATCH / EASING 哪個桶</strong>（Pipeline Cliff）</span></li>
+        <li><span class="lang-en"><strong>How J-REIT compares as alternative</strong> with his exact residency + horizon (REIT vs Direct toggles)</span><span class="lang-zh"><strong>用他的居民身分 + 持有期，J-REIT 替代方案的對照結果</strong>（REIT vs Direct toggles）</span></li>
+        <li><span class="lang-en"><strong>Direction of Tokyo's carry over 5 years</strong> (Carry Heatmap row + detail panel)</span><span class="lang-zh"><strong>東京 carry 過去 5 年方向</strong>（Carry Heatmap 列 + detail panel）</span></li>
+        <li><span class="lang-en"><strong>What policy & macro risks are on watch</strong> (Risk page radar + timeline)</span><span class="lang-zh"><strong>正在觀察哪些政策與宏觀風險</strong>（Risk 頁 radar + 時間軸）</span></li>
+        <li><span class="lang-en"><strong>Where every number comes from</strong> (Methodology page Japan row)</span><span class="lang-zh"><strong>每個數字的來源</strong>（Methodology 頁日本那一列）</span></li>
+      </ul>
+    </div>
+
+    <div class="takeaway-card outsource">
+      <h4><span class="lang-en">→ Questions for advisors outside this site</span><span class="lang-zh">→ 必須拿到站外問專業人士的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Personal tax position</strong> in Japan and Taiwan, foreign tax credit, and inheritance exposure → 稅理士 (zeirishi) in Japan + 會計師 in Taiwan</span><span class="lang-zh"><strong>個人在日本與台灣的稅務</strong>、扣抵安排、相續稅曝險 → 日本稅理士 + 台灣會計師</span></li>
+        <li><span class="lang-en"><strong>Business Manager visa renewal</strong> requirements (visa is independent of property purchase) → 行政書士 (gyoseishoshi)</span><span class="lang-zh"><strong>經營管理簽證更新</strong>條件（簽證獨立於買房） → 行政書士</span></li>
+        <li><span class="lang-en"><strong>Mortgage eligibility as non-resident</strong> with BM visa → SMBC, SBJ Bank, Tokyo Star, ARUHI loan officers</span><span class="lang-zh"><strong>非居住者 + 經管簽的房貸合格條件</strong> → SMBC、SBJ、東京スター、ARUHI 房貸專員</span></li>
+        <li><span class="lang-en"><strong>Specific unit due diligence</strong>: 新耐震 vs 旧耐震, 所有権 vs 借地権, HOA financials, reserve fund history → local 仲介 + 司法書士</span><span class="lang-zh"><strong>單一物件 DD</strong>：新耐震 vs 旧耐震、所有権 vs 借地権、管理組合財報、修繕積立金歷史 → 當地仲介 + 司法書士</span></li>
+        <li><span class="lang-en"><strong>Property management contract</strong> and tenant placement strategy → English-capable PM company in Tokyo</span><span class="lang-zh"><strong>物件管理合約</strong>與招租策略 → 在東京有英文窗口的 PM 公司</span></li>
+        <li><span class="lang-en"><strong>FX hedging</strong> on the JPY-TWD entry and exit → his bank's FX desk</span><span class="lang-zh"><strong>JPY-TWD 進出場避險</strong> → 他往來銀行的 FX 部門</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 5 — BEST OPTION                         -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 05</div>
+    <h2><span class="lang-en">The site's best-supported call for Mr. Lin</span><span class="lang-zh">站上資料能支持的最佳選項 — 給林先生</span></h2>
+    <p class="sec-sub"><span class="lang-en">Not a personalized recommendation — a single, opinionated call assembled only from data this site already shows in SECTIONS 01–04.</span><span class="lang-zh">非個人化推薦 — 是從 SECTION 01–04 站上資料推導出的單一明確建議。</span></p>
+  </div>
+
+  <div class="best-option">
+    <div class="bo-grid">
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">CITY / AREA</span><span class="lang-zh">城市 / 區域</span></div>
+        <div class="bo-val">Tokyo 23-ward · east yield tier</div>
+        <div class="bo-note"><span class="lang-en">Koto · Sumida · Kita · Arakawa — the yield band Tokyo Three Zones cards put ¥80M into.</span><span class="lang-zh">江東・墨田・北・荒川 — Tokyo Three Zones 卡顯示 ¥80M 落在的收租帶。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">PRODUCT</span><span class="lang-zh">產品類型</span></div>
+        <div class="bo-val">Second-hand 1-bed mansion · 25–40㎡</div>
+        <div class="bo-note"><span class="lang-en">Post-1981 quake code (新耐震), 所有権 not 借地権. No flip, no new-build premium.</span><span class="lang-zh">新耐震（1981 後）、所有権非借地権。不翻修、不買新成屋溢價。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">BUDGET MIX</span><span class="lang-zh">預算配置</span></div>
+        <div class="bo-val">¥65M asset + ¥10M reno + ¥5M buffer</div>
+        <div class="bo-note"><span class="lang-en">Reno covers cosmetic + appliance refresh for first tenant; buffer absorbs vacancy + tax timing.</span><span class="lang-zh">Reno 用於首位房客前的表面+家電翻新；buffer 吸收空置與稅務時點。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">HOLD</span><span class="lang-zh">持有期</span></div>
+        <div class="bo-val">7–10 years</div>
+        <div class="bo-note"><span class="lang-en">Aligned with BM visa 5+5 renewal cadence; matches Cost Calculator's break-even horizon.</span><span class="lang-zh">對齊 BM 簽證 5+5 續簽節奏；與 Cost Calculator 的回本期一致。</span></div>
+      </div>
+    </div>
+
+    <div class="bo-section bo-checklist">
+      <h4><span class="lang-en">✓ Pre-commit checklist (from site data)</span><span class="lang-zh">✓ 進場前 checklist（站上資料能驗證的）</span></h4>
+      <ul>
+        <li><span class="lang-en">INVESTMENT METRICS row on <code>/jp/</code> — confirm cap rate, vacancy, gross-to-net delta still match east-tier assumptions on the day of offer.</span><span class="lang-zh"><code>/jp/</code> 上 INVESTMENT METRICS 排 — 確認 cap rate、空置率、毛淨差在出價當天仍符合東城收租帶假設。</span></li>
+        <li><span class="lang-en">Pipeline Cliff status for Tokyo must read EASING or WATCH (not DANGER) — re-check the week of offer.</span><span class="lang-zh">Tokyo 的 Pipeline Cliff 狀態必須是 EASING 或 WATCH（不是 DANGER） — 出價週重新確認。</span></li>
+        <li><span class="lang-en">Cost Calculator 10-year total cost (JP tax baked in) must clear the post-tax yield hurdle Mr. Lin set after the 9-section report on <code>/jp/report</code>.</span><span class="lang-zh">Cost Calculator 10 年總成本（JP 稅內建）必須通過林先生讀完 <code>/jp/report</code> 9 章節後設的稅後 yield 門檻。</span></li>
+        <li><span class="lang-en">REIT vs Direct toggle on the unit's expected cap rate — direct must still beat J-REIT by ≥ the gap he flagged as worth the operational cost.</span><span class="lang-zh">用該物件預期 cap rate 跑 REIT vs Direct toggle — 直接持有勝出 J-REIT 的幅度必須 ≥ 他認為值得「自管成本」的差距。</span></li>
+        <li><span class="lang-en">Carry Heatmap direction for Tokyo — 5-year trend not flat or declining; rolling carry still positive.</span><span class="lang-zh">Tokyo Carry Heatmap 5 年方向 — 不能持平或下行，rolling carry 仍為正。</span></li>
+        <li><span class="lang-en">Methodology page Japan row — every figure used in the offer letter is sourced from BOJ / MLIT / 統計局, not crowdsourced.</span><span class="lang-zh">Methodology 頁日本那一列 — 出價文件中每個數字都來自 BOJ / MLIT / 統計局，非眾包資料。</span></li>
+      </ul>
+    </div>
+
+    <div class="bo-section bo-next">
+      <h4><span class="lang-en">→ Off-site next steps (the site cannot answer)</span><span class="lang-zh">→ 走出站外的下一步（站上無法回答的）</span></h4>
+      <ol>
+        <li><span class="lang-en"><strong>稅理士 (zeirishi) in Japan + 會計師 in Taiwan</strong> — joint tax position, foreign tax credit, inheritance exposure for a TW-resident JP-asset holder.</span><span class="lang-zh"><strong>日本稅理士 + 台灣會計師</strong> — 台灣居民持有日本資產的稅務、扣抵與相續曝險聯合規劃。</span></li>
+        <li><span class="lang-en"><strong>行政書士 (gyoseishoshi)</strong> — model BM visa renewal scenarios; property purchase ≠ visa right, so renewal failure ≠ forced sale but property → tax resident status interaction matters.</span><span class="lang-zh"><strong>行政書士</strong> — 模擬 BM 簽證續簽情境；買房 ≠ 簽證權利，續簽失敗不會強制賣，但「持有房 → 稅務居民」的互動要先模擬。</span></li>
+        <li><span class="lang-en"><strong>SMBC / SBJ Bank / Tokyo Star / ARUHI</strong> loan officers — non-resident mortgage with BM visa typically 50–70% LTV, rate 2.0–3.5%; lock terms before bidding.</span><span class="lang-zh"><strong>SMBC / SBJ / 東京スター / ARUHI</strong> 房貸專員 — 非居住者 + BM 簽證的房貸條件一般 LTV 50-70%、利率 2.0-3.5%；出價前先 lock。</span></li>
+        <li><span class="lang-en"><strong>Local 仲介 + 司法書士</strong> — single-unit due diligence: 新耐震 vs 旧耐震 confirmation, 所有権 vs 借地権 land title, HOA financials, reserve fund (修繕積立金) history.</span><span class="lang-zh"><strong>當地仲介 + 司法書士</strong> — 單一物件 DD：新耐震 vs 旧耐震、所有権 vs 借地権、管理組合財報、修繕積立金歷史。</span></li>
+        <li><span class="lang-en"><strong>English-capable PM company + bank FX desk</strong> — property management contract, tenant placement strategy, and JPY–TWD entry / exit hedging plan.</span><span class="lang-zh"><strong>英文窗口 PM 公司 + 銀行 FX 部門</strong> — 物件管理合約、招租策略、JPY-TWD 進出場避險方案。</span></li>
+      </ol>
+    </div>
+
+    <div class="bo-bottomline">
+      <span class="bo-bl-label"><span class="lang-en">BOTTOM LINE</span><span class="lang-zh">底線</span></span>
+      <p><span class="lang-en">A second-hand 1-bed in Tokyo's east-zone yield tier is the single call most consistent with the 12 stops Mr. Lin walked through. The site cannot solve BM-visa renewal risk, FX risk, or single-unit due diligence — those decide whether this call survives implementation.</span><span class="lang-zh">東京城東收租帶的二手單臥小宅是 12 站走完後最一致的選項。但 BM 簽證續簽、FX 風險、單一物件 DD — 都不是站上能解決的，那些才決定這個選項能不能真的執行。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 6 — DOWNLOAD PDF                        -->
+  <!-- ============================================== -->
+  <div class="pdf-bar">
+    <button type="button" class="pdf-btn" onclick="window.print()">
+      <span>📄</span>
+      <span class="lang-en">Download this walkthrough as PDF</span><span class="lang-zh">下載這份導覽為 PDF</span>
+    </button>
+    <a class="pdf-btn ghost" href="/demo/">
+      <span>←</span>
+      <span class="lang-en">Back to all walkthroughs</span><span class="lang-zh">回所有導覽</span>
+    </a>
+  </div>
+
+  <div class="source-footer" style="margin-top:24px">
+    <span class="lang-en"><em>This walkthrough teaches you how to navigate Property Monitor for a specific use case. The fictional persona "Mr. Lin" is a storytelling device only — the page descriptions, button labels, and navigation paths reflect the actual site as of Q1 2026. UI may change over time; if a screenshot looks out of date, the site itself is the source of truth.</em></span>
+    <span class="lang-zh"><em>本導覽教你如何在特定情境下使用 Property Monitor。虛構人物「林先生」只是敘述工具 — 頁面描述、按鈕名稱、導覽路徑反映 2026 Q1 實際網站。UI 可能隨時間變動，截圖若與現況不符，請以網站本身為準。</em></span>
+    <br><br>
+    <span class="lang-en"><strong>Not investment / tax / visa / property advice.</strong> See <a href="/methodology.html" style="color:#2563eb">/methodology</a> for data sources.</span>
+    <span class="lang-zh"><strong>本文不構成投資、稅務、簽證或不動產建議。</strong>資料來源見 <a href="/methodology.html" style="color:#2563eb">/methodology</a>。</span>
+  </div>
+
+</main>
+
+<script src="/js/navbar.js" defer></script>
+<script>
+function getLang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function applyLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+}
+window.addEventListener('load',function(){applyLang(getLang());
+  setTimeout(function(){applyLang(getLang());},120);
+});
+window.addEventListener('storage',function(e){if(e.key==='lang')applyLang(getLang());});
+</script>
+
+</body>
+</html>

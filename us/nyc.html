@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NYC Deep Dive | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+  .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+  .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+  .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+  .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+  .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+  .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+  .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+  .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+  .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+  .chart-note.green{color:#16a34a}
+  .chart-note.orange{color:#d97706}
+  .chart-note.red{color:#dc2626}
+  .chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+  .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+  .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+  .report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+  .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+  .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+  .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+  .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+  .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+  .toc-collapsed .toc-list{display:none}
+  .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+  .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  /* Side Nav */
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+  .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+  .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+  .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+  .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+  .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+  .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+  .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+  .side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}
+  @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="report-container">
+
+  <!-- Side Nav -->
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-supply" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Supply</span><span class="side-nav-label lang-zh" style="display:none">供給</span></a>
+    <a href="#sec-demand" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Demand</span><span class="side-nav-label lang-zh" style="display:none">需求</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rent Control</span><span class="side-nav-label lang-zh" style="display:none">租管</span></a>
+    <a href="#sec-airbnb" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">STR/Airbnb</span><span class="side-nav-label lang-zh" style="display:none">短租</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="lang-en">
+      <h1>NEW YORK CITY &mdash; DEEP DIVE</h1>
+      <div class="report-meta">April 2026 &middot; Data: Case-Shiller NYXRSA / Douglas Elliman / StreetEasy / NYC RGB</div>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <h1>紐約市——深度分析</h1>
+      <div class="report-meta">2026年4月 &middot; 數據：Case-Shiller NYXRSA / Douglas Elliman / StreetEasy / NYC RGB</div>
+    </div>
+  </div>
+
+  <div class="report-body">
+
+    <!-- TOC -->
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()">
+        <span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span>
+        <button class="toc-toggle" id="tocToggle">&#x25B2;</button>
+      </div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend: Case-Shiller &amp; Median</span><span class="lang-zh" style="display:none">2. 房價走勢：Case-Shiller與中位數</span></a>
+        <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">3. Supply: Inventory &amp; Cash Buyer Dominance</span><span class="lang-zh" style="display:none">3. 供給：庫存與現金買家</span></a>
+        <a href="#sec-demand" onclick="closeTocMobile()"><span class="lang-en">4. Demand: Volume &amp; Affordability</span><span class="lang-zh" style="display:none">4. 需求：成交量與可負擔性</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">5. Rent Control: The Most Complex Regime in the U.S.</span><span class="lang-zh" style="display:none">5. 租管：全美最複雜制度</span></a>
+        <a href="#sec-airbnb" onclick="closeTocMobile()"><span class="lang-en">6. Local Law 18: The STR Laboratory</span><span class="lang-zh" style="display:none">6. 地方法18號：短租實驗室</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 1. EXECUTIVE SUMMARY -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+
+    <div class="lang-en">
+      <p>New York City's residential property market occupies a unique structural position within the U.S. housing system. While the national market is defined by the rate lock-in effect &mdash; where sub-4% mortgage holders refuse to sell and move &mdash; Manhattan's market operates on a fundamentally different mechanism. Between 60 and 65% of Manhattan transactions close without mortgage financing at all. The market is disproportionately driven by high-net-worth individuals, family offices, and foreign capital parking in dollar-denominated assets. This cash buyer dominance means that Federal Reserve rate decisions have approximately half the impact on Manhattan prices that they would in a rate-sensitive suburban market. The result is a market that posted a Case-Shiller YoY gain of <strong>+4.9%</strong> through January 2026 &mdash; the strongest performance of any major U.S. metro &mdash; even as cities like Miami and Phoenix corrected by 4&ndash;5%.</p>
+      <p>The market's resilience is underscored by structural supply constraints that no policy intervention has resolved. New York City's zoning framework, landmark preservation requirements, and community board opposition processes make new residential development among the most expensive and time-consuming in the developed world. The residential vacancy rate stood at <strong>1.4%</strong> in 2024 &mdash; the lowest since 1968. Against this backdrop, the approximately 1 million rent-stabilized units effectively sit outside the market cycle, transferring price pressure entirely onto the 1.3 million free-market units. When the free market supply is this constrained, even modest demand increases produce outsized price responses.</p>
+      <p>Two regulatory developments define the current investment context. First, NYC's Local Law 18 &mdash; the strictest short-term rental law of any major global city &mdash; eliminated 85&ndash;90% of Airbnb listings (from ~22,000 to ~3,200) with no measurable improvement in affordability. Two years in, rents rose 8% while vacancy remained unchanged at 3%. The law's primary beneficiary has been the hotel industry, with average nightly rates exceeding <strong>$400</strong>. Second, the NYC Rent Guidelines Board adopted 2025&ndash;2026 guidelines allowing landlords of rent-stabilized apartments modest increases &mdash; the annual RGB process is the primary rent-setting mechanism for ~1 million units and a critical political flashpoint in the 2025 mayoral race.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>紐約市住宅房地產市場在美國住房體系中佔據獨特的結構性地位。全國市場由利率鎖定效應主導——持有4%以下房貸的屋主拒絕出售和搬遷——但曼哈頓市場運作機制截然不同。曼哈頓60至65%的交易是全現金成交，完全不需要房貸融資。市場主要由高淨值個人、家族辦公室和尋求美元資產避風港的外國資本驅動。這種現金買家主導格局意味著聯準會利率決策對曼哈頓房價的影響，僅約為對利率敏感的郊區市場的一半。結果是，在邁阿密和鳳凰城下跌4至5%的同時，紐約市在截至2026年1月的Case-Shiller年增率中錄得<strong>+4.9%</strong>——所有主要美國大都市中表現最強。</p>
+      <p>市場韌性源於任何政策干預都未能解決的結構性供給約束。紐約市的分區法框架、地標保護要求和社區委員會反對程序，使新建住宅開發成為發達國家中成本最高、耗時最長的城市之一。2024年住宅空置率僅<strong>1.4%</strong>——1968年以來最低。在此背景下，約100萬套租金穩定化公寓實際上游離於市場週期之外，將全部價格壓力轉移至130萬套自由市場公寓。當自由市場供應如此受限時，即便是溫和的需求增加也會產生放大的價格反應。</p>
+      <p>兩項監管發展定義了當前的投資背景。首先，NYC《地方法18號》——全球主要城市中最嚴格的短租法律——消除了85至90%的Airbnb掛牌（從約22,000套降至約3,200套），但對可負擔性沒有可量化的改善。兩年後，租金上漲8%，空置率維持在3%不變。該法的主要受益者是酒店業，平均夜間房價超過<strong>$400</strong>美元。其次，NYC租金指導委員會採納了2025至2026年指引，允許租金穩定化公寓的房東進行溫和漲租——年度RGB流程是約100萬套公寓的主要租金設定機制，也是2025年市長選舉中的關鍵政治議題。</p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">CS NYC INDEX (JAN 2026)</span><span class="lang-zh" style="display:none">CS NYC指數（2026年1月）</span></div>
+        <div class="kpi-value">324</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Jan 2000=100, SA &middot; YoY +4.9%</span><span class="lang-zh" style="display:none">2000年1月=100，季調 &middot; 年增+4.9%</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">MEDIAN PRICE (FEB 2026)</span><span class="lang-zh" style="display:none">中位數房價（2026年2月）</span></div>
+        <div class="kpi-value">$880K</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Redfin NYC metro &middot; YoY +2.3%</span><span class="lang-zh" style="display:none">Redfin NYC都會區 &middot; 年增+2.3%</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">MANHATTAN MEDIAN (Q3 2025)</span><span class="lang-zh" style="display:none">曼哈頓中位數（2025年Q3）</span></div>
+        <div class="kpi-value">$1.18M</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Douglas Elliman &middot; YoY +5.8%</span><span class="lang-zh" style="display:none">Douglas Elliman &middot; 年增+5.8%</span></span>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">CASH BUYERS SHARE</span><span class="lang-zh" style="display:none">現金買家佔比</span></div>
+        <div class="kpi-value">60&ndash;65%</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">Manhattan transactions &middot; vs 31% national avg</span><span class="lang-zh" style="display:none">曼哈頓成交 &middot; 對比全國均值31%</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">VACANCY RATE (2024)</span><span class="lang-zh" style="display:none">空置率（2024年）</span></div>
+        <div class="kpi-value">1.4%</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">NYC residential &middot; Lowest since 1968</span><span class="lang-zh" style="display:none">NYC住宅 &middot; 1968年以來最低</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">AIRBNB LISTINGS POST-LL18</span><span class="lang-zh" style="display:none">LL18後掛牌量</span></div>
+        <div class="kpi-value">~3,200</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Down from 22,000 &middot; &minus;85%</span><span class="lang-zh" style="display:none">從22,000下降 &middot; &minus;85%</span></span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 2. PRICE TREND -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND: CASE-SHILLER &amp; MEDIAN</span><span class="lang-zh" style="display:none">房價走勢：CASE-SHILLER與中位數</span></h2>
+
+    <div class="lang-en">
+      <p>NYC's Case-Shiller index (NYXRSA, SA) has appreciated 97% since 2015 &mdash; nearly doubling &mdash; driven by a combination of genuine income growth in the financial sector, persistent supply scarcity, and periodic influxes of foreign capital seeking dollar assets. The pandemic-era trajectory was atypical: NYC underperformed the national index in 2020&ndash;2021 as urban flight reduced demand, before mean-reverting sharply in 2022&ndash;2025 as office return mandates and Wall Street's continued strength brought buyers back. The Manhattan median sales price (condo/co-op combined) peaked at <strong>$1.27M</strong> in early 2022, corrected to $1.18M through 2023&ndash;2024, and has recovered to $1.18M in Q3 2025 &mdash; essentially flat over four years in nominal terms, which represents a real decline given inflation. However, the Case-Shiller index, which is based on repeat sales of the same single-family properties and covers the broader NYC MSA including outer boroughs, tells a different story: consistent appreciation with a pandemic-era dip now fully reversed.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>紐約市Case-Shiller指數（NYXRSA，季調）自2015年以來升值97%——幾近翻倍——由金融業真實收入增長、持續供給稀缺和週期性外資流入美元資產共同驅動。疫情時期的走勢不典型：隨著城市外逃降低需求，紐約市2020至2021年表現遜於全國指數，隨後2022至2025年辦公室返工要求和華爾街持續強勢帶回買家，指數急劇均值回歸。曼哈頓中位數成交價（公寓+合作公寓合計）在2022年初達到<strong>$1.27M</strong>峰值，2023至2024年修正至$1.18M，2025年第三季回升至$1.18M——名義上四年幾乎持平，考慮通膨實際上呈下降。然而，基於相同單棟住宅重複成交的Case-Shiller指數（涵蓋含外圍行政區的大NYC都會區）呈現不同面貌：穩定升值，疫情期跌幅現已完全逆轉。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Case-Shiller NYC Index + YoY% (2015&ndash;2025)</span><span class="lang-zh" style="display:none">Case-Shiller NYC指數 + 年增率（2015&ndash;2025）</span></h4>
+        <p><span class="lang-en">SA, Jan 2000=100 &middot; Source: FRED NYXRSA</span><span class="lang-zh" style="display:none">季調，2000年1月=100 &middot; 來源：FRED NYXRSA</span></p>
+        <div id="chartNYCPrice" style="height:220px"></div>
+        <p class="chart-note orange"><span class="lang-en">NYC +97% since 2015 vs national +93%; pandemic dip in 2020&ndash;21 fully recovered by 2023</span><span class="lang-zh" style="display:none">紐約市自2015年累計+97%，對比全國+93%；疫情期2020至21年跌幅於2023年完全收復</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Manhattan Median Sales Price 2015&ndash;2025</span><span class="lang-zh" style="display:none">曼哈頓中位數成交價 2015&ndash;2025</span></h4>
+        <p><span class="lang-en">Condo + Co-op combined &middot; Source: Douglas Elliman</span><span class="lang-zh" style="display:none">公寓+合作公寓合計 &middot; 來源：Douglas Elliman</span></p>
+        <div id="chartManhattanMedian" style="height:220px"></div>
+        <p class="chart-note orange"><span class="lang-en">Manhattan median flat since 2022 peak in nominal terms &mdash; real price decline of ~15% when CPI-adjusted</span><span class="lang-zh" style="display:none">曼哈頓中位數自2022年峰值名義持平——經CPI調整後實際下降約15%</span></p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 3. SUPPLY -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-supply"><span class="lang-en">SUPPLY: INVENTORY &amp; CASH BUYER DOMINANCE</span><span class="lang-zh" style="display:none">供給：庫存與現金買家</span></h2>
+
+    <div class="lang-en">
+      <p>NYC's supply dynamics are defined by three structural constraints that distinguish it from virtually every other U.S. market. First, Manhattan's physical geography &mdash; 13.4 miles long, 2.3 miles wide at its widest &mdash; sets an absolute land area limit. All incremental supply must come from increased density, which requires navigating landmark commissions, air rights negotiations, and community board processes that routinely add 3&ndash;7 years to development timelines and 20&ndash;40% to construction costs. Second, approximately 1 million rent-stabilized units are functionally locked out of the market supply cycle. Once occupied, these units rarely turn over &mdash; tenants pay 30&ndash;50% below market rate and have succession rights to pass apartments to family members. This chronic supply suppression has kept the residential vacancy rate at <strong>1.4%</strong> &mdash; the lowest in 56 years. Third, the outer boroughs (Brooklyn, Queens, the Bronx, Staten Island) do permit more new construction than Manhattan, but even there, supply addition has been insufficient to offset household formation. The net result is a market where the listed inventory of homes for sale runs at approximately 7,000&ndash;8,000 units in Manhattan &mdash; compared to the historical average of 7,000 and above a 10-year average &mdash; with months of supply now at 9.8 months in Manhattan (a buyer's market metric by traditional standards, but this reflects price, not affordability).</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>紐約市的供給動態由三個結構性制約因素定義，幾乎使其有別於美國其他任何市場。首先，曼哈頓的地理限制——長13.4英里，最寬處僅2.3英里——設定了絕對土地面積上限。所有增量供給必須通過提高密度實現，這需要應對地標委員會、空中權談判和社區委員會程序，通常為開發時間線增加3至7年，建設成本增加20至40%。其次，約100萬套租金穩定化公寓在功能上游離於市場供給週期之外。一旦入住，這些公寓極少騰空——租戶支付低於市場30至50%的租金，並擁有將公寓傳承給家庭成員的繼承權。這種長期供給壓制使住宅空置率維持在<strong>1.4%</strong>——56年來最低。第三，外圍行政區（布魯克林、皇后區、布朗克斯、史泰登島）允許更多新建，但即便在那裡，供給增加也不足以抵消家戶形成。最終結果是曼哈頓掛牌待售住宅約7,000至8,000套——處於歷史平均水平7,000套附近，高於10年均值——曼哈頓供給月數現為9.8個月（按傳統標準屬買方市場，但這反映的是價格，而非可負擔性）。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Manhattan Months of Supply 2015&ndash;2025</span><span class="lang-zh" style="display:none">曼哈頓供給月數 2015&ndash;2025</span></h4>
+      <div id="chartNYCInventory" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">9.8 months supply (2024) = 'buyer's market' by count, but high price + low affordability limits actual buyer pool</span><span class="lang-zh" style="display:none">2024年9.8個月供給=按數量屬買方市場，但高房價+低可負擔性限制了實際買家群體</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 4. DEMAND -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-demand"><span class="lang-en">DEMAND: VOLUME &amp; AFFORDABILITY</span><span class="lang-zh" style="display:none">需求：成交量與可負擔性</span></h2>
+
+    <div class="lang-en">
+      <p>Manhattan demand is structurally unlike any other U.S. market because of cash buyer dominance and the premium attached to NYC as a global financial hub. The 60&ndash;65% cash buyer share is roughly double the national average of 31&ndash;32%. This cohort consists of ultra-high-net-worth individuals trading between properties, family offices maintaining a Manhattan presence, foreign buyers (particularly from Europe and Asia, given FIRPTA's 15% withholding on disposals), and hedge fund and private equity professionals whose compensation cycles are tied to Wall Street bonus seasons. The practical implication for rate sensitivity: a 100bps move in the 30-year rate affects only 35&ndash;40% of demand directly, versus 65&ndash;70% in a suburban market. Manhattan prices are therefore far more responsive to Wall Street bonus cycles, global risk appetite, and FX rates than to Fed policy.</p>
+      <p>In Q3 2025, Manhattan recorded <strong>3,158</strong> closed sales &mdash; up 13.4% YoY, the strongest quarterly performance since 2023. This recovery was driven by pent-up demand from buyers who had sat on the sidelines during the 2023&ndash;2024 rate peak, combined with a modest decline in the 30-year rate toward 6.25&ndash;6.5%. The price-income ratio remains extreme: a median Manhattan home at $1.18M against a median NYC household income of approximately $80K implies a PTI of <strong>14.75x</strong> &mdash; nearly 50% above the already stressed national PTI of ~10x. However, the relevant buyer for Manhattan is rarely the median income household; the typical Manhattan buyer earns $200K&ndash;$400K+ or is transacting entirely in cash.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>由於現金買家主導和紐約市作為全球金融中心的溢價，曼哈頓需求在結構上有別於美國其他任何市場。60至65%的現金買家佔比約為全國平均31至32%的兩倍。這一群體由在房產間轉換的超高淨值個人、維持曼哈頓存在的家族辦公室、外國買家（尤其是來自歐洲和亞洲者，受FIRPTA 15%處置預扣影響）、以及薪酬週期與華爾街獎金季節掛鉤的對沖基金和私募股權人士構成。對利率敏感性的實際影響：30年利率100個基點的變動只直接影響35至40%的需求，而郊區市場為65至70%。因此，曼哈頓房價對華爾街獎金週期、全球風險偏好和匯率的反應遠超對聯準會政策的反應。</p>
+      <p>2025年第三季，曼哈頓錄得<strong>3,158</strong>宗成交——年增13.4%，2023年以來最強季度表現。這一復甦由在2023至2024年利率高峰期觀望的買家積壓需求驅動，加上30年利率適度降至6.25至6.5%。房價收入比仍然極端：曼哈頓118萬美元中位數房價對應紐約市約8萬美元家庭收入中位數，意味著PTI倍數為<strong>14.75x</strong>——比已承壓的全國約10倍高出近50%。然而，曼哈頓的相關買家群體很少是中位數收入家庭；典型曼哈頓買家年收入在20萬至40萬美元以上，或完全以現金交易。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Manhattan Quarterly Closed Sales 2020&ndash;2025</span><span class="lang-zh" style="display:none">曼哈頓季度成交量 2020&ndash;2025</span></h4>
+      <div id="chartNYCDemand" style="height:220px"></div>
+      <p class="chart-note green"><span class="lang-en">Q3 2025: 3,158 sales (+13.4% YoY) = strongest quarter since 2023; 2020 Q2 was Covid trough at 1,100</span><span class="lang-zh" style="display:none">2025年Q3：3,158宗（年增13.4%）=2023年以來最強季度；2020年Q2為新冠疫情低谷的1,100宗</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 5. RENT CONTROL -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-rent"><span class="lang-en">RENT CONTROL: THE MOST COMPLEX REGIME IN THE U.S.</span><span class="lang-zh" style="display:none">租管：全美最複雜制度</span></h2>
+
+    <div class="lang-en">
+      <p>New York City operates the most complex and extensive rent regulation system in the United States, covering approximately 1 million rent-stabilized apartments and a small number of rent-controlled units. The two regimes work as follows:</p>
+      <p><strong>Rent Control</strong> applies to a small and declining number of apartments &mdash; pre-February 1947 buildings where the same tenant (or a qualifying family successor) has lived continuously since before 1969. Increases are governed by the Maximum Base Rent (MBR) system, tied to operating costs. In practice, many rent-controlled tenants pay a few hundred dollars per month in a market where comparable free-market apartments rent for $2,000&ndash;$5,000+. This regime is disappearing naturally as tenants die or move.</p>
+      <p><strong>Rent Stabilization</strong> covers approximately one million NYC apartments &mdash; primarily buildings of 6 or more units built between February 1947 and March 1974. Annual increases are set by the NYC Rent Guidelines Board (RGB), which holds public hearings annually and votes on maximum permitted increases for 1-year and 2-year lease renewals. The 2025&ndash;2026 RGB guidelines (effective October 1, 2025) permit modest increases. The 2019 Housing Stability and Tenant Protection Act (HSTPA) fundamentally strengthened stabilization by eliminating high-rent vacancy deregulation, eliminating preferential rent loopholes, and making stabilization effectively permanent for covered units. For investors, this means that regulated units are now a permanent structural feature of the NYC rental market with no viable exit mechanism.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>紐約市運行美國最複雜、覆蓋最廣的租金管制系統，涵蓋約100萬套租金穩定化公寓和少量租金管制公寓。兩種制度運作如下：</p>
+      <p><strong>租金管制（Rent Control）</strong>適用於數量小且持續縮減的公寓——1947年2月前建設的建築，且同一租戶（或符合資格的家庭繼承人）自1969年前持續居住。漲租受與運營成本掛鉤的「最高基礎租金（MBR）」系統約束。實際上，許多租金管制租戶每月支付幾百美元，而市場上可比的自由市場公寓租金為$2,000至$5,000以上。隨著租戶去世或搬遷，這一制度正在自然消失。</p>
+      <p><strong>租金穩定化（Rent Stabilization）</strong>涵蓋約100萬套紐約市公寓——主要是1947年2月至1974年3月間建設的6個單位以上建築。年度漲幅由紐約市租金指導委員會（RGB）設定，RGB每年舉行公開聽證並對1年和2年租約續約的最高允許漲幅進行投票。2025至2026年RGB指引（2025年10月1日起生效）允許溫和漲租。2019年《住房穩定與租戶保護法》（HSTPA）從根本上強化了穩定化，消除了高租金空置去管制化、消除了優惠租金漏洞，並使穩定化對覆蓋單位實際上永久化。對投資者而言，這意味著受管制單位現在是紐約市租賃市場的永久結構性特徵，沒有可行的退出機制。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">RGB Annual Rent Increase Guidelines 2015&ndash;2026</span><span class="lang-zh" style="display:none">RGB年度租金漲幅指引 2015&ndash;2026</span></h4>
+      <div id="chartNYCRGB" style="height:220px"></div>
+      <p class="chart-note navy"><span class="lang-en">2015 &amp; 2016: RGB froze rents (0%). 2019 HSTPA permanently locked in stabilization. 2025&ndash;26: 2%/4% approved June 2025</span><span class="lang-zh" style="display:none">2015年和2016年：RGB凍結租金（0%）。2019年HSTPA永久鎖定穩定化。2025–26：2025年6月批准2%/4%</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 6. LOCAL LAW 18 / STR -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-airbnb"><span class="lang-en">LOCAL LAW 18: THE STR LABORATORY</span><span class="lang-zh" style="display:none">地方法18號：短租實驗室</span></h2>
+
+    <div class="lang-en">
+      <p>New York City's Local Law 18 (LL18), which came into full enforcement in September 2023, represents the most consequential short-term rental regulation of any major global city. The law requires: (1) registration with the Mayor's Office of Special Enforcement (OSE), with a $145 fee; (2) host presence during all stays; (3) no more than two guests at a time; (4) no door locks on guest rooms. The practical effect was immediate and dramatic: Airbnb listings in NYC fell from approximately 22,000 before LL18 to approximately 3,200 after enforcement &mdash; an <strong>85%</strong> reduction. In the outer boroughs alone, listings fell from 17,000 to 1,400.</p>
+      <p>Two years on, LL18's promised housing benefits have not materialized. The residential vacancy rate remains at 1.4% &mdash; unchanged from before LL18. Rents rose <strong>8%</strong> in the two years following enforcement, compared to 3.5% nationally. Hotel room rates increased approximately 6% in 2024, with average nightly rates exceeding $400. The law's primary measurable effect has been a substantial wealth transfer from STR hosts (many of them outer-borough homeowners using rental income to meet carrying costs) to the Manhattan hotel industry.</p>
+      <p>City Council Bill Intro 1107, introduced in November 2024, proposes to allow homeowners to rent their primary residences for short periods without being present &mdash; specifically targeting 1-and-2 family homeowners in outer boroughs who were the unintended victims of LL18's blanket approach. As of April 2026, the bill remains under consideration, supported by an unusual coalition of civil rights groups, homeowner associations, and even some hotel operators.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>紐約市《地方法18號》（LL18）於2023年9月全面執行，代表任何主要全球城市最具深遠影響的短租法規。該法要求：（1）向市長特別執法辦公室（OSE）登記，費用145美元；（2）主人全程在場；（3）每次最多兩名客人；（4）客房不得加鎖。實際效果立竿見影且戲劇性：紐約市Airbnb掛牌量從LL18前的約22,000套降至執行後的約3,200套——降幅<strong>85%</strong>。僅外圍行政區的掛牌就從17,000套降至1,400套。</p>
+      <p>兩年後，LL18承諾的住房效益未能兌現。住宅空置率仍為1.4%——與LL18前相同。執行後兩年租金上漲<strong>8%</strong>，而全國為3.5%。2024年酒店房價上漲約6%，平均夜間費用超過$400。該法唯一可量化的主要效果，是將財富從短租房主（其中許多是利用租金收入支付持有成本的外圍行政區業主）大規模轉移到曼哈頓酒店業。</p>
+      <p>市議會法案Intro 1107於2024年11月提出，旨在允許業主在不在場情況下短期出租其主要住所——特別針對成為LL18全面管制意外受害者的外圍行政區1至2戶家庭業主。截至2026年4月，該法案仍在審議中，獲得民權團體、業主協會甚至部分酒店業者組成的罕見聯盟支持。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Airbnb NYC Listings Before/After LL18</span><span class="lang-zh" style="display:none">LL18前後Airbnb NYC掛牌量</span></h4>
+      <div id="chartLL18" style="height:220px"></div>
+      <p class="chart-note red"><span class="lang-en">Outer borough listings: 17,000 &rarr; 1,400 (&minus;92%). Rents still rose 8% in 2 years. Hotel rates up 6% in 2024</span><span class="lang-zh" style="display:none">外圍行政區掛牌：17,000&rarr;1,400（&minus;92%）。租金仍在2年內上漲8%。2024年酒店費率上漲6%</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 7. OUTLOOK -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+
+    <div class="lang-en">
+      <p>New York City's outlook through 2028 is considerably more constructive than most U.S. markets, precisely because its primary demand drivers &mdash; Wall Street compensation, global capital flows, and high-income in-migration &mdash; are less rate-sensitive than the national average. The base case (<strong>60%</strong> probability) projects the CS NYC index advancing to approximately 345&ndash;360 by end-2027, implying cumulative appreciation of 6&ndash;11% from January 2026 levels. This scenario assumes the Fed delivers gradual easing toward 5.5&ndash;6.0% on the 30-year rate, Wall Street bonus cycles remain robust as capital markets recover from 2022&ndash;2023 lows, and supply remains structurally constrained.</p>
+      <p>The bull case (<strong>20%</strong> probability) requires two catalysts operating simultaneously: a 30-year rate below 5.5% (which would unlock financed buyer demand currently suppressed) and a strong Wall Street bonus season in early 2026. Under this scenario, the currently elevated 9.8-month inventory could normalize rapidly as buyers enter and sellers hold firm on pricing, potentially producing 12&ndash;15% appreciation in the Manhattan market through 2027.</p>
+      <p>The bear case (<strong>20%</strong> probability) centers on a global risk-off event &mdash; whether triggered by U.S. fiscal concerns, a financial system stress, or geopolitical escalation &mdash; that reduces foreign capital flows into Manhattan real estate and depresses Wall Street employment. Under this scenario, the cash buyer cohort contracts, the 9.8-month inventory builds further, and price softness emerges. However, even in a moderate bear case, NYC is unlikely to correct more than 10&ndash;12% given the structural floor provided by the 1.4% vacancy rate and the ongoing withdrawal of inventory by rent-stabilized units from the ownership market. A severe global recession would be needed to push prices down 20%+ in Manhattan &mdash; a scenario that would also imply significant stress across virtually all asset classes.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>紐約市到2028年的展望比大多數美國市場更具建設性，恰恰是因為其主要需求驅動力——華爾街薪酬、全球資本流動和高收入人口遷入——對利率的敏感度低於全國平均水平。基本情境（概率<strong>60%</strong>）預計CS NYC指數到2027年底升至約345至360，意味著從2026年1月水平累計升值6至11%。此情境假設聯準會漸進寬鬆使30年利率降至5.5至6.0%，資本市場從2022至2023年低點復甦使華爾街獎金週期保持強勁，供給維持結構性受限。</p>
+      <p>樂觀情境（概率<strong>20%</strong>）需要兩個催化劑同時作用：30年利率降至5.5%以下（這將釋放當前被壓制的融資買家需求）以及2026年初強勁的華爾街獎金季。在此情境下，目前偏高的9.8個月庫存可能隨著買家入場和賣家堅守定價而迅速正常化，曼哈頓市場到2027年可能產生12至15%的升值。</p>
+      <p>悲觀情境（概率<strong>20%</strong>）以全球避險事件為中心——無論是美國財政擔憂、金融系統壓力還是地緣政治升級觸發——減少外資流入曼哈頓房地產並壓制華爾街就業。在此情境下，現金買家群體收縮，9.8個月庫存進一步累積，價格出現疲軟。然而，即便在溫和悲觀情境下，考慮到1.4%空置率和租金穩定化公寓持續從自有市場撤出庫存提供的結構性底部，紐約市不太可能下跌超過10至12%。需要嚴重全球衰退才能使曼哈頓房價下跌20%以上——這一情境同樣意味著幾乎所有資產類別的重大壓力。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">CS NYC Index Forecast 2026&ndash;2028</span><span class="lang-zh" style="display:none">CS NYC指數預測 2026&ndash;2028</span></h4>
+      <div id="chartNYCForecast" style="height:220px"></div>
+      <p class="chart-note orange"><span class="lang-en">Bear floor: 1.4% vacancy + rent stabilization lock = structural price support. Bull: rate&lt;5.5% + Wall St bonus cycle</span><span class="lang-zh" style="display:none">悲觀底部：1.4%空置率+租金穩定化鎖定=結構性價格支撐。樂觀：利率&lt;5.5%+華爾街獎金週期</span></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: S&amp;P Cotality Case-Shiller NY-New York Home Price Index (FRED NYXRSA) &middot; Douglas Elliman / Miller Samuel Manhattan Market Reports &middot; StreetEasy NYC Housing Market Data &middot; NYC Rent Guidelines Board (RGB) Annual Orders 2015&ndash;2026 &middot; NYC Office of Special Enforcement (LL18 data) &middot; HR&amp;A Advisors / Airbnb STR Impact Report 2025 &middot; Redfin NYC Market Data (Feb 2026) &middot; NYC Comptroller Spotlight Report 2024. All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：S&amp;P Cotality Case-Shiller紐約房價指數（FRED NYXRSA）&middot; Douglas Elliman / Miller Samuel曼哈頓市場報告 &middot; StreetEasy NYC住房市場數據 &middot; NYC租金指導委員會（RGB）年度指令2015&ndash;2026 &middot; NYC特別執法辦公室（LL18數據）&middot; HR&amp;A Advisors / Airbnb 2025年短租影響報告 &middot; Redfin NYC市場數據（2026年2月）&middot; NYC審計長聚焦報告2024。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+
+  </div><!-- report-body -->
+</div><!-- report-container -->
+
+<script>
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText = {color:C.muted, fontFamily:'Inter, sans-serif', fontSize:11};
+var baseGrid = {left:50, right:20, top:40, bottom:30, containLabel:true};
+var baseTooltip = {trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy, fontSize:11, fontFamily:'Inter'}};
+var baseLegend = {top:8, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts = [];
+
+function initAllCharts(lang){
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts = [];
+  drawNYCPrice(lang);
+  drawManhattanMedian(lang);
+  drawNYCInventory(lang);
+  drawNYCDemand(lang);
+  drawNYCRGB(lang);
+  drawLL18(lang);
+  drawNYCForecast(lang);
+}
+
+// ── 1. Case-Shiller NYC Index + YoY ──
+function drawNYCPrice(lang){
+  var dom = document.getElementById('chartNYCPrice');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var index = [175,182,188,191,196,198,217,255,278,300,324];
+  var yoy = [4.2,4.0,3.3,1.6,2.6,1.0,9.6,17.5,9.0,7.9,8.0];
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid: {left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis: [
+      mkAxis({type:'value',min:150,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+      mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})
+    ],
+    series: [
+      {name:en?'CS NYC Index':'CS NYC指數',type:'bar',data:index,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1}
+    ]
+  });
+}
+
+// ── 2. Manhattan Median Sales Price ──
+function drawManhattanMedian(lang){
+  var dom = document.getElementById('chartManhattanMedian');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','Q3 25'];
+  var data = [0.98,1.05,1.15,1.20,1.10,0.96,1.14,1.27,1.18,1.18,1.18];
+  var colors = data.map(function(v){
+    if(v>=1.2) return C.red;
+    if(v<=0.96) return C.orange;
+    return C.navy;
+  });
+  c.setOption({
+    tooltip: {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11},formatter:function(p){return p[0].name+'<br/>'+en?'Median: $':'中位數：$'+p[0].value+'M';}},
+    grid: {left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis: mkAxis({type:'value',min:0.8,max:1.4,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v.toFixed(1)+'M';}}}),
+    series: [{
+      type:'bar',data:data.map(function(v,i){return {value:v,itemStyle:{color:colors[i]}};}),
+      barMaxWidth:32,itemStyle:{borderRadius:[3,3,0,0]},
+      label:{show:true,position:'top',formatter:function(p){return '$'+p.value+'M';},fontSize:9,color:C.muted}
+    }]
+  });
+}
+
+// ── 3. Manhattan Months of Supply ──
+function drawNYCInventory(lang){
+  var dom = document.getElementById('chartNYCInventory');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var months = [5.5,5.8,7.2,9.1,8.3,4.8,5.5,6.8,8.4,9.8,7.5];
+  c.setOption({
+    tooltip: baseTooltip,
+    grid: {left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis: mkAxis({type:'value',min:0,max:12,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}mo'}}),
+    series: [{
+      type:'line',data:months,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,
+      areaStyle:{color:'rgba(30,58,95,0.06)'},
+      markLine:{data:[
+        {yAxis:6,lineStyle:{color:C.green,type:'dashed',width:1},label:{formatter:en?'Balanced 6mo':'平衡 6個月',fontSize:8,color:C.green}},
+        {yAxis:10,lineStyle:{color:C.orange,type:'dashed',width:1},label:{formatter:en?"Buyer's market 10mo":'買方市場 10個月',fontSize:8,color:C.orange}}
+      ]}
+    }]
+  });
+}
+
+// ── 4. Manhattan Quarterly Closed Sales ──
+function drawNYCDemand(lang){
+  var dom = document.getElementById('chartNYCDemand');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['Q1 20','Q2 20','Q3 20','Q4 20','Q1 21','Q2 21','Q3 21','Q4 21','Q1 22','Q2 22','Q3 22','Q4 22','Q1 23','Q2 23','Q3 23','Q4 23','Q1 24','Q2 24','Q3 24','Q4 24','Q1 25','Q2 25','Q3 25'];
+  var data = [2800,1100,1800,2900,2400,3900,3800,3500,3200,3042,2400,1200,1800,2300,2800,2400,2200,2609,2792,2400,2560,3042,3158];
+  var colors = data.map(function(v){
+    if(v>=3000) return C.green;
+    if(v<1500) return C.red;
+    return C.navy;
+  });
+  c.setOption({
+    tooltip: {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+    grid: {left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:8,rotate:45}}),
+    yAxis: mkAxis({type:'value',min:0,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v>=1000?(v/1000).toFixed(1)+'K':v;}}}),
+    series: [{
+      type:'bar',data:data.map(function(v,i){return {value:v,itemStyle:{color:colors[i]}};}),
+      barMaxWidth:18,itemStyle:{borderRadius:[3,3,0,0]}
+    }]
+  });
+}
+
+// ── 5. RGB Annual Rent Increase Guidelines ──
+function drawNYCRGB(lang){
+  var dom = document.getElementById('chartNYCRGB');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['15-16','16-17','17-18','18-19','19-20','20-21','21-22','22-23','23-24','24-25','25-26'];
+  var oneYear = [0.0,0.0,1.25,1.5,1.5,0.0,3.25,3.0,2.75,2.75,2.0];
+  var twoYear = [0.0,2.0,2.0,2.5,2.5,0.0,5.0,5.0,5.0,5.0,4.0];
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid: {left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis: mkAxis({type:'value',min:0,max:6,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series: [
+      {name:en?'1-Year Lease':'1年租約',type:'bar',data:oneYear,barMaxWidth:20,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'30%'},
+      {name:en?'2-Year Lease':'2年租約',type:'bar',data:twoYear,barMaxWidth:20,itemStyle:{color:'rgba(30,58,95,0.4)',borderRadius:[3,3,0,0]}}
+    ]
+  });
+}
+
+// ── 6. Airbnb LL18 Impact ──
+function drawLL18(lang){
+  var dom = document.getElementById('chartLL18');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var cats = en
+    ? ['Manhattan\npre-LL18','Outer Boroughs\npre-LL18','Manhattan\npost-LL18','Outer Boroughs\npost-LL18']
+    : ['曼哈頓\nLL18前','外圍行政區\nLL18前','曼哈頓\nLL18後','外圍行政區\nLL18後'];
+  var data = [5000,17000,1800,1400];
+  var colors = [C.navy,C.navy,C.red,C.red];
+  c.setOption({
+    tooltip: {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+    grid: {left:12,right:50,top:16,bottom:16,containLabel:true},
+    yAxis: mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9}}),
+    xAxis: mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}}}),
+    series: [{
+      type:'bar',data:data.map(function(v,i){return {value:v,itemStyle:{color:colors[i]}};}),
+      barMaxWidth:24,itemStyle:{borderRadius:[0,3,3,0]},
+      label:{show:true,position:'right',formatter:function(p){return p.value>=1000?(p.value/1000).toFixed(1)+'K':p.value;},fontSize:10,color:C.muted}
+    }]
+  });
+}
+
+// ── 7. CS NYC Forecast ──
+function drawNYCForecast(lang){
+  var dom = document.getElementById('chartNYCForecast');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var periods = ['Jan 2026','2026E','2027E','2028E'];
+  var bull = [324,340,370,390];
+  var base = [324,332,348,360];
+  var bear = [324,315,300,292];
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid: {left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis: mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis: mkAxis({type:'value',min:270,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series: [
+      {name:en?'Bull (20%) — rate<5.5%':'樂觀(20%)—利率<5.5%',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+      {name:en?'Base (60%) — 30Y→5.5–6%':'基本(60%)—30Y→5.5–6%',type:'line',data:base,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+      {name:en?'Bear (20%) — risk-off':'悲觀(20%)—避險事件',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  initAllCharts(lang);
+}
+function toggleMarketMenu(){ document.getElementById('marketDropdown').classList.toggle('open'); }
+function toggleCityMenu(){ document.getElementById('cityDropdown').classList.toggle('open'); }
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.market-selector')){ var d=document.getElementById('marketDropdown'); if(d) d.classList.remove('open'); }
+  if(!e.target.closest('.city-dropdown')){ var d2=document.getElementById('cityDropdown'); if(d2) d2.classList.remove('open'); }
+});
+function toggleToc(){ document.getElementById('tocBox').classList.toggle('toc-collapsed'); }
+function closeTocMobile(){ if(window.innerWidth<=768){ document.getElementById('tocBox').classList.add('toc-collapsed'); } }
+
+window.addEventListener('load', function(){
+  var lang = localStorage.getItem('lang') || 'en';
+  setLang(lang);
+});
+window.addEventListener('resize', function(){
+  allCharts.forEach(function(c){ if(c) c.resize(); });
+});
+
+// ScrollSpy
+(function(){
+  function initScrollSpy(){
+    var items = document.querySelectorAll('.side-nav-item');
+    if(!items.length) return;
+    var sections = [];
+    items.forEach(function(a){
+      var id = a.getAttribute('href').replace('#','');
+      var el = document.getElementById(id);
+      if(el) sections.push({el:el, a:a});
+    });
+    function onScroll(){
+      var scrollY = window.scrollY + window.innerHeight * 0.25;
+      var current = sections[0];
+      sections.forEach(function(s){ if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s; });
+      items.forEach(function(a){ a.classList.remove('active'); });
+      if(current) current.a.classList.add('active');
+    }
+    window.addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+  }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', initScrollSpy); }
+  else { initScrollSpy(); }
+})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

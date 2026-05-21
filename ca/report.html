@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Market Report | Canada Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}.report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}.report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}.report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}.report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}.report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}.report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}.report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}.chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}.chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}.chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}.report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}.report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}.toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}.toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}.toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}.toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}.toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}.toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}.report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .city-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:20px 0}.city-card{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:8px;padding:16px}.city-card h3{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#1e3a5f;margin:0 0 8px}.city-card .city-stat{font-family:'JetBrains Mono',monospace;font-size:12px;color:#2c3e50;margin:3px 0}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}.side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}.side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}.side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}.side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}.side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600}.side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}@media(max-width:768px){.report-chart-grid,.city-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-macro" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Macro & Immigration</span><span class="side-nav-label lang-zh" style="display:none">宏觀與移民</span></a>
+    <a href="#sec-foreign" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Foreign Buyer Ban</span><span class="side-nav-label lang-zh" style="display:none">外國買家禁令</span></a>
+    <a href="#sec-toronto" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Toronto</span><span class="side-nav-label lang-zh" style="display:none">多倫多</span></a>
+    <a href="#sec-vancouver" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Vancouver</span><span class="side-nav-label lang-zh" style="display:none">溫哥華</span></a>
+    <a href="#sec-policy" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Policy Framework</span><span class="side-nav-label lang-zh" style="display:none">政策框架</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+  <div class="report-header">
+    <div class="lang-en"><h1>CANADA &mdash; MARKET REPORT</h1><div class="report-meta">May 2026 &middot; Data: CREA / CMHC / BOC / Statistics Canada</div></div>
+    <div class="lang-zh" style="display:none"><h1>加拿大——市場報告</h1><div class="report-meta">2026年5月 &middot; 數據：CREA / CMHC / 加拿大銀行 / 加拿大統計局</div></div>
+  </div>
+  <div class="report-body">
+    <div class="toc-box" id="tocBox"><div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-macro" onclick="closeTocMobile()"><span class="lang-en">2. Macro &amp; Immigration</span><span class="lang-zh" style="display:none">2. 宏觀與移民</span></a>
+        <a href="#sec-foreign" onclick="closeTocMobile()"><span class="lang-en">3. Foreign Buyer Ban</span><span class="lang-zh" style="display:none">3. 外國買家禁令</span></a>
+        <a href="#sec-toronto" onclick="closeTocMobile()"><span class="lang-en">4. Toronto Overview</span><span class="lang-zh" style="display:none">4. 多倫多概覽</span></a>
+        <a href="#sec-vancouver" onclick="closeTocMobile()"><span class="lang-en">5. Vancouver Overview</span><span class="lang-zh" style="display:none">5. 溫哥華概覽</span></a>
+        <a href="#sec-policy" onclick="closeTocMobile()"><span class="lang-en">6. Policy Framework</span><span class="lang-zh" style="display:none">6. 政策框架</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div></div>
+
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Canada's housing market entered 2026 in a state of stalled recovery. After the historic COVID boom (<strong>+21%</strong> in 2021) and the 2022 correction (<strong>-7.5%</strong>), national prices have stabilised but the two major urban markets — Toronto and Vancouver — remain visibly weak. Toronto prices are forecast to decline <strong>-3 to -4%</strong> in 2026 as high inventory, elevated consumer debt, mortgage rates that fell slowly, and weak buyer confidence all combine. In March 2026, Metro Vancouver's benchmark home price was <strong>C$1,104,300</strong>, down <strong>-6.8% year-on-year</strong>, reflecting a persistent inventory build-up against flat demand.</p>
+      <p>The Bank of Canada has confirmed its pause: after aggressive cuts from the 5.0% peak to 2.25%, the BoC <strong>held the overnight rate at 2.25%</strong> on 29 April 2026 (next decision 10 June 2026). The April Monetary Policy Report cited "heightened volatility from the evolving Middle East conflict" and ongoing US-tariff uncertainty as twin sources of caution. Markets now expect stable rates through 2026, with the first move (in either direction) most likely in 2027. This is a material headwind to housing: buyers waiting for further cuts now have to factor in that they may not come, which keeps sales subdued. Qualifying mortgage rates (contract + 2% stress test) have declined but remain constraining for marginal buyers. The CREA March 2026 data showed sales <strong>-2.3% YoY</strong>, and CREA's April forecast revision cut 2026 sales growth to just <strong>+1%</strong> (down from +5.1% in January).</p>
+      <p>The foreign buyer ban (Prohibition on the Purchase of Residential Property by Non-Canadians Act), now extended through January 2027, continues to cool high-end demand in Toronto and Vancouver luxury segments. The ban's impact has been less dramatic than feared because wealthy PR holders and existing residents were never subject to it, but it has measurably compressed the international bid. Canada's <strong>500,000/year immigration target</strong> creates ~200,000 new household formations annually against housing starts running near 240,000 — a tight but not catastrophic balance. CMHC's projection of a 5.8 million unit gap by 2030 remains the dominant long-term theme underwriting the market's floor.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>加拿大住宅市場進入 2026 年時，處於「復甦停滯」的狀態。2021 年歷史性 COVID 多頭（<strong>+21%</strong>）與 2022 年修正（<strong>-7.5%</strong>）之後，全國均價雖已穩定，但兩個主要都會市場——多倫多與溫哥華——仍明顯疲弱。2026 年多倫多房價預估下跌 <strong>-3 至 -4%</strong>，原因是高庫存、家庭消費者負債居高、房貸利率下降遲緩、加上買家信心不振。2026 年 3 月大溫哥華地區基準房價 <strong>C$1,104,300</strong>、年減 <strong>-6.8%</strong>，反映庫存持續累積、需求卻未回溫。</p>
+      <p>加拿大央行已確認暫停：從 5.0% 高峰一路降到 2.25% 後，BoC 於 2026 年 4 月 29 日<strong>將隔夜利率維持在 2.25%</strong>（下次決議 2026 年 6 月 10 日）。4 月《貨幣政策報告》點名「中東衝突演變帶來的高度波動」與美國關稅政策不確定性為兩大審慎理由。市場預期 2026 年整年維持不變，2027 年才可能首次動作（任何方向）。這對房市是重大逆風：等更低利率的買家現在得考慮利率可能不會再降，成交因此持續偏冷。合格房貸利率（合約利率 + 2% 壓力測試）雖下降但仍卡住邊際買家。CREA 2026 年 3 月資料顯示銷售年減 <strong>-2.3%</strong>，4 月預測將 2026 年銷售成長下修至僅 <strong>+1%</strong>（1 月時為 +5.1%）。</p>
+      <p>《禁止非加拿大人購買住宅物業法》外國買家禁令延長至 2027 年 1 月，仍在冷卻多倫多、溫哥華的高端市場。衝擊沒有原本預期得大，因為有錢的永久居民與既有居民本來就不受禁令影響，但國際買盤確實被壓縮。加拿大每年 <strong>50 萬移民</strong>目標每年形成約 20 萬戶新家庭，而住宅開工量約 24 萬戶——緊繃但還沒到崩潰。CMHC 估算 2030 年前需要 580 萬戶新住宅的缺口，仍是撐住市場底部的長期主題。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">TORONTO AVG HOME</span><span class="lang-zh" style="display:none">多倫多平均房價</span></div><div class="kpi-value">C$1.08M</div><span class="kpi-badge badge-orange"><span class="lang-en">-1.5% YoY &middot; $780K USD</span><span class="lang-zh" style="display:none">年減1.5% &middot; 78萬美元</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">VANCOUVER AVG HOME</span><span class="lang-zh" style="display:none">溫哥華平均房價</span></div><div class="kpi-value">C$1.28M</div><span class="kpi-badge badge-red"><span class="lang-en">-2.5% YoY &middot; PTI 12.5x</span><span class="lang-zh" style="display:none">年減2.5% &middot; 房價收入比12.5倍</span></span></div>
+      <div class="kpi-card blue"><div class="kpi-label"><span class="lang-en">BOC POLICY RATE</span><span class="lang-zh" style="display:none">加拿大銀行利率</span></div><div class="kpi-value">2.25%</div><span class="kpi-badge badge-blue"><span class="lang-en">Hold &middot; Apr 29 2026 decision</span><span class="lang-zh" style="display:none">維持 &middot; 2026年4月29日決議</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">2025 SALES</span><span class="lang-zh" style="display:none">2025年銷售量</span></div><div class="kpi-value">~480K</div><span class="kpi-badge badge-green"><span class="lang-en">+8% YoY &middot; Recovery trend</span><span class="lang-zh" style="display:none">年增8% &middot; 復甦趨勢</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">FOREIGN BUYER BAN</span><span class="lang-zh" style="display:none">外國買家禁令</span></div><div class="kpi-value"><span class="lang-en">Active</span><span class="lang-zh" style="display:none">生效中</span></div><span class="kpi-badge badge-red"><span class="lang-en">Extended to Jan 2027</span><span class="lang-zh" style="display:none">延長至2027年1月</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">IMMIGRATION TARGET</span><span class="lang-zh" style="display:none">移民目標</span></div><div class="kpi-value">500K/yr</div><span class="kpi-badge badge-orange"><span class="lang-en">~200K new households/yr</span><span class="lang-zh" style="display:none">每年約20萬新家庭</span></span></div>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card"><h4><span class="lang-en">Toronto vs Vancouver Price Trend (2019=100)</span><span class="lang-zh" style="display:none">多倫多 vs 溫哥華價格趨勢（2019=100）</span></h4><p><span class="lang-en">Source: CREA</span><span class="lang-zh" style="display:none">來源：CREA</span></p><div id="chartCAPriceTrend" style="height:220px"></div><p class="chart-note navy"><span class="lang-en">Both peaked 2021, Toronto corrected less. Calgary/Edmonton diverging upward</span><span class="lang-zh" style="display:none">兩者2021年見頂，多倫多調整幅度較小。卡加利/艾德蒙頓向上分化</span></p></div>
+      <div class="report-chart-card"><h4><span class="lang-en">Immigration vs Housing Starts (K)</span><span class="lang-zh" style="display:none">移民 vs 住房開工量（千）</span></h4><p><span class="lang-en">Source: Statistics Canada / CMHC</span><span class="lang-zh" style="display:none">來源：加拿大統計局 / CMHC</span></p><div id="chartCAImmiStarts" style="height:220px"></div><p class="chart-note red"><span class="lang-en">Gap widening: 500K immigrants vs 240K starts. CMHC: need 5.8M homes by 2030</span><span class="lang-zh" style="display:none">缺口擴大：50萬移民 vs 24萬開工量。CMHC：2030年前需580萬套住房</span></p></div>
+    </div>
+
+    <h2 id="sec-macro"><span class="lang-en">MACRO &amp; IMMIGRATION</span><span class="lang-zh" style="display:none">宏觀與移民</span></h2>
+    <div class="lang-en">
+      <p>Canada's economy grows at <strong>1.5%</strong> (2025), constrained by high rates but supported by immigration. The government targets <strong>500K</strong> permanent residents annually &mdash; creating ~200K new household formations/year. Housing starts at ~240K/year fall far short. The CMHC estimates Canada needs <strong>5.8M</strong> new homes by 2030 to restore affordability. This supply-demand gap underpins long-term price support despite cyclical weakness.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>加拿大經濟增長<strong>1.5%</strong>（2025年），受高利率制約但移民支持。政府目標每年<strong>50萬</strong>永久居民——每年創造約20萬新家庭。住房開工量約24萬/年遠不及需求。CMHC估計加拿大至2030年需新建<strong>580萬</strong>套住房以恢復負擔能力。這一供需缺口為長期價格提供支撐，儘管有週期性弱勢。</p>
+    </div>
+
+    <h2 id="sec-foreign"><span class="lang-en">FOREIGN BUYER BAN</span><span class="lang-zh" style="display:none">外國買家禁令</span></h2>
+    <div class="lang-en">
+      <p>The Prohibition on the Purchase of Residential Property by Non-Canadians Act took effect January 2023, extended to January 2027. Exemptions exist for PR holders, refugee claimants, and work permit holders buying under <strong>C$500K</strong>. The ban has measurably cooled Vancouver and Toronto luxury markets where Chinese buyers were historically active. Some investors use corporate structures or PR pathways to circumvent restrictions.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>《禁止非加拿大人購買住宅物業法》2023年1月生效，延長至2027年1月。永久居民、難民申請人和工作簽證持有者購買<strong>50萬加元</strong>以下物業可豁免。禁令明顯冷卻了中國買家歷來活躍的溫哥華和多倫多豪宅市場。部分投資者通過公司結構或PR途徑規避限制。</p>
+    </div>
+
+    <h2 id="sec-toronto"><span class="lang-en">TORONTO OVERVIEW</span><span class="lang-zh" style="display:none">多倫多概覽</span></h2>
+    <div class="lang-en">
+      <p>Canada's largest city and financial capital. Condo market under pressure &mdash; investor exits rising, rental vacancies increasing from <strong>1%</strong> to <strong>3%</strong>. Detached homes more resilient. GTA population <strong>7M+</strong>. Transit-oriented development (Ontario Line, GO expansion) reshaping suburban premiums.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>加拿大最大城市和金融首都。公寓市場承壓——投資者退出增加，租賃空置率從<strong>1%</strong>升至<strong>3%</strong>。獨棟住宅更具韌性。大多倫多地區人口<strong>700萬+</strong>。以交通為導向的發展（Ontario Line、GO擴展）正在重塑郊區溢價。</p>
+    </div>
+    <div class="city-card" style="margin:16px 0"><h3><span class="lang-en">Toronto</span><span class="lang-zh" style="display:none">多倫多</span></h3><div class="city-stat"><span class="lang-en">Avg: C$1.08M &middot; Yield: 3.8% &middot; PTI: 10.5x &middot; YoY: -1.5%</span><span class="lang-zh" style="display:none">均價：108萬加元 &middot; 收益率：3.8% &middot; 房價收入比：10.5倍 &middot; 年增：-1.5%</span></div><a href="toronto.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report &rarr;</span><span class="lang-zh" style="display:none">完整報告 &rarr;</span></a></div>
+
+    <h2 id="sec-vancouver"><span class="lang-en">VANCOUVER OVERVIEW</span><span class="lang-zh" style="display:none">溫哥華概覽</span></h2>
+    <div class="lang-en">
+      <p>Canada's most expensive market constrained by geography (mountains + ocean). Foreign buyer ban hit hardest here. Provincial speculation tax and vacancy tax layers on top of federal ban. Detached homes in West Side average <strong>C$3.5M+</strong>. Pre-sale condo market soft. Strong Asian diaspora community creates latent demand if restrictions ease.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>加拿大最昂貴的市場，受地理限制（山脈+海洋）。外國買家禁令對此衝擊最大。省級投機稅和空置稅疊加聯邦禁令。西區獨棟均價<strong>350萬加元+</strong>。預售公寓市場疲軟。強大的亞裔社區若限制放寬將釋放潛在需求。</p>
+    </div>
+    <div class="city-card" style="margin:16px 0"><h3><span class="lang-en">Vancouver</span><span class="lang-zh" style="display:none">溫哥華</span></h3><div class="city-stat"><span class="lang-en">Avg: C$1.28M &middot; Yield: 3.2% &middot; PTI: 12.5x &middot; YoY: -2.5%</span><span class="lang-zh" style="display:none">均價：128萬加元 &middot; 收益率：3.2% &middot; 房價收入比：12.5倍 &middot; 年增：-2.5%</span></div><a href="vancouver.html" style="font-family:Inter,sans-serif;font-size:11px;color:#1e3a5f;text-decoration:none;display:inline-block;margin-top:8px;padding:4px 10px;background:#eef3f9;border-radius:4px"><span class="lang-en">Full Report &rarr;</span><span class="lang-zh" style="display:none">完整報告 &rarr;</span></a></div>
+
+    <h2 id="sec-policy"><span class="lang-en">POLICY FRAMEWORK</span><span class="lang-zh" style="display:none">政策框架</span></h2>
+    <div class="lang-en">
+      <p>Multi-layered: federal foreign buyer ban, BOC stress test (qualifying rate <strong>5.25%</strong> or contract+2%), provincial speculation taxes (BC, ON), municipal vacancy taxes, first-time buyer incentives (FHSA, HBP). Current government pivoting from restriction to supply-side &mdash; fast-tracking permits, federal housing fund, zoning reform pressure on municipalities.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>多層次：聯邦外國買家禁令、加拿大銀行壓力測試（合格利率<strong>5.25%</strong>或合約+2%）、省級投機稅（BC、ON）、市級空置稅、首購族優惠（FHSA、HBP）。現任政府從限制轉向供給側——加快許可、聯邦住房基金、向市政府施壓進行分區改革。</p>
+    </div>
+
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+    <div class="lang-en">
+      <p>Canada's 2026–2028 outlook is dominated by the interaction of four variables: (1) the BoC's hold-through-2026 stance and any 2027 pivot; (2) the Jan 2027 expiration of the foreign buyer ban and whether it is renewed; (3) immigration policy continuity under political pressure; (4) the supply response to federal housing fund and zoning reform pressure. Unlike JP/KR (supply-constrained demand stories), Canada's near-term issue is inventory overhang in Toronto and Vancouver — affordability has improved but buyers remain on the sidelines.</p>
+      <p><strong>Base case</strong> (55% probability). BoC holds at <strong>2.25%</strong> throughout 2026 with first move (in either direction) deferred to 2027. Toronto prices fall <strong>-3 to -4%</strong> in 2026 before stabilising in H2 2027 for <strong>flat to +2%</strong> calendar 2027. Vancouver continues <strong>-4 to -6%</strong> through 2026 on inventory digestion, then flat to +1% in 2027. Calgary, Edmonton, Ottawa deliver <strong>+3 to +5%</strong> on interprovincial migration from high-cost centres. Sales volume recovers only 5–8% nationally (matching CREA's revised April outlook of +1% YoY). Foreign buyer ban expires in Jan 2027 and is not renewed under pressure from prime cities seeking international capital.</p>
+      <p><strong>Bull case</strong> (20% probability). Middle East tensions de-escalate, BoC resumes cutting in late 2026 to <strong>2.00%</strong> by year-end, further toward <strong>1.75%</strong> through 2027. Inventory clears; sales recover 15–20%. Toronto goes flat to <strong>+3%</strong> in 2026, <strong>+5 to +7%</strong> in 2027; Vancouver bottoms mid-2026 and recovers to <strong>+3 to +5%</strong> in 2027 on ban expiration plus rate relief. Immigration remains at 500K annual target. Chinese buyers re-enter Vancouver prime after ban expires. CMHC supply-gap narrative drives renewed investor interest.</p>
+      <p><strong>Bear case</strong> (20% probability). US-Canada trade tension, US recession, or C$ depreciation pressures BoC to hold or hike defensively. Immigration target cut to 300K or below under political pressure. Toronto falls <strong>-6 to -8%</strong> in 2026, Vancouver <strong>-8 to -10%</strong>. Investor condo resales surge as BTL math breaks at negative carry (3% yields vs 4%+ mortgage rates). Distressed pre-construction condo assignments flood the market. Sales volume falls another 10–15%. Calgary/Edmonton moderate to <strong>+1 to +2%</strong>.</p>
+      <p>Three indicators to monitor quarterly: (1) <strong>BoC Monetary Policy Report language on housing stress</strong> — the signal for when the cutting cycle might resume; (2) <strong>GTA and Metro Vancouver monthly sales-to-active-listings ratio</strong> — below 40% is balanced, below 30% is buyers' market; (3) <strong>federal immigration policy announcements</strong> — any material reduction below 400K/year would remove a key structural demand anchor. The underlying thesis: Canada is currently a range-bound, supply-gap-underwritten market where active city selection matters enormously. Calgary and Edmonton offer the best risk-adjusted entry; Toronto detached (not condo) offers contrarian value; Vancouver is a wait for the ban expiry catalyst play.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>加拿大 2026–2028 年展望由四個變數交織：（1）BoC 維持 2026 整年不動、以及 2027 年是否轉向；（2）外國買家禁令 2027 年 1 月到期是否續延；（3）移民政策在政治壓力下能否維持；（4）聯邦住宅基金與分區改革對供給的實質回應。跟日韓的供給受限型故事不同，加拿大當前的問題是多倫多與溫哥華的庫存過剩——可負擔性已經改善，但買家在場邊觀望。</p>
+      <p><strong>基本情境</strong>（機率 55%）。BoC 2026 整年維持 <strong>2.25%</strong>，首次動作（任何方向）延後到 2027。多倫多 2026 年跌 <strong>-3 至 -4%</strong>，到 2027 下半年才穩定，2027 整年持平至 +2%。溫哥華 2026 年持續 <strong>-4 至 -6%</strong> 消化庫存，2027 年持平至 +1%。卡加利、艾德蒙頓、渥太華受高成本城市跨省遷入推升 <strong>+3 至 +5%</strong>。全國成交量只恢復 5–8%（與 CREA 4 月下修後的 +1% 年增預測一致）。外國買家禁令 2027 年 1 月到期後不再續延，主要是因為核心城市需要國際資金。</p>
+      <p><strong>樂觀情境</strong>（機率 20%）。中東緊張降溫，BoC 2026 年末重啟降息至 <strong>2.00%</strong>，2027 年再降至 <strong>1.75%</strong>。庫存消化、成交量回升 15–20%。多倫多 2026 持平至 <strong>+3%</strong>、2027 年漲 <strong>+5 至 +7%</strong>；溫哥華 2026 年中觸底，2027 年靠禁令到期加降息回到 <strong>+3 至 +5%</strong>。移民維持 50 萬年度目標。中國買家在禁令到期後重新進場溫哥華高端。CMHC 的供給缺口論述重新吸引投資人關注。</p>
+      <p><strong>悲觀情境</strong>（機率 20%）。美加貿易緊張、美國衰退、加幣貶值壓力使 BoC 維持或防禦性升息。移民目標在政治壓力下砍到 30 萬以下。多倫多跌 <strong>-6 至 -8%</strong>、溫哥華跌 <strong>-8 至 -10%</strong>。投資客公寓轉售潮湧現，因為買房出租的數學在負利差（收益率 3% 對房貸 4% 以上）下破功。預售階段的 assignment 困境件湧入市場。成交量再降 10–15%。卡加利／艾德蒙頓放緩到 <strong>+1 至 +2%</strong>。</p>
+      <p>三個每季要追蹤的指標：（1）<strong>BoC 貨幣政策報告對房市壓力的措辭</strong>——判斷降息循環何時重啟的訊號；（2）<strong>大多倫多與大溫哥華的月度「成交 vs 在售物件」比</strong>——40% 以下為平衡市，30% 以下為買方市場；（3）<strong>聯邦移民政策公告</strong>——若實質下修到 40 萬／年以下，會抽掉結構性需求錨。核心論點是：加拿大目前是一個「區間盤整、靠供給缺口撐底」的市場，主動城市挑選極為關鍵。卡加利與艾德蒙頓提供最佳風險調整進場點；多倫多獨棟（而非公寓）有逆勢價值；溫哥華則是等禁令到期的催化劑題材。</p>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: CREA &middot; CMHC &middot; Bank of Canada &middot; Statistics Canada &middot; Global Property Guide Canada. All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：CREA &middot; CMHC &middot; 加拿大銀行 &middot; 加拿大統計局 &middot; 全球房地產指南加拿大。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawCAPriceTrend(lang);drawCAImmiStarts(lang);}
+
+function drawCAPriceTrend(lang){var dom=document.getElementById('chartCAPriceTrend');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];
+  var toronto=[100,108,131,121,116,118,116];
+  var vancouver=[100,106,127,118,113,114,111];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:95,axisLabel:{color:C.muted,fontSize:9}}),
+    series:[
+      {name:en?'Toronto':'多倫多',type:'line',data:toronto,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5},
+      {name:en?'Vancouver':'溫哥華',type:'line',data:vancouver,lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+    ]});}
+
+function drawCAImmiStarts(lang){var dom=document.getElementById('chartCAImmiStarts');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2020','2021','2022','2023','2024','2025'];
+  var immi=[185,405,437,472,500,500];
+  var starts=[220,270,260,240,245,240];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:[mkAxis({type:'value',min:0,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}K'}}),mkAxis({type:'value',min:0,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}K'},splitLine:{show:false}})],
+    series:[
+      {name:en?'Immigration (K)':'移民(千)',type:'bar',data:immi,barMaxWidth:28,itemStyle:{color:'rgba(37,99,235,0.7)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'Starts (K)':'開工量(千)',type:'line',data:starts,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1}
+    ]});}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>

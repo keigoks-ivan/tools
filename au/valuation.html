@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valuation Monitor | Australia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px}.summary-card{background:#fff;border:1px solid #ccd9e8;border-radius:10px;padding:20px}.summary-card h4{font-size:13px;color:#5a7a9a;margin:0 0 8px;font-family:Inter,sans-serif;text-transform:uppercase;letter-spacing:0.5px}.summary-card .val{font-size:22px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif}.summary-card .desc{font-size:12px;color:#5a7a9a;margin-top:6px;font-family:Inter,sans-serif;line-height:1.5}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+      <h1><span class="lang-en">Valuation Monitor</span><span class="lang-zh" style="display:none">估值監測</span></h1>
+      <p class="subtitle"><span class="lang-en">Yield, Affordability &amp; Regional Comparison</span><span class="lang-zh" style="display:none">收益率、負擔能力與區域比較</span></p>
+    </div>
+
+    <div class="section-label"><span class="lang-en">KEY METRICS</span><span class="lang-zh" style="display:none">關鍵指標</span></div>
+    <div class="kpi-grid">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">SYDNEY P/R RATIO</span><span class="lang-zh" style="display:none">雪梨租售比</span></div>
+        <div class="kpi-value">25x</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Expensive</span><span class="lang-zh" style="display:none">偏貴</span></span>
+        <div class="kpi-source">CoreLogic</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">NATIONAL YIELD</span><span class="lang-zh" style="display:none">全國收益率</span></div>
+        <div class="kpi-value">4.69%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Gross rental</span><span class="lang-zh" style="display:none">毛租金收益</span></span>
+        <div class="kpi-source">CoreLogic Q1 2026</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">YIELD SPREAD</span><span class="lang-zh" style="display:none">利差</span></div>
+        <div class="kpi-value">+0.84%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">vs RBA rate</span><span class="lang-zh" style="display:none">vs 央行利率</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">SYDNEY AFFORDABILITY</span><span class="lang-zh" style="display:none">雪梨負擔能力</span></div>
+        <div class="kpi-value"><span class="lang-en">85 yrs</span><span class="lang-zh" style="display:none">85年</span></div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Years to own</span><span class="lang-zh" style="display:none">購屋所需年數</span></span>
+        <div class="kpi-source">ANZ/CoreLogic</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">NATIONAL INCOME RATIO</span><span class="lang-zh" style="display:none">全國房價所得比</span></div>
+        <div class="kpi-value">8.2x</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Severely unaffordable</span><span class="lang-zh" style="display:none">嚴重不可負擔</span></span>
+        <div class="kpi-source">Demographia</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">BRISBANE 5Y GROWTH</span><span class="lang-zh" style="display:none">布里斯本5年漲幅</span></div>
+        <div class="kpi-value">+86.7%</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Top performer</span><span class="lang-zh" style="display:none">表現最佳</span></span>
+        <div class="kpi-source">CoreLogic</div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">VALUATION CHARTS</span><span class="lang-zh" style="display:none">估值圖表</span></div>
+
+    <div class="chart-card">
+      <h3><span class="lang-en">Yield vs RBA Cash Rate</span><span class="lang-zh" style="display:none">收益率 vs RBA基準利率</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Gross rental yield spread over policy rate</span><span class="lang-zh" style="display:none">毛租金收益率與政策利率之利差</span></p>
+      <div class="chart-wrap tall"><div id="chartAuYieldSpread" style="width:100%;height:100%"></div></div>
+    </div>
+
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">APAC Price Comparison</span><span class="lang-zh" style="display:none">亞太房價比較</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">AUD per sqm across major cities</span><span class="lang-zh" style="display:none">主要城市每平方公尺澳幣價格</span></p>
+        <div style="position:relative;height:360px;"><div id="chartAuAPAC" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">Years to Own a Home</span><span class="lang-zh" style="display:none">購屋所需年數</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Median household income basis</span><span class="lang-zh" style="display:none">以家庭中位數所得計算</span></p>
+        <div style="position:relative;height:360px;"><div id="chartAuAffordability" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="lang-en">SUMMARY</span><span class="lang-zh" style="display:none">總結</span></div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <h4><span class="lang-en">Yield</span><span class="lang-zh" style="display:none">收益率</span></h4>
+        <div class="val">4.69%</div>
+        <div class="desc"><span class="lang-en">National gross rental yield remains above the RBA cash rate, offering a positive carry of +0.84%. The spread has compressed since the Feb 2026 rate cut but remains in positive territory.</span><span class="lang-zh" style="display:none">全國毛租金收益率仍高於RBA基準利率，提供+0.84%正向現金流。自2026年2月降息後利差收窄，但仍維持正值。</span></div>
+      </div>
+      <div class="summary-card">
+        <h4><span class="lang-en">Supply</span><span class="lang-zh" style="display:none">供給</span></h4>
+        <div class="val"><span class="lang-en">Deficit</span><span class="lang-zh" style="display:none">短缺</span></div>
+        <div class="desc"><span class="lang-en">Housing starts remain well below the 300K annual target. Construction costs +25-29% since 2020 and labour shortages continue to constrain the pipeline. Structural undersupply supports prices.</span><span class="lang-zh" style="display:none">住宅開工量遠低於年度30萬套目標。自2020年以來營建成本上漲25-29%，勞動力短缺持續制約在建供給。結構性供不應求支撐房價。</span></div>
+      </div>
+      <div class="summary-card">
+        <h4><span class="lang-en">Affordability</span><span class="lang-zh" style="display:none">負擔能力</span></h4>
+        <div class="val"><span class="lang-en">Stretched</span><span class="lang-zh" style="display:none">緊繃</span></div>
+        <div class="desc"><span class="lang-en">Sydney requires 85 years of median household savings to purchase. National price-to-income at 8.2x remains severely unaffordable by global standards. Policy interventions expanding but insufficient.</span><span class="lang-zh" style="display:none">雪梨需要85年的家庭中位數儲蓄才能購屋。全國房價所得比8.2倍，以全球標準衡量屬嚴重不可負擔。政策干預擴大但仍不足。</span></div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en"><strong>Sources:</strong> CoreLogic, ABS, RBA, ANZ, Demographia. Data as of Q1 2026 unless stated otherwise.</span>
+      <span class="lang-zh" style="display:none"><strong>資料來源：</strong>CoreLogic、ABS、RBA、ANZ、Demographia。除另行標註外，資料截至2026年Q1。</span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  function fmtAUD(v){if(v>=1000000)return 'A$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return 'A$'+Math.round(v/1000)+'K';return 'A$'+v;}
+  function fmtAUDShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return Math.round(v/1000)+'K';return v.toString();}
+  var baseText={color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+  var allCharts=[];
+
+  function initCharts(lang){
+    var en=lang==='en';
+    var quarters=['2019','2020','2021','2022','2023','2024','2025','2026Q1'];
+
+    // Chart 1: Yield vs RBA Cash Rate
+    var c1=echarts.init(document.getElementById('chartAuYieldSpread'));
+    c1.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Gross Yield':'毛收益率',en?'RBA Cash Rate':'RBA基準利率']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:quarters}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'},min:0,max:6}),
+      series:[
+        {
+          name:en?'Gross Yield':'毛收益率',
+          type:'line',
+          data:[4.8,4.9,3.5,3.6,4.2,4.9,4.92,4.69],
+          smooth:true,
+          symbol:'circle',symbolSize:6,
+          lineStyle:{color:C.green,width:2},
+          itemStyle:{color:C.green},
+          areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.2)'},{offset:1,color:'rgba(22,163,74,0.02)'}])}
+        },
+        {
+          name:en?'RBA Cash Rate':'RBA基準利率',
+          type:'line',
+          data:[1.5,0.1,0.1,2.85,4.35,4.35,4.35,3.85],
+          step:'middle',
+          symbol:'none',
+          lineStyle:{color:C.red,width:2,type:'dashed'},
+          itemStyle:{color:C.red}
+        }
+      ]
+    });
+    allCharts.push(c1);
+
+    // Chart 2: APAC Price Comparison (horizontal bar)
+    var cities=[en?'Brisbane':'布里斯本',en?'Gold Coast':'黃金海岸',en?'Melbourne':'墨爾本',en?'Perth':'伯斯',en?'Sydney':'雪梨',en?'Auckland':'奧克蘭',en?'Taipei':'台北',en?'Tokyo':'東京',en?'Singapore':'新加坡',en?'Hong Kong':'香港'];
+    var prices=[3500,4500,6500,6800,12000,7200,8500,9500,14000,18000];
+    var c2=echarts.init(document.getElementById('chartAuAPAC'));
+    c2.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': A$'+p[0].value.toLocaleString()+'/sqm';}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      yAxis:mkAxis({type:'category',data:cities,axisLabel:{fontSize:10}}),
+      series:[{
+        type:'bar',
+        data:prices,
+        itemStyle:{
+          color:function(p){
+            var auCities=[0,1,2,3,4];
+            return auCities.indexOf(p.dataIndex)!==-1?C.navy:C.muted;
+          },
+          borderRadius:[0,3,3,0]
+        },
+        barWidth:'60%',
+        label:{show:true,position:'right',formatter:function(p){return 'A$'+fmtK(p.value);},fontSize:10,color:C.navy}
+      }]
+    });
+    allCharts.push(c2);
+
+    // Chart 3: Years to Own (horizontal bar)
+    var affCities=[en?'Gold Coast':'黃金海岸',en?'Melbourne':'墨爾本',en?'Brisbane':'布里斯本',en?'Sydney':'雪梨'];
+    var affYears=[32.7,55.6,64.5,85.0];
+    var c3=echarts.init(document.getElementById('chartAuAffordability'));
+    c3.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': '+p[0].value+(en?' years':'年');}}),
+      grid:{left:10,right:40,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',max:100,axisLabel:{formatter:function(v){return v+(en?'y':'年');}}}),
+      yAxis:mkAxis({type:'category',data:affCities,axisLabel:{fontSize:11}}),
+      series:[{
+        type:'bar',
+        data:affYears,
+        itemStyle:{
+          color:function(p){return p.value>=60?C.red:p.value>=40?C.orange:C.green;},
+          borderRadius:[0,3,3,0]
+        },
+        barWidth:'50%',
+        label:{show:true,position:'right',formatter:function(p){return p.value+(en?' yrs':'年');},fontSize:10,color:C.navy},
+        markLine:{
+          silent:true,
+          lineStyle:{color:C.muted,type:'dashed',width:1},
+          label:{formatter:en?'30yr benchmark':'30年基準',fontSize:10,color:C.muted,position:'end'},
+          data:[{xAxis:30}]
+        }
+      }]
+    });
+    allCharts.push(c3);
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

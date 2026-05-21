@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Analysis | Canada Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="dashboard">
+    <h1 class="page-title"><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
+
+    <div class="kpi-row">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">2025 Housing Starts</span><span class="lang-zh" style="display:none">2025年新屋開工</span></div>
+        <div class="kpi-value">~240,000</div>
+        <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Below target | CMHC</span><span class="lang-zh" style="display:none">低於目標 | CMHC</span></div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">CMHC Supply Gap</span><span class="lang-zh" style="display:none">CMHC供給缺口</span></div>
+        <div class="kpi-value">3.5M <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta negative"><span class="lang-en">By 2030 | Structural deficit</span><span class="lang-zh" style="display:none">2030年前 | 結構性短缺</span></div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">Toronto Starts</span><span class="lang-zh" style="display:none">多倫多開工量</span></div>
+        <div class="kpi-value">~42,000</div>
+        <div class="kpi-delta negative"><span class="lang-en">-15% YoY | Condo pullback</span><span class="lang-zh" style="display:none">年減15% | 公寓縮減</span></div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Vancouver Starts</span><span class="lang-zh" style="display:none">溫哥華開工量</span></div>
+        <div class="kpi-value">~28,000</div>
+        <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Flat YoY</span><span class="lang-zh" style="display:none">持平</span></div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Completions 2025</span><span class="lang-zh" style="display:none">2025年完工量</span></div>
+        <div class="kpi-value">~220,000</div>
+        <div class="kpi-delta" style="color:#2563eb">+5%</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">Purpose-Built Rental</span><span class="lang-zh" style="display:none">專建出租住宅</span></div>
+        <div class="kpi-value"><span class="lang-en">Growing</span><span class="lang-zh" style="display:none">成長中</span></div>
+        <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Policy incentives</span><span class="lang-zh" style="display:none">政策激勵</span></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card full">
+        <h3><span class="lang-en">Housing Starts vs Completions vs Population Growth</span><span class="lang-zh" style="display:none">新屋開工 vs 完工 vs 人口成長</span></h3>
+        <div id="chartCaPipeline" style="height:370px"></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">Starts by Province</span><span class="lang-zh" style="display:none">各省開工量</span></h3>
+        <div id="chartCaProvince" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">Toronto Condo Completions Forecast</span><span class="lang-zh" style="display:none">多倫多公寓完工預測</span></h3>
+        <div id="chartCaCondoForecast" style="height:370px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>A project by InvestMQuest.</p>
+  </footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    allCharts.length=0;
+
+    /* Chart 1: Housing Starts vs Completions vs Population Growth */
+    var c1=echarts.init(document.getElementById('chartCaPipeline'));
+    c1.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'新屋開工(K)':'Starts (K)',lang==='zh'?'完工(K)':'Completions (K)',lang==='zh'?'人口成長(K)':'Pop Growth (K)']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[
+        {name:lang==='zh'?'新屋開工(K)':'Starts (K)',type:'line',smooth:0.2,data:[220,270,260,240,245,240],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6},
+        {name:lang==='zh'?'完工(K)':'Completions (K)',type:'line',smooth:0.2,data:[200,210,220,225,220,220],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6},
+        {name:lang==='zh'?'人口成長(K)':'Pop Growth (K)',type:'line',smooth:0.2,data:[375,405,437,472,500,500],lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:6,
+          markPoint:{data:[{coord:['2025',500],symbol:'pin',symbolSize:40,label:{formatter:'500K',fontSize:9},itemStyle:{color:C.red}}]}
+        }
+      ]
+    });
+    allCharts.push(c1);
+
+    /* Chart 2: Starts by Province (horizontal bar) */
+    var provLabels=lang==='zh'?['其他','亞伯達省','魁北克省','卑詩省','安大略省']:['Other','Alberta','Quebec','BC','Ontario'];
+    var provVals=[27,38,48,42,85];
+    var provColors=[C.muted,C.orange,C.blue,C.green,C.navy];
+    var c2=echarts.init(document.getElementById('chartCaProvince'));
+    c2.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+': '+p[0].value+'K';}}),
+      grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'K';}}}),
+      yAxis:mkAxis({type:'category',data:provLabels}),
+      series:[{
+        type:'bar',
+        data:provVals.map(function(v,i){return{value:v,itemStyle:{color:provColors[i],borderRadius:[0,4,4,0]}};}),
+        label:{show:true,position:'right',formatter:function(p){return p.value+'K';},fontSize:11,fontFamily:'Inter, sans-serif',color:C.navy},
+        barWidth:20
+      }]
+    });
+    allCharts.push(c2);
+
+    /* Chart 3: Toronto Condo Completions Forecast (bar) */
+    var c3=echarts.init(document.getElementById('chartCaCondoForecast'));
+    c3.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2024','2025','2026','2027','2028']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[{
+        type:'bar',
+        data:[18000,22000,28000,25000,18000].map(function(v){
+          return{value:v,itemStyle:{color:v>=25000?C.red:v>=20000?C.orange:C.navy,borderRadius:[3,3,0,0]}};
+        }),
+        barMaxWidth:40,
+        label:{show:true,position:'top',formatter:function(p){return fmtK(p.value);},fontSize:10,fontFamily:'Inter, sans-serif',color:C.navy},
+        markLine:{
+          silent:true,
+          symbol:'none',
+          lineStyle:{color:C.green,type:'dashed',width:1},
+          label:{formatter:lang==='zh'?'年均 20K':'Annual avg 20K',fontSize:10,color:C.green,fontFamily:'Inter, sans-serif'},
+          data:[{yAxis:20000}]
+        }
+      }]
+    });
+    allCharts.push(c3);
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

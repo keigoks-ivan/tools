@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Park Place @ Desa ParkCity｜建案深度分析報告 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* Score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:640px;margin:12px auto 0;line-height:1.7;text-align:center}
+/* Dual */
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-r{background:#FEE2E2;color:#991B1B;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #dc2626}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+.print-btn:hover{background:#166534}
+@media(max-width:680px){.two-col,.score-cols,.dual-col{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}.section{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span>📍 建案分析：Park Place @ Desa ParkCity ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 依據：KL 供需 Overhang 報告（2026-04-01）+ brickz 實際成交數據</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>Park Place @ Desa ParkCity</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&yield=4.5&from=ParkPlace_DesaParkCity"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=ParkPlace_DesaParkCity"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Persiaran Residen，Desa ParkCity 鎮中心 ｜ ParkCity Group（Perdana ParkCity Sdn Bhd）｜ Freehold 住宅地契 ｜ 2024年11月完工，2025年1月交屋</div>
+  <div class="badge-row">
+    <span class="badge">📂 KL 供需 Overhang 深度分析 2026-04-01（上游報告）</span>
+    <span class="badge">📡 brickz 89筆實際成交（2025年全年）</span>
+    <span class="badge">📡 The Edge Value Creation Excellence Award 2025</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-v">RM1,461</div>
+        <div class="kpi-l">成交中位 PSF（2025全年）</div>
+        <div class="kpi-s neu">brickz 89筆實際成交</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">+102.6%</div>
+        <div class="kpi-l">最高資本增值</div>
+        <div class="kpi-s up">RM761→RM1,541 psf（2020→2025）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">537</div>
+        <div class="kpi-l">總單位（1棟54層）</div>
+        <div class="kpi-s neu">2024完工，2025-01交屋</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM1,680萬~700萬</div>
+        <div class="kpi-l">現掛牌總價範圍</div>
+        <div class="kpi-s neu">PropertyGuru 2026-04</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">Freehold</div>
+        <div class="kpi-l">地契類型</div>
+        <div class="kpi-s up">住宅地契，無商業地契問題</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">16.55%</div>
+        <div class="kpi-l">DPC 全區 YoY 中位數漲幅</div>
+        <div class="kpi-s up">SuperHomes 2026年報</div>
+      </div>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">Perdana ParkCity Sdn Bhd（ParkCity Group 子公司）｜ DPC 鎮主開發商</div></div>
+      <div class="spec-item"><div class="spec-l">地段位置</div><div class="spec-v">Desa ParkCity 鎮中心（TownCenter），夾在兩座公園與兩座湖泊之間</div></div>
+      <div class="spec-item"><div class="spec-l">基地面積</div><div class="spec-v">4.55 英畝（1.84公頃）</div></div>
+      <div class="spec-item"><div class="spec-l">坪數範圍</div><div class="spec-v">1,109–4,047 sqft｜2–4房，含頂層 Duplex</div></div>
+      <div class="spec-item"><div class="spec-l">管理費</div><div class="spec-v">RM0.44 psf（含沉沒基金）｜DPC 最優維護標準</div></div>
+      <div class="spec-item"><div class="spec-l">已入住率</div><div class="spec-v">34%（183戶）已入住；41%（221戶）裝修中（2025-11數據）</div></div>
+      <div class="spec-item"><div class="spec-l">現有公共交通</div><div class="spec-v">Sri Damansara Sentral MRT 站（SSP線）+ Feeder Bus T109 → 步行+接駁約 15–20 分鐘</div></div>
+      <div class="spec-item"><div class="spec-l">MRT3 催化劑</div><div class="spec-v">Taman Sri Sinar 站（MRT3）鄰近 DPC，2032年通車｜最近站點預計步行可達</div></div>
+      <div class="spec-item"><div class="spec-l">鄰近設施</div><div class="spec-v">Plaza Arkadia（5分鐘步行）、ParkCity Medical Centre（8分鐘）、ISP國際學校、The Waterfront（11分鐘）</div></div>
+      <div class="spec-item"><div class="spec-l">Township Premium</div><div class="spec-v">相比 Mont Kiara 或 Bandar Menjalara 同等物業溢價約 20%（SuperHomes 2026）</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜Desa ParkCity 解決了什麼不可替代的長期需求？</h3>
+    <p>Desa ParkCity（DPC）在 KL 房地產版圖中的獨特性，來自它解決了一個高端市場中長期匱乏的問題：<strong>在一座以「車為主」的城市裡，提供了一個可以步行生活的封閉式高品質社區</strong>。這不是行銷語言，而是工程現實——DPC 由一個廢棄採石場從零規劃，擁有完整的公園系統、步行道路、本地商業（Plaza Arkadia、The Waterfront）和私立醫院，形成一個自給自足的生態圈。</p>
+    <p>這個生態圈有三重護城河：第一，<strong>土地稀缺性</strong>——DPC 是 473 英畝已規劃完成的鎮，後續開發空間極為有限（「Noora」為近期最後主要地塊之一），無法複製；第二，<strong>社區品質黏性</strong>——業主忠誠度極高，入住率高（見夜燈比例），形成良性循環；第三，<strong>外籍家庭需求剛性</strong>——ISP 國際學校（IB 課程）直接錨定外籍高管租客池，帶動 3–4% 的穩定 Yield，且租約通常為 1–2 年長租，流動性高。</p>
+    <p>Park Place 是這個生態圈的最新、最高端住宅地標，位置在鎮中心最核心的位置（兩公園兩湖泊之間），是 DPC 歷史上最後幾個核心位置建案之一。2025 年已獲 The Edge Malaysia Value Creation Excellence Award，資本增值紀錄公開可查（+76.6%~+102.6%，2020→2025）。</p>
+
+    <hr class="dv">
+    <h3>B｜Munger 逆向推演——什麼會讓 Park Place 投資失敗？</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險維度</th><th>具體情境</th><th>概率</th><th>對本案影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>定價已在高位</strong></td><td>2020年 RM850 psf 發售，2025年成交中位 RM1,461 psf，漲幅已達 +72%。新入場者缺乏早期買家的增值緩衝，若市場降溫，套牢風險上升</td><td><span class="tag t-y">中</span></td><td>入場成本高，安全邊際收窄</td></tr>
+          <tr><td><strong>無軌道交通（現況）</strong></td><td>目前最近的 MRT 站（Sri Damansara Sentral）需接駁巴士，不可步行。外籍租客高度依賴私家車，制約了非車主族群的租客池</td><td><span class="tag t-r">中高（現況）</span></td><td>租客池相對窄，主要為有車外籍家庭；短租吸引力有限</td></tr>
+          <tr><td><strong>DPC 供給管道</strong></td><td>Noora 等後續項目增加短期供給；加上 Park Place 221 戶仍在裝修（裝修完成後集中進入出租市場）可能短暫壓低租金</td><td><span class="tag t-y">中</span></td><td>2026–2027 出租市場短期競爭增加</td></tr>
+          <tr><td><strong>獨立停車場缺陷</strong></td><td>DPC 高層建案普遍需走獨立車場 Podium（高建設成本源於採石場地質），需爬兩層電梯，影響自住舒適度</td><td><span class="tag t-b">低（已知成本）</span></td><td>買家進場前已知，不影響定價但影響自住體驗</td></tr>
+          <tr><td><strong>MRT3 延期</strong></td><td>MRT3 Taman Sri Sinar 站是 DPC 的最大催化劑；若 2032 年目標延期，預期溢價延遲實現</td><td><span class="tag t-y">中（工程延期屬常態）</span></td><td>資本增值時間軸拉長，但基本面不受影響</td></tr>
+          <tr><td><strong>KL 整體市場供給潮</strong></td><td>依據上游報告，KL 2025–2027 完工潮持續，新屋淨供過求 2025E 仍達 4,850 戶；但 DPC 屬於精品住宅地契區塊，受 SR/SOVO 供給影響有限</td><td><span class="tag t-b">低（對DPC影響有限）</span></td><td>廣義 KL 市場承壓，但 DPC 因地稀缺可隔離大部分壓力</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px"><strong>最大尾部風險：</strong>Park Place 的投資論點高度依賴「DPC 生態圈持續吸引外籍家庭 + MRT3 Taman Sri Sinar 站按時完成」兩個假設。若全球跨國企業在馬來西亞的外籍高管數量因任何原因（疫情、地緣政治、企業外遷）大幅萎縮，租客池基礎受損，而此時 MRT3 又延期，DPC 較高的 PSF（相比同等距離其他地段）將缺乏支撐。這條路徑在 2020 年疫情期間曾短暫出現，但被強勁需求迅速修復。</p>
+    </div>
+
+    <hr class="dv">
+    <h3>C｜投資論點錨定</h3>
+    <table>
+      <thead><tr><th>項目</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>核心驅動力</strong></td><td>DPC 土地不可複製稀缺性 + ISP 國際學校外籍租客池剛需 + MRT3 Taman Sri Sinar 站（2032）的基建溢價前置 + 住宅 Freehold 地契（KL 最優資產結構）</td></tr>
+        <tr><td><strong>主要假設 H1</strong></td><td>外籍高管家庭對 DPC 的偏好維持或增長，月租能維持 RM6,000–10,000（3BR），支撐 3.5–4.5% Gross Yield</td></tr>
+        <tr><td><strong>主要假設 H2</strong></td><td>MRT3 Taman Sri Sinar 站按 2032 年計畫完工，DPC 從「需開車」轉為「可步行至捷運」，解除目前最大結構性弱點</td></tr>
+        <tr><td><strong>關鍵監測指標</strong></td><td>① DPC 出租空置率（若連續兩季超 15% → 外籍租客池需求信號惡化）；② MRT3 Taman Sri Sinar 施工進度；③ 同棟掛牌 PSF 中位數走勢（是否持守 RM1,400+）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜總體市場概況（依據上游 KL Overhang 報告）</div>
+  <div class="section-body">
+    <p style="font-size:12px;color:#64748b;margin-bottom:14px">資料抓取：2026-04-12 ｜ 分析建案：Park Place @ Desa ParkCity ｜ 資料時間範圍：NAPIC Q3 2025 / brickz 2025全年 / SuperHomes 2026-02</p>
+
+    <h3>1.1 DPC 區域價格趨勢（與 KL 整體對比）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>當前值</th><th>YoY 變化</th><th>來源</th></tr></thead>
+      <tbody>
+        <tr><td>KL 全市公寓中位數</td><td>RM 510,000</td><td><span class="up">+4.3%</span>（名義，全市）</td><td>NAPIC Q3 2025</td></tr>
+        <tr><td>KL 全市房價指數（YoY）</td><td>—</td><td><span class="down">-4.3%</span>（名義，受舊樓拖累）</td><td>NAPIC Q3 2025</td></tr>
+        <tr><td>DPC 全區中位成交價</td><td>RM 1,450,000</td><td><span class="up">+16.55%</span> YoY ⭐</td><td>SuperHomes 2026-02</td></tr>
+        <tr><td>DPC 全區中位 PSF</td><td>RM 994 psf</td><td><span class="up">+6.06%</span> YoY</td><td>brickz / SuperHomes 2026</td></tr>
+        <tr><td>Park Place 成交中位 PSF（2025全年）</td><td>RM 1,461 psf</td><td>（首年完工後成交）</td><td>brickz 89筆，Jan–Dec 2025</td></tr>
+        <tr><td>Park Place 掛牌 PSF（2026-04）</td><td>RM 1,337–2,332 psf</td><td>—</td><td>iProperty / PropertyGuru 2026-04</td></tr>
+        <tr><td>DPC Township Premium vs 周邊</td><td>+20% vs Mont Kiara / Bandar Menjalara</td><td>持續</td><td>SuperHomes 2026</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：NAPIC Q3 2025；brickz.my；SuperHomes.my 2026-02；PropertyGuru 2026-04；iProperty 2026-04</p>
+
+    <div class="alert a-green">
+      <strong>關鍵數據解讀：</strong>DPC 全區 YoY +16.55% 的中位數漲幅，遠超 KL 全市 -4.3%（受低價二手屋拖累的全市均值）。這印證了上游報告的核心論點：「KL 市場分化極端——精品住宅地契稀缺 vs 中端 SR 積壓」。DPC 屬於最典型的精品住宅地契稀缺案例，與 KL 整體 Overhang 壓力幾乎完全隔離。
+    </div>
+
+    <h3>1.2 Park Place 實際成交數據（FIX-03 標準化）</h3>
+    <div class="alert a-blue">
+      <strong>⚠ FIX-03 應用說明：</strong>依 v1.3 方法論，二手掛牌信號需收集多筆並標準化樓層。以下 brickz 數據為 2025 年 89 筆政府登記實際成交，非掛牌起價，已是可靠的市場基準。
+    </div>
+    <table>
+      <thead><tr><th>數據點</th><th>數值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>樣本數</td><td>89 筆實際成交</td><td>brickz（NAPIC來源），Jan–Dec 2025</td></tr>
+        <tr><td>成交中位總價</td><td>RM 2,180,000</td><td>50th percentile</td></tr>
+        <tr><td>成交中位 PSF</td><td>RM 1,461 psf</td><td>可用作市場二手基準價</td></tr>
+        <tr><td>P25 總價</td><td>RM 1,880,000</td><td>較低樓層/一般朝向</td></tr>
+        <tr><td>P75 總價</td><td>RM 2,800,000</td><td>高樓層/景觀單位</td></tr>
+        <tr><td>掛牌 PSF 範圍（2026-04）</td><td>RM 1,337–2,332 psf</td><td>iProperty 237筆掛牌；高端為大坪數頂層</td></tr>
+        <tr><td>掛牌月租範圍</td><td>RM 5,800–35,000</td><td>PropertyGuru；3BR 主流約 RM8,000–12,000</td></tr>
+        <tr><td>最高資本增值案例（D1型）</td><td>RM761→RM1,541 psf（+102.6%）</td><td>2020年首購→2025年3月成交；The Edge 認證</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：brickz.my（NAPIC 政府成交數據）；The Edge Malaysia 2025-11-24（Value Creation Excellence Award 認證數據）</p>
+
+    <h3>1.3 市場週期定位</h3>
+    <div class="alert a-blue" style="border-color:#3B82F6;background:#EFF6FF;color:#1e40af">
+      <strong>DPC 週期定位：擴張期後段，向成熟期過渡。</strong>信心程度：高。<br>
+      理由：①成交量和成交金額雙升（公寓+8.1% YoY，Q3 2025）；②DPC 全區 YoY +16.55%，PSF 持續新高；③土地稀缺使供給端天然收斂；④MRT3 核准帶動前置需求。但入場 PSF 已在歷史高位，安全邊際收窄，屬「合理偏高」估值帶。
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構分析（直接應用上游 KL 報告框架）</div>
+  <div class="section-body">
+    <h3>2.1 DPC 的需求面——為何與 KL 整體供需脫鉤？</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>占比估計</th><th>趨勢</th><th>關鍵驅動因素</th></tr></thead>
+      <tbody>
+        <tr><td>外籍高管家庭（出租）</td><td>~40–50%</td><td>↑</td><td>ISP 國際學校、外資企業本地化、跨國公司進駐 TRX 後擴散效應</td></tr>
+        <tr><td>本地高收入自住買家</td><td>~30–35%</td><td>↑</td><td>升級換屋（從 Kepong/PJ 搬入）、生活方式驅動、子女教育</td></tr>
+        <tr><td>MM2H 外國買家（購屋）</td><td>~10–15%</td><td>↑</td><td>2,637 待購 MM2H 買家、台灣（17%）+中國（51%）買盤；DPC 符合外籍生活偏好</td></tr>
+        <tr><td>本地投資者</td><td>~10%</td><td>→</td><td>資本增值預期持穩，但進場成本高，純投資回報率下降</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供給面——為何 DPC 的供給壓力遠低於 KL 整體？</h3>
+    <p>上游 KL 報告顯示，KL 2024 年完工量 +42.5%（10,712 戶），2025 年仍在高位（9,890 戶），廣義供給壓力嚴峻。但 DPC 的供給結構根本不同：</p>
+    <table>
+      <thead><tr><th>KL 整體（上游報告數據）</th><th>DPC Park Place 對比</th></tr></thead>
+      <tbody>
+        <tr><td>全馬 SR 廣義庫存 17,900 戶（另計）</td><td>Park Place 為 Freehold 住宅地契，與 SR 庫存完全隔離</td></tr>
+        <tr><td>KL Overhang Q3 2025 = 2,287 戶（高端 RM1M+ 去化率 69.8%）</td><td>DPC 無 Overhang 記錄；成交量健康，入住快速</td></tr>
+        <tr><td>KL RM300K–500K 段去化率 60–75%（最差）</td><td>DPC 定位 RM150萬+，自動規避此壓力段</td></tr>
+        <tr><td>KL 廣義管道 11,568 戶待完工（2025–2028）</td><td>DPC 未來可開發土地極有限；後續主案 Noora 仍由同一開發商按節奏推出</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>供需結論（引用上游報告結構）：</strong>上游報告明確指出「KL 精品住宅地契（尤其 RM100萬以上 Mont Kiara、Bangsar、TRX）因外籍需求支撐而呈現稀缺邏輯」。Desa ParkCity 是此結論的最強例證之一——它的供需邏輯與「KL 整體 SR/SOVO 庫存積壓」完全並行，互不干擾。
+    </div>
+
+    <h3>2.3 供需平衡指標（DPC 精品住宅段）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>DPC 估計值</th><th>健康基準</th><th>判斷</th></tr></thead>
+      <tbody>
+        <tr><td>精品住宅空置率</td><td>估 10–15%（34% 已入住，41% 裝修中，25% 未入住）</td><td>&lt;15% 為健康</td><td><span class="tag t-g">健康</span></td></tr>
+        <tr><td>去化週期</td><td>89筆成交／全年，吸收速度正常</td><td>&lt;12個月</td><td><span class="tag t-g">健康</span></td></tr>
+        <tr><td>Gross Yield</td><td>3.5–4.5%（外籍長租）</td><td>3%+ 精品住宅合理</td><td><span class="tag t-g">達標</span></td></tr>
+        <tr><td>DPC 房價收入比</td><td>~12–15（以KL高收入中產/外籍計）</td><td>&lt;15 相對可負擔</td><td><span class="tag t-y">邊緣</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §3 -->
+<div class="section">
+  <div class="section-header">§3｜區域細分——DPC 在 KL 的定位與地段價差</div>
+  <div class="section-body">
+    <h3>3.1 KL Zone 分級中的 DPC 定位</h3>
+    <table>
+      <thead><tr><th>Zone</th><th>代表區域</th><th>均價 PSF</th><th>Yield</th><th>Park Place 定位</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Zone 1 核心</strong></td><td>KLCC / Jalan Ampang</td><td>RM1,400–2,660 psf</td><td>3–4%</td><td>定價接近，但 DPC 屬封閉住宅鎮，不同產品類型</td></tr>
+        <tr><td><strong>Zone 2 精品衛星</strong></td><td><strong>Desa ParkCity ← Park Place 所在</strong></td><td>RM994–1,461 psf（全區），Park Place RM1,461 psf（成交中位）</td><td>3.5–4.5%</td><td>✅ 本案——精品住宅地契，Freehold，外籍自住首選</td></tr>
+        <tr><td>Zone 2 成熟衛星</td><td>Mont Kiara（無MRT，無步行圈）</td><td>RM778–1,300 psf</td><td>5–6%</td><td>Yield 較高，但步行圈弱，無DPC生態圈優勢</td></tr>
+        <tr><td>Zone 2 新興</td><td>TRX / Bangsar South</td><td>RM700–1,500 psf</td><td>4–5%</td><td>Freehold 住宅選項，但社區成熟度不及DPC</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 DPC 內部分層——Park Place 的定位</h3>
+    <p>DPC 鎮內的高層公寓按定位由低至高排列：</p>
+    <table>
+      <thead><tr><th>建案</th><th>成交/掛牌 PSF</th><th>特徵</th><th>與 Park Place 比較</th></tr></thead>
+      <tbody>
+        <tr><td>Nadia / Westside One（舊）</td><td>RM 741–833 psf</td><td>低密度、舊案、值得翻新進場</td><td>入場門檻低，DPC 生活圈共享但品質較舊</td></tr>
+        <tr><td>South Brooks</td><td>RM700 psf（發售）→ 目前成交更高</td><td>2017發售，2021完工，920戶兩棟Y形</td><td>量大、較密、外觀設計偏一般；Park Place 高 ~40% psf（定價時）</td></tr>
+        <tr><td>Westside Three</td><td>~Park Place 同級</td><td>成熟次高端</td><td>Park Place 定價對標此層級，已超越</td></tr>
+        <tr><td><strong>Park Place（本案）</strong></td><td><strong>RM1,461 psf（成交中位）</strong></td><td>TownCenter 核心位置、獨特設施（Sky Garden、音樂室）、全DPC最新頂端</td><td>DPC 最高端次位（僅次 Park Regent）</td></tr>
+        <tr><td>Park Regent（最頂端）</td><td>RM1,478–3,374 psf</td><td>CapitaLand × ParkCity 合作，中央湖景，505戶兩棟</td><td>比 Park Place 貴 ~30%，湖景直達，低密度</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：PROPCAFE 分析；SuperHomes 2026；brickz；PropertyGuru 2026-04</p>
+
+    <div class="insight">
+      <strong>區域比較結論：</strong>Park Place 在 DPC 內的定位精確——高於量產中端（South Brooks），低於頂奢（Park Regent），是「精品主流層」。對於進不起 Park Regent 但要求頂級設施的買家，Park Place 是最自然的選擇。相比 DPC 以外的同 PSF 物業（如 KLCC SR），它提供的是「生活品質」而非「地址溢價」——不同的價值主張，不同的買家族群。
+    </div>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="section">
+  <div class="section-header">§4｜新案 vs 二手市場（FIX-01/02/03/04 完整應用）</div>
+  <div class="section-body">
+    <div class="alert a-orange">
+      <strong>FIX-01 應用：</strong>Park Place 2024年完工，比較基準須為同期（2022–2025年）DPC 內或相近地段同級新案／完工案，不可與 10 年以上舊樓比較。
+    </div>
+
+    <h3>4.1 同期競品比較（FIX-01）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>Park Place（本案）</th><th>Park Regent（DPC頂端）</th><th>South Brooks（DPC中端）</th><th>Noora（DPC新案）</th></tr></thead>
+      <tbody>
+        <tr><td>完工/預計竣工</td><td>2024完工，2025-01交屋</td><td>2023完工</td><td>2021完工</td><td>近期發售（進行中）</td></tr>
+        <tr><td>地契</td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td></tr>
+        <tr><td>PSF（發售）</td><td>RM850 psf（2020），現掛牌 RM1,337–2,332</td><td>高於 Park Place ~30%</td><td>RM700 psf（2017發售）</td><td>估 RM1,400–1,600 psf（新案定價中）</td></tr>
+        <tr><td>成交中位 PSF</td><td><strong>RM1,461 psf（brickz 89筆）</strong></td><td>RM1,478–1,680+ psf</td><td>已大幅升值（2017→2025）</td><td>N/A（未完工）</td></tr>
+        <tr><td>規模</td><td>537戶，1棟54層</td><td>505戶，2棟</td><td>920戶，2棟</td><td>未公開</td></tr>
+        <tr><td>位置</td><td>TownCenter 核心（最佳）</td><td>中央湖泊直接湖景</td><td>外圍地段</td><td>DPC 末期地塊</td></tr>
+        <tr><td>定位</td><td>DPC 精品主流頂端</td><td>DPC 頂奢</td><td>DPC 中端主流</td><td>DPC 最新精品</td></tr>
+        <tr><td>綜合評級</td><td>⭐⭐⭐⭐（優質）</td><td>⭐⭐⭐⭐⭐（旗艦）</td><td>⭐⭐⭐（中等，已充分升值）</td><td>待評估</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：brickz；PropertyGuru；iProperty；SuperHomes 2026；The Edge Malaysia 2025-11</p>
+
+    <h3>4.2 二手掛牌信號分析（FIX-02/03/04）</h3>
+    <p>Park Place 已完工且交屋，不屬期房分析範疇。以下基於 brickz 89 筆實際成交進行信號判斷：</p>
+    <table>
+      <thead><tr><th>FIX-03 步驟</th><th>Park Place 狀況</th></tr></thead>
+      <tbody>
+        <tr><td>Step 1 樣本收集</td><td>✅ brickz 89筆政府登記成交（2025全年），遠超 5–10 筆門檻</td></tr>
+        <tr><td>Step 2 樓層標準化</td><td>掛牌 PSF RM1,337–2,332 的區間反映樓層差異；中位 RM1,461 已代表「市場均衡定價」，無需進一步標準化（官方成交數已混合各樓層）</td></tr>
+        <tr><td>Step 3 異常值剔除</td><td>P25=RM1,880,000 至 P75=RM2,800,000 區間穩定，無顯著異常</td></tr>
+        <tr><td>Step 4 標準化中位 PSF</td><td><strong>RM1,461 psf</strong>（89筆成交中位，可信度高）</td></tr>
+        <tr><td>FIX-02 折扣結構</td><td>Park Place 已完工交屋，無期房折扣問題；2020年發售價 RM850 psf 為已知基準，現掛牌無折讓反而有溢價</td></tr>
+        <tr><td>Step 5 信號判斷</td><td>✅ <strong>偏多信號</strong>：掛牌中位高於任何合理進場成本估計，市場深度（89筆成交）充足，持有者有充裕溢價空間</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>二手市場信號：偏多（高信心）</strong><br>
+      89 筆實際政府成交、中位 RM1,461 psf，加上 The Edge 認證的 +76.6%~+102.6% 資本增值記錄，是 KL 近年住宅市場中數據最透明、信號最清晰的建案之一。掛牌均在中位線以上，無明顯拋壓。
+    </div>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率分析</div>
+  <div class="section-body">
+    <h3>5.1 Park Place 租金行情</h3>
+    <table>
+      <thead><tr><th>房型</th><th>掛牌月租範圍</th><th>Gross Yield（估）</th><th>外國人 Net Yield</th><th>主要租客</th></tr></thead>
+      <tbody>
+        <tr><td>2BR（1,109–1,163 sqft）</td><td>RM 5,800–8,000/月</td><td>~3.8–4.3%</td><td>~2.5–3.0%（扣30%所得稅）</td><td>外籍夫妻、小家庭</td></tr>
+        <tr><td>3BR（1,367–1,399 sqft）</td><td>RM 8,000–12,000/月</td><td>~4.0–4.5%</td><td>~2.7–3.2%</td><td>外籍高管家庭（ISP 學生）</td></tr>
+        <tr><td>3+1BR（1,755–1,830 sqft）</td><td>RM 10,000–15,000/月</td><td>~3.5–4.0%</td><td>~2.3–2.7%</td><td>外籍高管、跨國企業主管</td></tr>
+        <tr><td>4BR+ / Duplex（2,293 sqft+）</td><td>RM 15,000–35,000/月</td><td>~3.0–4.0%</td><td>~2.0–2.7%</td><td>超高淨值外籍家庭、企業租賃</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：PropertyGuru 2026-04（租金掛牌 RM5,800–35,000）；DPC Homes；iProperty；以 Gross Yield = 年租金/市場成交均價計算</p>
+
+    <h3>5.2 外國人現金流試算（3BR 1,367 sqft，假設 RM200萬入場）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租收入（RM9,000 × 12）</td><td>RM 108,000</td><td>3BR 中位保守估計</td></tr>
+        <tr><td>管理費（RM0.44 × 1,367 × 12）</td><td><span class="down">-RM 7,218</span></td><td>DPC 標準管理費</td></tr>
+        <tr><td>地稅 + 門牌稅（估）</td><td><span class="down">-RM 3,000</span></td><td></td></tr>
+        <tr><td>住宅電費（民用費率）</td><td>✅ 無超額</td><td>Freehold 住宅地契，享住宅費率</td></tr>
+        <tr><td>非居民租金所得稅（30%，外國人）</td><td><span class="down">-RM 29,334</span></td><td>（108,000–10,218）×30%</td></tr>
+        <tr><td>代管費（8%，遠程管理）</td><td><span class="down">-RM 8,640</span></td><td>非必要，本地可自行管理省去</td></tr>
+        <tr><td><strong>淨現金流（含代管，外國人）</strong></td><td><strong>~RM 59,808/年</strong></td><td>Net Yield ≈ 2.99%</td></tr>
+        <tr><td>淨現金流（無代管，外國人）</td><td>~RM 68,448/年</td><td>Net Yield ≈ 3.42%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>外國人視角：Net Yield 約 3.0–3.4%</strong>（住宅費率 + 扣 30% 非居民租金稅後），顯著優於同等進場價格的 SOVO/SR 商業地契建案（如 Armani Hallson SOVO 的 1.4–1.8%）。住宅地契的民用費率是關鍵差異——每月省去商業超額水電費，直接轉化為 Net Yield 提升。
+    </div>
+
+    <h3>5.3 租客結構</h3>
+    <table>
+      <thead><tr><th>租客類型</th><th>占比估計</th><th>需求穩定度</th><th>主要集中區域</th></tr></thead>
+      <tbody>
+        <tr><td>外籍長租（expat）</td><td>~50%</td><td>高（1–2年合約，企業租賃）</td><td>3BR+，DPC外籍聚落</td></tr>
+        <tr><td>本地高收入長租</td><td>~25%</td><td>高</td><td>2–3BR，自住型租客</td></tr>
+        <tr><td>企業租賃</td><td>~15%</td><td>很高（多年合約）</td><td>大坪數單位</td></tr>
+        <tr><td>短租（Airbnb）</td><td>~10%</td><td>中（受管委會規範）</td><td>小坪數 2BR</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規（直接引用上游 KL 報告框架）</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>法規項目</th><th>本地買家</th><th>外國買家</th><th>對 Park Place 的影響</th></tr></thead>
+      <tbody>
+        <tr><td>最低購置門檻（KL）</td><td>無限制</td><td>RM 1,000,000</td><td>✅ Park Place 最低入場 RM168萬+，遠超門檻</td></tr>
+        <tr><td>印花稅（2026年）</td><td>1–4%（階梯制）</td><td>4% 統一稅率</td><td>RM200萬物業印花稅 = RM80,000（外國人），RM200萬物業本地人 = RM44,000</td></tr>
+        <tr><td>RPGT（5年內）</td><td>30%</td><td>30%</td><td>需規劃持有期；SPA 簽署日起算</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>0%</td><td>10%（永遠無法降至0%）</td><td>外國人最優退出：持有6年以上，課10%而非30%</td></tr>
+        <tr><td>MM2H Gold 合規</td><td>N/A</td><td>RM100萬+，持有10年</td><td>✅ 住宅 Freehold 完全符合，地契最乾淨</td></tr>
+        <tr><td>地契結構（外資友好度）</td><td>住宅地契，最優</td><td>住宅地契，最優</td><td>✅ 無商業地契問題，State Consent 核批最易</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6.1 外國人完整入場成本試算（RM200萬 3BR 單位）</h3>
+    <table>
+      <thead><tr><th>費用項目</th><th>金額（RM）</th></tr></thead>
+      <tbody>
+        <tr><td>印花稅（4% flat，外國人）</td><td>RM 80,000</td></tr>
+        <tr><td>律師費（SPA + 貸款）</td><td>RM 16,000</td></tr>
+        <tr><td>State Consent 費用</td><td>RM 5,000</td></tr>
+        <tr><td><strong>入場總成本（估計）</strong></td><td><strong>~RM 101,000（物業價值5.05%）</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-blue">
+      <strong>外資友好度評級：🟡 中性（法規合理，但稅費不低）</strong><br>
+      Freehold 住宅地契是 KL 市場最乾淨的外資結構，無商業地契衍生問題。主要制約是 RPGT 外國人永不到 0%（最低 10%），以及 4% 印花稅統一稅率。整體框架對 MM2H Gold 持有者而言是目前 KL 最優選擇之一。
+    </div>
+  </div>
+</div>
+
+<!-- §7 -->
+<div class="section">
+  <div class="section-header">§7｜貸款環境（引用上游報告利率數據）</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>本地買家</th><th>外國買家</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>OPR（馬來西亞基準利率）</td><td colspan="2">3.00%（2025–2026維持）</td><td>BNM 暫維持不動</td></tr>
+        <tr><td>住宅房貸利率</td><td>3.8–4.3%</td><td>通常需本地銀行核可；外國人可申請但條件更嚴</td><td>住宅地契貸款條件最佳（vs 商業地契）</td></tr>
+        <tr><td>最高 LTV</td><td>90%（首套）</td><td>60–70%（外國人）</td><td>RM200萬物業，外國人頭期款 RM60–80萬</td></tr>
+        <tr><td>住宅 vs 商業貸款難度</td><td colspan="2">住宅地契 >> 商業地契（更易申請）</td><td>Park Place 為住宅地契，可正常申請住宅房貸；Armani Hallson SOVO 需商業貸款</td></tr>
+      </tbody>
+    </table>
+    <div class="alert a-green">
+      <strong>貸款優勢：</strong>Freehold 住宅地契可申請一般住宅房貸（利率 3.8–4.3%），相比 SOVO 商業地契需商業貸款（利率更高、門檻更嚴），住宅地契在融資成本和可及性上有結構性優勢。外國買家若能配合馬來西亞本地銀行，住宅貸款遠比商業地契更容易核批。
+    </div>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設與重劃區發展</div>
+  <div class="section-body">
+    <h3>8.1 Park Place 最關鍵的基建催化劑</h3>
+    <table>
+      <thead><tr><th>項目</th><th>狀態</th><th>DPC / Park Place 受益程度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>MRT3 Circle Line — Taman Sri Sinar 站</strong></td><td>2025-07 政府正式核准✅；土地收購 2026 完成，建設 2027+，全線 2032 通車</td><td>🔴 最大催化劑：Taman Sri Sinar 站鄰近 DPC 邊界，預計步行可達或 1–2 站接駁。解除 DPC 「需開車」的最大結構性弱點。MRT3 路線：Bukit Segambut → Taman Sri Sinar（near DPC/Kepong）→ Dutamas → Jalan Kuching</td></tr>
+        <tr><td>Sri Damansara Sentral MRT（現有）</td><td>已運營（SSP Putrajaya Line）</td><td>目前最近站，需搭 Feeder Bus T109，非步行可達</td></tr>
+        <tr><td>TRX 金融區成熟化</td><td>2026–2027 進駐企業增加</td><td>TRX 外籍高管帶動 KL 整體外籍租賃需求，間接利好 DPC 租客池</td></tr>
+        <tr><td>DPC 鎮中心商業持續擴張</td><td>Plaza Arkadia 擴容、新餐飲進駐</td><td>提升 DPC 步行商業密度，強化生態圈自給自足</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>MRT3 Taman Sri Sinar 是 Park Place 最重要的中期催化劑。</strong>上游報告引用：「MRT3 Circle Line 2025年7月獲最終政府核准，土地收購2026年底完成，建設2027+，受益區域包含 Sentul、Sri Hartamas 等地段」。DPC 的 Taman Sri Sinar 站位於 MRT3 路線的 Kepong 段，是此前 DPC 唯一缺少的基建拼圖。一旦 2032 通車，DPC 的租客池將從「有車外籍家庭」擴展至「所有公共交通使用者」，整體需求基礎大幅拓寬。
+    </div>
+
+    <h3>8.2 基建溢價估算</h3>
+    <p>參考上游報告中 Mont Kiara MRT3 前置溢價：MRT3 核准後，Mont Kiara 新案 PSF 已上調 +5%（2024 YoY+5% 部分歸因於此）。DPC 類似邏輯，Taman Sri Sinar 站的「前置溢價」可能已部分反映在 2025 年的 +16.55% YoY 漲幅中，但 2027–2032 施工期仍有持續定價機會。</p>
+  </div>
+</div>
+
+<!-- §9 -->
+<div class="section">
+  <div class="section-header">§9｜人口結構與移入移出趨勢</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>數值/趨勢</th><th>對 Park Place 關聯</th></tr></thead>
+      <tbody>
+        <tr><td>KL 城市人口</td><td>~200萬（WP KL），緩升</td><td>基礎需求穩定</td></tr>
+        <tr><td>MM2H 待購買家</td><td>2,637人（截至2025-12），估 RM23億確定性需求</td><td>台灣 17%（449人）+ 中國 51% 為主；DPC 是台灣和中國買家在 KL 的最高優先地段之一</td></tr>
+        <tr><td>外籍高管 Expat 居住偏好</td><td>DPC + Mont Kiara 長期位居前兩名</td><td>ISP 學校直接錨定外籍家庭；租金年增持穩</td></tr>
+        <tr><td>DPC 升級換屋族群</td><td>來自 Kepong、Bandar Menjalara、Damansara 的本地中產升級</td><td>自住需求強，押住型持有策略成熟</td></tr>
+        <tr><td>主力購屋年齡層（30–45歲）</td><td>KL 主市區高濃度</td><td>DPC 社區配套（醫院+學校+公園）完全對應此族群偏好</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §10 -->
+<div class="section">
+  <div class="section-header">§10｜橫向比較——Park Place 與 KL 主要競品</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>Park Place（DPC）</th><th>TS2（武吉免登）</th><th>Armani Hallson SOHO</th><th>TRX Residences</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-y">商業地契 Freehold</span></td><td><span class="tag t-g">HDA 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td></tr>
+        <tr><td>完工狀態</td><td>✅ 2024年完工，已交屋</td><td>2027年10月竣工</td><td>2029/2030竣工</td><td>首批 2026–2027</td></tr>
+        <tr><td>PSF（現況）</td><td>RM1,461（成交中位）</td><td>估 RM1,475（推算）</td><td>RM1,636–1,800（發售）</td><td>RM2,293（2024成交）</td></tr>
+        <tr><td>外籍 Net Yield（稅後）</td><td><span class="up">~3.0–3.4%</span></td><td>~1.8–2.2%（商業費率影響）</td><td>~1.4–1.8%（商業費率未解）</td><td>~2.5–3.0%（金融區成熟後）</td></tr>
+        <tr><td>步行生活圈</td><td>✅ DPC 鎮內完整（步行5–11分鐘）</td><td>✅ 武吉免登全KL最強</td><td>🔶 Link Bridge（未建成）</td><td>✅ Exchange TRX 最強</td></tr>
+        <tr><td>公共交通</td><td>🔶 需接駁（MRT3 2032後改善）</td><td>✅ Monorail 100m</td><td>🔶 KLCC LRT + Link Bridge</td><td>✅ MRT 交匯</td></tr>
+        <tr><td>資本增值記錄</td><td>✅ +76–102%（2020→2025，有據可查）</td><td>弱（商業地契，已接受）</td><td>尚無（期房）</td><td>+5.56% YoY（2024）</td></tr>
+        <tr><td>開發商信用</td><td>✅ ParkCity Group（DPC 鎮主開發商，23年記錄）</td><td>TS2 不明，但已完工</td><td>🔶 首次 RM30億規模</td><td>✅ 政府主導 TRX</td></tr>
+        <tr><td>MM2H 合規</td><td>✅ 住宅地契最乾淨</td><td>✅ 已確認</td><td>🔶 SOVO 需確認</td><td>✅</td></tr>
+        <tr><td>綜合評分（v1.3框架）</td><td><strong>7.5–8.0/10（優質）</strong></td><td>6.2/10（功能性）</td><td>5.7/10（中等）</td><td>7.5/10（優質）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <strong>橫向比較結論：</strong>在外國人視角下，Park Place 是本次比較中 Net Yield 最高、資本增值記錄最可靠、地契結構最乾淨的選項。唯一明顯弱點是現階段公共交通不便（需接駁），但這是 2032 年可解決的問題。TRX Residences 在步行+交通上更勝，但 PSF 高出近 57%，且社區成熟度遠不及 DPC。
+    </div>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="section">
+  <div class="section-header">§11｜進場時機與估值判斷</div>
+  <div class="section-body">
+    <h3>11.1 估值指標</h3>
+    <table>
+      <thead><tr><th>估值指標</th><th>當前值</th><th>歷史均值</th><th>當前分位</th><th>解讀</th></tr></thead>
+      <tbody>
+        <tr><td>Park Place 成交中位 PSF vs 2020 發售</td><td>RM1,461 vs RM850（發售）</td><td>—</td><td>歷史高點（首年完工後高位）</td><td><span class="tag t-y">中高位，但有基本面支撐</span></td></tr>
+        <tr><td>DPC 全區 PSF 中位</td><td>RM994 psf</td><td>RM740–850（2019–2021低位）</td><td>歷史高位</td><td><span class="tag t-y">偏高，但稀缺性支撐</span></td></tr>
+        <tr><td>DPC 租售比（Gross Yield）</td><td>~3.5–4.5%（住宅）</td><td>~4–5%（歷史）</td><td>略低於歷史均值</td><td><span class="tag t-y">偏緊，資本利得比重上升</span></td></tr>
+        <tr><td>DPC 房價收入比</td><td>~12–15（外籍高管/高收入本地）</td><td>~10–12</td><td>偏高</td><td><span class="tag t-y">可負擔但邊緣</span></td></tr>
+        <tr><td>DPC YoY漲幅（+16.55%）</td><td>高速增長期</td><td>~5–8%/年（長期均值）</td><td>75–85 percentile</td><td><span class="tag t-y">漲幅已超歷史均速，需警覺</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.2 進場時機矩陣</h3>
+    <table>
+      <thead><tr><th></th><th>趨勢向上</th><th>趨勢持平</th><th>趨勢向下</th></tr></thead>
+      <tbody>
+        <tr><td><strong>估值便宜</strong></td><td>🟢 最佳</td><td>🟢 分批</td><td>🟡 等待</td></tr>
+        <tr><td><strong>估值合理</strong></td><td>🟡 可進場，控制倉位</td><td>🟡 觀望</td><td>🔴 避免</td></tr>
+        <tr><td><strong>估值偏貴</strong></td><td>🟡 短線可，長線謹慎</td><td>🔴 避免</td><td>🔴 絕對避免</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Park Place 當前落點：估值中高位（合理偏貴），趨勢持續向上（MRT3 前置 + DPC 稀缺）→ 對應：🟡 可進場，但控制倉位，需長線視野（5年+）。</strong></p>
+
+    <h3>11.3 持有期情境分析（外國投資者，RM200萬入場）</h3>
+    <table>
+      <thead><tr><th>持有期</th><th>樂觀情境（MRT3 按時+外籍需求持續）</th><th>基本情境（溫和成長）</th><th>悲觀情境（MRT3延期+外籍萎縮）</th></tr></thead>
+      <tbody>
+        <tr><td>3年（至2029）</td><td>資本 +20–30%（MRT3 施工帶動前置溢價）+ 租金年收 RM70,000+</td><td>資本 +10–15% + 租金穩定</td><td>資本 +0–5%（DPC 稀缺性護底）</td></tr>
+        <tr><td>6年（至2032，RPGT 10%，MRT3通車）</td><td>資本 +40–60%（MRT3通車溢價實現）</td><td>資本 +20–35%</td><td>資本 +5–15%</td></tr>
+        <tr><td>10年（至2036）</td><td>資本 +60–100%（類 2020→2025 重演）</td><td>資本 +35–55%</td><td>資本 +15–30%</td></tr>
+      </tbody>
+    </table>
+    <p class="src">基本情境假設：DPC Gross Yield 持守 3.5–4%，PSF 年增 4–6%（稀缺性維持）；MRT3 在 2033 年左右通車。</p>
+
+    <h3>11.4 進場條件</h3>
+    <table>
+      <thead><tr><th>條件類型</th><th>具體內容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>理想進場</strong></td><td>中低樓層（P25 RM188萬以下）、非景觀朝向單位，相比中位 RM146萬 psf 有 10–15% 折讓空間</td></tr>
+        <tr><td><strong>政策條件</strong></td><td>外資購屋門檻不再提高；MRT3 施工計畫維持 2027+ 開始</td></tr>
+        <tr><td><strong>停損條件</strong></td><td>若 DPC 全區空置率連續 2 季超 20%（外籍需求崩退信號）；或 MRT3 計畫被取消（不太可能但需監測）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點（雙視角）</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】投資決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:130px;font-weight:600">市場性質</td><td>賣方市場（稀缺性 + DPC 業主忠誠度高，急售盤少）</td></tr>
+            <tr><td>議價空間</td><td>3–8%（中低樓層、非景觀）；高樓層 KLCC 景觀單位幾乎無議價空間</td></tr>
+            <tr><td>性價比最優選擇</td><td>3BR 中層（1,367–1,399 sqft），租金效益最優，自住也夠舒適</td></tr>
+            <tr><td>最大進場風險</td><td>入場成本已高（RM1,461 psf），安全邊際收窄；現無步行至捷運，依賴私家車</td></tr>
+            <tr><td>建議持有期</td><td>最少 6 年（RPGT 10% 節點）；理想 2032+ 配合 MRT3 通車退出</td></tr>
+            <tr><td>槓桿建議</td><td>住宅地契可申請住宅房貸（3.8–4.3%），建議 LTV 60–70%；外國人需確認本地銀行可核批</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】純分析結論</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟢 供給稀缺——DPC 土地有限，後續開發受限，屬 KL 最健康供需結構之一</td></tr>
+            <tr><td>價格趨勢</td><td>🟢 上行——DPC YoY +16.55%，PSF 持續創新高；MRT3 前置溢價尚未完全定價</td></tr>
+            <tr><td>租金市場</td><td>🟢 穩健——外籍長租需求剛性，ISP 學校鎖定租客池，3.5–4.5% Gross Yield 屬 KL 住宅最優區間</td></tr>
+            <tr><td>法規環境</td><td>🟡 中性——印花稅 4%、RPGT 外國人 10%（第6年後），住宅地契是最優結構</td></tr>
+            <tr><td>進場估值</td><td>🟠 偏貴——PSF 已在歷史高位，但有稀缺性、基建催化、品牌護城河支撐</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;padding:8px;background:#f1f5f9;border-radius:4px;font-size:12px">
+          <strong>市場研究一句話：</strong>地段稀缺、生態圈完整、住宅地契乾淨、資本增值記錄透明——Park Place 是 KL 精品住宅地契市場的教科書案例，唯一制約是現階段公共交通依賴私家車，2032 年 MRT3 通車後此弱點解除。
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px">最終進場建議</h3>
+    <div class="verdict-g">
+      <strong>🟢 審慎積極進場——長線持有邏輯清晰，需做好估值偏高的心理準備</strong><br><br>
+      <strong>核心邏輯：</strong>依據上游 KL 報告「精品住宅地契稀缺邏輯」，Park Place 是 KL 最清晰的此類標的之一：Freehold 住宅地契（無商業地契結構性折扣）、土地不可複製（DPC 473英畝規劃完成）、外籍租客池剛性（ISP 學校錨定）、資本增值有 brickz 89 筆實際成交背書（+76–102%，2020→2025）。供需上與 KL 整體 SR/SOVO 積壓完全隔離。<br><br>
+      <strong>進場策略：</strong>優先尋找中低樓層、非景觀朝向、急售業主，目標在 P25 區間（RM188萬以下）入場。若能取得 RM1,350–1,400 psf 以下的成交價，安全邊際明顯提升。長線持有至 MRT3 通車（2032+）並在 RPGT 第 6 年後（從 SPA 簽署日起算）擇機退出。
+    </div>
+
+    <h3>最關鍵監測指標</h3>
+    <table>
+      <thead><tr><th>#</th><th>監測指標</th><th>觸發重新評估的閾值</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>DPC 整體出租空置率</td><td>若連續 2 季超 15%（外籍高管離港信號）→ 租金論點動搖</td></tr>
+        <tr><td>2</td><td>MRT3 Taman Sri Sinar 施工進度</td><td>若 2028 年仍無動工跡象 → 基建催化劑時間軸大幅後移</td></tr>
+        <tr><td>3</td><td>Park Place 成交中位 PSF 走勢</td><td>若跌破 RM1,300 psf（約 -11% 調整）→ 市場信心轉弱，需重評</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分【v1.2 建案評分模組】</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Park Place @ Desa ParkCity ｜ 建案綜合評分卡</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%，MM2H 2,637待購，KL RM100萬+成交+31%，TRX帶動外籍需求增長</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">DPC 土地稀缺、無 Overhang、住宅地契與 KL SR 積壓完全隔離，供需結構 KL 最健康之一</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">擴張期後段，PSF 已在歷史高位，+16.55% YoY 超歷史均速，安全邊際收窄；但基本面支撐</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">MRT3 Taman Sri Sinar 站正式核准，2032通車；TRX 擴散效應；DPC 鎮中心商業持續成熟</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">住宅 Freehold 是外資最優結構；4%統一印花稅+RPGT外國人永遠10%是主要制約</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">7.6/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.5×.2 + 8.5×.25 + 6.5×.2 + 8.0×.2 + 6.5×.15 = 7.60</div>
+          </div>
+        </div>
+
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">ParkCity Group 是 DPC 鎮主開發商，23年信用記錄，此前已完成 South Brooks、Park Regent、Westside Three 等多個高品質案；已完工交屋，無任何交屋風險</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">成交中位 RM1,461 psf 相比 2020 發售 RM850 已漲 +72%；相比 Park Regent 仍折 30%；在 DPC 生態圈框架下合理，但對新入場者安全邊際收窄</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Gross 3.5–4.5%，外國人稅後 Net ~3.0–3.4%，是本輪比較中最高外籍 Net Yield；住宅電費省去商業超額，外籍租客池剛需</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">DPC 鎮內步行圈完整（Plaza Arkadia 5分鐘，醫院 8分鐘）；但現無步行可達捷運站（Sri Damansara Sentral 需接駁巴士 T109）。MRT3 2032 後解決此弱點</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">獨特 Sky Garden（L41–42，含音樂室、電影室、工作區）；537戶1棟相對低密度；夾公園湖泊最優地段；已獲 The Edge Value Creation Excellence Award 2025</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契——KL 市場最乾淨的外資結構；無商業地契問題；State Consent 核批最易；完全符合 MM2H Gold 持有規定</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz 2025年 89筆實際成交，流動性在 KL 精品住宅中屬高；DPC 業主忠誠度高，急售盤少；RPGT 第6年後 10%，外國人退出成本相對可控</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">7.8/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">9.0×.2 + 6.5×.2 + 7.5×.15 + 6.5×.15 + 8.0×.1 + 9.5×.1 + 8.0×.1 = 7.80</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 7.6 × 40%&nbsp;+&nbsp;B 類 7.8 × 60%</div>
+        <div class="score-big">7.7<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#DCFCE7;color:#166534">⭐⭐⭐⭐ 優質——基本面紮實，可審慎進場</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">3.04 + 4.68 = 7.72 → 四捨五入 7.7</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>KL 最稀缺的精品住宅地契社區，住宅 Freehold 地契乾淨，brickz 89筆實際成交印證資本增值（+76–102%），MRT3 Taman Sri Sinar 站 2032 通車解除最大弱點，外籍 Net Yield 3.0–3.4% 優於同價位商業地契。<br>
+          <strong style="color:#fca5a5">最大風險：</strong>PSF 入場成本已在歷史高位（RM1,461 成交中位），安全邊際收窄；現階段無步行可達捷運，高度依賴私家車，非車主族群租客池受限。
+        </div>
+      </div>
+    </div>
+
+    <h3>A 類評分說明</h3>
+    <p>KL 城市基本面（A1 7.5）和 DPC 區域供需平衡（A2 8.5）是最大加分項，直接引用上游報告數據：KL RM100萬+成交 +31%、MM2H 2,637待購買家、DPC 住宅地契與 SR 積壓完全隔離。基建催化劑（A4 8.0）得益於 MRT3 Taman Sri Sinar 站正式核准。市場週期（A3 6.5）扣分反映 DPC PSF 已在高位，2026 年入場者安全邊際遜於 2020 年早期買家。A 類整體 7.6 分反映大環境整體優質但進場時點不再是「底部」的現實。</p>
+
+    <h3>B 類評分說明</h3>
+    <p>開發商信用（B1 9.0）是全場最高分之一——ParkCity Group 作為 DPC 鎮主開發商，23 年連續高品質交屋記錄，Park Place 已在 2025 年 1 月完工交屋，零不確定性。產權結構（B6 9.5）幾乎滿分，是 KL 市場最乾淨的外資持有結構。主要扣分在估值合理性（B2 6.5，PSF 已充分定價）和交通連接（B4 6.5，現階段無捷運步行可達）。B 類整體 7.8 反映建案內在品質頂尖，但定價上已無早期買家的超額回報空間。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：NAPIC JPPH Q3 2025（上游 KL Overhang 報告，2026-04-01）｜brickz.my（89筆政府登記成交，Jan–Dec 2025）｜The Edge Malaysia Value Creation Excellence Award 2025（2025-11-24）｜PropertyGuru / iProperty 掛牌數據（2026-04）｜SuperHomes.my Desa ParkCity 2026 年報（2026-02）｜MRT Corp Circle Line（mrt.com.my）｜paultan.org MRT3 核准報導（2025-07）<br>
+  本報告基於公開資料及上游研究，不構成投資建議。稅費、地契細節需向律師確認。
+</div>
+</div>
+
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+
+</body>
+</html>

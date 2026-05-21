@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Osaka Deep Dive | Japan Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="container">
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">LAST UPDATED: Q4 2024</span><span class="lang-zh" style="display:none">最後更新：2024年Q4</span></span>
+    <h1><span class="lang-en">Osaka &mdash; Deep Dive</span><span class="lang-zh" style="display:none">大阪深度分析</span></h1>
+    <p class="subtitle"><span class="lang-en">Expo 2025 Catalyst and Kansai Hub</span><span class="lang-zh" style="display:none">2025世博催化與關西樞紐</span></p>
+  </div>
+
+  <div class="section-label"><span class="lang-en">KEY METRICS</span><span class="lang-zh" style="display:none">關鍵指標</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">NEW CONDO AVG</span><span class="lang-zh" style="display:none">新建公寓均價</span></div>
+      <div class="kpi-value"><span class="lang-en">&yen;58.1M</span><span class="lang-zh" style="display:none">5,813万円</span></div>
+      <span class="kpi-badge badge-blue">+16% YoY</span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CONTRACT RATE</span><span class="lang-zh" style="display:none">成約率</span></div>
+      <div class="kpi-value">77.2%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Seller's Market</span><span class="lang-zh" style="display:none">賣方市場</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">RENTAL YIELD</span><span class="lang-zh" style="display:none">租金收益率</span></div>
+      <div class="kpi-value">4.47%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Gross</span><span class="lang-zh" style="display:none">毛收益</span></span>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">P/R RATIO</span><span class="lang-zh" style="display:none">房價租金比</span></div>
+      <div class="kpi-value">27x</div>
+      <span class="kpi-badge badge-blue"><span class="lang-en">Price-to-Rent</span><span class="lang-zh" style="display:none">售租比</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">EXPO 2025 EFFECT</span><span class="lang-zh" style="display:none">2025世博效應</span></div>
+      <div class="kpi-value"><span class="lang-en">Active</span><span class="lang-zh" style="display:none">發酵中</span></div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Catalyst</span><span class="lang-zh" style="display:none">催化劑</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CORE LAND YoY</span><span class="lang-zh" style="display:none">核心區地價年增</span></div>
+      <div class="kpi-value">+7%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Commercial Land</span><span class="lang-zh" style="display:none">商業用地</span></span>
+    </div>
+  </div>
+
+  <div class="section-label"><span class="lang-en">MARKET OVERVIEW</span><span class="lang-zh" style="display:none">市場概況</span></div>
+  <div class="kpi-grid" style="grid-template-columns:1fr;">
+    <div class="summary-card" style="border-left:4px solid #d97706;">
+      <h4><span class="lang-en">Osaka Market Outlook</span><span class="lang-zh" style="display:none">大阪市場展望</span></h4>
+      <p><span class="lang-en">Osaka's property market is being reshaped by three mega-catalysts: Expo 2025 on Yumeshima island, the Umeda 2nd Phase redevelopment transforming the north gate area, and the planned IR/casino resort. Combined with relative affordability vs Tokyo, these drivers are attracting both domestic and foreign capital at an accelerating pace.</span><span class="lang-zh" style="display:none">大阪房地產市場正受三大催化劑重塑：夢洲2025世博會、梅田第二期再開發改造北門區域，以及規劃中的IR賭場度假村。加上相較東京的相對可負擔性，這些驅動力正以加速態勢吸引國內外資本。</span></p>
+    </div>
+  </div>
+
+  <div class="section-label"><span class="lang-en">KEY ZONES</span><span class="lang-zh" style="display:none">關鍵區域</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="micro-card">
+      <h4><span class="lang-en">Zone 1: Umeda / Nakanoshima</span><span class="lang-zh" style="display:none">第一區：梅田／中之島</span></h4>
+      <div class="kpi-value" style="font-size:18px;">6,000&ndash;7,000<span style="font-size:12px"><span class="lang-en"> &yen;M</span><span class="lang-zh" style="display:none"> 万円</span></span></div>
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Premium business district. Massive redevelopment underway with new towers and transport links.</span><span class="lang-zh" style="display:none">頂級商業區。大規模再開發進行中，新建塔樓及交通聯結。</span></p>
+    </div>
+    <div class="micro-card">
+      <h4><span class="lang-en">Zone 2: Namba / Tennoji</span><span class="lang-zh" style="display:none">第二區：難波／天王寺</span></h4>
+      <div class="kpi-value" style="font-size:18px;">4,500&ndash;5,500<span style="font-size:12px"><span class="lang-en"> &yen;M</span><span class="lang-zh" style="display:none"> 万円</span></span></div>
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Mid-tier commercial and entertainment hub. Strong tourism-driven rental demand.</span><span class="lang-zh" style="display:none">中階商業及娛樂中心。觀光驅動的強勁租賃需求。</span></p>
+    </div>
+    <div class="micro-card">
+      <h4><span class="lang-en">Zone 3: Suburban</span><span class="lang-zh" style="display:none">第三區：郊外</span></h4>
+      <div class="kpi-value" style="font-size:18px;">2,500&ndash;3,500<span style="font-size:12px"><span class="lang-en"> &yen;M</span><span class="lang-zh" style="display:none"> 万円</span></span></div>
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Affordable family zones along Osaka Metro lines. Stable demand from local residents.</span><span class="lang-zh" style="display:none">沿大阪地鐵的平價家庭區域。本地居民穩定需求。</span></p>
+    </div>
+  </div>
+
+  <div class="section-label"><span class="lang-en">CHARTS</span><span class="lang-zh" style="display:none">圖表</span></div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Osaka Price Trend</span><span class="lang-zh" style="display:none">大阪房價趨勢</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">New Condo Average (万円)</span><span class="lang-zh" style="display:none">新建公寓均價（万円）</span></p>
+      <div style="position:relative;height:220px;"><div id="chartOsakaPrice" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Zone Price Comparison</span><span class="lang-zh" style="display:none">區域價格比較</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Average Condo Price by Zone (万円)</span><span class="lang-zh" style="display:none">各區域公寓均價（万円）</span></p>
+      <div style="position:relative;height:220px;"><div id="chartOsakaZone" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <div class="source-footer">
+    <span class="lang-en">Real Estate Economic Institute &middot; MLIT &middot; Osaka Prefecture Data &middot; CBRE Japan Q4 2024<br><em>Not investment advice.</em></span>
+    <span class="lang-zh" style="display:none">不動産経済研究所 &middot; 國土交通省 &middot; 大阪府資料 &middot; CBRE Japan 2024年Q4<br><em>非投資建議。</em></span>
+  </div>
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtJPY(v,lang){lang=lang||localStorage.getItem('lang')||'en';if(lang==='zh'){if(v>=10000)return(v/10000).toFixed(0)+'\u5104\u5186';return v+'\u4e07\u5186';}var a=v*10000;if(a>=100000000)return '\u00a5'+(a/100000000).toFixed(1)+'B';if(a>=1000000)return '\u00a5'+(a/1000000).toFixed(1)+'M';return '\u00a5'+Math.round(a/1000)+'K';}
+function fmtJPYShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh'){if(v>=10000)return(v/10000).toFixed(1)+'\u5104';return v+'\u4e07';}if(a>=100000000)return(a/100000000).toFixed(1)+'B';if(a>=1000000)return(a/1000000).toFixed(0)+'M';return Math.round(a/1000)+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  allCharts.length=0;
+
+  /* chartOsakaPrice — line */
+  var c1=echarts.init(document.getElementById('chartOsakaPrice'));allCharts.push(c1);
+  var priceLabels=['2020','2021','2022','2023','2024','2025'];
+  var priceData=[3800,4200,4500,4800,5000,5813];
+  c1.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:priceLabels}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtJPYShort(v,lang);}})}),
+    series:[{type:'line',data:priceData,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},areaStyle:{color:'rgba(30,58,95,0.08)'},smooth:0.2,symbol:'circle',symbolSize:6}]
+  });
+
+  /* chartOsakaZone — horizontal bar */
+  var c2=echarts.init(document.getElementById('chartOsakaZone'));allCharts.push(c2);
+  var zoneLabelsEn=['Suburbs','East Osaka','Abeno','Umeda Area','Namba','Nakanoshima'];
+  var zoneLabelsZh=['\u90CA\u5916','\u6771\u5927\u962A','\u963F\u500D\u91CE','\u6885\u7530\u5468\u908A','\u96E3\u6CE2','\u4E2D\u4E4B\u5CF6'];
+  var zoneLabels=lang==='zh'?zoneLabelsZh:zoneLabelsEn;
+  var zoneData=[2500,3200,4000,5500,5000,6500];
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+    grid:{left:90,right:60,top:20,bottom:20,containLabel:false},
+    xAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtJPYShort(v,lang);}})}),
+    yAxis:mkAxis({type:'category',data:zoneLabels,axisLabel:{color:C.navy,fontFamily:'Inter',fontSize:11}}),
+    series:[{type:'bar',data:zoneData.map(function(v){return{value:v,itemStyle:{color:v>=5000?C.orange:v>=4000?C.navy:C.green,borderRadius:[0,4,4,0]}};}),barMaxWidth:22,label:{show:true,position:'right',formatter:function(p){return fmtJPY(p.value,lang);},fontSize:10,fontFamily:'JetBrains Mono'}}]
+  });
+}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

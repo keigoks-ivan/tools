@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Valuation Monitor | Japan Property Monitor</title>
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="dashboard">
+  <h1 class="page-title"><span class="lang-en">Valuation Monitor</span><span class="lang-zh" style="display:none">估值監測</span></h1>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Tokyo P/R Ratio</span><span class="lang-zh" style="display:none">東京租金比</span></div>
+      <div class="kpi-value">37x</div>
+      <div class="kpi-delta" style="color:#d97706">Numbeo</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">Osaka P/R Ratio</span><span class="lang-zh" style="display:none">大阪租金比</span></div>
+      <div class="kpi-value">27x</div>
+      <div class="kpi-delta">Numbeo</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label"><span class="lang-en">Fukuoka P/R Ratio</span><span class="lang-zh" style="display:none">福岡租金比</span></div>
+      <div class="kpi-value">26x</div>
+      <div class="kpi-delta">Numbeo</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">National Rental Yield</span><span class="lang-zh" style="display:none">全國租金回報率</span></div>
+      <div class="kpi-value">4.34%</div>
+      <div class="kpi-delta positive"><span class="lang-en">Above regional average</span><span class="lang-zh" style="display:none">高於區域平均</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Tokyo Spread vs BOJ</span><span class="lang-zh" style="display:none">東京利差 vs BOJ</span></div>
+      <div class="kpi-value">+3.09%</div>
+      <div class="kpi-delta positive"><span class="lang-en">Positive carry</span><span class="lang-zh" style="display:none">正利差</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Tokyo Condo 4Y Change</span><span class="lang-zh" style="display:none">東京公寓4年漲幅</span></div>
+      <div class="kpi-value">+64%</div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Overheating signal</span><span class="lang-zh" style="display:none">過熱信號</span></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Yield vs BOJ Rate</span><span class="lang-zh" style="display:none">租金回報率 vs BOJ 利率</span></h3>
+      <div id="chartJpYield" style="height:220px"></div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">APAC Price-to-Rent Comparison</span><span class="lang-zh" style="display:none">亞太租金比比較</span></h3>
+      <div id="chartJpAPAC" style="height:280px"></div>
+    </div>
+  </div>
+
+  <div class="chart-row single">
+    <div class="chart-card full">
+      <h3><span class="lang-en">Price-to-Income Multiple</span><span class="lang-zh" style="display:none">房價所得比</span></h3>
+      <div id="chartJpMedianMult" style="height:240px"></div>
+    </div>
+  </div>
+
+  <!-- Summary Framework -->
+  <h2 class="section-heading"><span class="lang-en">Valuation Framework</span><span class="lang-zh" style="display:none">估值框架</span></h2>
+  <div class="summary-grid">
+    <div class="summary-card green-left">
+      <h4><span class="lang-en">Yield Spread</span><span class="lang-zh" style="display:none">利差分析</span></h4>
+      <p><span class="lang-en">At +3.09%, Tokyo's yield spread over the BOJ rate remains one of the most attractive in the APAC region. Even after the BOJ's historic rate normalization cycle, property yields comfortably cover borrowing costs, providing a genuine carry trade for leveraged investors.</span><span class="lang-zh" style="display:none">東京租金回報率與 BOJ 利率利差達 +3.09%，仍為亞太地區最具吸引力之一。即使 BOJ 歷史性升息週期後，房產收益仍能輕鬆覆蓋借貸成本，為槓桿投資者提供真正的套利機會。</span></p>
+    </div>
+    <div class="summary-card green-left">
+      <h4><span class="lang-en">Regional Value</span><span class="lang-zh" style="display:none">區域價值</span></h4>
+      <p><span class="lang-en">Osaka (27x) and Fukuoka (26x) remain significantly cheaper than Tokyo (37x) on a price-to-rent basis. These secondary cities offer better yield profiles while benefiting from domestic migration, infrastructure investment, and tourism-driven demand growth.</span><span class="lang-zh" style="display:none">大阪（27 倍）和福岡（26 倍）的租金比遠低於東京（37 倍）。這些二線城市提供更好的收益率，同時受益於國內人口遷移、基礎設施投資和旅遊帶動的需求增長。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Bubble Risk</span><span class="lang-zh" style="display:none">泡沫風險</span></h4>
+      <p><span class="lang-en">Tokyo condo prices have surged +64% in four years, driven by foreign capital inflows, weak yen dynamics, and ultra-low rates. While fundamentals differ from the 1990s bubble, the pace of appreciation warrants caution &mdash; particularly in prime central Tokyo where price-to-income ratios exceed 15x.</span><span class="lang-zh" style="display:none">東京公寓價格四年內飆升 64%，受外資流入、日圓疲弱及超低利率推動。雖然基本面與 1990 年代泡沫不同，但升值速度仍需警惕，特別是東京都心房價所得比已超過 15 倍。</span></p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtJPY(v,lang){lang=lang||localStorage.getItem('lang')||'en';if(lang==='zh')return '\u00a5'+v+'\u4e07';if(v>=100)return '\u00a5'+(v/100).toFixed(1)+'M';return '\u00a5'+v+'K';}
+function fmtJPYShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';if(lang==='zh')return v+'\u4e07';if(v>=100)return(v/100).toFixed(1)+'M';return v+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  var c;
+
+  /* Chart: Yield vs BOJ Rate */
+  c=echarts.init(document.getElementById('chartJpYield'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:baseTooltip,
+    legend:Object.assign({},baseLegend,{data:['Rental Yield','BOJ Rate']}),
+    grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025Q3']}),
+    yAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
+    series:[
+      {name:'Rental Yield',type:'line',smooth:0.3,data:[4.2,4.1,4.0,4.0,4.1,4.2,4.34],lineStyle:{color:C.green},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(22,163,74,0.15)'},{offset:1,color:'rgba(22,163,74,0.02)'}]}}},
+      {name:'BOJ Rate',type:'line',step:'end',data:[0.0,0.0,0.0,0.0,0.0,0.1,0.5],lineStyle:{color:C.red,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+    ]
+  });
+
+  /* Chart: APAC Price-to-Rent Comparison */
+  var apacCities=['Ho Chi Minh','KL','Bangkok','Fukuoka','Osaka','Tokyo','Singapore','Taipei','Hong Kong','Shanghai'];
+  var apacVals=[18,21.7,25,26,27,37,40,47,50,59];
+  var apacColors=[C.green,C.green,C.navy,C.navy,C.navy,C.orange,C.navy,C.orange,C.orange,C.red];
+  c=echarts.init(document.getElementById('chartJpAPAC'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'x';}}),
+    grid:{left:90,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false}),
+    yAxis:mkAxis({type:'category',data:apacCities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:apacVals.map(function(v,i){return{value:v,itemStyle:{color:apacColors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}x',fontSize:11,color:C.navy,fontFamily:'Inter'}
+    }]
+  });
+
+  /* Chart: Price-to-Income Multiple */
+  var piCities=['Fukuoka','Osaka','Nagoya','Tokyo','Taipei','Hong Kong'];
+  var piVals=[8.5,10.2,11.0,15.1,15.4,47];
+  var piColors=piVals.map(function(v){return v>15?C.red:v>10?C.orange:C.navy;});
+  c=echarts.init(document.getElementById('chartJpMedianMult'));
+  allCharts.push(c);
+  c.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'item',formatter:function(p){return p.name+': '+p.value+'x';}}),
+    grid:{left:80,right:50,top:10,bottom:10,containLabel:false},
+    xAxis:mkAxis({type:'value',show:false}),
+    yAxis:mkAxis({type:'category',data:piCities,axisLabel:{fontSize:11,color:C.navy},splitLine:{show:false}}),
+    series:[{
+      type:'bar',
+      data:piVals.map(function(v,i){return{value:v,itemStyle:{color:piColors[i],borderRadius:[0,4,4,0]}};}),
+      barWidth:18,
+      label:{show:true,position:'right',formatter:'{c}x',fontSize:11,color:C.navy,fontFamily:'Inter'},
+      markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:1},data:[{xAxis:10,label:{formatter:'Severely Unaffordable',fontSize:9,color:C.red,position:'insideEndTop'}}]}
+    }]
+  });
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

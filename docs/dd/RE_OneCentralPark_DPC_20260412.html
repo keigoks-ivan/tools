@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Central Park @ Desa ParkCity｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#166534;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:linear-gradient(135deg,#14532D 0%,#166534 50%,#15803d 100%);color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#166534;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #22c55e}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #166534}
+.kpi-card.top{border-top:3px solid #16a34a;background:#F0FDF4}
+.kpi-card.warn{border-top:3px solid #d97706}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#166534;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#166534;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#166534;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#166534;line-height:1.4}
+.brickz-hero{background:linear-gradient(135deg,#14532D,#166534);border-radius:8px;padding:20px 24px;margin:12px 0;color:#fff}
+.brickz-t{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.6);margin-bottom:10px;letter-spacing:.05em}
+.brickz-g{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.brickz-s{text-align:center}
+.brickz-n{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:#86efac}
+.brickz-l{font-size:10px;color:rgba(255,255,255,.6);margin-top:3px}
+/* DPC vs MK */
+.eco-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+.eco-dpc{background:#F0FDF4;border:1px solid #86efac;border-radius:8px;padding:16px}
+.eco-mk{background:#EFF6FF;border:1px solid #93c5fd;border-radius:8px;padding:16px}
+.eco-t{font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:10px}
+.eco-dpc .eco-t{color:#166534}.eco-mk .eco-t{color:#1e40af}
+/* compare */
+.compare-5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
+.c5{border-radius:8px;padding:12px;border:1px solid;text-align:center}
+.c5-this{background:#F0FDF4;border-color:#86efac}
+.c5-a{background:#DCFCE7;border-color:#4ade80}
+.c5-b{background:#EFF6FF;border-color:#93c5fd}
+.c5-c{background:#fdf4ff;border-color:#c084fc}
+.c5-d{background:#FEF9C3;border-color:#d97706}
+.c5-t{font-size:9px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:4px}
+.c5-n{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700}
+.c5-this .c5-t{color:#166534}.c5-this .c5-n{color:#166534}
+.c5-a .c5-t{color:#15803d}.c5-a .c5-n{color:#15803d}
+.c5-b .c5-t{color:#1e40af}.c5-b .c5-n{color:#1e40af}
+.c5-c .c5-t{color:#7c3aed}.c5-c .c5-n{color:#7c3aed}
+.c5-d .c5-t{color:#92400E}.c5-d .c5-n{color:#92400E}
+/* score */
+.score-wrap{background:#166534;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:680px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.note-box{background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:2px solid #16a34a;border-radius:8px;padding:18px;margin:14px 0}
+.note-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#166534;margin-bottom:10px;letter-spacing:.05em}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#166534;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+@media(max-width:680px){.score-cols,.dual-col,.compare-5,.eco-grid,.brickz-g{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：One Central Park @ Desa ParkCity，KL｜框架 v1.3</span>
+  <span>2026-04-12 ｜ brickz 19筆 RM1,180 psf ｜ 資本成長+10.09% ｜ 掛牌率最健康（22%售+18%租）｜ 完工 2017 ｜ DPC Master Developer</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出 ｜ 二手已完工建案</div>
+  <h1>One Central Park @ Desa ParkCity</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&yield=4.44&from=OneCentralPark_DPC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=OneCentralPark_DPC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Residen 2（Central Park 旁），Desa ParkCity，Kepong，KL ｜ 開發商：Perdana ParkCity Sdn Bhd（DPC Master Developer，27 個建案，不折扣出售保護資產）｜ Freehold 住宅地契（Residential Strata）｜ 1 棟 45 層，359 戶 ｜ 1.65 公頃（4.08 英畝）｜ 竣工：2017 年 1 月｜ 坪數：1,034–3,153 sqft｜ 唯一 Parkfront Condo，1.8 英畝私人公園直通 Central Park</div>
+  <div class="badge-row">
+    <span class="badge">✅ Freehold 住宅地契——最佳地契</span>
+    <span class="badge">✅ brickz 19筆（2024-06至2025-05）RM1,180 psf</span>
+    <span class="badge">✅ 資本成長 +10.09%（iProperty）——本系列最強資本增值</span>
+    <span class="badge">✅ DPC 地段 YoY +16.55% 成交量；+6.06% PSF（SuperHomes 2026）</span>
+    <span class="badge">✅ 掛牌率最健康（79售 22% + 63租 18%）——本系列最低積壓</span>
+    <span class="badge">✅ Master Developer 不折扣出售——市場價值保護機制</span>
+    <span class="badge">✅ ISP + ParkCity Medical + Plaza Arkadia 全部步行</span>
+    <span class="badge">✅ Gross Yield 4.44%（iRumah 2025，歷史新高）</span>
+    <span class="badge">⚠️ 無直接 MRT（最近 Sri Damansara East MRT，仍需開車）</span>
+    <span class="badge">⚠️ RM1,180 psf 是本系列所有建案最高成交 PSF</span>
+    <span class="badge">⚠️ brickz 19 筆——FIX-03 勉強通過（略低於 21 筆基準）</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 特別框 -->
+<div class="note-box">
+  <div class="note-title">🏠 買方視角：「不叫 Grab 的生活圈」——One Central Park 是本系列最高度吻合的建案</div>
+  <p style="font-size:13px;color:#166534;line-height:1.7">目標買家的核心購房需求：追求「自給自足、步行可達的完整生活圈」。Desa ParkCity 是整個 KL 唯一一個完全不需要出 township 就可以滿足所有日常需求的居住環境：ISP 國際學校步行、ParkCity Medical 步行、Plaza Arkadia 購物步行、The Waterfront 餐廳步行、The Central Park 散步。這個框架與 TS2 武吉免登（步行 Berjaya Times Square）的選擇邏輯完全一致——<strong>用步行可達的完整生活圈替代對外交通依賴</strong>。One Central Park 是 DPC 內最頂端的 Parkfront 建案，緊鄰 Central Park，居住品質在 DPC 所有建案中是最高的。</p>
+</div>
+
+<!-- KPI + brickz -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="brickz-hero">
+      <div class="brickz-t">🏛️ BRICKZ 政府登記成交數據（2024-06 至 2025-05，12 個月）——19 筆，FIX-03 勉強通過</div>
+      <div class="brickz-g">
+        <div class="brickz-s"><div class="brickz-n">19</div><div class="brickz-l">成交筆數（FIX-03 勉強通過）</div></div>
+        <div class="brickz-s"><div class="brickz-n">RM1,180</div><div class="brickz-l">成交中位 PSF（本系列最高）</div></div>
+        <div class="brickz-s"><div class="brickz-n">RM160萬</div><div class="brickz-l">中位成交總價</div></div>
+        <div class="brickz-s"><div class="brickz-n">+10.09%</div><div class="brickz-l">資本成長（iProperty，本系列最強）</div></div>
+        <div class="brickz-s"><div class="brickz-n">4.44%</div><div class="brickz-l">Gross Yield（iRumah 2025，歷史新高）</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,.5);font-family:'IBM Plex Mono',monospace">
+        P25–P75：RM133.5萬–228萬 ｜ 掛牌 PSF RM1,154–1,588（iProperty 79筆售）｜ 月租 RM5,000–8,800 ｜ 發售 RM800–850 psf（2013）→ 成交 RM1,180（2025），12年升值 +38.8–47.5%
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card top">
+        <div class="kpi-v up">+10.09%</div>
+        <div class="kpi-l">資本成長（iProperty，本系列最強）</div>
+        <div class="kpi-s up">12年升值 +38.8–47.5%（發售 RM800–850→現 RM1,180）；YoY +0.3%（近期輕微放緩，但長線強）</div>
+      </div>
+      <div class="kpi-card top">
+        <div class="kpi-v">RM1,180</div>
+        <div class="kpi-l">成交中位 PSF（本系列最高）</div>
+        <div class="kpi-s up">DPC 地段整體均值 RM1,001 psf；OCP 溢價 18%——Parkfront 差異化合理</div>
+      </div>
+      <div class="kpi-card top">
+        <div class="kpi-v up">22% / 18%</div>
+        <div class="kpi-l">掛牌售率 / 掛牌租率</div>
+        <div class="kpi-s up">本系列所有建案最健康掛牌率；79售 + 63租 / 359戶——無積壓壓力</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">4.44%</div>
+        <div class="kpi-l">Gross Yield（iRumah 2025，歷史新高）</div>
+        <div class="kpi-s up">vs 2024年 4.13%；歷史最低 3.55%（2017）；上升趨勢清晰</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">+16.55%</div>
+        <div class="kpi-l">DPC 地段 YoY 成交量增幅（SuperHomes 2026）</div>
+        <div class="kpi-s up">PSF YoY +6.06%；地段強勁，One Central Park 作為旗艦建案受益最大</div>
+      </div>
+      <div class="kpi-card warn">
+        <div class="kpi-v">無直接 MRT</div>
+        <div class="kpi-l">最近：Sri Damansara East MRT（需開車）</div>
+        <div class="kpi-s neu">DPC 內步行完整生活圈補償交通劣勢；但對無車外籍是限制</div>
+      </div>
+    </div>
+
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">Perdana ParkCity Sdn Bhd（私人，Samling Strategic Group，1977年）；DPC 整個 473 英畝 township 的 Master Developer；27 個已完成建案；<strong>政策：不折扣出售，保護市場價值</strong></div></div>
+      <div class="spec-item"><div class="spec-l">地段 / 地契</div><div class="spec-v">Jalan Residen 2，Desa ParkCity，Kepong；1.65 公頃（4.08 英畝）；Freehold 住宅地契（Residential Strata）；88 戶/英畝（低密度）；DPC 內最高端地位</div></div>
+      <div class="spec-item"><div class="spec-l">規模</div><div class="spec-v">1 棟 45 層；359 戶；坪數 1,034–3,153 sqft；8 種戶型（Type A–H）；最小 2BR/1,034 sqft；最大 3+1BR/3,153 sqft；竣工：2017 年 1 月（官方：Completed in January 2017）</div></div>
+      <div class="spec-item"><div class="spec-l">核心差異化</div><div class="spec-v">唯一 Parkfront Condo：1.8 英畝私人公園直通 Central Park（DPC 心臟）；「Park Within A Park」——居住在公園內的公園；Lake + Central Park 全景</div></div>
+      <div class="spec-item"><div class="spec-l">DPC 自給自足生態</div><div class="spec-v">步行可達：ISP（International School @ ParkCity）；ParkCity Medical Centre；Plaza Arkadia；The Waterfront；ParkCity Club；Central Park；Lake——DPC 居民不需開車出 township 即可滿足所有日常需求</div></div>
+      <div class="spec-item"><div class="spec-l">iRumah 戶型 PSF</div><div class="spec-v">iProperty 掛牌 PSF：RM1,154–1,588；月租：RM5,000–8,800（PropertyGuru）；iProperty 另一時點：中位 RM1,160 psf（Dec 2025），YoY +0.3%；小坪 PSF 高，大坪 PSF 低</div></div>
+      <div class="spec-item"><div class="spec-l">設施</div><div class="spec-v">Level 5 設施甲板（泳池、小童池、Jacuzzi、更衣室、健身房、網球場、瑜珈花園、多功能廳、BBQ、天台露臺）；街道層（Garden Lounge、Garden Studio、Garden Pavilion、Jogging Track、景觀池塘、兒童遊樂場）</div></div>
+      <div class="spec-item"><div class="spec-l">DPC 地段數據</div><div class="spec-v">brickz（Aug 2024–Jul 2025）：DPC 住宅中位 RM1,001 psf，中位總價 RM152萬；OCP 成交中位 RM1,180 psf（高於地段均值 18%）；DPC 地段 YoY +6.06% PSF（SuperHomes 2026）</div></div>
+      <div class="spec-item"><div class="spec-l">開發商保值策略</div><div class="spec-v">「Perdana ParkCity 不以折扣清貨，保護市場率」（Park City Holdings 官方聲明）；DPC 業主持有力強；無大型甩賣壓力；有限土地（~70 英畝剩餘）形成稀缺壁壘</div></div>
+      <div class="spec-item"><div class="spec-l">交通連通性</div><div class="spec-v">Sri Damansara East MRT（需開車）；Kepong Sentral KTM；LDP；DUKE；MRR2；Sprint；Penchala Link；注意：DPC 自給自足設計使外出通勤需求減少，交通劣勢相對淡化</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜One Central Park 的核心投資論點</h3>
+    <p>One Central Park 的投資論點建立在三個難以複製的基礎上：①<strong>Desa ParkCity「不叫 Grab 的完整生態系」</strong>——步行可達 ISP、ParkCity Medical、Plaza Arkadia、The Waterfront，是 KL 唯一真正自給自足的 township；②<strong>DPC 內唯一 Parkfront Condo</strong>——1.8 英畝私人公園直通 Central Park，這個「公園之中的公園」定位不可複製；③<strong>Master Developer 不折扣保值策略</strong>——Perdana ParkCity 明確政策「不以折扣出售清貨」，保護所有 DPC 資產的市場價值。</p>
+
+    <p>這三個優勢共同解釋了一個反直覺的數字：One Central Park 是本系列成交 PSF 最高的建案（RM1,180），但同時也是資本成長最強的建案（+10.09%）——以最高 PSF 買入，卻獲得最強的資本增值。這說明 DPC 的「Township Premium」不是泡沫，而是稀缺性的真實定價。</p>
+
+    <div class="success-box">
+      <strong>🟢 本系列最強資本增值組合：brickz 成交 RM1,180 psf + 資本成長 +10.09%（本系列最高）+ 掛牌率最健康（22%/18%）+ DPC YoY +16.55% 成交量成長 + Master Developer 保值策略。</strong>這是本系列唯一同時擁有「最高 PSF + 最強資本成長 + 最健康供需」三重組合的建案。12 年升值 +38.8–47.5%（發售 RM800→現 RM1,180），年均 +2.8–3.3%——雖然低於 MK 地段均速（YoY +6.4%），但 DPC YoY +6.06% PSF 成長說明已進入加速階段。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Desa ParkCity vs Mont Kiara——兩個截然不同的外籍居住框架</h3>
+    <div class="eco-grid">
+      <div class="eco-dpc">
+        <div class="eco-t">🌳 DESA PARKCITY 框架——「不叫 Grab 的生活圈」</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td style="width:110px;font-weight:600">外籍偏好族群</td><td>喜歡綠地、安靜社區；有寵物；有小孩在 ISP；重視步行生活圈；西方外籍（PropCashflow：「DPC 特別受西方外籍和有寵物的外籍歡迎」）</td></tr>
+            <tr><td>核心 USP</td><td>473 英畝完整 township；Central Park + 湖景；ISP + ParkCity Medical 步行；The Waterfront + Plaza Arkadia 步行；真正低密度</td></tr>
+            <tr><td>交通模式</td><td>township 內步行/自行車；出 township 需自駕（劣勢）；但需出 township 的次數本身就很少</td></tr>
+            <tr><td>資本增值</td><td>+6.06% YoY PSF（DPC）；+16.55% 成交量；OCP +10.09% 資本成長；稀缺土地（~70 英畝剩餘）</td></tr>
+            <tr><td>代表建案</td><td><strong>One Central Park（RM1,180 psf）</strong>、Northshore（RM833 psf）、Park Place DPC（已分析，7.7/10）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="eco-mk">
+        <div class="eco-t">🏙️ MONT KIARA 框架——「外籍高密度國際社區」</div>
+        <table style="font-size:11px">
+          <tbody>
+            <tr><td style="width:110px;font-weight:600">外籍偏好族群</td><td>商界專業人士；重視 GIS/MKIS 名校；需要城市便利（Mall、餐廳、夜生活）；日韓外籍為主（Plaza Mont Kiara 是外籍心臟）</td></tr>
+            <tr><td>核心 USP</td><td>MK 是 KL 最密集的外籍社區；GIS/MKIS/French School 全部在 MK；Plaza/Solaris/Publika；MRT3 2032 前置</td></tr>
+            <tr><td>交通模式</td><td>有車族（Sprint/NKVE）；MRT3 2032 通車後改善；目前對無車族有限制</td></tr>
+            <tr><td>資本增值</td><td>YoY +6.4%（地段均值）；但部分建案（Pavilion Hilltop）升值停滯</td></tr>
+            <tr><td>代表建案</td><td>Kiaramas deDaun（RM844–918，8.34/10）、28 MK（RM774，8.04）、Sunway Mont（RM938，7.88）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="src">結論：DPC（以 OCP 為代表）和 MK 服務不同的外籍族群——DPC 更適合「慢生活、家庭、寵物、不想叫車」的外籍；MK 更適合「城市節奏、名校優先、企業租賃合約」的外籍。兩個框架均有市場，不存在誰更好，只有誰更適合。</p>
+
+    <hr class="dv">
+    <h3>C｜One Central Park vs 本系列 MK 建案定價矩陣</h3>
+    <div class="compare-5">
+      <div class="c5 c5-this">
+        <div class="c5-t">🌳 One Central Park（本案）</div>
+        <div class="c5-n">RM1,180</div>
+        <div style="font-size:9px;color:#166534;margin-top:3px">19筆｜+10.09% 資本成長<br>DPC 唯一 Parkfront</div>
+      </div>
+      <div class="c5 c5-a">
+        <div class="c5-t">🟢 Kiaramas deDaun（MK）</div>
+        <div class="c5-n">RM844–918</div>
+        <div style="font-size:9px;color:#15803d;margin-top:3px">期房｜8.34/10<br>MRT3 前置</div>
+      </div>
+      <div class="c5 c5-b">
+        <div class="c5-t">🟢 Sunway Mont（MK）</div>
+        <div class="c5-n">RM938</div>
+        <div style="font-size:9px;color:#1e40af;margin-top:3px">8 筆｜7.88/10<br>GIS 步行</div>
+      </div>
+      <div class="c5 c5-c">
+        <div class="c5-t">🟢 Trinity Pentamont（MK）</div>
+        <div class="c5-n">RM811</div>
+        <div style="font-size:9px;color:#7c3aed;margin-top:3px">27筆｜7.84/10<br>Net Yield 最高</div>
+      </div>
+      <div class="c5 c5-d">
+        <div class="c5-t">⚠️ Pavilion Hilltop（MK）</div>
+        <div class="c5-n">RM985</div>
+        <div style="font-size:9px;color:#92400E;margin-top:3px">21筆｜6.64/10<br>資本成長-0.1%</div>
+      </div>
+    </div>
+    <p class="src">重要洞察：OCP（RM1,180 psf）是本系列所有建案最高 PSF，但同時也是資本成長最強（+10.09%）、掛牌率最健康（22%）、供需最平衡的建案——這是「高 PSF 有理由」的正面案例，與 Pavilion Hilltop（RM985，高 PSF 但 -0.1% 資本成長）形成鮮明對比。</p>
+
+    <hr class="dv">
+    <h3>D｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>RM1,180 psf——本系列最高 PSF 入場</strong></td><td>RM1,180 是本系列所有 19 個建案中最高成交 PSF；最小坪 1,034 sqft × RM1,180 = RM122.8 萬（剛過外籍門檻）；最主力坪（約 1,300 sqft）≈ RM153.4 萬入場；買家需要更高資本</td><td><span class="tag t-y">中（高 PSF 但有資本增值支撐）</span></td><td>流動性偏低（但掛牌率 22% 健康）；急售可能折讓 8–15%</td></tr>
+          <tr><td><strong>無直接 MRT——唯一明顯弱點</strong></td><td>DPC 目前最近 MRT 是 Sri Damansara East MRT（舊稱 Damansara Damai）或 Kepong Sentral KTM，均需開車；對無車外籍租客是障礙；但 DPC 自給自足設計使「出 township 通勤」本身就是少數需求</td><td><span class="tag t-y">中（DPC 的系統性劣勢）</span></td><td>租客池比 MK 略窄；外籍租客通常有車或有企業接送</td></tr>
+          <tr><td><strong>YoY +0.3%（近期輕微放緩）</strong></td><td>iProperty Dec 2025 時點顯示 YoY +0.3%——比長線 +10.09% 資本成長明顯放緩；可能是短期資料雜訊，也可能是 PSF 接近階段性高點（RM1,180）後的整固</td><td><span class="tag t-y">中（需觀察 2026 數據確認）</span></td><td>若短期整固（12–18 個月），MRT3 前置不如 MK 清晰；但長線 DPC 土地稀缺性仍支撐</td></tr>
+          <tr><td><strong>Gross Yield 4.44%（非本系列最高）</strong></td><td>4.44% Gross Yield 低於 28 MK（6.44%）、Pentamont（6.38%）、Pavilion Hilltop（4.96%）——因為 RM1,180 psf 高 PSF 分母大；但租金仍在上升（4.13%→4.44% YoY），說明租需求強</td><td><span class="tag t-b">低（已知，Yield 非 OCP 的論點核心）</span></td><td>OCP 的論點主要是資本增值，而非最高 Yield；Net Yield 約 2.3–2.7%</td></tr>
+          <tr><td><strong>brickz 19 筆（FIX-03 勉強通過）</strong></td><td>19 筆略低於 21 筆基準；359 戶中 5.3% 換手率（健康，類似 DPC 業主強持有力）；置信度中高（DPC 成交價記錄一致性高，非因散戶單次炒作）</td><td><span class="tag t-b">低（FIX-03 勉強通過，整體可靠）</span></td><td>建議 2026 年追蹤新增 brickz 成交確認趨勢</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場定位——RM1,180 psf 的定價合理性</div>
+  <div class="section-body">
+    <h3>1.1 DPC 內定價矩陣——One Central Park 的溢價合理性</h3>
+    <table>
+      <thead><tr><th>DPC 建案</th><th>brickz PSF</th><th>OCP 溢價</th><th>解釋</th></tr></thead>
+      <tbody>
+        <tr><td><strong>One Central Park（本案）</strong></td><td><strong>RM1,180</strong></td><td>基準</td><td>唯一 Parkfront，1.8 英畝私人公園，DPC 最高端位置</td></tr>
+        <tr><td>DPC 地段均值（brickz）</td><td>RM1,001</td><td>OCP 高 18%</td><td>地段溢價合理——Parkfront 稀缺性定價</td></tr>
+        <tr><td>The Northshore（DPC）</td><td>RM833 psf（SuperHomes）</td><td>OCP 高 42%</td><td>Northshore 非 Parkfront，位置稍遠</td></tr>
+        <tr><td>Nadia Parkfront（DPC）</td><td>~RM741 psf</td><td>OCP 高 59%</td><td>更老舊建案（2010–2012完工）</td></tr>
+        <tr><td>Park Place DPC（本系列，7.7/10）</td><td>成交 PSF 未確認</td><td>—</td><td>Park Place 是 DPC 最新建案（2025前後竣工）</td></tr>
+      </tbody>
+    </table>
+    <p class="src">DPC 地段完整 brickz（Aug 2024–Jul 2025）：住宅中位 RM1,001 psf；OCP 比地段均值高 18%，符合「DPC 最高端 Parkfront 旗艦建案」的定位溢價。</p>
+
+    <div class="alert a-green">
+      <strong>估值結論：RM1,180 psf 貴，但有理由。</strong>相比於同一時段 DPC 地段均值（RM1,001）和 MK 地段均值（RM778），OCP 的高 PSF 是「Parkfront + Master Developer 保值 + 稀缺土地 + 完整自給自足生態」的真實定價，不是品牌泡沫（對比 Pavilion Hilltop 的 RM985 psf 搭配 -0.1% 資本成長）。OCP 的 +10.09% 資本成長驗證了市場對這個溢價的持續接受。
+    </div>
+
+    <h3>1.2 掛牌健康度分析（本系列最優）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>One Central Park</th><th>本系列比較</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>掛牌售比率</td><td>79/359 = 22%</td><td>Sunway Mont 59%；Pentamont 34%；28 MK 23%；Hilltop 40%+</td><td><span class="tag t-g">本系列最健康（並列 28 MK）</span></td></tr>
+        <tr><td>掛牌租比率</td><td>63/359 = 18%</td><td>Sunway Mont 25%；Pentamont 39%；28 MK 5%；Hilltop 24%</td><td><span class="tag t-g">非常健康——出租掛牌適中，不過剩</span></td></tr>
+        <tr><td>brickz 換手率</td><td>19/359 = 5.3%（年）</td><td>Pentamont 8.2%；28 MK 6.1%；Hilltop 3.4%</td><td><span class="tag t-g">健康中等——DPC 業主強持有力，換手率適中</span></td></tr>
+        <tr><td>掛牌 PSF vs 成交 PSF</td><td>掛牌 RM1,154–1,588；成交中位 RM1,180</td><td>掛牌低端（RM1,154）接近成交中位（RM1,180）——定價理性</td><td><span class="tag t-g">正面——賣家不過度要價</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率</div>
+  <div class="section-body">
+    <h3>5.1 One Central Park 租金行情</h3>
+    <table>
+      <thead><tr><th>房型估算</th><th>坪數</th><th>月租</th><th>月租 psf</th><th>Gross Yield（@RM1,180 psf）</th></tr></thead>
+      <tbody>
+        <tr><td>2BR（最小，主力）</td><td>1,034–1,300 sqft</td><td>RM5,000–7,000/月</td><td>RM3.8–6.8</td><td>~4.8–8.1%（@RM122–153萬）</td></tr>
+        <tr><td>3BR（中等）</td><td>1,412–1,743 sqft</td><td>RM6,500–9,000/月</td><td>RM3.7–6.4</td><td>~4.5–7.4%（@RM167–206萬）</td></tr>
+        <tr><td>3+1BR（大坪）</td><td>1,722–3,153 sqft</td><td>RM7,500–13,000/月</td><td>RM2.4–7.5</td><td>~3.2–7.4%（@RM203–372萬）</td></tr>
+      </tbody>
+    </table>
+    <p class="src">PropertyGuru：月租 RM5,000–8,800；iProperty：掛牌租 RM4.04–5.66 psf/月；iRumah：Gross Yield 4.44%（2025）；DPC Casaman（Landed）月租逾 RM8,000（JPPH H1 2025 官方報告）</p>
+
+    <h3>5.2 外國人現金流試算（2BR 1,300 sqft，RM153.4 萬入場 @ RM1,180 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租（RM6,500 × 12）</td><td>RM 78,000</td><td>2BR 1,300 sqft；DPC ISP + Central Park 生態吸引外籍家庭；Central Park 景觀溢價</td></tr>
+        <tr><td>管理費（估 RM0.35–0.45 × 1,300 × 12）</td><td><span class="down">-RM 5,460–7,020</span></td><td>DPC 管理費估算（需確認）；取中值 RM0.40 psf = RM6,240/年</td></tr>
+        <tr><td>地稅 + 門牌稅</td><td><span class="down">-RM 2,800</span></td><td></td></tr>
+        <tr><td>空置期（1.5 個月，DPC 需求穩健）</td><td><span class="down">-RM 9,750</span></td><td>DPC 業主持有力強，租客偏向長租；ISP 家庭傾向長期合約</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 18,453</span></td><td>（78,000–16,790）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 6,240</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 35,297/年</strong></td><td>Net Yield ≈ 2.30%（RM153.4 萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 41,537/年</td><td>Net Yield ≈ 2.71%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-yellow">
+      <strong>外籍 Net Yield 2.3–2.7%——本系列最高 PSF 入場的必然結果。</strong>OCP 的論點核心是資本增值（+10.09%），而非最高 Yield。Gross Yield 4.44% 雖是歷史新高且在上升，但在 RM1,180 psf 的高入場下，淨 Yield 比 Pentamont（2.9–3.4%）和 Sunway Mont（2.5–2.9%）略低。這是一個「用低 Yield 換高資本增值」的策略性取捨——DPC 的 +10.09% 資本成長 vs 其他建案 2.5–3.4% Net Yield 的選擇，本質上是「增值型 vs 收益型」的投資框架選擇。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>外籍影響</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td>Freehold 住宅地契（Residential Strata）</td><td>✅ LTV 80–90%；民用電費；MM2H 合規最清晰</td></tr>
+        <tr><td>外籍最低門檻</td><td>RM 1,000,000（KL）</td><td>✅ 最小坪 1,034 sqft × RM1,180 = RM122 萬，剛過 RM100 萬門檻；主力坪（1,300 sqft）= RM153 萬</td></tr>
+        <tr><td>KL 地址</td><td>Desa ParkCity 是 KL 地址（非 Selangor）</td><td>✅ 「KL 地址對外籍更友善，State Consent 通過更順暢」（Park City Holdings 官方聲明）</td></tr>
+        <tr><td>RPGT</td><td>竣工 2017；若 2026 買入，第6年約 2032</td><td>✅ RPGT 第6年優化時機清晰</td></tr>
+        <tr><td>入場成本（1,300 sqft，RM153.4 萬，80% LTV）</td><td>首付 20% = RM306,800；印花稅 4% = RM61,360；律師費 RM14,000；State Consent RM5,000</td><td>現金需求約 RM387,160（25%）</td></tr>
+        <tr><td>MM2H 合規</td><td>✅ Freehold 住宅地契 + KL 地址 + RM100 萬以上</td><td>✅ MM2H 框架完全適用；DPC 是 MM2H 持有者的「非 KLCC/MK 第三選項」</td></tr>
+      </tbody>
+    </table>
+    <div class="insight">
+      <strong>DPC 的 KL 地址優勢：</strong>Desa ParkCity 是 KL 境內的 township（雖然地理上偏向 Kepong），因此適用 KL 的外籍購房框架（最友善州別之一）。相比 Selangor 的多限制，KL 的 State Consent 過程更簡單順暢。這是 DPC vs 近郊 township（如 Puchong 或 Subang Jaya）的一個低調但重要的優勢。
+    </div>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">最適合者</td><td>重視「不叫 Grab 的完整生活圈」的外籍家庭（此類買家明確偏好）；有子女在 ISP 就讀；喜歡 Central Park 步行散步；有寵物；追求「資本增值型」投資而非「最高 Yield 型」；願意以 RM1,180 psf 的高 PSF 換取最強升值</td></tr>
+            <tr><td>OCP vs Park Place DPC</td><td>Park Place（7.7/10，DPC 新案）vs OCP（本案）——OCP 是 DPC 旗艦 Parkfront 建案，已完工 9 年有實際 brickz 驗證；Park Place 是更新建案，具有新建溢價但尚無 brickz 二手數據。若買家選 DPC，OCP 的已完工 + 資本增值驗證更穩健</td></tr>
+            <tr><td>OCP vs MK 建案</td><td>OCP（RM1,180 psf，資本增值框架，步行生活圈）vs MK 諸建案（RM774–938 psf，企業租賃框架，外籍租客）——核心選擇標準：自住優先選 OCP；純租金 Yield 優先選 Pentamont 或 28 MK；MRT3 前置增值選 deDaun</td></tr>
+            <tr><td>議價策略</td><td>掛牌低端 RM1,154 psf 接近 brickz 成交中位 RM1,180——賣家定價理性；議價空間小（5–8%）；目標 RM1,100–1,150 psf；1,300 sqft 目標成交 RM143–149.5 萬</td></tr>
+            <tr><td>持有框架</td><td>2026 買入 → 租給 ISP 外籍家庭（2 年合約）→ DPC 稀缺土地長期升值 → 2030+ 賣出（無特定 MRT 催化，但 DPC 供給稀缺性持續）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟢🟢 本系列最健康（22%售 + 18%租）；DPC 業主強持有力；Master Developer 不折扣保值</td></tr>
+            <tr><td>價格趨勢</td><td>🟢 12年升值 +38.8–47.5%；資本成長 +10.09%（本系列最強）；DPC YoY +6.06% PSF；近期 YoY +0.3% 輕微放緩需觀察</td></tr>
+            <tr><td>租金趨勢</td><td>🟢 Gross Yield 4.13%→4.44%（歷史新高，上升趨勢）；ISP 外籍家庭支撐長期租需求</td></tr>
+            <tr><td>供給稀缺性</td><td>🟢🟢 DPC ~70 英畝剩餘土地；Master Developer 嚴控節奏——長期供給受限是升值最強的結構性支撐</td></tr>
+            <tr><td>主要風險</td><td>🟡 無直接 MRT；RM1,180 psf 高 PSF 入場門檻；近期 YoY +0.3% 放緩需觀察</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-g" style="margin-top:16px">
+      <strong>🟢 審慎積極進場——本系列「資本增值型」最強建案；DPC「不叫 Grab 的完整生態系」與 此類買家生活哲學高度契合</strong><br><br>
+      One Central Park 是本系列在「資本增值論點」和「生活品質框架」上最強的建案：+10.09% 資本成長（本系列最高）+ 掛牌率 22%/18%（本系列最健康）+ DPC Master Developer 保值策略（獨一無二）+ 唯一 Parkfront 建案（不可複製差異化）+ 步行完整生態系（「步行完整生活圈」居住哲學的最高體現）。<br><br>
+      <strong>OCP 不是最高 Yield 的建案，而是最強升值 + 最高生活品質的建案。</strong>對於定位為「長期持有 + 資本增值」的外籍 MM2H 投資者，OCP 提供了 MK 建案難以複製的護城河：DPC 的 473 英畝 township 生態、Master Developer 的不折扣保值策略、有限的剩餘土地供給（~70 英畝）。這三個因素的疊加，使 OCP 的 RM1,180 psf 高 PSF 在長線框架下具有充分合理性。<br><br>
+      <strong>主要保留：</strong>①無直接 MRT（DPC 的系統性弱點）；②RM1,180 psf 是本系列最高入場，現金需求約 RM387K；③Gross Yield 4.44%（非本系列最高）；④brickz 19 筆 FIX-03 勉強通過；⑤近期 YoY +0.3% 放緩需觀察 2026 年新數據。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">One Central Park @ Desa ParkCity ｜ 建案綜合評分卡 ｜ brickz 19 筆 RM1,180 psf｜資本成長 +10.09%</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">DPC YoY +6.06% PSF；+16.55% 成交量（SuperHomes 2026）；稀缺土地（~70 英畝剩餘）；KL 地址（對外籍最友善）；Master Developer 保值策略；OCP 自身 +10.09% 資本成長；「DPC 比鄰近地段（MK、Bandar Menjalara）溢價 20%，供給有限仍有上升空間」（SuperHomes）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">掛牌率 22%/18%（本系列最健康，並列最佳）；brickz 換手率 5.3%（健康）；DPC 業主強持有力；Master Developer 不折扣策略阻止拋售；~70 英畝剩餘土地（供給稀缺）——A2 本系列最高分</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">完工 9 年成熟社區；Gross Yield 歷史新高（4.44%）；DPC 地段升值加速（+6.06% YoY）；扣分：近期 YoY +0.3% 放緩需觀察；無 MRT3 等單一明顯催化劑（DPC 的長線論點更靠稀缺性，非短期催化）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">DPC 自給自足生態（ISP、ParkCity Medical、Plaza Arkadia、The Waterfront 步行）；LDP/DUKE/MRR2/Sprint；扣分：無直接 MRT（DPC 最弱一環）；「DPC 是高度車依賴」（SuperHomes）；最近 MRT 仍需開車</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契 + KL 地址（最友善）；LTV 80–90%；民用電費；MM2H 合規；外籍門檻 RM100 萬達標（最小坪 RM122 萬）；KL State Consent 最順暢；「DPC 是外籍購房最友善的 KL township 之一」</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">8.1/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">8.5×.2 + 9.0×.25 + 7.5×.2 + 7.0×.2 + 8.5×.15 = 8.125 ≈ 8.1</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Perdana ParkCity（DPC 473 英畝 Master Developer）；私人（非 Bursa 上市）但 27 個建案全部成功交付；「不折扣清貨」政策保護投資者利益；已完工 9 年——零交屋風險；DPC 是其唯一業務，沒有分散投資風險——B1 本系列最高（並列 Kiaramas deDaun 的 Asia Quest）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">RM1,180 psf 是本系列最高 PSF；但 +10.09% 資本成長是本系列最強——高 PSF 有市場驗證；掛牌低端 RM1,154 接近 brickz 中位，賣家理性；扣分：RM1,180 確實貴，短期急售風險高（但長線沒問題）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Gross Yield 4.44%（歷史新高，上升趨勢）；Net Yield 2.3–2.7%（因高 PSF 分母）；ISP 外籍家庭租客偏向長期合約（穩定性高）；月租 RM5,000–8,800（DPC 地段租金持續上升）；OCP 論點核心是資本增值而非最高 Yield</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">DPC 自給自足生態（步行完整）；Central Park 旁（最佳 DPC 位置）；LDP/DUKE/MRR2；扣分：無直接 MRT（OCP 最大弱點）——DPC 整體是「高度車依賴的 township」；對無車外籍有限制</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">唯一 Parkfront Condo（DPC 不可複製）；1.8 英畝私人公園直通 Central Park；「Park Within A Park」定位；8 種戶型（1,034–3,153 sqft）；Level 5 設施甲板 + 街道層花園生活；GreenRE 認證——B5 本系列最高（差異化最清晰且完全不可複製）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 住宅地契——本系列最佳地契；KL 地址（最友善）；永久業權；民用電費；HDA 保護；已完工 9 年，零地契爭議</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz 19 筆（FIX-03 勉強通過）；掛牌率 22%（健康，無積壓）；但 RM1,180 psf（最小坪 RM122 萬）的高入場使買家池比中小坪建案窄；DPC 業主強持有力（正面——不輕易拋售）但也意味著急售折讓壓力</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">8.1/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">9.0×.2+7.5×.2+7.0×.15+7.0×.15+9.0×.1+9.5×.1+7.5×.1 = 8.075 ≈ 8.1</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 8.1 × 40% + B 類 8.1 × 60%</div>
+        <div class="score-big">8.10<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#DCFCE7;color:#166534">⭐⭐⭐⭐ 優質——本系列資本增值最強；DPC 生態最完整；供需最健康；此類買家哲學最吻合</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">3.24 + 4.86 = 8.10 → 已完工，brickz 19 筆（FIX-03 勉強通過）；置信度中高</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>資本成長 +10.09%（本系列最強，B2 7.5）+ 掛牌率 22%/18%（本系列最健康，A2 9.0）+ Master Developer 保值策略（B1 9.0，獨一無二）+ 唯一 DPC Parkfront（B5 9.0，完全不可複製）+ DPC 步行完整生態系（「步行完整生活圈」哲學最高吻合）+ Freehold 住宅地契 KL 地址（A5 8.5，最友善框架）。<br>
+          <strong style="color:#fca5a5">主要保留：</strong>無直接 MRT（B4 7.0，DPC 系統性弱點）；RM1,180 psf 本系列最高入場（B2 7.5）；Net Yield 2.3–2.7%（非本系列最高，B3 7.0）；brickz 19 筆 FIX-03 勉強通過；近期 YoY +0.3% 放緩待觀察。
+        </div>
+      </div>
+    </div>
+
+    <h3>十九個建案完整最終排序（含 One Central Park DPC）</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>狀態</th>
+          <th>資本成長</th>
+          <th>掛牌率</th>
+          <th>建議</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><strong>Kiaramas deDaun</strong></td><td style="font-weight:700;color:#16a34a">8.34</td><td><span class="tag t-g">Freehold 住宅</span></td><td>期房 2028</td><td>MRT3 前置</td><td>97% 取購（期房）</td><td>🟢 積極進場</td></tr>
+        <tr style="background:#F0FDF4"><td>2</td><td><strong>One Central Park DPC 🆕</strong></td><td style="font-weight:700;color:#16a34a">8.10</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2017</td><td style="font-weight:700;color:#16a34a">+10.09%（最強）</td><td style="font-weight:700;color:#16a34a">22%（最健康）</td><td>🟢 審慎積極（資本增值框架）</td></tr>
+        <tr><td>3</td><td><strong>28 Mont' Kiara</strong></td><td style="font-weight:700;color:#16a34a">8.04</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2012</td><td>YoY +6.7%</td><td>23%（健康）</td><td>🟢 審慎積極（確認管理費）</td></tr>
+        <tr><td>4</td><td><strong>Sunway Mont Residences</strong></td><td style="font-weight:700;color:#16a34a">7.88</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2020</td><td>+20%（6年）</td><td>59%（偏高）</td><td>🟢 審慎積極（GIS 步行）</td></tr>
+        <tr><td>5</td><td><strong>Trinity Pentamont</strong></td><td style="font-weight:700;color:#16a34a">7.84</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2022</td><td>+35%（7年）</td><td>34%（中等）</td><td>🟢 審慎積極（Net Yield 最高）</td></tr>
+        <tr><td>6</td><td><strong>R22 Mont Kiara</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>已完工</td><td>有驗證</td><td>中等</td><td>🟢 進場</td></tr>
+        <tr><td>7</td><td><strong>Park Place DPC</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>已完工</td><td>DPC 地段強</td><td>中等</td><td>🟢 進場</td></tr>
+        <tr><td>8</td><td><strong>TRX Residences</strong></td><td style="font-weight:700;color:#16a34a">7.6</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>已完工</td><td>+5.56% YoY</td><td>低</td><td>🟢 增值框架</td></tr>
+        <tr><td>9</td><td><strong>The Conlay by E&O</strong></td><td style="font-weight:700;color:#16a34a">7.4</td><td><span class="tag t-y">Freehold 商業</span></td><td>已完工</td><td>+17%</td><td>中等</td><td>🟢 審慎積極</td></tr>
+        <tr><td>10</td><td><strong>Bangsar Hill Park</strong></td><td style="font-weight:700;color:#16a34a">6.96</td><td><span class="tag t-y">Leasehold 住宅</span></td><td>完工 2025</td><td>待驗證</td><td>~0%</td><td>🟡 審慎考慮</td></tr>
+        <tr><td>11</td><td><strong>Pavilion Hilltop</strong></td><td style="font-weight:700;color:#d97706">6.64</td><td><span class="tag t-g">Freehold 住宅</span></td><td>✅ 完工 2017</td><td>-0.1%（唯一負）</td><td>40%+</td><td>🟡 觀望（投資性價比最低）</td></tr>
+        <tr><td>12</td><td><strong>CloutHaus KLCC</strong></td><td style="font-weight:700;color:#d97706">6.7</td><td><span class="tag t-y">Freehold 商業</span></td><td>期房 2029</td><td>待驗證</td><td>—</td><td>🟡 觀望</td></tr>
+        <tr><td>13</td><td><strong>SWNK Houze BBCC</strong></td><td style="font-weight:700;color:#d97706">6.2</td><td><span class="tag t-r">Leasehold 商業</span></td><td>期房</td><td>—</td><td>—</td><td>🔴 外籍不推</td></tr>
+        <tr><td>14</td><td><strong>TS2 武吉免登 🔵</strong></td><td style="font-weight:700;color:#3b82f6">6.0</td><td><span class="tag t-y">Freehold 商業</span></td><td>期房 2027</td><td>功能性</td><td>—</td><td>🔵 功能性持有</td></tr>
+        <tr><td>15</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="font-weight:700;color:#f97316">5.7</td><td><span class="tag t-g">SOHO HDA</span></td><td>期房</td><td>—</td><td>—</td><td>🟡 條件性</td></tr>
+        <tr><td>16</td><td><strong>Stonor 3 KLCC</strong></td><td style="font-weight:700;color:#dc2626">5.7</td><td><span class="tag t-y">商業地契 HDA</span></td><td>完工</td><td>負成長</td><td>高</td><td>🔴 暫緩</td></tr>
+        <tr><td>17</td><td><strong>Pavilion DH</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-y">Freehold 商業</span></td><td>完工 2025</td><td>—</td><td>中等</td><td>🟡 觀望</td></tr>
+        <tr><td>18</td><td><strong>Pavilion Square</strong></td><td style="font-weight:700;color:#d97706">5.5</td><td><span class="tag t-r">Leasehold 商業</span></td><td>期房 2028–29</td><td>—</td><td>—</td><td>🔴 投資暫緩</td></tr>
+        <tr><td>19</td><td><strong>Orion Residence BB</strong></td><td style="font-weight:700;color:#dc2626">5.2</td><td><span class="tag t-y">Freehold 商業</span></td><td>竣工確認中</td><td>—</td><td>—</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">🔑 One Central Park DPC（8.10）排名第2，成為本系列已完工建案中評分最高的（僅次期房 deDaun 8.34），也超越 28 MK（8.04）和 Sunway Mont（7.88）。核心優勢：A2 9.0（本系列最健康供需）+ B1 9.0（Master Developer 保值策略，獨一無二）+ B5 9.0（唯一 DPC Parkfront，完全不可複製）。主要差距 vs deDaun（8.34 vs 8.10）：①deDaun 期房 MRT3 前置未來空間（A4 8.0 vs 7.0）；②deDaun B2 安全邊際（9.0 vs 7.5，deDaun 以 Danai 二手成交作錨點）；③deDaun brickz 置信度略高（期房概念 vs OCP 實際 19 筆）。OCP 的優勢：已完工 + 確定性更高 + 此類買家哲學最吻合。⚠️ FIX-03：brickz 19 筆略低於 21 筆基準，建議 2026 年更新成交數據確認趨勢。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：KL RM1M+ 高端住宅市場深度研究（2026-03）｜KL 供需 Overhang 深度分析（2026-04-01）｜brickz.my（ONE CENTRAL PARK：19 筆，2024-06至2025-05，成交中位 RM1,180 psf，P25–P75：RM133.5萬–228萬；DPC 住宅整體：RM1,001 psf）｜iProperty.com.my（79 筆掛牌售 RM1,154–1,588 psf；63 筆掛牌租 RM4.04–5.66 psf/月；資本成長 +10.09%；iProperty Dec 2025：中位 RM1,160 psf，YoY +0.3%）｜iRumah.co（Gross Yield 4.44%，2025；vs 4.13%，2024；歷史最低 3.55%，2017；發售 RM800 psf，竣工 2016/2017）｜PropertyGuru（月租 RM5,000–8,800；掛牌 PSF RM1,001–1,670；坪數 1,034–3,153 sqft）｜desaparkcity.com 官方（「Parkfront Condos；完工 January 2017；Site Area 1.65 Hectares」）｜SuperHomes（DPC 地段：YoY +16.55% 成交量；+6.06% PSF；2026-02）｜Park City Holdings 官方（「Perdana ParkCity 不折扣清貨，保護市場率」）｜PropertyLau（資本成長 +8.93% 另一時點；1,292 sqft 低於市場 RM149 萬）<br>
+  ⚠️ 管理費未直接確認（DPC 建案一般估 RM0.35–0.50 psf）——進場前向管委會確認。brickz 19 筆 FIX-03 勉強通過，建議追蹤 2026 年新增成交。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

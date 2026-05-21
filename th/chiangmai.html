@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Chiang Mai Deep Dive | Thailand Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}.report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}.report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}.report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}.report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}.report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}.report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}.report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}.chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}.chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}.chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}.report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}.report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}.toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}.toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}.toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}.toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}.toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}.toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}.report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .city-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:20px 0}.city-card{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:8px;padding:16px}.city-card h3{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#1e3a5f;margin:0 0 8px}.city-card .city-stat{font-family:'JetBrains Mono',monospace;font-size:12px;color:#2c3e50;margin:3px 0}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}.side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}.side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}.side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}.side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}.side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600}.side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  .data-table{width:100%;border-collapse:collapse;margin:16px 0;font-family:'Inter',sans-serif;font-size:12px}.data-table th{background:#f4f7fc;color:#1e3a5f;font-weight:600;text-align:left;padding:10px 12px;border-bottom:1.5px solid #ccd9e8;font-size:11px;text-transform:uppercase;letter-spacing:.03em}.data-table td{padding:10px 12px;border-bottom:1px solid #eef3f9;color:#2c3e50}.data-table tr:last-child td{border-bottom:none}.data-table .td-num{font-family:'JetBrains Mono',monospace;color:#1e3a5f;text-align:right}.data-table .td-pos{color:#16a34a;font-weight:600}.data-table .td-neg{color:#dc2626;font-weight:600}
+  .callout{background:#fff9ed;border-left:3px solid #d97706;border-radius:0 6px 6px 0;padding:14px 18px;margin:20px 0;font-family:'Inter',sans-serif;font-size:13px;line-height:1.75;color:#2c3e50}.callout strong{background:transparent!important;padding:0!important;color:#d97706!important}
+  .callout.red{background:#fef2f2;border-left-color:#dc2626}.callout.red strong{color:#dc2626!important}
+  @media(max-width:1100px){.side-nav{display:none}}@media(max-width:768px){.report-chart-grid,.city-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}.data-table{font-size:11px}.data-table th,.data-table td{padding:7px 6px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-nomads" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Digital Nomads</span><span class="side-nav-label lang-zh" style="display:none">數字游民</span></a>
+    <a href="#sec-neighborhoods" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Neighborhoods</span><span class="side-nav-label lang-zh" style="display:none">重點社區</span></a>
+    <a href="#sec-lighttrail" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Light Rail</span><span class="side-nav-label lang-zh" style="display:none">輕軌催化劑</span></a>
+    <a href="#sec-rental" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rental Market</span><span class="side-nav-label lang-zh" style="display:none">租賃市場</span></a>
+    <a href="#sec-foreign" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Foreign &amp; Tax</span><span class="side-nav-label lang-zh" style="display:none">外資與稅務</span></a>
+    <a href="#sec-risk" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Risk Monitor</span><span class="side-nav-label lang-zh" style="display:none">風險監測</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+  <div class="report-header">
+    <div class="lang-en"><h1>CHIANG MAI &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: REIC / Bamboo Routes / InvestAsian / CBRE Thailand / Knight Frank</div></div>
+    <div class="lang-zh" style="display:none"><h1>清邁——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：REIC / Bamboo Routes / InvestAsian / 世邦魏理仕泰國 / 萊坊</div></div>
+  </div>
+  <div class="report-body">
+    <div class="toc-box" id="tocBox"><div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend</span><span class="lang-zh" style="display:none">2. 房價走勢</span></a>
+        <a href="#sec-nomads" onclick="closeTocMobile()"><span class="lang-en">3. Digital Nomads &amp; Expat Cohorts</span><span class="lang-zh" style="display:none">3. 數字游民與外籍群體</span></a>
+        <a href="#sec-neighborhoods" onclick="closeTocMobile()"><span class="lang-en">4. Neighborhoods Deep Dive</span><span class="lang-zh" style="display:none">4. 重點社區深度分析</span></a>
+        <a href="#sec-lighttrail" onclick="closeTocMobile()"><span class="lang-en">5. Light Rail Catalyst</span><span class="lang-zh" style="display:none">5. 輕軌催化劑</span></a>
+        <a href="#sec-rental" onclick="closeTocMobile()"><span class="lang-en">6. Rental Market &amp; Airbnb</span><span class="lang-zh" style="display:none">6. 租賃市場與Airbnb</span></a>
+        <a href="#sec-foreign" onclick="closeTocMobile()"><span class="lang-en">7. Foreign Ownership &amp; Tax</span><span class="lang-zh" style="display:none">7. 外資持有與稅務</span></a>
+        <a href="#sec-risk" onclick="closeTocMobile()"><span class="lang-en">8. Risk Monitor (AQI/Visa/Supply)</span><span class="lang-zh" style="display:none">8. 風險監測（空氣/簽證/供應）</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">9. Outlook &amp; Scenarios</span><span class="lang-zh" style="display:none">9. 展望與情景</span></a>
+      </div></div>
+
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Chiang Mai is Thailand's premier lifestyle-driven property market and the regional benchmark for digital-nomad and retiree inflows. A quality Nimman-district condo prices at <strong>THB 3.7M</strong> (roughly <strong>THB 92K/m&sup2;</strong>) &mdash; a dramatic <strong>3&ndash;7x discount to Bangkok CBD</strong> at THB 315K/m&sup2;. Gross rental yields of <strong>4&ndash;7%</strong> materially exceed Bangkok's mass-market returns, underpinned by a steady pipeline of digital nomads (35K+ national DTV-visa approvals in Year 1), retirees (~25,000 long-stay permit holders), and language-school students. REIC ranks Chiang Mai <strong>4th nationally by residential transaction volume</strong>, punching well above its population weight of 1.2M.</p>
+      <p>Three structural tailwinds define the 2026&ndash;2029 setup. First, a <strong>4.4x expansion in the digital nomad population since 2019</strong> (8K → 35K), catalysed by the DTV Destination Visa launched Q3 2024. Second, the <strong>15.8 km light rail transit (LRT) system</strong> targeting 2028 commercial opening &mdash; the city's first mass-transit project ever, with BTS/MRT-precedent uplift of 15&ndash;20% within 200m of stations. Third, living costs <strong>~40% below Bangkok</strong>, including rent, F&amp;B, and healthcare. Foreign condo transfers reached <strong>698 units</strong> in the latest reporting period, up 22% YoY. Every Chiang Mai zone remains priced below Bangkok CBD by a factor of 3&ndash;7x.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>清邁是泰國首屈一指的生活方式驅動房產市場，亦為區域內數字游民與退休人員流入的標竿。尼曼優質公寓定價<strong>泰銖370萬</strong>（約<strong>泰銖92K/平方米</strong>）——相較曼谷CBD泰銖315K/平方米有<strong>3-7倍折讓</strong>。<strong>4-7%毛租金收益率</strong>明顯超越曼谷大眾市場回報，受穩定的數字游民（全國DTV簽證首年35K+批准）、退休人員（約25,000長期居留許可）及語言學校學生需求支撐。REIC將清邁列為<strong>全國住宅交易量第4位</strong>，遠超其120萬人口權重。</p>
+      <p>2026-2029年格局由三大結構性順風定義。其一，<strong>數字游民人口自2019年擴張4.4倍</strong>（8K→35K），受2024年Q3推出的DTV目的地簽證催化。其二，<strong>15.8公里輕軌交通（LRT）系統</strong>目標2028年商業開通——城市有史以來首個大眾運輸項目，依BTS/MRT先例車站200米內提升15-20%。其三，生活成本<strong>比曼谷低約40%</strong>，含租金、餐飲、醫療。外國公寓轉讓最新報告期達<strong>698套</strong>，年增22%。清邁每區價格均低於曼谷CBD 3-7倍。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">NIMMAN PRICE</span><span class="lang-zh" style="display:none">尼曼價格</span></div><div class="kpi-value">THB 92K/m²</div><span class="kpi-badge badge-green"><span class="lang-en">Peak zone · 3.4x discount to BKK CBD</span><span class="lang-zh" style="display:none">峰值區 · 對曼谷CBD折讓3.4倍</span></span></div>
+      <div class="kpi-card blue"><div class="kpi-label"><span class="lang-en">FOREIGN TRANSFERS</span><span class="lang-zh" style="display:none">外國轉讓</span></div><div class="kpi-value">698 units</div><span class="kpi-badge badge-blue"><span class="lang-en">Latest period +22% YoY · China+Myanmar lead</span><span class="lang-zh" style="display:none">最新+22% · 中國緬甸領先</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">RENTAL YIELD</span><span class="lang-zh" style="display:none">租金收益率</span></div><div class="kpi-value">4–7%</div><span class="kpi-badge badge-green"><span class="lang-en">Gross · Studio/1BR highest</span><span class="lang-zh" style="display:none">毛 · 開放式/一房最高</span></span></div>
+      <div class="kpi-card blue"><div class="kpi-label"><span class="lang-en">EXPAT COMMUNITY</span><span class="lang-zh" style="display:none">外籍社區</span></div><div class="kpi-value">33K+</div><span class="kpi-badge badge-blue"><span class="lang-en">DN + retiree + long-stay · +8% YoY</span><span class="lang-zh" style="display:none">數游+退休+長住 · 年增+8%</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">DTV VISA Y1</span><span class="lang-zh" style="display:none">DTV簽證首年</span></div><div class="kpi-value">35K natl</div><span class="kpi-badge badge-green"><span class="lang-en">National approvals · CM = top destination</span><span class="lang-zh" style="display:none">全國批准 · 清邁首選</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">LIGHT RAIL TARGET</span><span class="lang-zh" style="display:none">輕軌目標</span></div><div class="kpi-value">2028</div><span class="kpi-badge badge-orange"><span class="lang-en">15.8 km · THB 29.5B · 15–20% uplift</span><span class="lang-zh" style="display:none">15.8km · 295億 · 15-20%提升</span></span></div>
+    </div>
+
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND</span><span class="lang-zh" style="display:none">房價走勢</span></h2>
+    <div class="lang-en">
+      <p>Chiang Mai's condo prices have followed a steady upward trajectory with a marked 2023&ndash;2025 acceleration in the Nimman district. Nimman has appreciated <strong>+28%</strong> over six years (2019&ndash;2025), from <strong>THB 72K to THB 92K/m&sup2;</strong>, with the steepest slope post-2022 reflecting DN inflows and LRT announcement speculation. Old City has tracked a similar but more moderate path, reaching <strong>THB 82K/m&sup2;</strong>. Suburban zones (Hang Dong, Mae Rim) remain accessible at <strong>THB 44&ndash;58K/m&sup2;</strong>, offering the highest gross-yield potential for budget-conscious investors.</p>
+      <p>Critically, every Chiang Mai zone remains priced <strong>below Bangkok CBD by a factor of 3&ndash;7x</strong>. This price gap, combined with comparable rental demand from the expat community, creates the yield premium that defines Chiang Mai's investment thesis. On a price-to-rent ratio basis, Nimman trades at ~15x (vs. ~22x Bangkok CBD), indicating better cashflow fundamentals. However, capital appreciation has historically underperformed Bangkok: <strong>5yr CAGR of 4.5% for Nimman vs. 5.8% for Bangkok CBD</strong>. Chiang Mai is a yield play; Bangkok is a capital-gains play.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>清邁公寓價格持續穩步上升，尼曼區2023-2025年顯著加速。尼曼六年間（2019-2025）從<strong>泰銖72K升至泰銖92K/平方米</strong>累計漲幅<strong>+28%</strong>，2022年後斜率最陡反映數游流入與輕軌公告投機。老城走勢相似但較溫和，達<strong>泰銖82K/平方米</strong>。郊區（杭東、美林）仍可負擔，價格<strong>泰銖44-58K/平方米</strong>，為預算敏感型投資者提供最高毛收益潛力。</p>
+      <p>關鍵在於，清邁每區均低於曼谷CBD 3-7倍。這種價差加上外籍社區帶來的可觀租賃需求，創造了定義清邁投資邏輯的收益溢價。以價格租金比計，尼曼約15倍（曼谷CBD約22倍），現金流基本面更佳。然資本增值歷史上表現遜於曼谷：<strong>尼曼5年CAGR 4.5% vs. 曼谷CBD 5.8%</strong>。清邁是收益戲法；曼谷是資本利得戲法。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card"><h4><span class="lang-en">Condo Price by Area 2019–2025 (THB K/m²)</span><span class="lang-zh" style="display:none">各區域公寓價格 2019-2025（THB K/m²）</span></h4><p><span class="lang-en">Source: REIC / CBRE Thailand</span><span class="lang-zh" style="display:none">來源：REIC / 世邦魏理仕泰國</span></p><div id="chartCMPrice" style="height:220px"></div></div>
+      <div class="report-chart-card"><h4><span class="lang-en">Foreign Transfers by Nationality (units)</span><span class="lang-zh" style="display:none">外國轉讓按國籍（套）</span></h4><p><span class="lang-en">Source: REIC / Bamboo Routes</span><span class="lang-zh" style="display:none">來源：REIC / Bamboo Routes</span></p><div id="chartCMUnits" style="height:220px"></div></div>
+    </div>
+
+    <h2 id="sec-nomads"><span class="lang-en">DIGITAL NOMADS &amp; EXPAT COHORTS</span><span class="lang-zh" style="display:none">數字游民與外籍群體</span></h2>
+    <div class="lang-en">
+      <p>Chiang Mai's <strong>digital nomad population has surged from ~8,000 in 2019 to an estimated 35,000 by 2025</strong>, a 4.4x increase catalysed by the <strong>Destination Thailand Visa (DTV)</strong> launched Q3 2024. The DTV offers <strong>5 years multi-entry, 180-day stays per entry</strong>, remote-work legal status, and a THB 500,000 bank-deposit requirement. First-year national approvals reached 35K, with Chiang Mai capturing an estimated 40%+ of DTV-holder residence choices. The broader expat community &mdash; including retirees on Non-O-A visas, long-stay residents, Thai-spouse holders, and language students &mdash; has grown to <strong>33,000+</strong>.</p>
+      <p>Four expat cohorts drive distinct rental demand profiles. <strong>Digital nomads (35K)</strong>: 3&ndash;12 month stays, prefer furnished 1BR condos in Nimman near co-working spaces (Punspace, CAMP, hub53), rent budget THB 12&ndash;25K/month. <strong>Retirees (~25K, mostly 50+ on Non-O-A)</strong>: 12+ month leases, prefer 2BR condos or small houses in Santitham, Hang Dong, Mae Rim; rent budget THB 20&ndash;45K/month. <strong>Chinese cohort (~12K)</strong>: mixed profile including second-home buyers, education-driven families (international school access), medical-tourism stays. <strong>Western long-stay (~8K)</strong>: families, small-business operators, authors/bloggers. The demographic base is diversifying away from the historical Western-dominant profile toward Chinese and Myanmar-origin residents, reflecting Thailand's regional positioning.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>清邁<strong>數字游民人口從2019年約8,000激增至2025年估計35,000</strong>，增長4.4倍，受2024年Q3推出的<strong>泰國目的地簽證（DTV）</strong>催化。DTV提供<strong>5年多次入境、每次停留180日</strong>、遠端工作合法身分、泰銖500,000銀行存款要求。首年全國批准達35K，清邁估計捕獲DTV持有者居住選擇的40%+。更廣泛外籍社區——含Non-O-A簽退休人員、長住居民、泰配偶持有者、語言學生——已增至<strong>33,000+</strong>。</p>
+      <p>四類外籍群體驅動不同租賃需求特徵。<strong>數字游民（35K）</strong>：3-12個月停留，偏好尼曼共享辦公（Punspace、CAMP、hub53）附近精裝一房，月租預算泰銖12-25K。<strong>退休人員（約25K，多為50+持Non-O-A）</strong>：12+個月租約，偏好三提坦、杭東、美林兩房或小屋；月租預算泰銖20-45K。<strong>華人群體（約12K）</strong>：混合類型含二房買家、教育驅動家庭（國際學校管道）、醫療旅遊停留。<strong>西方長住（約8K）</strong>：家庭、小企業主、作家/博主。人口基礎從歷史上西方主導轉向中國與緬甸籍居民多元化，反映泰國區域定位。</p>
+    </div>
+
+    <div class="chart-inline"><h4><span class="lang-en">Digital Nomad &amp; Expat Population 2019–2025 (K)</span><span class="lang-zh" style="display:none">數字游民與外籍人口 2019-2025（千）</span></h4><div id="chartCMNomads" style="height:220px"></div><p class="chart-note green"><span class="lang-en">DN population 4.4x since 2019. DTV Visa Y1 = 35K national approvals. CM captures ~40% of DTV holders</span><span class="lang-zh" style="display:none">數游人口自2019年4.4倍。DTV簽證首年全國35K批准。清邁捕獲約40% DTV持有者</span></p></div>
+
+    <h2 id="sec-neighborhoods"><span class="lang-en">NEIGHBORHOODS DEEP DIVE</span><span class="lang-zh" style="display:none">重點社區深度分析</span></h2>
+    <div class="lang-en">
+      <p>Chiang Mai's seven key investment neighborhoods each serve distinct buyer profiles and tenant cohorts. <strong>Nimman (Nimmanhaemin)</strong> at THB 92K/m&sup2; with 6.5% yield is the premium lifestyle hub &mdash; home to the highest concentration of co-working spaces, specialty coffee, and DN community. <strong>Old City</strong> (THB 82K/m&sup2;) attracts culture-focused expats and tourists &mdash; temple proximity, walkable, authentic. <strong>Chang Phueak</strong> and <strong>Santitham</strong> offer affordable alternatives for long-term residents at THB 65&ndash;68K/m&sup2;, while <strong>Hang Dong</strong> and <strong>Mae Rim</strong> serve retirees and families seeking larger spaces and nature proximity at THB 45&ndash;55K/m&sup2;.</p>
+      <p>The <strong>Airport area</strong> (THB 60K/m&sup2;, 5.5% yield) is the emerging opportunity zone, benefiting from Chiang Mai International Airport expansion plans (2026&ndash;2028, adding 8M passenger capacity) and confirmed LRT connectivity. Yield compression is most advanced in Nimman, where primary-market prices have outpaced rental growth over 2023&ndash;2025. The best <strong>risk-adjusted returns currently lie in Chang Phueak and the Airport corridor</strong>, combining lower entry prices, better yields, and LRT upside. Developer discipline has been superior to Bangkok: most Chiang Mai projects launch at 70%+ sold via off-plan, limiting speculation-driven oversupply.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>清邁七個重點投資社區各服務不同買家類型與租客群體。<strong>尼曼（Nimmanhaemin）</strong>泰銖92K/平方米、6.5%收益率是高端生活方式中心——擁有最密集的共享辦公、精品咖啡、數游社區。<strong>老城</strong>（泰銖82K/平方米）吸引注重文化的外籍與遊客——寺廟毗鄰、步行可達、原真。<strong>昌普克</strong>與<strong>三提坦</strong>以泰銖65-68K/平方米為長期居民提供可負擔選擇，而<strong>杭東</strong>與<strong>美林</strong>以泰銖45-55K/平方米服務尋求更大空間與親近自然的退休人員與家庭。</p>
+      <p><strong>機場區域</strong>（泰銖60K/平方米、5.5%收益率）是新興機會區，受惠於清邁國際機場擴建計劃（2026-2028年增加800萬人次容量）及已確認的輕軌連接。尼曼收益率壓縮最顯著，2023-2025年一手市場價格超越租金增長。目前<strong>風險調整後最佳回報在昌普克與機場走廊</strong>，結合較低入場價、較佳收益率、輕軌上行空間。開發商紀律優於曼谷：多數清邁項目預售70%+後才推出，限制了投機性超供。</p>
+    </div>
+
+    <table class="data-table">
+      <thead><tr>
+        <th><span class="lang-en">Area</span><span class="lang-zh" style="display:none">區域</span></th>
+        <th><span class="lang-en">Price THB K/m²</span><span class="lang-zh" style="display:none">價格 K/m²</span></th>
+        <th><span class="lang-en">Yield</span><span class="lang-zh" style="display:none">收益率</span></th>
+        <th><span class="lang-en">Primary Tenant</span><span class="lang-zh" style="display:none">主要租客</span></th>
+        <th><span class="lang-en">LRT Station</span><span class="lang-zh" style="display:none">輕軌車站</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Nimman</td><td class="td-num">92</td><td class="td-num">6.5%</td><td><span class="lang-en">DN · Western · Chinese</span><span class="lang-zh" style="display:none">數游 · 西方 · 華人</span></td><td><span class="lang-en">Direct</span><span class="lang-zh" style="display:none">直達</span></td></tr>
+        <tr><td>Old City</td><td class="td-num">82</td><td class="td-num">5.8%</td><td><span class="lang-en">Tourist · Cultural</span><span class="lang-zh" style="display:none">遊客 · 文化</span></td><td><span class="lang-en">Adjacent</span><span class="lang-zh" style="display:none">鄰近</span></td></tr>
+        <tr><td>Chang Phueak</td><td class="td-num">68</td><td class="td-num">5.2%</td><td><span class="lang-en">Long-stay · Students</span><span class="lang-zh" style="display:none">長住 · 學生</span></td><td><span class="lang-en">Direct</span><span class="lang-zh" style="display:none">直達</span></td></tr>
+        <tr><td>Santitham</td><td class="td-num">65</td><td class="td-num">4.8%</td><td><span class="lang-en">Retirees · Long-stay</span><span class="lang-zh" style="display:none">退休 · 長住</span></td><td><span class="lang-en">Bus link</span><span class="lang-zh" style="display:none">公車</span></td></tr>
+        <tr><td>Airport</td><td class="td-num">60</td><td class="td-num">5.5%</td><td><span class="lang-en">Short-stay · Biz travel</span><span class="lang-zh" style="display:none">短住 · 商旅</span></td><td><span class="lang-en">Terminus</span><span class="lang-zh" style="display:none">終點站</span></td></tr>
+        <tr><td>Hang Dong</td><td class="td-num">55</td><td class="td-num">4.2%</td><td><span class="lang-en">Retirees · Families</span><span class="lang-zh" style="display:none">退休 · 家庭</span></td><td><span class="lang-en">None</span><span class="lang-zh" style="display:none">無</span></td></tr>
+        <tr><td>Mae Rim</td><td class="td-num">45</td><td class="td-num">4.0%</td><td><span class="lang-en">Resort · 2nd home</span><span class="lang-zh" style="display:none">度假 · 二房</span></td><td><span class="lang-en">None</span><span class="lang-zh" style="display:none">無</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="sec-lighttrail"><span class="lang-en">LIGHT RAIL CATALYST</span><span class="lang-zh" style="display:none">輕軌催化劑</span></h2>
+    <div class="lang-en">
+      <p>The Chiang Mai Light Rail Transit (LRT) project is a <strong>15.8 km system</strong> with estimated <strong>THB 29.5 billion budget</strong> (~$820M), targeting commercial opening in <strong>2028</strong>. The planned <strong>Red Line</strong> connects Chiang Mai International Airport (south) through Chang Khlan &rarr; Old City &rarr; Nimman &rarr; Chiang Mai University &rarr; Chang Phueak &rarr; northern suburbs. Fifteen stations are planned at ~1km spacing. A second Green Line (9.2 km east-west) is in pre-feasibility. The project received Cabinet approval in 2023 and is proceeding under a PPP (public-private partnership) structure managed by MRTA (Metropolitan Rapid Transit Authority).</p>
+      <p>Based on Bangkok BTS/MRT precedent, properties within <strong>200m of LRT stations</strong> are forecast to see <strong>15&ndash;20% price uplift</strong> within 2&ndash;3 years of opening, decaying sharply to 6&ndash;12% at 200&ndash;500m and negligible beyond 2km. Early-mover investors are already pricing in partial uplift in <strong>Nimman and Airport corridor</strong> condos near confirmed station locations &mdash; Bamboo Routes surveys indicate 5&ndash;8% "anticipation premium" already embedded in 2024&ndash;2025 transactions. Execution risk remains: the Bangkok Pink Line slipped 18 months; the CM LRT could similarly see delays to 2029&ndash;2030, though the 2028 target has been reaffirmed by MRTA as of Q1 2026.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>清邁輕軌交通（LRT）項目為<strong>15.8公里系統</strong>，預算<strong>泰銖295億</strong>（約8.2億美元），目標<strong>2028年</strong>商業開通。規劃<strong>紅線</strong>連接清邁國際機場（南）經Chang Khlan→老城→尼曼→清邁大學→昌普克→北郊。15個車站以約1公里間距規劃。第二條綠線（9.2公里東西向）處於前期可行性。項目於2023年獲內閣批准，在MRTA（都會捷運局）管理的PPP（公私合營）架構下推進。</p>
+      <p>基於曼谷BTS/MRT先例，<strong>LRT車站200米內</strong>房產預計開通後2-3年內<strong>價格提升15-20%</strong>，200-500米急降至6-12%，2公里以上可忽略。早期投資者已在已確認車站位置附近的<strong>尼曼與機場走廊</strong>公寓部分計入——Bamboo Routes調查顯示2024-2025年交易已內含5-8%「預期溢價」。執行風險仍在：曼谷粉線延誤18個月；清邁LRT可能類似延至2029-2030年，雖MRTA於2026年Q1重申2028年目標。</p>
+    </div>
+
+    <div class="chart-inline"><h4><span class="lang-en">Projected Price Uplift by LRT Station Proximity</span><span class="lang-zh" style="display:none">按LRT車站距離預計價格提升</span></h4><div id="chartCMLightRail" style="height:220px"></div><p class="chart-note orange"><span class="lang-en">Based on Bangkok BTS/MRT precedent. &lt;200m = 15–20% uplift. Anticipation premium 5–8% already embedded</span><span class="lang-zh" style="display:none">基於曼谷BTS/MRT先例。200米內=15-20%提升。已內含5-8%預期溢價</span></p></div>
+
+    <h2 id="sec-rental"><span class="lang-en">RENTAL MARKET &amp; AIRBNB</span><span class="lang-zh" style="display:none">租賃市場與Airbnb</span></h2>
+    <div class="lang-en">
+      <p>Chiang Mai's rental market spans <strong>THB 8,000&ndash;45,000 per month</strong> for condos, with studios at the lower end and furnished 2-bedroom premium units in Nimman at the top. Market structure is unusually tenant-stable: digital nomads on 3&ndash;12 month leases, retirees on annual contracts, language students on semester-length stays. This tenant diversity provides significantly more occupancy stability than Bangkok's tourist-dependent rental stock. Gross yields range <strong>5&ndash;7%</strong>, with studios and serviced apartments commanding the highest returns; premium 2BR units yield lower (~4.0%) due to higher capital values.</p>
+      <p>Airbnb in Chiang Mai operates in the same <strong>regulatory grey zone</strong> as Bangkok &mdash; Thailand's Hotel Act technically prohibits &lt;30-day rentals without a hotel license. Enforcement in Chiang Mai has historically been lax but is tightening: 2024 saw the first TripAdvisor/Airbnb-listing raids by the Provincial Administration. <strong>Model short-term rental income at 5.5% gross</strong> to discount the regulatory tail risk. Long-stay (&ge;30 days) is fully legal and the dominant structure for DN tenants. The <strong>rent-to-own and branded furnished apartment</strong> segment is expanding rapidly &mdash; operators like Apartments4U, CM Homes Co., and Colony Co-Living target DN renters with THB 15&ndash;35K/month packages including utilities, cleaning, and co-working access.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>清邁租賃市場公寓月租<strong>泰銖8,000-45,000</strong>，開放式公寓在低端，尼曼精裝兩房優質單位在高端。市場結構租客異常穩定：數字游民3-12個月租約、退休人員年度合同、語言學生學期租約。此租客多樣性提供了顯著優於曼谷旅遊依賴型租賃存量的入住穩定性。毛收益率<strong>5-7%</strong>，開放式與服務式公寓最高；優質兩房單位較低（約4.0%）因資本價值較高。</p>
+      <p>清邁Airbnb與曼谷處於同樣<strong>監管灰色地帶</strong>——泰國飯店法技術上禁止無飯店執照的<30日租賃。清邁執法歷史上寬鬆但正收緊：2024年省政府首次對TripAdvisor/Airbnb列表突擊。<strong>短租收入以5.5%毛建模</strong>以折讓監管尾部風險。長住（≥30日）完全合法，為數游租客主導結構。<strong>租購與品牌精裝公寓</strong>板塊快速擴張——Apartments4U、CM Homes Co.、Colony Co-Living等運營商以泰銖15-35K/月套餐針對數游租客，含水電、清潔、共享辦公管道。</p>
+    </div>
+
+    <div class="chart-inline"><h4><span class="lang-en">Rental &amp; Yield by Property Type</span><span class="lang-zh" style="display:none">各類型租金與收益率</span></h4><div id="chartCMRental" style="height:220px"></div><p class="chart-note green"><span class="lang-en">Studio: THB 8K, 5.8%. Serviced apt: 6.5%. 2BR premium: 4.0% yield compression</span><span class="lang-zh" style="display:none">開放式：泰銖8K，5.8%。服務式：6.5%。兩房優質：4.0%收益率壓縮</span></p></div>
+
+    <h2 id="sec-foreign"><span class="lang-en">FOREIGN OWNERSHIP &amp; TAX</span><span class="lang-zh" style="display:none">外資持有與稅務</span></h2>
+    <div class="lang-en">
+      <p>Foreign-ownership rules in Chiang Mai are identical to Bangkok's &mdash; governed by the <strong>Condominium Act B.E. 2522 (1979)</strong> with a <strong>49% cumulative floor-area cap per building</strong> for foreign freehold condo ownership. Landed property is prohibited for foreign individuals; foreigners access landed housing via <strong>30+30+30-year leasehold</strong> or Thai company structures (100% share ownership of a land-holding company, subject to Thai-majority-shareholder rules). Payment must be remitted from abroad with <strong>FET (Foreign Exchange Transaction) form</strong> evidence. The 49% quota rarely binds in Chiang Mai &mdash; most buildings have foreign shares of 15&ndash;30%, leaving substantial headroom.</p>
+      <p>Transaction costs for a foreign buyer run approximately <strong>6.0&ndash;7.0% all-in</strong>, matching the Bangkok tax stack: transfer fee 2% (buyer-seller split), Specific Business Tax 3.3% (seller's tax passed through in new-build pricing), stamp duty 0.5% (alternative to SBT), withholding tax 1% (developer typically absorbs), legal fees 0.5&ndash;1.0%. Common area fees in Chiang Mai run <strong>THB 30&ndash;80/m&sup2;/month</strong> &mdash; lower than Bangkok's THB 40&ndash;120, reflecting simpler facility profiles. <strong>Rental withholding tax of 15%</strong> applies to non-resident landlords. On exit, <strong>capital gains treated as regular income</strong> with progressive PIT rates up to 35%, or structured via Thai company with 20% CIT.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>清邁外資持有規則與曼谷相同——由<strong>公寓法1979</strong>規範，外資永久產權公寓<strong>每棟建築累計49%樓板面積上限</strong>。有地物業禁止外國個人；外國人透過<strong>30+30+30年租賃</strong>或泰國公司結構（100%擁有一家擁地公司、受泰籍多數股東規定限制）取得有地住房。付款須從國外匯入並提供<strong>FET（外匯交易）表</strong>證明。清邁49%配額很少觸頂——多數建築外資持股15-30%，留有充裕空間。</p>
+      <p>外國買家交易成本約佔<strong>6.0-7.0%全包</strong>，與曼谷稅務堆疊相同：過戶費2%（買賣方分擔）、特定商業稅3.3%（賣方稅在新建案定價中轉嫁）、印花稅0.5%（SBT的替代）、預扣稅1%（開發商通常吸收）、律師費0.5-1.0%。清邁公共區域費<strong>泰銖30-80/平方米/月</strong>——低於曼谷泰銖40-120，反映較簡單的設施配置。<strong>15%租金預扣稅</strong>適用非居民房東。退出時，<strong>資本利得視同一般所得</strong>按最高35%累進PIT，或透過泰國公司結構以20% CIT。</p>
+    </div>
+
+    <h2 id="sec-risk"><span class="lang-en">RISK MONITOR</span><span class="lang-zh" style="display:none">風險監測</span></h2>
+    <div class="lang-en">
+      <p>Three risks warrant explicit monitoring for Chiang Mai property investors. <strong>(1) Air quality (AQI) risk</strong>: Chiang Mai's burning season (Feb&ndash;Apr) regularly sees AQI &gt;200 (unhealthy) and occasionally &gt;300 (very unhealthy) from agricultural burning and regional haze. This is the single most persistent negative for long-stay decisions &mdash; some DNs explicitly relocate to Bali, Da Nang, or Lisbon for Q1 each year. Government mitigation (burning bans, air-purifier subsidies) has been inconsistent. Model 2&ndash;3 months/year of reduced occupancy or rental discount during severe burning.</p>
+      <p><strong>(2) Visa policy risk</strong>: The DTV's 2024 launch was a major positive, but Thailand's immigration policy history is volatile &mdash; the Elite Card program saw multiple pricing and rule changes, and the LTR visa has already been refined twice. A DTV reversal or tightening (e.g., stricter proof-of-remote-income) would reduce DN inflow 20&ndash;40%. <strong>(3) LRT execution risk</strong>: Bangkok mass-transit projects routinely slip 12&ndash;24 months. CM LRT delays to 2030&ndash;2031 would defer the ~15&ndash;20% price uplift currently being anticipated and could trigger short-term correction in premium-priced Nimman stock. <strong>(4) Oversupply tail</strong>: Chiang Mai developers have been disciplined, but a wave of Bangkok-based developers (Sansiri, AP) entering CM if BKK mass-market remains frozen could shift the supply curve.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>清邁房產投資者需明確監測三大風險。<strong>(1) 空氣品質（AQI）風險</strong>：清邁焚燒季（2-4月）常見AQI>200（有害）偶爾>300（非常有害），來自農業焚燒與區域霾害。這是長住決策最持續的負面——部分數游每年Q1明確遷往峇里、峴港或里斯本。政府緩解（禁燒、空氣淨化器補貼）執行不一。建模每年嚴重焚燒期2-3個月入住率下降或租金折讓。</p>
+      <p><strong>(2) 簽證政策風險</strong>：DTV 2024年推出為主要利好，但泰國移民政策歷史波動——Elite卡計劃經歷多次定價與規則變動，LTR簽證已兩次精化。DTV逆轉或收緊（如更嚴格的遠端收入證明）將減少數游流入20-40%。<strong>(3) LRT執行風險</strong>：曼谷大眾運輸項目常滯後12-24個月。清邁LRT延至2030-2031年將延後當前預期的約15-20%價格提升，可能觸發高端尼曼存量短期修正。<strong>(4) 超供尾部</strong>：清邁開發商紀律良好，但若曼谷大眾市場維持凍結，曼谷開發商（Sansiri、AP）湧入清邁可能改變供應曲線。</p>
+    </div>
+
+    <div class="callout red">
+      <span class="lang-en"><strong>WATCH &mdash; burning season 2026:</strong> March AQI readings consistently &gt;150 would signal worsening baseline. Check Chiang Mai Pollution Control Department dashboard daily Feb–Apr. Advance-book Q1 tenants at 10% discount to mitigate vacancy risk.</span>
+      <span class="lang-zh" style="display:none"><strong>關注 — 2026焚燒季：</strong>3月AQI讀數持續>150將顯示基準惡化。2-4月每日查看清邁污染控制廳儀表板。預先以10%折扣鎖定Q1租客以降低空置風險。</span>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Chiang Mai AQI Monthly Pattern (PM2.5 µg/m³)</span><span class="lang-zh" style="display:none">清邁月度AQI模式（PM2.5 µg/m³）</span></h4>
+      <div id="chartCMAQI" style="height:220px"></div>
+      <p class="chart-note red"><span class="lang-en">Feb–Apr burning season drives 2–5x PM2.5 vs rainy-season baseline. WHO annual guideline: 15 µg/m³</span><span class="lang-zh" style="display:none">2-4月焚燒季PM2.5較雨季基準2-5倍。WHO年度指引：15 µg/m³</span></p>
+    </div>
+
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK &amp; SCENARIOS</span><span class="lang-zh" style="display:none">展望與情景</span></h2>
+    <div class="lang-en">
+      <p><strong>Base case (+3–5%/yr, probability 55%):</strong> Nimman condos appreciate steadily at 3&ndash;5% annually through 2027, accelerating to <strong>THB 115K/m&sup2; by 2029</strong> as the LRT opening in 2028 catalyses structural re-rating. DN population grows 15&ndash;20% p.a., supported by DTV continuation and CM's cost-of-living advantage. Rental yields compress modestly but stay above 4.5% gross across all segments. Air-quality issues remain a 2-month annual drag. <strong>Bull case (+6–9%/yr, probability 25%):</strong> LRT opens on schedule 2028, triggering 18&ndash;22% station-proximity uplift. DTV expands to 50K+ annual approvals. Nimman reaches <strong>THB 125K/m&sup2; by 2029</strong>. Chinese buyer inflow accelerates on improved air-quality mitigation measures.</p>
+      <p><strong>Bear case (-1 to +2%/yr, probability 20%):</strong> LRT slips to 2030&ndash;2031, disappointing expectation-premium bought by 2024&ndash;2025 buyers. Air pollution worsens during multi-year drought cycle, deterring long-stay expats. DTV is reversed or materially restricted. Nimman stagnates at <strong>THB 89&ndash;93K/m&sup2; through 2029</strong>. Key monitoring signals: (i) daily AQI readings Feb&ndash;Apr, (ii) monthly DTV approval counts, (iii) LRT physical-progress milestones, (iv) CM International Airport passenger arrivals (leading indicator of tourism/DN demand).</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p><strong>基準情景（年+3-5%，概率55%）：</strong>尼曼公寓至2027年穩步年增3-5%，2028年LRT開通催化結構性重估，<strong>至2029年達泰銖115K/平方米</strong>。數游人口在DTV延續與清邁生活成本優勢支持下年增15-20%。租金收益率溫和壓縮但所有板塊維持毛4.5%以上。空氣品質問題維持年度2個月拖累。<strong>牛市情景（年+6-9%，概率25%）：</strong>LRT 2028年如期開通，觸發車站鄰近區18-22%提升。DTV擴至年50K+批准。尼曼<strong>2029年達泰銖125K/平方米</strong>。中國買家流入因改善空氣品質措施加速。</p>
+      <p><strong>熊市情景（年-1至+2%，概率20%）：</strong>LRT延至2030-2031年，令2024-2025年買家已買入的預期溢價失望。多年乾旱週期空氣污染惡化，嚇退長住外籍。DTV被撤回或重大限制。尼曼停滯<strong>泰銖89-93K/平方米至2029年</strong>。關鍵監測訊號：(i) 2-4月每日AQI讀數；(ii) DTV月度批准數；(iii) LRT實體進度里程碑；(iv) 清邁國際機場旅客抵達數（旅遊/數游需求領先指標）。</p>
+    </div>
+
+    <div class="chart-inline"><h4><span class="lang-en">Nimman Price Forecast 2025–2029 (THB K/m²)</span><span class="lang-zh" style="display:none">尼曼價格預測 2025-2029（泰銖K/m²）</span></h4><div id="chartCMForecast" style="height:220px"></div><p class="chart-note navy"><span class="lang-en">3 scenarios. 2028 LRT = key inflection point. Bull: THB 125K · Base: THB 115K · Bear: THB 93K</span><span class="lang-zh" style="display:none">3情景。2028 LRT=關鍵拐點。牛：泰銖125K · 基：泰銖115K · 熊：泰銖93K</span></p></div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: REIC Thailand · Bamboo Routes Thailand Property Analysis · InvestAsian Chiang Mai Market Report 2025–2026 · CBRE Thailand Q3 2025 · Chiang Mai Light Rail Transit Authority · Bank of Thailand · Chiang Mai Pollution Control Department · Thailand Ministry of Labour (DTV data) · Global Property Guide Thailand. All data as of March–April 2026.</span><span class="lang-zh" style="display:none">數據來源：泰國REIC · Bamboo Routes泰國房地產分析 · InvestAsian清邁市場報告2025-2026 · 世邦魏理仕泰國2025年Q3 · 清邁輕軌交通局 · 泰國銀行 · 清邁污染控制廳 · 泰國勞動部（DTV數據） · 全球房地產指南泰國。所有數據截至2026年3-4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawCMPrice(lang);drawCMUnits(lang);drawCMNomads(lang);drawCMLightRail(lang);drawCMRental(lang);drawCMAQI(lang);drawCMForecast(lang);}
+
+function drawCMPrice(lang){var dom=document.getElementById('chartCMPrice');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025E'];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:20,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),
+    series:[{name:'Nimman',type:'bar',data:[72,73,73.5,76,82,88,92],barMaxWidth:16,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'10%'},{name:en?'Old City':'老城',type:'bar',data:[65,66,66.5,69,74,78,82],barMaxWidth:16,itemStyle:{color:C.blue,borderRadius:[3,3,0,0]}},{name:en?'Hang Dong':'杭東',type:'bar',data:[45,46,46.5,48,52,55,58],barMaxWidth:16,itemStyle:{color:C.green,borderRadius:[3,3,0,0]}},{name:en?'Suburban':'郊區',type:'bar',data:[35,35.5,36,37,40,42,44],barMaxWidth:16,itemStyle:{color:C.muted,borderRadius:[3,3,0,0]}}]});}
+
+function drawCMUnits(lang){var dom=document.getElementById('chartCMUnits');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var nats=en?['China','Myanmar','USA','Europe','TW/KR','Others']:['中國','緬甸','美國','歐洲','台韓','其他'];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:nats,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9}}),
+    series:[{name:'2023',type:'bar',data:[320,95,48,62,38,85],barMaxWidth:16,itemStyle:{color:'rgba(30,58,95,0.5)',borderRadius:[3,3,0,0]},barGap:'10%'},{name:'2024',type:'bar',data:[290,115,62,78,52,95],barMaxWidth:16,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]}},{name:'2025E',type:'bar',data:[210,145,85,98,72,88],barMaxWidth:16,itemStyle:{color:C.blue,borderRadius:[3,3,0,0]}}]});}
+
+function drawCMNomads(lang){var dom=document.getElementById('chartCMNomads');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025E'];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),
+    series:[{name:en?'Digital Nomads (K)':'數字游民(K)',type:'line',data:[8,4,6,14,22,28,35],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(22,163,74,0.15)'},{offset:1,color:'rgba(22,163,74,0)'}]}}},{name:en?'Expat Community (K)':'外籍社區(K)',type:'line',data:[18,8,12,22,26,30,33],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6}]});}
+
+function drawCMLightRail(lang){var dom=document.getElementById('chartCMLightRail');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var zones=en?['<200m','200-500m','500m-1km','1-2km','>2km']:['<200米','200-500米','500米-1公里','1-2公里','>2公里'];
+  var uplift=[18,12,6,3,0];var colors=[C.green,C.green,C.navy,C.muted,'#dde8f2'];
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},grid:{left:12,right:12,top:20,bottom:12,containLabel:true},xAxis:mkAxis({type:'category',data:zones,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:0,max:22,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{type:'bar',data:uplift.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:35,itemStyle:{borderRadius:[3,3,0,0]},label:{show:true,position:'top',formatter:function(p){return p.value>0?'+'+p.value+'%':'0%';},fontSize:10,color:C.navy}}]});}
+
+function drawCMRental(lang){var dom=document.getElementById('chartCMRental');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var types=en?['Studio','1BR','2BR\nPremium','2BR\nStandard','Serviced\nApt']:['開放式','一房','兩房\n優質','兩房\n標準','服務式\n公寓'];
+  var rent=[8,15,25,22,18];var yld=[5.8,5.5,5.2,4.0,6.5];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:types,axisLabel:{color:C.muted,fontSize:9}}),yAxis:[mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),mkAxis({type:'value',min:3,max:8,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'Rent (THB K/mo)':'月租(泰銖K)',type:'bar',data:rent,barMaxWidth:35,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},yAxisIndex:0},{name:en?'Gross Yield %':'毛收益率%',type:'line',data:yld,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,yAxisIndex:1}]});}
+
+function drawCMAQI(lang){var dom=document.getElementById('chartCMAQI');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var pm=[55,95,160,120,45,25,22,20,25,35,42,50];
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[{type:'bar',data:pm.map(function(v){return{value:v,itemStyle:{color:v>=100?C.red:v>=50?C.orange:C.green}};}),barMaxWidth:35,itemStyle:{borderRadius:[3,3,0,0]},label:{show:true,position:'top',formatter:function(p){return p.value;},fontSize:9,color:C.navy},markLine:{data:[{yAxis:15,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:'WHO 15',fontSize:9,color:C.muted}}]}}]});}
+
+function drawCMForecast(lang){var dom=document.getElementById('chartCMForecast');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2025','2026E','2027E','2028E','2029E'];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:85,max:130,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),
+    series:[{name:en?'Bull':'牛市',type:'line',data:[92,98,106,115,125],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,areaStyle:{color:'rgba(22,163,74,0.08)'}},{name:en?'Base':'基準',type:'line',data:[92,96,100,108,115],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6},{name:en?'Bear':'熊市',type:'line',data:[92,91,90,91,93],lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:6,areaStyle:{color:'rgba(220,38,38,0.05)'}}]});}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

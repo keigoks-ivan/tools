@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hanoi Deep Dive | Vietnam Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}.report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}.report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}.report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}.report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}.report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}.report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}.report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}.chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}.chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}.chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}.report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}.report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}.toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}.toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}.toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}.toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}.toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}.toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}.report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}.side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}.side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}.side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}.side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}.side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600}.side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  .city-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.city-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0;border-left:3px solid #1e3a5f}.city-card h4{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#1e3a5f;margin:0 0 8px}.city-card p{font-family:'Inter',sans-serif;font-size:12px;color:#5a7a9a;line-height:1.6;margin:0}
+  .data-table{width:100%;border-collapse:collapse;margin:16px 0;font-family:'Inter',sans-serif;font-size:12px}.data-table th{background:#f4f7fc;color:#1e3a5f;font-weight:600;text-align:left;padding:10px 12px;border-bottom:1.5px solid #ccd9e8;font-size:11px;text-transform:uppercase;letter-spacing:.03em}.data-table td{padding:10px 12px;border-bottom:1px solid #eef3f9;color:#2c3e50}.data-table tr:last-child td{border-bottom:none}.data-table .td-num{font-family:'JetBrains Mono',monospace;color:#1e3a5f;text-align:right}.data-table .td-pos{color:#16a34a;font-weight:600}.data-table .td-neg{color:#dc2626;font-weight:600}
+  .callout{background:#fff9ed;border-left:3px solid #d97706;border-radius:0 6px 6px 0;padding:14px 18px;margin:20px 0;font-family:'Inter',sans-serif;font-size:13px;line-height:1.75;color:#2c3e50}.callout strong{background:transparent!important;padding:0!important;color:#d97706!important}
+  @media(max-width:1100px){.side-nav{display:none}}@media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.city-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}.data-table{font-size:11px}.data-table th,.data-table td{padding:7px 6px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Surge</span><span class="side-nav-label lang-zh" style="display:none">價格飆升</span></a>
+    <a href="#sec-districts" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Key Districts</span><span class="side-nav-label lang-zh" style="display:none">重點地區</span></a>
+    <a href="#sec-infra" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Infrastructure</span><span class="side-nav-label lang-zh" style="display:none">基礎設施</span></a>
+    <a href="#sec-supply" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Supply Crisis</span><span class="side-nav-label lang-zh" style="display:none">供應危機</span></a>
+    <a href="#sec-rental" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rental Market</span><span class="side-nav-label lang-zh" style="display:none">租賃市場</span></a>
+    <a href="#sec-industrial" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Industrial Corridor</span><span class="side-nav-label lang-zh" style="display:none">工業走廊</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+  <div class="report-header">
+    <div class="lang-en"><h1>HANOI &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: Savills Vietnam / CBRE Vietnam / Hanoi DPI / SBV / VNREA</div></div>
+    <div class="lang-zh" style="display:none"><h1>河內——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：第一太平戴維斯越南 / 世邦魏理仕越南 / 河內計劃投資局 / 越南國家銀行 / 越南房地產協會</div></div>
+  </div>
+  <div class="report-body">
+    <div class="toc-box" id="tocBox"><div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Surge &amp; Drivers</span><span class="lang-zh" style="display:none">2. 價格飆升與驅動</span></a>
+        <a href="#sec-districts" onclick="closeTocMobile()"><span class="lang-en">3. Key Districts Deep Dive</span><span class="lang-zh" style="display:none">3. 重點地區深度分析</span></a>
+        <a href="#sec-infra" onclick="closeTocMobile()"><span class="lang-en">4. Infrastructure &amp; Metro</span><span class="lang-zh" style="display:none">4. 基礎設施與地鐵</span></a>
+        <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">5. Supply Crisis</span><span class="lang-zh" style="display:none">5. 供應危機</span></a>
+        <a href="#sec-rental" onclick="closeTocMobile()"><span class="lang-en">6. Rental Market &amp; Yield</span><span class="lang-zh" style="display:none">6. 租賃市場與收益率</span></a>
+        <a href="#sec-industrial" onclick="closeTocMobile()"><span class="lang-en">7. Industrial Corridor Effect</span><span class="lang-zh" style="display:none">7. 工業走廊效應</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">8. Outlook &amp; Scenarios</span><span class="lang-zh" style="display:none">8. 展望與情景分析</span></a>
+      </div></div>
+
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Hanoi's property market has been the standout Vietnamese city in 2025, with Savills Vietnam reporting H1 and FY 2025 average primary-market condo prices at <strong>VND 91&ndash;100M/m&sup2;</strong> (~<strong>$3,500&ndash;3,800/m&sup2;</strong>), up <strong>+38 to +40% YoY</strong> &mdash; the sharpest growth rate among any major Southeast Asian capital and materially ahead of HCMC's +23%. The Q1 2025 Savills print was VND 79M/m² (+38% YoY). The 5-yr CAGR now stands at ~22%. The market mechanics are unusual: unlike a speculation-led rally, this is a <strong>supply-starvation re-pricing</strong>. New launches dropped from 20,000+ units annually pre-2022 to only <strong>~8,000 units in 2025</strong>, driven by legal-approval paralysis averaging 3&ndash;5 years per project. Simultaneously, household formation (+2.8% p.a.), rural-to-urban migration (+1.2% net annually), and rising white-collar wages have sustained absolute demand.</p>
+      <p>Three factors distinguish Hanoi from HCMC. First, <strong>demand composition</strong>: ~8% foreign buyers (vs. 15% in HCMC), with the balance comprising domestic Hanoi residents (60%), provincial wealth holders (25%), and industrial-corridor Korean/Japanese workers (7%). Second, <strong>geography</strong>: the Red River bisects the city, with Long Bien / Gia Lam on the eastern bank benefiting from Ring Road 4 and new bridge connectivity. Third, <strong>demographic pressure</strong>: Hanoi's population grew from 6.7M (2010) to ~8.5M (2025), absorbing supply even during the launch drought. Price growth forecast for 2026: <strong>+8 to +10%</strong>, above HCMC but decelerating from 2025 peak as supply recovery begins.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>河內是2025年越南表現最突出的城市，一手公寓均價飆升至<strong>$2,900/平方米</strong>（<strong>年增12.0%</strong>）——東南亞主要首都中增速最快，明顯領先胡志明市的8.0%。市場機制不尋常：這不是由投機驅動，而是<strong>供應飢餓型重估</strong>。新推案從2022年前每年20,000多套降至<strong>2025年僅約8,000套</strong>，受每項目平均3-5年法律審批癱瘓拖累。與此同時，家庭形成（年+2.8%）、城鎮化（年淨+1.2%）和白領薪資上升維持絕對需求。</p>
+      <p>河內與胡志明市有三項區別。其一，<strong>需求構成</strong>：外資買家約8%（胡志明15%），其餘為河內本地居民（60%）、外省富裕階層（25%）、工業走廊韓/日工人（7%）。其二，<strong>地理</strong>：紅河將城市一分為二，東岸的龍編/嘉林受益於四環路與新建大橋連接。其三，<strong>人口壓力</strong>：河內人口從2010年670萬增至2025年約850萬，即使推案枯竭期仍吸收供應。2026年價格增長預測<strong>+8至+10%</strong>，高於胡志明市但隨供應恢復從2025年高點放緩。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">AVG PRIMARY PRICE</span><span class="lang-zh" style="display:none">一手均價</span></div><div class="kpi-value">$3,500–3,800/m²</div><span class="kpi-badge badge-red"><span class="lang-en">+38–40% YoY · Savills FY 2025</span><span class="lang-zh" style="display:none">年增+38-40% · Savills 2025</span></span></div>
+      <div class="kpi-card blue"><div class="kpi-label"><span class="lang-en">CBD PRICE</span><span class="lang-zh" style="display:none">CBD價格</span></div><div class="kpi-value">$4,200/m²</div><span class="kpi-badge badge-blue"><span class="lang-en">Hoan Kiem · Heritage + gov · No greenfield</span><span class="lang-zh" style="display:none">還劍 · 歷史+政府 · 無綠地</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">NEW LAUNCHES 2025</span><span class="lang-zh" style="display:none">2025年新推案</span></div><div class="kpi-value">~8,000</div><span class="kpi-badge badge-red"><span class="lang-en">Units · Down 60% from pre-2022</span><span class="lang-zh" style="display:none">套 · 較2022前下降60%</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">3-YEAR PRICE Δ</span><span class="lang-zh" style="display:none">3年漲幅</span></div><div class="kpi-value">+45%</div><span class="kpi-badge badge-green"><span class="lang-en">2022–2025 · Supply-driven</span><span class="lang-zh" style="display:none">2022-2025 · 供應驅動</span></span></div>
+      <div class="kpi-card blue"><div class="kpi-label"><span class="lang-en">VACANCY</span><span class="lang-zh" style="display:none">空置率</span></div><div class="kpi-value">< 5%</div><span class="kpi-badge badge-blue"><span class="lang-en">Occupancy 95%+ in prime bldgs</span><span class="lang-zh" style="display:none">優質建築入住率95%+</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">RING ROAD 4</span><span class="lang-zh" style="display:none">四環路</span></div><div class="kpi-value">$3.5B</div><span class="kpi-badge badge-orange"><span class="lang-en">2024–27 · 113 km · Opens eastern districts</span><span class="lang-zh" style="display:none">2024-27 · 113公里 · 開啟東部</span></span></div>
+    </div>
+
+    <h2 id="sec-price"><span class="lang-en">PRICE SURGE &amp; DRIVERS</span><span class="lang-zh" style="display:none">價格飆升與驅動</span></h2>
+    <div class="lang-en">
+      <p>Hanoi condo prices have risen <strong>+45%</strong> over three years (Jan 2022 to Dec 2025), accelerating sharply from the 2024 inflection point. The CBD core (Hoan Kiem, Ba Dinh) now transacts at <strong>$4,200/m&sup2;</strong> for new projects &mdash; remarkable given these districts have effectively zero new-condo supply, making all transactions secondary or redevelopment. Western districts (Nam Tu Liem, Cau Giay) average <strong>$2,900/m&sup2;</strong> and are the primary greenfield supply zone. Eastern emerging districts (Long Bien, Gia Lam) trade at <strong>$2,200/m&sup2;</strong> and offer the highest residual growth potential on Ring Road 4 connectivity.</p>
+      <p>Crucially, this is <strong>not a speculation rally</strong>. Indicators confirm demand fundamentals: (i) vacancy rates below 5% citywide, (ii) rental growth of 8&ndash;10% p.a. tracking price growth, (iii) developer inventory turnover under 12 months (vs. 36+ months historical), and (iv) primary-market absorption at 85%+ within 6 months of launch. The supply shortage is structural: legal-approval bottleneck blocks project launches, even where developer equity and bank financing are fully secured. Secondary-market transactions now represent <strong>60%+</strong> of total volume &mdash; unusually high and evidence that frustrated buyers are accepting resale stock at 5&ndash;10% premiums over equivalent primary pipeline.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>河內公寓價格在3年（2022年1月至2025年12月）內上漲<strong>+45%</strong>，自2024年拐點加速。CBD核心（還劍、巴亭）新項目均價<strong>$4,200/平方米</strong>——考慮到這些區域幾乎沒有新公寓供應，所有交易為二手或重建，此價格尤為顯著。西部區域（南慈廉、紙橋）均價<strong>$2,900/平方米</strong>，為主要綠地供應區。東部新興區域（龍編、嘉林）交易在<strong>$2,200/平方米</strong>，四環路連接後剩餘增長潛力最大。</p>
+      <p>關鍵在於，<strong>這不是投機性漲勢</strong>。指標確認需求基本面：(i) 全市空置率低於5%；(ii) 租金年增8-10%與價格增長同步；(iii) 開發商庫存周轉不到12個月（歷史36+個月）；(iv) 一手市場推出6個月內吸收率達85%+。供應短缺是結構性的：法律審批瓶頸阻擋項目推出，即使開發商股本與銀行融資均已到位。二手市場交易目前佔總成交<strong>60%+</strong>——異常高，證據是受挫的買家願以高於同級一手開盤5-10%溢價接受二手存量。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Price &amp; Supply Divergence 2020–2025</span><span class="lang-zh" style="display:none">價格與供應分歧 2020-2025</span></h4>
+        <p><span class="lang-en">New launches (units) vs avg primary price ($/m²)</span><span class="lang-zh" style="display:none">新推案（套）vs 一手均價（$/平方米）</span></p>
+        <div id="chartHNSupply" style="height:240px"></div>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Price by District ($/m²)</span><span class="lang-zh" style="display:none">各區價格（$/平方米）</span></h4>
+        <p><span class="lang-en">2025 primary condo price per m²</span><span class="lang-zh" style="display:none">2025年一手公寓每平方米</span></p>
+        <div id="chartHNDistrict" style="height:240px"></div>
+      </div>
+    </div>
+
+    <h2 id="sec-districts"><span class="lang-en">KEY DISTRICTS DEEP DIVE</span><span class="lang-zh" style="display:none">重點地區深度分析</span></h2>
+    <div class="lang-en">
+      <p>Hanoi's property geography is structured around four distinct district clusters, each with different investment profiles and growth trajectories. The <strong>Hoan Kiem / Ba Dinh</strong> CBD core commands premium pricing anchored by heritage French-colonial villa stock, the Presidential Palace zone, the Ho Chi Minh Mausoleum, and near-zero greenfield opportunities. Only ~50&ndash;100 new-build units launch annually in the entire CBD, making price-discovery almost entirely secondary. <strong>Cau Giay</strong> is the education-and-tech hub: VNU-HCM, the Foreign Trade University, and major ICT company headquarters cluster here, creating constant young-professional rental demand at a lower price point than Ba Dinh.</p>
+      <p><strong>Nam Tu Liem</strong> is the "new CBD" &mdash; Vingroup's Vinhomes Smart City, West Lake spillover, and the planned National Convention Center are landmarks. This district absorbed 40% of 2024&ndash;2025 launches and will dominate 2026 supply. <strong>Long Bien / Gia Lam</strong> on the east bank are the highest-beta plays: AEON Mall Gia Lam (opened 2015), Vinhomes Ocean Park (10,000+ unit township), and Ring Road 4 connectivity are the catalysts. Prices here lag the western districts by 25&ndash;30% but growth rates have matched or exceeded them since 2023. Risk: flood plain geography requires premium engineering, and the Red River crossings remain a bottleneck for CBD commuting.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>河內房產地理圍繞四個不同的區域集群構建，各有不同的投資特徵與增長軌跡。<strong>還劍/巴亭</strong>CBD核心以法殖民別墅存量、主席府區域、胡志明陵和近零綠地機會為支撐享溢價。整個CBD每年僅推出約50-100套新建單位，價格發現幾乎完全來自二手。<strong>紙橋</strong>是教育科技中心：國大、外貿大學、主要ICT企業總部聚集於此，年輕專業人士租賃需求穩定，價格低於巴亭。</p>
+      <p><strong>南慈廉</strong>是「新CBD」——越南巨頭Vingroup的Vinhomes智慧城、西湖溢出與規劃中的國家會議中心為地標。此區域吸收2024-2025年40%推案，並將主導2026年供應。<strong>龍編/嘉林</strong>東岸是最高beta選擇：AEON嘉林購物中心（2015年開幕）、Vinhomes海洋公園（10,000多套社區）及四環路連接為催化劑。此處價格較西部區域折讓25-30%，但2023年以來增長率已相當或超越。風險：泛濫平原地理要求優質工程，紅河過江仍是通勤CBD的瓶頸。</p>
+    </div>
+    <div class="city-grid">
+      <div class="city-card" style="border-left-color:#dc2626">
+        <h4><span class="lang-en">Hoan Kiem / Ba Dinh</span><span class="lang-zh" style="display:none">還劍 / 巴亭</span></h4>
+        <p><span class="lang-en">CBD core · $4,200/m² · Yield 4.5% · Heritage premium · Government district · ~50–100 new units/yr</span><span class="lang-zh" style="display:none">CBD核心 · $4,200/平方米 · 收益率4.5% · 歷史溢價 · 政府區域 · 年約50-100新單位</span></p>
+      </div>
+      <div class="city-card" style="border-left-color:#2563eb">
+        <h4><span class="lang-en">Cau Giay</span><span class="lang-zh" style="display:none">紙橋</span></h4>
+        <p><span class="lang-en">Tech/edu hub · $3,200/m² · Yield 5.0% · VNU-HN · ICT HQ cluster · Young professional demand</span><span class="lang-zh" style="display:none">科技教育中心 · $3,200/平方米 · 收益率5.0% · 河內國大 · ICT總部群 · 年輕專業需求</span></p>
+      </div>
+      <div class="city-card" style="border-left-color:#16a34a">
+        <h4><span class="lang-en">Nam Tu Liem</span><span class="lang-zh" style="display:none">南慈廉</span></h4>
+        <p><span class="lang-en">New CBD · $2,900/m² · Yield 5.2% · Vinhomes Smart City · 40% of 24–25 launches</span><span class="lang-zh" style="display:none">新CBD · $2,900/平方米 · 收益率5.2% · Vinhomes智慧城 · 佔24-25推案40%</span></p>
+      </div>
+      <div class="city-card" style="border-left-color:#d97706">
+        <h4><span class="lang-en">Long Bien / Gia Lam</span><span class="lang-zh" style="display:none">龍編 / 嘉林</span></h4>
+        <p><span class="lang-en">East bank · $2,200/m² · Yield 5.5% · Ocean Park 10K units · RR4 catalyst · Flood plain</span><span class="lang-zh" style="display:none">東岸 · $2,200/平方米 · 收益率5.5% · 海洋公園10K套 · 四環路催化 · 泛濫平原</span></p>
+      </div>
+    </div>
+
+    <table class="data-table" style="margin-top:16px">
+      <thead><tr>
+        <th><span class="lang-en">District</span><span class="lang-zh" style="display:none">區域</span></th>
+        <th><span class="lang-en">Price $/m²</span><span class="lang-zh" style="display:none">價格 $/平方米</span></th>
+        <th><span class="lang-en">3Y Δ%</span><span class="lang-zh" style="display:none">3年漲幅</span></th>
+        <th><span class="lang-en">Yield</span><span class="lang-zh" style="display:none">收益率</span></th>
+        <th><span class="lang-en">Occupancy</span><span class="lang-zh" style="display:none">入住率</span></th>
+        <th><span class="lang-en">Supply 26E</span><span class="lang-zh" style="display:none">26供應</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Hoan Kiem / Ba Dinh</td><td class="td-num">4,200</td><td class="td-num td-pos">+52%</td><td class="td-num">4.5%</td><td class="td-num">96%</td><td class="td-num">~100</td></tr>
+        <tr><td>Tay Ho (West Lake)</td><td class="td-num">3,800</td><td class="td-num td-pos">+48%</td><td class="td-num">4.8%</td><td class="td-num">94%</td><td class="td-num">600</td></tr>
+        <tr><td>Cau Giay</td><td class="td-num">3,200</td><td class="td-num td-pos">+45%</td><td class="td-num">5.0%</td><td class="td-num">95%</td><td class="td-num">900</td></tr>
+        <tr><td>Nam Tu Liem</td><td class="td-num">2,900</td><td class="td-num td-pos">+42%</td><td class="td-num">5.2%</td><td class="td-num">92%</td><td class="td-num">3,800</td></tr>
+        <tr><td>Thanh Xuan</td><td class="td-num">2,600</td><td class="td-num td-pos">+38%</td><td class="td-num">5.3%</td><td class="td-num">91%</td><td class="td-num">1,100</td></tr>
+        <tr><td>Long Bien / Gia Lam</td><td class="td-num">2,200</td><td class="td-num td-pos">+55%</td><td class="td-num">5.5%</td><td class="td-num">87%</td><td class="td-num">2,400</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="sec-infra"><span class="lang-en">INFRASTRUCTURE &amp; METRO</span><span class="lang-zh" style="display:none">基礎設施與地鐵</span></h2>
+    <div class="lang-en">
+      <p>Hanoi's infrastructure buildout is reshaping property dynamics on a 2024&ndash;2030 horizon. <strong>Ring Road 4 (Vanh dai 4)</strong> is the signature project: a <strong>113 km beltway</strong> costing USD 3.5B (VND 85 trillion), running through Hung Yen, Bac Ninh, and Hanoi provinces. Construction began June 2023, target completion <strong>2027</strong>. It will reduce Gia Lam-to-Noi Bai airport commute from 90 minutes to 35, dramatically expanding the effective buildable radius around the capital. Land parcels along the RR4 route have already repriced 20&ndash;40% since groundbreaking.</p>
+      <p>The urban metro system is expanding gradually. <strong>Line 2A (Cat Linh&ndash;Ha Dong)</strong>, 13 km, opened Nov 2021 with ridership now averaging 35,000/day. <strong>Line 3 (Nhon&ndash;Hanoi Station)</strong>, 12.5 km, partially opened (elevated section) in August 2024 with <strong>underground section targeting 2027</strong>. Construction delays on Line 3 pushed full completion from 2022 to 2027+, a five-year slip. <strong>Lines 5, 8, and 1</strong> are in various pre-feasibility stages. Additional rail investment: Noi Bai Airport Terminal 2 expansion (2026), Hanoi&ndash;Hai Phong high-speed rail (pre-feasibility for 2030s), and the Hanoi&ndash;Lao Cai Expressway upgrade. Together these projects make northern Vietnam's infrastructure pipeline materially more credible than previous plan cycles.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>河內基礎設施建設在2024-2030年時間軸上正在重塑房產格局。<strong>四環路（Vanh dai 4）</strong>是標誌性項目：<strong>113公里環城道路</strong>，耗資35億美元（85兆越南盾），經興安、北寧、河內省。2023年6月動工，目標<strong>2027年</strong>完工。將嘉林至內排機場通勤時間從90分鐘縮短至35分鐘，大幅擴大首都可建設有效半徑。沿四環路路線的土地地塊自動工以來已重估20-40%。</p>
+      <p>城市地鐵系統逐步擴張。<strong>2A號線（葛靈-河東）</strong>13公里於2021年11月開通，目前日均客流35,000人。<strong>3號線（日新-河內站）</strong>12.5公里，2024年8月部分開通（高架段），<strong>地下段目標2027年</strong>。3號線施工延誤將全面完工從2022推遲到2027+，延期五年。<strong>5、8、1號線</strong>處於不同前期可行性階段。其他鐵路投資：內排機場T2擴建（2026）、河內-海防高鐵（2030年代前期可行性）、河內-老街高速公路升級。這些項目令越南北部基礎設施管線相較過往規劃週期更具可信度。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Infrastructure Timeline (2020–2030E)</span><span class="lang-zh" style="display:none">基礎設施時間軸（2020-2030E）</span></h4>
+        <p><span class="lang-en">Major projects by year of completion / commercial operation</span><span class="lang-zh" style="display:none">主要項目按完工/商業營運年份</span></p>
+        <div id="chartHNInfra" style="height:240px"></div>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Gross Yield by District (%)</span><span class="lang-zh" style="display:none">各區毛收益率（%）</span></h4>
+        <p><span class="lang-en">Gross rental yield before tax &amp; fees</span><span class="lang-zh" style="display:none">稅費前毛租金收益率</span></p>
+        <div id="chartHNYield" style="height:240px"></div>
+      </div>
+    </div>
+
+    <h2 id="sec-supply"><span class="lang-en">SUPPLY CRISIS</span><span class="lang-zh" style="display:none">供應危機</span></h2>
+    <div class="lang-en">
+      <p>Hanoi's supply crisis is structural, not cyclical. Annual launches collapsed from <strong>18,000 units in 2020</strong> to <strong>8,000 in 2025</strong> &mdash; a 56% decline precisely when population and household formation accelerated. The bottleneck stack has four distinct layers: (1) <strong>Land-use conversion</strong> from agricultural or industrial to residential requires municipal People's Committee approval, averaging 18&ndash;24 months. (2) <strong>Master plan compliance</strong> &mdash; Hanoi's 2021&ndash;2030 master plan was only ratified in late 2024, during which period many projects were in limbo. (3) <strong>Environmental impact assessment</strong> and <strong>fire safety approval</strong> (QCVN 06:2022) tightened 2022 standards, requiring costly retrofit of in-flight designs. (4) <strong>Land valuation disputes</strong> following the 2024 Land Law's new methodologies created one-time compliance delays.</p>
+      <p>The <strong>2024 Housing Law reforms</strong> (effective August 2024) systematically address layers (1) and (2) through streamlined single-window procedures. HoREA estimates 2026 launches can recover to <strong>12,000 units</strong> and 2027 to <strong>18,000+</strong>, though execution risk remains. Developers have shifted focus to HCMC and resort markets during the Hanoi drought &mdash; Vingroup's 2025 HCMC allocation exceeded Hanoi for the first time. <strong>A meaningful supply normalisation is not expected before 2027&ndash;2028</strong>. This protracted shortage is the primary support for Hanoi's premium valuation versus regional peers.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>河內供應危機是結構性而非週期性。年推案從<strong>2020年18,000套</strong>崩跌至<strong>2025年8,000套</strong>——正值人口與家庭形成加速期，降幅56%。瓶頸堆疊有四層：(1) <strong>土地用途轉換</strong>從農/工轉為住需市人委會批准，平均18-24個月。(2) <strong>總體規劃合規</strong>——河內2021-2030總規至2024年底才批覆，期間許多項目懸而未決。(3) <strong>環評</strong>與<strong>消防安全批准</strong>（QCVN 06:2022）於2022年收緊標準，需對在建設計作昂貴改造。(4) <strong>土地估值爭議</strong>隨2024年土地法新方法產生一次性合規延遲。</p>
+      <p><strong>2024年住房法改革</strong>（2024年8月生效）通過簡化單一窗口程序系統性解決第(1)(2)層。HoREA估計2026年推案可恢復至<strong>12,000套</strong>、2027年<strong>18,000+</strong>，但執行風險仍存。河內乾旱期開發商轉向胡志明市與度假市場——Vingroup 2025年胡志明市配置首次超過河內。<strong>有意義的供應正常化預計在2027-2028年之前不會出現</strong>。此延長短缺是河內相對區域同儕估值溢價的主要支撐。</p>
+    </div>
+
+    <div class="callout">
+      <span class="lang-en"><strong>WATCH:</strong> Hanoi master plan 2021–2030 ratification (Dec 2024) defined 22 new satellite districts. Parcels in Hoa Lac, Son Tay, and Dong Anh satellite cities reprised 15–25% on announcement and are high-beta plays for investors with multi-year horizons.</span>
+      <span class="lang-zh" style="display:none"><strong>關注：</strong>河內2021-2030總規（2024年12月批覆）定義22個新衛星區。和樂、山西、東英衛星城地塊於宣布時重估15-25%，為多年期投資者的高beta選擇。</span>
+    </div>
+
+    <h2 id="sec-rental"><span class="lang-en">RENTAL MARKET &amp; YIELD</span><span class="lang-zh" style="display:none">租賃市場與收益率</span></h2>
+    <div class="lang-en">
+      <p>Hanoi's rental market yields approximately <strong>5.0% gross</strong> for mid-range condos, with meaningful dispersion by district and product type. A 2-bedroom 75&ndash;85m² unit in Cau Giay rents at <strong>$600&ndash;900/month</strong>; in Hoan Kiem / Ba Dinh CBD, <strong>$1,000&ndash;1,800/month</strong>; and in branded residences (Marriott, Lotte), <strong>$2,500&ndash;4,000/month</strong>. Serviced apartments in the expat zones command <strong>6.5&ndash;7.0% gross</strong>. Occupancy in well-located stock exceeds <strong>95%</strong>.</p>
+      <p>Rental demand draws from four distinct cohorts. <strong>Domestic white-collar workers</strong> (~1.8M in Hanoi metro, urbanising rapidly from surrounding provinces) form the majority. <strong>Korean corporate expatriates</strong> (Samsung, LG, LS group; ~25,000 Koreans in Hanoi metro) concentrate in Cau Giay and My Dinh. <strong>Japanese corporate expatriates</strong> (Canon, Yamaha, Honda; ~15,000) cluster around Times City. <strong>Embassy and NGO staff</strong> in Ba Dinh. Unlike HCMC which has seen rental growth stall at 3&ndash;4%, Hanoi rents have risen <strong>8&ndash;10% annually</strong>, partially catching up to price growth &mdash; a healthy sign that yield compression is moderate rather than severe.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>河內租賃市場中檔公寓毛收益率約<strong>5.0%</strong>，按區域和產品類型存在有意義的分散。紙橋75-85平方米兩房月租<strong>$600-900</strong>；還劍/巴亭CBD <strong>$1,000-1,800</strong>；品牌住宅（萬豪、樂天）<strong>$2,500-4,000</strong>。外籍區服務式公寓毛收益率<strong>6.5-7.0%</strong>。區位良好存量入住率超過<strong>95%</strong>。</p>
+      <p>租賃需求來自四個群體。<strong>國內白領工作者</strong>（河內都會區約180萬，來自周邊省份快速城鎮化）構成多數。<strong>韓國企業外派</strong>（三星、LG、LS集團；河內都會區約25,000韓國人）集中紙橋與美亭。<strong>日本企業外派</strong>（佳能、山葉、本田；約15,000人）聚集Times City附近。<strong>使領館與NGO人員</strong>在巴亭。與胡志明市租金增長停滯3-4%不同，河內租金年增<strong>8-10%</strong>，部分追趕房價增長——健康訊號，顯示收益率壓縮溫和而非嚴重。</p>
+    </div>
+
+    <h2 id="sec-industrial"><span class="lang-en">INDUSTRIAL CORRIDOR EFFECT</span><span class="lang-zh" style="display:none">工業走廊效應</span></h2>
+    <div class="lang-en">
+      <p>Northern Vietnam's industrial corridor is a dominant structural driver of Hanoi residential demand that is often under-appreciated in foreign-investor analysis. The corridor spans <strong>Bac Ninh, Thai Nguyen, Hung Yen, Vinh Phuc, and Hai Duong provinces</strong> &mdash; all within 30&ndash;90 minute commute of central Hanoi. Tenant anchors include <strong>Samsung Electronics</strong> (Bac Ninh + Thai Nguyen, combined 200,000+ workforce), <strong>Samsung Display</strong> (Bac Ninh), <strong>LG Display / LG Electronics / LG Innotek</strong> (Hai Phong + Hai Duong, combined 60,000+), <strong>Foxconn</strong> (Bac Ninh, 20,000+ and rising), and <strong>Canon, Honda, Yamaha, Toyota, Brother, Panasonic</strong> across multiple IZs.</p>
+      <p>Two demand channels feed Hanoi property. First, direct expat housing: ~25,000 Koreans, ~15,000 Japanese, ~5,000 Taiwanese/other concentrate in Hanoi rather than industrial-zone towns, as Hanoi offers the international schools, medical care, and consumer amenities these professionals require. Second, supply-chain wealth creation: domestic Vietnamese executives, senior engineers, and second-tier vendors accumulated capital from the 2010&ndash;2025 FDI boom and deploy it into Hanoi residential. The <strong>ongoing US&ndash;China supply-chain diversification</strong> continues to add new tenants &mdash; Apple-supplier announcements in 2024&ndash;2025 (Luxshare, GoerTek, BYD components) collectively imply another 100,000+ corridor headcount over 2026&ndash;2028.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>越南北部工業走廊是河內住宅需求的主導結構性驅動，在外資分析中常被低估。走廊橫跨<strong>北寧、太原、興安、永福、海陽省</strong>——均在河內市中心30-90分鐘通勤範圍內。租戶錨定包括<strong>三星電子</strong>（北寧+太原，合計20萬+員工）、<strong>三星顯示</strong>（北寧）、<strong>LG顯示/LG電子/LG Innotek</strong>（海防+海陽，合計6萬+）、<strong>富士康</strong>（北寧，2萬+且上升）及<strong>佳能、本田、山葉、豐田、兄弟、松下</strong>橫跨多個工業區。</p>
+      <p>兩條需求渠道饋入河內房產。其一，直接外派住房：約25,000韓國人、15,000日本人、5,000台灣/其他人集中於河內而非工業區小鎮，因河內提供這些專業人士所需的國際學校、醫療與消費品。其二，供應鏈財富創造：國內越南高管、資深工程師、二線供應商從2010-2025 FDI熱潮積累資本並部署至河內住宅。<strong>持續進行的美中供應鏈多元化</strong>繼續增加新租戶——2024-2025年蘋果供應商公告（立訊、歌爾、比亞迪零件）合計意味著2026-2028年再增加100,000+走廊員工。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Northern Vietnam Industrial FDI Inflows ($B)</span><span class="lang-zh" style="display:none">越南北部工業FDI流入（十億美元）</span></h4>
+      <div id="chartHNFDI" style="height:240px"></div>
+      <p class="chart-note navy"><span class="lang-en">FDI pledged into Bac Ninh / Thai Nguyen / Hai Phong / Hai Duong cluster. Apple supply-chain diversification from China drove the 2024 spike</span><span class="lang-zh" style="display:none">FDI承諾進入北寧/太原/海防/海陽集群。蘋果供應鏈從中國多元化推動2024年激增</span></p>
+    </div>
+
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK &amp; SCENARIOS</span><span class="lang-zh" style="display:none">展望與情景分析</span></h2>
+    <div class="lang-en">
+      <p><strong>Base case (+8–10%/yr, probability 55%):</strong> Supply recovery accelerates from 8K (2025) to 12K (2026) to 18K (2027) as 2024 legal reforms take hold. Apple-supplier FDI continues adding northern corridor jobs, sustaining rental demand. Ring Road 4 on-time (2027) validates eastern districts. Hanoi average reaches <strong>$3,500/m²</strong> by 2028, narrowing the gap to HCMC to ~8% from current 24% discount. <strong>Bull case (+12–15%/yr, probability 25%):</strong> Supply recovery disappoints (stays at 9&ndash;10K annually through 2027), legal reforms under-execute. Industrial FDI exceeds expectations on renewed China+1 momentum. Korean and Japanese cohort growth accelerates. Hanoi average reaches <strong>$3,900/m²</strong> by 2028, possibly overtaking HCMC for the first time in history.</p>
+      <p><strong>Bear case (+3 to +6%/yr, probability 20%):</strong> All delayed projects launch simultaneously in 2027&ndash;2028 as reforms catalyse a wave of approvals, creating a temporary supply glut. New launches spike to 25K in 2027 before renormalising. Absorption slips to 70&ndash;75%, prices consolidate at <strong>$3,100&ndash;3,300/m²</strong>. Secondary risks: USD/VND weakness hits the foreign-buyer 8% cohort; SBV rate surprises on inflation. Key monitoring signals: (i) quarterly project-reactivation count from HoREA, (ii) Ring Road 4 physical-progress milestones, (iii) northern FDI announcements, (iv) primary-market absorption rates below 80%.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p><strong>基準情景（年+8-10%，概率55%）：</strong>供應恢復自8K（2025）加速至12K（2026）再至18K（2027），隨2024年法改落實。蘋果供應商FDI繼續新增北部走廊工作，支撐租賃需求。四環路按期（2027）驗證東部區域。河內均價在2028年達<strong>$3,500/平方米</strong>，對胡志明市折讓從當前24%收窄至約8%。<strong>牛市情景（年+12-15%，概率25%）：</strong>供應恢復不及預期（2027年前維持9-10K），法改執行不力。工業FDI超預期因中國+1重燃動能。韓日群體增長加速。河內均價2028年達<strong>$3,900/平方米</strong>，可能史上首次超越胡志明市。</p>
+      <p><strong>熊市情景（年+3至+6%，概率20%）：</strong>所有延遲項目在2027-2028年同時推出，法改催化審批潮，造成暫時供過於求。新推案2027年激增至25K後常態化。吸收率下滑至70-75%，價格整理在<strong>$3,100-3,300/平方米</strong>。次要風險：USD/VND走弱衝擊8%外資群體；SBV因通脹意外加息。關鍵監測訊號：(i) HoREA季度項目重啟計數；(ii) 四環路實體進度里程碑；(iii) 北部FDI公告；(iv) 一手市場吸收率低於80%。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Hanoi Avg Price Forecast 2025–2028 ($/m²)</span><span class="lang-zh" style="display:none">河內均價預測 2025-2028（$/平方米）</span></h4>
+      <div id="chartHNForecast" style="height:260px"></div>
+      <p class="chart-note navy"><span class="lang-en">Base $3,500 · Bull $3,900 (supply stays tight) · Bear $3,300 (simultaneous unlock)</span><span class="lang-zh" style="display:none">基準$3,500 · 牛市$3,900（供應續緊） · 熊市$3,300（同步釋放）</span></p>
+    </div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: Savills Vietnam Q4 2025 · CBRE Vietnam H2 2025 · Hanoi Department of Planning and Investment · State Bank of Vietnam (SBV) · HoREA / VNREA · Ministry of Construction · Global Property Guide. All data as of March–April 2026.</span><span class="lang-zh" style="display:none">數據來源：第一太平戴維斯越南2025年Q4 · 世邦魏理仕越南2025年H2 · 河內計劃投資局 · 越南國家銀行（SBV） · 越南房地產協會 · 越南建設部 · 全球房地產指南。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawHNSupply(lang);drawHNDistrict(lang);drawHNInfra(lang);drawHNYield(lang);drawHNFDI(lang);drawHNForecast(lang);}
+
+function drawHNDistrict(lang){var dom=document.getElementById('chartHNDistrict');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var districts=en?['Long Bien','Thanh Xuan','Nam Tu Liem','Cau Giay','Tay Ho','Ba Dinh','Hoan Kiem']:['龍編','清春','南慈廉','紙橋','西湖','巴亭','還劍'];
+  var values=[2200,2600,2900,3200,3800,4000,4200];
+  var colors=[C.muted,C.muted,C.blue,C.blue,C.orange,C.red,C.red];
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},grid:{left:12,right:60,top:8,bottom:8,containLabel:true},yAxis:mkAxis({type:'category',data:districts,axisLabel:{color:C.muted,fontSize:9}}),xAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v/1000+'K';}}}),
+    series:[{type:'bar',data:values.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:18,itemStyle:{borderRadius:[0,3,3,0]},label:{show:true,position:'right',formatter:function(p){return '$'+p.value;},fontSize:9,color:C.muted}}]});}
+
+function drawHNSupply(lang){var dom=document.getElementById('chartHNSupply');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2020','2021','2022','2023','2024','2025','2026E'];
+  var supply=[18000,15000,12000,10000,8500,8000,12000];
+  var price=[2000,2100,2300,2550,2700,2900,3150];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:[mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}}}),mkAxis({type:'value',min:1500,max:3500,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v;}},splitLine:{show:false}})],
+    series:[{name:en?'New Supply (units)':'新供應（套）',type:'bar',data:supply,barMaxWidth:28,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},yAxisIndex:0},{name:en?'Avg Price ($/m²)':'均價（$/平方米）',type:'line',data:price,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1}]});}
+
+function drawHNInfra(lang){var dom=document.getElementById('chartHNInfra');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2021\nLine 2A','2024\nLine 3 elev','2026\nAirport T2','2027\nRing Rd 4','2027\nLine 3 full','2030\nHSR feas'];
+  var scale=[35,65,55,90,80,60];
+  var colors=[C.muted,C.blue,C.blue,C.green,C.green,C.orange];
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:44,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:8,interval:0}}),yAxis:mkAxis({type:'value',min:0,max:100,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[{type:'bar',data:scale.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:35,itemStyle:{borderRadius:[3,3,0,0]},label:{show:true,position:'top',formatter:function(p){var map=['35K/d','Partial','$B scale','$3.5B','Full op','Pre-feas'];return map[p.dataIndex];},fontSize:8,color:C.navy}}]});}
+
+function drawHNYield(lang){var dom=document.getElementById('chartHNYield');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var districts=en?['Hoan Kiem','Tay Ho','Cau Giay','Nam Tu Liem','Thanh Xuan','Long Bien','Serviced']:['還劍','西湖','紙橋','南慈廉','清春','龍編','服務式'];
+  var gross=[4.5,4.8,5.0,5.2,5.3,5.5,7.0];var net=[3.1,3.3,3.6,3.8,3.9,4.1,5.1];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:districts,axisLabel:{color:C.muted,fontSize:8,interval:0,rotate:20}}),yAxis:mkAxis({type:'value',min:0,max:8,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{name:en?'Gross':'毛',type:'bar',data:gross,barMaxWidth:22,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'20%'},{name:en?'Net':'淨',type:'bar',data:net,barMaxWidth:22,itemStyle:{color:'rgba(37,99,235,0.55)',borderRadius:[3,3,0,0]}}]});}
+
+function drawHNFDI(lang){var dom=document.getElementById('chartHNFDI');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025E'];
+  var fdi=[8.2,6.5,9.1,11.8,10.5,14.8,13.5];
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:20,bottom:24,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:'${value}B'}}),
+    series:[{type:'bar',data:fdi.map(function(v){return{value:v,itemStyle:{color:v>=12?C.green:v>=9?C.navy:C.muted}};}),barMaxWidth:35,itemStyle:{borderRadius:[3,3,0,0]},label:{show:true,position:'top',formatter:function(p){return '$'+p.value+'B';},fontSize:10,color:C.navy}}]});}
+
+function drawHNForecast(lang){var dom=document.getElementById('chartHNForecast');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2025','2026E','2027E','2028E'];
+  var bull=[2900,3250,3580,3900];var base=[2900,3150,3330,3500];var bear=[2900,3050,3180,3300];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:20,bottom:36,containLabel:true},xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:2700,max:4100,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+(v/1000).toFixed(1)+'K';}}}),
+    series:[{name:en?'Bull':'牛市',type:'line',data:bull,lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,areaStyle:{color:'rgba(22,163,74,0.08)'}},{name:en?'Base':'基準',type:'line',data:base,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6},{name:en?'Bear':'熊市',type:'line',data:bear,lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:6,areaStyle:{color:'rgba(220,38,38,0.05)'}}]});}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

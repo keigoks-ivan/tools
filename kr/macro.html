@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | Korea Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">Korea — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">韓國 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q1 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q1</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:2;background:#6b7280">
+        <div class="cs-title">GFC</div>
+        <div class="cs-year">08–09</div>
+      </div>
+      <div class="cycle-seg" style="flex:5;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Slow Expansion</span><span class="lang-zh" style="display:none">緩慢擴張</span></div>
+        <div class="cs-year">10–19</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">COVID Surge</span><span class="lang-zh" style="display:none">COVID暴漲</span></div>
+        <div class="cs-year">20–21</div>
+      </div>
+      <div class="cycle-seg" style="flex:3;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Correction</span><span class="lang-zh" style="display:none">修正</span></div>
+        <div class="cs-year">22–24</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Bifurcated</span><span class="lang-zh" style="display:none">分化</span></div>
+        <div class="cs-year">25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">BoK at 2.75% (Apr 2025) — cutting cycle underway; Seoul Gangnam stable/rising while provincial markets in deep correction; Jeonse crisis and PF loan risks linger</span>
+        <span class="lang-zh" style="display:none">BoK利率2.75%（2025年4月）——降息週期進行中；首爾江南穩定/上漲，但地方市場深度修正；全租金危機及PF貸款風險持續</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">BoK Base Rate</span><span class="lang-zh" style="display:none">BoK基準利率</span></div>
+      <div class="kpi-value">2.75%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">−75bp from peak</span><span class="lang-zh" style="display:none">距高點−75bp</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">KB HPI YoY (National)</span><span class="lang-zh" style="display:none">KB全國住宅指數 YoY</span></div>
+      <div class="kpi-value">−1.2%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Seoul +2.5% vs Rest −4%</span><span class="lang-zh" style="display:none">首爾+2.5% vs 其他地區−4%</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">CPI YoY</span><span class="lang-zh" style="display:none">通膨 YoY</span></div>
+      <div class="kpi-value">2.1%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Approaching target</span><span class="lang-zh" style="display:none">接近目標</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">2.0%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">2024 full year</span><span class="lang-zh" style="display:none">2024全年</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Household Debt/GDP</span><span class="lang-zh" style="display:none">家庭債務/GDP</span></div>
+      <div class="kpi-value">~100%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Highest in OECD</span><span class="lang-zh" style="display:none">OECD最高</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">Unemployment</span><span class="lang-zh" style="display:none">失業率</span></div>
+      <div class="kpi-value">2.7%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Structurally low</span><span class="lang-zh" style="display:none">結構性低位</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">BoK Rate Range (17yr)</span><span class="lang-zh" style="display:none">BoK歷史區間</span></div>
+      <div class="ctx-val">0.50%–3.50%</div>
+      <div class="ctx-sub"><span class="lang-en">Low: 2020–21 · High: 2023</span><span class="lang-zh" style="display:none">低點：2020–21 · 高點：2023年</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">KB HPI Since 2008</span><span class="lang-zh" style="display:none">KB指數自2008累計</span></div>
+      <div class="ctx-val" style="color:#16a34a">+80%</div>
+      <div class="ctx-sub"><span class="lang-en">National; Seoul Gangnam +130%+</span><span class="lang-zh" style="display:none">全國均值；首爾江南+130%以上</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+6.8% / −0.7%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2010 rebound · Worst: 2020 COVID</span><span class="lang-zh" style="display:none">最佳：2010反彈 · 最差：2020 COVID</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Jeonse Crisis 2022–23</span><span class="lang-zh" style="display:none">2022–23全租金危機</span></div>
+      <div class="ctx-val" style="color:#dc2626">−30%</div>
+      <div class="ctx-sub"><span class="lang-en">Jeonse prices drop — 150K+ fraud cases</span><span class="lang-zh" style="display:none">全租金下跌，15萬件以上詐騙案</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × House Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Korea's unique Jeonse system (lump-sum rental deposit instead of monthly rent) creates a leverage multiplier in the housing market. When Jeonse prices fall, landlords who used deposits as collateral face a squeeze — triggering the 2022–23 "Jeonse fraud" crisis affecting 150,000+ households. KB national HPI direction is driven by Seoul Gangnam and Mapo/Yongsan districts, which structurally outperform the national index.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>韓國獨特的全租金（Jeonse）制度（一次性押金取代月租）在房市中形成槓桿放大效應。當全租金下跌時，以押金作抵押的房東面臨資金緊縮——引發2022–23年「全租金詐騙」危機，影響超過15萬戶家庭。KB全國HPI走勢主要由首爾江南及麻浦/龍山地區帶動，長期跑贏全國指數。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">BoK Rate / Mortgage Rate / CPI vs KB HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">BoK利率 / 房貸利率 / CPI vs KB住宅指數（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × House Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Korea's household debt at ~100% of GDP is the highest in the OECD — a structural vulnerability. The 2023 PF (Project Financing) loan crisis, where regional developers and construction firms used short-term PF loans to finance unsold housing, put stress on savings banks and mutual savings institutions. BoK cannot cut aggressively because of household debt sensitivity to rate changes.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>韓國家庭債務約佔GDP 100%，為OECD最高——是結構性弱點。2023年PF（項目融資）貸款危機中，地方開發商和建築企業以短期PF貸款融資未售出住宅，對儲蓄銀行和互助儲蓄機構造成壓力。由於家庭對利率變動高度敏感，BoK無法大幅降息。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">GDP / Unemployment / Household Debt vs KB HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">GDP / 失業率 / 家庭債務/GDP vs KB住宅指數（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #6b7280">
+      <div class="ev-year" style="color:#6b7280"><span class="lang-en">2008–2009 · GFC SHOCK</span><span class="lang-zh" style="display:none">2008–2009 · GFC衝擊</span></div>
+      <div class="ev-title"><span class="lang-en">BoK Cuts to 2.00% — KB HPI Stagnates</span><span class="lang-zh" style="display:none">BoK降至2.00%，KB住宅指數停滯</span></div>
+      <div class="ev-desc"><span class="lang-en">GFC triggers rapid BoK cuts from 5.25% to 2.00% in six months. Korea's diversified export base limits GDP damage (−0.7% in 2009 — shallower than peers). KB national HPI dips modestly. Government launches large fiscal stimulus (FY2009 budget +5% of GDP). Recovery is swift: GDP rebounds +6.8% in 2010.</span><span class="lang-zh" style="display:none">GFC觸發BoK在六個月內從5.25%快速降至2.00%。韓國多元化出口基礎限制了GDP損失（2009年−0.7%，淺於同儕）。KB全國住宅指數小幅下滑。政府推出大規模財政刺激（2009年財政年度預算增加相當於GDP的5%）。復甦迅速，2010年GDP反彈+6.8%。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2011–2019 · SLOW GRIND HIGHER</span><span class="lang-zh" style="display:none">2011–2019 · 緩慢上行</span></div>
+      <div class="ev-title"><span class="lang-en">BoK Cuts Repeatedly to 1.25% — Seoul Outperforms</span><span class="lang-zh" style="display:none">BoK多次降息至1.25%，首爾跑贏全國</span></div>
+      <div class="ev-desc"><span class="lang-en">BoK cuts rates nine times 2012–2016, reaching historic low of 1.25%. National HPI rises gradually +2–4%/yr, but Seoul districts (Gangnam, Mapo) surge +20–30%. Jeonse prices rise faster than purchase prices — a warning sign of leveraged demand. Government introduces LTV (70%) and DTI (50%) caps from 2017. Chonsei fraud begins emerging.</span><span class="lang-zh" style="display:none">BoK在2012–2016年九次降息至歷史低點1.25%。全國住宅指數每年緩慢上漲2–4%，但首爾各區（江南、麻浦）暴漲20–30%。全租金漲速超過購房價格，是槓桿需求的警示信號。政府從2017年起引入LTV（70%）和DTI（50%）上限。全租金詐騙案開始浮現。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">2020–2021 · COVID SURGE</span><span class="lang-zh" style="display:none">2020–2021 · COVID暴漲</span></div>
+      <div class="ev-title"><span class="lang-en">BoK to 0.50% + K-New Deal Stimulus — HPI +20%</span><span class="lang-zh" style="display:none">BoK降至0.50%+韓國新政刺激，HPI+20%</span></div>
+      <div class="ev-desc"><span class="lang-en">BoK hits historic low 0.50% (May 2020). Government's K-New Deal (KRW 160tn) + emergency transfers. Seoul apartment prices surge +25% (2020–21). Young Koreans panic-buy ("영끌" — leveraging everything). Jeonse prices spike as buyers convert to purchase, tightening rental supply. Government imposes aggressive lending caps: LTV/DSR tightened multiple rounds.</span><span class="lang-zh" style="display:none">BoK降至歷史低點0.50%（2020年5月）。政府160兆韓元新政+緊急補貼。首爾公寓價格2020–21年暴漲25%。年輕韓國人恐慌性搶購（「영끌」——傾盡一切加槓桿）。隨著買家轉為購房，全租金急漲，租賃供給收緊。政府多輪收緊LTV/DSR貸款上限。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">APR 2022 – JAN 2023 · RATE SHOCK</span><span class="lang-zh" style="display:none">2022年4月–2023年1月 · 升息衝擊</span></div>
+      <div class="ev-title"><span class="lang-en">7 Hikes: 0.50% → 3.50% — HPI Falls −10%</span><span class="lang-zh" style="display:none">7次升息：0.50%→3.50%，HPI下跌−10%</span></div>
+      <div class="ev-desc"><span class="lang-en">BoK raises rates seven times to 3.50% — largest tightening since 1997 AFC. KB national HPI falls −9.5% peak-to-trough. Seoul Gangnam down −12%. Jeonse prices crash −20–30%: landlords who borrowed against rising Jeonse are trapped. Nationwide Jeonse fraud scandal emerges — 150K+ victim cases, KRW 3tn+ in losses.</span><span class="lang-zh" style="display:none">BoK七次升息至3.50%——為1997年亞洲金融危機以來最大緊縮。KB全國住宅指數從峰值下跌9.5%，首爾江南跌幅達12%。全租金價格暴跌20–30%：以上漲全租金作抵押借貸的房東陷入困境。全國全租金詐騙醜聞爆發——超過15萬受害者，損失逾3兆韓元。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">2023 · PROJECT FINANCING CRISIS</span><span class="lang-zh" style="display:none">2023年 · 項目融資危機</span></div>
+      <div class="ev-title"><span class="lang-en">PF Loans at Risk — Savings Banks Stress-Tested</span><span class="lang-zh" style="display:none">PF貸款面臨違約，儲蓄銀行壓力測試</span></div>
+      <div class="ev-desc"><span class="lang-en">Korea's Project Financing system — where developers borrow 70–80% LTV from savings banks using unsold units as collateral — faces defaults as construction costs rise and sales slow. FSC estimates KRW 230tn in PF exposure. Government launches KRW 50tn real estate PF support program. Several small savings banks face liquidity stress. Legoland Korea default triggers market shock (Oct 2022).</span><span class="lang-zh" style="display:none">韓國項目融資制度——開發商以未售出單位作抵押，向儲蓄銀行借入LTV高達70–80%——因建設成本上升和銷售放緩而面臨違約。FSC估計PF敞口達230兆韓元。政府推出50兆韓元房地產PF支援計劃，多家小型儲蓄銀行面臨流動性壓力。樂天世界（樂高樂園）韓國違約引發市場衝擊（2022年10月）。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #8b5cf6">
+      <div class="ev-year" style="color:#8b5cf6"><span class="lang-en">2024 · MARKET BIFURCATION</span><span class="lang-zh" style="display:none">2024年 · 市場嚴重分化</span></div>
+      <div class="ev-title"><span class="lang-en">Seoul Rebounds; Provincial Markets Still Deep in Correction</span><span class="lang-zh" style="display:none">首爾反彈；地方市場仍深度修正中</span></div>
+      <div class="ev-desc"><span class="lang-en">BoK begins cutting: 3.50% → 3.00% (Oct 2024) → 2.75% (Feb 2025). Seoul Gangnam and Mapo see renewed demand — HPI recovering +3–5% in H2 2024. But Incheon, Daejeon, regional cities: unsold inventory reaches decade highs, prices still falling. Government introduces "Non-Gangnam Revitalisation" special zones. Youth homeownership loans (금융 디딤돌) expanded.</span><span class="lang-zh" style="display:none">BoK開始降息：3.50%→3.00%（2024年10月）→2.75%（2025年2月）。首爾江南和麻浦需求重現，2024年下半年HPI回升3–5%。但仁川、大田及地方城市未售庫存達十年高點，房價仍在下跌。政府推出「非江南振興」特區，擴大青年購房貸款（金融基石）。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">DEC 2024 · POLITICAL CRISIS</span><span class="lang-zh" style="display:none">2024年12月 · 政治危機</span></div>
+      <div class="ev-title"><span class="lang-en">President Yoon's Martial Law Declaration — Market Shock</span><span class="lang-zh" style="display:none">尹錫悅宣布戒嚴，市場衝擊</span></div>
+      <div class="ev-desc"><span class="lang-en">President Yoon Suk-yeol declares martial law (Dec 3, 2024), revoked hours later after National Assembly vote. Yoon impeached Dec 14. KRW weakens −5% vs USD, KOSPI −3%. Property market sentiment temporarily chilled. BoK keeps rates stable amid political uncertainty. Acting government maintains fiscal stance; housing policy continuity preserved.</span><span class="lang-zh" style="display:none">尹錫悅總統宣布戒嚴（2024年12月3日），數小時後因國會投票而撤銷。尹錫悅於12月14日遭到彈劾。韓元對美元貶值5%，綜合股指跌3%。房市情緒暫時受壓。BoK在政治不確定性下維持利率穩定，代理政府維持財政立場，住房政策延續。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2025 · BoK EASING + HOUSEHOLD DEBT OVERHANG</span><span class="lang-zh" style="display:none">2025年 · BoK寬鬆+家庭債務懸頂</span></div>
+      <div class="ev-title"><span class="lang-en">Rate at 2.75% — Seoul Stable, Regions Lagging</span><span class="lang-zh" style="display:none">利率2.75%，首爾穩定，地方滯後</span></div>
+      <div class="ev-desc"><span class="lang-en">BoK at 2.75% (Feb 2025). Seoul KB HPI up +2.5% YoY (Q1 2025). Household debt at ~100% GDP constrains BoK from cutting aggressively. PF support programs continue. Government targeting 270,000 new homes in 2025. US tariff uncertainty adds export headwind. Demographics: population decline accelerating, household formation slowing.</span><span class="lang-zh" style="display:none">BoK利率2.75%（2025年2月）。首爾KB住宅指數2025年Q1同比上漲2.5%。家庭債務約佔GDP100%，制約BoK大幅降息空間。PF支援計劃持續，政府目標2025年新建27萬套住宅。美國關稅不確定性增加出口逆風。人口：人口減少加速，家庭形成放緩。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#dc2626;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#dc2626;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook — Correction / Bifurcated</span><span class="lang-zh" style="display:none">當前週期展望 — 修正/嚴重分化</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">BoK cutting cycle — 2.75% with room to go lower</span><span class="lang-zh" style="display:none">BoK降息週期——2.75%仍有降息空間</span></li>
+          <li><span class="lang-en">Seoul supply constrained — Gangnam greenbelt limits new builds</span><span class="lang-zh" style="display:none">首爾供給受限——江南綠化帶限制新建</span></li>
+          <li><span class="lang-en">Government youth homeownership loans at concessional rates</span><span class="lang-zh" style="display:none">政府優惠利率青年購房貸款支撐需求</span></li>
+          <li><span class="lang-en">Semiconductors (Samsung/SK Hynix) drive employment in Seoul metro</span><span class="lang-zh" style="display:none">半導體（三星/SK海力士）驅動首爾都會區就業</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">Household debt ~100% GDP — limits BoK easing scope</span><span class="lang-zh" style="display:none">家庭債務約佔GDP100%——限制BoK寬鬆空間</span></li>
+          <li><span class="lang-en">PF loan crisis still being resolved — savings banks at risk</span><span class="lang-zh" style="display:none">PF貸款危機仍在解決中，儲蓄銀行面臨風險</span></li>
+          <li><span class="lang-en">Provincial market collapse — unsold inventory at record highs</span><span class="lang-zh" style="display:none">地方市場崩潰，未售庫存達歷史高位</span></li>
+          <li><span class="lang-en">Population decline accelerating — long-term structural headwind</span><span class="lang-zh" style="display:none">人口減少加速——長期結構性逆風</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: Bank of Korea (BoK base rate, bok.or.kr), KB국민은행 (KB Housing Price Index — kbland.kr/research), Statistics Korea (KOSTAT — GDP, CPI, Labour Force Survey — kostat.go.kr), FSC/FSS (Financial Stability Report, Household Debt data — fsc.go.kr). Note: KB Housing Price Index is the most widely cited Korean residential price indicator, published monthly. Jeonse data from MOLIT (Ministry of Land, Infrastructure and Transport). 2025 data are Q1 2025 actuals or estimates from BoK/KOSTAT trend.</span>
+    <span class="lang-zh" style="display:none">來源：韓國銀行（BoK基準利率 · bok.or.kr）、KB國民銀行（KB住宅價格指數 · kbland.kr/research）、統計廳（KOSTAT — GDP、CPI、勞動力調查 · kostat.go.kr）、金融委員會/金融監督院（金融穩定報告、家庭債務數據 · fsc.go.kr）。注意：KB住宅價格指數為韓國最廣泛引用的住宅價格指標，每月發布。全租金數據來自國土交通部（MOLIT）。2025年數據為2025 Q1實際值或基於BoK/KOSTAT趨勢的估算。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, sources: BoK / KB / KOSTAT) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+/* KB Housing Price Index (National, approx index 2017=100) */
+/* Key confirmed: 2017=100; 2021 peak ~123; 2023 trough ~111; 2024 ~114 */
+/* 2008–2016 back-calculated: +~2%/yr national avg from KB reports */
+var hpi = [74,72,76,79,81,83,85,89,92,100,104,107,110,124,120,112,114,115];
+
+/* Chart 1: Monetary */
+/* BoK base rate (year-end) — bok.or.kr */
+var bokRate    = [3.00,2.00,2.50,3.25,2.75,2.50,2.00,1.50,1.25,1.50,1.75,1.25,0.50,1.00,3.25,3.50,3.00,2.75];
+/* Korean commercial bank avg mortgage rate (Kofia / BoK data) */
+var mortRate   = [6.50,5.00,5.00,5.25,4.75,4.00,3.50,3.00,2.80,3.00,3.30,2.70,2.50,2.80,4.50,5.00,4.00,3.70];
+/* KOSTAT CPI YoY% annual avg */
+var cpiYoy     = [4.7,2.8,2.9,4.0,2.2,1.3,1.3,0.7,1.0,1.9,1.5,0.4,0.5,2.5,5.1,3.6,2.3,2.1];
+
+/* Chart 2: Real Economy */
+/* KOSTAT real GDP YoY% */
+var gdpGrowth  = [2.3,-0.7,6.8,3.7,2.4,2.9,3.3,2.8,2.9,3.2,2.9,2.2,-0.7,4.3,2.6,1.4,2.0,1.8];
+/* KOSTAT Labour Force Survey unemployment % annual avg */
+var unemployRate = [3.2,3.6,3.7,3.4,3.2,3.1,3.5,3.6,3.7,3.7,3.8,3.8,4.0,3.7,2.9,2.7,2.8,2.7];
+/* Household debt / GDP % (BoK / FSC annual data) */
+var hhDebtGdp  = [70,72,72,73,74,76,77,79,82,88,93,93,96,105,107,108,105,100];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × KB HPI ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC Shock',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(217,119,6,0.07)'},  label:{formatter:isZh?'緩慢擴張':'Slow Expansion',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(22,163,74,0.08)'},  label:{formatter:isZh?'COVID暴漲':'COVID Surge',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.08)'},  label:{formatter:isZh?'修正':'Correction',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2024'}],
+    [{xAxis:'2025',itemStyle:{color:'rgba(220,38,38,0.06)'},  label:{formatter:isZh?'分化':'Bifurcated',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2012',label:{formatter:isZh?'BoK降息週期':'BoK Cut Cycle',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'BoK 0.50%':'BoK 0.50%',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'BoK升息':'BoK Hikes',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2024',label:{formatter:isZh?'BoK首降':'BoK Cuts',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:80,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-2,max:8,interval:2,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:60,max:140,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'KB住宅指數':'KB HPI',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'BoK基準利率':'BoK Base Rate',type:'line',data:bokRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'房貸利率':'Mortgage Rate',type:'line',data:mortRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpiYoy,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'KB住宅指數':'KB HPI',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy × KB HPI ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gdpBarData = gdpGrowth.map(function(v){return {value:v,itemStyle:{color:v>=0?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC衝擊':'GFC',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(22,163,74,0.08)'},  label:{formatter:isZh?'COVID暴漲':'COVID Surge',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.08)'},  label:{formatter:isZh?'修正':'Correction',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2024'}]
+  ];
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:80,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:-4,max:12,interval:4,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:60,max:140,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'KB住宅指數':'KB HPI',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GDP YoY%':'GDP YoY%',type:'bar',data:gdpBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'失業率%':'Unemployment%',type:'line',data:unemployRate,yAxisIndex:0,lineStyle:{color:C.red,width:1.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'家庭債務/GDP%':'Household Debt/GDP%',type:'line',data:hhDebtGdp.map(function(v){return v/10;}),yAxisIndex:0,lineStyle:{color:'#8b5cf6',width:1.5,type:'dashed'},itemStyle:{color:'#8b5cf6'},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'KB住宅指數':'KB HPI',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

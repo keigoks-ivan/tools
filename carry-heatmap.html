@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carry Spread Heatmap | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e3a5f;line-height:1.5}
+a{color:inherit;text-decoration:none}
+
+.hero{background:linear-gradient(180deg,#0a1726 0%,#0f1e33 60%,#162e4d 100%);color:#e2ecf8;padding:48px 32px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-30%;right:-10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,0.10) 0%,transparent 60%);pointer-events:none}
+.hero-inner{max-width:min(1280px,96vw);margin:0 auto;position:relative}
+.hero-eyebrow{font-size:10px;letter-spacing:.18em;font-weight:700;color:#f59e0b;margin-bottom:12px}
+.hero-h1{font-size:38px;font-weight:800;color:#fff;line-height:1.1;letter-spacing:-.02em;margin-bottom:14px;max-width:840px}
+.hero-h1 em{color:#f59e0b;font-style:normal}
+.hero-sub{font-size:14px;color:#94a3b8;line-height:1.65;max-width:680px;margin-bottom:24px}
+.hero-stats{display:flex;gap:32px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);flex-wrap:wrap}
+.hero-stat .lbl{font-size:9px;letter-spacing:.12em;color:#5a8ab5;font-weight:600;margin-bottom:3px}
+.hero-stat .val{font-size:20px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.hero-stat .val.green{color:#22c55e}
+.hero-stat .val.red{color:#f87171}
+@media(max-width:760px){.hero{padding:32px 16px}.hero-h1{font-size:24px}}
+
+.section{max-width:min(1280px,96vw);margin:0 auto;padding:32px}
+.section-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.section-eye{font-size:10px;letter-spacing:.16em;font-weight:700;color:#3b82f6}
+.section-h2{font-size:20px;font-weight:700;color:#0f1e33;letter-spacing:-.01em;line-height:1.2;margin-top:4px}
+.section-sub{font-size:12.5px;color:#5a7a9a;margin-top:6px;max-width:680px;line-height:1.55}
+
+/* TOP MOVERS BAND */
+.movers{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+@media(max-width:760px){.movers{grid-template-columns:1fr}}
+.mover-card{background:#fff;border:1px solid #dce8f5;border-radius:12px;padding:16px 18px}
+.mover-card.compress{border-left:4px solid #dc2626}
+.mover-card.expand{border-left:4px solid #16a34a}
+.mover-card h3{font-size:11px;letter-spacing:.10em;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.mover-card.compress h3{color:#dc2626}
+.mover-card.expand h3{color:#16a34a}
+.mover-list{display:flex;flex-direction:column;gap:6px}
+.mover-row{display:grid;grid-template-columns:24px 1fr 60px 80px;gap:8px;align-items:baseline;font-size:11.5px;padding:5px 0;border-bottom:1px solid #f0f5fb}
+.mover-row:last-child{border-bottom:none}
+.mover-rank{color:#94a3b8;font-size:9px;font-weight:700;letter-spacing:.06em}
+.mover-name{font-weight:600;color:#0f1e33;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mover-name .flag{margin-right:4px}
+.mover-then{font-size:10px;color:#94a3b8;text-align:right;font-variant-numeric:tabular-nums}
+.mover-now{font-weight:700;text-align:right;font-variant-numeric:tabular-nums;font-size:11px}
+.mover-now.neg{color:#dc2626}
+.mover-now.pos{color:#16a34a}
+.mover-arrow{display:inline-block;font-size:9px;margin:0 2px;color:#94a3b8}
+
+/* HEATMAP */
+.heatmap-wrap{background:#fff;border:1px solid #dce8f5;border-radius:12px;overflow:auto;-webkit-overflow-scrolling:touch}
+.heatmap-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.hm-toggle{display:flex;background:#f0f6ff;border:1px solid #dce8f5;border-radius:6px;padding:2px}
+.hm-toggle button{background:transparent;border:none;color:#5a7a9a;font-size:11px;font-family:inherit;padding:5px 11px;border-radius:4px;cursor:pointer;font-weight:600;letter-spacing:.04em}
+.hm-toggle button.on{background:#3b82f6;color:#fff}
+.hm-toggle button:hover:not(.on){color:#1e3a5f}
+.hm-meta{margin-left:auto;font-size:10px;color:#94a3b8}
+.hm-svg{display:block;width:100%;height:auto}
+.hm-tip{position:absolute;background:#0f1e33;color:#fff;padding:8px 12px;border-radius:6px;font-size:11px;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none;display:none;z-index:50;min-width:160px}
+.hm-tip.show{display:block}
+.hm-tip strong{color:#f59e0b}
+.hm-tip .row{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+.hm-tip .row .k{color:#94a3b8;font-size:10px}
+
+/* COLOR LEGEND */
+.scale-legend{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:10px;color:#5a7a9a;flex-wrap:wrap}
+.scale-bar{width:240px;height:10px;border-radius:5px;background:linear-gradient(90deg,#7f1d1d 0%,#dc2626 20%,#fca5a5 40%,#cbd5e1 50%,#86efac 60%,#16a34a 80%,#14532d 100%)}
+.scale-end{font-variant-numeric:tabular-nums;font-weight:600;color:#0f1e33}
+
+/* CITY DETAIL PANEL */
+.detail{background:#fff;border:1px solid #dce8f5;border-radius:12px;padding:20px 22px;margin-top:24px}
+.detail-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.detail-title{font-size:16px;font-weight:700;color:#0f1e33;display:flex;align-items:center;gap:8px}
+.detail-title .flag{font-size:22px}
+.detail-meta{font-size:11px;color:#5a7a9a}
+.detail-svg{width:100%;height:auto;display:block;background:#f8fbff;border-radius:8px;margin-bottom:12px}
+.detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:11px}
+@media(max-width:560px){.detail-stats{grid-template-columns:repeat(2,1fr)}}
+.detail-stat{padding:8px 10px;background:#f8fbff;border:1px solid #dce8f5;border-radius:6px}
+.detail-stat .k{font-size:9px;color:#94a3b8;letter-spacing:.06em;font-weight:600}
+.detail-stat .v{font-size:14px;font-weight:700;color:#0f1e33;font-variant-numeric:tabular-nums;margin-top:2px}
+.detail-stat .v.green{color:#16a34a}
+.detail-stat .v.red{color:#dc2626}
+
+/* DISCLAIMER */
+.disclaimer{font-size:10.5px;color:#94a3b8;line-height:1.6;background:#fef9e7;border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;margin-top:24px}
+.disclaimer strong{color:#92400e}
+
+/* FOOTER */
+.foot{background:#0f1e33;color:#94a3b8;padding:22px 0;font-size:11px;margin-top:32px}
+.foot .inner{max-width:min(1280px,96vw);margin:0 auto;padding:0 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.foot .brand{font-weight:700;letter-spacing:.12em;color:#cbd5e1}
+.foot a{color:#5a8ab5}.foot a:hover{color:#3b82f6}
+
+.lang-zh{display:none}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="lang-en">CARRY SPREAD HEATMAP &middot; 5 YEARS</span><span class="lang-zh">利差熱力圖 &middot; 5 年</span></div>
+    <h1 class="hero-h1">
+      <span class="lang-en">5 years of carry. <em>Find the inflection point.</em></span>
+      <span class="lang-zh">5 年利差變化。<em>找出轉折點。</em></span>
+    </h1>
+    <p class="hero-sub">
+      <span class="lang-en">Yield minus mortgage rate, quarter by quarter, for 30+ cities. Watch how the 2022–23 rate hike cycle compressed positive carry across most markets — and which cities held up.</span>
+      <span class="lang-zh">收益率減房貸利率，逐季比較 30+ 城市。看 2022–23 升息循環如何壓縮多數市場的正利差 — 以及哪些城市撐住了。</span>
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">CITIES TRACKED</span><span class="lang-zh">追蹤城市</span></div><div class="val" id="stat-cities">—</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">QUARTERS</span><span class="lang-zh">季度</span></div><div class="val">20</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">PERIOD</span><span class="lang-zh">期間</span></div><div class="val">2021Q2–2026Q1</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">BIGGEST COMPRESSION</span><span class="lang-zh">最大收斂</span></div><div class="val red" id="stat-compress">—</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">BIGGEST EXPANSION</span><span class="lang-zh">最大擴大</span></div><div class="val green" id="stat-expand">—</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-hdr">
+    <div>
+      <div class="section-eye"><span class="lang-en">TOP MOVERS</span><span class="lang-zh">變動榜</span></div>
+      <h2 class="section-h2"><span class="lang-en">Who lost the most carry — and who gained</span><span class="lang-zh">誰損失最多利差 — 誰擴大了</span></h2>
+      <p class="section-sub"><span class="lang-en">5-year change in carry spread (2021Q2 vs 2026Q1). Negative = carry compressed; positive = carry expanded.</span><span class="lang-zh">5 年利差變化（2021Q2 vs 2026Q1）。負值 = 利差收斂；正值 = 利差擴大。</span></p>
+    </div>
+  </div>
+
+  <div class="movers">
+    <div class="mover-card compress">
+      <h3>📉 <span class="lang-en">TOP 5 — CARRY COMPRESSED</span><span class="lang-zh">前 5 收斂最多</span></h3>
+      <div class="mover-list" id="movers-compress"></div>
+    </div>
+    <div class="mover-card expand">
+      <h3>📈 <span class="lang-en">TOP 5 — CARRY EXPANDED</span><span class="lang-zh">前 5 擴大最多</span></h3>
+      <div class="mover-list" id="movers-expand"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="section-hdr">
+    <div>
+      <div class="section-eye"><span class="lang-en">FULL HEATMAP</span><span class="lang-zh">完整熱力圖</span></div>
+      <h2 class="section-h2"><span class="lang-en">All cities &times; 20 quarters</span><span class="lang-zh">全城市 &times; 20 季</span></h2>
+      <p class="section-sub"><span class="lang-en">Each cell = carry spread in that quarter. Click any row to see the full 5-year line for that city.</span><span class="lang-zh">每格＝該季利差值。點任一城市列看該城 5 年走勢線圖。</span></p>
+    </div>
+  </div>
+
+  <div class="heatmap-controls">
+    <div class="hm-toggle">
+      <button class="on" data-sort="region" onclick="setSort('region')"><span class="lang-en">Region</span><span class="lang-zh">地區</span></button>
+      <button data-sort="current" onclick="setSort('current')"><span class="lang-en">Current carry</span><span class="lang-zh">當下利差</span></button>
+      <button data-sort="change" onclick="setSort('change')"><span class="lang-en">5yr change</span><span class="lang-zh">5 年變動</span></button>
+    </div>
+    <span class="hm-meta"><span class="lang-en">Hover any cell for value</span><span class="lang-zh">滑鼠停留任一格看數值</span></span>
+  </div>
+
+  <div class="heatmap-wrap" style="position:relative">
+    <svg id="hmSvg" class="hm-svg"></svg>
+    <div class="hm-tip" id="hmTip"></div>
+  </div>
+
+  <div class="scale-legend">
+    <span class="scale-end">−4%</span>
+    <div class="scale-bar"></div>
+    <span class="scale-end">+5%</span>
+    <span style="margin-left:14px"><span class="lang-en">Color = carry spread</span><span class="lang-zh">顏色 = 利差值</span></span>
+  </div>
+
+  <div class="detail" id="detail" style="display:none">
+    <div class="detail-hdr">
+      <div class="detail-title"><span class="flag" id="d-flag"></span><span id="d-name"></span></div>
+      <div class="detail-meta" id="d-meta"></div>
+    </div>
+    <svg class="detail-svg" id="dSvg" viewBox="0 0 800 240" preserveAspectRatio="none"></svg>
+    <div class="detail-stats">
+      <div class="detail-stat"><div class="k">2021Q2 CARRY</div><div class="v" id="d-then">—</div></div>
+      <div class="detail-stat"><div class="k">2026Q1 CARRY</div><div class="v" id="d-now">—</div></div>
+      <div class="detail-stat"><div class="k">5YR CHANGE</div><div class="v" id="d-change">—</div></div>
+      <div class="detail-stat"><div class="k">CURRENT YIELD / RATE</div><div class="v" id="d-yr" style="font-size:12px">—</div></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠ <span class="lang-en">Indicative model:</span><span class="lang-zh">示意模型：</span></strong>
+    <span class="lang-en">Quarterly mortgage rates derived from each country's central bank policy rate plus a typical spread. Yields back-cast from current values using estimated 5-year price growth (rents assumed flat). Real values vary 0.3–1.0pp per quarter — these curves show <strong>shape and inflection</strong>, not precise prints. Not for trading decisions.</span>
+    <span class="lang-zh">季度房貸利率由各國央行政策利率加典型利差推算。收益率以當下值反推（假設租金不變），用估計的 5 年房價增長還原。實際值每季可能差 0.3–1.0pp — 這些曲線顯示<strong>形狀與轉折</strong>，非精確數字。不可作為交易依據。</span>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="inner">
+    <span class="brand">INVESTMQUEST &middot; PROPERTY MONITOR</span>
+    <span><a href="/methodology.html"><span class="lang-en">Methodology</span><span class="lang-zh">方法論</span></a> · <a href="/dashboard.html"><span class="lang-en">Dashboard</span><span class="lang-zh">儀表板</span></a> · <span class="lang-en">Last reviewed 2026-04-27</span><span class="lang-zh">最後檢視 2026-04-27</span></span>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   QUARTERLY MORTGAGE CURVES BY COUNTRY (21Q2 → 26Q1, 20 pts)
+   Approximated from central bank policy rate + typical spread.
+   Last point ≈ current published rate; earlier points scaled.
+   ========================================================= */
+var COUNTRY_CURVE = {
+  us: [2.99,2.84,3.07,3.45,5.10,6.05,6.60,6.30,6.71,7.26,7.10,6.90,7.05,6.50,6.85,6.92,7.00,6.50,6.40,6.30],
+  uk: [1.85,1.95,2.00,2.40,3.00,4.50,5.50,5.20,5.10,5.80,5.50,4.85,4.80,4.95,4.80,4.50,4.50,4.65,4.55,4.35],
+  eu: [1.30,1.30,1.40,1.65,2.20,2.95,3.30,3.60,3.95,4.10,3.95,3.85,3.80,3.50,3.30,3.10,3.00,3.10,3.00,2.85],
+  jp: [1.30,1.32,1.35,1.40,1.50,1.60,1.70,1.75,1.80,1.85,1.90,1.95,2.00,2.05,2.05,2.08,2.08,2.10,2.10,2.08],
+  au: [2.50,2.50,2.50,2.65,3.45,4.40,5.10,5.55,6.05,6.30,6.30,6.40,6.40,6.30,6.30,6.20,6.10,5.90,5.80,5.49],
+  nz: [2.85,2.95,3.85,4.30,4.90,5.40,6.50,6.85,6.85,6.90,6.85,6.50,6.35,6.10,5.85,5.40,5.20,5.05,4.95,4.89],
+  kr: [2.85,3.10,3.45,3.95,4.50,4.80,5.20,5.10,4.85,4.65,4.55,4.45,4.35,4.25,4.20,4.15,4.20,4.15,4.20,4.19],
+  tw: [1.32,1.40,1.50,1.60,1.75,1.95,2.05,2.06,2.06,2.06,2.06,2.10,2.15,2.20,2.25,2.30,2.32,2.32,2.32,2.32],
+  sg: [1.65,1.70,1.85,1.95,2.85,3.40,3.85,4.05,4.10,3.95,3.85,3.65,3.55,3.30,3.10,2.90,2.85,2.80,2.75,2.70],
+  hk: [2.00,2.00,2.00,2.25,3.00,3.75,4.10,4.10,4.10,4.10,4.10,4.10,4.05,4.00,3.85,3.85,3.80,3.75,3.75,3.75],
+  my: [3.10,3.10,3.10,3.10,3.50,3.50,3.65,3.65,3.85,4.10,4.25,4.25,4.25,4.25,4.25,4.25,4.25,4.25,4.25,4.25],
+  th: [3.50,3.50,3.50,3.50,3.50,3.65,3.85,4.00,4.10,4.20,4.25,4.20,4.10,3.85,3.70,3.50,3.30,3.15,3.05,3.00],
+  vn: [10.5,10.5,10.5,11.0,12.0,13.5,14.5,14.0,13.5,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0],
+  in: [6.85,6.95,7.15,7.40,7.65,8.10,8.45,8.65,8.50,8.30,8.10,7.95,7.85,7.80,7.75,7.75,7.75,7.70,7.70,7.70],
+  ae: [3.99,3.99,3.99,4.10,4.50,5.20,5.85,5.85,5.85,5.85,5.85,5.65,5.45,5.10,4.85,4.50,4.20,3.95,3.80,3.70],
+  tr: [16.5,16.5,18.0,21.0,17.0,15.5,14.0,15.5,17.5,21.0,28.5,32.0,34.0,34.0,34.0,36.0,36.0,36.0,36.0,36.0],
+  ca: [2.10,2.20,2.55,3.10,4.30,5.00,5.50,5.55,5.30,5.20,5.00,4.85,4.65,4.45,4.30,4.20,4.10,4.10,4.05,4.04],
+  ph: [5.50,5.50,5.50,5.85,6.50,7.20,7.65,7.65,7.65,7.65,7.65,7.65,7.65,7.55,7.55,7.50,7.50,7.50,7.50,7.50],
+  id: [7.85,7.85,7.85,7.85,7.85,8.35,8.85,8.85,8.85,8.85,8.85,8.85,8.85,8.85,8.85,8.65,8.65,8.65,8.65,8.60],
+  ch: [1.35,1.35,1.45,1.65,2.40,2.85,3.05,3.05,2.95,2.90,2.85,2.65,2.50,2.30,2.10,2.00,1.95,1.90,1.85,1.81]
+};
+
+/* CITIES — current snapshot. country code maps to mortgage curve. */
+var HM_CITIES = [
+  {n:'NYC',z:'紐約',f:'\u{1F1FA}\u{1F1F8}',c:'us',y:2.8,m:6.30,d10:58,r:'NA'},
+  {n:'LA',z:'洛杉磯',f:'\u{1F1FA}\u{1F1F8}',c:'us',y:4.5,m:6.30,d10:80,r:'NA'},
+  {n:'SF',z:'舊金山',f:'\u{1F1FA}\u{1F1F8}',c:'us',y:3.5,m:6.30,d10:40,r:'NA'},
+  {n:'Seattle',z:'西雅圖',f:'\u{1F1FA}\u{1F1F8}',c:'us',y:5.5,m:6.30,d10:100,r:'NA'},
+  {n:'Boston',z:'波士頓',f:'\u{1F1FA}\u{1F1F8}',c:'us',y:4.5,m:6.30,d10:70,r:'NA'},
+  {n:'Chicago',z:'芝加哥',f:'\u{1F1FA}\u{1F1F8}',c:'us',y:8.3,m:6.30,d10:48,r:'NA'},
+  {n:'Miami',z:'邁阿密',f:'\u{1F1FA}\u{1F1F8}',c:'us',y:6.5,m:6.30,d10:115,r:'NA'},
+  {n:'Austin',z:'奧斯丁',f:'\u{1F1FA}\u{1F1F8}',c:'us',y:5.7,m:6.30,d10:85,r:'NA'},
+  {n:'Toronto',z:'多倫多',f:'\u{1F1E8}\u{1F1E6}',c:'ca',y:3.8,m:4.04,d10:50,r:'NA'},
+  {n:'Vancouver',z:'溫哥華',f:'\u{1F1E8}\u{1F1E6}',c:'ca',y:4.0,m:4.04,d10:60,r:'NA'},
+  {n:'London',z:'倫敦',f:'\u{1F1EC}\u{1F1E7}',c:'uk',y:3.8,m:5.42,d10:15,r:'EU'},
+  {n:'Manchester',z:'曼徹斯特',f:'\u{1F1EC}\u{1F1E7}',c:'uk',y:6.1,m:4.35,d10:40,r:'EU'},
+  {n:'Edinburgh',z:'愛丁堡',f:'\u{1F1EC}\u{1F1E7}',c:'uk',y:5.7,m:4.35,d10:35,r:'EU'},
+  {n:'Dublin',z:'都柏林',f:'\u{1F1EE}\u{1F1EA}',c:'eu',y:3.5,m:3.50,d10:70,r:'EU'},
+  {n:'Cork',z:'科克',f:'\u{1F1EE}\u{1F1EA}',c:'eu',y:7.0,m:3.50,d10:65,r:'EU'},
+  {n:'Madrid',z:'馬德里',f:'\u{1F1EA}\u{1F1F8}',c:'eu',y:5.1,m:2.85,d10:35,r:'EU'},
+  {n:'Malaga',z:'馬拉加',f:'\u{1F1EA}\u{1F1F8}',c:'eu',y:6.6,m:2.85,d10:70,r:'EU'},
+  {n:'Berlin',z:'柏林',f:'\u{1F1E9}\u{1F1EA}',c:'eu',y:3.8,m:3.75,d10:60,r:'EU'},
+  {n:'Amsterdam',z:'阿姆斯特丹',f:'\u{1F1F3}\u{1F1F1}',c:'eu',y:3.5,m:4.05,d10:85,r:'EU'},
+  {n:'Lisbon',z:'里斯本',f:'\u{1F1F5}\u{1F1F9}',c:'eu',y:4.3,m:4.00,d10:95,r:'EU'},
+  {n:'Zurich',z:'蘇黎世',f:'\u{1F1E8}\u{1F1ED}',c:'ch',y:2.5,m:1.81,d10:25,r:'EU'},
+  {n:'Tokyo',z:'東京',f:'\u{1F1EF}\u{1F1F5}',c:'jp',y:3.3,m:2.08,d10:110,r:'AS'},
+  {n:'Osaka',z:'大阪',f:'\u{1F1EF}\u{1F1F5}',c:'jp',y:3.3,m:2.08,d10:75,r:'AS'},
+  {n:'Fukuoka',z:'福岡',f:'\u{1F1EF}\u{1F1F5}',c:'jp',y:5.0,m:0.80,d10:120,r:'AS'},
+  {n:'Seoul',z:'首爾',f:'\u{1F1F0}\u{1F1F7}',c:'kr',y:3.0,m:4.19,d10:60,r:'AS'},
+  {n:'Singapore',z:'新加坡',f:'\u{1F1F8}\u{1F1EC}',c:'sg',y:3.3,m:2.70,d10:30,r:'AS'},
+  {n:'Hong Kong',z:'香港',f:'\u{1F1ED}\u{1F1F0}',c:'hk',y:3.4,m:3.75,d10:-10,r:'AS'},
+  {n:'Taipei',z:'台北',f:'\u{1F1F9}\u{1F1FC}',c:'tw',y:1.8,m:2.32,d10:35,r:'AS'},
+  {n:'Bangkok',z:'曼谷',f:'\u{1F1F9}\u{1F1ED}',c:'th',y:6.0,m:3.00,d10:40,r:'AS'},
+  {n:'KL',z:'吉隆坡',f:'\u{1F1F2}\u{1F1FE}',c:'my',y:4.9,m:4.25,d10:10,r:'AS'},
+  {n:'Mumbai',z:'孟買',f:'\u{1F1EE}\u{1F1F3}',c:'in',y:3.8,m:7.70,d10:20,r:'AS'},
+  {n:'Manila',z:'馬尼拉',f:'\u{1F1F5}\u{1F1ED}',c:'ph',y:5.8,m:7.50,d10:40,r:'AS'},
+  {n:'HCMC',z:'胡志明',f:'\u{1F1FB}\u{1F1F3}',c:'vn',y:4.0,m:13.00,d10:100,r:'AS'},
+  {n:'Sydney',z:'雪梨',f:'\u{1F1E6}\u{1F1FA}',c:'au',y:3.0,m:5.49,d10:65,r:'OC'},
+  {n:'Melbourne',z:'墨爾本',f:'\u{1F1E6}\u{1F1FA}',c:'au',y:3.8,m:5.49,d10:15,r:'OC'},
+  {n:'Brisbane',z:'布里斯本',f:'\u{1F1E6}\u{1F1FA}',c:'au',y:4.4,m:5.49,d10:93,r:'OC'},
+  {n:'Perth',z:'伯斯',f:'\u{1F1E6}\u{1F1FA}',c:'au',y:4.8,m:6.29,d10:90,r:'OC'},
+  {n:'Auckland',z:'奧克蘭',f:'\u{1F1F3}\u{1F1FF}',c:'nz',y:4.0,m:4.89,d10:45,r:'OC'},
+  {n:'Dubai',z:'杜拜',f:'\u{1F1E6}\u{1F1EA}',c:'ae',y:6.6,m:3.70,d10:80,r:'ME'},
+  {n:'Istanbul',z:'伊斯坦堡',f:'\u{1F1F9}\u{1F1F7}',c:'tr',y:7.0,m:36.0,d10:180,r:'ME'}
+];
+
+/* =========================================================
+   COMPUTE: yield + mortgage at each quarter (20 points)
+   ========================================================= */
+function buildSeries(c){
+  var curve=COUNTRY_CURVE[c.c]||[];
+  var ratio=curve.length?(c.m/curve[curve.length-1]):1;
+  /* yield drift: yield_then = yield_now × (1 + 0.5 × d10y/100 × (1-t/19)) */
+  var growFactor=0.5*(c.d10||0)/100;
+  var pts=[];
+  for(var t=0;t<20;t++){
+    var mort=curve[t]?curve[t]*ratio:c.m;
+    var yld=c.y*(1+growFactor*(1-t/19));
+    pts.push({q:t,m:mort,y:yld,carry:+(yld-mort).toFixed(2)});
+  }
+  return pts;
+}
+HM_CITIES.forEach(function(c){c.series=buildSeries(c);c.carryNow=c.series[19].carry;c.carryThen=c.series[0].carry;c.delta=+(c.carryNow-c.carryThen).toFixed(2);});
+
+/* =========================================================
+   COLOR SCALE for carry: -4 to +5
+   Stops:  -4(dark red) -2(red) -0.5(amber) 0(neutral) 1.5(green) 5(dark green)
+   ========================================================= */
+function carryColor(v){
+  if(v<=-4)return '#7f1d1d';
+  if(v<=-2)return '#dc2626';
+  if(v<=-0.5)return '#fca5a5';
+  if(v<=0.5)return '#cbd5e1';
+  if(v<=1.5)return '#86efac';
+  if(v<=3.5)return '#16a34a';
+  return '#14532d';
+}
+
+/* =========================================================
+   QUARTER LABELS
+   ========================================================= */
+var Q_LABELS=[];
+(function(){
+  var year=2021,quarter=2;
+  for(var i=0;i<20;i++){
+    Q_LABELS.push("'"+(year%100<10?'0':'')+(year%100)+'Q'+quarter);
+    quarter++;
+    if(quarter>4){quarter=1;year++;}
+  }
+})();
+
+/* =========================================================
+   RENDER HEATMAP
+   ========================================================= */
+var sortBy='region';
+function setSort(s){
+  sortBy=s;
+  document.querySelectorAll('.hm-toggle button').forEach(function(b){b.classList.toggle('on',b.dataset.sort===s);});
+  renderHeatmap();
+}
+function sortedCities(){
+  var arr=HM_CITIES.slice();
+  if(sortBy==='region'){
+    var order={NA:0,EU:1,AS:2,OC:3,ME:4};
+    arr.sort(function(a,b){
+      if(a.r!==b.r)return order[a.r]-order[b.r];
+      return b.carryNow-a.carryNow;
+    });
+  }else if(sortBy==='current'){
+    arr.sort(function(a,b){return b.carryNow-a.carryNow;});
+  }else if(sortBy==='change'){
+    arr.sort(function(a,b){return b.delta-a.delta;});
+  }
+  return arr;
+}
+function renderHeatmap(){
+  var lng=getLang();
+  var cities=sortedCities();
+  var nCities=cities.length;
+  var nQ=20;
+  var cellW=Math.max(28,Math.min(40,(window.innerWidth-280)/nQ));
+  var cellH=22;
+  var labelW=130;
+  var headerH=32;
+  var W=labelW+cellW*nQ+30;
+  var H=headerH+cellH*nCities+24;
+  var svg=document.getElementById('hmSvg');
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  svg.setAttribute('width',W);
+  svg.setAttribute('height',H);
+  var html='';
+  /* header: quarter labels */
+  for(var q=0;q<nQ;q++){
+    var x=labelW+q*cellW+cellW/2;
+    var lbl=Q_LABELS[q];
+    html+='<text x="'+x+'" y="20" fill="#5a7a9a" font-size="9" text-anchor="middle" font-weight="600">'+lbl+'</text>';
+  }
+  /* rows */
+  cities.forEach(function(c,row){
+    var y=headerH+row*cellH;
+    /* city label */
+    var nm=lng==='zh'?c.z:c.n;
+    var rowFill=row%2?'#fafcff':'transparent';
+    html+='<rect x="0" y="'+y+'" width="'+W+'" height="'+cellH+'" fill="'+rowFill+'" data-i="'+HM_CITIES.indexOf(c)+'" style="cursor:pointer" onclick="selectCity('+HM_CITIES.indexOf(c)+')"/>';
+    html+='<text x="8" y="'+(y+cellH/2+4)+'" fill="#0f1e33" font-size="11" font-weight="600" pointer-events="none">'+c.f+' '+nm+'</text>';
+    /* current carry value */
+    html+='<text x="'+(labelW-6)+'" y="'+(y+cellH/2+4)+'" fill="'+(c.carryNow>=0?'#16a34a':'#dc2626')+'" font-size="10" font-weight="700" text-anchor="end" font-variant-numeric="tabular-nums" pointer-events="none">'+(c.carryNow>=0?'+':'')+c.carryNow.toFixed(1)+'%</text>';
+    /* cells */
+    for(var q=0;q<nQ;q++){
+      var pt=c.series[q];
+      var cx=labelW+q*cellW;
+      var color=carryColor(pt.carry);
+      html+='<rect x="'+cx+'" y="'+(y+1)+'" width="'+(cellW-1)+'" height="'+(cellH-2)+'" fill="'+color+'" data-c="'+HM_CITIES.indexOf(c)+'" data-q="'+q+'" onmouseover="showTip(event,'+HM_CITIES.indexOf(c)+','+q+')" onmouseout="hideTip()" style="cursor:pointer"/>';
+    }
+  });
+  svg.innerHTML=html;
+}
+function showTip(ev,ci,q){
+  var c=HM_CITIES[ci];var pt=c.series[q];var lng=getLang();
+  var tip=document.getElementById('hmTip');
+  var rect=document.getElementById('hmSvg').getBoundingClientRect();
+  var x=ev.clientX-rect.left+12;
+  var y=ev.clientY-rect.top+12;
+  tip.innerHTML='<strong>'+c.f+' '+(lng==='zh'?c.z:c.n)+' · '+Q_LABELS[q]+'</strong>'+
+    '<div class="row"><span class="k">'+(lng==='zh'?'收益率':'Yield')+'</span><span>'+pt.y.toFixed(2)+'%</span></div>'+
+    '<div class="row"><span class="k">'+(lng==='zh'?'房貸':'Mortgage')+'</span><span>'+pt.m.toFixed(2)+'%</span></div>'+
+    '<div class="row"><span class="k">'+(lng==='zh'?'利差':'Carry')+'</span><span style="color:'+(pt.carry>=0?'#22c55e':'#f87171')+'">'+(pt.carry>=0?'+':'')+pt.carry.toFixed(2)+'%</span></div>';
+  if(x+200>rect.width)x=ev.clientX-rect.left-200;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+  tip.classList.add('show');
+}
+function hideTip(){document.getElementById('hmTip').classList.remove('show');}
+
+/* =========================================================
+   DETAIL LINE CHART
+   ========================================================= */
+function selectCity(ci){
+  var c=HM_CITIES[ci];var lng=getLang();
+  document.getElementById('detail').style.display='block';
+  document.getElementById('d-flag').textContent=c.f;
+  document.getElementById('d-name').textContent=lng==='zh'?c.z:c.n;
+  document.getElementById('d-meta').textContent=(lng==='zh'?'5 年利差軌跡 · 21Q2 → 26Q1':'5-year carry trajectory · 21Q2 → 26Q1');
+  document.getElementById('d-then').textContent=(c.carryThen>=0?'+':'')+c.carryThen.toFixed(2)+'%';
+  document.getElementById('d-then').className='v '+(c.carryThen>=0?'green':'red');
+  document.getElementById('d-now').textContent=(c.carryNow>=0?'+':'')+c.carryNow.toFixed(2)+'%';
+  document.getElementById('d-now').className='v '+(c.carryNow>=0?'green':'red');
+  document.getElementById('d-change').textContent=(c.delta>=0?'+':'')+c.delta.toFixed(2)+'pp';
+  document.getElementById('d-change').className='v '+(c.delta>=0?'green':'red');
+  document.getElementById('d-yr').textContent=c.y.toFixed(1)+'% / '+c.m.toFixed(2)+'%';
+
+  /* Render line chart */
+  var W=800,H=240,padL=44,padR=16,padT=14,padB=30;
+  var plotW=W-padL-padR,plotH=H-padT-padB;
+  var allY=c.series.map(function(s){return s.carry;});
+  var ymin=Math.min(-1,Math.min.apply(null,allY)-0.5);
+  var ymax=Math.max(1,Math.max.apply(null,allY)+0.5);
+  function px(i){return padL+(i/19)*plotW;}
+  function py(v){return padT+(1-(v-ymin)/(ymax-ymin))*plotH;}
+  var svg='';
+  /* zero line */
+  var y0=py(0);
+  svg+='<line x1="'+padL+'" y1="'+y0+'" x2="'+(padL+plotW)+'" y2="'+y0+'" stroke="#d97706" stroke-opacity="0.5" stroke-dasharray="4,3"/>';
+  svg+='<text x="'+(padL+plotW)+'" y="'+(y0-4)+'" fill="#d97706" font-size="9" text-anchor="end" font-weight="600">0%</text>';
+  /* grid horizontals */
+  for(var v=Math.ceil(ymin);v<=Math.floor(ymax);v++){
+    if(v===0)continue;
+    var yy=py(v);
+    svg+='<line x1="'+padL+'" y1="'+yy+'" x2="'+(padL+plotW)+'" y2="'+yy+'" stroke="#1e3a5f" stroke-opacity="0.06"/>';
+    svg+='<text x="'+(padL-6)+'" y="'+(yy+3)+'" fill="#5a7a9a" font-size="9" text-anchor="end">'+(v>0?'+':'')+v+'%</text>';
+  }
+  /* fill above line green for positive, below red for negative */
+  var fillTop='M '+padL+' '+y0;
+  for(var i=0;i<20;i++){
+    var x=px(i),pt=c.series[i];
+    if(pt.carry>=0){fillTop+=' L '+x+' '+py(pt.carry);}
+    else{fillTop+=' L '+x+' '+y0;}
+  }
+  fillTop+=' L '+(padL+plotW)+' '+y0+' Z';
+  svg+='<path d="'+fillTop+'" fill="#16a34a" fill-opacity="0.10"/>';
+  var fillBot='M '+padL+' '+y0;
+  for(var i=0;i<20;i++){
+    var x=px(i),pt=c.series[i];
+    if(pt.carry<=0){fillBot+=' L '+x+' '+py(pt.carry);}
+    else{fillBot+=' L '+x+' '+y0;}
+  }
+  fillBot+=' L '+(padL+plotW)+' '+y0+' Z';
+  svg+='<path d="'+fillBot+'" fill="#dc2626" fill-opacity="0.10"/>';
+  /* line */
+  var pts=c.series.map(function(s,i){return px(i)+','+py(s.carry);}).join(' ');
+  svg+='<polyline points="'+pts+'" fill="none" stroke="#1e3a5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  /* dots */
+  c.series.forEach(function(s,i){
+    var color=s.carry>=0?'#16a34a':'#dc2626';
+    svg+='<circle cx="'+px(i)+'" cy="'+py(s.carry)+'" r="2.5" fill="'+color+'" stroke="#fff" stroke-width="1"><title>'+Q_LABELS[i]+': '+(s.carry>=0?'+':'')+s.carry.toFixed(2)+'%</title></circle>';
+  });
+  /* x labels every 4 quarters */
+  for(var i=0;i<20;i+=4){
+    svg+='<text x="'+px(i)+'" y="'+(padT+plotH+18)+'" fill="#5a7a9a" font-size="9" text-anchor="middle">'+Q_LABELS[i]+'</text>';
+  }
+  /* end label */
+  svg+='<text x="'+px(19)+'" y="'+(padT+plotH+18)+'" fill="#5a7a9a" font-size="9" text-anchor="middle">'+Q_LABELS[19]+'</text>';
+  document.getElementById('dSvg').innerHTML=svg;
+  document.getElementById('detail').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* =========================================================
+   TOP MOVERS
+   ========================================================= */
+function renderMovers(){
+  var lng=getLang();
+  var compress=HM_CITIES.slice().sort(function(a,b){return a.delta-b.delta;}).slice(0,5);
+  var expand=HM_CITIES.slice().sort(function(a,b){return b.delta-a.delta;}).slice(0,5);
+  function rowHtml(c,i){
+    var nm=lng==='zh'?c.z:c.n;
+    return '<div class="mover-row">'+
+      '<div class="mover-rank">#'+(i+1)+'</div>'+
+      '<div class="mover-name"><span class="flag">'+c.f+'</span>'+nm+'</div>'+
+      '<div class="mover-then">'+(c.carryThen>=0?'+':'')+c.carryThen.toFixed(1)+'<span class="mover-arrow">→</span></div>'+
+      '<div class="mover-now '+(c.delta>=0?'pos':'neg')+'">'+(c.delta>=0?'+':'')+c.delta.toFixed(1)+'pp</div>'+
+      '</div>';
+  }
+  document.getElementById('movers-compress').innerHTML=compress.map(rowHtml).join('');
+  document.getElementById('movers-expand').innerHTML=expand.map(rowHtml).join('');
+  document.getElementById('stat-cities').textContent=HM_CITIES.length;
+  document.getElementById('stat-compress').textContent=compress[0].delta.toFixed(1)+'pp '+compress[0].f;
+  document.getElementById('stat-expand').textContent='+'+expand[0].delta.toFixed(1)+'pp '+expand[0].f;
+}
+
+/* =========================================================
+   LANG
+   ========================================================= */
+function getLang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function setLang(l){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=l==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=l==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  try{localStorage.setItem('lang',l);}catch(e){}
+  renderMovers();renderHeatmap();
+}
+
+window.addEventListener('load',function(){
+  setLang(getLang());
+});
+window.addEventListener('resize',function(){
+  if(window._hmRT)clearTimeout(window._hmRT);
+  window._hmRT=setTimeout(renderHeatmap,200);
+});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

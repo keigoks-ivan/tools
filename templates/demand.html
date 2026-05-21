@@ -1,0 +1,283 @@
+{% extends "_base.html" %}
+
+{% block title %}Demand Analysis{% endblock %}
+
+{% block content %}
+<main class="container">
+  <div class="page-header">
+    <h1><span class="lang-en">Demand Analysis</span><span class="lang-zh" style="display:none">需求分析</span></h1>
+    {% if page_data.subtitle_en is defined %}
+    <p class="subtitle"><span class="lang-en">{{ page_data.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ page_data.subtitle_zh | default('') }}</span></p>
+    {% endif %}
+  </div>
+
+  {# ── KPI Cards ── #}
+  {% if kpis.demand %}
+  <div class="section-label"><span class="lang-en">KEY INDICATORS</span><span class="lang-zh" style="display:none">關鍵指標</span></div>
+  <div class="kpi-grid">
+    {% for kpi in kpis.demand %}
+    <div class="kpi-card {{ kpi.color | default('') }}">
+      <div class="kpi-label"><span class="lang-en">{{ kpi.label_en }}</span><span class="lang-zh" style="display:none">{{ kpi.label_zh | default(kpi.label_en) }}</span></div>
+      <div class="kpi-value"{% if kpi.sub_color is defined %} style="color:{{ {'red':'#dc2626','orange':'#d97706','green':'#16a34a','blue':'#2563eb'}.get(kpi.sub_color, '') }}"{% endif %}>{{ kpi.value }}{% if kpi.unit %} <span class="kpi-unit">{{ kpi.unit }}</span>{% endif %}</div>
+      {% if kpi.badge_class is defined and kpi.sub_en %}
+      <span class="kpi-badge {{ kpi.badge_class }}"><span class="lang-en">{{ kpi.sub_en }}</span><span class="lang-zh" style="display:none">{{ kpi.sub_zh | default(kpi.sub_en) }}</span></span>
+      {% elif kpi.sub_en %}
+      <div class="kpi-delta"{% if kpi.sub_color is defined %} style="color:{{ {'red':'#dc2626','orange':'#d97706','green':'#16a34a','blue':'#2563eb'}.get(kpi.sub_color, '') }}"{% endif %}><span class="lang-en">{{ kpi.sub_en }}</span>{% if kpi.sub_zh %}<span class="lang-zh" style="display:none">{{ kpi.sub_zh }}</span>{% endif %}</div>
+      {% endif %}
+      {% if kpi.source %}<div class="kpi-source">{{ kpi.source }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Chart Sections ── #}
+  {% set demand_charts = [] %}
+  {% for id, chart in charts.items() %}
+    {% if chart.page == 'demand' %}
+      {% if demand_charts.append({'id': id, 'chart': chart}) %}{% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {% if demand_charts %}
+  {# Section heading #}
+  <div class="section-heading"><span class="lang-en">{{ page_data.section1_en | default('Transaction Trends') }}</span><span class="lang-zh" style="display:none">{{ page_data.section1_zh | default('交易趨勢') }}</span></div>
+
+  {# First chart: full width #}
+  {% if demand_charts | length > 0 %}
+  {% set first = demand_charts[0] %}
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3><span class="lang-en">{{ first.chart.title_en }}</span><span class="lang-zh" style="display:none">{{ first.chart.title_zh }}</span></h3>
+      {% if first.chart.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ first.chart.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ first.chart.subtitle_zh | default('') }}</span></p>{% endif %}
+      <div style="position:relative;height:220px;"><div id="{{ first.id }}" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Remaining charts: paired in two-col rows #}
+  {% set remaining = demand_charts[1:] %}
+  {# Insert optional second section heading before the 3rd pair (charts 4+5, i.e. index 2-3 in remaining) #}
+  {% for i in range(0, remaining | length, 2) %}
+    {% if i == 2 and page_data.section2_en is defined %}
+    <div class="section-heading"><span class="lang-en">{{ page_data.section2_en }}</span><span class="lang-zh" style="display:none">{{ page_data.section2_zh | default('') }}</span></div>
+    {% endif %}
+    <div class="chart-grid two-col">
+      {% set item_a = remaining[i] %}
+      <div class="chart-card">
+        <h3><span class="lang-en">{{ item_a.chart.title_en }}</span><span class="lang-zh" style="display:none">{{ item_a.chart.title_zh }}</span></h3>
+        {% if item_a.chart.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ item_a.chart.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ item_a.chart.subtitle_zh | default('') }}</span></p>{% endif %}
+        <div style="position:relative;height:220px;"><div id="{{ item_a.id }}" style="width:100%;height:100%"></div></div>
+      </div>
+      {% if i + 1 < remaining | length %}
+      {% set item_b = remaining[i + 1] %}
+      <div class="chart-card">
+        <h3><span class="lang-en">{{ item_b.chart.title_en }}</span><span class="lang-zh" style="display:none">{{ item_b.chart.title_zh }}</span></h3>
+        {% if item_b.chart.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ item_b.chart.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ item_b.chart.subtitle_zh | default('') }}</span></p>{% endif %}
+        <div style="position:relative;height:260px;"><div id="{{ item_b.id }}" style="width:100%;height:100%"></div></div>
+      </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+  {% endif %}
+
+  {# ── Source Footer ── #}
+  <div class="source-footer">
+    <span class="lang-en"><strong>Sources:</strong> {{ page_data.source_en | default('Government statistical agencies. Data as of latest available quarter.') }}</span>
+    <span class="lang-zh" style="display:none"><strong>資料來源：</strong>{{ page_data.source_zh | default('各國政府統計機構。資料截至最新可取得季度。') }}</span>
+  </div>
+</main>
+{% endblock %}
+
+{% block base_scripts %}
+function fmtNum(v) {
+  if (v === null || v === undefined) return '';
+  return Math.abs(v) >= 1000 ? (v/1000).toFixed(0) + 'K' : v;
+}
+
+function buildChartOption(d, en) {
+  var isHorizontal = (d.type && d.type.indexOf('horizontal') >= 0);
+  var datasets = d.datasets || [];
+  var labels = d.labels || [];
+  var legendData = [];
+  var series = [];
+
+  datasets.forEach(function(ds, idx) {
+    var sType = ds.type || 'line';
+    var sColor = ds.color || [C.navy, C.green, C.orange, C.red, C.blue, C.muted][idx % 6];
+    var sName = ds.name || ('Series ' + (idx + 1));
+
+    if (datasets.length > 1) {
+      legendData.push(sName);
+    }
+
+    var seriesData;
+    // Handle data items that are objects with value/color
+    if (ds.data && ds.data.length > 0 && typeof ds.data[0] === 'object' && ds.data[0] !== null && !Array.isArray(ds.data[0]) && ds.data[0].value !== undefined) {
+      seriesData = ds.data.map(function(item) {
+        return {
+          value: item.value,
+          itemStyle: { color: item.color || sColor, borderRadius: sType === 'bar' ? (isHorizontal ? [0,4,4,0] : [4,4,0,0]) : undefined }
+        };
+      });
+    } else if (ds.colors) {
+      // Per-item colors array
+      seriesData = ds.data.map(function(v, i) {
+        return {
+          value: v,
+          itemStyle: { color: ds.colors[i] || sColor, borderRadius: sType === 'bar' ? (isHorizontal ? [0,4,4,0] : [4,4,0,0]) : undefined }
+        };
+      });
+    } else {
+      seriesData = ds.data;
+    }
+
+    var s = {
+      name: sName,
+      type: sType,
+      data: seriesData,
+      smooth: sType === 'line' ? 0.2 : undefined,
+      symbol: sType === 'line' ? 'circle' : undefined,
+      symbolSize: sType === 'line' ? 6 : undefined,
+      barMaxWidth: sType === 'bar' ? 50 : undefined
+    };
+
+    // Line style
+    if (sType === 'line') {
+      s.lineStyle = { color: sColor, width: 2 };
+      if (ds.lineType === 'dashed') {
+        s.lineStyle.type = 'dashed';
+      }
+      s.itemStyle = { color: sColor };
+      if (ds.areaStyle) {
+        s.areaStyle = { color: 'rgba(' + hexToRgb(sColor) + ',0.08)' };
+      }
+    }
+
+    // Bar style (single color, no per-item overrides)
+    if (sType === 'bar' && !ds.colors && !(ds.data && ds.data.length > 0 && typeof ds.data[0] === 'object' && ds.data[0] !== null && ds.data[0].value !== undefined)) {
+      s.itemStyle = { color: sColor, borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] };
+      if (ds.borderColor) {
+        s.itemStyle.borderColor = ds.borderColor;
+        s.itemStyle.borderWidth = 1;
+      }
+    }
+
+    // Bar labels
+    if (sType === 'bar') {
+      s.label = {
+        show: true,
+        position: isHorizontal ? 'right' : 'top',
+        fontSize: 10,
+        fontFamily: 'Inter',
+        formatter: function(p) {
+          if (p.value === null || p.value === undefined) return '';
+          return fmtNum(p.value);
+        }
+      };
+    }
+
+    // markPoint on dataset
+    if (ds.markPoint) {
+      if (Array.isArray(ds.markPoint)) {
+        s.markPoint = {
+          data: ds.markPoint.map(function(mp) {
+            var r = {};
+            if (mp.type) r.type = mp.type;
+            if (mp.name) r.name = mp.name;
+            if (mp.coord) r.coord = mp.coord;
+            if (mp.label) r.label = { formatter: mp.label, fontSize: 10, fontWeight: 'bold' };
+            return r;
+          }),
+          symbolSize: 50,
+          itemStyle: { color: sColor }
+        };
+      } else {
+        var mpData = [];
+        if (ds.markPoint.type) mpData.push({ type: ds.markPoint.type, name: ds.markPoint.type });
+        if (ds.markPoint.coord) mpData.push({ name: ds.markPoint.name || '', coord: ds.markPoint.coord, value: ds.markPoint.name || '' });
+        s.markPoint = {
+          data: mpData,
+          label: ds.markPoint.label ? { formatter: ds.markPoint.label, fontSize: 10, fontWeight: 'bold' } : undefined,
+          symbolSize: 50,
+          itemStyle: { color: ds.markPoint.color || sColor }
+        };
+      }
+    }
+
+    series.push(s);
+  });
+
+  // Build option object
+  var opt = {
+    tooltip: Object.assign({}, baseTooltip, isHorizontal ? { trigger: 'axis', axisPointer: { type: 'shadow' } } : {}),
+    grid: isHorizontal ? { left: 90, right: 50, top: 10, bottom: 20, containLabel: false } : baseGrid,
+    series: series
+  };
+
+  if (legendData.length > 1) {
+    opt.legend = Object.assign({}, baseLegend, { data: legendData });
+  }
+
+  // Axes
+  var valAxisLabel = Object.assign({}, baseText, {
+    formatter: function(v) { return fmtNum(v); }
+  });
+
+  if (isHorizontal) {
+    opt.xAxis = mkAxis({ type: 'value', axisLabel: valAxisLabel });
+    opt.yAxis = mkAxis({
+      type: 'category',
+      data: labels.slice().reverse(),
+      axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+    });
+    // Reverse series data to match reversed y-axis
+    opt.series.forEach(function(s) {
+      if (Array.isArray(s.data)) s.data = s.data.slice().reverse();
+    });
+  } else {
+    opt.xAxis = mkAxis({ type: 'category', data: labels });
+    opt.yAxis = mkAxis({ type: 'value', axisLabel: valAxisLabel });
+  }
+
+  // Chart-level markLine
+  if (d.markLine) {
+    var mlData = [];
+    if (d.markLine.yAxis !== undefined) mlData.push({ yAxis: d.markLine.yAxis });
+    if (d.markLine.xAxis !== undefined) mlData.push({ xAxis: d.markLine.xAxis });
+    if (series.length > 0) {
+      series[series.length - 1].markLine = {
+        silent: true,
+        symbol: 'none',
+        lineStyle: { color: C.red, type: 'dashed', width: 1 },
+        label: { formatter: d.markLine.label || '', fontSize: 10, color: C.red, position: 'insideEndTop' },
+        data: mlData
+      };
+    }
+  }
+
+  return opt;
+}
+
+function hexToRgb(hex) {
+  if (!hex || hex.indexOf('rgba') >= 0 || hex.indexOf('rgb') >= 0) return '30,58,95';
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? parseInt(result[1],16)+','+parseInt(result[2],16)+','+parseInt(result[3],16) : '30,58,95';
+}
+
+function initCharts(lang) {
+  var DATA = {{ charts | tojson }};
+  var en = lang !== 'zh';
+  var page = 'demand';
+
+  Object.keys(DATA).forEach(function(id) {
+    var d = DATA[id];
+    if (d.page !== page) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    var opt = buildChartOption(d, en);
+    c.setOption(opt);
+  });
+}
+{% endblock %}

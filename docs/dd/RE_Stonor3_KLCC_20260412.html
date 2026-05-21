@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stonor 3 @ KLCC｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* Score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:640px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-r{background:#FEE2E2;color:#991B1B;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #dc2626}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+.print-btn:hover{background:#166534}
+/* Highlight box */
+.hda-box{background:#FEF9C3;border:2px solid #d97706;border-radius:8px;padding:16px 20px;margin:16px 0}
+.hda-box-title{font-size:13px;font-weight:700;color:#92400E;margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+@media(max-width:680px){.two-col,.score-cols,.dual-col{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}.section{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span>📍 建案分析：Stonor 3 @ KLCC Lorong Stonor ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 依據：KL 供需 Overhang 報告（2026-04-01）+ iRumah / iProperty / PropertyGuru 2025–2026</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>Stonor 3 @ KLCC</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&yield=4.23&from=Stonor3_KLCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=Stonor3_KLCC"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Lorong Stonor，距 KLCC Park 步行 10 分鐘 ｜ Tan &amp; Tan × Mitsubishi Jisho Residence JV ｜ GDV RM6.4億 ｜ 400單位，1棟41層 ｜ 2019年完工</div>
+  <div class="badge-row">
+    <span class="badge">📂 KL 供需 Overhang 深度分析（2026-04-01 上游報告）</span>
+    <span class="badge">📡 iRumah Yield 4.23%（2025）</span>
+    <span class="badge">📡 iProperty 140掛牌售 + 136掛牌租</span>
+    <span class="badge">⚠️ 地契：Commercial under HDA（商業地契受HDA保護）</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- ⚠️ 地契關鍵提示 -->
+<div class="hda-box">
+  <div class="hda-box-title">⚠️ 地契結構關鍵說明——讀報告前必讀</div>
+  <p style="font-size:13px;color:#92400E;margin:0">Stonor 3 的法律地契為「<strong>Commercial Title（商業地契）under HDA（Housing Development Act）</strong>」。這是一個介於「純住宅地契」和「純商業地契（SOVO）」之間的混合結構：<br><br>
+  ✅ 受 HDA 住宅發展法保護（買家受爛尾補償機制覆蓋，Tan & Tan 已完工故無此風險）<br>
+  ✅ 可申請民用水電費率（Freehold Residential Strata，iProperty 分類）<br>
+  ⚠️ 商業地契意味著：State Consent 申請流程與住宅地契略有差異；銀行貸款條件可能較住宅地契嚴格<br>
+  ❌ 非純住宅地契（如 Park Place、Residensi 22），二手流動性和買家池相對窄<br><br>
+  <strong>結論：比 SOVO 純商業地契（如 Armani Hallson SOVO）好，比純住宅地契（如 Park Place、R22）弱。</strong>需在分析中精確定位。</p>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-v">RM1,320</div>
+        <div class="kpi-l">2BR 成交中位 PSF</div>
+        <div class="kpi-s neu">iRumah（最熱門型號）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM1,338–1,771</div>
+        <div class="kpi-l">掛牌 PSF 範圍（售）</div>
+        <div class="kpi-s neu">iProperty 140筆掛牌 2026-04</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">4.23%</div>
+        <div class="kpi-l">Gross Yield（2025）</div>
+        <div class="kpi-s down">▼ vs 4.73%（2023年高點）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">136</div>
+        <div class="kpi-l">出租掛牌數（2026-04）</div>
+        <div class="kpi-s down">140掛牌售 / 136掛牌租 ≈ 1:1</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">400</div>
+        <div class="kpi-l">總單位（1棟41層）</div>
+        <div class="kpi-s neu">坪數 649–1,232 sqft</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM2,000</div>
+        <div class="kpi-l">發售均價 PSF（2016）</div>
+        <div class="kpi-s down">現成交 RM1,320（-34% vs發售）</div>
+      </div>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">Tan &amp; Tan Developments Bhd（IGB Corp 子公司，50年紀錄）× Mitsubishi Jisho Residence（三菱地所 子公司，日本領先住宅開發商）</div></div>
+      <div class="spec-item"><div class="spec-l">地段</div><div class="spec-v">3 Lorong Stonor，KLCC 核心，1.5英畝，距 KLCC Park 步行 10 分鐘，距 Conlay MRT 約 500m</div></div>
+      <div class="spec-item"><div class="spec-l">地契</div><div class="spec-v">Freehold ｜ 商業地契（Commercial Title under HDA）｜已完工，HDA 保護已無實際意義</div></div>
+      <div class="spec-item"><div class="spec-l">GreenRE 認證</div><div class="spec-v">GreenRE Gold（KL KLCC 首個獲此認證的住宅建案）</div></div>
+      <div class="spec-item"><div class="spec-l">GDV</div><div class="spec-v">RM6.4億（發售時），完工後樓齡 6年（截至2025）</div></div>
+      <div class="spec-item"><div class="spec-l">管理費</div><div class="spec-v">RM0.40–0.55 psf（各來源略有差異）</div></div>
+      <div class="spec-item"><div class="spec-l">房型 / 坪數</div><div class="spec-v">Type B: 689 sqft（1BR）｜Type C: 871 sqft（2BR，最熱門）｜Type D: 1,031 sqft（3BR）｜Type E: 1,232 sqft（3BR）</div></div>
+      <div class="spec-item"><div class="spec-l">捷運</div><div class="spec-v">Conlay MRT（Putrajaya Line）約 500m｜Ampang Park LRT/MRT 約 700m｜KLCC LRT 步行距離</div></div>
+      <div class="spec-item"><div class="spec-l">完工狀態</div><div class="spec-v">2019年12月完工，已運營6年；全棟全配（fully furnished）交付</div></div>
+      <div class="spec-item"><div class="spec-l">發售 vs 現況</div><div class="spec-v">發售 RM2,000 psf（2016）→ 現掛牌 RM1,338–1,771，成交約 RM1,320（2BR中位）｜下跌幅度顯著</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜KLCC Lorong Stonor 地段解決什麼長期需求？</h3>
+    <p>Stonor 3 所處的 Lorong Stonor 是 KL KLCC 黃金三角最安靜、最稀缺的地段之一——毗鄰大使館區，10 分鐘步行至 KLCC Park 和 Suria KLCC，500m 達 Conlay MRT 站。與喧鬧的 Jalan Ampang 相比，Lorong Stonor 提供了「KLCC 的地址 + Embassy Row 的安靜氛圍」，吸引外籍高淨值人士和企業高管的需求。</p>
+    <p>Stonor 3 的本質定位是「KLCC 核心區的精品服務式公寓（Serviced Apartment）」——Tan & Tan × 三菱地所的 JV 帶來了日本品質標準（Toto Neorest 馬桶、De Dietrich 廚電、緬甸柚木地板），GDV RM6.4億的體量小而精，400單位僅1棟，密度相對適中。</p>
+
+    <div class="callout">
+      <strong>最關鍵的第一性問題：</strong>Stonor 3 發售 RM2,000 psf（2016年），現二手成交約 RM1,320 psf（2BR 中位，iRumah）——<strong>這是一個 9 年後成交價比發售價下跌約 34% 的建案</strong>。這不是分析師的判斷，是市場的事實。<br><br>
+      在分析 Stonor 3 之前，必須先理解這個下跌的原因，才能判斷它是「已到底、可進場」還是「結構性弱點持續」。
+    </div>
+
+    <hr class="dv">
+    <h3>為什麼 Stonor 3 發售後跌破發售價？——結構性分析</h3>
+    <table>
+      <thead><tr><th>原因</th><th>詳細說明</th><th>是否已解決？</th></tr></thead>
+      <tbody>
+        <tr><td><strong>商業地契（主因）</strong></td><td>雖受 HDA 保護，但仍屬商業地契，銀行視為商業貸款（利率較高、LTV 較低）；買家池比純住宅地契更窄；外籍買家申請 State Consent 的條件略複雜</td><td>❌ 結構性，永久存在</td></tr>
+        <tr><td><strong>發售價定得過高</strong></td><td>2016年以 RM2,000 psf 發售，是當時 KLCC 住宅地契旗艦案（Binjai、Four Seasons）才有的定價水位；服務式公寓以此定價嚴重高估</td><td>✅ 已修正（現 RM1,320–1,500 psf 更反映現實）</td></tr>
+        <tr><td><strong>供給過剩（KLCC 中端 SR）</strong></td><td>上游報告：KLCC 2015–2018 量產投資盤「至今未回發售價，空置率高」；全馬 SR 廣義庫存 17,900 戶（KL 估 8,000–9,000 戶），競爭激烈</td><td>❌ 結構性，短期難改善</td></tr>
+        <tr><td><strong>Yield 下行壓力</strong></td><td>iRumah 記錄：Yield 從 2023年高點 4.73% 下滑至 2025年 4.23%；顯示月租增長跟不上持有成本（掛牌量過多、空置時間拉長）</td><td>⚠️ 持續中，需觀察</td></tr>
+        <tr><td><strong>超高掛牌量</strong></td><td>iProperty 140筆掛牌售 + 136筆掛牌租（400單位中共 276 筆活躍掛牌 = 69%）——這代表大量業主同時試圖出售或出租，競爭極度激烈</td><td>❌ 是最直接的市場信號</td></tr>
+      </tbody>
+    </table>
+
+    <hr class="dv">
+    <h3>B｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險維度</th><th>具體情境</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>掛牌過量 / 持續拋壓</strong></td><td>400 單位中 276 筆活躍掛牌（69%），代表大量持有者同時想退場；若市場無足夠買盤吸收，價格繼續承壓下行</td><td><span class="tag t-r">中高</span></td><td>RM1,320 中位 PSF 可能進一步下修</td></tr>
+          <tr><td><strong>KL KLCC 中端 SR 結構性積壓</strong></td><td>上游報告直接點名：「KLCC 2015–18 量產投資盤 -5%~-14%，至今未回發售價，空置率高」；Stonor 3 完全符合此描述</td><td><span class="tag t-r">中高</span></td><td>市場頭寸難以改善，資本利得無望</td></tr>
+          <tr><td><strong>Yield 持續下行</strong></td><td>Yield 從 4.73%（2023）→ 4.23%（2025），連續下滑，方向向下；若 KL KLCC 出租競爭加劇（更多新案完工），Yield 可能繼續跌破 4%</td><td><span class="tag t-y">中</span></td><td>投資回報進一步惡化</td></tr>
+          <tr><td><strong>商業地契永久折扣</strong></td><td>即使 HDA 保護了完工風險，商業地契的買家池窄、銀行貸款條件差、State Consent 成本存在，這些問題永久壓低估值</td><td><span class="tag t-r">高（確定）</span></td><td>相比同地段住宅地契，永久存在 10–20% 的結構性折讓</td></tr>
+          <tr><td><strong>外籍需求不足以吸收供給</strong></td><td>KLCC 外籍高管需求雖然存在，但這個需求更偏向 Binjai、Four Seasons 頂奢物件；中端 SR 面對的是更大的需求競爭</td><td><span class="tag t-y">中</span></td><td>出租填租時間拉長，空置率上升</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px"><strong>最大尾部風險：</strong>掛牌量過高（69%）的建案，若市場環境惡化或外籍需求減弱，這 276 筆掛牌中會有部分「急售盤」出現，觸發恐慌性降價，帶動整棟 PSF 進一步下修。這種「流動性危機螺旋」在 KL 中端 SR 中有先例（Sky Suites -6.6%，2024）。</p>
+    </div>
+
+    <hr class="dv">
+    <h3>C｜投資論點錨定</h3>
+    <table>
+      <thead><tr><th>項目</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>唯一合理的多方論點</strong></td><td>現成交 RM1,320 psf 相比發售 RM2,000 psf 已「充分修正」，Tan & Tan × 三菱品牌的精品定位，Conlay MRT 500m 的交通便利，對追求 KLCC 地址的自住買家有一定吸引力</td></tr>
+        <tr><td><strong>主要假設 H1</strong></td><td>KLCC 核心地址 + Conlay MRT + GreenRE Gold 能持續吸引足夠外籍出租需求，維持 Gross Yield 4%+ 而不繼續下滑</td></tr>
+        <tr><td><strong>主要假設 H2</strong></td><td>KL 廣義 SR 庫存（17,900 戶全馬，KL 估 8,000–9,000 戶）不進一步惡化，競租壓力在 2027 後隨供給放緩得到緩解</td></tr>
+        <tr><td><strong>關鍵監測指標</strong></td><td>① Stonor 3 本棟 iProperty 掛牌量是否下降至 100 筆以下（去庫信號）；② iRumah Yield 是否穩住 4%+ 而非繼續下行；③ KL 廣義 SR 庫存 2026–2027 是否如報告預測般回落</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜總體市場概況（依據上游 KL 報告）</div>
+  <div class="section-body">
+    <p style="font-size:12px;color:#64748b;margin-bottom:14px">資料抓取：2026-04-12 ｜ 分析建案：Stonor 3 @ KLCC ｜ 資料時間：NAPIC Q3 2025 / iRumah 2025 / iProperty 2026-04</p>
+
+    <h3>1.1 KLCC 區域價格趨勢（與 Stonor 3 對比）</h3>
+    <table>
+      <thead><tr><th>指標</th><th>當前值</th><th>YoY</th><th>來源</th></tr></thead>
+      <tbody>
+        <tr><td>KL 全市公寓中位數（NAPIC）</td><td>RM 510,000</td><td><span class="down">-4.3%</span>（全市均值）</td><td>NAPIC Q3 2025</td></tr>
+        <tr><td>KLCC/Town Centre 公寓中位數</td><td>RM 600,000</td><td><span class="up">+3.5%</span></td><td>NAPIC Q3 2025，上游報告 §5</td></tr>
+        <tr><td><strong>KLCC 2015–18 量產投資盤（Stonor 3 所屬類別）</strong></td><td>-5% 至 -14%</td><td><span class="down">持續跌壓</span></td><td>KL RM1M+ 深度報告（上游報告）直接點名</td></tr>
+        <tr><td>Stonor 3 發售 PSF（2016）</td><td>RM 2,000 psf</td><td>基準</td><td>iRumah / Tan & Tan 官方資料</td></tr>
+        <tr><td>Stonor 3 2BR 成交中位 PSF</td><td>RM 1,320 psf</td><td><span class="down">vs 發售 -34%</span></td><td>iRumah（最熱門型號中位）</td></tr>
+        <tr><td>Stonor 3 掛牌售 PSF 範圍</td><td>RM 1,338–1,771 psf</td><td>—</td><td>iProperty 140筆，2026-04</td></tr>
+        <tr><td>Stonor 3 Gross Yield</td><td>4.23%（2025）</td><td><span class="down">▼ -0.50pp vs 2023（4.73%）</span></td><td>iRumah 2025</td></tr>
+        <tr><td>KL 高端平均 PSF（JLL）</td><td>USD 240（≈RM1,100–1,200）</td><td><span class="up">+6.7%</span></td><td>JLL Q2 2025，上游報告 §2</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：NAPIC Q3 2025；KL 供需 Overhang 深度分析（2026-04-01）；KL RM1M+ 深度報告；iRumah.co；iProperty 2026-04</p>
+
+    <div class="alert a-red">
+      <strong>🔴 核心市場信號——與上游報告直接掛鉤：</strong>KL RM1M+ 深度報告（上游報告之一）明確記錄「KLCC 2015–18 量產投資盤 -5%~-14%，至今未回發售價，空置率高」，並列為「跌的共同點：高密度量產 + 商業地契 + 無差異化 + 供給持續增加」的案例。Stonor 3（2016年發售，SR 商業地契，400單位單塔）完全符合這個描述。雖然 Stonor 3 有 Tan & Tan × 三菱的品質差異化，但市場成交數據（-34% vs 發售）無法忽視。
+    </div>
+
+    <h3>1.2 掛牌數據深度解讀（重要信號）</h3>
+    <div class="hda-box">
+      <div class="hda-box-title">🔍 關鍵發現：400 單位中有 276 筆活躍掛牌（掛牌率 69%）</div>
+      <table style="font-size:12px">
+        <thead><tr><th>平台</th><th>掛牌售</th><th>掛牌租</th><th>合計</th><th>vs 總單位（400）</th></tr></thead>
+        <tbody>
+          <tr><td>iProperty（2026-04）</td><td>140筆</td><td>136筆</td><td>276筆</td><td><strong>69%</strong></td></tr>
+          <tr><td>PropertyGuru（2025-09）</td><td>80–105筆</td><td>296筆</td><td>376–401筆</td><td><strong>94–100%</strong>（重複掛牌較多）</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;font-size:12px;color:#92400E"><strong>解讀：</strong>掛牌率 69–94% 在 KL 市場屬極度異常偏高（健康市場通常 &lt;20%）。這代表：①大量業主想退出但找不到買家；②出租供給嚴重過剩，租客有極大議價空間；③市場深度（流動性）遠低於表面數字——看似有很多選擇，但實際成交量少（未找到 brickz 大量成交記錄）。這是 KL KLCC 中端 SR 積壓問題在 Stonor 3 的直接體現。</p>
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構分析（應用上游 KL 報告框架）</div>
+  <div class="section-body">
+    <h3>2.1 Stonor 3 所屬品類在上游報告中的位置</h3>
+    <p>上游 KL 供需 Overhang 報告 §3.2「供需失衡的價格段分化」明確將 Stonor 3 所屬的品類定義為：</p>
+    <table>
+      <thead><tr><th>上游報告定義</th><th>Stonor 3 的對應</th></tr></thead>
+      <tbody>
+        <tr><td>「RM100萬以上庫存主要為 2016–2019 服務式公寓舊存貨，舊高端積壓 vs 新精品稀缺是雙層分化」</td><td>✅ Stonor 3 = 2016年發售、2019年完工的 SR，完全對應「舊存貨」定義</td></tr>
+        <tr><td>「KLCC 2015–18 量產投資盤 -5%~-14%，空置率高」（KL RM1M+ 報告）</td><td>✅ Stonor 3 已跌至 RM1,320（vs 發售 RM2,000），-34%，比此範圍更深</td></tr>
+        <tr><td>「廣義庫存（SR 商業地契）消化路徑有限，大批投資者持有，若租金下行將面臨更大壓力」</td><td>✅ 69% 掛牌率印證大量投資者持有、急於退出</td></tr>
+        <tr><td>「RM100萬+段去化率 69.8%（Q3 2025）—— 舊高端積壓 vs 新精品稀缺」</td><td>⚠️ Stonor 3 屬舊高端積壓段，去化率偏低</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：KL 供需 Overhang 深度分析（2026-04-01）§3.2；KL RM1M+ 高端市場研究</p>
+
+    <div class="alert a-red">
+      <strong>供需結構判斷：🔴 嚴重過剩（對 Stonor 3 而言）</strong><br>
+      Stonor 3 不在「精品住宅地契稀缺」的那一邊，而在「中端 SR 舊存貨積壓」的那一邊。這是上游報告框架下最直接的供需定性。掛牌率 69%、Yield 下行、PSF 未回發售價，三個指標共同印證這一定性。
+    </div>
+
+    <h3>2.2 需求面——誰在買 / 租 Stonor 3？</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>占比估計</th><th>趨勢</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>外籍企業高管長租</td><td>~40–50%</td><td>→（持平，未顯著增長）</td><td>Embassy Row 地段有一定外籍需求，但坪數小（649–1,232 sqft）制約家庭租客</td></tr>
+        <tr><td>本地高收入短租 / 商務客</td><td>~20–25%</td><td>↓（受 Airbnb 供給競爭）</td><td>KLCC 核心位置對商務客有吸引力，但同質 SR 太多</td></tr>
+        <tr><td>MM2H 外籍買家</td><td>~10–15%</td><td>↑（MM2H 需求增加）</td><td>RM100萬以上，KLCC 位置，符合 MM2H 部分需求；但商業地契問題令部分 MM2H 買家回避</td></tr>
+        <tr><td>本地自住買家</td><td>~10–15%</td><td>→</td><td>KLCC 地址的本地高收入買家；GreenRE + Tan & Tan 品牌有吸引力</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §3 -->
+<div class="section">
+  <div class="section-header">§3｜區域細分——Stonor 3 在 KL 的真實定位</div>
+  <div class="section-body">
+    <h3>3.1 KLCC 地段分層——Stonor 3 的位置</h3>
+    <table>
+      <thead><tr><th>層級</th><th>代表建案</th><th>PSF 成交</th><th>特徵</th><th>vs Stonor 3</th></tr></thead>
+      <tbody>
+        <tr><td><strong>KLCC 頂奢稀缺</strong></td><td>Binjai on the Park、Four Seasons、Banyan Tree</td><td>RM2,660–2,950 psf</td><td>140–171戶超低密度，Freehold 住宅地契，品牌</td><td>Stonor 3 低 50–55%，完全不同市場</td></tr>
+        <tr><td><strong>KLCC 精品新案</strong></td><td>TRX Residences、The Ashwood、CloutHaus</td><td>RM1,200–2,900 psf</td><td>2026–2029 完工，新供給，住宅地契或高端 SR</td><td>Stonor 3 定價接近但屬老案，競爭不利</td></tr>
+        <tr><td><strong>KLCC 舊 SR 積壓段</strong></td><td><strong>Stonor 3 所在層級</strong></td><td><strong>RM1,320（成交中位）</strong></td><td>2016–2019發售，商業地契，投資者持有比例高，空置率高</td><td>本案所在，上游報告直接標注為「問題段」</td></tr>
+        <tr><td>KLCC 量產舊盤</td><td>Sky Suites（武吉免登）等</td><td>下跌 -6.6% YoY</td><td>高密度量產，最嚴重積壓</td><td>Stonor 3 品質高於此層，但供需邏輯類似</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>關鍵定位洞察：</strong>Stonor 3 的品質屬於精品層（Tan & Tan × 三菱、GreenRE Gold、Burmese Teak），但供需定位屬於「舊 SR 積壓段」。這是一個品質與市場定位之間存在撕裂的建案——品質加分，但供需結構持續扣分。這種撕裂是 KL KLCC 中端 SR 最典型的投資陷阱。
+    </div>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="section">
+  <div class="section-header">§4｜定價分析與二手市場信號（FIX-01/02/03/04）</div>
+  <div class="section-body">
+    <div class="alert a-orange">
+      <strong>FIX-01 應用：</strong>Stonor 3 2019年完工，比較基準應為同期（2018–2022年）同區（KLCC 核心）同類型（SR/精品公寓）建案，不可與 2005 年前老案比較。FIX-04：掛牌「起價 RM583 psf」為異常低樓層急售盤，僅代表最低門檻，不可作為市場定價基準。
+    </div>
+
+    <h3>4.1 同期競品比較（FIX-01）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>Stonor 3（本案）</th><th>TRX Residences（同期新）</th><th>Park Place DPC（同期新）</th><th>Aria Residences KLCC（舊鄰）</th></tr></thead>
+      <tbody>
+        <tr><td>地契</td><td><span class="tag t-y">商業地契（HDA）</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-g">Freehold 住宅</span></td><td><span class="tag t-y">商業地契（SOHO）</span></td></tr>
+        <tr><td>完工狀態</td><td>✅ 2019，6年老案</td><td>首批 2026–2027</td><td>✅ 2024，新交屋</td><td>2014，更老案</td></tr>
+        <tr><td>成交中位 PSF</td><td>RM 1,320（iRumah 2BR中位）</td><td>RM 2,293（2024成交）</td><td>RM 1,461（89筆）</td><td>RM 900–1,100（估）</td></tr>
+        <tr><td>vs 發售</td><td><span class="down">-34%（RM2,000→RM1,320）</span></td><td>N/A（期房）</td><td><span class="up">+72%（RM850→RM1,461）</span></td><td>—</td></tr>
+        <tr><td>Gross Yield</td><td>4.23%（且下行）</td><td>估 4–5%（成熟後）</td><td>3.5–4.5%（住宅地契）</td><td>3–4%</td></tr>
+        <tr><td>掛牌率（vs 總單位）</td><td><span class="down">69%（極高，流動性風險）</span></td><td>N/A</td><td>正常水平</td><td>—</td></tr>
+        <tr><td>上游報告評語</td><td>「舊存貨積壓，空置率高，至今未回發售價」</td><td>「新精品稀缺，TRX金融區催化」</td><td>「精品住宅地契稀缺邏輯」</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>4.2 二手掛牌信號分析（FIX-03/04）</h3>
+    <table>
+      <thead><tr><th>FIX-03 步驟</th><th>Stonor 3 狀況</th><th>信號方向</th></tr></thead>
+      <tbody>
+        <tr><td>樣本量</td><td>iProperty 140筆掛牌售（大量樣本）；但 brickz 未找到大量成交記錄（成交稀少）</td><td>⚠️ 掛牌多但成交少</td></tr>
+        <tr><td>PSF 範圍</td><td>掛牌 RM1,338–1,771 psf；成交中位 RM1,320（iRumah 2BR）；異常低掛牌 RM583（FIX-04 剔除）</td><td>⚠️ 低端急售盤拉低平均</td></tr>
+        <tr><td>FIX-02 發售成本比較</td><td>發售 RM2,000 psf，現二手成交約 RM1,320，<strong>跌幅 -34%</strong>；早期買家帳面虧損</td><td><span class="tag t-r">偏空信號</span></td></tr>
+        <tr><td>FIX-04 起價問題</td><td>掛牌「起價」低至 RM583 psf，屬急售/問題單位，不代表市場；以 RM1,320 成交中位為分析基準</td><td>已剔除</td></tr>
+        <tr><td>整體信號</td><td><strong>偏空（中高信心）</strong>：帳面虧損持有者眾多（69% 掛牌率）、Yield 下行、成交稀少（流動性差）、上游報告負面標注</td><td><span class="tag t-r">偏空</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率分析</div>
+  <div class="section-body">
+    <h3>5.1 Stonor 3 租金行情</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租掛牌範圍</th><th>Gross Yield（估）</th><th>外國人 Net Yield（估）</th></tr></thead>
+      <tbody>
+        <tr><td>1BR（Type B）</td><td>689 sqft</td><td>RM 3,500–4,500/月</td><td>~4.2–5.5%</td><td>~2.8–3.7%（扣30%所得稅）</td></tr>
+        <tr><td>2BR（Type C，最熱門）</td><td>871 sqft</td><td>RM 4,000–6,000/月</td><td>~3.7–5.5%</td><td>~2.5–3.7%</td></tr>
+        <tr><td>3BR（Type D）</td><td>1,031 sqft</td><td>RM 5,000–7,500/月</td><td>~3.9–5.8%</td><td>~2.6–3.9%</td></tr>
+        <tr><td>3BR（Type E，最大）</td><td>1,232 sqft</td><td>RM 6,000–8,000/月</td><td>~3.6–4.8%</td><td>~2.4–3.2%</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：PropertyGuru 掛牌 RM3,500–8,000；iRumah 2025 Gross Yield 4.23%；iProperty 租金 RM4.90–6.60/sqft</p>
+
+    <div class="alert a-yellow">
+      <strong>⚠️ Yield 下行趨勢是核心警示：</strong>iRumah 記錄顯示 Stonor 3 Yield 從 2023 年峰值 4.73% 下滑至 2025 年 4.23%，連續下滑 0.5 個百分點。這與 iProperty 136 筆掛牌租（出租供給大量）和 69% 整體掛牌率一致——供給遠超需求，租客議價空間大，月租難以提升，Yield 繼續承壓。
+    </div>
+
+    <h3>5.2 外國人現金流試算（2BR 871 sqft，假設 RM115萬入場 @ RM1,320 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租收入（RM4,500 × 12）</td><td>RM 54,000</td><td>2BR 中位保守估，競爭激烈環境下</td></tr>
+        <tr><td>管理費（RM0.50 × 871 × 12）</td><td><span class="down">-RM 5,226</span></td><td>取 RM0.50 psf 中位值</td></tr>
+        <tr><td>地稅 + 門牌稅（估）</td><td><span class="down">-RM 2,000</span></td><td></td></tr>
+        <tr><td>空置期（假設 2 個月/年，掛牌競爭激烈）</td><td><span class="down">-RM 9,000</span></td><td>136 筆出租掛牌表示填租競爭大</td></tr>
+        <tr><td>非居民租金所得稅（30%，外國人）</td><td><span class="down">-RM 11,333</span></td><td>（54,000–16,226–9,000 空置）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 4,320</span></td><td>若遠程管理（非必要）</td></tr>
+        <tr><td><strong>淨現金流（含代管，含空置）</strong></td><td><strong>~RM 22,121/年</strong></td><td>Net Yield ≈ 1.92%（RM115萬入場）</td></tr>
+        <tr><td>淨現金流（無代管，含空置）</td><td>~RM 26,441/年</td><td>Net Yield ≈ 2.30%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-red">
+      <strong>外國人視角：Net Yield 約 1.9–2.3%（含合理空置假設）</strong>。這在四個分析建案中是最低的，且考慮了 Stonor 3 出租競爭激烈（136 掛牌租）帶來的空置風險。相比 R22 MK（3.0–3.2%）和 Park Place DPC（3.0–3.4%），Stonor 3 的租金回報顯著更弱，且 Yield 在下行。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規（引用上游報告框架）</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>法規項目</th><th>外國買家</th><th>對 Stonor 3 的影響</th></tr></thead>
+      <tbody>
+        <tr><td>最低購置門檻（KL）</td><td>RM 1,000,000</td><td>✅ Stonor 3 現掛牌 RM70萬–235萬，部分低價單位外國人不可購（&lt;RM100萬），需選擇 RM100萬+ 單位</td></tr>
+        <tr><td>印花稅（2026年）</td><td>4% 統一稅率</td><td>RM115萬物業：印花稅 RM46,000</td></tr>
+        <tr><td>RPGT（5年內）</td><td>30%</td><td>早期買家（發售 RM2,000 psf 入場）多數虧損；即使出售也無 RPGT 問題（無資本利得）</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>10%</td><td>2016年發售者 SPA 已超6年，若出售 RPGT = 10%；但帳面虧損意味著出售不會產生應稅利潤</td></tr>
+        <tr><td>商業地契 State Consent</td><td>需申請（商業地契流程略複雜）</td><td>⚠️ 比住宅地契多一道行政門檻；費用約 RM5,000–10,000</td></tr>
+        <tr><td>MM2H 合規</td><td>RM100萬+，持有10年</td><td>✅ 金額符合；但商業地契是否完全符合 MM2H 住宅持有要求需向主管機關確認（類似 TS2 的爭議）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §7 -->
+<div class="section">
+  <div class="section-header">§7｜貸款環境</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>指標</th><th>本地買家</th><th>外國買家</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>OPR（BNM）</td><td colspan="2">2.75%（2025年中降息）</td><td>利率下降，月供降低，一定程度利好買家</td></tr>
+        <tr><td>商業地契貸款</td><td>可申請商業或住宅貸款（HDA 保護使部分銀行接受住宅貸款申請）</td><td>外國人可嘗試申請，但審批更嚴</td><td>⚠️ 商業地契通常需要更高頭期款（30–40%）；需向銀行確認是否按住宅或商業貸款審批</td></tr>
+        <tr><td>月供估算（RM115萬，80% LTV，4%，30年）</td><td>RM4,399/月</td><td>同（若獲批）</td><td>vs 月租 RM4,500：幾乎打平，但未計空置和其他成本</td></tr>
+      </tbody>
+    </table>
+    <div class="alert a-yellow">
+      <strong>貸款注意事項：</strong>Stonor 3 的「Commercial under HDA」地契可能被部分銀行視為商業貸款（LTV 60–70%，利率更高），也可能被部分銀行以住宅處理（LTV 80–90%）。進場前必須先向至少 2–3 家銀行確認貸款類別，避免錯估資金需求。
+    </div>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設——Conlay MRT 是最重要的正面催化劑</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>狀態</th><th>對 Stonor 3 受益程度</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Conlay MRT 站（MRT2 Putrajaya Line）</strong></td><td>已運營（2023年開通），距 Stonor 3 約 500m</td><td>✅ 最大正面催化劑：步行 5–7 分鐘，直連 TRX 和 KLCC 廊帶；是 KLCC 地段最稀缺的 MRT 步行可達條件之一</td></tr>
+        <tr><td>KLCC LRT 站</td><td>已運營，步行距離</td><td>✅ 補充連接</td></tr>
+        <tr><td>Ampang Park LRT/MRT</td><td>已運營，約 700m</td><td>✅ 補充連接</td></tr>
+        <tr><td>TRX 金融區成熟化</td><td>2026–2027 進駐企業增加</td><td>⚠️ 間接效益：TRX 外籍高管需求可能外溢至 KLCC 廊帶；但 Stonor 3 定位能否截獲這批需求取決於出租競爭</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>Conlay MRT 是 Stonor 3 最真實的加分項：</strong>在 KLCC 地段，步行可達 MRT 是罕見的（KLCC 週邊大多數 SR 建案都需要開車或接駁）。Conlay MRT 站距 Stonor 3 約 500m，步行 5–7 分鐘，這是相比同地段競品（如 Suria Stonor、Aria Residences）的真實差異化優勢。這也是 Stonor 3 能維持 Gross Yield 4.23% 而非進一步崩塌的支撐因素之一。
+    </div>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="section">
+  <div class="section-header">§11｜進場時機與估值判斷</div>
+  <div class="section-body">
+    <h3>11.1 估值指標</h3>
+    <table>
+      <thead><tr><th>估值指標</th><th>當前值</th><th>發售基準</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>2BR 成交中位 PSF</td><td>RM 1,320 psf</td><td>RM 2,000 psf（2016發售）</td><td><span class="tag t-g">修正充分，-34% 已是顯著折讓</span></td></tr>
+        <tr><td>掛牌 PSF 範圍</td><td>RM 1,338–1,771 psf</td><td>—</td><td><span class="tag t-y">部分掛牌仍偏高（RM1,771），議價空間存在</span></td></tr>
+        <tr><td>Gross Yield</td><td>4.23%（下行）</td><td>峰值 4.73%（2023）</td><td><span class="tag t-r">下行趨勢，非多方信號</span></td></tr>
+        <tr><td>掛牌率</td><td>69%（140售+136租 / 400單位）</td><td>健康市場 &lt;20%</td><td><span class="tag t-r">嚴重過剩，流動性風險</span></td></tr>
+        <tr><td>vs 同地段住宅地契</td><td>RM1,320 vs 住宅地契均值 RM1,400–1,800</td><td>—</td><td><span class="tag t-y">有折讓，但商業地契結構性劣勢永久存在</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.2 進場時機矩陣</h3>
+    <p><strong>Stonor 3 當前落點：估值偏貴→已修正至合理低位 + 趨勢向下（Yield 下行，供給過剩）→ 對應：🔴 暫緩迴避，等待明確止跌信號。</strong></p>
+
+    <h3>11.3 若確定進場的條件設定</h3>
+    <table>
+      <thead><tr><th>條件類型</th><th>具體內容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>估值條件（必達）</strong></td><td>1BR 入場 RM80萬以下（≈RM1,160 psf）；2BR 入場 RM100萬以下（≈RM1,148 psf）——即比現成交中位再議 10–15% 折讓</td></tr>
+        <tr><td><strong>供需條件（先觀察）</strong></td><td>iProperty 掛牌量下降至 100 筆以下（從 140 降至 100 = 去庫信號）；iRumah Yield 止跌回升至 4.5%+</td></tr>
+        <tr><td><strong>使用框架（非投資）</strong></td><td>若以「KLCC 自住、偶爾使用、接受資本利得弱」為框架，考慮 Conlay MRT + KLCC Park 步行的生活便利性，則進場邏輯成立</td></tr>
+        <tr><td><strong>停損條件</strong></td><td>若 KL 廣義 SR 庫存 2026 年惡化超過 12,000 戶（上游報告悲觀情境），即時停止考慮</td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.4 持有期情境分析</h3>
+    <table>
+      <thead><tr><th>持有期</th><th>樂觀（SR庫存消化+外籍需求增長）</th><th>基本（持平，供給緩慢消化）</th><th>悲觀（SR繼續積壓，競爭加劇）</th></tr></thead>
+      <tbody>
+        <tr><td>3年</td><td>PSF 回升至 RM1,450–1,500（Conlay MRT 溢價開始定價）</td><td>PSF 持平 RM1,300–1,350，租金稳定</td><td>PSF 進一步下修至 RM1,100–1,200，急售盤出現</td></tr>
+        <tr><td>6年</td><td>PSF 回升至 RM1,600+（若 KL SR 庫存大幅消化）</td><td>PSF 緩升至 RM1,400–1,500</td><td>PSF 維持 RM1,100–1,300，流動性差</td></tr>
+        <tr><td>10年</td><td>PSF 回升 RM1,700+（樂觀）</td><td>PSF 達 RM1,500–1,600，回到部分發售成本</td><td>未能回到 RM2,000 發售價，長期套牢</td></tr>
+      </tbody>
+    </table>
+    <p class="src">注意：樂觀情境需要 KL 廣義 SR 庫存大幅消化（上游報告預測 2028 後才回落），時間軸較長；基本情境是最現實的預期。</p>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點（雙視角）</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:130px;font-weight:600">市場性質</td><td>明顯買方市場（140筆掛牌售 vs 有限買盤，議價空間大）</td></tr>
+            <tr><td>議價空間</td><td>10–20%（從掛牌中位 RM1,500 psf 向 RM1,200–1,300 psf 議）；急售盤可能 RM1,100 psf 以下</td></tr>
+            <tr><td>最佳入場條件</td><td>1BR（689 sqft）高層 Conlay/KLCC景觀單位，RM80萬以下；純自住邏輯</td></tr>
+            <tr><td>最大進場風險</td><td>帳面虧損持有者（-34% vs發售）的拋壓 + Yield 下行趨勢 + 商業地契永久折扣</td></tr>
+            <tr><td>適合的買家</td><td>①有 KLCC 自住需求、接受商業地契的本地買家；②以 RM100萬以下「KLCC 入場門票」心態購買，不期待資本利得</td></tr>
+            <tr><td>不適合的買家</td><td>期待資本增值、或外國投資者以出租為主要目標的買家</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】純分析結論</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🔴 嚴重供過於求——69% 掛牌率，上游報告直接標注「舊高端 SR 積壓段」</td></tr>
+            <tr><td>價格趨勢</td><td>🔴 下行——成交價未回發售價（-34%），無資本增值；Conlay MRT 是唯一支撐</td></tr>
+            <tr><td>租金市場</td><td>🟠 走弱——Yield 4.73%→4.23% 連續下滑；136 筆出租掛牌競爭激烈</td></tr>
+            <tr><td>法規環境</td><td>🟡 中性偏弱——商業地契下多一道行政門檻；外籍貸款條件略嚴</td></tr>
+            <tr><td>進場估值</td><td>🟡 合理偏低——RM1,320 psf 相比發售已充分修正，但趨勢不支持進場</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;padding:8px;background:#f1f5f9;border-radius:4px;font-size:12px">
+          <strong>市場研究一句話：</strong>Stonor 3 是一個品質超過市場定位的建案——Tan & Tan × 三菱的精品工藝值得尊敬，但商業地契 + 發售過高定價 + KL 中端 SR 結構性積壓三重枷鎖，使其無論從資本利得還是租金回報視角都難以為外國投資者產生合理回報。
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px">最終進場建議</h3>
+    <div class="verdict-r">
+      <strong>🔴 暫緩迴避（投資邏輯）｜🟡 條件性考慮（自住邏輯）</strong><br><br>
+      <strong>投資邏輯（純出租 / 資本增值）：暫緩迴避。</strong>上游 KL 報告直接將 Stonor 3 所屬品類（KLCC 2016–2019 SR，商業地契）標注為「至今未回發售價，空置率高」的問題段。69% 掛牌率、Yield 連續下行（4.73%→4.23%）、帳面虧損持有者眾多、無明確止跌信號，這些因素共同指向應等待更清晰的市場轉折信號再進場。重新評估時點：2027 年，若 KL 廣義 SR 庫存如上游報告預測開始回落，屆時觀察 Stonor 3 掛牌量是否同步下降。<br><br>
+      <strong>自住邏輯（偶爾自住、KLCC 生活便利、接受商業地契）：有條件考慮。</strong>若以「KLCC 步行圈 + Conlay MRT 500m + Tan & Tan 品質精裝 + RM100萬以下預算」框架進場，目標議價至 RM1,100–1,200 psf（比現成交中位再折 10%），以使用價值（非增值）定位，Stonor 3 的地址和交通仍有一定吸引力。但需接受：商業地契永久折扣、未來出售流動性差、資本利得幾乎無望。
+    </div>
+
+    <h3>最關鍵監測指標</h3>
+    <table>
+      <thead><tr><th>#</th><th>監測指標</th><th>觸發重新評估閾值</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Stonor 3 iProperty 掛牌量（售+租）</td><td>若降至 200 筆以下（現約 276）→ 供給壓力緩解，考慮重評</td></tr>
+        <tr><td>2</td><td>iRumah Gross Yield 走勢</td><td>若 Yield 回升至 4.5%+ 且連續2季 → 租金端反彈，考慮重評</td></tr>
+        <tr><td>3</td><td>KL 廣義 SR 庫存（上游報告追蹤）</td><td>若 2027 年庫存回落至 6,000 戶以下（上游報告預測）→ 市場環境改善</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分【v1.2 建案評分模組】</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Stonor 3 @ KLCC ｜ 建案綜合評分卡</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">馬來西亞 GDP 4–5%，KL RM100萬+ 成交 +31%，MM2H 管道；整體大環境尚可，但 KLCC 中端 SR 供需問題嚴重拖累</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>3.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:35%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">上游報告直接標注「舊 SR 積壓段，空置率高，至今未回發售價」；廣義 KL SR 庫存 8,000–9,000 戶；Stonor 3 本棟 69% 掛牌率——這是 A2 最差的情境</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>4.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:40%;background:#f97316"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KLCC 整體公寓 YoY +3.5%，但這是被頂奢帶動的平均；Stonor 3 所屬中端 SR 段持續承壓，週期位置仍在修正期</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Conlay MRT 500m（已運營）是 A4 最大加分：KLCC 步行圈、TRX 2.3km、Embassy Row 地段；這是 Stonor 3 唯一明確加分的維度</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">商業地契 State Consent + 外籍貸款較難申請；4% 印花稅；RPGT 外籍 10%（但多數持有者虧損，無應稅利潤）</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">5.5/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.0×.2 + 3.5×.25 + 4.0×.2 + 8.0×.2 + 5.5×.15 = 5.48 ≈ 5.5</div>
+          </div>
+        </div>
+
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Tan & Tan（IGB Corp，50年記錄，Bursa上市）× Mitsubishi Jisho Residence（三菱地所子公司）；2019年已完工交屋，零交屋風險；品質有口碑</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">RM1,320 psf 已比發售大幅折讓（-34%），相對便宜；但供需環境不支持反彈，估值雖低但下行風險仍存；RM1,320 不是底部，而是已修正後的新基準</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>4.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:40%;background:#f97316"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Gross Yield 4.23% 且下行（2023年 4.73%）；外籍 Net Yield 含空置約 1.9–2.3%——四個分析建案中最低；136筆出租掛牌顯示競爭激烈</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Conlay MRT 500m（步行 5–7 分）、KLCC Park 步行 10 分、Embassy Row 安靜地段；KLCC 核心地段交通優勢實在，是本案最高分 B 類指標</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Burmese Teak 地板、De Dietrich 廚電、Toto Neorest 馬桶、GreenRE Gold 認證（KLCC 首個）、400 單位 1 棟相對低密度；品質屬精品頂端，超越一般 SR 定位</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>5.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 但商業地契（Commercial under HDA）：比純住宅地契（Park Place、R22）弱，比純 SOVO 商業（Armani Hallson）強；介於兩者之間，買家池窄、貸款較難</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>3.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:30%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">69% 掛牌率（140售+136租），brickz 成交稀少；帳面虧損持有者眾多（-34% vs發售）形成結構性拋壓；是四個分析建案中流動性最差的——B7 最低分</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">5.9/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">9.0×.2 + 5.5×.2 + 4.0×.15 + 7.5×.15 + 7.5×.1 + 5.0×.1 + 3.0×.1 = 5.925 ≈ 5.9</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 5.5 × 40%&nbsp;+&nbsp;B 類 5.9 × 60%</div>
+        <div class="score-big">5.7<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#FEF9C3;color:#92400E">⭐⭐⭐ 中等——有亮點但有明確缺陷，需設定停損條件</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">2.20 + 3.54 = 5.74 → 四捨五入 5.7</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>Conlay MRT 500m（KLCC 罕見的步行捷運可達）+ Tan & Tan × 三菱精品品質（GreenRE Gold）+ 發售後 -34% 充分修正（RM1,320 psf）——若以純自住邏輯（接受商業地契、不指望資本增值），KLCC 核心地址 + 捷運便利仍有吸引力。<br>
+          <strong style="color:#fca5a5">最大風險：</strong>上游報告直接標注此品類為「舊 SR 積壓，空置率高，至今未回發售價」；69% 掛牌率代表嚴重的流動性風險；Yield 從 4.73% 下滑至 4.23% 且繼續下行；外籍 Net Yield 僅 1.9–2.3%（四個分析建案最低）——投資邏輯不成立。
+        </div>
+      </div>
+    </div>
+
+    <h3>A 類評分說明</h3>
+    <p>大環境 5.5 分是四個分析建案中最低，核心原因是 A2 供需平衡僅 3.5 分——上游 KL 報告直接將 Stonor 3 所屬的「KLCC 2016–2019 SR 舊存貨」標注為供需最差的子市場，廣義庫存 8,000–9,000 戶且消化緩慢。唯一明顯加分是 A4 基建（8.0），Conlay MRT 500m 是 KLCC 地段罕見的步行捷運可達，確實是真實差異化。</p>
+
+    <h3>B 類評分說明</h3>
+    <p>開發商（B1 9.0）和產品設計（B5 7.5）是高分項，Tan & Tan × 三菱地所的精品工藝有目共睹，GreenRE Gold 是 KLCC 住宅區首例，地段交通（B4 7.5）因 Conlay MRT 加分。但租金回報（B3 4.0）和流動性（B7 3.0）是嚴重扣分項——B7 流動性 3.0 是四個分析建案中最低，69% 掛牌率直接反映市場對這個建案的態度。品質與市場表現的撕裂，是 Stonor 3 最根本的投資困境。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：NAPIC Q3 2025（KL 供需 Overhang 深度分析報告 2026-04-01）｜KL RM1M+ 高端住宅市場深度研究（2026-03）｜iRumah.co（Yield 數據）｜iProperty.com.my（掛牌數據 2026-04）｜PropertyGuru（掛牌 2025-09）｜Hartamas Listing（地契資料確認：Commercial under HDA）｜The Edge Malaysia（竣工報導 2020）｜Savills Malaysia<br>
+  本報告基於公開資料及上游研究，不構成投資建議。地契、貸款類別需向律師及銀行個別確認。
+</div>
+</div>
+
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

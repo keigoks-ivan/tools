@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sync | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/tw/tw.css">
+<style>
+/* ══════════════════════════════════════════════
+   SYNC PAGE — LOCAL STYLES
+══════════════════════════════════════════════ */
+
+/* ── Data snapshot table ── */
+.sync-table-wrap{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  overflow:auto;
+}
+.sync-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:500px;
+}
+.sync-table thead th{
+  background:#f0f6ff;
+  font-size:9px;
+  letter-spacing:.09em;
+  color:#5a7a9a;
+  font-weight:600;
+  padding:9px 14px;
+  text-align:left;
+  border-bottom:1px solid #dce8f5;
+  white-space:nowrap;
+  text-transform:uppercase;
+}
+.sync-table tbody td{
+  padding:10px 14px;
+  font-size:12px;
+  border-bottom:1px solid #f0f5fb;
+  color:#1e3a5f;
+  vertical-align:middle;
+}
+.sync-table tbody tr:last-child td{border-bottom:none}
+.sync-table tbody tr:hover td{background:#f8fbff}
+.sync-table .col-key{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;
+  font-weight:500;
+  color:#1e3a5f;
+}
+.sync-table .col-items{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  color:#1e3a5f;
+  text-align:center;
+}
+.sync-table .col-size{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:#5a7a9a;
+}
+.sync-table .col-ts{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:#94a3b8;
+}
+.empty-badge{
+  font-size:10px;
+  color:#94a3b8;
+  font-style:italic;
+}
+.items-badge{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:10px;
+  font-size:10px;
+  font-family:'JetBrains Mono',monospace;
+  background:#e8f0f9;
+  color:#1e3a5f;
+}
+
+/* ── Card container ── */
+.sync-card{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  padding:18px 20px;
+}
+
+/* ── Export checkboxes ── */
+.export-check-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:16px;
+}
+.export-check-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:7px 10px;
+  border-radius:4px;
+  transition:background .12s;
+  cursor:pointer;
+}
+.export-check-row:hover{background:#f4f7fc}
+.export-check-row input[type=checkbox]{
+  accent-color:#1e3a5f;
+  width:14px;
+  height:14px;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.export-check-label{
+  flex:1;
+  min-width:0;
+}
+.export-check-key{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;
+  color:#1e3a5f;
+  font-weight:500;
+}
+.export-check-desc{
+  font-size:10.5px;
+  color:#5a7a9a;
+  margin-top:1px;
+}
+.export-check-count{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:#5a7a9a;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+.export-check-count.has-data{color:#16a34a}
+
+/* ── Button row ── */
+.btn-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:4px;
+  padding-top:14px;
+  border-top:0.5px solid #e8f0f9;
+}
+.btn-primary{
+  padding:9px 18px;
+  background:#1e3a5f;
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  font-size:12.5px;
+  font-weight:600;
+  font-family:'Inter',sans-serif;
+  cursor:pointer;
+  transition:opacity .15s,box-shadow .15s;
+  white-space:nowrap;
+}
+.btn-primary:hover{opacity:.88;box-shadow:0 2px 8px rgba(30,58,95,.22)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{
+  padding:9px 18px;
+  background:transparent;
+  color:#1e3a5f;
+  border:0.5px solid #1e3a5f;
+  border-radius:4px;
+  font-size:12.5px;
+  font-weight:600;
+  font-family:'Inter',sans-serif;
+  cursor:pointer;
+  transition:background .15s,box-shadow .15s;
+  white-space:nowrap;
+}
+.btn-ghost:hover{background:#e8f0f9;box-shadow:0 1px 4px rgba(30,58,95,.12)}
+.btn-danger{
+  padding:9px 18px;
+  background:#dc2626;
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  font-size:12.5px;
+  font-weight:600;
+  font-family:'Inter',sans-serif;
+  cursor:pointer;
+  transition:opacity .15s,box-shadow .15s;
+  white-space:nowrap;
+}
+.btn-danger:hover{opacity:.88;box-shadow:0 2px 8px rgba(220,38,38,.22)}
+
+/* ── Danger card ── */
+.danger-card{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-left:3px solid #dc2626;
+  border-radius:4px;
+  padding:18px 20px;
+}
+
+/* ── Import section ── */
+.import-file-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.file-pick-btn{
+  padding:7px 14px;
+  background:#f0f6ff;
+  color:#1e3a5f;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  font-size:12px;
+  font-weight:600;
+  font-family:'Inter',sans-serif;
+  cursor:pointer;
+  transition:background .15s;
+  white-space:nowrap;
+}
+.file-pick-btn:hover{background:#ddeeff}
+#fileInput{display:none}
+.import-or{
+  font-size:11px;
+  color:#94a3b8;
+  font-style:italic;
+}
+.import-textarea{
+  width:100%;
+  min-height:120px;
+  padding:10px 12px;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:#1e3a5f;
+  background:#fafcff;
+  resize:vertical;
+  transition:border-color .15s;
+  line-height:1.5;
+  box-sizing:border-box;
+}
+.import-textarea:focus{outline:none;border-color:#2563eb;background:#fff}
+.import-textarea::placeholder{color:#b0c0d5;font-style:italic}
+
+/* ── Mode radio ── */
+.mode-row{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+  margin:14px 0 10px;
+}
+.mode-opt{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  user-select:none;
+}
+.mode-opt input[type=radio]{
+  accent-color:#1e3a5f;
+  width:14px;
+  height:14px;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.mode-label{
+  font-size:12px;
+  font-weight:600;
+  color:#1e3a5f;
+}
+.mode-sub{
+  font-size:10.5px;
+  color:#5a7a9a;
+  margin-left:22px;
+  margin-top:-2px;
+}
+
+/* ── Preview panel ── */
+.preview-panel{
+  margin:12px 0;
+  padding:12px 14px;
+  background:#f4f7fc;
+  border-radius:4px;
+  border:0.5px solid #dce8f5;
+  display:none;
+}
+.preview-panel.visible{display:block}
+.preview-title{
+  font-size:10px;
+  letter-spacing:.1em;
+  color:#5a7a9a;
+  font-weight:600;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.preview-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:4px 0;
+  border-bottom:0.5px solid #e8f0f9;
+  font-size:11.5px;
+}
+.preview-row:last-child{border-bottom:none}
+.preview-key{
+  font-family:'JetBrains Mono',monospace;
+  color:#1e3a5f;
+  font-weight:500;
+  font-size:11px;
+}
+.preview-change{
+  font-size:11px;
+  color:#5a7a9a;
+  font-family:'JetBrains Mono',monospace;
+  text-align:right;
+}
+.preview-change.new{color:#16a34a;font-weight:600}
+.preview-change.overwrite{color:#d97706;font-weight:600}
+.preview-change.merge{color:#2563eb;font-weight:600}
+.preview-change.noop{color:#94a3b8}
+
+/* ── Error / Info messages ── */
+.msg-error{
+  padding:10px 14px;
+  background:#fef2f2;
+  border:0.5px solid #fca5a5;
+  border-left:3px solid #dc2626;
+  border-radius:4px;
+  font-size:12px;
+  color:#991b1b;
+  margin:10px 0;
+  display:none;
+}
+.msg-error.visible{display:block}
+.msg-success{
+  padding:10px 14px;
+  background:#f0fdf4;
+  border:0.5px solid #86efac;
+  border-left:3px solid #16a34a;
+  border-radius:4px;
+  font-size:12px;
+  color:#166534;
+  margin:10px 0;
+  display:none;
+}
+.msg-success.visible{display:block}
+
+/* ── Toast ── */
+.sync-toast{
+  position:fixed;
+  bottom:28px;
+  right:24px;
+  background:#1e3a5f;
+  color:#fff;
+  padding:10px 18px;
+  border-radius:4px;
+  font-size:12.5px;
+  font-weight:500;
+  font-family:'Inter',sans-serif;
+  box-shadow:0 4px 16px rgba(30,58,95,.28);
+  z-index:9999;
+  opacity:0;
+  transition:opacity .2s;
+  pointer-events:none;
+}
+.sync-toast.show{opacity:1}
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  .sync-table{min-width:0}
+  .sync-table .col-ts{display:none}
+  .btn-row{flex-direction:column}
+  .mode-row{flex-direction:column;gap:10px}
+}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<main class="container">
+
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">UTILITY</span><span class="lang-zh" style="display:none">工具</span></span>
+    <h1><span class="lang-en">Sync / Cross-Device Transfer</span><span class="lang-zh" style="display:none">跨機器同步</span></h1>
+    <p class="subtitle"><span class="lang-en">Export your scenarios + watchlist as JSON, transfer to another machine, then import</span><span class="lang-zh" style="display:none">將場景與收藏清單匯出成 JSON，傳到另一台機器後再匯入</span></p>
+  </div>
+
+  <!-- ══ INSIGHT BOX ══ -->
+  <div class="insight-box accent" style="margin-top:0;margin-bottom:0">
+    <span class="lang-en"><strong>Why this page exists:</strong> Browser localStorage is device-local — data saved on your Mac mini is invisible on your MacBook. Workflow: Mac mini Export → transfer JSON via AirDrop / iCloud Drive / Email → MacBook Import. Language preference is <em>not</em> synced (stays per-device).</span>
+    <span class="lang-zh" style="display:none"><strong>為什麼需要這頁：</strong> 瀏覽器 localStorage 只存在當前機器，Mac mini 儲存的資料在 MacBook 上看不到。作業流程：Mac mini 匯出 → AirDrop / iCloud Drive / Email 傳 JSON → MacBook 匯入。語言偏好<em>不會</em>被同步（各機器個別設定）。</span>
+  </div>
+
+  <!-- ══ SECTION: CURRENT LOCAL DATA ══ -->
+  <div class="section-label" style="margin-top:28px">
+    <span class="lang-en">CURRENT LOCAL DATA</span>
+    <span class="lang-zh" style="display:none">當下本機資料</span>
+  </div>
+  <div class="sync-table-wrap">
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th><span class="lang-en">Key</span><span class="lang-zh" style="display:none">鍵名</span></th>
+          <th><span class="lang-en">Description</span><span class="lang-zh" style="display:none">說明</span></th>
+          <th style="text-align:center"><span class="lang-en">Items</span><span class="lang-zh" style="display:none">筆數</span></th>
+          <th><span class="lang-en">Size</span><span class="lang-zh" style="display:none">大小</span></th>
+          <th><span class="lang-en">Last Modified</span><span class="lang-zh" style="display:none">最後修改</span></th>
+        </tr>
+      </thead>
+      <tbody id="snapshotTbody">
+        <!-- rendered by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══ SECTION: EXPORT ══ -->
+  <div class="section-label" style="margin-top:28px">
+    <span class="lang-en">EXPORT</span>
+    <span class="lang-zh" style="display:none">匯出</span>
+  </div>
+  <div class="sync-card">
+    <div class="export-check-list" id="exportCheckList">
+      <!-- rendered by JS -->
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" id="btnDownload">
+        <span class="lang-en">Download JSON</span>
+        <span class="lang-zh" style="display:none">下載 JSON</span>
+      </button>
+      <button class="btn-ghost" id="btnCopy">
+        <span class="lang-en">Copy to Clipboard</span>
+        <span class="lang-zh" style="display:none">複製到剪貼簿</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ SECTION: IMPORT ══ -->
+  <div class="section-label" style="margin-top:28px">
+    <span class="lang-en">IMPORT</span>
+    <span class="lang-zh" style="display:none">匯入</span>
+  </div>
+  <div class="sync-card">
+
+    <!-- File picker + paste area -->
+    <div class="import-file-row">
+      <button class="file-pick-btn" id="filePickBtn">
+        <span class="lang-en">Choose file...</span>
+        <span class="lang-zh" style="display:none">選擇檔案...</span>
+      </button>
+      <input type="file" id="fileInput" accept=".json,application/json">
+      <span class="import-or">
+        <span class="lang-en">or paste JSON below</span>
+        <span class="lang-zh" style="display:none">或在下方貼上 JSON</span>
+      </span>
+    </div>
+    <textarea
+      class="import-textarea"
+      id="importTextarea"
+      placeholder="Paste exported JSON here…  /  在此貼上匯出的 JSON…"
+      spellcheck="false"
+      autocomplete="off"
+    ></textarea>
+
+    <!-- Error / success messages -->
+    <div class="msg-error" id="importError"></div>
+    <div class="msg-success" id="importSuccess"></div>
+
+    <!-- Mode selector -->
+    <div class="mode-row">
+      <div>
+        <label class="mode-opt">
+          <input type="radio" name="importMode" value="merge" id="modemerge" checked>
+          <span class="mode-label">
+            <span class="lang-en">Merge</span>
+            <span class="lang-zh" style="display:none">合併</span>
+          </span>
+        </label>
+        <div class="mode-sub">
+          <span class="lang-en">New keys added; existing keys <em>not</em> overwritten</span>
+          <span class="lang-zh" style="display:none">新 key 加入；既有 key 保留不覆蓋</span>
+        </div>
+      </div>
+      <div>
+        <label class="mode-opt">
+          <input type="radio" name="importMode" value="overwrite" id="modeoverwrite">
+          <span class="mode-label">
+            <span class="lang-en">Overwrite</span>
+            <span class="lang-zh" style="display:none">覆寫</span>
+          </span>
+        </label>
+        <div class="mode-sub">
+          <span class="lang-en">All imported keys replace local data</span>
+          <span class="lang-zh" style="display:none">所有匯入 key 整個覆蓋本機</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview panel -->
+    <div class="preview-panel" id="previewPanel">
+      <div class="preview-title">
+        <span class="lang-en">IMPORT PREVIEW</span>
+        <span class="lang-zh" style="display:none">匯入預覽</span>
+      </div>
+      <div id="previewRows"></div>
+    </div>
+
+    <!-- Apply button -->
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn-primary" id="btnApply" disabled>
+        <span class="lang-en">Apply Import</span>
+        <span class="lang-zh" style="display:none">套用匯入</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ SECTION: DANGER ZONE ══ -->
+  <div class="section-label" style="margin-top:28px">
+    <span class="lang-en">DANGER ZONE</span>
+    <span class="lang-zh" style="display:none">危險區</span>
+  </div>
+  <div class="danger-card">
+    <p style="font-size:12px;color:#4a6080;margin-bottom:14px;">
+      <span class="lang-en">Permanently removes all sync-able data from <em>this machine's</em> browser storage. Cannot be undone.</span>
+      <span class="lang-zh" style="display:none">從<em>本機</em>瀏覽器儲存永久移除所有可同步資料。此操作無法還原。</span>
+    </p>
+    <button class="btn-danger" id="btnClearAll">
+      <span class="lang-en">Clear all sync-able data on this machine</span>
+      <span class="lang-zh" style="display:none">清空本機所有可同步資料</span>
+    </button>
+  </div>
+
+  <div class="source-footer" style="margin-top:24px">
+    <span class="lang-en"><strong>Data stays local.</strong> Nothing is sent to any server — all export/import happens entirely in your browser. The JSON file is generated and downloaded client-side.</span>
+    <span class="lang-zh" style="display:none"><strong>資料保持在本機。</strong>沒有任何資料傳送到伺服器，所有匯出／匯入操作皆在瀏覽器端完成。JSON 檔案在用戶端產生並下載。</span>
+  </div>
+
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<!-- Toast -->
+<div class="sync-toast" id="syncToast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   SYNC PAGE — client-side only
+   No server, no file system API, pure localStorage.
+═══════════════════════════════════════════════════════ */
+
+/* ── Sync-able keys config ── */
+var SYNC_KEYS = [
+  {
+    key: 'stress-test-scenarios-v1',
+    en: 'Stress Test Scenarios',
+    zh: '壓測場景',
+    descEn: 'Named stress-test scenario array',
+    descZh: '命名壓力測試場景陣列',
+    countFn: function(v){ return Array.isArray(v) ? v.length : 0; }
+  },
+  {
+    key: 'dd-watchlist-v1',
+    en: 'DD Watchlist',
+    zh: 'DD 收藏清單',
+    descEn: 'DD starred / bookmarked items',
+    descZh: 'DD 報告 ★ 收藏清單',
+    countFn: function(v){ return Array.isArray(v) ? v.length : (v && typeof v === 'object' ? Object.keys(v).length : 0); }
+  },
+  {
+    key: 'dd-visit-status-v1',
+    en: 'DD Visit Status',
+    zh: 'DD 看房狀態',
+    descEn: 'DD property visit status map',
+    descZh: 'DD 看房狀態記錄',
+    countFn: function(v){ return v && typeof v === 'object' && !Array.isArray(v) ? Object.keys(v).length : (Array.isArray(v) ? v.length : 0); }
+  },
+  {
+    key: 'portfolio-holdings-v1',
+    en: 'Portfolio Holdings',
+    zh: '持有資產清單',
+    descEn: 'Property portfolio holdings',
+    descZh: '不動產投資組合持倉',
+    countFn: function(v){ return Array.isArray(v) ? v.length : 0; }
+  }
+];
+
+/* ── Helpers ── */
+function getLang(){
+  return localStorage.getItem('lang') || 'en';
+}
+
+function isEn(){
+  return getLang() === 'en';
+}
+
+/* Safe parse from localStorage */
+function lsGet(key){
+  try{
+    var raw = localStorage.getItem(key);
+    if(raw === null) return null;
+    return JSON.parse(raw);
+  }catch(e){ return '__CORRUPT__'; }
+}
+
+/* Human-readable byte size */
+function fmtSize(bytes){
+  if(bytes === 0) return '—';
+  if(bytes < 1024) return bytes + ' B';
+  return (bytes/1024).toFixed(1) + ' KB';
+}
+
+/* Format ISO timestamp short */
+function fmtTS(isoStr){
+  if(!isoStr) return '—';
+  try{
+    var d = new Date(isoStr);
+    if(isNaN(d)) return isoStr;
+    var pad = function(n){return n<10?'0'+n:n;};
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+
+      ' '+pad(d.getHours())+':'+pad(d.getMinutes());
+  }catch(e){ return isoStr; }
+}
+
+/* Guess last-modified from array of objects with savedAt / exportedAt fields */
+function guessLastModified(val){
+  if(val === null || val === '__CORRUPT__') return null;
+  if(Array.isArray(val)){
+    var best = null;
+    val.forEach(function(item){
+      if(item && item.savedAt){
+        if(!best || item.savedAt > best) best = item.savedAt;
+      }
+    });
+    return best;
+  }
+  if(typeof val === 'object' && val.exportedAt) return val.exportedAt;
+  return null;
+}
+
+/* Merge two values by type:
+   - both arrays → concat + deduplicate by JSON hash or 'name' field
+   - both objects → shallow merge (local wins on conflict)
+   - else → keep local (merge never overwrites) */
+function mergeValues(local, incoming){
+  if(Array.isArray(local) && Array.isArray(incoming)){
+    var seen = {};
+    var result = [];
+    local.concat(incoming).forEach(function(item){
+      var hash;
+      if(item && typeof item.name === 'string'){
+        hash = item.name;
+      } else {
+        try{ hash = JSON.stringify(item); }catch(e){ hash = String(item); }
+      }
+      if(!seen[hash]){
+        seen[hash] = true;
+        result.push(item);
+      }
+    });
+    return result;
+  }
+  if(local && incoming && typeof local === 'object' && typeof incoming === 'object' &&
+     !Array.isArray(local) && !Array.isArray(incoming)){
+    /* Shallow merge — local keys win */
+    var merged = Object.assign({}, incoming, local);
+    return merged;
+  }
+  /* Fallback: keep local */
+  return local;
+}
+
+/* Build export JSON object from selected keys */
+function buildExportPayload(selectedKeys){
+  var data = {};
+  selectedKeys.forEach(function(key){
+    var val = lsGet(key);
+    if(val !== null && val !== '__CORRUPT__') data[key] = val;
+  });
+  var ua = navigator.userAgent;
+  /* Simplify UA to something readable */
+  var device = 'Unknown';
+  if(/Macintosh/.test(ua)) device = 'Mac';
+  else if(/Windows/.test(ua)) device = 'Windows';
+  else if(/iPhone/.test(ua)) device = 'iPhone';
+  else if(/Android/.test(ua)) device = 'Android';
+  var browser = 'Browser';
+  if(/Chrome/.test(ua) && !/Edg/.test(ua)) browser = 'Chrome';
+  else if(/Safari/.test(ua) && !/Chrome/.test(ua)) browser = 'Safari';
+  else if(/Firefox/.test(ua)) browser = 'Firefox';
+  else if(/Edg/.test(ua)) browser = 'Edge';
+
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    exportedFrom: device + ' / ' + browser,
+    data: data
+  };
+}
+
+/* Validate import payload */
+function validatePayload(obj){
+  if(!obj || typeof obj !== 'object') return false;
+  if(typeof obj.version !== 'number') return false;
+  if(!obj.data || typeof obj.data !== 'object') return false;
+  return true;
+}
+
+/* ── Toast ── */
+var toastTimer = null;
+function showToast(msg){
+  var t = document.getElementById('syncToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+/* ── Render snapshot table ── */
+function renderSnapshot(){
+  var tbody = document.getElementById('snapshotTbody');
+  var en = isEn();
+  var rows = SYNC_KEYS.map(function(cfg){
+    var val = lsGet(cfg.key);
+    var rawSize = localStorage.getItem(cfg.key);
+    var byteSize = rawSize ? new Blob([rawSize]).size : 0;
+    var corrupt = val === '__CORRUPT__';
+    var empty = val === null;
+    var count = (!empty && !corrupt) ? cfg.countFn(val) : 0;
+    var ts = (!empty && !corrupt) ? guessLastModified(val) : null;
+
+    var countCell;
+    if(empty){
+      countCell = '<span class="empty-badge">(empty)</span>';
+    } else if(corrupt){
+      countCell = '<span style="color:#dc2626;font-size:10px">corrupt</span>';
+    } else {
+      countCell = '<span class="items-badge">'+count+'</span>';
+    }
+
+    var sizeCell = empty || corrupt
+      ? '<span class="empty-badge">—</span>'
+      : '<span class="col-size">'+fmtSize(byteSize)+'</span>';
+
+    var tsCell = ts
+      ? '<span class="col-ts">'+fmtTS(ts)+'</span>'
+      : '<span class="empty-badge">—</span>';
+
+    return '<tr>'+
+      '<td class="col-key">'+cfg.key+'</td>'+
+      '<td style="font-size:11.5px;color:#5a7a9a;">'+
+        '<span class="lang-en">'+(en?cfg.descEn:'')+'</span>'+
+        '<span class="lang-zh" style="display:'+(en?'none':'')+'">'+cfg.descZh+'</span>'+
+      '</td>'+
+      '<td class="col-items">'+countCell+'</td>'+
+      '<td>'+sizeCell+'</td>'+
+      '<td>'+tsCell+'</td>'+
+    '</tr>';
+  });
+  tbody.innerHTML = rows.join('');
+}
+
+/* ── Render export checklist ── */
+function renderExportList(){
+  var list = document.getElementById('exportCheckList');
+  var en = isEn();
+  var html = SYNC_KEYS.map(function(cfg){
+    var val = lsGet(cfg.key);
+    var empty = val === null || val === '__CORRUPT__';
+    var count = !empty ? cfg.countFn(val) : 0;
+    var countTxt = empty
+      ? '<span class="export-check-count">(empty)</span>'
+      : '<span class="export-check-count has-data">'+count+' '+( en ? (count===1?'item':'items') : '筆')+'</span>';
+
+    /* Default checked only if has data */
+    var checked = !empty ? 'checked' : '';
+
+    return '<label class="export-check-row">'+
+      '<input type="checkbox" class="export-key-cb" data-key="'+cfg.key+'" '+checked+'>'+
+      '<div class="export-check-label">'+
+        '<div class="export-check-key">'+cfg.key+'</div>'+
+        '<div class="export-check-desc">'+
+          '<span class="lang-en">'+cfg.descEn+'</span>'+
+          '<span class="lang-zh" style="display:none">'+cfg.descZh+'</span>'+
+        '</div>'+
+      '</div>'+
+      countTxt+
+    '</label>';
+  }).join('');
+  list.innerHTML = html;
+}
+
+/* ── Get selected export keys ── */
+function getSelectedKeys(){
+  var cbs = document.querySelectorAll('.export-key-cb:checked');
+  return Array.prototype.map.call(cbs, function(cb){ return cb.getAttribute('data-key'); });
+}
+
+/* ── Download ── */
+function doDownload(){
+  var keys = getSelectedKeys();
+  if(keys.length === 0){
+    showToast(isEn() ? 'No keys selected' : '未選擇任何 key');
+    return;
+  }
+  var payload = buildExportPayload(keys);
+  var json = JSON.stringify(payload, null, 2);
+  var blob = new Blob([json], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var now = new Date();
+  var pad = function(n){return n<10?'0'+n:n;};
+  var fname = 'personal-data-'+
+    now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+
+    '-'+pad(now.getHours())+pad(now.getMinutes())+'.json';
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+  showToast(isEn() ? 'Downloaded ' + fname : '已下載 ' + fname);
+}
+
+/* ── Clipboard copy ── */
+function doCopy(){
+  var keys = getSelectedKeys();
+  if(keys.length === 0){
+    showToast(isEn() ? 'No keys selected' : '未選擇任何 key');
+    return;
+  }
+  var payload = buildExportPayload(keys);
+  var json = JSON.stringify(payload, null, 2);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(json).then(function(){
+      showToast(isEn() ? 'Copied to clipboard' : '已複製到剪貼簿');
+    }).catch(function(){
+      fallbackCopy(json);
+    });
+  } else {
+    fallbackCopy(json);
+  }
+}
+
+function fallbackCopy(text){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-999px;left:-999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try{
+    document.execCommand('copy');
+    showToast(isEn() ? 'Copied to clipboard' : '已複製到剪貼簿');
+  }catch(e){
+    showToast(isEn() ? 'Copy failed — paste manually' : '複製失敗，請手動貼上');
+  }
+  document.body.removeChild(ta);
+}
+
+/* ── Import: current parsed payload ── */
+var importedPayload = null;
+
+function clearImportState(){
+  importedPayload = null;
+  document.getElementById('previewPanel').classList.remove('visible');
+  document.getElementById('previewRows').innerHTML = '';
+  document.getElementById('importError').classList.remove('visible');
+  document.getElementById('importSuccess').classList.remove('visible');
+  document.getElementById('btnApply').disabled = true;
+}
+
+function showImportError(msgEn, msgZh){
+  var el = document.getElementById('importError');
+  el.innerHTML = '<span class="lang-en">'+msgEn+'</span><span class="lang-zh" style="display:'+(isEn()?'none':'')+'">'+msgZh+'</span>';
+  el.classList.add('visible');
+  document.getElementById('importSuccess').classList.remove('visible');
+  document.getElementById('previewPanel').classList.remove('visible');
+  document.getElementById('btnApply').disabled = true;
+  importedPayload = null;
+}
+
+function processImportText(text){
+  clearImportState();
+  if(!text || !text.trim()){
+    return;
+  }
+  var obj;
+  try{
+    obj = JSON.parse(text);
+  }catch(e){
+    showImportError(
+      'Invalid JSON — could not parse. Check the file is not corrupted.',
+      '無效 JSON — 解析失敗。請確認檔案未損毀。'
+    );
+    return;
+  }
+  if(!validatePayload(obj)){
+    showImportError(
+      'Invalid format — missing "version" or "data" fields. Only files exported from this page are supported.',
+      '格式不正確 — 缺少 "version" 或 "data" 欄位。只支援本頁匯出的 JSON 檔。'
+    );
+    return;
+  }
+  importedPayload = obj;
+  renderPreview(obj);
+  document.getElementById('btnApply').disabled = false;
+}
+
+function renderPreview(payload){
+  var en = isEn();
+  var mode = document.querySelector('input[name=importMode]:checked').value;
+  var rows = [];
+
+  SYNC_KEYS.forEach(function(cfg){
+    if(!payload.data.hasOwnProperty(cfg.key)) return;
+    var incoming = payload.data[cfg.key];
+    var local = lsGet(cfg.key);
+    var localEmpty = local === null || local === '__CORRUPT__';
+    var inCount = cfg.countFn(incoming);
+    var loCount = localEmpty ? 0 : cfg.countFn(local);
+
+    var changeTxt, changeCls;
+    if(localEmpty){
+      changeTxt = en
+        ? 'local empty → add ' + inCount + (inCount===1?' item':' items')
+        : '本機空 → 新增 ' + inCount + ' 筆';
+      changeCls = 'new';
+    } else if(mode === 'overwrite'){
+      if(loCount === inCount){
+        changeTxt = en ? 'overwrite ('+inCount+' items)' : '覆寫（'+inCount+' 筆）';
+        changeCls = 'overwrite';
+      } else {
+        changeTxt = en
+          ? 'overwrite '+loCount+' → '+inCount
+          : '覆寫 '+loCount+' → '+inCount+' 筆';
+        changeCls = 'overwrite';
+      }
+    } else {
+      /* merge */
+      var merged = mergeValues(local, incoming);
+      var mergedCount = cfg.countFn(merged);
+      if(mergedCount === loCount){
+        changeTxt = en ? 'no change (local kept)' : '無變化（保留本機）';
+        changeCls = 'noop';
+      } else {
+        changeTxt = en
+          ? 'merge '+loCount+' + '+inCount+' → '+mergedCount
+          : '合併 '+loCount+' + '+inCount+' → '+mergedCount+' 筆';
+        changeCls = 'merge';
+      }
+    }
+
+    rows.push(
+      '<div class="preview-row">'+
+        '<span class="preview-key">'+cfg.key+'</span>'+
+        '<span class="preview-change '+changeCls+'">'+changeTxt+'</span>'+
+      '</div>'
+    );
+  });
+
+  if(rows.length === 0){
+    rows.push('<div class="preview-row"><span style="font-size:11px;color:#94a3b8;font-style:italic">'+(en?'No matching sync keys in this file':'此檔案中無可同步的 key')+'</span></div>');
+  }
+
+  document.getElementById('previewRows').innerHTML = rows.join('');
+  document.getElementById('previewPanel').classList.add('visible');
+}
+
+/* ── Apply import ── */
+function doApply(){
+  if(!importedPayload){
+    showImportError('No valid data to import.', '沒有有效的資料可匯入。');
+    return;
+  }
+  var mode = document.querySelector('input[name=importMode]:checked').value;
+  var en = isEn();
+
+  /* Count what will change */
+  var keysToModify = 0;
+  var itemsChanged = 0;
+  SYNC_KEYS.forEach(function(cfg){
+    if(!importedPayload.data.hasOwnProperty(cfg.key)) return;
+    var incoming = importedPayload.data[cfg.key];
+    var local = lsGet(cfg.key);
+    var localEmpty = local === null || local === '__CORRUPT__';
+    if(mode === 'overwrite' || localEmpty){
+      keysToModify++;
+      itemsChanged += cfg.countFn(incoming);
+    } else {
+      var merged = mergeValues(local, incoming);
+      var loCount = localEmpty ? 0 : cfg.countFn(local);
+      var mCount = cfg.countFn(merged);
+      if(mCount !== loCount){
+        keysToModify++;
+        itemsChanged += (mCount - loCount);
+      }
+    }
+  });
+
+  var confirmMsg = en
+    ? 'Import will modify ' + keysToModify + ' key(s), ' + itemsChanged + ' item(s) added/changed. Continue?'
+    : '匯入將修改 ' + keysToModify + ' 個 key，異動 ' + itemsChanged + ' 筆。繼續？';
+
+  if(!confirm(confirmMsg)) return;
+
+  /* Execute */
+  var applied = 0;
+  SYNC_KEYS.forEach(function(cfg){
+    if(!importedPayload.data.hasOwnProperty(cfg.key)) return;
+    var incoming = importedPayload.data[cfg.key];
+    var local = lsGet(cfg.key);
+    var localEmpty = local === null || local === '__CORRUPT__';
+
+    var finalVal;
+    if(mode === 'overwrite'){
+      finalVal = incoming;
+    } else {
+      /* merge */
+      if(localEmpty){
+        finalVal = incoming;
+      } else {
+        finalVal = mergeValues(local, incoming);
+      }
+    }
+    try{
+      localStorage.setItem(cfg.key, JSON.stringify(finalVal));
+      applied++;
+    }catch(e){
+      console.warn('sync: failed to write key', cfg.key, e);
+    }
+  });
+
+  /* Success feedback */
+  var successEl = document.getElementById('importSuccess');
+  successEl.innerHTML = en
+    ? '<strong>Import complete.</strong> '+applied+' key(s) updated. Refreshing local data...'
+    : '<strong>匯入完成。</strong> '+applied+' 個 key 已更新。重新整理本機資料...';
+  successEl.classList.add('visible');
+  document.getElementById('importError').classList.remove('visible');
+  document.getElementById('btnApply').disabled = true;
+
+  showToast(en ? 'Import applied' : '匯入已套用');
+
+  /* Refresh snapshot + export list */
+  setTimeout(function(){
+    renderSnapshot();
+    renderExportList();
+    applyLangToRendered();
+  }, 600);
+}
+
+/* ── Danger: clear all ── */
+function doClearAll(){
+  var en = isEn();
+  var keys = SYNC_KEYS.map(function(c){return c.key;});
+  var msg1 = en
+    ? 'This will permanently delete ALL sync-able data on this machine:\n\n  ' + keys.join('\n  ') + '\n\nThis cannot be undone. Are you sure?'
+    : '即將永久刪除本機所有可同步資料：\n\n  ' + keys.join('\n  ') + '\n\n此操作無法還原。確定繼續？';
+  if(!confirm(msg1)) return;
+
+  var msg2 = en
+    ? 'Second confirmation: really delete everything? Click OK to proceed.'
+    : '二次確認：確定要全部清空嗎？點 OK 繼續。';
+  if(!confirm(msg2)) return;
+
+  var removed = 0;
+  keys.forEach(function(key){
+    if(localStorage.getItem(key) !== null){
+      localStorage.removeItem(key);
+      removed++;
+    }
+  });
+
+  showToast(en ? 'Cleared ' + removed + ' key(s)' : '已清除 ' + removed + ' 個 key');
+
+  clearImportState();
+  renderSnapshot();
+  renderExportList();
+  applyLangToRendered();
+}
+
+/* ── Mode change updates preview ── */
+function onModeChange(){
+  if(importedPayload) renderPreview(importedPayload);
+}
+
+/* ── File picker ── */
+document.getElementById('filePickBtn').addEventListener('click', function(){
+  document.getElementById('fileInput').click();
+});
+document.getElementById('fileInput').addEventListener('change', function(){
+  var file = this.files && this.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var text = e.target.result;
+    document.getElementById('importTextarea').value = text;
+    processImportText(text);
+  };
+  reader.readAsText(file);
+  /* Reset so same file can be re-selected */
+  this.value = '';
+});
+
+/* ── Textarea change ── */
+var taTimer = null;
+document.getElementById('importTextarea').addEventListener('input', function(){
+  if(taTimer) clearTimeout(taTimer);
+  var txt = this.value;
+  taTimer = setTimeout(function(){ processImportText(txt); }, 400);
+});
+
+/* ── Button wiring ── */
+document.getElementById('btnDownload').addEventListener('click', doDownload);
+document.getElementById('btnCopy').addEventListener('click', doCopy);
+document.getElementById('btnApply').addEventListener('click', doApply);
+document.getElementById('btnClearAll').addEventListener('click', doClearAll);
+
+document.querySelectorAll('input[name=importMode]').forEach(function(r){
+  r.addEventListener('change', onModeChange);
+});
+
+/* ── Language helpers ── */
+function applyLangToRendered(){
+  /* Re-apply lang visibility to dynamically rendered elements */
+  var en = isEn();
+  document.querySelectorAll('.lang-en').forEach(function(e){
+    e.style.display = en ? '' : 'none';
+  });
+  document.querySelectorAll('.lang-zh').forEach(function(e){
+    e.style.display = en ? 'none' : '';
+  });
+}
+
+/* ── setLang ── */
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  /* Re-render dynamic sections with new lang */
+  renderSnapshot();
+  renderExportList();
+  if(importedPayload) renderPreview(importedPayload);
+  applyLangToRendered();
+}
+
+/* ── Init ── */
+window.addEventListener('load', function(){
+  var lang = localStorage.getItem('lang') || 'en';
+  setLang(lang);
+});
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

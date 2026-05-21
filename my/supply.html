@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Analysis | Malaysia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}</style>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <h1><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
+      <p class="subtitle"><span class="lang-en">From Land Acquisition to Overhang</span><span class="lang-zh" style="display:none">從土地取得到待售餘屋的完整供應鏈分析</span></p>
+    </div>
+
+    <!-- Section A: Pipeline Flow -->
+    <div class="section-label"><span class="lang-en">PIPELINE FLOW</span><span class="lang-zh" style="display:none">在建供給流程</span></div>
+    <div class="pipeline-flow">
+      <div class="pipeline-node">
+        <div class="node-title"><span class="lang-en">Land</span><span class="lang-zh" style="display:none">土地</span></div>
+        <div class="node-sub">12-18m</div>
+      </div>
+      <div class="pipeline-arrow"><span>&rarr;</span></div>
+      <div class="pipeline-node">
+        <div class="node-title"><span class="lang-en">BP Approval</span><span class="lang-zh" style="display:none">建築計畫核准</span></div>
+        <div class="node-sub">6-12m</div>
+      </div>
+      <div class="pipeline-arrow"><span>&rarr;</span></div>
+      <div class="pipeline-node">
+        <div class="node-title"><span class="lang-en">Starts</span><span class="lang-zh" style="display:none">新開工</span></div>
+        <div class="node-value">64,843</div>
+        <div class="node-sub">Q1-Q3 2025</div>
+      </div>
+      <div class="pipeline-arrow"><span>&rarr;</span></div>
+      <div class="pipeline-node">
+        <div class="node-title"><span class="lang-en">Completions</span><span class="lang-zh" style="display:none">完工</span></div>
+        <div class="node-value">69,303</div>
+      </div>
+      <div class="pipeline-arrow"><span>&rarr;</span></div>
+      <div class="pipeline-node">
+        <div class="node-title">CCC</div>
+        <div class="node-sub">0-9m</div>
+      </div>
+      <div class="pipeline-arrow"><span>&rarr;</span></div>
+      <div class="pipeline-node" style="border-left:3px solid #dc2626;">
+        <div class="node-title"><span class="lang-en">Overhang</span><span class="lang-zh" style="display:none">待售餘屋</span></div>
+        <div class="node-value">28,672</div>
+      </div>
+    </div>
+
+    <!-- Section B: Forward Projection -->
+    <div class="section-heading"><span class="lang-en">Forward Projection</span><span class="lang-zh" style="display:none">前瞻預測</span></div>
+
+    <!-- Chart 1: Annual Supply Pipeline -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3><span class="lang-en">Annual Supply Pipeline</span><span class="lang-zh" style="display:none">每年推案與完工概況</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Planned vs Starts vs Completions</span><span class="lang-zh" style="display:none">計畫 vs 開工 vs 完工</span></p>
+        <div class="chart-wrap tall"><div id="chartPipeline" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Chart 2 & 3 side by side -->
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <h3><span class="lang-en">Projected Completions</span><span class="lang-zh" style="display:none">預計完工量</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Historical &amp; Forecast Range</span><span class="lang-zh" style="display:none">歷史與預測區間</span></p>
+        <div style="position:relative;height:220px;"><div id="chartProjected" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="lang-en">WIP vs Absorption</span><span class="lang-zh" style="display:none">在建工程 vs 年吸收量</span></h3>
+        <p class="chart-subtitle"><span class="lang-en">Pipeline Imbalance</span><span class="lang-zh" style="display:none">在建供給失衡</span></p>
+        <div style="position:relative;height:280px;"><div id="chartWIP" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Section C: Overhang Deep Dive -->
+    <div class="section-heading"><span class="lang-en">Overhang Deep Dive</span><span class="lang-zh" style="display:none">待售餘屋深入分析</span></div>
+
+    <div class="chart-card" id="ohTabs">
+      <div class="tab-bar">
+        <button class="active" data-tab="national" onclick="switchTab('ohTabs','national')"><span class="lang-en">National Overview</span><span class="lang-zh" style="display:none">全國概覽</span></button>
+        <button data-tab="price" onclick="switchTab('ohTabs','price')"><span class="lang-en">By Price Band</span><span class="lang-zh" style="display:none">依價格帶</span></button>
+        <button data-tab="sa" onclick="switchTab('ohTabs','sa')"><span class="lang-en">Serviced Apartments</span><span class="lang-zh" style="display:none">服務式公寓</span></button>
+      </div>
+
+      <!-- Tab 1: National Overview -->
+      <div class="tab-panel active" id="tab-national">
+        <div class="chart-grid two-col">
+          <div>
+            <h3 style="font-size:13px;margin-bottom:8px;"><span class="lang-en">Overhang by State</span><span class="lang-zh" style="display:none">各州待售餘屋</span></h3>
+            <div style="position:relative;height:240px;"><div id="chartOhState" style="width:100%;height:100%"></div></div>
+          </div>
+          <div>
+            <h3 style="font-size:13px;margin-bottom:8px;"><span class="lang-en">Overhang Trend</span><span class="lang-zh" style="display:none">待售餘屋趨勢</span></h3>
+            <div style="position:relative;height:220px;"><div id="chartOhTrend" style="width:100%;height:100%"></div></div>
+          </div>
+        </div>
+        <div class="chart-card" style="margin-top:16px;">
+          <h3><span class="lang-en">Overhang Forecast 2015–2029</span><span class="lang-zh" style="display:none">待售餘屋預測 2015–2029年</span></h3>
+          <p class="chart-subtitle"><span class="lang-en">Historical 2015–2025 + 3-scenario forecast 2026–2029</span><span class="lang-zh" style="display:none">歷史2015–2025 + 三情境預測2026–2029</span></p>
+          <div style="position:relative;height:280px;"><div id="chartOhForecast" style="width:100%;height:100%"></div></div>
+          <div class="insight-box" style="margin-top:12px;">
+            <div class="lang-en">Base case (absorption 85,000/yr): overhang peaks at ~47,000 units in 2027, normalising to ~14,000 by 2029. Bull case (90,000/yr absorption, OPR stays low): peak ~42,000, clears faster to ~8,000. Bear case (75,000/yr, OPR reversal or economic slowdown): peak ~57,000 in 2027, still elevated at ~28,000 in 2029. All scenarios assume completions derived from lagged 2024–2025 starts data.</div>
+            <div class="lang-zh" style="display:none">基本情境（年均吸收85,000套）：待售餘屋在2027年高峰約47,000套，2029年回落至約14,000套。樂觀情境（吸收90,000套，OPR維持低位）：高峰約42,000套，2029年降至約8,000套。保守情境（吸收75,000套，OPR逆轉或經濟放緩）：高峰約57,000套，2029年仍達28,000套。三個情境的完工量均依據2024至2025年已知開工數據推算。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: By Price Band -->
+      <div class="tab-panel" id="tab-price">
+        <h3 style="font-size:13px;margin-bottom:8px;"><span class="lang-en">Overhang by Price Band</span><span class="lang-zh" style="display:none">依價格帶分類待售餘屋</span></h3>
+        <div style="position:relative;height:220px;"><div id="chartOhPrice" style="width:100%;height:100%"></div></div>
+      </div>
+
+      <!-- Tab 3: Serviced Apartments -->
+      <div class="tab-panel" id="tab-sa">
+        <h3 style="font-size:13px;margin-bottom:8px;"><span class="lang-en">Serviced Apartment Overhang by State</span><span class="lang-zh" style="display:none">各州服務式公寓待售餘屋</span></h3>
+        <div style="position:relative;height:220px;"><div id="chartOhSA" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- Overhang Severity: % of Completions -->
+    <div class="chart-card" style="margin-top:16px;">
+      <h3><span class="lang-en">Overhang Severity: % of Annual Completions</span><span class="lang-zh" style="display:none">餘屋嚴重度：佔當年完工量%</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">1-in-3 threshold = systemic concern · Source: NAPIC</span><span class="lang-zh" style="display:none">每3戶完工1戶賣不出=系統性警戒 · 來源：NAPIC</span></p>
+      <div style="position:relative;height:220px;"><div id="chartOhSeverity" style="width:100%;height:100%"></div></div>
+      <div style="margin-top:16px;padding:14px 16px;background:#f8fafc;border-left:3px solid #d97706;border-radius:0 6px 6px 0;">
+        <p style="font-family:'Inter',sans-serif;font-size:12px;line-height:1.7;color:#1e3a5f;margin:0 0 10px 0;">
+          <span class="lang-en"><strong>Why this metric matters more than absolute units:</strong> Malaysia has 6.3 million existing residential units — expressing overhang as a share of total stock yields a misleadingly small number (~0.5%). The more meaningful lens is <strong>what fraction of newly-completed homes remain unsold</strong>. At the 2019 peak, nearly <strong>1 in 2</strong> completed units went unsold — a level that signals genuine developer overreach, not just normal inventory churn. The 2025Q3 reading of <strong>41%</strong> is back near peak territory, driven by a surge in completions rather than a collapse in demand. Watch this ratio, not the absolute number.</span>
+          <span class="lang-zh" style="display:none"><strong>為何這個指標比絕對數量更重要：</strong>馬來西亞有630萬戶住宅存量——用餘屋佔總存量的比例衡量，會得出一個具誤導性的小數字（約0.5%）。更有意義的視角是<strong>每年新完工的房屋中有多少比例賣不出去</strong>。在2019年高峰期，接近<strong>每2戶完工就有1戶</strong>滯銷——這個水準顯示開發商供給嚴重過剩，而非正常的庫存流動。2025年Q3的<strong>41%</strong>再度接近峰值，主因是完工量激增，而非需求崩潰。追蹤這個比率，而非絕對數字。</span>
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px;">
+          <div style="background:#fff;border:1px solid #e8f0f9;border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:#16a34a;">11.9%</div>
+            <div style="font-family:'Inter',sans-serif;font-size:10px;color:#5a7a9a;margin-top:2px;"><span class="lang-en">2015 Low</span><span class="lang-zh" style="display:none">2015年最低</span></div>
+          </div>
+          <div style="background:#fff;border:1px solid #e8f0f9;border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:#dc2626;">47.3%</div>
+            <div style="font-family:'Inter',sans-serif;font-size:10px;color:#5a7a9a;margin-top:2px;"><span class="lang-en">2019 Peak</span><span class="lang-zh" style="display:none">2019年峰值</span></div>
+          </div>
+          <div style="background:#fff;border:1px solid #e8f0f9;border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:#d97706;">41.4%</div>
+            <div style="font-family:'Inter',sans-serif;font-size:10px;color:#5a7a9a;margin-top:2px;"><span class="lang-en">2025Q3 Now</span><span class="lang-zh" style="display:none">2025Q3現況</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Source -->
+    <div class="source-footer">
+      <span class="lang-en"><strong>Sources:</strong> NAPIC, JPPH, BNM. Data as of Q3 2025 unless stated otherwise. *2025Q3 overhang figure includes serviced apartments reclassification.</span>
+      <span class="lang-zh" style="display:none"><strong>資料來源：</strong>NAPIC、JPPH、BNM。除另行標註外，資料截至2025年第三季。*2025年Q3待售餘屋數據含服務式公寓重新分類。</span>
+    </div>
+  </main>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+  <script>
+  var C = {
+    navy:'#1e3a5f', green:'#16a34a', orange:'#d97706',
+    red:'#dc2626', blue:'#2563eb', muted:'#5a7a9a',
+    grid:'#e8f0f9', text:'#1e3a5f'
+  };
+  var baseText = { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 };
+  var baseGrid = { left: 50, right: 20, top: 40, bottom: 30, containLabel: true };
+  var baseTooltip = {
+    trigger: 'axis', backgroundColor: '#fff',
+    borderColor: '#ccd9e8', borderWidth: 1,
+    textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' }
+  };
+  var baseLegend = { top: 8, textStyle: baseText, icon: 'circle', itemWidth: 8, itemHeight: 8 };
+
+  function fmtNum(v) {
+    return v >= 1000 ? (v/1000).toFixed(0) + 'K' : v;
+  }
+  function mkAxis(opts) {
+    var r = Object.assign({
+      axisLine: { lineStyle: { color: C.grid } },
+      axisTick: { show: false },
+      axisLabel: baseText,
+      splitLine: { lineStyle: { color: C.grid } }
+    }, opts || {});
+    if(opts && opts.axisLabel) r.axisLabel = Object.assign({}, baseText, opts.axisLabel);
+    return r;
+  }
+
+  function setLang(lang){
+    document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+    document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+    document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+    localStorage.setItem('lang',lang);
+  }
+
+  var ohStateChart, ohPriceChart, ohSAChart;
+
+  function switchTab(cid, tab){
+    var w = document.getElementById(cid); if(!w) return;
+    w.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+    w.querySelectorAll('.tab-bar button').forEach(function(b){ b.classList.remove('active'); });
+    var p = w.querySelector('#tab-'+tab); if(p) p.classList.add('active');
+    w.querySelectorAll('.tab-bar button').forEach(function(b){ if(b.dataset.tab===tab) b.classList.add('active'); });
+    setTimeout(function(){
+      if (ohStateChart) ohStateChart.resize();
+      if (ohPriceChart) ohPriceChart.resize();
+      if (ohSAChart) ohSAChart.resize();
+      allCharts.forEach(function(c){ if(c) c.resize(); });
+    }, 100);
+  }
+
+  var allCharts = [];
+
+  window.addEventListener('load', function(){
+    // chartPipeline
+    var cPipe = echarts.init(document.getElementById('chartPipeline'));
+    allCharts.push(cPipe);
+    cPipe.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Planned','Starts','Completions'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025 Q1-Q3']
+      }),
+      yAxis: mkAxis({
+        type: 'value',
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } })
+      }),
+      series: [
+        {
+          name: 'Planned', type: 'line',
+          data: [110000,108000,95000,85000,85000,60000,77585,89111,80964,100461,49602],
+          lineStyle: { color: C.muted, width: 2, type: 'dashed' },
+          itemStyle: { color: C.muted },
+          smooth: 0.2, symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'Starts', type: 'line',
+          data: [105000,102000,92000,82000,82000,65000,86258,97804,88114,106236,64843],
+          lineStyle: { color: C.navy, width: 2 },
+          itemStyle: { color: C.navy },
+          smooth: 0.2, symbol: 'circle', symbolSize: 6
+        },
+        {
+          name: 'Completions', type: 'line',
+          data: [95000,92000,85000,78000,78000,72000,76393,71981,74893,82135,69303],
+          lineStyle: { color: C.green, width: 2 },
+          itemStyle: { color: C.green },
+          smooth: 0.2, symbol: 'circle', symbolSize: 6
+        }
+      ]
+    });
+
+    // chartProjected
+    var cProj = echarts.init(document.getElementById('chartProjected'));
+    allCharts.push(cProj);
+    cProj.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Historical','Projected Low','Projected High'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2022','2023','2024','2026E','2027E','2028E']
+      }),
+      yAxis: mkAxis({
+        type: 'value',
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } })
+      }),
+      series: [
+        {
+          name: 'Historical', type: 'bar',
+          data: [71981, 74893, 82135, null, null, null],
+          itemStyle: { color: C.navy, borderRadius: [3,3,0,0] },
+          barMaxWidth: 40,
+          label: { show: true, position: 'top', fontSize: 9, formatter: function(p){ return p.value ? fmtNum(p.value) : ''; } }
+        },
+        {
+          name: 'Projected Low', type: 'bar',
+          data: [null, null, null, 90000, 85000, 75000],
+          itemStyle: { color: 'rgba(30,58,95,0.2)', borderRadius: [3,3,0,0] },
+          barMaxWidth: 40,
+          label: { show: true, position: 'top', fontSize: 9, formatter: function(p){ return p.value ? fmtNum(p.value) : ''; } }
+        },
+        {
+          name: 'Projected High', type: 'bar',
+          data: [null, null, null, 100000, 95000, 85000],
+          itemStyle: { color: 'rgba(217,119,6,0.2)', borderColor: C.orange, borderWidth: 1, borderRadius: [3,3,0,0] },
+          barMaxWidth: 40,
+          label: { show: true, position: 'top', fontSize: 9, formatter: function(p){ return p.value ? fmtNum(p.value) : ''; } }
+        }
+      ]
+    });
+
+    // chartWIP
+    var cWIP = echarts.init(document.getElementById('chartWIP'));
+    allCharts.push(cWIP);
+    cWIP.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['WIP in Pipeline*', 'Annual Absorption']
+      }),
+      yAxis: mkAxis({
+        type: 'value', min: 0,
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } })
+      }),
+      series: [{
+        type: 'bar',
+        data: [
+          { value: 275000, itemStyle: { color: C.orange, borderRadius: [4,4,0,0] } },
+          { value: 85000, itemStyle: { color: C.green, borderRadius: [4,4,0,0] } }
+        ],
+        barMaxWidth: 120,
+        label: {
+          show: true, position: 'top', fontSize: 12,
+          fontFamily: 'JetBrains Mono, monospace',
+          formatter: function(p){ return fmtNum(p.value); }
+        }
+      }]
+    });
+
+    // chartOhState
+    ohStateChart = echarts.init(document.getElementById('chartOhState'));
+    allCharts.push(ohStateChart);
+    var osLabels = ['Perak','Johor','Sabah','Selangor','Penang','Kelantan','KL','N. Sembilan','Others'];
+    var osValues = [3300,3293,2771,2757,2730,2599,2287,2205,6730];
+    ohStateChart.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: { left: 90, right: 50, top: 10, bottom: 20, containLabel: false },
+      xAxis: mkAxis({ type: 'value', min: 0 }),
+      yAxis: mkAxis({
+        type: 'category',
+        data: osLabels.slice().reverse(),
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      }),
+      series: [{
+        type: 'bar',
+        data: osValues.slice().reverse().map(function(v){
+          return { value: v, itemStyle: { color: v > 3000 ? C.red : C.navy, borderRadius: [0,4,4,0] } };
+        }),
+        barMaxWidth: 22,
+        label: { show: true, position: 'right', formatter: function(p){ return fmtNum(p.value); }, fontSize: 10, fontFamily: 'Inter' }
+      }]
+    });
+
+    // chartOhTrend
+    var cOhTrend = echarts.init(document.getElementById('chartOhTrend'));
+    allCharts.push(cOhTrend);
+    cOhTrend.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Residential','Total incl SA'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024H1','2025Q3']
+      }),
+      yAxis: mkAxis({
+        type: 'value',
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } })
+      }),
+      series: [
+        {
+          name: 'Residential', type: 'line',
+          data: [11316,14762,20876,32313,36863,31092,26424,27746,25816,22642,28672],
+          lineStyle: { color: C.navy, width: 2 },
+          itemStyle: { color: C.navy },
+          areaStyle: { color: 'rgba(30,58,95,0.08)' },
+          symbol: 'circle', symbolSize: 5
+        },
+        {
+          name: 'Total incl SA', type: 'line',
+          data: [null,null,null,null,null,47463,42126,44794,47463,42126,44794],
+          lineStyle: { color: C.orange, width: 2, type: 'dashed' },
+          itemStyle: { color: C.orange },
+          symbol: 'circle', symbolSize: 5
+        }
+      ]
+    });
+
+    // chartOhForecast
+    var cOhFc = echarts.init(document.getElementById('chartOhForecast'));
+    allCharts.push(cOhFc);
+    cOhFc.setOption({
+      tooltip: baseTooltip,
+      legend: Object.assign({}, baseLegend, { data: ['Historical','Bull (90K)','Base (85K)','Bear (75K)'] }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024H1','25*','26E','27E','28E','29E'],
+        axisLabel: Object.assign({}, baseText, { rotate: 30, interval: 0, fontSize: 9 })
+      }),
+      yAxis: mkAxis({
+        type: 'value', min: 0,
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } })
+      }),
+      series: [
+        {
+          name: 'Historical', type: 'line',
+          data: [11316,14762,20876,32313,36863,31092,26424,27746,25816,22642,28672,null,null,null,null],
+          lineStyle: { color: C.navy, width: 2 },
+          itemStyle: { color: C.navy },
+          areaStyle: { color: 'rgba(30,58,95,0.08)' },
+          symbol: 'circle', symbolSize: 5,
+          markPoint: { data: [
+            { coord: ['2018',32313], symbol: 'pin', symbolSize: 40, label: { formatter: 'Peak 32K', fontSize: 9 }, itemStyle: { color: C.red } },
+            { coord: ['2024H1',22642], symbol: 'pin', symbolSize: 40, label: { formatter: 'Low 22.6K', fontSize: 9 }, itemStyle: { color: C.green } }
+          ]}
+        },
+        {
+          name: 'Bull (90K)', type: 'line',
+          data: [null,null,null,null,null,null,null,null,null,null,28672,43000,42000,22000,8000],
+          lineStyle: { color: C.green, width: 1.5, type: [4,2] },
+          itemStyle: { color: C.green },
+          symbol: 'circle', symbolSize: 4
+        },
+        {
+          name: 'Base (85K)', type: 'line',
+          data: [null,null,null,null,null,null,null,null,null,null,28672,46000,47000,28000,14000],
+          lineStyle: { color: C.orange, width: 2, type: [6,3] },
+          itemStyle: { color: C.orange },
+          symbol: 'circle', symbolSize: 5
+        },
+        {
+          name: 'Bear (75K)', type: 'line',
+          data: [null,null,null,null,null,null,null,null,null,null,28672,51000,57000,42000,28000],
+          lineStyle: { color: C.red, width: 1.5, type: [8,4] },
+          itemStyle: { color: C.red },
+          symbol: 'circle', symbolSize: 4
+        }
+      ]
+    });
+
+    // chartOhSeverity — % of annual completions
+    var domSeverity = document.getElementById('chartOhSeverity');
+    if(domSeverity){
+      var cSev = echarts.init(domSeverity);
+      allCharts.push(cSev);
+      cSev.resize();
+      var sevLabels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024H1','2025Q3'];
+      var sevData = [11.9,16.0,24.6,41.4,47.3,43.2,34.6,38.5,34.5,27.6,41.4];
+      cSev.setOption({
+        tooltip: Object.assign({},baseTooltip,{formatter:function(p){return p[0].axisValue+'<br/>'+(en?'% of Completions':'佔完工量%')+': <b>'+p[0].data+'%</b>';}}),
+        grid:{left:50,right:20,top:36,bottom:30,containLabel:true},
+        xAxis: mkAxis({type:'category',data:sevLabels,axisLabel:Object.assign({},baseText,{rotate:30,interval:0})}),
+        yAxis: mkAxis({type:'value',min:0,max:55,axisLabel:{formatter:function(v){return v+'%';},color:C.muted,fontFamily:'Inter,sans-serif',fontSize:11},splitLine:{lineStyle:{color:C.grid}}}),
+        series:[{
+          type:'bar',
+          data:sevData.map(function(v){return{value:v,itemStyle:{color:v>=40?C.red:v>=33?C.orange:v>=20?C.navy:C.green,borderRadius:[3,3,0,0]}};}),
+          barMaxWidth:35,
+          label:{show:true,position:'top',formatter:function(p){return p.value+'%';},fontSize:9,fontFamily:'JetBrains Mono,monospace'},
+          markLine:{silent:true,lineStyle:{type:'dashed',color:C.orange,width:1.5},data:[{yAxis:33}],label:{formatter:en?'1-in-3 threshold':'每3戶完工1戶滯銷',color:C.orange,fontFamily:'Inter,sans-serif',fontSize:10}}
+        }]
+      });
+    }
+
+    // chartOhPrice (lazy — init now but hidden tab)
+    ohPriceChart = echarts.init(document.getElementById('chartOhPrice'));
+    allCharts.push(ohPriceChart);
+    ohPriceChart.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['<200k','200-300k','300-500k','500k-1M','>1M']
+      }),
+      yAxis: mkAxis({
+        type: 'value', min: 0,
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } })
+      }),
+      series: [{
+        type: 'bar',
+        data: [1200, 4800, 8900, 9200, 4572].map(function(v){
+          return { value: v, itemStyle: { color: C.navy, borderRadius: [4,4,0,0] } };
+        }),
+        barMaxWidth: 50,
+        label: { show: true, position: 'top', fontSize: 10, formatter: function(p){ return fmtNum(p.value); } }
+      }]
+    });
+
+    // chartOhSA
+    ohSAChart = echarts.init(document.getElementById('chartOhSA'));
+    allCharts.push(ohSAChart);
+    var saColors = [C.orange, C.orange, C.navy, C.navy, C.muted];
+    ohSAChart.setOption({
+      tooltip: Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } }),
+      grid: baseGrid,
+      xAxis: mkAxis({
+        type: 'category',
+        data: ['Johor','KL','Selangor','Penang','Others']
+      }),
+      yAxis: mkAxis({
+        type: 'value', min: 0,
+        axisLabel: Object.assign({}, baseText, { formatter: function(v){ return fmtNum(v); } })
+      }),
+      series: [{
+        type: 'bar',
+        data: [6200, 4100, 3800, 1900, 1892].map(function(v, i){
+          return { value: v, itemStyle: { color: saColors[i], borderRadius: [4,4,0,0] } };
+        }),
+        barMaxWidth: 50,
+        label: { show: true, position: 'top', fontSize: 10, formatter: function(p){ return fmtNum(p.value); } }
+      }]
+    });
+
+    setLang(localStorage.getItem('lang')||'en');
+  });
+
+  window.addEventListener('resize', function(){
+    allCharts.forEach(function(c){ if(c) c.resize(); });
+  });
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

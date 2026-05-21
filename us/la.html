@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LA Deep Dive | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+  .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+  .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+  .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+  .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+  .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+  .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+  .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+  .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+  .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+  .chart-note.green{color:#16a34a}
+  .chart-note.orange{color:#d97706}
+  .chart-note.red{color:#dc2626}
+  .chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+  .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+  .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+  .report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+  .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+  .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+  .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+  .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+  .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+  .toc-collapsed .toc-list{display:none}
+  .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+  .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+  .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+  .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+  .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+  .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+  .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+  .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+  .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+  .side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}
+  @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="report-container">
+
+  <!-- Side Nav -->
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-wildfire" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">2025 Wildfire</span><span class="side-nav-label lang-zh" style="display:none">2025年野火</span></a>
+    <a href="#sec-insurance" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Insurance Crisis</span><span class="side-nav-label lang-zh" style="display:none">保險危機</span></a>
+    <a href="#sec-supply" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Supply &amp; Demand</span><span class="side-nav-label lang-zh" style="display:none">供需</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rent Control</span><span class="side-nav-label lang-zh" style="display:none">租管</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="lang-en">
+      <h1>LOS ANGELES &mdash; DEEP DIVE</h1>
+      <div class="report-meta">April 2026 &middot; Data: Case-Shiller LXXRSA / CAR / Redfin / UCLA Anderson / Cal Insurance</div>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <h1>洛杉磯——深度分析</h1>
+      <div class="report-meta">2026年4月 &middot; 數據：Case-Shiller LXXRSA / CAR / Redfin / UCLA Anderson / 加州保險局</div>
+    </div>
+  </div>
+
+  <div class="report-body">
+
+    <!-- TOC -->
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="toggleToc()">
+        <span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span>
+        <button class="toc-toggle" id="tocToggle">&#x25B2;</button>
+      </div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend: Case-Shiller &amp; Median</span><span class="lang-zh" style="display:none">2. 房價走勢：Case-Shiller與中位數</span></a>
+        <a href="#sec-wildfire" onclick="closeTocMobile()"><span class="lang-en">3. January 2025 Wildfire: Structural Damage</span><span class="lang-zh" style="display:none">3. 2025年1月野火：結構性破壞</span></a>
+        <a href="#sec-insurance" onclick="closeTocMobile()"><span class="lang-en">4. Insurance Crisis: The Existential Risk</span><span class="lang-zh" style="display:none">4. 保險危機：生存性風險</span></a>
+        <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">5. Supply, Demand &amp; ARM Dominance</span><span class="lang-zh" style="display:none">5. 供給、需求與ARM主導</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">6. Rent Control: AB 1482 &amp; Local Regimes</span><span class="lang-zh" style="display:none">6. 租管：AB 1482與地方制度</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 1. EXECUTIVE SUMMARY -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+
+    <div class="lang-en">
+      <p>Los Angeles enters 2026 as the most structurally complex residential property market in the United States &mdash; a city where the fundamental arithmetic of housing has become nearly impossible for the median household, and where a single January week in 2025 rewrote the risk calculus for an entire coastal region. The Case-Shiller LA index (LXXRSA) reached an all-time high of <strong>447</strong> in June 2025, before moderating to 445 as of February 2025 &mdash; a market that has appreciated 186% since January 2000 and represents the highest absolute index level of any U.S. metro tracked by Case-Shiller. The median home price for the City of Los Angeles was <strong>$1.07 million</strong> in March 2025, up 12.5% year-over-year &mdash; a figure inflated partly by the wildfire-induced supply shock that removed thousands of units from an already constrained inventory.</p>
+      <p>The January 2025 Palisades and Eaton wildfires destroyed <strong>16,251</strong> structures across 55,082 acres &mdash; the most destructive urban wildfire event in California history. The fires triggered an estimated <strong>$40&ndash;46 billion</strong> in insurance losses, with State Farm alone reporting $7.9 billion in claims. The macroeconomic aftershock was immediate: displaced households flooded an already tight rental market, rent-gouging complaints spiked (the state capped increases at 10%), and the resale market saw a supply shock as homeowners who lost homes became buyers competing for the same constrained inventory. One year on, investors have purchased approximately 40% of vacant lots in the burn zones, lot listings in Pacific Palisades have risen from 7 (Sep&ndash;Nov 2024) to 309 (Sep&ndash;Nov 2025), yet only 75 have sold &mdash; a 75% unsold rate that signals demand destruction, not recovery.</p>
+      <p>But the wildfire is a symptom, not the disease. The underlying pathology of the LA market is a tripartite affordability crisis built over decades: (1) chronic undersupply driven by exclusionary zoning, CEQA litigation, and coastal commission restrictions; (2) an insurance market that has effectively abandoned high-risk zip codes &mdash; State Farm, Allstate, and several other major carriers have either exited California or dramatically curtailed writing new policies; (3) the highest ARM mortgage share of any major U.S. metro (<strong>31%</strong> of originations in California versus 11% nationally), indicating that buyers are stretching to enter a market where affordability has broken down by every conventional metric. For foreign buyers (particularly Chinese and Korean capital concentrated in the San Gabriel Valley and Arcadia), FIRPTA's 15% withholding adds another friction layer. AB 1482's statewide rent cap of 5%+CPI or 10% sets the investment framework for non-exempt properties.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>洛杉磯進入2026年，成為美國結構最複雜的住宅房地產市場——這座城市的住房基本算術對中位收入家庭幾乎已無解，而2025年1月的一個星期重寫了整個沿海地區的風險計算。Case-Shiller LA指數（LXXRSA）在2025年6月達到<strong>447</strong>的歷史高位，2月稍回落至445——這一市場自2000年1月以來升值186%，是Case-Shiller追蹤的所有美國大都市中絕對指數最高的市場。洛杉磯市2025年3月中位數房價為<strong>107萬美元</strong>，年增12.5%——這一數字部分受到野火引發的供給衝擊的拉抬，野火從已然緊張的庫存中移除了數千套住宅。</p>
+      <p>2025年1月的帕利塞茲和伊頓野火在55,082英畝土地上摧毀了<strong>16,251</strong>棟建築——加州歷史上破壞性最強的城市野火事件。大火引發估計<strong>400至460億美元</strong>的保險損失，僅State Farm一家就報告了79億美元的理賠。宏觀經濟衝擊立竿見影：流離失所的家庭湧入本已緊繃的租賃市場，租金哄抬投訴激增（州政府將漲幅上限設為10%），二手房市場因失去房屋的屋主成為買家而遭遇供給衝擊。一年後，投資者購買了火災區約40%的空置地塊，帕利塞茲地塊掛牌從2024年9至11月的7套增至2025年同期的309套，但僅75套售出——75%的未售率表明需求破壞，而非復甦。</p>
+      <p>但野火是症狀，不是疾病。洛杉磯市場的根本病理是數十年積累的三重可負擔性危機：（1）排他性分區法、CEQA訴訟和海岸委員會限制驅動的長期供給不足；（2）保險市場實際上已放棄高風險郵政編碼——State Farm、Allstate和幾家其他主要承保商已退出加州或大幅削減新保單承保；（3）美國主要大都市中最高的ARM房貸佔比（加州<strong>31%</strong>，全國11%），表明買家正在勉強進入一個所有傳統指標下可負擔性已崩潰的市場。對外國買家（尤其是集中在聖蓋博谷和阿凱迪亞的中國和韓國資本），FIRPTA 15%的預扣增加了另一層摩擦。AB 1482的5%+CPI或10%州級租金上限為非豁免房產設定了投資框架。</p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">CS LA INDEX (FEB 2025)</span><span class="lang-zh" style="display:none">CS LA指數（2025年2月）</span></div>
+        <div class="kpi-value">445</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Jan 2000=100, SA &middot; ATH: 447 (Jun 2025)</span><span class="lang-zh" style="display:none">2000年1月=100，季調 &middot; 歷史高位：447（2025年6月）</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">MEDIAN PRICE (MAR 2025)</span><span class="lang-zh" style="display:none">中位數房價（2025年3月）</span></div>
+        <div class="kpi-value">$1.07M</div>
+        <span class="kpi-badge badge-green"><span class="lang-en">Redfin LA city, post-fire &middot; YoY +12.5%</span><span class="lang-zh" style="display:none">Redfin洛杉磯市，野火後 &middot; 年增+12.5%</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">STRUCTURES DESTROYED</span><span class="lang-zh" style="display:none">毀損建築</span></div>
+        <div class="kpi-value">16,251</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Palisades + Eaton fires Jan 2025 &middot; 55,082 acres</span><span class="lang-zh" style="display:none">帕利塞茲+伊頓大火 2025年1月 &middot; 55,082英畝</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">INSURANCE PAYOUT EST.</span><span class="lang-zh" style="display:none">保險理賠估計</span></div>
+        <div class="kpi-value">$40&ndash;46B</div>
+        <span class="kpi-badge badge-red"><span class="lang-en">Total Jan 2025 fires &middot; State Farm alone: $7.9B</span><span class="lang-zh" style="display:none">2025年1月野火總計 &middot; 僅State Farm：$7.9B</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">ARM SHARE (CA 2025)</span><span class="lang-zh" style="display:none">ARM佔比（加州2025）</span></div>
+        <div class="kpi-value">31%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Highest in U.S. &middot; vs national 11%</span><span class="lang-zh" style="display:none">全美最高 &middot; 對比全國11%</span></span>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">RENT CONTROL COVERAGE</span><span class="lang-zh" style="display:none">租管覆蓋</span></div>
+        <div class="kpi-value">AB 1482</div>
+        <span class="kpi-badge badge-blue"><span class="lang-en">5%+CPI or 10% cap &middot; 15-yr new exempt</span><span class="lang-zh" style="display:none">5%+CPI或10%上限 &middot; 新建15年豁免</span></span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 2. PRICE TREND -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND: CASE-SHILLER &amp; MEDIAN</span><span class="lang-zh" style="display:none">房價走勢：CASE-SHILLER與中位數</span></h2>
+
+    <div class="lang-en">
+      <p>The Los Angeles Case-Shiller index (LXXRSA, SA) is the highest absolute level of any U.S. metro in the 20-city composite &mdash; 445 as of February 2025, versus the national average of 329. This premium reflects LA's structural supply scarcity, coastal desirability, and the fact that housing stock barely grew while the metro population expanded. The pandemic-era surge was pronounced: the index rose from approximately 317 in January 2020 to 442 by May 2022 &mdash; a 39% gain in 28 months, driven by remote-work migration, ultra-low rates, and the flight of high-income coastal workers to suburban LA. Unlike the Sunbelt markets (Phoenix, Denver), which corrected sharply when pandemic tailwinds reversed, LA's correction was shallow: the index dipped to approximately 400 in early 2023 before recovering fully by late 2023. The wildfire supply shock of January 2025 added a secondary upward impulse: LA County sales fell 7.9% YoY in May 2025 while prices rose 2.9%, a textbook supply-shock divergence of volume down and price up.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>洛杉磯Case-Shiller指數（LXXRSA，季調）是20城複合指數中美國任何大都市的最高絕對值——2025年2月為445，而全國平均僅329。這一溢價反映了洛杉磯的結構性供給稀缺、沿海宜居性，以及在大都市人口擴張的同時住宅存量幾乎未能增長的事實。疫情時期的漲幅顯著：指數從2020年1月的約317升至2022年5月的442——在遠程辦公遷移、超低利率和高收入沿海工作者向洛杉磯郊區逃離的推動下，28個月上漲39%。與疫情順風逆轉後急劇修正的陽光地帶市場（鳳凰城、丹佛）不同，洛杉磯的修正很淺：指數在2023年初跌至約400後，2023年底完全收復。2025年1月的野火供給衝擊增加了次生上行動力：洛杉磯縣2025年5月銷量年降7.9%，而價格上漲2.9%——這是典型的供給衝擊現象，成交量下降而價格上升。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Case-Shiller LA Index + YoY% (2015&ndash;2025)</span><span class="lang-zh" style="display:none">Case-Shiller LA指數 + 年增率（2015&ndash;2025）</span></h4>
+        <p><span class="lang-en">SA, Jan 2000=100 &middot; Source: FRED LXXRSA</span><span class="lang-zh" style="display:none">季調，2000年1月=100 &middot; 來源：FRED LXXRSA</span></p>
+        <div id="chartLAPrice" style="height:220px"></div>
+        <p class="chart-note orange"><span class="lang-en">LA peaked at index 447 in Jun 2025 &mdash; the highest ever for any CS city. Jan 2025 wildfire added supply shock in Q1&ndash;Q2</span><span class="lang-zh" style="display:none">洛杉磯指數於2025年6月達到447歷史峰值——CS所有城市有史以來最高。2025年1月野火在Q1至Q2製造了供給衝擊</span></p>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">LA City Median Sales Price 2015&ndash;2025</span><span class="lang-zh" style="display:none">洛杉磯市中位數成交價 2015&ndash;2025</span></h4>
+        <p><span class="lang-en">Source: Redfin / CAR</span><span class="lang-zh" style="display:none">來源：Redfin / CAR</span></p>
+        <div id="chartLAMedian" style="height:220px"></div>
+        <p class="chart-note green"><span class="lang-en">Post-fire supply shock: Mar 2025 median $1.07M (+12.5% YoY) as inventory collapsed and displaced buyers competed</span><span class="lang-zh" style="display:none">野火後供給衝擊：2025年3月中位數107萬美元（年增12.5%），庫存崩潰且流離失所買家競價</span></p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 3. JANUARY 2025 WILDFIRE -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-wildfire"><span class="lang-en">JANUARY 2025 WILDFIRE: STRUCTURAL DAMAGE</span><span class="lang-zh" style="display:none">2025年1月野火：結構性破壞</span></h2>
+
+    <div class="lang-en">
+      <p>The Palisades and Eaton wildfires of January 7&ndash;31, 2025 constitute the most consequential single event in Los Angeles real estate history since the 1994 Northridge earthquake. The fires consumed <strong>55,082</strong> acres and destroyed <strong>16,251</strong> structures &mdash; 6,837 in Pacific Palisades and Malibu from the Palisades Fire, and 9,414 in Altadena from the Eaton Fire. At least 28 lives were lost. The UCLA Anderson School estimated total economic losses at $40&ndash;46 billion, with insurance payouts to date totaling a similar range. State Farm, California's largest homeowner insurer, reported <strong>$7.9 billion</strong> in claims from the Palisades Fire alone.</p>
+      <p>The housing market impact operated through two channels. The immediate supply destruction channel removed 16,000+ units from the metro's already-constrained inventory, creating an acute demand surge in surrounding neighborhoods &mdash; Pasadena, Alhambra, Culver City &mdash; where rents spiked 15&ndash;20% within two weeks. The state invoked its anti-price-gouging statute, capping increases at 10% of pre-disaster levels. The longer-term structural channel relates to the rebuild timeline: California real estate agents and economists estimate 3&ndash;5 years to full rebuild, given insurance settlement delays, permitting, debris clearance, and construction labor shortages. As of Q3 2025, only 75 of the 309 listed lots in Pacific Palisades had sold, and investors had purchased approximately 40% of those &mdash; a sign that institutional capital is acquiring rebuild optionality while individual displaced owners walk away.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2025年1月7日至31日的帕利塞茲和伊頓野火，是自1994年北嶺地震以來對洛杉磯房地產影響最深遠的單一事件。大火吞噬了<strong>55,082</strong>英畝，摧毀了<strong>16,251</strong>棟建築——帕利塞茲大火燒毀帕利塞茲和馬里布6,837棟，伊頓大火燒毀阿爾塔迪納9,414棟。至少28人罹難。UCLA安德森商學院估計總經濟損失400至460億美元，保險理賠截至目前合計金額相近。加州最大的房主保險商State Farm僅帕利塞茲大火一場就報告了<strong>79億美元</strong>的理賠。</p>
+      <p>住宅市場影響通過兩個渠道作用。即時供給破壞渠道從大都市本已受限的庫存中移除16,000多套，在帕薩迪納、阿罕布拉、卡爾弗城等周邊社區引發急性需求激增——兩周內租金飆升15至20%。州政府援引反哄抬物價法規，將漲幅上限設為災前水平的10%。長期結構性渠道涉及重建時間線：加州房地產經紀人和經濟學家估計，考慮保險結算延遲、許可審批、殘骸清理和建築工人短缺，完全重建需3至5年。截至2025年第三季，帕利塞茲309套掛牌地塊中僅75套售出，其中投資者購買了約40%——這表明機構資本正在獲取重建期權，而個人流離失所業主則選擇離場。</p>
+    </div>
+
+    <div class="report-chart-grid">
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Structures Destroyed by Fire (Jan 2025)</span><span class="lang-zh" style="display:none">野火摧毀建築數（2025年1月）</span></h4>
+        <p><span class="lang-en">Source: Cal Fire / UCLA Anderson</span><span class="lang-zh" style="display:none">來源：Cal Fire / UCLA安德森</span></p>
+        <div id="chartFireDamage" style="height:220px"></div>
+      </div>
+      <div class="report-chart-card">
+        <h4><span class="lang-en">Vacant Lot Listings: Sep&ndash;Nov 2024 vs 2025</span><span class="lang-zh" style="display:none">空置地塊掛牌：2024年vs2025年同期</span></h4>
+        <p><span class="lang-en">Source: HR&amp;A Advisors / Redfin</span><span class="lang-zh" style="display:none">來源：HR&amp;A Advisors / Redfin</span></p>
+        <div id="chartLotListings" style="height:220px"></div>
+      </div>
+    </div>
+    <p class="chart-note red"><span class="lang-en">309 Palisades lots listed vs 7 a year before; only 75 sold. Investors bought ~40% of sold lots in Q3 2025</span><span class="lang-zh" style="display:none">帕利塞茲309套地塊掛牌，較一年前7套；僅75套售出。投資者購買了2025年Q3已售地塊約40%</span></p>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 4. INSURANCE CRISIS -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-insurance"><span class="lang-en">INSURANCE CRISIS: THE EXISTENTIAL RISK</span><span class="lang-zh" style="display:none">保險危機：生存性風險</span></h2>
+
+    <div class="lang-en">
+      <p>The Los Angeles insurance crisis predates the January 2025 fires but has been dramatically accelerated by them. State Farm, Allstate, Farmers, and several other carriers had begun restricting or terminating California homeowner policies in 2022&ndash;2024 on the grounds that wildfire risk had rendered underwriting economics unviable under California's Proposition 103 framework, which requires the Insurance Commissioner's approval for rate increases and historically capped premium growth below actuarially justified levels.</p>
+      <p>The practical effect is a two-tier insurance market: properties in low- and medium-risk zones can still obtain private coverage at elevated but manageable premiums, while properties in high-risk zones (the California FAIR Plan areas, covering much of the hillside and canyon communities of LA) are increasingly limited to the California FAIR Plan &mdash; a state-backed insurer of last resort with coverage limits of <strong>$3 million</strong> per dwelling and higher premiums than the private market previously charged. Transaction cancellations tied to insurance concerns nearly doubled between 2023 and 2024 in LA County. Post-January 2025, the insurance bottleneck has become the primary transaction friction in the LA market: buyers who find suitable homes cannot close because they cannot obtain insurance, or can only obtain it at monthly premium levels that, combined with mortgage payments, push total housing costs into the <strong>45&ndash;50%+</strong> of income range.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>洛杉磯保險危機早於2025年1月野火，但已被大火急劇加速。State Farm、Allstate、Farmers等幾家承保商在2022至2024年間已開始限制或終止加州房主保單，理由是野火風險使承保經濟在加州《第103號提案》框架下失去可行性——該框架要求保險專員批准費率上漲，且歷史上將保費增長限制在精算合理水平以下。</p>
+      <p>實際效果是一個雙軌保險市場：低至中等風險區的房產仍可獲得私人保險，保費較高但尚可管理；而高風險區的房產（加州FAIR計劃覆蓋區域，涵蓋洛杉磯大部分山坡和峽谷社區）越來越多地僅限於加州FAIR計劃——這是一家州立後備保險商，每棟住宅保額上限<strong>300萬美元</strong>，且保費高於私人市場之前收取的水平。洛杉磯縣因保險問題取消的交易在2023至2024年間幾乎翻倍。2025年1月後，保險瓶頸已成為洛杉磯市場的主要交易摩擦：找到合適房屋的買家無法成交，因為無法獲得保險，或只能在月保費水平下獲得——加上按揭還款，總住房成本推至收入的<strong>45至50%以上</strong>。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">CA FAIR Plan Residential Policies 2019&ndash;2025</span><span class="lang-zh" style="display:none">加州FAIR計劃住宅保單 2019&ndash;2025</span></h4>
+      <div id="chartInsurance" style="height:220px"></div>
+      <p class="chart-note red"><span class="lang-en">FAIR Plan policies: 153K (2019) &rarr; 520K (2025E). Insurance exit = new primary transaction risk in LA</span><span class="lang-zh" style="display:none">FAIR計劃保單：153K（2019）&rarr;520K（2025E估算）。保險退出=洛杉磯主要的新交易風險</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 5. SUPPLY, DEMAND & ARM -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-supply"><span class="lang-en">SUPPLY, DEMAND &amp; ARM DOMINANCE</span><span class="lang-zh" style="display:none">供給、需求與ARM主導</span></h2>
+
+    <div class="lang-en">
+      <p>LA's supply problem is foundational and regulatory. The metro added approximately 110,000 housing units in the decade 2013&ndash;2023 against a net household formation of approximately 200,000 &mdash; a structural undersupply of 90,000 units before a single structure burned in January 2025. The primary culprits are: (1) single-family zoning covering 75% of residential land in the City of LA; (2) CEQA (California Environmental Quality Act) litigation that delays or kills infill projects; (3) the California Coastal Commission, which restricts new construction in coastal zones; and (4) extremely high construction costs &mdash; LA is among the top 3 most expensive cities in the U.S. to build, at approximately <strong>$500&ndash;700</strong> per square foot for multi-family.</p>
+      <p>On the demand side, the LA market is characterized by extreme ARM concentration. California's <strong>31%</strong> ARM share of mortgage originations is the highest of any U.S. state, driven by the math of entry: a $1M home with 20% down carries a 30-year fixed payment of approximately $6,440/month at 6.38%, versus an ARM initial payment of approximately $5,300&ndash;5,500 on a 5/1 or 7/1 ARM. For a buyer earning $180,000&ndash;$200,000 &mdash; a reasonable household income for LA's professional class &mdash; the ARM is the only instrument that keeps the front-end DTI below 36%. The risk is duration: if rates remain elevated at ARM reset, these buyers face payment shock analogous to the 2007 cycle, though today's ARM structures have more protective floors and caps.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>洛杉磯的供給問題是根本性且監管驅動的。大都市在2013至2023年的十年間新增約11萬套住宅，而淨家戶形成約為20萬戶——在2025年1月任何一棟建築被燒毀之前，就已存在9萬套的結構性供給缺口。主要原因是：（1）單棟住宅分區法覆蓋洛杉磯市75%的住宅用地；（2）《加州環境質量法》（CEQA）訴訟拖延或扼殺城市填充開發項目；（3）加州海岸委員會限制沿海區新建；（4）極高的建設成本——洛杉磯是美國建設成本最高的城市前三名之一，多家庭住宅約每平方英尺<strong>500至700美元</strong>。</p>
+      <p>在需求面，洛杉磯市場以極端的ARM集中為特徵。加州<strong>31%</strong>的ARM房貸發放佔比是美國所有州中最高的，由入市算術驅動：一套100萬美元的房屋以20%首付、6.38%利率辦理30年固定貸款，月供約6,440美元；而5年或7年期ARM的初始月供約為5,300至5,500美元。對年收入18萬至20萬美元的買家——洛杉磯專業階層合理的家庭收入——ARM是唯一能將前端負債收入比控制在36%以下的工具。風險在於久期：如果利率在ARM重設時仍高企，這些買家面臨類似2007年週期的還款衝擊，儘管今日ARM結構有更多保護性底線和上限。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">LA County: Sales Volume Index vs Median Price 2015&ndash;2025</span><span class="lang-zh" style="display:none">洛杉磯縣：銷量指數 vs 中位數房價 2015&ndash;2025</span></h4>
+      <div id="chartLASupplyDemand" style="height:220px"></div>
+      <p class="chart-note orange"><span class="lang-en">Classic supply shock: 2024&ndash;25 sales at ~70% of 2015 levels while prices stay 65%+ above. Wildfire adds secondary supply shock in 2025</span><span class="lang-zh" style="display:none">典型供給衝擊：2024至25年銷量為2015年水平的約70%，但價格維持高出65%以上。野火在2025年增加次生供給衝擊</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 6. RENT CONTROL -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-rent"><span class="lang-en">RENT CONTROL: AB 1482 &amp; LOCAL REGIMES</span><span class="lang-zh" style="display:none">租管：AB 1482與地方制度</span></h2>
+
+    <div class="lang-en">
+      <p>California's statewide rent cap (AB 1482, effective January 2020) applies to residential properties that are not otherwise exempt, limiting annual rent increases to 5% plus local CPI, or 10% &mdash; whichever is lower. Key exemptions include: single-family homes (unless owned by a corporation, REIT, or LLC); condominiums sold separately; buildings constructed within the last 15 years (rolling); and owner-occupied duplexes. The 15-year rolling exemption is significant for investment underwriting: a building constructed in 2010 became subject to AB 1482 in 2025; one built in 2015 remains exempt until 2030.</p>
+      <p>Within the City of Los Angeles, the Rent Stabilization Ordinance (RSO) applies an additional, stricter layer to pre-1978 buildings. RSO units are effectively rent-controlled in perpetuity, with the LA Housing Department setting permissible increases annually (typically 3&ndash;8% in recent years). The combination of AB 1482 and RSO means that approximately <strong>650,000</strong> rental units in the City of LA alone are subject to some form of rent regulation &mdash; roughly 60% of the rental stock. For the post-January 2025 period, both the state and city activated anti-price-gouging statutes for the wildfire emergency zones, prohibiting rent increases above 10% of pre-emergency levels for units rented within 30 days of a disaster declaration.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>加州州級租金上限（AB 1482，2020年1月生效）適用於未另行豁免的住宅房產，將年度漲租限制在當地CPI加5%或10%——取低者。主要豁免包括：獨棟住宅（除非由公司、房地產投資信託或有限責任公司持有）；單獨出售的公寓；過去15年內建設的建築（滾動計算）；以及業主自住的雙拼住宅。15年滾動豁免對投資核保意義重大：2010年建設的建築於2025年起受AB 1482約束；2015年建設的建築到2030年前仍豁免。</p>
+      <p>在洛杉磯市內，《租金穩定條例》（RSO）對1978年前建築增加了更嚴格的附加層。RSO公寓實際上永久受到租金管制，洛杉磯住房部每年設定允許漲幅（近年通常為3至8%）。AB 1482和RSO的組合意味著僅洛杉磯市就有約<strong>65萬套</strong>租賃公寓受到某種形式的租金管制——約佔租賃存量的60%。2025年1月後，州和市均針對野火緊急區域援引反哄抬物價法規，禁止在災難宣佈後30天內出租的公寓漲租超過緊急前水平的10%。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">AB 1482 Rent Cap vs LA Market Rent Growth 2020&ndash;2025</span><span class="lang-zh" style="display:none">AB 1482租金上限 vs 洛杉磯市場租金增長 2020&ndash;2025</span></h4>
+      <div id="chartAB1482" style="height:220px"></div>
+      <p class="chart-note orange"><span class="lang-en">2021&ndash;22: market rent (+9% / +14%) far exceeded AB 1482 cap. 2025: post-wildfire surge pushes market rents back above cap in high-demand areas</span><span class="lang-zh" style="display:none">2021至22年：市場租金（+9% / +14%）遠超AB 1482上限。2025年：野火後租金激增使高需求區市場租金再次突破上限</span></p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 7. OUTLOOK -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+
+    <div class="lang-en">
+      <p>Los Angeles presents the most asymmetric risk-return profile of any market in this monitor. The upside is real but narrow: the city's structural undersupply, coastal desirability, and entertainment/tech employment base provide a durable floor under prices even in adverse scenarios. The base case (<strong>50%</strong> probability) projects the CS LA index consolidating at 440&ndash;460 through 2027, representing near-flat nominal appreciation as the insurance crisis, post-wildfire rebuild uncertainty, and affordability headwinds balance against the structural supply deficit. This is not a strong-appreciation scenario &mdash; it is a price stability scenario driven by competing forces of equal magnitude.</p>
+      <p>The bull case (<strong>20%</strong> probability) requires three simultaneous catalysts: meaningful insurance market reform (the California Department of Insurance has proposed allowing actuarially sound rate-setting, which could attract carriers back), a Fed cutting cycle that brings the 30-year rate to 5.5% or below (unlocking the substantial pool of qualified buyers currently priced out), and an accelerated rebuild program that brings 5,000&ndash;8,000 new units to market by end-2027. In this scenario, the index could advance to 480&ndash;500.</p>
+      <p>The bear case (<strong>30%</strong> probability) is more consequential than in any other U.S. metro in this monitor. A sustained insurance market failure &mdash; where the FAIR Plan becomes overwhelmed and private carriers decline to return even with regulatory reform &mdash; could trigger the first structural price decline in LA coastal markets in 30 years. Properties in high-risk fire zones (Malibu, Pacific Palisades, the hills above Pasadena and Glendale) could see <strong>20&ndash;35%</strong> price declines as uninsurability becomes priced into transactions. The broader LA metro would partially decouple &mdash; flat to mid-single-digit declines in insurable areas, severe corrections in uninsurable ones. This is not a tail risk; it is an active scenario that insurance industry analysts place at meaningful probability.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>洛杉磯呈現本監測中任何市場中風險收益比最不對稱的格局。上行空間真實但狹窄：城市的結構性供給不足、沿海宜居性和娛樂/科技就業基礎，即便在不利情境下也為價格提供持久底部。基本情境（概率<strong>50%</strong>）預計CS LA指數在2027年前整固於440至460，代表名義升值幾乎持平，因為保險危機、野火後重建不確定性和可負擔性逆風與結構性供給缺口相互抵消。這不是強勁升值情境——而是同等量級競爭力量驅動的價格穩定情境。</p>
+      <p>樂觀情境（概率<strong>20%</strong>）需要三個催化劑同時作用：有意義的保險市場改革（加州保險局已提議允許精算合理的費率設定，可能吸引承保商回歸）、聯準會降息週期使30年利率降至5.5%或以下（釋放目前被拒門外的大量合格買家），以及加速重建計劃使2027年底前5,000至8,000套新房入市。在此情境下，指數可能升至480至500。</p>
+      <p>悲觀情境（概率<strong>30%</strong>）的影響比本監測中任何其他美國大都市都更深遠。持續的保險市場失靈——FAIR計劃不堪重負，即便進行監管改革私人承保商也拒絕回歸——可能引發30年來洛杉磯沿海市場首次結構性價格下跌。高風險火災區房產（馬里布、太平洋帕利塞茲、帕薩迪納和格倫代爾山丘以上）可能因不可保性被計入交易而下跌<strong>20至35%</strong>。更廣泛的洛杉磯大都市將部分脫鉤——可保區域持平至中個位數下跌，不可保區域嚴重修正。這不是尾部風險；它是保險業分析師認為具有顯著概率的活躍情境。</p>
+    </div>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">CS LA Index Forecast 2026&ndash;2028</span><span class="lang-zh" style="display:none">CS LA指數預測 2026&ndash;2028</span></h4>
+      <div id="chartLAForecast" style="height:220px"></div>
+      <p class="chart-note red"><span class="lang-en">Bear scenario driven by insurance market collapse, not rate or demand shock &mdash; unique LA risk not present in other U.S. metros</span><span class="lang-zh" style="display:none">悲觀情境由保險市場崩潰驅動，而非利率或需求衝擊——其他美國大都市不存在的洛杉磯獨特風險</span></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: S&amp;P Cotality Case-Shiller CA-Los Angeles Home Price Index (FRED LXXRSA) &middot; Redfin Los Angeles Housing Market Data (Mar 2025) &middot; California Association of Realtors (CAR) LA County Sales Data &middot; UCLA Anderson School of Management &mdash; Economic Impact of LA Wildfires (Feb 2025) &middot; California Department of Insurance &mdash; FAIR Plan Statistics &middot; Cal Fire &mdash; 2025 Wildfire Statistics &middot; Zillow LA Housing Data &middot; HR&amp;A Advisors / Redfin Lot Listing Analysis (Dec 2025). All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：S&amp;P Cotality Case-Shiller加州洛杉磯房價指數（FRED LXXRSA）&middot; Redfin洛杉磯住房市場數據（2025年3月）&middot; 加州房地產經紀人協會（CAR）洛杉磯縣銷售數據 &middot; UCLA安德森商學院——洛杉磯野火經濟影響報告（2025年2月）&middot; 加州保險局——FAIR計劃統計 &middot; Cal Fire——2025年野火統計 &middot; Zillow洛杉磯住房數據 &middot; HR&amp;A Advisors / Redfin地塊掛牌分析（2025年12月）。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+
+  </div><!-- report-body -->
+</div><!-- report-container -->
+
+<script>
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText = {color:C.muted, fontFamily:'Inter, sans-serif', fontSize:11};
+var baseGrid = {left:50, right:20, top:40, bottom:30, containLabel:true};
+var baseTooltip = {trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy, fontSize:11, fontFamily:'Inter'}};
+var baseLegend = {top:8, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts = [];
+
+function initAllCharts(lang){
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts = [];
+  drawLAPrice(lang);
+  drawLAMedian(lang);
+  drawFireDamage(lang);
+  drawLotListings(lang);
+  drawInsurance(lang);
+  drawLASupplyDemand(lang);
+  drawAB1482(lang);
+  drawLAForecast(lang);
+}
+
+// ── 1. Case-Shiller LA Index + YoY ──
+function drawLAPrice(lang){
+  var dom = document.getElementById('chartLAPrice');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var index = [240,258,280,301,313,340,400,442,415,435,445];
+  var yoy = [8.0,7.5,8.5,7.5,4.0,8.7,17.6,10.5,-6.1,4.8,2.3];
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid: {left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis: [
+      mkAxis({type:'value',min:200,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+      mkAxis({type:'value',min:-10,max:20,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})
+    ],
+    series: [
+      {name:en?'CS LA Index':'CS LA指數',type:'bar',data:index,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,
+        markLine:{data:[{yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1},label:{show:false}}]}}
+    ]
+  });
+}
+
+// ── 2. LA City Median Sales Price ──
+function drawLAMedian(lang){
+  var dom = document.getElementById('chartLAMedian');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','Mar 25'];
+  var data = [555,600,660,700,710,760,900,975,920,940,1070];
+  var colors = data.map(function(v){
+    if(v>=1000) return C.red;
+    if(v>=900) return C.orange;
+    return C.navy;
+  });
+  c.setOption({
+    tooltip: {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+    grid: {left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis: mkAxis({type:'value',min:400,max:1200,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+    series: [{
+      type:'bar',data:data.map(function(v,i){return {value:v,itemStyle:{color:colors[i]}};}),
+      barMaxWidth:32,itemStyle:{borderRadius:[3,3,0,0]},
+      label:{show:true,position:'top',formatter:function(p){return p.value>=1000?'$'+(p.value/1000).toFixed(2)+'M':'$'+p.value+'K';},fontSize:9,color:C.muted},
+      markLine:{data:[{yAxis:1000,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'$1M threshold':'$1M門檻',fontSize:8,color:C.red}}]}
+    }]
+  });
+}
+
+// ── 3. Fire Damage — Structures Destroyed (horizontal bar) ──
+function drawFireDamage(lang){
+  var dom = document.getElementById('chartFireDamage');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var cats = en
+    ? ['Palisades &\nMalibu Fire','Eaton Fire\n(Altadena)']
+    : ['帕利塞茲\n及馬里布','伊頓大火\n（阿爾塔迪納）'];
+  var data = [6837,9414];
+  c.setOption({
+    tooltip: {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+    grid: {left:12,right:60,top:16,bottom:16,containLabel:true},
+    yAxis: mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9}}),
+    xAxis: mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v>=1000?(v/1000).toFixed(1)+'K':v;}}}),
+    series: [{
+      type:'bar',data:[
+        {value:6837,itemStyle:{color:C.orange}},
+        {value:9414,itemStyle:{color:C.red}}
+      ],
+      barMaxWidth:28,itemStyle:{borderRadius:[0,3,3,0]},
+      label:{show:true,position:'right',formatter:function(p){return p.value.toLocaleString();},fontSize:10,color:C.muted}
+    }]
+  });
+}
+
+// ── 4. Lot Listings Before/After ──
+function drawLotListings(lang){
+  var dom = document.getElementById('chartLotListings');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var cats = en ? ['Pacific\nPalisades','Altadena','Malibu'] : ['太平洋\n帕利塞茲','阿爾塔迪納','馬里布'];
+  var before = [7,2,125];
+  var after = [309,225,214];
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid: {left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis: mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9}}),
+    yAxis: mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9}}),
+    series: [
+      {name:en?'Sep–Nov 2024':'2024年9–11月',type:'bar',data:before,barMaxWidth:24,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'30%'},
+      {name:en?'Sep–Nov 2025':'2025年9–11月',type:'bar',data:after,barMaxWidth:24,itemStyle:{color:C.red,borderRadius:[3,3,0,0]},
+        label:{show:true,position:'top',fontSize:9,color:C.muted}}
+    ]
+  });
+}
+
+// ── 5. CA FAIR Plan Policies ──
+function drawInsurance(lang){
+  var dom = document.getElementById('chartInsurance');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['2019','2020','2021','2022','2023','2024','2025E'];
+  var fairPlan = [153000,177000,203000,272000,322000,408000,520000];
+  var colors = fairPlan.map(function(v){
+    if(v>=400000) return C.red;
+    if(v>=300000) return C.orange;
+    return C.navy;
+  });
+  c.setOption({
+    tooltip: {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11},
+      formatter:function(p){return p[0].name+'<br/>'+p[0].marker+(p[0].value/1000).toFixed(0)+'K policies';}},
+    grid: {left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis: mkAxis({type:'value',min:0,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return (v/1000).toFixed(0)+'K';}}}),
+    series: [{
+      type:'bar',data:fairPlan.map(function(v,i){return {value:v,itemStyle:{color:colors[i]}};}),
+      barMaxWidth:35,itemStyle:{borderRadius:[3,3,0,0]},
+      label:{show:true,position:'top',formatter:function(p){return (p.value/1000).toFixed(0)+'K';},fontSize:9,color:C.muted},
+      markLine:{data:[{yAxis:200000,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'Pre-crisis baseline':'危機前基線',fontSize:8,color:C.muted}}]},
+      markPoint:{data:[
+        {coord:['2025E',520000],value:en?'State Farm exit 2024\nAllstate exit 2022\nFarmers restricted 2023':'State Farm 2024退出\nAllstate 2022退出\nFarmers 2023限制',
+          symbolSize:0,label:{show:true,position:'left',fontSize:8,color:C.red,offset:[-10,-30],lineHeight:12}}
+      ]}
+    }]
+  });
+}
+
+// ── 6. LA Supply & Demand ──
+function drawLASupplyDemand(lang){
+  var dom = document.getElementById('chartLASupplyDemand');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var price = [555,600,660,700,710,760,900,975,920,940,990];
+  var salesIdx = [100,102,105,98,97,89,118,108,72,68,70];
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid: {left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis: [
+      mkAxis({type:'value',min:400,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+      mkAxis({type:'value',min:40,max:130,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'},splitLine:{show:false}})
+    ],
+    series: [
+      {name:en?'Median Price ($K)':'中位數房價($K)',type:'bar',data:price,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'Sales Index (2015=100)':'銷量指數(2015=100)',type:'line',data:salesIdx,lineStyle:{color:C.red,width:2.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:5,yAxisIndex:1,
+        markLine:{data:[{yAxis:100,lineStyle:{color:C.muted,type:'dashed',width:1},label:{formatter:en?'2015 baseline':'2015基線',fontSize:8,color:C.muted}}]}}
+    ]
+  });
+}
+
+// ── 7. AB 1482 Rent Cap vs Market ──
+function drawAB1482(lang){
+  var dom = document.getElementById('chartAB1482');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var labels = ['2020','2021','2022','2023','2024','2025'];
+  var ab1482Cap = [3.0,3.0,5.0,8.8,8.8,8.8];
+  var marketRent = [0.5,9.0,14.2,3.5,4.2,6.8];
+  var marketColors = marketRent.map(function(v){
+    if(v>8) return C.red;
+    if(v>5) return C.orange;
+    return C.green;
+  });
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid: {left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis: mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis: mkAxis({type:'value',min:0,max:16,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series: [
+      {name:en?'AB 1482 Cap':'AB 1482上限',type:'bar',data:ab1482Cap,barMaxWidth:20,itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},barGap:'30%'},
+      {name:en?'Market Rent Growth':'市場租金增長',type:'bar',data:marketRent.map(function(v,i){return {value:v,itemStyle:{color:marketColors[i]}};}),barMaxWidth:20,itemStyle:{borderRadius:[3,3,0,0]},
+        label:{show:true,position:'top',formatter:function(p){return p.value+'%';},fontSize:9,color:C.muted}}
+    ]
+  });
+}
+
+// ── 8. CS LA Forecast ──
+function drawLAForecast(lang){
+  var dom = document.getElementById('chartLAForecast');
+  if(!dom) return;
+  var c = echarts.init(dom); allCharts.push(c);
+  var en = lang==='en';
+  var periods = ['Feb 2025','2026E','2027E','2028E'];
+  var bull = [445,462,480,500];
+  var base = [445,448,452,458];
+  var bear = [445,430,405,385];
+  c.setOption({
+    tooltip: baseTooltip,
+    legend: {bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},
+    grid: {left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis: mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:10}}),
+    yAxis: mkAxis({type:'value',min:360,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series: [
+      {name:en?'Bull (20%) — reform+rate cut':'樂觀(20%)—改革+降息',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+      {name:en?'Base (50%) — flat consolidation':'基本(50%)—持平整固',type:'line',data:base,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+      {name:en?'Bear (30%) — insurance collapse':'悲觀(30%)—保險崩潰',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  initAllCharts(lang);
+}
+function toggleMarketMenu(){ document.getElementById('marketDropdown').classList.toggle('open'); }
+function toggleCityMenu(){ document.getElementById('cityDropdown').classList.toggle('open'); }
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.market-selector')){ var d=document.getElementById('marketDropdown'); if(d) d.classList.remove('open'); }
+  if(!e.target.closest('.city-dropdown')){ var d2=document.getElementById('cityDropdown'); if(d2) d2.classList.remove('open'); }
+});
+function toggleToc(){ document.getElementById('tocBox').classList.toggle('toc-collapsed'); }
+function closeTocMobile(){ if(window.innerWidth<=768){ document.getElementById('tocBox').classList.add('toc-collapsed'); } }
+
+window.addEventListener('load', function(){
+  var lang = localStorage.getItem('lang') || 'en';
+  setLang(lang);
+});
+window.addEventListener('resize', function(){
+  allCharts.forEach(function(c){ if(c) c.resize(); });
+});
+
+// ScrollSpy
+(function(){
+  function initScrollSpy(){
+    var items = document.querySelectorAll('.side-nav-item');
+    if(!items.length) return;
+    var sections = [];
+    items.forEach(function(a){
+      var id = a.getAttribute('href').replace('#','');
+      var el = document.getElementById(id);
+      if(el) sections.push({el:el, a:a});
+    });
+    function onScroll(){
+      var scrollY = window.scrollY + window.innerHeight * 0.25;
+      var current = sections[0];
+      sections.forEach(function(s){ if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s; });
+      items.forEach(function(a){ a.classList.remove('active'); });
+      if(current) current.a.classList.add('active');
+    }
+    window.addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+  }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', initScrollSpy); }
+  else { initScrollSpy(); }
+})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk Monitor | U.S. Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer}</style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .chart-note.red{color:#dc2626}
+    .chart-note.navy{color:#1e3a5f}
+    .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}
+    .toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}
+    .toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}
+    .toc-collapsed .toc-list{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+    .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+    .data-table{width:100%;border-collapse:collapse;font-family:Inter,sans-serif;font-size:12px;margin:20px 0}
+    .data-table th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+    .data-table td{padding:7px 10px;border-bottom:1px solid #eef3f9}
+    .data-table tr:nth-child(even){background:#f8fafc}
+    /* Side Nav */
+    .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+    @media(max-width:768px){.report-header,.report-body{padding:20px}.data-table{font-size:11px}.data-table th,.data-table td{padding:5px 6px}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="report-container">
+
+  <!-- Side Nav -->
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-climate" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Climate</span><span class="side-nav-label lang-zh" style="display:none">氣候</span></a>
+    <a href="#sec-fiscal" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Fiscal</span><span class="side-nav-label lang-zh" style="display:none">財政</span></a>
+    <a href="#sec-tech" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Tech Conc.</span><span class="side-nav-label lang-zh" style="display:none">科技集中</span></a>
+    <a href="#sec-regulatory" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Regulatory</span><span class="side-nav-label lang-zh" style="display:none">法規</span></a>
+    <a href="#sec-matrix" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Matrix</span><span class="side-nav-label lang-zh" style="display:none">綜合矩陣</span></a>
+  </nav>
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="lang-en">
+      <h1>U.S. REAL ESTATE &mdash; RISK MONITOR</h1>
+      <div class="report-meta">April 2026 &middot; 12-City Monitor</div>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <h1>美國房地產——風險監測</h1>
+      <div class="report-meta">2026年4月 &middot; 十二城市監測</div>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="report-body">
+    <div class="toc-box" id="tocBox">
+      <div class="toc-header" onclick="document.getElementById('tocBox').classList.toggle('toc-collapsed')">
+        <span class="lang-en">Contents</span><span class="lang-zh" style="display:none">目錄</span>
+        <button class="toc-toggle">&#9650;</button>
+      </div>
+      <div class="toc-list">
+        <a href="#sec-climate"><span class="lang-en">1. Climate &amp; Insurance Risk</span><span class="lang-zh" style="display:none">1. 氣候與保險風險</span></a>
+        <a href="#sec-fiscal"><span class="lang-en">2. Fiscal &amp; Property Tax Risk</span><span class="lang-zh" style="display:none">2. 財政與房產稅風險</span></a>
+        <a href="#sec-tech"><span class="lang-en">3. Tech Concentration Risk</span><span class="lang-zh" style="display:none">3. 科技集中度風險</span></a>
+        <a href="#sec-regulatory"><span class="lang-en">4. Regulatory Risk</span><span class="lang-zh" style="display:none">4. 法規風險</span></a>
+        <a href="#sec-matrix"><span class="lang-en">5. Composite Risk Matrix</span><span class="lang-zh" style="display:none">5. 綜合風險矩陣</span></a>
+      </div>
+    </div>
+
+    <!-- SECTION 1: Climate & Insurance Risk -->
+    <h2 id="sec-climate"><span class="lang-en">1. CLIMATE &amp; INSURANCE RISK</span><span class="lang-zh" style="display:none">1. 氣候與保險風險</span></h2>
+
+    <p class="lang-en">Climate risk is reshaping the U.S. housing landscape at an accelerating pace. In 2025, insured losses from natural disasters exceeded <strong>$120B</strong> nationally, with Florida and California bearing the heaviest burden. Miami faces compound threats from hurricanes, storm surge, and rising sea levels&mdash;several major insurers have exited the Florida market entirely, pushing homeowners onto the state-run Citizens Property Insurance Corporation. Los Angeles grapples with wildfire risk extending deep into suburban neighborhoods, while Phoenix endures extreme heat that strains infrastructure and raises long-term habitability questions.</p>
+
+    <p class="lang-en">In the Sun Belt, insurance premiums have risen <strong>40&ndash;80%</strong> over three years, directly eroding net rental yields and compressing investor returns. Northern and coastal-Northeast cities (Boston, NYC, Chicago) face lower but growing flood and winter-storm exposure. For cross-border investors, climate insurance cost is now a first-order variable in underwriting&mdash;not an afterthought.</p>
+
+    <p class="lang-zh" style="display:none">氣候風險正以加速態勢重塑美國住宅市場格局。2025年全國自然災害保險損失超過<strong>1,200億美元</strong>，佛羅里達州和加州承受最沉重的負擔。邁阿密面臨颶風、風暴潮和海平面上升的複合威脅——數家大型保險公司已完全退出佛州市場，迫使屋主轉向州營的 Citizens Property Insurance Corporation。洛杉磯的野火風險已深入郊區社區，而鳳凰城則承受極端高溫對基礎設施的壓力，引發長期宜居性疑慮。</p>
+
+    <p class="lang-zh" style="display:none">在陽光帶地區，保險費在三年內上漲了<strong>40&ndash;80%</strong>，直接侵蝕淨租金收益率並壓縮投資者回報。北部和東北沿海城市（波士頓、紐約、芝加哥）的洪水和冬季風暴風險較低但持續增長。對於跨境投資者而言，氣候保險成本現已成為承保中的首要變數——而非事後考量。</p>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Climate &amp; Insurance Risk Score by City (0&ndash;10)</span><span class="lang-zh" style="display:none">各城市氣候與保險風險評分（0&ndash;10）</span></h4>
+      <div id="chartRiskClimate" style="width:100%;height:320px"></div>
+      <div class="chart-note navy"><span class="lang-en">Higher = greater exposure to climate-driven insurance cost &amp; asset risk</span><span class="lang-zh" style="display:none">分數越高＝氣候驅動保險成本與資產風險越大</span></div>
+    </div>
+
+    <!-- SECTION 2: Fiscal & Property Tax Risk -->
+    <h2 id="sec-fiscal"><span class="lang-en">2. FISCAL &amp; PROPERTY TAX RISK</span><span class="lang-zh" style="display:none">2. 財政與房產稅風險</span></h2>
+
+    <p class="lang-en">Property taxes remain one of the most underestimated drags on total returns for foreign investors. Illinois stands out as a structural risk: Cook County (Chicago) carries an effective rate of <strong>1.83%</strong>, amplified by chronic state pension underfunding exceeding <strong>$140B</strong>. New Jersey&mdash;the tax jurisdiction for many NYC-area investments&mdash;leads the nation at <strong>2.20%</strong>. Texas offers no state income tax, but compensates with property tax rates above <strong>1.6%</strong> in Travis County (Austin), a surprise for investors accustomed to Asia-Pacific holding costs.</p>
+
+    <p class="lang-en">In contrast, California&rsquo;s Proposition 13 caps annual assessed value increases at <strong>2%</strong>, creating a powerful long-hold advantage for buy-and-hold investors in LA, SF, San Diego, and Silicon Valley. Colorado and Arizona maintain moderate rates below <strong>0.65%</strong>. Washington State has no income tax and relatively low property taxes, making Seattle fiscally attractive despite high purchase prices.</p>
+
+    <p class="lang-zh" style="display:none">對外國投資者而言，房產稅仍是總回報中最被低估的拖累因素之一。伊利諾州是結構性風險的突出案例：庫克郡（芝加哥）的有效稅率為<strong>1.83%</strong>，加上超過<strong>1,400億美元</strong>的州退休金資金不足。紐澤西州——許多紐約地區投資的稅務管轄區——以<strong>2.20%</strong>的稅率居全國之首。德州雖無州所得稅，但特拉維斯郡（奧斯汀）的房產稅率超過<strong>1.6%</strong>，對習慣亞太持有成本的投資者而言是一大意外。</p>
+
+    <p class="lang-zh" style="display:none">相比之下，加州第13號提案將年度評估價值增幅上限設定為<strong>2%</strong>，為洛杉磯、舊金山、聖地亞哥和矽谷的長期持有型投資者創造了強大優勢。科羅拉多州和亞利桑那州維持在<strong>0.65%</strong>以下的適度稅率。華盛頓州無所得稅且房產稅相對較低，使西雅圖在高購入價格下仍具財政吸引力。</p>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Effective Property Tax Rate by City / State (%)</span><span class="lang-zh" style="display:none">各城市/州有效房產稅率（%）</span></h4>
+      <div id="chartRiskFiscal" style="width:100%;height:320px"></div>
+      <div class="chart-note navy"><span class="lang-en">Rates reflect effective residential property tax as % of market value</span><span class="lang-zh" style="display:none">稅率反映住宅房產稅佔市值的有效百分比</span></div>
+    </div>
+
+    <!-- SECTION 3: Tech Concentration Risk -->
+    <h2 id="sec-tech"><span class="lang-en">3. TECH CONCENTRATION RISK</span><span class="lang-zh" style="display:none">3. 科技集中度風險</span></h2>
+
+    <p class="lang-en">Single-industry concentration poses a systemic risk to housing demand in several U.S. metros. Silicon Valley leads with the top two tech employers accounting for roughly <strong>12%</strong> of the metro workforce&mdash;a layoff wave at any single firm can trigger immediate rental vacancy spikes and price corrections. Seattle&rsquo;s dependence on Amazon and Microsoft places it at <strong>9%</strong>, while San Francisco&rsquo;s broader but still tech-heavy economy sits at <strong>8%</strong>.</p>
+
+    <p class="lang-en">Austin and San Diego have diversified rapidly but remain exposed at <strong>6&ndash;7%</strong>. The most resilient metros are those with diversified employment bases: NYC (finance, healthcare, media), Chicago (logistics, finance, manufacturing), and Miami (tourism, trade, healthcare) each show concentration below <strong>3%</strong>. Investors should stress-test rental income assumptions against a 10&ndash;15% tech workforce reduction scenario in high-concentration cities.</p>
+
+    <p class="lang-zh" style="display:none">單一產業集中度對多個美國都會區的住房需求構成系統性風險。矽谷的前兩大科技雇主約佔都會區勞動力的<strong>12%</strong>——任何一家公司的裁員潮都可能立即引發租賃空置率飆升和價格修正。西雅圖對 Amazon 和 Microsoft 的依賴使其達到<strong>9%</strong>，而舊金山更廣泛但仍以科技為重的經濟結構處於<strong>8%</strong>。</p>
+
+    <p class="lang-zh" style="display:none">奧斯汀和聖地亞哥已迅速多元化，但在<strong>6&ndash;7%</strong>的水平上仍有風險敞口。最具韌性的都會區是那些就業基礎多元化的城市：紐約（金融、醫療、媒體）、芝加哥（物流、金融、製造業）和邁阿密（旅遊、貿易、醫療）的集中度均低於<strong>3%</strong>。投資者應在高集中度城市對租金收入假設進行科技勞動力減少10&ndash;15%的壓力測試。</p>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Top-2 Employer Share of Metro Workforce (%)</span><span class="lang-zh" style="display:none">前兩大雇主佔都會區勞動力比例（%）</span></h4>
+      <div id="chartRiskTech" style="width:100%;height:320px"></div>
+      <div class="chart-note navy"><span class="lang-en">Higher share = greater demand fragility from single-sector layoffs</span><span class="lang-zh" style="display:none">比例越高＝單一產業裁員導致需求脆弱性越大</span></div>
+    </div>
+
+    <!-- SECTION 4: Regulatory Risk -->
+    <h2 id="sec-regulatory"><span class="lang-en">4. REGULATORY RISK</span><span class="lang-zh" style="display:none">4. 法規風險</span></h2>
+
+    <p class="lang-en">The U.S. regulatory landscape for rental housing spans an extreme spectrum. At the tenant-protective end, San Francisco&rsquo;s rent control ordinance (score: <strong>9.5/10</strong>) limits annual increases to 60% of CPI, imposes just-cause eviction requirements, and mandates relocation assistance for no-fault evictions. New York City&rsquo;s rent stabilization system covers over <strong>1 million units</strong> with renewal lease increases set by the Rent Guidelines Board&mdash;often below inflation. Los Angeles layers city-wide RSO on top of California&rsquo;s statewide AB 1482 cap of 5% + CPI.</p>
+
+    <p class="lang-en">At the landlord-friendly end, Austin and Phoenix operate under Texas and Arizona state preemption laws that prohibit local rent control entirely. Miami benefits from Florida&rsquo;s similar preemption framework. For investors targeting cash-flow properties, regulatory risk directly impacts the ability to mark rents to market after tenant turnover and the cost of vacancy transitions. Markets scoring above 7 require careful legal due diligence and conservative underwriting of rent growth assumptions.</p>
+
+    <p class="lang-zh" style="display:none">美國租賃住宅的法規環境涵蓋極端光譜。在租戶保護端，舊金山的租金管制條例（評分：<strong>9.5/10</strong>）將年度漲幅限制在CPI的60%，要求正當理由驅逐，並規定無過失驅逐須提供搬遷補助。紐約市的租金穩定系統涵蓋超過<strong>100萬套單位</strong>，續租租金漲幅由租金指引委員會設定——通常低於通膨。洛杉磯在加州全州 AB 1482（上限5% + CPI）之上再疊加市級RSO。</p>
+
+    <p class="lang-zh" style="display:none">在房東友好端，奧斯汀和鳳凰城受德州和亞利桑那州的州級優先法律保護，完全禁止地方租金管制。邁阿密同樣受益於佛羅里達州的類似框架。對以現金流為目標的投資者而言，法規風險直接影響租戶更替後將租金調整至市場水平的能力以及空置過渡成本。評分超過7的市場需要仔細的法律盡職調查和保守的租金增長假設。</p>
+
+    <div class="chart-inline">
+      <h4><span class="lang-en">Regulatory Risk Score by City (0=Landlord-Friendly, 10=Tenant-Protective)</span><span class="lang-zh" style="display:none">各城市法規風險評分（0=房東友好，10=租戶保護）</span></h4>
+      <div id="chartRiskRegulatory" style="width:100%;height:320px"></div>
+      <div class="chart-note navy"><span class="lang-en">Higher = stricter rent control, eviction protections &amp; compliance burden</span><span class="lang-zh" style="display:none">分數越高＝更嚴格的租金管制、驅逐保護與合規負擔</span></div>
+    </div>
+
+    <!-- SECTION 5: Composite Risk Matrix -->
+    <h2 id="sec-matrix"><span class="lang-en">5. COMPOSITE RISK MATRIX</span><span class="lang-zh" style="display:none">5. 綜合風險矩陣</span></h2>
+
+    <p class="lang-en">The composite matrix below aggregates climate, fiscal, tech-concentration, and regulatory risk into a single framework. Each dimension is rated on a 1&ndash;5 star scale (5&#9733; = lowest risk / most favorable). The composite score is the average across all four dimensions, and the investment grade reflects the overall risk-adjusted attractiveness for cross-border capital.</p>
+
+    <p class="lang-zh" style="display:none">下方綜合矩陣將氣候、財政、科技集中度和法規風險整合為單一框架。每個維度以1&ndash;5星評級（5&#9733; = 風險最低 / 最有利）。綜合評分為四個維度的平均值，投資等級反映跨境資本的整體風險調整後吸引力。</p>
+
+    <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th><span class="lang-en">City</span><span class="lang-zh" style="display:none">城市</span></th>
+          <th><span class="lang-en">Climate</span><span class="lang-zh" style="display:none">氣候</span></th>
+          <th><span class="lang-en">Fiscal</span><span class="lang-zh" style="display:none">財政</span></th>
+          <th><span class="lang-en">Tech-Conc</span><span class="lang-zh" style="display:none">科技集中</span></th>
+          <th><span class="lang-en">Regulatory</span><span class="lang-zh" style="display:none">法規</span></th>
+          <th><span class="lang-en">Composite</span><span class="lang-zh" style="display:none">綜合</span></th>
+          <th><span class="lang-en">Inv. Grade</span><span class="lang-zh" style="display:none">投資等級</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Denver: Climate 3.5→4★, Fiscal 0.60→5★, Tech 3→5★, Reg 4.5→3★ → avg 4.25 -->
+        <tr>
+          <td>Denver</td>
+          <td style="color:#1e3a5f">&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#16a34a">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#16a34a">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#1e3a5f"><strong>4.3</strong></td>
+          <td style="color:#16a34a"><strong>A</strong></td>
+        </tr>
+        <!-- Phoenix: Climate 8.5→1★, Fiscal 0.62→5★, Tech 4→3★, Reg 2.5→5★ → avg 3.5 -->
+        <tr>
+          <td>Phoenix</td>
+          <td style="color:#dc2626">&#9733;</td>
+          <td style="color:#16a34a">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#16a34a">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706"><strong>3.5</strong></td>
+          <td style="color:#1e3a5f"><strong>B+</strong></td>
+        </tr>
+        <!-- Austin: Climate 4.0→3★, Fiscal 1.63→2★, Tech 6→3★, Reg 2.0→5★ → avg 3.25 -->
+        <tr>
+          <td>Austin</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#dc2626">&#9733;&#9733;</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#16a34a">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706"><strong>3.3</strong></td>
+          <td style="color:#1e3a5f"><strong>B+</strong></td>
+        </tr>
+        <!-- Boston: Climate 3.0→4★, Fiscal 1.20→3★, Tech 5→3★, Reg 7.5→2★ → avg 3.0 -->
+        <tr>
+          <td>Boston</td>
+          <td style="color:#1e3a5f">&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#dc2626">&#9733;&#9733;</td>
+          <td style="color:#d97706"><strong>3.0</strong></td>
+          <td style="color:#1e3a5f"><strong>B</strong></td>
+        </tr>
+        <!-- Seattle: Climate 4.0→3★, Fiscal 0.90→4★, Tech 9→2★, Reg 7.0→2★ → avg 2.75 -->
+        <tr>
+          <td>Seattle</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#1e3a5f">&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#dc2626">&#9733;&#9733;</td>
+          <td style="color:#dc2626">&#9733;&#9733;</td>
+          <td style="color:#d97706"><strong>2.8</strong></td>
+          <td style="color:#1e3a5f"><strong>B</strong></td>
+        </tr>
+        <!-- SD: Climate 6.0→3★, Fiscal 0.75→4★, Tech 7→2★, Reg 6.5→2★ → avg 2.75 -->
+        <tr>
+          <td>San Diego</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#1e3a5f">&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#dc2626">&#9733;&#9733;</td>
+          <td style="color:#dc2626">&#9733;&#9733;</td>
+          <td style="color:#d97706"><strong>2.8</strong></td>
+          <td style="color:#1e3a5f"><strong>B</strong></td>
+        </tr>
+        <!-- Chicago: Climate 3.5→4★, Fiscal 1.83→1★, Tech 2→5★, Reg 5.0→3★ → avg 3.25 -->
+        <tr>
+          <td>Chicago</td>
+          <td style="color:#1e3a5f">&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#8b0000">&#9733;</td>
+          <td style="color:#16a34a">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706"><strong>3.3</strong></td>
+          <td style="color:#1e3a5f"><strong>B+</strong></td>
+        </tr>
+        <!-- Miami: Climate 9.5→1★, Fiscal 0.98→4★, Tech 2→5★, Reg 4.0→3★ → avg 3.25 -->
+        <tr>
+          <td>Miami</td>
+          <td style="color:#8b0000">&#9733;</td>
+          <td style="color:#1e3a5f">&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#16a34a">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#d97706"><strong>3.3</strong></td>
+          <td style="color:#1e3a5f"><strong>B+</strong></td>
+        </tr>
+        <!-- SV: Climate 5.5→3★, Fiscal 0.75→4★, Tech 12→1★, Reg 8.0→1★ → avg 2.25 -->
+        <tr>
+          <td>Silicon Valley</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#1e3a5f">&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#8b0000">&#9733;</td>
+          <td style="color:#8b0000">&#9733;</td>
+          <td style="color:#dc2626"><strong>2.3</strong></td>
+          <td style="color:#dc2626"><strong>B&minus;</strong></td>
+        </tr>
+        <!-- NYC: Climate 4.5→3★, Fiscal 2.20→1★, Tech 3→5★, Reg 9.0→1★ → avg 2.5 -->
+        <tr>
+          <td>NYC</td>
+          <td style="color:#d97706">&#9733;&#9733;&#9733;</td>
+          <td style="color:#8b0000">&#9733;</td>
+          <td style="color:#16a34a">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#8b0000">&#9733;</td>
+          <td style="color:#dc2626"><strong>2.5</strong></td>
+          <td style="color:#dc2626"><strong>B&minus;</strong></td>
+        </tr>
+        <!-- LA: Climate 9.0→1★, Fiscal 0.75→4★, Tech 3→5★, Reg 8.5→1★ → avg 2.75 -->
+        <tr>
+          <td>Los Angeles</td>
+          <td style="color:#8b0000">&#9733;</td>
+          <td style="color:#1e3a5f">&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#16a34a">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#8b0000">&#9733;</td>
+          <td style="color:#d97706"><strong>2.8</strong></td>
+          <td style="color:#1e3a5f"><strong>B</strong></td>
+        </tr>
+        <!-- SF: Climate 6.5→2★, Fiscal 0.70→4★, Tech 8→2★, Reg 9.5→1★ → avg 2.25 -->
+        <tr>
+          <td>San Francisco</td>
+          <td style="color:#dc2626">&#9733;&#9733;</td>
+          <td style="color:#1e3a5f">&#9733;&#9733;&#9733;&#9733;</td>
+          <td style="color:#dc2626">&#9733;&#9733;</td>
+          <td style="color:#8b0000">&#9733;</td>
+          <td style="color:#dc2626"><strong>2.3</strong></td>
+          <td style="color:#dc2626"><strong>B&minus;</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p class="lang-en" style="font-size:12px;color:#5a7a9a;font-family:Inter,sans-serif;margin-top:8px">&#9733; Rating: 5&#9733;=Lowest Risk (green), 4&#9733;=Low (navy), 3&#9733;=Moderate (orange), 2&#9733;=Elevated (red), 1&#9733;=High (dark red). Composite is the average of four dimensions.</p>
+    <p class="lang-zh" style="display:none;font-size:12px;color:#5a7a9a;font-family:Inter,sans-serif;margin-top:8px">&#9733; 評級：5&#9733;=風險最低（綠色），4&#9733;=低（深藍），3&#9733;=中等（橙色），2&#9733;=偏高（紅色），1&#9733;=高（深紅）。綜合為四維度平均。</p>
+
+    <!-- Footer -->
+    <div class="report-footer">
+      <p class="lang-en"><strong>Data Sources:</strong> FEMA National Risk Index, CoreLogic Climate Risk Analytics, Insurance Information Institute, U.S. Census Bureau Tax Data, Bureau of Labor Statistics QCEW, National Multifamily Housing Council Rent Control Database, State Legislature Records.</p>
+      <p class="lang-en"><strong>Disclaimer:</strong> This monitor is for informational purposes only and does not constitute investment advice. Risk scores are proprietary estimates based on publicly available data as of April 2026.</p>
+      <p class="lang-zh" style="display:none"><strong>資料來源：</strong>FEMA 國家風險指數、CoreLogic 氣候風險分析、保險資訊研究所、美國人口普查局稅務資料、勞工統計局 QCEW、全國多戶住宅委員會租金管制資料庫、各州立法記錄。</p>
+      <p class="lang-zh" style="display:none"><strong>免責聲明：</strong>本監測報告僅供參考，不構成投資建議。風險評分為基於截至2026年4月公開資料的專有估計。</p>
+    </div>
+
+  </div><!-- .report-body -->
+</div><!-- .report-container -->
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:90,right:30,top:10,bottom:20,containLabel:false};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+
+var allCharts=[];
+
+function drawRiskClimate(lang){
+  var el=document.getElementById('chartRiskClimate');if(!el)return;
+  var c=echarts.init(el);allCharts.push(c);
+  var cities=['Boston','Chicago','Seattle','Austin','NYC','SV','SD','SF','Denver','Phoenix','LA','Miami'];
+  var vals=[3.0,3.5,4.0,4.0,4.5,5.5,6.0,6.5,7.0,8.5,9.0,9.5];
+  var colors=vals.map(function(v){return v>=8?C.red:v>=6?C.orange:v>=4?C.navy:C.green;});
+  c.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}},
+    grid:{left:90,right:30,top:10,bottom:20},
+    xAxis:{type:'value',max:10,axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}},
+    yAxis:{type:'category',data:cities,axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText},
+    series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[0,3,3,0]}};}),barMaxWidth:22,label:{show:true,position:'right',fontSize:10,fontFamily:'JetBrains Mono',color:C.navy,formatter:function(p){return p.value.toFixed(1);}}}]
+  });
+}
+
+function drawRiskFiscal(lang){
+  var el=document.getElementById('chartRiskFiscal');if(!el)return;
+  var c=echarts.init(el);allCharts.push(c);
+  var cities=['Denver/CO','Phoenix/AZ','SF/CA','LA/CA','SV/CA','SD/CA','Seattle/WA','Miami/FL','Boston/MA','Austin/TX','Chicago/IL','NYC/NJ'];
+  var vals=[0.60,0.62,0.70,0.75,0.75,0.75,0.90,0.98,1.20,1.63,1.83,2.20];
+  var colors=vals.map(function(v){return v>=1.5?C.red:v>=1.0?C.orange:C.navy;});
+  c.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'},formatter:function(p){return p[0].name+': '+p[0].value.toFixed(2)+'%';}},
+    grid:{left:90,right:30,top:10,bottom:20},
+    xAxis:{type:'value',max:2.5,axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:{color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11,formatter:function(v){return v+'%';}},splitLine:{lineStyle:{color:C.grid}}},
+    yAxis:{type:'category',data:cities,axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText},
+    series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[0,3,3,0]}};}),barMaxWidth:22,label:{show:true,position:'right',fontSize:10,fontFamily:'JetBrains Mono',color:C.navy,formatter:function(p){return p.value.toFixed(2)+'%';}}}]
+  });
+}
+
+function drawRiskTech(lang){
+  var el=document.getElementById('chartRiskTech');if(!el)return;
+  var c=echarts.init(el);allCharts.push(c);
+  var cities=['Miami','Chicago','LA','NYC','Denver','Phoenix','Boston','Austin','SD','SF','Seattle','SV'];
+  var vals=[2,2,3,3,3,4,5,6,7,8,9,12];
+  var colors=vals.map(function(v){return v>=10?C.red:v>=7?C.orange:v>=4?C.navy:C.green;});
+  c.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'},formatter:function(p){return p[0].name+': '+p[0].value+'%';}},
+    grid:{left:70,right:30,top:10,bottom:20},
+    xAxis:{type:'value',max:14,axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:{color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11,formatter:function(v){return v+'%';}},splitLine:{lineStyle:{color:C.grid}}},
+    yAxis:{type:'category',data:cities,axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText},
+    series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[0,3,3,0]}};}),barMaxWidth:22,label:{show:true,position:'right',fontSize:10,fontFamily:'JetBrains Mono',color:C.navy,formatter:function(p){return p.value+'%';}}}]
+  });
+}
+
+function drawRiskRegulatory(lang){
+  var el=document.getElementById('chartRiskRegulatory');if(!el)return;
+  var c=echarts.init(el);allCharts.push(c);
+  var cities=['Austin','Phoenix','Miami','Denver','Chicago','SD','Seattle','Boston','SV','LA','NYC','SF'];
+  var vals=[2.0,2.5,4.0,4.5,5.0,6.5,7.0,7.5,8.0,8.5,9.0,9.5];
+  var colors=vals.map(function(v){return v>=8?C.red:v>=6?C.orange:v>=4?C.navy:C.green;});
+  c.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}},
+    grid:{left:70,right:30,top:10,bottom:20},
+    xAxis:{type:'value',max:10,axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}},
+    yAxis:{type:'category',data:cities,axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText},
+    series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i],borderRadius:[0,3,3,0]}};}),barMaxWidth:22,label:{show:true,position:'right',fontSize:10,fontFamily:'JetBrains Mono',color:C.navy,formatter:function(p){return p.value.toFixed(1);}}}]
+  });
+}
+
+function initCharts(lang){
+  allCharts.length=0;
+  drawRiskClimate(lang);
+  drawRiskFiscal(lang);
+  drawRiskTech(lang);
+  drawRiskRegulatory(lang);
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}
+  initCharts(lang);
+}
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+
+/* Navbar helpers */
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');document.getElementById('cityDropdown').classList.remove('open');}
+function toggleCityMenu(){document.getElementById('cityDropdown').classList.toggle('open');document.getElementById('marketDropdown').classList.remove('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');if(!e.target.closest('.city-dropdown'))document.getElementById('cityDropdown').classList.remove('open');});
+
+/* Side-nav scroll spy */
+(function(){
+  var sections=['sec-climate','sec-fiscal','sec-tech','sec-regulatory','sec-matrix'];
+  var links=document.querySelectorAll('.side-nav-item');
+  function update(){
+    var scrollY=window.scrollY||document.documentElement.scrollTop;
+    var current='';
+    sections.forEach(function(id){var el=document.getElementById(id);if(el&&el.offsetTop-120<=scrollY)current=id;});
+    links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+current);});
+  }
+  window.addEventListener('scroll',update);
+  setTimeout(update,300);
+})();
+</script>
+
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

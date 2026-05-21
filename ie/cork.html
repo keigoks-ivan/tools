@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cork Deep Dive | Ireland Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="container">
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">&#x6700;&#x5F8C;&#x66F4;&#x65B0;&#xFF1A;2026&#x5E74;Q1</span></span>
+    <h1><span class="lang-en">Cork &mdash; 2026 Deep Dive</span><span class="lang-zh" style="display:none">&#x79D1;&#x514B; &mdash; 2026&#x5E74;&#x6DF1;&#x5EA6;&#x5206;&#x6790;</span></h1>
+    <p class="subtitle"><span class="lang-en">Ireland's Second City: Best Value Investment Proposition</span><span class="lang-zh" style="display:none">&#x611B;&#x723E;&#x862D;&#x7B2C;&#x4E8C;&#x5927;&#x57CE;&#xFF1A;&#x6700;&#x4F73;&#x50F9;&#x503C;&#x6295;&#x8CC7;&#x6A19;&#x7684;</span></p>
+  </div>
+
+  <div class="section-label"><span class="lang-en">KEY METRICS</span><span class="lang-zh" style="display:none">&#x95DC;&#x9375;&#x6307;&#x6A19;</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">MEDIAN HOUSE PRICE</span><span class="lang-zh" style="display:none">&#x4E2D;&#x4F4D;&#x6578;&#x623F;&#x50F9;</span></div>
+      <div class="kpi-value">&euro;340,000</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">+7.5% YoY &middot; -31% vs Dublin</span><span class="lang-zh" style="display:none">&#x5E74;&#x589E;7.5% &middot; &#x4F4E;&#x65BC;&#x90FD;&#x67CF;&#x6797;31%</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">MEDIAN APT PRICE</span><span class="lang-zh" style="display:none">&#x4E2D;&#x4F4D;&#x6578;&#x516C;&#x5BD3;&#x50F9;</span></div>
+      <div class="kpi-value">&euro;265,000</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">+6.8% YoY</span><span class="lang-zh" style="display:none">&#x5E74;&#x589E;6.8%</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">AVG RENT 2-BED</span><span class="lang-zh" style="display:none">&#x5169;&#x623F;&#x5E73;&#x5747;&#x79DF;&#x91D1;</span></div>
+      <div class="kpi-value">&euro;1,650/mo</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">+7.8% YoY</span><span class="lang-zh" style="display:none">&#x5E74;&#x589E;7.8%</span></span>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">VACANCY RATE</span><span class="lang-zh" style="display:none">&#x7A7A;&#x7F6E;&#x7387;</span></div>
+      <div class="kpi-value">0.6%</div>
+      <span class="kpi-badge badge-red"><span class="lang-en">Near functional zero</span><span class="lang-zh" style="display:none">&#x63A5;&#x8FD1;&#x529F;&#x80FD;&#x6027;&#x96F6;&#x7A7A;&#x7F6E;</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">POPULATION GROWTH</span><span class="lang-zh" style="display:none">&#x4EBA;&#x53E3;&#x6210;&#x9577;</span></div>
+      <div class="kpi-value">+2.1%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">&gt;Dublin growth rate</span><span class="lang-zh" style="display:none">&#x8D85;&#x904E;&#x90FD;&#x67CF;&#x6797;&#x6210;&#x9577;&#x7387;</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">GROSS YIELD</span><span class="lang-zh" style="display:none">&#x6BDB;&#x6536;&#x76CA;&#x7387;</span></div>
+      <div class="kpi-value">5.0&ndash;5.5%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Above ECB rate</span><span class="lang-zh" style="display:none">&#x9AD8;&#x65BC;ECB&#x5229;&#x7387;</span></span>
+    </div>
+  </div>
+
+  <div class="section-label"><span class="lang-en">ECONOMIC BASE</span><span class="lang-zh" style="display:none">&#x7D93;&#x6FDF;&#x57FA;&#x790E;</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="micro-card">
+      <h4><span class="lang-en">Zone 1: Pharma Corridor (Ringaskiddy / Carrigaline)</span><span class="lang-zh" style="display:none">&#x7B2C;&#x4E00;&#x5340;&#xFF1A;&#x88FD;&#x85E5;&#x8D70;&#x5ECA;&#xFF08;Ringaskiddy / Carrigaline&#xFF09;</span></h4>
+      <div class="kpi-value" style="font-size:18px;">Pfizer &middot; Eli Lilly &middot; J&amp;J &middot; Novartis</div>
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Strong engineer demand. High-salary tenants. Purpose-built rental emerging.</span><span class="lang-zh" style="display:none">&#x5DE5;&#x7A0B;&#x5E2B;&#x9700;&#x6C42;&#x5F37;&#x52C1;&#x3002;&#x9AD8;&#x85AA;&#x79DF;&#x6236;&#x3002;&#x5C08;&#x5EFA;&#x79DF;&#x8CC3;&#x65B0;&#x8208;&#x3002;</span></p>
+    </div>
+    <div class="micro-card">
+      <h4><span class="lang-en">Zone 2: Tech Hub (Hollyhill / Mahon)</span><span class="lang-zh" style="display:none">&#x7B2C;&#x4E8C;&#x5340;&#xFF1A;&#x79D1;&#x6280;&#x6A1E;&#x7D10;&#xFF08;Hollyhill / Mahon&#xFF09;</span></h4>
+      <div class="kpi-value" style="font-size:18px;">Apple EU HQ &middot; AWS &middot; Qualcomm</div>
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Young professional demand. Growing tech cluster. Premium apartment market.</span><span class="lang-zh" style="display:none">&#x5E74;&#x8F15;&#x5C08;&#x696D;&#x4EBA;&#x58EB;&#x9700;&#x6C42;&#x3002;&#x79D1;&#x6280;&#x805A;&#x843D;&#x6210;&#x9577;&#x3002;&#x512A;&#x8CEA;&#x516C;&#x5BD3;&#x5E02;&#x5834;&#x3002;</span></p>
+    </div>
+    <div class="micro-card">
+      <h4><span class="lang-en">Zone 3: City Centre / Suburbs (Douglas / Ballincollig)</span><span class="lang-zh" style="display:none">&#x7B2C;&#x4E09;&#x5340;&#xFF1A;&#x5E02;&#x4E2D;&#x5FC3;/&#x90CA;&#x5340;&#xFF08;Douglas / Ballincollig&#xFF09;</span></h4>
+      <div class="kpi-value" style="font-size:18px;">Yield 5&ndash;6%</div>
+      <p style="font-size:12px;color:#5a7a9a;margin-top:6px;"><span class="lang-en">Best rental yields. Family demand. Commuter rail expansion boosting accessibility.</span><span class="lang-zh" style="display:none">&#x6700;&#x4F73;&#x79DF;&#x91D1;&#x6536;&#x76CA;&#x7387;&#x3002;&#x5BB6;&#x5EAD;&#x9700;&#x6C42;&#x3002;&#x901A;&#x52E4;&#x9435;&#x8DEF;&#x64F4;&#x5C55;&#x63D0;&#x5347;&#x53EF;&#x9054;&#x6027;&#x3002;</span></p>
+    </div>
+  </div>
+
+  <div class="section-label"><span class="lang-en">CHARTS</span><span class="lang-zh" style="display:none">&#x5716;&#x8868;</span></div>
+  <div class="chart-grid two-col">
+    <div class="chart-card">
+      <h3><span class="lang-en">Cork Property Price Trend</span><span class="lang-zh" style="display:none">&#x79D1;&#x514B;&#x623F;&#x50F9;&#x8DA8;&#x52E2;</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">&euro; &middot; Houses vs Apartments &middot; 2019&ndash;2025</span><span class="lang-zh" style="display:none">&#x6B50;&#x5143; &middot; &#x4F4F;&#x5B85; vs &#x516C;&#x5BD3; &middot; 2019&ndash;2025</span></p>
+      <div style="position:relative;height:260px;"><div id="chartCorkPrice" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Cork 2-Bed Rent Trend</span><span class="lang-zh" style="display:none">&#x79D1;&#x514B;&#x5169;&#x623F;&#x79DF;&#x91D1;&#x8DA8;&#x52E2;</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">&euro;/month &middot; 2019&ndash;2025</span><span class="lang-zh" style="display:none">&#x6B50;&#x5143;/&#x6708; &middot; 2019&ndash;2025</span></p>
+      <div style="position:relative;height:260px;"><div id="chartCorkRent" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Cork vs Dublin Comparison</span><span class="lang-zh" style="display:none">&#x79D1;&#x514B; vs &#x90FD;&#x67CF;&#x6797;&#x6BD4;&#x8F03;</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Key metrics side-by-side</span><span class="lang-zh" style="display:none">&#x95DC;&#x9375;&#x6307;&#x6A19;&#x5C0D;&#x6BD4;</span></p>
+      <div style="position:relative;height:260px;"><div id="chartCorkVsDublin" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="chart-card">
+      <h3><span class="lang-en">Cork Housing Completions</span><span class="lang-zh" style="display:none">&#x79D1;&#x514B;&#x4F4F;&#x5B85;&#x5B8C;&#x5DE5;&#x91CF;</span></h3>
+      <p class="chart-subtitle"><span class="lang-en">Units &middot; 2022&ndash;2026E</span><span class="lang-zh" style="display:none">&#x6236;&#x6578; &middot; 2022&ndash;2026E</span></p>
+      <div style="position:relative;height:260px;"><div id="chartCorkSupply" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+
+  <div class="section-label"><span class="lang-en">SUMMARY</span><span class="lang-zh" style="display:none">&#x7E3D;&#x7D50;</span></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div class="summary-card" style="border-left:4px solid #16a34a;">
+      <h4><span class="lang-en">Value Play</span><span class="lang-zh" style="display:none">&#x50F9;&#x503C;&#x6A5F;&#x6703;</span></h4>
+      <p><span class="lang-en">31% discount to Dublin prices with 100&ndash;150bps yield premium. Cork offers the best risk-adjusted entry point among major Irish cities for income-focused investors.</span><span class="lang-zh" style="display:none">&#x6BD4;&#x90FD;&#x67CF;&#x6797;&#x4F4E;31%&#xFF0C;&#x6536;&#x76CA;&#x7387;&#x6EA2;&#x50F9;100&ndash;150&#x57FA;&#x9EDE;&#x3002;&#x79D1;&#x514B;&#x662F;&#x611B;&#x723E;&#x862D;&#x4E3B;&#x8981;&#x57CE;&#x5E02;&#x4E2D;&#x6536;&#x5165;&#x5C0E;&#x5411;&#x6295;&#x8CC7;&#x8005;&#x7684;&#x6700;&#x4F73;&#x98A8;&#x96AA;&#x8ABF;&#x6574;&#x5F8C;&#x9032;&#x5834;&#x9EDE;&#x3002;</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #16a34a;">
+      <h4><span class="lang-en">Diversifying Economy</span><span class="lang-zh" style="display:none">&#x7D93;&#x6FDF;&#x591A;&#x5143;&#x5316;</span></h4>
+      <p><span class="lang-en">Pharma + tech + biotech multi-anchor economy reduces single-sector risk. Cork's employment base is more diversified than Dublin's tech-heavy concentration.</span><span class="lang-zh" style="display:none">&#x88FD;&#x85E5;+&#x79D1;&#x6280;+&#x751F;&#x6280;&#x591A;&#x652F;&#x67F1;&#x7D93;&#x6FDF;&#x964D;&#x4F4E;&#x55AE;&#x4E00;&#x7522;&#x696D;&#x98A8;&#x96AA;&#x3002;&#x79D1;&#x514B;&#x5C31;&#x696D;&#x57FA;&#x790E;&#x6BD4;&#x90FD;&#x67CF;&#x6797;&#x79D1;&#x6280;&#x96C6;&#x4E2D;&#x5EA6;&#x66F4;&#x5206;&#x6563;&#x3002;</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #dc2626;">
+      <h4><span class="lang-en">Rental Crisis</span><span class="lang-zh" style="display:none">&#x79DF;&#x8CC3;&#x5371;&#x6A5F;</span></h4>
+      <p><span class="lang-en">0.6% vacancy rate with rents up 7.8% YoY. No near-term supply relief visible &mdash; completions tracking 34% below estimated annual demand of 5,000+ units.</span><span class="lang-zh" style="display:none">&#x7A7A;&#x7F6E;&#x7387;0.6%&#xFF0C;&#x79DF;&#x91D1;&#x5E74;&#x589E;7.8%&#x3002;&#x77ED;&#x671F;&#x5167;&#x7121;&#x4F9B;&#x7D66;&#x7D13;&#x89E3;&mdash;&#x5B8C;&#x5DE5;&#x91CF;&#x4F4E;&#x65BC;&#x5E74;&#x9700;&#x6C42;5,000+&#x6236;&#x768434%&#x3002;</span></p>
+    </div>
+    <div class="summary-card" style="border-left:4px solid #d97706;">
+      <h4><span class="lang-en">Infrastructure Catalyst</span><span class="lang-zh" style="display:none">&#x57FA;&#x790E;&#x5EFA;&#x8A2D;&#x50AC;&#x5316;&#x5291;</span></h4>
+      <p><span class="lang-en">N28 motorway and commuter rail expansion opening new development corridors. Infrastructure investment unlocking suburban land banks for future housing supply.</span><span class="lang-zh" style="display:none">N28&#x9AD8;&#x901F;&#x516C;&#x8DEF;&#x8207;&#x901A;&#x52E4;&#x9435;&#x8DEF;&#x64F4;&#x5C55;&#x958B;&#x95E2;&#x65B0;&#x958B;&#x767C;&#x8D70;&#x5ECA;&#x3002;&#x57FA;&#x5EFA;&#x6295;&#x8CC7;&#x91CB;&#x653E;&#x90CA;&#x5340;&#x571F;&#x5730;&#x5132;&#x5099;&#xFF0C;&#x70BA;&#x672A;&#x4F86;&#x4F4F;&#x5B85;&#x4F9B;&#x7D66;&#x63D0;&#x4F9B;&#x7A7A;&#x9593;&#x3002;</span></p>
+    </div>
+  </div>
+
+  <div class="source-footer">
+    <span class="lang-en">CSO &middot; Daft.ie &middot; RTB &middot; Cork City Council &middot; IDA Ireland<br><em>Not investment advice.</em></span>
+    <span class="lang-zh" style="display:none">CSO &middot; Daft.ie &middot; RTB &middot; &#x79D1;&#x514B;&#x5E02;&#x8B70;&#x6703; &middot; IDA Ireland<br><em>&#x975E;&#x6295;&#x8CC7;&#x5EFA;&#x8B70;&#x3002;</em></span>
+  </div>
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtEUR(v){if(v>=1000000)return '\u20AC'+(v/1000000).toFixed(2)+'M';if(v>=1000)return '\u20AC'+(v/1000).toFixed(0)+'K';return '\u20AC'+v;}
+function fmtEURShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  allCharts.length=0;
+  var enLabels=['Houses','Apartments'];
+  var zhLabels=['\u4F4F\u5B85','\u516C\u5BD3'];
+  var legendLabels=lang==='zh'?zhLabels:enLabels;
+
+  /* chartCorkPrice — dual line */
+  var c1=echarts.init(document.getElementById('chartCorkPrice'));allCharts.push(c1);
+  var priceLabels=['2019','2020','2021','2022','2023','2024','2025Q4'];
+  var houseData=[265000,270000,300000,325000,330000,320000,340000];
+  var aptData=[195000,200000,220000,245000,255000,250000,265000];
+  c1.setOption({
+    tooltip:baseTooltip,grid:baseGrid,legend:Object.assign({},baseLegend,{data:legendLabels}),
+    xAxis:mkAxis({type:'category',data:priceLabels}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtEURShort(v);}})}),
+    series:[
+      {name:legendLabels[0],type:'line',data:houseData,lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue},smooth:0.2,symbol:'circle',symbolSize:5,
+        markPoint:{data:[{coord:['2025Q4',340000],symbol:'pin',symbolSize:40,label:{formatter:fmtEUR(340000),fontSize:9},itemStyle:{color:C.blue}}]}},
+      {name:legendLabels[1],type:'line',data:aptData,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},smooth:0.2,symbol:'circle',symbolSize:5,
+        markPoint:{data:[{coord:['2025Q4',265000],symbol:'pin',symbolSize:40,label:{formatter:fmtEUR(265000),fontSize:9},itemStyle:{color:C.orange}}]}}
+    ]
+  });
+
+  /* chartCorkRent — line */
+  var c2=echarts.init(document.getElementById('chartCorkRent'));allCharts.push(c2);
+  var rentLabels=['2019','2020','2021','2022','2023','2024','2025'];
+  var rentData=[1100,1050,1100,1250,1400,1530,1650];
+  c2.setOption({
+    tooltip:baseTooltip,grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:rentLabels}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return '\u20AC'+v;}})}),
+    series:[{type:'line',data:rentData,lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},areaStyle:{color:'rgba(220,38,38,0.08)'},smooth:0.2,symbol:'circle',symbolSize:5,
+      markPoint:{data:[{coord:['2025',1650],symbol:'pin',symbolSize:50,label:{formatter:'\u20AC1,650',fontSize:9,lineHeight:13},itemStyle:{color:C.red}}]}
+    }]
+  });
+
+  /* chartCorkVsDublin — grouped bar, normalized display */
+  var c3=echarts.init(document.getElementById('chartCorkVsDublin'));allCharts.push(c3);
+  var catLabelsEN=['Price \u20ACK','Rent \u20AC/mo','Yield %','PTI x'];
+  var catLabelsZH=['\u50F9\u683C \u20ACK','\u79DF\u91D1 \u20AC/\u6708','\u6536\u76CA\u7387 %','PTI x'];
+  var catLabels=lang==='zh'?catLabelsZH:catLabelsEN;
+  var dublinLbl=lang==='zh'?'\u90FD\u67CF\u6797':'Dublin';
+  var corkLbl=lang==='zh'?'\u79D1\u514B':'Cork';
+  /* Normalize: show raw values but scale for visual comparison */
+  var dublinRaw=[490,2400,4.0,8.5];
+  var corkRaw=[340,1650,5.3,6.2];
+  /* Use percentage of max for display height, store raw for tooltip */
+  var maxPerCat=[490,2400,5.3,8.5];
+  var dublinNorm=dublinRaw.map(function(v,i){return Math.round(v/maxPerCat[i]*100);});
+  var corkNorm=corkRaw.map(function(v,i){return Math.round(v/maxPerCat[i]*100);});
+  c3.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(params){
+      var idx=params[0].dataIndex;
+      var labels=['Price','Rent','Yield','PTI'];
+      var units=['\u20ACK','\u20AC/mo','%','x'];
+      return labels[idx]+'<br/>'+dublinLbl+': '+dublinRaw[idx]+units[idx]+'<br/>'+corkLbl+': '+corkRaw[idx]+units[idx];
+    }}),
+    grid:baseGrid,
+    legend:Object.assign({},baseLegend,{data:[dublinLbl,corkLbl]}),
+    xAxis:mkAxis({type:'category',data:catLabels}),
+    yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return v+'%';}}),max:120}),
+    series:[
+      {name:dublinLbl,type:'bar',data:dublinNorm.map(function(v){return{value:v,itemStyle:{color:C.navy}};}),barMaxWidth:28,barGap:'30%'},
+      {name:corkLbl,type:'bar',data:corkNorm.map(function(v){return{value:v,itemStyle:{color:C.green}};}),barMaxWidth:28}
+    ]
+  });
+
+  /* chartCorkSupply — bar + markLine */
+  var c4=echarts.init(document.getElementById('chartCorkSupply'));allCharts.push(c4);
+  var supLabels=['2022','2023','2024','2025','2026E'];
+  var supData=[2800,3100,3200,3300,3500];
+  c4.setOption({
+    tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),grid:baseGrid,
+    xAxis:mkAxis({type:'category',data:supLabels}),
+    yAxis:mkAxis({type:'value',axisLabel:baseText}),
+    series:[{type:'bar',data:supData.map(function(v,i){return{value:v,itemStyle:{color:i===4?C.orange:C.green,borderRadius:[4,4,0,0]}};}),barMaxWidth:40,
+      markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed',width:2},label:{formatter:lang==='zh'?'\u5E74\u9700\u6C42 5K+':'Annual demand 5K+',fontSize:10,color:C.red},data:[{yAxis:5000}]}
+    }]
+  });
+}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+{% extends "_base.html" %}
+
+{% block title %}Risk Monitor{% endblock %}
+
+{% block extra_head %}
+<style>
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:12px}
+.summary-card{background:#fff;border:1px solid #ccd9e8;border-radius:10px;padding:18px 22px}
+.summary-card h4{margin:0 0 8px;font-size:13px;color:#1e3a5f;font-family:Inter,sans-serif}
+.summary-card p{margin:0;font-size:12px;color:#5a7a9a;line-height:1.6;font-family:Inter,sans-serif}
+.green-left{border-left:4px solid #16a34a}
+.red-left{border-left:4px solid #dc2626}
+.orange-left{border-left:4px solid #d97706}
+.blue-left{border-left:4px solid #2563eb}
+.timeline{position:relative;padding-left:24px;margin:16px 0}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:#ccd9e8}
+.timeline-item{position:relative;padding:10px 0 10px 20px;font-family:Inter,sans-serif}
+.timeline-item::before{content:'';position:absolute;left:-20px;top:14px;width:10px;height:10px;border-radius:50%;background:var(--dot-color,#ccd9e8);border:2px solid #fff;box-shadow:0 0 0 2px var(--dot-color,#ccd9e8)}
+.timeline-item.green::before{--dot-color:#16a34a}
+.timeline-item.red::before{--dot-color:#dc2626}
+.timeline-item.orange::before{--dot-color:#d97706}
+.timeline-item.gray::before{--dot-color:#94a3b8}
+.tl-date{display:inline-block;min-width:80px;font-weight:600;font-size:12px;color:#1e3a5f}
+.tl-text{font-size:12px;color:#5a7a9a;line-height:1.5}
+.table-scroll{overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;font-family:Inter,sans-serif;font-size:12px}
+.data-table th{text-align:left;padding:10px 12px;border-bottom:2px solid #ccd9e8;color:#5a7a9a;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.3px}
+.data-table td{padding:10px 12px;border-bottom:1px solid #eef3f9;color:#1e3a5f}
+.cell-green{color:#16a34a}
+.cell-orange{color:#d97706}
+.cell-red{color:#dc2626}
+.chart-footnote{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif;margin-top:10px;font-style:italic}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="container">
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">LAST UPDATED: {{ meta.data_asof_en }}</span><span class="lang-zh" style="display:none">最後更新：{{ meta.data_asof_zh }}</span></span>
+    <h1><span class="lang-en">Risk Monitor</span><span class="lang-zh" style="display:none">風險監測</span></h1>
+    <p class="subtitle"><span class="lang-en">{{ meta.market_en }} Property Risk Assessment</span><span class="lang-zh" style="display:none">{{ meta.market_zh }}房地產風險評估</span></p>
+  </div>
+
+  {# KPI Cards #}
+  {% if kpis is defined and kpis | length > 0 %}
+  <div class="kpi-grid">
+    {% for kpi in kpis %}
+    <div class="kpi-card {{ kpi.color | default('blue') }}">
+      <div class="kpi-label">
+        <span class="lang-en">{{ kpi.label_en }}</span>
+        <span class="lang-zh" style="display:none">{{ kpi.label_zh | default(kpi.label_en) }}</span>
+      </div>
+      <div class="kpi-value"{% if kpi.value | length > 6 %} style="font-size:18px"{% endif %}>
+        {% if kpi.value_zh is defined %}
+        <span class="lang-en">{{ kpi.value }}</span>
+        <span class="lang-zh" style="display:none">{{ kpi.value_zh }}</span>
+        {% else %}
+        {{ kpi.value }}
+        {% endif %}
+      </div>
+      {% if kpi.sub_en is defined and kpi.sub_en %}
+      <span class="kpi-badge {{ kpi.badge_class | default('') }}">
+        <span class="lang-en">{{ kpi.sub_en }}</span>
+        <span class="lang-zh" style="display:none">{{ kpi.sub_zh | default(kpi.sub_en) }}</span>
+      </span>
+      {% endif %}
+      {% if kpi.source is defined %}
+      <div class="kpi-source">{{ kpi.source }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Radar Chart — always rendered first if present #}
+  {% set radar_chart = None %}
+  {% for chart_id, chart in charts.items() %}
+    {% if chart.page == 'risk' and chart.type == 'radar' %}
+      {% set radar_chart = chart_id %}
+    {% endif %}
+  {% endfor %}
+
+  {% if radar_chart %}
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>
+        <span class="lang-en">{{ charts[radar_chart].title_en }}</span>
+        <span class="lang-zh" style="display:none">{{ charts[radar_chart].title_zh | default(charts[radar_chart].title_en) }}</span>
+      </h3>
+      {% if charts[radar_chart].subtitle_en is defined %}
+      <p class="chart-subtitle">
+        <span class="lang-en">{{ charts[radar_chart].subtitle_en }}</span>
+        <span class="lang-zh" style="display:none">{{ charts[radar_chart].subtitle_zh | default('') }}</span>
+      </p>
+      {% endif %}
+      <div class="radar-wrap"><div id="{{ radar_chart }}" style="width:100%;height:100%"></div></div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Non-radar chart sections #}
+  {% for chart_id, chart in charts.items() %}
+  {% if chart.page == 'risk' and chart.type != 'radar' %}
+  {% if chart.section_heading_en is defined %}
+  <h2 class="section-heading">
+    <span class="lang-en">{{ chart.section_heading_en }}</span>
+    <span class="lang-zh" style="display:none">{{ chart.section_heading_zh | default(chart.section_heading_en) }}</span>
+  </h2>
+  {% endif %}
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>
+        <span class="lang-en">{{ chart.title_en }}</span>
+        <span class="lang-zh" style="display:none">{{ chart.title_zh | default(chart.title_en) }}</span>
+      </h3>
+      {% if chart.subtitle_en is defined %}
+      <p class="chart-subtitle">
+        <span class="lang-en">{{ chart.subtitle_en }}</span>
+        <span class="lang-zh" style="display:none">{{ chart.subtitle_zh | default('') }}</span>
+      </p>
+      {% endif %}
+      <div style="position:relative;height:{{ chart.height | default(220) }}px;">
+        <div id="{{ chart_id }}" style="width:100%;height:100%"></div>
+      </div>
+      {% if chart.insight_en is defined %}
+      <div class="insight-box"{% if chart.insight_color is defined %} style="border-left-color:{{ chart.insight_color }}"{% endif %}>
+        <span class="lang-en">{{ chart.insight_en }}</span>
+        <span class="lang-zh" style="display:none">{{ chart.insight_zh | default(chart.insight_en) }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+
+  {# Policy Timeline #}
+  {% if data.risk_data is defined and data.risk_data.policy_timeline is defined and data.risk_data.policy_timeline | length > 0 %}
+  <h2 class="section-heading">
+    <span class="lang-en">Policy Timeline</span>
+    <span class="lang-zh" style="display:none">政策時間線</span>
+  </h2>
+  <div class="chart-card">
+    <div class="timeline">
+      {% for item in data.risk_data.policy_timeline %}
+      <div class="timeline-item {{ item.color | default('') }}"{% if item.color == 'warning' %} style="--dot-color:var(--warning)"{% endif %}>
+        <span class="tl-date">{{ item.date }}</span>
+        <span class="tl-text">
+          <span class="lang-en">{{ item.text_en | default(item.desc_en | default('')) }}</span>
+          <span class="lang-zh" style="display:none">{{ item.text_zh | default(item.desc_zh | default('')) }}</span>
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Developer Health Table — market-specific, may not exist for all markets #}
+  {% if data.risk_data is defined and data.risk_data.developer_health is defined and data.risk_data.developer_health | length > 0 %}
+  <h2 class="section-heading">
+    <span class="lang-en">Developer Health Tracker</span>
+    <span class="lang-zh" style="display:none">開發商健康度追蹤</span>
+  </h2>
+  <div class="chart-card">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Developer</span><span class="lang-zh" style="display:none">開發商</span></th>
+            <th><span class="lang-en">Net Debt/Equity</span><span class="lang-zh" style="display:none">淨負債/股東權益</span></th>
+            <th><span class="lang-en">Gross Margin</span><span class="lang-zh" style="display:none">毛利率</span></th>
+            <th><span class="lang-en">Overhang</span><span class="lang-zh" style="display:none">積壓</span></th>
+            <th><span class="lang-en">Rating</span><span class="lang-zh" style="display:none">評級</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for dev in data.risk_data.developer_health %}
+          <tr>
+            <td>{{ dev.name }}</td>
+            <td>{{ dev.net_debt_equity }}</td>
+            <td>{{ dev.gross_margin }}</td>
+            <td>
+              <span class="lang-en">{{ dev.overhang_en }}</span>
+              <span class="lang-zh" style="display:none">{{ dev.overhang_zh | default(dev.overhang_en) }}</span>
+            </td>
+            <td class="cell-{{ dev.rating_color | default('green') }}">{{ '&#9733;' * dev.rating }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="chart-footnote">
+      <span class="lang-en">*Directional estimates based on public annual reports. Not investment advice.</span>
+      <span class="lang-zh" style="display:none">*基於公開年報的方向性估算，非投資建議。</span>
+    </p>
+  </div>
+  {% endif %}
+
+  {# Key Risk Factors / Summary Cards #}
+  {% if data.risk_data is defined and data.risk_data.risk_factors is defined and data.risk_data.risk_factors | length > 0 %}
+  <h2 class="section-heading">
+    <span class="lang-en">Key Risk Factors</span>
+    <span class="lang-zh" style="display:none">主要風險因素</span>
+  </h2>
+  <div class="summary-grid">
+    {% for factor in data.risk_data.risk_factors %}
+    <div class="summary-card {{ factor.color | default(factor.level | default('orange')) }}-left">
+      <h4>
+        <span class="lang-en">{{ factor.title_en }}</span>
+        <span class="lang-zh" style="display:none">{{ factor.title_zh | default(factor.title_en) }}</span>
+      </h4>
+      <p>
+        <span class="lang-en">{{ factor.text_en | default(factor.desc_en | default('')) }}</span>
+        <span class="lang-zh" style="display:none">{{ factor.text_zh | default(factor.desc_zh | default('')) }}</span>
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Source Footer #}
+  {% if data.source_footer is defined %}
+  <div class="source-footer">
+    <span class="lang-en">{{ data.source_footer.en }}</span>
+    <span class="lang-zh" style="display:none">{{ data.source_footer.zh | default(data.source_footer.en) }}</span>
+  </div>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block base_scripts %}
+var DATA = {{ charts | tojson }};
+
+function initCharts(lang) {
+  var page = 'risk';
+
+  Object.keys(DATA).forEach(function(id) {
+    var cfg = DATA[id];
+    if (cfg.page !== page) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+
+    var chart = echarts.init(el);
+    allCharts.push(chart);
+
+    /* Radar chart */
+    if (cfg.type === 'radar') {
+      var indicators = (cfg.indicators || []).map(function(ind) {
+        var label;
+        if (lang === 'zh') {
+          label = (ind.name_zh || ind.name_en) + ' / ' + ind.name_en;
+        } else {
+          label = ind.name_en + (ind.name_zh ? ' / ' + ind.name_zh : '');
+        }
+        return { name: label, max: ind.max || 10 };
+      });
+      var seriesData = (cfg.datasets || []).map(function(ds) {
+        var obj = {
+          name: ds.name,
+          value: ds.data,
+          lineStyle: { color: ds.color, width: 2 },
+          itemStyle: { color: ds.color },
+          areaStyle: { color: ds.color === '#dc2626' ? 'rgba(220,38,38,0.1)' : 'rgba(139,163,192,0.08)' },
+          symbol: 'circle',
+          symbolSize: 5
+        };
+        if (ds.lineType === 'dashed') {
+          obj.lineStyle.type = 'dashed';
+          obj.lineStyle.width = 1.5;
+        }
+        return obj;
+      });
+      chart.setOption({
+        tooltip: { trigger: 'item' },
+        legend: { bottom: 0, textStyle: { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 }, icon: 'circle', itemWidth: 8, itemHeight: 8, data: cfg.datasets.map(function(d){ return d.name; }) },
+        radar: {
+          center: ['50%','52%'], radius: '58%', nameGap: 8,
+          name: { textStyle: { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 10 } },
+          indicator: indicators,
+          shape: 'polygon',
+          splitNumber: 5,
+          splitLine: { lineStyle: { color: C.grid } },
+          splitArea: { areaStyle: { color: ['rgba(238,243,249,0.3)','rgba(255,255,255,0.3)'] } },
+          axisLine: { lineStyle: { color: C.grid } }
+        },
+        series: [{ type: 'radar', data: seriesData }]
+      });
+      return;
+    }
+
+    /* Standard charts: line, bar, line (dual axis) */
+    var labels = cfg.labels || [];
+    if (cfg.labels_en && cfg.labels_zh) {
+      labels = lang === 'zh' ? cfg.labels_zh : cfg.labels_en;
+    }
+
+    var isHorizontalBar = (cfg.type || '').indexOf('horizontal') >= 0;
+
+    var series = (cfg.datasets || []).map(function(ds) {
+      var s = {
+        name: ds.name_en ? (lang === 'zh' ? (ds.name_zh || ds.name_en) : ds.name_en) : ds.name,
+        type: ds.type || 'line',
+        data: ds.data
+      };
+
+      if (ds.color) {
+        s.lineStyle = { color: ds.color, width: 2 };
+        s.itemStyle = { color: ds.color };
+      }
+      if (ds.lineType === 'dashed') {
+        s.lineStyle = s.lineStyle || {};
+        s.lineStyle.type = 'dashed';
+      }
+      if (ds.step) s.step = ds.step;
+      if (ds.yAxisIndex !== undefined) s.yAxisIndex = ds.yAxisIndex;
+      if (ds.smooth) s.smooth = ds.smooth;
+
+      if (s.type === 'line') {
+        s.symbol = 'circle';
+        s.symbolSize = 6;
+        if (ds.areaStyle) s.areaStyle = ds.areaStyle;
+      }
+      if (s.type === 'bar') {
+        s.barMaxWidth = 25;
+        if (ds.showLabel !== false) {
+          s.label = { show: true, position: isHorizontalBar ? 'right' : 'top', formatter: cfg.labelFormat || '{c}', fontSize: 10, fontFamily: 'Inter' };
+        }
+      }
+
+      return s;
+    });
+
+    var option = {
+      tooltip: baseTooltip,
+      grid: isHorizontalBar
+        ? { left: 90, right: 50, top: 10, bottom: 20, containLabel: false }
+        : { left: 15, right: 15, top: 40, bottom: 30, containLabel: true }
+    };
+
+    /* Legend */
+    if (series.length > 1) {
+      option.legend = { top: 8, textStyle: { color: C.muted, fontFamily: 'Inter, sans-serif', fontSize: 11 }, icon: 'circle', itemWidth: 8, itemHeight: 8, data: series.map(function(s){ return s.name; }) };
+    }
+
+    /* Axes */
+    if (isHorizontalBar) {
+      option.xAxis = mkAxis({ type: 'value' });
+      option.yAxis = mkAxis({
+        type: 'category', data: labels,
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      });
+    } else {
+      option.xAxis = mkAxis({ type: 'category', data: labels });
+      var hasSecondY = series.some(function(s){ return s.yAxisIndex === 1; });
+      if (hasSecondY) {
+        option.yAxis = [
+          mkAxis({ type: 'value', axisLabel: Object.assign({}, baseText, { formatter: cfg.yFormat || '{value}%' }), splitLine: { lineStyle: { color: C.grid } } }),
+          mkAxis({ type: 'value', position: 'right', axisLabel: Object.assign({}, baseText, { formatter: '{value}' }), splitLine: { show: false } })
+        ];
+      } else {
+        option.yAxis = mkAxis({ type: 'value', axisLabel: cfg.yFormat ? Object.assign({}, baseText, { formatter: cfg.yFormat }) : baseText });
+      }
+    }
+
+    /* Mark line */
+    if (cfg.markLine && series.length > 0) {
+      var mlIdx = cfg.markLine.seriesIndex || (series.length - 1);
+      series[mlIdx].markLine = {
+        silent: true, symbol: 'none',
+        lineStyle: { color: cfg.markLine.color || C.navy, type: 'dashed', width: 1 },
+        label: { formatter: cfg.markLine.label || 'Current', position: 'insideStartTop', fontSize: 9, color: C.muted },
+        data: [{ xAxis: cfg.markLine.xAxis }]
+      };
+    }
+
+    option.series = series;
+    chart.setOption(option);
+  });
+}
+{% endblock %}

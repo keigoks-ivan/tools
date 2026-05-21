@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methodology &amp; Data Sources | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e3a5f}
+.navbar{background:#fff;border-bottom:1px solid #dce8f5;height:52px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-brand{font-size:12px;font-weight:700;letter-spacing:.12em;color:#1e3a5f;text-decoration:none}
+.nav-brand:hover{color:#3b82f6}
+.lang-btns{display:flex;gap:4px}
+.lang-btn{padding:4px 10px;border:1px solid #dce8f5;border-radius:4px;font-size:11px;cursor:pointer;background:#fff;color:#5a7a9a;font-family:inherit}
+.lang-btn.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+
+.hero{background:#fff;border-bottom:1px solid #dce8f5;padding:24px 32px}
+.hero-inner{max-width:min(1100px,96vw);margin:0 auto}
+.hero-eyebrow{font-size:9.5px;letter-spacing:.18em;color:#3b82f6;font-weight:600;text-transform:uppercase;margin-bottom:6px}
+.hero-h1{font-size:22px;font-weight:700;color:#0f2a45;line-height:1.2;margin-bottom:6px}
+.hero-sub{font-size:12px;color:#5a7a9a;line-height:1.5;max-width:680px}
+
+.wrap{max-width:min(1100px,96vw);margin:0 auto;padding:32px}
+.section{margin-bottom:32px}
+.section-title{font-size:11px;letter-spacing:.16em;color:#3b82f6;font-weight:600;margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid #dce8f5}
+.intro{background:#fff;border:1px solid #dce8f5;border-radius:10px;padding:18px 22px;margin-bottom:24px;font-size:12.5px;line-height:1.65;color:#475569}
+.intro strong{color:#1e3a5f}
+
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #dce8f5;border-radius:10px;overflow:hidden}
+th{background:#f0f6ff;font-size:10px;letter-spacing:.06em;color:#5a7a9a;font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid #dce8f5}
+td{font-size:11.5px;padding:10px 12px;border-bottom:1px solid #f0f5fb;color:#1e3a5f;vertical-align:top;line-height:1.5}
+tr:last-child td{border-bottom:none}
+td.mono{font-family:'SF Mono',ui-monospace,monospace;font-size:10.5px;color:#5a7a9a;white-space:nowrap}
+td.country{font-weight:600;white-space:nowrap}
+td a{color:#3b82f6;text-decoration:none}
+td a:hover{text-decoration:underline}
+
+.glossary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.gloss-card{background:#fff;border:1px solid #dce8f5;border-radius:8px;padding:12px 14px}
+.gloss-term{font-size:12px;font-weight:700;color:#1e3a5f;margin-bottom:4px}
+.gloss-def{font-size:11px;color:#475569;line-height:1.55}
+.gloss-thresh{font-size:10px;color:#5a7a9a;margin-top:6px;padding-top:6px;border-top:1px dashed #e2e8f0}
+
+.note-box{font-size:11px;color:#475569;line-height:1.6;background:#fffbeb;border-left:3px solid #d97706;padding:10px 14px;border-radius:4px;margin-top:14px}
+
+.footer{border-top:1px solid #dce8f5;padding:18px 32px;max-width:min(1100px,96vw);margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.footer-l{font-size:11px;font-weight:700;letter-spacing:.08em;color:#1e3a5f}
+.footer-r{font-size:10px;color:#94a3b8}
+
+.lang-zh{display:none}
+@media(max-width:760px){
+  .hero{padding:18px 16px}
+  .wrap{padding:20px 16px}
+  .hero-h1{font-size:18px}
+  th,td{padding:7px 9px;font-size:10.5px}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="lang-en">METHODOLOGY &amp; DATA SOURCES</span><span class="lang-zh">方法論與資料來源</span></div>
+    <h1 class="hero-h1"><span class="lang-en">How We Compile This Data</span><span class="lang-zh">資料如何編製</span></h1>
+    <p class="hero-sub">
+      <span class="lang-en">Every number on Property Monitor traces back to a primary statistical agency, central bank, or major listings dataset. This page lists every source by market, defines each metric, and documents how derived figures (carry spread, PTI, P/R) are calculated.</span>
+      <span class="lang-zh">Property Monitor 上每個數字都可追溯到一手統計機構、央行或主要房源資料庫。本頁依市場列出所有資料來源，定義每個指標，並記錄衍生數字（利差、房價收入比、房租比）的計算方式。</span>
+    </p>
+  </div>
+</section>
+
+<div class="wrap">
+
+  <!-- INTRO -->
+  <div class="intro">
+    <strong><span class="lang-en">Update cadence:</span><span class="lang-zh">更新週期：</span></strong>
+    <span class="lang-en">Macro figures (GDP, CPI, central bank rates) refreshed when officially released. Price indices refreshed quarterly. Vacancy &amp; pipeline reviewed every 3 months. Foreign-buyer tax tables reviewed when policy changes are announced.</span>
+    <span class="lang-zh">總體指標（GDP、CPI、央行利率）依官方公告更新。房價指數每季更新。空置率與在建供給每 3 個月複核。外國買家稅表於政策變動公告時更新。</span>
+    <br><br>
+    <strong><span class="lang-en">Disclaimer:</span><span class="lang-zh">免責聲明：</span></strong>
+    <span class="lang-en">All data on Property Monitor is for informational purposes only and does not constitute investment, tax, legal, or financial advice. Always verify figures with the original source and a qualified local advisor before making any property investment decision.</span>
+    <span class="lang-zh">Property Monitor 所有資料僅供參考，不構成投資、稅務、法律或財務建議。任何房產投資決策前請以一手來源資料及合格在地顧問為準。</span>
+  </div>
+
+  <!-- DERIVED METRICS -->
+  <div class="section">
+    <div class="section-title"><span class="lang-en">DERIVED METRIC FORMULAS</span><span class="lang-zh">衍生指標計算公式</span></div>
+    <div class="glossary-grid">
+      <div class="gloss-card">
+        <div class="gloss-term">Carry Spread</div>
+        <div class="gloss-def">
+          <span class="lang-en">Gross rental yield &minus; prevailing local mortgage rate. Positive = rent covers debt service.</span>
+          <span class="lang-zh">毛租金收益率 &minus; 當地現行房貸利率。正值代表租金可負擔利息。</span>
+        </div>
+        <div class="gloss-thresh">
+          <span class="lang-en">+2% income · 0~+2% neutral · -1~0% mild · &lt;-3% deep negative</span>
+          <span class="lang-zh">+2% 收租 · 0~+2% 中性 · -1~0% 輕負 · &lt;-3% 深負</span>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">PTI &mdash; Price-to-Income</div>
+        <div class="gloss-def">
+          <span class="lang-en">Median apartment price &divide; median annual household income.</span>
+          <span class="lang-zh">中位公寓房價 &divide; 中位家庭年收入。</span>
+        </div>
+        <div class="gloss-thresh">
+          <span class="lang-en">&lt;5&times; affordable · 5&ndash;10&times; stretched · &gt;10&times; severely unaffordable</span>
+          <span class="lang-zh">&lt;5 倍可負擔 · 5&ndash;10 倍偏高 · &gt;10 倍嚴重不可負擔</span>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">P/R &mdash; Price-to-Rent</div>
+        <div class="gloss-def">
+          <span class="lang-en">Median price &divide; gross annual rent of comparable unit.</span>
+          <span class="lang-zh">中位房價 &divide; 同類單位毛年租。</span>
+        </div>
+        <div class="gloss-thresh">
+          <span class="lang-en">&lt;20&times; buy favored · 20&ndash;30&times; neutral · &gt;30&times; rent favored</span>
+          <span class="lang-zh">&lt;20 倍買有利 · 20&ndash;30 倍中性 · &gt;30 倍租有利</span>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">Vacancy Rate</div>
+        <div class="gloss-def">
+          <span class="lang-en">Rental vacancy rate (units listed but not let). Where unavailable, listings-to-stock ratio used as proxy.</span>
+          <span class="lang-zh">租賃空置率（已掛牌但未出租單位佔比）。無法取得時以掛牌量／存量為替代指標。</span>
+        </div>
+        <div class="gloss-thresh">
+          <span class="lang-en">&lt;1% crisis tight · 1&ndash;2% tight · 2&ndash;3.5% balanced · &gt;3.5% soft</span>
+          <span class="lang-zh">&lt;1% 危機緊張 · 1&ndash;2% 緊張 · 2&ndash;3.5% 平衡 · &gt;3.5% 鬆軟</span>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">Pipeline %</div>
+        <div class="gloss-def">
+          <span class="lang-en">Units under construction (approved &amp; commenced) as percentage of existing housing stock.</span>
+          <span class="lang-zh">在建單位（已核准且開工）佔現有住宅存量百分比。</span>
+        </div>
+        <div class="gloss-thresh">
+          <span class="lang-en">Low &lt;1% · Mod 1&ndash;2.5% · High &gt;2.5%</span>
+          <span class="lang-zh">低 &lt;1% · 中 1&ndash;2.5% · 高 &gt;2.5%</span>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">10yr Cumulative</div>
+        <div class="gloss-def">
+          <span class="lang-en">Apartment price index level Q1 2026 &divide; Q1 2016 &minus; 100%. Local currency, not USD.</span>
+          <span class="lang-zh">公寓房價指數 2026Q1 &divide; 2016Q1 &minus; 100%。當地貨幣計，非美元。</span>
+        </div>
+        <div class="gloss-thresh">
+          <span class="lang-en">Sources: country price index for the apartment segment specifically</span>
+          <span class="lang-zh">來源：各國公寓區段專屬房價指數</span>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">SSD &mdash; Seller Stamp Duty</div>
+        <div class="gloss-def">
+          <span class="lang-en">Punitive duty on short-hold sales (Singapore: 12% if &lt;1yr, tapering to 0% after 3yr).</span>
+          <span class="lang-zh">短期持有出售懲罰性印花稅（新加坡：&lt;1 年 12%，3 年後降至 0%）。</span>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">FIRPTA</div>
+        <div class="gloss-def">
+          <span class="lang-en">US Foreign Investment in Real Property Tax Act &mdash; 15% withholding on gross sale price by non-resident sellers.</span>
+          <span class="lang-zh">美國《外國人投資不動產稅法》&mdash; 非居民賣方按總售價預扣 15%。</span>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">CGT Cliff</div>
+        <div class="gloss-def">
+          <span class="lang-en">Sharp drop in capital gains tax rate after a holding-period threshold. MY: 30%→10% at yr 6. TW: 45%→20% at yr 5. JP: 39%→20% at yr 5.</span>
+          <span class="lang-zh">資本利得稅率在持有年限門檻後驟降。馬來西亞：第 6 年 30%→10%。台灣：第 5 年 45%→20%。日本：第 5 年 39%→20%。</span>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">LTV Cap</div>
+        <div class="gloss-def">
+          <span class="lang-en">Maximum loan-to-value ratio. Foreign-buyer LTV is often capped lower than domestic (e.g. TW 2nd home 30&ndash;60%).</span>
+          <span class="lang-zh">最高貸款成數。外國買家 LTV 上限通常低於本地（如台灣第二戶 30&ndash;60%）。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOURCES BY MARKET -->
+  <div class="section">
+    <div class="section-title"><span class="lang-en">PRIMARY DATA SOURCES BY MARKET</span><span class="lang-zh">各市場一手資料來源</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:130px"><span class="lang-en">Market</span><span class="lang-zh">市場</span></th>
+          <th style="width:170px"><span class="lang-en">Price Index</span><span class="lang-zh">房價指數</span></th>
+          <th style="width:160px"><span class="lang-en">Rent / Vacancy</span><span class="lang-zh">租金／空置</span></th>
+          <th style="width:130px"><span class="lang-en">Pipeline / Supply</span><span class="lang-zh">在建供給</span></th>
+          <th><span class="lang-en">Central Bank / Rate</span><span class="lang-zh">央行／利率</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="country">🇲🇾 Malaysia</td>
+          <td>NAPIC HPI · MHPI</td>
+          <td>iProperty / EdgeProp</td>
+          <td>NAPIC overhang</td>
+          <td>BNM (OPR)</td>
+        </tr>
+        <tr>
+          <td class="country">🇹🇼 Taiwan</td>
+          <td>Sinyi HPI · Yungching · MOI</td>
+          <td>591.com · MOI vacancy</td>
+          <td>MOI building permits</td>
+          <td>CBC</td>
+        </tr>
+        <tr>
+          <td class="country">🇯🇵 Japan</td>
+          <td>Kantei (used) · REINS · LIFULL</td>
+          <td>At Home · Suumo</td>
+          <td>MLIT housing starts</td>
+          <td>BoJ</td>
+        </tr>
+        <tr>
+          <td class="country">🇦🇺 Australia</td>
+          <td>Cotality (CoreLogic) HVI · ABS</td>
+          <td>SQM Research · Domain</td>
+          <td>HIA · ABS approvals</td>
+          <td>RBA</td>
+        </tr>
+        <tr>
+          <td class="country">🇳🇿 New Zealand</td>
+          <td>REINZ HPI</td>
+          <td>Trade Me · Tenancy Services</td>
+          <td>Stats NZ consents</td>
+          <td>RBNZ (OCR)</td>
+        </tr>
+        <tr>
+          <td class="country">🇬🇧 United Kingdom</td>
+          <td>ONS HPI · Land Registry · Rightmove</td>
+          <td>HomeLet · Zoopla</td>
+          <td>MHCLG · ONS new builds</td>
+          <td>BoE</td>
+        </tr>
+        <tr>
+          <td class="country">🇺🇸 United States</td>
+          <td>Case-Shiller · Zillow ZHVI · Redfin</td>
+          <td>RealPage · Apartment List</td>
+          <td>Census permits · NAHB</td>
+          <td>Fed (PMMS mortgage)</td>
+        </tr>
+        <tr>
+          <td class="country">🇨🇦 Canada</td>
+          <td>CREA HPI · Teranet</td>
+          <td>CMHC rental survey</td>
+          <td>StatCan starts</td>
+          <td>BoC</td>
+        </tr>
+        <tr>
+          <td class="country">🇸🇬 Singapore</td>
+          <td>URA PPI · SRX</td>
+          <td>SRX rental index</td>
+          <td>URA pipeline (REALIS)</td>
+          <td>MAS</td>
+        </tr>
+        <tr>
+          <td class="country">🇭🇰 Hong Kong</td>
+          <td>Centaline CCL · RVD</td>
+          <td>Midland · RVD</td>
+          <td>Lands Dept · TPB</td>
+          <td>HKMA</td>
+        </tr>
+        <tr>
+          <td class="country">🇰🇷 South Korea</td>
+          <td>KREB · KOSIS · MOLIT</td>
+          <td>R114 (Real Estate 114)</td>
+          <td>MOLIT housing starts</td>
+          <td>BoK</td>
+        </tr>
+        <tr>
+          <td class="country">🇹🇭 Thailand</td>
+          <td>Knight Frank · CBRE · REIC</td>
+          <td>BangkokPost · DDproperty</td>
+          <td>REIC pipeline</td>
+          <td>BOT</td>
+        </tr>
+        <tr>
+          <td class="country">🇻🇳 Vietnam</td>
+          <td>Cushman &amp; Wakefield · Savills · CBRE</td>
+          <td>Batdongsan</td>
+          <td>HoREA · Savills</td>
+          <td>SBV</td>
+        </tr>
+        <tr>
+          <td class="country">🇵🇭 Philippines</td>
+          <td>BSP RPPI · Colliers</td>
+          <td>Lamudi · Property24</td>
+          <td>Colliers pipeline</td>
+          <td>BSP</td>
+        </tr>
+        <tr>
+          <td class="country">🇮🇩 Indonesia</td>
+          <td>BI IHPR</td>
+          <td>Rumah123</td>
+          <td>Colliers / JLL Jakarta</td>
+          <td>BI</td>
+        </tr>
+        <tr>
+          <td class="country">🇪🇺 Eurozone (DE/FR/ES/IT/NL/PT/IE)</td>
+          <td>Eurostat · vdp · Notaires · INE · Idealista · Immobiliare · MyHome · Pararius</td>
+          <td>Idealista · Immobiliare · CSO</td>
+          <td>National statistics offices</td>
+          <td>ECB · BoE (UK separate)</td>
+        </tr>
+        <tr>
+          <td class="country">🇨🇭 Switzerland</td>
+          <td>Wüest Partner · Neho · IAZI</td>
+          <td>Comparis · Homegate</td>
+          <td>FSO Bauindex</td>
+          <td>SNB</td>
+        </tr>
+        <tr>
+          <td class="country">🇦🇪 UAE</td>
+          <td>DLD · Property Finder · Bayut</td>
+          <td>Property Finder rentals</td>
+          <td>DLD · REIDIN</td>
+          <td>CBUAE (USD-pegged)</td>
+        </tr>
+        <tr>
+          <td class="country">🇮🇳 India</td>
+          <td>ANAROCK · Knight Frank India · Magicbricks</td>
+          <td>99acres · Magicbricks</td>
+          <td>PropEquity</td>
+          <td>RBI</td>
+        </tr>
+        <tr>
+          <td class="country">🇹🇷 Turkey</td>
+          <td>TCMB RPPI · Endeksa</td>
+          <td>Sahibinden · Hepsiemlak</td>
+          <td>TÜİK</td>
+          <td>TCMB</td>
+        </tr>
+        <tr>
+          <td class="country">🇲🇽 🇧🇷 🇨🇱 🇦🇷 🇵🇪 🇨🇴 LATAM</td>
+          <td>SHF (MX) · FipeZap (BR) · BCCh UF (CL) · Zonaprop (AR) · BCRP (PE) · Banrep (CO)</td>
+          <td>Inmuebles24 · Zonaprop · Vivanuncios</td>
+          <td>National stats offices</td>
+          <td>Banxico · BCB · BCCh · BCRA · BCRP · Banrep</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note-box">
+      <span class="lang-en"><strong>Where two sources disagree:</strong> we report the official statistical agency figure (Case-Shiller, ONS, NAPIC, etc.) and use listings data (Zillow, Rightmove, Idealista) only for cross-checks or where official quarterly indices lag. Listings data is faster but skews to the active end of the market.</span>
+      <span class="lang-zh"><strong>當兩個來源互相牴觸：</strong>我們以官方統計機構數字為準（Case-Shiller、ONS、NAPIC 等），僅在需要交叉驗證或官方季度指數落後時使用房源資料（Zillow、Rightmove、Idealista）。房源資料較即時但偏向市場活躍端。</span>
+    </div>
+  </div>
+
+  <!-- TAX & POLICY SOURCES -->
+  <div class="section">
+    <div class="section-title"><span class="lang-en">TAX, STAMP DUTY &amp; FOREIGN-BUYER POLICY SOURCES</span><span class="lang-zh">稅務、印花稅與外國買家政策來源</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:170px"><span class="lang-en">Topic</span><span class="lang-zh">主題</span></th>
+          <th><span class="lang-en">Sources / Citations</span><span class="lang-zh">來源／引用</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="country"><span class="lang-en">Foreign buyer stamp duty</span><span class="lang-zh">外國買家印花稅</span></td>
+          <td>HMRC (UK SDLT non-resident surcharge), Australian Treasury (FIRB) &amp; state revenue offices, IRAS (SG ABSD), JTC (KR), MOI (TW), MoF (MY), Receita Federal (BR), DLD (UAE), HMRC Stamp Duty Land Tax</td>
+        </tr>
+        <tr>
+          <td class="country"><span class="lang-en">Capital gains / RPGT / SSD</span><span class="lang-zh">資本利得／RPGT／SSD</span></td>
+          <td>IRAS (SG SSD), IRBM (MY RPGT), NTA (JP), MoF Taiwan (LVITA), HMRC, IRS (US FIRPTA), CRA (CA), ATO (AU)</td>
+        </tr>
+        <tr>
+          <td class="country"><span class="lang-en">LTV caps / mortgage rules</span><span class="lang-zh">LTV 上限／房貸規則</span></td>
+          <td>Central bank macroprudential bulletins: BNM, CBC, BoK, RBNZ DTI, MAS</td>
+        </tr>
+        <tr>
+          <td class="country"><span class="lang-en">Visa / golden visa programs</span><span class="lang-zh">簽證／黃金簽證計畫</span></td>
+          <td>Government immigration portals: AIMA (PT), HiPo (GR), MM2H Centre (MY), GDRFA (UAE), DGM (TR), Spanish MAEC, Greek MFA</td>
+        </tr>
+        <tr>
+          <td class="country"><span class="lang-en">Currency / FX</span><span class="lang-zh">貨幣／匯率</span></td>
+          <td>BIS effective exchange rates, central bank reference rates, Bloomberg / Reuters spot</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note-box">
+      <span class="lang-en"><strong>Tax rates change.</strong> Stamp duty, CGT, and foreign-buyer rules are updated by governments without warning (Singapore raised ABSD overnight in 2023; Spain ended Golden Visa in 2025). Always confirm with a local lawyer or tax advisor before transacting. The figures shown are accurate as of the publication date stamped on each card.</span>
+      <span class="lang-zh"><strong>稅率會變。</strong>印花稅、資本利得稅、外國買家規則政府不預告即更新（新加坡 2023 年連夜上調 ABSD；西班牙 2025 年終止黃金簽證）。交易前請以當地律師或稅務顧問為準。本站數字以各卡片標示之發布日為準。</span>
+    </div>
+  </div>
+
+  <!-- TOP 5 / RANKING METHODOLOGY -->
+  <div class="section">
+    <div class="section-title"><span class="lang-en">TOP 5 CITY RANKING METHODOLOGY</span><span class="lang-zh">前 5 名城市排名方法</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:140px"><span class="lang-en">Factor</span><span class="lang-zh">因子</span></th>
+          <th style="width:80px"><span class="lang-en">5yr weight</span><span class="lang-zh">5 年權重</span></th>
+          <th style="width:80px"><span class="lang-en">10yr weight</span><span class="lang-zh">10 年權重</span></th>
+          <th><span class="lang-en">Rationale</span><span class="lang-zh">理由</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="country"><span class="lang-en">Carry spread</span><span class="lang-zh">利差</span></td><td class="mono">×2</td><td class="mono">×1</td><td><span class="lang-en">Drives near-term cash flow; less reliable over decades as rates cycle.</span><span class="lang-zh">驅動近期現金流；十年週期內利率多次循環故權重降低。</span></td></tr>
+        <tr><td class="country"><span class="lang-en">Supply tightness</span><span class="lang-zh">供給緊張度</span></td><td class="mono">×3</td><td class="mono">×3</td><td><span class="lang-en">Strongest predictor of price appreciation across both horizons.</span><span class="lang-zh">兩個時間尺度上對房價升值最強的預測因子。</span></td></tr>
+        <tr><td class="country"><span class="lang-en">Pipeline %</span><span class="lang-zh">在建供給</span></td><td class="mono">×2</td><td class="mono">×3</td><td><span class="lang-en">Signals incoming supply shock; crucial for 10yr structural bets.</span><span class="lang-zh">代表即將到來的供給衝擊；對 10 年結構性押注關鍵。</span></td></tr>
+        <tr><td class="country"><span class="lang-en">Vacancy</span><span class="lang-zh">空置率</span></td><td class="mono">×2</td><td class="mono">×2</td><td><span class="lang-en">Real-time tightness check; complements supply pipeline.</span><span class="lang-zh">即時緊張度查核；補強在建供給訊號。</span></td></tr>
+        <tr><td class="country"><span class="lang-en">Affordability (PTI)</span><span class="lang-zh">可負擔（PTI）</span></td><td class="mono">×1</td><td class="mono">×2</td><td><span class="lang-en">Lower PTI = more headroom for prices to grow before social/policy pushback.</span><span class="lang-zh">PTI 越低，房價成長空間越大，較不易引發社會或政策反彈。</span></td></tr>
+        <tr><td class="country"><span class="lang-en">10yr track record</span><span class="lang-zh">10 年增值紀錄</span></td><td class="mono">×1</td><td class="mono">×3</td><td><span class="lang-en">Past structural appreciation pattern; heavily weighted for long-horizon bets.</span><span class="lang-zh">過去結構性增值模式；長線押注高權重。</span></td></tr>
+        <tr><td class="country"><span class="lang-en">Momentum (YoY)</span><span class="lang-zh">動能（YoY）</span></td><td class="mono">×1</td><td class="mono">×0.5</td><td><span class="lang-en">Trend confirmation; smaller weight to avoid chasing peaks.</span><span class="lang-zh">趨勢確認；小權重以避免追高。</span></td></tr>
+      </tbody>
+    </table>
+    <div class="note-box">
+      <span class="lang-en"><strong>Caveat:</strong> Rankings are heuristic, not predictive. Single-event risks (war, sanctions, capital controls, currency crisis, sudden policy reversal) can override every fundamental factor in this table. Use rankings as a starting point for further due diligence, not as a buy signal.</span>
+      <span class="lang-zh"><strong>注意：</strong>排名為啟發式而非預測。單一事件風險（戰爭、制裁、資本管制、匯率危機、政策反轉）可能凌駕本表所有基本面因子。排名僅供進一步盡調起點，非買入訊號。</span>
+    </div>
+  </div>
+
+  <!-- VERSION -->
+  <div class="section">
+    <div class="section-title"><span class="lang-en">VERSION &amp; UPDATE LOG</span><span class="lang-zh">版本與更新記錄</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:130px"><span class="lang-en">Date</span><span class="lang-zh">日期</span></th>
+          <th><span class="lang-en">Change</span><span class="lang-zh">變更</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">2026-04-27</td>
+          <td><span class="lang-en">Methodology page first published. Compiled metric definitions, source matrix, and Top 5 ranking weights from the existing dashboard.</span><span class="lang-zh">方法論頁首次發布。彙整既有 dashboard 的指標定義、來源矩陣與前 5 名排名權重。</span></td>
+        </tr>
+        <tr>
+          <td class="mono">2026-Q1</td>
+          <td><span class="lang-en">Quarterly refresh: 84-city comparison table, mortgage rates, vacancy, pipeline.</span><span class="lang-zh">季度更新：84 城比較表、房貸利率、空置率、在建供給。</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer style="background:#fff;border-top:1px solid #dce8f5">
+  <div class="footer">
+    <span class="footer-l">INVESTMQUEST &middot; PROPERTY MONITOR</span>
+    <span class="footer-r">
+      <span class="lang-en">Methodology &middot; Last reviewed 2026-04-27</span>
+      <span class="lang-zh">方法論 &middot; 最後檢視 2026-04-27</span>
+    </span>
+  </div>
+</footer>
+
+<script>
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.textContent.trim()===(lang==='en'?'EN':'中文'));});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+}
+window.addEventListener('load',function(){
+  var saved='en';try{saved=localStorage.getItem('lang')||localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(saved);
+});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

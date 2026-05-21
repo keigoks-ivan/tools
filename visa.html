@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visa &amp; Residency by Investment | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e3a5f;line-height:1.5}
+a{color:inherit;text-decoration:none}
+
+/* HERO */
+.hero{background:linear-gradient(180deg,#0a1726 0%,#0f1e33 60%,#162e4d 100%);color:#e2ecf8;padding:48px 32px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-30%;right:-10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,0.10) 0%,transparent 60%);pointer-events:none}
+.hero-inner{max-width:min(1280px,96vw);margin:0 auto;position:relative}
+.hero-eyebrow{font-size:10px;letter-spacing:.18em;font-weight:700;color:#f59e0b;margin-bottom:12px}
+.hero-h1{font-size:38px;font-weight:800;color:#fff;line-height:1.12;letter-spacing:-.02em;margin-bottom:14px;max-width:840px}
+.hero-h1 em{color:#f59e0b;font-style:normal}
+.hero-sub{font-size:14px;color:#94a3b8;line-height:1.65;max-width:680px;margin-bottom:28px}
+.hero-stats{display:flex;gap:32px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);flex-wrap:wrap}
+.hero-stat .lbl{font-size:9px;letter-spacing:.12em;color:#5a8ab5;font-weight:600;margin-bottom:3px}
+.hero-stat .val{font-size:20px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.hero-stat .val.green{color:#22c55e}
+.hero-stat .val.amber{color:#f59e0b}
+.hero-stat .val.red{color:#f87171}
+@media(max-width:760px){.hero{padding:32px 16px}.hero-h1{font-size:26px}.hero-stat .val{font-size:16px}.hero-stats{gap:18px}}
+
+/* SECTION */
+.section{max-width:min(1280px,96vw);margin:0 auto;padding:36px 32px}
+.section-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.section-eye{font-size:10px;letter-spacing:.16em;font-weight:700;color:#3b82f6}
+.section-h2{font-size:22px;font-weight:700;color:#0f1e33;letter-spacing:-.01em;line-height:1.2;margin-top:4px}
+.section-sub{font-size:12.5px;color:#5a7a9a;margin-top:6px;max-width:680px;line-height:1.55}
+
+/* FILTER CHIPS */
+.chip-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.chip-lbl{font-size:10px;letter-spacing:.08em;font-weight:600;color:#94a3b8;margin-right:4px}
+.chip{padding:5px 11px;border:1px solid #dce8f5;background:#fff;color:#5a7a9a;font-size:11px;font-weight:500;border-radius:14px;cursor:pointer;font-family:inherit;transition:all .12s}
+.chip:hover{border-color:#3b82f6;color:#3b82f6}
+.chip.on{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+
+/* COMPARISON TABLE */
+.cmp-wrap{background:#fff;border:1px solid #dce8f5;border-radius:12px;overflow:auto;margin-bottom:32px}
+.cmp-tbl{width:100%;border-collapse:collapse;min-width:980px;font-size:11.5px}
+.cmp-tbl thead th{background:#f0f6ff;font-size:9.5px;letter-spacing:.06em;color:#5a7a9a;font-weight:700;padding:10px 12px;text-align:left;border-bottom:1px solid #dce8f5;white-space:nowrap;position:sticky;top:0;z-index:3}
+.cmp-tbl thead th.right{text-align:right}
+.cmp-tbl thead th.center{text-align:center}
+.cmp-tbl tbody td{padding:11px 12px;border-bottom:1px solid #f0f5fb;vertical-align:top;color:#1e3a5f;line-height:1.5}
+.cmp-tbl tbody tr:hover td{background:#f8fbff}
+.cmp-tbl tbody tr.row-closed td{opacity:0.6}
+.cmp-tbl .country-cell{font-weight:700;white-space:nowrap}
+.cmp-tbl .country-cell .flag{font-size:16px;margin-right:4px;vertical-align:middle}
+.cmp-tbl .threshold{font-weight:700;color:#0f1e33;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cmp-tbl .threshold-sub{font-size:9.5px;color:#94a3b8;margin-top:2px;font-weight:400}
+.cmp-tbl .pill{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:.04em;white-space:nowrap}
+.pill-citizen{background:#fef3c7;color:#92400e}
+.pill-pr{background:#dbeafe;color:#1e40af}
+.pill-residency{background:#dcfce7;color:#166534}
+.status-active{display:inline-flex;align-items:center;gap:4px;color:#16a34a;font-weight:700;font-size:10.5px}
+.status-active::before{content:'';width:6px;height:6px;border-radius:50%;background:#16a34a;display:inline-block}
+.status-caution{display:inline-flex;align-items:center;gap:4px;color:#d97706;font-weight:700;font-size:10.5px}
+.status-caution::before{content:'';width:6px;height:6px;border-radius:50%;background:#d97706;display:inline-block}
+.status-closed{display:inline-flex;align-items:center;gap:4px;color:#94a3b8;font-weight:700;font-size:10.5px}
+.status-closed::before{content:'×';color:#94a3b8;font-size:14px;line-height:1}
+
+/* PROGRAM CARDS */
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px}
+.prog-card{background:#fff;border:1px solid #dce8f5;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px;transition:border-color .15s,box-shadow .15s;position:relative;overflow:hidden}
+.prog-card:hover{border-color:#3b82f6;box-shadow:0 4px 16px rgba(15,30,51,0.06)}
+.prog-card[data-status="closed"]{opacity:0.65}
+.prog-card[data-status="caution"]::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#d97706}
+.prog-card[data-status="active"]::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#16a34a}
+.prog-card[data-status="closed"]::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#94a3b8}
+.prog-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.prog-flag{font-size:36px;line-height:1}
+.prog-titles{flex:1;min-width:0}
+.prog-country{font-size:10px;letter-spacing:.10em;color:#94a3b8;font-weight:600;margin-bottom:2px}
+.prog-name{font-size:17px;font-weight:700;color:#0f1e33;letter-spacing:-.01em;line-height:1.2}
+.prog-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.prog-bullets{display:flex;flex-direction:column;gap:8px}
+.prog-row{display:grid;grid-template-columns:120px 1fr;gap:10px;font-size:11.5px;align-items:baseline}
+.prog-row .k{font-size:9.5px;color:#94a3b8;letter-spacing:.05em;font-weight:600;text-transform:uppercase}
+.prog-row .v{color:#1e3a5f;line-height:1.5}
+.prog-row .v strong{color:#0f1e33;font-weight:700}
+.prog-note{font-size:11px;color:#5a7a9a;line-height:1.55;padding:10px 12px;background:#f8fbff;border-left:3px solid #3b82f6;border-radius:4px}
+.prog-note.warn{background:#fef9e7;border-left-color:#d97706;color:#92400e}
+.prog-foot{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#94a3b8;border-top:1px dashed #e2e8f0;padding-top:10px;flex-wrap:wrap;gap:6px}
+.prog-foot a{color:#3b82f6;font-weight:600}
+.prog-foot a:hover{text-decoration:underline}
+
+@media(max-width:480px){
+  .prog-card{padding:16px}
+  .prog-row{grid-template-columns:1fr;gap:2px}
+  .prog-row .k{margin-bottom:2px}
+  .prog-flag{font-size:28px}
+  .prog-name{font-size:15px}
+}
+
+/* TAX RED FLAGS */
+.tax-warn{background:#fff;border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:10px;padding:18px 22px;margin-bottom:24px}
+.tax-warn h3{font-size:13px;font-weight:700;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.tax-warn ul{padding-left:18px;font-size:11.5px;color:#5a7a9a;line-height:1.65}
+.tax-warn ul li{margin-bottom:5px}
+.tax-warn ul li strong{color:#92400e}
+
+/* DISCLAIMER */
+.disclaimer{font-size:10.5px;color:#94a3b8;line-height:1.6;background:#f0f6ff;border:1px solid #dce8f5;border-radius:8px;padding:12px 16px;margin-top:24px}
+.disclaimer strong{color:#5a7a9a}
+
+/* FOOTER */
+.foot{background:#0f1e33;color:#94a3b8;padding:22px 0;font-size:11px;margin-top:32px}
+.foot .inner{max-width:min(1280px,96vw);margin:0 auto;padding:0 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.foot .brand{font-weight:700;letter-spacing:.12em;color:#cbd5e1}
+.foot a{color:#5a8ab5}
+.foot a:hover{color:#3b82f6}
+
+.lang-zh{display:none}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="lang-en">VISA &amp; RESIDENCY BY INVESTMENT</span><span class="lang-zh">投資移民與居留</span></div>
+    <h1 class="hero-h1">
+      <span class="lang-en">Buy property. <em>Earn residency or citizenship.</em></span>
+      <span class="lang-zh">買房產，<em>換居留權或公民身份。</em></span>
+    </h1>
+    <p class="hero-sub">
+      <span class="lang-en">Active "golden visa" and citizenship-by-investment programs that accept property purchase or property-adjacent investment. Updated April 2026 — three EU programs ended in 2023–25, while UAE, Turkey, Greece, Hungary, MM2H and Indonesia remain active.</span>
+      <span class="lang-zh">目前仍接受房產或房產相關投資的「黃金簽證」與投資移民計畫。2026 年 4 月更新 — 2023–25 年間有三個歐盟計畫終止，而 UAE、土耳其、希臘、匈牙利、MM2H 與印尼仍開放中。</span>
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">ACTIVE PROGRAMS</span><span class="lang-zh">現役計畫</span></div><div class="val green" id="stat-active">7</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">UNDER REVIEW</span><span class="lang-zh">審查中</span></div><div class="val amber" id="stat-caution">2</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">CLOSED 2023–25</span><span class="lang-zh">2023–25 終止</span></div><div class="val red" id="stat-closed">3</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">LOWEST THRESHOLD</span><span class="lang-zh">最低門檻</span></div><div class="val">$130K</div></div>
+      <div class="hero-stat"><div class="lbl"><span class="lang-en">FASTEST CITIZENSHIP</span><span class="lang-zh">最快公民</span></div><div class="val">🇹🇷 6mo</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-hdr">
+    <div>
+      <div class="section-eye"><span class="lang-en">FILTER</span><span class="lang-zh">篩選</span></div>
+      <h2 class="section-h2"><span class="lang-en">Programs at a glance</span><span class="lang-zh">所有計畫一覽</span></h2>
+      <p class="section-sub"><span class="lang-en">Sort, filter, then drill into details below. Citizenship paths give a passport; PR / residency paths give long-term living rights.</span><span class="lang-zh">先篩選排序，再往下看詳情。公民路徑取得護照；PR／居留路徑取得長期居住權。</span></p>
+    </div>
+  </div>
+
+  <div class="chip-bar">
+    <span class="chip-lbl"><span class="lang-en">STATUS</span><span class="lang-zh">狀態</span></span>
+    <button class="chip on" data-f="status" data-v="all"><span class="lang-en">All</span><span class="lang-zh">全部</span></button>
+    <button class="chip" data-f="status" data-v="active"><span class="lang-en">✓ Active</span><span class="lang-zh">✓ 現役</span></button>
+    <button class="chip" data-f="status" data-v="caution"><span class="lang-en">⚠ Under review</span><span class="lang-zh">⚠ 審查中</span></button>
+    <button class="chip" data-f="status" data-v="closed"><span class="lang-en">× Closed</span><span class="lang-zh">× 已關閉</span></button>
+    <span class="chip-lbl" style="margin-left:18px"><span class="lang-en">PATH</span><span class="lang-zh">路徑</span></span>
+    <button class="chip on" data-f="path" data-v="all"><span class="lang-en">All</span><span class="lang-zh">全部</span></button>
+    <button class="chip" data-f="path" data-v="citizenship"><span class="lang-en">Citizenship</span><span class="lang-zh">公民</span></button>
+    <button class="chip" data-f="path" data-v="pr"><span class="lang-en">PR / Residency</span><span class="lang-zh">PR / 居留</span></button>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="cmp-wrap">
+    <table class="cmp-tbl" id="cmp-tbl">
+      <thead>
+        <tr>
+          <th><span class="lang-en">Country / Program</span><span class="lang-zh">國家／計畫</span></th>
+          <th><span class="lang-en">Status</span><span class="lang-zh">狀態</span></th>
+          <th><span class="lang-en">Path</span><span class="lang-zh">路徑</span></th>
+          <th class="right"><span class="lang-en">Min investment</span><span class="lang-zh">最低門檻</span></th>
+          <th><span class="lang-en">Investment type</span><span class="lang-zh">投資類型</span></th>
+          <th><span class="lang-en">Processing</span><span class="lang-zh">處理時間</span></th>
+          <th><span class="lang-en">Family</span><span class="lang-zh">家屬</span></th>
+          <th><span class="lang-en">Tax key</span><span class="lang-zh">稅務重點</span></th>
+        </tr>
+      </thead>
+      <tbody id="cmp-body"></tbody>
+    </table>
+  </div>
+
+  <!-- TAX WARNINGS -->
+  <div class="tax-warn">
+    <h3>⚠ <span class="lang-en">Tax red flags before you commit</span><span class="lang-zh">投資前必看的稅務地雷</span></h3>
+    <ul>
+      <li><span class="lang-en"><strong>Worldwide income tax exposure.</strong> Becoming tax resident in many of these countries means your global income is taxed there. Turkey, Greece, Hungary, Malta — all worldwide taxation if you live ≥183 days/year.</span><span class="lang-zh"><strong>全球所得稅暴露。</strong>取得這些國家稅務居民身份意味著全球所得在當地課稅。土耳其、希臘、匈牙利、馬爾他 — 居住 ≥183 天就要全球課稅。</span></li>
+      <li><span class="lang-en"><strong>Exit tax on unrealized gains.</strong> If you take residency in a country and later move, several jurisdictions tax unrealized capital gains as if you sold (e.g. some EU members).</span><span class="lang-zh"><strong>離境未實現利得稅。</strong>取得居留後再離開，部分國家會把未實現資本利得視同已賣出課稅（部分歐盟國家）。</span></li>
+      <li><span class="lang-en"><strong>Property minimum ≠ visa cost.</strong> Add: legal fees (1–7%), foreign-buyer stamp duty (varies), application fees ($5K–25K typical), agency commissions. Real out-of-pocket can be 15–25% above the headline number.</span><span class="lang-zh"><strong>房產門檻 ≠ 簽證總成本。</strong>還要加：律師費（1–7%）、外國買家印花稅、申請費（$5K–25K）、仲介佣金。實際支出常比標題數字高 15–25%。</span></li>
+      <li><span class="lang-en"><strong>Holding period before resale.</strong> Most programs require 3–7 years property holding before you can sell without losing the visa. Don't expect to flip.</span><span class="lang-zh"><strong>賣出前持有期限。</strong>多數計畫要求持有 3–7 年才能賣不失去身份。不要把這當短炒。</span></li>
+      <li><span class="lang-en"><strong>Citizenship vs PR is a meaningful difference.</strong> Turkey/Malta give a passport. Greece/Hungary/UAE/MM2H give residency only — citizenship comes after 7–10 years living + tax residency tests.</span><span class="lang-zh"><strong>公民 vs PR 有實質差別。</strong>土耳其／馬爾他給護照。希臘／匈牙利／UAE／MM2H 只給居留 — 公民身份要再 7–10 年居住＋稅務居民測試。</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="section-hdr">
+    <div>
+      <div class="section-eye"><span class="lang-en">PROGRAM DETAIL</span><span class="lang-zh">計畫詳情</span></div>
+      <h2 class="section-h2"><span class="lang-en">Active programs · what you actually get</span><span class="lang-zh">現役計畫 · 實際取得內容</span></h2>
+      <p class="section-sub"><span class="lang-en">Program-by-program breakdown of cost, timeline, family inclusion, residency requirements, and exit conditions.</span><span class="lang-zh">每個計畫的成本、時程、家屬納入、居住要求、退場條件詳細拆解。</span></p>
+    </div>
+  </div>
+
+  <div class="prog-grid" id="prog-grid"></div>
+
+  <div class="disclaimer" style="margin-top:24px">
+    <strong><span class="lang-en">Disclaimer:</span><span class="lang-zh">免責聲明：</span></strong>
+    <span class="lang-en">Information compiled from public government sources as of April 2026. Programs change frequently — always confirm current rules with official immigration portals or a qualified immigration lawyer before transacting. This page is not legal, tax, or immigration advice.</span>
+    <span class="lang-zh">資訊整理自公開政府來源，截至 2026 年 4 月。計畫變動頻繁 — 投資前務必向官方移民部門或合格移民律師確認最新規則。本頁不構成法律、稅務或移民建議。</span>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="inner">
+    <span class="brand">INVESTMQUEST &middot; PROPERTY MONITOR</span>
+    <span><a href="/methodology.html"><span class="lang-en">Methodology</span><span class="lang-zh">方法論</span></a> · <a href="/dashboard.html"><span class="lang-en">Dashboard</span><span class="lang-zh">儀表板</span></a> · <span class="lang-en">Last verified 2026-04-27</span><span class="lang-zh">最後驗證 2026-04-27</span></span>
+  </div>
+</footer>
+
+<script>
+/* ==========================================================
+   PROGRAM DATA — 12 programs (active / caution / closed)
+   ========================================================== */
+var PROGRAMS = [
+  {
+    code:'ae',flag:'\u{1F1E6}\u{1F1EA}',
+    country:{en:'United Arab Emirates',zh:'阿聯（杜拜）'},
+    name:{en:'UAE Golden Visa',zh:'阿聯黃金簽證'},
+    status:'active',
+    path:'pr',
+    pathLabel:{en:'10-year residency',zh:'10 年居留'},
+    minUSD:545000,
+    minDisp:{en:'AED 2M (~$545K)',zh:'AED 2M（約 $54.5 萬）'},
+    investType:{en:'Property purchase',zh:'房產購買'},
+    processing:{en:'30–60 days',zh:'30–60 天'},
+    family:{en:'Spouse + children + parents',zh:'配偶＋子女＋父母'},
+    tax:{en:'0% income / CGT (federal)',zh:'聯邦 0% 所得＋資本利得稅'},
+    detail:{
+      en:'AED 2M total (DLD valuation). 2026 update: mortgaged properties + off-plan from RERA-approved developers now both qualify, and you can combine multiple units to reach the threshold. Tax-free regime. Property registered in applicant name.',
+      zh:'AED 2M 總額（以 DLD 估值為準）。2026 更新：抵押房 + RERA 核准開發商的 off-plan 預售房現在都認可，且可累計多筆單位達標。零稅體制，房產須登記本人名下。'
+    },
+    note:{type:'good',en:'Best for: tax optimization + asset diversification + lifestyle hub. Singapore-grade infrastructure with zero personal tax. AED hard-pegged to USD.',zh:'適合：稅務優化＋資產多元化＋生活樞紐。新加坡級基建＋零個人稅。AED 固定釘住美元。'},
+    source:{label:'GDRFA / DLD',url:'https://u.ae/en/information-and-services/visa-and-emirates-id'}
+  },
+  {
+    code:'tr',flag:'\u{1F1F9}\u{1F1F7}',
+    country:{en:'Turkey',zh:'土耳其'},
+    name:{en:'Turkish Citizenship by Investment',zh:'土耳其投資公民'},
+    status:'active',
+    path:'citizenship',
+    pathLabel:{en:'Citizenship (passport)',zh:'公民護照'},
+    minUSD:400000,
+    minDisp:{en:'$400K property',zh:'$40 萬房產'},
+    investType:{en:'Property purchase (3yr hold)',zh:'房產（持有 3 年）'},
+    processing:{en:'6–9 months',zh:'6–9 個月'},
+    family:{en:'Spouse + children &lt;18',zh:'配偶＋未滿 18 歲子女'},
+    tax:{en:'Worldwide tax if resident',zh:'居民全球課稅'},
+    detail:{
+      en:'$400K total (one or multiple properties), held 3 years minimum. From May 2026, all payments must go through Güvenli Ödeme Sistemi (centralized escrow). GEDAŞ government valuation system tightened in Jan 2026 — if the official appraisal comes in even $1 below $400K, application is rejected. Same-day biometric submission now possible. No language test, no minimum residency.',
+      zh:'$40 萬總額（一筆或多筆房產），須持有 3 年以上。2026/5 起所有付款必須透過 Güvenli Ödeme Sistemi（集中託管）。2026/1 起 GEDAŞ 政府估值系統收緊 — 官方估值若低於 $40 萬一塊錢都會被拒。生物辨識現在可同日完成。無語言測試、無居住要求。'
+    },
+    note:{type:'warn',en:'Warning: TRY -87% vs USD 2018-2026. Buy USD/EUR-priced property only. Use a registered government appraiser BEFORE signing — over-valuation rejection is now common.',zh:'警告：里拉 8 年對美元 -87%。只買美元/歐元計價房產。簽約前先做政府登記估價 — 高估被拒近年常見。'},
+    source:{label:'Directorate General of Migration',url:'https://en.goc.gov.tr/'}
+  },
+  {
+    code:'my',flag:'\u{1F1F2}\u{1F1FE}',
+    country:{en:'Malaysia',zh:'馬來西亞'},
+    name:{en:'MM2H (4-tier · Silver / Gold / Platinum / SEZ)',zh:'MM2H（4 級制 · Silver / Gold / Platinum / SEZ）'},
+    status:'active',
+    path:'pr',
+    pathLabel:{en:'5–20yr renewable residency',zh:'5–20 年可續居留'},
+    minUSD:150000,
+    minDisp:{en:'$150K deposit + RM600K property (Silver)',zh:'$15 萬存款＋RM60 萬房產（Silver）'},
+    investType:{en:'Bank deposit + property purchase (both required)',zh:'銀行存款＋房產購買（兩者皆強制）'},
+    processing:{en:'4–8 months',zh:'4–8 個月'},
+    family:{en:'Spouse + children + parents',zh:'配偶＋子女＋父母'},
+    tax:{en:'Foreign income exempt until 2036',zh:'境外所得免稅至 2036 年'},
+    detail:{
+      en:'Four tiers (mainland 3 + SEZ/SFZ for Forest City / Iskandar). Silver: $150K deposit + RM600K property = 5yr renewable. Gold: $500K + RM1M = 15yr. Platinum: $1M + RM2M = 20yr (also allowed to be company director). SEZ: 10yr renewable for Forest City / IFZ-Iskandar. Both deposit AND property purchase are mandatory. Applicants under 50 must spend ≥90 days/year in Malaysia.',
+      zh:'4 級制（主流 3 級 + 森林城市／依斯干達 SEZ/SFZ）。Silver：$15 萬存款＋RM60 萬房產 = 5 年可續。Gold：$50 萬＋RM100 萬 = 15 年。Platinum：$100 萬＋RM200 萬 = 20 年（且可任公司董事）。SEZ：10 年可續，限森林城市／IFZ-依斯干達。存款與房產購買兩者皆強制。50 歲以下須每年居住 ≥90 天。'
+    },
+    note:{type:'good',en:'Best news: Malaysia extended foreign-source income tax exemption to 31 Dec 2036 (Budget 2025). Major confidence signal vs the 2026 cliff that was looming.',zh:'重大利多：馬來西亞境外所得免稅延長至 2036/12/31（2025 預算案）。原本 2026 到期的不確定性消除。'},
+    source:{label:'MM2H Official (mm2h.gov.my)',url:'https://www.mm2h.gov.my/'}
+  },
+  {
+    code:'gr',flag:'\u{1F1EC}\u{1F1F7}',
+    country:{en:'Greece',zh:'希臘'},
+    name:{en:'Greek Golden Visa (3-zone 2026)',zh:'希臘黃金簽證（2026 三區制）'},
+    status:'active',
+    path:'pr',
+    pathLabel:{en:'5yr PR · citizenship in 7yr',zh:'5 年 PR · 7 年後可申公民'},
+    minUSD:430000,
+    minDisp:{en:'€400K most regions / €800K Athens',zh:'€40 萬多數地區／€80 萬雅典等熱點'},
+    investType:{en:'Property purchase (or €250K heritage/conversion)',zh:'房產購買（或 €25 萬文化資產／商改住）'},
+    processing:{en:'2–6 months',zh:'2–6 個月'},
+    family:{en:'Spouse + children + parents',zh:'配偶＋子女＋父母'},
+    tax:{en:'Non-dom flat 7% foreign income (15yr)',zh:'Non-dom 境外所得 7%（限 15 年）'},
+    detail:{
+      en:'Three-zone system effective 2025+: €800K in Athens / Thessaloniki / Mykonos / Santorini / large islands; €400K in most other regions; €250K only for converting commercial buildings to residential, OR restoring heritage buildings. Airbnb / short-term rental of Golden Visa property is now BANNED (€50K fine + permit revocation). All transitional grandfathered deadlines passed in 2025.',
+      zh:'2025 年起三區制：雅典／薩洛尼卡／米科諾斯／聖托里尼／大島嶼 €80 萬；其他多數地區 €40 萬；€25 萬僅適用商改住或文化資產修復。黃金簽證房產現在禁止短租（Airbnb），違反罰 €5 萬＋撤證。2025 年過渡期已全部結束。'
+    },
+    note:{type:'good',en:'Best EU value still open. New: €250K stake in Greek startup (Elevate Greece registered) is now an alternative to property — useful if you want lower threshold without housing-market exposure.',zh:'歐盟現存最有性價比選項。新增：€25 萬投資希臘新創（Elevate Greece 登記）為替代路徑 — 適合想低門檻又不想沾房市的人。'},
+    source:{label:'Greek Ministry of Migration',url:'https://migration.gov.gr/en/'}
+  },
+  {
+    code:'hu',flag:'\u{1F1ED}\u{1F1FA}',
+    country:{en:'Hungary',zh:'匈牙利'},
+    name:{en:'Hungary Guest Investor Visa',zh:'匈牙利訪客投資簽證'},
+    status:'active',
+    path:'pr',
+    pathLabel:{en:'10-year residency',zh:'10 年居留'},
+    minUSD:270000,
+    minDisp:{en:'€250K real-estate fund',zh:'€25 萬房地產基金'},
+    investType:{en:'Real-estate fund / €1M property / €1M donation',zh:'房地產基金／€100 萬房產／€100 萬捐贈'},
+    processing:{en:'~6 months',zh:'~6 個月'},
+    family:{en:'Spouse + children',zh:'配偶＋子女'},
+    tax:{en:'Worldwide if resident, 15% flat',zh:'居民全球課稅，固定 15%'},
+    detail:{
+      en:'Relaunched July 2024 after 2017 closure. €250K route is via real-estate funds (not direct property). 10-year visa renewable. Hungary is in Schengen + EU, citizenship after 8 years residence.',
+      zh:'2017 年關閉後 2024/7 重啟。€25 萬路徑為房地產基金（非直接房產）。10 年簽證可續。匈牙利屬申根＋歐盟，居住 8 年後可申公民。'
+    },
+    note:{type:'good',en:'Cheapest EU + Schengen access. Direct property route is €1M (not €250K). Use the fund route for the headline price.',zh:'最便宜的歐盟＋申根入場券。直接房產路徑是 €100 萬（非 €25 萬）。要走基金路徑才是標題價。'},
+    source:{label:'Hungarian Immigration',url:'https://oif.gov.hu/'}
+  },
+  {
+    code:'id',flag:'\u{1F1EE}\u{1F1E9}',
+    country:{en:'Indonesia',zh:'印尼'},
+    name:{en:'Second Home Visa (KITAS)',zh:'第二家園簽證'},
+    status:'active',
+    path:'pr',
+    pathLabel:{en:'5 or 10 year visa',zh:'5 或 10 年簽證'},
+    minUSD:130000,
+    minDisp:{en:'IDR 2B (~$130K) deposit',zh:'IDR 20 億（約 $13 萬）存款'},
+    investType:{en:'Bank deposit OR Hak Pakai property',zh:'銀行存款 或 70 年使用權房產'},
+    processing:{en:'2–4 months',zh:'2–4 個月'},
+    family:{en:'Spouse + children',zh:'配偶＋子女'},
+    tax:{en:'Local-source taxation only',zh:'僅就印尼來源課稅'},
+    detail:{
+      en:'Two routes: (1) IDR 2B (~$130K) deposit OR property OR (2) luxury property &gt;$1M direct. 5-year visa renewable once for another 5 years. Foreigners only get Hak Pakai (70yr usage right, not freehold). Funds frozen during stay — withdrawal/sale prohibited. Pathway to ITAP permanent residency after 3 years living.',
+      zh:'兩條路：(1) IDR 20 億（約 $13 萬）存款／房產 或 (2) 直接買 $100 萬以上豪宅。5 年簽證可續一次再 5 年。外國人只能 Hak Pakai（70 年使用權，非永久產權）。在簽證期內資金凍結 — 不能提領或賣房。住滿 3 年後可申 ITAP 永居。'
+    },
+    note:{type:'info',en:'Lowest threshold in this list. But Hak Pakai limits exit liquidity — foreign buyers find title harder to resell. Bali tourist tax IDR 150K (~$10) per arrival since 2024.',zh:'本榜最低門檻。但 Hak Pakai 限制退出流動性 — 外國人接手較難。峇里島自 2024 起對每位入境遊客收 IDR 15 萬（約 $10）稅。'},
+    source:{label:'Indonesian Immigration',url:'https://www.imigrasi.go.id/'}
+  },
+  {
+    code:'hk',flag:'\u{1F1ED}\u{1F1F0}',
+    country:{en:'Hong Kong',zh:'香港'},
+    name:{en:'CIES (Capital Investment Entrant Scheme)',zh:'資本投資者入境計畫（CIES）'},
+    status:'active',
+    path:'pr',
+    pathLabel:{en:'7-year PR path',zh:'7 年永居路徑'},
+    minUSD:3850000,
+    minDisp:{en:'HK$30M (~$3.85M)',zh:'HK$3,000 萬（約 $385 萬）'},
+    investType:{en:'Approved investments (≤10% real estate)',zh:'核准投資組合（房產 ≤10%）'},
+    processing:{en:'4–6 months',zh:'4–6 個月'},
+    family:{en:'Spouse + dependent children',zh:'配偶＋受撫養子女'},
+    tax:{en:'Territorial — only HK income taxed',zh:'屬地稅制 — 僅香港來源課稅'},
+    detail:{
+      en:'Relaunched March 2024 after 2015 suspension. HK$30M total, of which HK$3M into Capital Investment Entrant Scheme Investment Portfolio, rest in stocks/bonds/funds. Real-estate cap: HK$10M of total. 7 years to PR.',
+      zh:'2015 年暫停後 2024/3 重啟。HK$3,000 萬總額，其中 HK$300 萬必須進「投資者組合」，其餘股票／債券／基金。房產上限：HK$1,000 萬。7 年取得永居。'
+    },
+    note:{type:'warn',en:'High threshold ($3.85M). Real estate is &lt;1/3 of allowed mix. Best suited for HNW already familiar with HK markets, not retail property buyers.',zh:'門檻高（$385 萬）。房產佔比 < 1/3。適合已熟悉香港市場的高資產淨值人士，非散戶買家。'},
+    source:{label:'InvestHK',url:'https://www.investhk.gov.hk/'}
+  },
+  {
+    code:'mt',flag:'\u{1F1F2}\u{1F1F9}',
+    country:{en:'Malta',zh:'馬爾他'},
+    name:{en:'MEIN (citizenship by naturalisation)',zh:'MEIN（特殊服務歸化）'},
+    status:'closed',
+    closedDate:'2025-07',
+    path:'citizenship',
+    pathLabel:{en:'(was) EU citizenship',zh:'（曾為）歐盟公民'},
+    minUSD:760000,
+    minDisp:{en:'€600K + property + bonds (was)',zh:'€60 萬＋房產＋債券（曾為）'},
+    investType:{en:'Donation + property + government bonds',zh:'捐贈＋房產＋政府債券'},
+    processing:{en:'—',zh:'—'},
+    family:{en:'Spouse + children + parents/grandparents',zh:'配偶＋子女＋父母／祖父母'},
+    tax:{en:'—',zh:'—'},
+    detail:{
+      en:'EU Court of Justice ruled against Malta on 29 April 2025, finding that "investor citizenship" violated EU citizenship principles. Malta officially terminated MEIN on 26 July 2025. Citizenships granted before that date remain valid; pending applications are in legal limbo. Malta has since announced a "merit-based" naturalization route (not investment-driven).',
+      zh:'歐洲法院 2025/4/29 裁決馬爾他違反歐盟公民原則。馬爾他於 2025/7/26 正式終止 MEIN。在此之前已授予的公民權維持有效；申請中案件法律地位未明。馬爾他已宣布改為「功績導向」歸化路徑（非投資驅動）。'
+    },
+    note:{type:'warn',en:'CLOSED. Cyprus PR is the closest EU residency-by-investment alternative left at this price point (~€300K).',zh:'已關閉。塞普勒斯 PR 是這個價位（約 €30 萬）剩下最近的歐盟居留選項。'},
+    source:{label:'EU Court Ruling C-181/23',url:'https://curia.europa.eu/'}
+  },
+  {
+    code:'cy',flag:'\u{1F1E8}\u{1F1FE}',
+    country:{en:'Cyprus',zh:'塞普勒斯'},
+    name:{en:'Cyprus PR (Fast Track / Category F)',zh:'塞普勒斯永居（快軌／F 類）'},
+    status:'active',
+    path:'pr',
+    pathLabel:{en:'Permanent Residency only',zh:'僅永久居留（無公民）'},
+    minUSD:325000,
+    minDisp:{en:'€300K property',zh:'€30 萬房產'},
+    investType:{en:'New-build property purchase',zh:'新建房產（限新屋）'},
+    processing:{en:'2–4 months',zh:'2–4 個月'},
+    family:{en:'Spouse + dependent children + parents',zh:'配偶＋受撫養子女＋父母'},
+    tax:{en:'Non-dom 17yr exemption',zh:'非住籍 17 年免稅'},
+    detail:{
+      en:'Citizenship route closed Nov 2020 (the famous "Cyprus passport" scheme). PR by Investment (Cat F) still open with €300K property + €50K annual income proof. Must visit Cyprus once every 2 years to maintain.',
+      zh:'公民路徑（著名的「塞普勒斯護照計畫」）2020/11 關閉。永居（F 類）仍開放，需 €30 萬房產＋年收入 €5 萬證明。每 2 年須訪塞 1 次以維持。'
+    },
+    note:{type:'info',en:'EU residency only — not a passport. Useful as Schengen-adjacent base. Citizenship path now requires 7 years physical residence + Greek language.',zh:'僅歐盟居留 — 非護照。可作申根周邊基地。公民路徑現需 7 年實際居住＋希臘語。'},
+    source:{label:'Cyprus Migration Dept',url:'https://moi.gov.cy/en/'}
+  },
+  {
+    code:'es',flag:'\u{1F1EA}\u{1F1F8}',
+    country:{en:'Spain',zh:'西班牙'},
+    name:{en:'Spanish Golden Visa',zh:'西班牙黃金簽證'},
+    status:'closed',
+    closedDate:'2025-04',
+    path:'pr',
+    pathLabel:{en:'(was) 2yr renewable',zh:'（曾為）2 年可續'},
+    minUSD:540000,
+    minDisp:{en:'€500K property (was)',zh:'€50 萬房產（曾為）'},
+    investType:{en:'Property',zh:'房產'},
+    processing:{en:'—',zh:'—'},
+    family:{en:'Spouse + children',zh:'配偶＋子女'},
+    tax:{en:'—',zh:'—'},
+    detail:{
+      en:'Officially terminated April 2025 after housing affordability concerns. Existing visa holders can renew until program fully wound down (~2027). Spanish Non-Lucrative Visa (€2,400/mo passive income) is the alternative residency path.',
+      zh:'因住房可負擔性問題 2025/4 正式終止。既有簽證持有人可續至計畫完全結束（~2027）。西班牙「非營利簽證」（每月 €2,400 被動收入）是替代居留路徑。'
+    },
+    note:{type:'warn',en:'CLOSED. If considering Spain, look at Non-Lucrative Visa or Beckham Law (24% flat tax for 6 years on Spanish income).',zh:'已關閉。若考慮西班牙，可看 Non-Lucrative Visa 或 Beckham Law（西班牙所得 6 年 24% 固定稅）。'},
+    source:{label:'Spanish MAEC',url:'https://www.exteriores.gob.es/'}
+  },
+  {
+    code:'pt',flag:'\u{1F1F5}\u{1F1F9}',
+    country:{en:'Portugal',zh:'葡萄牙'},
+    name:{en:'Portuguese Golden Visa (property route)',zh:'葡萄牙黃金簽證（房產路徑）'},
+    status:'closed',
+    closedDate:'2023-10',
+    path:'pr',
+    pathLabel:{en:'(property route closed)',zh:'（房產路徑已關閉）'},
+    minUSD:540000,
+    minDisp:{en:'€500K property (was)',zh:'€50 萬房產（曾為）'},
+    investType:{en:'Property (closed); funds still open',zh:'房產（已關）；基金仍開'},
+    processing:{en:'—',zh:'—'},
+    family:{en:'Spouse + children + parents',zh:'配偶＋子女＋父母'},
+    tax:{en:'NHR ended 2024',zh:'NHR 優惠 2024 結束'},
+    detail:{
+      en:'Property route eliminated October 2023. Investment funds (€500K) and job creation routes remain open but are not property-linked. NHR tax regime ended for new applicants in 2024 (replaced by limited IFICI for science/research).',
+      zh:'房產路徑 2023/10 取消。投資基金（€50 萬）與創造就業路徑仍開但非房產相關。NHR 稅務優惠 2024 起新申請者不適用（改為僅限科研的 IFICI）。'
+    },
+    note:{type:'warn',en:'CLOSED for property buyers. Funds path still works but bears different risk profile (illiquid private equity / VC funds).',zh:'房產買家路徑已關。基金路徑仍可走但風險特性不同（不流動的私募／創投基金）。'},
+    source:{label:'AIMA Portugal',url:'https://aima.gov.pt/'}
+  },
+  {
+    code:'ie',flag:'\u{1F1EE}\u{1F1EA}',
+    country:{en:'Ireland',zh:'愛爾蘭'},
+    name:{en:'Ireland IIP (Immigrant Investor Programme)',zh:'愛爾蘭 IIP 投資移民計畫'},
+    status:'closed',
+    closedDate:'2023-02',
+    path:'pr',
+    pathLabel:{en:'(closed)',zh:'（已關閉）'},
+    minUSD:1100000,
+    minDisp:{en:'€1M (was)',zh:'€100 萬（曾為）'},
+    investType:{en:'Enterprise / Fund / Trust / REIT',zh:'企業／基金／信託／REIT'},
+    processing:{en:'—',zh:'—'},
+    family:{en:'Spouse + children',zh:'配偶＋子女'},
+    tax:{en:'—',zh:'—'},
+    detail:{
+      en:'Closed February 2023. Was never property-direct (REIT was one of four options). Existing applications continued processing. No replacement program announced.',
+      zh:'2023/2 關閉。從未直接房產（REIT 是四個選項之一）。既有申請持續處理。無替代計畫公告。'
+    },
+    note:{type:'warn',en:'CLOSED. Ireland has no current investor immigration path. Standard Critical Skills Employment Permit is the realistic route.',zh:'已關閉。愛爾蘭目前無投資移民路徑。Critical Skills Employment Permit 是實際路徑。'},
+    source:{label:'Irish Naturalisation Service',url:'https://www.irishimmigration.ie/'}
+  }
+];
+
+/* ==========================================================
+   RENDER
+   ========================================================== */
+var lang='en';
+var filterStatus='all', filterPath='all';
+
+function getLang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function fmtMoney(usd){if(usd>=1e6)return '$'+(usd/1e6).toFixed(2)+'M';if(usd>=1e3)return '$'+Math.round(usd/1e3)+'K';return '$'+usd;}
+function statusLabel(s,lng){
+  if(s==='active')return '<span class="status-active">'+(lng==='zh'?'現役':'Active')+'</span>';
+  if(s==='caution')return '<span class="status-caution">'+(lng==='zh'?'審查中':'Under review')+'</span>';
+  if(s==='closed')return '<span class="status-closed">'+(lng==='zh'?'已關閉':'Closed')+'</span>';
+  return s;
+}
+function pathPill(p,label,lng){
+  var cls=p==='citizenship'?'pill-citizen':p==='pr'?'pill-pr':'pill-residency';
+  return '<span class="pill '+cls+'">'+label+'</span>';
+}
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=l==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=l==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  try{localStorage.setItem('lang',l);}catch(e){}
+  renderAll();
+}
+function setFilter(f,v){
+  if(f==='status')filterStatus=v;
+  if(f==='path')filterPath=v;
+  document.querySelectorAll('.chip[data-f="'+f+'"]').forEach(function(c){c.classList.toggle('on',c.dataset.v===v);});
+  renderAll();
+}
+function matchFilter(p){
+  if(filterStatus!=='all' && p.status!==filterStatus)return false;
+  if(filterPath!=='all' && p.path!==filterPath)return false;
+  return true;
+}
+function renderTable(){
+  var lng=getLang();
+  var rows=PROGRAMS.filter(matchFilter).map(function(p){
+    var cls=p.status==='closed'?'row-closed':'';
+    return '<tr class="'+cls+'">'+
+      '<td class="country-cell"><span class="flag">'+p.flag+'</span>'+(lng==='zh'?p.country.zh:p.country.en)+'<div style="font-size:9.5px;color:#94a3b8;font-weight:500;margin-top:2px">'+(lng==='zh'?p.name.zh:p.name.en)+'</div></td>'+
+      '<td>'+statusLabel(p.status,lng)+(p.closedDate?'<div style="font-size:9px;color:#94a3b8;margin-top:2px">'+p.closedDate+'</div>':'')+'</td>'+
+      '<td>'+pathPill(p.path,(lng==='zh'?p.pathLabel.zh:p.pathLabel.en),lng)+'</td>'+
+      '<td class="right"><div class="threshold">'+fmtMoney(p.minUSD)+'</div><div class="threshold-sub">'+(lng==='zh'?p.minDisp.zh:p.minDisp.en)+'</div></td>'+
+      '<td>'+(lng==='zh'?p.investType.zh:p.investType.en)+'</td>'+
+      '<td>'+(lng==='zh'?p.processing.zh:p.processing.en)+'</td>'+
+      '<td>'+(lng==='zh'?p.family.zh:p.family.en)+'</td>'+
+      '<td>'+(lng==='zh'?p.tax.zh:p.tax.en)+'</td>'+
+      '</tr>';
+  }).join('');
+  document.getElementById('cmp-body').innerHTML=rows||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#94a3b8">'+(lng==='zh'?'無符合條件的計畫':'No programs match these filters')+'</td></tr>';
+}
+function renderCards(){
+  var lng=getLang();
+  /* show only active + caution in detail cards; closed shown in table only */
+  var visible=PROGRAMS.filter(function(p){return matchFilter(p) && p.status!=='closed';});
+  var html=visible.map(function(p){
+    var noteCls=p.note.type==='warn'?'warn':'';
+    return '<div class="prog-card" data-status="'+p.status+'">'+
+      '<div class="prog-hdr">'+
+        '<div style="display:flex;gap:12px;align-items:center;flex:1;min-width:0">'+
+          '<span class="prog-flag">'+p.flag+'</span>'+
+          '<div class="prog-titles">'+
+            '<div class="prog-country">'+(lng==='zh'?p.country.zh:p.country.en)+'</div>'+
+            '<div class="prog-name">'+(lng==='zh'?p.name.zh:p.name.en)+'</div>'+
+            '<div class="prog-pills">'+pathPill(p.path,(lng==='zh'?p.pathLabel.zh:p.pathLabel.en),lng)+statusLabel(p.status,lng)+'</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="prog-bullets">'+
+        '<div class="prog-row"><div class="k">'+(lng==='zh'?'最低投資':'Min investment')+'</div><div class="v"><strong>'+fmtMoney(p.minUSD)+'</strong> · '+(lng==='zh'?p.minDisp.zh:p.minDisp.en)+'</div></div>'+
+        '<div class="prog-row"><div class="k">'+(lng==='zh'?'投資類型':'Type')+'</div><div class="v">'+(lng==='zh'?p.investType.zh:p.investType.en)+'</div></div>'+
+        '<div class="prog-row"><div class="k">'+(lng==='zh'?'處理時間':'Processing')+'</div><div class="v">'+(lng==='zh'?p.processing.zh:p.processing.en)+'</div></div>'+
+        '<div class="prog-row"><div class="k">'+(lng==='zh'?'家屬納入':'Family')+'</div><div class="v">'+(lng==='zh'?p.family.zh:p.family.en)+'</div></div>'+
+        '<div class="prog-row"><div class="k">'+(lng==='zh'?'稅務':'Tax')+'</div><div class="v">'+(lng==='zh'?p.tax.zh:p.tax.en)+'</div></div>'+
+      '</div>'+
+      '<div style="font-size:11px;color:#5a7a9a;line-height:1.6">'+(lng==='zh'?p.detail.zh:p.detail.en)+'</div>'+
+      '<div class="prog-note '+noteCls+'">'+(lng==='zh'?p.note.zh:p.note.en)+'</div>'+
+      '<div class="prog-foot">'+
+        '<span>'+(lng==='zh'?'官方來源：':'Source: ')+'<a href="'+p.source.url+'" target="_blank" rel="noopener">'+p.source.label+' ↗</a></span>'+
+        '<span>Verified 2026-04</span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('prog-grid').innerHTML=html||'<div style="grid-column:1/-1;text-align:center;padding:32px;color:#94a3b8;font-size:12px">'+(lng==='zh'?'無符合條件的計畫':'No programs match these filters')+'</div>';
+}
+function updateStats(){
+  document.getElementById('stat-active').textContent=PROGRAMS.filter(function(p){return p.status==='active';}).length;
+  document.getElementById('stat-caution').textContent=PROGRAMS.filter(function(p){return p.status==='caution';}).length;
+  document.getElementById('stat-closed').textContent=PROGRAMS.filter(function(p){return p.status==='closed';}).length;
+}
+function renderAll(){renderTable();renderCards();}
+
+document.querySelectorAll('.chip').forEach(function(c){
+  c.addEventListener('click',function(){setFilter(c.dataset.f,c.dataset.v);});
+});
+
+window.addEventListener('load',function(){
+  updateStats();
+  setLang(getLang());
+});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

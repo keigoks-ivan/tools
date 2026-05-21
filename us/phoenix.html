@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Phoenix Deep Dive | U.S. Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}.city-dropdown{position:relative}.city-dropdown-menu{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:150px;z-index:100}.city-dropdown-menu.open{display:block}.city-dropdown-menu a{display:block;padding:9px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.city-dropdown-menu a:hover{background:#f4f7fc}.city-dropdown-menu a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../tw/tw.css">
+<style>
+  .report-container{max-width:860px;margin:0 auto;padding:32px 20px}.report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}.report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}.report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}.report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}.report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}.report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}.report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+  .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}.chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}.chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}.chart-note.green{color:#16a34a}.chart-note.orange{color:#d97706}.chart-note.red{color:#dc2626}.chart-note.navy{color:#1e3a5f}
+  .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}.report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}.report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}.report-chart-card p{font-size:10px!important;color:#5a7a9a!important;line-height:1.5!important;margin-bottom:8px!important;font-family:Inter,sans-serif!important}
+  .toc-box{background:#fff;border:1px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:0;margin:0 0 28px;font-family:'Inter',sans-serif}.toc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none}.toc-toggle{background:none;border:none;color:#5a7a9a;font-size:14px;cursor:pointer;padding:0 4px;line-height:1}.toc-list{padding:4px 16px 14px;display:flex;flex-direction:column;gap:4px}.toc-list a{font-size:13px;color:#1e3a5f;text-decoration:none;padding:5px 8px;border-radius:4px;display:block;border-left:2px solid transparent;transition:all .15s}.toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;padding-left:12px}.toc-collapsed .toc-list{display:none}.toc-collapsed .toc-toggle{transform:rotate(180deg)}
+  .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}.report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+  .side-nav{position:fixed;top:50%;right:max(16px,calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}.side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}.side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}.side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}.side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}.side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600}.side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}.side-nav a:hover .side-nav-label{color:#1e3a5f}
+  @media(max-width:1100px){.side-nav{display:none}}@media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="report-container">
+  <nav class="side-nav" id="sideNav">
+    <a href="#sec-exec" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Exec Summary</span><span class="side-nav-label lang-zh" style="display:none">執行摘要</span></a>
+    <a href="#sec-price" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Price Trend</span><span class="side-nav-label lang-zh" style="display:none">房價走勢</span></a>
+    <a href="#sec-correction" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">The Correction</span><span class="side-nav-label lang-zh" style="display:none">修正解析</span></a>
+    <a href="#sec-water" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Water Scarcity</span><span class="side-nav-label lang-zh" style="display:none">水資源稀缺</span></a>
+    <a href="#sec-neighborhood" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Neighborhoods</span><span class="side-nav-label lang-zh" style="display:none">社區分化</span></a>
+    <a href="#sec-rent" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Rent Control</span><span class="side-nav-label lang-zh" style="display:none">租管</span></a>
+    <a href="#sec-outlook" class="side-nav-item"><span class="side-nav-dot"></span><span class="side-nav-label lang-en">Outlook</span><span class="side-nav-label lang-zh" style="display:none">展望</span></a>
+  </nav>
+  <div class="report-header">
+    <div class="lang-en"><h1>PHOENIX &mdash; DEEP DIVE</h1><div class="report-meta">April 2026 &middot; Data: Case-Shiller PHXRSA / Arizona REALTORS&reg; / Houzeo / ADWR / JVM Lending</div></div>
+    <div class="lang-zh" style="display:none"><h1>鳳凰城——深度分析</h1><div class="report-meta">2026年4月 &middot; 數據：Case-Shiller PHXRSA / 亞利桑那房地產商協會 / Houzeo / ADWR / JVM Lending</div></div>
+  </div>
+  <div class="report-body">
+    <div class="toc-box" id="tocBox"><div class="toc-header" onclick="toggleToc()"><span class="lang-en">&#x1F4CB; In This Report</span><span class="lang-zh" style="display:none">&#x1F4CB; 本報告涵蓋</span><button class="toc-toggle" id="tocToggle">&#x25B2;</button></div>
+      <div class="toc-list" id="tocList">
+        <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+        <a href="#sec-price" onclick="closeTocMobile()"><span class="lang-en">2. Price Trend: Pandemic Peak &amp; Correction</span><span class="lang-zh" style="display:none">2. 房價走勢：疫情峰值與修正</span></a>
+        <a href="#sec-correction" onclick="closeTocMobile()"><span class="lang-en">3. The Correction: Investor Retreat &amp; Normalization</span><span class="lang-zh" style="display:none">3. 修正解析：投資者撤退與正常化</span></a>
+        <a href="#sec-water" onclick="closeTocMobile()"><span class="lang-en">4. Water Scarcity: The Long-Term Structural Risk</span><span class="lang-zh" style="display:none">4. 水資源稀缺：長期結構性風險</span></a>
+        <a href="#sec-neighborhood" onclick="closeTocMobile()"><span class="lang-en">5. Neighborhood Divergence: Scottsdale vs Maricopa</span><span class="lang-zh" style="display:none">5. 社區分化：史考茲代爾 vs 馬里科帕</span></a>
+        <a href="#sec-rent" onclick="closeTocMobile()"><span class="lang-en">6. Rent Control: Arizona&rsquo;s Total Preemption</span><span class="lang-zh" style="display:none">6. 租管：亞州完全先占</span></a>
+        <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">7. Outlook 2026&ndash;2028</span><span class="lang-zh" style="display:none">7. 展望 2026&ndash;2028</span></a>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+    <div class="lang-en">
+      <p>Phoenix's housing market in 2026 represents the textbook case study of the American sunbelt pandemic cycle: extreme appreciation driven by migration and cheap money, followed by correction as both tailwinds reversed, now settling into a multi-speed recovery defined by neighborhood-level divergence. The Case-Shiller Phoenix index (PHXRSA) reached a peak of <strong>343</strong> in June 2022 &mdash; a 111% increase from January 2015 &mdash; before correcting to 330 by February 2025, a peak-to-trough decline of 3.8% on the CS metric. Phoenix median home price (city proper) stood at <strong>$444,000</strong> in February 2026, down 1.33% YoY. Scottsdale, 15 miles northeast, posted a median of <strong>$1.0M</strong> in December 2025, up 15% YoY. These two figures from the same metro illustrate the defining market dynamic: Phoenix 2026 is not one market &mdash; it is a portfolio of diverging submarkets.</p>
+      <p>The correction from the 2022 peak has been orderly rather than distressed. Arizona inventory reached <strong>27,000+</strong> active statewide listings in May 2025 &mdash; a level not seen in nearly a decade &mdash; but this reflects normalization from the extreme lows of 2021 rather than distress-driven supply. Approximately 50% of Arizona homeowners hold more than $250,000 in equity &mdash; a buffer against any demand-driven price correction. The market has moved to approximately 4.4 months of supply &mdash; balanced market territory.</p>
+      <p>The structural risk unique to Phoenix is water. Arizona obtains approximately <strong>41%</strong> of its water supply from groundwater pumping, and groundwater levels have been declining for decades. A 2023 state review found that several new subdivisions had insufficient groundwater for 100-year assured supply &mdash; triggering the state to halt some new home construction permits. This does not threaten near-term prices, but it fundamentally caps the decades-long growth trajectory that has characterized Phoenix since the 1980s.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2026年鳳凰城住宅市場是美國陽光地帶疫情週期的教科書案例研究。Case-Shiller鳳凰城指數（PHXRSA）在2022年6月達到<strong>343</strong>的峰值——自2015年1月以來漲幅111%——然後修正至2025年2月的330，峰值至谷值下跌3.8%。2026年2月鳳凰城市房屋中位數為<strong>444,000美元</strong>，年降1.33%。史考茲代爾在2025年12月錄得<strong>100萬美元</strong>的中位數，年增15%。來自同一都會區的這兩個數字說明了決定性的市場動態：2026年的鳳凰城不是一個市場——而是分化的子市場組合。</p>
+      <p>從2022年峰值的修正是有序而非困境驅動的。亞利桑那州庫存在2025年5月達到<strong>27,000套</strong>以上全州活躍掛牌——近十年未見的水平。約50%的亞利桑那州業主持有超過250,000美元的淨值——抵禦任何需求驅動的價格修正的緩衝。市場已移至約4.4個月供給——均衡市場範圍。</p>
+      <p>鳳凰城獨有的結構性風險是水資源。亞利桑那州約<strong>41%</strong>的水源來自地下水抽取，地下水位已下降數十年。2023年一項州級審查發現部分新住宅項目的地下水不足以保證100年確定供給——觸發州政府暫停部分新建房屋許可。這不會威脅近期價格，但從根本上限制了自1980年代以來鳳凰城特有的數十年增長軌跡。</p>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">CS PHOENIX (FEB 2025)</span><span class="lang-zh" style="display:none">CS鳳凰城指數（2025年2月）</span></div><div class="kpi-value">330</div><span class="kpi-badge badge-orange"><span class="lang-en">PHXRSA &middot; Peak: 343 (Jun 2022) &middot; YoY -1.5%</span><span class="lang-zh" style="display:none">PHXRSA &middot; 峰值：343（2022年6月）&middot; 年增-1.5%</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">PHOENIX CITY MEDIAN (FEB 2026)</span><span class="lang-zh" style="display:none">鳳凰城市中位數（2026年2月）</span></div><div class="kpi-value">$444K</div><span class="kpi-badge badge-orange"><span class="lang-en">Houzeo &middot; YoY -1.33% &middot; 65 days on market</span><span class="lang-zh" style="display:none">Houzeo &middot; 年降1.33% &middot; 上市65天</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">PEAK-TO-CURRENT CS DECLINE</span><span class="lang-zh" style="display:none">指數較峰值跌幅</span></div><div class="kpi-value">-3.8% CS</div><span class="kpi-badge badge-orange"><span class="lang-en">343 peak &rarr; 330 &middot; Pandemic surge: +111% (2015&rarr;peak)</span><span class="lang-zh" style="display:none">343峰值→330 &middot; 疫情漲幅：+111%（2015→峰值）</span></span></div>
+      <div class="kpi-card orange"><div class="kpi-label"><span class="lang-en">ARIZONA ACTIVE LISTINGS</span><span class="lang-zh" style="display:none">亞州活躍掛牌</span></div><div class="kpi-value">27,000+</div><span class="kpi-badge badge-orange"><span class="lang-en">May 2025 statewide &middot; Near decade high &middot; 4.4mo supply</span><span class="lang-zh" style="display:none">2025年5月全州 &middot; 近十年高位 &middot; 4.4個月供給</span></span></div>
+      <div class="kpi-card green"><div class="kpi-label"><span class="lang-en">SCOTTSDALE MEDIAN</span><span class="lang-zh" style="display:none">史考茲代爾中位數</span></div><div class="kpi-value">$1.0M</div><span class="kpi-badge badge-green"><span class="lang-en">Dec 2025 &middot; YoY +15% &middot; vs Phoenix city $444K</span><span class="lang-zh" style="display:none">2025年12月 &middot; 年增+15% &middot; 對比鳳凰城市$444K</span></span></div>
+      <div class="kpi-card red"><div class="kpi-label"><span class="lang-en">GROUNDWATER SUPPLY</span><span class="lang-zh" style="display:none">地下水供應比例</span></div><div class="kpi-value">41%</div><span class="kpi-badge badge-red"><span class="lang-en">Of AZ water &middot; Supply declining &middot; Long-term structural risk</span><span class="lang-zh" style="display:none">佔亞州水源 &middot; 供應下降中 &middot; 長期結構性風險</span></span></div>
+    </div>
+
+    <!-- 2 -->
+    <h2 id="sec-price"><span class="lang-en">PRICE TREND: PANDEMIC PEAK &amp; CORRECTION</span><span class="lang-zh" style="display:none">房價走勢：疫情峰值與修正</span></h2>
+    <div class="lang-en">
+      <p>Phoenix's price trajectory from 2015 to 2025 is one of the most extreme in modern U.S. real estate history. The CS Phoenix index rose from approximately 155 in January 2015 to 343 at the June 2022 peak &mdash; a <strong>121%</strong> increase in 7.5 years, making Phoenix the single largest appreciator in the CS 20-city composite. The pandemic phase (2020&ndash;2022) alone saw the index rise 53% &mdash; the fastest two-year appreciation in Phoenix history.</p>
+      <p>The correction has been significant but contained. From the June 2022 peak of 343, the CS index declined approximately 12&ndash;13% to a trough of approximately 295&ndash;300 in early 2023, before recovering to 330 by February 2025. City-level median data tells a similar story: from a pandemic peak of approximately $453,000 (2022), the Phoenix city median declined to approximately $425,000 (2023 trough) before partially recovering to $444,000&ndash;$450,000 by late 2025. For a buy-and-hold buyer who entered in 2019, Phoenix remains a strong appreciation story; for a buyer who purchased at the 2022 peak, the real (inflation-adjusted) return through 2026 is modestly negative.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>鳳凰城2015至2025年的房價走勢是現代美國房地產史上最極端的之一。CS鳳凰城指數從2015年1月的約155升至2022年6月峰值的343——7.5年漲幅<strong>121%</strong>，使鳳凰城在此期間成為CS 20城複合指數中單一漲幅最大的城市。疫情階段（2020至2022年）本身指數上漲53%——鳳凰城歷史上最快的兩年升值。</p>
+      <p>修正重大但可控。從2022年6月343的峰值，CS指數下跌約12至13%至2023年初約295至300的谷底，然後到2025年2月恢復至330。城市層面中位數數據呈現類似故事：從約453,000美元的疫情峰值（2022年），鳳凰城市中位數降至約425,000美元（2023年谷底），然後部分回升至2025年底的444,000至450,000美元。對於2019年入市的持有型買家，鳳凰城仍是強勁的升值故事；對於在2022年峰值購買的買家，到2026年的實際回報為小幅負值。</p>
+    </div>
+    <div class="report-chart-grid">
+      <div class="report-chart-card"><h4><span class="lang-en">CS Phoenix Index + YoY% (2015&ndash;2025)</span><span class="lang-zh" style="display:none">CS鳳凰城指數 + 年增率（2015&ndash;2025）</span></h4><p><span class="lang-en">SA, Jan 2000=100 &middot; FRED PHXRSA</span><span class="lang-zh" style="display:none">季調，2000年1月=100 &middot; FRED PHXRSA</span></p><div id="chartPHXPrice" style="height:220px"></div><p class="chart-note orange"><span class="lang-en">Phoenix: +121% (Jan 2015&rarr;Jun 2022) = largest CS 20-city gain. Peak-to-trough: -12% CS. Feb 2025: 330, recovered to ~96% of peak</span><span class="lang-zh" style="display:none">鳳凰城：+121%（2015年1月→2022年6月）=CS 20城最大漲幅。峰值至谷值：-12% CS。2025年2月：330，恢復至峰值約96%</span></p></div>
+      <div class="report-chart-card"><h4><span class="lang-en">Phoenix City Median Price 2015&ndash;2025</span><span class="lang-zh" style="display:none">鳳凰城市中位數房價 2015&ndash;2025</span></h4><p><span class="lang-en">Source: Houzeo / AZ REALTORS&reg;</span><span class="lang-zh" style="display:none">來源：Houzeo / 亞州房地產商協會</span></p><div id="chartPHXMedian" style="height:220px"></div><p class="chart-note orange"><span class="lang-en">City median: $293K (Jan 2020) &rarr; $453K (2022 peak) = +55% in 2 years. Now $444K. Most of pandemic gain retained</span><span class="lang-zh" style="display:none">城市中位數：$293K（2020年1月）→$453K（2022年峰值）=2年+55%。現$444K。大部分疫情漲幅得以保留</span></p></div>
+    </div>
+
+    <!-- 3 -->
+    <h2 id="sec-correction"><span class="lang-en">THE CORRECTION: INVESTOR RETREAT &amp; NORMALIZATION</span><span class="lang-zh" style="display:none">修正解析：投資者撤退與正常化</span></h2>
+    <div class="lang-en">
+      <p>Phoenix's correction from the 2022 peak has a distinct causal structure. The primary driver was investor retreat &mdash; the unwinding of pandemic-era speculative buying by individual investors, iBuyers (Opendoor, Offerpad, Zillow Offers), and small-scale landlords. When rates rose and appreciation expectations reversed, this cohort faced simultaneous pressure: high acquisition costs, elevated carrying costs, and falling rental yields. The result was a supply surge that took Arizona active listings from pandemic-era lows of approximately 6,000 to <strong>27,000+</strong> by May 2025.</p>
+      <p>The foreclosure picture tells the correction story cleanly. Maricopa County trustee deed filings totaled 317 in Q3 2025 &mdash; up 33% from Q2 but representing approximately 0.03% of total housing stock. During the 2009 GFC, Maricopa County had over 10,000 homes in pre-foreclosure. Most current distress is investor-owned: homeowners with sub-4% mortgages have almost no incentive to sell. The correction is an investor correction, not a homeowner correction &mdash; a structurally different and more benign phenomenon.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>鳳凰城從2022年峰值的修正有明顯不同的因果結構。主要驅動力是投資者撤退——個人投資者、iBuyer和小規模房東的疫情時期投機性買入的平倉。當利率上升且升值預期逆轉時，供給激增使亞利桑那州活躍掛牌從約6,000套的低位升至2025年5月的<strong>27,000套</strong>以上。</p>
+      <p>止贖圖景清楚說明了修正故事。馬里科帕縣授託書文件在2025年第三季共317份——較第二季增長33%，但代表總住宅存量的約0.03%。在2009年全球金融危機期間，馬里科帕縣有超過10,000套房屋處於止贖前期。大多數當前困境是投資者持有。修正是投資者修正，而非業主修正——一個結構上更良性的現象。</p>
+    </div>
+    <div class="chart-inline"><h4><span class="lang-en">Arizona Statewide Active Listings + Phoenix Months Supply 2020&ndash;2026</span><span class="lang-zh" style="display:none">亞州全州活躍掛牌 + 鳳凰城供給月數 2020&ndash;2026</span></h4><div id="chartPHXInventory" style="height:220px"></div><p class="chart-note navy"><span class="lang-en">AZ listings: 6K (2021 low) &rarr; 27K+ (May 2025). Correction driven by investor retreat, not homeowner distress. Foreclosures at 0.03% of stock</span><span class="lang-zh" style="display:none">亞州掛牌：6K（2021年低位）→27K+（2025年5月）。修正由投資者撤退驅動。止贖佔存量0.03%</span></p></div>
+
+    <!-- 4 -->
+    <h2 id="sec-water"><span class="lang-en">WATER SCARCITY: THE LONG-TERM STRUCTURAL RISK</span><span class="lang-zh" style="display:none">水資源稀缺：長期結構性風險</span></h2>
+    <div class="lang-en">
+      <p>Water is the defining long-term structural constraint on Phoenix's housing market. Arizona's water supply comes from three primary sources: the Colorado River (via the Central Arizona Project), groundwater aquifers, and smaller in-state surface water sources. Approximately <strong>41%</strong> of Arizona's total water supply comes from groundwater pumping, and groundwater levels have been declining for decades as extraction rates exceed natural recharge rates.</p>
+      <p>In 2023, the Arizona Department of Water Resources (ADWR) determined that the Phoenix Active Management Area does not have sufficient assured groundwater for all planned future development. This triggered a halt on approvals for new subdivisions relying solely on groundwater in specific areas, including Rio Verde Highlands. The housing market implication is long-term rather than immediate: Phoenix can continue building for at least 10&ndash;15 years within existing allocations. But the 100-year assured supply constraint introduces a ceiling on the city's unlimited-growth narrative. Properties in areas with demonstrable long-term water security will command an increasing premium over those relying on groundwater or private wells.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>水資源是決定鳳凰城住宅市場長期結構性約束的因素。亞利桑那州約<strong>41%</strong>的總水供應來自地下水抽取，地下水位已下降數十年。</p>
+      <p>2023年，亞利桑那州水資源部（ADWR）確定鳳凰城積極管理區域沒有足夠的確定地下水供應所有規劃的未來開發。這觸發了對包括Rio Verde Highlands在內特定地區審批的暫停。住宅市場影響是長期而非立即的：鳳凰城在現有分配範圍內至少可以繼續建設10至15年。但百年確定供給約束為城市的無限增長敘事引入了上限。具有可證明長期水資源安全性的區域房產將獲得越來越高的溢價。</p>
+    </div>
+    <div class="report-chart-grid">
+      <div class="report-chart-card"><h4><span class="lang-en">AZ Water Supply by Source (2025 est.)</span><span class="lang-zh" style="display:none">亞州水源構成（2025年估算）</span></h4><p><span class="lang-en">Source: ADWR</span><span class="lang-zh" style="display:none">來源：ADWR</span></p><div id="chartPHXWater" style="height:220px"></div></div>
+      <div class="report-chart-card"><h4><span class="lang-en">Phoenix AMA Groundwater Level Index (1960=100)</span><span class="lang-zh" style="display:none">鳳凰城AMA地下水位指數（1960=100）</span></h4><p><span class="lang-en">Conceptual trend &middot; Source: ADWR</span><span class="lang-zh" style="display:none">概念趨勢 &middot; 來源：ADWR</span></p><div id="chartPHXWaterTrend" style="height:220px"></div></div>
+    </div>
+    <p class="chart-note red"><span class="lang-en">41% of AZ water = groundwater pumping, declining for 60 years. 2023: ADWR found insufficient assured supply &rarr; building permit halts in some areas</span><span class="lang-zh" style="display:none">亞州41%水源=地下水抽取，60年來持續下降。2023年：ADWR發現確定供給不足→部分地區建築許可暫停</span></p>
+
+    <!-- 5 -->
+    <h2 id="sec-neighborhood"><span class="lang-en">NEIGHBORHOOD DIVERGENCE: SCOTTSDALE VS MARICOPA</span><span class="lang-zh" style="display:none">社區分化：史考茲代爾 VS 馬里科帕</span></h2>
+    <div class="lang-en">
+      <p>The Phoenix metro's defining investment characteristic in 2026 is extreme neighborhood-level divergence. At the premium end, Scottsdale posted a December 2025 median of <strong>$1.0M</strong> (+15% YoY), driven by persistent demand from wealth-management professionals and retirees from high-cost coastal markets. Paradise Valley (median $4M+) operates in an effectively separate market. At the affordable end, Maricopa posted a December 2025 median of <strong>$335,000</strong> (-7% YoY), reflecting the correction of pandemic-era exurban migration demand.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>2026年鳳凰城都會區的決定性投資特徵是極端的社區層面分化。在高端市場，史考茲代爾在2025年12月錄得<strong>100萬美元</strong>的中位數（年增15%）。天堂谷（中位數400萬美元以上）在實際上獨立運作。在可負擔端，馬里科帕錄得<strong>335,000美元</strong>的中位數（年降7%），反映了疫情時代遠郊遷移需求的修正。</p>
+    </div>
+    <div class="chart-inline"><h4><span class="lang-en">Phoenix Metro Submarket Median Prices (Dec 2025)</span><span class="lang-zh" style="display:none">鳳凰城都會區子市場中位數（2025年12月）</span></h4><div id="chartPHXNeighborhood" style="height:250px"></div><p class="chart-note orange"><span class="lang-en">Scottsdale +15% vs Maricopa -7% &mdash; same metro, same rates, opposite trajectories. Location premium = the entire story in Phoenix 2026</span><span class="lang-zh" style="display:none">史考茲代爾+15% vs 馬里科帕-7%——同一都會區，相同利率，相反走勢。地理溢價=2026年鳳凰城的全部故事</span></p></div>
+
+    <!-- 6 -->
+    <h2 id="sec-rent"><span class="lang-en">RENT CONTROL: ARIZONA&rsquo;S TOTAL PREEMPTION</span><span class="lang-zh" style="display:none">租管：亞州完全先占</span></h2>
+    <div class="lang-en">
+      <p>Arizona is a rent control preemption state. State statute (A.R.S. &sect; 33-1329) explicitly prohibits any city, town, or other governmental unit from enacting, maintaining, or enforcing any ordinance that would control the amount of rent charged for private residential property. This is an absolute preemption with no exceptions.</p>
+      <p>Phoenix's rental market in 2025 saw the median rent at approximately <strong>$2,100/month</strong> (city), with Scottsdale at $2,800/month. Year-over-year rent growth softened to approximately 6.0%. Phoenix ranked as the fastest-declining rent market of any major U.S. metro in 2024, with median asking rents down approximately 8% from peak. The absence of rent control means the full rental market adjustment &mdash; both up and down &mdash; passes through directly to investors.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>亞利桑那州是租管先占州。州法律（A.R.S. § 33-1329）明確禁止任何城市頒布或執行任何控制私人住宅房產租金的條例。這是無例外的絕對先占。</p>
+      <p>2025年鳳凰城租賃市場中位數租金約為<strong>2,100美元/月</strong>（城市），史考茲代爾為2,800美元/月。年度租金增長放緩至約6.0%。鳳凰城在2024年成為全美主要大都市中租金降速最快的市場，中位數要求租金較峰值下降約8%。租管缺失意味著完整的租賃市場調整直接傳導給投資者。</p>
+    </div>
+    <div class="chart-inline"><h4><span class="lang-en">Phoenix Median Asking Rent + YoY Growth 2019&ndash;2025</span><span class="lang-zh" style="display:none">鳳凰城中位數要價租金 + 年增率 2019&ndash;2025</span></h4><div id="chartPHXRent" style="height:220px"></div><p class="chart-note orange"><span class="lang-en">Phoenix rent: fastest-declining major U.S. metro 2024 (-8% from peak). 2025 recovery to +6%. No rent control = full market pass-through</span><span class="lang-zh" style="display:none">鳳凰城租金：2024年全美主要大都市降速最快（較峰值-8%）。2025年回升至+6%。無租管=完全市場傳導</span></p></div>
+
+    <!-- 7 -->
+    <h2 id="sec-outlook"><span class="lang-en">OUTLOOK 2026&ndash;2028</span><span class="lang-zh" style="display:none">展望 2026&ndash;2028</span></h2>
+    <div class="lang-en">
+      <p>Phoenix's 2026&ndash;2028 outlook is the most internally divergent of any market in this monitor. The base case (<strong>55%</strong> probability) projects overall CS Phoenix appreciation of 2&ndash;4% annually through 2027, driven by continued net in-migration (Arizona job growth projected at 2.1&ndash;2.5%) and the resolution of the investor supply overhang. The CS index advances from 330 toward 345&ndash;355 by end-2027. Premium submarkets continue to appreciate 5&ndash;8%; affordable outer suburbs face continued flat-to-slightly-negative conditions.</p>
+      <p>The bull case (<strong>20%</strong> probability) requires meaningful rate decline below 5.5% and accelerated semiconductor investment. TSMC's <strong>$40 billion</strong> investment in two advanced chip fabrication facilities in North Phoenix is creating direct manufacturing employment (~6,000 workers at full ramp) and a large multiplier effect. In this scenario, metro-wide appreciation could reach 6&ndash;8% annually.</p>
+      <p>The bear case (<strong>25%</strong> probability) is dominated by water risk. A federal ruling reducing Arizona's Colorado River allocation combined with a drought year could trigger more widespread permit moratoriums and investor confidence collapse. Areas most dependent on groundwater face meaningful price declines (15&ndash;20%). The overall CS index could fall to 295&ndash;305, returning to 2023 trough levels. The bear case is geography-specific &mdash; premium water-secure areas would be far less affected than peripheral groundwater-dependent suburbs.</p>
+    </div>
+    <div class="lang-zh" style="display:none">
+      <p>鳳凰城2026至2028年的展望是本監測任何市場中內部分化最大的。基本情境（概率<strong>55%</strong>）預計CS鳳凰城整體每年升值2至4%，CS指數推進至2027年底的345至355。優質子市場繼續在5至8%範圍內升值；可負擔外圍郊區面臨持續的持平至小幅負值條件。</p>
+      <p>樂觀情境（概率<strong>20%</strong>）需要利率下降至5.5%以下和半導體投資加速。台積電在北鳳凰城的<strong>400億美元</strong>投資正在創造直接製造業就業。在此情境下，都會區整體升值可達每年6至8%。</p>
+      <p>悲觀情境（概率<strong>25%</strong>）以水資源風險為主導。聯邦裁決削減亞利桑那州科羅拉多河分配加上乾旱年份，可能觸發更廣泛的許可暫停。最依賴地下水的地區面臨15至20%的有意義價格下跌。CS指數可能降至295至305，回到2023年谷底水平。悲觀情境具有地理特殊性。</p>
+    </div>
+    <div class="chart-inline"><h4><span class="lang-en">CS Phoenix Index Forecast 2026&ndash;2028</span><span class="lang-zh" style="display:none">CS鳳凰城指數預測 2026&ndash;2028</span></h4><div id="chartPHXForecast" style="height:220px"></div><p class="chart-note red"><span class="lang-en">Bear case driven by water risk (Colorado River ruling + drought). Bull: TSMC $40B fab ramp-up + rate relief. Base: investor overhang absorbed by 2027</span><span class="lang-zh" style="display:none">悲觀由水資源風險驅動。樂觀：台積電400億晶圓廠爬坡+利率緩解。基本：投資者懸頂於2027年前被吸收</span></p></div>
+
+    <div class="report-footer">
+      <p><span class="lang-en">Data sources: S&amp;P Cotality Case-Shiller AZ-Phoenix Home Price Index (FRED PHXRSA) &middot; Arizona REALTORS&reg; Market Reports &middot; Houzeo Phoenix Housing Market (Feb 2026) &middot; JVM Lending Phoenix Real Estate Forecast 2026 &middot; Arizona Department of Water Resources (ADWR) &mdash; 2023 Phoenix AMA Water Supply Availability &middot; TSMC Phoenix Fab Investment Announcements &middot; Bode Builders Phoenix Market Analysis (2026) &middot; Innago Arizona Housing Market Report (2025). All data as of March&ndash;April 2026.</span><span class="lang-zh" style="display:none">數據來源：S&amp;P Cotality Case-Shiller亞州鳳凰城房價指數（FRED PHXRSA）&middot; 亞利桑那州房地產商協會市場報告 &middot; Houzeo鳳凰城住宅市場（2026年2月）&middot; JVM Lending鳳凰城房地產預測2026 &middot; 亞利桑那州水資源部（ADWR）——2023年鳳凰城AMA水源可用性 &middot; 台積電鳳凰城晶圓廠投資公告 &middot; Bode Builders鳳凰城市場分析（2026）&middot; Innago亞利桑那州住宅市場報告（2025年）。所有數據截至2026年3月至4月。</span></p>
+      <p><span class="lang-en">For informational purposes only. Not investment advice.</span><span class="lang-zh" style="display:none">本報告僅供參考，不構成投資建議。</span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+var allCharts=[];
+function initAllCharts(lang){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];
+  drawPHXPrice(lang);drawPHXMedian(lang);drawPHXInventory(lang);drawPHXWater(lang);drawPHXWaterTrend(lang);drawPHXNeighborhood(lang);drawPHXRent(lang);drawPHXForecast(lang);}
+
+function drawPHXPrice(lang){var dom=document.getElementById('chartPHXPrice');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  var index=[155,168,182,195,202,233,306,340,303,322,330];var yoy=[7.5,8.4,8.3,7.1,3.6,15.3,31.3,11.1,-10.9,6.3,2.5];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:[mkAxis({type:'value',min:130,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),mkAxis({type:'value',min:-15,max:35,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'CS Phoenix Index':'CS鳳凰城指數',type:'bar',data:index,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0,markLine:{data:[{yAxis:343,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'Jun 2022 peak 343':'2022年6月峰值343',fontSize:8,color:C.red}}]}},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,markLine:{data:[{yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1},label:{show:false}}]}}]});}
+
+function drawPHXMedian(lang){var dom=document.getElementById('chartPHXMedian');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];var data=[210,225,245,265,275,295,380,453,430,448,448];
+  var colors=data.map(function(v){return v>=450?C.red:v>=350?C.orange:C.navy;});
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:24,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:180,max:500,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return '$'+v+'K';}}}),
+    series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:28,itemStyle:{borderRadius:[3,3,0,0]},markLine:{data:[{yAxis:453,lineStyle:{color:C.red,type:'dashed',width:1},label:{formatter:en?'2022 peak $453K':'2022年峰值$453K',fontSize:8,color:C.red}}]}}]});}
+
+function drawPHXInventory(lang){var dom=document.getElementById('chartPHXInventory');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['Jan 20','Jan 21','Jan 22','Jan 23','Jan 24','May 25','Feb 26'];var azL=[18.5,6.2,8.5,22.0,24.5,27.2,25.0];var phxM=[2.8,0.8,1.8,4.8,4.5,4.4,1.59];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),yAxis:[mkAxis({type:'value',min:0,max:30,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v+'K';}}}),mkAxis({type:'value',min:0,max:6,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}mo'},splitLine:{show:false}})],
+    series:[{name:en?'AZ Listings (K)':'亞州掛牌(K)',type:'line',data:azL,lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,yAxisIndex:0},
+      {name:en?'Phoenix Mo. Supply':'鳳凰城供給月數',type:'line',data:phxM,lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,markLine:{data:[{yAxis:4.5,lineStyle:{color:C.green,type:'dashed',width:1},label:{formatter:en?'Balanced':'均衡',fontSize:8,color:C.green}}]}}]});}
+
+function drawPHXWater(lang){var dom=document.getElementById('chartPHXWater');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var cats=en?['Colorado River\n(CAP)','Groundwater\n(pumping)','In-state\nsurface water','Recycled/\nother']:['科羅拉多河\n（CAP）','地下水\n（抽取）','州內\n地表水','回收水/\n其他'];
+  var vals=[40,41,12,7];var colors=[C.blue,C.red,C.green,C.muted];
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},grid:{left:12,right:50,top:8,bottom:8,containLabel:true},
+    yAxis:mkAxis({type:'category',data:cats,axisLabel:{color:C.muted,fontSize:9}}),xAxis:mkAxis({type:'value',max:50,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'}}),
+    series:[{type:'bar',data:vals.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:20,itemStyle:{borderRadius:[0,3,3,0]},label:{show:true,position:'right',formatter:function(p){return p.value+'%';},fontSize:9,color:C.muted}}]});}
+
+function drawPHXWaterTrend(lang){var dom=document.getElementById('chartPHXWaterTrend');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['1960','1970','1980','1990','2000','2010','2020','2025E'];var level=[100,95,87,78,70,63,58,55];
+  c.setOption({tooltip:baseTooltip,grid:{left:12,right:12,top:16,bottom:16,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:9}}),yAxis:mkAxis({type:'value',min:40,max:110,axisLabel:{color:C.muted,fontSize:9}}),
+    series:[{type:'line',data:level,lineStyle:{color:C.red,width:2.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(220,38,38,0.08)'}}]});}
+
+function drawPHXNeighborhood(lang){var dom=document.getElementById('chartPHXNeighborhood');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var subs=en?['Paradise Valley','Scottsdale','Chandler','Gilbert','Phoenix City','Mesa','Maricopa']:['天堂谷','史考茲代爾','錢德勒','吉爾伯特','鳳凰城市','梅薩','馬里科帕'];
+  var med=[4000,1000,525,480,455,390,335];var yoys=['+8%','+15%','-7%','+2%','+1%','-3%','-7%'];
+  var colors=med.map(function(v){return v>=1000?C.green:v>=450?C.navy:v>=400?C.orange:C.red;});
+  c.setOption({tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},grid:{left:12,right:80,top:8,bottom:8,containLabel:true},
+    yAxis:mkAxis({type:'category',data:subs,axisLabel:{color:C.muted,fontSize:9}}),xAxis:mkAxis({type:'value',axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return v>=1000?'$'+(v/1000).toFixed(0)+'M':'$'+v+'K';}}}),
+    series:[{type:'bar',data:med.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barMaxWidth:20,itemStyle:{borderRadius:[0,3,3,0]},
+      label:{show:true,position:'right',formatter:function(p){var i=p.dataIndex;var f=p.value>=1000?'$'+(p.value/1000).toFixed(0)+'M':'$'+p.value+'K';return f+' ('+yoys[i]+')';},fontSize:9,color:C.muted}}]});}
+
+function drawPHXRent(lang){var dom=document.getElementById('chartPHXRent');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var labels=['2019','2020','2021','2022','2023','2024','2025'];var rent=[1380,1390,1620,1920,1780,1710,2100];var yoy=[3.5,0.7,16.5,18.5,-7.3,-4.0,6.0];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:labels,axisLabel:{color:C.muted,fontSize:10}}),yAxis:[mkAxis({type:'value',min:1200,axisLabel:{color:C.muted,fontSize:9,formatter:function(v){return'$'+v;}}}),mkAxis({type:'value',min:-10,max:22,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}%'},splitLine:{show:false}})],
+    series:[{name:en?'Median Rent ($)':'中位數租金($)',type:'bar',data:rent,barMaxWidth:28,itemStyle:{color:'rgba(30,58,95,0.2)',borderRadius:[3,3,0,0]},yAxisIndex:0},
+      {name:en?'YoY %':'年增率',type:'line',data:yoy,lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},symbol:'circle',symbolSize:5,yAxisIndex:1,markLine:{data:[{yAxis:0,lineStyle:{color:C.muted,type:'dashed',width:1},label:{show:false}}]}}]});}
+
+function drawPHXForecast(lang){var dom=document.getElementById('chartPHXForecast');if(!dom)return;var c=echarts.init(dom);allCharts.push(c);var en=lang==='en';
+  var periods=['Feb 2025','2026E','2027E','2028E'];var bull=[330,345,360,378];var base=[330,338,348,355];var bear=[330,315,300,295];
+  c.setOption({tooltip:baseTooltip,legend:{bottom:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8},grid:{left:12,right:12,top:24,bottom:36,containLabel:true},
+    xAxis:mkAxis({type:'category',data:periods,axisLabel:{color:C.muted,fontSize:10}}),yAxis:mkAxis({type:'value',min:280,max:390,axisLabel:{color:C.muted,fontSize:9,formatter:'{value}'}}),
+    series:[{name:en?'Bull (20%) — TSMC+rate':'樂觀(20%)—台積電+利率',type:'line',data:bull,lineStyle:{color:C.green,width:1.5,type:'dashed'},itemStyle:{color:C.green},symbol:'circle',symbolSize:5},
+      {name:en?'Base (55%) — normalize':'基本(55%)—正常化',type:'line',data:base,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,areaStyle:{color:'rgba(30,58,95,0.06)'}},
+      {name:en?'Bear (25%) — water risk':'悲觀(25%)—水資源風險',type:'line',data:bear,lineStyle:{color:C.red,width:1.5,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5},
+      {type:'line',markLine:{data:[{yAxis:343,lineStyle:{color:C.muted,type:'dotted',width:1},label:{formatter:en?'Jun 2022 peak 343':'2022年6月峰值343',fontSize:8,color:C.muted}}]}}]});}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);initAllCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}function toggleCityMenu(){document.getElementById('cityDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){var d=document.getElementById('marketDropdown');if(d)d.classList.remove('open');}if(!e.target.closest('.city-dropdown')){var d2=document.getElementById('cityDropdown');if(d2)d2.classList.remove('open');}});
+function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+(function(){function initScrollSpy(){var items=document.querySelectorAll('.side-nav-item');if(!items.length)return;var sections=[];items.forEach(function(a){var id=a.getAttribute('href').replace('#','');var el=document.getElementById(id);if(el)sections.push({el:el,a:a});});function onScroll(){var scrollY=window.scrollY+window.innerHeight*0.25;var current=sections[0];sections.forEach(function(s){if(s.el.getBoundingClientRect().top+window.scrollY<=scrollY)current=s;});items.forEach(function(a){a.classList.remove('active');});if(current)current.a.classList.add('active');}window.addEventListener('scroll',onScroll,{passive:true});onScroll();}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initScrollSpy);}else{initScrollSpy();}})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

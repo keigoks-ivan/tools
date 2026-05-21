@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ireland Dashboard | Ireland Property Monitor</title>
+<meta name="color-scheme" content="light">
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<main class="main-content">
+  <section class="hero-section">
+    <p class="update-tag"><span class="lang-en">Updated Q1 2026</span><span class="lang-zh" style="display:none">更新於 2026 年第一季</span></p>
+    <h1><span class="lang-en">Ireland &mdash; Property Dashboard</span><span class="lang-zh" style="display:none">愛爾蘭 &mdash; 房產總覽</span></h1>
+    <p class="subtitle"><span class="lang-en">Housing Market Overview &middot; Q1 2026</span><span class="lang-zh" style="display:none">住宅市場概覽 &middot; 2026 年第一季</span></p>
+  </section>
+
+  <section class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 20px 24px">
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Median House</span><span class="lang-zh" style="display:none">房屋中位價</span></div><div class="kpi-value">&euro;360K</div><div class="kpi-delta up">+7.3% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Median Apartment</span><span class="lang-zh" style="display:none">公寓中位價</span></div><div class="kpi-value">&euro;285K</div><div class="kpi-delta up">+5.8% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Avg Rent</span><span class="lang-zh" style="display:none">平均租金</span></div><div class="kpi-value">&euro;1,800/mo</div><div class="kpi-delta up">+8.2% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Vacancy Rate</span><span class="lang-zh" style="display:none">空置率</span></div><div class="kpi-value">0.7%</div><div class="kpi-delta" style="color:#dc2626">EU Lowest</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Completions</span><span class="lang-zh" style="display:none">完工量</span></div><div class="kpi-value">32,695</div><div class="kpi-delta">Target 33K</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Population</span><span class="lang-zh" style="display:none">人口</span></div><div class="kpi-value">5.38M</div><div class="kpi-delta up">+1.7% YoY</div></div>
+  </section>
+
+  <section class="section-block">
+    <h2 class="section-title"><span class="lang-en">KEY CHARTS</span><span class="lang-zh" style="display:none">關鍵圖表</span></h2>
+    <div class="chart-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin:0 20px">
+      <div class="chart-card"><h3><span class="lang-en">National House Price Index</span><span class="lang-zh" style="display:none">全國房價指數</span></h3><div id="chartIEHPI" style="width:100%;height:300px"></div></div>
+      <div class="chart-card"><h3><span class="lang-en">RTB Rent Index</span><span class="lang-zh" style="display:none">RTB 租金指數</span></h3><div id="chartIERentIdx" style="width:100%;height:300px"></div></div>
+      <div class="chart-card"><h3><span class="lang-en">Annual Completions</span><span class="lang-zh" style="display:none">年度完工量</span></h3><div id="chartIECompletions" style="width:100%;height:300px"></div></div>
+      <div class="chart-card"><h3><span class="lang-en">Vacancy Rate by City</span><span class="lang-zh" style="display:none">各城市空置率</span></h3><div id="chartIEVacancy" style="width:100%;height:300px"></div></div>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <h2 class="section-title"><span class="lang-en">SUMMARY</span><span class="lang-zh" style="display:none">摘要</span></h2>
+    <div class="summary-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:0 20px">
+      <div class="summary-card"><h4><span class="lang-en">Price Trend</span><span class="lang-zh" style="display:none">價格趨勢</span></h4><p><span class="lang-en">Prices continued to rise through Q1 2026 driven by chronic undersupply relative to demand. Dublin leads gains at +8.1% while regional cities follow at 5-7%.</span><span class="lang-zh" style="display:none">受長期供不應求影響，2026年第一季房價持續上漲。都柏林漲幅領先達8.1%，地方城市介於5-7%。</span></p></div>
+      <div class="summary-card"><h4><span class="lang-en">Rental Crisis</span><span class="lang-zh" style="display:none">租賃危機</span></h4><p><span class="lang-en">Ireland's rental market remains among the tightest in Europe. National vacancy at 0.7% continues to push rents higher despite RPZ caps of 2% per year.</span><span class="lang-zh" style="display:none">愛爾蘭租賃市場仍為歐洲最緊縮之一。全國空置率0.7%持續推升租金，儘管RPZ年漲幅上限為2%。</span></p></div>
+      <div class="summary-card"><h4><span class="lang-en">Supply Gap</span><span class="lang-zh" style="display:none">供給缺口</span></h4><p><span class="lang-en">Completions of 32,695 units narrowly missed the government's 33,000 target. The construction sector faces labour shortages and rising material costs.</span><span class="lang-zh" style="display:none">全年完工32,695戶，略低於政府33,000戶目標。營建業面臨勞動力短缺與材料成本上升。</span></p></div>
+      <div class="summary-card"><h4><span class="lang-en">Population Pressure</span><span class="lang-zh" style="display:none">人口壓力</span></h4><p><span class="lang-en">Net migration of +68,900 and natural population growth push Ireland's population to 5.38M, the highest since pre-famine levels, amplifying housing demand.</span><span class="lang-zh" style="display:none">淨移民+68,900人加上自然增長，將愛爾蘭人口推至5.38M，為大飢荒前以來最高，加劇住房需求。</span></p></div>
+    </div>
+  </section>
+
+  <footer class="source-footer" style="text-align:center;padding:20px;font-size:11px;color:#5a7a9a">
+    <span class="lang-en">Sources: CSO Ireland, RTB, Daft.ie, Central Bank of Ireland &middot; Updated Q1 2026</span>
+    <span class="lang-zh" style="display:none">資料來源：愛爾蘭中央統計局、RTB、Daft.ie、愛爾蘭中央銀行 &middot; 更新於 2026 年第一季</span>
+  </footer>
+</main>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts=[];
+function initCharts(){
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+
+  var years=['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+  // Chart 1: HPI
+  var c1=echarts.init(document.getElementById('chartIEHPI'));
+  c1.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Index (2015=100)'}),series:[{name:'HPI',type:'line',smooth:true,data:[100,107,118,128,130,129,138,155,168,180,193],lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue}}]});
+  allCharts.push(c1);
+
+  // Chart 2: Rent Index
+  var c2=echarts.init(document.getElementById('chartIERentIdx'));
+  c2.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Index (2015=100)'}),series:[{name:'Rent Index',type:'line',smooth:true,areaStyle:{color:'rgba(22,163,74,0.15)'},data:[100,108,117,126,131,128,136,152,165,178,192],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green}}]});
+  allCharts.push(c2);
+
+  // Chart 3: Completions
+  var compYears=['2018','2019','2020','2021','2022','2023','2024','2025'];
+  var c3=echarts.init(document.getElementById('chartIECompletions'));
+  c3.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:compYears}),yAxis:mkAxis({type:'value',name:'Units'}),series:[{name:'Completions',type:'bar',data:[18021,21241,20526,20433,29851,32695,30335,32695],itemStyle:{color:C.blue},markLine:{silent:true,data:[{yAxis:33000,label:{formatter:'Target 33K',fontSize:10},lineStyle:{color:C.red,type:'dashed'}}]}}]});
+  allCharts.push(c3);
+
+  // Chart 4: Vacancy by city
+  var c4=echarts.init(document.getElementById('chartIEVacancy'));
+  c4.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:['Dublin','Cork','Galway','Limerick','National']}),yAxis:mkAxis({type:'value',name:'%',max:1.5}),series:[{name:'Vacancy',type:'bar',data:[0.5,0.6,0.8,1.0,0.7],itemStyle:{color:function(p){return p.value<0.7?C.red:p.value<0.9?C.orange:C.blue;}}}]});
+  allCharts.push(c4);
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(el){el.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(el){el.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+  initCharts();
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');});
+
+initCharts();
+window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

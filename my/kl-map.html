@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KL Interactive Map | Malaysia Property Monitor</title>
+  <meta name="description" content="Interactive map of 22 curated RM1M+ residential projects across Kuala Lumpur, with scores, tenure, psf, and deep-dive reports.">
+  <meta name="color-scheme" content="light">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+    .navbar{background:#fff!important}
+
+    /* ==== Map page specific (Navy theme) ==== */
+    :root{
+      --navy:#1e3a5f; --navy-2:#2c4a6f; --navy-bg:#eef3f9;
+      --bd:#ccd9e8; --muted:#5a7a9a;
+      --g:#16a34a; --o:#d97706; --r:#dc2626; --b:#2563eb;
+      --card:#fff;
+    }
+    .map-wrap{max-width:1440px;margin:0 auto;padding:0 16px 32px}
+    .page-header{max-width:none}
+    .map-shell{display:grid;grid-template-columns:340px 1fr;gap:16px;height:calc(100vh - 240px);min-height:600px;background:#fff;border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+    .map-sidebar{background:#fff;border-right:1px solid var(--bd);padding:18px;overflow-y:auto}
+    .map-side-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 6px}
+    .map-side-title:first-child{margin-top:0}
+
+    .map-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+    .map-stat{background:var(--navy-bg);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;text-align:center}
+    .map-stat-v{font-size:17px;font-weight:700;color:var(--navy);font-family:'IBM Plex Mono',monospace}
+    .map-stat-l{font-size:10px;color:var(--muted);margin-top:2px}
+
+    .view-tabs{display:flex;background:var(--navy-bg);border:1px solid var(--bd);border-radius:6px;padding:3px;margin:12px 0 8px}
+    .view-tab{flex:1;padding:6px 10px;text-align:center;font-size:12px;cursor:pointer;border-radius:4px;transition:all .12s;color:var(--navy)}
+    .view-tab.active{background:var(--navy);color:#fff;font-weight:600}
+
+    .chips{display:flex;flex-wrap:wrap;gap:5px}
+    .chip{font-size:11px;padding:3px 9px;border:1px solid var(--bd);border-radius:999px;cursor:pointer;background:#fff;color:var(--navy);transition:all .12s}
+    .chip:hover{border-color:var(--navy)}
+    .chip.active{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+
+    .psf-slider{margin:8px 0 4px}
+    .psf-slider input{width:100%;accent-color:var(--navy)}
+    .psf-values{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:2px}
+
+    .sort-bar{display:flex;gap:5px;margin-bottom:6px;font-size:11px;color:var(--muted);align-items:center}
+    .sort-btn{padding:3px 8px;border:1px solid var(--bd);border-radius:4px;cursor:pointer;background:#fff;color:var(--navy);font-size:11px}
+    .sort-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+    .proj-count{font-size:11px;color:var(--muted);margin:8px 0 6px}
+    .proj-item{padding:9px 11px;margin-bottom:4px;border:1px solid var(--bd);border-radius:6px;cursor:pointer;transition:all .12s;background:#fff}
+    .proj-item:hover{border-color:var(--navy);background:#f4f7fc}
+    .proj-item.active{background:#e6eef8;border-color:var(--navy)}
+    .proj-head{display:flex;align-items:center;gap:8px}
+    .proj-name{font-size:13px;font-weight:600;flex:1;color:var(--navy)}
+    .proj-meta{font-size:10.5px;color:var(--muted);margin-top:3px;font-family:'IBM Plex Mono',monospace}
+    .proj-rec{font-size:10px;color:var(--muted);margin-top:3px}
+
+    .score-pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 7px;border-radius:4px;font-family:'IBM Plex Mono',monospace;min-width:38px;text-align:center;color:#fff}
+    .score-t1{background:#14532d}
+    .score-t2{background:#16a34a}
+    .score-t3{background:#d97706}
+    .score-t4{background:#ea580c}
+    .score-t5{background:#dc2626}
+
+    .map-area{position:relative;min-height:500px}
+    #map{height:100%;width:100%;background:var(--navy-bg)}
+    .legend{position:absolute;bottom:16px;right:16px;background:rgba(255,255,255,.96);border:1px solid var(--bd);border-radius:6px;padding:9px 13px;font-size:11px;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+    .legend-item{display:flex;align-items:center;gap:8px;margin:2px 0;color:var(--navy)}
+    .legend-dot{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+    .map-badge{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.9);border:1px solid var(--bd);border-radius:5px;padding:4px 10px;font-size:10.5px;color:var(--muted);z-index:5;font-family:'IBM Plex Mono',monospace}
+
+    .marker-dot{border-radius:50%;border:2.5px solid rgba(255,255,255,.95);box-shadow:0 2px 6px rgba(30,58,95,.3);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-weight:700;color:#fff;cursor:pointer;transition:transform .12s}
+    .marker-dot:hover{transform:scale(1.18)}
+
+    .popup-card{font-family:Inter,sans-serif;min-width:260px;color:var(--navy)}
+    .popup-title{font-size:14px;font-weight:700;margin-bottom:2px;color:var(--navy)}
+    .popup-sub{font-size:11px;color:var(--muted);margin-bottom:10px;font-family:'IBM Plex Mono',monospace}
+    .popup-grid{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:12px;margin-bottom:10px}
+    .popup-k{color:var(--muted)}
+    .popup-v{text-align:right;font-weight:500}
+    .popup-note{font-size:11px;color:#334155;line-height:1.55;padding:8px;background:var(--navy-bg);border-radius:4px;margin-bottom:10px}
+    .popup-link{display:block;text-align:center;padding:7px 10px;background:var(--navy);color:#fff;text-decoration:none;border-radius:4px;font-size:12px;font-weight:600}
+    .popup-link:hover{background:var(--navy-2)}
+    .maplibregl-popup{max-width:320px!important}
+    .maplibregl-popup-content{background:#fff!important;border:1px solid var(--bd);border-radius:6px;padding:14px;box-shadow:0 4px 16px rgba(30,58,95,.12)}
+    .maplibregl-popup-tip{border-top-color:#fff!important;border-bottom-color:#fff!important}
+
+    @media (max-width:900px){
+      .map-shell{grid-template-columns:1fr;height:auto}
+      .map-sidebar{max-height:400px;border-right:none;border-bottom:1px solid var(--bd)}
+      .map-area{height:65vh}
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="map-wrap">
+    <div class="page-header">
+      <span class="updated">
+        <span class="lang-en">LAST UPDATED: 2026-Q2</span>
+        <span class="lang-zh" style="display:none">最後更新：2026年Q2</span>
+      </span>
+      <h1>
+        <span class="lang-en">KL Interactive Property Map</span>
+        <span class="lang-zh" style="display:none">吉隆坡建案互動地圖</span>
+      </h1>
+      <p class="subtitle">
+        <span class="lang-en">22 curated RM1M+ residential projects across Kuala Lumpur — scored, mapped, and linked to deep-dive research</span>
+        <span class="lang-zh" style="display:none">22 個精選 RM100 萬以上 KL 住宅建案——評分、地圖、深度研究一目了然</span>
+      </p>
+    </div>
+
+    <div class="map-shell">
+      <aside class="map-sidebar">
+        <div class="map-stats">
+          <div class="map-stat"><div class="map-stat-v" id="stat-total">22</div><div class="map-stat-l"><span class="lang-en">Projects</span><span class="lang-zh" style="display:none">建案</span></div></div>
+          <div class="map-stat"><div class="map-stat-v" id="stat-area">—</div><div class="map-stat-l"><span class="lang-en">Areas</span><span class="lang-zh" style="display:none">地區</span></div></div>
+          <div class="map-stat"><div class="map-stat-v" id="stat-avg">—</div><div class="map-stat-l"><span class="lang-en">Avg Score</span><span class="lang-zh" style="display:none">平均分</span></div></div>
+        </div>
+
+        <div class="view-tabs">
+          <div class="view-tab active" data-view="marker">
+            <span class="lang-en">📍 Markers</span><span class="lang-zh" style="display:none">📍 標點</span>
+          </div>
+          <div class="view-tab" data-view="heat">
+            <span class="lang-en">🔥 Heatmap</span><span class="lang-zh" style="display:none">🔥 熱圖</span>
+          </div>
+        </div>
+
+        <div class="map-side-title"><span class="lang-en">Score tier</span><span class="lang-zh" style="display:none">評分等級</span></div>
+        <div class="chips" id="tier-chips"></div>
+
+        <div class="map-side-title"><span class="lang-en">Area</span><span class="lang-zh" style="display:none">地區</span></div>
+        <div class="chips" id="area-chips"></div>
+
+        <div class="map-side-title"><span class="lang-en">Tenure / status</span><span class="lang-zh" style="display:none">地契 / 狀態</span></div>
+        <div class="chips" id="tenure-chips"></div>
+
+        <div class="map-side-title"><span class="lang-en">Max psf (RM)</span><span class="lang-zh" style="display:none">單價上限 (RM/psf)</span></div>
+        <div class="psf-slider">
+          <input type="range" id="psf-max" min="500" max="3000" step="100" value="3000">
+          <div class="psf-values"><span>500</span><span id="psf-val">≤ 3000</span><span>3000</span></div>
+        </div>
+
+        <div class="map-side-title" style="margin-top:18px"><span class="lang-en">Projects</span><span class="lang-zh" style="display:none">建案列表</span></div>
+        <div class="proj-count" id="proj-count">22 <span class="lang-en">projects</span><span class="lang-zh" style="display:none">個建案</span></div>
+        <div class="sort-bar">
+          <span class="lang-en">Sort:</span><span class="lang-zh" style="display:none">排序：</span>
+          <button class="sort-btn active" data-sort="score"><span class="lang-en">Score↓</span><span class="lang-zh" style="display:none">分數↓</span></button>
+          <button class="sort-btn" data-sort="psf"><span class="lang-en">PSF↑</span><span class="lang-zh" style="display:none">單價↑</span></button>
+          <button class="sort-btn" data-sort="rank"><span class="lang-en">Rank</span><span class="lang-zh" style="display:none">排名</span></button>
+        </div>
+        <div id="proj-list"></div>
+      </aside>
+
+      <div class="map-area">
+        <div id="map"></div>
+        <div class="map-badge">OpenFreeMap Liberty · OSM data · <span class="lang-en">no API key</span><span class="lang-zh" style="display:none">免 API key</span></div>
+        <div class="legend" id="marker-legend">
+          <div style="font-weight:700;margin-bottom:5px"><span class="lang-en">Score tier</span><span class="lang-zh" style="display:none">評分等級</span></div>
+          <div class="legend-item"><span class="legend-dot" style="background:#14532d"></span>T1 · 8.0+</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#16a34a"></span>T2 · 7.5–7.99</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#d97706"></span>T3 · 6.5–7.49</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#ea580c"></span>T4 · 5.5–6.49</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>T5 · &lt;5.5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">Data: KL RM1M+ Deep Research 2026-Q1 &middot; Brickz &middot; JPPH &middot; NAPIC Q3 2025 &middot; Map tiles: OpenFreeMap Liberty (OSM)<br><em>Not investment advice. Project details subject to change.</em></span>
+      <span class="lang-zh" style="display:none">資料來源：KL RM1M+ 深度研究 2026-Q1 &middot; Brickz &middot; JPPH &middot; NAPIC Q3 2025 &middot; 地圖底圖：OpenFreeMap Liberty (OSM)<br><em>非投資建議。建案資料可能異動。</em></span>
+    </div>
+  </main>
+
+  <script src="/js/navbar.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script>
+  const DATA=[{"rank": 1, "tier": 1, "fullname": "Kiaramas deDaun UEM Sunrise × Sunrise · Mont Kiara", "area": "Mont Kiara", "score": 8.34, "tenure": "Freehold 住宅", "psf_raw": "RM844–918（發售）", "psf_num": 844, "status": "2028 期房", "rec_code": "strong", "rec_label": "🟢 積極", "note": "本系列最高分（並列）；Block A 97% 取購；管理費 RM0.36 psf 最低；外籍家庭首選；MRT 3 長期催化", "name": "Kiaramas deDaun", "developer": "UEM Sunrise × Sunrise", "lat": 3.1752, "lng": 101.6518, "report": "RE_KiaramasDeDaun_20260412.html"}, {"rank": 1, "tier": 1, "fullname": "Park Regent @ Desa ParkCity ParkCity × CapitaLand · Desa ParkCity", "area": "Desa ParkCity", "score": 8.34, "tenure": "Freehold 住宅", "psf_raw": "RM1,541（Brickz 70筆中位，最高置信度）", "psf_num": 1541, "status": "2023 完工", "rec_code": "strong", "rec_label": "🟢 積極", "note": "Brickz 70 筆最高置信度；DPC 地塊封頂稀缺性最確定；ParkCity × CapitaLand 完工現房零風險；5年+40% 實證", "name": "Park Regent @ DPC", "developer": "ParkCity × CapitaLand", "lat": 3.1897, "lng": 101.6322, "report": "RE_ParkRegent_DPC_20260413.html"}, {"rank": 3, "tier": 1, "fullname": "One Central Park @ Desa ParkCity ParkCity Group · Desa ParkCity", "area": "Desa ParkCity", "score": 8.1, "tenure": "Freehold 住宅", "psf_raw": "RM1,180（Brickz 19筆中位）", "psf_num": 1180, "status": "2017 完工", "rec_code": "strong", "rec_label": "🟢 積極", "note": "資本成長 +10.09% 本系列最強；掛牌率 22% 最健康；DPC Parkfront 稀缺；完工現房", "name": "One Central Park @ DPC", "developer": "ParkCity Group", "lat": 3.191, "lng": 101.634, "report": "RE_OneCentralPark_DPC_20260412.html"}, {"rank": 4, "tier": 1, "fullname": "28 Mont' Kiara (MK28) UEM Sunrise · Mont Kiara", "area": "Mont Kiara", "score": 8.04, "tenure": "Freehold 住宅", "psf_raw": "RM774（Brickz 28筆中位，本系列最多）", "psf_num": 774, "status": "2012 完工", "rec_code": "strong", "rec_label": "🟢 積極", "note": "Brickz 28 筆最高置信度；Gross Yield 6.44% 本系列最高；完工現房；外籍現金需求 RM196萬+", "name": "28 Mont' Kiara (MK28)", "developer": "UEM Sunrise", "lat": 3.1718, "lng": 101.65, "report": "RE_28MontKiara_20260412.html"}, {"rank": 5, "tier": 2, "fullname": "Sunway Mont Residences Sunway · Mont Kiara", "area": "Mont Kiara", "score": 7.88, "tenure": "Freehold 住宅", "psf_raw": "RM938（Brickz 8筆，2025全年）", "psf_num": 938, "status": "2019/20 完工", "rec_code": "strong", "rec_label": "🟢 積極", "note": "6年升值 +20%（RM780→938）；管理費 RM0.33 最低；Gross Yield 4.9%↑；GIS 步行優勢", "name": "Sunway Mont Residences", "developer": "Sunway", "lat": 3.1758, "lng": 101.6542, "report": "RE_SunwayMontResidences_20260412.html"}, {"rank": 6, "tier": 2, "fullname": "Trinity Pentamont Trinity Group · Mont Kiara", "area": "Mont Kiara", "score": 7.84, "tenure": "Freehold 住宅", "psf_raw": "RM811（Brickz 27筆中位）", "psf_num": 811, "status": "2022/23 完工", "rec_code": "strong", "rec_label": "🟢 積極", "note": "7年升值 +25–35%；Net Yield 本系列最高；管理費 RM0.34；GIS 步行 MK 核心", "name": "Trinity Pentamont", "developer": "Trinity Group", "lat": 3.1745, "lng": 101.6551, "report": "RE_TrinityPentamont_20260412.html"}, {"rank": 7, "tier": 2, "fullname": "Residensi 22 @ Mont Kiara UEM Sunrise · Mont Kiara", "area": "Mont Kiara", "score": 7.7, "tenure": "Freehold 住宅", "psf_raw": "Brickz 31筆成交（PSF 待查）", "psf_num": null, "status": "完工", "rec_code": "other", "rec_label": "🟢 進場", "note": "成熟 MK 社區；住宅地契；管理費 RM0.34；Gross Yield 3.0–3.2%", "name": "Residensi 22 @ Mont Kiara", "developer": "UEM Sunrise", "lat": 3.1729, "lng": 101.6503, "report": "RE_Residensi22_MontKiara_20260412.html"}, {"rank": 7, "tier": 2, "fullname": "Park Place @ Desa ParkCity ParkCity Group · Desa ParkCity", "area": "Desa ParkCity", "score": 7.7, "tenure": "Freehold 住宅", "psf_raw": "DPC 地段（PSF 待查）", "psf_num": null, "status": "完工", "rec_code": "other", "rec_label": "🟢 進場", "note": "DPC 住宅地契；Gross Yield 3.0–3.4%；社區成熟；ParkCity 物業管理", "name": "Park Place @ DPC", "developer": "ParkCity Group", "lat": 3.1891, "lng": 101.6328, "report": "RE_ParkPlace_DesaParkCity_20260412.html"}, {"rank": 9, "tier": 3, "fullname": "TRX Residences Lendlease · TRX 金融城", "area": "TRX", "score": 7.6, "tenure": "Freehold 商業 HDA", "psf_raw": "RM2,293（Brickz 59筆中位；YoY +5.56%）", "psf_num": 2293, "status": "2024 完工", "rec_code": "other", "rec_label": "🟢 增值框架", "note": "KL 唯一 TRX 金融城敘事；TRX MRT 直達；Lendlease 開發商低風險；商業地契 HDA；外籍現金需求 RM164萬+", "name": "TRX Residences", "developer": "Lendlease", "lat": 3.1412, "lng": 101.7201, "report": "RE_TRXResidences_20260412.html"}, {"rank": 10, "tier": 3, "fullname": "The Conlay by E&O @ KLCC Eastern & Oriental × Mitsui · KLCC", "area": "KLCC", "score": 7.4, "tenure": "Freehold 商業 HDA", "psf_raw": "RM2,030–2,100（iRumah 成交；vs 發售 RM1,800，+17%）", "psf_num": 2030, "status": "~2025 完工", "rec_code": "strong", "rec_label": "🟢 積極", "note": "+17% 升值已驗證；E&O × Mitsui 品牌；HDA 保護；本系列商業地契中最值得考慮", "name": "The Conlay by E&O @ KLCC", "developer": "E&O × Mitsui", "lat": 3.1558, "lng": 101.709, "report": "RE_TheConlay_EO_KLCC_20260412.html"}, {"rank": 11, "tier": 4, "fullname": "Bangsar Hill Park (Verdura Ph.1) Pavilion Group · Bangsar", "area": "Bangsar", "score": 6.96, "tenure": "Leasehold 住宅 ⚠", "psf_raw": "RM910–1,083（發售；地段均值 RM765）", "psf_num": 910, "status": "2025 完工", "rec_code": "wait", "rec_label": "🟡 觀望", "note": "Bangsar 精品山景；Leasehold 外籍貸款限制；20–40% 定價溢價待市場驗證；Bangsar 住宅需求健康", "name": "Bangsar Hill Park", "developer": "Pavilion Group", "lat": 3.1055, "lng": 101.6675, "report": "RE_BangsarHillPark_20260412.html"}, {"rank": 12, "tier": 4, "fullname": "CloutHaus Residences @ KLCC TA Global · KLCC / P. Ramlee", "area": "KLCC", "score": 6.7, "tenure": "Freehold 商業 SA", "psf_raw": "RM2,900（發售均價；本系列最高 PSF）", "psf_num": 2900, "status": "2029 期房", "rec_code": "wait", "rec_label": "🟡 觀望", "note": "KLCC 核心地段；P. Ramlee 站步行可達；RM2,900 psf 定價最高，進場門檻最高；管理費 RM0.80 偏高", "name": "CloutHaus Residences @ KLCC", "developer": "TA Global", "lat": 3.1549, "lng": 101.7085, "report": "RE_CloutHaus_KLCC_20260412.html"}, {"rank": 13, "tier": 4, "fullname": "Pavilion Hilltop @ Mont Kiara Pavilion Group · Mont Kiara", "area": "Mont Kiara", "score": 6.64, "tenure": "Freehold 住宅", "psf_raw": "RM985（Brickz 21筆；MK 完工最高 PSF）", "psf_num": 985, "status": "2020 完工", "rec_code": "wait", "rec_label": "🟡 觀望", "note": "MK 完工最高 PSF；YoY -0.1% 資本停滯；掛牌積壓嚴重；Freehold 住宅地契是加分項", "name": "Pavilion Hilltop @ Mont Kiara", "developer": "Pavilion Group", "lat": 3.1708, "lng": 101.648, "report": "RE_PavilionHilltop_20260412.html"}, {"rank": 14, "tier": 4, "fullname": "Noöra @ Desa ParkCity ParkCity Group · Desa ParkCity", "area": "Desa ParkCity", "score": 6.32, "tenure": "Freehold Serviced Res ⚠", "psf_raw": "RM850–900（發售；Brickz 0筆期房）", "psf_num": 850, "status": "2026 期房", "rec_code": "wait", "rec_label": "🟡 觀望", "note": "DPC 品牌加分；Serviced Residence 商業電費；1,156 戶規模大；管理費 RM0.50 最高；外籍非居民稅後 Net Yield 本系列最低（1.5–2.0%）", "name": "Noöra @ DPC", "developer": "ParkCity Group", "lat": 3.1883, "lng": 101.6314, "report": "RE_Noora_DPC_20260412.html"}, {"rank": 15, "tier": 4, "fullname": "SWNK Houze @ BBCC EcoWorld × Lendlease · BBCC / Chow Kit", "area": "BBCC", "score": 6.2, "tenure": "Leasehold 商業 SA ⚠⚠", "psf_raw": "RM1,200（發售均價）", "psf_num": 1200, "status": "2026 期房", "rec_code": "avoid", "rec_label": "🔴 避開", "note": "LaLaport 直連加分；Leasehold + 商業地契雙重不利（本系列最差地契組合）；Chow Kit 地段治安問題；外籍淨 Yield 1.9–2.3%", "name": "SWNK Houze @ BBCC", "developer": "EcoWorld × Lendlease", "lat": 3.1393, "lng": 101.7048, "report": "RE_SWNKHouze_BBCC_20260412.html"}, {"rank": 16, "tier": 4, "fullname": "Centrix The Station @ Dang Wangi LRT Crest Builder × Prasarana · KLCC / Dang Wangi", "area": "KLCC / Dang Wangi", "score": 6.1, "tenure": "Leasehold 99年 商業 SOHO ⚠⚠", "psf_raw": "RM1,593–1,665（發售；Brickz 0筆期房）", "psf_num": 1593, "status": "2028–29 期房", "rec_code": "wait", "rec_label": "🟡 觀望", "note": "LRT Dang Wangi 正上方（本系列最強捷運條件）；KLCC 治安最佳；Leasehold + 商業地契雙重劣勢；Crest Builder 財務脆弱（16 季連虧剛轉盈）；Brickz 零成交", "name": "Centrix The Station @ Dang Wangi", "developer": "Crest Builder × Prasarana", "lat": 3.1568, "lng": 101.7033, "report": "RE_CentrixKLCC_20260413.html"}, {"rank": 17, "tier": 4, "fullname": "Times Square 2 (TS2) Berjaya Times Square Sdn Bhd · Bukit Bintang / Imbi", "area": "Bukit Bintang", "score": 6.0, "tenure": "Freehold 商業 SA", "psf_raw": "RM1,500 起（發售 Phase 1）；掛牌 RM1,138–1,869", "psf_num": 1500, "status": "2027-10 期房", "rec_code": "wait", "rec_label": "🟡 觀望", "note": "Imbi Monorail 100m（本系列最短步行距離）；Bukit Bintang 步行商圈 KL 最強；Airbnb 地段最適配；Freehold 是 SA 中最優地契；Berjaya Corp FY2025 歷史最大年虧 RM5.56億需追蹤；商業地契 SA 積壓 22,314 戶", "name": "Times Square 2 (TS2)", "developer": "Berjaya Times Square", "lat": 3.1431, "lng": 101.7108, "report": "RE_TimesSquare2_KL_20260413.html"}, {"rank": 18, "tier": 5, "fullname": "Armani Hallson @ KLCC（SOHO 棟） Armani Group × Magna Prima · KLCC", "area": "KLCC", "score": 5.7, "tenure": "SOHO HDA 商業", "psf_raw": "管理費 RM0.95 psf（本系列最高）", "psf_num": 0, "status": "2029 期房", "rec_code": "wait", "rec_label": "🟡 觀望", "note": "KLCC 地段加分；SOHO 條件性；SOVO 棟完全迴避；管理費 RM0.95 本系列最高；2,215 戶規模最大；規模帶來自我競爭風險", "name": "Armani Hallson @ KLCC (SOHO 棟)", "developer": "Armani × Magna Prima", "lat": 3.1592, "lng": 101.712, "report": "RE_ArmaniHallson_20260412.html"}, {"rank": 18, "tier": 5, "fullname": "Stonor 3 @ KLCC Tan & Tan × Mitsubishi Estate · KLCC", "area": "KLCC", "score": 5.7, "tenure": "Freehold 商業 HDA", "psf_raw": "RM1,320（2BR 成交中位）；發售 RM2,000（−34%）", "psf_num": 1320, "status": "2019 完工", "rec_code": "avoid", "rec_label": "🔴 避開", "note": "⚠ 完工 9 年後成交比發售跌 34%——資本升值已失敗；Tan & Tan × Mitsubishi 品牌；KLCC 核心地段；但高位發售定價是永久性傷害", "name": "Stonor 3 @ KLCC", "developer": "Tan & Tan × Mitsubishi Estate", "lat": 3.1549, "lng": 101.7163, "report": "RE_Stonor3_KLCC_20260412.html"}, {"rank": 20, "tier": 5, "fullname": "Pavilion Damansara Heights Pavilion Group · Damansara Heights", "area": "Damansara Heights", "score": 5.5, "tenure": "Freehold 商業", "psf_raw": "Brickz 住宅幾乎 0 筆；1 筆商業成交（不通過 FIX-03）", "psf_num": null, "status": "2025 完工", "rec_code": "wait", "rec_label": "🟡 觀望", "note": "50% 掛牌率本系列最高；Brickz 幾乎零成交；成交數據信心度極低；Damansara Heights 地段尚可但流動性不明", "name": "Pavilion Damansara Heights", "developer": "Pavilion Group", "lat": 3.1435, "lng": 101.662, "report": "RE_PavilionDH_20260412.html"}, {"rank": 20, "tier": 5, "fullname": "Pavilion Square @ Bukit Bintang Pavilion Group · Bukit Bintang", "area": "Bukit Bintang", "score": 5.5, "tenure": "Leasehold 商業 ⚠⚠", "psf_raw": "RM2,300–2,420（發售期房 2028–29）", "psf_num": 2300, "status": "2028–29 期房", "rec_code": "avoid", "rec_label": "🔴 避開", "note": "Leasehold + 商業地契雙重不利；直連 Pavilion Mall 地段加分；RM2,300+ psf 高定價；Brickz 0筆；2028 期房長等待", "name": "Pavilion Square @ Bukit Bintang", "developer": "Pavilion Group", "lat": 3.1482, "lng": 101.7119, "report": "RE_PavilionSquare_20260412.html"}, {"rank": 21, "tier": 5, "fullname": "Orion Residence @ Bukit Bintang Orion Tower Sdn Bhd · Bukit Bintang", "area": "Bukit Bintang", "score": 5.2, "tenure": "Freehold 商業", "psf_raw": "RM2,165–3,851（PropertyGuru 掛牌；未確認成交）", "psf_num": 2165, "status": "2025 延遲", "rec_code": "avoid", "rec_label": "🔴 避開", "note": "⚠ 管理費 RM1.20 psf 本系列最高；Gross Yield 僅 1.2–1.5%（本系列最低）；開發商完工延遲；本系列最低分", "name": "Orion Residence @ Bukit Bintang", "developer": "Orion Tower Sdn Bhd", "lat": 3.148, "lng": 101.71, "report": "RE_OrionResidence_BukitBintang_20260412.html"}];
+  const TIER_COLOR={1:'#14532d',2:'#16a34a',3:'#d97706',4:'#ea580c',5:'#dc2626'};
+  const state={tier:new Set(),area:new Set(),tenure:new Set(),view:'marker',sort:'score',psfMax:3000};
+
+  const map=new maplibregl.Map({
+    container:'map',
+    style:'https://tiles.openfreemap.org/styles/liberty',
+    center:[101.695,3.155],
+    zoom:11.5,
+    maxZoom:19
+  });
+  map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
+  map.addControl(new maplibregl.ScaleControl({unit:'metric'}),'bottom-left');
+
+  const markerObjs={};
+  function tierClass(s){return s>=8?1:s>=7.5?2:s>=6.5?3:s>=5.5?4:5}
+
+  function buildMarker(p){
+    const t=p.tier||tierClass(p.score);
+    const size=24+p.score*1.5;
+    const el=document.createElement('div');
+    el.className='marker-dot';
+    el.style.width=size+'px';el.style.height=size+'px';
+    el.style.background=TIER_COLOR[t];
+    el.style.fontSize=(size>=32?'12px':'10px');
+    el.textContent=p.score.toFixed(1);
+    const m=new maplibregl.Marker({element:el}).setLngLat([p.lng,p.lat]);
+    const popup=new maplibregl.Popup({offset:size/2+6,closeButton:true,maxWidth:'320px'}).setHTML(popupHTML(p));
+    m.setPopup(popup);
+    el.addEventListener('click',()=>highlightList(p.name));
+    return m;
+  }
+
+  function popupHTML(p){
+    const isZh=document.querySelector('.lang-zh:not([style*="none"])')!==null;
+    const L={
+      score:isZh?'評分':'Score',tenure:isZh?'地契':'Tenure',psf:isZh?'單價':'PSF',
+      status:isZh?'狀態':'Status',rec:isZh?'建議':'Verdict',
+      cta:isZh?'查看完整報告 →':'View full report →'
+    };
+    return `<div class="popup-card">
+      <div class="popup-title">${p.name}</div>
+      <div class="popup-sub">${p.developer} · ${p.area}</div>
+      <div class="popup-grid">
+        <span class="popup-k">${L.score}</span><span class="popup-v">${p.score} / 10 (#${p.rank})</span>
+        <span class="popup-k">${L.tenure}</span><span class="popup-v">${p.tenure}</span>
+        <span class="popup-k">${L.psf}</span><span class="popup-v">${p.psf_raw}</span>
+        <span class="popup-k">${L.status}</span><span class="popup-v">${p.status}</span>
+        <span class="popup-k">${L.rec}</span><span class="popup-v">${p.rec_label}</span>
+      </div>
+      <div class="popup-note">${p.note}</div>
+      <a class="popup-link" href="/docs/dd/${p.report}" target="_blank" rel="noopener">${L.cta}</a>
+    </div>`;
+  }
+
+  function highlightList(name){
+    document.querySelectorAll('.proj-item').forEach(el=>{
+      el.classList.toggle('active',el.dataset.name===name);
+      if(el.dataset.name===name)el.scrollIntoView({block:'nearest',behavior:'smooth'});
+    });
+  }
+
+  function getFiltered(){
+    return DATA.filter(p=>{
+      if(state.tier.size&&!state.tier.has(p.tier))return false;
+      if(state.area.size&&!state.area.has(p.area))return false;
+      if(state.tenure.size){
+        const isFH=p.tenure.includes('Freehold');
+        const isRes=p.tenure.includes('住宅');
+        const isBuilt=p.status.includes('完工');
+        const strong=p.rec_code==='strong';
+        let ok=false;
+        state.tenure.forEach(t=>{
+          if(t==='Freehold'&&isFH)ok=true;
+          if(t==='Leasehold'&&!isFH)ok=true;
+          if(t==='Residential'&&isRes)ok=true;
+          if(t==='Commercial'&&!isRes)ok=true;
+          if(t==='Built'&&isBuilt)ok=true;
+          if(t==='Off-plan'&&!isBuilt)ok=true;
+          if(t==='🟢 Strong buy'&&strong)ok=true;
+        });
+        if(!ok)return false;
+      }
+      if(p.psf_num&&p.psf_num>state.psfMax)return false;
+      return true;
+    });
+  }
+
+  function clearAllMarkers(){
+    Object.values(markerObjs).forEach(m=>m.remove());
+    for(const k in markerObjs)delete markerObjs[k];
+  }
+
+  function addHeatmap(filtered){
+    const features=filtered.map(p=>({type:'Feature',properties:{weight:p.score/10},geometry:{type:'Point',coordinates:[p.lng,p.lat]}}));
+    if(map.getSource('heat-src')){map.removeLayer('heat-layer');map.removeSource('heat-src');}
+    map.addSource('heat-src',{type:'geojson',data:{type:'FeatureCollection',features}});
+    map.addLayer({id:'heat-layer',type:'heatmap',source:'heat-src',paint:{
+      'heatmap-weight':['get','weight'],
+      'heatmap-intensity':1.2,'heatmap-radius':45,'heatmap-opacity':0.75,
+      'heatmap-color':['interpolate',['linear'],['heatmap-density'],
+        0,'rgba(22,163,74,0)',0.25,'rgba(22,163,74,0.5)',
+        0.5,'rgba(217,119,6,0.7)',0.75,'rgba(234,88,12,0.8)',1,'rgba(220,38,38,0.9)']
+    }});
+  }
+  function removeHeatmap(){if(map.getLayer('heat-layer'))map.removeLayer('heat-layer');if(map.getSource('heat-src'))map.removeSource('heat-src');}
+
+  function render(){
+    clearAllMarkers();removeHeatmap();
+    const filtered=getFiltered();
+    if(state.view==='marker'){filtered.forEach(p=>{const m=buildMarker(p);m.addTo(map);markerObjs[p.name]=m})}
+    else if(state.view==='heat'){addHeatmap(filtered)}
+
+    const sorted=[...filtered];
+    if(state.sort==='score')sorted.sort((a,b)=>b.score-a.score);
+    else if(state.sort==='psf')sorted.sort((a,b)=>(a.psf_num||9999)-(b.psf_num||9999));
+    else if(state.sort==='rank')sorted.sort((a,b)=>a.rank-b.rank);
+
+    const list=document.getElementById('proj-list');
+    list.innerHTML=sorted.map(p=>`
+      <div class="proj-item" data-name="${p.name}" onclick="flyTo('${p.name.replace(/'/g,"\\'")}')">
+        <div class="proj-head">
+          <span class="score-pill score-t${p.tier}">${p.score}</span>
+          <span class="proj-name">${p.name}</span>
+        </div>
+        <div class="proj-meta">#${p.rank} · ${p.area} · ${p.psf_raw.replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'')}</div>
+        <div class="proj-rec">${p.rec_label} · ${p.tenure}</div>
+      </div>`).join('');
+
+    document.getElementById('stat-total').textContent=filtered.length;
+    document.getElementById('stat-area').textContent=new Set(filtered.map(p=>p.area)).size;
+    document.getElementById('stat-avg').textContent=filtered.length?(filtered.reduce((s,p)=>s+p.score,0)/filtered.length).toFixed(1):'—';
+    const pc=document.getElementById('proj-count');
+    pc.childNodes[0].nodeValue=filtered.length+' ';
+    document.getElementById('marker-legend').style.display=state.view==='heat'?'none':'block';
+  }
+
+  window.flyTo=function(name){
+    const p=DATA.find(x=>x.name===name);if(!p)return;
+    map.flyTo({center:[p.lng,p.lat],zoom:16,duration:800});
+    const m=markerObjs[name];if(m)setTimeout(()=>m.togglePopup(),500);
+    highlightList(name);
+  };
+
+  function mkChips(id,values,key){
+    const el=document.getElementById(id);
+    el.innerHTML=values.map(v=>`<span class="chip" data-v="${v}">${v}</span>`).join('');
+    el.querySelectorAll('.chip').forEach(c=>{
+      c.onclick=()=>{
+        c.classList.toggle('active');
+        const v=c.dataset.v;
+        const isNum=!isNaN(parseInt(v))&&v.length<=2;
+        const val=isNum?parseInt(v):v;
+        if(state[key].has(val))state[key].delete(val);else state[key].add(val);
+        render();
+      };
+    });
+  }
+  mkChips('tier-chips',[1,2,3,4,5],'tier');
+  mkChips('area-chips',[...new Set(DATA.map(p=>p.area))].sort(),'area');
+  mkChips('tenure-chips',['Freehold','Leasehold','Residential','Commercial','Built','Off-plan','🟢 Strong buy'],'tenure');
+
+  document.querySelectorAll('.view-tab').forEach(t=>{
+    t.onclick=()=>{
+      document.querySelectorAll('.view-tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');state.view=t.dataset.view;render();
+    };
+  });
+  document.querySelectorAll('.sort-btn').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('.sort-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');state.sort=b.dataset.sort;render();
+    };
+  });
+  document.getElementById('psf-max').oninput=function(){
+    state.psfMax=+this.value;
+    document.getElementById('psf-val').textContent='≤ '+state.psfMax;
+    render();
+  };
+
+  map.on('load',render);
+  </script>
+</body>
+</html>

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the Chens use Property Monitor for MM2H + KL/Penang | Walkthrough | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="../../css/style.css">
+<style>
+.lang-zh{display:none}
+
+/* ── Persona Card (top) ── */
+.persona-card{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#e2ecf8;border-radius:8px;padding:26px 28px;margin:0 0 24px;position:relative;overflow:hidden}
+.persona-card::after{content:'🇲🇾';position:absolute;top:-20px;right:-10px;font-size:140px;opacity:.06}
+.persona-card .pc-eyebrow{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.persona-card .pc-title{font-size:22px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:8px;letter-spacing:-.01em}
+.persona-card .pc-tag{font-size:13px;color:#a8c0d8;line-height:1.6;max-width:780px;margin-bottom:18px}
+.pc-profile{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);margin-bottom:14px}
+.pc-profile-item .lbl{font-size:9px;letter-spacing:.10em;color:#5a8ab5;font-weight:600;text-transform:uppercase}
+.pc-profile-item .val{font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-weight:500;margin-top:3px}
+.pc-questions{font-size:11.5px;line-height:1.65;color:#a8c0d8}
+.pc-questions strong{color:#f59e0b;font-weight:600;display:block;margin-bottom:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pc-questions ol{margin:0;padding:0 0 0 18px}
+.pc-questions li{margin-bottom:3px}
+
+/* Urgency banner — MM2H-specific (2026 Jan stamp duty deadline) */
+.urgency-banner{background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);border:1.5px solid #dc2626;border-radius:8px;padding:14px 18px;margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.urgency-banner .ub-icon{font-size:24px;line-height:1}
+.urgency-banner .ub-text{font-size:12.5px;color:#7f1d1d;line-height:1.55}
+.urgency-banner .ub-text strong{color:#991b1b;font-weight:700;display:block;margin-bottom:3px;font-size:13px}
+
+/* ── Section heading ── */
+.demo-section{margin:32px 0 8px}
+.demo-section .sec-no{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:.08em}
+.demo-section h2{font-size:18px;font-weight:700;color:#1e3a5f;line-height:1.3;margin:2px 0 4px;letter-spacing:-.005em}
+.demo-section .sec-sub{font-size:12px;color:#5a7a9a;line-height:1.6;max-width:780px}
+
+/* ── Demo Step ── */
+.demo-step{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:36px 1fr;gap:16px}
+.demo-step .step-no{width:32px;height:32px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;font-family:'JetBrains Mono',monospace}
+.demo-step .step-content h4{font-size:14px;font-weight:600;color:#1e3a5f;margin-bottom:4px;line-height:1.35}
+.demo-step .step-url{font-family:'JetBrains Mono',monospace;font-size:11px;margin-bottom:10px}
+.demo-step .step-url a{color:#2563eb;text-decoration:none}
+.demo-step .step-url a:hover{text-decoration:underline}
+.demo-step .step-action{background:#eff6ff;border-left:3px solid #2563eb;padding:9px 12px;font-size:11.5px;color:#1e3a5f;line-height:1.6;margin-bottom:10px;border-radius:0 4px 4px 0}
+.demo-step .step-action strong{color:#1e3a5f;font-weight:600;display:inline-block;margin-right:4px}
+.demo-step .step-see{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:8px}
+.demo-step .step-see strong{color:#1e3a5f;font-weight:600}
+.demo-step .step-meaning{background:#fffbeb;border-left:3px solid #d97706;padding:9px 12px;font-size:11.5px;color:#78350f;line-height:1.6;margin-top:6px;border-radius:0 4px 4px 0}
+.demo-step .step-meaning strong{color:#92400e;font-weight:600}
+.demo-step .step-screenshot{background:#f4f7fc;border:1px solid #ccd9e8;border-radius:4px;margin-top:12px;overflow:hidden;line-height:0}
+.demo-step .step-screenshot img{display:block;width:100%;height:auto}
+
+/* ── Cheat sheet ── */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.cheat-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:14px 18px}
+.cheat-card h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cheat-card .ck-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#eef3f9;color:#1e3a5f;font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.cheat-card p{font-size:11.5px;color:#4a6080;line-height:1.6}
+.cheat-card .ck-tip{margin-top:6px;font-size:11px;color:#5a7a9a;font-style:italic}
+.cheat-card code{background:#eef3f9;color:#1e3a5f;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.color-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.color-legend .cl-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#4a6080;background:#f4f7fc;padding:6px 10px;border-radius:3px}
+.color-legend .cl-dot{width:10px;height:10px;border-radius:50%}
+.color-legend .cl-green{background:#16a34a}
+.color-legend .cl-orange{background:#d97706}
+.color-legend .cl-red{background:#dc2626}
+.color-legend .cl-blue{background:#2563eb}
+
+/* ── Takeaway box ── */
+.takeaway{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.takeaway-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px}
+.takeaway-card.answered{border-left:4px solid #16a34a}
+.takeaway-card.outsource{border-left:4px solid #d97706}
+.takeaway-card h4{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;letter-spacing:-.005em}
+.takeaway-card ul{list-style:none;padding:0;margin:0}
+.takeaway-card li{font-size:12px;color:#4a6080;line-height:1.6;padding:5px 0 5px 22px;position:relative}
+.takeaway-card.answered li::before{content:'✓';position:absolute;left:0;top:5px;color:#16a34a;font-weight:700}
+.takeaway-card.outsource li::before{content:'→';position:absolute;left:0;top:5px;color:#d97706;font-weight:700}
+.takeaway-card li strong{color:#1e3a5f;font-weight:600}
+
+/* ── PDF button ── */
+.pdf-bar{display:flex;gap:10px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap}
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;background:#1e3a5f;color:#fff;border:none;padding:12px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{background:#0f1e33}
+.pdf-btn.ghost{background:#fff;color:#1e3a5f;border:1px solid #ccd9e8}
+.pdf-btn.ghost:hover{border-color:#1e3a5f}
+
+/* ── Best Option Block ── */
+.best-option{margin:6px 0 16px}
+.bo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.bo-card{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #d97706;border-radius:4px;padding:14px 16px}
+.bo-card .bo-lbl{font-size:9px;letter-spacing:.1em;color:#5a7a9a;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.bo-card .bo-val{font-size:14px;font-weight:600;color:#1e3a5f;line-height:1.35;margin-bottom:6px;letter-spacing:-.005em}
+.bo-card .bo-note{font-size:11px;color:#5a7a9a;line-height:1.5}
+.bo-section{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:16px 20px;margin-bottom:10px}
+.bo-section h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:10px;line-height:1.35}
+.bo-checklist ul,.bo-next ol{margin:0;padding-left:18px}
+.bo-checklist li,.bo-next li{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:6px}
+.bo-bottomline{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#fff;border-radius:6px;padding:20px 24px;margin-top:14px}
+.bo-bottomline .bo-bl-label{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;display:block;margin-bottom:8px;text-transform:uppercase}
+.bo-bottomline p{font-size:14px;line-height:1.6;color:#fff;margin:0}
+@media (max-width:720px){.bo-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Print ── */
+@media print {
+  @page{size:A4;margin:14mm}
+  body{background:#fff!important}
+  #nav-root,.lang-switcher,.pdf-bar,.demo-back{display:none!important}
+  .bo-grid{grid-template-columns:repeat(4,1fr)!important}
+  .bo-bottomline{background:#1e3a5f!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .container{max-width:100%!important;padding:0!important}
+  .persona-card,.demo-step,.cheat-card,.takeaway-card,.urgency-banner{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  .persona-card::after{display:none}
+  .demo-section{break-after:avoid;page-break-after:avoid}
+  a{color:#1e3a5f!important;text-decoration:none}
+}
+
+@media (max-width:760px){
+  .pc-profile{grid-template-columns:repeat(2,1fr);gap:10px}
+  .demo-step{grid-template-columns:1fr;gap:10px}
+  .demo-step .step-no{margin-bottom:-4px}
+  .persona-card{padding:20px 18px}
+  .persona-card .pc-title{font-size:18px}
+  .cheat-grid,.takeaway,.color-legend{grid-template-columns:1fr}
+  .urgency-banner{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="container">
+
+  <!-- Breadcrumb -->
+  <div class="demo-back" style="font-size:11px;color:#5a7a9a;margin-bottom:12px;font-family:'JetBrains Mono',monospace">
+    <a href="/demo/" style="color:#2563eb;text-decoration:none">← <span class="lang-en">All walkthroughs</span><span class="lang-zh">所有導覽</span></a>
+    <span style="color:#aabdd4;margin:0 8px">/</span>
+    <span><span class="lang-en">The Chens use the site for KL/Penang under MM2H</span><span class="lang-zh">陳氏夫婦用本站研究 MM2H + 吉隆坡／檳城</span></span>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 1 — PERSONA CARD                       -->
+  <!-- ============================================== -->
+  <div class="persona-card">
+    <div class="pc-eyebrow"><span class="lang-en">USE CASE WALKTHROUGH · 02 · A SITE TOUR THROUGH THE CHENS' EYES</span><span class="lang-zh">情境導覽 · 02 · 跟著陳氏夫婦逛這個網站</span></div>
+    <div class="pc-title">
+      <span class="lang-en">Meet Mr. &amp; Mrs. Chen — MM2H-approved Taiwanese retirees choosing between KL and Penang</span>
+      <span class="lang-zh">認識陳先生夫婦 — 已取得 MM2H 的台灣退休夫妻，在吉隆坡與檳城之間二選一</span>
+    </div>
+    <p class="pc-tag">
+      <span class="lang-en">Mr. &amp; Mrs. Chen (both 58, retired tech executives from Hsinchu) just received their MM2H approval and have RM 2M in cash to deploy on one property they will live in part-time and rent out when they're back in Taiwan. They've never used Property Monitor. This walkthrough shows you <strong>which page to open first, what to click, what each chart means, and where to find each function</strong> — using the Chens' questions as the lens. It is <strong>not</strong> investment advice, tax advice, MM2H legal advice, or property recommendations.</span>
+      <span class="lang-zh">陳先生夫婦，皆 58 歲，新竹退休科技主管，剛取得 MM2H 核發，手上 RM 2M 現金預計買一戶，部分時間自住、人在台灣時出租。他們從沒用過 Property Monitor。這份導覽用陳氏夫婦的問題當主軸，<strong>告訴你先打開哪一頁、點哪裡、每張圖代表什麼、各種功能藏在哪</strong>。本文<strong>不是</strong>投資建議、稅務建議、MM2H 法律建議或不動產推薦。</span>
+    </p>
+
+    <div class="pc-profile">
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Buyers</span><span class="lang-zh">使用者</span></div><div class="val">Mr.&amp;Mrs. Chen · 58y</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Visa</span><span class="lang-zh">簽證</span></div><div class="val"><span class="lang-en">MM2H approved</span><span class="lang-zh">MM2H 已核發</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Budget</span><span class="lang-zh">預算</span></div><div class="val">RM 2M cash</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Goal</span><span class="lang-zh">目標</span></div><div class="val"><span class="lang-en">Live + rent</span><span class="lang-zh">自住 + 出租</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Site experience</span><span class="lang-zh">網站經驗</span></div><div class="val"><span class="lang-en">First-time</span><span class="lang-zh">第一次</span></div></div>
+    </div>
+
+    <div class="pc-questions">
+      <strong><span class="lang-en">Questions the Chens came to answer</span><span class="lang-zh">陳氏夫婦想在這個網站找到答案的問題</span></strong>
+      <ol>
+        <li><span class="lang-en">Where on this site does Malaysia data live, and how do I get there?</span><span class="lang-zh">馬來西亞的資料藏在哪？怎麼進去？</span></li>
+        <li><span class="lang-en">Where can I read the analyst narrative — what's the story behind the numbers — before I start clicking charts?</span><span class="lang-zh">在開始點圖之前，哪裡能讀到分析師的敘述、看「數字背後的故事」？</span></li>
+        <li><span class="lang-en">KL or Penang — how do I tell which one fits a retired couple who want to live + rent?</span><span class="lang-zh">吉隆坡 vs 檳城 — 兩個適合自住 + 出租的退休夫妻怎麼選？</span></li>
+        <li><span class="lang-en">Which specific buildings (out of dozens) suit the RM 2M MM2H tier?</span><span class="lang-zh">幾十個建案中，哪些具體建案符合 RM 2M MM2H 等級？</span></li>
+        <li><span class="lang-en">What does RM 2M actually cost end-to-end after the 2026 stamp duty change?</span><span class="lang-zh">2026 印花稅調漲後，RM 2M 含取得、持有、退場的實際總成本是多少？</span></li>
+        <li><span class="lang-en">Where is the tool that compares buying property vs buying MY-REITs as a foreigner?</span><span class="lang-zh">外國人買實體 vs 買 MY-REIT 對照的工具在哪？</span></li>
+        <li><span class="lang-en">How do I switch the site to 中文? Where do I download a PDF?</span><span class="lang-zh">怎麼切到中文？怎麼下載 PDF？</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 2026 stamp duty urgency banner -->
+  <div class="urgency-banner">
+    <div class="ub-icon">⏰</div>
+    <div class="ub-text">
+      <strong><span class="lang-en">2026 Jan deadline highlighted on /my/risk — foreign stamp duty doubles 4% → 8%</span><span class="lang-zh">2026 年 1 月期限（已標於 /my/risk）— 外國買家印花稅由 4% 翻倍至 8%</span></strong>
+      <span class="lang-en">For an RM 2M purchase, the difference is roughly RM 80,000 in upfront tax. The Chens see this on the risk timeline and treat 2025 as their decision window. <em>The site flags the deadline; whether the doubling is final policy must be confirmed with a Malaysian property lawyer.</em></span>
+      <span class="lang-zh">RM 2M 物件大約是 RM 80,000 的稅差。陳氏夫婦在 risk 時間軸上看到後，把 2025 當決策窗口。<em>網站標記了期限；最終政策是否定案請與馬來西亞不動產律師確認。</em></span>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 2 — OPERATIONS JOURNEY                 -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 02</div>
+    <h2><span class="lang-en">The Chens' click-by-click tour — 12 stops</span><span class="lang-zh">陳氏夫婦的逐步點擊旅程 — 12 個停靠點</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">Each stop is a real page on the site. For each, you'll see what they click, what the screen shows, and how that screen relates to their MM2H situation. Follow along in another tab — every URL works.</span>
+      <span class="lang-zh">每個停靠點都是站上的一頁實際畫面。每站告訴你他們點什麼、螢幕出現什麼、這個畫面跟他們 MM2H 情境有什麼關係。建議另開分頁跟著走 — 所有連結都能直接點。</span>
+    </p>
+  </div>
+
+  <!-- STOP 1 — Home pick passport persona -->
+  <div class="demo-step">
+    <div class="step-no">1</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Land on the home page and pick the "passport" persona</span><span class="lang-zh">進入首頁，選「身分」persona 卡</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">open the home page, scroll past the dark hero, see three persona cards labelled <strong>"I want yield / I want growth / I want a passport"</strong>. They click <strong>"I want a passport / 我要身分"</strong> because MM2H is what brought them here.</span>
+        <span class="lang-zh">打開首頁，往下捲過深色 hero，看到三張 persona 卡：<strong>「我要收租／我要增值／我要身分」</strong>。點 <strong>「我要身分 / I want a passport」</strong>，因為 MM2H 就是他們的起點。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> the chosen card lights up amber with a checkmark. The persona explicitly lists "UAE, Turkey, Malaysia, Indonesia routes" — Malaysia is in scope. Below the hero, the scatter chart and world map both <em>highlight visa-linked countries</em> automatically.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>選中的卡片變琥珀色亮起並打勾。persona 直接列「UAE、土耳其、馬來西亞、印尼路徑」 — 馬來西亞在範圍內。Hero 下方的散點圖與世界地圖會自動<em>高亮簽證連結國家</em>。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens:</span><span class="lang-zh">對陳氏夫婦：</span></strong> <span class="lang-en">picking the persona once = global filter. Every chart, map, and Top-5 list on /home reweights to "passport-route" countries. They don't need to manually filter for Malaysia.</span><span class="lang-zh">選一次 persona = 全站濾鏡。/home 上每張圖、地圖、Top-5 都會以「身分路徑」國家重新排序。不用自己手動篩選馬來西亞。</span></div>
+      <div class="step-screenshot"><img src="img/01-home-passport.png" alt="Home with I-want-a-passport persona active in amber" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 2 — Home map → Malaysia -->
+  <div class="demo-step">
+    <div class="step-no">2</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Use the world map to locate Malaysia</span><span class="lang-zh">用世界地圖找到馬來西亞</span></h4>
+      <div class="step-url"><a href="/home.html#map">myproperty.investmquest.com/home</a> · <span class="lang-en">map section</span><span class="lang-zh">地圖區段</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">scroll down to the world map. They use the metric toggle (Yield / Carry / 10yr / Pipeline) to switch how dot intensity is colored. They hover Kuala Lumpur and Penang dots; tooltip shows Yield, Carry, 10yr, PTI, Vacancy. They click <em>"Deep dive →"</em> in the KL tooltip to jump straight to /my/kl.</span>
+        <span class="lang-zh">捲到世界地圖。用上方按鈕（Yield / Carry / 10yr / Pipeline）切換顯示指標。游標停在吉隆坡與檳城點上 → tooltip 顯示 Yield、Carry、10yr、PTI、Vacancy。點 KL tooltip 內 <em>「Deep dive →」</em> 直接跳到 /my/kl。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> dot color depth = how extreme the metric. Top 5 strip below the map ranks leading cities for the chosen metric, with a ★ next to ones matching the passport persona.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>點顏色深度代表該指標極端度。地圖下方 Top 5 列表顯示當前指標的領先城市，符合身分 persona 的旁邊有 ★。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens:</span><span class="lang-zh">對陳氏夫婦：</span></strong> <span class="lang-en">the map is the visual shortcut into a city's deep page — no need to dig through navigation menus. They can see KL and Penang side-by-side as dots before deciding which to drill into.</span><span class="lang-zh">地圖是進入城市深度頁的視覺捷徑 — 不用翻 navbar。能在地圖上把吉隆坡與檳城當兩個點並排比較，再決定鑽進哪個。</span></div>
+      <div class="step-screenshot"><img src="img/02-home-map-my.png" alt="World map zoomed to Southeast Asia showing KL and Penang dots" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 3 — /my/report (read narrative first) -->
+  <div class="demo-step">
+    <div class="step-no">3</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Read the long-form Malaysia market report first — get the narrative before the numbers</span><span class="lang-zh">先讀馬來西亞長篇市場報告 — 看完故事再看數字</span></h4>
+      <div class="step-url"><a href="/my/report.html">myproperty.investmquest.com/my/report</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇲🇾 → <strong>Report / 報告</strong>. They read the Executive Summary first, then skim section headings to know what's covered (overhang dynamics, OPR cycle, MM2H regulatory shifts, KL vs Penang positioning, MRT3 / SEZ catalysts).</span>
+        <span class="lang-zh">navbar 🇲🇾 → <strong>Report / 報告</strong>。先讀執行摘要，再掃章節標題知道涵蓋範圍（滯銷量動態、OPR 週期、MM2H 政策變動、KL vs 檳城 定位、MRT3 / SEZ 催化劑）。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> a long-form analyst report — paragraphs of narrative with stats embedded in the text. No charts to interpret here, just prose. This is the only page on the site that connects all the data points into "what's the story."</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>長篇分析師報告 — 段落敘述配內嵌統計數字。沒有圖表要解讀，純散文。這是站上唯一把所有資料點串成「故事是什麼」的地方。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens:</span><span class="lang-zh">對陳氏夫婦：</span></strong> <span class="lang-en">reading the report FIRST means the KPI grids on /my/ later have context. Without it, "OPR 2.75%" or "Overhang 28,672" are meaningless numbers; with it, they understand "rates were just cut" and "supply is elevated but RM1M+ luxury is clearing fast."</span><span class="lang-zh">先讀報告，後面 /my/ 上的 KPI 才有脈絡。沒讀過，「OPR 2.75%」或「Overhang 28,672」就是抽象數字；讀過後，他們知道「利率剛降」、「整體供給高但 RM1M+ 高端正在快速去化」。</span></div>
+      <div class="step-screenshot"><img src="img/03-my-report.png" alt="MY market report long-form" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 4 — /my/ dashboard (3 KPI grids) -->
+  <div class="demo-step">
+    <div class="step-no">4</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Read the Malaysia dashboard — three KPI rows tell the whole market story</span><span class="lang-zh">讀馬來西亞儀表板 — 三排 KPI 把整個市場說完</span></h4>
+      <div class="step-url"><a href="/my/">myproperty.investmquest.com/my</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">open /my/. They read top-to-bottom — the page is structured as three KPI grids each labelled with a section header.</span>
+        <span class="lang-zh">打開 /my/，由上往下讀 — 頁面分成三排 KPI，每一排都有 section 標題。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong></span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong></span><br>
+        <span class="lang-en">① <strong>MARKET TEMPERATURE</strong> — gross rental yield, high-rise absorption, MHPI YoY, national avg price.<br>
+        ② <strong>SUPPLY PRESSURE</strong> — residential overhang, total overhang (incl. serviced apts), new completions, developer confidence. <em>Most cards are orange/red here — that's the signal that supply is elevated.</em><br>
+        ③ <strong>DEMAND MOMENTUM</strong> — 2024 transactions (10-year high), Q3 2025 transactions, loan approval rate, OPR (cut to 2.75% Jul 2025), MHPI YoY, KL avg price (−4.3% YoY, red).<br>
+        Below the KPIs: 6 ECharts charts including <em>City Avg Price (KL/Penang/Selangor/Johor/National)</em> and <em>Rental Yield by City Q1 2026</em>.</span>
+        <span class="lang-zh">① <strong>市場溫度</strong> — 毛租金收益率、高層去化、MHPI YoY、全國均價。<br>
+        ② <strong>供給壓力</strong> — 住宅滯銷量、總滯銷（含 SA）、新完工量、開發商信心。<em>這排大半卡片是橘／紅 — 信號是供給偏高。</em><br>
+        ③ <strong>需求動能</strong> — 2024 全年交易（10 年新高）、Q3 2025 交易、貸款核准率、OPR（2025/7 降至 2.75%）、MHPI YoY、KL 均價（−4.3% YoY，紅）。<br>
+        KPI 下方有 6 張 ECharts，包括《各城市均價》與《Q1 2026 各城市 yield》。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens:</span><span class="lang-zh">對陳氏夫婦：</span></strong> <span class="lang-en">the KL −4.3% YoY card is their cue: this is a buyer's correction window. Supply is elevated nationally, but the Chens are MM2H foreign cash buyers — they target the RM1M+ luxury tier, which the report told them is clearing 41% faster than overall.</span><span class="lang-zh">KL −4.3% YoY 那張卡片是訊號：這是買方修正期。整體供給偏高，但陳氏夫婦是 MM2H 外國現金買家 — 他們鎖 RM1M+ 高端等級，報告告訴他們這個等級去化速度比整體快 41%。</span></div>
+      <div class="step-screenshot"><img src="img/04-my-dashboard.png" alt="MY dashboard top with three KPI grids" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 5 — /my/macro -->
+  <div class="demo-step">
+    <div class="step-no">5</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Open Macro × Cycle — see "where in the cycle are we now"</span><span class="lang-zh">開 Macro × Cycle 頁，看「現在在週期哪個位置」</span></h4>
+      <div class="step-url"><a href="/my/macro.html">myproperty.investmquest.com/my/macro</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇲🇾 → <strong>Macro / 總經</strong>. The page opens with a horizontal cycle bar across the top: GFC → Boom → Cooling → COVID → Rate Hike, with a <strong>NOW</strong> marker on the current era.</span>
+        <span class="lang-zh">navbar 🇲🇾 → <strong>Macro / 總經</strong>。頁面開啟，上方有橫向週期軸：GFC → Boom → Cooling → COVID → Rate Hike，當下時點有 <strong>NOW</strong> 標記。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> below the cycle bar, 6 macro KPI cards (OPR, MHPI, CPI, GDP, Housing Loan Growth, Unemployment). Then 4 historical context cards. Then two multi-axis line charts (monetary cycle vs MHPI, real economy vs MHPI). Finally a vertical Key Cycle Events timeline ending with <em>"2025 Jul: OPR cut to 2.75% — monthly savings ~RM70 per RM500K loan"</em> and <em>"2025–2026: Johor SEZ + MRT3 + RTS Link"</em>.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>週期軸下方 6 張 macro KPI 卡（OPR、MHPI、CPI、GDP、房貸增速、失業率）。然後 4 張歷史脈絡卡。再來兩張雙軸折線圖（貨幣週期 vs MHPI、實體經濟 vs MHPI）。最後是垂直關鍵事件時間軸，結尾是 <em>「2025/7：OPR 降至 2.75% — 每 RM500K 貸款月省約 RM70」</em> 與 <em>「2025–2026：柔佛 SEZ + MRT3 + RTS Link」</em>。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens:</span><span class="lang-zh">對陳氏夫婦：</span></strong> <span class="lang-en">the cycle bar tells them this is "rate plateau" — not boom, not bust. The 2025 OPR cut + multiple infrastructure catalysts on the timeline mean the macro tailwinds are aligned. Even though they're paying cash, the lower borrowing cost benefits future tenants and supports rent growth.</span><span class="lang-zh">週期軸告訴他們現在是「利率高原」 — 不是 boom、不是 bust。2025 降息 + 時間軸上多項基建催化劑代表 macro 順風一致。即使他們全現金，較低借款成本利於未來租客、支撐租金增長。</span></div>
+      <div class="step-screenshot"><img src="img/05-my-macro.png" alt="MY macro cycle bar with NOW marker" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 6 — Penang scan (KL vs Penang triage) -->
+  <div class="demo-step">
+    <div class="step-no">6</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Open /my/penang to consider Penang as the alternative — and decide</span><span class="lang-zh">打開 /my/penang 考慮檳城為替代方案 — 然後做決定</span></h4>
+      <div class="step-url"><a href="/my/penang.html">myproperty.investmquest.com/my/penang</a> · <a href="/my/kl.html">/my/kl</a> <span class="lang-en">(in another tab)</span><span class="lang-zh">（另開分頁）</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇲🇾 → <strong>Penang 檳城</strong>. They scan the 6 KPI cards (avg price, growth, overhang, Gurney PSF, foreign min, manufacturing FDI) and the three zone cards: <strong>Gurney Drive / Pulau Tikus</strong>, <strong>Tanjung Bungah / Seri Tanjung Pinang</strong>, <strong>Bayan Lepas / Batu Kawan</strong>. Then they open /my/kl in another tab and compare KPIs side-by-side.</span>
+        <span class="lang-zh">navbar 🇲🇾 → <strong>Penang 檳城</strong>。掃 6 張 KPI 卡（均價、漲幅、滯銷、Gurney PSF、外國人下限、製造業 FDI）以及三個 zone 卡：<strong>Gurney Drive / Pulau Tikus</strong>、<strong>Tanjung Bungah / Seri Tanjung Pinang</strong>、<strong>Bayan Lepas / Batu Kawan</strong>。再另開分頁 /my/kl 並排比較 KPI。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see side-by-side:</strong></span>
+        <span class="lang-zh"><strong>三層級並排比較：</strong></span><br>
+        <span class="lang-en">▸ <strong>Penang</strong> — RM 504K avg price (lower entry), +5.7% YoY (growing), Gurney PSF RM 1,200–2,069, RM1M foreign min (island condos), industrial FDI +150% YoY (Intel, Motorola tech worker rentals). Strength: lower PSF + lifestyle.<br>
+        ▸ <strong>KL</strong> — RM 805K avg price (higher), −4.3% YoY (correction), Zone 1 KLCC PSF RM 1,200–2,500+, deep MM2H buyer ecosystem, MRT3 + TRX + Bandar Malaysia catalysts. Strength: liquidity + expat ecosystem + growth catalysts.</span>
+        <span class="lang-zh">▸ <strong>檳城</strong> — 均價 RM 504K（進入門檻低）、+5.7% YoY（成長中）、Gurney PSF RM 1,200–2,069、外國人下限 RM1M（島上公寓）、製造業 FDI +150% YoY（Intel、Motorola 工程師租屋需求）。強項：較低 PSF + 生活品質。<br>
+        ▸ <strong>吉隆坡</strong> — 均價 RM 805K（較高）、−4.3% YoY（修正中）、Zone 1 KLCC PSF RM 1,200–2,500+、MM2H 買家生態深、MRT3 + TRX + Bandar Malaysia 催化劑。強項：流動性 + 國際生態 + 成長催化劑。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens — KL wins (narrowly):</span><span class="lang-zh">對陳氏夫婦 — 吉隆坡勝出（差距不大）：</span></strong> <span class="lang-en">they're foreign cash buyers who want easy English-speaking property management, deep tenant pool of expats (not tech workers in Bayan Lepas), and structural infrastructure upside. KL's MRT3 (2032) + TRX maturation + ongoing 2025 price correction = better entry into a more liquid market. <em>Penang remains a valid alternative if lifestyle / proximity to Singapore matter more than yield.</em> They proceed to drill into KL in the next stop.</span><span class="lang-zh">他們是外國現金買家，要找會英文的物業管理、要深度的外籍租客池（不是 Bayan Lepas 的工程師）、要結構性基建上行。吉隆坡的 MRT3（2032）+ TRX 成熟 + 2025 價格修正中 = 進入流動性較高市場的好時點。<em>如果生活品質／靠近新加坡更重要，檳城是合理的備選。</em>下一站他們鑽進吉隆坡。</span></div>
+      <div class="step-screenshot"><img src="img/06-my-penang.png" alt="Penang dashboard with 6 KPIs and three zone cards" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 7 — /my/kl deep dive -->
+  <div class="demo-step">
+    <div class="step-no">7</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Drill into KL — find the right zone (out of 3) for an MM2H Live + Rent buyer</span><span class="lang-zh">鑽進吉隆坡 — 在 3 個 zone 中找到適合 MM2H 自住 + 出租的</span></h4>
+      <div class="step-url"><a href="/my/kl.html">myproperty.investmquest.com/my/kl</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇲🇾 → <strong>Kuala Lumpur 吉隆坡</strong>. They scan the 4 KPI cards (KL avg price, avg rent, overhang, luxury rent), then click through the <strong>4 tabs</strong>: <em>Zone 1 KLCC / Bukit Bintang</em>, <em>Zone 2 Mid Valley / OKR</em>, <em>Zone 3 Kepong / Cheras</em>, <em>Luxury RM1M+</em>. The Luxury tab is where they'll spend the most time.</span>
+        <span class="lang-zh">navbar 🇲🇾 → <strong>Kuala Lumpur 吉隆坡</strong>。掃 4 張 KPI 卡（KL 均價、均租、滯銷、豪宅租金），再點 <strong>4 個 tab</strong>：<em>Zone 1 KLCC / 武吉免登</em>、<em>Zone 2 Mid Valley / OKR</em>、<em>Zone 3 Kepong / 蕉賴</em>、<em>Luxury RM1M+</em>。Luxury tab 是他們會花最多時間的。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see in each tab:</strong> Zone 1 = ultra-luxury (PSF RM 1,200–2,500+, yield 3.5–4.5%, foreign 30–40%); Zone 2 = sweet spot (PSF RM 500–900, yield 5–6%, balanced supply); Zone 3 = overhang trap (red badges, ~40% of KL overhang). <em>The Luxury RM1M+ tab</em> has 4 dedicated KPIs and a long-form analyst card discussing 2025 correction window for branded residences (Pavilion BB, Alila 2 Bangsar, etc.). Plus a CTA banner pointing to <strong>kl-map.html</strong> with "22 curated RM1M+ projects" — the Chens click this in the next stop.</span>
+        <span class="lang-zh"><strong>每個 tab 看到什麼：</strong>Zone 1 = 超豪宅（PSF RM 1,200–2,500+、yield 3.5–4.5%、外資佔 30–40%）；Zone 2 = 甜蜜點（PSF RM 500–900、yield 5–6%、供需平衡）；Zone 3 = 滯銷陷阱（紅標、佔 KL 滯銷 ~40%）。<em>Luxury RM1M+ tab</em> 有 4 張專屬 KPI 與長篇分析師卡片（討論 2025 高端品牌住宅修正期，Pavilion BB、Alila 2 Bangsar 等）。並有 CTA banner 連到 <strong>kl-map.html</strong>「22 個策展 RM1M+ 建案」 — 下一站陳氏夫婦會點。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens — Zone 2 + selective Luxury:</span><span class="lang-zh">對陳氏夫婦 — Zone 2 + 精選 Luxury：</span></strong> <span class="lang-en">at RM 2M they're in the entry-luxury bracket. Pure Zone 1 KLCC at PSF RM 2,000+ buys them a small unit with 3.5% yield. Zone 2 sweet spot (Mont Kiara / Bangsar at PSF RM 700–1,000) gets them more square footage with 5%+ yield AND captures MRT3 upside. Zone 3 they avoid entirely (overhang). <em>The site's tab structure does the heavy lifting — they don't need to know KL geography to make this call.</em></span><span class="lang-zh">RM 2M 落在入門豪宅級。純 Zone 1 KLCC（PSF RM 2,000+）只能買小坪數、3.5% yield。Zone 2 甜蜜點（Mont Kiara / Bangsar PSF RM 700–1,000）能拿到較大坪數 + 5%+ yield + 抓到 MRT3 上行。Zone 3 完全避開（滯銷區）。<em>頁面 tab 結構幫他們做完判讀 — 他們不用懂吉隆坡地理就能下決定。</em></span></div>
+      <div class="step-screenshot"><img src="img/07-my-kl.png" alt="KL deep dive with 4 zones tabs and Luxury RM1M+ section" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 8 — /my/kl-map interactive -->
+  <div class="demo-step">
+    <div class="step-no">8</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Interactive Map — filter 22 scored RM1M+ projects to a shortlist</span><span class="lang-zh">互動地圖 — 從 22 個評分 RM1M+ 建案篩出口袋名單</span></h4>
+      <div class="step-url"><a href="/my/kl-map.html">myproperty.investmquest.com/my/kl-map</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">click the "Interactive Property Map" CTA on /my/kl, or navigate via 🇲🇾 → Kuala Lumpur. They use the left sidebar filters: <strong>Score tier = T1 (8.0+) + T2 (7.5–7.99)</strong>, <strong>Area = Mont Kiara, Bangsar, DPC</strong>, <strong>Status = Built</strong> (zero completion risk for retirees), <strong>Max PSF ≤ 1,200</strong>. They click each remaining map marker for the popup.</span>
+        <span class="lang-zh">在 /my/kl 點「Interactive Property Map」CTA，或從 🇲🇾 → Kuala Lumpur 進入。用左側 filter：<strong>分數 T1 (8.0+) + T2 (7.5–7.99)</strong>、<strong>區 = Mont Kiara、Bangsar、DPC</strong>、<strong>狀態 = Built</strong>（零完工風險，對退休族重要）、<strong>Max PSF ≤ 1,200</strong>。剩下的地圖標記逐一點開看 popup。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> a MapLibre map with colored markers (T1 dark green → T5 red). Each popup shows project name, developer + area, score (rank), tenure (Freehold / Leasehold), PSF, status, recommendation pill (🟢 積極 strong buy / 🟡 觀望 wait / 🔴 避開 avoid), 2–3 sentence rationale, and a <em>"View full report →"</em> link to the project's deep-dive HTML.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>MapLibre 地圖 + 彩色標記（T1 深綠 → T5 紅）。每個 popup 顯示建案名、開發商 + 區、分數（排名）、tenure（永久 / 租賃）、PSF、狀態、建議 pill（🟢 積極 / 🟡 觀望 / 🔴 避開）、2–3 句說明、以及 <em>「View full report →」</em> 連到該建案的深度 HTML。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens:</span><span class="lang-zh">對陳氏夫婦：</span></strong> <span class="lang-en">this map is the <em>most important page</em> on the site for them. It collapses 22 buildings into a filterable shortlist with explicit buy/wait/avoid recommendations. The "Built" filter eliminates pre-construction risk (huge for retirees who want occupancy ASAP). The "View full report →" link is the bridge to the next stop.</span><span class="lang-zh">這張地圖是站上對他們<em>最重要的頁面</em>。把 22 個建案壓縮成可篩選的口袋名單，附明確的「積極／觀望／避開」建議。「Built」篩選排除預售風險（對想立即入住的退休族很關鍵）。popup 內的「View full report →」是進到下一站的橋梁。</span></div>
+      <div class="step-screenshot"><img src="img/08-my-kl-map.png" alt="KL interactive map with 22 scored project markers and filter sidebar" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 9 — /docs/dd/DD_KL_RM1M (master DD) -->
+  <div class="demo-step">
+    <div class="step-no">9</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Master DD report — read the 8-section RM1M+ deep dive</span><span class="lang-zh">主 DD 報告 — 讀 8 章節 RM1M+ 深度報告</span></h4>
+      <div class="step-url"><a href="/docs/dd/DD_KL_RM1M_20260331.html">/docs/dd/DD_KL_RM1M_20260331</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">click "View full report →" on a kl-map popup, OR navbar Tools → DD library → filter by KL → open the master report. They read the 8 sections in order, paying special attention to:</span>
+        <span class="lang-zh">在 kl-map popup 點「View full report →」，或從 navbar Tools → DD library → 篩 KL → 打開主報告。依序讀 8 個章節，特別注意：</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see (8 sections):</strong></span>
+        <span class="lang-zh"><strong>螢幕出現什麼（8 章節）：</strong></span><br>
+        <span class="lang-en">§1 Asymmetric supply (RM1M+ overhang collapsed 41%)<br>
+        §2 The yield-vs-growth inversion (high-yield buildings have flat prices; low-yield buildings appreciate)<br>
+        §3 <strong>Six-District Scorecard</strong> table — KLCC / Mont Kiara / Damansara Heights / Bangsar / TRX / Bukit Bintang SA, with PSF, gross yield, capital growth, MRT3 effect, suitable investor type<br>
+        §4 <strong>Foreign cost framework — 8% stamp duty 2026</strong> (this is the urgency)<br>
+        §5 Three structural catalysts (MRT3 / TRX / Bandar Malaysia)<br>
+        §6 <strong>Three investor archetypes</strong> — Income / Growth / Wealth Allocation, each with target buildings, budget, hold period<br>
+        §7 Conclusion (5-year minimum hold due to 30% RPGT for foreigners)<br>
+        §8 Appendix charts (8 charts including stamp duty 2025-vs-2026 bar)</span>
+        <span class="lang-zh">§1 不對稱供需（RM1M+ 滯銷 41% 暴跌）<br>
+        §2 收益率與資本增值的反向關係（高 yield 建案價格平、低 yield 建案漲）<br>
+        §3 <strong>六大地段評分表</strong> — KLCC / Mont Kiara / Damansara Heights / Bangsar / TRX / Bukit Bintang SA，含 PSF、毛利、資本增值、MRT3 效應、適合投資者類型<br>
+        §4 <strong>外國人成本框架 — 2026 印花稅 8%</strong>（這是急迫性）<br>
+        §5 三大結構催化（MRT3 / TRX / Bandar Malaysia）<br>
+        §6 <strong>三種投資者畫像</strong> — 收租型／增值型／資產配置型，各附目標建案、預算、持有期<br>
+        §7 結論（外國人 5 年最短持有期，因 RPGT 30%）<br>
+        §8 附錄圖表（8 張，含 2025 vs 2026 印花稅對比）</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens — they self-identify as Income-Focused:</span><span class="lang-zh">對陳氏夫婦 — 他們自我識別為「收租型」：</span></strong> <span class="lang-en">§6 says Income-Focused = Mont Kiara / Bangsar, RM1M–1.5M, 5%+ gross yield, 5–7yr hold. Their RM 2M sits at the upper end of this bracket. §3's District Scorecard tells them Mont Kiara has the strongest MRT3 catalyst. §4 confirms 2025 is the buy window. §7 reminds them the 5-year RPGT cliff means short flips are impossible.</span><span class="lang-zh">§6 說「收租型」= Mont Kiara / Bangsar、RM1M–1.5M、5%+ 毛利、5–7 年持有。他們的 RM 2M 落在這個區間的高端。§3 評分表告訴他們 Mont Kiara 是 MRT3 最大受益區。§4 確認 2025 是買進窗口。§7 提醒 5 年 RPGT 懸崖意味短期翻轉不可能。</span></div>
+      <div class="step-screenshot"><img src="img/09-dd-kl-rm1m.png" alt="KL RM1M+ master DD report with 8 sections" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 10 — Cost Calculator -->
+  <div class="demo-step">
+    <div class="step-no">10</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Cost Calculator — what does RM 2M actually cost over 10 years, end-to-end?</span><span class="lang-zh">Cost Calculator — RM 2M 含取得、持有、退場 10 年總成本是多少？</span></h4>
+      <div class="step-url"><a href="/tools/cost-calculator.html">myproperty.investmquest.com/tools/cost-calculator</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar → Tools dropdown → <strong>Cost Calc / 成本計算</strong>. They set: <strong>Market = 🇲🇾 MY</strong>, <strong>Resident Status = Foreigner</strong>, <strong>Holding Horizon = 10y</strong>, <strong>Property Price = RM 2,000,000</strong>. Then they tweak the four sliders if needed (annual appreciation, maintenance, property tax, seller agent fee).</span>
+        <span class="lang-zh">navbar → Tools 下拉 → <strong>Cost Calc / 成本計算</strong>。設定：<strong>Market = 🇲🇾 MY</strong>、<strong>Resident Status = Foreigner</strong>、<strong>Holding Horizon = 10y</strong>、<strong>Property Price = RM 2,000,000</strong>。再微調四個 slider（年增值、維護、固稅、賣方仲介費）。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> hero KPIs (TOTAL CASH OUT / NET PROCEEDS AT EXIT / NET P&amp;L verdict) + 5 supporting stats. Three breakdown tables —</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>頂部 hero KPI（TOTAL CASH OUT／NET PROCEEDS AT EXIT／NET P&amp;L 判決）+ 5 張輔助統計。三張明細表 —</span><br>
+        <span class="lang-en">① <strong>Acquisition</strong> — price, foreign-buyer stamp duty (8% from 2026 / 4% in 2025), buyer legal fee, agent fee.<br>
+        ② <strong>Holding</strong> — quit rent + assessment, maintenance, insurance, optional rental income tax.<br>
+        ③ <strong>Exit</strong> — seller agent fee, RPGT (30% if held &lt;6yr for foreigners, 10% from year 6+).<br>
+        Plus a stacked bar chart, an annual holding-cost line chart, and a 12-market comparison table at the bottom (MY row highlighted).</span>
+        <span class="lang-zh">① <strong>Acquisition</strong> — 物業價、外國人印花稅（2026 起 8% / 2025 為 4%）、買方律師費、仲介費。<br>
+        ② <strong>Holding</strong> — quit rent + assessment、維護、保險、可選的房租所得稅。<br>
+        ③ <strong>Exit</strong> — 賣方仲介費、RPGT（外國人持有 < 6 年為 30%，第 6 年起 10%）。<br>
+        另有堆疊長條圖、年度持有成本折線圖、最底 12 市場比較表（MY 列高亮）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens — three eye-openers:</span><span class="lang-zh">對陳氏夫婦 — 三個關鍵覺察：</span></strong> <span class="lang-en">(1) The 8% stamp duty alone on RM 2M = RM 160,000 vs RM 80,000 in 2025 — toggle the Resident Status pill to compare. (2) The RPGT 30% bracket persists until year 6 — short-flip is impossible, confirming the master DD's 5-year minimum hold. (3) The 12-market comparison shows MY's foreign-buyer total cost vs SG (60% ABSD), AU (FIRB + state surcharges) — they see why MY is friendlier than alternatives despite the 2026 hike.</span><span class="lang-zh">(1) RM 2M 物件僅印花稅 2026 起 = RM 160,000，2025 是 RM 80,000 — 切 Resident Status pill 對照。(2) RPGT 30% 持續到第 6 年 — 短翻不可能，呼應 DD 的 5 年最短持有。(3) 底部 12 市場比較顯示 MY 對外國人總成本 vs SG（60% ABSD）、AU（FIRB + 州附加） — 他們看到為什麼 MY 仍比替代市場友善，即使 2026 漲價後。</span></div>
+      <div class="step-screenshot"><img src="img/10-cost-calc-my.png" alt="Cost Calculator with MY/Foreigner/10y/RM2M set" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 11 — REIT vs Direct -->
+  <div class="demo-step">
+    <div class="step-no">11</div>
+    <div class="step-content">
+      <h4><span class="lang-en">REIT vs Direct — does buying property still beat MY-REITs after the 2026 WHT change?</span><span class="lang-zh">REIT vs Direct — 2026 WHT 變動後，買實體仍勝過 MY-REIT 嗎？</span></h4>
+      <div class="step-url"><a href="/reit-vs-direct.html">myproperty.investmquest.com/reit-vs-direct</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>REIT vs Direct</strong>. They flip three toggle bands: Residency = <strong>Foreign</strong>, Period = <strong>10yr</strong>, Home Country chip = <strong>🇹🇼 TW</strong>. Scenario tab = <strong>All Cash</strong> (they're cash buyers).</span>
+        <span class="lang-zh">navbar → Tools → <strong>REIT vs Direct</strong>。切三個 toggle 列：Residency 切 <strong>Foreign</strong>、Period 切 <strong>10yr</strong>、母國 chip 選 <strong>🇹🇼 TW</strong>。場景 tab = <strong>All Cash</strong>（他們現金買家）。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> the 7-row comparison table (US/SG/JP/AU/MY/UK/EU) — they read the <strong>MY row</strong>: Direct Income vs REIT Income, Direct Total vs REIT Total, Gap, Winner. The right-side context cards include <em>"Foreign Mode Flips These"</em> which explicitly flags <strong>"Malaysia REIT 30% (2026): LHDN PR 2/2026 raised non-resident individual REIT WHT from 10% → 30% — major shift"</strong> in red. The Treaty Relief card for Taiwan shows whether MY-TW DTA reduces this.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>7 列比較表（美／新／日／澳／馬／英／歐） — 讀 <strong>MY 那一列</strong>：Direct Income vs REIT Income、Direct Total vs REIT Total、Gap、Winner。右側脈絡卡有 <em>「Foreign Mode Flips These」</em> 明確標示紅字 <strong>「馬來西亞 REIT 30%（2026 起）：LHDN PR 2/2026 將非居民個人 REIT 預扣從 10% → 30%，重大變動」</strong>。Treaty Relief（台灣）卡會顯示 MY-TW DTA 是否減免此稅。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens — direct property wins more decisively after 2026:</span><span class="lang-zh">對陳氏夫婦 — 2026 後實體更明顯勝出：</span></strong> <span class="lang-en">the MY-REIT route used to be a 10% WHT alternative for non-residents; from 2026 it's 30%, which destroys the REIT tax efficiency vs direct. The site's "Foreign Mode Flips These" card flags this in red so they can't miss it. <em>Confirms their direct-property thesis — without this page they might have defaulted to REIT thinking it was tax-efficient.</em></span><span class="lang-zh">MY-REIT 路徑過去對非居民僅 10% WHT，2026 起 30% — 把 REIT 對外國人的稅務優勢完全打破，相對實體不再有優勢。站上「Foreign Mode Flips These」紅字標出，他們不會錯過。<em>強化他們選實體的論點 — 沒有這頁可能會默認 REIT 比較省稅。</em></span></div>
+      <div class="step-screenshot"><img src="img/11-reit-vs-direct-my.png" alt="REIT vs Direct with Foreign / TW / 10yr toggles, MY row visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 12 — Risk + Methodology -->
+  <div class="demo-step">
+    <div class="step-no">12</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Risk Monitor + Methodology — confirm the 2026 deadline and verify data sources</span><span class="lang-zh">Risk Monitor + Methodology — 確認 2026 期限與驗證資料來源</span></h4>
+      <div class="step-url"><a href="/my/risk.html">/my/risk</a> · <a href="/methodology.html">/methodology</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Chens do:</span><span class="lang-zh">陳氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇲🇾 → <strong>Risk / 風險</strong>. They look at the 6-axis Risk Radar (Liquidity / Credit / Supply / Macro / Policy / Foreign — current vs 2023 baseline), read the Policy Timeline, and study the Developer Health table (Sime Darby / IOI / SP Setia / Eco World / Mah Sing / UEM Sunrise with Net D/E, Margin, Overhang, Star rating). Final stop: navbar → Tools → <strong>Methodology / 方法論</strong> for the Malaysia source row.</span>
+        <span class="lang-zh">navbar 🇲🇾 → <strong>Risk / 風險</strong>。看 6 軸 Risk Radar（流動性／信用／供給／宏觀／政策／外資 — 當前 vs 2023 基準）、讀 Policy Timeline、研究 Developer Health 表（Sime Darby／IOI／SP Setia／Eco World／Mah Sing／UEM Sunrise，含 Net D/E、利潤率、滯銷、星等）。最後一站：navbar → Tools → <strong>Methodology / 方法論</strong> 看 Malaysia 那一列。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see on Risk:</strong> the policy timeline ends with <em>"2026 Jan: foreign stamp duty raised to 8% — affects purchases above RM1M"</em> (red marker). Earlier markers include "2025 Jul: OPR cut to 2.75%" (green) and "2024: MM2H restructured Silver/Gold/Platinum" (neutral). The Risk Radar shows Supply at 8/10 (highest) and Policy at 6/10 (rising vs 2023's 4). Developer table lets them avoid stocks/properties from UEM Sunrise (⭐⭐ rating).<br>
+        <strong>On Methodology:</strong> the Malaysia row in the 20-market source table shows: Price Index = NAPIC HPI · Rent / Vacancy = iProperty · Pipeline / Supply = NAPIC overhang · Central Bank = BNM OPR.</span>
+        <span class="lang-zh"><strong>Risk 頁出現什麼：</strong>政策時間軸最後是 <em>「2026 年 1 月：外國人印花稅升至 8% — 影響 RM1M 以上購買」</em>（紅標）。較早的標記包括「2025/7：OPR 降至 2.75%」（綠）與「2024：MM2H 重整為 Silver / Gold / Platinum」（中性）。Risk Radar 顯示供給 8/10（最高）、政策 6/10（vs 2023 的 4 上升）。Developer 表讓他們避開 UEM Sunrise（⭐⭐ 評等）的標的。<br>
+        <strong>Methodology：</strong>20 市場來源表中，馬來西亞列：Price Index = NAPIC HPI · Rent / Vacancy = iProperty · Pipeline / Supply = NAPIC overhang · Central Bank = BNM OPR。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Chens:</span><span class="lang-zh">對陳氏夫婦：</span></strong> <span class="lang-en">Risk page reaffirms their 2025 entry timing (red 2026 marker is unmissable). Methodology gives them confidence to act on what they read — every number traces to a named Malaysian or international source. After this stop, the website has done all it can for them — every remaining question is for licensed advisors in Malaysia.</span><span class="lang-zh">Risk 頁再次確認 2025 進場時機（紅色 2026 標記無法錯過）。Methodology 給他們行動信心 — 每個數字可追到具名的馬來西亞或國際來源。走完這站，網站能幫的就到頂了 — 剩下任何問題必須找馬來西亞當地的合格專業人士。</span></div>
+      <div class="step-screenshot"><img src="img/12-my-risk.png" alt="MY Risk Monitor with Risk Radar, Policy Timeline, Developer Health table" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 3 — SITE CHEAT SHEET                   -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 03</div>
+    <h2><span class="lang-en">Site cheat sheet — the 6 site-wide patterns the Chens need to know</span><span class="lang-zh">網站小抄 — 陳氏夫婦要記得的 6 個全站通用規則</span></h2>
+    <p class="sec-sub"><span class="lang-en">These work the same way on every page across all markets — learn once, use everywhere.</span><span class="lang-zh">以下規則每一頁、每個市場都一致 — 學一次，整站通用。</span></p>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4><span class="ck-icon">EN</span> <span class="lang-en">Language toggle</span><span class="lang-zh">語言切換</span></h4>
+      <p><span class="lang-en">Top-right of every page: two pill buttons <code>EN</code> / <code>中文</code>. Choice is remembered across pages and visits via localStorage.</span><span class="lang-zh">每頁右上角：兩顆膠囊鈕 <code>EN</code> / <code>中文</code>。選擇會用 localStorage 跨頁、跨次造訪記住。</span></p>
+      <p class="ck-tip"><span class="lang-en">Tip: switch to 中文 first, then download PDF — the PDF will be in 中文.</span><span class="lang-zh">小技巧：先切到中文再下載 PDF，PDF 就會是中文版。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🇲🇾</span> <span class="lang-en">Market selector</span><span class="lang-zh">市場選擇</span></h4>
+      <p><span class="lang-en">Navbar second row: a country flag for each market. Hover any flag to see a dropdown with Overview / Supply / Demand / Valuation / Risk / Report / Macro plus city sub-pages.</span><span class="lang-zh">Navbar 第二列：每個市場一面國旗。游標停留在任一面旗上 → 跳出下拉，包含 Overview / Supply / Demand / Valuation / Risk / Report / Macro 與各城市子頁。</span></p>
+      <p class="ck-tip"><span class="lang-en">The Chens use 🇲🇾 → Kuala Lumpur or Penang to jump straight to city detail.</span><span class="lang-zh">陳氏夫婦用 🇲🇾 → Kuala Lumpur 或 Penang 直接跳到城市深度頁。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">⚙</span> <span class="lang-en">Tools dropdown</span><span class="lang-zh">Tools 下拉選單</span></h4>
+      <p><span class="lang-en">All cross-market analytical tools live here: <code>Home</code>, <code>Dashboard</code>, <code>Playbook</code>, <code>REITs</code>, <code>REIT vs Direct</code>, <code>Carry Heatmap</code>, <code>Pipeline Cliff</code>, <code>Cost Calculator</code>, <code>Methodology</code>, plus the DD library.</span><span class="lang-zh">所有跨市場分析工具都在這裡：<code>Home</code>、<code>Dashboard</code>、<code>Playbook</code>、<code>REITs</code>、<code>REIT vs Direct</code>、<code>Carry Heatmap</code>、<code>Pipeline Cliff</code>、<code>Cost Calculator</code>、<code>Methodology</code> 與 DD library。</span></p>
+      <p class="ck-tip"><span class="lang-en">If a tool isn't market-specific, it's in here.</span><span class="lang-zh">如果某個工具不是特定市場專屬的，就在這裡。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🟢</span> <span class="lang-en">KPI card colors</span><span class="lang-zh">KPI 卡顏色</span></h4>
+      <p><span class="lang-en">Left border color tells you the read at a glance.</span><span class="lang-zh">左邊框顏色一眼告訴你判讀。</span></p>
+      <div class="color-legend">
+        <div class="cl-item"><span class="cl-dot cl-green"></span><span class="lang-en">positive</span><span class="lang-zh">正向</span></div>
+        <div class="cl-item"><span class="cl-dot cl-orange"></span><span class="lang-en">caution</span><span class="lang-zh">注意</span></div>
+        <div class="cl-item"><span class="cl-dot cl-red"></span><span class="lang-en">risk</span><span class="lang-zh">風險</span></div>
+        <div class="cl-item"><span class="cl-dot cl-blue"></span><span class="lang-en">neutral</span><span class="lang-zh">中性</span></div>
+      </div>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🗺</span> <span class="lang-en">Interactive maps + DD library</span><span class="lang-zh">互動地圖 + DD library</span></h4>
+      <p><span class="lang-en">/my/kl-map — 22 RM1M+ projects scored, mapped, with full DD reports linked. /docs/dd/index.html — searchable library of all building DDs (filter by market / area / status / yield).</span><span class="lang-zh">/my/kl-map — 22 個 RM1M+ 建案附評分、地圖、連到完整 DD 報告。/docs/dd/index.html — 所有建案 DD 的可搜尋資料庫（依市場／區／狀態／yield 篩選）。</span></p>
+      <p class="ck-tip"><span class="lang-en">Most decision-dense pages on the site for MY buyers.</span><span class="lang-zh">對 MY 買家而言，這兩頁是站上資訊密度最高的決策工具。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">📄</span> <span class="lang-en">Save any page as PDF</span><span class="lang-zh">把任何頁面存成 PDF</span></h4>
+      <p><span class="lang-en">Press <code>⌘ + P</code> (Mac) or <code>Ctrl + P</code> (Windows) → choose "Save as PDF". The print stylesheet hides the navbar so the PDF looks clean.</span><span class="lang-zh">按 <code>⌘ + P</code>（Mac）或 <code>Ctrl + P</code>（Windows）→ 選「另存為 PDF」。印刷樣式表會自動隱藏 navbar，PDF 版面乾淨。</span></p>
+      <p class="ck-tip"><span class="lang-en">This walkthrough has a dedicated "Download PDF" button at the bottom.</span><span class="lang-zh">本導覽底部有專屬「下載 PDF」按鈕。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 4 — TAKEAWAY                           -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 04</div>
+    <h2><span class="lang-en">What the Chens walk away with — and what they must take outside this site</span><span class="lang-zh">陳氏夫婦帶走什麼 — 以及哪些必須拿到站外去問</span></h2>
+    <p class="sec-sub"><span class="lang-en">After the 12-stop tour, they have a clear separation between "questions the site answered" and "questions the site flagged but cannot answer."</span><span class="lang-zh">走完 12 站後，他們能清楚分開「網站已回答的問題」與「網站幫他們點出但不能回答的問題」。</span></p>
+  </div>
+
+  <div class="takeaway">
+    <div class="takeaway-card answered">
+      <h4><span class="lang-en">✓ The site answered these for them</span><span class="lang-zh">✓ 網站已回答的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Where Malaysia data lives</strong> and how to navigate from /home → /my/ → /my/kl + /my/penang</span><span class="lang-zh"><strong>馬來西亞資料在哪</strong>、怎麼從 /home → /my/ → /my/kl + /my/penang 一路鑽進去</span></li>
+        <li><span class="lang-en"><strong>The full market narrative in plain prose</strong> before they open any chart (the long-form report on /my/report)</span><span class="lang-zh"><strong>用白話文寫的完整市場敘述</strong>，在他們打開任何圖之前先讀（/my/report 的長篇報告）</span></li>
+        <li><span class="lang-en"><strong>Why KL beats Penang for their profile</strong> — deeper expat ecosystem, MRT3 / TRX / Bandar Malaysia catalysts (the call hidden in city summary cards)</span><span class="lang-zh"><strong>為什麼吉隆坡比檳城適合他們</strong> — 國際生態深、MRT3 / TRX / Bandar Malaysia 催化劑（藏在城市 summary 卡裡的判斷）</span></li>
+        <li><span class="lang-en"><strong>Which KL zone (out of 3) fits RM 2M Live + Rent</strong> — Zone 2 sweet spot (Mont Kiara / Bangsar) over Zone 1 KLCC ultra-luxury or Zone 3 overhang trap</span><span class="lang-zh"><strong>RM 2M 自住 + 出租落在哪個 KL zone</strong>（共 3 個） — Zone 2 甜蜜點（Mont Kiara / Bangsar）勝過 Zone 1 KLCC 超豪宅或 Zone 3 滯銷區</span></li>
+        <li><span class="lang-en"><strong>Which specific buildings to shortlist</strong> — filterable by score / area / status / recommendation on /my/kl-map (22 curated RM1M+ projects)</span><span class="lang-zh"><strong>口袋名單要哪些具體建案</strong> — 在 /my/kl-map 上可依分數／區／狀態／建議篩選（22 個策展 RM1M+ 建案）</span></li>
+        <li><span class="lang-en"><strong>Their investor archetype</strong> — Income-Focused per the master DD, with a 5–7 yr hold, RM1M–1.5M Mont Kiara / Bangsar target</span><span class="lang-zh"><strong>他們的投資者畫像</strong> — 主 DD 認定為收租型，5–7 年持有，RM1M–1.5M Mont Kiara / Bangsar 目標</span></li>
+        <li><span class="lang-en"><strong>What RM 2M actually costs over 10 years</strong> with MY foreign tax brackets baked in — including the 8% stamp duty 2026 hit (Cost Calculator)</span><span class="lang-zh"><strong>RM 2M 在 10 年週期內的真實總成本</strong>，MY 外國人稅率已內建公式 — 含 2026 印花稅 8% 衝擊（Cost Calculator）</span></li>
+        <li><span class="lang-en"><strong>Why direct property still beats MY-REIT after 2026 WHT change</strong> (REIT vs Direct, Foreign + TW mode)</span><span class="lang-zh"><strong>2026 WHT 變動後實體仍勝 MY-REIT</strong>（REIT vs Direct, Foreign + TW 模式）</span></li>
+        <li><span class="lang-en"><strong>The 2026 Jan deadline urgency</strong> — explicit red marker on /my/risk timeline, costing ~RM 80K extra stamp duty if they miss it</span><span class="lang-zh"><strong>2026 年 1 月期限急迫性</strong> — /my/risk 時間軸上明確紅標，錯過約多付 RM 80K 印花稅</span></li>
+        <li><span class="lang-en"><strong>Where every number comes from</strong> (Methodology page Malaysia row: NAPIC, JPPH, BNM, iProperty)</span><span class="lang-zh"><strong>每個數字的來源</strong>（Methodology 頁馬來西亞列：NAPIC、JPPH、BNM、iProperty）</span></li>
+      </ul>
+    </div>
+
+    <div class="takeaway-card outsource">
+      <h4><span class="lang-en">→ Questions for advisors outside this site</span><span class="lang-zh">→ 必須拿到站外問專業人士的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>MM2H deposit lock-up planning</strong> (RM 600K–2M deposit per tier) and renewal documentation → MM2H-licensed agent + tax planner</span><span class="lang-zh"><strong>MM2H 定存規劃</strong>（依 tier RM 600K–2M）與更新文件 → MM2H 持照仲介 + 稅務規劃師</span></li>
+        <li><span class="lang-en"><strong>Tax filing in Taiwan + Malaysia</strong>, foreign tax credit / DTA application, rental income reporting → Taiwan 會計師 + Malaysia 稅務代理</span><span class="lang-zh"><strong>台灣 + 馬來西亞稅務申報</strong>、扣抵 / DTA 適用、租金收入申報 → 台灣會計師 + 馬來西亞稅務代理</span></li>
+        <li><span class="lang-en"><strong>State Authority Consent for foreign purchase</strong> (mandatory for foreigners, takes weeks to months) → Malaysian conveyancing lawyer</span><span class="lang-zh"><strong>外國人購買的州政府同意書</strong>（外國人必備，數週到數月） → 馬來西亞過戶律師</span></li>
+        <li><span class="lang-en"><strong>Loan eligibility</strong> (if not paying full cash) — most banks restrict foreign LTV; MM2H holders get better terms but still capped → Maybank / CIMB / Hong Leong loan officers</span><span class="lang-zh"><strong>房貸資格</strong>（如非全現金） — 多數銀行限制外國人 LTV；MM2H 持有人條件較好但仍有上限 → Maybank / CIMB / Hong Leong 房貸專員</span></li>
+        <li><span class="lang-en"><strong>Property management contract</strong> (English-capable PM is non-negotiable when they're back in Taiwan) → local PM company in KL or Penang</span><span class="lang-zh"><strong>物業管理合約</strong>（人在台灣時，英語溝通的 PM 不可妥協） → 吉隆坡或檳城當地 PM 公司</span></li>
+        <li><span class="lang-en"><strong>FX hedging</strong> on the MYR-TWD entry and exit, rental income remittance — MYR has been volatile vs USD/TWD → bank FX desk</span><span class="lang-zh"><strong>MYR-TWD 進出場避險</strong>、租金匯回 — MYR 對美元／台幣波動 → 往來銀行 FX 部門</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 5 — DOWNLOAD PDF                       -->
+  <!-- ============================================== -->
+  <!-- ============================================== -->
+  <!-- SECTION 5 — BEST OPTION                         -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 05</div>
+    <h2><span class="lang-en">The site's best-supported call for the Chens</span><span class="lang-zh">站上資料能支持的最佳選項 — 給 Chen 夫婦</span></h2>
+    <p class="sec-sub"><span class="lang-en">Not a personalized recommendation — a single, opinionated call assembled only from data this site already shows in SECTIONS 01–04.</span><span class="lang-zh">非個人化推薦 — 是從 SECTION 01–04 站上資料推導出的單一明確建議。</span></p>
+  </div>
+
+  <div class="best-option">
+    <div class="bo-grid">
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">CITY / AREA</span><span class="lang-zh">城市 / 區域</span></div>
+        <div class="bo-val">KL Mont Kiara / Bangsar South</div>
+        <div class="bo-note"><span class="lang-en">Self-occupied core; Penang second home flagged as optional, not the core call.</span><span class="lang-zh">自住核心；Penang second home 是 optional 而非核心決策。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">PRODUCT</span><span class="lang-zh">產品類型</span></div>
+        <div class="bo-val">3-bed condo · 2015+ · freehold</div>
+        <div class="bo-note"><span class="lang-en">High-rise serviced or condo with stable strata management. Avoid leasehold and pre-2015 stock.</span><span class="lang-zh">高層 serviced 或 condo，管委會運作穩定。避開 leasehold 與 2015 前舊案。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">BUDGET MIX</span><span class="lang-zh">預算配置</span></div>
+        <div class="bo-val">RM 1.5M asset + RM 200K reno + RM 300K buffer</div>
+        <div class="bo-note"><span class="lang-en">Reno covers retrofit; buffer covers MM2H renewal FD + first 18 months living cost.</span><span class="lang-zh">Reno 用於改裝；buffer 覆蓋 MM2H 續簽 FD + 首 18 個月生活費。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">HOLD</span><span class="lang-zh">持有期</span></div>
+        <div class="bo-val">Permanent (self-occupied)</div>
+        <div class="bo-note"><span class="lang-en">Aligned with MM2H tenure; exit only if MM2H pathway changes materially.</span><span class="lang-zh">對齊 MM2H 居住期；只在 MM2H 路徑出現重大變動時 exit。</span></div>
+      </div>
+    </div>
+
+    <div class="bo-section bo-checklist">
+      <h4><span class="lang-en">✓ Pre-commit checklist (from site data)</span><span class="lang-zh">✓ 進場前 checklist（站上資料能驗證的）</span></h4>
+      <ul>
+        <li><span class="lang-en">Pipeline Cliff status for KL Mont Kiara / Bangsar must read EASING or WATCH; NAPIC overhang for the submarket within acceptable band.</span><span class="lang-zh">KL Mont Kiara / Bangsar 的 Pipeline Cliff 必須是 EASING 或 WATCH；NAPIC overhang 在可接受區間。</span></li>
+        <li><span class="lang-en"><code>/my/</code> Cost Calculator 10-year total (foreign buyer rates + RPGT) clears post-tax hurdle.</span><span class="lang-zh"><code>/my/</code> Cost Calculator 10 年總成本（外籍買家稅率 + RPGT）通過稅後門檻。</span></li>
+        <li><span class="lang-en">MM2H eligibility re-check: RM 1M FD + RM 40K monthly income proof still satisfied after this asset deployment.</span><span class="lang-zh">MM2H 條件再確認：資產配置後 RM 1M FD + RM 40K 月收證明仍滿足。</span></li>
+        <li><span class="lang-en"><code>/my/demand.html</code>: Mont Kiara / Bangsar absorption rate not in DANGER tier.</span><span class="lang-zh"><code>/my/demand.html</code>：Mont Kiara / Bangsar 去化率不在 DANGER 等級。</span></li>
+        <li><span class="lang-en">Methodology page Malaysia row: every figure used in offer letter sourced from NAPIC / JPPH / BNM, not crowdsourced.</span><span class="lang-zh">Methodology 頁馬來西亞那列：出價文件每個數字都來自 NAPIC / JPPH / BNM 官方。</span></li>
+      </ul>
+    </div>
+
+    <div class="bo-section bo-next">
+      <h4><span class="lang-en">→ Off-site next steps (the site cannot answer)</span><span class="lang-zh">→ 走出站外的下一步（站上無法回答的）</span></h4>
+      <ol>
+        <li><span class="lang-en"><strong>Licensed MM2H agent</strong> — application + renewal pathway, 2024 revamp tier choice (Silver / Gold / Platinum).</span><span class="lang-zh"><strong>持牌 MM2H 仲介</strong> — 申請+續簽路徑、2024 改版後的層級選擇（Silver / Gold / Platinum）。</span></li>
+        <li><span class="lang-en"><strong>Malaysian tax consultant + Taiwan 會計師</strong> — RPGT, double tax treaty (MY-TW), inheritance position for the couple.</span><span class="lang-zh"><strong>馬來西亞稅務顧問 + 台灣會計師</strong> — RPGT、MY-TW 雙邊稅務協定、夫婦相續曝險。</span></li>
+        <li><span class="lang-en"><strong>Malaysian mortgage broker</strong> — foreign-buyer mortgage typically 50–70% LTV, rate 4.5–6%; lock terms before offer.</span><span class="lang-zh"><strong>馬來西亞房貸經紀</strong> — 外籍買家房貸一般 LTV 50-70%、利率 4.5-6%；出價前先 lock。</span></li>
+        <li><span class="lang-en"><strong>Peguam (Malaysian lawyer)</strong> — title transfer, foreign-buyer restriction (Selangor minimum threshold RM 2M, KL different).</span><span class="lang-zh"><strong>馬來西亞律師 (Peguam)</strong> — 過戶、外籍買家限制（Selangor 最低門檻 RM 2M，KL 不同）。</span></li>
+        <li><span class="lang-en"><strong>Building inspector + HOA records review</strong> — sinking fund, maintenance fee history, JMB / MC governance.</span><span class="lang-zh"><strong>建物檢查 + 管委會檔案 review</strong> — sinking fund、管理費歷史、JMB / MC 運作。</span></li>
+      </ol>
+    </div>
+
+    <div class="bo-bottomline">
+      <span class="bo-bl-label"><span class="lang-en">BOTTOM LINE</span><span class="lang-zh">底線</span></span>
+      <p><span class="lang-en">A 3-bed self-occupied condo in KL Mont Kiara / Bangsar South is the single call most consistent with what the site shows about supply, demand, and yield for MM2H foreign buyers. Penang as a second home is a nice-to-have, not the core decision.</span><span class="lang-zh">KL Mont Kiara / Bangsar South 的 3-bed 自住公寓是站上對 MM2H 外國買家供需與 yield 資料能支持的最一致選項。Penang second home 是 nice-to-have，不是核心。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 6 — DOWNLOAD PDF                        -->
+  <!-- ============================================== -->
+  <div class="pdf-bar">
+    <button type="button" class="pdf-btn" onclick="window.print()">
+      <span>📄</span>
+      <span class="lang-en">Download this walkthrough as PDF</span><span class="lang-zh">下載這份導覽為 PDF</span>
+    </button>
+    <a class="pdf-btn ghost" href="/demo/">
+      <span>←</span>
+      <span class="lang-en">Back to all walkthroughs</span><span class="lang-zh">回所有導覽</span>
+    </a>
+  </div>
+
+  <div class="source-footer" style="margin-top:24px">
+    <span class="lang-en"><strong>Sources used in this walkthrough:</strong> NAPIC (overhang, transactions), JPPH (HPI), BNM (OPR, lending), iProperty (rents), REHDA (developer survey), LHDN (tax / RPGT). Last refresh: Q1 2026. See <a href="/methodology.html" style="color:#2563eb">/methodology</a> for per-metric source and known limitations. The 22 RM1M+ project scores on /my/kl-map are curated by InvestMQuest research; see each project's deep-dive HTML in /docs/dd/ for methodology.</span>
+    <span class="lang-zh"><strong>本導覽使用的資料來源：</strong>NAPIC（滯銷、交易）、JPPH（HPI）、BNM（OPR、放款）、iProperty（租金）、REHDA（開發商調查）、LHDN（稅務 / RPGT）。最後刷新：2026 Q1。逐指標來源與已知限制見 <a href="/methodology.html" style="color:#2563eb">/methodology</a>。/my/kl-map 上 22 個 RM1M+ 建案評分由 InvestMQuest 研究團隊策展；方法論見 /docs/dd/ 內各建案 HTML。</span>
+    <br><br>
+    <span class="lang-en"><em>Disclaimer: This walkthrough demonstrates how to use Property Monitor for a specific decision flow. It is not investment, tax, MM2H legal, or property advice. The 2026 stamp duty change reflects what's currently flagged on /my/risk; final policy must be confirmed with a Malaysian property lawyer. Personal tax, MM2H eligibility, financing, and entity structure must be confirmed with licensed advisors in the relevant jurisdiction.</em></span>
+    <span class="lang-zh"><em>免責聲明：本導覽示範如何使用 Property Monitor 支援特定決策流程，並非投資、稅務、MM2H 法律或不動產建議。2026 印花稅變動以 /my/risk 上目前標示為準；最終政策請與馬來西亞不動產律師確認。個人稅務、MM2H 資格、融資與持有架構，請務必諮詢當地有牌照的專業人士。</em></span>
+  </div>
+
+</main>
+
+<script src="/js/navbar.js" defer></script>
+<script>
+function getLang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function applyLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+}
+window.addEventListener('load',function(){applyLang(getLang());
+  setTimeout(function(){applyLang(getLang());},120);
+});
+window.addEventListener('storage',function(e){if(e.key==='lang')applyLang(getLang());});
+</script>
+
+</body>
+</html>

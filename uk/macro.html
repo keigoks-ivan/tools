@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Macro Overlay | UK Property Monitor</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}
+.navbar{background:#fff!important}
+.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.cycle-bar{display:flex;gap:3px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.cycle-seg{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;position:relative}
+.cycle-seg .cs-title{font-size:9px;font-weight:700;color:#fff;font-family:Inter,sans-serif;letter-spacing:0.3px;text-align:center}
+.cycle-seg .cs-year{font-size:8px;color:rgba(255,255,255,0.75);font-family:Inter,sans-serif;text-align:center}
+.cycle-now{position:absolute;top:4px;right:5px;background:rgba(255,255,255,0.28);border-radius:3px;font-size:8px;font-weight:700;color:#fff;padding:1px 5px;font-family:Inter,sans-serif;letter-spacing:0.3px}
+.ctx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.ctx-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:#5a7a9a;font-family:Inter,sans-serif;margin-bottom:6px}
+.ctx-val{font-size:18px;font-weight:700;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:2px}
+.ctx-sub{font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif}
+.ev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid #ccd9e8;border-radius:8px;padding:14px 16px}
+.ev-year{font-size:10px;font-weight:700;letter-spacing:0.5px;font-family:Inter,sans-serif;margin-bottom:4px}
+.ev-title{font-size:13px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:5px}
+.ev-desc{font-size:12px;color:#5a7a9a;line-height:1.55;font-family:Inter,sans-serif}
+.chart-insight{background:#f0f6ff;border-left:3px solid #2563eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#1e3a5f;line-height:1.6;font-family:Inter,sans-serif}
+@media(max-width:640px){.ctx-grid{grid-template-columns:repeat(2,1fr)}.ev-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+
+  <!-- ── Page Header ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">
+      <span class="lang-en">United Kingdom — Macro × Property Cycle</span>
+      <span class="lang-zh" style="display:none">英國 — 總經 × 房產週期</span>
+    </h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="kpi-badge badge-blue"><span class="lang-en">18-Year View · 2008–2025</span><span class="lang-zh" style="display:none">18年視角 · 2008–2025</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated: Q2 2025</span><span class="lang-zh" style="display:none">更新至：2025 Q2</span></span>
+    </div>
+  </div>
+
+  <!-- ── Cycle Position Tracker ── -->
+  <div class="chart-card" style="margin-bottom:24px;padding:20px 24px">
+    <div class="section-label" style="margin-bottom:14px">
+      <span class="lang-en">Where Are We in the Cycle?</span>
+      <span class="lang-zh" style="display:none">目前週期位置</span>
+    </div>
+    <div class="cycle-bar">
+      <div class="cycle-seg" style="flex:2;background:#6b7280">
+        <div class="cs-title">GFC</div>
+        <div class="cs-year">08–09</div>
+      </div>
+      <div class="cycle-seg" style="flex:6;background:#16a34a">
+        <div class="cs-title"><span class="lang-en">Post-GFC Recovery</span><span class="lang-zh" style="display:none">後GFC復甦</span></div>
+        <div class="cs-year">10–21</div>
+      </div>
+      <div class="cycle-seg" style="flex:2;background:#dc2626">
+        <div class="cs-title"><span class="lang-en">Rate Hike</span><span class="lang-zh" style="display:none">升息</span></div>
+        <div class="cs-year">22–23</div>
+      </div>
+      <div class="cycle-seg" style="flex:4;background:#d97706">
+        <div class="cs-title"><span class="lang-en">Correction → Recovery</span><span class="lang-zh" style="display:none">修正→復甦</span></div>
+        <div class="cs-year">24–25</div>
+        <span class="cycle-now">▶ NOW</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <p style="margin:6px 0 0 0;font-size:11px;color:#5a7a9a;font-family:Inter,sans-serif">
+        <span class="lang-en">BoE cutting cycle underway (5.25%→4.75% by Nov 2024); HPI recovering from 2023 trough; 2022 mini-budget mortgage shock now fading</span>
+        <span class="lang-zh" style="display:none">英格蘭銀行降息週期進行中（2024年11月前從5.25%降至4.75%）；HPI從2023年低谷復甦；2022年迷你預算房貸衝擊已逐漸消退</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── KPI Snapshot ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Current Snapshot</span><span class="lang-zh" style="display:none">當前快照</span>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">BoE Bank Rate</span><span class="lang-zh" style="display:none">英格蘭銀行利率</span></div>
+      <div class="kpi-value">4.75%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">−50bp from peak</span><span class="lang-zh" style="display:none">距高峰降50bp</span></span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label"><span class="lang-en">ONS House Price Index YoY</span><span class="lang-zh" style="display:none">ONS房價指數 YoY</span></div>
+      <div class="kpi-value">+3.4%</div>
+      <span class="kpi-badge badge-green"><span class="lang-en">Q1 2025</span><span class="lang-zh" style="display:none">2025 Q1</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">CPI YoY</span><span class="lang-zh" style="display:none">通膨 YoY</span></div>
+      <div class="kpi-value">3.0%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Above 2% target</span><span class="lang-zh" style="display:none">高於2%目標</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">GDP Growth</span><span class="lang-zh" style="display:none">GDP成長</span></div>
+      <div class="kpi-value">0.9%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">2024 full year</span><span class="lang-zh" style="display:none">2024全年</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Unemployment</span><span class="lang-zh" style="display:none">失業率</span></div>
+      <div class="kpi-value">4.4%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Edging up</span><span class="lang-zh" style="display:none">緩步上升</span></span>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">2-yr Fixed Mortgage Rate</span><span class="lang-zh" style="display:none">2年期固定房貸利率</span></div>
+      <div class="kpi-value">4.8%</div>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Down from 6.5% peak</span><span class="lang-zh" style="display:none">從6.5%高峰回落</span></span>
+    </div>
+  </div>
+
+  <!-- ── Historical Context Cards ── -->
+  <div class="ctx-grid">
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">BoE Rate Range (17yr)</span><span class="lang-zh" style="display:none">BoE歷史區間</span></div>
+      <div class="ctx-val">0.10%–5.25%</div>
+      <div class="ctx-sub"><span class="lang-en">Low: Mar 2020 · High: Aug 2023</span><span class="lang-zh" style="display:none">低點：2020年3月 · 高點：2023年8月</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Nationwide HPI Since 2008</span><span class="lang-zh" style="display:none">Nationwide HPI自2008累計</span></div>
+      <div class="ctx-val" style="color:#16a34a">+95%</div>
+      <div class="ctx-sub"><span class="lang-en">£183k → £357k average (Nationwide 2025)</span><span class="lang-zh" style="display:none">平均價格£183k → £357k（Nationwide 2025）</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">GDP Best / Worst</span><span class="lang-zh" style="display:none">GDP最佳/最差</span></div>
+      <div class="ctx-val">+8.6% / −10.4%</div>
+      <div class="ctx-sub"><span class="lang-en">Best: 2021 rebound · Worst: 2020 COVID</span><span class="lang-zh" style="display:none">最佳：2021反彈 · 最差：2020 COVID</span></div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label"><span class="lang-en">Peak Mortgage Rate (2-yr Fixed)</span><span class="lang-zh" style="display:none">房貸利率高峰（2年期固定）</span></div>
+      <div class="ctx-val" style="color:#dc2626">6.50%</div>
+      <div class="ctx-sub"><span class="lang-en">Oct 2022 — mini-budget shock (Moneyfacts)</span><span class="lang-zh" style="display:none">2022年10月 — 迷你預算衝擊（Moneyfacts）</span></div>
+    </div>
+  </div>
+
+  <!-- ── Chart 1: Monetary Cycle ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Monetary Cycle × House Prices</span><span class="lang-zh" style="display:none">貨幣週期 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> The UK property market has two unique structural features: (1) most mortgages refix every 2–5 years rather than being long fixed (unlike the US 30-yr) — creating "mortgage cliffs" where rate hike impact hits in waves; (2) Stamp Duty Land Tax (SDLT) holidays create sharp front-loaded demand spikes followed by hangovers. The Sep 2022 Kwasi Kwarteng mini-budget (unfunded £45bn tax cuts) caused 2-yr fixed rates to hit 6.5% in days — triggering the deepest single-event UK mortgage shock since 2008.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>英國房產市場有兩個獨特的結構性特點：(1) 大多數房貸每2–5年重新定價，而非長期固定（不同於美國30年固定）——製造出「房貸懸崖」，使升息衝擊呈波浪式延遲傳導；(2) 印花稅土地稅（SDLT）假期製造急劇的需求前置激增，隨後出現掛起效應。2022年9月夸西·夸騰恩迷你預算（無資金支持的450億英鎊減稅計劃）導致2年期固定利率數日內衝至6.5%——引發2008年以來最嚴重的單一事件英國房貸衝擊。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">BoE Rate / 2-yr Fixed Mortgage / CPI / M2 vs Nationwide HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">BoE利率 / 2年期固定房貸 / CPI / M2 vs Nationwide HPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroMonetary" style="height:440px"></div>
+  </div>
+
+  <!-- ── Chart 2: Real Economy ── -->
+  <div class="section-label" style="margin-bottom:12px">
+    <span class="lang-en">Real Economy × House Prices</span><span class="lang-zh" style="display:none">實體經濟 × 房價</span>
+  </div>
+  <div class="chart-insight lang-en">
+    <strong>What to watch:</strong> Brexit (Jun 2016) created a uniquely UK price divergence: London and SE England stagnated/fell 2017–2019 as foreign capital retreated and high-end demand faded, while regional UK (Yorkshire, Midlands, NW England) continued rising on domestic demand. Post-COVID, the pattern reversed — "race for space" and northern levelling-up amplified regional gains. London is now recovering fastest as international demand returns and supply remains acutely scarce.
+  </div>
+  <div class="chart-insight lang-zh" style="display:none">
+    <strong>重點觀察：</strong>英國脫歐（2016年6月）製造了獨特的英國內部房價分化：隨著外資撤退和高端需求消退，倫敦及英格蘭東南部2017–19年停滯/下跌，而英國其他地區（約克郡、中部、西北部）受內需支撐繼續上漲。COVID後局面逆轉——「爭搶居住空間」和北方振興計劃放大了地區性漲幅。隨著國際需求回歸和供給持續極度稀缺，倫敦目前復甦速度最快。
+  </div>
+  <div class="chart-card" style="margin-bottom:28px">
+    <h3 style="margin-bottom:4px">
+      <span class="lang-en">GDP / Unemployment / Mortgage Approvals / Net Migration vs Nationwide HPI (2008–2025)</span>
+      <span class="lang-zh" style="display:none">GDP / 失業率 / 房貸批准量 / 淨移民 vs Nationwide HPI（2008–2025）</span>
+    </h3>
+    <div id="chartMacroReal" style="height:440px"></div>
+  </div>
+
+  <!-- ── Key Events Timeline ── -->
+  <div class="section-label" style="margin-bottom:16px">
+    <span class="lang-en">Key Cycle Events (2008–2025)</span><span class="lang-zh" style="display:none">關鍵週期事件（2008–2025）</span>
+  </div>
+  <div class="ev-grid">
+    <div class="ev-card" style="border-left:4px solid #6b7280">
+      <div class="ev-year" style="color:#6b7280"><span class="lang-en">2008–2009 · GFC CRASH</span><span class="lang-zh" style="display:none">2008–2009 · GFC崩盤</span></div>
+      <div class="ev-title"><span class="lang-en">Northern Rock, RBS Nationalisations; HPI −16%</span><span class="lang-zh" style="display:none">Northern Rock、RBS國有化；HPI跌16%</span></div>
+      <div class="ev-desc"><span class="lang-en">UK's deepest post-war banking crisis. Northern Rock runs in Sep 2007, nationalised Feb 2008. HBOS/Lloyds and RBS need government bailout (£500bn+ package). BoE cuts to 0.50% by Mar 2009. UK house prices fall −16% (Nationwide 2007–09). GDP −4.3% (2009). Government launches SDLT holiday (£175k threshold raised to £250k) to support market.</span><span class="lang-zh" style="display:none">英國二戰後最嚴重的銀行業危機。Northern Rock於2007年9月發生擠兌，2008年2月被國有化。HBOS/勞埃茲和蘇格蘭皇家銀行需要政府紓困（逾5000億英鎊救助方案）。BoE於2009年3月降息至0.50%。英國房價跌16%（Nationwide 2007–09年）。2009年GDP衰退4.3%。政府推出SDLT假期（門檻提升至25萬英鎊）以支撐市場。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2010–2016 · POST-GFC RECOVERY</span><span class="lang-zh" style="display:none">2010–2016 · 後GFC復甦</span></div>
+      <div class="ev-title"><span class="lang-en">Help to Buy Scheme Fuels +30% London Surge</span><span class="lang-zh" style="display:none">Help to Buy計劃帶動倫敦房價+30%</span></div>
+      <div class="ev-desc"><span class="lang-en">BoE holds rates at 0.50% until Aug 2018 — 9-yr record low. Government launches Help to Buy equity loan scheme (Apr 2013): 20% equity loan on new builds enabling 5% deposits. UK HPI rises +30% nationally; London +50%. BoE's Funding for Lending Scheme (Aug 2012) compresses mortgage spreads. Buy-to-let (BTL) lending surges; SDLT 3% surcharge on BTL introduced Apr 2016 to cool investor demand.</span><span class="lang-zh" style="display:none">BoE將利率維持在0.50%至2018年8月——長達9年創紀錄的低位。政府於2013年4月推出Help to Buy股權貸款計劃：新建房屋享20%股權貸款，允許5%首付。全英HPI上漲30%，倫敦漲50%。BoE融資放貸計劃（2012年8月）壓縮房貸息差。買房出租（BTL）貸款激增；2016年4月針對BTL引入3%額外SDLT以冷卻投資者需求。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #8b5cf6">
+      <div class="ev-year" style="color:#8b5cf6"><span class="lang-en">JUN 2016 · BREXIT VOTE</span><span class="lang-zh" style="display:none">2016年6月 · 英國脫歐公投</span></div>
+      <div class="ev-title"><span class="lang-en">London Stagnates; Regional UK Diverges</span><span class="lang-zh" style="display:none">倫敦停滯；英國其他地區分化</span></div>
+      <div class="ev-desc"><span class="lang-en">Brexit vote (52% Leave) triggers immediate HPI deceleration in London: Central London prime falls −10% in 2017, outer London flat. Overseas buyer activity contracts. BoE cuts to 0.25% Aug 2016 (precautionary). Despite Brexit uncertainty, regional UK continues rising (Birmingham, Manchester, Leeds). SDLT reform raises thresholds for most buyers (Nov 2017). Transaction volumes fall to multi-year lows in London.</span><span class="lang-zh" style="display:none">脫歐公投（52%支持離開）導致倫敦HPI立即降速：2017年倫敦核心優質房跌10%，外倫敦持平。境外買家活動萎縮。BoE於2016年8月降息至0.25%（預防性措施）。儘管脫歐不確定性持續，英國其他地區持續上漲（伯明翰、曼徹斯特、利茲）。SDLT改革提高大多數買家的起征點（2017年11月）。倫敦成交量跌至多年低位。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #2563eb">
+      <div class="ev-year" style="color:#2563eb"><span class="lang-en">MAR 2020 · COVID EMERGENCY</span><span class="lang-zh" style="display:none">2020年3月 · COVID緊急應對</span></div>
+      <div class="ev-title"><span class="lang-en">BoE to 0.10%; SDLT Holiday; GDP −10.4%</span><span class="lang-zh" style="display:none">BoE降至0.10%；SDLT假期；GDP衰退10.4%</span></div>
+      <div class="ev-desc"><span class="lang-en">BoE emergency cuts to 0.10% — all-time low. GDP contracts −10.4% (2020) — worst in 300 years. SDLT holiday (Jul 2020–Jun 2021): nil rate on first £500k, saving buyers up to £15k. Furlough scheme (80% salary, £70bn+ cost) prevents unemployment surge. Race for space: suburban/rural demand surges while city centre falls. HPI rises +8.5% despite GDP collapse — QE, SDLT holiday and furlough combine.</span><span class="lang-zh" style="display:none">BoE緊急降息至0.10%歷史最低。2020年GDP衰退10.4%，為300年來最差。SDLT假期（2020年7月–2021年6月）：首50萬英鎊零稅率，節省買家最多1.5萬英鎊。就業保留計劃（80%薪資補貼，成本逾700億英鎊）阻止失業率激升。「爭搶居住空間」：郊區/農村需求激增，城市中心下跌。儘管GDP崩潰，HPI上漲8.5%——QE、SDLT假期和就業保留計劃共同作用。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #dc2626">
+      <div class="ev-year" style="color:#dc2626"><span class="lang-en">SEP 2022 · MINI-BUDGET MORTGAGE SHOCK</span><span class="lang-zh" style="display:none">2022年9月 · 迷你預算房貸衝擊</span></div>
+      <div class="ev-title"><span class="lang-en">Kwarteng Unfunded Tax Cuts — 2-yr Rates Hit 6.5%</span><span class="lang-zh" style="display:none">夸騰恩無資金支持減稅——2年期利率衝至6.5%</span></div>
+      <div class="ev-desc"><span class="lang-en">Chancellor Kwasi Kwarteng's "mini-budget" (Sep 23, 2022) announces £45bn unfunded tax cuts — pound crashes to record low vs USD; gilt yields spike; mortgage lenders withdraw 1,600+ products overnight. 2-yr fixed rates hit 6.5% within days (from 4.0%). PM Truss and Kwarteng resign within 45 days. BoE emergency intervention in gilts market. HPI falls −5.3% nationally from peak; London −6.8%. First-time buyers at lowest since 2009.</span><span class="lang-zh" style="display:none">財政大臣夸西·夸騰恩的「迷你預算」（2022年9月23日）宣布450億英鎊無資金支持減稅——英鎊兌美元跌至創紀錄低位，英國政府債券殖利率激增，房貸機構一夜間撤回逾1600款產品。2年期固定利率數日內從4.0%衝至6.5%。首相特拉斯和夸騰恩在45天內相繼辭職。BoE緊急干預英國政府債券市場。全國HPI從高峰跌5.3%，倫敦跌6.8%。首次置業者創2009年以來最低。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2023 · BoE PEAK + HPI CORRECTION</span><span class="lang-zh" style="display:none">2023年 · BoE利率見頂+HPI修正</span></div>
+      <div class="ev-title"><span class="lang-en">Bank Rate Peaks 5.25%; HPI Falls 2.1% YoY</span><span class="lang-zh" style="display:none">銀行利率見頂5.25%；HPI年跌2.1%</span></div>
+      <div class="ev-desc"><span class="lang-en">BoE hikes to 5.25% by Aug 2023 — 15-yr high. 14 consecutive increases from 0.10% to 5.25% (Dec 2021–Aug 2023). Nationwide HPI falls −2.1% annually; ONS HPI −0.9%. Transaction volumes down 20%. Buy-to-let sector exits accelerate: landlords selling up as mortgage costs exceed rental income. Rental market supply collapses, rents surge +10%+ nationally. Mortgage approvals at 10-yr low.</span><span class="lang-zh" style="display:none">BoE於2023年8月升息至5.25%，為15年高位。從2021年12月至2023年8月連續14次升息（0.10%→5.25%）。Nationwide HPI年跌2.1%，ONS HPI跌0.9%。成交量減少20%。買房出租板塊加速退出：隨著房貸成本超過租金收入，房東紛紛賣房。租屋市場供給崩潰，全國租金暴漲10%+。房貸批准量降至10年低位。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #16a34a">
+      <div class="ev-year" style="color:#16a34a"><span class="lang-en">2024 · BoE EASING + RECOVERY SIGNS</span><span class="lang-zh" style="display:none">2024年 · BoE降息+復甦訊號</span></div>
+      <div class="ev-title"><span class="lang-en">First Cut Aug 2024; SDLT Holiday Rush Q1 2025</span><span class="lang-zh" style="display:none">2024年8月首次降息；2025年Q1 SDLT假期搶購潮</span></div>
+      <div class="ev-desc"><span class="lang-en">BoE first cut in Aug 2024 (5.25%→5.00%), further to 4.75% Nov 2024. 2-yr fixed rates fall from 6.5% to 4.8%. HPI recovers: Nationwide +3.4% YoY Q1 2025. SDLT holiday (stamp duty on first £250k nil rate) expired Mar 2025, driving front-loaded rush — highest transaction volumes since 2022 in Q1 2025. Labour government planning 1.5M new homes by 2029 (seen as aspirational). Net migration hit record 900k (2023); now moderating.</span><span class="lang-zh" style="display:none">BoE於2024年8月首次降息（5.25%→5.00%），2024年11月進一步降至4.75%。2年期固定利率從6.5%降至4.8%。HPI復甦：Nationwide 2025年Q1年漲3.4%。SDLT假期（首25萬英鎊印花稅豁免）於2025年3月到期，帶動前置搶購潮——2025年Q1成交量創2022年以來最高。工黨政府計劃到2029年建設150萬套新屋（被認為是宏願）。淨移民創紀錄地達到90萬人（2023年）；現趨緩。</span></div>
+    </div>
+    <div class="ev-card" style="border-left:4px solid #d97706">
+      <div class="ev-year" style="color:#d97706"><span class="lang-en">2025 · CORRECTION → RECOVERY PIVOT</span><span class="lang-zh" style="display:none">2025年 · 修正→復甦轉折</span></div>
+      <div class="ev-title"><span class="lang-en">BoE at 4.75%; Housing Affordability Still Stretched</span><span class="lang-zh" style="display:none">BoE維持4.75%；住房可負擔性仍緊張</span></div>
+      <div class="ev-desc"><span class="lang-en">UK in Correction→Recovery transition. BoE expected to cut further to 4.00%–4.25% by end 2025 (market pricing). SDLT holiday expiry (Apr 2025) creates near-term demand softness. CPI sticky at 3.0% — above BoE 2% target. Rental inflation still +8%+ — extreme BTL landlord exit creating supply shortage. London outperforming: international demand, global safe haven, tech sector strength. Northern England lagging on economic headwinds.</span><span class="lang-zh" style="display:none">英國處於修正→復甦轉折期。市場預期BoE將於2025年底進一步降息至4.00%–4.25%。SDLT假期到期（2025年4月）造成短期需求軟化。CPI在3.0%徘徊——高於BoE 2%目標。租金通膨仍達+8%+——大量BTL房東退出造成供給短缺。倫敦領跑：國際需求、全球避風港地位、科技板塊強勁。英格蘭北部因經濟逆風而落後。</span></div>
+    </div>
+  </div>
+
+  <!-- ── Outlook Summary ── -->
+  <div class="summary-card" style="border-left-color:#d97706;margin-bottom:24px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#d97706;font-family:Inter,sans-serif;margin-bottom:10px">
+      <span class="lang-en">Current Cycle Outlook — Correction → Early Recovery</span><span class="lang-zh" style="display:none">當前週期展望 — 修正→早期復甦</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風因素</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">BoE easing cycle — rates expected at 4.00%–4.25% by end 2025</span><span class="lang-zh" style="display:none">BoE降息週期——預期2025年底利率達4.00%–4.25%</span></li>
+          <li><span class="lang-en">Record rental growth (+8%+) making buying increasingly attractive vs renting</span><span class="lang-zh" style="display:none">租金創紀錄增長（+8%+），購房相對租房愈發吸引</span></li>
+          <li><span class="lang-en">Chronic housing shortage — supply running ~200k/yr vs demand 300k+</span><span class="lang-zh" style="display:none">長期住房短缺——供給約20萬套/年 vs 需求30萬+</span></li>
+          <li><span class="lang-en">London: global safe-haven capital flows + tech sector demand</span><span class="lang-zh" style="display:none">倫敦：全球避風港資本流入+科技板塊需求</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a5f;font-family:Inter,sans-serif;margin-bottom:6px">
+          <span class="lang-en">Risks to Monitor</span><span class="lang-zh" style="display:none">風險監控</span>
+        </div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#5a7a9a;line-height:1.9;font-family:Inter,sans-serif">
+          <li><span class="lang-en">CPI still above 2% target — BoE cutting pace constrained</span><span class="lang-zh" style="display:none">CPI仍高於2%目標——BoE降息速度受限</span></li>
+          <li><span class="lang-en">GDP near stall (+0.9%) — Labour tax rises (NIC) dampening business</span><span class="lang-zh" style="display:none">GDP接近停滯（+0.9%）——工黨增稅（NIC）壓制商業活動</span></li>
+          <li><span class="lang-en">SDLT holiday hangover — Q2 2025 demand softness after March rush</span><span class="lang-zh" style="display:none">SDLT假期後遺症——3月搶購潮後2025年Q2需求疲軟</span></li>
+          <li><span class="lang-en">Global trade uncertainty (US tariffs) hitting UK export sector</span><span class="lang-zh" style="display:none">全球貿易不確定性（美國關稅）衝擊英國出口板塊</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Data Source Footer ── -->
+  <p class="source-footer">
+    <span class="lang-en">Sources: Bank of England (Bank Rate decisions · bankofengland.co.uk), ONS (House Price Index, GDP, CPI, Labour Market statistics · ons.gov.uk), Nationwide Building Society (House Price Index monthly · nationwide.co.uk/house-price-index), Moneyfacts (mortgage rate surveys). Nationwide HPI used as primary price series (longest continuous UK house price dataset). ONS HPI used for YoY% confirmation. Net migration from ONS International Migration Bulletin. M2 (M4 broad money) from BoE Statistical Interactive Database.</span>
+    <span class="lang-zh" style="display:none">來源：英格蘭銀行（銀行利率決策 · bankofengland.co.uk）、ONS（房價指數、GDP、CPI、勞動市場統計 · ons.gov.uk）、Nationwide Building Society（月度房價指數 · nationwide.co.uk/house-price-index）、Moneyfacts（房貸利率調查）。Nationwide HPI用作主要價格序列（英國最長連續房價數據集）。ONS HPI用於YoY%確認。淨移民來自ONS國際移民公報。M2（M4廣義貨幣）來自BoE統計互動數據庫。</span>
+  </p>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+/* ---- data (2008–2025, BoE / ONS / Nationwide sources) ---- */
+var years = ['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+/* Nationwide House Price Index (standardised, all properties UK).
+   Key anchors: 2008 avg ~£183k, 2022 peak ~£272k, 2023 trough ~£257k, 2025 ~£357k avg (Nationwide).
+   Index rebased for chart display (2008=100). */
+var hpi = [100,98,103,108,110,114,122,133,141,148,147,150,163,188,189,181,185,195];
+
+/* Chart 1: Monetary Cycle */
+/* BoE Bank Rate (year-end) — bankofengland.co.uk */
+var boeRate = [2.00,0.50,0.50,0.50,0.50,0.50,0.50,0.50,0.25,0.50,0.75,0.75,0.10,0.25,3.50,5.25,4.75,4.75];
+/* 2-yr fixed mortgage rate (avg, Moneyfacts/BoE data) */
+var mortRate = [5.80,3.50,3.90,4.20,4.00,3.40,3.50,2.80,2.50,2.30,2.50,1.90,1.50,1.40,4.00,6.50,4.80,4.80];
+/* CPI YoY% — ONS annual average */
+var cpiYoy = [3.6,2.2,3.3,4.5,2.8,2.6,1.5,0.0,0.7,2.7,2.5,1.8,0.9,2.5,9.1,7.3,3.2,3.0];
+/* M4 broad money YoY% — BoE Statistical Database (est) */
+var m2Growth = [9.5,4.0,2.5,1.5,4.5,4.5,4.5,3.5,6.5,4.0,2.5,3.0,12.5,8.5,4.0,1.0,2.5,3.0];
+
+/* Chart 2: Real Economy */
+/* GDP YoY% — ONS National Accounts */
+var gdpGrowth = [-0.3,-4.3,1.9,1.5,1.5,2.1,2.9,2.4,1.9,1.8,1.3,1.6,-10.4,8.6,4.0,0.3,0.9,1.4];
+/* Unemployment % — ONS Labour Market Survey, annual avg */
+var unempRate = [5.6,7.6,7.8,8.1,7.9,7.6,6.2,5.4,4.9,4.4,4.1,3.8,4.5,4.5,3.7,4.2,4.4,4.5];
+/* Mortgage approvals ('000s / month avg) — BoE mortgage approvals data, scaled */
+var mortApprovals = [48,42,47,48,52,62,61,70,68,65,63,65,50,72,56,44,58,62];
+/* Net migration ('000) — ONS long-term international migration */
+var netMigration = [230,200,215,205,195,210,240,270,280,280,270,230,-130,200,500,900,600,350];
+
+/* ---- chart infrastructure ---- */
+var C = {navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9'};
+var baseText    = {color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseTooltip = {trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend  = {top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){
+  var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};
+  var r=Object.assign({},b,o||{});
+  if(o&&o.axisLabel) r.axisLabel=Object.assign({},baseText,o.axisLabel);
+  return r;
+}
+
+var allCharts = [];
+
+function initCharts(lang){
+  allCharts.length = 0;
+  var isZh = lang === 'zh';
+
+  /* ── Chart 1: Monetary Cycle × HPI ── */
+  var c1 = echarts.init(document.getElementById('chartMacroMonetary'));
+  allCharts.push(c1);
+
+  var markAreaData1 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC危機':'GFC Crisis',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2010',itemStyle:{color:'rgba(22,163,74,0.07)'},label:{formatter:isZh?'後GFC復甦':'Post-GFC Recovery',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},label:{formatter:isZh?'升息週期':'Rate Hike Cycle',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'修正→復甦':'Correction→Recovery',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData1 = [
+    {xAxis:'2016',label:{formatter:isZh?'英國脫歐':'Brexit Vote',color:'#8b5cf6',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#8b5cf6',type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'BoE 0.10%':'BoE 0.10%',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'迷你預算':'Mini-Budget',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2024',label:{formatter:isZh?'BoE首降':'BoE Cut',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c1.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:false}),
+    yAxis:[
+      mkAxis({type:'value',min:-2,max:14,interval:2,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:90,max:220,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'HPI(2008=100)':'HPI(2008=100)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'BoE銀行利率':'BoE Bank Rate',type:'line',data:boeRate,yAxisIndex:0,lineStyle:{color:C.navy,width:2.5},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5,smooth:false},
+      {name:isZh?'2年期固定房貸':'2-yr Fixed Mortgage',type:'line',data:mortRate,yAxisIndex:0,lineStyle:{color:C.blue,width:1.5},itemStyle:{color:C.blue},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'CPI YoY%':'CPI YoY%',type:'line',data:cpiYoy,yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'M4廣義貨幣YoY%':'M4 Broad Money%',type:'line',data:m2Growth,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'Nationwide HPI':'Nationwide HPI',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData1},markLine:{silent:true,symbol:'none',data:markLineData1}}
+    ]
+  });
+
+  /* ── Chart 2: Real Economy × HPI ── */
+  var c2 = echarts.init(document.getElementById('chartMacroReal'));
+  allCharts.push(c2);
+
+  var gdpBarData = gdpGrowth.map(function(v){return {value:v,itemStyle:{color:v>=0?C.blue:C.red,borderRadius:[3,3,0,0]}};});
+  /* Scale net migration to manageable % for overlay */
+  var netMigPct = netMigration.map(function(v){return parseFloat((v/100).toFixed(1));});
+
+  var markAreaData2 = [
+    [{xAxis:'2008',itemStyle:{color:'rgba(107,114,128,0.10)'},label:{formatter:isZh?'GFC':'GFC',color:'#6b7280',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2009'}],
+    [{xAxis:'2016',itemStyle:{color:'rgba(139,92,246,0.07)'},label:{formatter:isZh?'Brexit':'Brexit',color:'#8b5cf6',fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2019'}],
+    [{xAxis:'2020',itemStyle:{color:'rgba(37,99,235,0.07)'},label:{formatter:isZh?'COVID':'COVID',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2021'}],
+    [{xAxis:'2022',itemStyle:{color:'rgba(220,38,38,0.07)'},label:{formatter:isZh?'升息':'Rate Hikes',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2023'}],
+    [{xAxis:'2024',itemStyle:{color:'rgba(217,119,6,0.07)'},label:{formatter:isZh?'復甦':'Recovery',color:C.orange,fontSize:10,fontFamily:'Inter, sans-serif'}},{xAxis:'2025'}]
+  ];
+
+  var markLineData2 = [
+    {xAxis:'2016',label:{formatter:isZh?'Brexit公投':'Brexit Vote',color:'#8b5cf6',fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:'#8b5cf6',type:'dashed',width:1}},
+    {xAxis:'2020',label:{formatter:isZh?'SDLT假期':'SDLT Holiday',color:C.blue,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.blue,type:'dashed',width:1}},
+    {xAxis:'2022',label:{formatter:isZh?'迷你預算':'Mini-Budget',color:C.red,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.red,type:'dashed',width:1}},
+    {xAxis:'2024',label:{formatter:isZh?'BoE首降':'BoE Cut',color:C.green,fontSize:10,fontFamily:'Inter, sans-serif',position:'end'},lineStyle:{color:C.green,type:'dashed',width:1}}
+  ];
+
+  c2.setOption({
+    tooltip:Object.assign({},baseTooltip,{formatter:function(p){var s=p[0].name+'<br/>';p.forEach(function(x){s+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:4px"></span>'+x.seriesName+': '+x.value+'<br/>';});return s;}}),
+    legend:Object.assign({},baseLegend),
+    grid:{left:50,right:60,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:years,boundaryGap:true}),
+    yAxis:[
+      mkAxis({type:'value',min:-15,max:15,interval:5,axisLabel:{formatter:'{value}%',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},name:isZh?'%指標':'% Indicators',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}}),
+      mkAxis({type:'value',min:90,max:220,interval:20,axisLabel:{formatter:'{value}',color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11},splitLine:{show:false},name:isZh?'HPI(2008=100)':'HPI(2008=100)',nameTextStyle:{color:C.muted,fontSize:10,fontFamily:'Inter, sans-serif'}})
+    ],
+    series:[
+      {name:isZh?'GDP YoY%':'GDP YoY%',type:'bar',data:gdpBarData,yAxisIndex:0,barMaxWidth:20},
+      {name:isZh?'失業率%':'Unemployment%',type:'line',data:unempRate,yAxisIndex:0,lineStyle:{color:C.red,width:1.5},itemStyle:{color:C.red},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'房貸批准量(×1k)':'Mortg.Approvals(×1k)',type:'line',data:mortApprovals.map(function(v){return parseFloat((v/10).toFixed(1));}),yAxisIndex:0,lineStyle:{color:C.orange,width:1.5},itemStyle:{color:C.orange},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'淨移民(×10k)':'Net Mig(×10k)',type:'line',data:netMigPct,yAxisIndex:0,lineStyle:{color:C.muted,width:1,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:4,smooth:false},
+      {name:isZh?'Nationwide HPI':'Nationwide HPI',type:'line',data:hpi,yAxisIndex:1,lineStyle:{color:C.green,width:2.5},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,smooth:false,
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(22,163,74,0.08)'},{offset:1,color:'rgba(22,163,74,0)'}])},
+       markArea:{silent:true,data:markAreaData2},markLine:{silent:true,symbol:'none',data:markLineData2}}
+    ]
+  });
+}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  var lang='en';
+  try{lang=localStorage.getItem('lang')||'en';}catch(e){}
+  setLang(lang);
+});
+</script>
+<script src="../js/navbar.js"></script>
+</body>
+</html>

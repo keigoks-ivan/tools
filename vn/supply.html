@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Analysis | Vietnam Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="dashboard">
+    <h1 class="page-title"><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
+
+    <div class="kpi-row">
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">New Launches 2025</span><span class="lang-zh" style="display:none">2025年新推案量</span></div>
+        <div class="kpi-value">~25,000 <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta positive">+30% YoY</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">HCMC New Supply</span><span class="lang-zh" style="display:none">胡志明市新供給</span></div>
+        <div class="kpi-value">~15,000 <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta" style="color:#2563eb"><span class="lang-en">Recovery</span><span class="lang-zh" style="display:none">復甦中</span></div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">Hanoi New Supply</span><span class="lang-zh" style="display:none">河內新供給</span></div>
+        <div class="kpi-value">~8,000 <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta negative"><span class="lang-en">Supply shortage</span><span class="lang-zh" style="display:none">供給短缺</span></div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">Unsold Inventory</span><span class="lang-zh" style="display:none">未售庫存</span></div>
+        <div class="kpi-value">~28,000 <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Nationwide</span><span class="lang-zh" style="display:none">全國</span></div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">Under Construction</span><span class="lang-zh" style="display:none">在建量</span></div>
+        <div class="kpi-value">~45,000 <span class="kpi-unit">units</span></div>
+        <div class="kpi-delta" style="color:#2563eb"><span class="lang-en">Pipeline</span><span class="lang-zh" style="display:none">建設中</span></div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">Legal Bottleneck</span><span class="lang-zh" style="display:none">法規瓶頸</span></div>
+        <div class="kpi-value">~60% <span class="kpi-unit"><span class="lang-en">projects</span><span class="lang-zh" style="display:none">項目</span></span></div>
+        <div class="kpi-delta negative"><span class="lang-en">Delayed permits</span><span class="lang-zh" style="display:none">許可延遲</span></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card full">
+        <h3><span class="lang-en">New Launches vs Completions vs Absorption</span><span class="lang-zh" style="display:none">新推案 vs 完工 vs 去化量</span></h3>
+        <div id="chartVnPipeline" style="height:370px"></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card half">
+        <h3><span class="lang-en">New Supply by City</span><span class="lang-zh" style="display:none">各城市新供給</span></h3>
+        <div id="chartVnCitySupply" style="height:370px"></div>
+      </div>
+      <div class="chart-card half">
+        <h3><span class="lang-en">HCMC Unsold Inventory Trend</span><span class="lang-zh" style="display:none">胡志明市未售庫存趨勢</span></h3>
+        <div id="chartVnUnsold" style="height:370px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>A project by InvestMQuest.</p>
+  </footer>
+
+  <script>
+  var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+  var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+  var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+  var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+  var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+  function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+  function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+  function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+  function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+  document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+  var allCharts=[];
+  function initCharts(lang){
+    allCharts.length=0;
+
+    /* Chart 1: New Launches vs Completions vs Absorption */
+    var c1=echarts.init(document.getElementById('chartVnPipeline'));
+    c1.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[lang==='zh'?'新推案':'New Launches',lang==='zh'?'完工':'Completions',lang==='zh'?'去化量':'Absorption']}),
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[
+        {name:lang==='zh'?'新推案':'New Launches',type:'line',smooth:0.2,data:[15000,12000,28000,18000,22000,25000],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy},symbol:'circle',symbolSize:6},
+        {name:lang==='zh'?'完工':'Completions',type:'line',smooth:0.2,data:[20000,18000,15000,22000,20000,23000],lineStyle:{color:C.green,width:2},itemStyle:{color:C.green},symbol:'circle',symbolSize:6},
+        {name:lang==='zh'?'去化量':'Absorption',type:'line',smooth:0.2,data:[18000,10000,25000,15000,19000,22000],lineStyle:{color:C.orange,width:2,type:'dashed'},itemStyle:{color:C.orange},symbol:'circle',symbolSize:6}
+      ]
+    });
+    allCharts.push(c1);
+
+    /* Chart 2: New Supply by City (horizontal bar) */
+    var cityLabels=lang==='zh'?['芽莊','平陽','峴港','河內','胡志明市']:['Nha Trang','Binh Duong','Da Nang','Hanoi','HCMC'];
+    var cityVals=[2500,5000,3500,8000,15000];
+    var cityColors=[C.navy,C.blue,C.navy,C.orange,C.red];
+    var c2=echarts.init(document.getElementById('chartVnCitySupply'));
+    c2.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:60,top:10,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      yAxis:mkAxis({type:'category',data:cityLabels}),
+      series:[{
+        type:'bar',
+        data:cityVals.map(function(v,i){return{value:v,itemStyle:{color:cityColors[i],borderRadius:[0,4,4,0]}};}),
+        label:{show:true,position:'right',formatter:function(p){return p.value.toLocaleString();},fontSize:11,fontFamily:'Inter, sans-serif',color:C.navy},
+        barWidth:20
+      }]
+    });
+    allCharts.push(c2);
+
+    /* Chart 3: HCMC Unsold Inventory Trend */
+    var c3=echarts.init(document.getElementById('chartVnUnsold'));
+    c3.setOption({
+      tooltip:baseTooltip,
+      grid:baseGrid,
+      xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
+      series:[{
+        type:'line',
+        data:[18000,22000,25000,20000,15000,12000,10000],
+        smooth:0.2,
+        lineStyle:{color:C.blue,width:2},
+        itemStyle:{color:C.blue},
+        symbol:'circle',
+        symbolSize:7,
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(37,99,235,0.15)'},{offset:1,color:'rgba(37,99,235,0)'}])},
+        markLine:{
+          silent:true,
+          symbol:'none',
+          lineStyle:{color:C.green,type:'dashed',width:1},
+          label:{formatter:lang==='zh'?'健康水準':'Healthy level',fontSize:10,color:C.green,fontFamily:'Inter, sans-serif'},
+          data:[{yAxis:15000}]
+        }
+      }]
+    });
+    allCharts.push(c3);
+  }
+
+  window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

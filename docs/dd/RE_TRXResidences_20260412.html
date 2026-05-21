@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRX Residences @ Tun Razak Exchange｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:linear-gradient(135deg,#14532D 0%,#1e4d4d 100%);color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-card.highlight{border-top:3px solid #16a34a;background:#F0FDF4}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+.success-box{background:#DCFCE7;border-left:4px solid #16a34a;border-radius:4px;padding:12px 16px;margin:12px 0;color:#166534;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* brickz highlight */
+.brickz-box{background:linear-gradient(135deg,#14532D,#166534);border-radius:8px;padding:20px 24px;margin:12px 0;color:#fff}
+.brickz-title{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.6);margin-bottom:10px;letter-spacing:.05em}
+.brickz-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.brickz-stat{text-align:center}
+.brickz-num{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:700;color:#86efac}
+.brickz-label{font-size:11px;color:rgba(255,255,255,.6);margin-top:3px}
+/* score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:680px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+/* note block */
+.note-box{background:#EFF6FF;border:1px solid #93c5fd;border-radius:8px;padding:16px 20px;margin:12px 0}
+.note-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:#1e40af;margin-bottom:8px;letter-spacing:.04em}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+.print-btn:hover{background:#166634}
+/* scenario */
+.scenario-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:12px 0}
+.sc-card{border-radius:8px;padding:14px}
+.sc-bull{background:#DCFCE7;border:1px solid #86efac}
+.sc-base{background:#EFF6FF;border:1px solid #93c5fd}
+.sc-bear{background:#FEE2E2;border:1px solid #fca5a5}
+.sc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
+.sc-bull .sc-title{color:#166534}
+.sc-base .sc-title{color:#1e40af}
+.sc-bear .sc-title{color:#991B1B}
+.sc-num{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700}
+@media(max-width:680px){.score-cols,.dual-col,.brickz-grid,.scenario-grid{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <span>📍 建案分析：TRX Residences @ Tun Razak Exchange ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ brickz 59 筆政府登記成交（2024-04 至 2025-03）｜ Lendlease 官方確認竣工 2024-05-15</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>TRX Residences</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&price=1640000&from=TRXResidences"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=TRXResidences"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Tun Razak Exchange（TRX），Jalan Tun Razak ｜ Lendlease（60%）× TRX City Sdn Bhd（財政部全資子公司，40%）JV ｜ Freehold，Commercial under HDA ｜ Phase 1：896單位（Tower A 53層 443戶 + Tower B 57層 453戶）｜ 竣工：2024年5月15日（Lendlease 官方）</div>
+  <div class="badge-row">
+    <span class="badge">✅ brickz 59筆實際成交（2024-04至2025-03）</span>
+    <span class="badge">✅ 成交中位 RM2,293 psf｜中位總價 RM164萬</span>
+    <span class="badge">✅ YoY +5.56%（上游 KL RM1M+ 報告確認）</span>
+    <span class="badge">✅ KL 唯一 MRT 雙線交匯站 70m 直達</span>
+    <span class="badge">📡 掛牌 338筆售 + 415筆租（iProperty 2026）</span>
+    <span class="badge">✅ LEED Gold + GBI Gold 雙綠建認證</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 地契釐清警示 -->
+<div class="insight">
+  <strong>⚠️ 地契名詞釐清——上游報告 vs 官方文件有細微差異：</strong><br><br>
+  上游 KL 供需報告將 TRX Residences 所在地段描述為「住宅地契，Overhang 風險：低」，但官方 TRX Residences 文件確認地契為：<strong>Freehold｜Land Title: Commercial under HDA</strong>。<br><br>
+  這意味著：①產權是 Freehold（永久業權）✅；②土地用途是商業地契（Commercial）；③但受 HDA（房屋發展法）保護，具備標準 SPA 和購屋者仲裁庭保護。這與 Stonor 3 的框架類似，但 TRX Residences 品質和地段更高。<strong>從外籍投資者角度，HDA 保護是重要正面因素，電費可申請民用費率轉換亦需確認。</strong>
+</div>
+
+<!-- 特別框架 -->
+<div class="note-box">
+  <div class="note-title">🔵 TS2 → TRX 2030–2031 換手框架關聯</div>
+  <p style="font-size:12px;color:#1e40af;margin:0">
+  上游 KL RM1M+ 深度報告（2026-03）明確記載：「TS2 武吉免登 2030–2031 換手首選目標：TRX Residences——步行生活圈最強、Freehold、金融區敘事」。本報告同時服務兩個目的：①對外籍投資者（新購）的系列分析；②對現有 TS2 持有者，評估 2030–2031 換手進入 TRX Residences 的合理性。
+  </p>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="brickz-box">
+      <div class="brickz-title">🏛️ BRICKZ 政府登記成交數據（2024-04 至 2025-03）——本系列最可靠的市場驗證數據之一</div>
+      <div class="brickz-grid">
+        <div class="brickz-stat">
+          <div class="brickz-num">59</div>
+          <div class="brickz-label">政府登記成交筆數</div>
+        </div>
+        <div class="brickz-stat">
+          <div class="brickz-num">RM2,293</div>
+          <div class="brickz-label">成交中位 PSF</div>
+        </div>
+        <div class="brickz-stat">
+          <div class="brickz-num">RM164萬</div>
+          <div class="brickz-label">中位成交總價</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.55);font-family:'IBM Plex Mono',monospace">
+        P25–P75 範圍：RM151.8萬 – RM198.4萬｜YoY +5.56%（上游報告）｜竣工後首年即有 59 筆實際成交——流動性健康
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card highlight">
+        <div class="kpi-v">RM2,293</div>
+        <div class="kpi-l">成交中位 PSF（brickz 59筆）</div>
+        <div class="kpi-s up">YoY +5.56%；本系列最充分驗證</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM1,931–4,369</div>
+        <div class="kpi-l">現掛牌 PSF 範圍（PropertyGuru）</div>
+        <div class="kpi-s neu">338筆掛牌售；37.7%掛牌率（健康）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">415筆</div>
+        <div class="kpi-l">掛牌租（iProperty 2026）</div>
+        <div class="kpi-s up">1BR RM4,500–5,500；3BR RM13,000–15,000</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">90%</div>
+        <div class="kpi-l">取購率（Topping Out，2023）</div>
+        <div class="kpi-s up">Lendlease 官方：最佳財務健康信號</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM0.85</div>
+        <div class="kpi-l">管理費 psf（含沉沒基金）</div>
+        <div class="kpi-s neu">分解：RM0.65居住+RM0.10水處理+RM0.10園區</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">70m</div>
+        <div class="kpi-l">至 TRX MRT 站距離</div>
+        <div class="kpi-s up">KL 唯一 MRT 雙線交匯（Kajang+Putrajaya）</div>
+      </div>
+    </div>
+
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商 JV</div><div class="spec-v">LQ Residential 1 Sdn Bhd（Lendlease 60%）× TRX City Sdn Bhd（財政部全資子公司，40%）——唯一「全球頂級開發商 + 馬來西亞政府」JV</div></div>
+      <div class="spec-item"><div class="spec-l">Lendlease 背景</div><div class="spec-v">澳洲全球整合房地產集團；代表作：Sydney Barangaroo、London Elephant Park、Singapore Paya Lebar Quarter、New York Clippership Wharf；KL 唯一項目即 TRX</div></div>
+      <div class="spec-item"><div class="spec-l">地契</div><div class="spec-v">Freehold｜Land Title: Commercial under HDA（受 HDA 保護，標準 SPA，仲裁庭可申訴）｜獨特稀缺：政府規劃金融區中的 Freehold</div></div>
+      <div class="spec-item"><div class="spec-l">Phase 1 規模</div><div class="spec-v">896單位：Tower A（443戶，53層）+ Tower B（453戶，57層）；1.12英畝；800戶/英畝（高密度，但 TRX 整合公園補償）</div></div>
+      <div class="spec-item"><div class="spec-l">坪數 / 房型</div><div class="spec-v">474–538 sqft（1BR）｜624–721 sqft（1BR+）｜850–1,076 sqft（2BR）｜1,184–1,636 sqft（3BR）；無大坪數豪宅，以 1–3BR 實用向為主</div></div>
+      <div class="spec-item"><div class="spec-l">竣工</div><div class="spec-v">2024年5月15日（Lendlease × TRX City 聯合官方宣告，BusinessToday 確認）；LEED Gold + GBI Gold 雙綠建認證；獨家郵遞區號 55188</div></div>
+      <div class="spec-item"><div class="spec-l">MRT 連接</div><div class="spec-v">TRX站（KG20/PY23）70m 直達，KL 唯一 Kajang Line（KG）× Putrajaya Line（PY）MRT 雙線交匯——全 KL 最強 MRT 節點</div></div>
+      <div class="spec-item"><div class="spec-l">The Exchange TRX</div><div class="spec-v">500+ 零售店，首家 Apple Store，Seibu 日本百貨，Gucci / Chanel / LV，Mercato 超市；建案地面層直通；全 KL 2024 最頂級購物中心</div></div>
+      <div class="spec-item"><div class="spec-l">TRX City Park</div><div class="spec-v">10英畝屋頂公園（全 KL 最大空中公園）；直接連通 TRX Residences；LEED Gold 綠建支持</div></div>
+      <div class="spec-item"><div class="spec-l">設施</div><div class="spec-v">90,000 sqft 設施分佈三層（8樓、29樓、30樓）：多泳池、健身中心、居民休息室、社交吧、共同工作空間、遊戲室、BBQ 區、藥草園；直接連通 10英畝 TRX City Park</div></div>
+      <div class="spec-item"><div class="spec-l">綠建認證</div><div class="spec-v">LEED Gold + GBI Gold 雙認證；雙層玻璃帷幕牆（Low-E 玻璃）降熱管理；首個使用再生水的建案；屋頂太陽能板；全機械通風系統</div></div>
+      <div class="spec-item"><div class="spec-l">租金行情</div><div class="spec-v">1BR（474sqft）RM4,500–5,500/月；2BR（850sqft）RM7,500–9,000/月；3BR（1,259sqft）RM13,000–15,000/月（iProperty 掛牌租，2026）</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜TRX Residences 的核心投資論點——「金融區主題」</h3>
+    <p>TRX Residences 的核心論點是 KL 版的「Marina Bay Singapore」或「Canary Wharf London」——一個由政府主導、全球資本支持的目的性金融區，在從「啟動期」到「成熟期」的過程中，住宅資產必然隨整個金融區的成熟而升值。</p>
+    <p>此論點的特殊性在於馬來西亞的制度背景：TRX 是<strong>財政部全資子公司</strong>（TRX City）擁有的土地，政府有強烈的政治意願讓 TRX 成功——HSBC、德勤等已進駐是「政府保證」論點的市場驗證。TRX Residences 由 Lendlease（60%）JV，Lendlease 是「進過 Barangaroo、Elephant Park、Paya Lebar Quarter」的全球整合開發商，KL 唯一項目即 TRX——這個組合在本系列所有建案中是獨一無二的機構等級 JV。</p>
+
+    <div class="success-box">
+      <strong>上游 KL RM1M+ 報告最強定性：</strong>「TRX 是目前唯一同時滿足步行生活圈 + RM100–130萬 + 增值潛力的地段，但略超預算。」這是上游報告對 KL 所有地段的最高單一評語，但也準確地點出了核心限制——預算偏高。RM100–130萬只能買到 474–600 sqft 的 1BR，這對自住有坪數壓力。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜「Marina Bay 類比」的合理性與侷限性</h3>
+    <table>
+      <thead><tr><th>維度</th><th>Marina Bay Singapore（成熟期）</th><th>TRX（目前啟動期）</th><th>類比成立度</th></tr></thead>
+      <tbody>
+        <tr><td>政府主導</td><td>✅ 新加坡政府 URA 規劃</td><td>✅ 財政部全資子公司（TRX City）</td><td><span class="tag t-g">高</span></td></tr>
+        <tr><td>全球金融機構進駐</td><td>花旗、瑞銀、摩根士丹利等</td><td>HSBC、德勤、畢馬威等</td><td><span class="tag t-y">中——KL 金融深度仍遠不及 SG</span></td></tr>
+        <tr><td>整合商業零售</td><td>The Shoppes at MBS 等</td><td>The Exchange TRX（首家 Apple Store）</td><td><span class="tag t-g">高</span></td></tr>
+        <tr><td>住宅升值（啟動→成熟）</td><td>初期 SGD1,500→現 SGD3,000–4,500 psf（+100–200%）</td><td>TRX 現 RM2,293 psf，代理預測 +5–8%/年</td><td><span class="tag t-y">論點成立，但時間和幅度不確定</span></td></tr>
+        <tr><td>城市量級</td><td>全球頂級金融中心，GDP 超 KL 10 倍</td><td>東南亞區域金融中心（非全球頂級）</td><td><span class="tag t-r">KL 量級顯著更小，升值幅度應折扣</span></td></tr>
+      </tbody>
+    </table>
+    <p class="src">注：「Marina Bay 類比」是代理行銷話術中最常見的框架，有一定合理性但量級折扣不可忽視</p>
+
+    <hr class="dv">
+    <h3>C｜Munger 逆向推演</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險</th><th>說明</th><th>概率</th><th>影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>掛牌租 415 筆過剩風險</strong></td><td>iProperty 415 筆掛牌租 vs 896 戶 = 46% 出租掛牌率——竣工後大量投資者同時進入出租市場，空置率偏高（新社區成熟前的「初期陣痛」）；但 338 筆掛牌售 = 37.7% 掛牌率尚健康</td><td><span class="tag t-y">中高（1–2 年內）</span></td><td>短期租金承壓；填租時間 2–4 個月；但 45,000 在地辦公人員提供租賃基礎</td></tr>
+          <tr><td><strong>TRX 金融區成熟化慢於預期</strong></td><td>The Exchange 106 辦公樓進駐率、新金融機構設立時間表均有不確定性；若 KL 金融區吸力弱於預期，外籍高管租賃需求增長慢於預期</td><td><span class="tag t-y">中</span></td><td>資本增值 5–8%/年 的代理預期難以實現；實際可能更接近 3–5%</td></tr>
+          <tr><td><strong>商業地契（Commercial under HDA）買家池折扣</strong></td><td>雖受 HDA 保護，但商業地契的銀行貸款條件（LTV 可能 70–80%）和外籍 State Consent 仍比純住宅地契複雜；買家池略窄</td><td><span class="tag t-b">低中（HDA 保護大幅緩解）</span></td><td>二手流動性比住宅地契略低，但 59 筆 brickz 成交顯示流動性健康</td></tr>
+          <tr><td><strong>Phase 1 密度（896戶/1.12英畝）偏高</strong></td><td>800 戶/英畝密度是本系列最高之一（僅次於 Armani Hallson 849 戶/英畝）；但 TRX 整合公園和大型 TOD 生態圈大幅補償了密度問題</td><td><span class="tag t-b">低中（生態圈補償效果明顯）</span></td><td>設施使用體驗略受大量鄰居影響；Phase 2/3 未來供給是不確定因素</td></tr>
+          <tr><td><strong>Phase 2/3 未來供給</strong></td><td>TRX Residences 規劃共三個地塊，Phase 2 鄰近 Exchange TRX 奢華節點正在規劃中；Phase 3 更多樓棟。未來供給可能壓制 Phase 1 的稀缺溢價</td><td><span class="tag t-y">中</span></td><td>Phase 2 若以更高 PSF 發售，反而可能帶動 Phase 1 升值；但若 Phase 2 同等 PSF，競爭增加</td></tr>
+          <tr><td><strong>坪數偏小（474 sqft 起）</strong></td><td>最小 1BR 474 sqft，RM115萬+；若以 RM164 萬中位價，對應單位坪數約 715 sqft——在 KL 金融區雖屬合理，但坪數偏小限制家庭自住</td><td><span class="tag t-b">低（對投資者，不是主要問題）</span></td><td>自住群體較少（外籍單身或年輕夫婦為主）；出租為主的投資者影響較小</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場概況——上游報告全面正面定性</div>
+  <div class="section-body">
+    <h3>1.1 上游兩份報告對 TRX Residences 的直接記錄</h3>
+    <table>
+      <thead><tr><th>報告</th><th>引用</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>KL RM1M+ 深度報告（主表）</td><td>「TRX Residences｜TRX金融城｜成交中位 RM2,293 psf｜YoY +5.56%｜MRT交匯，Freehold，金融區敘事」</td><td><span class="tag t-g">正面——明確記錄 YoY +5.56%</span></td></tr>
+        <tr><td>KL RM1M+ 深度報告（地段比較）</td><td>「TRX 是唯一同時滿足步行生活圈 + RM100–130萬 + 增值潛力的地段，但略超預算」</td><td><span class="tag t-g">正面——上游報告所有地段中最高評語</span></td></tr>
+        <tr><td>KL RM1M+ 深度報告（五大地段矩陣）</td><td>「步行最強 + Freehold 住宅 + 增值潛力佳 = ✅ × 3；預算略超 = 唯一扣分」</td><td><span class="tag t-g">正面——三個關鍵維度全滿分</span></td></tr>
+        <tr><td>KL 供需 Overhang 報告（§3）</td><td>「TRX 週邊租金 RM4,500–6,000（估）｜金融業外籍高管帶動 KLCC 週邊需求 -300–700戶（2026–2028）」</td><td><span class="tag t-g">正面——TRX 是 KL SR 積壓消化的正面吸力</span></td></tr>
+        <tr><td>KL 供需 Overhang 報告（§5 分地段）</td><td>「TRX 週邊」單獨列出，代理估 RM4,500–6,000；「新定價中」——TRX 尚在早期定價階段</td><td><span class="tag t-y">中性——市場尚在「發現價格」階段</span></td></tr>
+        <tr><td>KL 供需 Overhang 報告（§6 供給管道表）</td><td>「Core Residence @ TRX｜住宅地契｜Overhang 風險：低（高取購率）」——注意這裡指的是 Core Residence，非本案（TRX Residences by Lendlease）；但論點同樣適用</td><td><span class="tag t-g">正面——TRX 地段 Overhang 風險低</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 TRX vs 本系列其他建案橫向定價比較</h3>
+    <table>
+      <thead><tr><th>建案</th><th>地契</th><th>成交/掛牌 PSF</th><th>brickz 筆數</th><th>YoY</th></tr></thead>
+      <tbody>
+        <tr><td><strong>TRX Residences（本案）</strong></td><td><span class="tag t-g">Freehold（Commercial HDA）</span></td><td><strong>RM2,293（brickz 59筆，成交中位）</strong></td><td><strong>59筆 ✅✅</strong></td><td><span class="up">+5.56%</span></td></tr>
+        <tr><td>Park Place DPC</td><td><span class="tag t-g">Freehold 住宅</span></td><td>RM1,461（brickz 89筆，成交中位）</td><td>89筆 ✅✅</td><td><span class="up">+76–102%（5年）</span></td></tr>
+        <tr><td>R22 Mont Kiara</td><td><span class="tag t-g">Freehold 住宅</span></td><td>RM1,208（brickz 31筆）</td><td>31筆 ✅</td><td>+5%（2024）</td></tr>
+        <tr><td>The Conlay by E&O</td><td><span class="tag t-y">Freehold 商業</span></td><td>RM2,100（iRumah 估算）</td><td>未 brickz 驗證</td><td>+17%（vs 發售）</td></tr>
+        <tr><td>Stonor 3 KLCC</td><td><span class="tag t-y">商業地契 HDA</span></td><td>RM1,320（brickz 9筆，成交中位）</td><td>9筆 △</td><td>-34%（vs 發售）</td></tr>
+        <tr><td>Binjai on the Park（頂奢對照）</td><td><span class="tag t-g">Freehold 住宅</span></td><td>RM2,660</td><td>—</td><td><span class="up">+59.1%</span></td></tr>
+      </tbody>
+    </table>
+    <p class="src">注：TRX Residences 的 RM2,293 psf 成交中位以 59 筆 brickz 政府登記數據支撐，是本系列商業地契（Commercial HDA）建案中數據最紮實的成交驗證。</p>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構——TRX 生態圈 vs 初期出租競爭</div>
+  <div class="section-body">
+    <h3>2.1 TRX 生態圈的需求面正面論點</h3>
+    <table>
+      <thead><tr><th>需求來源</th><th>估計規模</th><th>信號強度</th></tr></thead>
+      <tbody>
+        <tr><td>TRX 在地辦公人員（2025 目標）</td><td>45,000 人（Lendlease 官方）；HSBC、德勤、畢馬威、Exchange 106 Grade A 辦公人口</td><td><span class="tag t-g">強——直接租賃需求基礎</span></td></tr>
+        <tr><td>MM2H 外籍買家</td><td>上游報告：2,637 待購買家，台灣佔 17%；均價 RM209萬，TRX 在範圍內</td><td><span class="tag t-g">強——TRX 是 MM2H 最常提及目標地段</span></td></tr>
+        <tr><td>外籍家庭（ISKL 等）</td><td>ISKL（International School of KL）3km 內；外籍高管家庭對 3BR 需求高</td><td><span class="tag t-y">中——但 3BR 月租 RM13,000+ 總價門檻高</span></td></tr>
+        <tr><td>短租市場（Airbnb）</td><td>TRX / The Exchange TRX 商務旅客；首家 Apple Store 等奢侈品打卡地；但管委會政策需確認</td><td><span class="tag t-y">中——法律框架 Commercial HDA 相對清晰</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 供給面——初期陣痛與中長期改善</h3>
+    <table>
+      <thead><tr><th>供給壓力</th><th>當前狀態</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>Phase 1 896戶同期進入市場</td><td>掛牌租 415 筆（46%出租掛牌率）——初期大量投資者同時行銷出租</td><td><span class="tag t-y">短期壓力（1–2 年），預期隨社區成熟緩解</span></td></tr>
+        <tr><td>Core Residence @ TRX（競品）</td><td>580戶，2024完工；掛牌租 RM3,700–13,000；競爭同一 TRX 租客池</td><td><span class="tag t-y">輕微競爭，但 TRX Residences 品牌更強</span></td></tr>
+        <tr><td>Phase 2/3 未來供給</td><td>Lendlease × TRX City 擁有另外兩個地塊；Phase 2 鄰近奢華節點</td><td><span class="tag t-y">中期不確定性，但 Phase 2 若高價發售反帶動 Phase 1 升值</span></td></tr>
+        <tr><td>TRX 商業進駐速度</td><td>The Exchange TRX 已全面開業（Apple Store、Seibu、Gucci 等）；辦公樓進駐持續中</td><td><span class="tag t-g">正面——零售側已成熟，辦公側在積累</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>供需核心判斷：</strong>TRX Residences 的供需結構在本系列所有建案中屬於「中長期最強、短期有初期陣痛」。45,000 名在地辦公人員 + MM2H 外籍需求 + The Exchange TRX 生態圈 = 長期需求基礎。415 筆出租掛牌是真實的短期競爭壓力，但隨社區成熟（1–2 年），預期空置率改善。
+    </div>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="section">
+  <div class="section-header">§4｜定價分析（FIX-01/03/04——brickz 59筆完整驗證）</div>
+  <div class="section-body">
+    <div class="success-box">
+      <strong>FIX-03 完全通過：59 筆 brickz 政府登記成交，遠超框架要求的 5–10 筆門檻。</strong>本系列數據可靠性：Park Place（89筆）&gt; TRX Residences（59筆）&gt; R22（31筆）&gt; Stonor 3（9筆）。59 筆覆蓋 2024-04 至 2025-03 的首年成交，統計代表性充分。
+    </div>
+
+    <h3>4.1 brickz 成交分佈分析</h3>
+    <table>
+      <thead><tr><th>指標</th><th>數值</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>成交中位 PSF</td><td>RM 2,293</td><td>本系列最高成交 PSF（除頂奢 Binjai）；商業地契 HDA 中最高</td></tr>
+        <tr><td>成交中位總價</td><td>RM 1,644,000</td><td>對應約 717 sqft @ RM2,293 psf（約 2BR 中小型）</td></tr>
+        <tr><td>P25 總價</td><td>RM 1,518,000</td><td>對應約 662 sqft（1BR 大坪）</td></tr>
+        <tr><td>P75 總價</td><td>RM 1,984,000</td><td>對應約 865 sqft（2BR）</td></tr>
+        <tr><td>YoY PSF</td><td>+5.56%</td><td>上游報告確認；是 KL RM1M+ 建案中增速第五（僅次 Binjai +59%, Damansara +37%, Banyan +31%, MK +5%）</td></tr>
+        <tr><td>首年成交速度</td><td>59筆/12個月 = 4.9筆/月</td><td>竣工後首年有效流動性；說明有真實買家，非純投資炒作</td></tr>
+      </tbody>
+    </table>
+
+    <h3>4.2 掛牌信號分析（FIX-03/04）</h3>
+    <table>
+      <thead><tr><th>信號</th><th>數值</th><th>解讀</th></tr></thead>
+      <tbody>
+        <tr><td>掛牌 PSF 低端（FIX-04 後）</td><td>RM1,931（最低，PropertyGuru）</td><td>FIX-04：低端 RM1,931 是小坪數高層景觀單位均化後，不代表市場中位；排除異常低端</td></tr>
+        <tr><td>掛牌 PSF 主流</td><td>RM2,200–2,600（多數掛牌集中）</td><td>比 brickz 成交中位 RM2,293 略高——賣家心理有 5–15% 溢價空間；議價後仍在成交中位附近</td></tr>
+        <tr><td>掛牌率（售）</td><td>338筆 / 896戶 = 37.7%</td><td>偏高但不嚴峻：竣工後首 1–2 年投資者行銷期正常；比 Stonor 3（69%）和 Armani Hallson 掛牌率健康很多</td></tr>
+        <tr><td>掛牌率（租）</td><td>415筆 / 896戶 = 46.3%</td><td>偏高——出租供給初期集中；短期租金壓力存在；但 45,000 辦公人員需求基礎支撐中長期消化</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率</div>
+  <div class="section-body">
+    <h3>5.1 TRX Residences 租金行情（iProperty 掛牌，2026-04）</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>月租掛牌（RM）</th><th>月租 psf</th><th>Gross Yield（@RM2,293 psf 成交）</th></tr></thead>
+      <tbody>
+        <tr><td>1BR 小</td><td>474 sqft</td><td>RM4,500–5,500</td><td>RM9.5–11.6</td><td>~4.6–5.7%（@RM108.7萬入場）</td></tr>
+        <tr><td>1BR 中</td><td>700 sqft</td><td>RM6,000–7,500</td><td>RM8.6–10.7</td><td>~4.5–5.6%（@RM160.5萬入場）</td></tr>
+        <tr><td>2BR</td><td>850 sqft</td><td>RM7,500–9,000</td><td>RM8.8–10.6</td><td>~4.4–5.3%（@RM194.9萬入場）</td></tr>
+        <tr><td>3BR</td><td>1,259 sqft</td><td>RM13,000–15,000</td><td>RM10.3–11.9</td><td>~4.1–4.8%（@RM288.8萬入場）</td></tr>
+      </tbody>
+    </table>
+    <p class="src">租金數據：iProperty 掛牌 2026-04；代理目標：RM10–12 psf/月；實際成交租金估計比掛牌低 10–15%（填租折扣）</p>
+
+    <h3>5.2 外國人現金流試算（2BR 850sqft，RM194.9萬入場 @ RM2,293 psf）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租收入（RM7,500 × 12）</td><td>RM 90,000</td><td>2BR 850sqft，TRX 金融區，保守取掛牌低端</td></tr>
+        <tr><td>管理費（RM0.85 × 850 × 12）</td><td><span class="down">-RM 8,670</span></td><td>RM0.85 psf（含 Veolia 水處理 + 園區管理）</td></tr>
+        <tr><td>地稅 + 門牌稅</td><td><span class="down">-RM 3,000</span></td><td></td></tr>
+        <tr><td>空置期（2個月，初期出租競爭）</td><td><span class="down">-RM 15,000</span></td><td>415 筆出租掛牌競爭；初期填租較慢</td></tr>
+        <tr><td>非居民租金稅（30%）</td><td><span class="down">-RM 19,299</span></td><td>（90,000–25,670）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 7,200</span></td><td></td></tr>
+        <tr><td><strong>淨現金流（含代管）</strong></td><td><strong>~RM 36,831/年</strong></td><td>Net Yield ≈ 1.89%（RM194.9萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 44,031/年</td><td>Net Yield ≈ 2.26%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-yellow">
+      <strong>外籍 Net Yield 1.9–2.3%——本系列最低之一。</strong>核心原因：RM2,293 psf 的入場成本高，使得即使租金 RM7,500/月也難以達到 2.5%+ Net Yield。TRX Residences 的投資邏輯<strong>必須以資本增值（5–8%/年）為主、租金收益（1.9–2.3%）為輔</strong>——這是一個「成長型資產」而非「收益型資產」的框架。對需要現金流的投資者不適合；對接受 3–5 年持有期並預期資本增值的投資者最合適。
+    </div>
+  </div>
+</div>
+
+<!-- §6 -->
+<div class="section">
+  <div class="section-header">§6｜外資法規——Commercial under HDA 的特殊框架</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>項目</th><th>說明</th><th>對外籍的影響</th></tr></thead>
+      <tbody>
+        <tr><td>地契類型</td><td>Freehold，Land Title: Commercial under HDA</td><td>受 HDA 保護（標準 SPA、仲裁庭）✅；商業地契（State Consent、貸款 LTV 略嚴）⚠️</td></tr>
+        <tr><td>外籍最低門檻</td><td>RM 1,000,000（KL）</td><td>✅ TRX Residences 起步 RM115萬+，完全符合</td></tr>
+        <tr><td>印花稅</td><td>4% 統一稅率</td><td>RM194.9萬物業：印花稅 RM77,960</td></tr>
+        <tr><td>RPGT（第6年+）</td><td>10%（外籍永久）</td><td>SPA 日期起算；若 2024–2025 購入，第6年約 2030–2031</td></tr>
+        <tr><td>State Consent</td><td>必須申請（標準外籍程序）</td><td>1–3 個月；Commercial under HDA 核批程序清晰</td></tr>
+        <tr><td>MM2H 合規</td><td>RM100萬+；Freehold 地契</td><td>✅ 金額達標；HDA 框架的合規性比純商業地契更強；建議書面確認</td></tr>
+        <tr><td>電費費率</td><td>Commercial land title</td><td>⚠️ 需確認是否可申請民用費率；TRX 使用 Veolia 水處理（RM0.10 psf 已含於管理費），電費情況需向管委會確認</td></tr>
+        <tr><td>貸款 LTV</td><td>Commercial 貸款，估 70–85%</td><td>各銀行立場不同；建議事前向銀行確認 TRX Residences 的融資可行性</td></tr>
+      </tbody>
+    </table>
+
+    <h3>外籍入場成本試算（2BR RM194.9萬）</h3>
+    <table>
+      <thead><tr><th>費用</th><th>金額（RM）</th></tr></thead>
+      <tbody>
+        <tr><td>印花稅（4%）</td><td>RM 77,960</td></tr>
+        <tr><td>律師費</td><td>RM 18,000</td></tr>
+        <tr><td>State Consent</td><td>RM 5,000</td></tr>
+        <tr><td><strong>入場總成本</strong></td><td><strong>~RM 100,960（約5.2%）</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜基礎建設——KL 最強 MRT 節點 + 最完整 TOD 生態圈</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>基建</th><th>狀態</th><th>對 TRX Residences 的影響</th></tr></thead>
+      <tbody>
+        <tr><td><strong>TRX MRT 站（KG20/PY23）</strong></td><td>已運營；KL 唯一 Kajang Line × Putrajaya Line 雙線交匯；70m 直達</td><td>✅✅✅ 本系列所有建案中最強 MRT 優勢；一站到 KLCC；直達 KL Sentral（KLIA Express）</td></tr>
+        <tr><td>The Exchange TRX</td><td>已全面開業（2023年11月）；500+ 店；首家 Apple Store；Seibu；頂奢品牌全陣容</td><td>✅✅ 建案地面層直通；全 KL 最新最強購物中心；吸引外籍高管租賃</td></tr>
+        <tr><td>TRX City Park（10英畝）</td><td>已開放；KL 最大屋頂公園；TRX Residences 直通</td><td>✅ 真實生活品質加分；低密度感（補償 800 戶/英畝的高密度）</td></tr>
+        <tr><td>HSBC / 德勤 / 畢馬威等</td><td>已進駐 Exchange 106 及其他 TRX 辦公樓</td><td>✅ 45,000 在地辦公人員；外籍高管直接租賃需求基礎</td></tr>
+        <tr><td>Kimpton Hotel（TRX 奢華酒店）</td><td>計畫中（471房）；馬來西亞首家 Kimpton</td><td>✅ 長期提升 TRX 地段品牌形象；外籍商務旅客帶動短租需求</td></tr>
+        <tr><td>SMART Tunnel / MEX / SPE</td><td>已連通；TRX 直接出入口</td><td>✅ 有車族 KL 全市最方便的出入口之一</td></tr>
+      </tbody>
+    </table>
+
+    <div class="success-box">
+      <strong>TRX 的「生態圈完整性」是本系列最完整的：</strong>唯一一個建案同時具備①KL 最強 MRT 節點（雙線交匯）②已全面運營的頂奢購物中心（地面層直通）③10 英畝屋頂公園（直接連通）④在地 45,000 辦公人員需求基礎⑤Freehold（Commercial HDA）地契——這五個條件在本系列其他任何建案都無法同時滿足。
+    </div>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="section">
+  <div class="section-header">§11｜進場時機、情境分析與 2030 換手評估</div>
+  <div class="section-body">
+    <h3>11.1 三情境 PSF 預測（2030–2031）</h3>
+    <div class="scenario-grid">
+      <div class="sc-card sc-bull">
+        <div class="sc-title">🟢 樂觀情境（25%概率）</div>
+        <div class="sc-num" style="color:#166534">RM3,000+</div>
+        <div style="font-size:11px;color:#166534;margin-top:6px;line-height:1.7">TRX 金融區加速成熟，KL 晉升 Top 10 全球金融中心；外籍高管大量湧入；Phase 2 以 RM2,800+ psf 發售帶動 Phase 1 升值。年均增值 ~5.5%。</div>
+      </div>
+      <div class="sc-card sc-base">
+        <div class="sc-title">🔵 基本情境（55%概率）</div>
+        <div class="sc-num" style="color:#1e40af">RM2,500–2,800</div>
+        <div style="font-size:11px;color:#1e40af;margin-top:6px;line-height:1.7">TRX 穩步成熟，KL 金融區東南亞排名提升；YoY +3–5% 持續；2028 後 Phase 2 發售。年均增值 ~3–5%。</div>
+      </div>
+      <div class="sc-card sc-bear">
+        <div class="sc-title">🔴 悲觀情境（20%概率）</div>
+        <div class="sc-num" style="color:#991B1B">RM1,900–2,200</div>
+        <div style="font-size:11px;color:#991B1B;margin-top:6px;line-height:1.7">TRX 辦公進駐慢於預期；馬幣大幅貶值侵蝕外籍購買力；KL 整體 SR 積壓持續。類似 KL 舊 SR 量產案走勢。年均增值 0–1%。</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px">11.2 TS2 → TRX 2030–2031 換手可行性評估</h3>
+    <div class="note-box">
+      <div class="note-title">🔵 換手規劃框架分析（以上游報告框架為依據）</div>
+      <table style="font-size:12px">
+        <thead><tr><th>項目</th><th>TS2（持有）</th><th>TRX Residences（目標）</th><th>換手邏輯</th></tr></thead>
+        <tbody>
+          <tr><td>地址</td><td>武吉免登（步行商圈）</td><td>TRX（步行生態圈）</td><td>步行商圈從「本地娛樂導向」升級為「金融精英導向」</td></tr>
+          <tr><td>地契</td><td>Freehold 商業（電費民用）</td><td>Freehold 商業 HDA</td><td>商業地契→商業 HDA（略好），Freehold 維持</td></tr>
+          <tr><td>增值預期</td><td>弱（已接受）</td><td>中強（3–5%/年）</td><td>從「功能性資產」升級為「增值型資產」</td></tr>
+          <tr><td>2030–2031 資金需求</td><td>TS2 賣出 RM100–130萬（估）</td><td>TRX 2BR 預計 RM200–250萬（2031）</td><td>差額約 RM70–150萬需另行籌資</td></tr>
+          <tr><td>RPGT 時機</td><td>若 SPA 2024–2025，第6年 2030–2031；RPGT 30%→10%</td><td>若 2030–2031 買入，持有至 2036–2037 才到第6年（10%）</td><td>換手時機選擇需同時考慮兩邊 RPGT</td></tr>
+          <tr><td>自住邏輯</td><td>偶爾自住，以功能性為主</td><td>Exchange TRX 生態圈；更高品質生活</td><td>完全符合「不叫 Grab」的核心需求</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#1e40af;margin-top:10px">
+        <strong>換手建議：</strong>2030–2031 是 TS2 RPGT 優化的最佳窗口，同時 TRX 預計社區成熟度更高（竣工後 6–7 年），是進場的合理時機。主要風險是資金差額（需額外 RM70–150 萬）和 TRX 當時的實際市場成交 PSF——建議 2028–2029 開始定期追蹤 TRX 成交 PSF，根據屆時情況調整換手決策。
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點與最終建議</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">適合的買家</td><td>外籍高淨值投資者（3–5 年資本增值主導）；TRX/KLCC 外籍高管自住；2030–2031 換手目標買家</td></tr>
+            <tr><td>不適合的買家</td><td>需要立即現金流（Net Yield 1.9–2.3% 偏低）；首次進入 KL（高入場門檻 RM164 萬+）；短期（2 年內）換手（RPGT 30%）</td></tr>
+            <tr><td>議價目標</td><td>掛牌 RM2,200–2,600 psf；目標議價至 brickz 成交中位附近（RM2,200–2,350 psf）</td></tr>
+            <tr><td>持有框架</td><td>以資本增值為主（3–5 年，目標 +15–30%）；租金收益為輔（Net Yield 2%+）</td></tr>
+            <tr><td>進場前確認</td><td>① 電費是否可轉民用費率；② 管委會短租政策；③ Phase 2 發售計畫（影響未來競爭）；④ 銀行 LTV 立場</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🟡 短期出租競爭（415筆掛牌租）；長期需求基礎最強（45,000辦公+MM2H+TRX生態圈）</td></tr>
+            <tr><td>價格趨勢</td><td>🟢 brickz 59筆確認 RM2,293 中位，YoY +5.56%；最充分的成交驗證</td></tr>
+            <tr><td>租金市場</td><td>🟡 外籍 Net Yield 1.9–2.3%（本系列最低）；必須接受「增值主導，收益輔助」框架</td></tr>
+            <tr><td>估值</td><td>🟡 RM2,293 psf 高於大多數 KLCC 商業地契 SR；但相比 Marina Bay 同期水平仍有差距</td></tr>
+            <tr><td>長期論點</td><td>🟢 政府背書 + Lendlease 全球品牌 + KL 最強 MRT 節點 + TRX 生態圈完整性——長期邏輯最清晰</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="verdict-g" style="margin-top:16px">
+      <strong>🟢 審慎積極進場（長線資本增值框架）——本系列住宅地契以外的最強長期論點</strong><br><br>
+      TRX Residences 是本系列分析建案中，長期（5–10 年）資本增值論點最清晰的商業地契（HDA）建案。brickz 59 筆成交驗證（YoY +5.56%）+ 上游報告最高評語（「唯一同時滿足步行生活圈 + 增值潛力」）+ KL 最強 MRT 節點 + 政府背書的金融區敘事 + Lendlease 全球品牌 + The Exchange TRX 已全面運營 = 在 KL 商業地契（HDA）建案中，沒有其他選項可以同時達到這五個條件的組合。<br><br>
+      <strong>核心注意事項：①必須接受「增值主導，收益輔助」的持有框架，不適合追求現金流的投資者</strong>；② 415 筆出租掛牌使初期填租有壓力，建議進場後設定 2–4 個月空置緩衝；③ Phase 2 發售計畫是重要監測指標——若 Phase 2 以更高 PSF 發售，直接帶動 Phase 1 升值；④ 電費和短租政策需事前確認。<br><br>
+      <strong>換手框架：</strong>2030–2031 年 TS2 → TRX 換手的邏輯完全成立（步行升級 + 增值框架）；建議 2028–2029 年開始認真追蹤 TRX brickz 成交數據，預先評估換手的預算缺口（估 RM70–150 萬差額）。
+    </div>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">TRX Residences ｜ 建案綜合評分卡 ｜ brickz 59筆政府登記成交支撐</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%，但 TRX 的特殊性在於財政部直接介入（政府保證論點）；RM1M+ 成交 +31%；TRX 金融區定位使 A1 評分高於一般 KL 市場</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">上游報告：TRX 是「新定價中，金融業外籍高管帶動 KLCC 週邊需求 -300–700 戶」；供給管道定性「Overhang 風險：低（高取購率）」；415筆出租掛牌是短期壓力（-0.5）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">已竣工 1–2 年（交屋風險已消）；brickz YoY +5.56% 顯示定價上行；社區成熟期（1–3 年）正在進行；Phase 2 發售前的「甜蜜點」窗口</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>10.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL 唯一 MRT 雙線交匯（Kajang + Putrajaya）70m 直達 + The Exchange TRX 地面層直通 + 10英畝 TRX City Park 直連 + HSBC 等 45,000 在地辦公人員 + SMART Tunnel 直接連通。A4 滿分——無可超越的基建組合</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold Commercial under HDA（標準 SPA，仲裁庭）是正面（+）；但商業地契 State Consent、LTV 限制、電費確認等是標準的商業地契摩擦；4% 印花稅；MM2H 合規性較 Stonor 3 更好（HDA 框架）</div>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">7.7/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">8.0×.2 + 7.0×.25 + 7.5×.2 + 10.0×.2 + 6.5×.15 = 7.725 ≈ 7.7</div>
+          </div>
+        </div>
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>9.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:95%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Lendlease（澳洲，全球整合開發商，代表作 Barangaroo、Elephant Park、Paya Lebar Quarter）× TRX City（財政部全資子公司）——本系列唯一「全球頂級 + 政府」JV。已竣工 2024年5月，交屋零風險。</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>6.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">brickz RM2,293 psf（59筆驗證）是最可靠的市場定價；掛牌 RM2,200–2,600 psf 有小幅溢價（議價空間 5–10%）；相比 Marina Bay 同期確實有折扣（類比框架估值合理但需驗證）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>5.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">外籍 Net Yield 1.9–2.3%（本系列最低）；但 Gross Yield 4–5.5% 尚屬合理；問題是入場 PSF 高（RM2,293）使 Yield 被壓縮。必須接受「增值主導，收益輔助」框架</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>10.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL 唯一 MRT 雙線交匯 70m + The Exchange TRX 地面層直通 + TRX City Park 直連。B4 滿分——本系列無可超越。與 SWNK Houze（A4 9.5）並列頂端，但 TRX 的 MRT 雙線交匯性質使其更具說服力</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>8.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:80%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">LEED Gold + GBI Gold 雙綠建（本系列唯一）；90,000 sqft 設施分三層；10 英畝公園直連；DP Architect（Singapore）+ Woods Bagot（室內）+ Pentago（景觀）；坪數偏小（474 sqft 起）扣分</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold + HDA 保護（標準 SPA，仲裁庭）= 商業地契框架中最好的保護（比 Stonor 3 更好，因 TRX 更新且社區更成熟）；電費費率未確認；仍是商業地契（vs 住宅地契 R22/Park Place）</div>
+          </div>
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">59 筆 brickz 政府登記成交是本系列商業地契（HDA）建案中最高；338 筆掛牌售（37.7%，健康）；YoY +5.56% 顯示有真實買盤；流動性是本系列商業地契建案最佳，接近住宅地契建案水平</td></tr>
+          </div>
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">7.5/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">9.5×.2+6.5×.2+5.0×.15+10.0×.15+8.0×.1+7.0×.1+7.5×.1 = 7.525 ≈ 7.5</div>
+          </div>
+        </div>
+      </div>
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 7.7 × 40% + B 類 7.5 × 60%</div>
+        <div class="score-big">7.6<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#DCFCE7;color:#166534">⭐⭐⭐⭐ 優質——長期增值論點最清晰，KL 金融區唯一標的</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">3.08 + 4.515 = 7.595 → 四捨五入 7.6</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>brickz 59筆政府登記成交 YoY +5.56%（最可靠數據）+ KL 唯一 MRT 雙線交匯 70m（A4 10.0/10 滿分）+ The Exchange TRX 地面層直通 + Lendlease × 財政部子公司（B1 9.5）+ Freehold HDA 保護 + 上游報告最高評語 + LEED Gold + GBI Gold 雙綠建。在「增值主導」框架下，TRX Residences 是 KL 商業地契（HDA）建案中最強的長線選擇。<br>
+          <strong style="color:#fca5a5">最大限制：</strong>外籍 Net Yield 1.9–2.3%（B3 5.0/10，本系列最低）——必須接受現金流犧牲換取資本增值；415 筆出租掛牌使短期空置率偏高；RM194.9萬（2BR）入場門檻高；Phase 2/3 未來供給是中期不確定性；「Marina Bay 類比」論點需折扣（KL 量級遠小於新加坡）。
+        </div>
+      </div>
+    </div>
+
+    <h3>十個建案（含 TRX Residences）完整最終排序</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>建案</th>
+          <th>評分</th>
+          <th>地契</th>
+          <th>外籍 Net Yield</th>
+          <th>A4 基建</th>
+          <th>B1 開發商</th>
+          <th>建議</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="font-weight:700;color:#ca8a04">1</td><td><strong>R22 Mont Kiara</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.2%</td><td>8.5</td><td>8.5</td><td>🟢 進場</td></tr>
+        <tr><td style="font-weight:700;color:#64748b">2</td><td><strong>Park Place DPC</strong></td><td style="font-weight:700;color:#16a34a">7.7</td><td><span class="tag t-g">Freehold 住宅</span></td><td>~3.0–3.4%</td><td>6.5</td><td>8.0</td><td>🟢 進場</td></tr>
+        <tr style="background:#F0FDF4"><td>3</td><td><strong>TRX Residences 🆕</strong></td><td style="font-weight:700;color:#16a34a">7.6</td><td><span class="tag t-g">Freehold Commercial HDA</span></td><td>~1.9–2.3%（增值主導）</td><td style="font-weight:700;color:#16a34a">10.0 ✅</td><td>9.5</td><td>🟢 增值框架下積極考慮</td></tr>
+        <tr><td>4</td><td><strong>The Conlay by E&O</strong></td><td style="font-weight:700;color:#16a34a">7.4</td><td><span class="tag t-y">Freehold 商業</span></td><td>~2.5–3.0%</td><td>9.0</td><td>9.5</td><td>🟢 審慎積極考慮</td></tr>
+        <tr><td>5</td><td><strong>CloutHaus KLCC</strong></td><td style="font-weight:700;color:#d97706">6.7</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.9–2.2%</td><td>9.0</td><td>8.0</td><td>🟡 觀望</td></tr>
+        <tr><td>6</td><td><strong>SWNK Houze BBCC</strong></td><td style="font-weight:700;color:#d97706">6.2</td><td><span class="tag t-r">Leasehold 商業</span></td><td>~1.9–2.3%</td><td>9.5</td><td>9.5</td><td>🟡 本地可；🔴 外籍不推</td></tr>
+        <tr><td>7</td><td><strong>TS2 武吉免登 🔵</strong></td><td style="font-weight:700;color:#3b82f6">6.0</td><td><span class="tag t-y">Freehold 商業</span></td><td>功能性定位</td><td>8.5</td><td>6.5</td><td>🔵 功能性持有（非投資）</td></tr>
+        <tr><td>8</td><td><strong>Armani Hallson（SOHO）</strong></td><td style="font-weight:700;color:#f97316">5.7</td><td><span class="tag t-g">SOHO HDA 商業</span></td><td>SOHO 2.8–3.4%</td><td>8.0</td><td>5.5</td><td>🟡 SOHO條件性；🔴 SOVO迴避</td></tr>
+        <tr><td>9</td><td><strong>Stonor 3 KLCC</strong></td><td style="font-weight:700;color:#dc2626">5.7</td><td><span class="tag t-y">商業地契 HDA</span></td><td>~1.9–2.3%</td><td>8.0</td><td>9.5</td><td>🔴 暫緩</td></tr>
+        <tr><td>10</td><td><strong>Orion Residence BB</strong></td><td style="font-weight:700;color:#dc2626">5.2</td><td><span class="tag t-y">Freehold 商業</span></td><td>~1.2–1.5%</td><td>9.0</td><td>5.5</td><td>🔴 暫緩迴避</td></tr>
+      </tbody>
+    </table>
+    <p class="src">
+      🔑 關鍵排序洞察：TRX Residences（7.6）排名第3，介於住宅地契建案（R22/Park Place 7.7）和精品商業地契 SR（The Conlay 7.4）之間。這個位置反映了 TRX 的雙重性：一方面擁有本系列最強的基建（A4/B4 10.0/10）和開發商（B1 9.5），接近住宅地契水準；另一方面商業地契 Net Yield（1.9–2.3%，B3 5.0）是最大弱點，需要接受「增值主導」框架才能合理解讀。與 The Conlay 的比較：TRX 更大（896戶 vs 491戶），Net Yield 更低，但資本增值論點（金融區成熟化）比 The Conlay（Kerry Hill 品牌溢價）更具宏觀支撐。兩者均值得在「審慎積極」框架下考慮，取決於投資者是更看重「稀缺品牌」還是「金融區主題」。
+    </p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：brickz.my（RESIDENSI TRX 1，59筆政府登記成交，2024-04至2025-03）｜KL RM1M+ 高端住宅市場深度研究（2026-03）｜KL 供需 Overhang 深度分析（2026-04-01）｜Lendlease 官方（竣工 2024-05-15；BusinessToday 確認）｜iProperty.com.my（掛牌 338售+415租）｜PropertyGuru（PSF 掛牌範圍）｜Wikipedia TRX 條目（開發架構）｜trx-kl.com（地契：Freehold，Commercial under HDA；管理費 RM0.85 psf）<br>
+  電費費率、短租政策、Phase 2 發售時間表需向管委會/Lendlease 官方確認。MM2H 合規性建議向律師書面確認。本報告同時服務「新購外籍投資者」和「TS2 → TRX 2030–2031 換手評估」兩個框架。不構成投資建議。
+</div>
+</div>
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

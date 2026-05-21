@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orion Residence @ Bukit Bintang｜建案深度分析 v1.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F8FAFC;color:#1e293b;font-size:14px;line-height:1.75}
+.top-bar{position:fixed;top:0;left:0;right:0;background:#14532D;color:#fff;padding:8px 24px;font-size:11px;display:flex;justify-content:space-between;align-items:center;z-index:1000;font-family:'IBM Plex Mono',monospace;gap:12px;flex-wrap:wrap}
+.container{max-width:1080px;margin:0 auto;padding:76px 20px 60px}
+.report-title{background:#14532D;color:#fff;padding:32px 36px;border-radius:8px;margin-bottom:24px}
+.report-title h1{font-size:26px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.report-title .sub{font-size:12px;opacity:.7;font-family:'IBM Plex Mono',monospace;margin-bottom:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.badge{background:rgba(255,255,255,.15);padding:3px 11px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
+.section{background:#fff;border-radius:8px;margin-bottom:20px;overflow:hidden;border:1px solid #e2e8f0}
+.section-header{background:#14532D;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;border-left:4px solid #16A34A}
+.section-body{padding:20px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:18px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #14532D}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:700;color:#14532D;line-height:1.2}
+.kpi-l{font-size:11px;color:#64748b;margin-top:4px;font-weight:500}
+.kpi-s{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:3px}
+.up{color:#16a34a}.down{color:#dc2626}.neu{color:#92400e}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px}
+thead tr{background:#14532D;color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:600}
+tbody tr:nth-child(even){background:#F0FDF4}
+tbody tr:nth-child(odd){background:#fff}
+tbody td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.alert{border-radius:6px;padding:12px 16px;margin:12px 0;font-size:13px;border-left:4px solid}
+.a-red{background:#FEE2E2;color:#991B1B;border-color:#dc2626}
+.a-yellow{background:#FEF9C3;color:#92400E;border-color:#d97706}
+.a-green{background:#DCFCE7;color:#166534;border-color:#16a34a}
+.a-blue{background:#EFF6FF;color:#1e40af;border-color:#3B82F6}
+.a-orange{background:#FFF0E6;color:#C2410C;border-color:#F97316}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:1px}
+.t-r{background:#FEE2E2;color:#991B1B}.t-g{background:#DCFCE7;color:#166534}
+.t-y{background:#FEF9C3;color:#92400E}.t-b{background:#EFF6FF;color:#1e40af}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+h3{color:#14532D;font-size:14px;font-weight:700;margin:16px 0 8px}
+p{margin-bottom:10px}
+strong{color:#1e293b}
+.callout{background:#FFF0E6;border-left:4px solid #F97316;border-radius:4px;padding:12px 16px;margin:12px 0;color:#C2410C;font-size:13px}
+.insight{background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:4px;padding:12px 16px;margin:12px 0;color:#1e40af;font-size:13px}
+hr.dv{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+.src{font-size:11px;color:#94a3b8;margin-top:6px;font-style:italic}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:12px 0}
+.spec-item{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:6px;padding:11px 14px}
+.spec-l{font-size:10px;color:#64748b;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.spec-v{font-size:13px;font-weight:700;color:#14532D;line-height:1.4}
+/* Score */
+.score-wrap{background:#14532D;border-radius:10px;padding:26px;margin:18px 0}
+.score-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.score-col{background:rgba(255,255,255,.08);border-radius:8px;padding:18px}
+.score-col-t{color:#86efac;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:14px}
+.s-item{margin-bottom:10px}
+.s-lbl{display:flex;justify-content:space-between;color:rgba(255,255,255,.75);font-size:12px;margin-bottom:4px}
+.s-lbl span{font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:600}
+.bar-bg{background:rgba(255,255,255,.12);border-radius:3px;height:7px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.score-sub-total{text-align:center;padding:12px;background:rgba(255,255,255,.1);border-radius:6px;margin-top:12px}
+.s-sub-num{font-family:'IBM Plex Mono',monospace;font-size:26px;color:#86efac;font-weight:700}
+.score-total{text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.12);margin-top:18px}
+.score-big{font-family:'IBM Plex Mono',monospace;font-size:72px;font-weight:700;color:#fff;line-height:1}
+.score-max{font-size:28px;color:rgba(255,255,255,.4);font-family:'IBM Plex Mono',monospace}
+.score-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.score-comment{font-size:13px;color:rgba(255,255,255,.75);max-width:640px;margin:12px auto 0;line-height:1.7;text-align:center}
+.dual-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.buy-card{background:#F0FDF4;border:1px solid #bbf7d0;border-radius:8px;padding:18px}
+.mkt-card{background:#F8FAFC;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.dc-title{font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;margin-bottom:10px}
+.buy-card .dc-title{color:#166534}.mkt-card .dc-title{color:#475569}
+.verdict-g{background:#DCFCE7;color:#166534;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #16a34a}
+.verdict-y{background:#FEF9C3;color:#92400E;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #d97706}
+.verdict-r{background:#FEE2E2;color:#991B1B;padding:18px 22px;border-radius:6px;margin:14px 0;border-left:5px solid #dc2626}
+.warn-box{background:#FEF9C3;border:2px solid #d97706;border-radius:8px;padding:16px 20px;margin:16px 0}
+.warn-box-title{font-size:13px;font-weight:700;color:#92400E;margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+.cashflow-table td:first-child{font-weight:600;width:55%}
+.print-btn{position:fixed;bottom:24px;right:24px;background:#14532D;color:#fff;border:none;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:999}
+.print-btn:hover{background:#166534}
+@media(max-width:680px){.two-col,.score-cols,.dual-col{grid-template-columns:1fr}.score-big{font-size:52px}}
+@media print{.top-bar,.print-btn{display:none!important}.container{padding-top:16px}body{background:#fff}.section{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span>📍 建案分析：Orion Residence @ Bukit Bintang ｜ 框架 v1.3</span>
+  <span>資料抓取：2026-04-12 ｜ 依據：KL 供需 Overhang 報告（2026-04-01）+ PropertyGuru / iProperty 2026</span>
+</div>
+
+<div class="container">
+
+<div class="report-title">
+  <div style="font-size:10px;opacity:.55;font-family:'IBM Plex Mono',monospace;margin-bottom:6px">房地產建案深度分析報告 v1.3 ｜ 買側研究員視角 ｜ §0–§13 完整輸出</div>
+  <h1>Orion Residence @ Bukit Bintang</h1>
+<div class="dd-tool-buttons" style="display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap">
+  <a href="/tools/stress-test.html?market=my&from=OrionResidence_BukitBintang"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#9889;</span><span>Stress Test &#27492;&#26696;</span>
+  </a>
+  <a href="/tools/buy-vs-rent.html?city=my&from=OrionResidence_BukitBintang"
+     class="dd-tool-btn"
+     style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 100%);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;border:0.5px solid rgba(59,130,246,.3);transition:transform .15s,box-shadow .15s">
+    <span>&#128257;</span><span>&#23565;&#29031; 12 &#24066;&#22330;</span>
+  </a>
+</div>
+  <div class="sub">Jalan Gading / Jalan Palmer，Bukit Bintang 核心 ｜ Welton Development（Orion Tower Sdn Bhd）｜ Freehold 商業地契（HDA）｜ 298單位，1棟46層 ｜ 竣工 2025 Q3/Q4（計畫，待確認）</div>
+  <div class="badge-row">
+    <span class="badge">📂 KL 供需 Overhang 深度分析（2026-04-01 上游報告）</span>
+    <span class="badge">📡 PropertyGuru 掛牌 RM2,165–3,851 psf</span>
+    <span class="badge">⚠️ 管理費 RM1.20 psf（本輪分析最高）</span>
+    <span class="badge">⚠️ 開發商首次 KL 超高層項目</span>
+    <span class="badge">📅 報告生成：2026-04-12</span>
+  </div>
+</div>
+
+<!-- 核心警示 -->
+<div class="warn-box">
+  <div class="warn-box-title">⚠️ 分析前必讀：Orion Residence 的三個關鍵不確定性</div>
+  <p style="font-size:13px;color:#92400E;margin:0"><strong>①  竣工狀態未確認：</strong>EdgeProp 計畫 Q1 2025 完工；Hartamas 標注 Q3 2025；Properket 標注 Q4 2025；2026年4月代理仍主動行銷新單位——截至報告日（2026-04-12）無法從公開資料確認是否已交屋，是否有延期。這是第一個需要在進場前向開發商親自確認的問題。<br><br>
+  <strong>② 管理費 RM1.20 psf——本輪所有分析建案最高：</strong>對最小 491 sqft 單位，每月管理費 RM589；對 871 sqft 單位，RM1,045/月。這個費用直接削減 Net Yield，是 Orion Residence 最容易被忽視的財務陷阱。<br><br>
+  <strong>③ Welton Development 首次 KL 超高層（46層）：</strong>其唯一已知完工記錄是 Johor 的 Green Haven（2016年，獲獎但較低樓層項目）。Orion Residence 是其最大規模、最複雜的建案。開發商規模擴張風險需要正視。</p>
+</div>
+
+<!-- KPI -->
+<div class="section">
+  <div class="section-header">📊 建案核心數據速查</div>
+  <div class="section-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-v">RM2,707–3,750</div>
+        <div class="kpi-l">發售 PSF 範圍</div>
+        <div class="kpi-s down">arktags.com 數據，頂豪定位</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM2,165–3,851</div>
+        <div class="kpi-l">掛牌 PSF（2026-04）</div>
+        <div class="kpi-s neu">PropertyGuru 110筆掛牌</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">RM1.20</div>
+        <div class="kpi-l">管理費（/sqft）</div>
+        <div class="kpi-s down">本輪最高，嚴重侵蝕 Yield</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">298</div>
+        <div class="kpi-l">總單位（1棟46層）</div>
+        <div class="kpi-s neu">0.56英畝，低密度精品</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">491–1,329</div>
+        <div class="kpi-l">坪數範圍（sqft）</div>
+        <div class="kpi-s neu">21種戶型，Studio至Dual-Key 3BR</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-v">550m</div>
+        <div class="kpi-l">至 Bukit Bintang MRT</div>
+        <div class="kpi-s up">步行約 7–8 分鐘</div>
+      </div>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-l">開發商</div><div class="spec-v">Orion Tower Sdn Bhd（Welton Development 子公司）｜2013年成立，Johor 起家，首次 KL 超高層</div></div>
+      <div class="spec-item"><div class="spec-l">地段地契</div><div class="spec-v">Freehold 商業地契（Commercial, HDA regulated）｜0.56英畝，Jalan Gading / Jalan Palmer 夾角</div></div>
+      <div class="spec-item"><div class="spec-l">竣工計畫</div><div class="spec-v">Q1 2025（EdgeProp）→ Q3 2025（Hartamas）→ Q4 2025（Properket）｜截至 2026-04 狀態待確認</div></div>
+      <div class="spec-item"><div class="spec-l">最低入場價</div><div class="spec-v">RM1,299,000（PropertyGuru 掛牌最低）｜RM1,580,000（IQI Global 起步）</div></div>
+      <div class="spec-item"><div class="spec-l">管理費</div><div class="spec-v">RM1.20 psf + 10% 沉沒基金｜491 sqft 單位月付 RM589｜871 sqft = RM1,045/月</div></div>
+      <div class="spec-item"><div class="spec-l">設施定位</div><div class="spec-v">Ice Rink、Sky Lounge、Moon Bar、自動泊車系統、東南亞首個戶外高速玻璃電梯</div></div>
+      <div class="spec-item"><div class="spec-l">精裝標準</div><div class="spec-v">全配（Fully Furnished）｜Miele、Bosch、Kohler 等頂級品牌；或 De Dietrich、Brandt + Toto（各來源略有差異）</div></div>
+      <div class="spec-item"><div class="spec-l">設計師</div><div class="spec-v">Jason Yee（RIBA Chartered Architect，曾主導 Liverpool One、Birmingham Queen Elizabeth Hospital 等國際項目）</div></div>
+      <div class="spec-item"><div class="spec-l">鄰近商場</div><div class="spec-v">Starhill Gallery（75m）、Lot 10（200m）、Pavilion KL（400m）｜Bukit Bintang 全 KL 最強商圈</div></div>
+      <div class="spec-item"><div class="spec-l">捷運</div><div class="spec-v">Bukit Bintang MRT（KG18A）550m / Hang Tuah Monorail 步行距離</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- §0 -->
+<div class="section">
+  <div class="section-header">§0｜建案定位與第一性原理</div>
+  <div class="section-body">
+    <h3>A｜Orion Residence 試圖解決什麼問題？定位在哪個市場？</h3>
+    <p>Orion Residence 的定位非常明確，也非常高調：它試圖在 Bukit Bintang（武吉免登）複製 KLCC 頂奢建案的定價邏輯（RM2,707–3,750 psf），用「首個 Ice Rink、東南亞首個戶外高速玻璃電梯、自動泊車」等話題性設施，以及 RIBA 英國建築師，建立「KL 版頂奢生活地標」的品牌形象。</p>
+    <p>這個定位的問題在於：Bukit Bintang 是 KL 最成熟的商業娛樂區，但歷史上從未出現過 RM2,700 psf 以上站穩的服務式公寓——即使是武吉免登最高端的建案（如 Pavilion Hilltop Residences），也定位在更大坪數、住宅地契的框架下。Orion Residence 以 491 sqft Studio（最小）、商業地契，試圖打進此定價段，是一個尚未被市場驗證的定價實驗。</p>
+
+    <div class="callout">
+      <strong>第一性問題：RM2,707–3,750 psf 的武吉免登商業地契 SR，在 KL 有足夠的需求嗎？</strong><br><br>
+      上游報告中的 KL RM1M+ 高端分析給出了清晰的答案：「KL 漲的共同點：稀缺性（低密度/土地不可複製）+ Freehold 住宅地契 + 有明確催化劑。跌的共同點：高密度量產 + 商業地契 + 無差異化 + 供給持續增加。」<br><br>
+      Orion Residence 試圖用「話題性設施」打破商業地契的結構折扣，用「獨特設計」突破定價天花板——這是一個有趣的假設，但在 KL 歷史上幾乎沒有成功先例。
+    </div>
+
+    <hr class="dv">
+    <h3>B｜Munger 逆向推演——什麼路徑讓 Orion Residence 投資失敗？</h3>
+    <div style="background:#FFF0E6;border-left:4px solid #F97316;border-radius:6px;padding:16px 20px;margin:12px 0">
+      <div style="color:#C2410C;font-weight:700;margin-bottom:10px">逆向風險矩陣</div>
+      <table>
+        <thead><tr><th>風險維度</th><th>具體情境</th><th>概率</th><th>對投資的影響</th></tr></thead>
+        <tbody>
+          <tr><td><strong>定價天花板無法突破（最大風險）</strong></td><td>RM2,700+ psf 的武吉免登商業地契 SR 在 KL 歷史上從未穩定站穩；買家不願為「話題設施」支付此溢價，二手成交大幅折讓於發售價</td><td><span class="tag t-r">中高</span></td><td>資本利得無望；帳面虧損持有</td></tr>
+          <tr><td><strong>管理費侵蝕所有回報</strong></td><td>RM1.20 psf 管理費是 KL 精品住宅均值（RM0.35–0.55）的 2–3 倍；對 Studio 491 sqft 持有者，每月 RM589 管理費相當於月租的 15–20%，無法轉嫁租客</td><td><span class="tag t-r">高（確定）</span></td><td>外籍 Net Yield 可能僅 0–1%（高持有成本下）</td></tr>
+          <tr><td><strong>開發商首次超高層執行風險</strong></td><td>Welton Development 唯一完成的已知項目是 Johor 的 Green Haven（中低層），KL 46 層超高層加自動泊車、Ice Rink 等複雜系統，交屋延期或品質縮水的概率不低</td><td><span class="tag t-y">中</span></td><td>交屋延期持有成本累積；品質未達預期影響定價</td></tr>
+          <tr><td><strong>武吉免登 SR 積壓結構</strong></td><td>上游報告：「武吉免登/KLCC 中端 SR 是 KL 積壓最嚴重的品類」；Sky Suites -6.6%（2024）。Orion Residence 定價更高，若出租市場無法支撐，拋售壓力更大</td><td><span class="tag t-y">中</span></td><td>租金市場不足以支撐超高定價，出租被迫折讓</td></tr>
+          <tr><td><strong>地契商業折扣</strong></td><td>商業地契（即使 HDA 保護）永久限制買家池，銀行貸款條件更嚴，外籍 State Consent 複雜；相比同 PSF 的住宅地契，結構性折扣 10–20%</td><td><span class="tag t-r">高（確定）</span></td><td>流動性弱，退出時必須接受額外折讓</td></tr>
+          <tr><td><strong>Ice Rink / 特殊設施維護失控</strong></td><td>Ice Rink 維護成本極高（冷媒、設備、人力），若入住率不足無法支撐，管委會可能廢棄此設施，RM1.20 psf 的管理費仍繼續收取</td><td><span class="tag t-y">中</span></td><td>最大賣點消失，定價論點崩潰</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px"><strong>最大尾部風險：</strong>Orion Residence 是 Welton Development 在 KL 的首個項目，定價在 RM2,700–3,750 psf，這是一個「全或無」的定價賭注。若市場認可，則成為 Bukit Bintang 新地標，資本利得可期；若市場不認可（更可能），則成為另一個「高定位 SR，現實很骨感」的 KL 案例，早期買家承受鉅額帳面損失。</p>
+    </div>
+
+    <hr class="dv">
+    <h3>C｜投資論點錨定</h3>
+    <table>
+      <thead><tr><th>項目</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>最大多方論點</strong></td><td>Bukit Bintang 地址是 KL 最强的步行商圈（Pavilion、Starhill、Lot 10 在 75–400m 範圍）；Bukit Bintang MRT 550m；話題設施（Ice Rink、自動泊車）帶來差異化敘事；低密度 298 單位對 0.56 英畝地相對精品</td></tr>
+        <tr><td><strong>主要假設 H1</strong></td><td>RM2,700+ psf 的武吉免登 SR 能找到足夠的高淨值外籍/本地買家，且這些買家能接受商業地契的結構限制</td></tr>
+        <tr><td><strong>主要假設 H2</strong></td><td>話題設施（Ice Rink 等）能在相當長的時間維持正常運營，RM1.20 psf 管理費被 justified，社區品質持穩</td></tr>
+        <tr><td><strong>關鍵監測指標</strong></td><td>① 竣工後 12 個月內的 brickz 實際成交 PSF——是否能在 RM2,000+ 站穩；② 二手期房掛牌是否出現折讓；③ Ice Rink 等設施是否正式開放且維持運營</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §1 -->
+<div class="section">
+  <div class="section-header">§1｜市場概況與定價分析（依據上游 KL 報告）</div>
+  <div class="section-body">
+    <p style="font-size:12px;color:#64748b;margin-bottom:14px">資料抓取：2026-04-12 ｜ 分析建案：Orion Residence @ Bukit Bintang ｜ 資料：NAPIC Q3 2025 / PropertyGuru 2026-04</p>
+
+    <h3>1.1 Bukit Bintang 地段的市場參照系</h3>
+    <table>
+      <thead><tr><th>指標</th><th>當前值</th><th>備注</th><th>對 Orion 影響</th></tr></thead>
+      <tbody>
+        <tr><td>KL 全市公寓中位數</td><td>RM 510,000</td><td>NAPIC Q3 2025，全市均值</td><td>Orion 定價是全市中位的 3–5 倍</td></tr>
+        <tr><td>Bukit Bintang SR（代表：Sky Suites）</td><td>YoY -6.6%（2024）</td><td>上游報告（KL RM1M+ 研究）</td><td>Orion 所在的 BB 商業地契 SR 品類表現最差</td></tr>
+        <tr><td>TS2 武吉免登</td><td>估 RM1,475 psf</td><td>同地段商業地契 SR</td><td>Orion 定價 RM2,707+ 比 TS2 貴 83%，市場是否認可有待驗證</td></tr>
+        <tr><td>KLCC 頂奢（Binjai）</td><td>RM 2,660 psf（2024）</td><td>Freehold 住宅地契，171戶</td><td>Orion 商業地契定價已超過 Binjai，無住宅地契支撐，合理性存疑</td></tr>
+        <tr><td>Orion 發售 PSF</td><td>RM 2,707–3,750</td><td>arktags.com 建案資料</td><td>頂端 RM3,750 = KL 歷史最高 SR 定價之一</td></tr>
+        <tr><td>Orion 掛牌 PSF（2026-04）</td><td>RM 2,165–3,851</td><td>PropertyGuru 110筆</td><td>低端 RM2,165 已低於部分發售價，顯示早期跡象</td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：NAPIC Q3 2025；KL RM1M+ 深度報告（上游）；PropertyGuru 2026-04</p>
+
+    <div class="alert a-red">
+      <strong>🔴 核心定價矛盾——直接引用上游報告框架：</strong><br>
+      上游 KL RM1M+ 報告明確指出：「漲的共同點：稀缺性 + Freehold 住宅地契 + 有明確催化劑。跌的共同點：高密度量產 + 商業地契 + 無差異化 + 供給持續增加。」<br>
+      Orion Residence 是商業地契 + Bukit Bintang 地段（武吉免登 SR 積壓最嚴重地段之一）的結合，卻以超過 Binjai（KLCC 住宅地契頂奢）的 PSF 定價進場。這個定價邏輯在 KL 歷史上沒有成功先例，是本案最大的結構性挑戰。
+    </div>
+
+    <h3>1.2 管理費財務衝擊——最被忽視的成本中心</h3>
+    <table>
+      <thead><tr><th>建案</th><th>管理費 PSF</th><th>871 sqft 月費</th><th>vs Orion</th></tr></thead>
+      <tbody>
+        <tr><td>Park Place（DPC）</td><td>RM 0.44</td><td>RM 383</td><td>Orion 貴 173%</td></tr>
+        <tr><td>Residensi 22（MK）</td><td>RM 0.34</td><td>RM 296</td><td>Orion 貴 253%</td></tr>
+        <tr><td>Stonor 3（KLCC）</td><td>RM 0.50</td><td>RM 436</td><td>Orion 貴 140%</td></tr>
+        <tr><td>TS2（武吉免登）</td><td>RM 0.80</td><td>RM 697</td><td>Orion 貴 50%</td></tr>
+        <tr><td><strong>Orion Residence</strong></td><td><strong>RM 1.20</strong></td><td><strong>RM 1,045</strong></td><td><strong>本輪最高</strong></td></tr>
+      </tbody>
+    </table>
+    <p class="src">來源：各建案官方資料；Orion Residence arktags.com 確認 RM1.20 psf + 10% 沉沒基金</p>
+
+    <div class="callout">
+      <strong>管理費財務影響：</strong>以 871 sqft（2BR）單位為例，每月管理費 RM1,045（RM1.20 psf）+ 沉沒基金 RM104，合計約 RM1,150/月。若月租 RM8,000，管理費占月租 14.4%，在扣除租金所得稅和其他持有成本後，對外國人的 Net Yield 影響是災難性的。這個管理費水平只在頂奢酒店式服務公寓（如 Four Seasons Residences）才常見，且這些建案的月租通常是 RM30,000+，才能稀釋持有成本。
+    </div>
+  </div>
+</div>
+
+<!-- §2 -->
+<div class="section">
+  <div class="section-header">§2｜供需結構（應用上游 KL 報告框架）</div>
+  <div class="section-body">
+    <h3>2.1 Orion Residence 在上游報告中的定位</h3>
+    <table>
+      <thead><tr><th>上游報告定義</th><th>Orion Residence 對應情況</th></tr></thead>
+      <tbody>
+        <tr><td>「武吉免登/KLCC 中端 SR 是 KL 積壓最嚴重品類」</td><td>⚠️ Orion 在武吉免登，商業地契 SR——雖定位超高端，但地契結構與積壓品類相同</td></tr>
+        <tr><td>「供給積壓問題：商業地契、高水電費率、無HDA保護三重障礙造成結構性買方抵制」</td><td>⚠️ Orion 有 HDA 保護（較好），但商業地契水電費問題仍存在；RM1.20 psf 管理費更是額外負擔</td></tr>
+        <tr><td>「漲的共同點：稀缺性 + 住宅地契 + 明確催化劑」</td><td>❌ Orion 為商業地契；催化劑僅有 Bukit Bintang MRT（已存在，非新催化劑）</td></tr>
+        <tr><td>「全馬 SR 廣義庫存 17,900 戶（KL 估 8,000–9,000 戶）」</td><td>Orion 竣工後即成為此廣義庫存的一部分；需與 KL 其他 SR 競爭同一租客池</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-orange">
+      <strong>供需定性：Orion 試圖用「話題定位」突破 SR 品類的結構性壓力，但尚未被市場驗證。</strong>它的地段確實更好（Bukit Bintang 商圈密度 > KLCC），但定價也更高，地契問題相同。最終能否突破，取決於竣工後的實際成交 PSF——目前所有判斷都是基於期房狀態，系統性不確定性最高。
+    </div>
+  </div>
+</div>
+
+<!-- §4 -->
+<div class="section">
+  <div class="section-header">§4｜定價比較與二手掛牌信號（FIX-01/02/03/04）</div>
+  <div class="section-body">
+    <div class="alert a-orange">
+      <strong>FIX-01 重要說明：</strong>Orion Residence 目前仍為期房（竣工狀態待確認），無法進行 FIX-03 標準化的實際成交分析。以下比較採用同期（2024–2026年）、同地段（Bukit Bintang）、同類型（豪華 SR/服務公寓）建案進行比較，並標注期房不確定性。
+    </div>
+
+    <h3>4.1 Bukit Bintang 地段同類競品比較（FIX-01）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>Orion Residence</th><th>TS2（武吉免登）</th><th>Armani Hallson（KLCC）</th><th>Stonor 3（KLCC）</th></tr></thead>
+      <tbody>
+        <tr><td>地段</td><td>Bukit Bintang 核心</td><td>Bukit Bintang</td><td>KLCC / Jalan Ampang</td><td>KLCC Lorong Stonor</td></tr>
+        <tr><td>地契</td><td><span class="tag t-y">商業地契（HDA）</span></td><td><span class="tag t-y">商業地契（HDA）</span></td><td><span class="tag t-r">SOVO 商業地契</span></td><td><span class="tag t-y">商業地契（HDA）</span></td></tr>
+        <tr><td>PSF（發售/成交）</td><td>RM2,707–3,750（發售）</td><td>估 RM1,475 psf</td><td>RM1,636–2,300（發售）</td><td>RM1,320（成交中位）</td></tr>
+        <tr><td>步行商圈</td><td>✅ Pavilion 400m，全KL最強</td><td>✅ Berjaya Times Square 直連</td><td>🔶 Link Bridge 未建成</td><td>✅ Suria KLCC 步行，Conlay MRT 500m</td></tr>
+        <tr><td>MRT</td><td>Bukit Bintang MRT 550m</td><td>Imbi Monorail 100m</td><td>KLCC LRT + Link Bridge</td><td>Conlay MRT 500m</td></tr>
+        <tr><td>管理費 psf</td><td><span class="down">RM1.20（最高）</span></td><td>RM0.80（已確認）</td><td>RM0.95</td><td>RM0.50</td></tr>
+        <tr><td>竣工狀態</td><td>⚠️ 2025 Q3/Q4（待確認）</td><td>2027年10月</td><td>2029/2030</td><td>✅ 2019完工</td></tr>
+        <tr><td>上游報告評語</td><td>未直接提及，但武吉免登 SR 品類「積壓最嚴重」</td><td>「功能性最佳，增值弱」</td><td>「地段一流，SOVO 問題重」</td><td>「舊SR積壓，空置率高」</td></tr>
+      </tbody>
+    </table>
+
+    <h3>4.2 期房二手掛牌信號（FIX-02/03/04 能力範圍內）</h3>
+    <table>
+      <thead><tr><th>FIX-03 步驟</th><th>Orion 狀況</th><th>信號</th></tr></thead>
+      <tbody>
+        <tr><td>樣本量</td><td>PropertyGuru 110筆掛牌售（2026-04）；但無 brickz 實際成交記錄（期房/剛竣工）</td><td>⚠️ 只有掛牌，無成交，無法 FIX-03 標準化</td></tr>
+        <tr><td>PSF 範圍分析</td><td>PropertyGuru 掛牌 RM2,165–3,851 psf；低端 RM2,165 已低於發售下限 RM2,707（跌幅 -20%）</td><td>⚠️ 低端掛牌出現折讓，可能是急售信號</td></tr>
+        <tr><td>FIX-04（起價排除）</td><td>最低掛牌 RM1,299,000 不可作為市場基準；以掛牌中位 RM2,600–2,800 psf 範圍評估</td><td>已排除</td></tr>
+        <tr><td>FIX-02（折扣結構）</td><td>代理仍在主動行銷「最新折扣」（2026-04代理帖子）；折扣結構無法從公開資料確認百分比，依FIX-02標記「未確認」</td><td>折扣結構：未確認，無法判斷信號方向</td></tr>
+        <tr><td>整體信號</td><td>期房狀態，實際成交數據缺失，低端掛牌出現折讓跡象——依 v1.3 框架：<strong>樣本不足，暫無法判斷信號，建議竣工後追蹤 brickz 首批成交數據</strong></td><td><span class="tag t-y">待確認</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §5 -->
+<div class="section">
+  <div class="section-header">§5｜租金市場與報酬率（含管理費衝擊詳算）</div>
+  <div class="section-body">
+    <h3>5.1 Bukit Bintang 地段租金潛力估算</h3>
+    <table>
+      <thead><tr><th>房型</th><th>坪數</th><th>合理月租估計</th><th>Gross Yield（發售PSF估）</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>Studio（Type A）</td><td>491–588 sqft</td><td>RM 3,500–5,500/月</td><td>~2.1–3.9%（基於 RM2,707 psf）</td><td>Bukit Bintang 短租市場有需求，但商業地契需管委會許可</td></tr>
+        <tr><td>2BR（Type B）</td><td>680–746 sqft</td><td>RM 4,500–7,000/月</td><td>~2.4–3.6%（基於 RM2,707 psf）</td><td>主要面向商務短租或外籍小家庭</td></tr>
+        <tr><td>2BR（Type C）</td><td>838–1,186 sqft</td><td>RM 5,500–9,000/月</td><td>~1.9–3.2%（基於 RM2,707 psf）</td><td>Pavilion 步行圈加持，租金有一定支撐</td></tr>
+        <tr><td>3BR Dual-Key（Type D）</td><td>1,180–1,329 sqft</td><td>RM 8,000–14,000/月</td><td>~2.0–3.4%（基於 RM2,707 psf）</td><td>Dual-Key 結構有短租靈活性，但管委會政策需確認</td></tr>
+      </tbody>
+    </table>
+    <p class="src">租金估計基於 Bukit Bintang 地段行情；TS2（武吉免登）參照為 RM3,000/月（678 sqft）</p>
+
+    <div class="alert a-red">
+      <strong>🔴 關鍵估值問題：Gross Yield 僅 2–4%，且建立在發售 PSF 基礎上</strong><br>
+      以 RM2,707 psf 的發售均價計算，Orion 的 Gross Yield 約 2–4%，遠低於本輪其他分析建案（R22 4.92%，Park Place 3.5–4.5%）。若二手轉讓成交 PSF 跌至 RM2,000 以下，Yield 才能勉強達到 3–4%。這意味著：要麼接受低 Yield，要麼等待 PSF 大幅修正後進場。
+    </div>
+
+    <h3>5.2 外國人現金流試算（2BR 871 sqft，假設 RM235萬入場 @ RM2,700 psf）</h3>
+    <table class="cashflow-table">
+      <thead><tr><th>項目</th><th>年度（RM）</th><th>備注</th></tr></thead>
+      <tbody>
+        <tr><td>月租收入（RM6,500 × 12）</td><td>RM 78,000</td><td>2BR 871 sqft，Bukit Bintang 中位，已算充分樂觀</td></tr>
+        <tr><td>管理費（RM1.20 × 871 × 12）</td><td><span class="down">-RM 12,542</span></td><td>⚠️ 最高管理費，年度 RM12,542</td></tr>
+        <tr><td>沉沒基金（10%）</td><td><span class="down">-RM 1,254</span></td><td></td></tr>
+        <tr><td>地稅 + 門牌稅（估）</td><td><span class="down">-RM 2,500</span></td><td></td></tr>
+        <tr><td>空置期（2個月，10% 住率假設）</td><td><span class="down">-RM 13,000</span></td><td>商業地契 SR 出租競爭激烈</td></tr>
+        <tr><td>非居民租金所得稅（30%，外國人）</td><td><span class="down">-RM 14,011</span></td><td>（78,000–29,296 空置+費用）×30%</td></tr>
+        <tr><td>代管費（8%）</td><td><span class="down">-RM 6,240</span></td><td>若遠程管理</td></tr>
+        <tr><td><strong>淨現金流（含代管、空置）</strong></td><td><strong>~RM 28,453/年</strong></td><td>Net Yield ≈ 1.21%（RM235萬入場）</td></tr>
+        <tr><td>淨現金流（無代管）</td><td>~RM 34,693/年</td><td>Net Yield ≈ 1.48%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-red">
+      <strong>外國人 Net Yield 約 1.2–1.5%——五個分析建案中倒數第一</strong><br>
+      RM1.20 psf 管理費（年度 RM12,542 + 沉沒基金）是核心殺手。即使月租達到 RM6,500，在扣除管理費、空置、30% 所得稅後，淨回報極低。這個結果與 Armani Hallson SOVO（1.4–1.8%）相近，均屬於外籍投資者的「租金收益幾乎等於零」的投資模式。
+    </div>
+  </div>
+</div>
+
+<!-- §6/7 -->
+<div class="section">
+  <div class="section-header">§6-7｜外資法規與貸款</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>法規項目</th><th>外國買家</th><th>對 Orion 的影響</th></tr></thead>
+      <tbody>
+        <tr><td>最低購置門檻（KL）</td><td>RM 1,000,000</td><td>✅ Orion 掛牌最低 RM1,299,000，符合；但主流 2BR 約 RM180–235萬</td></tr>
+        <tr><td>印花稅（2026年）</td><td>4% 統一稅率</td><td>RM235萬物業：印花稅 RM94,000——本輪最高入場稅費</td></tr>
+        <tr><td>RPGT（第6年後）</td><td>10%</td><td>若 SPA 2024–2025 簽，第6年約 2030–2031</td></tr>
+        <tr><td>商業地契貸款</td><td>可申請（HDA 保護有助），但需確認各銀行立場</td><td>⚠️ 商業地契 LTV 可能 60–70%（vs 住宅 80–90%）；頭期款更多；利率可能較高</td></tr>
+        <tr><td>MM2H 合規</td><td>RM100萬+，持有10年</td><td>✅ 金額符合；但商業地契是否完全符合 MM2H 持有規定需確認（同 TS2 的爭議）</td></tr>
+      </tbody>
+    </table>
+    <h3>外國人完整入場成本（RM235萬 2BR 單位）</h3>
+    <table>
+      <thead><tr><th>費用</th><th>金額</th></tr></thead>
+      <tbody>
+        <tr><td>印花稅（4%）</td><td>RM 94,000</td></tr>
+        <tr><td>律師費</td><td>RM 20,000</td></tr>
+        <tr><td>State Consent</td><td>RM 5,000</td></tr>
+        <tr><td><strong>入場總成本</strong></td><td><strong>~RM 119,000（約 5.1%）</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §8 -->
+<div class="section">
+  <div class="section-header">§8｜地段交通與基建</div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>基建</th><th>狀態</th><th>對 Orion 的影響</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bukit Bintang MRT（KG18A）</strong></td><td>已運營（2022年）</td><td>✅ 550m 步行，是 Orion 真實的交通優勢；連接全 KL MRT 網絡</td></tr>
+        <tr><td><strong>Pavilion KL（400m）</strong></td><td>已運營，全 KL 最強商場</td><td>✅ 步行可達，是 Bukit Bintang 地段最核心的生活設施</td></tr>
+        <tr><td>Starhill Gallery（75m）</td><td>直接鄰近</td><td>✅ 奢侈品購物，強化 Orion 頂豪定位敘事</td></tr>
+        <tr><td>TRX Exchange（2km）</td><td>已開業（2024）</td><td>✅ 金融業外籍高管租賃需求可能外溢至武吉免登</td></tr>
+        <tr><td>Hang Tuah Monorail</td><td>已運營，步行距離</td><td>✅ 補充連接</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert a-green">
+      <strong>地段交通是 Orion Residence 最真實的優勢：</strong>Bukit Bintang MRT 550m + Pavilion KL 400m + Starhill 75m，這是 KL 內商場密度最高的步行圈之一。對追求「KLCC 步行商圈」的買家來說，武吉免登在步行購物體驗上甚至優於 KLCC（Pavillion + Starhill + Lot 10 的組合比 Suria KLCC 更豐富）。這個地段優勢是真實的，但問題是 RM2,700+ psf 是否 justified。
+    </div>
+  </div>
+</div>
+
+<!-- §11 -->
+<div class="section">
+  <div class="section-header">§11｜進場時機與估值判斷</div>
+  <div class="section-body">
+    <h3>11.1 估值判斷</h3>
+    <table>
+      <thead><tr><th>指標</th><th>當前狀況</th><th>評估</th></tr></thead>
+      <tbody>
+        <tr><td>發售 PSF（RM2,707–3,750）</td><td>超過 KLCC Binjai（住宅地契頂奢，RM2,660）</td><td><span class="tag t-r">嚴重高估（商業地契不支持此定價）</span></td></tr>
+        <tr><td>掛牌低端 PSF（RM2,165）</td><td>比發售低端 RM2,707 已折讓 -20%</td><td><span class="tag t-y">早期急售信號出現</span></td></tr>
+        <tr><td>Gross Yield（@發售 PSF）</td><td>約 2–4%，且建立在樂觀租金假設上</td><td><span class="tag t-r">偏低，管理費進一步吃掉剩餘 Yield</span></td></tr>
+        <tr><td>合理 PSF（歷史比較框架）</td><td>同地段 TS2（商業地契）RM1,475；Stonor 3（HDA商業地契）RM1,320——邏輯上 Orion 應在 RM1,500–2,000 較合理</td><td><span class="tag t-r">發售定價偏高 35–80%</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.2 進場策略（若必須進場）</h3>
+    <table>
+      <thead><tr><th>策略</th><th>目標 PSF</th><th>目標總價（871 sqft）</th><th>條件</th></tr></thead>
+      <tbody>
+        <tr><td><strong>理想進場（大幅折讓）</strong></td><td>RM1,600–1,800 psf</td><td>RM139–157萬</td><td>竣工後出現急售盤，實際成交數據確認市場可接受此 PSF；Net Yield 才有可能達到 2%+</td></tr>
+        <tr><td><strong>次佳進場（一定折讓）</strong></td><td>RM1,800–2,000 psf</td><td>RM157–174萬</td><td>市場對 Orion 差異化有一定認可，但仍大幅低於發售；Yield 仍偏低</td></tr>
+        <tr><td><strong>不建議（發售或接近發售）</strong></td><td>RM2,700+ psf</td><td>RM235萬+</td><td>Net Yield 僅 1.2–1.5%，資本利得不確定，不符合投資邏輯</td></tr>
+      </tbody>
+    </table>
+
+    <h3>11.3 持有期情境分析</h3>
+    <table>
+      <thead><tr><th>持有期</th><th>樂觀（BB頂奢定位被市場認可）</th><th>基本（部分折讓修正後持穩）</th><th>悲觀（定價被市場否定）</th></tr></thead>
+      <tbody>
+        <tr><td>3年</td><td>PSF 站穩 RM2,500（BB新標準）</td><td>PSF 修正至 RM1,800–2,000</td><td>PSF 跌至 RM1,400–1,600（如 TS2 區間）</td></tr>
+        <tr><td>6年</td><td>PSF 達 RM2,800+（頂奢溢價兌現）</td><td>PSF RM2,000–2,200</td><td>PSF RM1,500–1,800，帳面虧損約 33–45%</td></tr>
+      </tbody>
+    </table>
+    <p class="src">基本情境假設 Bukit Bintang MRT 效應已部分定價，差異化設施能維持一定流動性但市場不認可頂奢溢價。</p>
+  </div>
+</div>
+
+<!-- §12 -->
+<div class="section">
+  <div class="section-header">§12｜買方決策錨點（雙視角）</div>
+  <div class="section-body">
+    <div class="dual-col">
+      <div class="buy-card">
+        <div class="dc-title">【買方視角】決策框架</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:130px;font-weight:600">適合的買家</td><td>①以生活方式為主（Pavilion/Starhill步行+話題設施），不計較 ROI 的高淨值自住者；②賭「武吉免登頂奢升值」的高風險投機者；③短租定位（需確認管委會允許）</td></tr>
+            <tr><td>不適合的買家</td><td>外籍長期投資者（Net Yield 1.2–1.5%不達標）；MM2H 合規資產配置（商業地契不確定）；資本保值需求（定價過高，修正風險大）</td></tr>
+            <tr><td>議價空間</td><td>期房/剛竣工階段，急售盤可議 15–30%；建議目標 RM1,600–1,800 psf</td></tr>
+            <tr><td>最大風險</td><td>管理費 RM1.20 psf（財務侵蝕）+ 定價天花板未被市場驗證 + 開發商首次 KL 超高層執行風險</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mkt-card">
+        <div class="dc-title">【市場研究視角】純分析結論</div>
+        <table style="font-size:12px">
+          <tbody>
+            <tr><td style="width:100px;font-weight:600">供需平衡</td><td>🔴 武吉免登 SR 品類整體積壓；Orion 超高定價為自己製造了更高的去化難度</td></tr>
+            <tr><td>價格趨勢</td><td>🔴 發售 PSF 高估（比同地段 TS2 貴 83%）；低端掛牌已出現折讓信號</td></tr>
+            <tr><td>租金市場</td><td>🟠 武吉免登月租行情無法支撐 RM2,700 psf 的 Yield 需求；管理費 RM1.20 進一步壓低 Net Yield</td></tr>
+            <tr><td>法規環境</td><td>🟡 中性（商業地契 HDA，外籍可購）；印花稅 4% 在高總價下金額不小</td></tr>
+            <tr><td>進場估值</td><td>🔴 嚴重偏高（@發售PSF）；需等待 PSF 大幅修正後才有合理安全邊際</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;padding:8px;background:#f1f5f9;border-radius:4px;font-size:12px">
+          <strong>市場研究一句話：</strong>Orion Residence 是一個野心極大、設計極佳、但定價定位嚴重超前於 KL 商業地契 SR 市場承受能力的建案——若定價修正 30–40% 後，是一個有趣的話題地標；以發售價進場，是一個高風險的定價豪賭。
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px">最終進場建議</h3>
+    <div class="verdict-r">
+      <strong>🔴 暫緩迴避（發售/接近發售價）｜🟡 觀望等待（竣工後追蹤 brickz 實際成交）</strong><br><br>
+      <strong>暫緩理由：</strong>①發售 PSF RM2,707–3,750 在 KL 商業地契 SR 歷史中嚴重高估，商業地契無法承載住宅地契頂奢的定價邏輯；②管理費 RM1.20 psf 是財務陷阱，外籍 Net Yield 僅 1.2–1.5%，無投資意義；③竣工狀態至今不確認（計畫 Q1 2025 竣工，2026年4月仍在行銷），開發商首次 KL 超高層執行風險為中等；④武吉免登 SR 品類在上游報告中被標注為「KL 積壓最嚴重品類之一」。<br><br>
+      <strong>觀望條件：</strong>若竣工後 brickz 顯示實際成交 PSF 在 RM1,600–1,800 區間，且管委會確認允許短租，重新評估。在此 PSF 水平下：Gross Yield 可達 3.5–4.5%，Net Yield 改善至 2%+，話題設施和 Bukit Bintang 地址成為真實差異化，進場邏輯才成立。
+    </div>
+
+    <h3>最關鍵監測指標</h3>
+    <table>
+      <thead><tr><th>#</th><th>監測指標</th><th>觸發重新評估閾值</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>brickz 首批實際成交 PSF（竣工後）</td><td>若首批成交穩定在 RM2,000+ psf → 市場有一定認可，重新評估進場可能；若跌破 RM1,800 → 定價論點崩潰</td></tr>
+        <tr><td>2</td><td>竣工狀態 + 交屋品質確認</td><td>確認已交屋且品質符合承諾（Ice Rink 正常運營、自動泊車可用）→ 開發商風險降低</td></tr>
+        <tr><td>3</td><td>管委會短租政策</td><td>若確認允許 Airbnb/短租 → Yield 改善路徑打開，重評 Studio 和 Dual-Key 型號</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- §13 -->
+<div class="section">
+  <div class="section-header">§13｜建案綜合評分【v1.2 建案評分模組】</div>
+  <div class="section-body">
+    <div class="score-wrap">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:18px">Orion Residence @ Bukit Bintang ｜ 建案綜合評分卡</div>
+      <div class="score-cols">
+        <div class="score-col">
+          <div class="score-col-t">A 類｜大環境評分（權重 40%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">A1 城市經濟基本面（20%）<span>7.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">KL GDP 4–5%，MM2H 管道，KL 整體成交向上；但武吉免登 SR 品類在上游報告中被標注為「積壓最嚴重」</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A2 區域供需平衡（25%）<span>3.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:35%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">武吉免登/KLCC 中端 SR 積壓最重（上游報告直接標注）；Sky Suites -6.6%（2024）是同地段代表；廣義 SR 庫存 8,000–9,000 戶（KL）</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A3 市場週期位置（20%）<span>4.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:45%;background:#f97316"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">竣工時機恰逢 KL SR 供給壓力高峰期（2025–2027）；定價超越市場承受能力，週期位置不利</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A4 基建與地段催化劑（20%）<span>8.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Bukit Bintang MRT 550m（已運營）+ Pavilion 400m + TRX 2km；步行商圈密度是 KL 所有分析建案中最強的，A4 最高分</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">A5 法規與外資友好度（15%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">商業地契 HDA（介於住宅和純SOVO之間）；4% 印花稅在高總價下金額大；MM2H 商業地契合規待確認</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">A 類加權平均</div>
+            <div class="s-sub-num">5.5/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">7.0×.2 + 3.5×.25 + 4.5×.2 + 8.5×.2 + 5.5×.15 = 5.50</div>
+          </div>
+        </div>
+
+        <div class="score-col">
+          <div class="score-col-t">B 類｜建案本身評分（權重 60%）</div>
+
+          <div class="s-item">
+            <div class="s-lbl">B1 開發商信用與交屋風險（20%）<span>5.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Welton Development 2013年成立，唯一已知完工記錄是 Johor 的 Green Haven（2016）。Orion Residence 是其最大規模、首次 KL、首次 46 層超高層項目。竣工計畫已延期（Q1→Q3/Q4 2025），2026年4月仍在行銷。開發商規模遠小於 Tan & Tan、UEM Sunrise</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B2 相對估值合理性（20%）<span>3.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:30%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">RM2,707–3,750 psf 的武吉免登商業地契 SR——超過 KLCC Binjai 住宅地契頂奢（RM2,660），在 KL 商業地契 SR 歷史中無成功先例。掛牌已出現 -20% 折讓。B2 最低分之一</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B3 租金報酬率潛力（15%）<span>3.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:35%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Gross Yield @發售 PSF 僅 2–4%；管理費 RM1.20 psf 每月吞掉 RM589–1,045；外籍 Net Yield 約 1.2–1.5%，五個分析建案倒數第一</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B4 地段與交通連接（15%）<span>9.0/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Pavilion 400m + Starhill 75m + Bukit Bintang MRT 550m + Lot 10 200m——Bukit Bintang 步行商圈密度是 KL 所有分析建案中最強，B4 最高分。這是 Orion 唯一真正頂尖的指標</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B5 產品設計與差異化（10%）<span>7.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:75%;background:#16a34a"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Ice Rink、自動泊車、東南亞首個戶外高速玻璃電梯、RIBA 設計師、moiré 效果立面——話題性設施在 KL 市場中獨一無二，差異化極強（但維護成本也極高）</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B6 產權與法律結構（10%）<span>5.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:55%;background:#d97706"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">Freehold 但商業地契（HDA protected）——比純 SOVO 商業地契好（有 HDA 保護），比住宅地契弱；買家池較窄，銀行貸款條件可能更嚴</div>
+          </div>
+
+          <div class="s-item">
+            <div class="s-lbl">B7 流動性與退出難易度（10%）<span>3.5/10</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:35%;background:#dc2626"></div></div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:3px">期房/剛竣工，無 brickz 成交記錄；掛牌低端已出現折讓；武吉免登 SR 歷史流動性偏弱（Sky Suites -6.6%）；RM200萬+ 總價在此品類中買家池窄</div>
+          </div>
+
+          <div class="score-sub-total">
+            <div style="color:rgba(255,255,255,.55);font-size:11px;font-family:'IBM Plex Mono',monospace">B 類加權平均</div>
+            <div class="s-sub-num">5.0/10</div>
+            <div style="color:rgba(255,255,255,.4);font-size:10px">5.0×.2 + 3.0×.2 + 3.5×.15 + 9.0×.15 + 7.5×.1 + 5.5×.1 + 3.5×.1 = 5.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-total">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:8px">A 類 5.5 × 40%&nbsp;+&nbsp;B 類 5.0 × 60%</div>
+        <div class="score-big">5.2<span class="score-max">/10</span></div>
+        <div style="margin-top:12px">
+          <span class="score-badge" style="background:#FEE2E2;color:#991B1B">⭐⭐ 偏弱——風險大於機會，建議觀望</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">2.20 + 3.00 = 5.20</div>
+        <div class="score-comment">
+          <strong style="color:#fbbf24">最關鍵進場理由：</strong>Bukit Bintang 步行商圈（Pavilion 400m + MRT 550m）是 KL 所有分析建案最強；話題設施（Ice Rink 等）差異化極強；低密度 298 單位在 0.56 英畝地上相對精品；地址敘事是真實的。<br>
+          <strong style="color:#fca5a5">最大風險：</strong>管理費 RM1.20 psf 直接摧毀投資回報（外籍 Net Yield 1.2–1.5%，五個建案最低）；發售 PSF RM2,707–3,750 超過 KLCC Binjai 住宅地契頂奢，在 KL 商業地契 SR 歷史上無成功先例；開發商首次 KL 超高層，竣工延期已有跡象；武吉免登 SR 品類在上游報告中被標注為積壓最嚴重。
+        </div>
+      </div>
+    </div>
+
+    <h3>A 類評分說明</h3>
+    <p>A 類 5.5 分與 Stonor 3 相同，反映武吉免登 SR 品類的供需困境（A2 3.5）以及竣工時機處於 KL SR 供給高峰期（A3 4.5）的現實。最大加分是 A4 基建（8.5）——Bukit Bintang MRT + Pavilion 的組合是本輪分析所有建案中最強的步行交通生活圈，這是 Orion Residence 唯一可以傲視所有競品的硬核優勢。</p>
+
+    <h3>B 類評分說明</h3>
+    <p>B 類 5.0 分是本輪五個建案中最低。地段交通（B4 9.0）是唯一高分，但其餘指標拖累嚴重：開發商信用（B1 5.0）因首次 KL 超高層且竣工已延期而扣分；估值合理性（B2 3.0）和流動性（B7 3.5）是全場最低分，商業地契 SR 以超過 KLCC 住宅地契頂奢的定價入市，是估值判斷上的致命傷；租金回報（B3 3.5）因 RM1.20 psf 管理費而被徹底壓低。話題設施（B5 7.5）加分，但維護風險也高。整體而言，Orion Residence 是一個「概念最好、執行風險最高、財務回報最差」的建案。</p>
+  </div>
+</div>
+
+<div style="font-size:11px;color:#94a3b8;text-align:center;padding:16px;margin-top:8px">
+  主要數據來源：NAPIC Q3 2025（KL 供需 Overhang 深度分析報告 2026-04-01）｜KL RM1M+ 高端住宅市場深度研究（2026-03）｜PropertyGuru（110筆掛牌 2026-04）｜iProperty（竣工狀態）｜arktags.com（建案規格）｜EdgeProp.my（開發商資料）｜Welton Development 官網｜MalaysiaProperty.ASIA（地契確認）<br>
+  本報告基於公開資料及上游研究，不構成投資建議。竣工狀態、折扣結構、短租政策等關鍵細節需向開發商親自確認。
+</div>
+</div>
+
+<button class="print-btn" onclick="window.print()">列印為 PDF</button>
+</body>
+</html>

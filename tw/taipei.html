@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taipei Deep Dive | Taiwan Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="tw.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <main class="container">
+    <div class="page-header">
+      <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+      <h1><span class="lang-en">Taipei &mdash; 2026 Deep Dive</span><span class="lang-zh" style="display:none">台北深度分析</span></h1>
+      <p class="subtitle"><span class="lang-en">Supply, Demand &amp; Policy Restructuring &mdash; Q1 2026</span><span class="lang-zh" style="display:none">供給、需求與政策重塑——2026年第一季</span></p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><span class="lang-en">PRESALE AVG PRICE</span><span class="lang-zh" style="display:none">預售屋均價</span></div>
+        <div class="kpi-value">NT$126萬/坪</div>
+        <span class="badge badge-blue"><span class="lang-en">+4.81% QoQ &middot; 2025 Q3</span><span class="lang-zh" style="display:none">季增+4.81% &middot; 2025年Q3</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">HOUSING PRICE INDEX</span><span class="lang-zh" style="display:none">住宅價格指數</span></div>
+        <div class="kpi-value">126.91</div>
+        <span class="badge badge-red"><span class="lang-en">-0.91% QoQ &middot; 3 straight</span><span class="lang-zh" style="display:none">季減-0.91% &middot; 連三季下滑</span></span>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><span class="lang-en">RENT INDEX</span><span class="lang-zh" style="display:none">住宅租金指數</span></div>
+        <div class="kpi-value">107.26</div>
+        <span class="badge badge-green"><span class="lang-en">+1.47% QoQ &middot; 2025 Q3</span><span class="lang-zh" style="display:none">季增+1.47% &middot; 2025年Q3</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">AVG LTV</span><span class="lang-zh" style="display:none">平均房貸成數</span></div>
+        <div class="kpi-value">58%</div>
+        <span class="badge badge-red"><span class="lang-en">-5% from peak &middot; Lowest</span><span class="lang-zh" style="display:none">較高點-5% &middot; 六都最低</span></span>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><span class="lang-en">PRICE-TO-INCOME</span><span class="lang-zh" style="display:none">房價所得比</span></div>
+        <div class="kpi-value">15.41x</div>
+        <span class="badge badge-red"><span class="lang-en">2025 Q2 &middot; World's worst</span><span class="lang-zh" style="display:none">2025年Q2 &middot; 全球最難負擔</span></span>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label"><span class="lang-en">1-PERSON HOUSEHOLDS</span><span class="lang-zh" style="display:none">一人家戶佔比</span></div>
+        <div class="kpi-value">&gt;42%</div>
+        <span class="badge badge-orange"><span class="lang-en">Taipei crossed threshold</span><span class="lang-zh" style="display:none">台北突破門檻 &middot; 歷史新高</span></span>
+      </div>
+    </div>
+
+    <!-- SECTION 1: MACRO & POLICY FRAMEWORK -->
+    <div class="section-label"><span class="lang-en">MACRO &amp; POLICY FRAMEWORK</span><span class="lang-zh" style="display:none">總體經濟與調控政策框架</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Taiwan's 7th wave of selective credit controls (September 2024) was the most aggressive in history &mdash; cutting LTV on 3rd+ properties and high-value homes to 30%, and reducing 2nd-home LTV nationwide to 50% (later eased to 60% for owner-occupiers). Taipei is the hardest-hit city: average LTV fell from 63% (Q1 2022 peak) to 58% in Q3 2024 &mdash; a 5-point drop vs 3-point nationally. Combined with housing tax 2.0 (Houchang Tax), purchase costs have risen at three levels simultaneously. AI and semiconductor-driven stock market wealth (TAIEX above 30,000) provides a crucial buffer: high-net-worth buyers hold sufficient cash to bypass the LTV constraints.</span>
+      <span class="lang-zh" style="display:none">台灣2024年9月實施第七波選擇性信用管制——史上最嚴——第三戶以上、豪宅貸款成數上限壓至三成，全國第二戶統一降至五成（後調整換屋至六成）。台北市是受創最深的城市：平均房貸成數從2022年Q1高點的63%驟降至2024年Q3的58%，跌幅達5個百分點，全國平均僅跌3%。加上囤房稅2.0，持有成本出現三重加重。然而AI與半導體產業強勢推動台股突破三萬點，財富效應為市場提供重要緩衝：高資產買方持有充沛自有資金，不受貸款成數制約。</span>
+    </div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Average LTV by City</span><span class="lang-zh" style="display:none">各城市平均房貸成數</span></div>
+        <div style="position:relative;height:200px;"><div id="chartTPELTV" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Policy Timeline</span><span class="lang-zh" style="display:none">政策時間軸</span></div>
+        <div style="position:relative;height:180px;"><div id="chartTPEPolicy" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">TAIEX vs Housing Index</span><span class="lang-zh" style="display:none">台股加權指數 vs 住宅指數</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPEStockWealth" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Triple Tax Burden (NT$30M property)</span><span class="lang-zh" style="display:none">三重稅負（NT$3,000萬物件）</span></div>
+        <div style="position:relative;height:200px;"><div id="chartTPEThreeTax" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: SUPPLY -->
+    <div class="section-label"><span class="lang-en">SUPPLY: PRESALE CONTRACTION &amp; NEW INVENTORY WAVE</span><span class="lang-zh" style="display:none">供給面：預售市場收縮與新屋供給浪潮</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Presale filings collapsed to just 994 units in Q4 2025 &mdash; the lowest quarterly count since 2019. Developers are delaying launches and downsizing projects as credit controls bite. However, national unsold new-home inventory has swelled to 111,000+ units, the highest since tracking began. The 2025&ndash;2027 delivery wave (400,000 units nationally) will test buyer commitment: failed mortgage approvals at settlement could trigger a secondary-market listing surge.</span>
+      <span class="lang-zh" style="display:none">2025年Q4預售申報量驟降至僅994戶——2019年以來單季最低。信用管制衝擊下，開發商延後推案並縮小規模。然而，全國待售新成屋庫存膨脹至11萬+戶，創統計以來新高。2025-2027年交屋潮（全國約40萬戶）將考驗買方承諾：交屋時房貸核拒可能引發中古市場拋售潮。</span>
+    </div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Presale Projects &amp; Units</span><span class="lang-zh" style="display:none">預售案量與戶數</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPEPresale" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Presale Cancellations</span><span class="lang-zh" style="display:none">預售解約數</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPECancellation" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">National Unsold New Homes</span><span class="lang-zh" style="display:none">全國待售新成屋庫存</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPEUnsold" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Social Housing Pipeline</span><span class="lang-zh" style="display:none">社會住宅進度</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPESocialHousing" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: DEMOGRAPHICS -->
+    <div class="section-label"><span class="lang-en">DEMOGRAPHICS: PAPER MIGRATION &amp; MICRO-HOUSEHOLDS</span><span class="lang-zh" style="display:none">人口結構：帳面遷徙與一人家戶崛起</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Taipei's net migration has been negative every month in 2025, losing over 33,000 registered residents in H1 alone. This is largely "paper migration" &mdash; households re-registering in New Taipei or Taoyuan for tax and school-district reasons. Crucially, single-person households now exceed 42% in Taipei, permanently reshaping housing demand toward compact formats. The 1+1BR and studio segments have doubled their market share since 2022.</span>
+      <span class="lang-zh" style="display:none">台北市2025年每月淨遷出皆為負值，上半年累計流失逾33,000名設籍人口。這主要是「帳面遷徙」——家戶為了稅務或學區因素將戶籍遷往新北或桃園。關鍵趨勢：台北一人家戶佔比已突破42%，永久改變住宅需求結構，轉向小坪數產品。1+1房與套房自2022年以來市佔率翻倍。</span>
+    </div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Taipei Monthly Net Migration (2025)</span><span class="lang-zh" style="display:none">台北市月淨遷徙人數（2025）</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPEMigration" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">1-Person Household Share</span><span class="lang-zh" style="display:none">一人家戶佔比趨勢</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPEHousehold" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Product Mix Shift</span><span class="lang-zh" style="display:none">產品結構轉變</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPEProductShift" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Neihu District Price Map</span><span class="lang-zh" style="display:none">內湖區價格地圖</span></div>
+        <div style="position:relative;height:260px;"><div id="chartTPEInhukuPrice" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: TRANSACTION MARKET -->
+    <div class="section-label"><span class="lang-en">TRANSACTION MARKET: VOLUME COLLAPSE &amp; BUYER'S MARKET</span><span class="lang-zh" style="display:none">買賣市場：量縮探底與買方定價時代</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Taipei building transfers fell to ~24,000 in 2025, with Jan&ndash;Feb 2026 annualizing at just 22,050 &mdash; the lowest since 2016. Negotiation power has shifted decisively to buyers: 60% of deals now involve &gt;10% price cuts from listing, vs 30% a year ago. The housing price index has declined for 3 consecutive quarters, yet presale prices paradoxically rose +4.81% QoQ as developers hold firm on new launches. This price divergence between new and secondary markets is the defining feature of the current cycle.</span>
+      <span class="lang-zh" style="display:none">台北市2025年建物移轉棟數降至約24,000棟，2026年1-2月年化僅22,050棟——2016年以來最低。議價權已決定性地轉向買方：60%成交案議價幅度超過10%，一年前僅30%。住宅價格指數連續三季下滑，但預售價格反而季增+4.81%——開發商堅守新案定價。新舊市場的價格背離是本輪週期的核心特徵。</span>
+    </div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Annual Building Transfers</span><span class="lang-zh" style="display:none">年度建物移轉棟數</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPETransfer" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">6-City Transfer Comparison (Jan-Feb 2026)</span><span class="lang-zh" style="display:none">六都移轉棟數比較（2026年1-2月）</span></div>
+        <div style="position:relative;height:240px;"><div id="chartTPE6Cities" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Price Index vs Presale Price</span><span class="lang-zh" style="display:none">價格指數 vs 預售價格</span></div>
+        <div style="position:relative;height:240px;"><div id="chartTPEPriceIndex" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Negotiation Discount Distribution</span><span class="lang-zh" style="display:none">議價幅度分布</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPENegotiation" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: DISTRICT PRICE MAP -->
+    <div class="section-label"><span class="lang-en">DISTRICT PRICE MAP &mdash; 2026 Q1</span><span class="lang-zh" style="display:none">各行政區房價地圖——2026年Q1</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Taipei's 12 districts show a clear three-tier structure. The premium core (Xinyi/Da'an) trades at 120&ndash;250 NT$/ping, driven by luxury and prestige demand. The tech corridor (Neihu/Nangang) at 80&ndash;120 commands a premium from proximity to the Neihu Tech Park and the emerging Nangang biotech hub. Peripheral districts (Wenshan/Shilin/Beitou) at 45&ndash;65 offer the only entry points for first-time buyers and are where social housing is concentrated.</span>
+      <span class="lang-zh" style="display:none">台北12區呈現清晰的三級結構。核心精華區（信義/大安）每坪120-250萬，由豪宅與品牌需求驅動。科技走廊（內湖/南港）80-120萬/坪，受惠於內科與南港生技園區。外圍區（文山/士林/北投）45-65萬/坪，是首購族唯一入場機會，也是社會住宅集中區域。</span>
+    </div>
+    <div class="chart-grid two-col">
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Zone 1: Xinyi / Da'an</span><span class="lang-zh" style="display:none">第一級：信義 / 大安</span></div>
+        <div class="micro-value">120&ndash;250萬/坪</div>
+        <p><span class="lang-en">Premium core. Luxury towers, prestige addresses. Price-insensitive HNW buyers. Lowest volume sensitivity to credit controls.</span><span class="lang-zh" style="display:none">頂級核心區。豪宅大樓、精華地段。高資產買方對價格不敏感。受信用管制量縮影響最小。</span></p>
+      </div>
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Zone 2: Neihu / Nangang</span><span class="lang-zh" style="display:none">第二級：內湖 / 南港</span></div>
+        <div class="micro-value">80&ndash;120萬/坪</div>
+        <p><span class="lang-en">Tech corridor. Driven by Neihu Tech Park and Nangang biotech/transit hub. Strong rental demand from tech workers. Near-zero vacancy.</span><span class="lang-zh" style="display:none">科技走廊。受惠內科園區與南港生技/交通樞紐。科技業租賃需求強勁。幾乎零空置。</span></p>
+      </div>
+      <div class="micro-card">
+        <div class="micro-title"><span class="lang-en">Zone 3: Wenshan / Shilin / Beitou</span><span class="lang-zh" style="display:none">第三級：文山 / 士林 / 北投</span></div>
+        <div class="micro-value">45&ndash;65萬/坪</div>
+        <p><span class="lang-en">Peripheral districts. Only viable entry for first-time buyers. Social housing concentration. MRT accessibility drives micro-location premiums.</span><span class="lang-zh" style="display:none">外圍區域。首購族唯一可負擔入場點。社宅集中區。捷運可及性決定微區位溢價。</span></p>
+      </div>
+    </div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">District Avg Price (萬/坪)</span><span class="lang-zh" style="display:none">各區均價（萬/坪）</span></div>
+        <div style="position:relative;height:300px;"><div id="chartTPEDistrict" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Rent Index vs Price Index</span><span class="lang-zh" style="display:none">租金指數 vs 房價指數</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPERentIndex" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: COMMERCIAL -->
+    <div class="section-label"><span class="lang-en">COMMERCIAL: OFFICE MARKET &amp; BTR</span><span class="lang-zh" style="display:none">商用不動產：辦公室市場與租屋新制</span></div>
+    <div class="insight-box">
+      <span class="lang-en">Taipei's office market faces a structural inflection in 2026. Nearly 59,000 ping of Grade A supply will enter the market (CBD + Nangang), pushing vacancy from ~3% toward 10%+. This is the first genuine tenant's market in a decade. ESG-certified and green buildings will absorb demand; legacy buildings face downgrade pressure. The Dunbei corridor led rent growth at +7.59% YoY, while overall CBD rents rose only +1.7%.</span>
+      <span class="lang-zh" style="display:none">台北辦公室市場2026年面臨結構性轉折。近5.9萬坪A辦新供給將入市（CBD+南港），空置率從約3%推向10%以上。這是十年來首次真正的租戶市場。ESG認證與綠建築將吸收需求；傳統舊大樓面臨降級壓力。敦北走廊租金年增+7.59%領漲，但CBD整體租金僅增+1.7%。</span>
+    </div>
+    <div class="chart-grid two-col">
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Office Rent by Submarket (NT$/ping/mo)</span><span class="lang-zh" style="display:none">各次市場辦公室租金（NT$/坪/月）</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPEOfficeRent" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Office Supply &amp; Vacancy</span><span class="lang-zh" style="display:none">辦公室供給與空置率</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPEOfficeVacancy" style="width:100%;height:100%"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="lang-en">Commercial Transactions by Type (Q4 2025, NT$M)</span><span class="lang-zh" style="display:none">商用不動產交易分類（2025 Q4，百萬）</span></div>
+        <div style="position:relative;height:220px;"><div id="chartTPECommercialTx" style="width:100%;height:100%"></div></div>
+      </div>
+    </div>
+
+    <!-- SECTION 7: SUMMARY -->
+    <div class="section-label"><span class="lang-en">SUMMARY</span><span class="lang-zh" style="display:none">摘要結論</span></div>
+    <div class="summary-grid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="summary-card red">
+        <div class="summary-title"><span class="lang-en">Deleveraging Deep Water</span><span class="lang-zh" style="display:none">去槓桿化深水區</span></div>
+        <p><span class="lang-en">7th wave credit controls successfully purged speculative capital. Taipei LTV at 58% &mdash; lowest of 6 cities. Presale filings: only 994 units in Q4 2025. Market now nearly exclusively owner-occupier driven.</span><span class="lang-zh" style="display:none">第七波信用管制成功清洗投機資金。台北市貸款成數58%——六都最低。2025年Q4預售僅994戶申報。市場幾乎完全由自住族單一支撐。</span></p>
+      </div>
+      <div class="summary-card orange">
+        <div class="summary-title"><span class="lang-en">Delivery Wave &mdash; Biggest Downside Risk</span><span class="lang-zh" style="display:none">交屋潮賣壓——最大下行風險</span></div>
+        <p><span class="lang-en">400,000 pre-sale deliveries nationally in 2025&ndash;2027. Failed loans at delivery &rarr; forced secondary market listings. Combined with 111K+ unsold national inventory, creates structural price ceiling for next 2-3 years.</span><span class="lang-zh" style="display:none">全台2025-2027年約40萬戶預售屋交屋潮。交屋時貸款核拒→被迫中古市場拋售。加上全國11萬+待售新成屋，形成未來2-3年的結構性價格天花板。</span></p>
+      </div>
+      <div class="summary-card green">
+        <div class="summary-title"><span class="lang-en">Rental Sector &mdash; Strongest Segment</span><span class="lang-zh" style="display:none">租賃逆勢升溫——最強板塊</span></div>
+        <p><span class="lang-en">Rent index +1.47% QoQ while prices soften &mdash; widening yields. Houchang tax landlord pass-through + first-buyer delay = structural rental demand. Neihu/Nangang tech zone: structural vacancy immunity.</span><span class="lang-zh" style="display:none">租金指數季增+1.47%，房價下修之際收益率擴張。囤房稅成本轉嫁+首購族延遲=結構性租賃需求。內湖/南港科技走廊：幾乎無空置壓力。</span></p>
+      </div>
+      <div class="summary-card orange">
+        <div class="summary-title"><span class="lang-en">Micro-Housing Irreversible</span><span class="lang-zh" style="display:none">小宅化不可逆——產品革命</span></div>
+        <p><span class="lang-en">Single-person households &gt;42% in Taipei. Product demand has permanently shifted to 1+1BR and 2BR. Developers must prioritize "total price control" and space efficiency over gross floor area.</span><span class="lang-zh" style="display:none">台北市一人家戶超42%。產品需求已永久轉向1+1房與兩房。開發商必須優先「控制總價」與坪效，而非單純追求建坪數量。</span></p>
+      </div>
+      <div class="summary-card navy" style="grid-column:span 2">
+        <div class="summary-title"><span class="lang-en">Office Market Flip &mdash; Tenant's Golden Era</span><span class="lang-zh" style="display:none">商辦翻轉——租戶黃金期</span></div>
+        <p><span class="lang-en">2026 brings 59,000 ping of Grade A office supply (CBD + Nangang). Vacancy heading to 10%+. First genuine tenant's market in a decade. ESG/green-certified buildings immune; legacy buildings vulnerable.</span><span class="lang-zh" style="display:none">2026年A辦新增逾5.9萬坪（CBD+南港）。空置率走向10%以上。十年來首次真正的租戶市場。ESG/綠建築免疫；傳統舊辦公大樓面臨邊緣化危機。</span></p>
+      </div>
+    </div>
+
+    <div class="source-footer">
+      <span class="lang-en">MOI Property Platform Q3 2025 &middot; Taipei City Land Bureau Q4 2025 &middot; Taipei City Civil Affairs 2025 &middot; CBC 7th Wave Credit Controls 2024 &middot; Housing &amp; Urban Development Authority 2026 &middot; Sinyi Research &middot; CBRE / Cushman 2025 &middot; Global Property Guide Q1 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">內政部不動產資訊平台2025年Q3 &middot; 台北市地政局2025年Q4 &middot; 台北市民政局2025 &middot; 央行第七波信用管制2024 &middot; 住都中心2026 &middot; 信義房屋研究 &middot; 世邦魏理仕/仲量聯行2025 &middot; Global Property Guide 2026年Q1<br><em>非投資建議。</em></span>
+    </div>
+  </main>
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtPrice(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return 'NT$'+v+'\u842c';if(a>=1000000)return 'NT$'+(a/1000000).toFixed(2)+'M';return 'NT$'+Math.round(a/1000)+'K';}
+function fmtPriceShort(v,lang){lang=lang||localStorage.getItem('lang')||'en';var a=v*10000;if(lang==='zh')return v+'\u842c';if(a>=1000000)return(a/1000000).toFixed(1)+'M';return Math.round(a/1000)+'K';}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+var allCharts=[];
+
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector'))document.getElementById('marketDropdown').classList.remove('open');});
+
+function setLang(lang){
+  localStorage.setItem('lang',lang);
+  document.querySelectorAll('.lang-en').forEach(function(el){el.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(el){el.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  allCharts.forEach(function(c){c.dispose();});
+  allCharts=[];
+  initCharts(lang);
+}
+
+function initCharts(lang){
+  var en=lang==='en';
+
+  // 1. chartTPELTV
+  (function(){
+    var dom=document.getElementById('chartTPELTV');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=en?['Taipei (2024 Q3)','Hsinchu (2024 Q3)','National avg (2024 Q3)','Taipei (2022 Q1 peak)','National avg (2021 Q4 peak)']:['台北(2024 Q3)','新竹(2024 Q3)','全國平均(2024 Q3)','台北(2022 Q1高點)','全國平均(2021 Q4高點)'];
+    var data=[58,59,61,63,64];
+    var colors=data.map(function(v){return v<=60?C.red:v<=62?C.orange:C.navy;});
+    ch.setOption({tooltip:baseTooltip,grid:Object.assign({},baseGrid,{left:130}),xAxis:mkAxis({type:'value',min:55,max:66}),yAxis:mkAxis({type:'category',data:labels,inverse:true}),series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:16,label:{show:true,position:'right',formatter:'{c}%',textStyle:baseText},markLine:{silent:true,symbol:'none',data:[{xAxis:60,label:{formatter:'60%',position:'end',fontSize:10,color:C.red},lineStyle:{color:C.red,type:'dashed'}}]}}]});
+  })();
+
+  // 2. chartTPEPolicy
+  (function(){
+    var dom=document.getElementById('chartTPEPolicy');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var xLabels=['2022','2023 Q1','2023 Q3','2024 Q1','2024 Q3','2024 Q4','2025 Q1','2026'];
+    var points=[
+      {value:[0,3],label:en?'5th wave':'第五波',color:C.red},
+      {value:[1,2],label:en?'6th wave':'第六波',color:C.red},
+      {value:[2,2],label:en?'House Tax 2.0':'囤房稅2.0',color:C.red},
+      {value:[3,1],label:en?'Rate hold':'利率維持',color:C.orange},
+      {value:[4,4],label:en?'7th wave':'第七波',color:C.red},
+      {value:[5,2],label:en?'LTV ease 60%':'成數放寬60%',color:C.orange},
+      {value:[6,1],label:en?'Rate cut talk':'降息風聲',color:C.green},
+      {value:[7,1],label:en?'Monitor':'觀察期',color:C.green}
+    ];
+    ch.setOption({tooltip:{trigger:'item',formatter:function(p){return p.data.label;}},grid:Object.assign({},baseGrid,{bottom:40}),xAxis:mkAxis({type:'category',data:xLabels,axisLabel:Object.assign({},baseText,{rotate:30})}),yAxis:mkAxis({type:'value',show:false,min:0,max:5}),series:[{type:'scatter',symbolSize:14,data:points.map(function(p){return{value:p.value,label:p.label,itemStyle:{color:p.color}};}),label:{show:true,position:'top',formatter:function(p){return p.data.label;},fontSize:9,color:C.navy}}]});
+  })();
+
+  // 3. chartTPEStockWealth
+  (function(){
+    var dom=document.getElementById('chartTPEStockWealth');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2020','2021','2022','2023','2024','2025 Q3','2026 Q1E'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'TAIEX (萬點)':'加權指數(萬點)',en?'Housing Index':'住宅指數']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:[mkAxis({type:'value',name:en?'Housing Index':'住宅指數',min:90,max:135}),mkAxis({type:'value',name:en?'TAIEX (萬)':'加權(萬)',min:1,max:3,splitLine:{show:false}})],series:[{name:en?'Housing Index':'住宅指數',type:'line',data:[100,115,125,127,128,127,126],itemStyle:{color:C.navy},smooth:true},{name:en?'TAIEX (萬點)':'加權指數(萬點)',type:'line',yAxisIndex:1,data:[1.3,1.8,1.42,1.75,2.1,2.45,2.7],itemStyle:{color:C.orange},smooth:true}]});
+  })();
+
+  // 4. chartTPEThreeTax
+  (function(){
+    var dom=document.getElementById('chartTPEThreeTax');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=en?['Standard (2021)','Extra cash from LTV cut','House tax 2.0','Land value tax','Triple burden']:['標準(2021)','LTV降低額外自備款','囤房稅2.0','地價稅','三重負擔'];
+    var data=[6,90,8,12,26];
+    var colors=[C.muted,C.red,C.orange,C.orange,C.red];
+    ch.setOption({tooltip:baseTooltip,grid:Object.assign({},baseGrid,{left:140}),xAxis:mkAxis({type:'value',name:en?'NT$萬':'萬元'}),yAxis:mkAxis({type:'category',data:labels,inverse:true}),series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:16,label:{show:true,position:'right',formatter:'{c}',textStyle:baseText}}]});
+  })();
+
+  // 5. chartTPEPresale
+  (function(){
+    var dom=document.getElementById('chartTPEPresale');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2024 Q1','2024 Q2','2024 Q3','2024 Q4','2025 Q1','2025 Q2','2025 Q3','2025 Q4'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Projects':'案量',en?'Units (÷100)':'戶數(÷100)']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:[mkAxis({type:'value',name:en?'Projects':'案量'}),mkAxis({type:'value',name:en?'Units(÷100)':'戶(÷100)',splitLine:{show:false}})],series:[{name:en?'Projects':'案量',type:'bar',data:[28,25,22,19,24,20,22,16],itemStyle:{color:C.navy},barWidth:14},{name:en?'Units (÷100)':'戶數(÷100)',type:'bar',yAxisIndex:1,data:[28,24,21,20,22,19,19.7,9.94],itemStyle:{color:C.orange},barWidth:14}]});
+  })();
+
+  // 6. chartTPECancellation
+  (function(){
+    var dom=document.getElementById('chartTPECancellation');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2024 Q1','2024 Q2','2024 Q3','2024 Q4','2025 Q1','2025 Q2','2025 Q3','2025 Q4'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Cancellations':'解約數',en?'YoY %':'年增%']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:[mkAxis({type:'value',name:en?'Units':'戶'}),mkAxis({type:'value',name:'YoY %',splitLine:{show:false}})],series:[{name:en?'Cancellations':'解約數',type:'bar',data:[18,15,20,22,24,28,26,40],itemStyle:{color:C.red},barWidth:16},{name:en?'YoY %':'年增%',type:'line',yAxisIndex:1,data:[0,-5,10,8,15,20,12,21.2],itemStyle:{color:C.orange},smooth:true}]});
+  })();
+
+  // 7. chartTPEUnsold
+  (function(){
+    var dom=document.getElementById('chartTPEUnsold');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2020 Q4','2021 Q4','2022 Q4','2023 Q4','2024 Q1','2024 Q2','2024 Q3','2024 Q4'];
+    var data=[6.8,7.2,8.1,10.1,10.2,10.5,10.6,11.1];
+    ch.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:mkAxis({type:'value',name:en?'Units (萬)':'萬戶'}),series:[{type:'bar',data:data.map(function(v){return{value:v,itemStyle:{color:v>=10?C.red:v>=8?C.orange:C.navy}};}),barWidth:18,label:{show:true,position:'top',formatter:'{c}',textStyle:baseText}}]});
+  })();
+
+  // 8. chartTPESocialHousing
+  (function(){
+    var dom=document.getElementById('chartTPESocialHousing');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2023','2024','2025','2026F','2027F'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Completed':'已完工',en?'Under construction':'施工中',en?'Pending':'待開工']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:mkAxis({type:'value',name:en?'Units':'戶'}),series:[{name:en?'Completed':'已完工',type:'bar',stack:'a',data:[12000,18000,24000,30000,35000],itemStyle:{color:C.navy},barWidth:22},{name:en?'Under construction':'施工中',type:'bar',stack:'a',data:[28000,38000,46501,52000,55000],itemStyle:{color:C.orange}},{name:en?'Pending':'待開工',type:'bar',stack:'a',data:[8000,10000,14200,16000,18000],itemStyle:{color:'#93b4d4'},markLine:{silent:true,symbol:'none',data:[{yAxis:70018,label:{formatter:en?'Target 70,018':'目標 70,018',position:'end',fontSize:10,color:C.red},lineStyle:{color:C.red,type:'dashed'}}]}}]});
+  })();
+
+  // 9. chartTPEMigration
+  (function(){
+    var dom=document.getElementById('chartTPEMigration');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=en?['Jan','Feb','Mar','Apr','May','Jun','Jul']:['1月','2月','3月','4月','5月','6月','7月'];
+    var data=[-2140,-6619,-12026,-1783,-7553,-1517,-1831];
+    ch.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:mkAxis({type:'value',name:en?'Net migration':'淨遷徙'}),series:[{type:'bar',data:data.map(function(v){return{value:v,itemStyle:{color:C.red}};}),barWidth:20,label:{show:true,position:'bottom',formatter:function(p){return p.value.toLocaleString();},textStyle:{fontSize:9,color:C.red}},markPoint:{data:[{coord:[2,data[2]],value:data[2].toLocaleString(),itemStyle:{color:C.red}},{coord:[4,data[4]],value:data[4].toLocaleString(),itemStyle:{color:C.red}}],symbolSize:6}}]});
+  })();
+
+  // 10. chartTPEHousehold
+  (function(){
+    var dom=document.getElementById('chartTPEHousehold');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2015','2017','2019','2021','2023','2025'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'National':'全國',en?'Taipei':'台北']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:mkAxis({type:'value',name:'%',min:28,max:45}),series:[{name:en?'National':'全國',type:'line',data:[31.5,33.2,35.8,37.2,39.1,40.5],itemStyle:{color:C.navy},smooth:true},{name:en?'Taipei':'台北',type:'line',data:[35.2,37.1,39.0,40.5,41.2,42.3],itemStyle:{color:C.orange},smooth:true,markLine:{silent:true,symbol:'none',data:[{yAxis:42,label:{formatter:'42%',position:'end',fontSize:10,color:C.red},lineStyle:{color:C.red,type:'dashed'}}]}}]});
+  })();
+
+  // 11. chartTPEProductShift
+  (function(){
+    var dom=document.getElementById('chartTPEProductShift');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=en?['3BR','2BR','1+1BR','Studio/1BR']:['三房','兩房','1+1房','套房/一房'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:['2022','2025']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:mkAxis({type:'value',name:'%'}),series:[{name:'2022',type:'bar',data:[35,40,18,7],itemStyle:{color:C.muted},barWidth:18,barGap:'30%'},{name:'2025',type:'bar',data:[18,38,30,14],itemStyle:{color:C.navy},barWidth:18}]});
+  })();
+
+  // 12. chartTPEInhukuPrice
+  (function(){
+    var dom=document.getElementById('chartTPEInhukuPrice');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['大直/美麗華新成屋','大直/美麗華10年內','內科核心新成屋','內科核心15-25年','內湖行政中心10-20年','巷弄公寓'];
+    var data=[120,105,113,94,92,70];
+    ch.setOption({tooltip:baseTooltip,grid:Object.assign({},baseGrid,{left:150}),xAxis:mkAxis({type:'value',name:en?'萬/坪':'萬/坪'}),yAxis:mkAxis({type:'category',data:labels,inverse:true}),series:[{type:'bar',data:data.map(function(v){return{value:v,itemStyle:{color:v>=110?C.red:v>=95?C.orange:C.navy}};}),barWidth:16,label:{show:true,position:'right',formatter:'{c}',textStyle:baseText}}]});
+  })();
+
+  // 13. chartTPETransfer
+  (function(){
+    var dom=document.getElementById('chartTPETransfer');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=en?['2020','2021','2022','2023','2024','2025','2026 Jan-Feb\n(ann.)']:['2020','2021','2022','2023','2024','2025','2026 1-2月\n(年化)'];
+    var data=[32000,38000,31000,29000,32000,24000,22050];
+    ch.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:mkAxis({type:'value',name:en?'Units':'棟'}),series:[{type:'bar',data:data.map(function(v){return{value:v,itemStyle:{color:v>=35000?C.green:v>=28000?C.navy:v>=22000?C.orange:C.red}};}),barWidth:20,label:{show:true,position:'top',formatter:function(p){return(p.value/1000).toFixed(1)+'K';},textStyle:baseText}}]});
+  })();
+
+  // 14. chartTPE6Cities
+  (function(){
+    var dom=document.getElementById('chartTPE6Cities');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=en?['Tainan +17.8%','Taipei +6.4%','New Taipei +0.8%','6-City -3.7%','Kaohsiung -8.7%','Taoyuan -6.0%','Taichung -16.5%']:['台南 +17.8%','台北 +6.4%','新北 +0.8%','六都 -3.7%','高雄 -8.7%','桃園 -6.0%','台中 -16.5%'];
+    var data=[3107,3675,6502,28717,4540,5509,5384];
+    var yoys=[17.8,6.4,0.8,-3.7,-8.7,-6.0,-16.5];
+    ch.setOption({tooltip:baseTooltip,grid:Object.assign({},baseGrid,{left:130}),xAxis:mkAxis({type:'value',name:en?'Units':'棟'}),yAxis:mkAxis({type:'category',data:labels,inverse:true}),series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:yoys[i]>=5?C.green:yoys[i]>=0?C.muted:C.red}};}),barWidth:16,label:{show:true,position:'right',formatter:function(p){return p.value.toLocaleString();},textStyle:baseText}}]});
+  })();
+
+  // 15. chartTPEPriceIndex
+  (function(){
+    var dom=document.getElementById('chartTPEPriceIndex');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2023 Q1','2023 Q2','2023 Q3','2023 Q4','2024 Q1','2024 Q2','2024 Q3','2024 Q4','2025 Q1','2025 Q2','2025 Q3'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Housing Index':'住宅指數',en?'Presale (萬/坪)':'預售(萬/坪)']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels,axisLabel:Object.assign({},baseText,{rotate:30})}),yAxis:[mkAxis({type:'value',name:en?'Index':'指數',min:115,max:130}),mkAxis({type:'value',name:en?'萬/坪':'萬/坪',min:100,max:130,splitLine:{show:false}})],series:[{name:en?'Housing Index':'住宅指數',type:'line',data:[121,123,124,125,127,128,128,128,127.5,127.1,126.91],itemStyle:{color:C.navy},smooth:true},{name:en?'Presale (萬/坪)':'預售(萬/坪)',type:'line',yAxisIndex:1,data:[108,110,112,115,118,120,122,120,118,120.5,126.32],itemStyle:{color:C.orange},lineStyle:{type:'dashed'},smooth:true}]});
+  })();
+
+  // 16. chartTPENegotiation
+  (function(){
+    var dom=document.getElementById('chartTPENegotiation');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['<5%','5-10%','10-12%','>12%'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:['2024 Q2','2025 Q1']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:mkAxis({type:'value',name:'%'}),series:[{name:'2024 Q2',type:'bar',data:[15,55,25,5],itemStyle:{color:C.muted},barWidth:20,barGap:'30%'},{name:'2025 Q1',type:'bar',data:[8,32,28,32],itemStyle:{color:C.red},barWidth:20}]});
+  })();
+
+  // 17. chartTPEDistrict
+  (function(){
+    var dom=document.getElementById('chartTPEDistrict');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['信義','大安','松山','中正','中山','南港','內湖','萬華','文山','北投','士林','大同'];
+    var data=[160,130,100,95,88,82,87,65,55,60,62,68];
+    var yoys=[-1.5,-0.8,-2.1,0.5,-1.2,1.8,0.9,-0.5,0.3,-0.2,0.1,-0.8];
+    ch.setOption({tooltip:{trigger:'axis',formatter:function(p){var i=p[0].dataIndex;return labels[i]+': '+data[i]+' '+('萬/坪')+'<br>YoY: '+(yoys[i]>0?'+':'')+yoys[i]+'%';}},grid:Object.assign({},baseGrid,{left:60}),xAxis:mkAxis({type:'value',name:en?'萬/坪':'萬/坪'}),yAxis:mkAxis({type:'category',data:labels,inverse:true}),series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:yoys[i]>0?C.green:yoys[i]>=-1?C.orange:C.red}};}),barWidth:14,label:{show:true,position:'right',formatter:function(p){var i=p.dataIndex;return p.value+' ('+(yoys[i]>0?'+':'')+yoys[i]+'%)';},textStyle:{fontSize:9,color:C.navy}}}]});
+  })();
+
+  // 18. chartTPERentIndex
+  (function(){
+    var dom=document.getElementById('chartTPERentIndex');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2022 Q1','2022 Q3','2023 Q1','2023 Q3','2024 Q1','2024 Q3','2025 Q1','2025 Q3'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Rent Index':'租金指數',en?'Price Index':'房價指數']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:[mkAxis({type:'value',name:en?'Index':'指數',min:95,max:130})],series:[{name:en?'Rent Index':'租金指數',type:'line',data:[100,101.5,103.2,104.8,105.1,105.6,106.0,107.26],itemStyle:{color:C.green},smooth:true},{name:en?'Price Index':'房價指數',type:'line',data:[119,122,123,124,126,128,127.5,126.91],itemStyle:{color:C.navy},lineStyle:{type:'dashed'},smooth:true}]});
+  })();
+
+  // 19. chartTPEOfficeRent
+  (function(){
+    var dom=document.getElementById('chartTPEOfficeRent');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=en?['Dunbei +7.59%','CBD Overall +1.7%','Xinyi','Songjiang/West +3.01%','Nangang +2.42%']:['敦北+7.59%','CBD整體+1.7%','信義','松江南京/西區+3.01%','南港+2.42%'];
+    var data=[2891,3258,3100,2694,2367];
+    ch.setOption({tooltip:baseTooltip,grid:Object.assign({},baseGrid,{left:150}),xAxis:mkAxis({type:'value',name:'NT$/坪/月'}),yAxis:mkAxis({type:'category',data:labels,inverse:true}),series:[{type:'bar',data:data.map(function(v){return{value:v,itemStyle:{color:v>=3000?C.navy:v>=2700?C.orange:C.muted}};}),barWidth:16,label:{show:true,position:'right',formatter:function(p){return p.value.toLocaleString();},textStyle:baseText}}]});
+  })();
+
+  // 20. chartTPEOfficeVacancy
+  (function(){
+    var dom=document.getElementById('chartTPEOfficeVacancy');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    var labels=['2022','2023','2024 Q1','2024 Q2','2024 Q3','2024 Q4','2025 Q4','2026F'];
+    ch.setOption({tooltip:baseTooltip,legend:Object.assign({},baseLegend,{data:[en?'Supply (\'000 ping)':'供給(千坪)',en?'Vacancy %':'空置率%']}),grid:baseGrid,xAxis:mkAxis({type:'category',data:labels}),yAxis:[mkAxis({type:'value',name:en?'\'000 ping':'千坪'}),mkAxis({type:'value',name:'%',splitLine:{show:false}})],series:[{name:en?'Supply (\'000 ping)':'供給(千坪)',type:'bar',data:[8,5,0,0,0,10,20,24],itemStyle:{color:C.orange},barWidth:18},{name:en?'Vacancy %':'空置率%',type:'line',yAxisIndex:1,data:[1.5,2.0,2.1,2.2,2.3,2.8,6.9,9.5],itemStyle:{color:C.red},smooth:true,markLine:{silent:true,symbol:'none',data:[{yAxis:3.0,label:{formatter:en?'Healthy 3%':'健康3%',position:'end',fontSize:10,color:C.green},lineStyle:{color:C.green,type:'dashed'}}]}}]});
+  })();
+
+  // 21. chartTPECommercialTx
+  (function(){
+    var dom=document.getElementById('chartTPECommercialTx');if(!dom)return;
+    var ch=echarts.init(dom);allCharts.push(ch);
+    ch.setOption({tooltip:{trigger:'item',formatter:'{b}: NT${c}M ({d}%)'},legend:Object.assign({},baseLegend,{data:[en?'Industrial':'工業',en?'Land':'土地',en?'Office':'辦公',en?'Retail':'零售']}),series:[{type:'pie',radius:['40%','70%'],center:['50%','55%'],data:[{value:1000,name:en?'Industrial':'工業',itemStyle:{color:C.navy}},{value:1337,name:en?'Land':'土地',itemStyle:{color:C.orange}},{value:580,name:en?'Office':'辦公',itemStyle:{color:C.green}},{value:320,name:en?'Retail':'零售',itemStyle:{color:C.muted}}],label:{formatter:'{b}\n{d}%',fontSize:10,color:C.navy}}]});
+  })();
+
+  // Resize handler
+  window.addEventListener('resize',function(){allCharts.forEach(function(c){c.resize();});});
+}
+
+// Init on load
+(function(){
+  var lang=localStorage.getItem('lang')||'en';
+  setLang(lang);
+})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

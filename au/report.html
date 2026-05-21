@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Report | Australia Property Monitor</title>
+  <meta name="color-scheme" content="light">
+  <style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}
+  .market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:140px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+    .toc-box{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;margin:0 0 24px;font-family:'Inter',sans-serif;overflow:hidden}
+    .toc-header{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;font-size:12px;font-weight:600;color:#1e3a5f;cursor:pointer;user-select:none;background:#f4f7fc}
+    .toc-toggle{background:none;border:none;color:#5a7a9a;font-size:13px;cursor:pointer;padding:0;line-height:1;transition:transform .2s}
+    .toc-list{padding:8px 16px 12px;display:flex;flex-direction:column;gap:2px}
+    .toc-list a{font-size:12px;color:#2c3e50;text-decoration:none;padding:5px 8px 5px 10px;border-radius:4px;border-left:2px solid transparent;display:block;transition:all .15s;font-family:Georgia,serif}
+    .toc-list a:hover{background:#eef3f9;border-left-color:#1e3a5f;color:#1e3a5f}
+    .toc-collapsed .toc-list{display:none}
+    .toc-collapsed .toc-toggle{transform:rotate(180deg)}
+    /* -- Side Progress Nav -- */
+    .side-nav{position:fixed;top:50%;right:max(16px, calc(50% - 860px/2 - 160px));transform:translateY(-50%);width:136px;z-index:200;display:flex;flex-direction:column;padding:16px 12px;background:#fff;border:0.5px solid #dde8f2;border-radius:10px;box-shadow:0 2px 12px rgba(30,58,95,0.08);gap:0}
+    .side-nav::before{content:'';position:absolute;left:22px;top:28px;bottom:28px;width:1.5px;background:#eef3f9;z-index:0}
+    .side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:5px 0;position:relative;z-index:1;cursor:pointer}
+    .side-nav-dot{width:7px;height:7px;border-radius:50%;background:#dde8f2;border:1.5px solid #ccd9e8;flex-shrink:0;transition:all .2s;position:relative;z-index:2}
+    .side-nav-label{font-family:'Inter',sans-serif;font-size:10.5px;color:#94a3b8;line-height:1.3;transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px;letter-spacing:.01em}
+    .side-nav a.active .side-nav-dot{background:#1e3a5f;border-color:#1e3a5f;width:9px;height:9px;box-shadow:0 0 0 3px rgba(30,58,95,0.12)}
+    .side-nav a.active .side-nav-label{color:#1e3a5f;font-weight:600;font-size:10.5px}
+    .side-nav a:hover .side-nav-dot{background:#5a7a9a;border-color:#5a7a9a}
+    .side-nav a:hover .side-nav-label{color:#1e3a5f}
+    @media(max-width:1100px){.side-nav{display:none}}
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../tw/tw.css">
+  <style>
+    .report-container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .report-header{background:#fff;border:0.5px solid #ccd9e8;border-bottom:2px solid #1e3a5f;border-radius:4px 4px 0 0;padding:28px 40px}
+    .report-header h1{font-family:'Inter',sans-serif;font-weight:600;font-size:20px;color:#1e3a5f;letter-spacing:.05em;margin:0 0 4px}
+    .report-header .report-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:#5a7a9a;margin-bottom:8px}
+    .report-body{background:#fff;border:0.5px solid #ccd9e8;border-top:none;border-radius:0 0 4px 4px;padding:32px 40px}
+    .report-body h2{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#1e3a5f;border-bottom:1px solid #ccd9e8;padding-bottom:8px;margin-top:36px;margin-bottom:16px}
+    .report-body p{font-family:Georgia,serif;font-size:15px;line-height:1.9;color:#2c3e50;margin-bottom:16px}
+    .report-body strong{font-family:'JetBrains Mono',monospace;font-size:13px;color:#1e3a5f;background:#eef3f9;padding:1px 4px;border-radius:3px}
+    .chart-inline{background:#f4f7fc;border:0.5px solid #dde8f2;border-radius:6px;padding:14px 16px;margin:20px 0}
+    .chart-inline h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#1e3a5f;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .chart-inline .chart-note{font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:8px}
+    .chart-note.green{color:#16a34a}
+    .chart-note.orange{color:#d97706}
+    .chart-note.red{color:#dc2626}
+    .report-chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+    .report-chart-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:8px;padding:16px;min-width:0}
+    .report-chart-card h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:4px}
+    .report-chart-card .chart-meta{font-family:'Inter',sans-serif;font-size:11px;color:#d97706;margin-bottom:8px}
+    .report-footer{border-top:1px solid #ccd9e8;padding-top:16px;margin-top:32px}
+    .report-footer p{font-family:'Inter',sans-serif!important;font-size:11px!important;color:#5a7a9a!important;line-height:1.6!important;margin-bottom:3px!important}
+    @media(max-width:768px){.report-chart-grid{grid-template-columns:1fr}.report-header,.report-body{padding:20px}}  </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script>
+  function toggleToc(){document.getElementById('tocBox').classList.toggle('toc-collapsed');}
+  function closeTocMobile(){if(window.innerWidth<=768){document.getElementById('tocBox').classList.add('toc-collapsed');}}
+  </script>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <div class="report-container">
+    <nav class="side-nav" id="sideNav">
+      <a href="#sec-exec" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Exec Summary</span>
+        <span class="side-nav-label lang-zh" style="display:none">執行摘要</span>
+      </a>
+      <a href="#sec-policy" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">RBA Policy</span>
+        <span class="side-nav-label lang-zh" style="display:none">RBA政策</span>
+      </a>
+      <a href="#sec-supply" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Supply</span>
+        <span class="side-nav-label lang-zh" style="display:none">供給面</span>
+      </a>
+      <a href="#sec-demand" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Demand</span>
+        <span class="side-nav-label lang-zh" style="display:none">需求面</span>
+      </a>
+      <a href="#sec-valuation" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Valuation</span>
+        <span class="side-nav-label lang-zh" style="display:none">估值</span>
+      </a>
+      <a href="#sec-sydney" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Sydney</span>
+        <span class="side-nav-label lang-zh" style="display:none">雪梨</span>
+      </a>
+      <a href="#sec-brisbane" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Brisbane</span>
+        <span class="side-nav-label lang-zh" style="display:none">布里斯本</span>
+      </a>
+      <a href="#sec-goldcoast" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Gold Coast</span>
+        <span class="side-nav-label lang-zh" style="display:none">黃金海岸</span>
+      </a>
+      <a href="#sec-outlook" class="side-nav-item">
+        <span class="side-nav-dot"></span>
+        <span class="side-nav-label lang-en">Outlook</span>
+        <span class="side-nav-label lang-zh" style="display:none">展望</span>
+      </a>
+    </nav>
+    <div class="report-header">
+      <div class="lang-en">
+        <h1>AUSTRALIA RESIDENTIAL PROPERTY: 2026 FULL MARKET REPORT</h1>
+        <div class="report-meta">May 2026 &middot; Market Research</div>
+        <p style="font-size:13px;color:#5a7a9a;margin:4px 0 0;font-family:Inter,sans-serif;">Supply, Demand &amp; City Deep Dives &mdash; Updated post-May RBA decision</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <h1>澳洲住宅房市：2026年全市場深度報告</h1>
+        <div class="report-meta">2026年5月 &middot; 市場研究</div>
+        <p style="font-size:13px;color:#5a7a9a;margin:4px 0 0;font-family:Inter,sans-serif;">供給、需求與城市深度研究——RBA 5 月決議後更新</p>
+      </div>
+    </div>
+    <div class="report-body">
+
+      <!-- SECTION 1: EXECUTIVE SUMMARY -->
+      <div class="toc-box" id="tocBox">
+        <div class="toc-header" onclick="toggleToc()">
+          <span class="lang-en">In This Report</span><span class="lang-zh" style="display:none">本報告涵蓋</span>
+          <button class="toc-toggle">&#9650;</button>
+        </div>
+        <div class="toc-list">
+          <a href="#sec-exec" onclick="closeTocMobile()"><span class="lang-en">1. Executive Summary</span><span class="lang-zh" style="display:none">1. 執行摘要</span></a>
+          <a href="#sec-policy" onclick="closeTocMobile()"><span class="lang-en">2. RBA &amp; Macro: 3rd Consecutive Hike to 4.35%</span><span class="lang-zh" style="display:none">2. RBA與總體環境：第三次連續升息至 4.35%</span></a>
+          <a href="#sec-supply" onclick="closeTocMobile()"><span class="lang-en">3. Supply: Structural Deficit</span><span class="lang-zh" style="display:none">3. 供給：結構性赤字</span></a>
+          <a href="#sec-demand" onclick="closeTocMobile()"><span class="lang-en">4. Demand: Migration, Credit &amp; Wealth Effects</span><span class="lang-zh" style="display:none">4. 需求：移民、信貸與財富效應</span></a>
+          <a href="#sec-valuation" onclick="closeTocMobile()"><span class="lang-en">5. Valuation &amp; Affordability</span><span class="lang-zh" style="display:none">5. 估值與可負擔性</span></a>
+          <a href="#sec-sydney" onclick="closeTocMobile()"><span class="lang-en">6. Sydney: Affordability Ceiling</span><span class="lang-zh" style="display:none">6. 雪梨：可負擔性天花板</span></a>
+          <a href="#sec-brisbane" onclick="closeTocMobile()"><span class="lang-en">7. Brisbane: Olympic City Momentum</span><span class="lang-zh" style="display:none">7. 布里斯本：奧運城市動能</span></a>
+          <a href="#sec-goldcoast" onclick="closeTocMobile()"><span class="lang-en">8. Gold Coast: Lifestyle Premium Logic</span><span class="lang-zh" style="display:none">8. 黃金海岸：生活方式溢價邏輯</span></a>
+          <a href="#sec-outlook" onclick="closeTocMobile()"><span class="lang-en">9. Outlook: Three Scenarios 2026&ndash;2027</span><span class="lang-zh" style="display:none">9. 展望：2026&ndash;2027年三大情境</span></a>
+        </div>
+      </div>
+
+      <h2 id="sec-exec"><span class="lang-en">EXECUTIVE SUMMARY</span><span class="lang-zh" style="display:none">執行摘要</span></h2>
+      <div class="lang-en">
+        <p>Australia's residential property market entered Q2 2026 in a state of extreme structural tension — high prices, tight rents, and a central bank that is now actively hiking against Middle East-driven inflation. Total dwelling value reached a record <strong>A$12.31 trillion</strong> in December 2025, with the national average price at <strong>A$1,074,700</strong>. On 6 May 2026 the RBA raised the cash rate by 25 bps to <strong>4.35%</strong> — its <strong>third consecutive hike of 2026</strong> — citing capacity pressures and second-round energy effects from the Middle East conflict. CBA economists now expect rates on hold for the rest of 2026, but the RBA explicitly left the door open to further hikes; ASX 30-day interbank futures continue to price the possibility of a terminal rate above <strong>4.50%</strong> by early 2027.</p>
+        <p>What is most revealing about the current cycle is how little effect tighter policy is having on the supply side. National dwelling completions fell to <strong>174,271</strong> in the year to June 2025, well below the National Housing Accord target of <strong>240,000 per year</strong>. Annual dwelling approvals have stalled at approximately <strong>196,500</strong> in the year to February 2026 — the first 20 months of the Accord period saw approvals running <strong>19% below</strong> the implied target. The NHSAC's March 2026 quarterly report forecasts total completions of just <strong>938,000</strong> over the five-year Accord window, implying a <strong>262,000-unit shortfall</strong> against the 1.2 million target. No state is on track: Victoria is expected to reach 98% of its share, but NSW will reach only 65% and Tasmania just 51%.</p>
+        <p>The May rate hike is now visibly reshaping the price tape. CoreLogic's April 2026 Home Value Index rose just <strong>+0.3% MoM</strong> nationally — the weakest growth in nearly a year — and Sydney and Melbourne moved into <strong>outright decline at -0.6% MoM each</strong>. The two-speed pattern has narrowed: Perth +2.1%, Adelaide +1.2%, Brisbane +1.1% in the same month. Trailing 12-month picture: Perth <strong>+24.3%</strong> YoY, Brisbane <strong>+19%</strong>, Gold Coast <strong>+12.8%</strong>; Sydney just <strong>+4.8%</strong>, Melbourne <strong>+3.4%</strong>. Rental markets remain extremely tight at a <strong>1.0% national vacancy rate</strong>, with Sydney's median rent at <strong>A$817/week</strong> — the highest in the country. Resale profitability hit a 20-year high: <strong>95.5% of sellers</strong> booked a nominal gain in Q3 2025 at a median profit of <strong>A$335,000</strong>. The crisis is structural, not cyclical — and monetary policy alone cannot fix it.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>澳洲住宅市場進入 2026 年第二季時面臨高度結構性張力：房價創新高、租金緊繃，而央行因中東引發的通膨壓力正主動升息。2025 年 12 月全國住宅總值達歷史新高 <strong>A$12.31 兆</strong>，全國平均價格 <strong>A$1,074,700</strong>。RBA 在 2026 年 5 月 6 日再升息 25 個基點至 <strong>4.35%</strong>——是 <strong>2026 年內連續第三次升息</strong>，主因產能壓力與中東衝突帶來的次輪能源效應。CBA 經濟學家預期 2026 年剩下月份維持不變，但 RBA 明確未排除進一步升息；ASX 30 天銀行間期貨仍反映 2027 年初終端利率可能高於 <strong>4.50%</strong>。</p>
+        <p>這波週期最值得注意的是：緊縮政策對供給面幾乎沒效果。截至 2025 年 6 月的年度住宅完工量降到 <strong>174,271 戶</strong>，遠低於《國家住房協議》每年 <strong>24 萬戶</strong>的目標。截至 2026 年 2 月的年度建築批准量停滯在約 <strong>196,500 戶</strong>，協議前 20 個月的批准量比目標低了 <strong>19%</strong>。NHSAC 在 2026 年 3 月季報中預估，協議的五年窗口內完工總量只有 <strong>93.8 萬戶</strong>，比 120 萬戶目標少 <strong>26.2 萬戶</strong>。沒有一個州達標：維多利亞州預計能達成 98%，新南威爾斯州只有 65%，塔斯馬尼亞更只有 51%。</p>
+        <p>5 月升息已開始重塑價格軌跡。CoreLogic 2026 年 4 月房屋價值指數全國僅 <strong>月增 +0.3%</strong>——近一年最弱——雪梨與墨爾本 <strong>月度雙雙轉跌至 -0.6%</strong>。雙速格局明顯收窄：同月伯斯 +2.1%、阿得雷德 +1.2%、布里斯本 +1.1%。過去 12 個月情況：伯斯獨立屋年漲 <strong>24.3%</strong>、布里斯本 <strong>19%</strong>、黃金海岸 <strong>12.8%</strong>；雪梨只漲 <strong>4.8%</strong>、墨爾本 <strong>3.4%</strong>。租屋市場仍極度緊繃，<strong>全國空置率 1.0%</strong>，雪梨中位週租 <strong>A$817/週</strong>，全國最高。轉售獲利更是創 20 年新高：2025 年 Q3 有 <strong>95.5% 的賣家</strong>錄得名目利潤，中位獲利 <strong>A$335,000</strong>。這是一場結構性危機，不是週期性波動，光靠貨幣政策解決不了。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">National Dwelling Total Value &amp; Average Price</span><span class="lang-zh" style="display:none">全國住宅總值與平均價格</span></h4>
+          <div class="chart-meta"><span class="lang-en">2020-2025, quarterly</span><span class="lang-zh" style="display:none">2020-2025，季度</span></div>
+          <div id="rChartAuPrice10y" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">City House Price Growth YoY</span><span class="lang-zh" style="display:none">各城市房價年增率</span></h4>
+          <div class="chart-meta"><span class="lang-en">Annual % change</span><span class="lang-zh" style="display:none">年度百分比變化</span></div>
+          <div id="rChartCityYoY" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Rental Vacancy Rate</span><span class="lang-zh" style="display:none">各城市空置率</span></h4>
+          <div class="chart-meta"><span class="lang-en">% of total stock</span><span class="lang-zh" style="display:none">佔總存量百分比</span></div>
+          <div id="rChartVacancy" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Resale Profitability Q3 2025</span><span class="lang-zh" style="display:none">轉售獲利率</span></h4>
+          <div class="chart-meta"><span class="lang-en">% of resales</span><span class="lang-zh" style="display:none">佔轉售百分比</span></div>
+          <div id="rChartResale" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: RBA & MACRO -->
+      <h2 id="sec-policy"><span class="lang-en">RBA &amp; MACRO: 3RD CONSECUTIVE HIKE TO 4.35%</span><span class="lang-zh" style="display:none">RBA與總體環境：第三次連續升息至 4.35%</span></h2>
+      <div class="lang-en">
+        <p>The Reserve Bank of Australia raised the cash rate by <strong>25 bps to 4.35%</strong> on 6 May 2026 — its <strong>third consecutive hike</strong> of 2026 (following February's move to 3.85% and the 17 March move to 4.10%). Eight Monetary Policy Board members voted in favour; one dissented in favour of holding at 4.10%. The trigger was a stubborn trimmed-mean CPI reading at the upper end of the target band, sharply reinforced by Middle East fuel and commodity-price pass-through that picked up materially in H2 2025. CBA economists now expect rates on hold for the rest of 2026 as the Bank monitors the inflation response, but the RBA's own communique left the door open to further moves, stating it will "do what it considers necessary" to return inflation to target.</p>
+        <p>The pass-through to borrower rates is now substantial. The average new variable mortgage rate has risen to <strong>6.75%</strong>, with some lenders above 7%. Mortgage stress — defined as households spending over 30% of income on repayments — now affects <strong>47.5%</strong> of mortgage holders nationally, rising to <strong>56.8%</strong> in NSW where median mortgage sizes are largest. Yet the distressed-listings channel remains suppressed: nationwide distressed listings sit <strong>29.2% below</strong> pre-COVID levels. Two buffers are holding: unemployment has only edged up to <strong>4.3%</strong>, keeping most households servicing their loans; and roughly 40% of mortgage holders still carry meaningful offset-account balances accumulated during the ultra-low-rate period of 2020–2022.</p>
+        <p>The macro picture beyond rates is mixed. Real GDP growth has moderated to <strong>~1.5%</strong> on an annualised basis, consumer sentiment remains below long-term averages, and retail volumes are flat. But the labour market continues to absorb new workers — payrolls added approximately 280,000 positions over the past 12 months, and participation remains near record highs. This combination of weak consumption and strong employment is the defining feature of Australia's current cycle, and it is precisely the environment that keeps housing demand intact despite elevated financing costs: buyers who can service a mortgage are not at risk of losing their income.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>RBA 於 2026 年 5 月 6 日升息 <strong>25 個基點至 4.35%</strong>——是 <strong>2026 年內第三次連續升息</strong>（2 月升至 3.85%、3 月 17 日升至 4.10% 後再次）。9 位貨幣政策理事中 8 人支持升息，1 人主張維持 4.10%。觸發點是截尾平均 CPI 持續貼近目標區間上緣，並被中東地緣傳導的能源與大宗商品價格在 2025 年下半年顯著放大。CBA 經濟學家預期 2026 年剩下月份維持，邊觀察通膨反應；但 RBA 在公報中明確保留進一步動作的空間，聲明將「採取必要措施」讓通膨回到目標。</p>
+        <p>升息對借款戶的傳導已經很實在。新增浮動房貸平均利率升到 <strong>6.75%</strong>，部分銀行突破 7%。「房貸壓力」——定義為家庭將超過 30% 收入用於還款——目前影響 <strong>47.5%</strong> 的房貸戶，在新南威爾斯州更達 <strong>56.8%</strong>，因為當地房貸中位數最高。但拋售管道仍被壓住：全國困境物件掛牌量比疫情前還低 <strong>29.2%</strong>。兩個緩衝在撐著：失業率只微升到 <strong>4.3%</strong>，絕大多數家庭還付得起；另外約 40% 的房貸戶還有 2020 至 2022 年超低利率期間累積下來的抵銷帳戶餘額。</p>
+        <p>利率之外的總體環境則偏複雜。實質 GDP 成長已放緩到年化約 <strong>1.5%</strong>，消費者信心低於長期平均，零售銷售量持平。但勞動市場仍持續吸收新就業，過去 12 個月大約新增 28 萬個職缺，勞動參與率也接近歷史高點。「消費疲弱但就業穩健」是澳洲現階段週期的核心特徵，也正是這個組合讓房市需求在高融資成本下仍然撐得住：付得起房貸的家庭，並沒有失去收入的風險。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">RBA Cash Rate Path &amp; ASX Futures</span><span class="lang-zh" style="display:none">RBA現金利率路徑與ASX期貨</span></h4>
+          <div class="chart-meta"><span class="lang-en">Official vs market pricing</span><span class="lang-zh" style="display:none">官方利率 vs 市場定價</span></div>
+          <div id="rChartRBAPath" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Mortgage Stress by State</span><span class="lang-zh" style="display:none">各州房貸壓力</span></h4>
+          <div class="chart-meta"><span class="lang-en">% households &gt;30% income on repayments</span><span class="lang-zh" style="display:none">還款佔收入超過30%的家庭佔比</span></div>
+          <div id="rChartMortgageStress" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Unemployment &amp; RBA Rate</span><span class="lang-zh" style="display:none">失業率與RBA利率</span></h4>
+          <div class="chart-meta"><span class="lang-en">Dual axis comparison</span><span class="lang-zh" style="display:none">雙軸比較</span></div>
+          <div id="rChartEmployment" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Distressed Listings &amp; Median Price</span><span class="lang-zh" style="display:none">困境房源與中位價格</span></h4>
+          <div class="chart-meta"><span class="lang-en">YoY % change &amp; price level</span><span class="lang-zh" style="display:none">年增率變化與價格水平</span></div>
+          <div id="rChartDistressed" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: SUPPLY -->
+      <h2 id="sec-supply"><span class="lang-en">SUPPLY: STRUCTURAL DEFICIT</span><span class="lang-zh" style="display:none">供給：結構性赤字</span></h2>
+      <div class="lang-en">
+        <p>Australia's housing construction system is in a visible, prolonged, and worsening crisis. Total dwelling completions in the year to June 2025 fell to <strong>174,271</strong>, well below the National Housing Accord's implied run rate of <strong>240,000 per annum</strong>. The annualised completion rate in Q2 2025 dropped to just <strong>162,096</strong> — a 12.5% year-on-year decline and a multi-year low. Annual dwelling approvals have stalled at <strong>196,500</strong> in the year to February 2026, with approvals over the first 20 months of the Accord period running <strong>77,660 units (19%) below</strong> the implied target.</p>
+        <p>The NHSAC's March 2026 quarterly report now projects total completions of just <strong>938,000 units</strong> over the five-year Housing Accord window (2024–2029), implying a <strong>262,000-unit shortfall</strong> against the 1.2 million target. The underperformance is geographically uneven and broad: Victoria is tracking at 98% of its share, NSW at only <strong>65%</strong>, Queensland at roughly 80%, and Tasmania at just <strong>51%</strong>. No state or territory is forecast to meet its pro-rata target. Structural Capacity Constraints in Australia's Housing Crisis, published in early 2026, characterises the 1.2M figure as "unachievable under the current policy architecture" — a notable admission from a peer-reviewed analysis.</p>
+        <p>The root causes are layered. Labour and trades shortages have extended construction timelines materially: Western Australia now averages <strong>15.45 months</strong> to complete a house, up 71% from 9.06 months in 2020; Queensland averages 13.2 months, NSW 11.8 months. Building materials costs have risen 35% cumulatively from pre-COVID levels, compressing builder margins. Builder insolvencies remain elevated, with around <strong>3,000 construction businesses</strong> entering administration in 2025. Developer feasibility for high-rise apartments is particularly strained: apartment approvals collapsed <strong>24.5% month-on-month</strong> in January 2026 to just 4,393 units — well below the level required to meet medium-term urban demand. Even if the RBA cuts rates aggressively in 2027, the supply side cannot respond meaningfully before 2028 at the earliest.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>澳洲住宅建設系統正處在明顯、長期且惡化中的危機。截至 2025 年 6 月的年度住宅完工量降到 <strong>174,271 戶</strong>，遠低於《國家住房協議》隱含的每年 <strong>24 萬戶</strong>節奏。2025 年 Q2 年化完工率只剩 <strong>162,096 戶</strong>，年減 12.5%，是多年來低點。截至 2026 年 2 月的年度建築批准量停滯在 <strong>196,500 戶</strong>，協議前 20 個月的累計批准比目標少了 <strong>77,660 戶（19%）</strong>。</p>
+        <p>NHSAC 在 2026 年 3 月的季報中預估，《住房協議》五年窗口（2024–2029）內總完工量只有 <strong>93.8 萬戶</strong>，比 120 萬戶目標少 <strong>26.2 萬戶</strong>。各州表現落差極大：維多利亞州可達成 98%、新南威爾斯州只剩 <strong>65%</strong>、昆士蘭州約 80%、塔斯馬尼亞只有 <strong>51%</strong>。沒有一個州可以按人口比例達標。2026 年初同儕審查發表的學術研究《澳洲住房危機中的結構性產能限制》直接定調：「在現行政策架構下，120 萬戶目標無法達成」——這是相當罕見的明確結論。</p>
+        <p>根源是多重疊加的。人力與技工短缺讓施工時間顯著拉長：西澳現在平均要 <strong>15.45 個月</strong>才能蓋完一棟獨立屋，比 2020 年的 9.06 個月多 71%；昆士蘭平均 13.2 個月、新南威爾斯 11.8 個月。建材成本比疫情前累計上升 35%，壓縮建商利潤空間。建商倒閉仍處高位，2025 年約 <strong>3,000 家</strong>營造業者進入破產程序。高層公寓的開發可行性尤其吃緊：2026 年 1 月公寓批准量月減 <strong>24.5%</strong>，只剩 4,393 戶，遠低於滿足中期都會需求所需的水準。即使 RBA 在 2027 年大幅降息，供給面最快也要到 2028 年才有可能做出有意義的回應。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Annual Dwelling Completions</span><span class="lang-zh" style="display:none">年度住宅完工量</span></h4>
+          <div class="chart-meta"><span class="lang-en">FY2020-FY2025</span><span class="lang-zh" style="display:none">2020-2025財政年度</span></div>
+          <div id="rChartCompletions" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Building Approvals</span><span class="lang-zh" style="display:none">建築批准</span></h4>
+          <div class="chart-meta"><span class="lang-en">Monthly, Nov 2025 - Jan 2026</span><span class="lang-zh" style="display:none">月度，2025年11月-2026年1月</span></div>
+          <div id="rChartApprovals" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Supply-Demand Balance (NHSAC)</span><span class="lang-zh" style="display:none">供需平衡（NHSAC）</span></h4>
+          <div class="chart-meta"><span class="lang-en">Projected 2023-2029</span><span class="lang-zh" style="display:none">2023-2029預測</span></div>
+          <div id="rChartNHSAC" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Construction Time by State</span><span class="lang-zh" style="display:none">各州建設工期</span></h4>
+          <div class="chart-meta"><span class="lang-en">Months to complete, 2020 vs 2025</span><span class="lang-zh" style="display:none">完工月數，2020 vs 2025</span></div>
+          <div id="rChartBuildTime" style="height:260px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: DEMAND -->
+      <h2 id="sec-demand"><span class="lang-en">DEMAND: MIGRATION, CREDIT &amp; WEALTH EFFECTS</span><span class="lang-zh" style="display:none">需求：移民、信貸與財富效應</span></h2>
+      <div class="lang-en">
+        <p>Net overseas migration (NOM) peaked at <strong>556,000</strong> in FY2023 — the highest on record — before moderating to <strong>446,000</strong> in FY2024 and an estimated <strong>306,000</strong> in FY2025. The federal government's Population Statement forecasts NOM to fall to around <strong>260,000</strong> in FY2026, roughly half the 2023 peak, driven by tighter student visa integrity rules, a wave of temporary-visa holders reaching maximum stay, and the unwinding of post-pandemic pent-up demand. Even at this lower level, annual net migration continues to dwarf annual housing supply: with household formation rates typically producing one new household per 2.3 arrivals, the FY2026 NOM alone implies demand for approximately 113,000 new dwellings — against completions tracking well below that figure.</p>
+        <p>Foreign investment has moderated sharply under policy headwinds. FIRB-approved foreign residential purchases fell to just <strong>3,922</strong> in FY2025, down from approximately 7,100 in FY2022. Chinese investment — historically the largest foreign buyer segment — dropped to <strong>A$1.4 billion</strong> in FY2025, reflecting both capital controls out of China and the federal government's 2-year ban on foreign buyers acquiring existing dwellings (announced in late 2024, effective 1 April 2025). The ban does not apply to new builds, which has created a narrow but durable demand channel for off-the-plan apartments in Melbourne, Brisbane, and inner Sydney — directly underwriting the build-to-sell pipeline that has otherwise shrunk materially.</p>
+        <p>Domestic credit flows tell a revealing story. <strong>56.7%</strong> of new mortgage lending in 2025 was directed at owner-occupied existing dwellings, while new construction financing captured only <strong>15.7%</strong>. The remainder went to investor purchases, which have rebounded modestly as yields improved relative to 2021–2022. Debt-to-income ratios reached alarming levels by international standards: Gold Coast leads at <strong>11.2x</strong>, Sydney at <strong>10.8x</strong>, and Melbourne at 9.1x — all well above APRA's macroprudential benchmark of 6x. APRA's 3% serviceability buffer (applied on top of the lender's offered rate) has become a binding constraint for the marginal buyer, which is the mechanism through which monetary policy is actually transmitting to the market. Existing owners with equity continue transacting; credit-dependent first-home buyers and upgraders are increasingly rationed out.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>淨海外移民（NOM）在 FY2023 達到歷史紀錄 <strong>55.6 萬人</strong>，之後降到 FY2024 的 <strong>44.6 萬人</strong>，FY2025 估計 <strong>30.6 萬人</strong>。聯邦政府在《人口白皮書》中預估 FY2026 NOM 會進一步降到約 <strong>26 萬人</strong>，約為 2023 年高峰的一半；原因是學生簽證審查收緊、疫情後大量臨時簽證持有人即將達到最長停留期限、加上疫情遞延需求消化完畢。即便降到這個水準，年度淨移民仍遠超過年度住宅供給：以平均每 2.3 名移民形成 1 個新家庭計算，光 FY2026 的 NOM 就等於創造約 11.3 萬戶新住宅需求——而完工量遠遠追不上。</p>
+        <p>外資在政策逆風下大幅放緩。FIRB 核准的外國住宅購買降到 FY2025 的 <strong>3,922 件</strong>，比 FY2022 的約 7,100 件大幅下降。中國投資——歷來最大的外國買家族群——FY2025 降到 <strong>A$14 億</strong>，既反映中國資本管制、也反映聯邦政府 2024 年底宣布、2025 年 4 月 1 日生效的「外國人兩年禁買中古屋」政策。這條禁令不適用於新建案，為墨爾本、布里斯本、內雪梨的預售公寓留了一條穩定的需求管道，實質上撐住了原本已大幅萎縮的預售供給。</p>
+        <p>國內信貸流向說明了問題所在。2025 年新增房貸中，<strong>56.7%</strong> 流向自住中古屋，新建案融資只佔 <strong>15.7%</strong>，剩下的進到投資客，後者因為 2021–2022 年以來收益率改善而小幅回流。債務收入比以國際標準看相當驚人：黃金海岸 <strong>11.2 倍</strong>、雪梨 <strong>10.8 倍</strong>、墨爾本 9.1 倍，全都遠高於 APRA 的 6 倍基準。APRA 的 3% 壓力測試緩衝（加在銀行實際利率之上）對邊際買家來說已經是卡死的門檻，這正是貨幣政策實際傳導到房市的機制：有資產的既有屋主照樣交易，靠信用的首購族和換屋族越來越被排擠出市場。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Net Overseas Migration</span><span class="lang-zh" style="display:none">淨海外移民</span></h4>
+          <div class="chart-meta"><span class="lang-en">Annual, FY2019-FY2026F</span><span class="lang-zh" style="display:none">年度，2019-2026財政年度</span></div>
+          <div id="rChartNOM" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">FIRB Foreign Purchases &amp; China A$B</span><span class="lang-zh" style="display:none">FIRB外國購買與中國投資</span></h4>
+          <div class="chart-meta"><span class="lang-en">FY2023-FY2025</span><span class="lang-zh" style="display:none">2023-2025財政年度</span></div>
+          <div id="rChartFIRB" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">New Lending by Type</span><span class="lang-zh" style="display:none">新增貸款類型分布</span></h4>
+          <div class="chart-meta"><span class="lang-en">% of total commitments</span><span class="lang-zh" style="display:none">佔總承諾百分比</span></div>
+          <div id="rChartLoanType" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Debt-to-Income Ratio by City</span><span class="lang-zh" style="display:none">各城市債務收入比</span></h4>
+          <div class="chart-meta"><span class="lang-en">Median household</span><span class="lang-zh" style="display:none">中位數家庭</span></div>
+          <div id="rChartDTI" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 5: VALUATION & AFFORDABILITY -->
+      <h2 id="sec-valuation"><span class="lang-en">VALUATION &amp; AFFORDABILITY</span><span class="lang-zh" style="display:none">估值與可負擔性</span></h2>
+      <div class="lang-en">
+        <p>Gross rental yields remain deeply compressed against current financing costs. The national average gross yield sits at <strong>3.7%</strong>, against an average new variable mortgage rate of <strong>6.75%</strong> — a negative carry of roughly 300 basis points. Sydney houses yield just <strong>3.1%</strong>, Melbourne houses 3.3%, while Darwin leads nationally at <strong>6.6%</strong> and Perth has narrowed to 4.2% as prices surge. On a post-interest, post-costs basis, most capital-city investors are operating in significant negative gearing — offset only by the expected capital appreciation path. The buy-hold-offset-through-negative-gearing playbook remains rational only because structural undersupply underwrites the capital growth assumption.</p>
+        <p>The market is bifurcating sharply along the price quartile dimension. Lower-quartile properties (the bottom 25% by value in each capital) delivered <strong>+2.5%</strong> growth in Q1 2026, while upper-quartile properties fell <strong>-2.0%</strong> — a clear affordability gravity effect as high-rate environments disproportionately constrain credit-dependent prestige buyers. First-home-buyer schemes, state stamp duty concessions, and the federal Help to Buy shared equity programme are all channeling marginal demand into entry-level stock, compounding this bottom-up compression of the value curve.</p>
+        <p>Build-to-rent (BTR) has emerged as the institutional answer to the rental crisis. The national BTR pipeline grew from just 800 units in 2021 to <strong>5,500 in 2025</strong>, with approximately <strong>6,000–6,500 new units</strong> forecast for delivery in 2026. Projections see the total pipeline reaching <strong>18,000 units by 2030</strong>, supported by Labor government tax concessions (reduced MIT withholding from 30% to 15% on eligible BTR assets) and APRA framework adjustments. While BTR will not solve the affordability crisis at the ownership level, it is material for rental supply in inner Melbourne, Brisbane, and increasingly Perth. Rent inflation continues to outpace general CPI but is moderating: actual rents rose <strong>6.6%</strong> in 2025 against CPI of 4.2%, and major forecasters (SQM, Domain) expect capital-city rental growth to slow to <strong>2–4%</strong> in 2026 as BTR supply and migration normalisation combine. Tenants are now allocating a record-high <strong>33.4%</strong> of income to rent, well above the 20-year average of 29.2%.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>毛租金收益率相對融資成本仍被嚴重壓縮。全國平均毛收益率 <strong>3.7%</strong>，對比新增浮動房貸平均利率 <strong>6.75%</strong>，負利差約 300 個基點。雪梨獨立屋收益率只有 <strong>3.1%</strong>、墨爾本 3.3%；達爾文以 <strong>6.6%</strong> 領先，伯斯因房價飆漲已收斂到 4.2%。扣掉利息和持有成本後，多數主要城市投資人實際上處於顯著「負收益槓桿（negative gearing）」，只靠預期資本增值撐住。這套「買入、持有、靠負收益抵稅」的劇本還站得住，是因為結構性供給短缺撐住了資本增值的假設。</p>
+        <p>市場按價格四分位明顯分化。低四分位物業（各大城市最低 25% 的價格帶）在 2026 年 Q1 漲 <strong>2.5%</strong>，高四分位物業卻跌 <strong>2.0%</strong>——這是典型的可負擔性重力效應：高利率環境下，靠信用的高端買家受衝擊更大。首購族補助、各州印花稅減免、以及聯邦「Help to Buy」共享權益計畫都把邊際需求推向入門物件，強化了「價值曲線由下往上壓縮」的格局。</p>
+        <p>「Build-to-Rent」（BTR，建成後出租）已是機構應對租屋危機的主要解方。全國 BTR 在建量從 2021 年的 800 戶成長到 <strong>2025 年 5,500 戶</strong>，2026 年預計再交出 <strong>6,000 至 6,500 戶</strong>。預估到 2030 年總在建量可達 <strong>1.8 萬戶</strong>，背後有工黨政府的稅負優惠（合格 BTR 資產 MIT 扣繳稅從 30% 降到 15%）與 APRA 框架調整。BTR 解決不了擁屋可負擔性問題，但對墨爾本、布里斯本內城、以及伯斯的租屋供給影響明顯。租金通膨仍高於整體 CPI 但在放緩中：2025 年實際租金漲 <strong>6.6%</strong>、CPI 漲 4.2%；SQM、Domain 等主要機構預估 2026 年主要城市租金漲幅將收斂到 <strong>2 至 4%</strong>，背後是 BTR 供給加上移民正常化。但租戶的「租金所得比」已升到歷史新高 <strong>33.4%</strong>，遠高於 20 年均值 29.2%。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Gross Rental Yield by City</span><span class="lang-zh" style="display:none">各城市毛租金收益率</span></h4>
+          <div class="chart-meta"><span class="lang-en">% annualised</span><span class="lang-zh" style="display:none">年化百分比</span></div>
+          <div id="rChartYield" style="height:240px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Price Growth by Quartile</span><span class="lang-zh" style="display:none">按價格四分位增長</span></h4>
+          <div class="chart-meta"><span class="lang-en">YoY % change</span><span class="lang-zh" style="display:none">年增率</span></div>
+          <div id="rChartQuartile" style="height:240px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Build-to-Rent Pipeline</span><span class="lang-zh" style="display:none">建後出租在建量</span></h4>
+          <div class="chart-meta"><span class="lang-en">Units in pipeline</span><span class="lang-zh" style="display:none">在建中的單位數</span></div>
+          <div id="rChartBTR" style="height:240px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Rent vs CPI Inflation</span><span class="lang-zh" style="display:none">租金 vs CPI通膨</span></h4>
+          <div class="chart-meta"><span class="lang-en">Annual % change</span><span class="lang-zh" style="display:none">年度百分比變化</span></div>
+          <div id="rChartRentInflation" style="height:240px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 6: SYDNEY -->
+      <h2 id="sec-sydney"><span class="lang-en">SYDNEY: AFFORDABILITY CEILING</span><span class="lang-zh" style="display:none">雪梨：可負擔性天花板</span></h2>
+      <div class="lang-en">
+        <p>Sydney remains the nation's most expensive market. The median house price reached <strong>A$1,607,046</strong> in Q1 2026, with units at <strong>A$903,080</strong>. Annual price growth has moderated sharply to just <strong>+4.8%</strong> over the 12 months to April 2026, and the monthly read turned marginally negative (-0.1%) in the latest print — leaving Sydney -0.4% below its November 2025 record high. The slowdown is a pure affordability story: with median house values at 10.8x median household income and the average new mortgage rate at 6.75%, the arithmetic no longer works for credit-dependent buyers across most of the city.</p>
+        <p>Auction clearance rates have been volatile and directional, providing the clearest real-time read on market direction. Sydney auctions cleared at <strong>79.6%</strong> in January 2026 when buyers expected a February hold, but collapsed to <strong>55%</strong> in late March 2026 immediately following the second RBA hike. Days-on-market for detached houses in the $1.5–2.5M bracket has extended from 32 days in mid-2025 to 48 days in Q1 2026, and vendor discounting has deepened from 2.8% to 4.5%. Sub-quartile properties — terrace houses under A$1.2M in the inner west, entry-level units in Parramatta, Liverpool, Penrith — continue to clear promptly, supported by first-home buyer schemes.</p>
+        <p>The rental market tells a very different story. Sydney's median weekly rent reached <strong>A$817</strong> — the highest of any Australian capital — with the rental vacancy rate at <strong>1.5%</strong>. A sub-A$800-per-week two-bedroom unit within 10km of the CBD now attracts 30–50 applicants in a typical week. Migration-driven demand remains the overwhelming rental support: Sydney retained roughly 45% of FY2025 NOM, and despite accelerating interstate outflows to Brisbane and Perth, population growth is still positive. The practical implication: rental yields are compressing at the top and expanding at the bottom, which is textbook late-cycle positioning in a supply-constrained affordability-capped market.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>雪梨仍是全澳最貴的市場。2026 年 Q1 中位獨立屋價格達 <strong>A$1,607,046</strong>、公寓 <strong>A$903,080</strong>。過去 12 個月到 2026 年 4 月，雪梨年增率已大幅放緩到 <strong>4.8%</strong>，最新月度讀數轉為微幅負值（-0.1%），目前比 2025 年 11 月的歷史高點還低 0.4%。放緩的原因純粹是可負擔性：中位獨立屋價為家庭年收入的 10.8 倍、新增房貸利率 6.75%，這套數字在雪梨絕大多數區域對靠信用的買家而言已經兜不攏。</p>
+        <p>拍賣清盤率波動明顯、也是即時判斷市場方向最清楚的訊號。雪梨 2026 年 1 月清盤率達 <strong>79.6%</strong>，當時市場以為 2 月會維持利率；但 3 月下旬 RBA 連續第二次升息後，清盤率立刻掉到 <strong>55%</strong>。A$150–250 萬區間獨立屋的平均上市天數，從 2025 年中的 32 天拉到 2026 年 Q1 的 48 天，賣方折讓幅度也從 2.8% 擴大到 4.5%。低四分位物件——內西區 A$120 萬以下連棟屋、Parramatta、Liverpool、Penrith 的入門公寓——在首購族補助撐住下仍迅速去化。</p>
+        <p>租屋市場故事完全不同。雪梨中位週租達 <strong>A$817</strong>，是全澳最貴首府；空置率 <strong>1.5%</strong>。CBD 方圓 10 公里內、週租不到 A$800 的兩房單位，一週平均會有 30 至 50 組申請人。移民驅動的需求仍是租屋市場的主要支撐：FY2025 NOM 約 45% 落在雪梨；雖然往布里斯本和伯斯的州內外移加速，但人口仍淨流入。實務上的意義是：租金收益率在高端壓縮、在低端擴張——這是供給受限、可負擔性封頂市場的典型晚週期特徵。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Sydney Median Price: Houses vs Units</span><span class="lang-zh" style="display:none">雪梨中位價格：獨立屋 vs 公寓</span></h4>
+          <div class="chart-meta"><span class="lang-en">2019-2026 Q1</span><span class="lang-zh" style="display:none">2019-2026年第一季</span></div>
+          <div id="rChartSydPrice" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Sydney Auction Clearance Rate</span><span class="lang-zh" style="display:none">雪梨拍賣清算率</span></h4>
+          <div class="chart-meta"><span class="lang-en">Weekly %, Sep 2025 - Mar 2026</span><span class="lang-zh" style="display:none">每週百分比，2025年9月-2026年3月</span></div>
+          <div id="rChartSydClearance" style="height:240px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 7: BRISBANE -->
+      <h2 id="sec-brisbane"><span class="lang-en">BRISBANE: OLYMPIC CITY MOMENTUM</span><span class="lang-zh" style="display:none">布里斯本：奧運城市動能</span></h2>
+      <div class="lang-en">
+        <p>Brisbane is the standout performer of the current cycle — up <strong>+19%</strong> year-on-year to April 2026, with median house prices reaching <strong>A$1,080,000</strong> and units at <strong>A$680,000</strong>. KPMG's January 2026 forecast sees Brisbane continuing to lead among east-coast capitals with projected 2026 growth of <strong>+10.9%</strong>, second only to Perth. Unlike Sydney and Melbourne where growth has stalled on affordability, Brisbane is still operating well below its mortgage stress ceiling: debt-to-income at approximately 7.8x remains meaningful headroom relative to Sydney's 10.8x.</p>
+        <p>The 2032 Olympic Games have moved from speculative catalyst to live infrastructure reality. The Queensland government's AUD 7.1 billion venue programme is now in construction, with the Gabba stadium rebuild, Brisbane Live precinct, and cross-river rail all delivering through 2026–2028. Olympic-precinct premiums over pre-announcement (2021) pricing are crystallising: <strong>Bowen Hills +28%</strong>, <strong>Herston/Kelvin Grove +25%</strong>, <strong>South Brisbane +22%</strong>, and <strong>Woolloongabba +20%</strong>. The infrastructure build-out has second-round employment effects: civil, construction, and hospitality hiring through 2026–2030 will sustain rental demand at a structural level that does not depend on interstate migration continuing at current pace.</p>
+        <p>Rental tightness is at crisis level. Brisbane's vacancy rate sits at <strong>1.0%</strong>, among the tightest of any Australian capital, with median rents up <strong>8.0% year-on-year</strong>. Interstate migration from Sydney and Melbourne continues — Queensland recorded net interstate inflows of approximately 55,000 in FY2025 — with Brisbane capturing the majority of that flow. The apartment pipeline remains materially undersupplied: RPM Group's May 2025 SEQ Apartments report highlighted that the Brisbane CBD and inner ring are on track for fewer than 2,500 completions in 2026, against estimated annual absorption of 4,000+ units. Even with recent developer approval spikes, the Olympic window is effectively supply-constrained through 2028. The primary risk is a sharp global commodity slowdown that hits Queensland resource sector employment; the base case is continued outperformance into 2027.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>布里斯本是這波週期表現最突出的城市——截至 2026 年 4 月年增 <strong>19%</strong>，中位獨立屋價達 <strong>A$1,080,000</strong>、公寓 <strong>A$680,000</strong>。KPMG 在 2026 年 1 月的預測指出，布里斯本 2026 年仍是東岸首府成長最強，預估漲幅 <strong>10.9%</strong>，僅次於伯斯。和雪梨、墨爾本因可負擔性失速不同，布里斯本離房貸壓力天花板還遠：債務所得比約 7.8 倍，相較雪梨的 10.8 倍，還有明顯成長空間。</p>
+        <p>2032 年奧運從「投機性催化劑」升級為「實體基礎建設」。昆士蘭州政府 71 億澳幣的場館計畫已進入施工階段，Gabba 體育場重建、Brisbane Live 場域、跨河鐵路（Cross River Rail）都將在 2026–2028 年間分階段交付。奧運區的溢價相對 2021 年公布前已明顯實現：<strong>Bowen Hills +28%</strong>、<strong>Herston/Kelvin Grove +25%</strong>、<strong>South Brisbane +22%</strong>、<strong>Woolloongabba +20%</strong>。基建開展的次輪效應在勞動市場發酵：2026–2030 年期間土木、營造、餐旅等行業招聘會持續撐起租屋需求，這層支撐不依賴州際移民維持當前速度。</p>
+        <p>租屋緊繃已到危機等級。布里斯本空置率 <strong>1.0%</strong>，是全澳最緊的幾個首府之一，中位租金年增 <strong>8.0%</strong>。來自雪梨和墨爾本的州際移民仍在持續：FY2025 昆士蘭州淨州內流入約 5.5 萬人，其中大多數進入布里斯本。公寓在建供給明顯不足：RPM Group 2025 年 5 月的東南昆士蘭公寓報告指出，布里斯本 CBD 與內圈 2026 年預估完工量不到 2,500 戶，但年吸收量已超過 4,000 戶。即使建商近期加快送審，奧運這個時間窗口實質上到 2028 年都處於供給受限。主要風險是全球大宗商品急速下滑衝擊昆士蘭資源部門就業；基本情境則是布里斯本在 2027 年前仍會持續優於大盤。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Brisbane Median Price: Houses vs Units</span><span class="lang-zh" style="display:none">布里斯本中位價格：獨立屋 vs 公寓</span></h4>
+          <div class="chart-meta"><span class="lang-en">2019-2026 Q1</span><span class="lang-zh" style="display:none">2019-2026年第一季</span></div>
+          <div id="rChartBNEPrice" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Olympic Precinct Premium</span><span class="lang-zh" style="display:none">奧運區域溢價</span></h4>
+          <div class="chart-meta"><span class="lang-en">% above pre-announcement price</span><span class="lang-zh" style="display:none">高於公布前價格百分比</span></div>
+          <div id="rChartBNEOlympics" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 8: GOLD COAST -->
+      <h2 id="sec-goldcoast"><span class="lang-en">GOLD COAST: LIFESTYLE PREMIUM LOGIC</span><span class="lang-zh" style="display:none">黃金海岸：生活方式溢價邏輯</span></h2>
+      <div class="lang-en">
+        <p>The Gold Coast has undergone a structural repricing that is best understood as a lifestyle-premium event with capital-market consequences. Median unit prices reached <strong>A$956,000</strong> in October 2025, overtaking Sydney units (A$927,000) for the first time in history. Annual unit growth of <strong>+12.8%</strong> is supported by the tightest rental vacancy rate in any major Australian market at <strong>0.8%</strong>, and the highest debt-to-income ratio in the country at <strong>11.2x</strong> — a reflection of elevated prices relative to local incomes rather than an influx of leverage-constrained buyers.</p>
+        <p>The buyer pool is structurally distinct from Sydney or Melbourne. Approximately 60% of Gold Coast buyers over the past 24 months are interstate migrants — predominantly from NSW and Victoria — with a significant share being cash-heavy lifestyle downsizers in their 50s and 60s. This cohort is less rate-sensitive than leveraged first-home buyers, which is the mechanism by which Gold Coast has been insulated from the 2024–2026 tightening cycle. Tourism-driven short-stay demand (Airbnb/Stayz) removes approximately <strong>7% of the long-term rental stock</strong> from the conventional lease market, accentuating the vacancy crunch for year-round residents.</p>
+        <p>The apartment supply pipeline, however, is heading toward a cliff. Completions drop from an estimated <strong>1,870 units in 2025</strong> to <strong>approximately 850 in 2026</strong> and <strong>just 95 in 2027</strong>, according to Urbis and RPM Group tracking. Developer feasibility has collapsed under the combined weight of construction cost inflation (building costs up 42% since 2020), difficult land acquisition (coastal sites at A$12–18M/ha), and the 2032 Olympic contractor capacity being monopolised by Brisbane projects. With annual absorption running at 1,200–1,500 units, the 2027 pipeline cliff implies a minimum 600-unit structural deficit against demand — before any acceleration from lifestyle migration. For investors who can tolerate the -11.2x debt-to-income ratio, the supply math is clear: Gold Coast has priced in premium once, and the next 24 months will test whether a further repricing is justified or a correction is due.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>黃金海岸的結構性重定價，最好的理解方式是：一場「生活方式溢價」事件，帶著資本市場層面的連帶效應。2025 年 10 月中位公寓價格達 <strong>A$956,000</strong>，歷史上首次超越雪梨公寓的 A$927,000。年增 <strong>12.8%</strong> 有兩個支撐：一是全澳主要市場中最緊的租屋空置率 <strong>0.8%</strong>；二是全國最高的債務所得比 <strong>11.2 倍</strong>，不過這個數字反映的是「房價相對本地所得偏高」，不是槓桿買家大量湧入。</p>
+        <p>黃金海岸的買家結構跟雪梨、墨爾本本質不同。過去 24 個月，約 60% 的買家是州際移入，主要來自新南威爾斯與維多利亞州；其中相當一部分是 50 至 60 歲、手上現金充裕、想換輕鬆生活的「生活方式換屋族」。這群人對利率敏感度遠低於槓桿首購族，也是黃金海岸在 2024–2026 年緊縮循環中相對隔離的主因。觀光驅動的短租（Airbnb、Stayz）從傳統長租市場抽走約 <strong>7% 的租屋存量</strong>，進一步拉緊常住居民的租屋供給。</p>
+        <p>但公寓在建供給正走向斷崖。根據 Urbis 與 RPM Group 追蹤，完工量從 2025 年預估的 <strong>1,870 戶</strong>，降到 2026 年約 <strong>850 戶</strong>、2027 年只剩 <strong>95 戶</strong>。建商的可行性因為三重壓力崩塌：建築成本自 2020 年以來累計上漲 42%、海岸地皮取得困難（每公頃 A$1,200–1,800 萬）、加上 2032 奧運相關承包商產能被布里斯本工程吸光。以年吸收量 1,200–1,500 戶計算，2027 年的供給斷崖意味著至少 600 戶的結構性短缺，還沒加入生活方式移民加速的變數。對能承受 11.2 倍債務所得比的投資人來說，供給數學很清楚：黃金海岸已經定過一次溢價，未來 24 個月會檢驗這個價格是再漲一波，還是進入修正。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">GC vs Sydney Unit Price</span><span class="lang-zh" style="display:none">黃金海岸 vs 雪梨公寓價格</span></h4>
+          <div class="chart-meta"><span class="lang-en">Median A$, 2015-2025</span><span class="lang-zh" style="display:none">中位A$，2015-2025</span></div>
+          <div id="rChartGCUnit" style="height:220px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">GC Apartment Completions</span><span class="lang-zh" style="display:none">黃金海岸公寓完工量</span></h4>
+          <div class="chart-meta"><span class="lang-en">Annual units</span><span class="lang-zh" style="display:none">年度單位</span></div>
+          <div id="rChartGCCliff" style="height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 9: OUTLOOK -->
+      <h2 id="sec-outlook"><span class="lang-en">OUTLOOK: THREE SCENARIOS FOR 2026-2027</span><span class="lang-zh" style="display:none">展望：2026-2027年三大情境</span></h2>
+      <div class="lang-en">
+        <p>Australia's housing outlook for 2026–2027 is dominated by a single unusual feature: the supply side cannot respond to demand signals in any meaningful window. With completions tracking 20%+ below the Housing Accord target, approval volumes stalled, construction timelines 60–70% longer than 2020, and the builder insolvency rate still elevated, the market is structurally supply-capped through 2028 at the earliest. This is not a rate-cycle story — it is a structural cycle operating in parallel with monetary policy, and the interaction of the two explains the bifurcated performance across capitals.</p>
+        <p><strong>Base case</strong> (55% probability). The RBA holds at <strong>4.35%</strong> through 2026, with a symmetric bias — one further hike to 4.60% if Q2 CPI surprises again above 4%, or a first cut in late Q4 2026 if the labour market loosens materially (unemployment above 5%). Net migration normalises to the federal government forecast of 260,000 in FY2026. Completions edge up modestly to 180,000–190,000 per year as partially-approved projects deliver but new approvals remain well below target. National dwelling prices rise <strong>+3% to +5%</strong> for the year (slowing from the +8% pace seen pre-May), with Sydney/Melbourne flat to -2% (April already turned negative), and supply-constrained capitals continuing to outperform: Perth <strong>+8 to +11%</strong>, Brisbane <strong>+7 to +10%</strong>, Gold Coast <strong>+6 to +9%</strong>, Adelaide <strong>+5 to +8%</strong>. Capital-city rental growth moderates to 2–4% as BTR and migration normalisation combine, but remains above CPI in most markets.</p>
+        <p><strong>Bull case</strong> (20% probability). Middle East tensions de-escalate, trimmed-mean CPI prints below 3% in Q3 2026, unemployment rises modestly to 4.6%, and the RBA delivers two cuts in late 2026 bringing the cash rate to <strong>3.85%</strong> by year-end, with the market pricing further cuts toward 3.50% through 2027. Mortgage stress eases, APRA's 3% serviceability buffer becomes less binding, and previously rationed credit-dependent buyers re-enter. National prices rise <strong>+8% to +11%</strong>, with Sydney and Melbourne disproportionately benefitting from rate relief given their high debt-to-income exposure. Perth and Brisbane continue their structural outperformance but at a narrower spread. The bull scenario is fundamentally a re-leveraging story — not a supply response — and requires the Middle East geopolitical shock to fade.</p>
+        <p><strong>Bear case</strong> (25% probability). Sticky inflation (CPI persists at 4%+), <strong>one or two further RBA hikes to 4.60–4.85%</strong>, and a global risk-off event triggered by escalating geopolitical or energy shocks push unemployment above 5.5%. Distressed listings begin climbing from the current 29.2%-below-COVID floor. National dwelling prices fall <strong>-3% to -6%</strong>, with Sydney and Melbourne correcting -6% to -10% on affordability exhaustion (extending the April 2026 decline), while Perth, Brisbane, and Gold Coast still grow marginally (+1% to +3%) on structural supply support. Importantly, even in this scenario, rental growth does not reverse: national rents continue rising 3–5% because the supply constraint operates independently of the economic cycle. This asymmetry — prices can fall, but rents cannot — is the distinguishing feature of Australia's current market.</p>
+        <p>The three indicators to monitor quarterly are: (1) the trimmed-mean CPI print — the direct determinant of RBA policy and therefore the value-curve response; (2) the NHSAC completion forecast revision — any further downward revision of the 938,000 projected figure tightens the structural deficit; and (3) Brisbane and Perth auction clearance rates — the leading indicator of whether the two-speed dynamic is intensifying or converging. For investors entering now, the positioning is clear in all three scenarios: <strong>structural undersupply favours Perth, Brisbane, Gold Coast, and Adelaide across bull, base, and bear cases</strong>, while Sydney and Melbourne outperform only if rate relief arrives. The crisis is not going to self-correct through 2028; positioning in advance is the only rational approach.</p>
+      </div>
+      <div class="lang-zh" style="display:none">
+        <p>澳洲房市 2026–2027 年的展望，最大的特徵是一個罕見現象：供給面在任何合理時間窗口內，都無法回應需求訊號。完工量比《住房協議》目標落後 20% 以上、建築批准量停滯、施工時間比 2020 年多 60 至 70%、建商倒閉率仍高。這個市場最早也要等到 2028 年才有可能解除結構性供給封頂。這不是「利率循環」的故事——這是一個跟貨幣政策並行的「結構循環」，兩者的交互作用，解釋了各首府之間分化的表現。</p>
+        <p><strong>基本情境</strong>（機率 55%）。RBA 在 2026 年全年維持 <strong>4.35%</strong>，態度對稱：如果 Q2 CPI 再次意外高於 4% 就再升至 4.60%，如果勞動市場明顯鬆動（失業率超過 5%）就在 Q4 晚段首次降息。淨移民正常化到聯邦政府預估的 FY2026 26 萬人。完工量小幅回升到每年 18 至 19 萬戶，部分已審物件交付，但新建批准仍遠低於目標。全國房價全年漲 <strong>3 至 5%</strong>（從升息前的 +8% 節奏放緩）：雪梨／墨爾本持平至 -2%（4 月已轉負）；供給受限的首府繼續領先——伯斯 <strong>+8 至 +11%</strong>、布里斯本 <strong>+7 至 +10%</strong>、黃金海岸 <strong>+6 至 +9%</strong>、阿得雷德 <strong>+5 至 +8%</strong>。首府租金漲幅在 BTR 供給與移民正常化合力下收斂到 2 至 4%，但多數市場仍高於 CPI。</p>
+        <p><strong>樂觀情境</strong>（機率 20%）。中東緊張降溫、截尾平均 CPI 於 2026 年 Q3 降到 3% 以下、失業率小幅升至 4.6%，RBA 於 2026 年末連降兩次，現金利率年底回到 <strong>3.85%</strong>，市場再反映 2027 年降息至 3.50% 附近。房貸壓力緩解、APRA 的 3% 壓力測試緩衝不再卡死邊際買家，原本被排除的靠信用買家重新進場。全國房價漲 <strong>8 至 11%</strong>，雪梨與墨爾本受惠最大——兩者債務所得比最高。伯斯和布里斯本維持結構性領先但差距收窄。樂觀情境本質是「再槓桿」故事，需要中東地緣衝擊消退作前提。</p>
+        <p><strong>悲觀情境</strong>（機率 25%）。通膨僵化（CPI 續高於 4%）、<strong>RBA 再升 1–2 次至 4.60–4.85%</strong>、加上地緣政治或能源衝擊升級引發全球避險，失業率衝破 5.5%。困境物件掛牌量從目前「比疫情前低 29.2%」的地板開始往上爬。全國房價跌 <strong>3 至 6%</strong>，雪梨、墨爾本在可負擔性耗盡下修正 6 至 10%（延伸 2026 年 4 月已開始的下跌），但伯斯、布里斯本、黃金海岸靠結構性供給支撐仍微幅成長（+1 至 +3%）。關鍵是：即便是悲觀情境，租金也不會反轉——全國租金仍會漲 3 至 5%，因為供給瓶頸獨立於經濟週期運作。這個非對稱性——「房價可能跌，但租金不會跌」——是目前澳洲市場最獨特的地方。</p>
+        <p>三個每季要追蹤的關鍵指標：（1）截尾平均 CPI——直接決定 RBA 政策、進而決定價值曲線的方向；（2）NHSAC 完工量預估的修正——任何把 93.8 萬這個數字往下修的動作，都會讓結構性缺口更嚴重；（3）布里斯本與伯斯的拍賣清盤率——判斷雙速格局是在加深還是在收斂的領先指標。對現在要進場的投資人來說，三個情境給出的定位都很清楚：<strong>結構性供給短缺讓伯斯、布里斯本、黃金海岸、阿得雷德在牛市、基本、熊市三個情境下都佔優勢</strong>，雪梨與墨爾本則要看降息能不能到位。這個供給危機在 2028 年之前不會自我修正；提前布局，是唯一合理的路徑。</p>
+      </div>
+      <div class="report-chart-grid">
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Price Forecast: Three Scenarios</span><span class="lang-zh" style="display:none">價格預測：三大情境</span></h4>
+          <div class="chart-meta"><span class="lang-en">12-month % change by city</span><span class="lang-zh" style="display:none">各城市12個月百分比變化</span></div>
+          <div id="rChartScenario" style="height:240px;"></div>
+        </div>
+        <div class="report-chart-card">
+          <h4><span class="lang-en">Rent Forecast 2026</span><span class="lang-zh" style="display:none">2026年租金預測</span></h4>
+          <div class="chart-meta"><span class="lang-en">Expected YoY % growth</span><span class="lang-zh" style="display:none">預期年增率</span></div>
+          <div id="rChartRentForecast" style="height:240px;"></div>
+        </div>
+      </div>
+
+      <div class="report-footer">
+        <p><span class="lang-en">ABS Building Activity Jun/Sep 2025 · ABS Building Approvals Jan 2026 · ABS Total Value of Dwellings Dec 2025 · ABS Overseas Migration 2024-25 · NHSAC State of Housing System 2025 · IPA Housing Construction Slowdown 2025 · SQM Research Vacancy Rates Mar 2026 · CoreLogic HVI Mar 2026 · CoreLogic Pain &amp; Gain Q3 2025 · FIRB Q2 2025 · APRA Sep 2025 · RBA Mar 2026 · ASX Rate Tracker · Domain Rental Report Dec 2025 · RPM Group SEQ Apartments May 2025 · Adept Economics Jan 2026 · Urbis · Ray White 2025 · KPMG 2025 · Q Shelter/AHURI 2025<br><em>For informational purposes only. Not investment advice.</em></span><span class="lang-zh" style="display:none">ABS建設活動2025年6月/9月 · ABS建築批准2026年1月 · ABS全國住宅總值2025年12月 · ABS海外移民2024-25 · NHSAC住房系統狀況2025 · IPA住宅建設放緩2025 · SQM Research空置率2026年3月 · CoreLogic房價指數2026年3月 · CoreLogic痛與利報告2025年Q3 · FIRB 2025年Q2 · APRA 2025年9月 · RBA 2026年3月 · ASX利率追蹤 · Domain租賃報告2025年12月 · RPM Group · Adept Economics · Urbis · Ray White · KPMG · Q Shelter/AHURI<br><em>本報告僅供參考，不構成投資建議。</em></span></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+function fmtAUD(v){if(v>=1000000)return 'A$'+(v/1000000).toFixed(2)+'M';if(v>=1000)return 'A$'+(v/1000).toFixed(0)+'K';return 'A$'+v;}
+function fmtAUDShort(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}
+function fmtK(v){if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(0)+'K';return v;}
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  initAllCharts(lang);
+}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initAllCharts(lang){
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  var en=lang==='en';
+
+  // ===== CHART 1: rChartAuPrice10y - Line dual axis =====
+  (function(){
+    var el=document.getElementById('rChartAuPrice10y');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2020 Q4','2021 Q4','2022 Q4','2023 Q4','2024 Q4','2025 Q4'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Total Value (T)':'總值(兆)',en?'Avg Price (K)':'平均價格(千)']}),
+      grid:{left:50,right:50,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:[
+        mkAxis({type:'value',name:en?'A$ Trillion':'A$兆',axisLabel:{formatter:function(v){return v+'T'}}}),
+        mkAxis({type:'value',name:en?'A$ K':'A$千',position:'right',axisLabel:{formatter:function(v){return v+'K'}}})
+      ],
+      series:[
+        {name:en?'Total Value (T)':'總值(兆)',type:'line',data:[7.85,9.91,9.77,10.56,11.32,12.31],areaStyle:{color:'rgba(30,58,95,0.15)'},itemStyle:{color:C.navy},lineStyle:{color:C.navy}},
+        {name:en?'Avg Price (K)':'平均價格(千)',type:'line',yAxisIndex:1,data:[664,750,748,783,815,1075],itemStyle:{color:C.orange},lineStyle:{color:C.orange}}
+      ]
+    });
+  })();
+
+  // ===== CHART 2: rChartCityYoY - Horizontal bar =====
+  (function(){
+    var el=document.getElementById('rChartCityYoY');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Perth','Darwin','Brisbane','Adelaide','Gold Coast','Sydney','Melbourne','Hobart']:['伯斯','達爾文','布里斯本','阿德萊德','黃金海岸','雪梨','墨爾本','荷巴特'];
+    var data=[22.0,19.4,17.3,10.9,12.8,6.0,4.7,3.2];
+    var colors=data.map(function(v){return v>=15?C.orange:v>=10?C.navy:C.muted;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed'},data:[{xAxis:9.9,label:{formatter:en?'National +9.9%':'全國 +9.9%',fontSize:10}}]}}]
+    });
+  })();
+
+  // ===== CHART 3: rChartVacancy - Horizontal bar =====
+  (function(){
+    var el=document.getElementById('rChartVacancy');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Perth','Adelaide','Brisbane','Darwin','Hobart','National','Sydney','Melbourne']:['伯斯','阿德萊德','布里斯本','達爾文','荷巴特','全國','雪梨','墨爾本'];
+    var data=[0.6,0.7,1.0,1.1,0.6,1.1,1.5,1.8];
+    var colors=data.map(function(v){return v<=0.8?C.red:v<=1.2?C.orange:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.green,type:'dashed'},data:[{xAxis:3.0,label:{formatter:en?'Equilibrium 3%':'均衡 3%',fontSize:10}}]}}]
+    });
+  })();
+
+  // ===== CHART 4: rChartResale - Bar =====
+  (function(){
+    var el=document.getElementById('rChartResale');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Houses\nProfitable','Units\nProfitable','Houses\nLoss','Units\nLoss']:['獨立屋\n獲利','公寓\n獲利','獨立屋\n虧損','公寓\n虧損'];
+    var data=[97.9,90.6,2.1,9.4];
+    var colors=[C.green,C.green,C.red,C.red];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:30,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:10,interval:0}}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:30,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.navy,type:'dashed'},data:[{yAxis:95.5,label:{formatter:'95.5% overall',fontSize:10}}]}}]
+    });
+  })();
+
+  // ===== CHART 5: rChartRBAPath - Line dual =====
+  (function(){
+    var el=document.getElementById('rChartRBAPath');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Feb 26','Mar 26','Apr 26','May 26','Jun 26','Sep 26','Dec 26','Mar 27']:['26年2月','26年3月','26年4月','26年5月','26年6月','26年9月','26年12月','27年3月'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Official Rate':'官方利率',en?'ASX Futures':'ASX期貨']}),
+      grid:{left:40,right:20,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',min:3.5,max:5.0,axisLabel:{formatter:function(v){return v+'%'}}}),
+      series:[
+        {name:en?'Official Rate':'官方利率',type:'line',data:[3.85,4.10,4.10,4.10,4.10,4.10,4.10,4.10],itemStyle:{color:C.navy},lineStyle:{color:C.navy},symbol:'circle',symbolSize:6},
+        {name:en?'ASX Futures':'ASX期貨',type:'line',data:[3.85,4.10,4.095,4.25,4.32,4.45,4.60,4.755],itemStyle:{color:C.orange},lineStyle:{color:C.orange,type:'dashed'},symbol:'circle',symbolSize:6,
+          markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dotted'},data:[{yAxis:4.75,label:{formatter:en?'Market ceiling':'市場上限',fontSize:10}}]}}
+      ]
+    });
+  })();
+
+  // ===== CHART 6: rChartMortgageStress - Horizontal bar =====
+  (function(){
+    var el=document.getElementById('rChartMortgageStress');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['NSW (Sydney)','QLD (Brisbane)','SA (Adelaide)','VIC (Melbourne)','WA (Perth)','National avg']:['新南威爾斯(雪梨)','昆士蘭(布里斯本)','南澳(阿德萊德)','維多利亞(墨爾本)','西澳(伯斯)','全國平均'];
+    var data=[56.8,53.0,54.0,46.0,38.0,47.5];
+    var colors=data.map(function(v){return v>=55?C.red:v>=45?C.orange:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed'},data:[{xAxis:30,label:{formatter:en?'Stress 30%':'壓力線 30%',fontSize:10}}]}}]
+    });
+  })();
+
+  // ===== CHART 7: rChartEmployment - Line dual =====
+  (function(){
+    var el=document.getElementById('rChartEmployment');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2022','2023','2024 Q1','2024 Q2','2024 Q3','2024 Q4','2025 Q1','2025 Q2','2025 Q3','2025 Q4','2026 Feb'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Unemployment %':'失業率 %',en?'RBA Rate %':'RBA利率 %']}),
+      grid:{left:40,right:40,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:9,rotate:30}}),
+      yAxis:[
+        mkAxis({type:'value',name:en?'Unemployment %':'失業率 %',axisLabel:{formatter:function(v){return v+'%'}}}),
+        mkAxis({type:'value',name:en?'RBA Rate %':'RBA利率 %',position:'right',axisLabel:{formatter:function(v){return v+'%'}}})
+      ],
+      series:[
+        {name:en?'Unemployment %':'失業率 %',type:'line',data:[3.5,3.7,3.8,4.0,4.2,4.1,4.1,4.2,4.3,4.2,4.3],itemStyle:{color:C.navy},lineStyle:{color:C.navy}},
+        {name:en?'RBA Rate %':'RBA利率 %',type:'line',yAxisIndex:1,data:[0.85,4.10,4.35,4.35,4.35,4.35,4.35,4.35,4.35,3.85,4.10],itemStyle:{color:C.orange},lineStyle:{color:C.orange,type:'dashed'}}
+      ]
+    });
+  })();
+
+  // ===== CHART 8: rChartDistressed - Line dual =====
+  (function(){
+    var el=document.getElementById('rChartDistressed');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Jan 25','Mar 25','May 25','Jul 25','Sep 25','Nov 25','Jan 26','Feb 26']:['25年1月','25年3月','25年5月','25年7月','25年9月','25年11月','26年1月','26年2月'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Median Price (K)':'中位價格(千)',en?'Distressed YoY %':'困境房源年增 %']}),
+      grid:{left:40,right:40,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:[
+        mkAxis({type:'value',name:en?'A$K':'A$千',axisLabel:{formatter:function(v){return v+'K'}}}),
+        mkAxis({type:'value',name:en?'YoY %':'年增 %',position:'right',axisLabel:{formatter:function(v){return v+'%'}}})
+      ],
+      series:[
+        {name:en?'Median Price (K)':'中位價格(千)',type:'line',data:[820,828,835,840,845,852,858,860],itemStyle:{color:C.navy},lineStyle:{color:C.navy}},
+        {name:en?'Distressed YoY %':'困境房源年增 %',type:'line',yAxisIndex:1,data:[-5,-8,-12,-18,-22,-25,-29,-29.2],itemStyle:{color:C.red},lineStyle:{color:C.red}}
+      ]
+    });
+  })();
+
+  // ===== CHART 9: rChartCompletions - Bar with markLine =====
+  (function(){
+    var el=document.getElementById('rChartCompletions');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['FY2020','FY2021','FY2022','FY2023','FY2024','FY2025','FY2025 Q2\n(ann.)']:['2020財年','2021財年','2022財年','2023財年','2024財年','2025財年','2025Q2\n(年化)'];
+    var data=[191000,213000,185000,177000,178000,174271,162096];
+    var colors=data.map(function(v){return v>=200000?C.green:v>=175000?C.navy:C.red;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:30,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:9,interval:0}}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v)}}}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:24,
+        markLine:{silent:true,symbol:'none',data:[
+          {yAxis:240000,lineStyle:{color:C.red,type:'dashed'},label:{formatter:en?'Accord 240K':'協議 240K',fontSize:10}},
+          {yAxis:195000,lineStyle:{color:C.muted,type:'dotted'},label:{formatter:en?'Hist avg':'歷史平均',fontSize:10}}
+        ]}}]
+    });
+  })();
+
+  // ===== CHART 10: rChartApprovals - Bar dual =====
+  (function(){
+    var el=document.getElementById('rChartApprovals');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Nov 25\n(peak)','Dec 25','Jan 26']:['25年11月\n(峰值)','25年12月','26年1月'];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:[en?'Total':'總計',en?'Apartments':'公寓']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:10,interval:0}}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v)}}}),
+      series:[
+        {name:en?'Total':'總計',type:'bar',data:[18406,15542,14564],itemStyle:{color:C.navy},barWidth:20},
+        {name:en?'Apartments':'公寓',type:'bar',data:[7800,5200,4393],itemStyle:{color:C.orange},barWidth:20,
+          markPoint:{data:[{coord:[2,4393],value:'-24.5%',itemStyle:{color:C.red},symbolSize:40,label:{fontSize:9,color:'#fff'}}]}}
+      ]
+    });
+  })();
+
+  // ===== CHART 11: rChartNHSAC - Bar dual + line =====
+  (function(){
+    var el=document.getElementById('rChartNHSAC');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2023-24','2024-25','2025-26','2026-27','2027-28','2028-29'];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:[en?'Supply':'供給',en?'Demand':'需求',en?'Gap':'缺口']}),
+      grid:{left:40,right:40,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:9}}),
+      yAxis:[
+        mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v)}}}),
+        mkAxis({type:'value',position:'right',axisLabel:{formatter:function(v){return fmtK(v)}}})
+      ],
+      series:[
+        {name:en?'Supply':'供給',type:'bar',data:[155000,158000,161000,164000,169000,173000],itemStyle:{color:C.navy},barWidth:14},
+        {name:en?'Demand':'需求',type:'bar',data:[241000,205000,179000,171000,173000,176000],itemStyle:{color:C.orange},barWidth:14},
+        {name:en?'Gap':'缺口',type:'line',yAxisIndex:1,data:[-86000,-47000,-18000,-7000,-4000,-3000],itemStyle:{color:C.red},lineStyle:{color:C.red}}
+      ]
+    });
+  })();
+
+  // ===== CHART 12: rChartBuildTime - Horizontal bar dual =====
+  (function(){
+    var el=document.getElementById('rChartBuildTime');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['WA +71%','SA +34%','QLD +34%','NSW +31%','National +34%','VIC +16%','TAS +15%']:['西澳 +71%','南澳 +34%','昆士蘭 +34%','新南威爾斯 +31%','全國 +34%','維多利亞 +16%','塔斯馬尼亞 +15%'];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:['2025','2020']}),
+      grid:{left:10,right:20,top:40,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',name:en?'Months':'月數'}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[
+        {name:'2025',type:'bar',data:[15.45,13.71,9.15,12.30,11.49,9.86,8.97],itemStyle:{color:C.orange},barWidth:10},
+        {name:'2020',type:'bar',data:[9.06,10.23,6.83,9.39,8.57,8.50,7.80],itemStyle:{color:C.muted},barWidth:10}
+      ]
+    });
+  })();
+
+  // ===== CHART 13: rChartNOM - Bar =====
+  (function(){
+    var el=document.getElementById('rChartNOM');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['FY2019','FY2020','FY2021','FY2022','FY2023','FY2024','FY2025E','FY2026F'];
+    var data=[232000,194000,-89000,171000,556000,446000,306000,260000];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:30,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:9,rotate:30}}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v)}}}),
+      series:[{type:'bar',data:data.map(function(v){return{value:v,itemStyle:{color:v>=0?C.navy:C.red}};}),barWidth:22,
+        markPoint:{data:[{type:'max',label:{formatter:en?'Peak 556K':'峰值 556K',fontSize:9},symbolSize:40,itemStyle:{color:C.orange}}]},
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.red,type:'dashed'},data:[{yAxis:240000,label:{formatter:en?'Annual housing need':'年度住房需求',fontSize:9}}]}}]
+    });
+  })();
+
+  // ===== CHART 14: rChartFIRB - Bar dual =====
+  (function(){
+    var el=document.getElementById('rChartFIRB');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['FY2023','FY2024','FY2025'];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:[en?'FIRB Approvals':'FIRB批准',en?'China A$B':'中國A$十億']}),
+      grid:{left:40,right:40,top:40,bottom:30,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:[
+        mkAxis({type:'value',name:en?'Approvals':'批准數'}),
+        mkAxis({type:'value',name:'A$B',position:'right'})
+      ],
+      series:[
+        {name:en?'FIRB Approvals':'FIRB批准',type:'bar',data:[6576,5581,3922],itemStyle:{color:C.navy},barWidth:24},
+        {name:en?'China A$B':'中國A$十億',type:'bar',yAxisIndex:1,data:[3.4,2.6,1.4],itemStyle:{color:C.orange},barWidth:24}
+      ]
+    });
+  })();
+
+  // ===== CHART 15: rChartLoanType - Pie donut =====
+  (function(){
+    var el=document.getElementById('rChartLoanType');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    ch.setOption({
+      tooltip:{trigger:'item',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11}},
+      legend:Object.assign({},baseLegend,{top:'bottom',orient:'horizontal',itemWidth:8,itemHeight:8}),
+      series:[{
+        type:'pie',radius:['40%','70%'],center:['50%','45%'],
+        label:{show:false},
+        data:[
+          {value:56.7,name:en?'Owner-occ existing':'自住型現有',itemStyle:{color:C.navy}},
+          {value:27.6,name:en?'Investor existing':'投資型現有',itemStyle:{color:C.orange}},
+          {value:10.7,name:en?'Owner-occ new':'自住型新建',itemStyle:{color:C.green}},
+          {value:5.0,name:en?'Investor new':'投資型新建',itemStyle:{color:C.muted}}
+        ]
+      }]
+    });
+  })();
+
+  // ===== CHART 16: rChartDTI - Horizontal bar =====
+  (function(){
+    var el=document.getElementById('rChartDTI');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Gold Coast','Sydney','Adelaide','Brisbane','Melbourne','National','Perth']:['黃金海岸','雪梨','阿德萊德','布里斯本','墨爾本','全國','伯斯'];
+    var data=[11.2,10.8,9.2,9.1,9.4,8.2,7.2];
+    var colors=data.map(function(v){return v>=10?C.red:v>=8?C.orange:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'x'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14,
+        markLine:{silent:true,symbol:'none',data:[
+          {xAxis:3.0,lineStyle:{color:C.green,type:'dotted'},label:{formatter:'3.0x',fontSize:9}},
+          {xAxis:8.2,lineStyle:{color:C.navy,type:'dashed'},label:{formatter:en?'National 8.2x':'全國 8.2x',fontSize:9}}
+        ]}}]
+    });
+  })();
+
+  // ===== CHART 17: rChartYield - Horizontal bar =====
+  (function(){
+    var el=document.getElementById('rChartYield');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Darwin 6.6%','Perth 4.3%','GC 4.3-5%','BNE H 3.6%','BNE U 4.2%','National 3.7%','MEL 3.7%','SYD H 3.1%']:['達爾文 6.6%','伯斯 4.3%','黃金海岸 4.3-5%','布里斯本獨立屋 3.6%','布里斯本公寓 4.2%','全國 3.7%','墨爾本 3.7%','雪梨獨立屋 3.1%'];
+    var data=[6.6,4.3,4.8,3.6,4.2,3.7,3.7,3.1];
+    var colors=data.map(function(v){return v>=5?C.green:v>=4?C.navy:v>=3.5?C.muted:C.red;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:12,
+        markLine:{silent:true,symbol:'none',data:[
+          {xAxis:4.10,lineStyle:{color:C.red,type:'dashed'},label:{formatter:'RBA 4.10%',fontSize:9}},
+          {xAxis:6.0,lineStyle:{color:C.orange,type:'dotted'},label:{formatter:en?'Mortgage 6%':'房貸 6%',fontSize:9}}
+        ]}}]
+    });
+  })();
+
+  // ===== CHART 18: rChartQuartile - Bar =====
+  (function(){
+    var el=document.getElementById('rChartQuartile');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Lower quartile','Second','Third','Upper quartile']:['低四分位','第二','第三','高四分位'];
+    var data=[2.5,1.2,0.3,-2.0];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:20,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:10,interval:0}}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      series:[{type:'bar',data:data.map(function(v){return{value:v,itemStyle:{color:v>=0?C.green:C.red}};}),barWidth:30,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.navy,type:'solid'},data:[{yAxis:0}]}}]
+    });
+  })();
+
+  // ===== CHART 19: rChartBTR - Bar =====
+  (function(){
+    var el=document.getElementById('rChartBTR');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2021','2022','2023','2024','2025','2030F'];
+    var data=[800,1200,2100,3200,5500,18000];
+    var colors=data.map(function(v){return v>=10000?C.green:v>=3000?C.navy:C.muted;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:20,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v)}}}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:24}]
+    });
+  })();
+
+  // ===== CHART 20: rChartRentInflation - Bar dual =====
+  (function(){
+    var el=document.getElementById('rChartRentInflation');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2022','2023','2024','2025','2026 YTD'];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:[en?'Actual Rent':'實際租金',en?'CPI':'CPI']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      series:[
+        {name:en?'Actual Rent':'實際租金',type:'bar',data:[14.2,18.5,9.8,6.6,6.6],itemStyle:{color:C.red},barWidth:18},
+        {name:en?'CPI':'CPI',type:'bar',data:[6.1,7.3,8.9,5.5,4.2],itemStyle:{color:C.navy},barWidth:18}
+      ]
+    });
+  })();
+
+  // ===== CHART 21: rChartSydPrice - Line dual =====
+  (function(){
+    var el=document.getElementById('rChartSydPrice');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2019','2020','2021','2022','2023','2024','2025','2026 Q1'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Houses':'獨立屋',en?'Units':'公寓']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtAUDShort(v)}}}),
+      series:[
+        {name:en?'Houses':'獨立屋',type:'line',data:[870000,872000,1350000,1175000,1070000,1460000,1575000,1607046],itemStyle:{color:C.navy},lineStyle:{color:C.navy}},
+        {name:en?'Units':'公寓',type:'line',data:[620000,618000,780000,760000,720000,820000,870000,903080],itemStyle:{color:C.orange},lineStyle:{color:C.orange,type:'dashed'}}
+      ]
+    });
+  })();
+
+  // ===== CHART 22: rChartSydClearance - Line with visualMap =====
+  (function(){
+    var el=document.getElementById('rChartSydClearance');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26']:['25年9月','25年10月','25年11月','25年12月','26年1月','26年2月','26年3月'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      grid:{left:30,right:20,top:20,bottom:30,containLabel:true},
+      visualMap:{show:false,pieces:[{lte:60,color:C.red},{gt:60,lte:70,color:C.orange},{gt:70,color:C.green}],dimension:1},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',min:40,max:90,axisLabel:{formatter:function(v){return v+'%'}}}),
+      series:[{type:'line',data:[70,68,65,58.1,79.6,65,55],symbol:'circle',symbolSize:8,lineStyle:{width:3},
+        markLine:{silent:true,symbol:'none',data:[
+          {yAxis:70,lineStyle:{color:C.green,type:'dashed'},label:{formatter:'70%',fontSize:9}},
+          {yAxis:60,lineStyle:{color:C.red,type:'dashed'},label:{formatter:'60%',fontSize:9}}
+        ]}}]
+    });
+  })();
+
+  // ===== CHART 23: rChartBNEPrice - Line dual =====
+  (function(){
+    var el=document.getElementById('rChartBNEPrice');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2019','2020','2021','2022','2023','2024','2025','2026 Q1'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Houses':'獨立屋',en?'Units':'公寓']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtAUDShort(v)}}}),
+      series:[
+        {name:en?'Houses':'獨立屋',type:'line',data:[560000,570000,750000,900000,870000,980000,1050000,1080000],itemStyle:{color:C.navy},lineStyle:{color:C.navy}},
+        {name:en?'Units':'公寓',type:'line',data:[340000,345000,420000,520000,490000,560000,640000,680000],itemStyle:{color:C.orange},lineStyle:{color:C.orange,type:'dashed'}}
+      ]
+    });
+  })();
+
+  // ===== CHART 24: rChartBNEOlympics - Horizontal bar =====
+  (function(){
+    var el=document.getElementById('rChartBNEOlympics');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Bowen Hills','Herston/KG','Woolloongabba','Kangaroo Pt','Spring Hill','East Brisbane']:['Bowen Hills','Herston/KG','Woolloongabba','Kangaroo Pt','Spring Hill','East Brisbane'];
+    var data=[28,25,20,18,15,16];
+    var colors=data.map(function(v){return v>=25?C.orange:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:20,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14}]
+    });
+  })();
+
+  // ===== CHART 25: rChartGCUnit - Line dual =====
+  (function(){
+    var el=document.getElementById('rChartGCUnit');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2015','2017','2019','2021','2023','2025 Oct'];
+    ch.setOption({
+      tooltip:baseTooltip,
+      legend:Object.assign({},baseLegend,{data:[en?'Gold Coast':'黃金海岸',en?'Sydney':'雪梨']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtAUDShort(v)}}}),
+      series:[
+        {name:en?'Gold Coast':'黃金海岸',type:'line',data:[475000,510000,540000,650000,830000,956000],itemStyle:{color:C.orange},lineStyle:{color:C.orange},
+          markPoint:{data:[{coord:['2025 Oct',956000],value:en?'GC overtakes':'黃金海岸超越',symbolSize:40,itemStyle:{color:C.orange},label:{fontSize:8,color:'#fff'}}]}},
+        {name:en?'Sydney':'雪梨',type:'line',data:[620000,660000,660000,720000,820000,927000],itemStyle:{color:C.navy},lineStyle:{color:C.navy,type:'dashed'}}
+      ]
+    });
+  })();
+
+  // ===== CHART 26: rChartGCCliff - Bar =====
+  (function(){
+    var el=document.getElementById('rChartGCCliff');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=['2023','2024','2025','2026F','2027F'];
+    var data=[2200,2050,1870,850,95];
+    var colors=data.map(function(v){return v>=1500?C.navy:v>=500?C.orange:C.red;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:10,top:30,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v)}}}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:28,
+        markPoint:{data:[{coord:['2027F',95],value:en?'SUPPLY\nCLIFF':'供應\n斷崖',symbolSize:50,itemStyle:{color:C.red},label:{fontSize:8,color:'#fff'}}]}}]
+    });
+  })();
+
+  // ===== CHART 27: rChartScenario - Bar grouped =====
+  (function(){
+    var el=document.getElementById('rChartScenario');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Perth','Brisbane','Gold Coast','Adelaide','Sydney','Melbourne','National']:['伯斯','布里斯本','黃金海岸','阿德萊德','雪梨','墨爾本','全國'];
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      legend:Object.assign({},baseLegend,{data:[en?'Bull':'牛市',en?'Base':'基本',en?'Bear':'熊市']}),
+      grid:{left:10,right:10,top:40,bottom:10,containLabel:true},
+      xAxis:mkAxis({type:'category',data:labels,axisLabel:{fontSize:9,rotate:30}}),
+      yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      series:[
+        {name:en?'Bull':'牛市',type:'bar',data:[24,17,15,14,8,5,12],itemStyle:{color:C.green},barWidth:12},
+        {name:en?'Base':'基本',type:'bar',data:[18,12,11,9,3,1,6],itemStyle:{color:C.navy},barWidth:12},
+        {name:en?'Bear':'熊市',type:'bar',data:[-3,-4,-5,-1,-7,-6,-3],itemStyle:{color:C.red},barWidth:12}
+      ]
+    });
+  })();
+
+  // ===== CHART 28: rChartRentForecast - Horizontal bar =====
+  (function(){
+    var el=document.getElementById('rChartRentForecast');if(!el)return;
+    var ch=echarts.init(el);allCharts.push(ch);
+    var labels=en?['Darwin','Brisbane','Sydney','Adelaide','Perth','GC Houses','Melbourne','National']:['達爾文','布里斯本','雪梨','阿德萊德','伯斯','黃金海岸獨立屋','墨爾本','全國'];
+    var data=[12,8.0,7.3,7.0,5.5,6.5,5.0,6.6];
+    var colors=data.map(function(v){return v>=10?C.red:v>=7?C.orange:C.navy;});
+    ch.setOption({
+      tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),
+      grid:{left:10,right:30,top:10,bottom:20,containLabel:true},
+      xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return v+'%'}}}),
+      yAxis:mkAxis({type:'category',data:labels,inverse:true}),
+      series:[{type:'bar',data:data.map(function(v,i){return{value:v,itemStyle:{color:colors[i]}};}),barWidth:14,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.green,type:'dashed'},data:[{xAxis:3.0,label:{formatter:en?'Pre-COVID norm':'疫情前常態',fontSize:9}}]}}]
+    });
+  })();
+
+}
+
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+  // -- Side Nav ScrollSpy --
+  (function(){
+    function initScrollSpy(){
+      var items = document.querySelectorAll('.side-nav-item');
+      if(!items.length) return;
+      var sections = [];
+      items.forEach(function(a){
+        var id = a.getAttribute('href').replace('#','');
+        var el = document.getElementById(id);
+        if(el) sections.push({el:el, a:a});
+      });
+      function onScroll(){
+        var scrollY = window.scrollY + window.innerHeight * 0.25;
+        var current = sections[0];
+        sections.forEach(function(s){
+          if(s.el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s;
+        });
+        items.forEach(function(a){ a.classList.remove('active'); });
+        if(current) current.a.classList.add('active');
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', initScrollSpy);
+    } else {
+      initScrollSpy();
+    }
+  })();
+  </script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

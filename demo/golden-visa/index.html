@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the Lius use Property Monitor for EU Golden Visa Research | Walkthrough | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="../../css/style.css">
+<style>
+.lang-zh{display:none}
+
+/* ── Persona Card (top) ── */
+.persona-card{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#e2ecf8;border-radius:8px;padding:26px 28px;margin:0 0 24px;position:relative;overflow:hidden}
+.persona-card::after{content:'🇮🇪';position:absolute;top:-20px;right:-10px;font-size:140px;opacity:.06}
+.persona-card .pc-eyebrow{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.persona-card .pc-title{font-size:22px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:8px;letter-spacing:-.01em}
+.persona-card .pc-tag{font-size:13px;color:#a8c0d8;line-height:1.6;max-width:780px;margin-bottom:18px}
+.pc-profile{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);margin-bottom:14px}
+.pc-profile-item .lbl{font-size:9px;letter-spacing:.10em;color:#5a8ab5;font-weight:600;text-transform:uppercase}
+.pc-profile-item .val{font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-weight:500;margin-top:3px}
+.pc-questions{font-size:11.5px;line-height:1.65;color:#a8c0d8}
+.pc-questions strong{color:#f59e0b;font-weight:600;display:block;margin-bottom:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pc-questions ol{margin:0;padding:0 0 0 18px}
+.pc-questions li{margin-bottom:3px}
+
+/* Scope banner — calm blue */
+.scope-banner{background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:1.5px solid #3b82f6;border-radius:8px;padding:14px 18px;margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.scope-banner .sb-icon{font-size:24px;line-height:1}
+.scope-banner .sb-text{font-size:12.5px;color:#1e40af;line-height:1.55}
+.scope-banner .sb-text strong{color:#1e3a8a;font-weight:700;display:block;margin-bottom:3px;font-size:13px}
+
+/* ── Section heading ── */
+.demo-section{margin:32px 0 8px}
+.demo-section .sec-no{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:.08em}
+.demo-section h2{font-size:18px;font-weight:700;color:#1e3a5f;line-height:1.3;margin:2px 0 4px;letter-spacing:-.005em}
+.demo-section .sec-sub{font-size:12px;color:#5a7a9a;line-height:1.6;max-width:780px}
+
+/* ── Demo Step ── */
+.demo-step{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:36px 1fr;gap:16px}
+.demo-step .step-no{width:32px;height:32px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;font-family:'JetBrains Mono',monospace}
+.demo-step .step-content h4{font-size:14px;font-weight:600;color:#1e3a5f;margin-bottom:4px;line-height:1.35}
+.demo-step .step-url{font-family:'JetBrains Mono',monospace;font-size:11px;margin-bottom:10px}
+.demo-step .step-url a{color:#2563eb;text-decoration:none}
+.demo-step .step-url a:hover{text-decoration:underline}
+.demo-step .step-action{background:#eff6ff;border-left:3px solid #2563eb;padding:9px 12px;font-size:11.5px;color:#1e3a5f;line-height:1.6;margin-bottom:10px;border-radius:0 4px 4px 0}
+.demo-step .step-action strong{color:#1e3a5f;font-weight:600;display:inline-block;margin-right:4px}
+.demo-step .step-see{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:8px}
+.demo-step .step-see strong{color:#1e3a5f;font-weight:600}
+.demo-step .step-meaning{background:#fffbeb;border-left:3px solid #d97706;padding:9px 12px;font-size:11.5px;color:#78350f;line-height:1.6;margin-top:6px;border-radius:0 4px 4px 0}
+.demo-step .step-meaning strong{color:#92400e;font-weight:600}
+.demo-step .step-screenshot{background:#f4f7fc;border:1px solid #ccd9e8;border-radius:4px;margin-top:12px;overflow:hidden;line-height:0}
+.demo-step .step-screenshot img{display:block;width:100%;height:auto}
+
+/* ── Limit notice ── */
+.limit-notice{background:#fef9e7;border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:6px;padding:10px 14px;font-size:11.5px;color:#78350f;line-height:1.6;margin:6px 0 10px}
+.limit-notice strong{color:#92400e;font-weight:700}
+
+/* ── Cheat sheet ── */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.cheat-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:14px 18px}
+.cheat-card h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cheat-card .ck-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#eef3f9;color:#1e3a5f;font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.cheat-card p{font-size:11.5px;color:#4a6080;line-height:1.6}
+.cheat-card .ck-tip{margin-top:6px;font-size:11px;color:#5a7a9a;font-style:italic}
+.cheat-card code{background:#eef3f9;color:#1e3a5f;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.color-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.color-legend .cl-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#4a6080;background:#f4f7fc;padding:6px 10px;border-radius:3px}
+.color-legend .cl-dot{width:10px;height:10px;border-radius:50%}
+.color-legend .cl-green{background:#16a34a}
+.color-legend .cl-orange{background:#d97706}
+.color-legend .cl-red{background:#dc2626}
+.color-legend .cl-blue{background:#2563eb}
+
+/* ── Takeaway box ── */
+.takeaway{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.takeaway-card{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:18px 20px}
+.takeaway-card.answered{border-left:4px solid #16a34a}
+.takeaway-card.outsource{border-left:4px solid #d97706}
+.takeaway-card h4{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;letter-spacing:-.005em}
+.takeaway-card ul{list-style:none;padding:0;margin:0}
+.takeaway-card li{font-size:12px;color:#4a6080;line-height:1.6;padding:5px 0 5px 22px;position:relative}
+.takeaway-card.answered li::before{content:'✓';position:absolute;left:0;top:5px;color:#16a34a;font-weight:700}
+.takeaway-card.outsource li::before{content:'→';position:absolute;left:0;top:5px;color:#d97706;font-weight:700}
+.takeaway-card li strong{color:#1e3a5f;font-weight:600}
+
+/* ── PDF button ── */
+.pdf-bar{display:flex;gap:10px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap}
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;background:#1e3a5f;color:#fff;border:none;padding:12px 22px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{background:#0f1e33}
+.pdf-btn.ghost{background:#fff;color:#1e3a5f;border:1px solid #ccd9e8}
+.pdf-btn.ghost:hover{border-color:#1e3a5f}
+
+/* ── Best Option Block ── */
+.best-option{margin:6px 0 16px}
+.bo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.bo-card{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #d97706;border-radius:4px;padding:14px 16px}
+.bo-card .bo-lbl{font-size:9px;letter-spacing:.1em;color:#5a7a9a;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.bo-card .bo-val{font-size:14px;font-weight:600;color:#1e3a5f;line-height:1.35;margin-bottom:6px;letter-spacing:-.005em}
+.bo-card .bo-note{font-size:11px;color:#5a7a9a;line-height:1.5}
+.bo-section{background:#fff;border:0.5px solid #ccd9e8;border-radius:4px;padding:16px 20px;margin-bottom:10px}
+.bo-section h4{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:10px;line-height:1.35}
+.bo-checklist ul,.bo-next ol{margin:0;padding-left:18px}
+.bo-checklist li,.bo-next li{font-size:12.5px;color:#4a6080;line-height:1.7;margin-bottom:6px}
+.bo-bottomline{background:linear-gradient(135deg,#0f1e33 0%,#1e3a5f 60%,#2c5282 100%);color:#fff;border-radius:6px;padding:20px 24px;margin-top:14px}
+.bo-bottomline .bo-bl-label{font-size:10px;letter-spacing:.16em;font-weight:700;color:#f59e0b;display:block;margin-bottom:8px;text-transform:uppercase}
+.bo-bottomline p{font-size:14px;line-height:1.6;color:#fff;margin:0}
+@media (max-width:720px){.bo-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Print ── */
+@media print {
+  @page{size:A4;margin:14mm}
+  body{background:#fff!important}
+  #nav-root,.lang-switcher,.pdf-bar,.demo-back{display:none!important}
+  .bo-grid{grid-template-columns:repeat(4,1fr)!important}
+  .bo-bottomline{background:#1e3a5f!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .container{max-width:100%!important;padding:0!important}
+  .persona-card,.demo-step,.cheat-card,.takeaway-card,.scope-banner{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  .persona-card::after{display:none}
+  .demo-section{break-after:avoid;page-break-after:avoid}
+  a{color:#1e3a5f!important;text-decoration:none}
+}
+
+@media (max-width:760px){
+  .pc-profile{grid-template-columns:repeat(2,1fr);gap:10px}
+  .demo-step{grid-template-columns:1fr;gap:10px}
+  .demo-step .step-no{margin-bottom:-4px}
+  .persona-card{padding:20px 18px}
+  .persona-card .pc-title{font-size:18px}
+  .cheat-grid,.takeaway,.color-legend{grid-template-columns:1fr}
+  .scope-banner{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="container">
+
+  <!-- Breadcrumb -->
+  <div class="demo-back" style="font-size:11px;color:#5a7a9a;margin-bottom:12px;font-family:'JetBrains Mono',monospace">
+    <a href="/demo/" style="color:#2563eb;text-decoration:none">← <span class="lang-en">All walkthroughs</span><span class="lang-zh">所有導覽</span></a>
+    <span style="color:#aabdd4;margin:0 8px">/</span>
+    <span><span class="lang-en">The Lius use the site to triage EU Golden Visa options</span><span class="lang-zh">劉氏夫婦用本站研究歐盟黃金簽證路徑</span></span>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 1 — PERSONA CARD                       -->
+  <!-- ============================================== -->
+  <div class="persona-card">
+    <div class="pc-eyebrow"><span class="lang-en">USE CASE WALKTHROUGH · 09 · A SITE TOUR THROUGH THE LIUS' EYES</span><span class="lang-zh">情境導覽 · 09 · 跟著劉氏夫婦逛這個網站</span></div>
+    <div class="pc-title">
+      <span class="lang-en">Meet Mr. &amp; Mrs. Liu — Taiwanese tech founders exploring the EU Golden Visa route to a holiday/retirement base and eventual EU passport</span>
+      <span class="lang-zh">認識劉先生夫婦 — 台灣科技創業家，探索歐盟黃金簽證路徑，目標是歐洲度假＋退休基地，以及最終的歐盟護照</span>
+    </div>
+    <p class="pc-tag">
+      <span class="lang-en">Mr. &amp; Mrs. Liu (55 and 53, Taipei) just sold their tech business and have €1.5M (~NT$50M) in cash. Originally targeted Portugal D7, which is now heavily restricted. Now exploring alternatives — they want a 5-year path to EU residency that may convert to citizenship, plus a holiday/retirement base in Europe. They've never used Property Monitor. This walkthrough shows them <strong>which page to open first, what to click, what each screen means, and where the site's honest limits are</strong> — using the Lius' questions as the lens. It is <strong>not</strong> investment advice, immigration advice, tax advice, or a country-selection recommendation.</span>
+      <span class="lang-zh">劉先生夫婦，55 歲與 53 歲，台北，剛出售科技公司，手握 €150 萬（約台幣 5,000 萬）現金。原先鎖定葡萄牙 D7，但現已大幅限縮。目前探索替代路徑 — 他們想要 5 年 EU 居留＋最終換護照，以及一個歐洲度假／退休基地。他們從沒用過 Property Monitor。這份導覽用劉氏夫婦的問題當主軸，<strong>告訴你先打開哪一頁、點哪裡、每個畫面代表什麼、以及網站的誠實限制在哪</strong>。本文<strong>不是</strong>投資建議、移民建議、稅務建議或國家選擇推薦。</span>
+    </p>
+
+    <div class="pc-profile">
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Buyers</span><span class="lang-zh">使用者</span></div><div class="val">Mr.&amp;Mrs. Liu · 55/53</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Goal</span><span class="lang-zh">目標</span></div><div class="val"><span class="lang-en">EU passport</span><span class="lang-zh">EU 護照</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Budget</span><span class="lang-zh">預算</span></div><div class="val">€1.5M cash</div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Origin</span><span class="lang-zh">來源</span></div><div class="val"><span class="lang-en">PT D7 → now open</span><span class="lang-zh">葡萄牙 D7 → 現找替代</span></div></div>
+      <div class="pc-profile-item"><div class="lbl"><span class="lang-en">Site experience</span><span class="lang-zh">網站經驗</span></div><div class="val"><span class="lang-en">First-time</span><span class="lang-zh">第一次</span></div></div>
+    </div>
+
+    <div class="pc-questions">
+      <strong><span class="lang-en">Questions the Lius came to answer</span><span class="lang-zh">劉氏夫婦想在這個網站找到答案的問題</span></strong>
+      <ol>
+        <li><span class="lang-en">Where on the site can I compare EU Golden Visa programs side-by-side?</span><span class="lang-zh">這個網站哪裡可以並排比較 EU 黃金簽證計畫？</span></li>
+        <li><span class="lang-en">Which EU country does this site actually have full market data on?</span><span class="lang-zh">這個網站對哪個歐盟國家有完整市場數據？</span></li>
+        <li><span class="lang-en">Where is the long-form Ireland market thesis — before I start clicking charts?</span><span class="lang-zh">在我開始點圖之前，愛爾蘭的長篇市場報告在哪？</span></li>
+        <li><span class="lang-en">What does €1.5M actually cost end-to-end as a foreign buyer in Ireland?</span><span class="lang-zh">身為外國買家，€150 萬在愛爾蘭的實際全程總成本是多少？</span></li>
+        <li><span class="lang-en">Does the site cover Portugal / Greece / Cyprus / Malta in detail? (Honest answer + workaround)</span><span class="lang-zh">網站對葡萄牙、希臘、塞普勒斯、馬爾他有詳細數據嗎？（誠實回答＋替代方案）</span></li>
+        <li><span class="lang-en">How do Ireland REITs compare to direct property for an EU residency strategy?</span><span class="lang-zh">對於歐盟居留策略，愛爾蘭 REIT 與直接買房哪個更好？</span></li>
+        <li><span class="lang-en">How do I switch the site to 中文? Where do I download a PDF for our migration lawyer?</span><span class="lang-zh">怎麼切到中文？怎麼下載 PDF 給我們的移民律師？</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Scope banner -->
+  <div class="scope-banner">
+    <div class="sb-icon">🌍</div>
+    <div class="sb-text">
+      <strong><span class="lang-en">Site coverage notice — read before proceeding</span><span class="lang-zh">網站覆蓋範圍說明 — 繼續前請閱讀</span></strong>
+      <span class="lang-en">This site provides deep coverage of <strong>Ireland (/ie/)</strong> — the only EU country with a full suite of Overview / Supply / Demand / Valuation / Risk / Macro / Report + Dublin &amp; Cork city pages — and a visa-route comparison hub at <strong>/visa.html</strong>. For Portugal, Greece, Cyprus, and Malta <em>market-specific</em> data, you must consult official sources or a licensed migration adviser. Use this walkthrough to learn <em>how</em> to triage EU options using the site's tools, not as a definitive country-selection guide.</span>
+      <span class="lang-zh">本站對<strong>愛爾蘭（/ie/）</strong>提供完整深度覆蓋 — 歐盟唯一完整涵蓋 Overview / Supply / Demand / Valuation / Risk / Macro / Report 加上都柏林、科克城市頁面的國家 — 以及 <strong>/visa.html</strong> 的簽證路徑比較中心。對於葡萄牙、希臘、塞普勒斯、馬爾他的<em>市場專屬</em>數據，您必須查閱官方來源或具牌照移民顧問。使用這份導覽學習<em>如何</em>用本站工具進行歐盟選項初篩，而非作為最終選國指南。</span>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 2 — OPERATIONS JOURNEY                 -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 02</div>
+    <h2><span class="lang-en">The Lius' click-by-click tour — 12 stops</span><span class="lang-zh">劉氏夫婦的逐步點擊旅程 — 12 個停靠點</span></h2>
+    <p class="sec-sub">
+      <span class="lang-en">Each stop is a real page on the site. For each, you'll see what they click, what the screen shows, and how that screen relates to their Golden Visa situation. Follow along in another tab — every URL works.</span>
+      <span class="lang-zh">每個停靠點都是站上的一頁實際畫面。每站告訴你他們點什麼、螢幕出現什麼、這個畫面跟他們黃金簽證情境有什麼關係。建議另開分頁跟著走 — 所有連結都能直接點。</span>
+    </p>
+  </div>
+
+  <!-- STOP 1 -->
+  <div class="demo-step">
+    <div class="step-no">1</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Land on the home page and pick the "passport / visa" persona</span><span class="lang-zh">進入首頁，選「身分」persona 卡</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">open the home page, scroll past the dark hero, see three persona cards labelled <strong>"I want yield / I want growth / I want a passport"</strong>. They click <strong>"I want a passport / 我要身分"</strong> because an EU passport is their primary motivation.</span>
+        <span class="lang-zh">打開首頁，往下捲過深色 hero，看到三張 persona 卡：<strong>「我要收租／我要增值／我要身分」</strong>。點 <strong>「我要身分 / I want a passport」</strong>，因為 EU 護照是他們的主要動機。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> the chosen card lights up amber with a checkmark. The persona explicitly lists visa-linked countries. Below the hero, the scatter chart and world map both highlight passport-route countries automatically — watch for the EU cluster.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>選中的卡片變琥珀色亮起並打勾。persona 直接列出簽證連結國家。Hero 下方的散點圖與世界地圖自動<em>高亮護照路徑國家</em> — 注意歐盟群組。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius:</span><span class="lang-zh">對劉氏夫婦：</span></strong> <span class="lang-en">picking the persona once sets a global filter — every chart, map, and Top-5 list on /home reweights to passport-route countries. They don't need to manually filter. This is the fastest orientation to the EU cluster on the world map.</span><span class="lang-zh">選一次 persona = 全站濾鏡。/home 上每張圖、地圖、Top-5 都以「護照路徑」國家重新排序。不用手動篩選。這是找到世界地圖上歐盟群組最快的定向方式。</span></div>
+      <div class="step-screenshot"><img src="img/01-home-passport.png" alt="Home page with passport persona selected in amber" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 2 -->
+  <div class="demo-step">
+    <div class="step-no">2</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Use the world map — see the EU cluster and note Dublin as the only fully-covered EU city</span><span class="lang-zh">用世界地圖 — 找到歐盟群組，注意都柏林是唯一完整覆蓋的歐盟城市</span></h4>
+      <div class="step-url"><a href="/home.html">myproperty.investmquest.com/home</a> · <span class="lang-en">map section</span><span class="lang-zh">地圖區段</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">scroll down to the world map. Use the metric toggle (Yield / Carry / 10yr / Pipeline) to see how EU cities compare. Hover the Dublin dot — the tooltip shows Yield, Carry, 10yr, PTI, Vacancy. Notice Dublin and Cork both appear in the EU cluster with full data; other EU cities like Lisbon or Athens have partial or no dots.</span>
+        <span class="lang-zh">捲到世界地圖。用切換按鈕（Yield / Carry / 10yr / Pipeline）查看歐盟城市比較。游標停在都柏林點上 — tooltip 顯示 Yield、Carry、10yr、PTI、Vacancy。注意都柏林和科克在歐盟群組中都有完整數據；里斯本、雅典等其他歐盟城市資料點不完整。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> dot color depth = how extreme the metric. Dublin stands out for tight vacancy (structural undersupply). The site's EU coverage is concentrated in Ireland — this is a feature to understand before going deeper.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>點顏色深度代表該指標極端度。都柏林在空置率（結構性供不應求）上格外突出。本站的歐盟覆蓋集中在愛爾蘭 — 這是深入研究前需要理解的重點。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius:</span><span class="lang-zh">對劉氏夫婦：</span></strong> <span class="lang-en">the map gives them a visual confirmation: the site is strongest on Ireland within the EU. For their Portugal / Greece / Cyprus / Malta questions, they'll use /visa.html for program-level data (next stop) and consult migration advisers for property-market specifics.</span><span class="lang-zh">地圖視覺確認了：本站在歐盟中以愛爾蘭最強。他們對葡萄牙／希臘／塞普勒斯／馬爾他的問題，將用 /visa.html 取得計畫層級數據（下一站），再向移民顧問諮詢各國房市細節。</span></div>
+      <div class="step-screenshot"><img src="img/02-home-map-eu.png" alt="World map showing EU cluster with Dublin highlighted" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 3 -->
+  <div class="demo-step">
+    <div class="step-no">3</div>
+    <div class="step-content">
+      <h4><span class="lang-en">/visa.html — the Golden Visa program comparison hub</span><span class="lang-zh">/visa.html — 黃金簽證計畫比較中心</span></h4>
+      <div class="step-url"><a href="/visa.html">myproperty.investmquest.com/visa</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navigate to /visa.html (navbar → Tools → Visa). They see the full 12-program table. They click the <strong>"✓ Active"</strong> filter chip to hide closed programs, then click <strong>"Citizenship"</strong> to see only passport paths. They also use the <strong>"PR / Residency"</strong> filter to compare all EU residency options.</span>
+        <span class="lang-zh">進到 /visa.html（navbar → Tools → Visa）。他們看到完整 12 個計畫的比較表。點 <strong>「✓ 現役」</strong> 篩選晶片排除已關閉計畫，再點 <strong>「公民」</strong> 只看護照路徑。也用 <strong>「PR / 居留」</strong> 篩選比較所有歐盟居留選項。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see — the 12-program comparison table columns:</strong></span>
+        <span class="lang-zh"><strong>螢幕出現什麼 — 12 個計畫比較表欄位：</strong></span><br>
+        <span class="lang-en">Country / Program · Status (Active / Under review / Closed) · Path (Citizenship pill / PR pill) · Min investment · Investment type · Processing time · Family inclusion · Tax key note.<br>
+        <strong>Hero stats:</strong> 7 Active programs · 2 Under review · 3 Closed (2023–25) · Lowest threshold $130K · Fastest citizenship Turkey 6mo.<br>
+        <strong>Key findings for the Lius:</strong><br>
+        ▸ <strong>Portugal property route: CLOSED</strong> (Oct 2023). Funds route still open but not property-linked. NHR ended 2024.<br>
+        ▸ <strong>Greece: ACTIVE</strong> — €800K Athens/Mykonos; €400K most regions; €250K heritage conversion. 5yr PR, citizenship in 7yr. Short-term rental (Airbnb) now BANNED on GV properties.<br>
+        ▸ <strong>Cyprus: ACTIVE PR</strong> — €300K new-build, Fast Track 2-4 months. Citizenship path closed (2020). Must visit every 2 years.<br>
+        ▸ <strong>Malta: CLOSED</strong> (Jul 2025) — EU court struck it down.<br>
+        ▸ <strong>Ireland IIP: CLOSED</strong> (Feb 2023). No replacement program. The /ie/ data is for market research, not a visa path.<br>
+        ▸ <strong>Turkey: ACTIVE Citizenship</strong> — $400K, 6-9 months. EU passport? No — Turkey is not in EU. But fastest citizenship path.<br>
+        Below the table: <em>Tax Red Flags</em> section with 5 warnings: worldwide income tax exposure, exit tax on unrealized gains, real out-of-pocket cost 15-25% above headline, 3-7yr holding period before resale, citizenship vs PR meaningful difference.</span>
+        <span class="lang-zh">國家／計畫 · 狀態（現役／審查中／已關閉）· 路徑（公民晶片 / PR 晶片）· 最低門檻 · 投資類型 · 處理時間 · 家屬納入 · 稅務重點。<br>
+        <strong>Hero 統計：</strong>7 個現役 · 2 個審查中 · 3 個 2023–25 關閉 · 最低門檻 $13 萬 · 最快公民土耳其 6 個月。<br>
+        <strong>對劉氏夫婦的關鍵發現：</strong><br>
+        ▸ <strong>葡萄牙房產路徑：已關閉</strong>（2023/10）。基金路徑仍開放但非房產相關。NHR 優惠 2024 終止。<br>
+        ▸ <strong>希臘：現役</strong> — 雅典 / 米科諾斯 €80 萬；多數地區 €40 萬；文化資產改建 €25 萬。5 年 PR，7 年申公民。黃金簽證房產現禁止短租（Airbnb）。<br>
+        ▸ <strong>塞普勒斯：現役 PR</strong> — €30 萬新建，快軌 2-4 個月。公民路徑 2020 年關閉。每 2 年須訪塞。<br>
+        ▸ <strong>馬爾他：已關閉</strong>（2025/7）— 歐洲法院判決違憲。<br>
+        ▸ <strong>愛爾蘭 IIP：已關閉</strong>（2023/2）。無替代計畫。/ie/ 數據供市場研究用，非簽證路徑。<br>
+        ▸ <strong>土耳其：現役公民</strong> — $40 萬，6-9 個月。EU 護照？不 — 土耳其非歐盟。但是最快公民路徑。<br>
+        表格下方：<em>稅務地雷</em>區，含 5 條警告：全球課稅暴露、離境未實現利得稅、實際支出比標題高 15-25%、持有 3-7 年才能賣、公民 vs PR 有實質差別。</span>
+      </p>
+      <div class="limit-notice"><strong><span class="lang-en">Site limit (important):</span><span class="lang-zh">網站限制（重要）：</span></strong> <span class="lang-en">/visa.html gives program-level investment thresholds, processing times, and tax flags for all 12 programs — but it does NOT have city-level market data for Greece, Cyprus, or Portugal. For Athens property prices, Limassol yields, or Lisbon market dynamics, consult local agents + official sources. The site is honest about this.</span><span class="lang-zh">/visa.html 提供所有 12 個計畫的門檻、處理時間、稅務警告 — 但<em>沒有</em>希臘、塞普勒斯或葡萄牙的城市級市場數據。雅典房價、利馬索爾租金收益率或里斯本市場動態，請諮詢當地仲介＋官方來源。本站對此誠實說明。</span></div>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius — decisive clarity in 3 minutes:</span><span class="lang-zh">對劉氏夫婦 — 3 分鐘得到決定性清晰度：</span></strong> <span class="lang-en">/visa.html tells them Portugal property is closed, Malta is dead, and their realistic EU options are Greece (€400K+ with 7yr citizenship path) or Cyprus (€300K PR only, citizenship needs 7yr residence). Ireland IIP is closed so /ie/ pages are for market research, not a visa. Greece fits their €1.5M budget and citizenship timeline. They proceed to Ireland market data next as a property-market comparison reference (and because Ireland is the only EU market the site has full data on).</span><span class="lang-zh">/visa.html 告訴他們葡萄牙房產路徑已關，馬爾他已終止，現實的歐盟選項是希臘（€40 萬+ ，7 年公民路徑）或塞普勒斯（€30 萬 PR，公民需 7 年居住）。愛爾蘭 IIP 已關閉，所以 /ie/ 頁面用於市場研究，非簽證路徑。希臘符合他們的 €150 萬預算和公民時程。接下來他們看愛爾蘭市場數據作為房產市場比較參考（也因為愛爾蘭是本站有完整數據的唯一歐盟市場）。</span></div>
+      <div class="step-screenshot"><img src="img/03-visa-hub.png" alt="Visa.html program comparison table with Active filter and EU programs visible" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 4 -->
+  <div class="demo-step">
+    <div class="step-no">4</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Read the long-form Ireland market report — get the narrative before the charts</span><span class="lang-zh">讀愛爾蘭長篇市場報告 — 看完故事再看圖表</span></h4>
+      <div class="step-url"><a href="/ie/report.html">myproperty.investmquest.com/ie/report</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇮🇪 → <strong>Report / 報告</strong>. They read the Executive Summary first (sidebar nav aids orientation), then skim section headings: ECB Policy cycle · Supply (planning backlog) · Demand (tech worker migration) · Valuation · Dublin city-level · Cork city-level · Outlook.</span>
+        <span class="lang-zh">navbar 🇮🇪 → <strong>Report / 報告</strong>。先讀執行摘要（左側欄 nav 輔助定向），再掃章節標題：ECB 政策週期 · 供給（規劃積壓）· 需求（科技工人移民）· 估值 · 都柏林城市層級 · 科克城市層級 · 展望。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> a long-form analyst report — paragraphs of narrative with stats embedded in the text. A fixed side-nav on the right (on wide screens) lets them jump to sections. This is the only page that connects Ireland's housing crisis, ECB rate cuts, tech-worker demand, and supply bottleneck into one cohesive story.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>長篇分析師報告 — 段落敘述配內嵌統計數字。寬螢幕上右側有固定側欄 nav 可跳章節。這是唯一把愛爾蘭住宅危機、ECB 降息、科技工人需求、供給瓶頸串成一個連貫故事的地方。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius:</span><span class="lang-zh">對劉氏夫婦：</span></strong> <span class="lang-en">reading the report FIRST gives context to the KPI grids they'll see on /ie/ next. The key takeaway: Ireland's housing crisis is structural (0.7% vacancy nationally, 0.5% in Dublin), the IIP visa is closed, ECB rate cuts since mid-2024 are improving affordability, and the planning bottleneck means supply won't catch up for 5+ years. For a buy-and-hold investor, the fundamentals are clear — but the Golden Visa route must go through Greece, Cyprus, or another still-open EU program.</span><span class="lang-zh">先讀報告，後面 /ie/ 的 KPI 才有脈絡。關鍵結論：愛爾蘭住宅危機是結構性的（全國空置率 0.7%，都柏林 0.5%），IIP 簽證已關閉，ECB 2024 年中起降息改善可負擔性，規劃瓶頸意味著供給 5 年以上追不上。對長期持有投資者來說，基本面清晰 — 但黃金簽證路徑必須走希臘、塞普勒斯或其他仍開放的歐盟計畫。</span></div>
+      <div class="step-screenshot"><img src="img/04-ie-report.png" alt="Ireland long-form market report with side navigation" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 5 -->
+  <div class="demo-step">
+    <div class="step-no">5</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Ireland dashboard — KPI grids tell the structural housing shortage story</span><span class="lang-zh">愛爾蘭儀表板 — KPI 格局說明結構性住宅短缺故事</span></h4>
+      <div class="step-url"><a href="/ie/">myproperty.investmquest.com/ie</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇮🇪 → <strong>Overview</strong>. They scan the 6 KPI cards top-to-bottom, then look at the 4 ECharts below.</span>
+        <span class="lang-zh">navbar 🇮🇪 → <strong>Overview</strong>。由上往下掃 6 張 KPI 卡，再看下方 4 張 ECharts。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see — 6 KPI cards:</strong><br>
+        ① <strong>Median House €360K</strong> (+7.3% YoY)<br>
+        ② <strong>Median Apartment €285K</strong> (+5.8% YoY)<br>
+        ③ <strong>Avg Rent €1,800/mo</strong> (+8.2% YoY)<br>
+        ④ <strong>Vacancy Rate 0.7%</strong> (EU's lowest — red badge)<br>
+        ⑤ <strong>Annual Completions 32,695</strong> (vs government target 33K)<br>
+        ⑥ <strong>Population 5.38M</strong> (+1.7% YoY)<br>
+        <strong>4 charts below:</strong> National HPI 2015–2025 (near-straight line up) · RTB Rent Index (parallel rise) · Annual Completions vs 33K target · Vacancy Rate by City (Dublin 0.5% — functional zero).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼 — 6 張 KPI 卡：</strong><br>
+        ① <strong>房屋中位價 €36 萬</strong>（年增 +7.3%）<br>
+        ② <strong>公寓中位價 €28.5 萬</strong>（年增 +5.8%）<br>
+        ③ <strong>均租 €1,800/月</strong>（年增 +8.2%）<br>
+        ④ <strong>空置率 0.7%</strong>（歐盟最低 — 紅標）<br>
+        ⑤ <strong>年完工量 32,695</strong>（vs 政府目標 33K）<br>
+        ⑥ <strong>人口 538 萬</strong>（年增 +1.7%）<br>
+        <strong>下方 4 張圖：</strong>全國 HPI 2015–2025（近直線上漲）· RTB 租金指數（並行上漲）· 年完工量 vs 33K 目標 · 各城市空置率（都柏林 0.5% — 功能性零空置）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius:</span><span class="lang-zh">對劉氏夫婦：</span></strong> <span class="lang-en">the dashboard confirms the narrative: demand structurally exceeds supply. The HPI chart's near-vertical rise from 2020 onward contrasts with the flatline completion chart stuck below target — this is what "structural undersupply" looks like in a data picture. Ireland won't have a housing crash; it has a housing shortage. For their €1.5M, buying into this market means buying into one of the tightest rental markets in Europe.</span><span class="lang-zh">儀表板確認了敘述：需求結構性超過供給。HPI 圖從 2020 年起的近垂直上漲，對比完工量始終低於目標的平線 — 這就是「結構性供不應求」的數據面貌。愛爾蘭不會有住宅崩盤；它有住宅短缺。以 €150 萬進場，意味著進入歐洲租賃市場最緊縮之一。</span></div>
+      <div class="step-screenshot"><img src="img/05-ie-dashboard.png" alt="Ireland dashboard with 6 KPI cards and 4 charts" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 6 -->
+  <div class="demo-step">
+    <div class="step-no">6</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Ireland Macro × Cycle — understand where ECB rate cuts place Ireland in the property cycle</span><span class="lang-zh">愛爾蘭 Macro × Cycle — 了解 ECB 降息把愛爾蘭放在房產週期哪個位置</span></h4>
+      <div class="step-url"><a href="/ie/macro.html">myproperty.investmquest.com/ie/macro</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇮🇪 → <strong>Macro / 總經</strong>. The page opens with a horizontal cycle bar across the top showing the 18-year view (2008–2025). They read the 4 context cards, then look at the event cards for macro milestones.</span>
+        <span class="lang-zh">navbar 🇮🇪 → <strong>Macro / 總經</strong>。頁面開啟顯示 18 年視角（2008–2025）的橫向週期軸。讀 4 張脈絡卡，再看事件卡中的宏觀里程碑。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> the cycle bar maps GFC recovery → Celtic Tiger → crash → COVID freeze → ECB rate hike 2022-2023 → ECB rate cuts 2024-2025 with a NOW marker on the current phase. Context cards show ECB rate (now at cut cycle), population growth, completions vs target, and affordability stress. The macro page explicitly notes that Ireland uses the ECB rate, not the Federal Reserve or Bank of England — which matters because ECB cut earlier and more aggressively than the Fed in 2024.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>週期軸描繪 GFC 復甦 → 凱爾特之虎 → 崩盤 → COVID 凍結 → ECB 升息 2022-2023 → ECB 降息 2024-2025，當下時點有 NOW 標記。脈絡卡顯示 ECB 利率（現在降息週期）、人口增長、完工量 vs 目標、可負擔性壓力。Macro 頁明確說明愛爾蘭使用 ECB 利率，而非聯準會或英格蘭銀行 — 這重要，因為 ECB 2024 年比聯準會更早、更積極降息。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius — why the rate cycle matters for their entry:</span><span class="lang-zh">對劉氏夫婦 — 為何利率週期對他們的進場時點重要：</span></strong> <span class="lang-en">even though they're paying cash (€1.5M cash buyers), the ECB rate cycle affects their tenants' affordability and thus rental demand. ECB cutting from 4.5% to 2.5% in 2024–2025 means mortgage holders pay less, freeing up spending — this supports rental demand and price growth for the Lius' eventual exit. The cycle bar places them entering at "ECB easing / supply still constrained" — historically a favorable entry for European buy-to-let.</span><span class="lang-zh">即使他們全現金（€150 萬現金買家），ECB 利率週期影響租客的可負擔性，進而影響租賃需求。ECB 2024–2025 年從 4.5% 降至 2.5% 意味著持有抵押貸款者支付更少，釋放消費力 — 支撐劉氏夫婦最終退出時的租賃需求與價格增長。週期軸把他們進場定位在「ECB 寬鬆 / 供給仍受限」— 歷史上對歐洲買房收租者是有利的進場時機。</span></div>
+      <div class="step-screenshot"><img src="img/06-ie-macro.png" alt="Ireland macro cycle bar with 18-year view and ECB rate cuts noted" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 7 -->
+  <div class="demo-step">
+    <div class="step-no">7</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Dublin vs Cork deep-dive — the Lius compare Ireland's two main investment cities</span><span class="lang-zh">都柏林 vs 科克深度分析 — 劉氏夫婦比較愛爾蘭兩大投資城市</span></h4>
+      <div class="step-url"><a href="/ie/dublin.html">myproperty.investmquest.com/ie/dublin</a> · <a href="/ie/cork.html">/ie/cork</a> <span class="lang-en">(in another tab)</span><span class="lang-zh">（另開分頁）</span></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇮🇪 → <strong>Dublin</strong>. They scan the 6 KPI cards (Median House €490K · Median Apt €380K · Avg Rent 2-bed €2,400/mo · Vacancy 0.5% · Tech Jobs 120K+ · Planning Permits −12% YoY). Then open Cork in another tab.</span>
+        <span class="lang-zh">navbar 🇮🇪 → <strong>Dublin</strong>。掃 6 張 KPI 卡（房屋中位價 €49 萬 · 公寓中位價 €38 萬 · 兩房均租 €2,400/月 · 空置率 0.5% · 科技就業 12 萬+ · 規劃許可 −12% YoY）。再另開分頁看科克。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see side-by-side:</strong><br>
+        ▸ <strong>Dublin</strong> — Median house €490K (+4.3% YoY), 2-bed rent €2,400/mo (+9.2% YoY), vacancy 0.5% (functional zero), 120K+ tech jobs (Google/Meta/Apple), planning permits −12% YoY (pipeline shrinking). Three zones: D1-D4 Southside (premium, €500K–700K), D6-D8 Inner Suburbs (sweet spot, €380K–480K), D15-D24 North/West (value, €300K–380K).<br>
+        ▸ <strong>Cork</strong> — Median house €340K (+7.5% YoY, −31% vs Dublin), 2-bed rent €1,650/mo (+7.8% YoY), vacancy 0.6%, population growth +2.1% (exceeds Dublin). Tagged "Ireland's Second City: Best Value Investment Proposition."<br>
+        <strong>Three zones (Dublin page):</strong> the page shows D1-D4 Southside, D6-D8 Inner Suburbs, D15-D24 North/West with PSF, yield, and growth context for each.</span>
+        <span class="lang-zh"><strong>並排看到什麼：</strong><br>
+        ▸ <strong>都柏林</strong> — 房屋中位價 €49 萬（年增 +4.3%）、兩房均租 €2,400/月（年增 +9.2%）、空置率 0.5%（功能性零空置）、12 萬+ 科技就業（Google / Meta / Apple）、規劃許可 −12% YoY（供給管線收縮）。三個分區：D1-D4 南岸（頂級，€50 萬–70 萬）、D6-D8 內郊（甜蜜點，€38 萬–48 萬）、D15-D24 北部/西部（入門，€30 萬–38 萬）。<br>
+        ▸ <strong>科克</strong> — 房屋中位價 €34 萬（年增 +7.5%，比都柏林低 31%）、兩房均租 €1,650/月（年增 +7.8%）、空置率 0.6%、人口增長 +2.1%（超過都柏林）。標題「愛爾蘭第二大城市：最佳價值投資標的」。<br>
+        <strong>都柏林頁面三個分區：</strong>D1-D4 南岸、D6-D8 內郊、D15-D24 北部/西部，各含 PSF、收益率與增值脈絡。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius — Dublin D6-D8 wins for their profile:</span><span class="lang-zh">對劉氏夫婦 — 都柏林 D6-D8 最符合他們的狀況：</span></strong> <span class="lang-en">with €1.5M they can buy comfortably in Dublin's sweet-spot zone (D6-D8 Inner Suburbs at €380K–480K range) and have capital left over for Greece/Cyprus program costs. Cork is a valid higher-yield / lower-entry alternative if they want to maximize rental return. Dublin IIP visa being closed is not relevant here — they're using the city page for market research. A Dublin D6-D8 apartment at €450K leaves ~€1.05M for the Greek Golden Visa (which needs €400K in most regions). That's their working capital allocation.</span><span class="lang-zh">持有 €150 萬，他們可以輕鬆買入都柏林甜蜜點區域（D6-D8 內郊 €38 萬–48 萬），並留有剩餘資本用於希臘/塞普勒斯計畫費用。如果他們想最大化租金收益，科克是有效的高收益 / 低門檻替代選項。都柏林 IIP 已關閉與這裡無關 — 他們是用城市頁面做市場研究。都柏林 D6-D8 公寓 €45 萬，留下約 €105 萬用於希臘黃金簽證（多數地區需 €40 萬）。這是他們的運作資本分配。</span></div>
+      <div class="step-screenshot"><img src="img/07-ie-dublin.png" alt="Dublin deep dive with 6 KPI cards and three zones" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 8 -->
+  <div class="demo-step">
+    <div class="step-no">8</div>
+    <div class="step-content">
+      <h4><span class="lang-en">/pipeline-cliff.html — see Dublin and Cork in the 10-quarter delivery calendar</span><span class="lang-zh">/pipeline-cliff.html — 在 10 季交屋日曆上看都柏林與科克</span></h4>
+      <div class="step-url"><a href="/pipeline-cliff.html">myproperty.investmquest.com/pipeline-cliff</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Pipeline Cliff</strong>. The page shows a 55-city heat calendar (2026Q3–2028Q4). They scroll to find Dublin and Cork in the EU section and click each to expand the quarterly bars and supply note.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Pipeline Cliff</strong>。頁面顯示 55 個城市的熱力日曆（2026Q3–2028Q4）。他們在歐盟區段找到都柏林和科克，點擊展開季度條形圖和供給說明。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see for Dublin and Cork:</strong> the quarterly delivery bars show intensity (color-coded by supply pressure). Dublin's note reads: <em>"2025 national completions 36,284 (+20% YoY, highest since CSO series began 2011). Dublin captured 70%+ of apartment completions (9,623 units). Government target 50,500/yr 2025+, scaling to 60,000 by 2030."</em> Cork's note: <em>"South-West region had ~1,000 single-dwelling completions (17% of national singles 2025). Cork tracks Dublin at smaller scale — same NPF target trajectory."</em> Source cited: CSO Ireland.</span>
+        <span class="lang-zh"><strong>都柏林和科克的顯示：</strong>季度交屋條形圖以顏色顯示供給壓力強度。都柏林說明：<em>「2025 全國完工 36,284（年增 +20%、為 CSO 自 2011 統計起新高）。都柏林佔 70%+ 公寓完工（9,623 戶）。政府目標 2025 起 50,500/年、2030 達 60,000/年。」</em>科克說明：<em>「西南區 2025 獨棟完工約 1,000 戶（佔全國 17%）。科克跟著都柏林軌跡但規模小，同 NPF 目標路徑。」</em>來源標注：愛爾蘭中央統計局。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius:</span><span class="lang-zh">對劉氏夫婦：</span></strong> <span class="lang-en">the pipeline calendar confirms the supply story: Dublin's completion rate is accelerating but is still chasing a government target that was raised because of how severe the shortage is. Even with completions at a 14-year high, demand from population growth and tech-worker net migration means the supply gap doesn't close on the 5-10 year horizon the Lius care about. This is the structural support for their holding-period case.</span><span class="lang-zh">供給日曆確認了供給故事：都柏林完工率在加速，但仍在追趕因短缺嚴重而提高的政府目標。即使完工量達 14 年新高，人口增長和科技工人淨移民的需求意味著供給缺口在劉氏夫婦關心的 5-10 年視野中不會縮小。這是他們持有期論點的結構性支撐。</span></div>
+      <div class="step-screenshot"><img src="img/08-pipeline-cliff.png" alt="Pipeline Cliff showing Dublin and Cork quarterly delivery calendar" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 9 -->
+  <div class="demo-step">
+    <div class="step-no">9</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Cost Calculator — what does €1.5M in Ireland actually cost end-to-end as a foreign buyer?</span><span class="lang-zh">Cost Calculator — 外國買家 €150 萬在愛爾蘭的實際全程總成本是多少？</span></h4>
+      <div class="step-url"><a href="/tools/cost-calculator.html">myproperty.investmquest.com/tools/cost-calculator</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Cost Calc / 成本計算</strong>. They set: <strong>Market = 🇮🇪 IE</strong> (pill exists in the calculator), <strong>Resident Status = Foreigner</strong>, <strong>Holding Horizon = 10y</strong>, <strong>Property Price = €1,500,000</strong>. They look at the results and note the foreign-buyer commentary for Ireland.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Cost Calc / 成本計算</strong>。設定：<strong>Market = 🇮🇪 IE</strong>（計算機中存在此晶片）、<strong>Resident Status = Foreigner</strong>、<strong>Holding Horizon = 10y</strong>、<strong>Property Price = €1,500,000</strong>。他們看結果，並注意愛爾蘭外國買家說明。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> hero KPIs (TOTAL CASH OUT / NET PROCEEDS AT EXIT / NET P&amp;L verdict) + 5 supporting stats. Three breakdown tables —<br>
+        ① <strong>Acquisition</strong> — price + stamp duty (Ireland has NO foreign-buyer surcharge — tool notes explicitly: "No foreign-buyer restrictions in Ireland. EU right of movement applies. Non-EU nationals face no extra stamp duty.")<br>
+        ② <strong>Holding</strong> — LPT (Local Property Tax), maintenance, insurance, optional rental income tax.<br>
+        ③ <strong>Exit</strong> — agent fee, CGT (33% in Ireland on gains; tool calculates based on assumed appreciation).<br>
+        Plus stacked bar chart, annual holding-cost line chart, and 12-market comparison table at bottom (IE row highlighted).<br>
+        <strong>Noteworthy for IE:</strong> no foreign-buyer stamp duty premium is a major advantage vs Malaysia (8%), Australia (FIRB + state charges), or Singapore (60% ABSD for foreigners).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>頂部 hero KPI（TOTAL CASH OUT / NET PROCEEDS AT EXIT / NET P&amp;L 判決）+ 5 張輔助統計。三張明細表 —<br>
+        ① <strong>Acquisition</strong> — 物業價 + 印花稅（愛爾蘭<em>沒有</em>外國買家附加 — 工具明確說明：「愛爾蘭無外國買家限制。歐盟移動自由適用。非歐盟國民無額外印花稅。」）<br>
+        ② <strong>Holding</strong> — LPT（地方財產稅）、維護、保險、可選的租金所得稅。<br>
+        ③ <strong>Exit</strong> — 仲介費、CGT（愛爾蘭利得稅 33%；工具根據假設增值計算）。<br>
+        另有堆疊長條圖、年度持有成本折線圖、底部 12 市場比較表（IE 列高亮）。<br>
+        <strong>IE 值得注意：</strong>無外國買家印花稅附加是重大優勢，相比馬來西亞（8%）、澳洲（FIRB + 州附加）、新加坡（外國人 60% ABSD）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius — Ireland is unusually foreigner-friendly on transaction costs:</span><span class="lang-zh">對劉氏夫婦 — 愛爾蘭在交易成本上對外國人異常友善：</span></strong> <span class="lang-en">the calculator shows that unlike most Asian markets (which levy 3–60% foreign-buyer stamp duties), Ireland charges the same 1% (up to €1M) / 2% (above €1M) stamp duty for everyone. For a €1.5M purchase that's roughly €25,000 in stamp duty vs €90,000+ in other markets. The 33% CGT on exit is high, but applies to gains only and can be deferred with long hold periods. The 12-market comparison table puts this in context — Ireland is among the cheapest for acquisition costs despite being one of Europe's most expensive housing markets.</span><span class="lang-zh">計算機顯示，與大多數亞洲市場（對外國買家徵收 3–60% 印花稅）不同，愛爾蘭對所有人收取相同的 1%（€100 萬以下）/ 2%（€100 萬以上）印花稅。€150 萬購買約 €25,000 印花稅，而其他市場可能超過 €90,000。退場時的 33% CGT 很高，但只適用於利得，長期持有可遞延。12 市場比較表提供脈絡 — 儘管愛爾蘭是歐洲最貴的房市之一，其取得成本卻是最低之列。</span></div>
+      <div class="step-screenshot"><img src="img/09-cost-calc-ie.png" alt="Cost Calculator set to IE / Foreigner / 10y / 1.5M euros" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 10 -->
+  <div class="demo-step">
+    <div class="step-no">10</div>
+    <div class="step-content">
+      <h4><span class="lang-en">REIT vs Direct — EU row: does buying Ireland property beat EU REITs for a Taiwanese foreign investor?</span><span class="lang-zh">REIT vs Direct — EU 那一列：愛爾蘭房產 vs 歐洲 REIT，台灣外國投資者哪個更好？</span></h4>
+      <div class="step-url"><a href="/reit-vs-direct.html">myproperty.investmquest.com/reit-vs-direct</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>REIT vs Direct</strong>. They flip three toggle bands: Residency = <strong>Foreign</strong>, Period = <strong>10yr</strong>, Home Country chip = <strong>🇹🇼 TW</strong>. Scenario = <strong>All Cash</strong> (they're cash buyers). They look at the <strong>EU row</strong> specifically.</span>
+        <span class="lang-zh">navbar → Tools → <strong>REIT vs Direct</strong>。切三個 toggle 列：Residency 切 <strong>Foreign</strong>、Period 切 <strong>10yr</strong>、母國 chip 選 <strong>🇹🇼 TW</strong>。場景 = <strong>All Cash</strong>（他們現金買家）。他們特別看 <strong>EU 那一列</strong>。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> the 7-row comparison table (US/SG/JP/AU/MY/UK/EU). <strong>EU row</strong>: Direct Income vs REIT Income, Direct Total vs REIT Total, Gap, Winner. Context cards include:<br>
+        ▸ <em>"The Honest 10yr Answer"</em> — <strong>Direct property won in all 7 markets</strong>, 2015-2025. Widest gap: EU (+6.8pp) where FTSE EPRA Dev Europe REITs had brutal 2022 rate-hike drawdowns (+0.1% total return).<br>
+        ▸ <em>Treaty Relief card for TW:</em> shows TW-EU REIT WHT situation — no TW-EU DTA for most EU REIT distributions means the default EU REIT WHT (25%) applies to Taiwanese residents.<br>
+        ▸ Non-resident rental WHT for EU direct property: 24% (varies by country; Ireland's is more favorable as an EU source jurisdiction).</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>7 列比較表（美／新／日／澳／馬／英／歐）。<strong>EU 那一列</strong>：Direct Income vs REIT Income、Direct Total vs REIT Total、Gap、Winner。脈絡卡包括：<br>
+        ▸ <em>「10 年真實答案」</em> — <strong>2015-2025 實體房產 7 個市場全勝</strong>。差距最大：歐盟 +6.8pp，因 FTSE EPRA 歐洲 REIT 遭受 2022 升息重創（總報酬僅 +0.1%）。<br>
+        ▸ <em>台灣協定減免卡：</em>顯示台灣與歐盟 REIT 預扣情況 — 多數歐盟 REIT 分配沒有台灣-EU 租稅協定，意味著對台灣居民適用預設歐盟 REIT 預扣稅（25%）。<br>
+        ▸ 歐盟直接房產的非居民租金預扣：24%（因國而異；愛爾蘭作為歐盟來源地更為有利）。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius — direct property wins more clearly in EU than anywhere else:</span><span class="lang-zh">對劉氏夫婦 — 歐盟的實體房產優勢比任何其他市場更明顯：</span></strong> <span class="lang-en">the EU REIT (FTSE EPRA Developed Europe) had a devastating 2022 drawdown and still hasn't recovered to 2021 peaks — that's what the +6.8pp gap for direct property represents. Direct EU property (Ireland in their case) gives them: (1) physical asset with residency/lifestyle value, (2) no foreign-buyer surcharge (Ireland), (3) CGT only on gains vs REIT WHT on every distribution. For a long-term Golden Visa strategy where they want the asset itself, REIT makes no sense.</span><span class="lang-zh">歐盟 REIT（FTSE EPRA 歐洲）2022 年遭受毀滅性下跌，至今未回到 2021 年高點 — 這就是實體房產 +6.8pp 差距的來源。對他們而言直接歐盟房產（愛爾蘭）能提供：(1) 有居留/生活價值的實體資產，(2) 無外國買家附加稅（愛爾蘭），(3) CGT 只對利得課稅，vs REIT 預扣對每筆分配課稅。對於想要資產本身的長期黃金簽證策略，REIT 沒有意義。</span></div>
+      <div class="step-screenshot"><img src="img/10-reit-vs-direct-eu.png" alt="REIT vs Direct with Foreign / TW / 10yr toggles, EU row highlighted" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 11 -->
+  <div class="demo-step">
+    <div class="step-no">11</div>
+    <div class="step-content">
+      <h4><span class="lang-en">/carry-heatmap.html — see Dublin and Cork in the carry context vs other EU markets</span><span class="lang-zh">/carry-heatmap.html — 在 carry 脈絡中看都柏林和科克 vs 其他歐盟市場</span></h4>
+      <div class="step-url"><a href="/carry-heatmap.html">myproperty.investmquest.com/carry-heatmap</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar → Tools → <strong>Carry Heatmap</strong>. The page shows 30+ cities × 20 quarters heatmap. They look at the EU cluster, specifically hovering Dublin and Cork to see the yield-minus-mortgage carry trend. They also click Dublin or Cork to expand the 20-quarter detail line chart.</span>
+        <span class="lang-zh">navbar → Tools → <strong>Carry Heatmap</strong>。頁面顯示 30+ 城市 × 20 季熱力圖。他們看歐盟群組，特別游標停在都柏林和科克上查看收益率減抵押貸款利率的 carry 趨勢。也點擊都柏林或科克展開 20 季詳細折線圖。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see:</strong> Dublin's carry started deeply negative in 2022-2023 (ECB rate hike compressed carry) and is now improving as ECB cuts. Cork shows a similar pattern but starts from higher yield (Cork yield ≈ 7.0% vs Dublin 3.5%), meaning Cork's carry is already positive while Dublin's is turning positive. The city detail card shows current yield / rate stats. The heatmap color scale: dark red = highly negative carry → grey = breakeven → dark green = strongly positive.</span>
+        <span class="lang-zh"><strong>螢幕出現什麼：</strong>都柏林的 carry 在 2022-2023 年嚴重為負（ECB 升息壓縮 carry），隨著 ECB 降息現在改善中。科克顯示類似模式，但從較高的租金收益率出發（科克 yield ≈ 7.0% vs 都柏林 3.5%），意味著科克的 carry 已轉正，而都柏林的正在轉正中。城市詳細卡顯示當前 yield / 利率統計。熱力圖色階：深紅 = 嚴重負 carry → 灰色 = 盈虧平衡 → 深綠 = 強正 carry。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius — carry context clarifies Dublin vs Cork trade-off:</span><span class="lang-zh">對劉氏夫婦 — carry 脈絡釐清都柏林 vs 科克的取捨：</span></strong> <span class="lang-en">for all-cash buyers like the Lius, negative carry (yield below mortgage rate) doesn't directly affect them — but it tells them what the leveraged market is doing. When carry is negative, leveraged buyers exit, reducing price competition and supporting patient all-cash buyers. Cork's already-positive carry (high yield + ECB cuts) means Cork can attract leveraged buyers first, supporting Cork prices. Dublin's carry turning positive in 2025-2026 is the lagged catalyst for a re-rating. <em>This tool doesn't tell them which to buy — it tells them which dynamic to monitor.</em></span><span class="lang-zh">對劉氏夫婦這樣的全現金買家，負 carry（收益率低於抵押貸款利率）不直接影響他們 — 但它告訴他們槓桿市場在做什麼。當 carry 為負時，槓桿買家退場，降低價格競爭，支持有耐心的全現金買家。科克已轉正的 carry（高收益率 + ECB 降息）意味著科克能先吸引槓桿買家，支撐科克房價。都柏林 carry 在 2025-2026 年轉正是重新定價的滯後催化劑。<em>這個工具不告訴他們買哪個 — 它告訴他們要監測哪個動態。</em></span></div>
+      <div class="step-screenshot"><img src="img/11-carry-heatmap.png" alt="Carry heatmap with Dublin and Cork visible in EU cluster" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- STOP 12 -->
+  <div class="demo-step">
+    <div class="step-no">12</div>
+    <div class="step-content">
+      <h4><span class="lang-en">Ireland Risk Monitor + Methodology — verify data sources and read the honest risk picture</span><span class="lang-zh">愛爾蘭 Risk Monitor + Methodology — 驗證資料來源並讀誠實的風險圖像</span></h4>
+      <div class="step-url"><a href="/ie/risk.html">/ie/risk</a> · <a href="/methodology.html">/methodology</a></div>
+      <div class="step-action">
+        <strong><span class="lang-en">The Lius do:</span><span class="lang-zh">劉氏夫婦動作：</span></strong>
+        <span class="lang-en">navbar 🇮🇪 → <strong>Risk / 風險</strong>. They scan the 6 KPI risk cards (Planning Backlog 18mo · Construction Cost +42% vs 2019 · Tech Layoff Risk Medium · Immigration Policy Watch · RPZ Rent Cap 2%/yr · Judicial Review High Risk), read the Risk Heatmap chart, Policy Timeline cards, and Key Risk Factors. Final stop: navbar → Tools → <strong>Methodology / 方法論</strong> to see the Ireland source row.</span>
+        <span class="lang-zh">navbar 🇮🇪 → <strong>Risk / 風險</strong>。掃 6 張 KPI 風險卡（規劃積壓 18 個月 · 建造成本 +42% vs 2019 · 科技裁員風險中等 · 移民政策關注 · RPZ 租金上限 2%/年 · 司法審查高風險），讀風險熱力圖、政策時間軸卡片和關鍵風險因素。最後一站：navbar → Tools → <strong>Methodology / 方法論</strong>看愛爾蘭那一列。</span>
+      </div>
+      <p class="step-see">
+        <span class="lang-en"><strong>What they see on Risk — 6 KPI cards:</strong><br>
+        ▸ <strong>Planning Backlog: 18 months</strong> — judicial reviews add 12-18 months to large projects.<br>
+        ▸ <strong>Construction Cost +42% vs 2019</strong> — squeezing viability of new builds (a supply-side negative, landlord-positive).<br>
+        ▸ <strong>Tech Layoff Risk: Medium</strong> — Ireland's reliance on multinational tech creates concentration risk if big layoffs hit.<br>
+        ▸ <strong>RPZ Rent Cap: 2%/yr</strong> — Rent Pressure Zone limits 2% annual rent increases; may discourage new rental investment, tightening supply further.<br>
+        ▸ <strong>Judicial Review: High Risk</strong> — major residential projects delayed by third-party judicial reviews (the "An Bord Pleanála" bottleneck).<br>
+        <strong>Key Risk Factors card:</strong> "Housing for All (2021-2030)" plan risks — judicial reviews, construction cost inflation, labour shortages.<br>
+        <strong>On Methodology:</strong> Eurozone row in the 20-market table shows sources as CSO, RTB, Daft.ie, Central Bank of Ireland.</span>
+        <span class="lang-zh"><strong>Risk 頁出現什麼 — 6 張 KPI 卡：</strong><br>
+        ▸ <strong>規劃積壓：18 個月</strong> — 司法審查為大型項目增加 12-18 個月。<br>
+        ▸ <strong>建造成本 +42% vs 2019</strong> — 壓縮新建可行性（供給側負面，房東正面）。<br>
+        ▸ <strong>科技裁員風險：中等</strong> — 愛爾蘭依賴跨國科技企業，如果大規模裁員衝擊將帶來集中風險。<br>
+        ▸ <strong>RPZ 租金上限：2%/年</strong> — 租金壓力區每年租金漲幅上限 2%；可能抑制新租賃投資，進一步緊縮供給。<br>
+        ▸ <strong>司法審查：高風險</strong> — 大型住宅項目被第三方司法審查延遲（「An Bord Pleanála」瓶頸）。<br>
+        <strong>關鍵風險因素卡：</strong>「全民住房（2021-2030）」計畫風險 — 司法審查、建造成本通膨、勞動力短缺。<br>
+        <strong>Methodology 頁：</strong>20 市場表格中歐元區列顯示來源為 CSO、RTB、Daft.ie、愛爾蘭中央銀行。</span>
+      </p>
+      <div class="step-meaning"><strong><span class="lang-en">For the Lius — three risks to internalize before proceeding:</span><span class="lang-zh">對劉氏夫婦 — 進行前需內化的三個風險：</span></strong> <span class="lang-en">(1) <strong>RPZ 2%/yr cap</strong>: the rent cap means rental income grows slowly in nominal terms while property values compound faster — works for capital gain strategy but limits income. (2) <strong>Tech concentration</strong>: if Google / Meta / Apple reduce Irish headcount materially, Dublin demand softens fast. Monitor big-tech employment news. (3) <strong>Judicial review delays</strong> for new supply actually <em>help</em> existing landlords by keeping supply constrained — this is an involuntary competitive moat. Methodology confirms: every number on /ie/ traces to CSO, RTB, Daft.ie — real Irish government and market data, not estimates.</span><span class="lang-zh">(1) <strong>RPZ 2%/年上限</strong>：租金上限意味著名義租金收益增長緩慢，而房產價值複利增長更快 — 對資本增值策略有利，但限制收入。(2) <strong>科技集中風險</strong>：如果 Google / Meta / Apple 大幅削減愛爾蘭員工數，都柏林需求快速軟化。要監測大型科技就業新聞。(3) 新供給的<strong>司法審查延遲</strong>實際上<em>幫助</em>現有業主，因為保持供給受限 — 這是一個非自願的競爭護城河。Methodology 確認：/ie/ 上的每個數字可追溯至 CSO、RTB、Daft.ie — 真實的愛爾蘭政府和市場數據，非估算。</span></div>
+      <div class="step-screenshot"><img src="img/12-ie-risk.png" alt="Ireland Risk Monitor with 6 KPI cards, risk heatmap, and policy timeline" loading="lazy" /></div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 3 — SITE CHEAT SHEET                   -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 03</div>
+    <h2><span class="lang-en">Site cheat sheet — 6 patterns that work on every page</span><span class="lang-zh">網站小抄 — 6 個全站通用規則</span></h2>
+    <p class="sec-sub"><span class="lang-en">These work the same way on every page across all markets — learn once, use everywhere.</span><span class="lang-zh">以下規則每一頁、每個市場都一致 — 學一次，整站通用。</span></p>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4><span class="ck-icon">EN</span> <span class="lang-en">Language toggle</span><span class="lang-zh">語言切換</span></h4>
+      <p><span class="lang-en">Top-right of every page: two pill buttons <code>EN</code> / <code>中文</code>. Choice is remembered across pages and visits via localStorage.</span><span class="lang-zh">每頁右上角：兩顆膠囊鈕 <code>EN</code> / <code>中文</code>。選擇用 localStorage 跨頁跨次造訪記住。</span></p>
+      <p class="ck-tip"><span class="lang-en">Tip: switch to 中文 first, then download PDF — the PDF will be in 中文.</span><span class="lang-zh">小技巧：先切到中文再下載 PDF，PDF 就會是中文版。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🇮🇪</span> <span class="lang-en">Market selector — IE is in the navbar</span><span class="lang-zh">市場選擇 — IE 在 navbar 中</span></h4>
+      <p><span class="lang-en">Navbar second row: a country flag for each market. Hover 🇮🇪 to see Overview / Supply / Demand / Valuation / Risk / Macro / Report / Dublin / Cork sub-pages. Ireland is the only EU market with this full suite.</span><span class="lang-zh">Navbar 第二列：每個市場一面國旗。游標停在 🇮🇪 上 → 下拉顯示 Overview / Supply / Demand / Valuation / Risk / Macro / Report / 都柏林 / 科克。愛爾蘭是唯一有完整套組的歐盟市場。</span></p>
+      <p class="ck-tip"><span class="lang-en">For PT / GR / CY / MT: use /visa.html for program-level data, then consult official sources and licensed migration advisers for country-specific property markets.</span><span class="lang-zh">葡萄牙 / 希臘 / 塞普勒斯 / 馬爾他：用 /visa.html 取得計畫層級數據，再向官方來源和持牌移民顧問諮詢各國房產市場。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">⚙</span> <span class="lang-en">Tools dropdown</span><span class="lang-zh">Tools 下拉選單</span></h4>
+      <p><span class="lang-en">All cross-market analytical tools live here: <code>Home</code>, <code>Dashboard</code>, <code>Visa</code>, <code>Playbook</code>, <code>REITs</code>, <code>REIT vs Direct</code>, <code>Carry Heatmap</code>, <code>Pipeline Cliff</code>, <code>Cost Calculator</code>, <code>Methodology</code>.</span><span class="lang-zh">所有跨市場分析工具都在這裡：<code>Home</code>、<code>Dashboard</code>、<code>Visa</code>、<code>Playbook</code>、<code>REITs</code>、<code>REIT vs Direct</code>、<code>Carry Heatmap</code>、<code>Pipeline Cliff</code>、<code>Cost Calculator</code>、<code>Methodology</code>。</span></p>
+      <p class="ck-tip"><span class="lang-en">The /visa.html page is the starting point for all Golden Visa research — don't skip it.</span><span class="lang-zh">/visa.html 是所有黃金簽證研究的起點 — 不要跳過。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🟢</span> <span class="lang-en">KPI card colors</span><span class="lang-zh">KPI 卡顏色</span></h4>
+      <p><span class="lang-en">Left border color tells you the read at a glance.</span><span class="lang-zh">左邊框顏色一眼告訴你判讀。</span></p>
+      <div class="color-legend">
+        <div class="cl-item"><span class="cl-dot cl-green"></span><span class="lang-en">positive</span><span class="lang-zh">正向</span></div>
+        <div class="cl-item"><span class="cl-dot cl-orange"></span><span class="lang-en">caution</span><span class="lang-zh">注意</span></div>
+        <div class="cl-item"><span class="cl-dot cl-red"></span><span class="lang-en">risk</span><span class="lang-zh">風險</span></div>
+        <div class="cl-item"><span class="cl-dot cl-blue"></span><span class="lang-en">neutral</span><span class="lang-zh">中性</span></div>
+      </div>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">🗺</span> <span class="lang-en">Visa page filter chips</span><span class="lang-zh">Visa 頁篩選晶片</span></h4>
+      <p><span class="lang-en">/visa.html has two filter bars: STATUS (All / Active / Under review / Closed) and PATH (All / Citizenship / PR-Residency). Use these to quickly isolate the programs still open for new applications.</span><span class="lang-zh">/visa.html 有兩條篩選列：狀態（全部 / 現役 / 審查中 / 已關閉）和路徑（全部 / 公民 / PR-居留）。用這些快速篩出仍接受新申請的計畫。</span></p>
+      <p class="ck-tip"><span class="lang-en">Filtering for "Active" + "Citizenship" shows only Turkey (non-EU) today — all EU citizenship-by-investment paths are closed (Malta) or require 7-10yr residence (Greece, Cyprus).</span><span class="lang-zh">篩「現役」+「公民」今天只顯示土耳其（非歐盟）— 所有歐盟投資換公民路徑已關閉（馬爾他）或需要 7-10 年居住（希臘、塞普勒斯）。</span></p>
+    </div>
+    <div class="cheat-card">
+      <h4><span class="ck-icon">📄</span> <span class="lang-en">Save any page as PDF for your migration lawyer</span><span class="lang-zh">把任何頁面存成 PDF 給移民律師</span></h4>
+      <p><span class="lang-en">Press <code>⌘ + P</code> (Mac) or <code>Ctrl + P</code> (Windows) → choose "Save as PDF". The print stylesheet hides the navbar so the PDF looks clean. Switch to 中文 first if your lawyer reads Chinese.</span><span class="lang-zh">按 <code>⌘ + P</code>（Mac）或 <code>Ctrl + P</code>（Windows）→ 選「另存為 PDF」。印刷樣式表自動隱藏 navbar，PDF 版面乾淨。如果您的律師閱讀中文，先切到中文再存。</span></p>
+      <p class="ck-tip"><span class="lang-en">Most useful pages for your migration lawyer: /visa.html (program comparison) + /ie/ + /ie/dublin + cost calculator printout.</span><span class="lang-zh">對移民律師最有用的頁面：/visa.html（計畫比較）+ /ie/ + /ie/dublin + 成本計算機列印。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 4 — TAKEAWAY                           -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 04</div>
+    <h2><span class="lang-en">What the Lius walk away with — and what they must take outside this site</span><span class="lang-zh">劉氏夫婦帶走什麼 — 以及哪些必須拿到站外去問</span></h2>
+    <p class="sec-sub"><span class="lang-en">After the 12-stop tour, they have a clear separation between "questions the site answered" and "questions the site flagged but cannot answer."</span><span class="lang-zh">走完 12 站後，他們能清楚分開「網站已回答的問題」與「網站幫他們點出但不能回答的問題」。</span></p>
+  </div>
+
+  <div class="takeaway">
+    <div class="takeaway-card answered">
+      <h4><span class="lang-en">✓ The site answered these for them</span><span class="lang-zh">✓ 網站已回答的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Which EU Golden Visa programs are still open</strong> — /visa.html: Portugal property closed, Malta terminated, Greece active (€400K+), Cyprus active PR (€300K), Ireland IIP closed</span><span class="lang-zh"><strong>哪些歐盟黃金簽證計畫仍開放</strong> — /visa.html：葡萄牙房產路徑關閉、馬爾他終止、希臘現役（€40 萬+）、塞普勒斯現役 PR（€30 萬）、愛爾蘭 IIP 關閉</span></li>
+        <li><span class="lang-en"><strong>The tax red flags to know before committing</strong> — 5 explicit warnings on /visa.html: worldwide income exposure, exit tax, real cost 15-25% above headline, holding period before resale, citizenship vs PR difference</span><span class="lang-zh"><strong>投資前必知稅務地雷</strong> — /visa.html 上 5 條明確警告：全球收入暴露、離境稅、實際成本比標題高 15-25%、賣前持有期、公民 vs PR 差別</span></li>
+        <li><span class="lang-en"><strong>Which EU country the site has full data on</strong> — Ireland: full suite of /ie/ pages including Dublin and Cork city deep-dives</span><span class="lang-zh"><strong>網站對哪個歐盟國家有完整數據</strong> — 愛爾蘭：完整 /ie/ 頁面套組，含都柏林和科克城市深度分析</span></li>
+        <li><span class="lang-en"><strong>Ireland's structural fundamentals</strong> — 0.5% vacancy in Dublin, structural undersupply, HPI +7.3% YoY, rent +8.2% YoY, ECB cuts improving affordability for tenants</span><span class="lang-zh"><strong>愛爾蘭結構基本面</strong> — 都柏林空置率 0.5%、結構性供不應求、HPI 年增 7.3%、租金年增 8.2%、ECB 降息改善租客可負擔性</span></li>
+        <li><span class="lang-en"><strong>Ireland's foreign-buyer transaction cost advantage</strong> — no foreign-buyer stamp duty surcharge (same 1-2% as locals), shown on cost calculator vs 12-market comparison table</span><span class="lang-zh"><strong>愛爾蘭外國買家交易成本優勢</strong> — 無外國買家印花稅附加（與本地人相同 1-2%），在成本計算機 12 市場比較表上顯示</span></li>
+        <li><span class="lang-en"><strong>Why EU direct property beats EU REITs for a Taiwanese foreign investor</strong> — FTSE EPRA EU REIT had +0.1% total 10yr return; direct property +6.8pp ahead (REIT vs Direct, EU row, Foreign + TW mode)</span><span class="lang-zh"><strong>台灣外國投資者為何歐盟直接房產勝過歐盟 REIT</strong> — FTSE EPRA 歐盟 REIT 10 年總報酬僅 +0.1%；直接房產領先 +6.8pp（REIT vs Direct 歐盟列，Foreign + TW 模式）</span></li>
+        <li><span class="lang-en"><strong>Dublin vs Cork trade-off</strong> — Dublin D6-D8 at €380K-480K: tech-worker tenant pool, 0.5% vacancy, carry turning positive 2025-2026. Cork: higher yield (7%), -31% price vs Dublin, positive carry already</span><span class="lang-zh"><strong>都柏林 vs 科克取捨</strong> — 都柏林 D6-D8 €38-48 萬：科技工人租客池、0.5% 空置率、carry 2025-2026 年轉正。科克：較高收益率（7%）、比都柏林低 31% 房價、carry 已轉正</span></li>
+        <li><span class="lang-en"><strong>Ireland's key risk factors</strong> — RPZ rent cap 2%/yr, tech concentration risk, judicial review supply delays, +42% construction costs (all on /ie/risk)</span><span class="lang-zh"><strong>愛爾蘭關鍵風險因素</strong> — RPZ 租金上限 2%/年、科技集中風險、司法審查供給延遲、建造成本 +42%（全在 /ie/risk）</span></li>
+        <li><span class="lang-en"><strong>Where every number comes from</strong> — Methodology page: IE sources = CSO, RTB, Daft.ie, Central Bank of Ireland</span><span class="lang-zh"><strong>每個數字的來源</strong> — Methodology 頁：IE 來源 = CSO、RTB、Daft.ie、愛爾蘭中央銀行</span></li>
+      </ul>
+    </div>
+
+    <div class="takeaway-card outsource">
+      <h4><span class="lang-en">→ Questions for advisors outside this site</span><span class="lang-zh">→ 必須拿到站外問專業人士的</span></h4>
+      <ul>
+        <li><span class="lang-en"><strong>Portugal / Greece / Cyprus market-specific data</strong> — Lisbon prices, Athens yields, Limassol supply — this site doesn't have city-level data for these markets. Consult local agents + official sources (AIMA, Greek Ministry of Migration, Cyprus Migration Dept)</span><span class="lang-zh"><strong>葡萄牙 / 希臘 / 塞普勒斯市場專屬數據</strong> — 里斯本房價、雅典租金收益率、利馬索爾供給 — 本站沒有這些市場的城市層級數據。請諮詢當地仲介 + 官方來源（AIMA、希臘移民部、塞普勒斯移民局）</span></li>
+        <li><span class="lang-en"><strong>Golden Visa application process</strong> for Greece or Cyprus — eligible property types, notarization, government approval timeline, family inclusion mechanics → licensed EU immigration lawyer (IAMA accredited)</span><span class="lang-zh"><strong>希臘或塞普勒斯黃金簽證申請流程</strong> — 合格房產類型、公證、政府核准時程、家屬納入機制 → 持牌歐盟移民律師（IAMA 認可）</span></li>
+        <li><span class="lang-en"><strong>Taiwan + Ireland (or Greece/Cyprus) dual tax obligations</strong> — foreign rental income filing in TW, CGT treaty application, passive income sourcing → Taiwan 會計師 + Irish (or EU) tax adviser</span><span class="lang-zh"><strong>台灣 + 愛爾蘭（或希臘 / 塞普勒斯）雙重稅務義務</strong> — 台灣境外租金收入申報、CGT 協定適用、被動收入來源 → 台灣會計師 + 愛爾蘭（或歐盟）稅務顧問</span></li>
+        <li><span class="lang-en"><strong>FX strategy</strong> for converting NT$50M → €1.5M entry, hedging EUR/TWD for 10yr hold, rental income euro repatriation → bank FX / treasury desk</span><span class="lang-zh"><strong>外匯策略</strong>：台幣 5,000 萬 → €150 萬換匯進場、10 年持有期歐元/台幣避險、租金收入歐元匯回 → 銀行外匯 / 財務部門</span></li>
+        <li><span class="lang-en"><strong>Residency physical presence requirement</strong> — Greece requires 5-year renewal; Cyprus requires visit every 2 years. Actual compliance tracking and travel planning → migration lawyer + calendar management</span><span class="lang-zh"><strong>居留實際到訪要求</strong> — 希臘需 5 年更新；塞普勒斯每 2 年須訪問。實際合規追蹤與旅行規劃 → 移民律師 + 行程管理</span></li>
+        <li><span class="lang-en"><strong>Property management in Ireland</strong> for a non-resident landlord — RPZ compliance, PRTB registration, RTB dispute resolution → licensed letting agent (PRSA registered)</span><span class="lang-zh"><strong>非居民房東在愛爾蘭的物業管理</strong> — RPZ 合規、PRTB 登記、RTB 糾紛解決 → 持牌出租仲介（PRSA 登記）</span></li>
+        <li><span class="lang-en"><strong>Citizenship naturalization timeline</strong> for Greece (7yr) or Cyprus (7yr physical residence) — specific language test, income test, criminal record clearance → specialized EU citizenship law firm</span><span class="lang-zh"><strong>希臘（7 年）或塞普勒斯（7 年實際居住）公民歸化時程</strong> — 語言測試、收入測試、犯罪記錄清查 → 歐盟公民身份專業法律事務所</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 5 — DOWNLOAD PDF                       -->
+  <!-- ============================================== -->
+  <!-- ============================================== -->
+  <!-- SECTION 5 — BEST OPTION                         -->
+  <!-- ============================================== -->
+  <div class="demo-section">
+    <div class="sec-no">SECTION 05</div>
+    <h2><span class="lang-en">The site's best-supported call for the Lius</span><span class="lang-zh">站上資料能支持的最佳選項 — 給劉氏夫婦</span></h2>
+    <p class="sec-sub"><span class="lang-en">Not a personalized recommendation — a single, opinionated call assembled only from data this site already shows in SECTIONS 01–04.</span><span class="lang-zh">非個人化推薦 — 是從 SECTION 01–04 站上資料推導出的單一明確建議。</span></p>
+  </div>
+
+  <div class="best-option">
+    <div class="bo-grid">
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">CITY / AREA</span><span class="lang-zh">城市 / 區域</span></div>
+        <div class="bo-val">Greece Athens (real-estate path still open)</div>
+        <div class="bo-note"><span class="lang-en">Portugal real-estate route closed 2023; Spain narrowing; Greece remains the simplest property-backed path for 2026.</span><span class="lang-zh">Portugal 不動產路徑 2023 已關閉；Spain 收窄；Greece 在 2026 仍是最簡單的房產型 visa。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">PRODUCT</span><span class="lang-zh">產品類型</span></div>
+        <div class="bo-val">€250K–€800K real estate (per zone tier)</div>
+        <div class="bo-note"><span class="lang-en">Athens centre + island tiers vary; pick zone that hits visa threshold + livable + resellable to next visa-buyer.</span><span class="lang-zh">雅典市區 + 離島區段門檻不同；選同時達到 visa 門檻、可居、可賣給下一個 visa 申請者的區段。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">BUDGET MIX</span><span class="lang-zh">預算配置</span></div>
+        <div class="bo-val">€500–800K visa asset + €700K–1M cash</div>
+        <div class="bo-note"><span class="lang-en">Cash buffer for visa renewal cycle + spouse application + tax timing; visa property is not their wealth allocation.</span><span class="lang-zh">Cash buffer 應對 visa 續簽週期 + 配偶申請 + 稅務時點；visa 不動產不是他們的財富配置主體。</span></div>
+      </div>
+      <div class="bo-card">
+        <div class="bo-lbl"><span class="lang-en">HOLD</span><span class="lang-zh">持有期</span></div>
+        <div class="bo-val">5–10 years</div>
+        <div class="bo-note"><span class="lang-en">Aligned with visa-renewal cadence; exit once permanent residency / citizenship pathway secured.</span><span class="lang-zh">對齊 visa 續簽節奏；取得永居 / 入籍路徑後可 exit。</span></div>
+      </div>
+    </div>
+
+    <div class="bo-section bo-checklist">
+      <h4><span class="lang-en">✓ Pre-commit checklist (from site data)</span><span class="lang-zh">✓ 進場前 checklist（站上資料能驗證的）</span></h4>
+      <ul>
+        <li><span class="lang-en">EU Golden Visa comparison page: Greece's 2026 minimum threshold, residency days requirement, family inclusion rules all confirmed current.</span><span class="lang-zh">EU Golden Visa 對照頁：Greece 2026 最低門檻、居住天數、家屬納入規則 — 全部確認為現行版。</span></li>
+        <li><span class="lang-en">Athens property valuation: target zone within historical band; resale liquidity confirmed (other visa-buyers in market).</span><span class="lang-zh">Athens 房產估值：目標區段在歷史區間；轉售流動性確認（市場有其他 visa 買家）。</span></li>
+        <li><span class="lang-en">Pipeline supply for Athens visa-tier zones: not in DANGER (no oversupply that crashes resale).</span><span class="lang-zh">Athens visa 區段供給：不在 DANGER（無打壞轉售的供給過剩）。</span></li>
+        <li><span class="lang-en">Risk page EU: each shortlisted country's policy stability — programs that could close suddenly are flagged.</span><span class="lang-zh">EU Risk 頁：每個 shortlist 國家的政策穩定度 — 可能突然關閉的方案已 flag。</span></li>
+        <li><span class="lang-en">Cost Calculator: total program cost (asset + fees + tax + holding cost) clears their value-for-residency hurdle.</span><span class="lang-zh">Cost Calculator：方案總成本（資產 + 費用 + 稅 + 持有）通過「居留價值」門檻。</span></li>
+      </ul>
+    </div>
+
+    <div class="bo-section bo-next">
+      <h4><span class="lang-en">→ Off-site next steps (the site cannot answer)</span><span class="lang-zh">→ 走出站外的下一步（站上無法回答的）</span></h4>
+      <ol>
+        <li><span class="lang-en"><strong>EU immigration lawyer (Greece-licensed)</strong> — confirm 2026 program terms, family eligibility, renewal pathway, citizenship route (typically 7 years).</span><span class="lang-zh"><strong>EU 移民律師（Greece 持照）</strong> — 確認 2026 方案條款、家屬資格、續簽路徑、入籍路徑（一般 7 年）。</span></li>
+        <li><span class="lang-en"><strong>Greek-side property lawyer + notary</strong> — title, transfer tax, structural compliance, anti-money-laundering documentation.</span><span class="lang-zh"><strong>希臘端產權律師 + 公證</strong> — 產權、轉讓稅、結構合規、AML 文件。</span></li>
+        <li><span class="lang-en"><strong>Cross-border tax (TW + Greece)</strong> — 全球所得申報、雙重課稅協定（無）、繼承曝險。</span><span class="lang-zh"><strong>跨境稅務（TW + Greece）</strong> — 全球所得申報、雙重課稅協定（無）、繼承曝險。</span></li>
+        <li><span class="lang-en"><strong>Local property manager + tenant placement</strong> — if not self-occupied; visa rules allow rental but management is local-language work.</span><span class="lang-zh"><strong>當地物管 + 招租</strong> — 若非自住；visa 規則允許出租，但管理是當地語言工作。</span></li>
+        <li><span class="lang-en"><strong>Currency / banking</strong> — EUR account, EU SEPA setup, FX repatriation strategy on eventual exit.</span><span class="lang-zh"><strong>外幣 / 銀行</strong> — EUR 帳戶、EU SEPA 設定、最終 exit 時的 FX 匯回策略。</span></li>
+      </ol>
+    </div>
+
+    <div class="bo-bottomline">
+      <span class="bo-bl-label"><span class="lang-en">BOTTOM LINE</span><span class="lang-zh">底線</span></span>
+      <p><span class="lang-en">Greece Golden Visa with a €500–800K Athens property is the single call most consistent with the 12 stops in 2026 (Portugal real-estate route closed). The frame is "buying visa, property as the vehicle" — not "buying property, visa as a bonus." Get that order right or the math goes wrong.</span><span class="lang-zh">Greece Golden Visa + €500-800K 雅典房產是 12 站走完後 2026 最一致的選項（Portugal 不動產路徑已關閉）。心態是「買 visa，房產是工具」— 不是「買房，visa 是順便」。順序搞反，數字就錯。</span></p>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SECTION 6 — DOWNLOAD PDF                        -->
+  <!-- ============================================== -->
+  <div class="pdf-bar">
+    <button type="button" class="pdf-btn" onclick="window.print()">
+      <span>📄</span>
+      <span class="lang-en">Download this walkthrough as PDF</span><span class="lang-zh">下載這份導覽為 PDF</span>
+    </button>
+    <a class="pdf-btn ghost" href="/demo/">
+      <span>←</span>
+      <span class="lang-en">Back to all walkthroughs</span><span class="lang-zh">回所有導覽</span>
+    </a>
+  </div>
+
+  <div class="source-footer" style="margin-top:24px">
+    <span class="lang-en"><strong>Sources used in this walkthrough:</strong> CSO Ireland (HPI, completions, population), RTB (rent index), Daft.ie (vacancy, rents), Central Bank of Ireland (mortgage rates), ECB (policy rates), Greek Ministry of Migration, Cyprus Migration Department, AIMA Portugal. Last refresh: Q1 2026. See <a href="/methodology.html" style="color:#2563eb">/methodology</a> for per-metric source and known limitations. Ireland IIP closed Feb 2023 — no investment immigration route to Ireland currently exists. Greece and Cyprus programs verified from official government sources as of April 2026; confirm current rules before transacting.</span>
+    <span class="lang-zh"><strong>本導覽使用的資料來源：</strong>愛爾蘭 CSO（HPI、完工量、人口）、RTB（租金指數）、Daft.ie（空置率、租金）、愛爾蘭中央銀行（抵押貸款利率）、ECB（政策利率）、希臘移民部、塞普勒斯移民局、葡萄牙 AIMA。最後刷新：2026 Q1。逐指標來源與已知限制見 <a href="/methodology.html" style="color:#2563eb">/methodology</a>。愛爾蘭 IIP 於 2023 年 2 月關閉 — 目前愛爾蘭沒有投資移民路徑。希臘和塞普勒斯計畫已依截至 2026 年 4 月的官方政府來源核實；投資前請確認最新規則。</span>
+    <br><br>
+    <span class="lang-en"><em>Disclaimer: This walkthrough demonstrates how to use Property Monitor for a specific decision flow. It is not investment, tax, immigration, or property advice. The site provides deep coverage of Ireland (/ie/) only within the EU. For Portugal, Greece, Cyprus, and Malta property market data, consult official sources and licensed local advisers. Program details on /visa.html reflect public information as of April 2026 and may change — always verify with official immigration portals or a qualified immigration lawyer before transacting.</em></span>
+    <span class="lang-zh"><em>免責聲明：本導覽示範如何使用 Property Monitor 支援特定決策流程，並非投資、稅務、移民或不動產建議。本站在歐盟中僅對愛爾蘭（/ie/）提供完整深度覆蓋。對於葡萄牙、希臘、塞普勒斯、馬爾他的房產市場數據，請諮詢官方來源和持牌當地顧問。/visa.html 的計畫詳情反映截至 2026 年 4 月的公開資訊，可能變動 — 投資前請向官方移民部門或合格移民律師確認最新規則。</em></span>
+  </div>
+
+</main>
+
+<script src="/js/navbar.js" defer></script>
+<script>
+function getLang(){var l='en';try{l=localStorage.getItem('lang')||'en';}catch(e){}return l;}
+function applyLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+}
+window.addEventListener('load',function(){applyLang(getLang());
+  setTimeout(function(){applyLang(getLang());},120);
+});
+window.addEventListener('storage',function(e){if(e.key==='lang')applyLang(getLang());});
+</script>
+
+</body>
+</html>

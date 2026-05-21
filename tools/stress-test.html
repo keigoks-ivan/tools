@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stress Test Calculator | Property Monitor</title>
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════
+   TOOL LAYOUT
+══════════════════════════════════════════════ */
+.tool-layout{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:20px;
+  align-items:start;
+  margin-top:0;
+}
+@media(max-width:900px){.tool-layout{grid-template-columns:1fr}}
+
+/* ══════════════════════════════════════════════
+   INPUT PANEL
+══════════════════════════════════════════════ */
+.input-panel{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  padding:0;
+  position:sticky;
+  top:60px;
+  overflow:hidden;
+}
+
+.input-section{
+  padding:14px 16px;
+  border-bottom:1px solid #f0f5fb;
+}
+.input-section:last-child{border-bottom:none}
+
+/* Market preset pill scroll row */
+.market-pills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+}
+.market-pill{
+  padding:4px 9px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:500;
+  color:#4a6080;
+  background:#eef3f9;
+  border:1px solid #ccd9e8;
+  cursor:pointer;
+  user-select:none;
+  transition:all .12s;
+  white-space:nowrap;
+  font-family:'Inter',sans-serif;
+  line-height:1.4;
+}
+.market-pill:hover{background:#dde8f2;color:#1e3a5f}
+.market-pill.active{
+  background:#1e3a5f;
+  color:#fff;
+  border-color:#1e3a5f;
+  box-shadow:0 1px 4px rgba(30,58,95,.22);
+}
+/* Keep real select hidden — JS still reads it */
+.asm-hidden-select{display:none}
+
+/* Form rows */
+.form-row{display:flex;flex-direction:column;gap:3px;margin-bottom:9px}
+.form-row:last-child{margin-bottom:0}
+
+.form-label{
+  font-size:10.5px;
+  color:#5a7a9a;
+  font-weight:500;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:4px;
+}
+.form-label .val{
+  color:#1e3a5f;
+  font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;
+}
+.slider-sub{
+  font-size:9.5px;
+  color:#94a3b8;
+  font-family:'JetBrains Mono',monospace;
+  margin-top:1px;
+}
+
+/* Range sliders */
+input[type=range].form-ctrl{
+  width:100%;
+  padding:0;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  accent-color:#1e3a5f;
+  height:18px;
+}
+
+/* Select */
+select.form-ctrl{
+  width:100%;
+  padding:6px 9px;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  font-size:11.5px;
+  color:#1e3a5f;
+  font-family:'Inter',sans-serif;
+  background:#fff;
+  cursor:pointer;
+  transition:border-color .15s;
+  -webkit-appearance:none;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a7a9a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 9px center;
+  padding-right:26px;
+}
+select.form-ctrl:focus{outline:none;border-color:#1e3a5f}
+
+/* Number input */
+input[type=number].form-ctrl{
+  width:100%;
+  padding:6px 9px;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  font-size:11.5px;
+  color:#1e3a5f;
+  font-family:'JetBrains Mono',monospace;
+  background:#fff;
+  transition:border-color .15s;
+}
+input[type=number].form-ctrl:focus{outline:none;border-color:#1e3a5f}
+
+/* Cross-border toggle */
+.toggle-pill{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  user-select:none;
+}
+.toggle-pill input[type=checkbox]{
+  accent-color:#1e3a5f;
+  width:14px;height:14px;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.toggle-pill-label{font-size:11px;color:#4a6080;font-weight:500}
+
+.cross-border-detail{display:none;padding:10px;background:#f4f7fc;border-radius:4px;margin-top:8px;border:0.5px solid #ccd9e8}
+.cross-border-detail.visible{display:block}
+.fx-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fx-note{font-size:9.5px;color:#94a3b8;margin:4px 0 0;font-family:'JetBrains Mono',monospace}
+
+/* Input section-label style (inside panel) */
+.input-sec-label{
+  font-size:9px;
+  letter-spacing:.13em;
+  color:#5a7a9a;
+  font-weight:600;
+  text-transform:uppercase;
+  margin-bottom:10px;
+  display:block;
+}
+
+/* ══════════════════════════════════════════════
+   BASE CASE HERO CARD
+══════════════════════════════════════════════ */
+.base-hero{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  border-left:4px solid #2563eb;
+  padding:18px 20px;
+  margin-bottom:0;
+  transition:border-left-color .3s;
+}
+.base-hero.hero-green {border-left-color:#16a34a}
+.base-hero.hero-yellow{border-left-color:#ca8a04}
+.base-hero.hero-orange{border-left-color:#d97706}
+.base-hero.hero-red   {border-left-color:#dc2626}
+
+.hero-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.hero-irr-block{display:flex;flex-direction:column;gap:2px}
+.hero-irr-eyebrow{
+  font-size:9px;
+  letter-spacing:.13em;
+  color:#5a7a9a;
+  font-weight:600;
+  text-transform:uppercase;
+}
+.hero-irr-value{
+  font-family:'JetBrains Mono',monospace;
+  font-size:42px;
+  font-weight:700;
+  line-height:1;
+  letter-spacing:-.02em;
+  color:#1e3a5f;
+  font-variant-numeric:tabular-nums;
+}
+.hero-irr-verdict{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:3px 10px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:600;
+  margin-top:6px;
+  width:fit-content;
+}
+.verdict-green {background:#dcfce7;color:#166534}
+.verdict-yellow{background:#fef9c3;color:#854d0e}
+.verdict-orange{background:#ffedd5;color:#9a3412}
+.verdict-red   {background:#fee2e2;color:#991b1b}
+
+.hero-deal-info{
+  text-align:right;
+  font-size:10.5px;
+  color:#5a7a9a;
+  line-height:1.65;
+  font-family:'JetBrains Mono',monospace;
+}
+
+.hero-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid #f0f5fb;
+}
+.hero-metric{
+  background:#f8fbff;
+  border-radius:4px;
+  padding:9px 12px;
+  border:0.5px solid #e8f0f9;
+}
+.hero-metric-lbl{
+  font-size:9px;
+  color:#5a7a9a;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-bottom:3px;
+}
+.hero-metric-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:14px;
+  font-weight:600;
+  color:#1e3a5f;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ══════════════════════════════════════════════
+   SCENARIO TABLE — aligned to buy-vs-rent .cmp-tbl
+══════════════════════════════════════════════ */
+.table-wrap{
+  background:#fff;
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  overflow:auto;
+  margin-bottom:0;
+}
+.scenario-tbl{width:100%;border-collapse:collapse}
+.scenario-tbl thead{position:sticky;top:0;z-index:3}
+.scenario-tbl th{
+  background:#f0f6ff;
+  font-size:9px;
+  letter-spacing:.09em;
+  color:#5a7a9a;
+  font-weight:600;
+  padding:10px 14px;
+  text-align:right;
+  border-bottom:1px solid #dce8f5;
+  white-space:nowrap;
+}
+.scenario-tbl th:first-child{text-align:left}
+.scenario-tbl td{
+  padding:11px 14px;
+  font-size:12.5px;
+  border-bottom:1px solid #f0f5fb;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  color:#1e3a5f;
+  white-space:nowrap;
+}
+.scenario-tbl td:first-child{text-align:left;font-weight:500}
+.scenario-tbl tbody tr:nth-child(even) td{background:#fafcfe}
+.scenario-tbl tbody tr:last-child td{border-bottom:none}
+.scenario-tbl tr:hover td{background:#f3f8ff!important}
+.scenario-tbl tr.greyed td{color:#b0c4d8}
+
+/* Scenario name cell — left accent border */
+.scenario-name-cell{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.scenario-stripe{
+  width:3px;
+  height:18px;
+  border-radius:2px;
+  flex-shrink:0;
+}
+
+/* IRR cell mono */
+.irr-mono{font-family:'JetBrains Mono',monospace;font-size:12.5px}
+.irr-green {color:#16a34a;font-weight:700}
+.irr-yellow{color:#ca8a04;font-weight:700}
+.irr-orange{color:#d97706;font-weight:700}
+.irr-red   {color:#dc2626;font-weight:700}
+.delta-pos {color:#16a34a}
+.delta-neg {color:#dc2626}
+
+/* Verdict pill */
+.verdict-pill{
+  display:inline-block;
+  padding:3px 10px;
+  border-radius:12px;
+  font-size:10.5px;
+  font-weight:600;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+.pill-green {background:#dcfce7;color:#166534}
+.pill-yellow{background:#fef9c3;color:#854d0e}
+.pill-orange{background:#ffedd5;color:#9a3412}
+.pill-red   {background:#fee2e2;color:#991b1b}
+
+/* ══════════════════════════════════════════════
+   CHART ROW
+══════════════════════════════════════════════ */
+.chart-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:0;
+}
+@media(max-width:800px){.chart-row{grid-template-columns:1fr}}
+
+/* ══════════════════════════════════════════════
+   SAVED SCENARIOS
+══════════════════════════════════════════════ */
+.saved-scenarios-block{
+  border:0.5px solid #ccd9e8;
+  border-radius:4px;
+  padding:12px 16px;
+  background:#fff;
+  margin-bottom:12px;
+}
+.saved-scenarios-title{
+  font-size:9px;
+  letter-spacing:.13em;
+  color:#5a7a9a;
+  font-weight:600;
+  text-transform:uppercase;
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.saved-scenarios-title svg{flex-shrink:0;opacity:.7}
+.scenario-list{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  margin-bottom:8px;
+}
+.scenario-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 8px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:background .12s;
+}
+.scenario-item:hover{background:#f4f7fc}
+.scenario-item-icon{
+  font-size:10px;
+  color:#5a7a9a;
+  flex-shrink:0;
+  line-height:1;
+}
+.scenario-item-name{
+  flex:1;
+  font-size:11.5px;
+  color:#1e3a5f;
+  font-weight:500;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  min-width:0;
+}
+.scenario-item-date{
+  font-size:9px;
+  color:#94a3b8;
+  font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.scenario-action-btn{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  flex-shrink:0;
+  font-size:13px;
+  line-height:1;
+  transition:background .12s,color .12s;
+  color:#5a7a9a;
+}
+.scenario-action-btn.load-btn:hover{background:#ddeeff;color:#1e3a5f}
+.scenario-action-btn.del-btn:hover{background:#fee2e2;color:#dc2626}
+.scenario-empty{
+  font-size:11px;
+  color:#94a3b8;
+  font-style:italic;
+  padding:4px 0;
+  line-height:1.5;
+}
+.save-scenario-btn{
+  width:100%;
+  padding:7px 10px;
+  border:1.5px dashed #ccd9e8;
+  border-radius:4px;
+  background:transparent;
+  color:#1e3a5f;
+  font-size:11.5px;
+  font-weight:600;
+  font-family:'Inter',sans-serif;
+  cursor:pointer;
+  transition:all .15s;
+  text-align:center;
+  margin-top:4px;
+}
+.save-scenario-btn:hover{
+  background:#f0f6ff;
+  border-color:#2563eb;
+  border-style:solid;
+  color:#2563eb;
+}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<main class="container">
+
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">DECISION TOOL</span><span class="lang-zh" style="display:none">決策工具</span></span>
+    <h1><span class="lang-en">⚡ Stress Test Calculator</span><span class="lang-zh" style="display:none">⚡ 壓力測試計算器</span></h1>
+    <p class="subtitle"><span class="lang-en">Model 5 stress scenarios — Rate +100bp · Rent −20% · FX −10% — and see IRR &amp; break-even</span><span class="lang-zh" style="display:none">5個壓力情境：利率+1% / 租金−20% / 匯率−10%，即時計算 IRR 與回本年</span></p>
+  </div>
+
+  <!-- ══ INSIGHT BOX ══ -->
+  <div class="insight-box accent" style="margin-bottom:20px">
+    <span class="lang-en"><strong>Traffic light:</strong> 🟢 IRR ≥ 6% Healthy &nbsp;/&nbsp; 🟡 3–6% Marginal &nbsp;/&nbsp; 🟠 0–3% Below cost of capital &nbsp;/&nbsp; 🔴 &lt;0% Capital loss. Adjust any input below — all 5 scenarios recalculate instantly.</span>
+    <span class="lang-zh" style="display:none"><strong>紅綠燈：</strong> 🟢 IRR ≥ 6% 健康 &nbsp;/&nbsp; 🟡 3–6% 邊際 &nbsp;/&nbsp; 🟠 0–3% 低於資金成本 &nbsp;/&nbsp; 🔴 &lt;0% 資本虧損。調整下方任何參數，5 個情境立刻重算。</span>
+  </div>
+
+  <div class="tool-layout">
+    <!-- ═══ LEFT: INPUT PANEL ═══ -->
+    <div>
+
+      <!-- SAVED SCENARIOS BLOCK (above input panel) -->
+      <div class="saved-scenarios-block">
+        <div class="saved-scenarios-title">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1h6l2 2v6H1V1z" stroke="#5a7a9a" stroke-width="1" fill="none"/><path d="M3 1v3h4V1M3 6h4" stroke="#5a7a9a" stroke-width="1"/></svg>
+          <span class="lang-en">SAVED SCENARIOS</span>
+          <span class="lang-zh" style="display:none">已存場景</span>
+          <a href="/sync.html" title="Cross-device sync" style="margin-left:auto;font-size:9.5px;color:#2563eb;text-decoration:none;font-weight:600;letter-spacing:.04em;display:flex;align-items:center;gap:2px;opacity:.8;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">&#x1F504; <span class="lang-en">Sync</span><span class="lang-zh" style="display:none">同步</span></a>
+        </div>
+        <div class="scenario-list" id="savedScenarioList">
+          <!-- rendered by JS -->
+        </div>
+        <button class="save-scenario-btn" id="saveScenarioBtn">
+          <span class="lang-en">+ Save current as ...</span>
+          <span class="lang-zh" style="display:none">+ 儲存當下...</span>
+        </button>
+      </div>
+
+      <!-- SECTION: ASSUMPTIONS -->
+      <div class="section-label" style="margin-top:0"><span class="lang-en">ASSUMPTIONS / INPUT</span><span class="lang-zh" style="display:none">輸入假設</span></div>
+      <div class="input-panel">
+
+        <!-- Market Preset -->
+        <div class="input-section">
+          <span class="input-sec-label"><span class="lang-en">Market Preset</span><span class="lang-zh" style="display:none">市場預設</span></span>
+          <div class="market-pills" id="marketPills">
+            <button class="market-pill active" data-val="my">🇲🇾 MY</button>
+            <button class="market-pill" data-val="tw">🇹🇼 TW</button>
+            <button class="market-pill" data-val="jp">🇯🇵 JP</button>
+            <button class="market-pill" data-val="au">🇦🇺 AU</button>
+            <button class="market-pill" data-val="nz">🇳🇿 NZ</button>
+            <button class="market-pill" data-val="uk">🇬🇧 UK</button>
+            <button class="market-pill" data-val="us">🇺🇸 US</button>
+            <button class="market-pill" data-val="th">🇹🇭 TH</button>
+            <button class="market-pill" data-val="vn">🇻🇳 VN</button>
+            <button class="market-pill" data-val="kr">🇰🇷 KR</button>
+            <button class="market-pill" data-val="ca">🇨🇦 CA</button>
+            <button class="market-pill" data-val="ie">🇮🇪 IE</button>
+          </div>
+          <select id="inMarket" class="asm-hidden-select">
+            <option value="my" selected>🇲🇾 Malaysia (KL) — RM</option>
+            <option value="tw">🇹🇼 Taiwan (Taipei) — NT$</option>
+            <option value="jp">🇯🇵 Japan (Tokyo) — ¥</option>
+            <option value="au">🇦🇺 Australia (Sydney) — A$</option>
+            <option value="nz">🇳🇿 New Zealand (Auckland) — NZ$</option>
+            <option value="uk">🇬🇧 UK (London) — £</option>
+            <option value="us">🇺🇸 US (NYC) — $</option>
+            <option value="th">🇹🇭 Thailand (Bangkok) — ฿</option>
+            <option value="vn">🇻🇳 Vietnam (HCMC) — ₫</option>
+            <option value="kr">🇰🇷 Korea (Seoul) — ₩</option>
+            <option value="ca">🇨🇦 Canada (Toronto) — C$</option>
+            <option value="ie">🇮🇪 Ireland (Dublin) — €</option>
+          </select>
+        </div>
+
+        <!-- Property -->
+        <div class="input-section">
+          <span class="input-sec-label"><span class="lang-en">Property</span><span class="lang-zh" style="display:none">物件</span></span>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">Property Price</span><span class="lang-zh" style="display:none">房價</span></span>
+              <span id="lblPrice" class="val"></span>
+            </label>
+            <input type="number" id="inPrice" class="form-ctrl" step="1000" min="0">
+          </div>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">Down Payment</span><span class="lang-zh" style="display:none">頭期款</span></span>
+              <span id="lblDown" class="val">20%</span>
+            </label>
+            <input type="range" id="inDown" class="form-ctrl" min="10" max="50" step="5" value="20">
+            <span class="slider-sub" id="lblDownAmt"></span>
+          </div>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">Loan Term</span><span class="lang-zh" style="display:none">貸款年限</span></span>
+            </label>
+            <select id="inTerm" class="form-ctrl">
+              <option value="15">15 yr</option>
+              <option value="20">20 yr</option>
+              <option value="25" selected>25 yr</option>
+              <option value="30">30 yr</option>
+              <option value="35">35 yr</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">Mortgage Rate</span><span class="lang-zh" style="display:none">貸款利率</span></span>
+              <span id="lblMRate" class="val">4.3%</span>
+            </label>
+            <input type="range" id="inMRate" class="form-ctrl" min="1" max="10" step="0.1" value="4.3">
+          </div>
+        </div>
+
+        <!-- Income -->
+        <div class="input-section">
+          <span class="input-sec-label"><span class="lang-en">Income</span><span class="lang-zh" style="display:none">租金收益</span></span>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">Gross Rental Yield</span><span class="lang-zh" style="display:none">毛租金收益率</span></span>
+              <span id="lblYield" class="val">5.2%</span>
+            </label>
+            <input type="range" id="inYield" class="form-ctrl" min="1" max="10" step="0.1" value="5.2">
+          </div>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">Vacancy</span><span class="lang-zh" style="display:none">空置率</span></span>
+              <span id="lblVacancy" class="val">8%</span>
+            </label>
+            <input type="range" id="inVacancy" class="form-ctrl" min="0" max="20" step="1" value="8">
+          </div>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">OpEx % of Rent</span><span class="lang-zh" style="display:none">營運費用（佔租金）</span></span>
+              <span id="lblOpEx" class="val">20%</span>
+            </label>
+            <input type="range" id="inOpEx" class="form-ctrl" min="0" max="50" step="1" value="20">
+          </div>
+        </div>
+
+        <!-- Exit Assumptions -->
+        <div class="input-section">
+          <span class="input-sec-label"><span class="lang-en">Exit Assumptions</span><span class="lang-zh" style="display:none">退出假設</span></span>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">Holding Horizon</span><span class="lang-zh" style="display:none">持有年限</span></span>
+              <span id="lblHorizon" class="val">10 yr</span>
+            </label>
+            <input type="range" id="inHorizon" class="form-ctrl" min="3" max="30" step="1" value="10">
+          </div>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">Annual Appreciation</span><span class="lang-zh" style="display:none">年均增值</span></span>
+              <span id="lblAppr" class="val">3%</span>
+            </label>
+            <input type="range" id="inAppr" class="form-ctrl" min="-2" max="8" step="0.5" value="3">
+          </div>
+          <div class="form-row">
+            <label class="form-label">
+              <span><span class="lang-en">Exit Cost % of Sale</span><span class="lang-zh" style="display:none">賣出交易成本</span></span>
+              <span id="lblExitCost" class="val">3.5%</span>
+            </label>
+            <input type="range" id="inExitCost" class="form-ctrl" min="0" max="10" step="0.5" value="3.5">
+          </div>
+        </div>
+
+        <!-- Cross-Border -->
+        <div class="input-section">
+          <span class="input-sec-label"><span class="lang-en">Cross-Border</span><span class="lang-zh" style="display:none">跨境投資</span></span>
+          <label class="toggle-pill">
+            <input type="checkbox" id="inCrossBorder">
+            <span class="toggle-pill-label"><span class="lang-en">Enable cross-border FX scenario</span><span class="lang-zh" style="display:none">啟用跨境匯率情境</span></span>
+          </label>
+          <div class="cross-border-detail" id="crossBorderDetail">
+            <div class="fx-row">
+              <div class="form-row">
+                <label class="form-label"><span class="lang-en">Buy FX rate</span><span class="lang-zh" style="display:none">買入匯率</span></label>
+                <input type="number" id="inFXBuy" class="form-ctrl" value="1" step="0.001" min="0.0001">
+              </div>
+              <div class="form-row">
+                <label class="form-label"><span class="lang-en">Exit FX rate</span><span class="lang-zh" style="display:none">賣出匯率</span></label>
+                <input type="number" id="inFXExit" class="form-ctrl" value="1" step="0.001" min="0.0001">
+              </div>
+            </div>
+            <p class="fx-note"><span class="lang-en">FX −10% scenario uses Exit FX × 0.90</span><span class="lang-zh" style="display:none">FX −10% 情境自動套用賣出匯率 × 0.90</span></p>
+          </div>
+        </div>
+
+      </div><!-- /input-panel -->
+    </div>
+
+    <!-- ═══ RIGHT: RESULT PANEL ═══ -->
+    <div>
+
+      <!-- SECTION: BASE CASE -->
+      <div class="section-label" style="margin-top:0"><span class="lang-en">BASE CASE</span><span class="lang-zh" style="display:none">基準情境</span></div>
+
+      <!-- Base Case Hero Card -->
+      <div class="base-hero" id="baseCaseCard">
+        <div class="hero-top">
+          <div class="hero-irr-block">
+            <div class="hero-irr-eyebrow"><span class="lang-en">BASE CASE IRR</span><span class="lang-zh" style="display:none">基準情境 IRR</span></div>
+            <div class="hero-irr-value" id="bccIRR">—</div>
+            <div id="bccVerdict" class="hero-irr-verdict verdict-yellow">—</div>
+          </div>
+          <div class="hero-deal-info" id="bccDealInfo"></div>
+        </div>
+        <div class="hero-metrics">
+          <div class="hero-metric">
+            <div class="hero-metric-lbl"><span class="lang-en">Cash-on-Cash Y1</span><span class="lang-zh" style="display:none">第1年現金收益率</span></div>
+            <div class="hero-metric-val" id="bccCoC">—</div>
+          </div>
+          <div class="hero-metric">
+            <div class="hero-metric-lbl"><span class="lang-en">Total Return</span><span class="lang-zh" style="display:none">總回報率</span></div>
+            <div class="hero-metric-val" id="bccTotalRet">—</div>
+          </div>
+          <div class="hero-metric">
+            <div class="hero-metric-lbl"><span class="lang-en">Break-even Year</span><span class="lang-zh" style="display:none">回本年份</span></div>
+            <div class="hero-metric-val" id="bccBEYear">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: STRESS SCENARIOS -->
+      <div class="section-label" style="margin-top:24px"><span class="lang-en">STRESS SCENARIOS</span><span class="lang-zh" style="display:none">壓力情境</span></div>
+      <div class="table-wrap">
+        <table class="scenario-tbl">
+          <thead>
+            <tr>
+              <th><span class="lang-en">Scenario</span><span class="lang-zh" style="display:none">情境</span></th>
+              <th><span class="lang-en">IRR</span><span class="lang-zh" style="display:none">IRR</span></th>
+              <th><span class="lang-en">Δ vs Base</span><span class="lang-zh" style="display:none">vs 基準</span></th>
+              <th><span class="lang-en">Verdict</span><span class="lang-zh" style="display:none">評級</span></th>
+            </tr>
+          </thead>
+          <tbody id="scenarioTbody">
+            <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px;font-size:12px"><span class="lang-en">Adjust inputs to see results</span><span class="lang-zh" style="display:none">調整參數後顯示結果</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SECTION: VISUALIZATIONS -->
+      <div class="section-label" style="margin-top:24px"><span class="lang-en">VISUALIZATIONS</span><span class="lang-zh" style="display:none">視覺化分析</span></div>
+      <div class="chart-row">
+        <!-- Cash Flow Waterfall -->
+        <div class="chart-card">
+          <h3><span class="lang-en">Cash Flow Waterfall</span><span class="lang-zh" style="display:none">現金流瀑布圖</span></h3>
+          <p class="chart-subtitle"><span class="lang-en">Annual net operating cash flow + exit gain in final year</span><span class="lang-zh" style="display:none">年度淨現金流，最後一年含退出獲利</span></p>
+          <div id="chartStressCashflow" style="height:240px;width:100%"></div>
+        </div>
+        <!-- Tornado Chart -->
+        <div class="chart-card">
+          <h3><span class="lang-en">IRR Sensitivity (Tornado)</span><span class="lang-zh" style="display:none">IRR 敏感度（龍捲風圖）</span></h3>
+          <p class="chart-subtitle"><span class="lang-en">Impact on IRR of ±1 standard deviation for each variable</span><span class="lang-zh" style="display:none">各變數變動對 IRR 的影響幅度</span></p>
+          <div id="chartStressTornado" style="height:240px;width:100%"></div>
+        </div>
+      </div>
+
+      <div class="source-footer">
+        <span class="lang-en">Calculator uses standard annuity mortgage formula. IRR solved by Newton-Raphson (50 iterations, 1e-6 tolerance). Defaults are indicative mid-market estimates as of 2026 — update inputs for your specific deal.</span>
+        <span class="lang-zh" style="display:none">計算器採用標準等額本息公式，IRR 以牛頓-拉弗森法求解（最多50次疊代，容差1e-6）。預設值為2026年市場估計值，請依實際交易調整參數。</span>
+      </div>
+    </div><!-- /result panel -->
+
+  </div><!-- /tool-layout -->
+</main>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script>
+/* ── Color palette ── */
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:'#3a5275',fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+function mkAxis(o){o=o||{};var m=Object.assign({axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},splitLine:{lineStyle:{color:C.grid}}},o);m.axisLabel=Object.assign({},baseText,o.axisLabel||{});return m;}
+
+/* ── Market defaults ── */
+var MARKET_DEFAULTS={
+  my:{city:'Kuala Lumpur',cur:'RM',price:800000,rentMo:3500,yield:5.2,mrate:4.30,appr:2.5,txTax:4.0,exitCost:5.0},
+  tw:{city:'Taipei',cur:'NT$',price:25000000,rentMo:38000,yield:1.8,mrate:2.30,appr:3.0,txTax:6.0,exitCost:3.0},
+  jp:{city:'Tokyo',cur:'¥',price:80000000,rentMo:280000,yield:4.2,mrate:1.80,appr:2.0,txTax:7.0,exitCost:3.0},
+  au:{city:'Sydney',cur:'A$',price:1400000,rentMo:3100,yield:2.7,mrate:6.30,appr:4.0,txTax:5.5,exitCost:3.5},
+  nz:{city:'Auckland',cur:'NZ$',price:1050000,rentMo:2820,yield:3.2,mrate:6.85,appr:3.5,txTax:0,exitCost:2.0},
+  uk:{city:'London',cur:'£',price:525000,rentMo:2400,yield:5.5,mrate:5.25,appr:2.5,txTax:5.0,exitCost:3.0},
+  us:{city:'NYC',cur:'$',price:800000,rentMo:4500,yield:6.8,mrate:7.10,appr:3.0,txTax:2.5,exitCost:3.0},
+  th:{city:'Bangkok',cur:'฿',price:8000000,rentMo:28000,yield:4.2,mrate:5.50,appr:2.5,txTax:6.3,exitCost:3.0},
+  vn:{city:'Ho Chi Minh',cur:'₫',price:6000000000,rentMo:25000000,yield:5.0,mrate:9.50,appr:4.0,txTax:2.0,exitCost:2.0},
+  kr:{city:'Seoul',cur:'₩',price:1200000000,rentMo:2500000,yield:2.5,mrate:4.80,appr:2.0,txTax:4.6,exitCost:3.0},
+  ca:{city:'Toronto',cur:'C$',price:1100000,rentMo:2800,yield:3.1,mrate:6.20,appr:3.0,txTax:5.5,exitCost:3.0},
+  ie:{city:'Dublin',cur:'€',price:420000,rentMo:2200,yield:6.3,mrate:4.30,appr:3.0,txTax:7.5,exitCost:3.0}
+};
+
+/* ── Currency formatter ── */
+function fmtCur(v,cur){
+  var abs=Math.abs(v);var sign=v<0?'−':'';
+  if(abs>=1000000000)return sign+cur+(abs/1000000000).toFixed(2)+'B';
+  if(abs>=1000000)return sign+cur+(abs/1000000).toFixed(2)+'M';
+  if(abs>=10000)return sign+cur+Math.round(abs/1000)+'K';
+  if(abs>=1000)return sign+cur+(abs/1000).toFixed(1)+'K';
+  return sign+cur+Math.round(abs).toLocaleString();
+}
+function fmtPct(v){return(v>=0?'+':'')+v.toFixed(2)+'%';}
+
+/* ── Core financial functions ── */
+function monthlyPayment(principal,annualRate,termYr){
+  var r=annualRate/12/100;var n=termYr*12;
+  if(r===0)return principal/n;
+  return principal*r/(1-Math.pow(1+r,-n));
+}
+
+function remainingPrincipal(principal,annualRate,termYr,elapsedYr){
+  var r=annualRate/12/100;var n=termYr*12;var k=elapsedYr*12;
+  if(r===0)return principal*(1-k/n);
+  var pmt=monthlyPayment(principal,annualRate,termYr);
+  return pmt*(1-Math.pow(1+r,-(n-k)))/r;
+}
+
+/* Newton-Raphson IRR
+   cashflows[0] = initial outflow (negative), cashflows[1..n] = periodic inflows
+   Returns IRR as decimal (e.g. 0.08 = 8%) */
+function irr(cashflows,guess){
+  if(typeof guess==='undefined')guess=0.08;
+  var rate=guess;
+  for(var iter=0;iter<50;iter++){
+    var npv=0,dnpv=0;
+    for(var i=0;i<cashflows.length;i++){
+      var disc=Math.pow(1+rate,i);
+      npv+=cashflows[i]/disc;
+      if(i>0)dnpv-=i*cashflows[i]/(disc*(1+rate));
+    }
+    if(Math.abs(dnpv)<1e-12)break;
+    var newRate=rate-npv/dnpv;
+    // clamp to avoid blow-up
+    if(newRate<-0.99)newRate=-0.99;
+    if(newRate>50)newRate=50;
+    if(Math.abs(newRate-rate)<1e-8){rate=newRate;break;}
+    rate=newRate;
+  }
+  return rate;
+}
+
+function npvCalc(cashflows,rate){
+  var n=0;
+  for(var i=0;i<cashflows.length;i++)n+=cashflows[i]/Math.pow(1+rate,i);
+  return n;
+}
+
+/* ── Build cash flow array ── */
+function buildCashFlows(p){
+  /* p: {price,downPct,mrate,term,yield,vacancy,opex,horizon,appr,exitCost,fxBuy,fxExit} */
+  var downAmt=p.price*p.downPct/100;
+  var loanAmt=p.price-downAmt;
+  var annualRent=p.price*p.yield/100;
+  var annualNetRent=annualRent*(1-p.vacancy/100)*(1-p.opex/100);
+  var annualMortgage=monthlyPayment(loanAmt,p.mrate,p.term)*12;
+  var annualCF=annualNetRent-annualMortgage;
+  var exitPrice=p.price*Math.pow(1+p.appr/100,p.horizon);
+  var exitProceeds=exitPrice*(1-p.exitCost/100);
+  var remPrincipal=remainingPrincipal(loanAmt,p.mrate,p.term,p.horizon);
+  var exitNet=exitProceeds-remPrincipal;
+  /* Apply FX if cross-border */
+  var fxRatio=p.fxExit/p.fxBuy;
+  var cfs=[];
+  cfs.push(-downAmt); // Year 0
+  for(var y=1;y<=p.horizon;y++){
+    var cf=annualCF;
+    if(p.crossBorder)cf*=fxRatio; // simplified: use exit fx ratio for all years
+    if(y===p.horizon){
+      var exit=exitNet;
+      if(p.crossBorder)exit*=fxRatio;
+      cf+=exit;
+    }
+    cfs.push(cf);
+  }
+  /* Base case: no FX adjustment on downpayment (invested in local cur) */
+  return {cfs:cfs,annualCF:annualCF,annualMortgage:annualMortgage,annualNetRent:annualNetRent,
+          downAmt:downAmt,loanAmt:loanAmt,exitPrice:exitPrice,exitNet:exitNet,remPrincipal:remPrincipal};
+}
+
+/* ── Break-even year ── */
+function breakEven(cfs,downAmt){
+  var cum=0;
+  for(var y=1;y<cfs.length;y++){
+    cum+=cfs[y];
+    if(cum>=downAmt)return y;
+  }
+  return '>'+(cfs.length-1)+'yr';
+}
+
+/* ── IRR verdict ── */
+function verdictData(irrPct){
+  if(irrPct>=6)return{cls:'verdict-green',pillCls:'pill-green',heroCls:'hero-green',dot:'🟢',en:'Healthy',zh:'健康'};
+  if(irrPct>=3)return{cls:'verdict-yellow',pillCls:'pill-yellow',heroCls:'hero-yellow',dot:'🟡',en:'Marginal',zh:'邊際'};
+  if(irrPct>=0)return{cls:'verdict-orange',pillCls:'pill-orange',heroCls:'hero-orange',dot:'🟠',en:'Below cost of capital',zh:'低於資金成本'};
+  return{cls:'verdict-red',pillCls:'pill-red',heroCls:'hero-red',dot:'🔴',en:'Capital loss',zh:'資本虧損'};
+}
+
+/* ── IRR class ── */
+function irrClass(v){
+  if(v>=6)return 'irr-green';
+  if(v>=3)return 'irr-yellow';
+  if(v>=0)return 'irr-orange';
+  return 'irr-red';
+}
+
+/* Scenario stripe color */
+function stripeColor(key){
+  if(key==='base')return C.green;
+  if(key==='rate')return C.orange;
+  if(key==='rent')return C.orange;
+  if(key==='fx')return '#94a3b8';
+  if(key==='all')return C.red;
+  return C.muted;
+}
+
+/* ── All charts array ── */
+var allCharts=[];
+
+/* ── Main compute & render ── */
+function compute(){
+  var market=document.getElementById('inMarket').value;
+  var cur=(MARKET_DEFAULTS[market]||MARKET_DEFAULTS.my).cur;
+  var price=parseFloat(document.getElementById('inPrice').value)||0;
+  var downPct=parseFloat(document.getElementById('inDown').value)||20;
+  var term=parseInt(document.getElementById('inTerm').value)||25;
+  var mrate=parseFloat(document.getElementById('inMRate').value)||4.3;
+  var yieldPct=parseFloat(document.getElementById('inYield').value)||5.2;
+  var vacancy=parseFloat(document.getElementById('inVacancy').value)||8;
+  var opex=parseFloat(document.getElementById('inOpEx').value)||20;
+  var horizon=parseInt(document.getElementById('inHorizon').value)||10;
+  var appr=parseFloat(document.getElementById('inAppr').value)||3;
+  var exitCost=parseFloat(document.getElementById('inExitCost').value)||3.5;
+  var crossBorder=document.getElementById('inCrossBorder').checked;
+  var fxBuy=parseFloat(document.getElementById('inFXBuy').value)||1;
+  var fxExit=parseFloat(document.getElementById('inFXExit').value)||1;
+  if(price<=0)return;
+
+  var baseP={price:price,downPct:downPct,mrate:mrate,term:term,yield:yieldPct,
+             vacancy:vacancy,opex:opex,horizon:horizon,appr:appr,exitCost:exitCost,
+             crossBorder:crossBorder,fxBuy:fxBuy,fxExit:fxExit};
+
+  var base=buildCashFlows(baseP);
+  var baseIRR=irr(base.cfs)*100;
+  var baseV=verdictData(baseIRR);
+  var coc=(base.annualCF/base.downAmt)*100;
+  var totalRet=((base.cfs.slice(1).reduce(function(a,b){return a+b;},0))/base.downAmt)*100;
+  var be=breakEven(base.cfs,base.downAmt);
+
+  /* Update base case hero card */
+  document.getElementById('bccIRR').textContent=(isFinite(baseIRR)?baseIRR.toFixed(1):'—')+'%';
+  var verdEl=document.getElementById('bccVerdict');
+  verdEl.className='hero-irr-verdict '+baseV.cls;
+  verdEl.innerHTML=baseV.dot+' <span class="lang-en">'+baseV.en+'</span><span class="lang-zh" style="display:none">'+baseV.zh+'</span>';
+  document.getElementById('bccCoC').textContent=isFinite(coc)?coc.toFixed(1)+'%':'—';
+  document.getElementById('bccTotalRet').textContent=isFinite(totalRet)?totalRet.toFixed(0)+'%':'—';
+  document.getElementById('bccBEYear').textContent=typeof be==='string'?be:be+'yr';
+  document.getElementById('bccDealInfo').innerHTML=
+    fmtCur(price,cur)+'<br>'+
+    downPct+'% dn &middot; '+mrate+'% &middot; '+term+'yr<br>'+
+    yieldPct+'% yield &middot; '+horizon+'yr hold';
+
+  /* Hero card left-border color */
+  var hero=document.getElementById('baseCaseCard');
+  hero.className='base-hero '+baseV.heroCls;
+
+  /* Build scenarios */
+  var scenarios=[
+    {key:'base',en:'🟢 Base Case',zh:'🟢 基準',p:Object.assign({},baseP)},
+    {key:'rate',en:'🟡 Rate +100bp',zh:'🟡 利率+1%',p:Object.assign({},baseP,{mrate:mrate+1})},
+    {key:'rent',en:'🟡 Rent −20%',zh:'🟡 租金-20%',p:Object.assign({},baseP,{yield:yieldPct*0.8})},
+    {key:'fx',en:'🟠 FX −10%',zh:'🟠 匯率-10%',p:Object.assign({},baseP,{fxExit:fxExit*0.9}),fxOnly:true},
+    {key:'all',en:'🔴 All 3 Combined',zh:'🔴 三壓疊加',p:Object.assign({},baseP,{mrate:mrate+1,yield:yieldPct*0.8,fxExit:fxExit*0.9})}
+  ];
+
+  var lang=localStorage.getItem('lang')||'en';
+  var rows='';
+  var scenarioIRRs=[];
+  scenarios.forEach(function(s,i){
+    var res=buildCashFlows(s.p);
+    var sIRR=irr(res.cfs)*100;
+    scenarioIRRs.push(sIRR);
+    var delta=sIRR-baseIRR;
+    var isFXOnly=s.fxOnly&&!crossBorder;
+    var vd=verdictData(sIRR);
+    var sc=stripeColor(s.key);
+
+    var irrTxt=isFXOnly?
+      '<span class="irr-mono" style="color:#b0c4d8">N/A</span>':
+      '<span class="irr-mono '+irrClass(sIRR)+'">'+(isFinite(sIRR)?sIRR.toFixed(1)+'%':'—')+'</span>';
+    var deltaTxt=isFXOnly?'<span style="color:#b0c4d8">—</span>':
+      (i===0?'<span style="color:#5a7a9a;font-family:JetBrains Mono,monospace">—</span>':
+       '<span class="irr-mono '+(delta>=0?'delta-pos':'delta-neg')+'">'+fmtPct(delta)+'</span>');
+    var verdTxt=isFXOnly?'<span style="color:#b0c4d8">—</span>':
+      '<span class="verdict-pill '+vd.pillCls+'">'+vd.dot+' <span class="lang-en">'+vd.en+'</span><span class="lang-zh" style="display:none">'+vd.zh+'</span></span>';
+
+    rows+='<tr'+(isFXOnly?' class="greyed"':'')+ '>'+
+      '<td>'+
+        '<div class="scenario-name-cell">'+
+          '<div class="scenario-stripe" style="background:'+sc+'"></div>'+
+          '<span class="lang-en">'+s.en+'</span>'+
+          '<span class="lang-zh" style="display:none">'+s.zh+'</span>'+
+        '</div>'+
+      '</td>'+
+      '<td>'+irrTxt+'</td>'+
+      '<td>'+deltaTxt+'</td>'+
+      '<td>'+verdTxt+'</td>'+
+    '</tr>';
+  });
+  document.getElementById('scenarioTbody').innerHTML=rows;
+
+  /* Re-apply lang to newly created elements */
+  var curLang=localStorage.getItem('lang')||'en';
+  document.querySelectorAll('#scenarioTbody .lang-en').forEach(function(e){e.style.display=curLang==='en'?'':'none';});
+  document.querySelectorAll('#scenarioTbody .lang-zh').forEach(function(e){e.style.display=curLang==='zh'?'':'none';});
+  document.querySelectorAll('#bccVerdict .lang-en').forEach(function(e){e.style.display=curLang==='en'?'':'none';});
+  document.querySelectorAll('#bccVerdict .lang-zh').forEach(function(e){e.style.display=curLang==='zh'?'':'none';});
+
+  /* Render charts */
+  renderCharts(base,baseP,cur,lang);
+}
+
+function renderCharts(base,p,cur,lang){
+  /* dispose existing */
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+
+  var en=lang==='en';
+
+  /* ── Chart 1: Cash Flow Waterfall ── */
+  var cfLabels=[],cfData=[];
+  for(var y=1;y<=p.horizon;y++){
+    cfLabels.push('Y'+y);
+    cfData.push(parseFloat(base.cfs[y].toFixed(0)));
+  }
+  var c1=echarts.init(document.getElementById('chartStressCashflow'));
+  var colors=cfData.map(function(v){return v>=0?C.green:C.red;});
+  c1.setOption({
+    tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:C.navy,fontSize:11},
+      formatter:function(params){return params[0].name+': '+fmtCur(params[0].value,cur);}},
+    grid:{left:10,right:20,top:20,bottom:10,containLabel:true},
+    xAxis:mkAxis({type:'category',data:cfLabels}),
+    yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtCur(v,cur);}}}),
+    series:[{
+      type:'bar',
+      data:cfData,
+      itemStyle:{color:function(p){return p.value>=0?C.green:C.red;},borderRadius:[3,3,0,0]},
+      barMaxWidth:40
+    }]
+  });
+  allCharts.push(c1);
+
+  /* ── Chart 2: Tornado ── */
+  /* Compute sensitivity: vary each param by ±1 unit and get ΔIRR */
+  function irrDelta(overrides){
+    var pp=Object.assign({},p,overrides);
+    var res=buildCashFlows(pp);
+    var irrV=irr(res.cfs)*100;
+    var base0=irr(buildCashFlows(p).cfs)*100;
+    return irrV-base0;
+  }
+  var baseIRR0=irr(buildCashFlows(p).cfs)*100;
+
+  var tornadoItems=[
+    {en:'Rate +100bp',zh:'利率+1%',plus:irrDelta({mrate:p.mrate+1}),minus:irrDelta({mrate:p.mrate-1})},
+    {en:'Yield ±10%',zh:'收益率±10%',plus:irrDelta({yield:p.yield*1.1}),minus:irrDelta({yield:p.yield*0.9})},
+    {en:'Appr ±1%',zh:'增值率±1%',plus:irrDelta({appr:p.appr+1}),minus:irrDelta({appr:p.appr-1})},
+    {en:'Exit Cost ±2%',zh:'賣出成本±2%',plus:irrDelta({exitCost:p.exitCost-2}),minus:irrDelta({exitCost:p.exitCost+2})},
+    {en:'FX ±10%',zh:'匯率±10%',plus:irrDelta({fxExit:p.fxExit*1.1}),minus:irrDelta({fxExit:p.fxExit*0.9})}
+  ];
+
+  /* Sort by total impact range */
+  tornadoItems.sort(function(a,b){
+    return (Math.abs(a.plus)+Math.abs(a.minus))-(Math.abs(b.plus)+Math.abs(b.minus));
+  });
+
+  var tLabels=tornadoItems.map(function(t){return en?t.en:t.zh;});
+  var tPlus=tornadoItems.map(function(t){return parseFloat(t.plus.toFixed(3));});
+  var tMinus=tornadoItems.map(function(t){return parseFloat(t.minus.toFixed(3));});
+
+  var c2=echarts.init(document.getElementById('chartStressTornado'));
+  c2.setOption({
+    tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:C.navy,fontSize:11},
+      formatter:function(params){
+        var s=params[0].name+'<br>';
+        params.forEach(function(p){s+=p.marker+p.seriesName+': '+(p.value>=0?'+':'')+p.value.toFixed(2)+'%<br>';});
+        return s;
+      }},
+    grid:{left:10,right:20,top:20,bottom:10,containLabel:true},
+    xAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return(v>=0?'+':'')+v.toFixed(1)+'%';}}}),
+    yAxis:mkAxis({type:'category',data:tLabels,axisLabel:{fontSize:10}}),
+    legend:{top:0,right:0,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8,
+      data:[en?'Upside':'上行',en?'Downside':'下行']},
+    series:[
+      {name:en?'Upside':'上行',type:'bar',data:tPlus,itemStyle:{color:C.green,borderRadius:[0,3,3,0]},barWidth:'40%',stack:'tornado'},
+      {name:en?'Downside':'下行',type:'bar',data:tMinus,itemStyle:{color:C.red,borderRadius:[0,3,3,0]},barWidth:'40%',stack:'tornado2'}
+    ]
+  });
+  allCharts.push(c2);
+}
+
+/* ── Load market defaults ── */
+function loadMarket(mk){
+  var d=MARKET_DEFAULTS[mk];
+  if(!d)return;
+  document.getElementById('inPrice').value=d.price;
+  document.getElementById('inMRate').value=d.mrate;
+  document.getElementById('lblMRate').textContent=d.mrate+'%';
+  document.getElementById('inYield').value=d.yield;
+  document.getElementById('lblYield').textContent=d.yield+'%';
+  document.getElementById('inExitCost').value=d.exitCost||3.5;
+  document.getElementById('lblExitCost').textContent=(d.exitCost||3.5)+'%';
+  updateSliderLabels();
+  compute();
+}
+
+/* ── Update all slider labels ── */
+function updateSliderLabels(){
+  var price=parseFloat(document.getElementById('inPrice').value)||0;
+  var downPct=parseFloat(document.getElementById('inDown').value)||20;
+  var mk=document.getElementById('inMarket').value;
+  var cur=(MARKET_DEFAULTS[mk]||MARKET_DEFAULTS.my).cur;
+  document.getElementById('lblDown').textContent=downPct+'%';
+  document.getElementById('lblDownAmt').textContent=fmtCur(price*downPct/100,cur)+' down / '+fmtCur(price*(1-downPct/100),cur)+' loan';
+  document.getElementById('lblMRate').textContent=parseFloat(document.getElementById('inMRate').value).toFixed(1)+'%';
+  document.getElementById('lblYield').textContent=parseFloat(document.getElementById('inYield').value).toFixed(1)+'%';
+  document.getElementById('lblVacancy').textContent=document.getElementById('inVacancy').value+'%';
+  document.getElementById('lblOpEx').textContent=document.getElementById('inOpEx').value+'%';
+  document.getElementById('lblHorizon').textContent=document.getElementById('inHorizon').value+' yr';
+  document.getElementById('lblAppr').textContent=parseFloat(document.getElementById('inAppr').value).toFixed(1)+'%';
+  document.getElementById('lblExitCost').textContent=parseFloat(document.getElementById('inExitCost').value).toFixed(1)+'%';
+  document.getElementById('lblPrice').textContent=fmtCur(price,cur);
+}
+
+/* ── Event wiring ── */
+['inMarket','inPrice','inDown','inTerm','inMRate','inYield','inVacancy','inOpEx',
+ 'inHorizon','inAppr','inExitCost','inCrossBorder','inFXBuy','inFXExit'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el){
+    el.addEventListener('input',function(){updateSliderLabels();compute();});
+    el.addEventListener('change',function(){updateSliderLabels();compute();});
+  }
+});
+
+document.getElementById('inMarket').addEventListener('change',function(){
+  loadMarket(this.value);
+});
+
+document.getElementById('inCrossBorder').addEventListener('change',function(){
+  document.getElementById('crossBorderDetail').classList.toggle('visible',this.checked);
+  compute();
+});
+
+/* ── Market pill wiring ── */
+(function(){
+  var pills=document.querySelectorAll('#marketPills .market-pill');
+  var sel=document.getElementById('inMarket');
+  pills.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      pills.forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      sel.value=btn.getAttribute('data-val');
+      loadMarket(btn.getAttribute('data-val'));
+    });
+  });
+})();
+
+/* ── setLang (CLAUDE.md standard) ── */
+function setLang(lang){
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  localStorage.setItem('lang',lang);
+  allCharts.forEach(function(c){if(c)c.dispose();});
+  allCharts=[];
+  compute();
+}
+
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+window.addEventListener('load',function(){
+  loadMarket('my');
+  var lang=localStorage.getItem('lang')||'en';
+  setLang(lang);
+});
+
+/* ════════════════════════════════════════════════
+   SAVED SCENARIOS — localStorage persistence
+   key: stress-test-scenarios-v1
+════════════════════════════════════════════════ */
+
+var SS_KEY='stress-test-scenarios-v1';
+
+/* Return all saved scenarios (array) */
+function ssLoad(){
+  try{var raw=localStorage.getItem(SS_KEY);return raw?JSON.parse(raw):[];}
+  catch(e){return [];}
+}
+
+/* Persist the full array */
+function ssSave(list){
+  try{localStorage.setItem(SS_KEY,JSON.stringify(list));}
+  catch(e){console.warn('stress-test: failed to persist scenarios',e);}
+}
+
+/* Collect current input values into an inputs object */
+function ssCollectInputs(){
+  function val(id){var el=document.getElementById(id);return el?el.value:'';}
+  function num(id){return parseFloat(val(id))||0;}
+  function chk(id){var el=document.getElementById(id);return el?el.checked:false;}
+  return{
+    market:   val('inMarket'),
+    price:    num('inPrice'),
+    downPct:  num('inDown'),
+    mrate:    num('inMRate'),
+    term:     parseInt(val('inTerm'))||25,
+    yieldPct: num('inYield'),
+    vacancy:  num('inVacancy'),
+    opex:     num('inOpEx'),
+    horizon:  parseInt(val('inHorizon'))||10,
+    appr:     num('inAppr'),
+    exitCost: num('inExitCost'),
+    crossBorder: chk('inCrossBorder'),
+    fxBuy:    num('inFXBuy'),
+    fxExit:   num('inFXExit')
+  };
+}
+
+/* Apply a saved inputs object back to the DOM without triggering loadMarket */
+function ssApplyInputs(inputs){
+  function set(id,v){var el=document.getElementById(id);if(el){el.value=v;}}
+  function setChk(id,v){var el=document.getElementById(id);if(el)el.checked=!!v;}
+  function triggerInput(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    var ev=new Event('input',{bubbles:true});
+    el.dispatchEvent(ev);
+  }
+
+  /* Set market dropdown display only — do NOT call loadMarket (it overwrites values) */
+  set('inMarket', inputs.market||'my');
+  /* Sync market pill highlight */
+  var pills=document.querySelectorAll('#marketPills .market-pill');
+  pills.forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-val')===(inputs.market||'my'));
+  });
+
+  /* Numeric & select inputs */
+  set('inPrice',    inputs.price);
+  set('inDown',     inputs.downPct);
+  set('inTerm',     inputs.term);
+  set('inMRate',    inputs.mrate);
+  set('inYield',    inputs.yieldPct);
+  set('inVacancy',  inputs.vacancy);
+  set('inOpEx',     inputs.opex);
+  set('inHorizon',  inputs.horizon);
+  set('inAppr',     inputs.appr);
+  set('inExitCost', inputs.exitCost);
+  set('inFXBuy',    inputs.fxBuy);
+  set('inFXExit',   inputs.fxExit);
+
+  /* Checkbox + show/hide cross-border detail */
+  setChk('inCrossBorder', inputs.crossBorder);
+  var cbd=document.getElementById('crossBorderDetail');
+  if(cbd)cbd.classList.toggle('visible',!!inputs.crossBorder);
+
+  /* Trigger input events on range sliders so labels update */
+  ['inDown','inMRate','inYield','inVacancy','inOpEx','inHorizon','inAppr','inExitCost'].forEach(function(id){
+    triggerInput(id);
+  });
+
+  /* Update all slider display labels */
+  updateSliderLabels();
+
+  /* Recompute */
+  compute();
+}
+
+/* Format saved timestamp as short date string */
+function ssFmtDate(isoStr){
+  try{
+    var d=new Date(isoStr);
+    return (d.getMonth()+1)+'/'+(d.getDate());
+  }catch(e){return '';}
+}
+
+/* Render the scenario list into #savedScenarioList */
+function ssRender(){
+  var list=ssLoad();
+  var lang=localStorage.getItem('lang')||'en';
+  var zh=lang==='zh';
+  var container=document.getElementById('savedScenarioList');
+  if(!container)return;
+
+  if(list.length===0){
+    container.innerHTML=
+      '<div class="scenario-empty">'+
+        '<span class="lang-en"'+(zh?' style="display:none"':'')+'>No saved scenarios yet. Save current to start.</span>'+
+        '<span class="lang-zh"'+(!zh?' style="display:none"':'')+'>尚無已存場景，按下方儲存按鈕開始。</span>'+
+      '</div>';
+    return;
+  }
+
+  var html='';
+  list.forEach(function(sc,idx){
+    html+=
+      '<div class="scenario-item" data-idx="'+idx+'" title="'+sc.name+'">'+
+        '<span class="scenario-item-icon">▸</span>'+
+        '<span class="scenario-item-name">'+escHtml(sc.name)+'</span>'+
+        '<span class="scenario-item-date">'+ssFmtDate(sc.savedAt)+'</span>'+
+        '<button class="scenario-action-btn load-btn" data-idx="'+idx+'" title="'+(zh?'載入':'Load')+'">↩</button>'+
+        '<button class="scenario-action-btn del-btn"  data-idx="'+idx+'" title="'+(zh?'刪除':'Delete')+'">✕</button>'+
+      '</div>';
+  });
+  container.innerHTML=html;
+
+  /* Wire events on the newly rendered rows */
+  container.querySelectorAll('.scenario-item').forEach(function(row){
+    /* Click on the row (not buttons) → load */
+    row.addEventListener('click',function(e){
+      if(e.target.classList.contains('scenario-action-btn'))return;
+      var idx=parseInt(row.getAttribute('data-idx'),10);
+      ssLoadScenario(idx);
+    });
+  });
+  container.querySelectorAll('.load-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var idx=parseInt(btn.getAttribute('data-idx'),10);
+      ssLoadScenario(idx);
+    });
+  });
+  container.querySelectorAll('.del-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var idx=parseInt(btn.getAttribute('data-idx'),10);
+      ssDeleteScenario(idx);
+    });
+  });
+}
+
+/* Minimal HTML escape for scenario names */
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* Save current inputs as a named scenario */
+function ssSaveNew(){
+  var lang=localStorage.getItem('lang')||'en';
+  var name=prompt(lang==='zh'?'場景名稱：':'Scenario name:','');
+  if(name===null||name.trim()==='')return; // cancelled or empty
+  name=name.trim();
+  var list=ssLoad();
+  list.push({
+    name:    name,
+    savedAt: new Date().toISOString(),
+    inputs:  ssCollectInputs()
+  });
+  ssSave(list);
+  ssRender();
+}
+
+/* Load a scenario by index */
+function ssLoadScenario(idx){
+  var list=ssLoad();
+  if(idx<0||idx>=list.length)return;
+  ssApplyInputs(list[idx].inputs);
+}
+
+/* Delete a scenario by index */
+function ssDeleteScenario(idx){
+  var list=ssLoad();
+  if(idx<0||idx>=list.length)return;
+  var lang=localStorage.getItem('lang')||'en';
+  var name=list[idx].name;
+  var msg=lang==='zh'?'刪除 \''+name+'\'？':'Delete \''+name+'\'?';
+  if(!confirm(msg))return;
+  list.splice(idx,1);
+  ssSave(list);
+  ssRender();
+}
+
+/* Wire the save button */
+document.getElementById('saveScenarioBtn').addEventListener('click',function(){ssSaveNew();});
+
+/* Initial render (before load event fires setLang which re-renders) */
+ssRender();
+
+/* Re-render scenario list when language changes so bilingual text updates */
+(function(){
+  var _origSetLang=setLang;
+  setLang=function(lang){
+    _origSetLang(lang);
+    ssRender();
+  };
+})();
+
+/* ── Query string param parsing (from DD reports) ── */
+(function(){
+  var params = new URLSearchParams(location.search);
+  if (!params.toString()) return;
+
+  var market = params.get('market');
+  var price = params.get('price');
+  var yld = params.get('yield');
+  var from = params.get('from');
+
+  // Wait for initial loadMarket('my') to finish, then override
+  setTimeout(function(){
+    if (market && document.getElementById('inMarket')) {
+      var mEl = document.getElementById('inMarket');
+      if (mEl.value !== market) {
+        mEl.value = market;
+        /* Sync market pill highlight */
+        var pills = document.querySelectorAll('#marketPills .market-pill');
+        pills.forEach(function(b){
+          b.classList.toggle('active', b.getAttribute('data-val') === market);
+        });
+        if (typeof loadMarket === 'function') loadMarket(market);
+      }
+    }
+    setTimeout(function(){
+      if (price) {
+        var pEl = document.getElementById('inPrice');
+        if (pEl) { pEl.value = parseFloat(price); pEl.dispatchEvent(new Event('input')); }
+      }
+      if (yld) {
+        var yEl = document.getElementById('inYield');
+        if (yEl) { yEl.value = parseFloat(yld); yEl.dispatchEvent(new Event('input')); }
+      }
+      if (typeof compute === 'function') compute();
+
+      // Show "from" banner
+      if (from) {
+        var hdr = document.querySelector('.page-header');
+        if (hdr && !document.getElementById('dd-source-banner')) {
+          var b = document.createElement('div');
+          b.id = 'dd-source-banner';
+          b.style.cssText = 'background:#eff6ff;border:0.5px solid #bfdbfe;border-left:3px solid #2563eb;border-radius:4px;padding:8px 14px;margin-top:10px;font-size:12px;color:#1e3a5f;display:flex;align-items:center;gap:8px';
+          b.innerHTML = '<span style="font-size:14px">&#128203;</span><span><strong>From DD report:</strong> ' + escapeHtml(from) + ' &middot; <a href="/docs/dd/index.html" style="color:#2563eb;text-decoration:underline;margin-left:4px">Browse all DDs</a></span>';
+          hdr.appendChild(b);
+        }
+      }
+    }, 50);
+  }, 100);
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+})();
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

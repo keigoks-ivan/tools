@@ -1,0 +1,318 @@
+{% extends "_base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<main class="container">
+  <div class="page-header">
+    <span class="updated"><span class="lang-en">LAST UPDATED: {{ meta.last_updated_en }}</span><span class="lang-zh" style="display:none">最後更新：{{ meta.last_updated_zh }}</span></span>
+    <h1><span class="lang-en">Market Dashboard</span><span class="lang-zh" style="display:none">市場儀表板</span></h1>
+    <p class="subtitle"><span class="lang-en">{{ meta.market_en }} Residential Property Analytics</span><span class="lang-zh" style="display:none">{{ meta.market_zh }}住宅房地產分析</span></p>
+  </div>
+
+  {# ── KPI Sections ── #}
+  {% for section in kpis.dashboard %}
+  <div class="section-label"><span class="lang-en">{{ section.section_en }}</span><span class="lang-zh" style="display:none">{{ section.section_zh }}</span></div>
+  <div class="kpi-grid">
+    {% for card in section.cards %}
+    <div class="kpi-card {{ card.color }}">
+      <div class="kpi-label"><span class="lang-en">{{ card.label_en }}</span><span class="lang-zh" style="display:none">{{ card.label_zh }}</span></div>
+      <div class="kpi-value">{{ card.value }}{% if card.unit_en %}<span style="font-size:13px"><span class="lang-en">{{ card.unit_en }}</span><span class="lang-zh" style="display:none">{{ card.unit_zh }}</span></span>{% endif %}</div>
+      <span class="kpi-badge badge-{{ card.color }}"><span class="lang-en">{{ card.sub_en }}</span><span class="lang-zh" style="display:none">{{ card.sub_zh }}</span></span>
+      {% if card.source %}<div class="kpi-source">{{ card.source }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  {# ── Charts ── #}
+  {# Collect all dashboard charts (page == 'index') in order #}
+  {% set dash_charts = [] %}
+  {% for cid, cdata in charts.items() %}
+    {% if cdata.page == 'index' %}
+      {% if dash_charts.append(cid) %}{% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {# Row 1: first 2 charts side-by-side #}
+  {% if dash_charts | length > 0 %}
+  <div class="chart-grid two-col" style="margin-top:20px;">
+    {% for cid in dash_charts[:2] %}
+    {% set c = charts[cid] %}
+    <div class="chart-card">
+      <h3><span class="lang-en">{{ c.title_en }}</span><span class="lang-zh" style="display:none">{{ c.title_zh }}</span></h3>
+      {% if c.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ c.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ c.subtitle_zh }}</span></p>{% endif %}
+      <div style="position:relative;height:{{ c.height | default(240) }}px;"><div id="{{ cid }}" style="width:100%;height:100%"></div></div>
+      {% if c.insight_en %}
+      <div class="insight-box">
+        <span class="lang-en">{{ c.insight_en }}</span>
+        <span class="lang-zh" style="display:none">{{ c.insight_zh }}</span>
+      </div>
+      {% endif %}
+      {% if c.footnote_en %}
+      <p class="chart-footnote"><span class="lang-en">{{ c.footnote_en }}</span><span class="lang-zh" style="display:none">{{ c.footnote_zh }}</span></p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Row 2+: remaining charts in pairs #}
+  {% if dash_charts | length > 2 %}
+  <div class="chart-grid two-col">
+    {% for cid in dash_charts[2:] %}
+    {% set c = charts[cid] %}
+    <div class="chart-card">
+      <h3><span class="lang-en">{{ c.title_en }}</span><span class="lang-zh" style="display:none">{{ c.title_zh }}</span></h3>
+      {% if c.subtitle_en %}<p class="chart-subtitle"><span class="lang-en">{{ c.subtitle_en }}</span><span class="lang-zh" style="display:none">{{ c.subtitle_zh }}</span></p>{% endif %}
+      <div style="position:relative;height:{{ c.height | default(240) }}px;"><div id="{{ cid }}" style="width:100%;height:100%"></div></div>
+      {% if c.insight_en %}
+      <div class="insight-box">
+        <span class="lang-en">{{ c.insight_en }}</span>
+        <span class="lang-zh" style="display:none">{{ c.insight_zh }}</span>
+      </div>
+      {% endif %}
+      {% if c.footnote_en %}
+      <p class="chart-footnote"><span class="lang-en">{{ c.footnote_en }}</span><span class="lang-zh" style="display:none">{{ c.footnote_zh }}</span></p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if source_footer %}
+  <div class="source-footer">
+    <span class="lang-en">{{ source_footer.en | safe }}</span>
+    <span class="lang-zh" style="display:none">{{ source_footer.zh | safe }}</span>
+  </div>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block base_scripts %}
+function fmtK(v){return v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v;}
+function fmtRM(v){if(v>=1000000)return'RM '+(v/1000000).toFixed(1)+'M';if(v>=1000)return'RM '+(v/1000).toFixed(0)+'K';return'RM '+v;}
+
+function initCharts(lang){
+  var DATA = {{ charts | tojson }};
+  var en = lang !== 'zh';
+
+  function initChart(id){
+    var el = document.getElementById(id);
+    if(!el) return null;
+    var c = echarts.init(el);
+    allCharts.push(c);
+    return c;
+  }
+
+  /* ── Generic helpers ── */
+  function dsColor(ds, idx){
+    // Return the series color; fall back to palette
+    var palette = [C.navy, C.green, C.orange, C.red, C.blue, C.muted];
+    return ds.color || palette[idx % palette.length];
+  }
+
+  function buildLineStyle(ds, idx){
+    var style = { color: dsColor(ds, idx), width: 2 };
+    if(ds.lineType === 'dashed') style.type = 'dashed';
+    if(ds.lineType) style.type = ds.lineType;
+    return style;
+  }
+
+  function buildMarkLine(cfg){
+    if(!cfg) return undefined;
+    var ml = {
+      silent: true, symbol: 'none',
+      lineStyle: { color: C.red, type: 'dashed', width: 1 },
+      label: { formatter: cfg.label || '', fontSize: 10, color: C.red },
+      data: []
+    };
+    if(cfg.xAxis !== undefined) ml.data.push({ xAxis: cfg.xAxis });
+    if(cfg.yAxis !== undefined) ml.data.push({ yAxis: cfg.yAxis });
+    return ml;
+  }
+
+  function buildMarkPoint(cfg){
+    if(!cfg) return undefined;
+    // cfg can be an object or an array
+    var items = Array.isArray(cfg) ? cfg : [cfg];
+    var mpData = items.map(function(mp){
+      var d = {};
+      if(mp.type) d.type = mp.type;
+      if(mp.coord) d.coord = mp.coord;
+      if(mp.label){
+        d.label = { formatter: mp.label, fontSize: 9, fontWeight: 'bold' };
+      }
+      d.symbolSize = mp.symbolSize || 50;
+      if(mp.color) d.itemStyle = { color: mp.color };
+      else if(mp.type === 'max') d.itemStyle = { color: C.green };
+      else if(mp.type === 'min') d.itemStyle = { color: C.red };
+      return d;
+    });
+    return { data: mpData };
+  }
+
+  /* Iterate over all charts in DATA that belong to page 'index' */
+  Object.keys(DATA).forEach(function(chartId){
+    var info = DATA[chartId];
+    if(info.page !== 'index') return;
+
+    var chart = initChart(chartId);
+    if(!chart) return;
+
+    var chartType = (info.type || '').toLowerCase();
+    var isHorizontal = chartType.indexOf('horizontal') >= 0;
+    var hasDualAxis = chartType.indexOf('dual') >= 0 ||
+                      info.datasets.some(function(ds){ return ds.yAxisIndex === 1; });
+    var legendNames = info.datasets.map(function(ds){ return ds.name; });
+
+    /* ── Build series array ── */
+    var series = info.datasets.map(function(ds, idx){
+      var s = { name: ds.name, type: ds.type || 'line' };
+      var clr = dsColor(ds, idx);
+
+      // Data: support per-item colors
+      if(ds.colors && Array.isArray(ds.colors)){
+        s.data = ds.data.map(function(v, i){
+          return { value: v, itemStyle: { color: ds.colors[i], borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] } };
+        });
+      } else if(ds.data && typeof ds.data[0] === 'object' && ds.data[0] !== null && ds.data[0].value !== undefined){
+        // Pre-structured data (e.g. {value, color})
+        s.data = ds.data.map(function(d){
+          return { value: d.value, itemStyle: { color: d.color || clr, borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] } };
+        });
+      } else {
+        s.data = ds.data;
+      }
+
+      if(ds.type === 'bar'){
+        s.barMaxWidth = isHorizontal ? 22 : 55;
+        if(!ds.colors && !ds.color_positive){
+          s.itemStyle = { color: clr, borderRadius: isHorizontal ? [0,4,4,0] : [4,4,0,0] };
+        }
+        // Color by positive/negative (bar YoY pattern)
+        if(ds.color_positive){
+          s.itemStyle = {
+            color: function(p){ return p.value >= 0 ? ds.color_positive : (ds.color_negative || C.red); },
+            borderRadius: [3,3,0,0]
+          };
+          s.barMaxWidth = 35;
+          s.label = { show: true, position: 'top', fontFamily: 'JetBrains Mono, monospace', fontSize: 9, formatter: function(p){ return p.value + '%'; } };
+        }
+        // Label for bar charts showing values
+        if(!ds.color_positive && ds.type === 'bar' && !isHorizontal && idx === 0){
+          s.label = {
+            show: true, position: 'top',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            formatter: function(p){ return typeof p.value === 'number' && p.value >= 1000 ? fmtK(p.value) : p.value; }
+          };
+        }
+        if(isHorizontal){
+          s.label = { show: true, position: 'right', formatter: '{c}%', fontSize: 11, fontFamily: 'Inter' };
+          // Color by threshold: apply color_rule logic via markLine threshold
+          if(info.markLine){
+            var threshold = info.markLine.xAxis || info.markLine.yAxis || 0;
+            s.data = ds.data.map(function(v){
+              return { value: v, itemStyle: { color: v > threshold ? C.green : C.orange, borderRadius: [0,4,4,0] } };
+            });
+          }
+        }
+      }
+
+      if(ds.type === 'line'){
+        s.lineStyle = buildLineStyle(ds, idx);
+        s.itemStyle = { color: clr };
+        s.symbol = 'circle';
+        s.symbolSize = 6;
+        if(ds.step) s.step = ds.step;
+        if(ds.areaStyle) s.areaStyle = { color: clr.replace(')', ',0.08)').replace('rgb(', 'rgba(') || 'rgba(30,58,95,0.08)' };
+        if(ds.smooth) s.smooth = ds.smooth;
+        // For YoY% line on dual axis
+        if(ds.yAxisIndex === 1){
+          s.yAxisIndex = 1;
+          s.symbol = 'circle';
+          s.symbolSize = 8;
+          s.label = {
+            show: true, position: 'bottom',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            formatter: function(p){ return (p.value >= 0 ? '+' : '') + p.value + '%'; }
+          };
+        }
+      }
+
+      // markPoint
+      if(ds.markPoint) s.markPoint = buildMarkPoint(ds.markPoint);
+      // markLine on the last dataset or the dataset itself
+      if(ds.markLine) s.markLine = buildMarkLine(ds.markLine);
+
+      return s;
+    });
+
+    // Chart-level markLine (applied to last series)
+    if(info.markLine && series.length > 0){
+      var lastSeries = series[series.length - 1];
+      if(!lastSeries.markLine) lastSeries.markLine = buildMarkLine(info.markLine);
+    }
+
+    /* ── Build axes ── */
+    var xAxisCfg, yAxisCfg;
+
+    if(isHorizontal){
+      // Horizontal bar: categories on Y axis, values on X
+      var maxVal = 0;
+      info.datasets.forEach(function(ds){ ds.data.forEach(function(v){ if(v > maxVal) maxVal = v; }); });
+      var xMax = Math.ceil(maxVal + 1);
+      xAxisCfg = mkAxis({ type: 'value', min: 0, max: xMax, axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) });
+      yAxisCfg = mkAxis({
+        type: 'category',
+        data: info.labels.slice().reverse(),
+        axisLabel: { color: C.navy, fontFamily: 'Inter, sans-serif', fontSize: 11 }
+      });
+      // Reverse data to match reversed labels
+      series.forEach(function(s){
+        if(Array.isArray(s.data)) s.data = s.data.slice().reverse();
+      });
+    } else {
+      xAxisCfg = mkAxis({ type: 'category', data: info.labels });
+      if(hasDualAxis){
+        // Find range for second axis
+        var yAxisSecondary = { type: 'value', splitLine: { show: false }, axisLabel: Object.assign({}, baseText, { formatter: '{value}%' }) };
+        yAxisCfg = [
+          mkAxis({ type: 'value' }),
+          mkAxis(yAxisSecondary)
+        ];
+      } else {
+        yAxisCfg = mkAxis({ type: 'value' });
+      }
+    }
+
+    /* ── Grid ── */
+    var grid;
+    if(isHorizontal){
+      grid = { left: 110, right: 50, top: 20, bottom: 20, containLabel: false };
+    } else if(hasDualAxis){
+      grid = { left: 50, right: 50, top: 45, bottom: 30, containLabel: true };
+    } else {
+      grid = Object.assign({}, baseGrid);
+    }
+
+    /* ── Assemble option ── */
+    var option = {
+      tooltip: isHorizontal
+        ? Object.assign({}, baseTooltip, { trigger: 'axis', axisPointer: { type: 'shadow' } })
+        : baseTooltip,
+      grid: grid,
+      xAxis: xAxisCfg,
+      yAxis: yAxisCfg,
+      series: series
+    };
+
+    // Legend: show if more than 1 dataset
+    if(legendNames.length > 1){
+      option.legend = Object.assign({}, baseLegend, { top: 8, data: legendNames });
+    }
+
+    chart.setOption(option);
+  });
+}
+{% endblock %}

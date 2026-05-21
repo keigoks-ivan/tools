@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Risk Monitor | Canada Property Monitor</title>
+<style>html,body{background:#eef3f9!important;color:#1e3a5f!important;color-scheme:light}.navbar{background:#fff!important}.kpi-card,.chart-card,.summary-card,.micro-card,.data-table{background:#fff!important;border-color:#ccd9e8!important}
+.market-selector{position:relative;margin-left:16px}.market-btn{background:#eef3f9;border:1px solid #ccd9e8;border-radius:6px;padding:5px 10px;font-family:Inter,sans-serif;font-size:12px;color:#1e3a5f;cursor:pointer;display:flex;align-items:center;gap:6px}.market-btn:hover{background:#dde8f2}.market-dropdown{display:none;position:absolute;top:110%;left:0;background:#fff;border:1px solid #ccd9e8;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:160px;z-index:100}.market-dropdown.open{display:block}.market-dropdown a{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:#1e3a5f;text-decoration:none;font-family:Inter,sans-serif}.market-dropdown a:hover{background:#f4f7fc}.market-dropdown a.active{font-weight:600}
+</style>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../tw/tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<main class="dashboard">
+  <h1 class="page-title"><span class="lang-en">Risk Monitor</span><span class="lang-zh" style="display:none">風險監測</span></h1>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Household Debt/GDP</span><span class="lang-zh" style="display:none">家庭負債/GDP</span></div>
+      <div class="kpi-value">101%</div>
+      <div class="kpi-delta negative"><span class="lang-en">Among highest globally</span><span class="lang-zh" style="display:none">全球最高之一</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Foreign Buyer Ban</span><span class="lang-zh" style="display:none">外國買家禁令</span></div>
+      <div class="kpi-value" style="font-size:18px"><span class="lang-en">Until 2027</span><span class="lang-zh" style="display:none">至2027年</span></div>
+      <div class="kpi-delta negative"><span class="lang-en">Federal law</span><span class="lang-zh" style="display:none">聯邦法律</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Stress Test</span><span class="lang-zh" style="display:none">壓力測試</span></div>
+      <div class="kpi-value">5.25%</div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Qualifying rate</span><span class="lang-zh" style="display:none">合格利率</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label"><span class="lang-en">Condo Investor Exits</span><span class="lang-zh" style="display:none">公寓投資者退出</span></div>
+      <div class="kpi-value" style="font-size:18px"><span class="lang-en">Rising</span><span class="lang-zh" style="display:none">上升中</span></div>
+      <div class="kpi-delta negative"><span class="lang-en">Toronto</span><span class="lang-zh" style="display:none">多倫多</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Immigration Risk</span><span class="lang-zh" style="display:none">移民風險</span></div>
+      <div class="kpi-value" style="font-size:18px"><span class="lang-en">Policy shift</span><span class="lang-zh" style="display:none">政策轉向</span></div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Potential cuts</span><span class="lang-zh" style="display:none">可能削減</span></div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label"><span class="lang-en">Rate Sensitivity</span><span class="lang-zh" style="display:none">利率敏感度</span></div>
+      <div class="kpi-value" style="font-size:18px"><span class="lang-en">High</span><span class="lang-zh" style="display:none">高</span></div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Variable rate exposure</span><span class="lang-zh" style="display:none">浮動利率曝險</span></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="chart-card half">
+      <h3><span class="lang-en">Risk Radar</span><span class="lang-zh" style="display:none">風險雷達圖</span></h3>
+      <div class="radar-wrap">
+        <div id="chartCaRisk" style="width:100%;height:320px"></div>
+      </div>
+    </div>
+    <div class="chart-card half">
+      <h3><span class="lang-en">Rate Sensitivity Analysis</span><span class="lang-zh" style="display:none">利率敏感度分析</span></h3>
+      <div id="chartCaRateSensitivity" style="height:220px"></div>
+    </div>
+  </div>
+
+  <!-- Policy Timeline -->
+  <h2 class="section-heading"><span class="lang-en">Policy Timeline</span><span class="lang-zh" style="display:none">政策時間軸</span></h2>
+  <div class="timeline">
+    <div class="timeline-item green">
+      <div class="tl-date">2020 Mar</div>
+      <div class="tl-text"><span class="lang-en">BOC emergency cuts to 0.25% (COVID response)</span><span class="lang-zh" style="display:none">BOC緊急降息至0.25%（COVID應對）</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2021</div>
+      <div class="tl-text"><span class="lang-en">Housing boom &mdash; national prices +21% YoY</span><span class="lang-zh" style="display:none">房市狂潮 &mdash; 全國房價年增+21%</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2022 Mar</div>
+      <div class="tl-text"><span class="lang-en">Aggressive rate hike cycle begins</span><span class="lang-zh" style="display:none">激進升息週期開始</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2023 Jan</div>
+      <div class="tl-text"><span class="lang-en">Foreign buyer ban takes effect (federal law)</span><span class="lang-zh" style="display:none">外國買家禁令生效（聯邦法律）</span></div>
+    </div>
+    <div class="timeline-item red">
+      <div class="tl-date">2023 Jul</div>
+      <div class="tl-text"><span class="lang-en">BOC rate peaks at 5.00%</span><span class="lang-zh" style="display:none">BOC利率達5.00%高峰</span></div>
+    </div>
+    <div class="timeline-item green">
+      <div class="tl-date">2024 Jun</div>
+      <div class="tl-text"><span class="lang-en">Rate cut cycle begins &mdash; first cut to 4.75%</span><span class="lang-zh" style="display:none">降息週期開始 &mdash; 首次降至4.75%</span></div>
+    </div>
+    <div class="timeline-item gray">
+      <div class="tl-date">2025</div>
+      <div class="tl-text"><span class="lang-en">Foreign buyer ban extended to 2027</span><span class="lang-zh" style="display:none">外國買家禁令延長至2027年</span></div>
+    </div>
+  </div>
+
+  <!-- Key Risk Factors -->
+  <h2 class="section-heading"><span class="lang-en">Key Risk Factors</span><span class="lang-zh" style="display:none">主要風險因素</span></h2>
+  <div class="summary-grid">
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">Household Debt</span><span class="lang-zh" style="display:none">家庭負債</span></h4>
+      <p><span class="lang-en">At 101% of GDP, Canada's household debt is among the highest in the G7 and globally. The combination of high mortgage balances, variable-rate exposure (approximately 30% of outstanding mortgages), and elevated housing costs creates systemic vulnerability. A significant portion of mortgages originated during 2020&ndash;2021 at ultra-low rates face renewal shock at substantially higher rates through 2026.</span><span class="lang-zh" style="display:none">家庭負債佔GDP 101%，為G7及全球最高之一。高房貸餘額、浮動利率曝險（約佔未償還房貸30%）和高昂住房成本的組合造成系統性脆弱性。2020至2021年超低利率期間發放的大量房貸在2026年前面臨大幅提高利率的續約衝擊。</span></p>
+    </div>
+    <div class="summary-card red-left">
+      <h4><span class="lang-en">Foreign Buyer Ban</span><span class="lang-zh" style="display:none">外國買家禁令</span></h4>
+      <p><span class="lang-en">Canada's Prohibition on the Purchase of Residential Property by Non-Canadians Act, extended to January 2027, removes a significant source of demand particularly in Vancouver and Toronto. While exemptions exist for permanent residents and certain property types, the ban signals a structural policy shift that may deter international capital flows even after expiry.</span><span class="lang-zh" style="display:none">加拿大《禁止非加拿大人購買住宅物業法》延長至2027年1月，移除了溫哥華和多倫多的重要需求來源。雖然永久居民和某些物業類型有豁免，但該禁令標誌著結構性政策轉向，即使到期後也可能阻礙國際資本流入。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Condo Oversupply</span><span class="lang-zh" style="display:none">公寓供給過剩</span></h4>
+      <p><span class="lang-en">Toronto's condo market faces rising investor exits as pre-construction units close at prices below original purchase levels. Negative cash flow from rising rates has pushed many investor-owners to list, increasing supply at a time when demand is constrained by the stress test qualifying rate of 5.25%. Completion volumes in 2025&ndash;2026 are at record highs, adding further pressure.</span><span class="lang-zh" style="display:none">多倫多公寓市場面臨投資者退出增加，預售單位以低於原始購買價的價格交割。升息帶來的負現金流促使許多投資者業主掛牌出售，在需求受5.25%壓力測試合格利率約束的時期增加供給。2025至2026年竣工量創歷史新高，進一步加大壓力。</span></p>
+    </div>
+    <div class="summary-card orange-left">
+      <h4><span class="lang-en">Immigration Dependency</span><span class="lang-zh" style="display:none">移民依賴</span></h4>
+      <p><span class="lang-en">Canada's housing demand has been heavily driven by record immigration levels exceeding 1 million per year. Political pressure to reduce immigration targets could significantly impact demand fundamentals, particularly in the rental market. Any substantial reduction in immigration intake would remove a key price support, especially in Toronto and Vancouver where newcomer settlement is concentrated.</span><span class="lang-zh" style="display:none">加拿大住房需求受到每年超過100萬人的創紀錄移民水平大力推動。減少移民目標的政治壓力可能顯著影響需求基本面，尤其是租賃市場。任何大幅削減移民配額都將移除關鍵價格支撐，特別是在新移民聚居的多倫多和溫哥華。</span></p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>A project by InvestMQuest.</p>
+</footer>
+
+<script>
+var C={navy:'#1e3a5f',green:'#16a34a',orange:'#d97706',red:'#dc2626',blue:'#2563eb',muted:'#5a7a9a',grid:'#e8f0f9',text:'#1e3a5f'};
+var baseText={color:C.muted,fontFamily:'Inter, sans-serif',fontSize:11};
+var baseGrid={left:50,right:20,top:40,bottom:30,containLabel:true};
+var baseTooltip={trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}};
+var baseLegend={top:8,textStyle:baseText,icon:'circle',itemWidth:8,itemHeight:8};
+function mkAxis(o){var b={axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}};var r=Object.assign({},b,o||{});if(o&&o.axisLabel)r.axisLabel=Object.assign({},baseText,o.axisLabel);return r;}
+function fmtK(v){return v>=1000?(v/1000).toFixed(0)+'K':v;}
+
+function setLang(lang){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});localStorage.setItem('lang',lang);if(typeof allCharts!=='undefined'){allCharts.forEach(function(c){if(c)c.dispose();});allCharts=[];}initCharts(lang);}
+function toggleMarketMenu(){document.getElementById('marketDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.market-selector')){document.getElementById('marketDropdown').classList.remove('open');}});
+
+var allCharts=[];
+function initCharts(lang){
+  // Risk Radar
+  var c1=echarts.init(document.getElementById('chartCaRisk'));allCharts.push(c1);
+  c1.setOption({
+    legend:{bottom:0,textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11},icon:'circle',itemWidth:8,itemHeight:8,data:['Current Risk','Baseline']},
+    radar:{
+      center:['50%','52%'],radius:'58%',nameGap:8,
+      name:{textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:10}},
+      indicator:[
+        {name:'Leverage\n/\u69D3\u687F',max:10},
+        {name:'Policy\n/\u653F\u7B56',max:10},
+        {name:'Supply\n/\u4F9B\u7D66',max:10},
+        {name:'Valuation\n/\u4F30\u503C',max:10},
+        {name:'Immigration\n/\u79FB\u6C11',max:10},
+        {name:'Rate\n/\u5229\u7387',max:10}
+      ],
+      shape:'polygon',splitNumber:5,
+      splitLine:{lineStyle:{color:C.grid}},
+      splitArea:{areaStyle:{color:['rgba(238,243,249,0.3)','rgba(255,255,255,0.3)']}},
+      axisLine:{lineStyle:{color:C.grid}}
+    },
+    series:[{type:'radar',data:[
+      {name:'Current Risk',value:[8,7,7,7,4,6],lineStyle:{color:C.red,width:2},itemStyle:{color:C.red},areaStyle:{color:'rgba(220,38,38,0.1)'},symbol:'circle',symbolSize:5},
+      {name:'Baseline',value:[7,5,7,8,3,8],lineStyle:{color:C.muted,type:'dashed',width:1.5},itemStyle:{color:C.muted},areaStyle:{color:'rgba(139,163,192,0.08)'},symbol:'circle',symbolSize:4}
+    ]}]
+  });
+
+  // Rate Sensitivity Analysis
+  var c2=echarts.init(document.getElementById('chartCaRateSensitivity'));allCharts.push(c2);
+  c2.setOption({
+    tooltip:baseTooltip,
+    legend:{top:8,textStyle:{color:'#5a7a9a',fontFamily:'Inter, sans-serif',fontSize:11},icon:'circle',itemWidth:8,itemHeight:8,data:['Yield Spread','Affordability Index']},
+    grid:{left:15,right:15,top:40,bottom:30,containLabel:true},
+    xAxis:mkAxis({type:'category',data:['BOC 2.0%','2.5%','3.25%','4.0%','5.0%']}),
+    yAxis:[
+      mkAxis({type:'value',axisLabel:{formatter:'{value}%',color:'#5a7a9a',fontSize:10},splitLine:{lineStyle:{color:'#e8f0f9'}}}),
+      mkAxis({type:'value',position:'right',axisLabel:{formatter:'{value}',color:'#5a7a9a',fontSize:10},splitLine:{show:false}})
+    ],
+    series:[
+      {name:'Yield Spread',type:'line',smooth:0.2,data:[1.8,1.3,0.55,-0.2,-1.2],lineStyle:{color:C.green},itemStyle:{color:C.green},symbol:'circle',symbolSize:6,
+        markLine:{silent:true,symbol:'none',lineStyle:{color:C.navy,type:'dashed',width:1},data:[{xAxis:'3.25%',label:{formatter:'Current',position:'insideStartTop',fontSize:9,color:'#5a7a9a'}}]}
+      },
+      {name:'Affordability Index',type:'line',smooth:0.2,yAxisIndex:1,data:[82,78,72,65,55],lineStyle:{color:C.orange},itemStyle:{color:C.orange},symbol:'circle',symbolSize:6}
+    ]
+  });
+}
+window.addEventListener('load',function(){setLang(localStorage.getItem('lang')||'en');});
+window.addEventListener('resize',function(){allCharts.forEach(function(c){if(c)c.resize();});});
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>
