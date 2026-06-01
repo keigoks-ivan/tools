@@ -99,23 +99,27 @@ git push origin main
 - `security:` 安全性相關
 - `refactor:` 重構（不改功能）
 
-## 歷史板塊 /history/（catalog 驅動）
+## 歷史板塊 /history/（repo = 唯一真實來源）
 史詩敘事歷史長文，與站內其他頁面風格刻意斷裂（羊皮紙史詩風）。
 - 上線網址：tools.investmquest.com/history/
-- 唯一真實來源：`scripts/history_build.py` 的 `ENTRIES` 清單
-- 來源素材：Google Drive `…/001投資/產業claude分析/歷史/`（原檔不動，腳本只複製）
+- ★ **repo 是唯一真實來源**：`/history/*.html` 一旦存在，build 腳本「永不覆蓋」。
+  所有編輯都**直接改 repo 裡的檔**（例：philippines-epic 已手動擴充到 5.4 萬字）。
+- Google Drive `…/001投資/產業claude分析/歷史/` 只在「某篇第一次匯入」時用一次，之後脫鉤。
 - 產物：`/history/<slug>.html`（英文 slug）+ `/history/catalog.json`
-- 總覽頁 `/history/index.html` 讀 catalog.json 自動生成 d3 世界地圖標點 + 4 區列表
+- 總覽頁 `/history/index.html` 讀 catalog.json 自動生成暖色夜空 d3 世界地圖 + 4 區列表
   （cat：nation 國家 / city 城市 / theme 主題 / sport 運動）
-- 內頁注入：頂端雙語返回列；缺章節目錄者自動補浮動 TOC（掃 h2.act-title）
+- 內頁注入（僅匯入時一次）：頂端雙語返回列；缺章節目錄者自動補浮動 TOC（掃 h2.act-title/ptitle）
 - navbar 入口在 `js/navbar.js` 的 `TOOLS`（key=history），全站生效
 
-### 加新史詩 HTML（兩步，重跑安全）
-1. 在 `scripts/history_build.py` 的 `ENTRIES` 貼一筆：
+### 改既有篇
+直接編輯 `/history/<slug>.html` → `git add -A && commit && push origin main`。
+**不要**重跑 build 期望它更新內容——它不會碰已存在的檔（這是刻意的保護）。
+跑 build 只會：匯入新篇 + 依 ENTRIES 重建 catalog.json。
+
+### 加新史詩 HTML（兩種情境）
+A. 從 Google Drive 匯入：把檔放進 Drive → `ENTRIES` 貼一筆 → 跑 build（只抓 repo 沒有的新篇）：
    `dict(src="資料夾/檔.html", slug="my-slug", cat="nation", zh="中文標題", en="English", lat=35.0, lng=139.0)`
-   - src：相對 Google Drive 歷史資料夾的路徑（或絕對路徑）
-   - cat：nation/city/theme/sport；theme/sport 無地理填 lat=None,lng=None
-   - 城市可加 `group="日本 Japan"` 做列表分組
-2. 跑 `python3 scripts/history_build.py`（冪等），再 `git add -A && commit && push origin main`
-   - 先驗證來源：`python3 scripts/history_build.py --check`
+   - cat：nation/city/theme/sport；theme/sport 無地理填 lat=None,lng=None；城市可加 `group="日本 Japan"`
+B. 直接在 repo 新增：把 .html 放進 `/history/` + `ENTRIES` 補 metadata → 跑 build 只更新 catalog。
+- 兩種都先驗證：`python3 scripts/history_build.py --check`（報告 已有/待匯入/來源缺）
 - 重複版本只在 ENTRIES 留一筆（取內容最完整者，例：泰國/印尼/馬來西亞取「擴充版」）

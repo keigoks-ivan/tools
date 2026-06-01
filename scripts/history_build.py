@@ -3,18 +3,22 @@
 """
 history_build.py — 歷史板塊建置腳本（catalog 驅動，冪等可重跑）
 
-唯一真實來源 = 下方 ENTRIES。執行時會：
-  1. 從 Google Drive 複製每篇史詩 HTML → /history/<slug>.html（原檔不動）
-  2. 注入頂端「返回列」（scoped、雙語、← 返回歷史總覽）
-  3. 為「沒有目錄」的內頁注入自動 TOC（自帶 CSS+JS，執行期掃 h2.act-title）
-  4. 輸出 /history/catalog.json → 總覽頁 index.html 讀它自動長卡片 + 地圖標點
+★ repo 是唯一真實來源 ★
+  /history/*.html 一旦存在，本腳本「永不覆蓋」——所有編輯都直接改 repo 裡的檔。
+  Google Drive 的源檔（SRC_ROOT）只在「某篇第一次匯入 repo」時用一次，之後脫鉤。
 
-== 日後加新檔 ==
-  在 ENTRIES 貼一筆（src / slug / zh / en / cat / lat / lng / blurb），重跑本腳本即可。
-  src 可給絕對路徑，或相對 SRC_ROOT 的路徑。重跑安全（不會重複注入）。
+執行時會：
+  1. 掃 ENTRIES，凡 repo 尚未有的 slug，才從 Google Drive 複製進來（複製時注入返回列/TOC）
+  2. repo 已存在的檔一律不動（保護手動擴充的內容，例如 philippines-epic）
+  3. 依 ENTRIES 重建 /history/catalog.json（分類/座標等 metadata 仍集中管理）
 
-用法:  python3 scripts/history_build.py            # 建置
-       python3 scripts/history_build.py --check    # 只檢查來源檔是否都在，不寫檔
+== 日後加新檔（兩種情境）==
+  A. 新的史詩 HTML：把檔放進 Google Drive → 在 ENTRIES 貼一筆（src/slug/zh/en/cat/lat/lng）
+     → 跑本腳本，它只把「repo 還沒有的新篇」抓進來。之後要改就改 repo 裡的檔。
+  B. 直接在 repo 新增/編輯：把 .html 放進 /history/ 並在 ENTRIES 補 metadata → 跑腳本只更新 catalog。
+
+用法:  python3 scripts/history_build.py            # 匯入新篇 + 重建 catalog（不覆蓋既有檔）
+       python3 scripts/history_build.py --check    # 只報告：已有/待匯入/來源缺，不寫檔
 """
 import json, os, re, shutil, sys
 
@@ -249,48 +253,63 @@ def inject_after_body(html, snippet):
     return html[:i] + "\n" + snippet + html[i:]
 
 def build():
-    missing = []
+    os.makedirs(HISTORY_DIR, exist_ok=True)
+
+    # 先盤點：哪些 entry 在 repo 已有、哪些是新的（需從 Drive 匯入）
+    need_import = []   # repo 還沒有，要從 Drive 抓
+    src_missing = []   # 要匯入、但 Drive 源檔也找不到
     for e in ENTRIES:
+        out = os.path.join(HISTORY_DIR, e["slug"] + ".html")
+        if os.path.exists(out):
+            continue  # repo 已有 → 永不覆蓋
+        need_import.append(e)
         if not os.path.exists(src_path(e)):
-            missing.append(e["src"])
-    if missing:
-        print("⚠️  找不到來源檔：")
-        for m in missing:
+            src_missing.append(e["src"])
+
+    if src_missing:
+        print("⚠️  以下新檔在 Google Drive 找不到來源，無法匯入：")
+        for m in src_missing:
             print("   -", m)
+
     if "--check" in sys.argv:
-        print(f"\n共 {len(ENTRIES)} 筆，缺 {len(missing)} 筆。")
+        print(f"\n共 {len(ENTRIES)} 筆 · repo 已有 {len(ENTRIES)-len(need_import)} 篇（不覆蓋）"
+              f" · 待匯入 {len(need_import)} 篇 · 來源缺 {len(src_missing)} 篇。")
         return
 
-    os.makedirs(HISTORY_DIR, exist_ok=True)
-    built = []
-    for e in ENTRIES:
+    # 只匯入 repo 尚未有、且 Drive 找得到源檔的新篇（複製時注入返回列/TOC）
+    imported = 0
+    for e in need_import:
         sp = src_path(e)
         if not os.path.exists(sp):
             continue
         with open(sp, encoding="utf-8", errors="replace") as f:
             html = f.read()
-
-        # 1) 返回列（冪等）
         if BACKBAR_MARK not in html:
             html = inject_after_body(html, BACKBAR_HTML.format(mark=BACKBAR_MARK))
-        # 2) 自動 TOC（僅原本沒 TOC 的，且冪等）
         if not has_native_toc(html) and TOC_MARK not in html:
             html = inject_after_body(html, TOC_SNIPPET.format(mark=TOC_MARK))
-
         out = os.path.join(HISTORY_DIR, e["slug"] + ".html")
         with open(out, "w", encoding="utf-8") as f:
             f.write(html)
+        imported += 1
+
+    # catalog.json 永遠依 ENTRIES 重建（metadata 集中管理）；
+    # 只收錄 repo 裡實際存在的檔，避免列出不存在的篇。
+    built = []
+    for e in ENTRIES:
+        if not os.path.exists(os.path.join(HISTORY_DIR, e["slug"] + ".html")):
+            continue
         rec = {k: e.get(k) for k in ("slug", "zh", "en", "cat", "lat", "lng", "group")}
         rec["blurb"] = e.get("blurb", "")
         built.append(rec)
 
-    # 3) catalog.json
     catalog = {"cats": [{"key": k, "zh": z, "en": en} for (k, z, en) in CATS],
                "items": built}
     with open(os.path.join(HISTORY_DIR, "catalog.json"), "w", encoding="utf-8") as f:
         json.dump(catalog, f, ensure_ascii=False, indent=2)
 
-    print(f"✅ 建置完成：{len(built)} 篇 → {HISTORY_DIR}")
+    print(f"✅ 建置完成：catalog {len(built)} 篇 → {HISTORY_DIR}")
+    print(f"   本次新匯入 {imported} 篇；其餘 repo 既有檔未動。")
     by = {}
     for r in built:
         by[r["cat"]] = by.get(r["cat"], 0) + 1
