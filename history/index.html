@@ -43,23 +43,26 @@ html[data-lang="en"] .blk[lang-en]{display:block}
 .hero .stats .s .n{font-family:'Cinzel',serif;font-size:26px;color:var(--gold-bright);font-weight:700}
 .hero .stats .s .l{font-size:10px;letter-spacing:.16em;color:#8aa;text-transform:uppercase;margin-top:2px}
 
-/* map */
+/* map — warm night-sky (C2) */
 .mapwrap{max-width:1180px;margin:-30px auto 0;padding:0 22px;position:relative;z-index:5}
-.mapcard{background:var(--parchment-card);border:1px solid var(--line);border-radius:14px;
-  box-shadow:0 14px 40px rgba(22,20,15,.18);padding:18px 18px 12px;position:relative}
+.mapcard{background:radial-gradient(ellipse at 50% 38%,#2a2012,#160f08 82%);
+  border:1px solid var(--gold);border-radius:14px;overflow:hidden;
+  box-shadow:0 16px 48px rgba(22,16,8,.5);padding:16px 18px 12px;position:relative}
 .maptop{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px}
-.mapcard .mh{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.18em;color:var(--rust);text-transform:uppercase}
-.maplegend{display:flex;gap:16px;font-size:11px;color:var(--faint)}
-.maplegend span{display:inline-flex;align-items:center;gap:5px}
-.maplegend .dot{width:9px;height:9px;border-radius:50%;border:1.3px solid #faf6ec;box-shadow:0 0 0 1px var(--line)}
-.maplegend .dn{background:#1d3640}.maplegend .dc{background:#8a3a23}
-#worldMap{width:100%;height:auto;display:block;border-radius:8px;background:#eef3ee;border:1px solid var(--line)}
-.maptip{position:absolute;background:var(--ink);color:var(--parchment);border:1px solid var(--gold);
-  border-radius:7px;padding:8px 12px;font-size:12px;pointer-events:none;display:none;z-index:30;max-width:240px;box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.mapcard .mh{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.18em;color:var(--gold-bright);text-transform:uppercase}
+.maplegend{display:flex;gap:16px;font-size:11px;color:#b9a982}
+.maplegend span{display:inline-flex;align-items:center;gap:6px}
+.maplegend .dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 6px 1px currentColor}
+.maplegend .dn{color:var(--gold-bright);background:var(--gold-bright)}.maplegend .dc{color:#f0a830;background:#f0a830}
+#worldMap{width:100%;height:auto;display:block}
+.maptip{position:absolute;background:#2a2012;color:var(--parchment);border:1px solid var(--gold);
+  border-radius:7px;padding:7px 12px;font-size:12.5px;pointer-events:none;display:none;z-index:30;max-width:240px;box-shadow:0 8px 22px rgba(0,0,0,.55)}
 .maptip.show{display:block}
 .maptip .tt{color:var(--gold-bright);font-weight:600;margin-bottom:2px}
-.maptip .ts{color:#c9c0ad;font-size:11px}
-.mapfoot{font-size:11px;color:var(--faint);text-align:center;margin-top:8px;font-family:'Cormorant Garamond',serif;font-style:italic}
+.maptip .ts{color:#b9a982;font-size:10px;letter-spacing:.1em}
+.mapfoot{font-size:11px;color:#8a7a55;text-align:center;margin-top:8px;font-family:'Cormorant Garamond',serif;font-style:italic}
+@keyframes imqtw{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.15)}}
+#worldMap .glow{transform-box:fill-box;transform-origin:center;animation:imqtw 3.4s ease-in-out infinite}
 
 /* sections */
 .wrap{max-width:1180px;margin:0 auto;padding:46px 22px 70px}
@@ -219,38 +222,46 @@ function loadMap(cat){
     }).catch(function(){});
 }
 function drawMap(cat,land){
-  var svg='';
-  var grat=d3.geoGraticule().step([30,30])();
-  var gd=PATH(grat); if(gd) svg+='<path d="'+gd+'" fill="none" stroke="#c6b58e" stroke-opacity="0.3" stroke-width="0.5"/>';
-  land.features.forEach(function(f){var d=PATH(f);if(d)svg+='<path d="'+d+'" fill="#e7dfc9" stroke="#c6b58e" stroke-width="0.4"/>';});
+  // defs: glow filter + warm radial sea
+  var svg='<defs>'+
+    '<filter id="imqglow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+    '<radialGradient id="imqsea" cx="50%" cy="38%" r="70%"><stop offset="0%" stop-color="#3a2c18"/><stop offset="100%" stop-color="#160f08"/></radialGradient>'+
+    '</defs>';
+  // sea sphere
+  svg+='<path d="'+PATH({type:'Sphere'})+'" fill="url(#imqsea)"/>';
+  // deterministic warm stars
+  for(var s=0;s<140;s++){var sx=(s*137.5)%1000,sy=(s*97.3)%500,sr=(s%3)*0.35+0.25,op=((s%5)+2)/12;
+    svg+='<circle cx="'+sx.toFixed(0)+'" cy="'+sy.toFixed(0)+'" r="'+sr.toFixed(2)+'" fill="#cdb98a" fill-opacity="'+op.toFixed(2)+'"/>';}
+  // graticule faint warm
+  var gd=PATH(d3.geoGraticule().step([30,30])()); if(gd) svg+='<path d="'+gd+'" fill="none" stroke="#6b4f25" stroke-opacity="0.35" stroke-width="0.5"/>';
+  // land — dark warm with bronze edge
+  land.features.forEach(function(f){var d=PATH(f);if(d)svg+='<path d="'+d+'" fill="#251a0e" stroke="#5e4520" stroke-width="0.6"/>';});
   var geo=cat.items.filter(function(i){return i.lat!=null&&i.lng!=null;});
   geo.forEach(function(i,idx){
     var p=PROJ([i.lng,i.lat]); if(!p) return;
     var isCity=(i.cat==='city');
-    var r=isCity?4:6;
-    var fill=isCity?'#8a3a23':'#1d3640';
-    svg+='<circle data-i="'+idx+'" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+r+'" '+
-      'fill="'+fill+'" stroke="#faf6ec" stroke-width="1.3" opacity="0.92" style="cursor:pointer"/>';
+    var col=isCity?'#f0a830':'#cda551';
+    svg+='<g data-i="'+idx+'" style="cursor:pointer">'+
+      '<circle class="glow" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isCity?2.6:4.2)+'" fill="'+col+'" filter="url(#imqglow)"/>'+
+      '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isCity?1.3:1.9)+'" fill="#fff4dc"/></g>';
   });
   var el=document.getElementById('worldMap');
   el.innerHTML=svg;
   var tip=document.getElementById('mapTip');
-  el.querySelectorAll('circle[data-i]').forEach(function(c){
-    var it=geo[+c.getAttribute('data-i')];
-    c.addEventListener('mouseenter',function(ev){
-      tip.innerHTML='<div class="tt">'+txt(it)+'</div><div class="ts">'+(it.cat==='city'?(LANG==='en'?'City':'城市'):(LANG==='en'?'Nation':'國家'))+' · '+(LANG==='en'?'click to read':'點擊閱讀')+'</div>';
+  el.querySelectorAll('g[data-i]').forEach(function(g){
+    var it=geo[+g.getAttribute('data-i')];
+    g.addEventListener('mouseenter',function(){
+      tip.innerHTML='<div class="ts">'+(it.cat==='city'?(LANG==='en'?'CITY':'城市'):(LANG==='en'?'NATION':'國家'))+'</div><div class="tt">'+txt(it)+'</div>';
       tip.classList.add('show');
     });
-    c.addEventListener('mousemove',function(ev){
+    g.addEventListener('mousemove',function(ev){
       var rect=el.getBoundingClientRect();
-      var x=(ev.clientX-rect.left)/rect.width*1000;
-      var y=(ev.clientY-rect.top)/rect.height*500;
       var px=ev.clientX-rect.left+14, py=ev.clientY-rect.top+14;
-      if(px>rect.width-200)px=ev.clientX-rect.left-200;
+      if(px>rect.width-210)px=ev.clientX-rect.left-210;
       tip.style.left=px+'px'; tip.style.top=py+'px';
     });
-    c.addEventListener('mouseleave',function(){tip.classList.remove('show');});
-    c.addEventListener('click',function(){location.href=it.slug+'.html';});
+    g.addEventListener('mouseleave',function(){tip.classList.remove('show');});
+    g.addEventListener('click',function(){location.href=it.slug+'.html';});
   });
 }
 </script>
