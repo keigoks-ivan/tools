@@ -54,6 +54,8 @@ ENTRIES = [
          zh="最古老的土地，最年輕的國家：澳洲", en="Australia: Oldest Land, Youngest Nation", lat=-25.3, lng=133.8),
     dict(src="紐西蘭史詩_最後的島嶼與兩個民族的條約.html", slug="newzealand-epic", cat="nation",
          zh="最後的島嶼，與兩個民族的條約：紐西蘭", en="New Zealand: The Last Islands", lat=-41.3, lng=174.0),
+    dict(src="日本史詩_菊與刀與永不止息的浪.html", slug="japan-epic", cat="nation",
+         zh="菊與刀,與永不止息的浪：日本的千年身世", en="Japan: The Chrysanthemum and the Sword", lat=36.2, lng=138.3),
     dict(src="東北亞歷史/南韓史詩_半島的意志.html", slug="southkorea-epic", cat="nation",
          zh="半島的意志：南韓從廢墟到尖端", en="South Korea: The Will of the Peninsula", lat=36.5, lng=127.8),
     dict(src="東北亞歷史/北韓史詩_堡壘之國.html", slug="northkorea-epic", cat="nation",
