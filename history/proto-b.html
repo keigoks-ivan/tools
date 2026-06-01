@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Proto B · 地區插畫</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital@0;1&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0e2128;font-family:'Noto Serif TC',serif;padding:30px;color:#e8dcc0}
+.wrap{max-width:1180px;margin:0 auto}
+h3{color:#cda551;font-family:'Cinzel',serif;letter-spacing:.2em;font-size:13px;margin:0 0 14px}
+.board{background:linear-gradient(160deg,#13343f,#0e2128);border:1px solid #a8842f;border-radius:14px;
+  padding:34px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px}
+.region{background:rgba(243,238,226,.04);border:1px solid rgba(205,165,81,.3);border-radius:12px;
+  padding:22px;position:relative;transition:.18s;cursor:default}
+.region:hover{background:rgba(243,238,226,.07);border-color:#cda551;transform:translateY(-3px)}
+.region .ic{font-size:30px;margin-bottom:8px}
+.region .rn{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;color:#cda551;margin-bottom:3px}
+.region h4{font-size:19px;margin:0 0 12px;font-weight:700}
+.region .cnt{position:absolute;top:18px;right:20px;font-family:'Cinzel',serif;font-size:13px;color:#8a6d3a}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:4px 10px;border-radius:20px;background:rgba(205,165,81,.12);
+  border:1px solid rgba(205,165,81,.25);color:#e8dcc0;text-decoration:none;transition:.14s}
+.chip:hover{background:#8a3a23;border-color:#8a3a23}
+.chip.nation{background:rgba(29,54,64,.5);border-color:rgba(205,165,81,.4)}
+</style></head><body><div class="wrap">
+<h3>方案 B · 地區插畫板（無真實地理，依區域分塊）</h3>
+<div class="board" id="board"></div></div>
+<script>
+var REGIONS=[
+ {key:'東亞 East Asia',ic:'⛩',match:['taiwan','tokyo','osaka','kobe','fukuoka','hongkong','macau','northkorea','southkorea','taipei','taichung','tainan','kaohsiung','keelung']},
+ {key:'東南亞 SE Asia',ic:'🌴',match:['singapore','malaysia','indonesia','thailand','vietnam','cambodia','laos','myanmar','brunei','philippines','hanoi','hochiminh','phnompenh','bangkok','chiangmai','jakarta','manila','kualalumpur','penang','ipoh','johorbahru','malacca','seremban','east-coast']},
+ {key:'南亞 South Asia',ic:'🏔',match:['india','pakistan','bangladesh','nepal','bhutan']},
+ {key:'大洋洲 Oceania',ic:'🦘',match:['australia','newzealand']},
+ {key:'主題 Themes',ic:'⚓',match:['age-of-sail','colonial','skyscraper']},
+ {key:'運動 Sports',ic:'🏆',match:['football','basketball','baseball','tennis','rugby','volleyball','tabletennis','americanfootball']},
+];
+fetch('catalog.json').then(r=>r.json()).then(cat=>{
+  var board=document.getElementById('board');
+  REGIONS.forEach(reg=>{
+    var items=cat.items.filter(i=>reg.match.some(m=>i.slug.indexOf(m)===0||i.slug.indexOf(m)>-1));
+    if(!items.length)return;
+    var chips=items.map(i=>'<a class="chip '+(i.cat==='nation'?'nation':'')+'" href="'+i.slug+'.html">'+i.zh.split('：')[0].split(':')[0]+'</a>').join('');
+    var el=document.createElement('div');el.className='region';
+    el.innerHTML='<div class="cnt">'+items.length+'</div><div class="ic">'+reg.ic+'</div>'+
+      '<div class="rn">'+reg.key.split(' ')[1].toUpperCase()+'</div><h4>'+reg.key.split(' ')[0]+'</h4>'+
+      '<div class="chips">'+chips+'</div>';
+    board.appendChild(el);
+  });
+});
+</script></body></html>

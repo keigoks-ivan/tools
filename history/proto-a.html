@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Proto A · 古地圖</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital@0;1&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#3a2f1d;font-family:'Noto Serif TC',serif;padding:30px}
+.wrap{max-width:1180px;margin:0 auto}
+h3{color:#cda551;font-family:'Cinzel',serif;letter-spacing:.2em;font-size:13px;margin:0 0 14px}
+.mapcard{position:relative;border-radius:6px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);border:14px solid #2b2113;
+  background:#e8dcc0}
+.mapcard::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:
+    radial-gradient(ellipse at center,transparent 55%,rgba(90,66,30,.35) 100%),
+    radial-gradient(circle at 12% 18%,rgba(120,90,45,.25),transparent 30%),
+    radial-gradient(circle at 88% 82%,rgba(120,90,45,.30),transparent 35%);}
+.mapcard::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.5;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply}
+#m{width:100%;height:auto;display:block;position:relative;z-index:0}
+.tt{position:absolute;z-index:5;background:#2b2113;color:#e8dcc0;border:1px solid #cda551;
+  padding:6px 11px;font-size:12px;border-radius:4px;display:none;pointer-events:none;max-width:220px}
+.tt.s{display:block}
+</style></head><body><div class="wrap">
+<h3>方案 A · 古地圖羊皮紙風（Age-of-Sail）</h3>
+<div class="mapcard">
+  <svg id="m" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="tt" id="tt"></div>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script>
+fetch('catalog.json').then(r=>r.json()).then(cat=>{
+fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r=>r.json()).then(world=>{
+  var land=topojson.feature(world,world.objects.countries);
+  var proj=d3.geoNaturalEarth1().fitSize([1000,500],{type:'Sphere'});
+  var path=d3.geoPath(proj);
+  var svg='';
+  // sphere outline
+  svg+='<path d="'+path({type:'Sphere'})+'" fill="#cdbfa0" stroke="#7a5c2e" stroke-width="2"/>';
+  // graticule faint
+  svg+='<path d="'+path(d3.geoGraticule().step([20,20])())+'" fill="none" stroke="#8a6d3a" stroke-opacity=".28" stroke-width=".6"/>';
+  // land — sepia with darker coast
+  land.features.forEach(f=>{var d=path(f);if(d)svg+='<path d="'+d+'" fill="#d8c69e" stroke="#6b4f25" stroke-width="0.7" stroke-linejoin="round"/>';});
+  // compass rose bottom-left
+  svg+='<g transform="translate(70,420)" opacity="0.8"><circle r="26" fill="none" stroke="#6b4f25" stroke-width="1"/><circle r="18" fill="none" stroke="#6b4f25" stroke-width=".6"/><path d="M0,-32 L6,0 L0,32 L-6,0 Z" fill="#7a5c2e"/><path d="M-32,0 L0,-6 L32,0 L0,6 Z" fill="#9c7b3e"/><text x="0" y="-34" text-anchor="middle" font-family="Cinzel" font-size="11" fill="#5a3d18">N</text></g>';
+  var geo=cat.items.filter(i=>i.lat!=null);
+  geo.forEach((i,idx)=>{var p=proj([i.lng,i.lat]);if(!p)return;
+    var isC=i.cat==='city';
+    svg+='<g data-i="'+idx+'" style="cursor:pointer"><circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isC?3:4.5)+'" fill="'+(isC?'#8a3a23':'#5a3d18')+'" stroke="#e8dcc0" stroke-width="1"/>'+(isC?'':'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="8" fill="none" stroke="#5a3d18" stroke-width=".8" stroke-opacity=".5"/>')+'</g>';
+  });
+  var m=document.getElementById('m');m.innerHTML=svg;
+  var tt=document.getElementById('tt');
+  m.querySelectorAll('g[data-i]').forEach(g=>{var it=geo[+g.getAttribute('data-i')];
+    g.onmouseenter=e=>{tt.textContent=it.zh;tt.classList.add('s');};
+    g.onmousemove=e=>{var r=m.getBoundingClientRect();tt.style.left=(e.clientX-r.left+12)+'px';tt.style.top=(e.clientY-r.top+12)+'px';};
+    g.onmouseleave=()=>tt.classList.remove('s');});
+});});
+</script></body></html>
