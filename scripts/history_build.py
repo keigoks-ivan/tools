@@ -170,8 +170,6 @@ ENTRIES = [
          zh="網的兩端，零接觸：排球", en="Volleyball: No Contact", lat=None, lng=None),
     dict(src="運動歷史/小球與大國 桌球一百二十年.html", slug="tabletennis-history", cat="sport",
          zh="小球與大國：桌球一百二十年", en="Table Tennis: Small Ball, Big Power", lat=None, lng=None),
-    dict(src="運動歷史/足球大冒險_兒童版.html", slug="football-kids", cat="sport",
-         zh="⚽ 足球大冒險（兒童版）", en="Football Adventure (Kids)", lat=None, lng=None),
 ]
 
 # ============================================================
