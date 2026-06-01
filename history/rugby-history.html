@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>泥土裡的紳士：橄欖球與一場關於階級、帝國與血性的史詩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#201d15;
+  --paper:#f2eee1;
+  --paper-deep:#e4ddc8;
+  --turf:#356340;
+  --turf-deep:#1f3f28;
+  --turf-bright:#558f60;
+  --mud:#9a6a32;
+  --mud-deep:#6d4920;
+  --maroon:#7a2230;
+  --maroon-deep:#561621;
+  --bone:#f3eddb;
+  --gold:#b18a34;
+  --gold-bright:#dcb456;
+  --crimson:#8f2420;
+  --night:#172019;
+  --night-deep:#0d130f;
+  --faint:#6d6650;
+  --line:#cabf9f;
+  --shadow:rgba(31,63,40,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(85,143,96,.12), transparent 55%),
+    radial-gradient(ellipse at 85% 100%, rgba(154,106,50,.09), transparent 50%),
+    var(--paper);
+  color:var(--ink);line-height:1.95;font-size:18px;overflow-x:hidden;position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+  background:radial-gradient(ellipse at 50% 38%, rgba(85,143,96,.4), transparent 70%),linear-gradient(165deg, var(--night-deep) 0%, var(--turf-deep) 48%, var(--turf) 100%);
+  color:var(--bone);overflow:hidden;padding:4rem 2rem;}
+.hero::after{content:"";position:absolute;inset:0;
+  /* rugby pitch with H goalposts + halfway line */
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='760'%3E%3Cg stroke='%23dcb456' stroke-width='1.4' opacity='0.16' fill='none'%3E%3Crect x='150' y='90' width='600' height='580'/%3E%3Cline x1='150' y1='380' x2='750' y2='380'/%3E%3Cline x1='150' y1='180' x2='750' y2='180' stroke-dasharray='6 8'/%3E%3Cline x1='150' y1='580' x2='750' y2='580' stroke-dasharray='6 8'/%3E%3Cg stroke-width='2'%3E%3Cline x1='420' y1='60' x2='420' y2='150'/%3E%3Cline x1='480' y1='60' x2='480' y2='150'/%3E%3Cline x1='420' y1='110' x2='480' y2='110'/%3E%3Cline x1='420' y1='610' x2='420' y2='700'/%3E%3Cline x1='480' y1='610' x2='480' y2='700'/%3E%3Cline x1='420' y1='650' x2='480' y2='650'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:cover;opacity:.85;}
+.hero-inner{position:relative;z-index:2;max-width:920px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;padding-left:.42em}
+.hero h1{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(2.2rem,6vw,4.4rem);line-height:1.15;letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.5)}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;color:rgba(243,237,219,.86);font-weight:400;letter-spacing:.03em}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2}
+.lede p{font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;color:var(--turf-deep);font-weight:500}
+.lede p .drop{float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;padding:.55rem .55rem 0 0;color:var(--maroon);font-weight:700}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem}
+.act-title{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.8rem,4.4vw,2.9rem);color:var(--turf-deep);line-height:1.2}
+.act-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint);margin-top:.8rem}
+.act-head .ornament{font-size:1.3rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;color:var(--mud-deep);margin:3rem 0 1rem;padding-left:1rem;border-left:4px solid var(--gold);line-height:1.4}
+.prose strong{color:var(--mud-deep);font-weight:700}
+.prose em{font-style:italic;color:var(--turf-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;background:linear-gradient(135deg, rgba(85,143,96,.10), rgba(177,138,52,.08));border-top:2px solid var(--gold);border-bottom:2px solid var(--gold)}
+.pull p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;line-height:1.55;color:var(--turf-deep);text-align:center;margin:0;font-weight:500}
+.pull::before{content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1}
+
+/* ====== LENS (商業/結構) ====== */
+.lens{margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;background:var(--night-deep);color:var(--bone);border-radius:2px;box-shadow:0 18px 40px -16px rgba(13,19,15,.6)}
+.lens::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--gold-bright),var(--mud))}
+.lens .tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem}
+.lens .tag::before{content:"\25C8";font-size:.9rem}
+.lens p{margin:.6rem 0;color:rgba(243,237,219,.92);font-size:1rem;line-height:1.8;text-align:left}
+.lens strong{color:var(--gold-bright)}
+.lens em{color:#ecd089;font-style:italic}
+
+/* ====== NATION (國族/階級/社會) ====== */
+.nation{margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;background:linear-gradient(135deg,rgba(122,34,48,.14),rgba(86,22,33,.09));border:1px solid var(--maroon);border-radius:2px}
+.nation::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--maroon),var(--maroon-deep))}
+.nation .tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--maroon-deep);text-transform:uppercase;display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;font-weight:600}
+.nation .tag::before{content:"\2698";font-size:1rem}
+.nation p{margin:.6rem 0;color:var(--maroon-deep);font-size:1rem;line-height:1.8;text-align:left}
+.nation strong{color:var(--mud-deep)}
+.nation em{color:var(--crimson);font-style:italic}
+
+/* ====== WARN ====== */
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(143,36,32,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem;font-weight:600}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+
+/* ====== TIMELINE ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem}
+.tl-item::before{content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;background:var(--paper);border:2px solid var(--mud);border-radius:50%}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--mud);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{background:var(--paper-deep);border:1px solid var(--line);border-radius:3px;padding:1.5rem 1.4rem;position:relative;overflow:hidden;transition:transform .3s ease, box-shadow .3s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--turf-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--mud-deep);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--paper-deep);border:1px solid var(--line)}
+th{background:var(--night-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;padding:.85rem 1rem;text-align:left}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(85,143,96,.07)}
+td strong{color:var(--mud-deep)}
+
+/* ====== STATS ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(85,143,96,.08);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Oswald',sans-serif;font-weight:700;font-size:2rem;color:var(--maroon);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1rem;opacity:.7}
+
+/* ====== FLOW ====== */
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--paper-deep);border:1px solid var(--line);border-radius:30px;color:var(--turf-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+
+/* ====== ASIDE ====== */
+.aside{margin:2.4rem 0;padding:1.2rem 1.6rem;border-left:4px solid var(--gold);background:rgba(177,138,52,.07);font-size:.95rem;line-height:1.8}
+.aside .hl{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--mud-deep)}
+
+/* ====== FINALE ====== */
+.finale{margin-top:6rem;background:linear-gradient(165deg,var(--night-deep),var(--turf-deep));color:var(--bone);padding:5rem 0;position:relative;overflow:hidden}
+.finale::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg stroke='%23dcb456' stroke-width='2' opacity='0.10' fill='none'%3E%3Cline x1='260' y1='120' x2='260' y2='260'/%3E%3Cline x1='340' y1='120' x2='340' y2='260'/%3E%3Cline x1='260' y1='190' x2='340' y2='190'/%3E%3C/g%3E%3C/svg%3E");background-position:center;background-size:cover}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--bone)}
+.finale .prose p{color:rgba(243,237,219,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#ecd089}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{margin:3rem 0;padding:2.4rem;border:1px solid rgba(220,180,86,.4);border-radius:3px;background:rgba(0,0,0,.2)}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--bone);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--paper-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--turf-bright),var(--mud),var(--gold-bright));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="kicker">From the Mud of Rugby School · 1823 – 2027</div>
+    <h1>泥土裡的<span class="em">紳士</span><br>橄欖球與一場關於階級、帝國與血性的史詩</h1>
+    <p class="sub">它與美式足球同源,卻在每一個分岔路口都走向相反的方向——<br>一個成了印鈔的帝國,一個成了精神的信仰</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下捲動 ▾</div>
+</header>
+
+<!-- ============ LEDE ============ -->
+<div class="lede reveal">
+  <p><span class="drop">一</span>八二三年,在英格蘭一所貴族男校的草地上,一個叫威廉·韋伯·艾利斯的少年,據說在一場足球賽中突然抱起球往前狂奔——這個「犯規」的動作,傳說中誕生了橄欖球。這個起源故事幾乎可以肯定是杜撰的,但它揭示了一個真相:橄欖球從第一天起,就是一項<strong>關於「打破規則、勇往直前」的運動</strong>。它與美式足球流著同一條血,卻在接下來的兩百年裡,在每一個關鍵的分岔路口,都選擇了與大西洋對岸那位富有表親<em>截然相反</em>的道路。美式足球用護具把暴力包裝成精密的商業奇觀;橄欖球卻幾乎赤手空拳地擁抱衝撞,並把「業餘的榮譽」奉為信仰長達一個世紀。這是一個關於同一顆橢圓形的球,如何分裂出兩個世界、承載了階級的戰爭、帝國的興衰、與一個國家的和解的故事。</p>
+</div>
+
+<!-- ============ 序章 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Prologue · 序章</span>
+    <h2 class="act-title">一個少年抱起球的瞬間</h2>
+    <p class="act-sub">The Myth of William Webb Ellis</p>
+    <div class="ornament">🏉 ✦ 🏉</div>
+  </div>
+  <div class="prose">
+    <p>橄欖球世界盃的冠軍獎盃,叫做<strong>「韋伯·艾利斯盃」（Webb Ellis Cup）</strong>。這個名字,紀念的是一個傳說:一八二三年,在英格蘭中部的<strong>拉格比公學（Rugby School）</strong>,一位名叫威廉·韋伯·艾利斯的學生,在一場用腳踢的足球賽中,突然<em>抱起球,往對方球門狂奔</em>——據說,橄欖球就此誕生,連這項運動的名字,都來自那所學校。</p>
+    <p>和棒球的「道布戴神話」一樣,這個故事幾乎可以確定是後人杜撰的。沒有任何可靠證據顯示艾利斯真的做過這件事;這個傳說是在他死後數十年才被「發明」出來的。但和所有的起源神話一樣,它之所以被需要、被流傳,是因為它精準地捕捉了這項運動的<strong>靈魂</strong>:橄欖球的本質,就是「用手抱著球,不顧一切地向前衝撞」。</p>
+
+    <div class="nation">
+      <div class="tag">公學的胎記</div>
+      <p>這個神話還埋藏著一個更關鍵的線索:橄欖球誕生於<strong>「公學」（public school）</strong>——這是英國最菁英、最昂貴的私立貴族學校的反諷稱呼。橄欖球從出生那一刻起,就帶著鮮明的<strong>階級胎記</strong>:它是上流社會用來鍛鍊「未來帝國領導者」的工具,信奉的是團隊犧牲、堅忍、與紳士風度。維多利亞時代的英國人相信,在泥濘中互相衝撞、為團隊流血而不喊痛,能鍛造出統治大英帝國所需要的男子氣概。<em>橄欖球不只是一項運動,它是一套「如何成為一個紳士」的教育哲學。</em>而這個階級胎記,將在七十年後,把這項運動撕成兩半。</p>
+    </div>
+
+    <div class="pull">
+      <p>橄欖球的起源神話告訴我們的,不是誰發明了它,而是它信仰什麼——抱起球,不顧一切地向前衝,哪怕那意味著打破規則。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 第一幕 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Act I · 第一幕</span>
+    <h2 class="act-title">同源分流：兩個世界的岔路</h2>
+    <p class="act-sub">The Fork in the Road</p>
+    <div class="ornament">✦ ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>要理解橄欖球,最好的方法,是把它和它那位大西洋對岸的表親——<strong>美式足球</strong>——並排來看。因為這兩項運動,流著同一條血,卻在每一個分岔路口,都做出了相反的選擇。它們是同一個故事的兩種結局。</p>
+
+    <h3>共同的祖先</h3>
+    <p>一八七〇年代,英國的橄欖球漂過大西洋,在美國的大學裡生根。最初,美國人打的就是橄欖球。但接著,一位叫華特·坎普的耶魯人開始「改造」它——他加入了爭球線、進攻檔數,把這個流動的、混亂的運動,變成了一個<em>停頓的、可規劃的、回合制的</em>運動。美式足球,就這樣從橄欖球的母體裡分裂了出去。</p>
+
+    <h3>每一個岔路口,都走向相反</h3>
+    <p>從那一刻起,兩者漸行漸遠,而且方向完全相反:</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>分岔路口</th><th>橄欖球 Rugby</th><th>美式足球 American Football</th></tr></thead>
+        <tbody>
+          <tr><td><strong>節奏</strong></td><td>連續流動,很少停頓</td><td>停頓、列陣、回合制</td></tr>
+          <tr><td><strong>護具</strong></td><td>幾乎不穿護具,赤裸衝撞</td><td>全副盔甲,把暴力「武裝化」</td></tr>
+          <tr><td><strong>傳球</strong></td><td>只能向後或平行傳球</td><td>可以向前長傳</td></tr>
+          <tr><td><strong>職業化</strong></td><td>堅持業餘長達一個世紀(到 1995)</td><td>很早就擁抱職業與金錢</td></tr>
+          <tr><td><strong>商業</strong></td><td>全球熱愛但財務脆弱</td><td>地表最賺錢的運動帝國</td></tr>
+          <tr><td><strong>信仰</strong></td><td>業餘的榮譽、紳士精神</td><td>專業、效率、商業奇觀</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="lens">
+      <div class="tag">分流透鏡:同樣的基因,相反的命運</div>
+      <p>這兩項運動的分流,是一個關於<strong>「制度選擇如何決定命運」</strong>的絕佳案例。它們的「產品內核」幾乎相同——都是高強度的衝撞、對領土的爭奪、團隊的對抗。但因為在「職業化」與「商業化」這兩個關鍵岔路上做出了相反的選擇,它們走向了天差地遠的結局:美式足球擁抱金錢,成了年營收 230 億美元、把全美聚在電視機前的印鈔機;橄欖球死守業餘的純潔長達百年,結果雖然贏得了全球的熱愛與道德光環,卻在商業上始終步履蹣跚、甚至年年虧損(見後面的「脆弱的帝國」一幕)。<em>同樣的基因,不同的制度選擇,造就了兩個完全不同的物種。這再次印證了這個系列反覆出現的鐵律:結構,就是命運。</em></p>
+    </div>
+
+    <div class="pull">
+      <p>美式足球與橄欖球是同一顆種子長出的兩棵樹——一棵向著金錢生長,長成了參天的帝國;一棵向著榮譽生長,長成了全球的信仰,卻始終為麵包發愁。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 第二幕 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Act II · 第二幕</span>
+    <h2 class="act-title">階級的大分裂：1895 年的內戰</h2>
+    <p class="act-sub">The Great Schism of 1895</p>
+    <div class="ornament">🏉 ✦ 🏉</div>
+  </div>
+  <div class="prose">
+    <p>橄欖球歷史上最深、最痛、也最獨特的一道傷口,不是它與美式足球的分家,而是它<strong>自己內部的一場內戰</strong>。這場內戰的導火線,不是規則,不是地域,而是那個最古老、最尖銳的東西:<strong>階級</strong>。</p>
+
+    <h3>南方的紳士,北方的工人</h3>
+    <p>十九世紀末的英格蘭,橄欖球已經傳遍全國,但它分裂成了兩個世界。在富裕的<strong>南方</strong>,打球的是公學出身的紳士、律師、醫生——他們有閒、有錢,把「業餘」視為高尚:為金錢打球,是下流的。但在工業化的<strong>北方</strong>(約克郡、蘭開夏),打球的是煤礦工、紡織工、鋼鐵工人——他們週六請假打球,就意味著<em>少了一天的工資</em>。</p>
+    <p>北方的俱樂部提出了一個卑微的要求:能不能補償球員「因打球而損失的工時費」(broken-time payments)?對工人來說,這不是貪財,而是生存。但南方的橄欖球當權者——那些有錢有閒的紳士——<strong>斷然拒絕</strong>。在他們眼中,給球員錢,玷污了這項運動的「業餘純潔」。但真正的潛台詞是:<em>業餘主義,是富人用來把窮人擋在門外的工具</em>——只有不需要靠這筆錢過活的人,才打得起「業餘」的球。</p>
+
+    <h3>1895:橄欖球裂成兩半</h3>
+    <p>一八九五年八月,北方二十二家俱樂部憤而脫離,另組「北方橄欖球聯盟」。橄欖球就此<strong>永久地裂成了兩個運動</strong>:</p>
+    <div class="flow">
+      <span class="node">Rugby Union<br>聯合式・15 人・業餘・紳士</span>
+      <span class="arrow">⚔</span>
+      <span class="node">Rugby League<br>聯盟式・13 人・付薪・工人</span>
+    </div>
+    <p>分裂後,兩者甚至演化出不同的規則:<strong>聯合式橄欖球（Rugby Union）</strong>維持 15 人、堅守業餘;<strong>聯盟式橄欖球（Rugby League）</strong>改為 13 人、簡化規則使比賽更快更好看(因為要賣票養活付薪的工人球員),並光明正大地付薪水。一個成了南方紳士的運動,一個成了北方工人的運動。</p>
+
+    <div class="nation">
+      <div class="tag">最赤裸的階級戰爭</div>
+      <p>1895 年的大分裂,是體育史上最赤裸的一場「階級戰爭」。沒有任何其他運動,曾經如此清楚地沿著「階級」這條線一刀劈開。它揭露了「業餘主義」這個崇高理想背後的真相:<strong>所謂「為榮譽而非金錢打球」的高尚,往往是富裕階級的特權——因為只有他們,輸得起那筆「榮譽」的成本。</strong>聯合式橄欖球甚至對「叛逃」到聯盟式的球員終身封殺,長達一個世紀。這道階級的傷口,撕裂了無數家庭、社區與球員,直到一百年後才真正開始癒合。</p>
+    </div>
+
+    <div class="pull">
+      <p>1895 年那場分裂,表面上是為了幾先令的工時費,本質上卻是一個古老的問題:當一項運動足夠迷人時,它究竟該屬於有閒的紳士,還是流汗的工人?</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 第三幕 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Act III · 第三幕</span>
+    <h2 class="act-title">業餘主義的百年聖戰</h2>
+    <p class="act-sub">A Century of Amateurism, until 1995</p>
+    <div class="ornament">✦ ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>1895 年的分裂之後,聯合式橄欖球(也就是我們今天說的主流「橄欖球」)做出了一個影響深遠的決定:它要把<strong>「業餘主義」奉為近乎宗教的信仰</strong>,而且一守,就是整整一個世紀。</p>
+
+    <h3>絕不為錢打球</h3>
+    <p>在長達一百年的時間裡,聯合式橄欖球的規則嚴格到近乎荒謬:球員不能收取任何形式的報酬,不能靠橄欖球的名氣賺錢,甚至連寫一本關於自己的書、收一筆代言費,都可能被判「違反業餘原則」而<em>終身禁賽</em>。世界上最頂尖的橄欖球員,白天得做著普通的工作(老師、農夫、警察、業務員),晚上和週末才去為國家隊拼到頭破血流——而這一切,<strong>分文不取</strong>。</p>
+    <p>這套制度創造了一種獨特的、令人敬佩的文化:球員為了純粹的榮譽與熱愛而戰,沒有任何金錢的玷污。橄欖球因此擁有了一種其他職業運動所沒有的<em>道德光環</em>。但這套制度也充滿了虛偽——和棒球、網球的「假業餘」時代一樣,檯面下的「贊助」「安排好的工作」「裝在靴子裡的現金」始終存在。業餘主義保護的,從來不只是純潔,更是當權者的控制。</p>
+
+    <h3>1995:世界一夜變天</h3>
+    <p>堤防最終在 1995 年崩塌。那一年,橄欖球世界盃的商業成功、來自南半球的職業聯賽壓力、以及電視轉播權的天價誘惑,讓「業餘」這道牆再也守不住。1995 年八月,世界橄欖球的當權者終於宣布:聯合式橄欖球,<strong>正式開放職業化</strong>。一百年的業餘聖戰,在幾乎一夕之間結束。</p>
+
+    <div class="lens">
+      <div class="tag">商業透鏡:遲到一百年的職業化</div>
+      <p>橄欖球的職業化,比美式足球晚了將近一個世紀。這個「遲到的開始」,造成了深遠的後果。當橄欖球在 1995 年才手忙腳亂地擁抱金錢時,美式足球早已建立起成熟的薪資上限、選秀、營收均分等精密的商業制度。橄欖球則是<strong>「在毫無準備的情況下,被推進了職業時代」</strong>——一位 1995 年的球星曾說,他們「跌跌撞撞地走進職業化,而管理它的卻是一群業餘的人」。這個倉促的轉型,埋下了橄欖球日後財務動盪的種子:它一邊要付職業球員的薪水,一邊卻還沒學會如何像一門真正的生意那樣賺錢。<em>太晚擁抱市場的代價,是你得用業餘的身體,去打一場職業的仗。</em></p>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1823</div><div class="tl-text">韋伯·艾利斯神話——橄欖球「誕生」於拉格比公學</div></div>
+      <div class="tl-item"><div class="tl-year">1871</div><div class="tl-text">英格蘭橄欖球總會（RFU）成立,統一規則</div></div>
+      <div class="tl-item"><div class="tl-year">1895</div><div class="tl-text">大分裂——聯合式 vs 聯盟式,沿階級裂成兩半</div></div>
+      <div class="tl-item"><div class="tl-year">1987</div><div class="tl-text">第一屆橄欖球世界盃(紐澳合辦),紐西蘭奪冠</div></div>
+      <div class="tl-item"><div class="tl-year">1995</div><div class="tl-text">業餘主義終結,聯合式橄欖球正式職業化</div></div>
+    </div>
+
+    <div class="pull">
+      <p>橄欖球用一百年的時間,證明了「為榮譽而戰」的純潔有多動人;又用 1995 年那一道命令,證明了在金錢面前,連最堅固的信仰也守不住。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 第四幕 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Act IV · 第四幕</span>
+    <h2 class="act-title">帝國的遊戲:當殖民地打敗了宗主國</h2>
+    <p class="act-sub">The Empire's Game</p>
+    <div class="ornament">🏉 ✦ 🏉</div>
+  </div>
+  <div class="prose">
+    <p>橄欖球是隨著<strong>大英帝國的艦隊</strong>傳遍世界的。英國的軍人、傳教士、教師、殖民官員,把這項「鍛鍊紳士」的運動帶到了帝國的每一個角落:紐西蘭、南非、澳洲、斐濟、薩摩亞、威爾斯的礦村、愛爾蘭的田野……它本是宗主國用來教化殖民地的工具。但帝國的劇本,出現了一個意想不到的轉折——<strong>殖民地,把這項運動打得比宗主國更好。</strong></p>
+
+    <h3>全黑軍團與哈卡</h3>
+    <p>最極致的例子,是<strong>紐西蘭的「全黑隊」（All Blacks）</strong>。這支身穿全黑球衣的球隊,是橄欖球史上最成功、勝率最高的國家隊——一個人口僅五百多萬的小國,長年雄踞世界橄欖球的頂峰。而他們在每場比賽前跳的<strong>「哈卡」（Haka）</strong>——一種源自原住民毛利人的戰舞,以跺腳、拍胸、瞪眼、伸舌的威嚇動作向對手下戰書——成了全球體育最具辨識度的儀式之一。</p>
+
+    <div class="nation">
+      <div class="tag">殖民地的逆襲</div>
+      <p>「全黑隊」與哈卡,是一個深刻的後殖民隱喻。一個被英國殖民的小島,不僅在這項「帝國的遊戲」裡<strong>徹底超越了宗主國</strong>,還把<em>原住民的文化</em>(毛利戰舞)放在這項運動最神聖的儀式位置上。橄欖球本是用來「教化」殖民地的工具,結果殖民地不僅學會了它,還用它重新定義了自己的民族認同——紐西蘭、斐濟、薩摩亞、湯加,這些太平洋島國把橄欖球變成了民族驕傲與身分的核心。<em>帝國輸出了一項運動,收回來的,卻是殖民地用這項運動鍛造出的、嶄新而強悍的自我。</em></p>
+    </div>
+
+    <h3>島國的人才工廠</h3>
+    <p>橄欖球也有它的「加勒比海」。<strong>斐濟、薩摩亞、湯加</strong>這些太平洋島國,人口稀少、經濟貧困,卻源源不絕地產出世界級的橄欖球員——他們的身體素質、爆發力與球感舉世無雙。和棒球的多明尼加一樣,對許多島國少年而言,橄欖球是<em>脫離貧困、養活整個家族的唯一出路</em>。他們大量輸出到英格蘭、法國、日本的職業聯賽,甚至「歸化」到紐西蘭、澳洲的國家隊。這條人才供應鏈,既是夢想,也帶著剝削的陰影:富裕的橄欖球強國,虹吸了貧窮島國最好的天賦。</p>
+
+    <div class="pull">
+      <p>大英帝國用橄欖球教化殖民地,卻沒料到,殖民地會用這顆球,在球場上把昔日的主人,一次又一次地按倒在泥地裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 第五幕 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Act V · 第五幕</span>
+    <h2 class="act-title">散塊與爭球:這項運動的靈魂</h2>
+    <p class="act-sub">The Soul of the Collision</p>
+    <div class="ornament">✦ ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>要理解橄欖球為何讓全球數億人著迷,得先理解它在球場上,究竟是一種什麼樣的存在。它的靈魂,藏在三個美式足球裡找不到的東西裡:<strong>不間斷的流動、不穿護具的衝撞,以及那團叫「爭球」的混亂。</strong></p>
+
+    <h3>沒有暫停的戰爭</h3>
+    <p>與美式足球一播一停、像下棋般的節奏相反,橄欖球是<strong>連續流動的</strong>。球員被擒抱倒地後,比賽不會停止——雙方會立刻在倒地處爆發爭奪(這叫「ruck」散塊),球權在電光石火間易手,然後比賽繼續流動。沒有暫停讓你喘息、沒有教練在場邊喊每一個戰術。球員必須在持續的衝撞、奔跑與決策中,自己讀懂比賽。這是一種更接近<em>「有組織的混沌」</em>的美學。</p>
+
+    <h3>不穿盔甲的勇氣</h3>
+    <p>橄欖球最令人敬畏的一點,是球員<strong>幾乎不穿護具</strong>——沒有頭盔,沒有護肩,只有一件薄薄的球衣。一群體重破百公斤的巨漢,用幾乎赤裸的身體全速對撞、擒抱、倒地。這在美式足球(全副盔甲)看來簡直是瘋了。但橄欖球的信徒會告訴你:正因為沒有盔甲,球員反而學會了<em>「安全地」擒抱與倒地的技術</em>,並且對彼此的身體懷抱著一種獨特的尊重。</p>
+
+    <h3>爭球:十六個人的角力</h3>
+    <p>而橄欖球最獨特的圖騰,是<strong>「正集團爭球」（scrum）</strong>:雙方各八名前鋒,肩並肩交扣成一道人牆,然後兩道人牆猛烈地對撞、推擠,爭奪腳下的球。這是純粹的、原始的力量角力,是一場八對八的、低吼著的肉搏。沒有任何其他運動有這樣的場面。爭球體現了橄欖球最核心的價值:<em>沒有任何一個人能獨力完成它,它是團隊力量最純粹的結晶。</em></p>
+
+    <div class="nation">
+      <div class="tag">紳士的暴力</div>
+      <p>橄欖球有一句廣為流傳的格言,精準地概括了它與足球、與美式足球的差異:<strong>「足球是紳士玩的流氓運動;橄欖球是流氓玩的紳士運動。」</strong>橄欖球場上,衝撞兇猛到近乎野蠻,但場下,有著嚴格的紳士禮儀:球員絕對服從裁判(只有隊長能與裁判對話)、賽後雙方一起喝酒社交(所謂的「第三節」)、對對手懷抱深刻的尊重。這種「場上拼命、場下紳士」的雙重性,正是橄欖球從那所貴族公學繼承下來的、最核心的精神遺產——它相信,真正的男子氣概,是既能承受最猛烈的衝撞,又能在哨聲響起後,向對手伸出手。</p>
+    </div>
+
+    <div class="pull">
+      <p>橄欖球的美,在於它的矛盾:它是最野蠻的衝撞,卻包裹在最嚴格的禮儀裡;它要你不顧一切地向前,卻又要你在哨聲響起時,立刻成為一位紳士。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 第六幕 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Act VI · 第六幕</span>
+    <h2 class="act-title">曼德拉的綠衫:一件球衣縫合一個國家</h2>
+    <p class="act-sub">Mandela's Green Jersey</p>
+    <div class="ornament">🏉 ✦ 🏉</div>
+  </div>
+  <div class="prose">
+    <p>體育史上,從來沒有任何一個時刻,像這一刻一樣,讓一項運動承載了一整個國家的命運。它發生在 1995 年的南非,主角是一件綠色的球衣,和一個剛從牢裡走出來不久的老人。</p>
+
+    <h3>仇恨的象徵</h3>
+    <p>在南非,橄欖球——以及國家隊「<strong>跳羚隊」（Springboks）</strong>那件綠金球衣——長久以來是<strong>白人種族隔離（apartheid）政權的象徵</strong>。橄欖球是白人的運動,跳羚隊是白人的驕傲;對占人口多數的黑人來說,那件綠衫代表著壓迫他們數十年的政權。在種族隔離時期,黑人觀眾甚至會在比賽中為跳羚隊的<em>對手</em>加油。這件球衣,是仇恨的圖騰。</p>
+
+    <h3>1995:曼德拉的豪賭</h3>
+    <p>1994 年,<strong>納爾遜·曼德拉（Nelson Mandela）</strong>在南非第一次不分種族的選舉中當選總統,結束了種族隔離。一個剛被仇恨撕裂的國家,如何重新縫合?曼德拉做了一個震驚所有人、甚至連他自己陣營都反對的決定:他<strong>擁抱了那件代表壓迫的綠衫</strong>。1995 年,南非主辦橄欖球世界盃,曼德拉公開為跳羚隊站台,呼籲所有南非人——無論黑白——一起支持這支「白人的球隊」。他賭上自己的政治威望,把這件仇恨的象徵,轉化為團結的旗幟。</p>
+    <p>那年的決賽,南非對上不可一世的紐西蘭全黑隊。在約翰尼斯堡的艾利斯公園球場,跳羚隊在延長賽以一記致勝的「定位踢」,以 <strong>15:12</strong> 擊敗全黑隊,首次奪得世界盃。而真正載入史冊的,是頒獎那一刻:<strong>曼德拉穿著跳羚隊隊長皮納爾的 6 號綠色球衣</strong>,走上球場,把獎盃交到這位白人隊長手中。全場六萬名觀眾——絕大多數是白人——爆發出「曼-德-拉!曼-德-拉!」的呼喊。一個曾被這個政權囚禁二十七年的黑人,穿著這個政權最神聖的圖騰,被白人狂熱地歡呼。<em>那一刻,一件球衣,縫合了一個國家。</em>(這個故事,後來被拍成了電影《打不倒的勇者》。)</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">27年</div><div class="lbl">曼德拉被種族隔離政權囚禁的時間</div></div>
+      <div class="stat"><div class="num">15:12</div><div class="lbl">1995 決賽南非延長賽擊敗全黑隊</div></div>
+      <div class="stat"><div class="num">4座</div><div class="lbl">南非世界盃冠軍數,史上最多</div></div>
+    </div>
+
+    <h3>柯里西:遲到的真正和解</h3>
+    <p>但 1995 年的「彩虹國度」夢想,並未真正實現。那支奪冠的跳羚隊,幾乎全是白人;球衣縫合的,更多是象徵,而非結構。真正的轉折,要再等將近四分之一個世紀。<strong>2019 年,西亞·柯里西（Siya Kolisi）成為跳羚隊史上第一位黑人隊長</strong>——一個在貧民窟長大、曾經餓著肚子的黑人孩子,率領南非奪得世界盃。2023 年,他再次率隊衛冕,在決賽以 12:11 一分之差擊敗全黑隊,讓南非成為史上第一支四度奪冠的球隊,並完成驚人的「三場淘汰賽都只贏一分」的奇蹟。</p>
+
+    <div class="nation">
+      <div class="tag">縫合,是一場漫長的工程</div>
+      <p>從 1995 年曼德拉穿上綠衫,到 2023 年柯里西高舉獎盃,橄欖球見證了南非和解的全部艱難與漫長。1995 年是一個動人的<em>象徵</em>:一件球衣,讓黑白在一個下午為同一支球隊歡呼。但真正的和解,不是一個下午的奇蹟,而是一個黑人孩子能從貧民窟,一路成為那支「白人球隊」的隊長——這花了二十八年。<strong>柯里西高舉的那座獎盃,比曼德拉那件綠衫更重:它證明了象徵的縫合,終於開始長成結構的縫合。</strong>橄欖球,成了一個國家照見自己傷口與癒合的鏡子。</p>
+    </div>
+
+    <div class="pull">
+      <p>曼德拉穿上那件綠衫的瞬間證明了:有時候,改變一個國家的,不是一場演說,也不是一紙法律,而是一件球衣,和一個願意原諒的人。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 第七幕 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Act VII · 第七幕</span>
+    <h2 class="act-title">血性的代價:橄欖球的浮士德時刻</h2>
+    <p class="act-sub">The Price of the Collision</p>
+    <div class="ornament">✦ ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>橄欖球以「不穿盔甲的勇氣」為傲。但這份勇氣,如今正面臨它兩百年歷史上最深的拷問——和它的美式表親一樣,橄欖球也走到了自己的<strong>浮士德時刻</strong>。</p>
+
+    <h3>看不見的傷</h3>
+    <p>橄欖球的衝撞,雖然不像美式足球那樣以高速盔甲對撞,但它的本質同樣是<strong>反覆的頭部創傷</strong>——擒抱、爭球、倒地,每一場比賽,球員的頭部都承受著無數次的撞擊與晃動。和美式足球一樣,科學界越來越清楚地指出:這些反覆的撞擊,與退化性腦病變<strong>CTE（慢性創傷性腦病變）</strong>以及早發性失智症之間,存在著令人不安的關聯。</p>
+
+    <h3>球員告上法庭</h3>
+    <p>近年,這個議題以最沉重的方式爆發:一群退役的橄欖球員(包括一些世界盃冠軍成員)對橄欖球的治理機構<strong>提起集體訴訟</strong>,指控管理者明知反覆腦震盪的風險,卻未善盡保護球員之責。他們之中,有人在四十多歲、五十歲出頭,就被診斷出<em>早發性失智症與運動神經元疾病</em>。曾經在球場上叱吒風雲的硬漢,如今記不得自己孩子的名字。這些案例,撼動了整個橄欖球世界。</p>
+
+    <div class="warn">
+      <div class="warn-tag">血性的悖論</div>
+      <p>這讓橄欖球陷入一個比美式足球更尖銳的兩難。因為橄欖球的<strong>整個身分認同,都建立在「不穿護具的勇氣」與「為團隊承受衝撞」之上</strong>——這份血性,正是它區別於美式足球、引以為傲的靈魂。但如今的科學告訴它:這份血性,可能正在慢慢摧毀球員的大腦。橄欖球可以引進更嚴格的腦震盪規程、降低擒抱高度、限制訓練衝撞——它也確實在這麼做——但它無法在「不改變橄欖球之所以為橄欖球」的前提下,真正消除這個風險。<em>當一項運動最自豪的特質,恰恰是最傷害它的人的東西時,它該如何自處?</em></p>
+    </div>
+
+    <div class="lens">
+      <div class="tag">商業透鏡:安全與存續的天平</div>
+      <p>腦傷危機對橄欖球,不只是道德問題,更是<strong>生存問題</strong>。和美式足球一樣,當越來越多家長因為腦傷風險而不讓孩子打橄欖球時,這項運動最底層的「人才供應鏈」與「社會許可」,可能會從草根開始枯萎。但橄欖球面對這個危機時,手裡的牌比美式足球差得多:美式足球有龐大的財富(十億美元的和解金、CTE 研究的投入)當緩衝;而橄欖球(見下一幕)自己都還在財務的泥沼裡掙扎,根本沒有同等的資源來應對天價的訴訟與安全投資。<em>同樣的傷,對富有的帝國是一筆可承受的帳單,對貧窮的信仰卻可能是致命的一擊。</em></p>
+    </div>
+
+    <div class="pull">
+      <p>橄欖球最自豪的,是它不穿盔甲的血性;而它如今最深的恐懼,也正是這份血性——它必須在「成為它自己」與「保護它的人」之間,找到一條活路。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 第八幕 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Act VIII · 第八幕</span>
+    <h2 class="act-title">脆弱的帝國:全球熱愛,卻幾乎破產</h2>
+    <p class="act-sub">Beloved, Yet Broke</p>
+    <div class="ornament">🏉 ✦ 🏉</div>
+  </div>
+  <div class="prose">
+    <p>現在,我們來到橄欖球與美式足球最驚人、也最諷刺的對比。美式足球是地表最賺錢的運動帝國,32 支球隊無一虧損。而橄欖球——這項擁有數億球迷、世界盃收視動輒破億的全球運動——在商業上,卻是一個<strong>幾乎年年虧損、俱樂部接連倒閉的「脆弱帝國」</strong>。</p>
+
+    <h3>一個賺錢的悖論</h3>
+    <p>橄欖球的財務數字,讀來令人心驚。根據近年的產業報告,全球排名前十的橄欖球國家協會,光是在一個財政年度(2023/24),就<strong>合計虧損約 1.37 億美元</strong>;英格蘭頂級聯賽與法國頂級聯賽的職業俱樂部,同年又合計虧損約 <strong>1 億美元</strong>。在英格蘭,一份財務報告更揭露:在 2022/23 球季,<strong>頂級聯賽裡沒有任何一家俱樂部能夠獲利</strong>,多數俱樂部技術上已經資不抵債,全靠老闆持續輸血才能存活。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">$1.37億</div><div class="lbl">全球前 10 大協會單一年度合計虧損</div></div>
+      <div class="stat"><div class="num">0 家</div><div class="lbl">英格蘭頂級聯賽 2022/23 賺錢的俱樂部數</div></div>
+      <div class="stat"><div class="num">230億</div><div class="lbl">對照組:NFL 年營收(美元),天壤之別</div></div>
+    </div>
+
+    <h3>靠世界盃續命的生意</h3>
+    <p>橄欖球的商業模式,有一個致命的結構性缺陷:它的收入<strong>高度依賴「每四年一次」的世界盃</strong>,以及「六國錦標賽」等少數幾項頂級國家隊賽事。這些賽事極度賺錢,但它們之間漫長的空檔,以及支撐整個運動的「俱樂部聯賽」,卻幾乎都在賠錢。換句話說,橄欖球是一個<em>「靠四年一次的豐收,去填補其餘三年虧損」</em>的生意——它的繁榮是週期性的、不穩定的,而它的根基(俱樂部)是長期失血的。近年,英格蘭就有伍斯特、黃蜂等知名百年俱樂部,因財務崩潰而<strong>直接倒閉</strong>。</p>
+
+    <div class="lens">
+      <div class="tag">商業透鏡:現金流結構,再一次決定命運</div>
+      <p>橄欖球的困境,是這個系列「結構就是命運」這條鐵律最悲傷的註腳。回顧美式足球篇:NFL 之所以是印鈔機,是因為它擁有<strong>全國均分、長約鎖定、極度穩定的現金流結構</strong>。而橄欖球恰恰相反:它的現金流<em>分散、衝突、且高度依賴週期性的單一事件(世界盃)</em>。更糟的是,它的治理也像網球一樣破碎——各國協會、各家俱樂部、世界橄欖球總會、各大聯賽,利益衝突、各自為政,沒有一個強勢的中央能像 NFL 主席那樣統一決策、統一分配。<strong>橄欖球同時擁有了棒球的「貧富不均」、網球的「治理破碎」、以及一個獨有的「靠世界盃續命」的週期性詛咒。</strong>它擁有全世界的熱愛,卻沒有一個能把這份熱愛穩定變現的結構。</p>
+    </div>
+
+    <h3>私募基金:救星還是浮士德?</h3>
+    <p>在這樣的財務絕境裡,橄欖球向華爾街與倫敦金融城伸出了手。私募股權巨頭 <strong>CVC Capital Partners</strong> 大舉買進了橄欖球的命脈:它斥資約 <strong>2 億英鎊</strong>買下英格蘭頂級聯賽的股份、約 <strong>3.65 億英鎊</strong>買下「六國錦標賽」的股份、再加上對另一大聯賽 URC 的投資。連最神聖的紐西蘭全黑隊,都把股份賣給了美國的私募基金 Silver Lake(此舉一度引發球員強烈反彈)。</p>
+
+    <div class="warn">
+      <div class="warn-tag">與資本的交易</div>
+      <p>私募基金的進場,對缺錢的橄欖球而言是一根救命稻草,但也是一把雙面刃。對 CVC 這樣管理著上百億資金的巨頭來說,橄欖球只是它龐大投資組合裡的一小塊(它同時持有西甲、印度板球聯賽等資產)。私募基金的本質是「買進、增值、賣出」以求回報——它們會不會為了短期的財務回報,把「六國錦標賽」這類免費電視轉播的、屬於全民的賽事推向<em>付費牆(paywall)</em>之後,從而犧牲掉橄欖球賴以生存的草根觀眾?<em>當一項自身財務脆弱的運動,把命脈交給以回報為唯一目的的資本時,它買到的究竟是續命的氧氣,還是另一筆遲早要還的浮士德債務?</em></p>
+    </div>
+
+    <div class="pull">
+      <p>橄欖球是這個系列裡最深刻的諷刺:它贏得了全世界的熱愛與道德的光環,卻幾乎贏不了一場與自己資產負債表的比賽。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 第九幕 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">Act IX · 第九幕</span>
+    <h2 class="act-title">七人制、女子潮與全球化的掙扎</h2>
+    <p class="act-sub">Sevens, Women &amp; the Fight to Grow</p>
+    <div class="ornament">🏉 ✦ 🏉</div>
+  </div>
+  <div class="prose">
+    <p>面對財務的困境與腦傷的陰影,橄欖球並非坐以待斃。它把未來的賭注,押在三個能讓它「更輕、更快、更廣、更多元」的方向上。</p>
+
+    <h3>七人制:橄欖球的奧運門票</h3>
+    <p>傳統橄欖球是 15 人、80 分鐘的消耗戰。但它有一個閃亮的輕量化版本:<strong>七人制橄欖球（Rugby Sevens）</strong>——每隊只有 7 人、每場僅 14 分鐘,場地一樣大,所以充滿了狂奔、速度與得分,節奏明快、極適合電視與派對氛圍。2016 年,七人制橄欖球正式<strong>重返奧運</strong>,為這項運動打開了一扇通往全新觀眾、新國家、與奧運光環的大門。對美國、亞洲這些非傳統橄欖球國家而言,門檻較低、更易上手的七人制,是橄欖球全球化最有效的「先頭部隊」。</p>
+
+    <h3>女子橄欖球:成長最快的引擎</h3>
+    <p>橄欖球近年成長最快的動能,來自<strong>女子賽事</strong>。長期被忽視的女子橄欖球,正以驚人的速度崛起——2025 年的女子橄欖球世界盃在英格蘭舉行,觀眾與關注度創下歷史紀錄。對一項急需擴大客群、改善財務的運動而言,女子橄欖球(以及它帶來的更多元、更家庭導向的觀眾)被視為最有潛力的成長引擎之一。它的成本相對低、成長空間相對大——這與美式足球意外發現的「女性觀眾紅利」,是同一個道理:<em>最大的增長,往往藏在被你長期忽視的那半邊人口裡。</em></p>
+
+    <h3>全球化的天花板</h3>
+    <p>但橄欖球的全球化,有一個與美式足球相似的根本難題:它<strong>高度集中在少數幾個傳統強國</strong>(英、法、紐、澳、南非、愛爾蘭,加上太平洋島國),在最龐大的潛在市場——美國、中國、印度——的根基都很淺。為了突破,世界橄欖球總會做了關鍵的佈局:把 <strong>2031 年(男子)與 2033 年(女子)世界盃交給美國主辦</strong>,試圖用最大的兩屆盛事,去撬開那個全球最富裕、卻對橄欖球最陌生的市場。這是一場豪賭:橄欖球能不能在美國——美式足球的大本營——種下種子,將決定它的天花板究竟在哪裡。</p>
+
+    <div class="lens">
+      <div class="tag">商業透鏡:輕、快、廣的求生策略</div>
+      <p>七人制、女子橄欖球、美國世界盃——這三條路線,本質上是橄欖球面對「財務脆弱＋腦傷陰影＋市場集中」三重困境時,所選擇的求生策略:用<strong>更輕量(七人制,衝撞較少、更安全)、更多元(女子,擴大客群)、更廣闊(美國,打開新市場)</strong>的方式,去尋找傳統 15 人制男子橄欖球之外的增長。這是一個聰明的多角化嘗試。但它也面臨一個殘酷的現實:這些新方向能帶來的收入,目前還遠遠填不滿傳統俱樂部聯賽那個年年失血的大坑。<em>橄欖球正在學習一件它抗拒了一個世紀的事——如何把全世界對它的熱愛,真正地、可持續地,變成活下去的麵包。</em></p>
+    </div>
+
+    <div class="pull">
+      <p>橄欖球的未來,不在於它能不能變得更賺錢,而在於它能不能在「保住它的靈魂」與「學會養活自己」之間,找到那條從未走過的窄路。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">🏉 🏉 🏉</div>
+
+<!-- ============ 總帳 ============ -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">The Ledger · 總帳</span>
+    <h2 class="act-title">兩百年的總帳</h2>
+    <p class="act-sub">Forces, Nations &amp; the Five-Sport Map</p>
+    <div class="ornament">✦ ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>橄欖球是由一股股力量塑造的:階級、帝國、業餘的信仰、血性的代價、與脆弱的金錢。把它們並排來看,這項運動的靈魂就一目了然。</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="flag">Class · 階級</div>
+        <h5>1895 的內戰</h5>
+        <p>南方紳士 vs 北方工人,為了幾先令的工時費,把橄欖球永久裂成聯合式與聯盟式。體育史上最赤裸的階級戰爭。</p>
+        <span class="model">The Schism</span>
+      </div>
+      <div class="card">
+        <div class="flag">Amateurism · 業餘</div>
+        <h5>百年的聖戰</h5>
+        <p>絕不為錢打球,死守業餘信仰整整一個世紀,直到 1995。贏得了道德光環,也埋下了財務動盪的種子。</p>
+        <span class="model">The Creed</span>
+      </div>
+      <div class="card">
+        <div class="flag">Empire · 帝國</div>
+        <h5>殖民地的逆襲</h5>
+        <p>隨帝國艦隊傳遍世界,卻被殖民地打得更好。全黑隊與哈卡,是後殖民最動人的逆襲隱喻。</p>
+        <span class="model">The Colony</span>
+      </div>
+      <div class="card">
+        <div class="flag">Collision · 血性</div>
+        <h5>不穿盔甲的勇氣</h5>
+        <p>連續流動、赤裸衝撞、八對八的爭球。「流氓玩的紳士運動」——場上野蠻,場下紳士。</p>
+        <span class="model">The Soul</span>
+      </div>
+      <div class="card">
+        <div class="flag">Reconciliation · 和解</div>
+        <h5>曼德拉的綠衫</h5>
+        <p>從 1995 曼德拉穿上仇恨的象徵,到 2023 柯里西高舉獎盃。一件球衣,縫合了一個被種族隔離撕裂的國家。</p>
+        <span class="model">The Jersey</span>
+      </div>
+      <div class="card">
+        <div class="flag">Brain · 腦傷</div>
+        <h5>血性的代價</h5>
+        <p>反覆撞擊與 CTE、早發性失智、球員集體訴訟。橄欖球最自豪的特質,正在拷問它的良心與存續。</p>
+        <span class="model">The Price</span>
+      </div>
+      <div class="card">
+        <div class="flag">Money · 金錢</div>
+        <h5>脆弱的帝國</h5>
+        <p>全球數億球迷,卻年年虧損、俱樂部倒閉、靠世界盃續命、把命脈賣給私募。最被愛卻最缺錢的運動。</p>
+        <span class="model">The Paradox</span>
+      </div>
+      <div class="card">
+        <div class="flag">The Ball · 那顆橢圓球</div>
+        <h5>向前的信仰</h5>
+        <p>從拉格比公學的泥地,到全球的草皮。它信仰的,始終是那個少年抱起球的瞬間:不顧一切,向前。</p>
+        <span class="model">Forward</span>
+      </div>
+    </div>
+
+    <h3>五種運動的商業性格總對照</h3>
+    <p>把這個系列走過的五種運動——棒球、網球、足球、美式足球、橄欖球——放在同一張表上,每一種運動「作為一門生意」的靈魂,就無所遁形。橄欖球,是這張表上最動人、也最令人唏噓的一欄。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>面向</th><th>橄欖球 Rugby</th><th>美式足球 NFL</th><th>棒球 MLB</th><th>網球</th><th>足球</th></tr></thead>
+        <tbody>
+          <tr><td><strong>財務體質</strong></td><td>年年虧損,靠世界盃與私募續命</td><td>地表最賺錢,32 隊無一虧損</td><td>富隊獨大,貧富懸殊</td><td>個體戶,贏家全拿</td><td>豪門壟斷,多數虧損</td></tr>
+          <tr><td><strong>治理結構</strong></td><td>協會/俱樂部/總會多頭,破碎</td><td>單一聯盟＋強勢主席</td><td>單一聯盟＋主席</td><td>四五股勢力分裂</td><td>FIFA／各國多層級</td></tr>
+          <tr><td><strong>現金流</strong></td><td>週期性(四年一次世界盃)</td><td>全國長約均分,最穩</td><td>本地媒體為主</td><td>治理分裂,被折價</td><td>各國差異極大</td></tr>
+          <tr><td><strong>核心精神</strong></td><td>業餘榮譽、紳士血性</td><td>專業、效率、奇觀</td><td>美國的田園神話</td><td>個人的孤獨對抗</td><td>世界的共通語言</td></tr>
+          <tr><td><strong>外部資本</strong></td><td>CVC、Silver Lake 私募進場</td><td>私募 2024 獲准持股</td><td>私募開始持股</td><td>沙烏地 PIF 大舉進場</td><td>主權基金/私募深度涉入</td></tr>
+          <tr><td><strong>核心風險</strong></td><td>財務崩潰＋腦傷＋市場集中</td><td>CTE／暴力的社會許可</td><td>RSN 崩塌、勞資停擺</td><td>明星集中、治理內戰</td><td>金元失衡、賽程通膨</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>這張橫跨五種運動的總表,把整個系列的核心洞見推到了最清晰的地步:<strong>一項運動有多精彩、多受愛戴,與它作為一門生意有多成功,幾乎是兩件無關的事。</strong>橄欖球擁有最動人的精神、最深刻的歷史、最忠誠的全球信徒,在「商業成功」這一欄上,卻幾乎墊底;而美式足球的文化內涵或許不及橄欖球深厚,卻憑藉著無懈可擊的「現金流結構」,成了地表最富有的運動。<em>結構,就是命運——這條貫穿棒球、網球、足球、美式足球、直到橄欖球的鐵律,在這裡得到了最完整、也最殘酷的印證。</em></p>
+  </div>
+</section>
+
+<!-- ============ 終章 ============ -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">Finale · 終章</span>
+      <h2 class="act-title">泥土、榮譽,與一場永不停止的向前</h2>
+      <p class="act-sub" style="color:rgba(243,237,219,.6)">Mud, Honour, and the Charge Forward</p>
+    </div>
+    <div class="prose">
+      <p>一八二三年,一個少年在拉格比公學的草地上抱起了球。兩百年後,那個「打破規則、向前衝撞」的瞬間,長成了一項橫跨四大洲、承載過階級戰爭、帝國興衰、與一個國家和解的全球運動。</p>
+      <p>它是一個關於「分岔」的故事:它與美式足球同源,卻在每一個路口都走向相反——一個用盔甲把暴力變成印鈔的奇觀,一個赤裸著身體把衝撞變成榮譽的信仰。它是一個關於「階級」的故事:1895 年,它沿著紳士與工人的裂縫,把自己劈成了兩半。它是一個關於「帝國」的故事:它被用來教化殖民地,卻被殖民地用來鍛造出嶄新的自我,讓全黑軍團的哈卡響徹世界。它更是一個關於「和解」的故事:曼德拉穿上那件仇恨的綠衫,證明了一件球衣,有時能縫合一個國家。</p>
+      <p>但它同時也是一個關於「代價」與「脆弱」的故事。它最自豪的血性,如今正拷問著它的良心——那些不穿盔甲的勇氣,正在悄悄地侵蝕著球員的大腦。而它,這項贏得了全世界熱愛與道德光環的運動,卻在金錢面前步履蹣跚、年年虧損、把命脈交給了私募的資本——它擁有最豐厚的靈魂,與最單薄的錢包。</p>
+
+      <div class="principle">
+        <span class="tag">兩百年的終極啟示</span>
+        <p>橄欖球是這個系列裡,商業上最不成功、精神上卻最富有的一個。它告訴我們:一項運動的偉大,從來不只由它的資產負債表來衡量。它教化過帝國的領袖,也縫合過破碎的國家;它沿階級裂開,又在綠衫下重新縫合;它守著業餘的純潔一百年,又赤裸著身體承受最猛烈的衝撞。它或許永遠成不了美式足球那樣的印鈔機,但它擁有後者用再多金錢也買不到的東西——一個能讓囚徒與獄卒、黑人與白人、殖民者與被殖民者,在同一件球衣下並肩流汗的、關於榮譽與寬恕的靈魂。神殿或許貧窮,但它的地基,是用血性與和解砌成的。</p>
+      </div>
+
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,237,219,.8);margin-top:2.5rem">
+        從拉格比公學那個抱起球的少年,到全球草皮上的衝撞(向前的信仰),<br>
+        從 1895 年南方紳士與北方工人的決裂,到聯合式與聯盟式的永久分家(階級的內戰),<br>
+        從業餘主義的百年聖戰,到 1995 年一夜變天的職業化(信仰與金錢的對決),<br>
+        從帝國艦隊載出的遊戲,到全黑軍團響徹世界的哈卡(殖民地的逆襲),<br>
+        從曼德拉穿上那件綠衫,到柯里西高舉的獎盃(一件球衣縫合一個國家),<br>
+        從不穿盔甲的勇氣,到法庭上那些記不得孩子名字的硬漢(血性的代價)——<br>
+        這顆從泥土裡滾出來的橢圓形的球,飛越了兩百年與整個地球,<br>
+        而它最終想告訴我們的,或許只是這句最樸素的話:<br>
+        <strong style="color:var(--gold-bright)">有些東西的價值,從來不在它能賺多少錢,而在它能縫合多少人。</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">🏉 ✦ 🏉</div>
+  <p>泥土裡的紳士 · 橄欖球與一場關於階級、帝國與血性的史詩</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE MUD OF RUGBY SCHOOL · 1823 – 2027</p>
+  <p style="font-size:.78rem;margin-top:.8rem;opacity:.45">註:本文部分當下數據(2023 世界盃結果、2027/2031 主辦權、橄欖球財務報告與虧損數字、CVC/Silver Lake 私募投資、腦震盪訴訟、七人制與女子賽事發展)整理自公開報導,以 2026 年 5 月為資料時點,後續可能持續變動。文中涉及失智、腦傷等沉重議題。</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

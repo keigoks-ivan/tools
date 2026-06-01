@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海港、難民與兩制:香港的身世史詩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0e1518;
+  --parchment:#f3eedd;
+  --parchment-deep:#e5dcbe;
+  --harbour:#123140;
+  --harbour-deep:#08191f;
+  --gold:#b3892c;
+  --gold-bright:#d8af48;
+  --jade:#1f6f63;
+  --crimson:#9c2226;
+  --crimson-deep:#771317;
+  --teal-neon:#2a9d8f;
+  --faint:#5e5a42;
+  --line:#c5b67f;
+  --shadow:rgba(14,21,24,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(179,137,44,.08), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(18,49,64,.07), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(42,157,143,.20), transparent 60%),
+    linear-gradient(165deg, var(--harbour-deep) 0%, var(--harbour) 48%, #1b4150 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d8af48' stroke-width='0.6' opacity='0.15'%3E%3Cpath d='M180 740 h60 v-160 h50 v-90 h60 v250 h70 v-300 h55 v300 h80 v-200 h50 v-120 h55 v320 h75 v-240 h60 v240 h90 v-180 h50 v180' /%3E%3Ccircle cx='600' cy='600' r='540'/%3E%3Ccircle cx='600' cy='600' r='400'/%3E%3Cpath d='M600 340 q60 90 0 180 q-60 -90 0 -180 Z' fill='%23d8af48' opacity='0.14'/%3E%3Cpath d='M60 600 H1140 M600 60 V1140'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 250s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(243,238,221,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--harbour-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--crimson);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--harbour-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--crimson);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--harbour-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson-deep);font-weight:700}
+.prose em{font-style:italic;color:var(--harbour-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(18,49,64,.05), rgba(179,137,44,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--harbour-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT (歷史的回聲) ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--harbour-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(8,25,31,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--teal-neon));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(243,238,221,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#7fd4c4;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--crimson);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--crimson);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--harbour-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--crimson);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--harbour-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(179,137,44,.045)}
+td strong{color:var(--crimson-deep)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(18,49,64,.05);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--crimson);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--harbour-deep),var(--harbour));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d8af48' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(243,238,221,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#7fd4c4}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(216,175,72,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--teal-neon));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--harbour-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#0a1418 !important}
+.dark .act-title{color:#cfc69e}
+.dark .prose p{color:#c2b691}
+.dark .prose strong{color:#d5635f}
+.dark .prose em{color:#6cc6b6}
+.dark .prose h3{color:#d5635f;border-left-color:var(--crimson)}
+.dark .act-sub{color:#7e7a52}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(156,34,38,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--crimson);margin-bottom:.5rem;font-weight:600}
+
+/* ===== perspectives box (for contested topics) ===== */
+.views{margin:2.6rem 0;display:grid;gap:1rem}
+.view{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem;border-left:4px solid var(--jade)}
+.view:nth-child(even){border-left-color:var(--crimson)}
+.view .vh{font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:.1em;color:var(--harbour-deep);text-transform:uppercase;margin-bottom:.5rem;font-weight:600}
+.view p{font-size:.95rem;line-height:1.75;margin:0;text-align:left}
+
+/* ===== interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--harbour-deep);font-weight:500}
+.interlude p .hl{color:var(--crimson);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(243,238,221,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--crimson);font-style:normal}
+
+/* ===== legacy & shift ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--harbour-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson-deep)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--harbour-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(18,49,64,.05);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--crimson)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--crimson);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson-deep)}
+.legacy-block em{color:var(--harbour-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--harbour-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The Fragrant Harbour · How Hong Kong Became Hong Kong</span>
+    <h1>海港、難民與<span class="em">兩制</span><br>香港<br>的身世</h1>
+    <p class="sub">從珠江口外的漁村與鹽田、一座因鴉片戰爭而割讓的小島,到一座「借來的時間、借來的地方」上崛起的世界金融樞紐——<br>一部關於「為何今天的香港與香港人是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的香港,是一個面積不大、卻曾是全球最重要的金融與貿易中心之一、人均財富名列前茅、卻又被一種難以言說的身分焦慮所縈繞的城市?為什麼這座城市,既深深植根於嶺南的中華文化,又被一個半世紀的英國殖民塑造得如此中西交融、自成一格?答案不在當下,而在近兩百年的縱深裡。一個深水不凍、扼守珠江口的天然良港,讓一座原本只有漁村與鹽田的小島,在鴉片戰爭的砲火中,被割讓給了一個來自遠方的海洋帝國;從此,它成為一個「<em>轉口港</em>」——貨物、資金、人與思想,從這裡進出那個龐大而封閉的中國;一波又一波因戰亂與動盪而南逃的難民,把資本、技術與一種「<em>什麼都沒有,只能靠自己雙手打拼</em>」的求生意志,帶到了這片借來的土地上,在獅子山下,鍛造出一座工業與金融的奇蹟之城;而當英國租約到期、這座城市在 1997 年「回歸」中國時,一個人類政治史上前所未有的實驗——「<em>一國兩制</em>」——開始了:一個社會主義的國家,承諾讓它治下的一座資本主義城市,在五十年裡「維持不變」。這不是一個主權國家的故事,而是一座<em>因海港而生、因難民而興、因兩種制度的交會而獨特、也因兩種制度的張力而焦慮</em>的城市,如何在兩個世界的夾縫與交會中,反覆地追問「自己究竟是誰」的故事。讓我們從頭走一遍,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--crimson);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Land</span>
+    <h2 class="act-title">在所有人來之前,這裡有什麼?</h2>
+    <p class="act-sub">A Deep-Water Harbour at the Mouth of a Great River</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的香港人,得先回到一個比英國人、比割讓條約都更古老的問題:在他們來之前,這裡有什麼?答案,藏在一片水裡——一個深水、避風、扼守著一條大河出海口的天然良港。</p>
+
+    <h3>一個天然的良港</h3>
+    <p>先看地圖。香港,坐落在中國南方<strong>珠江口</strong>的東側。它由香港島、九龍半島、與新界(以及離島)所組成,而把它們環抱起來的,是一片得天獨厚的水域——<strong>維多利亞港(維港)</strong>。這是一個<em>水深、避風、終年不凍</em>的天然深水港,大型遠洋船舶可以直接駛入停泊。在那個一切貿易都依賴海運的年代,一個如此優良的天然港口,本身就是一份無價的禮物。記住這一點:<em>香港的故事,從頭到尾,都是這個「海港」的故事——它的存在理由、它的命運、它的繁榮,全都繫於這片水。</em></p>
+
+    <h3>扼守一條大河的出海口</h3>
+    <p>而這個海港的真正價值,在於它的<strong>位置</strong>。它正好坐落在<em>珠江</em>的出海口——而珠江,連通著中國南方廣袤而富庶的腹地(廣州一帶,自古就是中國對外貿易的重要門戶)。這意味著,誰掌握了香港這個港口,誰就掌握了「進出中國南方」的一道海上門戶。對一個想與中國做生意、卻又被中國的天朝體制處處設限的海洋貿易帝國而言,香港這樣一個位於中國門口、卻又能自己掌控的深水港,簡直是夢寐以求的跳板。</p>
+    <div class="pull"><p>一個深水避風的天然良港,扼守著通往中國南方的大河出海口——香港全部的命運,都寫在這個「中國門口的港口」的地理裡。</p></div>
+
+    <h3>門戶,而非腹地</h3>
+    <p>但這裡藏著一個關鍵的特質:香港在地理上,是一個「<strong>門戶</strong>」,而非一個「<strong>腹地</strong>」。它的土地狹小、多山、平地稀少,本身缺乏農業或天然資源,養不活多少人;在英國人到來之前,它只是嶺南海岸線上,散布著幾個漁村與鹽田的、不起眼的角落。它的價值,從來不在於「它有什麼」,而在於「它連接什麼」——它是一個讓人與貨物、資金與思想,在「中國」與「世界」之間流通、轉運、交會的<em>節點</em>。今天香港所有的故事——它作為轉口港與金融中心的繁榮、它中西交融的文化、它那份「夾在中國與世界之間」的獨特身分與焦慮——根源都在這裡:<em>它生來就是一座「門戶之城」,它的命運,永遠繫於它所連接的兩端。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 地理是第一作者</span>
+      <p>在任何帝國、任何難民、任何制度登場之前,<strong>那個扼守珠江口的天然良港</strong>,就已經寫好了這個故事的全部基調。一個位於「中國門口」、卻土地狹小、缺乏腹地的深水港,註定不會成為一個自給自足的地方,而會成為一個依靠「連接」與「轉運」而生的門戶之城。</p>
+      <p>這是理解香港的第一把鑰匙:<em>它今天所有的特質——它驚人的商業繁榮、它中西交融的混血文化、它「左右逢源」的靈活、以及那份「自己究竟屬於哪一邊」的深層焦慮——其實都是同一個地理事實的一體多面:它是一座「門戶之城」,它的生命力,來自它連接的「中國」與「世界」這兩端。</em>當這兩端關係順暢、互通有無時,香港就如魚得水、繁榮無比;但當這兩端關係緊張、彼此角力時,夾在中間的香港,就會被撕扯、被擠壓、陷入身分的兩難。香港的全部歷史,本質上就是這座「門戶之城」,如何隨著「中國」與「世界」這兩端關係的變化,而起伏、繁榮、又焦慮的故事。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>在英國人到來之前,這片海港只是嶺南海岸上幾個不起眼的漁村與鹽田。<br>居住在這裡的,是世代與海為伍的漁民與墾荒的宗族——<br><span class="hl">他們是香港最古老的底色:嶺南的、中華的、討海維生的。</span></p>
+</div>
+
+<!-- ===== 第一章:嶺南的底色 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Roots</span>
+    <h2 class="act-title">漁村、鹽田,與嶺南的根</h2>
+    <p class="act-sub">The Lingnan Heritage Before the British Came</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>所有人都會問:在「香港」這個名字響徹世界之前,這片土地上,是什麼模樣?答案是——它是中華文明嶺南海岸線上,一個古老而平凡的角落。香港這片土地,自古以來就是<strong>中國</strong>的一部分,屬於嶺南(廣東一帶)的文化圈;它的居民,世世代代,都是中華文化的子民。</p>
+
+    <h3>討海與墾荒的人們</h3>
+    <p>在英國人到來之前,香港地區居住著幾個不同的族群,他們共同構成了這片土地最古老的底色。有世代居住於陸地、開墾田地、聚族而居的<em>本地宗族(本地人)</em>——他們建立了圍村,新界的「<strong>鄧、文、廖、侯、彭</strong>」等大族,在這裡繁衍生息了數百年。有後來遷入、多在山地丘陵間耕作的<em>客家人</em>。還有世代以船為家、捕魚為生、漂泊於海上的<em>蜑家人(水上人)</em>。此外,這裡自古也是重要的<strong>產鹽</strong>之地與海上交通要衝。「香港」這個名字的由來,一說便與此地曾是轉運<em>莞香(一種香木)</em>的港口有關——「<strong>香</strong>」的「<strong>港</strong>」口。</p>
+    <div class="pull"><p>在成為世界金融中心之前,香港只是嶺南海岸上,幾個討海的漁村、墾荒的圍村與轉運香木的鹽港——它的根,深植於中華的嶺南。</p></div>
+
+    <h3>天朝邊緣的一個角落</h3>
+    <p>對當時統治中國的<em>清帝國</em>而言,香港這片位於帝國最南端海岸線上的小地方,實在微不足道——它既非戰略要地,也非繁華都會,只是天朝廣袤版圖邊緣,一個不起眼的漁鹽之鄉。沒有人會想到,這個被天朝忽視的角落,即將因為一場關於貿易、白銀與鴉片的衝突,而被推上世界歷史的舞台,並從此走上一條與母體截然不同的、獨特的道路。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 不該被遺忘的底色</span>
+      <p>香港的「嶺南底色」,是一份在它日後的傳奇中,常常被淡忘、卻至關重要的根基。<strong>香港從來不是一片「無人的荒島」或「文化的空白」——在英國人到來之前,它早已是中華嶺南文化圈中,一個有著數百年宗族歷史、漁鹽傳統與生活肌理的角落。</strong>它的語言(粵語)、它的飲食、它的民間信仰(天后、黃大仙)、它的宗族倫理,無不深深植根於中華文化的土壤。</p>
+      <p>記住這份底色,對理解香港的身分至關重要。<em>因為香港日後最深的特質,並非「全盤西化」,而是「中西交融」——它是在這份深厚的中華嶺南根基之上,再嫁接了一個半世紀的英國殖民與全球化的影響,才長成了那個獨一無二的、既中且西、又非中非西的「香港」。</em>這份「底色」與「嫁接」之間的張力,正是香港身分認同的核心:它既無法否認自己的中華之根,又無法抹去那個塑造了它的、迥異於中國其他地方的獨特經歷。而那個改變一切的「嫁接」,即將在一場砲火中,被強行植入這片古老的嶺南土地。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>一場關於白銀、貿易與鴉片的衝突,把一個海洋帝國的砲艦,帶到了中國的門口。<br>當砲火平息,一紙條約,把這座海港,割給了遠方的女王——<br><span class="hl">香港的命運,從此被改寫。</span></p>
+</div>
+
+<!-- ===== 第二章:鴉片戰爭與割讓 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Cession</span>
+    <h2 class="act-title">鴉片、砲艦,與一紙割讓的條約</h2>
+    <p class="act-sub">The Opium War and the Birth of a Colony</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>香港命運的徹底改寫,源於十九世紀那場改變了整個中國近代史的衝突——<strong>鴉片戰爭</strong>。要理解它,得先理解當時「中國」與「世界」之間那道緊張的關係。</p>
+
+    <h3>白銀、貿易逆差與鴉片</h3>
+    <p>當時,以英國為首的西方海洋貿易強權,渴望與龐大的中國市場做生意——他們大量購買中國的茶葉、絲綢與瓷器,卻發現中國對西方的工業品興趣缺缺,導致英國的<em>白銀大量流入中國</em>,形成巨大的貿易逆差。為了扭轉這個逆差,英國商人找到了一樣中國市場「需要」的商品——<strong>鴉片</strong>。鴉片從英屬印度被大量走私入中國,毒害了無數人,並反過來造成中國的白銀大量外流。面對鴉片的禍害,清廷派出欽差大臣<em>林則徐</em>到廣州禁煙(著名的「虎門銷煙」)。這一禁煙行動,成了戰爭的導火線。</p>
+
+    <h3>砲艦下的割讓</h3>
+    <p>1840 年,英國以保護貿易與僑民為由,派遣艦隊,對中國發動了戰爭。裝備了現代砲艦與火器的英軍,輕易地擊敗了清帝國陳舊的軍隊。1842 年,戰敗的清廷被迫簽訂了中國近代史上第一個「不平等條約」——《南京條約》,其中一項,就是把<strong>香港島,永久割讓給英國</strong>。此後,英國又透過 1860 年的《北京條約》割得<em>九龍半島</em>,並在 1898 年透過《展拓香港界址專條》,以<strong>九十九年</strong>為期,「租借」了面積廣大的<em>新界</em>。至此,今天香港的完整版圖,在三紙條約下,落入了英國之手。</p>
+    <div class="pull"><p>香港不是被選擇成為殖民地的,它是在砲火下被割讓的——它的「誕生」,本身就是中國近代屈辱史的一道傷口。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一個「傷口」中誕生的城市</span>
+      <p>香港作為一個殖民地的「誕生」,有一個無法迴避的、沉重的歷史前提:<strong>它是在鴉片戰爭的砲火下,作為中國戰敗、被迫割讓的產物而出現的。</strong>對中國而言,香港的割讓,是「百年屈辱」的起點與象徵——一個古老的天朝,被西方的砲艦轟開了大門,被迫割地賠款。這份歷史記憶,深刻地影響著後來中國看待香港的方式:收回香港,被視為洗刷國恥、實現民族復興的重要一步。</p>
+      <p>但這裡也藏著香港命運最深的弔詭。<em>這個「在屈辱中誕生」的殖民地,卻在此後的一個半世紀裡,陰差陽錯地,發展成了一個與母體中國截然不同的、繁榮而獨特的社會。</em>那場割讓,固然是中國的傷口;但對香港這片土地而言,它也意味著,從此被納入了一個全球性的海洋貿易帝國的網絡之中,走上了一條「資本主義、自由港、中西交融」的、迥異於中國大陸的道路。香港的悲劇與傳奇,從一開始就是一體的:它因中國的屈辱而生,卻因這份「分離」而走向了獨特的繁榮。而這道「在傷口中誕生、又在分離中繁榮」的弔詭,將成為它一個半世紀後「回歸」時,所有複雜情感與張力的根源。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>割讓之初,連英國人自己都不看好這座「貧瘠的小島」。<br>但它扼守中國門戶的位置,很快展現了驚人的價值——<br><span class="hl">它成了一個「自由港」,一個讓全世界與中國做生意的轉運站。</span></p>
+</div>
+
+<!-- ===== 第三章:轉口港的崛起 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Entrepôt</span>
+    <h2 class="act-title">一座「自由港」,與中國的門戶</h2>
+    <p class="act-sub">The Rise of the Entrepôt and the Gateway to China</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>香港島剛割讓給英國時,並不被看好。當時英國國內甚至有官員譏諷它,不過是一座「<em>幾乎沒有一間房子的、貧瘠的小島</em>」。然而,序章裡那個「扼守中國門戶的深水良港」的地理價值,很快就展現了出來。英國人在這裡,做了一個影響深遠的決定——把香港建設成一個「<strong>自由港</strong>」。</p>
+
+    <h3>自由港:讓貨物與資金自由流動</h3>
+    <p>所謂「自由港」,意味著貨物可以幾乎免關稅地自由進出。這個政策,加上香港優越的港口與位置,讓它迅速成為一個繁忙的<strong>轉口港(entrepôt)</strong>——來自世界各地的商品,在這裡轉運進入中國;而中國的茶葉、絲綢等出口品,也經由香港運往世界。香港,成了「世界」與「中國」之間貿易的<em>中轉站與集散地</em>。一座座洋行(如怡和、太古)在這裡建立,維多利亞港兩岸,逐漸從荒涼的海岸,變成了商船雲集、貨棧林立的繁忙商埠。</p>
+    <div class="pull"><p>香港的第一桶金,不是靠生產什麼,而是靠「轉運」——它成了世界與中國之間,貨物、資金與資訊的中轉站。這個「中間人」的角色,將定義它往後的全部命運。</p></div>
+
+    <h3>中西交會的開始</h3>
+    <p>作為一個英國管治、卻以華人為絕大多數人口的商埠,香港從一開始,就是一個<strong>中西交會</strong>的獨特空間。一套源自英國的制度,被移植到了這片土地上:<em>普通法的法律體系、相對廉潔高效的文官制度(雖然早期殖民統治也充滿了種族隔離與不平等)、英語作為官方與商業語言、以及自由貿易的經濟理念</em>。與此同時,佔人口絕大多數的華人,則延續著他們的語言(粵語)、習俗與宗族網絡。一個華人的社會,在一套英國的制度框架下運作——這種獨特的「混血」結構,正是香港日後一切獨特性的制度源頭。一批往來於中西之間、通曉雙語的<em>華人買辦與商人</em>,也應運而生,成為連接兩個世界的橋樑。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「中間人」的城市</span>
+      <p>轉口港的崛起,確立了香港最核心的經濟性格——它是一個「<strong>中間人</strong>」的城市。<em>它的繁榮,從來不是建立在「自己生產什麼」之上,而是建立在「連接什麼、轉運什麼、服務什麼」之上。</em>它賺的,是「中間」的錢——貿易的中介費、轉運的服務費、後來金融的手續費。這完美地延續了序章「門戶之城」的命題:香港的生命力,來自它溝通「中國」與「世界」這兩端的能力。</p>
+      <p>而這個時期更深遠的遺產,是那套被移植進來的<strong>制度</strong>。<em>普通法、自由港、文官體系、契約精神、資訊與資金的自由流通——這些源自英國的制度,雖然是在殖民的背景下被強加的,卻意外地為香港日後成為一個世界級的商業與金融中心,打下了關鍵的基礎。</em>更重要的是,正是這套「與中國大陸截然不同」的制度,讓香港逐漸發展出一種獨特的社會運作方式與價值觀(法治、自由、契約、效率)。這套制度,將成為香港最寶貴的資產,也將成為日後「一國兩制」中,那個需要被「維持不變」的核心。香港的「中西交融」,不只是文化上的,更是制度上的——而制度的差異,終將成為它與母體之間,最深刻的議題。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⛰ ✦ ⛰</div>
+  <p>二十世紀,中國經歷了革命、戰亂與動盪的巨變。<br>一波又一波的人,為了逃離苦難,翻過邊界、湧入這座小城——<br><span class="hl">他們一無所有,卻帶來了改變香港命運的資本、技術與意志。</span></p>
+</div>
+
+<!-- ===== 第四章:難民潮與獅子山下 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Refugees</span>
+    <h2 class="act-title">難民潮,與獅子山下的奇蹟</h2>
+    <p class="act-sub">Waves of Refugees and the Forging of a City</p>
+    <div class="ornament">⛰ ⛰ ⛰</div>
+  </div>
+  <div class="prose">
+    <p>真正把香港從一個「轉口港」,鍛造成一座有血有肉、自成一格的「城市」的,是<strong>人</strong>——確切地說,是一波又一波,為了逃離中國大陸的動盪而湧入的<strong>難民</strong>。二十世紀的中國,經歷了清朝覆滅、軍閥混戰、抗日戰爭、國共內戰、以及之後的一系列政治運動與動盪。每一次的動盪,都把大批為了求生、求安定的人,推向了邊境另一側那座相對穩定的英國殖民城市——香港。</p>
+
+    <h3>逃難而來的人,與他們帶來的東西</h3>
+    <p>這些難民潮,尤其是 1940 年代末國共內戰前後的那一波,對香港影響至深。逃難而來的,不只是窮苦的百姓,還有來自上海等地的<em>企業家、資本家、技術人員與知識分子</em>。他們帶來了寶貴的<strong>資本、技術、商業網絡與管理經驗</strong>——尤其是上海的紡織業資本家,幾乎是把整個工廠都搬到了香港。香港的人口,在短短數年間暴增了數倍。這座小城,瞬間被填滿了人,也被填滿了求生的能量。</p>
+
+    <h3>「獅子山精神」:白手起家的意志</h3>
+    <p>這些難民,大多是<em>一無所有</em>地來到香港的——他們失去了家鄉、財產與過去,在這片擁擠、陌生、競爭激烈的土地上,只能<strong>靠自己的雙手,從零開始打拼</strong>。正是這份「<em>什麼都沒有,只能搏命向上</em>」的集體經驗,鍛造出了日後被稱為「<strong>獅子山精神</strong>」(得名於九龍的獅子山,以及一首同名的經典歌曲)的香港核心價值:<em>刻苦、堅韌、靈活、務實、自力更生、不靠政府、相信只要肯努力就能改變命運的「拼搏」精神</em>。在擁擠的徙置區、在嘈雜的山寨廠、在街頭的小販攤上,一代香港人,用汗水與意志,在獅子山下,書寫著屬於自己的奮鬥故事。</p>
+    <div class="pull"><p>香港的奇蹟,不是天上掉下來的——它是一群一無所有的難民,在獅子山下,用「靠自己」的雙手與意志,一點一滴拼出來的。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座由「難民」建成的城市</span>
+      <p>難民潮,是塑造「香港人」這個身分最關鍵的一股力量。<strong>香港,本質上是一座「移民城市」、一座「難民城市」——它的絕大多數居民,或他們的父輩、祖輩,都是為了逃離大陸的動盪而來到這裡的。</strong>這個事實,深刻地塑造了香港獨特的集體心理。</p>
+      <p>它至少帶來了兩個深遠的影響。其一,是那份「<strong>獅子山精神</strong>」——既然是逃難而來、一無所有,就只能靠自己;這份「自力更生、務實拼搏」的精神,成了香港經濟奇蹟的核心動力,也成了香港人最自豪的集體認同。其二,則是一種微妙而深刻的「<strong>難民心態</strong>」與身分的疏離。<em>對許多早期的難民而言,香港最初只是一個「逃避動盪的避風港」、一個「借來的地方」——他們既離開了那個讓他們受苦的大陸,又對腳下這片英國殖民地缺乏完整的歸屬感。</em>這份「既不完全屬於中國、也不完全屬於英國」的、夾在中間的疏離感,正是香港身分認同那份深層焦慮的歷史源頭之一。他們在這片「借來的土地」上,用「借來的時間」,拼命地打拼、生活——而這份獨特的處境,催生出了一句精準形容香港的話:「借來的地方,借來的時間。」</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">₩ ✦ ₩</div>
+  <p>難民帶來的拼搏意志,加上自由港的制度,點燃了一場經濟的奇蹟。<br>香港從一個轉口港,變成了「世界工廠」,再蛻變為國際金融中心——<br><span class="hl">「亞洲四小龍」之一,在獅子山下騰飛。</span></p>
+</div>
+
+<!-- ===== 第五章:經濟奇蹟 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Miracle</span>
+    <h2 class="act-title">從「世界工廠」到國際金融中心</h2>
+    <p class="act-sub">The Economic Miracle of an Asian Dragon</p>
+    <div class="ornament">₩ ₩ ₩</div>
+  </div>
+  <div class="prose">
+    <p>難民帶來的資本、技術與「獅子山精神」,加上香港自由港的制度與優越的位置,共同點燃了二十世紀下半葉一場驚人的<strong>經濟奇蹟</strong>。香港在短短數十年間,完成了一連串華麗的經濟轉型,從一個轉口港,一躍成為世界舞台上耀眼的「<em>亞洲四小龍</em>」之一。</p>
+
+    <h3>三級跳:工廠、金融、服務</h3>
+    <p>香港的崛起,經歷了幾次關鍵的轉型:</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">第一跳 · 1950–60s</span>
+        <h5>世界工廠</h5>
+        <p>當大陸因政治運動與封鎖,轉口貿易一度中斷時,香港憑藉難民帶來的資本與廉價勞動力,迅速轉型為<strong>製造業中心</strong>——紡織、成衣、玩具、電子、塑膠花……「<em>香港製造(Made in Hong Kong)</em>」的商品,行銷全球。</p>
+        <span class="model">Manufacturing</span>
+      </div>
+      <div class="card">
+        <span class="flag">第二跳 · 1970–80s</span>
+        <h5>金融中心</h5>
+        <p>隨著工資上漲與大陸改革開放,香港的工廠大批<em>北移</em>到珠三角,而香港本身,則升級為一個<strong>國際金融、貿易與服務中心</strong>——銀行、股市、航運、地產蓬勃發展。</p>
+        <span class="model">Finance</span>
+      </div>
+      <div class="card">
+        <span class="flag">第三跳 · 1980s–</span>
+        <h5>中國的窗口</h5>
+        <p>當中國「改革開放」、重新向世界打開大門時,香港憑藉其獨特的地位,成為<strong>外資進入中國、中國走向世界的關鍵「窗口」與「超級聯繫人」</strong>——它的轉口港角色,以全新的形式復活了。</p>
+        <span class="model">Super-connector</span>
+      </div>
+    </div>
+
+    <h3>東方之珠</h3>
+    <p>到了二十世紀末,香港已是世界上最繁榮、最自由的經濟體之一:它擁有全球頂尖的<em>港口、機場、股票市場與金融體系</em>,人均財富名列前茅,維多利亞港兩岸高樓林立、霓虹璀璨,被譽為「<strong>東方之珠</strong>」。它的影響力遠超其面積——香港的電影(功夫片、警匪片)、粵語流行音樂(Canto-pop)、與流行文化,風靡整個華人世界乃至亞洲,塑造了一代人的文化記憶。這座由難民與海港共同造就的城市,站上了它輝煌的頂點。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「中間人」角色的極致發揮</span>
+      <p>香港的經濟奇蹟,是它「門戶之城」與「中間人」這個核心性格的極致發揮。<strong>它每一次成功的轉型,本質上都是在重新定義自己「連接中國與世界」的方式。</strong>當轉口貿易中斷,它就靠製造業出口連接世界;當製造業北移,它就靠金融服務連接全球資本;而當中國改革開放,它更找到了最完美的角色——成為中國與世界之間,那個不可替代的「超級聯繫人」。</p>
+      <p>這裡藏著一個深刻的洞見,它將解釋香港日後的興衰。<em>香港的繁榮,從來高度依賴於一個前提:「中國」與「世界」之間,存在著一道需要它來「連接」的鴻溝或落差,而它恰好能憑藉其獨特的制度與位置,來填補這道鴻溝、賺取「中間」的價值。</em>當中國封閉時,它是唯一的窗口;當中國開放、卻尚未與世界規則完全接軌時,它是最好的橋樑與緩衝。香港的價值,正在於它的「<strong>不一樣</strong>」——它擁有一套與中國大陸不同的制度(法治、自由港、資金自由流動、與國際接軌),這正是它能扮演「中間人」的根本。這個洞見,直指香港命運最核心的問題:如果有一天,「中國」與「世界」之間的那道落差縮小了,或者香港那套「不一樣」的制度發生了變化,那麼,這座「中間人」城市賴以繁榮的根基,又將何去何從?這個問題的答案,將繫於一場關於它未來的、世紀性的談判。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">⏳ ✦ ⏳</div>
+  <p>繁榮的背後,有一個無法迴避的倒數計時——新界的九十九年租約,終將到期。<br>於是,兩個國家坐到了談判桌前,要決定這座城市的未來,<br><span class="hl">並設計出一個人類政治史上,前所未有的實驗。</span></p>
+</div>
+
+<!-- ===== 第六章:中英談判與一國兩制 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · One Country, Two Systems</span>
+    <h2 class="act-title">一場世紀談判,與一個前所未有的實驗</h2>
+    <p class="act-sub">The Sino-British Negotiations and the Promise of "Two Systems"</p>
+    <div class="ornament">⏳ ⏳ ⏳</div>
+  </div>
+  <div class="prose">
+    <p>香港的繁榮,始終懸著一個無法迴避的問題——「<strong>大限</strong>」。1898 年英國租借新界的條約,租期是<em>九十九年</em>,將在 1997 年 7 月 1 日到期。雖然香港島與九龍是「永久割讓」的,但佔香港絕大部分面積、且與港九唇齒相依的新界一旦歸還,剩下的港九根本無法獨立存續。因此,1997 年,實際上意味著整個香港前途的攤牌。隨著大限將近,一場決定香港命運的世紀談判,在中英兩國之間展開。</p>
+
+    <h3>兩個立場的交會</h3>
+    <p>1980 年代,中國的領導人<em>鄧小平</em>與英國首相<em>柴契爾夫人</em>,就香港前途展開了艱難的談判。中國的立場是堅定的:香港自古是中國領土,鴉片戰爭的割讓是不平等條約,中國必須在 1997 年<strong>恢復對香港行使主權</strong>,這是民族尊嚴與國家統一的核心。而英國則希望維持香港的繁榮穩定(以及自身的利益)。最終,雙方達成了一個極具創造性的方案,並寫入了 1984 年的《<strong>中英聯合聲明</strong>》。</p>
+
+    <h3>「一國兩制」:一個天才的構想,還是一個矛盾的設計?</h3>
+    <p>這個方案的核心,是鄧小平提出的「<strong>一國兩制</strong>」構想。它承諾:1997 年後,香港回歸中國,成為一個「<em>特別行政區</em>」;但在「<strong>一個中國</strong>」的前提下,香港可以保留它原有的<em>資本主義制度與生活方式「五十年不變」</em>——它將享有「高度自治」、保留自己的法律(普通法)、自己的貨幣(港元)、自己的關稅區、自由的市場、以及承諾中的言論、新聞、集會等自由。這個構想,被概括為「<strong>港人治港、高度自治</strong>」與「<strong>馬照跑、舞照跳</strong>」(意指生活方式不變)。它試圖用一種前所未有的方式,化解「主權回歸」與「制度差異」之間的矛盾。</p>
+    <div class="pull"><p>「一國兩制」——讓一個社會主義的國家,容納一座資本主義的城市,並承諾「五十年不變」。這是一個充滿智慧的構想,也是一個內含張力的實驗。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把「中間人」的角色,制度化</span>
+      <p>「一國兩制」,可以被理解為一次把香港「中間人」角色,制度化、永久化的偉大嘗試。<strong>它的核心智慧在於,它認識到了香港的價值,恰恰在於它的「不一樣」——在於它擁有一套與中國大陸不同的制度。因此,要保住香港(以及它對中國的價值),就必須保住這份「不一樣」。</strong>「兩制」的設計,正是為了讓香港在回歸中國(「一國」)的同時,能繼續保有那套讓它得以扮演「中國與世界橋樑」的獨特制度與自由。</p>
+      <p>但這個構想,從一開始就內含著一種深刻的<strong>張力</strong>,這份張力將定義香港回歸後的全部歷史。<em>「一國」強調的是主權的統一、是國家的整體性;而「兩制」強調的是制度的差異、是高度的自治。這兩者之間的平衡點究竟在哪裡?「高度自治」的邊界到底有多寬?當「一國」的要求與「兩制」的空間發生衝突時,該如何取捨?</em>這些問題,《聯合聲明》與後來的《基本法》雖然做了規定,但其具體的詮釋與實踐,卻留下了巨大的、可供各方解讀的空間。香港回歸後的故事,在很大程度上,就是中國中央政府、香港特區政府、與香港社會三方,圍繞著「一國」與「兩制」之間那條界線,不斷地磨合、拉扯、乃至激烈衝突的故事。一個充滿智慧的構想,與一場充滿張力的實踐,就此展開。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🎆 ✦ 🎆</div>
+  <p>1997 年 7 月 1 日的午夜,在滂沱大雨中,一面旗幟降下,另一面升起。<br>一個半世紀的殖民歲月落幕,一個前所未有的實驗開始——<br><span class="hl">香港,回家了。</span></p>
+</div>
+
+<!-- ===== 第七章:回歸 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Handover</span>
+    <h2 class="act-title">1997:午夜的旗幟,與一座城的回家</h2>
+    <p class="act-sub">The Handover and the First Years of the SAR</p>
+    <div class="ornament">🎆 🎆 🎆</div>
+  </div>
+  <div class="prose">
+    <p>1997 年 7 月 1 日的午夜,在香港會展中心,一場舉世矚目的儀式如期舉行。在滂沱的大雨中,飄揚了一個半世紀的英國國旗緩緩降下,中華人民共和國的國旗與香港特別行政區的<em>紫荊花區旗</em>冉冉升起。末代港督彭定康乘坐的不列顛尼亞號,駛離了維多利亞港。一個半世紀的英國殖民統治,正式結束;香港,以「中華人民共和國香港特別行政區」的身分,回到了中國。「一國兩制」這個前所未有的實驗,正式啟動。</p>
+
+    <h3>複雜交織的情感</h3>
+    <p>對這場「回歸」,香港人的心情是<strong>複雜而交織</strong>的。一方面,作為一個曾被殖民、被割讓的城市,回歸祖國、結束殖民統治,對許多人而言,帶有一種民族情感上的釋懷與認同。另一方面,香港人經歷了與大陸截然不同的數十年發展,對於回歸後「一國兩制」能否真正落實、自己習以為常的自由與生活方式能否得到保障,也普遍懷有深切的<em>憂慮與不確定感</em>。這份「期盼」與「憂慮」交織的複雜心情,正是回歸時香港社會最真實的寫照。</p>
+
+    <h3>風雨中的頭十年</h3>
+    <p>回歸後的頭十年,香港在風雨中前行。它一回歸,就遭遇了 1997–98 年的<strong>亞洲金融風暴</strong>,股市樓市暴跌、經濟重創;2003 年,又爆發了<strong>SARS 疫情</strong>,奪走了近三百條人命,讓城市陷入恐慌與蕭條。也是在 2003 年,特區政府試圖就《基本法》第二十三條(關於國家安全的立法)立法,觸發了<em>數十萬人上街遊行</em>反對,最終立法被擱置——這是回歸後「一國」與「兩制」之間張力的第一次大規模顯現。不過,在這段時期,中央政府也透過開放「<em>自由行</em>」(大陸旅客來港)與更緊密的經貿安排(CEPA),幫助香港經濟逐漸復甦。總體而言,回歸初期的香港,雖然歷經波折,但「一國兩制」大致維持了它的承諾,香港的自由與生活方式,基本得到了延續。</p>
+    <div class="pull"><p>回歸時的香港人,懷著一種「期盼」與「憂慮」交織的複雜心情——既為結束殖民、回歸祖國而釋懷,又為那份珍視的自由與獨特,能否被守護,而忐忑。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一場剛剛開始的磨合</span>
+      <p>1997 年的回歸,標誌著「一國兩制」從一個「<strong>構想</strong>」,正式變成了一場「<strong>實踐</strong>」。而回歸後頭十年的歷史證明,這場實踐,從一開始就是一個充滿挑戰、需要不斷磨合的過程。<em>亞洲金融風暴與 SARS,考驗的是香港的經濟韌性;而 2003 年的二十三條立法風波,則第一次清晰地暴露了「一國兩制」內在的那道核心張力——當「一國」(國家安全的要求)與「兩制」(香港社會對自由的珍視)發生碰撞時,會引發怎樣的反應。</em></p>
+      <p>這道張力的本質,呼應著香港全部歷史的命題。<strong>香港作為一座「門戶之城」、一個「中間人」,它的價值與認同,深深植根於它那套「不一樣」的制度與自由;而它能否安然存續於「一國」之內,則取決於「一國」與「兩制」之間,能否找到一個各方都能接受的平衡。</strong>回歸後的頭十年,這個平衡大致得到了維持,香港人對「一國兩制」也大致抱持著審慎的樂觀。然而,隨著時間推移,香港社會(尤其是成長於回歸前後、對自由與本土身分有著強烈認同的新一代)對「兩制」的期待、與中央政府對「一國」的要求之間,那道張力,將逐漸地、不可避免地,變得越來越尖銳。一場關於「香港究竟該是什麼」的深刻爭論,正在醞釀。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☂ ✦ ☂</div>
+  <p>回歸後的承平歲月之下,一道張力在悄然累積。<br>關於民主的步伐、關於身分的認同、關於「一國」與「兩制」的界線——<br><span class="hl">這些深層的爭論,終將以前所未有的規模,湧上街頭。</span></p>
+</div>
+
+<!-- ===== 第八章:張力的年代 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Years of Tension</span>
+    <h2 class="act-title">張力的累積,與湧上街頭的爭論</h2>
+    <p class="act-sub">Rising Tensions — A City Divided Over Its Future</p>
+    <div class="ornament">☂ ☂ ☂</div>
+  </div>
+  <div class="prose">
+    <p>回歸後的香港,在表面的承平之下,一道深層的張力,逐漸累積。這道張力,圍繞著幾個彼此交織的議題:<em>香港的民主進程該如何推進(尤其是行政長官與立法會的「普選」問題)?香港人的身分認同(是「中國人」、「香港人」、還是兩者兼具)?以及最根本的——「一國」與「兩制」之間的那條界線,究竟應該劃在哪裡?</em>進入 2010 年代,這些累積的張力,開始以大規模社會運動的形式,接連爆發。</p>
+
+    <p>關於這段時期(從 2014 年的佔領運動,到 2019 年的大規模抗爭與其後的變化),社會各方的<strong>立場嚴重對立、至今爭論不休</strong>。以下盡量並陳不同的視角,而非評斷對錯——因為對這段歷史的理解,本身就是當代最具爭議的議題之一。</p>
+
+    <div class="warn">
+      <div class="warn-tag">關於這段歷史的說明</div>
+      <p>以下事件牽涉高度敏感與對立的政治爭議。不同立場的人(香港不同世代與群體、中國中央政府、國際社會)對於這些事件的<strong>起因、性質、與評價,有著根本性的分歧</strong>。本節旨在客觀呈現事件梗概與各方的主要觀點,不對任何一方的立場做評斷,讀者宜參考多方資料、自行判斷。</p>
+    </div>
+
+    <h3>2014:雨傘運動</h3>
+    <p>2014 年,圍繞著行政長官「普選」的具體方案,香港爆發了大規模的「<strong>雨傘運動(佔領運動)</strong>」。抗議者(主要是學生與爭取民主的市民)佔領了主要街道達數十天,要求他們所認為的「真普選」。運動最終在沒有達成訴求的情況下結束,但它標誌著香港社會圍繞「民主」與「自治」的張力,公開化、白熱化了。</p>
+
+    <h3>2019:修例風波</h3>
+    <p>2019 年,因一項《逃犯條例》修訂草案(俗稱「<em>送中條例</em>」)而引發的爭議,演變成了香港歷史上規模空前、持續數月、且伴隨著激烈警民衝突的大型社會運動。這場運動,觸及了香港社會最深層的焦慮與分歧,將整個城市捲入了前所未有的動盪與撕裂之中。</p>
+
+    <div class="views">
+      <div class="view">
+        <div class="vh">部分抗爭者與支持者的視角</div>
+        <p>他們認為,這場運動是為了<strong>捍衛香港的自由、法治與「一國兩制」下的高度自治</strong>,擔憂香港原有的制度與生活方式正在被侵蝕,要求更大的民主與問責。對他們而言,這是一場保衛香港核心價值的抗爭。</p>
+      </div>
+      <div class="view">
+        <div class="vh">中國中央政府與支持者的視角</div>
+        <p>他們認為,後期的運動已演變為<strong>危害國家安全、挑戰中央權威、甚至受外部勢力影響的暴力與分離主義活動</strong>,嚴重破壞了香港的繁榮穩定與法治,因此中央有責任與權力出手,恢復秩序、維護「一國」的底線。</p>
+      </div>
+      <div class="view">
+        <div class="vh">許多普通市民的視角</div>
+        <p>還有大量身處其中的市民,經歷的是一座<strong>被撕裂的城市</strong>——家庭、朋友因立場不同而反目,日常生活被衝突打斷,並對城市的未來感到深切的憂慮、疲憊與無力。他們的感受,往往比任何單一立場都更為複雜。</p>
+      </div>
+    </div>
+
+    <h3>2020:國家安全法</h3>
+    <p>2020 年,中國全國人大常委會,為香港制定了《<strong>香港國家安全法</strong>》,並隨後對香港的選舉制度進行了改革(「愛國者治港」)。<em>支持者</em>認為,這恢復了香港的社會秩序與穩定,堵住了國家安全的漏洞,讓香港得以「由亂轉治」;<em>批評者(包括一些西方國家政府)</em>則認為,這大幅壓縮了香港原有的自由與自治空間,改變了「一國兩制」原本的面貌。對這部法律及其影響的評價,構成了當今關於香港最尖銳、最對立的爭論之一。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「一國」與「兩制」之間,那條難解的界線</span>
+      <p>這段「張力的年代」,是「一國兩制」內在的那道核心張力(見第六章)——「<strong>一國</strong>」的主權整體性 vs 「<strong>兩制</strong>」的制度差異與自治空間——的全面爆發。<em>它揭示了一個極其艱難的問題:在一個前所未有的制度安排下,當「主權國家對國家安全與統一的要求」,遇上「一座城市對其獨特自由與自治的珍視」時,兩者之間的界線,究竟應該如何劃定?而當雙方對這條界線的理解,出現根本性的分歧時,又該如何化解?</em></p>
+      <p>本書無意、也無力為這場仍在進行、各方立場嚴重對立的爭論下定論。但從香港全部歷史的脈絡看,可以理解這場張力為何如此深刻、如此難解。<strong>香港的整個身分與價值,都建立在它的「不一樣」之上——它是一座「門戶之城」、一個「中間人」,它賴以繁榮、也賴以認同的,正是那套迥異於中國大陸的制度與生活方式。</strong>因此,對許多香港人而言,守護那份「不一樣」,關乎的是這座城市的靈魂與存續;而對中國中央政府而言,在「一國」的前提下維護國家的主權、安全與統一,則是不可動搖的底線。<em>這兩種關切,各自都有其內在的邏輯與正當性,卻又在「一國兩制」這個獨特的框架下,發生了劇烈的碰撞。</em>香港正處在它身世中又一個關鍵的轉折點上——這座由海港、難民與兩制共同造就的城市,正在經歷一場關於「它究竟是什麼、又將走向何方」的深刻重塑,而這個故事的結局,至今仍未寫定。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🌅 ✦ 🌅</div>
+  <p>動盪之後,香港進入了一個全新的、也充滿爭論的階段。<br>有人看見秩序與穩定的恢復,有人看見一座城市的改變;有人離開,有人留下——<br><span class="hl">而那個最古老的問題,依然懸而未決:香港,究竟是什麼?</span></p>
+</div>
+
+<!-- ===== 第九章:當代香港 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · The City Today</span>
+    <h2 class="act-title">改變中的城市,與懸而未決的身分</h2>
+    <p class="act-sub">A City Transformed, and a Question Still Unanswered</p>
+    <div class="ornament">⚖ ⚖ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>經歷了動盪的年代之後,香港進入了一個全新的、卻同樣充滿爭論的階段。對於今天的香港,不同的人,看到的是截然不同的圖景——而這幅圖景本身,正是各方爭論的焦點。</p>
+
+    <div class="views">
+      <div class="view">
+        <div class="vh">「由亂轉治」的視角</div>
+        <p>持此觀點者認為,經歷了動盪後,香港<strong>恢復了社會秩序與穩定</strong>,街頭的衝突平息,城市重回正軌,得以重新聚焦於經濟發展與民生改善。他們認為香港正在一個更穩固的「一國兩制」框架下,翻開新的篇章。</p>
+      </div>
+      <div class="view">
+        <div class="vh">「城市已變」的視角</div>
+        <p>持此觀點者(包括許多選擇移民離開的港人)則認為,香港原有的<strong>自由空間、公民社會與獨特性,已發生深刻的改變</strong>,他們所熟悉與珍視的那個香港,正在消逝。對他們而言,這是一種深切的失落。</p>
+      </div>
+    </div>
+
+    <h3>融入「大灣區」,與移民潮</h3>
+    <p>在經濟與發展的層面,香港正被更緊密地整合進國家的發展藍圖之中——尤其是「<strong>粵港澳大灣區</strong>」的規劃,試圖把香港與深圳、廣州等珠三角城市,整合成一個世界級的城市群,為香港尋找新的經濟動能與腹地。與此同時,近年也出現了一波<strong>移民潮</strong>:相當數量的香港人(基於各種不同的考量——政治的、經濟的、或為下一代的),選擇移居海外(英國、加拿大、澳洲、台灣等地);而與此同時,也有來自中國大陸的新移民與人才,持續地遷入香港。這座「移民城市」的人口構成,正再一次經歷著流動與重塑。</p>
+
+    <h3>那個古老問題的當代回響:「中間人」的未來</h3>
+    <p>而在這一切變化之下,懸著一個關乎香港根本命運的問題——它賴以生存的「<strong>中間人</strong>」角色,未來將何去何從?回想第五章的洞見:香港的繁榮,高度依賴於它「連接中國與世界」的獨特價值,而這份價值,根植於它那套「不一樣」的制度。如今,隨著中國自身的崛起與開放(上海、深圳等大陸城市的金融與科技實力日益強大),以及香港自身制度環境的變化,一系列關於香港未來的問題被提了出來:<em>當中國與世界之間的「落差」縮小時,香港作為「橋樑」的不可替代性,是否會減弱?它將如何重新定義自己對國家、對世界的價值?它能否在新的格局下,繼續扮演那個獨特的「超級聯繫人」?</em>這些問題,至今沒有定論。</p>
+    <div class="aside"><span class="hl">不變的底色:</span>無論政治如何變遷,作為一座城市,香港依然是全球重要的金融中心之一,依然有著高效的運作、璀璨的維港夜景、獨特的中西交融文化與美食、以及那份深植於市民血液的、務實而堅韌的生活力。這座城市的日常生命力,始終在延續。</div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座永遠在重新定義自己的城市</span>
+      <p>當代香港的處境,把它全部歷史的核心命題,再一次推到了所有人面前。<strong>香港,從它作為「門戶之城」誕生的第一天起,它的命運就從來不掌握在自己手中,而是繫於它所連接的「中國」與「世界」這兩端的關係,以及它自身那份「不一樣」的價值。</strong></p>
+      <p>這正是理解香港的最終一把鑰匙,也是它最深的命運與焦慮的根源。<em>香港的偉大,在於它是一座無與倫比的「橋樑」、一個高效的「中間人」、一個中西交融的奇蹟;但它的脆弱,也恰恰在於此——作為一座「門戶之城」,它缺乏一個可以完全自主的腹地,它的繁榮與身分,始終依賴於外部的格局,並隨著「中國」與「世界」這兩端關係的變化而起伏。</em>當這兩端和諧互通時,香港如魚得水、繁榮無比;當這兩端緊張角力時,夾在中間的香港,便會被撕扯、被重塑、陷入身分的兩難。今天的香港,正處在這樣一個被重新定義的時刻。它的故事遠未結束——這座由一個深水海港所孕育、由一波波難民的血汗所建成、由兩種制度的交會所塑造的城市,正帶著它那份在獅子山下淬煉出的、務實而堅韌的生命力,繼續在「中國」與「世界」之間,在「一國」與「兩制」之間,尋找著、也爭論著,屬於自己的、下一個身分。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ★ 🌃</div>
+  <p>近兩百年,一個海港,一波波難民,一場世紀的實驗,與一座永遠在追問「自己是誰」的城市。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的香港與香港人,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的香港人</h2>
+      <p class="act-sub" style="color:rgba(243,238,221,.6)">Why Hong Kong, and Hong Kongers, Are What They Are</p>
+      <div class="ornament" style="color:var(--gold-bright)">⚓ ★ 🌃</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的香港之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程,也都指向同一個核心:它是一座「門戶之城」,命運繫於它所連接的兩端。</p>
+
+      <h3>第一層:海港,把它變成一座「門戶之城」</h3>
+      <p>一切的源頭是<strong>地理</strong>。一個深水避風、扼守珠江口的天然良港,讓香港從一開始,就註定是一座「門戶之城」而非「腹地之城」。它土地狹小、缺乏資源,它的價值不在於「擁有什麼」,而在於「連接什麼」——它是溝通「中國」與「世界」的節點。這個「門戶」的定位,寫定了香港的全部命運:它的繁榮與焦慮,永遠繫於它所連接的這兩端。</p>
+
+      <h3>第二層:割讓,把它推上了一條獨特的道路</h3>
+      <p>接著是<strong>分離</strong>。香港本是中華嶺南海岸上一個古老平凡的漁鹽之鄉,卻在鴉片戰爭的砲火中被割讓給英國。這道「在屈辱中誕生」的傷口,卻陰差陽錯地,讓香港被納入了全球海洋貿易的網絡,走上了一條「資本主義、自由港、中西交融」的、迥異於中國大陸母體的獨特道路。<em>它因中國的屈辱而生,卻因這份分離而走向了獨特——這道弔詭,是它日後一切複雜情感的根源。</em></p>
+
+      <h3>第三層:難民,用血汗為它注入了靈魂</h3>
+      <p>然後是<strong>人</strong>。一波波為逃離大陸動盪而南來的難民,把資本、技術,與一種「一無所有、只能靠自己」的求生意志,帶到了這片借來的土地上。在獅子山下,他們用血汗,鍛造出香港的經濟奇蹟(從世界工廠到金融中心),也鍛造出「<em>獅子山精神</em>」——那份務實、堅韌、自力更生的核心認同。<em>但「難民」的出身,也埋下了那份「夾在中間、歸屬不定」的身分疏離——「借來的地方,借來的時間」。</em></p>
+
+      <h3>第四層:兩種制度的交會,讓它獨一無二</h3>
+      <p>最關鍵的塑造,是<strong>交會</strong>。一套英國的制度(法治、自由港、文官體系),被嫁接在深厚的中華嶺南根基之上,讓香港成為一個「既中且西、又非中非西」的、獨一無二的混血之城。<em>正是這份「不一樣」——這套迥異於中國大陸的制度與生活方式——構成了香港作為「中間人」的價值根基,也構成了「香港人」這個身分認同的核心。守護這份「不一樣」,對許多港人而言,關乎這座城市的靈魂。</em></p>
+
+      <h3>第五層:「一國兩制」的張力,定義了它的當下</h3>
+      <p>最後是<strong>張力</strong>。1997 年回歸後,「一國兩制」這個前所未有的實驗,試圖讓「主權的統一(一國)」與「制度的差異(兩制)」共存。但這兩者之間,內含著一道難解的張力——「一國」對主權、安全與統一的要求,與「兩制」對自由與自治的珍視,該如何劃定界線?這道張力,在 2014、2019、2020 年以劇烈的形式爆發,各方立場嚴重對立、至今爭論不休。<em>香港正處在一個被深刻重塑的時刻,而這個故事的結局,尚未寫定。</em></p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 一座命運繫於兩端的門戶之城</span>
+        <p>所以,今天的香港人是誰?他是<strong>一座「門戶之城」的子民——這座城因海港而生、因割讓而獨特、因難民的血汗而興、因兩種制度的交會而獨一無二、又因兩種制度的張力而焦慮</strong>。他的祖輩或許是討海的漁民、墾荒的圍村人,或是逃難而來、白手起家的移民;他生活在一座既深植中華嶺南、又被一個半世紀殖民與全球化所塑造的、中西交融的城市;他經歷了「東方之珠」的輝煌,也正經歷著一場關於這座城市未來的、深刻而充滿爭論的重塑。</p>
+        <p>他的繁榮與他的脆弱,是同一個「門戶之城」定位的兩面;他的「中西交融」與他的「身分焦慮」,是同一份「夾在兩個世界之間」處境的兩面;他對那份「不一樣」的珍視,與圍繞著「一國兩制」的劇烈張力,則是同一座城市在「中國」與「世界」、「一國」與「兩制」之間求索的兩面。<em>香港最深刻的真相是:它從來就不是一個能夠完全自主決定自己命運的地方;作為一座「門戶之城」,它的身世、它的繁榮、它的焦慮,始終繫於它所連接的「中國」與「世界」這兩端的關係。當這兩端和諧時,它便綻放;當這兩端緊張時,它便被撕扯。這既是它作為「橋樑」的偉大與宿命,也是它最深的脆弱與兩難。今天的香港,正站在它身世的又一個轉折點上,而它最終會走向何方,將取決於那兩端的關係如何演變,以及——生活在這座城市裡的人們,如何在劇變中,繼續守護那份在獅子山下淬煉出的、務實而堅韌的生命力。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">海港把它變成門戶,割讓把它推上獨特的道路,難民用血汗給了它靈魂,兩制的交會讓它獨一無二——而它的命運,始終繫於「中國」與「世界」這兩端的關係,以及它的人們,如何在劇變中守住自己。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">近兩百年的終極啟示</span>
+      <p>一座城市的樣貌,往往由它的地理(門戶)開局,由歷史的偶然(割讓)推上獨特的道路,由一代代移民的血汗注入靈魂,再由它所處的、它無法完全掌控的大格局(兩種制度、兩個世界)所塑造與考驗——而它能否安然存續,既取決於它所連接的兩端關係能否和諧,也取決於生活在這裡的人們,能否在無法選擇的命運裡,守住那份務實、堅韌、自力更生的生命力。這,就是香港至今仍在書寫、也仍在爭論的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,238,221,.78);margin-top:2.5rem">
+        從珠江口外的漁村與鹽田、鴉片戰爭中被割讓的小島,<br>
+        到自由港的崛起、獅子山下白手起家的難民,<br>
+        從「世界工廠」到國際金融中心的東方之珠,<br>
+        到一場世紀的談判、午夜降下又升起的旗幟,<br>
+        再到「一國兩制」的實驗、與一座城關於「自己是誰」的爭論——<br>
+        這段交織著海港、割讓、難民、奇蹟與張力的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的香港,<br>以及今天的,香港人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">⚓ ✦ 🌃</div>
+  <p>海港、難民與兩制 · 香港的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM A FISHING VILLAGE TO A WORLD CITY · 1841 – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

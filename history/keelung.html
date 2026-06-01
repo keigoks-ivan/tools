@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雨港：被光芒掩蓋的門戶</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16140f;
+  --parchment:#f3eee2;
+  --parchment-deep:#e7dfc9;
+  --sea:#1d3640;
+  --sea-deep:#0e2128;
+  --gold:#a8842f;
+  --gold-bright:#cda551;
+  --rust:#8a3a23;
+  --crimson:#74221a;
+  --jade:#33583f;
+  --faint:#665a45;
+  --line:#c6b58e;
+  --shadow:rgba(22,20,15,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(168,132,47,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(29,54,64,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(29,54,64,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #223e48 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23cda551' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23cda551' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(243,238,226,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2}
+.lede p{font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;color:var(--sea-deep);font-weight:500}
+.lede p .drop{float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem}
+.act-title{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2}
+.act-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint);margin-top:.8rem}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;border-left:4px solid var(--gold);line-height:1.4}
+.prose h4{font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;color:var(--sea-deep);margin:2.2rem 0 .8rem}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;background:linear-gradient(135deg, rgba(29,54,64,.04), rgba(168,132,47,.06));border-top:2px solid var(--gold);border-bottom:2px solid var(--gold)}
+.pull p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500}
+.pull::before{content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1}
+
+/* ====== INVESTOR / ECHO CALLOUT ====== */
+.investor{margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;background:var(--sea-deep);color:var(--parchment);border-radius:2px;box-shadow:0 18px 40px -16px rgba(14,33,40,.6)}
+.investor::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--gold-bright),var(--rust))}
+.investor .tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(243,238,226,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem}
+.tl-item::before{content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;background:var(--parchment);border:2px solid var(--rust);border-radius:50%}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.5rem 1.4rem;position:relative;overflow:hidden;transition:transform .3s ease, box-shadow .3s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;padding:.85rem 1rem;text-align:left}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(168,132,47,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STATS ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(29,54,64,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden}
+.finale::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");background-position:center;background-size:cover}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(243,238,226,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{margin:3rem 0;padding:2.4rem;border:1px solid rgba(205,165,81,.4);border-radius:3px;background:rgba(0,0,0,.18)}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* expanded edition */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#180f08 !important}
+.dark .act-title{color:#d6c29e}
+.dark .prose p{color:#cbb292}
+.dark .prose strong{color:#c6785a}
+.dark .prose em{color:#d6a676}
+.dark .prose h3{color:#c6785a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#887356}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(116,34,26,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* interludes */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(243,238,226,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* legacy/shift */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(29,54,64,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* debate box for contested history */
+.debate{margin:2.8rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--parchment-deep)}
+.debate-head{background:linear-gradient(135deg,var(--jade),#2a4734);color:var(--parchment);font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;padding:.8rem 1.2rem;display:flex;align-items:center;gap:.5rem}
+.debate-head::before{content:"\2696";font-size:1rem}
+.debate-body{padding:1.2rem 1.4rem}
+.debate-body .view{margin:.9rem 0;padding-left:1.1rem;border-left:3px solid var(--gold);font-size:.95rem;line-height:1.75}
+.debate-body .view .who{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.1em;color:var(--rust);text-transform:uppercase;display:block;margin-bottom:.2rem}
+.debate-body .view strong{color:var(--crimson)}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Rain Harbor · The Gateway in the Shadow</span>
+    <h1>雨港<br>被光芒<br><span class="em">掩蓋</span>的門戶</h1>
+    <p class="sub">從一座三面環山的天然深水港灣、台灣最早登上世界舞台的北方門戶，到一座曾是全台第一大港、如今卻被緊鄰的台北掩蓋、努力想被重新看見的雨港——<br>一部關於「為何今天的基隆是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的基隆，是一座終年多雨、被山海擠在狹窄谷地、街道蜿蜒、依山而建的階梯爬滿了房子、曾經是台灣第一大港與北方門戶、如今卻成了「台北的後花園」、大量居民每天通勤到台北上班的城？它的身世，與南方的高雄驚人地相似——同樣是天賜的良港、同樣被日本人築港打造、同樣扛下了重工業與軍事的代價；但它們的命運，卻走向了完全相反的兩端。高雄努力轉身、後來居上成為第二大城；而基隆，卻從「台灣的玄關、第一大港」的榮光頂點，一路滑落，被緊鄰的台北那道太過耀眼的光芒，徹底地掩蓋了。它離首都太近——近到它的繁華被吸走、它的人口被通勤、它的存在感被稀釋。如果說高雄是「努力被世界重新看見的港」，那麼基隆，就是<span style="color:var(--rust);font-weight:600">那座因為太靠近光、反而被光掩蓋的門戶之城</span>。它守著全台最好的港灣之一、淋著全台最多的雨，在台北的陰影下，努力地想讓世界記得——它，曾經是台灣的大門。讓我們從那場永遠下不完的雨開始，一層一層把它讀回來。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the City</span>
+    <h2 class="act-title">雨、山與一個天然的深水港灣</h2>
+    <p class="act-sub">The Rain, the Mountains, and a Harbor Carved by Nature</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解基隆,得先理解兩件它最鮮明、也最矛盾的地理特質:<strong>它有全台灣數一數二好的天然港灣,卻也下著全台灣數一數二多的雨,而且幾乎沒有腹地。</strong>這三件事——好港、多雨、地窄——共同寫定了基隆的命運:它天生該是一座偉大的港,卻也天生背負著「<em>多雨、擁擠、難以擴張</em>」的先天限制。理解這份「天賦與限制並存」的地理,就理解了基隆一生的福與苦。</p>
+
+    <h3>三面環山的天然良港</h3>
+    <p>基隆最大的天賦,是一座<strong>三面環山的天然深水港灣</strong>。一個被丘陵環抱、開口朝北的灣澳,像一隻天然的手,把外海的風浪擋在外面,圍出了一池可供大船安穩停泊的深水。對航海者而言,這是絕佳的港灣條件——而且,它正好位於台灣的<em>最北端</em>,是從中國大陸、從日本、從太平洋進入台灣北部的第一個門戶。這個「北方門戶」的位置,將決定基隆一生最重要的身分:它是台灣的「<strong>玄關</strong>」、台灣面向北方世界的大門。也正因為這個港灣的形狀,相傳像一個「雞籠」,基隆最早就被稱為「<em>雞籠</em>」。</p>
+    <div class="pull"><p>基隆是台灣的北大門——所有從北方、從海上要進入台灣的人,第一個遇見的,就是這座港。它是這座島,迎接世界的第一張臉。</p></div>
+
+    <h3>為什麼這麼多雨?</h3>
+    <p>但同一個地理,也帶來了基隆最著名的「標籤」——<strong>雨</strong>。基隆是全台灣最多雨的城市,素有「<em>雨港</em>」「雨都」之稱,一年中有大半的日子在下雨。這份多雨,源自地理的精準安排:基隆位於台灣<em>東北角</em>,正面迎向冬季強勁的<strong>東北季風</strong>;當潮濕的季風從海上吹來、遇上基隆三面環抱的<em>山地抬升</em>,水氣便凝結成雨,綿綿不絕地落下。於是,成就了港灣的那圈山,同時也成了製造雨水的機器。<em>雨,是基隆最深的印記——它的潮濕、它的陰鬱、它的浪漫與悲情,全都從這場下不完的雨裡來。</em></p>
+
+    <h3>沒有腹地的城</h3>
+    <p>基隆的第三個地理特質,是它最大的限制——<strong>幾乎沒有平地腹地</strong>。基隆被群山緊緊地逼向海邊,可供建設的平地極其狹小;城市只能擠在港灣周邊狹窄的谷地裡,或者<em>沿著陡峭的山坡向上爬</em>。這造就了基隆獨特的「山城」景觀(後面專章詳述),也埋下了它一個致命的發展瓶頸:<em>當一座城市沒有腹地可以擴張時,它的成長就有了天花板。</em>這一點,將在它日後與「腹地廣闊的台北」的競爭中,成為它無法克服的劣勢。山,給了基隆良港與雨,卻也奪走了它伸展的空間。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 同一座山,給了港、給了雨,也奪走了腹地</span>
+      <p>在任何殖民者、任何政權、任何工廠到來之前,<strong>那圈三面環抱的山、那道迎風的東北季風、與那狹窄的谷地</strong>,就已經替基隆寫好了它一生的劇本——而這個劇本充滿了矛盾。同一圈山,既圍出了絕佳的天然良港(它的福),又攔下季風製造了無盡的雨(它的標籤),更逼壓得它幾乎沒有腹地(它的苦)。基隆的天賦與限制,竟來自同一個地理源頭。</p>
+      <p>這是讀懂基隆的第一把鑰匙,也預示了它與南方那座「雙胞胎港」高雄最深的分野。高雄同樣是良港,但高雄擁有廣闊的腹地與平原,可以承接重工業、可以無限擴張;而基隆,雖有同樣優異的港灣、甚至更早成為門戶,卻被山困死,沒有腹地。<em>這個「地窄」的先天限制,將成為基隆日後從「第一大港」滑落、被「腹地廣闊的台北」掩蓋的根本原因之一。</em>基隆的故事,某種程度上,就是一座「擁有最好的港、卻沒有空間成長」的城,如何在地理的祝福與詛咒之間,走過它大起大落的一生。而這一切,要從這座港灣最早的主人,與它最早迎接的世界說起。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">❂ ✦ ❂</div>
+  <p>在西班牙人、在漢人、在「基隆」之前,<br>這座北方的港灣早已有人居住——<br><span class="hl">凱達格蘭人,是這座島北端最早望見世界船帆的一群。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The First People</span>
+    <h2 class="act-title">凱達格蘭與雞籠:北方港灣的原主人</h2>
+    <p class="act-sub">The Ketagalan, Heping Island, and the Northern Gateway</p>
+    <div class="ornament">❂ ❂ ❂</div>
+  </div>
+  <div class="prose">
+    <p>在西班牙人、在漢人、在「基隆」這個名字之前,這座北方的港灣早已有人居住。它最早的主人,是<strong>平埔原住民凱達格蘭族(Ketagalan)</strong>——與台北盆地的原住民同屬一個族群系統(這呼應了台北的脈絡)。他們沿著港灣、海岸與河口聚居,以漁撈、狩獵與貿易為生。基隆作為「台灣北方門戶」的身分,它真正的開篇,其實是從凱達格蘭人迎接最早的外來者開始的。</p>
+
+    <h3>社寮島:北台灣最早的接觸點</h3>
+    <p>港灣中有一座小島——今天的<strong>和平島(舊稱社寮島)</strong>——是凱達格蘭人重要的聚居地之一。由於基隆位於台灣最北端、是進入北台灣的第一站,這裡的凱達格蘭部落,成為北台灣<em>最早與外來海上勢力接觸</em>的原住民之一。早在大航海時代,來自中國、日本、乃至更遠地方的商船與漁民,就可能在此停泊、交易。基隆的凱達格蘭人,因此比台灣島內許多原住民,更早地接觸到了外面的世界——這正是「門戶」這個身分,從最古老的時代就開始的印記。</p>
+    <div class="pull"><p>基隆作為台灣北大門的故事,從凱達格蘭人就開始了——他們是這座島的北端,最早望見外來船帆、最早迎接世界的一群人。</p></div>
+
+    <h3>「雞籠」:一個古老的名字</h3>
+    <p>基隆最古老的名字是「<strong>雞籠</strong>」。關於這個名字的由來有不同說法:一說是因為港灣周邊的地形(如港中的小島、環抱的山勢)形似「雞籠」;另一說則認為它源自<em>凱達格蘭族的音譯</em>(如族名或社名的近音)。無論何種說法,「雞籠」這個名字都沿用了數百年,出現在荷蘭、西班牙與清代的文獻地圖上。直到清末,才取其音近、寓意「基地昌隆」的雅字,將「雞籠」改名為「<strong>基隆</strong>」。一個地名的演變,就濃縮了這座港從原住民的港灣、到漢人市街、再到近代城市的身世。</p>
+
+    <h3>被同化的原主人</h3>
+    <p>隨著西班牙、荷蘭、以及後來漢人的相繼到來與墾拓,凱達格蘭人的生活空間被快速擠壓。一如台灣其他平埔族群的命運(這在台灣史中是反覆的母題),基隆與北海岸一帶的凱達格蘭人,經歷了土地流失、文化同化與身分的「消失」——他們在通婚、改姓與漢化中,逐漸隱沒於漢人社會之中。今日,凱達格蘭族的當代尋根與正名,與台灣其他平埔族群一樣,仍是一條漫長的路。但他們作為「北方門戶最早的迎接者」這個角色,已永遠寫進了基隆身世的最開頭。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 門戶的身分,從最古老的時代就開始了</span>
+      <p>凱達格蘭與雞籠的故事,揭示了基隆最核心的身分——「<strong>門戶</strong>」——其實有著極其古老的根源。早在凱達格蘭人的時代,基隆就因為它「位居台灣最北端、扼守北方港灣」的位置,而成為這座島最早接觸外來世界的所在。它迎接世界的歷史,比台北、比許多城市都更早。「門戶」,是地理從一開始就賦予基隆的天職。</p>
+      <p>這也呼應了基隆與系列其他城市的對照。台南是漢人「最早登陸的起點」,而基隆,則是北台灣「最早望見世界的門戶」——一個在南、一個在北,都是台灣面向海洋、迎接外來者的最前線。只是,基隆迎接的世界,將比台南更早地、也更戲劇性地到來:就在凱達格蘭人的港灣裡,即將出現大航海時代歐洲強權的城堡與旗幟。基隆,將比台北更早地登上世界的舞台——而這,要從一群來自菲律賓的西班牙人說起。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>基隆「門戶」的身分,從最古老的時代就開始了。<br>在大航海時代,當南部是荷蘭人的天下時,<br><span class="hl">北方的雞籠,迎來了另一支歐洲強權:西班牙。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Age of Sail</span>
+    <h2 class="act-title">大航海時代的據點:西班牙與荷蘭的爭奪</h2>
+    <p class="act-sub">San Salvador, the Spanish, and the Dutch Conquest, 1626–1668</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>基隆有一個連許多台灣人都不太知道的、極具戲劇性的身世——它比台北、甚至在某種意義上與台南幾乎同時,就登上了世界舞台。在十七世紀的大航海時代,當荷蘭人在南部的台南經營大員時(這呼應了台南的脈絡),北方的雞籠港,則迎來了另一支歐洲強權——<strong>西班牙人</strong>。基隆,成為大航海時代列強在台灣北部爭奪的焦點。</p>
+
+    <h3>西班牙來了:聖薩爾瓦多城</h3>
+    <p>1626 年,西班牙人從他們的根據地菲律賓馬尼拉北上,佔據了雞籠。他們看中的,正是序章所說的——這座位於台灣北端、扼守航線的天然良港。西班牙人在港灣中的<strong>社寮島(今和平島)</strong>上,興建了堅固的<strong>聖薩爾瓦多城(San Salvador)</strong>,作為他們統治北台灣、並企圖將貿易與傳教勢力,從這裡延伸向中國與日本的據點。於是,當南部是荷蘭人的天下時,北部的雞籠與淡水,則插上了西班牙的旗幟——台灣的南北兩端,分別被兩個歐洲強權佔據。基隆,因此成為北台灣<em>最早的國際接觸點與殖民據點</em>。</p>
+    <div class="pull"><p>當台北盆地還是一片無人聞問的湖沼時,基隆已經有了歐洲的城堡、傳教士與國際貿易——它比台北,早了整整兩百多年登上世界舞台。</p></div>
+
+    <h3>荷蘭逐西:北台灣易主</h3>
+    <p>但西班牙在北台灣的經營,並不順利。他們面臨著補給困難、原住民的反抗、以及最重要的——南部荷蘭人的競爭與威脅。荷蘭人一直視西班牙為眼中釘,不願見其盤踞北台灣、分享台灣的貿易利益。終於,在 1642 年,<strong>荷蘭人發兵北上,攻佔了西班牙的聖薩爾瓦多城,將西班牙人逐出台灣</strong>(這呼應了台灣史詩中荷蘭逐西的脈絡)。北台灣的雞籠,於是從西班牙手中,轉入了荷蘭人的掌控。基隆,在短短十幾年間,就見證了兩個歐洲強權的興替——這在當時的台灣,是絕無僅有的國際舞台。</p>
+
+    <h3>動盪的北方據點</h3>
+    <p>此後,雞籠歷經了荷蘭的統治、鄭氏時期的接管(鄭氏曾在此設防)、以及荷蘭一度短暫地重佔雞籠(約 1664–1668 年間)等動盪。作為一個遠離主要政權中心(無論是南部的荷蘭、還是後來的鄭氏)的北方邊陲據點,雞籠的角色始終是<em>軍事與貿易的前哨</em>,而非繁華的核心。它重要,因為它扼守北方門戶;但它也始終動盪,因為它正處在各方勢力爭奪的最前線。這份「<em>重要卻動盪、是門戶卻非核心</em>」的處境,將是基隆一再重演的命運基調。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 門戶的宿命:最早被看見,也最先被爭奪</span>
+      <p>西班牙與荷蘭爭奪雞籠的故事,揭示了「門戶」這個身分的雙面性:<strong>身為門戶,意味著你最早被世界看見、最早登上舞台;但也意味著,你最先成為強權爭奪的目標、最先承受衝突的烽火。</strong>基隆比台北早兩百多年迎來歐洲的城堡與旗幟,這是它「門戶」的榮光;但它也因此成為西、荷、鄭各方反覆爭奪、動盪不安的前哨,這是它「門戶」的代價。</p>
+      <p>這份「最早被看見、卻也最先被爭奪」的宿命,將貫穿基隆的一生。後面的章節會看到,它在清代成為清法戰爭的戰場、在日治成為帝國的玄關、在戰後成為二二八的重災區——基隆始終站在台灣與外部世界碰撞的最前線,承受著作為「門戶」的光榮與創傷。而它最深的悲劇還在後頭:這座最早登上世界舞台的門戶,最終卻會被一座<em>更晚崛起、卻擁有廣闊腹地</em>的城市(台北),徹底地掩蓋。但在那之前,基隆還要先迎來它因「煤」與「砲火」而被推上近代化前沿的時代。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚒ ✦ ⚒</div>
+  <p>大航海的旗幟更迭之後,<br>基隆因兩樣東西被推上近代化的前沿——<br><span class="hl">它腳下的煤,與作為門戶所承受的、列強的砲火。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · Coal and Cannon</span>
+    <h2 class="act-title">煤與砲火:清代雞籠的近代化前沿</h2>
+    <p class="act-sub">The Coal Mines, the French War, and Taiwan's First Railway</p>
+    <div class="ornament">⚒ ⚒ ⚒</div>
+  </div>
+  <div class="prose">
+    <p>清代的雞籠,因為兩樣東西而被推上了台灣近代化的最前沿——<strong>煤</strong>與<strong>砲火</strong>。一個是它腳下蘊藏的黑色礦藏,讓它成為台灣的「煤都」;一個是它作為北方門戶,讓它成為列強覬覦、兵家必爭的戰場。這兩者,既帶來了基隆的繁榮與建設,也預示了它「<em>因重要而被爭奪、因門戶而承受砲火</em>」的命運。</p>
+
+    <h3>台灣的煤都</h3>
+    <p>基隆周邊(如八斗子一帶)蘊藏著豐富的<strong>煤礦</strong>,而且這些煤層靠近港口、易於開採與輸出。在十九世紀,煤是蒸汽時代最重要的能源——輪船、火車都燒煤。於是基隆的煤,成了炙手可熱的戰略物資。清廷在此開辦了官方的新式煤礦(八斗子官礦,是台灣最早採用機器、引進西方技術的近代化煤礦之一),基隆因此成為<em>台灣的「煤都」</em>。這份「煤」的家底,將在日後深刻地形塑基隆——它既帶來了礦業的財富與就業,也帶來了礦工的血汗與礦災的悲情(後面專章詳述)。煤,是基隆繁華的基礎之一,也是它悲情的源頭之一。</p>
+    <div class="pull"><p>基隆腳下的煤,點燃了蒸汽時代的輪船與火車;但這份黑色的財富,也是用礦工在不見天日的坑道裡,用血汗甚至生命換來的。</p></div>
+
+    <h3>清法戰爭:基隆保衛戰</h3>
+    <p>基隆作為「北方門戶」的戰略價值,在 1884–1885 年的<strong>清法戰爭</strong>中,以最慘烈的方式顯現。當時,法國為了在中法戰爭中取得籌碼,將目標指向台灣——而它鎖定的首要目標,正是擁有良港與煤礦的<strong>基隆</strong>。法軍艦隊砲擊、登陸基隆,爆發了激烈的<em>基隆之役</em>。在巡撫劉銘傳的指揮下,清軍與法軍在基隆一帶反覆爭奪、苦戰。雖然基隆部分地區一度被法軍佔領,但清軍最終守住了防線,加上法軍受困於疫病與台灣的環境(那場下不完的雨,也成了天然的防禦),未能達成佔領全台的目標。這場戰役在基隆留下了深刻的傷痕,至今基隆仍有「<em>法國公墓</em>」,埋葬著當年戰死、病死於此的法軍士兵——它是這座門戶之城承受砲火的見證。</p>
+
+    <h3>台灣第一條鐵路</h3>
+    <p>清法戰爭後,清廷更加意識到台灣海防與基隆的重要,積極推動近代化建設。其中最具里程碑意義的,是<strong>台灣第一條鐵路</strong>的興建——由劉銘傳主持,這條鐵路從<em>基隆</em>出發,通往台北,再延伸至新竹(這呼應了台灣史詩與台北的脈絡)。鐵路以基隆為起點,絕非偶然——因為基隆是港口、是門戶、是貨物與人員進出台灣的咽喉,鐵路自然要從這裡,把世界送進來、把台灣的物產送出去。這條以基隆為起點的鐵路,奠定了基隆作為「<em>台灣對外交通樞紐</em>」的地位,也預告了它即將在日治時期,登上「全台第一大港」的巔峰。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 重要,是福也是禍</span>
+      <p>清代雞籠的故事,揭示了基隆身世中一個貫穿始終的辯證:<strong>「重要」對基隆而言,既是福,也是禍。</strong>它因為有煤、有良港、是門戶而變得重要;但這份重要,既為它帶來了近代化的建設(官礦、鐵路),也讓它成為列強砲火的目標(清法戰爭)。基隆的繁榮與創傷,往往來自同一個原因——它太重要了。</p>
+      <p>這也讓基隆與南方的高雄,有了一個有趣的呼應與對照。兩座港都,都因為「重要」而被推上近代化的前沿、都承擔了作為戰略要地的代價。但基隆的「重要」,更早、更直接地與「砲火」和「門戶」連結在一起——它是台灣最早承受國際戰爭(清法戰爭)的城市之一。而那條從基隆出發的台灣第一條鐵路,更象徵著基隆即將迎來它的黃金時代:當日本人接手台灣、把基隆打造成帝國的「玄關」與全台第一大港時,這座門戶之城,將攀上它繁華的頂峰。然而,站得越高,日後的跌落,也將越深。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">☼ ✦ ☼</div>
+  <p>清代的煤與砲火之後,新的主人到來。<br>日本人把這座天然良港築成現代大港,<br><span class="hl">並賦予它一個至高的身分:台灣的玄關、第一大港。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Gateway of the Empire</span>
+    <h2 class="act-title">築港與門戶:日本打造的台灣第一大港</h2>
+    <p class="act-sub">Dredging the Harbor, Building the Empire's Front Door, 1895–1945</p>
+    <div class="ornament">☼ ☼ ☼</div>
+  </div>
+  <div class="prose">
+    <p>基隆攀上它繁華頂峰的,是日本時代。如同日本人把高雄從潟湖漁港打造成工業大港(這呼應了高雄的脈絡),他們也對基隆進行了規模浩大的築港工程,並賦予它一個至高無上的身分——<strong>台灣的「玄關」,也就是整個帝國進出台灣的正門。</strong>在這個時期,基隆成為名副其實的<em>台灣第一大港</em>,站上了它一生的最高點。</p>
+
+    <h3>築港:把天然良港升級為現代大港</h3>
+    <p>序章說過,基隆有著三面環山的天然深水良港。日本人看中了這個港灣與它「北方門戶」的位置,展開了大規模的<strong>築港工程</strong>:疏濬航道、興建現代化的碼頭與防波堤、填築港區用地、設置倉庫與港埠設施。一座天然的港灣,被人工的力量,升級為一座能停靠大型輪船、吞吐巨量貨客的現代化大港。基隆港,成為日本經營台灣的<em>海運核心</em>。</p>
+    <div class="pull"><p>對日本人而言,基隆就是台灣的「正門」——所有要進入這座島的人與貨,都要先穿過基隆這道門。它是帝國與台灣之間,那道最重要的咽喉。</p></div>
+
+    <h3>玄關:帝國與台灣之間的咽喉</h3>
+    <p>基隆在日治時期最關鍵的身分,是台灣的「<strong>玄關</strong>」(門戶、正門)。為什麼是基隆?因為它位於台灣<em>最靠近日本「內地」</em>的北端——從日本本土搭船來台,基隆是登陸的第一站;台灣的物產(米、糖等)要運往日本,也多從基隆出港。基隆,因此成為連結「殖民母國日本」與「殖民地台灣」之間,那道最重要的<em>咽喉與門戶</em>。再加上序章所說、那條以基隆為起點的縱貫鐵路——貨客在基隆下船,即可搭火車直達台北、台中、台南、高雄——基隆「港口＋鐵路起點」的雙重樞紐地位,讓它成為當之無愧的<strong>台灣第一大港、第一玄關</strong>。一座城市,扼守著一整座島嶼對外的大門。</p>
+
+    <h3>現代市街與港都的興起</h3>
+    <p>隨著港口的繁榮,基隆的市街也快速現代化。日本人在狹窄的谷地與填築的港區用地上,規劃了現代化的市街、官署、車站(基隆車站是縱貫鐵路的起點站)、銀行、商店。港邊聚集了商行、倉庫、船運公司;社寮島(和平島)一帶發展出造船與漁業。基隆,從一個動盪的北方據點、一個產煤的港鎮,蛻變為一座繁華、現代、車水馬龍的<em>第一大港都</em>。它的人口與商業快速成長,迎來了它身世中最輝煌的時代序幕——一個即將在下一章綻放的「黃金時代」。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 站上頂峰的門戶</span>
+      <p>築港與玄關的故事,記錄了基隆攀上一生頂峰的時刻。<strong>它從一個動盪的邊陲據點,一躍成為台灣第一大港、整個帝國進出台灣的正門。</strong>在這個時代,基隆是台灣面向世界最重要的一張臉——你要進入台灣,第一個遇見的就是它;台灣要走向世界,第一步也是從它出發。「門戶」這個從凱達格蘭時代就開始的身分,在此達到了最輝煌的實現。</p>
+      <p>但這份頂峰的榮光裡,也藏著日後悲劇的伏筆。基隆之所以是「玄關」,很大程度上是因為它<em>緊鄰著、並服務於</em>那個正在崛起為全島中心的台北——基隆是門,台北是廳;貨客穿過基隆這道門,真正的目的地是台北。在繁華的當下,這種「門戶」關係讓基隆無比重要;但它也埋下了一個危險的依附性:<em>基隆的重要,有很大一部分,是建立在「服務台北」之上的。</em>當有一天,台北的光芒太過耀眼、或當運輸的方式改變、或當另一個港(高雄、台北港)崛起時,這道「門戶」的不可取代性,就會動搖。然而此刻,沒有人想到這些——基隆正沉浸在它最繁華、最風光的黃金歲月裡。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">❦ ✦ ❦</div>
+  <p>成為第一大港的基隆,迎來了它最風光的歲月。<br>委託行的舶來品、酒吧街的各國船員、煤礦的財富——<br><span class="hl">那是一個遍地黃金、被稱為「小上海」的黃金時代。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Golden Age</span>
+    <h2 class="act-title">黃金時代:繁華的港都歲月</h2>
+    <p class="act-sub">Imported Goods, Sailors' Bars, and the "Little Shanghai"</p>
+    <div class="ornament">❦ ❦ ❦</div>
+  </div>
+  <div class="prose">
+    <p>從日治後期到戰後初期,基隆迎來了它一生最繁華、最風光的黃金時代。作為台灣第一大港、第一玄關(第四章),全世界的貨物、人員、財富與文化,都從這道門湧入台灣;而基隆,作為這道門本身,自然也染上了最國際化、最五光十色的繁華。那是一個「<strong>大船入港、黃金遍地</strong>」的年代,基隆甚至被冠上「<em>小上海</em>」之名。</p>
+
+    <h3>委託行與舶來品:世界的櫥窗</h3>
+    <p>作為貨物進出的門戶,基隆最獨特的繁華象徵,是「<strong>委託行</strong>」。當年,跑船的船員從世界各地,帶回了台灣買不到的<em>舶來品</em>——化妝品、洋酒、服飾、家電、各式各樣的進口貨。這些珍稀的舶來品,就透過基隆的「委託行」(代為寄賣進口貨的商行)流通、販售。於是基隆的委託行街(如孝三路一帶),成了當年全台灣最時髦、最能買到「世界貨」的地方——人們從各地專程來基隆,就為了採購這些舶來品。委託行,是基隆作為「門戶」最生動的繁華見證:<em>世界的好東西,都先經過基隆這道門,才流向台灣各地。</em>基隆,曾是台灣眺望世界的櫥窗。</p>
+    <div class="pull"><p>那是基隆最風光的年代——大船載著世界的繁華入港,委託行裡擺滿了舶來品,整座城是台灣眺望世界的櫥窗。</p></div>
+
+    <h3>船員、酒吧與港都的夜</h3>
+    <p>大港的繁華,也帶來了獨特的<strong>港都文化</strong>。來自世界各國的船員,在基隆靠岸、停留、消費;於是港邊發展出熱鬧的<em>酒吧街、餐館與娛樂場所</em>,迎接著南腔北調、各國膚色的水手。基隆的夜,是喧鬧的、國際的、充滿異國情調與漂泊氣息的。這種「<em>船來船往、人來人去</em>」的港都性格,塑造了基隆獨特的海派、開放、又帶著一絲漂泊與滄桑的城市氣質——它見慣了世界的來去,也習慣了繁華與離別。</p>
+
+    <h3>煤礦財富與顏家</h3>
+    <p>基隆黃金時代的財富,除了來自港口,還來自腳下的<strong>煤</strong>(第三章)。基隆與周邊(瑞芳、平溪一帶)的礦業,造就了驚人的財富,其中最具代表性的,是<strong>基隆顏家</strong>——他們以經營煤礦致富,成為與霧峰林家、板橋林家等並列的「<em>台灣五大家族</em>」之一(這呼應了台中文化城林家的脈絡)。顏家的崛起,象徵著基隆在港口與煤礦雙重加持下的繁榮巔峰。一座城市,同時擁有台灣第一大港的吞吐、與支撐工業時代的黑金——基隆的黃金時代,是名副其實的「<em>遍地黃金</em>」。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 站在世界與台灣的交會點上</span>
+      <p>黃金時代的故事,記錄了基隆作為「門戶」所能達到的最繁華的樣貌。<strong>它站在世界與台灣的交會點上,世界的貨物、文化、人員從這裡湧入,而它就在這股洪流的中心,盡情地繁華著。</strong>委託行的舶來品、酒吧街的各國船員、顏家的煤礦財富——這一切共同構成了一個五光十色、國際化、遍地黃金的「小上海」。那是基隆最驕傲、最風光的歲月。</p>
+      <p>然而,這份繁華的本質,藏著它的脆弱。基隆的黃金時代,完全建立在它「作為門戶」的功能之上——它繁華,因為它是貨物與人員的<em>必經之地、轉運之站</em>。但「轉運站」的繁華,是流動的、是借來的:那些舶來品、那些船員、那些財富,都只是「<em>路過</em>」基隆,真正的目的地,往往是台北與台灣各地。基隆的繁華,是「門戶」的繁華,而非「目的地」的繁華。這意味著,一旦它「門戶」的不可取代性消失——一旦運輸方式改變、一旦台北自己強大到不再需要這道門、一旦有別的港取而代之——那麼這借來的繁華,就會像退潮一樣迅速消散。而在那之前,這座繁華的港都,還要先承受它身世中最深、最痛的幾道傷痕。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚑ ✦ ⚑</div>
+  <p>但繁華的黃金時代之下,<br>基隆也承載著它身世中最深、最痛的傷痕——<br><span class="hl">港邊的血、礦坑的難,與那場彷彿洗不盡悲情的雨。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Scars</span>
+    <h2 class="act-title">雨港的傷痕:二二八、礦災與悲情</h2>
+    <p class="act-sub">The Blood by the Harbor, the Mines, and the Rain's Sorrow</p>
+    <div class="ornament">⚑ ⚑ ⚑</div>
+  </div>
+  <div class="prose">
+    <p>繁華的黃金時代之下,基隆也承載著它身世中最深、最痛的幾道傷痕。一座作為「門戶」的城,既最早迎接世界的繁華,也最先承受時代的衝擊與創傷。基隆的雨,彷彿總帶著一絲化不開的悲情——而這份悲情,有著它真實而沉重的歷史來由:港邊的血、礦坑的難、與海上的逝。這一章,是基隆雨港性格中最沉重的底色。</p>
+
+    <h3>二二八:港邊的血色記憶</h3>
+    <p>1947 年的二二八事件中,<strong>基隆是受創極為慘重的地區之一</strong>(這呼應了台灣史詩中二二八的脈絡)。作為台灣的門戶大港,當國民政府自大陸調派軍隊來台進行鎮壓時,<em>基隆港正是軍隊登陸的主要port之一</em>。隨之而來的鎮壓與清鄉,在基隆港邊與市區,留下了極為慘烈、令人不忍卒睹的記憶——許多民眾在此罹難。這段港邊的血色歷史,是基隆作為「門戶」所承受的、最沉痛的一道傷痕:正因為它是大門,所以鎮壓的軍隊從這裡登陸,悲劇也在這裡最先、最慘烈地上演。如同整個台灣,基隆也透過後來的紀念與轉型正義,試圖面對與療癒這段傷痛。</p>
+    <div class="pull"><p>基隆的雨,洗不去港邊那段血色的記憶——身為台灣的大門,它最先迎接了繁華,也最先承受了時代最沉重的悲劇。</p></div>
+
+    <h3>礦災:黑金背後的血汗</h3>
+    <p>基隆繁華的另一個基礎——煤(第三章)——也有它沉重的代價。採煤是極其危險、艱辛的勞動,礦工們在不見天日、隨時可能崩塌或氣爆的坑道裡,用血汗甚至生命,換取那份「黑金」。基隆與周邊礦區的歷史上,發生過多起慘重的<strong>礦災</strong>,奪走了大量礦工的性命,留下無數破碎的家庭(台灣礦業史上幾場最嚴重的礦災,即發生在大基隆周邊的礦區)。礦工,是基隆黃金時代背後沉默的、被忽略的一群——他們的勞動撐起了繁榮,他們的犧牲卻常被遺忘。這份「<em>黑金背後的血汗與悲情</em>」,是基隆勞動歷史最沉重的一頁。</p>
+
+    <h3>海的無常:船難與漂泊</h3>
+    <p>作為一座以海為生的港都,基隆也承受著<strong>海的無常</strong>。漁民、船員出海討生活,卻可能一去不返;海難、船難,是港都居民生命中真實的陰影。靠海吃飯,意味著要與大海的喜怒無常共處;繁華的大船入港背後,是無數家庭對出海親人平安歸來的祈盼與牽掛。這份與海相伴的<em>漂泊、無常與牽掛</em>,加上終年不停的雨,共同沉澱出基隆那種<em>剛硬卻又帶著淡淡哀愁</em>的獨特城市氣質。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 繁華與創傷,是門戶的一體兩面</span>
+      <p>雨港傷痕的故事,揭示了基隆「門戶」身分最沉重的一面:<strong>身為迎接世界的大門,基隆既最先享受了繁華,也最先、最深地承受了時代的創傷。</strong>二二八的軍隊從這道門登陸、煤礦的血汗撐起這道門的繁榮、海的無常吞噬著這道門的子民——基隆的繁華有多耀眼,它的傷痕就有多沉重。它的雨,彷彿就是為了沖刷這些創傷,卻又永遠沖刷不盡。</p>
+      <p>這也讓基隆的城市性格,與南方那座同樣承受過代價的高雄,有了深刻的呼應。高雄因重工業而剛硬、因承受污染與職災而懂得抗爭;基隆則因港邊的血、礦坑的難、海的無常,而剛硬中帶著一絲化不開的悲情與滄桑。兩座港都,都在繁華的背後,扛下了沉重的代價。但基隆的命運,即將比高雄更加令人唏噓:就在它承受著這些傷痕的同時,它賴以繁華的根基——「門戶」的不可取代性——正在悄悄地、無可挽回地流失。那道一直在它身旁、越來越耀眼的光,即將把這座門戶之城,徹底地掩蓋。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">◐ ✦ ◐</div>
+  <p>就在它承受傷痕的同時,<br>它賴以繁華的根基,正無可挽回地流失——<br><span class="hl">那道一直在它身旁、越來越耀眼的光,即將把它掩蓋。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · In the Shadow</span>
+    <h2 class="act-title">被掩蓋的門戶:台北的光芒與港的沒落</h2>
+    <p class="act-sub">When the Capital's Light Eclipsed the Gateway</p>
+    <div class="ornament">◐ ◐ ◐</div>
+  </div>
+  <div class="prose">
+    <p>這一章,是基隆整部身世最核心、也最令人唏噓的轉折——它如何從「台灣第一大港、第一玄關」的頂峰,一路滑落,最終被緊鄰的台北,徹底地掩蓋。基隆的沒落,不是因為它做錯了什麼,而是因為一連串它無法控制的結構性因素,共同奪走了它「門戶」的不可取代性。它的悲劇在於:<strong>它離那道光(台北)太近了,近到自己被光吞沒。</strong></p>
+
+    <h3>第一擊:腹地的詛咒</h3>
+    <p>基隆沒落的根本原因之一,埋在它的地理裡——序章說過的「<strong>沒有腹地</strong>」。基隆被群山緊逼,幾乎沒有平地可以發展。當一座港口城市想要成長為一個完整的大都會時,它需要廣闊的腹地來建設工業區、住宅、商業中心。但基隆沒有。它的所有發展,都被擠壓在狹窄的港灣谷地裡。<em>於是,當貨物從基隆港上岸後,真正能容納這些貨物加工、儲存、消費、發展的廣闊腹地,不在基隆,而在隔壁那個有著廣大盆地的——台北。</em>基隆只能是「門」,台北才是「廳」。地理,從一開始就決定了基隆無法獨立壯大,只能依附於台北。</p>
+    <div class="pull"><p>基隆的悲劇,寫在它的地形裡:它有最好的港,卻沒有可以發展的腹地——所以它注定只能當台北的大門,而不是它自己的中心。</p></div>
+
+    <h3>第二擊:貨櫃時代的轉移</h3>
+    <p>第二個致命打擊,來自<strong>貨櫃運輸的時代變革</strong>。現代的貨櫃航運,需要更深的水深、更大的腹地來堆放貨櫃、更廣的腹地連接陸運。基隆狹窄的港灣與毫無腹地的地形,在貨櫃時代逐漸顯得力不從心。與此同時,南部腹地廣闊的<em>高雄港</em>崛起,成為台灣貨櫃吞吐的主力(這呼應了高雄的脈絡);後來,連台北自己旁邊、腹地更佳的<em>台北港</em>也加入分流。基隆港的貨運地位,從「全台第一」一路下滑。它「<em>第一大港</em>」的桂冠,先是被高雄奪走,自身的吞吐量也持續萎縮。失去了「第一大港」,基隆也就失去了它最核心的繁華基礎。</p>
+
+    <h3>第三擊:被台北吸走的一切</h3>
+    <p>最致命的,是<strong>台北的光芒</strong>。基隆緊鄰台北,而台北作為首都,擁有政治、經濟、文化、人口的絕對集中(這呼應了台北的脈絡)。當一座超級都會就在你隔壁時,你的一切——人才、資本、商業、機會——都會被它<em>吸走</em>。基隆的繁華(如委託行)隨著台北自身商業的發達與進口的便利化而沒落;基隆的人才與青年,流向台北尋求更好的發展;基隆的產業空洞化,因為所有的資源都向台北集中。<em>基隆從一個「服務台北的門戶」,逐漸退化成一個「被台北吸乾、又被台北掩蓋」的附庸。</em>它離光太近,於是它自己,成了那道光腳下最深的陰影。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 離光太近,反而被光掩蓋</span>
+      <p>被掩蓋的門戶,是基隆身世中最深刻、也最令人唏噓的一課:<strong>有時候,毀掉一座城的,不是它離繁華太遠,而是它離繁華太近。</strong>基隆的悲劇,恰恰在於它緊鄰著台北這道太過耀眼的光——近到它的繁華被吸走、它的人口被通勤、它的存在感被稀釋、它的不可取代性被剝奪。它本是台灣的大門,最後卻成了首都腳下最深的陰影。</p>
+      <p>這也構成了與南方高雄最深刻的鏡像對照。高雄與基隆,本是一對「港的雙胞胎」——同樣天賦良港、同樣被日本築港、同樣承受過代價。但高雄擁有<em>廣闊的腹地</em>,又<em>遠離首都的光芒</em>,所以它能獨立發展成完整的大都會、能承接重工業、能後來居上;而基隆,沒有腹地、又緊鄰台北,所以它只能依附、被吸附、被掩蓋。<em>同樣是好港,一個因「有腹地、離首都遠」而壯大,一個因「沒腹地、離首都近」而沒落——地理,再一次寫定了截然不同的命運。</em>然而,基隆的故事還沒結束。被掩蓋之後,它將以一個全新、卻也尷尬的身分繼續存在——台北的通勤後花園。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⇄ ✦ ⇄</div>
+  <p>失去了第一大港的繁華、被台北的光芒掩蓋,<br>基隆以一個全新卻尷尬的身分繼續存在——<br><span class="hl">一座大量居民每天通勤台北、被首都吃掉的宿舍之城。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Commuter Town</span>
+    <h2 class="act-title">通勤之城:被台北吃掉的基隆</h2>
+    <p class="act-sub">Living in Keelung, Working in Taipei</p>
+    <div class="ornament">⇄ ⇄ ⇄</div>
+  </div>
+  <div class="prose">
+    <p>失去了「第一大港」的繁華、被台北的光芒掩蓋之後(第七章),基隆以一個全新、卻也尷尬的身分繼續存在——它成了一座<strong>「台北的通勤後花園」</strong>。這是基隆當代最真實、也最無奈的處境:它不再是一個有著獨立繁華與自主命運的港都,而更像是大台北生活圈邊緣的一個<em>衛星城、一個宿舍區</em>。理解這份「被台北吃掉」的處境,就理解了當代基隆最深的失落與認同焦慮。</p>
+
+    <h3>住基隆,上班台北</h3>
+    <p>基隆當代最典型的生活模式,是「<strong>住基隆、上班台北</strong>」。由於基隆緊鄰台北(車程不遠),又因為它的房價與生活成本相對台北低廉,於是大量的基隆人——尤其是青壯年——<em>每天通勤往返於基隆與台北之間</em>:清晨擠上客運或火車進台北上班,夜晚再拖著疲憊回到基隆睡覺。基隆,成了許多人「<em>負擔得起的睡覺的地方</em>」,而他們的工作、消費、人生的重心,卻都在台北。一座城市的居民,白天大量「流出」到另一座城市,夜晚才「流回」——這正是「衛星城/通勤城」最典型的樣貌。基隆的白天,因此顯得有些空蕩。</p>
+    <div class="pull"><p>基隆成了一座「睡覺的城」——人們在這裡睡覺,卻在台北生活;它的居民,把人生最精華的白天,都留給了隔壁那座城。</p></div>
+
+    <h3>自主性的流失</h3>
+    <p>「通勤城」的身分,帶來了基隆<strong>城市自主性的流失</strong>。當大量居民的工作、消費、娛樂、社交都在台北時,基隆自身的商業、產業、文化活力就難以維繫——錢在台北賺、在台北花,基隆本地的經濟自然空洞化。一座城市若不能提供足夠的工作與機會,它就只能淪為「住宅功能」的提供者,失去作為一個<em>完整、自主的城市</em>的生命力。基隆的命運,於是與它的母體台北,綁定得越來越深,而它自己的面目,卻越來越模糊。它從一個曾經驕傲的「台灣門戶」,退化成一個「<em>大台北的邊陲宿舍</em>」。</p>
+
+    <h3>人口外移與老化</h3>
+    <p>缺乏在地的工作與發展機會,加上被台北的吸力,基隆面臨著嚴峻的<strong>人口外移與老化</strong>。青年為了更好的發展,不只是「通勤」台北,更乾脆「移居」台北或其他城市;基隆的人口長期呈現流失與老化的趨勢(這呼應了台灣整體少子化、區域發展不均的脈絡)。一座留不住年輕人的城市,它的活力與未來也隨之流失。對基隆而言,這是比「港口沒落」更深層的危機——港口的繁華還可能靠轉型找回,但<em>當一座城市連自己的下一代都留不住時,它失去的是希望本身。</em></p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 當一座城,變成另一座城的附屬</span>
+      <p>通勤之城的故事,揭示了基隆當代最深的失落:<strong>它不只失去了繁華,更失去了「作為一座獨立、自主城市」的完整性——它變成了另一座城市(台北)的附屬與延伸。</strong>它的居民、它的經濟、它的重心,都被台北吸納;它自己,則只剩下「提供廉價住宅」這個被動的功能。從「台灣的玄關」到「台北的宿舍」,這個身分的墜落,是何等的巨大。</p>
+      <p>這份「被鄰近的大城吃掉」的命運,並非基隆獨有——它其實是所有「緊鄰超級都會的衛星城」共同的困境(這也呼應了大台北雙城、乃至基隆周邊新北市鎮的處境)。當資源、機會、人口高度向單一中心(台北)集中時,周邊的城市就容易被「虹吸」,失去自主性。基隆只是這個現象中,最戲劇性、最令人唏噓的一個案例——因為它曾經那麼輝煌、曾經是台灣的大門,如今卻淪為附庸。然而,被掩蓋、被吃掉的基隆,並沒有完全失去它的靈魂。在那些依山而建的山城巷弄、在熱鬧的廟口、在多雨的日常裡,基隆獨特的生活肌理與性格,依然頑強地活著。下一章,讓我們走進真實的、生活著的基隆。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⌘ ✦ ⌘</div>
+  <p>但無論如何被掩蓋、被吃掉,<br>基隆都有它無法被奪走的靈魂——<br><span class="hl">藏在攀上山坡的階梯山城、廟口的燈火,與那場下不完的雨裡。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Hillside City</span>
+    <h2 class="act-title">山城與港邊:基隆的生活肌理</h2>
+    <p class="act-sub">Stairway Settlements, the Temple Market, and Life in the Rain</p>
+    <div class="ornament">⌘ ⌘ ⌘</div>
+  </div>
+  <div class="prose">
+    <p>無論港口如何沒落、無論被台北如何掩蓋,基隆都有它無法被奪走的、獨一無二的靈魂——它藏在那些依山而建的階梯巷弄裡、藏在熱氣蒸騰的廟口夜市裡、藏在那場下不完的雨裡。這份生活的肌理與性格,是基隆作為「基隆」而非「台北宿舍」的最後、也最堅實的證明。</p>
+
+    <h3>爬上山坡的城</h3>
+    <p>序章說過,基隆被群山緊逼、幾乎沒有平地。這個地理限制,造就了基隆最獨特的景觀——<strong>依山而建的階梯山城</strong>。由於谷地的平地有限,基隆的房子只能<em>沿著陡峭的山坡,一層一層地向上爬</em>。狹窄蜿蜒的階梯、緊密相連的房舍、在山壁上層層疊疊的聚落(如著名的「<em>罾仔寮</em>」等山城),構成了基隆獨有的、立體而魔幻的城市紋理。從港邊望去,整座城像是攀附在山坡上的一幅巨大拼貼。這種「<em>向上發展、與山共存</em>」的山城景觀,是基隆在「沒有腹地」的限制下,長出的獨特生命形態——它把劣勢,活成了一種獨一無二的城市風景。</p>
+    <div class="pull"><p>沒有平地,基隆就往山上長——那些攀爬在陡坡上、層層疊疊的房子,是這座城在地理的擠壓下,倔強活出來的姿態。</p></div>
+
+    <h3>廟口:基隆的不夜之心</h3>
+    <p>基隆生活肌理最熱鬧、最有名的核心,是「<strong>基隆廟口</strong>」夜市。圍繞著奠濟宮(廟)發展起來的廟口夜市,是全台灣最知名的夜市之一——這裡集結了基隆作為港都所匯聚的、各式各樣的小吃:鼎邊趖、天婦羅、營養三明治、泡泡冰、各種海鮮料理……廟口的熱鬧、喧囂、燈火與美食,是基隆庶民生命力最旺盛的展現,也是這座城市在沒落與失落之中,依然鮮活跳動的「<em>不夜之心</em>」。它證明了:無論港口如何冷清,基隆人「<em>把日子過得熱熱鬧鬧、有滋有味</em>」的本事,從未失去。</p>
+
+    <h3>海、雨,與港都性格</h3>
+    <p>基隆的生活,始終離不開<strong>海</strong>與<strong>雨</strong>。它仍是一個重要的<em>漁業基地</em>(遠洋漁業、卸魚),港邊的海產、漁市,是基隆飲食的底色;外海的<em>基隆嶼</em>,是這座城市標誌性的海上地標。而那場永遠下不完的雨(序章),則滲透進了基隆的一切——它讓這座城市潮濕、陰鬱,卻也帶來一種獨特的、電影感的浪漫與滄桑。海的漂泊、雨的纏綿、山城的擁擠、廟口的熱鬧、港邊的滄桑——這些共同淬鍊出基隆人那種<em>剛硬、海派、念舊,卻又帶著一絲憂鬱與漂泊氣質</em>的港都性格。它不像台北精緻、不像台中開闊、不像台南悠閒——基隆有一種<em>淋著雨、靠著海、在山坡上認真生活的、樸實而深情的性格</em>。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 在限制與失落中,活出獨一無二的樣子</span>
+      <p>山城與港邊的故事,揭示了基隆最動人的一面:<strong>即使在地理的擠壓(沒有腹地)、命運的失落(被掩蓋、被吃掉)之下,基隆依然頑強地、認真地,活出了自己獨一無二的樣子。</strong>它把「沒有平地」的限制,活成了魔幻的山城;它把港都的滄桑,化成了廟口的熱鬧;它在那場下不完的雨裡,淬鍊出一種別處沒有的、深情而剛硬的性格。</p>
+      <p>這份生活的肌理與性格,是基隆最寶貴、也最不該被遺忘的資產。當人們只看到「沒落的港、台北的宿舍」時,他們忽略了:基隆作為一座有著數百年身世、獨特地理、與鮮明性格的城市,它的靈魂,從未真正消失。它一直都在——在山城的階梯上、在廟口的燈火裡、在雨港的潮濕中。而這份「<em>即使被掩蓋,也依然活著的靈魂</em>」,正是基隆能否「重新被看見」的根本所在。因為一座有靈魂、有故事、有獨特樣貌的城,終究不該、也不會永遠被埋沒在陰影裡。下一章,讓我們看看,基隆如何努力地,想讓世界重新看見它。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">✦ ✦ ✦</div>
+  <p>守著獨特靈魂的基隆,不甘心永遠待在陰影裡。<br>它用一抹抹色彩、一座座改造的老屋、一艘艘郵輪,<br><span class="hl">努力地想對世界喊著:重新看見我。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · Seen Again</span>
+    <h2 class="act-title">重新被看見:港市再生與翻轉的努力</h2>
+    <p class="act-sub">Colorful Houses, Design, and the Effort to Be Noticed Again</p>
+    <div class="ornament">✦ ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>進入二十一世紀,被掩蓋、被吃掉的基隆,展開了一場努力——它想要<strong>重新被看見</strong>。當港口的繁華不再、當「台北宿舍」的身分令人不甘,基隆開始嘗試用新的方式,重新發現自己的價值、擦亮自己的招牌、找回作為一座城市的尊嚴與活力。這場「重新被看見」的努力,是當代基隆最積極、也最動人的一頁,雖然它也伴隨著爭議與未竟的挑戰。</p>
+
+    <h3>用設計,翻轉一座城</h3>
+    <p>基隆再生的一個鮮明策略,是「<strong>用設計翻轉城市</strong>」。近年來,基隆透過一系列的城市美學與設計改造,試圖扭轉它「老舊、陰鬱、沒落」的形象。其中最著名的案例之一,是<strong>正濱漁港的「彩色屋」</strong>——將老舊漁港邊的房舍,漆上繽紛的色彩,讓原本黯淡的港灣,搖身變成IG打卡的熱門景點,意外地讓世界重新注意到了基隆。此外,還有將老建築活化的<em>太平青鳥書店</em>(由山城裡廢棄的小學改造,呼應第九章的山城)、<em>基隆車站與港區的改造</em>、<em>城際轉運站</em>的整建,以及各種設計導向的城市再生計畫。基隆,試圖用「設計」與「美學」,為自己創造一個全新的、年輕的、值得被看見的形象。</p>
+    <div class="pull"><p>基隆不甘心只當台北的宿舍——它用一抹抹色彩、一座座改造的老屋,努力地對世界喊著:看見我,我曾是台灣的大門,我依然有我的美。</p></div>
+
+    <h3>郵輪母港:門戶的另一種可能</h3>
+    <p>基隆也試圖重新發揮它「港」的價值,只是換了一種形式——<strong>郵輪觀光</strong>。基隆港憑藉它鄰近台北、又是天然良港的條件,發展成為台灣重要的<em>郵輪母港</em>之一。一艘艘巨大的國際郵輪停靠基隆,載來大量的觀光客——他們從基隆登陸,前往台北及北台灣各地旅遊。這某種程度上,是基隆「門戶」身分的一種當代延續與轉化:它不再是貨物的門戶,而試圖成為「<em>觀光客進入台灣的門戶</em>」。雖然郵輪觀光也面臨「遊客只是路過、消費留在台北」的老問題(呼應第五章「轉運站繁華」的脆弱),但它畢竟為基隆港,找到了一條新的生路。</p>
+
+    <h3>重新被看見的努力與爭議</h3>
+    <p>這場「重新被看見」的努力,也伴隨著討論與爭議。樂觀者認為,設計翻轉、郵輪、年輕世代的回流與創業,確實讓基隆找回了一些活力與能見度,讓人們重新發現這座城的獨特魅力;但質疑者則提醒,城市的<em>表面美化(彩色屋、打卡點)</em>,不等於根本的振興——基隆真正的問題(缺乏就業、人口外移、依附台北、產業空洞)依然存在,若只停留在「景觀改造」而沒有實質的產業與經濟轉型,「重新被看見」就可能只是曇花一現的觀光熱潮。如何讓「被看見」轉化為「留得住人、有自主經濟」的真正復興,是基隆再生最核心的考驗。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 被看見,是重生的第一步</span>
+      <p>「重新被看見」的故事,揭示了基隆再生的核心邏輯與挑戰:<strong>對一座長期被掩蓋、被遺忘的城而言,「重新被看見」本身,就是重生的第一步,卻不是全部。</strong>基隆用設計、用色彩、用郵輪,成功地讓世界重新注意到了它——這是了不起的、必要的一步,它至少打破了「基隆=沒落宿舍」的單一印象,讓人們重新發現這座城的故事與美。</p>
+      <p>但「被看見」之後,更難的考驗才開始:如何把「被看見」的能見度,轉化為「留得住人、有工作、有自主經濟」的真正復興?這正是基隆與南方高雄(同樣在努力轉身)共同面對的課題——城市的「<em>硬體美化與形象翻轉</em>」相對容易,但「<em>產業轉型與留住青年</em>」才是真正的硬仗(這呼應了高雄轉身章的辯論)。基隆的彩色屋很美、郵輪很壯觀,但若它的年輕人依然只能通勤或移居台北,那麼這份「被看見」,就還沒有真正改變它的命運。基隆的重生,需要的不只是被看見,更是被看見之後——能不能給人一個「留下來」的理由。而這,正是它今日站在的十字路口。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">＄ ✦ ＄</div>
+  <p>努力被看見之後,基隆站在最後的十字路口。<br>它該徹底整合進大台北,還是找回獨立港都的尊嚴?<br><span class="hl">這道被掩蓋的門戶,能否以新的姿態歸來?</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Crossroads</span>
+    <h2 class="act-title">今日的十字路口:門戶能否歸來</h2>
+    <p class="act-sub">Independence or Integration — the Gateway's Final Question</p>
+    <div class="ornament">＄ ✦ ＄</div>
+  </div>
+  <div class="prose">
+    <p>走到今天,基隆站在一個關鍵、也充滿矛盾的十字路口。它努力地「重新被看見」了(第十章),但它身世裡那個最根本的問題依然懸而未決:<strong>基隆的未來,究竟是徹底擁抱「成為大台北的一部分」,還是努力找回「作為一座獨立港都」的自主與尊嚴?</strong>這個「獨立」與「整合」之間的選擇,是當代基隆最深的認同課題,也將決定這座門戶之城最終的命運。</p>
+
+    <h3>整合派:乾脆成為「大台北」的一員</h3>
+    <p>一種思路是:既然基隆無論如何都被台北深度綁定(通勤、經濟、生活圈),那麼<strong>不如徹底地、好好地整合進大台北都會區</strong>,享受作為「首都圈一員」的好處。這條路的核心工程,是改善基隆與台北之間的<em>交通連結</em>——其中最受矚目、也最具爭議的,是「<strong>基隆捷運</strong>」的興建計畫。支持者認為,若能有便捷的軌道運輸把基隆無縫接入台北捷運網,基隆就能更好地承接首都圈的人口與發展,房價與居住的優勢也能被放大,讓基隆成為一個「<em>宜居的首都圈門戶住宅城</em>」。此外,「<strong>港市合一</strong>」(讓長期分屬中央港務與地方市政的港區與城市整合治理)、把港區的土地還給城市發展,也是這條路的重要訴求。</p>
+    <div class="pull"><p>基隆的兩難,濃縮成一個問題:它該認命地當好「台北的門戶與宿舍」,還是該倔強地找回「自己作為一座港都」的靈魂?</p></div>
+
+    <h3>自主派:找回門戶的尊嚴</h3>
+    <p>另一種思路則認為,基隆不該甘於只當台北的附庸與宿舍,而應該努力找回<strong>作為一座獨立城市的自主性與尊嚴</strong>。這條路強調發展基隆<em>自己的產業與經濟</em>(而不只是當住宅區)、強化它<em>獨特的城市認同</em>(山城、雨港、海洋文化、歷史)、並重新發揮它「門戶」的價值(郵輪觀光、海洋產業)。支持者認為,若基隆只是一味地整合進台北、依賴通勤,它將永遠失去自己的靈魂,淪為一個沒有面目的衛星城;唯有發展出自主的經濟與鮮明的認同,基隆才能真正地「站起來」,而不只是「被看見」。</p>
+    <div class="debate">
+      <div class="debate-head">爭議 · 基隆該整合,還是該自主?</div>
+      <div class="debate-body">
+        <div class="view"><span class="who">整合派</span>認為,基隆緊鄰台北是無法改變的現實,與其對抗,不如善用——透過基隆捷運等建設,深度融入首都圈,成為一個交通便捷、宜居的「<strong>大台北門戶城市</strong>」,讓居民享受首都圈的機會與基隆的低生活成本。</div>
+        <div class="view"><span class="who">自主派</span>則主張,一味整合只會讓基隆永遠淪為台北的附庸與宿舍、失去靈魂;基隆應發展自主產業、強化獨特認同(雨港、山城、海洋、歷史),找回作為一座<strong>獨立港都</strong>的尊嚴與生命力。</div>
+        <div class="view"><span class="who">務實平衡派</span>認為,這未必是非此即彼——基隆可以一邊善用與台北的連結(交通、生活圈),一邊發展自己不可取代的特色(郵輪門戶、海洋、文化、觀光),在「整合」與「自主」之間,走出一條<em>既連結首都、又保有自我</em>的中間路線。關鍵是別讓「整合」變成「被吞噬」。</div>
+      </div>
+    </div>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 門戶,能否以新的姿態歸來?</span>
+      <p>基隆的十字路口,把它整部身世的核心命題,推到了最終的時刻:<strong>這座曾是「台灣門戶」、後來被光芒掩蓋的城,能否以一種新的姿態,重新找回它的價值與尊嚴?</strong>它的兩難——「整合進台北」還是「找回自主」——本質上,是一座被超級都會掩蓋的城,在尋找自己存在意義時,最深刻的掙扎。</p>
+      <p>而基隆的答案,或許就藏在它從未改變的那個身分裡——「<em>門戶</em>」。從凱達格蘭時代迎接最早的外來者、到大航海時代的國際據點、到日治的台灣第一玄關——基隆的價值,始終在於它是「台灣面向世界、連結外部的那道門」。今天,當貨運的門戶角色被高雄與台北港取代後,基隆若能重新定義它的「門戶」價值——成為郵輪觀光進入台灣的門戶、成為大台北通往海洋的門戶、成為一座連結了首都便利與海港特色的獨特城市——那麼,這道曾被掩蓋的門戶,或許就能以一種全新的姿態,重新歸來。基隆的故事告訴我們:<em>一座城市最珍貴的,不是它一時的繁華或地位,而是它那個無法被奪走的、獨一無二的身分。</em>只要基隆記得自己是誰、記得它曾是、也依然可以是台灣那道迎接世界的大門,它就永遠有重新被世界看見、重新發光的可能——即使,它就站在另一道更耀眼的光的旁邊。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⚓ ☩</div>
+  <p>一座多雨的良港,一道最早的門戶,一段小上海的繁華,一身被掩蓋的失落,與一場重新被看見的努力。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的基隆,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的基隆</h2>
+      <p class="act-sub" style="color:rgba(243,238,226,.6)">Why Keelung Became What It Is</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⚓ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整座城收攏成一條線。今天的基隆之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:山與雨,給了它港、也給了它限制</h3>
+      <p>一切的源頭是<strong>地理</strong>。一座三面環山的天然深水良港,加上位居台灣最北端,讓基隆天生就是台灣的「門戶」;但同一圈山,既攔下季風帶來全台最多的雨(讓它成為「雨港」),又把它逼壓得幾乎沒有腹地。基隆的天賦(良港、門戶)與限制(多雨、地窄),都來自同一個地理源頭——這份矛盾,寫定了它一生的福與苦。</p>
+
+      <h3>第二層:作為門戶,它最早登上世界舞台</h3>
+      <p>接著是<strong>門戶的榮光</strong>。從凱達格蘭人迎接最早的外來者,到西班牙人建起聖薩爾瓦多城、荷蘭人前來爭奪——基隆比台北早兩百多年登上世界舞台。它因煤、因良港而在清代成為近代化前沿(清法戰爭、台灣第一條鐵路的起點),更在日治時期被打造成「台灣的玄關、第一大港」,攀上一生的頂峰。「門戶」,是地理從最古老時代就賦予基隆的天職與榮耀。</p>
+
+      <h3>第三層:它的繁華,是「轉運站」借來的繁華</h3>
+      <p>然後是<strong>繁華的本質與傷痕</strong>。黃金時代的基隆,委託行的舶來品、酒吧街的各國船員、顏家的煤礦財富,繁華得像個「小上海」。但這份繁華的本質,是「<em>門戶/轉運站</em>」的繁華——是世界路過它、借給它的,真正的目的地往往是台北。與此同時,它也作為門戶,扛下了最沉重的傷痕:二二八的軍隊從這裡登陸、礦工的血汗撐起黑金、海的無常吞噬子民。基隆的雨,沖刷著這份借來的繁華與真實的悲情。</p>
+
+      <h3>第四層:離光太近,於是被光掩蓋</h3>
+      <p>最關鍵、也最令人唏噓的,是<strong>被掩蓋的命運</strong>。基隆沒有腹地、貨櫃時代被高雄與台北港分流、更緊鄰著台北那道太過耀眼的光——於是它的繁華被吸走、人口被通勤、自主性被剝奪。它從「台灣第一大港、第一玄關」,墜落為「台北的後花園、宿舍、附庸」。它的悲劇不是離繁華太遠,而是<em>離繁華(台北)太近,近到自己被光吞沒</em>。這正是它與「有腹地、離首都遠」而後來居上的高雄,最深的鏡像對照。</p>
+
+      <h3>第五層:它努力地,想重新被看見</h3>
+      <p>最後是<strong>重新被看見的努力</strong>。不甘於只當附庸的基隆,用設計翻轉城市(正濱彩色屋、老屋活化)、用郵輪重新發揮門戶價值,努力地讓世界重新注意到它。如今,它站在「整合進台北」與「找回自主」的十字路口,試圖回答:這道被掩蓋的門戶,能否以新的姿態歸來?——而它的答案,或許就藏在它從未改變的那個身分裡:門戶。</p>
+
+      <div class="investor">
+        <span class="tag">城市的回聲 · 一座因太靠近光而被掩蓋的門戶之城</span>
+        <p>所以,今天的基隆是什麼?它是一座<strong>因為太靠近光、反而被光掩蓋的門戶之城</strong>。它有最好的港、淋著最多的雨、卻沒有腹地;它曾是台灣最早登上世界舞台、最風光的第一大港與玄關,最終卻被緊鄰的台北徹底掩蓋,淪為它的後花園。它的繁華是門戶借來的,它的沒落是離光太近換來的,它的傷痕是作為大門承受的,而它的努力,是想讓世界重新看見它。</p>
+        <p>基隆最深刻的真相是:<em>它的一生,都被「門戶」這兩個字定義——成也門戶,敗也門戶。</em>作為門戶,它最早被世界看見、最風光地繁華;也作為門戶,它最先承受砲火與創傷、它的繁華只是「路過」、它的命運被緊緊綁在它所服務的台北身上。而它今日的希望,同樣藏在「門戶」裡——只要基隆記得自己是誰、記得它曾是、也依然可以是台灣那道迎接世界的大門,它就永遠有重新發光的可能。基隆的故事,是一則關於「<em>靠近光的代價,與不甘被掩蓋的尊嚴</em>」的故事——它提醒我們:即使站在巨大的陰影裡,一座有靈魂、有故事、有獨特身分的城,終究不該、也不會,永遠地被遺忘。那場下不完的雨終會停,而當雨停時,人們或許會重新發現:這道被掩蓋的門戶,一直都在,等著被再一次看見。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">山給了基隆港與雨,也奪走了它的腹地;它作為門戶最早被世界看見、最風光地繁華,卻也因離首都的光太近而被掩蓋——它是一座淋著雨、在陰影裡,努力想被重新看見的門戶之城。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座門戶之城的終極啟示</span>
+      <p>一座城市的命運,有時不取決於它擁有多少,而取決於它站在誰的旁邊。基隆有最好的港、最早的門戶榮光,卻因沒有腹地、又緊鄰著首都那道太耀眼的光,而被掩蓋成了陰影。但它的故事也告訴我們:被掩蓋,不等於被消滅——只要一座城記得自己獨一無二的身分(那道迎接世界的門戶)、守住自己的靈魂(山城、雨港、海洋),它就永遠保有重新被看見、重新發光的可能。這,就是基隆至今仍在書寫的故事。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,238,226,.78);margin-top:2.5rem">
+        從一座三面環山、終年多雨的天然良港、凱達格蘭人的家園,<br>
+        到西班牙人的聖薩爾瓦多城、清法戰爭的砲火與煤礦,<br>
+        從日本打造的台灣第一玄關、委託行裡的舶來品與「小上海」的繁華,<br>
+        到二二八港邊的血、礦坑的難、與被台北吸走的人潮,<br>
+        從攀上山坡的階梯山城、廟口不滅的燈火,<br>
+        到正濱漁港的彩色屋、重新入港的郵輪,<br>
+        這座因太靠近光而被掩蓋、卻努力想被重新看見的門戶之城,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的基隆。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+
+<footer>
+  <div class="orn">⚓ ✦ ☂</div>
+  <p>雨港 · 被光芒掩蓋的門戶</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE GATEWAY TO THE SHADOW · KELANG – PRESENT</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{const h=document.documentElement;pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';});
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

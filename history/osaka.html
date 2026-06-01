@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天下的廚房：大阪四百年，一座靠算盤撐起的商人之城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ===== 目錄 TOC ===== */
+.toc{max-width:760px;margin:3rem auto 1rem;padding:2.6rem 2.4rem;background:var(--parchment-deep);border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:4px}
+.toc .toc-head{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.32em;color:var(--rust);text-transform:uppercase;text-align:center;margin-bottom:.4rem}
+.toc .toc-sub{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin-bottom:1.8rem}
+.toc ol{list-style:none;counter-reset:toc;margin:0;padding:0}
+.toc li{counter-increment:toc;border-bottom:1px dashed var(--line)}
+.toc li:last-child{border-bottom:none}
+.toc li.toc-extra{}
+.toc a{display:flex;align-items:baseline;gap:.9rem;padding:.7rem .4rem;text-decoration:none;color:var(--sea-deep);transition:background .2s,color .2s,padding-left .2s}
+.toc a:hover{background:rgba(176,141,52,.1);color:var(--rust);padding-left:1rem}
+.toc .toc-n{font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;color:var(--gold);min-width:2.4rem;flex-shrink:0;letter-spacing:.03em}
+.toc a:hover .toc-n{color:var(--rust)}
+.toc .toc-t{font-family:'Noto Serif TC',serif;font-size:1.02rem;line-height:1.4;font-weight:500}
+.toc .toc-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:var(--faint);margin-left:auto;text-align:right;flex-shrink:0;padding-left:1rem}
+.toc .badge{display:inline-block;font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.1em;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:.05rem .45rem;margin-left:.5rem;vertical-align:middle;opacity:.85}
+@media(max-width:640px){
+  .toc{padding:2rem 1.4rem;margin:2rem 1rem 1rem}
+  .toc .toc-en{display:none}
+  .toc a{gap:.7rem}
+}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ---- 修正:深色章節內,擁有淺色背景的卡片組件須維持深色文字,避免淺底淺字 ---- */
+/* ---- 修正:深色章節內的對比度 ----
+   實心淺底組件(method-card / twocol)→ 深色文字;
+   shift-body 無背景貼深底 → 淺色文字。 ---- */
+.dark .method-card p,
+.dark .twocol p{color:var(--ink)}
+.dark .method-card p strong,
+.dark .twocol p strong{color:var(--crimson)}
+.dark .method-card p em,
+.dark .twocol p em{color:var(--sea-deep)}
+.dark .method-card h5{color:var(--sea-deep)}
+.dark .method-card .tool{color:var(--rust)}
+.dark .method-card .eg{color:#6b5d48}
+.dark .minihead{color:var(--rust)}
+.dark .shift-body{color:#cdb494}
+.dark .shift-body strong{color:#c87a5a}
+.dark .shift-body em{color:#d8a878}
+.dark .stat{background:rgba(212,175,90,.07)}
+.dark .stat .num{color:var(--gold-bright)}
+.dark .stat .lbl{color:#b9a784}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+.twocol>div{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left;color:var(--ink)}
+.method-card p strong{color:var(--crimson)}
+.method-card p em{color:var(--sea-deep)}
+.method-card .eg{font-size:.86rem;color:#6b5d48;font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<div id="progress" style="position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));width:0;z-index:99"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="kicker">Osaka · 1583–2025</div>
+    <h1>天下的<br><span class="em">廚房</span></h1>
+    <div class="sub">大阪四百年——一座沒有將軍、沒有天皇,卻靠算盤撐起的商人之城</div>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">大</span>阪人見面打招呼,不問「你好」,而問「<em>儲かりまっか</em>」——賺錢了嗎?這句市井問候,藏著理解這座城的全部鑰匙。在它四百年的歷史裡,京都有天皇、有千年的雅;江戶(東京)有將軍、有由上而下的權力;唯獨大阪,什麼都沒有——它沒有出過一位天皇,沒有駐過一位將軍,它的城裡沒有發號施令的官僚體系,只有一群精打細算的商人。然而正是這座「沒有權力」的城,卻成了整個日本的<strong>「天下の台所」——天下的廚房</strong>:全國的米糧物資在此集散,全國的米價在此決定,甚至世界上最早的期貨交易所,也在這裡誕生。如果說東京是一座靠「權力」由上而下建造的城,那麼大阪,就是一座靠「交易」由下而上撐起的城。它的護城河,不是城牆,不是官印,而是一把<span style="color:var(--rust);font-weight:600">算盤</span>。</p>
+</section>
+
+<!-- ===== 目錄 TOC ===== -->
+<nav class="toc">
+  <div class="toc-head">Table of Contents</div>
+  <div class="toc-sub">大阪四百年,一座靠算盤撐起的商人之城 · 全十二章</div>
+  <ol>
+    <li><a href="#ch0"><span class="toc-n">序章</span><span class="toc-t">在商人之前,這裡是一片河口三角洲</span><span class="toc-en">Before the Merchants</span></a></li>
+    <li><a href="#ch1"><span class="toc-n">第一章</span><span class="toc-t">秀吉的城:從本願寺到天下人的居城</span><span class="toc-en">The Warlord's Castle</span></a></li>
+    <li><a href="#ch2"><span class="toc-n">第二章</span><span class="toc-t">天下的廚房:用水路餵養全日本</span><span class="toc-en">The Kitchen of the Nation</span></a></li>
+    <li><a href="#ch3"><span class="toc-n">第三章</span><span class="toc-t">堂島米市場:世界最早的期貨交易所</span><span class="toc-en">The First Futures Market</span></a></li>
+    <li><a href="#ch4"><span class="toc-n">第四章</span><span class="toc-t">始末·才覺·算用:商人的三條鐵律</span><span class="toc-en">The Merchant's Code</span></a></li>
+    <li><a href="#ch5"><span class="toc-n">第五章</span><span class="toc-t">兩座城的對照:大阪的算盤,東京的官印</span><span class="toc-en">Commerce vs Power</span></a></li>
+    <li><a href="#ch6"><span class="toc-n">第六章</span><span class="toc-t">明治的打擊:當權力北移,商都失血</span><span class="toc-en">The Meiji Blow</span></a></li>
+    <li><a href="#ch7"><span class="toc-n">第七章</span><span class="toc-t">大大阪:東洋曼徹斯特的迴光</span><span class="toc-en">Greater Osaka</span></a></li>
+    <li><a href="#ch8"><span class="toc-n">第八章</span><span class="toc-t">地盤沉下:東京一極集中下的長眠</span><span class="toc-en">The Long Decline</span></a></li>
+    <li><a href="#ch9"><span class="toc-n">第九章</span><span class="toc-t">水都的版圖:被填掉的八百八橋</span><span class="toc-en">The Vanishing Canals</span></a></li>
+    <li><a href="#ch10"><span class="toc-n">第十章</span><span class="toc-t">五座城的對照:商業,是另一種韌性</span><span class="toc-en">Five Cities</span></a></li>
+    <li><a href="#ch11"><span class="toc-n">第十一章</span><span class="toc-t">再起的豪賭:萬博、賭場與副首都</span><span class="toc-en">What Comes Next</span></a></li>
+    <li><a href="#chF"><span class="toc-n">終章</span><span class="toc-t">於是,今天的大阪</span><span class="toc-en">Finale</span></a></li>
+  </ol>
+</nav>
+
+<div class="div-orn">⚖ ✦ ⚖</div>
+
+<!-- ===== 序章 ===== -->
+<section id="ch0" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the Merchants</span>
+    <h2 class="act-title">在商人之前,這裡是一片河口三角洲</h2>
+    <p class="act-sub">A River Delta at the Edge of the Inland Sea</p>
+    <div class="ornament">🌊 ✦ 🌊</div>
+  </div>
+  <div class="prose">
+    <p>今天的大阪,是關西的核心、日本的第二大都會、「粉物」與笑聲的故鄉。但把時間倒回五百年,這裡的模樣樸素得多:它是淀川等多條河川匯入大阪灣前,沖積出的一片低平<strong>河口三角洲</strong>。地名「大坂」(おおさか)中的「坂」指坡地,點出了它上町台地的微高地形——一塊在水鄉澤國中難得的、可以立足築城的高地。</p>
+    <p>但這片三角洲有一樣東西,是京都、江戶都比不上的——<strong>水</strong>。它扼守淀川入海口,北通京都,西臨瀨戶內海,是連接近畿內陸與海洋的天然樞紐。早在這裡還沒有商人、沒有城池時,它就已經是一個「東西貨物必經的水路咽喉」。一座城最初的地理稟賦,往往就埋下了它一生的劇本——大阪的劇本,從第一天起,就寫著「轉運」與「貿易」兩個字。</p>
+    <div class="pull"><p>京都有天皇的雅,江戶將有將軍的威,而大阪,從一開始擁有的只是水——以及水所帶來的,川流不息的貨物與生意。</p></div>
+    <p>更早之前,這片高地上曾矗立著一座龐大的宗教城堡——<strong>石山本願寺</strong>,淨土真宗的大本山,一個政教合一、足以與戰國群雄抗衡的宗教勢力。它與織田信長纏鬥十年(石山合戰),最終敗退。但本願寺選址於此,本身就證明了這塊地的價值:它既是兵家必爭的要害,又是水路匯聚的寶地。當宗教勢力退場,一位看穿這塊地全部潛力的天下人,即將在它的廢墟上,築起一座將改寫日本經濟史的城。</p>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚔ ✦</div>
+  <p>1583 年,一位從足輕(步卒)爬到天下人的男人,看中了這塊地。<br>他要在本願寺的廢墟上,築起一座象徵他霸業的巨城——<br><span class="hl">而他無意間,也為一座商人之城埋下了地基。</span></p>
+</div>
+
+<!-- ===== 第一章 ===== -->
+<section id="ch1" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Warlord's Castle</span>
+    <h2 class="act-title">秀吉的城:從本願寺到天下人的居城</h2>
+    <p class="act-sub">1583 — Hideyoshi Builds His Capital of Ambition</p>
+    <div class="ornament">⚔ ✦ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>1583 年,剛在織田信長死後的權力鬥爭中勝出的<strong>豐臣秀吉</strong>,選擇在石山本願寺的舊址上,興築一座壯麗的<strong>大坂城</strong>。對這位從最底層足輕一路爬到天下人的梟雄而言,大坂城是他霸業的象徵——金碧輝煌的天守,本丸、二之丸、三之丸層層展開,氣勢遠勝當時的任何城池。秀吉以關白、太政大臣之尊,把政治中心設在這裡,全國大名都得前來大坂朝賀、議事。</p>
+
+    <h3>築城,順便造了一座經濟之城</h3>
+    <p>但秀吉真正深遠的影響,不在那座天守,而在他築城時順手做的一件事:<strong>他把堺、平野等鄰近商業都市的商人與工匠,大量遷入大坂城下。</strong>他做嚴密的「町割」(都市區劃):武家地、寺社地、町人地清楚分開,大名宅邸環繞城周,寺院集中於南面以強化防衛,並開發城北的「天滿」、城西的「船場」。為服務龐大的武士消費,商人蜂擁而至,人口迅速膨脹到傳說中的 28 萬人。</p>
+    <p>這是大阪命運的關鍵一筆。秀吉的本意是造一座政治軍事之城,卻在無意間,為它注入了商業的基因——他親手把日本最精明的一批商人,聚攏到了這塊水路咽喉之地。<em>權力者種下的是城牆,長出來的卻是市場。</em></p>
+
+    <h3>城會易主,商人卻會留下</h3>
+    <p>秀吉死後,德川家康在 1615 年的大坂之陣中徹底消滅豐臣氏,大坂城在戰火中焚毀,後由德川幕府重建。政治中心移往江戶,大坂失去了「天下人居城」的地位。但耐人尋味的是:<strong>城換了主人,商人卻沒有離開。</strong>秀吉聚攏來的商業網絡、水路樞紐的地利、藏屋敷的雛形,全都留了下來,並在德川的和平年代裡持續壯大。</p>
+    <div class="pull"><p>政權可以被消滅,城池可以被燒毀,但一座城一旦長出了「市場」,市場本身就有了自己的生命。豐臣氏亡了,大坂的生意卻才剛要開始。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 制度與網絡,比建造它的人活得更久</span>
+      <p>大坂城的故事,藏著一個關於「什麼能延續」的洞見:<strong>一個強人親手打造的東西,真正能穿越他自身興亡的,往往不是他最看重的那座紀念碑(天守),而是他無意間培育起來的網絡與機制(商人聚落與市場)。</strong>豐臣氏的政權與天守都灰飛煙滅了,但秀吉聚攏的商業生態,卻成了大阪此後三百年的命根子。</p>
+      <p>這對任何「建造者」都是深刻的提醒:<em>你刻意打造、引以為傲的硬體(建築、頭銜、規模),往往是最脆弱、最容易隨你而去的;而那些你順手培育、卻具有自我繁殖能力的軟性網絡(人才生態、市場機制、信任關係),反而可能比你活得更久、影響更深遠。</em>大阪的商業之所以能在豐臣氏覆滅後不僅存活、還愈發興盛,正因為它已不再依附於任何單一的權力者——它長成了一個能自我運轉的生態系統。這正是大阪與接下來幾座城共同的母題伏筆:<strong>真正有韌性的,從來不是某個強人或某座建築,而是一套能脫離創造者、獨立活下去的系統。</strong></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⛵ ✦</div>
+  <p>德川的天下太平了,但全國諸侯有一個共同的難題——<br>他們收上來的年貢米,堆在領地裡換不成錢。<br><span class="hl">於是,所有的米,都順著水路,流向了同一座城。</span></p>
+</div>
+
+<!-- ===== 第二章 ===== -->
+<section id="ch2" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Kitchen of the Nation</span>
+    <h2 class="act-title">天下的廚房:用水路餵養全日本</h2>
+    <p class="act-sub">How Canals Turned Osaka into Japan's Pantry</p>
+    <div class="ornament">⛵ ✦ ⛵</div>
+  </div>
+  <div class="prose">
+    <p>江戶時代的日本,是一個「米本位」的經濟體:武士的俸祿用米發放,大名的財政靠米計算。各藩從領地徵收的年貢米,自己用不完,必須賣掉換成現金,才能購買其他物資、支應參勤交代的龐大開銷。問題是——該把米運到哪裡賣?答案,是大坂。</p>
+
+    <h3>全國的米,流向同一座城</h3>
+    <p>大坂憑著無可比擬的水運條件,成為全國年貢米的集散中心。西國各藩把米船運到大坂,存入沿河而建的<strong>藏屋敷</strong>(藩設的倉庫兼交易據點)。到天保年間(1830–44),大坂的藏屋敷多達 <strong>130 家以上</strong>。「出船千艘、入船千艘」,當時大坂的財富,據說有七成漂在港口的船上。這座城被冠以一個流傳至今的雅稱——<strong>「天下の台所」(天下的廚房)</strong>。(嚴格說來,江戶文獻多稱之為「諸國之台所」「日本の賄い所」,「天下の台所」是明治以後才普及的說法;但它精準地捕捉了大坂的本質——餵養全日本的那座廚房。)</p>
+
+    <h3>水,是它的高速公路</h3>
+    <p>支撐這一切的,是水。大坂城內河堀縱橫,大小船隻穿梭其上運送人與貨。正因河堀眾多,橋也架得特別多,於是相對於「江戶八百八町」「京都八百八寺」,大坂被稱為「<strong>浪速八百八橋</strong>」。值得玩味的是:這些橋多數不是官府所建——江戶幕府公費興建的「公儀橋」只有十二座,其餘絕大多數,是<strong>豪商自掏腰包架設的</strong>。連城市的基礎建設,都是商人出錢蓋的。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">130+</div><div class="lbl">天保年間藏屋敷數量</div></div>
+      <div class="stat"><div class="num">808</div><div class="lbl">「八百八橋」——商都的水路印記</div></div>
+      <div class="stat"><div class="num">12</div><div class="lbl">官建「公儀橋」數,其餘皆商人私建</div></div>
+      <div class="stat"><div class="num">70%</div><div class="lbl">大坂財富,據說漂在港口船上</div></div>
+    </div>
+    <p>商人河村瑞賢更在 1671–72 年改良、整備了<strong>西迴航路與東迴航路</strong>,把北海道、東北、日本海沿岸的物資源源不絕地接入大坂。北前船帶來的優質昆布,讓大阪發展出獨步全國的「出汁(高湯)文化」——這也是今天大阪「粉物」(章魚燒、大阪燒)之所以美味的根基:商人之城,連飲食都帶著「便宜、快速、實惠」的市井底色。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 成為「樞紐」,比成為「產地」更有價值</span>
+      <p>天下的廚房,給出一個關於「價值定位」的洞見:<strong>大坂自己幾乎不產米,卻成了全國米的中心——因為它佔據的不是「生產」的位置,而是「集散與交易」的樞紐位置。</strong>它不靠擁有資源,而靠成為「資源必經的節點」。所有的米都得經過它,於是所有的定價權、所有的流量財,都向它聚集。</p>
+      <p>這與我們在澳門看過的「居間」邏輯異曲同工,卻更進了一步:澳門的居間靠的是「體制的縫隙」(它無法掌控的特權),而大坂的樞紐地位靠的是「水路的地利 + 主動建設的網絡」(它自己打造、自己鞏固的能力)。<em>同樣是做中間人,一種是被動撿到位置,一種是主動經營出位置——後者遠比前者穩固。</em>大坂商人甚至自掏腰包架橋、開航路,把「樞紐」從天生的地利,升級成人為的、可持續強化的網絡優勢。這提醒我們:如果你的價值在於「連接」,那就別只滿足於恰好站在通道上,而要主動去拓寬、加固、甚至壟斷那條通道——把被動的地利,煉成主動的能力。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 📈 ✦</div>
+  <p>當全國的米都堆在大坂,一個問題浮現了:<br>米價漲跌不定,商人與大名如何規避風險?<br><span class="hl">大坂商人給出的答案,領先了世界整整一百多年。</span></p>
+</div>
+
+<!-- ===== 第三章 ===== -->
+<section id="ch3" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The First Futures Market</span>
+    <h2 class="act-title">堂島米市場:世界最早的期貨交易所</h2>
+    <p class="act-sub">1730 — The World's First Organized Futures Exchange</p>
+    <div class="ornament">📈 ✦ 📈</div>
+  </div>
+  <div class="prose">
+    <p>這是大阪商人智慧的巔峰,也是它最被低估的世界級成就。當全國的米都集中到大坂,米價的劇烈波動成了所有人的夢魘——大名怕米價在賣出前下跌,商人怕在交貨前上漲。為了管理這份不確定性,大坂商人發明了一套精密到驚人的制度。</p>
+
+    <h3>1730:世界期貨的起點</h3>
+    <p>1697 年(元祿十年),米市場移到堂島;<strong>1730 年(享保十五年)</strong>,在八代將軍德川吉宗的治世下,經名奉行大岡越前守公許,「<strong>堂島米會所</strong>」正式成立。它被全球經濟學者與金融史學者公認為——<strong>世界上第一個組織化的期貨交易所</strong>。它比美國芝加哥商品交易所(CBOT,1848)早了整整 <strong>118 年</strong>。</p>
+    <p>堂島的交易分兩種:「正米取引」(現貨交易,買賣代表米所有權的「米切手」)與「<strong>帳合米取引</strong>」(期貨交易)。而帳合米的制度設計,與現代期貨幾乎一模一樣,令人嘆為觀止:</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">期限契約</div><div class="shift-body"><strong>不交現貨,只簽約定</strong>:約定在未來某個交割日,以某價格買賣,只把契約記在帳簿上(故名「帳合米」)。這正是現代期貨合約的本質。</div></div>
+      <div class="shift-row"><div class="shift-era">證據金</div><div class="shift-body"><strong>保證金制度</strong>:參與者只需繳納「敷銀」(保證金),即可進行槓桿交易。這就是今天期貨的「margin」制度。</div></div>
+      <div class="shift-row"><div class="shift-era">差金決済</div><div class="shift-body"><strong>現金結算</strong>:多數不交割實米,只結算價格差額(差金決済),相當於現代的「cash-settled futures」。</div></div>
+      <div class="shift-row"><div class="shift-era">清算機構</div><div class="shift-body"><strong>中央清算</strong>:設有專門機構仲介決算、管理信用風險——即現代交易所的清算所(clearing house)。</div></div>
+    </div>
+
+    <h3>它的真正成就:價格發現</h3>
+    <p>但堂島米會所最深遠的貢獻,不只是提供避險工具。它最了不起的成就,是成為一個<strong>「價格發現(price discovery)」</strong>的社會基礎設施:堂島決定的米價,成為全國的米價基準,各地的交易都以它為錨。一個由商人自發組織的市場,竟承擔起了為整個國家經濟「定價」的公共職能。據說當時還用旗語、信號接力,把堂島的最新米價飛快傳遞到各地——這是世界最早的「即時行情」傳播系統之一。</p>
+    <div class="pull"><p>當歐洲還沒有任何一個組織化的期貨市場時,大坂的商人已經在用保證金、做差金決済、靠清算所管理信用風險了。現代金融的骨架,最早是在這座東方商都裡搭起來的。</p></div>
+    <p>這套經驗一脈相承地流傳下來:明治以後,大阪持續是日本商品交易的中心,堂島的血脈最終匯入今天的<strong>大阪取引所(OSE)</strong>——日本衍生性金融商品的主要交易所。一座商人之城,把它在江戶時代發明的金融智慧,延續成了現代日本的金融基礎設施。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 真正的創新,常誕生於「管理不確定性」的需求</span>
+      <p>堂島米會所,給出一個對任何面對風險的人(尤其是投資者)都極其深刻的洞見:<strong>人類最重要的金融創新之一——期貨,並非誕生於投機的貪婪,而是誕生於「管理不確定性」的真實需求。</strong>大名與商人需要鎖定未來的米價、規避波動的風險,這份對「確定性」的渴望,逼出了帳合米、保證金、差金決済、清算所這整套精密制度。需求是發明之母,而「對沖風險」這個需求,催生了整個現代衍生性金融市場的雛形。</p>
+      <p>這對任何在不確定中決策的人都是啟示:<em>真正高明的風險管理,不是被動地承受波動、或盲目地逃避波動,而是主動設計出一套「能與不確定性共處、甚至從中獲益」的機制。</em>堂島商人沒有試圖去「預測」米價(那是徒勞的),而是建立了一個讓所有人都能對沖、轉移、定價風險的「系統」。這正是成熟投資者與賭徒的根本分野:賭徒押注於猜對方向,而真正的系統建構者,設計的是一套「無論方向如何都能管理風險」的框架。三百年前的大坂商人就已洞悉:在不確定的世界裡,可靠的從來不是預測,而是制度。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🧮 ✦</div>
+  <p>能發明出世界最早期貨市場的,是怎樣的一群人?<br>他們沒有刀,沒有官位,只有一把算盤和三條鐵律——<br><span class="hl">而這三條鐵律,至今仍是商業世界的金科玉律。</span></p>
+</div>
+
+<!-- ===== 第四章 ===== -->
+<section id="ch4" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Merchant's Code</span>
+    <h2 class="act-title">始末·才覺·算用:商人的三條鐵律</h2>
+    <p class="act-sub">Thrift, Ingenuity, Reckoning — The Spirit of the Osaka Merchant</p>
+    <div class="ornament">🧮 ✦ 🧮</div>
+  </div>
+  <div class="prose">
+    <p>能發明堂島米會所的,是怎樣一群人?大坂商人的精神,被精煉成三個詞:<strong>始末、才覺、算用</strong>。這三個詞,至今讀來仍像一套穿越時空的商業箴言。</p>
+    <div class="method">
+      <div class="method-card">
+        <span class="tool">始末 · Thrift</span>
+        <h5>不浪費一分一毫</h5>
+        <p>「始末」即質樸節儉、物盡其用。傳說大阪商人連魚骨都不丟,拿去熬高湯。它不是吝嗇,而是對「資源」的極致尊重——在利潤微薄的商業世界裡,省下的每一分,都是賺到的。</p>
+      </div>
+      <div class="method-card">
+        <span class="tool">才覺 · Ingenuity</span>
+        <h5>永遠在想新點子</h5>
+        <p>「才覺」即創意巧思,不斷設計新的生意手法、積極進取。堂島的期貨制度、私建的八百八橋、改良的航路——都是「才覺」的產物。不墨守成規,永遠尋找更聰明的做法。</p>
+      </div>
+      <div class="method-card">
+        <span class="tool">算用 · Reckoning</span>
+        <h5>不划算的事,不做</h5>
+        <p>「算用」即精確的利益計算。商人凡事先算清楚划不划算,不做沒有勝算的買賣。這份冷靜的數字理性,是大阪商業文明的硬核——感情歸感情,帳本歸帳本。</p>
+      </div>
+    </div>
+
+    <h3>當商人有錢有閒,他們供養了文化</h3>
+    <p>靠著這三條鐵律累積巨富的大坂商人(尤其是掌握金融的兩替商),開始把錢花在生活品味與文化上。江戶時代的大坂,因此孕育出燦爛的<strong>町人文化</strong>:井原西鶴描寫町人世界的「浮世草子」(如《好色一代男》)風靡一時;近松門左衛門的人形淨瑠璃、歌舞伎在此繁盛。這是一種與京都的貴族雅文化、江戶的武家文化截然不同的——<em>由商人、為商人、寫商人</em>的庶民文化。</p>
+    <div class="pull"><p>京都的文化屬於公卿,江戶的文化屬於武士,而大阪的文化,第一次屬於那些既不掌權、也不持劍,只是認真做生意、認真過日子的平凡人。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 節儉、創新、精算——歷久不衰的成功三角</span>
+      <p>大坂商人的三條鐵律,給出一個樸素卻顛撲不破的成功框架:<strong>始末(控制成本)、才覺(持續創新)、算用(理性計算)——這三者構成的鐵三角,三百年前適用於米商,三百年後同樣適用於任何企業、任何投資者。</strong>它們缺一不可:只有始末沒有才覺,會淪為守財奴而被時代淘汰;只有才覺沒有算用,會淪為盲目的冒險家而血本無歸;只有算用沒有始末,再精明的計算也經不起浪費的侵蝕。</p>
+      <p>這套框架對任何經營者與投資者都是一面鏡子:<em>「始末」對應的是嚴格的成本與風險控制——不讓任何資源無謂流失;「才覺」對應的是不墨守成規的進取與創新——永遠尋找更優的做法;「算用」對應的是冷靜的數字理性——不被情緒左右,凡事先算清期望值與勝算。</em>大坂商人之所以能在沒有權力庇護的情況下,把一座城撐成天下的廚房、把米市場做成世界第一,靠的正是這套樸實無華卻極其紮實的內功。它提醒我們:真正可持續的成功,很少來自驚天動地的豪賭,而多半來自把「省、創、算」這三件平凡的事,日復一日地做到極致。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚖ ✦</div>
+  <p>同一個時代,日本有兩座百萬巨城:江戶與大坂。<br>一座住著將軍與武士,一座住著商人與町人。<br><span class="hl">把它們並排,「權力」與「商業」這兩種立城之道,纖毫畢現。</span></p>
+</div>
+
+<!-- ===== 第五章 ===== -->
+<section id="ch5" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · Commerce vs Power</span>
+    <h2 class="act-title">兩座城的對照:大阪的算盤,東京的官印</h2>
+    <p class="act-sub">Osaka and Edo — Two Opposite Ways to Build a City</p>
+    <div class="ornament">⚖ ✦ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>要真正讀懂大阪,最好的方法是把它和它的孿生對手——江戶(東京)——並排。它們是同一個江戶時代孕育的兩座百萬巨城,卻是兩種截然相反的「立城之道」。一座靠權力由上而下建造,一座靠商業由下而上撐起。這組對照,是理解整個日本的一把鑰匙。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>維度</th><th>大阪 · 商人之城</th><th>東京(江戶) · 權力之城</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>立城動力</strong></td><td>商業與交易,由下而上</td><td>政治與權力,由上而下</td></tr>
+          <tr><td><strong>城裡的主角</strong></td><td>商人、町人、兩替商</td><td>將軍、大名、武士、官僚</td></tr>
+          <tr><td><strong>人口從何而來</strong></td><td>米與物資的生意自然吸引</td><td>參勤交代制度強制聚集</td></tr>
+          <tr><td><strong>基礎建設誰出錢</strong></td><td>豪商私建(八百八橋)</td><td>幕府公費與制度動員</td></tr>
+          <tr><td><strong>核心精神</strong></td><td>始末·才覺·算用(算盤)</td><td>忠義·秩序·階級(官印)</td></tr>
+          <tr><td><strong>文化氣質</strong></td><td>庶民、務實、愛笑、重利</td><td>武家、規矩、體面、重名</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>一個問「賺錢了嗎」,一個問「官居幾品」</h3>
+    <p>這組對照,深深刻進了兩座城的性格,延續至今。大阪人見面問「儲かりまっか」(賺錢了嗎),東京則講究身分、體面與規矩。大阪人以務實、幽默、不擺架子著稱;東京則相對矜持、重視形式。連語言、笑點、待人接物的方式,都因這「商業 vs 權力」的底色而分道揚鑣。<em>大阪是日本的「異色」之城——在一個高度重視階級與秩序的國度裡,它固執地保留著一種「英雄不問出身、只問本事」的商人氣質。</em></p>
+    <div class="pull"><p>東京問你「是誰」(身分),大阪問你「能做什麼」(本事)。一個看官印,一個看算盤——這是兩種文明,擠在同一個島國裡。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 由下而上 vs 由上而下,兩種秩序的本質差異</span>
+      <p>大阪與東京的對照,揭示了兩種根本不同的「組織秩序」:<strong>一種是「由上而下」的權力秩序——靠制度、強制與階級來組織(東京);一種是「由下而上」的市場秩序——靠交易、誘因與自願來組織(大阪)。</strong>前者高效、穩定、可控,但僵化;後者靈活、創新、有活力,但也更易波動。它們各有所長,也各有所短。</p>
+      <p>這組對照對理解任何系統都極具價值:<em>無論是一個國家、一家公司,還是一套投資方法,你都可以問:它主要靠「由上而下的指令」運轉,還是靠「由下而上的市場機制」運轉?</em>純粹的權力秩序容易僵化、脫離現實;純粹的市場秩序容易過熱、失序。大阪的偉大,在於它示範了一種「不靠權力也能組織起龐大經濟」的可能——它用市場、用商人的自利與創意,自發地組織出了天下的廚房與世界最早的期貨市場。但它的脆弱也正在於此:<strong>當它所依賴的「市場樞紐」地位,被一個更強大的「權力中心」釜底抽薪時,純商業之城將如何自處?</strong>這個問題的答案,藏在它接下來的命運裡——一場由明治維新引爆的、商都的漫長失血。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 〽 ✦</div>
+  <p>1868 年,明治維新。權力的中心徹底移向東京。<br>對一座純粹的商人之城來說,這意味著一場無聲的失血——<br><span class="hl">而第一刀,直接砍在了大阪商人最核心的資產上。</span></p>
+</div>
+
+<!-- ===== 第六章 ===== -->
+<section id="ch6" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Meiji Blow</span>
+    <h2 class="act-title">明治的打擊:當權力北移,商都失血</h2>
+    <p class="act-sub">When the Capital Moved North, the Merchant City Bled</p>
+    <div class="ornament">〽 ✦ 〽</div>
+  </div>
+  <div class="prose">
+    <p>1868 年的明治維新,對東京是一場「重生」(江戶升格為帝都),對大阪卻是一記重擊。當權力與資源加速向新首都東京集中,這座純粹依賴商業的城,迎來了它的第一次重大危機。而最致命的一刀,直接砍在了大阪商人賴以為生的核心資產上。</p>
+
+    <h3>藩債處分:一夜之間,巨額債權化為烏有</h3>
+    <p>江戶時代,大阪的兩替商(金融商人)累積巨富的方式之一,是<strong>借錢給各藩</strong>——藩財政常年吃緊,大阪商人便是它們的債主,握有龐大的債權。然而明治政府推行廢藩置縣,並對舊藩的債務進行「<strong>藩債處分</strong>」:大量舊債被一筆勾銷或大幅折讓。對大阪的金融商人而言,這等於一夜之間,他們帳上巨額的債權資產,瞬間蒸發。商都的金融命脈,被新政權的一紙政令重創。</p>
+    <p>與此同時,米本位經濟瓦解(武士俸祿改革、貨幣現代化),曾讓大阪登上世界金融巔峰的堂島米市場,其賴以存在的整個制度基礎也開始動搖。大阪在江戶時代建立的那套「以米為核心、以藏屋敷為節點、以堂島為定價中樞」的商業帝國,隨著舊體制的崩解而失去了根基。</p>
+    <div class="pull"><p>東京的繁榮,是被權力「注入」的;大阪的衰退,是被權力「抽走」的。同一場維新,讓一座城重生,讓另一座城失血——只因為一座靠權力,一座靠商業。</p></div>
+
+    <h3>商人之城的結構性宿命</h3>
+    <p>這揭示了大阪作為「純商業之城」的結構性脆弱:<strong>它的繁榮,高度依賴一套特定的經濟體制(米本位 + 水運樞紐 + 它作為全國交易中心的地位)。當這套體制被一個更高的權力中心改變或取代時,它幾乎無力抵抗。</strong>它沒有東京那樣的政治權力作後盾,當遊戲規則被改寫,它只能被動承受。一座不掌握權力的城,終究無法掌握自己的命運——這是商人之城最深的隱痛。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 你的資產,建立在誰能改寫的規則之上?</span>
+      <p>大阪的明治之痛,給出一個對任何資產持有者都極其重要的洞見:<strong>任何資產的價值,都隱含著一個前提——「支撐它的那套規則維持不變」。而當那套規則由一個你無法掌控的權力中心制定時,你的資產,本質上就承擔著「規則被改寫」的風險。</strong>大阪商人借給各藩的債權,在舊體制下是堅實的資產;但當明治政府用「藩債處分」改寫了規則,這些資產瞬間蒸發。資產沒變,變的是規則。</p>
+      <p>這對任何投資者與資產配置者都是嚴厲的提醒:<em>評估一項資產時,不能只看它「現在值多少」,更要問「它的價值建立在哪些規則之上?這些規則由誰制定?那個人會不會、能不能改寫它?」</em>政策、法規、稅制、體制——這些「規則層面」的風險,往往比市場波動更致命,因為它可以讓一項資產一夜歸零,且你毫無還手之力。大阪的教訓是:當你的繁榮建立在「別人制定、且可能對你不利地改寫」的規則之上時,你就始終站在一個不穩固的地基上。真正的安全,需要的不只是好資產,更是對「規則風險」的清醒認知與分散——別把全部身家,押在任何單一權力可以一筆勾銷的東西上。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🏭 ✦</div>
+  <p>但大阪沒有就此沉淪。商人的「才覺」再次發作——<br>它從米的商都,轉型成了煙囪林立的工業巨人。<br><span class="hl">1920 年代,它迎來了名為「大大阪」的黃金迴光。</span></p>
+</div>
+
+<!-- ===== 第七章 ===== -->
+<section id="ch7" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · Greater Osaka</span>
+    <h2 class="act-title">大大阪:東洋曼徹斯特的迴光</h2>
+    <p class="act-sub">The 1920s — When Osaka Was Japan's Largest City</p>
+    <div class="ornament">🏭 ✦ 🏭</div>
+  </div>
+  <div class="prose">
+    <p>面對明治的打擊,大阪沒有沉淪。它的商業基因再次發作——既然米本位的舊商都垮了,那就轉型成新時代的工業之城。憑著既有的資本、商業網絡與水運優勢,大阪迅速擁抱工業化,尤其在<strong>紡織業</strong>上一枝獨秀,煙囪林立,被稱為「<strong>東洋的曼徹斯特</strong>」「煙之都」。日俄戰爭、第一次世界大戰的軍需,更把它的重工業推上高峰。</p>
+
+    <h3>1925:全國第一,世界第六</h3>
+    <p>這份榮景在 1920 年代結成了一個輝煌的果實——「<strong>大大阪時代</strong>」。1925 年,大阪市透過第二次市域擴張,併入周邊町村,人口從 133 萬暴增至 <strong>211 萬</strong>,一舉超越東京市,成為當時<strong>全國第一、世界第六大的城市</strong>。在巔峰時,大阪僅九家紡織工廠,就占了全國紡織資本金的近 47%。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">211萬</div><div class="lbl">1925 年大阪市人口,全國第一</div></div>
+      <div class="stat"><div class="num">No.6</div><div class="lbl">當時世界第六大城市</div></div>
+      <div class="stat"><div class="num">~47%</div><div class="lbl">大阪紡織占全國資本金比例</div></div>
+      <div class="stat"><div class="num">1925</div><div class="lbl">大大阪時代,商都的工業迴光</div></div>
+    </div>
+    <p>這個時代,與名市長<strong>關一</strong>(在任 1923–35)的名字緊緊相連。他主導了象徵現代大阪的標誌性建設:寬闊的<strong>御堂筋</strong>大道、日本早期的地下鐵。大阪以一種嶄新的、現代都市的面貌,昂首站上了它工業時代的巔峰。商人的「才覺」,讓它從舊體制的廢墟裡,硬是長出了一個新的黃金年代。</p>
+
+    <h3>但繁榮的陰影下,危機已在醞釀</h3>
+    <p>然而「大大阪」的光鮮之下,也藏著急速膨脹的代價:勞工貧困、住宅與貧民窟問題、煤煙與河川污染。更根本的是,這次的繁榮,是建立在「工業」這個新支柱上的——而工業的競爭力,終究會隨著時代與產業結構的變遷而轉移。大阪這次的重生雖然漂亮,卻仍未擺脫它的老問題:<em>它的繁榮,依然繫於某一種特定的經濟角色(先是米的商都,再是紡織的工業城),而非一種更難被取代的根本優勢。</em>當下一波結構轉變來臨時,這個迴光,終將黯淡。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 漂亮的轉型,未必解決根本的脆弱</span>
+      <p>大大阪時代,給出一個關於「轉型」的微妙洞見:<strong>一次成功的轉型(從米商到工業),固然展現了驚人的韌性與才覺,但如果轉型後的新支柱,本質上仍是「某種會隨時代轉移的特定優勢」,那麼這次重生,就只是換了一根同樣會倒的柱子,而非真正解決了脆弱的根源。</strong>大阪從「米的商都」轉型為「紡織的工業城」,看似浴火重生,實則只是把賭注從一種單一角色,換到了另一種單一角色上。</p>
+      <p>這呼應了整個系列反覆出現的母題,並給出更精細的一層:<em>真正的韌性,不只是「能轉型」,更是「轉型的方向,要從『依賴特定角色』走向『擁有不可替代的根本能力』」。</em>東京靠的是「重建的能力」(無形、不可奪),所以屢仆屢起;而大阪每次重生,雖然展現了高超的商業才覺,卻總是落腳在另一個「具體而會過時的產業角色」上(米→紡織→……)。這是兩種韌性的微妙分野:一種是「永遠能找到下一個產業」的韌性,一種是「擁有超越任何單一產業的根本能力」的韌性。前者讓你能一次次站起,但每次都得重新賭一把;後者,才讓你真正打不死。大大阪的迴光雖美,卻預示了它接下來那段漫長的、被結構轉變拖入的長眠。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 📉 ✦</div>
+  <p>戰後,日本騰飛,但繁榮的天平卻越來越偏向東京。<br>大阪,這座曾經的天下廚房,陷入了一場漫長的相對衰退——<br><span class="hl">日本人給它起了一個無奈的名字:「地盤沉下」。</span></p>
+</div>
+
+<!-- ===== 第八章 ===== -->
+<section id="ch8" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Long Decline</span>
+    <h2 class="act-title">地盤沉下:東京一極集中下的長眠</h2>
+    <p class="act-sub">The Slow Eclipse Under Tokyo's Gravity</p>
+    <div class="ornament">📉 ✦ 📉</div>
+  </div>
+  <div class="prose">
+    <p>戰後的日本締造了經濟奇蹟,但這場奇蹟的果實,越來越集中地落在東京。大阪,則陷入一場漫長、緩慢、卻持續不斷的相對衰退——日本人稱之為「<strong>地盤沉下</strong>」(地盤下沉)。這不是一場戲劇性的崩塌,而是一種溫水煮蛙式的、結構性的式微。</p>
+
+    <h3>東京一極集中:重力把一切都吸了過去</h3>
+    <p>大阪對東京的相對地位下滑,從 1960 年代後期開始,在 <strong>1970 年大阪萬博前後</strong>變得顯著,而在 <strong>1973 年第一次石油危機</strong>、高度成長期終結之後,變得決定性。幾個關鍵的時間刻度,標記著這場沉降:</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1960s末</div><div class="tl-text">東京一極集中啟動,企業總部、金融、人才加速北移東京。</div></div>
+      <div class="tl-item"><div class="tl-year">1970</div><div class="tl-text">大阪萬博達到戰後榮景頂點,卻也成為由盛轉衰的分水嶺。</div></div>
+      <div class="tl-item"><div class="tl-year">1973</div><div class="tl-text">石油危機終結高度成長期,大阪製造業全國份額大幅滑落。</div></div>
+      <div class="tl-item"><div class="tl-year">1974</div><div class="tl-text">京阪神都市圈人口轉為「轉出超過」,人才持續流向東京。</div></div>
+      <div class="tl-item"><div class="tl-year">1978</div><div class="tl-text">大阪市人口被橫濱市超越,東京一極集中時代正式確立。</div></div>
+    </div>
+    <p>東京一極集中的本質,是一種「贏家通吃」的重力效應:當企業總部、政府機關、金融中心、頂尖大學、媒體都集中在東京時,人才為了機會湧向東京,而人才的聚集又進一步吸引更多企業——形成一個自我強化的正向循環。大阪的企業總部一個個遷往東京(「本社移轉」),金融功能也向東京集中。曾經的「天下廚房」,在東京這個巨大的重力場面前,被一寸寸地抽乾。</p>
+    <div class="pull"><p>大阪不是輸給了某個對手的正面攻擊,而是輸給了一種無形的「重力」——當所有的資源都自動向一個中心聚集,不在那個中心的城,只能緩緩下沉。</p></div>
+
+    <h3>這一次的長眠,像極了怡保</h3>
+    <p>大阪的「地盤沉下」,與我們在系列裡看過的怡保有著驚人的相似:都不是被災難摧毀,而是「不再是那個中心」之後的緩慢式微。但大阪比怡保幸運——它畢竟是擁有 800 多萬人口都會圈的巨城,有深厚的工商業底蘊、世界級的製造業(它仍是日本重要的工業與商業中心),不至於像怡保那樣徹底沉睡。它的「長眠」,是一種「仍然龐大、卻持續相對失勢」的尷尬——不上不下,既無法重返巔峰,也未真正衰亡。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最難對抗的,是「贏家通吃」的重力</span>
+      <p>大阪的地盤沉下,揭示一個在現代世界愈發普遍的殘酷規律:<strong>在許多領域,資源會呈現「向頭部集中」的重力效應——贏家因為已經領先,而能吸引更多資源,從而變得更領先,形成自我強化的正向循環;而非頭部者,即使本身並不差,也會因為「不在那個中心」而被持續抽乾。</strong>東京一極集中、科技業的贏家通吃、資本向頭部聚集——本質都是同一種重力。</p>
+      <p>這對任何身處競爭格局的人事物都是深刻的警示:<em>當一個領域出現「贏家通吃」的重力效應時,單純地「做得不錯」往往不夠——因為重力會把資源持續吸向那個既有的中心,讓非中心者陷入緩慢的相對衰退。</em>面對這種格局,大阪的處境給出兩個啟示:其一,不要正面去跟那個重力中心拚它最強的項目(大阪拚不過東京當「全國中心」);其二,出路在於「差異化」——找到一個重力中心無法輕易覆蓋的利基,建立自己不可替代的價值。大阪後來的自救嘗試(主打它獨有的商業文化、製造業底蘊、與關西的區域整合),走的正是這條「不跟你拚中心,而是做你做不了的事」的差異化之路。在贏家通吃的世界裡,活路往往不在中心,而在那些重力照顧不到的縫隙與特色裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🌉 ✦</div>
+  <p>這場由盛轉衰,在大阪的地表上留下了一個看得見的痕跡——<br>那些曾讓它被稱為「八百八橋」的縱橫運河,<br><span class="hl">一條條,被填平了。</span></p>
+</div>
+
+<!-- ===== 第九章 ===== -->
+<section id="ch9" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Vanishing Canals</span>
+    <h2 class="act-title">水都的版圖:被填掉的八百八橋</h2>
+    <p class="act-sub">How the City of Water Lost Its Water</p>
+    <div class="ornament">🌉 ✦ 🌉</div>
+  </div>
+  <div class="prose">
+    <p>每座城的版圖變遷,都訴說著它的命運。吉隆坡向河谷外溢,澳門向海填地,東京沿鐵路攤開——而大阪的版圖故事,藏在一個略帶哀傷的詞裡:<strong>它的水,消失了。</strong>這座曾經的「水都」「八百八橋」之城,在現代化的過程中,親手填掉了大半的運河。</p>
+
+    <h3>當水路不再是高速公路</h3>
+    <p>大阪的縱橫河堀,曾是它作為「天下廚房」的命脈——它們是江戶時代的高速公路,千船萬艘在其上運送著餵養全日本的米與物資。但進入近代,情況逆轉了。陸路運輸(鐵路、卡車)崛起,水運的物流角色急速衰退;同時,密集的運河帶來了水質污染、衛生問題,並阻礙了汽車時代所需的道路建設。曾經的資產,變成了現代化的障礙。</p>
+    <p>於是,從近代到戰後,大阪展開了大規模的<strong>運河填埋</strong>。一條條曾經舳艫相接的水道,被填平、被加蓋,變成了道路、用地。那個「八百八橋」的水都意象,大半沉入了歷史。今天的大阪雖仍有道頓堀、中之島等水岸保留著水都的餘韻,但那縱橫如網的運河時代,已隨著它「天下廚房」角色的褪去,一同消逝。</p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">水曾是它的力量</div>
+        <p style="text-align:left;font-size:.96rem">江戶時代,縱橫運河是大阪的高速公路與護城河,水運撐起了天下廚房,八百八橋是商都繁榮的勳章。水,定義了大阪。</p>
+      </div>
+      <div>
+        <div class="minihead">水成了它的包袱</div>
+        <p style="text-align:left;font-size:.96rem">近代後,水運被陸運取代,運河淪為污染源與道路障礙,於是被大規模填埋。曾經的命脈,變成了該被清除的舊物。</p>
+      </div>
+    </div>
+    <div class="pull"><p>填掉運河的大阪,某種程度上,也填掉了那個「天下廚房」的自己。一座城的基礎設施如何變遷,往往就是它經濟角色如何變遷的地表倒影。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 昔日的核心優勢,可能變成明日的轉型包袱</span>
+      <p>大阪填運河的故事,給出一個關於「優勢會過期」的深刻洞見:<strong>一個主體曾經賴以成功的核心資產或優勢,在環境改變後,很可能從「資產」反轉為「負債」——昔日讓你致勝的東西,可能正是阻礙你轉型的包袱。</strong>運河曾是大阪稱霸的命脈,但當時代從水運轉向陸運,這套曾經的核心基礎設施,反而變成了污染源與道路障礙,不得不被填埋清除。</p>
+      <p>這對任何曾經成功的個人與組織都是嚴厲的提醒:<em>你最引以為傲的優勢、你投入最深的核心能力、你最熟悉的成功模式——在環境劇變時,都可能從你的護城河,變成你的沉沒成本與轉型障礙。</em>一家公司最賺錢的舊業務,可能正是它擁抱新技術最大的阻力;一個人最擅長的舊技能,可能正是他適應新時代最深的執念。大阪能下決心填掉自己引以為傲的運河、去擁抱汽車時代,展現了一種難得的「敢於拋棄昔日優勢」的勇氣——雖然伴隨著鄉愁與代價。這提醒我們:真正的與時俱進,有時不是「加上新的」,而是有勇氣「放下那個曾讓你成功、卻已過時的舊優勢」。抱著過期的護城河不放,反而會被它拖住。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚖ ✦</div>
+  <p>錫之城,賭之城,火與灰燼之城,如今再加上這座算盤之城。<br>把五座城並排,「靠什麼立城」這個問題,有了最完整的光譜——<br><span class="hl">而大阪,為這道光譜補上了一抹獨特的顏色。</span></p>
+</div>
+
+<!-- ===== 第十章 ===== -->
+<section id="ch10" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · Five Cities</span>
+    <h2 class="act-title">五座城的對照:商業,是另一種韌性</h2>
+    <p class="act-sub">Osaka, Tokyo, Macau, Ipoh, KL — Five Ways to Build a City</p>
+    <div class="ornament">⚖ ✦ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>大阪的故事,放進整個系列裡,補上了一個此前缺席的維度。我們看過靠「資源」的城(怡保、吉隆坡的錫)、靠「位置」的城(澳門的居間)、靠「重建能力」的城(東京)——而大阪,是靠「<strong>商業與市場機制</strong>」的城。把五座城並排,「一座城靠什麼立足、又靠什麼穿越時間」這個貫穿系列的問題,終於有了最完整的答案。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>城市</th><th>核心依靠</th><th>本質</th><th>遇變局時</th><th>長期命運</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>東京</strong></td><td>重建的能力</td><td>無形、奪不走</td><td>歸零後重建得更高</td><td>愈挫愈強的巨城</td></tr>
+          <tr><td><strong>大阪</strong></td><td>商業與市場機制</td><td>能力強,但繫於特定經濟角色</td><td>能轉型,但每次換一根柱子</td><td>韌性十足,卻持續相對失勢</td></tr>
+          <tr><td><strong>吉隆坡</strong></td><td>錫,但轉化為制度</td><td>有形→沉澱為制度</td><td>錫崩盤幾乎無傷</td><td>穩健升格為首都</td></tr>
+          <tr><td><strong>澳門</strong></td><td>合法性的位置</td><td>有形、可被取代</td><td>客源一斷即重創</td><td>繁榮但脆弱,待轉身</td></tr>
+          <tr><td><strong>怡保</strong></td><td>地底的錫</td><td>有形、會枯竭</td><td>礦竭即長眠數十年</td><td>暴起暴落,溫柔甦醒</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>大阪在光譜上的獨特位置</h3>
+    <p>大阪在這條「脆弱←→強韌」的光譜上,佔據了一個微妙而獨特的位置。它<strong>遠比怡保、澳門強韌</strong>——因為它依靠的不是會枯竭的資源或可被取代的位置,而是一種「商業才覺」的能力,這讓它能一次次轉型(米商→工業→……),展現出真正的韌性。但它又<strong>不及東京徹底</strong>——因為它每次轉型,落腳點都是「另一個會過時的特定經濟角色」,而非東京那種「超越任何單一角色的根本重建能力」。</p>
+    <div class="pull"><p>大阪證明了:商業才覺,本身就是一種強大的韌性。但它也提醒我們:如果這份才覺,每次都只用來尋找「下一個會過時的角色」,那它就只能讓你一次次站起,卻無法讓你真正立於不敗。</p></div>
+    <p>更深一層,大阪為整個系列補上了一個關鍵的洞見:<strong>「商業 vs 權力」是比「擁有什麼資源」更底層的一組分野。</strong>怡保、澳門、吉隆坡的故事,主要是關於「依賴什麼資源」;東京的故事,是關於「能力 vs 資產」;而大阪,則揭示了第三個維度——<em>一座城(或一個主體)的命運,還深刻地取決於它是靠「由下而上的市場機制」還是「由上而下的權力」來組織。</em>大阪的興盛證明了純市場機制能爆發出何等驚人的創造力(天下廚房、世界最早的期貨),而它的失勢則證明了:當純市場遭遇一個更強大的權力中心(東京一極集中)時,它在「規則制定權」上的缺席,會成為它致命的軟肋。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 市場的創造力,與權力的規則制定權</span>
+      <p>五城並排,大阪補上了系列最後一塊拼圖,給出一個關於「實力的兩個層次」的終極洞見:<strong>真正完整的實力,既需要「市場層面的創造力」(像大阪商人那樣,靠才覺、算用創造價值),也需要「規則層面的話語權」(像東京那樣,不至於被別人改寫的規則一夜抽乾)。</strong>大阪在前者登峰造極,卻在後者徹底缺席——它能創造出世界最早的期貨市場,卻無力阻止明治政府用一紙政令(藩債處分)抹掉它的資產,也無力對抗東京一極集中的重力。</p>
+      <p>這對任何在現實世界中追求長期成功的人事物,都是最務實的一課:<em>只擅長「在既有規則下把事情做到最好」(市場創造力)是不夠的,因為規則本身可能被改寫,而你若在「規則如何制定」上完全沒有話語權,你再強的創造力,也建立在別人可以隨時抽走的地基上。</em>怡保、澳門告訴我們別把命押在會枯竭、會被取代的東西上;東京告訴我們把根扎在能力上;而大阪最後補充道:<strong>除了能力與資產,還要警惕「規則制定權」這個更隱形的維度——真正的安全,不只是把事情做對,還包括確保你身處的那套規則,不會在你毫無還手之力時,被別人為了自己的利益而改寫。</strong>這,是這座只有算盤、沒有官印的商人之城,用四百年的興衰,為整個系列留下的最後一句箴言。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🎡 ✦</div>
+  <p>但大阪的商人魂從未熄滅。失勢了一甲子,它正用最大阪的方式反擊——<br>辦一場世界博覽會,蓋一座賭場,喊出「副首都」的口號。<br><span class="hl">這座算盤之城,又開始算它最大的一筆帳了。</span></p>
+</div>
+
+<!-- ===== 第十一章 ===== -->
+<section id="ch11" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · What Comes Next</span>
+    <h2 class="act-title">再起的豪賭:萬博、賭場與副首都</h2>
+    <p class="act-sub">Expo, Casino, and the Bet to Rise Again</p>
+    <div class="ornament">🎡 ✦ 🎡</div>
+  </div>
+  <div class="prose">
+    <p>長達一甲子的「地盤沉下」,並沒有澆熄大阪的商人魂。進入二十一世紀,這座城正以最「大阪」的方式——精打細算又敢於下注——試圖扭轉它相對衰退的命運。它同時押下了三注。</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">注一</span>
+        <h5>2025 大阪·關西萬博</h5>
+        <p>繼 1970 年後,大阪再度舉辦世界博覽會,以「人類的健康·長壽」為主題,主打它在生命科學領域的底蘊。世界最大木造建築「大屋根環」是其象徵。它想複製 1970 年那場萬博的提振效應——儘管 1970 後緊接的,正是它由盛轉衰的開始。</p>
+        <span class="model">Expo 2025</span>
+      </div>
+      <div class="card">
+        <span class="flag">注二</span>
+        <h5>IR:夢洲的賭場</h5>
+        <p>大阪積極爭取在人工島夢洲興建「整合型度假區」(IR,即賭場綜合度假村),寄望以博彩與會展拉動觀光與投資。這一步,讓它的命運與我們看過的澳門,意外地產生了交集——一座商都,也想分一杯賭城的羹。</p>
+        <span class="model">Integrated Resort</span>
+      </div>
+      <div class="card">
+        <span class="flag">注三</span>
+        <h5>副首都構想</h5>
+        <p>大阪維新會長期推動「副首都」願景,主張讓大阪成為東京以外的第二極,分散「東京一極集中」的國家級風險——萬一首都遭逢巨災,日本還有一個備援的中樞。這是對「重力效應」最直接的政治反擊。</p>
+        <span class="model">Second Capital</span>
+      </div>
+    </div>
+
+    <h3>豪賭背後的隱憂與底氣</h3>
+    <p>這三注,延續著大阪商人「才覺」與「算用」的基因,但也伴隨著清醒者的隱憂。財界人士坦言「大阪正在失去自信」;萬博與 IR 都面臨建設費膨脹的風險;疫情更一度重創了它賴以提振的觀光特需。更值得深思的是:萬博、賭場這類「事件型」「設施型」的刺激,本質上仍是在尋找「下一個能拉動經濟的特定角色」——這,恰恰是大阪百年來反覆走過、卻始終未能根治脆弱的老路。</p>
+    <div class="pull"><p>1970 年的萬博,曾是大阪的高峰,卻也是它由盛轉衰的轉折點。2025 年的萬博,究竟會是真正的再起,還是又一次絢爛的迴光?這把帳,還在算。</p></div>
+    <p>但若論底氣,大阪也並非沒有。它畢竟是擁有 800 多萬人口、深厚工商業底蘊、世界級製造業群聚的關西核心;它有獨步全國的商業文化與創業精神;它在生命科學、精密製造等領域仍有真材實料。它的出路,或許不在於「重新成為東京那樣的全國中心」(那條路在重力效應下幾乎走不通),而在於——回到它最擅長的本行,用「始末·才覺·算用」,在東京重力照顧不到的領域與利基裡,做一個不可替代的、有自己鮮明特色的關西之心。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 反擊重力,靠的是差異化,而非正面對撞</span>
+      <p>大阪的再起豪賭,給出一個關於「如何對抗強大對手」的洞見:<strong>當你面對一個擁有「重力效應」的領先者時,最危險的策略,是試圖在它最強的維度上正面超越它;最可行的出路,往往是建立一個它無法輕易覆蓋的差異化價值。</strong>大阪若想在「當全國中心」這件事上正面對撞東京,幾乎注定徒勞——因為重力會持續把資源吸向已經領先的東京。它真正的機會,在於做東京做不到、或不屑於做的事。</p>
+      <p>這對任何身處「老二」位置、面對贏家通吃格局的人事物,都是務實的策略指南:<em>不要執著於「成為第二個老大」,而要思考「如何成為一個不可替代的、有獨特價值的存在」。</em>大阪的三注裡,最有勝算的未必是模仿性的(辦萬博、開賭場都是別人玩過的),而是那些能真正發揮它獨有基因的方向——它的商業文化、它的製造業底蘊、它與整個關西的區域整合、它那股「不問出身只問本事」的務實創業精神。整個城市系列繞了五座城,最終都指向同一個樸素的真理:<strong>無論是一座城還是一個人,真正的長久之道,不是去擁有別人也有的東西,也不是去搶別人已經佔據的位置,而是把自己獨有的那份能力與特色,做到無可取代。</strong>這,是大阪仍在書寫的下半場,也是這整個系列,留給每一位讀者的共同功課。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⚖ ☩</div>
+  <p>河口,秀吉,米,水,算盤;天下的廚房,世界的期貨,漫長的沉降。<br>當我們把這四百年收攏,終於可以回答最初那個問題——<br><span class="hl">一座沒有權力的城,究竟能靠什麼,活成天下的廚房?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section id="chF" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">終章 · Finale</span>
+    <h2 class="act-title">於是,今天的大阪</h2>
+    <p class="act-sub">The City Built on the Abacus</p>
+    <div class="ornament">⚖ ✦ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>站在今天的大阪,你會同時看見它的四百年。大阪城的天守在藍天下重建後依然矗立,那是秀吉霸業的迴響;堂島曾經的米市場舊址,如今是安靜的公園,卻是世界金融史的起點;道頓堀的霓虹下人聲鼎沸,延續著町人那股愛吃、愛笑、愛熱鬧的市井魂;而填平的運河變成的大道上,車流奔忙,訴說著一個水都的逝去與一座工商城市的延續。一座城,把四百年的算盤聲,層層疊疊地壓進了今天的喧囂裡。</p>
+
+    <p>回到最初的問題:一座沒有天皇、沒有將軍、沒有權力的城,究竟靠什麼,活成了天下的廚房,甚至發明了世界最早的期貨市場?答案貫穿始終——它靠的是<strong>商業</strong>:靠水路的地利、靠商人的才覺、靠市場機制由下而上的自發組織。在一個由武士與權力主宰的國度裡,大阪固執地證明了一件事:<em>不靠刀,不靠官印,只靠算盤與信用,一樣可以撐起一座餵養全日本的巨城。</em></p>
+
+    <div class="pull"><p>它沒有出過一位將軍,卻定下了全國的米價;它沒有發過一道政令,卻發明了現代金融的雛形。這座城用四百年證明:市場的力量,可以不亞於權力的力量。</p></div>
+
+    <p>而這,正是大阪為整個城市系列補上的、不可或缺的一塊。從怡保的錫、吉隆坡的錫、澳門的賭、東京的重生,到大阪的算盤,這五座城用各自的命運,從不同角度叩問著同一個問題:<em>一座城(乃至一個人)的命運,究竟由什麼決定?</em></p>
+
+    <p>怡保說:別把全部押在會枯竭的東西上。吉隆坡說:趁繁榮,把紅利轉化成更持久的根基。澳門說:警惕那些不掌握在自己手裡的依賴。東京說:把根扎在「能力」上,因為能力奪不走。而大阪,給出了最後、也最微妙的補充——<strong>市場的創造力固然強大,能讓你無中生有、由下而上地撐起一片天;但別忘了,在創造價值之外,還要警惕那個更隱形的維度:你身處的規則,是否握在別人手裡?那股把資源吸向中心的重力,你又該如何用差異化去抗衡?</strong></p>
+
+    <p>所以,當你下一次精打細算、靠本事在這個世界上掙得一席之地時,不妨想起這座算盤之城。它會用四百年的興衰告訴你:<strong>靠真本事創造價值,永遠是值得驕傲、也最為紮實的活法——這是大阪的光榮。但真正的長久,還需要你看清自己身處的規則由誰制定、那股重力把一切吸向何方,並始終守住一件事:把你獨有的本事,做到無人能取代。</strong>因為在這個世界上,能被別人改寫的規則、能被重力吸走的繁榮,終究都會變;唯有你那把屬於自己的、誰也奪不走的算盤,才是真正的依靠。</p>
+
+    <p style="text-align:center;margin-top:3rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint)">— 全文完 · 城市系列 —</p>
+  </div>
+</section>
+
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

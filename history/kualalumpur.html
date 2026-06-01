@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>泥濘河口的錫礦王國：吉隆坡一百七十年的崛起</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ===== 目錄 TOC ===== */
+.toc{max-width:760px;margin:3rem auto 1rem;padding:2.6rem 2.4rem;background:var(--parchment-deep);border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:4px}
+.toc .toc-head{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.32em;color:var(--rust);text-transform:uppercase;text-align:center;margin-bottom:.4rem}
+.toc .toc-sub{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin-bottom:1.8rem}
+.toc ol{list-style:none;counter-reset:toc;margin:0;padding:0}
+.toc li{counter-increment:toc;border-bottom:1px dashed var(--line)}
+.toc li:last-child{border-bottom:none}
+.toc li.toc-extra{}
+.toc a{display:flex;align-items:baseline;gap:.9rem;padding:.7rem .4rem;text-decoration:none;color:var(--sea-deep);transition:background .2s,color .2s,padding-left .2s}
+.toc a:hover{background:rgba(176,141,52,.1);color:var(--rust);padding-left:1rem}
+.toc .toc-n{font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;color:var(--gold);min-width:2.4rem;flex-shrink:0;letter-spacing:.03em}
+.toc a:hover .toc-n{color:var(--rust)}
+.toc .toc-t{font-family:'Noto Serif TC',serif;font-size:1.02rem;line-height:1.4;font-weight:500}
+.toc .toc-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:var(--faint);margin-left:auto;text-align:right;flex-shrink:0;padding-left:1rem}
+.toc .badge{display:inline-block;font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.1em;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:.05rem .45rem;margin-left:.5rem;vertical-align:middle;opacity:.85}
+@media(max-width:640px){
+  .toc{padding:2rem 1.4rem;margin:2rem 1rem 1rem}
+  .toc .toc-en{display:none}
+  .toc a{gap:.7rem}
+}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ---- 修正:深色章節內,擁有淺色背景的卡片組件須維持深色文字,避免淺底淺字 ---- */
+/* ---- 修正:深色章節內的對比度 ----
+   實心淺底組件(method-card / twocol)→ 深色文字;
+   shift-body 無背景貼深底 → 淺色文字。 ---- */
+.dark .method-card p,
+.dark .twocol p{color:var(--ink)}
+.dark .method-card p strong,
+.dark .twocol p strong{color:var(--crimson)}
+.dark .method-card p em,
+.dark .twocol p em{color:var(--sea-deep)}
+.dark .method-card h5{color:var(--sea-deep)}
+.dark .method-card .tool{color:var(--rust)}
+.dark .method-card .eg{color:#6b5d48}
+.dark .minihead{color:var(--rust)}
+.dark .shift-body{color:#cdb494}
+.dark .shift-body strong{color:#c87a5a}
+.dark .shift-body em{color:#d8a878}
+.dark .stat{background:rgba(212,175,90,.07)}
+.dark .stat .num{color:var(--gold-bright)}
+.dark .stat .lbl{color:#b9a784}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+.twocol>div{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left;color:var(--ink)}
+.method-card p strong{color:var(--crimson)}
+.method-card p em{color:var(--sea-deep)}
+.method-card .eg{font-size:.86rem;color:#6b5d48;font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Kuala Lumpur · The Muddy Confluence That Became a Capital</span>
+    <h1>泥濘河口的<span class="em">錫礦王國</span><br>吉隆坡<br>一百七十年的崛起</h1>
+    <p class="sub">從兩條河交會處的一片爛泥灘、一座因械鬥而焚毀又重建的礦城，<br>到雙子星塔刺破雲層的東南亞金融心臟——<br>一座「無中生有」之城，如何成為一個國家的首都</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼一個國家的首都，會建在一片連名字都叫「泥濘河口」的沼澤上？吉隆坡沒有馬六甲的蘇丹宮殿，沒有檳城的海港傳奇，它的起點是巴生河與鵝麥河交會處那片瘴癘瀰漫的爛泥灘。讓它脫胎換骨的，不是國王，也不是將軍，而是埋在地底的一種灰色金屬——<em>錫</em>，以及成千上萬挑著扁擔、賭上性命漂洋而來的華人礦工。一場血腥的內戰把它燒成廢墟，一個放牛出身的客家人把它從灰燼裡重建；英國人看中它的戰略位置把首府遷來，殖民者的摩爾式拱頂在河岸升起，獨立那夜七聲「默迪卡」在這裡響徹雲霄。這不是一座被天賦的城，而是一座<em>被人「賭」出來、又一次次從廢墟裡站起來</em>的城。讓我們從那片泥濘走起，在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<!-- ===== 目錄 TOC ===== -->
+<nav class="toc">
+  <div class="toc-head">Table of Contents</div>
+  <div class="toc-sub">泥濘河口的錫礦王國 · 全十六章</div>
+  <ol>
+    <li><a href="#ch0"><span class="toc-n">序章</span><span class="toc-t">在錫礦之前，這裡只是一片爛泥</span><span class="toc-en">Before the Tin</span></a></li>
+    <li class="toc-extra"><a href="#ch1"><span class="toc-n">第一章</span><span class="toc-t">泥濘的名字：一座建在水患上的城<span class="badge">增補</span></span><span class="toc-en">Water</span></a></li>
+    <li><a href="#ch2"><span class="toc-n">第二章</span><span class="toc-t">扁擔、瘴癘與淘錫潮</span><span class="toc-en">The Tin Rush</span></a></li>
+    <li><a href="#ch3"><span class="toc-n">第三章</span><span class="toc-t">葉亞來：被稱為「吉隆坡王」的客家人</span><span class="toc-en">The Kapitan King</span></a></li>
+    <li><a href="#ch4"><span class="toc-n">第四章</span><span class="toc-t">摩爾式拱頂下的帝國中樞</span><span class="toc-en">The Colonial Capital</span></a></li>
+    <li><a href="#ch5"><span class="toc-n">第五章</span><span class="toc-t">太陽旗的陰影與七聲「默迪卡」</span><span class="toc-en">War and Merdeka</span></a></li>
+    <li><a href="#ch6"><span class="toc-n">第六章</span><span class="toc-t">從聯邦直轄區到刺破雲層的雙子星</span><span class="toc-en">The Twin Towers</span></a></li>
+    <li><a href="#ch7"><span class="toc-n">第七章</span><span class="toc-t">從單核到多核：一座城的規劃轉向</span><span class="toc-en">The Blueprint</span></a></li>
+    <li class="toc-extra"><a href="#ch8"><span class="toc-n">第八章</span><span class="toc-t">天際線的陰影：光鮮規劃的另一面帳本<span class="badge">增補</span></span><span class="toc-en">The Shadow</span></a></li>
+    <li><a href="#ch9"><span class="toc-n">第九章</span><span class="toc-t">繁華的三次搬家</span><span class="toc-en">The Moving Centre</span></a></li>
+    <li class="toc-extra"><a href="#ch10"><span class="toc-n">第十章</span><span class="toc-t">從一片泥灘到巴生谷：一座城的版圖演變史<span class="badge">增補</span></span><span class="toc-en">The Expanding Map</span></a></li>
+    <li><a href="#ch11"><span class="toc-n">第十一章</span><span class="toc-t">分區而居：一座城的族群版圖</span><span class="toc-en">The Ethnic Map</span></a></li>
+    <li class="toc-extra"><a href="#ch12"><span class="toc-n">第十二章</span><span class="toc-t">地圖上被寫淡的人：十五碑、契約勞工與原住民<span class="badge">增補</span></span><span class="toc-en">The Other Maps</span></a></li>
+    <li><a href="#ch13"><span class="toc-n">第十三章</span><span class="toc-t">五一三：一道把國家劈成兩半的分水嶺</span><span class="toc-en">The Watershed</span></a></li>
+    <li><a href="#ch14"><span class="toc-n">第十四章</span><span class="toc-t">兩座城的鏡像：吉隆坡與檳城</span><span class="toc-en">Twin Cities</span></a></li>
+    <li class="toc-extra"><a href="#ch15"><span class="toc-n">第十五章</span><span class="toc-t">兩個錫的孩子：資源詛咒的解剖學<span class="badge">增補</span></span><span class="toc-en">The Resource Curse</span></a></li>
+    <li><a href="#ch16"><span class="toc-n">第十六章</span><span class="toc-t">泥濘河口的下一個百年</span><span class="toc-en">What Comes Next</span></a></li>
+    <li><a href="#chF"><span class="toc-n">終章</span><span class="toc-t">於是，今天的吉隆坡</span><span class="toc-en">Finale</span></a></li>
+  </ol>
+</nav>
+
+<div class="div-orn">⚒ ✦ ⚒</div>
+
+<!-- ===== 序章：在錫礦之前 ===== -->
+<section id="ch0" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the Tin</span>
+    <h2 class="act-title">在錫礦之前，這裡只是一片爛泥</h2>
+    <p class="act-sub">Two Rivers, a Swamp, and the Grey Metal Beneath</p>
+    <div class="ornament">☴ ☴ ☴</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的吉隆坡，得先承認一件不浪漫的事實：它的名字本身就是它卑微出身的證據。馬來語「Kuala Lumpur」直譯就是<strong>「泥濘的河口」</strong>——「Kuala」是河流匯合處，「Lumpur」是泥漿。它指的，正是巴生河（Klang）與鵝麥河（Gombak）交會處那片混濁的爛泥灘。</p>
+
+    <h3>一個船隻只能到此為止的地方</h3>
+    <p>這片土地之所以會成為聚落，理由很實際：它是巴生河上溯航行所能抵達的<em>最遠處</em>。再往上游，河道淺窄、亂石密布，運貨的舢舨就上不去了。於是這個「轉運的終點」自然成了貨物上岸、轉往內陸礦區的集散點。在 1850 年代之前，這裡不過是河岸邊幾間亞答屋的小村，幾乎不存在於任何地圖上。</p>
+
+    <h3>真正的主角：地底的錫</h3>
+    <p>讓這片不毛之地脫胎換骨的，不是它的地表，而是它的<strong>地底</strong>。巴生谷一帶蘊藏著豐富的<em>錫砂</em>——這種看似不起眼的灰色金屬，在十九世紀的世界卻價值連城。歐美的工業化催生了罐頭食品的爆發，而製造馬口鐵罐頭最關鍵的鍍層原料，正是錫。一個遙遠的歐美餐桌需求，就這樣隔著半個地球，把命運的引信接到了這片馬來叢林的泥土裡。</p>
+    <div class="pull"><p>馬六甲靠海峽咽喉而富，檳城靠免稅自由港而興，吉隆坡卻是靠一種埋在爛泥裡、餵養著歐美罐頭工業的灰色金屬而生。</p></div>
+    <p>於是吉隆坡的故事，從一開始就和馬六甲、檳城走著完全不同的路。前兩座城是「貿易之城」——它們的財富來自<em>讓貨物經過</em>；而吉隆坡是一座「生產之城」——它的財富來自<em>從地裡挖出東西</em>。這個根本差異，決定了它將吸引一種完全不同的人：不是精明的商賈，而是不要命的礦工。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 需求在遠方，命運在腳下</span>
+      <p>吉隆坡誕生的第一課是：<strong>一個地方的命運，常常由一個它完全看不見的遠方需求所決定。</strong>巴生谷的礦工大概一輩子沒見過歐美工廠裡的罐頭生產線，但正是那條生產線對錫的胃口，把他們從中國南方的饑荒裡吸了過來。</p>
+      <p>這對應一個被低估的真理：<em>資源本身不會創造繁榮，是「外部世界對這項資源的渴望」才會。</em>同一片錫砂，在工業革命之前一文不值，在罐頭工業崛起之後就成了能造出一座城的黃金。吉隆坡的興，從來不只是它有什麼，而是世界剛好需要它有的東西。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚒ ✦ ⚒</div>
+  <p>地底的錫點燃了引信，但要把它挖出來，需要海量的人。<br>而在南中國海的對岸，正有成千上萬走投無路的人，<br><span class="hl">願意為了一線生機，賭上性命渡海而來。</span></p>
+</div>
+
+<!-- ===== 插章：水文宿命 ===== -->
+<section id="ch1" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · Water</span>
+    <h2 class="act-title">泥濘的名字：一座建在水患上的城</h2>
+    <p class="act-sub">Kuala Lumpur, the "Muddy Confluence," and Its 170-Year War with the Rivers</p>
+    <div class="ornament">≈ ✦ ≈</div>
+  </div>
+  <div class="prose">
+    <p>在談人、談錫、談權力之前，有一個更底層、更誠實的主角一直被忽略——<strong>水</strong>。吉隆坡這個名字本身，就是一句對它地理宿命的直白告白：馬來語 <em>Kuala</em> 意為「河口、交匯口」，<em>Lumpur</em> 意為「淤泥、泥濘」。合起來，「吉隆坡」的字面意思就是——<strong>泥濘的河口</strong>。這座未來的首都，從命名的第一天起，就被它腳下的兩條河與它們帶來的泥,定義了。</p>
+
+    <h3>1857：兩條河的交匯點</h3>
+    <p>1857 年，當錫礦工溯流而上、尋找運送錫砂的最遠登陸點時，他們停在了<strong>巴生河（Sungai Klang）與鵝麥河（Sungai Gombak）</strong>的交匯處——因為再往上，船就走不動了。這個「船到此為止」的泥濘交匯口，就成了城市最初的胚胎。今天聳立在這個交匯點上的占美清真寺（Masjid Jamek），正標記著整座城市故事的起點。<em>吉隆坡不是建在一片好地上，而是建在一個「船再也走不動」的爛泥灘上——它的位置，是被河流的物理極限決定的。</em></p>
+
+    <h3>水,既給它生命,也反覆要它的命</h3>
+    <p>但同一條給了吉隆坡生命的河，也成了它最持久的敵人。低窪的河口地形、熱帶的暴雨、加上上游採錫造成的泥沙淤積與河道淤塞，讓這座城從誕生起就與洪水反覆糾纏。其中最關鍵的一次,是 <strong>1881 年</strong>——那一年吉隆坡先遭大火、再逢洪災,木造的亞答屋幾乎被夷平。這場「火與水」的雙重摧毀,意外地改寫了城市的物質形態:</p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">災難 · 1881 火與洪</div>
+        <p style="text-align:left;font-size:.96rem">大火與洪災接連摧毀大片木屋。雪蘭莪參政司瑞天咸（Frank Swettenham）下了一道行政命令：基於安全與衛生，禁止再蓋亞答木屋，<strong>一律改建磚屋</strong>。</p>
+      </div>
+      <div>
+        <div class="minihead">後果 · 一座「磚」城的誕生</div>
+        <p style="text-align:left;font-size:.96rem">磚的需求暴增,葉亞來、政府紛紛在城南設磚廠——那片地從此叫做 <em>Brickfields（十五碑）</em>。今日吉隆坡的磚紅色殖民立面,根都在這場水火之災裡。</p>
+      </div>
+    </div>
+    <p>此後一個半世紀,洪水從未真正離開。每逢季風暴雨,巴生河谷的市中心便有淹水之虞——這是「泥濘河口」這個名字,寫進城市基因裡的物理債務。</p>
+
+    <h3>與水的世紀和解:SMART 隧道與生命之河</h3>
+    <p>進入二十一世紀,吉隆坡終於用兩項大工程,試圖與它的水患宿命達成和解。其一是 <strong>SMART 隧道</strong>(Stormwater Management and Road Tunnel,雨水管理與道路隧道)——一條長約 9.7 公里的巨型隧道,中段約 3 公里同時兼具「暴雨洩洪」與「行車道路」雙重功能,平時走車、暴雨時引洪,是<em>全球最長的多功能隧道</em>。其二是 <strong>「生命之河」(River of Life)</strong> 計畫,2011 年起啟動,試圖清理、美化巴生河與鵝麥河,把這條孕育了城市、卻長期淪為臭水溝的河,重新變成可親近的城市門面。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1857</div><div class="lbl">建城於巴生河與鵝麥河交匯口</div></div>
+      <div class="stat"><div class="num">1881</div><div class="lbl">火與洪雙災,催生「磚城」與十五碑</div></div>
+      <div class="stat"><div class="num">9.7km</div><div class="lbl">SMART 隧道,全球最長多功能隧道</div></div>
+      <div class="stat"><div class="num">2011</div><div class="lbl">「生命之河」計畫啟動,重整河岸</div></div>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座城最深的性格,藏在它的地理裡</span>
+      <p>吉隆坡的水文史,給出一個常被宏大敘事掩蓋的洞見:<strong>一座城(或一項事業)最底層的條件,往往不是人寫的劇本,而是它腳下那片土地的物理屬性——而這個屬性,會以你意想不到的方式,反覆回來定義它。</strong>吉隆坡的位置由「船到此為止」決定,它的建材由一場水火之災決定,它至今仍要花數十億令吉的工程,去償還那個寫在名字裡的「泥濘」債務。</p>
+      <p>更深的一層是:<em>真正高明的應對,不是去否認或抹除這個底層約束,而是學會與它共存、甚至把它轉化為資產。</em>SMART 隧道沒有試圖「消滅」洪水,而是給洪水一條與車流共享的通道;生命之河沒有把河填掉,而是把它從負債翻轉成門面。這正是吉隆坡韌性基因的另一種展現——它不只是「燒不垮、淹不沒」,更是懂得把那條反覆要它命的河,重新談判成一個可以共生的對象。一座城最成熟的標誌,是與它無法選擇的地理,達成體面的和解。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第一章：淘錫潮 ===== -->
+<section id="ch2" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Tin Rush</span>
+    <h2 class="act-title">扁擔、瘴癘與淘錫潮</h2>
+    <p class="act-sub">1857 — When Raja Abdullah Opened the Valley</p>
+    <div class="ornament">⚒ ⚒ ⚒</div>
+  </div>
+  <div class="prose">
+    <p>故事的引信，在 1857 年被點燃。這一年，雪蘭莪的馬來酋長<strong>拉惹阿都拉（Raja Abdullah）</strong>做出了一個改變一切的決定：他開放巴生谷供人開採錫礦，並出資招募礦工。這個看似尋常的商業舉動，意外地拉開了一座未來首都的序幕。</p>
+
+    <h3>從饑荒中渡海而來的人</h3>
+    <p>招募的對象，是海對岸的華人。當時正值清末最動盪的年代——太平天國的戰火、連年的饑荒、土地的兼併，把廣東與福建大批破產的農民逼上絕路。對他們而言，南洋叢林裡的錫礦雖然九死一生，卻至少是一條活路。於是成千上萬的華人礦工——<em>主要是客家人與廣府人</em>——挑著扁擔、揣著鄉音，循著海路湧入這片瘴癘瀰漫、瘧疾橫行的叢林。</p>
+    <p>礦工的生活近乎煉獄。他們在積水的礦坑裡赤腳勞作，被蚊蚋叮咬、被熱病擊倒；初到的「新客」死亡率高得驚人，許多人還沒攢夠回鄉的盤纏就埋骨異鄉。但人潮並未因此止息——一批倒下，下一批又從海上湧來。吉隆坡作為錫礦的集散地，就在這股拿命換錢的淘錫潮中，從幾間房舍迅速膨脹成一座喧囂、泥濘而危險的礦城。</p>
+
+    <h3>幫會、械鬥與失序</h3>
+    <p>但礦城的崛起伴隨著血。背井離鄉的礦工為了生存，依方言與地緣抱團，結成秘密會黨——以客家人為主的<strong>「海山會」</strong>與以另一派系為主的<strong>「義興會」</strong>，為了爭奪錫礦的開採權與水源、稅收的利益，長年械鬥火拼。礦場時常因此停工，屍體有時就棄置在街頭。在這片殖民政府鞭長莫及、馬來蘇丹也管不到的荒野，唯一的秩序，只能由華人自己建立。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 失序的地方，秩序最值錢</span>
+      <p>早期吉隆坡揭示了一個殘酷卻真實的規律：<strong>在一個沒有現成秩序的地方，「能建立秩序的人」就是最大的權力來源。</strong>礦坑裡的錫很值錢，但能讓礦坑安穩運轉、讓械鬥停止、讓稅收順暢的「治理能力」，比錫更值錢。</p>
+      <p>這也預示了吉隆坡接下來的劇本：真正主宰這座城的，不會是挖得最多錫的人，而是<em>能在混亂中拉起一套規矩、讓所有人都願意服從的人</em>。下一章那位放牛出身的客家領袖，正是憑著這項稀缺的能力，把自己的名字刻進了這座城的地基。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚔ ✦</div>
+  <p>當錫礦的利益大到足以讓人流血，<br>這片荒野需要的就不再只是礦工，而是一個王。<br><span class="hl">而那個王，將是一個十七歲下南洋、從雜工做起的客家人。</span></p>
+</div>
+
+<!-- ===== 第二章：葉亞來 ===== -->
+<section id="ch3" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Kapitan King</span>
+    <h2 class="act-title">葉亞來：被稱為「吉隆坡王」的客家人</h2>
+    <p class="act-sub">Yap Ah Loy and the City Rebuilt from Ashes</p>
+    <div class="ornament">⚒ ✦ ⚒</div>
+  </div>
+  <div class="prose">
+    <p>把吉隆坡從械鬥廢墟中真正建立起來的，是一個放牛娃出身的客家人——<strong>葉亞來</strong>。他的一生，本身就是一部濃縮的南洋華人奮鬥史詩。</p>
+    <p>葉亞來 1837 年生於廣東惠州惠陽縣一個貧苦佃農家庭，幼年放牛、編織竹器補貼家用。因家鄉動盪，他在十七歲那年（1854 年）隻身下南洋，從馬六甲一家錫礦的雜工做起，做過廚工、礦工、小販，一路在血與汗裡摸爬。他靠著過人的膽識、義氣與組織能力，在兇險的會黨世界裡逐步建立威望，最終在 1868 年被推選為<strong>吉隆坡第三任甲必丹（Kapitan Cina）</strong>——這是殖民政府與馬來酋長共同認可的「華人領袖」職位，授權他統管當地華人社區的一切事務，等於是在叢林中設立的一個半自治的「華人土皇帝」。</p>
+
+    <h3>雪蘭莪內戰：把吉隆坡燒成廢墟</h3>
+    <p>但葉亞來剛接掌大權，就撞上了一場幾乎毀掉一切的浩劫。1870 年代初，雪蘭莪皇室為了爭奪巴生河流域的錫礦稅收利益爆發內戰（史稱「巴生戰爭」），各方馬來勢力與華人會黨捲入混戰。葉亞來選擇與雪蘭莪攝政東姑古丁（Tengku Kudin）結盟，與敵對陣營反覆鏖戰。戰事一度逆轉，他兵敗連夜逃離吉隆坡，又退至巴生招兵買馬、捲土重來。等到 1873 年內戰終於以他這方的勝利告終時，吉隆坡已被戰火燒成一片<em>幾乎不剩房舍的廢墟</em>。</p>
+
+    <h3>真正的偉大，在戰爭結束之後</h3>
+    <p>換作旁人，打贏了仗、握著戰利品，或許就衣錦還鄉了。但葉亞來做了一個更困難的選擇——<strong>留下來，從灰燼裡重建這座城。</strong></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 在廢墟上重新下注的人</span>
+      <p>葉亞來真正的偉大，不在於他贏得了戰爭，而在於戰爭結束後他做了什麼。他召集流散的移民、重開停擺的礦場、修築道路與店屋；他制定行政與司法規則、組建武裝維持治安；他鼓勵馬來人到近郊開墾種植，開辦安老院收容貧苦無依的老人，並在 1880 年代資助創辦了當地最早的華文教育。1881 年一場大火再次把市鎮燒成瓦礫，他二話不說，出資以<em>磚瓦</em>取代亞答重建全城，讓吉隆坡第一次有了一座「永久城市」的雛形。</p>
+      <p>這裡藏著一個被低估的真理：<em>真正稀缺的，從來不是在順境中收割的人，而是在廢墟上願意重新下注的人。</em>同一片爛泥灘，戰前戰後都是泥；差別在於，有沒有一個人願意相信它還能再站起來，並親手把磚一塊塊砌上去。</p>
+    </div>
+    <p>在全盛時期，葉亞來雇用多達五千名礦工，吉隆坡市區三分之二的土地都歸他所有，被當地華人尊為<strong>「吉隆坡王」</strong>。連日後的英國駐雪蘭莪參政司瑞天咸（Frank Swettenham），都在官方報告中盛讚他「執法如山，使吉隆坡及附近地區治安良好」。一位放牛出身的客家移民，在異鄉的泥濘上，親手建起了一座日後將成為國家首都的城。1885 年，葉亞來病逝於吉隆坡，葬於廣東義山——他沒能看見這座城後來的高度，但那高度的地基，是他打下的。</p>
+    <div class="timeline" style="border-left-color:rgba(212,175,90,.4)">
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1857</div><div class="tl-text" style="color:#cdb494">拉惹阿都拉開放巴生谷採錫，華人礦工湧入，吉隆坡聚落成形。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1868</div><div class="tl-text" style="color:#cdb494">葉亞來被推選為吉隆坡第三任甲必丹。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1870–73</div><div class="tl-text" style="color:#cdb494">雪蘭莪內戰（巴生戰爭），吉隆坡被戰火燒成廢墟。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1873</div><div class="tl-text" style="color:#cdb494">內戰結束，葉亞來留下重建，召移民、開礦場、修道路。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1881</div><div class="tl-text" style="color:#cdb494">大火後以磚瓦重建全城，奠定永久市鎮基礎。</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ✦ ☩</div>
+  <p>華人甲必丹用血與汗把這座城從泥裡拉起，<br>但很快，另一股力量看上了它的戰略價值——<br><span class="hl">大英帝國，決定把它變成自己統治半島的中樞。</span></p>
+</div>
+
+<!-- ===== 第三章：英國人遷都 ===== -->
+<section id="ch4" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Colonial Capital</span>
+    <h2 class="act-title">摩爾式拱頂下的帝國中樞</h2>
+    <p class="act-sub">Swettenham, the Railway, and the Capital of Four States</p>
+    <div class="ornament">☩ ✦ ☩</div>
+  </div>
+  <div class="prose">
+    <p>當葉亞來把吉隆坡從廢墟重建之際，大英帝國的目光也正落在這片巴生谷上。英國人對馬來半島的興趣，從來不只是錫——他們要的是<em>控制</em>。1874 年的《邦咯條約》之後，英國以「參政司制度」逐步把雪蘭莪等馬來邦納入間接統治，而吉隆坡，正好坐在這套統治體系最關鍵的位置上。</p>
+
+    <h3>1880：首府遷來泥濘河口</h3>
+    <p>1880 年，以瑞天咸為首的英殖民政府做出決定：把雪蘭莪州的首府從沿海的<strong>巴生</strong>，遷到更靠近錫礦中心、更具戰略縱深的<strong>吉隆坡</strong>。這是吉隆坡命運的又一次躍升——它從一座「華人礦城」，正式升格為一個「行政首府」。英國人把官署與官員生活區設在巴生河西岸，與河東岸華人、馬來人的聚居區隔河相望；又在巴東（Padang，今獨立廣場）一帶設立警察訓練中心，城市的骨架自此被一筆筆規劃出來。</p>
+
+    <h3>鐵路、橡膠與摩爾式拱頂</h3>
+    <p>真正讓吉隆坡脫離「泥濘」的，是兩樣東西：<em>鐵路</em>與<em>規劃</em>。英國人修築鐵路把吉隆坡與巴生港連通，錫礦得以高效輸出，城市血脈被打通。1896 年，英國把雪蘭莪、霹靂、彭亨、森美蘭四個邦合組為<strong>「馬來聯邦」（Federated Malay States）</strong>，並選定吉隆坡為聯邦首府——華僑稱之為<strong>「四州府」</strong>。一座因錫而生的礦城，如今成了統治半島四個邦的中樞。</p>
+    <p>1897 年，一座融合摩爾式與蒙兀兒風格、紅磚白飾、頂著洋蔥狀拱頂與巍峨鐘塔的宏偉建築在巴東旁落成——這就是<strong>蘇丹阿都沙末大廈（Sultan Abdul Samad Building）</strong>，當時的政府秘書處所在。它的拱頂至今仍是吉隆坡最經典的天際線符號。與此同時，二十世紀初橡膠業的興起，又為這座城注入了錫之外的第二股財富，吸引了大批印度泰米爾勞工前來，進一步豐富了它的族群拼圖。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 是誰建了城，又是誰拿走了城</span>
+      <p>這裡藏著吉隆坡歷史最深的一層張力：<strong>把這座城從泥裡建起來的是華人礦工與甲必丹，但把它制度化、變成首都的，卻是英國殖民政府。</strong>葉亞來鋪的是地基，瑞天咸蓋的是上層建築——而最終留在權力頂端的，是後者。</p>
+      <p>這對應一個普遍的歷史模式：<em>「開拓者」與「制度的建立者」往往不是同一群人，而後來的故事，通常由後者書寫。</em>當英國人接手吉隆坡時，葉亞來的特權被逐步收回，華人甲必丹的職位最終取消。這不是某一個人的失敗，而是一個時代的轉折——草莽英雄的時代結束了，現代官僚體制的時代開始了。吉隆坡日後族群與權力分配的種種糾葛，其源頭之一，就埋在這次「誰建城、誰治城」的錯位裡。</p>
+    </div>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1874</div><div class="tl-text">《邦咯條約》確立英國對雪蘭莪等邦的「參政司」間接統治。</div></div>
+      <div class="tl-item"><div class="tl-year">1880</div><div class="tl-text">雪蘭莪首府由巴生遷至吉隆坡，礦城升格為行政首府。</div></div>
+      <div class="tl-item"><div class="tl-year">1896</div><div class="tl-text">馬來聯邦成立，吉隆坡成為「四州府」首都。</div></div>
+      <div class="tl-item"><div class="tl-year">1897</div><div class="tl-text">蘇丹阿都沙末大廈落成，摩爾式拱頂成為城市象徵。</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚑ ✦</div>
+  <p>帝國的拱頂在河岸升起，看似永恆，<br>但二十世紀的兩場巨變即將證明，沒有什麼旗幟是不會降下的——<br><span class="hl">先是太陽旗的鐵蹄，然後是一個國家自己的誕生。</span></p>
+</div>
+
+<!-- ===== 第四章：戰爭與獨立 ===== -->
+<section id="ch5" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · War and Merdeka</span>
+    <h2 class="act-title">太陽旗的陰影與七聲「默迪卡」</h2>
+    <p class="act-sub">Occupation, Resistance, and Independence, 1942–1957</p>
+    <div class="ornament">⚑ ✦ ⚑</div>
+  </div>
+  <div class="prose">
+    <p>二十世紀中葉，吉隆坡迎來了它歷史上最黑暗、也最光亮的兩個時刻——它們相隔僅僅十五年。</p>
+
+    <h3>1942：太陽旗下的屠戮</h3>
+    <p>1942 年 1 月 11 日，日軍佔領吉隆坡。城市本身在戰鬥中損傷不大，但接下來的日子卻是血色的。在佔領初期的「肅清」中，日軍對華人社區展開了大規模屠殺，數以千計的華人遇害；大批印度勞工則被強徵為苦力，押往泰緬邊境修築那條惡名昭彰的「死亡鐵路」，再也沒能回來。吉隆坡在太陽旗下度過了三年八個月的暗夜，直到 1945 年日本投降。</p>
+    <p>戰爭撕碎了「英國保護傘永不倒」的神話。馬來亞人民親眼看見不可一世的英國人如何在日軍面前狼狽潰退，又如何在戰後重返——這道裂縫，催化了一股再也壓不住的力量：<em>獨立的渴望</em>。</p>
+
+    <h3>1957：午夜降旗，七聲吶喊</h3>
+    <p>戰後的吉隆坡成為馬來亞獨立運動的中樞。各族群的政治力量在此匯流、博弈、妥協，最終在 1957 年迎來了那個改變一切的夜晚。</p>
+    <div class="pull"><p>1957 年 8 月 30 日午夜，蘇丹阿都沙末大廈前的草場上，英國國旗在探照燈下緩緩降下，馬來亞的旗幟第一次升起。</p></div>
+    <p>翌日，1957 年 8 月 31 日，首任首相東姑阿都拉曼（Tunku Abdul Rahman）在吉隆坡的<strong>默迪卡體育場（Stadium Merdeka）</strong>，在數萬人面前高舉右手，連喊七聲「<strong>默迪卡（Merdeka，獨立）！</strong>」——全場以同一個聲音回應。那一刻，馬來人、華人、印度人——這些原本被殖民者分隔在不同經濟軌道上的族群，用同一個詞、同一個聲音，宣告了一個共同國家的誕生。而見證這一切的舞台，正是那座由華人礦工從泥濘裡建起、又被英國人制度化的城。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座城，承載一個國家的成年禮</span>
+      <p>為什麼是吉隆坡，而不是更古老的馬六甲或更繁華的檳城，成了獨立宣言的舞台？因為到了二十世紀中葉，吉隆坡早已不只是一座城——<strong>它是英國半島統治的行政中樞，是各族群政治力量唯一共同匯聚的場所。</strong>權力在哪裡，歷史的關鍵時刻就在哪裡上演。</p>
+      <p>這裡有一個深刻的對稱：吉隆坡因錫礦把不同族群<em>吸聚</em>到一起，又在獨立那夜讓他們第一次用同一個聲音<em>結合</em>在一起。它從一開始就是個「多族群拼合」的城——而這既是它日後族群張力的根源，也是它能夠承載「一個多元國家誕生」這一刻的唯一資格。<em>一座由陌生人共同建起的城，最適合見證一個由陌生人共同組成的國家的成年禮。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ✦ ✦</div>
+  <p>獨立的旗幟升起後，這座城開始了一場新的賽跑——<br>不再是和錫礦、和英國人賽跑，<br><span class="hl">而是和「一個新生國家想證明自己」的雄心賽跑。</span></p>
+</div>
+
+<!-- ===== 第五章：直轄區與雙子星 ===== -->
+<section id="ch6" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Twin Towers</span>
+    <h2 class="act-title">從聯邦直轄區到刺破雲層的雙子星</h2>
+    <p class="act-sub">Federal Territory, the Petronas Towers, and a Nation's Ambition</p>
+    <div class="ornament">✦ ⚒ ✦</div>
+  </div>
+  <div class="prose">
+    <p>獨立之後，吉隆坡的地位節節攀升。1963 年馬來西亞成立，它順理成章成為新國家的首都。1974 年，雪蘭莪州把吉隆坡正式割讓給聯邦政府，吉隆坡成為馬來西亞第一個<strong>聯邦直轄區（Wilayah Persekutuan）</strong>，直接由中央管轄——它徹底脫離了「州轄城市」的身分，成為一個國家層級的存在。</p>
+
+    <h3>馬哈迪的雄心：要蓋世界最高樓</h3>
+    <p>真正把吉隆坡推上全球地標榜的，是 1980–90 年代那股急速現代化的雄心。在馬哈迪「2020 宏願」的旗幟下，吉隆坡要向世界證明：一個前殖民地、一個發展中的穆斯林國家，也能蓋出最現代、最雄偉的東西。1998 年，<strong>國油雙子星塔（Petronas Twin Towers）</strong>落成，以 452 公尺的高度，成為當時全世界最高的建築。</p>
+    <p>雙子星塔不只是辦公樓。它那以伊斯蘭幾何圖案為靈感的塔身輪廓、連接兩塔的空中天橋，是一份精心設計的<em>國家宣言</em>——它要說的是：馬來西亞既現代又伊斯蘭，既擁抱全球資本又不放棄自身認同。一個曾被叫做「泥濘河口」的地方，如今用一座一度雄踞世界之巔的高樓，宣告自己的存在。</p>
+    <div class="pull"><p>從葉亞來用磚瓦重建的兩層店屋，到馬哈迪刺破雲層的四百五十公尺雙塔——吉隆坡的天際線，就是一部濃縮的國家野心史。</p></div>
+
+    <h3>布城分流：首都的「減法」</h3>
+    <p>但雄心也帶來了新問題：擁擠、塞車、行政機能過載。1990 年代末，政府做出一個大膽決定——在吉隆坡以南約 20 公里處，從零打造一座全新的<strong>行政首都布城（Putrajaya）</strong>，把聯邦政府的行政中樞遷出。1999 年起，多數政府部門陸續南遷。於是今天的吉隆坡形成一個有趣的格局：它仍是<em>名義上的國家首都</em>、國會與國家皇宮所在地、商業與金融的絕對中心，但純粹的行政機能已分流給布城。一座城太成功，竟得靠「分身」來消化它的重量。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 地標的真正用途，是說一句話</span>
+      <p>雙子星塔給出的啟示是：<strong>一座偉大的地標，從來不只是為了「裝得下多少人」，更是為了「對世界說一句話」。</strong>吉隆坡其實不缺辦公空間，但一個剛跨入現代的國家，迫切需要一個能讓全世界一眼記住、並重新定義自己的符號。</p>
+      <p>這正好和這座城的開頭遙相呼應。一百多年前，葉亞來用磚瓦重建，說的是「這座城不會被燒垮」；一百多年後，雙子星塔刺破雲層，說的是「這個國家不再是誰的殖民地」。<em>建築從來都是一種語言，而吉隆坡的天際線，講述的始終是同一個主題的不同章節——一個從泥濘裡、從廢墟裡、從殖民裡一次次站起來的地方，如何向世界證明自己。</em></p>
+    </div>
+    <div class="timeline" style="border-left-color:rgba(212,175,90,.4)">
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1957</div><div class="tl-text" style="color:#cdb494">馬來亞獨立，吉隆坡成為首都。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1963</div><div class="tl-text" style="color:#cdb494">馬來西亞成立，吉隆坡續為國家首都。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1974</div><div class="tl-text" style="color:#cdb494">吉隆坡自雪蘭莪劃出，成為首個聯邦直轄區。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1998</div><div class="tl-text" style="color:#cdb494">國油雙子星塔落成，曾為世界最高建築。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1999</div><div class="tl-text" style="color:#cdb494">行政首都布城啟用，聯邦行政機能南遷分流。</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">⚙ ✦ ⚙</div>
+  <p>雙子星塔講完了「一個國家想證明什麼」，<br>但一座城真正的樣貌，藏在更瑣碎的地方——<br><span class="hl">它的街道怎麼長、商圈往哪走、人住在哪裡。</span></p>
+</div>
+
+<!-- ===== 第六章：城市規劃 ===== -->
+<section id="ch7" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Blueprint</span>
+    <h2 class="act-title">從單核到多核：一座城的規劃轉向</h2>
+    <p class="act-sub">PSKL 2040, Transit-Oriented Cities, and the Limits of Going Up</p>
+    <div class="ornament">⚙ ✦ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>如果說前五章講的是「吉隆坡如何長出來」，那麼這一章要問的是另一個問題：<em>它接下來打算怎麼長？</em>答案，寫在一份叫《吉隆坡結構藍圖 2040》（PSKL 2040）的官方文件裡。它揭示了這座城在歷經一個半世紀的野蠻生長後，第一次認真地面對自己的「天花板」。</p>
+
+    <h3>單核城市的擁擠詛咒</h3>
+    <p>吉隆坡長久以來是一座典型的「單核城市」——所有的財富、辦公、人流，都向著市中心那個以雙子星塔為圓心的核心區擠壓。結果就是教科書般的大城市病：早晚尖峰的嚴重塞車、市中心房價高企、而老城區與外圍地帶卻相對停滯。一座靠「向上長」（蓋更高的樓）來解決問題的城，終究會撞上物理與生活品質的上限。</p>
+
+    <h3>2040 藍圖：多中心、軌道導向、給天際線設限</h3>
+    <p>PSKL 2040 的核心思路，是一次明確的<strong>「從單核到多核」</strong>轉向。它不再鼓勵所有東西都往市中心擠，而是要培育多個次中心，讓人們能「就近上班、就近生活」。配套的工具有三：其一是<strong>軌道導向發展（TOD）</strong>——把高密度開發引導到捷運與輕軌站點周邊，讓城市沿著軌道、而非沿著馬路蔓延；其二是<strong>容積率管制與獎勵</strong>，市中心商業區的容積率被設定上限，同時對「舊區重建、地塊整併、軌道周邊、納入可負擔住宅」的項目給予容積獎勵；其三是為部分區域的<em>建築高度設限</em>，以保護低層老城的紋理不被無限拔高的高樓吞沒。</p>
+    <div class="pull"><p>吉隆坡規劃思維最深的轉變，是它終於承認：一座偉大的城，不該只會「向上長」，更要學會「向內修」與「向外散」。</p></div>
+
+    <h3>那個甩不掉的陰影：服務式公寓供給過剩</h3>
+    <p>但藍圖再漂亮，也得面對一個冷峻的現實——<strong>供給過剩</strong>。在過去十多年「人人搶建高樓」的熱潮下，吉隆坡累積了大量待售的服務式公寓（serviced apartment）與辦公空間庫存。官方的住宅數據顯示，大量新推案完工後仍未售出，服務式公寓的「滯銷」（overhang）尤其嚴重，而仍在興建與規劃中的單位還在源源不絕地進場。這是「向上長」這套舊邏輯留下的後遺症：當每個開發商都認定「蓋高樓必賺」時，市場最終會被自己的樂觀淹沒。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 成長的下半場，是「修剪」</span>
+      <p>吉隆坡的規劃轉向揭示了一個城市成長的普遍規律：<strong>任何高速擴張的系統，都會在某個點上從「增量遊戲」切換到「存量遊戲」。</strong>上半場比的是誰長得快、長得高；下半場比的卻是誰更會「修剪」——更新舊區、整併零碎地塊、把人流導向軌道、消化過剩的庫存。</p>
+      <p>這對應一個容易被忽略的真理：<em>一座城的成熟，不表現在它還能蓋多高，而表現在它願不願意停下來，處理過去高速生長留下的爛攤子。</em>從葉亞來用磚瓦「無中生有」，到雙子星塔「向上爭高」，再到 PSKL 2040「向內修整」——吉隆坡正在經歷一座城從青春期走向成年期最關鍵、也最不性感的那一步。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚠ ✦</div>
+  <p>規劃藍圖總是用最光鮮的詞寫成——多中心、軌道導向、永續、宜居。<br>但每一條上升的曲線下面,都壓著一些被它移走、推遠、犧牲的東西。<br><span class="hl">在繼續仰望天際線之前,先低頭看一眼它的陰影。</span></p>
+</div>
+
+<!-- ===== 插章：規劃的陰影 ===== -->
+<section id="ch8" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Shadow</span>
+    <h2 class="act-title">天際線的陰影:光鮮規劃的另一面帳本</h2>
+    <p class="act-sub">Displacement, Gentrification, Glut, and Who Pays for the Skyline</p>
+    <div class="ornament">⚠ ✦ ⚠</div>
+  </div>
+  <div class="prose">
+    <p>前一章談規劃,用的是規劃者的語言:多中心、TOD、給天際線設限。那是一份只記載收入的帳本。但任何一座城的成長,都還有另一份很少被攤開的帳本——記載著「為了這些光鮮,誰付出了代價」。把這份帳本攤開,吉隆坡的天際線會立刻立體起來。</p>
+
+    <h3>三筆被低估的成本</h3>
+    <div class="method">
+      <div class="method-card">
+        <span class="tool">成本一 · Displacement</span>
+        <h5>河岸治理背後的迫遷</h5>
+        <p>連最受好評的「生命之河」也有暗面。河川整治需要徵收防洪用地,沿岸一些社區因此面臨拆遷。例如曾被承諾列為文化遺產的甘榜布雅(Kg Puah),後因計畫改建防洪池而面臨拆遷,安置方案不明,引發居民抗議。<em>河變漂亮了,但住在河邊最久的人,未必還在那裡。</em></p>
+      </div>
+      <div class="method-card">
+        <span class="tool">成本二 · Gentrification</span>
+        <h5>遺產光鮮化的反噬</h5>
+        <p>當舊城、河岸被翻新成觀光門面,租金隨之上漲,原本在地的小店、老住戶被逐步擠出——這正是檳城喬治市世遺化後最痛的教訓。吉隆坡若把舊城當成純粹的「打卡景觀」來經營,同樣可能讓「活的社區」淪為「空的佈景」。</p>
+      </div>
+      <div class="method-card">
+        <span class="tool">成本三 · The Glut</span>
+        <h5>向上堆高的投機債</h5>
+        <p>那個甩不掉的<strong>服務式公寓供給過剩</strong>,本質是一筆投機帳。當開發商與資本把高樓當成金融商品來堆,而非當成「人要住的地方」來蓋,結果就是大量高空置率的「燈火稀疏的塔」——榮景的帳面數字,壓著真實需求的空洞。</p>
+      </div>
+    </div>
+
+    <h3>規劃的承諾 vs 規劃的代價</h3>
+    <p>把同一份規劃的兩面並排,張力就一目了然——每一個漂亮的承諾,都對應著一個沉默的風險:</p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">藍圖的承諾</div>
+        <p style="text-align:left;font-size:.96rem">多中心化緩解單核擁擠;軌道導向減少塞車與碳排;河岸復興提升宜居與觀光;遺產活化帶來文化與經濟雙贏;給天際線設限保護城市尺度。</p>
+      </div>
+      <div>
+        <div class="minihead">帳本的代價</div>
+        <p style="text-align:left;font-size:.96rem">新節點可能淪為「有軌道、沒人氣」的空殼;徵地與整治伴隨迫遷;遺產光鮮化推高租金、擠走在地社群;堆高的庫存變成投機泡沫;限高與既得開發利益持續拉鋸。</p>
+      </div>
+    </div>
+    <div class="warn">
+      <div class="warn-tag">關鍵提問 · 一座城是為誰而規劃的</div>
+      <p>規劃文件最危險的地方,在於它天然地用「城市」這個抽象主體說話——彷彿一座城是一個有單一意志、單一利益的整體。但實際上,<strong>「對城市好」往往不等於「對城市裡的每一個人都好」</strong>:一條讓 GDP 與觀光數字更好看的河岸,可能讓沿岸的窮人失去住所;一片讓天際線更國際化的 CBD,可能由全民的稅金與被迫遷者的犧牲共同買單。</p>
+      <p>因此,評估任何城市規劃(乃至任何宏大計畫)時,真正關鍵的問題從來不是「它能讓總量增長多少」,而是「<em>增長的果實流向誰、代價由誰承擔</em>」。吉隆坡的天際線確實壯觀,但壯觀本身不是無辜的——它是一系列分配選擇的結果。</p>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 每一條上升曲線,都有一份隱藏帳本</span>
+      <p>規劃的陰影,給出一個對城市、對企業、對任何「成長故事」都適用的洞見:<strong>任何只展示收入、不展示成本的成長敘事,都是不完整、甚至帶有誤導性的。</strong>一座城的天際線越是光鮮,越值得追問:這份光鮮,是靠真實的需求與生產力撐起來的,還是靠迫遷的犧牲、投機的槓桿與被掩蓋的外部成本堆出來的?</p>
+      <p>這對應一個樸素卻常被遺忘的判斷紀律:<em>看一個系統是否健康,不能只看它最亮的那部分,而要去看它的「邊緣」與「底層」——被它推走的人、被它掩蓋的庫存、被它外部化的代價。</em>因為一個系統真正的風險,往往不在它展示給你看的櫥窗裡,而在它不希望你看見的後巷裡。吉隆坡的成熟,不會只由它能蓋多高來衡量,更會由它願不願意誠實面對、並公平分攤這份隱藏帳本來衡量——這,才是「向內修整」這四個字最重的那一層意思。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚑ ✦</div>
+  <p>規劃畫的是未來的骨架，但城市的「重心」一直在偷偷移動——<br>一百多年來，吉隆坡的繁華中心已經換過好幾個地方，<br><span class="hl">每一次移轉，都是一次財富與權力的悄然搬家。</span></p>
+</div>
+
+<!-- ===== 第七章：商圈移轉 ===== -->
+<section id="ch9" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Moving Centre</span>
+    <h2 class="act-title">繁華的三次搬家</h2>
+    <p class="act-sub">From Merdeka Square to the Golden Triangle to TRX</p>
+    <div class="ornament">⚑ ✦ ⚑</div>
+  </div>
+  <div class="prose">
+    <p>一座城的「市中心」，從來不是固定的。吉隆坡一百多年來，它的商業與財富重心，至少經歷了三次明顯的搬家——而每一次搬家，都精準地對應著這個國家某個階段的身分。</p>
+
+    <h3>第一站：獨立廣場與舊城（殖民—獨立時代）</h3>
+    <p>最早的中心，在<strong>巴生河與鵝麥河交會處的舊城</strong>——也就是今天獨立廣場（Dataran Merdeka）、蘇丹阿都沙末大廈、茨廠街（Petaling Street）一帶。這裡是甲必丹時代的礦城核心，也是英國殖民政府的行政中樞，更是 1957 年降旗升旗的歷史現場。它的氣質是「<em>行政 + 開埠商業</em>」——摩爾式拱頂代表權力，茨廠街的店屋代表華商的生意。這是吉隆坡的「身世起點」。</p>
+
+    <h3>第二站：黃金三角與 KLCC（現代化時代）</h3>
+    <p>隨著獨立後的現代化，重心開始東移、南移，集中到<strong>「黃金三角」（Golden Triangle）</strong>——以武吉免登（Bukit Bintang）購物商圈、與 KLCC 雙子星塔金融商業區為兩極的高密度核心。這裡的氣質是「<em>跨國資本 + 高端消費</em>」：國際品牌旗艦店、五星酒店、甲級辦公樓、Suria KLCC 與柏威年（Pavilion）這類旗艦商場。當吉隆坡想向世界證明自己「夠現代、夠國際」時，它選擇的舞台，就是黃金三角。</p>
+
+    <h3>第三站：TRX 新中央商務區（金融樞紐時代）</h3>
+    <p>而最新的一次搬家，指向<strong>敦拉薩國際貿易中心（TRX）</strong>。這片被定位為吉隆坡「新 CBD」的金融特區，在歷經一馬公司（1MDB）醜聞拖累、一度停擺後，於 2023 年正式啟用，以國際金融中心的姿態崛起，並配上 The Exchange TRX 購物商場與空中公園。它最關鍵的籌碼，是交通——<em>TRX 站是吉隆坡捷運網路中唯一的換乘站</em>，無縫連接巴生河流域數十個車站。這標誌著吉隆坡商圈邏輯的又一次升級：從「靠地段」到「靠軌道節點」。</p>
+    <div class="pull"><p>舊城代表「我們從哪裡來」，黃金三角代表「我們想成為誰」，而 TRX 代表「我們要靠什麼連接世界」——三個中心，就是三個時代的自畫像。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 中心會移動，但移動有方向</span>
+      <p>吉隆坡商圈的三次搬家，揭示了一個城市地理的深層規律：<strong>繁華的中心會隨著「財富的來源」而遷移。</strong>當財富來自殖民行政與開埠貿易，中心就在舊城的河口；當財富來自跨國資本與消費，中心就移向黃金三角；當財富的關鍵變成「金融樞紐與軌道連接性」，中心就再次跳向 TRX。</p>
+      <p>這對應一個對任何城市觀察者都極有用的視角：<em>想預判一座城下一個崛起的區域，不要只看它現在哪裡熱鬧，而要問「下一個階段，這座城的財富會從哪裡來，以及那股財富需要什麼樣的基礎設施」。</em>在 PSKL 2040 多中心化與軌道導向的框架下，吉隆坡未來的「中心」可能不再是單一的一個，而是沿著捷運網路長出的一串節點——繁華，正在從「一個點」變成「一條線」。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ✦ ☩</div>
+  <p>商圈講的是「錢往哪裡走」——那是城市內部重心的移動。<br>但把鏡頭再拉遠一階，會看見一件更基本的事：<br><span class="hl">這座城本身的「輪廓」，是如何從一個泥灘，一圈圈長成今天的樣子。</span></p>
+</div>
+
+<!-- ===== 第十章：城市版圖演變 ===== -->
+<section id="ch10" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Expanding Map</span>
+    <h2 class="act-title">從一片泥灘到巴生谷:一座城的版圖演變史</h2>
+    <p class="act-sub">0.65 to 243 Square Kilometres — How the City Drew and Redrew Its Own Outline</p>
+    <div class="ornament">▦ ✦ ▦</div>
+  </div>
+  <div class="prose">
+    <p>前面幾章談的是城市「內部」的故事——規劃怎麼轉向、商圈怎麼搬家。但若把鏡頭拉到最高、俯瞰整座城,會看見一條更基本、也更驚人的軌跡:<strong>吉隆坡的「邊界」本身,一直在劇烈地擴張與重畫。</strong>它不是一座固定輪廓的城,而是一塊在一百多年裡反覆向外膨脹的版圖。讀懂這條輪廓線怎麼長大,等於從空間的角度,重看了一遍它的全部歷史。</p>
+
+    <h3>一條驚人的面積擴張鏈</h3>
+    <p>把吉隆坡歷年的行政面積排成一列,它的成長曲線陡得近乎暴力——從一個幾乎可以步行繞完的聚落,長成一座需要高速公路串聯的都會核心:</p>
+    <div class="timeline" style="border-left-color:rgba(212,175,90,.4)">
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1857</div><div class="tl-text" style="color:#cdb494">巴生河與鵝麥河交匯處的小村落,只有幾排棕櫚葉棚屋,是錫砂的登陸與集散點。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1895</div><div class="tl-text" style="color:#cdb494">行政面積僅約 <strong>0.65 平方公里</strong>——比今天許多大學校園還小,卻已是馬來聯邦首府。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1903</div><div class="tl-text" style="color:#cdb494">擴張到約 <strong>20 平方公里</strong>。短短八年膨脹約 30 倍,錫與鐵路把城撐開。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1948</div><div class="tl-text" style="color:#cdb494">升格為市(City),面積擴至約 <strong>93 平方公里</strong>,戰後行政機能快速集中。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1974</div><div class="tl-text" style="color:#cdb494">脫離雪蘭莪州,成立<strong>聯邦直轄區</strong>,面積定格在約 <strong>243 平方公里</strong>,沿用至今。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">今日</div><div class="tl-text" style="color:#cdb494">行政邊界雖封頂,但真實的城早已外溢成「大吉隆坡 / 巴生谷」都會區,人口逾 <strong>700 萬</strong>。</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="num">0.65</div><div class="lbl">1895 年面積(平方公里)</div></div>
+      <div class="stat"><div class="num">×374</div><div class="lbl">至 1974 年的面積放大倍數</div></div>
+      <div class="stat"><div class="num">243</div><div class="lbl">1974 至今的直轄區面積(km²)</div></div>
+      <div class="stat"><div class="num">76%</div><div class="lbl">市區已建成(建成區)比例</div></div>
+    </div>
+
+    <h3>一條河,劃開了「資本」與「權力」</h3>
+    <p>但版圖的故事,從來不只是「面積變大」這麼單純。在最初的擴張裡,藏著一條極具深意的空間分界線——<strong>巴生河本身</strong>。1880 年英殖民政府把雪蘭莪首府從巴生遷來吉隆坡後,做了一個影響至今的空間決定:它把這座城,沿著河,劃成了性質截然不同的兩岸。</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">河 · 東岸</div><div class="shift-body"><strong>華人的資本之岸</strong>:重建後,華人與馬來人聚居於巴生河東岸,華人集中在集市廣場一帶的商業中心,馬來人則在爪哇街(今敦霹靂路)一帶。這是「錢」與「市井」的一岸。</div></div>
+      <div class="shift-row"><div class="shift-era">河 · 西岸</div><div class="shift-body"><strong>殖民的權力之岸</strong>:英殖民政府刻意把官署與官員生活區設在西岸——武吉阿曼(今警察總部)、巴東練兵場(今獨立廣場)、以及 1897 年落成的政府總部大樓(今蘇丹阿都沙末大廈)。這是「權力」與「秩序」的一岸。</div></div>
+      <div class="shift-row"><div class="shift-era">交匯點</div><div class="shift-body"><strong>占美清真寺</strong>:就矗立在兩河、也是兩岸的交匯處,像一個沉默的樞紐,標記著資本之岸與權力之岸的縫合線。</div></div>
+    </div>
+    <p>於是,吉隆坡早期的版圖不只是「大小」問題,更是一張<em>權力的地圖</em>:殖民者用一條河,把被統治者的商業活力與統治者的行政權威,溫和卻清晰地隔開。今天當你站在獨立廣場,望向對岸的舊商業區,你看見的其實是一道一百多年前被刻意劃下、至今仍隱約可辨的空間階序。</p>
+
+    <h3>輪廓封頂之後:向外溢出的城</h3>
+    <p>1974 年聯邦直轄區的邊界一旦劃定,吉隆坡的「行政輪廓」就此封頂在 243 平方公里。但一座城真實的生長,從不甘於被一條行政線框住——它只是換了種方式繼續擴張:<strong>向外溢出。</strong></p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">行政的城 · 凍結</div>
+        <p style="text-align:left;font-size:.96rem">直轄區邊界固定在 243 km²,法理上的「吉隆坡」不再長大。城的核心被一條看不見的線,封存在一個世紀前劃定的範圍裡。</p>
+      </div>
+      <div>
+        <div class="minihead">真實的城 · 外溢</div>
+        <p style="text-align:left;font-size:.96rem">真正的都會擴張轉移到行政線之外:八打靈再也、莎阿南、蒲種、安邦……整個巴生河谷被連成一片,被重新包裝為「大吉隆坡 / 巴生谷」,容納逾 700 萬人。</p>
+      </div>
+    </div>
+    <p>這正是現代大都會最典型的空間命運:<em>城市的「行政身體」與它的「真實身體」逐漸分離。</em>地圖上那個 243 平方公里的吉隆坡,只是一顆核;而真正在運轉、通勤、呼吸的那座城,早已是一片沿著河谷鋪展、跨越無數行政邊界的廣袤有機體。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 邊界,是會說謊的</span>
+      <p>吉隆坡的版圖演變,給出一個關於「邊界」的深刻洞見:<strong>任何一條被劃定的邊界——無論是城市的行政線、公司的組織圖,還是一個人對自己能力範圍的設定——都只是某個歷史時刻的快照,而非真實邊界的誠實寫照。</strong>真實的生長,總是傾向於溢出那條線:吉隆坡的城溢出了直轄區,它的權力曾被一條河劃分、後來也溢出了河岸。線是靜止的,生命是流動的。</p>
+      <p>更深的一層是:<em>看懂一個系統的真實規模與真實結構,不能只看它「官方宣稱的邊界」,而要看它的活動實際流到了哪裡、它的影響實際溢出到了哪裡。</em>只盯著那條 243 平方公里的行政線,你會嚴重低估吉隆坡;只盯著一張組織圖,你會看不見一家公司真正的權力如何運作;只盯著一份履歷的職稱,你會錯判一個人真正的能量邊界。這座城用它一個半世紀、不斷被重畫的輪廓提醒我們:<strong>真正重要的從來不是線畫在哪裡,而是生命的活力正從哪裡溢出——因為下一張地圖,永遠是沿著今天的溢出處,被重新畫出來的。</strong></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ✦ ☩</div>
+  <p>版圖講的是「城長成了什麼形狀」，但在這片不斷擴張的土地上，<br>還有一張更古老、更敏感的地圖——<br><span class="hl">在這座城裡，不同的人，被安置在哪裡。</span></p>
+</div>
+
+<!-- ===== 第八章：族群空間版圖 ===== -->
+<section id="ch11" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Ethnic Map</span>
+    <h2 class="act-title">分區而居：一座城的族群版圖</h2>
+    <p class="act-sub">Chinatown, Brickfields, Kampung Baru — and the Geography of Race</p>
+    <div class="ornament">☩ ✦ ☩</div>
+  </div>
+  <div class="prose">
+    <p>要讀懂吉隆坡，光看天際線不夠，還得看一張看不見的地圖——<em>誰，住在哪裡</em>。而這張地圖的底稿，是英國殖民者親手畫下的。它的邏輯極其簡單，後果卻極其深遠：<strong>把不同的族群，安置在不同的區域，並綁定不同的經濟職能。</strong></p>
+
+    <h3>殖民者的三條軌道</h3>
+    <p>在錫礦、橡膠與建設讓吉隆坡爆發成長的年代，英國人用「分而治之」把三大族群安置在三塊幾乎不重疊的空間與經濟軌道上：</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">華人</span>
+        <h5>茨廠街 · Chinatown</h5>
+        <p>採礦與商業的華人，聚居於<strong>茨廠街（Petaling Street）</strong>一帶的市集與店屋區，這裡是甲必丹時代的礦城商業核心，宗祠、會館、廟宇林立。</p>
+        <span class="model">Mining &amp; Trade</span>
+      </div>
+      <div class="card">
+        <span class="flag">印度人</span>
+        <h5>十五碑 · Brickfields</h5>
+        <p>被引進膠林與鐵路的印度泰米爾勞工，集中在<strong>十五碑（Brickfields）</strong>——即今日的「小印度」，興都廟與泰米爾社群至今仍是這裡的底色。</p>
+        <span class="model">Estates &amp; Rail</span>
+      </div>
+      <div class="card">
+        <span class="flag">馬來人</span>
+        <h5>甘榜峇魯 · Kampung Baru</h5>
+        <p>馬來人則被劃定在 1900 年前後設立的<strong>甘榜峇魯（Kampung Baru）</strong>馬來保留地內務農種稻，以水路供應市區糧食。它是市中心至今最大的馬來傳統村落。</p>
+        <span class="model">Padi &amp; Village</span>
+      </div>
+    </div>
+    <p>這套安排的致命之處在於：它讓<strong>族群、經濟地位、與居住區域三者高度重疊</strong>。一個人的種族，幾乎就決定了他住哪裡、做什麼、賺多少。茨廠街的華商、十五碑的印度勞工、甘榜峇魯的馬來農民——他們生活在同一座城裡，卻像活在三條平行線上，彼此鮮少交集。這不是自然形成的聚居，而是被權力<em>刻意設計</em>出來的隔離。</p>
+
+    <h3>一個刺眼的並置：甘榜峇魯與雙子星塔</h3>
+    <p>這套殖民空間邏輯，在今天留下了一個極具象徵性的畫面：<strong>甘榜峇魯——那片低矮的馬來木屋村落，至今仍倔強地坐落在市中心，與背後高聳的雙子星塔形成強烈對比。</strong>它坐在全馬來西亞最值錢的土地上，卻因「馬來保留地」的特殊法律地位與複雜的繼承產權，使重建計畫從 2000 年代談判至今仍懸而未決。一邊是全球資本的玻璃帷幕，一邊是百年水稻村的亞答屋頂——這個並置本身，就是吉隆坡族群空間史最濃縮的標本。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 空間，會把「分類」變成「命運」</span>
+      <p>吉隆坡的族群地圖揭示了一個深刻而危險的機制：<strong>當你把不同的人在「空間上」分開，又在「經濟上」綁定不同職能，你就把一種人為的「分類」，固化成了難以流動的「命運」。</strong>住在哪裡、做什麼、和誰來往，全部被種族這一個變數鎖死。</p>
+      <p>這帶來一個被低估的洞見：<em>地理隔離最大的傷害，不是「住得遠」，而是「失去交集」——當不同群體在日常生活中幾乎不再相遇，誤解、刻板印象與不信任就會在彼此看不見的地方默默累積。</em>而當這種累積遇上一個政治的火星，後果可能是災難性的。下一章那場震動全國的悲劇，它的空間根源，正埋在這張被殖民者畫下、又被獨立後延續的族群地圖裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">✦ ⚑ ✦</div>
+  <p>那張族群地圖上,有兩種人的名字一直被寫得很淡——<br>一種是被契約綁來鋪設鐵路的泰米爾人,一種是這片土地最早的主人。<br><span class="hl">在分水嶺到來之前,讓我們先把地圖補完整。</span></p>
+</div>
+
+<!-- ===== 插章：被淡化的兩種人 ===== -->
+<section id="ch12" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Other Maps</span>
+    <h2 class="act-title">地圖上被寫淡的人:十五碑、契約勞工與原住民</h2>
+    <p class="act-sub">The Tamil Railway Workers, the Indenture System, and the Orang Asli Beneath the City</p>
+    <div class="ornament">⚑ ✦ ☖</div>
+  </div>
+  <div class="prose">
+    <p>前一章的族群地圖,主角是華人與馬來人。但一座由移民縫成的城,從來不只兩種線。要把吉隆坡的族群史說誠實,還得補上兩個一直被寫得很淡的群體——<strong>印度泰米爾人</strong>,與這片土地真正的原主<strong>原住民(Orang Asli)</strong>。他們之所以「淡」,本身就是一個值得追問的歷史問題。</p>
+
+    <h3>三種「來到」,三種地位</h3>
+    <p>關鍵在於:這座城的三大移民群體,是用<em>三種完全不同的方式</em>來到的——而「怎麼來的」,深刻決定了「在這座城裡站在哪」:</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">華人 · 自由移民</div><div class="shift-body"><strong>為錫而來,自帶組織</strong>:循會黨、甲必丹、宗親網絡而來,握有資本與商業自主性,從礦工一路爬到礦主、店東。<em>來時雖苦,卻握有向上流動的繩索。</em></div></div>
+      <div class="shift-row"><div class="shift-era">印度人 · 契約勞工</div><div class="shift-body"><strong>為橡膠與鐵路而來,被制度綁定</strong>:多數透過殖民者的「契約勞工(indentured labour)」與包工制度,從南印度被成批引進橡膠園與鐵路工地。<em>來時就被綁進一個難以翻身的位置。</em></div></div>
+      <div class="shift-row"><div class="shift-era">馬來人 · 原居與遷入</div><div class="shift-body"><strong>土地的政治主人</strong>:被殖民者定位為「鄉村的、農業的」,被刻意隔離在都市經濟之外,卻保有土地與政治的象徵主權。</div></div>
+      <div class="shift-row"><div class="shift-era">原住民 · 被蓋過的原主</div><div class="shift-body"><strong>真正最早的主人,卻最先被抹去</strong>:Orang Asli 是巴生谷叢林真正的原居者,但在「錫—移民—殖民」的敘事裡,他們幾乎被完全推到了歷史的邊緣與地理的邊緣。</div></div>
+    </div>
+
+    <h3>十五碑:一個由「火、洪、磚、鐵路」疊出來的小印度</h3>
+    <p>印度社群在吉隆坡的空間錨點,是城南的<strong>十五碑(Brickfields)</strong>——今日的「小印度」。它的身世,恰好把這座城的好幾條線索縫在了一起:1881 年那場火與洪之後,殖民政府下令改建磚屋,磚廠設在此地(故名 Brickfields);緊接著,殖民者從南印度引進大批<strong>泰米爾勞工</strong>來鋪設鐵路,鐵路工人的宿舍就設在這片磚廠區旁。一個地名,同時記錄了水患、建材革命與一個族群的落腳——這就是十五碑成為吉隆坡最古老、最大印度聚居區的由來。</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">為何是鐵路與橡膠</span>
+        <h5>被分配的職業</h5>
+        <p>殖民者刻意把印度勞工導向橡膠園與公共工程(鐵路、市政)。這不是偶然,而是「族群＝職業」這張殖民地圖的一部分——它同時決定了印度社群日後在經濟階梯上的起點。</p>
+        <span class="model">Indenture &amp; Estates</span>
+      </div>
+      <div class="card">
+        <span class="flag">為何聲音最小</span>
+        <h5>結構性的弱勢</h5>
+        <p>缺乏華人那樣的自主資本網絡,又不具馬來人的政治主權地位,印度社群在獨立後的族群博弈中,長期是「被夾在中間、聲音最微弱」的第三方——這也是它在主流敘事裡被寫淡的結構原因。</p>
+        <span class="model">The Third Voice</span>
+      </div>
+      <div class="card">
+        <span class="flag">最早卻最邊緣</span>
+        <h5>原住民的缺席</h5>
+        <p>Orang Asli 是這片土地最早的主人,卻在建城敘事中近乎隱形。一座城「最早的人」與「最被記得的人」之間的巨大落差,本身就是一則關於誰來書寫歷史的寓言。</p>
+        <span class="model">The Erased Origin</span>
+      </div>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「怎麼來的」,決定了「站在哪」</span>
+      <p>把這四種人並排,浮現出一個極深刻、也極殘酷的洞見:<strong>在一個由移民構成的社會裡,一個群體最初「進入的方式」,會像地基一樣,長期決定它在這個社會裡的位置——而這個位置,往往比個人的努力更難撼動。</strong>華人帶著資本與組織自由而來,握有向上的繩索;印度泰米爾人被契約綁進橡膠園與鐵路,起點就被固定在底層;原住民作為原主卻最早被抹去。同一座城,因為「怎麼來的」不同,給了三群人三條截然不同的起跑線。</p>
+      <p>這對應一個超越馬來西亞的普世規律:<em>結構性的位置,常常是在一個群體(或一個人)最沒有議價能力的時刻,被悄悄決定的——而一旦被決定,後來的所有制度都會傾向於維持它,而非鬆動它。</em>這也正是為什麼,理解這張「被寫淡的地圖」,是理解下一章 513 的另一個前提:那場爆炸表面上是華巫對立,底層卻是整張「族群＝職業＝空間」的殖民地圖,在獨立後仍被原封不動地延續——包括那些連在地圖上都幾乎沒有名字的人。一個社會的張力,往往不只藏在被看見的衝突裡,更藏在那些被寫淡、被消音、被視為理所當然的角落。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">✦ ⚠ ✦</div>
+  <p>當族群、經濟與空間被綁成一個結，<br>它平時看不見，卻在某個臨界點會突然繃斷。<br><span class="hl">1969 年 5 月那個傍晚，這個結，斷了。</span></p>
+</div>
+
+<!-- ===== 第九章：513 ===== -->
+<section id="ch13" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十三章 · The Watershed</span>
+    <h2 class="act-title">五一三：一道把國家劈成兩半的分水嶺</h2>
+    <p class="act-sub">May 13, 1969 — The Day That Reshaped Malaysia</p>
+    <div class="ornament">⚠ ✦ ⚠</div>
+  </div>
+  <div class="prose">
+    <p>在馬來西亞的歷史裡，有一個日期的份量，超過其他任何一天。它甚至不只是一個「事件」，而是一道<strong>分水嶺</strong>——它之前的馬來西亞，和它之後的馬來西亞，幾乎是兩個不同的國家。這個日期，是 1969 年 5 月 13 日。要理解今天吉隆坡乃至整個馬來西亞的族群、政治與經濟格局，幾乎所有的線索，都繞不開這一天。</p>
+
+    <h3>引信：一場選舉的衝擊</h3>
+    <p>導火線是 1969 年 5 月 10 日的全國大選。長期執政的「聯盟黨」（Alliance）遭遇空前挫敗——以華人為主要支持基礎的反對黨（民主行動黨 DAP 與民政黨 Gerakan）大有斬獲，執政聯盟在國會席次大幅縮水，在雪蘭莪州甚至要靠拉攏獨立人士才勉強維持多數。選後，反對派支持者上街遊行慶祝，隊伍中出現了帶有挑釁意味的口號與象徵物（如揮舞掃帚，喻意「掃走馬來人」）。作為回應，執政的巫統（UMNO）也在 5 月 13 日於雪蘭莪州務大臣官邸一帶組織反遊行。兩股對立的情緒，在這座族群早已被空間與經濟分隔得壁壘分明的城市裡，正面相撞。</p>
+
+    <h3>那幾天：失控的暴力</h3>
+    <p>5 月 13 日傍晚，遊行隊伍與旁觀者之間的口角，迅速升級為拳腳、瓶罐與石塊的互擲，繼而演變成全面的族群暴力。在接下來的數日裡，吉隆坡陷入失控——店屋被縱火、車輛被焚毀、人群在街頭互相攻擊。暴力沿著那張族群地圖蔓延：華人區、馬來區、印度人的商號彼此波及。政府旋即宣布吉隆坡進入二十四小時戒嚴，軍警上街。</p>
+    <div class="warn">
+      <span class="warn-tag">關於傷亡數字的爭議</span>
+      <p>513 的真實傷亡，至今仍是一個沒有定論、且高度敏感的問題。<strong>官方公布的死亡人數為 196 人</strong>；但當時的西方外交來源估計接近 <strong>600 人</strong>，部分估計甚至更高，且死者中約四分之三為華人。此外，據估計約有六千名居民（吉隆坡受災區當時以華人為主）在事件中失去家園與財產。官方與民間、本地與外部來源之間的巨大落差，本身就反映了這段歷史在馬來西亞至今仍未被完全公開、共同面對的現實——在《煽動法令》下，513 長期是一個近乎禁忌的話題。</p>
+    </div>
+
+    <h3>分水嶺的另一邊：一個被重新設計的國家</h3>
+    <p>513 真正的份量，不在那幾天的血，而在它<em>之後</em>徹底改寫的一切。它像一次劇烈的地震，震碎了 1957 年那套「靠妥協維持平衡」的獨立安排，逼使這個國家被<strong>從頭重新設計</strong>。一連串影響至今的根本性改變，全都源於這道分水嶺：</p>
+    <div class="legacy-grid">
+      <div class="legacy-block">
+        <h4>緊急狀態與權力轉移</h4>
+        <p>國家進入緊急狀態，<strong>國會停擺長達近兩年（至 1971）</strong>，由「國家行動理事會」（MAGERAN/NOC）以準軍事方式接管國政。首任首相<em>東姑阿都拉曼</em>威望盡失、被迫淡出，實權轉移到副首相<strong>敦拉薩</strong>手中。馬來西亞的政治權力結構，在這場危機中被重新洗牌。</p>
+        <div class="now">巫統主導的政治格局自此固化，並逐步演變為日後的「國陣」（Barisan Nasional）體制。</div>
+      </div>
+      <div class="legacy-block">
+        <h4>新經濟政策（NEP）：1971</h4>
+        <p>這是 513 最深遠的遺產。1971 年推出的<strong>新經濟政策</strong>設定雙重目標：一是不分種族地消除貧窮（目標將貧窮率從約 49% 降到 17%），二是<em>「消除種族與經濟職能、地理位置之間的綁定」</em>——後者正是直接針對殖民時代那張「族群＝職業＝居住區」的地圖。它透過土著（Bumiputera）優惠（固打）等手段，大力扶助馬來人進入商業、教育與都市經濟。</p>
+        <div class="now">土著優惠政策延續至今，是馬來西亞族群政治與「中等收入陷阱」爭論的核心，也深刻改變了城市的人口流動。</div>
+      </div>
+      <div class="legacy-block">
+        <h4>吉隆坡成為聯邦直轄區：1974</h4>
+        <p>513 五年後，吉隆坡於 1974 年正式<strong>脫離雪蘭莪州、成為馬來西亞第一個聯邦直轄區</strong>，由中央政府直接管轄。這一步把這座族群張力最尖銳、政治象徵最重的城市，從州的層級提升到國家層級，置於聯邦的直接掌控之下——它既是行政上的升格，也是一種政治上的「再掌握」。</p>
+        <div class="now">吉隆坡作為聯邦直轄區的特殊地位，是它日後城市規劃（PSKL 2040 由聯邦的 DBKL 主導）的制度基礎。</div>
+      </div>
+      <div class="legacy-block">
+        <h4>國家原則（Rukun Negara）：1970</h4>
+        <p>為了重建一個分裂社會的共同信念，政府在 1970 年頒布了<strong>國家原則</strong>——一套類似建國信條的五項原則，試圖為這個剛剛在街頭流過血的多元社會，重新縫合一個能共享的價值底線。</p>
+        <div class="now">國家原則至今仍出現在馬來西亞的校園與公共場合，是 513 後「重新凝聚國民認同」努力的象徵。</div>
+      </div>
+    </div>
+
+    <h3>513 如何重塑了吉隆坡的空間</h3>
+    <p>把鏡頭拉回這座城本身：513 不只改變了國家，也改變了吉隆坡的「人」與「地」。NEP 推動的土著都市化，讓大量馬來人從鄉村遷入吉隆坡，打破了殖民時代「馬來人＝鄉村」的舊格局，城市的人口結構與政治版圖隨之重組。而事件中受創最深的甘榜峇魯，作為市中心最後的馬來保留地，其象徵意義因 513 而更加沉重——它不只是一片土地，更承載著一段不能輕易觸碰的集體記憶。一座城的空間，從此疊加上了一層歷史的傷痕。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一次斷裂，定義一個世代</span>
+      <p>513 給出的最深啟示是：<strong>一個社會平時積累的張力是看不見的，但它一旦在某個臨界點繃斷，那一瞬間的斷裂，就會定義之後好幾個世代的軌跡。</strong>513 之後的每一項根本制度——NEP、土著優惠、巫統主導體制、甚至吉隆坡的直轄區地位——都是對那一天的「回應」，而這些回應又一路延續、形塑了今天。</p>
+      <p>更深的一層是：<em>513 的根源，並不在那場選舉，而在更早之前那張被殖民者畫下、又被獨立後延續的族群地圖——把族群、經濟與空間綁成一個結。</em>選舉只是那根點燃引信的火星，真正的炸藥，是幾十年裡在彼此看不見的隔離中累積起來的不信任。這正是為什麼，理解吉隆坡的族群空間（第八章），是理解 513 的前提；而理解 513，又是理解今日馬來西亞一切政治經濟爭論的鑰匙。它是這座城、這個國家，繞不開的那道分水嶺。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚒</div>
+  <p>吉隆坡的故事走到這裡，已足夠完整。<br>但它並不孤單——在海峽的北端，有一座性格截然相反的城，<br><span class="hl">把它放在一起看，兩座城才真正讀得懂彼此。</span></p>
+</div>
+
+<!-- ===== 第十章：雙城對比 ===== -->
+<section id="ch14" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十四章 · Twin Cities</span>
+    <h2 class="act-title">兩座城的鏡像：吉隆坡與檳城</h2>
+    <p class="act-sub">Tin vs Trade, One Core vs Many, Up vs Out</p>
+    <div class="ornament">⚒ ✦ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>吉隆坡的性格，要透過它的對照組才看得最清楚。海峽北端的檳城，幾乎在每一個維度上，都是吉隆坡的鏡像。把兩座城並排，馬來西亞城市發展的兩種截然不同的邏輯，便一目了然。</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">起源</div><div class="shift-body"><strong>吉隆坡＝人造</strong>：靠地底的錫礦與移民「無中生有」。<br><strong>檳城＝人造</strong>：靠一個「免稅」的點子在荒島上憑空造出。<em>兩者都不是天賦之城，而是「賭」與「點子」之城。</em></div></div>
+      <div class="shift-row"><div class="shift-era">財富引擎</div><div class="shift-body"><strong>吉隆坡＝生產</strong>：從地裡挖出東西（錫、橡膠）。<br><strong>檳城＝貿易</strong>：讓貨物經過（自由港轉口）。一個是「生產之城」，一個是「貿易之城」。</div></div>
+      <div class="shift-row"><div class="shift-era">城市結構</div><div class="shift-body"><strong>吉隆坡＝單核轉多核</strong>：長期單一市中心，靠 PSKL 2040 才轉向多中心。<br><strong>檳城＝海陸雙核再擴張</strong>：喬治市與大陸區隔海並立，再向 Silicon Island 擴張。</div></div>
+      <div class="shift-row"><div class="shift-era">成長方向</div><div class="shift-body"><strong>吉隆坡＝向上長</strong>：以摩天樓爭高（雙子星塔、TRX）。<br><strong>檳城＝向外填</strong>：以填海造地擴張（Silicon Island 930 公頃）。一個爭奪天空，一個爭奪海洋。</div></div>
+      <div class="shift-row"><div class="shift-era">族群空間</div><div class="shift-body"><strong>吉隆坡＝分區並置</strong>：族群被分配到不同的「區」（茨廠街／十五碑／甘榜峇魯）。<br><strong>檳城＝分街交織</strong>：族群被分配到不同的「街」，宗教場所比鄰，混居更早更密。</div></div>
+      <div class="shift-row"><div class="shift-era">當代張力</div><div class="shift-body"><strong>吉隆坡＝族群政治</strong>：513 的陰影、保留地、土著政策。<br><strong>檳城＝仕紳化</strong>：世遺觀光化導致的租金上漲與「活的遺產」流失。</div></div>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 同一片土地，兩種生存策略</span>
+      <p>吉隆坡與檳城最深的對比是：<strong>它們都沒有「天賦」，卻發展出兩種完全不同的「人造」策略。</strong>吉隆坡的本事是「韌性」——燒不垮、從廢墟裡一次次站起、靠生產與政治權力把自己舉成首都；檳城的本事是「遷移」——優勢消失了就換一個，從香料港到晶片島，靠不斷重新發明自己活下來。</p>
+      <p>這對應一個關於「成功路徑」的深刻洞見：<em>沒有天賦的個體（無論是城市、企業還是人），最終往往發展出比天賦者更強悍的生存能力——因為它們從一開始就知道，自己擁有的一切都是「爭來的」，沒有什麼是理所當然、不會失去的。</em>吉隆坡用韌性回答「如何在打擊後重建」，檳城用遷移回答「如何在優勢消失後重生」。兩座城，是同一個馬來西亞給出的兩份不同的生存範本。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚒ ✦ ⚖</div>
+  <p>檳城是它的橫向鏡像,但它還有一個更尖銳的縱向對照——<br>一個同樣「靠錫而生」、卻走向了完全相反結局的孿生兄弟。<br><span class="hl">把它倆放在一起,「資源詛咒」這四個字才真正顯影。</span></p>
+</div>
+
+<!-- ===== 插章：資源詛咒框架 ===== -->
+<section id="ch15" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十五章 · The Resource Curse</span>
+    <h2 class="act-title">兩個錫的孩子:資源詛咒的解剖學</h2>
+    <p class="act-sub">Why KL Became a Capital and Ipoh Fell Asleep — and What Norway and Venezuela Teach Us</p>
+    <div class="ornament">⚖ ✦ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>吉隆坡的命運,放進它的橫向鏡像(檳城)裡看,凸顯的是「人造之城」的兩種策略。但若放進一個<strong>縱向對照</strong>裡,它會逼出一個更普世、也對任何資源型經濟體都更有警示性的命題——<em>資源詛咒(Resource Curse)</em>。而這個對照組,就在它北邊兩小時車程外:同樣由近打山谷的錫養大、卻墜入數十年長眠的<strong>怡保</strong>。</p>
+
+    <h3>同一種金屬,兩種命運</h3>
+    <p>吉隆坡與怡保是一對殘酷的「孿生實驗」:它們的起點幾乎相同——都靠錫暴起、都由客家移民開拓、都在十九世紀末野蠻生長。但結局南轅北轍:當 1970–80 年代國際錫價崩盤、礦藏枯竭,<strong>怡保幾乎一夜墜入長眠,而吉隆坡幾乎毫髮無傷</strong>。差別究竟在哪?</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>維度</th><th>吉隆坡 · 解咒</th><th>怡保 · 中咒</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>對錫的依賴</strong></td><td>高,但很早就疊加橡膠、行政、政治、金融等多重角色</td><td>極高且純粹,近打山谷礦藏太豐,反而失去多元化的動力</td></tr>
+          <tr><td><strong>租金的去向</strong></td><td>大量「再投資」成首都機能:政府、鐵路、大學、CBD</td><td>較多「被消費」掉:豪宅、俱樂部、聲色——財富未充分轉化</td></tr>
+          <tr><td><strong>制度與權力</strong></td><td>1880 升格首府、1974 成聯邦直轄區,綁定國家級制度與資源</td><td>1937 才成州府,政治權重遠低,缺乏國家級的命運綁定</td></tr>
+          <tr><td><strong>錫崩盤後</strong></td><td>早已不依賴錫,平穩轉向服務、金融、跨國資本</td><td>唯一支柱被抽走,礦坑成湖、人去樓空,墜入長眠數十年</td></tr>
+          <tr><td><strong>重生方式</strong></td><td>持續「向上長」,以雙塔、TRX 鞏固首都地位</td><td>數十年後靠倖存的老街、美食、山水「溫柔甦醒」</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>結論很清楚:<strong>讓一座城在商品崩盤中倖存的,從來不是「它的礦藏有多豐」,而是「它有沒有趁資源還在時,把租金轉化成不依賴該資源的能力與制度」。</strong>怡保的錫太豐太純,反而讓它失去了多元化的動力——這正是資源詛咒最反直覺的核心:<em>越豐厚的單一祝福,越可能是陷阱。</em></p>
+
+    <h3>把鏡頭拉遠:這不只是兩座馬來西亞小城的事</h3>
+    <p>吉隆坡與怡保的分野,其實是發展經濟學裡一個被反覆驗證的全球模式。把它放進更大的座標,你會發現同樣的劇本,在國家層級上演了無數次:</p>
+    <div class="legacy-grid">
+      <div class="legacy-block">
+        <h4>荷蘭病(Dutch Disease)</h4>
+        <p>這個詞由《經濟學人》在 1977 年提出,源於荷蘭 1959 年發現巨大天然氣田後的遭遇:資源出口推高了匯率,反而讓本國製造業與農業<strong>失去競爭力而萎縮</strong>。資源的繁榮,意外地「擠掉」了其他產業。</p>
+        <div class="now">怡保的「錫太豐 → 不發展其他產業」,正是荷蘭病的城市版微縮。</div>
+      </div>
+      <div class="legacy-block">
+        <h4>反例:挪威 · 解咒的範本</h4>
+        <p>挪威 1960 年代發現北海石油,卻沒有揮霍。它立下嚴格的「管理規則」:石油收入絕大部分必須存入<strong>主權財富基金</strong>(現為全球最大,逾 1.7 兆美元),靠制度紀律,為「石油用完之後的生活」預先準備。</p>
+        <div class="now">挪威=吉隆坡的國家版:趁資源還在,把租金轉化成可持續的未來。</div>
+      </div>
+      <div class="legacy-block">
+        <h4>正例:委內瑞拉 · 中咒的極端</h4>
+        <p>委內瑞拉坐擁全球最大石油儲量,卻經歷了現代史上最嚴重的經濟崩潰之一。約九成政府支出依賴石油收入,當油價下跌,整個國家隨之崩塌——<strong>豐厚的資源沒有帶來繁榮,反而綁架了它的命運。</strong></p>
+        <div class="now">委內瑞拉=怡保的國家版極端:把全部押在單一商品上的終局。</div>
+      </div>
+      <div class="legacy-block">
+        <h4>關鍵變數:制度品質</h4>
+        <p>同樣有油,挪威解咒、委內瑞拉中咒,差別不在資源多寡,而在<strong>制度</strong>:有沒有透明、能約束租金尋求(rent-seeking)、強制把財富導向再投資而非消費的制度。資源是中性的,制度決定它是祝福還是詛咒。</p>
+        <div class="now">吉隆坡的「制度綁定」(首都、直轄區)正是它的解咒關鍵之一。</div>
+      </div>
+    </div>
+    <div class="pull"><p>資源不會決定命運,資源只會「放大」命運——它會放大一個有紀律的主體的優勢,也會放大一個沒有紀律的主體的弱點。同一桶油、同一座錫山,既能造出挪威,也能造出委內瑞拉。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一套可遷移的判斷框架</span>
+      <p>把吉隆坡、怡保、挪威、委內瑞拉收攏成一個框架,它給出的洞見遠超城市史,直指任何「靠單一豐厚來源致富」的主體——一個國家、一家公司、甚至一個人:<strong>暴富本身從不決定長期命運;真正的分水嶺,是你在「資源還在、現金還在流入」的那段黃金窗口裡,究竟做了什麼。</strong></p>
+      <p>具體而言,可以濃縮成三個診斷問題,套用在任何資源型(或單一收入型)主體上:<em>其一,租金的去向——財富是被「再投資」成不依賴該來源的新能力,還是被「消費」掉了?其二,依賴的純度——你有沒有趁繁榮時,主動疊加第二、第三根支柱?其三,制度的紀律——有沒有一套機制,強制你把錢導向未來,而非當下的揮霍?</em></p>
+      <p>怡保三題皆失而墜入長眠,吉隆坡三題大致過關而升格首都;委內瑞拉三題皆失而崩潰,挪威三題皆過而從容。這套框架最珍貴之處在於它的<strong>可遷移性</strong>:無論你評估的是一座城、一個押注單一商品的國家、一家營收高度集中於單一客戶或產品的公司、還是一個收入仰賴單一技能的個人——真正的安全邊際,從來不來自「那個來源有多豐厚」,而來自「你有沒有趁它還在時,建好了不依賴它的第二條腿」。這,就是兩個錫的孩子,用一個世紀的不同命運,寫給所有富有者的同一句警語。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ★ ✦</div>
+  <p>讀懂了它的過去、它的規劃、它的傷痕、它的鏡像，<br>最後一個問題自然浮現——<br><span class="hl">這座從泥濘裡長出的城，下一步要往哪裡去？</span></p>
+</div>
+
+<!-- ===== 第十一章：未來展望 ===== -->
+<section id="ch16" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十六章 · What Comes Next</span>
+    <h2 class="act-title">泥濘河口的下一個百年</h2>
+    <p class="act-sub">Polycentric Growth, the Race-Economy Knot, and the Road Ahead</p>
+    <div class="ornament">★ ✦ ★</div>
+  </div>
+  <div class="prose">
+    <p>站在 2020 年代的中段回望，吉隆坡正處在一個微妙的轉折點上。它的未來，大致會沿著三條彼此交纏的線索展開——而這三條線，每一條都是它一個半世紀身世的延續。</p>
+
+    <h3>線索一：從「一個中心」到「一串節點」</h3>
+    <p>在 PSKL 2040 多中心化與軌道導向的框架下，吉隆坡最可能的空間演化，是繁華從「黃金三角這一個點」，逐步散佈成「沿著捷運網路長出的一串節點」。TRX 是這個邏輯的第一個成熟樣本，未來巴生河流域（Klang Valley）的次中心——沿著各條捷運與輕軌線——可能陸續崛起。這是一個<em>可被觀察、可被證偽的趨勢</em>：如果軌道周邊的開發密度與商業活力持續上升、而舊單核的擁擠相對緩解，就說明這條路走通了；反之，若新節點淪為「有軌道、沒人氣」的空殼，則說明 TOD 在此水土不服。</p>
+
+    <h3>線索二：消化過剩，還是繼續堆高？</h3>
+    <p>第二條線索，是那個甩不掉的<strong>供給過剩</strong>問題。吉隆坡能否從「向上堆高」的舊慣性，真正轉向「向內修整、消化存量」的成熟模式，是觀察它城市健康度的關鍵指標。這考驗的不只是規劃文件，更是開發商的集體理性、與政策執行的決心。一座城願不願意停下盲目蓋樓的衝動，去處理過去留下的滯銷庫存與老舊街區，決定了它是邁向成熟，還是在下一輪週期裡重蹈覆轍。</p>
+
+    <h3>線索三：那個解不開的死結——族群與經濟</h3>
+    <p>但吉隆坡（以及整個馬來西亞）最深的未來變數，仍是 513 留下的那條<strong>族群—經濟死結</strong>。一方面是政治上的「綠潮」——馬來年輕世代向伊斯蘭保守主義的轉向，讓族群與宗教認同綁得更緊；另一方面是經濟上甩不掉的「中等收入陷阱」——一個仍受人才外流、固打爭議與補貼依賴所困的國家。這兩者交纏成一個兩難：跨越天花板需要「唯才是用、留住人才」的市場邏輯，鞏固政權卻需要「照顧土著、捍衛我族」的族群邏輯。</p>
+    <div class="pull"><p>吉隆坡的天際線能長多高，技術與資本說了算；但這座城（與這個國家）能走多遠，最終仍取決於那道從 1969 年延續至今的族群—經濟死結，能不能被一代人真正解開。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 未來，是過去的延長線</span>
+      <p>吉隆坡的三條未來線索，沒有一條是憑空冒出的——它們全都是這座城身世的延長線。多中心化，是它「單核擁擠詛咒」的解方；消化過剩，是它「向上長」舊邏輯的清算；而族群—經濟死結，則是 513、乃至更早那張殖民族群地圖，投射到未來的長長陰影。</p>
+      <p>這給出一個樸素卻有力的判斷框架：<em>要預判一座城的未來，最好的起點不是水晶球，而是它的歷史——因為一座城接下來要解決的問題，往往正是它過去成功的代價。</em>吉隆坡用一個半世紀證明了自己「能從最低處站起來」的韌性；它的下一個百年要回答的，是一個更難的問題：在站起來之後，它能不能解開那些當初讓它站起來的方式，所一併綁上的結。這，就是泥濘河口仍在書寫的下半場。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⚒ ☩</div>
+  <p>一片爛泥，一場內戰，一座雙塔，一張族群的地圖，一道分水嶺。<br>當我們把這一切收攏，終於可以回答最初那個問題——<br><span class="hl">為什麼一個國家的首都，會建在「泥濘的河口」上？</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section id="chF" class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是，今天的吉隆坡</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">Why a Swamp Became a Capital</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⚒ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的吉隆坡之所以是這個模樣，是四層層層相扣的原因疊加而成的——每一層，都對應著本篇的一段旅程。</p>
+
+      <h3>第一層：一種金屬，把人吸了過來</h3>
+      <p>一切的源頭是<strong>錫</strong>。是巴生谷地底的錫砂，配上歐美罐頭工業對它的渴望，把吉隆坡從一片無人聞問的爛泥灘，變成了一座淘金者蜂擁而至的礦城。它的起點不是貿易、不是政治，而是赤裸裸的「資源 + 遠方需求」——這決定了它從一開始就是一座「拿命換錢」的生產之城。</p>
+
+      <h3>第二層：移民，把不同的人縫在一起</h3>
+      <p>接著是<strong>移民</strong>。為了挖錫，成千上萬的華人客家人、廣府人渡海而來；為了割膠，大批印度泰米爾人被引進；馬來人則世居於此。今天吉隆坡「三大族群比鄰而居」的人口結構，不是偶然，而是錫與橡膠這兩塊磁鐵在一百多年間吸聚的結果。它的多元，是被經濟引力「吸」出來的。</p>
+
+      <h3>第三層：一個人，在廢墟上重新下注</h3>
+      <p>最關鍵的轉折是<strong>葉亞來</strong>。如果沒有他在 1873 年內戰後選擇留下、用磚瓦把焦土重建成一座永久市鎮，吉隆坡很可能只是南洋無數曇花一現的礦城之一。是他在廢墟上的那一次下注，給了這片爛泥灘「成為一座真正的城」的可能。<em>這座城的韌性基因——燒不垮、再站起——是他親手寫進去的。</em></p>
+
+      <h3>第四層：權力，把它升格成首都</h3>
+      <p>最後是<strong>制度與雄心</strong>。英國人看中它的戰略位置，把首府遷來、把它變成「四州府」的中樞、蓋起摩爾式拱頂；獨立那夜，它承載了七聲「默迪卡」；現代化的雄心，又讓它長出刺破雲層的雙子星塔。從礦城到首府，從首府到首都，從首都到全球地標——每一次升格，都是一次「誰掌握權力、誰就重新定義這座城」的過程。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 被泥土孕育，由韌性鑄成</span>
+        <p>所以，今天的吉隆坡是什麼？它是<strong>一座「無中生有」之城</strong>——沒有天賜的海港、沒有古老的王朝、沒有顯赫的傳說，它擁有的只是一片爛泥、一種金屬，和一群願意為它賭命、為它重建、為它升格的人。</p>
+        <p>它的泥濘出身與摩天天際線，是同一座城的兩面；它的族群活力與族群張力，是同一段移民史的兩面；它的草莽起源與現代雄心，是同一條韌性曲線的兩端。<em>吉隆坡最深刻的真相是：它不是被天賦的，而是被「賭」出來、被「建」出來、被一次次從廢墟裡「扶」起來的——因此這座城最動人的，從來不是它有多高，而是它記得自己曾經有多低。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">錫礦把陌生人吸聚到泥濘的河口，內戰把這座城燒成灰燼，一個客家人把它重新砌起，一個國家把它高高舉向雲層——吉隆坡的故事，是一場關於「從最低處出發」的長跑。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座城的終極啟示</span>
+      <p>一座城的偉大，往往不取決於它的出身有多高貴，而取決於它的韌性有多深——能不能在被燒成廢墟後重新下注，能不能把一片爛泥變成磚瓦、把磚瓦疊成首都、把首都舉向雲層。吉隆坡用一百七十年證明：起點的卑微從來不是命運，真正決定一座城高度的，是生活在這裡的人們，願不願意在每一次倒下之後，再把它扶起來一次。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從兩條河交會處的一片爛泥，<br>
+        到瘴癘叢林裡賭命淘錫的扁擔客，<br>
+        從一個放牛娃在焦土上砌起的磚瓦店屋，<br>
+        到摩爾式拱頂下的帝國中樞、默迪卡體育場的七聲吶喊，<br>
+        再到刺破雲層、一度雄踞世界之巔的雙子星塔——<br>
+        這段交織著錫礦、移民、械鬥、重建、殖民與雄心的歷史，<br>
+        最終回答了那個最初的問題：<br>
+        為什麼一個國家的首都，<br>會誕生在「泥濘的河口」。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">⚒ ✦ ⚓</div>
+  <p>泥濘河口的錫礦王國 · 吉隆坡一百七十年的崛起</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE MUDDY CONFLUENCE TO THE TWIN TOWERS · 1857 – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

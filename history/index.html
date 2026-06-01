@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>歷史 · Histories | Property Monitor</title>
+<meta name="description" content="史詩敘事的歷史長文：國家、城市、主題與運動的身世。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16140f; --parchment:#f3eee2; --parchment-deep:#e7dfc9; --parchment-card:#faf6ec;
+  --sea:#1d3640; --sea-deep:#0e2128; --gold:#a8842f; --gold-bright:#cda551;
+  --rust:#8a3a23; --crimson:#74221a; --jade:#33583f; --faint:#665a45; --line:#c6b58e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Serif TC',serif;background:var(--parchment);color:var(--ink);line-height:1.6;
+  background-image:radial-gradient(circle at 20% 10%,rgba(168,132,47,.05),transparent 50%),radial-gradient(circle at 85% 80%,rgba(138,58,35,.05),transparent 50%)}
+a{color:inherit;text-decoration:none}
+[lang-en]{display:none}
+html[data-lang="en"] [lang-zh]{display:none}
+html[data-lang="en"] [lang-en]{display:inline}
+html[data-lang="en"] .blk[lang-en]{display:block}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:100;background:var(--sea-deep);border-bottom:1px solid var(--gold);
+  display:flex;align-items:center;gap:18px;padding:9px 22px;color:var(--gold-bright)}
+.topbar a.home{color:var(--gold-bright);font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:7px}
+.topbar .crumb{color:#9a8f78;font-size:12px}
+.topbar .lang{margin-left:auto;background:transparent;border:1px solid var(--faint);color:var(--gold-bright);
+  border-radius:4px;padding:4px 11px;font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:.05em}
+
+/* hero */
+.hero{background:linear-gradient(180deg,#0e2128 0%,#1d3640 100%);color:#f3eee2;padding:54px 22px 46px;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 20h40M20 0v40' stroke='%23cda551' stroke-opacity='0.04' stroke-width='1'/%3E%3C/svg%3E");pointer-events:none}
+.hero-eyebrow{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.32em;color:var(--gold-bright);margin-bottom:16px;position:relative}
+.hero h1{font-size:clamp(30px,6vw,52px);font-weight:900;line-height:1.12;letter-spacing:.01em;margin-bottom:14px;position:relative}
+.hero h1 em{font-style:italic;color:var(--gold-bright);font-family:'Cormorant Garamond',serif;font-weight:500}
+.hero p{font-size:15px;color:#c9d4cc;max-width:620px;margin:0 auto;position:relative}
+.hero .stats{display:flex;justify-content:center;gap:38px;margin-top:30px;position:relative}
+.hero .stats .s .n{font-family:'Cinzel',serif;font-size:26px;color:var(--gold-bright);font-weight:700}
+.hero .stats .s .l{font-size:10px;letter-spacing:.16em;color:#8aa;text-transform:uppercase;margin-top:2px}
+
+/* map */
+.mapwrap{max-width:1180px;margin:-30px auto 0;padding:0 22px;position:relative;z-index:5}
+.mapcard{background:var(--parchment-card);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 40px rgba(22,20,15,.18);padding:18px 18px 12px;position:relative}
+.mapcard .mh{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.18em;color:var(--rust);margin-bottom:6px;text-transform:uppercase}
+#worldMap{width:100%;height:auto;display:block;border-radius:8px;background:#eef3ee}
+.maptip{position:absolute;background:var(--ink);color:var(--parchment);border:1px solid var(--gold);
+  border-radius:7px;padding:8px 12px;font-size:12px;pointer-events:none;display:none;z-index:30;max-width:240px;box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.maptip.show{display:block}
+.maptip .tt{color:var(--gold-bright);font-weight:600;margin-bottom:2px}
+.maptip .ts{color:#c9c0ad;font-size:11px}
+.mapfoot{font-size:11px;color:var(--faint);text-align:center;margin-top:8px;font-family:'Cormorant Garamond',serif;font-style:italic}
+
+/* sections */
+.wrap{max-width:1180px;margin:0 auto;padding:46px 22px 70px}
+.catblock{margin-bottom:46px}
+.cathdr{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;border-bottom:2px solid var(--line);padding-bottom:8px}
+.cathdr .cn{font-family:'Cinzel',serif;font-size:13px;letter-spacing:.2em;color:var(--rust)}
+.cathdr h2{font-size:24px;font-weight:700;color:var(--ink)}
+.cathdr .ct{margin-left:auto;font-size:12px;color:var(--faint);font-family:'Cormorant Garamond',serif}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:16px}
+.card{background:var(--parchment-card);border:1px solid var(--line);border-left:3px solid var(--gold);
+  border-radius:9px;padding:17px 18px 15px;transition:all .16s;display:flex;flex-direction:column;gap:7px;min-height:108px;position:relative}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(22,20,15,.16);border-left-color:var(--rust)}
+.card .t{font-size:16px;font-weight:700;line-height:1.35;color:var(--ink)}
+.card .b{font-size:12.5px;color:var(--faint);line-height:1.5;font-family:'Cormorant Garamond',serif;font-style:italic}
+.card .arrow{margin-top:auto;align-self:flex-end;color:var(--gold);font-size:15px;transition:transform .16s}
+.card:hover .arrow{transform:translateX(4px);color:var(--rust)}
+.grp{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;color:var(--rust);margin:18px 0 8px;grid-column:1/-1}
+.grp:first-child{margin-top:0}
+
+footer{background:var(--sea-deep);color:#9a8f78;text-align:center;padding:24px;font-size:12px;letter-spacing:.04em}
+footer a{color:var(--gold-bright)}
+@media(max-width:600px){.hero .stats{gap:22px}.cathdr h2{font-size:20px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="home" href="/home.html"><span style="font-size:15px">←</span><span lang-zh>Property Monitor</span><span lang-en>Property Monitor</span></a>
+  <span class="crumb"><span lang-zh>· 歷史</span><span lang-en>· Histories</span></span>
+  <button class="lang" onclick="toggleLang()">EN / 中</button>
+</div>
+
+<section class="hero">
+  <div class="hero-eyebrow">INVESTMQUEST · CHRONICLES</div>
+  <h1><span lang-zh>身世與<em>命運</em></span><span lang-en>Origins &amp; <em>Destinies</em></span></h1>
+  <p>
+    <span lang-zh>每一座城、每一個國家、每一項運動，都有一段如何走到今天的故事。這裡是它們的史詩敘事。</span>
+    <span lang-en>Every city, every nation, every sport has a story of how it became what it is. These are their epics.</span>
+  </p>
+  <div class="stats">
+    <div class="s"><div class="n" id="stNation">–</div><div class="l"><span lang-zh>國家</span><span lang-en>Nations</span></div></div>
+    <div class="s"><div class="n" id="stCity">–</div><div class="l"><span lang-zh>城市</span><span lang-en>Cities</span></div></div>
+    <div class="s"><div class="n" id="stTotal">–</div><div class="l"><span lang-zh>篇章</span><span lang-en>Chronicles</span></div></div>
+  </div>
+</section>
+
+<div class="mapwrap">
+  <div class="mapcard">
+    <div class="mh"><span lang-zh>世界地圖 · 點擊任一地標</span><span lang-en>World Map · Click any marker</span></div>
+    <svg id="worldMap" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="maptip" id="mapTip"></div>
+    <div class="mapfoot"><span lang-zh>自然地球投影 · 地標標出有地理座標的篇章</span><span lang-en>Natural Earth projection · markers show geo-located chronicles</span></div>
+  </div>
+</div>
+
+<div class="wrap" id="catRoot"></div>
+
+<footer>
+  <span lang-zh>INVESTMQUEST · PROPERTY MONITOR — 史詩敘事歷史長文 · </span>
+  <span lang-en>INVESTMQUEST · PROPERTY MONITOR — Epic-narrative histories · </span>
+  <a href="/home.html"><span lang-zh>回首頁</span><span lang-en>Home</span></a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script>
+var LANG = (localStorage.getItem('imqHistLang')||'zh');
+document.documentElement.setAttribute('data-lang', LANG);
+function toggleLang(){
+  LANG = (LANG==='zh'?'en':'zh');
+  document.documentElement.setAttribute('data-lang', LANG);
+  localStorage.setItem('imqHistLang', LANG);
+  if(window.__catalog) render(window.__catalog);
+}
+var MAP_W=1000, MAP_H=500, PROJ=null, PATH=null;
+
+fetch('catalog.json').then(function(r){return r.json();}).then(function(cat){
+  window.__catalog = cat;
+  render(cat);
+  loadMap(cat);
+}).catch(function(e){
+  document.getElementById('catRoot').innerHTML='<p style="color:#8a3a23">無法載入 catalog.json（'+e+'）</p>';
+});
+
+function txt(it){ return LANG==='en' ? (it.en||it.zh) : (it.zh||it.en); }
+
+function render(cat){
+  // stats
+  var items=cat.items;
+  document.getElementById('stNation').textContent=items.filter(function(i){return i.cat==='nation';}).length;
+  document.getElementById('stCity').textContent=items.filter(function(i){return i.cat==='city';}).length;
+  document.getElementById('stTotal').textContent=items.length;
+
+  var root=document.getElementById('catRoot'); root.innerHTML='';
+  cat.cats.forEach(function(c){
+    var list=items.filter(function(i){return i.cat===c.key;});
+    if(!list.length) return;
+    var block=document.createElement('div'); block.className='catblock';
+    var head='<div class="cathdr"><span class="cn">'+(c.key).toUpperCase()+'</span>'+
+      '<h2>'+(LANG==='en'?c.en:c.zh)+'</h2><span class="ct">'+list.length+'</span></div>';
+    var grid='<div class="grid">';
+    // city: group by .group
+    if(c.key==='city'){
+      var groups={}; var order=[];
+      list.forEach(function(i){var g=i.group||'其他';if(!groups[g]){groups[g]=[];order.push(g);}groups[g].push(i);});
+      order.forEach(function(g){
+        grid+='<div class="grp">'+g+'</div>';
+        groups[g].forEach(function(i){grid+=cardHTML(i);});
+      });
+    } else {
+      list.forEach(function(i){grid+=cardHTML(i);});
+    }
+    grid+='</div>';
+    block.innerHTML=head+grid;
+    root.appendChild(block);
+  });
+}
+function cardHTML(i){
+  return '<a class="card" href="'+i.slug+'.html">'+
+    '<div class="t">'+txt(i)+'</div>'+
+    (i.blurb?'<div class="b">'+i.blurb+'</div>':'')+
+    '<span class="arrow">→</span></a>';
+}
+
+function loadMap(cat){
+  if(typeof d3==='undefined'||typeof topojson==='undefined'){return;}
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')
+    .then(function(r){return r.json();})
+    .then(function(world){
+      var land=topojson.feature(world,world.objects.countries);
+      PROJ=d3.geoNaturalEarth1().fitSize([MAP_W,MAP_H],{type:'Sphere'});
+      PATH=d3.geoPath(PROJ);
+      drawMap(cat,land);
+    }).catch(function(){});
+}
+function drawMap(cat,land){
+  var svg='';
+  var grat=d3.geoGraticule().step([30,30])();
+  var gd=PATH(grat); if(gd) svg+='<path d="'+gd+'" fill="none" stroke="#c6b58e" stroke-opacity="0.3" stroke-width="0.5"/>';
+  land.features.forEach(function(f){var d=PATH(f);if(d)svg+='<path d="'+d+'" fill="#e7dfc9" stroke="#c6b58e" stroke-width="0.4"/>';});
+  var geo=cat.items.filter(function(i){return i.lat!=null&&i.lng!=null;});
+  geo.forEach(function(i,idx){
+    var p=PROJ([i.lng,i.lat]); if(!p) return;
+    var isCity=(i.cat==='city');
+    var r=isCity?4.2:6;
+    var fill=isCity?'#8a3a23':'#a8842f';
+    svg+='<circle data-i="'+idx+'" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+r+'" '+
+      'fill="'+fill+'" stroke="#faf6ec" stroke-width="1.3" opacity="0.92" style="cursor:pointer"/>';
+  });
+  var el=document.getElementById('worldMap');
+  el.innerHTML=svg;
+  var tip=document.getElementById('mapTip');
+  el.querySelectorAll('circle[data-i]').forEach(function(c){
+    var it=geo[+c.getAttribute('data-i')];
+    c.addEventListener('mouseenter',function(ev){
+      tip.innerHTML='<div class="tt">'+txt(it)+'</div><div class="ts">'+(it.cat==='city'?(LANG==='en'?'City':'城市'):(LANG==='en'?'Nation':'國家'))+' · '+(LANG==='en'?'click to read':'點擊閱讀')+'</div>';
+      tip.classList.add('show');
+    });
+    c.addEventListener('mousemove',function(ev){
+      var rect=el.getBoundingClientRect();
+      var x=(ev.clientX-rect.left)/rect.width*1000;
+      var y=(ev.clientY-rect.top)/rect.height*500;
+      var px=ev.clientX-rect.left+14, py=ev.clientY-rect.top+14;
+      if(px>rect.width-200)px=ev.clientX-rect.left-200;
+      tip.style.left=px+'px'; tip.style.top=py+'px';
+    });
+    c.addEventListener('mouseleave',function(){tip.classList.remove('show');});
+    c.addEventListener('click',function(){location.href=it.slug+'.html';});
+  });
+}
+</script>
+</body>
+</html>

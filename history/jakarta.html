@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重到正在沉沒的巨城：雅加達，一座決定搬走自己的首都</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style></head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Jakarta · The Capital So Heavy It Is Sinking — and Moving Away</span>
+    <h1>重到正在沉沒的<span class="em">巨城</span><br>雅加達<br>一座決定搬走自己的首都</h1>
+    <p class="sub">從爪哇海岸的一個香料小港、一座荷蘭人在焚城廢墟上建起的「東方阿姆斯特丹」,<br>到承載一個群島國家全部重量的三千萬人巨獸,再到下沉太快、終於決定把首都本身遷走的城——<br>一座「重到無法承受自己」之城的興衰與抉擇</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">前</span>一座吞下整個國家的城,是曼谷;它承受著一城獨大的重負,卻選擇留下來,硬扛那張下沉與失衡的帳單。而雅加達,是曼谷的近親,卻做出了一個截然相反、也截然驚人的決定——它太重了、沉得太快了,於是它的國家決定:<strong>不再修補它,而是把首都本身,搬走。</strong>這是這一系列裡最極端的一個原型:一座承載了印尼這個萬島之國幾乎全部重量(政治、經濟、人口)的超級都會,如今正以全世界最快的速度<em>沉入海中</em>——北部某些地方每年下沉達二十多公分,大片土地已低於海平面,海水步步進逼。面對這頭自己親手養大、卻已重到無法承受自身重量的巨獸,印尼做出了人類史上罕見的抉擇:在一千多公里外的婆羅洲叢林裡,從零打造一座全新的首都「努山塔拉」(Nusantara),把政府整個遷過去。而最深的諷刺在於:四百年前,荷蘭人也正是嫌棄舊都、才遷來這片海岸建起了雅加達的前身——歷史,在這片土地上,正以一種驚人的方式重演。一座城,如何會「重」到讓一個國家寧可拋下它、另起爐灶?讓我們從那片正在下沉的海岸走起,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">⚓ ✦ ⚓</div>
+
+<!-- ===== 序章：爪哇海岸 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Sinking Coast</span>
+    <h2 class="act-title">一片肥沃、繁忙、卻注定下沉的海岸</h2>
+    <p class="act-sub">The Java Coast — Where the Land Meets a Rising Sea</p>
+    <div class="ornament">☴ ☴ ☴</div>
+  </div>
+  <div class="prose">
+    <p>要理解雅加達的命運,得先理解它腳下那片土地。它坐落在爪哇島(Java)西北部的<strong>低窪海岸平原</strong>上,有十三條河流穿城而過,最終注入爪哇海。這片三角洲般的海岸,自古就是理想的港口腹地——肥沃、繁忙、易於通商。</p>
+
+    <h3>港口的恩賜</h3>
+    <p>正是這片海岸的「港口潛力」,讓雅加達從一個小漁村,一路成為東南亞最重要的貿易與權力中心之一。它面朝大海、背靠爪哇富庶的腹地,扼守著巽他海峽(連接印度洋與南海的另一條要道)的東口。對於任何想掌控香料貿易、想統治這個群島的勢力來說,這片海岸都是兵家必爭之地。它的「低平近海」,在帆船時代,是無與倫比的恩賜。</p>
+
+    <h3>恩賜底下的死亡時鐘</h3>
+    <p>但這片「低平近海」的恩賜底下,藏著一個與曼谷如出一轍、卻更加致命的隱患。它本質上是一片<em>低窪的沖積平原</em>,地勢極低、土質鬆軟;部分地區的海拔,本就只比海平面高出一點點。在城市規模還小的時候,這不成問題;但當這片海岸日後長出一座三千萬人的超級巨城,當這座巨城瘋狂地超抽地下水、用混凝土封死大地時,這片柔軟的海岸,將開始以全世界最快的速度<strong>下沉</strong>——同時,全球暖化又讓它面前的海,不斷<strong>上升</strong>。一邊沉、一邊漲,雅加達被夾在中間,一座當年因海而興的城,如今正面臨「被海吞沒」的命運。它腳下的這片土地,從第一天起,就埋著一座滴答作響的死亡時鐘。</p>
+    <div class="pull"><p>曼谷建在會下沉的三角洲上,雅加達也是——但雅加達沉得更快、海漲得更急。同樣是「因水而興」的城,雅加達把這份恩賜與詛咒,都推向了極致。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 同一塊地,可以是搖籃,也可以是墳墓</span>
+      <p>雅加達的起點,埋下了一個將在四百年後引爆的終極矛盾:<strong>讓它得以繁榮的條件(低平近海、便於通商),與讓它得以存續的條件(地勢夠高、不被海吞),恰恰是相互衝突的。</strong>同一片低窪海岸,在帆船時代是它的搖籃,在氣候變遷時代卻可能成為它的墳墓。</p>
+      <p>這與曼谷的「肥沃卻柔軟」遙相呼應,卻更為極端與宿命。它對應一個深刻的洞見:<em>一個主體賴以崛起的「環境優勢」,有時內藏著一個與「長期存續」直接對立的致命條件——而這個矛盾,往往在規模還小時被掩蓋,直到它大到讓那座「死亡時鐘」再也無法被忽視。</em>雅加達在這片低海岸上,建起了一個王朝、一座殖民首府、一個國家的心臟;但這片海岸的「低」,終將在它最龐大的時候,逼出一個任何城市都不曾想過的問題——當你腳下的土地正在沉沒,你是該死守,還是該離開?這個問題,要到終章才會被真正回答,但它的引信,在序章這片海岸上,就已經被點燃。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>這片海岸的價值,引來了一個又一個的征服者。<br>而其中最決絕的那一個,將會焚毀一座舊城,<br><span class="hl">在它的灰燼上,建起一座以荷蘭祖先為名的新都。</span></p>
+</div>
+
+<!-- ===== 第一章：焚城建巴達維亞 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · A City Razed and Rebuilt</span>
+    <h2 class="act-title">巽他格拉巴的終結,與巴達維亞的誕生</h2>
+    <p class="act-sub">Sunda Kelapa, Jayakarta, and the VOC's Fire, 1619</p>
+    <div class="ornament">⚜ ✦ ⚜</div>
+  </div>
+  <div class="prose">
+    <p>雅加達的誕生,是一個關於「征服與抹除」的故事。它最早的身分,是巽他王國(Sunda)治下的一個香料貿易港,名叫<strong>巽他格拉巴(Sunda Kelapa)</strong>。1527 年,來自北方的伊斯蘭勢力攻下此港,將它更名為<strong>雅加達(Jayakarta,意為「偉大的勝利」)</strong>——這是「雅加達」之名的起源。</p>
+
+    <h3>荷蘭人的野心:不只是貿易站</h3>
+    <p>十七世紀初,荷蘭東印度公司(VOC)為了壟斷香料貿易、擊敗葡萄牙與英國的競爭,看上了雅加達絕佳的戰略位置。起初,當地的雅加達王公允許 VOC 在港邊設立貿易站。但 VOC 要的遠不止於此——它要的是一個可以統治整個群島的<em>永久根據地</em>。</p>
+
+    <h3>1619:一把火,抹去一座城</h3>
+    <p>1619 年,VOC 那位以鐵腕(與殘暴)著稱的總督<strong>顏·彼得松·昆(Jan Pieterszoon Coen)</strong>,率軍攻打雅加達。他做了一件決絕的事:<strong>把整座雅加達城夷為平地、付之一炬</strong>。然後,他在這座被焚毀的舊城廢墟之上,建起了一座全新的、完全屬於荷蘭人的城,並以荷蘭人的祖先、古代日耳曼的「巴達維人(Batavi)」為它命名——<strong>巴達維亞(Batavia)</strong>。</p>
+    <p>這個命名與焚城的舉動,意義深遠:荷蘭人不是「接管」了雅加達,而是<em>抹除了它、再造了它</em>。巴達維亞從第一天起,就被設計成 VOC 在東印度的<strong>總部與權力中樞</strong>——一座統治整個群島的殖民首府。雅加達(Jayakarta)那「偉大的勝利」之名,連同它的本土身分,被一把火燒進了歷史的灰燼。</p>
+    <div class="pull"><p>馬六甲被葡萄牙佔據、卻保留了原貌;但雅加達被荷蘭人徹底焚毀、再以征服者祖先之名重建。它的誕生,不是被接管,而是被抹除後的重生——這份「在廢墟上另造一城」的基因,四百年後將以一種驚人的方式重演。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 征服的極致,是「重新命名與重建」</span>
+      <p>巴達維亞的誕生,揭示了殖民征服一種最徹底的形態:<strong>最深的征服,不只是奪取一座城,而是「抹除它原本的身分、再按征服者的意志重建它」——連名字,都換成征服者的祖先。</strong>顏·彼得松·昆沒有住進雅加達王公的宮殿,而是把整座城燒掉,在白紙般的廢墟上,建起一座純粹荷蘭式的城。</p>
+      <p>這對應一個關於「權力與身分」的深刻洞見:<em>當一個征服者選擇「重建」而非「接管」時,他追求的不只是控制,而是一種更徹底的東西——讓被征服之地,從根本上「成為他的造物」,失去獨立的自我記憶。</em>巴達維亞作為一座「被征服者從零打造、以服務於征服者統治意志」的城,它的城市基因裡,從一開始就缺少一個「自主的、本土的靈魂」——它是為了「統治整個群島」而存在的工具,一個高度「中心化、以權力為核心」的造物。這個基因,將在它日後成為印尼首都、並一城獨大時,清晰地顯現。而它「在廢墟上另起爐灶」的誕生方式,更與四百年後印尼「拋下雅加達、另建新都」的抉擇,形成了一個令人脊背發涼的歷史迴圈。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚜ ✦</div>
+  <p>荷蘭人在廢墟上建起了一座運河縱橫的「東方阿姆斯特丹」,<br>它富麗、繁華,卻也藏著殖民城市最深的傷口——<br><span class="hl">一場針對華人的大屠殺,將染紅這座城的河水。</span></p>
+</div>
+
+<!-- ===== 第二章：東方阿姆斯特丹 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Queen of the East</span>
+    <h2 class="act-title">東方阿姆斯特丹,與紅溪的血</h2>
+    <p class="act-sub">Canals, Spice Wealth, and the 1740 Massacre</p>
+    <div class="ornament">⚓ ✦ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>在 VOC 的經營下,巴達維亞迅速成為東南亞最富庶、最重要的殖民都會之一,贏得了「<strong>東方女王</strong>」的美譽。荷蘭人按照故鄉的模樣來打造它:開鑿縱橫交錯的<em>運河</em>、築起城牆、規劃方正的街區——使它宛如一座移植到熱帶的「<strong>東方阿姆斯特丹</strong>」。</p>
+
+    <h3>香料財富與多元移民</h3>
+    <p>作為 VOC 統治整個東印度群島的總部,巴達維亞匯聚了驚人的財富與多元的人群。香料貿易的利潤源源不絕地流入這裡;荷蘭殖民者、來自中國的勞工與商人、印度與阿拉伯的商賈、爪哇與群島各地的居民,在此交匯,使巴達維亞成為一座早期的「多元文化殖民城市」。其中,<strong>華人</strong>扮演了尤其關鍵的經濟角色——他們是商業、手工業與糖業種植的中堅力量,人數眾多、社群繁榮。</p>
+
+    <h3>1740:紅溪慘案</h3>
+    <p>但殖民城市的繁華,底下流淌著血。隨著華人社群日益壯大、經濟影響力日增,荷蘭殖民當局心生猜忌與恐懼。1740 年,在經濟管制與謠言激化的緊張氣氛下,VOC 對巴達維亞城內的華人發動了一場血腥的大屠殺——史稱<strong>「紅溪慘案」(因屍體染紅了城內的運河 Angke 而得名)</strong>。據估計,約有萬名華人在這場暴行中遇害。慘案之後,倖存的華人被迫遷往城牆外的一個區域——<em>草埔(Glodok)</em>,這裡也因此成為延續至今的雅加達唐人街。這場慘案,在這座城的多元繁華之下,刻下了一道深深的、關於猜忌與暴力的傷疤,也預示了族群矛盾將成為這座城揮之不去的陰影。</p>
+
+    <h3>VOC 的衰亡與荷蘭政府接手</h3>
+    <p>十八世紀末,VOC 因貪腐、戰爭與經營不善而瀕臨破產,於 1799 年正式解散,其殖民地由荷蘭政府直接接管。巴達維亞,從一家「公司的總部」,變成了「荷屬東印度殖民地」的正式首府,繼續扮演著統治這個龐大群島的中樞。(其間,拿破崙戰爭期間英國一度短暫占領巴達維亞,但很快又歸還荷蘭。)</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 繁華的多元之下,潛藏著猜忌的火種</span>
+      <p>巴達維亞的故事,揭示了多元殖民城市一個深刻而黑暗的悖論:<strong>殖民者一方面需要多元的移民(尤其是經濟能力強的華人)來創造財富,另一方面又恐懼這些移民坐大、威脅自己的統治——這種「既依賴又猜忌」的張力,一旦被點燃,就可能爆發成可怕的暴力。</strong>1740 年的紅溪慘案,正是這種張力最血腥的爆發。</p>
+      <p>這對應一個沉痛的歷史洞見:<em>當一個社會的繁榮,建立在「利用某個群體的經濟能力、卻又不給予他們相應的安全與權利」之上時,這種繁榮就潛藏著巨大的不穩定——猜忌、謠言與恐懼,隨時可能把「合作的夥伴」變成「清洗的對象」。</em>這道由殖民者種下的族群裂痕,並未隨著殖民時代的結束而消失,反而成了雅加達(乃至印尼)長期的隱痛——針對華人的暴力,在後來的歷史中(如 1998 年的排華暴亂)還會再次重演。一座城的多元,若不是建立在真正的平等與包容之上,那份多元就既是它的活力之源,也是它最脆弱的傷口。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚑ ✦</div>
+  <p>殖民的首府繁華了三百年,但二十世紀的怒潮,<br>將沖垮荷蘭人的統治,讓這座城換回它本來的名字——<br><span class="hl">並讓它成為一個全新的、萬島之國的心臟。</span></p>
+</div>
+
+<!-- ===== 第三章：從巴達維亞到雅加達 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Capital of a Nation</span>
+    <h2 class="act-title">巴達維亞之死,與雅加達的重生</h2>
+    <p class="act-sub">Independence, Sukarno, and the Heart of an Archipelago</p>
+    <div class="ornament">⚑ ✦ ⚑</div>
+  </div>
+  <div class="prose">
+    <p>巴達維亞作為殖民首府的命運,終結於二十世紀的戰火與民族覺醒。1942 年,日本擊敗荷蘭、佔領印尼,並把「巴達維亞」這個荷蘭名字,改回了帶有本土色彩的<strong>「雅加達」(Djakarta)</strong>。這個改名,象徵性地宣告了荷蘭殖民時代的終結。</p>
+
+    <h3>1945–49:獨立與首都</h3>
+    <p>二戰結束後,印尼民族主義者在蘇卡諾(Sukarno)的領導下宣布獨立,並經過數年艱苦的獨立戰爭,終於在 1949 年迫使荷蘭承認印尼的主權。雅加達,這座曾經的殖民首府,順理成章地成為了新生的<strong>印度尼西亞共和國的首都</strong>。一座由征服者焚城建起、為殖民統治服務了三百多年的城,如今成了一個獨立的、由萬千島嶼組成的新國家的心臟。</p>
+
+    <h3>蘇卡諾的國族劇場與蘇哈托的爆炸成長</h3>
+    <p>獨立後的雅加達,被賦予了沉重的使命——它要成為「印尼」這個由數百個族群、上萬座島嶼勉強凝聚而成的國家的<em>統一象徵</em>。開國總統蘇卡諾把雅加達當作展示國族雄心的舞台,興建了獨立紀念塔(Monas)、巨型清真寺、體育場與宏偉的紀念碑,試圖用建築把一個多元的國家「凝聚」成一個整體。隨後,在蘇哈托(Suharto)「新秩序」時代的數十年經濟發展中,雅加達迎來了爆炸性的成長:來自爪哇及群島各地的移民,為了工作與機會,如潮水般湧入這座唯一的中心。城市以驚人的速度向四周蔓延,人口從數百萬一路飆升,最終連同周邊衛星城,膨脹成一個容納<strong>三千萬人口</strong>的超級都會區(Jabodetabek)——成為全世界最大的都市圈之一。</p>
+    <div class="pull"><p>雅加達承載的,是一個「想像的共同體」最沉重的任務:把一萬七千座島嶼、數百個族群、無數種語言,凝聚成一個叫「印尼」的國家。整個群島的重量,都壓在了這一座城上。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當一座城,要扛起一個「拼出來的國家」</span>
+      <p>雅加達作為印尼首都的角色,揭示了一個關於「中心」的特殊重負:<strong>對於一個由極度多元、地理上又極度分散的群島所組成的國家來說,首都不只是政經中心,更被賦予了「凝聚國族、象徵統一」的沉重使命——它必須成為那個讓「印尼」這個概念得以成立的、唯一的向心力。</strong></p>
+      <p>這對應一個深刻的洞見:<em>越是鬆散、多元、難以凝聚的整體,就越是傾向於把一切力量與象徵,高度集中到一個單一的中心上——因為它太害怕分裂,於是用「極度的集中」來對抗「天然的離散」。</em>印尼是世界上地理最破碎的國家之一(橫跨一萬七千多座島嶼),正因如此,它對「一個強大中心」的需求格外迫切——雅加達於是被迫承載了遠超一座城市所能承受的重量:它要是政治首都、經濟引擎、人口磁鐵,還要是國族團結的象徵。這份「一座城扛起一個拼出來的國家」的超載,正是它日後種種危機(下沉、擁擠、失衡)的總根源。它和曼谷一樣「一城獨大」,但它的獨大背後,還多了一層「維繫國家統一」的、更沉重的政治使命。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">✦ ⚠ ✦</div>
+  <p>三千萬人的重量,壓在一片本就低窪柔軟的海岸上。<br>於是那座從序章就開始滴答作響的死亡時鐘,<br><span class="hl">終於走到了它最響亮、也最致命的一刻——這座城,正在沉沒。</span></p>
+</div>
+
+<!-- ===== 第四章：下沉 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Sinking</span>
+    <h2 class="act-title">全世界下沉最快的城市</h2>
+    <p class="act-sub">Subsidence, Floods, and a Megacity Drowning Under Its Own Weight</p>
+    <div class="ornament">⚠ ✦ ⚠</div>
+  </div>
+  <div class="prose">
+    <p>雅加達一城獨大的輝煌,要付出的帳單,比曼谷更加觸目驚心——而且這份帳單,直接寫著「生存」二字。序章那片低窪海岸所埋下的隱患,在三千萬人口的重壓之下,全面引爆。</p>
+
+    <h3>每年下沉二十多公分的城</h3>
+    <p>最致命的,是<strong>地層下沉</strong>。由於人口與產業極度集中,雅加達對水的需求遠遠超過了自來水系統的供應能力,於是數以百萬計的家庭與工廠,只能瘋狂地<em>超抽地下水</em>。後果是災難性的:這座建在鬆軟海岸上的巨城,正以全世界最快的速度下沉——平均每年下沉數公分,而<strong>北部某些臨海地區,每年下沉竟高達二十多公分</strong>。許多地方的地面,已經<em>低於海平面</em>。雅加達,是地球上下沉最快的大城市,沒有之一。</p>
+
+    <h3>被海與河夾擊的城</h3>
+    <p>下沉,疊加上全球暖化導致的海平面上升,讓雅加達陷入了「<strong>地在沉、海在漲</strong>」的雙重絕境。漲潮時的海水倒灌、雨季時十三條河流的氾濫,讓這座城飽受洪水之苦——大規模的水患幾乎成了家常便飯。政府試圖以工程手段應對,提出興建巨型海堤(如「大海鷗海堤 Giant Garuda」)來把海擋在外面;但批評者指出,這種「用混凝土硬擋」的方案治標不治本——因為城市還在繼續下沉,海堤本身也會跟著沉,洪水終將再次降臨。雅加達,彷彿在跟一個它根本無法戰勝的對手(物理與地心引力)賽跑。</p>
+
+    <h3>窒息與失衡:超載的全套症狀</h3>
+    <p>而在下沉這個最致命的危機之外,雅加達還承受著超級都會「一城獨大」的全套症狀:<em>世界級的塞車</em>(它常年名列全球交通最堵塞的城市之一)、嚴重的<em>空氣污染</em>、巨大的<em>貧富差距</em>(光鮮的摩天大樓與龐大的貧民窟並存)、以及與曼谷一樣的<em>區域失衡</em>(雅加達所在的爪哇島,聚集了印尼過半的人口與絕大部分的經濟,而廣大的外島則被甩在後頭)。整個印尼的命運,危險地押在了這一座正在沉沒的城上。</p>
+    <div class="pull"><p>曼谷每年下沉幾公分,已是危機;雅加達北部每年下沉二十多公分,則是末日級的警報。當一座城的部分土地已經低於海平面、且還在繼續下沉,問題就不再是「如何治理」,而是「還能不能住人」。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 有些帳單,大到無法償還,只能逃離</span>
+      <p>雅加達的下沉,把「過度集中的代價」推到了一個曼谷都未曾抵達的極端:<strong>當一座城的「集中之病」嚴重到威脅其物理存續本身時,任何「修補」的努力(如蓋海堤)都可能變得徒勞——因為你不是在對抗一個可以管理的問題,而是在對抗一個不斷自我惡化的物理現實。</strong></p>
+      <p>這對應一個令人警醒的洞見:<em>過度集中所累積的代價,存在一個「不可逆的臨界點」——在臨界點之前,代價尚可透過治理來緩解;一旦越過臨界點,代價就會自我強化、加速惡化,直到「修補」的成本與難度,超過了「放棄並重來」。</em>曼谷尚在臨界點的這一側,所以它選擇留下來、硬扛那張帳單;而雅加達,部分地區已經越過了那條線——當你的城市正以每年二十多公分的速度沉入海中、當海堤蓋好了也會跟著沉,「死守」這個選項本身,就變得越來越不理性。正是這份「無法償還的帳單」,把印尼逼到了一個任何國家都不願面對的牆角,並逼出了一個極端的、卻或許別無選擇的決定——這個決定,我們將在後面的篇章裡,完整地展開。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚡ ✦</div>
+  <p>當死守一座沉沒之城變得越來越不理性,<br>印尼做出了一個人類史上罕見的決定——<br><span class="hl">不再修補雅加達,而是在千里之外的叢林裡,從零建造一座新首都。</span></p>
+</div>
+
+<!-- ===== 第五章：遷都 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Great Move</span>
+    <h2 class="act-title">努山塔拉:把首都本身搬走的豪賭</h2>
+    <p class="act-sub">Nusantara, the Borneo Capital, and a Nation Walking Away</p>
+    <div class="ornament">⚡ ✦ ⚡</div>
+  </div>
+  <div class="prose">
+    <p>面對一座正在沉沒、且病入膏肓的首都,印尼做出了一個極其大膽、也極具爭議的決定——這個決定,讓雅加達的故事,在所有城市裡都顯得獨一無二:<strong>它不打算治好雅加達,而是要把「首都」這個身分,從雅加達身上拿走,搬到一千多公里外去。</strong></p>
+
+    <h3>2019–2024:一座從零建起的新都</h3>
+    <p>2019 年,時任總統佐科·維多多(Joko Widodo)正式宣布:印尼將遷都。新首都的選址,不在擁擠的爪哇島,而在遙遠的<strong>婆羅洲(加里曼丹)東部</strong>的叢林之中。2022 年,遷都計畫經國會立法確認;新首都被命名為<strong>「努山塔拉」(Nusantara)</strong>——這個名字在古爪哇語裡意為「<em>群島</em>」,寄託著「凝聚整個印尼群島」的象徵意義。2024 年 8 月 17 日(印尼獨立日),努山塔拉舉行了象徵性的揭幕,儘管此時它在很大程度上,仍是一座巨大的建築工地。</p>
+
+    <h3>遷都的多重動機</h3>
+    <p>印尼為何要下此重注?動機是多重的:其一,是<strong>逃離雅加達的絕境</strong>——下沉、洪水、擁擠、污染已讓雅加達不堪重負;其二,是<strong>對抗區域失衡</strong>——把首都從過度發達的爪哇島,遷往相對落後的婆羅洲,試圖把發展與資源,從一城獨大的格局中分散出去,帶動其他島嶼;其三,是<strong>打造一個理想之城</strong>——努山塔拉被規劃為一座「永續、綠色、智慧」的未來之城,試圖從零開始,避免雅加達犯過的所有錯誤。它的靈感,部分來自巴西利亞、坎培拉、布城(Putrajaya)等「人造首都」的先例。</p>
+
+    <h3>巨大的爭議與不確定</h3>
+    <p>但這場豪賭,充滿了爭議與不確定。批評的聲音從未停歇:在原始雨林中建城,對<em>環境與生物多樣性</em>的衝擊巨大;天文數字般的<em>建設經費</em>從何而來、能否吸引足夠的投資;政府官員與人民是否真的願意遷往一座遠離一切的叢林新城;以及最根本的——<em>遷走政府,並不能讓雅加達停止下沉</em>。雅加達仍將是印尼的經濟與金融中心,仍將住著數千萬人,它的下沉危機,並不會因為首都搬走而消失。努山塔拉究竟會成為一座偉大的新首都,還是淪為一座昂貴的「叢林鬼城」,至今仍是一個懸而未決的巨大問號。</p>
+    <div class="pull"><p>曼谷面對下沉,選擇留下來、硬扛帳單;雅加達面對更嚴重的下沉,選擇把首都搬走、另起爐灶。這是「一城獨大」這道難題,兩種截然相反的解法——一個死守,一個逃離。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當問題無法解決,「離開」是否也是一種答案?</span>
+      <p>雅加達的遷都,提出了一個關於「困境」的終極問題:<strong>當一個問題已經惡化到「修補的成本超過重建」時,「放棄並離開」究竟是一種智慧的止損,還是一種逃避責任的鴕鳥?</strong>遷都努山塔拉,可以被讚許為「不執著於沉沒成本、果斷另尋出路」的決斷;也可以被批評為「不去根治雅加達的病、卻把問題丟下不管」的逃避。</p>
+      <p>這對應一個極其深刻、且沒有標準答案的洞見:<em>面對一個積重難返的困境,「死守修補」與「放棄重來」之間,並沒有絕對的對錯——它取決於你對「這個困境是否還可逆」的判斷,以及你願意承擔哪一種風險(死守的風險是徒勞,重來的風險是新的未知)。</em>而雅加達的故事裡,還藏著一層令人脊背發涼的歷史迴圈:四百年前,荷蘭人也曾因為舊據點的種種問題,而選擇焚城、在新址另建巴達維亞;如今,印尼人又因為巴達維亞的後裔(雅加達)不堪重負,而選擇拋下它、在婆羅洲另建努山塔拉。「拋棄舊都、另建新都」這個動作,在這片土地上,以四百年為週期,驚人地重演了。歷史,彷彿在提醒我們:有些「另起爐灶」的衝動,可能並沒有真正解決問題,只是把問題,搬到了一個新的地方。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚙ ✦ ⚙</div>
+  <p>遷都的宏圖,並不能解除雅加達自身的重量。<br>就算政府搬走了,這座三千萬人的巨城,依然要繼續運轉——<br><span class="hl">於是規劃者面對的,是一個比遷都更棘手的問題:被留下的雅加達,該怎麼辦?</span></p>
+</div>
+
+<!-- ===== 第六章：城市規劃 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Blueprint</span>
+    <h2 class="act-title">被留下的巨城,如何自救</h2>
+    <p class="act-sub">Sea Walls, the MRT, and Saving the City Left Behind</p>
+    <div class="ornament">⚙ ✦ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>遷都努山塔拉,解決的是「首都」的問題,卻沒有解決「雅加達」的問題。即使政府機構陸續遷走,雅加達依然會是印尼的經濟與金融中心,依然會住著數千萬人。因此,雅加達城市規劃面對的,是一個甚至比遷都更棘手的命題:<strong>一座被「卸下首都身分」、卻依然龐大且正在下沉的巨城,該如何自救與重生?</strong></p>
+
+    <h3>與下沉和洪水的硬仗</h3>
+    <p>規劃的第一要務,是<em>活下去</em>——對抗下沉與洪水。這包括最根本、也最困難的一步:<strong>遏制地下水超抽</strong>(這需要建立起能覆蓋全城的自來水供應系統,以取代數百萬口私人水井);以及備受爭議的巨型海堤工程。然而,這些措施都極其艱鉅且昂貴,且面對「城市仍在下沉」這個根本事實,任何防洪工程都像是在跟時間賽跑。如何防止雅加達被海水吞沒,是它規劃中壓倒一切的生存命題。</p>
+
+    <h3>遲來的軌道交通</h3>
+    <p>在交通上,雅加達也在努力追趕。相較於曼谷,雅加達的軌道交通起步更晚——它的第一條地鐵(MRT)遲至 2019 年才開通。配合既有的快速公交系統(TransJakarta,擁有世界最長的 BRT 路網之一)與通勤鐵路,雅加達正試圖用大眾運輸,來緩解它那聞名世界的、災難級的塞車。但對於一座三千萬人、且長期以私家車與機車為主的巨城來說,這條軌道化的路,依然漫長。</p>
+
+    <h3>身分轉換的契機</h3>
+    <p>但「卸下首都身分」,或許也為雅加達帶來一個意想不到的<strong>契機</strong>。一旦不必再背負「政治中心」的重擔,雅加達或許能更專注地,把自己重新定位為一個純粹的<em>經濟、金融與商業之都</em>——一個區域性的商業樞紐。減去了政府機構的人口與功能壓力,理論上也能為這座過載的城市,騰出一些喘息與重整的空間。如何把「被留下」的失落,轉化為「輕裝上陣、專注重生」的契機,是雅加達規劃最具想像力的可能性。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 卸下重擔,有時是重生的開始</span>
+      <p>雅加達「被留下」的處境,藏著一個微妙而充滿希望的洞見:<strong>當一個過度承載的主體,被卸下它眾多角色中的一個(政治中心)時,這既是一種「失去」(地位的下降),也可能是一種「解放」(終於可以專注於做好剩下的事)。</strong></p>
+      <p>這對應一個關於「過載」的深刻啟示:<em>一個試圖「扮演所有角色」的主體,往往什麼都做不好,因為它的資源與精力被無限稀釋;而當它被迫(或主動)放下其中一些角色時,反而可能在剩下的角色上,獲得前所未有的專注與卓越。</em>雅加達過去同時是政治首都、經濟引擎、人口磁鐵、國族象徵——它什麼都是,於是被壓垮。如今首都的身分被遷走,如果雅加達能借此機會,從「什麼都想當的超級首都」,轉型為「一個專注而高效的經濟金融之都」,那麼這場「失去首都」的失落,反而可能成為它擺脫過載、輕裝重生的轉機。當然,這一切的前提是——它得先在物理上,不被海水吞沒。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚑ ✦</div>
+  <p>規劃描繪的是骨架,但雅加達的繁華重心,<br>四百年來經歷了一場從老城海港、一路向南的長途遷徙——<br><span class="hl">它一步步逃離那片最先下沉的海岸,奔向更高、更新的內陸。</span></p>
+</div>
+
+<!-- ===== 第七章：商圈移轉 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Southward Flight</span>
+    <h2 class="act-title">一路向南:逃離下沉海岸的繁華</h2>
+    <p class="act-sub">From the Old Harbour to the Golden Triangle and Beyond</p>
+    <div class="ornament">⚑ ✦ ⚑</div>
+  </div>
+  <div class="prose">
+    <p>雅加達的商業重心移轉,有一個比其他任何城市都更具象徵意義的方向——它<strong>持續地、不可逆地「向南」遷移</strong>。而這個方向,恰恰是「<em>逃離那片最先下沉、最常淹水的北部海岸,奔向地勢更高的南方內陸</em>」。它的繁華遷徙,本身就是一部「逃離海水」的歷史。</p>
+
+    <h3>起點:北部的老巴達維亞(Kota Tua)</h3>
+    <p>雅加達最早的中心,在<strong>最北端、緊鄰海港的老城區(Kota Tua,即老巴達維亞)</strong>。這裡是 VOC 焚城建都的原點,有著荷蘭式的運河、廣場與殖民建築。然而,這片最古老的海岸,如今也正是雅加達<em>下沉最嚴重、洪水最頻繁</em>的區域。繁華,早已從這片飽受海患的老城撤離,只留下殖民時代的建築遺跡,供人憑弔。</p>
+
+    <h3>中段:獨立後的市中心與「黃金三角」</h3>
+    <p>獨立後,隨著蘇卡諾的國族建設,城市中心向南移動到了<strong>獨立廣場(Monas 獨立紀念塔所在)一帶</strong>;而在經濟起飛的年代,真正的商業核心,則進一步集中到了以蘇迪曼大道(Sudirman)與塔姆林大道(Thamrin)為主軸的<strong>「黃金三角」(Golden Triangle)</strong>——這裡是雅加達摩天大樓林立的中央商務區,銀行、企業總部、五星酒店與大型商場的聚集地,是「現代雅加達」的門面。</p>
+
+    <h3>持續向南:衛星新城的蔓延</h3>
+    <p>而繁華的腳步,從未停止向南。隨著市中心日益擁擠、且地勢相對更低,新的高端住宅、商業與開發,持續向南方地勢更高的郊區與衛星城蔓延——如南雅加達的高級住宅區,以及更遠的、構成龐大都會區(Jabodetabek)的眾多衛星城。富裕的人群與資本,本能地朝著「更高、更新、更不容易淹水」的南方遷移。雅加達的城市擴張,因此呈現出一種「<em>逃離海岸、追逐高地</em>」的鮮明軌跡。</p>
+    <div class="pull"><p>多數城市的繁華遷移,追逐的是「財富」或「交通」;而雅加達繁華的向南遷移,追逐的卻是一個更原始的東西——「地勢的高度」,也就是「不被海水淹沒的權利」。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當繁華開始逃離,它洩露了最深的恐懼</span>
+      <p>雅加達繁華「一路向南、逃離海岸」的軌跡,揭示了一個沉重的真相:<strong>一座城的繁華重心朝哪裡移動,不只洩露了它追逐什麼,更洩露了它「恐懼」什麼。</strong>雅加達的資本與富人持續向南遷移,本質上是一場用腳投票的「逃離」——逃離那片正在下沉、注定被海水侵蝕的北部海岸。</p>
+      <p>這對應一個敏銳而令人不安的洞見:<em>當一個地方的「核心資源」(資本、富人、機會)開始系統性地朝著同一個方向撤離時,那個被它們「拋在身後」的方向,往往正暴露著這個地方最致命、最無解的問題。</em>雅加達的北部老城——它最古老、最具歷史的發源地——如今卻是下沉最嚴重、最先被放棄的區域;繁華像退潮一樣從那裡撤走,留下的是被海水威脅的貧困社區。這幅「富人向南逃、窮人困北方」的圖景,既是地理的,也是社會的——它讓「下沉」這個環境危機,疊加上了「不平等」這個社會危機。一座城的繁華若是在「逃離自己的一部分」,那便是它病得最深的徵兆。而當整座城的「逃離」累積到極致,便有了那個終極的逃離——遷都。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ✦ ☩</div>
+  <p>繁華講的是「人往哪裡逃」,但在這座巨城的血脈裡,<br>還流淌著一個由貿易、移民與傷痕交織的族群故事——<br><span class="hl">其中有一個社群,既是這座城的繁榮支柱,也一再是暴力的受害者。</span></p>
+</div>
+
+<!-- ===== 第八章：族群空間 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Melting Megacity</span>
+    <h2 class="act-title">縮影印尼:一座巨城的族群熔爐</h2>
+    <p class="act-sub">The Betawi, Glodok's Chinatown, and a Microcosm of a Nation</p>
+    <div class="ornament">☩ ✦ ☩</div>
+  </div>
+  <div class="prose">
+    <p>雅加達的族群圖譜,本質上是<strong>整個印尼的縮影</strong>。作為一個由數百個族群、上萬座島嶼組成的國家的首都與最大磁鐵,雅加達吸納了來自全國各地的人——它不是某一個族群的城,而是「所有印尼人」的城。</p>
+
+    <h3>原生的子民:巴達維人(Betawi)</h3>
+    <p>雅加達有自己的「原生」族群——<strong>巴達維人(Betawi)</strong>。有趣的是,巴達維人本身就是一個「混血」的產物:他們是數百年來在巴達維亞城中,由爪哇人、巽他人、華人、阿拉伯人、印度人、乃至歐洲人等各方移民,長期通婚、融合而形成的獨特社群。他們的語言(一種馬來方言)、飲食、與獨特的文化(如著名的 Ondel-ondel 巨型人偶),是雅加達本土身分的代表。巴達維人的存在本身,就說明了雅加達自誕生起,就是一座「融合之城」。</p>
+
+    <h3>草埔的華人:繁榮與傷痕</h3>
+    <p>而雅加達族群史中最深的一道印記,屬於<strong>華人</strong>。從巴達維亞時代起,華人就是這座城商業的中堅。1740 年紅溪慘案後遷往的<em>草埔(Glodok)</em>,至今仍是雅加達(乃至東南亞最大之一)的<strong>唐人街</strong>,廟宇、藥行、商鋪林立,是這座城最濃郁的市井底色之一。但華人社群在這座城的歷史,是繁榮與傷痕交織的:從 1740 年的紅溪慘案,到 1998 年蘇哈托政權垮台前夕、針對華人的<em>黑色五月暴動(排華暴亂)</em>——這座城的華人,一再地在經濟上扮演支柱、卻又在動盪中淪為暴力的代罪羔羊。這道由殖民時代種下、延續數百年的族群傷痕,是雅加達(乃至印尼)至今仍需面對的沉重課題。</p>
+
+    <h3>來自萬島的移民</h3>
+    <p>而構成今日雅加達主體的,是來自<strong>印尼各地的內部移民</strong>:爪哇人、巽他人、巴塔克人、米南加保人、布吉人……他們從擁擠的爪哇鄉村、從遙遠的蘇門答臘、蘇拉威西等島嶼,為了工作與機會,湧入這座唯一的中心。他們帶來了各自的語言、宗教(以伊斯蘭教為主,但也有基督教、印度教等)、與文化,讓雅加達成為一個名副其實的「印尼大熔爐」——你在這一座城裡,幾乎可以遇見整個印尼。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座城,承載一個國家的全部多元與全部裂痕</span>
+      <p>雅加達的族群圖譜,揭示了「超級首都」一個獨特的角色:<strong>當一座城吸納了一個極度多元的國家的全部人群時,它就同時承載了這個國家全部的「多元活力」與全部的「潛在裂痕」——它是一個讓所有人相遇的熔爐,也是一個讓所有矛盾匯聚的壓力鍋。</strong></p>
+      <p>這對應一個深刻的洞見:<em>高度的多元,是一把雙面刃——它在和平時是創造力與活力的泉源,卻在動盪時可能成為衝突與暴力的引爆點;而一座匯聚了全國多元的首都,便同時放大了這兩種可能。</em>雅加達既是印尼民族大融合最生動的展現(巴達維人的混血、萬島移民的共處),又是印尼族群暴力最慘痛的舞台(1740 與 1998 兩次排華悲劇)。這份「多元」既是它作為國家縮影的光榮,也是它必須小心呵護、否則隨時可能撕裂的脆弱。它和曼谷的「強力同化」、馬來西亞諸城的「多元並存」都不同——雅加達是「多元匯聚卻未必平等」,這使得它的族群和諧,始終是一個需要持續努力、且代價慘痛的未竟之業。一座承載了整個國家的城,也就承載了那個國家最美好與最艱難的一切。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ◉</div>
+  <p>讀懂了雅加達的興起、超載與它那「搬走自己」的驚人抉擇,<br>該把它放回那幅城市的地圖上了。<br><span class="hl">它與前面七座城並列,尤其與曼谷並肩時,一組最深刻的對照浮現出來。</span></p>
+</div>
+
+<!-- ===== 第九章：八城對比 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · Eight Archetypes</span>
+    <h2 class="act-title">八座城,八種命運原型</h2>
+    <p class="act-sub">And the Capital That Chose to Walk Away from Itself</p>
+    <div class="ornament">⚓ ✦ ◉</div>
+  </div>
+  <div class="prose">
+    <p>雅加達的性格,放進這八座東南亞代表性城市的對照裡才最完整。它補上了一種前七種原型都未曾抵達的、最極端的一種——「<em>重到搬家、放下自己</em>」的原型;而它與曼谷的並列,構成了「一城獨大」這道難題,最深刻的一組正反解答。</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">雅加達 · 超載</div><div class="shift-body"><strong>靠「承載一個群島之國的全部重量」而興</strong>:從焚城建起的殖民首府,長成三千萬人巨獸。<em>命運:重到正在沉沒,終於決定把首都本身遷往婆羅洲、另建新都。</em></div></div>
+      <div class="shift-row"><div class="shift-era">曼谷 · 獨大</div><div class="shift-body"><strong>靠「保獨立 + 全國集中」而興</strong>。<em>命運:一城即一國,面對下沉選擇留下硬扛,而非遷走。</em></div></div>
+      <div class="shift-row"><div class="shift-era">清邁 · 個性</div><div class="shift-body"><strong>靠「不複製首都、自成一格」而興</strong>。<em>命運:拒做小曼谷,以慢活與文化逆襲為數位遊牧之都。</em></div></div>
+      <div class="shift-row"><div class="shift-era">馬六甲 · 天賦</div><div class="shift-body"><strong>靠「地利」而興</strong>。<em>命運:天賦被泥沙與新加坡奪走,終轉為記憶之城。</em></div></div>
+      <div class="shift-row"><div class="shift-era">檳城 · 點子</div><div class="shift-body"><strong>靠「制度」而興</strong>。<em>命運:靠能力可遷移,兩度重生為東方矽谷。</em></div></div>
+      <div class="shift-row"><div class="shift-era">吉隆坡 · 賭注</div><div class="shift-body"><strong>靠「資源+移民」而興</strong>。<em>命運:靠韌性與政治權力,升格為首都。</em></div></div>
+      <div class="shift-row"><div class="shift-era">怡保 · 暴富</div><div class="shift-body"><strong>靠「單一礦藏」而興</strong>。<em>命運:錫崩盤後長眠,再靠慢活與美食甦醒。</em></div></div>
+      <div class="shift-row"><div class="shift-era">新山 · 依附</div><div class="shift-body"><strong>靠「鄰居」而興</strong>。<em>命運:繫於對岸的新加坡,正試圖從依附走向整合。</em></div></div>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 曼谷與雅加達:面對沉沒的兩種抉擇</span>
+      <p>把八座城並排,最深刻的一組對照,是<strong>曼谷與雅加達</strong>——兩座同樣「一城獨大」、同樣建在會下沉的軟土上、同樣面臨被水吞沒威脅的超級首都,卻在那道終極的生存難題前,做出了截然相反的抉擇。<em>曼谷選擇「留下來,硬扛那張下沉的帳單」;雅加達選擇「放下自己,把首都搬到別處去」。</em>一個死守,一個逃離。</p>
+      <p>而這組對照,把整個系列關於「集中」的母題,推向了最終極的層次。從曼谷到雅加達,我們看見了「一城獨大」這條路的盡頭——當集中累積的代價(下沉、超載)大到威脅城市的物理存續時,一個國家最終會被逼到一個任何人都不願面對的牆角:<strong>是傾盡全力去搶救那座承載了一切的城,還是壯士斷腕、另起爐灶?</strong>這對應一個沒有標準答案的終極洞見:<em>過度集中的終局,往往不是一個可以「優雅管理」的穩態,而是一個逼你做出痛苦抉擇的死角——而無論你選擇死守還是逃離,你都已經在為當初「把一切都壓在一座城上」這個選擇,付出最沉重的代價。</em>雅加達的遷都,因此不只是一座城的故事,更是一則寫給所有「正在無限集中」的城市與國家的、振聾發聵的警世寓言:它提醒我們,任何一座城,都有它無法承受的重量上限;而最好的策略,從來不是等到城市沉沒了才被迫逃離,而是在一切還來得及時,就學會「不要把所有的重量,都壓在同一個地方」。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ★ ✦</div>
+  <p>讀懂了它的興起、它的超載、它的下沉、它的抉擇,<br>最後一個問題自然浮現——<br><span class="hl">當首都搬走之後,這座被留下的、正在沉沒的巨城,將走向何方?</span></p>
+</div>
+
+<!-- ===== 第十章：未來展望 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · What Comes Next</span>
+    <h2 class="act-title">被留下的巨城,下一程</h2>
+    <p class="act-sub">Sinking, Surviving, and Life After the Crown</p>
+    <div class="ornament">★ ✦ ★</div>
+  </div>
+  <div class="prose">
+    <p>站在今天回望,雅加達正處在一個前所未有、也充滿不確定的十字路口。它即將失去「首都」這個維繫了它數百年身分的桂冠,卻依然要帶著三千萬人口與一身沉重的危機,走向未來。它的下一程,大致圍繞三條彼此交纏的線索展開。</p>
+
+    <h3>線索一:活下去——與海水的生存之戰</h3>
+    <p>第一條,也是壓倒一切的線索,是<strong>生存本身</strong>。無論首都是否遷走,雅加達都必須面對它最致命的問題:阻止下沉、抵禦海水。這場仗的核心,是能否成功<em>遏制地下水超抽</em>(這需要為三千萬人建立起可靠的自來水供應)、以及防洪工程能否真正奏效。這是一場與物理規律、與時間的硬仗——它的成敗,直接決定了這座城未來數十年「還能不能住人」。對雅加達而言,一切宏大的願景,都必須先建立在「不被淹沒」這個最低、卻最艱難的前提之上。</p>
+
+    <h3>線索二:卸下王冠後的重新定位</h3>
+    <p>第二條線索,是雅加達能否成功完成「<strong>後首都時代</strong>」的身分轉型。當政治中心遷往努山塔拉後,雅加達將不再是政治首都,但它仍將是印尼無可爭議的<em>經濟、金融與商業中心</em>。它能否借此機會,卸下「政治首都」的部分重擔,輕裝上陣,把自己重新打造成一個更專注、更高效的區域性商業樞紐?還是會在「失去首都地位」的失落與功能流失中,陷入衰退?這場身分的重新定位,將決定雅加達是「轉型重生」,還是「由盛轉衰」。</p>
+
+    <h3>線索三:遷都這場豪賭的最終驗收</h3>
+    <p>第三條線索,則關乎整個國家——<strong>努山塔拉的成敗</strong>。這場耗資巨大的遷都豪賭,究竟會成為一座成功帶動區域均衡、實現永續願景的偉大新都,還是淪為一座無人問津、財政無底洞的「叢林鬼城」?它能否真正分散雅加達的壓力、矯正印尼長期的區域失衡?這不僅關乎努山塔拉,也反過來深刻影響著雅加達的未來——如果遷都失敗,雅加達將被迫繼續扛起它本已無法承受的重擔。雅加達與努山塔拉,如今是一對命運相連的雙城,一榮一枯,牽動著整個印尼的未來。</p>
+    <div class="pull"><p>雅加達能不能擋住海水、能不能在卸下王冠後重生,工程、資本與政治的決心說了算;但它的故事已經為全世界留下一個沉重的問句——當一座城重到無法承受自己,我們是該死守,還是該離開?而最好的答案,或許是當初就不該讓它變得這麼重。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最深的智慧,是不要走到「必須抉擇」的那一步</span>
+      <p>雅加達的三條未來線索,最終都指向一個超越雅加達本身的、給全世界的警示:<strong>當一個主體被逼到「死守還是逃離」這個痛苦的抉擇時,其實它已經輸了——因為無論選哪一條,它都已經在為過去「過度集中、過度超載」的錯誤,付出無法挽回的代價。</strong>真正的智慧,不在於如何漂亮地解決這個兩難,而在於——根本不要讓自己走到這一步。</p>
+      <p>這給出整個系列最終極、也最樸素的一則洞見:<em>「分散」與「節制」,不是在危機爆發後才採取的補救,而應是在繁榮的全盛時期,就主動奉行的遠見。</em>雅加達(以及曼谷)的困境告訴我們:一座城、一個國家、乃至一個人,若在順境時把所有的重量、資源、期望都不斷地堆積到同一個點上,那麼它終將迎來一個「那個點再也承受不住」的時刻——而到了那時,所有的選項都是痛苦的。雅加達的遷都,是一個亡羊補牢的、昂貴而充滿風險的補救;它最深的啟示,卻是寫給所有「還沒走到這一步」的城市與個人的:<strong>不要等到你腳下的土地開始沉沒,才想起「不該把全部的重量都壓在一個地方」。真正的韌性,源於平時的分散;真正的遠見,是在你還承受得起的時候,就學會放下一些重量。</strong>這,或許就是這座正在沉沒、卻勇敢地選擇搬走自己的巨城,留給這個崇拜「集中」與「增長」的世界,最沉重、也最珍貴的一課。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⚓ ☩</div>
+  <p>一片下沉的海岸,一座焚城建起的殖民首府,一個群島之國的重量,一場搬走自己的豪賭。<br>當我們把這一切收攏,終於可以回答最初那個問題——<br><span class="hl">一座重到無法承受自己的城,最終教會了我們什麼?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的雅加達</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">What a City Too Heavy to Bear Itself Teaches Us</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⚓ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的雅加達之所以走到這一步,是四層層層相扣的原因疊加而成的——每一層,都對應著本篇的一段旅程。</p>
+
+      <h3>第一層:一片低窪海岸,埋下死亡時鐘</h3>
+      <p>一切的源頭是<strong>地理</strong>。是爪哇島西北那片低平近海、肥沃卻柔軟的海岸,讓雅加達得以作為港口而興。但這片「低窪近海」的恩賜底下,從第一天起就埋著一座死亡時鐘——它注定會在城市變得龐大時,以全世界最快的速度下沉。它的搖籃,終將成為它的墳墓。</p>
+
+      <h3>第二層:焚城建都,刻下中心化的基因</h3>
+      <p>接著是<strong>殖民的塑造</strong>。1619 年,荷蘭人焚毀雅加達、在廢墟上建起以征服者祖先為名的巴達維亞——一座為「統治整個群島」而從零打造的殖民中樞。這份「為極致中心化而生」的基因,連同 1740 年紅溪慘案種下的族群裂痕,都被刻進了這座城的底層。</p>
+
+      <h3>第三層:扛起一個群島之國,終於超載</h3>
+      <p>然後是<strong>獨立後的超載</strong>。從巴達維亞變回雅加達、成為印尼首都後,它被賦予了凝聚一個「萬島之國」的沉重使命——政治、經濟、人口、國族象徵,全壓在這一座城上。它膨脹成三千萬人的巨獸,承載著遠超任何城市所能承受的重量。</p>
+
+      <h3>第四層:重到沉沒,於是決定搬走自己</h3>
+      <p>最後是<strong>沉沒與逃離</strong>。三千萬人的重壓,讓那座低窪海岸以每年二十多公分的速度下沉,海水步步進逼。面對這張無法償還的帳單,印尼做出了人類史上罕見的決定:不再修補雅加達,而是把首都遷往婆羅洲、另建努山塔拉——一個與四百年前荷蘭人「焚舊城、建新都」驚人重演的歷史迴圈。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 重量,終有極限</span>
+        <p>所以,今天的雅加達是什麼?它是<strong>一座「因承載了一個國家的全部重量、而重到正在沉沒,最終逼得這個國家決定搬走它」的城</strong>——它曾是殖民帝國的東方女王、是萬島之國的心臟,但它把「集中」這條路走到了盡頭,走到了一個任何城市都不曾抵達的、必須在「死守」與「逃離」之間做出痛苦抉擇的死角。</p>
+        <p>它的繁華與它的下沉,是同一片低窪海岸的兩面;它的興起與它的超載,是同一份「一城獨大」的兩面;它的首都桂冠與它被搬走的命運,是同一場「過度集中」的兩端。<em>雅加達最深刻的真相是:它把「集中」這件事,做到了極致,也因此最徹底地嚐到了極致的代價——當你把一個國家的全部重量都堆到一座城上,那座城終將被自己的重量壓垮、壓沉。而它那「搬走首都」的驚人抉擇,與四百年前荷蘭人「焚城另建」的歷史迴圈,共同訴說著一個樸素卻被反覆遺忘的道理:任何一個地方,無論多麼重要,都有它無法承受的重量上限。雅加達用它的沉沒與遷徙,為整個崇拜「集中」與「增長」的世界,豎起了一座沉重的警示碑——真正的智慧,不是在城市沉沒後才學會逃離,而是在它還承受得起時,就學會,不要把所有的重量,都壓在同一個地方。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">大海給了它一片興旺的海岸,荷蘭人在焚城的灰燼上給了它一個中心化的身分,一個群島之國給了它無法承受的重量;而當它重到開始沉入海中,這個國家終於決定——拋下它,另起爐灶。雅加達的故事,是一場關於「集中的盡頭,是連首都本身都必須搬走」的長跑。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座城的終極啟示</span>
+      <p>任何一座城、一個國家、乃至一個人,都有它無法承受的重量上限。當你在順境時不斷地把所有重量、資源與期望,都堆積到同一個點上,那個點終將迎來「再也撐不住」的一刻——而到了那時,無論你選擇死守還是逃離,都已是慘痛的代價。雅加達用它的沉沒證明:真正的韌性,不源於把一個中心建得多麼強大,而源於平時就懂得分散重量;真正的遠見,不是在沉沒後才被迫搬家,而是在你還承受得起時,就主動學會放下。不要把所有的重量,都壓在同一個地方——這,是一座正在沉沒的巨城,用最昂貴的代價,換來的一句叮嚀。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從爪哇海岸一個香料小港,<br>
+        到荷蘭人在焚城廢墟上建起的「東方阿姆斯特丹」,<br>
+        從殖民帝國的東方女王、紅溪染血的傷痕,<br>
+        到承載一個萬島之國全部重量的三千萬人巨獸,<br>
+        再到重得正在沉沒、終於決定搬走自己的首都——<br>
+        這段交織著海岸、征服、超載與抉擇的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        一座重到無法承受自己的城,<br>教會了我們——別把所有的重量,壓在同一個地方。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">⚓ ✦ ☷</div>
+  <p>重到正在沉沒的巨城 · 雅加達:一座決定搬走自己的首都</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">THE CAPITAL SO HEAVY IT IS SINKING, AND MOVING AWAY · 1619 – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

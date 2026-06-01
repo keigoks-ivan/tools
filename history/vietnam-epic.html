@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>竹與龍：越南兩千年的不屈之身</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Bamboo and Dragon — Two Thousand Years of Defiance</span>
+    <h1>竹與龍<br><span class="em">越南</span><br>兩千年的不屈之身</h1>
+    <p class="sub">從紅河三角洲的龍之子民,到擊敗法國、拖垮美國的抵抗民族——<br>一部關於「被巨人反覆征服,卻從未被同化」的不屈追問</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼越南是東南亞唯一深受中華文明形塑、卻又最頑強抵抗中國的國家?為什麼這個被法國殖民、被戰火撕裂的民族,最終走上了社會主義道路,卻又擁抱了市場?答案不在當下,而在兩千年的抵抗裡。當泰國靠外交「永不淪陷」時,越南靠的是流血「永不屈服」——它曾被中華帝國直接統治近一千年,卻始終沒有被同化;它在二十世紀接連擊敗了法國與美國兩個西方強權,寫下小國拖垮超級大國的傳奇;但它最深的命題,從來是它與北方那條巨龍的關係——<em>既學習它、又抵抗它,糾纏了兩千年</em>。這不是一個「被誰殖民」的故事,而是一個<strong>在抵抗中淬煉出自我、卻必須學會與昔日敵人和解</strong>的故事。讓我們從頭走一遍,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Children of the Dragon</span>
+    <h2 class="act-title">紅河、龍與仙的子民</h2>
+    <p class="act-sub">The Red River and a People Born of Dragon and Fairy</p>
+    <div class="ornament">🐉 🐉 🐉</div>
+  </div>
+  <div class="prose">
+    <p>越南的故事,從一條河與一個神話開始。北部的<strong>紅河三角洲</strong>,是這個民族的搖籃——肥沃的沖積平原,孕育了密集的稻米文明與最早的越人聚落。而越南的國土,則像一根沿著南海岸線伸展的<em>狹長扁擔</em>,北接中國、面向南海,從一開始,它的命運就被「<strong>北方的巨人</strong>」與「東方的海洋」所定義。</p>
+
+    <h3>龍與仙的後代</h3>
+    <p>越南人對自己的起源,有一個美麗而意味深長的神話。傳說,龍王<strong>貉龍君</strong>娶了仙女<strong>甌姬</strong>,生下了一百個兒子;後來夫妻分離,一半的兒子隨父親下海,一半隨母親上山,而越南人,就是這「<em>龍與仙的後代</em>」。這個神話,把越南人定義為一個既屬於山、又屬於海的民族,更賦予了他們一種高貴而獨立的自我想像——<strong>我們是龍的子民,有自己的源頭,不是任何人的附庸。</strong></p>
+
+    <h3>面向中國的宿命</h3>
+    <p>但地理是無情的。越南北部與中國直接接壤,這意味著,從文明的最早期開始,越南就必須面對那個體量比它大上百倍的北方鄰居。中華文明將如潮水般湧入——它的文字、它的儒家、它的官僚制度、它的佛教與道教,都將深深滲入越南的肌理。但與此同時,越南也將用兩千年的時間證明一件事:<em>它可以吸收中華的文明,卻絕不接受中華的統治。</em>這份「既學又抗」的雙重性,從紅河文明的第一天起,就刻進了越南的基因。</p>
+    <div class="pull"><p>龍與仙的後代——這個神話從一開始就宣告:越南人有自己的源頭,他們可以學習北方的巨龍,卻永遠不會承認自己只是那條龍的一部分。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 在巨人陰影下的自我定義</span>
+      <p>越南的起點,揭示了一個關於「<strong>小國認同</strong>」的深刻命題:當一個民族世世代代生活在一個龐大文明的陰影之下時,它要如何不被吞噬、不被同化,守住「我們是誰」?</p>
+      <p>越南給出的答案,是一種高明的<em>雙軌策略</em>:在文化上,它大方地吸收中華文明的精華(文字、儒學、制度),讓自己變得「文明」而強大;但在政治與認同上,它頑強地堅持「我們是龍的子民,不是中國人」。這種「<strong>師其長技,卻拒其統治</strong>」的姿態,將成為貫穿越南兩千年歷史的主旋律。理解了這份從神話時代就埋下的雙重性,就理解了越南這個民族最核心的生存智慧——以及它與北方那條巨龍,糾纏不清的愛恨情仇。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">龍 ✦ 龍</div>
+  <p>公元前 111 年,漢帝國的大軍南下,吞併了紅河流域。<br>從此,越南將在中華帝國的直接統治下,度過漫長的一千年。<br><span class="hl">但這一千年,沒能把越南人變成中國人。</span></p>
+</div>
+
+<!-- ===== 第一章:北屬千年 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · A Thousand Years Under the Dragon</span>
+    <h2 class="act-title">北屬千年:在中華帝國的陰影下</h2>
+    <p class="act-sub">A Millennium of Chinese Rule — and Unbroken Resistance</p>
+    <div class="ornament">龍 龍 龍</div>
+  </div>
+  <div class="prose">
+    <p>越南歷史最深刻的烙印,來自一段漫長得驚人的經歷:它曾被中華帝國<strong>直接統治了將近一千年</strong>(約公元前 111 年至公元 938 年),史稱「<strong>北屬時期</strong>」。這是世界史上罕見的——一個民族被一個龐大帝國統治了長達一個千年,最後卻沒有被同化,反而獨立了出來。</p>
+
+    <h3>漢帝國的征服與「漢化」工程</h3>
+    <p>公元前 111 年,漢武帝的大軍征服了紅河流域。隨後,中華帝國展開了一場全面的「<strong>漢化</strong>」工程:它強制推行漢字、儒家與道家思想、中華的禮儀、服飾與髮式,試圖把越人徹底改造成中國人。中華的官僚制度、農業技術(灌溉、鐵犁)、水利工程也隨之而來。客觀上,這一千年讓越南深深吸收了中華文明,奠定了它日後作為一個「<em>儒家社會</em>」的基礎——這是中華文明留給越南最深的遺產。</p>
+
+    <h3>徵氏姊妹:抵抗的第一個圖騰</h3>
+    <p>但漢化從未成功地讓越南人「心服」。北屬千年,是一部不斷起義、反抗的歷史。其中最著名、也最具象徵意義的,是<strong>徵氏姊妹(Hai Bà Trưng)</strong>的起義。公元 40 年,面對日益沉重的壓迫與一位貪婪殘暴的漢朝太守,越人女子徵側、徵貳姊妹揭竿而起,率領各部落擊退漢軍,短暫地建立了獨立政權。儘管三年後起義被漢朝名將馬援鎮壓、姊妹倆投水殉國,但<strong>徵氏姊妹從此成為越南民族抵抗精神的永恆圖騰</strong>——她們不僅象徵著不屈,也象徵著越南社會中女性相對崇高的地位。此後千年,起義的火焰從未真正熄滅。</p>
+    <div class="pull"><p>中華帝國用一千年,給了越南文字、儒學與制度;卻始終沒能用這一千年,讓越南人忘記自己是龍的子民。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 同化的極限</span>
+      <p>北屬千年,是理解越南最關鍵的一段歷史,因為它揭示了一個深刻的現象:<strong>文化的吸收,不等於認同的臣服。</strong>中華帝國成功地讓越南「漢化」了——越南人用漢字、信儒學、行中華制度;但它徹底地失敗於讓越南「中國化」——越南人始終保有自己的語言、自己的神話、自己「我們不是中國人」的頑固認同。</p>
+      <p>這正是越南與本系列其他國家最根本的不同。對被西方殖民的菲律賓、印尼而言,殖民帶來了深刻的認同困惑(「我們究竟是誰?」);但對被中國統治千年的越南而言,漫長的壓迫反而<em>淬煉出一種無比清晰、堅定的民族認同</em>——「我們是越南人,我們抵抗,故我們存在」。抵抗,成了這個民族定義自我的方式。<strong>越南的認同,不是在和平中孕育的,而是在千年的反抗中,一次次被鍛打成形的。</strong>這是它最深的力量之源。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>公元 938 年,在白藤江的入海口,越南人用釘滿尖樁的河床,<br>埋葬了中國的艦隊,也埋葬了一千年的北屬。<br><span class="hl">一個獨立的越南,終於誕生了——但它選擇成為「另一個中華」。</span></p>
+</div>
+
+<!-- ===== 第二章:獨立與小中華 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Smaller Dragon</span>
+    <h2 class="act-title">獨立與「小中華」:在抵抗中誕生的王朝</h2>
+    <p class="act-sub">Another China, but Never China's</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>北屬千年的終結,來得驚心動魄。公元 938 年,趁著唐帝國崩潰、中原大亂,越南名將<strong>吳權(Ngô Quyền)</strong>在<strong>白藤江之戰</strong>中,用一招天才的戰術——在江底埋設尖樁,趁退潮時刺穿中國的戰船——一舉殲滅了南漢的艦隊。這場勝利,終結了將近一千年的北屬,<strong>越南,終於獨立了。</strong></p>
+
+    <h3>三度擊退蒙古的鐵騎</h3>
+    <p>獨立之後,越南進入了一個王朝興替的時代:吳、丁、前黎、李、陳、後黎等王朝相繼登場。這些王朝最了不起的成就,是<strong>一次次擊退來自北方的入侵</strong>。其中最輝煌的,是十三世紀<strong>陳朝</strong>在名將<em>陳興道</em>的領導下,連續三次擊退了橫掃歐亞、不可一世的<strong>蒙古鐵騎</strong>——當蒙古帝國征服了大半個世界時,小小的越南,卻三度讓它鎩羽而歸。抵抗北方的侵略,成了越南王朝最核心的使命與榮耀。</p>
+
+    <h3>「小中華」的矛盾認同</h3>
+    <p>但獨立後的越南,卻做出了一個耐人尋味的選擇:它<strong>全盤繼承並擁抱了中華的制度與文化</strong>。越南的王朝建立了與中國幾乎一模一樣的<em>科舉制度、儒家官僚體系、律法與禮儀</em>;越南的君主自稱「皇帝」,把自己的國家視為<strong>「另一個中華」(小中華)</strong>,甚至以中華文明的正統繼承者自居,反過來鄙視周邊「未開化」的鄰邦。這形成了越南認同最核心的矛盾:<em>它在文化上極度親近中國、以身為「中華文明圈」的一員為傲;但在政治上,它又絕對不能容忍成為中國的一部分。</em>「越南是另一個中華,但絕不是中國的一省」——這句話,精準地概括了越南千年的自我定位。</p>
+    <div class="pull"><p>越南一手擊退中國的軍隊,一手擁抱中國的文化——它要的不是拒絕中華文明,而是「我要當另一個中華,而不是你的附庸」。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 學習對手,以對抗對手</span>
+      <p>「小中華」的矛盾,揭示了越南一種極其高明的生存哲學:<strong>要抵抗一個強大的文明,最有效的方式,往往不是排斥它,而是徹底地學習它、掌握它,讓自己變得跟它一樣強大。</strong>越南深知,唯有把中華的制度、組織與文化學到手,它才有能力在政治上與中國分庭抗禮、保持獨立。</p>
+      <p>這份「<em>師夷長技以制夷</em>」的智慧,將在兩千年後以全新的形式重演:二十世紀末,當越南要發展經濟時,它再次選擇了「學習中國」——學習鄧小平的改革開放模式(我們會在後面詳談)。從學習中華制度以保持政治獨立,到學習中國改革以實現經濟崛起,越南始終在做同一件事:<strong>把那條北方巨龍當成最大的威脅,也當成最好的老師。</strong>這份愛恨交織、又學又抗的關係,是理解越南的終極鑰匙。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚑ ✦ ⚑</div>
+  <p>越南的故事,不只有抵抗北方的悲壯。<br>當它轉身向南,它自己,也成了征服者。<br><span class="hl">在那狹長國土的南方,曾有一個被越南徹底抹去的王國。</span></p>
+</div>
+
+<!-- ===== 第三章:南進 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The March South</span>
+    <h2 class="act-title">南進:當越南成為征服者</h2>
+    <p class="act-sub">Nam Tiến — How Vietnam Devoured a Kingdom</p>
+    <div class="ornament">⚑ ✦ ⚑</div>
+  </div>
+  <div class="prose">
+    <p>如果只講越南抵抗北方的故事,那將是不誠實的。因為越南今天那根狹長的「扁擔」國土,本身就是一部<strong>向南擴張、征服與吞併</strong>的歷史。越南人稱之為「<strong>南進</strong>」(Nam tiến)。在抵抗北方巨人的同時,越南自己,也是南方的征服者。</p>
+
+    <h3>占婆:一個被抹去的王國</h3>
+    <p>越南最初的疆域,只限於北部的紅河流域。但在獨立後的數百年間,它持續地向南方擴張。它最大的「受害者」,是一個曾經輝煌的王國——<strong>占婆(Champa)</strong>。占婆是一個信奉印度教與伊斯蘭、屬於南島語族、文化與越南截然不同的海洋王國,曾長期雄踞越南中南部海岸,留下了精美的占族塔廟。但從十一世紀起,越南不斷南侵蠶食,到了 1471 年,後黎朝的<strong>黎聖宗</strong>發動決定性的遠征,徹底擊潰並吞併了占婆的核心。這個存在了一千多年的王國,就此走向滅亡,占族淪為越南境內的少數民族,他們的文明幾乎被抹去。</p>
+
+    <h3>奪取湄公河三角洲</h3>
+    <p>越南的南進並未止步。它繼續向南推進,在十七、十八世紀,從衰落的<strong>高棉(柬埔寨)</strong>手中,逐步奪取了肥沃的<strong>湄公河三角洲</strong>——這片今天越南最富庶的「南圻」(包括西貢/胡志明市一帶),在數百年前還是高棉的土地。透過軍事征服與大量的越人移民墾殖,越南把它的版圖,從紅河一路延伸到了最南端的金甌角,形成了今天這個狹長的國土。</p>
+    <div class="pull"><p>越南是北方巨人的受害者,卻也是南方鄰邦的征服者——它今天狹長的國土,每一吋南方的土地,都曾屬於別人。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 受害者與加害者的雙重身分</span>
+      <p>南進的歷史,為越南的故事增添了一層至關重要的<strong>誠實與複雜</strong>。我們很容易把越南浪漫化為一個純粹的「悲情抵抗者」——一個總是被巨人欺凌、奮力反抗的小國。但歷史的真相是:<em>越南同時是北方的受害者,與南方的加害者。</em>它一邊抵抗著中國的征服,一邊複製著同樣的征服邏輯,吞併了占婆、奪取了高棉的土地。</p>
+      <p>這個雙重身分,揭示了一個關於民族與帝國的普遍真相:<strong>幾乎沒有一個民族,只是單純的受害者;在歷史的長河裡,今天的被壓迫者,常常也是昨天或明天的壓迫者。</strong>越南的「龍之子民」神話、它抵抗中國的悲壯,與它抹去占婆、蠶食高棉的擴張,是同一個民族的一體兩面。看見這份複雜,我們才能真正理解越南——一個既英勇、又並不無辜的民族。這份誠實,也讓它接下來抵抗法美的悲壯,不至於淪為單薄的英雄神話。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚜ ✦ ⚜</div>
+  <p>抵抗了中國兩千年的越南,卻在十九世紀,<br>第一次敗給了一個來自海上的、完全陌生的力量。<br><span class="hl">法國的砲艦,為越南套上了一副新的枷鎖。</span></p>
+</div>
+
+<!-- ===== 第四章:法國殖民 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The French Yoke</span>
+    <h2 class="act-title">法國的到來:印度支那的枷鎖</h2>
+    <p class="act-sub">When a New Empire Came from the Sea</p>
+    <div class="ornament">⚜ ⚜ ⚜</div>
+  </div>
+  <div class="prose">
+    <p>兩千年來,越南的威脅總是來自<em>北方的陸地</em>(中國)。但在十九世紀,一個全新的、來自<em>海上</em>的威脅出現了——<strong>法國</strong>。當統治越南的<strong>阮朝</strong>日益腐朽衰弱時,擁有現代化船堅砲利的法國,開始覬覦這片土地。</p>
+
+    <h3>法屬印度支那的建立</h3>
+    <p>1858 年,法國以保護傳教士為藉口,砲擊峴港,揭開了侵略的序幕。1859 年,法軍攻陷南方的<strong>西貢</strong>。隨後數十年間,法國以蠶食的方式,一步步將整個越南納入掌控,並最終在十九世紀末,把越南(分為北圻、中圻、南圻三部分)連同<strong>柬埔寨與寮國</strong>,合組為「<strong>法屬印度支那</strong>」(French Indochina)。抵抗了中華帝國兩千年的越南,如今第一次,淪為了一個西方帝國的殖民地。</p>
+
+    <h3>殖民的雙面遺產</h3>
+    <p>法國的殖民,留下了深刻而矛盾的烙印。一方面,是殘酷的<strong>經濟剝削</strong>:法國在越南建立了大量的<em>橡膠園、礦場與種植園</em>,越南農民與工人在惡劣的條件下被壓榨,稅賦沉重,民不聊生。另一方面,法國也帶來了<em>西方的事物</em>:天主教傳播開來,法語成為菁英的語言,西式的教育、建築(西貢一度被稱為「東方巴黎」)與思想也隨之而來。更關鍵的是,法國以拉丁字母為基礎、取代了傳統漢字與喃字的<strong>「國語字」(Quốc ngữ)</strong>,意外地成為日後越南普及識字與民族動員的有力工具。</p>
+
+    <h3>覺醒的火種</h3>
+    <p>但殖民最深遠的後果,是它<strong>點燃了越南本就熾烈的抵抗傳統</strong>。那個曾經三度擊退蒙古、把抵抗刻進基因的民族,絕不會甘於被法國奴役。從傳統的儒家士大夫,到留學歸來、接觸了西方民族主義與社會主義思想的新一代知識分子,反抗的火種在殖民的壓迫下迅速蔓延。越南在等待一個人,一個能把這千年的抵抗傳統、與二十世紀的革命浪潮結合起來的領袖——而他,即將登場。</p>
+    <div class="pull"><p>法國以為它征服了越南,卻不知道,它只是為那個抵抗了中國兩千年的民族,提供了一個新的、更值得反抗的對象。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 壓迫如何餵養它的掘墓人</span>
+      <p>法國的殖民,呈現了殖民主義一個共通的弔詭(在本系列中反覆出現):<strong>殖民者帶來的剝削與不公,恰恰餵養了最終將推翻它的反抗力量;而殖民者帶來的某些工具(教育、文字、思想),又往往被反抗者反過來用作武器。</strong></p>
+      <p>但越南的獨特之處在於,它擁有一個其他殖民地所沒有的、極其深厚的<em>抵抗傳統</em>。對菲律賓、印尼而言,反殖民是一場全新的覺醒;但對越南而言,反抗法國,只不過是它兩千年抵抗史的<strong>最新一章</strong>——徵氏姊妹、白藤江、擊退蒙古的記憶,早已為它準備好了反抗的精神武庫。這正是為什麼,越南的獨立運動,將比區域內任何國家都更為堅韌、更為徹底、也更願意付出血的代價。法國面對的,不是一群剛覺醒的殖民地子民,而是一個把「不屈服」刻進骨髓、抵抗了兩千年的古老民族。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">★ ✦ ★</div>
+  <p>1945 年九月,在河內的巴亭廣場,一個瘦削的男子,<br>向五十萬歡呼的群眾,讀出了越南的獨立宣言。<br><span class="hl">而他引用的第一句話,竟來自美國的獨立宣言。</span></p>
+</div>
+
+<!-- ===== 第五章:胡志明 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Spark</span>
+    <h2 class="act-title">胡志明:民族與革命的合流</h2>
+    <p class="act-sub">Ho Chi Minh and the Fusion of Nation and Revolution</p>
+    <div class="ornament">★ ★ ★</div>
+  </div>
+  <div class="prose">
+    <p>越南所等待的那個人,是<strong>胡志明(Hồ Chí Minh)</strong>。他的一生,本身就是越南二十世紀命運的縮影。年輕時,他遠赴海外(法國、蘇聯、中國)闖蕩數十年,當過廚工、做過記者,在巴黎接觸了社會主義,並成為一名堅定的<strong>共產主義者</strong>。但胡志明最高明之處在於,他把<em>共產主義</em>與<em>越南的民族主義</em>,天衣無縫地結合在了一起。</p>
+
+    <h3>民族解放與共產革命的合流</h3>
+    <p>1941 年,胡志明潛回越南,成立了「<strong>越盟</strong>」(Việt Minh)——一個以爭取民族獨立為號召、由共產黨領導的統一戰線。他的訊息極具感召力:對廣大的越南人民而言,跟隨越盟,首先是為了<em>把法國人趕出去、實現民族獨立</em>(這呼應了千年的抵抗傳統),其次才是社會主義的理想。<strong>民族主義,是越南共產革命最強大的引擎。</strong>這正是胡志明與越南共產黨能夠贏得廣泛支持的關鍵——他們成功地讓「愛國」與「革命」變成了同一件事。</p>
+
+    <h3>1945:八月革命與獨立宣言</h3>
+    <p>機會在二戰末期到來。日本曾在戰時佔領越南、架空法國;當 1945 年日本投降、出現權力真空時,越盟抓住時機,發動了「<strong>八月革命</strong>」,迅速奪取了河內等地的控制權。1945 年 9 月 2 日,胡志明在河內的巴亭廣場,面對五十萬群眾,宣讀了《<strong>越南獨立宣言</strong>》,宣告「越南民主共和國」的誕生。意味深長的是,他引用的開篇,竟是<em>美國《獨立宣言》</em>中「人人生而平等」的名句——這既是向世界(尤其美國)爭取認同的政治智慧,也透露了這場革命「民族解放」的本質。然而,法國並不打算放棄它的殖民地。一場慘烈的戰爭,即將開始。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當愛國與革命合而為一</span>
+      <p>胡志明的天才,在於他解開了二十世紀亞洲革命的<strong>核心密碼:把外來的「共產主義意識形態」,與本土的「民族主義情感」焊接在一起。</strong>單純的共產主義,對廣大的越南農民而言或許抽象;但「把法國人趕出去、讓越南獨立」,卻是每一個越南人都能熱血沸騰的召喚。胡志明讓越南人相信:<em>跟隨共產黨,就是延續徵氏姊妹、延續白藤江的千年抵抗。</em></p>
+      <p>這正是越南共產革命能夠成功、並最終擊敗法美兩大強權的最深根源。它的力量,不只來自馬列主義的組織與紀律,更來自那股被注入其中的、深不見底的<strong>民族主義能量</strong>。在越南,共產主義之所以勝利,很大程度上是因為它成功地把自己,變成了越南兩千年抵抗傳統的當代繼承者。理解了這一點,就理解了為什麼越南人能在接下來的數十年裡,付出如此驚人的犧牲,也絕不屈服。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>1954 年,在一個叫奠邊府的偏遠山谷裡,<br>一支亞洲的農民軍隊,做了一件全世界都認為不可能的事——<br><span class="hl">他們在正面戰場上,徹底擊敗了一支西方殖民強權的軍隊。</span></p>
+</div>
+
+<!-- ===== 第六章:奠邊府 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · Dien Bien Phu</span>
+    <h2 class="act-title">奠邊府:擊敗一個西方帝國</h2>
+    <p class="act-sub">When an Asian Army Defeated a Western Empire</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>1945 年獨立宣言之後,法國拒絕承認越南的獨立,執意要重奪殖民地。於是,<strong>第一次印度支那戰爭</strong>(1946–1954)爆發了。在名將<strong>武元甲(Võ Nguyên Giáp)</strong>的指揮下,越盟以游擊戰術與法軍周旋,逐漸控制了廣大的鄉村,把法軍困在城市裡。而這場戰爭的高潮與終局,發生在 1954 年一個叫<strong>奠邊府(Điện Biên Phủ)</strong>的偏遠山谷。</p>
+
+    <h3>不可能的勝利</h3>
+    <p>法軍指揮官犯了一個致命的錯誤:他們在這個四面環山的谷地,建立了一個堅固的據點,自信地認為越盟不可能把重型火砲運到周圍的高山上。但他們嚴重低估了越南人的意志。在武元甲的指揮下,數以萬計的越南民工,用人力與單車,把一門門大砲<em>拆解後扛上陡峭的叢林山頂,再重新組裝</em>。當法軍醒來時,發現自己已被居高臨下的越盟砲火團團包圍。經過數十天的慘烈圍攻,1954 年 5 月 7 日,<strong>法軍據點陷落,守軍投降。</strong></p>
+
+    <h3>震撼世界的一戰</h3>
+    <p>奠邊府的意義,遠遠超出了一場戰役。這是<strong>亞洲的民族,第一次在正規的陣地戰中,徹底擊敗一支西方殖民強權的軍隊</strong>。它震撼了整個殖民世界,鼓舞了亞非各地的民族解放運動,證明了「西方不可戰勝」的神話是可以被打破的。戰敗的法國,只能坐上談判桌。隨後的<strong>《日內瓦協議》</strong>結束了戰爭,法國撤出——但協議也以北緯十七度線,將越南<em>暫時分割</em>為北方的共產越南(胡志明)與南方的親西方政權。這條「暫時」的分界線,卻成了下一場、規模更大的戰爭的引信。</p>
+    <div class="pull"><p>奠邊府證明了一件事:當一個民族願意付出任何代價時,它可以把大砲扛上沒有路的高山,可以擊敗任何看似不可戰勝的帝國。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 意志可以搬動大砲</span>
+      <p>奠邊府是「<strong>意志戰勝技術</strong>」的經典範例。在帳面上,裝備精良的法軍佔盡優勢;但越南人用一種法國人完全無法想像的方式——純粹的人力、意志與犧牲——抵銷了這份優勢。把大砲扛上不可能的高山,這個畫面本身,就是越南民族精神最強烈的象徵:<em>沒有什麼是不可能的,只要你願意付出足夠的代價。</em></p>
+      <p>這場勝利,也為越南即將面對的更大考驗,埋下了伏筆。奠邊府讓越南人(以及全世界)相信,一個意志堅定的弱小民族,真的可以擊敗一個強大的西方帝國。這份信念,將支撐他們,去面對一個比法國強大千百倍的對手——美國。如果說奠邊府是越南抵抗精神的「畢業考」,那麼接下來的越戰,將是它面對全人類最強大軍事機器的「終極試煉」。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✸ ✦ ✸</div>
+  <p>一條「暫時」的分界線,把越南撕成了南北兩半。<br>而為了重新縫合它,越南將迎來人類史上最慘烈的戰爭之一,<br><span class="hl">並在其中,拖垮這個星球上最強大的超級強權。</span></p>
+</div>
+
+<!-- ===== 第七章:越戰 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · The American War</span>
+    <h2 class="act-title">越戰:與超級強權的二十年</h2>
+    <p class="act-sub">How a Small Nation Outlasted the World's Mightiest Power</p>
+    <div class="ornament">✸ ✸ ✸</div>
+  </div>
+  <div class="prose">
+    <p>這是越南故事中最廣為人知、也最慘烈的一章。《日內瓦協議》原訂在 1956 年舉行全國大選以統一越南,但南方在美國支持下拒絕舉行——因為所有人都心知肚明,若舉行選舉,胡志明將贏得壓倒性的勝利。於是,「暫時」的分裂變成了長期的對峙:<strong>北越</strong>(共產,河內)與<strong>南越</strong>(親美,西貢)。為了統一,一場新的戰爭開始了——越南人稱之為「<strong>抗美戰爭</strong>」。</p>
+
+    <h3>超級強權的介入</h3>
+    <p>在冷戰「骨牌理論」的恐懼下,美國逐步深陷其中。從支援南越,到 1960 年代大規模派遣地面部隊,美國投入了最高峰時超過五十萬的軍隊,以及人類史上空前的火力——美軍在越南投下的炸彈,超過了整個二戰。然而,面對北越正規軍與南方「<strong>越共</strong>」(越南南方民族解放陣線)游擊隊的頑強抵抗,這台世界最強的戰爭機器,卻陷入了無盡的泥淖。</p>
+
+    <h3>1968 春節攻勢與意志的較量</h3>
+    <p>戰爭的轉捩點,是 1968 年的「<strong>春節攻勢</strong>」。北越與越共在農曆新年發動全面突襲,雖然在軍事上付出慘重代價、未能守住佔領的城市,卻在<em>心理上</em>取得了決定性的勝利——它讓美國民眾透過電視,親眼看見這場戰爭遠未取勝,徹底動搖了美國國內的反戰情緒。這場戰爭的本質,從來不是火力的較量,而是<strong>意志的較量</strong>:美國要的是「不輸」,而越南要的是「不惜一切代價也要贏得統一」。在這種較量中,願意付出無限代價的一方,終將拖垮那個有底線的一方。</p>
+
+    <h3>1975:西貢陷落與統一</h3>
+    <p>在付出了數百萬人傷亡的驚人代價後,美國終於在 1973 年簽署《巴黎和平協議》、撤出戰鬥部隊。失去美國支撐的南越政權迅速崩潰。1975 年 4 月 30 日,北越的坦克衝破了西貢總統府的大門——<strong>西貢陷落,越南統一了。</strong>一個亞洲的小國,以難以想像的犧牲,拖垮並擊退了這個星球上最強大的超級強權。這是二十世紀最震撼人心的事件之一,也是越南兩千年抵抗史最悲壯、最輝煌的頂點。</p>
+    <div class="pull"><p>美國擁有世界上最強的軍隊,越南擁有的只是「絕不放棄統一」的意志——而在一場意志的戰爭裡,後者贏了。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 意志對火力的勝利</span>
+      <p>越戰是人類史上最鮮明的「<strong>非對稱戰爭</strong>」範例:它證明了,當一個民族願意付出無限的代價、為了一個它視為神聖的目標(統一與獨立)而戰時,再強大的軍事與技術優勢,也可能無法戰勝這份意志。美國輸掉越戰,不是因為它的軍隊不夠強,而是因為它的<em>戰爭目標(遏制共產主義)</em>,遠不如越南的目標(民族統一)那樣值得人民付出一切。</p>
+      <p>這場勝利,是越南兩千年抵抗精神的終極證明,也是它民族自豪感最深的源泉。但歷史的弔詭在於:<strong>戰場上的勝利,並不等於和平後的成功。</strong>當槍砲聲停歇、當統一終於實現時,越南將驚訝地發現,「贏得戰爭」與「治理一個國家、讓人民富足」,是兩件截然不同的事。那個靠抵抗與犧牲定義自我的民族,即將面對一個它完全不擅長的新考驗——和平。而和平的最初十年,將是黑暗的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>勝利的歡呼還沒散去,黑暗就降臨了。<br>再教育營、飢餓、與昔日盟友中國的反目,<br><span class="hl">以及數十萬人,寧可冒死投奔怒海,也要逃離這個剛剛統一的國家。</span></p>
+</div>
+
+<!-- ===== 第八章:統一的代價 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Price of Victory</span>
+    <h2 class="act-title">統一的代價:船民、改造營與反目</h2>
+    <p class="act-sub">Reeducation, Boat People, and the War with a Comrade</p>
+    <div class="ornament">☩ ☩ ☩</div>
+  </div>
+  <div class="prose">
+    <p>1975 年的統一,是越南用鮮血換來的偉大勝利。但勝利之後的最初十年,卻是越南近代史上最黑暗的時期之一。那個擅長「抵抗」的民族,在「治理」與「和平」面前,跌了一個慘痛的跟頭。</p>
+
+    <h3>再教育營與南方的傷痕</h3>
+    <p>統一後,勝利的北方對戰敗的南方,展開了嚴厲的清算。數十萬與南越政權、或與美國有關聯的人——軍官、官員、知識分子——被送入「<strong>再教育營</strong>」(reeducation camp)。這些名為「再教育」的營地,實則是嚴酷的勞改與思想改造之所,許多人在其中飽受折磨、勞役乃至死亡,被關押數年乃至十數年。同時,大批城市居民被強制遷往荒蕪的「<em>新經濟區</em>」墾荒。南方,尤其是西貢(被改名為胡志明市),承受了統一最沉重的代價。</p>
+
+    <h3>排華與船民潮</h3>
+    <p>而更大的悲劇,降臨在<strong>越南華人(華僑)</strong>身上。統一後,越南政府推行社會主義改造,沒收私人工商業——而華人,正是南方商業的主力。隨著 1978–79 年越南與中國關係急劇惡化,越南境內掀起了<strong>排華浪潮</strong>:大批華人的財產被沒收,被迫離開。他們與無數對共產政權絕望的越南人一起,匯成了震驚世界的「<strong>船民潮</strong>」(boat people)——數十萬人擠上簡陋破舊的小船,冒死投奔怒海,只為逃離家園。他們在海上遭遇風暴、海盜、飢餓與死亡,據聯合國估計,有<em>二十萬到二十五萬人葬身大海</em>。最終,超過百萬難民流散到美國、加拿大、澳洲與歐洲,在異鄉重建人生。這是越南統一最辛酸、最沉重的傷疤。</p>
+
+    <h3>與「同志」中國的反目</h3>
+    <p>雪上加霜的是,越南與它昔日最大的盟友——共產中國——徹底反目。1978 年,越南入侵柬埔寨、推翻了中國支持的赤柬政權;作為「懲罰」,1979 年初,<strong>中國發動了「中越戰爭」</strong>,大軍越過邊境攻入越南北部。雖然這場戰爭只持續了約一個月,雙方都宣稱勝利,卻造成了慘重的傷亡,也讓兩國邊境的緊張持續了整個 1980 年代。那條糾纏了兩千年的「又學又抗」的龍,再一次,成了越南的敵人。</p>
+    <div class="pull"><p>越南贏得了戰爭,卻幾乎輸掉了和平:再教育營的鐵絲網、怒海上的船民、與中國邊境的砲火——勝利的代價,是一個千瘡百孔、赤貧而孤立的國家。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 善於抵抗,未必善於治理</span>
+      <p>統一後的黑暗十年,揭示了一個深刻而普遍的歷史教訓:<strong>讓一個民族贏得戰爭的特質(意志、紀律、對敵人的無情、計劃式的動員),恰恰可能是讓它治理不好和平的特質。</strong>越南共產黨擅長打仗、擅長動員、擅長對抗;但當戰爭結束,需要的卻是包容、是經濟的活力、是與昔日敵人的和解——而這些,正是這個在戰火中淬煉出來的政權所最不擅長的。</p>
+      <p>僵化的計劃經濟讓越南陷入赤貧,嚴酷的清算製造了船民的悲劇,好戰的姿態(入侵柬埔寨)招來了與中國的戰爭與國際的孤立。<em>越南發現,把敵人趕走之後,真正的挑戰才剛剛開始。</em>這個靠「抵抗」定義自我的民族,終於走到了一個必須學會「放下抵抗」的歷史關口——它必須學會與市場和解、與世界和解、甚至與昔日的敵人和解。而這個痛苦的轉身,將在 1986 年,以「革新開放」之名展開。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">◷ ✦ ◷</div>
+  <p>瀕臨崩潰的越南,終於做出了一個務實的轉身。<br>它放下了僵化的教條,小心翼翼地擁抱了它曾誓死反對的東西——市場。<br><span class="hl">而它的老師,又一次,是那條北方的巨龍。</span></p>
+</div>
+
+<!-- ===== 第九章:革新開放 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · Đổi Mới</span>
+    <h2 class="act-title">革新開放:擁抱市場的務實轉身</h2>
+    <p class="act-sub">How Communist Vietnam Embraced Capitalism</p>
+    <div class="ornament">◆ ◆ ◆</div>
+  </div>
+  <div class="prose">
+    <p>到了 1980 年代中期,計劃經濟的失敗已經無可掩飾:通貨膨脹失控,糧食短缺,人民赤貧,國家瀕臨崩潰。面對絕境,越南共產黨展現了它最寶貴的特質之一——<strong>務實</strong>。1986 年,越共在第六次全國代表大會上,正式啟動了一場意義深遠的改革,名為「<strong>革新開放</strong>」(Đổi Mới,意為「革新」)。</p>
+
+    <h3>從計劃經濟到「社會主義市場經濟」</h3>
+    <p>革新開放的核心,是一場大膽的經濟轉向:<em>解散農業集體化,把土地的使用權還給農民;放開價格管制;鼓勵私營企業;開放外國投資;融入全球貿易。</em>越南實質上擁抱了<strong>市場經濟</strong>,儘管它在名義上仍堅持這是「社會主義導向的市場經濟」、政治上仍維持共產黨的一黨領導。這是一個經典的越南式安排:<em>經濟上放手擁抱資本主義,政治上牢牢守住共產黨的權力。</em></p>
+
+    <h3>又一次,向中國學習</h3>
+    <p>而越南改革的藍本,意味深長地,正是它的世仇兼老師——<strong>中國</strong>。越南的革新開放,在邏輯與路徑上,與鄧小平的改革開放高度相似:<em>都是在共產黨一黨專政不變的前提下,引入市場機制以發展經濟。</em>這完美地呼應了越南「小中華」時代就有的古老智慧(第二章):<strong>把那條北方的巨龍,既當成威脅,又當成最好的老師。</strong>越南再一次證明,它最擅長的,就是學習它最忌憚的對手。</p>
+
+    <h3>奇蹟的開端</h3>
+    <p>結果是驚人的。革新開放釋放了越南人被壓抑已久的勤奮與商業能量。從 1990 年代起,越南經濟開始高速成長(一度達年均約 8%),從一個赤貧、飢餓的國家,逐步轉變為一個充滿活力的新興經濟體。它與昔日的敵人——美國——也在 1995 年實現了關係正常化。那個用鮮血贏得戰爭的民族,終於開始學習用務實與開放,去贏得繁榮。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 務實,是另一種形式的不屈</span>
+      <p>革新開放,展現了越南民族性格中,與「不屈的抵抗」同樣重要、卻常被忽略的另一面:<strong>極致的務實。</strong>這個願意為了統一付出數百萬生命的民族,在面對經濟絕境時,卻能毫不猶豫地放下意識形態的教條,擁抱它曾經誓死反對的市場與資本主義。它甚至能放下與美國的血海深仇、放下與中國的世代恩怨,只為了一個目標:<em>讓國家富強起來。</em></p>
+      <p>這份「<strong>能屈能伸</strong>」,或許才是越南最深的生存智慧——它和「彎曲的竹子」(泰國)有異曲同工之妙,但越南的竹子,是先用兩千年證明了自己「寧折不彎」的硬度,再展現出「能屈能伸」的韌性。<em>抵抗時寸步不讓,務實時毫不教條</em>——這份看似矛盾的結合,正是越南能在二十一世紀崛起的關鍵。它告訴我們:真正的強大,不只是懂得抵抗,更是懂得在何時放下抵抗。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☯ ✦ ☯</div>
+  <p>是什麼,讓越南人在被中國統治千年後,依然是越南人?<br>答案藏在祠堂的香火、儒家的倫理,與一種獨特的信仰混合之中。<br><span class="hl">越南的靈魂,既是東亞的,又是東南亞的。</span></p>
+</div>
+
+<!-- ===== 第十章:信仰與認同 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Confucian Soul</span>
+    <h2 class="act-title">儒家、信仰,與越南認同的雙重性</h2>
+    <p class="act-sub">Both East Asian and Southeast Asian — the Vietnamese Soul</p>
+    <div class="ornament">☯ ☯ ☯</div>
+  </div>
+  <div class="prose">
+    <p>要理解越南的靈魂,得理解一件它與所有東南亞鄰居都不同的事:<strong>越南在文化上,屬於「東亞儒家文明圈」,而非「東南亞印度—伊斯蘭文明圈」。</strong>這份獨特的雙重性,是北屬千年留下的最深遺產。</p>
+
+    <h3>儒家:深入骨髓的倫理</h3>
+    <p>北屬千年與「小中華」時代,讓<strong>儒家思想</strong>深深植入了越南社會的骨髓。它塑造了越南人對<em>家庭、孝道、教育、科舉、官僚、社會秩序</em>的根本看法。越南人重視讀書與功名、強調家族與長幼有序、敬重學者——這些都是典型的儒家特質,使越南在文化氣質上,與中國、韓國、日本(同屬「漢字文化圈」)更為接近,而與信奉佛教的泰國、信奉伊斯蘭的印尼馬來、信奉天主教的菲律賓,形成鮮明的區別。</p>
+
+    <h3>獨特的信仰融合</h3>
+    <p>但越南的信仰,又絕非中國的翻版,而是一種豐富的<strong>融合</strong>。在民間,<em>大乘佛教、儒家、道教</em>「三教合一」,再加上深厚的<strong>祖先崇拜</strong>(幾乎每個越南家庭都設有祖先牌位與香案)——這構成了越南人精神世界的主體。在此之上,法國殖民留下了相當規模的<strong>天主教</strong>社群;而在南方,越南更孕育出獨一無二的本土宗教<strong>高台教(Cao Đài)</strong>——它融合了佛、道、儒、基督教乃至西方名人(雨果也在其神壇之列),是世界宗教史上的奇觀。</p>
+
+    <h3>「東亞」與「東南亞」之間</h3>
+    <p>於是,越南成了一個迷人的<strong>「之間」的國家</strong>:它的文化內核是東亞儒家的,它的地理與某些生活方式卻是東南亞的。它用筷子、受儒家影響、有著與中韓日相通的氣質,卻又種植水稻、信奉大乘佛教、擁有熱帶的風土。這份「<em>既是東亞、又是東南亞</em>」的雙重身分,正是越南認同最獨特的標誌。而它之所以能在被中國統治千年後依然故我,正是因為它把中華文明「越南化」了——它吸收了儒家的形式,卻填入了越南自己的靈魂。</p>
+    <div class="pull"><p>越南人用筷子、拜祖先、讀儒書,氣質彷彿東亞;卻又種水稻、住熱帶、信南傳之外的大乘佛教——它站在兩個世界的交界上,兩者都是,又兩者都不全是。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 吸收,而不被吞噬</span>
+      <p>越南的文化認同,完美地詮釋了它整個歷史的核心智慧:<strong>如何深度吸收一個強大文明,卻不被它同化、不失去自我。</strong>越南把中華的儒家、文字、制度學了個十成十,卻始終保有自己的語言、自己的神話、自己的祖先、自己「我們是越南人」的認同。它把外來的東西「越南化」,化為己用,而非被其取代。</p>
+      <p>這正是越南給整個系列帶來的最獨特的啟示。本系列許多國家的認同困惑,源於「外來文明取代了本土自我」(如菲律賓);而越南示範了另一種可能——<em>一個民族可以大方地、徹底地吸收一個強鄰的文明,同時又頑強地守住自己的核心認同。</em>吸收,而不被吞噬;學習,而不臣服。這份本事,越南練習了兩千年。而它將在當代,以一種最尖銳的形式,再次面對那個既是文明母體、又是政治威脅的北方巨龍。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">龍 ✦ 龍</div>
+  <p>兩千年了,越南與北方那條巨龍的關係,從未真正改變。<br>它學習它的制度、複製它的改革、同為共產黨執政;<br><span class="hl">卻又在南海的波濤上,與它針鋒相對。又學,又抗,糾纏至今。</span></p>
+</div>
+
+<!-- ===== 第十一章:既抗中又學中 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · Dancing with the Dragon</span>
+    <h2 class="act-title">既抗中又學中:與龍的永恆糾纏</h2>
+    <p class="act-sub">The Two-Thousand-Year Entanglement, Today</p>
+    <div class="ornament">龍 ✦ 龍</div>
+  </div>
+  <div class="prose">
+    <p>如果要用一句話概括越南兩千年的歷史,那就是:<strong>它與北方那條巨龍——中國——的永恆糾纏。</strong>這份「又學又抗」的關係,從未隨著時代而消失,反而在當代,以最複雜、最微妙的形式,延續至今。</p>
+
+    <h3>學:從制度到改革的模仿</h3>
+    <p>在「學」的這一面,越南與中國的相似度驚人。它們同為<strong>共產黨一黨專政</strong>的社會主義國家;越南的「革新開放」幾乎是中國「改革開放」的翻版(第九章);兩國的政治體制、治理模式、乃至近年的反腐運動,都高度相似。在意識形態與發展路徑上,越南始終把中國當作最重要的參照與老師。這延續了那個千年的傳統:<em>把巨龍當成最好的學習對象。</em></p>
+
+    <h3>抗:南海上的針鋒相對</h3>
+    <p>但在「抗」的這一面,兩國的衝突同樣尖銳。最核心的戰場,是<strong>南海(越南稱「東海」)的主權爭端</strong>。越南與中國在<em>西沙群島(中國已實際控制)與南沙群島</em>的主權上激烈對立,海上的對峙、漁船與鑽油平台的衝突時有所聞。對越南人而言,抗拒中國在南海的擴張,是延續千年抵抗傳統的當代戰場——民間的反中情緒一旦被觸動,往往非常激烈。歷史的記憶(北屬千年、1979 中越戰爭)讓越南對中國始終保持著深刻的<em>戒心</em>。</p>
+
+    <h3>「竹子外交」:在巨人之間求生</h3>
+    <p>面對這份「又學又抗」的複雜關係,以及中美兩強的博弈,當代越南發展出一套高明的<strong>「竹子外交」</strong>(bamboo diplomacy)——像竹子一樣,根基穩固,卻能靈活地隨風彎曲。越南一方面與中國維持「同志加兄弟」的密切關係、學習其模式;另一方面又積極地與美國、日本、印度等國深化關係,以平衡中國的壓力(它甚至與昔日的敵人美國,提升為了全面戰略夥伴)。<em>不選邊、不結盟、八面玲瓏,只為在巨人之間,為越南爭取最大的生存與發展空間。</em></p>
+    <div class="pull"><p>越南與中國的關係,是一場跳了兩千年的雙人舞:它緊緊跟著對方的舞步學習,卻又時刻提防著對方的擁抱會不會變成束縛。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 永恆的鄰居,永恆的功課</span>
+      <p>越南與中國的關係,是這個民族<strong>永恆的功課</strong>。地理是無法改變的——越南永遠在中國的身邊,永遠要面對這個體量龐大百倍的鄰居。兩千年來,越南的全部智慧,都凝聚在如何處理這份關係上:<em>既要吸收它的文明養分以自強,又要抵抗它的政治支配以自存;既不能徹底決裂(那是災難),又不能完全臣服(那是滅亡)。</em></p>
+      <p>這份「又學又抗、又近又遠」的平衡藝術,正是越南留給世界最深刻的地緣政治智慧。在一個中國重新崛起、中美激烈博弈的時代,越南的處境格外具有啟示性:<strong>對一個身處大國身邊的中小國家而言,生存之道往往不是非此即彼的選邊站,而是一種如竹子般柔韌的平衡——根要扎得深,身要彎得下,而心,要始終清楚自己是誰。</strong>越南用兩千年練就的這門功課,在今天,依然是它最重要的生存技藝。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">▲ ✦ ▲</div>
+  <p>今天的越南,是亞洲成長最快的經濟體之一,是全球工廠的新寵。<br>但在這片繁榮之下,舊的傷痕、新的矛盾,仍在悄然作用。<br><span class="hl">這個靠抵抗定義自我的民族,正走在一條前所未有的道路上。</span></p>
+</div>
+
+<!-- ===== 第十二章:當代越南 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Rising Dragon</span>
+    <h2 class="act-title">當代越南:奇蹟、矛盾與未竟之路</h2>
+    <p class="act-sub">Boom, Contradiction, and the Road Ahead</p>
+    <div class="ornament">▲ ▲ ▲</div>
+  </div>
+  <div class="prose">
+    <p>走到今天,越南呈現出一幅令人驚嘆、卻也充滿矛盾的圖景。那個曾經赤貧、被戰火撕裂的國家,如今已成為<strong>亞洲成長最快的經濟體之一</strong>,也是二十一世紀最受矚目的新興國家之一。</p>
+
+    <h3>全球工廠的新寵</h3>
+    <p>越南的經濟奇蹟令人矚目。近年其 GDP 成長率高居區域前列(2024 年達 7% 以上,2025 年更衝上約 8%)。憑藉著<em>年輕勤奮的人口、低廉的成本、穩定的政局,以及在中美貿易戰中作為「中國 +1」替代生產基地的戰略區位</em>,越南成為全球供應鏈的新寵——三星、蘋果供應鏈等跨國巨頭紛紛將工廠遷入,外資(FDI)持續湧入(2025 年外資佔出口高達約七成)。從紡織、製鞋到電子製造,越南正沿著當年東亞奇蹟的路徑,一步步向上攀爬。新任總書記<strong>蘇林(To Lam)</strong>更喊出邁向「<em>民族崛起的新時代</em>」、力爭 2045 年成為高收入國的雄心。</p>
+
+    <h3>一黨專政下的繁榮與「燒爐」反腐</h3>
+    <p>但這份繁榮,是在<strong>共產黨一黨專政</strong>的框架下實現的。越南維持著經濟開放、政治封閉的「越南模式」(與中國高度相似):市場活力蓬勃,但異議受到壓制,言論與政治自由受限。近年,越共在已故總書記阮富仲的主導下,發動了大規模的反腐運動——人稱「<strong>燒爐</strong>」(Blazing Furnace)行動,連兩任國家主席都因此下台。這場反腐,既是為了回應民間對貪腐的不滿、鞏固統治正當性,也夾雜著黨內的權力鬥爭——它是一把「雙面刃」,在整飭吏治的同時,也讓官僚體系趨於保守、決策放緩。</p>
+
+    <h3>南與北:未曾完全彌合的傷痕</h3>
+    <p>而在繁榮的表象之下,一道古老的裂痕依然隱隱作用——<strong>南方與北方的差異</strong>。儘管統一已半個世紀,西貢(胡志明市)所代表的<em>南方</em>,與河內所代表的<em>北方</em>,在性格上至今仍有微妙的不同:南方更商業、更外向、更具市場本能(它本就是越南的經濟引擎),也承載著戰敗、再教育營與船民的歷史記憶;北方則是政治權力的中心,更傳統、更貼近黨國體制。這道源於越戰南北分裂、又被統一後清算所加深的隱形界線,雖已淡化,卻從未完全消失——它是越南內部一個低調、卻真實的張力。</p>
+    <div class="pull"><p>越南正以驚人的速度崛起,但它要回答的問題,和它的鄰居們驚人地相似:經濟的奇蹟,能否填平歷史的傷痕、突破政治的天花板?</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 抵抗之後,是和解的功課</span>
+      <p>當代越南的處境,為它兩千年的故事,寫下了一個意味深長的當代註腳。這個靠「<strong>抵抗</strong>」定義了自我兩千年的民族——抵抗中國、抵抗法國、抵抗美國——如今,它最重要的功課,卻是<strong>「和解」</strong>:與市場和解(革新開放)、與昔日的敵人美國和解(全面戰略夥伴)、甚至與北方那條巨龍中國,維持著又學又抗的微妙共存。它甚至還需要與自己內部的傷痕(南北、船民的記憶)和解。</p>
+      <p>這正是越南故事最深刻的弧線:<em>一個在抵抗中誕生、靠流血贏得一切的民族,最終發現,它最艱難、也最重要的一課,是學會放下抵抗,去擁抱和解與務實,以贏得未來。</em>戰爭證明了越南的「不屈」,而和平,則正在考驗越南的「智慧」。它能否在守住獨立與認同的同時,完成經濟的升級、彌合內部的裂痕、並在中美的夾縫中如竹子般屹立——這道未竟的考題,將定義這個崛起中的東方之龍,在二十一世紀的最終樣貌。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">🐉 ⚓ 🐉</div>
+  <p>兩千年,一條河,一條龍,無數場戰爭,無盡的不屈。<br>當我們走到故事的盡頭,終於可以回答那個貫穿始終的問題——<br><span class="hl">為什麼今天的越南是這個模樣,而它能否完成從「抵抗」到「和解」的最後轉身?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的越南人</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">Who the Vietnamese Became, Through Two Thousand Years of Defiance</p>
+      <div class="ornament" style="color:var(--gold-bright)">🐉 ⚓ 🐉</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的越南之所以是這個模樣——深受中華文明形塑卻頑強抗中、被戰火淬煉卻務實崛起、共產黨執政卻擁抱市場——是幾層力量層層堆疊的結果。每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:紅河文明與龍的神話</h3>
+      <p>一切始於<strong>紅河三角洲</strong>的稻米文明,與「龍與仙的後代」那個高貴的建國神話。它給了越南人一份「我們有自己的源頭、不是任何人附庸」的自我想像;而它狹長、北接中國的地理,則注定了它必須世世代代面對北方的巨人。</p>
+
+      <h3>第二層:千年北屬淬煉的抵抗認同</h3>
+      <p>接著是<strong>北屬千年</strong>。被中華帝國直接統治近一千年,越南深深吸收了中華文明(儒家、文字、制度),卻從未被同化。從徵氏姊妹到白藤江,漫長的壓迫反而把「抵抗」鍛打成這個民族定義自我的方式——<em>我抵抗,故我存在。</em></p>
+
+      <h3>第三層:南進塑造的國土與民族</h3>
+      <p>然後是<strong>南進</strong>。越南一邊抵抗北方,一邊向南征服——它消滅了占婆、奪取了高棉的湄公河三角洲,形成今天狹長的國土。這提醒我們,越南既是受害者,也是加害者;它的故事,英勇卻並不無辜。</p>
+
+      <h3>第四層:殖民、革命,與抵抗定義的靈魂</h3>
+      <p>再來是<strong>法國殖民與共產革命的合流</strong>。胡志明把民族主義與共產主義焊接在一起,讓越南那千年的抵抗傳統,在二十世紀爆發出驚人的能量:奠邊府擊敗法國,越戰拖垮美國。越南以數百萬人的犧牲,寫下了小國擊退兩大西方強權的傳奇——抵抗,在此達到了最悲壯、最輝煌的頂點。</p>
+
+      <h3>第五層:從抵抗到和解的務實轉身</h3>
+      <p>最後是<strong>和平的考驗</strong>。統一後的黑暗十年(再教育營、船民、與中國反目)證明了,善於抵抗未必善於治理。於是越南展現了它的另一面——極致的務實:1986 年革新開放,放下教條擁抱市場(向中國學習);與美國和解;以「竹子外交」在中美間求生;如今成為亞洲成長最快的經濟體之一。那個靠抵抗定義自我的民族,終於開始學習與市場、與世界、與昔日的敵人和解。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 在抵抗中誕生,在和解中前行</span>
+        <p>所以,今天的越南人是誰?他是<strong>龍與仙的後代,被中華文明餵養卻從未臣服;他用兩千年的抵抗——抵抗中國、法國、美國——把「不屈」鍛造成了民族的靈魂;但他也學會了,在守住獨立與認同的前提下,務實地放下抵抗,去擁抱市場、擁抱世界、甚至擁抱昔日的敵人</strong>。</p>
+        <p>越南最深刻的真相是:<em>它是整個系列裡,認同最清晰、意志最堅韌的民族——因為它的認同,不是在和平中孕育,而是在兩千年的抵抗中,一次次被巨人的壓力鍛打成形的。</em>當泰國靠外交「永不淪陷」、汶萊靠石油買來穩定時,越南靠的是流血「永不屈服」。但它的故事最動人之處,不在於它如何善於抵抗,而在於它如何在贏得了所有的戰爭之後,鼓起勇氣,去學習一件更難的事——<strong>和解</strong>。與市場和解、與美國和解、與那條糾纏了兩千年的巨龍維持著又學又抗的共存、甚至與自己內部南北的傷痕和解。<em>抵抗,證明了越南的不屈;而和解,將決定越南的未來。</em>這個東方之龍,正用它兩千年練就的智慧——抵抗時寸步不讓,務實時毫不教條——書寫著它崛起的下一章。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">兩千年來,它靠抵抗定義自己;而此刻,它最艱難的一課,是學會在不失去自我的前提下,放下抵抗,擁抱和解。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">兩千年的終極啟示</span>
+      <p>一個民族的靈魂,可以在抵抗中被鍛造。越南用兩千年證明了,即使被巨人反覆征服,只要不放棄「我們是誰」的信念,就永遠不會被同化、不會被消滅。但越南也用它的當代轉身告訴我們:抵抗,只是生存的上半場;真正的成熟,是懂得在守住靈魂的前提下,放下不必要的對抗,以務實與和解去贏得未來。竹子之所以不折,不只因為它堅韌,更因為它懂得彎曲。這,就是龍與仙的後代,用兩千年寫下的不屈之身——與和解之路。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從紅河畔龍與仙的神話、徵氏姊妹投水的悲壯,<br>
+        到白藤江的尖樁、三度擊退蒙古的榮光,<br>
+        從南進吞併占婆的征服、法國殖民的枷鎖,<br>
+        從奠邊府的大砲、西貢城下的坦克、怒海上的船民,<br>
+        到革新開放的轉身、與龍共舞的智慧——<br>
+        這段交織著抵抗、征服、犧牲與務實的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        被巨人反覆征服的越南,<br>終究,從未被同化,也終將學會和解。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">🐉 ✦ ☯</div>
+  <p>竹與龍 · 越南兩千年的不屈之身</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE RED RIVER TO THE RISING DRAGON · 111 BC – 2025</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

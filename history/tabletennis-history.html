@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小球與大國：桌球一百二十年的權力史</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0e1a2b;
+  --paper:#f3f6fa;
+  --paper-deep:#e2ebf3;
+  --sky:#7faed6;
+  --sky-deep:#3d70a3;
+  --navy:#13284a;
+  --navy-deep:#081a33;
+  --gold:#c79a3a;
+  --gold-bright:#e6c068;
+  --crimson:#9a2a1e;
+  --jade:#3f8a7c;
+  --faint:#5a6c7e;
+  --line:#b8cadc;
+  --shadow:rgba(13,40,74,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 18% 0%, rgba(127,174,214,.12), transparent 55%),
+    radial-gradient(ellipse at 82% 100%, rgba(63,138,124,.07), transparent 50%),
+    var(--paper);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 36%, rgba(127,174,214,.55), transparent 70%),
+    linear-gradient(165deg, var(--navy-deep) 0%, var(--navy) 42%, var(--sky-deep) 100%);
+  color:var(--paper);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  /* table tennis table top-down silhouette in gold */
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Cg fill='none' stroke='%23e6c068' stroke-width='1.2' opacity='0.18'%3E%3Crect x='160' y='220' width='480' height='360' rx='4'/%3E%3Cline x1='400' y1='220' x2='400' y2='580'/%3E%3Cline x1='160' y1='400' x2='640' y2='400'/%3E%3Cline x1='160' y1='400' x2='640' y2='400' stroke-dasharray='4 4'/%3E%3Crect x='395' y='200' width='10' height='400' fill='%23e6c068' opacity='0.5'/%3E%3Ccircle cx='620' cy='160' r='14' fill='%23e6c068' opacity='0.7'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  opacity:.7;
+}
+.hero-inner{position:relative;z-index:2;max-width:900px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.4rem,6.6vw,4.8rem);line-height:1.14;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.45);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(243,246,250,.85);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--navy);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--crimson);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--navy);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.3rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--crimson);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--navy)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(127,174,214,.10), rgba(199,154,58,.07));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--navy);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== LENS CALLOUT (商業/結構) ====== */
+.lens{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--navy-deep);color:var(--paper);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(8,26,51,.6);
+}
+.lens::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--crimson));
+}
+.lens .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.lens .tag::before{content:"\25C8";font-size:.9rem}
+.lens p{margin:.6rem 0;color:rgba(243,246,250,.92);font-size:1rem;line-height:1.8;text-align:left}
+.lens strong{color:var(--gold-bright)}
+.lens em{color:#ecd089;font-style:italic}
+
+/* ====== NATION CALLOUT (國族/政治) ====== */
+.nation{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:linear-gradient(135deg,rgba(127,174,214,.18),rgba(63,112,163,.10));
+  border:1px solid var(--sky);border-radius:2px;
+}
+.nation::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--sky),var(--sky-deep));
+}
+.nation .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--sky-deep);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;font-weight:600;
+}
+.nation .tag::before{content:"\2691";font-size:1rem}
+.nation p{margin:.6rem 0;color:var(--navy);font-size:1rem;line-height:1.8;text-align:left}
+.nation strong{color:var(--sky-deep)}
+.nation em{color:var(--crimson);font-style:italic}
+
+/* ====== WARN ====== */
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(154,42,30,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem;font-weight:600}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+
+/* ====== TIMELINE ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--paper);border:2px solid var(--crimson);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--crimson);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--paper-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--navy);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--crimson);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--paper-deep);border:1px solid var(--line)}
+th{
+  background:var(--navy-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(127,174,214,.07)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(127,174,214,.08);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--crimson);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--navy-deep),var(--navy));
+  color:var(--paper);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23e6c068' stroke-width='0.6' opacity='0.10'%3E%3Crect x='80' y='180' width='440' height='300' rx='4'/%3E%3Cline x1='300' y1='180' x2='300' y2='480'/%3E%3Crect x='295' y='160' width='10' height='340' fill='%23e6c068' opacity='0.4'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--paper)}
+.finale .prose p{color:rgba(243,246,250,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#ecd089}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(230,192,104,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--paper);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--paper-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--sky),var(--gold-bright));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== extras ===== */
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--paper-deep);border:1px solid var(--line);border-radius:30px;color:var(--navy);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--crimson);margin-bottom:.5rem;font-weight:600}
+
+/* ===== interlude ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--navy);font-weight:500}
+.interlude p .hl{color:var(--crimson);font-style:normal;font-weight:600}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--crimson);font-style:normal}
+
+/* ===== Taiwan special block ===== */
+.taiwan{background:linear-gradient(170deg,#0c2240,#13284a 60%,#1d3b66);color:var(--paper);padding:1px 0 4rem;position:relative;overflow:hidden;margin-top:5rem}
+.taiwan::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Cg fill='none' stroke='%237faed6' stroke-width='0.5' opacity='0.13'%3E%3Cpath d='M0 200 Q200 150 400 200 T800 200'/%3E%3Cpath d='M0 400 Q200 350 400 400 T800 400'/%3E%3Cpath d='M0 600 Q200 550 400 600 T800 600'/%3E%3C/g%3E%3C/svg%3E");background-size:cover;opacity:.6}
+.taiwan .act{position:relative;z-index:2}
+.taiwan .act-title{color:var(--paper)}
+.taiwan .act-sub{color:rgba(243,246,250,.6)}
+.taiwan .act-num{color:var(--sky)}
+.taiwan .prose p{color:rgba(243,246,250,.9)}
+.taiwan .prose strong{color:var(--gold-bright)}
+.taiwan .prose em{color:#9fc6ec}
+.taiwan .prose h3{color:var(--sky);border-left-color:var(--sky)}
+.taiwan .interlude p{color:rgba(243,246,250,.9)}
+.taiwan .pull{background:rgba(0,0,0,.2);border-color:var(--sky)}
+.taiwan .pull p{color:var(--paper)}
+.taiwan .pull::before{color:var(--sky)}
+.taiwan .card{background:rgba(255,255,255,.06);border:1px solid rgba(127,174,214,.32)}
+.taiwan .card h5{color:#fff}
+.taiwan .card p{color:rgba(243,246,250,.88)}
+.taiwan .card .flag{color:var(--gold-bright)}
+.taiwan .card .model{border-color:var(--sky);color:var(--gold-bright)}
+.tw-tab{display:inline-block;font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.7rem;color:var(--navy-deep);background:linear-gradient(90deg,#9fc6ec,#7faed6);padding:.4rem 1.4rem;border-radius:30px;text-transform:uppercase;margin-bottom:1.4rem;font-weight:600}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Ping-Pong · A 120-Year Power Saga</span>
+    <h1>小球與大國<br>桌球一百二十年的<br><span class="em">權力史</span></h1>
+    <p class="sub">從維多利亞時代客廳的雪茄盒餐後遊戲，到一顆球轉動中美建交的歷史巨輪——<br>一部關於器材革命、國族意志與一個東方大國如何用四十年壟斷整個運動的故事</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下發球 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">這</span>是一個關於佔有的故事——關於一顆直徑不到四公分的球，如何被一個國家近乎完全地擁有，以及全世界如何用六十年的時間，反覆試圖把它奪回來。它起源於英國的客廳，誕生時甚至不叫桌球；它在二十世紀中葉短暫屬於日本與歐洲；然後從 1959 年起，它落入中國手中——並在此後的六十年裡，被打造成這個國家最完美的<em>體育意識形態</em>。1971 年，它甚至以一場貌似偶然的相遇，撬動了冷戰最堅固的鐵幕。我們將跟隨這顆小球，走過它的器材革命、國族戰爭、東亞王朝的興替，以及今天——當<span style="color:var(--crimson);font-weight:600">中國的霸權出現第一道裂縫</span>、當 WTT 賽事體系陷入信任危機之時——它正面臨的全新十字路口。</p>
+</section>
+
+<div class="div-orn">✦ 🏓 ✦</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Prologue</span>
+    <h2 class="act-title">維多利亞客廳的餐後遊戲</h2>
+    <p class="act-sub">From the Dinner Table</p>
+    <div class="ornament">✦ 🏓 ✦</div>
+  </div>
+  <div class="prose">
+    <p>桌球的誕生，幾乎是體育史上最不英雄的場景：1880 年代的英國，一群上流社會的紳士在晚餐後，把網球場的概念縮小到餐桌上，用書本當網、用酒瓶上的軟木塞當球、用雪茄盒蓋當球拍，無聊地打發著漫長的英倫夜晚。這個遊戲最初的名字混亂得令人發噱——「whiff-whaff」、「gossima」、「flim-flam」——直到有人把擊球時球擊在桌面與球拍上發出的擬聲詞拼在一起，定名為<strong>「ping-pong」</strong>。世界上極少有運動，是用聲音替自己命名的。</p>
+    <p>1901 年，英國商人 John Jaques 把「Ping-Pong」註冊為商標，並與美國的 Parker Brothers 簽下授權，這個原本上流社會的玩物，迅速被當作客廳遊戲商品銷往全球。這是這顆小球的<em>第一次擴散</em>——不是作為一項運動，而是作為一件商品。它沒有競技組織、沒有統一規則、甚至沒有獨立的器材標準。要讓它成為一項真正的運動，世界還要等上二十年。</p>
+    <div class="pull"><p>桌球的第一個身分，不是運動，而是英國客廳裡一件用擬聲詞命名的玩具。</p></div>
+    <p>真正的轉折發生在 1926 年。在德國柏林，<strong>國際桌球總會（ITTF）</strong>成立，並在同年於倫敦舉辦了第一屆世界桌球錦標賽。那一屆比賽的奪冠勢力，是今天聽起來無比陌生的中歐國家——匈牙利、捷克斯洛伐克、奧地利。在 1920 至 1950 年代之間，桌球的世界冠軍幾乎是中歐人的禁臠，匈牙利更是其中翹楚，這個多瑙河畔的小國，用它對球桌的熱愛，定義了桌球的第一個黃金時代。然而這個時代沒有人預料到：再過二十年，全世界的桌球版圖將被徹底改寫——而改寫它的力量，將來自一個還沒有完全甦醒的東方大國。</p>
+    <div class="lens">
+      <span class="tag">商業透鏡 · 商品先行，運動其後</span>
+      <p>桌球的擴散路徑很特別:它是<strong>先作為商品全球銷售，後才成為運動</strong>。Parker Brothers 把「Ping-Pong」當棋盤遊戲一樣賣到世界各地的家庭，使這個遊戲在還沒有正式競技規則之前，就已經建立了龐大的全球用戶基礎。</p>
+      <p>這個順序意味深長——它讓桌球從一開始就帶有<em>「人人可玩」</em>的低門檻基因:不需要場地、不需要體格、室內就能進行。而正是這個基因，日後決定了它在一個地廣人多、室外運動條件有限的東方大國裡，將擁有怎樣的群眾基礎。商品先行，是它日後征服中國的隱藏伏筆。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ✦ ✦</div>
+  <p>但要讓一個運動真正開始演化，<br>光有規則還不夠——<br><span class="hl">真正改變一切的，是球員手中那塊小小的板子。</span></p>
+</div>
+
+<!-- ===== 第一幕 器材革命 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一幕 · Act I</span>
+    <h2 class="act-title">海綿膠皮：一次徹底改寫運動的革命</h2>
+    <p class="act-sub">The Sponge Revolution</p>
+    <div class="ornament">◆ 🏓 ◆</div>
+  </div>
+  <div class="prose">
+    <p>1952 年，孟買世錦賽。一個沒有人聽過的日本選手——<strong>佐藤博治</strong>——抱著一支看起來像三明治的怪異球拍出現了。他的球拍正面，貼著一層厚厚的、海綿狀的橡膠。當他發球時，球以一種此前從未見過的、無聲卻致命的旋轉飛向對手；當他抽球時，球的速度遠超任何人的反應極限。那一屆比賽，沒沒無聞的佐藤橫掃對手奪冠——而他手中那塊「<strong>海綿膠皮</strong>」（sponge rubber），徹底改寫了桌球這項運動的物理學。</p>
+    <p>在海綿膠皮之前，桌球用的是顆粒朝外的硬橡膠球拍，球速慢、旋轉少，比賽節奏接近今天的一場高來高去的長對拉。海綿的出現，讓球拍能在剎那間給予球巨大的能量與旋轉，徹底改變了球的飛行軌跡與落點。日本選手率先掌握這項武器，從 1952 到 1959 年的整整七年裡，他們幾乎壟斷了世界冠軍，把過去的中歐霸權打得潰不成軍。桌球史上的<em>第一次器材革命</em>，由此開啟。</p>
+    <h3>規則永遠在追趕器材</h3>
+    <p>海綿膠皮只是一個開始。此後的七十年，桌球的歷史可以被視為一場<em>器材與規則之間永恆的軍備競賽</em>——每當一項新技術帶來不平衡的優勢，國際桌總就會試圖立法限制；而每一次限制，都會逼出下一次的技術突破。</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1952 · 海綿膠皮</div><div class="tl-text">佐藤博治用厚海綿橫掃孟買世錦，旋轉與速度的革命。</div></div>
+      <div class="tl-item"><div class="tl-year">1959 · 海綿厚度限制</div><div class="tl-text">ITTF 強制規定膠皮厚度上限，但日本與中國早已掌握新打法。</div></div>
+      <div class="tl-item"><div class="tl-year">1980s · 反膠／長膠／生膠分化</div><div class="tl-text">不同膠皮特性催生「怪拍」打法，戰術多元化。</div></div>
+      <div class="tl-item"><div class="tl-year">2000 · 38mm → 40mm 大球</div><div class="tl-text">ITTF 把球加大，刻意減慢速度、削弱中國優勢——失敗。</div></div>
+      <div class="tl-item"><div class="tl-year">2001 · 11 分制取代 21 分制</div><div class="tl-text">提高每分壓力，便於電視轉播。</div></div>
+      <div class="tl-item"><div class="tl-year">2002 · 無遮擋發球</div><div class="tl-text">禁止用手或身體遮住發球瞬間，旨在削弱發球變化——再次失敗。</div></div>
+      <div class="tl-item"><div class="tl-year">2014 · 塑膠球取代賽璐珞</div><div class="tl-text">材質改變導致旋轉減弱、速度降低——又一次「削中」嘗試。</div></div>
+      <div class="tl-item"><div class="tl-year">2014 · 禁用有機膠水</div><div class="tl-text">傳統「灌膠」打法消失，球員必須重新學習如何發力。</div></div>
+    </div>
+    <div class="pull"><p>桌球的規則史，就是世界對「削弱中國」的反覆嘗試史——而每一次，中國都用更深的訓練體系，把劣勢化為下一輪的優勢。</p></div>
+    <p>這份時間線最值得玩味的是 2000 年之後的部分——幾乎每一次規則變動，背後都隱約對應著一個共同的潛台詞:<strong>降低中國的統治力，讓比賽變得更不可預測、更有觀賞性</strong>。然而結果如何呢？大球、塑膠球、無遮擋發球、禁有機膠——這些原本被歐洲與日本寄予厚望的改革，全部失敗了。中國隊憑著無人能及的訓練深度，總能在每一次規則改變後最快適應，然後重新拉開差距。器材的軍備競賽，從來敵不過一個國家把整個體育體制都動員起來的意志。</p>
+    <div class="lens">
+      <span class="tag">技術透鏡 · 規則的不對稱效應</span>
+      <p>ITTF 的反覆改規則，揭示了體育治理的一個根本困境:<strong>當一個國家的優勢來自體制而非器材時，任何技術層面的規則調整都會失靈</strong>。中國的優勢，從來不是某種特殊的膠皮或球拍——而是它擁有全世界最深的板凳深度、最完整的省隊／國家隊雙層培訓金字塔、以及最豐富的對手樣本庫。</p>
+      <p>規則改變後，所有人的起點都被歸零；但中國的<em>適應速度</em>遠快於其他國家，因為它有能力在最短時間內動員數百名陪練、針對新規則設計新打法、並在全國範圍內鋪展。換言之，規則重置不會縮小差距——它只會展示誰的<strong>系統最具彈性</strong>。這跟商業世界裡，監管變動往往最終讓最有資源的玩家受益，邏輯如出一轍。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🏓 🏓 🏓</div>
+  <p>當器材與規則開始無休止地拉鋸，<br>桌球的舞台中央，正在上演一場真正改寫一切的權力轉移——<br><span class="hl">從多瑙河，到富士山，再到長江。</span></p>
+</div>
+
+<!-- ===== 第二幕 東亞接管 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二幕 · Act II</span>
+    <h2 class="act-title">東亞接管：從多瑙河到長江的權力轉移</h2>
+    <p class="act-sub">Power Migrates East</p>
+    <div class="ornament">⚑ 🏓 ⚑</div>
+  </div>
+  <div class="prose">
+    <p>1950 年代是日本桌球的全盛期。海綿膠皮、新發球技術、以及國家層級對乒乓的重視，讓這個剛從戰敗中復甦的島國，在桌球這項小球運動上找到了民族自信的出口。從 1952 到 1959 年，日本選手幾乎包攬了所有世界冠軍——直到 1959 年，多特蒙德世錦賽，一個來自北京的瘦弱年輕人改寫了歷史。他的名字叫<strong>容國團</strong>。</p>
+    <p>容國團在男單決賽擊敗匈牙利選手西多，為中華人民共和國奪下<em>歷史上第一個世界冠軍</em>——不只是桌球的、而是所有運動項目的第一個。這個消息在當時的中國引發了難以想像的轟動。在一個建國剛滿十年、剛經歷大躍進挫敗的國家，這枚金牌帶來的，是一種近乎宗教性的民族自尊。它讓最高領導層第一次具體地意識到:<strong>體育，可以成為新中國向世界展示自己的最佳舞台</strong>。從這一刻起，桌球在中國的命運就被永久改寫了——它不再只是一項運動，而是一項<em>國家戰略</em>。</p>
+    <div class="pull"><p>1959 年容國團的金牌，不只是中國的第一個世界冠軍——它是一個國家發現「體育也能是國力」的那一刻。</p></div>
+    <h3>舉國體制：把全國變成一張陪練板</h3>
+    <p>進入 1960 年代，中國國家體委以驚人的速度建立起一套<strong>「舉國體制」</strong>的桌球培訓系統。它的結構是金字塔型的:省、市、區三級體校層層篩選，全國數十萬名青少年選手從小被選拔進入體系，最頂尖的進入省隊，省隊中再篩選出國家隊。國家隊內部，則用一套舉世獨有的<em>「陪練文化」</em>運作——主力選手身邊，永遠有一群同樣世界級水準的陪練，負責模仿外國對手的打法，讓主力在訓練中見識過所有可能的對手樣態。</p>
+    <p>這套體制的恐怖之處在於它的<em>規模</em>。當瑞典、德國、日本的桌球協會還在數千人的選材池中挑選明日之星時，中國的選材池是<strong>千萬級</strong>的。當一個瑞典天才在歐洲尋找對手時，中國的某位省隊邊緣選手，可能每天都在跟世界冠軍對打。這種「金字塔基寬到無法想像」的結構，讓中國隊在 1960、1970 年代迅速崛起為新的霸主——直到一場改變世界的政治事件，把這支球隊推上了全人類的舞台中央。</p>
+    <div class="nation">
+      <span class="tag">國族迴響 · 體育即政體</span>
+      <p>桌球對毛澤東時代的中國而言，承載了遠遠超越一項運動的政治意義。在被西方世界孤立、剛剛走過反右與大躍進、即將進入文革的歷史脈絡裡，<strong>世界冠軍是極少數能讓「新中國」在國際舞台被看見的方式</strong>。它證明了「我們行」——而且是用世界的規則贏的。</p>
+      <p>這個邏輯，從容國團延續到今天的孫穎莎與王楚欽，從未改變。<em>桌球對中國而言，從來不只是桌球。它是一種國族敘事的容器</em>——把民族復興、體制優越、青年榮譽，全部裝進那顆來回飛舞的小球裡。這是其他任何國家都不曾達到的、體育與國族的深度綁定。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚑ ⚑ ⚑</div>
+  <p>當體育與國族綁定到極致，<br>有時，一顆小球能撬動的東西，遠遠超出任何人的想像——<br><span class="hl">包括，撬開冷戰最厚的那堵牆。</span></p>
+</div>
+
+<!-- ===== 第三幕 乒乓外交 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三幕 · Act III</span>
+    <h2 class="act-title">乒乓外交：一顆球撬動的鐵幕</h2>
+    <p class="act-sub">The Ball That Shook the Cold War</p>
+    <div class="ornament">⚑ 🏓 ⚑</div>
+  </div>
+  <div class="prose">
+    <p>1971 年 4 月，名古屋世錦賽。一位 19 歲的美國嬉皮球員<strong>柯文（Glenn Cowan）</strong>，留著一頭蓬亂長髮，因為錯過了美國隊的接駁巴士，慌張地跳上了一輛中國隊的車。在當時的政治氛圍下，這幾乎是「敵營來客」的等級——車上的中國選手們陷入了難以形容的尷尬與緊張。沉默了好幾分鐘後，國家隊的世界冠軍<strong>莊則棟</strong>做了一件令所有人意外的事:他走過去，遞給柯文一條印著中國山水畫的杭州織錦，作為禮物。</p>
+    <p>第二天，這個畫面登上了全世界的報紙頭條。柯文在記者面前向中國隊回送了一件 T 恤，並半開玩笑地說:「如果中國隊邀請我們訪問中國，我們會去嗎？」——而這個提問，被遠在北京的毛澤東敏銳地捕捉到了。原本中方並未計畫邀請美國隊訪華，但毛在當晚親自拍板:<strong>邀請美國乒乓球隊正式訪問中國</strong>。1971 年 4 月 10 日，這支美國隊抵達北京，成為新中國成立以來第一個踏上中國土地的美國代表團。短短九個月後，季辛吉秘密訪華；再一年後，尼克森本人到達北京——歷史性的中美建交大門，由此撬開。</p>
+    <div class="pull"><p>一條織錦、一句玩笑、一次跳錯巴士——歷史最戲劇性的轉折，有時就由這樣不可思議的偶然構成。</p></div>
+    <p>這就是<strong>「乒乓外交」（Ping-Pong Diplomacy）</strong>——體育史上最著名、政治影響力最大的單一事件。它證明了在最對立的兩個世界之間，一顆塑膠球可以成為比任何外交辭令都有效的<em>破冰工具</em>。而對中國而言，這個事件再一次強化了它對桌球的政治認知:這項運動，不只是體制優越的展示，它甚至能成為國家戰略的工具。從這一刻起，「乒乓球」在中國的特殊地位被永久神聖化——它是中國的「國球」，這個稱號至今未變。</p>
+    <div class="nation">
+      <span class="tag">國族迴響 · 唯一被稱為「國球」的運動</span>
+      <p>在中國以外的世界，沒有第二個國家賦予一項運動「國球」的封號。足球之於巴西、棒球之於日本、板球之於印度——這些都是熱愛，但都不是制度化的「國球」。<strong>「國球」這個概念本身，是中國桌球獨有的政治產物</strong>。</p>
+      <p>這個封號的成本巨大但無形:它意味著國家會用幾乎不計成本的方式維持這項運動的優勢；意味著輸球會被視為國恥；意味著每一個桌球選手從小就被教育，他們手中拿的不只是球拍。<em>當運動承載了國族尊嚴，它就再也不能僅僅是運動。</em>這是中國桌球統治力的真正源頭，也是它日後遭遇的所有壓力的真正源頭。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🏓 ⚑ 🏓</div>
+  <p>當一個國家把運動奉為國球，<br>它就再也輸不起。<br><span class="hl">而世界，也再也贏不了——這個故事，將持續整整四十年。</span></p>
+</div>
+
+<!-- ===== 第四幕 歐洲最後的抵抗 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四幕 · Act IV</span>
+    <h2 class="act-title">瑞典與歐洲最後的抵抗</h2>
+    <p class="act-sub">Europe's Last Stand</p>
+    <div class="ornament">✶ 🏓 ✶</div>
+  </div>
+  <div class="prose">
+    <p>1980 年代到 1990 年代初期，是歐洲桌球最後的黃金時代——而它的主角，是一個出乎所有人意料的北歐小國:<strong>瑞典</strong>。在這個人口不到一千萬、冬天漫長到只能在室內運動的國家，誕生了一群將定義一整個時代的桌球天才。其中最耀眼的，是被譽為「桌球史上最完美技術」的——<strong>瓦德內爾（Jan-Ove Waldner）</strong>。</p>
+    <p>瓦德內爾的桌球，是一種近乎藝術的東西。他的反手撥球柔軟得像羽毛，他的正手抽殺殘酷得像處決，他的步伐優雅得像跳舞。他從少年時期就被送到中國訓練，用敵人的方式學會了敵人的招式，再回頭擊敗他們。1989 年多特蒙德世錦賽，瑞典男隊在團體決賽以 5-0 橫掃中國;同年，瓦德內爾奪得世錦賽男單冠軍。1992 年巴塞隆納奧運，瓦德內爾在桌球首次成為奧運項目的這一屆，奪下男單金牌。整個 1980 年代後期到 1990 年代初，瑞典是世界上唯一能持續壓制中國的勢力。</p>
+    <h3>歐洲為何輸掉了下半場？</h3>
+    <p>但瑞典的輝煌沒能延續。進入 21 世紀後，瓦德內爾這一代逐漸老去，而歐洲再也沒能培養出能與中國抗衡的整代天才。原因不在於歐洲突然失去了桌球的熱情——而在於<em>一個根本的不對稱</em>:歐洲的桌球發展是以「俱樂部」為主體，依靠商業聯賽（如德國的 Bundesliga 桌球聯賽，至今仍是歐洲最強的職業桌球聯賽）培養職業球員；而中國的桌球發展是以「國家」為主體，依靠舉國體制源源不絕地產出新人。</p>
+    <div class="pull"><p>瑞典曾經證明:歐洲也能贏。但證明「能贏一次」與「能持續贏」之間，隔著一個國家機器的距離。</p></div>
+    <p>德國接過了歐洲桌球的旗幟，並貢獻了波爾（Timo Boll）、奧恰洛夫（Dimitrij Ovtcharov）這樣的世界級選手；近年法國的勒布倫兄弟（Lebrun brothers）也展現了驚人潛力。但這些都是<em>個別的天才</em>，而非整代的崛起。歐洲的桌球，從 21 世紀開始進入一個由「個別明星 vs 中國集團」對抗的長期格局——而這個格局，在過去二十年裡幾乎沒有改變。</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">Sweden</span>
+        <h5>瑞典 · 完美技術的故鄉</h5>
+        <p>1980s-90s 唯一能持續擊敗中國的勢力。瓦德內爾、佩爾森、卡爾松構成黃金一代。</p>
+        <span class="model">技術藝術</span>
+      </div>
+      <div class="card">
+        <span class="flag">Germany</span>
+        <h5>德國 · 歐洲的旗手</h5>
+        <p>Bundesliga 桌球聯賽是歐洲最強的職業體系。波爾、奧恰洛夫長期撐起歐洲門面。</p>
+        <span class="model">職業體制</span>
+      </div>
+      <div class="card">
+        <span class="flag">France</span>
+        <h5>法國 · 新一代衝擊者</h5>
+        <p>勒布倫兄弟（Alexis & Felix）以反手直拍打法與街頭明星氣質,成為新世代歐洲希望。</p>
+        <span class="model">新生代</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ✦ ✦</div>
+  <p>歐洲交出了權杖之後，<br>真正的桌球統治才剛剛開始。<br><span class="hl">從 1995 年起的近三十年，地球上幾乎沒有第二個國家能站到頒獎台最高處。</span></p>
+</div>
+
+<!-- ===== 第五幕 中國王朝 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五幕 · Act V</span>
+    <h2 class="act-title">中國王朝：六代人，三十年不敗</h2>
+    <p class="act-sub">The Dynasty</p>
+    <div class="ornament">★ 🏓 ★</div>
+  </div>
+  <div class="prose">
+    <p>從 1995 年天津世錦賽中國男隊重奪斯韋斯林杯開始，到 2024 年巴黎奧運，這近三十年的時間裡，中國隊在桌球世界的統治力，沒有任何一項團體運動可以比擬。讓我們先看一組殘酷的數字。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">32 / 37</div><div class="lbl">奧運桌球金牌中,中國贏走的數量(1988 桌球入奧至今)</div></div>
+      <div class="stat"><div class="num">100%</div><div class="lbl">2008-2020 連續四屆奧運男女單冠軍全包</div></div>
+      <div class="stat"><div class="num">5×</div><div class="lbl">2008 北京奧運包辦男女單金銀銅獎牌的歷史紀錄</div></div>
+      <div class="stat"><div class="num">~600</div><div class="lbl">中國國家隊+省隊+各級體校的常駐桌球選手規模(估計)</div></div>
+    </div>
+    <p>這不是運氣，這是一個系統的勝利。在這三十年裡，中國隊送上世界舞台的，不是一兩位天才，而是<strong>六個世代的世界冠軍</strong>——從劉國梁、孔令輝(1990s) → 王勵勤、馬琳(2000s) → 馬龍、張繼科(2010s) → 樊振東 → 王楚欽、林詩棟(2020s)，每一代之間幾乎無縫接班。當其他國家還在等待下一個天才出生時，中國的下一代已經在訓練館裡等著上場。</p>
+    <h3>三個無人能複製的優勢</h3>
+    <p>外界對中國桌球統治力的分析，往往集中在三個層次:</p>
+    <p><strong>第一，無與倫比的板凳深度。</strong>當其他國家的「第三選手」可能連世界 50 名都進不去時，中國的第三、第四選手往往就是世界前五的水準。這意味著國家隊內部的訓練強度，本身就達到了世界級對抗的密度。一個瑞典選手能練到的最高對手強度，中國選手每天早上六點就在面對。</p>
+    <p><strong>第二，獨步全球的「陪練文化」。</strong>國家隊會專門指派陪練選手，模仿任何一位外國對手的特殊打法。當馬龍要打波爾，國家隊就有一位專門「練成波爾」的陪練;要打瓦德內爾，就有「練成瓦德內爾」的陪練。這讓中國主力選手在真正比賽前，已經對所有可能的對手進行過<em>無數次模擬演練</em>。</p>
+    <p><strong>第三，深度的數據與情報。</strong>中國隊很早就建立了詳盡的對手錄影資料庫，分析每個對手的習慣、發球、戰術偏好。這套情報優勢，加上前兩項，構成了一個外國隊伍幾乎無法穿透的防線。</p>
+    <div class="lens">
+      <span class="tag">系統透鏡 · 為什麼複製不了？</span>
+      <p>外界(尤其是日本)曾多次嘗試複製「中國模式」——日本從 2000 年代起，砸下大量資源建立 T-League、設立精英學院、廣納海外教練。結果是:<strong>日本確實培養出了張本智和、伊藤美誠、早田希娜這樣的世界級選手，但無法複製「整代世界冠軍」的產出能力</strong>。</p>
+      <p>真正的原因在於，「中國模式」不是一個運動單項的訓練系統——它是一個國家體制與社會結構共同支撐的<em>整體生態</em>:政府願意投入、千萬家庭願意把孩子送進體校、體育官員的職業生涯與成績綁定、媒體會把每一場輸球變成全民議題。<strong>這不是錢能買來的，這是國族意志的具體化。</strong>沒有對應的社會土壤，再多錢也只能複製出「優秀」，複製不出「霸權」。</p>
+    </div>
+    <div class="pull"><p>中國桌球的霸權，不是某種訓練方法的勝利——而是一個國家把整個運動「制度化」的勝利。</p></div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">★ ★ ★</div>
+  <p>三十年的統治看似牢不可破，<br>但所有的王朝都有它的轉折時刻——<br><span class="hl">而 2024 年巴黎之後，第一道裂縫,終於浮現了。</span></p>
+</div>
+
+<!-- ===== 第六幕 裂縫浮現 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六幕 · Act VI</span>
+    <h2 class="act-title">裂縫浮現：2024 之後，中國的統治力真的在下滑嗎？</h2>
+    <p class="act-sub">Cracks in the Wall</p>
+    <div class="ornament">⚠ 🏓 ⚠</div>
+  </div>
+  <div class="prose">
+    <p>2024 年 8 月，巴黎奧運。中國隊一如既往地包辦了男女團體、混雙、女單、男單的金牌——表面上,霸權看似毫無動搖。然而就在奧運結束兩個月後，2024 年 10 月的世界盃女子團體決賽，中國隊以 1-3 輸給了日本。中國 1 號孫穎莎在第一場後感到肩膀肌肉問題,翌日退出後續比賽;沒有了她,中國隊全軍覆沒——女單無人進入四強、女雙在準決賽止步。這是中國女隊近十年來最難堪的一次大賽失敗。</p>
+    <p>2024 年底，更戲劇性的一幕發生:奧運金牌得主<strong>樊振東與陳夢，雙雙宣布退出 ITTF 世界排名</strong>，抗議 WTT 對未參賽選手的罰款新規。一時間，整個世界桌球輿論場炸裂——當代最頂尖的兩位中國選手，第一次公開站到 WTT 的對立面。</p>
+    <h3>2025 年的觀察:強勢猶在,但已不是壟斷</h3>
+    <p>進入 2025 年，這個趨勢延續了下來。5 月的杜哈世錦賽,中國依然強勢——王楚欽奪下男單首冠、孫穎莎衛冕女單、女雙與混雙也由中國拿下。但同一屆賽事:</p>
+    <ul style="margin:1.4rem 0 1.4rem 2.2rem;line-height:2;color:var(--ink)">
+      <li>日本的 Togami / Shinozuka 拿下男雙金牌——這是日本男子雙打<strong>64 年來</strong>首座世錦賽冠軍。</li>
+      <li>巴西的 Hugo Calderano 殺進男單決賽——南美選手歷史性的最佳成績。</li>
+      <li>台灣的<strong>林昀儒、高承睿</strong>男雙擊敗法國第一勒布倫兄弟,殺進決賽。</li>
+    </ul>
+    <p>到了 2025 年 12 月的香港 WTT Finals,孫穎莎/王楚欽混雙在決賽傷退,輸給韓國組合——這對自 2021 年起壟斷混雙的「莎頭組合」<em>首次在大賽決賽落敗</em>。中國隊一個一個的「不敗紀錄」,正在被一個一個地打破。</p>
+    <div class="pull"><p>霸權還在,但壟斷已不在。這是「中國時代」進入下半場最清晰的訊號。</p></div>
+    <h3>下滑還是新均衡？</h3>
+    <p>必須誠實地說:把這稱為「中國桌球的衰落」言過其實。世錦賽的男女單冠軍依然是中國的、世界第一依然是孫穎莎與王楚欽、整體獎牌數依然遙遙領先。但「<strong>絕對壟斷</strong>」與「<em>多極競爭中的最強者</em>」是兩種完全不同的狀態——而從 2024 起，世界桌球無疑正在從前者進入後者。</p>
+    <p>背後的結構性原因有三:第一，中國老將(馬龍、樊振東、陳夢)世代交替的陣痛,新生代尚未完全接班。第二，日本長達二十年的耐心投資開始開花——T-League、海外訓練、青少年系統,張本兄妹、早田希娜、Togami、戶上隼輔等正在進入巔峰。第三，全球化讓非傳統勢力(巴西、瑞典新世代、韓國)也能透過 WTT 巡迴賽累積經驗,縮小與中國的差距。</p>
+    <div class="nation">
+      <span class="tag">國族迴響 · 失敗難以承受</span>
+      <p>對其他國家而言，輸給中國是日常;但對中國而言，<strong>任何一場大賽失敗都是體制危機</strong>。當女隊在世界盃輸給日本，當混雙在香港輸給韓國——中國的社群媒體立刻引爆討論:是不是教練組失誤?是不是新生代訓練不夠?是不是 WTT 的賽程太密?</p>
+      <p>這正是「國球」的雙面性。<em>當你把整個國族尊嚴都綁在一項運動上，輸球就再也不是輸球——它是制度的失敗、是時代的隱憂、是無數人飯碗的問題。</em>這也解釋了為什麼樊振東與陳夢的退出排名,在中國國內引發了遠超體育範疇的政治性討論。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚠ ⚠ ⚠</div>
+  <p>但問題不只在中國這一邊。<br>另一場危機,正同時在桌球這項運動的<span class="hl">商業治理核心</span>引爆——<br>而它的名字,叫 WTT。</p>
+</div>
+
+<!-- ===== 第七幕 WTT 危機 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七幕 · Act VII</span>
+    <h2 class="act-title">WTT 的信任危機：商業化的代價</h2>
+    <p class="act-sub">The WTT Crisis</p>
+    <div class="ornament">$ 🏓 $</div>
+  </div>
+  <div class="prose">
+    <p>2021 年,國際桌總(ITTF)主導成立了一個全新的商業化賽事體系——<strong>WTT(World Table Tennis)</strong>。它的目標非常清晰:把桌球變成像網球 ATP 那樣的全球巡迴商業聯賽,用大滿貫(Grand Smash)、冠軍賽、挑戰賽等多層級賽事吸引觀眾、吸引贊助、吸引轉播權。從表面看,WTT 確實帶來了一些可見的進步:獎金總額提升、賽事曝光擴大、首屆新加坡 Smash 觸及超過 1.6 億觀眾。但伴隨而來的,是一場至今未解的<em>球員與體系之間的信任危機</em>。</p>
+    <h3>2024 年底的引爆點:罰款、強制參賽、樊振東退出</h3>
+    <p>2024 年 12 月,WTT 公布的 2025 年新版規則中,有兩項條款引爆了眾怒:第一,<strong>頂級球員「自動報名」</strong>頂級賽事(意即不需要本人同意);第二,<strong>缺席要付高額罰款</strong>——Top 10 球員每缺席一場罰款 5,000 美元。對 WTT 而言,這是為了「保證頂級賽事陣容完整」、提升商業價值的合理舉措。但對球員而言,這形同剝奪了他們最基本的<em>自主權</em>。</p>
+    <p>就在規則公布的幾天後,Olympic 金牌得主<strong>樊振東與陳夢同時宣布退出 ITTF 世界排名</strong>,實質上等於退出國際桌球體系。樊振東在社群媒體上的措辭異常強硬:「我從未被正式告知過這些罰款規定」。整個事件迅速從體育新聞變成全球性議題。</p>
+    <div class="warn">
+      <span class="warn-tag">⚠ 數字的殘酷對比 · 球員生計的真相</span>
+      <p>整個事件最令人震驚的數據,是這個:<strong>樊振東 2024 年全年從 WTT 賽事獲得的稅前獎金,僅約 68,000 美元</strong>。一個剛在巴黎奧運奪下單打與團體雙金、被視為當今最強桌球選手之一的人,WTT 一年內給他的獎金,還不如一位排名 100 名外的職業網球選手。</p>
+      <p>而 WTT 卻要求他「強制參賽」,缺席要罰款。這背後的不對稱是赤裸的:<em>體系拿走了選手的時間與健康,卻沒有給予對等的經濟回報</em>。樊振東選擇退出,不只是個人抗議,而是對整個桌球商業化模式的一次根本性質疑。</p>
+    </div>
+    <h3>WTT 模式的三重矛盾</h3>
+    <p>樊振東事件揭示的,是 WTT 賽事體系在誕生四年之後,正面臨的三個根本性矛盾:</p>
+    <p><strong>第一,獎金結構的失衡。</strong>桌球的全球商業價值遠不及網球或高爾夫,但 WTT 賽事頻率卻被刻意拉高(年度數十站賽事),試圖用「量」彌補「質」。結果是球員疲於奔命卻收入有限。</p>
+    <p><strong>第二,「強制參賽」與球員自主權的衝突。</strong>網球 ATP 的「強制參賽」附帶著高額獎金與長期積分回饋,球員的義務與收益對等;WTT 的強制參賽,則被普遍認為缺少對等回報。</p>
+    <p><strong>第三,治理透明度的缺失。</strong>WTT 聲稱新規則來自「球員回饋」,但拒絕公開回饋的具體內容與調查方法。當代頂級球員(樊振東、陳夢、奈及利亞名將 Aruna)的公開反對,直接挑戰了這個說法。</p>
+    <div class="lens">
+      <span class="tag">商業透鏡 · 一個運動的商業化困境</span>
+      <p>WTT 試圖做的,本質上是把桌球「ATP 化」——複製網球的職業巡迴模式,建立可持續的商業生態。這個方向本身並沒有錯,問題在於<strong>桌球的全球商業基礎遠遠不足以支撐這個模式</strong>。</p>
+      <p>網球的 ATP 之所以可行,是因為它有超過半個世紀的全球贊助、轉播、媒體生態作為底層。桌球除了在中國以外,其他國家的觀眾基礎、贊助意願、媒體曝光度都不在同一個量級。<em>強行套用一個更高量級的商業模式到一個尚未準備好的運動上,結果就是把成本轉嫁給球員——讓他們在收入有限的情況下被強制參賽。</em></p>
+      <p>更深一層的問題是:WTT 由 ITTF 主導,其執行長與董事會的構成,被批評為缺乏球員代表性。當「規則制定者」與「規則承受者」之間沒有制度性的對話機制,衝突幾乎是必然。<strong>商業化從來不是錯的,但商業化若以犧牲核心參與者為代價,終將反噬自己。</strong>這是桌球此刻面臨的真正治理難題。</p>
+    </div>
+    <p>2025 年初,WTT 在輿論壓力下對部分規則作了讓步——例如取消對「同週缺席 WTT 卻參加非 WTT 比賽」的最重罰款。但更深層的問題:獎金結構、強制參賽、治理透明度,至今仍未獲根本解決。樊振東的世界排名也尚未恢復。可以說,桌球這項運動正站在一個前所未有的<em>治理十字路口</em>:商業化要繼續推進,但如何在不剝奪球員權益的前提下做到,沒有人有答案。</p>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">$ 🏓 $</div>
+  <p>樊振東一年獎金只有 6.8 萬美元——這個數字背後,藏著一個更根本的問題:<br><span class="hl">為什麼桌球,這項全世界數億人在打的運動,獎金竟然這麼少?</span></p>
+</div>
+
+<!-- ===== 第八幕 獎金經濟學 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八幕 · Act VIII</span>
+    <h2 class="act-title">為什麼桌球的獎金這麼少?</h2>
+    <p class="act-sub">The Economics of an Underpaid Sport</p>
+    <div class="ornament">$ 🏓 $</div>
+  </div>
+  <div class="prose">
+    <p>這是一個值得深究的問題。桌球是全世界參與人口最多的運動之一——估計有數億人在打;它是奧運項目、有上百年歷史、在中國更是全民國球。然而,它頂尖選手的獎金,卻低得不成比例。讓我們先看一組真實數字:2024 年 WTT 男子獎金榜,排名世界第一的王楚欽,全年獎金約 <strong>26 萬美元</strong>;榜上第 35 名,全年僅約 <strong>5 萬美元</strong>。對照之下,一位網球世界第一,單單一座大滿貫冠軍的獎金就超過 300 萬美元。這中間的差距,有數十倍之多。為什麼?答案要從一個殘酷的事實說起。</p>
+    <h3>第一層:整個產業的餅,本來就很小</h3>
+    <p>獎金的多寡,終究取決於這項運動能產生多少<em>商業價值</em>——而商業價值來自三個源頭:轉播權、贊助、門票。在這三項上,桌球的規模都小得驚人。最能說明問題的數字是:全球桌球<strong>器材市場</strong>(球拍、球、球桌等所有裝備)的總規模,一年也僅約 <strong>1.3 至 1.8 億美元</strong>。請注意,這是「整個產業所有裝備銷售」的總和——而光是一位 NBA 頂級球星的年薪,就超過這個數字。當一項運動的整個經濟基礎都這麼小時,能分給選手的獎金自然有限。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">$26萬</div><div class="lbl">2024 WTT 男子獎金榜第一名(王楚欽)全年總額</div></div>
+      <div class="stat"><div class="num">$6.8萬</div><div class="lbl">樊振東 2024 全年 WTT 稅前獎金</div></div>
+      <div class="stat"><div class="num">~$1.5億</div><div class="lbl">全球桌球器材市場一年總規模</div></div>
+      <div class="stat"><div class="num">300萬+</div><div class="lbl">網球單座大滿貫冠軍獎金(美元)</div></div>
+    </div>
+    <h3>第二層:粉絲「廣但不深」的致命傷</h3>
+    <p>桌球有一個獨特而致命的商業弱點:它的粉絲<strong>遍布全球,卻在每個市場都不夠深</strong>。世界上幾乎每個國家都有人打桌球、都有人看奧運桌球——但除了中國,沒有任何一個單一市場,能養出「天天買票進場、追星、付費訂閱轉播」的死忠商業觀眾群。</p>
+    <p>這跟足球或網球恰恰相反。網球雖然也是個人運動,但它在歐美、澳洲都有夠深的中產階級消費市場,願意為溫網、美網付出高昂門票與轉播訂閱費。桌球的觀眾基礎雖然數量龐大,卻<em>高度集中在中國</em>——而中國以外的市場,商業變現能力極弱。對贊助商與電視台而言,一個「廣但淺」的市場,很難開出高價:你無法在任何單一國家,靠桌球賽事賣出滿場的門票或高價的轉播權。</p>
+    <div class="lens">
+      <span class="tag">商業透鏡 · 個人項目運動的通病</span>
+      <p>桌球的獎金困境,其實是<strong>所有「個人項目運動」共同弱點的極端版本</strong>。值得注意的是:即便是商業上比桌球成功得多的網球,也深陷類似問題——研究指出,職業網球的球員分潤僅約總營收的 <em>17%</em>(對比之下,NBA、NFL 等團隊運動的球員可分得約 50%),全世界能靠網球獎金損益兩平的職業選手,不到 1,000 人。</p>
+      <p>為什麼個人項目這麼弱勢?因為它們<strong>缺少「團隊聯盟」這個商業引擎</strong>。NBA、英超是由 30 支左右的「球隊」組成的封閉聯盟,每支球隊都是一個有地方認同、有死忠球迷、能賣季票與週邊的<em>商業實體</em>;球員是這些實體的雇員,享有保障薪資。而桌球選手本質上是「個體戶」——沒有球隊發保障底薪、受傷就沒收入、只能各自為轉瞬即逝的獎金與名次奔波。桌球把這個結構性弱點,推到了極致。</p>
+    </div>
+    <h3>第三層:被中國壟斷的「反商業」副作用</h3>
+    <p>還有一個少被提及、卻極關鍵的因素:<strong>中國的壟斷本身,就在壓抑這項運動的全球商業價值</strong>。這聽起來矛盾——中國是桌球最大的市場與最強的力量,怎麼反而壓抑了商業價值?</p>
+    <p>原因在於,一項運動的商業魅力,很大程度來自<em>結果的不確定性</em>。觀眾願意付錢,是因為「不知道誰會贏」的懸念。但在桌球的世界裡,過去三十年的頂級賽事,答案幾乎永遠是「某個中國選手會贏」。對中國以外的觀眾而言,一面倒的賽事缺乏吸引力;對中國以外的贊助商而言,贊助一支「註定贏不了中國」的隊伍,商業回報極低。於是,投資意願低 → 賽事獎金少 → 頂尖人才更難留住 → 中國以外的競爭力更弱 → 比賽更一面倒——這形成了一個壓抑全球商業價值的<strong>負向循環</strong>。</p>
+    <div class="pull"><p>桌球最大的商業困境,弔詭地正是它最大的成功:當一個國家贏得太徹底,這項運動就失去了「不知道誰會贏」的商業魅力。</p></div>
+    <h3>那麼,頂尖選手到底靠什麼生活?</h3>
+    <p>看到這裡,你可能會問:既然獎金這麼少,為什麼還是有人能當職業桌球選手?答案是——<strong>獎金從來就不是頂尖選手收入的主體</strong>。對一位世界級桌球選手而言,WTT 的獎金往往只是「蛋糕上的櫻桃」,真正的收入來自下面這四個更穩定的來源:</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">Source 1</span>
+        <h5>器材代言</h5>
+        <p>蝴蝶、DHS、Stiga 等品牌的贊助。頂級選手(如馬龍、波爾)的代言費可達數十萬美元,遠超 WTT 獎金。</p>
+        <span class="model">最大金主</span>
+      </div>
+      <div class="card">
+        <span class="flag">Source 2</span>
+        <h5>職業聯賽薪水</h5>
+        <p>德國 Bundesliga、日本 T-League 提供穩定且豐厚的俱樂部薪資,是歐亞選手的主要收入來源。</p>
+        <span class="model">穩定底薪</span>
+      </div>
+      <div class="card">
+        <span class="flag">Source 3</span>
+        <h5>國家/體制支持</h5>
+        <p>中國選手有國家隊體制供養;其他國家選手常有政府獎金、企業聘僱(如銀行職位)等保障。</p>
+        <span class="model">體制供養</span>
+      </div>
+      <div class="card">
+        <span class="flag">Source 4</span>
+        <h5>奪牌獎金</h5>
+        <p>奧運、世錦賽奪牌,各國政府與企業往往發放高額一次性獎金,有時遠超賽事本身獎金。</p>
+        <span class="model">里程碑獎勵</span>
+      </div>
+    </div>
+    <p>一個最生動的例子,是台灣的林昀儒。據業內人士分析,他的收入結構大致是:政府給予的訓練與團隊預算、台灣合作金庫銀行的正式僱員薪水(含退休金)、蝴蝶等品牌的器材贊助、日本 T-League 俱樂部的豐厚薪水,以及奪牌時台灣中央與地方政府發放的獎金——而 WTT 賽事獎金,在這個結構裡,反而是<em>最微不足道</em>的一塊。這完美說明了現代桌球選手的真實經濟模型:<strong>WTT 獎金是櫻桃,代言、聯賽與體制才是蛋糕。</strong></p>
+    <div class="lens">
+      <span class="tag">系統透鏡 · 回到樊振東事件的核心</span>
+      <p>理解了上述經濟結構,就能真正看懂為什麼<strong>樊振東會為了「強制參賽+罰款」而選擇退出排名</strong>。如果 WTT 的獎金真的是選手的主要收入,選手或許會忍氣吞聲地遵守規則。但正因為 WTT 獎金只佔頂尖選手收入的一小部分——而強制參賽卻要求他們犧牲大量時間與健康、放棄收入更高的俱樂部賽事與商業活動——這筆帳就完全划不來。</p>
+      <p>換言之,WTT 試圖用「低獎金」去「強制」一群「獎金不是主要收入」的選手,這個商業模式從根本上就站不住腳。<em>當體系給的不夠多,卻要求的太多,最有底氣的頂尖選手,自然會選擇離開。</em>桌球獎金為何這麼少,與樊振東為何出走,其實是同一個結構性問題的一體兩面——這項運動的商業價值,還遠遠撐不起它想建立的職業體系。</p>
+    </div>
+    <p style="font-size:.92rem;color:var(--faint);font-style:italic;text-align:center;margin-top:1.5rem">註:本節數據(WTT 2024 獎金榜、器材市場規模、選手收入結構)整理自公開報導與產業報告,口徑不一,以 2026 年 5 月為資料時點,僅供比較參考。</p>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🏓 $ 🏓</div>
+  <p>既然職業聯賽才是選手收入的真正支柱,<br>那麼,<span class="hl">全世界的桌球職業聯賽,究竟是一幅什麼樣的版圖?</span><br>而它,又將走向何方?</p>
+</div>
+
+<!-- ===== 第九幕 全球職業聯賽 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九幕 · Act IX</span>
+    <h2 class="act-title">全球職業聯賽的版圖與未來</h2>
+    <p class="act-sub">The Map of Professional Leagues</p>
+    <div class="ornament">◆ 🏓 ◆</div>
+  </div>
+  <div class="prose">
+    <p>與足球擁有英超、西甲等成熟的全球聯賽生態相比,桌球的職業聯賽世界要年輕、零散得多。它沒有一個統領全球的單一頂級聯賽,而是由<em>幾個各據一方、模式迥異的國家級聯賽</em>拼湊而成。理解這幅版圖,是理解這項運動商業未來的關鍵——因為正如前一章所述,聯賽薪水(而非賽事獎金)才是頂尖選手收入的真正支柱。讓我們逐一檢視當今世界主要的桌球職業聯賽。</p>
+    <h3>歐洲:德國 TTBL,最接近「真正職業聯賽」的範本</h3>
+    <p>若要選出全世界營運最成熟的桌球職業聯賽,答案毫無疑問是<strong>德國桌球甲級聯賽(TTBL)</strong>。它創立於 1966 年,是歐洲歷史最悠久、競技水準最高的桌球聯賽,2025/26 賽季有 12 支球隊,採用主客場制、升降級制——換言之,它具備了一個「真正職業聯賽」該有的所有結構性元素:地方球隊、固定主場、季票球迷、媒體轉播。多年來,波爾(Timo Boll)、奧恰洛夫等巨星都長期效力於此。而 2025/26 賽季最大的新聞,是中國奧運金牌得主<strong>樊振東加盟德甲的薩克森奧森豪森(Saarbrücken/Ochsenhausen 等隊)</strong>——這是中國頂級主力首度長期征戰歐洲聯賽,在全球桌球圈引發轟動,也象徵了 TTBL 的世界級號召力。</p>
+    <h3>日本:T.League,地域化經營的後起之秀</h3>
+    <p><strong>日本 T.League</strong> 成立於 2018 年,是日本第一個職業桌球聯賽,男女各 6 隊。它的設計帶有濃厚的日本職業運動色彩——每支球隊都綁定一個地方(埼玉、東京、靜岡、岡山、沖繩等),走地域化、社區化的經營路線,試圖複製日本職棒與 J-League 的成功模式。T.League 提供豐厚而穩定的薪資,吸引了大量世界級選手加盟(包括台灣的林昀儒),是亞洲除中國以外最重要的職業收入來源。</p>
+    <h3>中國:乒超,世界最強卻最不「職業」的聯賽</h3>
+    <p>弔詭的是,擁有全世界最強選手庫的<strong>中國乒乓球超級聯賽(CTTSL,乒超)</strong>,反而是商業化程度最低的頂級聯賽之一。它的選手名單堪稱夢幻——馬龍、樊振東、王楚欽全在其中,任何一場比賽的星光都遠超其他國家聯賽。但它的運作方式高度依附於舉國體制:賽程往往採取<em>「分階段集中賽會制」</em>(例如 2025 年分三個階段、加上年終決賽,而非長達數月的主客場賽季),且商業開放度、轉播國際化、俱樂部獨立經營程度都遠不及德日。它是國家培訓體系的延伸,而非一個面向市場的商業聯賽。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>聯賽</th><th>成立</th><th>模式特徵</th><th>定位與優勢</th><th>侷限</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>德國 TTBL 🇩🇪</strong></td><td>1966</td><td>主客場+升降級,最完整職業結構</td><td>歐洲最高水準,世界級號召力</td><td>市場仍限於德語區,國際轉播零散</td></tr>
+          <tr><td><strong>日本 T.League 🇯🇵</strong></td><td>2018</td><td>地域化、社區綁定,仿職棒模式</td><td>薪資穩定豐厚,亞洲收入支柱</td><td>規模有限,尚未全球化</td></tr>
+          <tr><td><strong>中國乒超 🇨🇳</strong></td><td>1999</td><td>集中賽會制,依附舉國體制</td><td>全世界最強選手庫</td><td>商業化、國際化程度最低</td></tr>
+          <tr><td><strong>印度 UTT 🇮🇳</strong></td><td>2017</td><td>IPL 式,2-3 週壓縮打完</td><td>Star Sports 轉播,市場潛力大</td><td>賽季極短,本土頂尖選手不足</td></tr>
+          <tr><td><strong>美國 MLTT 🇺🇸</strong></td><td>2023</td><td>娛樂導向,巡迴賽會+創新賽制</td><td>資本與行銷最積極,成長最快</td><td>競技水準與底蘊仍待累積</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>印度與美國:兩個用「資本與娛樂」切入的新玩家</h3>
+    <p>桌球職業聯賽版圖最值得關注的變化,來自兩個傳統桌球弱國——印度與美國。它們的共同特點是:不靠深厚的桌球底蘊,而靠<em>商業模式創新與資本</em>切入。</p>
+    <p><strong>印度的 Ultimate Table Tennis(UTT)</strong>創立於 2017 年,直接複製了印度最成功的體育商品——板球 IPL 的模式:把整個聯賽壓縮在 2 至 3 週內密集打完,搭配 Star Sports 與 Hotstar 的轉播。這個「短打快攻」的設計,讓世界級球員能在不影響其他賽事的前提下參賽、最大化收入,也讓贊助與轉播的能量在短時間內集中爆發。對一個擁有十四億人口、消費市場正在崛起的國家而言,UTT 的長期潛力不容小覷。</p>
+    <div class="lens">
+      <span class="tag">商業透鏡 · MLTT,一場美式的豪賭</span>
+      <p>最具啟示性的案例,是美國的 <strong>Major League Table Tennis(MLTT)</strong>。這個 2023 年才成立的聯賽,正在用一套徹底「美式職業運動」的打法,試圖改寫桌球的商業天花板。它的故事充滿了傳統桌球世界難以想像的元素:</p>
+      <p>2024 年,它獲得了一筆 <strong>550 萬美元</strong>的戰略投資,投資者包括 NBA 費城 76 人的老闆 David Blitzer、籃球營運總裁 Daryl Morey 等頂尖體育商業菁英;2025 年,它甚至吸引了剛與 WTT 鬧翻的<strong>樊振東,以「戰略投資人」身分入股</strong>。最新一季(2025-26),MLTT 交出了爆炸性的成長數據——門票銷售年增 <em>80%</em>、贊助收入年增 <em>188%</em>、賽季影片觀看 7,600 萬次、社群曝光年增高達 <em>2,600%</em>,並從 8 隊擴軍至 10 隊。它的目標非常明確:借力 2028 洛杉磯奧運,把桌球打造成美國的下一個主流觀賞性運動。</p>
+      <p>MLTT 的打法,跟傳統的 TTBL、乒超完全不同——它不執著於「最高競技水準」,而是主打<strong>娛樂性、團隊對抗、媒體創新、明星包裝</strong>。它賭的是:在一個桌球底蘊近乎為零、但娛樂消費市場極度成熟的國家,只要把「觀賽體驗」做到位,就能憑空創造出一個全新的商業市場。這是一場高風險的豪賭,但它的早期成績,已足夠讓整個桌球世界重新思考:<em>這項運動的商業天花板,或許不在中國,而在那些懂得如何「賣比賽」的市場。</em></p>
+    </div>
+    <h3>未來走向:三條可能的路</h3>
+    <p>綜觀全局,桌球職業聯賽的未來,大致沿著三個方向演化,而它們彼此之間既競爭又互補。</p>
+    <p><strong>方向一:歐亞「競技型」聯賽的穩健深耕。</strong>德國 TTBL 與日本 T.League 將繼續扮演「選手收入支柱」與「最高競技水準」的角色。它們的成長不會爆炸性,但勝在穩定、扎實、能持續供養世界級選手。樊振東加盟德甲,正是這條路徑價值的最佳證明——它讓最頂尖的選手,在國家體制之外有了第二個高水準的舞台。</p>
+    <p><strong>方向二:美印「娛樂型」聯賽的市場開拓。</strong>MLTT 與 UTT 代表的是另一種邏輯——用資本與娛樂包裝,在桌球的「新大陸」憑空創造市場。如果 MLTT 能成功搭上 2028 洛杉磯奧運的順風車,它有機會證明:桌球的商業價值,可以不依賴中國而獨立生長。這將是對「中國壟斷壓抑全球商業價值」這個困局的<em>正面突破</em>。</p>
+    <p><strong>方向三:轉播整合與「破碎市場」的縫合。</strong>桌球職業聯賽長期的致命傷,是轉播權的破碎——每個聯賽各自為政,球迷想完整追蹤幾乎不可能(連德甲 TTBL 的國際轉播都一度難尋)。2025 年,專門的串流平台 <strong>Table Tennis TV(TTTV)</strong>在北美上線,一口氣整合了 MLTT 與德國 TTBL 的轉播權——這是桌球史上第一次,有平台試圖把分散各國的職業聯賽「縫合」成一個可訂閱的整體。如果這個方向成功,它或許能解決桌球商業化最底層的「通路」問題。</p>
+    <div class="pull"><p>桌球的未來,可能不在於誰能打敗中國,而在於「中國以外」能否長出一個不依賴中國、也能自我造血的職業生態。</p></div>
+    <div class="lens">
+      <span class="tag">系統透鏡 · 聯賽,才是這項運動真正的未來戰場</span>
+      <p>把前面所有的線索串起來,會得到一個清晰的結論:桌球這項運動真正的未來,不在 WTT 的國際賽事,而在<strong>各國的職業聯賽</strong>。原因有三。</p>
+      <p>第一,<em>聯賽提供選手最需要的「穩定收入」</em>——這正是 WTT 獎金模式無法給予、卻是職業化根基的東西。第二,<em>聯賽提供「結果的不確定性」</em>——由於頂尖中國選手分散在不同俱樂部、且各國聯賽水準接近,聯賽比賽往往比中國壟斷的國際賽事更有懸念、更有觀賞性。第三,<em>聯賽創造「地方認同」</em>——一支有城市、有主場、有球迷的球隊,是任何運動商業化最堅實的基礎,而這正是足球百年商業成功的核心,也是桌球過去最缺乏的一塊。</p>
+      <p>因此,桌球能否走出「一個國家壟斷+商業價值低迷」的雙重困局,答案或許就藏在這些聯賽裡:<strong>當足夠多的國家擁有夠強的職業聯賽,選手就有了體制外的生計,觀眾就有了不可預測的比賽,贊助商就有了願意投資的地方實體</strong>——到那時,這項運動才可能真正被整個世界共同擁有,而不只是被一個國家壟斷。</p>
+    </div>
+    <p style="font-size:.92rem;color:var(--faint);font-style:italic;text-align:center;margin-top:1.5rem">註:各聯賽成立年份、隊伍數、投資與成長數據整理自公開報導,以 2026 年 5 月為資料時點,後續可能變動。</p>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🏓 🏓 🏓</div>
+  <p>講完了統治者中國、商業治理的危機、獎金的真相與職業聯賽的版圖,<br>我們要轉向桌球世界裡<span class="hl">另一塊獨特的版圖</span>——<br>一個沒有舉國體制、卻屢屢能在大舞台上製造驚奇的地方:台灣。</p>
+</div>
+
+<!-- ===== 台灣專區 ===== -->
+<div class="taiwan">
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="tw-tab">🇹🇼 Taiwan Special Block</span>
+    <div class="ch-emoji" style="font-size:2.6rem">🏓</div>
+    <h2 class="act-title">台灣專區:小島,但能贏</h2>
+    <p class="act-sub">A Small Island That Punches Above Its Weight</p>
+    <div class="ornament">⚽ ✦ ⚽</div>
+  </div>
+  <div class="prose">
+    <p>在桌球的世界裡,台灣的故事是一個非常特殊的版本。它沒有中國的舉國體制、沒有日本的 T-League 與精英學院、沒有歐洲的職業俱樂部生態——它有的,是一群在<em>有限資源下苦練出來的個別天才</em>,以及一份對「以小搏大」的特殊堅持。從莊智淵到陳建安,從鄭怡靜到鄭先知,再到當今的<strong>林昀儒</strong>——台灣在桌球這項運動上的存在感,遠遠超過了它的人口與資源所能解釋的範圍。</p>
+    <h3>莊智淵:第一個讓世界看見台灣桌球的人</h3>
+    <p>在台灣桌球的歷史座標上,<strong>莊智淵</strong>是一個分水嶺式的存在。他是台灣桌球第一個真正世界級的代表——2002 年世界盃男單冠軍、2013 年世錦賽男雙冠軍(與陳建安)、四次奧運會代表台灣出征,職業生涯橫跨二十年以上。他在缺乏舉國體制與龐大資源的條件下,憑著自己的家族經營的桌球館「智淵桌球館」訓練至世界頂尖,本身就是一個近乎傳奇的勵志故事。</p>
+    <p>對台灣桌球的下一代而言,莊智淵不只是一位選手,而是一個證明——<em>證明在沒有中國體制的條件下,台灣也能站到世界頂端</em>。這份證明,直接形塑了後來林昀儒這一代選手的可能性。</p>
+    <h3>林昀儒:當代台灣桌球的旗幟</h3>
+    <p><strong>林昀儒</strong>,1998 年生,雙手橫拍兩面反膠的全面型打法,是當今世界男子桌球前十的固定成員。他的特點不是某一項極端的武器,而是<em>近乎完美的技術全面性</em>——發球、接發球、相持、攻防轉換,每一項都打磨到世界級的水準。在頂級對戰中,他常常被中國一線選手視為最難纏的對手之一。</p>
+    <p>林昀儒的高光時刻有許多:2020 東京奧運男單第四名(在準決賽以 3-4 惜敗於樊振東,被廣泛認為是當屆最精彩的比賽之一)、2024 巴黎奧運男單第四名(再次與獎牌擦身而過,但證明了他的穩定性)、混雙與鄭怡靜的合作多次擊敗中國組合。<strong>2025 年杜哈世錦賽</strong>,他與<strong>高承睿</strong>的男雙組合更上演了一場驚奇——擊敗法國世界第一勒布倫兄弟,殺進決賽,雖然最終敗給日本組合屈居亞軍,但這已是台灣桌球近年來最閃耀的世界舞台時刻。</p>
+    <div class="pull"><p>當其他國家用體制堆出冠軍,台灣是用一群選手的個人堅持,在世界舞台上反覆證明:小島,也能贏。</p></div>
+    <h3>鄭怡靜、陳思羽與台灣女子桌球</h3>
+    <p>台灣女子桌球同樣有一群值得書寫的選手。<strong>鄭怡靜</strong>是混雙王牌,與林昀儒的搭檔曾在 WTT 賽事擊敗過孫穎莎/王楚欽組合——這是少數能在大賽贏過中國「莎頭組合」的世界級對手之一。<strong>陳思羽</strong>則以左手橫拍打法、頑強的相持能力,撐起台灣女隊的另一根支柱。她們的存在,讓台灣女隊在團體賽事中始終具備威脅。</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">Taiwan · 男子</span>
+        <h5>林昀儒 · 完美技術</h5>
+        <p>雙反橫拍,全面型打法。世界前十常客,近兩屆奧運男單第四。</p>
+        <span class="model">全面型</span>
+      </div>
+      <div class="card">
+        <span class="flag">Taiwan · 男雙</span>
+        <h5>林昀儒 / 高承睿</h5>
+        <p>2025 杜哈世錦賽擊敗法國第一勒布倫兄弟,殺進男雙決賽,獲銀牌。</p>
+        <span class="model">大賽奇蹟</span>
+      </div>
+      <div class="card">
+        <span class="flag">Taiwan · 混雙</span>
+        <h5>林昀儒 / 鄭怡靜</h5>
+        <p>多次擊敗中國組合的世界級混雙搭檔,長期穩坐世界前列。</p>
+        <span class="model">混雙王牌</span>
+      </div>
+    </div>
+    <h3>結構的問題:沒有體制,如何延續?</h3>
+    <p>台灣桌球的故事,真正的隱憂不在當下,而在未來。當林昀儒這一代逐漸老去——他已經 27 歲,職業生涯黃金期所剩有限——下一代誰能接棒？台灣的桌球發展長期以來缺乏穩定的<em>商業聯賽與職業體系</em>。沒有像 Bundesliga、T-League 這樣的職業生態,優秀選手退役後的去處有限,新一代選手在進階階段也難以獲得高水平對戰經驗。</p>
+    <div class="nation" style="background:rgba(255,255,255,.08);border-color:var(--sky)">
+      <span class="tag" style="color:var(--sky)">⚐ 台灣模式的啟示</span>
+      <p style="color:rgba(243,246,250,.92)">台灣桌球的真正特色,是它證明了——<strong style="color:#fdf0c8">即便沒有國家機器,個別天才加上家族與民間支撐,仍能讓一個小島在世界級舞台上贏球</strong>。莊智淵的智淵桌球館、林昀儒一家對訓練的投入,本質上都是<em style="color:#9fc6ec">「家庭級的舉國體制」</em>:用一個家庭的全部資源,去支撐一個世界級選手的養成。</p>
+      <p style="color:rgba(243,246,250,.92)">但這是一個極度脆弱的模式。它能產出英雄,卻很難複製;能造就傳奇,卻不能保證接班。當其他國家在升級體制,台灣仍在依賴個別家族的犧牲——這份「以個人對抗體制」的浪漫,既是台灣桌球的光榮,也是它的長期隱憂。</p>
+    </div>
+    <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,246,250,.78);margin-top:2.5rem">
+      從莊智淵到林昀儒,<br>從智淵桌球館到 2025 杜哈世錦賽決賽,<br>台灣桌球用二十多年的時間,完成了一件至關重要的事——<br><strong style="color:var(--gold-bright)">證明小島也能贏,而且,可以贏很多次。</strong>
+    </p>
+  </div>
+</section>
+
+</div>
+<!-- 台灣專區結束 -->
+
+<!-- ===== 總帳 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">綜覽 · The Ledger</span>
+    <h2 class="act-title">十國桌球哲學的總帳</h2>
+    <p class="act-sub">How Each Nation Played the Game</p>
+    <div class="ornament">◆ 🏓 ◆</div>
+  </div>
+  <div class="prose">
+    <p>桌球這項運動的全球版圖,雖然遠不如足球那樣繁複,卻有著自己鮮明的層次。下面這張表,試著把各國的桌球哲學、優勢與內在矛盾並排攤開——從定義了第一個黃金時代的中歐強權,到當今霸主中國,再到正在崛起或重新尋找定位的歐洲、亞洲與美洲新生勢力。</p>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>勢力</th><th>桌球哲學</th><th>核心優勢</th><th>歷史角色</th><th>當前狀態</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>中國 🇨🇳</strong></td><td>舉國體制+陪練文化</td><td>板凳深度、情報、訓練密度</td><td>三十年的絕對統治者</td><td>霸權仍在,但首現裂縫</td></tr>
+        <tr><td><strong>日本 🇯🇵</strong></td><td>精英學院+耐心投資</td><td>T-League、青訓系統、海外練兵</td><td>最有耐心的挑戰者</td><td>張本兄妹、戶上隼輔正接班</td></tr>
+        <tr><td><strong>韓國 🇰🇷</strong></td><td>體能+鬥志</td><td>削球傳統、頑強相持</td><td>第二序列穩定力量</td><td>2025 混雙終結中國連霸</td></tr>
+        <tr><td><strong>台灣 🇹🇼</strong></td><td>個別天才+家族支撐</td><td>技術全面性、心理素質</td><td>無體制的「以小搏大」</td><td>林昀儒巔峰末期、接班憂慮</td></tr>
+        <tr><td><strong>新加坡 🇸🇬</strong></td><td>歸化+商業中心</td><td>WTT 大滿貫主辦地</td><td>桌球商業化的東南亞樞紐</td><td>馮天薇之後的接班焦慮</td></tr>
+        <tr><td><strong>瑞典 🇸🇪</strong></td><td>技術藝術主義</td><td>瓦德內爾時代的完美技術</td><td>歐洲最後的桌球王朝</td><td>新生代 Moregård 嶄露頭角</td></tr>
+        <tr><td><strong>德國 🇩🇪</strong></td><td>俱樂部+職業聯賽</td><td>Bundesliga 桌球聯賽</td><td>歐洲桌球的旗手</td><td>波爾退役後尋找接班</td></tr>
+        <tr><td><strong>法國 🇫🇷</strong></td><td>新生代街頭明星</td><td>勒布倫兄弟的直拍新打法</td><td>歐洲新世代希望</td><td>主場奧運光環助攻</td></tr>
+        <tr><td><strong>匈牙利/中歐 🇭🇺</strong></td><td>古典歐洲技術</td><td>1920-50 代的世錦霸主</td><td>桌球第一個黃金時代</td><td>歷史榮光,當前邊緣</td></tr>
+        <tr><td><strong>巴西 🇧🇷</strong></td><td>個人天賦突破</td><td>Calderano 一人扛起整國</td><td>南美桌球的孤本</td><td>2025 世錦賽男單亞軍</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:.92rem;color:var(--faint);font-style:italic;text-align:center;margin-top:1rem">註:此表為長期桌球哲學與歷史角色的綜覽,非當下即時戰力排名。</p>
+</section>
+
+<div class="div-orn">✦ 🏓 ✦</div>
+
+<div class="interlude reveal">
+  <div class="mark">🏓 ⚑ $</div>
+  <p>規則來自英國,技術來自中歐與日本,霸權來自中國,挑戰來自整個世界。<br><span class="hl">那麼,這顆從維多利亞餐桌起飛、撬動冷戰鐵幕的小球,下一段命運將屬於誰?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">小球,大棋:桌球的下一個十年</h2>
+      <p class="act-sub" style="color:rgba(243,246,250,.6)">The Next Decade of the Small Ball</p>
+      <div class="ornament" style="color:var(--gold-bright)">🏓 ✦ 🏓</div>
+    </div>
+    <div class="prose">
+      <p>一百二十年的旅程走到這裡,桌球這項運動正同時面對它史上最複雜的兩個轉折。一方面,中國長達三十年的<strong>絕對壟斷</strong>正在悄悄鬆動——不是崩潰,而是從「無人能敵」變成「最強者之一」。日本的耐心、台灣的天才、巴西的奇蹟、瑞典與法國的新生代,正同時在不同層面對中國的霸權構成新的挑戰。另一方面,主導商業化的<strong>WTT 體系</strong>正陷入它成立四年來最深的信任危機——當頂級球員選擇退出排名,當「強制參賽+低獎金」的矛盾被攤開,當治理透明度被全球質疑,這個運動的<em>商業化路徑本身</em>都成了問題。</p>
+      <h3>三個未解的問題</h3>
+      <p>展望下一個十年,桌球世界有三個結構性的未解問題,它們將共同決定這項運動的未來走向。</p>
+      <p><strong>第一,中國能否度過世代交替的陣痛?</strong>馬龍、樊振東、陳夢的退場,留下了一個巨大的真空。王楚欽、孫穎莎、林詩棟雖然強勢,但能否複製前輩們近乎無敵的統治力,還是未知數。如果新生代適應不夠快,中國的「絕對」標籤,或許將永久變成「相對」。</p>
+      <p><strong>第二,WTT 模式能否與球員達成新均衡?</strong>桌球的商業化是必然的,但目前的模式已被證明傷害最核心的參與者。如果 WTT 不能在獎金結構、強制參賽、治理代表性上作出實質性的改革,類似「樊振東事件」的爆發只會更頻繁,最終會打擊整個運動的全球職業競爭力。</p>
+      <p><strong>第三,「中國以外」能否建立一個可持續的職業生態?</strong>德國的 Bundesliga、日本的 T-League,目前是世界上最接近「成功職業桌球聯賽」的範例——但兩者規模都遠不足以支撐一個全球巡迴體系。如果世界不能在中國之外,建立起一套有自我造血能力的職業體系,那麼桌球將永遠是「一個國家+其他國家」的不平衡結構。</p>
+      <div class="lens">
+        <span class="tag">系統透鏡 · 桌球的雙重悖論</span>
+        <p>桌球面臨的本質困境,是一個雙重悖論。<strong>從競技層面看</strong>,它太被中國壟斷,以至於其他國家難以維持長期投入熱情——觀眾看到一面倒的比分會失去興趣,贊助商也不願意投錢給「贏不了」的隊伍。<strong>但從治理層面看</strong>,它又太脆弱,以至於想商業化的 WTT 必須依賴中國頂級選手出席來維繫吸引力——而為了確保出席,它選擇了強制與罰款,反而傷害了正當化的球員權益。</p>
+        <p>這兩個悖論其實是同一個問題的兩面:<em>當一項運動的競技權力與商業價值都過度集中於少數選手與一個國家,治理就會在「平衡」與「強制」之間進退失據</em>。要解開這個結,需要的不只是規則調整,而是整個生態的<strong>多極化</strong>——更多有競爭力的國家、更多獨立的職業聯賽、更多被尊重的球員代表。</p>
+      </div>
+      <div class="aside" style="border-left-color:var(--gold-bright);color:rgba(243,246,250,.7)"><span class="hl" style="color:var(--gold-bright)">桌球的諷嘆:</span>它是最早被一個國家完全擁有的運動,也是最晚才開始學習如何被多元擁有的運動。它撬動過冷戰的鐵幕,如今卻被自己的成功——「中國的成功」與「商業化的成功」——困在一座新的牆裡。</div>
+    </div>
+    <div class="principle">
+      <span class="tag">一百二十年的終極啟示</span>
+      <p>任何一項運動,當它的競技榮耀過度集中於一個國家、商業治理過度集中於一個體系時,它的長期生命力都將受到雙重壓縮——一邊是觀眾對單調比賽的疲勞,另一邊是核心參與者對不公治理的反彈。桌球這項運動的下一個十年,將不在於誰能擊敗中國,而在於它能否學會,被整個世界一起擁有。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,246,250,.78);margin-top:2.5rem">
+        從維多利亞客廳的雪茄盒,到佐藤博治的海綿膠皮(器材革命),<br>
+        從容國團的孟買金牌,到莊則棟的杭州織錦(東亞接管與乒乓外交),<br>
+        從瓦德內爾的瑞典王朝,到馬龍、樊振東、孫穎莎的中國世紀(王朝興替),<br>
+        從 2024 巴黎之後的裂縫,到 WTT 的信任危機(治理十字路口)——<br>
+        這顆直徑不到四公分的小球,把一百二十年的人類故事擲來擲去,<br>
+        而它最終想告訴我們的,或許只是這句話:<br><strong style="color:var(--gold-bright)">任何被一個國家完全擁有的東西,終將被整個世界重新爭奪。</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">🏓 ✦ 🏓</div>
+  <p>小球與大國 · 桌球一百二十年的權力史</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE DINNER TABLE TO THE WORLD STAGE · 1880s – 2026</p>
+  <p style="font-size:.78rem;margin-top:.8rem;opacity:.45">註:本文部分當下數據(2024–2025 賽事、WTT 規則、選手動態)整理自公開報導,以 2026 年 5 月為資料時點,後續可能持續變動。</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

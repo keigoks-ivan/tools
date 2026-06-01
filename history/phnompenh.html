@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>被清空、又被重新住滿的城：金邊，從歸零中走回來</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style></head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Phnom Penh · The City That Was Emptied, and Filled Again</span>
+    <h1>被清空、又被重新<span class="em">住滿</span>的城<br>金邊<br>從歸零中走回來</h1>
+    <p class="sub">從四臂灣畔一座因佛像而生的山丘古寺、一座吳哥之後的高棉新都、一顆法國人眼中的「亞洲明珠」,<br>到 1975 年被強制清空、淪為近乎無人的鬼城,再到倖存者一步一步走回來、重新住滿的城——<br>一座「經歷過最徹底的歸零、卻靠人民走回家而重生」之城的傷痛與韌性</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">前</span>面這十二座城,經歷過種種命運——被征服、被殖民、被轟炸、被覆寫、輸掉戰爭。但沒有一座城,經歷過金邊所經歷的那件事:<em>被自己的統治者,刻意地、徹底地清空</em>。1975 年 4 月,當勝利的軍隊開進金邊,他們做的第一件事,不是接管這座兩百萬人口的首都,而是在短短幾天之內,用槍口把<strong>全城的居民,通通趕了出去</strong>——趕進鄉下的集體農場。貨幣被廢除、市場被關閉、學校被拆毀、銀行被炸毀,連鈔票都像廢紙一樣散落街頭。一座繁華的首都,在幾天之內,變成了一座<strong>近乎無人的鬼城</strong>——而且這一空,就是將近四年。這不是戰敗,不是天災,而是一場以意識形態之名、對一座城的「主動歸零」。在人類所有的城市史裡,這都是極其罕見、極其慘痛的一頁。然而,金邊的故事,並沒有停在那片死寂的廢墟上。1979 年之後,當噩夢結束,倖存下來的人們,開始拖著傷痕累累的身體,一步一步地,<strong>走回這座空城</strong>。他們從幾乎一無所有開始,一磚一瓦,把這座被清空的城,重新住滿、重新喚醒。一座被歸零到幾乎不存在的城,如何能僅僅靠著倖存者「走回家」的腳步,重新活過來?讓我們從那座因傳說而生的山丘走起,在每個轉折處,聽一聽歷史那聲意味深長、也格外沉重的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">卍 ✦ 卍</div>
+
+<!-- ===== 序章：Penh 夫人與山丘 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Lady and the Hill</span>
+    <h2 class="act-title">一座因佛像而生的山丘</h2>
+    <p class="act-sub">Lady Penh, Wat Phnom, and the Confluence of Rivers</p>
+    <div class="ornament">☴ ☴ ☴</div>
+  </div>
+  <div class="prose">
+    <p>金邊的故事,始於一個溫柔的傳說,和一座小小的山丘。它坐落在三條大河交匯的所在——<strong>湄公河、洞里薩河與巴薩河</strong>在此相會,形成了著名的「<strong>四臂灣(Chaktomuk)</strong>」。這是一片水網縱橫、土地肥沃、四通八達的河濱要地。</p>
+
+    <h3>Penh 夫人的傳說</h3>
+    <p>相傳在十四世紀,一位富有的寡婦<strong>奔夫人(Lady Penh)</strong>,在洞里薩河畔拾得了四尊隨水漂來的佛像。她視之為神聖的徵兆,於是在河邊堆起一座小山丘(高棉語「phnom」即「山」之意),並在丘頂建起一座寺廟來供奉這四尊佛像。這座寺廟,就是<strong>塔山寺(Wat Phnom)</strong>;而這座城,也因此得名——「<strong>Phnom Penh</strong>」,意為「<em>奔夫人的山</em>」。一座城,以一位虔誠婦人與她拾得的佛像為起點——這個溫柔而神聖的開端,為金邊注入了一份深厚的<strong>佛教信仰</strong>底色。</p>
+
+    <h3>河流交匯的恩賜</h3>
+    <p>而四臂灣的地理,則給了金邊作為一座都城的物質根基。三河交匯,讓它成為控制湄公河流域、連接內陸與下游的<em>水運與貿易樞紐</em>;肥沃的河濱平原,讓它能供養一座都城;而它居中的位置,則讓它成為統治高棉這片土地的天然中樞。山丘上的塔山寺(信仰)與山丘下的三河交匯(地利),共同奠定了金邊作為一座古都的雙重根基。</p>
+    <div class="pull"><p>金邊的起點,是一位婦人、四尊佛像與一座小小的山丘——一個無比溫柔、虔誠的開端。誰也不會想到,這座因信仰而生的城,日後會經歷人類史上最徹底、最無情的一次「清空」。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 信仰,是一座城最深的底色</span>
+      <p>金邊「因佛像而生」的起源,揭示了一個關於「精神根基」的深刻道理:<strong>一座城最初的精神底色——它建城傳說裡所蘊含的信仰與價值——會成為一種深埋的力量,在最黑暗的時刻,默默地支撐著這座城與它的人民。</strong>金邊以塔山寺為名、以佛教信仰為魂,這份信仰,是它身世最深的底色。</p>
+      <p>這對應一個容易被忽略的洞見:<em>一個共同體所共有的精神信仰,在繁榮時或許只是背景,但在遭遇毀滅性的災難時,它往往是支撐人們活下去、並在災後重新凝聚的、最後也最堅韌的力量。</em>這份洞見,對金邊而言,有著格外沉重的分量。在它日後將要經歷的那場浩劫中,連佛教、連寺廟都一度被廢除、被摧毀;然而,深植於這個民族心中的佛教信仰與對生命的虔敬,卻並未被真正抹去——它在倖存者的心底蟄伏著,並在噩夢結束後,成為人們重建家園、療癒創傷、重新凝聚的精神支柱。一座城可以被清空,它的寺廟可以被關閉,但只要那份深植於人民心中的信仰與韌性還在,這座城,就還有重新活過來的種子。金邊溫柔虔誠的開端,埋下的正是這樣一顆種子。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">卍 ✦ 卍</div>
+  <p>山丘上的古寺見證著歲月,而當輝煌的吳哥王朝走向衰落,<br>高棉人需要一個新的中心——<br><span class="hl">於是這座因佛像而生的城,接過了一個古老帝國的香火。</span></p>
+</div>
+
+<!-- ===== 第一章：吳哥之後的新都 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · After Angkor</span>
+    <h2 class="act-title">接過吳哥香火的高棉新都</h2>
+    <p class="act-sub">The Fall of Angkor and a New Khmer Capital</p>
+    <div class="ornament">⚜ ✦ ⚜</div>
+  </div>
+  <div class="prose">
+    <p>金邊的崛起,與一個偉大帝國的衰落緊緊相連。在它之前,高棉文明的中心,是那座舉世聞名的<strong>吳哥(Angkor)</strong>——以吳哥窟為代表的吳哥王朝,曾是中南半島上最強盛、最輝煌的帝國,留下了人類建築史上的奇蹟。</p>
+
+    <h3>吳哥的衰落與遷都</h3>
+    <p>然而,到了十五世紀,輝煌的吳哥王朝逐漸衰落。在與西方暹羅(泰國)的長年戰爭壓力下,加上水利系統的衰退等多重因素,高棉的統治者最終放棄了吳哥,將都城向南遷移。而四臂灣畔、塔山寺所在的金邊,因其優越的河運位置與居中的形勢,成為新都的選擇之一。約在十五世紀中葉,金邊一度成為<strong>後吳哥時代高棉王國的新都</strong>——它接過了這個古老文明的香火,成為高棉人新的中心。</p>
+
+    <h3>動盪中的都城</h3>
+    <p>不過,金邊作為都城的早期歷史,並非一帆風順。在此後的數百年裡,高棉王國夾在兩個崛起的強鄰——西邊的<em>暹羅</em>與東邊的<em>越南</em>——之間,飽受擠壓與爭奪,國勢衰微,都城的地位也時有變遷。金邊雖然承接了吳哥的香火,卻是在一個遠不如吳哥強盛的、風雨飄搖的時代。它見證的,是一個曾經偉大的文明,在強鄰環伺中艱難求存的漫長歲月。直到十九世紀,金邊才在新的歷史力量介入下,重新確立了它作為高棉首都的穩固地位。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 接過香火的,未必接過輝煌</span>
+      <p>金邊承接吳哥香火的歷史,揭示了一個關於「傳承」的微妙真相:<strong>一個繼承者接過了前人的身份與香火,卻未必能接過前人的輝煌與強盛——它可能恰恰是在那個偉大時代已然落幕、整個文明正走向衰微的艱難時刻,接下了這份沉甸甸的傳承。</strong>金邊接過的,是吳哥的香火,卻也是高棉文明由盛轉衰、在強鄰夾縫中求存的命運。</p>
+      <p>這對應一個深刻的洞見:<em>傳承一份偉大的遺產,有時並不是接過一份榮耀,而是接過一份重擔——在前人的光芒已經黯淡、形勢已經逆轉的時候,默默地守護住那份不至於斷絕的香火。</em>金邊在後吳哥時代所扮演的,正是這樣一個「守護香火」的角色。它沒有吳哥的輝煌,它所處的是一個高棉文明被暹羅與越南反覆擠壓、艱難求存的時代;但正是它,在那段漫長而黯淡的歲月裡,守住了高棉作為一個獨立文明與民族的中心地位,讓這份香火不至於斷絕。這份「在衰微中守護傳承」的韌性,是金邊性格中很深的一層底色——它讓這座城習慣了在逆境中堅持,也為它日後在更慘烈的浩劫之後依然能夠重新站起,埋下了伏筆。一個民族能在最艱難的時候守住自己的中心,它就還有復興的希望。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚜ ✦</div>
+  <p>在強鄰夾縫中艱難求存的高棉,迎來了一個來自遠方的「保護者」。<br>法國人的到來,既是殖民,也意外地穩固了這座搖搖欲墜的都城——<br><span class="hl">並把它打造成了一顆閃耀的「亞洲明珠」。</span></p>
+</div>
+
+<!-- ===== 第二章：法國殖民與亞洲明珠 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Pearl of Asia</span>
+    <h2 class="act-title">法國人的金邊,與「亞洲明珠」的繁華</h2>
+    <p class="act-sub">French Protectorate, Grand Boulevards, and a Golden Age</p>
+    <div class="ornament">⚜ ✦ ⚜</div>
+  </div>
+  <div class="prose">
+    <p>十九世紀中葉,當高棉王國在暹羅與越南的夾縫中幾乎難以為繼時,一股來自遠方的力量介入了——法國。1863 年,柬埔寨成為<strong>法國的保護國</strong>;1865 年前後,法國人將金邊正式確立並穩固為柬埔寨的首都。對一個瀕臨被鄰國瓜分的王國而言,法國的「保護」雖是殖民,卻也意外地讓金邊作為首都的地位,得到了穩固。</p>
+
+    <h3>把古都改造成歐式都會</h3>
+    <p>法國人按照他們的審美,對金邊進行了大規模的改造。他們開闢<strong>寬闊的林蔭大道、興建歐式的別墅、官署與市場</strong>,把這座傳統的高棉河濱古都,改造成一座優雅的殖民都會。其中最具代表性的,是建於 1937 年、那座金黃色、裝飾藝術風格的<strong>中央市場(Phsar Thmei)</strong>,以及郵政總局、萊佛士皇家酒店等一系列建築。與此同時,輝煌的<strong>皇宮(Royal Palace)與銀殿(Silver Pagoda)</strong>也在這一時期得到營建與完善,延續著高棉王室的尊嚴。法式的優雅,與高棉的傳統,在金邊交融。</p>
+
+    <h3>獨立與「亞洲明珠」的黃金時代</h3>
+    <p>1953 年,在西哈努克親王(Norodom Sihanouk)的領導下,柬埔寨擺脫法國、贏得獨立。獨立後的金邊,迎來了一段璀璨的<strong>黃金時代</strong>。在西哈努克時代,金邊在文化、藝術、建築上都綻放出奪目的光彩——新高棉建築(New Khmer Architecture)蓬勃發展,音樂、電影、文化生活欣欣向榮。這座優雅、寧靜、充滿藝術氣息的城市,贏得了「<strong>亞洲明珠(Pearl of Asia)</strong>」的美譽。那是金邊最美好、最從容的歲月——一座古老的高棉古都,在獨立的陽光下,綻放出它現代的、迷人的風華。</p>
+    <div class="pull"><p>1960 年代的金邊,是公認的「亞洲明珠」——優雅、寧靜、充滿藝術與文化的氣息。沒有人能想到,僅僅十餘年後,這顆明珠就會被一場浩劫,徹底地清空、熄滅。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最美好的時光,往往不知道自己有多脆弱</span>
+      <p>金邊「亞洲明珠」的黃金時代,在後來的歷史對照下,顯得格外令人唏噓,它揭示了一個沉重的道理:<strong>一個共同體最繁榮、最從容、最歲月靜好的時光,往往恰恰也是它最不設防、最不知道自己有多脆弱的時候——因為身處盛世之中的人們,很難想像那份美好會以怎樣猝不及防的方式戛然而止。</strong></p>
+      <p>這對應一個發人深省、也令人警醒的洞見:<em>繁榮與安定,並不會自動地、永久地延續下去;它需要被珍惜、被守護;而當一個社會陷入內部的撕裂、外部的捲入(如金邊當時被捲入鄰國的戰爭)時,看似牢固的美好,可能在短短數年之內,就走向徹底的崩塌。</em>1960 年代「亞洲明珠」的金邊,沉浸在獨立後的優雅與從容裡,沒有人能預見,這座城即將被捲入越戰的延燒、陷入內戰的動盪,並最終迎來那場將它徹底清空的浩劫。回望這段黃金時代,它的美好與它隨後的悲劇,形成了整個系列裡最劇烈、最令人心碎的反差。它沉痛地提醒著我們:和平與繁榮,是何等珍貴、又是何等需要被用心守護的東西——因為一旦失去,要重新把它找回來,將要付出難以想像的代價。而這份代價,金邊即將以最慘痛的方式,親身承受。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">✦ ⚠ ✦</div>
+  <p>黃金時代的明珠,被捲入了鄰國戰爭的烽火與內戰的動盪。<br>1975 年 4 月,當勝利的軍隊開進這座城,<br><span class="hl">這座城將迎來人類城市史上,最不可思議的一道命令——「全部離開」。</span></p>
+</div>
+
+<!-- ===== 第三章：1975 被清空 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Emptying</span>
+    <h2 class="act-title">1975:一座被清空的首都</h2>
+    <p class="act-sub">April 17, 1975, and the Unimaginable Order</p>
+    <div class="ornament">⚠ ✦ ⚠</div>
+  </div>
+  <div class="prose">
+    <p>金邊的黃金時代,在 1970 年代被無情地終結。柬埔寨被捲入了越戰的延燒,西哈努克政權被推翻,國家陷入了慘烈的內戰。而在內戰的烽火中,一股極端的力量逐漸壯大——<strong>赤柬(紅色高棉,Khmer Rouge)</strong>。到 1975 年,這座城已擠滿了從鄉間逃避戰火而來的難民,人口膨脹到約兩百萬。</p>
+
+    <h3>1975 年 4 月 17 日</h3>
+    <p>1975 年 4 月 17 日,赤柬的軍隊開進了金邊。起初,許多飽受內戰之苦的市民,曾天真地以為戰爭終於結束、和平終於到來。然而,他們很快就發現,等待這座城的,是一場遠超想像的噩夢。</p>
+
+    <h3>「全部離開」:一道清空一座城的命令</h3>
+    <p>赤柬掌權後,做出了一個在人類城市史上都極其罕見的決定:他們以「美軍即將轟炸」等理由,下令<strong>全城居民立即撤離,前往鄉下</strong>。這道命令冷酷而不容置疑——無論老幼病弱,所有人都必須在極短的時間內離開家園。於是,在短短幾天之內,這座擁有約兩百萬人口的繁華首都,被<strong>強制地、徹底地清空了</strong>。人們被迫拋下家園、財產與熟悉的一切,湧入鄉間的集體農場,從此被迫從事無休止的強制勞動。</p>
+    <p>而被清空的,不只是人。赤柬要建立一個沒有城市、沒有貨幣、沒有市場、沒有私產的極端農業社會。於是,<strong>貨幣被廢除、銀行被炸毀、市場與學校被關閉、宗教被禁止</strong>——這座城賴以運轉的一切現代文明的機制,被連根拔起。被炸毀的銀行裡,作廢的鈔票像廢紙一樣,散落在空無一人的街道上。一座「亞洲明珠」,在幾天之內,被歸零成了一座<em>死寂的空城</em>。這是一場以意識形態之名,對一座城市文明的徹底清除。(在隨後將近四年的赤柬統治中,柬埔寨全國有數以百萬計的人民因強制勞動、飢餓、疾病與迫害而喪生——這是二十世紀人類最深重的悲劇之一。)</p>
+    <div class="pull"><p>歷史上,城市曾被戰火摧毀、被天災夷平、被征服者佔領;但金邊所經歷的,是另一種更不可思議的命運——它被自己的新統治者,以意識形態之名,主動地、徹底地「清空」。這在人類城市史上,幾乎是絕無僅有的一頁。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當一種極端的理念,要抹去一座城</span>
+      <p>金邊被清空的悲劇,揭示了一個沉痛而深刻的歷史教訓:<strong>對一座城、一個社會最徹底的摧毀,有時不是來自外敵的炮火,而是來自一種極端的、烏托邦式的意識形態——當一種理念狂熱到要徹底推翻現有的一切、要按照某個抽象的藍圖「從零重建」整個社會時,它所帶來的破壞,可能比任何戰爭都更為徹底、更為慘烈。</strong></p>
+      <p>這對應一個值得全人類永遠銘記的洞見:<em>任何以「徹底清除舊世界、從零建立完美新世界」為名的極端狂熱,往往以對活生生的人的巨大犧牲為代價——因為真實的人、真實的城市、真實的文明,都是在漫長歲月中一點一滴積累、無法也不應被「歸零重來」的。</em>金邊的悲劇,是人類為這種極端烏托邦狂熱所付出的、最慘痛的代價之一。它沉痛地警示著後人:一座城、一個社會所積累的一切——它的市場、學校、信仰、文化、以及生活在其中的每一個普通人的生命與尊嚴——都是無比珍貴、不容被任何抽象理念「清空」的。對這段歷史,我們唯有以最深的哀悼與最清醒的銘記來面對。而金邊真正動人的地方在於:即使經歷了如此徹底的歸零,這座城與它的人民,最終並沒有被抹去——他們以一種令人動容的韌性,走過了那片廢墟,重新回到了這裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 卍 ✦</div>
+  <p>空城死寂了將近四年,彷彿一座被歷史遺棄的廢墟。<br>但當噩夢終於結束,一件最樸素、也最動人的事情發生了——<br><span class="hl">活下來的人們,開始一步一步,走回這座空城。</span></p>
+</div>
+
+<!-- ===== 第四章：鬼城與走回來 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Walk Home</span>
+    <h2 class="act-title">鬼城四年,與倖存者走回來的腳步</h2>
+    <p class="act-sub">A Ghost City, 1979, and the People Who Came Back</p>
+    <div class="ornament">卍 ✦ 卍</div>
+  </div>
+  <div class="prose">
+    <p>從 1975 到 1979 年,金邊是一座<strong>近乎無人的鬼城</strong>。在將近四年的時間裡,這座曾經繁華的「亞洲明珠」,只剩下少數赤柬的管理人員。宏偉的建築日漸傾頹,國家博物館任由蝙蝠棲居,街道上雜草叢生。一座本該充滿生活與聲音的首都,陷入了死一般的寂靜。它彷彿被從地圖上、從文明的世界裡,整個抹去了。</p>
+
+    <h3>1979:噩夢的終結</h3>
+    <p>轉機出現在 1979 年初。越南軍隊進入柬埔寨,終結了赤柬的統治。當金邊被解放時,這座兩百萬人口的首都裡,據估計只剩下<strong>約十萬個活著的人</strong>。城市的肌體還在,但它幾乎是空的——空蕩、殘破、滿目瘡痍,承載著難以言說的創傷。</p>
+
+    <h3>走回來的腳步</h3>
+    <p>而接下來發生的事,是金邊整個身世中,最樸素、也最動人的一幕。當噩夢結束,那些在鄉間集體農場裡九死一生、僥倖活下來的人們,開始<strong>拖著傷痕累累的身體,一步一步地,走回金邊</strong>。他們從四面八方的鄉野,沿著道路,徒步走回這座他們曾被迫離開的城。他們大多一無所有——失去了家人、失去了財產、失去了過去的一切;許多人甚至認不出回家的路,或發現自己的家早已物是人非、被他人佔據。但他們還是回來了。因為這裡是首都,是家,是這個破碎的民族唯一能夠重新凝聚的中心。</p>
+    <p>於是,金邊以一種最原始、最艱難的方式,開始重新被「住滿」。沒有規劃,沒有資源,沒有現成的秩序——只有一群劫後餘生的人,憑著「活下去」與「重建家園」的本能,一點一點地,讓這座空城重新有了炊煙、有了聲音、有了生活。據統計,金邊的人口,從赤柬末期(1978 年)的約五萬人,到 1987 年已重新增長到約七十萬——這每一個數字的背後,都是一個倖存者,走回家、重新開始的故事。</p>
+    <div class="pull"><p>金邊的重生,沒有英雄的史詩,沒有勝利的凱旋。它最動人的一幕,只是一群劫後餘生、一無所有的普通人,默默地、一步一步地,走回那座空蕩的城——因為那裡,是家。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 重生,有時只是「走回家」這麼樸素</span>
+      <p>金邊倖存者「走回來」的這一幕,揭示了關於「重生」最樸素、也最有力量的真相:<strong>一座被徹底清空的城、一個被徹底摧毀的社會,它的重生,往往不是來自什麼宏大的計畫或英雄的壯舉,而是來自無數個普通人「想要活下去、想要回家」的、最樸素的本能——是他們一步一步走回家的腳步,讓一座死城,重新活了過來。</strong></p>
+      <p>這對應一個無比深刻、也無比溫暖的洞見:<em>人類的韌性,最終體現在最平凡的地方——在一無所有、失去一切之後,依然願意拖著傷痛的身體,走回廢墟,從零開始,重新點起一爐炊煙、重新養育下一代、重新把生活過下去。這種「活下去並重建」的本能,是任何極端的暴力與毀滅,都無法徹底摧毀的。</em>金邊的重生,正是這種人類韌性最純粹的體現。赤柬可以清空一座城、可以廢除貨幣與市場、可以摧毀一切文明的機制,但他們無法摧毀人們「想要回家、想要重新生活」的意志。當噩夢結束,正是這份最樸素的意志,驅使著倖存者一步步走回金邊,用他們的雙手與雙腳,把這座被歸零的城,重新填滿。在這個意義上,金邊是一座真正屬於「人民」的城——它不是靠統治者的偉業、不是靠天賦或財富而重生,而是靠最普通的人,用最樸素的「走回家」,把它從死亡裡,一點一點地,重新喚醒。這,是人類韌性所能寫下的、最動人的詩篇之一。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">卍 ✦ ✦</div>
+  <p>走回來的人們,讓空城重新有了炊煙;<br>但要從一片廢墟與深重的創傷中,重建一座真正的首都,<br><span class="hl">這個民族,還有漫長而艱難的路要走。</span></p>
+</div>
+
+<!-- ===== 第五章：重新住滿的城 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · Filled Again</span>
+    <h2 class="act-title">從廢墟到復甦:一座重新住滿的城</h2>
+    <p class="act-sub">Peace, Reconstruction, and a Capital Reborn</p>
+    <div class="ornament">卍 ✦ 卍</div>
+  </div>
+  <div class="prose">
+    <p>倖存者走回了金邊,但這座城與這個國家的重建之路,卻無比漫長。從廢墟中站起來,需要的不只是人口的回歸,更是和平的到來、創傷的療癒,以及整個社會秩序的重新建立。</p>
+
+    <h3>漫長的復原之路</h3>
+    <p>1980 年代,回到金邊的人們,在極度匱乏的條件下,艱難地重建著生活。然而,柬埔寨的動盪並未立即結束——內戰的陰影在邊境地區持續了相當長的時間。這座城與這個國家真正的<strong>全面和平與民族和解,要到 1990 年代末才逐步實現</strong>。在聯合國的介入、和平協議的簽署之後,柬埔寨終於走出了長達數十年的戰亂,金邊也才得以在一個和平的環境中,真正地休養生息、重建家園。</p>
+
+    <h3>銘記,然後前行</h3>
+    <p>重建之中,金邊選擇了一條艱難卻必要的路——<strong>銘記那段歷史,然後帶著傷痛前行</strong>。那座曾被赤柬改為酷刑監獄的學校(S-21),被保留為<em>吐斯廉屠殺博物館(Tuol Sleng)</em>;城郊的瓊邑克(Choeung Ek)等地,則成為悼念遇難者的紀念地。這些沉重的場所,不是為了沉溺於傷痛,而是為了讓這個民族、讓全世界永遠記住那段歷史,記住「絕不能讓它重演」。金邊以一種莊嚴的方式,把創傷轉化為了警示與哀悼——這本身,就是一種療癒與重生。</p>
+
+    <h3>重新跳動的首都</h3>
+    <p>進入二十一世紀,在和平的環境下,金邊終於重新煥發了生機。它再次成為柬埔寨的<strong>政治、經濟與文化中心</strong>。皇宮與銀殿恢復了往日的莊嚴,中央市場與塔山寺重新車水馬龍,洞里薩河畔的西索瓦碼頭(Sisowath Quay)再度熱鬧起來。城市人口持續增長,新的建築、商業與投資不斷湧現,街頭巷尾重新充滿了嘟嘟車的喧鬧與市井的生活氣息。這座曾被徹底清空、只剩十萬人的鬼城,重新成為了一座擁有數百萬人口、生機勃勃的首都。它,被重新住滿了。</p>
+    <div class="pull"><p>從只剩十萬人的鬼城,到重新住滿數百萬人的首都——金邊用幾十年的時間,完成了一場人類城市史上罕見的「從歸零中重生」。它證明了:只要人還在、只要願意走回來,再徹底的清空,都填得回來。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 銘記傷痛,是為了更好地前行</span>
+      <p>金邊的重建之路,揭示了一個關於「從創傷中重生」的深刻智慧:<strong>一個經歷過巨大創傷的共同體,真正的療癒與重生,既不是徹底遺忘那段傷痛(那會讓悲劇有重演的風險),也不是永遠沉溺於那段傷痛(那會讓人無法前行),而是「莊嚴地銘記它,然後帶著這份記憶,堅定地走向未來」。</strong>金邊保留吐斯廉與瓊邑克作為紀念地,正是這種智慧的體現——它選擇直面而非掩蓋、銘記而非遺忘。</p>
+      <p>這對應一個沉痛而充滿力量的洞見:<em>對待巨大的歷史創傷,最健康的態度,是把它轉化為一種清醒的集體記憶與永恆的警示——讓「絕不重演」成為一個民族共同的誓言,同時不讓傷痛綁架未來,而是帶著從傷痛中淬煉出的韌性與珍惜,去重建生活、走向明天。</em>金邊做到了這一點。它沒有假裝那段歷史不曾發生,也沒有讓自己永遠停留在悲傷裡;它把酷刑監獄變成了警示後人的博物館,把悼念融入了城市的記憶,然後,它捲起袖子,重新建設家園、重新讓街道充滿生活的喧鬧。這份「銘記傷痛、卻不被傷痛困住」的成熟與堅韌,是金邊留給世界的、最寶貴的精神財富之一。它告訴我們:一個共同體真正的強大,不在於它不曾受過傷,而在於它能否帶著傷疤,既不遺忘、也不沉溺,而是充滿尊嚴地,繼續好好地活下去。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">卍 ✦ ⚙</div>
+  <p>重新住滿的城,要面對一座復甦中首都的種種現實。<br>它如何在快速的成長中,既療癒過去,又規劃未來?<br><span class="hl">這是一座從廢墟中站起的城,正在學習的功課。</span></p>
+</div>
+
+<!-- ===== 第六章：城市規劃 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Blueprint</span>
+    <h2 class="act-title">在復甦中,重建一座城的骨架</h2>
+    <p class="act-sub">Rapid Growth, Heritage, and the River City</p>
+    <div class="ornament">⚙ ✦ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>金邊的城市規劃,有一個與其他城市都不同的起點:它幾乎是從一座<strong>被清空的、近乎歸零的城</strong>重新開始的。這既意味著巨大的創傷與斷層,卻也在某種意義上,給了這座城一張(被迫的)「相對空白」的紙——而如何在這張承載著沉重歷史的紙上,重新規劃一座宜居的現代首都,是金邊當代的課題。</p>
+
+    <h3>快速成長的復甦之城</h3>
+    <p>進入和平年代後,金邊迎來了快速的成長。隨著柬埔寨經濟的發展、城市化的推進與外國投資(尤其是來自區域鄰國的投資)的湧入,金邊的城市面貌迅速改變——<strong>新的高樓、商業綜合體、住宅區與基礎設施不斷興起</strong>。這座城正以「補課」般的速度,追趕著它在那失去的數十年裡所錯過的發展。但快速的、有時略顯粗放的成長,也帶來了交通堵塞、城市無序蔓延、以及如何平衡發展與宜居的挑戰。</p>
+
+    <h3>守護劫後倖存的遺產</h3>
+    <p>金邊規劃中一個格外珍貴的課題,是守護那些<strong>在浩劫中倖存下來的歷史遺產</strong>。皇宮、銀殿、塔山寺、中央市場、以及那些優雅的法式殖民建築與獨立後的「新高棉建築」——它們是這座城歷史記憶的載體,是它在被清空之後,連接「過去的自己」的珍貴紐帶。對一座曾經幾乎被抹去歷史的城而言,守護這些倖存的遺產,有著格外深刻的意義——它們是這座城「我曾經是誰、我從哪裡來」的證明。如何在快速的開發中保護好這些遺產,是金邊對自己歷史的一份責任。</p>
+
+    <h3>河流之城</h3>
+    <p>而金邊規劃的核心,始終離不開那三條孕育了它的河流。四臂灣的水網,既是它的恩賜(水運、景觀、漁業),也帶來了挑戰(雨季的洪澇)。如何治理河岸、防範水患、並讓城市與河流和諧共生,是這座河濱之城永恆的規劃命題。洞里薩河畔的西索瓦碼頭一帶,如今已成為金邊最有活力的濱河公共空間之一——河流,重新成為了這座復甦之城的生活舞台。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 守護倖存之物,是對歸零最好的回應</span>
+      <p>金邊守護「劫後倖存遺產」的努力,揭示了一個對「曾被歸零」的城市格外深刻的意義:<strong>對一座歷史曾被刻意抹去的城而言,那些在浩劫中倖存下來的遺產——每一座古寺、每一棟老建築——都不只是普通的文物,而是它「身份與記憶的倖存者」,是它對抗「被歸零」的最有力證明。守護它們,就是守護這座城「我是誰」的答案。</strong></p>
+      <p>這對應一個深刻的洞見:<em>當一個個體曾經被試圖「徹底抹去」時,那些倖存下來的、連接它與過去的紐帶,就擁有了超乎尋常的意義——它們證明了「歸零」並未真正成功,證明了在最徹底的清除之後,「我」依然延續著、依然與「過去的我」血脈相連。</em>這正是金邊守護遺產的深層動機。赤柬曾試圖清空這座城、抹去它的歷史與文明;而每一座倖存下來的皇宮、古寺、老建築,都是對這場「歸零」最無聲、也最有力的反駁——它們向世界宣告:你可以清空一座城,但只要還有遺產倖存、還有人記得,這座城的身份就不曾被真正抹去。金邊珍視這些倖存之物,正是在珍視它自己「未被歸零成功」的證明,在重新縫合它被暴力割裂的歷史。對一座從歸零中重生的城而言,守護過去,就是在確認:我回來了,而且,我依然是我。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚙ ✦ 卍</div>
+  <p>規劃描繪的是骨架,但金邊的繁華重心,<br>在被清空又重新住滿的過程中,圍繞著那些倖存的核心重新生長——<br><span class="hl">從古老的山丘古寺,到重新熱鬧起來的市場與河岸。</span></p>
+</div>
+
+<!-- ===== 第七章：商圈移轉 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Reviving Centre</span>
+    <h2 class="act-title">重新熱鬧起來:從塔山到河岸</h2>
+    <p class="act-sub">Wat Phnom, the Central Market, and the Riverside Reborn</p>
+    <div class="ornament">卍 ✦ 卍</div>
+  </div>
+  <div class="prose">
+    <p>金邊的繁華重心移轉,有一個獨特而動人的特質:它是在「被清空又重新住滿」的過程中,圍繞著那些<strong>劫後倖存的核心</strong>,重新生長、重新熱鬧起來的。它的每一處重新繁華的地方,都是一次「生活重新回到這裡」的見證。</p>
+
+    <h3>精神的原點:塔山寺(Wat Phnom)</h3>
+    <p>金邊的原點,始終是那座給了它名字的<strong>塔山寺(Wat Phnom)</strong>。這座建在城中小丘上的古寺,是金邊的精神地標與象徵。歷經浩劫,它依然矗立在那裡;當人們重新走回金邊,塔山寺周邊,也重新恢復了往日的香火與生活。它是這座城「從哪裡來」的根,也是它重生後,精神上重新凝聚的中心。</p>
+
+    <h3>商業的心臟:中央市場與老城</h3>
+    <p>金邊商業的心臟,是那座金黃色的<strong>中央市場(Phsar Thmei)</strong>,以及周邊的老城商業區。赤柬曾廢除一切市場與商業,而當這座城重新住滿,市場——這個最能代表「日常生活與商業活力」的場所——也最先重新熱鬧起來。中央市場、俄羅斯市場(Russian Market)等地重新車水馬龍,小販的叫賣、討價還價的聲音,重新填滿了這座曾經死寂的城。市場的復甦,本身就是金邊「生活回來了」最鮮活的證明。</p>
+
+    <h3>復甦的舞台:西索瓦河岸</h3>
+    <p>而當代金邊最有活力的公共空間,是洞里薩河畔的<strong>西索瓦碼頭(Sisowath Quay)一帶的河岸</strong>。這條沿河的林蔭大道,匯聚了餐廳、咖啡館、酒吧與旅店,是金邊人與遊客休閒、散步、看河景的所在。傍晚時分,河岸上人潮湧動、華燈初上——這幅生機勃勃的景象,與四十多年前那座死寂的空城,形成了無比鮮明的對照。同時,隨著城市的成長,新的商業中心、高樓與開發區也在向外圍與新區延展。但金邊繁華的根,始終深植於那座倖存的山丘古寺、那座重新熱鬧的市場、與那道重新喧鬧的河岸——它們是這座城「重新活過來」的最生動的舞台。</p>
+    <div class="pull"><p>對大多數城市,繁華的移轉是「錦上添花」;而對金邊,每一處重新熱鬧起來的市場與河岸,都是「失而復得」——是生活在被徹底清空之後,重新一點一點地,回到了這座城。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 日常的喧鬧,是重生最美的聲音</span>
+      <p>金邊繁華「重新熱鬧起來」的歷程,揭示了一個對這座城格外深刻的真相:<strong>對一座曾被徹底清空、陷入死寂的城而言,最珍貴、最動人的,不是什麼宏偉的建設,而是那些最平凡的「日常的喧鬧」——市場裡的叫賣、河岸邊的人潮、街頭的市井聲——因為這些聲音,正是「生活重新回到了這裡」最鮮活的證明。</strong></p>
+      <p>這對應一個無比溫暖的洞見:<em>我們常常以為繁華是高樓、是財富、是宏大的成就;但對一個經歷過死寂與清空的地方來說,真正的繁華、真正的幸福,其實藏在最平凡的日常喧鬧裡——藏在市場的討價還價、街角的家常閒談、傍晚河邊的散步之中。這些最普通的生活聲響,恰恰是一個社會「健康地、正常地活著」的最美證明。</em>金邊的繁華復甦,因此有著一層別的城市所沒有的、格外深刻的意義。當中央市場重新響起小販的叫賣、當西索瓦河岸重新坐滿閒談的人們,這不只是商業的繁榮,更是一個曾被剝奪了一切「正常生活」的民族,重新奪回了「平凡地、好好地過日子」的權利。那些曾被赤柬廢除的市場、被禁止的日常,如今重新喧鬧起來——這喧鬧本身,就是對那段死寂歷史最有力的告慰。金邊的故事告訴我們:能夠平凡地、熱鬧地、安穩地過日子,從來不是理所當然的;它是一份需要用巨大代價才能贏回、值得無比珍惜的幸福。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">卍 ✦ ☩</div>
+  <p>繁華講的是「生活回到哪裡」,但在這座重生的城裡,<br>生活著的,是一個共同背負著沉重記憶、又共同走向未來的民族——<br><span class="hl">他們是倖存者,也是這座城重新住滿的、最堅韌的力量。</span></p>
+</div>
+
+<!-- ===== 第八章：倖存者之城 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · A City of Survivors</span>
+    <h2 class="act-title">倖存者之城:記憶、信仰與年輕的未來</h2>
+    <p class="act-sub">The Survivors, the Faith, and a Remarkably Young Nation</p>
+    <div class="ornament">☩ ✦ ☩</div>
+  </div>
+  <div class="prose">
+    <p>金邊的人口與認同,被那段歷史深刻地烙印著,卻又展現出驚人的生命力。這是一座<strong>「倖存者之城」</strong>——生活在這裡的人們,以及他們的後代,共同背負著一段沉重的集體記憶,也共同擁有著重建家園的堅韌。</p>
+
+    <h3>共同的記憶,共同的療癒</h3>
+    <p>金邊(乃至整個柬埔寨)的人民,以<strong>高棉人(Khmer)</strong>為絕對主體。幾乎每一個經歷過那個年代的家庭,都承載著失去親人的傷痛——這份共同的創傷記憶,是這個民族難以言說、卻又緊緊相連的集體經驗。如何面對、療癒這份創傷,是這個社會長期的課題。而支撐著人們走過傷痛的,很大程度上是深植於高棉文化中的<strong>上座部佛教信仰</strong>——那份對因果、對慈悲、對生命輪迴的信仰,曾被赤柬廢除,卻在浩劫之後重新成為人們心靈的慰藉與凝聚的力量。重建後的金邊,寺廟重新香火鼎盛,僧侶重新行走街頭——信仰的回歸,是這座城療癒與重生的重要一環。</p>
+
+    <h3>多元的市井</h3>
+    <p>在高棉人的主體之外,金邊也有其多元的構成。歷史悠久的<strong>華人</strong>社群,長期是金邊商業的重要力量(儘管他們也在那段歷史中遭受了深重的苦難);此外還有占族(Cham,穆斯林)、越南裔等社群。這些族群,共同構成了金邊復甦後多元的市井生活——市場裡、街道上,不同的面孔與文化重新交匯,讓這座城重新有了生活的層次與活力。</p>
+
+    <h3>一個格外年輕的未來</h3>
+    <p>而金邊(與柬埔寨)最深刻的一個特徵,是它<strong>格外年輕的人口結構</strong>。由於那段歷史造成了一整代人的斷層與巨大的人口損失,戰後的柬埔寨經歷了人口的快速恢復,使得今天的柬埔寨,成為世界上人口最年輕的國家之一——極大比例的人口,是在那段歷史之後出生的年輕世代。這個現象有著深刻的雙重意涵:一方面,它是那段慘痛歷史所留下的人口傷疤;另一方面,這龐大的、沒有親歷過那段噩夢的年輕世代,正是金邊與柬埔寨<em>面向未來、充滿希望與活力的最大本錢</em>。一座從歸零中重生的城,如今把它的未來,交到了一個格外年輕的世代手中。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最深的傷口裡,也能長出最年輕的希望</span>
+      <p>金邊「倖存者之城」與「格外年輕」的雙重特質,揭示了一個關於「創傷與新生」的深刻而動人的真相:<strong>一個經歷過最深重創傷的共同體,它的身上既背負著沉重的記憶與傷疤,卻也往往孕育著一股格外蓬勃、格外珍惜生命的新生力量——在最深的傷口裡,也能長出最年輕、最有希望的未來。</strong></p>
+      <p>這對應一個充滿希望的洞見:<em>歷史的創傷不會自動消失,它會以各種方式(如人口的斷層)烙印在一個共同體身上;但生命本身擁有一種不可思議的、向前奔湧的力量——在浩劫之後,新的生命依然會誕生、成長,並帶著對和平與生活的格外珍惜,接過建設未來的接力棒。</em>金邊年輕的人口結構,正是這種力量的體現。那段歷史奪走了一整代人,留下了巨大的傷痛;但戰後出生、成長起來的年輕世代,如今構成了這個國家最龐大、最有活力的群體。他們大多沒有親歷那場噩夢,卻從父輩的記憶中,懂得了和平與生活的珍貴。這個年輕的世代,既是創傷的見證(他們的存在本身,就提醒著曾經失去的那一代),也是希望的所在(他們將決定這座城、這個國家的未來)。金邊的故事因此沒有停在悲傷裡——它把目光,投向了這群年輕人身上。一座從歸零中走回來的城,最終把它重生的希望,寄託在了那些在傷口之上、新生長出來的、年輕的生命身上。這,或許是對那段歷史,最有力量的回答:你可以清空一座城,但你清空不了生命重新生長、奔向未來的意志。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">卍 ✦ ◉</div>
+  <p>讀懂了金邊的清空、它的歸零與它從廢墟中走回來的重生,該把它放回那幅城市的地圖上了。<br>它與前面十二座城並列,<br><span class="hl">為這組東南亞城市的命運光譜,補上最沉重、也最關於「韌性」的一筆。</span></p>
+</div>
+
+<!-- ===== 第九章：十三城對比 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · Thirteen Archetypes</span>
+    <h2 class="act-title">十三座城,十三種命運原型</h2>
+    <p class="act-sub">And the City That Was Emptied to Nothing, and Came Back</p>
+    <div class="ornament">卍 ✦ ◉</div>
+  </div>
+  <div class="prose">
+    <p>金邊的性格,放進這十三座東南亞代表性城市的對照裡才最完整。它補上了一種前十二種原型都未曾觸及的、最沉重、也最關於「韌性」的一種——「<em>被徹底歸零、卻靠人民走回家而重生</em>」的原型。</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">金邊 · 歸零</div><div class="shift-body"><strong>靠「被清空後、人民走回家」而重生</strong>:1975 年被強制清空成鬼城,1979 後倖存者一步步走回。<em>命運:從只剩十萬人的死城,重新住滿成數百萬人的首都,證明了人類最樸素的韌性。</em></div></div>
+      <div class="shift-row"><div class="shift-era">胡志明市 · 向前</div><div class="shift-body"><strong>靠「失去後不肯回頭的活力」而重生</strong>。<em>命運:輸掉戰爭、丟掉名字,卻向前奔成經濟引擎。</em></div></div>
+      <div class="shift-row"><div class="shift-era">河內 · 堅守</div><div class="shift-body"><strong>靠「千年不移的堅守」而立</strong>。<em>命運:守住正統,成為一個民族不滅的心臟。</em></div></div>
+      <div class="shift-row"><div class="shift-era">泗水 · 英雄</div><div class="shift-body"><strong>靠「一次拒不屈服的犧牲」而立</strong>。<em>命運:成為印尼英雄之城。</em></div></div>
+      <div class="shift-row"><div class="shift-era">馬尼拉 · 覆寫</div><div class="shift-body"><strong>靠「被三個帝國連續重塑」而成</strong>。<em>命運:身份破碎層疊,在斷裂中追尋自己。</em></div></div>
+      <div class="shift-row"><div class="shift-era">雅加達 · 超載</div><div class="shift-body"><strong>靠「承載一國全部重量」而興</strong>。<em>命運:重到正在沉沒,決定遷都。</em></div></div>
+      <div class="shift-row"><div class="shift-era">曼谷 · 獨大</div><div class="shift-body"><strong>靠「保獨立 + 全國集中」而興</strong>。<em>命運:一城即一國,留下硬扛下沉。</em></div></div>
+      <div class="shift-row"><div class="shift-era">清邁 · 個性</div><div class="shift-body"><strong>靠「不複製首都、自成一格」而興</strong>。<em>命運:守住蘭納靈魂,逆襲為遊牧之都。</em></div></div>
+      <div class="shift-row"><div class="shift-era">馬六甲 · 天賦</div><div class="shift-body"><strong>靠「地利」而興</strong>。<em>命運:天賦被奪,轉為記憶之城。</em></div></div>
+      <div class="shift-row"><div class="shift-era">檳城 · 點子</div><div class="shift-body"><strong>靠「制度」而興</strong>。<em>命運:能力可遷移,重生為東方矽谷。</em></div></div>
+      <div class="shift-row"><div class="shift-era">吉隆坡 · 賭注</div><div class="shift-body"><strong>靠「資源+移民」而興</strong>。<em>命運:靠韌性重建,升格為首都。</em></div></div>
+      <div class="shift-row"><div class="shift-era">怡保 · 暴富</div><div class="shift-body"><strong>靠「單一礦藏」而興</strong>。<em>命運:錫崩盤後長眠,再靠慢活甦醒。</em></div></div>
+      <div class="shift-row"><div class="shift-era">新山 · 依附</div><div class="shift-body"><strong>靠「鄰居」而興</strong>。<em>命運:繫於新加坡,從依附走向整合。</em></div></div>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 重生的四種面孔:馬尼拉、胡志明市、河內、金邊</span>
+      <p>把十三座城並排,一個關於「災難與重生」的深刻光譜浮現出來。這個系列裡,有四座城都經歷過毀滅性的打擊,卻以四種不同的方式重生,構成了一組意味深長的對照:<em>馬尼拉被戰火抹除了物質記憶,在「斷裂」中拼貼重尋身份;胡志明市輸掉了戰爭,靠「向前不回頭」而重生;河內被反覆轟炸,靠「千年深根的堅守」而屹立;而金邊,則被「人為地、徹底地清空」,靠著倖存者「走回家」的最樸素腳步,從歸零中重生。</em></p>
+      <p>而金邊,是這組對照裡最極端、也最觸及人類韌性底線的一個。其他城市的災難,或來自外敵(轟炸、戰敗),或來自征服(覆寫);唯獨金邊,經歷的是被自己的統治者以意識形態之名「主動歸零」——這是一種更難以理解、也更徹底的毀滅。然而,恰恰是這座被歸零得最徹底的城,展現了一種最純粹、最不依賴任何外在條件的重生力量:它的重生,不靠地利、不靠財富、不靠向前的商業活力、甚至不靠千年的深根,而僅僅靠著最普通的人「想要活下去、想要回家」的本能。這對應整個系列關於「韌性」最深、也最樸素的一則洞見:<em>人類韌性的最底層、最不可摧毀的,不是任何宏大的能力或資源,而是那份「在失去一切之後,依然願意走回廢墟、從零開始、重新生活」的、最樸素的生命意志。</em>金邊用它從歸零中重生的故事證明:你可以摧毀一座城的一切——它的建築、它的市場、它的貨幣、它的文明機制——但只要還有人活著、還有人願意走回家,這座城就填得回來。在所有關於「一座城如何贏得自己」的故事裡,金邊的故事最沉重,卻也最有力地證明了:生命本身重新生長的意志,是任何毀滅都無法戰勝的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ★ ✦</div>
+  <p>讀懂了它的清空、它的歸零、它的走回來、它的重生,<br>最後一個問題自然浮現——<br><span class="hl">這座從廢墟中重新住滿的城,該如何把那份韌性,化為走向未來的力量?</span></p>
+</div>
+
+<!-- ===== 第十章：未來展望 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · What Comes Next</span>
+    <h2 class="act-title">重生之城的下一程</h2>
+    <p class="act-sub">Healing, Growth, and Carrying the Memory Forward</p>
+    <div class="ornament">★ ✦ ★</div>
+  </div>
+  <div class="prose">
+    <p>站在今天回望,金邊正處在一個從「重生」走向「成長」的位置上。它已經度過了那段從廢墟中艱難復原的歲月,如今要面對的,是一座快速成長中的首都的種種課題,以及如何把那段歷史的記憶與韌性,轉化為走向未來的力量。它的未來,大致沿著三條線索展開。</p>
+
+    <h3>線索一:駕馭快速的成長</h3>
+    <p>第一條,也是最現實的線索,是金邊能否駕馭它那「補課式」的快速成長。在和平與發展的環境下,金邊正經歷著快速的城市化、大量的外國投資與建設熱潮。這帶來了繁榮,卻也伴隨著交通堵塞、城市無序蔓延、貧富差距、以及如何讓發展惠及多數人等挑戰。如何把這份快速、有時略顯粗放的成長,引導向一個更有規劃、更宜居、更可持續、也更公平的方向,是金邊作為一座復甦中首都的關鍵課題。</p>
+
+    <h3>線索二:在發展中守護記憶與遺產</h3>
+    <p>第二條線索,是金邊能否在追逐發展的同時,守護好它的歷史記憶與倖存的遺產。對一座曾被「歸零」的城而言,這一點有著格外深刻的意義——它既要守護那些劫後倖存的物質遺產(古寺、皇宮、老建築),也要守護那段沉重歷史的記憶(吐斯廉、瓊邑克等紀念地),讓「絕不重演」的警示,能夠傳遞給沒有親歷過那段歷史的年輕世代。在快速的開發與時間的流逝中,如何不讓記憶被淡忘、不讓遺產被推平,是金邊對自己歷史的一份莊嚴責任。</p>
+
+    <h3>線索三:把韌性,交給年輕的未來</h3>
+    <p>第三條線索,最深刻、也最充滿希望——金邊能否把它從歸零中淬煉出的<strong>韌性</strong>,連同對和平的珍惜,傳遞給那個格外年輕的世代,並讓他們把這份力量,化為建設未來的動能。柬埔寨年輕的人口,是這座城最大的希望;這個沒有親歷噩夢、卻繼承了民族記憶的世代,將決定金邊與柬埔寨的未來。<em>如何讓這群年輕人,既銘記歷史、珍惜和平,又能充滿信心地、創造性地走向未來——這是金邊重生故事的下一章,也是最關鍵的一章。</em></p>
+    <div class="pull"><p>金邊能不能駕馭成長、守護記憶,務實的努力說了算;但它能不能真正走向光明的未來,最終取決於一件事——它能否把那份「從歸零中走回來」的韌性與對和平的珍惜,交到下一個年輕世代的手中。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把苦難淬煉成的智慧,傳給下一代</span>
+      <p>金邊的未來課題,最終指向一個關於「傳承」的深刻命題:<strong>一個經歷過巨大苦難的共同體,它最重要的任務,不是讓下一代永遠活在苦難的陰影裡,也不是讓他們徹底遺忘那段歷史,而是把從苦難中淬煉出的智慧——對和平的珍惜、對生命的敬重、對極端理念的警惕、以及「從零開始也能重建」的韌性——傳遞給那個年輕的、面向未來的世代。</strong></p>
+      <p>這給出整個系列關於「韌性與傳承」最終、也最溫暖的一則洞見:<em>苦難本身沒有意義,但一個共同體如果能從苦難中淬煉出智慧與韌性,並把它傳給下一代,那麼那些逝去的苦難,就不會白白地逝去——它們會化為一個民族面向未來的清醒、珍惜與力量。</em>金邊的故事,最終是一個關於「傳承」的故事。經歷過那段歷史的一代人,正在老去;而那個格外年輕、沒有親歷噩夢的世代,正在成長為這座城的主人。金邊最深刻的未來課題,是如何在這兩代人之間,完成一場至關重要的傳承——讓年輕人既不被歷史的悲傷所壓垮,也不因未曾親歷而遺忘;讓他們帶著對和平的珍惜、對生命的敬重,以及祖輩「從歸零中走回家」的那份不屈韌性,自信地建設一個更好的未來。一座從廢墟中重生的城,它最了不起的成就,將不只是它重新住滿了人,更是它能否把那份用巨大代價換來的智慧與韌性,完整地、溫暖地,交到下一代手中。當它做到這一點,金邊就不只是「活了過來」,而是真正地,把苦難,轉化成了一個民族走向未來的、永恆的力量。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">卍 ★ 卍</div>
+  <p>一座因佛像而生的山丘,一顆閃耀的亞洲明珠,一場徹底的清空,一群走回家的人。<br>當我們把這一切收攏,終於可以回答最初那個問題——<br><span class="hl">一座被歸零到幾乎不存在的城,最終教會了我們什麼?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的金邊</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">What a City Emptied to Nothing, and Filled Again, Teaches Us</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ 卍 ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的金邊之所以是這個模樣,是四層層層相扣的原因疊加而成的——每一層,都對應著本篇的一段旅程。</p>
+
+      <h3>第一層:一座因信仰而生的城</h3>
+      <p>一切的源頭,是<strong>信仰與河流</strong>。一位婦人拾得四尊佛像、堆起一座山丘、建起塔山寺,給了這座城名字與虔誠的佛教底色;而湄公河等三河交匯的四臂灣,則給了它作為一座古都的地利。信仰與地利,是金邊最初的根。</p>
+
+      <h3>第二層:從吳哥香火,到亞洲明珠</h3>
+      <p>接著是<strong>傳承與繁華</strong>。十五世紀吳哥衰落後,金邊接過了高棉文明的香火,在強鄰夾縫中守護著一個民族的中心;而在法國殖民與獨立後的西哈努克時代,它被打造、綻放成一顆優雅迷人的「亞洲明珠」,迎來了它的黃金時代。</p>
+
+      <h3>第三層:1975,被徹底清空</h3>
+      <p>然後是<strong>歸零</strong>。1975 年,赤柬開進金邊,在幾天之內把這座兩百萬人口的首都強制清空,廢除貨幣、市場、學校與宗教,讓它淪為一座近乎無人的鬼城將近四年。這是人類城市史上極其罕見的、以意識形態之名對一座城的「主動歸零」,也是這個民族最深重的傷痛。</p>
+
+      <h3>第四層:走回家,重新住滿</h3>
+      <p>最後是<strong>重生</strong>。1979 年噩夢結束時,城裡只剩約十萬人;而倖存者們,拖著傷痕累累的身體,一步一步地走回這座空城,憑著最樸素的「想要活下去、想要回家」的意志,把它重新住滿。從只剩十萬人的死城,到今天數百萬人生機勃勃的首都——金邊完成了一場從歸零中重生的奇蹟。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 你清空不了生命重新生長的意志</span>
+        <p>所以,今天的金邊是什麼?它是<strong>一座「被徹底歸零、卻靠人民走回家而重新活過來」的城</strong>——它經歷了人類城市史上最徹底的一次清空,被剝奪了一切;但它最終證明了,只要還有人活著、還有人願意走回來,再徹底的歸零,都填得回來。</p>
+        <p>它的傷痛與它的韌性,是同一段歷史的兩面;它的死寂與它的喧鬧,是同一座城的兩面;它的歸零與它的重生,是同一個民族不屈意志的兩面。<em>金邊最深刻的真相是:它把人類韌性的證明,推到了一個最極端、也最樸素的底線——當一座城失去了一切(建築、市場、貨幣、文明的機制,甚至幾乎失去了它的全部人口),它靠什麼重生?金邊的答案,不是地利、不是財富、不是向前的活力、也不是千年的深根,而僅僅是最普通的人「想要活下去、想要回家」的、最樸素的生命意志。它證明了:你可以摧毀一座城的一切,可以把它歸零到幾乎不存在,但你摧毀不了、清空不了生命本身重新生長、重新走回家的意志。在這個系列的所有城市裡,金邊的故事最沉重、最令人心碎,卻也最有力地照亮了人類最底層、最不可摧毀的那份韌性——那份在失去一切之後,依然願意從零開始、重新好好活下去的勇氣。這,就是一座從歸零中走回來的城,用它最深的傷痛與最樸素的重生,留給世界的、永恆的回聲。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">一位婦人與四尊佛像給了它名字,吳哥的香火與法國的繁華給了它黃金時代,一場浩劫把它徹底清空成鬼城;而當噩夢結束,一群一無所有的倖存者,一步一步地走回了家——金邊的故事,是一場關於「被歸零到幾乎不存在、卻靠人民走回家而重生」的、最樸素也最動人的長跑。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座城的終極啟示</span>
+      <p>人類韌性最底層、最不可摧毀的,不是任何宏大的能力、資源或天賦,而是那份「在失去一切之後,依然願意走回廢墟、從零開始、重新好好生活」的、最樸素的生命意志。金邊被徹底地清空、歸零到幾乎不存在,卻靠著倖存者一步一步走回家的腳步,重新活了過來。它證明了:你可以摧毀一座城的一切,卻摧毀不了生命重新生長的意志。而一個經歷過巨大苦難的共同體,最了不起的成就,是能把那段歷史銘記為警示、把苦難淬煉成韌性,並溫暖地交到下一個年輕世代的手中——讓逝去的不白白逝去,讓重生的力量,代代相傳。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從四臂灣畔一座因佛像而生的山丘古寺,<br>
+        到吳哥之後的高棉新都、法國人眼中優雅的「亞洲明珠」,<br>
+        從 1975 年那道清空一座城的命令、將近四年的死寂鬼城,<br>
+        到倖存者拖著傷痛、一步一步走回家的腳步,<br>
+        再到從只剩十萬人、重新住滿成數百萬人的生機之城——<br>
+        這段交織著信仰、繁華、歸零與重生的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        一座被歸零到幾乎不存在的城,<br>靠人民走回家,證明了生命不可被清空的韌性。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">卍 ✦ ★</div>
+  <p>被清空、又被重新住滿的城 · 金邊:從歸零中走回來</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">THE CITY THAT WAS EMPTIED, AND FILLED AGAIN · 1979 – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

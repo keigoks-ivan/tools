@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>石油、蘇丹與「天佑之邦」：汶萊六百年的身世</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Oil, the Sultan &amp; the Abode of Peace</span>
+    <h1>石油、蘇丹與<span class="em">天佑之邦</span><br>汶萊<br>六百年的身世</h1>
+    <p class="sub">從統治整個婆羅洲的海上帝國,到富甲一方的彈丸之國——<br>一部關於「一個前現代王權,如何靠石油在現代世界存續」的追問</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼這個東南亞最小的國家之一,人口僅約四十五萬,卻是全世界唯一的<em>絕對君主制伊斯蘭王國</em>?為什麼它的人民不必繳稅、享有免費的醫療與教育,卻沒有選舉、沒有國會、不能批評蘇丹?答案不在當下,而在六百年的起落裡。汶萊曾是一個統治整個婆羅洲北部、勢力遠及菲律賓南部的海上帝國;後來在白人拉惹與英國的蠶食下,縮成了兩塊飛地般的彈丸之地,幾乎要從地圖上消失。然後,1929 年,地底湧出的黑色黃金——<strong>石油</strong>——徹底改寫了它的命運。這不是一個關於「人民如何爭取權利」的故事,而是一個關於「<em>一個古老的蘇丹王權,如何用地底的財富,在現代世界買來了穩定、虔誠與存續</em>」的故事。讓我們從頭走一遍,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Abode of Peace</span>
+    <h2 class="act-title">婆羅洲北岸的「天佑之邦」</h2>
+    <p class="act-sub">A Small Kingdom of Water, Jungle, and the Sea</p>
+    <div class="ornament">☾ ☾ ☾</div>
+  </div>
+  <div class="prose">
+    <p>在世界第三大島婆羅洲(Borneo)的西北角,有一個被熱帶雨林與南海環抱的小邦。它的全名是「<strong>Negara Brunei Darussalam</strong>」——「Darussalam」是阿拉伯語,意為「<em>和平之邦、天佑之邦</em>」。一個以「和平」與「神的庇佑」自我命名的國度,這個名字,本身就透露了它最深的自我期許:在動盪的世界裡,做一方安寧而蒙福的淨土。</p>
+
+    <h3>水上的千年聚落</h3>
+    <p>汶萊的文明,從水上開始。它的首都斯里巴加灣,有一個被稱為「<strong>甘榜亞逸</strong>」(Kampong Ayer,意為「水村」)的傳奇聚落——成千上萬的高腳屋建在河口的水面上,以木橋與舟船相連,<em>已經連續有人居住超過一千三百年</em>,被譽為世界上最古老、最大的水上村落之一。它是汶萊作為一個古老海洋民族的活見證:這個民族的根,從一開始就深植於河流、海洋與貿易之中,而非陸地與農耕。</p>
+
+    <h3>馬來—伊斯蘭海洋文化的底色</h3>
+    <p>汶萊的居民,主體是<strong>馬來人</strong>,屬於與馬來西亞、印尼相通的馬來海洋文化圈。早在中國唐宋時期,中國的文獻裡就記載著與「渤泥」(汶萊)的貿易往來。憑藉著扼守婆羅洲北岸、面向南海航道的區位,汶萊很早就成為區域貿易網絡中的一個節點。海洋,既是它的糧倉,也是它通往世界的道路——而這條道路,終將為它帶來伊斯蘭、帶來帝國的輝煌,也帶來帝國崩解的危機。</p>
+    <div class="pull"><p>一個建在水上的國度,一個以「和平之邦」自命的小邦——汶萊的故事,從河口那一片連綿千年的高腳屋開始。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 小,未必等於弱</span>
+      <p>汶萊給整個系列帶來一個獨特的視角:<strong>國家的大小,從來不直接等於它的命運。</strong>這個今天看來如此袖珍的小邦,曾經是統治半個婆羅洲的帝國;而它今天的富裕程度,更遠遠超過許多比它大上百倍的國家。</p>
+      <p>汶萊的身世,因此是一則關於「<em>規模與命運</em>」的耐人尋味的寓言。它提醒我們,在歷史的長河裡,決定一個政治體興衰的,往往不是它的面積或人口,而是它所處的<strong>位置</strong>(扼守貿易要道)、它所掌握的<strong>資源</strong>(後來的石油),以及它的統治者所做的<strong>選擇</strong>。這個水上的小邦,將用六百年的起落,為我們示範這三者如何交織出一個國家的命運。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☾ ✦ ☆</div>
+  <p>很少有人記得,這個今天的彈丸小國,<br>曾經是一頭統治整個婆羅洲、勢力遠及馬尼拉的海上巨獸。<br><span class="hl">那是汶萊的黃金時代——一個帝國的記憶。</span></p>
+</div>
+
+<!-- ===== 第一章:海上帝國 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Maritime Empire</span>
+    <h2 class="act-title">海上帝國:統治婆羅洲的黃金時代</h2>
+    <p class="act-sub">When Brunei Ruled an Empire from Borneo to Manila</p>
+    <div class="ornament">☾ ☾ ☾</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天汶萊的「小」,必須先看見它曾經的「大」。在十五到十七世紀,汶萊蘇丹國迎來了它的<strong>黃金時代</strong>,成為東南亞海域一個不容小覷的強權。</p>
+
+    <h3>博爾基亞蘇丹與帝國的巔峰</h3>
+    <p>汶萊國力的頂點,出現在第五位蘇丹<strong>博爾基亞(Bolkiah,約 1485–1521 在位)</strong>的治下。在他的時代,汶萊的勢力範圍據稱涵蓋了<em>幾乎整個婆羅洲島的沿海地區、蘇祿群島,乃至菲律賓南部</em>——它甚至一度將勢力伸入馬尼拉灣,在當地建立據點。這個海洋帝國靠著強大的水軍與繁榮的貿易稱霸一方,是當時南海世界最重要的馬來伊斯蘭強權之一。</p>
+
+    <h3>麻六甲陷落,意外的繁榮</h3>
+    <p>一個意想不到的歷史事件,助長了汶萊的繁榮。1511 年,葡萄牙人攻陷了麻六甲——那個原本的區域貿易與伊斯蘭中心。大批穆斯林商人為了躲避葡萄牙人,被迫改道,轉而尋求其他港口,而<strong>汶萊正是最大的受益者之一</strong>:它承接了部分原屬麻六甲的貿易與商人,聲勢更盛。1521 年,麥哲倫環球船隊的倖存者經過汶萊,隨行的航海家皮加費塔(Pigafetta)留下了驚嘆的記載,描繪了一座富庶繁華、宮殿宏偉的城市。</p>
+    <div class="pull"><p>當麻六甲在葡萄牙的砲火下陷落時,汶萊反而迎來了它的高峰——一個帝國的繁榮,有時建立在另一個中心的崩塌之上。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 被遺忘的帝國記憶</span>
+      <p>汶萊的黃金時代,對理解這個國家至關重要——因為<strong>這段「曾經是帝國」的記憶,從未在汶萊的自我認同中消失</strong>。今天統治汶萊的蘇丹,正是博爾基亞那個王朝的<em>直系延續</em>——這是一條從十五世紀綿延至今、超過六百年從未中斷的王統,是全世界現存最古老的王朝之一。</p>
+      <p>這份「古老而連續的王權」,是汶萊蘇丹制度神聖性與正當性的最深根源。當別國的傳統王室在殖民與革命中被廢黜時,汶萊的蘇丹卻能宣稱自己是一個延續了六百年、曾統治整個婆羅洲的偉大王朝的繼承人。<em>這份漫長而輝煌的歷史記憶,正是今日這個絕對君主制,得以在二十一世紀依然屹立不搖的文化地基。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☪ ✦ ☪</div>
+  <p>帝國的輝煌,需要一個神聖的根基來支撐。<br>而這個根基,隨著貿易的商船,從西方的海上而來——<br><span class="hl">它是伊斯蘭,它將把一位馬來酋長,變成「真主在人間的影子」。</span></p>
+</div>
+
+<!-- ===== 第二章:伊斯蘭與蘇丹制度 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Coming of Islam</span>
+    <h2 class="act-title">伊斯蘭、蘇丹,與神聖王權的確立</h2>
+    <p class="act-sub">How a Chieftain Became a Sultan, and a Sultan Became Sacred</p>
+    <div class="ornament">☪ ☪ ☪</div>
+  </div>
+  <div class="prose">
+    <p>汶萊王權的神聖性,以及它今日國體的根,都奠基於一件大事:<strong>伊斯蘭的降臨</strong>。和印尼、馬來西亞一樣,伊斯蘭主要透過<em>貿易</em>傳入汶萊——隨著穆斯林商人沿著海上絲路而來,這個信仰逐漸在汶萊的港口紮根。</p>
+
+    <h3>第一位蘇丹的皈依</h3>
+    <p>汶萊歷史的關鍵轉折,是它的統治者皈依了伊斯蘭。根據傳統,汶萊的第一位統治者在約十四世紀皈依伊斯蘭,採用了「<strong>蘇丹</strong>」(Sultan)的稱號——這標誌著汶萊從一個本土的馬來酋邦,轉變為一個<em>伊斯蘭王國</em>。皈依伊斯蘭,不只是信仰的轉變,更是一項精明的政治與商業決策:它讓汶萊得以融入橫跨印度洋的龐大穆斯林貿易共同體,也為統治者的權力,披上了一層全新的、來自真主的神聖外衣。</p>
+
+    <h3>從酋長到「真主的影子」</h3>
+    <p>伊斯蘭為汶萊的王權帶來了脫胎換骨的轉變。在伊斯蘭的政治傳統中,蘇丹不只是一個世俗的統治者,更是<strong>伊斯蘭信仰的守護者、真主意旨在人間的執行者</strong>(在某些傳統中被稱為「真主在塵世的影子」)。這套觀念,把汶萊的王權從單純的部族首領,提升為一個兼具<em>世俗權力與宗教神聖性</em>的至高存在。統治者既是政治的元首,也是宗教的領袖——這種<strong>政教合一</strong>的王權模式,從此深深烙印在汶萊的國體之中。</p>
+    <div class="pull"><p>皈依伊斯蘭,讓汶萊的統治者獲得了雙重的權柄:一手握著世俗的權力,一手握著真主的授權——這個結構,六百年後依然是汶萊的核心。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 神聖與權力的結合</span>
+      <p>伊斯蘭之於汶萊王權,提供了一個關於「<strong>正當性</strong>」的深刻範例。一個統治者的權力若只靠武力或財富,終究是脆弱的;但若它能與一套<em>神聖的信仰體系</em>結合,讓人民相信「服從蘇丹」就等同於「順從真主的安排」,那麼這份權力就獲得了最深厚、最難以撼動的正當性根基。</p>
+      <p>這正是汶萊與本系列其他國家的關鍵分野。泰國的王權靠佛教的神聖光環,而汶萊的王權靠伊斯蘭的神聖授權。這份「<em>政教合一</em>」的傳統,在六百年後將被現任蘇丹提煉成國家的官方意識形態(我們會在後面詳談),成為這個絕對君主制最堅實的精神支柱。當一個王權同時是宗教的權威時,反對這個王權,就幾乎等於反對信仰本身——這正是汶萊王權如此穩固的深層秘密。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>盛極而衰。十七世紀後,這頭海上巨獸開始衰老。<br>內戰、海盜、繼承之爭啃噬著它的肌體。<br><span class="hl">然後,一個英國冒險家來了,他將從帝國身上,切走最大的一塊肉。</span></p>
+</div>
+
+<!-- ===== 第三章:帝國崩解 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Empire Dismembered</span>
+    <h2 class="act-title">海盜、白人拉惹,與帝國的肢解</h2>
+    <p class="act-sub">How a British Adventurer Carved Up an Empire</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>沒有任何帝國能永遠強盛。從十七世紀末開始,汶萊蘇丹國陷入了長期的衰落。內部的<strong>王位繼承之爭、內戰、以及橫行沿海的海盜</strong>,不斷消耗著帝國的元氣。中央的權威日益衰微,地方的領主與部族離心離德。汶萊,正一步步走向它最脆弱的時刻——而就在此時,西方的力量到來了。</p>
+
+    <h3>詹姆斯·布魯克:自立為王的英國冒險家</h3>
+    <p>1839 年,一個名叫<strong>詹姆斯·布魯克(James Brooke)</strong>的英國冒險家來到婆羅洲。當時汶萊蘇丹正為砂拉越(Sarawak)地區的一場叛亂焦頭爛額,布魯克出手協助平定了叛亂。作為回報,他在 1841 年獲封為砂拉越的「<strong>拉惹</strong>」(Rajah,即統治者)——一個英國人,就這樣成了汶萊領土上的世襲君主,史稱「<em>白人拉惹</em>」(White Rajah)。更關鍵的是,布魯克及其後繼者,此後<strong>不斷地蠶食、擴張</strong>,一塊接一塊地從汶萊蘇丹手中奪取更多領土,把砂拉越經營成一個獨立的王國。</p>
+
+    <h3>被切成兩半的彈丸</h3>
+    <p>汶萊的肢解是全方位的。除了被白人拉惹奪走的砂拉越,<strong>英國</strong>在 1846 年取得了納閩島(Labuan);東北邊的沙巴(北婆羅洲),則被<strong>英國北婆羅洲公司</strong>蠶食。到了十九世紀末,那個曾經統治整個婆羅洲的海上帝國,已經萎縮成兩塊<em>被砂拉越的領土從中隔開、彼此不相連的飛地</em>——這就是今天汶萊那個奇特的「一國兩塊」國土形狀的由來。一個帝國,在數十年間,被切割得只剩下殘餘的彈丸。</p>
+    <div class="pull"><p>汶萊今天那塊被砂拉越從中切開、一分為二的國土,是它帝國崩解最直觀的傷疤——每一道邊界,都是一塊被割走的肉。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 衰落如何招來掠奪</span>
+      <p>汶萊帝國的崩解,揭示了一條殘酷的地緣政治規律:<strong>當一個政治體陷入內部的衰弱與失序時,它就會像受傷的獵物一樣,引來外部掠食者的環伺。</strong>布魯克之所以能輕易地一塊塊割走汶萊的領土,正是因為汶萊當時已經虛弱到無力反抗、甚至需要外人來幫忙平亂。</p>
+      <p>這與本系列其他國家的故事形成了微妙的對照。泰國在面對列強時,靠著主動現代化與高明外交「保住了核心」;而衰弱的汶萊,卻只能眼睜睜看著帝國被肢解,淪為彈丸。<em>同樣是面對西方的壓力,一個國家內部的強弱與領導者的智慧,決定了它是「彎曲求存」還是「任人宰割」。</em>汶萊的教訓是:當你失去了自我強盛的能力,你就只能任由別人決定你的命運——而這份慘痛,將直接推著它,在下一章投入英國的「保護」。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>眼看就要被砂拉越徹底吞併、從地圖上消失,<br>汶萊做出了一個求生的選擇:把自己交給英國「保護」。<br><span class="hl">這份屈辱的協議,卻意外地讓它,活了下來。</span></p>
+</div>
+
+<!-- ===== 第四章:英國保護國 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Protectorate</span>
+    <h2 class="act-title">英國的保護國:苟延殘喘的小邦</h2>
+    <p class="act-sub">How British "Protection" Saved Brunei from Vanishing</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>到了十九世紀末,汶萊已經奄奄一息。白人拉惹的砂拉越仍在不斷擴張,眼看就要把殘餘的汶萊也一併吞下。面對亡國的威脅,汶萊蘇丹做出了一個無奈卻關鍵的選擇:<strong>向英國尋求保護</strong>。</p>
+
+    <h3>1888:成為英國的保護國</h3>
+    <p>1888 年,汶萊與英國簽訂協議,正式成為<strong>英國的保護國</strong>(British Protectorate)。根據協議,汶萊的<em>外交與國防交由英國負責</em>,但蘇丹保留了內部的主權。這是一筆現實的交易:汶萊用部分主權,換取了英國對它「不再被進一步吞併」的保證。諷刺的是,正是這份協議,擋住了砂拉越白人拉惹進一步的蠶食——<strong>英國的「保護」,在某種程度上,救了汶萊一命。</strong></p>
+
+    <h3>1906:派駐參政司</h3>
+    <p>但「保護」的代價持續加深。1906 年,英國進一步派駐了「<strong>參政司</strong>」(British Resident)——一位英國官員,蘇丹在<em>除了宗教與馬來習俗以外的所有事務上,都必須聽從他的「建議」</em>。換句話說,汶萊的實際行政權,落入了英國人手中。汶萊雖然保住了蘇丹與王統的存續(這一點至關重要),但它在這段時期,基本上是一個由英國代管的、幾乎被世界遺忘的偏遠小邦。有歷史學者直言:<em>若不是英國在 1906 年設立了參政司,汶萊很可能早已被砂拉越完全吸收、從此消失。</em></p>
+    <div class="pull"><p>汶萊的存續,是一場弔詭的交易:它失去了主權的一部分,卻因此保住了蘇丹的王統與國家的軀殼——而這個被保住的軀殼,即將迎來地底的奇蹟。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 存續本身就是勝利</span>
+      <p>汶萊的保護國時期,呈現了一種與本系列其他國家都不同的「<strong>生存模式</strong>」。馬來西亞、印尼、菲律賓是<em>被殖民後反抗獨立</em>;泰國是<em>靠外交永不淪陷</em>;而汶萊,則是<strong>主動投入保護、以換取最低限度的存續</strong>。</p>
+      <p>這看似最屈辱、最沒有骨氣的選擇,卻在事後證明是極其關鍵的一步。因為它讓汶萊<em>保住了兩樣最寶貴的東西:蘇丹的王統,以及國家的法理存在</em>。當數十年後石油湧出時,汶萊正因為還「存在」、還有一個能行使主權的蘇丹,才能完整地掌握這份從天而降的財富。<em>有時候,在絕境中,「活下去」本身——哪怕是以屈辱的方式——就是為未來保留了一切可能性的、最重要的勝利。</em>汶萊的故事證明了這一點。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">◆ ✦ ◆</div>
+  <p>1929 年,在汶萊一個叫詩里亞的海岸小鎮,<br>鑽井探到了地底深處湧出的黑色液體。<br><span class="hl">那一刻,這個瀕死的彈丸小邦的命運,被徹底改寫了。</span></p>
+</div>
+
+<!-- ===== 第五章:石油 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · Black Gold</span>
+    <h2 class="act-title">石油:改變一切的黑色黃金</h2>
+    <p class="act-sub">How Oil Resurrected a Dying Kingdom</p>
+    <div class="ornament">◆ ◆ ◆</div>
+  </div>
+  <div class="prose">
+    <p>這是汶萊故事的核心轉折,也是它與本系列所有國家最不同的命運分水嶺。一切,都源於 1929 年那一個發現。</p>
+
+    <h3>1929:詩里亞油田的發現</h3>
+    <p>1929 年,在汶萊西部的海岸小鎮<strong>詩里亞(Seria)</strong>,人們發現了大規模的<strong>石油</strong>。隨後,更多的油田與天然氣田被陸續探明,尤其是豐富的<em>海上油氣田</em>在 1960 年代起被大規模開發。對一個原本赤貧、瀕臨消失的彈丸小邦而言,這簡直是<strong>從天而降的奇蹟</strong>。地底湧出的黑色黃金,在短短數十年間,把汶萊從一個被世界遺忘的角落,變成了一個富甲一方的國度。</p>
+
+    <h3>從赤貧到巨富</h3>
+    <p>石油帶來的財富是驚人的。汶萊的人口極少(僅約數十萬),而油氣的收入卻極為龐大——這意味著,<em>每一個汶萊人所能分到的財富,高得驚人</em>。汶萊的人均 GDP(以購買力平價計)躋身全球最高的國家之列。曾經需要靠割讓領土來換取收入的窮邦,搖身一變,成了一個富裕到流油的國家。前一章那個「為了存續而忍辱負重」的決定,此刻得到了最豐厚的回報——因為汶萊還「存在」,所以這筆財富,完整地屬於了它自己。</p>
+    <div class="pull"><p>1929 年的那口油井,是汶萊歷史的真正分水嶺:在它之前,汶萊是個瀕死的彈丸;在它之後,汶萊是個富可敵國的王國。</p></div>
+
+    <h3>石油:蘇丹權力的新地基</h3>
+    <p>但石油改變的,遠不只是財富。它更重塑了汶萊的<strong>權力結構</strong>。因為這些油氣資源與其收入,牢牢地掌握在<em>蘇丹與國家</em>的手中,石油因此成了蘇丹權力全新的、無比堅實的物質地基。它讓蘇丹有能力供養一個龐大而慷慨的福利國家,從而贏得人民的忠誠;它也讓蘇丹不再需要向人民徵稅——而「<em>無代表,不納稅</em>」這句西方民主的古老原則,反過來說,正意味著:<strong>當政府不靠人民的稅收過活時,人民要求政治代表權的籌碼,也就消失了。</strong>石油,將成為汶萊那套獨特政治契約的基石。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 資源如何決定政體</span>
+      <p>汶萊的石油故事,是「<strong>食利國家</strong>」(rentier state)理論最純粹的範例。所謂食利國家,是指一個主要靠出售天然資源(而非向人民徵稅)來獲得收入的國家。這類國家有一個共同的政治特徵:<em>因為政府的錢不來自人民,所以政府不需要對人民負責;反過來,政府用優渥的福利「收買」人民,換取他們的政治順從。</em></p>
+      <p>這正是理解汶萊政體的鑰匙。它的絕對君主制之所以能在二十一世紀穩固存續,根本原因不在於什麼神秘的東方傳統,而在於一個非常現實的經濟結構:<strong>石油讓蘇丹既富可敵國,又無須向人民伸手要錢。</strong>於是,一份「以福利換忠誠、以財富換沉默」的社會契約得以成立。汶萊因此成為一個活生生的證明——<em>一個國家的政治形態,常常深刻地由它的財富來源所決定。</em>而這也埋下了它最深的隱憂:當石油有一天枯竭時,這份契約的地基,又將如何?</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚑ ✦ ⚑</div>
+  <p>當整個亞洲都在爭取獨立、擁抱民主時,<br>汶萊面臨一個選擇:加入新生的馬來西亞、走向民選政治?<br><span class="hl">蘇丹的答案是:不。而一場起義的鮮血,鞏固了這個答案。</span></p>
+</div>
+
+<!-- ===== 第六章:1962 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Road Not Taken</span>
+    <h2 class="act-title">1962:一場起義,與「不獨立」的選擇</h2>
+    <p class="act-sub">The Revolt That Locked in Absolute Monarchy</p>
+    <div class="ornament">⚑ ⚑ ⚑</div>
+  </div>
+  <div class="prose">
+    <p>二十世紀中葉,當殖民帝國紛紛瓦解、新興國家爭相獨立並擁抱民主時,汶萊也走到了一個歷史的十字路口。而它在這個路口的選擇,徹底定義了它此後的政治命運——它選擇了一條與所有鄰居都不同的路。</p>
+
+    <h3>1959 年憲法與民主的曙光</h3>
+    <p>1959 年,汶萊頒布了一部新憲法,獲得了內部自治(外交與國防仍由英國掌管)。這部憲法甚至規劃了<em>部分民選的立法議會</em>——民主的曙光,似乎即將降臨汶萊。在 1962 年的選舉中,一個反對君主專制、主張民主、並傾向與鄰近的砂拉越、北婆羅洲共組聯邦的政黨——「<strong>汶萊人民黨</strong>」(Parti Rakyat Brunei, PRB)——贏得了壓倒性的勝利。</p>
+
+    <h3>1962 起義與它的鎮壓</h3>
+    <p>然而,當人民黨的民主訴求與蘇丹的權力發生衝突時,危機爆發了。1962 年 12 月,汶萊人民黨發動了一場<strong>武裝起義</strong>,試圖奪權、阻止汶萊加入即將成立的馬來西亞聯邦、並建立一個由人民作主的北婆羅洲國家。蘇丹立即向其保護者英國求援。<strong>英軍與啹喀(Gurkha)部隊</strong>迅速出兵,在一週內就鎮壓了這場起義。起義失敗了,而它的後果極其深遠:蘇丹藉此宣布<strong>進入緊急狀態</strong>,中止了憲法中關於民選議會的條款——<em>而這個「緊急狀態」,從 1962 年一直延續至今,從未解除。</em>汶萊那短暫的民主實驗,就此戛然而止。</p>
+    <div class="pull"><p>1962 年那場被鎮壓的起義,是汶萊民主唯一的、也是最後的一次認真嘗試——它的失敗,為這個國家鎖定了絕對君主制的未來。</p></div>
+
+    <h3>拒絕加入馬來西亞</h3>
+    <p>1962 年的危機,還促成了汶萊另一個關鍵決定。當時,英國正推動把馬來亞、新加坡、砂拉越、北婆羅洲(沙巴)與汶萊合組為「<strong>馬來西亞聯邦</strong>」。汶萊一度被認為會加入。但蘇丹最終<strong>拒絕了</strong>。原因很現實:汶萊不願與其他成員<em>分享自己豐厚的石油財富</em>,也不願讓自己的蘇丹屈居於馬來西亞的元首之下、降格為眾多統治者中的一員。於是,汶萊選擇繼續當英國的保護國,獨善其身。這個決定,讓汶萊保住了它的石油與它至高無上的蘇丹——也讓它走上了與馬來西亞、與整個區域民主化潮流截然不同的孤獨道路。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 主動選擇的「不自由」</span>
+      <p>1962 年是理解汶萊最關鍵的一年,因為它揭示了一個深刻的真相:<strong>汶萊今天的絕對君主制與沒有民主,並非歷史的偶然或被迫,而是一個被「主動選擇」並用武力「鎖定」的結果。</strong>當民主的機會真實地擺在眼前時,汶萊的統治者選擇了鎮壓它;當加入一個更大的民主聯邦的選項出現時,蘇丹為了石油與王權,選擇了拒絕它。</p>
+      <p>這讓汶萊成為本系列中一個獨特的存在。它不像泰國那樣在民主與威權間反覆掙扎,也不像菲律賓那樣為民主流血——汶萊<em>清醒地、刻意地選擇了不要民主</em>,並用石油的福利讓這個選擇變得(對多數人而言)可以接受。1962 年的緊急狀態延續至今,像一個凝固的時間膠囊,提醒著我們:這個國家的政治形態,是一場特定的歷史博弈中,勝出的一方所做出的選擇——而那一方,是蘇丹。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">★ ✦ ★</div>
+  <p>當鄰國早已獨立數十年,汶萊卻遲遲不願離開英國的羽翼。<br>直到 1984 年元旦,它才終於、也是最後一個,走向獨立。<br><span class="hl">而這一次,蘇丹要親手掌握一切。</span></p>
+</div>
+
+<!-- ===== 第七章:1984 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Last to Leave</span>
+    <h2 class="act-title">1984:最晚獨立的國家之一</h2>
+    <p class="act-sub">Independence at Last — and Absolute Power Confirmed</p>
+    <div class="ornament">★ ★ ★</div>
+  </div>
+  <div class="prose">
+    <p>在汶萊的鄰居們——印尼、馬來西亞、菲律賓——都已獨立數十年之後,汶萊卻遲遲沒有離開英國的保護。事實上,汶萊對獨立並不熱衷:在英國的保護下,它既享有安全,又能完整保有石油財富與蘇丹的權力,何樂而不為?直到英國主動希望結束這段保護關係,汶萊才終於走向獨立。</p>
+
+    <h3>1984 年元旦的獨立</h3>
+    <p>1984 年 1 月 1 日,汶萊正式從英國獨立,成為「<strong>汶萊達魯薩蘭國</strong>」(Negara Brunei Darussalam)——它是東南亞、也是全世界最晚獨立的國家之一。但這場獨立,與其鄰國當年那種「人民歡騰、推翻殖民」的氣氛截然不同。對汶萊而言,獨立不是一場掙脫枷鎖的革命,而更像是一次<em>權力的平穩交接</em>:英國交還了它原本代管的外交與國防權,而這些權力,全部集中到了一個人手中——<strong>蘇丹哈山納·包奇亞(Hassanal Bolkiah)</strong>。</p>
+
+    <h3>絕對君主制的確立</h3>
+    <p>1967 年即位的蘇丹哈山納·包奇亞,在獨立後成為汶萊集大權於一身的最高統治者。他不僅是國家元首,更<em>親自兼任首相</em>。獨立後的汶萊,沒有走向民選政治,而是穩固地確立為一個<strong>絕對君主制</strong>:沒有國會選舉、沒有反對黨的空間、1962 年的緊急狀態繼續維持。獨立,非但沒有為汶萊帶來民主,反而成了蘇丹<em>不再受任何外部力量(連英國也不再)制約、得以完整行使絕對權力</em>的起點。在獨立的那一刻,蘇丹還宣告了一套將定義這個國家的官方意識形態——我們將在後面詳談。</p>
+    <div class="pull"><p>對多數國家而言,獨立意味著人民當家作主的開始;但對汶萊而言,獨立意味著蘇丹終於可以不受任何人制約地,獨自掌握一切。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當獨立鞏固了王權</span>
+      <p>汶萊的獨立,提供了一個與整個系列、乃至整個後殖民世界都相反的弔詭範例:<strong>在絕大多數國家,「獨立」與「人民主權」是攜手而來的;但在汶萊,「獨立」反而是「絕對王權」的加冕禮。</strong></p>
+      <p>這背後的邏輯一以貫之:汶萊的權力核心從來是蘇丹,而非人民。當英國在的時候,蘇丹的權力還受參政司的制約;而英國一走,這最後一道制約也消失了,蘇丹的權力反而變得更完整、更不受約束。再加上石油財富讓他無須仰賴人民,1962 年的鎮壓又消滅了民主的種子——於是,獨立後的汶萊,順理成章地成為這個世界上少數幾個真正的絕對君主制國家。<em>它提醒我們:「獨立」是一個中性的容器,它究竟裝進的是人民的自由,還是統治者的權力,取決於在那個歷史關頭,究竟是誰,握有決定的力量。</em>在汶萊,握有那力量的,始終是蘇丹。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">♛ ✦ ♛</div>
+  <p>在這個國家,一個人同時是國王、首相、國防部長、財政部長與宗教領袖。<br>他住在全世界最大的宮殿裡,擁有富可敵國的財富。<br><span class="hl">他,就是汶萊本身。</span></p>
+</div>
+
+<!-- ===== 第八章:蘇丹的國度 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Sultan's Realm</span>
+    <h2 class="act-title">蘇丹的國度:絕對君主制如何運作</h2>
+    <p class="act-sub">One Man as King, Prime Minister, and Almost Everything Else</p>
+    <div class="ornament">♛ ♛ ♛</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的汶萊,就必須理解一個人——蘇丹<strong>哈山納·包奇亞(Hassanal Bolkiah)</strong>。在很大程度上,他不只是統治汶萊,他幾乎<em>就是</em>汶萊。1967 年即位至今,他是當今世界上在位最久的君主之一,也是這個絕對君主制最核心、最具體的化身。</p>
+
+    <h3>一人身兼數職的權力集中</h3>
+    <p>汶萊的權力集中程度,在現代世界裡極為罕見。蘇丹不僅是<strong>國家元首</strong>,還親自兼任<strong>首相、國防部長、財政部長</strong>等關鍵職位,同時也是國家的<strong>最高宗教領袖</strong>。汶萊有一個立法會(Legislative Council),但其成員全部由蘇丹<em>指派</em>,沒有立法的實權,更談不上制衡。沒有政黨政治的空間,沒有全國性的選舉,1962 年的緊急狀態賦予蘇丹廣泛的權力。這是一套高度純粹的、權力集中於一人的統治體系——<em>蘇丹的意志,幾乎就是國家的法律。</em></p>
+
+    <h3>世界上最富有的君主之一</h3>
+    <p>支撐這份權力的,是富可敵國的財富。憑藉著對國家石油財富的掌控,蘇丹哈山納·包奇亞長期是<strong>全世界最富有的君主之一</strong>。他的奢華舉世聞名:據稱擁有全世界最大的私人宮殿之一(擁有上千個房間)、龐大的名車與飛機收藏。王室的奢華與排場,既是個人財富的展現,也是一種<em>權力的展演</em>——它向人民與世界宣告著蘇丹的至高地位與汶萊的富足。但與一些揮霍無度的獨裁者不同,蘇丹也確實將大量的石油財富,投入了對人民的慷慨供養(這是下一章的主題),從而維繫了統治的正當性。</p>
+    <div class="pull"><p>汶萊的政治結構簡單到極致:沒有國會的角力、沒有政黨的競爭、沒有選票的喧囂——只有一位蘇丹,和他治下安靜而富足的子民。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一個時代的活化石</span>
+      <p>汶萊的絕對君主制,在二十一世紀的世界裡,幾乎是一個「<strong>活化石</strong>」般的存在。當絕大多數的君主制都已演變為虛位的、象徵性的立憲君主制時,汶萊卻保留了一個君主真正<em>大權獨攬、政教軍財一把抓</em>的前現代王權形態。</p>
+      <p>它能夠存續的秘密,是前面幾章層層鋪墊的結果:<strong>六百年不曾中斷的古老王統(正當性)+ 伊斯蘭的神聖授權(神聖性)+ 石油的龐大財富(物質基礎)+ 1962 年對民主的鎮壓(消除了挑戰)</strong>。這四者缺一不可。汶萊因此成為一個引人深思的樣本:它證明了,在特定的條件下——尤其是當一個統治者既神聖、又極度富有、又無須向人民徵稅時——一個前現代的絕對王權,確實能夠在現代世界裡,不僅存續,還能維持相當程度的穩定與人民的接受。這份「穩定」的代價與可持續性,正是後面章節要追問的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">$ ✦ $</div>
+  <p>為什麼汶萊人民,願意接受一個沒有選票、不能批評的統治?<br>答案,藏在一份心照不宣的交易裡。<br><span class="hl">蘇丹給你富足的生活,你給蘇丹安靜的順從。</span></p>
+</div>
+
+<!-- ===== 第九章:石油契約 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Bargain</span>
+    <h2 class="act-title">石油契約:沒有稅的福利天堂</h2>
+    <p class="act-sub">Welfare for Loyalty — the Deal That Buys Stability</p>
+    <div class="ornament">$ ✦ $</div>
+  </div>
+  <div class="prose">
+    <p>汶萊的穩定,並非靠恐怖的高壓統治來維持(它的鎮壓相對溫和),而是靠一份<strong>心照不宣的社會契約</strong>。這份契約的本質極其簡單:<em>蘇丹用石油的財富,供養人民富足的生活;而人民,則以政治上的順從與沉默作為回報。</em>這是理解汶萊為何如此穩定的終極鑰匙。</p>
+
+    <h3>慷慨的福利:從搖籃到墳墓</h3>
+    <p>汶萊公民所享有的福利,慷慨到令人稱羨。在這裡:<strong>沒有個人所得稅</strong>;<strong>醫療幾乎完全免費</strong>;<strong>教育免費</strong>(從小學到大學,成績優異者甚至由國家出資送往海外留學);<strong>住房有大量補貼</strong>,人民可以低價購得;汽油、食物等民生物資也都享有補貼。汶萊公民從出生到死亡,生活的方方面面都受到國家無微不至的照顧。對許多汶萊人而言,這是一種真實的、可觸摸的「<em>美好生活</em>」——一個富足、安穩、無須為基本生存操心的天堂。</p>
+
+    <h3>用「經濟福利」交換「政治沉默」</h3>
+    <p>但這份天堂,有它無形的代價。這份慷慨的福利,本質上是一筆<strong>交易</strong>:它讓汶萊人民在享受富足的同時,<em>失去了參與政治、表達異議、選擇統治者的權利</em>。當你的生活已經如此優渥、國家已經把一切都打點好時,要求民主、要求政治權利的動力,自然就被大大削弱了。批評蘇丹,不僅在法律上有風險,在心理上也顯得「忘恩負義」——畢竟,是蘇丹(透過石油)給了你這一切。於是,一種「<strong>富足的順從</strong>」成了汶萊社會的常態。人民用沉默,換取了安穩;蘇丹用福利,換取了忠誠。</p>
+    <div class="pull"><p>在汶萊,自由不是被暴力剝奪的,而是被富足「贖買」的——當生活已經如此美好,還有多少人會為了抽象的政治權利,去冒險呢?</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 黃金的牢籠</span>
+      <p>汶萊的社會契約,提出了一個關於人性與政治最深刻、也最令人不安的問題:<strong>當「麵包」與「自由」二選一時,人們會選擇什麼?</strong>汶萊給出的答案是:當麵包足夠豐厚時,絕大多數人,願意用自由來交換。</p>
+      <p>這也是汶萊與本系列其他國家最尖銳的對照。菲律賓人為民主流血、泰國的紅衫軍為選票抗爭、印尼人推翻了蘇哈托——這些國家的人民,在貧困與壓迫中,選擇了爭取政治權利。而汶萊人,則在石油的富足中,選擇了安於現狀。<em>這並非因為汶萊人「不愛自由」,而是因為他們的處境,讓「爭取自由」的代價(失去富足與安穩)變得太高,而收益顯得太抽象。</em>汶萊因此成了一座「黃金的牢籠」——它華麗、舒適、無比優渥,但籠子終究是籠子。而這座籠子最大的隱憂在於:支撐它的黃金(石油),並不會永遠湧出。當黃金耗盡時,這份契約還能維持嗎?這個問題,懸在汶萊的未來之上。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☪ ✦ ☪</div>
+  <p>石油給了蘇丹財富,但財富會枯竭。<br>於是蘇丹尋找一個更恆久的根基,把王權與信仰、與民族,焊接在一起。<br><span class="hl">這個根基,叫做「馬來伊斯蘭君主制」。</span></p>
+</div>
+
+<!-- ===== 第十章:MIB 與伊斯蘭法 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · Malay Islamic Monarchy</span>
+    <h2 class="act-title">馬來伊斯蘭君主制,與伊斯蘭法的降臨</h2>
+    <p class="act-sub">MIB, Sharia, and the Sacred Foundation of the Throne</p>
+    <div class="ornament">☪ ☪ ☪</div>
+  </div>
+  <div class="prose">
+    <p>如果說石油是汶萊王權的<em>物質</em>地基,那麼一套精心建構的國家意識形態,就是它的<em>精神</em>地基。1984 年獨立之際,蘇丹哈山納·包奇亞正式宣告了汶萊的官方國家哲學——「<strong>馬來伊斯蘭君主制</strong>」(Melayu Islam Beraja,簡稱 MIB)。</p>
+
+    <h3>三位一體的國家意識形態</h3>
+    <p>MIB 把三樣東西焊接成一個神聖而不可分割的整體:<strong>馬來(Melayu)</strong>——以馬來語言、文化與族群認同為國家的根基;<strong>伊斯蘭(Islam)</strong>——以遜尼派伊斯蘭為國教與道德、法律的最高準則;<strong>君主制(Beraja)</strong>——以蘇丹的絕對權威為國家的核心與效忠的對象。在這套意識形態下,「<em>身為一個好汶萊人</em>」幾乎就等同於「<em>身為馬來人、虔信伊斯蘭、效忠蘇丹</em>」。這三者環環相扣:蘇丹是伊斯蘭的守護者,伊斯蘭為蘇丹提供神聖性,而馬來認同則把兩者與這片土地的多數人民綁定。MIB 因此成了汶萊王權最堅實的精神護盾——<strong>反對蘇丹,就幾乎等於背叛了民族與信仰本身。</strong></p>
+
+    <h3>2014:嚴格伊斯蘭刑法的實施</h3>
+    <p>進入二十一世紀,蘇丹進一步強化了伊斯蘭在國家中的角色。2014 年起,汶萊開始<strong>分階段實施嚴格的伊斯蘭刑法(Syariah Penal Code)</strong>。這套法律的內容,在國際上引發了巨大的爭議與批評——它最嚴厲的條款,包含了對通姦、同性性行為等罪行處以<em>石刑(亂石砸死)</em>、對竊盜處以<em>斷肢</em>等中世紀式的酷刑。2019 年,當這套法律的最嚴厲階段宣布生效時,引發了全球性的抗議與抵制浪潮。面對國際壓力,蘇丹後來表示將暫緩執行死刑等最嚴厲的刑罰,但這套法律本身,已然成為汶萊強化其伊斯蘭認同、鞏固 MIB 意識形態的一個強烈宣示。</p>
+    <div class="pull"><p>當財富可能枯竭時,蘇丹為他的王權尋找了一個更恆久的根基——把王座與真主的意旨,牢牢地綁在一起。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 信仰作為統治的工具與根基</span>
+      <p>MIB 與伊斯蘭刑法的推行,揭示了汶萊王權一個深思熟慮的<strong>長期戰略</strong>。蘇丹顯然意識到一個問題:石油的財富(第九章的社會契約)雖然有效,但它<em>不可能永遠持續</em>。一旦石油枯竭、福利難以為繼,單靠「以福利換忠誠」的契約將會動搖。因此,他需要為王權找到一個比石油更恆久、更深植人心的根基——而那就是<strong>信仰與認同</strong>。</p>
+      <p>這正是 MIB 的深層用意:它把蘇丹的統治,從一個「<em>因為他給我們錢,所以我們服從</em>」的經濟交易,提升為一個「<em>因為他是真主與民族的守護者,所以我們效忠</em>」的神聖義務。透過強化伊斯蘭,蘇丹為自己的權力,鑄造了一層即使石油耗盡也不會輕易剝落的神聖外衣。這與馬來西亞、印尼的「伊斯蘭化」有著相似的政治邏輯,但在汶萊,它服務的對象不是選票,而是<em>一個絕對王權的永續存亡</em>。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☷ ✦ ☷</div>
+  <p>在這個馬來伊斯蘭的王國裡,有一群人光鮮卻隱形。<br>他們世代在此經商、生活,卻可能沒有這個國家的國籍。<br><span class="hl">他們是汶萊的華人——富足表面下的一道隱形裂痕。</span></p>
+</div>
+
+<!-- ===== 第十一章:華人與無國籍 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Invisible Citizens</span>
+    <h2 class="act-title">華人與多元社會的隱形張力</h2>
+    <p class="act-sub">The Chinese, Statelessness, and the Cracks Beneath the Calm</p>
+    <div class="ornament">☷ ☷ ☷</div>
+  </div>
+  <div class="prose">
+    <p>汶萊那幅富足、和諧、虔誠的圖景之下,藏著一道不易察覺、卻真實存在的裂痕——它關乎這個國家如何定義「誰是汶萊人」。而首當其衝的,是這裡的<strong>華人</strong>。</p>
+
+    <h3>經濟的要角,公民的邊緣</h3>
+    <p>華人約佔汶萊人口的<strong>一成</strong>,他們大多在英國保護國時期(1888–1984)移居而來。如同在東南亞其他地方,汶萊華人在<em>非官方的商業部門</em>扮演著重要角色,是這個國家經濟活力的重要來源。然而,他們的處境卻充滿了弔詭:許多華人雖然世世代代生活在汶萊,卻<strong>並非汶萊公民,而僅僅是永久居民,甚至是無國籍者</strong>。</p>
+
+    <h3>族群門檻的公民權</h3>
+    <p>問題的根源,在於汶萊公民權的<strong>族群門檻</strong>。汶萊的國籍法主要依循「<em>血統主義</em>」,並與 MIB 意識形態下的「馬來」認同緊密綁定——憲法只承認七個特定的「馬來」族群為當然的「土著」(Bumiputera),享有完整的公民權與各項特權(如土地所有權、特定公職、教育優惠)。而不屬於這些群體的華人,即使在汶萊出生、成長,也往往需要通過極為嚴苛的<em>馬來語言與文化考試</em>,並經歷漫長(動輒十數年)的等待,才有可能取得公民權——許多人因此終其一生都是「無國籍」者。據統計,汶萊有數以萬計的無國籍居民,其中大部分是華人。</p>
+    <p>無國籍的代價是真實的:他們<strong>不能擁有土地</strong>,在享受某些福利上受限,持有的不是護照而是「國際身分證明書」,連出國旅行都可能在他國海關遭遇困難。一群在這片土地上生活了數代、為其經濟做出貢獻的人,卻始終被擋在「正式國民」的身分之外。</p>
+    <div class="pull"><p>在汶萊,「富足」與「歸屬」是兩回事:你可以在這裡安穩地生活、賺錢,卻可能永遠無法在法律上,真正成為這個國家的「人」。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當認同劃出邊界</span>
+      <p>汶萊華人的處境,是這個系列反覆出現的主題在汶萊的版本:<strong>一個越是以單一族群與宗教來定義的國家認同,就越是會把不符合這個定義的少數,排除在外。</strong>MIB 那個「馬來—伊斯蘭—君主」三位一體的認同核心,在凝聚馬來多數的同時,也必然地把信奉其他宗教、屬於其他族群的華人,推到了公民身分的邊緣。</p>
+      <p>這與馬來西亞「馬來人優先」的政策、泰南穆斯林被「泰國性」排除、印尼華人的處境,本質上是同一道難題的不同變奏。它揭示了汶萊那份「和諧穩定」的另一面:<em>這份和諧,部分是建立在一個清晰而排他的認同邊界之上的——邊界之內的馬來穆斯林享有富足與歸屬,邊界之外的少數則被溫和地、卻真實地邊緣化。</em>富足的天堂,並非對所有居住其中的人,都同樣慷慨。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">◆ ✦ ◇</div>
+  <p>這個國家的一切——蘇丹的權力、人民的富足、契約的穩定——<br>全都建立在地底那些終將枯竭的油氣之上。<br><span class="hl">於是一個無法迴避的問題浮現了:石油之後,汶萊往哪去?</span></p>
+</div>
+
+<!-- ===== 第十二章:當代經濟 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十二章 · After the Oil</span>
+    <h2 class="act-title">石油之後,汶萊往哪去?</h2>
+    <p class="act-sub">The Looming Question of a Post-Oil Kingdom</p>
+    <div class="ornament">◆ ✦ ◇</div>
+  </div>
+  <div class="prose">
+    <p>走到今天,汶萊面臨著一個它無法迴避、卻又極難回答的根本問題。前面所有的章節——蘇丹的絕對權力、人民的富足福利、那份「以財富換忠誠」的社會契約——全都建立在同一個地基之上:<strong>石油與天然氣</strong>。而這個地基,正在動搖。</p>
+
+    <h3>對油氣的極度依賴</h3>
+    <p>汶萊的經濟,是一個高度<strong>「單一化」</strong>的經濟。石油與天然氣的出口,長期佔據汶萊出口收入與政府財政的<em>絕大部分(油氣相關佔出口的九成以上)</em>。這讓汶萊極其富有(人均 GDP 以購買力平價計可達約九萬美元的水準),但也讓它的命運,危險地<strong>懸於單一資源與國際油價的波動之上</strong>。當油價高漲時,汶萊富得流油;當油價下跌時,它的財政便立刻承壓。更根本的是,石油與天然氣是<em>不可再生的資源</em>——它們終有一天會枯竭。汶萊的油氣儲量雖然相對人口仍可觀,但「<strong>坐吃山空</strong>」的陰影,始終籠罩著這個國家的未來。</p>
+
+    <h3>「2035 宏願」與多元化的掙扎</h3>
+    <p>汶萊的統治者並非沒有意識到這個危機。早在 2008 年,政府就推出了「<strong>2035 宏願</strong>」(Wawasan Brunei 2035)——一個雄心勃勃的長期國家發展願景,目標是把人均收入提升至已開發國家水準,並<em>推動經濟多元化,擺脫對油氣的依賴</em>,發展諸如清真產業、金融服務、觀光、農業等非油氣產業。然而,十多年過去,這場多元化的努力<strong>成效有限</strong>。原因是多方面的:長期被石油寵壞的經濟與人民,缺乏拼搏與創業的動力;龐大而舒適的公部門(政府是最大的雇主)吸走了大部分勞動力,私人企業活力不足;加上絕對君主制下相對僵化的治理體制。汶萊發現,<em>擺脫石油的依賴,遠比想像中困難。</em></p>
+
+    <h3>年輕世代的隱憂</h3>
+    <p>而最深的隱憂,落在<strong>年輕世代</strong>身上。隨著人口增長,政府龐大的公部門已無法再像過去那樣,為每一個年輕人都提供一份安穩的鐵飯碗;而私人部門又不夠發達,難以創造足夠的優質就業。<em>青年失業與就業不足</em>,正成為這個富裕天堂裡一個日益浮現的問題。同時,在網路與全球化的時代成長起來的新一代汶萊人,也比他們的父輩更多地接觸到外面的世界與不同的價值觀。當「石油契約」所能提供的鐵飯碗開始減少時,維繫這份契約的基礎——「<em>富足的順從</em>」——是否也會隨之鬆動?</p>
+    <div class="pull"><p>汶萊的整座大廈,都蓋在石油之上。而它最艱難的工程,是要在這座大廈的地基被抽走之前,為它換上一個全新的、不靠石油的地基。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 用財富買來的,終究要用別的東西來維持</span>
+      <p>汶萊的當代困境,把它整個故事的核心張力,推到了最尖銳的時刻。汶萊用石油,買來了王權的穩固、人民的富足、與政治的沉默(第九章)。但這套精巧的安排,有一個無法迴避的時間限制:<strong>石油不會永遠湧出。</strong></p>
+      <p>於是,汶萊面臨一個比任何鄰國都更獨特的考驗。其他國家的挑戰,是如何在既有的基礎上「成長」;而汶萊的挑戰,是如何在它賴以維生的根基(石油)消失之前,<em>徹底地重建</em>整個國家的經濟與社會契約。它需要培養出一個不靠石油補貼、願意拼搏創新的社會——但這恰恰與它過去數十年「以福利豢養順從」的模式背道而馳。這正是汶萊「2035 宏願」雷聲大、雨點小的深層原因:<strong>你很難一邊用富足讓人民安於現狀,一邊又要求他們拼搏奮鬥。</strong>汶萊用財富買來的這座黃金天堂,最終要靠什麼來維持?這個問題,將定義它的下一個世代。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☾ ⚓ ☾</div>
+  <p>六百年,一個帝國的興衰,一口改變命運的油井,一座黃金的牢籠。<br>當我們走到故事的盡頭,終於可以回答那個貫穿始終的問題——<br><span class="hl">為什麼汶萊是這個模樣,而當石油枯竭時,這一切還能維持嗎?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的汶萊人</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">Who the Bruneians Became, and What the Oil Bought</p>
+      <div class="ornament" style="color:var(--gold-bright)">☾ ⚓ ☾</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的汶萊之所以是這個模樣——東南亞最小卻最富的國家之一、全世界唯一的絕對君主制伊斯蘭王國、一個沒有稅、福利優渥卻沒有民主的「天佑之邦」——是幾層力量層層堆疊的結果。每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:海洋帝國的記憶</h3>
+      <p>一切始於那段<strong>海上帝國的黃金時代</strong>。十五世紀,汶萊曾統治整個婆羅洲,而那個王朝,至今未斷——這條超過六百年、全世界最古老的王統,給了今天的蘇丹一份無比深厚的正當性。汶萊王權的神聖,根植於這份「我們曾是帝國」的古老記憶之中。</p>
+
+      <h3>第二層:伊斯蘭與蘇丹制度</h3>
+      <p>接著是<strong>伊斯蘭的降臨</strong>。它把一位馬來酋長,提升為兼具世俗權力與神聖授權的「蘇丹」,奠定了政教合一的王權傳統。從此,服從蘇丹幾乎等同於順從真主——這是汶萊王權最堅實的精神地基。</p>
+
+      <h3>第三層:從帝國淪為彈丸的創傷</h3>
+      <p>然後是<strong>帝國的崩解</strong>。十九世紀,白人拉惹與英國一塊塊割走了汶萊的領土,把帝國肢解成飛地般的彈丸。瀕臨消失的汶萊,只能投入英國的「保護」以求存續——而正是這份屈辱卻明智的選擇,保住了蘇丹的王統與國家的軀殼,讓它得以完整地迎接那即將到來的奇蹟。</p>
+
+      <h3>第四層:石油重生,與「石油—蘇丹—伊斯蘭」的契約</h3>
+      <p>這是汶萊命運的核心轉折。<strong>1929 年的石油</strong>,把瀕死的彈丸變成了富可敵國的王國。而蘇丹用這份財富,建構了一套精巧的統治:以慷慨的福利「贖買」人民的政治順從(石油契約),以「馬來伊斯蘭君主制」(MIB)的神聖認同焊接王權與信仰。1962 年對民主起義的鎮壓,則消滅了唯一的挑戰。於是,「<em>石油 + 蘇丹 + 伊斯蘭</em>」三位一體,構成了汶萊穩定的全部秘密。1984 年的獨立,非但沒帶來民主,反而是這個絕對王權的加冕禮。</p>
+
+      <h3>第五層:石油枯竭陰影下的未竟之問</h3>
+      <p>最後是<strong>懸在未來之上的問號</strong>。汶萊的一切都建立在終將枯竭的油氣之上;它富足卻單一的經濟、它龐大舒適卻吸走活力的公部門、它「2035 宏願」雷大雨小的多元化掙扎、它年輕世代日益浮現的就業隱憂——全都指向同一個問題:當石油不再湧出時,那份「以財富換忠誠」的契約,還能維持嗎?</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 用石油買來的天堂</span>
+        <p>所以,今天的汶萊人是誰?他是<strong>一個古老海洋帝國的後裔,生活在一個被石油重新點亮的彈丸小邦裡;他虔信伊斯蘭、效忠一位富可敵國的蘇丹、享受著從搖籃到墳墓的優渥福利,卻也交出了參與政治、選擇統治者的權利</strong>——他生活在一座華麗、舒適、無比富足的黃金牢籠之中。</p>
+        <p>汶萊最深刻的真相是:<em>它是東南亞唯一一個,用「地底的財富」買來了「一個前現代王權在現代世界存續」的國家。</em>當別國的傳統王室在殖民與革命中被廢黜、當別國的人民為民主流血抗爭時,汶萊卻靠著石油,讓一個六百年的絕對王權,不僅存續,還能維持人民真實的接受與富足。這是一個了不起的、卻也極其脆弱的成就。因為它的一切——穩定、虔誠、順從——本質上都是「<strong>被購買</strong>」的,而購買它的那筆財富(石油),並不會永遠存在。<em>汶萊保住了它的王冠與和平,但這份和平是用石油買來的;當油盡燈枯的那一天到來時,它必須回答一個它至今仍在迴避的問題:除了石油,還有什麼,能繼續買下這份「天佑之邦」?</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">它用地底的黑色黃金,買來了穩定、虔誠與順從;但黃金終會耗盡,而那時,「天佑之邦」要靠什麼,繼續被庇佑?</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">六百年的終極啟示</span>
+      <p>一個國家的穩定,可以建立在許多東西之上——人民的認同、制度的韌性、或者,財富的豐厚。汶萊證明了,財富確實能買來驚人的穩定:它讓一個前現代的絕對王權,在二十一世紀依然屹立;它讓一個沒有民主的國家,維持著人民真實的滿足。但汶萊也提醒我們,凡是被「購買」的東西,都受制於購買它的資源能維持多久。真正恆久的穩定,終究不能只靠地底的財富,而要靠一個社會自身的活力、認同與韌性。「天佑之邦」這個美麗的名字,是一份祝福,也是一道考題——它能否在石油之後,依然當得起「天佑」二字,將由下一代汶萊人來書寫。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從甘榜亞逸水上千年的高腳屋,<br>
+        到博爾基亞統治半個婆羅洲的海上帝國,<br>
+        從白人拉惹割走的領土、英國羽翼下苟存的彈丸,<br>
+        到詩里亞湧出的黑色黃金、蘇丹用財富築起的黃金牢籠,<br>
+        再到那個懸在石油盡頭、尚未有人能回答的問號——<br>
+        這段交織著帝國、信仰、石油與王冠的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        汶萊的和平,是用石油買來的;<br>而它的未來,要靠它自己贖回。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">☾ ✦ ◆</div>
+  <p>石油、蘇丹與「天佑之邦」 · 汶萊六百年的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE MARITIME EMPIRE TO AFTER THE OIL · c.1400 – 2025</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

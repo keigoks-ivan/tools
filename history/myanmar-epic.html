@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大江、金塔與高牆:緬甸的身世史詩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b1206;
+  --parchment:#f5edd6;
+  --parchment-deep:#e8dab6;
+  --teak:#3c2a17;
+  --teak-deep:#241809;
+  --gold:#b8862a;
+  --gold-bright:#dcac44;
+  --ruby:#a01f1a;
+  --crimson:#7a160f;
+  --jade:#2f6149;
+  --faint:#675939;
+  --line:#c8b67c;
+  --shadow:rgba(27,18,6,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(184,134,42,.08), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(60,42,23,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(160,31,26,.32), transparent 62%),
+    linear-gradient(165deg, var(--teak-deep) 0%, var(--teak) 48%, #4a3420 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23dcac44' stroke-width='0.6' opacity='0.16'%3E%3Cpath d='M600 200 l24 80 q40 0 40 40 q0 30 -20 50 l26 40 q30 -20 30 50 q0 40 -30 60 l24 50 q40 0 36 60 l-130 320 -130 -320 q-4 -60 36 -60 l24 -50 q-30 -20 -30 -60 q0 -70 30 -50 l26 -40 q-20 -20 -20 -50 q0 -40 40 -40 Z' fill='%23dcac44' opacity='0.14'/%3E%3Ccircle cx='600' cy='600' r='540'/%3E%3Ccircle cx='600' cy='600' r='400'/%3E%3Cpath d='M60 600 H1140 M600 60 V1140'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 250s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(245,237,214,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--teak-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--ruby);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--teak-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--ruby);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--teak-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--teak-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(60,42,23,.05), rgba(184,134,42,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--teak-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT (歷史的回聲) ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--teak-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(36,24,9,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--ruby));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(245,237,214,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c878;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--ruby);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--ruby);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--teak-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--ruby);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--teak-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(184,134,42,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(60,42,23,.05);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--ruby);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--teak-deep),var(--teak));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23dcac44' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(245,237,214,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c878}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(220,172,68,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--ruby));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--teak-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#140d05 !important}
+.dark .act-title{color:#d6c79e}
+.dark .prose p{color:#cab992}
+.dark .prose strong{color:#cf6e44}
+.dark .prose em{color:#d8aa74}
+.dark .prose h3{color:#cf6e44;border-left-color:var(--ruby)}
+.dark .act-sub{color:#887752}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,22,15,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--ruby);margin-bottom:.5rem;font-weight:600}
+
+/* ===== interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--teak-deep);font-weight:500}
+.interlude p .hl{color:var(--ruby);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(245,237,214,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--ruby);font-style:normal}
+
+/* ===== legacy & shift ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--teak-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--teak-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--ruby);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(60,42,23,.05);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--ruby)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--ruby);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--teak-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--teak-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The Land of Golden Pagodas · Who the Burmese Became</span>
+    <h1>大江、金塔與<span class="em">高牆</span><br>緬甸<br>的身世</h1>
+    <p class="sub">從一條貫穿南北的大江、一片被高山環抱的河谷盆地,到一個曾稱霸中南半島、又被軍靴與內戰困鎖了半世紀的國度——<br>一部關於「為何今天的緬甸與緬甸人是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的緬甸,是一個遍地金色佛塔、人民溫和虔誠,卻又陷在世界上持續最久的內戰、與一次又一次軍事政變泥沼中的國家?為什麼這片曾經富甲一方、被稱為「亞洲糧倉」的土地,如今卻是地區裡最貧困、最動盪的角落之一?答案不在當下,而在千餘年的縱深裡。一條大江(伊洛瓦底江)從北到南貫穿了這片土地,在乾燥的中部沖積出一片河谷盆地,養出了蒲甘那片矗立著數千座佛塔的平原;緬族的王在這裡建起一個又一個強盛的王朝,三度統一全境、甚至攻滅了暹羅的古都,稱霸中南半島;但環抱著中央盆地的崇山峻嶺裡,住著撣族、克倫族、克欽族、若開族等數十個從未真正臣服的民族——「<em>核心的緬族平原</em>」與「<em>邊緣的群山民族</em>」之間那道古老的裂痕,從未癒合;而當英國用三場戰爭吞併了它、廢黜了它的國王、又用「分而治之」加深了那道裂痕之後,獨立的緬甸便墜入了一個由內戰、軍人、與一道道「高牆」築成的牢籠。這不是一個一帆風順的故事,而是一片<em>由大江凝聚、被高牆撕裂</em>的土地,如何在「金塔的虔誠」與「軍靴的暴力」這兩個極端之間,一次次掙扎、一次次被困住的故事。讓我們從頭走一遍,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--ruby);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Land</span>
+    <h2 class="act-title">在所有人來之前,這裡有什麼?</h2>
+    <p class="act-sub">The River in the Middle, the Mountains All Around</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的緬甸人,得先回到一個比所有國王、所有金塔都更古老的問題:在他們來之前,這裡有什麼?答案,藏在一個獨特的地理格局裡——一條貫穿中央的大江,與一圈把它環抱起來的高山。正是這個「中央 vs 邊緣」的格局,寫定了緬甸日後一切的分裂與掙扎。</p>
+
+    <h3>一條大江,一片核心盆地</h3>
+    <p>先看地圖。這片土地的命脈,是一條從北方喜馬拉雅餘脈奔流而下、縱貫南北、最終注入安達曼海的大江——<strong>伊洛瓦底江（Irrawaddy）</strong>。它在國土的中央,沖積出一片廣闊的河谷與三角洲。尤其在中部那片相對乾燥的「<em>乾帶（Dry Zone）</em>」,大江提供的灌溉與肥沃的沖積土,養出了緬甸文明的<strong>核心心臟地帶</strong>——這裡是稻米的糧倉,是人口最稠密的地方,也是歷代緬族王朝建都、發跡的搖籃。記住這一點:<em>伊洛瓦底江的中央河谷,是「緬族(Bamar)」這個主體民族的家園與權力的核心。</em></p>
+
+    <h3>一圈高山,一道天然的隔閡</h3>
+    <p>但這片中央盆地,被一圈高聳、崎嶇、難以穿越的<strong>馬蹄形群山</strong>所環抱:西邊是若開山脈與通往印度的群山,北邊是接壤中國、西藏的雪峰,東邊則是廣袤的撣邦高原。這道天然的圍牆,造就了緬甸最根本的二元結構:<em>中央是平坦、富庶、由緬族主導的「河谷低地」;四周是崎嶇、相對貧瘠、卻住著眾多其他民族的「邊緣高地」。</em>這兩個世界,被地理硬生生地隔開——低地的緬族王權,從來就難以真正、長久地統治那些藏身於崇山峻嶺中的山地民族。</p>
+    <div class="pull"><p>一條大江凝聚了中央的緬族,一圈高山卻把無數其他民族隔絕在邊緣——緬甸從一開始,就不是「一個」民族的土地,而是「核心」與「邊緣」之間,一道永恆的張力。</p></div>
+
+    <h3>多元的拼圖:一百三十多個民族</h3>
+    <p>正因為這個「中央盆地 + 環繞高地」的格局,緬甸成了一塊驚人多元的民族拼圖。除了佔人口多數、居於中央河谷的<strong>緬族</strong>之外,環繞的群山與邊地裡,還住著<em>撣族、克倫族、克欽族、欽族、若開族、孟族</em>等一百三十多個官方認定的民族。今天緬甸所有的故事——它的多元、它從未停止的內戰、它「中央 vs 地方」的永恆角力、它那道難以跨越的族群高牆——根源都在這裡:<em>它生在一個被大江凝聚出強大核心、卻又被高山切割出無數邊緣的土地上。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 地理是第一作者</span>
+      <p>在任何國王、任何軍政府、任何革命登場之前,<strong>那條中央的大江與那圈環繞的高山</strong>,就已經寫好了這個故事的開頭與它最深的矛盾。一片由伊洛瓦底江養出強大「核心緬族」、又由群山隔出眾多「邊緣民族」的土地,註定會是一個既能誕生強盛帝國、又永遠被內部裂痕所困擾的地方。</p>
+      <p>這是理解緬甸的第一把鑰匙,也是它與其他國家最不同之處:<em>緬甸最根本的命題,從來不是「對抗哪個鄰居」,而是「如何把核心與邊緣、緬族與山地民族,真正凝聚成一個國家」。</em>這道由地理寫定的「核心 vs 邊緣」裂痕,將貫穿緬甸的全部歷史——它解釋了為何緬族王朝的偉大總是短暫(難以長久統合邊地)、為何英國的「分而治之」能輕易撕裂它、更解釋了為何獨立後的緬甸,會立刻墜入世界上持續最久的內戰。緬甸的故事,本質上,就是這道裂痕反覆被縫合、又反覆被撕開的故事。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ✦ ☸</div>
+  <p>在這片中央的河谷盆地上,緬族建起了他們的第一個王國。<br>而他們留下的,是一片至今仍令世界屏息的奇景——<br><span class="hl">一望無際的平原上,矗立著數千座佛塔的金色森林。</span></p>
+</div>
+
+<!-- ===== 第一章:蒲甘王朝 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Pagodas</span>
+    <h2 class="act-title">蒲甘:一片矗立著千塔的平原</h2>
+    <p class="act-sub">The First Burmese Empire and the Plain of Temples</p>
+    <div class="ornament">☸ ☸ ☸</div>
+  </div>
+  <div class="prose">
+    <p>所有人都會問:緬甸文明的第一個高峰在哪裡?答案,在伊洛瓦底江畔那片至今仍令世界屏息的平原上。大約從西元九世紀起,緬族(Bamar)從北方遷入中央河谷,並在十一世紀,由一位偉大的國王,建立起緬甸歷史上第一個統一的王朝——<strong>蒲甘王朝（Bagan / Pagan）</strong>。</p>
+
+    <h3>阿奴律陀:第一次統一</h3>
+    <p>蒲甘的奠基者,是國王<strong>阿奴律陀（Anawrahta）</strong>。十一世紀中葉,他南征北討,征服了南方信奉上座部佛教的<em>孟族(Mon)</em>王國,並把孟族的文化、文字與佛教典籍帶回了蒲甘。他第一次把伊洛瓦底江流域的大部分統一在一個緬族王權之下,奠定了緬甸作為一個國家的雛形。蒲甘王朝,成為當時中南半島上與吳哥並立的一大強權。</p>
+
+    <h3>千塔之城:把信仰堆成森林</h3>
+    <p>蒲甘留給世界最震撼的遺產,是它的<strong>佛塔</strong>。在隨後的兩百多年裡,蒲甘的歷代國王與貴族,出於虔誠的信仰與積累功德的渴望,在這片平原上瘋狂地建造佛塔與寺廟——據估計,鼎盛時期這裡曾矗立著<strong>上萬座</strong>大大小小的塔寺。雖歷經歲月與地震,今天的蒲甘平原上,依然散布著<em>兩千多座</em>古老的佛塔。當朝陽或夕暉灑在這片一望無際、塔影重重的平原上時,那景象彷彿一座由信仰堆成的金色森林——這是人類最壯觀的宗教景觀之一,與吳哥、婆羅浮屠並稱。</p>
+    <div class="pull"><p>蒲甘的國王們相信,建一座塔,就積一份功德。於是兩百年間,他們在一片平原上,堆起了一座由信仰築成的、數千塔的森林。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 核心的第一次綻放</span>
+      <p>蒲甘王朝的輝煌,完美地承接了序章的伏筆:<strong>它證明了伊洛瓦底江的中央河谷,擁有孕育一個強大「核心」文明的全部潛力。</strong>富饒的乾帶糧倉、稠密的人口,讓緬族有餘力去統一河谷、去「把信仰堆成佛塔的森林」。蒲甘,是緬族這個主體民族在歷史舞台上的第一次偉大綻放。</p>
+      <p>但這裡也藏著緬甸歷史那道根本裂痕的第一次顯影。<em>蒲甘的偉大,本質上是「中央河谷緬族」的偉大——它的統一,主要是低地的整合;而四周群山中的眾多民族,即使名義上臣服,也始終保有相當的獨立性。</em>更重要的是,蒲甘最終的衰亡(十三世紀末,在內部衰弱與北方蒙古(元朝)的入侵壓力下崩解),也揭示了這個「核心」的脆弱:一旦中央的緬族王權衰弱,整片土地就會立刻碎裂成各自為政的小邦。蒲甘的興衰,確立了緬甸歷史一個將反覆上演的節奏:<strong>強大的緬族王朝崛起、短暫地統一河谷與部分邊地、然後衰亡、碎裂,再等待下一個強人重新統一。</strong>而貫穿這一切興衰的,是那座座金色佛塔所代表的、永不褪色的信仰。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ✦ ☸</div>
+  <p>蒲甘從孟族那裡帶回的,不只是文字與工匠,更是一整套信仰。<br>這套信仰,將比任何王朝都更深、更久地——<br><span class="hl">融入每一個緬甸人的血液,成為他們面對苦難時,最後的避難所。</span></p>
+</div>
+
+<!-- ===== 第二章:上座部佛教 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Faith</span>
+    <h2 class="act-title">金塔、袈裟,與一個民族的虔誠</h2>
+    <p class="act-sub">Theravada Buddhism and the Soul of Burma</p>
+    <div class="ornament">☸ ☸ ☸</div>
+  </div>
+  <div class="prose">
+    <p>如果說伊洛瓦底江給了緬甸一個「身體」,那麼<strong>上座部佛教（Theravada Buddhism）</strong>就給了它一個「靈魂」。自蒲甘的阿奴律陀大力推崇以來,上座部佛教就成為緬甸社會至高無上的信仰,深深地、不可逆地融入了緬甸人生活的每一個層面。緬甸,是世界上佛教信仰最虔誠、最普及的國家之一。</p>
+
+    <h3>大金塔與遍地的金光</h3>
+    <p>緬甸佛教虔誠最耀眼的象徵,是它遍地的<strong>金色佛塔</strong>。其中最神聖的,是仰光的<strong>瑞光大金塔（Shwedagon Pagoda）</strong>——這座傳說供奉著佛陀髮絲、通體貼滿真金、塔尖鑲嵌著無數鑽石的巨塔,是緬甸佛教的心臟,千百年來,無數信眾在它的金光下頂禮膜拜。從蒲甘的千塔平原,到仰光的大金塔,再到每一個村莊的寺廟——<em>「金塔」是緬甸最鮮明的視覺符號,它代表著這個民族把最珍貴的財富,毫不吝惜地獻給信仰的虔誠。</em></p>
+    <div class="pull"><p>緬甸人把黃金、鑽石與一生的積蓄,獻給了佛塔;在最貧困、最動盪的歲月裡,那金色的塔尖,始終是他們仰望的方向。</p></div>
+
+    <h3>僧伽:一股精神的力量</h3>
+    <p>在緬甸,佛教不只是個人的信仰,更是一股強大的<strong>社會與道德力量</strong>。幾乎每一個緬甸男子,一生中都會有一段時間出家為僧,披上袈裟、托缽修行。由僧侶組成的「<em>僧伽(Sangha)</em>」團體,在傳統社會中享有極高的道德威望,寺廟更是村莊的學校與社區中心。值得記住的是,這股精神力量並非總是順從的——在緬甸近現代史上,身披袈裟的<strong>僧侶,曾一次又一次地走上街頭,成為反抗殖民暴政、反抗軍事獨裁的道德先鋒</strong>(如 2007 年的「番紅花革命」)。佛教,既是緬甸人心靈的慰藉,也是他們對抗不義的勇氣源泉。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 苦難中的避難所,與一把雙面刃</span>
+      <p>上座部佛教,是理解緬甸民族靈魂最深的一把鑰匙。<strong>它為這個將歷經無數苦難——衰亡、殖民、內戰、獨裁——的民族,提供了一個極其穩固的精神避難所。</strong>當世俗的世界崩壞時,金塔的金光與佛法的慈悲,始終給予緬甸人面對苦難的內在力量與尊嚴。緬甸人那份在極端逆境中依然能保持的溫和、堅韌與信仰,正源於此。</p>
+      <p>但這份信仰,也是一把意味深長的雙面刃。<em>一方面,它孕育了反抗暴政的道德勇氣(街頭的僧侶);另一方面,在當代,它也曾被極端的民族主義所利用——少數宣揚「佛教民族主義」的勢力,把佛教與緬族認同綁在一起,煽動對其他宗教(尤其穆斯林)的排斥與仇恨。</em>這就埋下了一個沉重的伏筆:同一個賦予緬甸人慈悲與勇氣的信仰,當它與「緬族至上」的民族主義相結合時,也可能成為加深那道「核心 vs 邊緣」裂痕、乃至釀成針對少數族群之悲劇的工具。緬甸的金塔,既照亮了它最美的虔誠,也將在歷史的某些時刻,投下令人不安的陰影。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>蒲甘崩解後,中央的核心碎裂了,土地陷入分裂。<br>但緬族王權一次次地重新崛起、重新統一,<br><span class="hl">並把劍鋒指向了西邊那個勢均力敵的宿敵——暹羅。</span></p>
+</div>
+
+<!-- ===== 第三章:重新統一與緬暹爭霸 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Conquerors</span>
+    <h2 class="act-title">三度統一,與攻滅暹羅古都的霸業</h2>
+    <p class="act-sub">The Toungoo and Konbaung Empires, and the Burmese-Siamese Wars</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>蒲甘在十三世紀末崩解後,緬甸陷入了長達兩百多年的分裂——中央河谷碎裂成數個緬族小邦,南方是孟族的王國,撣族則在東部高原崛起。但那道由伊洛瓦底江凝聚出的「核心」引力,一次次地把這片土地重新拉回統一。在蒲甘之後,緬族又先後建立了兩個強盛的王朝,把緬甸的武功推向了頂峰。</p>
+
+    <h3>東吁王朝:稱霸中南半島</h3>
+    <p>十六世紀,<strong>東吁王朝（Toungoo Dynasty）</strong>崛起,在莽應龍(Bayinnaung)等雄主的率領下,重新統一了緬甸,並向四方擴張,一度建立起<em>東南亞史上面積最大的帝國之一</em>。它的兵鋒所及,征服了撣邦、寮國的部分地區,並數度與西邊的宿敵——<strong>暹羅(泰國)</strong>——爆發大戰。緬甸與暹羅,這兩個中南半島上勢均力敵的強權,從此展開了長達數百年的爭霸,留下了無數慘烈的戰爭記憶。</p>
+
+    <h3>貢榜王朝:攻滅大城</h3>
+    <p>十八世紀,緬甸最後一個王朝——<strong>貢榜王朝（Konbaung Dynasty）</strong>——再度崛起,第三次統一了全境,並把緬暹爭霸推向最高潮。1767 年,貢榜的軍隊長途奔襲,攻陷並徹底摧毀了暹羅延續了四百年的輝煌古都——<strong>大城(阿瑜陀耶,Ayutthaya)</strong>。這座當時東南亞最繁華的城市之一被焚掠一空,暹羅王朝就此覆滅(雖然暹羅人很快在鄭信的領導下復國,並把首都遷往曼谷)。攻滅大城,是緬甸軍事霸業的巔峰象徵——它向整個中南半島宣告,緬族王朝是這片土地上最強悍的征服者。</p>
+    <div class="pull"><p>緬甸的武功在攻滅暹羅古都大城的烈火中達到頂峰——但這份睥睨中南半島的霸氣,也即將為它招來一個遠比暹羅更可怕的對手。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 偉大的記憶,與致命的傲慢</span>
+      <p>東吁與貢榜的霸業,為緬族塑造了一份與蒲甘的金塔同樣重要的「黃金記憶」——<strong>一份「我們曾三度統一、稱霸中南半島、攻滅暹羅古都」的尚武榮光與民族自豪</strong>。這份記憶,是緬族民族主義最深的根源之一,也讓緬族始終懷有一種「天生的統治者」的自我認知。</p>
+      <p>但這份偉大的記憶,也埋藏著兩個致命的伏筆。<em>其一,這些緬族帝國的「統一」,本質上仍是以中央緬族為核心、靠武力征服四周民族(撣、孟、若開)的「霸權式統一」,而非平等的融合——那道「核心 vs 邊緣」的裂痕,從未被真正彌合,只是被武力暫時壓住。</em>其二,正是這份睥睨四方的尚武霸氣與傲慢,讓貢榜王朝在十九世紀,做出了一個災難性的誤判:它低估了一個正從海上、從印度方向逼近的全新對手——大英帝國。當這個曾攻滅大城、不可一世的緬族王朝,迎頭撞上工業革命武裝起來的世界第一強權時,它即將迎來的,不是又一場勢均力敵的爭霸,而是一場徹底的、屈辱的覆滅。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>當緬甸還沉浸在攻滅大城的霸業中時,一個來自海上的新對手,正逼近它的邊境。<br>三場戰爭,把這個曾稱霸中南半島的王朝,一步步逼向終點——<br><span class="hl">直到最後一位緬甸國王,被裝上牛車,押往異鄉。</span></p>
+</div>
+
+<!-- ===== 第四章:英國的征服 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Fall</span>
+    <h2 class="act-title">三場戰爭,與被押往異鄉的末代國王</h2>
+    <p class="act-sub">Three Wars, the End of the Monarchy, and a Province of India</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>就在貢榜王朝武功最盛之時,一個它完全沒有預料到的對手,從西方逼近了——已經征服了印度的<strong>大英帝國</strong>。緬甸的西部邊境,直接與英屬印度接壤。緬甸王朝那份源自霸業的傲慢與對歐洲實力的誤判,使它與這個工業強權的衝突無可避免。在十九世紀,英國用三場戰爭,徹底終結了緬甸的獨立。</p>
+
+    <h3>三場戰爭,步步緊逼</h3>
+    <p>第一次英緬戰爭(1824–26),英國奪走了緬甸西部與南部的沿海地區;第二次(1852),英國併吞了富庶的<em>南部下緬甸與仰光</em>,掐住了出海口;第三次(1885),英國找了個藉口,長驅直入,攻佔了王都<strong>曼德勒(Mandalay)</strong>。1886 年,英國正式吞併了整個緬甸。最具屈辱象徵意義的一幕是:緬甸的末代國王<strong>錫袍(Thibaw)</strong>與王后,在英軍的押解下,被裝上一輛普通的牛車,當著臣民的面,被押送離開王宮、流放到遙遠的印度,從此再未能踏上故土。一個曾攻滅大城的偉大王朝,就以這樣一種無比屈辱的方式,走到了終點。</p>
+    <div class="pull"><p>最後一位緬甸國王,被裝上一輛牛車,押往異鄉——一個曾稱霸中南半島的王朝,它的覆滅,沒有壯烈的戰歌,只有牛車轆轆的屈辱。</p></div>
+
+    <h3>淪為「印度的一個省」</h3>
+    <p>而英國對緬甸的處置,更是加倍的羞辱:它沒有把緬甸當作一個獨立的殖民地,而是把它<strong>併入英屬印度,當作印度的一個「省」</strong>來管理。這對曾經睥睨四方的緬族而言,是難以忍受的奇恥大辱。更深遠的衝擊接踵而至:英國為了開發緬甸這個「亞洲糧倉」(伊洛瓦底江三角洲的稻米成為英帝國重要的出口品),大量引進<em>印度人</em>(來當勞工、放貸者、商人與官員)與<em>華人</em>。這些外來移民湧入,掌控了緬甸的商業與金融,讓本土緬族在自己的土地上,反而淪為經濟上的邊緣人,激起了強烈的排外情緒。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 從天朝到棄子的墜落</span>
+      <p>英國的征服,在緬族的民族心靈上,刻下了一道極深的創傷——一種從「<strong>稱霸中南半島的天朝</strong>」墜落為「<strong>印度的一個省、被外來移民支配的棄子</strong>」的巨大屈辱與失落。這份「光榮的墜落」,連同它失去的王權與尊嚴,成為日後緬甸民族主義最熾烈的燃料。</p>
+      <p>但這段殖民史,留下的最致命遺產,是它對緬甸那道根本裂痕的<strong>蓄意加深</strong>。<em>英國採取了典型的「分而治之」:它把富庶的中央緬族地區(「本部緬甸」)納入直接統治、徹底改造;卻把四周的山地民族地區(撣邦、克欽、克倫等「邊區」)劃為單獨的、半自治的「邊區」來間接管理,並刻意拉攏、優待這些山地少數民族(尤其大量招募克倫族、克欽族進入殖民軍隊與警察,用以制衡人數最多的緬族)。</em>這套做法,把緬甸序章裡那道「核心緬族 vs 邊緣民族」的古老地理裂痕,徹底地政治化、制度化、並火上澆油。當英國有一天離開時,留下的將不是一個統一的緬甸,而是一個「核心」與「邊緣」之間積怨已深、互不信任、隨時準備兵戎相見的火藥桶。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">★ ✦ ★</div>
+  <p>二戰的烽火席捲了緬甸,也給了它掙脫殖民枷鎖的機會。<br>一位年輕的將軍,將領導緬甸走向獨立,<br><span class="hl">並試圖把那些被高山與英國隔開的民族,第一次,凝聚成「一個緬甸」。</span></p>
+</div>
+
+<!-- ===== 第五章:獨立與翁山 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Founding</span>
+    <h2 class="act-title">翁山的夢:把破碎的拼圖,拼成一個國家</h2>
+    <p class="act-sub">Aung San, the Panglong Promise, and a Founding Cut Short</p>
+    <div class="ornament">★ ★ ★</div>
+  </div>
+  <div class="prose">
+    <p>二戰,成了緬甸命運的轉捩點。日本在戰爭初期佔領了緬甸,趕走了英國人;一批懷抱獨立夢想的年輕緬甸民族主義者,起初與日本合作、組建緬甸軍隊,後來又認清日本的本質、轉而倒戈協助盟軍。領導這批「<em>三十志士</em>」、並成為緬甸獨立運動核心的,是一位年輕、堅定、極具威望的將軍——<strong>翁山（Aung San）</strong>,後世尊為緬甸的「<em>國父</em>」。</p>
+
+    <h3>彬龍會議:一個關於「團結」的承諾</h3>
+    <p>翁山深刻地理解緬甸最根本的難題——那道「核心緬族 vs 邊緣民族」的裂痕。他知道,一個只屬於緬族的緬甸是不夠的;要建立一個真正的國家,就必須贏得那些被高山隔絕、被英國拉攏的山地民族的信任與加入。1947 年,翁山做了一件極具遠見的事:他與撣族、克欽族、欽族等少數民族的領袖,在<strong>彬龍（Panglong）</strong>舉行會議,達成了著名的「<strong>彬龍協議</strong>」。協議的核心精神是:各民族<em>自願、平等地</em>聯合,組成一個聯邦,少數民族將享有充分的自治權。這是緬甸歷史上,第一次嘗試用「平等聯邦」而非「武力征服」,來縫合那道古老的裂痕。</p>
+    <div class="pull"><p>翁山的彬龍之夢,是緬甸歷史上最珍貴的一次嘗試:不靠刀劍,而靠平等的承諾,把核心與邊緣,第一次真正地凝聚成「一個緬甸」。</p></div>
+
+    <h3>一聲槍響,夢碎了一半</h3>
+    <p>然而,這個充滿希望的開端,卻遭遇了悲劇性的夭折。1947 年 7 月,就在緬甸正式獨立的前夕,翁山與他的多位內閣同僚,在一場會議中被政敵派人<strong>刺殺身亡</strong>,年僅三十二歲。緬甸,在誕生的門檻上,失去了它最有威望、最有能力去落實「彬龍承諾」、去團結各民族的領袖。1948 年,緬甸獨立了,但那個能把破碎拼圖拼成一個國家的人,已經不在了。<em>翁山的彬龍之夢,從此成了一個未能兌現的承諾——而這個未兌現的承諾,將成為緬甸此後數十年一切苦難的根源。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一個未能兌現的承諾</span>
+      <p>翁山之死與彬龍承諾的落空,是緬甸現代史上最關鍵、也最令人扼腕的轉折。<strong>彬龍協議,曾是縫合緬甸那道「核心 vs 邊緣」根本裂痕的、唯一一次真誠而有希望的嘗試;而翁山,是唯一一個可能讓它成真的人。</strong>當他在獨立前夕倒下時,緬甸失去的不只是一位領袖,更是一條「平等聯邦」的、本可避免日後無數流血的道路。</p>
+      <p>這裡藏著理解緬甸悲劇的核心:<em>緬甸獨立後立刻、且持續至今地陷入內戰,根源就在於那道古老的裂痕,在翁山死後,再也無人能夠真誠地縫合。</em>繼任的緬族領導者,大多回到了「中央集權、緬族主導」的老路,讓少數民族感到彬龍的承諾被背叛;於是,撣族、克倫族、克欽族等紛紛拿起武器,要求兌現當初「自治」的承諾,或乾脆尋求獨立。一個本應靠「平等」凝聚的聯邦,變回了一個靠「武力」維繫的、四處烽火的牢籠。翁山留下的那個「彬龍之夢」,既是緬甸最美好的願景,也是它最深的遺憾——它像一個幽靈,提醒著緬甸人:本來,有另一種可能。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">⚙ ✦ ⚙</div>
+  <p>翁山的夢碎之後,那道古老的裂痕重新裂開,內戰四起。<br>而在這片混亂中,一股力量把自己定位為「國家唯一的拯救者」——<br><span class="hl">軍隊。它將用一道道高牆,把整個國家鎖進它的掌心,長達半個世紀。</span></p>
+</div>
+
+<!-- ===== 第六章:軍人接管與鎖國 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Generals</span>
+    <h2 class="act-title">當軍隊把國家鎖進高牆</h2>
+    <p class="act-sub">Ne Win, the Civil Wars, and a Country Sealed Off</p>
+    <div class="ornament">⚙ ⚙ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>翁山遇刺後,緬甸的開局充滿了動盪。獨立(1948)後,那道未被縫合的裂痕立刻爆發:撣族、克倫族、克欽族等少數民族,因感到彬龍的「自治承諾」被緬族中央政府背棄,紛紛拿起武器,各種少數民族武裝組織(EAO)與緬甸共產黨,在邊區的群山中燃起了反抗的烽火。<strong>緬甸,從獨立的第一天起,就陷入了內戰——而這場內戰,以各種形式,一直持續到了今天,成為世界上持續時間最長的內戰。</strong></p>
+
+    <h3>1962:軍隊登場,鎖上國門</h3>
+    <p>1962 年,以內戰動盪、國家可能分裂為由,將軍<strong>奈溫（Ne Win）</strong>發動政變,推翻了文人政府,開始了緬甸長達數十年的軍事統治。奈溫推行了一套災難性的「<strong>緬甸式社會主義道路</strong>」:他把所有產業收歸國有、驅逐外資與外國人(尤其大量印度裔、華裔被迫離開)、並把緬甸與外部世界<em>幾乎完全隔絕</em>。曾經富甲一方、被稱為「亞洲糧倉」的緬甸,在這套封閉、僵化的政策下,經濟迅速崩潰,一步步淪為<strong>世界上最貧窮、最封閉的國家之一</strong>。</p>
+    <div class="pull"><p>一個曾經富甲一方的「亞洲糧倉」,被軍隊鎖進高牆、與世隔絕,在短短數十年裡,墜落為世界上最貧窮的角落之一。</p></div>
+
+    <h3>「高牆」:軍隊為何如此強大?</h3>
+    <p>緬甸軍隊(Tatmadaw)為何能如此牢固地掌控國家?它的權力,深植於那道「核心 vs 邊緣」的裂痕之中。軍方把自己定位為「<em>國家統一的唯一守護者</em>」——它宣稱,正是因為有邊區那些「分裂國家」的少數民族武裝,緬甸才需要一支強大的軍隊來維繫統一,而文人政府太軟弱,無法擔此重任。這套「<strong>沒有軍隊,國家就會四分五裂</strong>」的論述,成了軍方攫取無上權力、凌駕於一切之上的正當性基礎。它建起了一道道「高牆」:把國家鎖在封閉之中、把權力鎖在軍營之內、把少數民族鎖在持續的戰火之下。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 裂痕,餵養了軍隊</span>
+      <p>緬甸軍隊那令人窒息的權力,根源並非偶然,而是直接源於它那道古老的、未被縫合的裂痕。<strong>正是因為翁山的「彬龍之夢」破滅、那道「核心 vs 邊緣」的傷口在獨立後立刻潰爛成全國性的內戰,才為軍隊提供了它賴以崛起與壟斷權力的全部理由——「我是唯一能阻止國家分裂的力量」。</strong></p>
+      <p>這揭示了緬甸悲劇最核心的一個惡性循環:<em>軍隊以「平定內戰、維護統一」為名攫取權力,但軍隊那套「中央集權、緬族主導、武力鎮壓」的鐵腕,恰恰是讓少數民族永遠無法信任中央、從而讓內戰永遠無法平息的根本原因。</em>換句話說,軍隊是靠著「內戰」而壯大的,因此它在潛意識裡,並不真正希望內戰結束——因為一旦邊區實現了和平與真正的自治,軍隊存在的理由就消失了。於是,軍隊與內戰,形成了一個互相餵養、永不止息的死結。緬甸那道由地理寫定、由英國加深、由翁山之死而潰爛的裂痕,最終餵養出了一個把整個國家都鎖進高牆的怪物。而要打破這道高牆,需要一股全新的、來自人民的力量。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✊ ✦ ✊</div>
+  <p>在軍隊的高牆下沉默了二十多年後,人民終於在 1988 年走上街頭。<br>而在那個血腥的夏天,一個熟悉的名字回到了緬甸——<br><span class="hl">國父翁山的女兒,將成為這個國家民主希望的象徵。</span></p>
+</div>
+
+<!-- ===== 第七章:1988 與翁山蘇姬 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Lady</span>
+    <h2 class="act-title">1988 的血,與一位回家的女兒</h2>
+    <p class="act-sub">The 8888 Uprising and the Rise of Aung San Suu Kyi</p>
+    <div class="ornament">✊ ✊ ✊</div>
+  </div>
+  <div class="prose">
+    <p>在奈溫的封閉統治下,緬甸的經濟瀕臨崩潰,民怨累積了二十多年。1988 年,壓抑已久的怒火終於爆發。8 月 8 日,席捲全國的學生與民眾,走上街頭,要求結束軍事獨裁、實行民主——這就是緬甸現代史上著名的「<strong>8888 民主運動</strong>」。軍方的回應,是血腥的鎮壓,數千名手無寸鐵的抗議者倒在了槍口下。</p>
+
+    <h3>一位回家的女兒</h3>
+    <p>就在這個風起雲湧的時刻,一個熟悉的名字回到了緬甸的歷史舞台——<strong>翁山蘇姬（Aung San Suu Kyi）</strong>,國父翁山的女兒。她本在英國過著學者與母親的平靜生活,卻因母親病重而返國,恰逢 1988 的浪潮。作為翁山的女兒,她身上承載著巨大的民族威望;她挺身而出,呼籲非暴力的民主抗爭,迅速成為整個民主運動的精神領袖,並創立了「<em>全國民主聯盟(NLD)</em>」。1990 年,軍政府舉行了大選,NLD 贏得了壓倒性的勝利——但軍方<strong>拒絕承認選舉結果</strong>,並將翁山蘇姬長期軟禁。</p>
+    <div class="pull"><p>父親翁山,為緬甸帶來了獨立的夢;女兒翁山蘇姬,則扛起了民主的夢。兩代人的夢,都遭遇了同一個對手——那道軍隊的高牆。</p></div>
+
+    <h3>被軟禁的象徵,與遲來的曙光</h3>
+    <p>在此後的二十多年裡,翁山蘇姬大部分時間都被軍政府<strong>軟禁在家中</strong>。她拒絕在自由與離開緬甸之間選擇後者,選擇留下來,與她的人民一同承受苦難。她那份在高壓下堅持非暴力、堅持原則的姿態,使她成為國際公認的民主與人權象徵,並獲得了<em>諾貝爾和平獎</em>。對緬甸人民而言,被軟禁的「<strong>夫人(The Lady)</strong>」,是高牆內那一線不滅的希望之光。期間,僧侶領導的「番紅花革命」(2007)、毀滅性的納吉斯氣旋(2008)接連衝擊著這個國家,但軍政府的高牆,似乎依然牢不可破。直到 2010 年前後,在內外壓力下,軍方終於開始鬆動,釋放了翁山蘇姬,並啟動了一場謹慎的、由上而下的政治改革——緬甸,似乎終於迎來了曙光。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 父女兩代的同一個對手</span>
+      <p>翁山蘇姬的崛起,在緬甸歷史上構成了一個深刻的呼應與輪迴。<strong>父親翁山的夢想是「獨立與民族團結」(彬龍),女兒翁山蘇姬的夢想是「民主與自由」(NLD)——而他們兩代人所面對的、所對抗的,本質上是同一個對手:那股以「維護統一」為名、壟斷一切權力的軍事力量。</strong></p>
+      <p>但這裡也藏著緬甸民主運動的一個局限與伏筆。<em>翁山蘇姬與她所代表的民主運動,其核心訴求是「緬族多數的民主」——即推翻軍政府、實現選舉民主。然而,這個訴求,與緬甸那道更古老、更根本的「核心 vs 邊緣」裂痕(即少數民族要求的「平等聯邦與自治」),並不完全是同一回事。</em>對許多少數民族而言,他們要的不只是「投票權」,更是父親翁山在彬龍承諾過的「自治權」。這個微妙的差異——「緬族的民主」與「少數民族的聯邦」之間的張力——將在翁山蘇姬日後真正掌權時,以一種令世界震驚、令她聲譽受損的方式爆發出來。希望的曙光背後,那道最深的裂痕,依然在等待著它的考驗。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☂ ✦ ☂</div>
+  <p>曙光似乎真的來了:翁山蘇姬贏得了大選,世界為緬甸的轉型喝采。<br>但就在這道曙光之下,西部邊境的一個角落,<br><span class="hl">正上演著一場讓「民主聖徒」的光環,與整個國家的良心,都蒙上陰影的悲劇。</span></p>
+</div>
+
+<!-- ===== 第八章:短暫的春天與羅興亞悲劇 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Brief Spring</span>
+    <h2 class="act-title">短暫的春天,與一道道德的裂痕</h2>
+    <p class="act-sub">The Democratic Opening, and the Rohingya Tragedy</p>
+    <div class="ornament">☂ ☂ ☂</div>
+  </div>
+  <div class="prose">
+    <p>2010 年代,緬甸迎來了一段令世界振奮的「<strong>短暫春天</strong>」。軍方主導的改革逐步推進,國家對外開放,經濟開始復甦,被壓抑已久的言論與社會空間得到鬆綁。2015 年,緬甸舉行了被廣泛認為自由公正的大選,翁山蘇姬的 NLD 贏得了壓倒性勝利。雖然軍方透過 2008 年自己制定的憲法,仍牢牢保留了巨大的權力(保障四分之一的議會席次、掌控國防內政等關鍵部門,並有一條專門條款阻止翁山蘇姬本人擔任總統),但翁山蘇姬以「<em>國務資政</em>」的身分,成為了國家的實際領導人。緬甸,似乎正走在一條從軍事獨裁邁向民主的道路上。</p>
+
+    <h3>若開邦的悲劇:羅興亞</h3>
+    <p>然而,就在這道曙光之下,西部<strong>若開邦(Rakhine)</strong>的一個角落,正上演著一場慘烈的悲劇。生活在那裡的<strong>羅興亞人（Rohingya）</strong>——一個信奉伊斯蘭教的少數族群——長期被緬甸政府與緬族主流社會視為「<em>來自孟加拉的非法移民</em>」,而非緬甸的合法公民,被剝奪了公民權,飽受歧視與壓迫。2016 至 2017 年,在若開邦發生武裝衝突後,緬甸軍隊展開了大規模的「清剿行動」——村莊被焚毀,大量平民遭到屠殺與暴行,超過<strong>七十萬羅興亞人</strong>被迫逃往鄰國孟加拉,釀成一場震驚世界的人道災難。聯合國等國際機構,將此定性為可能構成「<em>種族滅絕</em>」的罪行。</p>
+    <div class="warn">
+      <div class="warn-tag">蒙塵的光環</div>
+      <p>最令世界錯愕與痛心的是<strong>翁山蘇姬的反應</strong>。這位曾因捍衛人權而獲諾貝爾和平獎、被視為「民主聖徒」的領袖,在這場危機中,不僅沒有為羅興亞人發聲,反而在國際法庭上為緬甸軍方的行動辯護。她的國際聲譽因此一落千丈,昔日的光環蒙上了難以洗刷的陰影。</p>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 那道裂痕,吞噬了聖徒</span>
+      <p>羅興亞悲劇,以及翁山蘇姬令人心碎的沉默與辯護,是緬甸那道「核心 vs 邊緣」根本裂痕,在當代最黑暗、最尖銳的一次爆發。<strong>它殘酷地揭示了:緬甸所謂的「民主轉型」,從一開始就建立在一個未被解決的根基之上——那個「誰才算緬甸人」、「核心緬族與邊緣他者該如何相處」的古老問題。</strong></p>
+      <p>翁山蘇姬的「墮落」,與其說是個人的背叛,不如說是這道結構性裂痕的犧牲品。<em>她所代表的,終究是「緬族佛教徒多數」的民主;當「捍衛羅興亞人權」與「緬族民族主義情緒、軍方的紅線」相衝突時,她選擇了後者——因為她的政治權力,根植於緬族多數的支持。</em>這正是緬甸最深的悲劇:即使是最有威望的民主領袖,一旦進入那個由「緬族中心主義」與「軍方權力」共同築成的體制,也無法、或不願去觸碰那道最根本的裂痕。羅興亞的悲劇警示著:一個不能平等對待它所有族群、尤其是它的「他者」的國家,它的「民主」是殘缺的,它的「春天」也注定是脆弱而短暫的。而事實證明,這個春天,確實短得令人心碎。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚙ ✦ ✊</div>
+  <p>2021 年 2 月的一個清晨,人民從睡夢中醒來,發現網路斷了、領袖被捕了。<br>軍隊,推倒了它親手搭建的那座脆弱的「民主」舞台。<br><span class="hl">但這一次,從廢墟中站起來反抗的,是一整個全新的世代。</span></p>
+</div>
+
+<!-- ===== 第九章:2021 政變與春天革命 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Coup & The Spring</span>
+    <h2 class="act-title">2021:高牆重臨,與春天的革命</h2>
+    <p class="act-sub">The Coup, the Civil War, and a Generation That Refused</p>
+    <div class="ornament">⚙ ✊ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>緬甸那道「短暫的春天」,在 2021 年 2 月 1 日的清晨,戛然而止。在 2020 年的大選中,翁山蘇姬的 NLD 再次贏得壓倒性勝利;不願交出權力、也不願讓自身利益受損的緬甸軍方,以「選舉舞弊」為藉口,發動了<strong>政變</strong>。他們逮捕了翁山蘇姬與大批民選領袖,宣布接管政權,把緬甸重新推回了那道熟悉的、軍事獨裁的高牆之內。十年的民主實驗,一夜之間,化為烏有。</p>
+
+    <h3>春天革命:一個世代的拒絕</h3>
+    <p>但這一次,情況不同了。經歷過十年相對開放歲月、習慣了自由與網路的<strong>年輕一代</strong>,拒絕再退回那座高牆。一場規模空前的反抗——被稱為「<strong>春天革命（Spring Revolution）</strong>」——席捲了全國。它始於和平的「公民不服從運動」(罷工、罷課、敲鍋盆抗議),但在軍方的血腥鎮壓下,迅速演變成武裝抵抗。無數年輕人逃入叢林與邊區,組建「<em>人民防衛軍(PDF)</em>」,拿起武器與軍政府作戰。</p>
+
+    <h3>裂痕的彌合?一個意想不到的轉折</h3>
+    <p>而這場危機,催生了一個緬甸歷史上意想不到的轉折。被軍方迫害的緬族年輕抵抗者們,逃入邊區後,得到了那些與軍隊作戰了數十年的<strong>少數民族武裝組織</strong>的庇護、訓練與並肩作戰。在共同的敵人——軍政府——面前,「核心的緬族」與「邊緣的少數民族」之間那道延續了千年的裂痕,第一次出現了某種<em>彌合與聯合</em>的可能。流亡的民選議員組建了「民族團結政府(NUG)」,試圖團結各方,並罕見地承諾建立一個真正平等的「<strong>聯邦民主</strong>」——這,某種程度上,正是翁山當年那個「彬龍之夢」的迴響。</p>
+    <div class="pull"><p>軍隊的暴力,本想再一次鞏固它的高牆;卻意外地,把它分裂了千年的敵人——緬族與少數民族——第一次,推到了同一條戰壕裡。</p></div>
+    <p>今天的緬甸,正深陷在這場慘烈的內戰之中。軍政府控制著中央的城市,但在廣大的鄉村與邊區,抵抗力量與少數民族武裝節節進逼,軍方陷入了空前的困境。整個國家經濟崩潰、民不聊生,數百萬人流離失所。而在地緣政治上,被西方制裁孤立的軍政府,日益倒向<strong>中國</strong>與俄羅斯,尋求支持與武器——緬甸,再一次成為大國博弈的棋子。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 裂痕,與彌合裂痕的契機</span>
+      <p>2021 年的政變與春天革命,把緬甸的全部歷史矛盾,逼到了一個攤牌的時刻。<strong>軍方發動政變,證明了那道「軍隊高牆」的頑固——只要它存在,任何民主與和平都是脆弱的、隨時可被推倒的。</strong>而它對人民的血腥鎮壓,則把整整一個世代,推向了不惜以命相搏的反抗。</p>
+      <p>但這場黑暗的危機中,也藏著一線前所未有的、微弱的曙光。<em>歷史的弔詭在於:軍方為了維護「核心緬族」的統治而發動的政變,卻可能在無意中,促成了「核心緬族」與「邊緣少數民族」的歷史性聯合。</em>當被迫害的緬族青年與被壓迫了數十年的少數民族,終於在同一個敵人面前並肩作戰、並共同擘畫一個「聯邦民主」的未來時,翁山那個破碎了七十多年的「彬龍之夢」,似乎第一次有了重新被縫合的可能。緬甸的未來依然晦暗不明——它可能墜入更深、更長久的分裂與內戰,也可能在浴火之後,終於誕生出一個真正平等、能容納所有族群的新國家。這個由地理寫定、困擾了它千年的「核心 vs 邊緣」難題,正在以最慘烈、卻也最有可能帶來真正改變的方式,等待著它的答案。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ★ ⚙</div>
+  <p>千餘年,一條大江,一圈高山,數千座金塔,與一道從未癒合的裂痕。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的緬甸與緬甸人,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的緬甸人</h2>
+      <p class="act-sub" style="color:rgba(245,237,214,.6)">Why Myanmar, and the Burmese, Are What They Are</p>
+      <div class="ornament" style="color:var(--gold-bright)">☸ ★ ⚙</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的緬甸之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程,也都指向同一道核心的裂痕。</p>
+
+      <h3>第一層:地理把它分成「核心」與「邊緣」</h3>
+      <p>一切的源頭是<strong>地理</strong>。伊洛瓦底江在中央沖積出一片富饒的河谷盆地,養出了強大的「核心緬族」;但一圈環抱的崇山峻嶺,又把撣、克倫、克欽等上百個民族隔絕在「邊緣高地」。這道「中央 vs 邊緣」的二元格局,寫定了緬甸最根本的命題:它從來就不是「一個」民族的土地,而是一道「核心」與「邊緣」之間、永遠等待被縫合的張力。</p>
+
+      <h3>第二層:金塔與霸業,給了它驕傲,也給了它傲慢</h3>
+      <p>接著是<strong>偉大</strong>。緬族在中央河谷三度建起強盛的王朝——蒲甘堆起了千塔的森林,東吁與貢榜稱霸中南半島、攻滅了暹羅古都。這份「金塔的虔誠」與「霸業的榮光」,連同深入骨髓的上座部佛教,構成了緬族的民族靈魂與自豪。<em>但這份偉大始終是「核心緬族」的偉大、是靠武力征服邊緣的「霸權式統一」,那道裂痕從未被真正彌合;而它的尚武傲慢,也讓它誤判了大英帝國,招來覆滅。</em></p>
+
+      <h3>第三層:殖民者撕裂了它,也羞辱了它</h3>
+      <p>然後是<strong>墜落</strong>。英國用三場戰爭吞併了緬甸、把末代國王裝上牛車押往異鄉、並把它貶為「印度的一個省」,留下了從天朝墜為棄子的深沉屈辱。更致命的是,英國的「分而治之」——直接統治緬族核心、卻拉攏優待邊區的少數民族——把那道古老的地理裂痕,徹底地政治化、制度化、火上澆油,為日後的內戰埋下了引信。</p>
+
+      <h3>第四層:一聲槍響,讓「團結之夢」永遠破碎</h3>
+      <p>最關鍵的轉折是<strong>翁山之死</strong>。國父翁山曾用「彬龍協議」,做了緬甸歷史上唯一一次真誠的嘗試:用「平等聯邦」而非「武力征服」,來縫合那道裂痕。但他在獨立前夕遇刺身亡,這個夢隨之破碎。<em>於是緬甸獨立後立刻墜入內戰——少數民族因「自治承諾」被背棄而拿起武器,而那道未能彌合的裂痕,從此再也無人能夠真誠地縫合。</em></p>
+
+      <h3>第五層:裂痕餵養了軍隊,軍隊築起了高牆</h3>
+      <p>最後是<strong>高牆</strong>。正是那道潰爛成內戰的裂痕,給了軍隊壟斷權力的全部理由——「沒有我,國家就會分裂」。於是軍隊把整個國家鎖進高牆:鎖國的貧困、獨裁的鐵腕、永不止息的內戰。它鎮壓了 1988、軟禁了翁山蘇姬、在短暫的春天裡縱容了羅興亞的悲劇、又在 2021 推倒了民主、引爆了春天革命。<em>軍隊靠內戰壯大,因此並不真正希望內戰結束——這個死結,把緬甸困鎖至今。</em></p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 被一道裂痕,定義的民族</span>
+        <p>所以,今天的緬甸人是誰?他是<strong>一個被「核心與邊緣」這道千年裂痕所定義、在「金塔的虔誠」與「軍靴的暴力」之間反覆掙扎的人</strong>——他的祖先在蒲甘堆起過千塔的金色森林、攻滅過暹羅的古都;他向遍地的金塔頂禮膜拜、把一生的積蓄獻給信仰;但他的國家,卻被一道從地理長出、被殖民加深、因國父之死而潰爛的裂痕,困鎖在世界上持續最久的內戰與一次次的軍事高牆之中。</p>
+        <p>他的虔誠與他的苦難,是同一個民族的兩面;他的偉大記憶與他的當下困境,是同一道「核心 vs 邊緣」裂痕的兩面;他的金塔與他的高牆,是同一片土地上、信仰與暴力的兩面。<em>緬甸最深刻的真相是:它的全部歷史,本質上就是那道「如何把核心緬族與邊緣民族,真正凝聚成一個國家」的難題,反覆被嘗試、又反覆失敗的故事。從蒲甘的霸權統一,到翁山的彬龍之夢,到軍隊的武力高牆——每一次,它都未能真正彌合那道裂痕。而今天,在春天革命的烈火中,當被迫害的緬族青年與被壓迫的少數民族,第一次在同一條戰壕裡並肩作戰、共同擘畫一個「聯邦民主」的未來時,那個破碎了七十多年的彬龍之夢,或許正等待著它最後、也最艱難的一次縫合。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">大江凝聚了核心,高山隔出了邊緣,金塔守住了靈魂,而軍隊的高牆困鎖了希望——而要如何縫合那道千年的裂痕、把這片破碎的拼圖真正拼成一個國家,是這一代緬甸人正用鮮血,回答的問題。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">千餘年的終極啟示</span>
+      <p>一個國家的樣貌,往往由它的地理(核心與邊緣)開局,由一段偉大的記憶定下它驕傲的根,由殖民的算計撕裂它團結的本,再由一個關鍵領袖的隕落,讓「平等共處」的夢永遠破碎——而它能否真正成為一個國家,最終取決於生活在這裡的人們,能否在歷盡內戰與高牆之後,終於願意放下「誰征服誰」的執念,用平等與信任,去縫合那道由地理寫定、卻必須由人心彌合的裂痕。這,就是緬甸至今仍在用鮮血書寫的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(245,237,214,.78);margin-top:2.5rem">
+        從一條貫穿盆地的大江、蒲甘平原上數千座佛塔的森林,<br>
+        到稱霸中南半島的霸業、攻滅暹羅古都的烈火,<br>
+        從被牛車押往異鄉的末代國王、被撕裂的「分而治之」,<br>
+        到翁山未竟的彬龍之夢、那道餵養出軍隊的裂痕,<br>
+        再到軟禁中的女兒、短暫的春天,與一整個世代的革命——<br>
+        這段交織著大江、金塔、霸業、裂痕與高牆的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的緬甸,<br>以及今天的,緬甸人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">☸ ✦ ⚙</div>
+  <p>大江、金塔與高牆 · 緬甸的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE PLAIN OF PAGODAS TO THE SPRING REVOLUTION · c.1044 CE – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

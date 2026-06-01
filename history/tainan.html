@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>府城：台灣的起點</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16140f;
+  --parchment:#f3eee2;
+  --parchment-deep:#e7dfc9;
+  --sea:#1d3640;
+  --sea-deep:#0e2128;
+  --gold:#a8842f;
+  --gold-bright:#cda551;
+  --rust:#8a3a23;
+  --crimson:#74221a;
+  --jade:#33583f;
+  --faint:#665a45;
+  --line:#c6b58e;
+  --shadow:rgba(22,20,15,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(168,132,47,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(29,54,64,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(29,54,64,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #223e48 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23cda551' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23cda551' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(243,238,226,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2}
+.lede p{font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;color:var(--sea-deep);font-weight:500}
+.lede p .drop{float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem}
+.act-title{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2}
+.act-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint);margin-top:.8rem}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;border-left:4px solid var(--gold);line-height:1.4}
+.prose h4{font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;color:var(--sea-deep);margin:2.2rem 0 .8rem}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;background:linear-gradient(135deg, rgba(29,54,64,.04), rgba(168,132,47,.06));border-top:2px solid var(--gold);border-bottom:2px solid var(--gold)}
+.pull p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500}
+.pull::before{content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1}
+
+/* ====== INVESTOR / ECHO CALLOUT ====== */
+.investor{margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;background:var(--sea-deep);color:var(--parchment);border-radius:2px;box-shadow:0 18px 40px -16px rgba(14,33,40,.6)}
+.investor::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--gold-bright),var(--rust))}
+.investor .tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(243,238,226,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem}
+.tl-item::before{content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;background:var(--parchment);border:2px solid var(--rust);border-radius:50%}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.5rem 1.4rem;position:relative;overflow:hidden;transition:transform .3s ease, box-shadow .3s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;padding:.85rem 1rem;text-align:left}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(168,132,47,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STATS ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(29,54,64,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden}
+.finale::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");background-position:center;background-size:cover}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(243,238,226,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{margin:3rem 0;padding:2.4rem;border:1px solid rgba(205,165,81,.4);border-radius:3px;background:rgba(0,0,0,.18)}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* expanded edition */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#180f08 !important}
+.dark .act-title{color:#d6c29e}
+.dark .prose p{color:#cbb292}
+.dark .prose strong{color:#c6785a}
+.dark .prose em{color:#d6a676}
+.dark .prose h3{color:#c6785a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#887356}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(116,34,26,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* interludes */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(243,238,226,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* legacy/shift */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(29,54,64,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* debate box for contested history */
+.debate{margin:2.8rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--parchment-deep)}
+.debate-head{background:linear-gradient(135deg,var(--jade),#2a4734);color:var(--parchment);font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;padding:.8rem 1.2rem;display:flex;align-items:center;gap:.5rem}
+.debate-head::before{content:"\2696";font-size:1rem}
+.debate-body{padding:1.2rem 1.4rem}
+.debate-body .view{margin:.9rem 0;padding-left:1.1rem;border-left:3px solid var(--gold);font-size:.95rem;line-height:1.75}
+.debate-body .view .who{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.1em;color:var(--rust);text-transform:uppercase;display:block;margin-bottom:.2rem}
+.debate-body .view strong{color:var(--crimson)}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Fucheng · Where Taiwan Began</span>
+    <h1>府城<br><span class="em">台南</span><br>台灣的起點</h1>
+    <p class="sub">從一片淤積成陸的台江內海、台灣史寫下第一頁的地方，到一座曾是全島首府、後來失去舞台、卻因此完整保住了時間與記憶的古都——<br>一部關於「為何今天的台南是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的台南，是一座步調最慢、廟宇最密、小吃最講究、處處是古蹟、又驕傲地自稱「台灣第一個城市」的城？為什麼它曾是這座島的首府、是台灣歷史寫下第一頁的地方，後來卻把政治與經濟的中心，讓給了北邊的台北與南邊的高雄？答案，藏在一個動人的弔詭裡：<em>台南之所以成為今天的台南，不是因為它贏得了什麼，而是因為它「失去」了什麼。</em>它失去了首府的地位、失去了成為現代大都會的舞台、失去了被劇烈改造的命運——而正是這份失去，讓它保住了別的城市都早已弄丟的東西：完整的古蹟、緩慢的步調、層層疊疊的記憶，以及一種「<span style="color:var(--rust);font-weight:600">這裡就是台灣的根</span>」的從容與驕傲。如果說台北是被政權反覆覆寫的拼貼之城、高雄是被國家一手打造的工業港，那麼台南，就是<em>那座最古老的、台灣一切的開端、因為退出了競逐而完整保存了過去的城</em>。讓我們從那片早已消失的內海開始，一層一層把它讀回來。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the City</span>
+    <h2 class="act-title">台江內海與一片沙洲</h2>
+    <p class="act-sub">The Inland Sea, the Sandbars, and a Vanished Coastline</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解台南，得先理解一件外地人難以想像的事：<strong>今天台南最熱鬧的市區，在四百年前，大部分還泡在海水裡。</strong>台南的身世，是從一片如今早已消失的內海——<em>台江內海</em>——開始的。這片海，是台灣史一切的起點，也是這座城最深的祕密。</p>
+
+    <h3>一片被沙洲圍住的內海</h3>
+    <p>數百年前，今天台南的西半部，是一片廣闊而平靜的潟湖——<strong>台江內海</strong>。它的外側，是一連串狹長的沙洲島（當時稱為「<em>鯤鯓</em>」，一鯤鯓、二鯤鯓……如同一隻隻浮在海面的大魚），這些沙洲像一道天然的屏障，把外海的風浪擋在外面，圍出了一片可供船隻安穩停泊的內海。對航海者而言，這是一個絕佳的天然港灣：船從沙洲之間的水道駛入，就能在風平浪靜的內海裡靠岸。<strong>這片內海，正是荷蘭人選擇在此登陸、台灣史就此開篇的根本原因。</strong></p>
+    <div class="pull"><p>台灣的歷史，是從一片如今已經消失的海開始的——當你站在今天台南的街上，你其實正站在四百年前的海面之下。</p></div>
+
+    <h3>滄海桑田：內海如何淤積成陸</h3>
+    <p>但台江內海的命運，是一場壯觀的「<strong>滄海桑田</strong>」。河流（如曾文溪等）長年挾帶大量泥沙注入內海，加上風災、洪水的劇烈改變，這片內海在數百年間<em>逐漸淤積、陸化</em>。一片汪洋，慢慢變成了沙洲、潟湖、魚塭，最終成為今天我們所見的陸地與海埔新生地。當年荷蘭人停泊大船的內海，如今已是台南的市區與郊野；當年的沙洲島「鯤鯓」，有的變成了陸地的一部分，有的地名（如南鯤鯓）至今仍在訴說著那段海洋的記憶。<em>台南的地理，本身就是一部「海退陸進」的活歷史。</em></p>
+
+    <h3>為什麼起點在這裡？</h3>
+    <p>於是我們明白了：為什麼台灣的歷史，會從台南開始？因為在十七世紀，這片<strong>台江內海</strong>提供了全台灣西南海岸最理想的條件——一個有沙洲屏障的天然良港、一片適合登陸與屯墾的腹地、又位於連結中國、日本與南洋航線的要衝。當荷蘭人在尋找一個轉口貿易的據點時，這片內海成了他們的選擇。台灣與世界接軌的第一個觸點，就此落在了這裡。<em>地理，再一次成為第一作者——它把「台灣的起點」這個身分，寫給了台南。</em></p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 起點，是地理選出來的</span>
+      <p>在任何殖民者、任何政權、任何「城市」的念頭出現之前，<strong>台江內海與那一串沙洲</strong>就已經替台南寫好了它最重要的身分——<em>台灣的起點</em>。一片有屏障的天然內海、一塊適合登陸屯墾的腹地、一個位於東亞航線要衝的位置，註定讓這裡成為外來勢力叩開台灣大門的第一站。</p>
+      <p>這是讀懂台南的第一把鑰匙，也是它與台北、高雄最深的不同：台北的命運寫在「最大的平地」，高雄的命運寫在「最好的港灣」，而台南的命運，寫在「<em>最早的那片海</em>」。正因為它是起點，所以它擁有了別人沒有的東西——最古老的城、最深的歷史、最厚的記憶。而那片成就了它的內海雖然消失了，卻把「台灣從這裡開始」這個無法被任何城市奪走的身分，永遠地留給了台南。接下來，就讓我們看看，當第一艘外國的船駛入這片內海時，台灣的歷史，是如何被翻開第一頁的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">❂ ✦ ❂</div>
+  <p>在荷蘭人、在漢人、在「台灣」之前,<br>台江內海的沿岸早已有人居住——<br><span class="hl">西拉雅人,是這片土地真正的原主人,與最早的記憶。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The First People</span>
+    <h2 class="act-title">西拉雅的土地:台江畔的原主人</h2>
+    <p class="act-sub">The Siraya, the Four Great Villages, and the Sinkan Manuscripts</p>
+    <div class="ornament">❂ ❂ ❂</div>
+  </div>
+  <div class="prose">
+    <p>在荷蘭人、在漢人、在「台灣」這個概念之前,台江內海的沿岸早已有人居住。這片土地最早的主人,是<strong>平埔原住民西拉雅族(Siraya)</strong>。他們沿著內海、河口與平原聚居,以狩獵、漁撈與農耕為生,在荷蘭人到來之前,已在這裡生活了世世代代。台南作為「台灣的起點」,它真正的開篇,其實是從西拉雅人的家園開始的。</p>
+
+    <h3>四大社:台江畔的部落</h3>
+    <p>西拉雅人以「社」(部落)為單位聚居,其中最著名的是環繞台江內海的<strong>四大社</strong>——新港社、目加溜灣社、蕭壠社、麻豆社。這些部落各有領域,有自己的社會組織、信仰(如阿立祖、公廨的祀壺信仰)與生活方式。當荷蘭人登陸時,首先打交道的,正是這些西拉雅部落。荷蘭人透過結盟、貿易、傳教與武力,逐步將這些部落納入其統治體系——這也是荷蘭人能在台灣立足的重要基礎。今天台南許多地名(如新市、善化、麻豆、佳里),都還保留著這些古老部落的痕跡。</p>
+    <div class="pull"><p>台灣史寫下第一頁的地方,並不是一片空白的土地——荷蘭人的船駛入台江時,岸上早已有西拉雅人世代生活的家園。</p></div>
+
+    <h3>新港文書:用羅馬字寫下的原住民語</h3>
+    <p>西拉雅人留下了一項在台灣史上極為珍貴的文化遺產——<strong>新港文書</strong>。荷蘭傳教士為了傳教,以<em>羅馬字母拼寫西拉雅語</em>,教導新港社等部落的原住民用這套文字書寫自己的語言。這是台灣原住民語言第一次被系統性地文字化。更驚人的是,在荷蘭人離開之後,西拉雅人仍持續使用這套羅馬字長達一個多世紀,用來書寫土地買賣等契約文件(後人稱為「<em>番仔契</em>」)。新港文書是西拉雅文化曾經輝煌的見證,也是台灣這座島「多語、多文字」歷史最古老的一頁。</p>
+
+    <h3>被同化的原主人</h3>
+    <p>然而,西拉雅人的命運,與台灣其他平埔族群相似(這在台灣史中是反覆的母題)。隨著漢人移民在荷、鄭、清各時期大量湧入台江一帶墾殖,西拉雅人的土地被佔據、文化被同化、身分逐漸「消失」於漢人社會之中——許多西拉雅後裔在通婚、改姓與漢化中隱沒,被迫往內陸(如台南東山、左鎮一帶)遷移。今日,西拉雅族的當代尋根與正名運動仍在進行,他們努力地從新港文書、從祀壺信仰、從口傳記憶中,重新找回那個曾是台江畔主人的自己。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 起點之前,還有更早的起點</span>
+      <p>西拉雅的故事,為「台南是台灣的起點」這個說法,補上了一個更誠實、更古老的注腳:<strong>當我們說「台灣史從台南、從荷蘭人開始」時,別忘了,在荷蘭人翻開那一頁之前,西拉雅人早已在這片土地上,寫了無數頁沒有被記載下來的歷史。</strong>所謂的「起點」,其實是外來者的起點;對西拉雅人而言,那不是開始,而是一個世界被另一個世界覆蓋的時刻。</p>
+      <p>這也讓台南的「古老」有了雙重的意義:它不只是漢人城市裡最古老的一座,它腳下還躺著比漢人文明更古老的西拉雅家園。新港文書能流傳一個多世紀、西拉雅地名能存活至今,正是這座古都「層層疊疊保存記憶」的最早一例。它提醒我們:台南的故事,不是從熱蘭遮城開始的,而是從台江畔那一個個西拉雅部落、從一套用羅馬字寫下的古老語言開始的。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>1624 年,一支船隊駛入台江內海,<br>在一片名為「大員」的沙洲上登陸——<br><span class="hl">台灣有文字記載的歷史,就此翻開了第一頁。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · Where It Began</span>
+    <h2 class="act-title">大員:台灣史的第一頁,在這裡寫下</h2>
+    <p class="act-sub">Fort Zeelandia and the Opening of Taiwan's Recorded History, 1624–1662</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>1624 年,荷蘭聯合東印度公司(VOC)的船隊駛入台江內海,在一片名為「<strong>大員(Tayouan)</strong>」的沙洲上登陸——這個地名,後來成了整座島嶼的名字「台灣」的由來之一。對整個台灣而言,這是它被寫進世界史的第一頁;而對台南而言,這是它作為「台灣起點」這個身分,正式登場的時刻。台灣有文字記載的歷史,就從這片內海、這座沙洲開始。</p>
+
+    <h3>兩座城:熱蘭遮與普羅民遮</h3>
+    <p>荷蘭人在台江內海畔,建立了兩座決定性的城堡。其一是位於沙洲(大員)上的<strong>熱蘭遮城(Fort Zeelandia)</strong>,即今天的<em>安平古堡</em>所在——它是荷蘭人統治台灣的政治與軍事中心,堅固的稜堡俯瞰著進出內海的水道。其二是位於對岸赤崁地區的<strong>普羅民遮城(Provintia)</strong>,即今天的<em>赤崁樓</em>——它是行政與商業的中心。這兩座城,一個守海口、一個管陸地,構成了荷蘭人經營台灣的雙核心。今天,安平古堡與赤崁樓仍是台南最重要的古蹟,靜靜地訴說著台灣史開篇的那段歲月——它們是這座島「最古老的城」,名副其實。</p>
+    <div class="pull"><p>當其他台灣城市還不存在時,台南已經有了城堡、有了文字、有了與世界貿易的往來——這就是為什麼,台南有資格說「我是台灣第一個城市」。</p></div>
+
+    <h3>貿易、贌社與漢人的引進</h3>
+    <p>荷蘭人經營台灣的核心目的,是<em>貿易與獲利</em>(這呼應了台灣整體的荷蘭時代脈絡)。他們以大員為轉口站,中轉中國的絲綢瓷器、日本的白銀,並就地生產蔗糖與鹿皮外銷。為了管理西拉雅部落、徵收賦稅,他們推行「<strong>贌社</strong>」制度;更關鍵的是,為了開墾這片腹地、生產蔗糖與稻米,他們<strong>大規模招募中國東南沿海的漢人移民</strong>來台。這個出於商業利益的決定,啟動了漢人移民台灣的浪潮——而台南,正是這波浪潮最早登陸、最早形成漢人聚落的地方。台灣漢人社會的種子,最初就播在台江畔的這片土地上。</p>
+
+    <h3>傳教與文字</h3>
+    <p>荷蘭人也積極傳教,如前章所述,他們以羅馬字拼寫西拉雅語(新港文書),這是台灣語言文字化的開端。荷蘭時代雖然只有短短三十八年,卻為台南、為台灣留下了深遠的印記:第一座有制度的城堡、第一波漢人移民、第一份文字紀錄、第一次與全球貿易的連結。<em>台灣的「現代」歷史,確實是從台南的這片內海畔開始的。</em></p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 第一,是一種無法被奪走的身分</span>
+      <p>荷蘭時代給台南留下的,是一個任何其他城市都無法複製、無法奪走的身分:<strong>「第一」。</strong>第一座城堡、台灣史的第一頁、第一波漢人移民的登陸點、第一次與世界的連結——這些「第一」,都發生在台南。後來,台北會變得更大、更富、更有權力;高雄會變得更工業、更現代。但無論如何,它們都無法成為「台灣的起點」——因為那個位置,早在 1624 年,就被台南永久地佔據了。</p>
+      <p>這份「第一」的身分,是台南整部身世的根基,也是它日後即使失去首府地位、即使發展放緩,卻依然能保持從容與驕傲的底氣所在。<em>一座城市可以失去財富、失去權力、失去舞台,但它無法失去自己「是起點」這件事。</em>當熱蘭遮城的荷蘭人在 1662 年黯然退場時,他們留下的不只是兩座城堡的遺跡,更是把「台灣從這裡開始」這句話,刻進了台南的基因裡。而接手這片土地的下一個人,將讓台南第一次,成為一個漢人政權的「首都」。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">☩ ✦ ☩</div>
+  <p>當荷蘭人黯然退場,<br>一位反清復明的孤臣,讓台南第一次成為一座「都城」——<br><span class="hl">漢文化的根,將從這裡,深深扎進台灣的土壤。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The First Capital</span>
+    <h2 class="act-title">東都明京:台灣第一個漢人政權的首府</h2>
+    <p class="act-sub">Koxinga, Chengtian Prefecture, and the Roots of Han Culture, 1662–1683</p>
+    <div class="ornament">☩ ⚔ ☩</div>
+  </div>
+  <div class="prose">
+    <p>1661 年,反清復明的海上強人<strong>鄭成功</strong>(國姓爺)率軍渡海,圍攻荷蘭人的熱蘭遮城。經過將近九個月的苦戰,荷蘭人於 1662 年初開城投降,結束了在台灣三十八年的經營(這呼應了台灣整體的鄭氏時代脈絡)。而對台南而言,這次政權更替帶來了一個全新的、意義非凡的身分——它成為了<strong>台灣史上第一個漢人政權的首府</strong>。台南,第一次成為一座「都城」。</p>
+
+    <h3>承天府:台灣的第一個「京城」</h3>
+    <p>鄭成功將台灣定為反清復明的基地,設立<strong>承天府</strong>作為最高的行政中心,並建立天興、萬年二縣。他將荷蘭人的普羅民遮城(赤崁樓)一帶,作為承天府的核心。鄭氏政權雖以「反攻大陸」為號召,卻在台南留下了奠基性的漢人政治制度。鄭成功登台後不久即病逝,由其子鄭經、孫鄭克塽相繼治理。在台南,這個流亡政權建立起了台灣第一套漢人式的行政、軍事與社會體系。<em>台南,從一個貿易據點,升格為一個漢人政權的政治心臟。</em></p>
+    <div class="pull"><p>荷蘭人讓台南成為「台灣的起點」,鄭成功則讓台南成為「漢人台灣的首府」——這座城,連續兩次,站在了台灣歷史的最核心。</p></div>
+
+    <h3>陳永華與全台首學</h3>
+    <p>鄭氏政權真正為台南、為台灣留下最深遠影響的,是<strong>漢文化的扎根</strong>,而其中的關鍵人物,是名臣<strong>陳永華</strong>。他輔佐鄭經治理台灣,推行屯田以求自給、發展煮鹽製糖以充財源,更重要的是,他大力推動<em>儒學教育</em>。在他的主持下,台灣建立了第一座孔廟與官學——<strong>台南孔廟(全台首學)</strong>。「全台首學」這四個字,至今仍高懸於台南孔廟,訴說著這裡是台灣<em>儒學與正規教育的起點</em>。從此,漢文化的根,深深地植入了台南、植入了台灣的土壤。今天台南濃厚的文教氣息與對傳統的尊崇,其源頭可以一路追溯到陳永華與這座全台首學。</p>
+
+    <h3>降清:首府時代的延續</h3>
+    <p>1683 年,清廷派施琅率水師攻台,於澎湖海戰擊潰鄭軍,鄭克塽投降,鄭氏王朝結束,台灣被納入清帝國版圖。但值得注意的是:即使政權更替,<strong>台南作為台灣首府的地位並未中斷</strong>——清廷接手後,仍以台南一帶作為治理全台的中心(下一章詳述)。從荷蘭的大員、鄭氏的承天府、到清代的台灣府,台南連續扮演了台灣政治中心的角色。這份「首府」的身分,將持續近兩百年,直到清末才被打破。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 根,扎得最深的地方</span>
+      <p>鄭氏時代給台南留下的,是比「第一」更深一層的東西——<strong>「根」</strong>。如果說荷蘭人讓台南成為台灣與世界連結的起點,那麼鄭成功與陳永華,則讓台南成為<em>漢文化在台灣扎根的起點</em>。第一個漢人政權的首府、第一座孔廟、第一所官學——台南不只是台灣歷史的開端,更是台灣漢人社會的文化母體。</p>
+      <p>這也解釋了台南性格中一個極重要的面向:它的<em>文教底蘊與文化驕傲</em>。一座擁有「全台首學」、做為漢文化發源地的城市,自然會發展出一種深厚的、對傳統的尊崇與從容。這份文化的「根」,與它「起點」的身分疊加在一起,讓台南擁有了一種別的城市難以企及的歷史厚度。當後來台南失去政經舞台時(第五章),正是這份扎得最深的文化根基,讓它不至於失去自己——因為一座城市真正的底氣,不在於它有多少高樓與財富,而在於它的根,扎得有多深。下一章,讓我們看看台南作為「首府」的那段最榮耀的歲月。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⛩ ✦ ⛩</div>
+  <p>從荷蘭、鄭氏到清朝,台南連續扮演了台灣的中心。<br>「一府二鹿三艋舺」,排在第一的「府」,<br><span class="hl">說的正是這座無可爭議的台灣第一城。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Glory of "Fu"</span>
+    <h2 class="act-title">一府的榮光:清代的台灣府城</h2>
+    <p class="act-sub">"First the Prefecture" — Taiwan's Political and Cultural Heart, 1683–1885</p>
+    <div class="ornament">⛩ ⛩ ⛩</div>
+  </div>
+  <div class="prose">
+    <p>清帝國統治台灣的前期,台南迎來了它身世中最榮耀的一段時光。作為「<strong>台灣府</strong>」的所在地,它是全台灣的政治、經濟、文化中心,是無可爭議的「<em>第一城</em>」。那句著名的俗諺——「<strong>一府二鹿三艋舺</strong>」——說的正是清代台灣三大繁華城市的排序,而排在第一的「府」,指的就是<em>台灣府城,也就是台南</em>。在那個年代,「府城」這兩個字,幾乎就等於台南的代名詞,直到今天,台南人仍驕傲地以「府城」自稱。</p>
+
+    <h3>「府」就是台灣的中心</h3>
+    <p>清廷將台灣納入版圖後,設立「台灣府」治理全島,而府治就設在台南。這意味著,在長達兩百年的時間裡,<strong>台南就是台灣的「首都」</strong>——全台最高的行政機構在此,最重要的官署、文廟、考棚(科舉考試的場所)都在此。來自全台各地的士子,要到府城來應考;全台的政務,要在府城裁決。台南因此聚集了台灣最密集的官員、士紳、文人與商賈,是當時台灣<em>文化與權力的絕對核心</em>。這份「中心」的地位,是台南近兩百年來理所當然的日常。</p>
+    <div class="pull"><p>在清代,要說「台灣最重要的城市」,答案毫無懸念——就是府城台南。它不是之一,而是唯一的中心。</p></div>
+
+    <h3>郊商與繁華的街市</h3>
+    <p>作為全台的吞吐與貿易中心,台南的<strong>商業</strong>極為繁盛。府城聚集了強大的<em>郊商</em>(貿易商行的同業組織,如著名的「三郊」),他們掌控著台南與大陸、與台灣各地的貿易往來,財力雄厚,也熱心參與地方公共事務與廟宇興建。當時台南西側緊鄰著台江內海(尚未完全淤積),有著名的「<strong>五條港</strong>」——五條人工或天然的港道,船隻可以沿著港道深入市區,讓貨物在街市間直接裝卸。五條港一帶因此成為府城最繁忙的商業區,各郊商與carriers(如搬運工苦力)的行郊聚落林立,熱鬧非凡(這片五條港的舊街區,將在後面的「巷弄」章重新登場)。</p>
+
+    <h3>城牆與街市:一座成熟的城</h3>
+    <p>作為首府,台南也發展出成熟的城市形貌。清廷在此修築了<strong>台灣府城的城牆</strong>與城門(其中部分城門與城垣遺跡,如大東門、大南門、兌悅門等,至今仍存),圈起了這座台灣最重要的城。城內街市縱橫、廟宇林立、商家雲集,構成了一座在當時台灣首屈一指的繁華都會。從荷蘭的大員、鄭氏的承天府、到清代的台灣府,台南的「中心地位」已經延續了超過一個半世紀——它彷彿天經地義地,就該是台灣的第一城。然而,歷史即將給它一個意想不到的轉折。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 站在頂峰最久的城</span>
+      <p>清代府城的榮光,讓台南成為台灣史上「<strong>站在頂峰最久的城市</strong>」。從 1624 年荷蘭人登陸算起,經歷荷、鄭、清,台南作為台灣政治經濟文化中心的地位,延續了超過兩百年——這是台灣其他任何城市都不曾擁有過的、漫長的「第一」。台北作為中心不過百餘年,高雄的崛起更晚。論「當中心的資歷」,台南無人能及。</p>
+      <p>正是這兩百年的中心歲月,為台南累積了無比深厚的底蘊:最密的廟宇、最多的古蹟、最深的文教、最講究的飲食、最繁複的禮俗——這些都是「<em>一座當了兩百年首府的城市</em>」才會沉澱出來的東西。它不是暴發的,而是<em>慢慢養出來的貴氣</em>。然而,歷史的弔詭即將上演:正當台南以為自己會永遠是中心時,時代的重心,卻開始悄悄地向北移動。而這場「失去」,將以一種誰也想不到的方式,反而成全了台南。下一章,是這座城最重要的轉折——它如何失去首府,又如何在失去中,找到了另一種永恆。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⌖ ✦ ⌖</div>
+  <p>但歷史即將給台南一個意想不到的轉折。<br>當時代的重心悄悄向北移動,<br><span class="hl">它將失去當了兩百年的王冠——卻在失去中,得到另一種永恆。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · Losing the Crown</span>
+    <h2 class="act-title">失去首府:重心北移的失落與轉機</h2>
+    <p class="act-sub">When Taipei Took the Crown — and Tainan Kept Its Soul</p>
+    <div class="ornament">✦ ⌖ ✦</div>
+  </div>
+  <div class="prose">
+    <p>這一章,是台南整部身世最重要的轉折——它失去了當了兩百多年的「台灣第一城」地位。但這個故事最動人的地方在於:<strong>這場失去,表面上是台南的失落,實際上卻是它得以「保存」的開始。</strong>台南今天之所以是台南,關鍵就在於它失去了什麼,而不是它得到了什麼。</p>
+
+    <h3>重心北移:時代的轉向</h3>
+    <p>台南失去中心地位,是好幾股力量交織的結果。其一是<strong>經濟重心的北移</strong>——十九世紀中葉開港通商後,北部因<em>茶葉與樟腦</em>的貿易而急速崛起(這呼應了台灣整體與台北的脈絡),大稻埕、艋舺一帶日益繁華,台灣的經濟引擎開始從以糖為主的南部,轉向以茶為主的北部。其二是<strong>行政中心的北移</strong>——1885 年台灣建省,首任巡撫劉銘傳積極經營,並逐步將省會的重心移往台北;1894 年,台北正式成為台灣的省會。延續了兩百多年的「南部首府」時代,就此畫下句點。</p>
+    <p>更關鍵的一擊,還有<strong>地理本身的背叛</strong>:成就了台南的台江內海,在這段時期<em>加速淤積、陸化</em>(序章)。曾經讓船隻直入市區的五條港逐漸淤塞,台南賴以繁華的港口優勢一去不返。海,當初把繁華帶給台南,如今又把它收了回去。台南,從台灣的中心,退為「南方的一座城」。</p>
+    <div class="pull"><p>當台北接過了首府的王冠時,台南失去的是舞台;但它沒有意識到,自己同時保住了一樣更珍貴的東西——時間。</p></div>
+
+    <h3>失落,是另一種保存的開始</h3>
+    <p>失去中心地位,對任何城市而言,通常意味著衰落與失落。台南確實經歷了這種失落——它不再是政務的中心、不再是經濟的火車頭、不再是眾人矚目的焦點。但這裡藏著一個深刻的弔詭:<strong>正因為台南退出了「現代化競逐」的最前線,它反而躲過了那種為了發展而對舊城進行的劇烈破壞與改造。</strong></p>
+    <p>當台北、高雄日後被一次次地拆除、重建、覆寫、打造時(這正是前兩本傳記的主題),台南卻因為「不再那麼重要」,而被相對溫和地對待。它的古蹟得以留存、它的舊街得以延續、它的廟宇得以香火不斷、它的步調得以放慢。<em>失去舞台的代價,換來的是時間的凝結。</em>那些在別的城市早已被推土機抹去的東西,在台南,因為它「失去了未來」,反而完整地保住了「過去」。這是台南身世中最美的弔詭——它的失,成就了它的得。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 有時,失去才是最好的保存</span>
+      <p>台南失去首府的故事,揭示了一個關於城市、甚至關於人生的深刻真理:<strong>有時候,「不再被選中」「退出競逐」「失去舞台」,反而是一種最好的保存。</strong>那些一直站在風口浪尖、一直被當成「最重要」的地方,往往也是被改造、被消耗、被覆寫得最徹底的地方;而那些退到一旁、不再被劇烈爭奪的地方,反而得以保全它最珍貴的本來面目。</p>
+      <p>這也是台南與台北、高雄最深刻的分野。台北因為一直是中心,所以被政權層層覆寫;高雄因為被國家看中,所以被工業徹底打造;而台南,正因為「失去了中心地位」,所以它的古城、它的記憶、它的時間,得以完整地凝結下來。<em>台北與高雄是「贏家」,它們贏得了權力與工業,卻也付出了被改寫的代價;台南是「輸家」,它失去了舞台,卻因此成為全台灣保存最完整、最古老、最有時間厚度的城市。</em>從這個角度看,台南的失去,不是衰落,而是一種命運的成全。接下來,連日本人的現代化,都將以一種格外溫和的方式,降臨在這座失去了舞台的古都身上。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">☼ ✦ ☼</div>
+  <p>失去了中心地位的台南,<br>連日本人的現代化,都以格外溫和的方式降臨——<br><span class="hl">它迎接了現代,卻沒有失去它古老的容顏。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Gentle Modern</span>
+    <h2 class="act-title">日本時代:古都的溫和現代化</h2>
+    <p class="act-sub">Department Stores, Boulevards, and a Modernity That Spared the Old, 1895–1945</p>
+    <div class="ornament">☼ ☼ ☼</div>
+  </div>
+  <div class="prose">
+    <p>1895 年台灣割讓給日本,台南也進入了殖民現代化的時代。日本人同樣對台南進行了市區改正與現代建設(這呼應了台北、高雄的脈絡)。但台南的日治經驗,有一個與台北、高雄微妙而關鍵的不同:<strong>因為台南已不再是台灣的政經中心(第五章),它的現代化相對「溫和」——不像台北那樣承載著首都的劇烈改造,也不像高雄那樣被當成工業基地徹底重塑。</strong>這份「溫和」,讓台南得以在迎接現代的同時,保住了它古老的肌理。</p>
+
+    <h3>市區改正與現代地標</h3>
+    <p>日本人在台南推行了<strong>市區改正</strong>,開闢了筆直的道路(如以圓環為中心向外放射的街道格局,至今仍是台南市區的特色之一)、興建現代化的官署、學校、醫院、車站與公共設施。台南也出現了象徵現代消費文明的地標——<strong>林百貨</strong>。這座 1932 年開幕的百貨公司,是當時南台灣最摩登的建築之一,有著台南罕見的電梯,是府城邁入現代的鮮明象徵(它在歷經歲月後被修復重生,如今是台南最受歡迎的文化地標之一,延續著「老建築新生命」的故事)。此外,日本人也興建了神社等殖民建築,將帝國的символ植入這座古都。</p>
+    <div class="pull"><p>日本人為台南帶來了百貨公司與筆直的大道,卻沒有把它的古城推倒重來——因為台南已經不再是那個「必須被徹底改造」的中心。</p></div>
+
+    <h3>古與今,在這裡並存</h3>
+    <p>台南日治現代化最迷人的特質,是<strong>新與舊的並存</strong>。在台北,現代化往往意味著拆除舊城牆、覆寫舊街廓;但在台南,因為它的歷史包袱(與價值)太重、又不再是首要的改造目標,現代的建設往往是「<em>疊加</em>」在古老的城市之上,而非「<em>取代</em>」它。於是台南呈現出一種獨特的景觀:荷蘭時代的赤崁樓、鄭氏的孔廟、清代的廟宇與城門、與日治的林百貨、神社、車站,層層疊疊地共存於同一座城。<em>台南不是把過去抹去換上現代,而是讓現代,小心地擠進過去的縫隙裡。</em></p>
+
+    <h3>溫和現代化的遺產</h3>
+    <p>必須說明,如同整個日治時期,台南的殖民現代化也有其複雜的兩面(這在台灣史中已有討論):它帶來了現代的建設與制度,但核心仍服務於殖民統治,台灣人依然是被統治的一方。不過就「對古城的衝擊」而言,台南確實比台北、高雄幸運——它的歷史核心區大致得以保全。日治時期為台南留下的現代地標(如林百貨、車站、各式官廳建築),如今也都成了古蹟,與更古老的荷、鄭、清遺跡一起,構成了台南「<em>層層疊疊、新舊共存</em>」的獨特城市紋理。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 不被當成最重要,反而是一種幸運</span>
+      <p>台南的日治經驗,延續了第五章那個深刻的弔詭:<strong>「不再是最重要的地方」,在現代化的劇烈浪潮中,竟成了一種幸運。</strong>正因為台南已經把「中心」的位置讓給了台北,日本人對它的改造,也就少了幾分「必須徹底重塑首都」的決心。這讓台南的古城,躲過了被現代化推土機夷平的命運,得以與新的建設「並存」而非「被取代」。</p>
+      <p>這也讓台南發展出它最迷人的城市美學——<em>時間的層疊。</em>在這座城裡,你可以一個轉角,就從荷蘭走到清代,再走到日治,再走到當代,而每一層都還在。台北是「覆寫」(新的蓋過舊的),高雄是「打造」(從無到有),而台南是「<em>疊加</em>」(新的疊在舊的之上,卻都保留下來)。這種「疊加而不抹除」的特質,讓台南成為一座可以「閱讀時間」的城市。而當戰後台南徹底退出政經中心的競逐後,這份「時間的層疊」,將沉澱為它最核心、最不可取代的價值——下一章,我們將看到,「慢」如何成為台南的靈魂。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">◷ ✦ ◷</div>
+  <p>戰後,當整個台灣都在拚命向前衝,<br>台南卻以一種不疾不徐的節奏存在著——<br><span class="hl">而這份「慢」,將沉澱成它最珍貴、最不可取代的靈魂。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Slow City</span>
+    <h2 class="act-title">慢城:失去舞台,保住了時間</h2>
+    <p class="act-sub">How "Slow" Became Tainan's Greatest Treasure</p>
+    <div class="ornament">◷ ◷ ◷</div>
+  </div>
+  <div class="prose">
+    <p>戰後,台灣的發展進入快車道,但這條快車道的方向,是往台北(政治金融)與高雄(工業)去的。台南,作為一座早已失去政經中心地位的古都,在這場高速現代化的競賽中,扮演的是一個相對「<strong>緩慢</strong>」的角色。它沒有台北的權力與資本狂潮,也沒有高雄的工業巨輪——而正是這份「慢」,在數十年後,成為了台南最珍貴、最不可取代的核心價值。</p>
+
+    <h3>不再是中心,於是慢了下來</h3>
+    <p>戰後的台南,不再是台灣的舞台焦點。中央政府在台北,重工業在高雄,而台南則維持著它以<em>農業、傳統製造業、糖業</em>為主的相對穩定步調。它沒有經歷台北那種房價狂飆、市中心東移的劇烈變動,也沒有經歷高雄那種被重工業徹底改造、又承受污染代價的劇痛。台南就這樣,以一種不疾不徐的節奏,過著它的日子。對追求GDP與成長速度的時代而言,這或許是一種「落後」;但對這座城市本身而言,這份從容,讓它得以保有一種愈來愈稀缺的東西——<strong>生活的餘裕,與時間的厚度。</strong></p>
+    <div class="pull"><p>當整個台灣都在拚命向前衝時,台南選擇(或被命運安排)慢慢地走——而當別人都衝過了頭,才發現台南手裡,還握著大家早已弄丟的時間。</p></div>
+
+    <h3>古蹟密度全台之冠</h3>
+    <p>「慢」最直接的成果,是台南成為全台灣<strong>古蹟密度最高、保存最完整</strong>的城市。從荷蘭的安平古堡、赤崁樓,鄭氏的孔廟、延平郡王祠,清代的城門、廟宇、宅邸,到日治的林百貨、車站、官廳——超過四百年的歷史遺跡,密集地散布在台南的街巷之間。走在台南,你幾乎每隔幾步就會遇到一座古蹟、一間百年老店、一座香火數百年的廟。<em>整座台南,就是一座露天的、活的歷史博物館。</em>這是「慢」、是「沒有被劇烈改造」、是「失去了拆除重建的動力」所換來的,最豐厚的遺產。</p>
+
+    <h3>「慢」成為一種價值與認同</h3>
+    <p>進入二十一世紀,當快速、效率、成長不再是唯一的追求,當人們開始嚮往生活的品質、嚮往歷史的溫度、嚮往一種更從容的步調時,台南的「慢」,從一種「落後」翻轉成了一種<strong>令人嚮往的價值</strong>。台南的慢步調、它的古蹟、它的小吃(食之古都章)、它的廟宇(諸神之城章)、它的老屋(巷弄章),共同構成了一種獨特的<em>生活美學</em>——一種「<em>把日子過得有滋有味、有歷史、有人情</em>」的能力。「府城的悠閒」「台南的生活感」,成為許多台灣人(尤其是被台北高壓生活壓得喘不過氣的人)心目中理想生活的代名詞。台南人也由此發展出一種獨特的<em>從容與驕傲</em>:他們不急,因為他們知道,自己擁有的是別人用再多錢也買不回來的時間。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 速度的反面,是另一種富有</span>
+      <p>台南「慢城」的故事,揭示了一個關於發展、關於價值的深刻反思:<strong>速度與成長,並不是衡量一座城市(或一種人生)的唯一標準;有時候,「慢」本身,就是一種最稀缺、最難複製的富有。</strong>台北贏得了權力與財富,高雄贏得了工業與規模,但它們也在高速的競逐中,失去了從容、失去了完整的過去、失去了生活的餘裕。而台南,因為「輸掉」了這場速度的競賽,反而保住了這一切。</p>
+      <p>這正是台南整部身世收束至此的核心命題——<em>它是一座因為「失去了未來」,而完整保存了「過去」的城。</em>它的古蹟、它的慢、它的生活感,全都不是刻意打造出來的,而是「沒有被劇烈改造」「退出了競逐」所自然沉澱的結果。在一個人人追求快與多的時代,台南用它的存在證明了另一種可能:一座城市最大的財富,或許不在於它擁有多少,而在於它<em>保住了多少別人已經失去的東西。</em>而台南保住的,恰恰是時間。接下來的幾章,讓我們走進這份「慢」所孕育出的、台南最迷人的三樣靈魂——廟、食、與巷弄。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">卍 ✦ 卍</div>
+  <p>這份「慢」,孕育出台南最迷人的三樣靈魂。<br>第一樣,藏在它密度全台之冠的廟宇裡——<br><span class="hl">在這座城,神明與人,共享著同一座城、同一段時間。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · City of Gods</span>
+    <h2 class="act-title">諸神之城:廟宇與信仰的密度</h2>
+    <p class="act-sub">Temples, Wang Ye, and the Sacred Rhythm of Fucheng</p>
+    <div class="ornament">卍 卍 卍</div>
+  </div>
+  <div class="prose">
+    <p>如果要為台南的靈魂找一個最具體的載體,那一定是<strong>廟宇</strong>。台南的廟宇密度,高居全台之冠——這座城市裡,廟宇多到彷彿每個轉角都有一座。這不是偶然,而是它「台灣起點」與「兩百年首府」身世的直接結果:作為漢人最早登陸、漢文化最早扎根、移民最早聚居的地方,台南累積了全台灣最古老、最密集、也最講究的信仰文化。在這裡,神明與人,共享著同一座城。</p>
+
+    <h3>「開」字輩的廟:最古老的香火</h3>
+    <p>台南廟宇的「古老」,從它們的名字就看得出來。許多台南的廟宇,名字裡帶著一個「<strong>開</strong>」字——開基天后宮、開基武廟、開山宮、開元寺……這個「開」字,意味著「<em>開基、開創、最早</em>」,標誌著它們是台灣同類廟宇中最早創建的。當別的城市的廟宇還在「分靈」時,台南的廟,往往就是那個「<em>祖廟</em>」、那個源頭。這份「最早的香火」,正是台南作為台灣信仰起點的鮮明印記。從祀奉鄭成功的<em>延平郡王祠</em>、到全台首學的<em>孔廟</em>、到香火鼎盛的<em>大天后宮</em>(由明寧靖王府邸改建)與<em>祀典武廟</em>,台南的廟宇,本身就是一部立體的台灣史。</p>
+    <div class="pull"><p>在台南,廟不只是拜拜的地方——它是社區的中心、歷史的見證、生活的座標。這座城,是人與神共同居住的城。</p></div>
+
+    <h3>王爺與燒王船:與瘟疫共處的信仰</h3>
+    <p>台南及其周邊(包括大台南的沿海地區),是<strong>王爺信仰</strong>的重鎮。王爺常被視為代天巡狩、驅逐瘟疫的神祇,反映了早期移民在這片土地上與疾病、災厄搏鬥的集體經驗(這呼應了台灣整體的信仰脈絡)。其中最壯觀的儀式,是「<strong>燒王船</strong>」——如台南西港的刈香(被稱為「台灣第一香」)、北門南鯤鯓代天府的盛大祭典等。信眾打造華美的王船,承載瘟神與災厄,最後付之一炬,象徵送走不祥。這些動輒數天、規模浩大、陣頭綿延的祭典,是台南民間信仰生命力最旺盛、最震撼的展現,也是被列為重要民俗的文化資產。</p>
+
+    <h3>做十六歲:府城獨有的成年禮</h3>
+    <p>台南還保有一項全台獨特、別具意義的民俗——「<strong>做十六歲</strong>」。相傳源自昔日五條港(第四章)一帶,搬運工的子女滿十六歲後可領取成人的全額工資,於是families在孩子十六歲時舉行隆重的成年禮儀式,感謝守護兒童的神明(七娘媽),象徵孩子轉大人。這個源自勞動歷史、結合了信仰與生命禮俗的傳統,至今仍在台南被保存、被實踐——它是台南「<em>把禮俗與生活過得鄭重而講究</em>」這份性格的縮影,也是這座古都獨一無二的文化印記。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 信仰,是時間最忠實的容器</span>
+      <p>台南「諸神之城」的故事,揭示了信仰對一座古城的深層意義:<strong>廟宇與民俗,是一座城市保存「時間」與「記憶」最忠實、也最有生命力的容器。</strong>古蹟是靜止的、是被參觀的;但廟宇的香火、燒王船的火光、做十六歲的儀式,卻是<em>活的、流動的、世代相傳的</em>——它們不是被保存在博物館裡的標本,而是仍然被實踐、被相信、被融入日常的活傳統。</p>
+      <p>這也呼應了台南整部身世的核心:它的「古老」不是死的,而是活的。正因為台南慢、台南沒有被劇烈改造(慢城章),這些古老的廟宇與民俗才得以「<em>持續地被活著</em>」,而不只是被當成歷史遺跡保存。一座廟能香火數百年不斷、一個成年禮能世代傳承——這背後是一個社群對自己歷史與文化的珍視與認同。台南的諸神之城告訴我們:真正的文化保存,不是把過去鎖進玻璃櫃,而是讓過去,繼續活在每一天的生活裡。而台南另一個讓過去「活著」的方式,就藏在它的餐桌上。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">❦ ✦ ❦</div>
+  <p>第二樣靈魂,藏在台南的餐桌上。<br>一碗麵、一鍋湯、一抹甜——<br><span class="hl">台南人把對食物的講究,過成了一種生活的信仰。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Capital of Cuisine</span>
+    <h2 class="act-title">食之古都:小吃為何是台南的靈魂</h2>
+    <p class="act-sub">Why Food Is the Truest Language of Fucheng</p>
+    <div class="ornament">❦ ❦ ❦</div>
+  </div>
+  <div class="prose">
+    <p>提到台南,沒有人能不提「吃」。台南被公認為台灣的「<strong>美食之都</strong>」,它的小吃不只是食物,更是這座古都的靈魂、它表達自己的語言。台南人對吃的講究、對老店的執著、對一碗麵一鍋湯的堅持,近乎一種信仰。而這份對飲食的極致重視,並非偶然——它和台南「兩百年首府」的身世、和它的「慢」,有著深刻的淵源。</p>
+
+    <h3>小吃的殿堂:府城的滋味</h3>
+    <p>台南的小吃,是一張長長的、令人垂涎的名單:<strong>擔仔麵</strong>(度小月,那一小碗講究的麵,是台南小吃的代表)、<strong>牛肉湯</strong>(用溫體牛肉現燙,清晨就排隊的台南日常)、<strong>虱目魚</strong>(虱目魚粥、魚肚、魚皮——這條魚是台南養殖與飲食的象徵)、<em>碗粿、肉燥飯、蝦捲、棺材板、鱔魚意麵、牛肉湯、豆花</em>……每一樣都有它講究的做法、它的名店、它的擁護者。在台南,吃不是為了填飽肚子,而是一種生活的藝術、一種需要被認真對待的事。</p>
+    <div class="pull"><p>在台北,吃飯是為了活著;在台南,活著彷彿是為了吃飯——這座城市把對食物的講究,過成了一種生活的信仰。</p></div>
+
+    <h3>為什麼這麼甜?糖業與府城的歷史</h3>
+    <p>外地人對台南飲食最深的印象之一,是「<strong>偏甜</strong>」——連醬油、滷肉都帶著一抹甜味。這份「甜」,其實藏著台南的歷史密碼。台南所在的南台灣,自荷蘭時代起就是台灣<em>蔗糖</em>的主要產地(呼應荷蘭章與開港的糖郊),糖業興盛、糖價相對親民,於是「用糖調味」成了府城飲食的傳統。在那個糖是珍貴商品的年代,菜餚裡能放糖,某種程度上也是一種「<em>講究、不吝嗇、待客大方</em>」的表現。台南的甜,是它作為「糖之都」與「首府」雙重歷史,沉澱在味蕾上的記憶。</p>
+
+    <h3>辦桌與老店:對「講究」的執著</h3>
+    <p>台南的飲食文化,還體現在兩個面向。其一是<strong>辦桌</strong>——台南是台灣辦桌文化(在廟埕、街邊席開數十桌的流水席)極為興盛的地方,這與它密集的廟會、宗族與人情網絡密不可分(呼應諸神之城章)。其二是<strong>老店的傳承</strong>——台南有大量經營數十年、甚至上百年的<em>百年老店</em>,一個攤子、一鍋湯頭、一個配方,父傳子、子傳孫,堅持著同樣的味道。這種對「傳承」與「講究」的執著,正是台南「慢」與「重視傳統」性格(慢城章)在餐桌上的直接體現。<em>台南人吃的不只是味道,更是時間、是傳承、是一種對「把事情做好、做久」的尊重。</em></p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 餐桌上的兩百年</span>
+      <p>台南「食之古都」的故事,揭示了飲食與一座城市身世之間,那條看不見卻深刻的連結:<strong>一座城市吃什麼、怎麼吃、有多講究,其實是它的歷史、它的物產、它的性格,在餐桌上的總和。</strong>台南飲食的精緻與講究,源自它兩百年作為首府所累積的、那種「養出來的貴氣」;它的甜,源自南台灣的糖業歷史;它對老店的執著,源自它「慢」與「重傳統」的城市性格。</p>
+      <p>這也是台南「讓過去活在當下」最日常、最美味的方式。古蹟是用眼睛看的歷史,廟宇是用信仰活的歷史,而小吃,則是<em>用舌頭嚐的歷史</em>。當你在台南吃一碗百年老店的擔仔麵時,你嚐到的不只是麵,而是這座城市兩百年來對「講究」的堅持、對「傳承」的尊重、對「生活」的熱愛。在一個講求快速、標準化、連鎖化的時代,台南用它對食物的執著證明了:有些珍貴的東西,只能慢慢地、一代一代地,熬出來、傳下去。而這份「慢慢熬、代代傳」的精神,也同樣刻在台南的另一個靈魂——它的老屋與巷弄裡。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⌘ ✦ ⌘</div>
+  <p>第三樣靈魂,藏在它彎曲的巷弄與斑駁的老屋裡。<br>那些蜿蜒的舊街,記得早已消失的水道的形狀;<br><span class="hl">那些重生的老屋,讓過去,繼續在當下呼吸。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · Lanes and Old Houses</span>
+    <h2 class="act-title">巷弄與老屋:府城的空間記憶</h2>
+    <p class="act-sub">Crooked Streets, the Five Channels, and the Rebirth of Old Houses</p>
+    <div class="ornament">⌘ ⌘ ⌘</div>
+  </div>
+  <div class="prose">
+    <p>台南的靈魂,除了藏在廟裡、藏在食物裡,還藏在它的<strong>巷弄與老屋</strong>裡。漫步台南最大的樂趣,就是鑽進那些彎彎曲曲、不按牌理出牌的舊街窄巷——在這裡,你能讀到一座城市四百年來層層疊疊的空間記憶。如果說台北的街道是被日本人與規劃者拉直的、高雄的街道是築港時筆直畫出的,那麼台南的巷弄,則是<em>歷史自己慢慢長出來的、有機而蜿蜒的</em>。</p>
+
+    <h3>彎曲的街,藏著消失的港</h3>
+    <p>台南舊城區的街道,以「彎曲、狹窄、不規則」聞名,常讓初來乍到的人迷路。但這些看似雜亂的巷弄,其實藏著台南最深的地理記憶。許多彎曲的街道,正是<strong>沿著當年的河道、港道、海岸線</strong>自然形成的——尤其是清代繁華的「<strong>五條港</strong>」一帶(第四章)。當年船隻沿著五條港道深入市區,聚落、商行、街道便沿著水岸生長;後來台江內海淤積、港道消失(序章、第五章),但街道的彎曲走向,卻把那些<em>早已乾涸的水道</em>的形狀,永遠地保留了下來。<em>走在台南的彎巷裡,你其實正走在四百年前的河道與海岸線上。</em></p>
+    <div class="pull"><p>台南的巷弄之所以彎,是因為它們記得水的形狀——那些早已消失的港道與海岸,如今還活在街道的曲線裡。</p></div>
+
+    <h3>老屋欣力:讓老房子重新呼吸</h3>
+    <p>台南最動人的當代文化現象之一,是<strong>老屋的再生</strong>。台南有大量屋齡數十年、甚至上百年的<em>老房子</em>——日治的街屋、清代的宅邸、舊時的商行與民居。曾經,這些老屋因老舊而面臨被拆除的命運;但近年來,一股「<strong>老屋欣力</strong>」的風潮在台南興起:人們不再急著拆掉老屋蓋新樓,而是<em>修復、活化</em>這些老房子,把它們變成咖啡館、書店、民宿、工作室、藝廊、餐廳。老屋斑駁的紅磚、木構、老花磚被保留下來,注入新的生活與創意。<strong>神農街</strong>(位於昔日五條港核心)等老街區,更成為老屋再生與文創進駐的代表。這讓台南的老屋,不再只是「等待消失的舊房子」,而是「持續被使用、被珍惜的活空間」。</p>
+
+    <h3>空間裡的時間層疊</h3>
+    <p>台南的巷弄與老屋,完美體現了這座城市「<strong>時間層疊</strong>」的特質(日治章)。在同一條巷子裡,你可能看到:一座香火數百年的老廟、一棟日治時期的街屋、一間修復後開成咖啡館的清代老宅、與一個百年小吃攤——它們不是被刻意安排的「歷史街區」,而是<em>真實地、自然地、層層疊疊地共存於人們的日常生活之中</em>。台南的空間,不是被凍結在某個年代的標本,而是一個讓不同時代「同時活著」的容器。這種「<em>古今同框、新舊共生</em>」的空間質感,是台南獨一無二的魅力,也是它「慢」與「保存」所結出的最美果實。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 不拆,是最高級的智慧</span>
+      <p>台南巷弄與老屋的故事,揭示了一個與台北、高雄截然相反的城市哲學:<strong>對台南而言,「不拆」本身,就是一種最高級的智慧與價值。</strong>台北的故事是「覆寫」(拆舊蓋新)、高雄的故事是「打造」(從無到有),而台南的故事,卻是「<em>保留</em>」——讓彎曲的巷弄繼續彎曲、讓老屋繼續站立、讓水道的記憶繼續活在街道的曲線裡。</p>
+      <p>而「老屋欣力」更代表了台南對「保存」的理解,已經進化到一個更成熟的層次:<em>真正的保存,不是把老屋圍起來當古蹟參觀,而是讓它繼續「被使用、被生活」。</em>一棟老屋變成咖啡館,它就活了過來;一條老街有人進駐,它就繼續呼吸。這正是台南整部身世的精髓——它保住的「過去」,從來不是死的標本,而是活的、可以走進去、可以坐下來喝杯咖啡的當下。在一個習慣於「拆掉重來」的時代,台南用它的巷弄與老屋,溫柔地證明了:有時候,最珍貴的城市資產,恰恰是那些「<em>沒有被拆掉的東西</em>」。然而,當這份古都的魅力被世界看見,新的挑戰也隨之而來。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚖ ✦ ⚖</div>
+  <p>當台南的慢與美被世界看見,<br>觀光與科技主動找上了門——<br><span class="hl">一座因失去未來而保存過去的城,該如何面對回頭的未來?</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Old City's Dilemma</span>
+    <h2 class="act-title">古都的當代難題:保存、觀光與科技的拉扯</h2>
+    <p class="act-sub">Tourism, Silicon, and the Tension Between Past and Future</p>
+    <div class="ornament">⚖ ✦ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>當台南的「慢」、它的古蹟、它的小吃、它的老屋被全台灣、乃至全世界看見並嚮往時,這座古都迎來了它的當代難題。一座以「保存過去」為核心價值的城市,該如何面對「發展未來」的需求?這道「<strong>保存與發展、傳統與現代</strong>」的拉扯,是當代台南最核心、也最微妙的課題。</p>
+
+    <h3>觀光的兩面刃</h3>
+    <p>台南的魅力吸引了大量觀光客,觀光成為這座城市重要的經濟動能。但<strong>觀光化</strong>也是一把雙面刃。一方面,它帶來了人潮、商機,讓老屋再生、小吃名店、古蹟巡禮有了經濟的支撐;另一方面,過度的觀光也帶來隱憂——老街的<em>過度商業化</em>(在地的生活感被連鎖店、紀念品店、網紅店稀釋)、房租上漲擠壓在地居民、假日的人潮喧囂打擾了原本的「慢」。台南最珍貴的,恰恰是它「<em>真實的、在地的生活感</em>」;而觀光,在帶來繁榮的同時,也可能在無形中,侵蝕掉它最想保存的那份本真。如何在「分享府城之美」與「保住在地生活」之間取得平衡,是台南持續的拉扯。</p>
+    <div class="pull"><p>台南最大的弔詭是:它因「慢」而迷人,卻可能因為太多人愛上了它的慢,而再也慢不下來。</p></div>
+
+    <h3>升格與「大台南」</h3>
+    <p>2010 年,台南經歷了與高雄類似的行政變革——原本的<strong>台南市與台南縣合併,升格為直轄市</strong>(這呼應了大高雄的脈絡)。合併後的大台南,從府城的古都核心,延伸到廣大的農業平原、沿海漁鄉(如北門、七股的鹽田與潟湖,是台江內海記憶的延續)、與內陸丘陵(如玉井、楠西、左鎮——西拉雅後裔的所在)。一座「古都」,擴張成了一個涵蓋古城、農業、漁鄉與山區的複合體,也帶來了「<em>如何整合多元地理、如何讓資源不只集中於古城</em>」的治理課題。</p>
+
+    <h3>當古都遇上護國神山</h3>
+    <p>台南當代最戲劇性的變化,是<strong>科技產業的進駐</strong>。位於台南的<em>南部科學園區(南科)</em>,已成為台灣半導體與科技產業的重鎮;尤其隨著台積電(護國神山,呼應台灣經濟章)在台南的大規模投資設廠,大量的高科技工作、人才與資本湧入。這為台南帶來了前所未有的<strong>機會與衝擊</strong>:它可能解決台南長期「缺乏高薪工作、青年外流」的困境,為這座古都注入新的經濟活力與人口;但它也帶來新的挑戰——科技廠的用水用電與環境壓力、房價的上漲、以及一個更根本的張力:<em>當「最古老的慢城」遇上「最尖端的半導體」,台南要如何讓兩者共存,而不讓科技的快,輾過了古都的慢?</em></p>
+    <div class="debate">
+      <div class="debate-head">爭議 · 古都該如何面對科技與發展?</div>
+      <div class="debate-body">
+        <div class="view"><span class="who">擁抱發展者</span>認為,南科與台積電的進駐是台南難得的歷史機遇,能創造高薪就業、留住青年、扭轉古都長期經濟邊緣化的困境,讓台南「<strong>古蹟與科技兼得</strong>」,不必只能靠觀光與懷舊。</div>
+        <div class="view"><span class="who">憂心保存者</span>則擔心,科技與資本的快速湧入,會推高房價、加劇環境壓力、稀釋古都的生活感與步調,讓台南最珍貴的「慢」與「本真」,在發展的洪流中逐漸流失。</div>
+        <div class="view"><span class="who">尋求平衡者</span>認為,關鍵不在「要不要發展」,而在「<em>如何發展</em>」——能否讓科技的活力與古都的底蘊相輔相成,讓新移入的人也愛上並守護台南的慢與文化,才是這座城市能否「<strong>既有未來、又不失去過去</strong>」的真正考驗。</div>
+      </div>
+    </div>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 保住了過去的城,如何擁抱未來?</span>
+      <p>台南的當代難題,把它整部身世的核心命題,推到了一個全新的十字路口。前面的章節說,台南因為「失去了未來」(失去首府、退出競逐),而完整保存了「過去」(慢城章)。但如今,未來,以「半導體」與「觀光」的形式,主動找上門來了。<strong>於是台南面對一個它過去從未真正面對過的問題:當「未來」回來了,它還能守住那個因「沒有未來」才得以保存的「過去」嗎?</strong></p>
+      <p>這是一道沒有標準答案、且仍在進行中的考驗。台北與高雄的故事,是「如何發展」;而台南的故事,卻是更微妙的「<em>如何在發展的同時,不失去自己</em>」。它擁有全台灣最珍貴的歷史資產與生活美學,但這份資產的脆弱之處在於——它是「慢」的、是「本真」的,而這恰恰是發展、觀光、科技最容易輾碎的東西。台南能否找到一條路,讓護國神山的晶片與府城的擔仔麵共存、讓南科的工程師也愛上老屋的咖啡香、讓「未來」豐富而非取代「過去」——這將決定,這座「台灣起點」的城,能否在二十一世紀,寫下一個既不背叛歷史、又不錯過未來的新篇章。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⛩ ☩</div>
+  <p>一片消失的內海,台灣的起點,兩百年的首府,一場成全了它的失去,與一座凝結了時間的慢城。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的台南,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的台南</h2>
+      <p class="act-sub" style="color:rgba(243,238,226,.6)">Why Tainan Became What It Is</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⛩ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整座城收攏成一條線。今天的台南之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:台江內海,讓它成為「起點」</h3>
+      <p>一切的源頭是<strong>地理</strong>。一片有沙洲屏障的台江內海、一個位於東亞航線要衝的天然良港,讓荷蘭人選擇在此登陸,台灣有文字記載的歷史,就從這裡寫下第一頁。台南因此擁有了一個任何城市都無法奪走的身分——<em>台灣的起點</em>。它今天的古老、它的歷史厚度、它的從容與驕傲,根源都可以追回到「它是台灣一切開始的地方」這個最原始的事實。</p>
+
+      <h3>第二層:它當了兩百年的首府,養出了底蘊</h3>
+      <p>接著是<strong>首府的歲月</strong>。從荷蘭的大員、鄭氏的承天府、到清代的台灣府,台南連續超過兩百年,是台灣的政治、經濟、文化中心。第一座孔廟、第一所官學、最密的廟宇、最強的郊商——這份「當了兩百年第一城」的資歷,為台南養出了無比深厚的文教底蘊、信仰文化與生活講究。它的貴氣不是暴發的,而是慢慢沉澱出來的。</p>
+
+      <h3>第三層:它失去了舞台,卻保住了時間</h3>
+      <p>然後是那個關鍵的<strong>轉折——失去</strong>。清末,隨著經濟與行政重心北移、台江內海淤積,台南失去了首府的地位,退為「南方的一座城」。但這場失去,卻是它得以保存的開始:正因為退出了現代化的競逐,它躲過了台北的「覆寫」與高雄的「打造」,讓它的古蹟、舊街、廟宇、步調,得以完整地凝結下來。<em>它失去了未來,卻因此保住了過去。</em></p>
+
+      <h3>第四層:「慢」,沉澱成它的靈魂</h3>
+      <p>於是有了第四層——<strong>慢</strong>。戰後不再是政經中心的台南,以一種不疾不徐的節奏存在著。而當時代終於厭倦了快與多、開始嚮往生活的厚度時,台南的「慢」,從「落後」翻轉成了最稀缺的價值。它的古蹟密度全台之冠、它的廟宇是活的歷史、它的小吃是嚐得到的時間、它的老屋讓過去繼續呼吸——這份「慢」所孕育的生活美學,成了台南最不可取代的靈魂。</p>
+
+      <h3>第五層:如今,它要學會與未來共處</h3>
+      <p>最後是<strong>當代的十字路口</strong>。當台南的魅力被世界看見,觀光、科技(南科與護國神山)主動找上門來。一座因「失去未來」而保存了「過去」的城,如今必須學習一件全新的事:<em>如何在擁抱未來的同時,不失去那個讓它如此珍貴的過去。</em>這場「保存與發展」的拉扯,是台南尚未寫完的篇章。</p>
+
+      <div class="investor">
+        <span class="tag">城市的回聲 · 一座因失去而保存的城</span>
+        <p>所以,今天的台南是什麼?它是一座<strong>台灣一切的起點、當過兩百年首府、後來失去了舞台、卻因此完整保存了過去的古都</strong>。它的古老是地理給的,它的底蘊是首府養的,它的保存是失去換的,它的慢是時代成全的。當台北用「覆寫」贏得權力、高雄用「打造」贏得工業時,台南用「失去」,贏得了別人都早已弄丟的東西——時間、記憶,與根。</p>
+        <p>台南最深刻的真相是:<em>它是一座因為「失去了未來」,而完整保存了「過去」的城。</em>這個弔詭,是理解台南的終極鑰匙,也是它獻給這個追求快與多的時代,最溫柔的一課——原來,「不被選中」可以是一種幸運,「慢」可以是一種富有,「失去」可以是一種保存。而如今,當未來終於回頭來敲門,這座最古老的城,正面對它最新的考驗:它能不能證明,一座懂得珍惜過去的城,也同樣有能力,溫柔而從容地,走向未來。台南的故事,是台灣記憶最深的根——只要這根還在,無論這座島如何變化,它都記得自己,是從哪裡開始的。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">台江內海讓台南成為台灣的起點,兩百年首府養出它的底蘊,一場失去讓它保住了時間,而慢,沉澱成它的靈魂——它是一座因為失去了未來,而完整保存了過去的城。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座古都的終極啟示</span>
+      <p>一座城市的價值,未必在於它擁有多少權力、財富與速度,有時恰恰在於它「失去」了這些之後,所保存下來的東西——完整的過去、緩慢的步調、活著的記憶與深扎的根。在一個人人追逐未來的時代,台南用它的存在溫柔地提醒我們:懂得珍惜過去的地方,才知道自己是從哪裡來的;而知道自己從哪裡來的地方,才真正擁有走向未來的從容。這,就是台南至今仍在書寫的故事。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,238,226,.78);margin-top:2.5rem">
+        從一片淤積成陸的台江內海、西拉雅人的家園,<br>
+        到荷蘭人寫下台灣史第一頁的熱蘭遮城,<br>
+        從鄭成功的承天府、全台首學的孔廟,<br>
+        到「一府二鹿三艋舺」之首的府城榮光,<br>
+        從失去首府的失落,到慢城裡凝結的時間,<br>
+        從諸神之城的香火、擔仔麵的滋味,到老屋裡新生的咖啡香,<br>
+        這座台灣一切的起點、因失去而保存了過去的古都,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的台南。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+
+<footer>
+  <div class="orn">⛩ ✦ ⚓</div>
+  <p>府城 · 台灣的起點</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE INLAND SEA TO THE LIVING PAST · 1624 – PRESENT</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{const h=document.documentElement;pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';});
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

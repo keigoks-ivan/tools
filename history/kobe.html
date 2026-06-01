@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面向大海的城：神戶,一座由開放與震災淬鍊的港都</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ===== 目錄 TOC ===== */
+.toc{max-width:760px;margin:3rem auto 1rem;padding:2.6rem 2.4rem;background:var(--parchment-deep);border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:4px}
+.toc .toc-head{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.32em;color:var(--rust);text-transform:uppercase;text-align:center;margin-bottom:.4rem}
+.toc .toc-sub{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin-bottom:1.8rem}
+.toc ol{list-style:none;counter-reset:toc;margin:0;padding:0}
+.toc li{counter-increment:toc;border-bottom:1px dashed var(--line)}
+.toc li:last-child{border-bottom:none}
+.toc li.toc-extra{}
+.toc a{display:flex;align-items:baseline;gap:.9rem;padding:.7rem .4rem;text-decoration:none;color:var(--sea-deep);transition:background .2s,color .2s,padding-left .2s}
+.toc a:hover{background:rgba(176,141,52,.1);color:var(--rust);padding-left:1rem}
+.toc .toc-n{font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;color:var(--gold);min-width:2.4rem;flex-shrink:0;letter-spacing:.03em}
+.toc a:hover .toc-n{color:var(--rust)}
+.toc .toc-t{font-family:'Noto Serif TC',serif;font-size:1.02rem;line-height:1.4;font-weight:500}
+.toc .toc-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:var(--faint);margin-left:auto;text-align:right;flex-shrink:0;padding-left:1rem}
+.toc .badge{display:inline-block;font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.1em;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:.05rem .45rem;margin-left:.5rem;vertical-align:middle;opacity:.85}
+@media(max-width:640px){
+  .toc{padding:2rem 1.4rem;margin:2rem 1rem 1rem}
+  .toc .toc-en{display:none}
+  .toc a{gap:.7rem}
+}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ---- 修正:深色章節內,擁有淺色背景的卡片組件須維持深色文字,避免淺底淺字 ---- */
+/* ---- 修正:深色章節內的對比度 ----
+   實心淺底組件(method-card / twocol)→ 深色文字;
+   shift-body 無背景貼深底 → 淺色文字。 ---- */
+.dark .method-card p,
+.dark .twocol p{color:var(--ink)}
+.dark .method-card p strong,
+.dark .twocol p strong{color:var(--crimson)}
+.dark .method-card p em,
+.dark .twocol p em{color:var(--sea-deep)}
+.dark .method-card h5{color:var(--sea-deep)}
+.dark .method-card .tool{color:var(--rust)}
+.dark .method-card .eg{color:#6b5d48}
+.dark .minihead{color:var(--rust)}
+.dark .shift-body{color:#cdb494}
+.dark .shift-body strong{color:#c87a5a}
+.dark .shift-body em{color:#d8a878}
+.dark .stat{background:rgba(212,175,90,.07)}
+.dark .stat .num{color:var(--gold-bright)}
+.dark .stat .lbl{color:#b9a784}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+.twocol>div{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left;color:var(--ink)}
+.method-card p strong{color:var(--crimson)}
+.method-card p em{color:var(--sea-deep)}
+.method-card .eg{font-size:.86rem;color:#6b5d48;font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<div id="progress" style="position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));width:0;z-index:99"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="kicker">Kobe · 1868–2025</div>
+    <h1>面向大海<br><span class="em">的城</span></h1>
+    <div class="sub">神戶——一座由「開放」與「震災」淬鍊出來的港都</div>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">如</span>果說大阪是一座「向內」的城——它把全日本的米與物資吸進來,做天下的廚房;那麼隔著一道山、僅僅相距三十公里的神戶,就是一座徹底「向外」的城——它把自己整個敞開,面向大海與世界。1868 年,當神戶港在列強的條約下被迫開放,這座原本只是京都、大阪外港的小城,一夜之間成了日本對外的門戶。外國商人在山坡上蓋起異人館,牛肉、洋菓子、咖啡、爵士樂從這裡的碼頭登陸全日本,一種被稱為「<em>ハイカラ</em>(時髦洋派)」的混血氣質,在六甲山與大海之間悄悄成形。但這座以「開放」立身的城,也注定要承受開放的代價:它的命運繫於港口的興衰、繫於它無法掌控的世界潮流。而 1995 年 1 月 17 日清晨那場大地震,更讓它在一瞬間嚐到了最殘酷的脆弱。這是一座靠<span style="color:var(--rust);font-weight:600">開放</span>而生、也因開放而傷,最終學會在廢墟上重新定義自己的城。</p>
+</section>
+
+<!-- ===== 目錄 TOC ===== -->
+<nav class="toc">
+  <div class="toc-head">Table of Contents</div>
+  <div class="toc-sub">神戶,一座由開放與震災淬鍊的港都 · 全十二章</div>
+  <ol>
+    <li><a href="#ch0"><span class="toc-n">序章</span><span class="toc-t">在開港之前,這裡是一座古老的港津</span><span class="toc-en">Before the Port Opened</span></a></li>
+    <li><a href="#ch1"><span class="toc-n">第一章</span><span class="toc-t">1868:被條約推開的大門</span><span class="toc-en">The Door Forced Open</span></a></li>
+    <li><a href="#ch2"><span class="toc-n">第二章</span><span class="toc-t">東洋最美居留地:異人館與雜居地</span><span class="toc-en">The Foreign Settlement</span></a></li>
+    <li><a href="#ch3"><span class="toc-n">第三章</span><span class="toc-t">ハイカラ:從碼頭登陸的洋派文化</span><span class="toc-en">The Taste of the West</span></a></li>
+    <li><a href="#ch4"><span class="toc-n">第四章</span><span class="toc-t">三座城的對照:向外、向內、由上</span><span class="toc-en">Three Cities</span></a></li>
+    <li><a href="#ch5"><span class="toc-n">第五章</span><span class="toc-t">東亞第一大港:開放的黃金年代</span><span class="toc-en">The Golden Harbor</span></a></li>
+    <li><a href="#ch6"><span class="toc-n">第六章</span><span class="toc-t">5 時 46 分:那個崩塌的清晨</span><span class="toc-en">5:46 AM</span></a></li>
+    <li><a href="#ch7"><span class="toc-n">第七章</span><span class="toc-t">重生的代價:復興宣言之後</span><span class="toc-en">The Price of Recovery</span></a></li>
+    <li><a href="#ch8"><span class="toc-n">第八章</span><span class="toc-t">向海要地:人工島與海空雙港</span><span class="toc-en">The Made Islands</span></a></li>
+    <li><a href="#ch9"><span class="toc-n">第九章</span><span class="toc-t">六座城的對照:開放,是福也是劫</span><span class="toc-en">Six Cities</span></a></li>
+    <li><a href="#ch10"><span class="toc-n">第十章</span><span class="toc-t">設計之都:在收縮中重新定義自己</span><span class="toc-en">What Comes Next</span></a></li>
+    <li><a href="#ch11"><span class="toc-n">第十一章</span><span class="toc-t">1.17 的微光:一座城如何記住傷口</span><span class="toc-en">How a City Remembers</span></a></li>
+    <li><a href="#chF"><span class="toc-n">終章</span><span class="toc-t">於是,今天的神戶</span><span class="toc-en">Finale</span></a></li>
+  </ol>
+</nav>
+
+<div class="div-orn">⚓ ✦ ⚓</div>
+
+<!-- ===== 序章 ===== -->
+<section id="ch0" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the Port Opened</span>
+    <h2 class="act-title">在開港之前,這裡是一座古老的港津</h2>
+    <p class="act-sub">A Sliver of Land Between Mountain and Sea</p>
+    <div class="ornament">⛩ ✦ ⛩</div>
+  </div>
+  <div class="prose">
+    <p>今天的神戶,以異國風情、千萬夜景與神戶牛聞名。但在 1868 年那扇大門被推開之前,它早已是一座有著悠久歷史的港口。它的名字本身,就藏著一段樸素的由來——「神戶」(こうべ)源自當地<strong>生田神社</strong>的「<em>神封戶</em>」(かんべ,意為供奉神社的民戶),歪打正著,成了這座未來國際都市的名字。</p>
+    <p>更早之前,這裡的港口可追溯到平安時代末期。權傾一時的平清盛,曾在此地的「大輪田泊」修築人工島「經之島」,作為日宋貿易的據點——<em>早在一千年前,這裡就已經是日本面向海外的窗口。</em>到了鎌倉時代,它以「<strong>兵庫津</strong>」之名,成為日本國內第一大港。可以說,在神戶「洞開」之前,它早已有「向海而生」的千年血脈。</p>
+    <div class="pull"><p>它的地理是一句宿命的隱喻:北面是巍峨的六甲山,南面是浩瀚的大阪灣,城市被擠在這道狹長的沿海平原上——背山,面海。一座無路可退、只能向海洋敞開的城。</p></div>
+    <p>這道「背山面海」的地形,深深定義了神戶的一切。它沒有大阪那樣可以向內陸縱深攤開的腹地,它能擴張的方向只有一個:大海。它的目光,從來就不是望向內陸的京都、大阪,而是望向海平線之外那個更廣闊的世界。當十九世紀中葉,西方的黑船帶著條約叩響日本的大門時,這座背山面海、向海而生的古老港津,即將被推上一個它從未想像過的舞台——成為整個日本面向世界的門戶。</p>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⛵ ✦</div>
+  <p>1853 年,美國的黑船駛入江戶灣,叩響了鎖國兩百年的大門。<br>幾年之後,一紙條約,把這座叫神戶的小港,<br><span class="hl">推到了與全世界打交道的最前線。</span></p>
+</div>
+
+<!-- ===== 第一章 ===== -->
+<section id="ch1" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Door Forced Open</span>
+    <h2 class="act-title">1868:被條約推開的大門</h2>
+    <p class="act-sub">A Treaty, a Port, and a City Thrust into the World</p>
+    <div class="ornament">⛵ ✦ ⛵</div>
+  </div>
+  <div class="prose">
+    <p>神戶的開港,不是它自己的選擇,而是被列強的壓力推開的。1853 年美國黑船來航,結束了日本兩百多年的鎖國。1858 年(安政五年),日本被迫與美、英、荷、法、俄簽訂「<strong>安政五國條約</strong>」,決定開放函館、神奈川(橫濱)、長崎、新潟,以及<strong>兵庫(神戶)</strong>這五個港口。歷經延宕,神戶港終於在 <strong>1868 年 1 月 1 日</strong>正式對外開放通商。</p>
+
+    <h3>一個被「指定」的命運</h3>
+    <p>有趣的是,當時開放的其實是西側的「兵庫港」(古老的兵庫津),但幕府為避免外國人與舊有市街的日本居民摩擦,刻意把外國人居留地設在當時較荒僻的東側——也就是「神戶」一帶。以湊川為界,以西為兵庫、以東為神戶,後來隨著市鎮發展,才統合成今天的「神戶港」。<em>換句話說,現代神戶的都市核心,從一開始就是為了「安置外國人」而被規劃出來的。</em>它的城市基因裡,「國際」與「外來」是寫在最底層的代碼。</p>
+    <div class="pull"><p>橫濱之於東京,神戶之於大阪、京都——它們都是被指定的「對外窗口」:讓國門開一道縫,又把外國人圈在一個可控的範圍裡。神戶,就誕生在這道精心計算的縫隙中。</p></div>
+
+    <h3>從關西的外港,到日本的門戶</h3>
+    <p>開港,徹底改寫了神戶的命運。它原本只是京都、大阪的外港,如今卻成了整個關西、乃至整個日本面向世界的咽喉。外國的商社、領事館、銀行、洋行紛紛在此設立;西方的商品、技術、思想、生活方式,從神戶的碼頭源源不絕地湧入日本。一座原本默默無聞的小港,因為被推到了「東西交會」的最前線,而迅速國際化、繁榮化。</p>
+    <p>這正是神戶與它的鄰居大阪最根本的分野。大阪在江戶時代靠「向內」吸納全國物資而成為天下廚房;神戶則在明治時代靠「向外」對接世界而崛起。一個內向,一個外向;一個面對日本,一個面對海洋。命運給這兩座近在咫尺的城,安排了兩種截然相反的活法。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 被動的開放,也可能成為主動的契機</span>
+      <p>神戶的開港,藏著一個耐人尋味的洞見:<strong>一個重大的轉變,即使最初是被外力「強加」的、非自願的,也未必就是壞事——關鍵在於,你能否把這個被動的處境,轉化為主動的契機。</strong>神戶並非自願開港,它是被列強的條約推著敞開大門的;但它沒有把開港當成屈辱去抗拒,反而順勢把「國際門戶」這個被指定的角色,經營成了自己獨一無二的優勢。</p>
+      <p>這對任何面臨「非自願改變」的人事物都是啟示:<em>環境的劇變、外部的衝擊、被迫的轉型——這些我們無從選擇的處境,本身是中性的;它最終是危機還是轉機,往往不取決於它「是不是你想要的」,而取決於你「如何回應它」。</em>抗拒一個已成定局的變化,只會徒增痛苦;而順勢擁抱它、並從中找到自己能扮演的獨特角色,則可能開出意想不到的花。神戶把一場被迫的開港,活成了百年的繁華與獨特的城市性格——它提醒我們:你無法選擇浪潮何時到來,但你可以選擇是被浪潮打翻,還是借浪潮揚帆。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🏛 ✦</div>
+  <p>外國人來了,他們要住下來,要做生意,要過他們熟悉的生活。<br>於是在六甲山腳下,在面海的平地上,<br><span class="hl">升起了一片被譽為「東洋最美」的異國街區。</span></p>
+</div>
+
+<!-- ===== 第二章 ===== -->
+<section id="ch2" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Foreign Settlement</span>
+    <h2 class="act-title">東洋最美居留地:異人館與雜居地</h2>
+    <p class="act-sub">The Most Beautiful Settlement in the East</p>
+    <div class="ornament">🏛 ✦ 🏛</div>
+  </div>
+  <div class="prose">
+    <p>開港之後,大批外國人湧入神戶。他們需要居住、經商、生活的空間,於是在指定的範圍內,建起了一片西式街區——這就是<strong>神戶舊居留地</strong>。它由英國建築師 J.W. Hart 規劃,街道筆直、排水完善、建築典雅,在當時眾多開港地中獨樹一幟,被譽為「<strong>東洋最美的居留地</strong>」。</p>
+
+    <h3>當居留地不夠住,神戶發明了「雜居地」</h3>
+    <p>但很快,問題來了:外國人實在太多,劃定的居留地不夠住。於是神戶做了一件當時其他開港城市(如橫濱)都沒有做的事——它在居留地西邊,闢出一塊允許<strong>外國人與日本人混居</strong>的「雜居地」。這是神戶獨有的安排。它的意義遠超出住房問題:<em>當別的開港地還在用一道線把外國人「圈起來」時,神戶已經開始讓兩個世界的人「住在一起」了。</em>這種被迫的、卻又自然發生的混居,正是神戶日後那種獨特包容氣質的源頭。</p>
+
+    <h3>山坡上的異人館</h3>
+    <p>而那些更富有的外國商人與領事,則選擇在可以俯瞰神戶港的<strong>北野</strong>山坡上,依照故鄉的風格建造宅邸——這些洋館,後來統稱為「<strong>異人館</strong>」(外國人的住所)。德國貿易商托馬斯的宅邸「風見雞館」(以屋頂的風向雞為標誌)是其中最著名的象徵。全盛時期,北野一帶曾有超過 <strong>300 棟</strong>異人館。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1868</div><div class="lbl">神戶開港,居留地與異人館的起點</div></div>
+      <div class="stat"><div class="num">300+</div><div class="lbl">全盛期北野異人館數量</div></div>
+      <div class="stat"><div class="num">~60</div><div class="lbl">今存異人館數(歷經空襲與震災)</div></div>
+      <div class="stat"><div class="num">150+</div><div class="lbl">今日神戶外籍居民來自的國家數</div></div>
+    </div>
+    <p>但這片美麗的街區,也是脆弱的見證者。全盛期 300 多棟的異人館,歷經第二次世界大戰的神戶大空襲、以及 1995 年的阪神大地震,如今僅存約 60 棟。那些倖存下來的紅磚與白牆洋館,既是神戶國際歷史的活見證,也無言地訴說著:這座以開放和繁華著稱的城,曾一次次被戰火與天災重創。美麗,與脆弱,在神戶總是並存。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 包容,常常始於「不得不」的混居</span>
+      <p>神戶雜居地的故事,給出一個關於「包容」如何形成的洞見:<strong>真正深刻的多元與包容,往往不是源於崇高的理念設計,而是源於「不得不共處」的現實——當不同的人因為現實的限制(地不夠用)而被迫住在一起、日復一日地打交道時,包容才從抽象的口號,變成了具體的生活方式。</strong>神戶不是因為先有了「多元主義」才接納外國人,而是因為先讓兩個世界的人住在了一起,才長出了它包容的氣質。</p>
+      <p>這對任何想建立「多元」的個體或組織都是啟示:<em>包容與開放,與其靠宣示,不如靠「創造讓不同的人真實共處的場域」。</em>當人們只是在理念上「認同多元」,那是脆弱的;但當不同背景的人真實地比鄰而居、共事、交往,在摩擦與磨合中建立起日常的信任,那種包容才真正紮根。神戶從一個「安置外國人」的被動安排,長成了一座 150 多國居民和諧共處的國際都市,靠的不是口號,而是一百多年「住在一起」的真實累積。包容,是相處出來的,不是宣布出來的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ☕ ✦</div>
+  <p>外國人帶來的不只是商船與洋房,還有一整套陌生的生活方式。<br>牛肉、咖啡、洋菓子、爵士樂⋯⋯<br><span class="hl">這些後來席捲全日本的「時髦」,大多是從神戶的碼頭第一個登陸的。</span></p>
+</div>
+
+<!-- ===== 第三章 ===== -->
+<section id="ch3" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Taste of the West</span>
+    <h2 class="act-title">ハイカラ:從碼頭登陸的洋派文化</h2>
+    <p class="act-sub">Where the West First Touched Japanese Life</p>
+    <div class="ornament">☕ ✦ ☕</div>
+  </div>
+  <div class="prose">
+    <p>開港帶給神戶的,不只是貿易與財富,更是一整套全新的生活方式。透過神戶的居留地,西方的飲食、音樂、服飾、習慣大量湧入,並從這裡向全日本擴散。日本人用一個詞形容這種洋派、時髦的氣質——「<strong>ハイカラ</strong>」(源自英文 high collar,高領,指穿西式高領衣的摩登人士)。而神戶,正是日本「ハイカラ文化」最重要的發源地之一。</p>
+
+    <h3>許多「日本第一」,都從這裡開始</h3>
+    <p>神戶引進、或率先普及了許多後來成為日本日常的事物,清單長得驚人:</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">飲食</div><div class="shift-body"><strong>牛肉與洋菓子</strong>:神戶是日本最早普及肉食文化的都市之一(這也與高級品種「神戶牛」的產地有關);自開港至戰前,大批外國糕點師聚集神戶,使這裡成為日本<em>洋菓子</em>的重鎮。檸檬水、咖啡、麵包,也多由此登陸。</div></div>
+      <div class="shift-row"><div class="shift-era">音樂</div><div class="shift-body"><strong>爵士樂發祥地</strong>:神戶是日本爵士樂的發源地。1952 年,神戶的廣播電台(ラジオ神戸)在平安夜開放聽眾電話點播,是日本第一個電話點播節目——洋派的開放性,連廣播都走在最前面。</div></div>
+      <div class="shift-row"><div class="shift-era">藝術</div><div class="shift-body"><strong>洋畫與設計</strong>:作為最早接觸西洋文明的城市,神戶的美術充滿國際性,戰後更創立「神戶洋畫會」。這份開放的審美基因,為它日後成為「設計之都」埋下伏筆。</div></div>
+      <div class="shift-row"><div class="shift-era">社群</div><div class="shift-body"><strong>多元共存</strong>:神戶有日本三大中華街之一的「南京町」,有印度、歐美等各國社群。150 多國、約 4.5 萬名外籍居民,讓它成為日本最具國際色彩的城市之一。</div></div>
+    </div>
+
+    <h3>一種混血的城市性格</h3>
+    <p>這些從碼頭登陸的洋派事物,日積月累,沉澱成神戶獨特的城市性格:<strong>和洋折衷、開放包容、講究品味又帶點洋氣的「ハイカラ」氣質。</strong>神戶人以這份國際感為傲——它不像京都那樣承載著千年的和風傳統,也不像大阪那樣充滿市井的庶民活力,而是一種介於東西方之間、優雅而開放的混血氣質。<em>這座城最迷人的地方,恰恰在於它「不純粹」——它是東方與西方在一百多年摩擦中,共同調製出來的一杯獨特的調飲。</em></p>
+    <div class="pull"><p>京都的味道是抹茶,大阪的味道是高湯,而神戶的味道,是咖啡與牛排——一種從海上來的、混血的、洋氣的味道。一座城吃什麼、聽什麼,就洩露了它面向哪個方向。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 開放的接口,會累積出獨特的價值</span>
+      <p>神戶的 ハイカラ 文化,給出一個關於「開放」如何創造價值的洞見:<strong>一個持續對外開放、充當「交會接口」的主體,會在不知不覺中,累積出一種別人難以複製的獨特價值——這種價值不來自它「原創」了什麼,而來自它「最早、最大量地接觸並融合了外來事物」。</strong>神戶沒有發明牛排、咖啡或爵士,但因為它是這些事物進入日本的第一站,它就成了這些「混血文化」最權威、最有底蘊的所在地。</p>
+      <p>這對任何身處「交會點」的人事物都是啟示:<em>持續的開放與吸收,本身就是一種競爭優勢。當你比別人更早、更深、更廣地接觸多元的資訊、技術、文化、人脈時,這些異質元素在你身上的碰撞與融合,會長出獨一無二的東西。</em>真正的創新,常常不是憑空原創,而是「把原本不相干的東西,第一個融合在一起」。神戶的價值,正在於它是那個最開放的接口——它提醒我們:保持開放、主動吸收異質的養分,並讓它們在自己身上交融,是一條雖不轟轟烈烈、卻能日積月累地建立起不可替代性的路。封閉者守成,開放者進化。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚖ ✦</div>
+  <p>京都、大阪、神戶,關西的三座城,近在咫尺,性格卻天差地別。<br>把神戶與它最像、又最不像的鄰居大阪,以及遠方的東京並排——<br><span class="hl">「向外、向內、由上」三種立城之道,纖毫畢現。</span></p>
+</div>
+
+<!-- ===== 第四章 ===== -->
+<section id="ch4" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · Three Cities</span>
+    <h2 class="act-title">三座城的對照:向外、向內、由上</h2>
+    <p class="act-sub">Kobe, Osaka, Tokyo — Outward, Inward, Top-Down</p>
+    <div class="ornament">⚖ ✦ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>要真正讀懂神戶,最好的方法是把它放進一組三城對照裡:它的鄰居大阪(向內的商人之城),以及遠方的東京(由上而下的權力之城)。這三座城,代表了三種截然不同的「城市能量來源」——而神戶,補上了系列裡此前缺席的那一種:<strong>向外開放</strong>。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>維度</th><th>神戶 · 向外</th><th>大阪 · 向內</th><th>東京 · 由上</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>能量來源</strong></td><td>對外開放,連接世界</td><td>對內吸納,做天下廚房</td><td>政治權力,由上而下</td></tr>
+          <tr><td><strong>面向</strong></td><td>大海與海外</td><td>全日本的腹地</td><td>國家的中樞</td></tr>
+          <tr><td><strong>核心角色</strong></td><td>日本的對外門戶</td><td>全國的物資與金融樞紐</td><td>政治與權力的中心</td></tr>
+          <tr><td><strong>性格氣質</strong></td><td>洋派、包容、混血(ハイカラ)</td><td>務實、幽默、重利(算盤)</td><td>矜持、規矩、重名(官印)</td></tr>
+          <tr><td><strong>最大弱點</strong></td><td>命運繫於港口與世界潮流</td><td>無規則制定權,被重力抽乾</td><td>易生內生泡沫與一極集中</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>三十公里內的三種世界觀</h3>
+    <p>最令人驚嘆的是,大阪與神戶相距不過三十公里,卻孕育出兩種完全相反的世界觀。<strong>大阪向內,把全日本吸進自己的廚房;神戶向外,把自己整個敞開給世界。</strong>大阪人問「儲かりまっか」(賺錢了嗎),神戶人則帶著一種面向海洋的、洋派的從容。一個是精打細算的商人,一個是見過世面的港都紳士。它們共享關西的底色,卻在「面向哪個方向」這件事上,分道揚鑣。</p>
+    <div class="pull"><p>同樣是不靠權力的城,大阪選擇「向內做大」,神戶選擇「向外連接」。一座城面向的方向,決定了它的性格、它的繁榮,也決定了它的脆弱——你向哪裡敞開,就從哪裡獲得力量,也從哪裡承受風險。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「面向哪個方向」,決定了力量與風險的來源</span>
+      <p>神戶、大阪、東京的對照,揭示一個關於「定位」的根本洞見:<strong>一個主體選擇「面向哪個方向」獲取能量,就同時決定了它力量的來源,以及它風險的來源——這兩者永遠是同一個方向。</strong>神戶向外開放,於是它從世界獲得繁榮(貿易、文化、國際地位),也從世界承受風險(港口被取代、全球潮流的波動);大阪向內吸納,於是它從全國腹地獲得力量,也因「規則由中央制定」而被抽乾;東京靠權力,於是它享盡集中的紅利,也承擔一極集中與內生泡沫的風險。</p>
+      <p>這對任何做戰略定位的人事物都是深刻的提醒:<em>當你選擇一條獲取力量的路徑時,務必同時看清——這條路徑也正是你風險敞口最大的地方。</em>高度依賴出口的企業,繁榮來自全球市場,風險也來自全球市場;高度依賴單一平台的創作者,流量來自平台,風險也來自平台。力量與風險從不分家,它們是同一枚硬幣的兩面。神戶的故事尤其鮮明地證明了這一點:它最大的榮耀(國際開放的港都)與它最大的脆弱(命運繫於港口興衰與世界潮流),其實是同一件事。認清「你的力量從哪來」,就等於認清了「你的風險在哪裡」——而真正的智慧,是在享受那份力量的同時,為它必然伴隨的風險,預先準備好對沖。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚓ ✦</div>
+  <p>靠著開放,神戶的港口越做越大,一度成為東亞數一數二的大港。<br>那是它最輝煌、最意氣風發的年代——<br><span class="hl">直到一場大地震,在一個清晨,把這一切震成了瓦礫。</span></p>
+</div>
+
+<!-- ===== 第五章 ===== -->
+<section id="ch5" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Golden Harbor</span>
+    <h2 class="act-title">東亞第一大港:開放的黃金年代</h2>
+    <p class="act-sub">When Kobe Was One of the World's Great Ports</p>
+    <div class="ornament">⚓ ✦ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>從開港到二十世紀大半,是神戶港的黃金年代。憑著優越的天然港灣條件、位於日本列島中心與世界主要海運航線交會的地利,神戶港一路成長為日本最具代表性的國際貿易港,甚至一度是<strong>東亞數一數二的大港</strong>。即使歷經第二次世界大戰的重創,它在戰後迅速復興,繼續為日本的經濟高速成長扮演關鍵角色。</p>
+
+    <h3>不只是貨港,也是人的港</h3>
+    <p>神戶港轉運的不只是貨物,還有「人」。它曾是日本重要的<strong>移民港</strong>——二十世紀前期,大批懷抱夢想(或被生活所迫)的日本人,從神戶港登船,遠渡重洋前往巴西、秘魯等南美國家謀生。神戶,因此也是無數日本移民「故鄉的最後一瞥」。今天神戶仍保留著與這段移民史相關的記憶。一座港口,承載的從來不只是經濟,還有無數普通人的離別、夢想與命運。</p>
+
+    <h3>繁榮的頂點,也是脆弱的頂點</h3>
+    <p>到了戰後,神戶港作為國際貿易港的地位達到頂峰,貨櫃吞吐量名列世界前茅。整座城市圍繞著港口繁榮:貿易公司、海運業、倉儲、製造業群聚,神戶躋身日本最重要的工商業都市之一。背山面海的狹長地形,被一棟棟建築、一座座碼頭填得滿滿當當。這座靠開放而生的城,站上了它有史以來最高的位置。</p>
+    <div class="pull"><p>但繁榮的頂點,往往也是脆弱的頂點。當一座城把全部的繁華,都建立在那道狹長的、夾在山與海之間的土地上,它就把自己,完全暴露在了大地的脾氣面前。</p></div>
+    <p>沒有人想到,這座意氣風發的港都,即將遭遇日本戰後最慘烈的一場災難。1995 年 1 月 17 日清晨 5 時 46 分,大地毫無預兆地劇烈搖晃起來——一場規模 7.3、震度 7 的直下型地震,正從神戶腳下的活斷層,釋放出毀滅性的能量。黃金年代,在這一刻戛然而止。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 繁榮越集中,暴露的風險面越大</span>
+      <p>神戶港的黃金年代,給出一個與東京泡沫篇遙相呼應的洞見:<strong>當一個主體的繁榮高度集中於某一個基礎(神戶集中於那道狹長的沿海土地與單一的港口角色)時,它的繁榮越盛大,它暴露在單一風險下的「風險面」就越大。</strong>神戶把所有的城市資產、人口、產業,都密集地堆在那道背山面海的狹長平原上——這在繁榮時是高效的集聚,在災難來臨時,卻意味著一次衝擊就能傷及全部。</p>
+      <p>這對任何配置資產或規劃發展的人都是警示:<em>「集中」在順境時是效率與規模的來源,在逆境時卻是脆弱的根源。把所有雞蛋放在同一個籃子裡(無論那個籃子當下看起來多麼穩固繁榮),都意味著你接受了「一次衝擊傷及全部」的風險敞口。</em>神戶的地理讓它別無選擇地高度集中,但它的教訓對有選擇的我們格外有意義:在追求集聚效率的同時,務必清醒地意識到自己「最大的風險面」在哪裡——並在可能的範圍內,為那個無法分散的核心風險,預留緩衝與備援。因為繁榮從不會預告它何時結束,而當它結束時,你集中得有多徹底,就會痛得有多徹底。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 〰 ✦</div>
+  <p>1995 年 1 月 17 日,星期二,清晨 5 時 46 分。<br>大多數人還在睡夢中。然後,大地以人們從未經歷過的方式,<br><span class="hl">在十幾秒內,把一座現代化的大都市,搖成了瓦礫。</span></p>
+</div>
+
+<!-- ===== 第六章 ===== -->
+<section id="ch6" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · 5:46 AM</span>
+    <h2 class="act-title">5 時 46 分:那個崩塌的清晨</h2>
+    <p class="act-sub">January 17, 1995 — The Great Hanshin Earthquake</p>
+    <div class="ornament">〰 ✦ 〰</div>
+  </div>
+  <div class="prose">
+    <p>1995 年 1 月 17 日清晨 5 時 46 分,源自淡路島北部、深約 16 公里的活斷層(野島斷層)猛然錯動,釋放出巨大的能量。規模 <strong>M7.3</strong> 的兵庫縣南部地震,以日本觀測史上首次的<strong>震度 7</strong>,直接撕裂了神戶。這是<strong>日本戰後第一次襲擊現代化大都市的「直下型地震」</strong>——震源就在城市正下方,毀滅性的縱波幾乎沒有預警。</p>
+
+    <h3>數字背後,是六千多個破碎的清晨</h3>
+    <p>災難的數字至今讀來仍令人心碎:</p>
+    <div class="stats">
+      <div class="stat"><div class="num">6434</div><div class="lbl">罹難者(含災害關聯死)</div></div>
+      <div class="stat"><div class="num">7</div><div class="lbl">震度 7,日本觀測史上首次</div></div>
+      <div class="stat"><div class="num">64萬</div><div class="lbl">住宅被害棟數(約)</div></div>
+      <div class="stat"><div class="num">77%</div><div class="lbl">罹難者死於建物倒塌的窒息·壓死</div></div>
+    </div>
+    <p>清晨的時刻,意味著大多數人還在熟睡、來不及逃生。據統計,1995 年 1 月至 6 月的罹難者中,有 <strong>77%</strong> 死於建物倒塌造成的窒息與壓死。災情還呈現出殘酷的不均:受害高度集中於高齡者——神戶市的罹難者中,60 歲以上佔了 <strong>59%</strong>;而死者最多的,是老舊木造住宅密集的<strong>東灘區</strong>(1469 人)。地震之後,各處又燃起大火,延燒不止,讓長田區等地陷入火海。一座現代化的國際都市,在十幾秒內,連同它的高速公路、鐵路、港灣,被撕成了碎片。</p>
+    <div class="pull"><p>它不是一個落後的城,它是日本最現代、最國際的城之一。可正是這座現代之城,在大地的一次抖動面前,展現了現代文明最不願面對的真相:我們以為堅固的一切,其實如此脆弱。</p></div>
+
+    <h3>但在瓦礫之中,也升起了另一種東西</h3>
+    <p>然而,就在這片廢墟之上,也升起了某種珍貴的東西。地震後,大量志工自發湧入神戶救災——1995 年因此被稱為日本的「<strong>志工元年</strong>」,公民社會的力量在此刻覺醒。鄰里之間互相挖掘、救助;印度人社群連續數月為災民提供炊食;全日本的善意湧向這座傷城。在最黑暗的時刻,人與人之間的連結,成了支撐這座城活下去的另一種力量。神戶接下來的重生,將同時依靠混凝土,與這份人心。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 越是現代精密的系統,越要正視它的脆弱</span>
+      <p>阪神大地震,給出一個關於「現代性與脆弱」的沉重洞見:<strong>一個系統越是現代、越是精密、越是高度整合,它在面對某些根本性衝擊時,可能反而越脆弱——因為它的各個部分緊密相連、環環相扣,一處崩潰會迅速連鎖到全局。</strong>神戶不是因為落後而受創如此之重,恰恰相反,正因為它是高度現代化、高度密集的大都市,直下型地震才能在十幾秒內,同時癱瘓它的交通、港灣、電力、通訊與住宅。</p>
+      <p>這對任何依賴複雜系統的人事物都是警鐘:<em>現代化與整合帶來了平時的高效率,卻也可能埋下「一點崩潰、全局連鎖」的系統性風險。越是精密耦合的系統,越需要刻意保留冗餘、備援與緩衝——那些平時看起來「低效、多餘」的安全邊際,正是災難來臨時唯一能救命的東西。</em>阪神大地震也留下一個溫暖的補充:當精密的硬體系統崩潰時,真正補上缺口、支撐系統活下去的,往往是那個最「低科技」卻最堅韌的東西——人與人之間的連結與互助。這提醒我們:再先進的系統,都不該忽略那層由信任與人情構成的、最古老的安全網。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🔨 ✦</div>
+  <p>神戶以驚人的速度重建。兩年後,它驕傲地發出了「復興宣言」。<br>但若把時間拉長,你會看見一個比「浴火重生」更複雜、更誠實的故事——<br><span class="hl">重生,是有代價的;而有些東西,再也回不來了。</span></p>
+</div>
+
+<!-- ===== 第七章 ===== -->
+<section id="ch7" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Price of Recovery</span>
+    <h2 class="act-title">重生的代價:復興宣言之後</h2>
+    <p class="act-sub">The Complicated Truth of Rebuilding</p>
+    <div class="ornament">🔨 ✦ 🔨</div>
+  </div>
+  <div class="prose">
+    <p>神戶的重建速度是驚人的。震後,交通網迅速搶修,鐵路、道路一條條恢復;神戶港也以極快的速度修復,並在僅僅兩年後的 1997 年 5 月 19 日,驕傲地發出「<strong>神戶港復興宣言</strong>」。從表面看,這是一個「浴火重生」的勝利故事。但若把時間拉長、把鏡頭拉遠,神戶的重生,其實是一個遠比勝利複雜、也更值得深思的故事。</p>
+
+    <h3>港口回來了,但「地位」沒有回來</h3>
+    <p>這是最關鍵、也最殘酷的一點。神戶港的「機能」雖然快速恢復,但它的「<strong>地位</strong>」卻一去不返。地震發生後,原本停靠神戶的大量貨櫃,被迫轉移到釜山、高雄等周邊港口——而當這些港口接手了這些業務、建立起新的航運關係後,<em>它們就再也沒有把這些貨櫃還回來</em>。到 2004 年,神戶港的貨櫃吞吐量也只恢復到震前的約 <strong>80%</strong>;而在全球港口排名上,它從昔日的世界前列,一路下滑。</p>
+    <div class="pull"><p>這正是神戶最深的傷口:摧毀一座港口的建築只需十幾秒,重建它也許只需兩年;但一旦客戶因為你的中斷而改道、並在別處安頓下來,那份「被需要」的地位,可能永遠都回不來了。</p></div>
+
+    <h3>「創造性復興」的爭議</h3>
+    <p>神戶的重建,採取了「創造性復興」(不只復原、更要藉機升級)的方針——這本是它與東京共享的、值得稱許的韌性傳統。但在神戶,這條路引發了爭議。一方面,重災區如<strong>長田區</strong>實施了大規模的都市更新;但另一方面,因為人口減少、經濟低迷,許多重建的商業設施與大樓陷入空置、開發停滯。批評者指出:政府傾力投入大型基建與「創造性」項目,卻可能忽略了災民實際的生活重建——許多人在臨時住宅與「災害公營住宅」中孤獨終老,「孤獨死」成為震後揮之不去的陰影。</p>
+    <p>更根本的是<strong>人口</strong>。神戶雖然在帳面上恢復了人口,但重災區的社群結構、原有的居民網絡,許多再也沒有完整回來。一座城的「重建」,可以蓋回房子與道路,卻很難蓋回那些破碎的社群、離散的人、以及逝去的生命。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「機能」可以重建,「地位」與「信任」未必</span>
+      <p>神戶的重生代價,給出一個對任何遭遇重大中斷的主體都極其重要的洞見:<strong>當你因災難或危機而被迫中斷時,有形的「機能」往往可以較快地重建,但無形的「地位」與「信任關係」,一旦被中斷、被對手接手,可能就永遠回不來了。</strong>神戶港的碼頭兩年就修好了,但那些在它癱瘓期間改道釜山、高雄並就此留下的貨櫃,卻再也沒回來——因為客戶的信任與航運網絡一旦轉移並穩固,就有了強大的黏性。</p>
+      <p>這對任何依賴「客戶關係、市場地位、信任網絡」的人事物都是嚴厲的提醒:<em>你最該不惜代價去守護的,往往不是有形的資產(那些可以重建),而是那份「被需要、被信任、被依賴」的地位——因為這份地位一旦因你的中斷而流失到對手那裡,重建它的難度,遠遠超過重建任何硬體。</em>這也解釋了為什麼「持續穩定地履約、不中斷服務」對長期關係如此關鍵——一次長時間的中斷,代價可能不是那次的損失,而是永久失去一個本來屬於你的位置。神戶用它的港口告訴我們:有些東西摧毀只需一瞬,重建只需兩年,但「重新被需要」,可能需要永遠——或者,永遠都等不到。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🏝 ✦</div>
+  <p>背山面海、無地可用的神戶,從很早就開始做一件事——<br>把山削平,把海填起,造出一座座人工島。<br><span class="hl">這既是它擴張的智慧,也埋下了它沉重的財政包袱。</span></p>
+</div>
+
+<!-- ===== 第八章 ===== -->
+<section id="ch8" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Made Islands</span>
+    <h2 class="act-title">向海要地:人工島與海空雙港</h2>
+    <p class="act-sub">Port Island, Rokko Island, and the Airport on the Sea</p>
+    <div class="ornament">🏝 ✦ 🏝</div>
+  </div>
+  <div class="prose">
+    <p>每座城的版圖變遷,都訴說著它的處境。神戶的版圖故事,被它「背山面海」的地形死死定義:北有六甲山擋路,南臨大海,中間只剩一道狹長的平原。當這道平原被填滿,神戶想擴張,就只剩一條路——和它的鄰居大阪一樣,也和遙遠的澳門一樣:<strong>向海要地。</strong></p>
+
+    <h3>削山填海,造出一座座人工島</h3>
+    <p>神戶發展出一套獨特的擴張模式:把六甲山的土砂削下來,運去填海,既獲得了建材,又造出了新的陸地。靠著這套「削山填海」,神戶在海上造出了一系列人工島:1981 年啟用的<strong>港島(Port Island)</strong>、1990 年代的<strong>六甲島(Rokko Island)</strong>。它甚至為港島線(Port Liner)——日本最早投入實用的無人駕駛旅客捷運系統——感到自豪。這些人工島,承載了神戶擴張的港灣機能與新市區。</p>
+
+    <h3>海空雙港:震後的豪賭</h3>
+    <p>阪神大地震後,神戶加速推動一個醞釀已久的計畫:在港島南側,再填出一座專用人工島,興建<strong>神戶機場</strong>。2006 年,神戶機場啟用,讓神戶成為一座同時擁有「海港」與「空港」的「海空雙港」城市,並與關西國際機場、大阪國際機場並列關西三大機場。明石海峽大橋(連接淡路島)的開通,則進一步改善了神戶的交通樞紐地位。</p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">填海的智慧</div>
+        <p style="text-align:left;font-size:.96rem">背山面海、無腹地的困境,被「削山填海」化為轉機:山的土砂變成海上的新陸,港島、六甲島、神戶機場相繼誕生,硬是為這座狹長的城,擠出了擴張的空間。</p>
+      </div>
+      <div>
+        <div class="minihead">填海的代價</div>
+        <p style="text-align:left;font-size:.96rem">人工島工程耗資巨大,為神戶市財政埋下沉重負擔;震災中港島更發生嚴重「液狀化」。大型開發在人口減少的時代,也面臨招商與回本的長期壓力。</p>
+      </div>
+    </div>
+    <div class="pull"><p>神戶與澳門,隔著一片南海遙遙呼應:兩座都被地理逼到「無地可用」的城,都選擇了向海要地。填海是它們共同的破局之道,也是它們共同的財政重擔。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 突破極限的擴張,要算清它的長期代價</span>
+      <p>神戶的填海版圖,給出一個關於「擴張」的冷靜洞見:<strong>當一個主體用非常手段(填海、舉債、大型工程)去突破自身的先天極限時,這種擴張固然展現了破局的智慧與魄力,但它幾乎總是伴隨著高昂的、且往往被低估的長期代價。</strong>神戶削山填海造出人工島與機場,確實突破了「無地可用」的困境;但這些工程的巨額成本,也為它的財政埋下了長期的負擔,在後來人口減少、經濟低迷的環境下,回本壓力倍增。</p>
+      <p>這對任何考慮「以重資本、高槓桿去突破極限」的人事物都是務實的提醒:<em>突破天生極限的擴張,本質上是一場「用確定的當下成本(與債務),去博取不確定的未來收益」的賭注。它能否划算,取決於那個未來收益是否真能實現——而未來,恰恰是最不確定的。</em>在繁榮、樂觀的年代,這類大型擴張的回本假設往往顯得理所當然;但當環境逆轉(人口減少、需求下滑),當初的擴張就可能從資產變成包袱。神戶的人工島提醒我們:擴張的魄力值得敬佩,但在按下那個「重資本擴張」的按鈕之前,務必把它最壞情況下的長期代價,算得和它最樂觀的收益一樣清楚。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚖ ✦</div>
+  <p>錫、賭、重生、算盤,如今再加上神戶的「開放」。<br>把六座城並排,「一座城靠什麼立足、又靠什麼承受風險」——<br><span class="hl">這道貫穿系列的問題,終於有了最完整的光譜。</span></p>
+</div>
+
+<!-- ===== 第九章 ===== -->
+<section id="ch9" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · Six Cities</span>
+    <h2 class="act-title">六座城的對照:開放,是福也是劫</h2>
+    <p class="act-sub">Kobe, Osaka, Tokyo, Macau, KL, Ipoh</p>
+    <div class="ornament">⚖ ✦ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>神戶的故事,為整個城市系列補上了一個獨特的維度:<strong>開放</strong>。我們看過靠「資源」的城(怡保、吉隆坡的錫)、靠「位置/居間」的城(澳門)、靠「重建能力」的城(東京)、靠「商業」的城(大阪)——而神戶,是靠「向外開放、連接世界」的城。把六座城並排,「一座城(乃至一個人)靠什麼立足、又從何處承受風險」這個問題,終於有了最完整的答案。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>城市</th><th>核心依靠</th><th>風險來源</th><th>遇衝擊時</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>東京</strong></td><td>重建的能力</td><td>內生泡沫、一極集中</td><td>歸零後重建得更高</td></tr>
+          <tr><td><strong>神戶</strong></td><td>向外開放、連接世界</td><td>港口被取代、天災、世界潮流</td><td>機能可重建,地位難復返</td></tr>
+          <tr><td><strong>大阪</strong></td><td>商業與市場機制</td><td>規則被改寫、東京重力</td><td>能轉型,但持續相對失勢</td></tr>
+          <tr><td><strong>吉隆坡</strong></td><td>錫,但轉化為制度</td><td>較低(已多元化)</td><td>錫崩盤幾乎無傷</td></tr>
+          <tr><td><strong>澳門</strong></td><td>合法性的位置</td><td>客源、政策、被取代</td><td>客源一斷即重創</td></tr>
+          <tr><td><strong>怡保</strong></td><td>地底的錫</td><td>資源枯竭</td><td>礦竭即長眠數十年</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>神戶在光譜上的位置:開放的雙面性</h3>
+    <p>神戶最深刻地詮釋了一條貫穿全系列的鐵律:<strong>你的力量來源,就是你的風險來源。</strong>它向世界開放,因此從世界獲得了繁榮、文化與國際地位;但也正因為它如此依賴「與世界連接的那個接口」(港口),當這個接口被天災中斷、被對手(釜山、高雄)取代時,它便從同一個地方,承受了最沉重的打擊。<em>開放讓它偉大,開放也讓它脆弱——這不是兩件事,而是同一件事的兩面。</em></p>
+    <p>它與澳門尤其形成精彩的對照:兩者都靠「連接/中介」立身,都向海要地,也都嚐到了「被取代」的恐懼。但神戶比澳門多了一層東京式的韌性——它能在震災的廢墟上,啟動「創造性復興」、發展新產業、重新定義自己。它不像怡保那樣徹底沉睡,也不像澳門那樣繁榮卻被動;它是一座<strong>受了重傷、地位下滑,卻仍憑著開放的底蘊與重建的意志,努力重新定義自己的城</strong>。</p>
+    <div class="pull"><p>六座城,六種立身之道,卻共享同一句箴言:無論你靠什麼獲得力量——資源、位置、商業、開放、還是重建力——都要清醒地知道,那個給你力量的東西,正是你最大的風險所在。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 力量與風險同源,這是不變的鐵律</span>
+      <p>六城並排,神戶把整個系列最核心的一條鐵律,推到了最鮮明的程度:<strong>任何主體的「力量來源」與「風險來源」,永遠是同一個——你從哪裡獲得繁榮,就會從哪裡承受脆弱。</strong>怡保的力量與風險都是錫,澳門的都是「居間的位置」,大阪的都是「商業」,東京的都是「集中與重建」,而神戶的,都是「開放」。沒有哪座城能只享受力量、而不承擔與之同源的風險。</p>
+      <p>這條鐵律對任何人的生涯與資產配置,都有最直接的指導意義:<em>誠實地問自己——「我的力量、我的繁榮,主要來自哪裡?」當你回答出這個問題,你也就同時回答了「我最大的風險敞口在哪裡」。</em>一個收入全靠單一專業的人,專業是他的力量,也是他的風險(技能過時、行業衰退);一個高度開放、依賴全球連接的事業,開放是它的力量,也是它的風險(地緣、潮流、被取代)。真正的智慧,不是去消滅這種同源性(那不可能,因為力量必然伴隨風險),而是:<strong>在盡情運用你的力量來源時,清醒地為「它同時也是你最大風險」這件事,預先準備好對沖、備援與第二條腿。</strong>這,是六座城用各自的興衰,共同寫給每一位讀者的、最務實的一課。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🎨 ✦</div>
+  <p>港口的地位回不來了,人口在減少,財政背著重擔。<br>但神戶沒有認命。它正用那份與生俱來的開放與美感,<br><span class="hl">在收縮的時代裡,試著重新定義「神戶」這兩個字。</span></p>
+</div>
+
+<!-- ===== 第十章 ===== -->
+<section id="ch10" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · What Comes Next</span>
+    <h2 class="act-title">設計之都:在收縮中重新定義自己</h2>
+    <p class="act-sub">Reinventing Kobe for an Age of Decline</p>
+    <div class="ornament">🎨 ✦ 🎨</div>
+  </div>
+  <div class="prose">
+    <p>進入二十一世紀,神戶面對的是一組棘手的現實:港口的世界地位難以重返,人口進入減少趨勢,人工島與機場的財政負擔沉重。它無法再像黃金年代那樣,單靠「東亞第一大港」的身分活著。於是它做了一件最「神戶」的事——回到它最深的基因(開放、國際、美感),試著為自己找到新的定義。</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">方向一</span>
+        <h5>設計之都</h5>
+        <p>2008 年,神戶被 UNESCO 評選為「設計之都」(Design City)——亞洲首座獲此殊榮的城市。這不是偶然:它和開港以來的洋畫、洋菓子、ハイカラ 審美一脈相承。神戶試圖把它百年積累的「美感與國際性」,轉化為新時代的城市品牌。</p>
+        <span class="model">Design</span>
+      </div>
+      <div class="card">
+        <span class="flag">方向二</span>
+        <h5>醫療產業都市</h5>
+        <p>神戶在震後的港島上,傾力打造「神戶醫療產業都市」,聚集生命科學、再生醫療的研究機構與企業。它試圖讓經濟結構從「港口與重工業」,轉向高附加價值的知識與醫療產業——一次主動的多元化。</p>
+        <span class="model">Biomedical</span>
+      </div>
+      <div class="card">
+        <span class="flag">方向三</span>
+        <h5>觀光與生活品質</h5>
+        <p>異人館、南京町、北野、有馬溫泉、千萬夜景、神戶牛——神戶把它獨特的「混血魅力」與宜居品質,經營成觀光與生活的招牌。在「規模競賽」中輸給東京,它轉而在「生活品質」這條賽道上,做一個有品味的城。</p>
+        <span class="model">Quality of Life</span>
+      </div>
+    </div>
+
+    <h3>從「做大」到「做好」</h3>
+    <p>神戶的轉型,本質上是一次心態的轉變:<strong>從追求「成為更大的港、更強的經濟引擎」(規模),轉向追求「成為一個更有品味、更宜居、更獨特的城」(品質)。</strong>這條路未必能讓它重返昔日的世界排名,但它或許更適合一座在收縮時代、無法再靠規模取勝的成熟城市。神戶不再試圖跟東京、跟釜山拚港口的吞吐量,而是回到它最不可替代的特質——那份從一百多年開放中淬鍊出來的、優雅而國際的城市魅力。</p>
+    <div class="pull"><p>在一個無法再靠「做大」取勝的時代,神戶選擇了「做好」。它賭的不是重返巔峰,而是把自己獨有的那份魅力,做到無可取代。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 無法再「做大」時,出路是「做到不可取代」</span>
+      <p>神戶的轉型,給出一個關於「成熟期策略」的洞見:<strong>當一個主體進入無法再單純靠「規模擴張」取勝的階段(因為環境收縮、或對手更強)時,真正的出路,往往不是繼續在「規模」這條賽道上苦苦追趕,而是轉向「把自己獨有的特質,做到無可取代」。</strong>神戶在「港口吞吐量」「經濟規模」上已難以重返前列,但它在「美感、國際性、生活品質、混血魅力」上,擁有別人難以複製的深厚底蘊——於是它聰明地把戰場,從拚不過的規模,轉向了拚得贏的特質。</p>
+      <p>這對任何進入成熟期、或身處「贏家通吃」格局下的人事物,都是極務實的策略:<em>不是每個主體都註定要、或都能夠「無限做大」。當規模的賽道已被巨頭佔據、或環境已不再支持擴張時,執著於「做大」往往是徒勞甚至危險的;而轉向「做深、做精、做到不可取代」,則是一條更可持續的活路。</em>這呼應了整個系列反覆指向的結論——真正的長久之道,不在於擁有最多或最大,而在於把自己獨有的價值,經營到無人能取代。神戶從「東亞第一大港」的執念中走出,轉身成為一座「亞洲第一座設計之都」,正是這種智慧的體現:當你無法再做最大的那個,就去做那個唯一的、無可替代的自己。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🕯 ✦</div>
+  <p>每年 1 月 17 日清晨,神戶的廣場上,會點亮數萬盞燈火。<br>它們排成的形狀,訴說著這座城如何選擇與它的傷口共處——<br><span class="hl">不是遺忘,而是記住;不是被擊垮,而是帶著傷,繼續前行。</span></p>
+</div>
+
+<!-- ===== 第十一章 ===== -->
+<section id="ch11" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · How a City Remembers</span>
+    <h2 class="act-title">1.17 的微光:一座城如何記住傷口</h2>
+    <p class="act-sub">BE KOBE — Carrying the Scar Forward</p>
+    <div class="ornament">🕯 ✦ 🕯</div>
+  </div>
+  <div class="prose">
+    <p>一座城如何對待它的傷口,洩露了它最深的性格。神戶選擇的方式,不是抹平、不是遺忘,而是——<strong>記住</strong>。每年 1 月 17 日清晨,在神戶的東遊園地,人們會用數萬盞竹燈籠排出當年的字句與數字,在 5 時 46 分那一刻默哀。這場名為「<em>1.17 のつどい</em>」(1.17 集會)的悼念,年復一年,從不間斷。</p>
+
+    <h3>把傷口,變成這座城的精神</h3>
+    <p>震災沒有擊垮神戶的精神,反而淬鍊出一種新的城市認同。震後誕生的口號「<strong>BE KOBE</strong>」,凝聚了一個樸素而動人的信念:神戶最大的魅力,是「人」——是那些在廢墟中互助、在絕望中堅持、在悼念中前行的人。那場災難讓神戶人深刻體會到:城市的建築可以倒塌,但只要人與人之間的連結還在,這座城就不會真正死去。1995 年被稱為日本「志工元年」的那份公民覺醒,成了神戶留給整個日本的精神遺產。</p>
+    <div class="pull"><p>神戶沒有假裝那場地震沒發生過,也沒有讓它定義自己的全部。它把傷口,變成了記憶;把記憶,變成了「珍惜人與連結」的精神。這是一種比「重建建築」更深刻的重生。</p></div>
+
+    <h3>帶著傷,繼續做那座開放的城</h3>
+    <p>今天的神戶,是一座帶著傷口、卻依然優雅地向世界開放的城。它的港口地位或許不復當年,它的人口或許在減少,它的財政或許背著重擔——這些它都誠實地承受著。但它依然是那座有著異人館、南京町、千萬夜景與神戶牛的、混血而美麗的港都;依然是那座在每年 1 月 17 日點亮燈火、記住逝者、也珍惜生者的、有溫度的城。它沒有回到巔峰,但它找到了一種帶著傷痕、依然從容前行的姿態。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 真正的復原,是與傷口共處,而非抹去它</span>
+      <p>神戶記住傷口的方式,給出整個系列最溫柔、也最深刻的一課:<strong>真正成熟的復原,不是假裝傷害從未發生、急著抹平一切痕跡,而是誠實地承認傷口、記住它、並把它轉化為一種讓自己更深刻、更懂得珍惜的力量。</strong>神戶沒有粉飾那場地震,它每年都鄭重地紀念;但它也沒有讓自己永遠停留在受害者的姿態裡——它把傷痛,昇華成了「BE KOBE」那種珍惜人與連結的精神。記住,不是為了沉溺於痛苦,而是為了帶著那份領悟,更好地前行。</p>
+      <p>這對任何經歷過重大創傷、失敗或損失的人,都是最人性化的啟示:<em>真正的療癒,從來不是「徹底忘掉」或「假裝沒事」,而是學會與那道傷疤共處——承認它的存在,理解它教會了你什麼,然後帶著這份更深的領悟,繼續往前走。</em>那些試圖徹底否認、抹去傷口的人,往往反而被傷口暗中支配;而那些能坦然面對、並從中提煉出意義的人,才真正獲得了自由。神戶的燈火告訴我們:一個人(或一座城)的堅強,不在於它從未受過傷,而在於它能帶著傷口,依然優雅地、有溫度地、向著世界繼續敞開自己。這,或許是這座開放之城,用它最深的傷痛,換來的最寶貴的智慧。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⚓ ☩</div>
+  <p>港津,黑船,異人館,咖啡與爵士,大地的怒吼,廢墟上的燈火。<br>當我們把這一百五十年收攏,終於可以回答最初那個問題——<br><span class="hl">一座把自己完全敞開給世界的城,究竟得到了什麼,又失去了什麼?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section id="chF" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">終章 · Finale</span>
+    <h2 class="act-title">於是,今天的神戶</h2>
+    <p class="act-sub">The City That Faces the Sea</p>
+    <div class="ornament">⚓ ✦ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>站在今天的神戶,你會同時看見它的一百五十年。北野山坡上的異人館,在陽光下訴說著開港時的異國風情;舊居留地的歐式建築之間,人們喝著從這裡登陸日本的咖啡;南京町飄著中華料理的香氣,港邊的神戶港塔與摩天輪映著「千萬夜景」;而在某個廣場的角落,「BE KOBE」的字樣,靜靜提醒著那場改變一切的清晨。一座城,把開放的榮光與震災的傷痕,層層疊疊地壓進了這片背山面海的狹長土地裡。</p>
+
+    <p>回到最初的問題:一座把自己完全敞開給世界的城,究竟得到了什麼,又失去了什麼?它得到的是繁榮、是文化、是那份獨一無二的混血魅力、是成為日本門戶的百年榮光;它失去的,是對自己命運的掌控——它的興衰,繫於它無法左右的港口競爭、世界潮流,以及腳下那道隨時可能錯動的斷層。<em>開放給了它一切,也讓它把自己,暴露在了世界所有的風浪面前。</em></p>
+
+    <div class="pull"><p>它向大海敞開,於是大海給了它財富與世界;但大海也從同一個方向,帶來了它無法掌控的潮起潮落。一座面向大海的城,注定要同時擁抱海洋的慷慨與海洋的無常。</p></div>
+
+    <p>而這,正是神戶為整個城市系列補上的、最後一塊拼圖。從怡保的錫、吉隆坡的錫、澳門的賭、東京的重生、大阪的算盤,到神戶的開放,這六座城用各自的命運,從不同角度叩問著同一個問題:<em>一座城(乃至一個人)的命運,究竟由什麼決定?</em></p>
+
+    <p>而神戶給出的答案,或許是其中最貼近我們每個人的:<strong>你的力量來自哪裡,你的脆弱就在哪裡。</strong>你越是向某個方向敞開、越是依賴某個來源獲取繁榮,你就越是把自己,暴露在那個方向的風險之下。這不是要我們因此而封閉、而退縮——恰恰相反,神戶的一生證明了,開放與連接,能帶來封閉永遠無法企及的繁榮與豐盛。它要我們學會的,是另一件事:<strong>在盡情擁抱你的力量來源時,清醒地知道它同時是你的風險所在,並為那必然會到來的、無法掌控的風浪,預先備好你的韌性、你的第二條腿、以及那份「即使受傷也能重新站起」的意志。</strong></p>
+
+    <p>所以,當你下一次選擇向某個方向敞開自己、把希望寄託於某個力量來源時,不妨想起這座面向大海的城。它會用一百五十年的榮光與傷痕告訴你:<strong>不要因為害怕風浪,就不敢出海——因為大海的慷慨,只給那些願意敞開自己的人。但也不要忘了,在揚帆之前,為那必然會來的風暴,準備好你的船、你的錨,和那顆即使船破了、也能游回岸邊重新造船的心。</strong>這,是這座由開放與震災共同淬鍊出來的港都,留給每一位讀者的、最後的箴言。</p>
+
+    <p style="text-align:center;margin-top:3rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint)">— 全文完 · 城市系列 · BE KOBE —</p>
+  </div>
+</section>
+
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

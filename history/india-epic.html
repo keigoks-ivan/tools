@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>季風、種姓與諸神：印度五千年文明興衰史詩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c1208;
+  --parchment:#f6eeda;
+  --parchment-deep:#ecdfc0;
+  --indigo:#2a2350;
+  --indigo-deep:#171232;
+  --gold:#b8862f;
+  --gold-bright:#dcad4e;
+  --saffron:#c4561d;
+  --crimson:#8a1f12;
+  --jade:#3a5f48;
+  --faint:#6b5a3e;
+  --line:#cbb585;
+  --shadow:rgba(28,18,8,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(184,134,47,.08), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(42,35,80,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(42,35,80,.5), transparent 70%),
+    linear-gradient(165deg, var(--indigo-deep) 0%, var(--indigo) 45%, #322a5e 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23dcad4e' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='460'/%3E%3Ccircle cx='600' cy='600' r='360'/%3E%3Ccircle cx='600' cy='600' r='220'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020 M380 90 L820 1110 M820 90 L380 1110 M90 380 L1110 820 M90 820 L1110 380'/%3E%3Ccircle cx='600' cy='600' r='90' fill='%23dcad4e' opacity='0.18'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 240s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(246,238,218,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--indigo-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--saffron);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--indigo-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--saffron);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--indigo-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--indigo-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(42,35,80,.04), rgba(184,134,47,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--indigo-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT (歷史的回聲) ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--indigo-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(23,18,50,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--saffron));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(246,238,218,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--saffron);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--saffron);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--indigo-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--saffron);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--indigo-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(184,134,47,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(42,35,80,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--saffron);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--indigo-deep),var(--indigo));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23dcad4e' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(246,238,218,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(220,173,78,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--saffron));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--indigo-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#170f08 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#d27a4a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#d27a4a;border-left-color:var(--saffron)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(138,31,18,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--saffron);margin-bottom:.5rem;font-weight:600}
+
+/* ===== interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--indigo-deep);font-weight:500}
+.interlude p .hl{color:var(--saffron);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(246,238,218,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--saffron);font-style:normal}
+
+/* ===== legacy & shift ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--indigo-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--indigo-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--saffron);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(42,35,80,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--saffron)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--saffron);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--indigo-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--indigo-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The Subcontinent of Many Worlds · Who the Indians Became</span>
+    <h1>季風、種姓與<span class="em">諸神</span><br>印度<br>五千年的身世</h1>
+    <p class="sub">從印度河畔的磚砌古城、一條被山與海封住卻又被季風打開的次大陸，到一個由數百種語言、千百個族群、四大宗教搖籃拼合而成的文明——<br>一部關於「為何今天的印度與印度人是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的印度，是一個住著近十五億人、說著數百種語言、信奉印度教、伊斯蘭、錫克教、佛教、耆那教、基督宗教、卻又把「世俗」二字寫進憲法的國家？為什麼它既有最古老的種姓秩序，又有全世界規模最大的民主選舉？答案不在當下，而在五千年的縱深裡。一條大河在乾旱的西北平原上養出了人類最早的城市之一，雅利安人帶著《吠陀》與最初的階序翻過山口而來，孔雀王朝第一次把次大陸縫成一個帝國，佛陀與大雄在恆河平原上對抗婆羅門的壟斷，穆斯林蘇丹與蒙兀兒皇帝帶來了真主、波斯語與泰姬瑪哈陵，一家英國公司用商館與軍隊買下了整個次大陸，最後在一條倉促劃下的線上，一個文明被切成兩半、千萬人流離失所——而所有人的身分、信仰與隔閡，都在這五千年層層疊疊的相遇與征服中被一次次重寫。這不是一個民族的故事，而是一片<em>被高山與大海半封、又被季風與山口半開的次大陸</em>，如何把一波又一波翻山越海而來的人，鍛造成「印度人」的故事。讓我們從頭走一遍，在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--saffron);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章：在所有人來之前 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before Everyone</span>
+    <h2 class="act-title">在所有人來之前，這裡有什麼？</h2>
+    <p class="act-sub">The Land, the Rivers, and the Walls That Made a World Apart</p>
+    <div class="ornament">☴ ☴ ☴</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的印度人，得先回到一個比所有征服者、所有移民都更古老的問題：在他們來之前，這裡有什麼？答案，藏在兩樣東西裡——一道把次大陸與世界隔開的巨牆，和幾條把生命灌進這片土地的大河。</p>
+
+    <h3>一片被高山與大海封住的次大陸</h3>
+    <p>先看地圖。印度不只是一個國家，它在地理上是一塊獨立的「<strong>次大陸</strong>」——一塊幾乎自成一體的世界。它的北方，橫亙著全世界最高的山牆<em>喜馬拉雅山脈</em>；它的東、西、南三面，被孟加拉灣、阿拉伯海與印度洋環抱。這道由高山與大海築成的天然圍牆，讓次大陸在數千年裡發展出一套自成體系的文明、宗教與社會結構，與外界既相連又隔絕。記住這個格局：印度從一開始就是一個「<em>半封閉的世界</em>」——封閉到足以孕育獨特的文明，卻又沒封到能完全擋住外來者。</p>
+
+    <h3>那幾道缺口：被山口打開的牆</h3>
+    <p>因為這道牆，並不是密不透風的。在西北方，喜馬拉雅與興都庫什山脈之間，留著幾道致命的缺口——<strong>開伯爾山口（Khyber Pass）</strong>與博蘭山口等通道。幾千年來，幾乎每一波改變印度命運的外來力量——雅利安人、波斯人、亞歷山大的希臘軍隊、突厥與阿富汗的穆斯林征服者、蒙兀兒人——都是循著這幾道西北的山口翻牆而入。一道牆，加上幾個缺口，就決定了印度文明的基本節奏：<em>它總是在「自成一體的延續」與「被翻牆而入的征服」之間反覆擺盪。</em></p>
+    <div class="pull"><p>高山與大海把印度圍成一個自成一體的世界，西北的幾道山口卻又讓征服者一波波翻牆而入——這道「半封閉」的地理，寫定了印度文明的全部基調。</p></div>
+
+    <h3>那幾條養活一切的河：與一陣決定收成的風</h3>
+    <p>而真正讓這片土地長出文明的，是<strong>河</strong>與<strong>風</strong>。發源於喜馬拉雅冰雪的<em>印度河</em>與<em>恆河</em>，在乾旱的北方沖積出一片廣袤肥沃的大平原——人類最早的城市與最古老的經典，都在這片河水滋養的土地上誕生。而每年規律到來的<strong>季風</strong>，則決定著億萬人的生死：季風準時，便是豐收；季風失約，便是饑荒。這片土地的故事，本質上就是一個<em>「被山海半封、被河與風養育」的世界</em>，如何在延續與征服的反覆之間，把一波波翻牆而來的人吸收、消化，最終全都變成「印度的一部分」。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 地理是第一作者</span>
+      <p>在任何國王、任何宗教、任何帝國登場之前，<strong>地理</strong>就已經寫好了這個故事的開頭。一塊被高山大海圍成、卻又在西北留著缺口的次大陸，註定會變成一個既能自成一體、又會被一波波外力反覆改寫的世界。</p>
+      <p>這是理解印度的第一把鑰匙：<em>它今天所有的特質——文明的驚人延續性、極致的多元、層層疊疊的征服史、以及「吸收一切外來者卻從不被外來者取代」的奇特韌性——其實是同一個地理事實的一體多面：它生在一個既封閉到能保存自己、又開放到必須不斷接納他者的位置上。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">≈ ✦ ≈</div>
+  <p>季風帶來了河水，河水養出了人類最早的城市之一。<br>在任何國王、任何經典之前，<br><span class="hl">印度河畔已矗立著磚砌的街道、糧倉與下水道——一座沉默了三千年的文明。</span></p>
+</div>
+
+<!-- ===== 第一章：印度河文明 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The First City</span>
+    <h2 class="act-title">磚城、印章與一座沉默的文明</h2>
+    <p class="act-sub">The Indus Valley — A Civilization Without Kings</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>所有人都會問同一個問題：印度文明從哪裡開始？答案，在一片今天大多落在巴基斯坦境內、卻屬於整個次大陸源頭的土地上——印度河谷。早在西元前約 2600 年，當大多數人類還在村落裡摸索時，這裡已經矗立起人類最早的城市文明之一：<strong>印度河文明（Indus Valley Civilization）</strong>，又稱哈拉帕文明。</p>
+    <p>它的成就，即使以今天的眼光看也令人震撼。<strong>摩亨佐達羅</strong>與<strong>哈拉帕</strong>這兩座大城，是按照精密的<em>網格規劃</em>建造的——筆直的街道、標準化尺寸的燒製磚塊、複雜的公共下水道與排水系統，甚至有號稱史上最早的公共浴池「大浴場」。這是一個高度組織、講究衛生與秩序的城市世界，其工程水準在當時的世界首屈一指。</p>
+
+    <h3>一個沒有國王、沒有戰爭的謎</h3>
+    <p>但印度河文明最迷人的，是它的「<em>沉默</em>」。考古學家挖出了無數刻著符號的印章與文物，卻至今<strong>無法解讀它的文字</strong>；更奇特的是，這個橫跨廣大區域、人口可能達數十萬的文明，幾乎沒有留下宏偉的宮殿、巨大的王陵或描繪戰爭的圖像。沒有炫耀武力的國王，沒有歌頌征服的浮雕——它彷彿是一個由商業、工匠與市政秩序維繫，而非由帝王與軍隊統治的世界。約西元前 1900 年後，或許因為河流改道、氣候變遷與貿易衰退，這個文明逐漸沒落、城市被遺棄，連同它的文字一起，沉入了三千多年的寂靜。</p>
+    <div class="pull"><p>它建起了人類最早的城市與下水道，卻沒留下一個國王的名字、一場戰爭的記載——印度文明的開篇，是一段我們至今讀不懂的沉默。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 看不見的延續</span>
+      <p>印度河文明留給後世一個耐人尋味的對照：它幾乎沒有被後來的印度「記得」——沒有寫進《吠陀》、沒有進入神話，連文字都失傳了。然而學者相信，它的某些痕跡（如某些信仰符號、度量與工藝傳統）可能<strong>悄悄地融進了後來的印度文明底層</strong>。</p>
+      <p>這正是理解印度的一個關鍵母題：<em>在這片土地上，沒有什麼會真正「消失」，只會被吸收、改寫、然後以另一種面貌重新出現。</em>一個被徹底遺忘的文明，仍可能在三千年後的某個習俗、某種圖騰裡，留下它沉默的回聲——這種「層層疊加、無物盡失」的特性，將是貫穿整部印度史的主線。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⛰ ✦ ⛰</div>
+  <p>當印度河的城市沉入寂靜，<br>西北的山口傳來了馬蹄與聖歌。<br><span class="hl">一支自稱「高貴者」的民族翻牆而入，帶來了印度最初的經典——與最初的階序。</span></p>
+</div>
+
+<!-- ===== 第二章：吠陀與雅利安 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Vedas</span>
+    <h2 class="act-title">翻過山口的「高貴者」與最初的階序</h2>
+    <p class="act-sub">The Aryans, the Vedas, and the Birth of Varna</p>
+    <div class="ornament">☉ ☉ ☉</div>
+  </div>
+  <div class="prose">
+    <p>印度河文明沒落後約數百年，一股新的力量循著西北的山口進入次大陸——操著一種古老印歐語言、自稱「<strong>雅利安（Arya）</strong>」（意為「高貴者」）的人群。他們不像哈拉帕人那樣建造磚城，而是半遊牧的部族，趕著牛羊、駕著馬車，逐漸向東推進到肥沃的恆河平原。他們沒有留下宏偉的城市遺址，卻留下了某種更持久的東西——<em>語言、聖歌與一套關於宇宙秩序的觀念</em>。</p>
+
+    <h3>《吠陀》：被「聽見」而非寫下的經典</h3>
+    <p>這股力量帶來的最重要遺產，是一部部口耳相傳的聖典——<strong>《吠陀》（Vedas）</strong>。其中最古老的《梨俱吠陀》是一部獻給諸神的讚歌集。值得注意的是，《吠陀》在最初的千百年裡並非寫成文字，而是由婆羅門祭司以驚人的記憶力<em>逐字背誦、世代口傳</em>下來的——它被視為「天啟」（shruti，意為「被聽見的」），是宇宙的神聖之聲。這部經典所構築的信仰世界，連同其中的諸神、儀式與哲思，正是後來綿延至今的<strong>印度教</strong>最古老的根。</p>
+
+    <h3>那條最深的線：種姓的雛形</h3>
+    <p>但《吠陀》時代留給印度最深遠、也最沉重的遺產，是一套關於「人該如何被分類」的觀念——<strong>瓦爾納（Varna，意為「色」或「類」）</strong>。在後期吠陀文獻中，社會被想像成從原初巨人「原人」（Purusha）的身體不同部位誕生的四個層級：從口中生出<em>婆羅門（祭司與學者）</em>，從手臂生出<em>剎帝利（武士與統治者）</em>，從腿部生出<em>吠舍（農民與商人）</em>，從腳部生出<em>首陀羅（勞動者與僕役）</em>。而在這四級之外，還有被排除於體系之外、從事「不潔」工作的群體——後世所稱的「<strong>賤民</strong>」（後來甘地稱他們為「神之子」Harijan，今多自稱達利特 Dalit）。</p>
+    <div class="pull"><p>一套關於「誰生而高貴、誰生而卑賤」的觀念，在三千年前被寫進了印度文明的底層程式碼——它將比任何帝國都更持久。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 寫進底層的程式碼</span>
+      <p>雅利安人帶來的真正「征服」，不是軍事的，而是<strong>觀念的</strong>。他們沒有留下多少城牆與王宮，卻留下了一套關於宇宙秩序與社會階序的<em>作業系統</em>——《吠陀》的信仰，與瓦爾納的分類。這套系統如此根深蒂固，以至於後來無論誰來統治印度（佛教徒、穆斯林、英國人），都無法將它真正抹去。</p>
+      <p>這揭示了印度史的一條鐵律：<em>在這片土地上，真正持久的力量，往往不是握有刀劍的帝國，而是寫進文化底層的觀念與制度。</em>帝國會崛起又崩解，但種姓——這套關於「人生而不平等」的古老程式碼——卻穿越了三千年、躲過了一切征服，至今仍在以各種變形的方式，塑造著億萬印度人的命運。這是理解印度社會繞不開的第一把鑰匙。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ✦ ☸</div>
+  <p>當婆羅門壟斷了通往諸神的階梯，<br>恆河平原上，兩個出身王族的人各自走進森林，<br><span class="hl">他們要問一個婆羅門無法回答的問題：人能不能不靠祭司，自己得到解脫？</span></p>
+</div>
+
+<!-- ===== 第三章：佛陀與大雄 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Awakening</span>
+    <h2 class="act-title">兩位王子，與一場對婆羅門的挑戰</h2>
+    <p class="act-sub">The Buddha, the Mahavira, and the Revolt Against the Priests</p>
+    <div class="ornament">☸ ✦ ☸</div>
+  </div>
+  <div class="prose">
+    <p>到了西元前六世紀左右，恆河平原上的婆羅門祭司階層，已經把信仰變成了一套繁複、昂貴、由他們壟斷的儀式系統——只有透過婆羅門主持的祭祀，凡人才能與諸神溝通、求得福報。但這套壟斷激起了反抗。在這個被稱為印度「軸心時代」的思想大爆發中，出現了一批質疑《吠陀》權威的「沙門」（出家苦行者），其中兩位的影響最為深遠。</p>
+
+    <h3>悉達多：在菩提樹下覺悟的王子</h3>
+    <p>第一位是釋迦族的王子<strong>悉達多·喬達摩（Siddhartha Gautama）</strong>。傳說他生於優渥的宮廷，卻在某次出遊中目睹了老、病、死與苦行者，深受震撼，於是捨棄王位與家庭，出家尋求解脫之道。歷經多年苦行與冥想，他最終在一棵菩提樹下證悟，成為「<strong>佛陀</strong>」（Buddha，意為「覺者」）。他的教法核心極其平實卻革命性：人生本質是苦，苦來自慾望與執著，唯有透過<em>八正道</em>的修行才能止息痛苦、達到涅槃——而這條路，<strong>不需要婆羅門、不需要昂貴的祭祀、也不問你的種姓出身</strong>。</p>
+
+    <h3>大雄：耆那教與「不害」的極致</h3>
+    <p>幾乎在同一時代，另一位王族出身的覺者<strong>大雄（Mahavira）</strong>，集大成地創立了<strong>耆那教（Jainism）</strong>。耆那教把「<em>不害（ahimsa）</em>」——不傷害任何生命——推到了極致，主張嚴格的苦行與非暴力。這個看似極端的理念，日後將透過一個叫甘地的人，以驚人的方式重新登上世界舞台。</p>
+    <div class="pull"><p>佛陀與大雄的革命，本質上是一場「精神的平民化」——他們把通往解脫的鑰匙，從婆羅門的手裡，交回到每一個普通人自己手中。</p></div>
+    <p>這場思想革命影響深遠。佛教因其平等、慈悲的訊息與不分種姓的開放性，迅速吸引了大批信眾，並在數百年後得到一位偉大帝王的擁抱，從印度傳遍整個亞洲——東亞、東南亞乃至更遠的地方，至今仍深受其塑造。諷刺的是，佛教雖征服了半個亞洲，卻在它的<em>誕生地印度本土逐漸式微</em>，最終被復興的印度教與後來的伊斯蘭吸收、取代。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 被故鄉遺忘的革命</span>
+      <p>佛教的命運，是印度「<strong>吸收一切</strong>」這個特性的最佳註腳。印度教沒有用刀劍消滅佛教，而是用一種更高明的方式：<em>把佛陀吸納進自己的神譜</em>——在後來的印度教傳統中，佛陀甚至被說成是大神毗濕奴的化身之一。一場原本要顛覆印度教的革命，最終被印度教溫柔地「收編」了。</p>
+      <p>這帶來一個深刻的啟示：<em>印度文明對付挑戰者的方式，往往不是擊敗它，而是消化它。</em>它像一片無邊的海，任何投入其中的新思想、新信仰、新民族，最終都不是被排斥，而是被溶解、吸收，成為這片海的一部分。佛教如此，後來的許多外來者也將如此——這種「以吸收代替抵抗」的韌性，是印度文明能延續五千年而不斷裂的核心秘密之一。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">♟ ✦ ♟</div>
+  <p>思想在恆河平原上爆發時，西北的山口又一次被推開——<br>這一次來的是亞歷山大的希臘長矛。<br><span class="hl">而擋住他、並第一次把這片破碎土地縫成一個帝國的，是一個出身卑微的青年。</span></p>
+</div>
+
+<!-- ===== 第四章：孔雀王朝與阿育王 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The First Empire</span>
+    <h2 class="act-title">第一個把次大陸縫成一體的帝國</h2>
+    <p class="act-sub">Chandragupta, Ashoka, and the Empire That Chose Peace</p>
+    <div class="ornament">♟ ♟ ♟</div>
+  </div>
+  <div class="prose">
+    <p>長久以來，印度次大陸是一片由眾多王國、部族與城邦組成的破碎拼圖，從未真正統一。改變這一切的契機，來自一場外來的衝擊。西元前 327 年，馬其頓的<strong>亞歷山大大帝</strong>翻過西北山口、攻入印度西北，雖然他的軍隊最終因厭戰而折返，卻在這片土地的權力格局上撕開了一道裂口。</p>
+
+    <h3>旃陀羅笈多：從混亂中建起帝國</h3>
+    <p>抓住這個契機的，是一位出身不詳、據傳地位卑微的青年——<strong>旃陀羅笈多·孔雀（Chandragupta Maurya）</strong>。在傳說中那位精於權謀的導師考底利耶（Kautilya，著有治國奇書《政事論》）的輔佐下，他推翻了恆河流域強大的難陀王朝，並擊退了亞歷山大的繼業者，建立起印度史上第一個真正意義上的大帝國——<strong>孔雀王朝（Maurya Empire）</strong>。這個帝國的版圖空前遼闊，第一次把次大陸的大部分縫合在一個中央政權之下。</p>
+
+    <h3>阿育王：那場改變一切的屠殺</h3>
+    <p>而把孔雀王朝推上頂峰、也讓它名垂千古的，是旃陀羅笈多的孫子——<strong>阿育王（Ashoka）</strong>。他起初是一位殘酷而野心勃勃的征服者。西元前約 261 年，他發動了對東部羯陵伽（Kalinga）王國的征服戰爭，取得了慘烈的勝利——據其自述，這場戰爭造成了十餘萬人死亡、更多人被俘流離。但站在堆積如山的屍體前，這位征服者沒有感到勝利的喜悅，而是被巨大的悔恨與痛苦淹沒。</p>
+    <div class="pull"><p>阿育王是歷史上罕見的例子：一個在勝利的頂點，主動選擇放下刀劍的征服者。</p></div>
+    <p>羯陵伽之戰成了阿育王的轉捩點。他皈依了<strong>佛教</strong>，從一個「以征服擴張」的帝王，徹底轉變為一個「以正法（Dharma）治國」的君主。他在帝國各地的岩壁與石柱上鐫刻敕令（即著名的「阿育王詔書」），宣揚非暴力、寬容、慈悲與對一切生命的尊重；他派遣使團將佛教傳播到斯里蘭卡乃至更遠的地方，使佛教從一個地方性的信仰，成長為一個世界性的宗教。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一根柱子，三千年後的國徽</span>
+      <p>阿育王留下的最深遠遺產，或許是一個象徵。他所立的石柱上，那組四隻背對而立的雄獅柱頭，在兩千兩百多年後，被新生的印度共和國選為<strong>國徽</strong>；而他詔書中那枚象徵正法的「法輪」（Dharmachakra），則被放進了<strong>印度國旗的正中央</strong>。</p>
+      <p>這是一個意味深長的選擇：當印度在 1947 年要為自己尋找一個立國的精神象徵時，它沒有選擇任何一位武功赫赫的征服者，而是選擇了那個<em>在勝利頂點放下屠刀、選擇和平與寬容的帝王</em>。阿育王證明了印度史的另一面：<em>這片土地最被珍視的力量，從來不只是征服的武功，更是放下征服的智慧。</em>這份理想，將在兩千年後，由一個赤腳的瘦弱老人重新點燃。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚜ ✦</div>
+  <p>孔雀王朝崩解後，次大陸再度碎裂。<br>但幾百年後，一個王朝將迎來印度的「黃金時代」——<br><span class="hl">在那個時代，印度人發明了一個將永遠改變人類的符號：零。</span></p>
+</div>
+
+<!-- ===== 第五章：笈多王朝黃金時代 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Golden Age</span>
+    <h2 class="act-title">黃金時代，與一個叫「零」的發明</h2>
+    <p class="act-sub">The Gupta Era — Mathematics, Myth, and a Classical Peak</p>
+    <div class="ornament">⚜ ⚜ ⚜</div>
+  </div>
+  <div class="prose">
+    <p>孔雀王朝衰亡後，印度經歷了數百年的分裂與外族（如貴霜帝國）的進出。直到西元四世紀，<strong>笈多王朝（Gupta Empire）</strong>在恆河流域興起，重新統一了北印度的大部分，並開創了一個被後世譽為印度「<strong>古典黃金時代</strong>」的繁榮盛世。這是一個文化、科學、藝術與哲學全面綻放的時代。</p>
+
+    <h3>改變世界的符號：零與十進位</h3>
+    <p>黃金時代最不朽的成就，發生在數學與科學領域。正是在這個時代前後，印度數學家系統化地發展出<strong>十進位記數法</strong>，並確立了「<strong>零（zero）</strong>」作為一個獨立數字的概念與符號。這聽起來簡單，卻是人類思想史上最偉大的飛躍之一——沒有「零」，就沒有現代數學、沒有計算、沒有今天的數位世界。這套數字系統後來經由阿拉伯人傳入歐洲，被稱為「阿拉伯數字」，但它真正的源頭，在印度。</p>
+    <div class="pull"><p>印度給世界最深遠的禮物之一，不是黃金或香料，而是一個「什麼都沒有」的符號——零。整個現代世界，都建立在這個印度的發明之上。</p></div>
+    <p>同一時代，天文學家<strong>阿耶波多（Aryabhata）</strong>計算出了極為精確的圓周率與地球自轉的概念；醫學、冶金（如至今不鏽的德里鐵柱）、文學（劇作家迦梨陀娑）與藝術（阿旃陀石窟的壁畫）都達到了高峰。這個時代也是<em>印度教復興</em>的關鍵期——許多至今仍構成印度教核心的神話、史詩（《摩訶婆羅多》與《羅摩衍那》大致定型）與哲學體系，都在此時被整理、確立。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 文明的軟實力</span>
+      <p>笈多黃金時代揭示了印度文明的另一個側面：它的真正力量，往往不在於版圖的大小或軍隊的強弱，而在於它所創造的<strong>觀念與知識——那些能跨越國界、穿越時間的「軟實力」</strong>。一個王朝的疆域早已湮滅，但它發明的「零」，至今仍在全世界每一台電腦、每一筆交易中運轉。</p>
+      <p>這對應一個常被低估的真理：<em>一個文明留給世界的最持久遺產，常常不是它征服了多少土地，而是它貢獻了哪些改變人類思維方式的觀念。</em>從零到非暴力，從棋類遊戲到瑜伽，印度反覆證明：思想的輸出，遠比領土的擴張走得更遠、活得更久。這也預示了印度未來的某種命運——一個在「軟實力」上始終富有、在「硬實力」的統一上卻反覆掙扎的文明。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☪ ✦ ☪</div>
+  <p>當黃金時代的餘暉散去，西北的山口再一次被推開。<br>這一次翻牆而入的，帶著一部新的經典、一位唯一的真主，<br><span class="hl">與一種印度從未見過的、堅決不肯被「吸收」的信仰。</span></p>
+</div>
+
+<!-- ===== 第六章：伊斯蘭的到來 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The New Faith</span>
+    <h2 class="act-title">真主來到諸神之地</h2>
+    <p class="act-sub">Islam Arrives — Sultans, Sufis, and a Faith That Would Not Dissolve</p>
+    <div class="ornament">☪ ☪ ☪</div>
+  </div>
+  <div class="prose">
+    <p>從西元八世紀起，一股全新的力量開始循著古老的西北路徑與西南的海岸，進入這片諸神之地——<strong>伊斯蘭</strong>。最初是阿拉伯商人沿著海岸帶來貿易與信仰，接著從十一世紀起，來自中亞與阿富汗的突厥、阿富汗穆斯林統治者，一波波翻過山口南下。到了十三世紀，他們在北印度建立起一個以德里為中心的穆斯林政權——<strong>德里蘇丹國（Delhi Sultanate）</strong>。</p>
+
+    <h3>一種無法被「吸收」的信仰</h3>
+    <p>伊斯蘭的到來，對印度文明構成了一個前所未有的挑戰。回想前面——印度教曾用「吸收」化解了佛教的挑戰，把佛陀變成自己的神。但這一招對伊斯蘭<strong>失靈了</strong>。伊斯蘭是嚴格的<em>一神信仰</em>：只有一位真主，禁止偶像崇拜，主張信徒在真主面前人人平等。這與印度教<em>多神、偶像林立、種姓森嚴</em>的世界觀，是根本性的對立。印度教無法把「唯一的真主」吸收成自己萬神殿裡的又一尊神——於是，印度第一次遇到了一個它無法溶解、必須長久共存的「他者」。</p>
+    <div class="pull"><p>印度教能把佛陀吸收成自己的神，卻無法把真主吸收成萬神殿裡的一尊——伊斯蘭，是第一個印度這片海溶解不掉的他者。</p></div>
+
+    <h3>蘇非派：在硬碰硬之外的柔軟相遇</h3>
+    <p>但兩大文明的相遇，並非只有征服與對抗。在刀劍與王朝之外，伊斯蘭的<strong>蘇非派（Sufism）</strong>——強調神秘體驗、虔愛真主與眾生平等的一支——以其溫和、包容、近乎詩意的靈性，在印度民間贏得了大量人心。蘇非聖者的陵墓至今仍是印度教徒與穆斯林共同朝拜的聖地，他們的虔愛詩歌也與印度教的<em>巴克提（Bhakti，虔信）運動</em>相互呼應。在底層社會，許多飽受種姓壓迫的低種姓印度教徒，正是被伊斯蘭「人人平等」的訊息所吸引而改宗——這也埋下了日後印度與巴基斯坦人口宗教分布的伏筆。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 第一個溶不掉的他者</span>
+      <p>伊斯蘭的到來，在印度文明的「吸收一切」這條鐵律上，劃下了第一道真正的裂痕。在此之前，印度像一片無邊的海，任何投入其中的新事物最終都會被溶解；但伊斯蘭是<strong>第一塊溶不掉的礁石</strong>——它與印度教共存了近千年，卻始終保持著自己清晰的邊界與認同。</p>
+      <p>這道未能彌合的裂痕，將成為理解現代南亞最關鍵的一條線。<em>當兩個都不肯被對方吸收的龐大群體，必須在同一片土地上共存千年時，他們之間時而交融（蘇非與巴克提的詩歌）、時而對立（王朝的征伐）的複雜關係，最終會在二十世紀被政治化、被武器化，演變成一場把整個次大陸切成兩半的悲劇。</em>印度教與伊斯蘭這道「無法互相溶解」的張力，是後面所有故事的伏筆。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⬡ ✦ ⬡</div>
+  <p>德里蘇丹國之後，一支來自中亞、自稱帖木兒與成吉思汗後裔的力量南下，<br>建立起印度史上最華麗的帝國。<br><span class="hl">它留下了世界上最美的陵墓——也留下了印度教與伊斯蘭能否共治的千古難題。</span></p>
+</div>
+
+<!-- ===== 第七章：蒙兀兒帝國 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Mughals</span>
+    <h2 class="act-title">蒙兀兒：一座陵墓背後的兩種治國術</h2>
+    <p class="act-sub">Akbar's Tolerance, Aurangzeb's Zeal, and the Empire of the Taj</p>
+    <div class="ornament">⬡ ⬡ ⬡</div>
+  </div>
+  <div class="prose">
+    <p>1526 年，一位自稱兼有帖木兒與成吉思汗血統的中亞君主<strong>巴布爾（Babur）</strong>，翻過山口擊敗了德里蘇丹，建立起印度史上最強盛、最華麗的伊斯蘭帝國——<strong>蒙兀兒帝國（Mughal Empire）</strong>。在其鼎盛期，蒙兀兒統治著次大陸的絕大部分，是當時全世界最富庶的帝國之一，其 GDP 一度佔到全球的相當大份額。然而，這個由穆斯林少數統治著印度教多數的帝國，從一開始就面對著一個根本問題：<em>如何治理一個與統治者信仰不同的龐大社會？</em>對於這個問題，兩位皇帝給出了截然相反的答案。</p>
+
+    <h3>阿克巴：用「寬容」黏合帝國</h3>
+    <p>第一個答案來自最偉大的蒙兀兒皇帝<strong>阿克巴（Akbar）</strong>。他是一位深具遠見的統治者，深知一個穆斯林少數政權若想長治久安，絕不能與印度教多數為敵。於是他推行了一系列極具包容性的政策：<strong>廢除對非穆斯林徵收的人頭稅（吉茲亞）</strong>、迎娶印度教拉吉普特公主、任用印度教徒擔任高官與將領、贊助印度教典籍的翻譯，甚至嘗試創立一種融合各宗教精華的新信仰。阿克巴的策略本質上是「<em>以多元包容換取統治正當性</em>」——他把帝國黏合在一種跨宗教的共同認同之上。</p>
+
+    <h3>奧朗則布：用「正統」撕裂帝國</h3>
+    <p>第二個答案，來自一個多世紀後的皇帝<strong>奧朗則布（Aurangzeb）</strong>。他是一位虔誠而嚴苛的遜尼派穆斯林，採取了與阿克巴完全相反的路線：他<strong>恢復了吉茲亞人頭稅</strong>、推行更嚴格的伊斯蘭律法、在一些地方拆毀印度教廟宇，疏遠了印度教臣民與盟友。雖然他在軍事上把帝國版圖擴張到極致，但他的宗教高壓政策，激起了印度教拉吉普特人、馬拉塔人與錫克教徒的強烈反抗，從內部掏空了帝國的根基。在他死後，這個龐大的帝國便迅速地分崩離析。</p>
+    <div class="pull"><p>阿克巴用寬容把帝國黏合，奧朗則布用正統把帝國撕裂——蒙兀兒兩百年的興衰，本質上是一場關於「多元能否治理多元」的巨大實驗。</p></div>
+
+    <h3>泰姬瑪哈陵：愛與權力的永恆見證</h3>
+    <p>而在阿克巴與奧朗則布之間，是皇帝<strong>沙賈汗（Shah Jahan）</strong>。他為紀念早逝的愛妃慕塔芝·瑪哈，傾全國之力修建了一座白色大理石的陵墓——<strong>泰姬瑪哈陵（Taj Mahal）</strong>。這座融合了波斯、伊斯蘭與印度建築美學的曠世傑作，至今仍是印度乃至全人類最動人的建築象徵。它既是一個男人對亡妻的深情，也是一個帝國財富與權力的極致展現——這份華麗背後龐大的耗費，也成了帝國由盛轉衰的隱喻。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 兩種治國術的千古辯論</span>
+      <p>蒙兀兒帝國最深刻的遺產，是它用兩百年的興衰，為印度演示了一場關於「<strong>多元社會該如何被統治</strong>」的巨大辯論。阿克巴證明了：一個多元帝國的長治久安，建立在<em>包容與共享的正當性</em>之上；奧朗則布則反證了：當統治者試圖把某一群體的信仰強加於整個社會時，帝國的裂縫便會從內部蔓延。</p>
+      <p>這場辯論，從未真正結束。<em>阿克巴的「多元寬容」與奧朗則布的「宗教正統」，作為兩種對立的治國想像，至今仍在現代印度的政治中反覆交鋒。</em>一個由眾多宗教、語言、族群拼成的國家，究竟該以「世俗包容」為立國之本，還是該以「多數宗教認同」為國家凝聚的核心？這個蒙兀兒人沒能解決的問題，將成為當代印度政治最深、最危險的斷層線。泰姬瑪哈陵的白色大理石下，埋著的不只是一位皇后，還有一個至今懸而未決的難題。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>當蒙兀兒帝國從內部崩解、次大陸再度碎裂成無數王國時，<br>幾艘來自遙遠島國的商船，正悄悄駛入印度的港口。<br><span class="hl">他們起初只想做生意——卻意外地買下了整個次大陸。</span></p>
+</div>
+
+<!-- ===== 第八章：東印度公司 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Company</span>
+    <h2 class="act-title">一家公司，如何買下一個次大陸</h2>
+    <p class="act-sub">How a Trading Firm Conquered India</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>大航海時代開啟後，葡萄牙、荷蘭、法國與英國的商船相繼來到印度，爭奪香料、棉布與貿易的暴利。最終勝出的，是一個極其特殊的存在——它不是一個國家，而是一家公司：<strong>英國東印度公司（British East India Company）</strong>。這家成立於 1600 年的商業公司，起初只在沿海設立商館（如馬德拉斯、孟買、加爾各答）做生意。但隨著蒙兀兒帝國的崩解，次大陸陷入群雄割據的權力真空，這家公司開始做一件商業史上前所未見的事——<em>用自己的軍隊，介入印度的政治</em>。</p>
+
+    <h3>普拉西戰役：一家公司的政變</h3>
+    <p>1757 年的<strong>普拉西戰役（Battle of Plassey）</strong>是命運的轉捩點。東印度公司的克萊夫（Robert Clive）靠著賄賂與策反孟加拉王公的將領，以極小的代價贏得了這場戰役，從此掌控了富庶的孟加拉地區的財政與行政大權。一家貿易公司，搖身一變成了印度一整片土地的實際統治者與徵稅者。此後一個世紀，東印度公司透過戰爭、結盟、收買與「兼併」，像滾雪球般吞併了一個又一個印度王國，最終以一家公司之力，控制了幾乎整個次大陸。</p>
+    <div class="pull"><p>人類歷史上最荒誕的征服之一：統治印度數億人口的，不是某個帝國或國王，而是一家在倫敦上市、向股東分紅的「公司」。</p></div>
+
+    <h3>1857：一場兵變與帝國的接管</h3>
+    <p>公司的貪婪統治與對印度社會的粗暴干預，終於在 1857 年引爆了大規模的反抗——<strong>1857 年印度民族大起義</strong>（舊稱「印度兵變」）。導火線之一，是英國發給印度士兵的新式子彈，據傳塗有牛油與豬油——這同時冒犯了視牛為聖的印度教徒與視豬為不潔的穆斯林。起義迅速從軍營蔓延成一場席捲北印度的反英抗爭，印度教徒與穆斯林一度並肩而戰。儘管起義最終被殘酷鎮壓，它卻徹底改變了印度的統治格局：英國政府認為，讓一家公司統治如此龐大的領土實在太過危險，於是在 1858 年<strong>解散了東印度公司，由英國王室直接接管印度</strong>，開啟了「英屬印度（British Raj）」時代。維多利亞女王在 1876 年更被加冕為「印度女皇」。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 分裂讓征服變得廉價</span>
+      <p>東印度公司能以一家公司之力征服一個次大陸，最根本的原因，不在於它有多強，而在於印度有多<strong>分裂</strong>。當蒙兀兒帝國崩解後，次大陸碎裂成數十個彼此征戰、互不信任的王國——這正給了公司「<em>分而治之、各個擊破</em>」的完美舞台。公司很少需要正面擊敗一個統一的印度，它只需要不斷地利用印度內部的矛盾：收買這個王公去打那個、扶植這一派去制衡那一派。</p>
+      <p>這揭示了貫穿印度史的一條殘酷規律：<em>這片土地最大的脆弱，從來不是缺乏強者，而是缺乏統一。</em>一個分裂的次大陸，對任何一個有組織、有紀律的外來力量來說，都是可以被逐塊蠶食的獵物。從亞歷山大到蒙兀兒，再到一家貿易公司——印度反覆被「翻牆而入」的外來者征服，根源都在於它自身難以凝聚成一個整體。而這個慘痛的教訓，將在下一個世紀，催生出印度歷史上最重要的一場運動：把這片分裂的土地，第一次團結成一個「民族」。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✠ ✦ ✠</div>
+  <p>英國女皇加冕為「印度女皇」的那一刻，<br>這片土地第一次被一個外來政權縫成一個統一的行政整體。<br><span class="hl">而這個外來帝國，將在無意中，為印度人鍛造出一樣他們從未擁有過的東西——「我們是一個民族」的意識。</span></p>
+</div>
+
+<!-- ===== 第九章：英屬印度 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Raj</span>
+    <h2 class="act-title">鐵路、英語，與「分而治之」的毒種</h2>
+    <p class="act-sub">The British Raj — Railways, English, and the Seeds of Division</p>
+    <div class="ornament">✠ ✠ ✠</div>
+  </div>
+  <div class="prose">
+    <p>英國對印度的統治，是一段充滿深刻矛盾的歷史。一方面，英國人為了高效地統治、徵稅與榨取資源，在印度建起了一套前所未有的<em>現代基礎設施與制度</em>；另一方面，這套統治的本質是<strong>殖民榨取</strong>——印度的財富被大量輸往英國，繁榮的本土手工業（尤其紡織業）在英國工業品的傾銷下崩潰，而幾次因政策失當與漠視而加劇的大饑荒，更奪走了數百萬人的生命。</p>
+
+    <h3>意外的禮物：一個被「統一」的印度</h3>
+    <p>但英國的統治，在無意中為印度留下了幾樣將改變其命運的遺產。為了連結這片廣袤的土地，英國人修建了當時亞洲最龐大的<strong>鐵路網與電報系統</strong>，第一次讓次大陸的各個角落緊密相連；為了培養替殖民政府服務的本地文官，他們建立了<strong>英語教育體系</strong>。這套體系造就了一批新興的印度知識精英——他們來自不同地區、說著不同母語，卻能用<em>同一種語言（英語）相互溝通</em>，並透過英式教育接觸到「自由」「民族」「自治」這些觀念。</p>
+    <div class="pull"><p>英國人用鐵路、電報與英語把印度連成一片，本是為了統治；卻不料正是這套網絡，讓印度人第一次有了「我們是一個民族」的想像。</p></div>
+    <p>於是出現了歷史最大的諷刺：<em>正是殖民者提供的工具，鍛造出了反抗殖民者的力量。</em>1885 年，印度國民大會黨（國大黨，Indian National Congress）成立，最初只是溫和地向英國請願、爭取更多印度人參政的權利，後來逐漸成為領導整個印度獨立運動的核心。一個「印度民族」的意識，第一次在這片從未真正統一過的土地上凝聚起來。</p>
+
+    <h3>那顆最毒的種子：分而治之</h3>
+    <p>然而，英國為了鞏固對龐大殖民地的控制，也熟練地運用了那套古老的伎倆——<strong>「分而治之」（Divide and Rule）</strong>。他們刻意強調、固化、甚至製造印度社會內部的分野，尤其是<em>印度教徒與穆斯林之間的宗教界線</em>。英國的人口普查把人按宗教、種姓精確分類；1905 年孟加拉的分割、以及後來設立的「<strong>分別選區</strong>」（讓穆斯林只能投票給穆斯林候選人）等制度安排，都在不斷地把「宗教」變成印度政治中最尖銳的分類軸線。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 殖民者最危險的遺產</span>
+      <p>英國統治留給印度的，是一份善惡交織、難以簡單評斷的複雜遺產。鐵路、英語、文官體系與「統一的行政整體」，固然在客觀上為現代印度的誕生奠定了基礎；但「分而治之」所刻意加深的<strong>印度教—穆斯林裂痕</strong>，卻是一顆將釀成巨大悲劇的毒種。</p>
+      <p>這裡藏著理解現代南亞最關鍵的一環：<em>印度教與穆斯林之間「無法互相溶解」的古老張力（見第六章），原本是一種複雜、流動、時而衝突時而交融的共存關係；但在英國殖民的「分類」與「分而治之」之下，這道張力被精準地測量、固化、並政治化成一道你死我活的對立。</em>當「你是印度教徒還是穆斯林」變成決定你投票、你的政治權利、乃至你屬於哪個「民族」的問題時，這道被殖民者加工過的裂痕，就再也無法被輕易彌合了。它將在獨立的那一刻，引爆人類史上最大規模的一場流血遷徙。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☮ ✦ ☮</div>
+  <p>當一個民族意識覺醒、卻面對著世界上最強大的帝國時，<br>它需要一種前所未有的武器。<br><span class="hl">而給出這件武器的，是一個身披土布、手持紡車、瘦弱赤腳的老人——他的武器，叫「不抵抗」。</span></p>
+</div>
+
+<!-- ===== 第十章：甘地與獨立運動 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Mahatma</span>
+    <h2 class="act-title">一個赤腳老人，與「不抵抗」的武器</h2>
+    <p class="act-sub">Gandhi, Satyagraha, and the Power of Nonviolence</p>
+    <div class="ornament">☮ ☮ ☮</div>
+  </div>
+  <div class="prose">
+    <p>領導印度走向獨立的核心人物，是一個外表毫不起眼、卻擁有驚人精神力量的人——<strong>莫罕達斯·甘地（Mohandas Gandhi）</strong>，後人尊稱他為「<strong>聖雄</strong>」（Mahatma，意為「偉大的靈魂」）。他出身於一個普通的印度教家庭，曾留學英國成為律師，又在南非親身經歷種族歧視的屈辱——正是在南非，他發展出了那套日後將撼動帝國的鬥爭哲學。</p>
+
+    <h3>真理的堅持：用「不害」對抗帝國</h3>
+    <p>甘地的思想核心，是兩個古老的印度觀念的結合：源自耆那教與印度教的「<strong>不害（ahimsa，非暴力）</strong>」，與他自創的「<strong>真理的堅持（Satyagraha）</strong>」。他主張，面對不義的強權，最強大的武器不是暴力，而是有組織、有紀律的<em>非暴力不合作</em>——拒絕服從不公正的法律，坦然承受逮捕與毆打，用道德的力量讓壓迫者的暴力顯得荒謬而失去正當性。這套哲學把弱者的「忍受」轉化成了一種主動的、咄咄逼人的力量。</p>
+
+    <h3>一把鹽，動搖一個帝國</h3>
+    <p>這套哲學最經典的展演，是 1930 年的<strong>食鹽長征（Salt March）</strong>。當時英國壟斷食鹽的製造與課稅，禁止印度人自行製鹽。年逾六旬的甘地，率領眾人徒步數百公里走到海邊，當眾彎腰捧起一把海鹽——以這個簡單到近乎卑微的舉動，公開違抗了英國的鹽法。這個畫面震撼了全世界：一個赤腳老人,僅憑一把鹽，就讓大英帝國的不義暴露在全球的目光之下。數百萬印度人響應，非暴力不合作運動席捲全國。</p>
+    <div class="pull"><p>甘地最偉大的發明，是把印度最古老的精神資產——「不害」，鍛造成了二十世紀最有力的政治武器。他用印度自己的靈魂，贏回了印度自己的自由。</p></div>
+    <p>甘地的另一個深刻關懷，是印度社會內部的傷痕。他終生致力於<em>消除種姓歧視</em>，尤其是「賤民」（他稱之為「神之子」Harijan）所受的不公；他也畢生奔走於<em>印度教徒與穆斯林的團結</em>，視兩大社群的和解為印度的生命線。然而，這也正是他最終未能阻止的悲劇——以及他最終為之殉難的理想。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 用自己的靈魂贏回自由</span>
+      <p>甘地的偉大，不只在於他趕走了英國人，更在於他選擇了「<strong>如何</strong>」趕走英國人。面對一個用槍砲與武力建立的帝國，他沒有選擇以暴制暴——因為他深知，用暴力贏得的國家，將會是一個崇尚暴力的國家。他要的不只是政權的更替，而是一種<em>道德上的勝利</em>。</p>
+      <p>這呼應了從阿育王到佛陀一脈相承的印度理想：<em>真正的力量，在於放下武力的智慧。</em>甘地從印度文明最古老的精神寶庫（不害、真理、苦行）中，提煉出對抗現代帝國的武器——這本身就證明了印度「軟實力」的驚人韌性。他的方法後來啟發了全世界的民權與和平運動，從馬丁·路德·金恩到曼德拉。然而，歷史最痛的諷刺在於：這位畢生宣揚「團結」與「非暴力」的聖雄，最終親眼目睹了他的祖國在獨立的那一刻，被宗教仇恨撕成兩半、血流成河——而他自己，也將倒在一個同胞的槍口下。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>自由終於來臨。但在歡慶的鐘聲響起的同一刻，<br>一條倉促劃下的線，正把一個文明切成兩半。<br><span class="hl">獨立的代價，是人類史上最大規模、最血腥的一場遷徙。</span></p>
+</div>
+
+<!-- ===== 第十一章：分治 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Partition</span>
+    <h2 class="act-title">午夜的鐘聲，與一條血色的線</h2>
+    <p class="act-sub">Independence, Partition, and the Wound That Never Healed</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>1947 年 8 月，印度終於迎來了獨立。在那個著名的午夜，首任總理<strong>尼赫魯（Jawaharlal Nehru）</strong>發表了「與命運有約」的演說，宣告一個古老文明在沉睡之後重獲新生。然而，這份自由的喜悅，從誕生的第一刻起，就浸透了鮮血。因為印度的獨立，並非以一個完整國家的形式到來，而是伴隨著一場慘烈的<strong>分治（Partition）</strong>。</p>
+
+    <h3>兩個民族，還是一個國家？</h3>
+    <p>分治的根源，正是前幾章層層鋪墊的那道裂痕。以真納（Muhammad Ali Jinnah）為首的全印穆斯林聯盟，堅持「<em>兩個民族理論</em>」——主張印度的穆斯林與印度教徒是兩個截然不同的民族，無法在同一個由印度教徒佔多數的國家裡得到保障，因此必須擁有一個屬於自己的獨立國家：<strong>巴基斯坦</strong>。而以甘地、尼赫魯為首的國大黨，則堅持一個「<em>世俗、統一、各宗教平等</em>」的印度。雙方的立場最終無法調和，加上英國急於脫身，分治成了無可挽回的結局。</p>
+
+    <h3>一條線，與一千五百萬人的逃亡</h3>
+    <p>於是，一位從未到過印度、對當地一無所知的英國律師雷德克里夫（Cyril Radcliffe），被指派在短短數週內，依據宗教人口的分布，在地圖上劃出印度與巴基斯坦的邊界。這條倉促、武斷的「<strong>雷德克里夫線</strong>」，硬生生地把旁遮普與孟加拉這兩個族群混居、血脈交融的地區從中切開。結果是一場人類史上規模最大的遷徙與災難：約<strong>一千多萬人</strong>為了逃到「正確」宗教的一邊而背井離鄉——印度教徒與錫克教徒湧向印度，穆斯林湧向巴基斯坦。在遷徙途中，積壓的宗教仇恨徹底爆發，村莊被屠戮、火車載著滿車屍體抵達邊境，估計有<strong>數十萬到上百萬人</strong>在這場大屠殺中喪生。</p>
+    <div class="pull"><p>一個共存了近千年的文明，被一條畫了幾週的線切成兩半。獨立的鐘聲與屠殺的哭嚎，在同一個午夜響起。</p></div>
+    <p>悲劇並未隨分治結束。獨立後僅數月，1948 年初，畢生為印度教徒與穆斯林團結奔走的甘地，被一名激進的印度教民族主義者刺殺身亡——這位「偉大的靈魂」，最終死於他畢生對抗的那種宗教仇恨。而印巴之間因分治結下的血仇，尤其是對<strong>喀什米爾（Kashmir）</strong>的主權爭端，更演變成了延續至今、數度引爆戰爭、且雙方都已擁有核武的永久對峙。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 縫合的代價與未癒的傷</span>
+      <p>分治，是印度文明「吸收一切」這條鐵律最終失效的慘烈證明。回顧整部印度史——印度教吸收了佛教，蘇非與巴克提讓伊斯蘭與印度教在民間交融。但<strong>當「宗教認同」被殖民者的分類、被政治家的算計徹底武器化之後，那道印度教與伊斯蘭「無法互相溶解」的古老張力，終於從一種可以共存的差異，變成了一道必須用國境線來隔開的鴻溝。</strong></p>
+      <p>這留下了一個至今仍在淌血的教訓：<em>當一個社會無法找到一種讓不同群體共同歸屬的方式時，差異就會被仇恨填滿，而仇恨最終需要用鮮血與國界來「解決」。</em>分治的傷口，定義了此後南亞的全部地緣政治：印巴的世仇、喀什米爾的火藥桶、核武的對峙。而更深層的是，它在獨立的印度心中留下了一個永恆的拷問——<em>一個剛剛因宗教分裂而流盡鮮血的國家，該如何建立一個能讓所有宗教都安心歸屬的家園？</em>這個問題的答案，將寫在它即將選擇的立國根本之中。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚖ ✦ ⚖</div>
+  <p>從血泊中誕生的新國家，必須立刻回答一個問題：<br>一個由數百種語言、千百個族群、四大宗教搖籃拼成的國度，該如何不再分裂？<br><span class="hl">他們的答案，是一場人類史上最大膽的政治實驗——民主。</span></p>
+</div>
+
+<!-- ===== 第十二章：世界最大民主 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Great Experiment</span>
+    <h2 class="act-title">把「分裂」變成「多元」的豪賭</h2>
+    <p class="act-sub">The World's Largest Democracy and a Constitution Written by an Untouchable</p>
+    <div class="ornament">⚖ ⚖ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>1947 年的印度，幾乎具備了一切「註定失敗」的條件：剛經歷血腥分治、極度貧困、文盲遍地、數百種語言、被森嚴的種姓制度割裂、由五百多個半獨立的土邦拼湊而成。當時幾乎所有西方觀察家都斷言，這樣一個國家根本不可能維持統一，更不可能實行民主。但印度的開國者們，卻做出了一個石破天驚的決定——他們要在這片最不可能的土地上，建立一個<strong>普選、世俗、聯邦制的民主共和國</strong>。</p>
+
+    <h3>一部由「賤民」寫下的憲法</h3>
+    <p>主持起草這部憲法的，是一個極具象徵意義的人物——<strong>安貝德卡（B. R. Ambedkar）</strong>。他自己就出身於「賤民」（達利特），親身飽嘗種姓歧視之苦，卻憑藉驚人的毅力成為當時印度學識最淵博的法學家之一。由一位「不可觸碰者」來為這個古老的、等級森嚴的文明書寫其根本大法，本身就是一場無聲的革命。這部 1950 年生效的憲法，明文<strong>廢除了「不可觸碰」的賤民制度、賦予所有公民（無論種姓、性別、宗教）平等的權利與一人一票的選舉權</strong>，並確立了印度作為一個<em>世俗國家</em>的根本性質——這正是對分治悲劇的直接回應：既然宗教分裂幾乎毀了這個國家，那麼新印度就要把「不偏袒任何宗教」寫進它的靈魂。</p>
+    <div class="pull"><p>讓一位「賤民」起草憲法、讓每一個文盲農民都擁有一票——印度的開國者用最激進的平等，回應了它最古老的不平等。</p></div>
+
+    <h3>保留制：用制度撬動三千年的不平等</h3>
+    <p>為了真正撼動種姓制度延續三千年的不公，印度還採取了一項大膽的制度設計——<strong>保留制（Reservation）</strong>，即為歷史上受壓迫的「表列種姓」（賤民）、「表列部落」（原住民）與後來的「其他落後階級」，在公立教育、政府職位與議會席次中保留固定的名額。這是世界上規模最龐大、最早系統化的「平權行動」（affirmative action）之一，旨在用制度的力量，為被種姓鎖死的群體強行打開一條向上流動的通道。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 在最不可能處,押注多元</span>
+      <p>印度的民主實驗，本質上是對其全部歷史困境的一個正面回應。回想整部印度史的核心難題：<strong>它總是因為「分裂」而被征服（見第八章）、因為宗教與種姓的「裂痕」而流血（見第十一章）。</strong>面對這個困境，新印度給出的答案不是「強行統一、抹平差異」，而是反其道而行——<em>用一套包容的民主與聯邦制度，給每一種語言、每一個宗教、每一個族群都留出空間，把「分裂」重新框定為「多元」。</em></p>
+      <p>這是一場驚險的豪賭：賭一個如此多元、如此貧困的社會，能靠「選票」而非「刀劍」來凝聚。七十多年過去，這場賭局大致成功了——印度以十多億人口的規模，成為全世界最大的民主國家，定期舉行著人類規模最大的選舉。它證明了一件事：<em>一個被歷史反覆撕裂的文明，確實有可能找到一種方式，把它的差異轉化為共存的基礎，而非分裂的引信。</em>但這場豪賭，至今仍未真正塵埃落定——因為那道阿克巴與奧朗則布之間的古老辯論，正在當代以全新的、更尖銳的形式重新上演。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">₹ ✦ ₹</div>
+  <p>民主穩住了這個國家的「身分」，卻穩不住它的「肚子」。<br>獨立後的印度，曾被一種緩慢的、近乎宿命的貧窮困住了數十年——<br><span class="hl">直到一場危機，逼著它打開了緊閉已久的大門。</span></p>
+</div>
+
+<!-- ===== 第十三章：經濟轉折 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十三章 · The Opening</span>
+    <h2 class="act-title">從「印度式增長率」到軟體王國</h2>
+    <p class="act-sub">From the Licence Raj to a Trillion-Dollar Tech Power</p>
+    <div class="ornament">₹ ₹ ₹</div>
+  </div>
+  <div class="prose">
+    <p>獨立後的尼赫魯時代，印度選擇了一條<em>社會主義式的計劃經濟</em>道路：國家主導重工業、嚴格管制私人企業、對外貿易高度封閉。這套體制初衷良善，卻造就了一個效率低下、被繁文縟節層層捆綁的經濟——任何企業要生產、擴張、進口，都需要政府的層層許可證，這套體制被諷刺地稱為「<strong>許可證統治（Licence Raj）</strong>」。結果是數十年緩慢、停滯的經濟成長，緩慢到被經濟學家無奈地稱為「<strong>印度式增長率</strong>」（the Hindu rate of growth）。億萬印度人，被困在一種看似永恆的貧窮裡。</p>
+
+    <h3>1991：一場危機逼開的大門</h3>
+    <p>轉機來自一場危機。1991 年，印度遭遇嚴重的國際收支危機，外匯幾乎見底、瀕臨國家破產。絕境之中，時任財政部長<strong>曼莫漢·辛格（Manmohan Singh）</strong>推動了一場劃時代的<strong>經濟自由化改革</strong>：拆解許可證統治、向外資與貿易開放、放鬆管制、擁抱市場。這場改革如同打開了一道緊閉數十年的閘門，釋放出印度經濟長期被壓抑的活力。此後三十年，印度經濟以驚人的速度成長，數億人脫離了赤貧，一個龐大的中產階級開始崛起。</p>
+    <div class="pull"><p>有時候，一個國家最深刻的改變，不是來自從容的規劃，而是來自走投無路時被逼出來的勇氣。1991 年的印度，正是如此。</p></div>
+
+    <h3>跳過工廠，直接躍上雲端</h3>
+    <p>印度的崛起，走的還是一條獨特的路。與中國「世界工廠」的製造業模式不同，印度的成長更多是由<strong>服務業，尤其是資訊科技（IT）</strong>所驅動的。班加羅爾等城市成為全球的軟體外包與研發中心，孕育出 Infosys、TCS 等世界級的科技服務巨頭。這背後，正是前面講過的兩樣英國遺產的「複利」——<em>英語</em>讓印度工程師能無縫對接歐美客戶，而獨立後對<em>高等教育（尤其是理工學院 IIT）</em>的重視，則提供了源源不絕的人才。今天，印度不僅是全球的「軟體後台」，更走向了世界舞台的中心：印度裔高管掌管著全球眾多頂尖科技公司，印度本土的數位支付與新創生態也蓬勃發展。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 軟實力的複利</span>
+      <p>印度的經濟崛起路徑，再一次呼應了它文明最深的特質——<strong>「軟實力」優先於「硬實力」</strong>。回想第五章的笈多黃金時代：印度給世界的最大禮物，是「零」這樣的觀念，而非疆土或物產。兩千年後，印度經濟崛起的引擎，依然不是煙囪與生產線，而是<em>程式碼、知識與人才</em>。</p>
+      <p>這背後是一個深刻的歷史複利：<em>殖民者留下的英語、開國者押注的高等教育——這些當年的「無心插柳」或「遠見」，在半個世紀後，意外地成了印度躍上數位時代的兩級火箭。</em>但這條「跳過工廠、直奔雲端」的道路，也留下了印度最深的隱憂：它的繁榮高度集中在受過良好教育的少數精英手中，而數以億計的農村人口、低種姓群體與缺乏技能的勞動者，卻被遠遠地甩在了這場盛宴之外。印度於是成了一個極度割裂的國家——它同時擁有矽谷級的科技精英，與仍在為溫飽掙扎的億萬貧民。如何讓增長的果實「向下滲透」，跨越種姓、階級與城鄉的鴻溝，成了這個崛起中大國最艱難的功課。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">卐 ✦ ☪</div>
+  <p>經濟的崛起讓印度有了大國的身板，<br>但它的靈魂深處，那道五百年前就埋下的問題，正重新被點燃——<br><span class="hl">這個國家，究竟是「所有宗教的世俗家園」，還是「印度教徒的國度」？</span></p>
+</div>
+
+<!-- ===== 第十四章：當代印度的張力 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十四章 · The Soul at Stake</span>
+    <h2 class="act-title">世俗印度，還是印度教國度？</h2>
+    <p class="act-sub">Hindutva, Secularism, and the Battle for India's Idea</p>
+    <div class="ornament">卐 ✦ ☪</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的印度，光看它亮眼的經濟數字不夠，得看它內部一場關乎「立國根本」的激烈辯論。獨立以來，印度的官方身分一直是尼赫魯所奠定的「<strong>世俗主義</strong>」——國家不偏袒任何宗教，所有信仰一律平等。但過去數十年，一股強大的對立思潮持續壯大，主張印度的根本認同應該是<strong>印度教特性（Hindutva）</strong>——即印度在本質上是一個印度教文明的國度，印度教應當在國家認同中佔據核心地位。</p>
+
+    <h3>兩種「印度理念」的對決</h3>
+    <p>這場辯論的兩端，分別站著兩種截然不同的「印度理念」。一端是<em>多元世俗的印度</em>：認為印度的偉大正在於它海納百川、各宗教共存的多元性，任何宗教都不應凌駕於國家之上。另一端是<em>印度教民族主義的印度</em>：認為長期的世俗主義過度遷就了少數族群（尤其穆斯林），稀釋了印度教多數的文化主體性，主張重振印度教的文明自信。後者在當代印度的政治中取得了巨大的成功與廣泛的民意支持，深刻地重塑了國家的政治氛圍與文化議程。</p>
+    <div class="pull"><p>當代印度政治最核心的張力，已不再是「哪個政黨執政」，而是「印度究竟是誰的印度」——是所有人的世俗家園，還是印度教徒的文明國度？</p></div>
+
+    <h3>阿克巴與奧朗則布的當代回聲</h3>
+    <p>如果這場辯論聽起來似曾相識，那是因為它<strong>正是第七章那場古老辯論的當代版本</strong>。四百多年前，蒙兀兒的阿克巴用「跨宗教的包容」黏合帝國，而奧朗則布則用「單一宗教的正統」撕裂了它。今天的印度，正站在同一個十字路口上，重新辯論著同一個問題：一個多宗教、多族群的龐大國家，究竟該以「多元包容」還是「多數認同」作為凝聚的核心？只不過這一次，作出選擇的不再是一位皇帝，而是十多億張選票。對印度的穆斯林少數（人口已逾兩億，是全世界最大的穆斯林群體之一）與其他少數群體而言，這場辯論的走向，直接關乎他們在這個國家裡的歸屬與安全。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 從未定稿的立國契約</span>
+      <p>印度當代最深刻的困局是：它的「立國理念」，<strong>從來就不是一份已經定稿的契約，而是一場仍在白熱化進行的談判。</strong>1950 年的憲法把「世俗、平等、多元」寫進了紙上，但這些原則究竟意味著什麼、該如何在現實中落實，每一代印度人都在用選票、用街頭、用法庭重新爭論。</p>
+      <p>這正是整部印度史的核心母題在當代的最終回響：<em>一個由季風、山口與征服反覆混合而成的次大陸，一個吸收了佛陀、真主與無數諸神的文明，它最艱難也最了不起的功課，始終是「如何讓彼此無法溶解的差異和平共存」。</em>從阿育王放下屠刀，到阿克巴的寬容，到甘地的團結之夢，到安貝德卡的平等憲法——印度文明最珍貴的傳統，始終指向「包容」這一端。但歷史的另一端——分治的仇恨、宗教的動員、「捍衛我族」的誘惑——也從未真正消失。今天的印度人究竟會選擇哪一端，將決定的不只是一個國家的走向，更是一個關於「人類能否在極致的多元中和平共處」的世界級試驗的答案。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ⚖ ☸</div>
+  <p>五千年，一道牆，幾條河，無數翻牆而入的人，與一片溶解了一切卻溶不掉一切的海。<br>當我們走到故事的盡頭，終於可以回答最初那個問題——<br><span class="hl">為什麼今天的印度與印度人，是現在這個模樣？</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是，今天的印度人</h2>
+      <p class="act-sub" style="color:rgba(246,238,218,.6)">Why India, and Indians, Are What They Are</p>
+      <div class="ornament" style="color:var(--gold-bright)">☸ ⚖ ☸</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的印度之所以是這個模樣，是五個層層相扣的原因疊加而成的——每一層，都對應著本書的一段旅程。</p>
+
+      <h3>第一層：地理把它變成一個「半封閉的世界」</h3>
+      <p>一切的源頭是<strong>地理</strong>。喜馬拉雅山與三面大海把次大陸圍成一個自成一體的世界，足以孕育出延續五千年、自有一套宇宙觀與社會秩序的獨特文明；但西北的幾道山口又留著缺口，讓一波波外來者得以翻牆而入。這「半封閉」的格局，寫定了印度文明的基本節奏——它既有驚人的延續性，又被反覆征服與改寫；它既能保存自己，又必須不斷接納他者。</p>
+
+      <h3>第二層：一套古老的觀念，鎖住了人的位置</h3>
+      <p>接著是<strong>種姓</strong>。三千年前隨《吠陀》而來的瓦爾納階序，像一套寫進文明底層的程式碼，把人按出身分成高下、定下他一生的位置。它比任何帝國都持久——躲過了佛教的挑戰、穆斯林的統治、英國的殖民，至今仍以各種變形塑造著億萬印度人的命運。理解印度社會的不平等與張力，繞不開這條三千年的線。</p>
+
+      <h3>第三層：一片「吸收一切」的海，與第一個溶不掉的他者</h3>
+      <p>然後是<strong>宗教的層層疊加</strong>。印度文明像一片無邊的海，把投入其中的一切都吸收、消化：它把佛陀變成自己的神，把無數外來者溶進自己的萬神殿。但伊斯蘭是第一塊<em>溶不掉的礁石</em>——一個嚴格的一神信仰，與多神、種姓的印度教根本對立，卻又共存了近千年。印度教與伊斯蘭這道「無法互相溶解」的張力，是理解此後一切分裂與衝突的鑰匙。</p>
+
+      <h3>第四層：分裂招來征服，征服鍛造了「民族」</h3>
+      <p>最關鍵的轉折是<strong>殖民</strong>。次大陸長期分裂、從未真正統一，這個致命弱點讓一家貿易公司都能將它逐塊蠶食。但英國的統治又在無意中留下了三樣改變命運的東西：鐵路與英語把印度連成一體、催生了「我們是一個民族」的意識；而「分而治之」則把印度教—穆斯林的古老張力，加工、固化、武器化成一道你死我活的鴻溝。<em>這道被殖民者加深的裂痕，最終在獨立的午夜引爆——一條畫了幾週的線，把一個共存千年的文明切成兩半，釀成人類史上最大的血色遷徙。</em></p>
+
+      <h3>第五層：用最激進的平等，回應最古老的不平等</h3>
+      <p>最後是<strong>那場豪賭</strong>。從分治的血泊中誕生的新印度，做出了一個石破天驚的選擇：不靠刀劍、而靠選票來凝聚這個最不可能統一的國家。它讓一位「賤民」起草憲法、給每個文盲農民一張選票、把「世俗」寫進靈魂、用保留制去撬動三千年的種姓不公——它要把「分裂」重新框定為「多元」。這場賭局大致成功了，造就了全世界最大的民主國家與一個崛起的科技大國。但那道阿克巴與奧朗則布之間的古老辯論——印度究竟是「所有人的世俗家園」還是「印度教徒的文明國度」——至今仍在白熱化地進行，這份立國契約，從未真正定稿。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 被牆圍起，由海吸收</span>
+        <p>所以，今天的印度人是誰？他是<strong>一片半封閉次大陸上、五千年層層疊加的產物</strong>——印度河畔沉默的築城者、翻過山口的雅利安人、菩提樹下的覺者、放下屠刀的阿育王、發明「零」的數學家、帶來真主的蘇非聖者、建起泰姬陵的蒙兀兒人、被一家公司征服的臣民、捧起一把鹽的赤腳老人、在分治中流離的千萬難民、以及在人類最大規模選舉中投下一票的億萬選民——這一切，都層層沉積在他身上。</p>
+        <p>他的文明延續性與被反覆征服，是同一道「半封閉」地理的兩面；他的極致多元與深刻裂痕，是同一片「吸收一切卻溶不掉一切」的海的兩面；他的科技崛起與億萬貧困，是同一條「軟實力優先」道路的兩面。<em>印度最深刻的真相是：它的統一從來不是天成的，而是被一次次「強行縫合」的——從孔雀王朝到蒙兀兒，從英屬印度到民主共和國。因此這個文明最艱難、也最了不起的功課，就是把這份「被歷史反覆撕裂又反覆縫合」的多元，一天一天轉化為「主動選擇的共存」。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">高山與大海把印度圍成一個世界，山口讓征服者反覆翻牆而入，這片海溶解了一切卻溶不掉一切——而要不要真正成為「我們」，是這一代印度人仍在用選票回答的問題。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">五千年的終極啟示</span>
+      <p>一個文明的樣貌，往往由它的地理格局開局，由古老的觀念鎖定它的內部秩序，由一波波征服層層疊加它的信仰與血脈，再由一場血腥的分裂與一場大膽的豪賭定下它的當代身分——而它能否真正成為一個共同體，最終取決於生活在這裡的人們，願不願意把歷史強行縫合在一起的差異，轉化為自己主動選擇的共存。這，就是印度至今仍在書寫的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(246,238,218,.78);margin-top:2.5rem">
+        從一座印度河畔沉默的磚城，<br>
+        到菩提樹下的覺悟、放下屠刀的帝王、與一個叫「零」的符號，<br>
+        從真主來到諸神之地、泰姬陵的白色大理石，<br>
+        到一家公司買下的次大陸、一把動搖帝國的鹽，<br>
+        再到午夜的鐘聲、血色的邊界線，與億萬人投下的選票——<br>
+        這段交織著地理、觀念、信仰、征服、分裂與重生的歷史，<br>
+        最終回答了那個最初的問題：<br>
+        為什麼會有今天的印度，<br>以及今天的，印度人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">☸ ✦ ⚖</div>
+  <p>季風、種姓與諸神 · 印度五千年的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE INDUS TO THE LARGEST DEMOCRACY · c.2600 BCE – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

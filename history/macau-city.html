@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大海在此結束，陸地由此開始：澳門四百年的賭與夢</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ===== 目錄 TOC ===== */
+.toc{max-width:760px;margin:3rem auto 1rem;padding:2.6rem 2.4rem;background:var(--parchment-deep);border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:4px}
+.toc .toc-head{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.32em;color:var(--rust);text-transform:uppercase;text-align:center;margin-bottom:.4rem}
+.toc .toc-sub{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin-bottom:1.8rem}
+.toc ol{list-style:none;counter-reset:toc;margin:0;padding:0}
+.toc li{counter-increment:toc;border-bottom:1px dashed var(--line)}
+.toc li:last-child{border-bottom:none}
+.toc li.toc-extra{}
+.toc a{display:flex;align-items:baseline;gap:.9rem;padding:.7rem .4rem;text-decoration:none;color:var(--sea-deep);transition:background .2s,color .2s,padding-left .2s}
+.toc a:hover{background:rgba(176,141,52,.1);color:var(--rust);padding-left:1rem}
+.toc .toc-n{font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;color:var(--gold);min-width:2.4rem;flex-shrink:0;letter-spacing:.03em}
+.toc a:hover .toc-n{color:var(--rust)}
+.toc .toc-t{font-family:'Noto Serif TC',serif;font-size:1.02rem;line-height:1.4;font-weight:500}
+.toc .toc-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:var(--faint);margin-left:auto;text-align:right;flex-shrink:0;padding-left:1rem}
+.toc .badge{display:inline-block;font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.1em;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:.05rem .45rem;margin-left:.5rem;vertical-align:middle;opacity:.85}
+@media(max-width:640px){
+  .toc{padding:2rem 1.4rem;margin:2rem 1rem 1rem}
+  .toc .toc-en{display:none}
+  .toc a{gap:.7rem}
+}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ---- 修正:深色章節內,擁有淺色背景的卡片組件須維持深色文字,避免淺底淺字 ---- */
+/* ---- 修正:深色章節內的對比度 ----
+   實心淺底組件(method-card / twocol)→ 深色文字;
+   shift-body 無背景貼深底 → 淺色文字。 ---- */
+.dark .method-card p,
+.dark .twocol p{color:var(--ink)}
+.dark .method-card p strong,
+.dark .twocol p strong{color:var(--crimson)}
+.dark .method-card p em,
+.dark .twocol p em{color:var(--sea-deep)}
+.dark .method-card h5{color:var(--sea-deep)}
+.dark .method-card .tool{color:var(--rust)}
+.dark .method-card .eg{color:#6b5d48}
+.dark .minihead{color:var(--rust)}
+.dark .shift-body{color:#cdb494}
+.dark .shift-body strong{color:#c87a5a}
+.dark .shift-body em{color:#d8a878}
+.dark .stat{background:rgba(212,175,90,.07)}
+.dark .stat .num{color:var(--gold-bright)}
+.dark .stat .lbl{color:#b9a784}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+.twocol>div{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left;color:var(--ink)}
+.method-card p strong{color:var(--crimson)}
+.method-card p em{color:var(--sea-deep)}
+.method-card .eg{font-size:.86rem;color:#6b5d48;font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<div id="progress" style="position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));width:0;z-index:99"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="kicker">Macau · 1557–2024</div>
+    <h1>大海在此結束<br><span class="em">陸地由此開始</span></h1>
+    <div class="sub">澳門四百年——一座把命運押在「中介」上的城</div>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">葡</span>萄牙詩人賈梅士站在歐洲大陸最西端的羅卡角，寫下「陸地在此結束，大海由此開始」。而當他的同胞航過半個地球、在一座華南漁村的媽祖廟前上岸時，這句話彷彿被倒過來說了一遍——對他們而言，<em>大海在此結束，陸地由此開始</em>。那座漁村叫濠鏡澳，他們把廟名的諧音填上航海圖，從此它有了一個流傳世界的名字：<em>Macau</em>。這不是一座靠物產暴富的城，它腳下沒有錫、沒有金、沒有油。它唯一的、也是最珍貴的資源，是它的<span style="color:var(--rust);font-weight:600">位置</span>——一個夾在帝國與海洋、東方與西方、合法與灰色之間的「中介點」。四百多年來，它反覆靠著「替別人牽線」維生：替明清牽起與世界的貿易，替天主教牽起通往東亞的門，最後，替整個華人世界牽起一張覆著綠呢的賭桌。這是一座把全部身家，都押在「居間」這件事上的城。</p>
+</section>
+
+<!-- ===== 目錄 TOC ===== -->
+<nav class="toc">
+  <div class="toc-head">Table of Contents</div>
+  <div class="toc-sub">澳門四百年的賭與夢 · 全十三章</div>
+  <ol>
+    <li><a href="#ch0"><span class="toc-n">序章</span><span class="toc-t">在賭場之前，這裡只是一座漁村</span><span class="toc-en">Before the Bet</span></a></li>
+    <li><a href="#ch1"><span class="toc-n">第一章</span><span class="toc-t">借地晾貨：四百年殖民的開端</span><span class="toc-en">The Borrowed Shore</span></a></li>
+    <li><a href="#ch2"><span class="toc-n">第二章</span><span class="toc-t">大三巴：一座城作為東西方的轉運站</span><span class="toc-en">The Golden Entrepôt</span></a></li>
+    <li class="toc-extra"><a href="#ch3"><span class="toc-n">第三章</span><span class="toc-t">向海要地：一座把海變成陸的城<span class="badge">增補</span></span><span class="toc-en">The Made Land</span></a></li>
+    <li><a href="#ch4"><span class="toc-n">第四章</span><span class="toc-t">土生葡人：在兩個世界之間誕生的人</span><span class="toc-en">The People In Between</span></a></li>
+    <li><a href="#ch5"><span class="toc-n">第五章</span><span class="toc-t">當港口優勢消失：一座城的第一次長眠</span><span class="toc-en">The Eclipse</span></a></li>
+    <li><a href="#ch6"><span class="toc-n">第六章</span><span class="toc-t">設賭：一座城找到了它的第二種「中介」</span><span class="toc-en">The House Opens</span></a></li>
+    <li><a href="#ch7"><span class="toc-n">第七章</span><span class="toc-t">壟斷的時代：何鴻燊與一張賭桌的王國</span><span class="toc-en">The Monopoly</span></a></li>
+    <li><a href="#ch8"><span class="toc-n">第八章</span><span class="toc-t">2002：賭權開放與井噴式的暴富</span><span class="toc-en">The Boom</span></a></li>
+    <li><a href="#ch9"><span class="toc-n">第九章</span><span class="toc-t">一桌獨大：博彩賭城的資源詛咒</span><span class="toc-en">The Resource Curse</span></a></li>
+    <li><a href="#ch10"><span class="toc-n">第十章</span><span class="toc-t">回歸：一國兩制下的小城</span><span class="toc-en">The Handover</span></a></li>
+    <li><a href="#ch11"><span class="toc-n">第十一章</span><span class="toc-t">三座城的對照：賭與錫，兩種單一的命運</span><span class="toc-en">Three Cities</span></a></li>
+    <li><a href="#ch12"><span class="toc-n">第十二章</span><span class="toc-t">後賭城時代：澳門的下一場豪賭</span><span class="toc-en">What Comes Next</span></a></li>
+    <li><a href="#chF"><span class="toc-n">終章</span><span class="toc-t">於是，今天的澳門</span><span class="toc-en">Finale</span></a></li>
+  </ol>
+</nav>
+
+<div class="div-orn">⚓ ✦ ⚓</div>
+
+<!-- ===== 序章 ===== -->
+<section id="ch0" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the Bet</span>
+    <h2 class="act-title">在賭場之前，這裡只是一座漁村</h2>
+    <p class="act-sub">A Fishing Village, a Sea Goddess, and a Sheltered Bay</p>
+    <div class="ornament">⚓ ✦ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>在霓虹、賭桌與填海造出的金光大道之前，澳門只是珠江口外一個不起眼的小漁村。它隸屬廣東香山縣，名叫<strong>濠鏡澳</strong>(也寫作蠔鏡)——「濠鏡」形容它兩處內港的水面平靜如鏡，「澳」是可供船隻停泊的港灣。這個名字樸素得近乎卑微，卻精準地點出了它唯一的天賦:<em>一個安靜、避風、可以讓船停下來的地方。</em></p>
+    <p>早在南宋末年，逃難的軍民就曾在此一帶的媽閣山下紮寨。長年與大海搏鬥的漁民，把對平安的全部渴望寄託於海神<strong>媽祖</strong>。於是在葡萄牙人到來之前，媽閣山下早已立起一座供奉媽祖的廟宇。這座廟，後來成了整座城命運的起點——它不只庇佑了漁民，還在不經意間，給了這座城一個將傳遍全世界的名字。</p>
+    <div class="pull"><p>它沒有金、沒有銀、沒有錫。它全部的本錢，只是一處讓遠航的船願意停下來的避風港。而一座城最初的稟賦，往往就埋藏著它一生的劇本。</p></div>
+    <p>這就是澳門故事真正的底色:它從不是一座「生產」的城，而是一座「中轉」的城。它的價值不在於自己擁有什麼，而在於它恰好站在哪裡——站在海與陸、華與洋、體制與體制的縫隙之間。理解了這一點，你就理解了它後來四百年所有的繁華與墜落,為何都繞著同一個字打轉:<em>居間</em>。</p>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⛵ ✦</div>
+  <p>就在這座漁村打盹的時候，半個地球外，<br>一個小小的歐洲王國正沿著非洲海岸，一寸寸地向東摸索而來——<br><span class="hl">他們要找的，正是一個能讓船停下來、與中國做生意的地方。</span></p>
+</div>
+
+<!-- ===== 第一章 ===== -->
+<section id="ch1" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Borrowed Shore</span>
+    <h2 class="act-title">借地晾貨:四百年殖民的開端</h2>
+    <p class="act-sub">1557 — How a Drying Permit Became a 442-Year Colony</p>
+    <div class="ornament">⛵ ✦ ⛵</div>
+  </div>
+  <div class="prose">
+    <p>十五、十六世紀是地理大發現的時代，也是葡萄牙帝國的黃金年代。1498 年達伽馬繞過好望角抵達印度，1511 年葡人佔領馬六甲，同年船隊首次抵達珠江口。他們渴望在中國邊上建立一個貿易據點，卻屢屢碰壁:1517 年闖入屯門，被明朝水師擊退;轉往漳州,亦無功而返。叩開古老中華帝國的大門，遠比繞過好望角艱難。</p>
+
+    <h3>一個「晾曬貨物」的藉口</h3>
+    <p>轉機出現在 1553 年。葡萄牙人以<strong>船遇風暴、貢物被海水浸濕、需要借塊地晾曬</strong>為由，請求在濠鏡澳上岸。香山縣官員一口答應——誰也沒想到，這塊「暫借晾貨」的灘地，葡人從此賴著不走。1557 年，明朝政府正式同意葡人在澳門居住。據記載，葡人以每年約 <strong>500 兩白銀</strong>(約合 20 公斤)的代價，租下了澳門南部的居留區。一紙曖昧的默許，開啟了葡萄牙對澳門長達 <strong>442 年</strong>的管治。</p>
+
+    <div class="timeline" style="border-left-color:rgba(212,175,90,.4)">
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1511</div><div class="tl-text" style="color:#cdb494">葡萄牙佔領馬六甲，船隊首抵珠江口，叩門中國未果。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1553</div><div class="tl-text" style="color:#cdb494">葡人以「晾曬水漬貢物」為由請求上岸，獲准。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1557</div><div class="tl-text" style="color:#cdb494">明廷同意葡人居住澳門，殖民管治自此開始。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1569</div><div class="tl-text" style="color:#cdb494">葡人始建城牆(以泥砂、稻草摻蠔殼粉夯實)。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1574</div><div class="tl-text" style="color:#cdb494">香山縣在居留區北界修建關閘，駐兵看管。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1623</div><div class="tl-text" style="color:#cdb494">葡萄牙委任首任澳門總督馬士加路也就任。</div></div>
+    </div>
+
+    <h3>媽閣廟前的命名</h3>
+    <p>葡萄牙人登陸的地點，恰恰就在媽祖廟前。初到貴境、人地生疏的他們向當地人打探地名，當地人以為他們問的是眼前那座廟，便答「<strong>媽閣</strong>」。葡人如獲至寶，依其粵語諧音，在航海圖上澳門的位置鄭重填下 <em>Macau</em> 幾個字母。從此，這個混合著中西語言因子的名字，如水銀瀉地般散佈到全世界的航海圖上。一座海神的廟，就這樣替整座城命了名。</p>
+    <p>明廷也並非全然放任。1574 年，香山縣在葡人居留區的北方邊界修建了<strong>關閘</strong>，派兵駐守——這道關閘清楚地宣告:葡人只是「租住」於此，越過這道線，便是不容侵犯的中國。於是澳門從一開始就是一個極其微妙的存在:<em>名義上的中國領土，事實上的葡人居留地</em>。這種「一地兩屬」的曖昧,將貫穿它此後四百年的全部歷史。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最大的機會，常來自體制的縫隙</span>
+      <p>澳門的開端藏著一個耐人尋味的洞見:<strong>葡萄牙人之所以能在此立足，不是因為他們征服了中國，而是因為他們找到了一條中國體制的「縫隙」——一個明廷既不願正式開放、又不願徹底封閉的灰色地帶。</strong>他們用一個「晾曬貨物」的小藉口擠了進去，再用四百年把這條縫隙，活成了一座城。</p>
+      <p>這對應一個樸素卻強大的規律:<em>真正巨大的機會，往往不在體制的正中央(那裡早已被佔滿、被規範)，而在它的邊緣與縫隙——那些「還沒被定義清楚」的模糊地帶。</em>澳門一生的本事，就是把自己活成那道縫隙:它既不完全屬於中國，也不完全屬於葡萄牙;既不全然合法，也不全然非法。後來讓它暴富的博彩業，本質上也是同一道縫隙——它是整個華人世界裡，唯一一塊「合法的灰色地帶」。一座城最初賴以生存的縫隙，竟成了它一生反覆回去汲取的命脈。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ✚ ✦</div>
+  <p>租下這塊灘地之後，葡人沒有把它變成軍事要塞，<br>而是把它變成了一個轉運站——<br><span class="hl">在這裡，白銀、絲綢、香料與十字架，開始向四面八方流動。</span></p>
+</div>
+
+<!-- ===== 第二章 ===== -->
+<section id="ch2" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Golden Entrepôt</span>
+    <h2 class="act-title">大三巴:一座城作為東西方的轉運站</h2>
+    <p class="act-sub">When Macau Was the Hinge Between East and West</p>
+    <div class="ornament">✚ ✦ ✚</div>
+  </div>
+  <div class="prose">
+    <p>租下澳門之後的近一個世紀，是這座城的第一個黃金年代。在明清海禁、中國對外通道極度有限的年代，澳門幾乎是唯一一扇半開的窗。它一躍成為當時全球貿易網絡中一個關鍵的<strong>轉運港(entrepôt)</strong>:一條條航線在此交會——澳門至日本長崎、澳門至印度果亞再轉里斯本、澳門至馬尼拉再轉墨西哥。</p>
+    <p>流經這座小城的貨物清單，閃耀得驚人:中國的生絲與瓷器、日本與美洲的白銀、東南亞的香料。澳門靠著「居間轉手」這一件事，賺取了富可敵國的利潤。它不生產這些東西中的任何一樣，它只是恰好站在所有航線必經的那個樞紐上——再一次，它靠的是<em>位置</em>，而非<em>物產</em>。</p>
+
+    <h3>不只是貨物的轉運，更是文明的轉運</h3>
+    <p>但澳門轉運的遠不只是貨物。它同時是天主教進入東亞的跳板，是「西學東漸」與「東學西漸」的雙向閘門。1594 年，耶穌會在此創辦<strong>聖保祿學院</strong>——遠東地區第一所西式大學，培養出大批通曉中西的傳教士，從這裡派往中國、日本、越南、暹羅。利瑪竇正是經澳門進入中國內地的。一座彈丸小城，竟成了兩大文明體系交換思想的接口。</p>
+
+    <h3>大三巴:一塊石頭裡的中西交匯</h3>
+    <p>這段歷史最凝練的象徵，是今天澳門最著名的地標——<strong>大三巴牌坊</strong>。它其實是聖保祿學院附屬教堂(天主之母教堂)的前壁遺址。「三巴」是葡文聖保祿 <em>São Paulo</em> 的音譯，「大三巴」即「最大的聖保祿」。這座教堂於 1602 年動工、幾經火劫，1835 年的一場大火將整座學院與教堂燒毀，只剩下這面巍峨的石砌前壁——因形似中國牌坊，被澳門人喚作「大三巴牌坊」。</p>
+    <div class="pull"><p>它的石刻上，天主教的聖母與聖徒，和中文字、牡丹、菊花乃至日本風格的紋飾並肩而立。一面牆，把兩個原本相隔萬里的世界，砌進了同一塊石頭裡。</p></div>
+    <p>這面牆是整座城的隱喻:它既不是純粹的歐洲，也不是純粹的中國，而是兩者在四百年摩擦中熔鑄出的、獨一無二的<strong>第三種東西</strong>。今天它與旁邊的中式哪吒廟、舊城牆遺址近到幾乎連成一體——天主堂、中國神祇與葡式城牆並存,正是澳門最日常、也最深刻的風景。2005 年，以大三巴為核心的「澳門歷史城區」(22 座建築、8 個廣場)被列入世界遺產，表決僅用了約十分鐘——這是歷次審議同類項目中最短的紀錄之一。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">1594</div><div class="lbl">聖保祿學院創辦,遠東第一所西式大學</div></div>
+      <div class="stat"><div class="num">1835</div><div class="lbl">大火後僅存前壁,即今大三巴牌坊</div></div>
+      <div class="stat"><div class="num">2005</div><div class="lbl">澳門歷史城區列入世界遺產</div></div>
+      <div class="stat"><div class="num">30</div><div class="lbl">世遺城區建築與廣場合計(22+8)</div></div>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 站在通道上的人，賺的是流量財</span>
+      <p>澳門第一個黃金年代的祕密，是一種極特殊的財富模式:<strong>它從不擁有貨物，只擁有「貨物必經的通道」。</strong>白銀、絲綢、香料、甚至思想與信仰，本身都不屬於澳門;澳門只是它們流動時，恰好都得經過的那個收費站。這是一種純粹的「流量財」——你不必生產任何東西，只要確保自己站在所有人都得經過的位置上。</p>
+      <p>這種模式的迷人與危險，是一體兩面的。<em>迷人在於:它的利潤可以遠遠超過你自身的「生產能力」,因為你賺的是整個網絡的過路費。</em>但危險也正在於此:<em>你的全部價值，都依附於「這條通道仍然唯一、仍然必經」這個前提。一旦出現了別的通道，或那條通道不再被需要，你瞬間就一無所有。</em>澳門靠通道暴富,也終將因通道被取代而墜入長眠——而這,正是下一章的故事。任何靠「居間、平台、樞紐」獲利的人事物,都該記得:流量財的根，從來不長在自己身上。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⛏ ✦</div>
+  <p>商港的繁華需要土地來承載，但澳門三面環海、背靠關閘，<br>它沒有腹地可以向外攤開——<br><span class="hl">於是它做了一件吉隆坡從不需要做的事:向大海，要地。</span></p>
+</div>
+
+<!-- ===== 城市版圖演變 ===== -->
+<section id="ch3" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Made Land</span>
+    <h2 class="act-title">向海要地:一座把海變成陸的城</h2>
+    <p class="act-sub">From 11.6 to 33 Square Kilometres — A City Built on Reclaimed Sea</p>
+    <div class="ornament">⛏ ✦ ⛏</div>
+  </div>
+  <div class="prose">
+    <p>每一座城的版圖,都在悄悄訴說它的處境。吉隆坡的版圖故事是「行政邊界封頂後,城向四周的河谷外溢」;而澳門的版圖故事,恰恰是它的鏡像——它三面環海,北邊僅以一條不到一公里的沙堤(陸界寬僅約 240 米)與珠海拱北相連,根本沒有腹地可供外溢。當土地不夠用時,澳門只剩下一個選擇:<strong>向大海要地</strong>。它的擴張史,是一部把海水填成陸地的「無中生有」史。</p>
+
+    <h3>一條翻倍的面積線</h3>
+    <p>把澳門有記錄以來的陸地面積排成一列,你會看見一條幾乎全靠人力填出來的成長曲線——這座城今天腳下的土地,超過一半在一百年前還是海:</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">19世紀</div><div class="tl-text">半島約 3.1、氹仔約 1.7、路環約 5.5 平方公里,合計僅約 <strong>10 平方公里</strong>,且彼此分離。</div></div>
+      <div class="tl-item"><div class="tl-year">1850</div><div class="tl-text">澳門半島最早的填海工程,在三巴仔橫街與下環街之間動工——向海要地的序幕。</div></div>
+      <div class="tl-item"><div class="tl-year">1912</div><div class="tl-text">有正式記錄的面積:<strong>11.6 平方公里</strong>(半島3.4+氹仔2.3+路環5.9)。</div></div>
+      <div class="tl-item"><div class="tl-year">1866–2005</div><div class="tl-text">歷經 <strong>5 次</strong>大規模填海,填出外港碼頭、黑沙環、新口岸;削山填海更造出澳門國際機場。</div></div>
+      <div class="tl-item"><div class="tl-year">1999</div><div class="tl-text">回歸時陸地約 <strong>23.8 平方公里</strong>,已是 1912 年的兩倍有餘。</div></div>
+      <div class="tl-item"><div class="tl-year">今日</div><div class="tl-text">陸地約 <strong>33 平方公里</strong>,百年增長約 <strong>200%</strong>——逾半土地由填海得來。</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="num">11.6</div><div class="lbl">1912 年陸地面積(平方公里)</div></div>
+      <div class="stat"><div class="num">~33</div><div class="lbl">今日陸地面積(平方公里)</div></div>
+      <div class="stat"><div class="num">+200%</div><div class="lbl">百年版圖增長,幾乎全靠填海</div></div>
+      <div class="stat"><div class="num">240m</div><div class="lbl">與大陸相連的天然陸界寬度</div></div>
+    </div>
+
+    <h3>路氹城:從零填出來的金光大道</h3>
+    <p>這部填海史最戲劇性的一筆,發生在回歸之後。澳門原本由「一個半島 + 兩個離島(氹仔、路環)」組成,三塊陸地彼此分離。特區成立後,當局把氹仔與路環之間的海域整片填平,生生造出約 <strong>5.6 平方公里</strong>的新土地,把兩個離島連成一體——這片完全由海水變來的新天地,就叫「<strong>路氹城</strong>」。</p>
+    <div class="pull"><p>今天威尼斯人、新濠天地、金沙城那一整條璀璨的「金光大道」(Cotai Strip),腳下沒有一寸是天然的土地。它整個,是從海裡填出來的。</p></div>
+    <p>這就是澳門版圖演變最深的隱喻:<em>它不只賭業是「無中生有」(靠合法性的縫隙憑空變出財富),連它的土地,都是「無中生有」(靠填海憑空變出陸地)。</em>當 2002 年賭權開放、國際資本湧入卻發現無地可用時,澳門的答案一如既往——沒有,就造一個出來。賭場需要土地,土地不夠,就填海;填出來的地,再蓋更多賭場。版圖的擴張與賭業的暴富,像兩條互相纏繞、彼此餵養的藤蔓,一起瘋長。</p>
+
+    <h3>但這一次,擴張不再由自己說了算</h3>
+    <p>不過,澳門的填海有一個吉隆坡完全沒有的緊箍咒。1999 年主權移交後,澳門<strong>沒有「固有水域」</strong>——它周邊的海,法理上不歸它管。因此回歸後任何新的填海工程,都需要取得<strong>中央人民政府的批准</strong>。土地,這個澳門賴以擴張的命根子,它的「水龍頭」並不握在自己手裡。</p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">擴張的本事</div>
+        <p style="text-align:left;font-size:.96rem">三面環海反成資源:淺灘廣布,填海技術成熟,讓這座沒有腹地的城,硬是把面積翻了三倍,撐起了世界級的賭城規模。</p>
+      </div>
+      <div>
+        <div class="minihead">擴張的約束</div>
+        <p style="text-align:left;font-size:.96rem">回歸後無固有水域,填海須報中央批准;腹地不足的根本困境,最終還是要靠對岸珠海的橫琴(粵澳深度合作區)來解。</p>
+      </div>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 連土地都能無中生有,但水龍頭未必在你手上</span>
+      <p>澳門的填海史,給出一個雙層的洞見。第一層是關於「創造資源」的樂觀:<strong>當一個主體被先天條件死死框住時(澳門沒有腹地),真正的破局往往不是接受極限,而是重新定義「資源」本身——把原本的障礙(三面環海),轉化成擴張的素材(向海要地)。</strong>澳門證明了,連最看似不可動搖的物理極限(陸地面積),都可以靠決心與技術去改寫。</p>
+      <p>但第二層,是更冷靜的提醒:<em>你能不能持續擴張,最終往往不取決於你「會不會擴張」,而取決於那個擴張所依賴的「水龍頭」掌握在誰手裡。</em>澳門有填海的本事,卻沒有填海的最終決定權——它的土地閥門,握在北方。這與它整個故事的母題完美呼應:無論是賭業的合法性、自由行的客源,還是填海的批准,澳門所有的繁榮,都依賴一份來自更大力量的「許可」。它是一座極擅長在約束中創造、卻始終無法擁有最終開關的城。一座城如此,一個依附於更大平台、更大體系的個體或企業,又何嘗不是。能力決定你能走多遠,但「開關在誰手裡」,決定你能不能一直走下去。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚭ ✦</div>
+  <p>當兩個世界在一座小城裡共處了幾代人之後，<br>一件奇妙的事發生了——<br><span class="hl">這裡開始長出一種「既不屬於中國、也不屬於葡萄牙」的人。</span></p>
+</div>
+
+<!-- ===== 第三章 ===== -->
+<section id="ch4" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The People In Between</span>
+    <h2 class="act-title">土生葡人:在兩個世界之間誕生的人</h2>
+    <p class="act-sub">The Macanese — A People Born of the Hyphen</p>
+    <div class="ornament">⚭ ✦ ⚭</div>
+  </div>
+  <div class="prose">
+    <p>一座轉運了四百年的城，轉運的最終產物，是「人」本身。在葡萄牙人與華人(以及途經此地的馬來、印度、日本血統)長期共處、通婚之後，澳門孕育出一個獨一無二的族群——<strong>土生葡人(Macanese，葡文 Filhos da Terra,意為「土地之子」)</strong>。他們是這座中介之城,在血脈層面上的結晶。</p>
+
+    <h3>連他們的「家常菜」都是一種轉運</h3>
+    <p>土生葡人最迷人之處，在於他們把「居間」活成了一種完整的文化。他們大多信奉天主教、取葡文姓名、效忠葡萄牙，卻又說著夾雜粵語與馬來語詞彙的<strong>土生葡語(Patuá)</strong>，吃著一種沒有任何單一國家能宣稱擁有的料理:</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">語言</div><div class="shift-body"><strong>土生葡語 Patuá</strong>:以葡語為骨幹,混入粵語、馬來語、僧伽羅語詞彙的克里奧爾語。今天已近乎失傳,被聯合國列為瀕危語言——一個族群的「居間性」,連語言都無法被任一方完整繼承。</div></div>
+      <div class="shift-row"><div class="shift-era">飲食</div><div class="shift-body"><strong>土生葡菜(Macanese cuisine)</strong>:被視為世界上最早的「融合菜」之一。葡式做法,卻用上來自非洲、印度、東南亞與中國的香料食材——非洲雞、葡國雞、免治……每一道都是一條航線的縮影。</div></div>
+      <div class="shift-row"><div class="shift-era">認同</div><div class="shift-body"><strong>雙重的歸屬,也是雙重的疏離</strong>:對葡萄牙人,他們太「中國」;對中國人,他們太「葡萄牙」。他們是橋,卻也因此永遠站在橋上,不完全屬於任何一岸。</div></div>
+    </div>
+
+    <h3>橋的宿命</h3>
+    <p>土生葡人活成了澳門精神最純粹的化身:<em>他們的價值,正在於「不純粹」。</em>他們之所以重要,是因為他們能同時聽懂兩邊的話、走進兩邊的門——在殖民政府與華人社群之間,他們長期扮演著翻譯、買辦、文官、仲介的角色。一座靠居間維生的城,自然會把「居間」這件事,寫進它子民的血液裡。</p>
+    <p>但橋也有橋的宿命。當兩岸的關係改變——例如主權回歸、葡人退場——橋的角色就變得尷尬。今天,純正的土生葡人社群已大幅縮減,Patuá 瀕臨消亡。這個族群的興衰,本身就是澳門「中介價值」起落的人格化縮影:當這座城最需要「居間者」時,他們是不可或缺的樞紐;當時代不再需要那種居間時,他們連同那種語言、那種身分,一起靜靜地退入了歷史。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 橋的價值,繫於兩岸是否分離</span>
+      <p>土生葡人給出一個關於「中介者」的深刻洞見:<strong>一個居間者(無論是一個人、一種職業,還是一座城)的全部價值,都建立在「它所連接的兩端彼此分離、且需要被連接」這個前提之上。</strong>正因為中國與葡萄牙的世界如此遙遠、如此不同,能同時通曉兩邊的土生葡人才如此珍貴。</p>
+      <p>但這也埋下了中介者共同的脆弱:<em>當兩端因為任何原因不再需要中介——也許是它們直接連通了,也許是其中一端退場了,也許是出現了更高效的連接方式——那個曾經不可或缺的「橋」,就會在一夕之間失去存在的理由。</em>這不是橋做錯了什麼,而是橋的價值從來就不掌握在自己手裡,而掌握在「兩岸的距離」手裡。從買辦到翻譯,從仲介到平台,所有靠連接兩端獲利的角色,都共享著土生葡人的這份榮光與哀愁:你越是完美地連接了兩端,就越是在為「有一天不再被需要」鋪路。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⌛ ✦</div>
+  <p>就在土生葡人的文化開到最盛時，<br>一件足以摧毀整座城的事正在不遠處發生——<br><span class="hl">珠江口的另一側，出現了一個更深、更好、由英國人經營的港口。</span></p>
+</div>
+
+<!-- ===== 第四章 ===== -->
+<section id="ch5" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Eclipse</span>
+    <h2 class="act-title">當港口優勢消失:一座城的第一次長眠</h2>
+    <p class="act-sub">How Hong Kong's Rise Put Macau to Sleep</p>
+    <div class="ornament">⌛ ✦ ⌛</div>
+  </div>
+  <div class="prose">
+    <p>靠「通道」吃飯的城,最怕的事只有一件:出現另一條更好的通道。十九世紀中葉,這件最怕的事發生了。</p>
+    <p>1842 年鴉片戰爭後,英國取得香港。香港擁有澳門無法比擬的條件:<strong>水深港闊的維多利亞港</strong>,可停泊吃水更深的現代蒸汽輪船;背後是如日中天的大英帝國與其全球貿易與金融網絡。相較之下,澳門的內港日漸淤淺,容不下大船;它背後的葡萄牙帝國,則早已從巔峰跌落,日薄西山。</p>
+
+    <h3>樞紐,一寸寸地移走了</h3>
+    <p>結果是殘酷而緩慢的:作為遠東貿易樞紐的地位,從澳門一寸寸地轉移到了香港。商船改停香港,洋行把總部設在香港,資金與人才向香港聚集。澳門那個賴以暴富的「轉運港」角色,被它珠江口對岸這個更年輕、更強壯的對手,徹底地接收了過去。</p>
+    <div class="pull"><p>它沒有被戰火摧毀,也沒有被天災夷平。它只是「不再被需要」了。對一座靠居間維生的城來說,這是比任何災難都更致命的結局。</p></div>
+    <p>於是,澳門迎來了它的第一次長眠。當香港的天際線一年年長高、成為亞洲金融中心時,澳門卻彷彿被時間遺忘,退化成一個寧靜、緩慢、帶著南歐情調的小城。那些大三巴、媽閣廟、議事亭前地,從「世界貿易的舞台」,慢慢凝固成了「懷舊的風景」。一座曾經站在全球航線正中央的城,被擠到了時代的邊角。</p>
+
+    <h3>但它手裡,還剩一張別人沒有的牌</h3>
+    <p>然而,澳門並沒有像怡保那樣徹底沉睡。因為它手裡,還攥著一張極其特殊、別人(尤其是它的對手香港)礙於體制而不便打的牌。早在 <strong>1847 年</strong>,還在葡萄牙管治下的澳門,就已將<strong>博彩業合法化</strong>——一來便於管理,二來可抽稅增加收入。當時的澳門,已小有「<em>東方蒙地卡羅</em>」之名。</p>
+    <p>這張牌的邏輯,和它四百年來賴以為生的邏輯一模一樣:<strong>當你無法在「正當生意」上勝過對手時,就去佔據那個對手不願、或不能進入的「灰色縫隙」。</strong>香港要做正派的國際金融與貿易中心,有些生意它做不得;而澳門,正好可以接住那些「不那麼正派、卻需求龐大」的生意。港口的通道沒了,但「灰色的通道」還在。澳門即將靠著同一套居間本能,找到它的第二春。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 被取代的,從來不是你,而是你的「位置」</span>
+      <p>澳門的第一次長眠,給出一個冷峻的洞見:<strong>對一個靠「位置/通道」獲利的主體而言,它最大的風險從來不是被對手正面擊敗,而是被一條「繞過它的新路徑」悄悄架空。</strong>香港從未攻打澳門,它只是提供了一個更好的選擇,於是世界自然而然地改道而行。澳門就這樣,在沒有一場敗仗的情況下,輸掉了整個時代。</p>
+      <p>這對任何依賴「樞紐地位」的人事物都是警鐘:<em>渠道、平台、中間商、樞紐城市——這類角色的繁榮,本質上是脆弱的,因為它們的價值不來自自身的不可替代性,而來自「目前還沒有更好的替代路徑」這個暫時的事實。</em>而技術、制度與地緣,總在不斷地創造新路徑。澳門的應對之道,藏著一線生機也藏著一個警示:當你舊的「位置」被架空,出路往往不是去跟對手搶同一個位置,而是去尋找下一道「對手進不來的縫隙」。只是,這條路會把你帶向哪裡,當時的澳門還無法預料。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ♠ ✦</div>
+  <p>於是這座沉睡的小城,把賭注押在了一張綠呢桌上。<br>它即將發現,「賭」這件事,<br><span class="hl">將比它歷史上任何一種生意,都更暴利、也更危險。</span></p>
+</div>
+
+<!-- ===== 第五章 ===== -->
+<section id="ch6" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The House Opens</span>
+    <h2 class="act-title">設賭:一座城找到了它的第二種「中介」</h2>
+    <p class="act-sub">1961 — The City Bets on the Bet</p>
+    <div class="ornament">♠ ✦ ♣</div>
+  </div>
+  <div class="prose">
+    <p>如果說十九世紀的澳門是「東方蒙地卡羅」的雛形,那麼讓它真正把命運押上賭桌的,是 <strong>1961 年</strong>。這一年,葡萄牙海外部正式確定澳門為旅遊區,特准設賭,認為此舉能促進澳門經濟。同年,澳葡政府頒佈《承投賭博娛樂章程》,將澳門博彩業全面合法化、專營化。</p>
+
+    <h3>「賭」,其實是另一種居間</h3>
+    <p>表面上,從「轉運港」到「賭城」是一次徹底的轉行;但若看穿本質,你會發現澳門根本沒變——<em>它只是把「中介」的標的,從貨物換成了慾望。</em>過去它居間於東西方的貿易,如今它居間於一個龐大的需求與它的供給:在整個華人世界,有著根深柢固的博彩需求,而幾乎所有華人社會(中國大陸、香港、台灣、新加坡早期)都對賭博嚴格設限。</p>
+    <div class="pull"><p>於是澳門再一次站到了那道熟悉的縫隙裡:它成了整個華人世界唯一一塊「合法的賭桌」。它賣的不是運氣,而是「合法性」這個它獨家擁有的位置。</p></div>
+    <p>這正是澳門商業模式的驚人一致性。四百年前,它靠的是「唯一半開的貿易之窗」;四百年後,它靠的是「唯一合法的博彩之窗」。標的物從絲綢白銀換成了籌碼,但底層邏輯分毫未變:<strong>佔住一個別人因體制原因進不來的縫隙,然後對所有不得不經過這道縫隙的人,收取過路費。</strong>賭場的莊家優勢(house edge),不過是「過路費」最赤裸、最高效的一種形式。</p>
+
+    <h3>一張牌照,定義一座城</h3>
+    <p>1961 年的設賭,還確立了一個將深刻形塑澳門半世紀的制度:<strong>專營權</strong>。博彩不是誰想開就能開,而是由政府以特許牌照的方式,授予極少數經營者。這意味著,誰拿到那張牌照,誰就幾乎握有整座城的經濟命脈。這座城的命運,即將被一個人和他的牌照,牢牢攥在手裡近四十年。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 換湯不換藥的,才是真正的核心能力</span>
+      <p>澳門從貿易港到賭城的轉身,揭示一個關於「核心能力」的深刻洞見:<strong>一個主體真正的核心能力,往往不是它「在做什麼生意」,而是它「靠什麼邏輯賺錢」——前者會隨時代不斷更換,後者卻可能數百年不變。</strong>澳門換過無數次「生意」:絲綢、白銀、宗教、苦力、賭博;但它「佔據體制縫隙、收取過路費」的底層邏輯,四百年如一日。</p>
+      <p>這帶來一個雙面的啟示。<em>正面看:認清自己「換湯不換藥」的那個核心邏輯,你就能在一個行業衰落時,把同一套能力遷移到下一個縫隙,完成驚險的轉生——澳門正是如此,靠同一套居間本能,從貿易的廢墟裡,長出了博彩的繁榮。</em>但反面看也同樣鋒利:<em>如果你的核心邏輯本身就是「依賴單一縫隙」,那麼無論你換多少次生意,你都只是在不斷地重複同一種脆弱。</em>澳門換了標的,卻沒換掉它「把全部身家押在單一依賴上」的宿命——這個宿命,將在它最輝煌的時刻,以最戲劇性的方式回來索債。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ♛ ✦</div>
+  <p>1962 年,一個來自香港的年輕人投得了澳門的賭牌。<br>在接下來的四十年裡,他幾乎就是澳門經濟本身——<br><span class="hl">他叫何鴻燊。</span></p>
+</div>
+
+<!-- ===== 第六章 ===== -->
+<section id="ch7" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Monopoly</span>
+    <h2 class="act-title">壟斷的時代:何鴻燊與一張賭桌的王國</h2>
+    <p class="act-sub">Four Decades Under One Man's Licence</p>
+    <div class="ornament">♛ ✦ ♛</div>
+  </div>
+  <div class="prose">
+    <p>1962 年,以何鴻燊為核心的「澳門旅遊娛樂有限公司」(澳娛,STDM)投得澳門博彩專營權。自此直到 2002 年賭權開放,長達四十年間,何鴻燊的賭業王國幾乎<strong>壟斷</strong>了澳門全部的合法博彩。在很長一段時間裡,「澳門經濟」與「何鴻燊的生意」幾乎是同義詞。</p>
+
+    <h3>賭桌之外,他還鋪了路、修了橋、開了船</h3>
+    <p>專營權的力量,遠超出賭場本身。澳娛的事業延伸到航運、地產、酒店、基建。1974 年,連接澳門半島與氹仔的<strong>澳氹大橋</strong>落成——這是澳門史上第一條陸路跨海通道,而它的興建與澳娛的賭業利益密不可分。賭場需要遊客,遊客需要交通與酒店,於是一張賭牌,牽動了整座城的基礎建設。何鴻燊不只是個賭業大亨,他在很大程度上,塑造了現代澳門的物理形貌。</p>
+    <div class="pull"><p>當一座城的命脈繫於一張牌照,而那張牌照又繫於一個人,那麼這座城的繁榮,就既是它的幸運,也是它的軟肋。</p></div>
+
+    <h3>壟斷的雙面性</h3>
+    <p>四十年的壟斷,給澳門帶來了穩定的稅收與緩慢但持續的發展,讓這座一度沉睡的小城重新有了生計。但壟斷的代價同樣明顯:缺乏競爭,意味著缺乏進化的壓力。在那四十年裡,澳門的賭場大多停留在相對傳統、樸素的形態,與一河之隔、不斷自我革新的拉斯維加斯相比,顯得陳舊。整座城的經濟活力,被鎖死在單一專營者的步調裡。</p>
+    <p>更深的問題是:壟斷把澳門對博彩的「單一依賴」進一步固化了。當一個產業由單一巨頭壟斷、又貢獻了城市大半的財政時,任何「發展其他產業」的動力都會被嚴重削弱——既然賭桌穩穩地流著金,何必費力去開墾貧瘠的新田?這正是「資源詛咒」最隱蔽的機制:<em>豐厚而穩定的單一收入,會溫柔地殺死一切多元化的意願。</em>而這個被壟斷壓抑了四十年的市場,一旦鬆綁,將會釋放出何等驚人的能量,連何鴻燊本人恐怕都未必料到。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 穩定的壟斷,是進化最溫柔的敵人</span>
+      <p>何鴻燊的四十年,揭示一個反直覺的洞見:<strong>對一個系統而言,最危險的處境之一,不是激烈的競爭,而是「穩定而豐厚的壟斷」。</strong>競爭會逼迫你不斷進化、不斷尋找第二曲線;而壟斷帶來的穩定金流,卻會悄悄抽走你所有改變的動力。你會誤以為現狀可以永遠持續,於是停止為「萬一現狀結束」做任何準備。</p>
+      <p>這對個人與組織同樣適用:<em>一份穩定豐厚的收入、一個難以撼動的市場地位、一項暫時無人能及的優勢——這些「好事」最大的隱性代價,是它們會麻痺你對風險的警覺,讓你把「暫時的壟斷」誤當成「永恆的安全」。</em>真正清醒的主體,會在壟斷利潤最豐厚時,反而最警惕地去培育第二、第三條腿——因為它知道,所有的壟斷終將被打破,而被打破的那一刻,你手裡有沒有別的東西,決定了你是迎來新生,還是墜入深淵。澳門的壟斷在 2002 年被打破了,迎來的是一場它從未見過的暴富——以及暴富背後,那個更深的陷阱。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ♦ ✦</div>
+  <p>2002 年,壟斷的大門被推開了。<br>當全世界的賭業巨頭蜂擁而入,這座小城迎來的,<br><span class="hl">是人類經濟史上最猛烈的暴富之一。</span></p>
+</div>
+
+<!-- ===== 第七章 ===== -->
+<section id="ch8" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Boom</span>
+    <h2 class="act-title">2002:賭權開放與井噴式的暴富</h2>
+    <p class="act-sub">When the Monopoly Broke and the Money Flooded In</p>
+    <div class="ornament">♦ ✦ ♦</div>
+  </div>
+  <div class="prose">
+    <p>1999 年回歸後的澳門,正深陷困境。受亞洲金融風暴衝擊,它已連續三年經濟負增長,1998 年增長率低至約 -4.6%。新成立的特區政府急需新出路。2001 年,首任行政長官何厚鏵提出「以博彩業為龍頭」的經濟戰略;2002 年,做出了那個改寫澳門命運的決定:<strong>開放賭權,終結何鴻燊四十年的壟斷</strong>。</p>
+
+    <h3>「三主三副」與外資的湧入</h3>
+    <p>賭牌經招標,由澳門博彩(澳博)、永利澳門、銀河娛樂投得。其後經「轉批給」的安排,演變成<strong>「三主三副」共六張賭牌</strong>的格局,讓拉斯維加斯金沙、威尼斯人、美高梅、新濠博亞等國際賭業巨頭悉數進場。當此例一開,世界各地的資本對澳門的興趣被瞬間點燃。</p>
+    <p>更關鍵的是 <strong>2003 年</strong>——中國大陸開放「港澳個人遊」(自由行)。澳門作為中華人民共和國管轄範圍內<em>唯一</em>合法經營賭場的地區,瞬間對接上了十幾億人口的龐大市場。供給端(國際資本與頂級賭場)與需求端(自由行遊客)同時被打開,兩股力量疊加,引爆了一場井噴。</p>
+
+    <div class="timeline" style="border-left-color:rgba(212,175,90,.4)">
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1999</div><div class="tl-text" style="color:#cdb494">回歸;受金融風暴拖累,連續三年經濟負增長。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">2002</div><div class="tl-text" style="color:#cdb494">開放賭權,終結四十年壟斷,引進國際賭業巨頭。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">2003</div><div class="tl-text" style="color:#cdb494">大陸開放自由行,對接十幾億人的龐大需求。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">2004</div><div class="tl-text" style="color:#cdb494">金沙娛樂場開幕,首年即收回成本,神話般獲利。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">2006</div><div class="tl-text" style="color:#cdb494">澳門博彩毛收入超越拉斯維加斯,成全球第一賭城。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">2013</div><div class="tl-text" style="color:#cdb494">博彩收入登頂,約等於全澳 GDP 的 87.6%。</div></div>
+    </div>
+
+    <h3>填海造出的金光大道</h3>
+    <p>暴富的規模大到連土地都不夠用。澳門靠<strong>填海</strong>,把氹仔與路環之間的海域填成陸地——這片新生的土地叫「<strong>路氹城</strong>」,成了威尼斯人、新濠天地等巨型綜合度假村林立的「金光大道」(Cotai Strip)。短短數年,一座以傳統賭場為主的舊城,搖身變成媲美拉斯維加斯的超級娛樂之都。2006 年,澳門的博彩毛收入<strong>超越拉斯維加斯,登上全球第一賭城的寶座</strong>。</p>
+    <div class="pull"><p>一個人口僅數十萬、面積僅三十多平方公里的彈丸之地,賭收竟超越整個拉斯維加斯。這不是繁榮,這是井噴——而井噴的水,總有噴完的一天。</p></div>
+    <p>到了 2018–2019 年,澳門的人均 GDP 一度衝上<strong>全球第二</strong>(與瑞士並列,約 8.4 萬美元)。一座四百年前靠晾曬貨物起家的小漁村,登上了世界最富裕地區的榜首。這是澳門的第二個、也是最炫目的黃金年代。但越是炫目,陰影就越深——因為這一次,它把比歷史上任何時候都更高比例的身家,押在了同一張賭桌上。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 暴富的速度,常與脆弱的程度成正比</span>
+      <p>2002 後的澳門奇蹟,藏著一個常被狂歡掩蓋的洞見:<strong>暴富來得越快、越猛、越集中於單一來源,它背後的脆弱性通常也越高。</strong>澳門的井噴,是「壟斷鬆綁 + 國際資本 + 十幾億人的需求 + 唯一合法地位」這幾個極端有利條件,在極短時間內同時引爆的結果。但每一個讓它暴富的條件,反過來都是一個它無法掌控的依賴:它依賴政策不變、依賴對岸不開賭、依賴需求不轉向。</p>
+      <p>這對應一條樸素的風險定律:<em>當你的成功高度依賴一組「恰好同時成立」的外部條件時,你享受的繁榮有多大,你承擔的隱性風險就有多大——因為那些條件只要有一個改變,整座大廈就會搖晃。</em>人均 GDP 全球第二的光環下,澳門其實站在一個極窄的支點上。它不是不知道危險,而是當金流如此洶湧時,「居安思危」這四個字,顯得格外蒼白無力。下一章,我們就來解剖這個藏在繁華正中央的陷阱。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚠ ✦</div>
+  <p>當一座城八成的收入都來自同一張賭桌,<br>它的繁華就懸在一條看不見的線上——<br><span class="hl">而 2020 年,這條線突然斷了。</span></p>
+</div>
+
+<!-- ===== 第八章 ===== -->
+<section id="ch9" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Resource Curse</span>
+    <h2 class="act-title">一桌獨大:博彩賭城的資源詛咒</h2>
+    <p class="act-sub">When 87.6% of Your Economy Sits on One Table</p>
+    <div class="ornament">⚠ ✦ ⚠</div>
+  </div>
+  <div class="prose">
+    <p>把澳門的繁華翻到背面,你會看見一個極端到教科書級的「<strong>單一依賴</strong>」。在 2013 年的高峰,澳門的博彩收入約等於全澳 GDP 的 <strong>87.6%</strong>;博彩業每年貢獻整體經濟約一半,近三成的就業人口投入博彩相關產業。這是一種比絕大多數「資源型經濟體」都更極端的結構——委內瑞拉的石油約佔出口九成,而澳門的「石油」,是一張綠呢賭桌。</p>
+
+    <h3>當「資源」不是埋在地底,而是擺在桌上</h3>
+    <p>澳門的處境,與你或許熟悉的「資源詛咒」如出一轍,只是它的「資源」不是錫、不是油,而是博彩。但詛咒的機制完全相同:<em>一個過於豐厚、過於容易的單一收入來源,會擠壓掉發展其他產業的空間與意願——這就是經濟學上的「荷蘭病」。</em>當賭場的薪水遠高於其他行業時,年輕人湧向賭桌,其他產業招不到人、長不起來;當博彩稅輕鬆填滿國庫時,政府與社會發展多元經濟的迫切性,也被悄悄消解。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>維度</th><th>繁榮期(井噴)</th><th>脆弱性(崩落)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>博彩佔 GDP</strong></td><td>2013 高峰約 87.6%,人均 GDP 全球第二</td><td>2022 疫情下驟降至約 21.4%,經濟劇烈收縮</td></tr>
+          <tr><td><strong>就業結構</strong></td><td>賭場高薪吸納近三成就業人口</td><td>單一技能、難以轉行,衝擊時無處可去</td></tr>
+          <tr><td><strong>財政來源</strong></td><td>博彩稅輕鬆撐起國庫,政府年年派錢</td><td>稅基單一,賭收一跌,財政立即承壓</td></tr>
+          <tr><td><strong>需求端</strong></td><td>高度依賴大陸自由行與政策紅利</td><td>政策、防疫、反貪一收緊,客源即枯竭</td></tr>
+          <tr><td><strong>其他產業</strong></td><td>被高薪賭業擠壓,長期發育不良</td><td>危機來時,沒有第二根支柱可以承接</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2020:那條線斷了</h3>
+    <p>這個結構性脆弱,在 2020 年的疫情中被無情地揭開。當邊境關閉、自由行停擺,澳門賴以維生的那條「需求通道」瞬間被掐斷。賭收暴跌,經濟劇烈收縮,博彩佔 GDP 的比例從高峰的 87.6% 一路跌到 2022 年的約 <strong>21.4%</strong>。那個曾讓它登上世界富裕之巔的單一支柱,在外部衝擊面前,顯露出它脆弱的真身。政府不得不動用豐厚的財政儲備,持續向市民「派錢」以紓解民困。</p>
+    <div class="pull"><p>怡保用了幾十年才明白「把全部押在錫上」的代價;澳門只用了一場疫情,就在幾個月內,嚐到了「把全部押在賭上」的同一杯苦酒。</p></div>
+    <p>值得注意的是,疫情前澳門並非沒有警覺。「產業多元化」一直是北京與澳門政府反覆強調的施政重點。但問題在於:<em>當賭桌穩穩流金時,多元化永遠是「明天再說」的事;只有當賭桌真的停了,人們才痛切地意識到,自己從來只有這一張桌子。</em>這正是資源詛咒最深的悲劇——它最該被打破的時刻(繁榮期),恰恰是人們最沒有動力打破它的時刻。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 單一依賴的詛咒,不分錫、油,還是賭</span>
+      <p>澳門的賭桌,給「單一依賴」這個母題提供了一個最當代、最極端的版本。把它和怡保的錫、委內瑞拉的油放在一起,浮現出一條跨越產業、跨越國界的鐵律:<strong>任何主體,只要它的命脈高度集中於「單一收入來源」,無論那個來源當下多麼豐厚,它就始終站在一個隨時可能被外力抽掉的支點上。</strong>支柱越粗、越賺錢,人們就越捨不得、也越沒必要去培育第二根——直到那根唯一的支柱倒下。</p>
+      <p>這套邏輯的可遷移性令人警醒。它適用於一個營收九成來自單一客戶的公司,適用於一個收入全繫於單一平台流量的創作者,適用於一個資產全壓在單一標的上的投資者,也適用於一個全部價值繫於單一技能的個人。<em>真正的安全,從來不來自「那根支柱有多強」,而來自「你有沒有第二、第三根支柱」。</em>澳門的故事最殘酷之處在於:它其實「知道」這個道理(口號喊了二十年),卻在繁榮的麻醉下,始終沒能真正做到。知道,和做到之間,隔著的正是人性最難跨越的那道惰性——而那道惰性,往往要用一場危機,才能被強行喚醒。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ☆ ✦</div>
+  <p>在這場暴富與危機的中途,有一個改變一切的時刻——<br>1999 年 12 月 20 日,葡萄牙的旗幟落下,<br><span class="hl">四百多年的殖民,在這一夜畫上句點。</span></p>
+</div>
+
+<!-- ===== 第九章 ===== -->
+<section id="ch10" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Handover</span>
+    <h2 class="act-title">回歸:一國兩制下的小城</h2>
+    <p class="act-sub">1999 — The Flag Comes Down</p>
+    <div class="ornament">☆ ✦ ☆</div>
+  </div>
+  <div class="prose">
+    <p>澳門的暴富,發生在一個全新的政治框架之下。1999 年 12 月 20 日,葡萄牙將澳門的主權交還中國,結束了長達 442 年的管治。澳門成為繼香港之後,中國第二個<strong>特別行政區</strong>,實行「一國兩制、澳人治澳、高度自治」。</p>
+
+    <h3>一場「平靜」的回歸</h3>
+    <p>與香港相比,澳門的回歸與後續整合,普遍被認為更為平順。這背後有幾層原因:其一,澳門社會的華人佔絕大多數,本就與內地關係緊密;其二,葡萄牙國力早衰,殖民晚期對澳門的管治相對鬆散,留下的對立情緒遠不如英治香港深刻。事實上,早在 1966 年的「<strong>一二三事件</strong>」後,澳葡政府的實際權威就已大幅削弱,親北京力量在澳門社會的影響力長期居於主導。</p>
+    <p>更關鍵的是經濟上的深度綁定。回歸後,《內地與澳門關於建立更緊密經貿關係的安排》(CEPA)、自由行、以及後來的粵港澳大灣區規劃,把澳門與內地的命運越綁越緊。對一座經濟命脈高度依賴大陸客源的賭城而言,與北京保持良好關係,不只是政治選擇,更是生存必需。</p>
+
+    <h3>回歸與賭城,是同一個故事的兩面</h3>
+    <p>這裡藏著一個容易被忽略的關聯:<strong>澳門的「賭業暴富」與「平穩回歸」,其實是同一枚硬幣的兩面。</strong>正因為澳門在政治上高度配合、與內地深度整合,它才能獨家對接十幾億人的自由行市場;也正因為它的繁榮如此依賴這份來自北方的善意,它在政治上就更沒有偏離的空間。賭桌的金流,與政治的引力,彼此加固。</p>
+    <p>於是回歸後的澳門,呈現出一種與香港頗為不同的氣質:它更安靜、更務實,也更深地把自己的未來,交付給了「被規劃」的角色。從「世界旅遊休閒中心」到「大灣區」,澳門始終是被更大的力量定位、安排。對一座靠居間維生、習慣了「依附於更大網絡」的城來說,這或許是它最熟悉、也最不抗拒的位置。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 繁榮的來源,也是約束的來源</span>
+      <p>澳門的回歸與賭業的共生,給出一個關於「依賴」的洞見:<strong>當一個主體的繁榮高度依賴某個更大力量的善意時,這份依賴會同時帶來兩樣東西——豐厚的紅利,以及無形的約束。</strong>你享受對方給你的獨家通道,就難免要接受對方對你的定位與安排。紅利與約束,本是同源。</p>
+      <p>這無關褒貶,而是一個清醒主體必須認清的結構性現實:<em>你從哪裡獲得力量,你就會在哪裡失去自主。</em>一家深度綁定單一大客戶的供應商,享受穩定訂單的同時,也讓渡了定價權與話語權;一個依附於單一平台的創作者,享受流量紅利的同時,也接受了平台規則的支配。澳門看得很透,也選得很實際:在「自主但貧困」與「依附但繁榮」之間,它選擇了後者。這不是軟弱,而是一座小城在大國夾縫中,延續了四百年的生存智慧——只是這份智慧的代價,需要被誠實地看見。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚖ ✦</div>
+  <p>澳門的賭,怡保的錫,吉隆坡的錫——<br>三座城,三種「單一」,卻是三種截然不同的結局。<br><span class="hl">把它們並排,「單一依賴」這門功課才真正講透。</span></p>
+</div>
+
+<!-- ===== 第十章 ===== -->
+<section id="ch11" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十一章 · Three Cities</span>
+    <h2 class="act-title">三座城的對照:賭與錫,兩種單一的命運</h2>
+    <p class="act-sub">Macau, Ipoh, Kuala Lumpur — Three Ways to Live and Die by One Thing</p>
+    <div class="ornament">⚖ ✦ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>澳門的故事,放進一個更大的對照組裡,會顯出它真正的份量。在南洋,有兩座同樣由「單一商品」塑造命運的城——靠錫暴起又墜入長眠的<strong>怡保</strong>,以及同樣靠錫起家、卻成功多元化升格首都的<strong>吉隆坡</strong>。把賭城澳門與這兩座錫城並排,「單一依賴」這個母題的全部光譜,就一覽無遺。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>維度</th><th>澳門 · 賭</th><th>怡保 · 錫(中咒)</th><th>吉隆坡 · 錫(解咒)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>核心資源</strong></td><td>博彩(合法性的壟斷)</td><td>近打山谷的錫礦</td><td>錫礦,但很早疊加他業</td></tr>
+          <tr><td><strong>依賴程度</strong></td><td>極端:賭收曾達 GDP 87.6%</td><td>極高且純粹</td><td>高,但持續分散</td></tr>
+          <tr><td><strong>多元化</strong></td><td>口號二十年,實質有限</td><td>幾乎沒有,坐吃礦藏</td><td>政治、行政、金融多管齊下</td></tr>
+          <tr><td><strong>遇衝擊時</strong></td><td>2020 疫情賭收驟跌至 21.4%</td><td>錫價崩盤即墜入長眠數十年</td><td>錫崩盤幾乎毫髮無傷</td></tr>
+          <tr><td><strong>本質邏輯</strong></td><td>佔據「體制縫隙」收過路費</td><td>開採「天然資源」直到枯竭</td><td>把資源租金「再投資」成制度</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>澳門是哪一種?</h3>
+    <p>看完這張表,一個尖銳的問題浮現:在「中咒的怡保」與「解咒的吉隆坡」之間,澳門站在哪裡?</p>
+    <p>答案是耐人尋味的「<strong>兩者之間,且尚未定論</strong>」。一方面,澳門的單一依賴程度比怡保更極端(賭收佔 GDP 的比例,遠高於當年怡保對錫的依賴);它和怡保一樣,長期被豐厚的單一收入麻痺,多元化始終停留在口號。但另一方面,澳門又擁有怡保所沒有的兩張底牌:其一,它的「資源」是博彩——一種<em>不會像錫礦那樣枯竭</em>的服務業,只要需求還在、合法地位還在,賭桌就能繼續流金;其二,它背靠大灣區與十幾億人的市場,擁有怡保完全不具備的、來自更大網絡的持續輸血。</p>
+    <div class="pull"><p>怡保的錫會挖完,澳門的賭桌不會。但賭桌不會枯竭,不代表「對賭桌的需求」不會轉移——這,才是懸在澳門頭上真正的問號。</p></div>
+    <p>所以澳門的命運,比怡保更不確定,也更掌握在自己手裡。它不會因為「資源枯竭」而被動死去(那是怡保的劇本);它真正的考驗是:<strong>能否在賭桌還流金的時候,主動長出第二根支柱,從「中咒的怡保」那條路,轉向「解咒的吉隆坡」那條路。</strong>這道選擇題,澳門至今仍在作答。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 同一道題,三種交卷方式</span>
+      <p>三座城並排,把「單一依賴」這道題的三種交卷方式,清清楚楚地攤在眼前:<strong>怡保交了白卷(從不多元化,資源枯竭即崩),吉隆坡交了範本(趁繁榮把租金轉化成制度與多元產業),而澳門,還在答題中——它握著比怡保更好的牌,卻也揹著比怡保更極端的依賴。</strong></p>
+      <p>這給所有面對「單一依賴」處境的人一個分層清晰的啟示:<em>第一,單一依賴本身不必然是死刑——吉隆坡證明了,只要在窗口期主動轉化,單一起點也能長成多元根基。第二,決定生死的不是「你依賴什麼」,而是「你有沒有趁還能選擇時,去建立不依賴它的能力」。第三,最危險的不是怡保那種「無路可走」的處境,而是澳門這種「明明有路、有資源、有時間,卻因繁榮而遲遲不走」的處境——因為前者是命運,後者是選擇。</em>澳門的下半場,本質上是一場與自己惰性的賽跑。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⟳ ✦</div>
+  <p>賭桌教會了澳門暴富,也讓它看清了暴富的代價。<br>於是這座城開始問自己一個四百年來最難的問題——<br><span class="hl">如果不只靠賭,我還能靠什麼?</span></p>
+</div>
+
+<!-- ===== 第十一章 ===== -->
+<section id="ch12" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十二章 · What Comes Next</span>
+    <h2 class="act-title">後賭城時代:澳門的下一場豪賭</h2>
+    <p class="act-sub">The City's Hardest Bet — On Itself</p>
+    <div class="ornament">⟳ ✦ ⟳</div>
+  </div>
+  <div class="prose">
+    <p>2020 年的衝擊,像一記響亮的耳光,把「多元化」從口號打成了生死攸關的現實。後賭城時代的澳門,正在下它四百年來最艱難的一場賭注——這一次,賭桌上押的不是籌碼,而是它自己能否轉身。</p>
+
+    <h3>三個方向,三條尚未驗證的路</h3>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">方向一</span>
+        <h5>從「博彩」到「休閒」</h5>
+        <p>官方定位是「世界旅遊休閒中心」,要把賭場綜合度假村裡的非博彩元素(會展、表演、購物、餐飲、家庭娛樂)做大,讓遊客為「賭以外的理由」而來。難點:這些元素至今仍高度依附於賭場本身。</p>
+        <span class="model">Tourism Beyond Gaming</span>
+      </div>
+      <div class="card">
+        <span class="flag">方向二</span>
+        <h5>橫琴:借一塊地長新身體</h5>
+        <p>面積僅 32 平方公里的澳門,腹地嚴重不足。對岸珠海的橫琴被劃為「粵澳深度合作區」,給澳門一塊數倍於己的土地,去發展科技、中醫藥、金融等賭以外的產業。</p>
+        <span class="model">Hengqin</span>
+      </div>
+      <div class="card">
+        <span class="flag">方向三</span>
+        <h5>遺產與文化這張舊牌</h5>
+        <p>那個四百年攢下的世界遺產城區、中西交匯的獨特底蘊,是澳門最不該被賭場光芒掩蓋的資產。把「文化澳門」做深,或許能提供一種不靠賭桌、也不易被取代的價值。</p>
+        <span class="model">Heritage</span>
+      </div>
+    </div>
+
+    <h3>難題:它的多元化,能擺脫「居間」的宿命嗎?</h3>
+    <p>但若把這三條路看穿,會發現一個發人深省的共同點:<em>它們在很大程度上,依然是「居間」邏輯的延續。</em>休閒中心,是居間於遊客的慾望;橫琴,是居間於澳門的制度彈性與內地的產業腹地;連大灣區定位,本質上也是讓澳門繼續扮演一個「接口」。四百年了,澳門似乎仍在尋找下一個可以居間的縫隙,而非真正長出「自己生產價值」的能力。</p>
+    <div class="pull"><p>這或許正是澳門最深的命運:它太擅長居間,以至於每一次轉型,都只是換一個居間的對象,而非改變居間的本質。</p></div>
+    <p>這未必是壞事。對一座只有三十多平方公里、數十萬人口的小城而言,「居間」本就是它最現實、最擅長的活法——強求它變成一個「生產型」經濟體,或許並不明智。真正的問題不在於它要不要繼續居間,而在於:<strong>它能否不再把全部身家押在「單一一種」居間上,而是同時握有好幾種——賭的、休閒的、文化的、產業接口的。</strong>從「一桌獨大」到「多桌並存」,這才是澳門務實版的「解咒」之路。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 真正的多元化,是分散依賴,而非改變天性</span>
+      <p>澳門的轉型困境,給出一個關於「改變」的成熟洞見:<strong>一個主體真正可行的進化,往往不是「徹底改變自己的天性」,而是「在自己的天性之上,分散風險」。</strong>要澳門放棄居間、變成製造業中心,既不現實也無必要;但要澳門把「居間」這項看家本領,從只押在賭桌上,擴展到同時押在休閒、文化、產業接口上——這既符合它的天性,又能讓它擺脫「一桌獨大」的脆弱。</p>
+      <p>這對任何尋求轉型的人事物都極具參考價值:<em>多元化的真諦,不是去做你不擅長的事,而是把你擅長的那套核心能力,應用到多個不同的、彼此不相關的場景上,從而讓任何單一場景的崩塌,都不足以擊垮你。</em>澳門不需要、也不可能變成另一座吉隆坡;它需要的,是成為「一個分散下注的居間者」。它的下一場豪賭,賭的不是能否脫胎換骨,而是能否在自己最擅長的牌桌上,學會不再 all in。這,是這座賭城,需要為自己上的最後一課。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⚓ ☩</div>
+  <p>漁村,商港,賭城;一座廟,一面牆,一張桌。<br>當我們把這四百年收攏,終於可以回答最初那個問題——<br><span class="hl">一座沒有任何物產、只有「位置」的城,究竟靠什麼活了四百年?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section id="chF" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">終章 · Finale</span>
+    <h2 class="act-title">於是,今天的澳門</h2>
+    <p class="act-sub">The City That Lives In Between</p>
+    <div class="ornament">⚓ ✦ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>站在今天的澳門,你會同時看見它的四百年。媽閣廟的香火仍在媽祖像前繚繞,那是它作為漁村的起點;大三巴的石壁在陽光下沉默矗立,那是它作為世界商港的黃金記憶;而轉過街角,金光大道上的巨型賭場與度假村燈火通明,那是它作為全球第一賭城的當下。一座彈丸小城,把四百年的身世,層層疊疊地壓進了三十多平方公里裡。</p>
+
+    <p>回到最初的問題:一座沒有錫、沒有金、沒有油,只有「位置」的城,究竟靠什麼活了四百年?答案貫穿始終——它靠的是<strong>居間</strong>。它一生都站在縫隙裡:海與陸的縫隙、東方與西方的縫隙、合法與灰色的縫隙、一個帝國與另一個帝國的縫隙。它從不生產,只負責連接;它從不擁有,只負責轉手。這是它全部的天才,也是它全部的脆弱。</p>
+
+    <div class="pull"><p>它把貨物換成了白銀,把白銀換成了信仰,把信仰換成了人,最後把人換成了籌碼。標的物變了又變,但那個站在縫隙裡收過路費的身影,四百年從未改變。</p></div>
+
+    <p>而澳門留給我們的,遠不只是一座城的傳奇。它和它南洋的兄弟——怡保、吉隆坡——一起,把「<strong>單一依賴</strong>」這門功課,從不同的角度講了個透徹。怡保示範了押注單一資源、坐吃山空的代價;吉隆坡示範了趁繁榮多元化、成功解咒的範本;而澳門,則示範了一種更當代、更幽微的處境——<em>明明知道單一依賴的危險,明明握著轉身的資源與時間,卻在繁榮的麻醉下,遲遲邁不出那一步。</em></p>
+
+    <p>這也許是三座城裡,最貼近我們每一個人的一面鏡子。因為怡保的「資源枯竭」是一種我們大多不會遇到的極端命運,而澳門的「知道卻做不到」,卻是我們在面對自己的事業、資產、人生時,反覆陷入的真實困境。我們也常常把全部身家押在一份工作、一項技能、一個平台、一段關係上;我們也常常在順遂時告訴自己「該分散一下了」,卻總在風險真正降臨前,捨不得離開那張還在流金的賭桌。</p>
+
+    <p>所以,當你下一次站在某個「穩穩流金」的單一依賴面前,不妨想起這座把命運押了四百年的小城。它會用它全部的繁華與脆弱告訴你:<strong>真正的安全,從來不是把那張賭桌做得更大,而是在它還流金的時候,悄悄地,為自己再多備幾張桌子。</strong>大海在此結束,陸地由此開始——願你我都能在自己的縫隙裡,既懂得居間的智慧,也記得不要把一切,都押在同一張桌上。</p>
+
+    <p style="text-align:center;margin-top:3rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint)">— 全文完 —</p>
+  </div>
+</section>
+
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

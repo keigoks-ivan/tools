@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>被光芒蓋過卻各自承載著史詩的三座小城：芙蓉 · 太平 · 金寶</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style></head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Seremban · Taiping · Kampar — Three Cities in the Shadow of the Spotlight</span>
+    <h1>被光芒蓋過<br>卻各自<span class="em">承載著史詩</span>的三座小城<br>芙蓉 · 太平 · 金寶</h1>
+    <p class="sub">三座因錫礦而生、被吉隆坡與怡保的光芒蓋過的馬來西亞小城,<br>卻各自承載著血與火的開埠戰爭、改變一個國家命運的條約、與一場震動世界的戰役——<br>一篇關於「配角之城,其實也藏著主角級的故事」的三城史詩</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">人</span>們總以為,只有大城市才有大故事。吉隆坡、檳城、馬六甲——這些站在聚光燈下的城,被一遍又一遍地書寫;而那些二線的小城,似乎只配做沉默的背景。但這是一個天大的誤會。馬來西亞的<strong>芙蓉(Seremban)、太平(Taiping)、金寶(Kampar)</strong>這三座被光芒蓋過的小城,其實各自承載著<em>足以驚動整個國家、甚至改寫歷史的故事</em>。芙蓉,守護著一份從蘇門答臘渡海而來、全馬來西亞獨一無二的<strong>米南加保母系文化</strong>,而它的開埠,同樣浸透著錫礦的血與火,並直接引來了英國對馬來半島的干預。太平,它的名字本身就是一座血流成河的紀念碑——那場席捲四萬華人、打了整整四場的「<strong>拉律戰爭</strong>」,以及終結它的「<strong>邦咯條約</strong>」,直接開啟了英國殖民整個馬來半島的序幕;而它隨後創下的「無數個第一」,讓它成為馬來亞現代文明的搖籃。金寶,這座近打谷裡的錫礦小鎮,則在 1941 年的歲末,上演了一場讓不可一世的日軍<em>第一次嘗到重大挫敗</em>的「<strong>金寶戰役</strong>」。這三座城,從來都不只是配角——它們只是被遺忘了。讓我們撥開吉隆坡與怡保投下的巨大陰影,走進這三座小城各自塵封的史詩,在每一個轉折處,聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">⌂ ✦ ⌂</div>
+
+<!-- ===== 共同序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · In the Shadow of Giants</span>
+    <h2 class="act-title">被光芒蓋過,不等於沒有故事</h2>
+    <p class="act-sub">Why the Supporting Cast Often Holds the Best Stories</p>
+    <div class="ornament">☴ ☴ ☴</div>
+  </div>
+  <div class="prose">
+    <p>在走進這三座城各自的史詩之前,得先理解它們共同的處境——一種絕大多數城市都共有、卻很少被認真書寫的命運:活在巨人的陰影裡。</p>
+
+    <h3>同一場錫礦盛宴的產物</h3>
+    <p>芙蓉、太平、金寶,都不是憑空誕生的。它們和吉隆坡、怡保一樣,都是十九世紀馬來半島那場波瀾壯闊的<strong>錫礦熱</strong>的產物。錫,這種看似不起眼的銀白色金屬(它讓罐頭得以保存、讓工業得以運轉),在十九世紀的世界引發了瘋狂的需求。於是,成千上萬的華人礦工,從中國南方漂洋過海而來;馬來酋長們,靠著土地上的錫砂迅速致富;而英國殖民者,則在背後虎視眈眈。一座座礦城,沿著富藏錫砂的河谷與山麓拔地而起——雙溪烏絨(芙蓉)、拉律(太平)、近打谷(金寶),都曾是這場盛宴中舉足輕重的角色。它們與那些日後成為「主角」的大城,本是同根而生的兄弟。</p>
+
+    <h3>被聚光燈遺忘</h3>
+    <p>但歷史的聚光燈,終究只打在少數幾座城身上。同樣靠錫起家,吉隆坡因緣際會成了首都、怡保成了名滿天下的「錫都」;而芙蓉、太平、金寶,雖也各有過風光無限的歲月(太平甚至一度是霹靂州的首府),卻終究被身旁更耀眼的鄰居所遮蓋。當人們談起馬來西亞的城市,首先想到的總是吉隆坡、檳城;這三座城,則默默退到了人們視線的邊緣,成了地圖上那些「聽過、卻不太熟悉」的名字。而當二十世紀錫礦的時代落幕、當高速現代化的快車呼嘯駛過,它們又一次被甩在了身後。</p>
+
+    <h3>陰影裡的史詩</h3>
+    <p>然而,「被光芒蓋過」,絕不等於「沒有故事」。恰恰相反——這三座城各自承載的故事,其分量與戲劇性,絲毫不亞於任何一座主角之城。芙蓉有獨一無二的文化與血火開埠,太平有改寫國家命運的戰爭與條約,金寶有震動世界的抗日之戰。它們的故事被遺忘,不是因為不夠精彩,而僅僅是因為——聚光燈,恰好沒有打在它們身上。這一篇,就是要把那束光,重新打回它們身上。</p>
+    <div class="pull"><p>每一個閃耀的主角身旁,都站著許多沉默的配角;而每一個沉默的配角身上,往往都藏著一段不為人知、卻同樣驚心動魄的史詩。被遺忘的,從來不是故事本身,而只是說故事的人。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 沉默,不代表平凡</span>
+      <p>這三座城共同的處境,揭示了一個常被忽略的真相:<strong>一個存在「不夠有名」,絕不等於它「不夠重要」或「沒有故事」——名氣與分量,從來不是同一回事。</strong>歷史的聚光燈,受限於人們的注意力與記憶,只能照亮少數幾個焦點;而被它遺漏在黑暗中的,往往同樣承載著深刻、動人、甚至改變了歷史走向的故事。</p>
+      <p>這對應一個適用於城市、也適用於人的深刻洞見:<em>我們太容易用「知名度」來判斷一個存在的價值,於是讓無數真正重要、卻不夠出名的人與事,被埋沒在沉默裡。但一個真正懂得歷史、懂得世界的人會明白:最動人的故事,常常不在聚光燈下,而在燈光照不到的角落——在那些沉默的配角身上。</em>芙蓉、太平、金寶,正是這樣的角落。接下來,讓我們逐一走進它們,你會驚訝地發現:這三座「沒沒無聞」的小城,竟然各自握著一段足以驚動整個馬來西亞、甚至改寫了一個半島命運的史詩。它們從來不是平凡的——它們只是,太久沒有被人好好地講述了。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⌂ ✦ ⌂</div>
+  <p>第一座城,是森美蘭州的首府芙蓉。<br>它的故事,要從一群渡海而來、把母系社會帶到馬來半島的人說起——<br><span class="hl">以及一場同樣血腥、卻直接引來英國干預的錫礦戰爭。</span></p>
+</div>
+
+<!-- ============================================ -->
+<!-- ============ 芙蓉 SEREMBAN ================== -->
+<!-- ============================================ -->
+
+<!-- ===== 芙蓉 第一章 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">芙蓉 · 卷一 · The Matrilineal Soul</span>
+    <h2 class="act-title">渡海而來的母系王國</h2>
+    <p class="act-sub">The Minangkabau, Adat Perpatih, and the Only Matrilineal State</p>
+    <div class="ornament">⌂ ✦ ⌂</div>
+  </div>
+  <div class="prose">
+    <p>要理解芙蓉,得先理解整個<strong>森美蘭(Negeri Sembilan)</strong>——因為芙蓉作為這個州的首府,它最深的靈魂,來自一份全馬來西亞、乃至整個馬來世界都獨一無二的文化:<strong>米南加保(Minangkabau)的母系傳統</strong>。</p>
+
+    <h3>從蘇門答臘渡海而來</h3>
+    <p>數百年前(大約十五至十六世紀起),來自<strong>蘇門答臘高地</strong>的米南加保人,陸續渡過馬六甲海峽,來到馬來半島中部這片土地定居。他們不是空手而來——他們帶來了一整套獨特的社會制度、建築、語言與世界觀。他們依山傍水而居,在這片土地上建立起一個個自治的小邦。「森美蘭」這個名字,意為「<em>九個地區(Nine States)</em>」,正是源自米南加保人所建立的那九個聯盟邦域。芙蓉所在的<strong>雙溪烏絨(Sungai Ujong)</strong>,便是其中最重要的一個。</p>
+
+    <h3>Adat Perpatih:母系的習俗法</h3>
+    <p>米南加保文化最驚人、也最獨特之處,是它的<strong>母系社會(matrilineal)傳統</strong>,體現在一套被稱為「<strong>Adat Perpatih</strong>」的習俗法之中。在這套延續了數百年的制度裡:<em>家族的姓氏與血脈,沿著母親這一系傳承;土地、房屋等祖傳財產(harta pusaka),由女性繼承並掌管;婚後,男子往往「嫁」入女方的家族</em>。這在一個普遍奉行父系制度的馬來-伊斯蘭世界裡,是極其罕見的存在。森美蘭,因此成為<strong>馬來西亞唯一一個在行政與習俗上,正式保留了母系繼承傳統的州</strong>——這份文化的獨特性,放眼整個東南亞,都堪稱瑰寶。</p>
+
+    <h3>沒有世襲君主,而是「推選」的元首</h3>
+    <p>米南加保的政治智慧,同樣獨特。森美蘭的最高統治者,不稱「蘇丹(Sultan)」,而稱「<strong>嚴端(Yang di-Pertuan Besar)</strong>」;更耐人尋味的是,這個位置在傳統上並非簡單的父死子繼,而是由森美蘭境內幾位握有實權的「<em>世襲酋長(Undang)</em>」共同<strong>推選</strong>產生的——這是一種帶有「協商與制衡」色彩的、近乎「選舉君主制」的古老智慧。一個建立在母系繼承與酋長推選之上的政體,在那個時代,展現出一種令人驚嘆的、不同於絕對王權的政治想像。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最獨特的,往往最值得守護</span>
+      <p>森美蘭與芙蓉的米南加保底色,揭示了一個關於「獨特性」的深刻價值:<strong>在一片被主流文化(此處是父系的馬來-伊斯蘭傳統)所主導的土地上,一份「逆主流而行」、卻頑強保留下來的獨特文化,本身就是一份無比珍貴的、不可複製的遺產。</strong>森美蘭的母系傳統與推選制,在周遭一片父系蘇丹國的環繞下,顯得格外突出而珍貴。</p>
+      <p>這對應一個深刻的洞見:<em>文化的價值,不在於它是否「主流」,而恰恰常常在於它的「不同」——一份能夠抵抗同化、保留自身獨特性的文化,為整個世界的多樣性,守住了一種寶貴的「另一種可能」。</em>米南加保人渡海而來,在異鄉的土地上,數百年如一日地守護著他們母系的習俗、推選的智慧、與獨特的世界觀,沒有被周遭強大的父系主流所同化——這份堅守,本身就是一個了不起的文化奇蹟。芙蓉作為這個獨特州份的首府,它最深的尊嚴與底氣,正來自於此。它或許不是馬來西亞最繁華的城,但它守護著一份連最繁華的吉隆坡都不曾擁有的、獨一無二的文化靈魂。這提醒我們:衡量一個地方的分量,不能只看它的高樓與財富,更要看它守護著怎樣不可替代的、獨特的東西。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⌂ ✦ ⚔</div>
+  <p>米南加保的母系傳統,是芙蓉寧靜而深沉的底色;<br>但這座城的開埠,卻和它的兄弟城一樣,浸透著錫礦的血與火——<br><span class="hl">而那場發生在雙溪烏絨的衝突,將直接引來英國對馬來半島的干預。</span></p>
+</div>
+
+<!-- ===== 芙蓉 第二章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">芙蓉 · 卷二 · Tin, Blood, and the British</span>
+    <h2 class="act-title">雙溪烏絨:錫、酋長與引狼入室</h2>
+    <p class="act-sub">Sungai Ujong, the Dato' Klana, and the Door to British Intervention</p>
+    <div class="ornament">⚔ ✦ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>芙蓉寧靜的米南加保外表下,它的開埠史,和太平、和吉隆坡一樣,是一部由「錫」所書寫的、充滿衝突與算計的故事。而這裡的衝突,在馬來半島的近代史上,扮演了一個關鍵的角色。</p>
+
+    <h3>雙溪烏絨的錫</h3>
+    <p>芙蓉的前身<strong>雙溪烏絨(Sungai Ujong)</strong>,意為「河流的盡頭」,是森美蘭九邦之一,也是富藏錫砂之地。十九世紀,隨著錫礦需求的暴漲,大批<strong>華人礦工</strong>湧入雙溪烏絨開採錫礦。錫,為當地的馬來酋長帶來了滾滾財富,卻也埋下了衝突的種子——因為,有財富的地方,就有爭奪。</p>
+
+    <h3>酋長的內鬥與華人幫派</h3>
+    <p>雙溪烏絨的權力,主要掌握在兩位酋長手中:握有行政權的「<strong>Dato' Klana(克拉那)</strong>」與控制著河口、得以抽取貿易稅的「<strong>Dato' Bandar(班達)</strong>」。隨著錫礦財富的暴增,這兩位酋長之間,為了爭奪對錫礦貿易與稅收的控制權,矛盾日益尖銳。與此同時,聚集在礦區的華人,也分屬不同的<em>幫派會黨</em>,各自依附於不同的酋長,捲入了這場利益的角力。一場圍繞著錫礦財富的衝突,如同當時整個馬來半島的縮影,在雙溪烏絨一觸即發。</p>
+
+    <h3>引來英國:海峽殖民地的干預</h3>
+    <p>而雙溪烏絨衝突的關鍵意義在於:其中一位酋長<strong>Dato' Klana</strong>,為了在權力鬥爭中取得上風,主動向<strong>英國海峽殖民地</strong>尋求支持與保護。對於早已對馬來半島豐富錫礦垂涎三尺的英國而言,這正是一個求之不得的<em>干預藉口</em>。1874 年前後,英國以「恢復秩序、保護貿易」為名,介入了雙溪烏絨的事務,並與 Dato' Klana 簽訂協議,逐步把英國的勢力與「保護」,伸入了森美蘭。這與同一時期英國介入霹靂(太平)、雪蘭莪(吉隆坡)的模式如出一轍——<strong>馬來酋長為了內鬥而引入英國,最終卻把整個馬來半島,一步步交到了英國的手中</strong>。芙蓉的開埠衝突,因此是英國殖民整個馬來半島這盤大棋上,一枚關鍵的棋子。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 為了內鬥而引入的外力,最終會反客為主</span>
+      <p>雙溪烏絨的故事,揭示了一個在歷史上反覆上演的沉痛教訓:<strong>當內部的鬥爭雙方,各自為了戰勝對方而引入一個更強大的「外部勢力」來助拳時,那個被引入的外力,最終往往會「反客為主」,把鬥爭的雙方一起收入囊中。</strong>馬來酋長為了爭奪錫礦,向英國求助;而英國,則藉著這些邀請,順理成章地殖民了整個馬來半島。</p>
+      <p>這對應一個極其深刻、也極具普世性的洞見:<em>內部的分裂與內鬥,是引入並坐大外部勢力的最大溫床——當一個共同體的內部各方,都把「戰勝同胞」看得比「共同體的整體利益」更重要時,他們就會爭相向外力獻媚求助,而那個外力,最終會成為所有人共同的主人。</em>這個教訓,不只屬於十九世紀的馬來半島,它在古今中外的歷史中,一再地重演。雙溪烏絨(芙蓉)的開埠衝突,正是這個教訓在馬來西亞近代史上,一個關鍵而典型的案例——它與太平的拉律戰爭一起,共同構成了「英國如何藉著馬來人的內鬥而殖民整個半島」這段歷史的開端。一座看似寧靜的小城,它的身世裡,竟藏著一個關乎整個國家命運的、沉重的歷史教訓。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⌂</div>
+  <p>血與火的開埠過後,英國的秩序降臨,芙蓉慢慢安定下來。<br>它沒有成為最耀眼的都會,卻在水牛角的屋頂下,<br><span class="hl">把它的米南加保靈魂與它的多元市井,沉澱成一座有底蘊的州府。</span></p>
+</div>
+
+<!-- ===== 芙蓉 第三章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">芙蓉 · 卷三 · The City of Customs</span>
+    <h2 class="act-title">水牛角屋頂下的「禮俗之城」</h2>
+    <p class="act-sub">Kapitan, Buffalo-Horn Roofs, and a State Capital with a Soul</p>
+    <div class="ornament">⌂ ✦ ⌂</div>
+  </div>
+  <div class="prose">
+    <p>英國介入之後,雙溪烏絨乃至整個森美蘭,逐漸被整合進英屬馬來亞的秩序之中。而它的行政中心,最終落在了<strong>芙蓉(Seremban)</strong>。一座由錫礦衝突中誕生的城,慢慢沉澱為一座安定、多元、有底蘊的州府。</p>
+
+    <h3>華人甲必丹與多元的市井</h3>
+    <p>如同其他馬來亞礦城,芙蓉的發展也離不開華人社群的貢獻。英國殖民者透過委任「<strong>甲必丹(Kapitan Cina)</strong>」來管理華人事務——這些華人領袖,在開埠、商業與市鎮建設中扮演了重要角色。芙蓉因此和其他馬來亞城市一樣,發展成一座<em>多元族群共處</em>的城:馬來人(尤其是米南加保裔)、華人、印度人,在這裡共同生活、貿易、建設。芙蓉的老街區、廟宇、店屋,至今仍保留著那段多元歲月的痕跡。</p>
+
+    <h3>水牛角屋頂:把文化寫進建築</h3>
+    <p>而芙蓉最鮮明的標誌,是它把米南加保的文化,驕傲地<strong>寫進了城市的建築</strong>。那獨特的<em>水牛角形屋頂</em>——兩端如水牛角般高高翹起、線條優雅而充滿張力——成為森美蘭建築的標誌。森美蘭的州務大廈(Wisma Negeri)、州博物館、乃至王宮,都採用這種源自米南加保的形式。當你走進芙蓉,看見那些翹起的屋頂,你會立刻明白:這座城,有著一個與馬來西亞其他任何地方都不同的文化身份。它不需要靠高樓來彰顯自己,它靠的是那份寫在屋頂線條裡的、獨一無二的文化自信。</p>
+
+    <h3>「Bandaraya Beradat」:守禮俗之城</h3>
+    <p>也正因為對傳統習俗(adat)的深切重視,芙蓉擁有一個美麗而貼切的別稱——「<strong>Bandaraya Beradat</strong>」,意為「<em>有禮俗、守傳統之城</em>」。2020 年,芙蓉正式獲得了「市」的地位。但它真正的尊嚴,從來不在於這個行政頭銜,而在於它作為米南加保文化的中心,數百年如一日地守護著那份獨特的傳統。它或許不是馬來西亞最繁華的城市,卻是馬來西亞文化版圖上,一塊不可替代的、深沉而獨特的拼圖。它是一座有靈魂、有底蘊、知道自己是誰的城。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把身份寫進屋頂的城,不會迷失自己</span>
+      <p>芙蓉「水牛角屋頂」與「禮俗之城」的形象,揭示了一座城安身立命的深層智慧:<strong>當一座城清楚地知道「自己的文化是什麼」,並驕傲地把這份文化彰顯在它的建築、它的別稱、它的日常之中時,它就擁有了一種不會被任何繁華或潮流所動搖的、穩固的自我認同。</strong>芙蓉把米南加保的靈魂寫進了屋頂的線條裡——這意味著,它的身份,是看得見、摸得著、無法被輕易抹去的。</p>
+      <p>這對應一個關於「認同」的深刻洞見:<em>一個個體最大的安定感,不來自它有多富有、多耀眼,而來自它「清楚地知道自己是誰、並安然地做自己」。一個知道自己是誰的存在,即使身處陰影、即使不夠繁華,也不會迷失、不會焦慮;而一個不知道自己是誰的存在,即使再繁華,內裡也是空洞而漂泊的。</em>芙蓉正是前者。它在吉隆坡的巨大引力旁,沒有變成一個面目模糊的衛星城,而是穩穩地守著它水牛角屋頂下的米南加保靈魂,做一座有禮俗、有底蘊、知道自己是誰的城。它用自己的存在證明:一座城的尊嚴,不在於它有多大、多亮,而在於它是否守護著一份清晰而獨特的自我。這份「知道自己是誰」的篤定,正是芙蓉留給我們的、最深的啟示——也是接下來太平與金寶,將以各自不同的方式,繼續訴說的主題。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⌂ ✦ ☔</div>
+  <p>芙蓉守著它寧靜的母系靈魂;而往北,在霹靂的拉律,<br>另一座城正經歷著馬來半島近代史上最血腥的一場錫礦戰爭——<br><span class="hl">那場戰爭的結局,將為整個馬來半島的命運,按下改寫的按鈕。</span></p>
+</div>
+
+<!-- ============================================ -->
+<!-- ============ 太平 TAIPING =================== -->
+<!-- ============================================ -->
+
+<!-- ===== 太平 第一章 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">太平 · 卷一 · The Larut Wars</span>
+    <h2 class="act-title">拉律戰爭:四萬人捲入的錫礦血戰</h2>
+    <p class="act-sub">Hai San vs Ghee Hin, Ngah Ibrahim, and Four Wars over Tin</p>
+    <div class="ornament">⚔ ✦ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>太平的故事,要從它血腥的舊名說起。在成為「太平」之前,這片土地叫做<strong>拉律(Larut)</strong>;而拉律的歷史,是一部由錫礦、幫派與鮮血寫成的、馬來半島近代史上最慘烈的篇章之一。</p>
+
+    <h3>拉律的錫,與兩大華人會黨</h3>
+    <p>十九世紀中葉,拉律地區發現了極為豐富的<strong>錫礦</strong>。消息傳開,大批<em>華人礦工</em>蜂擁而至,在克連寶(Klian Pauh)、克連峇魯(Klian Baru,即後來的甘文丁)等礦區開採。這些華人礦工,主要分屬兩大<strong>秘密會黨</strong>:以<em>客家人為主的「海山(Hai San)」</em>,與<em>以廣東人為主的「義興(Ghee Hin)」</em>。而管轄這片土地、靠錫礦致富的馬來酋長,是拉律的「Mantri(大臣)」——<strong>Ngah Ibrahim(雅依布拉欣)</strong>,他在 1858 年從父親手中繼承了這片富饒之地與其龐大的華人礦工人口。</p>
+
+    <h3>四場戰爭,綿延十三年</h3>
+    <p>財富,點燃了仇恨。從 1861 年起,海山與義興兩大會黨,為了爭奪錫礦與賴以採礦的<strong>水道</strong>控制權,爆發了長達十三年、總共四場的「<strong>拉律戰爭(Larut Wars)</strong>」:</p>
+    <p>第一場(1861),始於對水道的爭奪——海山搗毀義興的水道、釀成人命,並將義興逐出礦區,迫使約千名義興成員逃往檳城。第二場(1865),竟因一場<em>賭局的糾紛</em>而起,雙方互相擄掠、殺戮,血流成河。此後衝突不斷升級,並與霹靂蘇丹的<strong>王位繼承之爭</strong>糾纏在一起——拉者阿都拉(Raja Abdullah)支持義興,而 Ngah Ibrahim 則支持海山,使這場幫派械鬥,演變成了一場牽動整個霹靂的權力戰爭。據估計,前後有<strong>超過四萬名華人</strong>捲入了這場慘烈的同胞相殘。礦場停產、屍橫遍野,連檳城的華商都因投資血本無歸而焦慮不安。</p>
+    <div class="pull"><p>同樣是錫,在怡保造就了百萬富翁,在拉律卻釀成了四萬人捲入、屍橫遍野的血戰。財富從來都是一把雙面刃——它能建設一座城,也能讓一座城,先在仇恨裡焚燒。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 失控的財富爭奪,是最慘烈的內耗</span>
+      <p>拉律戰爭揭示了一個沉痛的真相:<strong>當巨大的財富出現、而又缺乏一個能夠主持公道、維持秩序的權威時,對財富的爭奪,就會迅速地、不受控制地滑向最慘烈的暴力與內耗——而最大的受害者,往往是爭奪雙方自己。</strong>海山與義興,本都是漂洋過海、為了生計而來的華人同胞,卻為了錫礦,陷入了長達十三年、四萬人捲入的自相殘殺。</p>
+      <p>這對應一個深刻的洞見:<em>財富本身不會帶來秩序;相反,在缺乏規則與公正權威的情況下,巨大的財富反而會成為衝突的引爆點,把本可合作的人們,變成不死不休的仇敵。</em>拉律戰爭的悲劇在於,它是一場本可避免的內耗——爭奪的雙方都是同胞,爭奪的對象(錫礦)本足以讓所有人都富足。但失控的貪婪與缺位的秩序,讓財富變成了詛咒。這場慘烈的內耗,最終耗盡了爭奪雙方的元氣,也讓他們失去了對自己命運的掌控——因為,當你在內鬥中兩敗俱傷時,就給了第三方「介入並收割」的可乘之機。拉律戰爭血腥的結局,恰恰為英國殖民整個馬來半島,鋪好了道路。這座城用它最慘痛的開端提醒我們:沒有什麼比「自己人為了利益而陷入失控的內鬥」更危險——因為那不僅會兩敗俱傷,更會把命運,拱手讓給旁觀的獵手。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚓</div>
+  <p>連年的血戰,讓礦場停產、投資血本無歸。<br>檳城的華商與焦慮的馬來酋長,都把目光投向了一個旁觀已久的力量——<br><span class="hl">英國。而英國等的,正是這一刻。</span></p>
+</div>
+
+<!-- ===== 太平 第二章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">太平 · 卷二 · Everlasting Peace</span>
+    <h2 class="act-title">邦咯條約:一紙條約,改寫一個半島</h2>
+    <p class="act-sub">The Pangkor Engagement 1874, the Residential System, and a New Name</p>
+    <div class="ornament">⚓ ✦ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>拉律戰爭血腥的僵局,最終以一種改寫了整個馬來半島命運的方式收場。而它的舞台,是停泊在<strong>邦咯島(Pangkor)</strong>外海的一艘英國軍艦。</p>
+
+    <h3>1874:Pluto 號上的條約</h3>
+    <p>連年的械鬥讓拉律的錫礦業全面停擺,捲入其中的霹靂王位繼承之爭也僵持不下。投資受損的檳城華商、無力維持秩序的馬來酋長,紛紛尋求英國介入。1874 年 1 月 20 日,在英國海峽殖民地新任總督<strong>安德魯·克拉克(Andrew Clarke)</strong>的主導下,衝突各方在邦咯島外的軍艦 <strong>Pluto 號</strong>上,簽署了影響深遠的「<strong>邦咯條約(Pangkor Treaty / Pangkor Engagement)</strong>」。</p>
+
+    <h3>「駐紮官制度」:殖民的開端</h3>
+    <p>這紙條約做了三件事:其一,解決了華人會黨的紛爭;其二,確認了霹靂蘇丹的繼承(承認拉者阿都拉為蘇丹);而其三,也是影響最深遠的一條——它規定霹靂蘇丹必須接受一位英國「<strong>駐紮官(Resident)</strong>」,並且,除了涉及馬來習俗與宗教的事務之外,蘇丹在一切行政事務上,都<em>必須聽從駐紮官的「建議」</em>。這就是著名的「<strong>駐紮官制度(Residential System)</strong>」。表面上,蘇丹仍是統治者;實際上,真正的權力,已經轉移到了英國駐紮官手中。邦咯條約,因此被視為<strong>英國正式殖民馬來半島的開端</strong>——這套在霹靂(以太平為中心)首創的模式,隨後被複製到雪蘭莪、森美蘭、彭亨,最終把整個馬來半島,都納入了英國的掌控。一場拉律的錫礦械鬥,竟成了一個半島命運的轉捩點。</p>
+
+    <h3>「太平」:永久的和平</h3>
+    <p>條約簽訂後,血腥的械鬥終於平息。海山與義興的兩位首領——<strong>鄭景貴(Chung Keng Quee,海山)</strong>與<strong>陳亞炎(Chin Ah Yam,義興)</strong>——被英國封為「華人甲必丹」,以示和解。而那座飽經血火的礦城<strong>拉律</strong>,則被賦予了一個寄託著無限願望的新名字——「<strong>太平(Taiping)</strong>」,在華語裡意為「<em>永久的和平</em>」,以紀念這來之不易的停戰。一座因爭奪而血流成河的城,最終以「和平」為名,翻開了它全新的一頁。這個名字,本身就是一則從「血腥」走向「安寧」的、深刻的寓言。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 內鬥的代價,是把命運交給仲裁者</span>
+      <p>邦咯條約揭示了一個冷峻而深刻的歷史邏輯:<strong>當內部的各方在慘烈的鬥爭中陷入僵局、誰也無法獨自取勝、又都無力承受繼續鬥爭的代價時,他們最終往往會請來一個「外部的仲裁者」;而這個仲裁者,會藉著「主持公道」之名,順理成章地攫取真正的權力,成為所有人新的主人。</strong>英國正是拉律戰爭這個僵局中,那個「應邀而來、卻反客為主」的仲裁者。</p>
+      <p>這對應一個極具普世性的洞見:<em>內部的分裂與內耗,是最危險的——它不僅會耗盡各方的元氣,更會創造出一個「權力真空」,而這個真空,必然會被某個更強大的外部勢力填補。鬥爭的各方以為自己是在「請外人來幫忙」,實際上卻是在「把自己的命運,拱手交給外人裁決」。</em>邦咯條約的深遠意義,正在於此:它用一紙「和平」的條約,終結了拉律的血戰,卻也用「駐紮官制度」,開啟了英國殖民整個馬來半島的序幕。太平的「永久和平」,是真實的——械鬥確實停止了;但這份和平,是以馬來半島交出自主權為代價換來的。這座城的名字,因此承載著一個雙重的真相:它既是「和平」的紀念碑,也是「失去自主」的見證。它沉痛地提醒著我們:當你因為內鬥而不得不請來一個強大的仲裁者時,你或許贏得了和平,卻可能也失去了自己做主的權利。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ★</div>
+  <p>和平降臨後,作為霹靂行政中心的太平,迎來了它最輝煌的建設年代。<br>在英國的經營下,這座剛從血泊中走出的礦城,<br><span class="hl">即將創下一連串讓整個馬來亞都望塵莫及的「第一」。</span></p>
+</div>
+
+<!-- ===== 太平 第三章 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">太平 · 卷三 · The Town of Firsts</span>
+    <h2 class="act-title">無數個「第一」,與一座化礦坑為湖的城</h2>
+    <p class="act-sub">Malaya's Firsts, Maxwell Hill, the Rain, and the Peace After Glory</p>
+    <div class="ornament">★ ✦ ★</div>
+  </div>
+  <div class="prose">
+    <p>和平之後,作為霹靂早期行政中心的太平,在英國的經營下,迅速從一座血腥的礦城,蛻變為<strong>馬來亞現代文明的搖籃</strong>。它創下的「第一」之多,讓任何一座馬來亞城市都望塵莫及。</p>
+
+    <h3>馬來亞的「無數個第一」</h3>
+    <p>太平的「第一」清單,長得驚人,幾乎涵蓋了現代文明的方方面面:</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">知識</span>
+        <h5>第一座博物館</h5>
+        <p>霹靂博物館(1883),是<strong>馬來亞最古老的博物館</strong>,至今仍在開放,典藏著這片土地的自然與人文記憶。</p>
+        <span class="model">Perak Museum</span>
+      </div>
+      <div class="card">
+        <span class="flag">交通</span>
+        <h5>第一條鐵路</h5>
+        <p>1885 年通車的太平—港口(Port Weld)鐵路,是<strong>馬來亞第一條鐵路</strong>,為的是把錫礦運往海港。</p>
+        <span class="model">First Railway</span>
+      </div>
+      <div class="card">
+        <span class="flag">公共</span>
+        <h5>第一座公園</h5>
+        <p>太平湖濱公園,馬來亞<strong>第一座公共花園</strong>——而它,竟是由廢棄的錫礦坑改造而成的。</p>
+        <span class="model">Lake Gardens</span>
+      </div>
+      <div class="card">
+        <span class="flag">文明</span>
+        <h5>更多的第一</h5>
+        <p>第一份馬來文報紙、第一座監獄、馬來亞最早的動物園之一……太平,是無數現代制度在馬來亞的起點。</p>
+        <span class="model">And More</span>
+      </div>
+    </div>
+
+    <h3>化礦坑為湖:太平最美的隱喻</h3>
+    <p>在所有「第一」裡,最動人的,是<strong>太平湖濱公園(Taiping Lake Gardens)</strong>。這片波光粼粼、古樹垂蔭、被譽為馬來西亞最美的市鎮公園之一的湖泊,並非天然形成——它的前身,是拉律戰爭與採礦年代留下的、<em>千瘡百孔的廢棄錫礦坑</em>。英國人與後來的市政者,沒有任由這些礦坑荒廢,而是巧妙地把它們改造、串連成一片優雅的湖泊園林,遍植雨樹(rain tree),如今那些樹齡逾百年的雨樹,枝椏低垂、宛如綠色的拱廊。把瘡疤改造成美景、把採礦的傷痕轉化為休憩的樂園——這,或許是太平最深、也最美的一則隱喻:<strong>它懂得如何與自己血腥的過往和解,如何把傷痛,釀成美麗。</strong></p>
+
+    <h3>麥士威山、戰俘營,與多雨的退場</h3>
+    <p>太平的輝煌,還包括它身後那座清涼的<strong>麥士威山(Maxwell Hill / Bukit Larut)</strong>——馬來亞<em>最古老的避暑高原(hill station)</em>,殖民官員昔日避暑的所在。然而,輝煌之中也有陰影:二戰日據時期,太平也曾有過囚禁戰俘的黑暗一頁。而二十世紀初,隨著交通更便利、發展更迅猛的<strong>怡保</strong>崛起,霹靂的首府地位,逐漸從太平轉移了過去。失去了首府光環的太平,漸漸退居為一座寧靜的二線小城。再加上它地處<em>全馬來西亞降雨量最高之地</em>,有著「雨城」之稱——那連綿的細雨,更為它添了一份慵懶、安靜、與世無爭的氣質。曾經創下無數「第一」、曾經是州府的先驅之城,如今安靜地守著它的湖、它的雨、它的老建築,過著一種從容而緩慢的生活。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把傷痕釀成美麗,從輝煌中從容退場</span>
+      <p>太平的故事,藏著兩重深刻的智慧。其一,是「<strong>把傷痕釀成美麗</strong>」——太平把採礦的廢坑,改造成了全馬最美的湖濱公園;把血腥的舊名「拉律」,轉化為「永久和平」的新名「太平」。這對應一個動人的洞見:<em>一個成熟的個體,衡量它的,不是它有沒有受過傷,而是它能否把那些傷痕,轉化、昇華為某種美麗而有意義的東西——傷疤不必是恥辱的印記,它也可以成為一片湖、一座公園、一個和平的名字。</em></p>
+      <p>其二,是「<strong>從輝煌中從容退場</strong>」——太平曾是先驅、是州府、是「無數個第一」的締造者,但當這份光環隨著怡保的崛起而褪去,它沒有變得怨懟或頹喪,而是安然地接受了退居二線的命運,在湖光與細雨中,過起了從容的慢生活。這對應另一個深刻的人生洞見:<em>真正的豁達,不只在於攀上高峰,更在於「從高峰從容地走下來」之後,依然能心平氣和、有尊嚴地生活。最難的,往往不是贏得輝煌,而是輝煌過後,坦然地放下。</em>太平把它「無數個第一」的風光,沉澱成了今日從容的底蘊;它的湖、它的博物館、它的老火車站,都是那段輝煌的優雅遺產,而它如今的寧靜多雨,則讓它免於了大城市的喧囂與焦慮。一座城能把傷痕釀成美麗、能從第一的位置從容退場——這份成熟與豁達,本身就是一種了不起的、不亞於任何輝煌的境界。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☔ ✦ ⛰</div>
+  <p>太平把血腥釀成了和平與湖光;而往南,在近打谷裡,<br>還有一座因錫而生的小鎮,它的史詩同樣驚心動魄——<br><span class="hl">1941 年的歲末,它將讓不可一世的日軍,嚐到入侵馬來亞以來的第一次重大挫敗。</span></p>
+</div>
+
+<!-- ============================================ -->
+<!-- ============ 金寶 KAMPAR ==================== -->
+<!-- ============================================ -->
+
+<!-- ===== 金寶 第一章 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">金寶 · 卷一 · The Richest Valley</span>
+    <h2 class="act-title">近打谷:世界最盛產錫之地</h2>
+    <p class="act-sub">The Kinta Valley, the Tin Rush, and a Booming Mining Town</p>
+    <div class="ornament">⛰ ✦ ⛰</div>
+  </div>
+  <div class="prose">
+    <p>金寶的故事,和它的兄弟城一樣,始於錫;但它所在的地方,是這場錫礦盛宴的<strong>絕對核心</strong>——<strong>近打谷(Kinta Valley)</strong>。</p>
+
+    <h3>全世界產錫最豐盛的地方</h3>
+    <p>近打谷,這片位於霹靂、被石灰岩山巒環抱的山谷,自十九世紀末以來,就是<strong>全世界產錫最豐盛的地方之一</strong>。這裡的沖積層中,蘊藏著驚人的錫砂。自 1890 年代起,以怡保為中心的整個近打谷,成為馬來亞、乃至全球錫礦業的心臟——它生產的錫,源源不絕地輸往世界,支撐著全球的工業。而<strong>金寶(Kampar)</strong>,正是這片黃金山谷裡,一座重要的錫礦市鎮。</p>
+
+    <h3>礦城的繁榮</h3>
+    <p>在錫礦的鼎盛年代,金寶是一座生機勃勃、充滿活力的礦城。來自中國南方的<em>華人礦工</em>(以客家人與廣府人為主)聚集於此,胼手胝足地開採錫砂;商號、店屋、廟宇、會館沿街而立;礦業帶來的財富,讓這座小鎮一度相當繁榮。金寶的名字「Kampar」,有一說與當地的地理水文相關,而它的繁榮,則完完全全建立在腳下那片富藏錫砂的土地上。它和怡保、和整個近打谷一樣,是錫礦時代一顆閃亮的明珠——只不過,它的光芒,被身旁那顆更大的明珠「怡保」所掩蓋了。</p>
+    <div class="pull"><p>金寶坐落在全世界最富的錫谷裡,卻始終活在「錫都」怡保的陰影下。它和怡保喝的是同一條河的水、挖的是同一片谷的錫,卻注定要做那個沒沒無聞的弟弟。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 身處富饒,未必就能成為焦點</span>
+      <p>金寶的起點,揭示了一個關於「位置」的微妙真相:<strong>即使身處一片最富饒的土地、擁有與「主角」完全相同的資源稟賦,一個存在也未必能成為焦點——因為焦點往往只有一個,而那個位置,常常已經被身旁更早崛起、或更具優勢的鄰居佔據了。</strong>金寶與怡保同處全世界最富的錫谷,卻只能做怡保身旁那個沒沒無聞的小鎮。</p>
+      <p>這對應一個現實而深刻的洞見:<em>擁有好的資源與條件,是成功的必要條件,卻不是充分條件——在同樣的稟賦下,「是否恰好站在了那個能成為焦點的位置上」,往往由許多自己無法掌控的因素(機緣、先後、鄰居的強弱)所決定。</em>這意味著,世界上有大量「條件並不差、卻始終做著配角」的存在——它們不是不夠好,只是恰好沒有站在聚光燈下。金寶就是這樣。它腳下的錫,並不比怡保的差;它的繁榮,也曾真實而蓬勃。但它注定要活在怡保的陰影裡,做近打谷裡那個被忽略的弟弟。然而,金寶的故事並未就此平庸地收場——恰恰因為它的「不起眼」,在一個誰也想不到的歷史時刻,它將意外地,成為一場驚天動地之戰的主角。一座配角之城,也會有它登上歷史舞台中央的、悲壯的一刻。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">⛰ ✦ ⚔</div>
+  <p>錫礦小鎮平靜地繁榮著,直到 1941 年底,戰爭的烏雲席捲馬來亞。<br>日軍勢如破竹地南下,而金寶獨特的地形,<br><span class="hl">讓它意外地成了英軍選定的、要讓日軍付出代價的戰場。</span></p>
+</div>
+
+<!-- ===== 金寶 第二章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">金寶 · 卷二 · The Battle of Kampar</span>
+    <h2 class="act-title">1941:讓日軍首嘗敗績的四天血戰</h2>
+    <p class="act-sub">Three Ridges, Four Days, and Japan's First Serious Setback</p>
+    <div class="ornament">⚔ ✦ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>金寶最不為人知、卻最驚心動魄的一刻,發生在 1941 年的歲末。當時,日軍正以驚人的速度橫掃馬來亞,英軍節節敗退。而這座沉默的錫礦小鎮,卻意外地成為了英軍選定的、要讓日軍血債血償的戰場。</p>
+
+    <h3>為何選中金寶?</h3>
+    <p>1941 年 12 月,日軍南侵勢如破竹。為了延緩日軍的推進、爭取時間,英軍馬來亞司令白思華(Percival)決定選擇一個地點,做一次堅決的阻擊。他選中了金寶。原因,正在於金寶獨特的<strong>地形</strong>:金寶鎮以北,有三道低矮卻關鍵的<em>石灰岩山脊——湯普森嶺、甘迺迪嶺與墓園嶺(Thompson, Kennedy & Cemetery Ridges)</em>,它們背靠著高達 4070 呎的<strong>武吉壩玲瓏山(Gunung Bujang Melaka)</strong>,居高臨下,俯瞰著從怡保南下的主幹道與鐵路。更妙的是,周遭平坦開闊的<em>錫礦地形</em>,讓日軍引以為傲的坦克與空中優勢難以施展,卻正好讓英軍的炮兵能夠充分發揮。這片因採錫而形成的地貌,成了一個絕佳的天然要塞。</p>
+
+    <h3>四天,以寡敵眾</h3>
+    <p>1941 年 12 月 30 日至 1942 年 1 月 2 日,「<strong>金寶戰役(Battle of Kampar)</strong>」打響。守軍是英印第 11 師的部隊,兵力約一千多人;而進攻的日軍第 5 師團,則有約九千人,還配備了坦克與火炮。日軍原本打算把攻下金寶,當作獻給天皇的「新年禮物」。然而,在這片他們無法施展機械優勢的險要地形上,他們遭遇了出乎意料的頑強抵抗。英印守軍(其中包括英勇的英軍營與印度部隊)依託山脊,以猛烈的炮火與堅決的反衝鋒,一次次擊退了日軍的進攻。雙方在那幾道石灰岩山脊上反覆爭奪、血戰了整整<strong>四天</strong>。</p>
+
+    <h3>日軍的第一次重大挫敗</h3>
+    <p>金寶戰役的結果,震動了整個戰場:英印守軍以一千多人的兵力,在四天裡,給予了優勢日軍以<strong>沉重的打擊</strong>。日軍傷亡慘重——據稱,參與此役的日軍第 41 聯隊損失之大,以至於<em>後來無力再參加進攻新加坡的戰役</em>。這是<strong>日軍入侵馬來亞以來,所遭遇的第一次重大挫敗</strong>。儘管最終因日軍從海路在側翼登陸、威脅到退路,英印守軍不得不在 1 月 2 日撤往斯林河(Slim River)的下一道防線,但金寶戰役作為一場「<em>防禦的勝利</em>」,證明了:不可一世的日軍,並非不可阻擋。這場血戰,讓金寶這座沉默的錫礦小鎮,在馬來亞抗日的歷史上,留下了悲壯而光榮的一筆。</p>
+    <div class="pull"><p>一座沒沒無聞的錫礦小鎮,因為它採礦形成的地形,意外地成了讓不可一世的日軍首嘗敗績的戰場。金寶用四天的血戰證明:配角,也會有登上歷史舞台中央、發出怒吼的那一刻。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 配角,也有屬於自己的高光時刻</span>
+      <p>金寶戰役揭示了一個振奮人心的真相:<strong>一個平時沒沒無聞的配角,在某個特定的歷史時刻、特定的條件下,也可能爆發出驚人的力量,成為扭轉局勢、留名青史的主角。</strong>金寶平時只是怡保陰影下的小鎮,但在 1941 年那個歲末,正是它——憑著它獨特的地形與守軍的英勇——讓不可一世的日軍,第一次嚐到了重大的挫敗。</p>
+      <p>這對應一個充滿力量的洞見:<em>「配角」並不是一種永恆固定的身份;在合適的時機、合適的舞台上,任何一個看似平凡的存在,都可能迎來屬於自己的「高光時刻」,綻放出不亞於任何主角的光芒。一個人(或一座城)的價值,不會因為它平時的沒沒無聞而被抹去——它只是在等待一個能讓它發光的契機。</em>金寶的可貴,更在於一層深刻的反諷與詩意:正是它作為「礦城」的身份——那片因採錫而形成的、平坦開闊又有險要山脊的獨特地形——成就了它作為「戰場」的高光。它「配角」的出身(錫礦小鎮),恰恰成了它「主角」時刻(抗日要塞)的條件。這提醒我們:你平凡的、不起眼的特質,或許正藏著你在某個關鍵時刻大放異彩的潛能。一座配角之城尚且能有它撼動歷史的四天,那麼,沒有任何一個沉默的存在,是真正注定平庸的——它們,都只是在等待那個讓自己發光的時刻。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ✎</div>
+  <p>戰火散去,和平重臨,金寶重新做回那座安靜的錫礦小鎮。<br>但二十世紀後期,當錫礦的時代落幕,它也迎來了配角之城最典型的命運——<br><span class="hl">礦盡,人散,沉寂。直到一群年輕人的到來,改寫了結局。</span></p>
+</div>
+
+<!-- ===== 金寶 第三章 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">金寶 · 卷三 · Reborn Young</span>
+    <h2 class="act-title">礦盡之後,被年輕重新喚醒</h2>
+    <p class="act-sub">The Tin Collapse, the Silence, and a University Town's New Life</p>
+    <div class="ornament">✎ ✦ ✎</div>
+  </div>
+  <div class="prose">
+    <p>戰爭結束後,金寶重新做回那座安靜的錫礦小鎮。但「靠單一礦藏而興」的城,也註定要承受「礦藏耗竭」的命運——而金寶的結局,卻出乎所有人的意料。</p>
+
+    <h3>礦盡人散的沉寂</h3>
+    <p>二十世紀後期,隨著錫礦的逐漸枯竭、以及 1980 年代國際<strong>錫價的崩盤</strong>,整個近打谷的錫礦業全面衰落。這是「錫都」怡保的命運,也是金寶的命運。曾經因錫而熱鬧的金寶,迅速陷入了沉寂:礦場一座座關閉,商業凋零,<em>年輕人為了生計,紛紛離開家鄉</em>,前往吉隆坡等大城市謀生。留下來的,多是老人與舊屋。金寶,似乎也將像許多礦盡的市鎮一樣,慢慢地老去、被遺忘,只剩下空蕩的老街、斑駁的店屋,與一段無人記得的、曾經繁榮與悲壯的過往。它的故事,本該在這片沉寂中,黯淡地收尾。</p>
+
+    <h3>大學城:年輕人帶回的生命</h3>
+    <p>然而,金寶的故事,迎來了一個動人的轉折。進入二十一世紀,一所大學——<strong>拉曼大學(UTAR,Universiti Tunku Abdul Rahman)</strong>——把它的主要校園,設在了這座沉寂的小城。隨之而來的,是<strong>成千上萬朝氣蓬勃的年輕學生</strong>。這群年輕人,為這座垂垂老去的礦城,注入了一股全新的、青春的生命力。圍繞著大學,新的宿舍、餐廳、咖啡館、書店、文具店與商業,如雨後春筍般,在金寶重新生長起來;沉寂多年的老街,重新響起了年輕的笑聲、單車的鈴聲與青春的喧鬧。金寶,從一座「礦盡人散的礦城」,華麗地轉型成了一座<strong>「充滿青春活力的大學城」</strong>。</p>
+
+    <h3>靠全新的東西重生</h3>
+    <p>金寶重生的方式,格外耐人尋味。它不是靠重新挖到什麼礦藏、不是靠回到它的過去而復甦,而是靠著一種「<em>與它的過去毫不相干的全新事物</em>」——教育與年輕人——獲得了第二次生命。曾經,是「錫」這種地下的礦藏,定義了金寶;如今,是「人」,尤其是充滿希望的年輕人,重新定義了它。一座曾經因挖掘地下的財富而興、又因財富耗竭而衰的城,最終發現:它真正取之不竭的「礦藏」,原來是「人」與「知識」。從錫礦到大學,金寶完成了一場最徹底、也最有希望的重生。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 真正取之不竭的礦藏,是人</span>
+      <p>金寶從「礦城」到「大學城」的重生,揭示了一個深刻而充滿希望的洞見:<strong>一個依賴「會耗竭的有形資源」(如錫礦)而興的存在,當資源枯竭時,它真正的出路,往往是轉向一種「取之不竭的無形資源」——而世界上最取之不竭的礦藏,正是「人」,尤其是年輕人所蘊含的知識、活力與未來。</strong></p>
+      <p>這與怡保「在金屬之外重生」、檳城「能力可遷移」一脈相承,卻給出了一個更溫暖、也更具啟發性的版本。它對應一個值得深思的洞見:<em>地下的礦藏會有挖完的一天,但「人的潛能」與「知識的價值」卻是源源不絕、可以世代再生的。一個地方若懂得把它的根基,從「腳下會耗竭的資源」,轉向「身邊生生不息的人」,它就找到了一條真正可持續的、永不枯竭的生路。</em>金寶的轉身之所以動人,正在於這層象徵意義:它曾用一百多年,挖掘腳下那會耗盡的錫;而當錫挖完了,它最終發現,讓它重新活過來的,是那些充滿希望、會不斷成長的年輕人。更美的是,這場重生由「年輕」帶來——一座垂垂老去的城,被一代又一代的年輕學生重新喚醒,這本身就是最具生命力的隱喻。金寶用它的故事告訴我們:當你賴以生存的舊根基耗盡時,不必絕望;因為真正最寶貴、最取之不竭的財富,從來不在地下,而在那些充滿可能性的、年輕的生命裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⌂ ☔ ✎</div>
+  <p>三座城,三段塵封的史詩:芙蓉的母系王國與血火開埠,<br>太平的拉律血戰與改寫半島的條約,金寶的抗日血戰與青春新生。<br><span class="hl">而走進這三座城,你會發現它們還共享著一種大城市早已弄丟的東西。</span></p>
+</div>
+
+<!-- ===== 合論 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">合論 · The Texture of Small Cities</span>
+    <h2 class="act-title">三城共有的:慢而真實的小城質感</h2>
+    <p class="act-sub">What These Three Cities Quietly Kept</p>
+    <div class="ornament">⌂ ✦ ⌂</div>
+  </div>
+  <div class="prose">
+    <p>芙蓉、太平、金寶,各自承載著驚心動魄的史詩;但走進今天的這三座城,你會感受到一種共通的、寧靜的氣質——一種正在被馬來西亞的大都會迅速弄丟、卻在這些配角之城裡安靜保留下來的、珍貴的「小城質感」。</p>
+
+    <h3>慢的節奏</h3>
+    <p>首先是<strong>慢</strong>。沒有吉隆坡那種令人窒息的塞車與步調,這些小城有著一種從容的節奏。人們有時間在老咖啡店(kopitiam)裡,悠閒地喝一杯濃郁的南洋咖啡、配一份半熟蛋與咖椰吐司;街角的小販認得熟客的臉,記得他們的口味;生活,是按著一種更貼近人本身的速度,而非按著效率與資本的速度,在運轉。這份「慢」,在快節奏的當代,反而成了一種難得的奢侈。</p>
+
+    <h3>舊的街廓</h3>
+    <p>其次是<strong>舊</strong>。正因為沒有被瘋狂的開發與推土機所席捲,這些小城完整地保留下了大量充滿韻味的<em>舊街廓</em>:成排的戰前店屋(shophouse)、斑駁的中文招牌、古老的廟宇與會館、英式的殖民老建築、太平那些雨樹成蔭的湖畔、芙蓉水牛角屋頂的官署、金寶留著礦業記憶的老街……這些「舊」,不是刻意修復的觀光布景,而是活生生地、依然在被日常使用著的空間。漫步其中,時間彷彿慢了下來,一個更舊、更有故事的馬來西亞,在這些街廓裡靜靜地呼吸。</p>
+
+    <h3>真實的人情與底蘊</h3>
+    <p>最後,也是最珍貴的,是<strong>真實</strong>。這些小城沒有大都會那種匆忙、疏離與千篇一律;它們保有著更緊密的<em>社區人情</em>,以及各自獨特而深厚的<em>歷史底蘊</em>——芙蓉的米南加保傳統、太平的先驅歷史與湖光、金寶的礦業記憶與抗日榮光。它們是真實的、有個性的、有根的。在一個越來越多城市變得彼此相似、面目模糊的時代,這份「真實」與「有底蘊」,讓這三座小城,各自保有了一張不可替代的、屬於自己的面孔。</p>
+    <div class="pull"><p>大城市用繁華,換走了慢、舊與真實;而這些配角之城,因為沒能追上繁華,反而把這些最珍貴的東西,連同那些塵封的史詩,一起留了下來。有時候,「沒跟上」,恰恰是一種幸運的保全。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 被遺忘,有時是一種保全</span>
+      <p>三城共有的小城質感,揭示了一個與「發展至上」截然不同的深刻洞見:<strong>當一個地方沒能跟上瘋狂發展的腳步、被時代的快車甩在身後時,它固然失去了繁華,卻也因此「被保全」了——那些在高速發展中最容易被犧牲掉的東西(慢的節奏、舊的街廓、真實的人情,以及那些塵封的歷史),恰恰因為「沒被發展碰到」,而完整地保留了下來。</strong></p>
+      <p>這與怡保「沉睡保存了老街」、清邁「不爭保住了靈魂」一脈相承,卻在這三座更小的配角之城身上,得到了更普遍、也更動人的印證。它對應一個值得當代人深思的洞見:<em>「發展」與「繁華」並非沒有代價——它們往往以犧牲掉慢、舊、真實與在地性為代價。因此,那些被發展「遺忘」的地方,雖然失去了繁華,卻可能在不經意間,成為了這些珍貴之物——以及那些不該被遺忘的歷史——最後的保管者。</em>芙蓉、太平、金寶的「落後」,因此需要被重新理解。它們不是純粹的失敗者;它們是一種更慢、更真實的生活方式,以及一段段塵封史詩的、無意中的守護者。當大都會裡的人們,開始厭倦於喧囂、疏離與千篇一律,開始懷念那種慢而真實的生活、開始追尋那些被遺忘的故事時,他們會驚訝地發現:這些被遺忘的配角小城,恰恰還完好地保存著那一切。被遺忘,於是不再只是失落,而成了一種幸運的保全。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⌂ ✦ ◉</div>
+  <p>讀懂了這三座配角之城各自的史詩與它們共有的質感,該把它們放回那幅城市的地圖上了。<br>它們與前面十三座「主角之城」並列,<br><span class="hl">補上了最謙卑、卻也最貼近你我多數人處境的一筆。</span></p>
+</div>
+
+<!-- ===== 第十四篇 對比 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十四篇 · The Supporting Cast</span>
+    <h2 class="act-title">在主角之外:配角之城的位置</h2>
+    <p class="act-sub">Where the Quiet Cities Stand Among the Protagonists</p>
+    <div class="ornament">⌂ ✦ ◉</div>
+  </div>
+  <div class="prose">
+    <p>這三座配角之城,放進前面十三座「主角之城」的對照裡,才顯出它們獨特、也獨特地謙卑的位置。前十三座城,每一座都是某種命運的「主角」;而芙蓉、太平、金寶,則共同代表了那個被前面所有篇章都忽略了、卻最為普遍的存在——「<em>配角</em>」。</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">芙蓉/太平/金寶 · 配角</div><div class="shift-body"><strong>靠「在巨人光芒外、活出小城的從容」而立</strong>:各自承載著母系王國、改寫半島的條約、撼動戰局的血戰,卻被大城蓋過、被時代甩下。<em>命運:芙蓉守文化、太平化傷痕為美、金寶迎青春新生——配角,也藏著主角級的史詩。</em></div></div>
+      <div class="shift-row"><div class="shift-era">金邊 · 歸零</div><div class="shift-body"><strong>靠「被清空後人民走回家」而重生</strong>。<em>命運:從死城重新住滿,證明生命的韌性。</em></div></div>
+      <div class="shift-row"><div class="shift-era">胡志明市 · 向前</div><div class="shift-body"><strong>靠「失去後不肯回頭的活力」而重生</strong>。<em>命運:輸掉戰爭,卻向前奔成經濟引擎。</em></div></div>
+      <div class="shift-row"><div class="shift-era">河內 · 堅守</div><div class="shift-body"><strong>靠「千年不移的堅守」而立</strong>。<em>命運:守住正統,成為民族不滅的心臟。</em></div></div>
+      <div class="shift-row"><div class="shift-era">泗水 · 英雄</div><div class="shift-body"><strong>靠「一次拒不屈服的犧牲」而立</strong>。<em>命運:成為印尼英雄之城。</em></div></div>
+      <div class="shift-row"><div class="shift-era">馬尼拉 · 覆寫</div><div class="shift-body"><strong>靠「被三個帝國連續重塑」而成</strong>。<em>命運:在斷裂中追尋自己。</em></div></div>
+      <div class="shift-row"><div class="shift-era">雅加達 · 超載</div><div class="shift-body"><strong>靠「承載一國全部重量」而興</strong>。<em>命運:重到沉沒,決定遷都。</em></div></div>
+      <div class="shift-row"><div class="shift-era">曼谷 · 獨大</div><div class="shift-body"><strong>靠「保獨立 + 全國集中」而興</strong>。<em>命運:一城即一國,留下硬扛。</em></div></div>
+      <div class="shift-row"><div class="shift-era">清邁 · 個性</div><div class="shift-body"><strong>靠「不複製首都、自成一格」而興</strong>。<em>命運:守住蘭納靈魂,逆襲為遊牧之都。</em></div></div>
+      <div class="shift-row"><div class="shift-era">馬六甲 · 天賦</div><div class="shift-body"><strong>靠「地利」而興</strong>。<em>命運:天賦被奪,轉為記憶之城。</em></div></div>
+      <div class="shift-row"><div class="shift-era">檳城 · 點子</div><div class="shift-body"><strong>靠「制度」而興</strong>。<em>命運:能力可遷移,重生為東方矽谷。</em></div></div>
+      <div class="shift-row"><div class="shift-era">吉隆坡 · 賭注</div><div class="shift-body"><strong>靠「資源+移民」而興</strong>。<em>命運:靠韌性重建,升格為首都。</em></div></div>
+      <div class="shift-row"><div class="shift-era">怡保 · 暴富</div><div class="shift-body"><strong>靠「單一礦藏」而興</strong>。<em>命運:錫崩盤後長眠,再靠慢活甦醒。</em></div></div>
+      <div class="shift-row"><div class="shift-era">新山 · 依附</div><div class="shift-body"><strong>靠「鄰居」而興</strong>。<em>命運:繫於新加坡,從依附走向整合。</em></div></div>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 配角,才是世界的多數</span>
+      <p>把這三座配角之城,放進前面十三座主角之城的行列,一個最樸素、也最容易被忽略的真相,清晰地浮現出來:<strong>在這個世界上,像芙蓉、太平、金寶這樣的「配角之城」,才是絕大多數;而像吉隆坡、曼谷、河內那樣的「主角之城」,永遠是少數。而更深刻的是——這些配角,其實各自都藏著不亞於主角的、驚心動魄的故事。</strong></p>
+      <p>這給了整個系列一個謙卑卻深刻的收尾洞見:<em>衡量一座城(或一個人)的價值,如果只用「主角的標準」——最大、最強、最有名——那麼這世上絕大多數的存在,都將被判定為「失敗」或「平庸」。但這套標準本身是偏頗的。因為一個豐富、健康、有韌性的世界,從來不是只由幾個耀眼的主角構成的,而是由無數各有其位、各有其史、安靜地做著自己的「配角」共同織就的。</em>芙蓉的母系王國與血火開埠、太平改寫半島命運的條約、金寶撼動戰局的四天血戰——這三座「沒沒無聞」的小城,各自握著的故事,其分量絲毫不亞於任何一座主角之城。它們的史詩被遺忘,不是因為不夠精彩,而僅僅是因為,聚光燈恰好沒有打在它們身上。在寫完了十三座主角之城後,以這三座配角之城作結,正是這趟旅程最需要的一份謙卑與提醒——它讓我們記起:這世界上最廣大、最真實、也藏著最多動人故事的風景,從來都在聚光燈之外。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">⌂ ★ ⌂</div>
+  <p>三座因錫而生、各自承載著史詩、卻被光芒蓋過的小城。<br>當我們把這一切收攏,終於可以回答最初那個問題——<br><span class="hl">一座城不做主角,是不是就沒有了精彩的故事?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,這三座配角之城</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">The Epics Hidden in the Shadow of the Spotlight</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⌂ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把這三座城的故事,收攏成一條線。芙蓉、太平、金寶,共享著「被光芒蓋過」的命運底色,卻各自承載著一段足以驚動整個國家的史詩,並各自活出了不同的從容。</p>
+
+      <h3>芙蓉:母系王國與血火開埠</h3>
+      <p><strong>芙蓉</strong>,守護著一份從蘇門答臘渡海而來、全馬來西亞獨一無二的<em>米南加保母系文化</em>與推選智慧;而它的開埠,同樣浸透著雙溪烏絨錫礦的血與火,並因酋長的內鬥而直接引來了英國的干預。它在水牛角的屋頂下,做一座知道自己是誰的「禮俗之城」。</p>
+
+      <h3>太平:改寫半島命運的血戰與條約</h3>
+      <p><strong>太平</strong>,它的舊名「拉律」是一座血流成河的紀念碑——四萬華人捲入、打了四場的<em>拉律戰爭</em>,與終結它的<em>邦咯條約</em>,直接開啟了英國殖民整個馬來半島的序幕。而它隨後創下的「無數個第一」、它化礦坑為湖的智慧,讓它成為馬來亞現代文明的搖籃,如今從容地守著它的湖與雨。</p>
+
+      <h3>金寶:撼動戰局的四天血戰與青春新生</h3>
+      <p><strong>金寶</strong>,這座近打谷裡的錫礦小鎮,在 1941 年的歲末,上演了讓不可一世的日軍<em>第一次嘗到重大挫敗</em>的「金寶戰役」;而當錫礦的時代落幕、礦盡人散,它又靠著一所大學與一群年輕人,完成了從礦城到大學城的、最有希望的重生。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 你不必成為主角,但你的故事,同樣值得被講述</span>
+        <p>所以,這三座城,究竟是什麼?它們是<strong>「被光芒蓋過、卻各自承載著主角級史詩的配角之城」</strong>——它們不夠大、不夠耀眼、不被歷史特別記住,在「主角的標準」下,它們似乎是沒沒無聞的配角;但它們各自握著的故事——獨一無二的母系文化、改寫半島命運的戰爭與條約、撼動戰局的抗日血戰——其分量,絲毫不亞於任何一座主角之城。</p>
+        <p>它們的「被遺忘」與它們「驚心動魄的史詩」,是同一種命運的兩面;它們的「不夠繁華」與它們「保全下來的真實與底蘊」,是同一種選擇的兩面;它們的「配角身份」與它們「主角級的故事」,是同一個真相的兩面。<em>這三座城最深刻的啟示是:在寫完了十三座站在聚光燈下的主角之城後,它們以最謙卑、卻也最有力的姿態,道出了一個最普遍、也最被忽略的真理——這世界上絕大多數的城、絕大多數的人,都不是主角,而是配角;但「配角」絕不等於「沒有故事」。每一個沉默的配角身上,往往都藏著一段不為人知、卻同樣驚心動魄的史詩;每一個沒沒無聞的存在,都值得被好好地看見、好好地講述。真正的智慧,不是焦慮地去爭奪那盞照不到自己的聚光燈,而是相信:即使聚光燈不在你身上,你的故事、你的價值、你獨一無二的史詩,也同樣真實、同樣動人、同樣值得被銘記。你不必成為主角——但請相信,你的故事,從來都值得被講述。這,就是這三座配角之城,留給世界的、最溫柔也最有力的回聲。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">錫礦給了它們起點,大城的光芒蓋過了它們,時代的快車把它們甩在身後;但它們各自承載著母系王國、改寫半島的條約、撼動戰局的血戰,並把大城市弄丟的慢、舊與真實,連同這些塵封的史詩,一起守了下來——這三座配角之城的故事證明:不在聚光燈下,不代表沒有光。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">三座城的終極啟示</span>
+      <p>這世界上絕大多數的城、絕大多數的人,終其一生都將是某個更大舞台上的「配角」。但「配角」絕不等於「平庸」或「沒有故事」。芙蓉承載著獨一無二的母系王國,太平握著改寫整個半島命運的戰爭與條約,金寶藏著一場撼動戰局的抗日血戰——它們的史詩被遺忘,不是因為不夠精彩,而僅僅是因為聚光燈沒有打在它們身上。真正的智慧,不是焦慮地去爭奪那盞照不到自己的燈,而是認清並接納自己的位置,守護好自己獨一無二的故事與本色,並相信:即使不在聚光燈下,你的故事,也同樣真實、同樣動人、同樣值得被講述。你不必成為主角——你只需要,好好地成為你自己。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        三座因錫而生、被光芒蓋過的小城,<br>
+        芙蓉守著水牛角屋頂下渡海而來的母系王國,<br>
+        太平的舊名拉律曾血流成河,卻以一紙條約改寫了一個半島,<br>
+        金寶在 1941 年的山脊上,讓不可一世的日軍首嘗敗績,<br>
+        它們都不曾長久地站在歷史的聚光燈下,<br>
+        卻各自承載著一段足以驚動整個國家的史詩。<br>
+        這三座配角之城,最終回答了那個最初的問題:<br>
+        不在聚光燈下,<br>不代表沒有光。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">⌂ ✦ ☔</div>
+  <p>被光芒蓋過卻各自承載著史詩的三座小城 · 芙蓉 · 太平 · 金寶</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">THREE CITIES IN THE SHADOW OF THE SPOTLIGHT · SEREMBAN · TAIPING · KAMPAR</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

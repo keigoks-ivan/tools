@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>河流、信仰與山口：巴基斯坦的身世史詩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#10180f;
+  --parchment:#f3eedb;
+  --parchment-deep:#e6dcbf;
+  --green:#0c4a32;
+  --green-deep:#06281a;
+  --gold:#a8852c;
+  --gold-bright:#cda94a;
+  --terra:#9a5a1f;
+  --crimson:#7c2415;
+  --jade:#2f6149;
+  --faint:#605737;
+  --line:#c4b585;
+  --shadow:rgba(16,24,15,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(168,133,44,.08), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(12,74,50,.07), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(12,74,50,.5), transparent 70%),
+    linear-gradient(165deg, var(--green-deep) 0%, var(--green) 45%, #14573b 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23cda94a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='540'/%3E%3Cpath d='M600 90 a200 200 0 1 0 130 50 a150 150 0 1 1 -130 -50 Z' fill='%23cda94a' opacity='0.14'/%3E%3Cpath d='M820 360 l36 70 78 8 -58 54 16 78 -72 -40 -72 40 16 -78 -58 -54 78 -8 Z' fill='%23cda94a' opacity='0.2'/%3E%3Ccircle cx='600' cy='600' r='400'/%3E%3Ccircle cx='600' cy='600' r='250'/%3E%3Cpath d='M60 600 H1140 M600 60 V1140'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 240s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(243,238,219,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--green-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--terra);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--green-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--terra);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--green-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--green-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(12,74,50,.05), rgba(168,133,44,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--green-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT (歷史的回聲) ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--green-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(6,40,26,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--terra));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(243,238,219,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e6c878;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--terra);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--terra);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--green-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--terra);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--green-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(168,133,44,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(12,74,50,.05);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--terra);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--green-deep),var(--green));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23cda94a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(243,238,219,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e6c878}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(205,169,74,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--terra));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--green-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#0c1209 !important}
+.dark .act-title{color:#d4c39c}
+.dark .prose p{color:#c8b690}
+.dark .prose strong{color:#c87a4a}
+.dark .prose em{color:#d4a874}
+.dark .prose h3{color:#c87a4a;border-left-color:var(--terra)}
+.dark .act-sub{color:#867452}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(124,36,21,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--terra);margin-bottom:.5rem;font-weight:600}
+
+/* ===== interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--green-deep);font-weight:500}
+.interlude p .hl{color:var(--terra);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(243,238,219,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--terra);font-style:normal}
+
+/* ===== legacy & shift ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--green-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--green-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--terra);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(12,74,50,.05);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--terra)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--terra);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--green-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--green-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The Land of the Indus · Who the Pakistanis Became</span>
+    <h1>河流、信仰與<span class="em">山口</span><br>巴基斯坦<br>的身世</h1>
+    <p class="sub">從印度河畔人類最早的城市、一道被征服者反覆翻越的山口，到一個為「信仰」而生、卻在「軍隊、神壇與選票」之間反覆拉鋸的國家——<br>一部關於「為何今天的巴基斯坦與巴基斯坦人是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的巴基斯坦，是一個以「伊斯蘭」為立國根本、卻又被旁遮普人、信德人、普什圖人、俾路支人撕扯著的國家？為什麼它擁有南亞最強悍的軍隊與核子武器，文人政府卻總是站不穩腳跟？答案不在當下，而在數千年的縱深裡。一條大河在西北的平原上養出了人類最古老的城市之一，雅利安人、波斯人、希臘人、貴霜人循著同一道山口一波波翻牆而入，佛教曾在這裡綻放成犍陀羅的微笑，而後真主的信仰沿著同一條路線抵達、扎根、最終成為這片土地的靈魂；一家英國公司買下了整個次大陸，而當帝國退場時，一群說著烏爾都語、深信「穆斯林是一個獨立民族」的人，在一條血色的線上，為自己劃出了一個全新的國家——它沒有古老的疆界，只有一個嶄新的理念。這不是一個自古就存在的民族的故事，而是一片<em>被河流養育、被山口貫穿、被信仰定義</em>的土地，如何在 1947 年的午夜，把一個「理念」變成一個「國家」，又如何在此後數十年裡，艱難地追問「我們究竟是誰」的故事。讓我們從頭走一遍，在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--terra);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Land</span>
+    <h2 class="act-title">在所有人來之前，這裡有什麼？</h2>
+    <p class="act-sub">The River, the Pass, and a Land Made to be Crossed</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的巴基斯坦人，得先回到一個比所有征服者、所有信仰都更古老的問題：在他們來之前，這裡有什麼？答案，藏在兩樣東西裡——一條給予生命的大河，和一道讓征服者反覆翻越的山口。</p>
+
+    <h3>一條河，與它命名的土地</h3>
+    <p>先看地圖。這片土地的命脈，是一條發源於喜馬拉雅冰雪、奔流向南注入阿拉伯海的大河——<strong>印度河（Indus）</strong>。事實上，「India」「Hindu」這些字眼的源頭，正是這條河的古名。印度河與它的五條支流（旁遮普「Punjab」的字面意思就是「五水之地」）在乾旱的西北沖積出一片廣袤肥沃的平原，人類最古老的城市文明就在這片河水滋養的土地上誕生。記住這一點：<em>巴基斯坦這片土地，是被一條河定義、滋養、也命名的——它從文明的最初就是「河的國度」。</em></p>
+
+    <h3>那道讓一切改變的缺口：開伯爾山口</h3>
+    <p>但這片土地的命運，更被它西北方的一道缺口所決定。喜馬拉雅與興都庫什山脈之間，留著一道致命的通道——<strong>開伯爾山口（Khyber Pass）</strong>。幾千年來，幾乎每一波改變南亞命運的外來力量——雅利安人、波斯人、亞歷山大的希臘軍隊、貴霜人、突厥與阿富汗的穆斯林征服者、蒙兀兒人——都是循著這道山口翻牆而入。而巴基斯坦這片土地，正好坐落在這道山口的「南方門廳」：<em>它是次大陸的大門，是每一個征服者進入南亞時，第一個踏上、也第一個被改寫的地方。</em></p>
+    <div class="pull"><p>印度河給了這片土地生命，開伯爾山口給了它命運——一片注定要被一波波翻牆而入的人反覆穿越、反覆改寫的土地。</p></div>
+
+    <h3>被穿越者：這片土地的宿命</h3>
+    <p>於是這片土地的故事，本質上是一個「<em>大門</em>」的故事。它太關鍵——是進出南亞的咽喉，所以每一個南下的征服者都必須先拿下它；它又太開放——沒有天然的屏障擋住山口，所以每一波新來的民族、語言與信仰，都會在這裡層層沉積。今天巴基斯坦的多元族群（旁遮普、信德、普什圖、俾路支）、它與阿富汗、伊朗、中亞千絲萬縷的連結、以及它「總是站在帝國邊疆與十字路口」的地緣宿命，根源都在這裡：<em>它生在一道大門上，註定要不斷地迎接、抵抗、並最終吸收那些翻牆而入的人。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 大門即命運</span>
+      <p>在任何國王、任何信仰、任何國家登場之前，<strong>地理</strong>就已經寫好了這個故事的開頭。一片坐落在次大陸西北大門上、被一條大河滋養、又被一道山口貫穿的土地，註定會變成一個多元、戰略地位極高、卻也永遠暴露在外力衝擊下的「邊疆走廊」。</p>
+      <p>這是理解巴基斯坦的第一把鑰匙：<em>它今天所有的特質——族群的多元與張力、與中亞和西亞的深刻連結、以及那份「永遠處在大國地緣博弈最前線」的宿命——其實是同一個地理事實的一體多面：它生在一道誰都必須經過、誰都想掌控的大門上。</em>後來它選擇用「信仰」來凝聚這片本質上是「過道」的土地，正是因為地理本身，從未給過它一個天然的、不證自明的「我們」。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⛩ ✦ ⛩</div>
+  <p>在這片大門之地上，人類建起了最早的城市之一。<br>它有筆直的街道、公共浴池與下水道，<br><span class="hl">卻沒有一個國王的名字、一場戰爭的記載——一個沉默了三千年的文明。</span></p>
+</div>
+
+<!-- ===== 第一章：印度河文明 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The First City</span>
+    <h2 class="act-title">磚城、印章與一座沉默的文明</h2>
+    <p class="act-sub">The Indus Valley — The World's First Urban Civilization, on Pakistani Soil</p>
+    <div class="ornament">⛩ ⛩ ⛩</div>
+  </div>
+  <div class="prose">
+    <p>所有人都會問同一個問題：這片土地的文明，從哪裡開始？答案，就在腳下。早在西元前約 2600 年，當大多數人類還在村落裡摸索時，今天巴基斯坦的土地上，已經矗立起人類最古老的城市文明之一：<strong>印度河文明（Indus Valley Civilization）</strong>。它的兩座大城——信德省的<strong>摩亨佐達羅（Mohenjo-daro）</strong>與旁遮普的<strong>哈拉帕（Harappa）</strong>，都坐落在今日巴基斯坦境內。換句話說，南亞文明的最初源頭，就在這片後來叫做巴基斯坦的土地上。</p>
+
+    <h3>三千年前的城市規劃</h3>
+    <p>它的成就，即使以今天的眼光看也令人震撼。摩亨佐達羅是按照精密的<em>網格規劃</em>建造的——筆直的街道、標準化尺寸的燒製磚塊、複雜的公共下水道與排水系統，甚至有號稱史上最早的公共浴池「大浴場」。這是一個高度組織、講究衛生與秩序的城市世界，其市政工程水準在當時的世界首屈一指。</p>
+
+    <h3>一個沒有國王、沒有戰爭的謎</h3>
+    <p>但印度河文明最迷人的，是它的「<em>沉默</em>」。考古學家挖出了無數刻著符號的印章與文物，卻至今<strong>無法解讀它的文字</strong>；更奇特的是，這個橫跨廣大區域、人口可能達數十萬的文明，幾乎沒有留下宏偉的宮殿、巨大的王陵或描繪戰爭的圖像。沒有炫耀武力的國王，沒有歌頌征服的浮雕——它彷彿是一個由商業、工匠與市政秩序維繫，而非由帝王與軍隊統治的世界。約西元前 1900 年後，或許因為河流改道、氣候變遷與貿易衰退，這個文明逐漸沒落、城市被遺棄，連同它的文字一起，沉入了三千多年的寂靜。</p>
+    <div class="pull"><p>人類最早的城市之一，就建在這片土地上——它有下水道與浴池，卻沒留下一個國王的名字。巴基斯坦的文明開篇，是一段我們至今讀不懂的沉默。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 站在最古老的地基上</span>
+      <p>印度河文明留給今天巴基斯坦一個耐人尋味的對照。一方面，這片土地是南亞城市文明的<strong>真正搖籃</strong>——比《吠陀》、比任何帝國都更古老；摩亨佐達羅至今仍是巴基斯坦最珍視的文化遺產。但另一方面，這個文明被後來的歷史<em>徹底遺忘</em>了——它的文字失傳、它的神祇無人記得，連它與後來「印度教文明」的關係都模糊不清。</p>
+      <p>這埋下了一個將困擾現代巴基斯坦的深層問題：<em>當一個 1947 年才以「伊斯蘭」為名誕生的國家，回望腳下這片土地最古老的根時，它該如何安放這段「前伊斯蘭」、甚至「前印度教」的遠古遺產？</em>摩亨佐達羅的沉默磚牆，是巴基斯坦最深的歷史地基，卻也是它「國族敘事」中最難安放的一塊——因為它提醒著：這片土地的身世，遠比「伊斯蘭國家」這個年輕的標籤要古老、要複雜得多。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ✦ ☸</div>
+  <p>當印度河的城市沉入寂靜，山口傳來了一波又一波的征服者。<br>而在他們之中，有一個帝國帶來了佛陀——<br><span class="hl">於是在這片土地上，曾綻放出人類最美的微笑之一：犍陀羅的佛像。</span></p>
+</div>
+
+<!-- ===== 第二章：山口的過客與犍陀羅 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Crossroads</span>
+    <h2 class="act-title">山口的過客，與犍陀羅的微笑</h2>
+    <p class="act-sub">Persians, Greeks, and the Buddhist Civilization of Gandhara</p>
+    <div class="ornament">☸ ☸ ☸</div>
+  </div>
+  <div class="prose">
+    <p>印度河文明沒落後的兩千年裡，這片「大門之地」迎來了一波又一波翻越山口的過客。首先是雅利安人帶著《吠陀》而來；接著西元前六世紀，波斯的<strong>阿契美尼德帝國</strong>把這裡納為帝國最東的行省；西元前 327 年，馬其頓的<strong>亞歷山大大帝</strong>更率軍翻過山口、渡過印度河，在這片土地上留下了希臘的印記。波斯的行政、希臘的藝術、印度的信仰——這片土地像一個巨大的熔爐，把每一波過客的文化都層層疊加、相互混合。</p>
+
+    <h3>犍陀羅：當希臘遇見佛陀</h3>
+    <p>這場文化大熔合，孕育出一個璀璨的文明——<strong>犍陀羅（Gandhara）</strong>。以今天巴基斯坦西北的白沙瓦、塔克西拉一帶為中心，這裡在貴霜帝國（尤其迦膩色伽王）時期成為佛教的重鎮。最不可思議的是它的藝術：<em>當地的工匠用希臘羅馬的雕刻技法，來塑造佛陀的形象</em>——於是佛陀第一次有了波浪般的捲髮、深邃的五官、與古希臘神祇般飄逸的衣褶。這就是著名的「<strong>犍陀羅佛像</strong>」，是東西方文明在這片土地上交融出的、人類藝術史上最動人的成果之一。塔克西拉（Taxila）更是當時世界上最古老的大學城與佛教學術中心之一。</p>
+    <div class="pull"><p>在這片後來以伊斯蘭立國的土地上，曾經盛開過佛教最燦爛的花朵——一尊用希臘技法雕出的佛陀微笑，正是「大門之地」海納百川的最美見證。</p></div>
+    <p>幾個世紀裡，犍陀羅是佛教向北、向東傳播的關鍵樞紐——佛法正是經由這片土地，越過帕米爾高原，傳入中國與東亞。然而，正如後來在印度本土一樣，佛教在這片土地上也終究式微，被後來的印度教與更晚到來的伊斯蘭所取代。今天，塔克西拉與犍陀羅的佛教遺址，靜靜地躺在巴基斯坦的土地上，成為一個失落世界的見證。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 熔爐的證明</span>
+      <p>犍陀羅文明是這片「大門之地」最深刻的隱喻：<strong>它的偉大，恰恰來自它的「被穿越」。</strong>正因為波斯人、希臘人、印度人、中亞人都曾在這裡相遇、停留、混合，才會誕生出「用希臘之手雕刻印度之佛」這樣前所未有的奇蹟。這片土地的創造力，從來不是源於封閉的純粹，而是源於開放的雜糅。</p>
+      <p>這留下一個耐人尋味的對照。當代巴基斯坦的國族敘事，傾向於從「伊斯蘭的到來」開始講述自己的故事；但犍陀羅的佛陀微笑提醒著：<em>這片土地真正的歷史性格，不是任何單一信仰的「純粹」，而是無數信仰與文明層層交疊的「混血」。</em>一個誕生於「大門」之上的地方，它最真實的身世，永遠是多元的、交融的、收納一切過客的——這與它後來試圖用單一信仰來定義自己的努力之間，存在著一種深刻而微妙的張力。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☪ ✦ ☪</div>
+  <p>佛陀的微笑漸漸淡去後，山口又一次被推開。<br>這一次翻牆而入的，帶著一部新的經典與一位唯一的真主——<br><span class="hl">而這片「大門之地」，將成為它在南亞最早、也最深的落腳處。</span></p>
+</div>
+
+<!-- ===== 第三章：伊斯蘭的到來 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Faith Arrives</span>
+    <h2 class="act-title">真主，沿著河與山口而來</h2>
+    <p class="act-sub">How Islam Took Root in the Land of the Indus</p>
+    <div class="ornament">☪ ☪ ☪</div>
+  </div>
+  <div class="prose">
+    <p>從西元八世紀起，一股將永遠改變這片土地的力量，循著古老的路徑進入次大陸——<strong>伊斯蘭</strong>。而它最早、最深的落腳處，正是今天的巴基斯坦。西元 711 年，年輕的阿拉伯將領<strong>穆罕默德·賓·卡西姆（Muhammad bin Qasim）</strong>率軍沿海路與河谷北上，征服了信德（Sindh）——這是伊斯蘭政權在南亞建立的第一個據點。真主的信仰，從這片印度河下游的土地，開始向次大陸滲透。</p>
+
+    <h3>山口再次成為信仰之路</h3>
+    <p>幾個世紀後，更大的浪潮從西北的山口湧入。從十一世紀起，來自中亞與阿富汗的突厥、阿富汗穆斯林統治者（如加茲尼的馬哈茂德），一波波翻過開伯爾山口南下。他們建立的政權——德里蘇丹國、乃至後來的蒙兀兒帝國——都把今天的巴基斯坦這片土地，當作進入南亞的<em>第一塊基石</em>。於是這片「大門之地」，自然而然地成為次大陸上伊斯蘭信仰最濃厚、扎根最深的核心區域。</p>
+
+    <h3>蘇非聖者：用詩歌與愛贏得人心</h3>
+    <p>但伊斯蘭真正深入這片土地人心的，不只是征服者的刀劍，更是<strong>蘇非派（Sufism）</strong>聖者的詩歌與愛。蘇非派強調神秘體驗、虔愛真主與眾生平等，以其溫和、包容、近乎詩意的靈性，在旁遮普與信德的鄉野贏得了無數信眾。許多飽受種姓壓迫的低種姓群體，正是被伊斯蘭「人人在真主面前平等」的訊息所吸引而改宗。今天巴基斯坦各地那些香火鼎盛的蘇非聖者陵墓（dargah），以及布雷·沙阿（Bulleh Shah）等蘇非詩人傳唱至今的詩歌，正是這段「以愛傳教」歷史留下的、最溫柔也最深刻的印記。</p>
+    <div class="pull"><p>伊斯蘭在這片土地上的勝利，與其說是靠征服者的刀劍，不如說是靠蘇非聖者的詩歌——它贏得的不只是土地，更是人心。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 信仰扎根的地理</span>
+      <p>為什麼今天的巴基斯坦是一個穆斯林佔絕對多數的國家，而南亞其他大部分地區卻不是？答案，深植於它「大門之地」的地理。<strong>正因為這片土地是伊斯蘭進入南亞的第一站、是每一波穆斯林征服者南下時最先、也最久經營的核心區域，伊斯蘭在這裡扎根最早、最深、最廣。</strong></p>
+      <p>這是一個將決定一切的伏筆。<em>當數百年後，整個次大陸的命運要被「宗教人口的分布」所重新切割時，這片西北的「穆斯林多數區」，自然就成了「一個獨立穆斯林家園」這個構想最現實的地理基礎。</em>地理決定了伊斯蘭在哪裡扎根最深，而伊斯蘭扎根的深淺，又將在二十世紀決定一個全新國家的邊界。從山口到信仰，再從信仰到國界——這條因果鏈，正是理解巴基斯坦為何存在的最深一層邏輯。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⬡ ✦ ⬡</div>
+  <p>當蒙兀兒的旗幟飄揚在次大陸上空時，<br>幾艘來自遙遠島國的商船，正悄悄駛入印度的港口。<br><span class="hl">他們起初只想做生意——卻意外地買下了整個次大陸，連同這片大門之地。</span></p>
+</div>
+
+<!-- ===== 第四章：蒙兀兒與東印度公司 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · Empire and Company</span>
+    <h2 class="act-title">蒙兀兒的盛世，與一家公司的征服</h2>
+    <p class="act-sub">The Mughals, the British, and the Subcontinent Bought by a Firm</p>
+    <div class="ornament">⬡ ⬡ ⬡</div>
+  </div>
+  <div class="prose">
+    <p>1526 年，自稱兼有帖木兒與成吉思汗血統的中亞君主<strong>巴布爾</strong>，翻過山口建立了南亞史上最華麗的伊斯蘭帝國——<strong>蒙兀兒帝國</strong>。今天巴基斯坦的土地，是這個帝國的核心區域之一：拉合爾（Lahore）一度是帝國的首都之一，至今仍矗立著蒙兀兒時代留下的壯麗遺產——拉合爾古堡、巴德夏希清真寺（曾是世界最大的清真寺之一）、以及精緻的夏利馬爾花園。這是這片土地作為一個強盛伊斯蘭帝國心臟的黃金時代。</p>
+
+    <h3>盛極而衰：分裂招來征服</h3>
+    <p>但蒙兀兒帝國在皇帝奧朗則布的宗教高壓與過度擴張後，於十八世紀迅速崩解。次大陸再度碎裂成無數彼此征戰的王國與勢力。也正是在這個權力真空中，一個極其特殊的存在登場了——它不是一個國家，而是一家公司：<strong>英國東印度公司</strong>。這家貿易公司利用印度的分裂，透過戰爭、結盟與收買，像滾雪球般吞併了一個又一個王國。1849 年，它擊敗了旁遮普強大的<em>錫克王國</em>，吞併了旁遮普——這意味著，今天巴基斯坦的全部土地，都落入了英國之手。</p>
+    <div class="pull"><p>統治次大陸數億人口的，一度不是某個帝國，而是一家在倫敦上市、向股東分紅的「公司」——分裂的土地，讓征服變得如此廉價。</p></div>
+    <p>1857 年的大起義後，英國政府解散了東印度公司，由王室直接接管，開啟了「英屬印度（British Raj）」時代。整個次大陸——包括今天的印度、巴基斯坦、孟加拉——第一次被一個外來政權，縫合成一個統一的行政整體。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 邊疆的雙重角色</span>
+      <p>在英屬印度的版圖裡，今天巴基斯坦這片土地扮演著一個雙重角色，而這兩個角色都將深刻地塑造它的未來。<strong>其一，它是帝國的「西北邊疆」</strong>——直接面對著阿富汗與沙俄南下的威脅，是英國與俄國「大博弈（Great Game）」的最前線。為了守住這道邊疆，英國在這裡駐紮重兵、修築要塞、並大量從旁遮普招募士兵，使旁遮普成為英印軍隊的主要兵源地。</p>
+      <p><strong>其二，它是「穆斯林多數區」</strong>。這兩個身分疊加，埋下了深遠的伏筆：<em>這片土地既養成了濃厚的尚武傳統與龐大的軍人階層（這將解釋為何巴基斯坦的軍隊日後如此強大），又是伊斯蘭認同最深厚的區域（這將解釋為何它會成為「穆斯林家園」的地理基礎）。</em>「強悍的軍隊」與「伊斯蘭的認同」——這兩樣日後定義巴基斯坦的核心特質，都深植於它作為英帝國「西北邊疆穆斯林兵源地」的這段歷史之中。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ✺ ✦</div>
+  <p>當一個「印度民族」的意識在反抗英國的浪潮中覺醒時，<br>次大陸的穆斯林精英卻開始焦慮地追問一個問題——<br><span class="hl">在一個印度教徒佔多數的國家裡，我們穆斯林，會不會永遠是少數？</span></p>
+</div>
+
+<!-- ===== 第五章：兩個民族理論 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Idea</span>
+    <h2 class="act-title">一個「理念」如何變成一個國家</h2>
+    <p class="act-sub">Iqbal's Dream, Jinnah's Will, and the Two-Nation Theory</p>
+    <div class="ornament">✺ ✺ ✺</div>
+  </div>
+  <div class="prose">
+    <p>巴基斯坦與世界上絕大多數國家都不同。它不是一個自古就存在的民族、在某片祖傳的土地上建立的國家。它是<strong>一個「理念」的產物</strong>——一個關於「次大陸的穆斯林應該擁有自己的家園」的理念。要理解巴基斯坦，就必須理解這個理念如何誕生、又如何被意志與鮮血變成現實。</p>
+
+    <h3>覺醒的焦慮：穆斯林會不會永遠是少數？</h3>
+    <p>故事的背景，是英屬印度後期高漲的反殖民與民族主義浪潮。當以國大黨為首、要求印度獨立的運動風起雲湧時，次大陸的穆斯林精英卻陷入了深深的焦慮：印度的穆斯林雖有近億之眾，但在一個印度教徒佔絕對多數的「一人一票」民主國家裡，他們會不會<em>永遠淪為政治上的少數，他們的信仰、文化與權利會不會被多數所淹沒</em>？這份焦慮，是「巴基斯坦理念」的真正起點。</p>
+
+    <h3>詩人的夢與律師的意志</h3>
+    <p>給這份焦慮賦予詩意與哲思的，是偉大的詩人哲學家<strong>穆罕默德·伊克巴爾（Muhammad Iqbal）</strong>。1930 年，他在一場著名的演說中構想：印度西北的穆斯林多數省份，應當聯合成一個自治的整體。他用優美的烏爾都語與波斯語詩歌，喚起了穆斯林對自身文明與尊嚴的自覺，被尊為巴基斯坦的「精神之父」。</p>
+    <p>而把這個詩意的夢想，變成一個冷峻政治現實的，是一位西裝筆挺、作風世俗的律師——<strong>穆罕默德·阿里·真納（Muhammad Ali Jinnah）</strong>，被尊稱為「<strong>巴巴-伊-阿札姆</strong>」（Quaid-e-Azam，意為「偉大的領袖」）。真納早年其實是印度教徒與穆斯林團結的倡導者，但他逐漸確信兩大社群已無法共存，於是領導全印穆斯林聯盟，提出了著名的「<strong>兩個民族理論（Two-Nation Theory）</strong>」：印度的穆斯林與印度教徒不只是兩個宗教群體，而是兩個擁有不同歷史、文化、價值與生活方式的<em>截然不同的民族</em>，因此穆斯林理應擁有一個屬於自己的獨立國家。1940 年，穆斯林聯盟正式通過《拉合爾決議》，公開要求建立「巴基斯坦」。</p>
+    <div class="pull"><p>巴基斯坦的誕生，靠的不是一塊祖傳的土地，而是一個信念：穆斯林是一個獨立的民族，理應擁有自己的家園。一個「理念」，從此要變成一個國家。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 為理念而生的國家</span>
+      <p>巴基斯坦的立國，是人類歷史上罕見的案例：<strong>一個主要基於「宗教認同」這個單一理念、而非基於既有民族或地理疆界而誕生的國家。</strong>它的名字「Pakistan」本身就是一個拼合的新詞（取旁遮普、阿富汗尼亞/西北邊省、喀什米爾、信德、俾路支斯坦等地名的字首），同時在波斯語/烏爾都語中意為「純淨之地」——一個為「信仰的純淨」而生的、嶄新的名字。</p>
+      <p>這個獨特的起點，是理解巴基斯坦此後一切掙扎的鑰匙。<em>當一個國家的存在理由是「我們是穆斯林，所以我們是一個民族」時，它就背負了一個其他國家不必回答的根本問題：除了「我們都是穆斯林」之外，是什麼讓旁遮普人、信德人、普什圖人、俾路支人、以及說孟加拉語的東部同胞，真正成為「一個民族」？</em>「伊斯蘭」這個立國的黏合劑，究竟夠不夠強，足以壓過族群、語言與地域的巨大差異？這個在 1947 年被巧妙迴避的問題，將在此後的數十年裡，一次又一次地回來索債。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>自由終於來臨。但在歡慶的鐘聲響起的同一刻，<br>一條倉促劃下的線，正把一個文明切成兩半。<br><span class="hl">理念的勝利，是用人類史上最大規模、最血腥的一場遷徙換來的。</span></p>
+</div>
+
+<!-- ===== 第六章：分治與誕生 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Birth</span>
+    <h2 class="act-title">午夜誕生的國家，與一條血色的線</h2>
+    <p class="act-sub">Partition, 1947 — A Nation Born in Blood and Migration</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>1947 年 8 月 14 日的午夜，巴基斯坦誕生了——比印度早一天。一個僅僅存在於演說、決議與夢想中的「理念」，終於成為一個插上聯合國旗幟的真實國家。真納成為它的首任總督。然而，這份來之不易的自由，從誕生的第一刻起，就浸透了鮮血。因為巴基斯坦的誕生，伴隨著一場慘烈到難以言喻的<strong>分治（Partition）</strong>。</p>
+
+    <h3>一條線，與一千五百萬人的逃亡</h3>
+    <p>一位從未到過印度的英國律師雷德克里夫，被指派在短短數週內，依據宗教人口的分布，在地圖上劃出印度與巴基斯坦的邊界。這條倉促、武斷的「<strong>雷德克里夫線</strong>」，硬生生地把旁遮普與孟加拉這兩個族群混居、血脈交融的地區從中切開。結果是一場人類史上規模最大的遷徙與災難：約<strong>一千多萬人</strong>為了逃到「正確」宗教的一邊而背井離鄉——穆斯林湧向巴基斯坦，印度教徒與錫克教徒湧向印度。在遷徙途中，積壓的宗教仇恨徹底爆發，村莊被屠戮、滿載屍體的火車抵達邊境，估計有<strong>數十萬到上百萬人</strong>在這場大屠殺中喪生。巴基斯坦，是在數百萬難民的血淚與屍骨之上立國的。</p>
+    <div class="pull"><p>巴基斯坦的國旗在午夜升起，難民的哭嚎在邊境響起——這個為理念而生的國家，誕生於人類史上最大的一場血色遷徙之中。</p></div>
+
+    <h3>一個被「分成兩半」的奇怪國家</h3>
+    <p>更奇特的是這個新國家的形狀。因為它的疆界是依「穆斯林多數區」劃定的，而這樣的地區散落在次大陸的東西兩端——於是巴基斯坦從誕生之日起，就是一個「一國兩塊」的怪異存在：<em>西巴基斯坦</em>（今天的巴基斯坦，以旁遮普、信德、普什圖、俾路支為主）與<em>東巴基斯坦</em>（今天的孟加拉，以孟加拉人為主），中間隔著一千六百公里的敵國印度領土。把這兩塊地理隔絕、語言不通、文化迥異的土地黏在一起的，只有一樣東西——<strong>共同的伊斯蘭信仰</strong>。這個先天的結構性矛盾，將在二十四年後引爆。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 縫合的代價，與留下的傷口</span>
+      <p>巴基斯坦的誕生，留下了兩道將定義其國運的傷口。<strong>第一道是對外的</strong>：分治在印巴之間結下了血海深仇，尤其是對<em>喀什米爾</em>的主權爭端——這個穆斯林佔多數、卻由印度教王公決定加入印度的地區，在 1947 年立刻引爆了第一次印巴戰爭，並成為延續至今、數度引爆戰爭、雙方都已擁有核武的永久火藥桶。<em>從誕生的第一刻起，「對抗印度」就被寫進了巴基斯坦的國家基因，這也將餵養出它日後龐大的軍事機器。</em></p>
+      <p><strong>第二道是對內的</strong>：那個「一國兩塊、只靠信仰黏合」的怪異結構，以及那個被巧妙迴避的問題——「除了伊斯蘭，是什麼讓我們成為一個民族」——都被原封不動地帶進了這個新生的國家。巴基斯坦立國的那一刻，既是一個理念的輝煌勝利，也是一連串尚未引爆的矛盾的開始。它證明了一個理念可以創造一個國家，但還沒有證明，這個理念能否<em>長久地維繫</em>一個國家。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">★ ✦ ★</div>
+  <p>新生的國家還來不及站穩，它的「國父」就溘然長逝。<br>留下的權力真空裡，三股力量開始角逐——<br><span class="hl">軍隊、文人政客、與神壇。這場三方拉鋸，將定義巴基斯坦的一切。</span></p>
+</div>
+
+<!-- ===== 第七章：軍隊的崛起 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Generals</span>
+    <h2 class="act-title">當軍隊成為國家本身</h2>
+    <p class="act-sub">Why the Army, Not the Ballot, Came to Rule</p>
+    <div class="ornament">★ ★ ★</div>
+  </div>
+  <div class="prose">
+    <p>巴基斯坦的開局極其不利。國父真納在立國僅一年後就因病去世，第一任總理也在 1951 年遇刺身亡。國家失去了最具威望的奠基者，文人政治精英卻陷入內鬥與無能，遲遲無法制定出一部憲法、建立穩固的民主制度。在這個權力真空中，一股組織嚴密、紀律嚴明、且繼承了英印「西北邊疆兵源地」傳統的力量，迅速填補了空缺——<strong>軍隊</strong>。</p>
+
+    <h3>第一次政變，與一個循環的開始</h3>
+    <p>1958 年，陸軍總司令<strong>阿尤布·汗（Ayub Khan）</strong>發動政變，廢除憲法、實行軍事統治。這是巴基斯坦歷史上第一次軍事接管，卻絕不是最後一次。此後數十年，一個清晰的<em>循環</em>反覆上演：文人政府上台 → 陷入腐敗、內鬥或經濟危機 → 軍隊以「拯救國家」之名發動政變 → 將軍統治數年 → 迫於內外壓力還政於民 → 文人政府再度上台……巴基斯坦的歷史，幾乎有一半時間是在軍事統治下度過的。</p>
+    <div class="pull"><p>在許多國家，是國家擁有一支軍隊；但在巴基斯坦，人們半開玩笑半認真地說——是這支軍隊，擁有一個國家。</p></div>
+
+    <h3>不只是軍隊，而是一個「國中之國」</h3>
+    <p>巴基斯坦軍隊的特殊之處，在於它遠不止是一支武裝力量。經過數十年的擴張，它已經成為一個盤根錯節的<strong>政治與經濟複合體</strong>：它掌控著龐大的商業帝國（從房地產、製造業到消費品）、深度介入外交與安全政策、並透過其強大的情報機構「<em>三軍情報局（ISI）</em>」，在幕後操縱著政局。即使在文人執政時期，國防、核武、對印與對阿富汗政策等核心領域，實際的決定權往往仍牢牢掌握在軍方手中。軍隊把自己定位為國家意識形態（伊斯蘭與反印）的最終守護者——這賦予了它凌駕於民選政府之上的正當性。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 為何是軍隊填補了真空</span>
+      <p>軍隊之所以能成為巴基斯坦真正的權力核心，根源要追溯到它的立國條件。<strong>第一，是「對抗印度」的生存焦慮</strong>：一個從誕生起就與龐大宿敵為鄰、且為喀什米爾數度開戰的國家，自然會把軍事安全置於一切之上，從而賦予軍隊至高的地位與資源。<strong>第二，是文人政治的先天虛弱</strong>：國父早逝、缺乏成熟的民主傳統、加上族群分裂，使文人政府始終難以建立穩固的正當性。</p>
+      <p>於是形成了一個自我強化的惡性循環：<em>文人政府越是虛弱與分裂，軍隊干政的「必要性」就越被凸顯；而軍隊每一次干政，又進一步削弱了文人民主制度自我成長、自我修復的能力。</em>這正是巴基斯坦政治最深的結構性困局——它擁有民主的形式（選舉、議會、政黨），卻始終無法讓民主真正成為國家權力的最終來源。理解了「軍隊為何是國家本身」，就理解了巴基斯坦政治的一半。而另一半，藏在那個被軍隊高舉的旗幟——「伊斯蘭」——之中。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☂ ✦ ☂</div>
+  <p>那個「一國兩塊、只靠信仰黏合」的怪異結構，<br>在立國二十四年後，終於到了攤牌的一刻。<br><span class="hl">當東邊的同胞用選票贏得了多數、卻被拒絕掌權時，「兩個民族理論」自己,迎來了最痛的反證。</span></p>
+</div>
+
+<!-- ===== 第八章：1971 與孟加拉的分離 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Breaking</span>
+    <h2 class="act-title">1971：當「信仰」黏不住「語言」</h2>
+    <p class="act-sub">The Loss of East Pakistan and the Limits of an Idea</p>
+    <div class="ornament">☂ ☂ ☂</div>
+  </div>
+  <div class="prose">
+    <p>巴基斯坦立國時最深的結構性矛盾，終於在 1971 年引爆。回想第六章——巴基斯坦是一個「一國兩塊」的怪異國家，西巴基斯坦與東巴基斯坦（今孟加拉）相隔一千六百公里，把它們黏在一起的只有共同的伊斯蘭信仰。但隨著時間推移，這層信仰的黏合劑，被一道越來越深的裂痕所撕扯。</p>
+
+    <h3>多數的人口，邊緣的待遇</h3>
+    <p>問題的核心是<strong>不公</strong>。東巴基斯坦的孟加拉人，其實佔了全國的人口多數；但國家的政治、軍事與經濟權力，卻幾乎全被西巴基斯坦（尤其旁遮普）的精英所壟斷。東部創造的大量外匯（如黃麻出口）被用於西部的建設，東部卻長期投資不足、發展滯後。更致命的是<em>語言問題</em>：當中央政府試圖把西部的<strong>烏爾都語</strong>強加為唯一國語、貶抑孟加拉人引以為傲的<em>孟加拉語</em>時，深深地刺痛了東部同胞的認同——他們覺得，自己雖然同為穆斯林，卻在這個「穆斯林家園」裡淪為了二等公民。</p>
+    <div class="pull"><p>原來，光是「我們都是穆斯林」，並不足以讓人們忘記他們說著不同的語言、受著不平等的待遇——這是「兩個民族理論」最痛的反證。</p></div>
+
+    <h3>選票、鎮壓與獨立</h3>
+    <p>1970 年，巴基斯坦舉行了第一次全國大選。代表東部孟加拉人利益的政黨贏得了壓倒性的多數，依法理應組閣執政。但西部的軍政權與政治精英，拒絕把權力交給東部——他們無法接受由「孟加拉人」來主導國家。談判破裂後，軍隊在 1971 年對東部發動了血腥的軍事鎮壓。慘烈的衝突與人道災難隨之而來，數以百萬計的難民湧入印度。最終，印度出兵介入，巴基斯坦軍隊在東線戰敗投降。東巴基斯坦宣告獨立，成為一個新的國家——<strong>孟加拉（Bangladesh）</strong>。巴基斯坦，失去了它一半以上的人口。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一個理念的極限</span>
+      <p>1971 年孟加拉的分離，是對巴基斯坦立國根基——「兩個民族理論」——最沉重的一次拷問。這個理論主張「<strong>宗教認同高於一切，穆斯林就是一個民族</strong>」；但孟加拉的獨立卻無情地證明了：<em>當宗教的認同，遇上語言、族群與經濟公平的訴求時，它未必總能勝出。</em>同樣是穆斯林的孟加拉人，最終選擇了基於「語言與族群」的孟加拉民族認同，而非基於「宗教」的巴基斯坦認同。</p>
+      <p>這場創傷，給巴基斯坦留下了一個揮之不去的幽靈，也讓第五章那個被迴避的問題以最慘烈的方式回歸：<em>除了「我們都是穆斯林」之外，是什麼讓這個國家的各個族群，真正成為「一個民族」？</em>1971 年的答案是殘酷的——僅靠信仰是不夠的。這場分裂深深地震撼了剩下的巴基斯坦，並催生出一種深刻的恐懼：如果信仰黏不住孟加拉人，那它能黏住信德人、普什圖人、尤其是長期心懷不滿的俾路支人嗎？這份「國家可能再度分裂」的焦慮，將促使後來的統治者，更加用力地去強化那唯一的黏合劑——伊斯蘭。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☪ ✦ ☪</div>
+  <p>失去了一半人口的巴基斯坦，陷入了身分的恐慌。<br>於是一位將軍決定，要把那唯一的黏合劑用到極致——<br><span class="hl">他要把這個「為穆斯林而生」的國家，改造成一個真正「伊斯蘭」的國家。</span></p>
+</div>
+
+<!-- ===== 第九章：伊斯蘭化 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Islamisation</span>
+    <h2 class="act-title">齊亞政變與一場由上而下的伊斯蘭化</h2>
+    <p class="act-sub">Zia's Revolution and the Faith That Became Law</p>
+    <div class="ornament">☪ ☪ ☪</div>
+  </div>
+  <div class="prose">
+    <p>1971 年的創傷，把一個根本問題逼到了巴基斯坦面前：如果信仰連孟加拉人都黏不住，那這個國家還能靠什麼凝聚？對於這個問題，一位將軍給出了一個極端的答案。1977 年，陸軍參謀長<strong>齊亞·哈克（Zia-ul-Haq）</strong>發動政變，推翻並處決了民選總理布托，開始了長達十一年的軍事統治。而他留給巴基斯坦最深遠的遺產，是一場由國家機器由上而下強力推動的<strong>伊斯蘭化（Islamisation）</strong>。</p>
+
+    <h3>把信仰寫進法律</h3>
+    <p>齊亞的邏輯是：既然巴基斯坦是「為伊斯蘭而生」的國家，那麼強化伊斯蘭，就能同時鞏固國家認同與他自己統治的正當性。他推行了一系列影響至今的措施：引入嚴格的<em>伊斯蘭刑法（Hudood Ordinances）</em>、設立伊斯蘭法庭審查法律是否符合教義、推動經濟伊斯蘭化（如禁止利息）、並大力扶植宗教學校（madrassa）的擴張。原本相對世俗、由蘇非傳統主導的巴基斯坦社會，在這場運動中被推向了一個遠為保守、教條的方向。</p>
+    <div class="pull"><p>巴基斯坦立國時，「伊斯蘭」是凝聚穆斯林的一面旗幟；在齊亞之後，「伊斯蘭」成了寫進法律、深入日常、且再也無法輕易退回的國家機器。</p></div>
+
+    <h3>冷戰、聖戰與一個無法回收的怪物</h3>
+    <p>齊亞的伊斯蘭化，恰好撞上了一個改變世界的時刻。1979 年，蘇聯入侵鄰國阿富汗。巴基斯坦在美國與沙烏地阿拉伯的金援下，成為支援阿富汗「<em>聖戰者（Mujahideen）</em>」抵抗蘇聯的前線基地。巴基斯坦的情報機構 ISI，與遍布邊境的宗教學校，被動員起來訓練、武裝、輸送大批伊斯蘭武裝份子進入阿富汗。這場「聖戰」在當時被視為冷戰的偉大勝利——它確實拖垮了蘇聯。但它也在巴基斯坦的西北邊境，催生出一個由武器、毒品、宗教極端主義與跨境武裝網絡交織而成的<strong>怪物</strong>。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 用同一把火,既取暖又自焚</span>
+      <p>齊亞時代揭示了巴基斯坦最深刻的一個困局：<strong>它試圖把「伊斯蘭」這團火，同時當作三樣東西來使用——凝聚國家認同的黏合劑、鞏固政權的工具、以及對外（對印度、在阿富汗）的戰略武器。</strong>在短期，這團火確實提供了認同、正當性與地緣影響力。</p>
+      <p>但火,是無法被完全馴服的。<em>當一個國家為了戰略目的，刻意培育、武裝、神聖化了宗教極端主義之後，它就再也無法決定這團火只燒向哪裡。</em>那些被訓練來對抗蘇聯與印度的武裝網絡，最終把槍口轉向了巴基斯坦自身——在後來的數十年裡，巴基斯坦成為全球遭受恐怖主義襲擊最嚴重的國家之一，數萬平民與軍人死於本土的爆炸與襲擊。齊亞的伊斯蘭化，是一場用「信仰之火」既取暖、又最終灼傷自己的悲劇。這也讓那個立國的根本問題變得更加沉重：當「伊斯蘭」這個黏合劑被推向極端後，它究竟是讓國家更團結了，還是釋放出了更難以收拾的分裂與暴力？</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✺ ✦ ✺</div>
+  <p>除了軍隊與神壇，巴基斯坦還有第三股力量在角逐權力——<br>那些懷抱著民主與改革夢想的文人政治家。<br><span class="hl">而其中一個家族的興衰起落，幾乎就是巴基斯坦民主命運的縮影。</span></p>
+</div>
+
+<!-- ===== 第十章：文人政治與王朝 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Dynasties</span>
+    <h2 class="act-title">布托家族與民主的悲劇循環</h2>
+    <p class="act-sub">The Bhuttos, the Sharifs, and Democracy's Recurring Tragedy</p>
+    <div class="ornament">✺ ✺ ✺</div>
+  </div>
+  <div class="prose">
+    <p>在軍隊與神壇之外，巴基斯坦也從未放棄對民主的追求。但它的文人政治，呈現出一種獨特而悲劇的面貌——它高度<strong>王朝化、個人化</strong>，並一次次地被軍隊的陰影、彼此的內鬥與自身的腐敗所吞噬。其中最具代表性的，是兩個輪流主宰了巴基斯坦民主政治數十年的家族與政黨。</p>
+
+    <h3>布托家族：一個王朝的興衰與血淚</h3>
+    <p>第一個是<strong>布托家族（Bhutto）</strong>。家族的開創者<em>佐勒菲卡爾·阿里·布托（Zulfikar Ali Bhutto）</em>是一位魅力非凡的政治家，創立了巴基斯坦人民黨，在 1971 年的廢墟上出任總理，並推動了一系列民粹改革。但他最終被齊亞·哈克政變推翻，並在一場備受爭議的審判後被處以絞刑。他的女兒<strong>貝娜齊爾·布托（Benazir Bhutto）</strong>繼承了衣缽，成為<em>伊斯蘭世界第一位女性政府首腦</em>，兩度出任總理，象徵著巴基斯坦自由派的希望。然而她也兩度被解職，最終在 2007 年競選期間，於一場恐怖襲擊中遇刺身亡。一個家族，兩代領袖，皆死於非命——布托家族的血淚，本身就是巴基斯坦政治殘酷的縮影。</p>
+    <div class="pull"><p>巴基斯坦的民主，常常不是一場制度的競賽，而是一個個家族的悲劇——父親被絞死，女兒被刺殺，而軍隊的陰影,始終籠罩在每一場選舉之上。</p></div>
+
+    <h3>三股力量的永恆拉鋸</h3>
+    <p>另一個是以<strong>謝里夫家族（Sharif）</strong>為代表、根植於旁遮普商界的政治勢力。布托派與謝里夫派這兩大陣營在 1990 年代輪流執政、彼此惡鬥，卻又同樣難逃被軍隊掣肘的命運——1999 年，謝里夫的政府就被陸軍參謀長<em>穆夏拉夫（Pervez Musharraf）</em>政變推翻。進入二十一世紀，又出現了以前板球明星<strong>伊姆蘭·汗（Imran Khan）</strong>為代表的新興民粹力量，一度衝擊舊有的兩黨格局，但他與軍方的關係同樣經歷了從合作到決裂、最終鋃鐺入獄的劇變。無論誰上台，那場<em>軍隊、文人政客、宗教勢力之間的三方拉鋸</em>，始終是巴基斯坦政治不變的底色。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 被掐住的民主</span>
+      <p>巴基斯坦的文人政治為何如此脆弱、如此王朝化？這要回到它的結構性困局。<strong>在一個軍隊掌握著實質權力的國家裡，文人政黨從未能在一個公平、穩定的場域裡自由成長。</strong>它們的命運——能否上台、能否做完任期——往往不取決於選民，而取決於它們與軍方的關係。這種扭曲的環境，逼使政黨高度依賴個人魅力與家族忠誠（而非制度與政綱）來維繫，從而走向王朝化。</p>
+      <p>於是巴基斯坦陷入了一個難解的循環：<em>軍隊以「文人政府腐敗無能」為由干政，但正是軍隊的反覆干政，剝奪了文人民主在試錯中走向成熟的機會，從而不斷地「製造」出它所指責的那種腐敗與無能。</em>這是一個自我應驗的預言。布托父女的悲劇、謝里夫與伊姆蘭·汗的起落，本質上都是同一齣戲——在軍隊、神壇與選票這三股力量的永恆拉鋸中，民主始終被掐住喉嚨，無法真正地呼吸與長大。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☢ ✦ ☢</div>
+  <p>在內部的拉鋸之外，是那道從未癒合的、對外的傷口——<br>與印度的世仇，與喀什米爾的火藥桶。<br><span class="hl">為了在這場永恆的對峙中生存，巴基斯坦做出了一個改變南亞的決定。</span></p>
+</div>
+
+<!-- ===== 第十一章：核武與對印對峙 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Bomb</span>
+    <h2 class="act-title">核子、喀什米爾，與一場永恆的對峙</h2>
+    <p class="act-sub">The Nuclear Standoff and the Wound That Defines a Nation</p>
+    <div class="ornament">☢ ☢ ☢</div>
+  </div>
+  <div class="prose">
+    <p>從 1947 年誕生的那一刻起，「對抗印度」就被寫進了巴基斯坦的國家基因。兩國因分治結下的血仇，集中體現在一塊土地上——<strong>喀什米爾（Kashmir）</strong>。這個穆斯林佔多數、卻在分治時由印度教王公決定加入印度的地區，成了印巴之間永恆的爭端核心。圍繞著它，兩國爆發了數次戰爭，邊境的「控制線」上至今槍聲不斷。對巴基斯坦而言，喀什米爾不只是領土問題，更是它立國理念的延伸——一個穆斯林多數區，「理應」屬於穆斯林的家園。</p>
+
+    <h3>「就算吃草,也要造出原子彈」</h3>
+    <p>面對人口與國土都遠勝於己、且在 1971 年親手肢解了自己的宿敵印度，巴基斯坦的安全焦慮達到了頂點。尤其當印度在 1974 年進行了首次核試驗後，巴基斯坦認定，唯有擁有自己的核武，才能確保國家的生存。時任總理布托留下一句名言，大意是：即使全國人民只能吃草，也一定要造出自己的原子彈。在科學家<strong>阿卜杜勒·卡迪爾·汗（A. Q. Khan）</strong>主導的計劃下，巴基斯坦傾全國之力秘密發展核武，並在 1998 年印度再次核試後，立即進行了自己的核試驗，正式成為一個<strong>擁核國家</strong>。</p>
+    <div class="pull"><p>對巴基斯坦而言，核武不是炫耀的工具，而是面對龐大宿敵時，確保自己「不會再被肢解一次」的最後保險。</p></div>
+    <p>於是南亞成為全世界唯一一處<em>兩個接壤的核武國家長期敵對</em>的地區。核武在某種程度上帶來了一種恐怖的平衡——它讓全面戰爭的代價變得無法承受，從而抑制了大規模戰爭的爆發；但它也讓每一次邊境衝突、每一次恐怖襲擊，都籠罩在一層核子升級的陰影之下，使南亞成為地球上最危險的火藥桶之一。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 由恐懼定義的國家</span>
+      <p>核武的故事，揭示了「對抗印度」這條主線如何深刻地塑造了巴基斯坦的一切。<strong>對印度的生存恐懼，是理解巴基斯坦的另一把總鑰匙。</strong>它解釋了為何軍隊能攫取如此巨大的權力與資源（國家安全高於一切）、為何國家願意傾盡國力發展核武、也部分解釋了為何它會在阿富汗扶植代理人勢力（尋求「戰略縱深」以對抗印度）。</p>
+      <p>這裡藏著一個深刻的悖論。<em>巴基斯坦與印度，本是同一個文明母體分裂出的雙生子——共享著數千年的歷史、相似的語言（印地語與烏爾都語幾乎相通）、交融的音樂與飲食。</em>然而正是這份「太過相似」的親緣，加上 1947 年那道血色的傷口，催生出一種格外執著、格外深刻的敵意。巴基斯坦的國家認同，在很大程度上是「<strong>透過否定印度</strong>」來建立的——我們是穆斯林，所以我們「不是」印度。這種以「對立」為基礎的認同，既給了這個年輕的國家一個清晰的凝聚焦點，也讓它背上了一個沉重的、永遠無法真正放下的包袱。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⬗ ✦ ⬖</div>
+  <p>1971 年失去孟加拉的恐懼從未消散。<br>因為剩下的這個巴基斯坦，本身也不是「一個」民族,<br><span class="hl">而是旁遮普、信德、普什圖、俾路支——四個族群,在一面信仰的旗幟下,勉力共處。</span></p>
+</div>
+
+<!-- ===== 第十二章：族群與聯邦張力 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Four Peoples</span>
+    <h2 class="act-title">旁遮普的重量,與俾路支的怒火</h2>
+    <p class="act-sub">Punjab's Dominance and the Federation's Fault Lines</p>
+    <div class="ornament">⬗ ⬖ ⬗</div>
+  </div>
+  <div class="prose">
+    <p>1971 年孟加拉的分離，給巴基斯坦留下了一個揮之不去的恐懼：信仰，並不足以黏合不同的族群。而剩下的這個巴基斯坦，恰恰也不是一個單一民族的國家，而是一個由<strong>四大族群</strong>勉力組成的聯邦——人口與權力都佔主導的<em>旁遮普人</em>、印度河下游古老的<em>信德人</em>、西北邊境剽悍的<em>普什圖人</em>、以及西南廣袤山地中人數最少、卻最不馴服的<em>俾路支人</em>。把他們黏在一起的，依然主要是那唯一的黏合劑——伊斯蘭。</p>
+
+    <h3>旁遮普的「重量」</h3>
+    <p>巴基斯坦聯邦最深的結構性張力，源於<strong>旁遮普一省獨大</strong>。旁遮普人佔了全國人口的多數，更幾乎壟斷了國家的兩大權力支柱——<em>軍隊</em>（繼承自英印「旁遮普兵源地」的傳統）與<em>官僚體系</em>。這意味著，其他三個較小的族群，常常感到自己是在一個由旁遮普主導的國家裡「被代表」、被支配，他們的資源被攫取、聲音被忽視。這正是 1971 年孟加拉悲劇的同一種病理，只是換了主角——當年是東部的孟加拉人不滿西部旁遮普的支配，如今是西部其他三族不滿旁遮普的獨大。</p>
+    <div class="pull"><p>巴基斯坦最深的恐懼，是 1971 年的幽靈——當一個族群感到被另一個族群永久支配時,「我們是一個民族」這句話,就會開始動搖。</p></div>
+
+    <h3>俾路支:從未真正平息的怒火</h3>
+    <p>這股張力最劇烈的體現，是<strong>俾路支斯坦（Balochistan）</strong>。這片佔了全國近半面積、卻人口稀少的西南山地，蘊藏著豐富的天然氣、礦產與漫長的戰略海岸線（瓜達爾港）。但俾路支人長期感到，他們腳下的資源被中央（旁遮普）攫取，自己卻依然是全國最貧窮、最被忽視的族群。自立國以來，俾路支地區已多次爆發要求更大自治、乃至獨立的武裝叛亂，又一次次被軍隊鎮壓。這場低強度卻持續數十年的衝突，是巴基斯坦聯邦內部一道從未真正癒合的傷口。普什圖地區與阿富汗邊境的動盪、各族群間的猜忌，也始終是這個國家難以擺脫的暗流。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 那個立國時被迴避的問題</span>
+      <p>巴基斯坦的族群張力，把那個從第五章就埋下、在 1971 年第一次爆炸的根本問題，再一次推到所有人面前：<strong>除了「我們都是穆斯林」之外，是什麼讓旁遮普人、信德人、普什圖人、俾路支人,真正成為「一個民族」？</strong></p>
+      <p>這是巴基斯坦立國理念中最深、也最未解的矛盾。<em>「兩個民族理論」當年用「宗教」這把刀，把穆斯林從印度切了出來；但這把刀無法回答:在「穆斯林」這個大標籤之內，那些說著不同語言、有著不同歷史、感受著不平等待遇的族群,該如何凝聚？</em>一個僅靠「共同信仰」立國的國家，先天就缺乏一套能調和內部族群差異的機制。它的選擇，要嘛是用更強的中央集權（與軍事力量）去壓制離心力，要嘛是冒著重蹈 1971 年覆轍的風險。理解了「旁遮普的重量與俾路支的怒火」，就理解了為何巴基斯坦至今仍在為「如何成為一個真正的民族」而掙扎——這道功課,自它誕生那天起,就從未真正完成。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">₨ ✦ ₨</div>
+  <p>內部的拉鋸與外部的對峙之下，懸著一個更根本的問題——<br>這個國家，能不能讓它近兩億五千萬的人民,過上好日子？<br><span class="hl">而它的答案，被一個甩不掉的循環,困住了數十年。</span></p>
+</div>
+
+<!-- ===== 第十三章：當代經濟與挑戰 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十三章 · The Ceiling</span>
+    <h2 class="act-title">借貸的循環,與一個年輕國家的天花板</h2>
+    <p class="act-sub">Debt, Demography, and the Search for a Way Out</p>
+    <div class="ornament">₨ ₨ ₨</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的巴基斯坦人為何焦慮，光看政治與安全不夠，得看他們的錢包。巴基斯坦是世界第五人口大國，擁有近兩億五千萬人口，且極其年輕——這本應是巨大的「人口紅利」。然而，這個國家的經濟，數十年來卻被困在一個令人沮喪的循環裡，遲遲無法把這份潛力兌現為繁榮。</p>
+
+    <h3>那個甩不掉的循環:借貸、危機、再借貸</h3>
+    <p>巴基斯坦經濟最深的結構性難題，是一種反覆發作的<strong>國際收支危機</strong>。它長期入不敷出——出口疲弱、稅基狹窄、能源短缺、財政赤字龐大——於是每隔幾年，當外匯儲備見底、瀕臨違約時，就不得不向<em>國際貨幣基金（IMF）</em>求援，接受附帶緊縮條件的紓困貸款。這個「借貸 → 短暫喘息 → 再度危機 → 再度借貸」的循環，已經重複了二十多次，使巴基斯坦背上了沉重的外債，也讓它的經濟主權與發展，長期受制於人。</p>
+    <div class="pull"><p>一個擁有兩億五千萬年輕人口、本該充滿活力的國家,卻被一個「借了又借」的循環困住——這是巴基斯坦最深的經濟天花板。</p></div>
+
+    <h3>三道結構性的傷</h3>
+    <p>要兌現人口紅利的願景，巴基斯坦必須先面對幾道長年的結構性傷口：</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">傷口一</span>
+        <h5>軍費的擠壓</h5>
+        <p>對印度的永恆對峙，使<strong>國防開支</strong>長年吞噬巨額財政資源。當大量預算流向軍隊與安全時，能投入教育、醫療與基礎建設的錢就被嚴重擠壓——這正是人口紅利難以兌現的根源之一。</p>
+        <span class="model">Guns vs. Growth</span>
+      </div>
+      <div class="card">
+        <span class="flag">傷口二</span>
+        <h5>狹窄的稅基</h5>
+        <p>巴基斯坦的<strong>稅收佔 GDP 比例</strong>長期偏低，富裕階層與大地主的避稅、龐大的非正式經濟，使國家始終「收不到足夠的錢」，只能靠舉債度日,財政體質極度脆弱。</p>
+        <span class="model">Fiscal Fragility</span>
+      </div>
+      <div class="card">
+        <span class="flag">傷口三</span>
+        <h5>恐怖主義與不穩</h5>
+        <p>齊亞時代埋下的<strong>極端主義之火</strong>反噬本土，加上政治的反覆動盪，嚴重打擊了投資信心與旅遊。沒有穩定，就沒有持續的成長——安全與發展,在這裡是死結。</p>
+        <span class="model">Instability Tax</span>
+      </div>
+    </div>
+
+    <h3>地緣的籌碼:中巴經濟走廊</h3>
+    <p>面對困局，巴基斯坦把一個重要的賭注，押在了它最古老的資產上——<em>地理位置</em>。作為連接中國西部與阿拉伯海的捷徑，巴基斯坦成為中國「一帶一路」旗艦項目<strong>「中巴經濟走廊（CPEC）」</strong>的核心。中國投入巨資，修建從新疆直通俾路支瓜達爾港的公路、鐵路、電廠與港口。對巴基斯坦而言，這既是擺脫經濟困局、解決能源短缺的重大機遇，也讓它在中、美、印的地緣博弈中,握有了新的籌碼——但同時,也帶來了新的債務負擔與被捲入大國競爭的風險。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 永遠的十字路口</span>
+      <p>巴基斯坦當代的經濟困局，與它的政治、安全困局是<strong>同一個死結的不同切面</strong>。要打破「借貸循環」、兌現人口紅利，需要的是和平穩定的環境、對教育的長期投資、與精簡的安全開支；但「對抗印度」的生存焦慮與強大的軍隊，又持續地把資源吸向國防、把國家綁在對峙的軌道上。<em>安全的需求,擠壓了發展的空間;而發展的滯後,又加劇了不穩定——這是巴基斯坦最根本的死結。</em></p>
+      <p>而 CPEC 的故事，則讓這個國家回到了它最初的身世原點。<em>還記得序章嗎?巴基斯坦這片土地，最古老、最不變的資產,就是它「大門之地」的地理位置——它是進出南亞的咽喉,是連接中亞、西亞與印度洋的十字路口。</em>五千年來,這份「區位」既是它被反覆征服的禍根,也是它最珍貴的籌碼。今天,當它試圖用這條「走廊」來換取繁榮與發展時,它本質上仍在做著同一件事:在一道誰都想經過的大門上,尋找自己的生存之道。地理,從第一頁到最後一頁,始終是這個國家命運的第一作者。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☪ ★ ☪</div>
+  <p>數千年,一條河,一道山口,四個族群,一個理念,與一面從未真正放下的信仰旗幟。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的巴基斯坦與巴基斯坦人,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的巴基斯坦人</h2>
+      <p class="act-sub" style="color:rgba(243,238,219,.6)">Why Pakistan, and Pakistanis, Are What They Are</p>
+      <div class="ornament" style="color:var(--gold-bright)">☪ ★ ☪</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的巴基斯坦之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:地理把它變成一道「大門」</h3>
+      <p>一切的源頭是<strong>地理</strong>。一條大河(印度河)滋養並命名了這片土地,而西北的一道山口(開伯爾)讓它成為進出南亞的咽喉。這道「大門」的格局,寫定了它的命運基調:它太關鍵,所以永遠被征服者經過;它太開放,所以注定多元、注定要不斷吸收翻牆而入的人。今天巴基斯坦的多元族群、它與中西亞的連結、以及它「永遠站在地緣博弈最前線」的宿命,都從這道大門長出來。</p>
+
+      <h3>第二層:一波波過客,層層疊加了它的血脈與信仰</h3>
+      <p>接著是<strong>反覆的穿越</strong>。雅利安人、波斯人、希臘人、貴霜人循山口而來,讓這裡綻放出犍陀羅的佛陀微笑;而後,伊斯蘭沿著同一條河與山口抵達,並因為這裡是「進入南亞的第一站」,而在此扎根最早、最深。今天巴基斯坦作為一個穆斯林佔絕對多數的國家,不是偶然,而是這道「大門」上信仰層層沉積的結果。</p>
+
+      <h3>第三層:一個「理念」,而非一塊土地,定義了這個國家</h3>
+      <p>然後是那個獨一無二的<strong>立國理念</strong>。當英帝國退場時,巴基斯坦不是作為一個自古存在的民族而獨立,而是作為一個「理念」——「兩個民族理論」——的產物而誕生。它主張穆斯林是一個獨立的民族,理應擁有自己的家園。<em>這就是為什麼今天每一個巴基斯坦人的身分,本質上都繫於「信仰」這個立國的原點——它不是自然而然的,而是 1947 年那場理念之賭的直接產物。</em>而這個理念也留下了一個從未定稿的問題:除了信仰,是什麼讓我們成為一個民族?</p>
+
+      <h3>第四層:一場血色的分裂,與一道永恆的傷口</h3>
+      <p>最痛的是<strong>分治</strong>。理念的勝利,是用人類史上最大的血色遷徙換來的。它在巴基斯坦心中烙下了兩道傷:對外,是與印度的世仇與喀什米爾的火藥桶,把「對抗印度」寫進了國家基因,並餵養出龐大的軍隊與核武;對內,是那個「一國兩塊、只靠信仰黏合」的怪異結構,在 1971 年以孟加拉的分離,給了「兩個民族理論」最痛的反證。</p>
+
+      <h3>第五層:軍隊、神壇與選票,把這一切寫進了日常</h3>
+      <p>最後是<strong>權力的拉鋸</strong>。國父早逝、文人虛弱、生存焦慮——這些條件讓<em>軍隊</em>成為國家本身;1971 的恐懼讓統治者把<em>伊斯蘭</em>(神壇)推向極端,卻釋放出反噬自身的極端主義之火;而懷抱民主夢的<em>文人政客</em>,則在布托與謝里夫的家族悲劇中,一次次被軍隊的陰影掐住喉嚨。軍隊、神壇、選票的三方永恆拉鋸,加上甩不掉的經濟借貸循環與族群張力——這些當代的劇烈起伏,全都是在反覆重新談判那份從未真正「定稿」的立國理念。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 為理念而生,為理念而困</span>
+        <p>所以,今天的巴基斯坦人是誰?他是<strong>一道「大門之地」上、為一個理念而生的人</strong>——他的腳下踩著人類最古老的城市與佛陀的微笑,他的信仰沿著山口與大河而來,他的國家因「穆斯林是一個民族」的信念而在血泊中誕生,又在軍隊、神壇與選票的拉鋸中,艱難地追問著自己究竟是誰。</p>
+        <p>他的多元與張力,是同一道「大門」地理的兩面;他的虔誠與動盪,是同一團「信仰之火」的兩面;他的強悍軍隊與脆弱民主,是同一份「對印生存焦慮」的兩面。<em>巴基斯坦最深刻的真相是:它是一個「先有理念、後找土地」的國家——因此它最艱難、也最根本的功課,從來不是守住疆界,而是回答那個立國時就被迴避的問題:除了「我們都是穆斯林」之外,是什麼能讓旁遮普人、信德人、普什圖人、俾路支人,真正地、心甘情願地,成為「一個我們」。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">地理把它變成一道誰都想經過的大門,信仰把它的人民召喚到同一面旗幟下,一個理念把他們鍛造成一個國家——而要不要、以及如何,真正成為「一個民族」,是這一代巴基斯坦人仍在回答的問題。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">數千年的終極啟示</span>
+      <p>一個國家的樣貌,往往由它的地理位置開局,由流經它的征服者與信仰層層疊加,由一個立國的理念定下它的身分,再由一道血色的傷口與內部的拉鋸塑造它的性格——而它能否真正成為一個民族,最終取決於生活在這裡的人們,願不願意在「共同的信仰」之外,找到一種能讓彼此的差異被尊重、被調和的共處之道。這,就是巴基斯坦至今仍在書寫的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,238,219,.78);margin-top:2.5rem">
+        從印度河畔一座沉默的磚城,<br>
+        到用希臘之手雕出的佛陀微笑、沿著山口而來的真主之音,<br>
+        從一位詩人的夢、一位律師的意志,<br>
+        到午夜升起的國旗、邊境上血色的遷徙,<br>
+        再到軍隊、神壇與選票之間那場永不停歇的拉鋸——<br>
+        這段交織著河流、山口、信仰、征服、理念與掙扎的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的巴基斯坦,<br>以及今天的,巴基斯坦人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">☪ ✦ ★</div>
+  <p>河流、信仰與山口 · 巴基斯坦的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE INDUS TO THE IDEA OF PAKISTAN · c.2600 BCE – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

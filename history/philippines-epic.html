@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>十字架、群島與「我們是誰」：菲律賓五百年的身世</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The Cross, the Archipelago &amp; the Question of Who We Are</span>
+    <h1>十字架、群島與<span class="em">我們是誰</span><br>菲律賓<br>五百年的身世</h1>
+    <p class="sub">從一片連名字都沒有的群島,到亞洲唯一的天主教大國、被兩個西方帝國接力形塑的國度——<br>一部關於「在三百年西班牙、五十年美國之後,我們究竟是誰」的追問</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的菲律賓,是一個位於亞洲、卻信奉天主教、講英語、連國名都來自一位西班牙國王的國家?答案不在當下,而在五百年的傷痕裡。在所有殖民者到來之前,這裡只是一片由七千多座島嶼、上百個部落組成、<em>從未被統一、連名字都還沒有</em>的群島。然後,麥哲倫的船隊來了,帶來了十字架與一個國王的名字;西班牙的修道士用三百年,把這片群島變成亞洲唯一的基督教國度;美國人接著用槍砲買下了它,再用英語、籃球與民主將它徹底重塑。這不是一個民族自然生長的故事,而是一片群島<em>被兩個西方帝國接力雕刻</em>、最終不得不追問「我們究竟是誰」的故事。讓我們從頭走一遍,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the Name</span>
+    <h2 class="act-title">一片連名字都還沒有的群島</h2>
+    <p class="act-sub">Seven Thousand Islands, a Hundred Tribes, and No Nation</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解菲律賓,得先理解它與鄰居的不同。馬來西亞、印尼在殖民者來臨前,都曾有過麻六甲、滿者伯夷這樣統一的大帝國;但菲律賓沒有。在十六世紀西班牙人到來之前,這片由<strong>七千多座島嶼</strong>組成的群島,從未被任何單一政權統一過——它甚至<em>連一個共同的名字都沒有</em>。</p>
+
+    <h3>巴朗蓋:小到不能再小的社會單元</h3>
+    <p>當時群島上的居民,是南島語族的後裔,散居在一個個被稱為「<strong>巴朗蓋</strong>」(barangay)的小型聚落裡。每個巴朗蓋通常只有數十到數百人,由一位首領(datu)統治,彼此之間或貿易、或結盟、或征戰。他們信奉萬物有靈的本土信仰,透過海洋與東南亞、中國、印度的商人交易黃金、香料與森林產物。這是一個<em>高度在地化、碎片化</em>的世界——沒有中央、沒有共主、沒有「國家」的概念。</p>
+    <div class="aside"><span class="hl">關鍵概念:</span>「巴朗蓋」這個詞,今天仍是菲律賓最基層的行政單位名稱——五百年過去,這個最古老的社會細胞,依然活在這個國家的肌理裡。</div>
+
+    <h3>伊斯蘭已經先到一步</h3>
+    <p>值得注意的是,在基督教之前,<strong>伊斯蘭已經先抵達了這片群島</strong>。大約十四世紀起,沿著與印尼、馬來西亞相同的海上貿易網絡,伊斯蘭從南方傳入,在最南端的<em>蘇祿與棉蘭老島</em>建立起強大的蘇丹國。如果沒有西班牙人的到來,菲律賓很可能會像它的鄰居一樣,成為一個穆斯林國家。這個「差一點」的歷史分岔,埋下了日後南北分裂最深的伏筆——我們會在後面的章節回到這裡。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一張白紙的命運</span>
+      <p>菲律賓的起點,是一個關於「<strong>空白</strong>」的故事。正因為這片群島在殖民前從未被統一、沒有強大的本土帝國、沒有共同的高等宗教與文字傳統,它在面對西班牙人時,<em>缺乏一個足以抵抗、足以凝聚的既有核心</em>。</p>
+      <p>這帶來了深遠的後果:相較於擁有滿者伯夷記憶的印尼、或馬六甲蘇丹傳統的馬來西亞,菲律賓幾乎是被殖民者<strong>「從零開始」地書寫</strong>的。它的名字、它的宗教、它的文字、乃至「成為一個國家」這個念頭本身,大多是外來的。這既讓殖民者的烙印格外之深,也讓「我們究竟是誰」這個問題,從一開始就格外難以回答。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✝ ✦ ✝</div>
+  <p>1521 年,一支懸掛著西班牙旗幟的船隊,駛入了這片群島的海域。<br>領航的,是一個註定要改變這裡一切、自己卻將命喪於此的葡萄牙人。<br><span class="hl">他帶來了一個十字架,和一個國王的名字。</span></p>
+</div>
+
+<!-- ===== 第一章:麥哲倫 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Cross Arrives</span>
+    <h2 class="act-title">麥哲倫之死,與一個國王的名字</h2>
+    <p class="act-sub">Magellan, Lapulapu, and the Name of a King</p>
+    <div class="ornament">✝ ✝ ✝</div>
+  </div>
+  <div class="prose">
+    <p>1521 年,為西班牙效力的葡萄牙航海家<strong>麥哲倫(Ferdinand Magellan)</strong>,在他環球航行的途中抵達了這片群島,登陸於中部的宿霧(Cebu)一帶。他做了兩件影響深遠的事:他在宿霧豎起了十字架,為一些當地首領施洗、引入了天主教——這成了菲律賓基督教化的起點;同時,他也為西班牙宣示了對這片土地的主權。</p>
+
+    <h3>拉普拉普:第一個說「不」的人</h3>
+    <p>但麥哲倫的傲慢,很快帶來了報應。鄰近的麥克坦島(Mactan)上,有一位拒絕臣服的酋長<strong>拉普拉普(Lapulapu)</strong>。1521 年 4 月,麥哲倫親自帶兵登島,想以武力逼其就範。結果,拉普拉普率領的戰士在灘頭擊潰了裝備精良的西班牙人——<strong>麥哲倫本人也在這場麥克坦戰役中被殺</strong>,他的環球船隊只能倉皇撤離。</p>
+    <p>這個細節意味深長:這片群島留給世界的第一印象,不是臣服,而是<em>反抗</em>。今天,拉普拉普被菲律賓尊為「抵抗外來侵略的第一位民族英雄」,他的雕像矗立在麥克坦島上。一個民族的歷史,從一場勝利的抵抗開始——儘管這場勝利,只延緩了殖民,並未阻止它。</p>
+    <div class="pull"><p>菲律賓的歷史,以一場擊殺殖民者的勝利揭幕——但諷刺的是,接下來的故事,卻是這片群島被同一批人徹底改造的五百年。</p></div>
+
+    <h3>連名字都是殖民者給的</h3>
+    <p>麥哲倫死後,西班牙並未放棄。經過數次遠征,1565 年,黎牙實比(Legazpi)率隊建立了第一個永久殖民據點,1571 年攻佔並建立了馬尼拉(Manila)作為首府。而在這個過程中,一個影響至今的命名發生了:西班牙人以當時的王儲、後來的國王<strong>腓力二世(Felipe II)</strong>之名,將整片群島命名為「<strong>Las Islas Filipinas</strong>」——「腓力的群島」。</p>
+    <p>請停下來體會這一點的份量:<em>這個國家的名字「菲律賓」,本身就是一位西班牙國王的名字。</em>不像「印尼」「馬來西亞」源自本土或地理,「菲律賓」這個名字從第一天起,就是殖民的烙印。一個連自己名字都來自征服者的國家,日後在追問「我們是誰」時,將面對何等深刻的困惑——這個伏筆,在五百年後依然迴盪。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 命名即權力</span>
+      <p>麥哲倫的故事,濃縮了菲律賓身世的核心張力:<strong>抵抗與被塑造,從一開始就並存。</strong>拉普拉普的勝利證明了這片土地不乏反抗的血性;但西班牙的命名與紮根,卻證明了更深層的力量——<em>誰掌握了命名權,誰就掌握了定義一個地方「是什麼」的權力。</em></p>
+      <p>「菲律賓」這個名字,是理解這個國家認同困境的第一把鑰匙。當一個民族連用來稱呼自己的詞,都是殖民者留下的,那麼「去殖民」「找回自我」就變得異常艱難——因為連「自我」的容器本身,都是別人鑄造的。這正是菲律賓與它的鄰居最深刻的不同:它的認同追問,必須從一個外來的名字開始。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⛪ ✦ ⛪</div>
+  <p>真正征服這片群島的,不是西班牙的士兵,<br>而是跟在他們身後、手持十字架的修道士。<br><span class="hl">他們用三百年,把七千座島嶼,變成了亞洲唯一的天主教國度。</span></p>
+</div>
+
+<!-- ===== 第二章:西班牙的三百年 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · Under the Bells</span>
+    <h2 class="act-title">十字架與劍:修道士統治的三百年</h2>
+    <p class="act-sub">How Friars, Not Soldiers, Conquered the Soul of the Islands</p>
+    <div class="ornament">⛪ ⛪ ⛪</div>
+  </div>
+  <div class="prose">
+    <p>西班牙統治菲律賓長達三百多年(1565–1898)。但這場統治最特別的地方在於:真正深入到群島每一個角落、把這片土地徹底改造的,不是西班牙的軍隊或總督,而是<strong>天主教的修道士(friars)</strong>。</p>
+
+    <h3>「鐘聲之下」的治理</h3>
+    <p>西班牙人推行一種「<strong>聚居</strong>」(reducción)政策:把原本散居的巴朗蓋居民,集中遷移到教堂周圍居住——所謂「<em>鐘聲之下</em>」(bajo las campanas),意即生活在教堂鐘聲所能傳到的範圍內。教堂成了每個村鎮的物理與精神中心。在這套體系下,修道士不只是神職人員,更實質掌握了教育、戶籍、土地、道德乃至地方行政的大權。在許多偏遠地區,<strong>修道士才是真正的統治者,權力甚至凌駕於西班牙派來的文官之上</strong>。教會也藉此累積了龐大的土地與財富。</p>
+    <div class="pull"><p>西班牙用劍打開了群島,卻是用十字架真正佔領了它——征服的不是土地,而是靈魂。</p></div>
+
+    <h3>一場成功的靈魂改造</h3>
+    <p>結果是驚人的。在三百年間,菲律賓群島(穆斯林的南方除外)幾乎被<strong>完整地改造成了一個天主教社會</strong>。這是西班牙在亞洲最徹底的一次文化殖民:語言、姓名(大量菲律賓人至今擁有西班牙姓氏)、節慶、價值觀、家庭觀念,都被天主教深深重塑。直到今天,菲律賓仍是<em>亞洲唯一以天主教為絕對主流的國家</em>,約八成人口是天主教徒。這份信仰,成了菲律賓認同最核心、也最不可動搖的一塊基石——我們會在後面專章探討。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最深的殖民是信仰</span>
+      <p>西班牙的菲律賓經驗,揭示了殖民最深層的一種形式:<strong>當你改變了一個民族的信仰,你就改變了它的靈魂,而這種改變比任何政治統治都持久。</strong>西班牙的政權早已在 1898 年離去,但它留下的天主教,至今仍定義著菲律賓人如何看待生命、家庭、道德與死亡。</p>
+      <p>這是菲律賓與穆斯林鄰居最根本的分野。印尼、馬來西亞的伊斯蘭是「<em>由商人柔性傳入、與本土融合</em>」的;而菲律賓的天主教,是「<em>由殖民者強力植入、伴隨政治權力</em>」的。一個是自下而上的滲透,一個是自上而下的改造。這也是為什麼,菲律賓的宗教認同,從根源上就與「西方」「殖民」緊緊纏繞——它既是這個民族最深的凝聚力,也是它認同困惑的一部分。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⛵ ✦ ⛵</div>
+  <p>當修道士在改造靈魂時,馬尼拉的港口正上演著另一場大戲。<br>一艘艘滿載中國絲綢與墨西哥白銀的大帆船,在此交會——<br><span class="hl">這片群島,意外成了第一場全球化的太平洋樞紐。</span></p>
+</div>
+
+<!-- ===== 第三章:大帆船貿易 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Galleon</span>
+    <h2 class="act-title">馬尼拉大帆船:太平洋上的絲銀之路</h2>
+    <p class="act-sub">When Manila Linked China, Mexico, and the World</p>
+    <div class="ornament">⛵ ⛵ ⛵</div>
+  </div>
+  <div class="prose">
+    <p>在殖民的苦難之外,西班牙時期的菲律賓還扮演了一個意想不到的世界級角色。從 1565 年到 1815 年,長達兩個半世紀,馬尼拉是一條傳奇貿易航線的東方終點——「<strong>馬尼拉大帆船貿易</strong>」(Manila-Acapulco Galleon Trade)。</p>
+
+    <h3>絲綢、白銀與第一場全球化</h3>
+    <p>這條航線的運作,堪稱早期全球化的縮影:來自<strong>中國</strong>的商人,把精美的絲綢、瓷器、茶葉運到馬尼拉;西班牙人再用巨型的「大帆船」(galleon),將這些東方珍寶橫渡浩瀚的太平洋,運往墨西哥的阿卡普爾科(Acapulco);而換回來的,是來自美洲(尤其墨西哥與秘魯礦山)的<strong>白銀</strong>。這些白銀有相當部分最終流入中國,成為當時中華帝國經濟的重要貨幣。</p>
+    <p>換句話說,馬尼拉成了連接<em>亞洲、美洲與歐洲</em>三大洲的關鍵節點——這是人類歷史上第一條真正意義上的跨太平洋定期貿易航線,讓菲律賓在數百年前,就已是「<strong>太平洋絲路</strong>」的樞紐。一片原本碎片化的群島,被全球貿易的洪流推上了世界舞台的中心。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 樞紐的繁榮與空洞</span>
+      <p>大帆船貿易揭示了一個關於「樞紐經濟」的深刻道理:<strong>身為一個轉運的節點,能帶來巨大的財富流,卻不一定能轉化為在地的根基。</strong>馬尼拉因大帆船而繁華,但這份繁華的本質,是替別人(西班牙、中國、墨西哥)轉運財富——絲綢不是菲律賓產的,白銀也不留在菲律賓。</p>
+      <p>這個「<em>過路財神</em>」的模式,某種程度上預示了菲律賓經濟日後的某些特質:它常常擅長扮演全球體系裡的「中介」與「服務者」角色(從大帆船,到後來的海外勞工與客服外包),卻較難建立起自主、深厚的本土產業基礎。樞紐的位置帶來了流量,但流量本身,並不等於根基。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☪ ✦ ☪</div>
+  <p>當北方的群島在十字架下臣服時,<br>南方有一片土地,西班牙人打了三百年也從未真正征服。<br><span class="hl">那裡的人信奉真主,而非基督——他們是「摩洛」。</span></p>
+</div>
+
+<!-- ===== 第四章:穆斯林的南方 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Unconquered South</span>
+    <h2 class="act-title">摩洛:三百年未曾屈服的南方</h2>
+    <p class="act-sub">The Muslim Sultanates That Spain Could Never Subdue</p>
+    <div class="ornament">☪ ✦ ☪</div>
+  </div>
+  <div class="prose">
+    <p>菲律賓的天主教故事,有一個巨大的例外,而這個例外至今仍在流血。在群島最南端的<strong>棉蘭老島(Mindanao)與蘇祿群島(Sulu)</strong>,生活著早在西班牙人到來之前,就已皈依伊斯蘭的居民。他們建立了強大的<strong>蘇祿蘇丹國與馬京達瑙蘇丹國</strong>,擁有自己的政治、法律與軍事體系。</p>
+
+    <h3>西班牙打了三百年,始終沒能拿下</h3>
+    <p>西班牙人稱這些穆斯林為「<strong>摩洛人</strong>」(Moros)——這個詞源自西班牙人對北非「摩爾人」(Moors)的稱呼,帶著歷史上基督徒對抗穆斯林的敵意。在長達三百年的殖民期間,西班牙不斷試圖征服南方,雙方進行了綿延數世紀的「摩洛戰爭」。但結果是:<strong>西班牙始終未能真正征服摩洛人的核心區域</strong>。當北方的呂宋與米沙鄢已徹底天主教化時,南方依然頑強地保持著伊斯蘭信仰與自治。</p>
+    <div class="pull"><p>同一片群島,北方在十字架下被改造了靈魂,南方卻在真主的旗幟下守住了自己——這道宗教的分界線,劃下了菲律賓最深、最久的裂痕。</p></div>
+
+    <h3>一道注定的裂痕</h3>
+    <p>這段歷史的後果極其深遠。當菲律賓日後成為一個以天主教徒、以北方(馬尼拉)為核心的國家時,南方的穆斯林摩洛人,便發現自己被硬生生併入了一個<em>由「異教徒」主導、且從未真正征服過自己</em>的國家。他們從未認同「菲律賓」這個身分,因為這個身分本質上是西班牙—天主教的產物。這道從西班牙時代就劃下的宗教與認同裂痕,將在二十世紀演變成綿延數十年的分離戰爭——我們會在後面的章節,回到這片仍未平息的南方。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 未被征服者的記憶</span>
+      <p>摩洛的故事,揭示了「國家邊界」與「人民認同」之間可能存在的深刻鴻溝。摩洛人之所以至今難以融入菲律賓,根源在於:<strong>他們從來不是被「說服」加入這個國家的,而是在殖民與後殖民的權力轉移中,被「劃」進來的。</strong></p>
+      <p>「未被征服」這件事,本身就成了一種強大的身分記憶。當一個群體保有「我們從未屈服」的集體記憶時,任何外來的整合都會被視為新一輪的征服。這與印尼的巴布亞、亞齊有著驚人的相似——都是被殖民疆界圈進來、卻在歷史與信仰上自成一格的土地。<em>它提醒我們:一個國家真正的考驗,從來不是如何對待願意加入的多數,而是如何面對那些從未選擇加入的少數。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☷ ✦ ☷</div>
+  <p>在西班牙人與原住民之間,還有一個夾在中間、卻舉足輕重的群體。<br>他們是商人、是放貸者、是代罪羔羊,也是日後菁英的搖籃——<br><span class="hl">他們是華人,以及他們與本地通婚的後代「混血兒」。</span></p>
+</div>
+
+<!-- ===== 第五章:華人與混血 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Mestizos</span>
+    <h2 class="act-title">華人、混血兒,與菲律賓菁英的誕生</h2>
+    <p class="act-sub">The Chinese, the Mestizos, and the Making of an Elite</p>
+    <div class="ornament">☷ ☷ ☷</div>
+  </div>
+  <div class="prose">
+    <p>菲律賓的故事裡,有一個常被忽略、卻至關重要的群體——<strong>華人與華菲混血兒(mestizo)</strong>。他們的命運,既辛酸又深刻地塑造了這個國家的權力結構,直到今天。</p>
+
+    <h3>不可或缺,卻屢遭屠殺</h3>
+    <p>華人移民馬尼拉的歷史悠久。在西班牙統治下,華人是經濟的命脈——他們經營著零售、手工業與商品流通,是連接前述「大帆船貿易」中國端的關鍵。馬尼拉的「<strong>八連</strong>」(Parián)是當時的華人聚居區。但華人的處境極其危險:西班牙殖民者既<em>依賴</em>華人的經濟能力,又<em>恐懼</em>華人的數量與影響力。這種矛盾屢屢釀成悲劇——1603 年、1639 年等多次,馬尼拉爆發了針對華人的<strong>大屠殺</strong>,死者動輒以萬計。華人成了殖民體系裡被需要、卻又最不被信任、最易被犧牲的一群。</p>
+
+    <h3>混血兒:意外崛起的菁英階層</h3>
+    <p>然而,歷史在此處轉了一個關鍵的彎。許多華人為了生存與融入,改信天主教、與當地女性通婚,他們的後代——<strong>華菲混血兒(Chinese mestizo)</strong>——逐漸形成一個獨特而強大的社會階層。到了十九世紀,隨著菲律賓開放對外貿易、咖啡與蔗糖等經濟作物興起,這些混血兒憑藉商業頭腦與資本,大量購置土地、經營莊園(hacienda),累積了驚人的財富,並送子女赴歐洲受教育。</p>
+    <p>於是,一個影響深遠的結構形成了:<strong>華菲混血兒成為菲律賓本土菁英的主體</strong>。他們既非純粹的西班牙人,也非底層的原住民,而是夾在中間、兼具財富與教育的新階級。十九世紀末領導民族覺醒的「開明人士」(Ilustrados),乃至日後許多顯赫的政治世家(如艾奎諾 Aquino、許寰哥 Cojuangco 家族),其根源都可追溯到這個混血菁英階層。連民族英雄黎剎本人,都有華人血統。</p>
+    <div class="pull"><p>菲律賓的革命由混血菁英點燃,菲律賓的政治王朝也由他們延續——這個夾在中間的階層,成了定義國家命運的主角。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 中間階層的力量</span>
+      <p>華菲混血菁英的崛起,揭示了殖民社會一個普遍的規律:<strong>真正塑造一個後殖民國家的,往往不是頂層的殖民者,也不是底層的大眾,而是那個夾在中間、兼具資源與視野的「中間階層」。</strong>他們因受教育而萌生民族意識,因擁有財富而具備行動能力。</p>
+      <p>但這也埋下了菲律賓至今未解的難題。這個由混血菁英構成的階層,在獨立後並未消失,反而演化成盤踞政壇與經濟的<strong>「寡頭世家」</strong>(oligarchy)。菲律賓政治至今高度被少數家族把持(王朝政治),其歷史根源正在於此。<em>同一個階層,既帶來了民族的覺醒,也帶來了權力的世襲——這是菲律賓民主最深的悖論之一。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✒ ✦ ✒</div>
+  <p>三百年的壓迫,終於在十九世紀末迎來了反彈。<br>而點燃這場覺醒的,不是刀劍,而是一位醫生手中的筆。<br><span class="hl">他用兩部小說,喚醒了一個民族;他的死,則點燃了一場革命。</span></p>
+</div>
+
+<!-- ===== 第六章:黎剎與革命 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Awakening</span>
+    <h2 class="act-title">黎剎之筆,與亞洲第一個共和國</h2>
+    <p class="act-sub">Rizal, the Katipunan, and Asia's First Republic</p>
+    <div class="ornament">✒ ✒ ✒</div>
+  </div>
+  <div class="prose">
+    <p>到了十九世紀末,西班牙的統治已腐朽不堪,尤其是修道士的特權與濫權,激起了愈來愈強的不滿。前面提到的混血菁英子弟,被送往歐洲(尤其西班牙、德國)受教育,他們接觸了自由、民主與民族主義的思想,被稱為「<strong>開明人士</strong>」(Ilustrados)。他們發起「宣傳運動」,要求改革,要求菲律賓人與西班牙人平等。而其中最耀眼的一位,就是<strong>黎剎(José Rizal)</strong>。</p>
+
+    <h3>用小說喚醒一個民族</h3>
+    <p>黎剎是一位才華橫溢的醫生、作家與博學者。他最致命的武器,是兩部小說——《<strong>不許犯我</strong>》(Noli Me Tángere)與《<strong>起義者</strong>》(El Filibusterismo)。在書中,他以辛辣的筆觸揭露了西班牙殖民統治、特別是修道士的虛偽、貪婪與壓迫。儘管遭禁,這兩本書仍被偷偷傳閱,在菲律賓人心中點燃了民族意識的火種。黎剎主張的是和平改革,而非暴力革命;但他的思想,卻成了革命最強的引信。</p>
+
+    <h3>一場處決,點燃了革命</h3>
+    <p>西班牙當局視黎剎為威脅。1896 年,當以<strong>博尼法秀(Andrés Bonifacio)</strong>領導的祕密革命組織「<strong>卡蒂普南</strong>」(Katipunan)發動起義時,西班牙人將黎剎牽連其中,並於 1896 年 12 月 30 日將他公開處決。但這場處決適得其反——<strong>黎剎之死,反而成了革命最有力的催化劑</strong>,他從此成為菲律賓的民族英雄,殉難日至今是國定紀念日。</p>
+    <p>革命的火焰愈燒愈旺。1898 年,在革命領袖<strong>阿奎納多(Emilio Aguinaldo)</strong>的領導下,菲律賓人宣布獨立,並在隔年建立了共和國——這被視為<strong>亞洲第一個共和國</strong>。一個被殖民三百年、連名字都來自征服者的民族,似乎終於要掌握自己的命運了。然而,命運開了一個殘酷的玩笑:就在獨立的曙光乍現時,地平線上出現了一支新的艦隊——這一次,來自美國。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 筆比劍更危險</span>
+      <p>黎剎的故事,是「<strong>觀念的力量</strong>」最經典的範例。一個手無寸鐵的作家,用兩部小說所釋放的能量,遠超過任何一支軍隊——因為他改變的不是領土,而是<em>人們如何看待自己</em>。當菲律賓人透過黎剎的筆,第一次把自己想像成一個「被壓迫的民族」而非一盤散沙的村落時,「菲律賓人」這個身分才真正開始凝聚。</p>
+      <p>而西班牙處決黎剎的錯誤,則揭示了壓迫者永恆的盲點:<em>你可以殺死一個人,卻無法殺死一個已經被釋放的念頭。</em>黎剎死後,他反而比生前更強大——這正是為什麼,獨裁者最害怕的,從來都是作家與思想。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">★ ✦ ★</div>
+  <p>亞洲第一個共和國的旗幟才剛升起,就被另一面星條旗壓了下去。<br>西班牙把這個國家「賣」掉了——只賣了兩千萬美元。<br><span class="hl">買主,是一個自詡帶來「文明」的新帝國。</span></p>
+</div>
+
+<!-- ===== 第七章:美國來了 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · Bought and Sold</span>
+    <h2 class="act-title">被「買賣」的國家,與美式改造</h2>
+    <p class="act-sub">The 20-Million-Dollar Colony and the American Remaking</p>
+    <div class="ornament">★ ★ ★</div>
+  </div>
+  <div class="prose">
+    <p>1898 年,美國與西班牙因古巴問題開戰(美西戰爭)。美國海軍在馬尼拉灣輕鬆擊潰了西班牙艦隊。戰後,在巴黎簽訂的《<strong>巴黎條約</strong>》中,發生了菲律賓史上最屈辱的一幕:西班牙把整個菲律賓,以<strong>兩千萬美元</strong>的價格,「賣」給了美國。</p>
+
+    <h3>菲美戰爭:被背叛的獨立</h3>
+    <p>對剛剛宣布獨立、建立共和國的菲律賓人而言,這是徹底的背叛。他們以為美國是幫助他們擺脫西班牙的盟友,沒想到美國只是換了一個主人。菲律賓人拒絕承認美國的主權,於是爆發了慘烈的「<strong>菲美戰爭</strong>」(1899–1902)。這場戰爭極其殘酷,據估計造成超過兩萬名菲律賓戰士陣亡,而死於戰火、饑荒與疾病的平民,<strong>更可能高達二十萬人</strong>。亞洲第一個共和國的獨立夢,就此被美國的槍砲碾碎。</p>
+    <div class="pull"><p>菲律賓人剛擊退了一個三百年的舊帝國,就立刻被一個新帝國以兩千萬美元買走——獨立的滋味,還沒嚐到就被奪走了。</p></div>
+
+    <h3>糖衣的殖民:英語、學校與民主</h3>
+    <p>但美國的殖民,與西班牙截然不同。美國標榜自己是來「<em>監護與教化</em>」(trusteeship and tutelage)的,因此它的統治帶著一層「糖衣」。美國人做的最重要的一件事,是建立了一套<strong>免費、普及的公共教育體系,並以英語為教學語言</strong>——第一批老師,甚至就是美國大兵與隨後而來的教師團(被稱為「Thomasites」)。在短短數十年間,英語成了菲律賓的教育、政府與商業語言。</p>
+    <p>除了英語,美國還移植了一整套美式的事物:民主制度與選舉、法律體系、媒體,乃至籃球、好萊塢電影與選美文化。這些都深深地烙印在菲律賓的肌理裡,塑造出一種獨特的、揮之不去的<strong>「親美情結」</strong>。可以說,如果西班牙改造了菲律賓的<em>靈魂(信仰)</em>,那麼美國就重塑了它的<em>頭腦(語言與制度)</em>。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最有效的殖民,讓你愛上殖民者</span>
+      <p>美國對菲律賓的殖民,是一種更高明、也更難擺脫的形式。西班牙靠強制與恐懼;而美國靠<strong>教育、機會與文化的吸引力</strong>——它讓菲律賓人主動學習英語、嚮往美國的生活方式、認同美式的價值觀。這種「<em>讓被殖民者愛上殖民者</em>」的軟性力量,其影響比任何武力都更深遠、更持久。</p>
+      <p>這正是菲律賓認同困境的第二層:在西班牙的天主教之上,又疊加了美國的英語與文化。一個菲律賓人可能信著西班牙的神、說著美國的語言、看著好萊塢長大——那麼,什麼才是「純粹的菲律賓」?<em>這份深刻的親美與西化,既是菲律賓在全球化時代的獨特優勢(英語能力),也是它「我們究竟是誰」這道難題中,最難解開的一環。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>美國的統治尚未走完,二戰的炮火就席捲了群島。<br>日本的鐵蹄、巴丹的死亡行軍、麥克阿瑟的誓言——<br><span class="hl">菲律賓在血與火中,終於迎來了遲到的、卻又綁著繩索的獨立。</span></p>
+</div>
+
+<!-- ===== 第八章:二戰與獨立 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · Liberation</span>
+    <h2 class="act-title">戰火、死亡行軍,與 1946 的獨立</h2>
+    <p class="act-sub">War, Sacrifice, and an Independence Tied to America</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>1941 年底,日本襲擊珍珠港的同時,也入侵了美國治下的菲律賓。儘管美菲聯軍奮力抵抗,仍不敵日軍。1942 年,菲律賓淪陷,美軍指揮官<strong>麥克阿瑟(MacArthur)</strong>撤離時,留下了那句名言:「<em>I shall return</em>」(我會回來)。</p>
+
+    <h3>巴丹死亡行軍</h3>
+    <p>日本佔領是菲律賓近代史上最慘痛的記憶之一。其中最駭人的,是<strong>巴丹死亡行軍</strong>(Bataan Death March)——數萬名投降的美菲戰俘,被日軍強迫在酷熱中徒步行進數十英里,沿途因虐待、飢渴與處決而大量死亡。日據三年間,菲律賓飽受蹂躪,馬尼拉更在 1945 年的收復戰中被夷為廢墟,成為二戰中受創最嚴重的城市之一。麥克阿瑟最終實現諾言,率軍重返菲律賓。</p>
+
+    <h3>1946:遲到的、綁著繩索的獨立</h3>
+    <p>戰爭結束後,美國終於兌現了讓菲律賓獨立的承諾。1946 年 7 月 4 日(刻意選在美國國慶日),菲律賓正式獨立,成為「菲律賓共和國」。然而,這份獨立從一開始就<strong>深深綁在美國的軌道上</strong>:美國保留了大型軍事基地(如蘇比克灣、克拉克),在貿易與經濟上維持著巨大的影響力,菲律賓的政治與外交也長期唯美國馬首是瞻。</p>
+    <p>於是,菲律賓的獨立帶著一種尷尬:它在法律上自主了,在心理與結構上卻仍是美國的「小兄弟」。這個剛剛站起來的國家,還來不及好好回答「我們是誰」,就被冷戰、被親美的慣性、以及國內盤根錯節的寡頭世家,推向了一段動盪的歲月——而其中最黑暗的一章,即將由一個名叫馬可仕的人寫下。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 形式的獨立與實質的依附</span>
+      <p>1946 年的獨立,揭示了後殖民世界一個普遍的困境:<strong>降下殖民者的旗幟很容易,但要真正擺脫殖民所形塑的依附結構,卻困難得多。</strong>菲律賓拿回了主權,卻沒拿回經濟的自主、外交的獨立,乃至心理上的自信。</p>
+      <p>把獨立日刻意定在美國國慶日(後來才改回紀念 1898 年宣布獨立的 6 月 12 日),這個細節本身就是一則隱喻:<em>連「獨立」這件事,都還籠罩在美國的影子之下。</em>菲律賓的故事告訴我們,殖民真正的遺產,往往不是看得見的統治,而是看不見的、內化於一個民族心理與制度深處的依附慣性——而這,需要比爭取獨立更漫長的努力去克服。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✎ ✦ ✎</div>
+  <p>一個被三百年西班牙、五十年美國輪番改造的民族,<br>該用什麼語言說話?<br><span class="hl">這個看似簡單的問題,藏著菲律賓認同最日常、也最分裂的傷口。</span></p>
+</div>
+
+<!-- ===== 第九章:語言 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · Tongues</span>
+    <h2 class="act-title">該說誰的話?一個國家的語言難題</h2>
+    <p class="act-sub">English, Tagalog, and the Search for a National Voice</p>
+    <div class="ornament">✎ ✎ ✎</div>
+  </div>
+  <div class="prose">
+    <p>沒有什麼,比「語言」更能赤裸地暴露菲律賓的認同難題了。一個被兩個帝國接力殖民的國家,究竟該用什麼語言來定義自己?這個問題的答案,至今仍充滿矛盾與張力。</p>
+
+    <h3>消失的西班牙語,留下的英語</h3>
+    <p>有趣的是,儘管西班牙統治了三百多年,<strong>西班牙語卻幾乎沒有在菲律賓普及為大眾語言</strong>——因為當年修道士為了壟斷知識,刻意不教導大眾西班牙語。反倒是美國僅僅統治了數十年,卻因為推行普及的英語公共教育,讓<strong>英語牢牢紮根</strong>,成為菲律賓的政府、法律、高等教育與商業語言。這是一個諷刺:留下語言的,不是統治更久的西班牙,而是更懂得用教育的美國。</p>
+
+    <h3>「國語」之爭:他加祿語的難題</h3>
+    <p>獨立後,菲律賓亟需一種「國語」來凝聚認同。最終,政府選擇了以馬尼拉地區的<strong>他加祿語(Tagalog)</strong>為基礎,定為國語「<strong>菲律賓語</strong>」(Filipino)。但這個選擇引發了持久的反彈——因為菲律賓有上百種語言,其他大島的族群(如中部講宿霧語 Cebuano 的人、北部講伊洛卡諾語的人)使用人口眾多,他們質疑:<em>憑什麼是馬尼拉的他加祿語?這不是「國語」,而是把首都的語言強加給全國。</em></p>
+    <div class="pull"><p>菲律賓人靠殖民者的英語彼此溝通、走向世界,卻在「自己的國語」上爭執不休——這正是它認同困境最日常的縮影。</p></div>
+
+    <h3>三語交織的日常</h3>
+    <p>於是今天的菲律賓,呈現出一種獨特的語言生態:<strong>英語</strong>是菁英、商業與向上流動的語言(也是它在全球勞動市場的最大優勢);<strong>菲律賓語(他加祿語)</strong>是官方國語與大眾媒體的語言;而各地的<strong>母語</strong>(宿霧語等)則是真正的家鄉話。許多菲律賓人在日常中混用英語與他加祿語,形成被稱為「Taglish」的獨特口語。一個國家,用著殖民者的語言走向世界,用著首都的語言勉強凝聚,用著各自的母語守護鄉愁。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 語言裡的認同地圖</span>
+      <p>菲律賓的語言難題,精準地對應了它的認同結構:<strong>英語代表「面向世界的菲律賓」(外向、西化、機會),他加祿語代表「試圖凝聚的菲律賓」(國族、卻帶著馬尼拉中心的爭議),母語則代表「真實存在的菲律賓」(在地、多元、根深柢固)。</strong></p>
+      <p>這三層語言的並存與張力,正是「我們是誰」這道題的日常版本。菲律賓人精湛的英語能力,讓上千萬人得以走向世界(下一章的海外勞工故事);但對殖民語言的依賴,也讓「什麼是真正屬於我們自己的聲音」這個問題,始終懸而未決。<em>當一個民族最流利的語言是別人給的,它與世界的連結最強,而與自己的連結,有時反而最弱。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">▰ ✦ ▰</div>
+  <p>獨立後的菲律賓,陷入了寡頭世家與貧富不均的泥沼。<br>然後,一個承諾要帶來「新社會」的強人登場了——<br><span class="hl">他用戒嚴令攫取了絕對權力,也最終召喚出了人民的怒火。</span></p>
+</div>
+
+<!-- ===== 第十章:馬可仕與人民力量 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十章 · Strongman</span>
+    <h2 class="act-title">馬可仕、戒嚴,與「人民力量」</h2>
+    <p class="act-sub">Dictatorship, EDSA, and a Family's Improbable Return</p>
+    <div class="ornament">▰ ✦ ▰</div>
+  </div>
+  <div class="prose">
+    <p>1965 年,<strong>馬可仕(Ferdinand Marcos)</strong>當選總統。他聰明、能言善道,但也權力慾極強。1972 年,他以共產主義叛亂與社會動盪為由,宣布全國<strong>戒嚴</strong>——中止憲法、解散國會、查封媒體,把菲律賓變成了他個人的獨裁王國。</p>
+
+    <h3>戒嚴歲月:掠奪與恐怖</h3>
+    <p>馬可仕的戒嚴統治持續了近十四年。這是一段黑暗的歲月:成千上萬的異議人士、記者、學生與反對派遭到逮捕、刑求,乃至失蹤與處決。同時,馬可仕及其家族與親信(裙帶資本家,cronies)以驚人的規模掠奪國家財富——據估計,馬可仕家族貪汙的金額高達數十億甚至上百億美元,他的妻子伊美黛(Imelda)收藏的數千雙鞋子,更成了這個政權奢靡腐敗的象徵。國家債台高築,經濟最終走向崩潰。</p>
+
+    <h3>1986:人民力量革命</h3>
+    <p>壓垮駱駝的,是 1983 年反對派領袖<strong>艾奎諾(Ninoy Aquino)</strong>在馬尼拉機場一下飛機就遭暗殺的事件。這激起了全國的怒火。1986 年,在一場充滿舞弊爭議的大選後,人民的不滿徹底爆發。在天主教會(辛海棉樞機主教)的號召、軍方倒戈與數百萬民眾的響應下,馬尼拉的<strong>EDSA 大道</strong>上聚集了如海洋般的人群——他們用祈禱、鮮花與血肉之軀,擋在坦克之前。這場幾乎不流血的「<strong>人民力量革命</strong>」(People Power Revolution),在四天內推翻了馬可仕,迫使他流亡海外。艾奎諾的遺孀<strong>柯拉蓉(Cory Aquino)</strong>就任總統,民主得以恢復。</p>
+    <p>這場革命震撼了世界,成為二十世紀「<em>人民非暴力推翻獨裁</em>」的標誌性時刻,啟發了此後全球許多民主運動。對菲律賓人而言,EDSA 是民族的驕傲——它證明了人民的意志,終能戰勝槍桿子。</p>
+    <div class="pull"><p>菲律賓人曾用血肉之軀擋住坦克、推翻獨裁,向全世界示範了「人民力量」——這讓三十多年後發生的事,顯得格外不可思議。</p></div>
+
+    <h3>歷史的逆轉:馬可仕家族的回歸</h3>
+    <p>然而,菲律賓的故事在此處給了世界一個驚人的反轉。被人民推翻、流亡海外的馬可仕家族,並沒有從此消失。數十年間,他們逐步重返政壇。而在 <strong>2022 年</strong>的總統大選中,馬可仕的兒子——綽號「邦邦」(Bongbong)的<strong>小費迪南德·馬可仕(Marcos Jr.)</strong>——竟以壓倒性的票數當選總統。</p>
+    <p>這如何可能?關鍵之一,是一場持續多年、極其成功的「<strong>歷史記憶戰爭</strong>」。馬可仕家族與其支持者,透過社群媒體(尤其 TikTok、YouTube、Facebook),系統性地「<em>美化</em>」戒嚴時期,把那段掠奪與恐怖的歲月,重新包裝成一個「秩序井然、經濟繁榮的黃金時代」,並淡化、扭曲其暴行。對沒有親歷戒嚴的年輕世代而言,這套經過粉飾的敘事極具吸引力。一個曾被人民力量推翻的獨裁家族,就這樣靠著數位時代的記憶改寫,堂堂正正地重返了它當年被趕出的總統府。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 記憶,是會被改寫的戰場</span>
+      <p>馬可仕家族的回歸,是數位時代最深刻、也最令人不安的政治寓言之一:<strong>歷史不是一個被封存的事實,而是一個持續被爭奪、被重寫的戰場。</strong>當一個社會沒能徹底清算過去的暴行、沒能把真相牢牢寫進集體記憶時,那段歷史就可能被有心人重新粉飾、甚至徹底翻轉。</p>
+      <p>菲律賓的「人民力量」曾是全世界民主的燈塔,但它沒能完成最後一步——把獨裁的罪行轉化為不可動搖的歷史共識。於是三十六年後,在社群媒體演算法的助力下,加害者的後代成了英雄,受害者的記憶反被淡忘。<em>這提醒所有民主社會:推翻一個獨裁者,只是一場戰役的勝利;而守護關於他的真相,才是一場永無止境的戰爭。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✝ ✦ ✝</div>
+  <p>無論政權如何更迭、強人如何起落,有一樣東西始終穩坐菲律賓的核心。<br>它定義了人們如何出生、結婚、死亡,甚至如何投票——<br><span class="hl">那就是,西班牙留下的天主教信仰。</span></p>
+</div>
+
+<!-- ===== 第十一章:天主教國度 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Catholic Nation</span>
+    <h2 class="act-title">亞洲唯一的天主教大國</h2>
+    <p class="act-sub">How Faith Defines What It Means to Be Filipino</p>
+    <div class="ornament">✝ ✝ ✝</div>
+  </div>
+  <div class="prose">
+    <p>如果說有一條線索貫穿了菲律賓的整個身世,那就是<strong>天主教</strong>。約八成的菲律賓人是天主教徒,使這個國家成為<em>亞洲唯一以天主教為絕對主流的大國</em>(另一個天主教為主的亞洲國家是東帝汶)。這份信仰,是西班牙三百年統治留下的最深、最持久的遺產。</p>
+
+    <h3>信仰,滲透在生活的每個縫隙</h3>
+    <p>天主教不只是菲律賓人週日上教堂的習慣,它滲透在生活的每一個縫隙裡:盛大的聖週與耶誕慶典、家家戶戶的聖像、孩子的受洗與堅振、婚禮與葬禮的儀式。菲律賓也發展出獨特的民間天主教信仰——例如每年吸引數百萬人的「黑拿撒勒人」遊行,以及融合了本土色彩的虔誠表達。對許多菲律賓人而言,<strong>天主教不只是宗教,更是身分認同本身</strong>——它是這個飽經殖民、認同破碎的民族,少數能凝聚所有人的共同核心。</p>
+
+    <h3>教會的巨大政治權力</h3>
+    <p>菲律賓的天主教會,還握有強大的政治影響力。前面講過,正是教會(辛海棉樞機主教)的號召,在 1986 年推翻馬可仕的人民力量革命中扮演了關鍵角色。時至今日,教會在重大社會議題上仍有舉足輕重的發言權,尤其在攸關道德與家庭的領域。最鮮明的例子是:在教會的長期反對下,<strong>菲律賓至今仍是全世界極少數法律上禁止離婚的國家之一</strong>(梵蒂岡是另一個)。教會也長期反對避孕與生育健康政策,使相關法案的推動歷經漫長的角力。信仰,在這裡是會直接影響立法的真實力量。</p>
+    <div class="pull"><p>在菲律賓,天主教不是一個你選擇的宗教,而是一個你出生就被賦予的身分——它既是這個破碎民族最強的黏著劑,也是殖民烙印最深的證明。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 凝聚力與枷鎖的一體兩面</span>
+      <p>天主教對菲律賓,是一個關於「<strong>遺產的兩面性</strong>」的深刻案例。一方面,在一個被七千座島嶼、上百種語言、殖民傷痕割裂的國家裡,天主教提供了一個<em>難得的、超越族群與地域的共同認同</em>——它是凝聚菲律賓的最強黏著劑之一。</p>
+      <p>但另一方面,它也是殖民最深的烙印,並在當代帶來真實的束縛——從禁止離婚到生育議題,信仰的力量有時凌駕於個人權利與公共政策之上。<em>這正是菲律賓認同的終極弔詭:它最強大的凝聚核心(天主教),恰恰是殖民者植入的;它最「菲律賓」的東西,本質上卻是「西班牙」的。</em>當一個民族最深的身分認同,源自征服它的人,那麼「我們究竟是誰」這個問題,就永遠帶著一絲無法擺脫的鄉愁與困惑。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☪ ✦ ☪</div>
+  <p>還記得那個西班牙三百年都征服不了的穆斯林南方嗎?<br>當北方在慶祝獨立與民主時,南方的戰火,從未真正熄滅。<br><span class="hl">那道從殖民時代就劃下的裂痕,流了半個多世紀的血。</span></p>
+</div>
+
+<!-- ===== 第十二章:摩洛問題 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The South Bleeds</span>
+    <h2 class="act-title">摩洛問題:南方半世紀的戰爭與和平</h2>
+    <p class="act-sub">Mindanao's Long War and the Bangsamoro Experiment</p>
+    <div class="ornament">☪ ✦ ☪</div>
+  </div>
+  <div class="prose">
+    <p>讓我們回到南方。前面說過,棉蘭老島與蘇祿的穆斯林摩洛人,從未被西班牙真正征服,也從未認同「菲律賓」這個天主教—北方主導的身分。當菲律賓獨立後,這道裂痕並沒有癒合,反而惡化成一場綿延數十年的<strong>分離戰爭</strong>。</p>
+
+    <h3>邊緣化與武裝抗爭</h3>
+    <p>問題的根源,除了宗教與歷史,還有<strong>人口與土地</strong>。二十世紀,菲律賓政府鼓勵大批信奉天主教的北方人移民到棉蘭老島開墾——結果,原本是穆斯林家園的土地,逐漸變成穆斯林反而成了少數的處境。被邊緣化的摩洛人,在 1970 年代起組成武裝組織,如「<strong>摩洛民族解放陣線</strong>」(MNLF)與後來更具伊斯蘭色彩的「<strong>摩洛伊斯蘭解放陣線</strong>」(MILF),展開了爭取自治乃至獨立的長期武裝鬥爭。數十年的衝突,造成了超過十萬人死亡與大量流離失所,讓資源豐富的棉蘭老島,長期陷於貧困與動盪。</p>
+
+    <h3>2019:邦薩摩洛的和平實驗</h3>
+    <p>經過漫長而反覆的談判,和平的曙光終於在近年出現。經過數十年努力,菲律賓政府與最大的武裝組織 MILF 達成了歷史性的和平協議。2019 年,<strong>「邦薩摩洛自治區」(BARMM)</strong>正式成立——這是一個賦予摩洛人高度自治權的全新政治實體,旨在以「自治」換取「和平」,讓摩洛人能在菲律賓的框架內管理自己的事務。這是菲律賓試圖縫合這道五百年裂痕的最重要、也最充滿希望的一次嘗試,儘管前路仍佈滿挑戰(零星的極端組織活動仍存在)。</p>
+    <div class="pull"><p>用「自治」換「和平」——邦薩摩洛的實驗,是菲律賓對那道從西班牙時代就劃下的裂痕,遲到了五百年的回應。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 整合少數的終極考驗</span>
+      <p>摩洛問題,與印尼的亞齊、巴布亞驚人地相似,都指向同一道難題:<strong>當一個國家裡,存在一群在歷史、信仰、認同上「從未真正選擇加入」的人時,該怎麼辦?</strong>菲律賓嘗試過武力鎮壓,結果是半世紀的流血;最終,它選擇了一條更艱難卻更可持續的路——<em>用自治與尊重,換取認同與和平</em>。</p>
+      <p>邦薩摩洛的實驗能否成功,將是檢驗「菲律賓」這個國家成熟度的終極考題。它考驗的,正是序章提出的那個根本問題的反面:如果說「菲律賓」是被殖民者由上而下定義的,那麼能否容納一群拒絕這個定義的人、給他們自己定義自己的空間——這或許才是這個國家真正走向成熟、真正回答「我們是誰」的關鍵一步。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✈ ✦ ✈</div>
+  <p>當這個國家無法在本土給人民足夠的機會時,<br>它做出了一個獨特而辛酸的選擇——<br><span class="hl">把自己的人民,送往全世界。</span></p>
+</div>
+
+<!-- ===== 第十三章:海外菲勞 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十三章 · The Scattered Nation</span>
+    <h2 class="act-title">海外菲勞:一個「離散的國家」</h2>
+    <p class="act-sub">The OFWs and a Nation That Exports Its People</p>
+    <div class="ornament">✈ ✈ ✈</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的菲律賓,必須認識一個獨特而深刻的現象:這是一個<strong>把人民「出口」到全世界的國家</strong>。在全球各地的醫院、油輪、家庭、建築工地與郵輪上,你都能找到菲律賓人的身影。他們被稱為「<strong>海外菲律賓勞工</strong>」(OFW,Overseas Filipino Workers)——估計有上千萬之眾,約佔全國人口的十分之一。</p>
+
+    <h3>「現代英雄」與僑匯經濟</h3>
+    <p>這個模式的根源,可追溯到 1970 年代馬可仕政府為了緩解國內失業與賺取外匯,而正式推動的「勞務輸出」政策。憑藉著美國殖民遺留下來的<strong>英語能力</strong>(見語言一章),菲律賓人在全球勞動市場上具有獨特優勢——尤其在護理、海事、家務與服務業。他們寄回家鄉的錢(僑匯),成了支撐菲律賓經濟的支柱:2024 年僑匯總額創下約 380 億美元的歷史新高,長年約佔 GDP 的 <strong>8% 到 10%</strong>。政府尊稱這些海外工作者為國家的「<strong>現代英雄</strong>」(mga bagong bayani)。</p>
+
+    <h3>繁榮背後的辛酸</h3>
+    <p>但這份「現代英雄」的光環下,是無數家庭的犧牲。數以百萬計的父母(尤其母親)為了給子女更好的生活,遠赴他鄉,忍受著與骨肉長年分離的痛苦,有些更在異國遭受剝削、虐待乃至危險。一個「<em>留守兒童</em>」的世代,在父母缺席中長大。整個國家的繁榮,某種程度上是建立在家庭的離散之上——這是一種辛酸的、用親情換取生計的發展模式。</p>
+    <div class="pull"><p>菲律賓最大的出口品,不是商品,而是它的人民——以及他們對家鄉的思念與匯款。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 輸出人民的兩難</span>
+      <p>海外菲勞現象,揭示了一個發展中國家深刻的兩難。短期看,它是聰明的:它解決了國內就業不足、賺取了大量外匯、用僑匯撐起了內需。海外菲勞確實是支撐這個國家的英雄。</p>
+      <p>但長期看,它也是一個<strong>「陷阱」</strong>:當一個國家習慣了「輸出人民、依賴僑匯」,它就可能<em>缺乏動力去建立能在本土創造優質工作的產業</em>——畢竟,把問題「外包」出去比解決它容易。這呼應了本書「大帆船」一章的洞見:菲律賓再次扮演了全球體系裡的「服務者」角色。最優秀的人才持續外流,本土的根基卻難以深植。<em>一個國家若把最寶貴的資源(人)當成出口品,它換來了當下的生計,卻可能犧牲了長遠的未來。</em>所幸,近年僑匯佔 GDP 的比重已逐漸下降,顯示本土經濟正在成長——這或許是這個「離散的國家」,開始學會把人才留在家裡的徵兆。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🌀 ✦ 🌀</div>
+  <p>除了殖民者與強人,菲律賓還有一個永恆的、無法談判的對手——<br>大自然本身。<br><span class="hl">它坐落在地球最猛烈的火環與颱風走廊之上,而這,鍛造了它的靈魂。</span></p>
+</div>
+
+<!-- ===== 第十四章:災難與韌性 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十四章 · The Ring of Fire</span>
+    <h2 class="act-title">火環與風暴:災難如何鍛造一個民族</h2>
+    <p class="act-sub">How Catastrophe Forged the Filipino Spirit</p>
+    <div class="ornament">🌀 🌀 🌀</div>
+  </div>
+  <div class="prose">
+    <p>有一條形塑菲律賓的力量,比任何殖民者都更古老、更無情——<strong>地理本身</strong>。菲律賓位於環太平洋「<strong>火環</strong>」(Ring of Fire)之上,又正處於西太平洋颱風生成的主要路徑上。這使它成為全世界<em>受自然災害衝擊最頻繁、最嚴重的國家之一</em>:地震、火山爆發、颱風、洪水、土石流,是這片群島揮之不去的宿命。</p>
+
+    <h3>與災難共存的宿命</h3>
+    <p>這份宿命寫滿了菲律賓的近代史。1991 年,呂宋島的<strong>皮納圖博火山</strong>爆發,是二十世紀全球規模最大的火山噴發之一,其噴出的火山灰甚至短暫地降低了全球氣溫。2013 年,超級颱風「<strong>海燕</strong>」(Yolanda,國際名 Haiyan)以人類記錄上最強的登陸風暴之一橫掃中部,造成超過六千人死亡、數百萬人流離失所,整座塔克洛班市幾乎被夷平。平均而言,菲律賓<em>每年要承受約二十個颱風的侵襲</em>。對菲律賓人來說,災難不是「如果」,而是「何時」。</p>
+
+    <h3>苦難中淬煉的韌性與「歡笑」</h3>
+    <p>然而,正是在這種與災難長期共存的處境中,菲律賓人淬煉出一種舉世聞名的民族性格——<strong>堅韌(resilience)與樂觀</strong>。他們有一個獨特的文化概念叫「<em>bayanihan</em>」,意指社區守望相助、共同扛起重擔的精神(其意象正是全村合力扛起一棟房子)。一次次在廢墟中重建、在風暴後重新站起,菲律賓人發展出一種以信仰(天主教)為依託、以社群為支撐、以笑容面對苦難的生命態度。這份在絕境中依然歡笑的能力,是這個民族最動人的特質之一。</p>
+    <div class="pull"><p>當你生在一片每年被二十場風暴造訪、隨時可能天搖地動的土地上,你只有兩個選擇:被擊垮,或者學會在廢墟上微笑著重建。菲律賓人選擇了後者。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 苦難塑造性格</span>
+      <p>菲律賓的災難史,揭示了地理對民族性格的深層塑造。一個必須<strong>反覆面對毀滅、又反覆重建</strong>的民族,會發展出兩種截然不同的特質:一方面是令人敬佩的韌性、社群凝聚力與樂觀;但另一方面,長期的「災後重建」模式,也可能讓社會習慣於<em>應對危機,而非長遠的預防與規劃</em>。</p>
+      <p>更深一層看,這份「韌性」有時也是一把雙刃劍:當「菲律賓人很堅韌」成為一種讚美時,它有時也可能<em>掩蓋了結構性的問題</em>——是不是因為政府的防災與治理長期不足,人民才不得不如此「堅韌」?無論如何,這份在火環與風暴中淬煉出的、面對苦難依然微笑重建的精神,已經成為「菲律賓人是誰」這個答案中,最不可或缺、也最令人動容的一塊。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">▣ ✦ ▣</div>
+  <p>歷史走到了今天。<br>強人的幽靈回返、毒品戰爭的爭議、南海的波濤、王朝的政治——<br><span class="hl">這個飽經滄桑的群島,正站在新的十字路口。</span></p>
+</div>
+
+<!-- ===== 第十五章:當代政治經濟 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十五章 · The Crossroads</span>
+    <h2 class="act-title">毒品戰爭、王朝回朝,與南海的波濤</h2>
+    <p class="act-sub">Duterte, the Marcos Return, the Economy, and the Sea</p>
+    <div class="ornament">▣ ✦ ▣</div>
+  </div>
+  <div class="prose">
+    <p>EDSA 革命恢復民主後,菲律賓走過了數位民選總統。但這個國家的當代政治,始終擺盪在「<em>民主理想</em>」與「<em>強人渴望</em>」之間,而它的經濟,則在希望與困境中艱難前行。</p>
+
+    <h3>杜特蒂與血腥的毒品戰爭</h3>
+    <p>2016 年,以鐵腕作風著稱的<strong>杜特蒂(Rodrigo Duterte)</strong>當選總統。他發動了一場爭議極大的「<strong>毒品戰爭</strong>」,鼓勵警方與治安人員對涉毒嫌疑人格殺勿論。這場運動雖在部分民眾中獲得高支持度,卻造成了數千乃至上萬人在未經審判下喪生,引發國際社會嚴重的人權譴責,國際刑事法院更介入調查。杜特蒂現象,反映了一部分菲律賓人在長期的犯罪與失序中,對「強人秩序」的渴望——這份渴望,也為馬可仕家族的回歸鋪平了道路。</p>
+
+    <h3>2022:王朝政治的極致</h3>
+    <p>2022 年的大選,將菲律賓的「王朝政治」推向了極致。如前一章所述,被推翻的獨裁者之子<strong>小馬可仕(Bongbong)</strong>當選總統;而他的副手,正是<strong>杜特蒂的女兒莎拉(Sara Duterte)</strong>。兩大政治家族聯手登頂,把菲律賓政治由少數寡頭世家把持的特質,展現得淋漓盡致(儘管兩家後來反目)。這呼應了本書「混血菁英」一章埋下的根:菲律賓的民主,始終籠罩在家族世襲的陰影之下。</p>
+
+    <h3>經濟:希望與困境並存</h3>
+    <p>而在政治的動盪之外,菲律賓的經濟也走到了一個關鍵的十字路口——它擁有龐大年輕的人口與獨特的優勢,卻也背負著深刻的結構性難題(這正是下一章要深入的主題)。但決定這個國家走向的,不只是內部的政經,還有它身處的這片日益洶湧的海洋。</p>
+
+    <h3>南海:在巨人之間</h3>
+    <p>而在外部,菲律賓正站在當代最危險的地緣斷層線上——<strong>南海(菲律賓稱「西菲律賓海」)的主權爭端</strong>。菲律賓與中國在黃岩島、仁愛礁等海域的對峙日益升溫,海警船的衝突時有所聞。儘管菲律賓在 2016 年的國際仲裁中獲得了有利裁決,中國卻拒不承認。面對崛起的中國,菲律賓再次轉向它的舊宗主國美國尋求安全保障——這個五百年前就是「貿易十字路口」的群島,如今又一次成為大國博弈的最前線。歷史的迴聲,從未停止。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 在巨人之間的永恆位置</span>
+      <p>菲律賓的當代處境,是它五百年身世的當代縮影。在<strong>政治上</strong>,它仍在「人民力量」的民主理想與「強人/王朝」的現實引力之間拉扯——這道張力,根源於那個始終未被打破的寡頭結構。在<strong>經濟上</strong>,它再次扮演著全球體系的「服務者」(BPO、僑匯),延續著從大帆船時代就有的「樞紐而非根基」的命運。</p>
+      <p>而在<strong>地緣上</strong>,南海的波濤,讓菲律賓再一次回到了它最古老的宿命位置——<em>一片夾在巨人之間、注定要在大國博弈中尋找生存之道的群島</em>。從西班牙到美國,從冷戰到中美對抗,菲律賓的命運,始終與它身處的這個「十字路口」緊緊相連。理解了這一點,就理解了為什麼「我們是誰、我們該站在哪一邊」,對菲律賓而言,從來不只是一個哲學問題,而是一個攸關生存的現實命題。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">＄ ✦ ＄</div>
+  <p>一個把人民送往全球、又在風暴中反覆重建的國家,<br>它的經濟,究竟靠什麼撐起?<br><span class="hl">答案,藏在深夜裡那一通通操著流利英語的客服電話中。</span></p>
+</div>
+
+<!-- ===== 當代經濟專章 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十六章 · The Service Economy</span>
+    <h2 class="act-title">客服電話、僑匯,與一個跳過工廠的經濟體</h2>
+    <p class="act-sub">BPO, Remittances, and the Trap of Skipping the Factory</p>
+    <div class="ornament">＄ ✦ ＄</div>
+  </div>
+  <div class="prose">
+    <p>今天的菲律賓,是一個擁有<strong>超過一億一千萬人口</strong>、且相當年輕的國家,是東南亞重要的新興經濟體。過去十五年,它的表現相當亮眼:GDP 年均成長約 5%,是中等收入國家中的前段班,並在近年正式邁向「中高收入」國家的門檻。世界銀行更指出,這是一段難得的「<em>創造就業、有利於窮人</em>」的成長,失業率降至歷史低點,2023 年的貧富差距(吉尼係數)更首度跌破「高度不均」的門檻。這是一份值得肯定的成績單。</p>
+
+    <h3>兩根支柱:深夜的客服與遠方的匯款</h3>
+    <p>但撐起這份成績的,是兩根極其特殊的支柱——而它們都與本書反覆出現的主題緊緊相連。第一根是<strong>海外僑匯</strong>(見前章):上千萬海外菲勞寄回的錢,2024 年創下約 380 億美元的新高,長年佔 GDP 的 8%–10%,是支撐家庭消費的命脈。</p>
+    <p>第二根,則是「<strong>商業流程外包</strong>」(BPO)。憑藉著美國殖民遺留的<em>英語優勢</em>(見語言一章),菲律賓在二十一世紀初一躍成為<strong>全球客服中心與後勤外包的重鎮</strong>——當歐美的消費者深夜打電話查帳單、問客服時,接聽的往往是馬尼拉、宿霧辦公大樓裡一位操著流利美式英語的菲律賓青年。BPO 產業創造了上百萬個相對高薪的工作,養活了一個龐大的新興都市中產階級,並帶來可觀的外匯。可以說,菲律賓把它最大的殖民遺產(英語),變成了二十一世紀最值錢的經濟資產。</p>
+    <div class="pull"><p>菲律賓經濟的兩大支柱——海外僑匯與客服外包——本質上是同一件事:把美國留下的英語能力,當成商品賣給全世界。</p></div>
+
+    <h3>一個「跳過工廠」的經濟體</h3>
+    <p>然而,這套模式藏著一個深刻的結構性隱憂。綜觀東亞的成功故事——日本、韓國、台灣、中國——它們崛起的路徑幾乎都是「<strong>製造業立國</strong>」:從廉價代工起步,一步步往高附加價值的工業攀爬,藉此創造大量就業、累積技術、壯大中產。但菲律賓走了一條罕見的路:它的服務業(BPO、零售)異常發達,佔 GDP 超過六成,<strong>製造業卻長期疲弱、空洞</strong>,佔比遠低於它的東南亞鄰居。它彷彿「<em>跳過了工廠</em>」,直接從農業經濟躍入了服務經濟。</p>
+    <p>這條「跳過工廠」的路為何危險?因為製造業是吸納大量中低技術勞動力、創造廣泛就業的引擎。當一個國家缺乏堅實的製造業基礎時,經濟成長就難以惠及最廣大的底層民眾——這正是為什麼,儘管菲律賓 GDP 數字漂亮,2025 年仍有約<strong>百分之十六的人口生活在貧窮線以下</strong>,貧富差距與「有感」的問題依然嚴峻。成長,沒能充分轉化為多數人「過上好日子」。</p>
+
+    <h3>馬可仕的賭注與中等收入陷阱</h3>
+    <p>面對這個困境,小馬可仕政府把希望寄託在大規模的基礎建設上,推出「<strong>建設更多、更好</strong>」(Build Better More)計畫,要興建道路、鐵路、機場與能源設施,試圖補上長期落後的基建短板、並藉此吸引製造業投資。但挑戰巨大:薄弱的製造業、根深柢固的貪腐(2025 年甚至爆發公共工程貪腐醜聞,一度拖累成長)、不足的稅收、以及天災的反覆衝擊,都是沉重的包袱。</p>
+    <p>經濟學家因此提出一個尖銳的警告:菲律賓正面臨陷入「<strong>中等收入陷阱</strong>」的風險。有分析指出,若 GDP 維持過去十五年約 6% 的成長,菲律賓<em>無法在 2040 年如願成為高收入國</em>——要達標,需要連續十五年 8% 的高速成長,這幾乎是不可能的任務。一個靠「賣服務、輸出人力」走到中等收入的國家,能否完成最艱難的下一跳,躋身真正的已開發行列?</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 樞紐宿命的當代版</span>
+      <p>菲律賓的經濟困境,是它五百年身世在當代最精準的迴響。回想本書「<em>大帆船</em>」一章的洞見:菲律賓自古就擅長扮演全球體系裡的「<strong>中介者與服務者</strong>」——大帆船時代替人轉運絲銀,當代則輸出人力(僑匯)與服務(BPO)。這份「樞紐」角色帶來了可觀的流量與外匯,卻始終難以沉澱為自主、深厚的工業根基。</p>
+      <p>這揭示了一個發展經濟學的深刻命題:<em>一個經濟體靠「服務全世界」可以活得不錯,但若想真正「富起來、強起來」,往往仍需要一段把技術與產業留在本土、紮下根基的艱苦歷程。</em>菲律賓擁有東南亞最寶貴的兩項資產——年輕的人口紅利,與無與倫比的英語能力。它能否善用這個窗口,從「全世界的服務者」升級為「有自己根基的經濟體」,將決定它在二十一世紀,究竟是又一個「成長卻沒能富裕」的中等收入故事,還是下一個東亞奇蹟。這道題,本質上與「我們是誰」一樣,都是關於菲律賓能否真正掌握自己命運的追問。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✝ ⚓ ✝</div>
+  <p>五百年,七千座島,兩個西方帝國,無數場風暴。<br>當我們走到故事的盡頭,終於可以回答那個貫穿始終的問題——<br><span class="hl">在三百年西班牙、五十年美國之後,菲律賓人究竟是誰?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的菲律賓人</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">Who the Filipinos Became, After Everything</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⚓ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的菲律賓之所以是這個模樣——亞洲唯一的天主教大國、講英語、深受美國影響、政治被家族把持、人民散布全球、卻又無比堅韌——是幾層力量層層堆疊的結果。每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:一片空白的群島</h3>
+      <p>一切始於那片<strong>從未統一、連名字都沒有</strong>的群島。正因為沒有滿者伯夷或馬六甲那樣的本土帝國作為抵抗的核心,菲律賓幾乎是被殖民者「從零開始」地書寫——這讓外來的烙印格外之深,也讓「我們是誰」這個問題,從一開始就格外難答。</p>
+
+      <h3>第二層:西班牙給了它靈魂(與一個名字)</h3>
+      <p>接著是<strong>西班牙的十字架</strong>。三百年的修道士統治,把這片群島改造成亞洲唯一的天主教國度,連這個國家的名字「菲律賓」,都來自一位西班牙國王。天主教成了菲律賓最深的凝聚核心——但這個核心,本質上是殖民者植入的。</p>
+
+      <h3>第三層:美國重塑了它的頭腦</h3>
+      <p>然後是<strong>美國的英語與民主</strong>。五十年的美式統治,用普及教育、英語、籃球與好萊塢,重塑了菲律賓的頭腦,埋下了深刻的親美情結。如果西班牙給了它靈魂,美國就給了它頭腦——而這兩者都來自西方,讓「什麼是純粹的菲律賓」變得格外難尋。</p>
+
+      <h3>第四層:它從未真正整合所有人</h3>
+      <p>同時,有一群人從未被這個故事涵蓋——<strong>南方的穆斯林摩洛人</strong>。他們從未被西班牙征服、從未認同這個天主教—北方的國家。這道從殖民時代就劃下的裂痕,流了半個多世紀的血,直到 2019 年的邦薩摩洛自治,才迎來縫合的希望。</p>
+
+      <h3>第五層:它把人民送向世界,在風暴中重建家園</h3>
+      <p>最後是<strong>當代的命運</strong>。寡頭世家(源自混血菁英)把持著政治,連被推翻的獨裁家族都能靠記憶改寫而回朝;經濟上,它靠著美國留下的英語,把上千萬人民送往全球、把客服電話接給全世界(僑匯與 BPO),卻「跳過了工廠」、缺乏堅實的製造業根基,延續著從大帆船時代就有的「樞紐而非根基」的宿命,並在中等收入的門檻前苦苦掙扎;而在火環與風暴的反覆摧殘中,它淬煉出了那份舉世聞名的、在廢墟上微笑重建的堅韌。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 在別人的烙印中,尋找自己</span>
+        <p>所以,今天的菲律賓人是誰?他是<strong>一片空白群島上的居民,被西班牙賜予了靈魂與名字,被美國重塑了頭腦與語言,被自己的寡頭與強人反覆辜負,被太平洋的風暴一次次擊倒又扶起</strong>——他信著西方的神,說著西方的話,卻有著一顆無比堅韌、無比顧家、在苦難中依然歡笑的東方靈魂。</p>
+        <p>菲律賓最深刻的真相是:<em>它的認同,不是「找回」一個殖民前的純粹自我(那個自我從未以「國家」的形式存在過),而是「拼湊」——把西班牙的信仰、美國的語言、本土的韌性、混血的菁英、南方的異議、離散的兒女,全部揉進一個複雜而矛盾的整體。</em>「我們是誰」對菲律賓而言,從來不是一個能簡單回答的問題,而是一場仍在進行的、誠實的追尋。而或許,正是這份「在無數別人的烙印中,依然努力尋找與創造自己」的姿態本身,就是最真實的菲律賓——一個由傷痕、信仰、韌性與愛拼湊而成,卻依然倔強地微笑著的民族。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">西班牙給了它名字,美國給了它語言,風暴給了它韌性——而把這一切揉成「菲律賓人」的,是這個民族自己。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">五百年的終極啟示</span>
+      <p>一個民族的身世,未必始於一個光榮的古老帝國;它也可以始於一片空白,在一層層外來的征服與烙印中,被動地被書寫,卻又主動地、倔強地,從那些不屬於自己的碎片裡,拼湊出一個屬於自己的靈魂。菲律賓的答案告訴我們:認同的本質,有時不是「找回」,而是「創造」;不是擁有一個純粹的過去,而是誠實地擁抱一個複雜的現在。這,就是「我們是誰」這個問題,最深刻的重量。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從拉普拉普擊殺麥哲倫的那片灘頭,<br>
+        到鐘聲之下三百年的十字架、太平洋上的絲銀帆船,<br>
+        從黎剎之筆喚醒的亞洲第一個共和國、被兩千萬美元賣掉的屈辱,<br>
+        從 EDSA 大道上擋住坦克的血肉之軀,<br>
+        到散布全球的上千萬「現代英雄」、風暴後依然重建的家園——<br>
+        這段交織著十字架、殖民、抵抗與堅韌的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        在所有人的烙印之後,<br>菲律賓人,終究是菲律賓人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">✝ ✦ ⚓</div>
+  <p>十字架、群島與「我們是誰」 · 菲律賓五百年的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM MACTAN TO THE WEST PHILIPPINE SEA · 1521 – 2024</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用免稅憑空造出的城：檳城兩百四十年的兩次重生</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">George Town, Penang · The Island Conjured from Tax-Free Air</span>
+    <h1>用「免稅」<span class="em">憑空造出</span>的城<br>檳城<br>兩百四十年的兩次重生</h1>
+    <p class="sub">從一座長滿檳榔樹的荒島、一個反直覺到近乎瘋狂的商業點子，<br>到被新加坡超越的失落，再到「東方矽谷」的優雅轉身——<br>一座靠「不收稅」起家的城，如何兩度死裡逃生</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">如</span>果說馬六甲是「天賜的咽喉」、吉隆坡是「泥裡賭出的礦城」，那麼檳城就是一場徹頭徹尾的<em>人造奇蹟</em>。在 1786 年之前，這座馬來半島西北外海的小島只是一片長滿檳榔樹的荒地，島上居民據說不到六十人。把它變成一座城的，不是蘇丹、不是礦藏，而是一名英國船長和一個在當時聽起來近乎瘋狂的點子——<strong>把整座城變成免稅的</strong>。短短十六年，進港船隻暴增四十倍；短短數年，荒灘變成八方移民雜處的諸神之街。但這座靠「點子」起家的城，註定要面對「點子會被更好的點子取代」的宿命：先是被新加坡超越，後又在獨立後失去自由港地位、跌入近一成六的失業深淵。它如何兩度從失落裡重生、最終把自己活成全球半導體的「東方矽谷」？讓我們從那片荒島走起，在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">⚓ ✦ ⚓</div>
+
+<!-- ===== 序章：荒島 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · An Empty Island</span>
+    <h2 class="act-title">一座沒有故事的荒島</h2>
+    <p class="act-sub">Pulau Pinang Before 1786 — The Island of Betel Nut Palms</p>
+    <div class="ornament">☴ ☴ ☴</div>
+  </div>
+  <div class="prose">
+    <p>檳城的故事，要從一個「幾乎什麼都沒有」的起點講起。在 1786 年之前，這座位於馬來半島西北外海的島嶼，沒有蘇丹的宮殿，沒有古城的城牆，沒有黃金的傳說。馬來人稱它為「檳榔嶼」（Pulau Pinang）——因為島上長滿了<em>檳榔樹</em>。它在當時的地圖上，幾乎是一片空白。</p>
+
+    <h3>它原本屬於吉打蘇丹</h3>
+    <p>這座島在名義上屬於北方的<strong>吉打蘇丹國（Kedah）</strong>。但吉打當時正深陷困境——它夾在強大的暹羅（今泰國）與緬甸兩大勢力之間，隨時可能被吞併。蘇丹迫切需要一個強有力的外援，來保護自己不被鄰國的軍隊踏平。這份「對保護的渴望」，後來成了一名英國船長手中最重要的籌碼。</p>
+
+    <h3>海盜的巢穴，列強的空隙</h3>
+    <p>在被英國人盯上之前，這片海域是海盜出沒的水域。但對一個正在亞洲擴張的海權帝國來說，這座荒島的價值不在於它「有什麼」，而在於它的<em>位置</em>：它扼守馬六甲海峽的北口，正好位於印度與中國之間那條最繁忙的海上航線上。對於往返印度與廣州的英國商船而言，這裡是一個天然的中途補給站；對於急於遏制荷蘭與法國在東南亞勢力的英國東印度公司而言，這裡是一枚絕佳的戰略棋子。</p>
+    <div class="pull"><p>檳城的價值，從來不在它的土地上長出了什麼，而在於它「卡在哪裡」——一座荒島，因為坐在航線的咽喉上，而被歷史選中。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 空白，有時是最大的優勢</span>
+      <p>檳城起點的反常之處在於：它的「一無所有」，竟成了它的優勢。馬六甲有沉重的蘇丹體制與既有勢力，新的征服者必須先打碎舊秩序；而檳城是一張<strong>近乎空白的畫布</strong>，一個船長可以在上面隨心所欲地畫出他理想中的城——沒有舊規矩要打破，沒有既得利益要安撫。</p>
+      <p>這對應一個被低估的真理：<em>有時候，「沒有歷史包袱」本身就是一種稀缺資源。</em>正因為檳城是荒島，它才能成為東南亞第一個敢於徹底實驗「免稅自由港」這個激進點子的地方。後來的故事將證明，一張空白的紙，能寫出最大膽的字。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>季風吹來了商船，也吹來了第一個讀懂這座荒島價值的人。<br>他不是國王，而是一名替公司辦事的船長，<br><span class="hl">他將用一個近乎瘋狂的點子，把這片荒灘變成東方的交易所。</span></p>
+</div>
+
+<!-- ===== 第一章：萊特與自由港 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Free Port</span>
+    <h2 class="act-title">萊特船長與那個改變一切的點子</h2>
+    <p class="act-sub">Francis Light and the Birth of George Town, 1786</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>把這座荒島變成一座城的，是英國東印度公司的一名船長——<strong>弗朗西斯·萊特（Francis Light）</strong>。他長年在吉打一帶經商，深得當地蘇丹信任，也比任何人都清楚這片海域的價值。</p>
+
+    <h3>一場交易：保護換土地</h3>
+    <p>萊特的算盤很清楚。他向急需外援的吉打蘇丹開出條件：以英國的軍事保護，換取檳島的使用權。蘇丹答應了。1786 年 8 月 11 日，萊特正式登陸，升起米字旗，以英王喬治三世之名宣告佔領，並把登陸地命名為「喬治市」（George Town），全島則稱為「威爾斯親王島」。一座城，就在一片荒灘上憑空誕生——這也是<em>英國在東南亞的第一個據點</em>。據說登陸後為了激勵士兵清理叢林，萊特曾下令把銀幣裝進砲管射入林中，讓人們爭相去尋。</p>
+    <p>（值得一提的是，這份「保護承諾」後來並未完全兌現——當吉打蘇丹試圖收回檳島時反遭擊退，這段恩怨成了檳城開埠史上一道不光彩的伏筆。）</p>
+
+    <h3>那個近乎瘋狂的點子：把整座城變成免稅的</h3>
+    <p>萊特做了一件在當時極為大膽、甚至違反直覺的事——他把整座喬治市設為<strong>免稅自由港</strong>。在這裡，貨物可以免關稅地自由交易。對於被荷蘭高稅率港口壓得喘不過氣的亞洲商人來說，這是一個無法抗拒的誘惑。</p>
+    <div class="pull"><p>馬六甲靠地理「收稅」而富，檳城卻靠「不收稅」而興——兩種完全相反的策略，吸引的卻是同一群追逐利潤的商人。</p></div>
+    <p>效果立竿見影。進港船隻數量從 1786 年的寥寥數十艘，在短短十六年內暴增到 1802 年的數千艘。人口從開埠時的數十人，三年內膨脹到上萬人。一座靠「不收稅」這個反直覺策略起家的城，迅速成為東南亞香料與轉口貿易的主要通道之一。萊特深知，光有免稅還不夠——一座城真正需要的是<em>人</em>。於是他大力招商引民，刻意減少對移民的限制與課稅。他曾預言：只要讓馬來人、武吉斯人與華人自由地來此安家，這裡就會成為「東方的交易所」（the Exchange of the East）。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把護城河，建在「制度」上</span>
+      <p>萊特的天才之處在於：他沒有任何天賦資源可用——沒有礦、沒有腹地、沒有現成的貿易網絡。他唯一能造的，是一套<strong>更好的「制度」</strong>。免稅，就是他憑空造出的護城河。</p>
+      <p>這揭示了一個深刻的競爭邏輯：<em>當你沒有天賦的優勢時，你可以用「規則」創造優勢。</em>降低交易成本、減少摩擦、讓人「來這裡比去別處更划算」——這套邏輯放到今天，依然是無數自由貿易區、低稅地、商業樞紐崛起的核心密碼。但這套邏輯也藏著一個致命弱點：<em>制度可以被複製。</em>萊特能想到的點子，別人也能想到，而且可能在更好的位置上想到。這個弱點，將在三十多年後成為檳城最痛的一課。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ☩ ✦</div>
+  <p>免稅的誘因像磁鐵，把全世界的人吸到這座小島上。<br>他們帶來了各自的神、各自的語言、各自的廚房，<br><span class="hl">於是一座街角就能聽見四種禱告的城，悄然成形。</span></p>
+</div>
+
+<!-- ===== 第二章：多元熔爐 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Melting Pot</span>
+    <h2 class="act-title">諸神比鄰：一座城的多元熔爐</h2>
+    <p class="act-sub">Clans, Temples, and the Peranakan Soul of George Town</p>
+    <div class="ornament">☩ ✦ ☩</div>
+  </div>
+  <div class="prose">
+    <p>萊特的招商政策，意外地為整個馬來西亞的族群結構定下了基調。各地移民循著免稅的誘因湧入喬治市：華人帶來了宗祠、會館與廟宇，印度人帶來了印度廟與香料貿易，馬來人、阿拉伯人、武吉斯人、亞美尼亞人也各自落腳。短短數年，喬治市就從一片荒灘變成一座語言、信仰、建築彼此交疊的城。</p>
+
+    <h3>一條街，四種禱告</h3>
+    <p>今日喬治市老城那著名的街景，正是這場移民實驗留下的活化石——華人店屋的騎樓、宗祠的飛簷、清真寺的尖塔、印度廟的彩繪神龕、教堂的鐘樓，竟能在同一條街上並肩而立。其中一條街因雲集了觀音廟、清真寺、印度廟與聖公會教堂，而被稱為「<strong>和諧之街</strong>」。早期華人富商如<strong>張弼士</strong>（被譽為「東方洛克菲勒」），更在此打造融合中西風格的宏偉宅邸——即著名的<em>藍屋（Cheong Fatt Tze Mansion）</em>，見證了華人資本在檳城的崛起。</p>
+
+    <h3>峇峇娘惹：混血而生的獨特文化</h3>
+    <p>1826 年，英國把檳城、馬六甲與新加坡這三個沿海峽的據點合併為一個行政單位——<strong>「海峽殖民地」（Straits Settlements）</strong>。這三座城從此被綁進同一套英國體系，也共同孕育出一種獨特的混血文化：土生華人「<strong>峇峇娘惹</strong>」（Peranakan）。他們是早期華人移民與當地通婚的後代，說著夾雜馬來語的方言，發展出自成一格的服飾、刺繡與料理（如娘惹菜），至今仍是檳城最迷人的文化標誌。</p>
+    <p>但繁華的代價也很真實。早期移民大多雜居在碼頭附近極不衛生的區域，疫病橫行。諷刺的是，連這座城的締造者萊特自己也未能倖免——1794 年，他因瘧疾病逝於自己親手打造的城中，年僅五十四歲。一座城的開創者，最終長眠在自己創造的繁華與汙穢之中。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 多元不是設計出來的，是「吸」出來的</span>
+      <p>檳城的多元，有一個常被忽略的真相：它不是某個人「規劃」出來的，而是一套<strong>開放制度的自然副產品</strong>。萊特要的只是貿易與人氣，他降低門檻、歡迎各方移民——而多元，是這個選擇水到渠成的結果。</p>
+      <p>這對應一個深刻的觀察：<em>當你把門打開、把摩擦降到最低，你吸引來的不會是單一的人，而是「所有願意來的人」。</em>檳城的諸神之街、峇峇娘惹文化，本質上都是「開放」這個決定的利息。這份多元日後成了檳城（乃至整個馬來西亞）最美的資產，但它也提醒我們：<em>多元從來不是免費的——它需要一套能讓不同的人「都覺得值得留下」的制度持續供養。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚓ ✦</div>
+  <p>當檳城沉醉於免稅帶來的繁華時，<br>南方的海峽中央，另一個英國人正複製著同樣的點子——<br><span class="hl">只是他選的位置，比檳城更靠近世界貿易的心臟。</span></p>
+</div>
+
+<!-- ===== 第三章：被超越 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Better Copy</span>
+    <h2 class="act-title">當你的優勢只是一個「點子」</h2>
+    <p class="act-sub">Raffles, Singapore, and the Port That Overtook Penang</p>
+    <div class="ornament">⚓ ✦ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>檳城的輝煌，藏著一個它無法逃避的弱點：它的成功完全建立在「自由港」這個<strong>可複製的商業模式</strong>上，而不是不可取代的地理位置。免稅是個好點子——但好點子最大的問題，就是別人也學得會。</p>
+
+    <h3>1819：海峽南端的複製者</h3>
+    <p>1819 年，另一位英國人<strong>萊佛士（Stamford Raffles）</strong>在海峽南端開闢了新加坡——同樣是免稅自由港，卻擁有比檳城<em>更靠近海峽中心、更具戰略價值</em>的位置。它正好坐在印度洋與南中國海之間最關鍵的轉折點上，是東西方船隻幾乎無法繞過的節點。</p>
+    <p>結果幾乎是註定的。新加坡迅速崛起，商船、資本與人才源源不絕地往南流去。到了 1832 年，海峽殖民地的行政中心從檳城遷往新加坡——昔日的「老大哥」，正式被自己的「複製品」超越。檳城作為區域第一大貿易港的時代，就此落幕。</p>
+    <div class="pull"><p>當你的優勢只是一個「點子」，那麼任何能在更好位置複製這個點子的人，都能把你比下去。模式可以被抄襲，但區位無法搬移。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 平台會被更好的平台取代</span>
+      <p>檳城被新加坡超越的故事，是一堂關於「<strong>護城河的脆弱性</strong>」的經典課。免稅自由港這個模式，在 1786 年是革命性的創新，但到了 1819 年，它已經變成一個「人人都會的標準動作」。一旦模式被普及，真正的勝負手就回到了那個無法複製的東西上——<em>位置</em>。</p>
+      <p>這個教訓在今天依然鋒利：<em>建立在「可複製模式」上的領先，是一種會折舊的資產；只有建立在「不可複製的結構性優勢」上的領先，才可能持久。</em>檳城輸的不是努力，也不是模式本身——它輸在，它的對手把同一個模式，安裝在了一個更好的地基上。但檳城的故事並未就此結束。被超越，逼著它去尋找一個比「免稅」更深的立足點——這個尋找的過程，將花掉它一個多世紀。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚑ ✦</div>
+  <p>失去了「第一大港」的桂冠，檳城本可以就此沉睡。<br>但真正的危機還在後頭——獨立之後的一紙政令，<br><span class="hl">將奪走它賴以為生的最後一張王牌：免稅。</span></p>
+</div>
+
+<!-- ===== 第四章：失去自由港 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Fall</span>
+    <h2 class="act-title">1969：失去免稅的那一年</h2>
+    <p class="act-sub">When the Free Port Status Was Revoked — and Unemployment Hit 16%</p>
+    <div class="ornament">⚑ ✦ ⚑</div>
+  </div>
+  <div class="prose">
+    <p>1957 年馬來亞獨立、1963 年馬來西亞成立後，檳城從一座「海峽殖民地的城」，變成了「一個新國家裡的一個州」。這個身分轉變，帶來了它建城以來最致命的一次打擊。</p>
+
+    <h3>賴以為生的王牌被收走</h3>
+    <p>1969 年，馬來西亞聯邦政府正式取消了檳城的<strong>自由港地位</strong>。這一紙政令，等於抽走了檳城從 1786 年立城以來最核心的那根支柱——免稅。一座靠「不收稅」起家、繁榮、立身的城，突然之間，必須像所有其他地方一樣收稅了。它賴以吸引商人與船隻的那個近兩百年的獨特誘因，一夕消失。</p>
+    <p>後果是災難性的。轉口貿易萎縮，碼頭蕭條，商號倒閉，失業率一路飆升，一度衝到驚人的<strong>約 16%</strong>。這座曾經吞吐萬船、號稱「東方交易所」的城，陷入了它兩百年來最深的低谷。檳城面臨一個生死攸關的問題：當「免稅」這個立身之本被抽走，它還能靠什麼活下去？</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當你的「唯一優勢」被拿走</span>
+      <p>1969 年的危機，把檳城逼到了一個許多個人、企業、城市都會遇到的絕境：<strong>那個讓你賴以成功的單一優勢，突然消失了。</strong>對檳城來說，免稅不只是政策，它幾乎是這座城的「身分」本身。</p>
+      <p>這裡藏著一個殘酷卻關鍵的洞見：<em>過度依賴單一優勢，等於把命運押在「這個優勢永遠不會消失」這個賭注上——而沒有任何優勢是永恆的。</em>檳城被新加坡超越時，輸的是「位置」；這一次失去免稅，輸的是「身分」。但也正是這場幾乎致命的危機，反而逼出了檳城最了不起的一次轉身。當舊的路被徹底堵死，它被迫去走一條全新的、誰也沒走過的路。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚙ ✦</div>
+  <p>絕境之中，一位州首長做出了一個大膽的賭注——<br>他不再追逐已經逝去的「貿易」，<br><span class="hl">而是把賭注押在一個全新的東西上：製造，與晶片。</span></p>
+</div>
+
+<!-- ===== 第五章：東方矽谷 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · Silicon Island</span>
+    <h2 class="act-title">八武士登陸：東方矽谷的誕生</h2>
+    <p class="act-sub">Lim Chong Eu, the Eight Samurai, and Penang's Reinvention</p>
+    <div class="ornament">⚙ ✦ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>把檳城從失業深淵裡拉出來的，是時任州首長<strong>林蒼祐（Lim Chong Eu）</strong>。面對失去自由港後的經濟崩塌，他沒有試圖挽回逝去的轉口貿易，而是做了一個面向未來的大膽決定：把檳城從一座「貿易之城」，徹底改造成一座「<em>製造之城</em>」。</p>
+
+    <h3>1972：把稻田變成工業區</h3>
+    <p>1972 年，在檳島南部一片名叫<strong>峇六拜（Bayan Lepas）</strong>的稻田上，馬來西亞第一個<strong>自由工業區（Free Industrial Zone）</strong>正式設立。林蒼祐用稅務優惠、簡化的關務、現成的廠房與基礎設施，向全球的跨國電子廠招手。這是一場精明的「優勢轉換」——檳城把它最熟悉的那套「免稅吸引外來者」的老本領，從「貿易」嫁接到了「製造」上。</p>
+
+    <h3>八武士登陸</h3>
+    <p>招商很快有了回報。1970 年代，一批先驅跨國公司陸續在峇六拜設廠，後來被稱為<strong>「八武士」（The Eight Samurai）</strong>——包括英特爾（Intel）、超微（AMD）、惠普（HP）、博世（Bosch）、日立（Hitachi）、國家半導體、Litronix、Clarion。這些全球電子與半導體巨頭的進駐，為檳城注入了全新的工業基因。一座曾經吞吐香料與絲綢的港城，開始吞吐晶片與電路板。</p>
+    <div class="pull"><p>檳城用同一套「免稅引外資」的老智慧，做了一件全新的事——它把自己從「香料的轉口港」，改造成了「晶片的封裝廠」。</p></div>
+    <p>半個多世紀過去，這場豪賭結出了驚人的果實。今天的檳城是全球半導體封裝測試的關鍵基地，被譽為「<strong>東方矽谷</strong>」（Silicon Valley of the East），匯聚了三百多家跨國公司與數千家本地中小企業，在全球晶片的封測環節佔據舉足輕重的地位。在當前全球供應鏈「去風險化」、各國爭搶半導體產能的浪潮下，這座島再一次站到了世界科技週期的風口上。喬治市老城更在 2008 年與馬六甲一同被聯合國教科文組織列為<em>世界文化遺產</em>——檳城於是擁有了一種罕見的雙重身分：一邊是承載兩百年記憶的世遺古城，一邊是驅動全球科技的晶片重鎮。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 真正的能力，是「優勢的可遷移性」</span>
+      <p>檳城的重生揭示了一個深刻的道理：<strong>它真正的核心能力，從來不是「免稅」這個具體政策，而是「用制度優勢吸引外來者、並把他們組織起來創造價值」這套底層能力。</strong>政策（免稅貿易）會過時，但底層能力可以被遷移到全新的領域（免稅製造）。</p>
+      <p>這對應一個關鍵洞見：<em>當你把自己的優勢定義得太具體（「我是自由貿易港」），你就會隨著那個具體形態的消亡而消亡；但當你能看穿它背後更抽象的能力（「我擅長降低外來者的進入成本」），你就能在一個又一個新時代裡重新兌現它。</em>檳城兩百四十年來換過三種身分——香料港、被超越的舊港、東方矽谷——但貫穿始終的，是同一套「為外來者搭建最低摩擦平台」的本事。這，才是它真正不可複製的護城河。</p>
+    </div>
+    <div class="timeline" style="border-left-color:rgba(212,175,90,.4)">
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1786</div><div class="tl-text" style="color:#cdb494">萊特開埠，設免稅自由港，荒島變商城。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1826</div><div class="tl-text" style="color:#cdb494">與馬六甲、新加坡合組海峽殖民地。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1832</div><div class="tl-text" style="color:#cdb494">海峽殖民地中心南遷新加坡，檳城被超越。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1969</div><div class="tl-text" style="color:#cdb494">自由港地位被取消，失業率飆升至約 16%。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1972</div><div class="tl-text" style="color:#cdb494">峇六拜自由工業區成立，「八武士」進駐。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">2008</div><div class="tl-text" style="color:#cdb494">喬治市與馬六甲同列聯合國教科文世界遺產。</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">⚙ ✦ ⚙</div>
+  <p>東方矽谷講完了「一座城如何重生」，<br>但重生之後，它打算怎麼安放自己未來的身體？<br><span class="hl">答案，是一張把海洋也納入版圖的規劃藍圖。</span></p>
+</div>
+
+<!-- ===== 第六章：城市規劃 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Blueprint</span>
+    <h2 class="act-title">向海要地：一座島的規劃野心</h2>
+    <p class="act-sub">PTMP, the Mutiara LRT, and Silicon Island 2050</p>
+    <div class="ornament">⚙ ✦ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>檳城的規劃難題，從一開始就和吉隆坡相反。吉隆坡的困擾是「市中心太擠、要疏散」；檳城的困擾卻是「島就這麼大、地不夠用」。一座被海洋限定了邊界的島嶼之城，當它的半導體產業持續膨脹、人口與車輛不斷增長時，它能往哪裡長？檳城給出的答案近乎大膽——<strong>既然向上、向外都受限，那就向海要地。</strong></p>
+
+    <h3>交通的解方：Mutiara 輕軌線</h3>
+    <p>檳城長年的痛點是交通。作為一座道路狹窄、汽車密度極高的島，塞車是它揮之不去的城市病。解方寫在《檳城交通總體規劃》（PTMP）裡，其骨幹是<strong>Mutiara 輕軌線（LRT Mutiara Line）</strong>——一條全長約 29.5 公里、設 21 座車站的高架輕軌，於 2025 年動工。它最具象徵性的設計，是把島嶼最南端的填海新地與大陸區的檳城中央車站（Penang Sentral）連接起來，第一次讓檳城島與大陸之間，有了一條軌道的臍帶。配套的，還有自動電車、電動巴士與水上計程車所構成的綠色交通網。</p>
+
+    <h3>最大膽的賭注：Silicon Island</h3>
+    <p>而檳城規劃中最大膽、也最具爭議的一步，是<strong>Silicon Island（矽島，即檳城南部填海計畫 PSR）</strong>——一片在峇六拜外海填出、面積達約 930 公頃的人造島嶼。根據《檳城矽島地方藍圖 2050》，這座島將近一半的面積保留給工業與基礎設施（呼應其「東方矽谷 2.0」的定位），其餘則規劃為住宅、商業與混合用途，並引入一個全新的州行政中心。它的設計理念是「<em>15 分鐘城市</em>」——讓居民步行或單車就能抵達日常所需，並追求高比例的公共運輸使用。填海工程分期推進，第一期約在 2031 年完成，輕軌機廠用地則已優先交付動工。</p>
+    <div class="pull"><p>吉隆坡向天空爭取空間，檳城向海洋爭取空間——一座爭高，一座造地，這是兩種被各自地理逼出來的生存策略。</p></div>
+    <div class="warn">
+      <span class="warn-tag">填海的雙面性</span>
+      <p>Silicon Island 並非沒有代價。大規模填海對沿海生態、漁業社群與環境的衝擊，是它從規劃之初就背負的爭議。它寄託著檳城「為下一代造一塊高價值經濟新地」的雄心，但這份雄心究竟是遠見、還是過度開發，仍是一個需要時間與環境數據來驗證的開放問題。</p>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 受限者，最懂得創造空間</span>
+      <p>檳城向海要地的選擇，延續了它兩百多年來一以貫之的性格：<strong>當既有的條件不夠用時，它就「創造」新的條件。</strong>當年沒有資源，它創造了「免稅」這個制度；今天沒有土地，它創造了「Silicon Island」這片人造地。憑空造城的基因，從萊特一直流淌到今天。</p>
+      <p>這對應一個深刻的觀察：<em>真正被約束逼到極限的主體，往往會發展出「無中生有」的本事——因為它別無選擇。</em>一座沒有腹地的島，反而比擁有廣袤土地的城，更早、更徹底地思考「空間到底該怎麼用」。但這也藏著風險：當「創造空間」變成一種慣性，就要小心別把「能造」誤當成「該造」。檳城的下一個考驗，是證明它向海要來的這塊地，能像當年的免稅自由港一樣，真正創造出超過其代價的價值。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚑ ✦</div>
+  <p>規劃畫的是未來的身體，但檳城的「重心」<br>其實早已從那座世遺老城，悄悄漂移到別處——<br><span class="hl">而且這一次，它甚至漂過了海峽。</span></p>
+</div>
+
+<!-- ===== 第七章：商圈移轉 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Drifting Centre</span>
+    <h2 class="act-title">重心的四次漂移</h2>
+    <p class="act-sub">From the Heritage Core to Bayan Lepas, Gurney, and Across the Strait</p>
+    <div class="ornament">⚑ ✦ ⚑</div>
+  </div>
+  <div class="prose">
+    <p>檳城的商業重心，比吉隆坡漂移得更遠、也更戲劇性——因為它不只在島上移動，最後甚至跨過了海峽，登上了大陸。它的四次漂移，恰好對應它從貿易、到製造、到擴張的每一次身分轉換。</p>
+
+    <h3>第一站：喬治市世遺核心（貿易時代）</h3>
+    <p>最早的中心，是<strong>喬治市的老城核心</strong>——萊特當年劃下的那個由萊特街、海灘街（Beach Street）、牛干冬（Chulia Street）、椰腳街（Pitt Street）圍成的方格。這裡是自由港時代的心臟：海灘街是金融與洋行的所在，店屋與宗祠是華商的根據地。今天它是聯合國世界文化遺產，但在商業意義上，它早已從「核心」退位為「歷史現場」。</p>
+
+    <h3>第二站：峇六拜與光大（製造時代）</h3>
+    <p>失去自由港、轉向製造後，島上的經濟重心南移到了<strong>峇六拜（Bayan Lepas）</strong>的自由工業區——「東方矽谷」的引擎室。同時，市區的商業地標則由 1980 年代落成的<strong>光大大廈（KOMTAR）</strong>所代表，它一度是檳城最高的現代化象徵。</p>
+
+    <h3>第三站：海濱新貴 Gurney（消費時代）</h3>
+    <p>隨著中產與消費崛起，島上的高端商業與住宅重心，又移向了<strong>Gurney（葛尼）海濱一帶</strong>——以葛尼廣場（Gurney Plaza）等大型商場與海景高級公寓為代表，這裡成了檳城島「現代精緻生活」的門面。</p>
+
+    <h3>第四站：跨過海峽的 Batu Kawan（擴張時代）</h3>
+    <p>而最關鍵的一次漂移，是<strong>跨過海峽、登上大陸</strong>。當島嶼的土地與成本逼近極限，新的工業與商業擴張轉向了大陸區（Seberang Perai）的<strong>峇都加灣（Batu Kawan）</strong>——這裡有更便宜、更廣闊的土地，承接了新一輪的工業園、購物中心與大學。檳城的經濟引擎，第一次從「島」溢出到了「陸」。而未來，這個重心還將再漂一次——漂向那座正在海中升起的 Silicon Island。</p>
+    <div class="pull"><p>喬治市代表「我們從哪裡來」，峇六拜代表「我們靠什麼活」，Batu Kawan 與 Silicon Island 則代表「我們往哪裡去」——檳城的重心，是一部不斷向新土地遷徙的歷史。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 重心會漂向「成本與空間的窪地」</span>
+      <p>檳城商業重心的四次漂移，揭示了一個比吉隆坡更純粹的規律：<strong>當一個地方的成功推高了它的成本與密度，新的成長就會漂向成本更低、空間更大的「窪地」。</strong>喬治市太貴太擠，重心就漂向峇六拜；島嶼整體飽和，就漂向大陸的 Batu Kawan；大陸也不夠，就向海裡造一座新島。</p>
+      <p>這對應一個對城市觀察極有用的視角：<em>繁華的中心，本質上是在「價值」與「成本」之間不斷尋找新平衡點的移動目標。</em>吉隆坡的重心是隨「財富來源」而移動（生產→資本→金融），檳城的重心則是隨「成本窪地」而漂移（島核→島緣→大陸→填海）。看懂一座城重心漂移的方向，就看懂了它下一個十年的成長極在哪裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ✦ ☩</div>
+  <p>商圈講的是「錢往哪裡漂」，但在喬治市的老街裡，<br>還藏著一張比吉隆坡更細密、更迷人的地圖——<br><span class="hl">在這座城裡，不同的人，被安置在哪一條街。</span></p>
+</div>
+
+<!-- ===== 第八章：族群空間馬賽克 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Mosaic</span>
+    <h2 class="act-title">分街而居：一座城的族群馬賽克</h2>
+    <p class="act-sub">Chulia Street, Little India, the Clan Jetties — and Why Penang Stayed Calm</p>
+    <div class="ornament">☩ ✦ ☩</div>
+  </div>
+  <div class="prose">
+    <p>檳城的族群地圖，和吉隆坡出自同一套殖民邏輯——「分而治之」，卻畫出了截然不同的紋理。如果說吉隆坡是把族群分配到不同的「<em>區</em>」，那麼檳城是把族群分配到不同的「<strong>街</strong>」。尺度的不同，造就了兩座城完全不同的性格。</p>
+
+    <h3>一條街，一個族群，一座神廟</h3>
+    <p>萊特開埠時，喬治市的格局是逐街劃分、各安其位的。隨著移民湧入與會黨衝突，殖民政府以「甲必丹」間接管理，各族群沿著街道形成緊鄰卻分明的聚落：</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">印度回教徒</span>
+        <h5>牛干冬 · Chulia Street</h5>
+        <p>早期的印度泰米爾穆斯林（Chulia）商人聚居於<strong>牛干冬一帶</strong>，是喬治市最古老的街道之一；後來大量華人移入，兩個社群在此交融出共享的飲食與市井文化。</p>
+        <span class="model">Tamil Muslim</span>
+      </div>
+      <div class="card">
+        <span class="flag">印度教徒</span>
+        <h5>小印度 · Little India</h5>
+        <p>印度教社群集中於<strong>市場街、皇后街一帶的「小印度」</strong>，檳城最古老的興都廟（Sri Mahamariamman）坐落於此，至今仍是香料、紗麗與南印文化的核心。</p>
+        <span class="model">Hindu Enclave</span>
+      </div>
+      <div class="card">
+        <span class="flag">馬來／亞齊人</span>
+        <h5>亞齊街 · Acheen Street</h5>
+        <p>馬來人、亞齊人與蘇門答臘移民聚居於<strong>亞齊街、椰腳街清真寺一帶</strong>，以亞齊清真寺為中心，曾是東南亞朝聖與伊斯蘭貿易的重要節點。</p>
+        <span class="model">Malay-Acehnese</span>
+      </div>
+      <div class="card">
+        <span class="flag">華人宗族</span>
+        <h5>姓氏橋 · Clan Jetties</h5>
+        <p>不同姓氏的華人宗族，在<strong>Weld Quay 海邊建起水上聚落——「姓氏橋」</strong>（姓周橋、姓林橋等），以血緣與地緣聚族而居，是世界罕見的水上宗族聚落。</p>
+        <span class="model">Surname Villages</span>
+      </div>
+    </div>
+    <p>這套「分街」格局的特別之處在於：各族群的邊界雖然分明，距離卻極近——一條街之外就是另一個族群，清真寺、興都廟、華人宗祠與教堂常常比鄰而立（喬治市甚至有一條因此被稱為「<strong>和諧之街</strong>」的街道）。比起吉隆坡那種「整片區域的隔離」，檳城更像是一幅「<em>細密交織的馬賽克</em>」——分明，卻緊貼；隔離，卻日日相見。也正因如此，混血的峇峇娘惹文化能在這裡如此繁盛。</p>
+
+    <h3>那個關鍵的對照：為什麼 513 沒有重創檳城</h3>
+    <p>1969 年那場震動全國、重塑了吉隆坡的 513 族群衝突，在檳城的破壞程度相對輕微。原因眾說紛紜，但其中一個結構性的解釋，正與這張「分街馬賽克」有關：<strong>當不同族群在日常生活中緊密交織、天天相見、共享市井與飲食，彼此之間「看不見的陌生」就比較少；而陌生，正是恐懼與暴力最好的溫床。</strong>吉隆坡那種「分區並置、彼此鮮少交集」的格局，反而更容易讓不信任在看不見的地方默默累積——這正是它的族群章（與 513）所揭示的悲劇根源。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 距離，決定了陌生的程度</span>
+      <p>吉隆坡與檳城的族群空間對照，給出一個深刻的啟示：<strong>同樣是「分而治之」，「分區」與「分街」帶來的後果可能天差地別。</strong>分區，製造的是「整片的隔離」——兩個群體可能一輩子都不踏進對方的生活；分街，製造的卻是「緊鄰的交織」——你的鋪子隔壁就是另一個族群的廟，你每天都會與「他者」擦肩。</p>
+      <p>這對應一個關於社會凝聚的普遍真理：<em>族群和諧的關鍵，往往不在於「住得多近」這個物理距離，而在於「日常生活有多少真實的交集」這個社會距離。</em>檳城的馬賽克之所以相對穩定，不是因為它沒有隔離，而是因為它的隔離「夠細密」，細密到不同的人無法迴避彼此、被迫日日共處。這也提醒今天所有的多元城市：真正危險的不是「不同」，而是「不同卻互不相見」。</p>
+    </div>
+
+    <h3>檳城真正的當代張力：仕紳化</h3>
+    <p>所以，檳城今天面對的族群—空間挑戰，和吉隆坡的「族群政治」是不同性質的。它的核心張力，是<strong>世遺化帶來的仕紳化（gentrification）</strong>。2008 年喬治市列入世界遺產、加上 2000 年租金管制解除後，老城湧入大量觀光與資本，店屋身價飆升、租金上漲。結果是：那些構成「活的遺產」（living heritage）的原生社群——老匠人、小商販、世代居住的各族家庭——因負擔不起而逐漸遷出，老城有被「博物館化、空心化」的風險。<em>一座靠多元社群活著的城，最怕的不是被遺忘，而是被觀光「愛到」失去了人。</em></p>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚒ ✦ ⚓</div>
+  <p>檳城的故事，要透過它的鏡像才看得最清楚。<br>海峽的另一端，有一座性格截然相反的城，<br><span class="hl">把它們放在一起，兩座城才真正讀得懂彼此。</span></p>
+</div>
+
+<!-- ===== 第九章：雙城對比 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · Twin Cities</span>
+    <h2 class="act-title">兩座城的鏡像：檳城與吉隆坡</h2>
+    <p class="act-sub">Trade vs Tin, Many Cores vs One, Out vs Up</p>
+    <div class="ornament">⚓ ✦ ⚒</div>
+  </div>
+  <div class="prose">
+    <p>檳城的性格，要對照它的鏡像——馬來半島心臟的吉隆坡——才看得最清楚。兩座城幾乎在每一個維度上都恰好相反，並排來看，馬來西亞城市發展的兩種邏輯便一目了然。</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">起源</div><div class="shift-body"><strong>檳城＝點子</strong>：靠「免稅」在荒島上憑空造出。<br><strong>吉隆坡＝賭注</strong>：靠地底錫礦與移民「無中生有」。<em>兩者都不是天賦之城，但檳城靠制度，吉隆坡靠資源。</em></div></div>
+      <div class="shift-row"><div class="shift-era">財富引擎</div><div class="shift-body"><strong>檳城＝貿易</strong>：讓貨物經過（自由港轉口）。<br><strong>吉隆坡＝生產</strong>：從地裡挖出東西（錫、橡膠）。一個是「貿易之城」，一個是「生產之城」。</div></div>
+      <div class="shift-row"><div class="shift-era">城市結構</div><div class="shift-body"><strong>檳城＝海陸雙核再擴張</strong>：喬治市與大陸區隔海並立，向 Silicon Island 擴張。<br><strong>吉隆坡＝單核轉多核</strong>：長期單一市中心，靠 PSKL 2040 才轉多中心。</div></div>
+      <div class="shift-row"><div class="shift-era">成長方向</div><div class="shift-body"><strong>檳城＝向外填</strong>：以填海造地擴張（Silicon Island 930 公頃）。<br><strong>吉隆坡＝向上長</strong>：以摩天樓爭高（雙子星塔、TRX）。一個爭奪海洋，一個爭奪天空。</div></div>
+      <div class="shift-row"><div class="shift-era">族群空間</div><div class="shift-body"><strong>檳城＝分街交織</strong>：族群被分配到不同的「街」，宗教場所比鄰，混居早而密。<br><strong>吉隆坡＝分區並置</strong>：族群被分配到不同的「區」，彼此交集少。</div></div>
+      <div class="shift-row"><div class="shift-era">當代張力</div><div class="shift-body"><strong>檳城＝仕紳化</strong>：世遺觀光化導致租金上漲與「活的遺產」流失。<br><strong>吉隆坡＝族群政治</strong>：513 的陰影、保留地、土著政策。</div></div>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 同一片土地，兩種生存策略</span>
+      <p>檳城與吉隆坡最深的對比是：<strong>它們都沒有「天賦」，卻發展出兩種完全不同的「人造」策略。</strong>檳城的本事是「遷移」——優勢消失了就換一個，從香料港到晶片島，靠不斷重新發明自己活下來；吉隆坡的本事是「韌性」——燒不垮、從廢墟裡一次次站起，靠生產與政治權力把自己舉成首都。</p>
+      <p>這對應一個關於「生存能力」的深刻洞見：<em>沒有天賦的個體（無論城市、企業還是人），最終往往發展出比天賦者更強悍的能力——因為它們從一開始就知道，自己擁有的一切都是爭來的，沒有什麼理所當然、不會失去。</em>檳城用遷移回答「優勢消失後如何重生」，吉隆坡用韌性回答「遭受打擊後如何重建」。兩座城，是同一個馬來西亞給出的兩份不同的生存範本——也正因如此，它們才如此值得放在一起閱讀。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ★ ✦</div>
+  <p>讀懂了它的過去、它的規劃、它的馬賽克、它的鏡像，<br>最後一個問題自然浮現——<br><span class="hl">這座兩度重生的島城，第三次重生會是什麼模樣？</span></p>
+</div>
+
+<!-- ===== 第十章：未來展望 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · What Comes Next</span>
+    <h2 class="act-title">荒島的第三次重生</h2>
+    <p class="act-sub">Silicon Island 2.0, the Singapore Alternative, and the Heritage Dilemma</p>
+    <div class="ornament">★ ✦ ★</div>
+  </div>
+  <div class="prose">
+    <p>檳城的歷史，是一部「重生史」——它靠免稅第一次崛起，靠晶片第二次重生。站在 2020 年代回望，它的未來，正圍繞著「第三次重生」的可能展開，大致沿著三條線索。</p>
+
+    <h3>線索一：東方矽谷 2.0 與「新加坡替代地」</h3>
+    <p>第一條線索，是檳城能否把握住當前全球供應鏈「去風險化」的歷史機遇，從「封裝測試重鎮」向上攀升為「設計與高值製造中心」——也就是它喊出的「<strong>東方矽谷 2.0</strong>」。一個有意思的當代論述是：當新加坡的營運成本不斷攀高，檳城正試圖把自己定位為一個<em>「新加坡的替代地」</em>——以成熟的電子產業生態、更低的成本與現成的基礎設施，吸引那些想分散風險的高科技投資。這是檳城兩百多年來「為外來者搭建低摩擦平台」這套本事的最新一次施展。它能否成功，將決定 Silicon Island 是一塊金礦，還是一個包袱。</p>
+
+    <h3>線索二：填海賭注的兌現</h3>
+    <p>第二條線索，是 Silicon Island 這場大賭注的兌現程度。一座約 930 公頃的人造島、一條串起島與陸的輕軌、一個 15 分鐘城市的願景、一個新的州行政中心——這是檳城對未來下的最大一注。觀察它的關鍵指標很明確：<em>填海的進度是否如期、高值產業是否真的進駐、輕軌是否帶來預期的人流、以及環境代價是否在可控範圍。</em>如果這些都兌現，檳城將擁有一塊全新的高價值經濟核心；若不，它將背上一筆沉重的填海成本與生態爭議。</p>
+
+    <h3>線索三：留住「活的遺產」</h3>
+    <p>第三條線索，看似最柔軟，卻關乎檳城的靈魂——它能否在觀光與資本的浪潮中，<strong>留住喬治市那份「活的遺產」</strong>。世遺帶來了名聲與財富，卻也帶來了仕紳化的反噬。檳城未來的考驗，是能不能找到一種平衡：讓老城既能受惠於觀光經濟，又不至於把賦予它靈魂的原生多元社群擠走。畢竟，喬治市真正的世界遺產，從來不只是那些店屋與廟宇的磚瓦，而是<em>幾百年來在那些街道上交織共生的人</em>。</p>
+    <div class="pull"><p>檳城向海要來的新島能長多大，工程與資本說了算；但它的老城能否留住靈魂、它能否第三次重生，最終取決於它記不記得自己當初為何迷人——因為人，而非磚瓦。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 重生的前提，是記得自己是誰</span>
+      <p>檳城的三條未來線索，全是它身世的延長線。東方矽谷 2.0，是它「優勢可遷移」這套核心能力的最新一次施展；填海賭注，是它「無中生有」基因的當代版本；而留住活的遺產，則是它「靠多元而興」的初心，在仕紳化時代面臨的最大考驗。</p>
+      <p>這給出一個樸素卻有力的判斷：<em>一個善於「重新發明自己」的主體，最大的風險不是改變得不夠，而是在不斷改變中，弄丟了那個讓它一開始就值得存在的核心。</em>檳城最了不起的是它的遷移能力——但它最該守護的，是那個「為各方來客搭建一個能共同生活的低摩擦平台」的初心。當年是免稅吸引了商人，後來是晶片吸引了工程師，但讓檳城始終是檳城的，是它<em>讓不同的人能在同一座島上交織共生</em>的那份本事。守住這個，它的第三次、乃至第四次重生，就都還有根。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⚓ ☩</div>
+  <p>一座荒島，一個點子，兩次重生，一張族群的馬賽克，一場向海的賭注。<br>當我們把這一切收攏，終於可以回答最初那個問題——<br><span class="hl">一座靠「不收稅」憑空造出的城，憑什麼能活到今天？</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是，今天的檳城</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">Why a Tax-Free Idea Survived Two Centuries</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⚓ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的檳城之所以是這個模樣，是四層層層相扣的原因疊加而成的——每一層，都對應著本篇的一段旅程。</p>
+
+      <h3>第一層：一個點子，憑空造出一座城</h3>
+      <p>一切的源頭是<strong>免稅</strong>。萊特在一座一無所有的荒島上，靠「把整座城變成免稅的」這個反直覺的點子，憑空造出了一座商城。檳城從一開始就證明了一件事：當你沒有天賦資源，你可以用<em>更好的制度</em>創造優勢。它的繁榮，是「規則」的繁榮，而非「土地」的繁榮。</p>
+
+      <h3>第二層：開放，吸來了多元</h3>
+      <p>接著是<strong>開放</strong>。免稅與低門檻像磁鐵，把華人、印度人、馬來人、阿拉伯人、亞美尼亞人吸到同一座小島上，造就了諸神比鄰的街景與獨特的峇峇娘惹文化。今天喬治市世遺古城那令人目眩的多元，不是被設計出來的，而是「開放」這個決定自然結出的果實。</p>
+
+      <h3>第三層：被超越，學會了謙卑</h3>
+      <p>然後是<strong>被超越</strong>。新加坡用同一個免稅點子、在更好的位置上把檳城比了下去，教會了它一堂殘酷的課：建立在「可複製模式」上的領先會折舊，模式可以被抄襲，但區位無法搬移。這次失落，是檳城從「天之驕子」走向「務實求生者」的成年禮。</p>
+
+      <h3>第四層：兩度重生，遷移了優勢</h3>
+      <p>最關鍵的是<strong>重生的能力</strong>。1969 年失去免稅、失業率衝到一成六的絕境，本可以毀掉它；但林蒼祐看穿了檳城真正的能力不是「免稅貿易」，而是「為外來者搭建最低摩擦的平台」——於是他把這套本事從貿易遷移到製造，1972 年的峇六拜工業區與「八武士」，把檳城重新鍛造成了「東方矽谷」。<em>它換了身分，卻沒換靈魂。</em></p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 靠點子而生，靠遷移而活</span>
+        <p>所以，今天的檳城是什麼？它是<strong>一座「靠點子憑空造出、又靠遷移優勢兩度重生」的城</strong>——沒有天賜的咽喉，沒有地底的礦藏，它擁有的只是一套「降低外來者進入成本」的底層本事，以及一次次在優勢消失後重新發明自己的勇氣。</p>
+        <p>它的世遺古城與晶片工廠，是同一座城的兩面；它的多元之美與務實之韌，是同一套開放制度的兩面；它的繁華、失落與重生，是同一條「靠規則而非靠天賦」的曲線上的不同點。<em>檳城最深刻的真相是：一個沒有天賦優勢的地方，反而最懂得「優勢是會消失的」這件事——因此它把生存的賭注，押在了「不斷重新發明自己」上。這份在絕境中遷移、轉身、重生的能力，才是它真正活了兩百四十年的祕密。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">免稅把陌生人吸聚到荒島上，新加坡奪走了它的桂冠，政令抽走了它的身分，而晶片讓它重新站上世界的風口——檳城的故事，是一場關於「優勢會消失，但能力可以遷移」的長跑。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座城的終極啟示</span>
+      <p>一座城（或一個人、一家企業）能否長久，往往不取決於它當下的優勢有多耀眼，而取決於當那個優勢消失時，它能不能看穿優勢背後更抽象的「能力」，並把它遷移到全新的領域。檳城用兩百四十年證明：把自己定義成一個「具體的形態」（自由貿易港）的，會隨那個形態消亡；而把自己定義成一種「可遷移的能力」（為外來者搭建最低摩擦平台）的，才能在一個又一個時代裡，一次次死裡逃生。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從一座長滿檳榔樹的無名荒島，<br>
+        到一個船長用「免稅」憑空造出的東方交易所，<br>
+        從諸神比鄰的世遺古城、峇峇娘惹的混血靈魂，<br>
+        到被新加坡超越的失落、失去免稅的至暗時刻，<br>
+        再到稻田上崛起的晶片工廠、馳名全球的「東方矽谷」——<br>
+        這段交織著貿易、移民、信仰、失落與重生的歷史，<br>
+        最終回答了那個最初的問題：<br>
+        為什麼一個靠「不收稅」起家的點子，<br>能活成一座兩度重生的城。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">⚓ ✦ ⚙</div>
+  <p>用免稅憑空造出的城 · 檳城兩百四十年的兩次重生</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE FREE PORT TO SILICON ISLAND · 1786 – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

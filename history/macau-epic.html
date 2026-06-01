@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海岬、教堂與賭城:澳門的身世史詩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#13161f;
+  --parchment:#f3eedb;
+  --parchment-deep:#e5dbbb;
+  --azul:#1e3a5f;
+  --azul-deep:#0f2138;
+  --gold:#b5872a;
+  --gold-bright:#d9ad46;
+  --tile:#2e6ca3;
+  --crimson:#9a2128;
+  --crimson-deep:#76151b;
+  --jade:#2f6149;
+  --faint:#5e5740;
+  --line:#c6b57e;
+  --shadow:rgba(19,22,31,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(181,135,42,.08), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,95,.07), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(46,108,163,.22), transparent 60%),
+    linear-gradient(165deg, var(--azul-deep) 0%, var(--azul) 48%, #284a73 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d9ad46' stroke-width='0.6' opacity='0.15'%3E%3Cpath d='M540 360 h120 v40 h-40 v60 h60 v260 h-220 v-260 h60 v-60 h-40 Z' /%3E%3Cpath d='M600 300 v60 M560 340 h80' stroke-width='3'/%3E%3Ccircle cx='600' cy='600' r='540'/%3E%3Ccircle cx='600' cy='600' r='400'/%3E%3Cpath d='M120 760 q200 -60 480 0 t480 0' /%3E%3Cpath d='M60 600 H1140 M600 60 V1140'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 250s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(243,238,219,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;}
+.lede p{font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;color:var(--azul-deep);font-weight:500;}
+.lede p .drop{float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;padding:.55rem .55rem 0 0;color:var(--crimson);font-weight:700;}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;}
+.act-title{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.9rem,4.6vw,3rem);color:var(--azul-deep);line-height:1.2;}
+.act-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint);margin-top:.8rem;}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;color:var(--crimson);margin:3rem 0 1rem;padding-left:1rem;border-left:4px solid var(--gold);line-height:1.4;}
+.prose h4{font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;color:var(--azul-deep);margin:2.2rem 0 .8rem;}
+.prose strong{color:var(--crimson-deep);font-weight:700}
+.prose em{font-style:italic;color:var(--azul-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;background:linear-gradient(135deg, rgba(30,58,95,.05), rgba(181,135,42,.06));border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);}
+.pull p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;line-height:1.55;color:var(--azul-deep);text-align:center;margin:0;font-weight:500;}
+.pull::before{content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;}
+
+/* ====== INVESTOR CALLOUT (歷史的回聲) ====== */
+.investor{margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;background:var(--azul-deep);color:var(--parchment);border-radius:2px;box-shadow:0 18px 40px -16px rgba(15,33,56,.6);}
+.investor::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--gold-bright),var(--tile));}
+.investor .tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(243,238,219,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#7db4e0;font-style:italic}
+
+/* ====== CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.5rem 1.4rem;position:relative;overflow:hidden;transition:transform .3s ease, box-shadow .3s ease;}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--azul-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--crimson);border-radius:30px}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,95,.05);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--crimson);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{margin-top:6rem;background:linear-gradient(165deg,var(--azul-deep),var(--azul));color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;}
+.finale::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d9ad46' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");background-position:center;background-size:cover;}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(243,238,219,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#7db4e0}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{margin:3rem 0;padding:2.4rem;border:1px solid rgba(217,173,70,.4);border-radius:3px;background:rgba(0,0,0,.18);}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--tile));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions ===== */
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--crimson);font-style:normal}
+.dark{background:#0d1620 !important}
+.dark .act-title{color:#cfc69e}
+.dark .prose p{color:#c2b691}
+.dark .prose strong{color:#d5635f}
+.dark .prose em{color:#6ca8d6}
+.dark .prose h3{color:#d5635f;border-left-color:var(--crimson)}
+.dark .act-sub{color:#7e7a52}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(154,33,40,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+
+/* ===== interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--azul-deep);font-weight:500}
+.interlude p .hl{color:var(--crimson);font-style:normal;font-weight:600}
+
+/* ===== legacy ===== */
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,95,.05);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--crimson)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--crimson);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson-deep)}
+.legacy-block em{color:var(--azul-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--azul-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The City of the Name of God · How Macau Became Macau</span>
+    <h1>海岬、教堂與<span class="em">賭城</span><br>澳門<br>的身世</h1>
+    <p class="sub">從珠江口西岸的一座小半島、東西方相遇的第一扇門,到一座以一座教堂的殘壁與全世界最大的賭場群聞名的城市——<br>一部關於「為何今天的澳門與澳門人是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的澳門,是一座面積比香港還小、人口只有六十多萬、卻是全世界博彩收入最高、人均財富名列前茅的城市?為什麼這座深深植根於嶺南中華文化的小城,會矗立著一座大三巴的教堂殘壁、鋪著葡萄牙風格的碎石路、混血出一種獨一無二的「土生葡人」與澳式葡國菜?答案不在當下,而在近五百年的縱深裡。一個位於珠江口西岸、不起眼的小小海岬,在十六世紀,成為遠道而來的葡萄牙人,叩開東方大門、停泊船隻的落腳點;從此,它成為東西方在遠東相遇的<em>第一扇門</em>——天主教的傳教士由此進入中國,中國的絲綢與瓷器由此銷往全球,而一種中葡交融、四百年和平共處的獨特文明,在這片小小的半島上,悄然生長;當鄰近的香港因鴉片戰爭崛起、搶走了它轉口貿易的光芒後,澳門沉寂為一座被時光遺忘的、閒適的小城,直到它找到了一樣別處沒有、卻能讓它起死回生的東西——<em>賭</em>;而當葡萄牙的管治在 1999 年結束、澳門「回歸」中國時,它也走上了「<em>一國兩制</em>」的道路,並憑藉著開放的賭權,搖身一變,成為一座被金錢與霓虹淹沒的、紙醉金迷的「東方拉斯維加斯」。這不是一個叱吒風雲的故事,而是一座<em>因相遇而生、因被遺忘而沉靜、因一場豪賭而暴富</em>的小城,如何在大國的縫隙與時代的浪潮中,反覆地尋找自己存在價值的故事。讓我們從頭走一遍,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--crimson);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Land</span>
+    <h2 class="act-title">在所有人來之前,這裡有什麼?</h2>
+    <p class="act-sub">A Small Peninsula at the Mouth of the River</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的澳門人,得先回到一個比葡萄牙人、比賭場都更古老的問題:在他們來之前,這裡有什麼?答案,藏在一個位置裡——珠江口西岸,一座小小的、扼守著一條大河出海口的半島。</p>
+
+    <h3>珠江口西岸的一個小海岬</h3>
+    <p>先看地圖。澳門,坐落在中國南方<strong>珠江口的西側</strong>(與東側的香港隔著珠江口相望)。它原本是一座由小半島與離島(氹仔、路環)組成的、面積極其狹小的彈丸之地。它的價值,和它的鄰居香港一樣,源於同一個地理事實——它恰好位於<em>珠江</em>的出海口附近,而珠江連通著中國南方最富庶的貿易腹地(廣州一帶)。對任何一個想與中國做生意、卻又被天朝體制拒於門外的海上來客而言,在中國的「大門口」,找到一個可以停泊船隻、暫時落腳的據點,是無比珍貴的。</p>
+
+    <h3>門戶,而非腹地</h3>
+    <p>和香港一樣,澳門在地理上,是一個「<strong>門戶</strong>」,而非一個「腹地」。它土地狹小、缺乏資源、養不活多少人;在葡萄牙人到來之前,它只是嶺南海岸上一個有著漁村與媽祖廟的、不起眼的小角落。它的全部價值,不在於「它有什麼」,而在於「它連接什麼」——它能成為一個讓人、貨物、信仰,在「中國」與「世界」之間相遇、轉運的<em>節點</em>。今天澳門所有的故事——它作為東西方相遇之門的獨特、它中葡交融的混血文化、它後來作為賭城的繁華——根源都在這裡:<em>它生來就是一座「門戶之城」,它的命運,永遠繫於它所連接的兩端,以及它能為這兩端,提供什麼別處沒有的價值。</em></p>
+    <div class="pull"><p>一座扼守珠江口的小海岬——澳門與香港,是隔著一條大河相望的、兩扇通往中國的「門」。它們的命運,從一開始,就寫在這個「中國門口」的地理裡。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座「門戶之城」的宿命</span>
+      <p>在任何帝國、任何賭場登場之前,<strong>那個扼守珠江口西岸的小海岬</strong>,就已經寫好了澳門故事的全部基調。一個位於「中國門口」、卻土地狹小、缺乏腹地的小半島,註定不會成為一個自給自足的地方,而會成為一個依靠「連接」、「相遇」與「提供獨特價值」而生的門戶之城。</p>
+      <p>這是理解澳門的第一把鑰匙,也是它與香港的「雙城」對照:<em>它們同為珠江口的「門戶之城」,命運都繫於溝通「中國」與「世界」的能力。但澳門比香港更早開門(早了近三百年)、卻也更早被超越;它最終找到的「獨特價值」,不是金融、不是轉口,而是一樣更特殊的東西——博彩。</em>澳門的全部歷史,本質上就是這座小小的「門戶之城」,在不同的時代,不斷地尋找與重新定義「我能為這兩端,提供什麼別人提供不了的價值」的故事。而它找到的第一個答案,要從五百年前,那些遠道而來的葡萄牙帆船說起。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⛵ ✦ ⛵</div>
+  <p>大航海時代,一群來自歐洲最西端的水手,繞過了半個地球,來到中國的門口。<br>他們需要一個落腳的據點,而這座小小的海岬,<br><span class="hl">成了東西方在遠東相遇的,第一扇門。</span></p>
+</div>
+
+<!-- ===== 第一章:葡萄牙人的到來 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The First Door</span>
+    <h2 class="act-title">遠道而來的帆船,與東西方的第一扇門</h2>
+    <p class="act-sub">The Portuguese Arrive — Europe's First Foothold in East Asia</p>
+    <div class="ornament">⛵ ⛵ ⛵</div>
+  </div>
+  <div class="prose">
+    <p>所有人都會問:這座小城獨特命運的起點在哪裡?答案,在十六世紀的大航海時代。當時,位於歐洲最西端的<strong>葡萄牙</strong>,是航海與探險的先驅。他們的船隊繞過非洲、橫越印度洋,一路向東,尋找通往「東方」的香料與財富之路,最終來到了遙遠的中國海岸。他們渴望與富庶的中國通商,卻苦於沒有一個可以長期停泊、居住、囤積貨物的據點。</p>
+
+    <h3>1557:一個落腳的據點</h3>
+    <p>大約在 1557 年前後,葡萄牙人透過向當地的明朝官員<em>繳納租金(地租)</em>、並提供協助剿滅海盜等方式,獲得了在澳門這座小半島上<strong>居留、通商</strong>的許可。值得注意的是,這在最初,並非「割讓」或「殖民」——在相當長的時間裡,澳門的主權仍屬於中國,明清政府保留著對它的管轄權(設有官員、海關),葡萄牙人是以「租住」的方式在此經營。這種獨特的安排,讓澳門成為一個極其特殊的存在:<strong>歐洲人在東亞建立的、第一個、也是維持最久的長期據點。</strong></p>
+    <div class="pull"><p>1557 年,葡萄牙人在這座小海岬落腳——這是歐洲人在整個東亞,踏下的第一個長期的腳印。澳門,成了東西方相遇的第一扇門。</p></div>
+
+    <h3>東西方相遇的門</h3>
+    <p>從此,澳門扮演起一個無比關鍵的歷史角色——它是<strong>東西方文明,在遠東相遇、交流的第一扇門</strong>。透過這扇門,歐洲的商品、科技、火砲、天文曆法傳入中國;而中國的絲綢、瓷器、茶葉,則由此銷往世界。更重要的是,它也成為<em>東西方思想與信仰交會</em>的門戶——下一章我們將看到,正是透過澳門這扇門,天主教與西方的學問,第一次系統性地進入了中華帝國。在那個中國對外緊閉大門的年代,澳門,是那道門上,唯一開啟的一條縫。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 因「相遇」而獨特</span>
+      <p>葡萄牙人的到來與 1557 年的落腳,確立了澳門最根本的歷史身分——它是「<strong>東西方相遇的第一扇門</strong>」。<em>這完美地兌現了序章「門戶之城」的命題:澳門最初的、也是最獨特的價值,正在於它「連接」並「相遇」了「中國」與「歐洲」這兩個當時彼此幾乎隔絕的世界。</em></p>
+      <p>這份「第一扇門」的身分,帶來了一個將永遠定義澳門的特質——<strong>和平的、長期的中西交融</strong>。與許多在暴力征服中誕生的殖民地不同,澳門的開端,是一場基於「租住」與「通商」的、相對和平的安排;中葡兩個民族,在這座小小的半島上,以一種獨特的方式,共處了將近四百年。<em>這份漫長而和平的共處,讓澳門得以孕育出一種在世界上都極為罕見的、深度交融的混血文明——它不是「中國的」、也不是「葡萄牙的」,而是「澳門的」。</em>這份在「相遇」中誕生的獨特混血,正是澳門最珍貴的靈魂。而這扇門最先迎來的,不是商人,而是一群懷抱著信仰、要把上帝的話語帶進中國的傳教士。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✝ ✦ ✝</div>
+  <p>透過這扇門進入中國的,除了商品,還有一群穿著黑袍的人。<br>他們建起教堂與學院,要把上帝的話語,帶進這個古老的帝國——<br><span class="hl">而他們留下的一座教堂殘壁,將成為這座城市永恆的象徵。</span></p>
+</div>
+
+<!-- ===== 第二章:信仰與中西交融 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Crossing of Worlds</span>
+    <h2 class="act-title">大三巴的殘壁,與一座城的混血靈魂</h2>
+    <p class="act-sub">Catholicism, the Jesuits, and a Unique Eurasian Culture</p>
+    <div class="ornament">✝ ✝ ✝</div>
+  </div>
+  <div class="prose">
+    <p>澳門作為「第一扇門」,最深刻的影響,發生在<strong>信仰與文化</strong>的層面。隨著葡萄牙人而來的,是一群懷抱著傳教熱忱的<strong>天主教傳教士</strong>,尤其是著名的<em>耶穌會(Jesuits)</em>。對他們而言,澳門是把基督信仰傳入龐大中華帝國的<em>前進基地與跳板</em>。</p>
+
+    <h3>傳教士的跳板</h3>
+    <p>耶穌會在澳門建立了教堂、修道院與<em>聖保祿學院(遠東第一所西式大學)</em>,把它當作學習中文、研究中國文化、培訓傳教士、再進入中國內地的基地。正是從澳門這扇門,像<strong>利瑪竇(Matteo Ricci)</strong>這樣的傳教士進入了中國——他們不僅帶來了天主教,更帶來了西方的<em>天文、數學、地理、火砲與鐘錶等科技與學問</em>,在明清的宮廷與士大夫之間,掀起了第一波「西學東漸」。澳門,因此成為近代以來,東西方知識與信仰交流的關鍵樞紐。</p>
+
+    <h3>大三巴:一座教堂的殘壁,一座城的象徵</h3>
+    <p>這段信仰歷史,留下了澳門最著名的地標——「<strong>大三巴牌坊</strong>」。它其實是聖保祿教堂(São Paulo)的<em>前壁殘跡</em>。這座曾經宏偉壯麗的天主教堂,在一場大火中焚毀,只留下了那面融合了歐洲巴洛克風格與東方元素(石壁上甚至刻有中文與東方圖案)的、孤零零矗立的前壁。這面屹立不倒的殘壁,如今成了澳門最具代表性的形象,印在無數的明信片與紀念品上。</p>
+    <div class="pull"><p>大三巴——一座教堂只剩下一面殘壁,卻成了整座城市的象徵。它本身就是澳門的隱喻:一段中西交融的輝煌,在歲月中只留下一道獨特而動人的痕跡。</p></div>
+
+    <h3>土生葡人:一個混血的民族</h3>
+    <p>四百年的和平共處,還孕育出了一個世界上獨一無二的群體——「<strong>土生葡人（Macanese）</strong>」。他們是葡萄牙人與華人(以及來自東南亞、印度的族裔)通婚混血的後裔,世代居住在澳門。他們發展出自己獨特的<em>語言(澳門土語)、習俗,以及一種融合了葡萄牙、中國、東南亞風味的「澳門土生菜(澳葡菜)」</em>。這個「中西混血」的民族,連同澳門那些葡式的碎石路、彩色的歐式建築、與華人的廟宇、店鋪和諧並存的城市景觀,共同構成了澳門那獨一無二的、迷人的「混血靈魂」。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 在「相遇」中誕生的獨特靈魂</span>
+      <p>澳門的中西交融,是它「第一扇門」身分最深刻、最美麗的結晶。<strong>正因為中葡兩個民族,在這座小城裡和平共處了將近四百年,澳門才得以孕育出一種在世界上都極為罕見的、深度交融的混血文明——從大三巴的中西合璧,到土生葡人這個獨特的族群,再到那座華人廟宇與天主教堂比鄰而立、和諧共存的城市。</strong></p>
+      <p>這份獨特的混血,正是澳門靈魂的核心,也是它與香港最不同的地方。<em>如果說香港的中西交融,更多體現在「制度」上(英國的法治與商業體系);那麼澳門的中西交融,則更深地體現在「生活與文化」的肌理之中——在它的飲食、建築、宗教、與土生葡人的血脈裡。</em>澳門證明了,「相遇」未必是衝突,它也可以是一場長達數百年的、溫和而深刻的「融合」。這份在和平相遇中淬煉出的、獨一無二的文化遺產(澳門歷史城區後來被列為世界文化遺產),是澳門獻給世界最珍貴的禮物。然而,這座「第一扇門」的光芒,即將被一場改變了整個珠江口格局的戰爭,以及一個崛起於它對岸的、更年輕的對手,所黯然掩蓋。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>三百年來,澳門一直是西方通往中國的唯一門戶。<br>但一場鴉片戰爭,讓對岸的香港橫空出世,搶走了它所有的光芒——<br><span class="hl">這座曾經的「第一扇門」,從此沉寂為一座被時光遺忘的小城。</span></p>
+</div>
+
+<!-- ===== 第三章:被香港超越 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Eclipse</span>
+    <h2 class="act-title">當對岸升起一座新城,它被遺忘了</h2>
+    <p class="act-sub">Overshadowed by Hong Kong, a City Falls Quiet</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>在將近三百年的時間裡,澳門作為西方通往中國的「第一扇門」,享有著獨特而重要的地位。然而,十九世紀中葉的一場戰爭,徹底改變了珠江口的格局,也讓澳門的命運,從輝煌轉向沉寂。</p>
+
+    <h3>香港的崛起,與澳門的黯淡</h3>
+    <p>1842 年,鴉片戰爭結束,英國從清廷手中得到了珠江口東岸的<strong>香港</strong>,並把它建設成一個現代化的、自由的<em>深水良港與轉口貿易中心</em>。這對澳門是致命的打擊。相較於擁有優良深水港、又有英國強大國力與全球貿易網絡支撐的香港,澳門的港口較淺(且日漸淤積)、葡萄牙的國力也已遠遠衰落。於是,原本經由澳門進出中國的<em>貿易、資金與人才,迅速地轉移到了新興的香港</em>。澳門作為「中國門戶」的核心地位,被它對岸這個更年輕、更強大的對手,徹底取代了。</p>
+    <div class="pull"><p>同樣是珠江口的「門戶之城」,香港憑藉深水港與大英帝國橫空出世;而曾經輝煌了三百年的澳門,則在它的光芒下,黯然沉寂。</p></div>
+
+    <h3>一座被時光遺忘的閒適小城</h3>
+    <p>失去了貿易中心地位的澳門,沉寂了下來,變成了一座相對<strong>寧靜、緩慢、閒適</strong>的小城。沒有了香港那樣高速運轉的商業節奏,澳門保留了它那份葡式的、慵懶而優雅的生活情調——蜿蜒的碎石小巷、斑駁的彩色老屋、午後的咖啡與蛋撻、教堂的鐘聲與廟宇的香火。它彷彿成了一個被時光遺忘的角落,一個與對岸繁忙的香港,形成鮮明對比的「慢城」。(值得一提的是,正式確立葡萄牙對澳門管治權的條約,要到十九世紀後期才簽訂;而澳門的法律地位,也始終比香港更為模糊與特殊。)</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「門戶」價值的轉移</span>
+      <p>澳門被香港超越的這段歷史,深刻地印證了序章關於「門戶之城」的洞見:<strong>一座門戶之城的命運,取決於它能否持續地、比競爭者更好地,提供「連接中國與世界」的價值。</strong>當香港憑藉更優越的深水港、更強大的帝國後盾、與更現代的制度,提供了比澳門更高效的「門戶」服務時,澳門那扇曾經獨一無二的「門」,就失去了它的不可替代性。</p>
+      <p>這裡藏著一個關於「門戶之城」的殘酷規律,也預示了澳門未來的求生之道。<em>一座缺乏腹地、靠「連接」而生的門戶之城,如果在它原有的角色(轉口貿易)上被超越,它就必須去尋找一個全新的、別處無法替代的「獨特價值」,才能重新找到自己存在的理由。</em>香港搶走了澳門「轉口貿易門戶」的角色;那麼,澳門還能為「中國」與「世界」這兩端,提供什麼香港(以及中國大陸)所不能、或不願提供的東西呢?在沉寂了將近一個世紀之後,澳門終於找到了那個獨特的答案——一個在當時的中國與香港,都不被允許、或不被鼓勵的行業。這個答案,將讓這座被遺忘的小城,起死回生。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">🎲 ✦ 🎲</div>
+  <p>失去了貿易的澳門,需要一樣別人沒有的東西,才能活下去。<br>於是,它把目光投向了一個在別處被禁止、在這裡卻被允許的行業——<br><span class="hl">賭。這個字,將徹底重塑這座小城的命運。</span></p>
+</div>
+
+<!-- ===== 第四章:賭城的誕生 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Gamble</span>
+    <h2 class="act-title">一座小城,押上了它的全部未來</h2>
+    <p class="act-sub">How Macau Found Its One Irreplaceable Value</p>
+    <div class="ornament">🎲 🎲 🎲</div>
+  </div>
+  <div class="prose">
+    <p>沉寂的澳門,需要為自己找到一個全新的、別人無法替代的「獨特價值」,才能重新繁榮。而它找到的答案,是一樣在周遭地區(無論是保守的中國大陸,還是後來的香港)都受到嚴格禁止或限制、卻能在澳門被合法經營的行業——<strong>博彩(賭博)</strong>。</p>
+
+    <h3>把賭博合法化:一個關鍵的決定</h3>
+    <p>事實上,澳門的賭博歷史由來已久,但真正讓它脫胎換骨的,是二十世紀中葉的一個關鍵決定。葡萄牙管治下的澳門政府,把博彩業<strong>正式合法化、並以「專營」的方式,授予特定的公司經營</strong>。1962 年起,以<em>何鴻燊</em>為核心的財團,獲得了澳門博彩業的<strong>專營權(賭權壟斷)</strong>,長達四十年。在這段時期,博彩業逐漸取代了一切,成為澳門經濟的絕對支柱。葡京等標誌性的賭場拔地而起,來自香港與各地的賭客,搭乘渡輪湧入澳門,一擲千金。這座曾經的「貿易之門」,搖身一變,成了「<strong>東方的蒙地卡羅</strong>」。</p>
+    <div class="pull"><p>澳門找到的「獨特價值」,不是金融、不是工業,而是「賭」——它提供了一樣周遭地區都不允許、人們卻趨之若鶩的東西。這場豪賭,讓被遺忘的小城,起死回生。</p></div>
+
+    <h3>被「賭」重新定義的城市</h3>
+    <p>從此,澳門的命運,與「賭」這個字,牢牢地綁在了一起。博彩業不僅貢獻了政府絕大部分的財政收入,更帶動了與之相關的旅遊、酒店、餐飲等一整套產業。澳門的經濟結構,變得高度地、甚至危險地<em>單一</em>——它幾乎把自己全部的繁榮,都押在了這一張「賭」的牌上。這既是它起死回生的妙方,也埋下了它經濟「一業獨大、過度依賴」的長期隱憂。但無論如何,正是「賭」,讓這座在香港陰影下沉寂了近百年的小城,重新找到了它在「中國」與「世界」之間,那個不可替代的位置。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 在「差異」中,找到價值</span>
+      <p>澳門轉型為賭城的故事,是它作為「門戶之城」求生智慧的又一次精彩體現。<strong>它再一次證明了,一座缺乏腹地的門戶之城,它的生存之道,在於提供一樣「別處沒有」的獨特價值——而它找到的這個價值,恰恰來自它與周遭地區的「制度差異」(博彩在這裡合法,在別處不合法)。</strong></p>
+      <p>這個洞見,深刻地呼應著澳門(以及香港)作為「門戶之城」的本質。<em>它們的價值,從來都根植於它們的「不一樣」。香港的「不一樣」,是它那套與大陸不同的金融與法律制度;而澳門的「不一樣」,則更集中地體現在「博彩合法」這一點上。</em>正是這份「差異」,讓澳門得以扮演一個獨特的角色:它成了整個大中華地區(中國大陸與香港都禁止或限制賭博)唯一一個可以合法博彩的「特區」,從而吸引了源源不絕的人潮與財富。澳門的命運再一次說明:它的繁榮,繫於它能否保有那份讓它「與眾不同」的獨特性。而這場「賭」的豪賭,在澳門「回歸」中國、並開放賭權之後,還將被推向一個連澳門人自己都無法想像的、瘋狂的巔峰。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🎆 ✦ 🎆</div>
+  <p>香港回歸的兩年後,輪到了澳門。<br>葡萄牙的旗幟降下,中國的旗幟升起,四百多年的管治落幕——<br><span class="hl">這座小城,也走上了「一國兩制」的道路。</span></p>
+</div>
+
+<!-- ===== 第五章:回歸 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Handover</span>
+    <h2 class="act-title">1999:四百年管治的落幕,與一國兩制</h2>
+    <p class="act-sub">The 1999 Handover and the "Other" SAR</p>
+    <div class="ornament">🎆 🎆 🎆</div>
+  </div>
+  <div class="prose">
+    <p>當香港的前途在 1980 年代被中英談判決定後,澳門的回歸,也順理成章地被提上了議程。1987 年,中國與葡萄牙簽訂了《<strong>中葡聯合聲明</strong>》,確定葡萄牙將在 1999 年 12 月 20 日,把澳門交還給中國。</p>
+
+    <h3>一場平和的交接</h3>
+    <p>與香港的回歸相比,澳門的交接過程,要<strong>平和、順暢得多</strong>。這背後有幾個原因:其一,葡萄牙是一個國力遠不如英國的小國,且早已無意、也無力戀棧這塊遙遠的、財政上甚至需要補貼的屬地;其二,澳門社會的構成與氛圍,也與香港有所不同。1999 年 12 月 20 日,在澳門,飄揚了四百多年的葡萄牙國旗緩緩降下,中華人民共和國的國旗與澳門特別行政區的<em>蓮花區旗</em>升起。葡萄牙在東亞最後的、也是歐洲在東亞最早的據點,正式回歸中國。澳門,成為繼香港之後,第二個實行「<strong>一國兩制</strong>」的特別行政區。</p>
+    <div class="pull"><p>歐洲人在東亞踏下的第一個腳印,也成了歐洲人在東亞收回的最後一個腳印——1999 年,長達四百多年的葡萄牙管治,平和地落幕了。</p></div>
+
+    <h3>「另一個」特區</h3>
+    <p>回歸後的澳門,與香港一樣,獲得了「<em>澳人治澳、高度自治</em>」的承諾,保留它原有的資本主義制度與生活方式「五十年不變」,擁有自己的法律、貨幣(澳門元)與關稅區。然而,作為「另一個」特區,澳門的故事,與香港相當不同。澳門面積更小、人口更少、經濟結構更單一(高度依賴博彩),社會的政治氛圍也相對平靜。回歸前的澳門,曾飽受治安不靖(黑社會為爭奪賭場利益而火拼)與經濟低迷之苦,因此社會上對於回歸、對於一個能帶來「穩定」的新秩序,普遍抱持著較高的期待。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 同一個實驗,不同的劇本</span>
+      <p>1999 年的回歸,讓澳門與香港,成為實踐「一國兩制」這同一個歷史性實驗的「<strong>雙城</strong>」。但這兩座珠江口的「門戶之城」,雖然踏上了同一條道路,卻演繹著相當不同的劇本。<em>香港回歸時,是一個經濟高度發達、公民社會活躍、對自身制度與身分有著強烈認同的國際大都會,「一國」與「兩制」之間的張力也因此更為顯著;而澳門回歸時,則是一個經濟相對低迷、社會氛圍較為平靜、且飽受治安問題困擾、渴望穩定的小城。</em></p>
+      <p>這份差異,將深刻地影響兩座城市回歸後的不同走向。<strong>對許多澳門人而言,回歸後最迫切的期待,是「穩定」與「發展」(經濟的繁榮、治安的改善);相較於香港社會對「民主」與「自由空間」的高度關注,澳門社會的政治參與傳統較弱、訴求也較為溫和。</strong>這種社會氛圍的不同,加上即將到來的、由開放賭權所引爆的空前經濟繁榮,讓澳門的「一國兩制」之路,走得遠比香港平順。澳門的故事告訴我們:即使是同一個制度框架,落在不同的歷史、經濟與社會土壤上,也會長出截然不同的果實。而讓澳門這顆果實,結得無比甜美(也無比沉重)的,正是回歸後那場將賭業推向巔峰的關鍵變革。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">💰 ✦ 💰</div>
+  <p>回歸後,澳門做了一個決定,徹底引爆了它的繁榮:它打破了賭權的壟斷,向世界敞開。<br>於是,全球的賭業巨頭蜂擁而至,在這片小小的土地上——<br><span class="hl">建起了一座超越拉斯維加斯的、紙醉金迷的賭城帝國。</span></p>
+</div>
+
+<!-- ===== 第六章:博彩帝國 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Empire of Chance</span>
+    <h2 class="act-title">超越拉斯維加斯的紙醉金迷</h2>
+    <p class="act-sub">Liberalisation, the Gaming Boom, and the World's Casino Capital</p>
+    <div class="ornament">💰 💰 💰</div>
+  </div>
+  <div class="prose">
+    <p>回歸之後,澳門特區政府做了一個影響深遠的決定,徹底引爆了這座小城的繁榮——它在 2002 年,<strong>結束了長達四十年的博彩專營(壟斷)</strong>,向全世界開放賭牌的競投。這個決定,加上同一時期中國大陸開放居民以「<em>自由行</em>」方式赴澳旅遊,共同點燃了澳門史上最瘋狂的一場經濟爆炸。</p>
+
+    <h3>全球賭業巨頭的湧入</h3>
+    <p>賭權的開放,吸引了來自<em>拉斯維加斯</em>的全球博彩業巨頭(金沙、永利等),帶著雄厚的資本與經驗,蜂擁而至。它們在澳門(尤其是填海造地、新開發的<strong>路氹金光大道(Cotai Strip)</strong>)上,瘋狂地興建一座座規模空前、極盡奢華的<strong>綜合度假村式賭場</strong>——巨大的賭廳、豪華的酒店、購物中心、表演場館……澳門的天際線,在短短十幾年間,被這些金碧輝煌的賭場建築徹底改變。一座座度假村,把這片小小的土地,變成了一個紙醉金迷、霓虹不夜的金錢世界。</p>
+
+    <h3>富可敵國的小城</h3>
+    <p>結果是驚人的。澳門的博彩收入,在很短的時間內,就<strong>超越了它的師父——美國的拉斯維加斯,成為全世界博彩收入最高的城市</strong>(一度數倍於拉斯維加斯)。海量的財富湧入這座小城,讓它的政府財政極其充裕(政府甚至年年向市民派發「現金分享」),澳門的<em>人均 GDP,一度躍居世界前列</em>。一座面積、人口都極小的城市,憑藉著「賭」這一張牌,變得富可敵國。</p>
+    <div class="aside"><span class="hl">驚人的反差:</span>這座以中西交融的歷史古蹟(世界文化遺產)聞名的寧靜小城,與那片璀璨奪目、紙醉金迷的賭場帝國,在同一片狹小的土地上,形成了極其鮮明而魔幻的對比——澳門,同時是「最古老的」與「最浮華的」。</div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「獨特價值」的極致,與它的代價</span>
+      <p>回歸後的博彩大爆發,是澳門「在差異中尋找獨特價值」這條生存之道的極致發揮。<strong>透過開放賭權,澳門把它「全大中華地區唯一合法博彩特區」這個獨一無二的價值,發揮到了登峰造極的地步,從而為自己帶來了空前的財富與繁榮。</strong>它再一次完美地扮演了「門戶之城」的角色——它提供了一樣「中國」與「世界」都渴求、卻只有它能合法供給的東西。</p>
+      <p>但這份繁榮的背後,也藏著深刻的代價與隱憂,呼應著澳門命運的另一面。<em>其一,是經濟結構的「畸形單一」——澳門把幾乎所有的雞蛋,都放進了「博彩」這一個籃子裡,使它的經濟極其脆弱,一旦博彩業受到任何衝擊(如政策調整、經濟下行、疫情),整座城市就會立刻承壓。其二,是發展的失衡——博彩的暴利,擠壓了其他產業的發展空間,也帶來了貧富差距、樓價高漲、過度依賴等社會問題。其三,是文化的兩難——這座以中西交融的「歷史」聞名的古城,其形象與經濟,卻被「賭」這個浮華的標籤所主導。</em>澳門的繁榮,是真實的、驚人的;但它「一業獨大」的脆弱,也是真實的。這就為澳門的未來,提出了一個和它的鄰居香港不同、卻同樣關乎根本的問題:這座富可敵國、卻又危險地依賴單一產業的小城,該如何走向一個更穩健、更多元的未來?</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚖ ✦ ⚖</div>
+  <p>富可敵國的繁榮之下,澳門也意識到了「把全部身家押在一張牌上」的風險。<br>於是,它開始尋找新的方向——既要融入國家的藍圖,<br><span class="hl">又要回頭,重新擦亮自己那份被賭場光芒掩蓋的、古老的獨特。</span></p>
+</div>
+
+<!-- ===== 第七章:當代澳門 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The City Today</span>
+    <h2 class="act-title">在繁華與隱憂之間,尋找新的價值</h2>
+    <p class="act-sub">Diversification, the Greater Bay Area, and the Search Beyond the Casino</p>
+    <div class="ornament">⚖ ⚖ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的澳門,得看它如何在「博彩帶來的空前繁榮」與「過度依賴單一產業的深層隱憂」之間,尋找它的下一步。富可敵國的澳門,並非高枕無憂——它比任何人都清楚,把全部身家都押在「賭」這一張牌上的風險。近年來,從博彩業的整頓、到全球疫情對旅遊業的重創,都讓澳門深刻地體會到「一業獨大」的脆弱。於是,「<strong>經濟適度多元</strong>」,成了澳門念茲在茲的目標。</p>
+
+    <h3>政治平穩的「另一個」特區</h3>
+    <p>在政治上,澳門的「一國兩制」之路,走得遠比香港平順。如前所述,澳門社會的政治氛圍相對平靜、訴求較為溫和、與中央的關係也較為和諧。回歸以來,澳門大致維持了社會的穩定與經濟的繁榮,較少出現香港那樣大規模的社會張力。在許多論述中,澳門甚至被視為「一國兩制」成功實踐的一個範例。當然,平穩的另一面,也伴隨著對單一經濟、貧富差距、與公共治理等議題的關注。</p>
+
+    <h3>兩條路:融入國家,與擦亮古老的獨特</h3>
+    <p>面對未來,澳門正嘗試走兩條路。其一,是<strong>融入國家的發展藍圖</strong>——積極參與「<em>粵港澳大灣區</em>」的建設,並開發鄰近的<em>橫琴</em>(與珠海合作),為自己狹小的土地與單一的經濟,尋找新的空間與動能。其二,則是<strong>回頭擦亮自己那份古老的獨特</strong>。澳門意識到,在博彩的浮華之外,它還有一份無比珍貴、且無法被複製的資產——那就是它<em>四百多年中西交融的歷史文化(「澳門歷史城區」已被列為世界文化遺產)</em>。把自己從一個單純的「賭城」,轉型為一個兼具「博彩、休閒、文化、旅遊」的「<strong>世界旅遊休閒中心</strong>」,並重新發掘它作為「中國與葡語國家商貿合作平台」的獨特橋樑角色——這是澳門為自己尋找的、新的「獨特價值」。</p>
+    <div class="pull"><p>澳門最珍貴的,或許不是它的賭場,而是它那份在賭場光芒下,差點被遺忘的——四百年中西交融的、獨一無二的靈魂。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座永遠在尋找「獨特價值」的小城</span>
+      <p>當代澳門的處境,把它全部歷史的核心命題,再一次呈現出來。<strong>澳門,從它作為「東西方第一扇門」誕生的那一刻起,作為一座缺乏腹地的「門戶之城」,它的生存與繁榮,就永遠取決於它能否為「中國」與「世界」這兩端,提供一樣「別處無法替代的獨特價值」。</strong></p>
+      <p>回顧澳門的整部歷史,正是一部「不斷尋找、失去、再尋找獨特價值」的歷史。<em>它最初的獨特價值,是作為東西方相遇的「第一扇門」(中西貿易與信仰的樞紐);當這份價值被香港超越後,它沉寂了;然後,它找到了第二個獨特價值——「博彩」(全大中華唯一的合法賭城),並憑此富可敵國;而如今,當它意識到「一業獨大」的脆弱時,它又在尋找下一個、更多元、更穩健的獨特價值——無論是融入大灣區、連接葡語世界,還是擦亮它那份四百年中西交融的文化遺產。</em>澳門的故事,歸根結柢,是一座小城在「中國」與「世界」之間,憑藉著它的位置、它的歷史、與它的靈活,反覆地為自己尋找「存在價值」的故事。它既驚人地成功(富可敵國),又始終帶著那份「門戶之城」特有的脆弱與不安——因為它的命運,從來不完全由自己決定。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">⛵ ★ 🎲</div>
+  <p>近五百年,一座小海岬,一扇相遇之門,一道教堂的殘壁,與一座賭城的霓虹。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的澳門與澳門人,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的澳門人</h2>
+      <p class="act-sub" style="color:rgba(243,238,219,.6)">Why Macau, and the Macanese, Are What They Are</p>
+      <div class="ornament" style="color:var(--gold-bright)">⛵ ★ 🎲</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的澳門之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程,也都指向同一個核心:它是一座「門戶之城」,永遠在為自己尋找「獨特的價值」。</p>
+
+      <h3>第一層:海岬,把它變成一座「門戶之城」</h3>
+      <p>一切的源頭是<strong>地理</strong>。一個扼守珠江口西岸的小小海岬,讓澳門從一開始,就註定是一座「門戶之城」——它土地狹小、缺乏腹地與資源,它的價值不在於「擁有什麼」,而在於「連接什麼」。它的命運,永遠繫於它所連接的「中國」與「世界」這兩端,以及它能為這兩端,提供什麼別處沒有的獨特價值。這個定位,寫定了澳門全部歷史的基調。</p>
+
+      <h3>第二層:相遇,讓它成為「第一扇門」</h3>
+      <p>接著是<strong>相遇</strong>。十六世紀,遠道而來的葡萄牙人,在這座小海岬落腳,讓它成為歐洲人在東亞的第一個據點、東西方相遇的「第一扇門」。透過這扇門,貿易、科技與天主教信仰流入中國。<em>這份「相遇」的身分,是澳門最初的、也是最獨特的價值——它連接了當時彼此隔絕的中國與歐洲兩個世界。</em></p>
+
+      <h3>第三層:交融,給了它獨一無二的靈魂</h3>
+      <p>然後是<strong>交融</strong>。中葡兩個民族,在這座小城和平共處了將近四百年,孕育出一種世界罕見的、深度交融的混血文明——大三巴的中西合璧、土生葡人這個獨特族群、澳葡菜、以及廟宇與教堂和諧並存的城市景觀。<em>這份在和平相遇中淬煉出的「中西交融」靈魂,是澳門最珍貴的文化遺產,也是它與香港最不同的地方——澳門的交融,更深地體現在生活與文化的肌理之中。</em></p>
+
+      <h3>第四層:失去與重生,逼它找到了「賭」</h3>
+      <p>最關鍵的轉折是<strong>價值的失去與重尋</strong>。鴉片戰爭後,香港橫空出世,搶走了澳門「貿易門戶」的角色,讓它沉寂為一座被遺忘的小城。為了重新找到存在的價值,澳門把目光投向了一樣「別處被禁止、在這裡卻合法」的行業——<em>博彩</em>。正是這份「制度的差異」,讓被遺忘的小城起死回生,成為「東方的蒙地卡羅」。<strong>澳門再一次證明:它的價值,根植於它的「不一樣」。</strong></p>
+
+      <h3>第五層:回歸與豪賭,讓它富可敵國,也埋下隱憂</h3>
+      <p>最後是<strong>巔峰與隱憂</strong>。1999 年,澳門平和地回歸中國,踏上「一國兩制」之路;回歸後開放賭權,引爆了空前的繁榮,讓它超越拉斯維加斯、成為世界賭城之首、富可敵國。<em>但這份繁榮,也讓它陷入「一業獨大」的危險單一。於是今天的澳門,正在尋找新的方向——融入大灣區、連接葡語世界、並回頭擦亮它那份古老的中西交融文化,試圖為自己找到下一個、更穩健的「獨特價值」。</em></p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 一座永遠在尋找價值的門戶之城</span>
+        <p>所以,今天的澳門人是誰?他是<strong>一座「門戶之城」的子民——這座城因相遇而生、因交融而獨特、因被遺忘而沉靜、又因一場豪賭而暴富</strong>。他的城市裡,矗立著一座教堂的殘壁(大三巴),也閃爍著全世界最璀璨的賭場霓虹;他走在葡式的碎石路上,吃著澳葡菜,卻又拜著媽祖、過著中國年;他的小城,同時是「最古老的」(東西方相遇的第一扇門、世界文化遺產)與「最浮華的」(世界賭城之首)。</p>
+        <p>他的古老與他的浮華,是同一座「門戶之城」在不同時代的兩面;他的「中西交融」靈魂,是四百年和平相遇的結晶;他的「富可敵國」與他的「危險單一」,則是同一場「賭」的豪賭的兩面。<em>澳門最深刻的真相是:它和它的鄰居香港一樣,是一座命運繫於外部的「門戶之城」——它從來不完全由自己決定命運,它的存續與繁榮,永遠取決於它能否為「中國」與「世界」這兩端,持續地提供一樣「別處無法替代的獨特價值」。它的整部歷史,就是一部不斷地尋找、失去、再尋找這份「獨特價值」的歷史——從「相遇之門」,到「合法賭城」,再到它正在尋找的下一個身分。這既是這座小城驚人的靈活與韌性所在,也是它那份「門戶之城」特有的、永恆的不安所在。而它那份在賭場光芒下、差點被遺忘的、四百年中西交融的靈魂,或許才是它最不該失去的、真正獨一無二的價值。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">海岬把它變成門戶,相遇讓它成為第一扇門,交融給了它獨一無二的靈魂,而一場豪賭讓它富可敵國——而它的命運,始終繫於它能否在「中國」與「世界」之間,不斷找到那份「別處沒有」的獨特價值。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">近五百年的終極啟示</span>
+      <p>一座城市的樣貌,往往由它的地理(門戶)開局,由歷史的相遇(中西交會)賦予它獨特的靈魂,由競爭的失敗逼它另尋出路,再由一場關鍵的豪賭(博彩)決定它的繁榮與隱憂——而它能否安然存續,取決於它能否在所連接的兩個世界之間,持續地、靈活地,為自己找到一份「別處無法替代的獨特價值」;同時,也取決於它能否在追逐浮華的繁榮時,不忘守護那份讓它真正獨一無二的、古老的靈魂。這,就是澳門至今仍在書寫的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,238,219,.78);margin-top:2.5rem">
+        從珠江口西岸的一座小海岬、葡萄牙帆船落腳的第一扇門,<br>
+        到大三巴的中西合璧、土生葡人的混血靈魂,<br>
+        從被香港超越後遺忘的沉靜小城,<br>
+        到一場讓它起死回生的豪賭、超越拉斯維加斯的霓虹,<br>
+        再到平和的回歸、與一座古城在繁華中尋找自己的身影——<br>
+        這段交織著海岬、相遇、交融、遺忘與豪賭的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的澳門,<br>以及今天的,澳門人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">⛵ ✦ ✝</div>
+  <p>海岬、教堂與賭城 · 澳門的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE FIRST DOOR OF THE EAST TO THE CAPITAL OF CHANCE · 1557 – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

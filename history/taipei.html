@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>盆地之城：台北的身世</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16140f;
+  --parchment:#f3eee2;
+  --parchment-deep:#e7dfc9;
+  --sea:#1d3640;
+  --sea-deep:#0e2128;
+  --gold:#a8842f;
+  --gold-bright:#cda551;
+  --rust:#8a3a23;
+  --crimson:#74221a;
+  --jade:#33583f;
+  --faint:#665a45;
+  --line:#c6b58e;
+  --shadow:rgba(22,20,15,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(168,132,47,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(29,54,64,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(29,54,64,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #223e48 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23cda551' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23cda551' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(243,238,226,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2}
+.lede p{font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;color:var(--sea-deep);font-weight:500}
+.lede p .drop{float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem}
+.act-title{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2}
+.act-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint);margin-top:.8rem}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;border-left:4px solid var(--gold);line-height:1.4}
+.prose h4{font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;color:var(--sea-deep);margin:2.2rem 0 .8rem}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;background:linear-gradient(135deg, rgba(29,54,64,.04), rgba(168,132,47,.06));border-top:2px solid var(--gold);border-bottom:2px solid var(--gold)}
+.pull p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500}
+.pull::before{content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1}
+
+/* ====== INVESTOR / ECHO CALLOUT ====== */
+.investor{margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;background:var(--sea-deep);color:var(--parchment);border-radius:2px;box-shadow:0 18px 40px -16px rgba(14,33,40,.6)}
+.investor::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--gold-bright),var(--rust))}
+.investor .tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(243,238,226,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem}
+.tl-item::before{content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;background:var(--parchment);border:2px solid var(--rust);border-radius:50%}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.5rem 1.4rem;position:relative;overflow:hidden;transition:transform .3s ease, box-shadow .3s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;padding:.85rem 1rem;text-align:left}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(168,132,47,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STATS ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(29,54,64,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden}
+.finale::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");background-position:center;background-size:cover}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(243,238,226,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{margin:3rem 0;padding:2.4rem;border:1px solid rgba(205,165,81,.4);border-radius:3px;background:rgba(0,0,0,.18)}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* expanded edition */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#180f08 !important}
+.dark .act-title{color:#d6c29e}
+.dark .prose p{color:#cbb292}
+.dark .prose strong{color:#c6785a}
+.dark .prose em{color:#d6a676}
+.dark .prose h3{color:#c6785a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#887356}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(116,34,26,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* interludes */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(243,238,226,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* legacy/shift */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(29,54,64,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* debate box for contested history */
+.debate{margin:2.8rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--parchment-deep)}
+.debate-head{background:linear-gradient(135deg,var(--jade),#2a4734);color:var(--parchment);font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;padding:.8rem 1.2rem;display:flex;align-items:center;gap:.5rem}
+.debate-head::before{content:"\2696";font-size:1rem}
+.debate-body{padding:1.2rem 1.4rem}
+.debate-body .view{margin:.9rem 0;padding-left:1.1rem;border-left:3px solid var(--gold);font-size:.95rem;line-height:1.75}
+.debate-body .view .who{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.1em;color:var(--rust);text-transform:uppercase;display:block;margin-bottom:.2rem}
+.debate-body .view strong{color:var(--crimson)}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">City in a Basin · Why Taipei Became What It Is</span>
+    <h1>盆地之城<br><span class="em">台北</span><br>的身世</h1>
+    <p class="sub">從一座沉在湖底的盆地、三條交會的河，到一座被一個個政權反覆移植、改寫、再拼貼的城市——<br>一部關於「為何今天的台北是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的台北，是一座街道又長又直、市中心卻一路向東漂移、同時擠著日式街屋、巴洛克立面、廟宇、眷村、夜市與摩天豪宅的城市？為什麼它被人半開玩笑地稱作「天龍國」，卻又住著全台灣最焦慮買不起房的一群人？答案不在當下的市容，而在它腳下的盆地與河流，以及兩百多年來，一個又一個「從別處移植而來」的政權，如何在這同一塊低地上，反覆地畫線、拆除、重建。台北的故事，本質上不是「一座城慢慢長大」的故事，而是<em>一座被外力一次次重寫的城</em>——凱達格蘭人的獵場、河港商人的碼頭、清朝倉促築起的城牆、日本人拆牆鋪設的現代骨架、戰後湧入的百萬移民塞滿的違建、再到資本把重心整個搬到東邊的信義區。每一層都沒有完全抹去前一層，於是台北成了一座<span style="color:var(--rust);font-weight:600">不斷被覆寫、卻又處處露出舊底稿的拼貼之城</span>。讓我們從湖底開始，一層一層把它讀回來。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the City</span>
+    <h2 class="act-title">盆地與三條河：城市的第一作者</h2>
+    <p class="act-sub">The Basin, the Rivers, and the Lake Beneath It All</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解台北，得先承認一件事：在任何人決定「在這裡蓋一座城」之前，<strong>地形</strong>就已經替這座城寫好了它的命運。台北最根本的身世，是一座<em>盆地</em>。</p>
+
+    <h3>一座被山環抱的低地</h3>
+    <p>台北盆地是一塊被群山環繞的低平凹地——北邊是大屯火山群（陽明山一帶），東南是雪山山脈的支稜，西邊則有林口台地。盆地中央地勢低窪，是淡水河水系沖積、長年堆積而成的平原。這樣的封閉地形，帶來了幾個影響至今的特徵：盆地像一個「鍋子」，夏天悶熱、冬天濕冷、空氣不易擴散；同時，這塊被山保護、又有河運之便的平坦低地，正是人類最樂於聚居、最適合發展大城的地形。<strong>台北之所以會長成北台灣的中心，第一個原因就是：它是這一帶最大、最完整的一塊平地。</strong></p>
+
+    <h3>三條河，決定了城市的骨架</h3>
+    <p>如果說盆地是舞台，那麼<strong>河流</strong>就是這座城最早的主角。台北盆地由淡水河水系貫穿，三條河在此交會：主流<em>淡水河</em>向北出海，<em>基隆河</em>從東北匯入，<em>新店溪</em>從南方注入。在沒有公路、沒有鐵路的年代，河流就是高速公路——貨物、人員、財富，全靠船運。<em>於是台北最早的繁華，全都長在河邊。</em>誰掌握了好的河港，誰就掌握了整座盆地的經濟命脈。後面幾章會看到，台北的城市重心如何隨著「哪一段河還能行船」而一次次遷移——這是理解早期台北的關鍵密碼。</p>
+    <div class="pull"><p>台北不是「先有城、後有河」，而是「先有河、後有港、再有市街，最後才被圈出一座城」——它的身世，是被水寫成的。</p></div>
+
+    <h3>湖底的記憶：康熙台北湖</h3>
+    <p>盆地還藏著一個戲劇性的地質記憶。根據文獻與研究推測，在十八世紀初（清康熙年間），一場大地震可能造成盆地西北部地層下陷，海水與河水倒灌，使台北盆地的一大片區域變成一個鹹水湖——後世稱之為「<strong>康熙台北湖</strong>」。當時的文獻甚至記載了「水面如海」的景象。雖然這個湖後來逐漸淤積、陸化，但它提醒我們一件重要的事：<em>台北盆地的地面，是會變動的、年輕的、由水反覆塑造的。</em>這塊低地的鬆軟地質與低窪特性，日後將深深影響它的水患、地基與都市開發。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 地形是第一張設計圖</span>
+      <p>在任何總督、任何市長、任何建商畫下第一條街之前，<strong>盆地與河流</strong>就已經替台北畫好了第一張設計圖。一塊被山環抱的最大低地，註定會成為人口聚集的中心；三條交會的河，註定讓最早的財富沿著水岸生長；而鬆軟低窪的湖積地質，則埋下了水患與地基的長期課題。</p>
+      <p>這是讀懂台北的第一把鑰匙：<em>它今天所有的特徵——悶熱的氣候、沿河興衰的老城區、一路東移的重心、對水患的戒慎、乃至盆地塞滿人的擁擠感——根源都可以一路追回到「它是一座盆地、一座被河與湖反覆塑造的低地」這個最原始的事實。</em>城市可以被一次次重寫，但它腳下的地形，始終是那張擦不掉的底稿。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">❂ ✦ ❂</div>
+  <p>在任何城市、任何政權到來之前,這片盆地早已有人居住。<br>他們划著獨木舟,在河岸與漢人交易,<br><span class="hl">並把自己的名字,永遠留在了這座城的地圖上。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The First People</span>
+    <h2 class="act-title">凱達格蘭的土地：城市之前的盆地</h2>
+    <p class="act-sub">The Ketagalan, and the Names That Survived</p>
+    <div class="ornament">❂ ❂ ❂</div>
+  </div>
+  <div class="prose">
+    <p>在漢人、在荷蘭人、在任何「城市」的概念到來之前，台北盆地早已有人居住。這片低地最早的主人，是<strong>平埔原住民凱達格蘭族（Ketagalan）</strong>。他們以盆地與河岸為家，散居成大大小小的社（部落），以漁獵、採集與簡單的耕作為生。今天當我們在台北的水泥叢林裡穿梭時，很容易忘記：腳下這塊地，曾經是別人的獵場與家園。</p>
+
+    <h3>地名是最後的證人</h3>
+    <p>凱達格蘭人沒有留下宏偉的建築，但他們把名字刻進了這座城。台北許多地名，其實都是<em>原住民語的音譯遺留</em>——這是他們存在過的最頑強的證據。例如<strong>北投</strong>（Patauw，相傳意指女巫、與硫磺地熱的神祕感有關）、<strong>唭哩岸</strong>（關渡一帶的古老聚落名）、<strong>大龍峒</strong>（源自凱達格蘭的「大浪泵」社）、<strong>艋舺</strong>（Bangka，後詳）等。當你搭捷運經過這些站名時，其實正在唸誦一份比台北城本身古老得多的名單。</p>
+    <div class="pull"><p>台北最古老的居民沒有留下城牆與宮殿，他們留下的是名字——藏在捷運站牌、藏在你每天經過卻不曾細想的地名裡。</p></div>
+
+    <h3>被推到邊緣的原主人</h3>
+    <p>隨著十八世紀漢人移民大量湧入盆地、開墾水田、興建市街，凱達格蘭人的生活空間被快速擠壓。一如台灣其他平埔族群的命運（這在台灣史中是反覆的母題），他們經歷了土地的流失、文化的同化與身分的「消失」——大量平埔後裔在通婚、改姓與漢化中，逐漸隱沒於漢人社會之中，族群身分在戶籍與記憶裡淡去。今日，凱達格蘭的名字雖被刻意保存（如總統府前的「凱達格蘭大道」即是 1996 年為紀念原住民而更名），但作為一個有完整文化與認同的群體，他們的當代復振仍是一條漫長的路。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 每座城都建在別人的家園上</span>
+      <p>台北的開篇，藏著一個所有移民城市都必須誠實面對的前提：<strong>這座繁華之城，是建立在另一群人的土地之上的。</strong>當我們歌頌艋舺的崛起、大稻埕的茶香、信義區的天際線時，最底層的那塊地基，是凱達格蘭人被推開後留下的家園。</p>
+      <p>這也呼應了整座城市的性格——台北從一開始就是一座<em>「被覆寫」的城</em>。凱達格蘭的盆地，被漢人的市街覆寫；漢人的城牆，被日本的現代街廓覆寫；而每一次覆寫，都不曾完全抹去前一層的痕跡。原住民的地名能存活至今，正是這座拼貼之城最早的一道底稿——它提醒我們：台北的故事，不是從艋舺開始的，而是從一個更古老、更安靜的名字開始的。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>當漢人移民沿著淡水河深入盆地,<br>他們在一個原住民稱為「Bangka」的渡口靠岸——<br><span class="hl">台北作為一座「商業城市」的故事,就從這裡開始。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The River Port</span>
+    <h2 class="act-title">一府二鹿三艋舺：河港撐起的第一個市街</h2>
+    <p class="act-sub">Bangka, the Feuds, and the Birth of Commercial Taipei</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>台北作為「商業城市」的故事，從一個河港開始——<strong>艋舺（今萬華）</strong>。序章說過，台北最早的繁華都長在河邊；而艋舺，正是淡水河岸最早、最興盛的一個。它的名字源自凱達格蘭語的「Bangka」，意指獨木舟或小船——因為這裡曾是原住民划著獨木舟、與漢人交易的渡口。一個地名，就濃縮了整座城起點的畫面。</p>
+
+    <h3>「一府二鹿三艋舺」</h3>
+    <p>十八世紀中葉起，漢人移民（主要來自福建泉州）沿淡水河深入盆地，在艋舺靠岸、定居、開店。憑藉優越的河港條件，艋舺迅速成為北台灣物資集散的樞紐——稻米、樟腦、染料、日用品在此轉運，郊商（貿易商行的同業組織）雲集。到了清代中期，艋舺繁華到能與台南府城、鹿港並列，民間遂有「<strong>一府二鹿三艋舺</strong>」之說，意指它是全台第三大的繁華市街。這是台北盆地第一次真正意義上的「城市」雛形。</p>
+    <div class="pull"><p>「三艋舺」三個字，是台北拿到的第一張城市門票——而這張門票，是淡水河的水流替它印的。</p></div>
+
+    <h3>龍山寺：信仰與自治的中心</h3>
+    <p>移民聚居之處，必有廟宇。1738 年創建的<strong>艋舺龍山寺</strong>，主祀觀世音菩薩，不只是泉州移民的信仰中心，更是早期艋舺實質的<em>自治與議事中心</em>——在官府力量薄弱的移民社會裡，廟宇承擔了排解糾紛、組織防衛、辦理公共事務的功能。龍山寺香火至今鼎盛，是台北最重要的古蹟之一，也見證了這座城市最早的社會是如何圍繞著一座廟組織起來的。</p>
+
+    <h3>頂下郊拚：移民社會的血色裂痕</h3>
+    <p>但繁榮的底下，是移民社會典型的張力。1853 年，艋舺爆發了著名的「<strong>頂下郊拚</strong>」——這是一場泉州不同原鄉移民之間（「頂郊」三邑人與「下郊」同安人）為爭奪碼頭利益與地盤而起的大規模分類械鬥。械鬥極為慘烈，敗下陣來的同安人被迫離開艋舺，往北遷移到當時還相對荒涼的<em>大稻埕</em>另起爐灶。這場血腥的內鬥，看似是艋舺的衰敗插曲，卻在無意間，<strong>親手催生了下一個將取代它的市街</strong>——這是台北城市重心第一次重大的轉移。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 成也河運，敗也河運</span>
+      <p>艋舺的崛起與它日後的相對沒落，揭示了早期台北一條鐵律：<strong>這座城的興衰，緊緊綁在「河還能不能行船」這件事上。</strong>艋舺因為扼守淡水河的良港而興起；但隨著河道淤積、大船難以停靠，它的港口優勢逐漸流失，繁華也隨之轉移。台北早期的城市史，幾乎就是一部「<em>追著還能行船的河岸跑</em>」的歷史。</p>
+      <p>而頂下郊拚更埋下一個耐人尋味的伏筆：<em>台北的重心轉移，往往不是和平的「自然成長」，而是由衝突、淤積、政權更替這些「斷裂」所推動的。</em>被趕出艋舺的同安人，把資本與人脈帶到了大稻埕——下一章，那批失敗者將在新的河岸上，用一片片茶葉，打造出台北最輝煌的本土商業傳奇。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">❦ ✦ ❦</div>
+  <p>一場慘烈的械鬥,把一群失敗者趕出了艋舺。<br>他們往北遷到一片曬穀的空地另起爐灶,<br><span class="hl">誰也沒想到,這裡將被一片片茶葉,變成台北最輝煌的市街。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Tea Port</span>
+    <h2 class="act-title">大稻埕：一片茶葉撐起的市街</h2>
+    <p class="act-sub">Dadaocheng, the Tea Trade, and Taipei's First Capital Class</p>
+    <div class="ornament">❦ ❦ ❦</div>
+  </div>
+  <div class="prose">
+    <p>上一章那批在頂下郊拚中落敗、被迫離開艋舺的同安人，往北遷到了一處河岸——因當地有大片曬穀的空地（稻埕）而得名<strong>大稻埕</strong>。誰也沒料到，這個收容失敗者的「次等地段」，將在數十年內，成為台北最國際化、最富庶、孕育最多本土菁英的市街。它的崛起，靠的是一樣改變了北台灣經濟的東西——<strong>茶</strong>。</p>
+
+    <h3>開港通商：世界來敲門</h3>
+    <p>1860 年代，因列強壓力，台灣的淡水（含其腹地大稻埕）被迫開港通商，正式接上了全球貿易網絡。而台灣北部丘陵的氣候，恰好極適合種茶。<strong>烏龍茶與包種茶</strong>成為炙手可熱的外銷商品，行銷歐美與南洋。大稻埕憑藉淡水河的航運之便（此時艋舺河港已淤積），一躍成為全台的<em>茶葉加工與外銷中心</em>。一箱箱台灣茶從這裡裝船出海，換回了滾滾財富。</p>
+    <div class="pull"><p>艋舺賣的是米與日用品，大稻埕賣的是飄洋過海的茶香——前者面向盆地，後者面向世界。台北的格局，在這裡第一次被打開。</p></div>
+
+    <h3>洋行、買辦與本土資本的搖籃</h3>
+    <p>茶葉貿易把世界帶進了大稻埕。外國商行（<em>洋行</em>）在此設點，與本地商人合作；一批懂得與洋人打交道、精通貿易的<strong>本土商人與買辦</strong>就此崛起，累積了驚人的財富與見識。這群人不只是商人——他們是台北第一代真正意義上的<em>本土資本家與仕紳階級</em>，日後在文化、社會運動乃至政治上都扮演了關鍵角色（日治時期推動議會請願、文化啟蒙的許多菁英,都與大稻埕的商業背景淵源深厚）。今天迪化街上那些華麗的歷史街屋——融合了閩南、洋樓與巴洛克風格的立面——正是當年那段繁華最直接的見證。</p>
+
+    <h3>劉銘傳的近代化舞台</h3>
+    <p>大稻埕的興盛，也吸引了清廷的目光。台灣首任巡撫<strong>劉銘傳</strong>推動近代化建設時，便以大稻埕一帶為重要據點——架設電燈、興建鐵路（台灣第一條鐵路的台北段）、設立機器局與郵政。大稻埕於是成為台北「現代化」最早的試驗場之一。它同時擁有最傳統的南北貨、中藥、布行（迪化街至今仍是年貨大街），又是最早接觸電燈、火車、洋貨的地方——這種<em>傳統與現代並陳</em>的特質，至今仍是大稻埕迷人的底色。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 失敗者的逆襲，與「面向世界」的基因</span>
+      <p>大稻埕的故事有兩層深刻的啟示。其一是那個動人的逆轉：<strong>一群在內鬥中落敗、被趕到次等地段的人，反而抓住了開港通商的時代機遇，建立起比原本更輝煌的事業。</strong>城市的繁華從不固定在某個地點，它跟著「機會」走——而機會，有時恰恰落在被主流拋棄的邊緣。</p>
+      <p>其二，大稻埕替台北注入了一種延續至今的基因——<em>面向世界、與外部連結、孕育本土主體性。</em>它證明了台北的活力，從來不只來自政權由上而下的規劃，更來自一群懂得抓住全球貿易、又深植本土的商人與菁英。當下一章那座由清廷倉促築起的「官方台北城」登場時，會形成一個鮮明的對照：一邊是商人用茶葉自下而上長出來的大稻埕，一邊是官府用磚石自上而下圈起來的城牆——台北的兩種性格，就此並存。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⛩ ✦ ⛩</div>
+  <p>商人用茶葉,自下而上長出了大稻埕;<br>而官府,則要用磚石與風水,自上而下圈出一座城——<br><span class="hl">清帝國在台灣最晚、也最短命的一道城牆。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Walled City</span>
+    <h2 class="act-title">台北城：清帝國最後、也最短命的城牆</h2>
+    <p class="act-sub">The Last City Wall of an Empire, 1884–1904</p>
+    <div class="ornament">⛩ ⛩ ⛩</div>
+  </div>
+  <div class="prose">
+    <p>到目前為止，台北的繁華都長在河邊的市街——艋舺與大稻埕。但這兩個地方都是「商人的城」，不是「官府的城」。真正由國家權力、用磚石圈出一座有城牆的「<strong>台北府城</strong>」，要到很晚——1884 年才完工，是清帝國在台灣、乃至全中國最晚興建的一批城池之一。而它的壽命短得驚人：城牆從落成到被拆，前後只存在約二十年。</p>
+
+    <h3>為什麼建得這麼晚？</h3>
+    <p>這要回到台灣史的大脈絡。如台灣整體的歷史一樣，清廷長期把台灣視為邊陲，治理消極。但十九世紀後期，列強環伺、牡丹社事件等危機讓清廷猛然警覺台灣的海防價值，態度轉趨積極——於是有了開港、有了建省。隨著台北因茶葉貿易而崛起、政經重心北移，在此設立府治、興建城池以鞏固統治，就成了順理成章的事。台北府城選址於艋舺與大稻埕<em>兩大市街之間</em>的空地興建，某種程度上也是要在兩個強勢的商業聚落之間，安插一個官方的政治中心。</p>
+
+    <h3>風水、城門與棋盤街</h3>
+    <p>台北府城是一座講究<strong>風水方位</strong>的傳統城池：城牆大致呈方形，並參照星象與地理（傳說刻意將城的軸線朝向七星山以借其山勢），城內闢有整齊的街道，興建衙署、文廟、考棚等官方建築。城設有<strong>五座城門</strong>——東門（景福門）、西門（寶成門）、南門（麗正門）、小南門（重熙門）、北門（承恩門）。其中<em>北門</em>是今日唯一仍維持清代原貌的城門，歷經拆除危機後被保存下來，成為台北最珍貴的古蹟之一，靜靜地站在車水馬龍的高架橋與大樓之間，像一位來自另一個時代的見證者。</p>
+    <div class="pull"><p>台北府城是一座「為了權力而生」的城，與艋舺、大稻埕那種「為了生意而長」的市街，本質截然不同——一個是被規劃出來的，一個是自己生長出來的。</p></div>
+
+    <h3>最短命的城牆</h3>
+    <p>然而，這座清廷最後的城池，命運格外諷刺。建城僅僅十一年後（1895），台灣就因《馬關條約》被割讓給日本。日本人接手台北後，認為厚重的城牆阻礙了現代都市的交通與擴張，遂在二十世紀初<strong>陸續拆除城牆</strong>，僅保留了部分城門作為點綴。存在約二十年的台北城牆，就此走入歷史。但它並未完全消失——日本人沿著被拆除的城牆基址，闢建了寬闊的<em>三線林蔭大道</em>（今中山南路、忠孝西路、中華路、愛國西路一帶），城牆的「輪廓」反而以道路的形式，永久地烙印在了今天台北的地圖上。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 連消失，都留下了痕跡</span>
+      <p>台北府城短暫的一生，是這座「拼貼之城」最精準的縮影。<strong>一個政權（清）倉促築起的城牆，被下一個政權（日）迅速拆除——但拆除本身，又留下了新的痕跡（環城的大道）。</strong>沒有任何一層被真正抹去：清代的城門還在、城牆的輪廓變成了今天的馬路、而當年城內的棋盤街廓，至今仍是台北舊城區（今城中、博愛特區一帶）的肌理基礎。</p>
+      <p>這正是台北最迷人也最矛盾的特質：<em>它從不徹底地保存,也從不徹底地抹除。</em>每一個政權都急著用自己的方式重寫這座城，卻又總在無意間，把前一層的某些東西「翻譯」進新的形式裡留存下來。下一章那個拆掉城牆的日本政權，將為台北鋪下它至今仍在使用的「現代骨架」——而那副骨架的起點，正是這道被拆掉的城牆。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">☼ ✦ ☼</div>
+  <p>清廷剛築起城牆,一紙條約就把台灣讓了出去。<br>新的殖民主人嫌城牆礙事,把它拆了,<br><span class="hl">並在這座盆地上,鋪下一副至今仍在使用的現代骨架。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Colonial Capital</span>
+    <h2 class="act-title">殖民首都：台北的現代骨架是怎麼鋪下的</h2>
+    <p class="act-sub">How the Japanese Drew the Bones of Modern Taipei, 1895–1945</p>
+    <div class="ornament">☼ ☼ ☼</div>
+  </div>
+  <div class="prose">
+    <p>1895 年台灣割讓給日本後，台北的地位陡然提升——它被日本殖民政府選為統治全台灣的<strong>首府</strong>。這個決定影響極其深遠：為了把台北打造成一座足以彰顯帝國威儀、又能高效運轉的「現代殖民首都」，日本人對這座城進行了一場徹底的、由上而下的改造。<em>今天台北市中心的基本骨架——筆直的大道、棋盤式的街廓、地下的水道、宏偉的官署——絕大多數，都是在這五十年間奠定的。</em></p>
+
+    <h3>市區改正：拆掉舊的，畫上新的</h3>
+    <p>日本人推行了一系列「<strong>市區改正</strong>」計畫，以現代都市規劃的理念重塑台北。最具象徵性的一步，就是上一章提到的——<em>拆除清代城牆</em>，並在原址闢建寬闊的「三線路」（中央快車道、兩側慢車道、間以林蔭分隔的現代大道）。城牆代表的是封閉與防衛，三線路代表的是流通與展示——這一拆一建，宣告了一種全新的城市邏輯。同時，他們在舊城區（城內）整理出整齊的棋盤街廓，興建現代化的官廳、學校、醫院、市場與商店街。</p>
+    <div class="pull"><p>清朝用城牆把台北「圍」起來，日本人用大道把台北「攤」開來——這座城的身體，從一個防衛的堡壘，被改造成一個展示的舞台。</p></div>
+
+    <h3>帝國的門面：總督府與官廳集中區</h3>
+    <p>日本人在台北蓋了一批至今仍是地標的宏偉建築，作為帝國權力的具象展示。其中最核心的，是壯麗的<strong>台灣總督府</strong>（即今日的總統府）——一座紅磚與白石相間、帶有中央高塔的後文藝復興式建築，刻意以其高度與軸線統御整座城市。此外還有總督官邸、台北州廳、台灣銀行、台北車站、總督府博物館（今國立台灣博物館）等。這些建築在舊城區一帶形成了一個<em>「官廳集中區」</em>，也就是今天台北「博愛特區」的雛形——權力的地理中心，自此被固定下來。</p>
+
+    <h3>看不見的現代化：上下水道與公共衛生</h3>
+    <p>但日本人對台北最深刻的改造，其實藏在地下與細節裡。他們鋪設了現代化的<strong>自來水與下水道系統</strong>（如知名的水道工程），大幅改善了這座盆地城市長期的衛生與水患問題；引進電力、電話、現代消防與公共衛生制度；興建公園（如台北公園，今二二八和平公園）、規劃公墓與市場。這些「看不見的基礎建設」，才是讓台北真正從一個傳統市街，蛻變為一座能容納大量人口、可持續運轉的<em>現代都市</em>的關鍵。</p>
+    <div class="debate">
+      <div class="debate-head">史學爭議 · 如何看待殖民者打造的台北？</div>
+      <div class="debate-body">
+        <p style="font-size:.93rem;color:var(--faint);margin-bottom:.6rem">日本對台北的改造,評價與整個日治時期一樣複雜,並存幾種視角：</p>
+        <div class="view"><span class="who">強調現代化貢獻者</span>認為,日本為台北奠定了延用至今的現代都市骨架——街道系統、上下水道、公共建築與都市規劃理念,是台北「現代性」的真正起點。</div>
+        <div class="view"><span class="who">強調殖民本質者</span>指出,這些建設的核心目的是<strong>服務殖民統治與帝國門面</strong>:宏偉官署是為了威嚇、現代街廓是為了統治效率,台灣人在這座城裡始終是被規劃、被統治的二等角色,不應以「建設」淡化殖民的權力本質。</div>
+        <div class="view"><span class="who">空間政治的視角</span>提醒,殖民者透過拆城牆、立總督府、定軸線,把「誰是主人」的訊息直接寫進了城市空間——而這套空間秩序在戰後被新政權繼承、改寫,本身就是台北權力變遷的活地圖。</div>
+      </div>
+    </div>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 一副用了百年的骨架</span>
+      <p>日治時期給台北留下的,是一個難以一刀切的遺產:<strong>一座城市最深層、最持久的東西,往往不是某一棟漂亮的建築,而是它看不見的「骨架」——街道怎麼走、水往哪裡流、權力中心擺在哪。</strong>而台北這副骨架,正是在殖民的五十年間被鋪設定型的。</p>
+      <p>這帶來一個耐人尋味的事實:<em>今天每一個在台北通勤、用水、洗澡、走過總統府前的人,都還在使用一個世紀前由殖民者規劃的系統。</em>政權一次次更迭,旗幟一次次更換,但這副骨架始終在底下默默運作。它再次印證了台北「層層覆寫卻不抹除」的本質——只是這一次,被留下來的不是一道城門或一個地名,而是整座城市的底層作業系統。下一章,一個全新的政權將帶著數以百萬計的人湧入這座城,把這副優雅的骨架,塞得遠遠超過它原本的設計負荷。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⌂ ✦ ⌂</div>
+  <p>日本人留下了一副為數十萬人規劃的優雅骨架。<br>但一場戰爭的結局,即將帶來數以百萬計的人——<br><span class="hl">他們要把這副骨架,塞得遠遠超過它原本的負荷。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Great Influx</span>
+    <h2 class="act-title">湧入的城市：眷村、違建與百萬移民</h2>
+    <p class="act-sub">1949, the Newcomers, and a City Bursting at the Seams</p>
+    <div class="ornament">⌂ ⌂ ⌂</div>
+  </div>
+  <div class="prose">
+    <p>1945 年日本戰敗,台灣由中華民國政府接收,台北繼續扮演全島的政治中心。但真正讓台北「爆炸性」改變的,是 1949 年——國共內戰失利,國民政府撤退來台,並把<strong>台北定為中華民國的中央政府所在地</strong>。隨之而來的,是台灣史上規模空前的人口移入:大批軍人、公務員、各省民眾隨政府湧入,其中相當一部分集中落腳於台北。一座原本為數十萬人規劃的城市,要在極短時間內,塞進遠超其設計負荷的人口。</p>
+
+    <h3>眷村:臨時becoming永久</h3>
+    <p>為了安置大量隨軍來台的軍人及其眷屬,政府在台北各處興建或劃設了<strong>眷村</strong>——一片片緊密相連的簡易住所。它們原本被設想為「<em>反攻大陸前的臨時居所</em>」,因此建得克難而擁擠;但隨著反攻無望,這些「臨時」的村落一住就是數十年,成了永久的家。眷村發展出獨特而濃烈的生活文化:南腔北調的鄉音、家家戶戶的各省菜餚(眷村菜、牛肉麵的源流)、緊密的鄰里關係。它們是台北「外省」族群記憶最濃縮的載體,也是這座城市多元拼貼的重要一塊。如今多數眷村已隨都市更新而拆除改建,僅少數被保存為文化園區。</p>
+    <div class="pull"><p>眷村是一個時代的隱喻——一群人帶著「明天就要回去」的心情住下,結果在這裡過完了一生,還養大了在這裡出生、認台北為家的下一代。</p></div>
+
+    <h3>北漂:全台的人都往台北擠</h3>
+    <p>除了 1949 年的外省移入,戰後台北的膨脹還有第二股、且更持久的動力——<strong>島內的城鄉移民</strong>。隨著台灣經濟起飛(對應台灣經濟奇蹟的脈絡),工作機會、教育資源、政治與文化中心全都高度集中於台北。於是,一代又一代來自中南部與東部的年輕人「<em>北漂</em>」到台北求學、就業、討生活。台北像一塊巨大的磁鐵,持續吸納全台灣的人口、人才與資源,人口在數十年間翻了數倍。「<em>台北是台北人的台北,也是全台灣人的台北</em>」——這座城市的居民,早已遠遠超出它原本的範圍。</p>
+
+    <h3>失序的擴張:違建與都市計畫的失靈</h3>
+    <p>人口湧入的速度,遠遠超過了城市建設與規劃的速度。其直接後果,就是大量<strong>違章建築</strong>的蔓延:頂樓加蓋、巷弄裡見縫插針的鐵皮屋、河岸與山坡地的非正式聚落。日本人留下的那副優雅骨架,被快速、廉價、缺乏規劃的建築填滿、覆蓋、撐到極限。台北於是呈現出一種獨特的「<em>密集而雜亂</em>」的市容——這也是日後台北諸多都市問題(老舊建築、防災、都市更新困難)的根源。城市的成長,從日治時期的「由上而下精心規劃」,變回了戰後的「由下而上見縫插針」。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 被人塞滿的盆地</span>
+      <p>戰後的台北,完成了它身世中最劇烈的一次轉變:<strong>從一座「被規劃的城」,變成一座「被塞滿的城」。</strong>1949 年的政治撤退與其後數十年的島內北漂,讓這座盆地承載了遠超其設計的人口。而盆地的封閉地形(序章)在此顯露出它的另一面——四面環山,意味著城市無法無限向外攤平擴張,只能向內擠壓、向上加蓋、向周邊的山腳與河岸滿溢。</p>
+      <p>這次大湧入,也為台北寫下了兩條延續至今的主線。其一是<em>族群與文化的再一次拼貼</em>:本省與外省、台北人與北漂者,各自的記憶與生活方式在這座盆地裡層層交疊。其二是<em>一個結構性的難題</em>:當有限的盆地被無限的人口需求擠壓,「住」就成了這座城市永恆的痛——這條線,將在後面的「天龍國」章爆發為當代台北最尖銳的焦慮。被山環抱的福分,如今成了被山困住的擁擠。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">➤ ✦ ➤</div>
+  <p>當盆地被人口塞到極限,<br>台北的繁華開始沿著一條清晰的軸線移動——<br><span class="hl">從沒落的西區,一路向東,漂向最後那片空白的土地。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Eastward Drift</span>
+    <h2 class="act-title">城市向東:重心如何一路漂到信義區</h2>
+    <p class="act-sub">From the Old West to Xinyi — the Migration of a City's Heart</p>
+    <div class="ornament">➤ ➤ ➤</div>
+  </div>
+  <div class="prose">
+    <p>如果你拿一張台北的歷史地圖,把不同年代「最繁華的地方」依序標出來,會看到一條清晰的軌跡:從西邊的<em>艋舺、大稻埕</em>(河港時代),到中間的<em>城中、西門町</em>(清日舊城),再到<em>東區(忠孝東路一帶)</em>,最後抵達最東邊的<strong>信義計畫區</strong>。台北的市中心,一百多年來一直在<strong>向東漂移</strong>。理解這條東移的軌跡,就理解了當代台北的空間邏輯。</p>
+
+    <h3>西區的黃金年代與沒落</h3>
+    <p>戰後初期,台北的繁華中心在<strong>西區</strong>——尤其是<em>西門町</em>(日治以來的娛樂商業區,電影街、流行文化的發源地)與<em>中華路</em>一帶(曾有知名的中華商場)。那是西區最風光的年代:看電影、買流行貨、約會逛街,都往西門町去。然而隨著城市東移、商業重心轉移,加上中華商場拆除等變遷,西區一度陷入相對的沒落與老化,留下大量老舊街區。(近年透過西門町的再生、大稻埕的文創復興,西區又走出了一條「老城新生」的路。)</p>
+
+    <h3>東區崛起:消費與時尚的新中心</h3>
+    <p>1970–80 年代,隨著人口東擴、忠孝東路沿線開發,<strong>東區</strong>(以忠孝東路四段、頂好商圈、敦化南路一帶為核心)迅速崛起,取代西門町成為台北最時髦的<em>消費與時尚中心</em>。百貨公司、精品店、流行服飾、餐廳酒吧聚集,「逛東區」成為一個世代的時尚象徵。東區的繁華,標誌著台北從「西區時代」正式走入「東區時代」。</p>
+    <div class="pull"><p>台北的市中心不是固定的一個點,而是一個沿著時間軸向東滑動的光標——每一代台北人記憶中的「最熱鬧的地方」,其實都不一樣。</p></div>
+
+    <h3>信義計畫區:一座「被規劃出來」的新市中心</h3>
+    <p>東移的終點(目前為止),是<strong>信義計畫區</strong>。與艋舺、東區那種「自然長出來」的繁華不同,信義計畫區是台北少數<em>由政府從一片相對空曠的土地(原為兵營、倉庫用地)上,以現代規劃理念整體打造</em>的新市中心——這讓人想起日治的市區改正,是台北又一次「由上而下」的規劃實驗。這裡寬闊筆直的街道、整齊的街廓、密集的摩天大樓,構成了台北最具現代都會感的天際線。台北市政府、市議會、世貿中心、國際會議廳、大型百貨群(信義商圈)在此聚集。而 2004 年落成、一度為世界第一高樓的<strong>台北101</strong>,更成為整座城市、乃至整個台灣的地標與象徵——每年跨年的101煙火,是台北獻給世界的名片。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 向東,是向著「未被填滿」的方向</span>
+      <p>台北市中心一路東移的軌跡,藏著一條城市發展的普遍邏輯:<strong>當舊的中心被填滿、老化、難以重建時,城市的能量會流向「還有空間、能重新規劃」的地方。</strong>西邊的河港淤積了、舊城被塞滿了、東區也飽和了,於是資本與規劃的目光,自然投向了最東邊那片尚待開發的低度利用土地——信義計畫區。</p>
+      <p>而這條東移軸線,也精準地呼應了台北「拼貼之城」的本質:<em>它的不同年代,被「攤」在了不同的地理位置上。</em>你可以在同一座城市裡,從西到東,依序走過河港時代的大稻埕、舊城時代的城中、消費時代的東區、與摩天時代的信義區——彷彿走過一條被空間化的時間軸。台北沒有一個永恆的中心,因為它的中心,一直在追逐著「下一塊還沒被寫滿的空白」。而要把這些散落東西的繁華串連起來,需要一樣戰後才出現的東西——下一章的捷運。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">◷ ✦ ◷</div>
+  <p>要把散落東西的繁華串連起來,<br>需要一樣戰後才出現的東西——<br><span class="hl">一張地下與高架的路網,將再一次重寫整座城的移動方式。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Metro Reshapes</span>
+    <h2 class="act-title">捷運紀元:一張路網如何重寫整座城</h2>
+    <p class="act-sub">How the MRT Rewired Taipei's Daily Life and Land Values</p>
+    <div class="ornament">◷ ◷ ◷</div>
+  </div>
+  <div class="prose">
+    <p>如果說盆地與河流是台北的「第一作者」,那麼<strong>捷運(MRT)</strong>,就是當代重寫這座城市最有力的一支筆。在捷運出現之前,台北是一座被機車、汽車與公車塞滿、交通惡名昭彰的擁擠盆地;捷運通車後,這座城市的時間感、空間感、乃至地價版圖,都被徹底重新繪製。對許多台北人而言,生活可以分成「捷運前」與「捷運後」兩個時代。</p>
+
+    <h3>從一條線,到一張網</h3>
+    <p>台北捷運的興建並非一帆風順,初期(1990 年代)曾因工程爭議、首條通車路線的諸多狀況而備受批評。但隨著一條條路線陸續完工、彼此串連,台北逐漸織就了一張綿密、準點、潔淨而高效的<strong>捷運路網</strong>,服務範圍從台北市核心向外擴展,跨越行政界線深入新北市的各個衛星市鎮。它的乾淨(車廂內禁飲食的規範深入人心)、準點與便利,贏得了市民高度的依賴與認同,成為台北城市治理與公共生活品質的一張代表性名片。</p>
+    <div class="pull"><p>捷運讓台北人重新認識了自己的城市——原本遙遠的兩端,因為一張路網,變成了「不過幾站」的距離。</p></div>
+
+    <h3>沿著捷運線,地價重新洗牌</h3>
+    <p>捷運最深刻的影響之一,是它<strong>重畫了整座城市的價值地圖</strong>。「<em>捷運宅</em>」「離捷運站走路幾分鐘」成為房地產最核心的賣點之一;捷運站周邊發展出高密度的商業與住宅(這正是都市規劃中「<strong>大眾運輸導向發展,TOD</strong>」的概念);而原本因交通不便而沉寂的區域,一旦通了捷運,地價與人潮便隨之翻揚。捷運路網延伸到哪裡,城市的開發熱度與房價,就跟著蔓延到哪裡——這條規律,深刻地形塑了當代大台北的擴張方向。</p>
+
+    <h3>通勤圈的擴張:把新北「拉進」台北</h3>
+    <p>捷運更做了一件改變大台北格局的事:它<strong>把通勤圈大幅向外擴張</strong>。住在新北市的板橋、新店、淡水、蘆洲、三重的人,可以靠捷運在合理的時間內通勤到台北市區上班。這實質上模糊了台北市與新北市的界線,形成一個遠比行政區劃更真實的「<em>生活圈</em>」——人們居住在房價較低的新北,工作消費在台北市,每天透過捷運在兩座城市之間流動。捷運,成了縫合「雙北」的那根針(這條線將在「雙城」章進一步展開)。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 基礎建設,是看不見的城市規劃師</span>
+      <p>捷運的故事揭示了一個關於城市的深刻真理:<strong>真正重塑一座城市的,往往不是某棟搶眼的建築,而是改變了「人如何移動」的基礎建設。</strong>當移動的方式改變,人們選擇住哪、在哪工作、去哪消費的邏輯,乃至土地的價值,全都會跟著重組。捷運沒有蓋出任何一棟豪宅,卻決定了無數豪宅該蓋在哪裡。</p>
+      <p>這也是台北「不斷被重寫」這個主題的當代版本:<em>繼日本人用「三線路」重寫了台北的地面交通之後,捷運用一張地下與高架的路網,再一次重寫了這座城市的移動方式與空間價值。</em>每一個時代,都用它最先進的交通技術,在這座盆地上重畫一次人的流動路線——而每一次重畫,都讓台北變成一座稍微不同的城。下一章,讓我們離開宏觀的骨架與路網,走進台北最日常、最微觀的肌理:那些塞滿了生活的巷弄。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⌘ ✦ ⌘</div>
+  <p>離開宏觀的骨架與路網,<br>走進台北最日常、最微觀的肌理——<br><span class="hl">那些藏在大馬路背後、塞滿了生活的巷弄。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · Republic of Alleys</span>
+    <h2 class="act-title">巷弄共和國:台北的生活肌理</h2>
+    <p class="act-sub">Night Markets, Arcades, and the 24-Hour Texture of a City</p>
+    <div class="ornament">⌘ ⌘ ⌘</div>
+  </div>
+  <div class="prose">
+    <p>前面幾章談的都是台北的「大骨架」——盆地、河港、城牆、現代街廓、捷運路網。但台北真正讓居住者與旅人著迷的,其實是它的「<strong>微肌理</strong>」:那些藏在大馬路背後、密密麻麻、充滿生活感的巷弄。如果說宏觀的台北是被政權一次次規劃出來的,那麼微觀的台北,則是被千千萬萬個小生意、小攤販、小店家,自下而上「長」出來的。這是台北最有機、最迷人的一面。</p>
+
+    <h3>夜市:庶民的客廳</h3>
+    <p>台北生活肌理最鮮明的符號,是<strong>夜市</strong>。士林、饒河街、寧夏、臨江街(通化)……每一座夜市都是一個自成一格的小宇宙,擠滿了小吃攤、遊戲攤與人潮。蚵仔煎、滷肉飯、胡椒餅、珍珠奶茶、臭豆腐……夜市不只是吃東西的地方,更是台北庶民文化的<em>共同客廳</em>——它平價、喧鬧、不分階級、徹夜不眠,把這座城市最旺盛的生命力,毫無保留地攤在燈火與油煙之間。對許多旅人而言,夜市就是台北最真實的樣子。</p>
+    <div class="pull"><p>台北的靈魂不在摩天大樓的頂端,而在巷口那盞昏黃的攤燈下、在一碗熱湯的蒸氣裡、在便利商店24小時不滅的光中。</p></div>
+
+    <h3>騎樓與巷弄:模糊的公共與私人</h3>
+    <p>台北的街道有一種獨特的空間語法——<strong>騎樓</strong>(亭仔腳)。這種「樓上是住家、樓下退縮成有遮蔽的人行走廊」的建築形式(源自閩南與南洋,並在日治法規下普及),讓行人能在多雨炎熱的盆地氣候裡遮陽避雨,也讓店家得以把生意「溢出」到半室外的空間。騎樓模糊了公共與私人、室內與室外的界線,是台北街道生活最重要的舞台之一。而騎樓背後那些蜿蜒的<em>巷弄</em>,則藏著無數的小店、住宅、工作室與咖啡館——台北的精彩,往往不在大街上,而在你願不願意拐進那條不起眼的小巷。</p>
+
+    <h3>便利商店與咖啡館:24 小時不打烊的城市</h3>
+    <p>台北是全世界<strong>便利商店密度</strong>最高的城市之一。轉角就有的超商,早已超越了「買東西」的功能——它們是繳費中心、取貨點、提款機、廁所、深夜的避難所、城市的微血管。它與遍地開花的<em>咖啡館</em>文化、書店、24 小時營業的店家一起,共同構築出台北「<strong>24 小時不打烊</strong>」的城市性格:無論幾點,這座城市總有一盞為你而亮的燈。這種高度便利、高度密集、隨時可得的生活感,是台北居住體驗中最被居民珍視、也最讓外來者驚嘆的特質。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 由下而上長出來的城</span>
+      <p>巷弄、夜市、騎樓、超商所構成的生活肌理,揭示了台北性格中與「被規劃」截然相反的另一面:<strong>這座城市最珍貴的活力,恰恰來自那些「沒被規劃」的部分——由無數庶民的小生意,在規劃的縫隙裡自發長出來的。</strong></p>
+      <p>這形成了台北最迷人的張力:<em>它的骨架是由上而下、被一個個政權規劃出來的;但它的血肉,卻是由下而上、被千萬個普通人填滿、撐起來的。</em>總督府與101代表前者的雄心,夜市的攤燈與巷口的超商代表後者的生命力。兩者疊在同一座盆地裡,既矛盾又互補——這正是為什麼台北常給人一種「宏觀凌亂、微觀宜居」的奇特印象。然而,這份「宜居」也有它沉重的代價:要在這座生活如此便利的城市裡,擁有一個屬於自己的家,卻愈來愈難。下一章,我們要面對台北最尖銳的矛盾。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚖ ✦ ⌂</div>
+  <p>但這份令人著迷的便利,藏著一個沉重的代價。<br>在這座生活如此宜居的城市裡,<br><span class="hl">要擁有一個屬於自己的家,卻愈來愈遙不可及。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Dragon Capital</span>
+    <h2 class="act-title">天龍國的矛盾:房價、階級與都更困局</h2>
+    <p class="act-sub">Sky-High Prices, Class, and the Deadlock of Renewal</p>
+    <div class="ornament">⌂ ⚖ ⌂</div>
+  </div>
+  <div class="prose">
+    <p>台北有一個半戲謔、半批判的綽號——「<strong>天龍國</strong>」。這個源自網路文化的稱呼,指向一種印象:台北(尤其是某些蛋黃區)的居民,享受著全台灣最集中的資源與最高的房價,彷彿活在一個與其他縣市脫節的「天龍人」世界。這個綽號背後,藏著當代台北最尖銳、也最痛的矛盾——一座資源無比集中、生活無比便利的城市,卻也是全台灣最讓人「買不起家」的地方。</p>
+
+    <h3>買不起的城市</h3>
+    <p>台北的<strong>房價</strong>長期高居全台之冠,房價所得比(不吃不喝多少年才買得起一間房)更是世界前列。這背後是序章與「湧入」章埋下的結構性宿命:<em>盆地地形限制了土地供給</em>(四面環山,無法無限擴張)、<em>資源與機會的高度集中</em>持續吸引人口湧入、加上房地產的投資與保值需求——供給有限、需求無窮,價格自然被推到一般受薪者難以企及的高度。對許多在台北工作、貢獻、生活的年輕人而言,「在台北擁有一個家」已經從努力的目標,變成了近乎遙不可及的夢(這與整個台灣的居住焦慮一脈相承,而台北是這道難題最極端的展現)。</p>
+    <div class="pull"><p>天龍國最深的諷刺是:它把全台灣的人吸引過來打拚,卻又讓這些打拚的人,幾乎不可能在這裡買下一個安身立命的地方。</p></div>
+
+    <h3>老去的城市:都更為何這麼難?</h3>
+    <p>台北還面臨一個與「湧入」章直接相關的後遺症:<strong>大量老舊建築</strong>。戰後那段「見縫插針、快速加蓋」的擴張,留下了滿城屋齡偏高、缺乏電梯、結構與防災條件不佳的老公寓。在地震頻繁的台灣(呼應台灣的地震帶宿命),這些老屋的<em>耐震安全</em>是一顆顆隱憂。理論上,「<strong>都市更新(都更)</strong>」——把老舊建築拆除重建為現代化、更安全的大樓——是解方;但實務上,都更在台北窒礙難行,原因盤根錯節:</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">困難一</span>
+        <h5>整合的不可能</h5>
+        <p>一棟改建往往需要<strong>所有住戶同意</strong>,但每位屋主對分回坪數、權益、是否信任建商的想法都不同,只要少數人反對,整案就卡住。整合的交易成本極高。</p>
+        <span class="model">Coordination</span>
+      </div>
+      <div class="card">
+        <span class="flag">困難二</span>
+        <h5>利益與信任的拉扯</h5>
+        <p>都更牽涉龐大的<strong>土地增值利益</strong>,屋主、建商、地方政府之間的分配與信任問題複雜,加上對建商「黑箱」「圖利」的疑慮,使協商屢屢破局。</p>
+        <span class="model">Trust Deficit</span>
+      </div>
+      <div class="card">
+        <span class="flag">困難三</span>
+        <h5>公權力的界線</h5>
+        <p>當多數同意、少數堅拒時,政府能否動用公權力強制拆除?——這觸及<strong>居住權與財產權</strong>的根本爭議,是極敏感的法律與道德難題。</p>
+        <span class="model">Property Rights</span>
+      </div>
+    </div>
+    <p>2012 年的<strong>文林苑事件</strong>,正是這道難題最激烈的引爆點——一個不同意都更的住戶遭強制拆除,引發了關於「居住正義」「財產權」與「公權力界線」的全國性激辯,讓台北的都更困局與其牽涉的價值衝突,赤裸裸地攤在全社會面前。此後,如何在「都市安全更新」與「保障個人居住權」之間取得平衡,始終是台北未解的難題。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 繁華的城,容不下自己的家</span>
+      <p>天龍國的矛盾,是台北整部身世累積至今的「<strong>總結算</strong>」。盆地限制了土地、湧入填滿了空間、東移與捷運推高了地價、便利的生活吸引更多人擠進來——每一個讓台北「成功」的因素,最終都疊加成了同一個結果:一座極度成功、卻也極度買不起、極度難以更新的城市。</p>
+      <p>而這道難題最深的提醒是:<em>一座城市的偉大,不能只用它的天際線、它的便利、它的繁華來衡量,更要看它能不能讓在這裡生活、貢獻的普通人,擁有一個安穩的家。</em>當「住」成為一座城市最大的焦慮時,再華麗的101煙火,也照不亮那些在巷弄裡為房租與房貸發愁的人。台北作為全台灣資源最集中的城市,它的居住困境,某種程度上也是整個台灣「成長的代價」最濃縮的縮影。而要理解這道困境,還必須看見台北從來不是獨自存在的——它與身邊那座更大的城市,共生著、也分擔著彼此的壓力。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⊃⊂ ✦ ⊃⊂</div>
+  <p>要理解台北的居住困境,<br>必須先承認一件常被忽略的事——<br><span class="hl">我們口中的「台北」,其實從來就是兩座城市。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Twin Cities</span>
+    <h2 class="act-title">雙城記:台北與新北的共生</h2>
+    <p class="act-sub">One Living Area, Two Cities — Taipei and New Taipei</p>
+    <div class="ornament">⊃⊂ ⊃⊂</div>
+  </div>
+  <div class="prose">
+    <p>有一件關於台北的事,常被外地人忽略,卻是理解這座城市真實樣貌的關鍵:<strong>我們口中的「台北」,其實是兩座城市。</strong>在行政上,有「台北市」與包圍著它的「<em>新北市</em>」(舊稱台北縣);但在真實的生活裡,這兩座城早已縫合成一個無法切割的整體——一個常被稱為「大台北」的單一<strong>生活圈</strong>。理解這對「雙城」的關係,就理解了當代台北人真正的生活地理。</p>
+
+    <h3>一條看不見、卻又無所不在的界線</h3>
+    <p>台北市與新北市之間的行政界線,在地圖上清清楚楚,在生活中卻幾乎感覺不到。一個住在新北板橋的人,可能在台北信義區上班、在台北東區吃飯、週末去淡水(新北)看海——他一天之內可能跨越這條界線好幾次,卻渾然不覺。捷運(第八章)更是徹底抹平了這條界線:路網無視行政區劃,把新店、淡水、板橋、蘆洲、三重等新北市鎮,全都串進了同一張通勤網。<em>對生活在這裡的人而言,「大台北」是一個整體,行政上的「雙城」反而是個技術性的細節。</em></p>
+    <div class="pull"><p>台北市與新北市,像是一對共用一個身體、卻有兩個戶口的雙胞胎——你很難說清一個動作究竟是哪一個做的。</p></div>
+
+    <h3>分工:核心與腹地</h3>
+    <p>這對雙城之間,存在著一種清晰而互補的<strong>分工</strong>。<em>台北市</em>是核心——政治、金融、企業總部、高階商業與文化機構高度集中,提供了最多的工作與最高的薪資,但也有著最高的房價(天龍國)。<em>新北市</em>則扮演了廣大的<strong>腹地</strong>角色:它以相對可負擔的房價,承接了無數無法在台北市買房、卻需要在台北市工作的家庭——許多年輕人與小家庭「<em>住新北、上班台北</em>」,成了大台北最典型的生活模式。新北市環抱台北市,既是它的居住後盾、也是它的衛星城群。可以說,是新北市分擔了台北市「住不起」的壓力,兩座城市才得以共同運轉。</p>
+
+    <h3>共生的張力</h3>
+    <p>但這種共生也帶來張力。行政的分割,使得交通、河川、垃圾、防災、都市計畫等需要「整體規劃」的議題,被切割在兩個市政府之間,協調不易;資源、稅收與建設的分配,也時有「核心吸走腹地資源」的爭論。一個真實的「大台北」生活圈,被切成兩個行政單位來治理——這種「<em>真實生活圈</em>」與「<em>行政邊界</em>」之間的落差,是大台北治理長期的結構性課題。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 城市的真實邊界,由人的雙腳決定</span>
+      <p>雙城的故事點出一個關於現代都市的深刻真理:<strong>一座城市的真實邊界,從來不是地圖上那條行政界線,而是由人們每天的移動、通勤、生活軌跡所畫出來的。</strong>當數百萬人每天在兩個行政區之間流動、把它們當成一個整體來使用時,「大台北」這個生活圈,就比「台北市」這個行政區,更接近真實。</p>
+      <p>這也再次呼應了台北「盆地之城」的本質:<em>當核心的盆地(台北市)被人口與房價撐到極限時,城市的能量必然向外溢出,流向周邊的腹地(新北市)。</em>是整個台北盆地、乃至周邊的河谷與台地,共同承載了這個龐大都會的重量。台北從來不是一座孤立的城,而是一整片被山環抱的低地上,由核心與腹地、由市與縣、由無數每日跨界流動的人,共同構成的有機體。理解了這一點,我們終於可以走向這座城市的最後一個身分——它不只是經濟與生活的中心,更是整個國家權力與民主的劇場。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚑ ✦ ⚑</div>
+  <p>台北不只是經濟與生活的中心,<br>它還有一個超越日常的身分——<br><span class="hl">整個國家權力與民主記憶,被寫進地面的劇場。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Stage of Power</span>
+    <h2 class="act-title">權力的劇場:民主聖地與抗爭舞台</h2>
+    <p class="act-sub">Boulevards, Squares, and the Theatre of a Nation's Politics</p>
+    <div class="ornament">✦ ⚑ ✦</div>
+  </div>
+  <div class="prose">
+    <p>台北還有一個身分,超越了它作為經濟與生活中心的角色——它是整個國家的<strong>政治中心與權力劇場</strong>。中央政府坐落於此,於是台北的某些街道與廣場,不只是地理空間,更是承載著國家權力、歷史記憶與公民抗爭的<em>象徵性舞台</em>。台北的空間,本身就是一部台灣現代政治史的活地圖。</p>
+
+    <h3>被繼承又被改寫的權力中心</h3>
+    <p>第五章說過,日本人在台北舊城區打造了「官廳集中區」,並以總督府統御全城。戰後,新政權幾乎<strong>原封不動地繼承了這套權力空間</strong>:日治的台灣總督府,變成了中華民國的<em>總統府</em>;周邊的官署一帶,成了戒備森嚴的「博愛特區」。權力的地理中心被沿用,但它所代表的政權與意義,卻被徹底改寫。這是台北「層層覆寫」本質在政治空間上最直接的體現——同一棟建築、同一條軸線,在不同時代,訴說著完全不同的權力故事。</p>
+    <div class="pull"><p>台北的權力空間,是被一個政權交給下一個政權的——建築還是那棟建築,但旗幟換了,意義也被重新書寫了。</p></div>
+
+    <h3>凱達格蘭大道:從威權軸線到抗爭現場</h3>
+    <p>總統府前那條筆直的大道,最能說明台北空間的政治變遷。它在威權時代曾是展示國家力量、舉行閱兵的<em>威權軸線</em>;而在 1996 年,它被更名為「<strong>凱達格蘭大道</strong>」——以這片土地最古老主人的名字命名(呼應第一章),象徵著一種對歷史的重新詮釋與謙卑。更重要的是,在民主化之後,這條大道與周邊的廣場,從「<em>展示權力</em>」的舞台,轉變為「<strong>挑戰權力</strong>」的舞台——它成了台灣最重要的<em>集會遊行現場</em>,無數的訴求、抗議與公民運動在此登場。權力的軸線,變成了人民的廣場。</p>
+
+    <h3>立法院、廣場與符號的攻防</h3>
+    <p>台北的政治劇場不只一處。<strong>立法院</strong>是國會殿堂,也是台灣民主史上最具戲劇性的抗爭現場之一(如 2014 年牽動全台的太陽花運動,佔領的正是這裡)。而<strong>中正紀念堂</strong>及其廣場,則是台北最具爭議的政治符號——它從威權時代的崇拜空間,在民主化後成為轉型正義辯論的核心場域,其廣場(自由廣場)更見證了野百合學運等關鍵的民主運動。圍繞著這些空間的「<em>符號攻防</em>」——該如何命名、該保留還是改變、該紀念什麼又該反省什麼——本身,就是台灣社會在民主化後持續進行的、關於「我們是誰、我們記得什麼」的公共對話。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 一座城,記錄著一個國家如何學會自由</span>
+      <p>台北作為權力劇場的故事,揭示了城市空間最深刻的一個功能:<strong>它不只是人們生活的容器,更是一個社會的政治記憶與價值衝突,被「寫進地面」的地方。</strong>哪條路叫什麼名字、哪座建築被保留或改建、哪個廣場上演了什麼集會——這些空間的故事,共同記錄著一個國家如何從威權,一步步學會自由。</p>
+      <p>而這一切,又完美收束了台北「層層覆寫卻不抹除」的終極主題:<em>同一個權力中心,被殖民政權建立、被威權政權繼承、再被民主社會重新詮釋與挑戰——每一層都疊在前一層之上,卻沒有一層被真正抹去。</em>總統府還是那棟紅磚建築,但它前方的大道已改用原住民的名字、已成為人民集會的廣場。台北的空間,因此成了台灣民主化最忠實的見證者:它把一個社會「奪回自己定義自己之權利」的漫長過程,一條街、一座廣場地,刻在了這座盆地的地面上。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⌂ ☩</div>
+  <p>一座盆地,三條河,多個政權,百萬移民,一層又一層被覆寫卻擦不掉的痕跡。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的台北,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的台北</h2>
+      <p class="act-sub" style="color:rgba(243,238,226,.6)">Why Taipei Became What It Is</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⌂ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整座城收攏成一條線。今天的台北之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:盆地與河,給了它一具身體</h3>
+      <p>一切的源頭是<strong>地形</strong>。一座被群山環抱的最大低地,註定成為北台灣的人口中心;三條交會的河,讓最早的財富沿著水岸生長;而鬆軟低窪、被湖與河反覆塑造的地質,則埋下了水患、地基與「向上擠壓」的宿命。台北今天所有的特徵——悶熱的氣候、沿河興衰的老城、被山困住的擁擠、買不起的房——根源都可以追回到「它是一座盆地」這個最原始的事實。</p>
+
+      <h3>第二層:河港的興衰,讓重心開始移動</h3>
+      <p>接著是<strong>水的邏輯</strong>。在沒有公路鐵路的年代,「哪一段河還能行船」決定了繁華的所在。於是台北的重心,從河港時代的<em>艋舺</em>(因淤積而沒落)、到接棒的<em>大稻埕</em>(因茶葉而輝煌),一路追著「還能行船的河岸」與「還有機會的空白」奔跑。台北從一開始就學會了一件事:<em>它的中心,從來不是固定的。</em></p>
+
+      <h3>第三層:一個個政權,層層覆寫了它</h3>
+      <p>然後是<strong>政權的覆寫</strong>。清廷倉促築起又被迅速拆除的城牆、日本人拆牆鋪設的現代骨架與權力中心、戰後新政權對這套空間的繼承與改寫——每一個政權都急著用自己的方式重畫這座城。但台北最獨特之處在於:<em>它從不徹底保存,也從不徹底抹除。</em>原住民的地名、清代的城門、日治的街道與水道、戰後的眷村——每一層都還在,只是被翻譯進了新的形式裡。台北因此成了一座<strong>處處露出舊底稿的拼貼之城</strong>。</p>
+
+      <h3>第四層:百萬人的湧入,把骨架塞滿了</h3>
+      <p>最劇烈的一次轉變,是<strong>戰後的大湧入</strong>。1949 的政治撤退與其後數十年的島內北漂,讓這座盆地承載了遠超設計的人口。眷村、違建、見縫插針的擴張,把日治那副優雅的骨架塞到極限;而盆地四面環山的封閉,使這份擁擠無處宣洩,只能向內擠壓、向上加蓋、向東漂移、向新北市溢出。台北從「被規劃的城」,變成了「被塞滿的城」。</p>
+
+      <h3>第五層:資本與民主,寫下了當代的台北</h3>
+      <p>最後是<strong>當代的兩股力量</strong>。一股是資本與規劃,把市中心一路東移、用捷運重畫了價值地圖、在信義區立起摩天天際線,卻也把房價推到了「天龍國」的高度,留下都更的困局與買不起家的焦慮。另一股是民主,讓總統府前的威權軸線,變成了以原住民命名的人民廣場——把這座城市「奪回自己定義自己」的過程,一條街、一座廣場地,刻進了地面。<em>繁華與焦慮、規劃與失序、權力與抗爭,都疊在了同一座盆地裡。</em></p>
+
+      <div class="investor">
+        <span class="tag">城市的回聲 · 一座永遠在被重寫的城</span>
+        <p>所以,今天的台北是什麼?它是一座<strong>被盆地與河選中、被一個個政權反覆移植與改寫、又被百萬移民自下而上填滿的拼貼之城</strong>。它的骨架是由上而下規劃的(總督府、三線路、信義區、捷運),它的血肉卻是由下而上長出來的(艋舺的廟、大稻埕的茶行、夜市的攤燈、巷口的超商)。它的繁華與它的擁擠、它的便利與它的買不起、它的權力中心與它的抗爭廣場——全都是同一段身世的一體兩面。</p>
+        <p>台北最深刻的真相是:<em>它從來沒有一個「最終完成」的樣子,因為它一直在被重寫——但每一次重寫,都沒有真正抹去前一層。</em>所以你能在同一座城裡,從西到東,走過河港、舊城、東區與摩天大樓;能在同一條街上,看見清代的城門、日治的街屋、戰後的公寓與當代的玻璃帷幕。這座盆地之城,就是一本被反覆覆寫、卻又處處透出舊字跡的羊皮紙——而生活在其中的每一個台北人,都正在它最新的一頁上,寫下屬於這個時代的句子。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">盆地給了台北一具身體,河港讓它的心臟開始移動,政權層層覆寫它的面容,百萬人填滿它的血肉——而它永遠不會完成,因為它一直在被重寫。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座城的終極啟示</span>
+      <p>一座城市的樣貌,往往由它腳下的地形開局,由最早的財富沿著水岸定位,由一個個更迭的政權層層覆寫面容,由湧入的人口填滿它的骨架——而它真正的靈魂,藏在那些「被覆寫卻不曾被抹去」的舊底稿裡,以及生活其中的人們自下而上長出來的、規劃之外的生命力。這,就是台北至今仍在書寫的故事。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,238,226,.78);margin-top:2.5rem">
+        從一座沉在湖底的盆地、三條交會的河,<br>
+        到艋舺渡口的獨木舟、大稻埕飄香的茶箱,<br>
+        從清廷倉促築起又被拆除的城牆,<br>
+        到總督府的高塔、眷村的炊煙、違建的鐵皮,<br>
+        從東移的市中心、信義區的天際線、捷運不滅的燈,<br>
+        到夜市的油煙、巷口的攤燈,與凱道上人民的聲音,<br>
+        這座被盆地選中、被河流寫就、被政權反覆重寫的城,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的台北。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+
+<footer>
+  <div class="orn">⌂ ✦ ⚓</div>
+  <p>盆地之城 · 台北的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE LAKEBED TO THE SKYLINE · KETAGALAN – PRESENT</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{const h=document.documentElement;pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';});
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

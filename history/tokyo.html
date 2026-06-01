@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火與灰燼之城：東京四百年，一座不斷重生的巨城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ===== 目錄 TOC ===== */
+.toc{max-width:760px;margin:3rem auto 1rem;padding:2.6rem 2.4rem;background:var(--parchment-deep);border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:4px}
+.toc .toc-head{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.32em;color:var(--rust);text-transform:uppercase;text-align:center;margin-bottom:.4rem}
+.toc .toc-sub{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin-bottom:1.8rem}
+.toc ol{list-style:none;counter-reset:toc;margin:0;padding:0}
+.toc li{counter-increment:toc;border-bottom:1px dashed var(--line)}
+.toc li:last-child{border-bottom:none}
+.toc li.toc-extra{}
+.toc a{display:flex;align-items:baseline;gap:.9rem;padding:.7rem .4rem;text-decoration:none;color:var(--sea-deep);transition:background .2s,color .2s,padding-left .2s}
+.toc a:hover{background:rgba(176,141,52,.1);color:var(--rust);padding-left:1rem}
+.toc .toc-n{font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;color:var(--gold);min-width:2.4rem;flex-shrink:0;letter-spacing:.03em}
+.toc a:hover .toc-n{color:var(--rust)}
+.toc .toc-t{font-family:'Noto Serif TC',serif;font-size:1.02rem;line-height:1.4;font-weight:500}
+.toc .toc-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:var(--faint);margin-left:auto;text-align:right;flex-shrink:0;padding-left:1rem}
+.toc .badge{display:inline-block;font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.1em;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:.05rem .45rem;margin-left:.5rem;vertical-align:middle;opacity:.85}
+@media(max-width:640px){
+  .toc{padding:2rem 1.4rem;margin:2rem 1rem 1rem}
+  .toc .toc-en{display:none}
+  .toc a{gap:.7rem}
+}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ---- 修正:深色章節內,擁有淺色背景的卡片組件須維持深色文字,避免淺底淺字 ---- */
+/* ---- 修正:深色章節內的對比度 ----
+   實心淺底組件(method-card / twocol)→ 深色文字;
+   shift-body 無背景貼深底 → 淺色文字。 ---- */
+.dark .method-card p,
+.dark .twocol p{color:var(--ink)}
+.dark .method-card p strong,
+.dark .twocol p strong{color:var(--crimson)}
+.dark .method-card p em,
+.dark .twocol p em{color:var(--sea-deep)}
+.dark .method-card h5{color:var(--sea-deep)}
+.dark .method-card .tool{color:var(--rust)}
+.dark .method-card .eg{color:#6b5d48}
+.dark .minihead{color:var(--rust)}
+.dark .shift-body{color:#cdb494}
+.dark .shift-body strong{color:#c87a5a}
+.dark .shift-body em{color:#d8a878}
+.dark .stat{background:rgba(212,175,90,.07)}
+.dark .stat .num{color:var(--gold-bright)}
+.dark .stat .lbl{color:#b9a784}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+.twocol>div{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left;color:var(--ink)}
+.method-card p strong{color:var(--crimson)}
+.method-card p em{color:var(--sea-deep)}
+.method-card .eg{font-size:.86rem;color:#6b5d48;font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<div id="progress" style="position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));width:0;z-index:99"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="kicker">Tokyo · 1590–2024</div>
+    <h1>火與灰燼<br><span class="em">之城</span></h1>
+    <div class="sub">東京四百年——一座把「重建」本身,煉成護城河的巨城</div>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">江</span>戶人有句老話:「<em>火事と喧嘩は江戸の華</em>」——火災與打架,是江戶之華。一座城,竟把吞噬自己的烈火,說成是城市的「花」。這句近乎黑色幽默的話,藏著理解東京的全部鑰匙。在它四百年的歷史裡,它被燒毀過、被震碎過、被炸成白地過、被金融泡沫掏空過——明曆大火、關東大地震、東京大空襲、泡沫崩壞,任何一次,都足以讓一座尋常的城從此一蹶不振。但東京每一次都站了起來,而且每一次,都站得比之前更高、更大、更現代。前面我們看過的城,無論吉隆坡的錫、怡保的礦、還是澳門的賭,都把命運押在「擁有某樣東西」上;而東京的故事恰恰相反——它幾乎一無所恃,它真正的、也是唯一的<span style="color:var(--rust);font-weight:600">護城河</span>,是它一次次從灰燼裡重新長回來的能力本身。這是一座不靠「擁有」、而靠「重生」活下來的城。</p>
+</section>
+
+<!-- ===== 目錄 TOC ===== -->
+<nav class="toc">
+  <div class="toc-head">Table of Contents</div>
+  <div class="toc-sub">東京四百年,一座不斷重生的巨城 · 全十二章</div>
+  <ol>
+    <li><a href="#ch0"><span class="toc-n">序章</span><span class="toc-t">在將軍之前,這裡只是一片蘆葦濕地</span><span class="toc-en">Before the Shogun</span></a></li>
+    <li><a href="#ch1"><span class="toc-n">第一章</span><span class="toc-t">家康的賭注:從濕地造一座百萬之城</span><span class="toc-en">The Shogun's Capital</span></a></li>
+    <li><a href="#ch2"><span class="toc-n">第二章</span><span class="toc-t">火事之華:一座在烈火中定型的城</span><span class="toc-en">The City of Fire</span></a></li>
+    <li><a href="#ch3"><span class="toc-n">第三章</span><span class="toc-t">江戶變東京:一次平靜的權力大遷移</span><span class="toc-en">Edo Becomes Tokyo</span></a></li>
+    <li><a href="#ch4"><span class="toc-n">第四章</span><span class="toc-t">大地震:後藤新平與帝都的重生</span><span class="toc-en">The Great Quake</span></a></li>
+    <li><a href="#ch5"><span class="toc-n">第五章</span><span class="toc-t">白地:一夜燒成焦土的東京</span><span class="toc-en">The Night It Burned</span></a></li>
+    <li><a href="#ch6"><span class="toc-n">第六章</span><span class="toc-t">已不再是戰後:1964 與奇蹟的年代</span><span class="toc-en">The Miracle</span></a></li>
+    <li><a href="#ch7"><span class="toc-n">第七章</span><span class="toc-t">無形的毀滅:泡沫崩壞與失落的三十年</span><span class="toc-en">The Bubble</span></a></li>
+    <li><a href="#ch8"><span class="toc-n">第八章</span><span class="toc-t">韌性的解剖:為什麼東京總能重生?</span><span class="toc-en">The Anatomy of Resilience</span></a></li>
+    <li><a href="#ch9"><span class="toc-n">第九章</span><span class="toc-t">巨城的版圖:從江戶到三千七百萬人</span><span class="toc-en">The Expanding Map</span></a></li>
+    <li><a href="#ch10"><span class="toc-n">第十章</span><span class="toc-t">四座城的對照:重生力,才是真正的資源</span><span class="toc-en">Four Cities</span></a></li>
+    <li><a href="#ch11"><span class="toc-n">第十一章</span><span class="toc-t">下一場毀滅:東京未來的考題</span><span class="toc-en">What Comes Next</span></a></li>
+    <li><a href="#chF"><span class="toc-n">終章</span><span class="toc-t">於是,今天的東京</span><span class="toc-en">Finale</span></a></li>
+  </ol>
+</nav>
+
+<div class="div-orn">🔥 ✦ 🔥</div>
+
+<!-- ===== 序章 ===== -->
+<section id="ch0" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the Shogun</span>
+    <h2 class="act-title">在將軍之前,這裡只是一片蘆葦濕地</h2>
+    <p class="act-sub">A Marsh at the Edge of the Bay</p>
+    <div class="ornament">🌾 ✦ 🌾</div>
+  </div>
+  <div class="prose">
+    <p>今天的東京,是世界上最龐大、最精密的都會機器之一——三千七百萬人的呼吸、全球最繁忙的鐵路網、徹夜不眠的霓虹。但把時間倒回四百多年,這片土地的模樣會讓你難以置信:它只是江戶灣畔一片<strong>低窪、潮濕、長滿蘆葦的濕地</strong>,幾條河川在此漫流入海,漲潮時泥濘不堪。它甚至比不上當時的京都(千年帝都)、大阪(商業重鎮)——那兩座城各有千年積累,而這裡,什麼都沒有。</p>
+    <p>1457 年,武將太田道灌曾在此築過一座小小的「江戶城」,但在隨後的戰國亂世裡,它始終只是關東平原邊緣一個不起眼的據點。「江戶」這個名字本身就很樸素:「江」指河川或入海口,「戶」指門戶、入口——合起來,大致是「河川入海的門戶」之意。一個地理性的、毫無野心的名字。</p>
+    <div class="pull"><p>京都有天皇,大阪有商賈,而江戶,只有蘆葦與泥濘。它是這場城市競賽裡,起跑線最靠後的那一個。</p></div>
+    <p>這正是東京故事最動人的起點:它不是含著金湯匙出生的城。它沒有古都的血統,沒有天然的良港,沒有富庶的腹地。它後來的一切——權力、財富、規模——沒有一樣是「天生」的,全都是被人為地、一次又一次地「建造」出來的。一座從蘆葦濕地上憑空長出的巨城,它最擅長、也最不得不擅長的,從一開始就是同一件事:<em>無中生有地,把一片廢墟般的土地,變成一座城。</em></p>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚔ ✦</div>
+  <p>1590 年,一位剛打贏天下的武將被「發配」到這片濕地。<br>所有人都以為這是貶謫,他卻在這裡,<br><span class="hl">下了一場將改寫日本歷史的豪賭。</span></p>
+</div>
+
+<!-- ===== 第一章 ===== -->
+<section id="ch1" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Shogun's Capital</span>
+    <h2 class="act-title">家康的賭注:從濕地造一座百萬之城</h2>
+    <p class="act-sub">How Tokugawa Ieyasu Built a Capital from a Swamp</p>
+    <div class="ornament">⚔ ✦ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>1590 年,豐臣秀吉攻滅關東的後北條氏後,把他最強大、也最具威脅的盟友——<strong>德川家康</strong>——調離了富庶的東海道根據地,「改封」到剛打下來的關東。表面上這是擴大封地的恩賞,實則是把這頭猛虎遷到遠離權力中心的荒僻之地,是一種精明的流放。而家康選擇的居城,正是那片蘆葦濕地上的小城:江戶。</p>
+
+    <h3>把流放,變成霸業的起點</h3>
+    <p>換作旁人,這也許是失意的開始;但家康看見的是另一回事。遠離京都的政治漩渦,反而給了他一塊可以從零開始、按自己意志打造的根據地。他大興土木:開挖運河、填平濕地、引水道、整地築城。1603 年,家康在關原之戰勝出、受封征夷大將軍,在江戶開設幕府——<strong>江戶幕府(德川幕府)</strong>。從此,這片濕地不再是邊陲,而是統治整個日本兩百六十餘年的權力中樞。</p>
+
+    <h3>參勤交代:一條讓江戶爆炸性膨脹的制度</h3>
+    <p>真正讓江戶從政治中心暴漲為「世界級巨城」的,是一項精巧到近乎天才的制度——<strong>參勤交代</strong>。幕府規定,各地大名(藩主)必須隔年輪流前往江戶駐留,而他們的正室與繼承人,則必須<em>常住江戶</em>,形同人質。這一招同時達成了三個目的:</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">政治上</div><div class="shift-body"><strong>控制</strong>:大名的妻兒常駐江戶為質,大名本人往返奔波,既無力、也不敢造反。幕府用一條制度,鎖住了全國諸侯。</div></div>
+      <div class="shift-row"><div class="shift-era">經濟上</div><div class="shift-body"><strong>抽血</strong>:浩大的往返隊伍、兩地的宅邸開銷,持續耗損各藩財力,讓他們無力擴軍。財富則源源不絕地流入江戶。</div></div>
+      <div class="shift-row"><div class="shift-era">城市上</div><div class="shift-body"><strong>催城</strong>:大名與龐大家臣團定居江戶,武士人口暴增;為服務他們的消費,商人、工匠、僕役大量湧入。一座消費型巨城,就此被「制度」餵養成形。</div></div>
+    </div>
+    <p>效果是驚人的。到了十八世紀,江戶的人口一般認為已<strong>突破百萬大關</strong>,成為當時<em>全世界首屈一指的大都市</em>——彼時的倫敦、巴黎,人口都還遠不及它。一座四百年前的蘆葦濕地,靠著一位武將的賭注與一套精巧的制度,長成了地表最大的城。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 巨大的成果,常來自巧妙的「制度設計」</span>
+      <p>家康造江戶的故事,藏著一個關於「如何放大力量」的深刻洞見:<strong>真正撐起江戶百萬人口的,不是某項天然資源,而是「參勤交代」這套人為設計的制度。</strong>它不靠掠奪、不靠運氣,而是靠一個精巧的規則,讓全國的人流、金流、物流,源源不絕地自動匯向同一個點。制度,是一種可以憑空創造、又能持續運轉的「無形資源」。</p>
+      <p>這對任何想「放大產出」的人事物都極具啟發:<em>與其埋頭去「擁有更多資源」,不如去設計一套「能讓資源自動向你聚集」的機制。</em>一個好的制度、一套好的系統、一條好的規則,它的威力遠勝於任何單一的天賦或資產——因為它不會枯竭,只要規則還在運轉,它就持續為你工作。這也正是東京與前幾座城最根本的分野:吉隆坡靠的是地底的錫(會挖完),澳門靠的是合法性的縫隙(可能被填平),而東京從一開始靠的,就是「制度與系統」這種<strong>可以被反覆重建、永不枯竭</strong>的東西。這個基因,將決定它面對此後一次次毀滅時的命運。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🔥 ✦</div>
+  <p>但這座木造的百萬之城,有一個致命的弱點。<br>它密集、它易燃,而它所在的關東,冬季乾燥、季風強勁——<br><span class="hl">於是,火,成了它一生的宿敵,也成了它的老師。</span></p>
+</div>
+
+<!-- ===== 第二章 ===== -->
+<section id="ch2" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The City of Fire</span>
+    <h2 class="act-title">火事之華:一座在烈火中定型的城</h2>
+    <p class="act-sub">"Fires and Brawls Are the Flowers of Edo"</p>
+    <div class="ornament">🔥 ✦ 🔥</div>
+  </div>
+  <div class="prose">
+    <p>百萬人口擠在低矮密集的木造房屋裡,街道狹窄,防火落後,加上關東冬季乾燥、季風強勁——江戶,幾乎是為火災量身打造的。事實也是如此:在江戶幕府二百六十餘年間,大小火災多達 <strong>1798 次</strong>,其中足以焚毀大片city區的大火就有 <strong>49 次</strong>。火,不是江戶的偶發災難,而是它的日常背景。江戶人甚至帶著一種近乎悲壯的幽默,把它說成:「<em>火事と喧嘩は江戸の華</em>」——火災與打架,是江戶之華。</p>
+
+    <h3>明曆大火:燒掉三分之二的城</h3>
+    <p>所有大火中,最慘烈的是 <strong>1657 年的明曆大火</strong>。在寒冬的強風中,三場大火兩天內接連爆發,將江戶的<strong>三分之二</strong>化為灰燼:燒毀 500 多家大名宅邸、700 多家旗本宅邸、300 多座寺廟、400 多個町;連江戶城的天守閣、本丸御殿都付之一炬。死亡人數據估計高達十萬人。被害面積約 26.8 平方公里——相當於把一整座中型城市,一夜之間從地圖上抹去。它的慘烈,讓後世有人將它與羅馬大火、倫敦大火並稱「世界三大火災」。</p>
+
+    <h3>但江戶沒有哀悼,它開始「升級」</h3>
+    <p>真正定義東京性格的,不是這場大火本身,而是它之後發生的事。明曆大火後,幕府沒有原樣重建,而是把災難當成了一次<strong>都市升級的契機</strong>:</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">防災</span>
+        <h5>開闢防火空間</h5>
+        <p>首次系統性地開闢「廣小路」(防火寬街)與防火巷,在密集的木造城市裡,硬切出能阻斷火勢的空白地帶。災難,逼出了現代都市計畫的雛形。</p>
+        <span class="model">Firebreaks</span>
+      </div>
+      <div class="card">
+        <span class="flag">疏散</span>
+        <h5>大名宅邸外遷</h5>
+        <p>把御三家等大名宅邸遷出江戶城周邊,騰出防火空地。這些外遷騰出的大片土地,日後成了東京大學、新宿御苑等公共設施與綠地的來源。</p>
+        <span class="model">Decentralize</span>
+      </div>
+      <div class="card">
+        <span class="flag">民生</span>
+        <h5>重建催生新生活</h5>
+        <p>浩大的重建工程匯集大量勞力,催生了江戶街頭的食堂文化——日本第一家平民餐廳「奈良茶飯屋」由此誕生。連飲食習慣,都從廢墟裡長了出來。</p>
+        <span class="model">Rebirth</span>
+      </div>
+    </div>
+    <div class="pull"><p>江戶人不是不怕火,而是與火共處了太久,久到他們學會了一件事:重建時,不要只是「復原」,而要趁機「變得更好」。</p></div>
+    <p>這就是東京最早、也最核心的性格定型:<strong>它把「毀滅」內化成了一種週期性的「更新機制」。</strong>火災一次次燒掉舊的、過密的、危險的部分,而每一次重建,都是一次防災升級、一次空間優化。對一座尋常的城,火是純粹的災難;但對江戶,火逐漸變成了一種殘酷卻有效的「新陳代謝」——燒掉老舊,逼出新生。這個在江戶兩百年間反覆操練、刻進骨子裡的本能,將在它面對二十世紀那兩場遠超火災的浩劫時,成為它最關鍵的求生能力。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把反覆的衝擊,內化成升級的節奏</span>
+      <p>江戶的火,給出一個關於「面對衝擊」的深刻洞見:<strong>當一種衝擊變得無法避免、且會反覆發生時,真正高明的應對不是徒勞地「祈求它別再來」,而是建立一套機制,讓每一次衝擊到來時,都能順勢完成一次「升級」。</strong>江戶無法阻止火災,於是它把火災變成了都市更新的觸發器——每燒一次,就拓一次防火巷、疏散一次過密區。衝擊本身沒變,但江戶把它的「意義」改寫了。</p>
+      <p>這套思維可以遷移到任何反覆面對波動的領域:<em>對一個投資系統而言,市場的回檔與崩跌是無法避免的「火災」——與其恐懼它,不如把它設計成「重新配置、汰弱留強、優化部位」的觸發點;對一個人而言,挫敗與失去也是人生反覆的火災——真正的韌性,不是不被燒到,而是讓每一次被燒,都成為一次清理冗餘、重建得更好的機會。</em>東京用四百年示範了一件事:決定一個系統長期命運的,不是它「會不會遭遇衝擊」(一定會),而是它「能否把衝擊內化成升級的節奏」。能,則愈挫愈強;不能,則一蹶不振。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🎌 ✦</div>
+  <p>1868 年,持續兩百六十餘年的幕府時代走到了終點。<br>一個古老的名字將被抹去,一個新的名字將被寫上——<br><span class="hl">而這一次的「重建」,重建的是整個國家的方向。</span></p>
+</div>
+
+<!-- ===== 第三章 ===== -->
+<section id="ch3" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · Edo Becomes Tokyo</span>
+    <h2 class="act-title">江戶變東京:一次平靜的權力大遷移</h2>
+    <p class="act-sub">1868 — The Capital Moves East</p>
+    <div class="ornament">🎌 ✦ 🎌</div>
+  </div>
+  <div class="prose">
+    <p>1868 年,明治維新。第十五代將軍德川慶喜大政奉還,延續二百六十五年的江戶幕府落幕,江戶開城。新生的維新政府面臨一個根本問題:這個要「脫胎換骨」的新日本,首都該設在哪裡?</p>
+
+    <h3>一場關於「都城」的角力</h3>
+    <p>維新派深知,要真正擺脫舊勢力,年輕的天皇必須離開京都那個被千年公卿傳統層層包裹的環境。起初,大久保利通提議遷都大阪,卻遭保守派與京都民眾強烈反對而作罷。最終,大木喬任、江藤新平等人提出「東西兩都」的構想,主張善用原幕府所在地——江戶。1868 年 7 月,朝廷下詔,將江戶改名為「<strong>東京</strong>」(東部的京城)。1869 年,明治天皇東幸;次年正式遷都。一座武家將軍的城,就此變成天皇的帝都。</p>
+
+    <h3>不流血的「接收」:東京最聰明的一次重生</h3>
+    <p>耐人尋味的是,這場巨大的權力轉移,出奇地平順。江戶幾乎是<strong>完整地</strong>被新政權「接收」並改造,而非被摧毀後重建。明治政府沒有推倒這座百萬之城,而是巧妙地<em>沿用</em>了它的骨架,再注入全新的內容:</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">空間</div><div class="shift-body"><strong>舊瓶裝新酒</strong>:將軍的江戶城成了天皇的皇居;大名外遷後騰出的大片宅邸用地,變成了大學、官廳、公園、軍政機構——明曆大火後埋下的伏筆,在此刻結成果實。</div></div>
+      <div class="shift-row"><div class="shift-era">身分</div><div class="shift-body"><strong>階級重組</strong>:廢除四民制度,大名公卿改稱「華族」,武士改為「士族」,頒布廢刀令。支撐江戶的舊武士社會被和平地拆解、轉化。</div></div>
+      <div class="shift-row"><div class="shift-era">方向</div><div class="shift-body"><strong>面向世界</strong>:東京從一座內向的、封閉的幕府之城,轉身成為一個立志「脫亞入歐」、追趕西方的現代國家的門面與引擎。</div></div>
+    </div>
+    <p>這是東京「重生」的另一種形態——不是物理的焚毀與重建,而是<strong>制度與意義的徹底更換</strong>。同樣的土地、同樣的城,卻換了一套完全不同的「作業系統」:從幕藩體制,升級到現代民族國家。它再一次證明,東京真正延續的從來不是某種具體的形態,而是它「在舊基礎上不斷重寫自己」的能力。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最高明的轉型,是「保留骨架、更換系統」</span>
+      <p>江戶變東京,示範了一種極高明的轉型智慧:<strong>真正成本最低、也最穩健的重生,往往不是把一切推倒重來,而是「保留已被驗證有效的骨架,只更換其上的運作系統」。</strong>明治政府沒有浪費江戶兩百年累積的城市基礎(它的人口、街區、運河、宅邸),而是把這套現成的硬體,接上了一套全新的軟體(現代國家)。舊的不必全毀,新的也不必從零造。</p>
+      <p>這對任何面臨「轉型」的人事物都是寶貴的提醒:<em>升級不等於砍掉重練。一個成熟的系統(一家公司、一套方法、一個人的生涯),在轉向時最該做的,常常是辨認出哪些是「值得保留的骨架」(已驗證的核心能力、既有的資源網絡),哪些是「該更換的系統」(過時的觀念、不再適用的策略),然後只動後者、保住前者。</em>全盤推倒,往往是因為看不清自己手裡真正值錢的是什麼。東京之所以能一次次低成本地重生,正因為它每次都精準地保住了骨架——而這,恰恰是它即將面對的兩場二十世紀浩劫中,最關鍵的本錢。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 〰 ✦</div>
+  <p>就在東京以帝都之姿,昂首追趕世界之際,<br>1923 年 9 月 1 日上午,大地毫無預兆地劇烈搖晃起來——<br><span class="hl">這一次的毀滅,不再來自火,而是來自腳下的大地本身。</span></p>
+</div>
+
+<!-- ===== 第四章 ===== -->
+<section id="ch4" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Great Quake</span>
+    <h2 class="act-title">大地震:後藤新平與帝都的重生</h2>
+    <p class="act-sub">1923 — The Great Kantō Earthquake and the Rebuilding of a Capital</p>
+    <div class="ornament">〰 ✦ 〰</div>
+  </div>
+  <div class="prose">
+    <p>1923 年 9 月 1 日上午,規模 7.9 的<strong>關東大地震</strong>襲擊了東京與橫濱。地震發生在午餐時刻,無數家庭正在生火煮飯,於是地震引發的大火四處蔓延,與倒塌的房屋一起,把帝都化為一片焦土。東京約 530 萬坪的市區被燒毀,死亡與失蹤者高達十餘萬人。這座剛剛在現代化道路上加速狂奔的城,被一場天災打回了原點。</p>
+
+    <h3>地震次日,他已備好了重建藍圖</h3>
+    <p>但東京「災難即更新」的基因,再次發作。地震發生的隔天(9 月 2 日),剛就任內務大臣的 <strong>後藤新平</strong>,就提出了東京復興的方針——他不要簡單復原一個老舊的東京,而要藉這次浩劫,把它重建成一座真正現代化的「帝都」。(順帶一提,後藤新平正是日本治台時期那位推動全台現代化建設、首次把公共衛生觀念導入都市系統的台灣總督府民政長官——他在台灣的建設手筆,與他對東京的構想,一脈相承。)</p>
+    <p>他成立「帝都復興院」,推動大規模的<strong>土地區劃整理</strong>:由國家負責整理燒毀區域的土地,把約 30% 的燒毀區改為防火地區,大規模興建耐火建築。這項工程的難度驚人——要處理約 4.6 萬筆土地所有權、上萬筆借地權,遷移二十萬棟建物。同時,他著手規劃現代化的道路系統、上下水道、衛生設施,拓寬橋梁並改為耐震耐火構造。</p>
+
+    <div class="timeline" style="border-left-color:rgba(212,175,90,.4)">
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1923.9.1</div><div class="tl-text" style="color:#cdb494">關東大地震,規模 7.9,午餐時刻引發大火,帝都成焦土。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1923.9.2</div><div class="tl-text" style="color:#cdb494">後藤新平就任翌日即提出帝都復興方針,拒絕「原樣復原」。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1923–30</div><div class="tl-text" style="color:#cdb494">帝都復興院推動土地區劃整理:防火區、耐火建築、現代道路與上下水道。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">遺產</div><div class="tl-text" style="color:#cdb494">今日東京許多幹道、橋梁、公園的骨架,皆奠基於這場震後復興。</div></div>
+    </div>
+
+    <p>後藤新平的計畫雖因財政與既得利益的阻力而未能完全實現,但它依然徹底改造了東京的骨架。今天東京許多主要幹道、橋梁與公園的格局,都源自這場震後復興。一場毀滅十餘萬人的大地震,被東京轉化成了一次城市基礎建設的世代躍進。</p>
+    <div class="pull"><p>對尋常的城,大地震是終點;對東京,它只是又一次「該升級了」的訊號。災難的規模換了,但這座城回應災難的方式,兩百年來從未改變。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 危機,是推動「平時做不到的改革」的唯一窗口</span>
+      <p>後藤新平的帝都復興,揭示一個關於「改革時機」的洞見:<strong>許多平時因為阻力太大、利益糾葛太深而永遠做不成的根本性改革,往往只有在一場巨大的危機之後,才獲得被推動的窗口。</strong>在和平時期,要拓寬道路、重劃土地、處理數萬筆產權,幾乎不可能;但當一切已被夷平,重建本身就提供了一張難得的「白紙」,讓那些早該做、卻一直做不了的改革得以實現。</p>
+      <p>這帶來一個略顯殘酷、卻極其務實的啟示:<em>危機固然是破壞,但它同時也是一扇短暫敞開的「改革之窗」——舊的結構被打破時,正是重建出更好結構的黃金時刻。</em>真正有遠見的主體,會在危機尚未發生時就「想清楚:如果有一天一切歸零,我會怎麼重建得更好?」——這樣當危機真的來臨,它就能像後藤新平那樣,在災難次日就拿出藍圖,把破壞的窗口期,變成躍進的起跑線。最怕的是危機過去了,卻只忙著「復原成原來的樣子」,白白浪費了那扇用慘痛代價換來的窗。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ✈ ✦</div>
+  <p>震後重建的東京還沒站穩多久,更大的毀滅就降臨了。<br>這一次,火從天上來——<br><span class="hl">1945 年 3 月 10 日的一夜,十萬人葬身火海,東京成了白地。</span></p>
+</div>
+
+<!-- ===== 第五章 ===== -->
+<section id="ch5" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Night It Burned</span>
+    <h2 class="act-title">白地:一夜燒成焦土的東京</h2>
+    <p class="act-sub">March 10, 1945 — The Deadliest Air Raid in History</p>
+    <div class="ornament">✈ ✦ ✈</div>
+  </div>
+  <div class="prose">
+    <p>1945 年 3 月 10 日凌晨,超過 300 架 B-29 轟炸機飛臨東京上空,在這座以木造房屋為主的城市上空,投下約 1500 公噸的<strong>燒夷彈</strong>。這不是針對軍事設施的精準轟炸,而是蓄意製造大規模火災的「火攻」。在強風助長下,大火連成一片火海,吞噬了整個下町地區。</p>
+
+    <h3>人類史上最致命的一次空襲</h3>
+    <p>那一夜的數字至今讀來仍令人窒息:估計超過 <strong>10 萬人</strong>喪生,約 <strong>100 萬人</strong>流離失所,26 萬餘幢建築被毀(占當時東京建築總量的四分之一),全市約 <strong>41 平方公里</strong>燒成白地。其單次造成的死亡與破壞規模,甚至超過了後來廣島、長崎的原子彈爆炸,是第二次世界大戰中最血腥的單次空襲。曾在關東大地震後為避火而建的大型公園,這次再次擠滿避難者,卻仍有大批平民因火勢過猛而喪生。</p>
+    <p>到戰爭結束時,東京的大片市區已是斷壁殘垣。這座江戶以來的巨城,第三次(火、震、彈)被徹底打回了灰燼。日本戰敗,被美國託管。對任何一座城而言,這都是足以讓它從歷史舞台上消失的終局。</p>
+    <div class="pull"><p>明曆大火燒掉三分之二,關東大地震夷平市區,東京大空襲再化為白地——四百年裡,這座城被「歸零」了不只一次。而它每一次的回答,都是同一個字:重建。</p></div>
+
+    <h3>從白地上,長出戰後的東京</h3>
+    <p>戰後的東京,在物資極度匱乏中艱難重生。但那套刻進骨子裡的本能仍在運轉:廢墟被一寸寸清理,鐵路重新通車,黑市裡長出商業,人口從疏散地回流。借助朝鮮戰爭帶來的軍需訂單,以及美國的扶持,日本經濟開始觸底反彈。而那座剛剛被燒成白地的城,即將在不到二十年的時間裡,完成一場讓全世界瞠目結舌的逆襲——以一場奧運會,向世界宣告它的歸來。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 真正的底氣,是「歸零之後還能再來」</span>
+      <p>東京三度被歸零的歷史,給出一個關於「安全感」的終極洞見:<strong>一個主體真正的底氣,從來不是「我擁有的東西多到不可能失去」,而是「即使我失去了一切,我也有能力重新長回來」。</strong>東京從不曾擁有「不可能被毀滅」的東西——它的木城會燒、它的地會震、它的建築會被炸平。它擁有的,是一種比任何具體資產都更深的東西:把廢墟重新變成城市的能力。</p>
+      <p>這正是它與前幾座城最深刻的分野,也是給我們每個人最重要的一課。<em>把安全感建立在「擁有什麼」之上(一份工作、一筆資產、一個位置、一段關係),本質上是脆弱的——因為擁有的東西都可能在某一刻被奪走;而把安全感建立在「能重建什麼」之上(你的能力、你的學習力、你的韌性、你的人際信任),才是真正穩固的——因為那是任何災難都燒不掉、震不碎、炸不平的東西。</em>東京用三次歸零證明:能被毀滅的,終究會被毀滅;唯有「重建的能力」本身,才是亂世中真正的不動產。這個道理,對一座城如此,對一個在不確定世界裡配置自己人生與資產的人,更是如此。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🏅 ✦</div>
+  <p>燒成白地不到二十年,東京就向世界發出了一張請帖。<br>1964 年,五環旗在這座曾經的焦土上升起——<br><span class="hl">它要用一場奧運告訴全世界:我們,已不再是戰後了。</span></p>
+</div>
+
+<!-- ===== 第六章 ===== -->
+<section id="ch6" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Miracle</span>
+    <h2 class="act-title">已不再是戰後:1964 與奇蹟的年代</h2>
+    <p class="act-sub">The 1964 Olympics and Japan's Economic Miracle</p>
+    <div class="ornament">🏅 ✦ 🏅</div>
+  </div>
+  <div class="prose">
+    <p>1956 年,日本政府的經濟白皮書寫下一句後來廣為流傳的話:「<strong>已不再是戰後了</strong>」(もはや戦後ではない)。這句話既是事實的陳述,也是一種意志的宣告。1960 年,首相池田勇人提出「<strong>國民所得倍增計畫</strong>」,目標在十年內把 GDP 翻倍。結果,日本以更快的速度達成——一場舉世矚目的「<em>經濟奇蹟</em>」就此展開。</p>
+
+    <h3>1964:一座城向世界遞出的名片</h3>
+    <p>這場奇蹟最華麗的舞台,是 <strong>1964 年的東京奧運</strong>。對一座十九年前還是一片焦土的城來說,主辦奧運的象徵意義遠超體育本身——它是一個戰敗國向世界宣告「我回來了」的儀式。為了這場奧運,東京進行了又一次大規模的城市改造:</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1964</div><div class="lbl">東京奧運,戰敗國的華麗歸來</div></div>
+      <div class="stat"><div class="num">210</div><div class="lbl">東海道新幹線時速(km/h),世界首條高鐵</div></div>
+      <div class="stat"><div class="num">×2</div><div class="lbl">國民所得倍增計畫,十年 GDP 翻倍</div></div>
+      <div class="stat"><div class="num">No.2</div><div class="lbl">1968 年,日本成為世界第二大經濟體</div></div>
+    </div>
+    <p>就在奧運開幕前,連接東京與大阪的<strong>東海道新幹線</strong>通車——這是世界上第一條高速鐵路,以時速 210 公里風馳電掣,成為日本現代化最耀眼的圖騰。首都高速公路、地鐵網、現代化體育場館⋯⋯整座城為了這一刻而脫胎換骨。當聖火在國立競技場點燃時,那座白地上的城,已蛻變為一座光鮮的現代化大都會。</p>
+
+    <h3>從白地到世界第二</h3>
+    <p>奧運只是序章。此後日本經濟一路狂飆:在紡織、鋼鐵、汽車、半導體等領域接連登上世界龍頭,1968 年超越西德,成為僅次於美國的<strong>世界第二大經濟體</strong>。東京,作為這個經濟巨人的心臟,迎來了它有史以來最輝煌的繁榮。從蘆葦濕地到百萬之城,從三度歸零到世界第二——東京的「重生」這一次,不只重建了一座城,更托起了一個國家的崛起。</p>
+    <div class="pull"><p>它再一次證明:被燒成白地不是結局。問題從來不是「你被打倒了幾次」,而是「你每次站起來,能不能比上一次站得更高」。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最強的反彈,源自最徹底的歸零</span>
+      <p>1964 的奇蹟,藏著一個反直覺卻深刻的洞見:<strong>東京戰後之所以能反彈得如此猛烈,某種程度上,恰恰是因為它被毀滅得如此徹底。</strong>當舊的、過時的、低效的一切都被燒成白地,重建時就能直接採用當時最先進的技術與規劃,沒有歷史包袱的拖累。它跳過了「逐步改良舊系統」的漫長過程,直接在白紙上畫出了最新的藍圖——新幹線、高速公路、現代電網,一步到位。</p>
+      <p>這呼應了一個在許多領域都成立的現象:<em>有時候,一個被徹底打掉重練的後進者,反而能比那些「家大業大、包袱沉重」的領先者跑得更快——因為它沒有沉沒成本要保護,沒有舊系統要遷就,可以直接擁抱最優解。</em>這不是說毀滅是好事,而是提醒我們:當歸零已成事實,與其哀悼失去的,不如善用「沒有包袱」這個唯一的優勢,把重建變成一次跳級式的升級。東京戰後的騰飛,是它四百年「災難即升級」哲學的最高潮——也是它在迎來下一場、性質完全不同的毀滅之前,最後的、最燦爛的黃金時代。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 💴 ✦</div>
+  <p>但下一場毀滅,將不再有熊熊火光,也不會有大地的震動。<br>它無聲無形,藏在節節高升的股價與地價裡——<br><span class="hl">這一次,東京要花整整三十年,才能從廢墟裡爬出來。</span></p>
+</div>
+
+<!-- ===== 第七章 ===== -->
+<section id="ch7" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Bubble</span>
+    <h2 class="act-title">無形的毀滅:泡沫崩壞與失落的三十年</h2>
+    <p class="act-sub">1989 — When the Money Vanished into Thin Air</p>
+    <div class="ornament">💴 ✦ 💴</div>
+  </div>
+  <div class="prose">
+    <p>1980 年代的東京,繁榮到了近乎瘋狂的地步。股價與地價節節飆升,「東京都的地價,足以買下整個美國」的說法廣為流傳。全球市值最高的 20 家公司中,有 15 家是日本企業;全球富豪榜上,日本人比比皆是。整個國家沉浸在「日本第一」的自信裡。1989 年 12 月 29 日,日經平均指數攀上歷史最高點 <strong>38,957 點</strong>。所有人都相信,這場盛宴永遠不會散場。</p>
+
+    <h3>一場看不見火光的大火</h3>
+    <p>然而,當局為抑制過熱而急踩剎車——升息、限制土地融資——本已走向自然衰退的泡沫,瞬間加速崩潰。這一次的毀滅,沒有火、沒有震、沒有彈,卻同樣是一場徹底的「歸零」:</p>
+    <div class="timeline" style="border-left-color:rgba(212,175,90,.4)">
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1989.12</div><div class="tl-text" style="color:#cdb494">日經指數攀上 38,957 點歷史高峰,舉國狂歡。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1990</div><div class="tl-text" style="color:#cdb494">大藏省限制土地融資,股市單年暴跌約 33%,泡沫開始崩潰。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1992</div><div class="tl-text" style="color:#cdb494">日經跌破 2 萬點,僅剩高峰一半;地價跟著崩跌。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">2003</div><div class="tl-text" style="color:#cdb494">日經一度跌破 8000 點,不良債權壓垮無數金融機構。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">2024.2</div><div class="tl-text" style="color:#cdb494">日經終於突破 1989 年高點——距離崩壞,已過去 34 年。</div></div>
+    </div>
+    <p>房地產價格自高峰下跌超過 <strong>70%</strong>,股票資產跌幅超過 <strong>80%</strong>,日本企業與家庭蒸發了逾 <strong>1500 兆日圓</strong>的財富。更可怕的是它的綿長:股市要等到 <strong>2024 年</strong>才終於重新越過 1989 年的高點——整整<strong>三十四年</strong>。這就是「<em>失落的三十年</em>」:長期通縮、就業冰河期、一整代年輕人(失落的世代)錯過正常就業、被迫蟄居或寄生單身。</p>
+
+    <h3>這一次,東京遇到了它最難纏的敵人</h3>
+    <p>火災可以靠重建,地震可以靠工程,空襲可以靠時間——這些都是「外來的、有形的、一次性的」毀滅,東京四百年來最擅長應對。但泡沫崩壞不一樣:它是<strong>內生的、無形的、慢性的</strong>。它毀掉的不是建築,而是信心;它留下的不是焦土,而是一張張資不抵債的資產負債表,和一整代人對未來的悲觀。你無法用推土機清理一片廢墟,因為廢墟在人心裡。</p>
+    <div class="pull"><p>前三次毀滅,東京花十幾二十年就重建完畢;這第四次,它花了三十四年。因為這一次燒掉的,不是房子,是一整個民族對未來的信念。</p></div>
+    <p>這也是東京「重生神話」遭遇的最大考驗。面對有形的災難,它的「災難即升級」哲學屢試不爽;但面對這場無形的、由自身繁榮反噬而來的危機,那套靠「物理重建」的本能失靈了。它揭示了東京韌性模式的邊界:<em>有些毀滅,推土機與藍圖救不了。</em>而這,也讓我們不得不深入追問下一個問題——東京那看似無敵的「重生能力」,究竟是怎麼來的?它的極限又在哪裡?</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最危險的毀滅,往往來自自身的成功</span>
+      <p>泡沫崩壞給出一個與前幾次截然不同、卻更貼近現代人的洞見:<strong>一個成熟主體最致命的威脅,往往不是外來的災難,而是它自身的成功所滋生的、內生的泡沫。</strong>火災、地震、空襲都是「別人加在東京身上」的;但泡沫,是東京在自己最輝煌、最自信的頂點,親手吹起來的。最大的風險,常常不在你最恐懼的地方(外部衝擊),而在你最得意的地方(自我膨脹)。</p>
+      <p>這對任何經歷過巨大成功的人事物都是嚴厲的警鐘:<em>當一切順遂、資產飆升、舉世稱羨時,恰恰是泡沫最容易形成、而警覺最容易鬆懈的時刻。外來的衝擊有形、可見、能防備;但內生的泡沫無形、誘人、且會被當成「實力」來慶祝——直到它破裂。</em>而且這類「自我造成的毀滅」往往最難復原,因為它擊垮的不是你的硬體,而是你的判斷力與信心。東京能從火與震中快速站起,卻在自己吹起的泡沫前躺了三十年——這提醒我們,真正需要嚴防死守的,從來不是運氣最差的時候,而是運氣最好的時候。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚙ ✦</div>
+  <p>火、震、彈、泡沫——四次毀滅,四次重生(或掙扎著重生)。<br>現在,讓我們停下來,解剖一個核心問題——<br><span class="hl">這座城「總能重新長回來」的能力,究竟藏在哪裡?</span></p>
+</div>
+
+<!-- ===== 第八章 ===== -->
+<section id="ch8" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Anatomy of Resilience</span>
+    <h2 class="act-title">韌性的解剖:為什麼東京總能重生?</h2>
+    <p class="act-sub">What Actually Makes a City Un-killable</p>
+    <div class="ornament">⚙ ✦ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>把東京四百年的毀滅與重生並排,一個核心問題浮現:這座城「打不死」的能力,到底是什麼構成的?它顯然不是運氣(沒有城市能靠運氣躲過這麼多次浩劫)。當我們把它解剖開來,會發現它的韌性,建立在三根彼此交織的支柱上——而這三根支柱,恰恰都不是「某種可被奪走的資源」。</p>
+    <div class="method">
+      <div class="method-card">
+        <span class="tool">支柱一</span>
+        <h5>不依賴單一資源</h5>
+        <p>東京從不靠某種會枯竭的天然資源(錫、油)或某個會消失的特權(賭權)。它的根基是制度、人才、技術、資本與市場的「組合」。當任何一項受損,其餘的仍能支撐重建。<em>它的雞蛋,從來不在同一個籃子裡。</em></p>
+      </div>
+      <div class="method-card">
+        <span class="tool">支柱二</span>
+        <h5>毀滅即更新的文化</h5>
+        <p>從江戶大火到帝都復興,「重建時順便升級」被反覆操練了四百年,內化成集體本能。災難來時,它的第一反應不是哀悼,而是「這次該怎麼建得更好」。<em>韌性不是天賦,是被災難一次次訓練出來的肌肉記憶。</em></p>
+      </div>
+      <div class="method-card">
+        <span class="tool">支柱三</span>
+        <h5>能力大於資產</h5>
+        <p>東京真正的財富,不是它「擁有的建築」(那些反覆被毀),而是它「重建的能力」——人的技術、組織的效率、社會的信任。這些無形之物,火燒不掉、震不碎、炸不平。<em>它把護城河,從「資產」挪到了「能力」上。</em></p>
+      </div>
+    </div>
+
+    <h3>韌性的代價與邊界</h3>
+    <p>但東京的韌性,不是沒有代價與盲點的。泡沫崩壞那一章已經揭示了它的<strong>邊界</strong>:它的重生模式高度擅長應對「有形的、外來的、一次性的」毀滅,卻在面對「無形的、內生的、慢性的」危機(信心崩潰、人口老化、結構性停滯)時,顯得遲緩而笨拙。推土機重建得了焦土,卻重建不了信心。</p>
+    <p>更深一層的代價是:這種「總能重建」的能力,某種程度上也讓它<em>習慣了被毀滅</em>——它在防災上投入巨大,卻或許在「避免泡沫、避免內生危機」這類更隱微的風險上,顯得準備不足。一個太擅長從災難中復原的系統,有時會在不知不覺中,降低了對「避免災難」本身的警覺。這是所有「強韌性」系統共同的隱患:<em>復原力太強,有時會掩蓋預防力的不足。</em></p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把護城河,從「資產」遷移到「能力」</span>
+      <p>東京韌性的解剖,給出整個系列最核心、也最可遷移的一課:<strong>一個主體最深的安全,不來自它「擁有」的資產(那些都可能被奪走),而來自它「重建」的能力(那是奪不走的)。</strong>前幾座城——怡保、吉隆坡、澳門——的命運,都繫於它們「擁有什麼」:錫、位置、賭權。資源在,則興;資源去,則衰。它們的護城河,挖在「資產」上。而東京把護城河,挖在了「能力」上:它從不指望永遠擁有什麼,它只確保自己永遠有能力重新長出什麼。</p>
+      <p>這個視角,對在不確定世界裡配置人生與資產的人,具有最直接的指導意義:<em>真正抗風險的配置,不是擁有一項看似堅不可摧的資產(沒有資產是堅不可摧的),而是培養一套「即使失去現有的一切,也能重新賺回來、建起來」的能力組合——你的專業、你的學習力、你的判斷力、你的人際信任、你的紀律。</em>同時,東京也提醒我們韌性的另一面:別因為「我復原力很強」就疏於「預防」——最高明的系統,是既有從災難中重建的能力,又有避免不必要災難(尤其是自己造成的泡沫)的清醒。能屈能伸是本事,但不必要的屈,本就該避免。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 🗾 ✦</div>
+  <p>這套「總能重建」的能力,還在空間上留下了一個驚人的痕跡——<br>從一座蘆葦濕地上的小城,<br><span class="hl">它一圈圈長成了人類史上最龐大的都會。</span></p>
+</div>
+
+<!-- ===== 第九章 ===== -->
+<section id="ch9" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Expanding Map</span>
+    <h2 class="act-title">巨城的版圖:從江戶到三千七百萬人</h2>
+    <p class="act-sub">From a Castle Town to the World's Largest Metropolis</p>
+    <div class="ornament">🗾 ✦ 🗾</div>
+  </div>
+  <div class="prose">
+    <p>每一次重生,東京不只長回原樣,還長得更大。把它的版圖演變排成一列,你會看見一條幾乎不曾真正中斷的擴張曲線——即使中間被三次歸零打斷,趨勢線依然頑強地向上、向外。它和我們看過的其他城,構成了一組有趣的對照。</p>
+
+    <h3>一條穿越毀滅的成長線</h3>
+    <div class="timeline" style="border-left-color:rgba(212,175,90,.4)">
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1457</div><div class="tl-text" style="color:#cdb494">太田道灌築江戶城,關東平原邊緣一個不起眼的小據點。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">18世紀</div><div class="tl-text" style="color:#cdb494">參勤交代催出 <strong>百萬人口</strong>,成為當時全世界最大的城市。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1868</div><div class="tl-text" style="color:#cdb494">改名東京、成為帝都,城市範圍隨現代化向外擴張。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">1943</div><div class="tl-text" style="color:#cdb494">「東京都」制度成立,整合市與周邊郡域為單一行政體。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">戰後</div><div class="tl-text" style="color:#cdb494">沿鐵路向郊外攤開,衛星都市與通勤圈不斷外擴。</div></div>
+      <div class="tl-item"><div class="tl-year" style="color:var(--gold-bright)">今日</div><div class="tl-text" style="color:#cdb494">東京都會區(首都圈)逾 <strong>3700 萬人</strong>,世界第一大都會區。</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="num">100萬</div><div class="lbl">18 世紀江戶人口,當時世界第一</div></div>
+      <div class="stat"><div class="num">23</div><div class="lbl">東京都心特別區數(舊東京市範圍)</div></div>
+      <div class="stat"><div class="num">3700萬+</div><div class="lbl">今日首都圈人口,世界最大都會區</div></div>
+      <div class="stat"><div class="num">×N</div><div class="lbl">穿越三次歸零,趨勢線從未真正反轉</div></div>
+    </div>
+
+    <h3>沿著鐵路,而非沿著河或海</h3>
+    <p>東京的擴張方式,也與前幾座城形成鮮明對照。吉隆坡沿河谷外溢,澳門向海填地;而東京,主要是<strong>沿著鐵路網向外攤開</strong>。私營鐵道公司一邊鋪設通往郊外的路線,一邊在沿線開發住宅區與終點站商業設施(這套「鐵道 + 不動產」的開發模式,本身就是日本的發明),把一個個原本獨立的郊區小鎮,串連、吸納進東京龐大的通勤圈。新宿、澀谷、池袋這些今日的副都心,正是這樣沿著鐵路節點長出來的。</p>
+    <p>於是東京的版圖,呈現出一種獨特的「<strong>多中心</strong>」形態:不是單一市中心向外攤大餅,而是由皇居周邊的傳統中心,加上新宿、澀谷、池袋等多個沿鐵路長出的副都心,共同構成一個多核網絡。這種分散的結構,某種程度上也是它韌性的一部分——沒有單一的、一擊就垮的絕對核心。</p>
+    <div class="pull"><p>它的版圖證明了一件事:一座城真正的規模,不取決於它有多少天然稟賦,而取決於它能把多大範圍的人流、物流、活動,有效地組織進同一個系統。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 規模的本質,是「組織」而非「擁有」</span>
+      <p>東京的版圖演變,呼應了它全篇的母題:<strong>一個系統的真正規模,不是由它「擁有多少資源」決定,而是由它「能有效組織多大範圍的活動」決定。</strong>東京沒有比別人多的土地或資源,但它靠鐵路、靠制度、靠「鐵道+不動產」這類組織模式,把三千七百萬人的生活、工作、消費,精密地編織進同一張運轉不息的網——這張「組織之網」,才是它真正的版圖。</p>
+      <p>這對理解任何「規模」都適用:<em>一家公司、一個平台、一個投資組合的真正體量,往往不在於它直接「持有」多少,而在於它能「調度、連接、組織」多大的網絡。</em>而且東京的多中心結構還多給了一層提醒:<em>分散的、多核的組織方式,比單核的大餅,更不容易被一次打擊摧毀。</em>無論是城市、企業還是個人的資產配置,「多中心、不依賴單一核心」既是抗風險的結構,也是可持續擴張的結構。東京把這個道理,寫進了它三千七百萬人的龐大身軀裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⚖ ✦</div>
+  <p>錫之城,賭之城,如今再加上這座火與灰燼之城。<br>把四座城並排,一個貫穿整個系列的答案,終於浮現——<br><span class="hl">真正能穿越時間的,從來不是你擁有什麼。</span></p>
+</div>
+
+<!-- ===== 第十章 ===== -->
+<section id="ch10" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · Four Cities</span>
+    <h2 class="act-title">四座城的對照:重生力,才是真正的資源</h2>
+    <p class="act-sub">Tokyo, Macau, Ipoh, KL — What Actually Survives Time</p>
+    <div class="ornament">⚖ ✦ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>東京的故事,放進整個系列的對照組裡,才顯出它真正的份量。我們看過三座靠「擁有」維生的城——怡保擁有錫,吉隆坡擁有錫(但懂得轉化),澳門擁有「居間的位置」。而東京,是這組對照裡的<strong>反例</strong>:它幾乎一無所恃,卻活得最久、長得最大、最打不死。把四座城並排,「什麼才能穿越時間」這個問題的答案,一覽無遺。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>維度</th><th>東京 · 重生力</th><th>澳門 · 居間</th><th>怡保 · 錫(中咒)</th><th>吉隆坡 · 錫(解咒)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>核心依靠</strong></td><td>重建的「能力」</td><td>合法性的「位置」</td><td>地底的「錫」</td><td>錫,但及早多元化</td></tr>
+          <tr><td><strong>本質</strong></td><td>無形、奪不走</td><td>有形、可被取代</td><td>有形、會枯竭</td><td>有形,但已轉化為制度</td></tr>
+          <tr><td><strong>遇毀滅時</strong></td><td>歸零後重建得更高</td><td>客源一斷即重創</td><td>礦竭即長眠數十年</td><td>錫崩盤幾乎無傷</td></tr>
+          <tr><td><strong>護城河挖在</strong></td><td>能力上</td><td>位置上</td><td>資產上</td><td>制度上</td></tr>
+          <tr><td><strong>長期命運</strong></td><td>愈挫愈強的巨城</td><td>繁榮但脆弱,待轉身</td><td>暴起暴落,溫柔甦醒</td><td>穩健升格為首都</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>一條貫穿四城的軸線</h3>
+    <p>把這四座城從「最脆弱」到「最強韌」排成一條軸線,你會看見一個清晰的規律——<strong>它們護城河所挖之處的「可被奪走性」,決定了它們的命運</strong>:</p>
+    <div class="shift">
+      <div class="shift-row"><div class="shift-era">怡保</div><div class="shift-body"><strong>護城河挖在「資產」上</strong>——而且是會枯竭的資產(錫)。資產耗盡,城即長眠。最脆弱。</div></div>
+      <div class="shift-row"><div class="shift-era">澳門</div><div class="shift-body"><strong>護城河挖在「位置」上</strong>——位置不會枯竭,但會被取代、被收回(如港口優勢被香港奪走)。繁榮而懸命。</div></div>
+      <div class="shift-row"><div class="shift-era">吉隆坡</div><div class="shift-body"><strong>護城河從「資產」遷向「制度」</strong>——它把錫的紅利,及時轉化成首都地位與多元產業。脆弱性大降。</div></div>
+      <div class="shift-row"><div class="shift-era">東京</div><div class="shift-body"><strong>護城河挖在「能力」上</strong>——重建的能力無形、不可奪、可再生。即使被歸零,也能重新長出一切。最強韌。</div></div>
+    </div>
+    <div class="pull"><p>資產會枯竭,位置會被取代,唯有「能力」奪不走。四座城用四種命運,共同講了同一句話:把根扎在能再生的東西上,你才真正打不死。</p></div>
+    <p>這也回答了整個系列最初的提問。從怡保到澳門,我們反覆看見「單一依賴」如何成為一座城的詛咒;而東京提供了那個最徹底的解答——<strong>真正的解咒,不是換一種更好的「擁有物」,而是把命運的根基,從「擁有」整個遷移到「能力」上。</strong>當你依賴的是「重建的能力」而非「擁有的資產」時,單一依賴的詛咒,就從根本上失效了:因為能力不會枯竭,反而會在一次次使用(乃至一次次災難)中愈發強韌。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 系列的總答案:能力 &gt; 制度 &gt; 位置 &gt; 資產</span>
+      <p>四座城並排,給出貫穿整個系列的總答案,可以濃縮成一條清晰的「抗風險階梯」:<strong>把命運押在「會枯竭的資產」上最脆弱(怡保),押在「會被取代的位置」上次之(澳門),把資產「轉化為制度」則穩健許多(吉隆坡),而把根基扎在「可再生的能力」上,才最為強韌(東京)。</strong></p>
+      <p>這條階梯,可以直接套用在任何主體的長期生存策略上——一座城、一家公司、一個投資組合,乃至一個人的生涯規劃:<em>你的安全感,究竟建立在階梯的哪一層?是建立在一項可能枯竭的資產上(單一收入、單一客戶、單一標的)?還是一個可能被取代的位置上(暫時的市場優勢、平台紅利)?還是已經把優勢沉澱為難以撼動的制度與系統?又或者,最理想地,建立在一套「即使失去一切也能重新賺回來、建起來」的能力上?</em>階梯越往上,你就越接近東京那種「打不死」的狀態。整個系列繞了一大圈,最終指向的,正是這個樸素卻顛撲不破的結論:<strong>真正能穿越時間的,從來不是你擁有什麼,而是你能重建什麼。</strong></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ⏳ ✦</div>
+  <p>但東京的故事還沒有結束。<br>在它最擅長的「有形毀滅」之外,幾道新的、更難纏的陰影正在逼近——<br><span class="hl">而這一次的考題,可能是它四百年來最棘手的一次。</span></p>
+</div>
+
+<!-- ===== 第十一章 ===== -->
+<section id="ch11" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · What Comes Next</span>
+    <h2 class="act-title">下一場毀滅:東京未來的考題</h2>
+    <p class="act-sub">The Quake, the Decline, and the Tests Ahead</p>
+    <div class="ornament">⏳ ✦ ⏳</div>
+  </div>
+  <div class="prose">
+    <p>四百年來,東京通過了一場又一場毀滅的考驗。但它的下半場,正面臨幾道性質各異的新考題——有些是它最熟悉的,有些,卻是它從未真正面對過的。</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">考題一</span>
+        <h5>首都直下地震</h5>
+        <p>專家長期警告,東京正面臨高機率的「首都直下型地震」與南海海槽地震風險。這是東京最「熟悉」的敵人——有形的、外來的。它四百年的防災基因與工程能力,正是為此而生。這道題,它最有把握。</p>
+        <span class="model">The Known Enemy</span>
+      </div>
+      <div class="card">
+        <span class="flag">考題二</span>
+        <h5>少子高齡與人口減少</h5>
+        <p>日本總人口持續萎縮、急速老化。一座靠「人流匯聚」而生的巨城,若餵養它的人口活水逐漸枯竭,將是一種<em>緩慢的、無形的</em>毀滅——沒有火光,卻可能比任何地震都更難重建。</p>
+        <span class="model">The Quiet Decline</span>
+      </div>
+      <div class="card">
+        <span class="flag">考題三</span>
+        <h5>一極集中的隱憂</h5>
+        <p>東京越強,日本其他地區越被抽乾。3700 萬人過度集中於首都圈,既是它的力量,也是國家級的風險——萬一首都遭逢巨災,整個日本將同時失去心臟。盛極,本身就是一種脆弱。</p>
+        <span class="model">Over-Concentration</span>
+      </div>
+    </div>
+
+    <h3>它真正的考驗,是那些「燒不掉」的危機</h3>
+    <p>把這三道考題排開,一個清晰的判斷浮現:<strong>東京最有把握的,是它最熟悉的那道題(地震)——因為那是有形的、可以靠工程與重建應對的;而它真正的考驗,是人口減少、活力流失這類「無形的、慢性的、燒不掉的」危機。</strong>泡沫的三十年已經給過它一次教訓:它的「物理重建」神話,在無形危機面前會失靈。如今人口結構的挑戰,是同一類敵人的升級版,而且更加無解——你可以印錢救市,卻無法印出年輕人。</p>
+    <div class="pull"><p>東京最擅長的,是從廢墟裡重建一座城;它最不擅長的,是在沒有廢墟、只有緩慢凋零的處境裡,重新找回生機。而後者,正是它的下半場。</p></div>
+    <p>但若論底氣,沒有哪座城比東京更有資格面對未知。它畢竟是那座從蘆葦濕地起家、被歸零過三次仍一次次站得更高的城。它的下一場「重生」,或許不再是物理意義上的重建,而是一場更艱難的轉型:從一個追求「不斷膨脹」的成長型巨城,轉型為一個能在「人口收縮」中依然保持活力、品質與韌性的成熟型都會。這道題沒有現成答案,但如果有任何一座城能解出它——憑著那刻進骨子裡四百年的重生本能——那很可能,還是東京。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最大的考驗,是學會應對「不擅長的那類危機」</span>
+      <p>東京的未來考題,給出一個關於「成長極限」的洞見:<strong>一個主體最大的長期風險,往往不是它最熟悉、最會應對的那類危機,而是與它過往成功模式「性質完全不同」的那類危機。</strong>東京太擅長應對有形毀滅,以至於它真正的軟肋,恰恰是那些無法靠「重建」解決的無形難題(信心、人口、活力)。一個系統最危險的盲點,常常就藏在它最引以為傲的能力的「背面」。</p>
+      <p>這對任何依賴某種成功模式的人事物都是深刻的提醒:<em>你最擅長的那套打法,在帶給你成功的同時,也悄悄定義了你的盲區——你會本能地用熟悉的方式去應對所有問題,即使有些問題根本不吃這一套。</em>真正的成熟,不是把熟悉的能力練到極致,而是清醒地認識到「我這套方法的邊界在哪裡」,並有意識地去發展那些「不在我舒適圈內、卻是未來真正考驗」的新能力。東京能否解開人口收縮這道無形的題,取決於它能否超越自己「靠物理重建解決一切」的成功慣性——而這,也是每一個曾經成功的個體與組織,遲早都要面對的同一道終極考題。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ 🔥 ☩</div>
+  <p>蘆葦,將軍,火,震,彈,泡沫;一次次歸零,一次次重生。<br>當我們把這四百年收攏,終於可以回答最初那個問題——<br><span class="hl">一座一無所恃的城,究竟靠什麼活成了世界最大的都會?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section id="chF" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">終章 · Finale</span>
+    <h2 class="act-title">於是,今天的東京</h2>
+    <p class="act-sub">The City That Refused to Stay Dead</p>
+    <div class="ornament">🔥 ✦ 🔥</div>
+  </div>
+  <div class="prose">
+    <p>站在今天的東京,你會同時看見它的四百年。皇居的石垣,是將軍江戶城的遺骨;街角的防火空地與寬闊幹道,藏著明曆大火與關東大地震的記憶;新幹線的流線車身,載著 1964 年那場「已不再是戰後」的驕傲;而某些寫字樓的玻璃帷幕背後,仍隱約映著泡沫年代未曾散盡的嘆息。一座城,把四百年的毀滅與重生,層層疊疊地壓進了三千七百萬人的日常裡。</p>
+
+    <p>回到最初的問題:一座一無所恃的城——沒有古都血統、沒有天然良港、沒有富庶腹地,還被反覆燒成白地、震成廢墟——究竟靠什麼,活成了世界最大的都會?答案貫穿始終:它靠的不是「擁有」,而是「重生」。它把護城河,從一切可能被奪走的「資產」與「位置」上,徹底地遷移到了那個奪不走的東西上——<strong>把廢墟重新變成城市的能力本身</strong>。</p>
+
+    <div class="pull"><p>火可以燒掉它的房屋,地震可以震碎它的街道,炸彈可以把它夷為白地,泡沫可以掏空它的帳面——但沒有任何一場災難,能燒掉那些倖存者重新建起一座城的決心與本事。</p></div>
+
+    <p>而這,正是東京為整個系列畫下的句點,也是它留給我們每個人最厚的禮物。從怡保的錫、吉隆坡的錫、澳門的賭,到東京的重生力,這四座城用各自的命運,反覆叩問著同一個問題:<em>在這個沒有什麼能永遠擁有的世界裡,什麼,才是真正值得你把人生押上去的東西?</em></p>
+
+    <p>怡保的答案是「不要把全部押在會枯竭的東西上」;吉隆坡的答案是「趁繁榮,把紅利轉化成更持久的根基」;澳門的答案是「警惕那些不掌握在自己手裡的依賴」;而東京,給出了那個最徹底、也最令人安心的答案——<strong>把你的根,扎在『能力』上。</strong>因為資產會枯竭,位置會被取代,紅利會散場,連繁榮本身都會反噬成泡沫;唯有你重建的能力——你的學習力、你的判斷力、你的紀律、你愈挫愈強的韌性——是任何災難都奪不走、反而會在災難中愈磨愈利的東西。</p>
+
+    <p>所以,當你下一次站在自己人生的某片廢墟前——一次失敗、一次崩盤、一次歸零——不妨想起這座火與灰燼之城。它會用四百年、四次毀滅、四次重生告訴你:<strong>被歸零,從來不是故事的結局;它只是你下一次,重建得更好的開始。</strong>真正打不死的,從來不是那些擁有最多的人,而是那些無論失去多少,都還能從灰燼裡,重新站起來的人。</p>
+
+    <p style="text-align:center;margin-top:3rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint)">— 全文完 · 城市系列 —</p>
+  </div>
+</section>
+
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

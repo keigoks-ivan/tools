@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大墩：在中間崛起的城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16140f;
+  --parchment:#f3eee2;
+  --parchment-deep:#e7dfc9;
+  --sea:#1d3640;
+  --sea-deep:#0e2128;
+  --gold:#a8842f;
+  --gold-bright:#cda551;
+  --rust:#8a3a23;
+  --crimson:#74221a;
+  --jade:#33583f;
+  --faint:#665a45;
+  --line:#c6b58e;
+  --shadow:rgba(22,20,15,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(168,132,47,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(29,54,64,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(29,54,64,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #223e48 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23cda551' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23cda551' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(243,238,226,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2}
+.lede p{font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;color:var(--sea-deep);font-weight:500}
+.lede p .drop{float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem}
+.act-title{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2}
+.act-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint);margin-top:.8rem}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;border-left:4px solid var(--gold);line-height:1.4}
+.prose h4{font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;color:var(--sea-deep);margin:2.2rem 0 .8rem}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;background:linear-gradient(135deg, rgba(29,54,64,.04), rgba(168,132,47,.06));border-top:2px solid var(--gold);border-bottom:2px solid var(--gold)}
+.pull p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500}
+.pull::before{content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1}
+
+/* ====== INVESTOR / ECHO CALLOUT ====== */
+.investor{margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;background:var(--sea-deep);color:var(--parchment);border-radius:2px;box-shadow:0 18px 40px -16px rgba(14,33,40,.6)}
+.investor::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--gold-bright),var(--rust))}
+.investor .tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(243,238,226,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem}
+.tl-item::before{content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;background:var(--parchment);border:2px solid var(--rust);border-radius:50%}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.5rem 1.4rem;position:relative;overflow:hidden;transition:transform .3s ease, box-shadow .3s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;padding:.85rem 1rem;text-align:left}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(168,132,47,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STATS ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(29,54,64,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden}
+.finale::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");background-position:center;background-size:cover}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(243,238,226,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{margin:3rem 0;padding:2.4rem;border:1px solid rgba(205,165,81,.4);border-radius:3px;background:rgba(0,0,0,.18)}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* expanded edition */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#180f08 !important}
+.dark .act-title{color:#d6c29e}
+.dark .prose p{color:#cbb292}
+.dark .prose strong{color:#c6785a}
+.dark .prose em{color:#d6a676}
+.dark .prose h3{color:#c6785a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#887356}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(116,34,26,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* interludes */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(243,238,226,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* legacy/shift */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(29,54,64,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* debate box for contested history */
+.debate{margin:2.8rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--parchment-deep)}
+.debate-head{background:linear-gradient(135deg,var(--jade),#2a4734);color:var(--parchment);font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;padding:.8rem 1.2rem;display:flex;align-items:center;gap:.5rem}
+.debate-head::before{content:"\2696";font-size:1rem}
+.debate-body{padding:1.2rem 1.4rem}
+.debate-body .view{margin:.9rem 0;padding-left:1.1rem;border-left:3px solid var(--gold);font-size:.95rem;line-height:1.75}
+.debate-body .view .who{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.1em;color:var(--rust);text-transform:uppercase;display:block;margin-bottom:.2rem}
+.debate-body .view strong{color:var(--crimson)}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Toatun · The City That Rose from the Middle</span>
+    <h1>大墩<br>在中間<br><span class="em">崛起</span>的城</h1>
+    <p class="sub">從一座氣候最宜人的盆地、一個差點成為省城卻落空的地方，到一座靠鐵路被規劃出來、靠文化與製造翻身、最終後來居上的台灣第二大城——<br>一部關於「為何今天的台中是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的台中，是一座沒有港、四季最舒適、街道寬闊、汽車奔流、曾驕傲地自稱「文化城」、一度被評為最宜居、如今卻在傳統與科技、山線與海線、沒落的舊市區與閃亮的新市政之間反覆拉扯的城？它既不是台南那樣的古老起點，不是台北那樣理所當然的中心，也不是高雄那樣被國家一手打造的港——它的身世，藏在一個獨特的關鍵字裡：<em>中間</em>。台中卡在台灣的地理正中央、卡在山與海之間、卡在南北兩大都會的夾縫裡，它沒有海港的天賦、沒有悠久首府的傳統，甚至曾經差一點當上省城卻又落空。但正是這座「在中間」的城，靠著全台最舒服的氣候、靠著日本人用鐵路替它畫出的棋盤新市、靠著一群仕紳點燃的文化之火、靠著一群黑手打造的隱形製造王國，一次又一次地<span style="color:var(--rust);font-weight:600">重新定義自己</span>，最終後來居上，成為台灣的第二大城。如果說台南是「起點」、台北是「中心」、高雄是「港」，那麼台中，就是<em>那座永遠在中間、永遠在尋找與重新定義自己是誰的城</em>。讓我們從那座給了它好天氣的盆地開始，一層一層把它讀回來。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the City</span>
+    <h2 class="act-title">盆地、大肚山與最舒服的氣候</h2>
+    <p class="act-sub">The Basin, the Plateau, and the Kindest Climate on the Island</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解台中,得先理解一件最日常、卻也最根本的事:<strong>這是全台灣氣候最舒服的地方。</strong>台中沒有台北盆地的濕冷悶熱,沒有南部夏季的酷烈,也沒有東部的多颱——它四季溫和、相對乾爽、少有極端天氣。這份「好天氣」不是偶然,而是地理精心安排的結果,也是理解台中性格與吸引力的第一把鑰匙。</p>
+
+    <h3>一座被山屏障的盆地</h3>
+    <p>台中的核心,是一塊<strong>台中盆地</strong>——它的東邊是高聳的中央山脈與雪山山脈,西邊是大肚山台地與八卦山台地,形成一個被丘陵與高山環抱的低平地帶。這個地形帶來了關鍵的氣候優勢:東邊的<em>中央山脈像一道巨大的屏障</em>,擋下了冬季的東北季風與夏季部分颱風的直接侵襲;盆地的位置又讓它避開了南部的極端高溫。於是台中享有了全台難得的溫和氣候——這也是為什麼,台中長期被許多人認為是台灣「最適合居住」的地方之一。<em>好天氣,是台中最原始、也最持久的天賦。</em></p>
+    <div class="pull"><p>台北因「最大的平地」聚人、高雄因「最好的港灣」吞吐、台南因「最早的那片海」成為起點——而台中,最初的天賦,是一份全台最舒服的好天氣。</p></div>
+
+    <h3>大肚山與兩條溪</h3>
+    <p>盆地的西側,橫亙著一道<strong>大肚山台地</strong>——它像一道天然的牆,把台中盆地與西邊的海岸平原(海線)分隔開來。這道台地,日後將深刻地形塑台中「山線」與「海線」的分裂與差異(這是後面專章的主題)。而滋養這片土地的,是<strong>大甲溪</strong>與<strong>烏溪(大肚溪)</strong>等河川——它們從中央山脈奔流而下,沖積出肥沃的平原,提供了灌溉與生活的水源。山、台地、盆地、溪流,共同構成了台中的地理骨架。</p>
+
+    <h3>沒有海的城</h3>
+    <p>但這裡要點出台中最關鍵的一個地理特質——它<strong>不臨海</strong>(其核心市區位於內陸盆地)。這一點,讓台中與台南、高雄這兩座南方的海港城市,從根本上區別開來。台南、高雄的命運都繫於海與港,而台中的命運,則繫於<em>陸地、繫於它「位居台灣地理中央」的位置</em>。它不是一個「面向海洋」的城,而是一個「立足陸地中心」的城。這份「內陸性、中心性」,既決定了它沒有海港帶來的早期繁華(所以它開發較晚),也決定了它日後將靠「鐵路、公路、地理中點」這些陸上的連結,而非海運,來成就自己。<em>台中的身世,從一開始就寫在「中間」與「陸地」這兩個字上。</em></p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 好天氣與「中間」的位置</span>
+      <p>在任何省城、任何鐵路、任何工廠出現之前,<strong>盆地、屏障的群山、與不臨海的內陸位置</strong>就已經替台中寫好了它的兩個基本性格。其一是<em>好天氣</em>——這份溫和的氣候,將成為台中最持久的吸引力,也是它日後「宜居城市」形象的根源。其二是<em>「中間」與「陸地」</em>——不臨海的內陸位置,讓它錯過了海港城市的早期繁華,卻也讓它在鐵路與公路的時代,因「位居全台地理中央」而獲得了無可取代的樞紐價值。</p>
+      <p>這是讀懂台中的第一把鑰匙,也是它與系列裡其他城市最深的分野:台南、高雄是「向海」的城,台北是被盆地「困住」的城,而台中,是一座「<em>立足陸地中心、靠連結而非靠海</em>」的城。它沒有天生的港口優勢,所以它的崛起來得較晚、也必須更費力——它得靠後天的條件(鐵路、文化、製造、地理中點),一次次地為自己創造價值、重新定義自己。「在中間崛起」,從地理的那一刻起,就注定是台中必須面對的命運。而它的故事,要先從這片盆地最早的主人說起。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">❂ ✦ ❂</div>
+  <p>在漢人、在鐵路、在「台中」這個名字之前,<br>中部的盆地與台地早已有人居住——<br><span class="hl">他們甚至曾結成一個聯盟,有自己的王:大肚王國。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The First People</span>
+    <h2 class="act-title">大肚王國:平埔的土地與消失的聯盟</h2>
+    <p class="act-sub">The Papora, the Kingdom of Middag, and the Original Owners</p>
+    <div class="ornament">❂ ❂ ❂</div>
+  </div>
+  <div class="prose">
+    <p>在漢人入墾、在日本人築城、在「台中」這個名字之前,中部的盆地與台地早已有人居住。這片土地最早的主人,是多支<strong>平埔原住民族群</strong>——分布於此的有拍瀑拉(Papora)、巴布薩(Babuza)、道卡斯(Taokas)、貓霧捒(Babusa 系)等族。他們沿著盆地、台地與河岸聚居,以狩獵、農耕與漁撈為生。而中部的平埔史上,還有一個格外特殊、令人神往的存在——<strong>大肚王國</strong>。</p>
+
+    <h3>大肚王國:一個跨部落的聯盟</h3>
+    <p>在十七世紀,中部的平埔部落之間,曾存在一個被荷蘭與後世文獻稱為「<strong>大肚王國(Kingdom of Middag)</strong>」的政治體——它以大肚山一帶(序章的那道台地)為核心,是一個由多個平埔部落結成的<em>跨部落聯盟</em>,有一位被稱為「大肚王(Quataong)」的共主。這在以分散部落為主的台灣平埔社會中,是相當罕見的、具有一定政治整合程度的存在。荷蘭人、後來的鄭氏與清廷,都曾與這個聯盟發生接觸、貿易與衝突。大肚王國的存在提醒我們:在漢人到來之前,中部這片土地並非無主的荒野,而有著自己複雜的政治與社會組織。</p>
+    <div class="pull"><p>台中這片土地最早的「政權」,不是漢人的、也不是殖民者的,而是一個由平埔部落結成、以大肚山為中心的原住民聯盟——大肚王國。</p></div>
+
+    <h3>聯盟的瓦解與族群的消失</h3>
+    <p>然而,大肚王國的命運,終究敵不過時代的浪潮。隨著鄭氏時期的屯墾、清代漢人移民的大量湧入,平埔部落的土地被佔據、武力反抗被鎮壓(鄭氏時期曾與中部平埔發生激烈衝突),這個聯盟逐漸<em>瓦解、消失</em>。而中部的平埔各族,也與台灣其他平埔族群走上了相同的命運(這在台灣史中是反覆的母題):土地流失、文化同化、身分隱沒——他們在通婚、改姓、漢化中淡出歷史,有的被迫遷往內陸(如埔里盆地,成為中部平埔族群重要的遷徙終點)。今日,這些族群的後裔仍在進行著艱難的尋根與正名。</p>
+
+    <h3>留在地名裡的記憶</h3>
+    <p>一如台灣其他城市,這些消失的原主人,把名字留在了土地上。「<strong>大肚</strong>」(大肚王國、大肚山、大肚溪)、「<strong>貓霧捒</strong>」(清代此地的古稱)、「<strong>沙轆</strong>」(沙鹿)、「<strong>大甲</strong>」(道卡斯族大甲社)等地名,都是平埔族群曾經存在的見證。當我們今天行經這些地方時,其實正在唸誦一份比台中城本身古老得多的名單。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 中間的土地,也曾有自己的王</span>
+      <p>大肚王國的故事,為台中的開篇,補上了一個容易被遺忘的、卻意義深遠的注腳:<strong>這片日後被視為「後來才崛起」「開發較晚」的中部土地,其實在漢人到來之前,就曾有過一個相當有組織的原住民政治聯盟。</strong>它不是一片等待被開發的空白,而是一塊早已有人居住、有人統治、有人世代生活的家園。</p>
+      <p>這也讓台中「在中間崛起」的故事,有了一個更厚重的起點。後面的章節會看到,台中的漢人開發確實比台南晚、它的城市地位也是後天爭取來的;但這不代表它「沒有歷史」——它只是有一段「不被主流漢人史觀記載」的、屬於平埔與大肚王國的古老歷史。一如台南腳下躺著西拉雅、台北腳下躺著凱達格蘭,台中盆地的最底層,躺著拍瀑拉、巴布薩,與那個以大肚山為中心、曾經整合了中部部落的大肚王國。它提醒我們:每一座「後來」崛起的城,腳下都有一段「更早」的故事。而台中作為漢人城市的故事,要從一群墾拓者,在這片平埔的土地上建立「大墩街」開始。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⛏ ✦ ⛏</div>
+  <p>當大肚王國瓦解,漢人墾民進入盆地,<br>在一處地勢稍高的土丘上,建起了市街「大墩」——<br><span class="hl">一個樸實、晚到、卻安靜等待著時代契機的起點。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Settlers' Mound</span>
+    <h2 class="act-title">大墩街:墾拓者在盆地上的起點</h2>
+    <p class="act-sub">Litoutian, the Mound, and the Late Settling of the Central Plain</p>
+    <div class="ornament">⛏ ⛏ ⛏</div>
+  </div>
+  <div class="prose">
+    <p>台中作為一座「漢人城市」的起點,比台南晚了許多。當台南早已是繁華的府城、台灣的首府時(這呼應了台南的脈絡),中部的盆地,還是一片以平埔部落與零星墾拓為主的土地。台中的漢人開發,主要要到清代中期才真正展開——這份「<strong>晚開發</strong>」的特質,是理解台中身世的一個重要起點:它不是含著金湯匙出生的城,它的一切,都得靠後天爭取。</p>
+
+    <h3>犁頭店與大墩街</h3>
+    <p>清代,漢人移民(主要來自福建)逐漸進入台中盆地墾拓。早期重要的聚落之一,是「<strong>犁頭店</strong>」(今南屯一帶)——因聚集了打製犁頭等農具的店家而得名,這個地名本身,就訴說著這是一個以<em>農業墾拓</em>為核心的開發起點。隨著開墾的推進,盆地中央一處地勢稍高的土丘地帶,逐漸形成了市街——人們稱之為「<strong>大墩</strong>」(「墩」即土丘之意),這就是台中市區最早的核心「<em>大墩街</em>」。「大墩」這個樸實的名字,正是台中最古老的稱呼,也是這座城市的雛形(本書書名即取此意)。此外,清代著名的「<em>藍張興庄</em>」等大規模墾號,也在中部的拓墾史上留下了印記。</p>
+    <div class="pull"><p>台中最早的名字「大墩」,只是盆地裡一處地勢稍高的土丘——它沒有古都的城牆、沒有港口的繁華,就是一個墾拓者老老實實、從土地上長出來的小市街。</p></div>
+
+    <h3>農業的盆地,樸實的起點</h3>
+    <p>清代的台中,本質上是一個<strong>農業的盆地</strong>。肥沃的土地、序章提到的溫和氣候與大甲溪、烏溪的灌溉,讓這裡成為適合農耕的所在。漢人墾民在此開圳、闢田、建庄,逐漸把盆地開發成中部的米倉之一。今天台中許多帶數字的地名——「<em>四張犁、五張犁、三十張犁</em>」等——正是當年依「墾地面積(以犁計算)」而來的拓墾印記,訴說著這段以農立基的歷史。這個時期的台中,還只是一個樸實的農業市街,規模與地位都遠不及南邊的府城台南、或正在崛起的北部。它安靜地、緩慢地,在盆地中央累積著自己的能量。</p>
+
+    <h3>等待一個契機</h3>
+    <p>但台中盆地有一個別人沒有的潛在優勢——它<strong>位居台灣的地理中央</strong>(序章)。在以海運為主的時代,這個內陸位置是劣勢(所以它開發晚);但只要時代的連結方式改變——只要有一天,陸上的交通(鐵路、公路)取代海運成為主軸——那麼這個「正中央」的位置,就會從劣勢翻轉為無可取代的優勢。此時的大墩街還不知道,它正安靜地等待著兩個即將改變它命運的契機:一個來自清末的「省城夢」,另一個,來自日本人的鐵路。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 晚到的,未必輸在起跑點</span>
+      <p>大墩街的故事,揭示了台中身世的一個基本設定:<strong>它是一座「晚到」的城。</strong>當台南已享盡兩百年首府的榮光、當台北正因茶葉貿易而崛起時,台中還只是盆地中央一個樸實的農業市街。它沒有海港的天賦、沒有古都的資歷、沒有首府的傳統——論「先天條件」,台中在台灣的主要城市裡,起步是相對落後的。</p>
+      <p>但這恰恰是台中故事最勵志的伏筆:<em>晚到,未必就輸在起跑點。</em>台中那個「不臨海、位居中央」的位置,在海運時代是它開發遲緩的原因,卻在即將到來的「陸路時代」,埋著翻身的契機。一座城市的地理價值,從來不是固定的,而是隨著「時代用什麼方式連結彼此」而改變的。台中的命運,就懸在這個轉變之上——當連結台灣的主軸,從海運變成鐵路時,這座「在中間」的城,終於要等到屬於它的時代。而第一個讓台中「差一點」成為中心的契機,來自一位清末的巡撫,與一個未能實現的省城夢。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⛩ ✦ ⌖</div>
+  <p>台中「在中間」的位置,第一次帶來了天大的機會——<br>它差一點,就要成為整個台灣的省城;<br><span class="hl">但這個夢,最終碎了,中心的桂冠,飛向了北方。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Capital That Never Was</span>
+    <h2 class="act-title">省城夢碎:差一點成為台灣的中心</h2>
+    <p class="act-sub">Liu Mingchuan's Plan to Make Taichung the Provincial Capital</p>
+    <div class="ornament">⛩ ⌖ ⛩</div>
+  </div>
+  <div class="prose">
+    <p>台中身世中第一個戲劇性的轉折,是一個「<strong>差一點成真</strong>」的省城夢。在清末,台中曾經被選定為整個台灣的省會所在地——如果這個計畫成功,台灣的歷史與台中的命運,可能都將完全不同。但這個夢,最終碎了。這場「煮熟的鴨子飛了」的歷史,深深地烙印在台中的身世裡,也預示了它「<em>永遠在中間、總是差一步</em>」的某種宿命。</p>
+
+    <h3>建省與選址:為什麼是台中?</h3>
+    <p>1885 年,台灣建省(這呼應了台灣整體與台北的脈絡),需要選定一個省會。首任巡撫<strong>劉銘傳</strong>等人面臨一個務實的考量:台灣狹長,若把省會設在最北(台北)或最南(台南),都偏於一隅,不利於統治全島。於是,位居<strong>台灣地理中央</strong>的台中盆地(當時的「橋孜圖」一帶),成了一個極具邏輯的選擇——把省會設在正中央,正好可以兼顧南北、居中駕馭。序章與上一章埋下的「中間位置」的價值,在此第一次被認真地看見。台中盆地,被選定為新的台灣省城。</p>
+    <div class="pull"><p>台中的「中間」位置,第一次為它帶來了天大的機會——成為整個台灣的省城。它差一點,就要成為這座島的中心。</p></div>
+
+    <h3>動工與夭折</h3>
+    <p>於是,一場建城工程在台中盆地展開:規劃城池、興建城牆與衙署。這座未竟的省城,留下了一些痕跡——其中最著名的,是<strong>台中公園裡的「北門樓(明遠樓)」遺構</strong>(後世遷建保存),以及一些城牆、考棚的殘跡,它們是這段「省城夢」曾經真實存在過的見證。然而,這個雄心勃勃的計畫,卻很快地<strong>夭折</strong>了。由於經費、工程、以及主政者更替等種種現實因素,省城的建設未能完成;更關鍵的是,隨著北部因茶葉貿易而日益繁榮,台灣的政經重心持續北移,繼任的主政者最終決定——將<em>省會正式定於台北</em>。台中的省城夢,就此破碎。煮熟的鴨子,飛向了北方。</p>
+
+    <h3>差一步的宿命</h3>
+    <p>這場省城夢碎,對台中的意義是雙重的。一方面,它<em>第一次證明了台中「中間位置」的戰略價值</em>——台中是真的有資格、有邏輯成為台灣的中心的,這不是空想。但另一方面,它也讓台中嚐到了「<strong>差一步</strong>」的滋味:它明明被選中了,卻又因時代的轉向而落空,眼睜睜看著中心的地位飛向台北。這份「曾經那麼接近、卻終究錯過」的經驗,彷彿為台中定下了一種基調——它總是在「中間」,總是那個「有實力、有條件,卻不是最終被選中的那一個」。台中往後的崛起,某種程度上,就是一場對這個「差一步」宿命的不斷追趕與超越。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 「差一點」,也是一種命運的伏筆</span>
+      <p>省城夢碎的故事,揭示了台中性格中一個深層的母題:<strong>「中間」與「差一步」。</strong>台中的地理中心位置,讓它一再被視為「合理的中心人選」——省城選址如此,後來的鐵路樞紐、行政整合亦然。但歷史卻一次次地,讓最終的「中心」桂冠,落到了別人(台北)頭上。台中總是那個「<em>很接近中心、卻不是中心</em>」的城。</p>
+      <p>然而,這個「差一步」的宿命,也藏著台中最動人的潛能。正因為它不是天生的、被指定的中心,它的崛起,就必須靠自己——靠後天的條件、靠不斷的努力、靠一次次重新定義自己的價值。如果說省城夢的破碎是台中的「失」,那麼這個失,反而逼出了它日後「<em>自立自強、後來居上</em>」的性格。它不會像台南那樣躺在古老的榮光上,也不會像台北那樣坐享中心的地位——它必須證明自己。而緊接著,一個全新的力量將到來,並真正地、實實在在地,把台中從一個「差點成為省城的盆地」,變成一座被精心規劃出來的現代城市——那就是日本人的鐵路。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">☼ ✦ ☼</div>
+  <p>省城夢碎之後,一個全新的力量到來,<br>用一樣台中苦苦等待的東西,把它重新造了出來——<br><span class="hl">那就是鐵路,與日本人在圖紙上規劃的棋盤新市。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · A City by Design</span>
+    <h2 class="act-title">鐵路造城:日本人規劃出來的棋盤新市</h2>
+    <p class="act-sub">How the Japanese Drew Taichung on a Grid, 1895–1945</p>
+    <div class="ornament">☼ ☼ ☼</div>
+  </div>
+  <div class="prose">
+    <p>真正把台中從一個樸實的農業市街(大墩)、一個夭折的省城工地,改造成一座現代城市的,是日本人。而他們用的工具,正是上一章台中苦苦等待的那個契機——<strong>鐵路</strong>。日治時期,台中迎來了它身世中最關鍵的一次「無中生有」:它幾乎是被日本人,在圖紙上重新規劃、設計、建造出來的一座<em>全新的現代城市</em>。</p>
+
+    <h3>縱貫鐵路的中點</h3>
+    <p>日本人為了統治與經濟的需要,修築了貫穿台灣南北的<strong>縱貫鐵路</strong>。而台中,憑藉它「位居全台地理中央」的位置(序章),成為這條大動脈上一個<em>關鍵的中點與樞紐</em>。序章與墾拓章埋下的伏筆,在此終於兌現:當連結台灣的主軸從「海運」變成「鐵路」時,台中那個曾經是劣勢的「不臨海、在中間」的位置,瞬間翻轉成了無可取代的優勢。鐵路,把台中從台灣交通的邊緣,一舉拉到了中心。<strong>台中,是一座因鐵路而興、為鐵路而生的城。</strong></p>
+    <div class="pull"><p>海運時代,台中因「沒有海」而落後;鐵路時代,台中因「在中央」而崛起——同一個地理位置,在不同的時代,命運完全相反。</p></div>
+
+    <h3>棋盤街廓:一座被「畫」出來的城</h3>
+    <p>日本人對台中做了一件影響至今的事:他們以現代都市規劃的理念,把台中市區<strong>整體地、從頭規劃</strong>。不同於台南那種歷史自然長出的彎曲巷弄(這呼應了台南的脈絡),台中市區被設計成<em>整齊的棋盤狀街廓</em>——筆直、寬闊、井然有序。這就是為什麼,台中市區的街道,給人一種比台南、甚至比部分台北地區更「規劃感」、更開闊的印象。日本人還整治了流經市區的<strong>綠川與柳川</strong>,興建了現代化的官署、學校、市場,以及一座融合東西方風格的<em>台中車站</em>(其紅磚的舊站體,是台中重要的歷史地標)。他們更在市區興建了<strong>台中公園</strong>,園中的「<em>湖心亭</em>」(日治時期的建築)至今仍是台中最經典的城市意象之一。</p>
+
+    <h3>新市街的誕生</h3>
+    <p>於是,在日治時期,一座嶄新的「台中」誕生了。它不再是那個樸實的大墩農業聚落,而是一座有著棋盤街道、車站、公園、現代官署的<em>計畫性現代城市</em>。「台中」這個名字(意為「台灣之中」),也在這個時期被確立、被叫響——這個名字本身,就直白地宣告了它「<strong>位居台灣中央</strong>」的身分與驕傲。日本人用鐵路與規劃,給了台中一個它先天沒有的東西:一座現代城市的、整齊而清晰的骨架。台中,終於從「盆地裡的市街」,正式成為「台灣中部的現代都會」。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 被連結重新定義的城</span>
+      <p>鐵路造城的故事,揭示了台中身世最核心的一條規律:<strong>台中的價值,是由「時代如何連結彼此」所定義的。</strong>在海運時代,連結靠的是港口,所以不臨海的台中落後了;在鐵路時代,連結靠的是陸路樞紐,所以位居中央的台中崛起了。台中不像台南、高雄有「天生的港」,它的崛起,完全依賴於後天的「連結方式」對它是否有利。而鐵路,正是第一個讓「在中間」這件事,從劣勢變成優勢的時代力量。</p>
+      <p>這也讓台中成為系列裡一個有趣的對照。台南是「歷史自己長出來的」古都、高雄是「被國家為工業而打造的」港,而台中,則是「<em>被鐵路與規劃,在圖紙上設計出來的</em>」現代都會。它的棋盤街道、它的車站、它的公園,都是被精心「畫」出來的,而非自然演化的。這份「計畫性」與「現代感」,將成為台中的城市基因——它日後那些寬闊的大道、整齊的重劃區(後面的專章),其實都延續著日治時期這套「在圖紙上規劃一座城」的傳統。台中,從這一刻起,學會了用「規劃」與「連結」來成就自己。而緊接著,在這座新城的土壤上,將綻放出一朵讓台中引以為傲的花——文化。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">✒ ✦ ✒</div>
+  <p>在這座新城的土壤上,綻放出一朵讓台中驕傲的花。<br>一群仕紳與知識分子,在這裡點燃了一把火——<br><span class="hl">追求台灣人尊嚴與文化的火,成就了「文化城」之名。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The City of Culture</span>
+    <h2 class="act-title">文化城:中部的知識與抵抗中心</h2>
+    <p class="act-sub">Lin Hsien-tang, the Cultural Association, and Taichung's Proudest Name</p>
+    <div class="ornament">✒ ✒ ✒</div>
+  </div>
+  <div class="prose">
+    <p>台中有一個它最引以為傲、也最常自我認同的稱號——「<strong>文化城</strong>」。這個稱號不是憑空而來的城市行銷,而是深深根植於日治時期的一段輝煌歷史:台中,曾是<em>台灣人文化啟蒙與民族運動最重要的重鎮之一</em>。在那個被殖民的年代,正是中部的仕紳與知識分子,在這座城裡點燃了一把追求台灣人尊嚴與文化主體性的火。這把火,是台中身世裡最閃亮的一頁。</p>
+
+    <h3>霧峰林家與林獻堂</h3>
+    <p>故事的核心人物,是<strong>林獻堂</strong>與他所出身的<strong>霧峰林家</strong>。霧峰林家是台灣中部首屈一指的望族,在清代以軍功與田產崛起,到了日治時期,以林獻堂為代表的這一代,則把家族的力量,投注到了一件更高遠的事業上——<em>為台灣人爭取權利與尊嚴</em>。林獻堂被譽為「台灣議會之父」,他長期領導著體制內的抗爭,推動「<strong>台灣議會設置請願運動</strong>」,要求殖民政府給予台灣人自治的權利。霧峰林家的宅邸(霧峰林家花園),不只是一座華麗的園林,更是當時台灣民族運動的重要據點與精神象徵。</p>
+    <div class="pull"><p>當許多城市還在埋頭拚經濟時,台中的仕紳們,已經在思考一個更大的問題:身為被殖民的台灣人,我們如何活得有尊嚴、有文化、有自己的聲音?</p></div>
+
+    <h3>台灣文化協會:啟蒙的火炬</h3>
+    <p>1921 年,在林獻堂等人的支持下,<strong>台灣文化協會</strong>成立——這是日治時期台灣<em>文化啟蒙運動</em>最重要的組織。它透過舉辦演講會、讀報社、放映電影、巡迴宣講等方式,向廣大的台灣民眾傳播現代知識、民族意識與文化自覺,要喚醒被殖民者的心靈。雖然文化協會的主要活動遍及全台,但中部、台中一帶,正是它重要的活動核心與發源地之一。一座城市,成為「啟蒙」與「覺醒」的基地——這賦予了台中一種深刻的<em>知識性與抵抗性</em>的城市氣質。「文化城」之名,正是源於這段台中作為「台灣人精神與文化抵抗中心」的光榮歷史。</p>
+
+    <h3>文教傳統的延續</h3>
+    <p>這份文化的根基,在戰後也以各種形式延續。台中聚集了相當多的學校、文教機構,長期維持著濃厚的文教氛圍;它也孕育、吸引了不少文人、藝術家。「文化城」不只是一個歷史標籤,更內化為台中人的一種<em>自我認同與驕傲</em>——它讓這座原本「晚開發、靠後天崛起」的城,擁有了一份不輸給古都的、屬於精神層面的厚度。在很長一段時間裡,「台中是文化城」這個印象,是台中區別於「政治台北、工業高雄」的核心身分。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 用文化,為自己掙得一個身分</span>
+      <p>文化城的故事,揭示了台中如何「重新定義自己」的第一個經典範例。台中沒有台南的古老起點、沒有台北的政治中心地位、沒有高雄的港口與工業——在這些「硬實力」上,它都不是第一。但它找到了一條屬於自己的路:<strong>用「文化」與「精神」,為自己掙得一個獨一無二的身分。</strong>當別的城市以權力、財富、工業定義自己時,台中以「文化城」定義自己——這是一種高明的、屬於台中的自我定位策略。</p>
+      <p>這也呼應了台中整部身世「靠後天、靠重新定義自己」的主線。林獻堂與文化協會點燃的那把火,讓台中證明了:<em>一座城市的價值,不只在於它擁有多少實質的權力與財富,更在於它能不能成為某種精神與價值的中心。</em>「文化城」這個身分,是台中靠著它的仕紳、它的知識分子、它的抵抗精神,主動為自己創造、爭取來的。然而,文化城的光環之下,台中還有一片廣大而多元的腹地,被一條鐵路分成了兩個截然不同的世界——下一章,我們要走進「山線」與「海線」的故事。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⫴ ✦ ⫴</div>
+  <p>文化城的光環之下,台中還有一片廣大的腹地,<br>被一道台地、兩條鐵路,劃成了兩個世界——<br><span class="hl">靠山的「山線」,與面海的「海線」。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · Mountain Line, Coast Line</span>
+    <h2 class="act-title">山線與海線:被鐵路分裂又縫合的腹地</h2>
+    <p class="act-sub">Two Lines, Two Worlds — the Plural Hinterland of Taichung</p>
+    <div class="ornament">⫴ ⫴ ⫴</div>
+  </div>
+  <div class="prose">
+    <p>台中不只是那座棋盤狀的市區與文化城,它還有一片廣大而多元的腹地。而這片腹地,被一個獨特的鐵路地理,分成了兩個性格迥異的世界——「<strong>山線</strong>」與「<strong>海線</strong>」。理解這對「雙線」的分合,就理解了大台中真正多元而複雜的身體,也理解了序章那道「大肚山台地」如何把這座城劃成了兩半。</p>
+
+    <h3>一道台地,兩條鐵路</h3>
+    <p>序章提過,台中盆地的西側橫亙著一道<strong>大肚山台地</strong>,把內陸的盆地與西側的海岸平原分隔開來。當縱貫鐵路通過台中時,因應這個地形與聚落分布,鐵路在中部<em>分成了兩條路線</em>:一條走內陸盆地、靠山的「<strong>山線</strong>」(經豐原一帶),一條走西側靠海的「<strong>海線</strong>」(經清水、沙鹿、大甲一帶),兩條線在南北兩端交會。這道「山線/海線」的分野,不只是兩條鐵軌,更劃出了大台中兩種不同的地理、產業與生活樣貌。</p>
+    <div class="pull"><p>一道大肚山台地,把台中劃成了兩個世界:靠山的、與靠海的。它們同屬一個台中,性格卻大不相同。</p></div>
+
+    <h3>海線:面海的閩南漁農與道卡斯</h3>
+    <p>「<strong>海線</strong>」是台中面向海洋的一側——清水、沙鹿、大甲、梧棲、大安等沿海鄉鎮。這裡有著與盆地市區不同的氣質:它更接近傳統的<em>閩南漁農社會</em>,有著靠海維生的聚落、農田與漁港(梧棲港),也是平埔道卡斯族(大甲社等,呼應第一章)曾經的家園。海線最著名的文化象徵,是<strong>大甲鎮瀾宮的媽祖遶境</strong>——這場每年動輒數十萬人、徒步綿延數天、跨越中南部的進香盛事,是全台規模最大的宗教活動之一(呼應台灣的諸神之島),也是海線、乃至整個台中最旺盛的民間信仰生命力的展現。</p>
+
+    <h3>山線:靠山的客家與農林</h3>
+    <p>「<strong>山線</strong>」則是台中靠近內陸與山區的一側——豐原、潭子、后里,以及更往山裡的東勢、新社、和平等地。這裡的氣質又不同:豐原一帶曾是繁榮的<em>商業與木業重鎮</em>(昔日山區林木集散之地);而東勢一帶,則是台中重要的<strong>客家聚落</strong>(呼應台灣的客家族群),有著與閩南海線不同的客家文化、語言與信仰;更往山裡的和平區,則是<em>原住民(泰雅族等)的原鄉</em>與高山林地。山線,連結著台中從平原到丘陵、再到高山的多元地貌與族群。</p>
+
+    <h3>分裂,也是縫合</h3>
+    <p>於是,大台中其實是一個極其多元的拼貼:盆地的現代市區、面海的閩南漁農(海線)、靠山的客家與木業(山線)、深山的原住民部落。山線與海線曾因鐵路的分隔而各自發展、甚至帶著一點彼此的區隔感;但它們又同屬一個「台中」,被鐵路的兩端、被共同的行政與生活圈所縫合。這種「<em>被一道台地分裂、又被一個台中縫合</em>」的多元腹地,是台中身世中常被市區光環掩蓋、卻極其重要的一面。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 一座城裡的多重世界</span>
+      <p>山線與海線的故事,揭示了「台中」這個名字底下,藏著一個遠比「文化城」「科技城」更複雜多元的真實。<strong>它不是一塊均質的整體,而是由盆地、海岸、丘陵、高山,由閩南、客家、原住民、平埔記憶,層層拼貼而成的多重世界。</strong>一道大肚山台地、兩條鐵路,就把這座城劃出了「靠山」與「靠海」兩種截然不同的生活。</p>
+      <p>這也讓台中成為一個「<em>微縮的台灣</em>」——它內部就包含了台灣的多元地理與族群:有海洋與漁農、有平原與都會、有客家與山林、有原住民的原鄉。而它面對的整合課題——如何讓市區的繁華不只獨厚自己、如何讓山線海線的多元被看見與善待——其實正是台灣「城鄉差距」「多元共存」難題的地方版本。從這個角度看,台中「在中間」的身分,不只是地理上的南北之中,更是一種「<em>兼容並蓄、多元拼貼</em>」的中間性。而支撐起這片多元腹地、讓台中真正在經濟上站起來的,是一個低調卻驚人的力量——下一章,讓我們認識台中那個「隱形的製造王國」。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚙ ✦ ⚙</div>
+  <p>在山與海之間的盆地廠房裡,<br>藏著一個外人不熟悉、卻驚人的祕密——<br><span class="hl">由黑手與中小企業撐起的、世界級的隱形製造王國。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Hidden Kingdom</span>
+    <h2 class="act-title">隱形的製造王國:黑手打造的世界級聚落</h2>
+    <p class="act-sub">Machine Tools, Bicycles, and the Quiet Manufacturing Powerhouse</p>
+    <div class="ornament">⚙ ⚙ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>台中有一個外人不太熟悉、卻極為驚人的身分——它是一座<strong>世界級的製造王國</strong>。當人們談台中時,總想到文化城、想到好天氣、想到太陽餅;卻很少有人知道,在台中盆地的廠房裡,藏著台灣、甚至全球最頂尖的精密機械與製造聚落之一。這個「<em>隱形</em>」的製造實力,是台中經濟真正的底氣,也塑造了這座城市最樸實、最硬底的性格。</p>
+
+    <h3>工具機:製造業的「工業之母」</h3>
+    <p>台中最了不起的產業,是<strong>精密機械與工具機</strong>(製造機器的機器)。以台中為核心、向周邊(如台中精密機械園區、神岡、大里一帶)綿延的這個產業聚落,是台灣<em>工具機產業的心臟</em>,讓台灣長期位居全球工具機重要的生產與出口國之列。工具機被稱為「工業之母」——因為它是用來製造其他所有機器與零件的母機。台中能在這個高度依賴技術積累、精密度與經驗的領域做到世界級,靠的不是天然資源,而是<em>數十年的技術沉澱與綿密的產業協作網絡</em>。這正是台中「靠後天、靠實力」性格的最佳體現。</p>
+    <div class="pull"><p>台中不靠海、不靠天然資源,它靠的是一雙雙「黑手」——數十年來在廠房裡,一刀一銼、一絲不苟地,把「製造」這件事做到世界頂尖。</p></div>
+
+    <h3>自行車王國:從巨大到美利達</h3>
+    <p>台中製造王國最閃亮的招牌之一,是<strong>自行車產業</strong>。全球知名的自行車大廠——<em>巨大機械(Giant,捷安特)</em>與<em>美利達(Merida)</em>——都以台中(及周邊的大甲一帶)為根據地。它們不只是代工,更打造出自己的世界級品牌,並帶動了周邊綿密的<strong>自行車零組件產業聚落</strong>(輪圈、變速器、車架……),形成一個完整、強大的產業生態系。台中因此被稱為「<em>自行車產業的搖籃</em>」,是全球高階自行車產業鏈上一個無可取代的核心。從工具機到自行車,再到各式手工具、五金、水五金(如彰化鄰近一帶)等,中部構成了台灣「<strong>隱形冠軍</strong>」最密集的腹地。</p>
+
+    <h3>黑手起家的中小企業性格</h3>
+    <p>這個製造王國,是由無數<strong>中小企業</strong>撐起來的。它的典型形象,是「<em>黑手頭家</em>」——許多老闆都是從基層的黑手技術工做起,憑著一身硬底的技術、一股不服輸的拚勁、與一只皮箱跑遍世界接單的精神(這呼應了台灣經濟奇蹟中中小企業的底色),從小工廠一步步打拚出世界級的事業。這種「<em>務實、低調、重技術、肯打拚</em>」的黑手性格,深深地烙印在台中的城市氣質裡。它不像台北那樣精緻時髦、不像台南那樣悠閒講究——台中有一種<em>樸實、海派、肯做事、不浮誇的中部硬底子氣質</em>,而這份氣質,正是從這片製造王國的廠房與機油味裡,一點一滴養出來的。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 真正的實力,往往是隱形的</span>
+      <p>製造王國的故事,揭示了台中身世中一個最被低估、卻最堅實的面向:<strong>台中真正的底氣,不在它表面的文化光環或宜居印象,而在那個藏在廠房裡、由黑手與中小企業撐起的世界級製造實力。</strong>這是一種「隱形」的偉大——它不喧嘩、不搶眼,卻實實在在地,讓台中在全球產業鏈上,佔據了無可取代的位置。</p>
+      <p>這也完美呼應了台中「靠後天崛起、靠重新定義自己」的主線。台中沒有天然的港口與資源,它的經濟實力,完全是靠「<em>把技術做到極致</em>」這件事拚出來的——工具機需要數十年的精密積累、自行車需要完整的產業協作,這些都不是天上掉下來的,而是黑手頭家們一刀一銼磨出來的。如果說「文化城」是台中用精神為自己掙得的身分,那麼「製造王國」就是台中用雙手、用實力為自己掙得的身分。這兩者一虛一實,共同構成了台中的底蘊。而隨著時代推進,這座靠製造崛起的城,即將迎來一次讓它「暴發」、卻也帶來焦慮的巨變——縣市合併,與第二大城的誕生。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">➤ ✦ ➤</div>
+  <p>靠著製造的實力與不斷的成長,<br>台中迎來了它最戲劇性的一次翻身——<br><span class="hl">縣市合併,後來居上,成為台灣的第二大城。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Second City</span>
+    <h2 class="act-title">大台中:第二大城的誕生與重心西移</h2>
+    <p class="act-sub">The Merger, Overtaking Kaohsiung, and the Shift of the City's Heart</p>
+    <div class="ornament">➤ ➤ ➤</div>
+  </div>
+  <div class="prose">
+    <p>2010 年,台中迎來了它身世中又一次巨大的轉折——<strong>縣市合併升格</strong>。這次變革,讓台中的規模、地位與自我認知都發生了根本性的改變,它甚至在人口上後來居上,超越了高雄,成為台灣的<em>第二大城</em>。這是台中「在中間崛起」最具體、最戲劇性的一次實現,但這份「暴發」的榮光背後,也藏著它新的焦慮。</p>
+
+    <h3>合併:從台中市縣,到「大台中」</h3>
+    <p>2010 年,原本的<strong>台中市與台中縣合併</strong>,升格為直轄市(這呼應了大高雄、大台南的脈絡)。合併後的「大台中」,把原本的市區核心,與廣大的腹地——山線的豐原東勢、海線的清水大甲、以及更外圍的鄉鎮(第六章)——整合為一個單一的直轄市。這次合併大幅擴張了台中的版圖與人口。</p>
+    <p>更具象徵意義的是,在合併與持續的人口成長之後,<strong>台中的人口超越了高雄,躍居全台灣第二大城</strong>(僅次於新北市/台北都會區的範疇)。對一座「晚開發、曾省城夢碎、靠後天崛起」的城而言,這是一個極具份量的里程碑——它證明了台中那條「不斷重新定義自己、後來居上」的路,真的走成了。曾經那個盆地裡的大墩街,如今成了台灣數一數二的大都會。</p>
+    <div class="pull"><p>從差點當不上省城,到後來居上成為第二大城——台中用一百多年證明了:晚到的城,也能靠後天的努力,走到舞台的中央。</p></div>
+
+    <h3>中區的沒落:舊市中心的黃昏</h3>
+    <p>但繁華的背後,是一場城市重心的劇烈遷移,並帶來了一個令人感傷的對照。台中最古老、最核心的市中心——<strong>中區</strong>(日治時期車站、綠川一帶規劃的精華地段,第四章)——曾是台中最繁華的所在:火車站、第一廣場、繼光街、各大商號雲集,是幾代台中人記憶中「逛街」的中心。然而,隨著城市的擴張與重心的轉移,中區逐漸<em>沒落、老化、空洞化</em>——人潮散去、商業凋零,曾經的精華區成了承載著老台中記憶、卻略顯黯淡的舊城。(近年透過鐵路高架化、舊城再生、文創進駐等努力,中區也正試圖找回生機。)</p>
+
+    <h3>重心西移:新市政中心的崛起</h3>
+    <p>與中區沒落相對的,是城市重心的<strong>西移</strong>。台中的繁華中心,從舊的中區、一路向西、向新開發的區域遷移,最終落腳在西屯一帶——新的<em>市政中心(新市府)</em>、與閃亮的<strong>七期重劃區</strong>(下一章的主角)。這裡有著全新規劃的寬闊大道、現代化的市政大樓、高聳的豪宅與百貨,構成了「新台中」的門面。台中的城市重心,就這樣從日治規劃的舊核心,漂移到了當代開發的新都心——<em>新與舊、繁華與沒落,在同一座城市裡形成了鮮明的對照。</em></p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 後來居上的榮光,與重心漂移的代價</span>
+      <p>大台中的誕生,是台中「在中間崛起」這條主線最輝煌的實現,也暴露了它最新的張力。一方面,從「省城夢碎」到「第二大城」,台中徹底翻轉了它「晚開發、差一步」的宿命,證明了一座靠後天努力、不斷重新定義自己的城,真的能後來居上。這是屬於台中的、得來不易的榮光。</p>
+      <p>但另一方面,這場崛起也帶來了「<em>重心漂移</em>」的代價——當城市的能量一窩蜂地湧向新的重劃區時,老的市中心(中區)被快速地拋下、掏空。這形成了台中身世中一個鮮明的對照:<em>新台中的暴發與舊台中的沒落,並存於同一座城市。</em>這份「不斷向新的地方蓋、不斷拋下舊的地方」的發展模式,將在下一章「七期與重劃區」中,展現得淋漓盡致——它既是台中活力的來源,也是它焦慮的根源。一座永遠在「向外擴張、向新處奔去」的城,該如何面對它被留在身後的過去?這是當代台中必須回答的問題。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">▦ ✦ ▦</div>
+  <p>成為第二大城的台中,用一種獨特的方式擴張——<br>它不斷在郊區「畫」出新的市區,一圈圈向外蓋,<br><span class="hl">造就了七期的閃亮,與舊中區的黯淡。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Ever-Expanding City</span>
+    <h2 class="act-title">七期與重劃區:一座不斷向外蓋的城</h2>
+    <p class="act-sub">Land Zones, Luxury Towers, and a City Built for the Car</p>
+    <div class="ornament">▦ ▦ ▦</div>
+  </div>
+  <div class="prose">
+    <p>當代台中最鮮明的城市意象,是<strong>重劃區</strong>——一片片在農地與郊區上,被整體規劃、重新劃分、然後快速開發起來的新市區。而其中最著名、最具代表性的,就是「<strong>七期</strong>」(第七期市地重劃區)。理解台中的重劃區開發模式,就理解了「新台中」的長相、它的繁華與空曠、以及它獨特的城市性格。</p>
+
+    <h3>重劃區:台中的開發DNA</h3>
+    <p>台中的城市擴張,高度依賴一種叫做「<strong>市地重劃</strong>」的開發模式:政府(或地主)把一片原本零散的農地或郊區,整體性地重新規劃——畫出筆直寬闊的棋盤大道、整齊的街廓、公園綠地與公共設施,然後釋出土地進行開發。這種模式,某種程度上延續了日治時期「在圖紙上規劃一座城」的傳統(第四章),把台中變成了一座<em>不斷透過重劃、向外蔓延生長</em>的城。從一期、二期……一路到七期、乃至更外圍的單元,台中就像年輪一樣,一圈一圈地向外擴張。這讓台中擁有了全台難得的、大面積整齊而現代的市容。</p>
+    <div class="pull"><p>台中的成長方式,不是讓老城自己慢慢長,而是不斷在郊區「畫」出一塊新地、整體開發——它是一座靠「重劃」一圈圈向外蓋出來的城。</p></div>
+
+    <h3>七期:豪宅、歌劇院與新台中的門面</h3>
+    <p>「<strong>七期</strong>」(西屯一帶)是這套模式最華麗的成果,也是「新台中」的門面與市政中心(第八章)。這裡有著:寬到驚人的<em>大道與綠園道</em>、林立的<strong>高級豪宅</strong>(七期豪宅是台中財富的象徵,房價高昂)、新穎的市政大樓與商業設施、大型百貨。其中最具國際聲量的地標,是由日本建築大師設計、造型前衛的<strong>台中國家歌劇院</strong>——它以獨特的曲牆結構聞名,是台中現代與文化企圖心的象徵。七期,展現了台中「<em>有錢、有規劃、有現代感、有企圖心</em>」的一面,是這座後來居上的第二大城,獻給世界的新名片。</p>
+
+    <h3>寬闊的大道,與汽車的城市</h3>
+    <p>重劃區的開發,也塑造了台中獨特的<strong>空間感與生活方式</strong>。台中的街道,以「寬、直、大」聞名——這份開闊,源自日治規劃與重劃區的設計傳統。而寬闊的道路、相對分散的重劃區、不臨海又地形平坦的盆地,共同造就了台中成為一座高度依賴<strong>汽車</strong>的城市。比起台北的捷運、高雄的機車海,台中是一座典型的「<em>汽車城市</em>」——這也是台中生活感與其他城市不同的一個鮮明特徵(雖然台中也已開始發展捷運與BRT等大眾運輸)。寬街、豪宅、歌劇院、汽車——這些共同構成了「新台中」現代而開闊的樣貌。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 永遠向外蓋,留下了什麼?</span>
+      <p>七期與重劃區的故事,揭示了當代台中最核心的發展模式與性格:<strong>它是一座「永遠在向外蓋、向新處生長」的城。</strong>透過一圈圈的重劃,台中不斷地在郊區創造出嶄新、寬闊、現代的市區,展現出驚人的開發活力與成長動能。這份「不斷向外擴張」的能力,是台中後來居上、成為第二大城的重要引擎。</p>
+      <p>但這個模式也藏著一個值得深思的問題——<em>當一座城市總是熱衷於「在新的地方蓋新的城」時,那些被留在身後的舊城(中區)、那些被開發的農地、那些重劃區裡尚未填滿的空曠,又該如何安放?</em>新台中的繁華,與舊台中的沒落(第八章),正是這個模式的一體兩面。台中的活力來自「向外」,但它的記憶與根,卻在「身後」。這座靠重劃不斷重新定義自己空間的城,終究要面對「成長」與「保存」、「新」與「舊」之間的平衡。而它另一個必須平衡的,是它最自豪的本錢——好天氣、好生活,與這份美好背後,正在浮現的環境代價。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">☀ ✦ ☁</div>
+  <p>在這座不斷擴張的城裡,人們追求的是一種好生活。<br>好天氣、好步調、好吃好喝——「最宜居」是它的招牌;<br><span class="hl">但這份美好的背後,也有一道需要被誠實面對的灰天空。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Livable City</span>
+    <h2 class="act-title">宜居與其代價:好生活與灰天空的拉扯</h2>
+    <p class="act-sub">The Most Livable City, and the Grey Skies It Must Reckon With</p>
+    <div class="ornament">☀ ☁ ☀</div>
+  </div>
+  <div class="prose">
+    <p>如果問台灣人「哪座城市最適合居住」,台中常常是答案之一。這份「<strong>宜居</strong>」的印象,是台中最受珍視的城市資產之一,它源自序章那份得天獨厚的好氣候,也源自台中獨特的生活步調。但這份美好的背後,台中也面臨著一個切身的環境課題——空氣品質。好生活與灰天空,構成了當代台中一個真實的拉扯。</p>
+
+    <h3>「最宜居」的印象從何而來</h3>
+    <p>台中的宜居形象,有幾個扎實的支柱。其一是<strong>氣候</strong>(序章)——四季溫和、相對乾爽、少有極端天氣,是全台公認最舒服的天氣之一。其二是<strong>生活的開闊與從容</strong>——寬闊的街道、大面積的公園綠地(如秋紅谷、各重劃區的綠園道)、不像台北那樣高壓擁擠的步調、相對台北親民的房價(雖然七期豪宅是例外)。其三是<strong>豐富的生活機能與獨特的台中味</strong>——台中有著蓬勃的餐飲、咖啡、文創文化,更孕育了風靡全台、乃至全球的<em>珍珠奶茶</em>(相傳發源於台中的茶飲文化),以及作為伴手禮代表的<em>太陽餅</em>。好天氣、好步調、好吃好喝——這些共同構成了「台中,好生活」的迷人印象,吸引了大量人口移入(這也是它人口成長、躍居第二大城的原因之一)。</p>
+    <div class="pull"><p>台中最迷人的,不是哪一座地標,而是一種「好天氣配上不疾不徐的好生活」的整體感受——一種剛剛好的、舒服的城市溫度。</p></div>
+
+    <h3>灰天空:中部空污的爭議</h3>
+    <p>然而,這份美好,近年來面臨一個嚴峻的挑戰——<strong>空氣污染</strong>。中部地區的空污問題,成為台中宜居形象上的一道陰影。其成因複雜:既有來自大型<em>火力發電廠</em>(中部的火力電廠是全台重要的供電來源,卻也是空污的爭議焦點)、工業排放的因素;也有台中盆地的<em>地形因素</em>——序章提到台中盆地被群山環抱,這份「屏障」帶來了好天氣,卻也意味著<em>空氣不易擴散</em>,在特定季節(尤其秋冬)容易累積污染物。於是,曾經以「好天氣」自豪的台中,在某些日子裡,卻要面對灰濛濛的天空與紫爆的空品。這讓「空污」成為近年台中(乃至整個中部)最受關注、也最具政治與環境張力的議題之一。</p>
+
+    <h3>好生活的兩面</h3>
+    <p>空污的爭議,讓台中的「宜居」有了更複雜的面貌。它提醒人們:一座城市的「好生活」,不能只看好天氣、好步調、好吃好喝這些表面的舒適,更要看它腳下的環境是否健康、它的空氣是否乾淨、它的發展是否付出了不該付出的代價。台中面對的拉扯,本質上是一個許多現代城市共同的難題——<em>經濟發展(供電、工業)與環境品質(空氣、健康)之間的平衡</em>(這呼應了高雄「拚經濟的代價」的脈絡,只是台中的形式不同)。如何在「宜居」的招牌下,真正守護好它的環境,是台中必須誠實面對的課題。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 美好,需要被誠實地守護</span>
+      <p>宜居與空污的故事,揭示了台中身世中一個關於「美好」的深刻提醒:<strong>一座城市的宜居,從來不是理所當然、也不是一成不變的——它需要被誠實地檢視、被認真地守護。</strong>台中擁有得天獨厚的好天氣、好步調、好生活,這是它最珍貴的資產;但同樣是那座「帶來好天氣的盆地」,也讓污染不易擴散——美好與隱憂,竟來自同一個地理源頭。</p>
+      <p>這也讓台中的「宜居」,從一個單純的優勢,變成了一份「<em>需要被守護的責任</em>」。台中的吸引力,很大程度上建立在「生活品質」之上;而空氣品質,正是生活品質中最基本、卻最容易被發展犧牲的一環。當台中繼續成長、繼續發展工業與科技(下一章)時,它必須回答一個問題:它能不能在追求成長的同時,守住那個讓它如此迷人的「好生活」?畢竟,如果連最基本的乾淨空氣都失去了,那麼再寬闊的大道、再華麗的歌劇院,也撐不起「宜居」這兩個字。而這道「成長與品質」的平衡題,在台中面對它最新的時代機遇——科技產業的進駐時,將變得更加迫切。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">＄ ✦ ＄</div>
+  <p>後來居上、宜居繁華的台中,卻仍有一個未解的問題。<br>卡在南北之間、什麼都有一點的它,<br><span class="hl">當科技帶來新的機遇,究竟想成為什麼?</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Crossroads in the Middle</span>
+    <h2 class="act-title">今日的十字路口:科技、夾擊與「中間」的宿命</h2>
+    <p class="act-sub">Silicon, the Squeeze, and the Search for an Identity</p>
+    <div class="ornament">＄ ✦ ＄</div>
+  </div>
+  <div class="prose">
+    <p>走到今天,台中站在一個耐人尋味的十字路口。它已經是台灣的第二大城、是世界級的製造王國、是宜居的好生活之城——但它身世裡那個最核心的關鍵字「<strong>中間</strong>」,卻也帶來了一個始終縈繞不去的問題:<em>當台中卡在南北之間、卡在傳統與科技之間時,它到底想成為什麼?它能不能走出一個屬於自己的、清晰的定位?</em>這是當代台中最深的課題。</p>
+
+    <h3>中科與護國神山:新的時代機遇</h3>
+    <p>台中當代最重要的機遇,是<strong>科技產業的升級</strong>。位於台中的<em>中部科學園區(中科)</em>,已成為台灣重要的科技產業基地;而隨著台積電(護國神山,呼應台灣經濟章)在中科的擴廠與投資,大量的高科技資本、工作與人才湧入台中。這對台中意義重大:它讓台中得以從傳統的精密機械、製造業(第七章),向更高階的半導體與科技產業升級,為這座城市注入新的經濟動能與人口。台中那個「<em>位居中央、交通便利、生活宜居、製造底蘊深厚</em>」的綜合優勢,正好成為吸引科技投資的良好條件。台中,有機會在半導體的時代,再一次「重新定義自己」。</p>
+    <div class="pull"><p>從工具機到半導體,台中又一次站在「重新定義自己」的關口——它要從製造王國,升級為科技之城嗎?</p></div>
+
+    <h3>南北夾擊下的「中間者」</h3>
+    <p>但台中的「中間」位置,既是優勢,也是它永恆的張力來源。它<strong>夾在台北與高雄(乃至南科)之間</strong>:北有政經與資源高度集中的首都圈,南有奮力轉型、同樣爭取科技投資的高雄與台南。台中既要承接北部外溢的資源與人口,又要在與南部的競爭中爭取產業與建設。這種「<em>南北夾擊</em>」的處境,讓台中始終要在巨人之間找到自己的生存空間。它的「中間性」,讓它左右逢源,卻也讓它容易被南北的光芒所掩蓋——人們談台灣的城市,總先想到政治的台北、想到轉型的高雄、想到古都台南,而「中間」的台中,它的形象與定位,反而常常是<em>模糊</em>的。</p>
+
+    <h3>文化城光環的褪色與重尋</h3>
+    <p>這份「定位模糊」的焦慮,也體現在台中引以為傲的「<strong>文化城</strong>」光環上(第五章)。隨著時代變遷、城市快速擴張與商業化,有人感嘆台中昔日那種濃厚的文化、知識氣息有所淡化,「文化城」更多時候成了一個歷史的稱號,而非當下鮮活的現實。於是,當代台中面臨一個身分重尋的課題:<em>它還是不是那個「文化城」?它的當代身分,究竟該是製造王國、科技之城、宜居之都、還是重新擦亮的文化城?</em>——這些可能的定位,反映的正是台中「在中間、什麼都有一點、卻不確定自己最該是什麼」的深層認同課題。</p>
+    <div class="debate">
+      <div class="debate-head">爭議 · 台中該如何定義自己?</div>
+      <div class="debate-body">
+        <div class="view"><span class="who">科技升級論</span>認為,台中應全力擁抱中科與半導體,以高科技產業作為新的城市引擎與定位,從「製造王國」升級為「科技之城」,徹底擺脫定位模糊的困境。</div>
+        <div class="view"><span class="who">生活品質論</span>則認為,台中最大的本錢是「宜居」與「生活感」,應以好天氣、好生活、文化與休閒為核心,避免重蹈工業污染的覆轍,走一條與台北高雄不同的「<strong>生活之城</strong>」路線。</div>
+        <div class="view"><span class="who">綜合中間論</span>認為,台中的優勢恰恰在於它的「中間性」與「均衡」——它不必只選一個,而可以兼具製造、科技、文化與宜居,做一座「<em>什麼都不極端、但什麼都不錯</em>」的均衡之城。但批評者則擔心,這種「什麼都是」的定位,反而會讓台中始終缺乏一個鮮明、不可取代的城市身分。</div>
+      </div>
+    </div>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 「在中間」,是優勢還是宿命?</span>
+      <p>台中的十字路口,把它整部身世的核心命題,推到了最尖銳的時刻:<strong>「在中間」,究竟是台中最大的優勢,還是它揮之不去的宿命?</strong>台中的一生,都是靠「中間」的位置與「重新定義自己」的能力而崛起的——它因地理中央而成為鐵路樞紐、因均衡而宜居、因什麼都有一點而充滿可能。但「中間」「均衡」「什麼都有一點」的另一面,也可能是「<em>定位模糊、缺乏一個鮮明而不可取代的身分</em>」。</p>
+      <p>這正是台中與系列裡其他城市最深的不同。台南的身分清晰得不能再清晰——它是「起點」;高雄的身分也鮮明——它是「港」與「轉型中的工業城」;台北是「中心」。唯有台中,它的身分一直是流動的、可塑的、需要被不斷重新定義的——從省城夢、到文化城、到製造王國、到宜居之都、到科技新貴。<em>台中最大的特質,就是它「沒有一個固定的、與生俱來的身分」,而必須一次次地,為自己選擇與創造身分。</em>這既是它的自由,也是它的焦慮。而台中能否在這個科技與轉型的新時代,終於為自己找到(或創造出)一個既發揮「中間」優勢、又鮮明而自信的定位——這,將決定這座「在中間崛起」的城,下一個百年的模樣。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⚙ ☩</div>
+  <p>一座好天氣的盆地,一個碎掉的省城夢,一條造城的鐵路,一把文化的火,一個隱形的製造王國,與一場後來居上的崛起。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的台中,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的台中</h2>
+      <p class="act-sub" style="color:rgba(243,238,226,.6)">Why Taichung Became What It Is</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⚙ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整座城收攏成一條線。今天的台中之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程,也都圍繞著同一個關鍵字:<strong>中間</strong>。</p>
+
+      <h3>第一層:地理,給了它「好天氣」與「中間」</h3>
+      <p>一切的源頭是<strong>地理</strong>。一座被群山屏障的盆地,給了台中全台最舒服的好天氣——這是它「宜居」形象最原始的根源。而它「位居台灣地理中央、卻不臨海」的位置,則定下了它一生的基調:在海運時代,它因「沒有海」而開發較晚、起步落後;但它「在中間」的位置,埋著一個只要時代的連結方式改變、就會翻身的契機。台中的命運,從一開始就寫在「好天氣」與「中間」這兩件事上。</p>
+
+      <h3>第二層:它總是「差一步」,卻學會了靠自己</h3>
+      <p>接著是<strong>「差一步」的宿命與自立的性格</strong>。台中沒有台南的古老起點,它的漢人開發從樸實的「大墩街」晚晚地開始;它曾差一點成為台灣的省城,卻又眼睜睜看著中心地位飛向台北。這份「很接近、卻不是最終被選中的那一個」的經驗,逼出了台中「<em>不靠天賦、只能靠後天努力</em>」的性格——它必須靠自己,一次次地證明、創造、重新定義自己的價值。</p>
+
+      <h3>第三層:鐵路與規劃,把它「造」了出來</h3>
+      <p>然後是<strong>後天的崛起</strong>。當連結台灣的主軸從海運變成鐵路,台中「在中間」的位置瞬間從劣勢翻轉為優勢——它成為縱貫鐵路的樞紐,並被日本人用棋盤街廓,在圖紙上「規劃」成一座現代城市。從此,台中學會了用「<em>連結</em>」(地理中點、交通樞紐)與「<em>規劃</em>」(棋盤街、重劃區)來成就自己。它的寬闊、它的現代感、它不斷向外蓋的擴張模式,都源於此。</p>
+
+      <h3>第四層:它用文化與製造,為自己掙得身分</h3>
+      <p>接著是<strong>身分的創造</strong>。台中沒有與生俱來的身分,於是它主動為自己創造:它用林獻堂與文化協會點燃的精神之火,掙得了「<em>文化城</em>」的稱號;它用黑手頭家與中小企業的硬底實力,打造了世界級的「<em>製造王國</em>」(工具機、自行車)。一虛一實,這兩個靠後天爭取來的身分,構成了台中真正的底蘊——它證明了,一座城市的價值,可以靠精神與雙手,自己掙出來。</p>
+
+      <h3>第五層:後來居上,卻仍在尋找自己是誰</h3>
+      <p>最後是<strong>崛起與認同的張力</strong>。透過縣市合併與持續成長,台中後來居上,成為台灣第二大城——徹底翻轉了「差一步」的宿命。但繁華的背後,是新台中的暴發與舊中區的沒落、是宜居招牌下的空污隱憂、更是一個始終縈繞的問題:<em>卡在南北之間、什麼都有一點的台中,究竟想成為什麼?</em>當科技(中科、護國神山)帶來新的機遇,台中又一次站在「重新定義自己」的關口。</p>
+
+      <div class="investor">
+        <span class="tag">城市的回聲 · 一座永遠在重新定義自己的城</span>
+        <p>所以,今天的台中是什麼?它是一座<strong>沒有海、沒有古老首府傳統、曾經差一步、卻靠著好天氣、鐵路、文化、製造與不斷重新定義自己,而後來居上的城</strong>。它的好天氣是盆地給的,它的崛起是鐵路給的,它的身分是文化與製造掙來的,它的繁華是重劃蓋出來的——而貫穿這一切的,是它「在中間」的位置,與「重新定義自己」的能力。</p>
+        <p>台中最深刻的真相是:<em>它是台灣城市裡,唯一一座「沒有與生俱來的、固定身分」的城——它的身分,從來不是被給予的,而是被一次次地選擇與創造出來的。</em>台南是「起點」、台北是「中心」、高雄是「港」,它們的身分是命運給定的;唯有台中,它的身分一直是流動的、可塑的:省城、文化城、製造王國、宜居之都、科技新城……它什麼都可以是,也什麼都還沒完全定下。這既是「在中間」的焦慮——定位模糊、容易被南北掩蓋;也是「在中間」的自由——它永遠有重新出發、重新定義自己的可能。台中的故事還沒寫完,因為它始終在問那個最台中的問題:<strong>下一個我,要成為什麼?</strong>——而一座永遠願意重新定義自己的城,本身,就擁有最多的可能。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">盆地給了台中好天氣,鐵路給了它樞紐,文化與製造給了它底蘊,合併給了它規模——而「在中間」,既是它的宿命,也是它一次次重新定義自己、後來居上的自由。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座中間之城的終極啟示</span>
+      <p>一座城市的價值,未必來自與生俱來的天賦或固定的身分,有時恰恰來自它「不被給定」、必須靠自己一次次重新定義的命運。沒有海、沒有古老首府傳統、總是差一步的台中,正是靠著好天氣、靠著連結、靠著文化與雙手、靠著永不停止地追問「下一個我要成為什麼」,而從盆地中央的一個小土丘,崛起為台灣的第二大城。這,就是台中至今仍在書寫的故事。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,238,226,.78);margin-top:2.5rem">
+        從一座被群山屏障、有著最好天氣的盆地、大肚王國的土地,<br>
+        到墾拓者老實築起的大墩街、那個差一步的省城夢,<br>
+        從日本人用鐵路與棋盤街畫出的現代新市,<br>
+        到林獻堂點燃的文化之火、黑手打造的製造王國,<br>
+        從後來居上的第二大城、七期閃亮的天際線,<br>
+        到好天氣下的好生活、與灰天空裡的省思,<br>
+        這座沒有海、卻在中間崛起、永遠在重新定義自己的城,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的台中。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+
+<footer>
+  <div class="orn">⚙ ✦ ⛩</div>
+  <p>大墩 · 在中間崛起的城</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE MOUND TO THE MIDDLE · MIDDAG – PRESENT</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{const h=document.documentElement;pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';});
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

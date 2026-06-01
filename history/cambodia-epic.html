@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大湖、神廟與廢墟:柬埔寨的身世史詩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c1509;
+  --parchment:#f4ecd7;
+  --parchment-deep:#e7dab8;
+  --stone:#3a4a4f;
+  --stone-deep:#1d292d;
+  --gold:#b08a2c;
+  --gold-bright:#d6ac49;
+  --saffron:#bb5a1c;
+  --crimson:#871d12;
+  --jade:#34604a;
+  --faint:#665a3c;
+  --line:#c6b67e;
+  --shadow:rgba(28,21,9,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,138,44,.08), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(58,74,79,.07), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(58,74,79,.5), transparent 65%),
+    linear-gradient(165deg, var(--stone-deep) 0%, var(--stone) 48%, #43545a 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d6ac49' stroke-width='0.6' opacity='0.16'%3E%3Cpath d='M600 220 l30 70 50 -40 -20 60 70 10 -60 35 40 60 -65 -25 -15 70 -15 -70 -65 25 40 -60 -60 -35 70 -10 -20 -60 50 40 Z' fill='%23d6ac49' opacity='0.13'/%3E%3Cpath d='M420 760 l40 -120 50 70 60 -120 60 120 50 -70 40 120 Z'/%3E%3Ccircle cx='600' cy='600' r='540'/%3E%3Ccircle cx='600' cy='600' r='400'/%3E%3Ccircle cx='600' cy='600' r='250'/%3E%3Cpath d='M60 600 H1140 M600 60 V1140'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 250s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,215,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--stone-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--saffron);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--stone-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--saffron);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--stone-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--stone-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(58,74,79,.05), rgba(176,138,44,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--stone-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT (歷史的回聲) ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--stone-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(29,41,45,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--saffron));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,215,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c878;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--saffron);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--saffron);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--stone-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--saffron);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--stone-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,138,44,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(58,74,79,.05);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--saffron);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--stone-deep),var(--stone));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d6ac49' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,215,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c878}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(214,172,73,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--saffron));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--stone-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#100c06 !important}
+.dark .act-title{color:#d6c79e}
+.dark .prose p{color:#cab992}
+.dark .prose strong{color:#cf7244}
+.dark .prose em{color:#d8aa74}
+.dark .prose h3{color:#cf7244;border-left-color:var(--saffron)}
+.dark .act-sub{color:#887752}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(135,29,18,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--saffron);margin-bottom:.5rem;font-weight:600}
+
+/* ===== interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--stone-deep);font-weight:500}
+.interlude p .hl{color:var(--saffron);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,215,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--saffron);font-style:normal}
+
+/* ===== legacy & shift ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--stone-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--stone-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--saffron);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(58,74,79,.05);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--saffron)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--saffron);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--stone-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--stone-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The Land of Angkor · Who the Khmer Became</span>
+    <h1>大湖、神廟與<span class="em">廢墟</span><br>柬埔寨<br>的身世</h1>
+    <p class="sub">從一座會「呼吸」的大湖、一座令世界屏息的石造神廟,到一個曾統治半個中南半島、又經歷人類史上最黑暗一場自我屠殺的國度——<br>一部關於「為何今天的柬埔寨與柬埔寨人是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的柬埔寨,是一個國旗上印著一座神廟、人民以一段「失落的偉大」為傲、卻又默默背負著一段「無法言說的傷痛」的國家?為什麼這片土地上,既矗立著人類最宏偉的宗教建築之一,又埋藏著數以百萬計的無名枯骨?答案不在當下,而在千餘年的縱深裡。一座會隨季風漲縮、像在呼吸的大湖,養出了一個富庶到能驅動數十萬人、用石頭堆出神山的帝國;吳哥的高棉王在叢林中建起了一座座神廟,把自己刻成神的化身;但盛極而衰,這個曾經的霸主在數百年裡被它養大的鄰居——暹羅與越南——從兩側不斷蠶食、擠壓,幾乎被吞沒;法國的「保護」讓它在帝國的夾縫中苟存,卻也把它捲入了印度支那的戰火;最後,一群高舉著「重建純粹」旗幟的革命者,在短短三年多裡,讓這個國家經歷了人類史上最徹底的一場自我毀滅。這不是一個一帆風順的故事,而是一片<em>從巔峰墜入深淵、又從廢墟中艱難爬起</em>的土地,如何背負著「最偉大」與「最慘痛」這兩段極端的記憶,默默地、固執地活下來的故事。讓我們從頭走一遍,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--saffron);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Land</span>
+    <h2 class="act-title">在所有人來之前,這裡有什麼?</h2>
+    <p class="act-sub">The Lake That Breathes, and the River That Feeds an Empire</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的柬埔寨人,得先回到一個比所有國王、所有神廟都更古老的問題:在他們來之前,這裡有什麼?答案,藏在一片會「呼吸」的水裡——一座神奇的大湖,與一條餵養它的大河。</p>
+
+    <h3>洞里薩:一座會呼吸的湖</h3>
+    <p>先看地圖。柬埔寨的心臟,是一座東南亞最大的淡水湖——<strong>洞里薩湖（Tonlé Sap）</strong>。它最神奇之處,在於它會隨著季節「呼吸」:旱季時,湖水經由洞里薩河流入湄公河,湖面縮小;而到了雨季,湄公河暴漲,河水竟會<em>倒灌</em>進湖裡,讓湖面擴張到旱季的數倍之大。這一漲一縮之間,大湖把肥沃的泥沙與洪水,均勻地鋪灑在周邊廣闊的氾濫平原上,並孕育出全世界最豐饒的<strong>淡水漁場</strong>之一。記住這一點:<em>這座會呼吸的大湖,是柬埔寨文明的搖籃——它提供了魚與米這兩樣養活一個帝國所需的全部。</em></p>
+
+    <h3>魚與米:一個帝國的引擎</h3>
+    <p>正是這份得天獨厚的富饒,讓這片土地能夠養活異常密集的人口、累積驚人的剩餘財富。洞里薩湖的「呼吸」帶來的天然灌溉與漁獲,加上高棉人發展出的精密<em>水利系統</em>(水庫、運河、蓄水池),使這裡的稻米能夠一年多穫。<strong>充沛的糧食,意味著可以供養大量不事生產的人口——僧侶、工匠、官員,以及最重要的:成千上萬建造神廟的勞動力。</strong>一個文明能投入多少資源去「堆石頭蓋神山」,取決於它的肚子有多飽——而柬埔寨的肚子,在那個年代,飽得驚人。</p>
+    <div class="pull"><p>一座會呼吸的大湖,給了高棉人取之不盡的魚與米;而正是這份富饒,讓他們有餘力,用石頭堆出一座座令世界屏息的神山。</p></div>
+
+    <h3>四面開闊:富庶的祝福與詛咒</h3>
+    <p>但這片富饒的平原,還有一個將深刻影響其命運的特質——它<em>四面相對開闊</em>。柬埔寨不像寮國那樣被群山緊緊鎖住,它的核心地帶是一片連綿的低地平原,西接暹羅(泰國)、東鄰越南。在它強盛時,這片開闊的平原是它向四方擴張的坦途;但當它衰弱時,同樣是這片無險可守的開闊,讓它暴露在兩側鄰居的蠶食之下。今天柬埔寨所有的故事——它曾有的偉大、它後來的衰落、它與暹羅和越南那段愛恨交織的關係——根源都在這裡:<em>它生在一片由大湖養育的、富饒卻無險可守的平原上。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 富饒是第一作者</span>
+      <p>在任何國王、任何帝國、任何革命登場之前,<strong>那座會呼吸的大湖</strong>,就已經寫好了這個故事的開頭。一片由洞里薩湖的「呼吸」所養育、富饒到能驅動帝國的平原,註定會誕生出一個輝煌的文明;但它四面開闊、無險可守的地形,也註定了當這個文明衰弱時,它將難以抵禦來自兩側的蠶食。</p>
+      <p>這是理解柬埔寨的第一把鑰匙:<em>它今天所有的特質——它對「失落的偉大」(吳哥)的無比驕傲、它後來淪為「夾在暹越之間」的弱國、以及那份「我們曾經如此偉大,為何淪落至此」的深沉集體情結——其實都是同一個地理事實的一體兩面:它生在一片富饒卻無屏障的土地上。</em>富饒,讓它登上過巔峰;無險,又讓它墜入過深淵。柬埔寨的全部歷史,就是這「大起」與「大落」之間,一場由地理寫定的、劇烈的擺盪。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">卐 ✦ 卐</div>
+  <p>大湖的富饒,吸引來了海上的商船與印度的諸神。<br>而一位自稱「宇宙之王」的國王,將在這片平原上,<br><span class="hl">用石頭,堆起一座獻給神、也獻給自己的神山。</span></p>
+</div>
+
+<!-- ===== 第一章:吳哥的興起 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The God-Kings</span>
+    <h2 class="act-title">宇宙之王,與石頭堆成的神山</h2>
+    <p class="act-sub">Funan, Chenla, and the Rise of the Angkor Empire</p>
+    <div class="ornament">卐 卐 卐</div>
+  </div>
+  <div class="prose">
+    <p>所有人都會問:那座令世界屏息的吳哥,是如何崛起的?故事要從更早說起。早在西元最初幾個世紀,大湖與湄公河流域就已孕育出受印度文明深刻影響的早期王國——海上貿易發達的<strong>扶南（Funan）</strong>,以及繼之而起的<strong>真臘（Chenla）</strong>。來自印度的<em>印度教與梵文、王權觀念、藝術與建築</em>,沿著貿易路線傳入,與本土的高棉文化交融,為後來的偉大奠定了基礎。</p>
+
+    <h3>闍耶跋摩二世:一個帝國的開端</h3>
+    <p>西元 802 年,一位名叫<strong>闍耶跋摩二世（Jayavarman II）</strong>的國王,在荔枝山(Phnom Kulen)舉行了一場意義非凡的儀式,宣告自己為獨立的「<strong>轉輪聖王(Chakravartin)</strong>」、宇宙的統治者,擺脫了外部勢力的宗主權。這一年,被視為<strong>吳哥王朝（Angkor Empire）</strong>的開端。一個將統治中南半島大部分地區、延續六百年的偉大帝國,就此誕生。</p>
+
+    <h3>神王思想:把國王刻成神</h3>
+    <p>吳哥帝國的核心,是一套獨特而強大的政治宗教思想——「<strong>神王（Devaraja）</strong>」崇拜。高棉的國王不只是凡間的統治者,更被視為印度教大神(濕婆或毗濕奴)在人間的<em>化身</em>,是連接天界與人間的橋樑。而為了彰顯這份神性、為了積累功德、也為了在人間複製神話中諸神居住的「<em>須彌山</em>」,每一位偉大的吳哥國王,都會傾全國之力,建造屬於自己的<strong>神廟</strong>。這些用巨石堆砌、層層升高、象徵宇宙中心聖山的神廟,正是吳哥留給世界最震撼的遺產。</p>
+    <div class="pull"><p>吳哥的國王相信,自己是神在人間的化身。於是他們用石頭,在大地上複製天上的神山——既是獻給神,也是把自己,變成神。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 富饒,化為了神性</span>
+      <p>吳哥帝國的崛起,完美地承接了序章的伏筆:<strong>正是那座會呼吸的大湖所提供的驚人富饒,才使「神王」與「神山」成為可能。</strong>建造一座吳哥神廟,需要動員數以萬計的勞工、工匠與資源,持續數十年——這樣龐大的工程,只有一個糧食極度充裕、能供養大量非生產人口的社會才負擔得起。<em>魚與米的富饒,在這裡被轉化成了石頭與神性。</em></p>
+      <p>這揭示了吳哥文明的內在邏輯,也埋下了它日後衰亡的伏筆。<em>整個帝國的運轉,都建立在「富饒 → 供養 → 建廟 → 鞏固神王權威」這個循環之上。</em>這套體系在富饒持續時固然輝煌無比;但它也意味著,這個文明把巨大的資源,投入到了「建造神廟」這種無法直接再生產的事業上。當有一天,支撐這一切的根基——那套精密的水利系統與富饒的環境——開始動搖時,這座建立在富饒之上的神性帝國,便會比任何人想像的都更加脆弱。但那是後話。此刻,讓我們先去看一看,這份富饒所堆出的、人類建築史上的奇蹟。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ✦ 卐</div>
+  <p>在所有神王、所有神山之中,有兩座最為不朽。<br>一座,是獻給毗濕奴的、人類最大的宗教建築;<br><span class="hl">另一座,則由一位棄印度教而皈依佛陀的國王,刻滿了慈悲的微笑。</span></p>
+</div>
+
+<!-- ===== 第二章:吳哥的巔峰 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Zenith</span>
+    <h2 class="act-title">吳哥窟的尖塔,與巴戎寺的微笑</h2>
+    <p class="act-sub">Suryavarman II, Jayavarman VII, and the Glory of Angkor</p>
+    <div class="ornament">卐 ☸ 卐</div>
+  </div>
+  <div class="prose">
+    <p>吳哥帝國的偉大,在兩位國王手中達到了登峰造極的境界,他們也留下了人類文明史上最不朽的兩座建築。</p>
+
+    <h3>蘇利耶跋摩二世與吳哥窟</h3>
+    <p>十二世紀上半葉,國王<strong>蘇利耶跋摩二世（Suryavarman II）</strong>,為供奉印度教大神毗濕奴、並作為自己的陵廟,動員舉國之力,建造了一座曠世巨構——<strong>吳哥窟（Angkor Wat）</strong>。這座神廟以其完美的比例、層層升高的迴廊、五座象徵須彌山的蓮花苞尖塔,以及綿延數百米、栩栩如生描繪印度史詩(如「攪拌乳海」)的精美浮雕,成為<strong>世界上最大的宗教建築</strong>。它的莊嚴與壯美,八百多年來令每一個見到它的人屏息。今天,它依然矗立在叢林中,並被印在了柬埔寨的國旗上——這是全世界唯一一個國旗上印著建築的國家。</p>
+    <div class="pull"><p>吳哥窟——世界上最大的宗教建築,被印在了一個國家的國旗上。一個民族把它「最偉大的記憶」,永遠地舉過了頭頂。</p></div>
+
+    <h3>闍耶跋摩七世與巴戎寺的微笑</h3>
+    <p>不久之後,帝國迎來了它最後、也最具傳奇色彩的偉大君主——<strong>闍耶跋摩七世（Jayavarman VII）</strong>。他在帝國一度被鄰國占婆攻陷的危機中即位,擊退外敵、重整江山,並把帝國的疆域與聲威推向頂點。與前人不同的是,他<em>皈依了大乘佛教</em>,將帝國的信仰從印度教轉向佛教。他大興土木,建造了新都城<strong>吳哥城（Angkor Thom）</strong>及其中心的<strong>巴戎寺（Bayon）</strong>。巴戎寺最攝人心魄之處,是它數十座塔上、那一張張面帶神秘微笑、向四方俯視的<em>巨大石刻人面</em>——後世稱之為「<strong>高棉的微笑</strong>」。他還廣建醫院與驛站,展現了一位佛教君主的慈悲。</p>
+    <div class="aside"><span class="hl">驚人的規模:</span>在其鼎盛期,大吳哥地區可能居住著數十萬到上百萬人口,是當時全世界最大的前工業城市之一,其複雜的水利網絡至今仍令考古學家驚嘆。</div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一個民族的「黃金記憶」</span>
+      <p>吳哥的巔峰,為柬埔寨民族塑造了一個將永遠定義它的東西——一段<strong>「失落的偉大」的黃金記憶</strong>。吳哥窟與高棉的微笑所代表的,是一個曾經統治半個中南半島、創造出人類最頂尖建築藝術的、無比輝煌的文明。這份記憶,是每一個柬埔寨人民族自尊的源泉。</p>
+      <p>但這份「黃金記憶」,是一把雙面刃,它深刻地塑造了柬埔寨的集體心理。<em>一方面,對「曾經偉大」的記憶,給了這個飽經苦難的民族一份無法被奪走的尊嚴與認同——無論後來淪落得多麼悲慘,他們始終記得「我們曾經是吳哥的子民」。</em>但另一方面,這份過於輝煌的記憶,也成了一份沉重的<em>心理負擔</em>:它讓「現在的衰落」與「過去的偉大」形成了刺眼的對比,催生出一種深沉的失落感、一種「光榮不再」的集體哀傷。理解了吳哥這份「黃金記憶」的雙重重量,就理解了柬埔寨民族心靈的一半——它既是驕傲的源泉,也是哀愁的根源。而這份哀愁,即將在帝國衰亡的數百年裡,被無限地放大。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ✦ ☸</div>
+  <p>當神王把帝國的資源都堆成了石頭,一場無聲的轉變正在底層發生。<br>一種新的信仰,從鄰國傳入,悄悄瓦解了支撐神王的根基——<br><span class="hl">它告訴每一個人:解脫,不必透過國王,也不必透過神山。</span></p>
+</div>
+
+<!-- ===== 第三章:衰落與信仰的轉變 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Fading</span>
+    <h2 class="act-title">神山的崩解,與一種更謙卑的信仰</h2>
+    <p class="act-sub">The Decline of Angkor and the Turn to Theravada</p>
+    <div class="ornament">☸ ☸ ☸</div>
+  </div>
+  <div class="prose">
+    <p>沒有一個帝國能永遠停留在巔峰。從十三、十四世紀起,曾經不可一世的吳哥帝國,開始走向漫長而複雜的衰落。它的衰亡沒有單一的原因,而是多重因素的疊加——而其中一些,正源於它賴以偉大的根基本身。</p>
+
+    <h3>為何盛極而衰?</h3>
+    <p>學者們指出了幾個交織的原因。<strong>其一,是那套水利系統的脆弱</strong>:支撐龐大人口的精密水利網絡,可能因長期的維護不善、淤積,以及氣候變遷(嚴重的旱災與洪災交替)而逐漸失靈,動搖了帝國的糧食根基。<strong>其二,是「建廟」的沉重負擔</strong>:歷代神王投入海量資源建造神廟,長期消耗著國力。<strong>其三,是外部的壓力</strong>:西邊新興的<em>泰人王國(素可泰、阿瑜陀耶)</em>日益強大,不斷侵擾,並在 1431 年前後攻陷了吳哥。最終,高棉的王室放棄了這座偉大的都城,將首都南遷至金邊一帶。吳哥城,逐漸被叢林吞沒,淹沒在歷史的記憶裡。</p>
+    <div class="pull"><p>吳哥的衰亡,藏著一個深刻的諷刺:那套讓它偉大的「富饒—建廟」體系,當根基動搖時,反而成了壓垮它的重擔。</p></div>
+
+    <h3>一種更謙卑的信仰:上座部佛教</h3>
+    <p>與帝國衰落同時發生的,是一場深刻的信仰轉變。從鄰近的斯里蘭卡、經由泰國傳入的<strong>上座部佛教（Theravada Buddhism）</strong>,在這幾個世紀裡,逐漸取代了原本的印度教與大乘佛教,成為高棉社會的主流信仰,至今依然。這場轉變意義深遠:上座部佛教是一種<em>更平民、更個人、更謙卑</em>的信仰——它不需要神王、不需要昂貴的神山,它告訴每一個普通人,可以透過自己的修行與積德,直接追求解脫。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 從神王到僧侶</span>
+      <p>從印度教「神王」到上座部佛教的這場轉變,標誌著柬埔寨文明性格的一次深刻轉向。<strong>它從一個以「宏偉、神性、王權」為核心的擴張性帝國文明,轉向了一個以「謙卑、平和、個人修行」為核心的鄉村佛教社會。</strong>那位俯視四方、把自己刻成神的「宇宙之王」消失了,取而代之的,是清晨在村莊裡托缽的、平凡的橙袍僧侶。</p>
+      <p>這裡藏著一份意味深長的對照。<em>支撐吳哥偉大的「神王思想」,本質上是一種需要傾盡國力去供養的、高度集中的權力崇拜;而上座部佛教,則是一種讓人安於現狀、向內尋求平靜的謙卑信仰。</em>當高棉人從「建造神山的子民」變成「托缽行善的信眾」時,他們失去了帝國的雄心與榮光,卻也獲得了一種在苦難中安身立命的內在力量。這份佛教的平和與韌性,將在接下來數百年的衰落、屈辱、乃至滅頂之災中,成為柬埔寨人賴以存續的精神支柱。只是,衰落的腳步,才剛剛開始——前方等待這個失去了帝國光環的民族的,是被兩個鄰居夾在中間、幾乎被吞沒的數百年。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>失去了吳哥的光環,這個昔日的霸主淪為了弱者。<br>而它兩側的鄰居——西邊的暹羅、東邊的越南——<br><span class="hl">正像兩張巨口,從兩個方向,一口一口地,啃食著它的身體。</span></p>
+</div>
+
+<!-- ===== 第四章:夾在暹越之間 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · Between Two Tigers</span>
+    <h2 class="act-title">被兩頭猛虎啃食的數百年</h2>
+    <p class="act-sub">The Long Decline Between Siam and Vietnam</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>從十五世紀放棄吳哥,到十九世紀,是柬埔寨歷史上最漫長、最屈辱的一段「<strong>黑暗時代</strong>」。這個曾經統治半個中南半島的霸主,徹底淪為了一個弱小、分裂、任人擺布的王國。而讓它陷入絕境的,是它兩側那兩個正在崛起的鄰居——回想序章,柬埔寨的核心是一片無險可守的開闊平原,如今這成了致命傷。</p>
+
+    <h3>兩張巨口:暹羅與越南</h3>
+    <p>西邊,是日益強大的<strong>暹羅（泰國,阿瑜陀耶與後來的曼谷王朝）</strong>;東邊,是正在沿著海岸線「南進」、不斷向湄公河三角洲擴張的<strong>越南</strong>。這兩個鄰居,從兩個方向不斷地侵蝕、蠶食柬埔寨的領土,並把它變成自己的<em>藩屬</em>。柬埔寨的國王,常常不得不同時向曼谷與順化(越南王都)兩邊稱臣納貢,在兩個宗主之間艱難地求生。更慘的是,柬埔寨的王位繼承,也屢屢淪為暹越兩國介入、扶植傀儡的角力場——王子們往往要靠投靠這一邊或那一邊,才能登上王位。</p>
+    <div class="pull"><p>一個曾經建造吳哥的帝國,如今淪落到要同時向兩個鄰居下跪——西邊的暹羅,與東邊的越南。被兩頭猛虎,從兩側啃食。</p></div>
+
+    <h3>失去的土地,與一種「生存的恐懼」</h3>
+    <p>這段歷史,讓柬埔寨永久地失去了大片領土。尤其在東邊,越南的「南進」吞併了原屬高棉的<em>湄公河三角洲</em>地區(高棉人稱之為「下柬埔寨」Kampuchea Krom,即今天越南南部的胡志明市一帶),那裡至今仍生活著大量的高棉裔居民。在十九世紀中葉,柬埔寨甚至一度被暹羅與越南瓜分、共管,幾乎要從地圖上消失。<em>「被鄰居吞沒」的恐懼,從此深深地烙印在柬埔寨的民族心理之中。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 從巔峰墜入深淵的落差</span>
+      <p>這段「夾在兩虎之間」的數百年,在柬埔寨民族心靈上,刻下了一道與吳哥的「黃金記憶」同樣深刻、卻完全相反的烙印——一種<strong>「亡國的恐懼」與「被鄰居吞噬」的深沉焦慮</strong>。當一個民族,曾經站在過吳哥那樣的巔峰,卻又親身經歷了幾乎被暹越兩國從地圖上抹去的深淵時,這種<em>從最高處墜入最低處的巨大落差</em>,會在它的集體潛意識裡,埋下難以磨滅的創傷。</p>
+      <p>這份「對鄰居的恐懼」與「對失去的偏執」,將成為理解柬埔寨近現代史的一把關鍵鑰匙。<em>它解釋了為何柬埔寨對越南始終懷有極深的猜忌與敵意(尤其針對被越南吞併的下柬埔寨);也部分地、令人不寒而慄地,預示了後來紅色高棉那套「重返純粹高棉、清除一切外來污染、奪回失土」的偏執狂熱,其心理根源從何而來。</em>一個曾經偉大、卻被反覆羞辱、幾近滅亡的民族,它內心深處對「純粹」與「偉大」的病態渴望,以及對「被吞噬」的極端恐懼,正是在這數百年的屈辱中,被一點一點地累積起來的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚜ ✦ ⚜</div>
+  <p>正當柬埔寨即將被兩個鄰居徹底瓜分時,一個來自遙遠歐洲的帝國伸出了手。<br>它帶來了「保護」,把柬埔寨從亡國邊緣拉了回來;<br><span class="hl">但這份保護,也讓它成了另一場更大風暴中,身不由己的一環。</span></p>
+</div>
+
+<!-- ===== 第五章:法國保護國 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Protectorate</span>
+    <h2 class="act-title">法國的「保護」,與被凍結的時光</h2>
+    <p class="act-sub">French Indochina and a Kingdom Preserved in Amber</p>
+    <div class="ornament">⚜ ⚜ ⚜</div>
+  </div>
+  <div class="prose">
+    <p>就在柬埔寨即將被暹羅與越南瓜分殆盡的危急時刻,歷史的劇本被一個外來者改寫了。十九世紀下半葉,正在擴張其「印度支那」殖民帝國的<strong>法國</strong>,把目光投向了柬埔寨。1863 年,柬埔寨國王諾羅敦(Norodom)與法國簽訂條約,接受法國的「<strong>保護</strong>」,柬埔寨成為法國的保護國。</p>
+
+    <h3>一份雙面的「保護」</h3>
+    <p>這份「保護」對柬埔寨而言,意義極其複雜。<strong>一方面,它確實救了柬埔寨。</strong>法國的介入,阻止了暹羅與越南繼續瓜分這個王國,讓奄奄一息的柬埔寨得以作為一個政治實體存續下來;法國後來還透過外交施壓,從暹羅手中為柬埔寨<em>討回了包括吳哥在內的西北部省份</em>。從這個角度看,是法國,把柬埔寨從亡國的邊緣拉了回來,並讓它重新擁有了自己最珍貴的「黃金記憶」吳哥。</p>
+    <div class="pull"><p>法國的殖民,對柬埔寨是一份矛盾的禮物:它奪走了主權,卻也救回了一個瀕臨滅亡的國家——並把吳哥,還給了它的子民。</p></div>
+
+    <h3>被凍結的王國,與被忽視的角落</h3>
+    <p><strong>但另一方面,這終究是殖民。</strong>法國保留了柬埔寨的王室作為統治的門面(維持了王朝的延續),實權卻牢牢掌握在法國總督手中;它徵收賦稅、開發橡膠種植園、並像在寮國一樣,大量引進<em>越南人</em>來擔任行政官員——這再次加深了高棉人對越南人的猜忌。與越南相比,法國對柬埔寨的投入同樣有限,把它當作印度支那聯邦中一個相對寧靜、被忽視的角落。在近一個世紀的殖民統治下,柬埔寨彷彿被「凍結」在了時光裡——它的王室、它的鄉村社會、它的佛教傳統,大致維持了原樣,既未被現代化深刻改造,也未被徹底摧毀。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 救命恩人,還是新的枷鎖?</span>
+      <p>法國保護國這段歷史,給柬埔寨留下了一份難以簡單評斷的複雜遺產。<strong>從「存續」的角度看,法國是救命恩人——沒有它的介入,柬埔寨很可能已被暹越兩國徹底瓜分,從此不復存在。</strong>它讓柬埔寨保住了王室、保住了國土的核心、並重新拿回了吳哥這份民族尊嚴的源泉。</p>
+      <p>但從更深的層次看,這份「保護」也帶來了新的問題。<em>法國的統治,雖然延續了王朝的形式,卻也中斷了柬埔寨自我發展、自我更新的可能,把它「凍結」在了一個前現代的狀態,並培養出的本土精英嚴重不足。</em>更重要的是,它把柬埔寨牢牢地綁進了「印度支那」這個與越南、寮國共享的殖民框架之中。這個框架,將在二十世紀帶來致命的後果:當越南的反殖民與共產革命的烈火燃起時,被綁在同一輛戰車上的柬埔寨,將無可避免地被捲入那場席捲整個印度支那的、慘烈的戰爭與革命漩渦——而這場漩渦,最終將把它拖入人類歷史上最黑暗的深淵之一。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">★ ✦ ★</div>
+  <p>二戰的烽火動搖了法國,獨立的曙光終於降臨。<br>一位充滿魅力、被尊為「國父」的王子,帶領柬埔寨走向自主;<br><span class="hl">但他試圖在冷戰的風暴中保持中立的努力,終究擋不住鄰國戰火的蔓延。</span></p>
+</div>
+
+<!-- ===== 第六章:獨立與西哈努克 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · Independence</span>
+    <h2 class="act-title">「國父」的鋼索,與一場躲不掉的戰火</h2>
+    <p class="act-sub">Sihanouk, Neutrality, and the Spillover of a Neighbor's War</p>
+    <div class="ornament">★ ★ ★</div>
+  </div>
+  <div class="prose">
+    <p>二戰削弱了法國的殖民力量,印度支那的獨立浪潮風起雲湧。在柬埔寨,一位年輕的國王成為了這場運動的核心人物——<strong>諾羅敦·西哈努克（Norodom Sihanouk）</strong>。他充滿魅力、精力旺盛、手腕靈活,透過巧妙的外交斡旋,於 1953 年為柬埔寨贏得了完全的<strong>獨立</strong>。隨後,他甚至放棄王位、投身政治,以「親王」之姿主導國政,被柬埔寨人尊為「<em>國父</em>」。獨立後的柬埔寨,迎來了一段相對和平、繁榮的「黃金歲月」。</p>
+
+    <h3>在冷戰風暴中走鋼索</h3>
+    <p>但西哈努克面對的,是一個極其凶險的時代。柬埔寨恰好被夾在冷戰最熾熱的戰場——<strong>越南戰爭</strong>的旁邊。為了讓柬埔寨免於被捲入這場大國的對決,西哈努克竭力推行<em>中立政策</em>,試圖在美國、中國、北越與南越之間,走一條艱難的鋼索。他既不願得罪強大的美國,又不願與正在崛起、近在咫尺的北越為敵。然而,這條鋼索越來越難走——當越戰的規模不斷擴大,柬埔寨這片緊鄰戰場、又無險可守的開闊土地,終究無法置身事外。</p>
+    <div class="pull"><p>西哈努克想讓柬埔寨在冷戰的風暴中保持中立——但一個緊鄰著戰場、又無險可守的小國,從來就沒有真正「中立」的權利。</p></div>
+
+    <h3>戰火的蔓延與秘密轟炸</h3>
+    <p>越戰的戰火,終究還是燒了過來。如同寮國一樣,北越在柬埔寨東部邊境地區設立了補給線與庇護所(「胡志明小道」的一部分),用以支援南越的戰事。為了打擊這些目標,美國從 1960 年代末起,對柬埔寨東部展開了大規模的<strong>秘密轟炸</strong>,投下了數十萬噸炸彈,造成大量平民傷亡與社會動盪。1970 年,親美的將領<em>龍諾(Lon Nol)</em>發動政變,推翻了在外訪問的西哈努克,把柬埔寨正式拖入了戰爭。國家陷入內戰,經濟崩潰,社會撕裂——<em>而這場由外部戰火點燃的混亂與苦難,恰恰為一股潛藏在叢林中的、更極端的力量,提供了崛起的完美溫床。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 中立的幻滅</span>
+      <p>西哈努克時代的悲劇,再一次印證了柬埔寨「無險可守的開闊平原」這個地理宿命。<strong>它太靠近越戰這個巨大的漩渦,以至於無論它的領袖多麼努力地想保持中立,都無法阻止戰火的蔓延與大國的介入。</strong>美國的轟炸、北越的滲透、內部的政變——這個小國,被無可選擇地拋入了一場本不屬於它的、席捲整個地區的風暴之中。</p>
+      <p>但這段歷史最深遠、也最致命的後果,在於它<strong>製造了滋生極端主義的完美土壤</strong>。<em>大規模的轟炸摧毀了鄉村、製造了無數無家可歸、心懷怨恨的難民與孤兒;內戰與經濟崩潰瓦解了舊有的社會秩序;美國的介入則激起了強烈的反帝、反西方情緒。</em>當一個社會被戰爭撕得粉碎、當人民在絕望中尋找出路時,一股高舉著「徹底革命、重建純粹」旗幟的力量,便有了乘虛而入的機會。下一章,我們將見證,當柬埔寨那份源自吳哥的「對偉大的渴望」、那份源自衰亡的「對純粹的偏執」、與這場戰爭製造的「絕望與狂熱」三者結合時,會釀成怎樣一場人類史上罕見的災難。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☠ ✦ ☠</div>
+  <p>1975 年 4 月,一支身穿黑衣的軍隊開進了金邊,人們起初以為和平終於來臨。<br>但他們帶來的,不是和平,<br><span class="hl">而是一個要把時間歸零、把一個民族重新「打造」的、瘋狂的烏托邦實驗。</span></p>
+</div>
+
+<!-- ===== 第七章:紅色高棉 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · Year Zero</span>
+    <h2 class="act-title">「零年」:一個民族的自我屠殺</h2>
+    <p class="act-sub">The Khmer Rouge and the Killing Fields</p>
+    <div class="ornament">☠ ☠ ☠</div>
+  </div>
+  <div class="prose">
+    <p>這是整部柬埔寨史中,最黑暗、最難以言說的一章。1975 年 4 月 17 日,在內戰中獲勝的共產主義武裝「<strong>紅色高棉（Khmer Rouge）</strong>」,在領袖<strong>波布（Pol Pot）</strong>的率領下,開進了首都金邊。一場人類歷史上最徹底、最瘋狂的社會改造實驗,就此開始。</p>
+
+    <h3>「零年」:把時間歸零</h3>
+    <p>紅色高棉的意識形態,是一種被推向極致的、農本的共產主義。他們宣稱要把柬埔寨的歷史<strong>「歸零」(Year Zero)</strong>——徹底摧毀舊世界的一切,在一張白紙上,重新打造一個沒有階級、沒有金錢、沒有城市、沒有私產、絕對「純粹」的農業共產烏托邦。為此,他們在掌權的第一天,就做出了一個駭人聽聞的決定:<strong>強制疏散所有城市</strong>。金邊等城市的數百萬居民,在槍口下被驅趕出城,徒步遷往鄉村的集體農場,從事繁重的勞動。城市,在一夜之間,變成了空城。</p>
+    <div class="pull"><p>他們要把一個民族的時間,撥回到「零」——摧毀城市、金錢、學校、家庭、宗教,然後在這片廢墟上,用恐懼與屍骨,重新「打造」一個純粹的人。</p></div>
+
+    <h3>殺戮戰場</h3>
+    <p>接下來發生的,是一場系統性的恐怖。為了清除一切「不純粹」的、可能威脅革命的元素,紅色高棉展開了大規模的<strong>清洗與屠殺</strong>:知識分子、教師、醫生、僧侶、商人、少數族裔(尤其華人、越南裔、占族穆斯林)、舊政權人員、乃至任何「<em>戴眼鏡的人</em>」「會說外語的人」,都被視為敵人而遭到處決。在集體農場,無數人因過度勞動、飢餓與缺乏醫療而死去。同志之間的猜忌引發了一輪輪的內部清洗(如圖斯倫 S-21 集中營的酷刑與處決)。在那些被稱為「<strong>殺戮戰場（Killing Fields）</strong>」的地方,埋葬著數以萬計的無名枯骨。</p>
+    <div class="warn">
+      <div class="warn-tag">難以承受的代價</div>
+      <p>在紅色高棉統治的短短三年八個月裡(1975–1979),據估計約有<strong>一百五十萬到兩百萬人</strong>死於處決、勞役、飢餓與疾病——這相當於當時柬埔寨總人口的<strong>近四分之一</strong>。這是二十世紀按人口比例計算,最慘烈的種族滅絕與大規模屠殺之一。最令人心碎的是,這並非外族的入侵,而是一場<em>高棉人對高棉人的、自我的屠殺</em>。</p>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當「對純粹的渴望」變成屠刀</span>
+      <p>紅色高棉的悲劇,是柬埔寨全部歷史中那些深層暗流的、最恐怖的一次總爆發。它不是憑空出現的瘋狂,而是多重歷史創傷與極端意識形態交織的產物。<em>那份源自吳哥的「對偉大的渴望」,被扭曲成了「重建一個純粹高棉烏托邦」的狂妄;那份源自數百年衰亡的「對被吞噬的恐懼」與「對純粹的偏執」,被煽動成了對一切「外來污染」(越南、華人、西方、城市文明)的瘋狂清洗;而越戰的轟炸與內戰所製造的絕望、仇恨與社會崩解,則為這把火,澆上了汽油。</em></p>
+      <p>這留下了一個關於人類的、最沉重的警示:<strong>當一個民族對「失落的偉大」的執念、對「他者」的恐懼,與一套追求「絕對純粹」的烏托邦狂熱相結合,並由一個不受制約的極權所掌握時,它能釋放出的破壞力,足以讓一個民族親手毀滅自己。</strong>「零年」想要創造一個完美的新世界,結果卻只創造了「殺戮戰場」。柬埔寨從吳哥的「最偉大」,墜入了紅色高棉的「最慘痛」——這兩個極端,構成了柬埔寨民族記憶中,無法分割的一體兩面。而這場浩劫,將如何結束?諷刺的是,終結這場噩夢的,正是那個它最恐懼、最仇恨的鄰居。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ☮</div>
+  <p>結束這場噩夢的,不是西方,不是聯合國,<br>而是柬埔寨數百年來最恐懼、最仇恨的鄰居——越南。<br><span class="hl">但「被解放」之後,等待這個流盡了血的國家的,是漫長而複雜的重生之路。</span></p>
+</div>
+
+<!-- ===== 第八章:解放與漫長的重建 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Long Recovery</span>
+    <h2 class="act-title">越南的坦克,與廢墟上的重生</h2>
+    <p class="act-sub">Liberation, the UN, and Rebuilding from the Ashes</p>
+    <div class="ornament">☮ ☮ ☮</div>
+  </div>
+  <div class="prose">
+    <p>紅色高棉的瘋狂,最終以一種充滿諷刺的方式被終結。波布政權不僅屠殺自己的人民,還不斷向東挑釁、攻擊越南邊境(基於那份對「奪回下柬埔寨」的偏執)。1978 年底,忍無可忍的<strong>越南</strong>大舉出兵入侵柬埔寨,在 1979 年初迅速攻佔金邊,推翻了紅色高棉政權,扶植起一個親越的新政府。那個柬埔寨數百年來最恐懼、最仇恨的鄰居,竟成了把它從自我屠殺中「解放」出來的力量。</p>
+
+    <h3>冷戰的荒謬:被支持的劊子手</h3>
+    <p>但歷史的荒謬並未就此結束。由於冷戰的格局,越南(蘇聯陣營)的入侵,遭到了中國、美國與西方陣營的反對。於是出現了一個道德上極其扭曲的局面:<strong>已經犯下種族滅絕罪行的紅色高棉,竟在隨後的十多年裡,得到西方與中國的某種支持,繼續以游擊隊的形式盤踞邊境,甚至一度保有柬埔寨在聯合國的席位。</strong>柬埔寨陷入了長達十多年的內戰與越南佔領,直到 1991 年的《巴黎和平協定》。</p>
+    <div class="pull"><p>把柬埔寨從種族滅絕中解放出來的,是它最仇恨的鄰居;而那個犯下滅絕罪行的政權,卻在冷戰的算計下,被外界繼續支持了十多年。歷史的荒謬,莫此為甚。</p></div>
+
+    <h3>聯合國、王室與一個強人的崛起</h3>
+    <p>1991 年的和平協定後,聯合國史無前例地接管了柬埔寨、組織了大選,西哈努克也一度回國復辟為國王,柬埔寨重新成為一個君主立憲國家。然而,真正在此後數十年牢牢掌握實權的,是一位出身於紅色高棉、後來倒戈投越的政治強人——<strong>洪森（Hun Sen）</strong>。他以高超的政治手腕,連續執政長達三十餘年(成為世界上任期最長的政府首腦之一),近年更將權力移交給其子洪馬內,形成了某種家族政治的格局。在他的長期統治下,柬埔寨告別了戰亂、實現了和平與經濟成長(成衣業、旅遊業、與中國的緊密經濟連結),但也被批評為威權、壓制反對派與打壓異議。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 創傷之後,選擇了穩定</span>
+      <p>柬埔寨從紅色高棉的廢墟中重建的歷程,揭示了這個民族在經歷了極致創傷之後的一種深層選擇。<strong>對一個剛剛經歷了「自我屠殺」、社會結構被徹底摧毀、幾乎每一個家庭都失去過親人的民族而言,壓倒一切的渴望,是「和平」與「穩定」——哪怕代價是犧牲一部分的自由與民主。</strong></p>
+      <p>這份對「穩定」近乎本能的渴求,是理解當代柬埔寨政治的關鍵。<em>當一個社會曾經墜入過「零年」那樣的深淵,它對任何可能再次引發動盪、衝突、分裂的因素,都會懷有極深的恐懼。</em>這在某種程度上,為一個能夠提供「穩定」的強人政權,提供了它的正當性基礎。今天的柬埔寨,依然在處理紅色高棉留下的巨大創傷——透過國際法庭審判倖存的領導人、透過殺戮戰場與圖斯倫的紀念館保存記憶、也透過整整一代人對那段歷史的沉默與療癒。它在「記住傷痛」與「向前走」之間艱難地平衡,正如它整個民族,始終在「吳哥的偉大」與「殺戮的慘痛」這兩段極端記憶之間,尋找著自己的位置。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">₩ ✦ ₩</div>
+  <p>和平終於降臨,經濟開始成長,觀光客重新湧向吳哥。<br>但這個流盡了血的國家,必須在新的世界裡回答兩個問題——<br><span class="hl">如何在大國之間自處?又如何與那段「無法言說的過去」共存?</span></p>
+</div>
+
+<!-- ===== 第九章:當代柬埔寨 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · Between Memory and Growth</span>
+    <h2 class="act-title">在記憶與成長之間,在大國之間</h2>
+    <p class="act-sub">Tourism, China, and Living with the Past</p>
+    <div class="ornament">₩ ₩ ₩</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的柬埔寨,得看它如何同時背負著兩段極端的記憶——吳哥的偉大與殺戮的慘痛——在一個全新的世界裡,努力地向前走。和平之後的數十年,柬埔寨確實取得了顯著的成長:經濟持續發展,告別了赤貧,城市日新月異。而驅動這份成長的,是幾股交織的力量。</p>
+
+    <h3>吳哥:從「黃金記憶」到「黃金產業」</h3>
+    <p>柬埔寨最大的資產,依然是它「失落的偉大」——<strong>吳哥</strong>。這座沉睡在叢林中、被法國探險家「重新發現」並被列為世界文化遺產的神廟群,如今成為全球遊客嚮往的聖地,<em>觀光業</em>因此成為柬埔寨經濟的重要支柱。那份曾經是「民族尊嚴源泉」與「沉重心理負擔」的黃金記憶,在今天,又多了一重身分——它是養活無數柬埔寨人的「黃金產業」。<em>吳哥窟印在國旗上、印在啤酒商標上、也印在每一張遊客的門票上——它從未離開過柬埔寨人的生活,只是換了一種方式繼續定義著他們。</em></p>
+    <div class="pull"><p>八百年前,吳哥是高棉人獻給神的偉大;八百年後,它是高棉人賴以為生的尊嚴。同一座神廟,跨越了從巔峰到深淵、再到重生的全部旅程。</p></div>
+
+    <h3>新的巨人:中國的份量</h3>
+    <p>而在地緣政治上,柬埔寨延續了它「在大國之間求生存」的古老命題,只是棋盤上的玩家換了。近年來,<strong>中國</strong>成為柬埔寨最重要的投資者、援助國與政治盟友——從基礎建設、經濟特區,到西哈努克港的開發,中國的資金深刻地重塑著柬埔寨。對洪森政權而言,與中國的緊密關係,既帶來了發展的資金,也提供了制衡西方對其人權與民主批評的籌碼;但這也引發了「過度依賴」、主權與債務的憂慮。<em>從暹羅、越南、法國,到如今的中國——柬埔寨始終在尋找一個能依靠、卻又不被吞噬的強鄰,這道功課,從吳哥衰亡至今,從未改變。</em></p>
+
+    <h3>與「無法言說的過去」共存</h3>
+    <p>但柬埔寨當代最深的功課,是如何與紅色高棉那段創傷<strong>共存</strong>。這個社會,幾乎每一個中老年人都是大屠殺的倖存者或遇難者家屬。國家透過聯合國協助的<em>特別法庭</em>審判了少數倖存的紅色高棉領導人,透過<em>圖斯倫屠殺博物館與殺戮戰場紀念館</em>保存記憶、警示後世。然而,對許多家庭而言,那段歷史依然是難以對年輕一代啟齒的沉默傷痛。一個曾經親手屠殺了自己四分之一人口的民族,如何療癒、如何記憶、如何讓加害者與受害者(往往是同村、甚至同家的人)在同一片土地上繼續生活下去——這是一道沒有標準答案、需要用幾代人的時間去面對的功課。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 背負兩段極端記憶的民族</span>
+      <p>當代柬埔寨的處境,是它全部歷史的一次完整收束。<strong>這是一個必須同時背負「人類最偉大的成就」(吳哥)與「人類最慘痛的創傷」(殺戮戰場)這兩段極端記憶的民族。</strong>它的尊嚴與哀愁,都來自吳哥;它的傷痛與堅韌,都來自那段「零年」。而它在大國之間求存的姿態,則延續著那道從吳哥衰亡就開始的、千年不變的生存命題。</p>
+      <p>但這裡藏著一份不該被輕視的、屬於這個民族的力量。<em>一個曾經墜入過「殺戮戰場」那樣的人間地獄、失去了四分之一人口的民族,竟然能夠重新站起來——重建家園、恢復和平、讓孩子重新走進學校、讓僧侶重新走上街頭托缽、讓遊客重新在吳哥的迴廊間驚嘆。</em>這份從最徹底的毀滅中「活下來、並重新生活」的能力,本身就是一種了不起的、深植於那份佛教式韌性的生命力。柬埔寨的故事告訴我們:一個民族可以經歷最極端的偉大與最極端的苦難,而它真正的偉大,或許不在於它曾經建造過吳哥,而在於它在親手摧毀了自己之後,依然選擇了寬恕、療癒,與向前活下去。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">卐 ★ ☠</div>
+  <p>千餘年,一座會呼吸的大湖,一座石頭的神山,與一片埋著枯骨的田。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的柬埔寨與柬埔寨人,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的柬埔寨人</h2>
+      <p class="act-sub" style="color:rgba(244,236,215,.6)">Why Cambodia, and the Khmer, Are What They Are</p>
+      <div class="ornament" style="color:var(--gold-bright)">卐 ★ ☸</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的柬埔寨之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:大湖的富饒,養出了一個帝國</h3>
+      <p>一切的源頭是<strong>地理</strong>。那座會「呼吸」的洞里薩湖,用魚與米的驚人富饒,養活了異常密集的人口、累積了驚人的財富,讓高棉人有餘力去「用石頭堆出神山」。但這片土地<em>四面開闊、無險可守</em>——這個特質,在帝國強盛時是擴張的坦途,在帝國衰弱時,卻成了任憑鄰居蠶食的致命傷。富饒與無險,寫定了柬埔寨「大起大落」的命運基調。</p>
+
+      <h3>第二層:吳哥,給了它一份「黃金記憶」</h3>
+      <p>接著是<strong>偉大</strong>。在「神王」思想的驅動下,高棉人建造了吳哥窟與巴戎寺的微笑,締造了一個統治半個中南半島、創造出人類頂尖建築藝術的輝煌帝國。<em>這份「失落的偉大」,成了每一個柬埔寨人民族尊嚴的源泉——它被印在國旗上,舉過了整個民族的頭頂。</em>但這份過於輝煌的記憶,也成了一份沉重的負擔,讓後來的衰落顯得格外刺眼、格外哀傷。</p>
+
+      <h3>第三層:衰亡與夾擊,埋下了恐懼與偏執</h3>
+      <p>然後是<strong>墜落</strong>。吳哥盛極而衰,高棉人放棄了都城、轉向了更謙卑的上座部佛教;而失去光環的王國,淪為了被西邊暹羅、東邊越南兩頭猛虎夾在中間、反覆啃食、幾近滅亡的弱者。<em>這段從巔峰墜入深淵的巨大落差,在民族心靈深處埋下了一種「亡國的恐懼」、「對鄰居(尤其越南)的猜忌」與「對失土、對純粹的偏執」——這些深層的創傷,日後將釀成可怕的後果。</em></p>
+
+      <h3>第四層:戰火與狂熱,釀成了「零年」的浩劫</h3>
+      <p>最痛的是<strong>毀滅</strong>。法國的「保護」把柬埔寨從亡國邊緣救回、也將它綁進了印度支那的框架;當越戰的戰火與美國的轟炸蔓延過來,撕碎了這個無險可守的小國的社會時,一股極端力量乘虛而起。紅色高棉把那份「對偉大的渴望」扭曲成重建「純粹烏托邦」的狂妄,把那份「對他者的恐懼」煽動成瘋狂的清洗——在短短三年多裡,讓這個民族<em>親手屠殺了自己近四分之一的人口</em>。柬埔寨從吳哥的「最偉大」,墜入了殺戮戰場的「最慘痛」。</p>
+
+      <h3>第五層:從廢墟中,選擇了活下去</h3>
+      <p>最後是<strong>重生</strong>。終結噩夢的,諷刺地,是它最仇恨的鄰居越南;而冷戰的荒謬,又讓劊子手被外界支持了十多年。歷經越南佔領、聯合國接管、與一位強人長達數十年的統治,柬埔寨終於告別戰亂、走向和平與成長。<em>它把吳哥從「黃金記憶」變成了「黃金產業」,在中國等新巨人之間延續著古老的生存功課,並用幾代人的時間,艱難地與那段「無法言說的過去」共存、療癒。</em>對一個墜入過人間地獄的民族而言,「選擇活下去」本身,就是最艱難、也最了不起的勝利。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 背負著巔峰與深淵的人</span>
+        <p>所以,今天的柬埔寨人是誰?他是<strong>一個同時背負著「人類最偉大的成就」與「人類最慘痛的創傷」、卻依然選擇活下去的人</strong>——他的祖先用石頭堆出了令世界屏息的吳哥神山,也在「零年」的瘋狂中,把刀對準了自己的同胞;他為國旗上那座八百年的神廟而驕傲,也在沉默中,埋葬著殺戮戰場上至親的枯骨;他經歷過一個民族所能抵達的最高處,也墜入過一個民族所能墜入的最深淵。</p>
+        <p>他的驕傲與哀愁,是「吳哥」這份黃金記憶的兩面;他的偉大與毀滅,是同一份「對純粹與偉大的渴望」走向兩個極端的兩面;他的傷痛與堅韌,是同一片「會呼吸的大湖」所養育的子民,在歷盡滄桑後的兩面。<em>柬埔寨最深刻的真相是:它是一個經歷了最極端的「大起大落」的民族——它既證明了人類能創造出何等的偉大,也證明了人類能墜入何等的黑暗。而它最終留給世界的啟示,或許不在於那座宏偉的神廟,也不在於那片悲傷的枯骨田,而在於這兩者之間——一個曾經親手摧毀了自己的民族,如何在廢墟之上,重新拾起寬恕、療癒與生活的勇氣。這份從深淵中重新站起的韌性,才是高棉真正的、不朽的微笑。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">大湖的富饒養出了它的偉大,無險的平原招來了它的墜落,衰亡的創傷埋下了它的浩劫,而佛塔的微笑與活下去的勇氣,守住了它的靈魂——而要如何與巔峰和深淵這兩段記憶共存,是這一代柬埔寨人仍在回答的問題。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">千餘年的終極啟示</span>
+      <p>一個民族的樣貌,往往由它的地理(富饒與無險)開局,由一段偉大的記憶定下它尊嚴的高度,由衰亡的創傷埋下它恐懼的深度,再由一場無法承受的浩劫,把它推向人性的極端——而它能否真正立足於世,最終不取決於它曾經多麼偉大、或墜落得多麼徹底,而取決於生活在這裡的人們,能否在背負著巔峰與深淵這兩段極端記憶的同時,依然選擇寬恕、療癒,並堅韌地活下去。這,就是柬埔寨至今仍在書寫的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,215,.78);margin-top:2.5rem">
+        從一座會呼吸的大湖、一位自稱宇宙之王的神王,<br>
+        到吳哥窟的尖塔、巴戎寺向四方俯視的微笑,<br>
+        從被暹越兩虎啃食的數百年、法國保護下被凍結的時光,<br>
+        到「零年」的瘋狂、殺戮戰場上無名的枯骨,<br>
+        再到越南坦克帶來的解放、與廢墟之上艱難的重生——<br>
+        這段交織著富饒、偉大、衰亡、浩劫與重生的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的柬埔寨,<br>以及今天的,柬埔寨人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">卐 ✦ ☸</div>
+  <p>大湖、神廟與廢墟 · 柬埔寨的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM ANGKOR TO YEAR ZERO AND BEYOND · 802 CE – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

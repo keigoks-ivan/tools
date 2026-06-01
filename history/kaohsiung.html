@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>潟湖之港：高雄的身世</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16140f;
+  --parchment:#f3eee2;
+  --parchment-deep:#e7dfc9;
+  --sea:#1d3640;
+  --sea-deep:#0e2128;
+  --gold:#a8842f;
+  --gold-bright:#cda551;
+  --rust:#8a3a23;
+  --crimson:#74221a;
+  --jade:#33583f;
+  --faint:#665a45;
+  --line:#c6b58e;
+  --shadow:rgba(22,20,15,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(168,132,47,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(29,54,64,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(29,54,64,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #223e48 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23cda551' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23cda551' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(243,238,226,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2}
+.lede p{font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;color:var(--sea-deep);font-weight:500}
+.lede p .drop{float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem}
+.act-title{font-family:'Noto Serif TC',serif;font-weight:900;font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2}
+.act-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--faint);margin-top:.8rem}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;border-left:4px solid var(--gold);line-height:1.4}
+.prose h4{font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;color:var(--sea-deep);margin:2.2rem 0 .8rem}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;background:linear-gradient(135deg, rgba(29,54,64,.04), rgba(168,132,47,.06));border-top:2px solid var(--gold);border-bottom:2px solid var(--gold)}
+.pull p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500}
+.pull::before{content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1}
+
+/* ====== INVESTOR / ECHO CALLOUT ====== */
+.investor{margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;background:var(--sea-deep);color:var(--parchment);border-radius:2px;box-shadow:0 18px 40px -16px rgba(14,33,40,.6)}
+.investor::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--gold-bright),var(--rust))}
+.investor .tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(243,238,226,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem}
+.tl-item::before{content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;background:var(--parchment);border:2px solid var(--rust);border-radius:50%}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.5rem 1.4rem;position:relative;overflow:hidden;transition:transform .3s ease, box-shadow .3s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;padding:.85rem 1rem;text-align:left}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(168,132,47,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STATS ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(29,54,64,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden}
+.finale::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23cda551' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");background-position:center;background-size:cover}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(243,238,226,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{margin:3rem 0;padding:2.4rem;border:1px solid rgba(205,165,81,.4);border-radius:3px;background:rgba(0,0,0,.18)}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* expanded edition */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#180f08 !important}
+.dark .act-title{color:#d6c29e}
+.dark .prose p{color:#cbb292}
+.dark .prose strong{color:#c6785a}
+.dark .prose em{color:#d6a676}
+.dark .prose h3{color:#c6785a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#887356}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(116,34,26,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* interludes */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(243,238,226,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* legacy/shift */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(29,54,64,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* debate box for contested history */
+.debate{margin:2.8rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--parchment-deep)}
+.debate-head{background:linear-gradient(135deg,var(--jade),#2a4734);color:var(--parchment);font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;padding:.8rem 1.2rem;display:flex;align-items:center;gap:.5rem}
+.debate-head::before{content:"\2696";font-size:1rem}
+.debate-body{padding:1.2rem 1.4rem}
+.debate-body .view{margin:.9rem 0;padding-left:1.1rem;border-left:3px solid var(--gold);font-size:.95rem;line-height:1.75}
+.debate-body .view .who{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.1em;color:var(--rust);text-transform:uppercase;display:block;margin-bottom:.2rem}
+.debate-body .view strong{color:var(--crimson)}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Harbor on a Lagoon · Why Kaohsiung Became What It Is</span>
+    <h1>潟湖之港<br><span class="em">高雄</span><br>的身世</h1>
+    <p class="sub">從一座沙洲環抱的天然潟湖，到一座由港口與重工業一手打造、如今正努力從「工業黑鄉」轉身為宜居海港的城市——<br>一部關於「為何今天的高雄是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的高雄，是一座街道筆直寬闊、瀰漫著海風與機油氣味、被鋼鐵與石化撐起、政治上格外鮮明、卻又正努力沿著一條河與一片海岸重新定義自己的城市？答案不在當下的港灣夕照，而在它腳下那座天然的潟湖，以及一百多年來，一個又一個力量——日本的築港工程、戰後國家的重工業佈局——如何把這座原本只是漁村的潟湖，硬生生鍛造成台灣最重要的工業港都。高雄的故事，與台北截然不同：台北是一座被盆地圈住、被政權層層覆寫的拼貼之城；而高雄，是一座<em>因港而生、為工業而建、由勞動者的汗水撐起</em>的城市。它的筆直大道是被規劃出來的、它的重工業是被國家擺進來的、它的剛直性格是被碼頭與工廠磨出來的。如今，當工業的榮光褪色、當煙囪不再是驕傲，這座港都正站在一個艱難的十字路口，試圖把自己從「<span style="color:var(--rust);font-weight:600">為工業而生的城</span>」，重新打造成一座「<span style="color:var(--rust);font-weight:600">為人而活的城</span>」。讓我們從那座潟湖開始，一層一層把它讀回來。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Before the Port</span>
+    <h2 class="act-title">潟湖、沙洲與一座天然良港</h2>
+    <p class="act-sub">The Lagoon, the Sandbar, and a Harbor Made by Nature</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解高雄，得先承認一件事：在任何築港工程、任何工廠、任何「城市」的念頭出現之前，<strong>地形</strong>就已經替這座城寫好了它唯一的命運——它註定是一座港。而這份天賦，來自一座<em>潟湖</em>。</p>
+
+    <h3>沙洲圍出的一池靜水</h3>
+    <p>高雄最根本的身世，是一座被沙洲環抱的天然<strong>潟湖</strong>。一道狹長的沙洲（今<em>旗津</em>）橫亙在外海與內陸之間，像一道天然的防波堤，把它身後的一池海水，圍成了一個風平浪靜的內灣。這道沙洲與陸地之間，只留下一個狹窄的出入口（今高雄港口）。對航海者而言，這簡直是天賜的禮物：外海的風浪被沙洲擋住，船隻可以安穩地停泊在內灣裡——<strong>一個天然的、可遮蔽的深水良港。</strong>加上一旁拔地而起、可作為航行地標與屏障的<em>壽山（打狗山）</em>，高雄的港灣條件，在整個台灣西南海岸都是頂尖的。</p>
+    <div class="pull"><p>台北是先有河、後有城；高雄則是先有港、後有市——這座城市的一切，都是從那一道沙洲圍出的靜水開始的。</p></div>
+
+    <h3>「打狗」：一個來自原住民的名字</h3>
+    <p>高雄最古老的名字，不叫高雄，而叫「<strong>打狗</strong>」。這個看似奇特的名字，其實是平埔原住民語的音譯——相傳源自當地原住民（馬卡道族）語言中指稱「刺竹（Takau）」的詞,因為早期此地遍植刺竹作為防禦的圍籬。「打狗（Takau）」這個名字,從荷蘭時代起就出現在文獻地圖上,沿用了數百年。它提醒我們:這座港的故事,並不是從漢人或日本人開始的,而是從一個更古老的、屬於原住民的名字開始的(下一章詳述)。直到日治時期,日本人才取其音近的雅字,將「打狗」改名為「高雄(Takao)」。</p>
+
+    <h3>天然的良港,人工的偉業</h3>
+    <p>但這裡要先埋下一個關鍵的伏筆:高雄雖有天然良港的<em>基礎</em>,卻並非一開始就是大港。早期的潟湖,水域有淤淺、航道不夠深、腹地是沙洲與濕地——它有成為大港的<strong>潛力</strong>,卻還缺臨門一腳。真正把這座天然潟湖「升級」為能停靠現代巨輪的工業大港的,是後來日本人那場規模浩大的<em>築港工程</em>(第三章)。換句話說:<strong>高雄的港,一半是天生的,一半是人造的。</strong>是「天然的條件」加上「國家級的工程」,才共同造就了這座港都——這個「天賦＋人工」的雙重性,將是貫穿高雄一生的主題。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 地形決定了它「只能是一座港」</span>
+      <p>在任何總督、任何政府、任何企業到來之前,<strong>潟湖、沙洲與壽山</strong>就已經替高雄畫好了它的命運。一座被沙洲圍蔽的天然良港,加上一座可作屏障的山,註定讓這裡成為船隻停泊、貨物吞吐的所在。高雄今天所有的特徵——它的海洋性格、它沿著港灣發展的城市軸線、它作為工業與航運樞紐的地位——根源都可以追回到「它是一座潟湖良港」這個最原始的事實。</p>
+      <p>這是讀懂高雄的第一把鑰匙,也是它與台北最深的分野:<em>台北因「最大的平地」而成為人的聚居中心,高雄則因「最好的港灣」而成為物的吞吐中心。</em>一個的命運寫在它的腹地,一個的命運寫在它的海岸線。而正因為高雄的價值在於「港」,它日後的繁榮與困境,也都將圍繞著這座港——成也港、敗也港、轉型也靠港。這座城,從第一天起,就把自己的身家性命,押在了那一道沙洲圍出的靜水之上。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">❂ ✦ ❂</div>
+  <p>在任何築港工程、任何工廠、任何「高雄」之名出現之前,<br>這片潟湖與沙洲早已有人居住——<br><span class="hl">他們種下刺竹圍成的家,把「打狗」這個名字,留給了後世。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The First People</span>
+    <h2 class="act-title">馬卡道的土地:港口之前的潟湖</h2>
+    <p class="act-sub">The Makatao, the Thorny Bamboo, and the Name "Takau"</p>
+    <div class="ornament">❂ ❂ ❂</div>
+  </div>
+  <div class="prose">
+    <p>在漢人、在荷蘭人、在「高雄」這個名字之前,這片潟湖與沙洲早已有人居住。它最早的主人,是<strong>平埔原住民馬卡道族(Makatao)</strong>——一支屬於西拉雅系統的族群。他們沿著潟湖、河口與海岸聚居,以漁撈、狩獵與採集為生。今天當我們望著高雄繁忙的貨櫃碼頭時,很容易忘記:腳下這片被鋼鐵與柏油覆蓋的土地,曾經是另一群人捕魚撒網、種植刺竹的家園。</p>
+
+    <h3>刺竹圍成的家:「Takau」的由來</h3>
+    <p>序章說過,高雄最古老的名字「打狗」,源自原住民語的「Takau」。而這個詞,相傳與「<strong>刺竹</strong>」有關——馬卡道人習慣在聚落周圍遍植帶刺的竹子,作為防禦外敵(包括海盜與其他族群)的天然圍籬。這片<em>刺竹環繞的聚落</em>,就被稱為「Takau」。漢人來到後,以音近的漢字記為「打狗」,日本人再改為雅化的「高雄」。一座今日以鋼鐵巨輪聞名的工業大港,它的名字最初竟來自一圈帶刺的竹籬——這是這座城市身世裡,一個容易被遺忘卻動人的起點。</p>
+    <div class="pull"><p>高雄最古老的居民沒有留下港口與工廠,他們留下的是一個名字——一圈刺竹圍成的家,被音譯成「打狗」,沿用了數百年。</p></div>
+
+    <h3>被推開的原主人</h3>
+    <p>隨著荷蘭時代引進漢人、清代漢人移民大量湧入墾殖,馬卡道人的生活空間被快速擠壓。一如台灣其他平埔族群的命運(這在台灣史中是反覆出現的母題),他們經歷了土地的流失、文化的同化與身分的「消失」——許多馬卡道後裔在通婚、改姓與漢化的過程中,逐漸隱沒於漢人社會之中。他們被迫往內陸、往丘陵遷移(高雄內門、屏東一帶仍有其後裔的足跡與信仰)。今日,馬卡道族的當代尋根與正名,仍是一條進行中的漫長道路。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 港口建在漁村之上,漁村建在獵場之上</span>
+      <p>高雄的開篇,藏著一個與台北、與整個台灣一致的前提:<strong>這座工業大港,是一層一層建立在前人的土地之上的——現代港口建在漢人的漁村之上,漢人的漁村又建在馬卡道人的獵場與漁場之上。</strong>當我們驚嘆於高雄港的吞吐量、加工區的產值時,最底層的那塊地基,是馬卡道人被推開後留下的家園。</p>
+      <p>而「打狗」這個名字能存活數百年、最終雅化為「高雄」,本身就是這座城市最早的一道「<em>覆寫卻不抹除</em>」的痕跡——原住民的刺竹圍籬,被翻譯成漢字的「打狗」,再被翻譯成日文的「高雄」,層層轉譯,卻始終隱約指向同一個原點。它提醒我們:高雄的故事,不是從築港工程開始的,而是從一個更古老、更安靜的名字,與一圈帶刺的竹籬開始的。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>漢人沿著潟湖定居,在沙洲上建起漁村;<br>一紙開港的條約,讓世界第一次注意到這座南方的港——<br><span class="hl">蔗糖與樟腦,將為它賺得第一桶金。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Fishing Port</span>
+    <h2 class="act-title">旗後與糖郊:開港通商前後的打狗</h2>
+    <p class="act-sub">Cijin, the Treaty Port, and Sugar's First Boom</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>在成為工業巨港之前,打狗有過一段樸素而漫長的「<strong>漁港歲月</strong>」。漢人移民沿著潟湖定居,最早、最熱鬧的聚落,出現在那道沙洲——<strong>旗後(今旗津)</strong>。這裡是進出潟湖的咽喉,漁船在此靠岸、漁獲在此交易,媽祖廟(旗津天后宮)的香火見證了漁村的信仰與生活。在很長一段時間裡,打狗就是一個寧靜的漁業聚落,規模遠不及北邊的台南府城。</p>
+
+    <h3>開港:世界第一次注意到打狗</h3>
+    <p>打狗命運的第一次轉折,來自一紙條約。1860 年代,因列強壓力,台灣被迫開港通商,<strong>打狗</strong>名列其中,正式對外國商船開放。這是打狗第一次被接上全球貿易網絡——外國的<em>洋行</em>進駐,在旗後與哨船頭一帶設立據點;英國更在此設立<strong>領事館</strong>(打狗英國領事館,今仍是高雄重要的歷史地標,雄踞在能俯瞰港口的山丘上)。世界的目光,第一次投向了這座南方的潟湖港。</p>
+    <div class="pull"><p>開港讓打狗第一次嚐到「與世界連結」的滋味——而這份「向海、向外、靠貿易吃飯」的基因,將成為高雄一生的底色。</p></div>
+
+    <h3>糖與樟腦:潟湖港的第一桶金</h3>
+    <p>開港後,打狗成為台灣南部物產的外銷口岸。其中最重要的商品是<strong>蔗糖</strong>——南台灣廣闊的平原盛產甘蔗,製成的糖透過打狗港銷往海外;此外還有樟腦等南部山區的物產。打狗的腹地(高雄、屏東一帶的嘉南平原南段與屏東平原)是台灣的農業精華區,而打狗,正是這片農業腹地通往世界的<em>出海口</em>。這段「糖郊」時代,讓打狗從單純的漁村,第一次具備了「商港」的雛形——雖然此時的它,規模仍然有限,真正的爆發還要等待下一個時代的到來。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 港的價值,在於它連結了什麼</span>
+      <p>打狗的漁港與開港歲月,揭示了一個關於港口城市的根本道理:<strong>一座港的價值,從來不只在於它自己,而在於它「連結了什麼」——它背後的腹地有多富庶,它前方的海洋通往何方。</strong>打狗能從漁村升級為商港,靠的是它身後那片盛產蔗糖的農業平原,與開港後接通的全球貿易網。</p>
+      <p>這也為高雄定下了一個延續至今的角色:<em>它是一個「出海口」、一個「吞吐者」——把腹地的產物送向世界,把世界的需求引進腹地。</em>從清代的糖,到後來的工業產品、貨櫃,高雄始終扮演著台灣「面向海洋的那扇門」。但此時的打狗,還只是一座規模有限的商港。要把這座天然潟湖,真正鍛造成一座能停靠萬噸巨輪的現代大港,需要一場規模空前的人工改造——下一章,日本人將帶著怪手與抽砂船到來,徹底重塑這座潟湖的形貌。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">☼ ✦ ☼</div>
+  <p>但天然的潟湖,還不足以成為現代大港。<br>新的殖民主人帶著抽砂船與填海工程到來,<br><span class="hl">要把這片淺灘,徹底改寫成台灣的南方門戶。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · Building the Harbor</span>
+    <h2 class="act-title">築港:日本人如何造出一座現代港都</h2>
+    <p class="act-sub">Dredging a Lagoon into a Modern Port, 1895–1945</p>
+    <div class="ornament">☼ ☼ ☼</div>
+  </div>
+  <div class="prose">
+    <p>高雄從「潟湖漁港」變身為「現代工業港都」的關鍵轉折,發生在日本時代。如同日本人把台北從傳統市街改造成現代殖民首都,他們對打狗做的事更為徹底——他們沒有只是「使用」這座天然港,而是動用龐大的國家工程力量,把它<strong>整個重新打造</strong>了一遍。今天高雄港作為一座能停靠巨輪的現代深水大港的基礎,絕大部分,都是在這五十年間奠定的。</p>
+
+    <h3>把潟湖,挖成大港</h3>
+    <p>日本人看中了打狗的戰略與經濟價值——它是南台灣的出海口,又是日本「南進」的重要據點。於是,從二十世紀初開始,他們展開了規模浩大的<strong>打狗築港工程</strong>:用抽砂船<em>疏濬</em>淤淺的潟湖、挖深航道,讓大型輪船得以進出;把挖出的泥沙<em>填築</em>成大片新生地,創造出建設碼頭、倉庫、市街所需的平地;興建現代化的碼頭、防波堤與港埠設施。一座天然的潟湖,就這樣被人工的力量,改造成一座規格現代的商港。序章埋下的伏筆在此實現:<strong>高雄的港,一半是天生的,一半是日本人挖出來、填出來的。</strong></p>
+    <div class="pull"><p>日本人對打狗做的,不是「發現」一座港,而是「製造」一座港——他們用抽砂船與填海,把一片淺灘改寫成了台灣的南方門戶。</p></div>
+
+    <h3>鐵路、改名與新市街</h3>
+    <p>築港不是孤立的工程,它與一整套現代化佈局相互配合。日本人把貫穿台灣南北的<strong>縱貫鐵路</strong>南端,直接接到打狗港——於是,北部的貨物可以由鐵路運到南部,再從打狗港裝船出海;港、鐵路、腹地被串成一條完整的物流鏈。1920 年,日本人把「打狗」正式改名為雅化的「<strong>高雄(Takao)</strong>」。而隨著築港填出的新生地,兩個全新的市街拔地而起:<em>哈瑪星</em>(濱線,源自日語「はません」,是鐵路濱海線一帶的新市區,曾是高雄最繁華、最現代的所在)與<em>鹽埕</em>。它們以整齊的<strong>棋盤式街廓</strong>規劃,成為早期高雄市的核心——這也是為什麼高雄的街道,普遍比台北更筆直、更寬闊、更有「被規劃過」的現代感。</p>
+
+    <h3>工業港的雛形</h3>
+    <p>到了日治後期,隨著日本的戰爭需求,高雄不只是商港,更開始被賦予<strong>工業</strong>的角色——港區周邊出現了與軍需、重工業相關的設施(如煉鋁、造船、軍港等)。這埋下了一個影響極深遠的伏筆:<em>高雄作為「工業港都」的性格,在日治時期就已經萌芽。</em>它不再只是運送農產品的出海口,而開始成為一個「生產」的基地。這個方向,將在戰後被國家以更大的規模延續、放大,最終把高雄推上「台灣重工業之都」的地位(下一章)。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 一座被「製造」出來的城</span>
+      <p>築港的故事,點出了高雄與台北最深刻的分野。台北是一座在盆地裡<em>慢慢生長、被政權層層覆寫</em>的城;而高雄,從很大程度上說,是一座被<strong>「製造」出來的城</strong>——它的港是挖出來、填出來的,它的市街是規劃出來的,它的命運是被國家工程一手安排的。這種「人工打造」的基因,讓高雄從骨子裡就帶著一種<em>現代的、規劃的、目的明確的</em>氣質,與台北那種有機而雜亂的拼貼感截然不同。</p>
+      <p>而這也預示了高雄一生最核心的特質與宿命:<em>它是一座「為了某個國家級目的而存在」的城。</em>日本人為了南進與貿易而築港,戰後的政府為了工業化而把重工業擺進來——高雄的繁榮,從來不只屬於高雄自己,它總是被鑲嵌在一個更大的、由國家主導的藍圖裡。這份「被國家打造」的命運,既造就了它的輝煌,也埋下了它日後「港市分離」「為工業犧牲」等困境的根源。下一章,戰後的國家機器將開動,把高雄推向它工業榮光的頂峰。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⚙ ✦ ⚙</div>
+  <p>日本人打下了工業港的雛形,<br>戰後的國家機器,則把這座港都推上了引擎的駕駛座——<br><span class="hl">中鋼、中船、煉油廠,將定義它的天際線。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Industrial City</span>
+    <h2 class="act-title">重工業之城:鋼鐵、石化與國家的佈局</h2>
+    <p class="act-sub">Export Zones, Steel, and the Forging of an Industrial Capital</p>
+    <div class="ornament">⚙ ⚙ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>戰後,高雄迎來了它身世中最輝煌、也最沉重的一個篇章——它被國家選中,成為台灣的<strong>重工業之都</strong>。如果說日本人為高雄打下了工業港的雛形,那麼戰後的中華民國政府,則是把這座港都,推上了台灣工業化引擎的駕駛座。高雄的天際線,從此被一根根煙囪與一座座廠房定義。</p>
+
+    <h3>全台第一座加工出口區</h3>
+    <p>故事的起點,是 1966 年——在台灣推動「出口導向」經濟的浪潮下(對應台灣經濟奇蹟的脈絡),政府在高雄設立了<strong>全台灣第一座加工出口區</strong>(高雄加工出口區)。這是一個劃時代的決定:它以租稅優惠、現成廠房與港口之便,吸引外資與訂單,讓無數產品在此加工、再從高雄港裝船外銷。加工出口區為高雄帶來了大量的就業機會,吸引中南部的人口湧入,也讓高雄成為台灣出口經濟最前線的火車頭之一。為什麼選高雄?答案還是那座港——<em>生產與出口可以在同一個地方完成,這是任何內陸城市都無法比擬的優勢。</em></p>
+    <div class="pull"><p>港口讓高雄成為「生產與出海」一氣呵成的地方——這是它被國家選為工業基地的根本原因,也是它與台北分工的關鍵:台北管錢與權,高雄管造與運。</p></div>
+
+    <h3>十大建設:鋼鐵與石化的巨人</h3>
+    <p>1970 年代,政府推動「十大建設」(同樣對應台灣整體的發展脈絡),其中<strong>多項重工業的核心,都被擺進了高雄</strong>。這絕非偶然——龐大的重工業需要進口原料、出口成品,需要大量用水與廣闊的臨海土地,而高雄的港口與沿海正好提供了一切。於是:</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">鋼鐵</span>
+        <h5>中鋼</h5>
+        <p>中國鋼鐵公司落腳高雄臨海工業區,成為台灣鋼鐵工業的龍頭,supply 著全島營建與製造業所需的鋼材,也是高雄重工業的象徵之一。</p>
+        <span class="model">Steel</span>
+      </div>
+      <div class="card">
+        <span class="flag">造船</span>
+        <h5>中船</h5>
+        <p>中國造船公司(今台船)在高雄建立大型造船基地,打造巨輪——一座有港有鋼的城市,造船是順理成章的延伸。</p>
+        <span class="model">Shipbuilding</span>
+      </div>
+      <div class="card">
+        <span class="flag">石化</span>
+        <h5>煉油與石化</h5>
+        <p>高雄煉油廠與一系列石化工業(如後勁的五輕等)聚集於此,構成龐大的石化聚落,是台灣石化產業鏈的心臟——也是日後環境爭議的核心。</p>
+        <span class="model">Petrochemical</span>
+      </div>
+    </div>
+    <p>再加上<strong>臨海工業區</strong>的整體開發,高雄沿著海岸線,被打造成一條綿延的重工業帶。鋼鐵、造船、石化、機械、拆船(高雄曾是世界知名的拆船王國)……這座城市的經濟命脈,與這些「重、大、粗」的產業緊緊綁在一起。高雄,成了名副其實的「<em>台灣工業的引擎室</em>」。</p>
+
+    <h3>勞動者的城市</h3>
+    <p>重工業的聚集,也決定了高雄的<strong>人口性格</strong>。大量的工廠需要大量的工人,於是高雄成為一座典型的<em>勞動者城市</em>——藍領、技術工、碼頭工人、產業工人構成了這座城市的人口主體。中南部的青年湧入高雄的工廠討生活,如同他們的同鄉北漂到台北一樣。這種「以勞動階級為主體」的人口結構,深深形塑了高雄日後的社會氣質、政治傾向與城市性格(後面幾章詳述)。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 被國家「指定」的命運</span>
+      <p>高雄的重工業之路,把序章與築港章埋下的伏筆,推向了極致:<strong>高雄是一座「被國家指定了用途」的城市。</strong>它不是自己選擇成為工業之都的,而是因為它擁有「港口＋臨海土地＋出海口」這套無可取代的條件,被國家的發展藍圖,擺上了「重工業基地」這個位置。中鋼、中船、煉油廠不是高雄人自己蓋的,而是國家擺進來的。</p>
+      <p>這份「被指定」的命運,是一把鋒利的雙面刃。一方面,它帶來了數十年的繁榮、就業與成長,讓高雄成為僅次於台北的台灣第二大城,撐起了整個台灣的工業化奇蹟。但另一方面,它也意味著高雄<em>承接了整個台灣工業化最沉重、最骯髒、最危險的那一部分</em>——污染、職災、環境的犧牲。當台北享受著金融與服務業的乾淨繁華時,是高雄用它的天空、它的河流、它的勞動者的健康,扛起了「台灣製造」的另一面。這筆帳,將在下一章被攤開來算。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">☁ ✦ ☁</div>
+  <p>但每一份繁榮都有它的帳單。<br>當整個台灣享受工業化的果實時,<br><span class="hl">是這座城市,用它的天空與河流,扛下了最骯髒的代價。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Price</span>
+    <h2 class="act-title">拚經濟的代價:污染、勞動與「工業黑鄉」</h2>
+    <p class="act-sub">Smokestacks, Sacrifice, and the City That Bore the Burden</p>
+    <div class="ornament">☁ ☁ ☁</div>
+  </div>
+  <div class="prose">
+    <p>每一份繁榮都有它的帳單。高雄作為台灣重工業之都的輝煌背後,是一筆由這座城市與它的居民,默默承擔了數十年的沉重代價。當我們談高雄的身世,如果只講中鋼的鋼、加工區的產值,而不講它的天空、它的河流與它勞動者的身體,那就只講了一半——而且是比較不誠實的那一半。</p>
+
+    <h3>「工業黑鄉」:被犧牲的天空與河流</h3>
+    <p>密集的鋼鐵、石化、水泥與各類重工業,讓高雄付出了慘重的<strong>環境代價</strong>。長年的<em>空氣污染</em>是高雄居民共同的記憶與痛——灰濛濛的天空、刺鼻的氣味、偏高的空污指數,讓高雄背上了「<strong>工業黑鄉</strong>」的沉重標籤。河川(如曾經惡名昭彰、污染嚴重的愛河與後勁溪)被工業與生活廢水染黑發臭;土壤與地下水的污染問題在各工業區潛伏。這座城市的居民,用他們每天呼吸的空氣、每天經過的河流,實實在在地替整個台灣的工業化,付出了健康與環境的代價。</p>
+    <div class="pull"><p>當台北的天空是藍的、河水逐漸變清時,高雄的天空卻是灰的——這不是高雄不努力,而是它替整個台灣,扛下了工業最骯髒的那一面。</p></div>
+
+    <h3>後勁反五輕:覺醒的環境運動</h3>
+    <p>但高雄人並沒有一直沉默地承受。其中最具代表性的覺醒,是<strong>後勁反五輕運動</strong>。後勁地區長期緊鄰高雄煉油廠,飽受污染之苦。當政府計畫在此興建第五輕油裂解廠(五輕)時,當地居民展開了長達多年、極為激烈而持久的反對抗爭。這場運動是台灣<em>環境運動</em>史上的重要里程碑——它代表著一個長期被要求「為經濟發展犧牲」的社區,終於站出來追問:<em>發展的果實由全國共享,污染的代價憑什麼要我們一個地方承擔?</em>這場抗爭最終以政府承諾煉油廠遷廠為一個階段性的結果,也深刻地形塑了高雄人「敢於抗爭、追求環境正義」的公民性格。</p>
+
+    <h3>職災、拆船與勞動者的身體</h3>
+    <p>重工業的代價,還寫在勞動者的身體上。鋼鐵、造船、石化、拆船——這些都是<strong>高風險、高強度的勞動</strong>。職業災害、工傷、長期暴露於有害環境下的職業病,是許多高雄勞工生命中真實的陰影。其中,高雄曾經興盛的<em>拆船業</em>(把報廢的巨輪拆解回收)更是危險的代名詞,1986 年的拆船爆炸事故等職災,是這段歷史中慘痛的記憶。這座城市的繁榮,是由無數勞動者用汗水、甚至用健康與生命換來的——他們是高雄真正的英雄,卻也常是最被忽略的一群。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 發展的代價,從來不是平均分攤的</span>
+      <p>高雄「拚經濟的代價」這一章,揭示了一個關於發展最不舒服、卻最重要的真相:<strong>一個國家的經濟成長,它的果實與它的代價,從來不是平均分攤的。</strong>當整個台灣享受著工業化帶來的富裕時,是高雄這樣的工業城市,集中承受了污染、職災與環境的破壞。發展的「利」流向全國,發展的「弊」卻沉澱在特定的土地與人身上。</p>
+      <p>而這也鍛造了高雄獨特的<em>城市性格</em>:一種剛硬、直率、不畏抗爭、帶著勞動者尊嚴與環境正義意識的氣質。後勁反五輕的吶喊、職災勞工的血淚,讓高雄人比誰都更懂得「發展不該以犧牲特定人為代價」這個道理。這份從污染與勞動中淬鍊出的城市意識,將與它的政治性格(民主聖地)和轉型渴望(從工業港到水岸城)深深相連。高雄的剛硬,不是天生的,而是它在替全台灣扛下重擔的數十年裡,一點一滴磨出來的。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⊟ ✦ ⊟</div>
+  <p>成就了高雄的那座港,<br>卻在某個時刻,反過來阻隔了這座城市——<br><span class="hl">市民守著全台最好的港灣,卻長期走不到自己的海邊。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · Port and City Apart</span>
+    <h2 class="act-title">港與城的背離:成就它的,也阻隔了它</h2>
+    <p class="act-sub">When the Harbor That Made the City Began to Wall It Off</p>
+    <div class="ornament">⊟ ⊟ ⊟</div>
+  </div>
+  <div class="prose">
+    <p>高雄因港而生、因港而盛。但這座城市的身世裡,藏著一個深刻的矛盾:<strong>那座成就了高雄的港,在某個時刻,卻反過來阻隔了城市的發展。</strong>港與城,這對本應相依的伴侶,在數十年間漸漸背離。理解這個「港市分離」的困局,就理解了高雄為何長期有著「有港、卻摸不到港」的奇特疏離。</p>
+
+    <h3>港是國家的,城是地方的</h3>
+    <p>問題的根源,在於一道權力的界線。高雄港作為一座國家級的<strong>商港與工業港</strong>,長期由中央(港務機構)管理,服務於全國的航運與貿易;而高雄市的城市發展,則由地方政府負責。兩者分屬不同的權力系統,目標也不同——港務追求的是<em>貨物吞吐的效率</em>,城市追求的是<em>市民生活的品質</em>。當這兩個目標不一致時,衝突就產生了。最直接的結果是:廣大的港區、碼頭、倉庫、工業區,像一道<strong>厚實的屏障</strong>,把高雄市民與他們自己的海岸線隔開了。市民住在港都,卻長期<em>親近不了那片海</em>——海岸線被貨櫃、圍籬與管制區佔據,「看得到、走不到」。</p>
+    <div class="pull"><p>高雄最大的諷刺是:它是一座海港城市,市民卻長期被擋在自己的海岸線之外——港口屬於國家的貨櫃,不屬於這座城市的人。</p></div>
+
+    <h3>舊港區的沒落:哈瑪星與鹽埕的黃昏</h3>
+    <p>港市的背離,還體現在城市重心的遷移上。第三章提過,日治時期填築而成的<strong>哈瑪星與鹽埕</strong>,曾是高雄最繁華、最現代的市中心。但隨著時代變遷——港口作業向更深、更大的新碼頭區轉移、城市行政與商業重心向內陸的新市區(如後來的三多商圈、巨蛋、左營一帶)遷移——這些緊鄰舊港的老市區,逐漸失去了昔日的光環,陷入相對的<em>沒落與老化</em>。曾經車水馬龍的哈瑪星,成了承載著老高雄記憶、卻略顯寂寥的舊街區。(它們的命運,將在「轉身」章迎來轉機。)</p>
+
+    <h3>貨櫃時代的興衰</h3>
+    <p>高雄港本身,也經歷了起伏。在貨櫃運輸的黃金年代,高雄港憑藉優越的條件,曾躋身<strong>世界貨櫃吞吐量名列前茅的大港</strong>,是高雄人引以為傲的榮光。然而,隨著全球航運格局的變化、區域競爭的加劇(鄰近國家大港的崛起)、以及兩岸與全球供應鏈的調整,高雄港的世界排名在後來逐漸下滑。這個變化,既是全球性的結構因素,也再次提醒高雄:<em>過度依賴單一的港口與貨運,城市的命運就會隨著航運的潮汐而起落。</em></p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 成也是它,困也是它</span>
+      <p>港市分離的困局,點出了高雄身世中最深的辯證:<strong>那個定義了一座城市、成就了一座城市的東西,有時也會變成束縛它、阻隔它的東西。</strong>港口給了高雄生命,但當港口被國家、被貨運、被工業獨佔時,它就在城市與海洋之間,築起了一道看不見的牆。高雄人守著全台灣最好的港灣,卻長期無法把它變成生活的一部分。</p>
+      <p>這也呼應了高雄「被國家打造」的宿命(築港章、工業章):當一座城市的核心資產(港)是為「國家目的」而存在時,它就未必為「市民生活」而服務。港的效率與城的宜居,長期是兩條平行線。而高雄當代轉型最核心的課題之一,正是要打破這道牆——把港還給城、把海岸線還給市民,讓「港」與「城」重新合而為一(這正是「轉身」章與「亞洲新灣區」的核心願景)。要從「為工業而生的城」轉變為「為人而活的城」,第一步,就是要讓高雄人,終於能走到自己的海邊。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">✊ ✦ ✊</div>
+  <p>一座勞動的、承受代價的、被忽略的城市,<br>它的土壤天生孕育著不平則鳴的反抗——<br><span class="hl">台灣民主化最關鍵的火種,就在這裡點燃。</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Southern Spirit</span>
+    <h2 class="act-title">民主聖地:美麗島與南方意識</h2>
+    <p class="act-sub">Where the Democracy Movement Found Its Southern Heart</p>
+    <div class="ornament">✊ ✊ ✊</div>
+  </div>
+  <div class="prose">
+    <p>高雄不只是一座工業港都,它還有一個在台灣現代史上份量極重的身分——<strong>民主聖地</strong>。台灣民主化進程中最關鍵的一個事件,就發生在這座城市。而這並非偶然:高雄作為一座勞動者的城市、一座長期承受發展代價卻聲音被忽略的城市,它的土壤,天生就孕育著一種不平則鳴的反抗精神。</p>
+
+    <h3>美麗島事件:就在高雄</h3>
+    <p>1979 年,台灣仍處於戒嚴的威權年代。黨外人士在<strong>高雄</strong>舉辦一場人權紀念活動與遊行,與軍警爆發了激烈衝突,主要的組織者隨後遭到大規模逮捕與軍法審判——這就是震撼全台、影響深遠的<strong>美麗島事件</strong>(高雄事件)。這場事件雖然以鎮壓收場,卻意外地成為台灣民主運動的<em>重大轉捩點</em>:許多當年的辯護律師與受難者,日後都成為台灣民主化與政壇的核心人物。台灣從威權走向民主的漫長道路上,高雄,是那個點燃關鍵火種的地方。今天,高雄捷運的「美麗島站」(以其壯麗的「光之穹頂」公共藝術聞名),正是為了紀念這段歷史而命名——它讓這座城市每天搭捷運的人,都記得腳下這塊土地的民主重量。</p>
+    <div class="pull"><p>台灣民主化最關鍵的火種,不是在首都台北點燃的,而是在南方的港都高雄——這座勞動者的城市,替整個台灣喊出了那一聲「我們要自由」。</p></div>
+
+    <h3>「南方」的城市認同</h3>
+    <p>美麗島事件,也強化了高雄作為「<strong>南方</strong>」意識核心的角色。在台灣的政治與文化版圖中,長期存在一種「<em>北—南</em>」的對照感:北部(以台北為中心)是政治、金融、權力與資源高度集中的所在;而高雄所代表的南部,則往往被視為相對被忽略、卻更貼近土地、更具勞動氣質與本土意識的一方。這種「南方」的自我意識,既包含著對資源分配不均(「重北輕南」)的不滿與抗議,也包含著一種對在地、對草根、對本土的認同與驕傲。高雄,是這種「南方意識」最鮮明的代表城市。</p>
+
+    <h3>勞動城市的政治性格</h3>
+    <p>高雄鮮明的政治傾向,與它的身世密不可分。一座<em>以勞動階級為人口主體</em>(工業章)、<em>長期承受發展代價</em>(代價章)、<em>對資源分配不均深有感受</em>(南方意識)、又是<em>民主運動聖地</em>(美麗島)的城市,自然發展出一種強烈而一致的政治認同。高雄因此長期是某種政治力量的重要票倉與根據地,城市的政治色彩格外鮮明。理解高雄的政治,不能脫離它「工業—勞動—南方—民主」這一整條身世脈絡——它的政治性格,是被它的歷史一手塑造的。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 被忽略者,往往最先吶喊</span>
+      <p>高雄作為民主聖地的故事,揭示了一個關於反抗的深刻規律:<strong>追求改變與自由的火種,常常不是在權力與資源的中心點燃,而是在那些長期被忽略、被要求犧牲、卻聲音最小的地方燃起。</strong>正是因為高雄是一座勞動的、承受代價的、被「重北輕南」的城市,它才比誰都更渴望公平、更不畏抗爭、更早喊出對自由的要求。</p>
+      <p>這也讓高雄的城市認同,具有一種獨特的<em>主體性與骨氣</em>:它不甘於只當台北的「工業後院」,它要為自己、為南方、為勞動者發聲。從後勁反五輕的環境抗爭(代價章),到美麗島的民主吶喊,高雄一次次證明了——這座城市的剛硬,不只是性格,更是一種立場。而這種「為自己作主」的渴望,與它想擺脫「工業黑鄉」、重新定義自己是誰的轉型渴望,本質上是同一股力量。一座懂得為自由抗爭的城市,自然也會渴望為自己,爭取一個更好的未來。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">≋ ✦ ≋</div>
+  <p>當工業的榮光褪色、煙囪不再是驕傲,<br>高雄展開了它最艱難的一次努力——<br><span class="hl">把自己從「為工業而生」,重新打造成「為人而活」。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Turn</span>
+    <h2 class="act-title">轉身:從工業港到水岸城市</h2>
+    <p class="act-sub">Reclaiming the River, the Waterfront, and the City Itself</p>
+    <div class="ornament">≋ ≋ ≋</div>
+  </div>
+  <div class="prose">
+    <p>進入二十一世紀,高雄展開了它身世中最關鍵、也最艱難的一次努力——<strong>轉身</strong>。當重工業的榮光褪色、當「工業黑鄉」的標籤再也不是驕傲、當市民渴望一座更宜居的城市時,高雄開始嘗試一件極其困難的事:把自己從「為工業而生的城」,重新打造成一座「為人而活的水岸城市」。這場轉型的核心,是要修復前面幾章累積的傷痕——污染的河、被阻隔的海、沒落的舊港區。</p>
+
+    <h3>愛河:從臭水溝到城市之心</h3>
+    <p>轉身的第一個象徵,是<strong>愛河整治</strong>。曾經因工業與生活廢水而惡名昭彰、又黑又臭的愛河(代價章),經過長年的截污、整治與河岸景觀改造,逐漸恢復了清澈,成為一條可以親近、可以散步、夜晚波光粼粼的<em>城市之河</em>。愛河的重生,是高雄環境改善最具代表性的成就,也象徵著這座城市「<em>把生活品質找回來</em>」的決心——它向市民證明:被工業犧牲的東西,是可以被一點一點修復回來的。</p>
+    <div class="pull"><p>愛河從臭水溝變回城市之心,是高雄寫給自己的一封情書——它證明了,一座為工業犧牲了太多的城市,依然有能力,重新變得溫柔而宜居。</p></div>
+
+    <h3>把海岸線還給市民:駁二與亞洲新灣區</h3>
+    <p>轉身最核心的工程,是打破「港市分離」那道牆(港市章),把海岸線還給市民。一系列的計畫圍繞著這個目標展開:</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">舊港新生</span>
+        <h5>駁二藝術特區</h5>
+        <p>把舊港區閒置的<strong>倉庫群</strong>改造為文創、藝術與展演空間,讓沒落的哈瑪星、鹽埕一帶(港市章)重獲新生,成為高雄最受歡迎的文化地標之一。</p>
+        <span class="model">Cultural Reuse</span>
+      </div>
+      <div class="card">
+        <span class="flag">水岸再造</span>
+        <h5>亞洲新灣區</h5>
+        <p>以舊港區為核心,整體打造的水岸新都心,集結<strong>流行音樂中心、展覽館、圖書總館、港埠旅運中心</strong>等地標,要把高雄最精華的海岸線,變成市民與遊客的生活舞台。</p>
+        <span class="model">Waterfront</span>
+      </div>
+      <div class="card">
+        <span class="flag">港市合一</span>
+        <h5>輕軌與港區開放</h5>
+        <p>環狀<strong>輕軌</strong>沿著水岸串連各景點,加上港務與市政的整合(港市合一的努力),讓市民終於能搭著輕軌、走到海邊——打破數十年的港市隔閡。</p>
+        <span class="model">Port-City Merge</span>
+      </div>
+    </div>
+
+    <h3>轉型成功了嗎?一場仍在進行的辯論</h3>
+    <p>高雄的轉身,是否成功?這是一個仍在進行、且有不同視角的辯論。</p>
+    <div class="debate">
+      <div class="debate-head">爭議 · 高雄轉型的成與未竟</div>
+      <div class="debate-body">
+        <div class="view"><span class="who">肯定者</span>認為,愛河整治、駁二、亞洲新灣區、輕軌等,實實在在地改善了高雄的環境與city面貌,把海岸線還給了市民,提升了城市的文化能量與宜居度,讓高雄擺脫了「工業黑鄉」的單一形象,展現了港都的新魅力。</div>
+        <div class="view"><span class="who">質疑者</span>則指出,城市景觀與場館的「<strong>硬體美化</strong>」,不等於產業與經濟的真正轉型;高雄仍面臨產業外移、高薪工作不足、青年外流的結構困境(下一章)。漂亮的水岸,能不能轉化為留得住人的「<em>就業與機會</em>」,才是轉型成敗的真正關鍵。</div>
+        <div class="view"><span class="who">務實的中間視角</span>認為,城市轉型本就是數十年的長期工程,環境與生活品質的改善是必要的第一步、也確有成果;但它必須與「產業升級、創造高值就業」同步,否則美麗的城市留不住年輕人。轉身已經開始,但遠未完成。</div>
+      </div>
+    </div>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 修復,比建造更難</span>
+      <p>高雄的轉身,揭示了一個關於城市的深刻道理:<strong>「建造」一座城往往只需要資本與決心,但「修復」一座被傷害過的城,卻需要更長的時間、更細膩的努力,以及對「城市到底為誰而存在」的根本反思。</strong>當年國家把重工業擺進高雄只花了幾年,但要把被污染的河、被阻隔的海、被犧牲的生活品質重新找回來,卻是數十年的漫漫長路。</p>
+      <p>而這場轉身最動人的地方,在於它背後的價值翻轉:<em>從「城市為工業服務」,翻轉為「城市為人服務」。</em>愛河不再只是排放廢水的渠道,而是市民散步的河;海岸線不再只是貨櫃的領地,而是大家的水岸。這正是高雄想對自己說的話——它要從一座「被國家指定用途」的工具型城市,變回一座「為了生活在這裡的人」而存在的家園。但這封寫給自己的情書能否真正兌現,還取決於最現實的一件事:它能不能讓年輕人,願意留下來。下一章,就是這道尚未解開的難題。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⛰ ✦ ≈</div>
+  <p>但今天行政上的高雄,遠比那座港都大得多。<br>一次重大的合併,讓它從海港一路延伸到高山——<br><span class="hl">它擁抱了海、平原、丘陵與原住民的原鄉。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · Greater Kaohsiung</span>
+    <h2 class="act-title">大高雄:縣市合併與山海河港的拼貼</h2>
+    <p class="act-sub">One City of Sea, Mountain, Plain, and River</p>
+    <div class="ornament">⛰ ≈ ⛰</div>
+  </div>
+  <div class="prose">
+    <p>說到這裡,我們談的「高雄」,主要都是那座港都——濱海的、工業的、城市的高雄。但今天行政上的「高雄市」,其實比這大得多、也複雜得多。2010 年的一次重大行政變革,讓高雄從一座「港市」,變成了一個涵蓋海港、平原、丘陵、高山與原住民部落的<strong>龐大複合體</strong>。理解這個「大高雄」,才算看見了高雄完整的身體。</p>
+
+    <h3>2010:縣市合併,誕生最大的直轄市</h3>
+    <p>2010 年,台灣進行行政區劃改革,原本的<strong>高雄市(都會核心)與高雄縣(廣大的腹地)正式合併</strong>,升格為一個單一的直轄市——高雄市。這次合併的影響極為深遠:合併後的高雄市,成為台灣<em>面積最大的直轄市</em>,從濱海的港區市中心,一路延伸到內陸的平原、丘陵,直抵中央山脈的高山地帶。一座原本定義清晰的「港都」,瞬間擁抱了極其多元的地理與人文。</p>
+    <div class="pull"><p>合併之後的高雄,不再只是一座港——它是一個從海平面一路爬升到三千公尺高山、從貨櫃碼頭一路延伸到原住民部落的微型台灣。</p></div>
+
+    <h3>從海到山:一個城市裡的多重世界</h3>
+    <p>今天的大高雄,內部其實包含著好幾個截然不同的「世界」:</p>
+    <div class="cards">
+      <div class="card">
+        <span class="flag">海與港</span>
+        <h5>濱海都會</h5>
+        <p>前面九章的主角:港區、工業帶、市中心、水岸——這是高雄最為人熟知的<strong>港都核心</strong>。</p>
+        <span class="model">Coast</span>
+      </div>
+      <div class="card">
+        <span class="flag">平原</span>
+        <h5>農業與舊城鎮</h5>
+        <p>岡山、鳳山、旗山、美濃等平原城鎮,有著農業、傳統產業與深厚的歷史(如美濃的<strong>客家文化</strong>、旗山的香蕉與老街),是高雄的糧倉與文化底蘊。</p>
+        <span class="model">Plain</span>
+      </div>
+      <div class="card">
+        <span class="flag">山與原鄉</span>
+        <h5>丘陵與原住民部落</h5>
+        <p>六龜、桃源、那瑪夏等山地,是<strong>原住民族(如布農、鄒、拉阿魯哇等)的原鄉</strong>,有著高山、溫泉與部落文化,也是八八風災重創的地方(呼應台灣的災難記憶)。</p>
+        <span class="model">Mountain</span>
+      </div>
+    </div>
+
+    <h3>整合的難題</h3>
+    <p>把如此多元的地理「合併」為一個行政單位,帶來了顯著的<strong>治理挑戰</strong>。濱海都會的繁華與山區部落的偏遠、工業區的污染與農業區的環境、市中心的高樓與美濃的稻田——它們的需求、資源、發展邏輯天差地遠,卻要由同一個市政府來統籌。如何讓資源不過度集中於市區、如何兼顧農業與原鄉的發展、如何在「一個高雄」之下整合「多個世界」,是大高雄合併後持續面對的課題。這也是台灣多次行政區劃改革中,「<em>把都會與廣大腹地綁在一起</em>」這個模式的共同挑戰。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 一座城,如何裝下整片土地</span>
+      <p>大高雄的故事,點出了當代城市治理一個有趣的張力:<strong>當「行政的高雄」遠遠大於「人們想像中的高雄」時,這座城市該如何理解、整合它自己?</strong>多數人心中的高雄,是那座港都;但行政上的高雄,卻是一個從海到山、從工業到農業到原鄉的龐大拼貼。</p>
+      <p>而這恰恰讓高雄,成了一個<em>濃縮的台灣</em>。它內部就包含了台灣的幾乎所有面向:海洋與港口、重工業與農業、漢人市鎮與原住民部落、繁華都會與偏遠山村。它面對的整合難題——如何不「重市區輕偏鄉」、如何讓發展的果實不只集中在海港——其實正是整個台灣面對的「重北輕南」「城鄉差距」難題的縮影,只是這一次,發生在一座城市的內部。從這個角度看,大高雄不只是一座變大的港都,它更是一個必須學會「如何讓多元共存、讓資源公平流動」的微型國家。而它能否做好這件事,也將是它整體轉型能否成功的一部分。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">⌘ ✦ ⌘</div>
+  <p>在港、工業、政治這些「硬」身分之外,<br>高雄還有它最柔軟的一面——<br><span class="hl">藏在海口人的海產、廟會、寬街與那份不設防的熱情裡。</span></p>
+</div>
+
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Harbor Folk</span>
+    <h2 class="act-title">海口人:港都的生活肌理與性格</h2>
+    <p class="act-sub">Seafood, Temples, Scooters, and the Soul of a Harbor City</p>
+    <div class="ornament">⌘ ⌘ ⌘</div>
+  </div>
+  <div class="prose">
+    <p>前面談的都是高雄的「大歷史」——港、工業、政治、轉型。但這座城市真正的靈魂,藏在它的日常肌理裡,藏在被稱為「<strong>海口人</strong>」的高雄人,那種獨特的生活方式與性格之中。如果說台北的肌理是密集擁擠的巷弄,那麼高雄的肌理,則是寬闊、明亮、帶著海風與人情味的——一種屬於南方港都的、舒展而熱情的生活感。</p>
+
+    <h3>向海而生:海產與港都的味道</h3>
+    <p>高雄是一座「<strong>吃海</strong>」的城市。緊鄰漁港的地利,讓新鮮的海產成為高雄飲食最鮮明的標記——旗津的海產街、各地的海鮮快炒,是海口人最熟悉的味道。從討海的漁民、到碼頭的勞工、到海產攤的喧鬧,高雄的生活,自始至終都與那片海緊緊相連。這種「<em>向海而生</em>」的飲食與生活方式,是高雄海洋性格最日常的展現。</p>
+    <div class="pull"><p>台北人說「逛街」,高雄人說「看海」——這座城市的生活半徑裡,永遠有一片海、一陣鹹鹹的風,與一盤剛上岸的漁獲。</p></div>
+
+    <h3>寬闊的街、機車的城</h3>
+    <p>高雄的城市空間,給人的第一印象就是<strong>寬闊</strong>。承襲日治築港時期的規劃(築港章)與戰後的開闊佈局,高雄的街道普遍筆直而寬大,天空也比擁擠的台北盆地更為開朗。而在這些寬闊的街道上奔流的,是密密麻麻的<strong>機車</strong>——高雄是一座不折不扣的「機車城市」,機車是海口人最主要的代步工具,機車的洪流,是高雄街頭最鮮明的風景。寬街、藍天、機車、海風,共同構成了高雄那種<em>明亮而舒展</em>的城市感官。</p>
+
+    <h3>廟會、眷村與多元的人</h3>
+    <p>高雄的人文肌理,同樣是多元拼貼的。<strong>廟宇與廟會</strong>香火鼎盛,媽祖、王爺等信仰(呼應台灣的諸神之島)是社區凝聚的中心,熱鬧的廟會陣頭是南方民間文化最旺盛的展現。<strong>左營</strong>一帶曾是重要的海軍基地,聚集了大量<em>眷村</em>(如知名的左營眷村),帶來了濃厚的外省與軍旅文化記憶(眷村菜、各省鄉音),與本土的閩南、客家(美濃)、原住民(山區)、以及近年的<em>東南亞移工與新住民</em>(工業與漁業所需的大量外籍勞動力),共同構成了高雄多元的人口面貌。</p>
+
+    <h3>剛直而熱情:海口人的性格</h3>
+    <p>所有這些——海洋、勞動、開闊、抗爭的歷史——共同淬鍊出高雄人鮮明的<strong>性格</strong>。海口人常被形容為<em>剛直、海派、熱情、講義氣、不拘小節</em>。這種性格,與這座城市的身世一脈相承:海洋給了它開闊,勞動給了它樸實,抗爭的歷史給了它骨氣,南方的陽光給了它熱情。比起台北的精緻、快速與疏離,高雄給人的感覺更像是一個<em>大方、直爽、會拍著你肩膀請你吃海產的老朋友</em>。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 性格,是身世長出來的</span>
+      <p>海口人的生活肌理與性格,揭示了一個關於城市的溫柔真理:<strong>一座城市的「性格」,從來不是憑空而來的,而是它的地理、它的產業、它的歷史,在居民身上長出來的果實。</strong>高雄人的剛直海派,不是偶然——它是海洋的開闊、碼頭的勞動、工業的樸實、與抗爭歷史的骨氣,一起在這座城市的人身上,沉澱出來的氣質。</p>
+      <p>這也是高雄與台北最溫暖的一處對照。台北的肌理是「<em>密集而便利</em>」——巷弄、超商、24小時不打烊;高雄的肌理則是「<em>開闊而熱情</em>」——寬街、藍天、海產與人情。兩座城市用不同的方式,回答了「什麼是好的生活」這個問題。而高雄的答案裡,始終有一片海、一份勞動者的樸實、與一種南方特有的、不設防的熱情。正是這份生活的溫度與人的性格,構成了高雄在港口、工業、政治這些「硬」身分之外,最柔軟、也最值得珍惜的底色——也是它無論如何轉型,都不該弄丟的東西。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="interlude reveal">
+  <div class="mark">＄ ✦ ＄</div>
+  <p>城市的面貌變美了,但最根本的問題仍懸而未決——<br>當重工業不再是未來,<br><span class="hl">這座為工業而生的城,該靠什麼,留住它的下一代?</span></p>
+</div>
+
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Crossroads</span>
+    <h2 class="act-title">今日的十字路口:人口、產業與未竟的轉型</h2>
+    <p class="act-sub">Exodus, Silicon, and a Transformation Still Unfinished</p>
+    <div class="ornament">＄ ✦ ＄</div>
+  </div>
+  <div class="prose">
+    <p>走到今天,高雄站在一個關鍵的十字路口。它已經完成了環境與城市面貌的初步轉身(轉身章),但它身世中那個最根本的問題——<strong>當重工業不再是未來,這座為工業而生的城,該靠什麼活下去?</strong>——卻仍未得到完整的答案。高雄當代的焦慮,與它的繁華一樣,都深深刻在這個尚未解開的難題裡。</p>
+
+    <h3>人口的隱憂:外移與老化</h3>
+    <p>高雄面臨的最切身挑戰之一,是<strong>人口</strong>。曾經,高雄憑藉工業的就業機會,吸納了大量中南部的人口(工業章);但隨著傳統重工業的衰退與外移,高雄的就業吸引力下降,出現了<em>人口外移與成長停滯</em>的隱憂——尤其是年輕人,為了尋求更多、更高薪的工作機會,往往「<em>北漂</em>」到台北、或流向其他城市。人口的外移與老化,如同台灣整體少子化、高齡化困境的地方版本(呼應台灣的天花板),動搖著這座城市的長期活力。一座城市最怕的,不是工廠關門,而是年輕人離開。</p>
+    <div class="pull"><p>高雄最深的焦慮,不在它的天空是否變藍、它的水岸是否變美,而在於——它能不能給年輕人一個「不必離開高雄,也能有好未來」的理由。</p></div>
+
+    <h3>產業的轉型:從傳統重工業到「南進的神山」</h3>
+    <p>高雄轉型的核心,是<strong>產業</strong>。傳統的鋼鐵、石化、造船等重工業,面臨環保壓力、全球競爭與產業外移的多重夾擊,風光不再。高雄迫切需要新的、更高附加價值、更乾淨的產業引擎。而近年來最受矚目的契機,是<strong>半導體產業的南進</strong>——隨著台灣半導體(護國神山,呼應台灣經濟章)的擴張,高雄被納入了重要的半導體與科技投資佈局(如相關晶圓廠與產業園區的設立)。這被視為高雄擺脫「夕陽重工業」、邁向「高科技新產業」的歷史性機會。如果成功,高雄有望從「為舊工業而生」,轉變為「為新科技而活」;但這個轉型能否真正落地、能否創造足夠的高薪就業、能否留住與吸引人才,仍是進行式的考驗。</p>
+
+    <h3>未竟的轉身</h3>
+    <p>於是,高雄當代的處境,是一場「<strong>未竟的轉身</strong>」。它的城市面貌變美了(愛河、駁二、水岸),但它的產業體質與人口結構,仍在艱難地調整中。漂亮的硬體,需要被乾淨而高薪的產業填滿,才能真正留住人;新的科技投資,需要時間才能開花結果。高雄正處在「<em>舊的已去、新的未穩</em>」的過渡期——它已經知道自己不想再只當「工業黑鄉」,但它要成為什麼、能不能成功,答案還懸在空中。這份「轉型尚未完成」的不確定,正是當代高雄最真實的心情。</p>
+    <div class="investor">
+      <span class="tag">城市的回聲 · 一座城,正在重新尋找它存在的理由</span>
+      <p>高雄的十字路口,揭示了所有「<strong>因單一產業而興的城市</strong>」終將面對的命運考驗:當那個曾經定義你、餵養你的產業走向黃昏時,你能不能及時找到新的存在理由?高雄因港而生、因重工業而盛,但當重工業不再是未來,它就必須回答一個關乎生死的問題——<em>沒有了煙囪,我還是誰?</em></p>
+      <p>而這道難題,又與高雄整部身世的核心命題相互呼應。它一生都是一座「<em>被國家指定用途</em>」的城市(築港章、工業章)——日本人指定它築港,戰後指定它做重工業。如今,它第一次有機會,試著為自己選擇未來:是繼續被動地接受新的產業佈局(半導體南進),還是能主動地、結合它的海洋、它的人文、它的生活品質,長出一個屬於高雄自己的、不可取代的樣子?高雄的轉身能否真正完成,某種程度上,就是看這座一向「被打造」的城市,能不能在這一次,真正地「自己定義自己」。它的故事,還沒有結局——它,正站在重新書寫自己的起點上。</p>
+    </div>
+  </div>
+</section>
+
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">☩ ⚓ ☩</div>
+  <p>一座潟湖,一座被打造的港,一段扛下代價的工業歲月,一聲南方的吶喊,一場未竟的轉身。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的高雄,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的高雄</h2>
+      <p class="act-sub" style="color:rgba(243,238,226,.6)">Why Kaohsiung Became What It Is</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ⚓ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整座城收攏成一條線。今天的高雄之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:潟湖良港,給了它唯一的命運</h3>
+      <p>一切的源頭是<strong>地形</strong>。一道沙洲圍出的天然潟湖、一座可作屏障的壽山,讓這裡天生就是一座好港。高雄的命運從第一天起就被寫定:它是一個「<em>港</em>」、一個物的吞吐者、一扇台灣面向海洋的門。它今天所有的特徵——海洋性格、沿港發展的城市軸線、作為航運與工業樞紐的地位——根源都可以追回到「它是一座潟湖良港」這個最原始的事實。這是它與台北最深的分野:台北因「最大的平地」聚人,高雄因「最好的港灣」吞吐。</p>
+
+      <h3>第二層:它的港與工業,是被「打造」出來的</h3>
+      <p>接著是<strong>人工的偉業</strong>。高雄的天然潟湖,是被日本人用抽砂船疏濬、用填海造出大港的;它的重工業,是被戰後的國家為了工業化而擺進來的。高雄因此是一座<em>「被製造」的城</em>——它的港、它的工業、它筆直的街道,都是被規劃、被指定、被國家藍圖一手安排的。這份「被打造」的基因,給了它現代而剛硬的氣質,也埋下了它「被指定用途、為國家目的而存在」的一生宿命。</p>
+
+      <h3>第三層:它扛下了工業化最沉重的代價</h3>
+      <p>然後是<strong>沉重的代價</strong>。作為台灣的重工業之都,高雄用它的天空、它的河流、它勞動者的健康,替整個台灣扛下了工業化最骯髒、最危險的那一面——「工業黑鄉」的污染、職災的血淚、被犧牲的生活品質。發展的果實流向全國,發展的代價卻沉澱在這座城市。而正是這份「替別人犧牲」的經驗,淬鍊出高雄剛直、海派、不畏抗爭的性格,與它對公平、對環境正義的強烈渴望。</p>
+
+      <h3>第四層:被忽略者,成了民主的火種</h3>
+      <p>第四層是<strong>南方的骨氣</strong>。一座勞動的、承受代價的、被「重北輕南」的城市,自然孕育出不平則鳴的反抗精神。台灣民主化最關鍵的火種——美麗島事件——就在高雄點燃。高雄因此不只是工業港都,更是<em>民主聖地與南方意識的核心</em>。它的政治性格,是它「工業—勞動—南方—民主」整條身世脈絡,一手塑造的。它不甘只當台北的工業後院,它要為自己、為南方發聲。</p>
+
+      <h3>第五層:它正努力,從「為工業」轉向「為人」</h3>
+      <p>最後是<strong>艱難的轉身</strong>。當工業榮光褪色,高雄開始修復傷痕、重新定義自己:愛河從臭水溝變回城市之心,駁二與亞洲新灣區把海岸線還給市民,輕軌打破了數十年的港市隔閡。它要從一座「<em>為工業而生的城</em>」,變成一座「<em>為人而活的城</em>」。但這場轉身尚未完成——漂亮的水岸,還需要乾淨而高薪的新產業(如南進的半導體)來填滿,才能真正留住正在外移的年輕人。高雄,正站在重新書寫自己的十字路口。</p>
+
+      <div class="investor">
+        <span class="tag">城市的回聲 · 一座為工業而生,正努力為人而活的港都</span>
+        <p>所以,今天的高雄是什麼?它是一座<strong>被潟湖選中、被國家打造、為工業而生、由勞動者的汗水撐起,如今正努力為「人」而重新活過來的港都</strong>。它的港是天生的也是人造的,它的工業是國家擺進來的,它的剛直是被碼頭與工廠磨出來的,它的骨氣是被忽略與抗爭逼出來的,而它的轉身,則是一座城市對「自己到底為誰而存在」的深刻反思。</p>
+        <p>高雄最深刻的真相是:<em>它一生都是一座「被指定用途」的城市——被指定築港、被指定做工業——而它當代最了不起的努力,就是第一次試著為自己,選擇未來。</em>它想擺脫「只是台灣的引擎室」這個角色,想結合它的海洋、它的人文、它海口人的熱情,長出一個不可取代的、屬於高雄自己的樣子。這條路還沒走完,結局也還沒寫定。但一座懂得為自由抗爭、懂得修復自己傷痕、懂得追問「我還能是誰」的城市,本身就已經走在重新定義自己的路上。高雄的故事,不是一座工業城的黃昏,而是一座港都,正努力迎接它的第二次日出。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">潟湖給了高雄一座港,國家把工業擺進它的身體,勞動者用汗水撐起它的繁華,代價刻進它的天空與河流——而如今,它正努力把自己,從一座為工業而生的城,變回一座為人而活的城。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座港都的終極啟示</span>
+      <p>一座城市的樣貌,往往由它的地理開局,由它被賦予的用途定型,由它承擔的代價刻下紋理,由它的反抗淬鍊出骨氣——而它真正的成熟,在於某一天,它終於不再只是被別人指定用途的工具,而開始追問「我為誰而存在、我想成為什麼」,並親手為自己,選擇一個更好的未來。這,就是高雄至今仍在書寫的故事。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(243,238,226,.78);margin-top:2.5rem">
+        從一道沙洲圍出的潟湖、一圈刺竹圍成的「打狗」,<br>
+        到旗後的漁火、開港後的糖香與洋行,<br>
+        從日本人抽砂填海造出的大港、哈瑪星的繁華,<br>
+        到中鋼的爐火、煙囪下灰濛的天空、勞動者的汗與血,<br>
+        從美麗島那一夜的吶喊,到愛河重新映出的波光,<br>
+        從駁二的舊倉庫、輕軌駛過的水岸,到正在南進的科技之光,<br>
+        這座被潟湖選中、被國家打造、正努力為自己而活的港都,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的高雄。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+
+<footer>
+  <div class="orn">⚓ ✦ ⚙</div>
+  <p>潟湖之港 · 高雄的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE LAGOON TO THE WATERFRONT · TAKAU – PRESENT</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{const h=document.documentElement;pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';});
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大河、群山與佛塔:寮國的身世史詩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1408;
+  --parchment:#f5eedb;
+  --parchment-deep:#e9ddbd;
+  --teal:#0e3f3a;
+  --teal-deep:#06231f;
+  --gold:#b3892b;
+  --gold-bright:#d8af48;
+  --saffron:#c2611a;
+  --crimson:#8a2014;
+  --jade:#356048;
+  --faint:#665a39;
+  --line:#c9b780;
+  --shadow:rgba(26,20,8,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(179,137,43,.08), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(14,63,58,.07), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(194,97,26,.28), transparent 60%),
+    linear-gradient(165deg, var(--teal-deep) 0%, var(--teal) 48%, #11534b 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d8af48' stroke-width='0.6' opacity='0.15'%3E%3Cpath d='M600 200 l40 90 q60 30 0 120 q-20 60 -40 90 q-20 -30 -40 -90 q-60 -90 0 -120 Z' fill='%23d8af48' opacity='0.16'/%3E%3Ccircle cx='600' cy='600' r='540'/%3E%3Ccircle cx='600' cy='600' r='400'/%3E%3Cpath d='M120 500 q200 -70 400 0 t400 0 t160 30'/%3E%3Cpath d='M90 660 q220 -80 440 0 t440 0'/%3E%3Cpath d='M600 60 V1140 M60 600 H1140'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 250s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(245,238,219,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--teal-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--saffron);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--teal-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--saffron);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--teal-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--teal-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(14,63,58,.05), rgba(179,137,43,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--teal-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT (歷史的回聲) ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--teal-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(6,35,31,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--saffron));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(245,238,219,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c878;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--saffron);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--saffron);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--teal-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--saffron);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--teal-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(179,137,43,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(14,63,58,.05);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--saffron);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--teal-deep),var(--teal));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d8af48' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(245,238,219,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c878}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(216,175,72,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--saffron));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--teal-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#100d06 !important}
+.dark .act-title{color:#d6c79e}
+.dark .prose p{color:#cab992}
+.dark .prose strong{color:#cf7244}
+.dark .prose em{color:#d8aa74}
+.dark .prose h3{color:#cf7244;border-left-color:var(--saffron)}
+.dark .act-sub{color:#887752}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(138,32,20,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--saffron);margin-bottom:.5rem;font-weight:600}
+
+/* ===== interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--teal-deep);font-weight:500}
+.interlude p .hl{color:var(--saffron);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(245,238,219,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--saffron);font-style:normal}
+
+/* ===== legacy & shift ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--teal-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--teal-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--saffron);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(14,63,58,.05);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--saffron)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--saffron);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--teal-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--teal-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The Land of a Million Elephants · Who the Lao Became</span>
+    <h1>大河、群山與<span class="em">佛塔</span><br>寮國<br>的身世</h1>
+    <p class="sub">從一條貫穿南北的大河、一片被群山與強鄰環抱的內陸高地,到一個曾號稱「百萬大象之地」、又淪為人類史上被炸得最慘的國度——<br>一部關於「為何今天的寮國與寮國人是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的寮國,是一個只有七百多萬人口、卻是東南亞唯一一個<em>沒有海岸線</em>的內陸國?為什麼這個以溫和、虔誠的佛教徒著稱的國度,竟是人類歷史上<strong>按人均計算被轟炸得最猛烈的國家</strong>?答案不在當下,而在數百年的縱深裡。一條大河(湄公河)從北到南貫穿了這片土地,既滋養了它、也將它與山外的世界半隔絕;一位流亡的王子在十四世紀建起了「百萬大象之國」,在群山環抱中綻放出佛塔與經文的金光;但這片土地太小、又恰好卡在暹羅、緬甸、越南與中國這幾個強鄰的縫隙裡,於是它被瓜分、被臣服、被殖民、又在冷戰中被捲入一場「不是自己的戰爭」,默默承受了傾瀉而下的數百萬噸炸彈;最後,它在群山的沉默中,成為東南亞少數幾個仍由共產黨統治的國家,並把自己最珍貴的兩樣東西——水與位置——押上了通往未來的賭桌。這不是一個叱吒風雲的大國故事,而是一片<em>被大河貫穿、被群山環抱、被強鄰夾在中間</em>的內陸高地,如何在比自己強大太多的鄰居與帝國之間,一次次失去、又一次次默默地、堅韌地活下來的故事。讓我們從頭走一遍,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--saffron);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Land</span>
+    <h2 class="act-title">在所有人來之前,這裡有什麼?</h2>
+    <p class="act-sub">The River, the Mountains, and a Land with No Sea</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的寮國人,得先回到一個比所有國王、所有戰爭都更古老的問題:在他們來之前,這裡有什麼?答案,藏在三樣東西裡——一條貫穿南北的大河、一片層層疊疊的群山,以及一個殘酷的事實:它沒有海。</p>
+
+    <h3>一條大河,一條命脈</h3>
+    <p>先看地圖。這片土地的命脈,是一條從青藏高原奔流而下、貫穿整個中南半島的大河——<strong>湄公河（Mekong）</strong>。它從北到南,像一條金色的脊椎,縱貫了整個寮國,沿岸的河谷與台地是這片土地上最肥沃、人口最集中的地方。寮國的城市、稻田、信仰與生活,幾乎全都依偎著這條河展開。記住這一點:<em>湄公河之於寮國,既是它的生命線、它的糧倉、它的高速公路,也是它與外界連結(與隔絕)的唯一動脈。</em></p>
+
+    <h3>一片群山,一道圍牆</h3>
+    <p>但這片土地的另一個主宰,是<strong>山</strong>。寮國大部分的國土是崎嶇、茂密、難以穿越的<em>山地與高原</em>。這些山,既是屏障,也是牢籠:它們讓寮國的各個族群分散在難以相連的河谷與山頭之間,難以凝聚成一個緊密的整體;它們也讓這片土地交通不便、與外界半隔絕。更關鍵的是一個地理上的「致命傷」——<strong>寮國是東南亞唯一一個沒有海岸線的國家</strong>。它被四面的鄰居完全包圍,通往大海、通往世界的每一條路,都必須經過別人的領土。</p>
+    <div class="pull"><p>一條大河給了寮國生命,層層群山給了它屏障與孤立,而「沒有海」這個事實,則給了它一個必須仰賴鄰居才能呼吸的宿命。</p></div>
+
+    <h3>夾在巨人之間的縫隙</h3>
+    <p>於是這片土地的故事,本質上是一個「<em>夾縫</em>」的故事。它面積不大、人口稀少,卻恰好坐落在幾個遠比它強大的鄰居的縫隙之間:西邊是<strong>暹羅(泰國)</strong>、西北是<strong>緬甸</strong>、東邊隔著長長的山脈是<strong>越南</strong>、北邊則是龐大的<strong>中國</strong>。這幾個強鄰,在歷史上輪番把寮國當作可以爭奪、可以臣服、可以當作緩衝的對象。今天寮國所有的命運——它的內陸困境、它的多族群分散、它與每一個鄰居千絲萬縷又身不由己的關係——根源都在這裡:<em>它生在一片被大河貫穿、被群山環抱、被巨人夾在中間的內陸高地上。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 地理是第一作者</span>
+      <p>在任何國王、任何帝國、任何意識形態登場之前,<strong>地理</strong>就已經寫好了這個故事的開頭。一片被湄公河貫穿、被群山切割、又沒有出海口的內陸土地,夾在幾個強大的鄰居之間,註定會是一個小而分散、命運大半由外力左右、卻又因群山的屏障而頑強存續的地方。</p>
+      <p>這是理解寮國的第一把鑰匙:<em>它今天所有的特質——它的小、它的內陸困境、它族群的多元分散、它那份溫和而不爭的民族性格、以及它「永遠在強鄰之間求生存」的宿命——其實都是同一個地理事實的一體多面:它生在一道巨人之間的縫隙裡,被一條大河與一片群山所定義。</em>正因為它太小、又卡在太多強權的中間,它的歷史很少能由自己書寫;但也正因為群山的屏障,它一次次在被瓜分、被臣服之後,仍能保有一塊屬於自己的、佛塔金光閃爍的土地。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🐘 ✦ 🐘</div>
+  <p>在群山與大河之間,一支民族順流而下,尋找新的家園。<br>而一位被放逐的王子,將把這些分散的河谷部落,<br><span class="hl">凝聚成一個號稱擁有「百萬大象」的王國。</span></p>
+</div>
+
+<!-- ===== 第一章:瀾滄王國的誕生 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · The Million Elephants</span>
+    <h2 class="act-title">流亡王子與「百萬大象之國」</h2>
+    <p class="act-sub">Fa Ngum and the Birth of Lan Xang, 1353</p>
+    <div class="ornament">🐘 🐘 🐘</div>
+  </div>
+  <div class="prose">
+    <p>所有人都會問:這片分散在群山與河谷間的土地,是如何第一次被凝聚成一個國家的?故事要從一支民族的遷徙說起。大約從一千多年前開始,操著<em>傣語(Tai)</em>的民族,從中國南方一帶,沿著河谷向南、向西遷徙,逐漸定居在中南半島的土地上——他們是今天寮族、泰族、撣族等民族的共同祖先。其中一支,沿著湄公河流域定居下來,成為今天寮國人的先民。</p>
+
+    <h3>法昂:從放逐到開國</h3>
+    <p>把這些分散的河谷部落第一次統一起來的,是一位充滿傳奇色彩的人物——<strong>法昂（Fa Ngum）</strong>。傳說他出身於琅勃拉邦一帶的王族,卻因故與家族一同被放逐,流亡到當時中南半島最強大的帝國——<em>柬埔寨的高棉(吳哥)王朝</em>。他在吳哥的宮廷中長大、迎娶了高棉公主,並在高棉的軍事支持下率軍北返,一路征服、收服了湄公河流域的眾多部落與城邦。1353 年,法昂建立了寮國歷史上第一個統一的王國,並為它取了一個霸氣的名字——<strong>瀾滄（Lan Xang）</strong>,意為「<strong>百萬大象之地</strong>」。</p>
+    <div class="pull"><p>「百萬大象」——在那個年代,大象是戰爭與權力的象徵。這個名字宣告著:這片群山環抱的土地,第一次有了一個屬於自己的、強盛的國家。</p></div>
+
+    <h3>盛世與一尊金佛</h3>
+    <p>瀾滄王國在此後的數百年間,時有興衰,但也曾締造輝煌的盛世(尤其十六、十七世紀)。它的疆域一度涵蓋今天寮國的大部分以及周邊地區,首都<strong>琅勃拉邦（Luang Prabang）</strong>成為一座佛塔林立、僧侶雲集的宗教與文化中心。法昂從高棉迎回了一尊備受尊崇的金佛「<em>勃拉邦(Phra Bang)</em>」,這尊佛像成為王國正統與佛法的象徵,琅勃拉邦這座城市,也因它而得名。一個由流亡王子在群山間建起的王國,就這樣在湄公河畔,綻放出佛塔的金光。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 在縫隙中凝聚</span>
+      <p>瀾滄王國的誕生,揭示了寮國歷史的一個關鍵母題:<strong>這片分散的土地,需要一個強大的外力或人物,才能被暫時凝聚成一個整體。</strong>法昂本身就是被高棉帝國「扶植」回來的——他的開國,從一開始就帶著鄰近強權的影子。這預示了寮國此後的命運:它的統一與存續,往往與周邊巨人的角力息息相關。</p>
+      <p>但這裡也藏著寮國最珍貴的一份遺產。<em>儘管國家的政治命運大半由地理與強鄰決定,但瀾滄王國為這片土地注入了一個無法被輕易奪走的靈魂——一個共同的語言、一段「百萬大象之國」的光榮記憶,以及最重要的,一種深入骨髓的佛教信仰。</em>後來,當這個王國分裂、臣服、乃至亡國時,正是這份共同的文化與信仰,像群山一樣,默默地守護著「寮國人」這個身分,讓它在數百年的動盪中始終沒有消散。理解了瀾滄,就理解了寮國人那份「國可亡、佛塔與母語不可滅」的韌性源頭。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ✦ ☸</div>
+  <p>法昂從高棉帶回的,不只是一尊金佛,更是一整套信仰。<br>這套信仰,將比任何國王、任何王朝都更深、更久地——<br><span class="hl">塑造每一個寮國人看待生命、痛苦與來世的方式。</span></p>
+</div>
+
+<!-- ===== 第二章:上座部佛教 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Faith</span>
+    <h2 class="act-title">袈裟、功德,與一個民族的靈魂</h2>
+    <p class="act-sub">Theravada Buddhism and the Soul of the Lao</p>
+    <div class="ornament">☸ ☸ ☸</div>
+  </div>
+  <div class="prose">
+    <p>如果說瀾滄王國給了寮國一個「身體」(國家),那麼<strong>上座部佛教（Theravada Buddhism）</strong>就給了它一個「靈魂」。這套源自斯里蘭卡、經由高棉與暹羅傳入的佛教傳統,在瀾滄王國時代成為國教,並從此深深地、不可逆地融入了寮國人生活的每一個層面。要理解寮國人,就必須理解這套信仰。</p>
+
+    <h3>袈裟與晨間的布施</h3>
+    <p>上座部佛教塑造了寮國最動人的日常風景。每天清晨,當天色微亮,寮國城鎮的街道上,就會出現一列列身披橙黃色袈裟、赤足托缽、靜默前行的僧侶;而虔誠的信眾則跪在路邊,恭敬地把糯米飯與食物放入僧侶的缽中——這就是琅勃拉邦聞名於世的「<strong>布施(Tak Bat)</strong>」儀式。在傳統的寮國社會,幾乎每一個男子一生中都會有一段時間出家為僧,這被視為成長與盡孝的必經之路。寺廟(wat)不只是宗教場所,更是村莊的學校、社區的中心、文化的守護者。</p>
+    <div class="pull"><p>在寮國,佛教不是一週上一次的宗教,而是融入每一個清晨、每一缽糯米飯、每一座村莊寺廟裡的——生活本身。</p></div>
+
+    <h3>功德、知足與隨遇而安</h3>
+    <p>但佛教給寮國人最深的塑造,是一種<em>看待生命的態度</em>。上座部佛教強調<strong>業力(karma)、輪迴與積累功德(making merit)</strong>:今生的境遇是前世的果,而透過布施、行善、虔敬,可以為來世積累福報。這套世界觀,孕育出寮國人一種獨特的民族性格——<em>溫和、知足、不爭、隨遇而安</em>。面對人生的無常與苦難,寮國人傾向於以一種平靜、接納的心態去面對,而非激烈地對抗。這份「<strong>慢活、不爭</strong>」的氣質,至今仍是寮國最鮮明的文化標誌。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一個國家的精神底盤</span>
+      <p>上座部佛教,是理解寮國民族性格最深的一把鑰匙。<strong>它為這個小而分散、命運多舛的民族,提供了一個極其穩固的「精神底盤」。</strong>當政治的天空風雲變幻——王朝分裂、強鄰入侵、殖民、戰爭——這份信仰始終如群山般沉默而堅定地存在著,給予寮國人面對動盪的內在力量與心靈的慰藉。</p>
+      <p>這裡藏著一個深刻的雙面性。<em>一方面,佛教孕育的「知足、隨遇而安」,是寮國人能在無數次失去與苦難中,依然保持平和、堅韌地活下去的根本原因——這是一種了不起的生存智慧。</em>但另一方面,這份「不爭」的氣質,也讓寮國在面對遠比自己進取、強勢的鄰居(暹羅、越南)時,往往處於被動。它很少主動向外擴張、爭奪,於是在強權的縫隙中,常常是被爭奪、被決定的那一方。寮國的溫和與它的弱勢,某種程度上是同一份精神特質的一體兩面——這份特質,將在它接下來被瓜分、被殖民、被捲入戰爭的命運中,被反覆地考驗。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚔ ✦ ⚔</div>
+  <p>盛世之後,「百萬大象之國」沒有亡於外敵,<br>而是先亡於自己——一場王位的爭奪,把它撕成了三塊。<br><span class="hl">而虎視眈眈的強鄰,正等著把這三塊碎片,一一吞下。</span></p>
+</div>
+
+<!-- ===== 第三章:分裂與暹羅的支配 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Shattering</span>
+    <h2 class="act-title">分成三塊的王國,與暹羅的鐵腕</h2>
+    <p class="act-sub">Three Kingdoms, Siamese Vassalage, and a Lost Capital</p>
+    <div class="ornament">⚔ ⚔ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>瀾滄王國的輝煌,在十八世紀初走向了終結。但擊垮它的,首先不是外敵,而是<em>內部的分裂</em>。在一場王位繼承的爭奪之後,這個曾經統一的「百萬大象之國」,在 1707 年前後分裂成了三個各自為政的王國:北部的<strong>琅勃拉邦王國</strong>、中部的<strong>永珍(萬象)王國</strong>、與南部的<strong>占巴塞王國</strong>。一個本就因群山而難以凝聚的國家,如今更被分割成三塊互不統屬、彼此競爭的碎片。</p>
+
+    <h3>強鄰環伺:被吞下的碎片</h3>
+    <p>分裂,讓寮國暴露在強鄰的鐵蹄之下。回想序章——寮國恰好夾在暹羅、緬甸、越南的縫隙中。當它統一而強盛時,尚能在縫隙中自保;但當它分裂成三塊弱小的碎片時,它就成了強鄰眼中唾手可得的獵物。其中,西邊崛起的<strong>暹羅(泰國)</strong>勢力最盛,逐漸將這三個寮國王國一一納為自己的<em>藩屬(朝貢國)</em>。寮國的諸王,從此必須向曼谷的暹羅國王稱臣納貢。</p>
+    <div class="pull"><p>分裂,是寮國一切苦難的開端。一個被群山切割的國家,一旦失去了統一,就只剩下被強鄰逐塊吞下的命運。</p></div>
+
+    <h3>永珍的毀滅與一場慘痛的記憶</h3>
+    <p>這段臣服的歷史中,最慘痛的一頁發生在 1828 年前後。永珍王國的國王<strong>昭阿努(Anouvong)</strong>,不甘於臣服,起兵反抗暹羅的宗主權。但寡不敵眾,起義失敗。暹羅的軍隊作為報復,<strong>幾乎將永珍(萬象)這座城市夷為平地</strong>——宮殿、寺廟被焚毀洗劫,人口被大批擄掠遷往暹羅境內。昔日瀾滄的中部核心,淪為一片廢墟。昭阿努本人被俘,慘死於曼谷。這場毀滅,在寮國人的集體記憶中留下了難以磨滅的傷痕,也讓昭阿努成為寮國人心中反抗強權的悲劇英雄。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 分裂招來吞噬</span>
+      <p>瀾滄王國的分裂與滅亡,把寮國歷史最殘酷的一條規律,血淋淋地展現了出來:<strong>對一個夾在巨人之間的小國而言,「分裂」幾乎等同於「死亡」。</strong>當寮國統一時,群山的屏障還能保護它;但一旦它分裂成三塊互鬥的碎片,那些原本被屏障擋在外面的強鄰,就能輕易地將它逐一吞噬。</p>
+      <p>這段歷史也揭示了寮國一個深沉的處境:<em>它的命運,從這時起就越來越不掌握在自己手中,而是取決於周邊強權的角力。</em>它先是成為暹羅的藩屬,而很快,當另一個更遙遠、更強大的力量——歐洲的殖民帝國——從海上而來時,寮國這片土地,將再一次成為大國劃分勢力範圍的棋子。昭阿努的悲劇提醒著我們:寮國人並非沒有反抗的勇氣與尊嚴,但在懸殊的實力面前,反抗的代價往往是毀滅。這份「想反抗卻無力反抗」的悲愴,將成為寮國近代史揮之不去的底色。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚜ ✦ ⚜</div>
+  <p>當寮國在暹羅的陰影下喘息時,一個來自遙遠歐洲的帝國,<br>正沿著湄公河逆流而上。<br><span class="hl">它要的不是寮國本身,而是把寮國當作一塊「緩衝」,與一條通往中國的幻夢之路。</span></p>
+</div>
+
+<!-- ===== 第四章:法國殖民 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Buffer</span>
+    <h2 class="act-title">法國的算計:一塊被當作「緩衝」的土地</h2>
+    <p class="act-sub">French Indochina and the Land that Was a Means to an End</p>
+    <div class="ornament">⚜ ⚜ ⚜</div>
+  </div>
+  <div class="prose">
+    <p>十九世紀末,歐洲的殖民帝國瓜分了整個東南亞。從海上而來的<strong>法國</strong>,先後控制了越南與柬埔寨,組成了「法屬印度支那」。接著,法國的目光投向了內陸的寮國。1893 年,法國以武力威逼,迫使暹羅放棄對湄公河東岸寮國領土的宗主權,將寮國納入法屬印度支那的版圖。寮國,就這樣從暹羅的藩屬,變成了法國的殖民地。</p>
+
+    <h3>法國要的,從來不是寮國本身</h3>
+    <p>但這裡藏著一個對寮國命運影響深遠的真相:<strong>法國對寮國本身,其實興趣缺缺。</strong>與資源豐富、人口稠密的越南不同,內陸、多山、人口稀少的寮國,在法國殖民者眼中,經濟價值有限。法國要寮國,主要是出於兩個算計:其一,把寮國當作一塊<em>「緩衝地帶」</em>,用來阻擋英國勢力(已控制緬甸與馬來亞)向東擴張;其二,曾天真地以為可以把湄公河當作一條<em>通往中國西南的貿易通道</em>(後來證明湄公河多急流瀑布,根本無法通航,此夢遂碎)。</p>
+    <div class="pull"><p>對法國而言,寮國從來不是目的,而是手段——一塊用來隔開對手的緩衝,一條通往中國的幻夢之路。這份「不被當回事」,本身就是一種命運。</p></div>
+
+    <h3>被忽視的殖民地</h3>
+    <p>正因為寮國「不被當回事」,法國對它的統治也相當鬆散、投入極少。法國幾乎沒有在寮國發展什麼像樣的基礎建設、教育或經濟;它甚至為了行政便利,大量引進<em>越南人</em>來擔任殖民政府的中下層官員與技術人員。這種「<strong>用越南人來管理寮國</strong>」的做法,在寮國人與越南人之間埋下了微妙的張力,也讓寮國本土精英的培養嚴重不足。在長達半個世紀的法國統治下,寮國基本上維持著它原有的、緩慢的、以農業與佛教為中心的鄉村社會樣貌,被遺忘在帝國的邊緣角落。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 作為「手段」的命運</span>
+      <p>法國殖民的這段歷史,把寮國「夾縫小國」的處境,推向了一個更深的層次:<strong>它不僅命運由強權決定,甚至連被統治時,都只是別人達成目的的「手段」,而非「目的」本身。</strong>它被當作緩衝、被當作通道,唯獨很少被當作一個值得認真對待、認真發展的地方。</p>
+      <p>這份「被忽視」,留下了一份複雜的遺產。<em>一方面,法國的漠視讓寮國錯失了現代化的機會,基礎建設與人才的匱乏,成為它日後發展的沉重包袱;但另一方面,正是這份漠視,反而讓寮國傳統的佛教文化、鄉村社會與生活節奏,得以較少被殖民現代性所衝擊、改造,相對完整地保存了下來。</em>更深遠的是,這段歷史把寮國與越南、柬埔寨綁進了同一個「印度支那」的框架裡——這個框架,將在接下來的二十世紀,把寮國這個本不好戰的小國,無可避免地捲入它鄰居(越南)那場席捲整個地區的、慘烈的戰爭漩渦之中。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ☭ ✦</div>
+  <p>二戰的烽火動搖了法國的殖民帝國,獨立的呼聲在印度支那響起。<br>但對寮國而言,獨立並未帶來和平,<br><span class="hl">而是把它推進了一場更大、更冷酷的全球對決——冷戰。</span></p>
+</div>
+
+<!-- ===== 第五章:獨立與冷戰漩渦 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Cold War</span>
+    <h2 class="act-title">獨立的代價:被捲入別人的戰爭</h2>
+    <p class="act-sub">Independence, Division, and a Small Country in a Global Game</p>
+    <div class="ornament">☭ ☭ ☭</div>
+  </div>
+  <div class="prose">
+    <p>二戰期間,日本一度佔領了印度支那;戰後,法國試圖重返,卻遭遇了越南胡志明領導的、風起雲湧的獨立運動。在第一次印度支那戰爭中,法國最終戰敗。1954 年的《日內瓦協議》,正式承認了寮國的<strong>獨立</strong>。一個被瀾滄分裂、被暹羅臣服、被法國殖民的內陸小國,終於在名義上,重新成為一個主權國家。</p>
+
+    <h3>獨立,卻立刻被冷戰撕裂</h3>
+    <p>但獨立並未帶來和平。寮國恰好誕生在<strong>冷戰</strong>對峙最激烈的時刻與最敏感的地點——它緊鄰著已經分裂為南北、即將爆發大戰的越南。於是,這個本不好戰的小國,立刻被捲入了美國與共產陣營的全球對決。寮國國內也隨之分裂成幾股勢力:<em>親西方的右派、中立派,以及由共產主義的「巴特寮(Pathet Lao)」所代表的左派</em>。其中,巴特寮與越南的共產黨(越盟)關係密切,得到北越的有力支持。一場由全球冷戰所驅動的內戰,在寮國的群山與河谷間悄然展開。</p>
+    <div class="pull"><p>寮國的悲劇在於:它太小、太弱,卻又恰好坐在冷戰的斷層線上。於是它的內戰,從來就不只是它自己的戰爭。</p></div>
+
+    <h3>「胡志明小道」:把寮國拖入深淵的路</h3>
+    <p>真正把寮國拖入深淵的,是一條穿過它國土的小路。為了向南越的共產游擊隊輸送兵員與物資,北越開闢了一條穿越寮國東部山區叢林的補給線——著名的「<strong>胡志明小道（Ho Chi Minh Trail）</strong>」。這條小道,讓寮國的領土成為了越戰中北越的關鍵後勤動脈。而為了切斷這條動脈,美國決定對寮國境內的這條小道、以及巴特寮控制的區域,展開大規模的轟炸。一個從未向美國宣戰、大多數人甚至不知道自己被捲入的小國,即將承受人類戰爭史上最瘋狂的一場空襲。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 小國在大國棋局中的宿命</span>
+      <p>寮國的冷戰悲劇,是它「夾縫小國」宿命最殘酷的一次體現。<strong>它的命運,再一次完全不由自己掌握:它的內戰由全球冷戰所驅動,它的領土因鄰國(越南)的戰爭而成為戰場,它的天空因超級大國(美國)的戰略需要而落滿炸彈。</strong>從瀾滄被高棉扶植、到被暹羅臣服、到被法國當作緩衝——這條「命運由外力決定」的主線,在冷戰中達到了它最黑暗的高潮。</p>
+      <p>這裡藏著一個關於小國生存的、令人心碎的真理:<em>當你恰好坐落在大國博弈的斷層線上時,你自身的意願、你的中立、你的弱小,都無法保護你;你會被無可選擇地捲入一場「不是你的戰爭」,並為此付出最慘重的代價。</em>寮國從未想與美國為敵,大多數寮國農民甚至不知道華盛頓與河內的角力與自己何干;然而,正是這片由佛塔、糯米飯與溫和僧侶構成的寧靜土地,即將在接下來的九年裡,成為地球上被炸得最慘的地方。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ☂ ✦</div>
+  <p>在世界的目光都聚焦於越南時,一場「秘密的戰爭」,<br>正在寮國的天空無聲地進行。<br><span class="hl">九年裡,平均每八分鐘,就有一架飛機,向這片寧靜的土地投下炸彈。</span></p>
+</div>
+
+<!-- ===== 第六章:秘密戰爭與轟炸 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Secret War</span>
+    <h2 class="act-title">地球上被炸得最慘的地方</h2>
+    <p class="act-sub">The Most Heavily Bombed Country, Per Capita, in History</p>
+    <div class="ornament">☂ ☂ ☂</div>
+  </div>
+  <div class="prose">
+    <p>從 1964 到 1973 年,在越戰的陰影下,美國對寮國發動了一場不公開宣戰、長期不為世人所知的空中戰役——後世稱之為「<strong>秘密戰爭（Secret War）</strong>」。它的規模之大,慘烈到令人難以置信。</p>
+
+    <h3>一組無法被遺忘的數字</h3>
+    <p>讓我們直視這組數字。在這九年裡,美國對寮國投下了<strong>超過兩百萬噸的炸彈</strong>——這個數量,比二戰期間美國在歐洲與太平洋兩個戰場投下的炸彈總和還要多。平均下來,在這九年裡,寮國這片土地<em>平均每八分鐘就承受一次轟炸,日復一日,持續了將近十年</em>。按人口平均計算,寮國,成為了<strong>人類歷史上被轟炸得最猛烈的國家</strong>。一個從未向美國宣戰、面積不大、人口稀少、以溫和佛教徒為主的小國,承受了人類戰爭史上最密集的空中火力。</p>
+    <div class="pull"><p>兩百萬噸炸彈,落在一個七百萬人都不到的小國身上。寮國,是地球上被炸得最慘的地方——而世界,當時幾乎沒有人知道。</p></div>
+
+    <h3>那些沒有爆炸的炸彈,還在殺人</h3>
+    <p>但這場戰爭最殘酷的遺產,在於它從未真正結束。美軍投下的炸彈中,有大量是「<strong>集束炸彈</strong>」,內含數以億計的小型「<em>炸彈子(bombie)</em>」。其中據估計約有<strong>三分之一沒有在當時引爆</strong>,而是作為「<em>未爆彈(UXO)</em>」,靜靜地埋在寮國的稻田、村莊、森林與山坡裡。戰爭結束半個世紀後的今天,這些未爆彈仍在持續地殺人、致殘——農夫犁田時、孩童玩耍時、村民開墾時,隨時可能引爆這些沉睡的死神。數十年來,已有數萬名寮國人——其中許多是在戰後出生、與那場戰爭毫無關係的孩子——死於或殘於這些遲來的炸彈。寮國大片肥沃的土地,至今因未爆彈而無法安全耕種。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 沉默承受的代價</span>
+      <p>秘密戰爭與未爆彈的遺產,是寮國「夾縫小國」宿命最深、最痛的傷口。<strong>它承受了一場「不是自己的戰爭」中最猛烈的火力,而它的苦難,卻因為這場戰爭的「秘密」性質與它自身的弱小,長期被世界所忽視、所遺忘。</strong>大國在它的天空中傾瀉炸彈,事後卻很少有人為這片土地半個世紀的傷痛負起責任。</p>
+      <p>這裡藏著一個關於寮國民族性格的深刻體現。<em>面對如此巨大的、無妄的災難,寮國人並沒有被仇恨吞噬,也沒有大聲地控訴。</em>承襲著佛教那份「知足、接納、隨遇而安」的精神底盤(見第二章),寮國人選擇了一種令人動容的方式來面對:他們默默地清除未爆彈,甚至把回收的炸彈金屬,打造成湯匙、首飾、農具與船隻——<strong>把死亡的工具,轉化為生活的器物</strong>。這份在巨大苦難面前的平靜與韌性,正是寮國最了不起、也最令人心疼的地方。它提醒著世界:在大國博弈的宏大敘事之外,總有一些沉默的小國,在默默地、堅韌地,承受並消化著那些本不該由它們承受的代價。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☭ ✦ ☭</div>
+  <p>當美軍撤離越南、整個印度支那的天平倒向共產陣營時,<br>寮國延續了六百年的王室,也走到了盡頭。<br><span class="hl">1975 年,一個全新的、紅色的國家,在群山中悄然誕生。</span></p>
+</div>
+
+<!-- ===== 第七章:共產革命與建國 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Red Dawn</span>
+    <h2 class="act-title">王朝的終結,與一個沉默的新國家</h2>
+    <p class="act-sub">1975 — The End of the Monarchy and the Birth of the Lao PDR</p>
+    <div class="ornament">☭ ☭ ☭</div>
+  </div>
+  <div class="prose">
+    <p>1973 年美軍從越南撤離後,整個印度支那的局勢迅速倒向共產陣營。1975 年,南越的西貢陷落、柬埔寨的金邊易手;就在同一年,寮國的共產主義力量「<strong>巴特寮（Pathet Lao）</strong>」,也在北越的支持下,兵不血刃地接管了全國的政權。延續了六百多年、可上溯至法昂瀾滄王國的<strong>寮國王室,就此被廢除</strong>。1975 年 12 月,「<strong>寮人民民主共和國（Lao PDR）</strong>」正式成立,成為一個由「寮國人民革命黨」一黨專政的社會主義國家——這個體制,延續至今。</p>
+
+    <h3>革命之後:出走的人與沉默的國</h3>
+    <p>革命帶來了劇烈的社會變動。新政權推行社會主義改造,舊政權的官員、軍人與部分被指控「協助美國」的群體(尤其是曾被美國中情局招募、組成游擊隊的<em>苗族(Hmong)</em>),遭到清算或被送往「再教育營」。為了逃離迫害與動盪,<strong>數十萬寮國人——佔當時總人口相當高的比例——越過湄公河逃往泰國,再輾轉移居美國、法國、澳洲等地</strong>。這場大出走,造成了寮國嚴重的人才流失,也在海外形成了龐大的寮裔離散社群。而留下來的寮國,則在新政權的統治下,進入了一段封閉、貧困而沉默的歲月。</p>
+    <div class="pull"><p>六百年的王室在一年之間消失,數十萬人渡河出走——寮國以一種異常安靜的方式,翻過了它歷史上最劇烈的一頁。</p></div>
+
+    <h3>越南的影子</h3>
+    <p>新生的寮人民民主共和國,在建國初期與<strong>越南</strong>結成了極其緊密的同盟關係。畢竟,巴特寮的革命從頭到尾都得到越南共產黨的扶植與指導,兩黨、兩軍、兩國之間有著「特殊關係」。在相當長的一段時間裡,寮國在政治、軍事與外交上,都深受越南的影響與主導。這延續了寮國歷史的一條古老主線——它的命運,始終與一個更強大的鄰居緊密地綁在一起。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 換了顏色的舊主線</span>
+      <p>1975 年的革命,在表面上是一場翻天覆地的劇變(王室覆滅、社會主義建國),但從更深的歷史脈絡看,它延續了寮國一條從未改變的主線:<strong>這個夾縫小國的命運,依然與一個強大的鄰居(此時是越南)深度綁定。</strong>從瀾滄被高棉扶植、被暹羅臣服、被法國當作緩衝,到如今由越南扶植的巴特寮建國——施加影響的主角換了一個又一個,但「命運與強鄰相連」的結構,始終如一。</p>
+      <p>這裡也藏著寮國民族性格的又一次體現。<em>相較於鄰國柬埔寨在同一時期經歷的、紅色高棉那場慘絕人寰的大屠殺,寮國的共產革命雖然同樣帶來了壓迫與出走,卻相對「溫和」、流血較少。</em>這份相對的溫和,某種程度上也呼應了寮國那份佛教式的、不走極端的民族氣質。革命之後,寮國沒有走向狂熱的烏托邦實驗,而是回到了它一貫的步調——緩慢、沉默、在強鄰的影子下,默默地尋找自己的生存之道。接下來的數十年,這個沉默的紅色小國,將學會如何在新的時代裡,把自己僅有的資產,變成通往未來的籌碼。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">₭ ✦ ₭</div>
+  <p>封閉與貧困之後,這個沉默的小國,終於小心翼翼地打開了門。<br>它環顧四周,發現自己一無所有——除了兩樣東西:<br><span class="hl">那條貫穿全境的大河,與那個「夾在中間」的位置。</span></p>
+</div>
+
+<!-- ===== 第八章:改革開放與發展困局 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Battery</span>
+    <h2 class="act-title">把大河變成電,把位置變成路</h2>
+    <p class="act-sub">The "Battery of Asia," Dams, and a Landlocked Bet</p>
+    <div class="ornament">₭ ₭ ₭</div>
+  </div>
+  <div class="prose">
+    <p>1980 年代末,隨著蘇聯陣營的鬆動,寮國也仿效中國與越南,啟動了經濟改革(「新經濟機制」),小心翼翼地從封閉的計劃經濟,轉向引入市場機制、對外開放。但當這個沉默的小國環顧四周時,它發現自己幾乎一無所有:它內陸、多山、貧困、人才匱乏、缺乏工業基礎。它能拿什麼來換取發展?答案,回到了它最古老的兩樣資產——序章裡的那條河,與那個位置。</p>
+
+    <h3>「亞洲的電池」:把湄公河變成錢</h3>
+    <p>寮國最大的賭注,是<strong>水力發電</strong>。湄公河及其眾多支流穿越寮國的崇山峻嶺,落差巨大,蘊藏著豐富的水力資源。於是寮國立下了一個雄心勃勃的國策——把自己打造成「<strong>亞洲的電池（Battery of Asia）</strong>」:在境內的河流上大量興建<em>水壩與水力發電廠</em>,再把發出的電力,賣給電力需求旺盛的鄰國,尤其是泰國、越南與中國。對一個缺乏其他出口商品的內陸國而言,「賣電」成了它賺取外匯、驅動經濟的核心戰略。</p>
+    <div class="pull"><p>沒有海、沒有工業、沒有資源——寮國環顧四周,發現自己唯一能賣的,是那條祖先賴以為生的大河本身。</p></div>
+    <p>但這個賭注代價高昂、爭議巨大。大量建壩,<em>嚴重衝擊了湄公河的生態與漁業</em>,改變了河水的流量與泥沙,影響了賴河維生的數百萬下游居民(尤其在柬埔寨與越南),也淹沒了沿岸村莊、迫使居民遷移。「賣掉這條河的力量」,是否會反過來毀掉這條河本身?這成了懸在寮國發展頭上的一個沉重問號。</p>
+
+    <h3>從「內陸鎖國」到「陸鎖樞紐」?</h3>
+    <p>寮國的第二個賭注,是它「夾在中間」的<strong>位置</strong>。長久以來,「沒有海岸線」是寮國最大的詛咒——它被鎖在內陸,通往世界的路都要經過鄰居。但近年來,寮國試圖把這個「詛咒」翻轉成「祝福」:它喊出要從「<em>陸鎖國(land-locked)</em>」,轉變為連接周邊各國的「<strong>陸聯國(land-linked)</strong>」樞紐。其中最重大的一步,是 2021 年通車、由中國投資興建的<strong>中寮鐵路</strong>——這條鐵路把寮國首都永珍,與中國的鐵路網直接相連,被視為寮國融入區域、擺脫內陸困境的關鍵。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把詛咒,賭成祝福</span>
+      <p>寮國當代的發展戰略,本質上是一場圍繞著它「地理宿命」的豪賭。<strong>它把自己僅有的兩樣資產——序章裡那條「貫穿全境的大河」與那個「夾在中間的位置」——全都押上了賭桌,試圖把千百年來的「地理詛咒」,翻轉成「地理紅利」。</strong>賣水力發電,是把大河變成錢;建跨國鐵路,是把「無路可走的內陸」變成「四通八達的樞紐」。</p>
+      <p>但這場豪賭,也讓寮國陷入了它那條古老主線的當代版本——<em>對強鄰的深度依賴</em>。它的電要賣給鄰國,它的鐵路靠中國投資與貸款,它的市場、它的資金、它的發展前景,高度仰賴於泰國、越南,以及越來越舉足輕重的<strong>中國</strong>。這就回到了寮國永恆的命題:<em>一個夾在巨人之間的小國,如何在「借力發展」與「淪為附庸」之間,守住自己的自主與尊嚴?</em>賣掉大河的力量,會不會也賣掉了生態與下游鄰居的信任?借來中國的鐵路與資金,會不會也借來了難以承受的債務與影響力?寮國的未來,就懸在這場關於「水、位置與自主」的豪賭的結果之上。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚖ ✦ ⚖</div>
+  <p>當鐵路通車、水壩發電時,新的巨人也來到了門前。<br>於是這個沉默的小國,必須學會一門古老的功課——<br><span class="hl">如何在更多、更強的巨人之間,既借到力,又不被吞掉。</span></p>
+</div>
+
+<!-- ===== 第九章:在巨人之間 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · Between Giants</span>
+    <h2 class="act-title">在巨人之間,守住一個小國的自主</h2>
+    <p class="act-sub">Debt, China, and the Eternal Balancing Act</p>
+    <div class="ornament">⚖ ⚖ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的寮國,光看它的水壩與鐵路不夠,得看它在強鄰之間那場永不停歇的平衡遊戲。回顧整部歷史——寮國的命運,始終由它與強鄰的關係所定義:被高棉扶植、被暹羅臣服、被法國緩衝、被越南主導。而在二十一世紀,一個新的、更龐大的力量,正以前所未有的份量,進入這個方程式——<strong>中國</strong>。</p>
+
+    <h3>中國的份量:機會,還是枷鎖?</h3>
+    <p>中國透過「一帶一路」,成為寮國最重要的投資者與債權國。中寮鐵路、水壩、礦業、經濟特區、北部的賭場城鎮——中國的資金與項目,深刻地重塑著寮國的經濟版圖。對一個缺乏資本的小國而言,這是難得的發展機遇;但它也帶來了沉重的代價。寮國因大量借貸基礎建設項目,背上了<strong>巨額的外債(其中很大一部分欠中國)</strong>,使國家財政陷入困境,本幣大幅貶值、通膨高漲,被外界憂慮可能落入「<em>債務陷阱</em>」、喪失部分經濟主權。那條被寄予厚望的鐵路與那些水壩,究竟是通往繁榮的橋,還是通往依賴的鎖?這成了寮國當代最核心的焦慮。</p>
+    <div class="pull"><p>寮國永恆的難題,從未改變:它太小,所以必須借強鄰的力量才能前行;但借得越多,就越難不被那股力量所支配。</p></div>
+
+    <h3>古老的智慧:在縫隙中求存</h3>
+    <p>面對這個困局,寮國依靠的,是它在數百年夾縫求生中磨練出的<em>古老智慧</em>。它小心翼翼地在各個巨人之間維持平衡:它與越南保有傳統的「特殊關係」,與中國深化經濟合作,與泰國有著緊密的語言文化與貿易連結,同時也努力透過<strong>東協(ASEAN)</strong>這個區域組織,為自己尋求更多的迴旋空間與集體保護。它不選邊站、不張揚、不對抗——這份「<em>低調、務實、左右逢源</em>」的生存策略,正是寮國那份佛教式「不爭」民族性格,在地緣政治上的延伸。</p>
+    <div class="aside"><span class="hl">關鍵處境:</span>寮國至今仍是世界上最不發達的國家之一,經濟高度依賴鄰國與資源出口(水電、礦產);但它也是東南亞少數幾個維持政治穩定、社會平和的國家。「貧窮但平靜」,是它當代最真實的寫照。</div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 小國的生存藝術</span>
+      <p>寮國當代在巨人之間的處境,是它全部歷史的一次完整收束。<strong>從瀾滄到今天,「如何在比自己強大太多的鄰居之間活下去」,始終是這個夾縫小國唯一的、也是最重要的功課。</strong>只是棋盤上的巨人換了一輪又一輪——高棉、暹羅、法國、美國、越南,如今是中國——而寮國,始終是那個在縫隙中、努力不被碾碎的小棋子。</p>
+      <p>但這裡藏著一份不該被輕視的尊嚴與智慧。<em>一個如此弱小、命運如此身不由己的國家,卻在數百年的瓜分、臣服、殖民、轟炸與革命之後,依然存續著——它保住了自己的語言、自己的佛塔、自己那份溫和知足的靈魂。</em>這份「<strong>活下來</strong>」的本身,就是一種了不起的成就。寮國或許從未強大、從未叱吒風雲,但它示範了一種獨特的生存哲學:面對無法改變的地理與懸殊的實力,不以卵擊石,而是以柔克剛、以靜制動、在巨人的縫隙中,守住一塊屬於自己的、寧靜的土地。它的未來能否在新一輪大國博弈中守住自主、走出貧困,仍是未知數;但它過去千百年的存續本身,已經證明了這份「夾縫中的韌性」,有多麼珍貴。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">🐘 ★ 🐘</div>
+  <p>數百年,一條大河,一片群山,一尊金佛,兩百萬噸炸彈,與一個始終夾在巨人之間的小國。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的寮國與寮國人,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的寮國人</h2>
+      <p class="act-sub" style="color:rgba(245,238,219,.6)">Why Laos, and the Lao, Are What They Are</p>
+      <div class="ornament" style="color:var(--gold-bright)">🐘 ★ 🐘</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的寮國之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:地理把它變成「夾縫中的小國」</h3>
+      <p>一切的源頭是<strong>地理</strong>。一條大河(湄公河)貫穿全境,給了它生命與命脈;一片群山環抱,給了它屏障與孤立;而「沒有海岸線」這個事實,則把它鎖進了內陸,讓它通往世界的每一條路都得仰賴鄰居。最關鍵的是,它太小、又恰好卡在暹羅、緬甸、越南、中國這幾個巨人的縫隙裡。這道「夾縫」的格局,寫定了寮國的命運基調:它的歷史,很少能由自己書寫。</p>
+
+      <h3>第二層:一個王國與一套信仰,給了它一個靈魂</h3>
+      <p>接著是<strong>瀾滄與佛法</strong>。流亡王子法昂在 1353 年建起「百萬大象之國」,第一次把分散的河谷部落凝聚成一個國家;而上座部佛教,則融入了寮國人生活的每一個層面,孕育出他們<em>溫和、知足、不爭、隨遇而安</em>的民族靈魂。<em>這就是為什麼今天的寮國人,即使歷經無數苦難,依然能保持那份平靜與韌性——這份靈魂,是瀾滄與佛塔留下的、無法被奪走的遺產。</em></p>
+
+      <h3>第三層:分裂與強鄰,讓它的命運身不由己</h3>
+      <p>然後是<strong>失去自主</strong>。瀾滄王國因內部分裂而碎成三塊,從此暴露在強鄰的鐵蹄下——被暹羅臣服、永珍被夷平,再被法國當作一塊「緩衝」與通往中國的幻夢之路而殖民。從這時起,寮國的命運就越來越不掌握在自己手中,而是取決於周邊巨人的角力。「夾縫小國」的悲劇,一層層加深。</p>
+
+      <h3>第四層:一場「不是自己的戰爭」,把它炸成廢墟</h3>
+      <p>最痛的是<strong>秘密戰爭</strong>。獨立後的寮國,恰好誕生在冷戰最敏感的斷層線上,被無可選擇地捲入了鄰國越南的戰爭。因為「胡志明小道」穿越其領土,美國對這個從未宣戰的小國,投下了超過兩百萬噸炸彈,使它成為<em>人類史上人均被炸得最慘的國家</em>。而那些未爆彈,至今仍在這片土地上殺人。<em>這就是為什麼一個以溫和佛教徒為主的寧靜國度,會背負著如此沉重的戰爭創傷——它承受了一場本不該由它承受的災難。</em></p>
+
+      <h3>第五層:用僅有的資產,在巨人之間賭一個未來</h3>
+      <p>最後是<strong>沉默的求存</strong>。1975 年,六百年的王室在越南支持下被廢除,寮國成為一個一黨專政的社會主義國家,數十萬人渡河出走。改革開放後,這個一無所有的小國,把它僅有的兩樣資產——<em>那條大河(賣水電,當「亞洲的電池」)與那個位置(建跨國鐵路,從「陸鎖」變「陸聯」)</em>——全押上了賭桌。但這場豪賭,也讓它背上巨額外債、再次深陷對強鄰(如今是中國)的依賴。它在越南、泰國、中國等巨人之間,延續著那門古老的平衡功課:如何既借到力,又不被吞掉。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 在縫隙中,沉默地活下來</span>
+        <p>所以,今天的寮國人是誰?他是<strong>一片夾縫之地上、被大河與群山養育、被巨人反覆決定命運、卻始終沉默而堅韌地活下來的人</strong>——他的祖先在「百萬大象之國」綻放過佛塔的金光,也在永珍的廢墟與兩百萬噸炸彈下承受過毀滅;他每天清晨向托缽的僧侶布施糯米,也把回收的炸彈金屬打造成湯匙;他的國家從未強大、從未叱吒風雲,卻在六百年的瓜分、臣服、殖民、轟炸與革命之後,依然守著自己的語言、佛塔與靈魂。</p>
+        <p>他的溫和與他的弱勢,是同一份佛教式靈魂的兩面;他的苦難與他的韌性,是同一個「夾縫小國」宿命的兩面;他通往未來的橋(大河與鐵路)與他的枷鎖(生態與債務),是同一場地理豪賭的兩面。<em>寮國最深刻的真相是:它是一個命運大半由外力書寫的小國,但它用一種了不起的方式,守住了那一小部分能由自己決定的東西——它的信仰、它的平和、它「活下來」的本身。它的故事告訴我們:一個民族真正的尊嚴,未必在於它有多強大、能否主宰自己的命運,而在於它能否在最身不由己的處境裡,依然保有自己的靈魂,並沉默而堅韌地,一天一天活下去。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">大河給了它生命,群山給了它屏障,巨人決定了它的命運,佛塔守住了它的靈魂——而要如何在強鄰的縫隙中,守住自主、走出貧困,是這一代寮國人仍在回答的問題。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">數百年的終極啟示</span>
+      <p>一個國家的樣貌,往往由它的地理位置開局,由它與強鄰的關係決定它能否自主,由一套信仰定下它靈魂的底色,再由它無法選擇的戰爭與動盪刻下它的傷痕——而它能否真正立足於世,最終未必取決於它有多強大,而取決於生活在這裡的人們,能否在最身不由己的命運裡,守住自己的靈魂,並以一份沉默的韌性,一天一天地活下來。這,就是寮國至今仍在書寫的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(245,238,219,.78);margin-top:2.5rem">
+        從一條貫穿群山的大河、一位流亡王子建起的「百萬大象之國」,<br>
+        到清晨托缽的僧侶、琅勃拉邦佛塔的金光,<br>
+        從被暹羅夷平的永珍、被法國當作緩衝的殖民歲月,<br>
+        到那場無聲的秘密戰爭、傾瀉而下的兩百萬噸炸彈,<br>
+        再到沉默的紅色建國、把大河與位置押上賭桌的當代豪賭——<br>
+        這段交織著大河、群山、信仰、強鄰、戰爭與韌性的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的寮國,<br>以及今天的,寮國人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">🐘 ✦ ☸</div>
+  <p>大河、群山與佛塔 · 寮國的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM A MILLION ELEPHANTS TO THE BATTERY OF ASIA · 1353 – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

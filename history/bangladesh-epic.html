@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>河口、語言與洪水:孟加拉的身世史詩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14110a;
+  --parchment:#f5efdc;
+  --parchment-deep:#e8ddbe;
+  --river:#10463f;
+  --river-deep:#06261f;
+  --gold:#ac8a2d;
+  --gold-bright:#d0ac49;
+  --vermillion:#b03020;
+  --crimson:#7d1f13;
+  --jade:#2f6149;
+  --faint:#62583a;
+  --line:#c7b682;
+  --shadow:rgba(20,17,10,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(172,138,45,.08), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(16,70,63,.07), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(176,48,32,.32), transparent 60%),
+    linear-gradient(165deg, var(--river-deep) 0%, var(--river) 48%, #155a4e 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d0ac49' stroke-width='0.6' opacity='0.15'%3E%3Ccircle cx='600' cy='600' r='250' fill='%23b03020' opacity='0.18'/%3E%3Ccircle cx='600' cy='600' r='540'/%3E%3Ccircle cx='600' cy='600' r='400'/%3E%3Cpath d='M120 480 q200 -80 400 0 t400 0 t160 40' /%3E%3Cpath d='M80 640 q220 -90 440 0 t440 0' /%3E%3Cpath d='M140 760 q200 -80 400 0 t400 0 t120 30' /%3E%3Cpath d='M600 60 V1140 M60 600 H1140'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 250s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(245,239,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--river-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--vermillion);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--river-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--vermillion);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--river-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--river-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(16,70,63,.05), rgba(172,138,45,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--river-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT (歷史的回聲) ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--river-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(6,38,31,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--vermillion));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(245,239,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c878;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--vermillion);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--vermillion);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--river-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--vermillion);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--river-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(172,138,45,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(16,70,63,.05);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--vermillion);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--river-deep),var(--river));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d0ac49' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(245,239,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c878}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(208,172,73,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--vermillion));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--river-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#0e1009 !important}
+.dark .act-title{color:#d6c59e}
+.dark .prose p{color:#cab892}
+.dark .prose strong{color:#cd7048}
+.dark .prose em{color:#d6aa76}
+.dark .prose h3{color:#cd7048;border-left-color:var(--vermillion)}
+.dark .act-sub{color:#887654}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(125,31,19,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--vermillion);margin-bottom:.5rem;font-weight:600}
+
+/* ===== interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--river-deep);font-weight:500}
+.interlude p .hl{color:var(--vermillion);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(245,239,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--vermillion);font-style:normal}
+
+/* ===== legacy & shift ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--river-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--river-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--vermillion);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(16,70,63,.05);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--vermillion)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--vermillion);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--river-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--river-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 60px);width:300px;
+  overflow-y:auto;background:rgba(243,238,226,.97);border-right:1px solid #c6b58e;
+  font-family:'Noto Serif TC',serif;padding:18px 16px 40px;transform:translateX(-300px);
+  transition:transform .25s ease;box-shadow:2px 0 18px rgba(22,20,15,.12)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-size:11px;letter-spacing:.18em;color:#8a3a23;font-weight:700;margin-bottom:12px;text-transform:uppercase}
+#imq-auto-toc a{display:block;color:#16140f;text-decoration:none;font-size:13px;line-height:1.45;padding:5px 8px;
+  border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.12);border-left-color:#a8842f}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.16);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9001;background:#16140f;color:#cda551;
+  border:1px solid #a8842f;border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){#imq-auto-toc{width:80vw;transform:translateX(-82vw)}}
+</style>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){btn.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var sec=h.closest('section')||h;
+    if(!sec.id) sec.id='imqsec-'+i;
+    var t=(h.textContent||'').trim().replace(/\s+/g,' ');
+    var a=document.createElement('a');a.href='#'+sec.id;a.textContent=t;
+    if(h.classList.contains('ptitle')){a.style.fontWeight='700';a.style.color='#8a3a23';a.style.marginTop='8px';}
+    a.addEventListener('click',function(){if(window.innerWidth<=820)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+120,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The Land of the Delta · Who the Bangladeshis Became</span>
+    <h1>河口、語言與<span class="em">洪水</span><br>孟加拉<br>的身世</h1>
+    <p class="sub">從三條大河沖積出的世界最大三角洲、一片被水定義的肥沃土地,到一個為「母語」而流血、為「身分」而獨立、又在洪水與成衣機台中奮力站起的國家——<br>一部關於「為何今天的孟加拉與孟加拉人是這個模樣」的完整溯源</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">為</span>什麼今天的孟加拉,是一個擠著一億七千萬人、世界上人口最稠密的大國之一,既深信伊斯蘭、又為自己的語言與詩歌驕傲到願意為它流血的國家?為什麼它是全世界唯一一個「<em>因語言而誕生</em>」的國家,卻又一次次被洪水、政變與貧窮的標籤所淹沒?答案不在當下,而在數千年的縱深裡。三條大河在這裡交匯、沖積出地球上最大的三角洲,養出了一片富庶到讓所有帝國垂涎、卻也脆弱到任由洪水擺布的土地;佛教的波羅王朝曾在此綻放,蘇非聖者帶來了真主,蒙兀兒的總督在達卡織出全世界最昂貴的棉布;一家英國公司正是從這片三角洲的財富開始,買下了整個次大陸;而當帝國退場、次大陸依宗教被切成兩半時,這片土地被劃給了一千六百公里外的巴基斯坦——直到有一天,當有人要奪走它的母語時,它終於明白:光是「我們都是穆斯林」,並不足以讓它甘願被人統治。這不是一個僅由信仰定義的故事,而是一片<em>被水養育、被語言喚醒</em>的三角洲,如何在血泊中為自己的「母語」與「身分」掙來一個國家,又如何在世人「籃子裡的籃子」的嘲諷中,默默織出一條向上之路的故事。讓我們從頭走一遍,在每個轉折處聽一聽歷史那聲意味深長的<span style="color:var(--vermillion);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Delta</span>
+    <h2 class="act-title">在所有人來之前,這裡有什麼?</h2>
+    <p class="act-sub">The Rivers, the Silt, and a Land Made of Water</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>要理解今天的孟加拉人,得先回到一個比所有帝國、所有信仰都更古老的問題:在他們來之前,這裡有什麼?答案,藏在一樣東西裡——<em>水</em>。不是普通的水,而是三條大河匯流成的、地球上最龐大的一片三角洲。</p>
+
+    <h3>三條大河,與世界最大的三角洲</h3>
+    <p>先看地圖。發源於喜馬拉雅的<strong>恆河（Ganges）</strong>、<strong>布拉馬普特拉河（Brahmaputra）</strong>與<strong>梅克納河（Meghna）</strong>,在這裡交匯、漫流、最終注入孟加拉灣——它們共同沖積出地球上面積最大的<em>河流三角洲</em>。整個孟加拉,幾乎就是這三條河用千萬年的泥沙「堆」出來的一片土地。這裡水網密布、湖沼縱橫,雨季時大半國土泡在水裡;這裡的土壤被河水反覆灌溉,肥沃到驚人。記住這一點:<em>孟加拉不是一塊「有河流經過的土地」,它本身就是河流的造物——它是水做的。</em></p>
+
+    <h3>富庶與脆弱:同一枚硬幣的兩面</h3>
+    <p>這片「水做的土地」,從一開始就帶著一個深刻的悖論。一方面,豐沛的河水與肥沃的沖積土,讓孟加拉成為次大陸上<strong>最富庶的農業區</strong>之一——稻米一年三熟,黃麻、棉花、香料源源不絕,千百年來讓無數帝國垂涎。但另一方面,這份富庶的代價是極致的<em>脆弱</em>:同樣是這些河流,在季風失控時會化身為吞噬一切的<strong>洪水與氣旋風暴</strong>;地勢低平,讓孟加拉成為全世界最容易受水患與海平面上升威脅的地方之一。富庶與災難,在這片三角洲上,是同一枚硬幣的兩面。</p>
+    <div class="pull"><p>三條大河給了孟加拉地球上最肥沃的土壤,也給了它最無情的洪水。這片「水做的土地」,從第一天起就同時是天堂與險境。</p></div>
+
+    <h3>稠密:被肥沃召喚而來的人</h3>
+    <p>正因為這片土地如此肥沃、能養活如此多的人,它吸引了一波又一波的人在此定居、繁衍。千百年下來,孟加拉成為地球上<strong>人口最稠密</strong>的大型區域——今天,一億七千萬人擠在一塊比許多省份還小的土地上。這份「稠密」,連同那份「富庶與脆弱並存」的宿命,以及由河水滋養出的、獨特而驕傲的<em>孟加拉語言與文化</em>,共同構成了這片土地最底層的性格。今天孟加拉所有的故事——它的勤奮、它的韌性、它與水的永恆搏鬥、它對自身語言文化的執著——根源都在這裡:<em>它生在一片水做的、肥沃到擁擠、富庶到脆弱的三角洲上。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 水是第一作者</span>
+      <p>在任何國王、任何帝國、任何信仰登場之前,<strong>水</strong>就已經寫好了這個故事的開頭。一片由三條大河沖積而成、肥沃到擁擠、富庶到脆弱的三角洲,註定會養出一個人口稠密、勤奮堅韌、卻也永遠在與洪水搏鬥的社會。</p>
+      <p>這是理解孟加拉的第一把鑰匙:<em>它今天所有的特質——驚人的人口密度、面對天災的非凡韌性、農業立國的根基、以及那份對自身語言與身分近乎執著的驕傲——其實都是同一個地理事實的一體多面:它是一片水做的土地。</em>而正因為這份富庶,它在歷史上反覆被外來的帝國當作「最肥的一塊肉」來爭奪、榨取;也正因為這片三角洲孕育出了如此鮮明、如此自成一體的語言與文化,當有一天外人試圖抹去它的母語時,這片土地會爆發出連「共同信仰」都無法壓制的、為身分而戰的怒火。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☸ ✦ ☸</div>
+  <p>這片肥沃的三角洲,在歷史的長河中,曾是諸多信仰的家園。<br>在伊斯蘭到來之前,這裡曾綻放出佛教與印度教的光輝——<br><span class="hl">一個你或許從未聽過、卻護持了佛法數百年的王朝。</span></p>
+</div>
+
+<!-- ===== 第一章:古代孟加拉 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第一章 · Ancient Bengal</span>
+    <h2 class="act-title">佛法的護持者,與富庶的「黃金孟加拉」</h2>
+    <p class="act-sub">The Pala Empire and a Delta Coveted by All</p>
+    <div class="ornament">☸ ☸ ☸</div>
+  </div>
+  <div class="prose">
+    <p>所有人都會問:在伊斯蘭與英國人到來之前,這片三角洲是什麼模樣?答案是——它早已是一片文明璀璨、信仰多元的富庶之地。古代的孟加拉曾孕育出獨特的區域文明,在不同時期分別由佛教、印度教與本土信仰所主導。其中最值得一提的,是一個今天鮮少被提起、卻在亞洲佛教史上舉足輕重的王朝。</p>
+
+    <h3>波羅王朝:被遺忘的佛教護法</h3>
+    <p>從西元八世紀到十二世紀,<strong>波羅王朝（Pala Empire）</strong>統治著孟加拉與比哈爾一帶長達四百年。這是一個虔誠護持佛教的王朝,在它的支持下,孟加拉成為當時<em>大乘佛教,尤其是密宗（金剛乘）</em>的重鎮。它資助了著名的<strong>那爛陀（Nalanda）</strong>與超戒寺等佛教大學——那爛陀是當時世界上最偉大的學術中心之一,吸引了來自中國、西藏、東南亞的求法僧人。佛法正是經由孟加拉,深刻地影響了西藏佛教的形成。一個今天以伊斯蘭為主的國度,腳下曾是亞洲佛教學術的一座高峰。</p>
+    <div class="pull"><p>在成為穆斯林的家園之前,這片三角洲曾是佛法的護持者——孟加拉的身世,遠比任何單一信仰要古老、要豐厚。</p></div>
+
+    <h3>「黃金孟加拉」:讓所有帝國垂涎的肥肉</h3>
+    <p>波羅王朝之後,孟加拉歷經印度教的犀那王朝等政權的統治。但無論誰來統治,有一件事始終不變——這片三角洲的<strong>富庶</strong>。憑藉肥沃的土壤與發達的河運貿易,孟加拉的稻米、棉布、絲綢與糖,經由海路與陸路遠銷各地。它的財富之盛,讓它贏得了「<strong>黃金孟加拉（Sonar Bangla）</strong>」的美名——這個飽含深情的詞,至今仍流淌在孟加拉的詩歌與國歌之中。然而,正是這份「黃金」,讓它成為每一個崛起的帝國都想吞下的一塊肥肉。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 富庶的詛咒</span>
+      <p>古代孟加拉揭示了這片土地一個貫穿始終的母題:<strong>它的富庶,既是它最大的福分,也是它最深的詛咒。</strong>三角洲的肥沃讓它成為「黃金孟加拉」,養育了璀璨的文明與稠密的人口;但同樣是這份富庶,讓它在整部歷史中,反覆淪為外來強權眼中「最值得征服、也最值得榨取」的目標。</p>
+      <p>這埋下了一個將反覆上演的悲劇模式:<em>孟加拉很少能作為自己財富的主人——它的黃金,總是被一個又一個遠方的權力中心(德里、倫敦、後來的喀拉蚩)所攫取、外運。</em>一片如此肥沃的土地,它的人民卻在歷史上一次次陷入貧困,根源正在於此:財富在這裡生產,卻在別處被享用。理解了「黃金孟加拉」這個既驕傲又心酸的名字,就理解了孟加拉人那份「我們明明如此富饒,為何總是被人榨取」的集體情結——這份情結,將在二十世紀,化為爭取獨立的怒火。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☪ ✦ ☪</div>
+  <p>當佛法的光輝漸漸黯淡,一股新的信仰循著河流與商路而來。<br>它不是靠刀劍,而是靠蘇非聖者的歌聲與愛,<br><span class="hl">在這片三角洲的鄉野間,贏得了億萬人的心。</span></p>
+</div>
+
+<!-- ===== 第二章:伊斯蘭的到來 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Faith</span>
+    <h2 class="act-title">真主,沿著河流與蘇非的歌聲而來</h2>
+    <p class="act-sub">How Islam Became the Faith of the Delta's Poor</p>
+    <div class="ornament">☪ ☪ ☪</div>
+  </div>
+  <div class="prose">
+    <p>從十三世紀起,伊斯蘭隨著突厥穆斯林統治者的東征,進入了孟加拉三角洲。但伊斯蘭之所以能在這片土地上扎根得如此之深、最終成為多數人的信仰,靠的遠不只是征服者的刀劍——更關鍵的,是一群懷抱著愛與詩歌的傳教者:<strong>蘇非聖者（Sufi）</strong>。</p>
+
+    <h3>蘇非:用愛與歌聲傳教</h3>
+    <p>蘇非派強調神秘體驗、虔愛真主與眾生平等,以其溫和、包容、近乎詩意的靈性,深入孟加拉的鄉野水鄉。許多蘇非聖者不只傳教,還帶領信眾開墾三角洲的沼澤荒地、興修水利、建立村莊——他們既是精神導師,也是這片濕地的開拓者。對於三角洲上廣大的、長期受種姓制度壓迫的底層農民而言,伊斯蘭「人人在真主面前平等」的訊息,有著無法抗拒的吸引力。<em>他們改宗,不只是換了一個神,更是擺脫了一套把自己鎖在最底層的舊秩序。</em></p>
+    <div class="pull"><p>伊斯蘭在孟加拉的勝利,是一場「平等」對「階序」的勝利——三角洲的窮人選擇真主,因為真主告訴他們:在祂面前,人人平等。</p></div>
+
+    <h3>一種獨特的、孟加拉的伊斯蘭</h3>
+    <p>但孟加拉的伊斯蘭,從一開始就帶著這片土地獨特的印記。它與本土的孟加拉文化、語言、音樂深度交融,蘇非聖者的陵墓(mazar)成為香火鼎盛的朝聖地,虔愛的歌謠與本土的詩歌傳統相互呼應。這造就了一種既虔誠、又溫和、且深深植根於<em>孟加拉語言與文化</em>之中的信仰形態。今天孟加拉東部成為穆斯林佔多數的地區,而西部(後來的印度西孟加拉邦)仍以印度教徒為主——這條沿著三角洲劃下的宗教分布線,正是這段歷史的產物,也將在二十世紀決定一條國界的走向。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 信仰與語言,並存的兩種認同</span>
+      <p>孟加拉的伊斯蘭化,埋下了一個將定義這個國家命運的、深刻而獨特的雙重認同。<strong>一方面,他們是虔誠的穆斯林</strong>——這份信仰,是蘇非聖者用愛與平等贏來的,深植於人心。<strong>但另一方面,他們始終是孟加拉人</strong>——他們的伊斯蘭,是用孟加拉語吟唱的,是與這片三角洲的詩歌、音樂、文化血脈相連的。</p>
+      <p>這就是理解孟加拉最關鍵的一把鑰匙:<em>在這片土地上,「宗教認同(穆斯林)」與「語言文化認同(孟加拉人)」是並存的兩種力量,而非互相取代。</em>這與它西邊鄰居(後來的巴基斯坦)那種「宗教高於一切」的立國邏輯,有著根本的不同。當有一天,有人試圖強迫孟加拉人「為了宗教,放棄你的語言」時,他們會發現,這兩種認同在孟加拉人心中,從來不是可以互相替換的——而這份「我既是穆斯林、更是孟加拉人」的執著,將成為一個全新國家誕生的火種。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⬡ ✦ ⬡</div>
+  <p>當蒙兀兒的旗幟插上三角洲時,達卡織出了全世界最昂貴的布。<br>但這份冠絕天下的富庶,<br><span class="hl">也即將引來一個從未見過的掠奪者——一家公司。</span></p>
+</div>
+
+<!-- ===== 第三章:蒙兀兒與達卡的細棉布 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Richest Province</span>
+    <h2 class="act-title">達卡的細棉布,與帝國最富的一塊地</h2>
+    <p class="act-sub">Mughal Bengal, the Muslin of Dhaka, and a Wealth Beyond Measure</p>
+    <div class="ornament">⬡ ⬡ ⬡</div>
+  </div>
+  <div class="prose">
+    <p>十六世紀末,蒙兀兒帝國把孟加拉納入版圖,設為一個總督管轄的行省。在蒙兀兒的統治下,這片三角洲的富庶達到了頂峰——它成為整個蒙兀兒帝國<strong>最富有、貢獻稅收最多的一個省份</strong>,被譽為帝國的「天堂」與「萬國的樂園」。首府達卡(Dhaka)一度成為人口數十萬的繁華大都會。</p>
+
+    <h3>達卡的「織入空氣」:細棉布的傳奇</h3>
+    <p>孟加拉富庶的象徵,是一種冠絕全球的紡織品——達卡的<strong>細棉布（Muslin）</strong>。這種棉布薄透到了不可思議的程度,傳說一整匹布可以穿過一枚戒指,被詩意地形容為「<em>織入的空氣</em>」「<em>流動的水</em>」。它由孟加拉特有的棉花、與工匠世代相傳的絕技織成,是當時全世界最昂貴、最受追捧的奢侈品,遠銷至羅馬、波斯、歐洲的宮廷。孟加拉的紡織業如此發達,使它在工業革命之前,就已是一個高度商業化、製造業興盛的繁榮經濟體。</p>
+    <div class="pull"><p>在英國的工廠煙囪升起之前,世界上最精美的布,是孟加拉的工匠在三角洲的村莊裡,一絲一線織出來的「空氣」。</p></div>
+
+    <h3>從繁榮到目標</h3>
+    <p>然而,這份冠絕天下的富庶,也讓孟加拉成為大航海時代每一個歐洲商業強權眼中最誘人的獵物。葡萄牙、荷蘭、法國、英國的商人紛紛在孟加拉沿岸建立商館,爭奪這裡的棉布、絲綢與硝石貿易的暴利。其中,英國東印度公司在<strong>加爾各答</strong>建立的據點,將成為改變整個次大陸命運的起點。富庶,再一次成了詛咒的開端。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 越富庶,越是目標</span>
+      <p>蒙兀兒時代的孟加拉,把這片土地「富庶即詛咒」的母題演繹到了極致。<strong>正因為它是帝國最富的省份、擁有冠絕全球的紡織業與貿易,它才成為所有外來掠奪者最優先、最執著的目標。</strong>達卡細棉布的傳奇有多耀眼,孟加拉作為「肥肉」的命運就有多沉重。</p>
+      <p>這裡藏著一個將被英國人殘酷實現的邏輯:<em>一個地方最寶貴的資產(發達的本土製造業與財富),在一個掠奪性強權眼中,恰恰是最需要被摧毀或攫取的對象。</em>孟加拉本是一個製造業繁榮、可能走向自主工業化的富庶經濟體;但它即將遇到的,不是一個來貿易的夥伴,而是一個來榨取的主人。那「織入的空氣」般的細棉布——孟加拉工藝與繁榮的象徵——在不久的將來,將在英國工業品的傾銷與殖民政策的扼殺下,徹底消亡。一個本可以靠自己的雙手織出未來的三角洲,即將被拖入長達兩百年的、被榨乾的命運。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚓ ✦ ⚓</div>
+  <p>1757 年,在孟加拉的一片芒果林旁,<br>一家公司用賄賂贏得了一場戰役。<br><span class="hl">征服整個次大陸的故事,就從這片最富庶的三角洲,正式開始了。</span></p>
+</div>
+
+<!-- ===== 第四章:東印度公司的掠奪 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Plunder</span>
+    <h2 class="act-title">普拉西的芒果林,與被榨乾的三角洲</h2>
+    <p class="act-sub">Where the Conquest of India Began — and the Famine That Followed</p>
+    <div class="ornament">⚓ ⚓ ⚓</div>
+  </div>
+  <div class="prose">
+    <p>征服整個次大陸的故事,並非始於印度的腹地,而是始於孟加拉這片最富庶的三角洲。1757 年,英國東印度公司的克萊夫(Robert Clive),在達卡附近的<strong>普拉西（Plassey）</strong>一片芒果林旁,靠著賄賂與策反孟加拉王公的將領,以極小的代價贏得了那場決定性的戰役。從此,公司掌控了富庶的孟加拉的財政與行政大權。<em>孟加拉的黃金,成了東印度公司征服整個印度的第一桶金。</em></p>
+
+    <h3>1770:被榨出來的大饑荒</h3>
+    <p>公司對孟加拉的統治,是赤裸裸的掠奪。它瘋狂地提高田賦、壟斷貿易、把財富源源不絕地輸往英國。這種竭澤而漁的榨取,在 1770 年釀成了一場人間慘劇——<strong>1770 年孟加拉大饑荒</strong>。當旱災來襲時,公司不僅沒有賑濟,反而為了維持稅收而繼續橫徵暴斂、囤積糧食。結果,這場饑荒據估計奪走了<strong>約一千萬人——當時孟加拉近三分之一的人口</strong>——的生命。富庶的「黃金孟加拉」,在最富有的掠奪者手中,餓死了三分之一的人。</p>
+    <div class="pull"><p>世界上最富庶的三角洲,在世界上最富有的公司手中,餓死了三分之一的人口。「富庶的詛咒」,從未如此血淋淋。</p></div>
+
+    <h3>細棉布之死:從製造者到原料供應地</h3>
+    <p>掠奪還體現在另一個層面。為了讓英國本土的紡織工業獨佔市場,殖民政策有系統地<strong>扼殺了孟加拉繁榮的本土紡織業</strong>。在英國機器棉布的傾銷與懲罰性關稅之下,曾經冠絕全球的達卡細棉布工藝逐漸失傳、消亡。孟加拉從一個「製造精美棉布的繁榮經濟體」,被強行改造成一個只為英國工廠<em>提供原料(棉花、後來是黃麻)、再買回成品</em>的殖民地。一個本可能自主工業化的富庶之地,就這樣被「去工業化」,鎖死在貧窮與依賴的軌道上。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 財富在這裡生產,在別處被享用</span>
+      <p>東印度公司在孟加拉的故事,是「富庶的詛咒」這個母題最殘酷的高潮,也是整部孟加拉史的一個縮影。<strong>這片土地生產了驚人的財富(稅收、棉布、黃麻),但這些財富幾乎全被一個遙遠的權力中心(倫敦)所攫取、外運;而留給三角洲人民的,卻是饑荒、去工業化與貧窮。</strong></p>
+      <p>這道傷口的影響極其深遠,它定義了孟加拉此後兩百年的命運模式:<em>富庶卻貧窮、生產卻被榨取、明明擁有勤奮的人民與肥沃的土地,卻一次次被外部的權力結構鎖死在底層。</em>更重要的是,這段歷史在孟加拉人心中烙下了一個深刻的集體記憶——「我們的財富總是被外人拿走」。這份記憶,先是指向倫敦的殖民者;而在 1947 年之後,它將指向一個新的、同樣遙遠的權力中心——一千六百公里外的西巴基斯坦。被榨取的悲劇,即將換一個主角,再次上演。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ ✺ ✦</div>
+  <p>當英帝國退場、次大陸依宗教被切成兩半時,<br>這片穆斯林佔多數的三角洲,被劃給了一個遙遠的國家。<br><span class="hl">於是,它成了一個「一國兩塊」的怪異拼圖中,被忽視的東半邊。</span></p>
+</div>
+
+<!-- ===== 第五章:分治與成為東巴基斯坦 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第五章 · East Pakistan</span>
+    <h2 class="act-title">被劃給遠方的東半邊</h2>
+    <p class="act-sub">Partition, and a Delta Tied to a Land 1,600 km Away</p>
+    <div class="ornament">✺ ✺ ✺</div>
+  </div>
+  <div class="prose">
+    <p>1947 年,英國人離開了,次大陸依「宗教人口的分布」被切成兩半:印度教徒佔多數的歸印度,穆斯林佔多數的歸一個全新的國家——巴基斯坦。而孟加拉這片三角洲,恰恰被那條宗教界線從中切開:西部印度教徒較多的一半(西孟加拉),歸了印度;東部穆斯林佔多數的一半,則被劃給了巴基斯坦,成為「<strong>東巴基斯坦（East Pakistan）</strong>」。</p>
+
+    <h3>一個「一國兩塊」的怪胎</h3>
+    <p>這造就了人類政治史上最奇特的國家結構之一。巴基斯坦由兩塊土地組成,中間隔著一千六百公里的敵國印度領土:<em>西巴基斯坦</em>(今天的巴基斯坦,以旁遮普人為主)與<em>東巴基斯坦</em>(這片孟加拉三角洲)。這兩塊地理上完全隔絕、語言不通、文化迥異的土地,被硬生生地黏成一個國家。而把它們黏在一起的,只有一樣東西——<strong>共同的伊斯蘭信仰</strong>。回想前一章,這正是巴基斯坦立國理念的核心:「兩個民族理論」主張,宗教認同高於一切,穆斯林就是一個民族。</p>
+    <div class="pull"><p>一個國家被分成兩塊,中間隔著一千六百公里的敵國——把它們黏在一起的,只有一句話:「我們都是穆斯林。」</p></div>
+
+    <h3>多數的人口,被忽視的東部</h3>
+    <p>但這個結構從一開始就埋藏著巨大的不公。東巴基斯坦(孟加拉)的人口,其實佔了整個巴基斯坦的<strong>多數</strong>。然而,國家的政治、軍事與經濟權力中心,卻全都設在西部(尤其旁遮普人主導的喀拉蚩、伊斯蘭瑪巴德)。更關鍵的是,東部創造的大量外匯——尤其是孟加拉<em>黃麻出口</em>的收入(當時黃麻是巴基斯坦最重要的外匯來源)——被大量用於西部的建設,東部自己卻長期投資不足、發展滯後。<em>「富庶的三角洲生產財富,財富卻被遙遠的權力中心拿走」——這個延續了兩百年的悲劇模式,只是把主角從倫敦,換成了喀拉蚩。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 換了主人的舊傷</span>
+      <p>東巴基斯坦的處境,是孟加拉「被榨取」這道舊傷的完美重演,只是換了一個施害者。<strong>對孟加拉人而言,他們發現自己只是擺脫了一個遙遠的掠奪者(英國),又落入了另一個遙遠掠奪者(西巴基斯坦)的手中。</strong>他們人口最多,貢獻的外匯最多,卻在政治、軍事與經濟上被當作二等公民、被邊緣化。</p>
+      <p>但這一次,有一個關鍵的不同,它將引爆一場革命。<em>英國人是異族的殖民者,孟加拉人被榨取時,至少還能用「我們是被異教徒/外族統治」來理解自己的屈辱;但西巴基斯坦人,理應是與他們共享同一個「穆斯林家園」的同胞兄弟。</em>當「自己人」用比殖民者更傲慢的姿態來支配、榨取自己時,孟加拉人心中那個被巧妙迴避的問題,開始劇烈地翻騰:如果「我們都是穆斯林」,為什麼我卻被你當成次等的人?「宗教」這個唯一的黏合劑,真的足以讓我甘願被你統治嗎?點燃這把怒火的,將不是經濟,而是一件更觸及靈魂的東西——他們的母語。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">✍ ✦ ✍</div>
+  <p>當西巴基斯坦宣布,要用一種陌生的語言取代孟加拉人的母語時,<br>三角洲的學生們走上了街頭。<br><span class="hl">那一天的鮮血,將誕生出全世界唯一一個「為語言而獨立」的國家。</span></p>
+</div>
+
+<!-- ===== 第六章:語言運動 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Language</span>
+    <h2 class="act-title">為母語流的血,與一個國家的火種</h2>
+    <p class="act-sub">The Language Movement of 1952 — When a People Bled for Their Words</p>
+    <div class="ornament">✍ ✍ ✍</div>
+  </div>
+  <div class="prose">
+    <p>引爆孟加拉認同的,不是經濟,不是政治,而是一件更觸及靈魂的東西——<strong>語言</strong>。新生的巴基斯坦面臨一個問題:這個由眾多族群組成的國家,該用什麼當國語?西巴基斯坦的精英給出的答案,深深地刺痛了東部:他們決定,把西部使用的<strong>烏爾都語（Urdu）</strong>,定為巴基斯坦唯一的官方語言。</p>
+
+    <h3>「真主的語言」與「我的母語」</h3>
+    <p>對東巴基斯坦的孟加拉人而言,這是無法接受的。孟加拉語(Bangla)不只是一種溝通工具,它是這片三角洲千百年來孕育出的、承載著無數詩歌、歌謠與文學的<em>靈魂</em>——它是泰戈爾的語言,是「黃金孟加拉」的語言。而且,說孟加拉語的人口其實佔了全巴基斯坦的多數。如今,佔多數的母語,卻要被一種西部少數人的語言所取代、貶抑。西巴的精英甚至宣稱烏爾都語才是「真正的穆斯林語言」,暗示孟加拉語因夾雜印度教/梵文淵源而「不夠伊斯蘭」——這更是觸碰了孟加拉人那「<em>我既是穆斯林、更是孟加拉人</em>」的雙重認同的逆鱗。</p>
+
+    <h3>1952 年 2 月 21 日:用生命捍衛文字</h3>
+    <p>抗爭在達卡的校園裡爆發。1952 年 2 月 21 日,達卡大學的學生不顧禁令走上街頭,要求承認孟加拉語的官方地位。軍警開槍了。數名學生——沙拉特、巴卡特、賈巴爾等人——當場中彈身亡,鮮血灑在了達卡的土地上。<strong>他們,是人類歷史上第一批為「捍衛自己的母語」而犧牲的烈士。</strong>消息傳開,整個東巴基斯坦被悲憤點燃,語言運動轉化為一場席捲全孟加拉的民族覺醒。最終,巴基斯坦當局被迫在 1956 年承認孟加拉語為官方語言之一。</p>
+    <div class="pull"><p>世界上有許多國家為土地、為信仰、為自由而戰——但只有一個國家,是為了「說自己的話」的權利而流血誕生的。那就是孟加拉。</p></div>
+    <p>2 月 21 日成了孟加拉人永恆的「<strong>語言烈士日</strong>」。為了紀念這些為母語獻身的人,聯合國後來將每年的 2 月 21 日定為「<em>國際母語日</em>」——一個源自達卡街頭鮮血的全球節日。語言運動,成了孟加拉民族主義的真正火種,也是日後獨立建國的精神原點。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 對「兩個民族理論」的第一聲反駁</span>
+      <p>1952 年的語言運動,是孟加拉送給世界、也送給歷史的一份獨特禮物:<strong>它是對巴基斯坦立國根基「兩個民族理論」的第一聲、也是最深刻的一聲反駁。</strong>「兩個民族理論」斷言:宗教認同高於一切,只要同為穆斯林,就是一個民族。但孟加拉人用鮮血回答:<em>不。我的信仰是穆斯林,但我的靈魂是孟加拉的。你可以和我共享真主,但你不能奪走我的母語。</em></p>
+      <p>這正是理解孟加拉為何會誕生的最深邏輯。<em>巴基斯坦的整個立國前提,是「信仰能壓過一切其他認同」;而孟加拉的整個立國精神,恰恰是「語言與文化的認同,有時比信仰更深」。</em>當西巴基斯坦試圖以「宗教純粹」之名抹去孟加拉的母語時,它其實是在親手證偽自己的立國理論。語言運動播下的種子很清楚:這兩塊靠「信仰」勉強黏在一起的土地,終將因為「身分」的不可調和而分開。1952 年達卡街頭的那幾灘血,是一個新國家的胎動——它要用十九年的時間,長成一場席捲三角洲的獨立戰爭。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">★ ✦ ★</div>
+  <p>語言運動點燃的火種,需要一個人把它變成燎原大火。<br>於是,一位聲音洪亮、為孟加拉人代言的領袖站了出來——<br><span class="hl">他將在一場用選票贏得、卻被槍砲否決的危機中,喊出「獨立」二字。</span></p>
+</div>
+
+<!-- ===== 第七章:穆吉布與獨立戰爭 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Liberation</span>
+    <h2 class="act-title">1971:用選票贏得、用鮮血換來的獨立</h2>
+    <p class="act-sub">Mujib, the Stolen Election, and the War That Made a Nation</p>
+    <div class="ornament">★ ★ ★</div>
+  </div>
+  <div class="prose">
+    <p>語言運動之後的近二十年,東巴基斯坦對西部支配的不滿持續累積。把這股不滿凝聚成一場政治運動的,是一位充滿魅力、為孟加拉人發聲的領袖——<strong>謝赫·穆吉布·拉赫曼（Sheikh Mujibur Rahman）</strong>,後人尊稱他為「<strong>孟加班度</strong>」(Bangabandhu,意為「孟加拉之友」)。他領導的人民聯盟,提出了爭取東部自治的「六點綱領」,成為孟加拉人權利的代言人。</p>
+
+    <h3>被偷走的勝利</h3>
+    <p>1970 年,巴基斯坦舉行了第一次全國大選。穆吉布的人民聯盟在東部贏得了壓倒性的勝利,在全國議會中也贏得了<strong>絕對多數的席次——依法理應由穆吉布出任總理、組建全國政府</strong>。但西部的軍政權與政治精英,拒絕把權力交給一個「孟加拉人」。他們無法接受由人口雖多、卻被他們視為次等的東部人來主導國家。談判一再破裂,西巴基斯坦選擇了最黑暗的一條路。</p>
+    <div class="pull"><p>孟加拉人用選票,贏得了整個國家的領導權;西巴基斯坦人用槍砲,否決了這場勝利。獨立,從此不再是選項,而是唯一的出路。</p></div>
+
+    <h3>探照燈行動與九個月的血戰</h3>
+    <p>1971 年 3 月 25 日深夜,巴基斯坦軍隊發動了代號「<strong>探照燈行動</strong>」的軍事鎮壓,在達卡及全境對手無寸鐵的平民、學生、知識分子展開血腥屠殺。穆吉布被捕,但獨立的宣言已經發出。一場慘烈的<strong>孟加拉獨立戰爭（Liberation War）</strong>就此爆發。在接下來的九個月裡,孟加拉這片三角洲經歷了難以言喻的浩劫:據孟加拉方面的估計,<strong>多達數十萬至上百萬人</strong>在屠殺中喪生,數十萬婦女遭到暴行,近<em>一千萬難民</em>逃往鄰國印度。游擊隊「自由戰士」(Mukti Bahini)在水鄉澤國中頑強抵抗。最終,印度出兵介入,在 1971 年 12 月與孟加拉游擊隊並肩擊敗了巴基斯坦軍隊。1971 年 12 月 16 日,巴基斯坦軍隊在達卡投降。一個全新的國家——<strong>孟加拉人民共和國（Bangladesh）</strong>,在血泊與廢墟中誕生了。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 證偽了一個理論的國家</span>
+      <p>1971 年孟加拉的誕生,在世界史上具有獨一無二的意義:<strong>它是一個用「語言與民族認同」打敗了「宗教認同」而誕生的國家,從而徹底證偽了巴基斯坦賴以立國的「兩個民族理論」。</strong>巴基斯坦曾斷言「同為穆斯林就必然是一個民族」;而孟加拉用一場血戰證明——同樣是穆斯林的孟加拉人,最終選擇了基於語言、文化與公平的「孟加拉民族」,而非基於宗教的「巴基斯坦」。</p>
+      <p>這是貫穿孟加拉全史的兩條主線——「<em>富庶卻被榨取的三角洲</em>」與「<em>為母語與身分而驕傲的人民</em>」——交匯成的最終爆發。被榨取的經濟屈辱(黃麻外匯被西部拿走)、被踐踏的文化尊嚴(母語被貶抑、勝選被剝奪),共同點燃了這場獨立戰爭。孟加拉的獨立宣告了一個深刻的真理:<em>一個建立在「強迫的共同信仰」之上、卻無視語言、文化與公平的國家,是無法長久維繫的。</em>但這個在血泊中誕生的國家,等待它的並非從此安寧——而是饑荒、政變,與一連串將定義它前途的考驗。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☂ ✦ ☂</div>
+  <p>獨立的喜悅還未散去,新生的國家就被饑荒與動盪淹沒。<br>建國之父,倒在了自己同胞的槍口下。<br><span class="hl">世界給這個國家貼上了一個殘忍的標籤:「籃子裡的廢物」。</span></p>
+</div>
+
+<!-- ===== 第八章:艱難的開局 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Basket Case</span>
+    <h2 class="act-title">饑荒、政變,與一個被詛咒的開局</h2>
+    <p class="act-sub">Famine, Assassination, and the Cruel Label of a New Nation</p>
+    <div class="ornament">☂ ☂ ☂</div>
+  </div>
+  <div class="prose">
+    <p>1971 年從廢墟中誕生的孟加拉,面對的是一個幾乎絕望的開局。九個月的戰爭摧毀了基礎設施與經濟;它是世界上人口最稠密的國家之一,卻一窮二白、滿目瘡痍。建國之父穆吉布雖眾望所歸地成為領袖,卻無力在短時間內收拾這個爛攤子。</p>
+
+    <h3>1974 大饑荒與「籃子裡的廢物」</h3>
+    <p>1974 年,毀滅性的洪水重創了新生的國家,引發了一場大饑荒,奪走了數以萬計的生命。國際社會對這個貧困、多災、人口爆炸的新國家極度悲觀。據傳,當時美國的一位高層官員,輕蔑地把孟加拉稱為「<strong>籃子裡的廢物（basket case）</strong>」——意指一個無可救藥、只能永遠靠國際援助續命的失敗國家。這個殘忍的標籤,連同「貧窮、洪水、人口過剩」的刻板印象,長久地烙印在了世界對孟加拉的認知裡。</p>
+    <div class="pull"><p>「籃子裡的廢物」——這是世界給這個剛從血泊中站起來的國家,貼上的第一個標籤。沒有人相信,它有未來。</p></div>
+
+    <h3>建國之父的殞落</h3>
+    <p>經濟的崩潰與政治的混亂,終於釀成了悲劇。1975 年 8 月,一群少壯派軍官發動政變,衝入穆吉布的官邸,將這位<em>建國之父連同他的大部分家人一同殺害</em>。孟加拉就此墜入了軍事政變與反政變交替的動盪年代,此後十多年大多在軍事強人(如齊亞·拉赫曼、艾爾沙德)的統治下度過。一個為「民主」與「自決」而誕生的國家,卻在誕生不久就失去了它的締造者,並陷入了與它的鄰居巴基斯坦如出一轍的「軍隊干政」循環。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 被標籤困住的真相</span>
+      <p>孟加拉艱難的開局,揭示了它將長期背負的一個沉重包袱——<strong>標籤</strong>。「籃子裡的廢物」「貧窮」「洪水」「人口過剩」——這些刻板印象,像它那「富庶卻被榨取」的歷史一樣,長期地遮蔽了世界看待這個國家的眼光,也遮蔽了它真實的潛力。</p>
+      <p>但這裡藏著一個將被未來顛覆的伏筆。<em>那個被輕蔑地稱為「廢物」的國家,其實擁有兩樣被嚴重低估的資產:一片地球上最肥沃、勤奮的人民最密集的土地,以及一種在獨立戰爭中淬煉出的、面對任何災難都打不垮的非凡韌性。</em>世界看到的是它的災難,卻沒看到災難底下那股堅韌的生命力。歷史最動人的反轉之一即將上演:這個被預言永遠失敗的國家,將在接下來的數十年裡,默默地、固執地,把「籃子裡的廢物」這個標籤,織成一個讓所有人跌破眼鏡的發展故事。而織就這個故事的,正是兩樣源自這片三角洲、最不起眼的東西——窮人的小額貸款,與成衣廠的縫紉機。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✺ ✦ ✺</div>
+  <p>當世界斷定它無可救藥時,這片三角洲卻在悄悄地織就奇蹟。<br>不靠石油,不靠礦藏,只靠兩樣最不起眼的東西——<br><span class="hl">借給窮人的幾塊錢,與千萬名女工手中的縫紉機。</span></p>
+</div>
+
+<!-- ===== 第九章:發展的奇蹟 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Surprise</span>
+    <h2 class="act-title">小額貸款與縫紉機:被低估的逆襲</h2>
+    <p class="act-sub">Microcredit, Garments, and How the "Basket Case" Rose</p>
+    <div class="ornament">✺ ✺ ✺</div>
+  </div>
+  <div class="prose">
+    <p>歷史最動人的反轉之一,發生在這片被斷定為「無可救藥」的三角洲上。在政治動盪不斷的同時,孟加拉社會的底層,卻在孕育著一場靜默而深刻的變革。它不靠石油,不靠礦藏,而是靠兩樣源自這片土地、最不起眼卻最契合它本質的力量。</p>
+
+    <h3>第一樣:借給窮人的幾塊錢</h3>
+    <p>第一樣,是一個關於「<strong>窮人也值得被信任</strong>」的革命性想法。經濟學家<strong>穆罕默德·尤努斯（Muhammad Yunus）</strong>觀察到,鄉村的窮人(尤其是婦女)並非不努力,而是被排除在正規金融體系之外——沒有銀行願意借給他們區區幾塊錢去做小生意。於是他創辦了<strong>格萊珉銀行（Grameen Bank）</strong>,專門向最貧困的人發放無需抵押的「<em>小額貸款（microcredit）</em>」,讓他們得以購買一頭牛、一台織機、一些貨物,從而自食其力。這個模式取得了驚人的成功,讓數百萬人脫離赤貧,並啟發了全世界的扶貧實踐。尤努斯與格萊珉銀行因此榮獲<strong>諾貝爾和平獎</strong>。一個源自孟加拉鄉村的想法,改變了全世界看待貧窮的方式。</p>
+    <div class="pull"><p>孟加拉給世界的禮物之一,不是黃金或棉布,而是一個觀念:最窮的人,也值得被信任、被投資。這個想法,贏得了諾貝爾和平獎。</p></div>
+
+    <h3>第二樣:千萬名女工手中的縫紉機</h3>
+    <p>第二樣,是<strong>成衣業</strong>。孟加拉重新拾起了它最古老的天賦——紡織(回想第三章那「織入空氣」的達卡細棉布)。憑藉龐大、年輕、低成本的勞動力,孟加拉成為全球品牌的成衣代工基地,一躍成為<strong>僅次於中國的世界第二大成衣出口國</strong>。你衣櫥裡許多衣服的標籤上,都印著「Made in Bangladesh」。這個產業的特殊之處在於,它的主力是<em>數百萬名女性工人</em>——成衣業第一次給了孟加拉農村婦女一份自己的薪水、一個走出家門的機會,在無形中悄悄地改變了這個社會的性別結構。</p>
+
+    <h3>跌破眼鏡的成績單</h3>
+    <p>這兩股力量,連同非政府組織(如全球最大的 NGO「BRAC」)在基層醫療、教育上的深耕,共同造就了一份讓世界跌破眼鏡的成績單。過去數十年,孟加拉在<em>降低嬰兒死亡率、提高女性識字率與就學率、控制人口成長、延長預期壽命</em>等社會發展指標上,進步神速,許多方面甚至超越了它更富裕的鄰居。它的經濟長期保持高速成長,人均 GDP 一度超越了印度與巴基斯坦。那個「籃子裡的廢物」,默默地走出了一條屬於自己的、由下而上的發展之路。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 韌性,織成了奇蹟</span>
+      <p>孟加拉的發展奇蹟,是對那個殘忍標籤最有力的反擊,也是它全部歷史性格的一次正面綻放。<strong>它的崛起,靠的不是天上掉下的資源,而是這片三角洲最根本的兩樣資產:勤奮密集的人民,與打不垮的韌性。</strong></p>
+      <p>這裡藏著深刻的歷史呼應。<em>還記得序章嗎?孟加拉是一片「水做的、肥沃到擁擠」的土地——它最大的「資源」,從來就是人。</em>當這份龐大的人力,透過小額貸款被賦予了資本、透過成衣業被賦予了就業、透過 NGO 被賦予了健康與教育時,那股一直被「貧窮」標籤掩蓋的生命力,終於爆發了出來。同樣深刻的是,這片土地終於開始<em>留住</em>並<em>運用</em>自己創造的財富——這是對它「富庶卻總被榨取」的兩百年悲劇,一次溫柔而堅定的扭轉。孟加拉證明了:一個國家的命運,不取決於別人給它貼的標籤,而取決於它的人民,願不願意一針一線、一塊錢一塊錢地,把自己的未來織出來。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">⚖ ✦ ⚖</div>
+  <p>經濟在向上,但政治卻被兩個家族、兩位女性的世仇所撕扯。<br>而這場僵持了數十年的對決,<br><span class="hl">終於在 2024 年的夏天,被一場席捲街頭的學生風暴所打破。</span></p>
+</div>
+
+<!-- ===== 第十章:政治的撕扯 ===== -->
+<section class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Begums</span>
+    <h2 class="act-title">兩位女性的世仇,與一場學生的風暴</h2>
+    <p class="act-sub">Dynastic Rivalry, Authoritarian Drift, and the 2024 Uprising</p>
+    <div class="ornament">⚖ ⚖ ⚖</div>
+  </div>
+  <div class="prose">
+    <p>當經濟在底層默默向上時,孟加拉的高層政治,卻數十年來被一場個人化、家族化的世仇所主宰。這場被稱為「<strong>兩位貝岡(Begum,夫人)之戰</strong>」的對決,主角是兩位來自悲劇家族的女性,她們的恩怨幾乎定義了孟加拉獨立後的全部政治。</p>
+
+    <h3>兩個王朝,一段血仇</h3>
+    <p>一位是<strong>謝赫·哈西娜（Sheikh Hasina）</strong>——建國之父穆吉布的女兒。1975 年那場政變屠殺了她的父親與全家,她因人在國外而倖免於難,後來歸國繼承父親的人民聯盟。另一位是<strong>卡莉達·齊亞（Khaleda Zia）</strong>——前軍事強人、總統齊亞·拉赫曼的遺孀;她的丈夫同樣死於政變,她領導著民族主義政黨。這兩位失去了至親的女性,各自背負著家族的悲劇與光環,輪流出任總理、彼此勢不兩立,把孟加拉政治拖入了長達數十年的惡性對抗、罷工與街頭衝突之中。</p>
+    <div class="pull"><p>孟加拉的民主,常常不是制度的競賽,而是兩個失去至親的家族之間,一場延續數十年、無法和解的世仇。</p></div>
+
+    <h3>長期執政,與威權的滑坡</h3>
+    <p>進入二十一世紀後,謝赫·哈西娜領導的人民聯盟長期執政。在她任內,孟加拉的經濟成長亮眼、基礎建設突飛猛進(如大型橋樑、電力)。但與此同時,她的統治也日益被批評為走向<em>威權</em>:打壓反對黨與異議、操控選舉、箝制媒體與言論。一個為「自決」與「民主」而流血誕生的國家,似乎又一次陷入了權力高度集中的困境。</p>
+
+    <h3>2024:學生掀翻了棋盤</h3>
+    <p>僵局在 2024 年夏天被徹底打破。一場最初由學生發起、抗議政府公職「保留配額」制度不公的運動,在政府的強力鎮壓下迅速擴大,演變成一場席捲全國、要求哈西娜下台的<strong>大規模民眾起義</strong>。衝突造成了嚴重的傷亡。在巨大的街頭壓力下,執政長達十五年的哈西娜於 2024 年 8 月倉皇辭職、逃離了國家。一個由諾貝爾和平獎得主<em>尤努斯</em>領導的臨時政府接掌了權力,孟加拉就此進入了一個充滿不確定、卻也充滿可能性的全新政治階段。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 那股拒絕被壓制的怒火</span>
+      <p>2024 年的學生起義,是孟加拉歷史性格的又一次鮮明展現。<strong>這個國家的人民,有一種深植於血脈的、拒絕被傲慢的權力壓制的傳統——無論那權力來自殖民者、來自西巴基斯坦的軍隊,還是來自一個本土的、日益威權的政府。</strong></p>
+      <p>這股怒火的源頭,要一路追溯到本書的開篇。<em>還記得 1952 年的語言運動、1971 年的獨立戰爭嗎?孟加拉這個民族,本就是在「學生走上街頭、為尊嚴與權利反抗強權」的烈火中淬煉出來的。</em>2024 年達卡街頭的年輕人,與 1952 年為母語倒下的達卡大學生,流著同樣的血、承著同樣的精神。這揭示了孟加拉政治最深的一條主線:它的民主或許脆弱、它的政治或許被家族世仇所困,但它的人民始終保有一股「不容權力為所欲為」的草根能量。這個國家的未來能否走向真正成熟、包容的民主,仍是一個懸而未決的問題;但可以確定的是,任何試圖騎在這個民族頭上的權力,都終將面對那股從 1952 年延燒至今、拒絕被壓制的街頭怒火。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">≈ ✦ ≈</div>
+  <p>在政治的起落與經濟的奮進之下,懸著一個比任何政權都更根本的威脅——<br>那是這片土地與生俱來的宿命,如今正被全球暖化放大。<br><span class="hl">那養育了孟加拉的水,如今正威脅著要把它淹沒。</span></p>
+</div>
+
+<!-- ===== 第十一章:與水的最後一搏 ===== -->
+<section class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Water Returns</span>
+    <h2 class="act-title">養育它的水,與淹沒它的海</h2>
+    <p class="act-sub">Climate Change and the Delta on the Front Line</p>
+    <div class="ornament">≈ ≈ ≈</div>
+  </div>
+  <div class="prose">
+    <p>無論孟加拉的政治如何起落、經濟如何奮進,它都必須面對一個比任何政權都更根本、更無情的挑戰——這個挑戰,正是它與生俱來的宿命。回想序章:孟加拉是一片「水做的土地」,富庶與脆弱是同一枚硬幣的兩面。而在二十一世紀,這枚硬幣的「脆弱」那一面,正被全球暖化以前所未有的力度放大。</p>
+
+    <h3>站在氣候危機最前線的國家</h3>
+    <p>孟加拉,是全世界<strong>最容易受氣候變遷衝擊的國家之一</strong>。它地勢極其低平,大半國土只高出海平面寥寥數米。全球暖化帶來的<em>海平面上升</em>,正一步步吞噬它的沿海土地、讓海水倒灌入農田;喜馬拉雅冰川的變化與更極端的季風,加劇了毀滅性的<em>洪水</em>;孟加拉灣的<em>氣旋風暴</em>變得更強、更頻繁。科學家警告,在最壞的情境下,海平面上升可能在本世紀淹沒孟加拉相當大一部分的國土,製造出數以千萬計的「<strong>氣候難民</strong>」。</p>
+    <div class="pull"><p>那三條給了孟加拉地球上最肥沃土壤的大河,如今在全球暖化的驅使下,正威脅著要把這個一億七千萬人的家園,淹回水裡。</p></div>
+
+    <h3>殘酷的不公,與堅韌的應對</h3>
+    <p>這裡有一層深刻的不公:孟加拉的人均碳排放量極低,對全球暖化的「貢獻」微乎其微,卻要承受其最嚴重的後果——它為富裕國家排放的二氧化碳,付出最慘重的代價。但孟加拉並未坐以待斃。憑藉它在無數次洪水中淬煉出的非凡韌性,它成為全球<em>氣候調適</em>的先行者:發展抗洪抗鹽的農業品種、建立綿密的氣旋預警與避難系統(大幅降低了風暴的死亡人數)、推動社區層級的防災。在國際舞台上,孟加拉更是為氣候脆弱國家發聲、爭取「損失與損害」補償的領袖。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 與水搏鬥,是這個民族的本能</span>
+      <p>氣候危機,把孟加拉的故事帶回了它最初的原點——<strong>水</strong>。從第一頁到最後一頁,這個國家的命運,始終由水書寫。水給了它「黃金孟加拉」的富庶,也給了它 1770 年、1974 年的饑荒;水沖積出它賴以為生的三角洲,如今又以海平面上升的形式,威脅著要奪走這一切。<em>與水共生、與水搏鬥,是這個民族刻在骨子裡的本能。</em></p>
+      <p>而孟加拉應對氣候危機的方式,恰恰是它全部歷史性格的最終體現。<em>它沒有被「氣候難民」的悲觀預言擊垮,正如它當年沒有被「籃子裡的廢物」的標籤擊垮一樣。</em>它用那份在獨立戰爭、在無數次洪水中淬煉出的韌性,把自己從一個「氣候災難的受害者」,努力轉變為一個「氣候調適的領航者」。這正是理解孟加拉最深的一把鑰匙:這個由水做成、被水養育、也被水威脅的民族,它最了不起的能力,從來不是逃避命運,而是<strong>在最不利的牌局裡,一次又一次地,堅韌地活下去、並織出新的可能</strong>。這份韌性,是它五千年三角洲歲月留給今天每一個孟加拉人的、最寶貴的遺產。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✶ ✦ ✶</div>
+
+<div class="interlude reveal">
+  <div class="mark">≈ ★ ≈</div>
+  <p>數千年,三條大河,一片三角洲,一種被血捍衛的語言,與一個在標籤下崛起的民族。<br>當我們走到故事的盡頭,終於可以回答最初那個問題——<br><span class="hl">為什麼今天的孟加拉與孟加拉人,是現在這個模樣?</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是,今天的孟加拉人</h2>
+      <p class="act-sub" style="color:rgba(245,239,220,.6)">Why Bangladesh, and Bangladeshis, Are What They Are</p>
+      <div class="ornament" style="color:var(--gold-bright)">≈ ★ ≈</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的孟加拉之所以是這個模樣,是五個層層相扣的原因疊加而成的——每一層,都對應著本書的一段旅程。</p>
+
+      <h3>第一層:水,把它造成一片三角洲</h3>
+      <p>一切的源頭是<strong>水</strong>。三條大河沖積出地球上最大的三角洲,造就了一片肥沃到擁擠、富庶到脆弱的土地。這片「水做的土地」,寫定了孟加拉的命運基調:它人口稠密、農業立國、與水共生;它的富庶讓它成為所有帝國垂涎的肥肉,它的脆弱讓它永遠在與洪水搏鬥。今天孟加拉的稠密、勤奮、韌性,以及它面對的氣候威脅,全都從這片三角洲長出來。</p>
+
+      <h3>第二層:富庶,變成了被榨取的詛咒</h3>
+      <p>接著是<strong>富庶的詛咒</strong>。從「黃金孟加拉」到達卡「織入空氣」的細棉布,這片三角洲生產了驚人的財富——但這份財富,總是被一個又一個遙遠的權力中心(德里、倫敦、後來的喀拉蚩)所攫取、外運。1770 年餓死三分之一人口的大饑荒、被扼殺的本土紡織業,都是這道「財富在此生產、在別處被享用」的傷口的見證。這份「我們明明富饒、卻總被榨取」的集體記憶,成了孟加拉民族意識的底色。</p>
+
+      <h3>第三層:信仰與語言,是並存的兩種靈魂</h3>
+      <p>然後是<strong>雙重的認同</strong>。蘇非聖者用愛與平等,讓伊斯蘭成為三角洲窮人的信仰;但孟加拉的伊斯蘭,始終是用孟加拉語吟唱的。於是「穆斯林」與「孟加拉人」,成了並存而非互相取代的兩種認同。<em>這就是為什麼今天的孟加拉人,既是虔誠的穆斯林,又為自己的母語、詩歌與文化驕傲到願意為它流血——這兩種靈魂,在他們心中從來不是可以互相替換的。</em></p>
+
+      <h3>第四層:為母語而流的血,誕生了一個國家</h3>
+      <p>最關鍵的是<strong>身分的覺醒</strong>。1947 年,這片三角洲因宗教被劃給了一千六百公里外的巴基斯坦,成了被忽視、被榨取的「東半邊」。但當西巴基斯坦試圖用「宗教純粹」之名,奪走孟加拉人的母語時,1952 年的語言運動爆發了——孟加拉人成為人類史上第一批為「捍衛母語」而犧牲的烈士。這把火,在 1971 年燒成了一場獨立戰爭。<em>孟加拉於是成為全世界唯一一個「因語言與民族認同、而非僅因宗教」而誕生的國家——它用鮮血,證偽了巴基斯坦「兩個民族理論」的立國根基。</em></p>
+
+      <h3>第五層:在標籤之下,默默織出一條向上之路</h3>
+      <p>最後是<strong>韌性的逆襲</strong>。獨立的開局是饑荒、政變與「籃子裡的廢物」的嘲諷;它的政治,長期被兩個家族的世仇與威權的滑坡所困,直到 2024 年的學生風暴掀翻棋盤。但在這一切之下,孟加拉社會的底層,卻靠著兩樣最不起眼的東西——<em>借給窮人的小額貸款,與千萬名女工手中的縫紉機</em>——默默織出了一個讓世界跌破眼鏡的發展故事。而它從 1952 年延燒至今、拒絕被權力壓制的草根怒火,與它在無數次洪水中淬煉的韌性,正是它面對未來(尤其是氣候危機)最寶貴的本錢。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 由水養育,為語言而生,以韌性立足</span>
+        <p>所以,今天的孟加拉人是誰?他是<strong>一片三角洲用水與泥沙養育出的、為母語流過血的、在最不被看好的牌局裡堅韌活下來的人</strong>——他的祖先在「黃金孟加拉」織出過全世界最美的布,也在大饑荒中餓死過三分之一;他既向真主祈禱,也為泰戈爾的詩句落淚;他的國家因「我既是穆斯林、更是孟加拉人」這句話而在血泊中誕生,又在「籃子裡的廢物」的嘲諷中,一針一線地織出了自己的尊嚴。</p>
+        <p>他的富庶與貧窮,是同一片「被榨取的三角洲」的兩面;他的虔誠與驕傲,是「信仰」與「母語」這兩種並存靈魂的兩面;他的災難與韌性,是同一片「水做的土地」的兩面。<em>孟加拉最深刻的真相是:它是一個被世界反覆低估、卻一次次用韌性回應的民族。它的歷史不斷地證明同一件事——一個民族真正的命運,不取決於別人給它貼的標籤、不取決於它被誰榨取或統治,而取決於它願不願意,為自己的尊嚴流血、為自己的未來,一塊錢一塊錢、一針一線地,把它織出來。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">水把它造成一片三角洲,富庶把它變成被榨取的目標,母語把它喚醒成一個民族,韌性讓它在標籤之下站了起來——而要如何守住這片水做的家園、織出自己的未來,是這一代孟加拉人仍在回答的問題。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">數千年的終極啟示</span>
+      <p>一個國家的樣貌,往往由它的地理(水)開局,由流向它的財富決定它被榨取的命運,由信仰與語言定下它靈魂的雙重底色,再由一場為尊嚴而流的血,喚醒它成為一個民族——而它能否真正立足於世,最終不取決於別人給它的標籤,而取決於生活在這裡的人們,願不願意用那份與水搏鬥千年的韌性,把自己的尊嚴與未來,親手織出來。這,就是孟加拉至今仍在書寫的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(245,239,220,.78);margin-top:2.5rem">
+        從三條大河沖積出的肥沃三角洲,<br>
+        到「織入空氣」的達卡細棉布、餓死三分之一人的大饑荒,<br>
+        從 1952 年達卡街頭為母語灑下的鮮血,<br>
+        到 1971 年九個月血戰中誕生的新國家,<br>
+        再到小額貸款、縫紉機,與一場掀翻棋盤的學生風暴——<br>
+        這段交織著河流、富庶、信仰、語言、鮮血與韌性的歷史,<br>
+        最終回答了那個最初的問題:<br>
+        為什麼會有今天的孟加拉,<br>以及今天的,孟加拉人。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">≈ ✦ ★</div>
+  <p>河口、語言與洪水 · 孟加拉的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE GOLDEN DELTA TO A NATION BORN OF LANGUAGE · ANTIQUITY – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
