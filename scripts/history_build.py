@@ -54,7 +54,7 @@ ENTRIES = [
          zh="半島的意志：南韓從廢墟到尖端", en="South Korea: The Will of the Peninsula", lat=36.5, lng=127.8),
     dict(src="東北亞歷史/北韓史詩_堡壘之國.html", slug="northkorea-epic", cat="nation",
          zh="堡壘之國：北韓的身世", en="North Korea: The Fortress State", lat=40.3, lng=127.5),
-    dict(src="東北亞歷史/香港史詩_海港難民與兩制.html", slug="hongkong-epic", cat="nation",
+    dict(src="東北亞歷史/香港史詩_海港難民與兩制.html", slug="hongkong-epic", cat="city", group="中國 China",
          zh="海港、難民與兩制：香港的身世", en="Hong Kong: Harbour, Refugees & Two Systems", lat=22.32, lng=114.17),
     dict(src="東北亞歷史/澳門史詩_海岬教堂與賭城.html", slug="macau-epic", cat="nation",
          zh="海岬、教堂與賭城：澳門的身世", en="Macau: Cape, Church & Casino", lat=22.20, lng=113.54),
