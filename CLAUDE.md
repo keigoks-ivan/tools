@@ -98,3 +98,24 @@ git push origin main
 - `update:` 更新數據或文字
 - `security:` 安全性相關
 - `refactor:` 重構（不改功能）
+
+## 歷史板塊 /history/（catalog 驅動）
+史詩敘事歷史長文，與站內其他頁面風格刻意斷裂（羊皮紙史詩風）。
+- 上線網址：tools.investmquest.com/history/
+- 唯一真實來源：`scripts/history_build.py` 的 `ENTRIES` 清單
+- 來源素材：Google Drive `…/001投資/產業claude分析/歷史/`（原檔不動，腳本只複製）
+- 產物：`/history/<slug>.html`（英文 slug）+ `/history/catalog.json`
+- 總覽頁 `/history/index.html` 讀 catalog.json 自動生成 d3 世界地圖標點 + 4 區列表
+  （cat：nation 國家 / city 城市 / theme 主題 / sport 運動）
+- 內頁注入：頂端雙語返回列；缺章節目錄者自動補浮動 TOC（掃 h2.act-title）
+- navbar 入口在 `js/navbar.js` 的 `TOOLS`（key=history），全站生效
+
+### 加新史詩 HTML（兩步，重跑安全）
+1. 在 `scripts/history_build.py` 的 `ENTRIES` 貼一筆：
+   `dict(src="資料夾/檔.html", slug="my-slug", cat="nation", zh="中文標題", en="English", lat=35.0, lng=139.0)`
+   - src：相對 Google Drive 歷史資料夾的路徑（或絕對路徑）
+   - cat：nation/city/theme/sport；theme/sport 無地理填 lat=None,lng=None
+   - 城市可加 `group="日本 Japan"` 做列表分組
+2. 跑 `python3 scripts/history_build.py`（冪等），再 `git add -A && commit && push origin main`
+   - 先驗證來源：`python3 scripts/history_build.py --check`
+- 重複版本只在 ENTRIES 留一筆（取內容最完整者，例：泰國/印尼/馬來西亞取「擴充版」）
