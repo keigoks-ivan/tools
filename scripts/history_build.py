@@ -95,6 +95,10 @@ ENTRIES = [
     dict(src="東南亞 南亞 歷史/菲律賓/菲律賓史詩_十字架群島與我們是誰.html", slug="philippines-epic", cat="nation",
          zh="十字架、群島與我們是誰：菲律賓", en="Philippines: Cross & Archipelago", lat=12.9, lng=122.0),
 
+    # ---------- 歐洲史詩 ----------
+    dict(src="歐洲歷史/葡萄牙史詩_大地盡頭大海起點.html", slug="portugal-epic", cat="nation",
+         zh="大地盡頭，大海起點：葡萄牙的航海身世", en="Portugal: Where the Land Ends and the Sea Begins", lat=39.5, lng=-8.2),
+
     # ---------- 城市史詩 ----------
     dict(src="台灣歷史/台北_盆地之城.html", slug="taipei", cat="city", group="台灣 Taiwan",
          zh="盆地之城：台北的身世", en="Taipei: City in a Basin", lat=25.03, lng=121.57),
