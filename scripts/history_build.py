@@ -162,6 +162,8 @@ ENTRIES = [
          zh="殖民勢力交替動畫地圖 · 1500–1900", en="Colonial Powers: Animated Map", lat=None, lng=None),
     dict(src="經濟史/skyscraper-curse-v2.html", slug="skyscraper-curse", cat="theme",
          zh="摩天大樓詛咒：最高樓與經濟轉折", en="The Skyscraper Curse", lat=None, lng=None),
+    dict(src="經濟史/工業革命與AI時代的回聲.html", slug="industrial-revolution", cat="theme",
+         zh="從蒸汽到演算法：工業革命與 AI 時代的回聲", en="From Steam to Algorithm: The Industrial Revolution & the Age of AI", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
