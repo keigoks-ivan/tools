@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>瓜分、枷鎖與未竟的獨立：帝國主義與非洲的兩百年</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ---- 修正:深色章節內,擁有淺色背景的卡片組件須維持深色文字,避免淺底淺字 ---- */
+/* ---- 修正:深色章節內的對比度 ----
+   實心淺底組件(method-card / twocol)→ 深色文字;
+   shift-body 無背景貼深底 → 淺色文字。 ---- */
+.dark .method-card p,
+.dark .twocol p{color:var(--ink)}
+.dark .method-card p strong,
+.dark .twocol p strong{color:var(--crimson)}
+.dark .method-card p em,
+.dark .twocol p em{color:var(--sea-deep)}
+.dark .method-card h5{color:var(--sea-deep)}
+.dark .method-card .tool{color:var(--rust)}
+.dark .method-card .eg{color:#6b5d48}
+.dark .minihead{color:var(--rust)}
+.dark .shift-body{color:#cdb494}
+.dark .shift-body strong{color:#c87a5a}
+.dark .shift-body em{color:#d8a878}
+.dark .stat{background:rgba(212,175,90,.07)}
+.dark .stat .num{color:var(--gold-bright)}
+.dark .stat .lbl{color:#b9a784}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+.twocol>div{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left;color:var(--ink)}
+.method-card p strong{color:var(--crimson)}
+.method-card p em{color:var(--sea-deep)}
+.method-card .eg{font-size:.86rem;color:#6b5d48;font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+@media(max-width:1100px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<=1100)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Imperialism in Africa · From the Scramble to the New Scramble</span>
+    <h1>瓜分、枷鎖與<span class="em">未竟的獨立</span><br>帝國主義與非洲的兩百年</h1>
+    <p class="sub">1870 年，歐洲列強直接統治的非洲還不到整片大陸的一成；三十年後，除了衣索比亞，整個非洲幾乎被瓜分殆盡。<br>從柏林會議的一紙地圖、剛果的斷手，到獨立的旗幟、盧安達的屠刀，再到今天「新瓜分」的港口與礦場——<br>這是一段關於掠奪、抵抗、解放，與一場至今仍未走完的獨立的歷史</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">一</span>八七〇年，歐洲列強直接控制的非洲土地，還不到整片大陸的十分之一；然而短短一個世代之後，除了衣索比亞與賴比瑞亞，整個非洲幾乎已被歐洲列強瓜分、佔領、重新命名。這是人類史上最快速、也最大規模的一次領土掠奪——歷史上稱之為「瓜分非洲」（the Scramble for Africa）。但這段歷史，遠不只是歐洲人在地圖上劃線的故事。在歐洲人到來之前，非洲早已有過輝煌的帝國、綿密的貿易網與深厚的文明；在被征服的過程中，非洲人從未停止抵抗；在獨立之後，他們又必須在殖民者留下的<em>人為國界、單一經濟與分裂的族群</em>之上，艱難地重建自己的國家。而帝國主義的影響，並沒有隨著國旗的降下而結束——它至今仍寫在非洲的邊界、經濟、衝突，以及一場被稱為「新瓜分」的當代角力裡。這篇長文要<em>完整地</em>講完這段從十九世紀延續到今天的歷史，在每個轉折處，聽一聽它那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">⚒ ✦ ⚒</div>
+
+<section id="ch0" class="act reveal">
+  <div class="act-head"><span class="act-num">序章 · Africa Before the Scramble</span>
+    <h2 class="act-title">瓜分之前的非洲</h2><p class="act-sub">A Continent of Kingdoms, Not a Blank Map</p>
+    <div class="ornament">◆ ✦ ◆</div></div>
+  <div class="prose">
+    <p>十九世紀的歐洲地圖繪師,常把非洲內陸畫成一片空白——只在邊緣標幾個海港,中央留下大片米黃,偶爾寫上「未探勘」字樣,或畫一頭想像中的獅子。這片「空白」後來成了一種強而有力的政治修辭:既然那裡什麼都沒有,把它填滿、佔領、教化,豈不是一樁功業?然而那片米黃從來不是空白。它之所以對歐洲人是空白,只因歐洲人尚未踏足、尚未測繪、尚未理解;對於世世代代生活在那裡的數千個族群而言,那是田野、市集、王宮、清真寺、聖殿與祖墳俱全的世界,有自己的曆法、法律、詩歌與帝王譜系。</p>
+    <p>要理解後來那場「瓜分非洲」的悲劇,必須先把這張被刻意塗白的地圖重新填回顏色。因為唯有看見瓜分之前的非洲有多麼豐富、多元、充滿創造力,才能衡量那場征服究竟打斷了什麼。</p>
+    <h3>金鹽之路:橫越撒哈拉的財富</h3>
+    <p>早在歐洲人沿西非海岸南下之前數百年,撒哈拉沙漠就不是隔絕的屏障,而是一條繁忙的高速公路。駱駝商隊載著北非的鹽塊、布匹、書籍與馬匹南下,再馱著西非的黃金、象牙、柯拉果與——令人痛心地——奴隸北返。黃金是這條路的命脈:中世紀世界流通的黃金,有相當大的比例來自西非的礦區。</p>
+    <p>掌控這條金路的,是接連興起的薩赫勒帝國。先是迦納帝國(與今日的迦納共和國無地理關係,而在更北的內陸),繼之以馬利帝國。馬利的曼薩穆薩(Mansa Musa)在一三二四年率龐大隊伍前往麥加朝聖,沿途在開羅散金之多,據阿拉伯史家記載,竟一度壓低了埃及的金價多年——這雖是傳說化的描述,卻反映同時代人對馬利財富的真實震撼。馬利之後是桑海帝國,鼎盛時疆域橫跨今日多國。</p>
+    <div class="pull"><p>那片米黃從來不是空白;它之所以對歐洲人是空白,只因歐洲人尚未踏足。</p></div>
+    <h3>廷巴克圖:沙漠中的學城</h3>
+    <p>桑海治下的廷巴克圖(Timbuktu)不只是商埠,更是伊斯蘭學術重鎮。桑科雷(Sankore)等清真寺兼學府吸引各地學者,講授古蘭經學、法學、天文、數學與醫學。城中私人與學院收藏的手抄本數以萬計,內容遠超宗教,涵蓋科學與文藝——這些手稿一部分留存至今,二〇一二年面臨聖戰組織威脅時,廷巴克圖的圖書館員冒險將大批古籍偷運藏匿,世人才再次驚覺這座沙漠之城曾是何等的知識寶庫。廷巴克圖證明了一件事:中世紀的非洲不僅有財富,更有讀書識字、辯論思想的傳統。</p>
+    <h3>印度洋的另一面:斯瓦希里海岸</h3>
+    <p>把目光轉向東岸,則是另一個截然不同卻同樣繁華的世界。從今日索馬利亞南下,沿肯亞、坦尚尼亞直到莫三比克的綿長海岸線上,興起了一連串斯瓦希里(Swahili)城邦——蒙巴薩、馬林迪、桑吉巴、基爾瓦(Kilwa)。這些城市的商人乘著季風,與阿拉伯半島、波斯、印度乃至中國通商。基爾瓦尤其富庶,壟斷了內陸黃金經由索法拉出口的貿易;遺址中至今矗立的大清真寺與宮殿,以珊瑚石砌成,精美程度令十六世紀來到此地的葡萄牙人也為之側目。斯瓦希里文化本身就是非洲與印度洋世界交融的結晶:斯瓦希里語以班圖語為骨幹,吸收大量阿拉伯詞彙,用阿拉伯字母書寫詩歌。中國明代的瓷器碎片散落在這些海岸遺址,鄭和的船隊也曾抵達此地——非洲早已是舊世界貿易網絡中活躍的一環。</p>
+    <h3>石頭築成的記憶:大辛巴威</h3>
+    <p>內陸高原上,還矗立著一座無聲卻有力的見證——大辛巴威(Great Zimbabwe)。這是一座以乾砌石牆築成的巨大城市遺址,牆體不用任何灰泥,卻能歷數百年而不傾;最高的圍牆逾十公尺,蜿蜒環抱昔日的王宮與聚落。它在約十一至十五世紀間是一個強大政體的中心,財富來自畜牧、農耕與黃金貿易。當十九世紀的歐洲探險者面對這座宏偉石城時,許多人拒絕相信非洲人能建造它,硬要附會成腓尼基人或示巴女王的遺跡——殖民時期的羅德西亞政府甚至壓制考古結論,因為承認大辛巴威是非洲人的成就,會動搖白人統治的合法性。今天它的名字成了一個國家的國名,正是對那套否定的莊嚴反駁。</p>
+    <div class="pull"><p>承認大辛巴威是非洲人的成就,會動搖白人統治的合法性——於是真相被壓制了近一個世紀。</p></div>
+    <h3>古老的王冠:衣索比亞與努比亞</h3>
+    <p>若論延續之久,非洲東北角的衣索比亞高地堪稱奇蹟。早在西元一世紀,阿克蘇姆(Aksum)王國便已是與羅馬、波斯、印度通商的強權,鑄造自己的金幣,並在西元四世紀皈依基督教——使衣索比亞成為世界上最古老的基督教國家之一。拉利貝拉(Lalibela)那些從整塊岩石中向下鑿出的十字形教堂,至今仍是活生生的朝聖地。衣索比亞的皇室自稱可上溯至所羅門王與示巴女王,這套「所羅門血統」的敘事支撐了一個延續數百年的帝國。更早之前,在尼羅河上游的努比亞(Nubia),庫施(Kush)王國一度強盛到反過來征服埃及,建立統治整個尼羅河流域的「第二十五王朝」,其境內麥羅埃(Meroë)的金字塔數量,甚至比埃及本土還多。</p>
+    <h3>森林與草原上的政體</h3>
+    <p>再往西非與中南部看,政治組織同樣繁複而成熟。西非森林帶的阿散蒂(Asante)王國以黃金立國,有精巧的官僚制度與象徵王權的「金凳」(Golden Stool),其黃金工藝舉世聞名。其鄰近的貝南(Benin,今奈及利亞境內,非今日的貝南共和國)以失蠟法鑄造的青銅雕像精美絕倫,十九世紀末被英軍劫掠後流散歐美各大博物館,如今正成為文物歸還爭議的焦點。十九世紀初,富拉尼學者奧斯曼·丹·福迪奧(Usman dan Fodio)發動聖戰,在西非建立了幅員遼闊的索科托哈里發國(Sokoto Caliphate),這是一個有成文行政、伊斯蘭法治與發達學術的大型伊斯蘭政體。</p>
+    <p>在南部,十九世紀初的沙卡(Shaka)以軍事革新鍛造出強盛的祖魯(Zulu)王國,其短矛戰術與軍團編制使祖魯成為令鄰邦與後來的歐洲人都不敢小覷的力量。東非內陸的維多利亞湖畔,則有組織嚴密、王權強大的布干達(Buganda)王國,有國王(Kabaka)、宮廷、官道與貢賦體系。這些只是無數例子中的少數——整片大陸上,從尼羅河谷到好望角,佈滿了王國、酋邦、城邦與部族聯盟,各有政制、信仰與技藝。</p>
+    <h3>尼羅河的恩賜:埃及與它的非洲根源</h3>
+    <p>談非洲文明,自然繞不開那條孕育了人類最古老文明之一的尼羅河。古埃及——金字塔、象形文字、複雜的官僚與曆法、對來世的宏大想像——是非洲大地上誕生的偉大成就。長久以來,西方學界曾傾向把埃及從非洲剝離,將其歸入「地中海」或「東方」文明,彷彿如此燦爛的文明不可能屬於非洲;但越來越多的研究強調埃及與其南方努比亞、與更廣大非洲的深刻聯繫——人群、信仰、技術與貿易在尼羅河上下游之間長期流動。前述的庫施王國一度入主埃及,正是這種上下游一體性的明證。把埃及還給非洲,是重寫這張地圖的重要一筆。</p>
+    <h3>並非停滯,而是被打斷</h3>
+    <p>非洲人很早就獨立發展出冶鐵技術,鐵製農具與兵器支撐了農業擴張與人口成長;班圖語族橫越大陸的數千年大遷徙,把農耕、畜牧與冶金帶到中南部。各地發展出適應不同環境的農業——尼羅河的灌溉、薩赫勒的雜糧、雨林的塊根作物、高原的梯田。社會形態同樣多元:有中央集權的帝國,也有刻意不設國王、靠長老議事與年齡組織維繫秩序的「無國家社會」,後者並非落後,而是另一種精巧的政治智慧。</p>
+    <p>口傳並不等於沒有歷史。西非的格里奧(griot)世代相承,以記誦的史詩傳唱帝王譜系與英雄事蹟,《松迪亞塔史詩》便是這樣流傳下來的馬利建國敘事;許多社會雖無歐式檔案,卻有極其精密的口述傳統、法律慣例與系譜知識。把「無文字」等同於「無歷史」,正是「黑暗大陸」迷思的另一個面向。同樣,非洲的宗教生活既深且廣:伊斯蘭沿商路深入西非與東岸,基督教在衣索比亞延續逾千五百年,各地的傳統信仰則有複雜的宇宙觀、祖先崇拜與儀式體系。藝術上,從貝南青銅、約魯巴的雕塑到各地的織染、面具與金工,無不展現高度的美學與技術成熟。</p>
+    <p>必須誠實地說:瓜分之前的非洲並非田園牧歌般的樂土。這裡同樣有戰爭、有奴役、有興衰更替——一如同時代的歐洲、亞洲。但關鍵在於:它有自己的歷史節奏與發展方向,是一個個活生生、不斷變動的社會,而非一塊等待被「喚醒」的沉睡空地。它的軌跡正要走向何方,我們已永遠無法確知——因為一場外來的風暴,即將把這些軌跡盡數打斷,強行扭向另一個方向。</p>
+    <div class="investor"><span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>「黑暗大陸」這個詞,從來不是對非洲的客觀描述,而是歐洲為自己的征服預備的藉口。把一塊住滿王國與文明的土地說成空白、停滯、等待被開化,就能把掠奪粉飾成恩賜。這套敘事的後勁極長:直到今天,國際媒體談非洲,仍慣性地以飢荒、戰亂、貧窮為框架,彷彿這片大陸的歷史是從歐洲人到來才開始的。</p>
+      <p>然而當代非洲正積極奪回自己的歷史話語權。大辛巴威成了國名,迦納、馬利的國名取自昔日帝國,廷巴克圖手稿被搶救與數位化,貝南青銅器的歸還談判登上國際版面,衣索比亞作為唯一從未被長期殖民的非洲古國,長期是泛非主義與非洲尊嚴的精神象徵——非洲聯盟總部正設於其首都阿迪斯阿貝巴。理解今天的非洲,必須先承認:它在被瓜分之前,早已是一個有金鹽商路、有學術之城、有石砌王宮、有古老教堂的豐饒世界。那場瓜分打斷的,不是一片空白,而是無數條自有其方向的歷史軌跡。</p></div>
+    <p>所以,在講述帝國主義如何降臨之前,我們必須先把這張地圖填滿。接下來的故事不是「非洲被發現」,而是一個豐饒大陸如何被捲入一場它不曾選擇、卻將深刻改變其命運的風暴。而這場風暴的第一道陰影,早在「瓜分」之前的幾個世紀,就已經沿著海岸悄然籠罩——那便是奴隸貿易的長影。</p>
+  </div>
+</section>
+<div class="interlude reveal"><div class="mark">◆ ✦ ◆</div><p>金鹽之路上的商隊仍在前行,廷巴克圖的學者仍在抄經,然而大西洋的另一端,一種全新的、規模空前的貿易正在成形。它不要黃金,不要象牙——它要的是人。<br><span class="hl">於是,長影落下。</span></p></div>
+<section id="ch1" class="act reveal dark">
+  <div class="act-head"><span class="act-num">第一章 · The Slave Trade's Long Shadow</span>
+    <h2 class="act-title">奴隸貿易的長影</h2><p class="act-sub">Four Centuries Across the Atlantic</p>
+    <div class="ornament">◆ ✦ ◆</div></div>
+  <div class="prose">
+    <p>當葡萄牙的卡拉維爾帆船在十五世紀沿西非海岸試探南下時,他們起初尋找的是黃金與通往印度的航路。但很快,一種更黑暗的商品壓過了一切。從十五世紀中葉起,直到十九世紀,橫跨大西洋的奴隸貿易持續了將近四個世紀,成為人類歷史上規模最龐大、最有組織的強制人口遷移之一。據史家根據航運紀錄的長期統計,被裝上奴隸船、強行運往美洲的非洲人,總數約在一千二百萬至一千三百萬之間——而這個數字尚未計入在被擄、押送至海岸途中死去的無數人。</p>
+    <p>這不是抽象的數字。每一個被計入的,都是有名字、有母親、有故鄉、有來世信仰的人。要莊重地講述這段歷史,就不能讓他們消融成統計;但也唯有透過這些被反覆核對的數字,我們才能衡量這場災難的真實尺度。</p>
+    <h3>中央航路:海上的煉獄</h3>
+    <p>被稱為「中央航路」(Middle Passage)的,是奴隸船橫越大西洋的那一段航程——它構成了三角貿易的中段:歐洲的工業製品與槍枝運往非洲,換取被奴役的人;人被運往美洲的種植園;再把蔗糖、棉花、菸草運回歐洲。對被囚禁的非洲人而言,中央航路是難以想像的酷刑。他們被鎖鏈成排塞進低矮悶熱、空氣污濁的船艙,動彈不得,病疫橫行。航程往往持續數週甚至更久,痢疾、天花、壞血病與絕望奪走大量性命;有人在反抗中被殺,有人寧可投海。死亡率高得驚人,以致船東把這些性命的損耗預先計入成本。一七八一年的「鬆號」(Zong)慘案中,船員為詐領保險金,竟將上百名奴隸活活拋入海中——這樁暴行後來成為英國廢奴運動的關鍵控訴。</p>
+    <div class="pull"><p>船東把這些性命的損耗預先計入成本——人,被當成可折舊的貨物。</p></div>
+    <p>抵達美洲的人,被賣到加勒比海與巴西的甘蔗園、北美的棉花與菸草田,在皮鞭下勞作至死。整套大西洋經濟——歐洲的港口城市、銀行、保險、製糖業的興盛——有相當一部分建立在這套被奴役勞動之上。這是後來許多歷史學者反覆論證的:歐洲工業化的部分資本,正來自這場貿易與其支撐的種植園經濟。</p>
+    <h3>三角形的兩端:財富與血</h3>
+    <p>奴隸貿易並非孤立的買賣,而是一套精密咬合的全球經濟機器。在這套被稱為「三角貿易」的循環裡,大西洋兩岸與歐洲被緊緊綁在一起:利物浦、布里斯托、南特等港口因奴隸貿易而暴富,城中富麗的宅邸與宏偉的市政建築,有不少是這筆財富的紀念碑。種植園的產品——蔗糖、咖啡、菸草、棉花——重塑了歐洲人的日常飲食與消費習慣;一杯加糖的紅茶背後,是加勒比海甘蔗園裡無數人的血汗。為奴隸貿易與種植園提供融資、保險與航運的金融網絡,推動了現代資本主義若干制度的發展。這套體系運轉了數個世紀,把一端的繁榮,牢牢建立在另一端的苦難之上。</p>
+    <h3>非洲社會的內傷</h3>
+    <p>奴隸貿易對非洲本身造成的破壞,既深且久,且必須誠實面對其中的複雜性。歐洲商人通常不深入內陸捕奴——他們在海岸設立堡壘與商館,向非洲的中間人收購。一些沿海王國與商人因此被捲入這套體系,以戰俘、罪犯或被擄者交換歐洲的槍枝、酒類與布匹。這造成一種惡性循環:槍枝助長了戰爭,戰爭製造了更多俘虜,俘虜又換來更多槍枝。達荷美(Dahomey)、阿散蒂等政體都曾深涉其中。</p>
+    <p>承認部分非洲統治者的共謀,並不減輕歐洲需求方的根本責任——是大西洋彼岸種植園無止境的勞力需求,驅動了整個體系。但這份誠實也正是凸顯非洲能動性的一部分:非洲人在這段歷史中既是受害者,也有自己的政治算計與選擇,而非全然被動的客體。其後果是慘痛的:人口最精壯的青壯年被大量抽走,某些地區人口長期停滯;社會普遍軍事化;以擄人為利的風氣腐蝕了族群之間的互信。一些史家認為,這幾個世紀的人口與社會創傷,削弱了非洲在十九世紀面對歐洲征服時的抵抗能力。</p>
+    <h3>不只大西洋:印度洋與跨撒哈拉</h3>
+    <p>必須指出,大西洋並非唯一的奴隸貿易場。早在跨大西洋貿易之前千年,橫越撒哈拉與沿印度洋的奴隸貿易就已存在,將非洲人運往北非、阿拉伯半島、波斯與印度。這套貿易延續的時間更長,總人數的估計同樣龐大。十九世紀,當大西洋貿易在廢奴壓力下萎縮時,東非沿岸的奴隸貿易反而一度興盛,桑吉巴成為樞紐,大量奴隸被驅往島上的丁香園與更遠的市場。這提醒我們:奴隸制的歷史既有歐洲的責任,也有更廣闊、更複雜的脈絡,不應簡化。</p>
+    <h3>廢奴——與一個意外的後果</h3>
+    <p>十八世紀末,廢奴運動在英國興起,結合了宗教良知(尤其貴格會與福音派)、獲釋奴隸的親身證言(如奧拉達·埃奎亞諾的自傳),以及威伯福斯等議員的長期奮鬥。英國於一八〇七年立法廢止奴隸貿易,一八三三年再立法廢除整個大英帝國境內的奴隸制度。皇家海軍此後在西非沿海巡弋,攔截奴隸船。這無疑是道德上的重大進步。</p>
+    <div class="pull"><p>廢奴是道德的勝利,卻在不經意間,為更深的征服遞上了鑰匙。</p></div>
+    <h3>不肯馴服的人:抵抗與創造</h3>
+    <p>即使在最深的黑暗中,被奴役者也從未真正放棄能動性。在橫渡的航程中,船上的起事屢見不鮮,以致奴隸船必須加派看守、佈設防範;有人選擇蹈海,寧死不屈。抵達美洲後,反抗以各種形式延續:逃亡者在巴西的內陸建立起被稱為「金邦果」(quilombo)的自由聚落,其中帕爾馬雷斯一度抵抗葡萄牙人數十年;加勒比海與美洲各地,逃入山林沼澤的「馬隆人」(Maroon)組成獨立社群,甚至迫使殖民當局簽約承認其自治。一七九一年爆發的海地革命,更是被奴役者推翻奴隸制、擊敗殖民軍隊、建立起人類史上第一個由前奴隸建國的共和國——這場革命震撼了整個蓄奴世界。</p>
+    <p>而在精神與文化的層面,被擄走的非洲人把信仰、音樂、語言與記憶帶過了大洋,在異鄉重新編織。約魯巴、剛果等地的宗教與儀式,在加勒比海與巴西融合成新的信仰體系;非洲的節奏與歌唱,後來孕育出深刻影響全世界的音樂形式。奴役奪走了自由,卻奪不走創造的能力——這份在絕境中依然生生不息的文化生命力,本身就是對「被動受害者」這一刻板印象最有力的反駁。</p>
+    <h3>「正當貿易」:文明面具下的更深介入</h3>
+    <p>然而歷史有其殘酷的反諷。廢奴之後,歐洲鼓吹以所謂「正當貿易」(legitimate commerce)取代奴隸貿易——即改為收購棕櫚油、花生、橡膠等原料。表面上這是文明的替代,實際上卻把歐洲商業利益更深地楔入非洲內陸。對非洲沿海的一些統治者而言,奴隸出口曾是重要財源,如今被迫轉型,既要適應新的商品經濟,又要應對歐洲日益增強的存在;權力與財富的格局因此重新洗牌。為了「保護」貿易、「壓制」殘餘奴隸販子、「開化」當地,歐洲找到了源源不絕的干預藉口。傳教士深入內陸,探險家測繪河流,商人建立據點,而這一切都為後來的政治併吞鋪了路。廢奴的旗幟,在某些場合竟成了征服的先導——「我們是來終結奴隸制的」這句話,日後一再被用來為佔領辯護。值得一提的是,正當貿易所急需的棕櫚油、橡膠等原料,恰恰是下一個時代列強瓜分的標的——奴隸貿易的終結,並未終結對非洲的榨取,只是改變了榨取的形式。</p>
+    <div class="investor"><span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>奴隸貿易的長影,至今仍清晰可見。被強行運走的一千多萬人,在美洲繁衍出今日遍佈加勒比海、巴西、美國的非洲離散族裔(African diaspora);他們的後代塑造了現代世界的音樂、宗教、語言與文化,卻也世代承受著奴隸制遺留的種族不平等——美國的種族問題、巴西的社會階層,都與這段歷史密不可分。</p>
+      <p>在學術與政治層面,蓋亞那史學家華特·羅德尼(Walter Rodney)那部影響深遠的《歐洲如何使非洲低度發展》提出了一個至今仍被激烈辯論的論點:非洲今日的貧困並非「天生落後」,而是被奴隸貿易與殖民體系系統性地抽乾財富、扭曲發展的結果。這個「低度發展」(underdevelopment)的框架,深刻影響了非洲與離散族裔的自我理解。</p>
+      <p>而最具當下性的,是賠償(reparations)議題。加勒比共同體已正式向歐洲前殖民與蓄奴國家提出賠償訴求;非洲聯盟也將奴隸貿易與殖民賠償列為議程,二〇二五年更以「賠償正義」為其年度主題之一。歐洲若干國家、教會與大學近年陸續為其在奴隸貿易中的角色道歉或設立基金。這場關於歷史責任與補償的辯論遠未結束——它證明,四個世紀前在海岸堡壘裡敲定的那些交易,其帳目至今仍未結清。</p></div>
+    <p>奴隸貿易的長影沿著海岸蔓延了四百年。但真正讓整片大陸在短短二十餘年間被瓜分殆盡的,是另一股力量的匯聚——工業文明的胃口、列強的傾軋,以及一場在歐洲心臟召開、卻無一個非洲人在場的會議。</p>
+  </div>
+</section>
+<div class="interlude reveal"><div class="mark">◆ ✦ ◆</div><p>蒸汽機轟鳴,工廠日夜不息,歐洲的胃口前所未有地龐大。它需要原料,需要市場,需要榮耀。地圖上那片米黃,忽然成了列強眼中最後一塊尚待瓜分的肥肉。<br><span class="hl">於是,他們圍坐到了柏林的長桌前。</span></p></div>
+<section id="ch2" class="act reveal">
+  <div class="act-head"><span class="act-num">第二章 · The Scramble &amp; Berlin 1884</span>
+    <h2 class="act-title">瓜分與柏林會議</h2><p class="act-sub">Carving a Continent at a Conference Table</p>
+    <div class="ornament">◆ ✦ ◆</div></div>
+  <div class="prose">
+    <p>一八七〇年代,歐洲列強在非洲的存在,大多仍侷限於海岸的零星據點與少數內陸滲透。但在短短二三十年間,幾乎整片大陸被歐洲強權瓜分殆盡——這場急速的爭奪,史稱「瓜分非洲」(the Scramble for Africa)。到二十世紀初,除了衣索比亞與賴比瑞亞,整個非洲都被插上了歐洲的旗幟。是什麼力量,讓這場瓜分以如此驚人的速度發生?</p>
+    <h3>飢渴的工業</h3>
+    <p>第一股動力來自工業革命本身。歐洲的工廠對原料的需求永無饜足:紡織業要棉花,新興產業要橡膠(自行車與汽車輪胎的興起使橡膠價格飆升)、要棕櫚油(用於潤滑與肥皂)、要銅與錫。同時,大量生產的工業製品也急需新的市場傾銷。在這種「新帝國主義」(New Imperialism)的邏輯下,殖民地不再只是貿易據點,而被視為宗主國經濟體系的延伸——原料的產地、商品的市場、資本的去處。</p>
+    <p>第二股動力是國族威望與列強競爭。十九世紀後期,新統一的德國與義大利急欲躋身強權之列,殖民地被當成大國地位的勳章。英法的長期競爭、德國的後來居上,使得「別人佔了,我們就不能落後」的心態瀰漫。殖民擴張因此帶上了濃厚的民族主義色彩——海外的每一面國旗,都被視為民族榮耀的延伸。在這股競爭中,還潛藏著一個野心勃勃的個人:比利時國王利奧波德二世(Leopold II),他覬覦廣袤的剛果盆地,意圖將其化為自己的私產。</p>
+    <div class="pull"><p>殖民地不再只是貿易據點,而成了大國地位的勳章——海外的每一面國旗,都被當成民族榮耀的延伸。</p></div>
+    <h3>讓征服成為可能的技術</h3>
+    <p>胃口與野心若無實現的手段,終究只是空想。十九世紀的一連串技術突破,徹底改變了歐洲與非洲之間的力量對比。</p>
+    <p>其中最關鍵的,或許是奎寧(quinine)。長久以來,瘧疾是阻擋歐洲人深入非洲內陸的致命屏障,西非沿岸甚至有「白人的墳墓」之稱。當金雞納樹皮提煉的奎寧被系統性地用作抗瘧藥物後,歐洲人的內陸死亡率大幅下降,深入探勘與駐紮終於可行。其次是武器的代差:後膛步槍,尤其是一八八〇年代日趨成熟的馬克沁(Maxim)機槍,賦予歐洲軍隊壓倒性的火力。汽船讓歐洲人得以溯尼羅河、剛果河、尼日河而上,深入過去無法抵達的腹地。電報則使遠在歐洲的政府能與前線即時聯絡,協調行動。鐵路隨後鋪設,把內陸的原料快速運往海港。技術的天平,徹底傾向了入侵者一方。</p>
+    <h3>探險家:帝國的前鋒</h3>
+    <p>在政治瓜分之前,先有探險家為歐洲「描繪」了內陸。傳教士兼探險家李文斯頓(David Livingstone)深入中南部非洲,以反奴隸與傳教之名探勘河流湖泊,在歐洲贏得聖徒般的聲望;當他久無音訊,記者史坦利(Henry Morton Stanley)受報社之託前往尋找,那句傳說中的招呼「李文斯頓博士,我想是吧?」轟動一時。史坦利後來橫越非洲、探明剛果河的全程,他的探勘報告與地圖,直接為利奧波德二世的剛果計畫提供了藍本。探險家筆下的「發現」,往往是當地人早已熟知的山川;但對歐洲而言,被測繪、被命名、被寫進報告的土地,才算是「可以佔領」的土地。</p>
+    <h3>條約的把戲:用一紙文書換走一個王國</h3>
+    <p>「有效佔領」的原則一旦確立,列強便派出大批代理人深入內陸,與非洲統治者簽訂五花八門的「保護條約」。這些條約往往以非洲君王看不懂的語言寫成,經由翻譯轉述;許多統治者以為自己簽下的只是一紙通商或友好協定,或是引入一個對抗鄰敵的盟友,殊不知文件的歐文版本,卻寫著他們已將主權、土地與資源「割讓」給某個歐洲公司或政府。史坦利在剛果一帶為利奧波德二世簽下的數百份此類「條約」,正是這套手法的代表。當非洲統治者察覺受騙、起而反抗時,迎接他們的,便是前一章那種懸殊的武力。征服,於是常常以一支筆開場,以一挺機槍收尾。</p>
+    <h3>柏林的長桌:一八八四至八五</h3>
+    <p>瓜分的速度與野心相互踩踏,列強之間摩擦漸增,衝突一觸即發。為了「和平地」分配這塊大陸,德國首相俾斯麥(Otto von Bismarck)於一八八四年底在柏林召集了一場國際會議,史稱柏林西非會議(Berlin Conference),會期延續至一八八五年初。約有十四個國家派代表出席——包括歐洲列強、鄂圖曼帝國與美國。會議的官方語言裡,充滿了「文明」「自由貿易」「終結奴隸制」「人道」等漂亮辭藻;與會者把瓜分包裝成一樁造福非洲、傳播文明的高尚事業,這套「文明使命」(mission civilisatrice)的修辭,成了整個殖民計畫的道德外衣。</p>
+    <p>這場會議最刺目的事實是:會議桌前,沒有一個非洲人。整片大陸的命運,由一群素未踏足當地、甚至連那些河流山脈都只在地圖上見過的歐洲外交官決定。會議確立的核心原則包括:列強若宣稱對某地享有主權,必須證明「有效佔領」(effective occupation)——即實際派駐行政與軍隊,而非僅僅插旗宣告,這一條等於鼓勵各國加緊向內陸實際進兵;剛果河與尼日河流域被宣布為「自由貿易區」;而最具諷刺意味的是,會議將廣袤的剛果盆地交給了利奧波德二世個人——名義上是一個促進自由貿易與文明、終結奴隸制的「剛果自由邦」(Congo Free State),實則淪為一個國王的私人榨取機器(其後果將在下一章揭曉)。</p>
+    <div class="pull"><p>整片大陸的命運,由一群從未踏足當地的歐洲外交官,在一張長桌前用經緯度劃定。</p></div>
+    <p>會議並未當場把非洲全部分割完畢,但它確立了瓜分的「遊戲規則」,為其後二十年列強的進兵、劃界與條約提供了框架。許多國界就此沿著經緯線、河流或地圖上的直線被劃下——全然不顧地面上實際的族群分布、語言界線與政治實體。一個民族可能被一刀劃成兩三國的人;世仇的兩群人可能被硬塞進同一條邊界之內。</p>
+    <h3>分贓:一張被瓜分的地圖</h3>
+    <p>柏林之後的二十年,非洲地圖以驚人的速度被填滿顏色。法國取得了西非與赤道非洲的廣大版圖,從地中海岸一路延伸至撒哈拉以南;英國則沿著「從開羅到開普敦」的縱貫構想,經營埃及、蘇丹、東非與南部非洲,並在西非佔據奈及利亞、黃金海岸等地。德國雖起步較晚,仍攫取了東非、西南非、喀麥隆與多哥;葡萄牙固守其古老的安哥拉與莫三比克;義大利染指利比亞與非洲之角;而比利時國王利奧波德二世,則獨佔了那塊面積遠超比利時本土數十倍的剛果。列強之間並非全無摩擦——例如英法在蘇丹的法紹達(Fashoda)險些開戰——但他們最終總能透過外交談判,在彼此之間分配戰利品,把衝突留在會議室,把代價留給非洲人。</p>
+    <p>就這樣,在不到一個世代的時間裡,一塊住著數億人口、擁有數千個政治實體的大陸,在地圖上被切割成寥寥數十塊殖民地,各自塗上歐洲宗主國的顏色。這是人類歷史上罕見的、如此大規模、如此迅速的領土再分配——而做出這一切決定的人,絕大多數從未踏上過那片土地。</p>
+    <div class="investor"><span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>柏林會議的遺產,沒有一樣比那些國界更直接、更持久地塑造著今日的非洲。當你攤開現代非洲地圖,那些異常筆直、彷彿用尺畫出的邊界線——撒哈拉一帶尤其明顯——正是當年歐洲人在地圖上劃下的痕跡。一九六〇年代非洲各國獨立時,新生國家幾乎全盤繼承了這些殖民邊界;非洲統一組織(後來的非洲聯盟)甚至刻意確立了「尊重既有邊界」的原則,因為重劃的代價太可怕。</p>
+      <p>但這些人為國界埋下的隱患從未消失:許多跨境而居的族群、被強行併入同一國的敵對群體,成為日後內戰、分離運動與族群衝突的結構性根源——從奈及利亞到剛果,從蘇丹的分裂到無數邊境糾紛,都能追溯到那張柏林長桌。</p>
+      <p>更深一層,柏林會議樹立了一個範本:外部強權替非洲決定命運,而非洲人自己缺席。這個範本在今天以新的形式重演——論者常以「新瓜分」(new scramble)形容當代各大國對非洲資源、市場與戰略據點的競逐:基礎建設貸款、礦產協議、軍事基地、外交拉攏。非洲領導人如今至少坐在了談判桌前,擁有了主權與選擇權,但「外部力量爭奪非洲」這一基本格局的延續,使柏林一八八四這個年份,在非洲的集體記憶中始終是一個關於「被決定」的沉重符號。</p></div>
+    <p>柏林的墨跡未乾,真正的征服才剛剛開始。地圖上的線條要化為地面上的統治,意味著戰爭、條約、欺騙與屠殺。而在所有殖民地中,有一塊地方的命運最為慘烈——那是被交到一個國王手中的剛果。但在那之前,讓我們先看看當槍聲響起時,非洲人如何回應:不是默默就範,而是以你或許從未聽聞的頑強,奮起抵抗。</p>
+  </div>
+</section>
+<div class="interlude reveal"><div class="mark">◆ ✦ ◆</div><p>地圖上的線條,要靠地面上的刺刀來兌現。歐洲人帶著馬克沁機槍走來,以為征服只是時間問題。但他們低估了一件事——這片土地上的人民,不會輕易交出自己的家園。<br><span class="hl">於是,抵抗的烽火燃起。</span></p></div>
+<section id="ch3" class="act reveal dark">
+  <div class="act-head"><span class="act-num">第三章 · Conquest &amp; Resistance</span>
+    <h2 class="act-title">征服與抵抗</h2><p class="act-sub">Maxims, Spears, and the Pride of Adwa</p>
+    <div class="ornament">◆ ✦ ◆</div></div>
+  <div class="prose">
+    <p>把柏林桌上的線條化為地面上的統治,靠的是槍砲。征服非洲的戰爭,常常呈現一種令人不忍的懸殊:一邊是裝備後膛步槍、火砲與機槍的歐洲縱隊,另一邊是手持長矛、舊式火繩槍或弓箭的非洲軍隊。詩人希萊爾·貝洛克曾以一句冷酷的詩道破當時的心態——大意是「無論發生什麼,我們有馬克沁機槍,他們沒有」。</p>
+    <p>這種火力的代差,在一八九八年蘇丹的恩圖曼(Omdurman)之役達到極致。英埃聯軍以機槍與火砲,對衝鋒而來的馬赫迪派戰士進行了大規模的單方面殺戮——當天倒下的非洲戰士數以萬計,英方傷亡卻極輕。那不是一場戰役,而是一場屠殺。年輕的邱吉爾當時在場,後來也對那景象的恐怖有所記述。恩圖曼成了工業化武器面對血肉之軀時,那道無法跨越的鴻溝的象徵。</p>
+    <div class="pull"><p>那不是一場戰役,而是一場屠殺——工業化的武器,對上血肉之軀。</p></div>
+    <p>然而,若征服的故事只剩下機槍與屍體,便抹去了這段歷史中最重要的一面:非洲人的抵抗。從西非到南部,從草原到雨林,非洲的君王、戰士與百姓以驚人的決心、智慧與犧牲,一次次抗拒外來的征服。他們未必能贏,但他們的抗爭證明了——這片大陸從不是溫順地交出自己。</p>
+    <p>火力的懸殊也不該被簡化為「先進對落後」。許多非洲軍隊並非不懂現代戰爭:他們設法購入步槍、研究戰術、利用地形與氣候,有的甚至能自製或修理武器。真正決定勝負的,往往是工業化國家在後勤、財政與武器產能上的整體優勢——歐洲能源源不絕地運來彈藥、補給與增援,而非洲政體一旦在初戰受挫,便難以持久。換言之,這不是文明程度的差距,而是一個剛剛經歷工業革命的世界,壓向一個尚未工業化的世界時,那種冷酷的物質落差。理解這一點,才能既不美化失敗,也不貶低抵抗者的智慧與勇氣。</p>
+    <h3>薩莫里·圖雷:西非的長期抗戰</h3>
+    <p>在西非,薩莫里·圖雷(Samori Touré)建立了瓦蘇盧(Wassoulou)帝國,以對抗法國的東進。他不是只會硬拚的莽夫:他建立了訓練有素的常備軍,設法取得並仿製現代步槍,甚至在自己的軍械工坊修造武器;當正面交鋒不利,他便採取焦土與機動戰術,且戰且退,讓法軍補給線拉長、疲於奔命。他的抵抗前後延續了將近十七年,直到一八九八年才被法軍俘獲、流放。薩莫里的長期抗戰,是非洲人運用戰略、外交與軍事創新對抗殖民的典範。</p>
+    <h3>祖魯:伊散德爾瓦納的震撼</h3>
+    <p>一八七九年,英國入侵南部非洲的祖魯王國。當年一月,在伊散德爾瓦納(Isandlwana),祖魯軍隊以其著名的「水牛角」包抄戰術與壓倒性的人數,殲滅了一支裝備精良的英軍主力——這是大英帝國在非洲遭遇的最慘重失敗之一,震動了整個英國。祖魯戰士主要靠的是短矛與決死的勇氣,卻擊潰了號稱無敵的紅衫軍。儘管英國隨後增兵反撲,並在同年的烏倫迪(Ulundi)之役擊敗祖魯、最終吞併其地,但伊散德爾瓦納永遠留在記憶中:它證明了非洲軍隊在戰術與意志上,完全有能力擊敗歐洲列強。</p>
+    <h3>阿散蒂:黃金與金凳的守護</h3>
+    <p>西非的阿散蒂王國與英國斷續交戰近百年,前後爆發數次盎格魯—阿散蒂戰爭。阿散蒂人為保衛其獨立與那象徵民族靈魂的「金凳」反覆抗爭。在最後階段,當英國總督傲慢地要求交出金凳坐上去時,激起了由王太后雅·阿桑特瓦(Yaa Asantewaa)領導的起義——一位年長女性挺身號召戰士,捍衛民族尊嚴的形象,至今仍是迦納人引以為傲的記憶。阿散蒂最終雖被併入英國殖民地,但金凳始終未落入英人之手。</p>
+    <h3>邁吉邁吉:聖水與信念</h3>
+    <p>在德屬東非(今坦尚尼亞一帶),一九〇五至〇七年爆發了規模浩大的邁吉邁吉起義(Maji Maji Rebellion)。殖民當局強制當地人種植棉花、繳納苛稅,激起廣泛憤怒。一位靈媒宣稱,以一種特製的「聖水」(斯瓦希里語 maji 即「水」)灑身,便能使德軍的子彈化為清水、無法傷人。這個信念跨越了原本彼此分立的眾多族群,把他們團結成一場空前的反殖大起義——這份跨族群的團結本身,就是非洲能動性的有力證明。然而面對機槍,聖水終究無法擋住子彈。德軍以殘酷的焦土政策鎮壓:燒毀村莊、摧毀田地,引發大饑荒。死於這場鎮壓與隨之而來的饑荒者,數以萬計乃至更多。邁吉邁吉的悲壯,是信念與火力之間最令人心碎的對照之一。</p>
+    <h3>赫雷羅與納馬:二十世紀的第一場種族滅絕</h3>
+    <p>而在德屬西南非(今納米比亞),發生了這場大瓜分中最黑暗的暴行之一。一九〇四年,赫雷羅人(Herero)因不堪殖民掠奪土地與牲畜而起義,納馬人(Nama)隨後加入。德國指揮官馮·特羅塔(Lothar von Trotha)發出了惡名昭彰的「滅絕令」(Vernichtungsbefehl),明令將赫雷羅人逐入沙漠、封鎖水源,任其渴死;倖存者被關進集中營,在強制勞動、飢餓與疾病中大批死去。據估計,絕大多數的赫雷羅人與相當比例的納馬人因此喪生。這場一九〇四至〇八年間的浩劫,如今被廣泛認定為二十世紀的第一場種族滅絕。它以最沉痛的方式提醒世人:殖民征服的邏輯,可以走到何等滅絕人性的地步。</p>
+    <div class="pull"><p>聖水終究擋不住子彈;但邁吉邁吉跨越族群的團結,本身就是一種無法被機槍消滅的證明。</p></div>
+    <h3>阿杜瓦:衣索比亞的勝利</h3>
+    <p>然而在這片被征服的大陸上,有一個輝煌的例外,光芒至今不滅。一八九六年,義大利大舉入侵衣索比亞,意圖將其納為殖民地。皇帝孟尼利克二世(Menelik II)早已洞察列強的野心,多年來巧妙地透過外交與貿易,從不同歐洲國家購入現代武器、整軍經武。在阿杜瓦(Adwa),孟尼利克集結了一支規模龐大、裝備不俗且士氣高昂的大軍,與皇后泰圖等將領協同作戰,以絕對優勢的兵力與周密的戰術,徹底擊潰了輕敵冒進的義大利軍隊。這是一場決定性的勝利:義大利被迫承認衣索比亞的完全獨立。</p>
+    <p>阿杜瓦之役因此成為整個瓜分時代最重大的例外——一個非洲國家以堂堂正正的會戰,擊敗了一個歐洲列強,並守住了自己的主權。衣索比亞由此成為(連同特殊歷史背景的賴比瑞亞)非洲僅有的、未被長期殖民征服的古國。</p>
+    <h3>抵抗的千百種面貌</h3>
+    <p>除了戰場上的正面交鋒,非洲人的抵抗還有許多不那麼顯眼、卻同樣堅韌的形式。蘇丹的馬赫迪運動以宗教號召,建立起一個對抗英埃統治的伊斯蘭政權,延續多年;東非的內陸社群以游擊、設伏與堅壁清野拖延殖民軍的推進;面對強徵勞役與苛稅,村莊以怠工、隱匿收成、集體遷徙乃至遠走他鄉的方式消極抵抗。當武力抵抗被鎮壓之後,抗爭並未終止,而是轉入新的形態:受過教會學校教育的非洲菁英,開始以歐洲人自己的語言、法律與報刊,質問殖民統治的正當性;非洲獨立教會紛紛興起,在信仰領域擺脫白人傳教士的控制。這些都是日後二十世紀民族主義與獨立運動的種子。</p>
+    <p>同樣不該被遺忘的,是女性在抵抗中的角色。雅·阿桑特瓦在阿散蒂號召起義只是其中之一;在許多社會,婦女以集體行動抗議殖民當局的徵稅與羞辱,展現出不亞於男性的政治勇氣。抵抗,從來不只是國王與戰士的事,而是整個社會的事——這也正是它無法被徹底撲滅的原因。</p>
+    <div class="investor"><span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>殖民者書寫的歷史,長期把這段往事敘述成一場順理成章的「征服」,彷彿非洲只是被動地被收編。但真相是:每一寸土地的易手,幾乎都伴隨著抵抗、條約、欺騙與流血。當代非洲史學的一大工程,正是把這些被抹去的抵抗重新寫回——薩莫里、雅·阿桑特瓦、邁吉邁吉的戰士,都從「叛亂者」被重新理解為民族英雄,他們的名字進入了教科書、紀念碑與街道。</p>
+      <p>赫雷羅與納馬種族滅絕的回聲尤為當下:經過後代長達一世紀的抗爭,德國終於在近年正式承認那是一場種族滅絕,並承諾提供發展援助——儘管賠償的形式與是否充分,納米比亞與赫雷羅、納馬社群仍在持續爭取,這場關於認錯與補償的角力至今未息,是殖民罪責清算的標誌性案例。</p>
+      <p>而阿杜瓦,則升華為超越衣索比亞的象徵。它向全非洲乃至整個非洲離散世界證明:歐洲並非不可戰勝。在二十世紀的反殖民與泛非主義運動中,衣索比亞與阿杜瓦一再被援引為非洲尊嚴與自主的旗幟;當一九三〇年代義大利再度入侵時,全球黑人世界的聲援空前高漲。今天,阿杜瓦戰役的紀念日仍是衣索比亞的重要節日,而衣索比亞作為唯一未被長期殖民的古國、非洲聯盟總部的所在地,持續扮演著非洲精神象徵的角色。抵抗,從來不是徒勞——它鍛造了一個大陸日後爭取自由的記憶與底氣。</p></div>
+    <p>抵抗的烽火終究被優勢火力一一撲滅,殖民統治的羅網漸漸籠罩全洲。但在所有殖民地中,有一塊土地的遭遇之慘,連當時的歐洲輿論都為之震動——那是被柏林會議交到一個國王私人手中的剛果。在那裡,「文明使命」的面具之下,是一場以橡膠與斷手為記號的恐怖。</p>
+  </div>
+</section>
+<div class="interlude reveal"><div class="mark">◆ ✦ ◆</div><p>地圖上,剛果盆地被塗上一個人的顏色——比利時國王利奧波德二世。他從未踏足那片土地,卻將它變成自己的私產。在「自由邦」與「文明」的名義下,一場以橡膠為名的浩劫,正在赤道的雨林深處悄然展開。<br><span class="hl">於是,我們走進剛果的恐怖。</span></p></div>
+
+<section id="ch4" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Congo Horror</span>
+    <h2 class="act-title">剛果的恐怖</h2>
+    <p class="act-sub">A King's Private Estate and the Price of Rubber</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>在帝國主義瓜分非洲的所有篇章裡，沒有哪一頁比剛果更黑暗。它的特殊之處不在於暴行的「程度」——殖民暴力在非洲各地都觸目驚心——而在於它的「形式」：一整片相當於西歐面積的廣袤土地，一條僅次於亞馬遜的世界第二大河流域，在大約二十三年的時間裡，竟然不屬於任何國家，而是屬於一個人。它是比利時國王利奧波德二世（Leopold II）的私人地產。</p>
+    <p>這件事荒誕到後世幾乎難以置信，卻是白紙黑字寫在外交文書上的事實。1885 年柏林會議的尾聲，列強承認了一個名為「剛果自由邦」（Congo Free State，法語 État indépendant du Congo）的政治實體。「自由」與「獨立」這兩個詞，是人類語言被濫用的極致案例之一——這片土地對它的住民而言既不自由，對任何議會或政府也不負責，它的「主權」歸於利奧波德個人，與比利時這個立憲王國在法律上完全分離。利奧波德不是以「比利時國王」的身分擁有剛果，而是以「利奧波德這個人」的身分擁有它。他從未踏上過剛果的土地一步。</p>
+
+    <h3>一位「慈善家」的精心包裝</h3>
+    <p>利奧波德二世是十九世紀最善於操弄輿論的統治者之一。比利時是個小國，沒有海外帝國，這令這位野心勃勃的君主深感屈辱。他曾露骨地對親信說，必須為比利時「奪得一塊這偉大非洲蛋糕的份額」。但他知道，赤裸裸的征服無法說服歐洲的道德輿論，於是他披上了當時最體面的外衣——人道主義與反奴隸貿易。</p>
+    <p>1876 年，他在布魯塞爾召開「地理會議」，成立了名稱冠冕堂皇的「國際非洲協會」，宣稱目標是打開非洲內陸、傳播文明、終結阿拉伯-斯瓦希里奴隸販子在中非的劫掠。他雇用了當時最有名的探險家亨利·莫頓·史坦利（Henry Morton Stanley），在 1879 至 1884 年間沿剛果河上溯，與沿岸大量酋長簽訂條約。那些酋長多半不識字、不懂歐洲財產法的概念，在他們的理解裡或許只是締結友誼或通商之盟；在史坦利帶回的文件上，他們卻「讓渡」了土地與一切權利。靠著這疊條約與柏林會議桌上的縱橫捭闔，利奧波德把一個慈善幌子兌換成了人類史上規模最大的私人領地。</p>
+    <div class="pull"><p>它名叫「自由邦」。對住在那裡的兩千萬人而言，這是語言所能承載的最大謊言。</p></div>
+
+    <h3>橡膠：把人變成榨取機器</h3>
+    <p>起初，象牙是這片領地的主要財富。但 1890 年代，一場技術革命在地球另一端改變了剛果的命運：充氣輪胎問世，自行車與隨後的汽車工業使全世界對橡膠的需求暴漲。剛果的雨林裡遍生野生橡膠藤，而採集橡膠不需要種植園，只需要——人手。於是整個自由邦被改造成一台龐大的橡膠榨取機器，而齒輪是當地的非洲人。</p>
+    <p>制度的核心是「配額」。每個村莊、每個成年男子被攤派必須上繳的橡膠量，份額被刻意定得高到近乎不可能完成。橡膠藤要在深林中尋找，藤液乾涸後人們不得不愈走愈遠；採集者常把橡膠塗在身上待其凝固，再撕下來——連皮帶肉。完不成配額的懲罰是系統性的暴力：鞭打用的是河馬皮製成的「chicotte」鞭，抽在裸露的皮膚上能見骨；村莊被焚燒；最令人髮指的，是「人質制度」——武裝的私營公司民兵與「公安軍」（Force Publique）扣押村裡的婦女與兒童，把她們關進營地，逼迫男人交出橡膠才放人，許多人質在等待中死於飢餓與疾病。</p>
+
+    <h3>被砍下的手</h3>
+    <p>在所有剛果暴行的符號裡，最為世人記憶的是「被砍下的手」。「公安軍」的歐洲軍官懷疑士兵把發給他們鎮壓用的子彈偷偷拿去打獵或私藏，於是要求士兵每用掉一發子彈，就必須帶回一隻被砍下的右手作為「沒有浪費彈藥」的證明。這套變態的會計制度產生了恐怖的連鎖效應：當士兵真的把子彈拿去打獵時，為了湊足「手」的數目，他們便砍下活人——包括兒童——的手來交差。砍下的手被燻製、計數、上繳。傳教士的照片裡，有非洲父親茫然望著面前一隻屬於自己幼女的小手，這些影像後來震動了整個歐洲。</p>
+    <div class="pull"><p>子彈要記帳，於是手成了帳目。一套會計制度，竟以人的肢體為單位結算。</p></div>
+
+    <h3>一場人口浩劫</h3>
+    <p>沒有人為剛果自由邦的死者做過普查，因此確切數字永遠無法得知。但綜合人口學者的推算，從 1885 到 1908 這二十多年間，剛果的人口可能減少了數百萬之譜——許多研究估計約為一千萬，相當於當時人口的一半，儘管具體數字學界仍有爭議。死亡並非全部來自直接屠殺，更多來自暴力衍生的連鎖災難：強迫勞動使農田荒廢導致飢荒、人口被驅趕逃散、營養崩潰使天花與昏睡病等疾病肆虐、出生率因社會解體而暴跌。這是一場由榨取制度催生的人口浩劫，其慘烈程度使它在二十世紀的暴行史上占有沉重的一席。</p>
+    <p>必須強調：剛果人並非沉默的羔羊。各地爆發過無數反抗——村莊集體逃入森林、拒絕採膠、襲擊哨站；1895 年甚至發生「公安軍」非洲士兵的兵變。這些抵抗大多被殘酷鎮壓，但它們證明剛果人從未默許自己的處境。能動性在最黑暗的角落依然燃燒。</p>
+
+    <h3>一台無人負責的機器</h3>
+    <p>剛果恐怖最令人不寒而慄之處，在於它並非某個瘋子一時的暴虐，而是一套被精心設計、層層轉包、責任四散的「制度」。利奧波德把廣大的領地切割成特許區，租給少數私營橡膠公司——例如 ABIR 與 Anversoise——這些公司被授予在自己區內近乎主權的權力：徵稅、武裝民兵、執法。公司的唯一目標是利潤，而利潤直接與橡膠產量掛鉤。從布魯塞爾的國王，到特許公司的董事，到區內的歐洲代理人，再到手持河馬皮鞭的非洲哨兵，每一層都把暴力的執行往下推、把利潤往上送。沒有人覺得自己該為那一隻隻被砍下的手負責——國王說那是公司的事，公司說那是代理人的失職，代理人說那是士兵不受控。這種「責任的稀釋」，正是現代官僚化暴力最陰森的特徵：當一台機器被設計成讓每個齒輪都覺得自己只是奉命行事時，最龐大的罪行也可以在無人承擔罪責的情況下發生。</p>
+    <div class="pull"><p>沒有一個人覺得自己該負責，於是所有人一起完成了那場浩劫。這正是制度化暴行最深的恐怖。</p></div>
+
+    <h3>良知的覺醒：見證、報告與一場現代人權運動</h3>
+    <p>謊言終究瞞不住。最早把真相帶向世界的，是一群傳教士、商人與外交官。1903 年，英國政府委派駐剛果領事羅傑·凱斯門特（Roger Casement）深入內地調查。他溯河而上，逐村訪談，親眼記錄下殘肢、空蕩的村落與倖存者的證詞。1904 年發表的《凱斯門特報告》以冷靜詳實的官方筆觸描述了系統性暴行，成為無可辯駁的鐵證。</p>
+    <p>真正把這份證據轉化為運動的，是一位英國航運公司職員艾德蒙·德內·莫雷爾（E. D. Morel）。他在分析貿易帳目時發現一個矛盾：大量的橡膠與象牙從剛果運出，運回去的卻幾乎只有槍枝、彈藥與鎖鏈——沒有正常貿易應有的對等商品。他由此推斷：這不是貿易，這是強取豪奪，只有奴役才能解釋這樣的帳目。莫雷爾辭去工作，全心投入揭露，1904 年成立「剛果改革協會」（Congo Reform Association）。他發行刊物、巡迴演講、串連教會與議員、在英美兩國組織群眾集會，並善用傳教士拍下的殘肢照片這種前所未有的視覺證據。這場運動被許多歷史學者視為最早的現代國際人權運動之一——它跨越國界，動員公眾良知，用事實與影像向一個君主問責。</p>
+    <div class="pull"><p>帳本上只進不出的槍與鎖鏈，向莫雷爾洩漏了整個體制的祕密：這不是貿易，是劫掠。</p></div>
+    <p>文學也加入了見證的行列。約瑟夫·康拉德（Joseph Conrad）曾於 1890 年親赴剛果河擔任汽船船長，那段經歷化為 1899 年的中篇小說《黑暗之心》（Heart of Darkness）。小說裡那位墮入瘋狂、臨終呢喃「恐怖啊，恐怖」（The horror! The horror!）的庫爾茲，正是榨取制度如何腐蝕人性的隱喻。儘管後世對這部作品如何呈現非洲人有深刻的批評，它仍把剛果的黑暗烙進了西方的集體想像。</p>
+
+    <h3>1908：移交比利時</h3>
+    <p>在持續的國際壓力、議會質詢與輿論譴責之下，利奧波德二世終於被迫放手。1908 年，比利時議會通過法案，將剛果自由邦從國王個人手中接收為國家殖民地，更名為「比屬剛果」（Belgian Congo）。利奧波德在交出之前焚毀了大量檔案，企圖湮滅證據，他說那是「我的剛果，與任何人無關」。改為國家治理後，最極端的橡膠恐怖逐漸消退，但這片土地的命運並未從此光明——強迫勞動、礦業榨取與種族隔閡的殖民結構，又延續了半個世紀，直到 1960 年。</p>
+
+    <div class="investor"><span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>剛果自由邦樹立了一個陰森的範本：把一整片土地與人民化約為原物料的供給端，榨取其財富而對其福祉毫不負責。這個「資源極度豐富、人民極度貧窮」的悖論，至今仍緊緊定義著今天的剛果民主共和國。它擁有全球規模最大的鈷礦藏與大量的鈳鉭鐵礦（coltan，提煉鉭的礦石）——這些是智慧型手機、電動車電池與筆記型電腦不可或缺的金屬。然而開採這些「未來礦物」的，許多仍是手工挖礦的礦工，包括兒童，在缺乏保障的礦坑中以血汗換取微薄報酬，財富的大部分流向遠方的跨國供應鏈。一百多年過去，採集的對象從橡膠藤換成了鈷與鉭，但「世界渴求剛果的資源、剛果人卻幾乎分不到果實」的結構性悖論，仍是這片土地揮之不去的歷史回聲。</p>
+    </div>
+  </div>
+</section>
+<div class="interlude reveal"><div class="mark">◆ ✦ ◆</div><p>剛果的恐怖是榨取邏輯推到極致的樣貌。但帝國並非處處如此赤裸——在更廣大的非洲，列強發展出更精細、更「文明」的<span class="hl">統治體系</span>，用酋長、稅捐與分類學，把征服轉化為日常的秩序。</p></div>
+<section id="ch5" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · Systems of Rule</span>
+    <h2 class="act-title">統治的體系</h2>
+    <p class="act-sub">Indirect Rule, Assimilation, and the Invention of the Tribe</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>瓜分非洲只是把地圖上的線畫定，真正困難的事接踵而至：歐洲列強憑著少得驚人的人力與財力，要如何「治理」這片廣袤的大陸？答案不是靠軍隊——軍隊太貴、太少；答案是靠「制度」。十九世紀末到二十世紀初，殖民列強各自摸索出一整套統治的技術與哲學，這些體系如何運作，深刻地塑造了非洲的政治、經濟與社會結構，其影響一直延續到今天。</p>
+
+    <h3>英國的「間接統治」</h3>
+    <p>英國治理非洲的核心理念，被概括為「間接統治」（Indirect Rule）。它的理論奠基者是弗雷德里克·盧加德（Frederick Lugard），他在 1922 年出版的《英屬熱帶非洲的雙重委任》（The Dual Mandate in British Tropical Africa）成為這套思想的經典文本。盧加德曾任奈及利亞北部與後來全境的最高統治者，他的方法在奈及利亞北部的索科托哈里發轄區得到最完整的實踐。</p>
+    <p>間接統治的邏輯是：英國人不直接治理千百萬非洲人，而是「透過」既有的本地統治者——埃米爾、酋長、王——來治理。這些傳統權威保留其位置與部分權力，負責徵稅、維持秩序、執行習慣法，而英國則在其上派駐少數「常駐專員」與「地區官」加以監督與指揮。盧加德把這包裝成「雙重委任」：殖民母國既為自身利益開發資源，也對「未開化」民族負有監護與提升的責任。這套說法既節省成本，又能宣稱尊重本地傳統。</p>
+    <p>但間接統治的「尊重傳統」往往是虛構的。在許多沒有集權王權的社會裡——例如東奈及利亞較為分散、由長老會議與年齡組決策的伊博人社會——英國找不到符合他們想像的「酋長」，於是乾脆指派一些人當「特任酋長」（warrant chiefs）。這些憑英國一紙委任狀上台的人，在自己社群裡毫無正當性，卻被賦予徵稅、審判的大權，往往淪為貪腐與壓迫的工具。1929 年東奈及利亞爆發的「阿巴婦女戰爭」（Aba Women's War），正是伊博與伊比比奧婦女對特任酋長制與傳聞中要對婦女課稅的大規模抗議——這是非洲女性集體政治能動性的鮮明例證。</p>
+    <div class="pull"><p>間接統治宣稱尊重傳統，卻常常先發明一個「傳統」，再要求人們服從它。</p></div>
+
+    <h3>法國的「同化」與「聯繫」</h3>
+    <p>海峽對岸的法國走了一條相反的路。法蘭西帝國的官方意識形態是「同化」（assimilation）：理論上，殖民地不是異域，而是「海外的法蘭西」；非洲人若接受法語教育、皈依法國文化、達到一定文明標準，理論上便能成為「法國人」。法國的統治因此是「直接」而高度中央集權的——權力由巴黎下達，透過層層任命的法籍官員直接統治，本地酋長的角色被大幅削弱，淪為執行命令的下級辦事員。</p>
+    <p>支撐這一切的修辭，是「教化使命」（mission civilisatrice）——法國自詡肩負把文明之光帶給「落後」民族的神聖任務。在這套邏輯裡，少數受過法式教育、能流利使用法語的非洲菁英被稱為「évolués」（意為「已進化者」），他們被視為同化成功的樣板，理論上可晉升、可獲公民權。但現實是，這扇門極其狹窄：絕大多數非洲人始終是沒有公民權的「臣民」（sujets），受制於專為他們設計的歧視性《原住民法》（Code de l'indigénat），可被行政官員不經審判即施以拘禁與強迫勞動。同化的承諾，對絕大多數人而言只是一張永遠兌現不了的支票。後來法國也在實踐中轉向更務實的「聯繫」（association）策略，承認文化差異、不再強求全盤同化，但中央集權的直接統治骨架始終未變。</p>
+
+    <h3>葡萄牙與比利時的家長式統治</h3>
+    <p>葡萄牙與比利時則代表了另一種極端——赤裸而僵硬的家長式統治（paternalism）。葡萄牙在安哥拉與莫三比克的統治以強迫勞動（chibalo）惡名昭著，並維持著一套近乎卡夫卡式的「同化民」（assimilado）制度：理論上非洲人可透過考核成為享有部分權利的「同化民」，但門檻苛刻、名額稀少，獲得身分者寥寥無幾。比屬剛果則被學者稱為「家長式殖民主義」的典型——殖民政府、天主教會與大企業（採礦的 Union Minière 等）形成「三位一體」，把非洲人當作需要被嚴格管教的「孩子」：給予基礎教育與基本醫療，卻系統性地阻斷高等教育與政治參與，唯恐培養出會挑戰秩序的菁英。這埋下了 1960 年剛果倉促獨立時本土專業人才極度匱乏的隱患。</p>
+
+    <h3>政治經濟：把人逼進貨幣與工資</h3>
+    <p>無論統治哲學如何不同，所有殖民體系都共享一個經濟目標：讓殖民地自給自足，並產出母國需要的原料。為此，他們必須改造非洲的經濟生活，把以自給農業為主的社會，拖進貨幣與工資的軌道。</p>
+    <p>第一個槓桿是「經濟作物」（cash crops）。殖民當局鼓勵甚至強制非洲農民種植供出口的單一作物——西非的可可與花生、烏干達的棉花、東非的咖啡與劍麻——而非糧食。這使非洲經濟綁死在世界市場的價格波動上，糧食安全被犧牲，土地與勞力被導向他人的需求。在更高壓的地方，強迫勞動更是公然的制度：人們被徵調去修鐵路、開礦、闢種植園，往往無償或近乎無償。</p>
+    <p>第二個、也是最巧妙陰狠的槓桿，是「稅」。許多非洲社會原本不使用歐洲式貨幣，自給自足，沒有出賣勞力的必要。殖民者於是發明了必須以現金繳納的「人頭稅」（poll tax）與「茅屋稅」（hut tax）——對每個成年男子或每一間屋子課稅。要繳這筆稅，非洲人就必須取得殖民貨幣；要取得貨幣，就必須去歐洲人的礦場、農場或工地出賣勞力，或種植可換現的經濟作物。稅，因此不只是財政工具，更是一套精心設計的「勞動力動員機器」：它不直接抓人去做工，而是製造一種非工作不可的處境，逼著人「自願」走進工資經濟。由此衍生出大規模的「外籍勞工」（migrant labour）制度——男人長年離鄉到礦區城市做工，家庭被拆散，鄉村只剩老弱婦孺，社會結構被深深扭曲。</p>
+    <div class="pull"><p>稅不是為了徵收金錢，而是為了製造一種「非工作不可」的處境。它把自由的農夫，悄悄變成了礦坑裡的工資勞動者。</p></div>
+
+    <h3>「部族」的發明</h3>
+    <p>殖民統治留給非洲最深遠、也最具破壞性的遺產之一，是身分的硬化——常被學者稱為「部族的發明」（the invention of tribalism）。在殖民之前，許多非洲社會的身分認同是流動、重疊且具彈性的：人們的歸屬隨語言、世系、居地、職業、宗教與政治效忠而變動，界線模糊，可以遷移、通婚、融合與重組。</p>
+    <p>但這種流動性對一個要靠分類來治理的官僚體系而言是噩夢。殖民行政官需要把人「歸檔」——你屬於哪一族？你的酋長是誰？你受哪一套習慣法管轄？為了治理的方便，他們把模糊流動的身分，硬生生切割、固定成一個個邊界清晰、彼此排他的「部族」（tribe）類別，登記在冊，寫進法律與行政地圖。間接統治更是雪上加霜：既然要「透過酋長治理」，就必須先界定「每個部族」與「其酋長」，這等於用行政權力把原本鬆散的群體焊死成固定的政治單位，甚至無中生有地創造出新的族群邊界。人類學者把這個過程稱為「傳統的發明」。</p>
+    <p>這套被製造出來的、僵化的族群分類，並非無害的學術標籤。它重新分配了資源與權力——某些「部族」被指定為合作對象而獲利，另一些被邊緣化；它教導人們以排他的族群框架理解政治。當這些被固化的身分在數十年後與後殖民的政治競爭、選舉動員結合，便可能成為衝突的引信。最慘痛的案例之一是盧安達：比利時殖民當局把胡圖（Hutu）與圖西（Tutsi）這原本可流動的社會階層，透過身分證上的族群登記等手段固化為涇渭分明的種族範疇，並長期偏袒一方——這套被殖民者鞏固的二元對立，是 1994 年種族滅絕悲劇背後一個沉重的歷史伏筆（儘管悲劇的爆發另有其複雜的近因，不能簡化為單一原因）。</p>
+
+    <h3>教會、學校與基督教：矛盾的角色</h3>
+    <p>傳教士是殖民事業中一支龐大而矛盾的力量。一方面，許多傳教士與殖民秩序緊密共生，教導順從、貶抑本土信仰與文化、為征服塗上「拯救靈魂」的正當性，是文化支配的一環。另一方面——而這是歷史最深刻的反諷——教會也成了非洲現代教育幾乎唯一的提供者。在殖民政府吝於辦學的年代，是教會學校教會了一代非洲人讀寫、外語、歷史與《聖經》。</p>
+    <p>而《聖經》是一把雙面刃。它講順服，但也講摩西帶領以色列人出埃及、脫離奴役；它講「在上帝面前人人平等」，這話聽在被當作次等臣民的人耳裡，便成了質疑殖民等級制的火種。教會學校的畢業生——識字、通曉殖民者語言、熟知其法律與道德修辭——日後恰恰成為民族主義運動的骨幹與領袖。殖民體系為了治理而培養的人才，最終轉身成為終結這個體系的人。許多獨立後的非洲開國領袖，正是教會學校的學生。</p>
+
+    <div class="investor"><span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>統治的體系在今天的非洲處處留下印記。間接統治的遺緒，體現在許多國家至今仍存在的傳統酋長制度——酋長在土地分配、地方司法與選舉動員中扮演實質角色，國家權力與傳統權威的關係始終是治理的核心課題。而「被發明的部族」更是一道難以癒合的傷口：殖民者為治理便利而固化的族群分類，在後殖民時代與政治權力、資源分配交纏，成為許多族群緊張與衝突的歷史根源之一——從奈及利亞的區域政治到大湖區的悲劇皆有其影子。理解今天非洲的「族群政治」，不能把族群衝突看作「古老的部族仇恨」這種懶惰的解釋；許多所謂「古老的」對立，其實是殖民分類學相當晚近的產物。看清這一點，正是還原非洲歷史複雜性、拒絕本質化敘事的關鍵。</p>
+    </div>
+  </div>
+</section>
+<div class="interlude reveal"><div class="mark">◆ ✦ ◆</div><p>間接統治與同化大體是「治理他人之地」的技術。但在非洲某些角落，歐洲人不只想統治——他們想<span class="hl">定居</span>、奪地、紮根，把非洲人的土地變成自己的家園。這便是移民殖民主義最尖銳的衝突。</p></div>
+<section id="ch6" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · Settler Colonialism</span>
+    <h2 class="act-title">移民殖民主義</h2>
+    <p class="act-sub">When Europeans Came to Stay — and to Take the Land</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>殖民主義有許多種面貌。在西非與中非的大部分地區，歐洲人來「統治」與「榨取」，卻很少打算長住——氣候、疾病與缺乏可耕的溫帶高地，使大規模白人移民難以立足。但在非洲的另一些角落——氣候宜人、土壤肥沃、礦藏豐厚之處——歐洲人來的目的不只是統治，而是「定居」（settle）。他們攜家帶眷而來，奪取土地，世代紮根，把非洲人的家園變成自己的家園。這就是「移民殖民主義」（settler colonialism）。它與單純的行政殖民有著本質的不同：它的核心邏輯不是利用本地勞動力，而是「取代」本地人對土地的占有。最深、最難解的傷口，往往就刻在這些土地上。</p>
+
+    <h3>南非：礦業革命鍛造的種族秩序</h3>
+    <p>移民殖民主義在非洲最劇烈、最具決定性的展開，發生在南非。轉折點是兩次驚天動地的礦藏發現。1867 年，在金伯利（Kimberley）附近發現了鑽石；1886 年，在維瓦特斯蘭（Witwatersrand，今約翰尼斯堡一帶）發現了當時世界上最大的金礦脈。這兩次發現，把南非從一個歐洲移民的農牧邊陲，瞬間引爆成全球資本與人潮湧入的工業淘金場，史稱「礦業革命」（Mineral Revolution）。它徹底改造了南非的經濟、政治與種族結構。</p>
+    <p>主導這場革命、也最能象徵帝國主義野心的人物，是塞西爾·羅德斯（Cecil Rhodes）。他在金伯利的鑽石田起家，透過無情的兼併與收購，於 1888 年創立 De Beers 聯合礦業公司，幾乎壟斷了全球鑽石產量。羅德斯不只是礦業鉅子，更是狂熱的帝國主義者，他公開宣稱英國人是「世界第一等的民族」，夢想著一條從開普到開羅、貫通整個非洲大陸的英國版圖。他後來出任開普殖民地總理，並以自己的名字命名了他攫取的領土——羅德西亞。</p>
+    <p>礦業需要海量的廉價勞動力，於是發展出移民殖民主義最具壓迫性的制度之一：「外籍勞工營房制」（migrant labour compound system）。非洲男性勞工被招募——或被前述的稅捐機制逼迫——離開家鄉，到礦區簽下定期合約，被關進與外界隔絕、戒備森嚴的單身營房（compounds），與家人長期分離，做著危險的地底工作，領取被刻意壓低的工資。這套制度把勞動力與其家庭、土地切割開來，使礦業公司能榨取最廉價的勞動而無須負擔工人的家庭再生產成本。它也成為日後種族隔離下勞動與居住空間隔離制度的雛形。</p>
+    <div class="pull"><p>鑽石與黃金不只埋在南非的地底，也埋進了它的政治結構——把廉價的非洲勞動力，鍛造成一套延續百年的種族秩序。</p></div>
+
+    <h3>布爾戰爭與聯邦的代價</h3>
+    <p>黃金的財富也點燃了白人之間的火併。維瓦特斯蘭金礦位於布爾人（Boers，荷蘭裔農民後裔）建立的德蘭士瓦共和國境內，覬覦金礦的英國與不願臣服的布爾人之間矛盾激化，終於在 1899 至 1902 年爆發了慘烈的「南非戰爭」（South African War），即第二次「布爾戰爭」。這是一場帝國史上代價高昂的戰爭：布爾游擊隊的頑抗，使英軍採取了焦土政策，並把布爾平民——婦女與兒童——關進「集中營」（concentration camps），數以萬計的人死於營中惡劣的衛生與飢餓。同時，大量非洲人也被捲入戰爭、被關進為他們另設的營地，他們的苦難長期被這場「白人之間的戰爭」的敘事所掩蓋。</p>
+    <p>英國最終獲勝。1910 年，原本分立的殖民地與前布爾共和國合併，成立「南非聯邦」（Union of South Africa），成為大英帝國內的自治領。但這場和解是白人之間的和解——它把政治權力鞏固在白人（英裔與布爾裔）手中，把占人口絕大多數的非洲人徹底排除於政治之外。聯邦的成立，不是解放的起點，而是制度化種族壓迫的起點。</p>
+
+    <h3>1913 年《原住民土地法》：種族隔離的地基</h3>
+    <p>南非聯邦成立僅僅三年後，1913 年通過了一部影響極其深遠的法律——《原住民土地法》（Natives Land Act）。這部法律以法律形式劃定：占人口多數的非洲人，只能在被指定的「保留地」（reserves）內擁有或購買土地，而這些保留地僅占全國土地面積的極小比例（最初約 7%，後來增至約 13%），其餘逾八成的土地則保留給少數白人。一夜之間，數百萬非洲人在自己祖輩生活的土地上，從佃農或地主淪為非法居留者，被驅離、被迫遷徙。</p>
+    <p>非洲人領袖索爾·普拉切（Sol Plaatje）在他記錄此事的著作裡留下了那句沉痛的觀察——這部法律生效之日，南非的原住民「發現自己在出生的土地上，幾乎成了一個流浪者」。1913 年《原住民土地法》被普遍視為日後「種族隔離」（apartheid）制度的法律地基：它確立了以種族劃分土地與空間的原則，這個原則在 1948 年國民黨上台後被推向系統化的極致，影響一直延續到今天南非極度不均的土地分配格局。</p>
+    <div class="pull"><p>1913 年的一紙法律，把多數人趕進了少數的土地。它畫下的那條線，南非用了一個世紀，至今仍未真正抹去。</p></div>
+
+    <h3>「通行證」與被管制的移動</h3>
+    <p>移民殖民主義不僅奪走土地，更要控制非洲人的身體與移動。為了確保礦業與農場永遠有廉價勞力、為了把非洲人限制在指定的居住與工作空間，南非很早就發展出惡名昭著的「通行證制度」（pass laws）。非洲人——尤其是非洲男性——被要求隨身攜帶官方文件，證明自己有權出現在某地、有合法的雇傭關係；沒有有效通行證而出現在「白人區域」者，可被逮捕、罰款或驅逐。這套制度把整個國家變成一張對非洲人而言處處設卡的網，他們的勞動被需要，他們的存在卻被視為應受管制的麻煩。通行證成為種族壓迫最日常、最貼身的象徵，也正因如此，它日後成為反種族隔離鬥爭最集中的怒火所向——1960 年沙佩維爾（Sharpeville）的抗議與屠殺，正是針對通行證法的示威。移民殖民主義從一開始，就把「誰能站在哪片土地上」這個問題，寫成了法律。</p>
+    <p>同時必須記得，南非的非洲人從未停止抵抗。從教會、工會到報刊，從法律請願到罷工，反抗以各種形式持續進行。他們不是被動承受歷史的客體，而是在最不利的制度下，反覆主張自身權利、組織自身力量的行動者——這份韌性，最終匯成了二十世紀後半葉撼動整個種族隔離體制的洪流。</p>
+
+    <h3>南羅德西亞：羅德斯公司的領地</h3>
+    <p>羅德斯的帝國野心向北延伸。他的「英國南非公司」（British South Africa Company, BSAC）——一家被英王特許、擁有準政府權力的特許公司——在 1890 年代向北推進，以武力與條約占領了今天辛巴威一帶的土地，並以羅德斯之名命名為「南羅德西亞」。BSAC 把最肥沃的高地分配給湧入的白人農場主，把當地的紹納人（Shona）與恩德貝勒人（Ndebele）趕入貧瘠的保留地。1896 至 1897 年，紹納人與恩德貝勒人發動了大規模反抗——當地稱為「第一次奇穆倫加」（First Chimurenga，意為「解放鬥爭」）——雖遭鎮壓，卻成為日後民族解放運動反覆援引的精神源頭。白人少數對最佳農地的長期壟斷，為這片土地埋下了一個世紀的土地仇怨。</p>
+
+    <h3>肯亞：白人高地與基庫尤人的失土</h3>
+    <p>在東非，類似的劇本在肯亞上演。肯亞中部地勢高、氣候涼爽、土壤肥沃，正適合歐洲人定居與農耕，殖民當局把這片區域劃為「白人高地」（White Highlands），保留給歐洲移民開設咖啡與其他經濟作物的莊園。而這片高地，正是基庫尤人（Kikuyu）世代耕作的家園。基庫尤人被大量逐出祖傳土地，淪為在白人莊園裡做工的「占地佃農」（squatters）或低薪勞工，土地的喪失成為深刻的集體創傷。這份積壓數十年的失土之痛與屈辱，在 1950 年代爆發為激烈的「茅茅起義」（Mau Mau Uprising）——一場主要由基庫尤人發動、被英國以極殘酷手段鎮壓的反殖民武裝鬥爭，它成為肯亞邁向獨立道路上血跡斑斑的一頁。</p>
+
+    <h3>阿爾及利亞：被當作「法國本土」的殖民地</h3>
+    <p>移民殖民主義最極端、最難切割的案例，或許是阿爾及利亞。法國自 1830 年起征服阿爾及利亞，並做出了一個與眾不同的決定：法律上，阿爾及利亞不被視為「殖民地」，而被併為法國「本土」的延伸，劃為法國的行政省份。大批歐洲移民——法國人，以及來自西班牙、義大利、馬爾他的移民——湧入定居，他們及其後代被稱為「pieds-noirs」（黑腳，這個帶有民間色彩的稱呼用以指阿爾及利亞的歐洲裔居民）。他們占據了沿海最肥沃的土地與葡萄園，掌握經濟與政治權力，而占人口絕大多數的阿爾及利亞穆斯林則被剝奪了平等的公民權利。</p>
+    <p>「阿爾及利亞是法國」——這個信念深植於 pieds-noirs 與法國右翼心中。正因為法國把阿爾及利亞當作自己身體的一部分而非可以放手的殖民地，當阿爾及利亞人在 1954 年掀起獨立戰爭時，這場戰爭才會異常漫長、殘酷而撕裂——它不僅重創了阿爾及利亞，也險些撕裂法國本身，最終在 1962 年以阿爾及利亞獨立、近百萬 pieds-noirs 倉皇逃回從未真正生活過的「祖國」而告終。移民殖民主義把奪地者也綁死在這片土地上，使分離的代價對雙方都格外慘烈。</p>
+
+    <div class="investor"><span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>移民殖民主義留下的核心遺產，是一個至今仍在燃燒的議題——「土地」。哪裡曾有大規模的白人奪地，哪裡的後殖民政治就被「土地問題」深深主宰。辛巴威在 2000 年前後推行的激進「快速土改」，強制徵收白人農場、釀成經濟動盪，正是對一個世紀前 BSAC 奪地的遲來而失序的清算。在南非，1913 年《原住民土地法》造成的土地極度不均至今未解，「土地改革」與「無償徵收」的辯論始終是政治最敏感的神經。在肯亞，殖民時代「白人高地」的土地分配遺緒，仍纏繞著當代的族群與政治矛盾。這些都提醒我們：殖民並非一段乾淨翻篇的過去，它的地契、它劃下的地界，仍實實在在地壓在今天千百萬人的腳下。土地，是帝國主義留給非洲最沉重、也最難和解的回聲。</p>
+    </div>
+  </div>
+</section>
+<div class="interlude reveal"><div class="mark">◆ ✦ ◆</div><p>奪地激起的憤怒不會永遠沉睡。在莊園、礦坑、教會學校與遙遠的戰場上，一種新的意識正在凝聚——非洲人開始想像一個沒有帝國的未來。<span class="hl">民族主義的種子</span>，已悄然落地生根。</p></div>
+<section id="ch7" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · Seeds of Nationalism</span>
+    <h2 class="act-title">民族主義的種子</h2>
+    <p class="act-sub">War, Pan-Africanism, and the Awakening</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>帝國以為自己鑄造了永恆的秩序。但在征服的每一道縫隙裡，在它自己設立的學校、它調動的軍隊、它輸出的理念之中，都悄悄埋下了將來推翻它的種子。二十世紀上半葉，非洲民族主義從一星星火苗，逐漸匯聚成燎原之勢。它的養分來自四面八方：兩次世界大戰的衝擊、跨越大洋的泛非思想、一場重估黑人尊嚴的文化運動，以及一群被殖民體系親手培養出來、卻轉而反對它的菁英。</p>
+
+    <h3>兩次世界大戰：為「自由」而戰的偽善</h3>
+    <p>沒有什麼比戰爭更能戳破帝國的謊言。兩次世界大戰，歐洲列強都把非洲拖入自己的廝殺，徵召了數以百萬計的非洲人——有的扛槍上前線，有的當挑夫、修路、運補給。在法屬非洲，「塞內加爾步兵」（Tirailleurs Sénégalais，這個名稱泛指法國招募的西非士兵）在歐洲的戰壕裡為法國流血犧牲；在英屬非洲，「國王非洲步槍隊」（King's African Rifles）的東非士兵被派往各地作戰。他們為一個高喊著「自由」「民主」「自決」口號的帝國而戰、而死。</p>
+    <p>而這正是激進化的引信。非洲士兵親眼看見：被神化的白人會在戰場上恐懼、會流血、會死亡，「白人不可戰勝」的神話就此破滅。他們在歐洲見識了更廣闊的世界，學會了組織與技術，並帶著一個尖銳的問題回到家鄉：我們為帝國的「自由」流了血，為什麼自己卻不配享有自由？這份巨大的偽善——帝國在歐洲為自由而戰，卻在非洲否認自由——成為一代退伍軍人心中無法平息的怒火，許多人退伍後直接投身民族主義運動。第二次世界大戰期間，盟國發布的《大西洋憲章》（Atlantic Charter, 1941）更公開宣示了「民族自決」的原則；邱吉爾本想把它限縮於歐洲，但非洲與亞洲的民族主義者立刻抓住這句話，反問：自決，難道不該也適用於我們嗎？</p>
+    <div class="pull"><p>他們為帝國的自由而死。歸來時，他們帶回一個再也壓不下去的問題：那我們的自由呢？</p></div>
+
+    <h3>泛非主義：跨越大洋的團結</h3>
+    <p>非洲覺醒的思想火種，很多並非源自非洲大陸內部，而是來自大西洋彼岸的非洲離散族裔（African diaspora）——加勒比海與美洲那些祖先被奴隸貿易擄走的黑人後代。這就是「泛非主義」（Pan-Africanism）：一種主張全世界黑人應團結一致、共享尊嚴與命運、共同對抗種族壓迫與殖民主義的思想與運動。</p>
+    <p>它的兩位巨人風格迥異。一位是美國學者、社會運動家杜波依斯（W. E. B. Du Bois），他學識淵博、思想深邃，自二十世紀初便組織一系列「泛非大會」（Pan-African Congresses），主張黑人的政治平等與漸進的非殖民化，被尊為泛非主義之父。另一位是來自牙買加、活躍於美國的馬科斯·加維（Marcus Garvey），他訴諸大眾情感，高舉「非洲屬於非洲人」（Africa for the Africans）的旗幟，發起聲勢浩大的「回歸非洲」黑人民族主義運動，喚起了千百萬普通黑人的種族自豪。儘管杜波依斯與加維彼此激烈論戰，但他們共同把「全球黑人團結」的觀念深深植入人心。</p>
+    <p>泛非運動的高潮，是 1945 年在英國舉行的「曼徹斯特泛非大會」（Fifth Pan-African Congress）。這次大會與以往不同——它的主角不再只是西方的黑人知識分子，而是來自非洲本土、即將回國領導獨立運動的年輕一代。在曼徹斯特的會場上，有日後成為迦納開國總統的夸梅·恩克魯瑪（Kwame Nkrumah）、有日後成為肯亞開國總統的喬莫·肯雅塔（Jomo Kenyatta）。這次大會不再只談「改善待遇」，而是明確要求「結束殖民統治」。它像一道分水嶺，標誌著泛非主義從離散族裔的訴求，轉化為非洲大陸切實的政治綱領。許多後來的獨立領袖，正是帶著曼徹斯特的決議回到自己的國家，著手點燃獨立的火炬。</p>
+    <div class="pull"><p>覺醒的火種跨過了大西洋——從被擄走者的後代，傳回了祖先的大陸。1945 年的曼徹斯特，理念終於握上了政治的韁繩。</p></div>
+
+    <h3>黑人性：重估黑人的尊嚴</h3>
+    <p>在法語世界，覺醒採取了一種更具文化與詩意的形式——「黑人性」運動（Négritude）。1930 年代，一群在巴黎求學的法語非洲與加勒比裔知識分子，對法國「同化」意識形態——那套要求黑人否定自身文化、變成「黑皮膚的法國人」才算文明的邏輯——發起了驕傲的反擊。其領軍人物，是來自塞內加爾、後來成為塞內加爾首任總統的詩人桑戈爾（Léopold Sédar Senghor），以及來自馬丁尼克的詩人塞澤爾（Aimé Césaire），正是塞澤爾鑄造了「négritude」這個詞。</p>
+    <p>「黑人性」的核心，是顛覆殖民者強加的價值等級：它宣告，黑人有自己豐厚而獨特的文化、美學、歷史與精神世界，這一切值得驕傲，而非羞恥。它把殖民者貶為「落後」「原始」的東西，重新詮釋為珍貴的文明遺產。這是一場心靈的去殖民化——它讓人們明白，征服不僅占領土地，也試圖殖民人的自我認知，而真正的解放，必須從重新肯定自身的尊嚴開始。「黑人性」為政治民族主義提供了不可或缺的文化與心理基礎。</p>
+
+    <h3>受教育的菁英與教會學校的畢業生</h3>
+    <p>領導獨立運動的，正是一個獨特的群體：受過西式教育的非洲菁英。他們大多出身教會學校，繼而負笈倫敦、巴黎、美國的大學。這是歷史最深刻的反諷——殖民體系為了治理而培養的識字者、律師、教師、記者與醫生，恰恰最能看穿殖民的虛偽：他們熟讀殖民者的法律、哲學與自由民主的修辭，於是能用殖民者自己的語言與理念，反過來要求殖民者兌現它口口聲聲的平等與自由。他們既深諳本土社會，又通曉帝國的話語，因而成為連接群眾與現代政治的橋樑。恩克魯瑪、肯雅塔、桑戈爾、奈及利亞的阿齊基韋（Nnamdi Azikiwe）——這一代開國者，無不是這條教育之路上走出來的人。</p>
+
+    <h3>早期組織：抗爭的雛形</h3>
+    <p>覺醒的意識需要組織的容器。早在二十世紀初，非洲各地就開始出現現代政治組織。其中最具歷史意義的，是 1912 年在南非成立的「南非原住民國民大會」——它後來改名為「非洲人國民大會」（African National Congress, ANC）。ANC 由一群受過教育的非洲菁英——律師、神職人員、知識分子——創立，最初以溫和的請願、陳情與法律途徑，爭取非洲人的權利、抗議 1913 年《原住民土地法》等不公。它的早期路線雖然溫和，卻是非洲大陸上最早、最持久的現代民族主義組織之一，在往後的漫長歲月裡演變為對抗種族隔離的中流砥柱，最終把納爾遜·曼德拉（Nelson Mandela）送上總統之位。類似的政治結社、工會與報刊，也在西非、東非各地萌芽，編織起日後獨立運動的組織網絡。</p>
+
+    <h3>戰後：時機成熟</h3>
+    <p>第二次世界大戰結束時，歷史的天平開始傾斜。歐洲列強——英國與法國——在戰爭中被嚴重削弱，財力、人力與道德威信都元氣大傷，已愈來愈難以維持龐大昂貴的殖民帝國。新成立的聯合國（United Nations）把「民族自決」寫進了國際話語，為被殖民者提供了一個申訴的舞台與一套正當性語言。亞洲的非殖民化浪潮——尤其 1947 年印度的獨立——更給了非洲人巨大的鼓舞：如果印度能掙脫大英帝國，非洲為何不能？外在環境的鬆動，與內部數十年積累的覺醒、組織與領袖，終於匯流到一起。時機，正在成熟。</p>
+
+    <h3>城市、報刊與工會：覺醒的土壤</h3>
+    <p>民族主義之所以能從少數菁英的理念，擴散為千百萬人的運動，靠的是殖民體系自身製造出的新社會空間。殖民經濟催生了城市——人們離開鄉村，到礦區、港口、行政中心謀生，在城市裡，原本分屬不同地域與族群的人們混居、共事、交談，新的集體認同與不滿在此交織發酵。城市也孕育了非洲人辦的報刊——這些報紙用本地讀者讀得懂的方式，批評殖民不公、報導抗爭、傳播泛非與自決的理念，成為塑造輿論的利器；阿齊基韋在西非辦報的事業，便是以報刊喚起民族意識的典範。</p>
+    <p>工會則是另一片關鍵的土壤。殖民經濟把大量非洲人變成礦工、鐵路工、碼頭工與工廠工人，共同的勞動處境與被壓低的工資，使他們學會以階級的方式團結。戰後一連串大規模罷工——例如橫貫西非鐵路的罷工——展現了非洲勞工驚人的組織力，也讓殖民當局第一次嘗到大眾動員的威力。許多工會領袖日後直接成為民族主義政黨的骨幹。城市、報刊與工會，這三股力量把抽象的「自決」理念，轉化成了街頭與工廠裡可動員、可組織的真實政治能量。</p>
+
+    <div class="investor"><span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>民族主義的種子結出的果實，遠不止於各國的獨立。泛非主義「全球黑人團結」的理想，直接化為今天的「非洲聯盟」（African Union）——這個由全非洲國家組成、致力於大陸整合與共同發聲的組織，其精神根源正可上溯到杜波依斯、加維與曼徹斯特大會的願景。「黑人性」運動對黑人尊嚴與文化的肯定，至今仍在全球的反種族主義、非裔離散族裔文化復興與身分認同論述中迴響。而那一代受教育菁英用殖民者自己的自由理念反制殖民的智慧，提醒著今天的我們：解放不僅是奪回土地，更是奪回定義自己的權利。當代非洲在國際舞台上日益強調「非洲人的能動性」、要求平等夥伴關係而非被施捨的援助，正是那顆百年前埋下的種子，在今日結出的、仍在生長的果實。</p>
+    </div>
+  </div>
+</section>
+<div class="interlude reveal"><div class="mark">◆ ✦ ◆</div><p>種子已經發芽，時機已經成熟。當英國首相在 1960 年的開普敦議會上說出那句著名的話，整個大陸都聽見了——一股<span class="hl">變革之風</span>，正吹過非洲。</p></div>
+
+<section id="ch8" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Wind of Change</span>
+    <h2 class="act-title">變革之風</h2>
+    <p class="act-sub">The Wind of Change</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>一九六〇年二月三日，英國首相哈羅德·麥米倫站在開普敦的南非國會大廳，面對一群多半神情僵硬的白人議員，說出了一句後來被反覆引用的話。「一陣變革之風，正吹遍這片大陸，」他說，「無論我們喜歡與否，這股民族意識的成長，都是一個政治事實。我們都必須接受它，並把它納入我們的政策考量。」這位來自前帝國中樞的保守黨領袖，在南非種族隔離政權的家門口，等於當著主人的面宣告：殖民的時代正在結束，連大英帝國也攔不住。台下一片尷尬的沉默。南非總理維沃爾德隨即起身反駁，堅持白人才是這片土地真正的「歐洲血統的非洲人」。但麥米倫沒有說錯。那一年，非洲將見證史上罕見的政治雪崩。</p>
+
+    <p>把時鐘往回撥三年，到一九五七年三月六日的迦納。午夜時分，在阿克拉的舊閱兵場上，英國的米字旗緩緩降下，一面紅金綠三色、中央嵌著黑色五角星的新國旗升起。一個高大、戴著囚徒帽（一頂他在獄中常戴的便帽）的男人站在群眾面前，聲音因激動而顫抖：「迦納的獨立，毫無意義，除非它與整個非洲大陸的徹底解放連結在一起。」他叫夸梅·恩克魯瑪。這一刻，撒哈拉以南非洲第一個掙脫殖民枷鎖的黑人國家誕生了。原本叫「黃金海岸」的英國殖民地，刻意改名為「迦納」——借用一個曾經輝煌的古代西非帝國之名，以此宣告：這片土地的偉大，不是從歐洲人到來才開始的。</p>
+
+    <p>恩克魯瑪並非天生的統治者。他出身西部一個金匠之家，當過小學教師，三十出頭遠赴美國，在賓州的林肯大學半工半讀，做過洗碗工、在魚市場扛過貨、在費城的街頭佈道。十年的海外歲月——美國、倫敦——讓他大量吸收了泛非主義、馬克思主義與民族解放的思想。他讀馬庫斯·加維，讀杜波依斯；他參與一九四五年在曼徹斯特召開的第五屆泛非大會。一九四七年回到黃金海岸時，他已經不是當年那個鄉下教師，而是一個帶著明確政治綱領的組織者。他打出的口號簡潔有力：「我們現在就要自治」（Self-Government Now）。他組建「人民大會黨」，發動罷工與「積極行動」的非暴力抗爭，因此入獄。可諷刺的是，他正是從監獄裡贏得了一九五一年的選舉——殖民當局只好把他放出來，請這位「囚犯」出任政府首腦。</p>
+
+    <h3>為什麼是這個時候</h3>
+
+    <p>去殖民的浪潮並非偶然在一九五〇年代末突然湧起，它的潮水早在二戰的硝煙中就開始積蓄。戰爭本身重創了歐洲列強的元氣與威望——當英法在歐洲戰場一度被德軍打得潰不成軍，當日本在亞洲輕易擊潰白人的殖民軍隊，那種「歐洲人天生優越、不可戰勝」的神話便出現了無法彌合的裂痕。數十萬非洲士兵被徵召，為宗主國的「自由」遠赴緬甸、北非與歐洲作戰，他們在槍林彈雨中流血，回鄉後卻發現自己依然是二等臣民——這份巨大的反差，點燃了戰後一整代退伍軍人的政治覺醒。一九四八年迦納阿克拉的退伍軍人遊行遭警方開槍、釀成傷亡，正是引爆當地民族主義的關鍵事件之一。</p>
+
+    <p>國際格局的劇變同樣推波助瀾。戰後崛起的兩個超級大國——美國與蘇聯——基於各自的理由（一個標榜民族自決與反帝，一個輸出反殖民革命）都不再支持歐洲維繫舊式殖民帝國；冷戰的競逐反而讓新興國家成了雙方爭取的對象。更近的示範來自亞洲：一九四七年印度的獨立，向全世界的被殖民者證明了一件事——龐大如英屬印度的殖民地，也能掙脫帝國的枷鎖；甘地的非暴力抗爭，更為各地的民族運動提供了可資借鏡的方法與精神力量。一九五五年，亞非新興國家在印尼萬隆召開會議，宣告「第三世界」的集體登場，反殖民成為一股跨洲際的時代潮流。當這些內外因素疊加在一起，殖民帝國的瓦解便從「是否」的問題，變成了「何時、如何」的問題。</p>
+
+    <h3>談判桌取代戰場</h3>
+
+    <p>迦納的獨立有一個關鍵特徵，足以為一整代英屬非洲殖民地的命運定調：它基本上是「談出來的」，而非「打出來的」。沒有大規模的武裝起義，沒有曠日持久的戰爭，而是一連串的選舉、憲政會議、權力下放與最終的政權移交。英國人並非突然良心發現。二戰耗盡了帝國的元氣，倫敦再也養不起遍布全球的殖民地駐軍；國際輿論、尤其是新興的兩個超級大國美國與蘇聯，都對歐洲的殖民帝國持批判態度；而本地的民族主義運動已經組織化、現代化，逼得殖民者不得不算一筆帳：是花大錢鎮壓划算，還是體面地交權、保住經濟與文化的影響力划算？在西非這些以可可、棕櫚油、礦產出口為主、白人移民稀少的殖民地，倫敦選擇了後者。</p>
+
+    <p>於是接下來的劇本一再重演。殖民當局先放寬選舉權，扶植一個「溫和」的本地政黨；民族主義者透過選舉取得立法機構多數；接著召開憲政會議，逐步讓本地人接管內政、財政、教育，最後是國防與外交；某個午夜，旗幟交換，新國家在英國女王的祝福與大英國協的框架下「合法地」誕生。這套程序看似文明、有序，掩蓋了背後巨大的不對等——談判桌上的籌碼、國界的劃定、軍隊與文官體系的人事、乃至獨立後仍緊扣前宗主國的貨幣與貿易結構，多半仍由離去的一方暗中設定。但無論如何，旗幟確實降了又升。對億萬非洲人而言，那一刻是真實的、是他們父輩想都不敢想的。</p>
+
+    <pull>「迦納的獨立，毫無意義，除非它與整個非洲大陸的徹底解放連結在一起。」——恩克魯瑪在獨立之夜的宣告，把一國的自由，綁定成全大陸的使命。</pull>
+
+    <h3>非洲必須團結</h3>
+
+    <p>恩克魯瑪的眼光從不只停在迦納。他真誠地相信，個別小國的獨立若不匯聚成一個統一的非洲，終將被前殖民勢力各個擊破。「非洲必須團結」（Africa Must Unite）成了他畢生的信條，也是他一本著作的書名。他主張一個跨越國界的「非洲合眾國」，要有共同的市場、共同的貨幣、共同的防務。他用迦納有限的國庫，慷慨資助其他殖民地的解放運動，把阿克拉變成泛非主義者的朝聖地與庇護所。一九五八年，他在阿克拉召開「全非人民大會」，來自各地的青年民族主義者齊聚一堂——其中就包括日後剛果的悲劇英雄帕特里斯·盧蒙巴。對許多後來的領袖而言，恩克魯瑪是導師，是先行者，是那顆黑色五角星的化身。</p>
+
+    <p>然而，先行者的命運往往最為孤獨。恩克魯瑪的泛非夢想超前於他的時代：剛剛嚐到主權滋味的新國家領袖們，沒幾個願意把得來不易的權力交給一個超國家機構。而在國內，他逐步走向集權——一黨制、《預防性拘留法》、對反對派的壓制、對個人崇拜的縱容（他被尊為「奧薩傑佛」，意為「救世主」），加上雄心過大的工業化計畫（如阿科松博水壩）拖垮了財政。可可價格一跌，經濟便陷入困境。一九六六年二月，當他出訪北京途中，國內軍方與警察發動政變，推翻了他。這位「非洲解放的先知」客死他鄉，一九七二年病逝於羅馬尼亞。他的失敗與他的理想同樣意味深長：團結的號角吹得太早，而腳下的國家還太脆弱。</p>
+
+    <h3>非洲年</h3>
+
+    <p>一九六〇年，史稱「非洲年」。在這短短十二個月裡，多達十七個非洲國家宣告獨立——這是人類歷史上去殖民化最密集的一次爆發。法屬西非與赤道非洲的廣大版圖一夕瓦解：塞內加爾、馬利、象牙海岸、達荷美（今貝南）、上伏塔（今布吉納法索）、尼日、查德、加彭、剛果（布拉薩）、中非、茅利塔尼亞、馬達加斯加、多哥、喀麥隆，一個接一個升起新國旗。法國的戴高樂在阿爾及利亞戰爭的泥淖中已經明白，與其在撒哈拉以南也陷入同樣的消耗，不如主動安排一場「優雅的退場」——他在一九五八年讓各殖民地公投決定是否留在「法蘭西共同體」，繼而在一九六〇年順勢放手。英屬的奈及利亞也在這一年獨立，成為當時非洲人口最多的國家。比利時治下的剛果同樣在六月匆匆獨立。聯合國的會員國名單在那一年迅速膨脹，大會的議席間多了一張張非洲的面孔。</p>
+
+    <p>聯合國本身也順勢成為去殖民浪潮的推手。一九六〇年十二月，聯合國大會通過第1514號決議——《給予殖民地國家和人民獨立宣言》，莊嚴宣告「使人民受異族奴役、統治和剝削，是對基本人權的否定」，並要求立即終止一切形式的殖民主義。儘管這項決議沒有強制力，它卻在道義與國際法層面，把「殖民」從一種被默許的常態，徹底打成了一種需要被清算的罪行。新獨立的非洲國家在聯合國裡很快結成一股不可忽視的力量，與亞洲的新興國家一道，推動著一個「第三世界」的崛起。從萬隆到阿克拉，一種新的自我意識正在成形：被殖民者不再只是歷史的客體，而要成為自己命運的主人。</p>
+
+    <pull>一九六〇年，十七個國家在十二個月內升起新國旗。這不是漸進的退潮，而是一場政治的雪崩——舊世界的地圖，一夜之間被重新書寫。</pull>
+
+    <h3>樂觀的清晨</h3>
+
+    <p>那是一個充滿希望的時刻，後人很容易忘記當年的樂觀有多麼真實、多麼具體。新國家的首都裡，年輕的本地公務員第一次坐進過去只有白人才能進的辦公室；大學擴招，獎學金把農家子弟送往海外深造；報紙以本地語言報導本地的政治；國家電台播放著自己的國歌；醫院、學校、公路被列入雄心勃勃的「發展計畫」。許多領袖真誠地相信，只要趕走了殖民者、掌握了國家機器，非洲就能在一兩個世代之內趕上世界。坦尚尼亞的尼雷爾談「烏賈瑪」的非洲式社會主義與自力更生；幾內亞的塞古·杜爾在一九五八年對戴高樂的公投投下唯一的「不」，寧可立即承受法國撤走全部援助與技術人員的報復，也要立刻、完全的獨立——他那句「我們寧願在自由中受窮，也不願在奴役中富足」傳遍了整個大陸。</p>
+
+    <p>這份樂觀並非天真，它根植於一個合理的信念：殖民體制本身就是非洲落後的主因，拆掉它，潛力自會釋放。然而歷史很快會給出更複雜的答案。許多在一九六〇年前後匆匆獨立的國家，並沒有足夠的時間建立起能夠承載一個現代主權國家的制度——獨立的、運作的司法；專業而中立的文官體系；多黨競爭與和平交接的政治文化；超越族群與地域的國族認同。殖民者留下的，往往是一套為「統治外人」而設計、而非為「治理自己」而設計的行政機器，以及一份隨手劃定、把不同民族硬塞進同一條國界的地圖。樂觀的清晨之後，許多國家要走的，是一段比任何人預期都更崎嶇的路。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>「移交得太快、來不及建立制度」——這是理解今日非洲許多治理困境的一把鑰匙，但必須小心使用，以免落入「非洲人沒準備好自治」這種殖民者的老調。真正的問題不在於非洲人是否配得上自由（自由從來不需要資格審查），而在於：殖民體制刻意沒有培養本地的治理能力。剛果獨立時，全國受過大學教育的本地人屈指可數，幾乎沒有本地醫生、工程師或高階文官——這不是偶然，而是比利時統治七十餘年「只取不予」的結果。今天當人們談論某些非洲國家的制度脆弱、政變頻仍、貪腐叢生時，恩克魯瑪那代人面對的起跑線，提供了不可或缺的歷史縱深。迦納本身則走出了一條相對穩健的路：經歷數次政變後，自一九九〇年代起建立起多黨民主，多次和平的政權輪替，被視為西非民主化的範例。先行者播下的種子，未必在他自己手上開花，卻可能在半個世紀後結果。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude">
+  <div class="mark">◆ ✦ ◆</div>
+  <p>當英國與法國在西非選擇了<hl>體面退場</hl>，把旗幟的交換變成一場午夜的典禮，另一些殖民者卻選擇了相反的道路。在阿爾及利亞的山區、在肯亞的森林、在安哥拉的叢林、在羅德西亞的灌木地帶，獨立不是談出來的，而是用八年、十年、甚至更久的血與火換來的。下一章，我們走進那些<hl>解放戰爭</hl>——在那裡，自由的代價以人命計算。</p>
+</div>
+
+<section id="ch9" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · Wars of Liberation</span>
+    <h2 class="act-title">解放戰爭</h2>
+    <p class="act-sub">Wars of Liberation</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>不是每一面殖民旗幟都在午夜的典禮上溫順地降下。在某些地方，殖民者深深扎了根——大批白人移民把這片土地當成永久的家園，把肥沃的高地與沿海平原據為己有；又或者，宗主國的政治認同已經與殖民地牢牢綁定，撤退被視為國恥。在這些地方，自由不是談判桌上的協議，而是要從戰壕、森林、拘留營與絞刑架中奪回的東西。這一章記述的，是非洲去殖民化最血腥的一面：那些以人命為代價、以年計算的解放戰爭。它們的殘酷提醒我們，殖民體制的暴力本質，往往要到它被連根拔起的那一刻，才暴露得最為徹底。</p>
+
+    <h3>阿爾及利亞：一場「不是戰爭的戰爭」</h3>
+
+    <p>阿爾及利亞之於法國，不同於任何其他殖民地。在法律上，它根本不被當成殖民地，而是法國本土的延伸——分成幾個「省」，由巴黎的內政部而非殖民部管轄。一個多世紀以來，超過一百萬歐洲移民（被稱為「黑腳」，pieds-noirs）在此定居，佔據了最好的土地、城市與職位，而占人口絕大多數的阿拉伯與柏柏爾穆斯林，則是被剝奪了完整公民權的二等居民。對法國的政治階層而言，「放棄阿爾及利亞」幾乎等同於「肢解法國」。正因如此，當民族解放陣線（FLN）在一九五四年十一月一日的「諸聖節」發動起義時，法國的反應不是談判，而是不惜一切代價的鎮壓。</p>
+
+    <p>這場戰爭打了將近八年（1954–1962），其殘酷程度震動了整個西方世界。FLN以游擊戰、城市恐怖攻擊與政治動員對抗法軍；法軍則投入數十萬大軍，實施集體遷村、酷刑與大規模逮捕。一九五七年的「阿爾及爾之戰」中，法國傘兵部隊系統性地使用電刑、水刑等酷刑來瓦解城市裡的FLN網路——這段歷史後來被拍成經典電影《阿爾及爾之戰》。酷刑的揭露在法國本土引發激烈的道德辯論，連薩特等知識分子也公開譴責。戰爭的死亡人數至今仍有爭議：法方估計約三十五萬人死亡，FLN則主張高達一百萬「烈士」；無論確切數字為何，這是一場吞噬了數十萬條人命的浩劫，雙方都犯下了暴行。</p>
+
+    <p>戰爭也幾乎拖垮了法蘭西第四共和。一九五八年，因阿爾及利亞危機引發的政治動盪，把退隱多年的戴高樂重新推上權力頂峰，並催生了沿用至今的第五共和。起初許多「黑腳」與軍方以為戴高樂會「保住阿爾及利亞」，但這位現實主義的老人最終認定：法國無法、也不該繼續這場耗盡國力又道德破產的戰爭。他推動公投，準備放手。這一決定激怒了死硬派——由部分軍官與極端「黑腳」組成的「秘密軍組織」（OAS）發動了一連串恐怖攻擊，甚至幾度密謀刺殺戴高樂本人，並在撤離前對阿爾及利亞的基礎設施進行瘋狂的破壞。一九六二年，《埃維昂協議》簽訂，阿爾及利亞終於獨立。近百萬「黑腳」倉皇逃回一個他們從未真正生活過的「祖國」法國；而曾為法軍效力的阿爾及利亞輔助兵「哈基」（harkis），則多半被遺棄，遭到血腥報復。一場戰爭結束了，但它留下的創傷——在法國與阿爾及利亞兩邊——延續至今。</p>
+
+    <pull>在法律上，阿爾及利亞不是殖民地，而是「法國本土」。正因如此，放手才如此痛苦——這不是放棄一塊海外領地，而被視為肢解祖國的肉身。</pull>
+
+    <p>阿爾及利亞戰爭還孕育出一位影響深遠的革命思想家——法蘭茲·法農。他原是出身法屬馬丁尼克的黑人精神科醫師，在阿爾及利亞的醫院工作期間，親眼目睹了殖民暴力如何同時摧殘被殖民者與殖民者的心靈，最終投身FLN，成為其重要的理論家與宣傳者。他的著作《大地上的受苦者》在他一九六一年病逝後出版，成為全世界反殖民與黑人解放運動的思想經典。法農剖析了殖民如何透過暴力建立、又如何在被殖民者心中種下自卑與異化；他主張被殖民者唯有透過行動（在他看來，往往是暴力的反抗）才能重建被殖民體制摧毀的人格與尊嚴。他的思想越過了阿爾及利亞的邊界，深深影響了從南非的黑人意識運動到美國民權與黑人權力運動的整整一代人——這提醒我們，解放戰爭輸出的不只是軍火與戰術，更是一套足以重塑被壓迫者自我認知的思想。</p>
+
+    <h3>肯亞：茅茅起義與拘留營的真相</h3>
+
+    <p>在東非的肯亞，英國同樣面對一個白人移民盤踞的殖民地。富饒的中部「白色高地」被歐洲農場主圈佔，而世代耕作於此的基庫尤人，許多淪為自家土地上的佃農或勞工。土地的剝奪、政治的壓迫與文化的羞辱，孕育了一場被稱為「茅茅起義」（Mau Mau，1952–1960）的武裝反抗。起義者多為基庫尤人，透過秘密的宣誓儀式凝聚成員，躲入阿伯德爾山脈與肯亞山的森林展開游擊戰，襲擊白人農場與「通敵」的非洲人。英國當局宣布進入緊急狀態，展開了一場規模驚人、手段酷烈的鎮壓。</p>
+
+    <p>長期以來，殖民敘事把茅茅描繪成一場野蠻、非理性的「恐怖暴亂」，刻意淡化英方的暴行。直到近年，歷史學者（如卡羅琳·埃爾金斯的研究）與解密的官方檔案才揭開真相的另一面：英國建立了一整套被稱為「管道」（the Pipeline）的拘留營網絡，估計有數萬乃至十餘萬基庫尤人未經審判被關押，承受強迫勞動、毆打、酷刑乃至性暴力，數以百計村莊被強制遷併入「保護村」（實為集中監控的圍村）。一九五九年的「霍拉營慘案」中，十一名拒絕勞動的拘留者被看守活活打死，事件最終驚動了英國國會。多年後，倖存者向英國法院提起訴訟；二〇一三年，英國政府正式對受害者表達「真誠的遺憾」，並向逾五千名倖存者支付總計約兩千萬英鎊的賠償——這是大英帝國首次為殖民時期的暴行作出此類官方賠償，遲到了半個多世紀。</p>
+
+    <p>諷刺的是，從軍事上看，英國「贏」了茅茅起義：起義被血腥鎮壓下去，主要領袖如戴丹·基馬蒂被處決。但從政治上看，這場戰爭加速了英國對肯亞局勢的重新評估，也讓殖民統治的成本與道德破產暴露無遺。肯亞最終在一九六三年獨立，由曾被殖民當局指控為茅茅幕後黑手而長期監禁的喬莫·肯雅塔出任領袖。歷史的吊詭在於：肯雅塔執政後，對茅茅老兵的待遇相當冷淡——這場犧牲慘重的起義，其遺產在獨立後的政治中長期處於尷尬的邊緣，直到晚近才被重新承認為民族解放的重要篇章。</p>
+
+    <h3>葡屬殖民地：帝國的最後堡壘</h3>
+
+    <p>當英法在一九六〇年前後大規模撤出非洲，伊比利半島上的葡萄牙卻反其道而行。薩拉查的獨裁政權（「新國家」）把安哥拉、莫三比克、幾內亞比索等地宣稱為「海外省」，是葡萄牙不可分割的一部分，死也不肯放手。對一個本身就貧窮、落後、專制的母國而言，這些殖民地是國家威望與經濟命脈所繫。於是，當解放運動在一九六一年前後相繼揭竿，葡萄牙陷入了一場三線作戰、長達十三年的殖民戰爭，把這個小國的青年與財政拖入無底的深淵。</p>
+
+    <p>三塊殖民地各有自己的解放陣線：安哥拉以「安哥拉人民解放運動」（MPLA）等組織為主；莫三比克是「莫三比克解放陣線」（FRELIMO）；幾內亞比索與維德角則是「幾內亞和維德角非洲獨立黨」（PAIGC）。其中，PAIGC的領袖阿米爾卡·卡布拉爾是這一代非洲解放思想家中最深刻的一位。他原是受過良好教育的農藝師，曾為葡萄牙當局做過農業普查，因而踏遍鄉野、深知農民的處境。他主張解放不只是趕走殖民者，更是一場「文化的再非洲化」與社會的重建；他著名的告誡是「不要說空話，不要編造勝利」，要對群眾誠實。他在解放區建立學校、診所與民選機構，把游擊戰與建設未來國家結合在一起。一九七三年一月，就在獨立的曙光在即之時，卡布拉爾被內部叛徒暗殺，沒能親眼看見幾內亞比索那年稍晚的獨立宣告。</p>
+
+    <p>結束這場戰爭的，不是非洲的戰場，而是葡萄牙本土的一場革命。一九七四年四月二十五日，一群厭倦了無休止殖民戰爭的青年軍官在里斯本發動政變，幾乎兵不血刃地推翻了延續近半世紀的獨裁政權——市民把康乃馨插進士兵的槍管，史稱「康乃馨革命」。新政府迅速決定：結束殖民戰爭，放棄所有海外領地。一九七四至七五年間，幾內亞比索、莫三比克、安哥拉、維德角等地相繼獨立。然而，葡萄牙的倉促撤離，尤其在安哥拉，留下了權力真空——MPLA、FNLA、UNITA三派為爭奪政權立即陷入內戰，加上冷戰兩大陣營（蘇聯、古巴對MPLA，美國、南非對UNITA）的介入，把這個剛獲自由的國家拖入了長達二十七年、慘烈無比的內戰。解放的代價，竟以另一場更漫長的戰爭續寫。</p>
+
+    <h3>羅德西亞：白人的最後頑抗</h3>
+
+    <p>在南部非洲的羅德西亞（今辛巴威），居於少數的白人移民演出了去殖民史上最頑固的一幕。當英國準備按「多數統治」的原則讓殖民地走向獨立時，羅德西亞的白人政權拒絕接受由黑人多數執政的前景。一九六五年十一月，總理伊恩·史密斯領導的白人政府單方面宣布獨立（UDI），公然脫離英國，建立一個由二十餘萬白人統治四百多萬黑人的政權。這在當時是極為罕見的——一個殖民地的白人少數，竟反過來向母國「鬧獨立」，只為保住自己的種族特權。國際社會普遍拒絕承認，聯合國對其實施制裁，但在鄰近的南非種族隔離政權與葡屬殖民地的暗中支持下，羅德西亞撐了下來。</p>
+
+    <p>黑人民族主義者於是轉向武裝鬥爭。兩支主要的解放軍——穆加比領導的「辛巴威非洲民族聯盟」（ZANU）與恩科莫領導的「辛巴威非洲人民聯盟」（ZAPU）——從鄰國的基地發動了長達十餘年的「叢林戰爭」（Bush War）。游擊隊在農村動員民眾、襲擊白人農場與軍事目標；白人政權則以殘酷的反游擊作戰回應，包括跨境突襲解放軍營地。隨著葡屬莫三比克在一九七五年獨立、為游擊隊提供了更廣闊的後方，加上南非也逐漸不願再無限度地支撐這個負擔，史密斯政權終於撐不住。在英國斡旋下，一九七九年的《蘭開斯特府協議》為衝突劃下句點。一九八〇年，辛巴威在多數統治的基礎上正式獨立，羅伯特·穆加比當選首任政府首腦。曾經不可一世的白人少數政權，終於走入歷史。</p>
+
+    <pull>羅德西亞是去殖民史上最荒謬的一幕：一群殖民者，反過來向自己的母國「鬧獨立」，只為延續對多數人的統治。少數凌駕多數的政權，終究撐不過歷史的重量。</pull>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>解放戰爭留下了一份沉重而矛盾的遺產：那些浴血奪取政權的解放運動，獨立後往往把自己等同於國家本身，從「解放者」變成「不肯下台的執政黨」。莫三比克的FRELIMO自一九七五年執政至今近半個世紀；辛巴威的ZANU-PF在穆加比手中長期把持權力，二〇〇〇年代後以強佔白人農場、惡性通膨與政治暴力把國家推向崩潰，直到二〇一七年穆加比才在一場「不算政變的政變」中下台，而ZANU-PF依舊掌權；南非的非洲民族議會（ANC）自一九九四年執政三十年，直到二〇二四年才在選舉中首度失去國會多數、被迫組建聯合政府。這背後有一種共通的邏輯：當一個政黨把「民族解放」的道德光環攬在自己身上，它便容易認為自己天然有權永久執政，把任何反對都污名化為對國家、對解放本身的背叛。這正是今日許多後解放國家民主鞏固的核心難題——如何讓「解放者」學會在選票前下台。理解這一點，就能明白：奪取自由是一回事，學會分享與交出權力，是另一回事，往往更難。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude">
+  <div class="mark">◆ ✦ ◆</div>
+  <p>在阿爾及利亞、肯亞、安哥拉、羅德西亞，殖民者最終都走了——有的被打走，有的被本國的革命召回。但在大陸最南端，還有一座更頑固的堡壘。那裡的白人少數政權不滿足於殖民式的統治，而是把種族壓迫<hl>立法化、體制化、神聖化</hl>，建構出一套舉世罕見、以膚色決定一切的制度。下一章，我們走進南非——走進<hl>種族隔離</hl>的漫長黑夜，與那場從沙佩維爾的槍聲走向羅本島牢房、最終走向一九九四年投票所的偉大抗爭。</p>
+</div>
+
+<section id="ch10" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · Apartheid</span>
+    <h2 class="act-title">種族隔離</h2>
+    <p class="act-sub">Apartheid</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>當大半個非洲在一九六〇年代升起獨立的旗幟，大陸的最南端卻反向加固了一座種族壓迫的堡壘。一九四八年，南非的「國民黨」在僅限白人投票的選舉中勝出，隨即把一種早已存在的種族歧視常態，系統性地升格為一整套法律與行政體制，並賦予它一個南非語的名字：apartheid——意為「分離」「隔開」。這不是一般意義上的歧視，而是人類現代史上罕見的、以國家機器全力推行的、把種族分類寫進每一條法律、每一張身分證、每一寸土地、每一段婚姻的制度。它的野心是：讓占人口少數的白人，永久、合法、看似「秩序井然」地統治占絕大多數的黑人、有色人與印度裔。</p>
+
+    <h3>把膚色寫進法律</h3>
+
+    <p>種族隔離的第一步，是給每個人貼上種族的標籤。《人口登記法》把全體國民強制歸類為「白人」「黑人」「有色人」「亞裔」等，這個分類決定了一個人能住哪裡、能做什麼工作、能讀哪所學校、能愛上並娶嫁誰。《禁止異族通婚法》與《背德法》把跨種族的婚姻與性關係定為犯罪。《族群區域法》（Group Areas Act）按種族劃分城市的居住區，強制把數十萬「身分不符」的居民從家園驅逐——開普敦的「第六區」、約翰尼斯堡的「索菲亞鎮」等多元社區被夷為平地，居民被趕往荒涼的城郊。最日常、也最屈辱的，是惡名昭彰的「通行證法」：黑人必須隨身攜帶一本記錄其身分與活動許可的「通行證」，在自己的國土上，沒有白人當局的許可便寸步難行；忘帶或無證，隨時可能被逮捕。</p>
+
+    <p>種族隔離還分「小」與「大」兩個層次。「小種族隔離」是日常生活中無所不在的隔離：公車、長椅、海灘、廁所、入口、醫院、學校，全都掛著「僅限白人」或「僅限非白人」的牌子。而「大種族隔離」則是其終極的、最瘋狂的構想——「班圖斯坦」或「家邦」（homelands/Bantustans）政策。當局把全國劃出十塊貧瘠、零碎、無經濟前景的土地，宣稱它們是各個黑人「部族」的「祖國」，並逐步剝奪黑人在「白人南非」的公民權，把他們重新定義為這些名義上「獨立」家邦的「公民」。如此一來，黑人雖占人口多數，卻在法律上成了自己國家裡的「外國勞工」——他們的勞動力被城市與礦場需要，他們的政治權利卻被流放到那些連國際社會都拒絕承認的偽國家。這是一套用地圖和法律精心設計的種族驅逐工程。</p>
+
+    <pull>種族隔離不是混亂的歧視，而是冷靜的工程：把膚色寫進身分證、寫進地圖、寫進婚姻法，讓少數人對多數人的統治，看起來「秩序井然」。</pull>
+
+    <p>種族隔離披著「分離發展」的意識形態外衣——其辯護者宣稱，這套制度是讓各個「種族群體」在各自的天地裡「依其本性自由發展」。但這層說辭掩蓋不了它赤裸裸的經濟邏輯。南非的財富建立在金礦與鑽石礦之上，而礦業的暴利依賴的，正是一支龐大、廉價、馴服、且不被允許在城市落地生根的黑人勞動力。整套制度——通行證法、家邦政策、遷徙勞工制度——本質上是一部把黑人勞動力與其政治權利強行剝離的精密機器：把黑人男性的勞動榨取進城市的礦場與工廠，卻把他們的家庭、政治權利與「公民身分」流放回貧瘠的家邦。工人住在城郊封閉的單身工棚，與家人長年分離；他們創造的財富留在「白人南非」，而養育、撫卹、年老的負擔則被甩給那些連基本生計都難以維持的家邦。種族隔離因此不只是一種偏見，更是一套為少數人榨取多數人勞動而量身打造的政治經濟體制。看穿這一層，才能明白為什麼它如此頑固——觸動它，等於觸動整個白人社會的物質基礎。</p>
+
+    <h3>抵抗的世代</h3>
+
+    <p>壓迫從一開始就遭遇抵抗。成立於一九一二年的「非洲民族議會」（ANC）是非洲最古老的解放組織之一，起初走溫和的請願路線。但面對種族隔離的步步進逼，新一代領袖認定請願已經無用。一九五二年，ANC發動「蔑視運動」，號召民眾以非暴力的公民不服從，公然違反種族隔離的各項法令——故意進入「僅限白人」的場所、拒帶通行證——以坐牢來癱瘓這套不義之法。一位年輕的律師在運動中嶄露頭角，他的名字叫納爾遜·曼德拉。一九五五年，ANC與盟友召開「人民大會」，通過了著名的《自由憲章》，開宗明義地宣告：「南非屬於所有居住於此的人民，無分黑白。」這份文件描繪了一個不分種族、人人平等、共享土地與財富的南非願景，成為日後解放運動的綱領。</p>
+
+    <p>然而，和平抗爭撞上了暴力的高牆。一九六〇年三月二十一日，在約翰尼斯堡附近的沙佩維爾鎮，數千人聚集在警察局外，和平抗議通行證法。警方突然開槍，朝著多半背對著他們、四散奔逃的人群射擊，當場打死六十九人，其中包括婦女與兒童，傷者更多。「沙佩維爾屠殺」震驚了世界，也成為南非歷史的轉折點。政府隨即宣布緊急狀態，查禁ANC等組織，把抵抗運動逼入地下。曾經堅持非暴力的解放者們，在和平之路被徹底封死之後，做出了痛苦的抉擇：轉向武裝鬥爭。一九六一年，ANC的武裝組織「民族之矛」（Umkhonto we Sizwe，簡稱MK）成立，由曼德拉領導，最初以破壞政府設施為主，盡量避免傷及人命。</p>
+
+    <h3>羅本島的漫長黑夜</h3>
+
+    <p>武裝鬥爭的代價來得很快。一九六二年，曼德拉被捕。一九六三至六四年的「里沃尼亞審判」中，他與一批MK領導人因「破壞罪」等指控受審，面臨死刑。在被告席上，曼德拉發表了那篇載入史冊的陳詞。他平靜地告訴法庭：「我畢生獻身於非洲人民的鬥爭。我反對白人專制，也反對黑人專制。我珍視一個民主而自由的社會的理想——在那裡，所有人都能和諧共處，享有平等的機會。這是我希望為之而活、為之奮鬥的理想。但如果有必要，這也是一個我準備為之獻出生命的理想。」他與多數被告被判無期徒刑，押往開普敦外海的羅本島，在採石場服苦役。曼德拉將在獄中度過二十七年。種族隔離政權以為，把領袖鎖進孤島的牢房，就能讓抵抗熄滅。他們錯了——羅本島反而成了一所「大學」，囚徒們在那裡彼此教育、磨礪信念，而曼德拉的名字，在牆外漸漸化為一個無法抹去的自由象徵。</p>
+
+    <p>一九七六年六月十六日，抵抗的火炬傳到了最年輕的一代手中。在約翰尼斯堡的黑人城鎮索韋托，數以千計的中學生走上街頭，抗議當局強制以「南非語」（壓迫者的語言）作為部分科目的教學語言。和平的學生遊行，再次遭到警方開槍鎮壓。一張照片傳遍全球：一名少年抱著中彈倒地的十二歲男孩赫克托·彼得森奔跑，身旁是失聲痛哭的姐姐。索韋托起義迅速蔓延全國，演成持續數月的動亂，數百名（一說上千）多為青少年的抗議者喪生。這場由孩子們點燃的起義，把種族隔離的殘暴血淋淋地攤在世界面前，也喚醒了一整代南非青年的政治意識。許多倖存的學生越過邊境，加入流亡的解放運動。</p>
+
+    <p>那個年代還站著另一位巨人：史蒂夫·比科。他是「黑人意識運動」的靈魂人物，主張黑人必須首先在精神上解放自己——擺脫殖民與種族隔離長期灌輸的自卑，重建身為黑人的尊嚴與自豪。「壓迫者手中最有力的武器，」他說，「是被壓迫者的心智。」他的思想深深影響了索韋托一代。一九七七年，比科被警方拘留，遭到毒打，在拘留期間傷重不治，年僅三十歲。當局起初謊稱他死於絕食。比科之死激起國內外的巨大憤慨，他成為反種族隔離運動的烈士，也讓世界看清這個政權願意為維持統治而做到何種地步。</p>
+
+    <pull>「壓迫者手中最有力的武器，是被壓迫者的心智。」——史蒂夫·比科。解放，首先是要在精神上拒絕被定義為次等的人。</pull>
+
+    <h3>世界轉身與談判落幕</h3>
+
+    <p>種族隔離的崩潰，是內部抵抗與外部壓力共同作用的結果。在國內，城鎮起義、罷工與抵制此起彼伏，工會運動壯大，國家陷入長期的「不可治理」狀態，維持高壓統治的成本越來越高。在國外，一場全球性的反種族隔離運動逐漸成形：各國對南非實施經濟與軍事制裁，外資撤離；南非被逐出奧運與眾多國際體育賽事；各地大學生發起抵制南非貨物、要求校產撤資的運動；「釋放曼德拉」成為跨越國界的口號，從倫敦到紐約，無數人為一個他們從未見過面孔的囚徒走上街頭。曾經被西方某些政府視為「反共堡壘」而曖昧縱容的種族隔離政權，到一九八〇年代後期已淪為國際社會的賤民。</p>
+
+    <p>轉機來自一位務實的新總統。一九八九年上台的戴克拉克，認清了種族隔離已無以為繼，做出了歷史性的決斷。一九九〇年二月，他解除對ANC等組織的禁令，並宣布釋放曼德拉。當年二月十一日，七十一歲的曼德拉走出監獄大門，舉起拳頭，全世界透過電視屏住呼吸見證這一刻。接下來是數年艱難、屢屢瀕臨破裂、伴隨著血腥暴力的談判。曼德拉與戴克拉克——昔日的囚徒與昔日的獄方——在巨大的相互猜疑中，硬是為一個瀕臨種族內戰的國家談出了一條和平轉型之路，兩人因此共獲一九九三年諾貝爾和平獎。一九九四年四月，南非舉行了史上第一次不分種族的全民普選。投票那天，數百萬黑人生平第一次行使選舉權，在投票所外排起綿延數里、等候數小時也無怨言的長龍。曼德拉當選總統。種族隔離的漫長黑夜，終於迎來黎明。</p>
+
+    <p>新南非選擇了一條不尋常的和解之路。在大主教德斯蒙德·圖圖的主持下，「真相與和解委員會」公開聆訊種族隔離時代的暴行：受害者講述自己的傷痛，加害者則可在如實坦白的前提下申請特赦。這個機制飽受爭議——許多人質問，沒有懲罰的真相，是否就是正義？但它也讓一個本可能陷入血腥報復的社會，避免了內戰式的清算，把創傷攤在陽光下面對。曼德拉拒絕復仇，以驚人的寬容向昔日的壓迫者伸出手，成為二十世紀道德領導力的典範。他只做了一任總統便和平交棒，親手為新生的民主立下不戀棧權力的榜樣。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>一九九四年，南非贏得了政治自由，卻沒有同步贏得經濟平等——這是種族隔離留下的、至今最沉重的未竟之業。談判式的和平轉型，刻意沒有觸動白人手中的土地與資本：絕大多數的優質農地、礦業、大企業與財富，至今仍高度集中在少數人手中，而種族與貧富的界線在很大程度上重疊。三十年過去，南非依然是全世界貧富差距最懸殊的國家之一，黑人多數的失業率居高不下，廣大城鎮的居民仍住在種族隔離時代被驅趕去的破敗角落。「土地改革」「黑人經濟賦權」喊了多年，成效有限且爭議不斷。這提醒我們一個冷峻的道理：撤掉歧視性的法律，遠比扭轉它在數十年間累積、並被代代繼承的物質結構要容易得多。曼德拉的奇蹟在於避免了一場血腥的內戰、在於以寬容立國；但他與後繼者都未能解開那道更深的結——當自由來臨時，財產與機會的版圖，早已被舊體制牢牢鎖定。今天南非的掙扎，正是「政治解放」與「經濟解放」之間那道未填平的鴻溝的回聲。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude">
+  <div class="mark">◆ ✦ ◆</div>
+  <p>從迦納的午夜旗幟，到阿爾及利亞的戰壕，再到南非投票所外綿延數里的長龍——非洲一個接一個贏回了主權。但獨立並不是一張白紙上的重新開始。新生的國家在誕生的那一刻，就<hl>繼承</hl>了一份沉重的遺產：一張被外人隨手劃定的地圖、一套為榨取而非為治理而設計的經濟與制度、一道道被殖民者刻意加深的族群裂痕。最後一章，我們要追問那個縈繞至今的問題——為什麼如此多的後殖民國家走得這般艱難？答案，藏在它們<hl>繼承的遺產</hl>裡。</p>
+</div>
+
+<section id="ch11" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Inheritance</span>
+    <h2 class="act-title">繼承的遺產</h2>
+    <p class="act-sub">The Inheritance</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>旗幟換了，國歌奏響了，街道改了名字。但獨立那一天的非洲領袖們很快發現：他們繼承來的，並不是一張可以自由書寫的白紙，而是一份由殖民者預先寫好、條款苛刻、難以撕毀的契約。國界、經濟結構、行政制度、教育水準、族群關係——這些構成一個現代國家骨架的東西，沒有一樣是新國家從零選擇的，全都是殖民時代留下的「既成事實」。要理解為什麼眾多後殖民國家走得如此艱難，就必須認清：他們不是在一片開闊的原野上起跑，而是背負著一份被精心植入的、有毒的遺產上路。這一章，我們逐一清點這份遺產。</p>
+
+    <h3>一張別人劃的地圖</h3>
+
+    <p>非洲的國界，是這份遺產中最刺眼的一項。前面的章節已經說過，這些線條多半是十九世紀末歐洲列強在會議桌上、用直尺和經緯度劃出來的，全然不顧地面上民族、語言、王國與生態的分布。結果，同一個民族被一刀切進兩三個不同的國家（如索馬利人散落於索馬利亞、衣索比亞、肯亞、吉布地），而原本素無往來、甚至彼此敵對的眾多族群，又被硬塞進同一條國界之內，被迫共組一個「國族」。獨立後，這些荒謬的邊界並沒有被推倒重來。</p>
+
+    <p>原因在於一個艱難的集體抉擇。一九六三年，新獨立的非洲國家在阿迪斯阿貝巴成立「非洲統一組織」（OAU），並很快確立了一條核心原則：尊重殖民時代遺留的既有邊界，不得以武力更改。這個決定看似自相矛盾——剛剛擺脫殖民，卻要守護殖民者劃下的線？但領袖們的考量是現實而沉重的：非洲大陸上幾乎沒有一條邊界是「公正」的，如果每個國家都去追討「歷史上應屬於我們的領土」、每個分裂的民族都去爭取「統一的家園」，整個大陸將陷入永無止境的領土戰爭。與其追求一個不可能的「公正邊界」，不如凍結現狀、把精力用於建設。這項務實的妥協，確實避免了許多戰爭，但它也意味著：殖民的地理暴力被永久地承襲下來，許多國家從此背負著先天的族群張力，這成為後來眾多內戰、分離主義與族群衝突的深層根源。</p>
+
+    <pull>非洲沒有一條邊界是公正的。於是新生的國家做出了一個沉重的選擇：與其為「公正」而永遠開戰，不如守住殖民者劃下的線——把地理的暴力，凍結成既成的事實。</pull>
+
+    <h3>為榨取而生的經濟</h3>
+
+    <p>第二項遺產，是一套畸形的經濟結構。殖民地經濟從來不是為了「發展非洲」而設計的，而是為了「服務母國」而打造的。它的邏輯是榨取：從非洲低價抽走原料——可可、咖啡、棉花、花生、橡膠、銅、黃金、鑽石——運回歐洲加工，再把製成品高價賣回非洲。鐵路與港口的修建，方向全是從礦區、種植園通往海岸，把財富向外輸送，而非把大陸內部連結起來、服務本地的商業與人民。許多殖民地被刻意打造成「單一作物經濟」：整個國家的命脈，繫於一兩種出口農礦產品的國際價格。</p>
+
+    <p>這種結構在獨立後成了一個難以掙脫的陷阱。新國家的財政高度依賴少數初級產品的出口，而這些產品的價格由它們無法控制的國際市場決定。國際可可價一跌，迦納的財政便應聲崩潰（恩克魯瑪的失敗就有這一層原因）；銅價一垮，尚比亞的經濟便陷入危機。與此同時，這些國家缺乏本土的製造業與加工能力，賺來的外匯又得用去進口昂貴的工業製品，貿易條件長期不利。更深一層的綁定來自貨幣。在前法屬非洲的廣大地區，至今仍流通著「非洲金融共同體法郎」（CFA法郎）——這套貨幣制度起源於殖民時代，獨立後延續下來，長期與法國法郎（後來是歐元）掛鉤，其運作曾長期要求成員國把相當比例的外匯儲備存放於法國國庫。支持者說它帶來了幣值穩定與低通膨；批評者則指控它是「新殖民」經濟綁定的活化石，讓非洲國家在貨幣主權上仍受制於前宗主國。無論評價如何，它都生動地說明：政治獨立之後，經濟的臍帶往往仍未剪斷。</p>
+
+    <p>為這套經濟綁定命名的，正是迦納的恩克魯瑪。他在一九六五年出版的《新殖民主義：帝國主義的最後階段》中提出了「新殖民主義」（neo-colonialism）這個影響深遠的概念。他的核心論點是：殖民正式結束之後，前宗主國與西方資本並未真正放手，而是換上了更隱晦的手段繼續支配——透過控制貨幣、貿易、投資、援助與跨國公司，讓名義上獨立的非洲國家在經濟上依舊仰人鼻息。「新殖民主義的本質，」他寫道，「在於受其支配的國家，理論上獨立、擁有國際主權的一切外在裝飾，實際上其經濟體系、進而其政治政策，卻由外部操控。」這個概念是否誇大、是否低估了非洲領袖自身的責任，至今仍有爭論；但它精準地捕捉到了一個真實的困境——當經濟的命脈仍掌握在他人手中，政治旗幟的更換，未必帶來實質的自主。冷戰更使這份綁定雪上加霜：美蘇兩大陣營把非洲變成代理人戰爭的棋盤，為爭奪盟友而扶植聽話的獨裁者、輸送軍火、煽動內戰，從剛果的盧蒙巴之死到安哥拉長達數十年的內戰，無不留著冷戰干預的指紋。</p>
+
+    <h3>空心的制度與單薄的階層</h3>
+
+    <p>第三項遺產，是制度的脆弱與人才的稀缺。殖民政府的設計初衷，是讓極少數外來者高效地統治並榨取廣大的本地人口，而不是培養本地人去治理一個複雜的現代社會。因此，殖民地的司法、文官、軍警體系，本質上都是「壓迫的工具」而非「服務的機構」；它們講求的是控制與秩序，而非問責與公共服務。獨立後，新政府接手的，正是這樣一套習慣於由上而下發號施令、缺乏民主問責傳統的國家機器——它太容易被新的統治者拿去做與殖民者相同的事：壓制反對、控制人民。</p>
+
+    <p>更致命的是受教育與行政階層的極度單薄。殖民教育普遍是精英式、且刻意有限的——只培養剛好夠用的低階文書、翻譯與技工，絕不培養能挑戰統治的龐大知識階層。前一章已提及的剛果是最極端的例子：一九六〇年比利時倉促撤離時，這個面積廣大的國家幾乎找不出幾位本地的大學畢業生，沒有本地的醫生、工程師或高階軍官，整個國家的運轉曾完全仰賴比利時人。當這些技術與管理人員一夕撤走，國家機器當場停擺，秩序迅速崩解，旋即陷入軍隊嘩變、分離主義與外國干預交織的「剛果危機」。即便在教育較普及的殖民地，獨立之初能勝任高階治理的本地人才也屈指可數。一個現代國家需要成千上萬訓練有素的法官、醫生、教師、工程師與管理者，而殖民體制刻意沒有為非洲準備這些人。這道人才的鴻溝，要用一兩個世代的時間才能慢慢填補。</p>
+
+    <h3>被加深的裂痕</h3>
+
+    <p>第四項遺產，是被殖民統治刻意加深的族群分裂。殖民者深諳「分而治之」之道：他們常扶植某一族群為中介、賦予其相對優待的地位，去管理或壓制其他族群；他們透過人口普查、身分登記與「部族」分類，把原本流動、模糊、可變的族群認同，硬化成固定、對立、可供操弄的標籤。盧安達是這道遺產最慘痛的見證——比利時殖民者強化了胡圖與圖西之間的區隔，給每個人發放標明「族別」的身分證，並長期偏袒圖西少數，埋下了深刻的怨恨。這些被殖民體制制度化、武器化的族群對立，並不會隨著殖民者的離去而自動消散，反而常被獨立後爭奪權力的政客重新點燃、加以利用，成為政變、內戰乃至種族屠殺的火種。</p>
+
+    <p>這份脆弱，在獨立後的數十年間被一場全球性的經濟風暴進一步放大。一九七〇年代的石油危機與商品價格的劇烈波動，重創了高度依賴單一出口的非洲經濟；許多國家為填補缺口而大舉外債，到一九八〇年代陷入了沉重的債務危機。國際貨幣基金與世界銀行隨之開出「結構調整方案」作為借貸與紓困的條件——要求削減公共開支、裁減公務員、取消糧食與燃料補貼、開放市場、貨幣貶值。這些藥方在帳面上講求財政紀律，落到地面上卻往往意味著醫院與學校的經費被砍、城市窮人的麵包漲價、剛剛起步的本土產業在外國商品的衝擊下倒閉。對許多非洲國家而言，這「失落的十年」既是經濟的倒退，也是主權的再度旁落——關鍵的政策不再由本國國會決定，而是寫在華盛頓的貸款條件裡。這正是恩克魯瑪當年所警告的「新殖民」綁定，在債務時代的具體上演。</p>
+
+    <p>把這四項遺產放在一起看——人為的國界、榨取型的經濟、空心的制度、被加深的裂痕——我們便能理解一場由來已久的辯論：所謂「人為國家」（artificial states）之說。一派觀點認為，正因為這些國家是被外力拼湊而成、缺乏自然的國族基礎，它們才天生不穩、註定艱難。這個論點包含部分真實，卻潛藏著危險：它很容易滑向一種宿命論，甚至替殖民主義開脫，暗示「非洲的問題是非洲自己的問題」。更公允的理解是：這些國家並非「天生失敗」，而是被植入了一份極其不利的起始條件。世上沒有哪個國家是「自然」的——歐洲的民族國家同樣是經由戰爭、征服、整合，歷經數百年才鍛造成形的。差別在於，非洲被剝奪了那段自我整合的漫長時間，被迫在一夜之間、用別人發的牌，去打一局極難的牌局。把後殖民的困境簡單歸咎於「非洲人不會治國」，是把果當成了因，也抹煞了殖民體制在其中扮演的、決定性的角色。</p>
+
+    <pull>這些國家不是「天生失敗」，而是「被植入了一份有毒的遺產」。世上沒有哪個國家是天然的——只是非洲被剝奪了自我鍛造的時間，被迫用別人發的牌，打一局極難的牌局。</pull>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>這份「繼承的遺產」是讀懂今日非洲的關鍵透鏡——但它必須與另一面同時把握，否則就成了又一種剝奪非洲能動性的宿命論。一方面，那些被歸咎於「非洲失敗」的現象——政變、貪腐、族群衝突、單一商品依賴、債務危機——其結構性的根源，大量埋藏在這份殖民遺產之中；脫離這段歷史去談論非洲的「治理問題」，是不誠實的。另一方面，過去半個多世紀，非洲人從未只是這份遺產的被動承受者：波札那以鑽石財富建立起穩健的民主與廉能政府，被譽為「非洲的奇蹟」；迦納、塞內加爾等國一次次完成和平的政權輪替；盧安達在種族屠殺的灰燼上重建秩序；非洲聯盟、區域經濟共同體、二〇二一年起步的「非洲大陸自由貿易區」，都是非洲人試圖鬆動那套面向前宗主國的舊經濟結構、轉而把大陸內部連結起來的努力；CFA法郎區的改革辯論也在持續推進。今天當人們談論非洲的命運時，最誠實的立場是同時握住兩端：既承認殖民植入的起始條件之沉重，也尊重非洲人在其中不斷奮力改寫劇本的能動性。遺產決定了起點，卻從來不曾、也不該決定終點。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude">
+  <div class="mark">◆ ✦ ◆</div>
+  <p>清點完這份沉重的遺產，故事還沒有結束。殖民者的軍隊撤走了，但他們留下的<hl>經濟臍帶、地緣影響與心理印記</hl>並未隨之消失。獨立之後的非洲，迎來的不是純粹的自由，而是一個更隱晦、更難辨認的新階段——舊的支配換上了新的面貌。下一章，我們將追問：當殖民正式落幕，那份「繼承的遺產」如何在新的世紀裡繼續發酵、變形，又如何被非洲人一次次地挑戰與改寫。</p>
+</div>
+
+<section id="ch12" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十二章 · Cold War Africa &amp; the Strongmen</span>
+    <h2 class="act-title">冷戰非洲與強人</h2>
+    <p class="act-sub">Cold War Africa &amp; the Strongmen</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>升起的旗幟很少能餵飽人。一九六〇年代之初，從加納到剛果，從幾內亞到坦干伊喀，數十個新國家在一兩年內接連把宗主國的三色旗或米字旗降下，把自己的旗升起。那是非洲史上最濃縮的一段樂觀：報紙談「非洲世紀」，詩人寫黎明，政治家許諾學校、醫院、工廠。然而獨立帶來的並非自動的繁榮。新國家繼承的，是殖民者畫下的邊界、為出口單一原料而設計的經濟、薄弱到近乎不存在的本土行政與技術階層，以及一套把權力高度集中於首都的統治機器。樂觀很快撞上這些結構性的牆，而撞牆的聲音，往往是坦克開上街頭的履帶聲。</p>
+
+    <h3>政變的浪潮</h3>
+    <p>第一聲槍響來得很快。一九六三年，多哥的開國總統奧林匹歐（Sylvanus Olympio）在政變中被殺，成為獨立後非洲第一位被推翻並喪命的元首；同年剛果（布拉薩）與達荷美也發生政變。一九六六年是真正的分水嶺：一月奈及利亞發生軍事政變，總理被殺；二月加納的恩克魯瑪——泛非主義的旗手、獨立的象徵——在出訪北京途中被軍方與警察聯手推翻。曾被視為非洲新生的化身，一夕之間成了流亡者。此後二十餘年，軍事政變成為撒哈拉以南非洲改朝換代最常見的方式。據統計，從一九六〇到一九九〇年間，非洲發生了數十次成功的政變與更多次未遂政變，許多國家經歷了反覆的軍人接管。權力的轉移很少透過選票，多半透過兵營。</p>
+    <p>為什麼？原因不只一個，且彼此交纏。殖民邊界把語言、宗教、生活方式各異的群體硬塞進同一個國家，獨立後爭奪中央權力的鬥爭便容易沿著族群斷層線爆裂。經濟單一化使國家財政隨國際原料價格起伏，價格一跌，預算崩盤，公務員與軍人領不到薪餉，不滿便累積。殖民時期刻意不培養本土菁英，使新國家嚴重缺乏受過訓練的文官與工程師，治理品質難以支撐人民的期望。而最關鍵的或許是：殖民國家本身就是一部為「控制」而非為「同意」設計的機器——它教給後繼者的，是如何用強制力統治，而非如何用合法性治理。第一代民族主義領袖中，不少人很快走向一黨制，理由常是「國家太脆弱，承擔不起分裂的政黨競爭」「先發展、後民主」。一黨制有時確實換來一段穩定，卻也關上了和平更替權力的門，把所有政治矛盾都逼向兵變這一個出口。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>「先發展、後民主」「強人才能維穩」的論證，在今天的非洲（與非洲之外）依然迴響。問題不在於追求穩定本身，而在於：當穩定建立在壓制而非同意之上，它往往只是把矛盾延後、並在延後中放大。許多今日仍困擾非洲的治理難題——脆弱的政黨制度、軍隊涉入政治的慣性、權力的個人化——其根並不全在「非洲文化」，而在殖民國家留下的那部「控制機器」，以及冷戰雙方為了拉攏盟友而對強人睜一隻眼閉一隻眼的縱容。理解這一點，才能避免把複雜的歷史化約成關於某個大陸的偏見。</p>
+    </div>
+
+    <h3>「大人物」與盜賊統治</h3>
+    <p>在政變與一黨制的土壤上，長出了一種特殊的政治形態，研究者常稱之為「大人物統治」（Big Man rule）或「新世襲制」（neo-patrimonialism）：國家與統治者個人之間的界線被抹去，公共財政變成領袖的私囊，官位與資源依忠誠而非能力分配，反對者被收買或消滅。其中最赤裸的版本，被稱為「盜賊統治」（kleptocracy）——以偷竊為統治的政權。</p>
+    <p>最具象徵性的案例，是薩伊（Zaire，今剛果民主共和國）的蒙博托（Mobutu Sese Seko）。一九六五年，他在冷戰背景下發動政變掌權，把國名改為薩伊、把自己的名字改得冗長而充滿君臨意味，並推行「真實性」（authenticité）運動，要國民拋棄西方教名、改穿他設計的「阿巴科斯特」服裝。他統治了三十二年。在這三十二年裡，他把一個礦產極其豐饒的國家——銅、鈷、鑽石、黃金——掏成了空殼。學界與調查報導對他侵吞的金額估計不一，常見的數字以數十億美元計；他在歐洲購置城堡與豪宅，在故鄉格巴多萊（Gbadolite）修建被稱為「叢林凡爾賽」的宮殿，甚至傳說包機運送名酒與時尚。與此同時，國家的道路崩壞、學校關閉、貨幣貶到形同廢紙。</p>
+    <p>關鍵在於：蒙博托並非孤立的怪物，而是冷戰結構的產物與受益者。他堅定反共、容許西方取得薩伊的戰略礦產（包括核時代極具價值的鈷與鈾），於是被美國與法國等西方國家長期當作「我們的混蛋」加以扶植——軍事援助、外交背書、在他財政告急時的紓困一再到來。對華府而言，一個貪腐但可靠的反共盟友，勝過一個可能倒向莫斯科的不確定政權。蒙博托深諳此道，反覆以「赤色威脅」要挾，把自己包裝成西方在中非不可或缺的堡壘。直到一九九〇年代冷戰結束、他失去了戰略價值，西方的支持迅速退潮，他的政權也隨之在一九九七年崩解。盜賊統治的興衰，幾乎與冷戰的曲線同步。</p>
+
+    <p>蒙博托並非唯一。在烏干達，阿敏（Idi Amin）於一九七一年政變上台，以極端的暴力統治八年，估計數以萬計乃至十萬計的人在其治下喪命，一九七二年他更下令驅逐亞裔（多為南亞裔）社群，重創烏干達經濟。中非共和國的博卡薩（Jean-Bédel Bokassa）在一九七七年仿拿破崙加冕為「皇帝」，據報耗費相當於國家年度預算可觀比例的鉅資，而他長期得到法國的支持，加冕的荒誕背後，是 Françafrique（法非特殊關係）那張看不見的網。赤道幾內亞、衣索比亞門格斯圖（Mengistu）的「紅色恐怖」……名單可以拉得很長。這些政權的共通點，不只是個人的殘暴，更是一種被外部默許、甚至被外部需要的殘暴：只要站對冷戰的隊，內政上的罪行往往被兩大陣營選擇性無視。</p>
+
+    <div class="pull">在冷戰的算盤上，一個聽話的暴君，常常被計為一筆「資產」而非一筆「罪行」。</div>
+
+    <p>必須同時說清楚：把這段歷史寫成「非洲人天生不會自治」是危險而錯誤的。同一時期，也有領袖試圖走不同的路。坦尚尼亞的尼雷爾（Julius Nyerere）推行「烏賈瑪」（Ujamaa）村社社會主義，其經濟成效備受爭議、晚年他本人也坦承部分政策失敗，但他清廉、主動和平交棒、並致力於把語言族群眾多的坦尚尼亞凝聚成一個相對和睦的國族，這份遺產至今受到尊敬。波札那則在獨立後依靠鑽石財富、相對廉潔的制度與審慎的財政，成為非洲少數長期維持多黨民主與穩定增長的國家。能動性始終存在；歷史並非命定。</p>
+
+    <h3>代理戰爭：把非洲變成棋盤</h3>
+    <p>如果說強人是冷戰在非洲內政層面的投影，那麼代理戰爭就是冷戰在非洲戰場上的肉身。兩大超強極少在非洲直接交火，卻透過金錢、武器、顧問與盟友，把非洲的本土衝突一一接上全球對抗的電路。</p>
+    <p>最慘烈的舞台之一是安哥拉。一九七五年葡萄牙倉促撤離後，三股獨立運動勢力為爭奪政權陷入內戰，迅速演變為冷戰代理戰：得到蘇聯與古巴支持的「安哥拉人民解放運動」（MPLA）控制首都，對抗得到美國與南非（種族隔離政權）支持的「爭取安哥拉徹底獨立全國聯盟」（UNITA）。古巴派遣了規模龐大的部隊（高峰時以萬計）進入安哥拉，與南非軍隊在卡奎納瓦萊（Cuito Cuanavale）等地反覆交鋒——這是冷戰期間非洲最大規模的常規戰役之一。值得注意的是，這場戰爭的後續與南部非洲的解放糾纏在一起：圍繞安哥拉的軍事與外交博弈，最終與納米比亞獨立、乃至南非種族隔離的鬆動產生了關聯。但對安哥拉人民而言，代價是持續到二〇〇二年的戰火、遍地的地雷，以及一個被石油與鑽石財富扭曲的戰時經濟。</p>
+    <p>非洲之角則上演了冷戰最戲劇性的「換邊」。一九七〇年代，索馬利亞的西亞德（Siad Barre）原本親蘇，衣索比亞則親西方；一九七四年衣索比亞君主制被推翻、門格斯圖的軍政府倒向莫斯科後，兩國一打起來（一九七七至七八的歐加登戰爭），超強竟然當場對調：蘇聯轉而大力支持衣索比亞，美國則接手了被蘇聯拋下的索馬利亞。同一塊土地、同一群人，因為大棋局的一個轉身，瞬間從盟友陣營被劃進敵對陣營。沒有什麼比這更能說明：在冷戰的眼裡，非洲常常不是目的，而是手段。</p>
+
+    <h3>剛果危機與盧蒙巴之死</h3>
+    <p>而冷戰在非洲最深的傷口，幾乎在獨立的第一刻就劃下了。一九六〇年六月三十日，比利時統治下的剛果獨立，年輕的盧蒙巴（Patrice Lumumba）出任首任總理。獨立才幾天，軍隊嘩變、礦產最豐的加丹加省在比利時的支持下宣布分離，國家瀕臨解體。盧蒙巴向聯合國求援未獲滿意回應後，轉而向蘇聯尋求協助——這一步，在冷戰最敏感的神經上踩了一腳。西方情報機關與部分政治圈視他為可能把中非交給莫斯科的危險人物。</p>
+    <p>一九六〇年九月，盧蒙巴在權力鬥爭中被解職、軟禁；一九六一年一月十七日，他在加丹加被殺害，凶手包括加丹加的分離勢力與比利時人員。多年後解密的文件與多國調查顯示，比利時在其死亡中扮演了角色，美國中央情報局亦曾策劃對他不利的行動——比利時官方後來為其在盧蒙巴遇害中的責任正式表達遺憾與道歉。盧蒙巴死時年僅三十五歲，遺體被毀屍滅跡，僅一顆牙齒在二〇二二年才被比利時歸還剛果安葬。他迅速成為整個非洲與全球反殖民運動的烈士與圖騰：一個剛贏得獨立的國家，其民選領袖竟在外部勢力的介入下喪命——這是「形式上獨立、實質上仍受擺布」最刺眼的注腳，也是後來蒙博托三十二年盜賊統治的開場。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>盧蒙巴之死提醒我們：殖民的結束從來不是一條乾淨的終點線。剛果在一九六〇年同時失去了一位領袖與一段可能的另類未來，迎來的卻是長達數十年的掠奪式統治，以及日後在剛果東部延燒至今的衝突（見下一章）。當我們追問「為什麼這個礦產如此豐富的國家如此貧困」，答案無法繞過這一連串外部介入與內部背叛交織的開端。歷史的因果在此格外清晰：今日剛果之難，部分正是六十多年前那聲槍響的長長餘音。</p>
+    </div>
+
+    <h3>債務、撙節與「失落的十年」</h3>
+    <p>冷戰的最後一幕，是一場沒有硝煙卻同樣傷人的危機。一九七〇年代，原料價格一度高漲，許多非洲國家在西方銀行與機構慷慨放貸下大舉借債，投入往往規劃不周、甚至淪為大白象的建設。隨後風向逆轉：一九七九年後美國等國大幅升息，借貸成本飆升；國際原料價格回落，出口收入縮水。雙重夾擊之下，許多非洲國家陷入債務危機——借的是美元，賺的卻是貶值中的本國貨幣與下跌中的原料，債務如雪球般無法償還。</p>
+    <p>於是國際貨幣基金（IMF）與世界銀行帶著「結構調整方案」（Structural Adjustment Programmes, SAPs）登場。換取紓困與新貸款的條件，是一整套常被概括為「華盛頓共識」的藥方：削減政府開支（尤其補貼、教育與醫療）、貨幣貶值、開放市場與貿易、私有化國營企業、減少國家對經濟的干預。其理論是讓市場恢復效率、讓財政重回平衡。</p>
+    <p>結果在許多國家是痛苦的。撙節砍向的，往往正是學校、診所與糧食補貼——城市出現「IMF 暴動」；貨幣貶值推高進口民生品價格；私有化過程中，國有資產有時以低價落入權貴或外資手中。一九八〇年代因此被廣泛稱為非洲的「失落的十年」：不少國家的人均所得不升反降，貧困加深，社會服務倒退。對結構調整的評價至今分歧——支持者認為若不改革、財政崩潰會更糟，且部分政策（如匯率合理化）有其必要；批評者則指其忽視社會成本、削弱了脆弱國家提供基本服務的能力、並把改革的代價最沉重地壓在窮人身上。這場辯論本身，就是理解非洲與外部金融機構複雜關係的一把鑰匙。</p>
+
+    <div class="pull">借的是別人的貨幣，賺的是自己貶值的原料——債務危機把不平等的全球結構，寫進了每一份家庭的菜籃子。</div>
+
+    <p>把這一章合起來看，會浮現一個清晰的模式：外部強權為了資源與結盟，扶植或容忍強人；本土的脆弱結構（殖民邊界、單一經濟、薄弱菁英）又讓強人得以坐大；當外部需求改變，棋子被棄、戰火被點、財政被掏空，承受後果的始終是非洲的人民。這個「為資源與結盟而扶植代理人」的模式，並沒有隨冷戰結束而消失——它只是換了玩家、換了話術。我們將在第十四章「新的瓜分」裡，看到同一齣戲以新的面孔重演。但在那之前，必須先直面這套榨取與分類的邏輯，如何把非洲的礦藏與多元，變成了最致命的衝突燃料。</p>
+  </div>
+</section>
+
+<div class="interlude">
+  <p>旗幟升起，槍聲隨之而來；強人坐大，財富流向遠方。冷戰退場時，留下的不是和平，而是一地的武器、一身的債務，與被外力一再搬動的棋盤。當超強不再為非洲的衝突買單，那些被殖民分類撕開的裂縫、被榨取經濟扭曲的財富，並未癒合——它們只是失去了名義上的看管者，露出了最血腥的一面。</p>
+</div>
+
+<section id="ch13" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十三章 · Genocide, Conflict &amp; the Resource Curse</span>
+    <h2 class="act-title">種族滅絕、衝突與資源詛咒</h2>
+    <p class="act-sub">Genocide, Conflict &amp; the Resource Curse</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>有一個悖論，反覆出現在非洲的地圖上：礦藏越豐、油田越廣的地方，人民往往越窮、流血往往越多。經濟學者稱之為「資源詛咒」（resource curse）——天賜的財富不但沒有帶來繁榮，反而招來貪腐、戰爭與外力的覬覦。這個詛咒並非神秘的命運，而是有跡可循的結構：當一個國家的收入主要來自地底的礦與油，掌權者只需控制礦坑與油井、無需依賴人民納稅，於是治理與人民脫鉤，奪取資源的暴力比建設社會更划算。而這套榨取邏輯的最初模板，正是殖民者親手鑄下的。這一章，是整部歷史中最沉重的一章；我們以莊重之心書寫，因為這裡的每一個數字背後，都是無法計數的人。</p>
+
+    <h3>血鑽：用鮮血換來的光芒</h3>
+    <p>一九九〇年代的西非，把「資源詛咒」演成了人間煉獄。在獅子山（Sierra Leone），「革命聯合陣線」（RUF）以控制鑽石礦區為財源發動內戰，以對平民施加極端暴行（包括大規模砍斷手腳）製造恐怖，強徵兒童為兵。鄰國賴比瑞亞的軍閥泰勒（Charles Taylor）在背後支持 RUF，以走私鑽石換取武器、從中牟利——這些染血的寶石被稱為「血鑽」（blood diamonds）或「衝突鑽石」。一場以「革命」為名的戰爭，本質上是一場圍繞鑽石礦的劫掠，奪走了數萬人的生命，使無數人殘缺、流離。泰勒後來被海牙的特別法庭定罪，成為二戰後紐倫堡審判以來第一位因國際罪行被定罪的前國家元首——遲來的正義，卻無法贖回那些被砍下的手臂。</p>
+    <p>賴比瑞亞本身的悲劇，更是這套榨取邏輯的縮影。這個由十九世紀獲釋的美國黑奴後裔建立的國家，長期由美裔賴比瑞亞菁英統治、壓制本土多數族群，一九八〇年的政變與隨後的權力鬥爭，最終在泰勒等軍閥的角逐下，於一九八九年滑入長達十餘年、斷斷續續的殘酷內戰，奪走數十萬人的生命、製造了大批童兵。鑽石、橡膠、木材等資源既是各派武裝的戰利品，也是延長戰爭的燃料。直到二〇〇三年泰勒下台流亡，賴比瑞亞才逐步走向和平——二〇〇五年，瑟利夫（Ellen Johnson Sirleaf）當選總統，成為非洲史上第一位民選的女性國家元首，並於二〇一一年與另兩位女性共獲諾貝爾和平獎，為這個傷痕累累的國家寫下了能動性與韌性的一頁。</p>
+    <p>同樣以鑽石為財源的衝突，也燒在安哥拉——前章提及的 UNITA 即以鑽石走私維繫其戰爭機器。正是在獅子山、安哥拉等地的慘劇推動下，國際社會於二〇〇三年正式啟動「金伯利進程」（Kimberley Process）認證機制，試圖以原產地證明把「衝突鑽石」逐出合法市場。這套機制的成效屢受批評——定義過窄、執法不力、難以涵蓋非武裝團體造成的人權侵害——但它畢竟標誌著一個遲到的認知：我們指間的光芒，可能沾著遠方的血。消費者、企業與政府第一次被迫追問一件首飾的來歷，而這種「追問供應鏈源頭」的意識，日後將延伸到剛果的礦石之上。</p>
+
+    <h3>剛果東部：非洲的世界大戰</h3>
+    <p>如果說血鑽是西非的傷，那麼剛果東部就是非洲心臟上至今未癒的潰瘍。剛果民主共和國（前薩伊）的東部蘊藏著驚人的礦藏——黃金、錫、鎢，尤其是鈳鉭鐵礦（coltan，提煉出鉭，是手機與電子產品電容器的關鍵原料）與鈷（電動車與鋰電池不可或缺）。豐饒的地底，引來了無休止的戰火。</p>
+    <p>一九九六至二〇〇三年間，剛果先後爆發兩次戰爭。其中第二次剛果戰爭（一九九八至二〇〇三）規模空前，先後捲入剛果政府軍與多達近十個非洲國家的軍隊（盧安達、烏干達、安哥拉、辛巴威、納米比亞等分屬不同陣營），以及數不清的本土與外來武裝團體，因而被稱為「非洲的世界大戰」（Africa's World War）。戰爭與其引發的饑荒、疾病、社會崩潰造成的死亡，據國際救援委員會等機構的估計高達數百萬人——雖然具體數字學界有爭議，但它被廣泛認為是二戰結束以來全球最致命的衝突之一。其驅動力之一，正是對礦產的爭奪：各方武裝以控制礦區、走私礦石維持戰爭機器，礦與血形成了恐怖的循環。即便兩次大戰「結束」之後，剛果東部的武裝衝突至今仍未停息，平民——尤其是婦女——持續承受著難以言說的苦難。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>剛果東部的悲劇，與全球供應鏈直接相連。鈳鉭鐵礦、鈷、錫、鎢、金被合稱「衝突礦物」（conflict minerals）：它們可能流經武裝控制的礦坑，再經層層中介，最終進入我們手中的智慧型手機、筆電與電動車。美國《陶德－法蘭克法案》第 1502 條、歐盟的衝突礦物規範，都要求企業對供應鏈進行盡職調查——這些規範本身有其侷限與爭議（例如曾一度衝擊合法礦工的生計），但它們確立了一個不容迴避的事實：殖民時代「把非洲當原料倉庫」的榨取結構並未消失，它只是被嵌進了二十一世紀的科技經濟裡。當我們談「綠色轉型」需要大量的鈷與鋰時，更不能迴避：能源未來的礦藏，許多正埋在這片被詛咒過的土地之下。</p>
+    </div>
+
+    <h3>石油與三角洲：尼日河的黑色之淚</h3>
+    <p>把鏡頭轉向奈及利亞的尼日河三角洲（Niger Delta）。這裡是非洲最大的產油區之一，數十年來為奈及利亞政府與跨國石油公司帶來了天文數字的收入。然而三角洲本地的人民，卻在油污、漏油、天然氣燃燒（gas flaring）的污染中，承受著生態崩壞與貧困——河流被污染、漁業與農業凋敝，財富被抽往遠方，留下的只有污染與被打碎的生計。</p>
+    <p>一九九〇年代，奧戈尼族（Ogoni）作家與環境運動者肯·薩羅－維瓦（Ken Saro-Wiwa）領導「奧戈尼人民生存運動」，以非暴力方式抗議殼牌（Shell）等石油公司對奧戈尼土地的污染與當地未獲公平回饋，引發國際關注。一九九五年，他與另外八名運動者（合稱「奧戈尼九君子」）在備受國際譴責、被廣泛認為不公的審判後，遭奈及利亞軍政府處決。此舉激起全球抗議，奈及利亞一度被大英國協停權。殼牌長期否認指使此事；圍繞其在當地角色與責任的法律訴訟延續多年。薩羅－維瓦之死，成為「資源詛咒」與環境正義的標誌性事件：當財富從一片土地底下被抽走，反抗的聲音卻可能被連根拔起。</p>
+
+    <div class="pull">財富自地底湧出，流向遠方的賬戶；留給土地的，是油污、烈焰，與一座座沉默的墳。</div>
+
+    <h3>蘇丹與達佛：石油、土地與被命名的滅絕</h3>
+    <p>蘇丹的悲劇，同樣纏繞著資源與身分。長期的南北內戰部分圍繞石油資源與權力分配，最終導致二〇一一年南蘇丹獨立——但獨立並未帶來和平，南蘇丹自身旋即陷入內戰。而在蘇丹西部的達佛（Darfur），二〇〇三年起爆發的衝突中，政府支持的民兵對特定族群平民進行大規模屠殺、強暴與驅逐，造成數十萬人死亡、數百萬人流離。美國政府等曾將達佛的暴行定性為「種族滅絕」（genocide），國際刑事法院並就此對蘇丹時任領導人巴希爾發出逮捕令。達佛提醒世人：「資源詛咒」往往與被殖民者強化的族群分類交織，把對土地、水源與權力的爭奪，扭曲成沿著「身分」展開的屠殺。</p>
+
+    <h3>比夫拉：飢餓作為武器</h3>
+    <p>時間再往前一些。一九六七年，奈及利亞東部以伊博族（Igbo）為主的地區宣布獨立、成立「比夫拉共和國」（Biafra），引發內戰（一九六七至七〇）。這片地區同樣蘊藏石油，資源因素深嵌於衝突之中。奈及利亞政府軍對比夫拉的封鎖，造成了駭人的大饑荒——電視上骨瘦如柴的比夫拉兒童影像，震撼了全世界，也催生了「無國界醫生」等現代人道組織的誕生。估計有上百萬人（多為平民、多死於饑餓與疾病）在這場戰爭中喪生。比夫拉是奈及利亞為「統一」付出的慘痛代價，也再次印證：殖民者把多個民族硬塞進一個國家、又在其下埋藏石油，等於同時埋下了分裂與爭奪的引信。</p>
+
+    <h3>盧安達：百日之內，殖民分類的最終回</h3>
+    <p>而在所有這些傷口之中，最深、最該被牢記、也最直接通往本書核心論點的，是一九九四年的盧安達種族滅絕。</p>
+    <p>要理解它，必須回到殖民。盧安達的胡圖（Hutu）與圖西（Tutsi）原本並非壁壘分明的「種族」——他們語言相通、信仰相通、通婚普遍，界線更多是社會經濟與身分流動的（例如擁有牛隻的多寡曾與身分相關），可以隨境遇變動。是德國、尤其是繼之而來的比利時殖民者，把這種流動的身分硬化成固定的「種族」：殖民者依據偽科學的種族理論，認定圖西人更「高貴」、更接近歐洲人，扶植圖西菁英作為間接統治的工具；一九三〇年代，比利時當局更發放標明「胡圖／圖西」的身分證，把這種分類用紙張與法律固定下來，世代相傳。一個本可流動的社會差異，就此被鑄成不可改變、寫在證件上的敵我標籤。獨立前後權力翻轉、殖民者又轉而支持胡圖多數，積怨與暴力的種子層層累積。</p>
+    <p>一九九四年四月，胡圖族總統的座機被擊落後，醞釀已久的滅絕計畫被引爆。在約一百天之內，以胡圖極端派為主的軍隊、民兵與被煽動的平民，對圖西人以及反對屠殺的胡圖人展開系統性的殺戮，估計約有八十萬至一百萬人遇害。仇恨透過廣播電台（如著名的「千丘自由廣播電台」）煽動，鄰人殺鄰人、同事殺同事，許多人死於砍刀之下。而國際社會——聯合國、各大國——在明知大屠殺正在發生的情況下選擇了撤離與不作為，沒有及時的干預。這份不作為，後來成為國際社會集體的恥辱與懺悔的對象，也直接催生了日後「保護的責任」（R2P）等國際規範的討論。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>盧安達種族滅絕是本書論點最沉痛的證明：殖民者為了「分而治之」而發明、固化、用身分證寫死的族群分類，並非無害的行政技術——它可以在數十年後，化為砍刀。今天，當我們在各地看到沿著「族群」「血統」展開的仇恨動員時，盧安達是一記警鐘：所謂「自古以來的種族仇恨」往往並非自古，而是被權力刻意製造與固化的；分類一旦被當成命運，就可能被用來執行命運。盧安達其後在哀痛中艱難重建、推行全國和解（包括「加卡卡」社區審判），其能動性與韌性同樣值得被看見——但和解的前提，是誠實地指認暴力的根源，包括那本殖民時代的身分證。</p>
+    </div>
+
+    <div class="pull">把流動的身分鑄成固定的「種族」，再發給每個人一張寫明歸屬的證件——殖民者或許未曾預見，七十年後，那張紙會成為一份死亡名單的依據。</div>
+
+    <p>這一章的每一段，都指向同一個源頭：殖民者畫下的邊界、強化的分類、與只懂榨取的經濟，把非洲地底的豐饒，一次次轉化為地面上的血。資源本身不是詛咒，被殖民邏輯扭曲的權力關係才是。明白了這套邏輯如何運作，我們才能在下一章看清：當新的外部強權再次帶著資本與軍隊走進非洲、競逐同樣的礦與油時，這齣戲究竟是在重演，還是有可能被改寫。</p>
+  </div>
+</section>
+
+<div class="interlude">
+  <p>礦坑深處的血、油田之上的火、百日之內的砍刀——這些都不是非洲「自身的問題」，而是殖民榨取與分類邏輯延燒至今的灰燼。當二十一世紀的世界再度發現非洲地底埋著未來所需的鈷、鋰與稀土，新的競逐者已經備好了資本、貸款與軍隊。柏林那張一八八四年的地圖，彷彿正被重新攤開——只是這一次，桌邊多了新的面孔，而非洲，也不再只是被分割的對象。</p>
+</div>
+
+<section id="ch14" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十四章 · The New Scramble</span>
+    <h2 class="act-title">新的瓜分</h2>
+    <p class="act-sub">The New Scramble</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>一八八四年的柏林，歐洲列強圍著一張非洲地圖瓜分大陸。一百四十年後，地圖換成了衛星圖與供應鏈圖，桌邊的面孔也換了——中國、俄羅斯、法國（與其他前殖民母國）、美國、波灣國家、印度、土耳其，乃至日本與韓國，都在以各自的方式競逐非洲的資源、市場與外交支持。媒體因此普遍稱之為「新的瓜分」（the New Scramble for Africa）。但這個比喻必須謹慎使用：與一八八四年不同，今天的非洲是由五十多個主權國家組成的，它們有自己的政府、軍隊、選票與議價能力。本章嘗試平衡地呈現各方強權的角色與不同的觀點——既不為任何一方背書，也不替任何一方掩飾——因為唯有如此，才能看清非洲在這場新競逐中真正的位置與選擇。</p>
+
+    <h3>中國：基建、貸款與一場仍在進行的辯論</h3>
+    <p>中非的交往並非始於今日。早在冷戰時期，中國便援建了著名的坦贊鐵路（TAZARA，一九七〇年代完工），連接坦尚尼亞與當時為擺脫南羅德西亞與南非種族隔離政權鉗制的尚比亞——這在當年是中國對非「南南團結」的標誌性工程，也為日後的合作奠下歷史與情感的基礎。進入二十一世紀，中國成為非洲經濟版圖上最受矚目的外部力量。中國已連續多年是非洲整體第一大貿易夥伴；透過「中非合作論壇」（FOCAC）與「一帶一路」倡議，中國在非洲修築了大量鐵路、公路、港口、電廠、體育場與政府建築——從衣索比亞通往吉布地的鐵路，到肯亞的標準軌鐵路，再到各地的水壩與通訊網路。這種「基建換資源／市場」的模式，對許多非洲國家而言，提供了西方多邊機構附帶政治條件、且程序冗長的貸款之外的另一個選項。中國方面強調「不干涉內政」「南南合作」「互利共贏」，並指出自身曾被殖民與半殖民的歷史，使其與非洲有共情基礎。</p>
+    <p>圍繞這一模式，存在一場持續且尚無定論的辯論，值得平衡呈現雙方論點：</p>
+    <p><strong>「債務陷阱」的疑慮一方認為：</strong>部分中國貸款條件不透明、利率與抵押安排可能使財政脆弱的國家陷入難以償還的債務，極端情況下或被迫以戰略資產（如港口）抵債；工程常使用中方承包商與勞工，對當地就業與技術轉移有限；某些項目經濟效益存疑、環境與勞工標準受質疑。斯里蘭卡漢班托塔港常被援引為「債務陷阱」的範例。</p>
+    <p><strong>對此一說的反駁與質疑一方則指出：</strong>多項獨立學術研究（例如對非洲債務結構的實證分析）發現，非洲多數國家的外債中，欠中國的比例往往低於欠西方私人債權人與多邊機構的比例；「債務陷阱外交」是否為一套蓄意戰略、抑或是個別項目失敗的事後敘事，學界尚有重大分歧；漢班托塔港案例的細節（為主動租讓而非「沒收」）也被指出與通俗說法有出入；而非洲領袖中不乏公開為中國合作辯護、強調其填補了真實的基建缺口者。亦有批評認為「債務陷阱」論述本身，可能帶有西方與中國地緣競爭的色彩。</p>
+    <p>持平而論：中國在非洲的角色既非某些敘事中純粹的「新殖民者」，也非另一些敘事中純粹的「南南夥伴」；它是一個帶著自身國家利益、同時也確實提供了被需要的資本與基建的大國行為者。真正的關鍵，往往不在於資金來自北京、巴黎還是華府，而在於非洲國家自身的談判能力、合約透明度與治理品質——這正是非洲能動性的所在。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>把今天的中非關係簡單貼上「新殖民主義」標籤，既不準確、也不公平——殖民意味著主權的剝奪與直接統治，而非主權國家之間的貿易與借貸。但歷史的回聲確實存在：當一個經濟體高度依賴向外輸出原料、向內輸入製成品與資本時，無論交易對象是誰，那種「榨取式分工」的結構性風險都會浮現。非洲面對的真正課題，不是「選中國還是選西方」，而是如何利用多方競逐的籌碼，爭取更好的條件、推動本地加工與工業化、避免再次被鎖死在「原料供應者」的角色裡。這一次，主導權有機會掌握在非洲自己手中——前提是治理與議價能力跟得上。</p>
+    </div>
+
+    <h3>Françafrique 的黃昏與薩赫爾的政變潮</h3>
+    <p>如果說中國是新進場者，那麼法國則是一個正在退場、卻退得艱難的舊勢力。獨立之後，法國透過被稱為「Françafrique」（法非特殊關係）的網絡，維持著對前法屬非洲的深度影響：駐軍、情報、對親法政權的支持，以及一套關鍵的貨幣安排——CFA 法郎。這套貨幣由前殖民地共用、長期與法郎（後與歐元）掛鉤、並曾要求成員國將部分外匯儲備存於法國國庫，被批評者視為經濟主權受限、後殖民依附的象徵；支持者則認為它提供了貨幣穩定與低通膨。近年改革（部分國家將其改名為「Eco」、取消存款義務）正在推進，但爭議與象徵意義仍在。</p>
+    <p>而在薩赫爾（Sahel）——撒哈拉以南那條橫貫的半乾旱地帶——法國的影響力近年急遽崩落。為打擊蓋達與伊斯蘭國分支的恐怖組織，法國曾在馬利等地長期駐軍（「藪貓行動」等）。然而反恐成效不彰、安全持續惡化，加上對前殖民母國軍事存在的民間反感累積，引爆了一連串政變：馬利（二〇二〇、二〇二一）、幾內亞（二〇二一）、布吉納法索（二〇二二）、尼日（二〇二三）相繼發生軍事接管。政變後的軍政府多以「主權」與「反法」為號召，要求法軍撤離，法國在西非的軍事與政治影響力大幅退潮。</p>
+    <p>值得平衡指出的是，這些軍政府中的數個，轉而尋求俄羅斯的安全合作——包括與俄方關聯的軍事承包集團（即原瓦格納集團相關勢力，其後重組為與俄國防部關係更密切的「非洲軍團」等架構）。俄羅斯藉此在薩赫爾擴大影響力，提供安全服務、武器與政治支持，並在輿論場上推動反西方敘事。對此，不同觀點並存：有人視之為非洲擺脫前殖民母國、行使主權選擇夥伴的自主；有人則擔憂以僱傭武力換取安全，可能帶來新的人權問題與另一種形式的依附，且未必能真正解決恐怖主義的根源。莫斯科方面則強調其與非洲的合作不附帶殖民包袱。各方說法皆有其立場，宜並陳而非輕斷。</p>
+
+    <div class="pull">前殖民母國的軍隊撤離，留下的權力真空，立刻有新的玩家補上——競逐者換了，被競逐的土地未變。</div>
+
+    <h3>美國、波灣、印度、土耳其：多極競逐</h3>
+    <p>美國在非洲的存在，近年主要圍繞安全與反恐：二〇〇七年成立的「美國非洲司令部」（AFRICOM）統籌對非軍事關係，在吉布地等地設有基地，並與多國進行反恐合作。經濟上，美國透過《非洲增長與機會法案》（AGOA）給予部分非洲國家貿易優惠，並在近年明顯意識到自己在基建與投資領域落後於中國，試圖以「重建更美好世界」「全球基礎設施與投資夥伴關係」等倡議回應，但落實程度與聲量仍有限。華府的對非政策，常被觀察到夾在「價值觀外交」（民主、人權）與「地緣競爭」（制衡中俄影響力）之間擺盪。</p>
+    <p>波灣國家（阿聯、沙烏地、卡達）近年大舉投資非洲的港口、農業與物流，尤其在紅海與非洲之角地區布局，兼具商業與戰略考量。印度與非洲有悠久的歷史與離散族裔聯繫，是重要的貿易與投資夥伴，並以「印非論壇峰會」推進關係。土耳其則以航空（土耳其航空密集的非洲航線）、建設、軍售與軟實力（影劇、援助）迅速擴大在非洲的足跡。再加上日本（TICAD 論壇）、韓國等，今天的非洲面對的，是一個遠比冷戰兩極、或柏林會議列強更加多極、更加擁擠的外部競逐場。</p>
+
+    <h3>土地與糧食：另一種「圈地」</h3>
+    <p>競逐的對象不只礦與油，還有土地本身。近一二十年，部分外國政府與企業（來自波灣、亞洲及西方等地）在非洲收購或長期租賃大片農地，種植供出口的糧食作物或生質燃料原料，這一現象被批評者稱為「土地掠奪」（land grabbing）。支持者視之為帶來資本、技術與就業的農業投資；批評者則指其可能侵犯當地社區的傳統土地權、造成在地居民被驅離、在糧食不安全的國家把土地用於出口而非本地需求。圍繞具體案例的事實常有爭議，但這一趨勢無疑與殖民時代「為宗主國種植經濟作物」的記憶產生了刺眼的共鳴。</p>
+
+    <h3>為什麼是現在？人口與市場的引力</h3>
+    <p>在這場多極競逐中，越來越多非洲領袖開始公開強調「不選邊」的自主立場。在二〇二二年俄烏戰爭引發全球選邊壓力時，多個非洲國家在聯合國的相關表決中選擇棄權或缺席，並明確表示不願被捲入他人的對抗、拒絕重演冷戰時代被當作棋子的命運。南非、肯亞、塞內加爾等國領導人都曾在不同場合表達：非洲要與所有夥伴交往、依自身利益決定立場，而非依某個大國的劇本行事。這種「策略性不結盟」的姿態，本身就是一八八四年的非洲所不可能擁有的——它是能動性的具體展現，儘管在大國競爭白熱化時，維持這種平衡需要高超且持續的外交技巧。</p>
+    <p>外部強權為何在此刻如此熱切地競逐非洲？除了關鍵礦產（鈷、鋰、稀土等綠色轉型與高科技所需）之外，最根本的拉力來自人口與市場。非洲是全球人口增長最快、最年輕的大陸；隨著都市化與中產階級擴大，它被視為二十一世紀下半葉最後一塊巨大的消費市場與勞動力來源。誰能在今天建立貿易、基建與外交的橋樑，誰就可能在未來的非洲市場與全球供應鏈中佔得先機。在多極化的世界裡，非洲五十多國手中的外交承認、聯合國票數與資源准入，也都成了被爭取的籌碼。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>柏林一八八四的回聲，在這一章格外清晰：外部強權再次圍繞非洲的資源與結盟而競逐。但有一個關鍵差異不容抹去——這一次，非洲擁有遠比當年更多的能動性。沒有任何一方能像當年的列強那樣直接劃分與佔領；非洲國家可以在中、美、俄、法、印、土、波灣之間「左右逢源」，以競爭換取更好的條件。當然，這種多邊周旋是雙刃劍：操作得當，是發展的槓桿；操作失當，則可能淪為大國博弈的代理戰場、或在多重依附中失去方向。歷史不會自動重演，也不會自動避免重演——差別在於非洲能否從上一輪瓜分的教訓中，學會做自己命運的議價者，而非被瓜分的對象。</p>
+    </div>
+
+    <p>新的瓜分究竟是舊劇本的重演，還是一次可以被改寫的競逐？答案不在北京、巴黎或華府，而在阿迪斯阿貝巴、阿布加、奈洛比與基加利——在非洲自己的選擇裡。下一章，我們就走進今日與明日的非洲，看這片大陸如何一面清算殖民的舊賬、一面試圖在自己的條件上，書寫一個尚未寫定的未來。</p>
+  </div>
+</section>
+
+<div class="interlude">
+  <p>柏林的地圖被重新攤開，桌邊卻坐了更多陌生的面孔；只是這一次，非洲不再只是被指劃的版圖，而是握有籌碼、能夠議價的一方。競逐仍在，但劇本未定。當外部的目光再度聚焦於這片大陸的地底與市場，非洲人自己正在問一個更根本的問題：我們能否不只是被書寫，而是提筆書寫？清算與創造，賠償與崛起，正在同一片土地上同時展開。</p>
+</div>
+
+<section id="ch15" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十五章 · Africa Today &amp; Tomorrow</span>
+    <h2 class="act-title">今日與明日的非洲</h2>
+    <p class="act-sub">Africa Today &amp; Tomorrow</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>歷史的長河走到這裡，鏡頭該從過去轉向當下與未來。前面十四章，我們追溯了帝國如何瓜分、榨取、分類、扭曲這片大陸，又如何在退場時留下難以癒合的傷。但若把非洲的故事停在傷口上，便是另一種偏見——彷彿非洲只是被動的受害者，沒有創造、沒有未來。事實恰恰相反。今日的非洲，正同時進行著兩件事：一面向過去清算殖民的舊賬，一面以驚人的活力，朝著一個尚未寫定的未來奔去。這一章，我們以希望與清醒並存的目光，看這片最年輕的大陸。</p>
+
+    <h3>清算：被掠奪的文物該不該回家</h3>
+    <p>清算的第一條戰線，在博物館裡。十九世紀的帝國，不只奪走了非洲的土地與資源，也奪走了它的記憶與聖物。其中最著名的，是「貝南銅器」（Benin Bronzes）：一八九七年，英軍對貝南王國（今奈及利亞境內）發動懲罰性遠征，洗劫了王宮，將數千件精美絕倫的青銅與象牙雕刻（其實多為黃銅）掠往歐洲，散入大英博物館、柏林、以及歐美各地的收藏。這些銅器是貝南宮廷藝術的巔峰，也是一個被武力摧毀的王國的歷史檔案。</p>
+    <p>一個多世紀後，歸還（restitution）成了全球性的議題。德國已正式將大批貝南銅器的所有權移交奈及利亞、並陸續實際歸還部分藏品；法國在一份委託研究報告（薩爾－薩瓦伊報告）後，歸還了若干掠自貝南共和國的文物；不少歐美博物館也在重新檢視館藏。然而爭議遠未結束：擁有最大宗貝南銅器收藏的大英博物館，長期以英國法律限制其永久處分館藏為由，主要談論「長期借展」而非完全歸還；「環球博物館」論者主張這些文物在大都會的博物館能被更多人看見、研究與保存，反對者則指出，這套說法本身正是殖民邏輯的延續——憑什麼一個民族的聖物，要由掠奪者來決定誰能看見它。圍繞貝南銅器最終由誰保管、如何展示，奈及利亞內部亦有不同聲音。歸還之辯，因此遠不只是文物的物流問題，而是關於誰有權詮釋歷史、誰擁有記憶的根本叩問。</p>
+    <p>清算也發生在語言裡。殖民留下的，還有一套主導著教育、行政與文學的歐洲語言——英語、法語、葡語。非洲作家為此展開了一場深刻的辯論：奈及利亞的阿契貝（Chinua Achebe）以英文寫出《分崩離析》（Things Fall Apart），主張可以「為自己的目的」征用殖民者的語言、從內部改造它；肯亞的恩古吉（Ngũgĩ wa Thiong'o）則在某個階段毅然放棄英文、改以母語基庫尤語寫作，認為語言是殖民「精神統治」最後也最深的堡壘，真正的去殖民必須奪回自己的語言。這場沒有標準答案的論爭，本身就是非洲知識界能動性的明證——它不只在收回文物與土地，也在追問：用誰的語言、講誰的故事、為誰而寫。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>文物歸還之所以重要，是因為它觸及了殖民最深的傷——不只奪走財富，更奪走一個民族講述自己故事的能力。非洲聯盟近年推動更廣泛的「賠償」（reparations）議程，將文物歸還、對奴隸貿易與殖民暴行的正式道歉與補償，乃至債務正義，連成一條完整的訴求線。賠償之辯極具爭議（如何計算、向誰賠、是否會淪為政治姿態），但它標誌著力量對比的緩慢轉變：非洲不再只是請求援助的一方，而是開始以「歷史債權人」的姿態，要求一個遲到的清算。這場對話本身，就是去殖民的一部分。</p>
+    </div>
+
+    <h3>創造：一個正在崛起的大陸</h3>
+    <p>清算之外，是更澎湃的創造。二〇二一年，《非洲大陸自由貿易區》（AfCFTA）正式生效——以參與國家數量計，這是全球最大的自由貿易區，囊括非洲幾乎所有國家、覆蓋十多億人口。它的願景，是打破殖民邊界遺留的碎片化——當年列強畫的邊界，把非洲切成五十多個各自為政、彼此貿易壁壘重重的市場，使非洲內部貿易比例遠低於歐洲或亞洲。AfCFTA 試圖把這些碎片重新縫合成一個統一大市場，推動本地工業化、減少對原料出口的依賴。落實之路漫長且充滿挑戰（基建、海關、規則協調、政治意願），但其象徵意義巨大：這是非洲人自己畫的一張地圖，第一次嘗試覆蓋在列強那張一八八四年的地圖之上。</p>
+    <p>支撐這個願景的，是人口。非洲目前人口約十五億，據聯合國預估，到二〇五〇年將增長至約二十五億——屆時全球每四個人中約有一個是非洲人，且非洲是全球年齡中位數最低、最年輕的大陸。這既是巨大的機遇——龐大的勞動力與消費市場，所謂「人口紅利」；也是嚴峻的挑戰——若教育與就業跟不上，年輕人口可能轉為不穩定的壓力。紅利能否兌現，取決於投資於人：教育、醫療、就業，與善治。</p>
+
+    <h3>蛙跳：跳過電纜，直接連上未來</h3>
+    <p>非洲沒有等待外界的施捨來追趕，而是在某些領域直接「蛙跳」（leapfrogging）過了發達國家走過的階段。最經典的例子是行動支付：肯亞的 M-Pesa 在二〇〇七年推出，讓沒有銀行帳戶的人也能用最普通的手機收付款項、匯款、儲蓄。在一個傳統銀行分行稀少的環境裡，M-Pesa 跳過了實體銀行的階段，直接把金融服務裝進了千百萬人的口袋，深刻改變了肯亞乃至東非的經濟生活，並成為全球研究普惠金融與金融科技的標竿。今天，從奈及利亞的金融科技獨角獸，到各地蓬勃的行動商務與創業生態，非洲的年輕人正用科技書寫不被舊基礎設施束縛的新可能。</p>
+
+    <div class="pull">當電纜還沒鋪到村莊，金融服務已經先一步裝進了口袋——非洲不總是追趕者，有時它直接跳到了前面。</div>
+
+    <h3>各自的軌跡：奈及利亞、肯亞、衣索比亞、盧安達</h3>
+    <p>「非洲」從來不是鐵板一塊，而是五十多個迥異的國家。<strong>奈及利亞</strong>是非洲人口最多的國家（逾兩億），擁有龐大的市場、活力四射的文化產業（諾萊塢電影、afrobeats 音樂風靡全球），也背負著石油依賴、治安與分裂的挑戰。<strong>肯亞</strong>是東非的科技與商業樞紐，創新生態蓬勃。<strong>衣索比亞</strong>是非洲少數從未被長期殖民、保有古老文明與獨立記憶的國家，近年經歷高速增長與工業化嘗試，卻也在二〇二〇至二二年的提格雷衝突中付出慘重代價，提醒人們發展與穩定的脆弱。<strong>盧安達</strong>在種族滅絕的廢墟上重建，以高效治理、潔淨與快速增長著稱，被一些人譽為「非洲的新加坡」，但其發展模式對政治空間的壓縮，也引發關於「發展是否必須以自由為代價」的爭論。這些不同的軌跡告訴我們：非洲的未來不會只有一種寫法。</p>
+    <p>還有都市的爆發。<strong>拉哥斯</strong>（Lagos）——奈及利亞的經濟首都——正以驚人的速度膨脹為非洲最大的超級城市之一，人口以千萬計，是混亂與機會、貧民窟與摩天樓、塞車與創業並存的二十一世紀非洲縮影。連同離散在全球各地的非洲族裔（diaspora）——他們匯回家鄉的僑匯總額，多年來已超過外國對非援助的規模，並帶回技能、資本與人脈——非洲的能量，早已不限於這片大陸的地理邊界。非洲聯盟甚至正式將全球非洲離散族裔視為非洲的「第六大區域」，呼應著一個多世紀前由加維、杜博依斯（W. E. B. Du Bois）等人點燃、又經恩克魯瑪等獨立領袖傳承的泛非主義理想——只是這一次，它從反殖民的政治口號，逐漸轉化為跨越大西洋與印度洋的經濟、文化與身分認同網絡。</p>
+    <p>而真正推動這一切的，是非洲的年輕人。在這片年齡中位數不到二十歲的大陸上，新一代不再只透過殖民者的眼睛看自己。從拉哥斯與奈洛比的科技創業者，到把 afrobeats 與 amapiano 送上全球榜單的音樂人，從重新書寫非洲史的學者，到要求文物歸還與氣候正義的青年運動者——他們既清醒地承接著歷史的重負，又拒絕被那段歷史定義。他們是「非洲崛起」（Africa Rising）這個既被寄予厚望、也被提醒勿過度樂觀的敘事中，最真實也最不確定的變數。發展不會是直線，挫折與倒退仍會發生；但掌握這支筆的，終究是他們自己。</p>
+
+    <h3>不正義：排放最少，受害最深</h3>
+    <p>然而，在所有希望之上，懸著一道最殘酷的不正義。非洲是對全球碳排放貢獻最小的大陸之一——其歷史與當前的人均排放量遠低於工業化國家——卻是氣候變遷受害最深的地區之一。薩赫爾的乾旱與荒漠化、非洲之角反覆的飢荒、莫三比克遭受的超強氣旋、各地的洪水與糧食危機……氣候災難正不成比例地砸向那些最無力承受、也最不該負責的人。這是殖民式不平等在生態層面的延續：富裕世界透過工業化（很大程度建立在包括非洲在內的全球榨取之上）累積了財富與排放，帳單卻寄到了非洲的門口。在國際氣候談判桌上，非洲國家因此成為「氣候正義」與「損失與損害」補償最堅定的倡議者——這同樣是一場關於誰該為歷史負責的清算。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 至今的影響</span>
+      <p>氣候不正義，是殖民邏輯最新、也最全球化的一張面孔。它把「榨取的利益歸於少數、承受的代價推給多數」這條貫穿全書的線索，從礦坑與棉田，延伸到了整個地球的大氣層。非洲在氣候談判中要求歷史責任與補償，與它要求文物歸還、債務正義、殖民賠償，本質上是同一場運動：要求世界誠實地面對，今日的不平等並非偶然，而是有其歷史的因果。如何回應這份要求，是檢驗「後殖民世界」是否真的後殖民的試金石。</p>
+    </div>
+
+    <h3>開放的提問</h3>
+    <p>於是我們回到最初、也是最終的那個問題：非洲能否擺脫殖民寫下的劇本，提筆書寫自己的未來？</p>
+    <p>沒有人能給出確定的答案，任何確定的答案都是傲慢的。樂觀的理由是真實的：最年輕的人口、最大的自貿區、蛙跳的科技、覺醒的能動性、要求清算的底氣。悲觀的理由也是真實的：未癒的衝突、脆弱的治理、沉重的債務、新一輪的外部競逐、與不成比例的氣候打擊。非洲的未來，很可能不是樂觀或悲觀的單選題，而是五十多個國家、十幾億人，在這兩股力量的拉鋸中，各自走出的不同道路。</p>
+    <p>但有一點，本書希望讀者帶走：無論未來如何，非洲都不該、也不再只是被書寫的對象。從反抗殖民的戰士，到獨立的締造者，到今日清算歷史、創造未來的世代——能動性始終在這片大陸上跳動。帝國曾以為自己畫下的地圖是永恆的，但地圖是人畫的，也可以被人重畫。</p>
+  </div>
+</section>
+
+<div class="interlude">
+  <p>清算與創造、傷口與希望，在這片最年輕的大陸上同時展開。帝國的旗幟早已降下，但它畫下的邊界、強化的分類、留下的榨取結構與不平等，仍如影隨形地纏繞著今天。歷史不會替任何人收尾，它只把問題交到後人手中。於是，當所有的征服與反抗、瓜分與獨立、掠奪與清算都被一一說過之後，剩下的，是一個必須被誠實面對的事實——</p>
+</div>
+
+
+<section id="chF" class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是，帝國退場，遺產卻留了下來</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">The Empire Left, But Its Map Remained</p>
+      <div class="ornament" style="color:var(--gold-bright)">★ ◆ ★</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。為什麼今天的非洲，會是這個模樣——明明擁有最年輕的人口、最豐富的礦藏、最古老的文明，卻仍在許多指標上墊底？答案，是四層層層相扣、且大多源自帝國主義的遺產疊加而成的。每一層，都對應著本篇的一段旅程，也都至今仍在回聲。</p>
+
+      <h3>第一層：一張人為的地圖</h3>
+      <p>一切結構的源頭，是<strong>那些被外人劃下的疆界</strong>。1884 年的柏林會議，歐洲列強用尺與筆在非洲地圖上劃線，完全不顧地面上活生生的民族、語言與王國。於是有的民族被一刀切成兩三個國家，有的世仇被硬塞進同一道國界內。獨立之後，非洲統一組織選擇<em>維持這些殖民邊界</em>以避免無止境的領土戰爭——但這也意味著，那張不合理的地圖，連同它埋藏的張力，被原封不動地繼承了下來。今天非洲許多衝突的根，都能一路追溯回那張會議桌上的地圖。</p>
+
+      <h3>第二層：一套被改造的經濟</h3>
+      <p>接著是<strong>被重塑的經濟結構</strong>。殖民經濟的設計目的，從來不是讓非洲自身繁榮，而是把原料——黃金、鑽石、銅、可可、棉花、石油——盡可能廉價地抽往宗主國。鐵路只通向港口，而非連結內陸城市；國家被綁定在一兩種出口商品上。獨立六十年後，許多非洲國家依然困在這套「榨取型、單一商品」的軌道裡：價格由遠方的市場決定，財富由少數人攫取。這就是揮之不去的「資源詛咒」——它的藍圖，是殖民者畫下的。</p>
+
+      <h3>第三層：一道被製造的裂痕</h3>
+      <p>然後是<strong>被製造、又被固化的族群分裂</strong>。為了便於統治，殖民者常把流動的身分硬分成壁壘分明的「部族」，扶植一群人去壓制另一群人。盧安達的胡圖與圖西之分被殖民者以身分證制度化，最終在 1994 年釀成近百萬人遇害的種族滅絕；類似的「分而治之」遺毒，也潛伏在許多後殖民衝突的底層。<em>帝國最深的暴力，往往不是它拿走了什麼，而是它在人群之間，劃下了一道原本不存在、卻再也抹不掉的線。</em></p>
+
+      <h3>第四層：一場未竟的獨立</h3>
+      <p>最後是<strong>形式上完成、實質上未竟的獨立</strong>。國旗降下了，但經濟的依賴、貨幣的綁定（如 CFA 法郎）、與舊宗主國的恩庇網絡並未隨之消失。而今天，一場被稱為「新瓜分」的角力正在上演：中國的基建與貸款、俄羅斯的軍事承包商、西方的資源與基地、各方對礦藏與市場的競逐——非洲再一次成為大國博弈的棋盤。獨立，在許多意義上，仍是一張未兌現的支票。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 至今的影響</span>
+        <p>所以，帝國主義對今天的非洲意味著什麼？它意味著：<strong>殖民者退場時帶走了官員與國旗，卻留下了地圖、經濟結構與族群裂痕</strong>——這三樣東西，比任何一位總督都活得更久，至今仍在形塑非洲的命運。許多被歸咎於非洲「自身」的問題——衝突、貪腐、貧窮、依賴——若不放回這段被掠奪、被改造、被分裂的歷史脈絡裡，就根本無法被真正理解。</p>
+        <p>但歷史的回聲，從來不是宿命的判決。非洲從不只是一個「被書寫的客體」：在被征服時它頑強抵抗，在衣索比亞它擊退了入侵，在獨立浪潮裡它書寫了二十世紀最壯闊的解放史詩。<em>今天，擁有全球最年輕人口、自由貿易區與正在追討的文物與正義的非洲，正試圖從別人替它寫的劇本裡，奪回自己那支筆。</em></p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">柏林的一張地圖、礦場的一條鐵路、身分證上的一個分類、國旗降下後仍未斷的那條線——帝國退場了，它的遺產卻留了下來；而非洲的下一章，正在它自己手裡，緩緩寫成。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一段歷史的終極啟示</span>
+      <p>帝國主義最深、最持久的傷害，往往不是它掠奪走的黃金與人口，而是它強加下的、比帝國本身更長壽的東西——一張不合理的地圖、一套榨取的經濟、一道被製造的族群裂痕。把這片大陸的當代困境，僅僅歸因於非洲人「自己不行」，是一種對歷史的失憶；但若把非洲僅僅描繪成永遠的受害者，又抹煞了它從未止息的能動性與尊嚴。真正的啟示是：地圖的去殖民已經完成，結構的去殖民尚未；而這未竟的工程，最終只能由非洲人，用自己的手去完成。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從瓜分之前那些輝煌的帝國與綿密的商道，<br>
+        到柏林會議桌上那條無視人命劃下的國界，<br>
+        從剛果被砍下的雙手、邁吉邁吉與赫雷羅的血，<br>
+        到阿杜瓦的勝利、迦納升起的第一面獨立國旗，<br>
+        再到盧安達的屠刀、種族隔離的牆，與今天「新瓜分」的港口和礦場——<br>
+        這段交織著瓜分、枷鎖、抵抗、解放與未竟獨立的歷史，<br>
+        最終回答了那個最初的問題：<br>
+        為什麼一片最古老、最年輕、最富饒的大陸，<br>至今仍在別人替它畫下的地圖上，尋找自己的路。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">◆ ✦ ◆</div>
+  <p>瓜分、枷鎖與未竟的獨立 · 帝國主義與非洲的兩百年</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE SCRAMBLE TO THE NEW SCRAMBLE · 1884 – TODAY</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

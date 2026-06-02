@@ -155,6 +155,10 @@ ENTRIES = [
     dict(src="澳洲/布里斯本_棕蛇之河流放與奧運.html", slug="brisbane", cat="city", group="澳洲 Australia",
          zh="棕蛇之河、流放與奧運：布里斯本的身世", en="Brisbane: The Penal River That Became an Olympic City", lat=-27.47, lng=153.02),
 
+    # ---------- 歐洲城市 ----------
+    dict(src="歐洲歷史/紐卡索_運煤到紐卡索.html", slug="newcastle", cat="city", group="英國 United Kingdom",
+         zh="運煤到紐卡索：煤、船與泰恩河的傲骨", en="Newcastle upon Tyne: Coal, Ships & Geordie Pride", lat=54.98, lng=-1.61),
+
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
          zh="海權、契約與資本：六百年特許公司興衰", en="The Age of Sail", lat=None, lng=None),
@@ -164,6 +168,8 @@ ENTRIES = [
          zh="摩天大樓詛咒：最高樓與經濟轉折", en="The Skyscraper Curse", lat=None, lng=None),
     dict(src="經濟史/工業革命與AI時代的回聲.html", slug="industrial-revolution", cat="theme",
          zh="從蒸汽到演算法：工業革命與 AI 時代的回聲", en="From Steam to Algorithm: The Industrial Revolution & the Age of AI", lat=None, lng=None),
+    dict(src="世界史/帝國主義與非洲的兩百年.html", slug="africa-imperialism", cat="theme",
+         zh="瓜分、枷鎖與未竟的獨立：帝國主義與非洲的兩百年", en="Imperialism in Africa: From the Scramble to the New Scramble", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
