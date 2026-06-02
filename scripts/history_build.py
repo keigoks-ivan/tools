@@ -150,6 +150,8 @@ ENTRIES = [
          zh="東海岸三城：哥打巴魯·瓜拉丁加奴·關丹", en="East Coast Trio", lat=5.0, lng=103.2),
     dict(src="紐西蘭/奧克蘭_地峽與火山之城.html", slug="auckland", cat="city", group="紐西蘭 New Zealand",
          zh="地峽、火山與帆之城：奧克蘭的身世", en="Auckland: The Isthmus Desired by Many", lat=-36.85, lng=174.76),
+    dict(src="澳洲/雪梨_流放地與港灣之城.html", slug="sydney", cat="city", group="澳洲 Australia",
+         zh="流放地、港灣與房價：雪梨的兩百年身世", en="Sydney: From the Fatal Shore to the Harbour Empire", lat=-33.87, lng=151.21),
 
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
