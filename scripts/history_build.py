@@ -148,6 +148,8 @@ ENTRIES = [
          zh="三座承載史詩的小城：芙蓉·太平·金寶", en="Seremban · Taiping · Kampar", lat=4.85, lng=101.40),
     dict(src="東南亞 南亞 歷史/馬來西亞/哥打巴魯瓜拉丁加奴關丹_守著一個民族之根的東海岸三城.html", slug="east-coast-trio", cat="city", group="馬來西亞 Malaysia",
          zh="東海岸三城：哥打巴魯·瓜拉丁加奴·關丹", en="East Coast Trio", lat=5.0, lng=103.2),
+    dict(src="紐西蘭/奧克蘭_地峽與火山之城.html", slug="auckland", cat="city", group="紐西蘭 New Zealand",
+         zh="地峽、火山與帆之城：奧克蘭的身世", en="Auckland: The Isthmus Desired by Many", lat=-36.85, lng=174.76),
 
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
