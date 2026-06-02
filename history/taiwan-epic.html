@@ -284,22 +284,6 @@ footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-s
 .concept,concept{display:inline-block;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.04em;padding:.05rem .5rem;margin:0 .15rem;border:1px solid var(--gold);border-radius:20px;color:var(--rust);background:rgba(168,132,47,.06);white-space:nowrap;vertical-align:middle}
 .dark .concept,.dark concept{color:#d6a676;border-color:var(--gold)}
 
-/* ====== TABLE OF CONTENTS ====== */
-.toc{max-width:760px;margin:0 auto;padding:5rem 1.6rem 3rem}
-.toc .toc-h{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.28em;color:var(--rust);text-transform:uppercase;text-align:center;margin-bottom:.6rem}
-.toc .toc-sub{text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.15rem;color:var(--faint);margin-bottom:2.6rem}
-.toc .toc-rule{width:60px;height:1px;background:var(--gold);margin:0 auto 2.8rem;opacity:.6}
-.toc-part{margin:1.9rem 0 .4rem}
-.toc-part .pn{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
-.toc-part .pt{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.05rem;color:var(--sea-deep);margin-top:.1rem}
-.dark .toc-part .pt{color:var(--gold-bright)}
-.toc-item{display:flex;align-items:baseline;gap:.7rem;padding:.32rem 0 .32rem 1.2rem;border-left:1px solid var(--line);margin-left:.3rem;text-decoration:none}
-.toc-item:hover{border-left-color:var(--gold)}
-.toc-item .ci-num{font-family:'Cinzel',serif;font-size:.72rem;color:var(--rust);min-width:2.6rem;letter-spacing:.04em}
-.toc-item .ci-title{font-size:.96rem;color:var(--ink);line-height:1.4}
-.toc-item:hover .ci-title{color:var(--rust)}
-.dark .toc-item .ci-title{color:#cbb292}
-
 /* ====== PART DIVIDER ====== */
 .part{position:relative;max-width:100%;margin:0;padding:7rem 1.6rem 6.5rem;text-align:center;background:linear-gradient(160deg,var(--sea-deep),#0f2a33 60%,#143842);color:var(--parchment);overflow:hidden}
 .part::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,rgba(168,132,47,.16),transparent 60%);z-index:0}
@@ -355,6 +339,59 @@ footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-s
 </style>
 </head>
 <body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+@media(max-width:1100px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<=1100)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
 <!-- imq-history-backbar -->
 <div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
   font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
@@ -380,43 +417,6 @@ footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-s
   </div>
   <div class="scroll-hint">向下展開 ▾</div>
 </header>
-<nav class="toc reveal">
-  <div class="toc-h">目錄 · Contents</div>
-  <div class="toc-sub">海上孤舟 · 台灣四百年的身世</div>
-  <div class="toc-rule"></div>
-  <a class="toc-item" href="#prologue"><span class="ci-num">序章</span><span class="ci-title">在所有人來之前，這裡有什麼？</span></a>
-  <div class="toc-part"><div class="pn">第一部 · Part I</div><div class="pt">強權的潮汐</div></div>
-  <a class="toc-item" href="#ch1"><span class="ci-num">第一章</span><span class="ci-title">大員：一家公司，把台灣帶進世界貿易</span></a>
-  <a class="toc-item" href="#ch2"><span class="ci-num">第二章</span><span class="ci-title">鄭氏王朝：海上孤臣的反攻基地</span></a>
-  <a class="toc-item" href="#ch3"><span class="ci-num">第三章</span><span class="ci-title">清朝兩百年：從化外之地到帝國行省</span></a>
-  <a class="toc-item" href="#ch4"><span class="ci-num">第四章</span><span class="ci-title">日本五十年：現代化與皇民化的雙面刃</span></a>
-  <a class="toc-item" href="#ch5"><span class="ci-num">第五章</span><span class="ci-title">接收、二二八與白色恐怖</span></a>
-  <div class="toc-part"><div class="pn">第二部 · Part II</div><div class="pt">島嶼的組成</div></div>
-  <a class="toc-item" href="#ch6"><span class="ci-num">第六章</span><span class="ci-title">原住民的當代史：正名、土地與遲來的道歉</span></a>
-  <a class="toc-item" href="#ch7"><span class="ci-num">第七章</span><span class="ci-title">客家人：硬頸與隱形的一群</span></a>
-  <a class="toc-item" href="#ch8"><span class="ci-num">第八章</span><span class="ci-title">諸神之島：信仰如何縫合一座移民社會</span></a>
-  <a class="toc-item" href="#ch9"><span class="ci-num">第九章</span><span class="ci-title">母語與文學：一座島如何爭奪自己的聲音</span></a>
-  <a class="toc-item" href="#ch10"><span class="ci-num">第十章</span><span class="ci-title">新住民與移工：台灣的「第五大族群」</span></a>
-  <a class="toc-item" href="#ch11"><span class="ci-num">第十一章</span><span class="ci-title">同婚與性別：亞洲的進步試驗場</span></a>
-  <div class="toc-part"><div class="pn">第三部 · Part III</div><div class="pt">奇蹟與它的代價</div></div>
-  <a class="toc-item" href="#ch12"><span class="ci-num">第十二章</span><span class="ci-title">治理一座島：從衛生現代化到全民健保</span></a>
-  <a class="toc-item" href="#ch13"><span class="ci-num">第十三章</span><span class="ci-title">經濟發展史：一座窮島如何養活全世界</span></a>
-  <a class="toc-item" href="#ch14"><span class="ci-num">第十四章</span><span class="ci-title">畸形的房市：奇蹟背面的世代帳單</span></a>
-  <a class="toc-item" href="#ch15"><span class="ci-num">第十五章</span><span class="ci-title">寧靜革命：從黨外到政黨輪替</span></a>
-  <div class="toc-part"><div class="pn">第四部 · Part IV</div><div class="pt">邊界、認同與孤獨</div></div>
-  <a class="toc-item" href="#ch16"><span class="ci-num">第十六章</span><span class="ci-title">金門與馬祖：冷戰最前線的兩座島</span></a>
-  <a class="toc-item" href="#ch17"><span class="ci-num">第十七章</span><span class="ci-title">國族的難題：我是誰，我們是誰</span></a>
-  <a class="toc-item" href="#ch18"><span class="ci-num">第十八章</span><span class="ci-title">外交的孤獨：一個被擠出國際組織的國家</span></a>
-  <div class="toc-part"><div class="pn">第五部 · Part V</div><div class="pt">當代的考驗</div></div>
-  <a class="toc-item" href="#ch19"><span class="ci-num">第十九章</span><span class="ci-title">海峽的張力：地緣前線與「矽盾」</span></a>
-  <a class="toc-item" href="#ch20"><span class="ci-num">第二十章</span><span class="ci-title">與災難共生：地動、風雨與一座島的韌性</span></a>
-  <a class="toc-item" href="#ch21"><span class="ci-num">第二十一章</span><span class="ci-title">那片被背對的海：漁、港與海洋的身世</span></a>
-  <a class="toc-item" href="#ch22"><span class="ci-num">第二十二章</span><span class="ci-title">今日的天花板：少子化、能源與產業集中</span></a>
-  <a class="toc-item" href="#ch23"><span class="ci-num">第二十三章</span><span class="ci-title">AI 的時刻：從「矽島」到「智慧之島」的機會</span></a>
-  <a class="toc-item" href="#ch24"><span class="ci-num">第二十四章</span><span class="ci-title">面海，還是背海？一座島的自我之辯</span></a>
-  <a class="toc-item" href="#ch25"><span class="ci-num">第二十五章</span><span class="ci-title">尚未書寫的水域：未來三十年的幾種可能</span></a>
-  <a class="toc-item" href="#finale"><span class="ci-num">終章</span><span class="ci-title">於是，今天的台灣人</span></a>
-</nav>
 <section id="prologue" class="act reveal">
   <div class="act-head">
     <span class="act-num">序章 · Before Everyone</span>

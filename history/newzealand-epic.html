@@ -302,35 +302,6 @@ footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-s
 .legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
 .legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
 
-/* ===== TABLE OF CONTENTS ===== */
-.toc{max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2}
-.toc-head{text-align:center;margin-bottom:2.6rem}
-.toc-head .kick{font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:.32em;color:var(--gold);text-transform:uppercase}
-.toc-head h2{font-family:'Noto Serif TC',serif;font-weight:900;font-size:2rem;color:var(--sea-deep);margin:.6rem 0 .4rem;letter-spacing:.04em}
-.toc-head .toc-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.15rem;color:var(--faint)}
-.toc-head .rule{width:64px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1.2rem auto 0}
-.toc-part{margin:2.2rem 0 0}
-.toc-part-label{display:flex;align-items:baseline;gap:.8rem;margin-bottom:.7rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
-.toc-part-label .pn{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.2em;color:var(--rust);text-transform:uppercase;white-space:nowrap}
-.toc-part-label .pt{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.12rem;color:var(--sea-deep)}
-.toc-part-label .pe{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.95rem;color:var(--faint);margin-left:auto;text-align:right}
-.toc-list{list-style:none;margin:0;padding:0}
-.toc-list li{margin:0}
-.toc-list a{display:flex;align-items:baseline;gap:.9rem;text-decoration:none;color:var(--ink);padding:.5rem .6rem;border-radius:3px;transition:background .25s ease, transform .25s ease;border-left:2px solid transparent}
-.toc-list a:hover{background:rgba(176,141,52,.08);border-left-color:var(--gold);transform:translateX(4px)}
-.toc-list .ch{font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold);letter-spacing:.04em;white-space:nowrap;min-width:3.6rem;font-weight:600}
-.toc-list .ti{font-family:'Noto Serif TC',serif;font-size:1.02rem;color:var(--ink);font-weight:500;line-height:1.4}
-.toc-list a:hover .ti{color:var(--rust)}
-.toc-list .dots{flex:1;border-bottom:1px dotted var(--line);transform:translateY(-.28rem);min-width:1rem}
-@media(max-width:640px){
-  .toc{margin-top:3.4rem}
-  .toc-list .dots{display:none}
-  .toc-part-label{flex-wrap:wrap}
-  .toc-part-label .pe{flex-basis:100%;margin-left:0;text-align:left;margin-top:.2rem}
-  .toc-list a{gap:.6rem}
-  .toc-list .ti{font-size:.96rem}
-}
-
 /* ===== ACT / PART DIVIDER ===== */
 .part-div{max-width:900px;margin:5.5rem auto 1rem;padding:0 1.6rem;text-align:center;position:relative;z-index:2;scroll-margin-top:80px}
 .part-div .pn{font-family:'Cinzel',serif;font-size:.76rem;letter-spacing:.34em;color:var(--rust);text-transform:uppercase}
@@ -374,6 +345,59 @@ footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-s
 </style>
 </head>
 <body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+@media(max-width:1100px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<=1100)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>1100)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
 <!-- imq-history-backbar -->
 <div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
   font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
@@ -406,106 +430,6 @@ footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-s
 </section>
 
 <div class="div-orn">✶ ✦ ✶</div>
-
-<!-- ===== TABLE OF CONTENTS ===== -->
-<nav class="toc reveal" id="toc">
-  <div class="toc-head">
-    <span class="kick">Table of Contents</span>
-    <h2>全書目錄</h2>
-    <p class="toc-sub">六部、二十八章，最後的島嶼與一份仍在協商的契約</p>
-    <div class="rule"></div>
-  </div>
-
-  <div class="toc-part">
-    <div class="toc-part-label">
-      <span class="pn">第一部</span>
-      <span class="pt">最後的島嶼</span>
-      <span class="pe">The Last Islands</span>
-    </div>
-    <ul class="toc-list">
-      <li><a href="#ch-0"><span class="ch">序章</span><span class="ti">奧特亞羅瓦：地球上最後被人類踏上的大島</span><span class="dots"></span></a></li>
-      <li><a href="#ch-1"><span class="ch">第一章</span><span class="ti">最後的航海者：毛利人跨越太平洋的史詩遷徙</span><span class="dots"></span></a></li>
-      <li><a href="#ch-2"><span class="ch">第二章</span><span class="ti">鳥之國：沒有哺乳動物的世界，與毛利文化的成形</span><span class="dots"></span></a></li>
-    </ul>
-  </div>
-
-  <div class="toc-part">
-    <div class="toc-part-label">
-      <span class="pn">第二部</span>
-      <span class="pt">兩個世界的相遇</span>
-      <span class="pe">When Two Worlds Met</span>
-    </div>
-    <ul class="toc-list">
-      <li><a href="#ch-3"><span class="ch">第三章</span><span class="ti">捕鯨者、傳教士與火槍戰爭：相遇的混亂序幕</span><span class="dots"></span></a></li>
-      <li><a href="#ch-4"><span class="ch">第四章</span><span class="ti">1840《懷唐伊條約》：一紙條約，兩個文本</span><span class="dots"></span></a></li>
-      <li><a href="#ch-5"><span class="ch">第五章</span><span class="ti">土地戰爭：條約簽訂後，承諾如何被背棄</span><span class="dots"></span></a></li>
-      <li><a href="#ch-6"><span class="ch">第六章</span><span class="ti">「平滑垂死的枕頭」：一個被預言將消失的民族</span><span class="dots"></span></a></li>
-    </ul>
-  </div>
-
-  <div class="toc-part">
-    <div class="toc-part-label">
-      <span class="pn">第三部</span>
-      <span class="pt">更好的英國</span>
-      <span class="pe">Britain's Farm</span>
-    </div>
-    <ul class="toc-list">
-      <li><a href="#ch-7"><span class="ch">第七章</span><span class="ti">「更好的英國」：用羊與奶油打造的模範殖民地</span><span class="dots"></span></a></li>
-      <li><a href="#ch-8"><span class="ch">第八章</span><span class="ti">社會實驗室：全世界第一個給婦女投票權的國家</span><span class="dots"></span></a></li>
-      <li><a href="#ch-9"><span class="ch">第九章</span><span class="ti">加里波利與圍裙帶：為帝國流血的忠誠</span><span class="dots"></span></a></li>
-    </ul>
-  </div>
-
-  <div class="toc-part">
-    <div class="toc-part-label">
-      <span class="pn">第四部</span>
-      <span class="pt">走出帝國的陰影</span>
-      <span class="pe">Out of the Empire's Shadow</span>
-    </div>
-    <ul class="toc-list">
-      <li><a href="#ch-10"><span class="ch">第十章</span><span class="ti">被切斷的臍帶：英國轉身歐洲，紐西蘭被「拋棄」</span><span class="dots"></span></a></li>
-      <li><a href="#ch-11"><span class="ch">第十一章</span><span class="ti">毛利文藝復興：語言、土地與條約的覺醒</span><span class="dots"></span></a></li>
-      <li><a href="#ch-12"><span class="ch">第十二章</span><span class="ti">無核之國：小國如何對超級強權說「不」</span><span class="dots"></span></a></li>
-      <li><a href="#ch-13"><span class="ch">第十三章</span><span class="ti">羅傑經濟學：從福利天堂到激進改革的大轉身</span><span class="dots"></span></a></li>
-    </ul>
-  </div>
-
-  <div class="toc-part">
-    <div class="toc-part-label">
-      <span class="pn">第五部</span>
-      <span class="pt">兌現契約</span>
-      <span class="pe">Honouring the Bargain</span>
-    </div>
-    <ul class="toc-list">
-      <li><a href="#ch-14"><span class="ch">第十四章</span><span class="ti">條約的重生：從廢紙到「活的文件」與懷唐伊法庭</span><span class="dots"></span></a></li>
-      <li><a href="#ch-15"><span class="ch">第十五章</span><span class="ti">Aotearoa：當毛利語與 haka 成為國家認同</span><span class="dots"></span></a></li>
-      <li><a href="#ch-16"><span class="ch">第十六章</span><span class="ti">小國的世界：在中國、美國與太平洋之間</span><span class="dots"></span></a></li>
-      <li><a href="#ch-17"><span class="ch">第十七章</span><span class="ti">條約原則法案：2024 那場撼動全國的 hīkoi</span><span class="dots"></span></a></li>
-      <li><a href="#ch-18"><span class="ch">第十八章</span><span class="ti">中土世界、全黑隊與被放大的小國軟實力</span><span class="dots"></span></a></li>
-    </ul>
-  </div>
-
-  <div class="toc-part">
-    <div class="toc-part-label">
-      <span class="pn">第六部</span>
-      <span class="pt">島嶼的深層紋理</span>
-      <span class="pe">The Deeper Grain</span>
-    </div>
-    <ul class="toc-list">
-      <li><a href="#ch-19"><span class="ch">第十九章</span><span class="ti">沒有國王的民族：iwi、hapū、mana 與 utu 的世界</span><span class="dots"></span></a></li>
-      <li><a href="#ch-20"><span class="ch">第二十章</span><span class="ti">板塊上的島：地震、火山與基督城的傷口</span><span class="dots"></span></a></li>
-      <li><a href="#ch-21"><span class="ch">第二十一章</span><span class="ti">被改寫的伊甸園：外來物種、滅絕與「2050 無掠食者」的豪賭</span><span class="dots"></span></a></li>
-      <li><a href="#ch-22"><span class="ch">第二十二章</span><span class="ti">不只兩個民族：Pasifika、亞洲移民與黎明的突襲</span><span class="dots"></span></a></li>
-      <li><a href="#ch-23"><span class="ch">第二十三章</span><span class="ti">「我們是他們」：2019 清真寺槍擊與一個國家的選擇</span><span class="dots"></span></a></li>
-      <li><a href="#ch-24"><span class="ch">第二十四章</span><span class="ti">共治的難題：當「夥伴關係」要落實到日常治理</span><span class="dots"></span></a></li>
-      <li><a href="#ch-25"><span class="ch">第二十五章</span><span class="ti">語言、刺青與世界觀：一個民族如何「想」這個世界</span><span class="dots"></span></a></li>
-      <li><a href="#ch-26"><span class="ch">第二十六章</span><span class="ti">「公平機會」之國：一個平等夢的興起與褪色</span><span class="dots"></span></a></li>
-      <li><a href="#ch-27"><span class="ch">第二十七章</span><span class="ti">距離的暴政與餽贈：世界盡頭，是詛咒還是保護?</span><span class="dots"></span></a></li>
-      <li><a href="#ch-28"><span class="ch">第二十八章</span><span class="ti">下一個百年：氣候、人口與一座島的未竟之問</span><span class="dots"></span></a></li>
-      <li><a href="#ch-finale"><span class="ch">終章</span><span class="ti">於是，今天的紐西蘭人：一份仍在協商的契約</span><span class="dots"></span></a></li>
-    </ul>
-  </div>
-</nav>
 
 <div class="div-orn">✶ ✦ ✶</div>
 
