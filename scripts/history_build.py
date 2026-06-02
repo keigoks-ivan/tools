@@ -152,6 +152,8 @@ ENTRIES = [
          zh="地峽、火山與帆之城：奧克蘭的身世", en="Auckland: The Isthmus Desired by Many", lat=-36.85, lng=174.76),
     dict(src="澳洲/雪梨_流放地與港灣之城.html", slug="sydney", cat="city", group="澳洲 Australia",
          zh="流放地、港灣與房價：雪梨的兩百年身世", en="Sydney: From the Fatal Shore to the Harbour Empire", lat=-33.87, lng=151.21),
+    dict(src="澳洲/布里斯本_棕蛇之河流放與奧運.html", slug="brisbane", cat="city", group="澳洲 Australia",
+         zh="棕蛇之河、流放與奧運：布里斯本的身世", en="Brisbane: The Penal River That Became an Olympic City", lat=-27.47, lng=153.02),
 
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
