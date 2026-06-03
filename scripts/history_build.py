@@ -99,6 +99,12 @@ ENTRIES = [
     dict(src="歐洲歷史/葡萄牙史詩_大地盡頭大海起點.html", slug="portugal-epic", cat="nation",
          zh="大地盡頭，大海起點：葡萄牙的航海身世", en="Portugal: Where the Land Ends and the Sea Begins", lat=39.5, lng=-8.2),
 
+    # ---------- 美洲史詩 ----------
+    dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
+         zh="自由與枷鎖，與永不止息的邊疆：美利堅", en="America: Liberty, Bondage & the Frontier", lat=39.5, lng=-98.35),
+    dict(src="美洲歷史/加拿大史詩_兩個孤獨與一個縫起來的國家.html", slug="canada-epic", cat="nation",
+         zh="兩個孤獨，與一個縫起來的國家：加拿大", en="Canada: Two Solitudes, Stitched Together", lat=56.1, lng=-106.3),
+
     # ---------- 城市史詩 ----------
     dict(src="台灣歷史/台北_盆地之城.html", slug="taipei", cat="city", group="台灣 Taiwan",
          zh="盆地之城：台北的身世", en="Taipei: City in a Basin", lat=25.03, lng=121.57),
