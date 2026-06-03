@@ -106,6 +106,8 @@ ENTRIES = [
          zh="兩個孤獨，與一個縫起來的國家：加拿大", en="Canada: Two Solitudes, Stitched Together", lat=56.1, lng=-106.3),
     dict(src="美洲歷史/阿根廷史詩_豐饒與衰落與永遠不來的未來.html", slug="argentina-epic", cat="nation",
          zh="豐饒與衰落，與永遠不來的未來：阿根廷", en="Argentina: Abundance, Decline & the Future That Never Comes", lat=-38.4, lng=-63.6),
+    dict(src="美洲歷史/墨西哥史詩_血與玉米與一座建在神廟上的城.html", slug="mexico-epic", cat="nation",
+         zh="血與玉米，與一座建在神廟上的城：墨西哥", en="Mexico: Blood, Corn & a City on a Temple", lat=23.6, lng=-102.5),
 
     # ---------- 城市史詩 ----------
     dict(src="台灣歷史/台北_盆地之城.html", slug="taipei", cat="city", group="台灣 Taiwan",

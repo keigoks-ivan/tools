@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>血與玉米，與一座建在神廟上的城：墨西哥的身世</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* ===== ACT / PART DIVIDER ===== */
+.part-div{max-width:900px;margin:5.5rem auto 1rem;padding:0 1.6rem;text-align:center;position:relative;z-index:2;scroll-margin-top:80px}
+.part-div .pn{font-family:'Cinzel',serif;font-size:.76rem;letter-spacing:.34em;color:var(--rust);text-transform:uppercase}
+.part-div .pt{font-family:'Noto Serif TC',serif;font-weight:900;font-size:1.7rem;color:var(--sea-deep);margin:.7rem 0 .3rem;letter-spacing:.05em}
+.part-div .pe{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--faint)}
+.part-div .pline{display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:1.1rem;color:var(--gold)}
+.part-div .pline span{height:1px;width:80px;background:linear-gradient(90deg,transparent,var(--gold))}
+.part-div .pline span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+.part-div .pline .dot{font-size:1rem;opacity:.8}
+.back-toc{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;color:var(--faint);text-decoration:none;text-transform:uppercase;transition:color .25s ease}
+.back-toc:hover{color:var(--gold)}
+.act,.finale{scroll-margin-top:70px}
+
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){heads=[].slice.call(document.querySelectorAll('h2'));}
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>=1480)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Blood and Corn, and a City Built upon a Temple</span>
+    <h1>血與玉米<br><span class="em">與一座建在神廟上的城</span><br>墨西哥的身世</h1>
+    <p class="sub">一個被一層層文明疊壓、誕生於征服與融合的國家，<br>如何在「血」與「玉米」之間鍛造出既哀傷又熾烈、既擁抱死亡又無比堅韌的靈魂——並在北方巨人的陰影下，倔強地做自己</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">在</span>墨西哥城的市中心，有一座全美洲最大的廣場——憲法廣場（Zócalo）。廣場的一側，矗立著宏偉的天主教大教堂；而就在大教堂的腳下、地表之下幾公尺處，靜靜躺著一座被掩埋的阿茲特克金字塔——「大神廟（Templo Mayor）」的廢墟。當年西班牙征服者拆掉了阿茲特克的神廟，用同一批石頭，在原地，蓋起了天主教的教堂；而那座教堂腳下的整座城市，墨西哥城本身，就建在阿茲特克帝國那座輝煌的水上都城——特諾奇蒂特蘭——的遺骸之上。<strong>這就是理解墨西哥最好的一把鑰匙：它是一個由一層又一層的文明，疊壓而成的國家。</strong>每一次征服，都試圖抹去前一層；但每一層，都從未真正消失，只是被壓到了底下，繼續在暗處呼吸、滲透、影響著上面的一切。在最底層，是綿延三千年、以「玉米」為生命與信仰的原住民文明（馬雅、阿茲特克）；其上疊壓著西班牙征服者帶來的十字架、語言與血脈；而這兩層的暴力交媾，又孕育出一個全新的民族——「混血兒（mestizo）」，一個既非純粹西班牙、也非純粹原住民，而是兩者血肉交織的新人。墨西哥，因此是一個誕生於「征服」與「融合」、誕生於「血」與「玉米」的國家。它的靈魂深處，藏著一道征服留下的、永不癒合的傷口；它的頭頂上，則永遠籠罩著北方那個巨人——美國——的陰影，它曾一口氣，失去了一半的國土。這本書要追問的正是這個謎：<em>一個被一次次征服、卻一次次在廢墟上重生的國家，如何在「血」與「玉米」、「征服」與「融合」、「傷口」與「面具」之間鍛造出一個獨一無二、既哀傷又熾烈、既擁抱死亡又無比堅韌的靈魂——並學會，在那頭北方巨人的巨大陰影下，倔強地，做自己?</em>讓我們，從那最底層的、玉米與諸神的世界開始，一路向上，在每個轉折處，聽一聽墨西哥那層層疊疊的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">◆ ✦ ◆</div>
+
+<!-- ========== PART I ========== -->
+<div class="part-div reveal" id="part-1">
+  <span class="pn">第一部</span>
+  <h2 class="ptitle pt">玉米與諸神</h2>
+  <div class="pe">Corn and the Gods — Three Thousand Years Beneath the City</div>
+  <div class="pline"><span></span><span class="dot">◆</span><span></span></div>
+</div>
+
+<!-- ===== 序章 ===== -->
+<section class="act reveal" id="ch-0">
+  <div class="act-head">
+    <span class="act-num">序章 · A City Built upon a Temple</span>
+    <h2 class="act-title">一座建在神廟上的城：層疊、傷口與北方的巨人</h2>
+    <p class="act-sub">A City Built upon a Temple — Layers, the Wound, and the Colossus to the North</p>
+    <div class="ornament">◆ ✦ ◆</div>
+  </div>
+  <div class="prose">
+    <p>每一個國家，都有一個關於「自己從何而來」的故事。而墨西哥的這個故事，不是寫在書上的而是堆疊在腳下的——你只要，站在墨西哥城的市中心，往下挖，就能讀到它。最上面一層，是十九、二十世紀的現代都市；再往下，是西班牙人留下的天主教大教堂與殖民宮殿；而在大教堂的地基之下，靜靜躺著一座被掩埋的阿茲特克金字塔。當年征服者埃爾南·科爾特斯，下令拆毀阿茲特克帝國最神聖的「大神廟」，然後用拆下來的同一批石頭，在原址，蓋起了天主教的教堂。<strong>這個動作，是理解整個墨西哥的縮影——征服者，從不在空地上蓋新世界；他們總是把新的一層，直接壓在舊的一層上面。</strong></p>
+
+    <h3>一個由「層」疊成的國家</h3>
+    <p>墨西哥，因此是一個由一層又一層的文明，疊壓而成的國家——一份巨大的、活著的「<strong>羊皮紙重寫本（palimpsest）</strong>」。每一次新的征服，都試圖把前一層，徹底地，抹去、覆寫；但每一層，都從未真正死去。它們只是被壓到了底下，繼續在暗處呼吸、滲透並一次次地，從現代的裂縫中，重新冒出頭來。在最底層，是綿延三千年、以「<strong>玉米</strong>」為生命與信仰的原住民文明（奧爾梅克、馬雅、阿茲特克）；其上疊壓著西班牙人帶來的十字架、卡斯提亞語與歐洲的血脈。而最關鍵的是：這兩層，並沒有彼此取代，而是暴力地，交融在了一起。</p>
+
+    <h3>誕生於一道傷口的民族</h3>
+    <p>這場「交融」，孕育出了一個全新的民族——「<strong>混血兒（mestizo）</strong>」：一個既非純粹的西班牙人、也非純粹的原住民，而是兩者血肉交織的新人。今天絕大多數的墨西哥人，都是這場融合的後代。然而這場「融合」的起點，並不浪漫——它始於征服、奴役與征服者對被征服者女性的占有。墨西哥的詩人、諾貝爾獎得主<strong>奧克塔維奧·帕斯</strong>，在《孤獨的迷宮》中道破了這個民族靈魂深處的祕密：墨西哥人，是「<em>被強暴的母親的孩子</em>」——他們的身世，源自一場暴力的結合，因此他們的靈魂深處，藏著一道征服留下的、永不癒合的<strong>傷口</strong>，與一種揮之不去的孤獨。為了保護這道傷口，墨西哥人，學會了戴上「<strong>面具</strong>」——以節慶的喧鬧、以對死亡的嘲弄、以彬彬有禮的距離，把那份深沉的哀傷，藏在底下。<em>血與玉米、征服與融合、傷口與面具——這組矛盾，是墨西哥靈魂的底色。</em></p>
+
+    <h3>「離上帝太遠，離美國太近」</h3>
+    <p>而在這個層疊之國的頭頂上，還永遠籠罩著第三道陰影——北方那個巨人，<strong>美國</strong>。十九世紀，一場戰爭，讓墨西哥，一口氣，失去了將近<em>一半</em>的國土（今天的加州、德州與整個美國西南部）。從此墨西哥，便活在這個強大鄰居的巨大陰影之下。它的獨裁者波費里奧·迪亞斯，留下了一句道盡墨西哥宿命的、辛酸的話：「<strong>可憐的墨西哥啊——離上帝，太遠；離美國，太近。</strong>」這道「北方的巨人」，將以失土、移民、毒品、貿易與一道綿長的邊境，一次次地，定義墨西哥的命運。這本書要追問的正是這個謎：<em>一個被一次次征服、卻一次次在廢墟上重生的國家，如何在「血」與「玉米」之間鍛造出一個既哀傷又熾烈、既擁抱死亡又無比堅韌的靈魂，並學會在那頭北方巨人的陰影下，倔強地，做自己?</em></p>
+
+    <h3>一片濃縮了整個世界的土地</h3>
+    <p>要理解墨西哥，也得理解，它那極其多樣的土地。它是一個，被兩大洋（太平洋與墨西哥灣）擁抱、被兩道巨大山脈（東、西馬德雷山脈）縱貫的國家。它的地貌濃縮了，整個世界：北方是廣袤的沙漠；南方是濕熱的雨林；中部是高聳的火山與溫帶高原（首都墨西哥城，就坐落在海拔兩千多公尺的谷地是全球最大、最高的都會區之一）。這份地理的多樣孕育了，墨西哥，驚人的生物與文化多樣性——它是全球少數的「<em>超級多樣性</em>」國家之一，也是數十個，至今仍說著，不同語言的原住民族的家園。今天墨西哥，擁有超過<strong>一億兩千萬</strong>人口是全世界，最大的西班牙語國家，也是一個不容小覷的文化與經濟強權。</p>
+
+        <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1325</div><div class="tl-text">阿茲特克人在湖中小島，建立特諾奇蒂特蘭。</div></div>
+      <div class="tl-item"><div class="tl-year">1521</div><div class="tl-text">科爾特斯與原住民盟軍攻陷該城——阿茲特克帝國覆滅，新一層，覆寫上去。</div></div>
+      <div class="tl-item"><div class="tl-year">1531</div><div class="tl-text">瓜達盧佩聖母顯現——被征服的神，有了一張原住民的臉。</div></div>
+      <div class="tl-item"><div class="tl-year">1810</div><div class="tl-text">多洛雷斯的吶喊，獨立戰爭爆發。</div></div>
+      <div class="tl-item"><div class="tl-year">1848</div><div class="tl-text">美墨戰爭戰敗，失去將近一半的國土。</div></div>
+      <div class="tl-item"><div class="tl-year">1910</div><div class="tl-text">大革命爆發——百萬人死，換來一部超越時代的憲法。</div></div>
+      <div class="tl-item"><div class="tl-year">1929</div><div class="tl-text">PRI 成立，把革命變成一個黨——「完美的獨裁」。</div></div>
+      <div class="tl-item"><div class="tl-year">1968</div><div class="tl-text">特拉特洛爾科屠殺——完美獨裁的面具，滑落。</div></div>
+      <div class="tl-item"><div class="tl-year">2000</div><div class="tl-text">PRI 七十一年統治，靠選票，和平終結。</div></div>
+      <div class="tl-item"><div class="tl-year">2024</div><div class="tl-text">辛鮑姆當選——墨西哥史上第一位女總統，重寫本，再疊一層。</div></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num">3000年</div><div class="lbl">不曾中斷的文明史，從奧爾梅克到今天</div></div>
+      <div class="stat"><div class="num">~1.3億</div><div class="lbl">人口，全世界最大的西班牙語國家</div></div>
+      <div class="stat"><div class="num">一半</div><div class="lbl">一八四八年，輸給北方巨人的國土比例</div></div>
+      <div class="stat"><div class="num">~30萬</div><div class="lbl">二〇〇六年以來，毒品戰爭奪走的生命</div></div>
+    </div>
+
+    <div class="pull"><p>征服者以為把神廟拆了、把教堂蓋上去，就能抹掉一個世界。他們錯了。在墨西哥，沒有任何一層，會真正消失——它們只是被壓到底下，然後等待著，從每一道裂縫裡，重新長出來。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 三個將貫穿全書的密碼</span>
+      <p>這本書接下來的故事，將圍繞三個密碼反覆迴響，它們在序章便已埋下。第一個，是「<strong>層疊（the Layers）</strong>」——墨西哥是一個由多層文明疊壓而成的「重寫本」。這意味著，理解墨西哥，不能只看最上面那一層；它最深的力量與最古老的傷，都藏在底下的地層裡。那綿延三千年、以玉米為根的原住民文明，從未被征服真正消滅——它至今仍在語言、食物、信仰、藝術與血脈中，頑強地，活著（今日墨西哥仍有數百萬人說著原住民語言）。這份「舊層永不消失、不斷從底下湧現」的特質，是墨西哥文化那驚人的厚度與韌性的根源。第二個密碼，是「<strong>傷口（the Wound）</strong>」——這個由「征服」與「融合」交織而生的民族，靈魂深處，藏著一道源自暴力起源的創傷。它催生了帕斯所說的「孤獨」與「面具」，也催生了墨西哥文化中那份獨特的、對死亡既親暱又嘲弄的態度（亡靈節）。這道傷口，也以一種更具體的形式，反覆發作——<strong>暴力</strong>：從阿茲特克的活人獻祭，到征服的屠殺，到獨立與革命的血流成河，再到今日的毒品戰爭，「血」，是這個國家揮之不去的旋律。</p>
+      <p>第三個密碼，是「<strong>北方的巨人（the Colossus to the North）</strong>」——美國。墨西哥的現代史，在很大程度上，是由它與這個強大鄰居的、不對稱的關係所定義的。它曾因這個鄰居而失去半壁江山；它至今仍與這個鄰居，糾纏在移民、毒品、貿易與認同的複雜網絡之中。而本書最深的洞見將是：這三個密碼，共同塑造了墨西哥那種獨一無二的生命姿態——一種「<em>在廢墟上重生</em>」的能力。一個被一次次征服、一次次幾乎被抹去的民族，卻總能從每一層廢墟的縫隙中，倔強地，重新長出自己。它擁抱死亡，因為它見過太多死亡；它無比堅韌，因為它別無選擇。理解了這份「層疊、傷口與重生」，你就拿到了讀懂墨西哥的鑰匙。而這一切的起點，在那最底層的、比阿茲特克還要古老兩千年的——玉米與諸神的世界。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 玉米 ✦</div>
+  <p>在金字塔出現之前、在帝國誕生之前，這片土地上的人，先馴服了一株野草。<br>那株草，叫玉米。它餵養了三千年的文明，也寫進了創世的神話。<br><span class="hl">墨西哥人說：我們是玉米做成的人。</span></p>
+</div>
+
+<!-- ===== 第一章 ===== -->
+<section class="act reveal" id="ch-1">
+  <div class="act-head">
+    <span class="act-num">第一章 · The People of Corn</span>
+    <h2 class="act-title">玉米之民：奧爾梅克、馬雅與三千年的文明</h2>
+    <p class="act-sub">The People of Corn — Olmec, Maya, and Three Thousand Years</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>當西班牙人，在十六世紀，「發現」墨西哥時，他們以為自己遇到的是一群「野蠻人」。事實上，他們撞見的是一個比歐洲任何文明，都更加古老的世界——一個在這片土地上，已經連續發展了<strong>三千年</strong>的文明搖籃。要理解這個世界，得先從一株植物說起：<strong>玉米（maíz）</strong>。大約九千年前，這片土地上的先民，從一種不起眼的野草，馴化出了玉米。玉米徹底地，改變了一切——它讓人們，得以定居、儲糧、建城並供養起龐大的人口與複雜的文明。玉米不只是食物，更是信仰的核心：馬雅人的創世史詩《波波爾·烏》明白地寫道，諸神是用<em>玉米麵團</em>，捏出了人類。<strong>墨西哥人，從骨子裡，就是「玉米做成的人」。</strong>這株植物，是這個國家最底層、也最堅實的地基。</p>
+
+    <h3>奧爾梅克：一切的母親</h3>
+    <p>在這片沃土上，最早綻放的偉大文明，是「<strong>奧爾梅克（Olmec）</strong>」，約莫興起於三千多年前。他們被稱為中美洲的「<em>母親文明</em>」，因為後世幾乎所有的中美洲文明，都繼承了他們奠定的基本範式：金字塔、精密的曆法、神聖的「橡膠球賽」、與一整套神祇體系。奧爾梅克，最令人震撼的遺產，是他們雕刻的、重達數十噸的<strong>巨石頭像</strong>——那些有著厚唇、神情威嚴的巨大頭顱，是用沒有金屬工具的雙手，從遠方搬運來的玄武岩，雕鑿而成。他們為這片土地的文明，寫下了第一頁。</p>
+
+    <h3>馬雅：叢林中的數學家與天文學家</h3>
+    <p>而將中美洲文明，推向智識巔峰的是「<strong>馬雅（Maya）</strong>」。在今天墨西哥東南部與中美洲的熱帶叢林中，馬雅人，建立起一座座宏偉的城邦（如蒂卡爾、帕倫克、奇琴伊察）。他們的成就足以讓同時代的歐洲，相形見絀：他們獨立地，發明了「<strong>零</strong>」的概念（比歐洲早了數百年）；他們發展出全美洲最複雜、最完整的<strong>文字</strong>系統；他們是驚人的天文學家，能精準地，預測日月食、推算金星的運行，並制定出比當時歐洲更精確的曆法。值得注意的是馬雅從來不是一個統一的「帝國」，而是一群彼此競爭、征戰的城邦。大約在西元九世紀，馬雅的眾多大城，因為旱災、戰爭與生態崩潰等複雜原因，神祕地，被棄置於叢林之中——史稱「馬雅崩潰」。<strong>但請記住這個關鍵：馬雅人，並沒有「消失」。</strong>他們的城市荒廢了，但他們的後代，數百萬計，至今仍生活在這片土地上，說著馬雅語，種著玉米——這正是序章「層疊」密碼的最佳寫照：舊的一層，從不真正死去。</p>
+
+    <h3>諸神誕生之地：特奧蒂瓦坎</h3>
+    <p>而在墨西哥中部的高原上，曾矗立著一座，當時全世界最大的城市之一——「<strong>特奧蒂瓦坎（Teotihuacan）</strong>」。在它的鼎盛期（約西元五百年），這座城市，居住著超過十萬、甚至二十萬人，擁有規劃嚴整的街道、與雄偉的「太陽金字塔」和「月亮金字塔」。然後它也同樣神祕地，衰落、傾頹了。它衰落得如此之早、如此徹底，以致於，幾百年後，當阿茲特克人，來到這片高原時，他們望著那些巨大的、不知何人所建的金字塔廢墟，充滿了敬畏，便為它，取了一個意味深長的名字——「<strong>特奧蒂瓦坎</strong>」，意思是「<em>諸神誕生之地</em>」。<strong>連那個即將建立起最強大帝國的民族，都覺得自己，只是站在更古老文明的廢墟上的後來者。</strong>這就是墨西哥的時間深度。</p>
+
+    <h3>神聖的球賽：用橡膠與生命，進行的競技</h3>
+    <p>在這些文明的城市中央，除了金字塔，幾乎都矗立著另一種，獨特的建築——「<strong>球場</strong>」。中美洲的「球賽（juego de pelota）」，是一項，綿延了三千年、貫穿所有文明的神聖傳統。球員用臀部與身體，擊打一顆，沉重的<strong>橡膠</strong>球（橡膠也是這片土地，獻給世界的又一樣禮物），讓它穿過高牆上的石環。然而這遠不只是一場運動。球賽是一場，再現宇宙秩序的神聖儀式——它象徵著，太陽與黑暗、生與死的永恆鬥爭。在某些重大的賽事中，輸的一方（有時甚至是贏的一方）的隊長，會被當作祭品，獻給神明。<em>在這裡，連競技，都浸透著「血」與「神聖」——這是序章「血」這個密碼，又一個，古老的源頭。</em></p>
+
+    <h3>循環的時間：馬雅曆法與「世界末日」</h3>
+    <p>馬雅人，對「時間」的理解，更與西方，截然不同。西方人，視時間，為一條，從創世，奔向末日的<em>直線</em>；而馬雅人，視時間，為一個，不斷毀滅與重生的巨大<strong>循環</strong>。他們發明了，精密的「長紀曆」，能推算數千年的時間週期。二〇一二年，曾轟動全球的「馬雅世界末日」預言其實是西方人的誤解——馬雅曆法，所標示的並非世界的「終結」，而是一個巨大週期的「<em>結束</em>」與另一個，新週期的「<em>開始</em>」。這種「<strong>毀滅與重生，循環不息</strong>」的時間觀，與阿茲特克「五個太陽」的宇宙觀（第二章），一脈相承，也奇異地，預示了，墨西哥這個國家，此後那「一次次被毀滅、又一次次在廢墟上重生」的宿命。</p>
+
+    <h3>群星閃耀：薩波特克、托爾特克與更多</h3>
+    <p>在奧爾梅克、馬雅與特奧蒂瓦坎之外，這片土地上，還並存、接續著，眾多璀璨的文明如夜空群星。在南方的瓦哈卡谷地，<strong>薩波特克人</strong>，在一座削平的山頭上，建起了，壯麗的聖城「<em>阿爾班山</em>」，並發展出，中美洲，最早的文字之一（日後那位原住民總統胡亞雷斯，正出身這個民族）。而在特奧蒂瓦坎，衰落之後，<strong>托爾特克人</strong>，在圖拉崛起成為後世阿茲特克人，無比景仰、奉為文明典範的前輩——阿茲特克的貴族甚至以能攀附托爾特克的血統為榮。而那位，托爾特克的傳奇君王兼祭司「<strong>羽蛇神（Quetzalcoatl）</strong>」的神話（傳說他誓言將從東方歸來），更在千百年後，以一種悲劇性的方式與東方海上，到來的西班牙人，糾纏在一起。<em>這片土地的文明從不是單一的它是一層層，文明彼此繼承、景仰、又覆寫的悠長譜系——序章「層疊」的密碼，早在西班牙人，到來之前，就已經運轉了，三千年。</em></p>
+
+    <div class="pull"><p>當歐洲還在中世紀的蒙昧中時，這片土地上的人，早已算出了金星的軌道、發明了「零」、用玉米麵團，捏出了關於自己的神話。墨西哥的文明，不是從西班牙人來的那天才開始的——它比那要古老三千年。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 那永不消失的「最底層」</span>
+      <p>第一章，奠定了序章「<strong>層疊</strong>」密碼最關鍵的一塊基石——那「永不消失的最底層」。理解墨西哥，最常見的錯誤，就是把它的歷史，從一五一九年西班牙人到來，才開始講起。這會錯失墨西哥靈魂的一大半。因為在那一層歐洲的覆寫之下，壓著的是一個綿延了三千年、智識上毫不遜於舊大陸的、深厚無比的原住民文明地層。這個地層，是墨西哥文化那驚人厚度的根源——它的食物（玉米、辣椒、巧克力、番茄這些後來餵養並改變了全世界的作物，都源自這裡）、它的語言、它的藝術、它的宇宙觀，至今都深深地，根植於這片前哥倫布的土壤。</p>
+      <p>而這個地層，最深刻的啟示，在於它的「<strong>韌性</strong>」——它從未被真正地，征服或抹去。馬雅的城市荒廢了，但馬雅人還在；特奧蒂瓦坎傾頹了，但它的金字塔，至今仍矗立，每年吸引千萬人朝聖。這份「舊層永遠在底下活著、並不斷重新湧現」的特質，將是貫穿全書的主旋律：當西班牙人用教堂，蓋住神廟時，原住民的神，便偷偷地，躲進了天主教聖人的軀殼裡（第五章的瓜達盧佩聖母）；當二十世紀的革命者，要為墨西哥，尋找一個民族認同時，他們回過頭去，從這個最底層的、輝煌的原住民過去，汲取靈感（第十七章的壁畫運動）。<em>墨西哥，永遠在向它最古老的地層，尋找自己。</em>而在這所有原住民文明中，最後、也最強悍的一個，即將登場——他們建立起一座令征服者都目瞪口呆的水上之城，並信奉著一個需要鮮血來餵養的太陽。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 1325 ✦</div>
+  <p>一群流浪的部族，在湖中的小島上，看見一隻老鷹，叼著蛇，停在仙人掌上。<br>神諭說：就是這裡了。於是他們在水上，建起了一座城。<br><span class="hl">那座城，叫特諾奇蒂特蘭；那個圖騰，至今仍印在墨西哥的國旗上。</span></p>
+</div>
+
+<!-- ===== 第二章 ===== -->
+<section class="act reveal dark" id="ch-2">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Sun Needs Blood</span>
+    <h2 class="act-title">太陽需要鮮血：阿茲特克帝國與特諾奇蒂特蘭</h2>
+    <p class="act-sub">The Sun Needs Blood — The Aztec Empire and Tenochtitlan</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>在這片文明古國的最後一個篇章，登場的是「<strong>墨西加人（Mexica）</strong>」——也就是後世所稱的「<strong>阿茲特克人</strong>」（「墨西哥」這個國名，正源於他們）。耐人尋味的是阿茲特克人，並非這片土地古老的主人；他們是後來者——一個來自北方、相對野蠻的流浪部族，直到十三世紀，才遷徙到墨西哥中部的谷地。根據傳說，他們的戰神，指示他們，要在看見「一隻老鷹，叼著一條蛇，停在仙人掌上」的地方，定居。一三二五年，他們在特斯科科湖中的一座小島上，看見了這個異象，於是在那裡，建立起他們的都城——「<strong>特諾奇蒂特蘭（Tenochtitlan）</strong>」。（那隻鷹、蛇與仙人掌的圖騰，至今仍是墨西哥的國徽。）</p>
+
+    <h3>水上之城：一座讓征服者目瞪口呆的奇蹟</h3>
+    <p>從一座湖中小島，阿茲特克人，憑著驚人的工程能力，打造出了一座，當時全世界最壯麗的城市之一。到了十六世紀初，特諾奇蒂特蘭，人口超過<strong>二十萬</strong>——遠遠超過當時的倫敦、巴黎等任何歐洲城市。它是一座名副其實的「水上之城」：以巨大的堤道，連接湖岸；城內運河縱橫，舟楫往來；居民用「<em>奇南帕（chinampa）</em>」這種精巧的「浮園」耕作法，在湖上種出糧食；潔淨的飲水，由高架引水道，從遠方山泉引來。城市的中心，矗立著巍峨的「大神廟」；而它的市集（特拉特洛爾科），每天有數萬人交易，琳瑯滿目的商品，令人嘆為觀止。後來當西班牙征服者，第一次，望見這座漂浮在水上的、潔白宏偉的城市時，他們簡直不敢相信自己的眼睛，有人甚至以為自己是在夢中。</p>
+
+    <h3>太陽需要鮮血：一個以獻祭維繫的宇宙</h3>
+    <p>然而這座輝煌城市的核心，跳動著一顆，令現代人不寒而慄的心臟——大規模的「<strong>活人獻祭</strong>」。阿茲特克人的宇宙觀，是悲劇而沉重的。他們相信，世界已經毀滅、重生過四次了；而他們所處的「第五個太陽」，也終將毀滅。要延緩這場毀滅、要讓太陽神（維齊洛波奇特利），每天都有力氣，升起就必須，不斷地，用最珍貴的祭品——「<em>人血</em>」——來餵養祂。於是在大神廟的祭壇上，祭司們，用黑曜石刀，剖開戰俘的胸膛，掏出仍在跳動的心臟，獻給太陽。為了獲取足夠的獻祭者，阿茲特克人，甚至會與鄰邦，進行儀式性的「<strong>鮮花戰爭</strong>」，其目的不是殺敵，而是<em>活捉</em>俘虜。<strong>「太陽需要鮮血」——這個信念，是序章「血」這個密碼，最古老、最赤裸的源頭。在墨西哥，血與神聖、血與宇宙的存續，從一開始，就緊緊地，綁在一起。</strong></p>
+
+    <h3>輝煌底下的裂縫</h3>
+    <p>阿茲特克，是一個靠武力與「進貢」維繫的帝國。它征服了中部墨西哥的眾多城邦，強迫它們，年年進貢糧食、財貨以及——獻祭用的人。然而這套以恐懼與壓榨維繫的體系，藏著一道致命的裂縫：那些被征服、被榨取、被擄去獻祭的<strong>附庸民族，無不對阿茲特克，懷著刻骨的仇恨</strong>。他們表面臣服，內心卻無時無刻，不在等待著，一個掙脫枷鎖的機會。這道裂縫，在承平之時，看不出來；但當一小群陌生的、騎著「巨鹿」、帶著「噴火棍」的異鄉人，從東方的海上，登陸時，這道裂縫，將瞬間，撕裂整個帝國。一個統治了中部墨西哥、看似不可一世的龐大帝國，它的崩塌，將快得，令所有人，都措手不及。</p>
+
+    <h3>不只是獻祭：詩人、學校與「花與歌」</h3>
+    <p>把阿茲特克人，僅僅看作「嗜血的野蠻人」，是一種，粗暴的偏見。事實上，這是一個，高度文明、且意外地，富有詩意的社會。阿茲特克，擁有當時世界罕見的「<strong>強制義務教育</strong>」——無論貴族或平民的子弟，都必須入學學習歷史、宗教、禮儀與作戰。他們有著嚴密的法律、繁榮的市場、與精深的植物學與醫藥知識。而最動人的是他們極其崇尚<strong>詩歌</strong>。在納瓦特爾語中，「詩」，被稱為「<em>花與歌（in xochitl in cuicatl）</em>」，被視為人類所能企及的、最接近真理與神聖的事物。鄰邦特斯科科的「<strong>哲人王」內薩瓦爾科約特爾</strong>，更是一位，名垂青史的詩人——他在詩中，沉思著，一位無形而唯一的造物主，並喟嘆生命如花般，短暫易逝。<em>一個會為生命的無常而寫詩的民族，與一個會在祭壇上掏出心臟的民族，竟是同一個民族——這正是墨西哥靈魂，那「美」與「血」並存的最古老的源頭。</em></p>
+
+    <h3>一個關於毀滅的預感</h3>
+    <p>而在阿茲特克，那輝煌的文明深處，始終縈繞著一股，深沉的憂鬱與宿命感。他們的宇宙觀（第二章）告訴他們，這個「第五個太陽」的世界，終將毀滅；他們活在一種永恆的、對「末日」的預感之中。傳說在西班牙人到來的前幾年，墨西哥的天空，出現了，種種不祥的異象——彗星、火災、夜半哭泣的女人。皇帝蒙特蘇馬，本人更被一種，深刻的宿命感，所籠罩。<em>這份瀰漫在阿茲特克文明黃昏的「毀滅預感」，與那源於「五個太陽」的循環宿命觀，交織在一起，為那場即將到來的、天崩地裂的「征服」，染上了，一層悲劇的色彩——彷彿連那個最強大的帝國，都早已預感到自己的傾覆。</em></p>
+
+    <h3>太陽石與浮園：一個精密運轉的世界</h3>
+    <p>阿茲特克的文明精密得令人驚嘆。那塊著名的「<strong>太陽石</strong>」（常被誤稱為「曆法石」），重達數十噸，雕刻著，阿茲特克，對宇宙與時間（五個太陽紀）的全部理解是人類天文與宇宙觀的傑作。在農業上，他們發明的「<strong>浮園（chinampa）</strong>」——在湖面上，用淤泥與水草堆築的人工田畝——是全世界，單位產量，最高的農耕法之一，足以供養那座二十萬人的巨城（時至今日，墨西哥城南郊的霍奇米爾科，仍保留著，這片千年的浮園水道）。而社會的頂端是被稱為「<em>特拉托阿尼（tlatoani，意為『發言者』）</em>」的統治者；其下是嚴密的貴族、祭司、戰士、商人與平民的等級。<em>這是一個，有著精密曆法、高效農業、嚴整法律、與繁榮貿易的複雜文明——絕非西班牙人，口中那「需要被拯救的野蠻人」。</em></p>
+
+    <h3>從阿茲特蘭到應許之島</h3>
+    <p>阿茲特克人的起源傳說，本身就是一則動人的史詩。他們自稱來自北方一個叫「阿茲特蘭」的神祕家園，在戰神維齊洛波奇特利的指引下，展開了長達數百年的漂泊遷徙，尋找那塊神諭應許之地。當他們終於在特斯科科湖的小島上，看見那隻立於仙人掌、口銜長蛇的雄鷹時，他們知道，流浪結束了。一個一無所有、被周邊強鄰鄙視的流浪部族，竟在不到兩百年間，把這片沼澤湖島，打造成中美洲最強大的帝國與最壯麗的城市——這份從卑微中崛起的意志，是阿茲特克人最深的驕傲。而那段尋找家園的漂泊神話，也奇異地預示了，墨西哥這個民族，此後永恆的命運主題：一次次失去家園，又一次次，在新的廢墟上，重建家園。</p>
+
+    <div class="pull"><p>特諾奇蒂特蘭，是一座建在水上的奇蹟之城，比當時任何歐洲城市都更宏偉。但它的祭壇上，淌著永不乾涸的血——而它腳下，那些被它壓榨的附庸的仇恨，比湖水，還要深。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「血」的源頭，與一個帝國的脆弱</span>
+      <p>第二章，揭示了兩件將深刻影響墨西哥命運的事。第一是「<strong>血</strong>」這個密碼的古老源頭。阿茲特克「太陽需要鮮血」的宇宙觀，把「暴力」與「神聖」，編織進了這片土地最深的文化記憶裡。這當然不是說墨西哥人「天生嗜血」——那是一種粗暴的偏見；而是說，在墨西哥的歷史長河中，「血」與「犧牲」，反覆地，扮演著某種具有「意義」的、甚至「神聖」的角色。從阿茲特克的獻祭、到天主教那位為世人流血的基督（兩種「血的信仰」竟意外地，能夠對話）、到革命烈士的犧牲、到亡靈節對死亡的坦然，墨西哥文化，發展出一種與「死亡」和「血」異常親密、甚至能加以審美與嘲弄的獨特關係（這是序章「傷口」密碼的一個面向）。理解這一點，才能理解墨西哥那既哀傷、又熾烈的靈魂。</p>
+      <p>第二是阿茲特克帝國那道「<strong>致命的裂縫</strong>」——它被它所壓榨的附庸民族，深深地仇恨著。這一點，至關重要，因為它，徹底顛覆了「幾百個西班牙人，征服了一個龐大帝國」這個流傳已久的神話。真相是：科爾特斯，從來不是靠那幾百個西班牙人，打敗阿茲特克的；他是靠著與成千上萬、痛恨阿茲特克的<em>原住民盟友</em>（尤其是特拉斯卡拉人）結盟才得以推翻帝國的。換言之<strong>阿茲特克帝國，與其說是被西班牙「征服」，不如說是被它自己內部的矛盾，與一場由原住民盟友主導的「起義」，所摧毀的。</strong>這個真相，讓墨西哥的「征服」故事遠比「歐洲人 vs. 原住民」的簡單敘事，要複雜、也要悲劇得多——它從一開始，就是一個原住民與原住民相殘、敵友難分的故事。而下一章，這場改變了世界、也開啟了墨西哥那道永恆傷口的相遇，即將上演。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">◆ ✦ ◆</div>
+
+<!-- ========== PART II ========== -->
+<div class="part-div reveal" id="part-2">
+  <span class="pn">第二部</span>
+  <h2 class="ptitle pt">征服</h2>
+  <div class="pe">The Conquest — Cortés, La Malinche, and a New Layer Laid in Blood</div>
+  <div class="pline"><span></span><span class="dot">◆</span><span></span></div>
+</div>
+
+<!-- ===== 第三章 ===== -->
+<section class="act reveal" id="ch-3">
+  <div class="act-head">
+    <span class="act-num">第三章 · Cortés and La Malinche</span>
+    <h2 class="act-title">科爾特斯、馬林切與一個帝國的崩塌</h2>
+    <p class="act-sub">Cortés and La Malinche — The Fall of an Empire, and the Birth of a Wound</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>一五一九年，一支由埃爾南·科爾特斯率領的西班牙船隊，登陸了墨西哥東岸（今韋拉克魯斯）。科爾特斯，是一個野心勃勃、孤注一擲的冒險家。為了斷絕部下退路、逼他們向前，他做了一件驚人的事——<strong>鑿沉了自己的船</strong>。從此這幾百個西班牙人，只剩下一條路：向內陸，向那個傳說中黃金遍地的帝國，挺進。然而僅憑這幾百人、十幾匹馬與幾門火砲，要征服一個擁有數百萬人口的龐大帝國，無異於癡人說夢。科爾特斯，靠的從來不是武力，而是另外兩樣東西：<strong>仇恨</strong>，與<strong>一個女人</strong>。</p>
+
+    <h3>馬林切：背叛者，還是一個新民族的母親?</h3>
+    <p>那個女人，是「<strong>馬林切（La Malinche）</strong>」。她原是一名被賣為奴的原住民貴族女子，通曉多種原住民語言。被獻給科爾特斯後，她迅速地，學會了西班牙語，成為科爾特斯，唯一的、也是最關鍵的「<strong>舌頭</strong>」——他的翻譯、顧問與情人。沒有馬林切，科爾特斯，將又聾又啞，寸步難行；是她讓科爾特斯，得以與各方原住民，溝通、結盟、離間。她更為科爾特斯，生下了一個兒子——這個孩子，被後世，象徵性地，視為「<strong>第一個墨西哥混血兒</strong>」。馬林切，因此成了墨西哥歷史上，最複雜、最具爭議的人物。在一種敘事裡，她是出賣了自己民族的「<em>叛徒</em>」（西班牙語中的「malinchista」，至今仍是「崇洋媚外者」的貶稱）；但在另一種、更深刻的敘事裡，她是這個「混血民族」象徵性的「<strong>母親</strong>」——墨西哥人，從她與科爾特斯的結合中，誕生。<em>帕斯所說的那道「傷口」、那個「被強暴的母親的孩子」的身世情結，其源頭，正是馬林切。</em></p>
+
+    <h3>不是征服，而是一場起義</h3>
+    <p>科爾特斯，靠著馬林切的舌頭，做成了一件決定性的事：他與那些痛恨阿茲特克的附庸民族（尤其是驍勇的<strong>特拉斯卡拉人</strong>）結盟。於是向特諾奇蒂特蘭進軍的不再是幾百個西班牙人，而是一支由<em>數萬名原住民戰士</em>組成的大軍。阿茲特克皇帝<strong>蒙特蘇馬二世</strong>，面對這些騎著「巨鹿」、帶著「噴火棍」的陌生人，態度猶疑（傳說中，他可能將科爾特斯，誤認為是預言中要歸來的羽蛇神），竟將他們，迎入城中——隨即被科爾特斯，挾持為人質。衝突終於爆發。一五二〇年，西班牙人，一度被憤怒的阿茲特克人，趕出城（史稱「悲傷之夜」）。</p>
+
+    <h3>看不見的盟友：天花</h3>
+    <p>但科爾特斯，還有一個看不見、卻最致命的盟友——<strong>天花</strong>。西班牙人帶來的這種瘟疫，對於毫無免疫力的原住民，是滅頂之災（這正是那份美國史詩裡「哥倫布大交換」的同一場浩劫）。瘟疫在特諾奇蒂特蘭城內，奪走了無數人的性命，包括繼任的皇帝。當科爾特斯，率領他龐大的原住民聯軍，回頭圍城時，這座偉大的水上之城，已被瘟疫，掏空了大半。一五二一年八月，經過慘烈的圍城戰，特諾奇蒂特蘭，淪陷了。最後一位皇帝<strong>夸烏特莫克</strong>，被俘、受刑、處死。這座當時全世界最壯麗的城市之一，被夷為平地。<strong>阿茲特克帝國，覆滅了。但請記住——擊垮它的是仇恨它的原住民盟友，與一場瘟疫，而非那幾百個西班牙人。墨西哥的「征服」，從一開始，就是一個敵友難分的悲劇。</strong></p>
+
+    <h3>悲傷之夜，與一座城的毀滅</h3>
+    <p>征服的過程，遠比傳說，更曲折、更血腥。一五二〇年，當被挾持的皇帝蒙特蘇馬，死於亂局後，憤怒的阿茲特克人，發動總攻，把西班牙人，逐出了特諾奇蒂特蘭。在那個，倉皇潰逃的雨夜，無數貪婪的西班牙士兵，因身上背負了，過多搶來的黃金，而沉入湖中，溺斃——科爾特斯，據說坐在一棵樹下，為慘重的損失，痛哭。這一夜，被西班牙人，稱為「<strong>悲傷之夜（La Noche Triste）</strong>」。然而潰敗的科爾特斯，並未放棄。他退往盟友特拉斯卡拉人的地盤，重整旗鼓；而他最致命的盟友——<strong>天花</strong>——則在城中，持續肆虐。一五二一年，科爾特斯，率領龐大的原住民聯軍，回師圍城。他切斷了，這座水上之城的飲水與糧道，然後一個街區、一個街區地，將它夷為平地。最後一位皇帝<strong>夸烏特莫克</strong>，率眾頑強抵抗到最後一刻，城破被俘。征服者，為逼問黃金的下落，用火炙烤他的雙腳——夸烏特莫克，那句「<em>難道我，是躺在玫瑰花床上嗎?</em>」的從容反詰，成了墨西哥，不屈精神的象徵。一座當時全世界最壯麗的城市，就此化為瓦礫。</p>
+
+    <h3>九成的死亡：一場靜默的浩劫</h3>
+    <p>而征服，最致命、也最靜默的一面是瘟疫。西班牙人，帶來的天花、麻疹、傷寒等，舊大陸，疾病對於從未接觸過、毫無免疫力的原住民，是滅頂之災（這是那份美國史詩裡「哥倫布大交換」的同一場，浩劫）。在征服後的一個世紀內，墨西哥的原住民人口，據估計，從征服前的約兩千萬，銳減到僅剩一兩百萬——<strong>消亡的比例高達九成</strong>。這是人類史上，最慘烈的人口崩潰之一。整座整座的村莊與城市因瘟疫而化為空城。<em>序章那「一座建在神廟上的城」的意象因此有了更沉重的註腳：西班牙人，得以把他們的那一層，蓋上去，很大程度上，是因為一場瘟疫已經先替他們，清空了，底下那一層的大部分，居民。征服的地基是一座由疾病堆成的巨大墓地。</em></p>
+
+    <div class="pull"><p>科爾特斯鑿沉了船，斷了自己的退路。但真正讓他征服一個帝國的不是他的勇氣，而是一個女人的舌頭、數萬名原住民的仇恨，與一場看不見的瘟疫。墨西哥，就在這場敵友難分的浩劫中，被孕育了出來。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「傷口」的誕生，與一段敵友難分的身世</span>
+      <p>第三章，是序章「<strong>傷口</strong>」這個密碼，真正誕生的時刻。「征服」，是墨西哥這個民族，最深的創傷起點。而馬林切，則是這道創傷，最複雜的象徵。她同時是「背叛」與「誕生」、是「征服者的幫兇」與「混血民族的母親」。墨西哥人，對她懷著一種既鄙夷、又無法割捨的矛盾情感——因為鄙夷她，就是鄙夷自己一半的血脈。這種「<em>我既是征服者的後代，也是被征服者的後代；我既是施暴者，也是受害者</em>」的身世矛盾，是墨西哥靈魂深處，那份「孤獨」與「傷口」的根源。它讓墨西哥人，對「我是誰」這個問題，有著一種比美國（信條之國）或加拿大（縫合之國）都更為複雜、更為痛苦的糾結。墨西哥的認同，不是建立在一個清晰的答案上，而是建立在一道無法癒合的傷口上。</p>
+      <p>而這一章，也徹底，顛覆了「征服」的簡單神話。真相是：阿茲特克帝國，是被它自己內部的矛盾（被壓榨的附庸的仇恨）、加上一場生物浩劫（天花），所摧毀的；科爾特斯，只是那個，巧妙地，點燃並利用了這一切的人。這個真相，至關重要，因為它，奠定了墨西哥歷史的一個基本母題——「<strong>內部的分裂，比外來的敵人，更致命</strong>」。從阿茲特克的附庸倒戈，到日後獨立、革命中，墨西哥人一次次的自相殘殺，這個民族，總是在內部的撕裂中，付出最慘痛的代價。而現在征服者，要開始，在這片血泊與廢墟之上，鋪設一個全新的、將持續三百年的「層」——新西班牙。他們會把教堂，蓋在神廟上；但他們，不會知道，底下那一層，從未真正死去。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 新西班牙 ✦</div>
+  <p>征服者拆掉了神廟，用同一批石頭，在原地，蓋起了教堂。<br>接下來的三百年，一個全新的世界，被一層層，疊壓在舊世界之上。<br><span class="hl">白銀、十字架，與一套把人按血統分等的制度。</span></p>
+</div>
+
+<!-- ===== 第四章 ===== -->
+<section class="act reveal dark" id="ch-4">
+  <div class="act-head">
+    <span class="act-num">第四章 · New Spain</span>
+    <h2 class="act-title">新西班牙：廢墟上的教堂與三百年的殖民</h2>
+    <p class="act-sub">New Spain — A Church on the Ruins, and Three Centuries of Caste</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>特諾奇蒂特蘭淪陷後，西班牙人，做了一件意味深長的事：他們沒有另尋他處，建立新都；而是就在阿茲特克帝國那座都城的廢墟上，原地建起了他們的「<strong>墨西哥城</strong>」。他們填平運河、拆毀神廟，並用神廟的石頭，蓋起教堂與宮殿。<em>新的一層，就這樣，被嚴絲合縫地，壓在了舊的一層上面。</em>由此開啟了長達三百年的殖民時代——「<strong>新西班牙（Nueva España）</strong>」。它將成為整個西班牙帝國，最富庶、最重要的一塊瑰寶。</p>
+
+    <h3>白銀：流向世界的血液</h3>
+    <p>讓新西班牙，如此重要的是<strong>白銀</strong>。在薩卡特卡斯、瓜納華托等地，西班牙人，發現了驚人的銀礦。源源不絕的墨西哥白銀，被開採出來，運過大西洋，支撐起西班牙的霸權；更有大量的白銀，經由「<em>馬尼拉大帆船</em>」，橫越太平洋，運往中國，換取絲綢與瓷器（這正是那份《大航海時代》與菲律賓史詩裡，那條連結全球的白銀貿易動脈）。<strong>墨西哥的白銀，是當時全球經濟的血液之一。</strong>然而開採這些白銀、耕種這片土地的是被奴役的原住民勞工——而他們的人口，在瘟疫與過勞的雙重打擊下，銳減了高達九成。一場人類史上最慘烈的人口崩潰，是這份殖民繁榮，沉默的代價。</p>
+
+    <h3>卡斯塔：一套把人按血統分等的制度</h3>
+    <p>而新西班牙社會，最深刻的特徵，是一套精密到近乎荒謬的<strong>種姓制度</strong>——「<strong>卡斯塔（casta）</strong>」。在這套制度裡，一個人的地位，由他的「<em>血統純度</em>」決定層層分明：最頂端，是出生於西班牙本土的「<strong>半島人</strong>」（peninsulares），他們壟斷一切最高的權位；其次是出生於美洲的純西班牙裔「<strong>克里奧爾人</strong>」（criollos）；再往下，是西班牙與原住民混血的「<strong>梅斯蒂索人</strong>」（mestizos）；然後是「<strong>原住民</strong>」；最底層，是被擄來的「<strong>非洲奴隸</strong>」。膚色與血統，決定了你的一生。<em>這套「按血統分等」的制度，把種族的不平等，澆鑄進了墨西哥社會的地基——它是序章「層疊」密碼在社會結構上的體現，其陰影，至今未散。</em></p>
+
+    <h3>十字架，與一道埋下的引線</h3>
+    <p>與白銀和卡斯塔並行的是天主教會強大的「<strong>精神征服</strong>」。傳教士，深入各地，大規模地，為原住民施洗；教堂取代神廟，成為每個城鎮的中心。教會積累了驚人的土地與財富，掌控著教育、醫療與人們的精神世界，成為新西班牙，僅次於王室的最大權力。然而在這看似穩固的殖民秩序之下，一道引線，正被悄悄埋下。那些出生於美洲的「克里奧爾人」，雖然富有、有教養，卻因為不是出生於西班牙本土，而被「半島人」，排擠在最高權力之外。這份「<em>同樣是西班牙人，卻被當作次等</em>」的怨恨，日積月累。<strong>當這份克里奧爾人的怨恨，與底層原住民、混血者的苦難，匯流在一起時，這個看似永固的殖民帝國，就將迎來它的終結。</strong></p>
+
+    <h3>馬尼拉大帆船：白銀如何把墨西哥與中國，連在一起</h3>
+    <p>墨西哥的白銀，其流向不只西渡大西洋，更東越太平洋，把新西班牙，變成了，人類史上，第一個「全球經濟」的樞紐。從一五六五年起，一年一度的「<strong>馬尼拉大帆船</strong>」，往返於，墨西哥的阿卡普爾科，與西班牙在亞洲的據點馬尼拉之間（這正是那份菲律賓史詩裡的故事）。它把墨西哥的白銀，運往馬尼拉，再轉運到中國換取令歐洲人，趨之若鶩的絲綢、瓷器與香料。<strong>於是墨西哥的白銀，成了串連美洲、亞洲與歐洲的第一種，真正意義的「世界貨幣」。</strong>那枚鑄著西班牙王徽的「八里亞爾」銀幣（peso），在中國，被稱為「番銀」，在全球，廣泛流通——它正是日後美元符號「$」的遠祖。<em>墨西哥，從殖民時代起，就不是一個孤立的角落；它是那個正在成形的、全球化世界的一個心臟。</em></p>
+
+    <h3>波旁改革：壓垮駱駝的「現代化」</h3>
+    <p>到了十八世紀，西班牙，換上了，來自法國的「波旁王朝」。新王朝，為了從殖民地，榨取更多財富、以應付歐洲的戰爭，推行了，一系列的「<strong>波旁改革</strong>」。這些改革，旨在「現代化」與「中央集權」：它加重了，殖民地的賦稅；它把更多的肥缺與權位，交給從西班牙本土，派來的「半島人」，進一步，排擠了，本地的克里奧爾人；它更於一七六七年，驅逐了，在美洲深得人心、且多由克里奧爾人擔任的「<strong>耶穌會</strong>」傳教士。<strong>這些「現代化」的改革，非但沒有鞏固帝國，反而火上澆油，激化了，克里奧爾人那本已深重的怨恨（第四章）。</strong>克里奧爾人，越來越覺得，自己雖生於斯、長於斯，卻在自己的土地上，被當作次等公民，被一個，遙遠而貪婪的母國，所剝削。<em>波旁改革，本想加強控制，卻反而鬆動了帝國的地基——它是那條，將引爆獨立的引線，又一次關鍵的延燒。</em></p>
+
+    <h3>白銀之城與卡斯塔的畫</h3>
+    <p>支撐新西班牙，繁榮的白銀催生了，一座座，富甲一方的礦業之城——<strong>薩卡特卡斯、瓜納華托、塔斯科</strong>。這些城市用白銀堆砌出，富麗堂皇的巴洛克教堂與宅邸至今仍是墨西哥，最美麗的殖民古城。而這個等級森嚴的殖民社會，更發展出，一種獨特的畫種——「<strong>卡斯塔畫（pinturas de castas）</strong>」。這些畫作系統性地，描繪不同種族通婚所生的後代及其對應的稱謂（西班牙人與原住民，生「梅斯蒂索」；西班牙人與非洲人，生「穆拉托」……），多達數十種，分類鉅細靡遺。<em>這些卡斯塔畫，是序章「層疊」與「混血」密碼最赤裸的視覺見證——它既記錄了，墨西哥，那無與倫比的種族融合，也暴露了，殖民者，企圖用血統將這份融合分門別類、層層分等的焦慮與傲慢。混血是現實；而將混血分等則是權力。</em></p>
+
+    <div class="pull"><p>西班牙人把教堂，蓋在神廟的石頭上；把一套按膚色分等的制度，澆鑄進社會的地基。他們以為這樣就能建起一個永恆的新世界。但他們不知道，被他們壓在底下的那一層，從未停止呼吸——它正在等待，重新冒出頭來的那一天。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 殖民這一「層」，與它埋下的種子</span>
+      <p>第四章，描繪了壓在原住民地基之上的、那厚厚的「<strong>殖民層</strong>」。這一層，給墨西哥，留下了三樣將深刻影響其未來的遺產。第一是<strong>白銀經濟</strong>所代表的「<em>榨取型</em>」殖民模式——新西班牙的繁榮，建立在開採白銀、與奴役原住民勞力之上，而非建立在發展多元、自主的經濟之上。這種「靠出口少數貴重資源」的依賴型結構，與那份阿根廷史詩裡的「潘帕斯詛咒」，有著異曲同工之處，也為墨西哥日後的經濟脆弱，埋下了遠因。第二是「<strong>卡斯塔</strong>」種姓制度所澆鑄的、極端的<strong>種族不平等</strong>。這套「按血統分等」的等級觀念，雖然在獨立後，於法律上被廢除，卻在文化與經濟的深層，頑強地，存活了下來——膚色越白、越接近歐洲，往往意味著越高的社會地位。這道源自殖民的種族裂痕，是墨西哥（乃至整個拉丁美洲）至今未解的深層創傷。</p>
+      <p>第三也是最具引爆力的是「<strong>克里奧爾人的怨恨</strong>」。獨立革命，往往不是由最底層的人發動的而是由「<em>次頂層</em>」的人——那些有能力、有資源，卻被壓在頂層之下、無法上升的人——所點燃的。新西班牙的克里奧爾人，正是如此：他們掌握著財富與知識，卻被出生於西班牙的「半島人」，剝奪了政治權力。這份怨恨，是墨西哥獨立的火種。但墨西哥獨立的獨特之處在於：當這把火，被點燃時，它迅速地，與底層原住民、混血者那積壓了三百年的、對整個殖民體系的怒火，匯流在了一起，使得墨西哥的獨立，從一開始，就帶著濃厚的、底層革命與種族復仇的色彩。而在點燃這把火之前，被壓在最底下的那一層——原住民的信仰——已經悄悄地，找到了一種，從教堂內部，重新冒出頭來的、神奇的方式。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 1531 ✦</div>
+  <p>征服者帶來了一位白皮膚的聖母。但十年後，在一座原住民女神的舊聖地上，<br>聖母再次顯現——這一次，她有著一張棕色的、原住民的臉，說著原住民的語言。<br><span class="hl">被征服的神，沒有死去。她躲進了征服者的聖母袍裡。</span></p>
+</div>
+
+<!-- ===== 第五章 ===== -->
+<section class="act reveal" id="ch-5">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Virgin of Guadalupe</span>
+    <h2 class="act-title">瓜達盧佩聖母：當征服者的神，有了一張原住民的臉</h2>
+    <p class="act-sub">The Virgin of Guadalupe — When the Conqueror's God Took an Indigenous Face</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>征服可以摧毀神廟、可以禁絕舊神、可以強迫人們，受洗、改信。但它能征服一個民族的「靈魂」嗎?墨西哥的答案，藏在一個發生於一五三一年的、神奇的傳說裡——「<strong>瓜達盧佩聖母</strong>」的故事。它是理解墨西哥靈魂，最重要的一把鑰匙。</p>
+
+    <h3>一張棕色的臉，說著原住民的語言</h3>
+    <p>傳說在特諾奇蒂特蘭淪陷僅僅十年後，一位名叫<strong>胡安·迪亞哥</strong>的原住民皈依者，在墨西哥城北邊的特佩亞克山丘上，遇見了聖母瑪利亞的顯現。但這次顯現，與眾不同：聖母不是西班牙人那白皙的、歐洲面孔的瑪利亞；她有著一張<strong>棕色的、原住民的臉龐</strong>，而且用原住民的語言——<em>納瓦特爾語</em>——對他說話。她要求在此地，為她建一座教堂。為了向半信半疑的主教，證明此事，聖母讓胡安·迪亞哥的斗篷上，奇蹟般地，浮現出她的聖像。而最關鍵的細節是：她顯現的這座特佩亞克山丘，正是阿茲特克人，過去供奉「<strong>大地母神托南欽（Tonantzin）</strong>」的聖地。</p>
+
+    <h3>被征服者，奪回了征服者的神</h3>
+    <p>瓜達盧佩聖母的意義，深不可測。表面上，這是一個天主教的奇蹟；但在更深的層次，這是一次完美的「<strong>融合</strong>」與「<strong>奪回</strong>」。被征服的原住民，沒有被迫全盤放棄自己的信仰；他們巧妙地，把自己古老的大地母神（托南欽），<em>藏進了</em>征服者那位聖母的袍子裡。瓜達盧佩，是一位「混血」的聖母——她有天主教的形式，卻有原住民的臉孔與靈魂。透過她，原住民，把征服者強加的宗教，從一套「<em>奴役的工具</em>」，轉化成了一套「<strong>屬於自己的信仰</strong>」。<strong>這是序章「層疊」與「融合」密碼最動人的展現：底下那一層（原住民的神），沒有被上面那一層（天主教）抹去；它從教堂的內部，重新長了出來，並把那座教堂，變成了自己的。</strong></p>
+
+    <h3>一面民族的旗幟</h3>
+    <p>正因如此，瓜達盧佩聖母，超越了單純的宗教，成為了「<strong>墨西哥認同</strong>」本身最神聖的象徵。有一句話說得好：「<em>並非所有墨西哥人，都是天主教徒；但幾乎所有墨西哥人，都是瓜達盧佩的信徒。</em>」她是凝聚這個由不同血統、不同階級，撕裂而成的社會的最大公約數。在日後墨西哥每一個關鍵的歷史時刻，人們都會高舉她的旗幟：神父伊達爾戈，將舉著她的聖像，發動獨立戰爭（第六章）；革命英雄薩帕塔的農民軍，也將以她，為精神象徵（第十三章）。<em>如果說，馬林切，是那個源於暴力、令人糾結的「傷口之母」，那麼瓜達盧佩，就是那個帶來慰藉、凝聚認同的「療癒之母」。墨西哥的靈魂，就在這兩位母親之間，擺盪。</em></p>
+
+    <h3>巴洛克的靈魂：索爾·胡安娜與殖民地的智慧</h3>
+    <p>三百年的殖民，不只留下了白銀與卡斯塔，也孕育出一種獨特的、混血的「墨西哥巴洛克」文化。在那些由白銀堆砌、金碧輝煌的教堂裡，歐洲的形式，與原住民工匠之手、與本土的色彩與草木，再一次，悄悄融合。而這個時代最耀眼的靈魂，是一位修女——<strong>索爾·胡安娜·伊內斯·德拉克魯斯</strong>。她是一位天才橫溢的詩人、學者與劇作家，被譽為「第十位繆思」。身為女性，她無法進入大學，便遁入修道院，在那裡，建起龐大的藏書，鑽研從神學到天文的一切學問。當主教指責她，一個女人不該鑽研世俗知識時，她寫下了一封擲地有聲的回信，捍衛女性受教育與思考的權利。<em>索爾·胡安娜，是拉丁美洲第一位偉大的女性知識分子、一位超越時代三百年的原初女性主義者。她證明了，即使在殖民最壓抑的高牆之內，墨西哥的靈魂，依然在燦爛地思考、創造。</em></p>
+    <h3>裁判所的陰影，與底層的暗流</h3>
+    <p>維繫這套殖民秩序的除了教會，還有令人畏懼的「<strong>宗教裁判所</strong>」——它監控著人們的信仰與思想，懲罰任何被視為異端的言行。然而即便在如此嚴密的思想控制下，被壓在底層的原住民信仰，依然如序章「層疊」所揭示的頑強地存活——它們偽裝成對天主教聖人的崇拜，把古老的神祇，藏在十字架的背後；在偏遠的山村，人們一邊上著教堂，一邊仍向山神與雨神，獻上祭品。整個殖民地的文化，因此是一場永不停歇的融合：表面上，是天主教的、西班牙的；底層下，卻永遠湧動著那原住民的、混血的暗流。三百年的殖民，沒能抹去底層，只是在它之上，疊了厚厚的一層——而底層，始終在呼吸。</p>
+
+        <div class="cards">
+      <div class="card">
+        <span class="flag">La Malinche · 馬林切</span>
+        <h5>傷口之母</h5>
+        <p>被獻給科爾特斯的原住民女子，成為他的翻譯、顧問與情人，為他生下「第一個混血兒」。她是「背叛」與「誕生」的雙重象徵——墨西哥那道源於征服的傷口之母。</p>
+        <span class="model">征服 · 背叛 · 混血的起源</span>
+      </div>
+      <div class="card">
+        <span class="flag">Guadalupe · 瓜達盧佩</span>
+        <h5>療癒之母</h5>
+        <p>顯現於原住民女神舊聖地、有著棕色臉龐的聖母。她讓被征服者，奪回了征服者的神，成為凝聚全民的認同象徵——墨西哥那道融合與慰藉的療癒之母。</p>
+        <span class="model">融合 · 慰藉 · 認同的旗幟</span>
+      </div>
+    </div>
+
+    <div class="pull"><p>征服者以為他們帶來了自己的神。但被征服者，做了一件更高明的事——他們給了那位神，一張自己的臉。瓜達盧佩聖母，是墨西哥最深的祕密：在這裡，沒有什麼會被真正征服，一切都會被重新融合成自己的。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「融合」的奧義，與一個民族的療癒</span>
+      <p>第五章，揭示了墨西哥「<strong>融合（mestizaje）</strong>」這個密碼，最深刻的奧義——它不只發生在血脈上，更發生在靈魂與信仰上。瓜達盧佩聖母的故事，是一則關於「文化如何在征服中存活」的偉大寓言。它告訴我們，一個被征服的民族，未必只能在「全盤接受」與「徹底滅亡」之間二選一；它還有第三條路——「<em>挪用與改造</em>」：把征服者強加的東西（天主教），偷偷地，注入自己的靈魂（原住民的母神），從而把它轉化成一件，屬於自己的、甚至可以用來抵抗的武器。這正是墨西哥文化那驚人的「韌性」與「創造力」的核心機制。它從不被動地，承受征服；它總是主動地，把征服者帶來的一切——宗教、語言、藝術——咀嚼、消化再吐出一個，全新的、混血的、屬於墨西哥自己的東西。</p>
+      <p>而瓜達盧佩，作為「<strong>療癒之母</strong>」，也為理解墨西哥的靈魂，提供了關鍵的一半。墨西哥的認同，建立在兩位象徵性的母親之上：一位是馬林切——那個源於「征服與背叛」的、令人糾結的「傷口之母」（第三章）；另一位，是瓜達盧佩——那個源於「融合與奪回」的、帶來慰藉與凝聚的「療癒之母」。墨西哥人的靈魂，就在這兩位母親之間，永恆地，擺盪：一邊是征服留下的、無法癒合的傷口與孤獨；另一邊，是融合所孕育的、足以凝聚整個民族的、溫暖的認同。理解了馬林切與瓜達盧佩，你就理解了墨西哥那「既哀傷、又熾烈」的雙重靈魂。而現在這個在殖民底層，已悄悄融合、發酵了三百年的新民族，即將在一位鄉村神父的鐘聲中，向那壓在他們頭上的殖民帝國，發出怒吼。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">◆ ✦ ◆</div>
+
+<!-- ========== PART III ========== -->
+<div class="part-div reveal" id="part-3">
+  <span class="pn">第三部</span>
+  <h2 class="ptitle pt">誕生於混亂</h2>
+  <div class="pe">Born in Chaos — A Confused Independence, and the Loss of Half a Country</div>
+  <div class="pline"><span></span><span class="dot">◆</span><span></span></div>
+</div>
+
+<!-- ===== 第六章 ===== -->
+<section class="act reveal" id="ch-6">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Cry of Dolores</span>
+    <h2 class="act-title">多洛雷斯的吶喊：神父、混血與獨立之戰</h2>
+    <p class="act-sub">The Cry of Dolores — Priests, Mestizos, and a War for Independence</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>一八一〇年九月十六日凌晨，在墨西哥中部一個叫「多洛雷斯」的小鎮，一位名叫<strong>米格爾·伊達爾戈</strong>的克里奧爾神父，敲響了教堂的鐘。鐘聲召來了鎮上的群眾。然後伊達爾戈，發出了一聲，將點燃整個墨西哥的怒吼——史稱「<strong>多洛雷斯的吶喊（Grito de Dolores）</strong>」。他高舉著瓜達盧佩聖母的旗幟（第五章），號召人民，起來反抗那壓迫了他們三百年的西班牙統治。墨西哥的獨立戰爭，就此爆發。（至今每年的九月十六日，墨西哥總統，都會在國家宮的陽台上，重現這聲「吶喊」，作為國慶的最高潮。）</p>
+
+    <h3>一場底層的、種族的怒火</h3>
+    <p>伊達爾戈的吶喊，點燃的遠不只是一場政治革命。它瞬間引爆了底層原住民與混血者，那積壓了三百年的、對整個殖民與種姓體系的怒火。一支由數萬名手持棍棒、彎刀的農民、礦工、原住民組成的烏合大軍，迅速地，集結到伊達爾戈麾下。這支大軍，所到之處，攻城掠地，並對西班牙人（gachupines）與富有的克里奧爾人，展開血腥的報復。<strong>這讓墨西哥的獨立戰爭，從一開始，就不只是「墨西哥 vs. 西班牙」的民族戰爭，更是一場「窮人 vs. 富人、棕色人 vs. 白色人」的<em>階級與種族戰爭</em>。</strong>這份血腥與失控，嚇壞了原本也對西班牙不滿的克里奧爾菁英——他們赫然發現，這把火，可能會把他們自己，也一起燒掉。伊達爾戈的大軍，最終被裝備精良的殖民軍隊擊潰，他本人，於一八一一年，被俘、處決。繼起的是另一位神父、混血者<strong>莫雷洛斯</strong>，他提出了更清晰的社會綱領（廢除奴隸制、廢除種姓），但也同樣，於一八一五年，兵敗被殺。</p>
+
+    <h3>一場被偷走的革命</h3>
+    <p>故事到這裡，出現了一個巨大的、諷刺的轉折。當伊達爾戈、莫雷洛斯的「底層革命」，被鎮壓下去後，獨立似乎遙遙無期了。然而一八二〇年，西班牙本土，發生了一場「自由派」革命。這反而嚇壞了新西班牙那些「保守的」克里奧爾菁英與教會——他們深恐西班牙的自由派新政，會剝奪他們的特權與財產。於是他們做出了一個驚人的決定：<strong>與其留在那個變得「太自由」的西班牙，不如乾脆獨立</strong>，好把自己的舊特權，原封不動地，保住。一八二一年，保守派軍官<strong>伊圖爾維德</strong>，調轉槍口，宣布獨立。墨西哥，終於獨立了——但諷刺的是它不是由伊達爾戈那樣的底層革命者完成的而是由<em>保守派</em>，為了「保住特權」而完成的。伊圖爾維德，甚至一度自封為「墨西哥皇帝」。<strong>那個由「多洛雷斯吶喊」所許諾的、底層的、平等的革命，被偷走了。墨西哥，因此從誕生的第一天起，就帶著一道深刻的裂痕：政治上獨立了，但社會的不公與種族的高牆，卻幾乎原封不動。</strong></p>
+
+    <h3>從游擊到共和：一場拖了十一年的戰爭</h3>
+    <p>伊達爾戈與莫雷洛斯相繼殞落後（第六章），獨立的火焰，並未熄滅，而是轉入了，南方的山區，由莫雷洛斯的部將<strong>格雷羅</strong>，以游擊戰的形式，頑強地，延續著。這場獨立戰爭，前後拖延了，整整十一年（1810–1821），血流成河，把墨西哥，打成了，一片殘破的廢墟。而最終，促成獨立的卻是那場，戲劇性的轉折（第六章）：保守派軍官伊圖爾維德，為了躲避西班牙本土的自由派新政，反而與他原本要剿滅的游擊隊領袖格雷羅，握手言和共同宣布獨立。一八二一年，兩人以《三項保證計畫》（獨立、天主教、團結），達成妥協，墨西哥，終於誕生。</p>
+    <h3>曇花一現的帝國</h3>
+    <p>然而這個倉促誕生的國家，立刻暴露了，它先天的混亂。野心勃勃的伊圖爾維德，竟自封為「<strong>奧古斯丁一世皇帝</strong>」，建立起，一個荒唐的「墨西哥第一帝國」。但這場帝王夢，僅僅維持了，不到兩年，便在一片反對聲中，垮台；伊圖爾維德，被放逐，後來潛回墨西哥，旋即被槍決。墨西哥，改行共和。<em>從一場底層的種族革命，到保守派的妥協獨立，再到一場荒唐的帝制，最後落腳於，一個脆弱的共和國——墨西哥的「誕生」，本身就是一團，理想與現實、激進與保守、反覆拉扯的亂麻。</em>這團亂麻，預示了，接下來，數十年的失序（第七章）。一個國家，若連自己該如何，誕生都如此糾結它又如何能平順地，長大?</p>
+
+    <div class="pull"><p>伊達爾戈敲響的鐘聲，召喚的是一場底層的、種族的革命；但最終完成獨立的卻是為了保住特權的保守派。墨西哥的誕生，是一場被偷走的革命——它許諾了平等，交付的卻是換了面孔的舊秩序。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一道「被偷走的革命」的裂痕</span>
+      <p>第六章，揭示了墨西哥獨立那「<strong>矛盾的誕生</strong>」，並埋下了一道將貫穿其後一個世紀的裂痕。墨西哥的獨立，包含了兩場，目標截然相反的運動：一場是伊達爾戈、莫雷洛斯所代表的、底層的「<em>社會革命</em>」（要平等、要廢除種姓、要土地）；另一場，是伊圖爾維德所代表的、菁英的「<em>保守獨立</em>」（要保住特權、維持舊秩序）。最終是後者，竊取了前者的果實。這道「<strong>社會革命的承諾，被菁英所背叛</strong>」的裂痕，是理解墨西哥的關鍵。因為那個未被兌現的、底層的、平等的承諾，並沒有消失；它像序章「層疊」密碼裡那永不消失的底層一樣，被壓抑了下去，然後在整整一百年後，以一場更猛烈、更血腥的方式——「墨西哥大革命」（第五部）——再次爆發出來。墨西哥的歷史，因此呈現出一種「<em>未竟的革命，反覆重來</em>」的結構。</p>
+      <p>而瓜達盧佩聖母，在這場獨立戰爭中，所扮演的角色，更印證了第五章的洞察。伊達爾戈，高舉的正是她的旗幟。她從一個宗教象徵，搖身一變，成為了動員底層原住民與混血者的、最有力的「民族旗幟」。被征服者，當年把自己的母神，藏進了征服者的聖母袍裡（第五章）；如今他們舉著這位混血的聖母，反過來，向征服者的後代，發動革命。<em>底層的那一層，又一次，從歷史的縫隙中，冒出了頭。</em>然而獨立後的墨西哥，並沒有迎來和平與秩序。它迎來的是長達數十年的、令人絕望的混亂——一個無法治理自己的國家，即將把自己，暴露在北方那個，正虎視眈眈、迅速擴張的鄰居面前。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 失序 ✦</div>
+  <p>獨立之後，墨西哥花了幾十年，也沒能想清楚：自己到底該是個什麼樣的國家。<br>數十年間，政府換了將近五十次；一個叫桑塔·安納的人，當了十一次總統。<br><span class="hl">而就在這片混亂中，北方的巨人，正一步步，逼近。</span></p>
+</div>
+
+<!-- ===== 第七章 ===== -->
+<section class="act reveal dark" id="ch-7">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Years of Disorder</span>
+    <h2 class="act-title">失序的年代：考迪羅、桑塔·安納與一個無法治理的國家</h2>
+    <p class="act-sub">The Years of Disorder — Caudillos, Santa Anna, and an Ungovernable Land</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>獨立並沒有，給墨西哥，帶來和平。相反它開啟了長達數十年的、令人絕望的「<strong>失序年代</strong>」。一個剛剛誕生的國家，赫然發現，自己對於「該成為一個什麼樣的國家」，毫無共識。在獨立後的頭幾十年裡，墨西哥的政府，更迭了將近<strong>五十次</strong>；總統的寶座，像走馬燈一樣，在政變、叛亂與內戰中，不斷易主。這個遼闊的國家，幾乎無法被治理。</p>
+
+    <h3>兩個無法調和的墨西哥</h3>
+    <p>失序的根源，是一道，深刻的、無法調和的分裂。一邊是「<strong>自由派</strong>」：他們崇尚歐美的進步思想，主張建立一個世俗的、聯邦制的共和國，並要剝奪天主教會與軍隊，那龐大的特權與財產。另一邊，是「<strong>保守派</strong>」：他們主張維持殖民時代留下的、以天主教會與軍隊為支柱的、中央集權的、階級森嚴的舊秩序（甚至一度想迎回一位歐洲君主）。這兩派，對於墨西哥，該是什麼，懷著南轅北轍的想像，並為此反覆地，兵戎相見。<em>這道「自由派 vs. 保守派」的撕裂，與那份阿根廷史詩裡「不知自己是什麼」的困境，遙相呼應——這是許多西屬美洲新國家，共同的、難產的宿命。</em></p>
+
+    <h3>桑塔·安納：失序年代的化身</h3>
+    <p>而把這個失序年代，演繹得淋漓盡致的是一個人——<strong>安東尼奧·洛佩斯·德·桑塔·安納</strong>。這位反覆無常、虛榮浮誇的考迪羅（強人），在二十多年間，竟先後，<strong>十一次</strong>，出任墨西哥總統。他一會兒是自由派，一會兒是保守派，全看哪邊，對他有利；他自封為「<em>至尊殿下</em>」，甚至為他在戰爭中失去的一條腿，舉行國葬。桑塔·安納，是墨西哥那「考迪羅政治」的縮影——一個在制度崩壞、社會分裂之際，靠著個人野心與軍事力量，反覆攫取權力的投機者（這與阿根廷的羅薩斯，是同一種人）。<strong>在他與他所象徵的失序之下，墨西哥，國庫空虛、軍隊渙散、人心離散。一個如此虛弱、如此分裂的國家，恰恰在最危險的時刻，要去面對，它北方那個，正以「天命昭彰」之名、瘋狂向西擴張的強大鄰居。</strong></p>
+
+    <h3>糕點戰爭：連法國，都來敲一筆</h3>
+    <p>失序的墨西哥，不只內鬥不休，更因虛弱而反覆遭受外侮。一八三八年，竟爆發了，一場匪夷所思的「<strong>糕點戰爭</strong>」：一位在墨西哥城開店的法國糕點師，聲稱他的店，在動亂中，遭墨西哥軍人，劫掠要求賠償。法國竟以此為藉口，派出艦隊，砲轟、封鎖墨西哥的港口韋拉克魯斯，逼墨西哥賠款。這場因幾塊糕點，而起的荒誕戰爭，赤裸地，暴露了，當時墨西哥，在列強眼中，是何等，軟弱可欺——任何一個歐洲強權，都可以隨便找個藉口，前來敲詐一筆。（而桑塔·安納，正是在這場戰爭中，失去了，一條腿，並藉此重塑了，他的英雄形象。）</p>
+    <h3>破產的國家</h3>
+    <p>失序最深的根源之一，是「錢」。獨立戰爭的破壞、持續的內戰、與菁英的貪腐讓墨西哥，長期陷於破產的邊緣。政府發不出，軍餉只能靠向教會或外國高利貸，舉債度日；而沉重的債務又反過來，成為外國干預的藉口（第十章的法國入侵，正源於此）。一個收不上稅、還不起債、養不起，一支忠誠軍隊的政府自然無力抵禦內憂與外患。<em>墨西哥，在十九世紀中葉的那場巨大的失土（第八章），與反覆的外國干預，其根源都可以追溯到這個獨立後，數十年的「失序」與「破產」——一個無法凝聚、無法治理、無法自立的國家在弱肉強食的世界裡，注定要任人宰割。</em></p>
+
+    <div class="pull"><p>獨立後的墨西哥，把幾十年的光陰，耗費在自己人對自己人的內鬥上。當它還在為「我們到底是什麼」而自相殘殺時，北方那個目標明確、團結強大的鄰居，已經磨好了刀。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「失序」的代價，與一場注定的悲劇</span>
+      <p>第七章，揭示了墨西哥（乃至許多新興國家）一個深刻的困境——「<strong>獨立易，立國難</strong>」。推翻一個舊政權，相對容易；但要在廢墟上，建立一個各方都能接受的、穩定的新秩序，卻無比艱難。墨西哥獨立後的失序，與那份阿根廷史詩裡的困境，是同一種病：當一個社會，無法就「我們該成為什麼樣的國家」這個根本問題，達成共識時，它就會陷入無休止的內鬥、政變與擺盪。墨西哥的「自由派 vs. 保守派」，與阿根廷的「港口 vs. 內地」、「中央集權 vs. 聯邦」，本質上，是同一道裂痕。而桑塔·安納，與阿根廷的羅薩斯，則是同一種「考迪羅」——在制度真空中，靠個人魅力與武力填補權力的強人。這提醒我們，墨西哥的動盪，並非「拉丁民族劣根性」這種偏見所能解釋；它是殖民遺產（種族不平等、缺乏自治傳統、教會與軍隊的過大權力）與「被偷走的革命」（第六章）所共同造成的結構性難題。</p>
+      <p>但這一章，最沉痛的回聲，在於它，為下一場悲劇，埋下了引線。墨西哥的「失序」，恰恰發生在一個最致命的時間點——它北方的鄰居美國，正處於「天命昭彰」、瘋狂向西擴張的巔峰（這正是那份美國史詩第七章所描繪的）。歷史在此展現了它殘酷的對稱：當美國，這個年輕、團結、自信、擴張的強權，向上崛起時，墨西哥，這個同樣年輕、卻分裂、虛弱、失序的鄰居，正向下沉淪。<strong>一個向上，一個向下；一個團結，一個分裂；一個飢渴，一個虛弱。</strong>當這兩者，在邊境上相遇時，結局幾乎已經注定。墨西哥，即將為它的「失序」，付出歷史上最慘痛的代價——失去它將近一半的國土。序章那道「北方的巨人」的陰影，即將第一次，以最暴力的方式，籠罩下來。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 1848 ✦</div>
+  <p>一場戰爭，讓墨西哥，一口氣，失去了將近一半的國土——<br>今天的加州、德州、整個美國西南部，曾經都是墨西哥。<br><span class="hl">「可憐的墨西哥啊——離上帝太遠，離美國太近。」</span></p>
+</div>
+
+<!-- ===== 第八章 ===== -->
+<section class="act reveal" id="ch-8">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Lost Half</span>
+    <h2 class="act-title">失去的一半：德州、美墨戰爭與「離美國太近」</h2>
+    <p class="act-sub">The Lost Half — Texas, the U.S. War, and "So Close to the United States"</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>墨西哥剛獨立時，它的疆域，遼闊無比——它的北方領土，包括了今天美國的德州、加州、新墨西哥、亞利桑那、內華達、猶他乃至科羅拉多的一部分。然而這片廣袤的北方，人煙稀少、鞭長莫及。而南方，那個剛剛崛起、飢渴地向西擴張的美國，正覬覦著這片土地。一場改變兩國命運的悲劇，即將上演。</p>
+
+    <h3>德州的失去</h3>
+    <p>悲劇始於德州。墨西哥，曾歡迎美國的移民，前來開墾人煙稀少的德州。但這些美國移民，很快在數量上，超過了當地的墨西哥人，並在文化與利益上，與墨西哥政府，格格不入（尤其在奴隸制等問題上）。一八三六年，德州的美國移民，發動叛亂，宣布獨立。桑塔·安納，親率大軍，前往鎮壓，雖在「<strong>阿拉莫</strong>」一役獲勝（殲滅了守軍），卻隨即在聖哈辛托一役，慘敗、被俘被迫承認德州獨立。一八四五年，美國正式<strong>吞併</strong>了德州。</p>
+
+    <h3>「蒙特祖馬的殿堂」：美墨戰爭</h3>
+    <p>德州的吞併，引爆了全面的「<strong>美墨戰爭</strong>」（1846–1848）。在「天命昭彰」的狂熱驅使下（見那份美國史詩），美國向墨西哥，發動了入侵。裝備、組織、國力全面占優的美軍，勢如破竹。他們甚至一路攻入了墨西哥城——美國海軍陸戰隊的軍歌中，那句「from the Halls of Montezuma（自蒙特祖馬的殿堂）」，指的正是此役。在墨西哥城最後的保衛戰中，查普爾特佩克城堡的一群年輕軍校學生，寧死不降，戰至最後——他們被尊為「<strong>少年英雄（Niños Héroes）</strong>」，成為墨西哥民族悲情的象徵。</p>
+
+    <h3>失去一半：一道永恆的傷口</h3>
+    <p>一八四八年，戰敗的墨西哥，被迫簽下了屈辱的《<strong>瓜達盧佩·伊達爾戈條約</strong>》。根據條約，墨西哥，將它北方<strong>將近一半</strong>的領土——加州、新墨西哥、亞利桑那、內華達、猶他等廣大地區——割讓給了美國。<em>一夕之間，墨西哥，失去了它一半的身體。</em>（而那些，世代居住在這片土地上的墨西哥人，一覺醒來，發現自己，竟成了「美國人」——這正是今日美國境內，那龐大的墨西哥裔人口，最深的歷史根源。）這場巨大的失土，是墨西哥民族，最深、最痛的一道集體創傷。它永遠地，定義了墨西哥，與北方那個巨人的關係——一種混合著恐懼、怨恨、依賴與羨慕的、複雜而不對稱的關係。<strong>「可憐的墨西哥啊——離上帝，太遠；離美國，太近。」</strong>這句後來由獨裁者迪亞斯說出的、辛酸的名言，道盡了墨西哥，自此無法逃脫的地緣宿命。</p>
+
+    <h3>邊境兩邊的人</h3>
+    <p>《瓜達盧佩·伊達爾戈條約》，紙面上，「保障」了那些留在新邊界以北的墨西哥人的財產與公民權利。但在現實中，這些承諾，大多被踐踏了。加州、德州的墨西哥裔地主（Californios、Tejanos），在美國的法律體系與蜂擁而至的盎格魯移民面前，一步步，喪失了，他們世代擁有的土地淪為自己故土上的二等公民。一八五三年，美國又透過「<strong>蓋茲登購地</strong>」，從貪財的桑塔·安納手中，買下了，更多的墨西哥領土。然而征服可以移動邊界卻無法抹去文化。今天美國西南部，那些地名——<em>加利福尼亞、科羅拉多、內華達、洛杉磯、聖弗朗西斯科、聖安東尼奧</em>——無一不是西班牙語；那片土地的建築、飲食、信仰無一不深深，烙印著，墨西哥的靈魂。<strong>那道一八四八年，劃下的邊界，從未真正把墨西哥，與這片曾屬於它的土地，分開——它只是創造了，一個將在一個半世紀後，因移民洪流（第二十三章）而再次活躍起來的巨大「邊境地帶」。失去的一半，從未在文化上，真正失去。</strong></p>
+
+    <div class="pull"><p>美國在它向上崛起的路上，咬下了墨西哥一半的身體。對美國，那是「天命昭彰」的榮光；對墨西哥，那是一道永不癒合的傷口。同一條邊界，劃開的是一個帝國的崛起，與一個鄰居的悲愴。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「北方的巨人」之傷與兩個國家的鏡像</span>
+      <p>第八章，是序章「<strong>北方的巨人</strong>」這個密碼，最痛、也最具決定性的時刻。失去一半的國土，是墨西哥現代史的奠基性創傷。它不只是領土的損失，更是一道，深植於民族心理的傷口——它讓墨西哥，永遠地，對北方那個強大的鄰居，懷著一種根深柢固的警惕、怨恨與不信任。墨西哥的民族主義，在很大程度上，正是「<em>對抗美國</em>」而塑造出來的——「我們不是美國人；我們要捍衛，那剩下的一半。」（這份「以對抗北方巨人來定義自己」的心態，與那份加拿大史詩裡的「我們不是美國人」，異曲同工；只不過，加拿大的巨人是「友善」的而墨西哥的巨人，曾真實地，咬掉了它的半個身體，因此墨西哥的怨恨，遠比加拿大，要深、要痛。）</p>
+      <p>而這一章，最深刻的意義，在於它，呈現了一組完美的「<strong>歷史鏡像</strong>」。把這一章，與那份美國史詩的第七章（天命昭彰、美墨戰爭），並排來讀，你會看到同一段歷史的、兩個截然相反的面孔：對美國，這是「邊疆引擎」全速擴張、國力蒸蒸日上的榮光；對墨西哥，這是國土淪喪、民族蒙羞的悲愴。一個的崛起，正是建立在另一個的失落之上。這組鏡像，揭示了一個冷峻的地緣政治真理：在弱肉強食的世界裡，一個「失序、虛弱」的國家（墨西哥，第七章），緊鄰著一個「團結、飢渴」的強權（美國），其命運，往往是悲劇性的。墨西哥的這場浩劫，是它「內部失序」與「外部強鄰」這兩大不幸，致命疊加的結果。然而浩劫之後，墨西哥，並沒有沉淪下去。一位原住民出身的、沉默而堅毅的領袖，即將站出來，試圖把這個傷痕累累的國家，從廢墟中，重新扶起。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">◆ ✦ ◆</div>
+
+<!-- ========== PART IV ========== -->
+<div class="part-div reveal" id="part-4">
+  <span class="pn">第四部</span>
+  <h2 class="ptitle pt">改革、帝國與獨裁</h2>
+  <div class="pe">Reform, Empire, and Dictatorship — An Indigenous President, a Rejected Emperor, a Powder Keg</div>
+  <div class="pline"><span></span><span class="dot">◆</span><span></span></div>
+</div>
+
+<!-- ===== 第九章 ===== -->
+<section class="act reveal" id="ch-9">
+  <div class="act-head">
+    <span class="act-num">第九章 · Juárez</span>
+    <h2 class="act-title">胡亞雷斯：一個原住民總統與墨西哥的「改革」</h2>
+    <p class="act-sub">Juárez — An Indigenous President and the Reform of Mexico</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>在失土的廢墟與失序的混亂中，墨西哥，迎來了一位，足以改變它命運的領袖——而他的出身，本身就是一個奇蹟。<strong>貝尼托·胡亞雷斯</strong>，是一個來自南方瓦哈卡的<strong>薩波特克原住民</strong>。他出身赤貧，做過牧童，直到十二歲，才開始學西班牙語。然而靠著驚人的意志與才智，他一路成為律師、法官、州長最終登上了墨西哥的總統寶座。<em>在一個由「卡斯塔」種姓制度（第四章）統治了三百年、把原住民壓在底層的國家，一個純血統的原住民，竟成了國家的元首——這是序章「層疊」密碼最震撼的展現：被壓在最底下的那一層，登上了最高的頂點。</em></p>
+
+    <h3>改革：把教會與軍隊，請下神壇</h3>
+    <p>胡亞雷斯，與他領導的自由派，推動了一場深刻的變革——「<strong>改革（La Reforma）</strong>」。他們的核心目標，是打破殖民時代遺留下來的、兩大特權堡壘：天主教會，與軍隊。改革派，剝奪了教會龐大的土地與財產、確立了政教分離、引入了世俗的民事登記（出生、婚姻、死亡不再由教會壟斷），並制定了一部自由派的新憲法（1857）。這些舉措，激怒了保守派，引爆了慘烈的「<strong>改革戰爭</strong>」（自由派與保守派的內戰）。經過血戰，自由派，獲勝。胡亞雷斯，試圖把墨西哥，從一個由教會與軍隊主宰的、半封建的舊社會，改造成一個世俗的、法治的、現代的共和國。他留下了一句，至今仍刻在墨西哥心中的名言：「<strong>尊重他人的權利，就是和平（El respeto al derecho ajeno es la paz）。</strong>」</p>
+
+    <h3>一位國父，與一個未解的難題</h3>
+    <p>胡亞雷斯，被尊為「<em>美洲的偉人</em>」，是現代墨西哥的國父。他象徵著法治、世俗、與一個原住民也能領導國家的、平等的理想。然而他的「改革」，也藏著一個意想不到的、苦澀的後果。自由派，在打破教會大地產的同時，也依據其「個人財產」的理念，瓦解了<strong>原住民村社的「公有土地」（ejido）</strong>。結果許多原住民與農民，失去了賴以為生的公有地，這些土地，反而被有錢有勢的人，趁機大量兼併。<em>自由派「人人平等」的理想，在土地問題上，諷刺地，加速了土地的集中。</em>這道因「改革」而加劇的土地不公，將與下一個時代的獨裁，疊加在一起，最終釀成那場席捲全國的大革命。</p>
+
+    <h3>改革戰爭：兩個墨西哥的決鬥</h3>
+    <p>胡亞雷斯所推動的「改革」（第九章），並非一帆風順。它激起了，保守派（教會、軍隊、大地主）的殊死反撲，引爆了，一場慘烈的內戰——「<strong>改革戰爭</strong>」（1858–1861）。這是「兩個墨西哥」的一次正面決鬥：一邊是以胡亞雷斯為首的自由派（要世俗、要法治、要剝奪教會特權）；另一邊，是誓死捍衛舊秩序的保守派。戰爭打得天昏地暗，雙方各自成立政府，分庭抗禮。最終自由派，慘勝。胡亞雷斯，得以將他那部，一八五七年的自由派憲法，與一系列的改革法令，付諸實施。<em>這場戰爭，是墨西哥，那「自由派 vs. 保守派」結構性裂痕（第七章），最血腥的一次，總清算。</em></p>
+    <h3>一個原則勝過一個人的時代</h3>
+    <p>胡亞雷斯，與他那一代的自由派菁英，所懷抱的是一個，深刻的理想：他們要讓墨西哥，從一個，由個人魅力的「考迪羅」（強人）、與教會、軍隊的特權所主宰的國家轉變為一個由「<strong>法律</strong>」與「<strong>制度</strong>」，所治理的現代共和國。胡亞雷斯，本人那沉默、嚴肅、一絲不苟，近乎刻板的作風正是這種「以法治國、以原則治國」精神的化身——與那些浮誇善變的考迪羅（如桑塔·安納），形成鮮明的對比。然而墨西哥，那「強人政治」的土壤是如此深厚——諷刺的是正是從胡亞雷斯，賴以抵抗法國的那場戰爭中（第十章），崛起了，一位新的將軍他最終將把胡亞雷斯，畢生追求的法治理想，再次踩在腳下建立起，墨西哥，最長的獨裁（第十一章的迪亞斯）。法治與強人，這道墨西哥政治的永恆拉鋸，從未停歇。</p>
+
+    <h3>改革法令：拆解一個舊世界</h3>
+    <p>胡亞雷斯，與自由派的「改革」（第九章），是透過一系列，具體的法令來拆解那個殖民遺留的舊世界的。「<em>胡亞雷斯法</em>」，廢除了，教會與軍隊的特殊法庭（讓他們也受一般法律的管轄）；「<em>萊爾多法</em>」，則強制教會（與原住民村社），出售其名下不事生產的地產。這些法令的精神被凝鍊進，一八五七年的自由派《憲法》——它確立政教分離、言論自由、與個人權利。<em>這是墨西哥，第一次，認真地，嘗試把自己從一個由教會、軍隊、與世襲特權，主宰的半封建社會，改造成，一個由法律與個人權利，所界定的現代國家。</em>儘管如第九章所述，萊爾多法，在瓦解教會地產的同時，也意外地，傷害了，原住民的村社共有地——這道理想與現實的落差是墨西哥，自由主義，深刻的內在矛盾。但無論如何，胡亞雷斯的改革為現代墨西哥的世俗國家，奠定了，法理的基石。</p>
+
+    <div class="pull"><p>一個牧童出身、直到十二歲才會說西班牙語的原住民，成了墨西哥的總統與國父。被壓在卡斯塔最底層三百年的那一層，登上了頂峰——這是墨西哥最動人的證明：在這裡，沒有什麼，會被永遠地，壓在底下。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「底層登頂」的象徵，與改革的兩面</span>
+      <p>第九章，是序章「層疊」密碼一次充滿希望的展現。胡亞雷斯，這位原住民總統，是墨西哥「<em>被壓抑的底層，終將重新湧現</em>」這一母題的最高象徵。他的崛起，向墨西哥（乃至全世界）證明那道源自殖民的、看似牢不可破的種族高牆，是可以被穿透的。這份「底層可以登頂」的精神，是墨西哥認同中，極為重要的一部分——它與胡亞雷斯所代表的「世俗、法治、共和」的理想一起，構成了現代墨西哥，自由派傳統的基石。胡亞雷斯，之於墨西哥，某種程度上，正如林肯之於美國——一個出身寒微、卻重新定義了國家靈魂的、被神聖化的國父。</p>
+      <p>但這一章，也揭示了「<strong>改革的兩難</strong>」——一個將在墨西哥反覆出現的悲劇性主題。胡亞雷斯的自由派，懷抱著「人人平等、個人自由」的崇高理想，要打破舊的封建特權。然而當他們，把這套源自歐洲的「個人財產」理念套用到墨西哥那獨特的、原住民「公有土地」的現實上時，卻產生了災難性的後果——它瓦解了保護弱者的村社共有制，反而讓土地，加速地，集中到強者手中。<em>這是一個深刻的教訓：抽象的、普世的理想（個人自由），若不顧及具體的、在地的現實（村社共有），有時反而會傷害它本想保護的人。</em>這道因改革而加劇的「土地不公」，是一條，將直接通向墨西哥大革命的導火線。而在革命爆發之前，墨西哥，還要先，捍衛一次它的主權——對抗一個，由法國，硬塞給它的歐洲皇帝。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 1864 ✦</div>
+  <p>法國的皇帝，硬塞給墨西哥一個歐洲皇帝——一位來自奧地利的哈布斯堡王子。<br>但那位原住民總統，拒絕投降，從沙漠裡，領導著抵抗。<br><span class="hl">三年後，那位歐洲皇帝，被一支墨西哥的行刑隊，槍決。</span></p>
+</div>
+
+<!-- ===== 第十章 ===== -->
+<section class="act reveal dark" id="ch-10">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Emperor from France</span>
+    <h2 class="act-title">法國人的皇帝：馬西米連諾與抵抗</h2>
+    <p class="act-sub">The Emperor from France — Maximilian and the Resistance</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>多年的內戰，掏空了墨西哥的國庫。一八六一年，走投無路的胡亞雷斯政府，宣布暫停償還外債。這給了歐洲列強，一個干預的藉口。法國的皇帝<strong>拿破崙三世</strong>，野心勃勃，企圖趁美國深陷內戰（無暇南顧）之際在墨西哥，建立一個聽命於法國的傀儡帝國，重振法蘭西在美洲的影響力。於是法軍入侵了墨西哥。</p>
+
+    <h3>五月五日：一場以弱勝強的傳奇</h3>
+    <p>一八六二年五月五日，在普埃布拉，裝備簡陋的墨西哥軍隊，竟奇蹟般地，擊退了當時號稱「全世界最強」的法國軍隊。這場「<strong>五月五日（Cinco de Mayo）</strong>」的大捷，雖然未能阻止法軍，最終捲土重來，卻成為墨西哥民族抵抗外侮的、不朽的象徵。（有趣的是這個節日，後來在美國，因墨西哥裔社群的緣故，被慶祝得，遠比在墨西哥本土，更為盛大。）</p>
+
+    <h3>一個悲劇的歐洲皇帝</h3>
+    <p>法軍終究攻佔了墨西哥城。拿破崙三世，與墨西哥的保守派（他們一直渴望，迎來一位歐洲君主，以恢復舊秩序）合謀從奧地利，請來了哈布斯堡王朝的王子<strong>馬西米連諾</strong>，立他為「墨西哥皇帝」（1864–67）。然而這場鬧劇，充滿了反諷：馬西米連諾，本人竟是一個天真的自由派理想主義者。他到了墨西哥後，非但沒有，恢復保守派想要的舊秩序，反而試圖推行一些自由派的政策，結果把擁立他的保守派，也給得罪了。他成了一個，兩面不討好、懸在半空中的悲劇皇帝。</p>
+
+    <h3>「我們不要歐洲的皇帝」</h3>
+    <p>而那位原住民總統胡亞雷斯，從未承認這個傀儡帝國。他帶著共和國的政府，退守北方的沙漠，頑強地，領導著抵抗。轉機來自北方：當美國，打完內戰、騰出手來，便依據「門羅主義」（美洲是美洲人的美洲），向法國，施加巨大壓力，要求法軍撤離。失去了法國刺刀支撐的馬西米連諾，帝國迅速崩潰。一八六七年，馬西米連諾，被共和軍俘虜。儘管歐洲各國，紛紛求情，胡亞雷斯，仍下令將他<strong>槍決</strong>。<em>這一槍，是墨西哥，向整個世界，發出的鄭重宣告：墨西哥，是一個共和國；它絕不接受，一個歐洲的皇帝，騎在自己頭上。</em>這是墨西哥，捍衛自身主權的一次高光時刻。</p>
+
+    <h3>卡洛塔：一位皇后的瘋狂</h3>
+    <p>馬西米連諾的悲劇還連著另一個人——他的皇后<strong>卡洛塔</strong>。這位比利時的公主，懷著成為一個帝國皇后的夢想來到墨西哥。當帝國，搖搖欲墜、法軍即將撤離時，是卡洛塔，挺身而出，遠渡重洋，返回歐洲，四處奔走向拿破崙三世、向教宗苦苦哀求，請求援助以挽救她丈夫的帝國與性命。然而沒有人，願意再理會這個注定覆滅的墨西哥帝國。一次次的碰壁與絕望最終擊垮了，卡洛塔的心智——她精神崩潰陷入了，瘋狂並在這種，瘋癲的狀態中，又活了整整六十年。<em>當她在歐洲，瘋癲地，遊蕩時，她的丈夫，已在墨西哥，被槍決。這對異國的皇帝與皇后，那淒涼的結局，為這場歐洲干預墨西哥的鬧劇畫上了，一個悲愴的句點。</em></p>
+    <h3>門羅主義的第一次，怒吼</h3>
+    <p>而促成，馬西米連諾，垮台的關鍵外力，是北方的美國。值得玩味的是這一次，那頭曾咬掉墨西哥，半個身體的「北方巨人」（第八章），卻扮演了，墨西哥的「救星」。當美國，打完內戰、騰出手後，立刻搬出「<strong>門羅主義</strong>」（美洲是美洲人的美洲，反對歐洲，干預西半球），向法國施加巨大壓力，並向胡亞雷斯的共和軍，提供武器援助。法國迫於美國的壓力（與歐洲自身的戰事），撤軍。<em>這揭示了，墨西哥，與「北方巨人」關係的複雜性：美國既是墨西哥，最大的威脅有時又是墨西哥，抵禦其他列強，干預的屏障。墨西哥，對美國的情感因此永遠是恐懼、怨恨、與不得不，依賴的糾結混合。</em>無論如何，槍決一位，歐洲皇帝，讓墨西哥，捍衛了，它作為一個獨立共和國的尊嚴。</p>
+
+    <div class="pull"><p>法國人，想把一個歐洲皇帝，硬塞給墨西哥。墨西哥的回答，是一支行刑隊。一個原住民總統，槍決了一位哈布斯堡的王子——這是這個傷痕累累的國家，向世界宣告：我們自己的命運，自己作主。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一次罕見的、捍衛主權的勝利</span>
+      <p>第十章，在墨西哥那充滿失敗與創傷的歷史中，是一個罕見的、揚眉吐氣的篇章。如果說，與美國的戰爭（第八章），是墨西哥「主權」最慘痛的失敗，那麼擊退法國、槍決馬西米連諾，則是它「主權」最光輝的勝利。它向世界，也向自己，證明了：墨西哥，雖然分裂、虛弱卻絕不甘心，淪為任何外來強權的殖民地或傀儡。這份在屈辱中，依然頑強捍衛獨立的精神，是墨西哥民族主義的重要養分。而由一位「原住民總統」，來槍決一位「歐洲皇帝」，這個畫面，更具有強烈的象徵意義——它徹底顛倒了殖民時代「歐洲人統治原住民」的舊秩序，宣告了一個由墨西哥人（包括原住民）自己當家作主的新時代。</p>
+      <p>然而歷史的反諷在於，這場捍衛「共和」的勝利，最終卻孕育出了墨西哥最長的一場「獨裁」。在抵抗法國的戰爭中，湧現出了一位戰功彪炳的年輕將軍——<strong>波費里奧·迪亞斯</strong>。他是共和國的英雄。但這位英雄，在胡亞雷斯死後，卻逐漸背離了共和的理想，靠著軍事政變，攫取了權力，並一坐就是三十五年。這是權力一個古老的悖論：捍衛自由的英雄，往往最終成了自由的囚徒。墨西哥，剛剛趕走了一個外來的皇帝，卻即將迎來一個本土的、更長久的「無冕之王」。而在這位強人，所打造的、那個看似「秩序與進步」的太平盛世之下，一座巨大的火藥庫，正在悄然堆積。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 1876 ✦</div>
+  <p>一位抵抗法國的英雄，奪取了權力，然後一坐就是三十五年。<br>他帶來了鐵路、外資與秩序，也帶來了壓迫、失地與沉默。<br><span class="hl">在「秩序與進步」的太平盛世底下，一座火藥庫，正在堆積。</span></p>
+</div>
+
+<!-- ===== 第十一章 ===== -->
+<section class="act reveal" id="ch-11">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Porfiriato</span>
+    <h2 class="act-title">波費里奧的太平盛世：鐵路、外資與沉默的火藥庫</h2>
+    <p class="act-sub">The Porfiriato — Railways, Foreign Capital, and a Silent Powder Keg</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>一八七六年，抵抗法國的英雄將軍<strong>波費里奧·迪亞斯</strong>，靠著政變，奪取了政權。他將統治墨西哥，長達三十五年——史稱「<strong>波費里奧時代（Porfiriato）</strong>」。迪亞斯的統治哲學，凝結成兩個詞：「<strong>秩序與進步</strong>」。在經歷了獨立後數十年的混亂、內戰與外侮（第七、八、十章）之後墨西哥，太渴望，秩序了。而迪亞斯，給了它秩序——只不過，代價是自由。</p>
+
+    <h3>秩序與進步：一個現代化的櫥窗</h3>
+    <p>在迪亞斯的鐵腕下，墨西哥，迎來了表面上的繁榮與現代化。他大力引進外國資本（尤其是美國與英國），修建了縱橫全國的<strong>鐵路</strong>、架設了電報、開發了礦業與新興的石油業。首都墨西哥城，也仿效巴黎，進行了華麗的改造（這份「成為拉美巴黎」的渴望，與同時代的布宜諾斯艾利斯，如出一轍——見那份阿根廷史詩）。經濟在數據上，高速成長；國家在數十年的動盪後，終於迎來了和平與穩定。對外國投資者與本國的權貴而言，這是一個黃金時代。</p>
+
+    <h3>「外國人的母親，墨西哥人的後母」</h3>
+    <p>然而這座光鮮的現代化櫥窗背後，是觸目驚心的不公與壓迫。迪亞斯的統治，靠的是「<strong>麵包或棍子（pan o palo）</strong>」——順從者，給好處；反抗者，用棍子（鎮壓、暗殺）。媒體被噤聲；選舉是橡皮圖章。而最深的毒瘤，是<strong>土地</strong>。在迪亞斯時代，土地以驚人的速度，集中到極少數大地主（hacendado）的手中——少數家族，坐擁廣達數百萬英畝的巨型莊園，而數百萬的農民，則淪為沒有土地、背負債務、被束縛在莊園裡的「<em>債務奴工</em>」。原住民（如雅基人），被血腥鎮壓、被強制遷徙。同時國家的經濟命脈（鐵路、礦產、石油），大量落入外國公司手中。當時人們這樣形容迪亞斯的墨西哥：「<strong>它是外國人的母親，卻是墨西哥人的後母。</strong>」（這份對「外資掌控經濟、本國人受苦」的怨恨，也呼應著序章「北方巨人」的陰影。）</p>
+
+    <h3>沉默的火藥庫</h3>
+    <p>於是在「秩序與進步」那華麗的表面之下，一座巨大的火藥庫，正在沉默地，堆積。失去土地的農民、被壓榨的礦工、被排擠的新興中產階級、與那些渴望，政治能有所改變、卻看著八十歲的迪亞斯，遲遲不肯交權的人們——他們的怨恨與絕望，正在累積，逼近臨界點。<strong>迪亞斯，用三十五年的鐵腕，買來了表面的穩定，卻把社會深層的矛盾，壓到了爆炸的邊緣。</strong>到了一九一〇年，當這位老獨裁者，再次操弄選舉、宣布連任時，那根點燃火藥庫的引線，終於被點著了。</p>
+
+    <h3>「科學家們」與野蠻的墨西哥</h3>
+    <p>支撐迪亞斯統治的是一群，自稱「<strong>科學家（científicos）</strong>」的技術官僚。他們信奉當時流行的「實證主義」哲學相信墨西哥，需要的是「秩序」與「科學的治理」，而非民主與平等。他們用「進步」之名為迪亞斯的獨裁，與外資的掠奪，提供了，理論的包裝。然而在這層，光鮮的「科學」外衣之下，是令人髮指的殘暴。美國記者約翰·特納，在他的揭露性著作《<strong>野蠻的墨西哥</strong>》中記錄了，迪亞斯政權的真面目：在尤卡坦的劍麻莊園、在瓦哈卡的菸草種植園，數以萬計的原住民與貧農，被當作奴隸活活做到死。其中最慘烈的是對北方「<strong>雅基人</strong>」的鎮壓與種族清洗——這個驍勇的原住民族，因反抗土地被奪，而遭到政府系統性地，屠殺並被成批地，當作奴隸，賣到數千公里外的劍麻莊園，途中死者無數。<em>「秩序與進步」的華麗櫥窗背後，是用最底層人民的血與骨，砌成的地基。</em></p>
+
+    <h3>盛大的百年慶典，與火藥庫的引爆</h3>
+    <p>一九一〇年九月，迪亞斯，為墨西哥，獨立一百週年，舉辦了，一場極盡奢華的慶典。他邀來各國使節舉行盛大的閱兵、宴會與揭幕儀式，向全世界，展示一個現代、繁榮、秩序井然的「波費里奧的墨西哥」。墨西哥城，被妝點得金碧輝煌，宛如歐洲名都。然而這場慶典是何等諷刺——就在這場盛大演出的同時遍布全國的失地農民、被壓榨的礦工、與渴望變革的中產那積壓已久的怒火已逼近臨界。慶典結束僅僅兩個月後，馬德羅的起義便爆發了；那座迪亞斯，精心維繫了，三十五年的火藥庫，轟然引爆（第十二章）。<em>那場華麗的百年慶典，因此成了一個舊時代，落幕前的最後一場盛宴——它那金光燦爛的表面與底下即將噴湧的鮮血恰恰構成了，序章「面具」與「血」密碼最戲劇性的並置。</em></p>
+
+    <div class="pull"><p>迪亞斯，用三十五年，給了墨西哥秩序、鐵路與外資的繁榮。但他是用棍子，買來的秩序；是用農民的失地，換來的繁榮。他把社會的矛盾，壓進了一座火藥庫——然後坐在火藥庫上，慢慢變老。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「秩序」與「公義」的致命取捨</span>
+      <p>第十一章，揭示了一個將反覆出現於墨西哥（乃至許多發展中國家）的、深刻的兩難——「<strong>秩序與公義的取捨</strong>」。在經歷了數十年的失序（第七章）後墨西哥，太需要穩定了；而迪亞斯，正是抓住了這份對「秩序」的渴望，建立起他的獨裁。他的故事，揭示了一種誘人卻危險的交易：以「自由」與「公義」，換取「穩定」與「成長」。在短期，這筆交易，似乎划算——它帶來了和平、鐵路與經濟數據的繁榮。但在長期，它是災難性的：因為被壓抑的矛盾，不會消失，只會在沉默中，累積直到以更猛烈的方式，爆發。迪亞斯的「秩序」，最終孕育了墨西哥史上最血腥的「失序」——大革命。</p>
+      <p>而波費里奧時代的經濟模式，也與那份阿根廷史詩裡的「黃金時代」，驚人地相似——同樣是「<em>靠出口初級產品、靠外國資本、由少數寡頭享受、把多數人排除在外</em>」的依賴型繁榮。這種模式的脆弱與不公，是拉丁美洲許多國家共同的命運。但墨西哥，與阿根廷，走向了不同的結局：阿根廷，在繁榮退去後，陷入了「永劫回歸」的經濟擺盪（見那份史詩）；而墨西哥，那積壓的社會矛盾，則以一場「<strong>大革命</strong>」的形式，總爆發。這場革命，將是二十世紀，最早、也最深刻的社會革命之一，它將吞噬上百萬條人命，並徹底重塑墨西哥。而它正是序章「被偷走的革命」（第六章）那未竟的承諾，與「迪亞斯的火藥庫」（本章）這巨大的不公，疊加引爆的結果。一個世紀前，「多洛雷斯的吶喊」所許諾、卻未能兌現的那場底層革命，即將捲土重來。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">◆ ✦ ◆</div>
+
+<!-- ========== PART V ========== -->
+<div class="part-div reveal" id="part-5">
+  <span class="pn">第五部</span>
+  <h2 class="ptitle pt">大革命</h2>
+  <div class="pe">The Revolution — Land and Liberty, a Million Dead, and a Constitution</div>
+  <div class="pline"><span></span><span class="dot">◆</span><span></span></div>
+</div>
+
+<!-- ===== 第十二章 ===== -->
+<section class="act reveal" id="ch-12">
+  <div class="act-head">
+    <span class="act-num">第十二章 · 1910</span>
+    <h2 class="act-title">一九一〇：火藥庫炸了</h2>
+    <p class="act-sub">1910 — The Powder Keg Explodes</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>一九一〇年，迪亞斯的火藥庫，炸了。點燃引線的是一個看似溫和的人——<strong>弗朗西斯科·馬德羅</strong>。他出身北方的富裕家庭，卻懷抱著民主的理想。他勇敢地，站出來，挑戰那位已經八十歲、卻仍打算繼續連任的迪亞斯，喊出了一句樸素卻有力的口號：「<strong>有效選舉，不得連任（Sufragio Efectivo, No Reelección）</strong>」。迪亞斯的回應，是把馬德羅，關進監獄，然後照例「贏得」了那場舞弊的選舉。</p>
+
+    <h3>一場席捲全國的怒火</h3>
+    <p>但這一次，不一樣了。馬德羅，逃出監獄，發出了武裝起義的號召。而他沒有料到的是他這聲號召，點燃的遠不只是一場「要求民主選舉」的政治運動——它瞬間引爆了迪亞斯時代，所積壓的、全社會的、巨大的怒火。失去土地的農民、被壓榨的工人、被排擠的中產階級，從四面八方，揭竿而起。起義的烈火，迅速地，蔓延全國。那位統治了墨西哥三十五年、看似不可一世的老獨裁者迪亞斯，被這突如其來的、燎原的聲勢，徹底震懾。一九一一年，他黯然辭職流亡巴黎。馬德羅，則以英雄之姿，當選總統。<em>火藥庫，炸開了第一響。但這僅僅是個開始。</em></p>
+
+    <h3>溫和者的悲劇</h3>
+    <p>馬德羅，是一個善良、理想主義的人，卻是一個糟糕的革命領袖。他犯了一個致命的錯誤：他以為革命的目標，只是「政治民主」（公平的選舉）；他沒有意識到那些跟隨他、流血犧牲的廣大農民，要的是更具體、更迫切的東西——<strong>土地</strong>。馬德羅，遲遲不肯推行土地改革，這讓追隨他的農民領袖（如薩帕塔），大失所望，甚至反目。他被夾在「不肯改革的舊勢力」與「要求激進變革的底層」之間進退失據。一九一三年，悲劇降臨：在「<strong>悲慘的十天</strong>」政變中，野心勃勃的將軍<strong>韋爾塔</strong>（背後有美國大使的暗中支持），背叛並謀殺了馬德羅，篡奪了政權。<strong>馬德羅的被害，是一個關鍵的轉折：它徹底撕碎了「和平改革」的幻想，把墨西哥，推入了一場全面的、血腥的內戰。一場「政治革命」，就此升級為一場「社會大革命」。</strong></p>
+
+    <h3>革命的先聲：弗洛雷斯·馬貢兄弟</h3>
+    <p>馬德羅的起義（第十二章），並非憑空而來。在他之前，已有一群勇敢的知識分子與工人為反抗迪亞斯的獨裁鋪平了，道路。其中最重要的是<strong>弗洛雷斯·馬貢兄弟</strong>。他們創辦反對派報紙《再生報》，猛烈抨擊迪亞斯政權，因而被反覆囚禁、流亡。他們的思想比馬德羅，要激進得多——帶有強烈的無政府主義與社會主義色彩，主張不只是政治改革，更要土地與勞動的根本變革。而在迪亞斯，統治的末期工人的怒火也已開始爆發：一九〇六年的坎內阿銅礦罷工、與里奧布蘭科的紡織廠罷工，都遭到血腥鎮壓——這些流血的事件是革命到來前的第一聲，悶雷。</p>
+    <h3>一個招魂的理想主義者</h3>
+    <p>而馬德羅，本人是一個，奇特的人物。他出身北方的富裕家庭，本可以安享榮華卻選擇投身這場凶險的革命。他是一位，虔誠的招魂術信徒，相信自己肩負著，某種神聖的使命要把民主，帶給墨西哥。他的那本《一九一〇年的總統繼承》，點燃了，全國對「改變」的渴望。然而正是這份純粹的理想主義，與政治的天真注定了，他的悲劇（第十二章）——他以為推翻獨裁者、舉行乾淨的選舉，就足夠了；他沒有看見那在他腳下洶湧的要求「土地」的社會海嘯。<em>馬德羅，是一個，太好、卻太弱的人。他打開了，革命的閘門卻被自己放出來的洪流所吞沒。他的殉難把一場溫和的政治革命，推入了，一場血腥的社會大革命。</em></p>
+
+    <div class="pull"><p>馬德羅，只想要一場乾淨的選舉；但他鬆開的是一整個被壓抑了三十五年的社會的怒火。他是那個天真地，以為自己能駕馭海嘯的人——而海嘯，吞沒了他。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「政治革命」與「社會革命」的落差</span>
+      <p>第十二章，揭示了一個貫穿墨西哥（乃至所有大革命）的、深刻的張力——「<strong>政治革命</strong>」與「<strong>社會革命</strong>」的落差。馬德羅，要的是「政治革命」：換掉獨裁者、舉行公平選舉、建立民主制度。但跟隨他的廣大農民與底層，要的是「社會革命」：分到土地、改變那套讓他們世代貧困的社會結構。馬德羅的悲劇，在於他沒有理解，後者才是這場革命，真正的、燃燒的核心。當一個改革者，只給「政治」、卻不給「麵包與土地」時他注定無法滿足那些，為他流血的人。<em>這個落差，正是序章所說的、那場「被偷走的革命」（第六章，獨立時，底層的社會革命，被菁英的政治獨立所竊取）的百年重演。</em>歷史再一次，問了同一個問題：這一次，底層那「土地與麵包」的渴望，能被兌現嗎?</p>
+      <p>而馬德羅之死，也再次印證了序章「<strong>北方的巨人</strong>」的陰影，與「血」的密碼。謀殺馬德羅的政變背後，有美國大使的黑手——北方的巨人，再一次，伸進了墨西哥的內政，攪動風雲。而馬德羅的被害，所開啟的是墨西哥史上最血腥的十年。它再次印證了那個殘酷的母題：在墨西哥，「血」，總是扮演著歷史的助產士——每一次，重大的變革，似乎都必須用大量的鮮血，來澆灌。馬德羅，這位溫和的理想主義者，是這場革命的第一位殉道者；但絕不是最後一位。隨著他的死，那些比他更激進、更草根、更代表底層渴望的領袖，登上了歷史舞台。他們將為「土地與自由」，掀起一場，真正撼動墨西哥根基的農民大革命。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 土地與自由 ✦</div>
+  <p>南方一個沉默的農民領袖，舉起了「土地與自由」的旗幟。<br>北方一個傳奇的盜匪將軍，率領著他的鐵騎，橫掃大地。<br><span class="hl">最底層的那一層，這一次，是拿起槍，自己衝了上來。</span></p>
+</div>
+
+<!-- ===== 第十三章 ===== -->
+<section class="act reveal dark" id="ch-13">
+  <div class="act-head">
+    <span class="act-num">第十三章 · Zapata and Villa</span>
+    <h2 class="act-title">薩帕塔與比利亞：土地與自由</h2>
+    <p class="act-sub">Zapata and Villa — Land and Liberty</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>馬德羅死後，墨西哥，陷入了全面的革命戰爭。而這場革命，最動人、最具代表性的兩張面孔，來自南北兩端——他們都不是出身菁英，而是真正從底層，崛起的領袖。</p>
+
+    <h3>薩帕塔：南方的良心</h3>
+    <p>在南方的莫雷洛斯州，崛起了<strong>埃米利亞諾·薩帕塔</strong>。他是一個原住民血統的、沉默而堅毅的農民領袖。他為之奮鬥的目標純粹而單一：<strong>土地</strong>——把那些，在迪亞斯時代，被大莊園主，巧取豪奪的土地，還給原住民的村莊。他提出了著名的《阿亞拉計畫》，要求徹底的土地重分配，並喊出了那句，響徹墨西哥百年的口號：「<strong>土地與自由（Tierra y Libertad）</strong>」。薩帕塔的農民軍，高舉著瓜達盧佩聖母的旗幟（第五章），為保衛家鄉的土地而戰。他是這場革命，最純粹的「<em>道德良心</em>」——他不為權力，不為財富，只為讓農民，能擁有，自己的土地。（他那句「<em>寧可站著死，不願跪著生</em>」，至今仍是墨西哥精神的象徵。）</p>
+
+    <h3>比利亞：北方的旋風</h3>
+    <p>在北方的奇瓦瓦州，則崛起了一位，截然不同、卻同樣傳奇的領袖——<strong>潘喬·比利亞</strong>。他出身貧寒，當過盜匪，卻極具個人魅力與軍事天才，宛如一位「劫富濟貧」的羅賓漢。他組建了一支強大的騎兵軍團——「<strong>北方師</strong>」，作戰勇猛，所向披靡。比利亞，甚至做了一件，讓墨西哥人，至今津津樂道的事：一九一六年，他率部越境突襲了美國新墨西哥州的哥倫布鎮。震怒的美國，派出潘興將軍，率領大軍，深入墨西哥，追剿比利亞，卻勞師動眾，數月<em>一無所獲</em>。<strong>一個墨西哥的草莽英雄，戲耍了北方那個巨人——這讓比利亞，成了墨西哥民族驕傲的傳奇。</strong></p>
+
+    <h3>農民坐進了總統的椅子</h3>
+    <p>在韋爾塔（謀殺馬德羅的篡位者）被推翻後，革命達到了一個象徵性的高潮。一九一四年，薩帕塔與比利亞的兩支農民大軍，會師進入了墨西哥城。有一張著名的歷史照片：比利亞，大剌剌地，坐上了總統府那金碧輝煌的寶座，薩帕塔，則神情靦腆地，坐在他身旁。<strong>那些世世代代，被踩在社會最底層的農民與原住民，如今拿起槍，自己打進了權力的最高殿堂——這是序章「層疊」密碼最震撼的一幕：被壓在最底下的那一層，這一次，不是被恩賜，而是自己浴血衝了上來。</strong>然而這個輝煌的時刻，卻無比短暫。因為這兩位純樸的農民領袖，雖然能贏得戰爭，卻不懂得，如何玩弄政治。而政治，這頭怪獸，即將吞噬他們。</p>
+
+    <h3>女兵與民謠：革命的另一張臉</h3>
+    <p>墨西哥大革命，不只是男人與槍的故事。在那些，行軍的隊伍裡，有成千上萬的女性身影——「<strong>女兵（soldaderas）</strong>」。她們有的隨軍照料傷患、張羅糧食；有的乾脆拿起槍，與男人，並肩作戰。她們是革命，不可或缺、卻長期被歷史，忽略的半邊天。那首傳唱至今的革命民謠《<em>阿德莉塔（La Adelita）</em>》，唱的正是這些勇敢的女兵。而這也揭示了，革命深遠的文化遺產——「<strong>民謠（corrido）</strong>」。在那個，識字率，低落的年代，墨西哥人，用一首首，口耳相傳的敘事歌謠，來記錄、傳頌革命的英雄與戰役（從《阿德莉塔》到《<em>蟑螂（La Cucaracha）</em>》）。這些民謠把比利亞與薩帕塔，唱成了，不朽的傳奇也把革命的記憶，深深地，刻進了，墨西哥的文化基因。<em>墨西哥大革命，雖然吞噬了，無數的生命卻也成為墨西哥，二十世紀，文化（壁畫、音樂、文學）取之不盡的靈感泉源——它是這個民族，用鮮血，寫成的集體史詩。</em></p>
+
+    <h3>潘興的徒勞，與比利亞的不朽</h3>
+    <p>比利亞突襲美國哥倫布鎮後，震怒的美國，派出潘興將軍，率領數千大軍，配備當時最先進的汽車與飛機，深入墨西哥北方，誓言活捉比利亞。然而，在熟悉地形、又得到鄉親掩護的比利亞面前，這支現代化的美軍，勞師動眾近一年，跑遍千里黃沙，最終卻空手而返，連比利亞的影子都沒摸著。這場「懲罰性遠征」的徹底失敗，讓比利亞，成了戲耍北方巨人的民族英雄。然而英雄的結局是悲涼的：一九二〇年比利亞與政府和解、解甲歸田，卻仍在一九二三年，於返鄉途中，遭埋伏亂槍打死。一如薩帕塔，這位草莽英雄，最終，也死於同胞的暗算。但他們的肉身雖滅，傳奇卻在無數的民謠（corrido）中，永遠地，奔馳在墨西哥的想像裡。</p>
+
+    <div class="pull"><p>薩帕塔為土地而戰，比利亞戲耍了北方的巨人。那些被踩在最底層幾百年的農民，這一次，拿起槍，自己打進了總統府。但他們很快會發現：贏得戰場，遠比贏得權力的遊戲，要容易得多。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「底層武裝崛起」的高峰，與它的悲劇</span>
+      <p>第十三章，是序章「<strong>層疊</strong>」密碼——「被壓抑的底層，終將重新湧現」——最壯烈的一次展現。如果說，胡亞雷斯（第九章），是底層「個人」登頂的象徵，那麼薩帕塔與比利亞的農民大軍，則是底層「群體」武裝崛起的高峰。薩帕塔的「土地與自由」，更直接承接了一個世紀前，伊達爾戈、莫雷洛斯（第六章）那場「被偷走的革命」的、未竟的承諾。這一次，農民不再等待菁英的恩賜；他們拿起槍，自己為土地，而戰。薩帕塔，作為這場革命「道德良心」的象徵，其影響，極其深遠——「薩帕塔主義（Zapatismo）」，將成為墨西哥，為弱勢、為原住民、為土地正義，而抗爭的永恆旗幟。八十年後，當另一群原住民，在恰帕斯，揭竿而起時，他們將自稱「薩帕塔民族解放軍」（第二十章）。薩帕塔，沒有死；他活在了，每一次，墨西哥底層，為尊嚴而戰的吶喊裡。</p>
+      <p>但這一章，也埋下了革命悲劇的伏筆——「<strong>贏得戰爭，不等於贏得權力</strong>」。薩帕塔與比利亞，是偉大的軍事領袖、純粹的人民英雄，卻不是精明的政治家。他們知道如何為土地，浴血奮戰，卻不知道，如何建立政府、玩弄權謀、整合派系。當他們，坐進總統府的寶座，又旋即退去時，他們把建立新秩序的政治舞台，讓給了，另一批人——那些來自北方、更具現代官僚與政治手腕的「立憲派」（卡蘭薩、奧夫雷貢）。而正是這批人，將一方面，竊取革命的果實，一方面，將這兩位，純樸的農民英雄，一一謀殺。墨西哥的革命，即將展現它最殘酷的一面——它將吞噬自己的孩子。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 1917 ✦</div>
+  <p>這場革命，吞噬了上百萬條人命，也吞噬了它自己幾乎所有的英雄。<br>薩帕塔、比利亞、卡蘭薩、奧夫雷貢——幾乎全都死於暗殺。<br><span class="hl">但它也留下了一部，當時全世界最激進的憲法。</span></p>
+</div>
+
+<!-- ===== 第十四章 ===== -->
+<section class="act reveal" id="ch-14">
+  <div class="act-head">
+    <span class="act-num">第十四章 · A Revolution Devours Its Children</span>
+    <h2 class="act-title">一場吞噬自己孩子的革命：百萬人的死與一部憲法</h2>
+    <p class="act-sub">A Revolution Devours Its Children — A Million Dead, and a Constitution</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>當共同的敵人（篡位者韋爾塔）被推翻後，曾經並肩作戰的革命陣營，立刻分裂、反目陷入了一場，更血腥的自相殘殺。革命分成了兩大陣營：一邊是來自北方、代表中產與資產階級、更具政治手腕的「<strong>立憲派</strong>」（領袖是卡蘭薩與軍事天才奧夫雷貢）；另一邊，是代表農民與底層的「<strong>人民派</strong>」（薩帕塔與比利亞）。一九一五年，奧夫雷貢，憑藉其現代化的軍隊與戰術，在塞拉亞，擊潰了比利亞的「北方師」。人民派，由盛轉衰。</p>
+
+    <h3>百萬人的死</h3>
+    <p>這場長達十年（1910–1920）的革命與內戰，其代價，是駭人的。據估計，墨西哥，在這場浩劫中，死了<strong>一百萬到兩百萬人</strong>——以當時約一千五百萬的總人口計算，意味著，每七到十五個墨西哥人中，就有一個，死於戰亂、饑荒或瘟疫。這是墨西哥民族，繼「征服」之後最深、最痛的一次集體創傷。<strong>「血」，這個自阿茲特克時代，就纏繞著這片土地的密碼，在二十世紀，再一次，以最慘烈的規模，氾濫成災。</strong></p>
+
+    <h3>一部超越時代的憲法</h3>
+    <p>然而這場血腥的革命，也孕育出了一個，了不起的成果——一九一七年的《<strong>墨西哥憲法</strong>》。這部憲法，在當時的世界，是極其激進、極其進步的它遠遠走在了時代的前面：它的「<strong>第二十七條</strong>」，宣告土地與地下資源（尤其是<em>石油</em>）的最終所有權，屬於「國家」與「人民」，為土地改革，與日後的石油國有化，奠定了基礎；它的「<strong>第一二三條</strong>」，保障了，當時世界罕見的勞工權利（八小時工時、罷工權、最低工資）；它還確立了，強硬的「<em>反教權</em>」原則（剝奪教會的政治與經濟特權），與免費的世俗公共教育。<strong>這部憲法，是革命，用百萬人的鮮血，換來的、寫給未來的藍圖——它把「多洛雷斯的吶喊」以來那一個世紀，底層所渴望的「土地、勞動、平等」的承諾，第一次，鄭重地，寫進了國家的根本大法。</strong></p>
+
+    <h3>革命吞噬了它的孩子</h3>
+    <p>但這場革命，最終也以最殘酷的方式，吞噬了它自己幾乎所有的締造者。一九一九年，純粹的農民英雄<strong>薩帕塔</strong>，被卡蘭薩的人，設下圈套，誘騙亂槍打死；一九二〇年，卡蘭薩，本人在逃亡中，被殺；一九二三年，傳奇的<strong>比利亞</strong>，在路上，遭暗殺身亡；一九二八年，連最後勝出、當選總統的軍事強人<strong>奧夫雷貢</strong>，也被刺殺。<em>幾乎每一個，革命的主要領袖，都死於非命。</em>這場革命，像神話中那個吞食自己兒女的巨神，把它的孩子，一個個，吞了下去。墨西哥，贏得了一部偉大的憲法，卻失去了它所有的英雄，並陷入了一個，迫切的問題：如何才能終結這場永無止境的、自相殘殺的革命暴力?</p>
+
+    <h3>阿瓜斯卡連特斯：當革命者，無法達成共識</h3>
+    <p>在推翻篡位者韋爾塔之後，勝利的革命陣營，曾試圖坐下來，談出一個共同的未來。一九一四年，各派系，齊聚「<strong>阿瓜斯卡連特斯</strong>」，召開大會，希望協調出，一個統一的革命政府。然而會議徹底破裂了。代表底層農民的薩帕塔與比利亞，和代表中產與資產階級的卡蘭薩，對於「革命究竟為何而戰」，有著無法調和的歧見：前者要立刻徹底的土地重分配；後者只要溫和的政治與憲政改革。談判破裂革命者，再次兵戎相見。<em>這是序章「內部分裂比外敵更致命」母題的又一次，慘烈印證——共同的敵人，一旦消失革命者，便因無法就「我們到底要什麼」達成共識，而自相殘殺。這與那份阿根廷史詩裡，那「無法就根本問題達成共識」的鐘擺遙相呼應。</em></p>
+    <h3>一部領先世界的社會憲法</h3>
+    <p>而從這場，血腥的分裂中，勝出的卡蘭薩一派，卻在制定憲法時，不得不，吸納了，對手（薩帕塔派）的激進訴求，以安撫廣大的底層。其結果，是那部超越時代的一九一七年憲法（第十四章）。它的歷史地位，怎麼強調，都不為過：<strong>它是全世界，第一部，把「社會權利」（土地、勞動、教育），明確寫入根本大法的憲法——比蘇聯一九一八年的第一部，社會主義憲法，還要早一年。</strong>它宣告地下資源，屬於國家（第二十七條，日後石油國有化的依據）、保障勞工的八小時工時與罷工權（第一二三條）、並確立免費的世俗教育。<em>墨西哥，這個被視為「落後」的國家，竟在「社會權利」這件事上，走在了，全世界的最前面。這是它用百萬人的鮮血換來的給未來的禮物——儘管這份禮物的全面兌現，還要再等二十年，等到一位叫卡德納斯的總統。</em></p>
+
+    <h3>奧夫雷貢：用機關槍，終結一個時代</h3>
+    <p>在革命諸雄的混戰中，最終勝出的，是來自北方索諾拉的軍事天才奧夫雷貢。他敏銳地學習了同時代歐洲一次大戰的戰術——壕溝、鐵絲網與機關槍。一九一五年，在塞拉亞的決戰中，他正是用這套現代化的火力，把比利亞那支勇猛卻過時的騎兵「北方師」，打得潰不成軍。比利亞一蹶不振，革命的天平，倒向了較具現代官僚與軍事手腕的「立憲派」。奧夫雷貢的勝利，象徵著一種轉變：那個靠個人魅力與草莽勇氣的革命時代，正讓位給一個靠組織、制度與現代技術的新時代。而正是這批索諾拉的軍事強人（奧夫雷貢、卡列斯），將在戰後，著手把混亂的革命，馴化成一個制度、一個政黨——PRI（第十五章）。革命的烈火，終將被裝進一個體制的爐膛裡。</p>
+
+    <div class="pull"><p>墨西哥大革命，用上百萬人的血，換來了一部寫給未來的偉大憲法；卻也用暗殺的子彈，吞噬了它自己幾乎所有的英雄。它是一場，既誕生了崇高理想、又血流成河的矛盾的革命——一如墨西哥，這個國家本身。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「血」的高峰，與「未竟革命」的最終藍圖</span>
+      <p>第十四章，是序章「<strong>血</strong>」這個密碼，在二十世紀的最高峰。墨西哥大革命，是二十世紀最早、也最血腥的社會革命之一（早於俄國革命）。它以一百多萬人的死，再次印證了墨西哥歷史那「以血為助產士」的悲劇母題——從阿茲特克的獻祭、征服的屠殺、獨立的內戰，到革命的相殘，這個民族，似乎總要用大量的鮮血，來澆灌每一次的蛻變。而「革命吞噬其子女」這一幕，更是墨西哥那「內部分裂比外敵更致命」母題（第三章）的慘烈重演——擊垮這些革命英雄的不是外敵，而是昔日的革命同志。</p>
+      <p>但這一章，最深遠的遺產，是一九一七年的《憲法》——它是這場血腥革命，留給未來的、最珍貴的「<strong>藍圖</strong>」。這部憲法的偉大之處，在於它終於把一個世紀以來（自「多洛雷斯的吶喊」起），底層墨西哥人，所渴望、卻一再被「偷走」的那場「社會革命」的承諾——土地、勞動權、教育、國家對資源的主權——白紙黑字地，寫進了國家的根本大法。它是「被偷走的革命」，第一次，被正式地，「贖回」。尤其是那條宣告「石油屬於國家」的第二十七條，更將成為墨西哥，日後對抗「北方巨人」（美國石油公司）、捍衛經濟主權的最有力的武器（第十六章的石油國有化）。然而藍圖終究只是藍圖。如何把這部理想的憲法，落到實處?更迫切的是如何終結這場，吞噬了所有英雄的革命暴力的循環?墨西哥，即將給出一個，極其獨特、也極其弔詭的答案——它要把「革命」本身變成一個「制度」、一個「政黨」。一個將統治墨西哥七十一年的龐然大物，即將誕生。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">◆ ✦ ◆</div>
+
+<!-- ========== PART VI ========== -->
+<div class="part-div reveal" id="part-6">
+  <span class="pn">第六部</span>
+  <h2 class="ptitle pt">制度化的革命</h2>
+  <div class="pe">The Institutionalized Revolution — The Perfect Dictatorship, Oil, Murals, and a Mask That Slipped</div>
+  <div class="pline"><span></span><span class="dot">◆</span><span></span></div>
+</div>
+
+<!-- ===== 第十五章 ===== -->
+<section class="act reveal" id="ch-15">
+  <div class="act-head">
+    <span class="act-num">第十五章 · The Perfect Dictatorship</span>
+    <h2 class="act-title">把革命變成一個黨：PRI 與「完美的獨裁」</h2>
+    <p class="act-sub">The Perfect Dictatorship — When the Revolution Became a Party</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>革命吞噬了它所有的英雄（第十四章）。到了一九二〇年代末，墨西哥，面臨一個迫切的難題：如何才能終結這場，由考迪羅之間，無休止的暗殺與內戰，所構成的暴力循環?一位名叫<strong>卡列斯</strong>的強人，給出了一個，極其獨特、也極其弔詭的答案。一九二九年，他創建了一個政黨——後來幾經改名，定名為「<strong>革命制度黨（PRI）</strong>」。</p>
+
+    <h3>把所有的派系，都裝進一個黨</h3>
+    <p>這個黨的構想，堪稱政治工程的傑作。它的核心邏輯是：與其讓那些手握槍桿的革命派系與考迪羅，在戰場上，互相殘殺，不如把他們，<strong>全部吸納進「同一個黨」裡</strong>，讓他們，在黨的內部，透過協商、分贓與輪流坐莊，來爭奪權力。換言之它要把「革命」這場血腥的、失控的事件，馴化成一套，可以和平運轉的「<strong>制度</strong>」——「<em>革命制度黨</em>」，這個自相矛盾的名字（革命怎麼會是制度?），正道出了它的本質。它把農民、工人、與中產官僚，分別組織進黨控制的龐大工會與組織裡，用恩庇、用分贓、用就業機會，把整個社會，編織進這張，無所不在的黨網之中。</p>
+
+    <h3>「完美的獨裁」</h3>
+    <p>這套制度，運作得，出奇地，成功。它終結了暴力，為墨西哥，帶來了長達<strong>七十一年</strong>的、罕見的政治穩定。當二十世紀的拉丁美洲，到處都在上演軍事政變、獨裁與動盪時（回想那份阿根廷史詩），墨西哥，卻在 PRI 的統治下，保持著，平穩的、可預測的權力交接。它的祕訣，在於「彈性」與「吸納」：它不像軍政府那樣，赤裸裸地，靠坦克鎮壓；它舉行（看似民主的）定期選舉（雖然結果永遠是 PRI 獲勝，必要時，就靠舞弊）；它保留了革命「<em>不得連任</em>」的唯一原則（每位總統，做滿一個六年任期「sexenio」，便欽點繼任者，然後下台）；它更擅長把任何冒出頭的反對聲音，或收買、或吸納、或邊緣化。秘魯作家、諾貝爾獎得主<strong>巴爾加斯·尤薩</strong>，為這套體制，取了一個流傳千古的稱號——「<strong>完美的獨裁</strong>」：它不是靠暴力，而是靠一套，柔軟、靈活、無孔不入的霸權，來維繫，一黨的長期統治，同時還披著一層民主的外衣。</p>
+
+    <h3>基督君王萬歲：克里斯特羅戰爭</h3>
+    <p>在 PRI 締造穩定的同時，它也引爆了，二十世紀墨西哥，最被低估、卻最慘烈的一場戰爭。一九一七年的革命憲法（第十四章），帶有強烈的「反教權」色彩。而 PRI 的締造者<strong>卡列斯</strong>，是一個，激進的反教權主義者。一九二六年，他開始嚴厲地，執行憲法中，那些壓制天主教會的條款——關閉教堂、驅逐外籍神父、禁止公開的宗教遊行、甚至限制神父的人數。對一個，信仰深入骨髓、瓜達盧佩聖母就是其靈魂的民族（第五章）而言這是無法忍受的。於是在墨西哥中西部，那些最虔誠的鄉村地區，農民們，自發地，拿起武器，揭竿而起，高喊著：「<strong>基督君王萬歲（¡Viva Cristo Rey!）</strong>」。這場史稱「<strong>克里斯特羅戰爭</strong>」（1926–1929）的內戰，慘烈異常——雙方都犯下了殘酷的暴行；政府公開槍決神父（如後來被封聖的普羅神父）；而戰爭，總共奪走了，約<strong>二十五萬</strong>條人命。</p>
+    <p>克里斯特羅戰爭，是序章「<strong>層疊</strong>」密碼又一次慘烈的展現——它是墨西哥，那「世俗、自由派的革命國家」這一層，與那「天主教、瓜達盧佩信仰」的古老底層之間，一場你死我活的碰撞。它也再次印證了「血」的密碼，與「內部分裂比外敵更致命」的母題。最終這場戰爭，在美國的斡旋下，以一紙脆弱的停戰協議，告終但教會與國家之間的深刻裂痕，並未真正癒合（數年後，更爆發了第二次克里斯特羅戰爭）。<em>而這場戰爭，也驅使，大批虔誠的墨西哥難民，逃往北方的美國——成為墨西哥大規模移民史（第二十三章）上早期的一波。</em>克里斯特羅戰爭，深刻地，提醒著我們：那個看似無所不能的「完美獨裁」，其誕生的過程，本身就浸透著鮮血。</p>
+
+    <div class="pull"><p>墨西哥，給「如何終結革命暴力」這道難題，一個獨一無二的答案：把革命，變成一個黨。它用一黨的長期壟斷，換來了七十年的和平——一場不需要坦克，就能維繫的「完美的獨裁」。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「以穩定換民主」的獨特解方</span>
+      <p>第十五章，揭示了墨西哥，為它那「血」與「分裂」的歷史頑疾，所開出的、獨一無二的藥方——「<strong>制度化的革命</strong>」。要理解這個解方的精妙與弔詭，可以把它，與本系列的其他國家，對照來看。面對「派系內鬥、無法和平交權」這個拉美的通病（那份阿根廷史詩裡，這導致了民主與軍政府的反覆擺盪），墨西哥，沒有走上阿根廷那條「鐘擺」之路；它發明了 PRI——一個把所有派系，都吸納進來、用「黨內接班」取代「政變奪權」的、龐大的單一政黨。這個發明，是天才的：它真的終結了暴力，給了墨西哥，二十世紀拉美，最稀有的東西——長期的穩定。它也與美國（兩黨輪替）、加拿大（和平協商）形成對比：墨西哥，找到了第三條路——「一黨霸權下的穩定」。</p>
+      <p>但這條路的代價，是「民主」。PRI 的「完美的獨裁」，用穩定，換取了人民的政治自由。它是一套，靠「吸納」與「分贓」維繫的、龐大的恩庇體系——這也意味著，無孔不入的<strong>貪腐</strong>，與一個凌駕於社會之上的、無所不能的「黨國」。它更是序章「層疊」與「面具」密碼的政治體現：PRI，宣稱自己「繼承」並「代表」了那場偉大的革命（把革命的光環，披在自己身上），實則卻把革命的激進承諾，束之高閣，並馴化了它。它戴著「革命」與「民主」的面具，行一黨壟斷之實。這套體制，將主宰墨西哥，整個二十世紀。而它之所以，能維繫如此之久，不只靠手腕，更因為在它統治的前期，它確實兌現了革命的一部分承諾——而兌現得最徹底的是一位，至今仍被深深愛戴的總統。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 1938 ✦</div>
+  <p>當外國的石油公司，藐視墨西哥的法律時，一位總統，做了一件驚人的事。<br>他把它們，全部收歸國有。舉國歡騰，連窮人，都捐出了，自己的雞與首飾。<br><span class="hl">那一天，墨西哥，向北方的巨人宣告：地底下的石油，是我們的。</span></p>
+</div>
+
+<!-- ===== 第十六章 ===== -->
+<section class="act reveal dark" id="ch-16">
+  <div class="act-head">
+    <span class="act-num">第十六章 · Cárdenas</span>
+    <h2 class="act-title">卡德納斯：土地、石油與民族主義的巔峰</h2>
+    <p class="act-sub">Cárdenas — Land, Oil, and the Height of Revolutionary Nationalism</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>在 PRI 漫長的統治中，有一位總統，與眾不同——他沒有把革命的承諾，束之高閣，而是真正地，將它兌現。他是<strong>拉薩羅·卡德納斯</strong>（1934–1940 在任），至今仍是墨西哥人，最深愛、最敬重的總統。</p>
+
+    <h3>把土地，還給薩帕塔的人民</h3>
+    <p>卡德納斯，做的第一件大事，是<strong>土地改革</strong>。他以前所未有的魄力，將大莊園的土地，徵收、重分配給農民——他在任內，分配出去的土地（以「ejido」公有村社的形式），比他之前，所有總統，分配的總和還要多（約一千八百萬公頃）。<em>那個自伊達爾戈、薩帕塔以來，墨西哥底層，渴望了一個多世紀的「土地與自由」的夢想（第六、十三章），在卡德納斯手中，得到了，最大程度的兌現。</em>這讓 PRI 政權，贏得了廣大農民，發自內心的、長久的忠誠，也為這個體制，奠定了，深厚的合法性基礎。</p>
+
+    <h3>石油國有化：向北方巨人的宣告</h3>
+    <p>而卡德納斯，做的最驚天動地的一件事，是一九三八年的「<strong>石油國有化</strong>」。當時墨西哥的石油，幾乎全被英、美的外國公司掌控。當這些外國公司，傲慢地，拒絕遵守墨西哥法院，關於勞工權益的判決時，卡德納斯，依據一九一七年憲法那條「<em>地下資源屬於國家</em>」的第二十七條（第十四章），毅然宣布將所有外國石油公司，<strong>收歸國有</strong>，創立了國家石油公司「<strong>PEMEX</strong>」。這在當時，是石破天驚之舉——一個弱小的發展中國家，竟敢沒收強大帝國的資產。消息傳出，舉國陷入愛國的狂熱：上至富商，下至貧苦的農婦，紛紛向政府，捐款、捐出自己的雞、豬甚至結婚的戒指，來幫助國家，賠償外國公司。<strong>三月十八日，這個石油國有化的日子，從此成為墨西哥的國定紀念日。它是墨西哥，自一八四八年失土以來，向「北方的巨人」、向外國資本，發出的最響亮的一次「主權宣告」——地底下的財富，是墨西哥人的。</strong></p>
+
+    <h3>給世界難民的避風港</h3>
+    <p>卡德納斯（第十六章）的偉大不只在於，土地與石油，更在於，一種恢宏的人道精神。一九三〇年代末，當西班牙，內戰以法西斯的佛朗哥，獲勝告終時，卡德納斯，向數以萬計的戰敗的西班牙共和派難民（知識分子、藝術家、科學家、教授），敞開了，墨西哥的大門。這群被稱為「<em>西班牙流亡者（los transterrados）</em>」的菁英為墨西哥的大學、科學與文化注入了，巨大的能量影響至今。卡德納斯，更收留了，被史達林，追殺、走投無路的蘇聯革命家<strong>托洛斯基</strong>——儘管托洛斯基，最終仍在墨西哥城，被史達林的特務用冰鎬刺殺。<em>在那個，法西斯與極權橫行的黑暗年代，墨西哥，成了全球受迫害者的一座難得的避風港——這是它最光輝的國際形象之一。</em></p>
+    <h3>打造一台，能運轉七十年的機器</h3>
+    <p>而卡德納斯，在鞏固革命成果的同時，也親手完善了，那台將主宰墨西哥，七十年的政治機器——PRI 的「<strong>統合主義</strong>」結構。他把全國的農民組織進，官方的「全國農民聯合會（CNC）」、把工人組織進「墨西哥勞工聯合會（CTM）」、把中產與公務員，組織進，另一個，部門。整個社會，被分門別類地，編織進，這張由黨控制的巨網之中。透過這張網，PRI，得以由上而下地，動員、控制、與分配恩惠從而維繫它那「完美的獨裁」（第十五章）。<em>諷刺的是這位墨西哥，最深得，民心的總統他為造福人民，所打造的這套統合結構，最終卻成了PRI，得以長期壟斷權力、收編社會的最有力的工具。卡德納斯的理想主義，與PRI 的威權機器，就這樣難分難解地，糾纏在了一起。</em></p>
+
+    <h3>瓦斯孔塞洛斯：用教育，鑄造一個民族</h3>
+    <p>而為墨西哥的文化復興，奠定基石的，是革命後第一任教育部長瓦斯孔塞洛斯。他懷抱著一個恢宏的願景：要透過教育，把這個剛經歷大革命、四分五裂、文盲遍地的國家，鍛造成一個有共同靈魂的民族。他派出教師大軍，深入最偏遠的鄉村，興辦數千所「鄉村學校」，把識字與墨西哥認同，帶給最底層的人民；他也正是他，把那面面公共建築的牆，交給了里維拉等畫家，催生了壁畫運動（第十七章）。而他提出的「宇宙種族」理念——歌頌墨西哥的混血，視之為融合世界各民族、面向未來的優越新種族——更為這個曾為自己的混血身世而自卑的民族，提供了一套自信的、引以為傲的認同論述。瓦斯孔塞洛斯證明了，鑄造一個民族，靠的不只是槍與憲法，更是教育、藝術與，一個值得相信的，關於「我們是誰」的故事。</p>
+
+    <div class="pull"><p>卡德納斯，把土地，還給了薩帕塔的子孫；把石油，從外國巨頭手中，奪回給了墨西哥。他是那個，真正兌現了革命承諾的人——也因此，墨西哥人，至今仍深愛著他。石油從此成了墨西哥主權的圖騰。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命承諾的兌現，與主權的圖騰</span>
+      <p>第十六章，是革命理想，與 PRI 體制，達到合法性巔峰的時刻。卡德納斯之所以，如此重要，是因為他回答了第十四章末尾的問題：那部偉大的一九一七年憲法，那些寫給未來的、激進的承諾（土地、資源主權），能被兌現嗎?卡德納斯，用土地改革與石油國有化，給出了，響亮的「是」。他兌現了「土地與自由」（薩帕塔的夢），也兌現了「資源屬於人民」（憲法第二十七條）。<em>正是這份「真正為人民做了事」的政績，為 PRI 那「完美的獨裁」，注入了，最深厚的合法性——人民願意容忍它的一黨壟斷，因為它似乎真的站在人民這一邊。</em>這是理解 PRI 為何能統治如此之久的關鍵：它的穩定，前期不只靠操控，更靠真實的社會兌現。</p>
+      <p>而石油國有化，更是序章「<strong>北方的巨人</strong>」這個密碼，一次揚眉吐氣的逆襲。自一八四八年失去半壁江山（第八章）、又經歷波費里奧時代「外國人的母親」的屈辱（第十一章）以來墨西哥，對「被外國（尤其是美國）資本掌控自己經濟命脈」，懷著刻骨的怨恨。卡德納斯的石油國有化，是這份怨恨的第一次，強力宣洩——它向世界，宣告墨西哥，要自己掌控自己的資源與命運。「石油」，從此超越了經濟，成為墨西哥「<em>國家主權</em>」與「民族尊嚴」的神聖圖騰（這也是為何，日後任何要將石油，重新對外開放的改革，都會觸動墨西哥人，最敏感的神經）。卡德納斯，把革命的理想與民族的尊嚴，推上了巔峰。而站在這個巔峰上，墨西哥，即將迎來它，經濟與文化，最輝煌燦爛的數十年——一個「奇蹟」的年代，與一場，在牆上，重新發明「墨西哥是誰」的藝術革命。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 壁畫 ✦</div>
+  <p>在巨大的牆上，畫家們，重新畫出了「墨西哥是誰」：<br>輝煌的阿茲特克、被壓迫的原住民、流血的革命、與混血的新民族。<br><span class="hl">他們把那層層疊疊的過去，畫成了，一個民族，可以驕傲的身世。</span></p>
+</div>
+
+<!-- ===== 第十七章 ===== -->
+<section class="act reveal" id="ch-17">
+  <div class="act-head">
+    <span class="act-num">第十七章 · The Mexican Miracle</span>
+    <h2 class="act-title">墨西哥奇蹟，與壁畫上的國族</h2>
+    <p class="act-sub">The Mexican Miracle, and the Nation Painted on the Walls</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>在 PRI 帶來的政治穩定下，從一九四〇到一九七〇年代，墨西哥，迎來了它的「<strong>奇蹟</strong>」——「墨西哥奇蹟（el milagro mexicano）」。在這數十年間，墨西哥的經濟，以年均約百分之六的高速，持續成長。國家大力推動工業化（進口替代）；城市急遽擴張墨西哥城，從一座城市，膨脹成一座，人口千萬的超級巨城；一個龐大的、買得起家電與汽車的城市中產階級，興起了。在政治穩定與經濟成長的雙重加持下，那是一個，墨西哥人，對未來，充滿信心的年代。</p>
+
+    <h3>在牆上，重新發明一個民族</h3>
+    <p>而比經濟奇蹟，更深刻、更持久的是這個時代，那場波瀾壯闊的「<strong>文化革命</strong>」——它要為這個剛剛經歷大革命、亟需凝聚的民族，重新鍛造一個「<em>我是誰</em>」的答案。其核心，是舉世聞名的「<strong>壁畫運動</strong>」。以<strong>迪亞哥·里維拉</strong>、奧羅斯科、西凱羅斯為首的偉大畫家，在政府的支持下，在一座座公共建築的巨大牆面上，繪製出，氣勢磅礴的壁畫。這些壁畫，講述了一個全新的「墨西哥國族故事」：它<em>歌頌</em>那輝煌的阿茲特克與原住民過去、<em>控訴</em>西班牙征服與殖民的殘暴、<em>禮讚</em>革命的英雄與抗爭、並<em>讚美</em>那由所有這些層次，交融而成的「混血民族」。<strong>畫家們，把序章那「層層疊疊」的過去——原住民、征服、混血、革命——畫成了一個，連貫的、可以驕傲的、屬於全體墨西哥人的「身世」。</strong>與此同時，<strong>芙烈達·卡蘿</strong>，以她痛徹心扉、又絢爛奪目的自畫像，畫出了墨西哥那「傷口與堅韌」並存的靈魂；思想家瓦斯孔塞洛斯，更提出了「<strong>宇宙種族</strong>」的概念，宣稱墨西哥的「混血」，不是缺陷，而是融合了世界各民族優點的、未來的「優越種族」。</p>
+
+    <h3>把「層疊」與「傷口」，化為驕傲</h3>
+    <p>這場文化運動的意義，怎麼強調，都不為過。它是墨西哥，主動地，擁抱、並昇華自己那複雜身世的一次偉大嘗試。<em>面對「我是誰」這個因征服與混血，而格外痛苦的問題（序章的「傷口」），墨西哥，給出了一個，與阿根廷（始終認同漂浮、心向歐洲——見那份史詩）截然不同的、自信的答案：我就是這片土地上，原住民與西班牙，血肉交融的產物；我的混血，我的層疊，不是我的恥辱，而是我的驕傲與力量。</em>透過壁畫、透過「宇宙種族」、透過對阿茲特克祖先的重新擁抱，墨西哥，把它那道「征服的傷口」，部分地，轉化成了，一個充滿生命力的、獨特的民族認同。<strong>這是墨西哥，在文化上，最自信、最燦爛的時刻——它學會了，為自己的「層疊」與「混血」，而驕傲。</strong></p>
+
+    <h3>黃金年代的銀幕：當墨西哥，征服了拉美的眼睛</h3>
+    <p>在「墨西哥奇蹟」的年代，墨西哥的文化影響力，達到了，巔峰——尤其是它的「<strong>電影黃金時代</strong>」。從一九三〇到五〇年代，墨西哥的電影工業，蓬勃發展，產量與影響力，雄踞整個西語世界之首。它捧紅了，一批不朽的巨星：喜劇泰斗<strong>坎丁弗拉斯</strong>（那個伶牙俐齒、代表市井小民的街頭智慧的角色，風靡整個拉丁美洲）、絕代風華的<strong>瑪麗亞·費利克斯</strong>與多洛雷斯·德爾里奧。連西班牙的超現實主義，電影大師<strong>布紐爾</strong>，都流亡墨西哥，在此拍出傑作。<em>透過銀幕墨西哥，把它的語言、它的音樂、它的情感與幽默輸出到整個西語世界——它在文化上，成了拉丁美洲的一個中心。這份文化的自信與輸出力，是序章「層疊」密碼化為驕傲認同的又一展現。</em></p>
+    <h3>沉默的文學，與痛苦的畫</h3>
+    <p>而在更深沉的藝術領域，墨西哥，也誕生了，足以震撼世界的靈魂。作家<strong>胡安·魯爾福</strong>，以一部，薄薄的、卻魔幻而沉鬱的小說《佩德羅·巴拉莫》，描繪了，一個亡靈與生者雜處的鬼村——它深刻地，捕捉了，墨西哥，那與死亡朝夕相處的靈魂（第二十四章），並啟發了，整個拉美的「魔幻寫實主義」。詩人<strong>奧克塔維奧·帕斯</strong>，則以《孤獨的迷宮》，剖析了，墨西哥人，那源於征服的孤獨與面具（序章），並最終贏得諾貝爾文學獎。而畫家<strong>芙烈達·卡蘿</strong>，更把她一生承受的肉體與精神的劇痛（車禍、流產、破碎的婚姻），化為一幅幅，絢爛、血腥、又無比誠實的自畫像。<em>芙烈達，本身就是墨西哥的化身——她把最深的傷口活成了，最濃烈的藝術。她那混合著，原住民服飾、天主教意象、與現代痛苦的畫正是序章「傷口」與「層疊」密碼的完美視覺體現。</em></p>
+
+    <h3>把現代，蓋成墨西哥的模樣</h3>
+    <p>墨西哥奇蹟的自信，也澆築在它的建築裡。建築師們，沒有照搬歐美的玻璃帷幕，而是試圖把「現代」，蓋出墨西哥的靈魂。路易斯·巴拉岡，以濃烈的色彩（粉紅、赭黃、湛藍）、樸素的牆面與寧靜的光影，創造出一種既現代、又深植於墨西哥鄉土與情感的建築語言，後來贏得了建築界的最高榮譽。而墨西哥國立自治大學（UNAM）那座宏偉的校園，更把現代主義的建築，與里維拉、西凱羅斯的巨幅壁畫，融為一體——連圖書館的整面外牆，都鋪滿了講述墨西哥歷史的馬賽克鑲嵌畫。一九六八年，墨西哥城更以一場奧運，向世界展示這個現代化的國度。然而，就在那座奧運場館落成的同時，特拉特洛爾科的學生鮮血（第十八章），也，揭穿了這幅現代圖景背後，那威權的真相。輝煌的建築，與廣場的血，是同一個墨西哥的，一體兩面。</p>
+
+    <div class="pull"><p>面對「我是誰」這道因征服而痛苦的難題，阿根廷選擇了把臉，朝向遙遠的歐洲；墨西哥，卻把臉轉向了腳下的土地。它把原住民的祖先、混血的血脈、層疊的傷口，全都畫上了牆——並學會了，為這一切，驕傲。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把「層疊」鍛造成「認同」</span>
+      <p>第十七章，是序章「<strong>層疊</strong>」與「<strong>傷口</strong>」密碼被昇華為「認同」與「驕傲」的關鍵時刻。一個由多層文明（原住民、西班牙、混血）暴力疊壓而成的國家，本可能，像阿根廷那樣，陷入「我到底是誰」的認同焦慮與漂浮（那份史詩裡，阿根廷始終心向歐洲、不知身在何處）。但墨西哥，走了一條，相反的、也更成功的路。透過壁畫運動、「宇宙種族」的理念，墨西哥，主動地，把自己「層疊」的歷史，編織成一個，連貫而自豪的民族敘事——它不迴避征服的傷口，反而把它與輝煌的原住民過去、英勇的革命，一起熔鑄成一個，獨一無二的「墨西哥認同」。<em>墨西哥，因此擁有了拉丁美洲，最強烈、最自信的民族文化認同之一。</em>這份文化自信，是它能夠在「北方巨人」那壓倒性的文化引力下，依然倔強地，保有自我的深層根源。</p>
+      <p>但這份輝煌，也有它的陰影與侷限。第一「墨西哥奇蹟」的成長，主要惠及了城市與中產階級，廣大的農村貧民與原住民，依然被甩在後面——不平等，並未消除，只是被經濟成長的光環，暫時掩蓋。第二這場壯麗的文化建構，本身也是一種「<em>面具</em>」（序章密碼）：它歌頌「光榮的原住民祖先」，但被歌頌的是博物館裡、壁畫上的、抽象的「印第安人」；而現實中，活生生的原住民社群，卻依然貧困、被邊緣化。這種「<em>頌揚死去的印第安人、卻忽視活著的印第安人</em>」的矛盾，是墨西哥認同，一道未解的內在張力。第三這一切的輝煌，都建立在 PRI「完美的獨裁」那威權的地基之上。而任何，靠「面具」維繫的穩定，終有一天，面具會滑落。一九六八年，當全世界的目光，聚焦於墨西哥城的奧運時，那張掩蓋著威權暴力的面具，將在一場血腥的屠殺中，被徹底撕下。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 1968 ✦</div>
+  <p>就在奧運開幕的前夕，學生們，聚集在「三種文化廣場」上要求民主。<br>然後槍響了。數百名學生，倒在了血泊中；而政府，把這一切，掩蓋了數十年。<br><span class="hl">「完美的獨裁」那張溫和的面具，終於滑落了。</span></p>
+</div>
+
+<!-- ===== 第十八章 ===== -->
+<section class="act reveal dark" id="ch-18">
+  <div class="act-head">
+    <span class="act-num">第十八章 · Tlatelolco</span>
+    <h2 class="act-title">特拉特洛爾科：一九六八，面具下的血</h2>
+    <p class="act-sub">Tlatelolco — 1968, the Blood Beneath the Mask</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>到了一九六〇年代，PRI 那「完美的獨裁」，開始露出裂縫。經濟奇蹟，雖然造就了一個龐大的城市中產階級與大學生群體，但這個受過教育的新世代，卻越來越，無法忍受 PRI 那一黨專制、壓制異己、與貧富不均的現實。而一九六八年，恰逢全球，青年抗爭的浪潮（從巴黎到布拉格）。墨西哥的學生，也走上街頭，要求真正的民主與自由。</p>
+
+    <h3>三種文化廣場上的屠殺</h3>
+    <p>而這一年，對 PRI 政權，格外敏感——因為墨西哥城，即將舉辦<strong>奧運會</strong>。這是 PRI，要向全世界，展示「現代、穩定、進步的墨西哥」的櫥窗時刻。它絕不容許，學生的抗議，破壞這場精心安排的演出。一九六八年十月二日，就在奧運開幕的十天前，數千名抗議的學生與民眾，聚集在墨西哥城的「<strong>三種文化廣場（特拉特洛爾科）</strong>」。然後軍警開槍了。在一場，精心策劃的屠殺中，<strong>數百名</strong>手無寸鐵的學生，倒在了血泊之中（確切的死亡人數，至今成謎）。而 PRI 政權，動用它強大的宣傳機器，將這場屠殺的真相，<em>掩蓋了，長達數十年</em>。十天後，奧運如期盛大開幕，彷彿什麼都沒有發生。</p>
+
+    <h3>面具滑落了</h3>
+    <p>這個屠殺地點的選擇，本身就充滿了序章「層疊」的、悲劇性的象徵。「三種文化廣場」，是一個，活生生的「重寫本」：在那裡，並存著，阿茲特克時代的金字塔廢墟、西班牙殖民時代的天主教堂、與現代的高樓——三個墨西哥的層次，疊壓在同一個廣場上。而現在一層新的血，被潑灑在了，這層層疊疊的歷史之上。<strong>特拉特洛爾科大屠殺，是 PRI 統治的一個決定性的轉捩點。它徹底撕下了「完美的獨裁」那張溫和、靈活、靠吸納而非暴力的面具露出了底下，那張與任何赤裸獨裁，並無二致的、血腥的臉。</strong>從這一刻起，PRI 政權，在墨西哥，受過教育的世代心中，永遠地，失去了道德的合法性。「血」，這個墨西哥永恆的密碼，再一次，氾濫——只不過，這一次，流的是政府，殺害自己年輕子民的血。一九六八年的槍聲，敲響了 PRI 那看似永固的統治，緩慢崩解的第一聲喪鐘。</p>
+
+    <h3>一個世代的覺醒與幻滅</h3>
+    <p>一九六八年的學生運動，不只是墨西哥，孤立的事件它是那一年，席捲全球的青年反抗浪潮（巴黎的五月風暴、布拉格之春、美國的反戰運動）的一部分。墨西哥的學生要求的並不激進——他們要的是言論自由、釋放政治犯、與真正的民主。他們相信那個自詡「革命」的PRI 政權，應該會傾聽。然而他們得到的回答是子彈。特拉特洛爾科的槍聲徹底粉碎了，這個世代，對體制的幻想。<em>「一九六八年的世代」，從此成了墨西哥，一個特殊的群體——他們是幻滅的一代，也是覺醒的一代。許多當年的學生日後成為推動墨西哥，民主化、與左翼運動的中堅力量（包括日後的總統參選人，與知識分子）。那場屠殺殺死了，數百個，年輕人，卻也催生了，一個再也不肯盲目相信，政權的公民世代。</em></p>
+    <h3>被掩蓋的真相，與遲來的追問</h3>
+    <p>而 PRI 政權，對這場屠殺，那長達數十年的掩蓋本身就是序章「面具」密碼的極致展現。官方輕描淡寫，死亡人數，封鎖真相彷彿那個血腥的夜晚，從未發生。直到數十年後，墨西哥，民主化（第二十一章），相關的檔案才逐漸解密真相才被一點一點地，挖掘出來。然而至今確切的死亡人數，與下令開槍者的全部責任，仍籠罩在迷霧之中——這是墨西哥，眾多「<em>有罪不罰</em>」的歷史傷口之一。記錄這場屠殺的作家波尼亞托夫斯卡，那本《特拉特洛爾科之夜》，以倖存者的證詞拼湊出，那個被官方，抹去的夜晚——它是記憶對遺忘的一場頑強抵抗。</p>
+
+    <div class="pull"><p>就在那座，疊壓著阿茲特克金字塔、殖民教堂與現代高樓的廣場上，政府槍殺了自己的孩子，又把一切，掩蓋。墨西哥那「完美的獨裁」，從此再也無法假裝自己，是溫和的了。面具下的是血。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「面具」的滑落，與一個體制的緩慢死亡</span>
+      <p>第十八章，是序章「<strong>面具</strong>」與「<strong>血</strong>」兩個密碼，交會的悲劇時刻。帕斯所說的墨西哥人「戴面具」的傾向（序章），在 PRI 體制上，得到了最宏觀的體現——這整個政權，本身就是一張，巨大的「面具」：它戴著「革命」「民主」「穩定」的面具，掩蓋著一黨專制、貪腐與威權的真實面孔。在很長一段時間，這張面具，戴得天衣無縫，以致於，連墨西哥人自己，都半信半疑。而特拉特洛爾科的槍聲，是這張面具，第一次，徹底地，滑落——它讓所有人，都看清了，那「完美的獨裁」底下那張可以為了維護權力，而屠殺自己學生的冷酷的臉。一個體制，最危險的時刻，往往不是它，被武力推翻，而是它失去了，人民發自內心的「相信」。一九六八年後，PRI，依然統治了墨西哥三十二年，但它再也無法贏回那個受過教育的世代的真心。它的合法性，從此開始漫長而緩慢的漏氣。</p>
+      <p>而這場屠殺的地點——「三種文化廣場」——更是這整本書的一個微縮的象徵。在那個，疊壓著阿茲特克廢墟、殖民教堂與現代高樓的廣場上，上演的是一場，現代國家機器，對自己人民的屠殺。<em>序章那「一座建在神廟上的城」的意象，在此得到了，最沉痛的迴響：墨西哥的「血」，一層又一層，從阿茲特克的祭壇、到征服的屠戮、到革命的相殘、再到一九六八的廣場，反覆地，被潑灑在同一片，層層疊疊的土地之上。</em>暴力似乎是這個國家，永遠擺脫不掉的地層。而一九六八年的血，所開啟的是 PRI 漫長的衰落，與墨西哥，邁向民主的崎嶇長路。但在那條路的盡頭，等待著墨西哥的將是另一場，更血腥的浩劫——以及那個永遠揮之不去的「北方巨人」，那越來越強大的引力。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">◆ ✦ ◆</div>
+
+<!-- ========== PART VII ========== -->
+<div class="part-div reveal" id="part-7">
+  <span class="pn">第七部</span>
+  <h2 class="ptitle pt">裂縫與轉變</h2>
+  <div class="pe">Cracks and Transition — Debt, NAFTA, an Indigenous Ghost, and the Dawn of Democracy</div>
+  <div class="pline"><span></span><span class="dot">◆</span><span></span></div>
+</div>
+
+<!-- ===== 第十九章 ===== -->
+<section class="act reveal" id="ch-19">
+  <div class="act-head">
+    <span class="act-num">第十九章 · Debt and the Pull of the North</span>
+    <h2 class="act-title">危機、披索與北方的引力</h2>
+    <p class="act-sub">Debt and the Pull of the North — The Crisis That Turned Mexico Around</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>一九六八年的槍聲（第十八章），敲響了 PRI 道德合法性的喪鐘；而緊接而來的一九七〇、八〇年代，則敲響了它「經濟奇蹟」的喪鐘。那個曾經，讓 PRI 引以為傲的、穩定成長的「墨西哥奇蹟」，在一連串的揮霍與危機中，戛然而止。墨西哥，即將被迫放棄它自革命以來，奉行了半個世紀的「民族主義、國家主導」的道路，轉而投入它一直又恨又怕的「北方巨人」的經濟懷抱。</p>
+
+    <h3>石油的詛咒：在繁榮的頂點借債</h3>
+    <p>一九七〇年代，墨西哥，在地下，發現了巨大的新油田。在當時油價高漲的背景下，這本該是天賜的良機。然而總統洛佩斯·波蒂略，卻被這份「黑色黃金」，沖昏了頭。他宣稱墨西哥的任務，是「<em>管理這份富足</em>」，並以未來的石油收入，作為擔保，向國際銀行，瘋狂地，舉債大興土木。<em>這與那份阿根廷史詩裡，「坐享豐饒、寅吃卯糧」的資源詛咒，如出一轍——靠著一種地下的財富，過度膨脹，卻沒有建立起穩健而多元的根基。</em>狂歡建立在一個脆弱的假設上：油價會永遠，高漲。</p>
+
+    <h3>一九八二：拉丁美洲「失落十年」的引爆點</h3>
+    <p>然後假設破滅了。一九八二年，國際油價，崩跌而美國的利率，飆升。墨西哥，赫然發現，自己再也付不出，那如山的債務利息了。一九八二年八月，墨西哥，宣布無力償債——這一聲違約，像推倒第一張骨牌，引爆了整個拉丁美洲的「<strong>債務危機</strong>」，開啟了該地區，經濟停滯、通膨肆虐的「<strong>失落的十年</strong>」。披索急遽貶值，人民的儲蓄，大幅縮水。在卸任前，洛佩斯·波蒂略，以一個民粹的姿態，將全國的銀行，收歸國有，然後在罵聲中，黯然下台。墨西哥，那個建立在石油與借貸上的繁榮幻夢，破碎了。</p>
+
+    <h3>一場地震，搖醒了沉睡的公民社會</h3>
+    <p>而就在這經濟的廢墟之上，一九八五年，一場芮氏規模八點以上的大地震，重創了墨西哥城，造成數萬人死亡。地震不只震垮了房屋，更震出了 PRI 政權的無能與腐敗——面對巨大的災難，官僚體系，反應遲緩、救援無力，甚至傳出因偷工減料而倒塌的政府建築醜聞。在政府失能的真空中，墨西哥城的普通市民，自發地，組織起來，互救、搜救、重建。<strong>這場災難，意外地，催生了墨西哥現代「公民社會」的覺醒——人們第一次，發現他們不必事事依賴那個無能而威權的黨國；他們可以自己組織起來，解決問題。</strong>這份在廢墟中萌芽的公民自主意識，將成為日後瓦解 PRI 一黨專制、推動民主轉型的重要力量。</p>
+
+    <h3>技術官僚的轉向：擁抱北方</h3>
+    <p>面對債務危機的爛攤子，一批在美國名校（哈佛、耶魯、MIT）受過訓練的、年輕的「<strong>技術官僚</strong>」，掌握了政權。其中的代表，是總統<strong>薩利納斯</strong>（1988–1994）。他們做出了一個與墨西哥革命傳統，徹底決裂的選擇：拋棄卡德納斯以來「國家主導、民族主義、抵抗外資」的舊模式（第十六章），全面擁抱<strong>新自由主義</strong>。他們大規模地，<em>私有化</em>國營企業（這個過程，造就了像卡洛斯·斯利姆這樣的世界級富豪，也加劇了貧富不均）、解除管制、開放貿易與外資。薩利納斯，甚至修改了那部革命憲法，最神聖的「<strong>第二十七條</strong>」——允許農民的公有地（ejido），可以被買賣。<em>那個薩帕塔與卡德納斯，用鮮血與抗爭，為農民爭來的土地保障，被一筆，勾銷了。</em>墨西哥，正調轉船頭，駛向它一個世紀以來，一直又恨又怕的北方巨人。</p>
+
+    <h3>墨西哥，自己的「骯髒戰爭」</h3>
+    <p>「完美的獨裁」（第十五章）那溫和的面具下，藏著的不只是一九六八年的特拉特洛爾科屠殺（第十八章）。在整個，一九七〇年代，PRI 政權，對異議分子、左派游擊隊、與學生運動者，展開了，一場祕密的鎮壓——墨西哥，自己的「<strong>骯髒戰爭</strong>」。在這場，鮮為人知的鎮壓中，數百名，異議者，被國家祕密地，逮捕、刑求、與「失蹤」（這個令人膽寒的詞，與那份阿根廷史詩裡的desaparecidos，遙相呼應）。總統<strong>埃切維里亞</strong>（正是一九六八年，屠殺時的內政部長），一面在國際上，扮演進步的「第三世界」領袖一面在國內血腥地，鎮壓異己。<em>這再次撕下了，PRI 那「革命」與「進步」的面具露出它威權的本質。墨西哥的「血」（序章），在這個看似承平的年代從未停止在暗處流淌。</em></p>
+    <h3>「穩定發展」的終結</h3>
+    <p>而在經濟上，那個創造了「墨西哥奇蹟」的模式——「<strong>穩定發展</strong>」（靠進口替代工業化、與國家主導），也在一九七〇年代，走到了，盡頭。它造就了，城市的繁榮卻把廣大的農村與底層甩在後面；它培育出，一批受惠於，成長、卻渴望政治參與的新中產階級，而他們對PRI 的威權日益不滿。埃切維里亞與繼任的洛佩斯·波蒂略，試圖用民粹的大撒幣、與舉借外債（賭未來的石油），來維繫繁榮的幻象結果反而把墨西哥，推向了，一九八二年，那場毀滅性的債務危機（第十九章）。<em>「奇蹟」，結束了；接下來，等待墨西哥的是失落的十年，與一場向北方巨人，徹底靠攏的大轉向。</em></p>
+
+    <div class="pull"><p>革命曾教墨西哥，抵抗北方的巨人、把資源，攥在自己手裡。但一場債務危機，逼著墨西哥，調轉船頭，駛向那個巨人的懷抱。卡德納斯為農民爭來的土地、為國家奪回的石油，都被重新，擺上了，談判桌。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「北方引力」的勝利，與革命模式的終結</span>
+      <p>第十九章，是序章「<strong>北方的巨人</strong>」這個密碼，一次決定性的轉折——從「抵抗」，轉為「擁抱」。回顧墨西哥的二十世紀，它曾以卡德納斯的石油國有化（第十六章），向北方巨人，發出最響亮的「主權宣告」；它曾以革命的民族主義，築起一道，抵抗外國資本的高牆。然而一九八二年的債務危機，徹底擊垮了這套模式。從此墨西哥，被那頭巨人的、巨大的「經濟引力」，越拉越近——它需要美國的市場、美國的投資、美國的紓困。這份「經濟上的依附」，是序章「北方巨人」陰影的當代形態：墨西哥，雖然在一八四八年，失去了一半的「土地」，但在二十世紀末，它正逐漸失去它「經濟」的自主。技術官僚的「新自由主義」轉向標誌著，那場一九一〇年大革命，所開創的「國家主導、民族主義」道路的正式終結。</p>
+      <p>而這一章，也呼應著本系列史詩，一個反覆出現的母題——「<strong>資源的詛咒</strong>」。洛佩斯·波蒂略，在石油繁榮的頂點，瘋狂借債、揮霍無度，與那份阿根廷史詩裡，那個「坐享潘帕斯豐饒、卻寅吃卯糧」的國家，犯了同樣的錯誤。它證明了，一個深刻的教訓：突如其來的資源財富（無論是阿根廷的草，還是墨西哥的油），若沒有穩健的制度與紀律來駕馭，往往不是祝福，而是詛咒——它會誘使一個國家，過度膨脹、放鬆警惕，最終在資源行情逆轉時，墜入更深的危機。但在這場經濟的「北方化」之中也埋藏著一線希望的種子：一九八五年地震，所喚醒的「公民社會」。那股在廢墟中，自發組織起來的力量，雖然微弱卻將與日益高漲的反對運動，匯流最終撼動 PRI 那看似永固的一黨統治。而墨西哥，與北方巨人的「擁抱」，即將在一九九四年的第一天，達到頂點——同時那被壓在最底層的、原住民的幽靈，也將在同一天，再次破土而出。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 1994 ✦</div>
+  <p>一九九四年一月一日，墨西哥，把自己的經濟，正式綁上了北方巨人的戰車（NAFTA）。<br>就在同一天，南方的叢林裡，一群蒙面的原住民，舉起了槍，喊出：「夠了!」<br><span class="hl">他們自稱「薩帕塔民族解放軍」——那個為土地而死的英雄，回來了。</span></p>
+</div>
+
+<!-- ===== 第二十章 ===== -->
+<section class="act reveal dark" id="ch-20">
+  <div class="act-head">
+    <span class="act-num">第二十章 · NAFTA and the Ghost of Zapata</span>
+    <h2 class="act-title">NAFTA 與薩帕塔的幽靈歸來</h2>
+    <p class="act-sub">NAFTA and the Ghost of Zapata — Two Mexicos Collide</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>一九九四年一月一日，是技術官僚們，精心挑選的、象徵性的日子。這一天，《<strong>北美自由貿易協定（NAFTA）</strong>》，正式生效。墨西哥，與美國、加拿大，組成了一個自由貿易區。對薩利納斯與技術官僚而言，這是他們的加冕時刻——它標誌著，墨西哥，終於告別了「第三世界」的落後，正式躋身由北方巨人主導的「第一世界」經濟俱樂部。墨西哥，把它的未來，徹底地，押在了，與北方的「整合」之上。</p>
+
+    <h3>「夠了!」：叢林裡的槍聲</h3>
+    <p>然而就在 NAFTA 生效的同一天，在墨西哥，最南方、最貧窮、原住民人口最多的恰帕斯州，一群蒙面持槍的原住民，攻佔了數座城鎮，向墨西哥政府，宣戰。他們自稱「<strong>薩帕塔民族解放軍（EZLN）</strong>」——刻意以那位，為土地而死的革命英雄薩帕塔（第十三章），為名。他們的領袖，是一位戴著滑雪面罩、叼著煙斗、文采斐然的神祕人物——「<strong>馬科斯副司令</strong>」。他們的口號，是「<strong>夠了!（¡Ya basta!）</strong>」。他們宣稱，NAFTA 所代表的「新自由主義」，對墨西哥的原住民而言，是一紙「<em>死亡判決書</em>」——它將徹底摧毀他們賴以為生的、傳統的村社與土地（尤其是薩利納斯剛剛修改的、允許公有地買賣的憲法第二十七條，第十九章）。他們要的是土地、民主、與原住民的尊嚴。</p>
+
+    <h3>兩個墨西哥，在同一天，正面相撞</h3>
+    <p>一九九四年一月一日，因此成了墨西哥歷史上，一個極具象徵意義的日子：在這一天，「<strong>兩個墨西哥</strong>」，正面相撞了。一個是技術官僚的、面向北方的、現代的、都市的、擁抱全球化的墨西哥（NAFTA）；另一個，是被遺忘的、面向土地的、古老的、原住民的、被全球化拋下的墨西哥（薩帕塔運動）。<strong>序章那「層疊」與「兩個墨西哥」的密碼，在這一天，得到了，最戲劇性的展現：當上面那一層（現代、北方），正歡慶它的勝利時，被壓在最底下的那一層（原住民、土地），再一次，從歷史的縫隙中，破土而出，發出怒吼。</strong>薩帕塔的幽靈，回來了。馬科斯，巧妙地，運用當時新興的「網際網路」，把恰帕斯叢林裡的抗爭，傳遍全世界，贏得了全球左翼的同情，迫使政府，無法公然血腥鎮壓。這場起義，最終沒有推翻政府，卻深刻地，喚醒了墨西哥，對原住民權利與社會不公的良知。</p>
+
+    <h3>龍舌蘭危機：一場豪賭的脆弱</h3>
+    <p>而一九九四這一年，對墨西哥，還充滿了，其他的血與震盪。三月PRI 內定的、形象清新的總統候選人<strong>科洛西奧</strong>，在競選途中，遭暗殺身亡——這起至今成謎的政治謀殺，震驚全國，再次揭開了 PRI 體制內部，那血腥的權力鬥爭（「血」的密碼）。而到了年底，墨西哥，那場「擁抱北方」的經濟豪賭，也露出了它脆弱的真面目：披索再次崩潰引爆了「<strong>龍舌蘭危機</strong>」——一場嚴重的金融危機，墨西哥，被迫接受美國的鉅額紓困。<strong>這深刻地，揭示了「北方引力」的雙面性：與巨人整合，固然帶來了投資與機會，卻也讓墨西哥的經濟，變得更脆弱、更受制於人——一有風吹草動，便需要向那個巨人，求救。</strong></p>
+
+    <h3>血汗工廠與華雷斯城的女兒們</h3>
+    <p>NAFTA，所帶來的最具體的產物是「<strong>邊境加工出口廠（maquiladora）</strong>」的遍地開花。在緊鄰美國的北方邊境城市，數以千計的工廠林立——它們進口美國的零件利用墨西哥的廉價勞工，組裝成，成品再銷回美國。這創造了，大量的就業卻也是一種新形態的剝削：低廉的工資、惡劣的環境、與被連根拔起、湧入邊境，討生活的無根人口。而這份，繁榮的陰暗面，最駭人的象徵是「<strong>華雷斯城的女性連環謀殺（feminicidios）</strong>」——自一九九〇年代起，在這座，加工出口的邊境大城，數以百計的年輕女工，慘遭姦殺、棄屍於荒漠，而兇手大多逍遙法外。<em>這是序章「血」與「兩個墨西哥」密碼在全球化時代的最殘酷展現——當一個國家，把自己，獻給北方的生產鏈時，最底層的那些人（尤其是貧窮的女性），承受了，最沉重的代價。</em></p>
+    <h3>「我們是你們的鏡子」：薩帕塔運動的回響</h3>
+    <p>而恰帕斯的薩帕塔運動（EZLN，第二十章），雖然最終沒能推翻政府，卻以一種，全新的方式改變了，墨西哥。他們放棄了，奪取國家政權的舊式革命路線，轉而在恰帕斯的叢林裡，建立起，一個個，自治的原住民社區，實踐他們所信奉的民主與尊嚴。馬科斯副司令，那詩意、機智、充滿後現代色彩的文告更透過網際網路，傳遍全球啟發了，世界各地的反全球化運動。他曾說：「<em>我們是你們的鏡子。</em>」——薩帕塔運動，逼著那個光鮮的、面向北方的墨西哥，去正視它腳下那個被遺忘的、原住民的墨西哥。<em>它是序章「被壓抑的底層，終將湧現」這一母題，在二十一世紀，最優雅、也最頑強的一次迴響。</em></p>
+
+    <h3>二〇〇六：一場差點再次撕裂國家的選舉</h3>
+    <p>民主轉型（第二十一章）並未帶來和解。二〇〇六年的總統大選，左派的羅培茲·歐布拉多（AMLO），以不到一個百分點的差距，惜敗於右派的卡爾德隆。AMLO，拒絕承認敗選，指控選舉舞弊，發動支持者，佔領墨西哥城的中心大道，長達數週，甚至自行「就任」。這場爭議，深刻地撕裂了墨西哥的社會，也讓人想起，那道從獨立以來，就反覆發作的、「無法和平接受選舉結果」的舊疾（與那份阿根廷史詩裡的「輸不起」，遙相呼應）。而正是這場挫敗，把 AMLO，鍛造成一個更堅韌、更民粹的反對者；他將蟄伏十二年，最終，在二〇一八年，以壓倒性的勝利，登上總統大位（第二十五章）。墨西哥的民主，贏得了選票，卻仍在學習，那最艱難的一課——如何，體面地，輸。</p>
+
+    <div class="pull"><p>就在墨西哥，歡慶它擠進北方巨人的俱樂部時，南方的叢林裡，被那場盛宴遺忘的原住民，舉起了薩帕塔的旗幟。一個國家，兩個世界，在同一天，正面相撞。被壓在最底下的那一層，從不會，真正沉默。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「兩個墨西哥」的碰撞，與底層的永恆湧現</span>
+      <p>第二十章，是序章「<strong>層疊</strong>」密碼在當代，最鮮明的一次爆發。NAFTA 與薩帕塔起義，在同一天發生，絕非巧合——馬科斯，刻意選擇了這一天，正是要，向全世界，揭示那個技術官僚們，極力想要掩蓋的真相：在那個「現代、繁榮、面向北方」的墨西哥之下，壓著另一個「古老、貧困、面向土地」的墨西哥。這「<em>兩個墨西哥</em>」的並存與張力，是理解當代墨西哥，最重要的一把鑰匙。它不只是貧富差距，更是兩種，截然不同的文明邏輯，與發展路徑的衝突：一個要擁抱全球化、與北方整合；另一個，要捍衛土地、社群與在地的尊嚴。而薩帕塔運動，以「薩帕塔」為名更印證了序章那「被壓抑的底層，終將重新湧現」的母題——從一九一〇年的薩帕塔（為土地而戰），到一九九四年的新薩帕塔（為土地與原住民尊嚴而戰），那道「土地與自由」的吶喊，跨越了八十年，再次響起。底層的那一層，從來不會真正死去。</p>
+      <p>而這一章，也深化了序章「<strong>北方的巨人</strong>」這個密碼的複雜性。NAFTA，代表著墨西哥，與北方巨人的關係，進入了一個，全新的、矛盾的階段——「<em>深度整合</em>」。一方面，NAFTA，確實把墨西哥，更緊密地，綁進了北美的經濟體系，帶來了製造業（尤其是北方的「maquiladora」加工出口廠）、投資與成長。另一方面，「龍舌蘭危機」，也赤裸地，暴露了這份整合的代價——脆弱與依賴。從此墨西哥的經濟命運，與美國，再也無法分割：美國一打噴嚏，墨西哥，就感冒。這份與巨人「<em>既緊密相依、又地位不對等</em>」的關係，與那份加拿大史詩裡的「與大象同床」，異曲同工；但墨西哥，因為更貧窮、更依賴，這份關係，也更不對稱、更充滿張力（它還疊加著移民與毒品的問題，第八部）。而在這一連串的危機與震盪中，那個統治了墨西哥七十一年的龐然大物——PRI——終於走到了它的盡頭。墨西哥，即將迎來它期盼已久的民主黎明。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 2000 ✦</div>
+  <p>七十一年了。那個「完美的獨裁」，那個把革命變成一個黨的龐然大物。<br>終於在公元兩千年，墨西哥人，用一張張選票，把它請下了台。<br><span class="hl">沒有政變，沒有流血——這一次，墨西哥，靠選票，改變了自己。</span></p>
+</div>
+
+<!-- ===== 第二十一章 ===== -->
+<section class="act reveal" id="ch-21">
+  <div class="act-head">
+    <span class="act-num">第二十一章 · The Dawn of Democracy</span>
+    <h2 class="act-title">民主的黎明：PRI 七十一年統治的終結</h2>
+    <p class="act-sub">The Dawn of Democracy — The End of Seventy-One Years</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>PRI 那「完美的獨裁」，並非一夕崩潰，而是經歷了，一場長達三十多年的緩慢漏氣。這個過程的起點，是一九六八年的特拉特洛爾科屠殺（第十八章）——它奪走了 PRI 的道德合法性。此後一連串的打擊，接踵而至：一九八二年的債務危機，擊垮了它的經濟政績；一九八五年的地震，喚醒了公民社會；而一九八八年的總統大選，更成為壓垮駱駝的關鍵。</p>
+
+    <h3>一場被「電腦故障」偷走的選舉</h3>
+    <p>一九八八年，PRI 的統治，第一次，受到真正的威脅。挑戰者，是<strong>夸烏特莫克·卡德納斯</strong>——正是那位，墨西哥人最敬愛的總統、石油國有化英雄拉薩羅·卡德納斯（第十六章）的兒子。他脫離 PRI，整合左派，發起了強有力的挑戰。在開票之夜，當計票結果，顯示卡德納斯，可能領先時，政府的計票系統，突然「<strong>當機</strong>」了。等到系統，重新恢復，PRI 的候選人薩利納斯，已經「反超」獲勝。這場幾乎公然舞弊的選舉，臭名昭著，被稱為「<em>系統當機</em>」事件。<strong>它徹底激怒了墨西哥人，也成為墨西哥，民主化進程的催化劑。</strong>在巨大的民怨壓力下，墨西哥，被迫進行政治改革，其中最關鍵的是建立了一個，獨立於政府之外的「<strong>聯邦選舉委員會（IFE）</strong>」，來確保選舉的公正。</p>
+
+    <h3>公元兩千年：靠選票，而非子彈</h3>
+    <p>有了乾淨選舉的制度保障，加上日益壯大的公民社會、與左右兩翼反對黨（右翼的「國家行動黨 PAN」、左翼的「民主革命黨 PRD」）的崛起，PRI 那看似永固的堤壩，終於潰決。公元<strong>兩千年</strong>，來自右翼國家行動黨（PAN）的候選人、前可口可樂公司高管、作風豪邁的<strong>維森特·福克斯</strong>，贏得了總統大選。<strong>統治了墨西哥，長達七十一年、不曾間斷的 PRI 政權，就此和平地，下台。</strong>這是墨西哥歷史上，一個意義非凡的時刻。回顧墨西哥那充滿暴力的歷史——征服、獨立的內戰、失序、大革命的百萬人死、特拉特洛爾科的屠殺——這個國家，幾乎每一次重大的政權更替，都伴隨著，血流成河（序章的「血」密碼）。<em>而這一次，墨西哥，第一次，靠著一張張選票，而非一顆顆子彈，和平地，改變了，自己的命運。</em></p>
+
+    <h3>黎明不是終點</h3>
+    <p>然而民主的黎明，雖然光輝燦爛，卻並非墨西哥所有問題的終點。福克斯與隨後的政府，很快便發現「民主」，這帖藥，無法一夜之間，治好墨西哥，那些根深柢固的沉痾：那觸目驚心的貧富不均（兩個墨西哥）、那盤根錯節的貪腐、那積弱不振的法治、與那在 PRI 統治末期，已悄然，坐大的——販毒集團。<strong>政治上的「民主化」，並不等於，社會的「公平化」，更不等於，國家的「強大化」。</strong>福克斯，贏得了選舉，卻無力推動深層的結構改革。墨西哥人，在二〇〇〇年，懷抱的巨大希望，很快便被現實的沉重所沖淡。而更可怕的是一頭在 PRI 那「完美獨裁」的灰色地帶中，悄悄餵養壯大的怪獸正準備掙脫鎖鏈。當舊的、無所不包的威權秩序，崩解後，一個新的、血腥的失序即將降臨。</p>
+
+    <h3>從廢墟中站起的公民</h3>
+    <p>PRI 的崩解並非由某個英雄獨力完成而是由墨西哥的「<strong>公民社會</strong>」，一磚一瓦地，鬆動的。其關鍵的覺醒時刻，是一九八五年的墨西哥城，大地震（第十九章）。當政府的官僚體系，在巨災面前，反應遲緩、無能甚至腐敗時，是墨西哥城的普通市民，自發地，組織起來，徒手挖掘廢墟、救助傷患、重建家園。那一刻，數百萬人，第一次，清晰地，意識到：他們不必事事仰賴那個無能而威權的黨國；他們可以自己當家作主。<em>這份在瓦礫中，萌芽的公民自主意識，是瓦解PRI 一黨專制的最深層的土壤。一場天災意外地，成了民主的催生婆。</em></p>
+    <h3>民主沒能填滿的那個洞</h3>
+    <p>然而二〇〇〇年的政黨輪替（第二十一章），雖然光輝卻也暴露了，一個深刻的難題：當PRI 那，無所不包、靠收編與灰色交易，來「管理」一切（包括地下世界）的威權秩序，崩解後，那個本該接管秩序的「民主國家」，卻太過虛弱無力填補那個巨大的權力真空。法治沒有隨著選舉一起到來；國家的許多角落（尤其是警察與司法），依然深陷貪腐。<strong>於是一頭曾被PRI 的舊秩序，勉強關在籠中的怪獸——販毒集團——趁著這個新舊交替的權力真空，掙脫了，鎖鏈。</strong>墨西哥，贏得了，民主卻發現自己缺少一個夠強、夠廉潔的「國家」，去駕馭這份得來不易的自由。<em>這正是民主轉型，最殘酷的弔詭：推翻一個強大的威權相對容易；但建立一個強大而廉潔的民主國家，卻無比艱難。</em></p>
+
+    <h3>福克斯之後：希望如何，褪色</h3>
+    <p>二〇〇〇年，福克斯，承載著全民的巨大希望，終結了 PRI 的統治。然而，他的六年任期，卻以失望告終。一個習慣了當反對黨的政黨（PAN），驟然執政，卻發現自己，被那盤根錯節的官僚、與，國會的牽制，綁住了手腳，無力推動，真正的，結構改革。貪腐依舊、不均依舊、而毒品集團，更在他任內，悄然坐大。繼任的卡爾德隆，則，在二〇〇六年，貿然向毒品集團，宣戰，把國家，拖入了血腥的深淵（第二十二章）。到了二〇一二年，墨西哥人，在失望之餘，竟，把票，又投回給了PRI（培尼亞·涅托）——只是，這個「重返」的 PRI，旋即，深陷阿約特西納帕等貪腐醜聞（第二十二章），把僅存的一點威信，也，敗光了。<em>民主的鐘擺，在 PAN、PRI 之間，擺盪了一圈，墨西哥人，卻發現，無論換誰，那些最深的沉痾——貪腐、暴力、不均——都，紋風不動。正是這份，對整個舊政治階級的，徹底幻滅，為 AMLO 那場「第四次轉型」的，民粹海嘯，鋪平了道路。</em></p>
+
+    <div class="pull"><p>七十一年的一黨統治，沒有被一場革命推翻，而是被一張張選票，請下了台。在一個，習慣了用鮮血，改朝換代的國家，這是一個奇蹟。但墨西哥人很快發現：贏得民主，只是萬里長征的第一步。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「不流血的改變」之珍貴，與民主的限度</span>
+      <p>第二十一章，記錄了墨西哥歷史上，一次極其珍貴的「<strong>不流血的改變</strong>」。要理解二〇〇〇年政黨輪替的重大意義，必須把它放回墨西哥那「血」的歷史長河中（序章密碼）。從阿茲特克的獻祭、征服的屠殺、獨立的內戰、大革命的百萬人死、到特拉特洛爾科的學生鮮血——墨西哥的歷史，幾乎是一部，用鮮血，書寫的歷史；它的每一次重大變革，似乎都必須由暴力，來助產。而二〇〇〇年，墨西哥，第一次，打破了這個魔咒：它靠著一套逐步建立起來的民主制度（獨立選委會、反對黨、公民社會），靠著選票和平地，終結了，一個長達七十一年的威權統治。這是一項，了不起的政治成熟——它呼應著，那份美國史詩裡，被反覆強調的、「權力的和平轉移」這一民主基石。對一個，有著如此暴力傳統的國家，能走到這一步，是它數十年來，無數人，前仆後繼，爭取民主的偉大成果。</p>
+      <p>但這一章，也揭示了一個，貫穿本系列、也貫穿墨西哥史的深刻教訓——「<strong>政治革命，不等於社會革命</strong>」。這正是墨西哥史，反覆出現的母題：一八二一年的獨立，是「政治」的改變，卻沒有改變社會的不公（第六章）；一九一〇年的馬德羅，要的是「政治民主」，卻無法滿足底層對「土地」的渴望（第十二章）；而二〇〇〇年的民主轉型，同樣是一場「政治」的勝利，卻沒有也無法一夜之間，解決墨西哥那「兩個墨西哥」的、巨大的社會不公。墨西哥人，一次又一次地，發現換掉統治者，遠比改變那不公的結構，要容易得多。而這一次，民主轉型，所留下的最危險的未竟之業，是「<em>國家能力</em>」的薄弱——當 PRI 那無所不包的、靠收編與灰色交易，來「管理」一切（包括地下世界）的威權秩序，崩解後，那個本該接管秩序的「民主國家」，卻太過虛弱，無力填補那個真空。於是一頭被舊秩序，餵養、卻又被舊秩序，勉強關在籠中的怪獸——販毒集團——即將掙脫鎖鏈把墨西哥，拖入一場比以往，任何一次，都更漫長、更血腥的惡夢。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">◆ ✦ ◆</div>
+
+<!-- ========== PART VIII ========== -->
+<div class="part-div reveal" id="part-8">
+  <span class="pn">第八部</span>
+  <h2 class="ptitle pt">當代的墨西哥</h2>
+  <div class="pe">Contemporary Mexico — The Drug War, the Border, Death, and the Fourth Transformation</div>
+  <div class="pline"><span></span><span class="dot">◆</span><span></span></div>
+</div>
+
+<!-- ===== 第二十二章 ===== -->
+<section class="act reveal" id="ch-22">
+  <div class="act-head">
+    <span class="act-num">第二十二章 · The Drug War</span>
+    <h2 class="act-title">毒品戰爭：當血再一次，淹沒了大地</h2>
+    <p class="act-sub">The Drug War — When Blood Drowned the Land Again</p>
+    <div class="ornament">⚔ ◈ ⚔</div>
+  </div>
+  <div class="prose">
+    <p>民主的黎明（第二十一章），並沒有，給墨西哥，帶來和平。相反它揭開了，墨西哥現代史上，最血腥、也最看不到盡頭的一章——「<strong>毒品戰爭</strong>」。在這場戰爭中，「血」這個自阿茲特克的祭壇，就纏繞著這片土地的密碼（第二章），以一種，前所未有的規模與殘酷，再一次，淹沒了大地。</p>
+
+    <h3>當「完美獨裁」的籠子，打開了</h3>
+    <p>要理解毒品戰爭，得先理解 PRI 那「完美的獨裁」（第十五章），是如何，「管理」犯罪的。在 PRI 一黨獨大的年代，販毒雖然存在卻被那個無所不包的黨國，收編、控制在一個，相對穩定的、腐敗的均衡之中——販毒集團，向官員行賄、劃定地盤、低調行事，而國家，則睜一隻眼、閉一隻眼。然而當二〇〇〇年，PRI 那隻「管理」一切的手，鬆開後，這個脆弱的均衡，崩潰了。失去了舊主子節制的販毒集團，開始為了爭奪地盤與利潤，彼此火併。與此同時，美國加強了對加勒比海販毒路線的打擊，使得南美的古柯鹼，被迫改道全部湧過墨西哥，運往北方那個，全世界最大的毒品市場——美國。巨大的利潤，把墨西哥的販毒集團，餵養成了，武裝到牙齒的龐大帝國。</p>
+
+    <h3>一場讓暴力，爆炸的「戰爭」</h3>
+    <p>二〇〇六年，新任總統<strong>卡爾德隆</strong>，為了展現國家的權威、打擊日益猖獗的毒梟，做出了一個，影響深遠的決定：他調動<strong>軍隊</strong>，向販毒集團，宣戰。然而這場「戰爭」，非但沒有平息暴力，反而讓它徹底爆炸。軍隊的打擊，擊垮了大型集團的首腦，卻導致它們，分裂成，更多、更小、更兇殘的派系，為了爭奪地盤，陷入無止境的廝殺。暴力的形式，也變得駭人聽聞：斬首、屠村、把屍體，掛在橋上示眾、用恐怖，來控制地方。<strong>據估計，自二〇〇六年以來，這場戰爭，已奪走，超過<em>三十萬</em>條人命，並造成超過<em>十萬人</em>「失蹤」。</strong>「失蹤者（desaparecidos）」——這個曾在「骯髒戰爭」（那份阿根廷史詩，與墨西哥自身的歷史）中令人膽寒的詞，再一次，成為墨西哥，日常的夢魘。墨西哥的大地上，散布著，無數不知名的亂葬崗。</p>
+
+    <h3>阿約特西納帕：國家與犯罪的共謀</h3>
+    <p>這場戰爭，最令人心碎的象徵，發生在二〇一四年。在格雷羅州的阿約特西納帕，<strong>四十三名</strong>師範學院的學生，在一夜之間，集體失蹤。調查逐漸揭開一個，令人不寒而慄的真相：是當地的<em>警察</em>，把這些學生，抓捕後，「移交」給了與政府，勾結的販毒集團，而後慘遭殺害、焚屍。<strong>「阿約特西納帕的四十三人」，成了墨西哥，這場悲劇的最痛的傷口——它赤裸地，揭示了，墨西哥國家機器，與犯罪集團之間，那深不見底的共謀與腐敗，以及那幾乎完全的「<em>有罪不罰</em>」。</strong>（這一幕，與一九六八年特拉特洛爾科的學生屠殺，遙相呼應——國家再一次，與它最年輕、最有希望的子民，為敵。）</p>
+
+    <h3>「離美國太近」：一場雙國的悲劇</h3>
+    <p>而這場戰爭，最深的悲劇，在於它是一場，墨西哥，為「北方的巨人」，而流的血。販毒這門生意，存在的根本原因，是北方那個，全世界最龐大的<strong>毒品需求市場</strong>——美國人的吸毒，是這一切的源頭。而那些，武裝毒梟、讓墨西哥血流成河的<strong>槍枝</strong>，絕大多數，是從美國，非法流入南方的（一條「鋼鐵之河」）。<em>毒品的錢，從北方來；殺人的槍，從北方來；而死的人，卻是墨西哥人。</em>這是序章「離上帝太遠，離美國太近」這句宿命之言，最血腥的當代註腳。墨西哥，再一次，為它與那個強大鄰居的、不對稱的關係，付出了，慘痛的代價——只不過，這一次，流的不是失土的血，而是被那個鄰居的「胃口」，所吞噬的無數普通人的血。</p>
+
+    <h3>集團的興衰：從錫納羅亞到 CJNG</h3>
+    <p>毒品戰爭的舞台上，輪番上演著，一個個，殘暴帝國的興衰。一度最龐大的是「<strong>錫納羅亞集團</strong>」，其首腦「矮子」古茲曼（El Chapo），三度戲劇性地，越獄最終被引渡美國，judged。從墨西哥灣集團，分裂出的「<strong>洛斯哲塔斯</strong>」，則由前特種部隊士兵，組成把軍事化的恐怖（屠殺、斬首、酷刑），推向新的極致。近年崛起的「<strong>哈利斯科新世代集團（CJNG）</strong>」，更擁有足以與國家軍隊，抗衡的火力。這些集團早已超越單純的販毒——它們控制地盤、徵收「保護費」、滲透地方政府與警察在墨西哥的許多角落，形成了，與國家並存、甚至凌駕國家的「平行政權」。</p>
+    <h3>芬太尼：北方的新瘟疫</h3>
+    <p>而這場，雙國悲劇，在近年又添了新的篇章——「<strong>芬太尼</strong>」。這種比海洛因，強效數十倍的合成鴉片，由墨西哥集團，利用從中國進口的原料製造再走私到美國引爆了，美國史上最致命的藥物過量危機（每年奪走數萬美國人的性命）。芬太尼，把墨西哥與北方巨人的毒品「共業」，推向了，新的高峰也使墨西哥，承受著，來自華府的巨大壓力（第二十五章川普的威脅正源於此）。</p>
+    <h3>尋找消失的人：搜尋之母</h3>
+    <p>而在這片由暴力籠罩的土地上，升起的最動人的力量是「<strong>搜尋之母（madres buscadoras）</strong>」。她們是那十萬，「失蹤者」的母親——拿著鏟子帶著孩子的照片三五成群地，走進荒野親手挖掘那一座座，無名的亂葬崗，只為找回自己孩子的一塊遺骨。<em>她們與那份阿根廷史詩裡的「五月廣場的母親」，遙相呼應——在國家失能、有罪不罰的黑暗中，是這些悲傷而堅韌的母親用她們徒手的挖掘扛起了，一個國家的良知。</em>（而墨西哥，也是全世界，對記者最危險的國家之一——無數調查毒品與貪腐的記者慘遭殺害。）</p>
+
+    <div class="pull"><p>毒品的錢，從北方來；殺人的槍，從北方來；而死的人，是墨西哥人。這場戰爭，沒有神、沒有革命、沒有理想——它只是為了餵飽北方那個巨人的胃口。三十萬條人命，是墨西哥，為「離美國太近」，付出的最新的帳單。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「血」的當代氾濫，與雙國的共業</span>
+      <p>第二十二章，是序章「<strong>血</strong>」這個密碼，最令人絕望的當代展現。回顧這個密碼，貫穿全書的軌跡——從阿茲特克「太陽需要鮮血」的獻祭（第二章）、到征服的屠殺、到獨立與大革命的百萬人死、到一九六八的學生鮮血——「血」，似乎是墨西哥，永遠擺脫不掉的地層。然而毒品戰爭的「血」，與以往，又有所不同，也因此更令人絕望。過去的血，無論多麼慘烈，至少還被賦予了某種「意義」：阿茲特克的血，為了太陽的存續；革命的血，為了土地與自由。但毒品戰爭的血，卻是徹底「<em>無意義</em>」的——它不為神、不為國、不為任何理想，而只為了，毒品的利潤、地盤的爭奪、與北方那個市場的胃口。這是一種，褪去了所有崇高外衣的、最赤裸的暴力。它也標誌著，序章「層疊」密碼的一個，黑暗變奏：當 PRI 那無所不包的舊秩序（一層）崩解而新生的民主國家（另一層），又太過虛弱，無力填補真空時，暴力便從那秩序的裂縫中，噴湧而出。</p>
+      <p>而這一章，也把序章「<strong>北方的巨人</strong>」這個密碼，推向了，它最沉痛的形態——「<em>共業</em>」。毒品戰爭，從根本上，是一場「雙國的悲劇」：它根植於，美國那無法滿足的毒品需求、與那寬鬆的槍枝管制（武器南流）；卻由墨西哥，承擔幾乎所有的死亡與恐怖。這是「離美國太近」這句宿命，最殘酷的當代詮釋。它揭示了，墨西哥與北方巨人之間，那種深刻的、不對稱的「相互纏繞」：兩國的命運，從毒品、到槍枝、到金錢、到移民，再也無法分割；但在這場共業之中，承受苦難的卻總是那較弱的一方。而毒品的暴力，與經濟的困頓，也共同驅動著，墨西哥，另一個，定義其與北方關係的巨大現象——數以千萬計的墨西哥人，跨越那道一八四八年劃下的邊界，向北遷徙。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 邊境 ✦</div>
+  <p>數以千萬計的墨西哥人，跨過那道，一八四八年劃下的邊界，湧向北方——<br>湧向那片，曾經也是墨西哥的土地。<br><span class="hl">他們是這個國家最痛的失血，也是它，最大的一筆，匯款收入。</span></p>
+</div>
+
+<!-- ===== 第二十三章 ===== -->
+<section class="act reveal dark" id="ch-23">
+  <div class="act-head">
+    <span class="act-num">第二十三章 · Migration and the Border</span>
+    <h2 class="act-title">移民、邊境與兩個墨西哥</h2>
+    <p class="act-sub">Migration and the Border — Two Nations, Inseparably Bound</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>如果說，毒品與槍枝，是墨西哥與「北方巨人」之間那道流淌著鮮血的紐帶，那麼<strong>移民</strong>，則是另一道，流淌著，汗水、思念與金錢的更龐大的紐帶。在二十與二十一世紀，數以千萬計的墨西哥人，懷著對更好生活的渴望，跨過那道，綿延三千多公里的邊界，向北方，遷徙。這場大遷徙，深刻地，重塑了，墨西哥、美國以及兩國之間，那剪不斷、理還亂的關係。</p>
+
+    <h3>向北方：一場世紀的大遷徙</h3>
+    <p>這場遷徙，根源複雜。它源於墨西哥國內，揮之不去的貧窮與不均（兩個墨西哥）；源於一次次的經濟危機（第十九、二十章）；也源於NAFTA，對墨西哥，數百萬，無法與美國廉價玉米競爭的小農的衝擊。而拉力，則來自北方，那永遠，渴求廉價勞動力的龐大經濟。早在二戰期間，美國就透過「<em>布拉塞洛計畫</em>」，引進墨西哥的客工。此後無論合法或非法，移民的洪流，從未停止。今天在美國，擁有墨西哥血統的人口，已超過<strong>三千萬</strong>，是美國，最大的移民群體。而這些移民，寄回家鄉的「<strong>匯款（remesas）</strong>」，更成為墨西哥，最重要的外匯來源之一，其總額，甚至超過了石油收入，養活了，無數的家庭與村鎮。<em>移民是墨西哥，最痛的「失血」（它流失了，最勇敢、最有活力的人口），卻也是它最重要的「輸血」（那源源不絕的匯款）。</em></p>
+
+    <h3>「返回」一片曾經是墨西哥的土地</h3>
+    <p>而這場大遷徙，藏著一個，深刻的、歷史的反諷。那些墨西哥移民，所湧向的「北方」——加州、德州、亞利桑那、新墨西哥——<strong>恰恰正是墨西哥，在一八四八年，被美國，奪走的那「失去的一半」（第八章）。</strong>從某種意義上說，這些移民，是在「返回」一片他們的祖先，曾經生活過的土地。歷史在此劃了一個，苦澀的圓：當年美國用一場戰爭，把那片土地的「<em>地</em>」，奪了過去；一個半世紀後，墨西哥人，又用他們的雙腳，把那片土地的「<em>人</em>」，悄悄地，遷了回去。今天在洛杉磯、在德州，西班牙語，隨處可聞；墨西哥的食物、音樂、節慶深深地，融入了美國的文化。<strong>那道一八四八年，用鮮血，劃下的邊界，從未真正把這兩個民族，分開——它只是創造了，一個混血的、跨越邊界的、巨大的「邊境世界」。</strong></p>
+
+    <h3>高牆、代罪羔羊，與兩個墨西哥</h3>
+    <p>然而這道紐帶，也充滿了，痛苦與張力。那道邊界，是全世界，被穿越最頻繁的邊界，也是無數悲劇的現場——多少人，葬身於，穿越邊境的沙漠與河流。在美國的政治中，墨西哥移民，更週期性地，淪為「<strong>代罪羔羊</strong>」——當美國，面臨經濟或社會焦慮時，總有政客，把矛頭，指向南方的移民。「<em>築一道牆</em>」的口號，與對墨西哥的妖魔化，一次次，在美國政壇，響起（這正是那份美國史詩裡，那道反覆發作的「排他」陰影）。而在墨西哥國內，移民現象，也映照出，那「<strong>兩個墨西哥</strong>」的分裂：一個是與美國經濟，深度整合的、相對富裕的工業化北方（遍布著為美國市場代工的「<em>maquiladora</em>」工廠）；另一個，是貧窮的、原住民人口眾多的、不斷向外輸出移民的南方。</p>
+
+    <h3>布拉塞洛：用合約，引進的雙手</h3>
+    <p>墨西哥，向北方的大遷徙，有一個制度性的起點——「<strong>布拉塞洛計畫（Programa Bracero）</strong>」。二戰期間，美國因男丁奔赴戰場，農場勞動力，短缺便與墨西哥，簽約引進數百萬，墨西哥，客工（braceros），到美國的農場與鐵路工作。這個計畫從一九四二年，持續到一九六四年，奠定了，墨西哥，向美國輸出勞動力的基本模式與路徑。它也揭示了，這份關係的根本邏輯：美國的經濟需要墨西哥的廉價勞力；而墨西哥的貧困需要美國的工作機會與匯款。這份「相互需要」，比任何一道高牆都更強大——它是那道綿延三千公里的邊界永遠無法真正封閉的根本原因。</p>
+    <h3>奇卡諾：邊界另一邊的墨西哥</h3>
+    <p>而在美國那片曾屬於墨西哥的土地上，那數千萬的墨西哥裔人口，並沒有被完全同化。他們發展出，一種獨特的、混血的認同——「<strong>奇卡諾（Chicano）</strong>」。一九六〇、七〇年代，伴隨著，美國的民權運動（見那份美國史詩），奇卡諾人，也發起了，自己的民權鬥爭：農工領袖<strong>凱薩·查維茲</strong>，組織加州的墨西哥裔農工，爭取尊嚴與權益；藝術家與作家則重新挖掘、頌揚他們的原住民與墨西哥根源（他們把美國西南部，稱為阿茲特克人，傳說中的故鄉「阿茲特蘭」）。<em>奇卡諾文化，是序章「層疊」與「融合」密碼跨越國界的延伸——它證明了，那道一八四八年的邊界沒能分開兩個民族，反而催生了，一個橫跨邊界的、嶄新的混血世界。</em></p>
+    <h3>大篷車與高牆：當代的邊境劇場</h3>
+    <p>進入二十一世紀，邊境成了一座永不落幕的悲劇劇場。墨西哥，不只是移民的輸出國，更成了來自中美洲（宏都拉斯、薩爾瓦多、瓜地馬拉）的移民北上的必經通道。成千上萬的中美洲人，搭乘那列被稱為「<em>野獸</em>」的貨運火車，穿越墨西哥，奔向美國；近年更出現了，數萬人，集體徒步北上的「<strong>移民大篷車</strong>」。而在邊界的另一端，是美國日益高漲的反移民情緒、川普的「<em>築牆</em>」承諾、與把墨西哥，當作代罪羔羊的政治操作（序章「北方巨人」與那份美國史詩「排他」陰影的當代交會）。<em>那道邊界是希望與絕望、生與死的交界——多少人，葬身於，穿越它的沙漠與河流。它是當代墨西哥與北方巨人關係的最痛的傷口。</em></p>
+
+    <div class="pull"><p>當年美國用一場戰爭，奪走了墨西哥一半的「土地」；一個半世紀後，墨西哥人，用雙腳，把那片土地的「人」，悄悄遷了回去。那道用鮮血劃下的邊界，從未真正把兩個民族分開——它只是創造了一個，混血的邊境世界。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「北方巨人」的人間紐帶，與一道無法切斷的纏繞</span>
+      <p>第二十三章，揭示了序章「<strong>北方的巨人</strong>」這個密碼，最人性、也最深刻的一個面向——兩國之間，那道由「人」所構成的、無法切斷的纏繞。如果說，一八四八年的失土（第八章），是這道關係的「創傷起點」，那麼移民則是這道創傷，在當代，長出的、最複雜的「疤痕組織」。它充滿了，深刻的反諷：墨西哥人，「返回」那片曾被奪走的土地（失去的一半）；他們是墨西哥，最大的「失血」，卻也是它最大的「輸血」（匯款）；他們在美國，被當作「外人」、被妖魔化，卻又是美國經濟，不可或缺的勞動力。這道「<em>既相互依存、又彼此怨懟</em>」的關係，把墨西哥與美國，這兩個，曾經兵戎相見的鄰居，永遠地，纏繞在了一起。它比那份加拿大史詩裡的「與大象同床」，更深、更痛——因為它纏繞著，失土的歷史創傷、毒品的鮮血、與數千萬，活生生的骨肉分離的人。</p>
+      <p>而這一章，最深的洞見，在於那個「<strong>邊境世界</strong>」的誕生——它是序章「層疊」與「融合」密碼在當代，跨越國界的全新展現。那道一八四八年，劃下的邊界，從未真正把墨西哥與美國西南部，分開；相反它創造了一個，獨特的、混血的、跨越邊界的文化空間。在那裡，英語與西班牙語，交融；墨西哥的傳統，與美國的生活方式，交織；數千萬「墨西哥裔美國人（Chicano）」，活在兩個世界的交界處。<em>這是墨西哥那「融合」的天賦（瓜達盧佩聖母的奧義，第五章），在二十一世紀，向北方的延伸——它再一次，證明墨西哥，總能把加諸於它的一切（包括那道象徵著失敗與屈辱的邊界），消化、改造成一個，新的、混血的東西。</em>而要理解，是什麼，讓墨西哥人，在這一切的苦難（征服、革命、毒品、失土、貧困）之中依然能活得如此熾烈、如此堅韌我們必須潛入這個民族，靈魂最深的地方——它與「死亡」的那份獨一無二的關係。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 亡靈節 ✦</div>
+  <p>別的民族，畏懼死亡、迴避死亡；墨西哥人，卻為死亡，擺上酒席、唱起歌。<br>每年他們邀請死去的親人，回家與他們，共度一夜。<br><span class="hl">一個與死亡，如此親暱的民族——也因此把生命，活得格外熾烈。</span></p>
+</div>
+
+<!-- ===== 第二十四章 ===== -->
+<section class="act reveal" id="ch-24">
+  <div class="act-head">
+    <span class="act-num">第二十四章 · Death and Life</span>
+    <h2 class="act-title">死亡與生命：墨西哥的靈魂</h2>
+    <p class="act-sub">Death and Life — The Soul of Mexico</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>我們已經走過了，墨西哥，五百年的血與創傷——征服、殖民、失土、革命、屠殺、毒戰。一個承受了，如此多苦難的民族，理應沉淪於，絕望。然而任何到過墨西哥的人，都會驚訝地，發現事實恰恰相反：這是一個，色彩最濃烈、音樂最歡騰、笑容最溫暖、生命力，最旺盛的民族之一。要解開，這個謎——這個民族，何以能在如此多的苦難中，活得如此熾烈——我們必須潛入它靈魂，最深的地方，看一看，它與「<strong>死亡</strong>」，那份獨一無二的關係。</p>
+
+    <h3>為死亡，擺上酒席</h3>
+    <p>世界上，大多數的文化，畏懼死亡、迴避死亡、隱藏死亡。唯獨墨西哥，反其道而行——它把死亡，當成朋友、當成玩伴、當成慶祝的對象。每年十一月初的「<strong>亡靈節（Día de Muertos）</strong>」，是墨西哥，最重要、最歡樂的節日之一。在這幾天，墨西哥人，相信死去的親人的靈魂，會返回人間。於是家家戶戶，擺起繽紛的「<em>祭壇（ofrenda）</em>」，供上亡者生前最愛的食物、酒、與萬壽菊；墓園裡，不是愁雲慘霧，而是燭火通明、樂聲飛揚，全家人，圍坐在親人的墓旁，吃喝、談笑、唱歌彷彿那位逝者，從未離開。街上到處是糖做的骷髏頭、紙紮的骷髏、與那位戴著華麗大帽、優雅而詼諧的女骷髏——「<strong>卡特里娜（La Catrina）</strong>」。<strong>墨西哥人，不哭悼死亡；他們嘲弄死亡、裝扮死亡、與死亡，把酒言歡。</strong></p>
+
+    <h3>帕斯的洞察：與死亡同眠的民族</h3>
+    <p>詩人帕斯，在《孤獨的迷宮》中道破了這份獨特的死亡觀：「<em>對紐約人、巴黎人、倫敦人而言，『死亡』，是一個，他們從不提起的詞，因為它灼傷嘴唇。然而墨西哥人，卻與死亡，朝夕相處；他嘲弄它、撫弄它、與它同眠、慶祝它；它是他最鍾愛的玩具，與最忠貞的愛人。</em>」這份與死亡的親暱，根源正是序章那「<strong>層疊</strong>」的密碼——它是兩層文明，融合的產物：在最底層，是阿茲特克的死亡觀（死亡是生命循環的一部分，是通往「<em>米克特蘭</em>」冥界的旅程，而非終結）；其上疊壓著，天主教的死亡觀（那位為世人受難、流血的基督，那諸聖的殉道，那萬靈節的追思）。這兩層，對「死亡」與「犧牲」的深刻執迷，融合在一起，孕育出了，墨西哥，這份舉世無雙的向死而生的文化。</p>
+
+    <h3>面具與慶典：把傷口，活成色彩</h3>
+    <p>而這也連接著序章，另一個密碼——「<strong>面具</strong>」。帕斯認為墨西哥人，因為靈魂深處，那道源於征服的「傷口」與「孤獨」（第三章），而習慣於，戴上面具——以彬彬有禮的疏離、以堅忍的沉默，把真實的自己，藏在底下。而「<strong>慶典（fiesta）</strong>」，正是墨西哥人，唯一能卸下面具的時刻。在節慶那爆炸性的喧鬧中——震耳的鞭炮、濃烈的色彩、暢飲的龍舌蘭、與瑪利亞奇樂隊的歌聲——那個平日孤獨而戴著面具的墨西哥人，得以短暫地，掙脫他的孤獨，與整個社群，融為一體，盡情地，宣洩那被壓抑的激情。<strong>慶典是傷口的解藥；而對死亡的擁抱，是恐懼的解藥。墨西哥人，把它所承受的所有苦難與哀傷，沒有讓它們，化為絕望而是化為了，最濃烈的色彩、音樂與對「活著」的瘋狂熱愛。</strong>正因為它與死亡，如此親密，它才把生命，活得如此熾烈。這是墨西哥，最深的堅韌也是它獻給世界，最動人的禮物。</p>
+
+    <h3>玉米的滋味：一個獻給世界的餐桌</h3>
+    <p>墨西哥的生命力，也盛開在它的餐桌上。墨西哥菜，是全世界，少數被聯合國教科文組織，列為「<strong>人類非物質文化遺產</strong>」的飲食傳統之一。它本身就是序章「層疊」與「融合」密碼的一場盛宴——以原住民的三大根基（<em>玉米、辣椒、豆類</em>）為底融合西班牙帶來的豬肉、乳酪、與小麥再加上世界各地的香料。從一張小小的玉米餅（tortilla），到那需要數十種，食材、耗費數日熬煮的醬料「<em>mole</em>」，墨西哥菜，是一部可以吃的歷史。而這片土地，獻給世界的禮物更是無價的：<strong>玉米、辣椒、番茄、巧克力、酪梨、香草</strong>——這些源自墨西哥的作物徹底改變了，全人類的餐桌（沒有墨西哥的番茄就沒有義大利的紅醬；沒有墨西哥的辣椒就沒有川菜與泰國菜）。</p>
+    <h3>用歌聲，對抗命運：馬利亞奇與民謠</h3>
+    <p>而墨西哥的靈魂更迴盪在它的音樂裡。穿著銀飾盛裝、高唱著，愛情、背叛與故鄉的「<strong>馬利亞奇（mariachi）</strong>」樂隊是墨西哥，獻給世界的又一文化標誌。那高亢、激昂、淚中帶笑的「<em>蘭切拉（ranchera）</em>」歌曲唱盡了，墨西哥人，那熾烈的愛恨與宿命。而那源自革命年代的「民謠（corrido）」傳統（第十三章），至今仍鮮活——只不過，它的當代變體「<em>毒梟民謠（narcocorrido）</em>」，傳唱的已是毒梟的傳奇成了墨西哥，那血腥當代的黑暗配樂。<em>從馬利亞奇，到毒梟民謠，墨西哥人，始終用歌聲來面對他們的愛、他們的痛、與他們的死亡。</em></p>
+    <h3>面具的狂歡：摔角與大眾文化</h3>
+    <p>而「面具」這個墨西哥的密碼（序章），在大眾文化中，化為一種歡樂的傳奇——「<strong>自由式摔角（lucha libre）</strong>」。在墨西哥的摔角場上，戴著五顏六色面具的摔角手（luchador），化身為正邪對決的英雄與惡棍；那神祕的面具本身就是摔角手，神聖不可揭露的身分（傳奇人物「銀面具 El Santo」，一生從不以真面目，示人甚至戴著面具下葬）。<em>從亡靈節的骷髏到摔角手的面具墨西哥人，總懂得如何用色彩、扮裝與狂歡把最沉重的主題（死亡、善惡、命運），轉化為一場全民的慶典。這份把苦難活成色彩的天賦正是這個飽經滄桑的民族，最深的堅韌。</em></p>
+
+    <div class="pull"><p>墨西哥承受了五百年的血與創傷，卻活成了，全世界，色彩最濃烈、生命力最旺盛的民族之一。它的祕密，藏在它與死亡的友誼裡：一個敢於與死亡，把酒言歡的民族，才真正懂得如何瘋狂地，熱愛活著。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「傷口」如何化為「堅韌」</span>
+      <p>第二十四章，揭示了，序章「<strong>傷口</strong>」與「<strong>面具</strong>」這兩個密碼，最深刻、也最動人的轉化。我們在序章，便指出墨西哥，誕生於一道，征服的傷口，靈魂深處，藏著帕斯所說的「孤獨」。然而這道傷口，並沒有，把墨西哥，變成一個，沉淪於自憐的民族。相反墨西哥，發展出，一套舉世無雙的「療傷」的文化機制——它透過對「死亡」的擁抱（亡靈節），馴服了，恐懼；透過「慶典」的爆發（fiesta），宣洩了，孤獨。它把承受的苦難，沒有化為怨毒或絕望，而是化為了，最濃烈的藝術、色彩、音樂與生命力。<em>這正是墨西哥，最深的「堅韌」之所在也回答了，序章的核心提問：一個被一次次征服的國家，何以能一次次，在廢墟上，重生?——因為它學會了，與死亡，與傷口，共處；它把墜落的疼痛，活成了，向上的熾烈。</em></p>
+      <p>而這份文化，再一次，是序章「<strong>層疊</strong>」與「<strong>融合</strong>」密碼的完美結晶。墨西哥那獨特的死亡觀，不是單純的原住民遺產，也不是單純的天主教傳統，而是兩者深度融合的產物——阿茲特克的「死亡即循環」，與天主教的「受難與復活」，交織孕育出，亡靈節那，既哀傷、又歡樂的獨特氣質。它與瓜達盧佩聖母（第五章）一樣證明了，墨西哥，那種把不同的層次，融為一體、並化為獨一無二之物的文化天賦。這份文化，是墨西哥，在「北方巨人」那巨大的文化引力下（可口可樂、好萊塢），依然能倔強地，保有自我的最深根源——你可以買它的可樂、看它的電影，但你無法奪走它與死亡，把酒言歡的靈魂。而帶著這份，獨特的靈魂，墨西哥，走進了，二十一世紀，迎來了，它最新的一場「轉型」，與一位史無前例的領袖。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 2024 ✦</div>
+  <p>一個自稱「第四次轉型」的左派民粹領袖，席捲了墨西哥。<br>而在他之後，墨西哥，選出了，史上第一位女總統——一位猶太裔的氣候科學家。<br><span class="hl">層層疊疊的墨西哥，又疊上了，新的一層。</span></p>
+</div>
+
+<!-- ===== 第二十五章 ===== -->
+<section class="act reveal dark" id="ch-25">
+  <div class="act-head">
+    <span class="act-num">第二十五章 · The Fourth Transformation</span>
+    <h2 class="act-title">AMLO、第四次轉型與一位女總統</h2>
+    <p class="act-sub">The Fourth Transformation — AMLO, a Woman President, and the Colossus Again</p>
+    <div class="ornament">◆ ◈ ◆</div>
+  </div>
+  <div class="prose">
+    <p>二〇〇〇年的民主轉型（第二十一章），帶來的是希望，也是失望。PAN 執政十二年，未能遏止毒品戰爭，也未能撼動根深柢固的貪腐與不均。二〇一二年，PRI，一度捲土重來，卻旋即深陷阿約特西納帕（第二十二章）等醜聞的泥淖。墨西哥人，對舊有的政治菁英（無論 PAN 或 PRI），徹底失望了。在這份，巨大的幻滅中，一位等待了，數十年的左派民粹領袖，迎來了，他的時刻。</p>
+
+    <h3>第四次轉型</h3>
+    <p>二〇一八年，<strong>安德烈斯·曼努埃爾·羅培茲·歐布拉多（AMLO）</strong>，以壓倒性的勝利，當選總統。他創立的政黨「<strong>莫雷納（Morena）</strong>」，橫掃全國。AMLO，是一個，作風樸素、言辭犀利、極具個人魅力，也極具爭議的領袖。他宣稱自己的執政，是墨西哥歷史上，「<strong>第四次轉型（La Cuarta Transformación）</strong>」——足以與前三次，偉大的歷史轉型，並列：<em>獨立</em>（第六章）、<em>胡亞雷斯的改革</em>（第九章）、與<em>大革命</em>（第五部）。這個宏大的自我定位，本身就道出了，墨西哥，那反覆出現的渴望：一場能真正為底層人民，帶來公平與尊嚴的根本「轉型」。AMLO，反對新自由主義、重振國家對石油的掌控（重提卡德納斯的民族主義，第十六章）、推行慷慨的濟貧福利、並誓言「<em>窮人優先</em>」。他贏得了，廣大底層民眾，狂熱的愛戴。</p>
+
+    <h3>一位女總統：層疊之國的新一層</h3>
+    <p>二〇二四年，AMLO，任期屆滿。接替他的是他親手栽培的繼任者——<strong>克勞迪婭·辛鮑姆（Claudia Sheinbaum）</strong>。她的當選，本身就是一個，意義深遠的歷史時刻：在一個，以「<em>男子氣概（machismo）</em>」著稱的國度，墨西哥，選出了，它史上第一位<strong>女總統</strong>。而辛鮑姆，還是一位，傑出的氣候科學家，更是一位，<strong>猶太裔</strong>的後代——在一個，天主教與瓜達盧佩聖母，深入骨髓的國家。<em>序章那「層層疊疊」的墨西哥，又疊上了，全新的一層：在原住民、西班牙、混血的諸多層次之上，一位猶太裔的女科學家，登上了，這個國家的頂峰。</em>這是墨西哥，那份不斷融合、不斷疊加永遠在「重寫本」上書寫新篇章的生命力的又一次，展現。</p>
+
+    <h3>巨人再次逼近</h3>
+    <p>然而辛鮑姆，所接掌的墨西哥，依然面對著，那些未解的沉痾——綿延不絕的毒品暴力（第二十二章）、巨大的貧富不均（兩個墨西哥）、與那盤根錯節的貪腐。而最迫切的挑戰再一次，來自序章那道，永恆的陰影——「<strong>北方的巨人</strong>」。隨著二〇二五年，川普重返美國權力的頂峰，墨西哥，再次承受著，那個強大鄰居，巨大的壓力：高額的關稅威脅、嚴厲的移民遣返、乃至揚言要對墨西哥境內的販毒集團，採取軍事行動。<strong>「離上帝太遠，離美國太近」——這句迪亞斯的宿命之言（第八章），在二十一世紀，依然沉重地，迴盪。</strong>辛鮑姆，與她領導的墨西哥，再一次，必須在那頭，既是最大威脅、又是最大夥伴的巨人面前，小心翼翼地，捍衛自己的尊嚴與主權。</p>
+
+    <h3>第四次轉型的功與過</h3>
+    <p>AMLO 的「第四次轉型」（第二十五章），毀譽參半。支持者，盛讚他真正地，把資源傾注於，底層——大幅提高最低工資、發放慷慨的老人年金與獎助學金、推動南方的基礎建設（如爭議性的「<em>馬雅鐵路</em>」）。他那樸素的作風、與每天清晨的記者會，更讓他與廣大的平民保持著，一種獨特的連結。然而批評者，則憂心他對體制的侵蝕：他削弱獨立的選舉與司法機構、把越來越多的權力與預算（甚至商業項目），交給軍隊（軍事化，不減反增）、並對批評他的媒體與公民團體，極盡攻擊。<em>AMLO，是一個，矛盾的民粹領袖——他既重振了，卡德納斯式的國家主義與濟貧理想，又重現了，墨西哥，那「強人凌駕制度」的古老幽靈（從羅薩斯，到迪亞斯，到 PRI）。</em></p>
+    <h3>近岸外包：北方引力的新機會</h3>
+    <p>而辛鮑姆，所接掌的墨西哥，也面對著，一個前所未有的歷史機遇——「<strong>近岸外包（nearshoring）</strong>」。隨著美國與中國的戰略對抗，加劇（見那份美國史詩），大量的跨國企業，為了分散風險，紛紛把工廠從中國遷往地理鄰近、又有NAFTA（現為 USMCA）保障的墨西哥。一時間，墨西哥，超越中國，成為美國最大的貿易夥伴。<em>序章「北方的巨人」這道永恆的陰影，在此露出了，它少見的光明面：墨西哥，與美國，那深度的經濟纏繞，在大國博弈的新格局下，竟可能成為墨西哥，難得的發展契機。</em>能否抓住這個機會把它轉化為真正的繁榮與公平是辛鮑姆，與當代墨西哥，最大的考驗。</p>
+    <h3>在巨人的新一輪施壓下</h3>
+    <p>然而機會總伴隨著，壓力。隨著川普於二〇二五年，重返白宮，墨西哥，再次首當其衝：高額的關稅威脅、把毒品集團，列為「恐怖組織」、甚至揚言要派美軍越境打擊毒梟——這些都嚴重衝擊著，墨西哥的主權與尊嚴。辛鮑姆，這位墨西哥，史上第一位，女總統，必須以冷靜與務實在那頭既是最大威脅、又是最大夥伴的巨人面前，捍衛墨西哥的立場。<em>「離上帝太遠，離美國太近」——迪亞斯的這句宿命之言（第八章），在墨西哥，建國兩百年後，依然沉重地，迴盪。墨西哥的故事永遠無法擺脫北方的那道巨大的陰影；而它的韌性也正體現在它一次次，在那道陰影下，倔強地，重新站起。</em></p>
+
+    <div class="pull"><p>從一位猶太裔的女科學家，登上這個天主教國家的頂峰，可以看見墨西哥，那永不停止融合的生命力。但她頭頂上，那道「北方巨人」的陰影，與腳下那兩個墨西哥的鴻溝，依然沉重如昔。轉型被許諾了，一次又一次——這一次，會不同嗎?</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 「第四次轉型」，與一個反覆被許諾的夢</span>
+      <p>第二十五章，把墨西哥，帶到了，它當下的十字路口。AMLO 的「第四次轉型」，這個宏大的命名，本身就深刻地，呼應了，本書一個反覆出現的核心母題——那場「被偷走的」「未竟的」革命與對「真正的轉型」的永恆渴望。回顧墨西哥史：獨立（第六章），許諾了平等，卻被菁英偷走；馬德羅的革命（第十二章），許諾了民主，卻無法給予土地；大革命（第五部），寫下了偉大的憲法，卻被 PRI 馴化；二〇〇〇年的民主（第二十一章），帶來了選票，卻未改變不公。<em>墨西哥的歷史，因此是一部，「轉型被一次次許諾、又一次次，未能完全兌現」的歷史。</em>AMLO 的「第四次轉型」，是這個，古老渴望的最新版本——它再一次，點燃了，底層人民，對「公平與尊嚴」的巨大希望。它能否打破那「轉型總是半途而廢」的魔咒?——這是懸在當代墨西哥，頭上的最大問號。</p>
+      <p>而辛鮑姆的當選，則是序章「<strong>層疊</strong>」密碼一個充滿希望的當代註腳。一個猶太裔的女科學家，領導這個以天主教、男子氣概、與混血認同，著稱的國家——這本身就證明了，墨西哥，那永不停止的「融合」與「疊加」的生命力。這個國家，從不是靜止的、單一的；它永遠在它那層層疊疊的「重寫本」上書寫新的篇章。然而無論內部如何轉型、如何疊加那道序章便埋下的最古老的外部陰影——「北方的巨人」——卻始終籠罩不去。從一八四八年的失土、到 NAFTA 的整合、到毒品的共業、到川普的關稅與高牆，墨西哥，與美國的這道不對稱的糾纏是它永遠無法迴避的宿命。墨西哥，未來的命運將在很大程度上，取決於，它能否在那頭巨人的陰影下，既捍衛自己的尊嚴，又駕馭那份深刻的相互依存。讓我們，把這趟，跨越三千年的旅程收攏成，一條線。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">✦ 重生 ✦</div>
+  <p>三千年了。從玉米與諸神，到一座建在神廟上的城，到一個誕生於傷口的民族。<br>它被一次次征服，卻一次次，在廢墟上，重新長出自己。<br><span class="hl">讓我們，把這趟層層疊疊的旅程，收攏成最後一條線。</span></p>
+</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale reveal" id="ch-finale">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是今天的墨西哥人：血、玉米與一座永遠在重建的城</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">Blood, Corn, and a City Forever Rebuilt — Who the Mexicans Are Today</p>
+      <div class="ornament" style="color:var(--gold-bright)">◆ 血 ✦ 玉米 ◆</div>
+    </div>
+    <div class="prose">
+      <p>讓我們，把這趟，跨越三千年、聚焦於一個「在征服中，反覆重生」的旅程，收攏成一條線。今天的墨西哥之所以是這個模樣——一個色彩濃烈卻傷痕累累、擁抱死亡卻熱愛生命、緊鄰巨人卻倔強保有自我、古老到三千年卻又年輕到充滿活力的矛盾國度——是它那「層疊、傷口與北方巨人」三個密碼，與那份「在廢墟上重生」的生命力，層層交織的結果。</p>
+
+      <h3>第一重：一個由「層」疊成的國家</h3>
+      <p>墨西哥最深的身世密碼，是「<strong>層疊</strong>」。它是一座，建在神廟上的城——一份活著的羊皮紙重寫本。在最底層，是綿延三千年、以玉米為根的原住民文明；其上疊壓著西班牙的十字架與語言；再其上，是混血的、革命的、現代的墨西哥。而最關鍵的是：<em>沒有任何一層，會真正消失。</em>被征服的神，躲進了瓜達盧佩聖母的袍裡（第五章）；被壓抑的底層，化身胡亞雷斯、薩帕塔、新薩帕塔，一次次，破土而出（第九、十三、二十章）；古老的死亡觀，與天主教，融成了亡靈節（第二十四章）。墨西哥，永遠在向它最古老的地層，尋找自己，也永遠在那重寫本上，疊加新的一層——直到一位猶太裔女科學家，登上頂峰（第二十五章）。</p>
+
+      <h3>第二重：一個誕生於「傷口」、卻學會重生的靈魂</h3>
+      <p>而貫穿這趟旅程的是那道「<strong>傷口</strong>」——征服與融合，交織而生的創傷。墨西哥，是「被強暴的母親的孩子」，靈魂深處，藏著帕斯所說的孤獨；它的歷史，更被一道，反覆氾濫的「<strong>血</strong>」所浸透——從阿茲特克的獻祭，到征服的屠殺，到大革命的百萬人死，到今日毒戰的三十萬亡魂。然而墨西哥，最了不起之處，在於它沒有被這道傷口，擊垮。它學會了，與傷口、與死亡，共處——把苦難，化為亡靈節的色彩、化為壁畫的壯麗、化為慶典的狂歡、化為對「活著」的瘋狂熱愛（第二十四章）。<em>它把墜落的疼痛，活成了，向上的熾烈。這是它在一次次征服與浩劫後，總能在廢墟上，重生的祕密。</em></p>
+
+      <h3>第三重：一個活在「北方巨人」陰影下的鄰居</h3>
+      <p>而籠罩這一切的是那道「<strong>北方的巨人</strong>」——美國。墨西哥，曾因它失去一半的國土（第八章）；它曾以石油國有化，向它宣告主權（第十六章）；它今天與它糾纏於 NAFTA 的整合、毒品的共業、與數千萬移民的骨肉紐帶（第十九至二十三章）。「<strong>離上帝太遠，離美國太近</strong>」——這句宿命，定義了墨西哥的現代命運。但墨西哥，也以它那「融合」的天賦，把這道陰影，部分地，化為了自己的東西——它把那片失去的土地，用移民的雙腳，悄悄「住」了回去，並在邊境，創造了一個，混血的新世界。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 今天的墨西哥人</span>
+        <p>所以今天的墨西哥人是誰?他，是<strong>那座「永遠在重建的城」最新的居民</strong>——身上流淌著原住民與西班牙，血肉交融的血脈；靈魂裡，並存著征服的傷口、與瓜達盧佩的慰藉、馬林切的糾結、與薩帕塔的不屈；生活中，則面對著毒品的暴力、貧富的鴻溝、與那永遠揮之不去的北方巨人的陰影。他既是那個建造了特諾奇蒂特蘭、寫下馬雅曆法、繪製壯麗壁畫、並把死亡，活成了慶典的偉大文明的繼承者；也是那個承受了征服、失土、革命相殘與毒戰浩劫的苦難歷史的背負者；更是那個向全人類，證明了一條，深刻真理的先行者——<em>一個民族，可以被一次次征服，被壓上一層又一層，卻永遠不會被真正抹去；因為被壓在最底下的那一層，總會從每一道裂縫裡，倔強地，重新長出來。</em></p>
+        <p>這本書，從一座建在神廟上的城開始，問了一個核心的問題：<em>一個被一次次征服、卻一次次在廢墟上重生的國家，如何在血與玉米、征服與融合、傷口與面具之間，鍛造出一個獨一無二的靈魂，並在北方巨人的陰影下，倔強地，做自己?</em>走到終點，我們看到的答案是：墨西哥的偉大，不在於它，從未被征服——恰恰相反，它被征服了，一次又一次。它真正的偉大，在於那份，獨一無二的能力——<strong>它能夠，把每一個，加諸於它的征服與苦難，咀嚼、消化、融合再吐出一個，全新的、混血的、屬於自己的東西；它能夠，與傷口共存、與死亡言歡，並把墜落的疼痛，活成最濃烈的色彩；它能夠，在每一片廢墟之上，倔強地，重新長出自己。</strong>它是一座，永遠在被征服、也永遠在重建的城。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">在墨西哥，沒有什麼會被真正征服，也沒有什麼會被真正抹去。神廟被拆了，教堂蓋了上去；但神廟的石頭，還在教堂的牆裡；而被壓在最底下的那一層，從未停止呼吸——它只是在等待，從下一道裂縫裡，重新長出來。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">層疊之國的終極啟示</span>
+      <p>一個民族真正的力量，未必來自它，從未戰敗，而可能，來自一種，更深的能力：在每一次被征服、被壓垮之後，依然能把加諸於它的一切，消化、融合並在廢墟之上，重新長出自己。墨西哥證明了，「融合」，可以比「純粹」，更有生命力；被壓抑的底層，終將重新湧現；而一個，與死亡如此親暱的民族，反而能把生命，活得最熾烈。它那道，源於征服的「傷口」，是它最深的哀傷，卻也是它創造力與韌性的源泉。如何在承受苦難之後，不沉淪於怨恨，而是把苦難，化為色彩與重生——這不只是墨西哥的功課，也是每一個，曾被征服、曾經受傷的民族，共同的啟示。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從玉米與諸神，到一座建在神廟上的城，<br>
+        從科爾特斯的劍、馬林切的舌，到瓜達盧佩棕色的臉，<br>
+        從多洛雷斯的鐘聲、失去的一半，到胡亞雷斯與槍決的皇帝，<br>
+        從波費里奧的火藥庫，到薩帕塔的「土地與自由」，<br>
+        從吞噬孩子的革命、完美的獨裁，到特拉特洛爾科的血，<br>
+        從 NAFTA 與薩帕塔的幽靈，到毒戰的亡魂與北漂的雙腳——<br>
+        這個，被一層層征服、卻一層層重生的國家，<br>
+        在血與玉米之間，活了三千年。<br>
+        而那座，建在神廟上的城，<br>依然在每一道裂縫裡，<br>倔強地，重新長出自己。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">◆ ✦ ◆</div>
+  <p>血與玉米，與一座建在神廟上的城 · 墨西哥的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM TENOCHTITLAN TO THE COLOSSUS'S SHADOW · 1325 – 2026</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
