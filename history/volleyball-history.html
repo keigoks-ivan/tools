@@ -203,7 +203,9 @@ footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-s
 #imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
 #imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
 #imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
-@media(max-width:1100px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
 </style>
 <div id="imq-toc-prog"></div>
 <nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
@@ -228,11 +230,11 @@ function init(){
     var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
     var ts=document.createElement('span');ts.textContent=txt;
     a.appendChild(ns);a.appendChild(ts);
-    a.addEventListener('click',function(){if(window.innerWidth<=1100)nav.classList.remove('open');});
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
     nav.appendChild(a);links.push({a:a,sec:sec});
   });
   btn.addEventListener('click',function(){nav.classList.toggle('open');});
-  if(window.innerWidth>1100)nav.classList.add('open');
+  if(window.innerWidth>=1480)nav.classList.add('open');
   var ticking=false;
   function mark(){ticking=false;var y=window.scrollY+110,cur=null;
     links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});

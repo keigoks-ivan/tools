@@ -12,7 +12,9 @@ B_BLOCK=r'''<!-- imq-auto-toc -->
 #imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
 #imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
 #imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
-@media(max-width:1100px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
 </style>
 <div id="imq-toc-prog"></div>
 <nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
@@ -37,11 +39,11 @@ function init(){
     var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
     var ts=document.createElement('span');ts.textContent=txt;
     a.appendChild(ns);a.appendChild(ts);
-    a.addEventListener('click',function(){if(window.innerWidth<=1100)nav.classList.remove('open');});
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
     nav.appendChild(a);links.push({a:a,sec:sec});
   });
   btn.addEventListener('click',function(){nav.classList.toggle('open');});
-  if(window.innerWidth>1100)nav.classList.add('open');
+  if(window.innerWidth>=1480)nav.classList.add('open');
   var ticking=false;
   function mark(){ticking=false;var y=window.scrollY+110,cur=null;
     links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
@@ -66,6 +68,13 @@ def transform(slug):
     t=re.sub(r'/\* =+ *TABLE OF CONTENTS *=+ \*/[\s\S]*?(?=/\* =)','',t)
     t=re.sub(r'<!--[^>]*(?:目錄|TABLE OF CONTENTS)[^>]*-->\s*','',t,flags=re.I)
     t=re.sub(r'<nav class="toc[\s\S]*?</nav>\s*','',t)
+    # --- remove dead floating FAB (old jump-to-#toc button + its now-orphaned CSS/JS) ---
+    t=re.sub(r'\s*<a class="fab"[^>]*>[^<]*</a>','',t)
+    t=re.sub(r'\s*/\* =+ FLOATING TOC BUTTON =+ \*/','',t)
+    t=re.sub(r'\s*@media\(max-width:640px\)\{\.fab\{[^{}]*\}\}','',t)   # whole fab @media first
+    t=re.sub(r'\s*\.fab(?:\.show|:hover)?\{[^{}]*\}','',t)              # then top-level .fab rules
+    t=re.sub(r"\s*const fab=document\.getElementById\('fab'\);",'',t)
+    t=re.sub(r"\s*if\(h\.scrollTop>window\.innerHeight\*0\.9\)\{fab\.classList\.add\('show'\);\}else\{fab\.classList\.remove\('show'\);\}",'',t)
     # --- inject B after <body> ---
     t=re.sub(r'(<body[^>]*>)', lambda m: m.group(1)+'\n'+B_BLOCK, t, count=1)
     open(p,'w',encoding='utf-8').write(t)
