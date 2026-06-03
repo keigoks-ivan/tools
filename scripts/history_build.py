@@ -104,6 +104,8 @@ ENTRIES = [
          zh="自由與枷鎖，與永不止息的邊疆：美利堅", en="America: Liberty, Bondage & the Frontier", lat=39.5, lng=-98.35),
     dict(src="美洲歷史/加拿大史詩_兩個孤獨與一個縫起來的國家.html", slug="canada-epic", cat="nation",
          zh="兩個孤獨，與一個縫起來的國家：加拿大", en="Canada: Two Solitudes, Stitched Together", lat=56.1, lng=-106.3),
+    dict(src="美洲歷史/阿根廷史詩_豐饒與衰落與永遠不來的未來.html", slug="argentina-epic", cat="nation",
+         zh="豐饒與衰落，與永遠不來的未來：阿根廷", en="Argentina: Abundance, Decline & the Future That Never Comes", lat=-38.4, lng=-63.6),
 
     # ---------- 城市史詩 ----------
     dict(src="台灣歷史/台北_盆地之城.html", slug="taipei", cat="city", group="台灣 Taiwan",
