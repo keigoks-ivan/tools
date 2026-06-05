@@ -120,6 +120,12 @@ ENTRIES = [
          zh="帝國的回聲、德意志的問題，與一座中立的橋：奧地利", en="Austria: The Echo of Empire, the German Question & a Neutral Bridge", lat=47.5, lng=14.5),
     dict(src="歐洲歷史/捷克史詩_歐洲的心臟與真理必勝與好兵帥克.html", slug="czech-epic", cat="nation",
          zh="歐洲的心臟、真理必勝，與好兵帥克：捷克", en="Czechia: The Heart of Europe, Truth Prevails & the Good Soldier Švejk", lat=49.8, lng=15.5),
+    dict(src="歐洲歷史/希臘史詩_光海與永恆的重生.html", slug="greece-epic", cat="nation",
+         zh="光、海，與永恆的重生：希臘", en="Greece: The Light, the Sea & the Eternal Resurrection", lat=37.98, lng=23.73),
+    dict(src="歐洲歷史/丹麥史詩_海收縮與信任.html", slug="denmark-epic", cat="nation",
+         zh="海、收縮，與信任：丹麥", en="Denmark: The Sea, the Shrinking & Trust", lat=55.68, lng=12.57),
+    dict(src="歐洲歷史/匈牙利史詩_孤獨邊界與一道永不癒合的傷口.html", slug="hungary-epic", cat="nation",
+         zh="孤獨、邊界，與一道永不癒合的傷口：匈牙利", en="Hungary: Alone, the Frontier & an Unhealing Wound", lat=47.50, lng=19.04),
     dict(src="歐洲歷史/波蘭史詩_消失與復活與夾在兩個巨人之間.html", slug="poland-epic", cat="nation",
          zh="消失、復活，與夾在兩個巨人之間：波蘭", en="Poland: Disappearance, Resurrection & a Nation Between Two Giants", lat=52.0, lng=19.5),
 
