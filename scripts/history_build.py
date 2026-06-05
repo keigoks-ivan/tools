@@ -216,6 +216,8 @@ ENTRIES = [
          zh="瓜分、枷鎖與未竟的獨立：帝國主義與非洲的兩百年", en="Imperialism in Africa: From the Scramble to the New Scramble", lat=None, lng=None),
     dict(src="世界史/伊斯蘭世界_啟示商道與烏瑪.html", slug="islamic-world", cat="theme",
          zh="從麥加出發：啟示、商道與烏瑪的一千四百年", en="Out of Mecca: Revelation, Commerce & the Umma — 1,400 Years of Islam", lat=None, lng=None),
+    dict(src="經濟史/股市史詩_貪婪與恐懼.html", slug="stock-market", cat="theme",
+         zh="貪婪與恐懼：泡沫、崩盤，與股市四百年的人心", en="Greed & Fear: Four Centuries of the Market", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",

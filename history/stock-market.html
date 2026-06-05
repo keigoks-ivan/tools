@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>貪婪與恐懼：泡沫、崩盤，與股市四百年的人心</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ===== econ-layer callout boxes (deepen / counterfactual) ===== */
+.deepen{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(176,141,52,.07);border:1px solid rgba(176,141,52,.32);border-left:4px solid var(--gold);border-radius:3px}
+.deepen .dh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--rust);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.deepen p{margin:.7rem 0;text-align:justify}
+.cf{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(30,58,76,.05);border:1px dashed rgba(30,58,76,.4);border-radius:3px}
+.cf .cfh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--sea-deep);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.cf p{margin:.7rem 0;text-align:justify}
+/* ===== dark-section legibility (boxes + stats + pull + timeline + interlude) ===== */
+.dark .deepen{background:rgba(216,196,160,.06);border-color:rgba(212,175,90,.4);border-left-color:#d4af5a}
+.dark .deepen .dh{color:#e2a878}
+.dark .cf{background:rgba(255,255,255,.045);border-color:rgba(212,175,90,.32)}
+.dark .cf .cfh{color:#d8c4a0}
+.dark .deepen p,.dark .cf p{color:#cdb494}
+.dark .deepen strong,.dark .cf strong{color:#c87a5a}
+.dark .deepen em,.dark .cf em{color:#d8a878}
+.dark .pull{background:linear-gradient(135deg,rgba(216,196,160,.07),rgba(176,141,52,.1));border-top-color:#d4af5a;border-bottom-color:#d4af5a}
+.dark .pull p{color:#ecd9b4}
+.dark .pull::before{color:#d4af5a}
+.dark .stat{background:rgba(216,196,160,.06)}
+.dark .stat .num{color:#d4af5a}
+.dark .stat .lbl{color:#c4af88}
+.dark .tl-text{color:#cdb494}
+.dark .tl-year{color:#e2a060}
+.dark .interlude p{color:rgba(243,238,226,.9)}
+.dark .interlude p .hl{color:#e2a060}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* ===== ACT / PART DIVIDER ===== */
+.part-div{max-width:900px;margin:5.5rem auto 1rem;padding:0 1.6rem;text-align:center;position:relative;z-index:2;scroll-margin-top:80px}
+.part-div .pn{font-family:'Cinzel',serif;font-size:.76rem;letter-spacing:.34em;color:var(--rust);text-transform:uppercase}
+.part-div .pt{font-family:'Noto Serif TC',serif;font-weight:900;font-size:1.7rem;color:var(--sea-deep);margin:.7rem 0 .3rem;letter-spacing:.05em}
+.part-div .pe{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--faint)}
+.part-div .pline{display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:1.1rem;color:var(--gold)}
+.part-div .pline span{height:1px;width:80px;background:linear-gradient(90deg,transparent,var(--gold))}
+.part-div .pline span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+.part-div .pline .dot{font-size:1rem;opacity:.8}
+.back-toc{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;color:var(--faint);text-decoration:none;text-transform:uppercase;transition:color .25s ease}
+.back-toc:hover{color:var(--gold)}
+.act,.finale{scroll-margin-top:70px}
+
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){heads=[].slice.call(document.querySelectorAll('h2'));}
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>=1480)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Greed, Fear, and the Crowd</span>
+    <h1>貪婪與恐懼，<br><span class="em">泡沫與崩盤</span><br>股市四百年的人心</h1>
+    <p class="sub">一台每天替數十億人的貪婪與恐懼定價的機器，如何在四百年間，把人類最古老的兩種情緒——「想要更多」的渴望，與「害怕失去」的驚慌——煉成一個又一個泡沫與崩盤？從一六三七年荷蘭人為一顆鬱金香球莖付出一棟房子的價錢，到一七二〇年連牛頓都賠光身家的南海泡沫；從一九二九年華爾街的縱身一躍，到一九八九年東京一座皇居的地價抵得上整個加州；從二〇〇〇年的網路狂熱，到二〇〇八年「房價永遠不會跌」的信念崩塌，再到今天散戶在手機上、在迷因裡掀起的群眾風暴——投機的工具不斷翻新，底層的情緒卻從未改變。這部書要說的，不是數字的歷史，而是人心的歷史：那座永遠在貪婪與恐懼之間擺盪、卻從不肯在「合理」那一點上停留的鐘擺。</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">那</span>是一六八八年的阿姆斯特丹。一個名叫約瑟夫·德拉維加（Joseph de la Vega）的西班牙裔猶太商人，在這座當時全世界最富裕的城市裡，寫下了人類史上第一本描寫股票市場的書，書名叫《混亂中的混亂》（<em>Confusión de confusiones</em>）。他筆下那座開市還不到一個世紀、全世界最早的證券交易所，已經有了我們今天熟悉的一切：看多的「公牛」與看空的「熊」、追漲殺跌的群眾、散播謠言的掮客、做空逼倉的陰謀、一夜暴富的傳奇，與一夜傾家蕩產的哀號。他寫下那句後來不斷被人引用的話——這是<strong>「全世界最公平、也最虛偽的生意；最高貴、也最惡名昭彰的買賣；它是世間最精明的，也是最愚蠢的」</strong>。三百多年前，當股票這樣東西才剛被發明不久，這個敏銳的觀察者，就已經看穿了它的本質：股市，從來不是一台冷靜的計算機器，而是一台滾燙的情緒機器。它真正在交易的，不是公司的盈餘、不是國家的興衰，而是兩種比文字更古老、深植於每個人血液裡的情緒——「想要更多」的貪婪，與「害怕失去」的恐懼。請記住這座交易所，也請記住這個觀察。因為這部書要追問的，正是這樣一個近乎瘋狂、卻一再重演的問題：為什麼一群擁有最多資訊、動用最複雜模型、自認為最理性的人，會一次又一次地，在完全相同的地方，犯下完全相同的錯誤——在最該恐懼的時候貪婪，在最該貪婪的時候恐懼？這趟旅程很長。它將從阿姆斯特丹那座最早的交易所與一六三七年的鬱金香狂熱出發，走過一七二〇年讓牛頓都賠光身家的南海泡沫，走過華爾街梧桐樹下那紙催生了紐約證交所的協定，走過十九世紀的鐵路狂熱與報價機前屏息的群眾；它將親歷一九二九年那場把一代人嚇了一輩子的大崩盤，見證凱因斯如何替市場的瘋狂取名為「動物本能」，又看著一群經濟學家如何宣稱「市場是有效率的、情緒根本不重要」；它將跟隨卡尼曼與特沃斯基，把人心的種種偏誤一一拆解成科學，在一九八七年的黑色星期一裡看著機器把恐慌放大成雪崩；它將飛越太平洋，目睹日本泡沫那場最緩慢、最哀傷的破滅，網路狂熱裡「這次不一樣」的第一千次合唱，與二〇〇八年「房價永遠不會跌」這個信念的轟然倒塌；最後，它將抵達今天——一個散戶在手機上、在迷因裡、在加密貨幣與人工智慧的浪潮中，把貪婪與恐懼放大到光速的時代。讓我們從阿姆斯特丹那座最早的交易所開始，在每一次泡沫的巔峰與每一次崩盤的谷底，<span style="color:var(--rust);font-weight:600">聽一聽人心的回聲</span>。</p>
+</section>
+
+<div class="div-orn">▲ ✦ ▼</div>
+
+<section class="act reveal" id="ch-0">
+  <div class="act-head">
+    <span class="act-num">序章 · The Heartbeat of Mr. Market</span>
+    <h2 class="act-title">市場先生的心跳：價格，是貪婪與恐懼相遇的地方</h2>
+    <p class="act-sub">The Heartbeat of Mr. Market — Where Greed Meets Fear, and the Three Keys to Four Centuries</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>每一座股票市場，每一天，都會吐出一個數字。台積電今天收在某個價位，蘋果收在某個價位，整個市場用一個指數來概括——道瓊、標普、日經、加權。我們太習慣這些數字，以致於忘了去問一個最根本的問題：<strong>這個叫做「價格」的東西，到底是什麼？</strong>多數人會說，價格反映的是價值，是公司未來能賺多少錢的折現，是一台精密的計算機算出來的客觀真相。這個答案，在很長的時間尺度上，大致是對的——正如價值投資之父班傑明·葛拉漢（Benjamin Graham）那句名言所說，「短期而言，市場是一台投票機；長期而言，它是一台秤重機。」但這部書要講的，恰恰是那台「投票機」：在每一個當下，在每一場狂熱與每一次崩盤裡，價格從來不是被「算」出來的，而是被「投」出來的——它是一群人的情緒，在某個瞬間達成的、脆弱的停火協議。價格，是買方的貪婪與賣方的恐懼，在那一刻碰頭、握手、然後立刻又要再戰的地方。</p>
+
+    <p>葛拉漢留給世界一個流傳最廣的比喻，他叫它「<strong>市場先生</strong>」（Mr. Market）。想像你有一個生意上的合夥人，名叫市場先生。他每天都來敲你的門，報給你一個價格，說他願意用這個價格買走你手上的股份，或者把他的股份用這個價格賣給你。問題是，這位市場先生有嚴重的躁鬱症：有些日子他興高采烈、對未來充滿無限憧憬，於是報出一個高得離譜的價格；另一些日子他垂頭喪氣、覺得世界末日就要來臨，於是報出一個低得可笑的價格。他從不介意你不理他——明天他還會再來，帶著一個全新的、同樣情緒化的數字。葛拉漢說，聰明的投資人不會讓市場先生的情緒感染自己，而是利用它：在他絕望時向他買，在他狂喜時賣給他。這個比喻之所以不朽，是因為它一語道破了股市的本質——<em>市場先生不是一台計算機，他是一個人；而且是一個情緒比理智更強大的人。</em>這部書，就是這位市場先生四百年的病歷。</p>
+
+    <p>要讀懂這四百年，要在鬱金香、南海、鐵路、一九二九、日本、網路、次貸、迷因股這一連串看似毫不相干的瘋狂裡，看見那條始終如一的暗線，我們需要先握住三把鑰匙——三個將貫穿全書、彼此咬合的密碼。它們不是經濟學，而是心理學；不是關於錢，而是關於人。</p>
+
+    <h3>第一把鑰匙：鐘擺——市場永遠在兩個極端之間擺盪，卻很少停在中間</h3>
+    <p>第一個密碼，是<strong>鐘擺</strong>。當代最受推崇的投資人之一、橡樹資本的霍華德·馬克斯（Howard Marks）說過一段話，幾乎可以當作這部書的總綱：投資人的情緒，就像一座鐘擺，在「興奮」與「沮喪」之間、在「貪婪」與「恐懼」之間、在「樂觀到買進一切」與「悲觀到拋售一切」之間，來回擺盪。而這座鐘擺最關鍵的特性是：<em>它幾乎從不停在中點。</em>那個中點——「合理價值」、「不貪也不怕」的理性位置——理論上是鐘擺該待的地方，可實際上，鐘擺只會在飛掠過它的那一瞬間經過它，然後繼續衝向另一個極端。市場大部分的時間，不是在奔向過熱，就是在奔向過冷；不是貴得離譜，就是便宜得離譜。所謂「股價反映合理價值」，是一個美麗的中點神話；真實的市場，是一座永不止息、總是擺過頭的鐘擺。記住這座鐘擺，因為從鬱金香到比特幣，每一次泡沫都是它擺向貪婪那一端的極致，每一次崩盤都是它報復性地盪回恐懼那一端的反彈。</p>
+
+    <h3>第二把鑰匙：群眾與循環——個人的情緒，會被群眾放大成狂熱</h3>
+    <p>第二個密碼，是<strong>群眾與循環</strong>。一個人獨自面對風險時，多半還算謹慎；可是一旦把成千上萬人放進同一個市場、讓他們看著彼此的行動，奇妙而可怕的事情就發生了。十九世紀的法國社會心理學家勒龐（Gustave Le Bon）在《烏合之眾》裡寫道：人一旦融入群眾，就會失去獨立思考的能力，個體的理性被群體的情緒淹沒，變得衝動、易受暗示、極端。股票市場，是人類有史以來組織起來的、最龐大的一個群眾。當別人都在賺錢，「踏空」的痛苦會逼著最冷靜的人也跳進場——這就是為什麼泡沫總是在最後階段漲得最瘋，因為連最後一個懷疑者都投降了。經濟史家金德爾伯格（Charles Kindleberger）與經濟學家明斯基（Hyman Minsky）把這個過程拆解成一套幾乎不變的劇本：先是某個新事物點燃想像（位移），接著信貸湧入、價格上漲（繁榮），然後是失去理智的全民狂歡（亢奮），緊接著聰明錢悄悄離場（陷入困境），最後是奪門而逃的崩潰（恐慌與厭惡）。<em>這套「位移→繁榮→亢奮→困境→恐慌」的循環，會在這部書裡一遍又一遍地上演，只是每一次都換了一身新衣裳。</em></p>
+
+    <div class="flow">
+      <span class="node">隱憂消退</span><span class="arrow">→</span>
+      <span class="node">希望</span><span class="arrow">→</span>
+      <span class="node">樂觀</span><span class="arrow">→</span>
+      <span class="node">興奮</span><span class="arrow">→</span>
+      <span class="node">狂熱 · 貪婪</span><span class="arrow">→</span>
+      <span class="node">否認</span><span class="arrow">→</span>
+      <span class="node">恐懼</span><span class="arrow">→</span>
+      <span class="node">恐慌 · 投降</span><span class="arrow">→</span>
+      <span class="node">絕望</span><span class="arrow">→</span>
+      <span class="node">重生</span>
+    </div>
+    <p class="map-note">每一次泡沫，都是這座情緒循環走完整整一圈。貪婪在頂點，恐懼在谷底——而最大的獲利機會，弔詭地，總是藏在「絕望」那一格。</p>
+
+    <h3>第三把鑰匙：敘事與遺忘——每個泡沫都需要一個故事，每一代人都會忘記上一次</h3>
+    <p>第三個密碼，是<strong>敘事與遺忘</strong>。光有貪婪，撐不起一場泡沫；貪婪需要一個故事，一個讓人「理直氣壯地貪婪」的理由。每一次大泡沫，都有一句核心咒語，而且永遠是同一句——「<strong>這次不一樣</strong>」（This time is different）。這次不一樣，因為鬱金香是稀世珍寶；因為南海公司壟斷了新世界的財富；因為鐵路將永遠改變文明；因為我們進入了「新經濟」；因為網路讓舊的估值法則作廢；因為房價在全國範圍內從來不曾下跌。投資大師約翰·坦伯頓（John Templeton）說，「這次不一樣」是投資世界裡<em>最昂貴的四個字</em>。而與這個故事如影隨形的，是另一個更深的心理機制：遺忘。經濟學家高伯瑞（John Kenneth Galbraith）有一條冷酷的觀察——金融界的記憶極其短暫，大約只有二十年，剛好是上一場災難的傷痛淡去、而一批沒有親歷過的新人登場的時間。於是同樣的瘋狂，每隔一代就會重演一次，每一次的主角都真心相信，自己這一次，是聰明的。索羅斯（George Soros）則用「反身性」（reflexivity）指出更深一層：人們的信念不只是被動反映現實，還會反過來改變現實——當所有人都相信股價會漲而買進，股價真的就漲了，於是信念「自我實現」，直到再也撐不住的那一刻。</p>
+
+    <div class="pull"><p>新的工具，舊的情緒。從一顆鬱金香球莖到一行比特幣的程式碼，投機的載體換了一輪又一輪，可是駕馭它的，永遠是同樣那兩種、和人類一樣古老的情緒——想要更多的貪婪，與害怕失去的恐懼。</p></div>
+
+    <h3>為什麼偏偏是這兩種情緒</h3>
+    <p>在我們上路之前，還有一個問題值得停下來想一想：在人類所有複雜的情緒裡，為什麼偏偏是「貪婪」與「恐懼」這兩種，主宰了市場？答案，藏在比股市古老得多的地方——藏在我們的演化史裡。恐懼，是人類最古老的生存本能。在那個一頭猛獸、一場饑荒就足以致命的遠古世界，對「失去」（失去食物、失去領地、失去性命）反應過度的祖先，比那些反應遲鈍的，更容易活下來、把基因傳下去。於是「對損失的痛苦，遠大於對等量獲得的快樂」這種不對稱（也就是損失趨避），被深深地刻進了我們的神經迴路——它不是一個理財上的缺陷，它是一份救過我們命的演化遺產。只是在叢林裡，它讓我們躲過猛獸；在股市裡，它卻讓我們在最該買進的谷底，因恐懼而奪門而逃。</p>
+    <p>而貪婪，或者說「想要更多」的渴望，同樣源遠流長。驅動它的，是大腦深處那套「獎賞迴路」——當我們「預期」將要獲得獎賞時，腦中會分泌多巴胺，催促我們去追逐、去獲取。耐人尋味的是，研究發現，真正讓多巴胺狂飆的，往往不是「得到」的那一刻，而是「即將得到」的「預期」——這恰恰解釋了，為什麼追逐一檔飆股的過程比真正獲利更令人上癮，為什麼「下一筆會更大」的幻想如此難以抗拒。市場，正是一台精準地、持續地刺激這套古老獎賞迴路的機器。</p>
+    <p>更關鍵的是，這兩種情緒，都是會「傳染」的。人類是高度社會性的動物，我們天生就會觀察、模仿、同步身邊人的情緒（這也曾是叢林裡的生存利器——別人都在跑，你最好跟著跑，別問為什麼）。當我們看到旁人因某檔股票而致富，那份貪婪會像打哈欠一樣傳染給我們；當我們看到旁人恐慌拋售，那份恐懼也會瞬間擊穿我們的理智。<strong>於是股市成了一個奇異的場所：它把「貪婪」與「恐懼」這兩種最古老、最私密、最個人的生存情緒，透過群眾的相互感染，匯聚、放大，最後濃縮成一個公開的、即時跳動的、人人都看得見的數字——價格。</strong>這部書講的，從來不是金融,而是人性；而所謂市場的歷史，不過是這兩種寫在我們基因裡的遠古情緒，在一個又一個新舞台上，反覆上演的歷史。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 三把將貫穿全書的鑰匙</span>
+      <p>這三把鑰匙，不是各自獨立的，而是一條環環相扣的鎖鏈。一切始於<strong>鐘擺</strong>：人心天生在貪婪與恐懼之間擺盪，而且總是擺過頭。可是單憑個人的擺盪，還不足以撼動市場；要等到<strong>群眾</strong>把千萬人的情緒同步、放大，鐘擺才會盪成一場席捲一切的狂熱或恐慌，走完「位移→繁榮→亢奮→困境→恐慌」那套不變的<strong>循環</strong>。而讓群眾甘願跟著鐘擺衝向極端的，是<strong>敘事</strong>——那個「這次不一樣」的故事；又因為人們健忘，這個故事每隔一代就能重新騙過一批新人。於是，鐘擺、群眾與循環、敘事與遺忘，三者合力，把市場變成一台不斷重演同一齣悲喜劇的機器。</p>
+      <p>接下來的二十六章，將是這三把鑰匙在四百年裡的反覆迴響。<strong>鐘擺</strong>會在鬱金香的頂點（第二章）、在一九二九的縱身一躍（第八章）、在二〇〇八的谷底（第十九章）一次次盪到極致；<strong>群眾與循環</strong>會從南海泡沫（第三章）、鐵路狂熱（第五章），一路放大到迷因股那個用社群網路即時串連的群眾 2.0（第二十二章）；<strong>敘事與遺忘</strong>則會從「這次不一樣」的第一次合唱，唱到網路泡沫（第十八章）、唱到加密貨幣（第二十三章），而每一次，都有人忘了上一次。這部書最終要說的，是一個既讓人沮喪、又奇異地令人安慰的真相：市場的技術一直在進步，人心卻幾乎從未改變。讀懂了人心，你就讀懂了這四百年；而讀懂了這四百年，或許，你能在下一次鐘擺盪向極端時，比群眾多清醒那麼一點點。</p>
+    </div>
+  </div>
+</section>
+
+<div class="part-div reveal" id="part-1">
+  <span class="pn">第一部</span>
+  <h2 class="ptitle pt">情緒的源頭</h2>
+  <div class="pe">The Origins — How a Machine for Measuring Emotion Was Born, and Its First Three Manias</div>
+  <div class="pline"><span></span><span class="dot">▲</span><span></span></div>
+</div>
+
+<!-- ===== 第一章 ===== -->
+<section class="act reveal" id="ch-1">
+  <div class="act-head">
+    <span class="act-num">第一章 · Amsterdam Invents the Future</span>
+    <h2 class="act-title">阿姆斯特丹的發明：第一張股票，與第一個看穿它的人</h2>
+    <p class="act-sub">Amsterdam Invents the Future — The First Share, the First Exchange, and the First Man to See Through Them</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>故事要從一艘船說起——或者說，從一艘船所承載的、人類最古老的一種情緒衝突說起。十六世紀末，荷蘭的商人想到遙遠的東印度群島去販運香料。胡椒、肉豆蔻、丁香，在歐洲貴比黃金；可是一趟航程要兩三年，要繞過半個地球，途中可能遇上風暴、海盜、疾病與敵國的艦隊。十艘船出發，能回來六七艘就算走運。這裡頭，藏著一個讓所有人夜不能寐的兩難：<strong>巨大的貪婪（一趟成功能讓人致富），對撞著巨大的恐懼（一場海難能讓人傾家蕩產）。</strong>沒有任何一個商人，富可敵國也好，敢把全部身家壓在單獨一趟航程上。怎麼辦？</p>
+
+    <p>一六〇二年，荷蘭人想出了一個將永遠改變世界的辦法。他們把好幾家彼此競爭的香料貿易公司合併成一家——荷蘭東印度公司（Vereenigde Oostindische Compagnie，簡稱 VOC），然後做了一件前所未有的事：他們把這家公司切成許多小份，公開賣給阿姆斯特丹城裡任何願意掏錢的人——無論你是大商人、麵包師傅、寡婦還是女僕。你買下一「股」，就分擔了公司一小份的風險，也分享了一小份的利潤。風險，被分散到了成千上萬人的肩上；而每個人承擔的，都小到可以承受。這就是世界上第一家公開發行股票、由眾多股東共同持有的「股份有限公司」，也是現代資本主義最核心的發明。VOC 用這個辦法募到了一筆當時天文數字般的資本，組建起一支龐大的商船與武裝艦隊，在往後近兩百年裡壟斷了東方貿易，一度是地表最有錢、最有權的公司。</p>
+
+    <p>但對這部書而言，VOC 真正的革命，還在後頭。人們很快發現一個問題：VOC 的合約規定，這筆投資要鎖很多年才分紅、退股。可萬一我中途急著用錢呢？萬一我覺得公司前景變差、想脫手呢？於是，一個自然而然的需求誕生了：我想把手上的股份，轉賣給另一個願意接手的人。一六〇二年起，阿姆斯特丹就出現了專門買賣 VOC 股份的場所，到一六一一年，更建起了一座固定的證券交易所（Amsterdam Beurs）——人類歷史上第一個股票交易所。從這一刻起，一件影響至今的事情發生了：股票的「價格」，不再只取決於公司每年真正賺多少錢，而開始取決於<em>另一個人，願意用多少錢從你手裡買走它</em>。而「另一個人願意出多少」，從來就是一件被情緒、被預期、被消息、被恐慌與貪婪牽著走的事。投機，從股票誕生的第一天起，就和它形影不離。</p>
+
+    <h3>一家擁有軍隊的公司</h3>
+    <p>要體會 VOC 這個發明有多石破天驚，得知道它究竟是個什麼樣的龐然大物。它不只是世界第一家公開發行股票的公司，更是人類史上第一家真正意義上的「跨國企業」，而且權力大得驚人：荷蘭政府授予它一系列近乎主權國家的特權——它可以擁有自己的軍隊與艦隊、可以鑄造貨幣、可以代表荷蘭與外國簽訂條約、可以在殖民地宣戰與媾和、可以審判與處決。它是一家公司，卻同時是一個帝國。它存續了將近兩百年，在巔峰時期是地表最有錢的商業組織，定期向股東派發豐厚的股息（早年甚至直接用香料來支付）。把一件如此巨大、如此長壽、權力如此驚人的事業，切成小份賣給平民百姓，這在當時是徹底顛覆想像的——它第一次讓一個阿姆斯特丹的麵包師傅，得以「擁有」遠在地球另一端、一支正在與葡萄牙人交戰的艦隊的一小片。</p>
+    <p>而正是這個「擁有一片你永遠見不到、也無法掌控的龐大事業」的結構，從根本上，替情緒打開了大門。一個股東怎麼可能真正知道，此刻在好望角以東，公司的船隊是滿載而歸還是葬身海底？他無從得知。於是他手中股票的價值，便不再取決於他能親眼查證的事實，而取決於消息、謠言、預期，以及最重要的——「別人此刻願意出多少」。<strong>當一樣資產的真實價值變得遙遠而模糊，價格就會被預期與情緒填滿；資訊的真空，正是貪婪與恐懼最好的溫床。</strong>這是股票這項發明與生俱來的特質：它在分散風險、匯聚資本的同時，也創造出了一個讓人類情緒得以即時定價、即時放大的全新空間。德拉維加之所以能在交易所裡看見那麼多瘋狂，正因為這台機器的設計，從第一天起，就替瘋狂預留了位置。</p>
+
+    <h3>德拉維加：第一個替市場情緒寫病歷的人</h3>
+    <p>一六八八年，阿姆斯特丹的猶太商人約瑟夫·德拉維加，寫下了《混亂中的混亂》。這是人類史上第一本系統描寫股票交易的書，而它讀起來，竟與今天任何一本講「投資心理」的暢銷書沒有兩樣。德拉維加用一段對話體，描述了交易所裡的眾生相：有看多的「公牛」（liefhebber，意為「愛好者」、樂觀派），有看空的「熊」（contremine，做空者）；有人靠散播假消息操縱股價，有人結成同盟聯手逼倉；有人因為一個傳言就瘋狂搶進，有人因為一場恐慌就血本無歸。他描寫了那種「賺錢時得意忘形、賠錢時呼天搶地」的情緒擺盪，描寫了群眾如何被消息與謠言像潮水一樣推來推去。他甚至已經懂得，<strong>市場最大的敵人不是壞消息，而是不確定性與恐懼本身。</strong></p>
+
+    <p>德拉維加給後人留下一句精準到殘酷的話，他說股票交易是「全世界最公平、也最虛偽的生意；最高貴、也最惡名昭彰的買賣；它既是世間最精明的事業，也是最愚蠢的賭博」。請細細品味這句話裡的每一組矛盾——公平與虛偽、高貴與惡名、精明與愚蠢。它道破的，正是這部書的核心：股市永遠同時是這兩面，因為驅動它的人心，本身就同時裝著理性與瘋狂、計算與衝動、貪婪與恐懼。三百多年前，當這台情緒機器才剛剛被造出來、還在嬰兒期時，德拉維加就已經為它寫好了一份至今仍然準確的病歷。他甚至給了讀者一句忠告，這句話放到今天任何一個追高殺低的散戶身上，依然字字見血：<em>「永遠不要建議別人去買賣股票，因為當判斷被慾望蒙蔽時，最善意的建議也會變成最糟的結果。」</em></p>
+
+    <h3>第一個放空者，與第一道禁令</h3>
+    <p>就在這台機器運轉的最初幾年，它就催生了另一個將伴隨股市至今、且永遠引發爭議的角色——放空者。一六〇九到一六一〇年間，一位曾經當過 VOC 董事、後來與公司反目的商人伊薩克·勒梅爾（Isaac Le Maire），糾集了一批同夥，組成了人類史上第一個「放空集團」。他們的盤算是：簽下「將來才交割」的遠期合約，承諾以今天的價格、在未來賣出大量根本還沒到手的 VOC 股票，同時散播關於公司前景不妙的悲觀消息，把股價壓下去；等股價真的跌了，再用低價買進股票來履約交割，賺取其中的價差。這是「無券放空」與「打壓做空」的鼻祖，也是德拉維加筆下那頭「熊」最早的原型。</p>
+    <p>VOC 的管理層被這場做空攻擊激怒了，向荷蘭當局控訴勒梅爾等人惡意操縱、損害公司與其他股東。一六一〇年，當局頒布了人類歷史上第一道「禁止放空」的法令。這道禁令，幾乎注定了一場將反覆上演四百年的拉鋸：每當市場崩跌，放空者就會被當成製造恐慌的代罪羔羊，遭到輿論譴責與監管禁止（一九二九年如此，二〇〇八年如此，二〇二一年的迷因股風暴更是如此）；可是放空者也一次次扮演著戳破泡沫、揭穿謊言的角色（從 LTCM 到安隆到二〇〇八的次貸，往往是放空者最早嗅到了腐臭）。<strong>放空，是市場裡「恐懼」這種情緒的制度化身——人們既需要它來給狂熱的貪婪降溫，又在恐慌時恨它入骨。</strong>而這一切愛恨，早在股市誕生的第一個十年，就已經在阿姆斯特丹預演完畢了。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 機器誕生，情緒先到</span>
+      <p>這是全書的起點，也是一個耐人尋味的事實：<strong>股票市場這台機器，從被發明的第一天起，情緒就已經住了進去。</strong>它本來是為了解決一個情緒問題而生的——用「分散持股」來馴服人們對海上風險的恐懼；可它一旦運轉起來，就立刻長出了一個它自己也控制不住的新東西：一個讓貪婪與恐懼可以即時定價、即時傳染、即時放大的場所。鐘擺（第一把鑰匙）在這裡第一次擺動，群眾（第二把鑰匙）在這裡第一次聚集，而德拉維加，成了第一個替這座鐘擺、這群群眾寫下觀察筆記的人。他看見的一切——公牛與熊、謠言與恐慌、得意與崩潰——將在接下來四百年裡，在每一座交易所、每一塊螢幕上，原封不動地重演。接下來，就讓我們看這台剛出生的機器，如何在三十多年後，導演出人類史上第一場真正瘋狂的全民泡沫——而它的主角，竟是一朵花。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第二章 ===== -->
+<section class="act reveal" id="ch-2">
+  <div class="act-head">
+    <span class="act-num">第二章 · Tulipmania</span>
+    <h2 class="act-title">鬱金香狂熱：當一朵花的價格，等於一棟房子</h2>
+    <p class="act-sub">Tulipmania — When a Flower Cost a House, and the Anatomy of the First Bubble</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>如果要為「泡沫」這個概念找一個原型、一個被一代又一代人反覆引用的寓言，那一定是鬱金香。一六三〇年代的荷蘭，正處在它的黃金時代：靠著 VOC 與海上貿易，這個小國累積了全歐洲最多的財富，阿姆斯特丹的市民口袋裡有了前所未有的閒錢。而就在這時，一種來自鄂圖曼帝國、花色斑斕奇異的花——鬱金香，成了身分與品味的象徵。最名貴的品種，花瓣上有著如火焰般的條紋（後人才知道，那其實是一種病毒感染的結果），數量稀少，一球難求。最受追捧的「永遠的奧古斯都」（Semper Augustus），紅白相間，據說全荷蘭也沒幾顆球莖。</p>
+
+    <p>於是，那台在阿姆斯特丹剛剛學會運轉的情緒機器，找到了它的第一個全民玩具。鬱金香的價格，開始一路攀升。一開始，買家是真心喜愛這花的鑑賞家；可是當價格漲了一倍、兩倍、十倍之後，買家的動機悄悄變了——他們買鬱金香，不再是為了種在花園裡欣賞，而是為了過幾個月用更高的價格賣給下一個人。這是所有泡沫的關鍵轉折：<strong>當一樣東西的買進理由，從「我想要它」變成「我相信有人會用更高的價出價買走它」，投機就取代了投資，鐘擺就開始全力盪向貪婪。</strong>經濟學家給這個機制取了個傳神的名字——「更大的傻瓜理論」（greater fool theory）：我明知道這價格荒謬，但只要還有一個比我更傻的人願意接手，我就還能賺。泡沫，就是一場所有人都打賭「我不會是最後那個傻瓜」的遊戲。</p>
+
+    <p>到了一六三六年底至一六三七年初，狂熱達到了頂點。交易已經不再是真的球莖在易手——球莖大多還埋在土裡，人們買賣的是一紙「將來交貨」的合約，也就是最早的期貨。酒館裡擠滿了臨時湊起來的交易商，人人都在轉手鬱金香合約。傳說中，最貴的球莖一顆能換到的東西，包括好幾噸小麥與黑麥、四頭肥牛、八頭豬、十二隻羊、大量的酒與乳酪、一張床、一套衣服，外加一個銀製酒杯——粗略折算，相當於阿姆斯特丹運河邊一棟體面房子的價錢。一個熟練工匠要不吃不喝工作十年,才賺得到那一顆埋在土裡、隨時可能爛掉的球莖。荒謬到了極點，卻沒有人覺得荒謬——因為每個人身邊，都有人靠它真的賺到了錢。這就是群眾的力量：當「賺錢」成了眼見為憑的集體經驗，再清醒的理智也會開始動搖。</p>
+
+    <h3>崩盤，與一個必要的誠實</h3>
+    <p>然後，在一六三七年二月的某一天，在哈倫（Haarlem）的一場拍賣會上，據說突然沒有人出價了。沒有人知道為什麼是那一天，正如後來每一次崩盤都沒有人能事先說準是哪一天——恐懼像貪婪一樣，是會傳染的，而且傳染得更快。「沒人接手」的消息一旦傳開，所有人同時意識到自己手裡那紙合約一文不值，於是奪門而逃。價格在幾天之內崩塌了九成以上，無數簽了高價合約的人賴帳、違約、對簿公堂，荷蘭政府最後不得不出面，宣布這些投機合約大多無效。那台情緒機器，第一次完整地走完了「貪婪→否認→恐懼→恐慌」的整圈循環。</p>
+
+    <p>不過，這裡必須插入一段誠實的修正，因為它本身就是這部書的一個重要主題——<strong>關於泡沫的「故事」，往往比泡沫本身更誇張。</strong>我們今天對鬱金香狂熱的多數聳動印象，其實來自一八四一年蘇格蘭作家查爾斯·麥凱（Charles Mackay）那本《異常流行幻象與群眾瘋狂》（後文還會再見到他）。麥凱把它描寫成一場讓整個荷蘭經濟陷落、無數人跳河自盡的全民災難。但近代史學家——尤其是安妮·戈德加（Anne Goldgar）扎實的檔案研究——指出，真相要溫和得多：捲入最深的，主要是一小群有錢的商人與行家，而非「全民」；荷蘭的整體經濟並未因此崩潰；那些駭人的破產與自殺故事，多半查無實據，更像是當時道德家用來警告世人「貪婪有報」的寓言。<em>這並不是說鬱金香泡沫不存在——它真實發生過；而是說，後人對它的記憶，被加工、被誇大、被改寫成了一則道德神話。</em>這個現象本身，正是第三把鑰匙「敘事」的最佳註腳：我們不只用故事製造泡沫，我們也用故事來記憶泡沫——而兩種故事，往往都不太可靠。</p>
+
+    <div class="pull"><p>鬱金香狂熱真正不朽的，不是那些被誇大的破產傳說，而是它第一次完整示範了一套此後將重演四百年的劇本：稀有的標的、一個誘人的故事、買進理由從「擁有」變成「轉手」、群眾的相互感染，以及最後，沒有任何明確原因、卻在某個尋常日子突然降臨的崩潰。</p></div>
+
+    <h3>「風中交易」：買賣一樣不存在的東西</h3>
+    <p>鬱金香狂熱還有一個格外深刻的細節，它預告了往後四百年金融投機的核心機制。到了狂熱的後期，人們交易的早已不是真實的球莖——球莖大多還埋在冬天的土裡，要到春天才開花、夏天才能起出。人們買賣的，是一紙「來年某月某日，以某價交割某球莖」的合約。也就是說，買賣雙方手上，其實什麼實物都沒有：賣家沒有球莖，買家也不真想要球莖，他們交易的，純粹是一張會隨群眾情緒上下浮動的「紙」。荷蘭人給這種交易取了一個精準到近乎詩意的名字——「<strong>風中交易</strong>」（windhandel），意思是「買賣風」，買賣一樣抓不住、看不見、其實並不在場的東西。這些交易，多在小酒館裡由一群臨時湊成的「行會」（colleges）進行，憑著酒意與口頭承諾，一紙合約一個晚上就能轉手數次。</p>
+    <p>「買賣風」這四個字，幾乎可以當作整部投機史的隱喻。從鬱金香的遠期合約，到南海公司的認股權，到今天的選擇權、期貨、永續合約與一行行加密貨幣的程式碼——投機的標的，越來越脫離它所代表的任何實體，越來越接近一個純粹的、由集體預期與情緒所支撐的符號。<strong>當交易的對象變成「風」，價格就徹底掙脫了現實的錨，只剩下「下一個人願意出多少」這一個變數——而那，正是貪婪與恐懼最純粹的角力場。</strong>有趣的是，那最名貴的「永遠的奧古斯都」之所以有著如火焰般的斑斕條紋，後人才知道，竟是一種病毒感染的結果——這病毒在讓花變得奇美的同時，也悄悄削弱了球莖的生命力。人們為之瘋狂、傾家蕩產去追逐的「稀世之美」，本質上是一場病。這個冷酷的隱喻，幾乎適用於每一場泡沫最迷人的那個核心。</p>
+
+    <div class="deepen">
+      <span class="dh">深掘 · 為什麼「更大的傻瓜」遊戲總有人玩</span>
+      <p>明知是擊鼓傳花，為什麼還有那麼多人前仆後繼？因為在泡沫裡，「不參加」本身就是一種痛苦——這在心理學上叫「踏空的恐懼」（FOMO, fear of missing out）。當你眼睜睜看著鄰居、同事、那個你一向看不起的笨蛋都靠鬱金香發了財，你心裡承受的，不是抽象的「風險」，而是具體的、灼燒般的「相對剝奪感」。人對「比別人少賺」的痛苦，往往大於對「自己虧損」的恐懼——這正是三百多年後，卡尼曼與特沃斯基用「展望理論」精確量化的人性（見第十三章）。於是泡沫有一種殘酷的自我強化機制：它漲得越久、讓越多人賺到錢，就有越多原本清醒的旁觀者再也忍不住跳進來，把它推得更高、更久，直到再也沒有「下一個傻瓜」為止。鬱金香如此，三百年後的網路股、加密貨幣，分毫不差。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第三章 ===== -->
+<section class="act reveal" id="ch-3">
+  <div class="act-head">
+    <span class="act-num">第三章 · The South Sea & the Mississippi</span>
+    <h2 class="act-title">南海與密西西比：一七二〇年，連牛頓都賠光了</h2>
+    <p class="act-sub">The South Sea & the Mississippi — 1720, When Even Newton Lost Everything</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>如果說鬱金香是一場由民間自發、繞著一朵花打轉的狂熱，那麼一七二〇年同時引爆於倫敦與巴黎的兩場泡沫，則把投機推向了一個全新的、更危險的層次——這一次，點火的是國家，是政府，是與一國財政深深綁在一起的金融工程。鬱金香賠掉的是一些富商的閒錢；南海與密西西比賠掉的，是兩個大國的國運與無數中產家庭的積蓄。而它留給後世最珍貴的禮物，是兩個詞：英文裡用來形容投機狂熱的「<strong>泡沫</strong>」（bubble），與一個關於「最聰明的人也躲不過群眾瘋狂」的、永恆的教訓。</p>
+
+    <h3>巴黎：約翰·勞與紙幣的魔術</h3>
+    <p>故事的一邊在巴黎。一個流亡的蘇格蘭賭徒兼金融奇才約翰·勞（John Law），說服了財政破產的法國攝政王，讓他來主持一場大膽的實驗。勞有一個在當時極為超前、甚至到今天聽來都頗具現代感的想法：一個國家的繁榮，不必受限於它有多少黃金白銀，只要發行足夠的紙幣、讓信用流動起來，就能刺激貿易與經濟。他成立了一家銀行發行紙幣，又成立了壟斷法國北美殖民地（路易斯安那、密西西比河流域）貿易的「密西西比公司」，然後把兩者捆在一起：他用銀行印出的紙幣，去推升密西西比公司的股價；股價漲了，吸引更多人拿真金白銀來換紙幣、買股票；錢越滾越多，股價越推越高。一七一九到一七二〇年間，密西西比公司的股價漲了將近二十倍，巴黎街頭擠滿了想發財的人，據說「百萬富翁」（millionaire）這個詞，就是在這時被造出來的。</p>
+
+    <p>可是這整座大廈，建立在一個致命的循環論證上：股價之所以漲，是因為勞不斷印鈔票去買；而人們之所以願意持有那些紙幣，又是因為相信股價會一直漲。這是一台只能往上、不能停下的機器——一旦有人開始懷疑、想把紙幣換回真正的黃金，整個魔術就會穿幫。一七二〇年，懷疑真的來了。當人們蜂擁到銀行要把紙幣兌成硬幣時，勞才發現他印出的紙幣，遠遠超過了金庫裡的黃金。擠兌、恐慌、崩盤，密西西比公司的股價灰飛煙滅，法國的紙幣信用徹底破產。這場災難讓法國對「銀行」與「紙幣」這兩樣東西恐懼了將近一個世紀，間接拖累了它的金融現代化，有史家甚至認為，這份對金融的不信任，為七十年後的法國大革命埋下了遠因。</p>
+
+    <h3>倫敦：南海公司與一個被買通的國會</h3>
+    <p>幾乎在同一時間，海峽對岸的倫敦，正在上演一齣異曲同工的戲。英國的「南海公司」（South Sea Company），打著壟斷與南美洲（西屬美洲）貿易的旗號——儘管它實際上的貿易微不足道——向政府提出一個驚人的方案：由南海公司來「承接」龐大的英國國債，把國債持有人手中的債券，換成南海公司的股票。這個方案的成敗，全繫於一件事：南海公司的股價必須漲，而且要漲得越高越好。於是公司用盡一切手段——散播誇大的貿易前景、賄賂國會議員與宮廷權貴、甚至允許人們只付一小筆訂金就能認購股票（最早的融資槓桿之一）——把股價從一七二〇年初的約一百二十八英鎊，在幾個月內硬生生推到了一千英鎊以上。</p>
+
+    <p>狂熱像瘟疫一樣蔓延。倫敦冒出了上百家有樣學樣的「泡沫公司」，募資的名目一個比一個荒唐，其中最有名的一家，招股說明書上寫的是「經營一項有巨大利潤的事業，但沒有人知道那是什麼」——而它竟然真的募到了錢。貴族、議員、詩人、家庭主婦，全都捲了進來。然後，和所有泡沫一樣，頂點之後是斷崖。一七二〇年夏末，內部人開始悄悄出貨，信心一旦動搖，「沒人接手」的恐懼瞬間引爆全面崩盤，南海股價在幾個月內從一千多英鎊跌回一百出頭，無數家庭血本無歸，連帶引發英國的政治醜聞與金融重整，史稱「南海泡沫」。英國國會事後通過《泡沫法案》，往後一百多年都嚴格限制新設股份公司——這個社會，被嚇出了長達一世紀的後遺症。</p>
+
+    <h3>牛頓的教訓</h3>
+    <p>在南海泡沫的所有受害者裡，有一個名字讓後人格外唏噓——艾薩克·牛頓爵士，那個算出了萬有引力、看穿了宇宙運行法則的人類最偉大的頭腦之一。牛頓早期買了南海股票，並在賺了一筆（據說約七千英鎊）後明智地賣出。可是接下來，他眼睜睜看著股價繼續飆漲，看著身邊的人一個個賺得比他多——於是他忍不住了，在更高的價位重新買回，而且投入更多。然後崩盤來了，牛頓據估虧損了約兩萬英鎊，相當於他多年的積蓄，是一筆讓他餘生都不願再被人提起的鉅款。傳說他後來感嘆：<strong>「我能算出天體運行的軌跡，卻算不出人類的瘋狂。」</strong>（這句話的真實出處已不可考，多半是後人的演繹，但它之所以流傳兩百年，正因為它精準得可怕。）</p>
+
+    <p>牛頓的故事，是這部書最重要的一課，值得每一個自認聰明的人記在心上：<em>在泡沫面前，智商幾乎毫無用處。</em>打敗牛頓的，不是他不夠聰明、不夠了解南海公司——恰恰相反，他第一次的進出完美無瑕。打敗他的，是當他看著別人賺得比自己多時，那股連萬有引力的發現者都按捺不住的、灼燒般的貪婪與不甘。情緒，凌駕了他全世界最強的理智。這就是為什麼，這部書講的是人心，而不是聰明——因為從牛頓到今天華爾街最頂尖的數學博士，一次又一次證明了：在群眾的狂熱面前，再高的智商也只是讓你更會替自己的貪婪找藉口而已。</p>
+
+    <h3>「泡沫」這個詞，是這樣進入人類語言的</h3>
+    <p>我們今天用來形容一切投機狂熱的那個詞——「泡沫」（bubble）——正是從一七二〇年的這場災難裡，被鑄造出來、並從此牢牢嵌進人類語言的。「南海泡沫」（South Sea Bubble）這個說法，把那種「外表膨脹得碩大華麗、內裡卻只是一包空氣、一戳就破、破了什麼也不剩」的意象，精準地烙在了投機這件事上。從那以後，無論是鐵路、網路還是加密貨幣，每一場狂熱破滅時，人們都會本能地借用這個三百年前的詞——一個肥皂泡的隱喻，竟成了人類描述自身集體瘋狂時，最貼切、也最歷久不衰的語言。</p>
+    <p>當時的英國社會，也用藝術與嘲諷，替這場瘋狂留下了刻骨銘心的記錄。版畫家威廉·霍加斯創作了著名的諷刺畫，把南海狂熱描繪成一場群魔亂舞的旋轉木馬與賭場，貪婪、愚蠢與毀滅的眾生相躍然紙上；市面上甚至印製了專門的撲克牌與紙牌，每一張都嘲弄一家荒唐的泡沫公司。這些作品，是一個社會在被自己的貪婪狠狠教訓之後，試圖用嘲笑來消化傷痛、警告後人的努力。<strong>然而，正如這部書一再證明的，這種「警告」的效力，從來撐不過一兩代人。</strong></p>
+    <p>霍加斯的版畫、麥凱後來的著作、「泡沫」這個詞本身——人類替每一場狂熱都立了警示碑，把教訓寫得清清楚楚。可是這些警示碑，攔不住任何一場新的泡沫。因為正如高伯瑞所言，金融的記憶極其短暫：當親歷南海慘劇的人都已作古，當「泡沫」這個詞退化成一個歷史名詞、一句人們掛在嘴邊卻不再真正害怕的成語，下一個「這次不一樣」的故事，就能毫不費力地，重新點燃同樣的貪婪。<em>我們替過去的瘋狂立碑，卻從不真正閱讀它們——這或許是這部書最令人感傷，也最顛撲不破的一條規律。</em></p>
+
+    <h3>「一樁無人知曉的偉大事業」與一部清算的法案</h3>
+    <p>南海狂熱最荒誕、也最能說明群眾心理的，是它周邊冒出的那一百多家「泡沫公司」（bubble companies）。當南海公司的股價一飛沖天，整個倫敦陷入「只要發股票就能賺錢」的集體幻覺，於是各種光怪陸離的募資計畫紛紛出籠：有的說要從鉛裡提煉白銀，有的說要造一種永動的輪子，有的說要替私生子辦保險，有的說要從西班牙進口大批驢子。而其中最傳神、後世引用最多的一家，招股書上赫然寫著：要經營「<strong>一樁有著巨大利潤、但沒有人知道那是什麼的事業</strong>」（a company for carrying on an undertaking of great advantage, but nobody to know what it is）。荒謬至極——可它竟然真的在幾個小時內募滿了錢，據說那位發起人收了錢，當天下午就捲款潛逃，從此消失。當群眾的貪婪達到頂點，他們需要的根本不是一個合理的投資理由，他們只需要一張可以轉手給下一個人的紙。</p>
+    <p>泡沫破滅後的清算，深刻而漫長。為了給狂熱降溫（諷刺的是，這部法案其實是南海公司為了打壓那些瓜分資金的競爭對手而推動的），英國國會在一七二〇年通過了《<strong>泡沫法案</strong>》（Bubble Act），嚴格限制未經特許就成立股份公司。這道法案，連同南海崩盤留下的巨大心理陰影，讓英國社會對「股份公司」這個東西，恐懼並排斥了長達一個多世紀——一直要到十九世紀,鐵路時代需要龐大資本時，才被鬆綁。崩盤也掀起了滔天的政治海嘯：許多收受南海公司賄賂的政要身敗名裂，公司董事的財產被國會沒收充公；而在這場混亂中冷靜收拾殘局、保全了王室與金融體系的羅伯特·沃波爾，則趁勢崛起，被普遍視為英國史上第一位「首相」。一場由貪婪吹起的泡沫，重塑了一個國家的金融制度與政治格局。</p>
+    <p>把巴黎的密西西比與倫敦的南海並置，會看見一個意味深長的對照。法國的約翰·勞，敗在「紙幣印太多、金庫撐不住」的擠兌；英國的南海，敗在「股價吹太高、故事撐不住」的崩盤。一個是貨幣的泡沫，一個是股權的泡沫，但底層的情緒引擎完全相同：一個誘人的故事（壟斷新世界的財富），加上群眾「怕錯過」的貪婪，再加上「只付訂金就能參與」的槓桿。<strong>一七二〇年最深的教訓是：當投機與國家信用纏在一起，泡沫破裂的就不再只是某些人的錢包，而是整個社會對「金錢」與「信任」本身的信心。</strong>法國因此恐懼紙幣與銀行近一個世紀，英國因此恐懼股份公司一個多世紀——兩個民族，都被一七二〇年那場狂熱，烙下了一道要花上百年才淡去的傷疤。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 國家、槓桿，與更大的傻瓜</span>
+      <p>一七二〇的這對雙生泡沫，把第二把鑰匙「群眾與循環」推上了一個新台階，也加進了兩樣往後將反覆出現的危險元素。第一是<strong>槓桿</strong>：無論是勞用紙幣印出來的購買力，還是南海公司「只付訂金就能認股」的安排，都讓人們得以用借來的錢去追逐狂熱——而槓桿會同時放大貪婪與恐懼，讓泡沫漲得更高，也讓崩盤跌得更慘、更快。第二是<strong>國家信用的捲入</strong>：當政府、國債與金融工程綁在一起，泡沫破裂的代價就不再只是投機客的損失，而是整個社會的系統性災難——這正是兩百八十八年後，二〇〇八年那場危機的古老預演。而貫穿這一切的，仍是那個最樸素的真相：連牛頓都躲不過。鐘擺擺向貪婪的力量，強大到足以擊敗人類最偉大的頭腦——記住這一點，因為接下來的每一章，我們都會看到一群「絕不會犯這種錯」的聰明人，一次又一次地，犯下完全相同的錯。</p>
+    </div>
+  </div>
+</section>
+
+<div class="part-div reveal" id="part-2">
+  <span class="pn">第二部</span>
+  <h2 class="ptitle pt">機器成形</h2>
+  <div class="pe">The Machine Takes Shape — A Buttonwood Tree, the Railways, and the Crowd Learns to Panic</div>
+  <div class="pline"><span></span><span class="dot">▲</span><span></span></div>
+</div>
+
+<!-- ===== 第四章 ===== -->
+<section class="act reveal" id="ch-4">
+  <div class="act-head">
+    <span class="act-num">第四章 · Under the Buttonwood Tree</span>
+    <h2 class="act-title">梧桐樹下：一個新國家，與它的投機天性</h2>
+    <p class="act-sub">Under the Buttonwood Tree — A New Nation and Its Appetite for Speculation</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>一七九二年五月十七日，在紐約曼哈頓下城一條叫做「華爾街」的小街上，二十四個股票經紀人聚在一棵梧桐樹（buttonwood，美國梧桐）下，簽了一份只有兩句話的協定。他們約定：彼此之間優先交易，並收取統一的佣金。這份後來被稱為「梧桐樹協定」（Buttonwood Agreement）的小文件，就是紐約證券交易所——日後地表最強大的金融機構——的胚胎。一個剛剛打完獨立戰爭、連憲法都還是新墨水的年輕國家，幾乎在誕生的同時，就替自己造好了一台投機的機器。</p>
+
+    <p>這並非偶然。美國這個國家，骨子裡就帶著一種與股市天性相投的東西——對「未來」近乎宗教般的信仰，以及對「一夜致富」毫不掩飾的渴望。歐洲的舊世界，被南海與密西西比嚇出了對金融的戒懼；而美洲的新世界，卻把投機當成了拓荒精神的延伸。事實上，催生這份協定的，正是美國的第一場金融恐慌：一七九二年初，一個叫威廉·杜爾（William Duer）的投機客，借了大筆錢去炒作新成立的合眾國銀行股票與政府債券，把價格推到高點後資金鏈斷裂，引發一場小型崩盤，杜爾本人鋃鐺入獄。<strong>一場由槓桿與貪婪吹起、又被恐懼戳破的投機，催生了一個要把這種投機制度化的機構——這幾乎就是整個華爾街歷史的縮影。</strong></p>
+
+    <h3>從戰爭債到鐵軌：市場找到了它的燃料</h3>
+    <p>早期的紐約市場，交易的主要是政府公債與少數幾家銀行、保險公司的股票，規模還小。真正讓它脫胎換骨的，是十九世紀那場席捲一切的東西——工業化。當美國開始修運河、鋪鐵路、建工廠，這些事業需要的資本，是任何單一富豪都拿不出來的天文數字；於是，那個阿姆斯特丹兩百年前發明的辦法再一次大顯神威：把龐大的事業切成股票，賣給千千萬萬人，集眾人之財，辦巨人之業。市場，找到了它源源不絕的燃料。一條條鐵軌鋪向西部荒野，一張張股票湧進華爾街，美國的命運與它的股市，從此緊緊纏在了一起。</p>
+
+    <p>而每一次「新事業需要新資本」，都意味著一次新的情緒盛宴。投資人面對一條尚未建成的鐵路、一塊尚未開發的西部土地，能依憑的不是已經實現的盈餘，而是對未來的「想像」——而想像，正是貪婪與恐懼最肥沃的土壤。一條鐵路真能賺錢嗎？要好幾年後才知道。可是它的股票，今天就能漲、就能跌、就能讓人發財或破產。於是十九世紀的美國股市，成了一座巨大的、關於「未來」的賭場：人們不是在為已經發生的事定價，而是在為自己腦中的夢想與恐懼定價。這種「替尚未存在的未來下注」的本質，從鐵路到網路到人工智慧，將是往後每一場科技泡沫共同的引擎。</p>
+
+    <div class="pull"><p>美國幾乎在建國的同時就建好了它的股市。一個對未來抱有宗教般信仰、又對一夜致富毫不羞愧的國家，為人類最古老的兩種情緒，造出了史上最大的舞台。</p></div>
+
+    <h3>運河、野貓銀行，與第一頭華爾街巨熊</h3>
+    <p>梧桐樹協定之後的半個世紀，年輕的美國市場，就在一連串「繁榮—投機—恐慌」的循環中跌跌撞撞地長大。第一個點燃全國想像的，是運河。一八二五年,連通五大湖與大西洋的伊利運河完工，它帶來的巨大商業利益，引爆了一場全國性的「運河熱」——各州爭相舉債開鑿運河，投機資金蜂擁而入，這幾乎是二十年後英國鐵路狂熱的美國預演。與此同時，傑克遜總統廢除了中央銀行，放任各州的「野貓銀行」（wildcat banks）濫發沒有十足準備的紙幣，信貸像氣球一樣膨脹，西部的土地投機炒到了天上。</p>
+    <p>然後，一八三七年，氣球破了。信貸驟然收緊，銀行成批倒閉，土地與棉花價格崩跌，美國陷入了一場持續數年的嚴重蕭條——這是這個年輕國家第一次嘗到全國性金融恐慌的苦頭。此後，一八五七、一八七三、一八九三，恐慌幾乎每隔二十年就準時報到，像一台節拍器，敲打著美國經濟成長的節奏。<strong>每一次的劇本都驚人地相似：一個新機會（運河、鐵路、西部）點燃貪婪，廉價信貸火上澆油，價格漲到脫離現實，然後某個導火線戳破信心，恐懼瞬間傳染，銀行倒閉、信貸凍結、蕭條降臨。</strong>三把鑰匙——鐘擺、群眾、敘事與遺忘——在這片新大陸上，一遍遍地重演，而每一代美國人，似乎都得親自再被燙傷一次，才肯相信火是燙的。</p>
+    <p>這個草莽時代，也鍛造出了第一批靠操弄市場情緒維生的職業投機客。其中的代表人物，是綽號「華爾街大熊」的雅各布·利特爾（Jacob Little）——他是美國第一個以「放空」聞名的大投機家，擅長在市場狂熱時做空、在崩盤中獲利，一生數度暴富又數度破產。他是後來德魯、古爾德，乃至二十世紀李佛摩的先驅。從利特爾這一脈相承的「巨熊」身上，我們看到了一個將反覆出現的角色：在群眾盲目樂觀時，總有少數人冷靜地站到恐懼那一邊，靠著與群眾為敵來下注——他們有時是戳破泡沫的清醒者，有時是製造恐慌的禿鷹，但無論哪一種，他們的存在本身就證明了：市場永遠是貪婪與恐懼這兩股力量的角力場，少了任何一邊，戲都唱不下去。</p>
+
+    <h3>南北戰爭：在黃金廳裡，下注一個國家的命運</h3>
+    <p>真正把華爾街從一個地方性的市場，鍛造成美國金融中樞的，是一八六一到六五年的南北戰爭。這場戰爭的耗資是天文數字，遠超政府的稅收，於是聯邦政府不得不大規模舉債。金融家傑伊·庫克想出了一個劃時代的辦法——他不只向少數富豪募資，而是發動鋪天蓋地的愛國宣傳，把戰爭公債直接賣給成千上萬的普通市民。這是繼荷蘭人之後，又一次「把金融大眾化」的壯舉：千百萬從未碰過證券的平民，第一次成了國家債券的持有人。一場戰爭的融資需求，意外地，把一整個國民拉進了資本市場。</p>
+    <p>而戰爭也點燃了一場最赤裸、也最能說明「價格即情緒」的投機——「黃金廳」（the Gold Room）裡的賭局。當時北方發行的紙幣（greenbacks）的價值，與人們對北軍勝負的信心緊緊掛鉤：北軍打了勝仗，紙幣就堅挺、金價就跌；北軍吃了敗仗，人們對聯邦的未來失去信心，金價就飆漲。於是黃金廳裡那條金價的曲線，幾乎成了一張即時跳動的「戰爭信心指數」——投機客們不是在交易黃金，而是在交易整個國家的命運、整個民族的希望與恐懼。據說當北軍打了勝仗，林肯甚至會說：金價跌了，那是好消息。<strong>沒有什麼比這更能說明這部書的核心了：價格，從來不是冷冰冰的數字，它是一群人此刻的集體情緒——在這裡，是一整個國家對自身存亡的恐懼與希望——所凝結成的一個刻度。</strong></p>
+    <p>戰爭結束時，華爾街已經脫胎換骨：它積累了空前的資本，培養出一大批嗜血的投機客，建立起更成熟的交易機制，並坐穩了美國金融中心的位置。接下來那個鍍金時代（Gilded Age）的鐵路狂熱、強盜大亨與一次次大恐慌，都將在這個被戰爭餵養壯大的舞台上輪番上演。<em>一個國家的股市，又一次，在一場危機中完成了它的成年禮——這幾乎是美國金融史不變的節奏：每一次大跨步，都踩著一場危機或一場戰爭的鼓點。</em></p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 投機，被寫進了一個國家的基因</span>
+      <p>梧桐樹下那紙協定，標誌著情緒機器完成了一次重要的「在地化」——它從金融老練、但戒慎恐懼的歐洲，搬到了一個年輕、樂觀、對未來深信不疑的新大陸。這個遷移很重要，因為它決定了往後兩百年最大的那些泡沫，多半會在美國上演：這裡有最深的資本、最敢做夢的群眾、最少的歷史包袱。鐘擺在這片土地上，會擺得比任何地方都更高、更瘋。同時，杜爾的故事也預告了一個將反覆出現的母題——美國股市的每一次大進步，幾乎都是被一場恐慌「逼」出來的：恐慌催生了交易所，後來的恐慌會催生中央銀行、催生證管會、催生存款保險。<em>這台機器，是靠著一次次崩潰，才一塊磚一塊磚地給自己裝上安全護欄的。</em>而下一塊燃料——鐵路，即將為它帶來十九世紀最壯觀的一場狂熱與幻滅。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第五章 ===== -->
+<section class="act reveal" id="ch-5">
+  <div class="act-head">
+    <span class="act-num">第五章 · Railway Mania</span>
+    <h2 class="act-title">鐵路狂熱：當「未來」第一次被做成股票</h2>
+    <p class="act-sub">Railway Mania — When the Future Was First Sold as a Stock</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>十九世紀四〇年代的英國，被一種前所未見的東西迷住了——鐵路。蒸汽火車噴著白煙，以人類雙腿、馬匹做夢都追不上的速度，把城市與城市連了起來。這不是幻覺，這是一場真實的、將永遠改變文明的技術革命。也正因為它如此真實、如此偉大，它孕育的泡沫才格外凶猛——<strong>最危險的泡沫，往往不是建立在謊言上，而是建立在一個千真萬確的偉大真理上。</strong>鐵路會改變世界，這是對的；錯的是人們由此推論出的那句話：所以任何一條鐵路的股票，買了都會賺。</p>
+
+    <p>一八四〇年代中期，英國掀起了「鐵路狂熱」（Railway Mania）。國會核准了數以百計的鐵路興建案，報紙上塞滿了新鐵路公司的招股廣告，從貴族到牧師、從寡婦到店主，整個中產階級把畢生積蓄投進了一張張鐵路股票。當時最具代表性的人物，是綽號「鐵路大王」的喬治·哈德森（George Hudson），他一度控制了英國近三分之一的鐵路里程，被捧為金融天才、國家英雄。和所有泡沫一樣，許多新成立的鐵路公司，路線根本重複、彼此競爭，有的甚至從未打算真的把鐵軌鋪完——它們存在的唯一目的，就是發行股票、收割狂熱。投資人買的不是鐵路，是「鐵路」這兩個字所代表的、無限光明的未來想像。</p>
+
+    <p>一八四五至四六年間，狂熱見頂；接著，利率上升、現實的工程進度遠遠跟不上紙上的承諾，信心開始崩解。鐵路股價一路下滑，許多公司倒閉，哈德森的帝國在會計醜聞中土崩瓦解，這位昔日的英雄晚景淒涼、債務纏身。成千上萬把養老錢押進去的中產家庭，財富蒸發。<em>然而——這正是鐵路狂熱最耐人尋味之處——當泡沫的泡沫散去，鐵軌，是真的留了下來。</em>那些在狂熱中籌到的資本，儘管浪費驚人，卻終究在英國的土地上鋪出了一張真實的鐵路網，成為日後工業經濟的骨幹。這是科技泡沫一個反覆出現的、近乎殘酷的弔詭：<strong>泡沫摧毀了大部分投資人，卻往往替整個社會留下了珍貴的基礎建設。</strong>運河如此，鐵路如此，一百五十年後的網路光纖，也將如此。</p>
+
+    <h3>大西洋對岸：恐慌成了美國的節拍器</h3>
+    <p>同一個劇本，在大西洋對岸的美國，以更狂野的方式反覆上演。十九世紀的美國經濟，幾乎是踩著一連串「恐慌」（Panic）的鼓點前進的——一八三七年恐慌、一八五七年恐慌、一八七三年恐慌、一八九三年恐慌，平均每隔二十年左右就來一次。它們的劇本驚人地相似：先是某樣東西（西部土地、運河、鐵路）點燃投機，銀行大放信貸、槓桿層層堆高，價格漲到天上；然後某個導火線——一家大公司倒閉、一次歐洲抽資、一場銀行擠兌——戳破信心，恐懼瞬間傳染，銀行倒閉、信貸凍結、股市崩盤、工廠關門、失業遍地。一八七三年那場恐慌，由鐵路融資巨頭傑伊·庫克（Jay Cooke）的公司倒閉引爆，導致紐約證交所史無前例地關門十天，並拖出一段長達數年的蕭條，當時的人就把它叫做「大蕭條」（直到一九三〇年代那場更大的，才把這名號接了過去）。</p>
+
+    <p>這個時代還孕育了一批「強盜大亨」（robber barons）式的投機客，他們把市場當成可以隨意操弄的私人賭桌。其中最惡名昭彰的，是傑伊·古爾德（Jay Gould）。一八六九年，他與同夥企圖壟斷整個美國的黃金市場，把金價硬炒上天，結果在九月二十四日那個「黑色星期五」，當政府拋售黃金戳破他的陰謀時，金價崩潰，無數跟風的投機客血本無歸。<strong>「黑色星期五」「黑色星期四」「黑色星期一」——這一連串以「黑色」命名的崩盤日，將成為股市史的關鍵詞</strong>，而它們無一例外，都是恐懼在某個尋常日子集體爆發的時刻。市場用「恐慌」這個詞替自己的情緒命名，本身就說明了一切：驅動這台機器的，從來不是理性的計算，而是會傳染、會踩踏、會在一夜之間吞噬一切的集體情緒。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>十九世紀的幾場大恐慌</th><th>導火線</th><th>留下的情緒記憶</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1837 恐慌</strong></td><td>西部土地投機、銀行濫發紙幣，信貸驟然收緊</td><td>長達數年的蕭條，催生對「硬通貨」的執念</td></tr>
+          <tr><td><strong>1857 恐慌</strong></td><td>一家保險公司倒閉＋鐵路股泡沫破裂</td><td>第一次靠電報「光速」傳染全國的恐慌</td></tr>
+          <tr><td><strong>1873 恐慌</strong></td><td>鐵路融資巨頭傑伊·庫克破產</td><td>紐約證交所關門十天；史上第一個「大蕭條」</td></tr>
+          <tr><td><strong>1893 恐慌</strong></td><td>鐵路過度擴張＋白銀危機，銀行大量倒閉</td><td>十九世紀最嚴重蕭條，失業率近兩成</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>強盜大亨：當市場是一張被操縱的賭桌</h3>
+    <p>十九世紀後半的美國股市，還有一個必須誠實面對的面向——它在很大程度上，是一張被少數內部人公然操縱的賭桌，而桌邊圍滿了懷抱發財夢、卻一次次被宰割的散戶。鐵路，是這場大戲的主舞台。一批被後世稱為「強盜大亨」（robber barons）的金融巨頭——康內留斯·范德比爾特、丹尼爾·德魯、傑伊·古爾德、吉姆·菲斯克——把鐵路公司的股票，當成可以隨意操弄的籌碼。他們最拿手的把戲，叫「<strong>摻水股</strong>」（watered stock）：憑空印出大量新股票，稀釋原股東的權益，藉以擊潰對手的逼倉，或單純地坑殺大眾。</p>
+    <p>一八六八年的「伊利鐵路大戰」，是這場鬧劇的經典。當范德比爾特試圖收購伊利鐵路、悄悄在市場上吸納它的股票時，掌控伊利的德魯、古爾德與菲斯克，乾脆開動印刷機，源源不絕地印出新股票賣給他——范德比爾特買多少，他們就印多少，他的逼倉因此永遠無法完成，反而砸進去鉅資。雙方接著各自賄賂法官與州議員，讓「印股票」這件事忽而合法忽而非法，把整場商戰打成了一齣賄賂與訴訟的醜聞鬧劇。對普通投資人而言，這意味著一個冷酷的現實：他們手中股票的價值，可能在一夜之間被內部人憑空印出的新股稀釋殆盡；他們以為自己在投資國家的未來，實則是在一場由莊家做了記號的牌局裡，下注。</p>
+    <p>而把這場狂歡推向極致的，是橫貫北美大陸的鐵路。一八六九年，第一條橫貫大陸鐵路完工，但它的修建，伴隨著「聯合太平洋」鐵路那樁著名的「動產信貸」（Crédit Mobilier）貪腐醜聞——內部人成立空殼營造公司，灌水浮報工程款，從中飽私囊，並用股票賄賂大批國會議員。狂熱的鐵路擴張，最終在一八七三年，由融資巨頭傑伊·庫克的破產引爆了大恐慌。<strong>這個時代留下的，是一個將反覆迴響的清醒認知：市場從來不是一個公平的競技場。</strong>在資訊不對稱、規則可以被金錢買通的地方，普通群眾那份「想搭上致富列車」的天真貪婪，恰恰成了內部人最肥美的獵物。正是這個時代赤裸裸的操縱與坑殺，才在半個世紀後，催生了一九三四年的證管會與「禁止操縱、強制揭露」的種種法規——又一道用慘痛教訓換來的護欄。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 真實的偉大，吹出最大的泡沫</span>
+      <p>鐵路時代留給這部書兩個將反覆出現的深刻教訓。其一：<strong>泡沫最愛附身於「真的會改變世界」的技術。</strong>正因為鐵路（後來的電力、汽車、網路、AI）的願景千真萬確，群眾才會把「這項技術偉大」與「這些股票該漲」這兩件截然不同的事混為一談——而這正是「敘事」這把鑰匙最迷人也最致命的地方：一個越動人、越接近真理的故事，越能讓鐘擺盪向極端。其二：<strong>泡沫破滅與技術成功，可以並存。</strong>鐵軌留下了，光纖留下了，輸掉的只是那些在最高點接棒的投資人。所以「這項技術會贏」從來不等於「現在買它的股票會賺」——這兩者之間，隔著的正是估值、時機與群眾情緒這道鴻溝。下一章，我們要看這台情緒機器如何裝上一個新器官——把貪婪與恐懼以光速傳遍全國的電報與報價機，並讓「群眾」第一次有了學名。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第六章 ===== -->
+<section class="act reveal" id="ch-6">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Ticker and the Crowd</span>
+    <h2 class="act-title">報價機與群眾：當恐懼學會了以光速傳染</h2>
+    <p class="act-sub">The Ticker and the Crowd — When Fear Learned to Travel at the Speed of Light</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>一八六七年，一樣不起眼的小機器，永遠改變了股市情緒的物理學。它叫「股票報價機」（stock ticker），一台會把交易所最新成交價，透過電報線即時打印在一條窄窄紙帶上的裝置——後來愛迪生改良的版本讓它風行天下。「ticker」這個字，來自它運轉時發出的滴答聲（tick）。在它出現之前，遠在外地的投資人要等上幾天才知道紐約的股價；在它出現之後，幾分鐘前的成交價，就能透過電報線，「滴答滴答」地吐在芝加哥、波士頓、舊金山某間券商辦公室的紙帶上。從此，全國的投資人第一次，可以「同時」盯著同一個跳動的價格。</p>
+
+    <p>這件事的心理後果，怎麼強調都不為過。請回想第二把鑰匙——群眾。當千萬人即時看著同一個跳動的數字，他們就不再是各自獨立的個體，而融成了一個會集體呼吸、集體亢奮、集體恐慌的有機體。價格往上跳一格，貪婪就同步點燃成千上萬人；價格往下崩一截，恐懼就在同一秒鐘傳遍全國。報價機，是人類替自己的市場情緒裝上的第一條神經網路；它讓「群眾」這個原本鬆散的概念，第一次有了即時同步的、可怕的力量。一百五十年後，手機 App 上那條紅綠跳動的股價、社群媒體上瘋傳的截圖，不過是這台報價機的曾曾孫——本質完全沒變：讓貪婪與恐懼，傳染得更快。</p>
+
+    <h3>替群眾命名的人：麥凱與勒龐</h3>
+    <p>也正是在這個世紀，思想家們開始認真研究「群眾為什麼會集體發瘋」。一八四一年，蘇格蘭記者查爾斯·麥凱出版了《異常流行幻象與群眾瘋狂》（<em>Extraordinary Popular Delusions and the Madness of Crowds</em>）——前面講鬱金香時我們已經見過他。這本書把鬱金香、南海、密西西比等歷次狂熱並列在一起，第一次讓世人看清：這些瘋狂並非孤立的偶然，而是同一種人性弱點的反覆發作。麥凱留下一句名言：<strong>「人是成群結隊地思考的；你會看到，他們也成群結隊地發瘋，然後才一個接一個地，緩慢地恢復理智。」</strong>狂熱來時排山倒海、全民皆醉，清醒時卻是一個一個慢慢醒來——這句話精準地捕捉了泡沫「漲時轟轟烈烈、退時拖泥帶水」的不對稱節奏。</p>
+
+    <p>一八九五年，法國人勒龐出版《烏合之眾：大眾心理研究》，把群眾心理推向更系統的分析。他主張，一旦個人融入群眾，就會出現一種「心理同一化」：個體的理性與責任感消失，取而代之的是衝動、輕信、情緒化與極端化；群眾的智力，往往低於其中最笨的那個成員，但它的情緒能量，卻遠大於任何個人。把勒龐的觀察放進股市，一切豁然開朗：為什麼最理性的人在牛市裡也會追高？為什麼崩盤時連基本面完好的好股票也被無差別拋售？因為在那一刻，市場不是一群獨立思考的投資人，而是一個被同一種情緒席捲的「烏合之眾」。麥凱與勒龐，等於替這部書的第二把鑰匙，補上了學術的底座。</p>
+
+    <h3>一九〇七：當市場沒有最後的救火員</h3>
+    <p>十九世紀末到二十世紀初，這台越來越敏感的情緒機器，暴露出一個致命的缺陷：當恐慌來臨，沒有任何人有責任、有能力去阻止它。一九〇七年，一場由投機客企圖壟斷某銅礦公司股票失敗所引爆的危機，演變成全面的銀行擠兌與股市崩盤——史稱「一九〇七年大恐慌」。當時的美國還沒有中央銀行，沒有人扮演「最後貸款人」的角色。在這千鈞一髮之際，挺身而出的，竟是一個私人——華爾街最有權勢的銀行家約翰·皮爾龐特·摩根（J. P. Morgan）。年屆七十的他，把紐約的銀行家們召集到自己的圖書館，靠著個人的威望、財力與鐵腕，硬是湊出資金、堵住擠兌、穩住人心，幾乎以一己之力，把整個美國金融體系從懸崖邊拉了回來。</p>
+
+    <p>摩根做到了，但這件事本身嚇壞了所有人——一個現代國家的金融命脈，竟然繫於一個七十歲老人的個人意志？萬一下次他不在了怎麼辦？正是這場恐慌的教訓，直接催生了一九一三年美國聯邦準備系統（Fed，聯準會）的成立——一個由國家設立、永久存在的「最後貸款人」，專門在恐慌來襲時向體系注入流動性、安撫集體的恐懼。<strong>從此，馴服市場情緒這件事，從一個私人銀行家的英雄壯舉，變成了一項國家制度。</strong>這條線索極為重要，因為它將一路延伸到本書的後半段：從摩根，到聯準會，到二〇〇八年的柏南克、二〇二〇年的鮑爾——人類花了一百多年，試圖打造一個能在恐慌時刻安撫整個群眾的角色。而這個角色究竟是馴服了恐懼，還是反而餵大了貪婪，將是第二十章最棘手的辯論。</p>
+
+    <h3>圖書館裡的那一夜</h3>
+    <p>一九〇七年大恐慌最關鍵、也最具戲劇性的一幕，發生在摩根私人圖書館的那一夜。當擠兌如野火般蔓延、一家又一家信託公司搖搖欲墜、紐約證交所幾乎要被迫關門時，這位年屆七十的老銀行家，把全紐約最重要的銀行家與信託公司總裁，全都召集到他位於麥迪遜大道的豪華圖書館裡。據說，他把這群人關在裡頭徹夜商議，自己則在隔壁房間抽著雪茄、玩著單人紙牌，撂下話：在你們湊出足夠的錢、拿出一個能止住這場恐慌的方案之前，誰也別想離開。</p>
+    <p>就在那一夜，靠著摩根個人的威望、意志與鐵腕，這群銀行家最終同意共同出資，組成一筆救援基金，去支撐那些最危急的機構、堵住擠兌的缺口。摩根本人更是親自出馬，逐一安排對股票交易所、對紐約市政府的緊急融資，硬是用一連串的斡旋與施壓，把整個美國金融體系，從崩潰的懸崖邊一寸一寸地拉了回來。一場足以演變成全面災難的恐慌，就這樣被一個老人和一個夜晚，奇蹟般地化解了。</p>
+    <p>但這一幕,在事後讓所有清醒的人都不寒而慄。一個現代工業強國的金融命脈，竟然繫於一個七十歲私人銀行家的個人意志與壽命之上？如果下一次恐慌來臨時，已經沒有摩根了，誰來扮演那個把大家鎖進圖書館的人？<strong>正是這份「不能再賭運氣、不能再依賴某個英雄碰巧出現」的深刻恐懼，直接催生了一九一三年聯邦準備系統的誕生</strong>——一個由國家設立、永久存在、專門在恐慌時刻向體系注入流動性的「最後貸款人」。摩根那一夜的個人英雄主義，最終被制度化成了一個國家機器。</p>
+    <p>這條線索的意義，會貫穿這部書的後半段。從摩根的圖書館，到聯準會的成立，到一九八七年葛林斯潘的迅速馳援，到二〇〇八年柏南克的量化寬鬆，再到二〇二〇年鮑爾「無限量」的承諾——人類花了一百多年，把「在恐慌時刻接住整個群眾」這件事，從一個老人的孤膽壯舉，一步步打造成了一套龐大而精密的制度。<em>而這套制度，究竟是馴服了市場的恐懼，還是反過來，用「跌深必被救」的承諾餵大了市場的貪婪——這個從摩根那一夜就埋下的問題，至今仍沒有答案。</em></p>
+
+    <h3>查爾斯·道：把一群人的情緒，濃縮成一個數字</h3>
+    <p>報價機讓人們看見了「個股」的即時價格，但很快地，一個更野心勃勃的念頭出現了：能不能用一個數字，來概括「整個市場」此刻的冷暖？做這件事的人，叫查爾斯·道（Charles Dow）。他與合夥人創辦了道瓊公司與《華爾街日報》，並在一八八四年編製出最早的股價平均指數，到一八九六年，推出了由十二檔工業股組成的「道瓊工業平均指數」——也就是日後那個無人不曉的「道瓊指數」的始祖。從此，人們每天打開報紙，只消看一眼那個數字的漲跌，就能感知整個市場的脈搏。這是一件意義深遠的事：<strong>指數，是人類替市場的集體情緒所發明的第一支溫度計。</strong></p>
+    <p>把這條線索拉長來看，會發現一個迷人的軌跡：人類對「測量市場情緒」這件事的執念，從未停歇。一八九六年的道瓊指數，把整個市場的冷暖濃縮成一個數字；一九二三年問世、後來成為標普五百前身的指數，把它擴展到更廣的範圍；而到了一九九三年，VIX「恐慌指數」更進一步，直接把市場的「恐懼」本身做成了一條可以交易的曲線（見第二十章）。從報價機到道瓊指數到 VIX，是同一個衝動的不斷進化——人類拼了命地，想替那團叫做「群眾情緒」的、抓不住摸不著的東西，裝上一個看得見的刻度盤。</p>
+    <p>而在這個時代的市場邊緣，還繁殖著一種更赤裸地反映人性賭性的東西——「空桶店」（bucket shops）。它們表面上像券商，實則是不真正買賣股票、只讓客人對著報價機的價格下注漲跌的賭場，輸贏全看那條紙帶。空桶店裡擠滿了想以小搏大的市井小民，把股市最純粹的投機與賭博本質，演繹得淋漓盡致。它們後來大多被取締，但那種「把股價當成輪盤來賭」的衝動從未消失——一百年後，它會以零日選擇權、以加密貨幣永續合約、以手機 App 上一鍵下注的形態，全部捲土重來。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 神經網路、烏合之眾，與第一個救火員</span>
+      <p>這一章，情緒機器裝上了三樣將定義其現代形態的零件。報價機，是它的<strong>神經系統</strong>——讓貪婪與恐懼能即時同步、即時傳染，群眾從此能「集體呼吸」。麥凱與勒龐，是它的<strong>診斷書</strong>——人類終於開始理解，自己為何會成群結隊地發瘋。而摩根與隨後的聯準會，是它的第一個<strong>救火員</strong>——一個試圖在恐慌時刻接住整個群眾的機制。三者合起來，把一個十七世紀的阿姆斯特丹發明，升級成了一台能以光速運轉、覆蓋全國、且開始被國家盯著看管的龐然大物。一切都準備好了。當這台高速運轉的機器，遇上一個史上最樂觀、最相信「新時代」的十年——一九二〇年代——人類史上最著名的那場泡沫與崩盤，就要登場了。</p>
+    </div>
+  </div>
+</section>
+
+<div class="part-div reveal" id="part-3">
+  <span class="pn">第三部</span>
+  <h2 class="ptitle pt">喧囂與崩潰</h2>
+  <div class="pe">The Roar and the Crash — The 1920s, 1929, and a Wound That Scarred a Generation</div>
+  <div class="pline"><span></span><span class="dot">▲</span><span></span></div>
+</div>
+
+<!-- ===== 第七章 ===== -->
+<section class="act reveal" id="ch-7">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Roaring Twenties</span>
+    <h2 class="act-title">咆哮的二〇年代：人人都該變有錢</h2>
+    <p class="act-sub">The Roaring Twenties — &ldquo;Everybody Ought to Be Rich&rdquo; and the Permanently High Plateau</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>第一次世界大戰結束後，美國迎來了一個它從未經歷過的十年——咆哮的二〇年代（the Roaring Twenties）。戰爭讓美國從歐洲的債務人變成了債權人，工廠的生產線全速運轉，新的奇蹟一個接一個冒出來：汽車開始駛進尋常人家的車庫，收音機把娛樂與廣告送進千家萬戶，電力照亮城市的夜空，電影、爵士樂、摩天大樓——整個社會被一種前所未有的樂觀情緒籠罩。人們真心相信，科技與繁榮已經把舊世界的規律徹底改寫，一個永不衰退的「新時代」（New Era）來臨了。而這份對未來的集體信仰，自然而然地，流進了股票市場。</p>
+
+    <p>道瓊工業指數在一九二〇年代一路攀升，到一九二九年夏天，已是十年前的數倍。但這一次和以往的泡沫有個關鍵的不同——<strong>股市，第一次成了「全民」的事。</strong>過去買股票是富人與專業投機客的遊戲，可是在二〇年代，理髮師、計程車司機、擦鞋童、家庭主婦，全都開了證券戶。一個流傳甚廣的故事說，金融大亨約瑟夫·甘迺迪（甘迺迪總統之父）某天讓一個擦鞋童替他擦鞋，擦鞋童竟開口給他報明牌、談自己買了哪些股票；甘迺迪回去後立刻把持股全部出清——他的理由是：<em>「當擦鞋童都在給你報明牌時，這個市場已經沒有新的傻瓜可以接棒了。」</em>這個故事的真假難辨，但它捕捉到的心理是真的：當一場狂熱蔓延到社會的最底層、最後一個旁觀者都下了場，鐘擺，就已經盪到了它的極限。</p>
+
+    <h3>兩樣致命的燃料：保證金與「新時代」的故事</h3>
+    <p>把二〇年代的鐘擺推向極限的，是兩樣東西。第一樣，是<strong>保證金交易</strong>（buying on margin）——也就是槓桿。當時的規矩極為寬鬆，你只要付一成、甚至更少的現款，就能買進價值十倍的股票，其餘的錢向券商借。在上漲的市場裡，這簡直是印鈔機：股票漲一成，你的本金就翻了一倍。千百萬人於是用借來的錢追逐股票，把指數越推越高。可是槓桿是一把雙刃劍，它在上漲時放大貪婪，在下跌時就會以同樣的倍率放大恐懼——當股價開始跌，券商會要求你立刻補錢（margin call），補不出來就強制賣出你的持股，而這些被迫的拋售又會把股價砸得更低，逼出更多的追繳與拋售。槓桿，等於在情緒機器裡裝了一個會自我強化的正回饋裝置：漲時更漲，跌時更崩。這個機制，將在一九二九、一九八七、二〇〇八，一次次扮演把崩盤變成雪崩的關鍵角色。</p>
+
+    <p>第二樣燃料，是那個「這次不一樣」的故事——只是這一次，它穿上了最體面的學術外衣。一九二九年夏天，美國最負盛名的經濟學家、耶魯大學的歐文·費雪（Irving Fisher）公開宣稱：<strong>「股價已經達到了一個看起來會永遠維持下去的高原。」</strong>（a permanently high plateau）他不是江湖騙子，而是當時全美最受尊敬的經濟學泰斗之一。同年，通用汽車的高管、也是民主黨全國委員會主席的約翰·拉斯科布（John J. Raskob）在一本婦女雜誌上發表了一篇文章，標題直白得驚人——〈人人都該變有錢〉（Everybody Ought to Be Rich）。他算了一筆帳：只要每個月省下十五美元投進股市，二十年後人人都能成為富翁。一個全民的、被權威背書的致富神話，就這樣鋪天蓋地。當最聰明的經濟學家與最有頭臉的實業家都在替狂熱站台時，普通人還有什麼理由懷疑？</p>
+
+    <div class="pull"><p>泡沫的頂點，從來不是少數騙子在欺騙大眾的時刻，而恰恰是連最受尊敬的權威都真心相信「這次不一樣」的時刻。費雪不是在說謊——他是真的信了。這，才是最可怕的。</p></div>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 如果沒有保證金</span>
+      <p>假如一九二〇年代沒有那麼寬鬆的保證金制度，這場泡沫會是什麼樣子？它或許仍會發生——「新時代」的故事與全民的樂觀，本就足以吹起一場狂熱。但它幾乎肯定不會吹得那麼高，破得那麼慘。是槓桿，把一場本可以溫和收場的高估，變成了一場會自我加速的災難：上漲時，借來的錢把指數推到脫離現實的高度；下跌時，強制平倉的連鎖反應，又把回檔變成了自由落體。這就是為什麼，後來一九三四年成立的證管會，做的第一批事情之一，就是授權聯準會規定保證金的最低比率——人類用血的代價學到：放任群眾用借來的錢去餵養自己的貪婪，等於在情緒機器底下埋了一顆定時炸彈。然而這個教訓，會在二〇〇八年的房貸槓桿、與二〇二一年的選擇權與融資裡，被一次次地重新遺忘。</p>
+    </div>
+
+    <h3>用借來的錢堆起來的繁榮</h3>
+    <p>咆哮二〇年代的繁榮，底下藏著一個越吹越大的氣球——「<strong>經紀商貸款</strong>」（broker call loans），也就是券商借給融資戶買股票的錢。隨著保證金交易越來越瘋狂，這個數字在一九二〇年代末暴增到驚人的規模。更危險的是，連美國的大企業、甚至外國的資金，都被這個市場高得誘人的利息吸引，紛紛把閒錢投進來放貸——大家都覺得「借錢給人炒股、穩穩收高息」是天底下最安全的生意。於是一座龐大的債務金字塔悄然成形：股票被融資買進，而融資的錢，又有一部分來自賣股票賺到的利潤……整個市場，越來越像一座用借來的錢、層層相疊堆起來的紙牌屋。</p>
+    <p>這種槓桿的可怕，在於它的對稱性。在上漲時，它是一台印鈔機，讓每個人都覺得自己是天才；可是它有一個致命的脆弱點——它經不起「下跌」。一旦股價開始回落，融資戶會收到「追繳保證金」的通知，補不出錢就被強制賣出；這些被迫的拋售壓低了股價，又觸發了更多人的追繳與拋售。那座在上漲時無比堅固的金字塔，會在下跌時，由內而外地自我崩解。<strong>一九二九年十月，崩盤之所以會在短短幾天內演變成毀滅性的自由落體，正是這座債務金字塔反向坍塌的結果——槓桿，把一次本可承受的回檔，變成了一場無法剎車的雪崩。</strong></p>
+    <p>這份繁榮還有另一個被狂歡掩蓋的裂縫：它其實並不像表面那麼健康、那麼普惠。二〇年代的財富，高度集中在少數人手中，廣大的農民與工人,並未真正分享到股市與消費的盛宴；表面的鼎沸，掩蓋著需求基礎的脆弱。然而在「人人都該變有錢」「股票只會漲」的集體亢奮中，沒有人想聽這些掃興的話。<em>泡沫的頂點，總是同時是「最樂觀」與「最脆弱」的時刻——而正因為太樂觀，沒有人看得見那份脆弱。</em>這正是明斯基「穩定孕育不穩定」的最佳寫照：最危險的，從來不是人人恐懼的時候，而是人人都覺得再也不會有風險的時候。</p>
+
+    <h3>佛羅里達的陽光，與「投資信託」的金字塔</h3>
+    <p>在一九二九年的股市狂熱之前，二〇年代其實還上演過一場規模較小、卻同樣經典的預演——佛羅里達的土地泡沫。在「陽光、海灘、永遠的好天氣」這個動人故事的鼓動下，一九二〇年代中期，無數美國人湧向佛羅里達，搶購那裡的土地。狂熱到了一個地步，許多人買賣的甚至不是土地本身，而是土地的「購買選擇權」（binder），一張合約在幾天內轉手好幾遍、價格翻好幾倍，買家從頭到尾沒見過那塊地，有些「地」甚至根本是沼澤或泡在水裡。一九二六年，一場猛烈的颶風橫掃佛羅里達，把這個美夢連同許多新建的房子一起摧毀，泡沫應聲破裂。佛羅里達的故事是鬱金香的完美翻版，也是即將到來的股市大泡沫的一次小小彩排——可惜，沒有人從中學到教訓，因為下一個「這次不一樣」的故事，正唱得震天價響。</p>
+    <p>而把一九二九年那場股市泡沫的槓桿推到極致的，是一種叫「<strong>投資信託</strong>」（investment trust）的金融工具——它幾乎就是二〇〇八年那些有毒衍生品的曾祖父。投資信託是一種封閉型基金，向大眾募資去投資一籃子股票；這本身沒問題，問題出在「金字塔」式的堆疊：一家投資信託，可以用借來的錢去買進另一家投資信託的股票，後者又拿借來的錢去買第三家……槓桿層層相疊，一層一層往上堆。在上漲時，這座金字塔能創造出驚人的帳面財富，最底層資產一點點的漲幅，會被層層槓桿放大成頂層信託股票的暴漲。可是這個機制是完全對稱的：一旦底層資產開始下跌，同樣的槓桿會以同樣的倍率反向運轉，把整座金字塔，由上而下，砸成齏粉。</p>
+    <p>這正是一九二九年崩盤之所以如此慘烈的隱藏推手之一。當崩盤來臨，這些被過度槓桿堆疊起來的投資信託，價值蒸發的速度遠超大盤，許多直接歸零。<strong>它揭示了一個將反覆出現的鐵律：每一次大泡沫的頂點，金融業總會發明出某種「這次的槓桿不一樣」的精巧工具，把風險層層包裝、層層放大，直到沒有人看得清底下究竟堆了多少炸藥。</strong>一九二九年的投資信託，一九九八年 LTCM 的衍生品，二〇〇八年的 CDO，本質上是同一頭怪獸，只是換了個更時髦的名字。人類在「用槓桿放大貪婪」這件事上的創造力，是無窮無盡的；而每一次，它都會在崩盤時，化作同等規模的恐懼。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 當權威也信了</span>
+      <p>咆哮的二〇年代，把三把鑰匙的合奏推向了一個歷史性的高潮。<strong>鐘擺</strong>盪到了前所未有的高度，因為這一次有了槓桿這個加速器；<strong>群眾</strong>第一次擴張到了全社會，連擦鞋童都入了場；而<strong>敘事</strong>——那個「新時代」「永遠的高原」「人人都該變有錢」的故事——更被費雪這樣的頂尖權威親口背書，成了不容質疑的真理。一個泡沫所需的一切要素，在一九二九年夏天，全部到齊，而且每一樣都拉到了滿弦。市場先生，正處在他這輩子最亢奮、最不可一世的時刻。可正是在這種「再也不可能跌」的集體確信達到頂點之時，崩潰，總是已經站在門口。下一章，我們將走進那個被「黑色星期四」「黑色星期二」永遠刻進人類記憶的十月。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第八章 ===== -->
+<section class="act reveal" id="ch-8">
+  <div class="act-head">
+    <span class="act-num">第八章 · 1929</span>
+    <h2 class="act-title">一九二九：當所有人同時想奪門而出</h2>
+    <p class="act-sub">1929 — When Everyone Tried to Reach the Exit at Once</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>道瓊工業指數在一九二九年九月三日攀上了三八一點的歷史高峰——這個高度，往後它要花二十五年，直到一九五四年，才能再次企及。九月過後，市場開始變得不安，價格在高檔劇烈震盪，樂觀的人說這只是健康的回檔，是「逢低承接」的良機。可是那座盪到極限的鐘擺，已經開始無聲地反向滑落。恐懼，總是先於崩盤悄悄潛入，像漲潮前海面下的暗流。</p>
+
+    <p>十月二十四日，星期四——後來被稱為「黑色星期四」——恐慌第一次正面爆發。開盤後賣壓如山崩般湧出，報價機跟不上拋售的速度，紙帶落後了好幾個小時，這意味著驚慌失措的投資人，根本不知道自己手中的股票此刻究竟跌到了多少——而「不知道」本身，正是恐懼最好的養料。交易所大廳一片混亂，場外擠滿了臉色慘白的人群。那天下午，一群華爾街最大的銀行家再度仿效當年的摩根，集資高調進場護盤，買進藍籌股，市場暫時穩住，當天的跌幅被收窄。許多人鬆了一口氣，以為最壞的已經過去——這是崩盤過程中最殘忍的一幕：絕望前的虛假希望。</p>
+
+    <p>但這一次，沒有一個摩根能擋得住整個群眾的恐懼。週末過後，恐慌捲土重來，而且更加凶猛。十月二十八日「黑色星期一」，道瓊重挫近百分之十三；緊接著十月二十九日「黑色星期二」，又崩跌近百分之十二，這一天有超過一千六百萬股易手，創下當時的天量，無數融資戶在追繳令下被強制平倉，賣盤逼出賣盤，跌勢自我加速。短短幾天，數百億美元的帳面財富蒸發。那個幾週前還在預言「永遠的高原」的費雪，他自己的財富也在這場崩盤中幾乎賠光，從一個富翁淪為負債者，名譽掃地，餘生再未恢復昔日的地位。<strong>市場先生的躁鬱，在這幾天裡完成了人類史上最劇烈的一次相位翻轉：從無可救藥的狂喜，墜入無可救藥的絕望。</strong></p>
+
+    <h3>真正的恐怖，是接下來的三年</h3>
+    <p>但很多人不知道的是，一九二九年十月那場著名的崩盤，其實只是漫長噩夢的序曲。真正把一代人嚇出心理創傷的，不是那驚心動魄的幾天，而是接下來那望不到底的三年。崩盤之後，市場一度反彈，許多抱著希望逢低買進的人，又一次次被更深的下跌吞沒。隨著股災拖垮銀行、銀行倒閉凍結信貸、信貸凍結拖垮企業、企業裁員製造失業、失業又進一步壓垮消費與股市——一場金融崩盤，演變成了席捲整個實體經濟的「大蕭條」（the Great Depression）。道瓊指數一路陰跌，跌跌不休，直到一九三二年七月，才在四十一點觸底。</p>
+
+    <p>請記住這個數字背後的意義：從一九二九年的三八一點，到一九三二年的四十一點，道瓊蒸發了將近<strong>百分之八十九</strong>。如果你在一九二九年的頂點投入一千美元，到一九三二年的谷底，只剩下大約一百一十美元。這不是一次性的暴跌，而是一場持續三年、看不到任何盡頭、每一次希望都被無情碾碎的凌遲。失業率飆升到約四分之一，銀行成批倒閉，存戶畢生的積蓄一夕化為烏有，城市邊緣冒出用破木板搭成的貧民窟。那台情緒機器，這一次不只是擺向了恐懼的極端——它幾乎徹底停擺，沉入了一種集體的、麻木的絕望。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">381</div><div class="lbl">道瓊高點<br>1929/9/3</div></div>
+      <div class="stat"><div class="num">41</div><div class="lbl">道瓊谷底<br>1932/7</div></div>
+      <div class="stat"><div class="num">−89%</div><div class="lbl">高峰到谷底<br>總跌幅</div></div>
+      <div class="stat"><div class="num">25年</div><div class="lbl">收復失土<br>直到 1954</div></div>
+    </div>
+
+    <div class="pull"><p>一九二九的真正教訓，不在那幾個「黑色」的日子，而在它們之後那三年——當鐘擺盪向恐懼的極端，它不會乾脆地一次跌到底，而是用一次次虛假的希望，把絕望拉長成一場凌遲。崩盤是一瞬間的事，但絕望，是會持續好幾年的。</p></div>
+
+    <h3>希望，是崩盤最殘忍的武器</h3>
+    <p>從一九二九到一九三二那望不到底的三年裡，市場並不是一條筆直墜落的線。恰恰相反，它墜落的途中，穿插著好幾次猛烈的反彈——例如一九三〇年初，道瓊曾從低點強勁回升了近五成，當時的報紙、權威與政要紛紛宣告「最壞的已經過去」「景氣即將復甦」。可是每一次這樣的反彈，都只是更深一輪下跌的前奏。市場給投資人一線希望，誘使他們重新進場抄底，然後再用更狠的一波下殺，把這份希望連同他們僅存的本金，一起碾碎。後人替這種騙人的反彈取了個傳神的名字——「<strong>傻瓜的反彈</strong>」（sucker rally），或者更刻薄的「死貓跳」。</p>
+    <p>這揭示了長期熊市最殘忍的心理機制：<strong>真正把人拖垮的，不是恐懼，而是希望。</strong>如果市場一次就跌到底，人們反而能死心、能停損、能離場療傷；可是當下跌被一次次虛假的反彈打斷，希望就成了一根反覆收割的鐮刀——它讓人不甘心賣在低點（沉沒成本的執念），讓人一次次「再撐一下、就快漲回來了」，讓人把救命的錢一筆筆投進無底洞去攤平。那位幾週前還在預言「永遠的高原」的經濟學泰斗費雪，正是這樣一步步被希望拖垮的：他不僅賠光了自己的財富，還借錢加碼、深信會漲回來，結果負債累累、名譽盡毀，淒涼地度過餘生。<em>在鐘擺盪向恐懼谷底的漫漫長路上，「希望」這種最美好的情緒，反而成了市場手中最鋒利的一把刀。</em></p>
+
+    <h3>傑西·李佛摩：讀懂了所有人的情緒，卻讀不懂自己</h3>
+    <p>在一九二九這齣大悲劇裡，有一個人的故事，幾乎是這整部書的縮影——傑西·李佛摩（Jesse Livermore），二十世紀最傳奇的投機客，綽號「華爾街巨熊」。他天賦異稟，從少年時在空桶店裡下注起家，憑著對群眾心理近乎直覺的洞察，一次次在市場的關鍵轉折點上押對方向。一九〇七年大恐慌時，他放空大賺；而一九二九年，當所有人都還沉醉在「永遠的高原」裡時，他嗅到了頂點的味道，建立了龐大的放空部位。崩盤來臨那幾天，當千萬人的財富灰飛煙滅，李佛摩卻賺進了據估高達一億美元的鉅款——在那個年代，這是一筆難以想像的財富。他彷彿是唯一一個站在恐懼的對立面、冷靜收割群眾瘋狂的人。一本以他為原型的書《股票作手回憶錄》，至今仍被奉為交易聖經。</p>
+    <p>但李佛摩的故事，真正的重量不在他賺了多少，而在他最後失去了多少。這位能精準讀出「別人」情緒的天才，終其一生卻管不住「自己」的情緒。他一輩子四次大起大落，賺到富可敵國，又數度賠到破產。他比任何人都清楚那些紀律——順勢而為、嚴守停損、不要過度交易、要有耐心等待——他甚至把這些鐵律寫了下來；可是在真實的市場裡，他一次次違背自己定下的規矩，被貪婪誘使加碼過頭，被恐懼逼得在錯誤的時點認賠，被翻本的執念拖向更大的賭注。<strong>他能算準群眾的瘋狂，卻算不準自己心裡那座鐘擺。</strong>一九四〇年，這位曾經富甲一方、寫下了無數交易智慧的「華爾街巨熊」，在深陷憂鬱與再一次的破產後，於一間旅館的衣帽間裡，結束了自己的生命。</p>
+    <p>李佛摩，是牛頓那一課最沉痛的回聲，也是第二十五章那條救贖線索最黑暗的反襯。如果說牛頓證明了「智商擋不住貪婪」，那麼李佛摩證明了更殘酷的一件事：<em>哪怕你窮盡一生去研究群眾的情緒、哪怕你成了這方面舉世無雙的大師、哪怕你親手寫下了所有正確的紀律——你最難戰勝的敵人，依然是你自己。</em>知道，與做到之間，隔著的不是知識，而是一個人一生都未必跨得過的、關於性情的鴻溝。這部書最後會反覆強調「性情重於智商」，而李佛摩，正是那個用一生與一條命，替這句話作證的人。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 鐘擺的另一端</span>
+      <p>如果說咆哮的二〇年代示範了鐘擺盪向貪婪能有多瘋，一九二九到一九三二，就示範了它盪回恐懼能有多狠。這裡藏著一個對投資人至關重要、卻極反直覺的真相：<strong>鐘擺的兩端，是對稱的——有多大的貪婪在頂點，就有多深的恐懼在谷底。</strong>正因為二〇年代的樂觀漲到了「永遠的高原」，三〇年代的絕望才會跌到「股票是給傻瓜玩的東西」。而槓桿（保證金）這個加速器，在下跌時露出了它最猙獰的一面：強制平倉把恐慌變成了自我加速的雪崩。最後，這一章也預告了下一章最深的主題——情緒不只屬於當下，它會結痂、會留疤、會被一整代人記一輩子。那些在一九二九到一九三二年間被市場碾碎的人，將用接下來三十年的時間，把對股票的恐懼，深深刻進他們、乃至他們子女的骨子裡。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第九章 ===== -->
+<section class="act reveal" id="ch-9">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Scar</span>
+    <h2 class="act-title">大蕭條的傷疤：被恐懼烙印的一代人</h2>
+    <p class="act-sub">The Scar — The Generation That Fear Branded, and Keynes&rsquo;s Animal Spirits</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>一場大崩盤真正的代價，不是某一天蒸發了多少帳面數字，而是它在人心裡留下的、要花幾十年才淡去的傷疤。經歷過一九二九至一九三二年那場凌遲的美國人，從此被一種深刻的恐懼改寫了一生。他們之中許多人，即使後來重新富裕起來，也終其一生拒絕再碰股票，寧可把錢藏在床墊下、存進保險箱，也不願再把命運交給那台曾經吞噬了一切的機器。他們教育自己的子女：股票是賭博，是會讓人傾家蕩產的陷阱。這種集體的、代際相傳的創傷，造成了一個影響深遠的後果——美國股市在大蕭條之後，整整沉寂了一個世代。<strong>一場足夠慘烈的恐懼，可以讓一整代人，在往後的牛市裡都不敢上車。</strong></p>
+
+    <p>這正是第三把鑰匙「遺忘」的反面——「記得太牢」。高伯瑞說金融記憶大約只有二十年，指的是承平太久後，沒經歷過災難的新人會重蹈覆轍；但這枚硬幣的另一面同樣真實：親歷過大災難的那一代人，會把恐懼記得太久太牢，牢到錯過後來幾十年的繁榮。一九五〇年代，當美國經濟欣欣向榮、股市其實已悄悄走出大蕭條的陰影、開啟一輪長期大多頭時，許多大蕭條世代的人仍然不敢相信、不肯入場，眼睜睜錯過了財富重新累積的二十年。<em>創傷讓他們安全，也讓他們貧窮。</em>市場的鐘擺，不只在當下的貪婪與恐懼間擺盪，它的擺動，還會以「記憶」與「遺忘」的形式，跨越世代，一代過度恐懼，下一代又重新過度貪婪。</p>
+
+    <h3>凱因斯：替市場的瘋狂取一個名字</h3>
+    <p>就在大蕭條最深的泥沼中，一位英國經濟學家試圖理解：一個經濟體，為什麼會這樣集體地、非理性地陷入停滯？約翰·梅納德·凱因斯（John Maynard Keynes）——他本人就是一位精明（且曾大賠又翻身）的投資者——在一九三六年的《就業、利息與貨幣的一般理論》裡，提出了一個將永遠改變經濟學的詞：「<strong>動物本能</strong>」（animal spirits）。他指出，人們做出投資、消費這類面向未來的重大決定時，依憑的並不是、也不可能是對未來收益的冷靜精算（因為未來根本無法精算），而是一種「自發的行動衝動」，一種源於樂觀或悲觀的、近乎本能的情緒。當動物本能高漲，人們便投資、擴張、消費，經濟欣欣向榮；當它低落、被恐懼取代，所有人同時縮手、囤積現金、停止冒險，經濟便陷入自我實現的蕭條。</p>
+
+    <p>凱因斯這個概念之所以偉大，是因為他把「情緒」這個東西，正式請進了原本假設人人都是理性計算者的經濟學殿堂。他另一句廣為流傳的話也同樣深刻：<strong>「市場保持非理性的時間，可以長過你保持不破產的時間。」</strong>——這是對那些自以為看穿了泡沫、急著做空、卻被市場的瘋狂活活拖垮的聰明人，最沉痛的警告。凱因斯等於是替這部書下了一個學術判詞：市場由情緒驅動，這不是市場偶爾的失常，而是市場的常態與本質。從某種意義上說，他是德拉維加在兩個半世紀後、戴著經濟學家帽子的回聲。</p>
+
+    <h3>把教訓鑄成制度：恐懼如何建起了護欄</h3>
+    <p>大蕭條還留下了另一份更實際的遺產。如同一九〇七年的恐慌催生了聯準會，一九二九年的災難，催生了一整套至今仍在保護著市場的制度。羅斯福新政期間，美國通過了《1933年證券法》與《1934年證券交易法》，成立了證券交易委員會（SEC，證管會），強制上市公司公開揭露財務真相、嚴禁內線交易與市場操縱，並授權管制保證金比率。同年的《格拉斯—斯蒂格爾法》（Glass-Steagall Act）把商業銀行與投資銀行分隔開來，並設立聯邦存款保險（FDIC），讓存戶不必再因為「怕銀行倒」而擠兌——直接從制度上，拆掉了恐慌最容易引爆的那根引線。</p>
+
+    <p>這些制度的本質，是人類試圖用「規則」這個冷靜的東西，去約束「情緒」這個瘋狂的東西。它們承認了一件事：放任群眾的貪婪與恐懼自由發作，代價太慘重，社會必須建起護欄——資訊透明的護欄、槓桿限制的護欄、存款保險的護欄、最後貸款人的護欄。這是一場人類與自己天性的漫長角力，而它的每一道護欄，幾乎都是用一場災難的血換來的。然而，這部書接下來會反覆證明一件令人沮喪的事：<em>護欄能擋住上一場危機的形態，卻擋不住下一場危機的情緒。</em>規則管得住保證金的比率，卻管不住人心想要更多的渴望；它會換一個新的、護欄還沒蓋到的地方，重新爆發。</p>
+
+    <h3>復甦中的二次衰退，與一個投資人凱因斯</h3>
+    <p>大蕭條的療傷之路，還藏著一個常被忽略、卻極富啟示的教訓。經過羅斯福新政的刺激，美國經濟與股市在一九三三到一九三七年間，其實已經顯著回升。可是就在復甦看似站穩腳跟之際，一九三七年，政策制定者過早地收緊了財政與貨幣——他們急著平衡預算、回收流動性，結果一腳踩死了還很脆弱的復甦。經濟與股市在一九三七到三八年間再次急轉直下，史稱「<strong>蕭條中的衰退</strong>」。這個慘痛的教訓——在元氣未復之時過早抽走支撐，會把復甦扼殺在搖籃裡——被後世的央行牢牢記住，並直接影響了二〇〇八與二〇二〇年「寧可救過頭、也絕不過早收手」的政策選擇。恐懼的記憶，不只刻在投資人身上，也刻在政策制定者身上。</p>
+    <p>而提出「動物本能」的凱因斯，本人就是一個絕佳的活教材。他不是躲在書齋裡的學究，而是一個親自下海、用真金白銀搏殺的投資者，替自己、也替劍橋大學的學院管理基金。他早年沉迷於用宏觀預測來擇時進出，結果在一九二〇年代的匯市與商品市場上幾度幾乎血本無歸；痛定思痛後，他轉向了「集中持有少數他深入了解、且價格被低估的好公司，長期抱牢」的策略——這幾乎與葛拉漢、巴菲特的價值投資不謀而合，並讓他最終為基金賺得了優異的長期報酬。<strong>一個能洞察「動物本能」如何驅動整個經濟的天才，自己也得在市場裡跌得頭破血流，才學會駕馭自身的情緒——這本身，就是「知道」與「做到」之間那道鴻溝，最有力的證詞。</strong></p>
+    <p>大蕭條留給那一代人的傷疤，最終以一種弔詭的方式，塑造了戰後的繁榮。正因為親歷過深淵的人對債務與投機懷有深刻的戒懼，戰後的一兩個世代，反而養成了量入為出、儲蓄為先、腳踏實地的保守習性，為戰後幾十年穩健的經濟成長，打下了一個不那麼浮躁的地基。然而，正如本章所述，傷疤也會隨著親歷者的老去而淡去。當那批「記得太牢」的人逐漸凋零，當一批沒有傷疤的新人登場，那份來之不易的謹慎，就會被重新滋長的貪婪所取代——高伯瑞的「遺忘」，與大蕭條那「結痂的恐懼」，原來是同一枚硬幣的兩面，只是分屬不同的世代。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 結痂的恐懼，與被命名的本能</span>
+      <p>大蕭條替這部書補上了情緒的「時間維度」。在此之前，我們談的貪婪與恐懼，多半是當下的、即時的；而大蕭條告訴我們，情緒會<strong>結痂、會留疤、會跨代相傳</strong>——一場夠慘的恐懼，能讓整整一代人在隨後的牛市裡都不敢上車（記得太牢），直到一批沒受過傷的新人登場，才會重新開始貪婪（高伯瑞的遺忘）。凱因斯的「動物本能」，則把這一切提升為一條經濟學原理：驅動經濟與市場的，根本上是情緒，不是計算。而新政那一整套制度，是人類第一次大規模地、有意識地嘗試用規則去馴服情緒——一個將貫穿後半部全書的宏大主題。下一部，我們要看這份恐懼如何被漫長的繁榮慢慢治癒，又如何在一群經濟學家手中，被一個大膽得近乎傲慢的理論徹底否認：他們將宣稱，市場是有效率的，而情緒，根本不存在。</p>
+    </div>
+  </div>
+</section>
+
+<div class="part-div reveal" id="part-4">
+  <span class="pn">第四部</span>
+  <h2 class="ptitle pt">復甦、理論與新的傲慢</h2>
+  <div class="pe">Recovery, Theory, and a New Hubris — Healing, the Efficient Market, and the Respectable Bubble</div>
+  <div class="pline"><span></span><span class="dot">▲</span><span></span></div>
+</div>
+
+<!-- ===== 第十章 ===== -->
+<section class="act reveal" id="ch-10">
+  <div class="act-head">
+    <span class="act-num">第十章 · Climbing a Wall of Worry</span>
+    <h2 class="act-title">爬上憂慮之牆：恐懼如何被漫長的繁榮慢慢治癒</h2>
+    <p class="act-sub">Climbing a Wall of Worry — How a Long Boom Slowly Healed a Generation&rsquo;s Fear</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>第二次世界大戰結束時，美國股市仍籠罩在大蕭條的長長陰影裡。儘管戰爭重新點燃了工業、儘管美國成了西方世界無可爭議的霸主，但普通人對股票的記憶，仍停留在一九三二年那個血淋淋的谷底。一九四〇年代末，市場的本益比低得驚人，許多績優公司的股價，便宜到連它們每年發的股息殖利率，都高過債券利息——按任何理性的標準，這都是千載難逢的便宜貨。然而沒有人敢買。<strong>這正是恐懼留下的傷疤最昂貴的地方：當資產便宜到不可思議時，正是因為所有人都還太害怕，才沒有人敢伸手。</strong>群眾在谷底的恐懼，和它在頂點的貪婪一樣，是非理性的；只是這一次，非理性讓他們錯過的，是財富，而不是讓他們賠掉財富。</p>
+
+    <p>就在這個瀰漫著恐懼與懷疑的時刻，一本後來被巴菲特稱為「有史以來最偉大的投資著作」的書，悄然問世。一九四九年，班傑明·葛拉漢出版了《智慧型投資人》（<em>The Intelligent Investor</em>）。正是在這本書裡，他提出了「市場先生」那個躁鬱合夥人的比喻，以及一個更核心的概念——「<strong>安全邊際</strong>」（margin of safety）：永遠用遠低於其內在價值的價格買進，好讓自己在判斷出錯或厄運降臨時，仍有一層緩衝。葛拉漢的全部智慧，本質上是一套對抗情緒的紀律：他教人把市場的瘋狂報價，當成「為你服務的工具，而不是指揮你的主人」。在一個被恐懼凍僵的年代，葛拉漢冷靜地指出：別人的恐懼，正是你的機會。後來，他在哥倫比亞大學的一個年輕學生，把這套哲學發揚光大，成了二十世紀最偉大的投資者——那個學生叫華倫·巴菲特。</p>
+
+    <h3>憂慮之牆，與遺忘的開始</h3>
+    <p>從一九四〇年代末到一九六〇年代中，美國股市開啟了戰後第一輪波瀾壯闊的長期大多頭。道瓊終於在一九五四年，時隔二十五年，重新站上一九二九年的高點，並繼續一路向上。但這輪牛市有一個耐人尋味的特徵——它是「爬著一道憂慮之牆」（climbing a wall of worry）往上走的。整段期間，壞消息從未斷過：冷戰的核陰影、韓戰、麥卡錫主義、古巴飛彈危機、對「另一次大蕭條」隨時會降臨的揮之不去的恐懼。市場是在所有人都還半信半疑、隨時準備逃命的氛圍裡，一步一步往上爬的。<strong>這道「憂慮之牆」，本身就是一則關於市場情緒的深刻寓言：最健康、最持久的牛市，往往不是在歡欣鼓舞中誕生的，而是在懷疑與恐懼中，被一個個不情願的買家，勉強推上去的。</strong></p>
+
+    <p>而隨著歲月流逝，那道牆，被慢慢爬過去了。經歷過大蕭條的老一輩仍然戒慎，但一批在戰後成長、沒有親身嘗過一九二九苦果的新世代，開始走進市場。對他們而言，股票不是吞噬一切的怪獸，而是分享美國繁榮的入場券。到了一九五〇、六〇年代，「全民資本主義」（people&rsquo;s capitalism）成了流行語，持股的家庭數量穩步攀升，共同基金開始興起，把普通人的儲蓄重新導回股市。坦伯頓那句不朽的名言，幾乎就是這段歷程的完美註腳：<strong>「牛市在悲觀中誕生，在懷疑中成長，在樂觀中成熟，在亢奮中死亡。」</strong>戰後的這輪牛市，正沿著這條情緒曲線，從一九四九年的悲觀谷底，緩緩向「樂觀」與「亢奮」爬升——而高伯瑞所說的那場「遺忘」，也在同時，悄悄地，開始了。</p>
+
+    <div class="pull"><p>恐懼，是會被時間治癒的——但治癒的方式，是讓親歷傷痛的那一代人逐漸老去、退場，讓一批沒有傷疤的新人登台。市場的記憶，不存在於任何一個人的腦中，而存在於「還記得的人」與「已經忘了的人」之間，那不斷變動的比例裡。</p></div>
+
+    <h3>把華爾街帶到大街上</h3>
+    <p>恐懼的治癒，除了靠時間與世代更替，也靠一個人有意識的推動。他叫查爾斯·梅里爾（Charles Merrill）。在大蕭條把普通人嚇得遠離股市的年代，梅里爾卻看見了相反的機會——他要「把華爾街帶到大街上」（bring Wall Street to Main Street）。他改造了自己的證券公司（美林），讓它不再是只服務富人的神秘俱樂部，而是一個值得普通家庭信賴的地方：他堅持透明、教育投資人、廢除某些利益衝突的佣金制度，甚至開辦課程教民眾認識股票。他要做的，是用「信任」這味解藥，去化解大蕭條留下的「恐懼」這道傷疤。</p>
+    <p>與此同時，「共同基金」（mutual fund）這個工具也開始普及。它讓沒有時間、沒有專業、也沒有膽量自己選股的普通人，可以把錢交給專業經理人、買進一籃子分散的股票。對一個還對股市心有餘悸的世代而言，這降低了重新入場的心理門檻。於是，一種「股票崇拜」（the cult of equity）在戰後悄然興起——人們重新開始相信，長期持有股票，是分享國家繁榮、對抗通膨、累積財富的最佳途徑。持股的家庭數量穩步回升，資金重新流回市場。</p>
+    <p>但這裡藏著一個將反覆出現的弔詭。梅里爾與共同基金，本意是用「信任」去治癒「恐懼」，這是好事；可是當信任積累得太多、太久，它就會慢慢發酵成「自滿」，再發酵成「貪婪」。把普通人請回市場的同一股力量，最終也會把他們一路推向下一場狂熱的頂點。<strong>這正是市場情緒鐘擺最深刻的宿命：治癒恐懼的解藥，本身就是孕育下一輪貪婪的種子。</strong>戰後那場從「悲觀」一路爬升的大多頭，沿著坦伯頓的曲線，終將在一九六〇年代的「沸騰歲月」與一九七〇年代初的漂亮五十裡，抵達「樂觀」與「亢奮」——而梅里爾請回市場的那些普通人，又將在下一次崩盤裡，重新學一遍恐懼的滋味。鐘擺，從不為任何人停留。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 牆爬完了，傲慢就來了</span>
+      <p>這一章是全書情緒曲線的一個轉折——鐘擺從一九三二年恐懼的谷底，沿著一道「憂慮之牆」，緩緩盪回了中點，再越過中點，朝樂觀的那一端爬升。它示範了恐懼如何被治癒：不是靠誰說服了誰，而是靠世代的更替，靠傷疤的淡去，靠「記得的人」一個個退場。葛拉漢的《智慧型投資人》，則在這個轉折點上立起了一座燈塔——它把「對抗情緒」這件事，第一次系統化成了一套可學習的紀律（安全邊際、市場先生），這套紀律將成為本書後半段「與情緒共存」那條救贖線索的源頭（見第二十五章）。然而，當一輪牛市爬完了它的憂慮之牆、當繁榮持續得夠久、當記得大蕭條的人越來越少，一種新的情緒便會悄然滋生——那是一種智識上的傲慢，一種「我們終於搞懂市場了、過去那些瘋狂再也不會重演」的自信。下一章，這份傲慢，將以人類有史以來最優雅、也最自負的一個學術理論的形態，登上舞台。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第十一章 ===== -->
+<section class="act reveal" id="ch-11">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Efficient Market</span>
+    <h2 class="act-title">效率市場的傲慢：當經濟學家宣稱情緒不存在</h2>
+    <p class="act-sub">The Efficient Market — When Economists Declared That Emotion Did Not Matter</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>一九五〇到七〇年代，當美國的大學裡，一場安靜卻深刻的革命正在發生。一群才華橫溢的經濟學家與數學家，決心把投資這門過去充滿江湖氣與直覺的行當，改造成一門嚴謹的、可以用方程式描述的科學。他們的成果輝煌得無可挑剔：一九五二年，哈利·馬可維茲（Harry Markowitz）提出「投資組合理論」，用數學證明了「分散」如何能在不犧牲報酬的前提下降低風險——這替三百五十年前荷蘭人靠直覺發明的 VOC 分散持股，補上了精確的數學證明。隨後，威廉·夏普（William Sharpe）等人發展出「資本資產定價模型」（CAPM），把風險與報酬的關係寫成了一道優雅的公式。這些成就實至名歸，後來都拿了諾貝爾經濟學獎，至今仍是金融學的基石。</p>
+
+    <p>但這場革命真正大膽、也最具爭議的一步，由芝加哥大學的尤金·法馬（Eugene Fama）邁出。一九六〇年代，他提出了「<strong>效率市場假說</strong>」（Efficient Market Hypothesis，EMH）。它的核心主張石破天驚：在一個有眾多聰明人參與、資訊自由流通的市場裡，所有已知的資訊，都會在「瞬間」被反映進股價。因此，任何一個時刻的股價，都已經是「正確」的價格——它已經包含了所有人所知道的一切。這個假說推導出一個讓所有投機客、所有基金經理人都不舒服的結論：<em>你不可能持續地、靠分析「打敗市場」，因為任何你能想到的資訊，價格早就反映了。</em>股價的下一步，只取決於下一個「無法預測的新消息」，因此股價的走勢，就像一個醉漢的腳步，是一場「<strong>隨機漫步</strong>」（random walk）。一九七三年，普林斯頓的伯頓·墨基爾（Burton Malkiel）出版了暢銷書《漫步華爾街》，把這個觀念普及給大眾，留下一句著名的挑釁：一隻蒙著眼睛、對著報紙金融版擲飛鏢選股的猴子，選出的投資組合，表現可以和專家精挑細選的一樣好。</p>
+
+    <h3>一個太美、以致於忘了人性的理論</h3>
+    <p>效率市場假說，是人類試圖用理性馴服市場的最高峰，也是這部書最重要的反派——因為它的根本前提，幾乎是對本書全部論點的正面否定。EMH 預設了什麼？它預設市場裡的參與者，即使不是個個理性，他們的非理性也會「互相抵消」（你的過度樂觀，會被我的過度悲觀沖掉），於是整體上，價格永遠是理性的、正確的。換句話說，<strong>EMH 等於宣稱：情緒，在加總之後，不重要；市場先生沒有躁鬱症，他冷靜、客觀、永遠正確。</strong>這個理論如此優雅、如此符合學術界對「世界應該是理性的」那份深切渴望，以致於它在學界稱霸了數十年。它也並非全錯——它有一個極其重要、至今顛撲不破的洞見：絕大多數主動選股的基金經理人，長期而言確實打不贏大盤（在這一點上，下一個世代的指數基金革命，將證明 EMH 陣營是對的，見第二十五章）。</p>
+
+    <p>但 EMH 的傲慢，在於它把「大多數人選股贏不了大盤」這個經驗事實，悄悄偷換成了「所以價格永遠是對的、市場永遠理性」這個哲學主張。而後者，與整部金融史的事實，是赤裸裸地衝突的。如果市場永遠理性，那麼鬱金香怎麼解釋？南海泡沫怎麼解釋？一九二九的「永遠的高原」與隨後百分之八十九的崩跌怎麼解釋？一個價格如果在一九二九年九月是「正確」的，又怎麼可能在三年後「正確」地只剩九分之一，而這期間公司的真實價值並沒有縮水九成？效率市場假說，對著三百多年來一場接一場的集體瘋狂，閉上了眼睛，因為它的數學模型裡，根本沒有「情緒」這個變數的位置。<em>它是一座蓋得無比精密、卻建在「人是理性的」這片流沙上的宮殿。</em></p>
+
+    <div class="cf">
+      <span class="cfh">辯證 · EMH 對在哪裡，錯在哪裡</span>
+      <p>公平地說，效率市場假說不該被全盤否定，它的功與過，恰恰標出了這部書的邊界。它「對」的部分是：市場在「資訊」層面，確實高度有效率——任何公開的消息，都會被極快地反映進價格，所以靠打聽消息、靠分析公開財報去持續打敗大盤，極其困難，這也是為什麼指數化投資後來大獲全勝。它「錯」的部分是：市場在「情緒」層面，從來不曾有效率——它會集體地、系統性地、朝同一個方向犯錯，因為人的非理性並不會互相抵消，反而會在群眾中互相強化、彼此傳染。於是真相是一個微妙的雙面體：<strong>你很難用「更多的資訊」打敗市場，卻有可能用「更穩定的情緒」熬贏市場。</strong>下一部要登場的行為金融學，做的正是這件事——它不否認 EMH 在資訊上的洞見，但它要把 EMH 硬塞回模型外的那個變數——情緒——重新請回經濟學的殿堂。</p>
+    </div>
+
+    <h3>一個被遺忘六十年的人，與一張沒人撿的鈔票</h3>
+    <p>「隨機漫步」這個概念，其實早在效率市場假說之前六十年，就已經被一個孤獨的法國人想出來了——只是沒有人理會他。一九〇〇年，一位名叫路易·巴舍利耶（Louis Bachelier）的法國數學家，在他的博士論文《投機理論》裡，第一次用數學證明：股價的波動，遵循一種隨機的、類似花粉在水中亂竄（布朗運動）的模式，無法預測。這比愛因斯坦用同樣的數學描述物理世界的布朗運動，還早了五年。然而巴舍利耶的洞見太過超前，在當時的學界乏人問津，他本人潦倒一生，這篇開創性的論文，被塵封了整整半個多世紀，直到一九五〇年代，才被經濟學家保羅·薩繆爾森等人重新發掘，奉為現代金融理論的奠基之作。<em>一個關於市場的真理，可以被發現、然後被遺忘六十年——這件事本身，就帶著幾分這部書一貫的反諷。</em></p>
+    <p>效率市場假說最深刻的影響，其實是一個它的信徒們未必樂見的反諷。如果市場真的高效率到「沒有人能持續打敗它」，那麼，普通人最理性的選擇，邏輯上就不該是費盡心力去選股、去擇時——而該是乾脆放棄這場注定徒勞的努力，用最低的成本買下「整個市場」，然後什麼都不做。於是，這個最「傲慢」的理論，竟直接孕育出了最「謙卑」的投資方式——指數型基金（這正是第二十五章柏格的故事）。效率市場假說在哲學上或許錯了（市場並不總是理性），但它在實務上催生的指數化投資，卻成了拯救無數普通人、讓他們免於被自己情緒反覆收割的最有力武器。一個錯誤的理論，結出了一顆正確的果實。</p>
+    <p>關於效率市場假說的爭論，有一個流傳甚廣的笑話，精準地點出了它的盲點。兩個經濟學家走在路上，年輕的那個看見地上有一張一百美元的鈔票，正要彎腰去撿，年長的那個攔住他說：「別費事了，如果那真是一百美元，早就被人撿走了。」——這個笑話的妙處在於，雙方某種程度上都對：大多數時候，地上確實不會有白撿的鈔票（市場在資訊上高度有效率，輕鬆的錢早被人賺走）；但「絕對不會有」這個信念本身，又顯然是錯的——因為在群眾集體瘋狂的時刻，地上會散落著一大把一百美元的鈔票（嚴重錯估的價格），只是極少有人有膽量、在眾人皆醉時，獨自彎下腰去撿。<strong>市場既不是永遠有效率，也不是永遠無效率；它在平靜時近乎理性，在極端時徹底瘋狂——而真正的機會，永遠藏在後者，藏在那個所有人都太貪婪或太恐懼、以致於對腳邊的鈔票視而不見的時刻。</strong></p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 理性的最高峰，與它的盲點</span>
+      <p>效率市場假說，是鐘擺盪向「智識傲慢」那一端的極致——人類自信地宣布，自己終於用數學徹底馴服了市場，過去那些瘋狂，要嘛是統計上的雜訊，要嘛是不夠聰明的人的錯覺。這份傲慢之所以重要，是因為它幾乎在被提出的同時，就被現實狠狠打臉：就在 EMH 於學界如日中天的那些年，市場接連上演了漂亮五十的崩盤（下一章）、一九八七年那場「找不到任何理由」的單日暴跌（第十五章）——這些事件，用 EMH 的框架根本無法解釋。歷史的反諷在於：人類越是宣稱自己已經征服了情緒，情緒就越是要找個地方，給人類一記響亮的耳光。而下一章那記耳光特別有意思，因為它打在最「優質」、最「穩健」、最不該出事的一批股票身上——它將證明，連「只買最好的公司」這種看似最理性的策略，一旦被群眾推到極端，也會變成一場泡沫。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第十二章 ===== -->
+<section class="act reveal" id="ch-12">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Nifty Fifty</span>
+    <h2 class="act-title">漂亮五十：當「買最好的公司」也變成一場泡沫</h2>
+    <p class="act-sub">The Nifty Fifty — When Even &ldquo;Buy the Best&rdquo; Became a Bubble</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>一九六〇年代末到一九七〇年代初，華爾街流行起一種看似無懈可擊、實則暗藏殺機的投資信仰。經過戰後二十年的繁榮，一批美國最頂尖的成長型企業——可口可樂、IBM、全錄（Xerox）、寶麗來（Polaroid）、麥當勞、迪士尼、嬌生、奇異等——被市場奉為「永遠的成長股」。它們業務優異、品牌強大、年年成長，看起來真的不會犯錯。市場給這大約五十檔績優成長股取了個響亮的綽號——「<strong>漂亮五十</strong>」（the Nifty Fifty）。當時最流行的說法是，這些是「一次決定」的股票（one-decision stocks）：你這輩子只需要做一個決定，就是「買進」；之後永遠不必賣，只要抱著，就能富足一生。</p>
+
+    <p>這個信仰之所以危險，正因為它聽起來如此「理性」、如此「穩健」，幾乎是貪婪能找到的最體面的偽裝。它不像鬱金香或南海那樣明顯瘋狂——畢竟，這些是真正偉大的公司啊！買最好的公司，難道有錯嗎？問題出在價格。在狂熱的追捧下，這些漂亮五十的本益比，被推升到了四十倍、五十倍、甚至上百倍——也就是說，你得用這家公司未來五十年、上百年的盈餘，才能回本。市場犯了一個它將反覆重犯的致命錯誤：<strong>把「一家偉大的公司」與「一筆划算的投資」混為一談。</strong>一家偉大的公司，如果你用了荒謬的價格去買，它依然會是一筆糟糕的投資。漂亮五十的故事告訴我們，泡沫不一定建立在垃圾上——它常常建立在最優質的資產上，只是被付了過高的價錢。這是「敘事」這把鑰匙最狡猾的一種變體：當故事本身（這些是好公司）完全正確時，人們最容易忽略那個唯一重要的問題——我付的價格，對嗎？</p>
+
+    <h3>一九七三—七四：優質股也躲不過的屠殺</h3>
+    <p>一九七三到一九七四年，鐘擺開始無情地反向擺動。石油危機、通膨失控、布列敦森林體系崩潰、水門事件的政治動盪——一連串的壞消息，戳破了「永遠成長」的迷夢。而當賣壓來臨，那些被捧上天的漂亮五十，跌得比誰都慘。本益比從五十倍打回十倍，意味著股價可以腰斬再腰斬。許多「一次決定」的信徒驚恐地發現，他們手中那些「永遠不必賣」的偉大公司，市值在兩年裡蒸發了百分之七十、八十。整體而言，標普五百在這場熊市裡跌掉了約四成五，是大蕭條以來最慘烈的一次。<em>那些用一輩子積蓄、在頂點買進「最安全的好股票」的人，被市場上了最痛的一課：在錯誤的價格上，沒有任何一檔股票是安全的。</em></p>
+
+    <p>漂亮五十的崩盤，還有一個更深的反諷。如果你真的、真的有鋼鐵般的意志，在一九七三年的頂點買進這些公司，然後死抱著不放、抱上二三十年，其中不少（如可口可樂、麥當勞）最終確實漲了回來，甚至大賺——它們真的是偉大的公司。但問題是，幾乎沒有人能在帳面虧損百分之八十、且看不到盡頭的那幾年裡，做到「無動於衷地抱著」。<strong>這正是市場最殘酷的地方：它不只考驗你的眼光（買對公司），更考驗你的情緒（在腰斬再腰斬時不投降）；而後者，遠比前者難得多。</strong>多數人會在最深的恐懼中，於接近谷底處割肉認賠，然後眼睜睜看著它在自己賣出後緩緩漲回。眼光人人學得會，情緒卻幾乎無人能馴服——這道鴻溝，將是第二十五章「與情緒共存」最核心的命題。</p>
+
+    <div class="pull"><p>泡沫不只長在垃圾上，它也長在鑽石上。漂亮五十證明了：把一家偉大的公司，與一筆划算的投資畫上等號，是市場最體面、也最昂貴的錯覺。在錯誤的價格面前，「績優股」三個字，保護不了任何人。</p></div>
+
+    <h3>當機構也開始追高：被制度化的從眾</h3>
+    <p>漂亮五十還有一個格外深刻、也格外現代的面向：這一次，把鐘擺推向極端的，不是天真的散戶，而是最專業、最該冷靜的「機構法人」——退休基金、保險公司、銀行信託部門。這些掌管著千百萬人血汗錢的專業經理人，理應是市場裡最理性的一群；可是他們卻集體地，把資金一股腦地湧入同樣那五十檔「績優成長股」，把它們的本益比越推越高。為什麼？因為對一個受雇的經理人而言，買進這些「公認最好、人人都在買」的公司，是最安全的選擇——萬一這些藍籌股出了事，那是整個市場、所有同行一起錯，沒人會怪你；可萬一你特立獨行去買了別的、結果看走眼，你個人就要承擔全部的責難，甚至丟掉飯碗。</p>
+    <p>這正是凱因斯早就一針見血指出的職業投資人困境，他說得辛辣而精準：<strong>「對名聲而言，循規蹈矩地失敗，遠勝於離經叛道地成功。」</strong>（寧可跟著大家一起錯，也不要獨自一人對。）於是，「羊群效應」這個原本被當成散戶毛病的東西，竟然以一種更隱蔽、更冠冕堂皇的方式，深植於最專業的機構之中——它甚至被「制度化」了，化作了基金經理人為了保住職業生涯，而不得不從眾的理性選擇。<em>當追高殺低不再是無知者的衝動，而成了專業人士為了自保的職業策略，從眾，就從一種心理弱點，升級成了一種結構性的力量。</em></p>
+    <p>這個洞見的意義極為深遠，因為它解釋了為什麼即使市場越來越「專業化」、越來越由受過嚴格訓練的機構主導，泡沫卻從未因此消失。專業，並不能讓人免於從眾；恰恰相反，職業生涯的考量，往往讓專業人士比散戶更不敢、也更不能違抗群眾。從漂亮五十的退休基金，到二〇〇〇年人人重押科技股的共同基金，到二〇〇八年集體擁抱 AAA 級毒資產的全球銀行——一次又一次，最聰明的專業人士，正是因為「不敢與群眾為敵」，而集體地、體面地，走向了同一個懸崖。</p>
+
+    <h3>沸騰歲月：「電子」與「綜合企業」的前奏</h3>
+    <p>漂亮五十的崩盤，並不是憑空發生的，它是一九六〇年代那整段被稱為「<strong>沸騰歲月</strong>」（the Go-Go Years）的投機狂熱，最後的、也最體面的一幕。要讀懂它，得先回到那十年的兩場前奏。第一場，發生在一九六一到六二年——「電子股熱潮」（the tronics boom）。當時太空競賽與電子科技點燃了全民的想像，於是任何一家公司，只要在名字後面加上「-tronics」或「electronics」（電子）這個字，股價就能無端飆漲，哪怕它做的根本是賣鞋或開餐館。這個現象，幾乎是四十年後「.com 後綴讓股價翻倍」的完美預演——又一次，群眾為一個代表「未來」的字眼，付出了荒謬的溢價。一九六二年的一場急跌，把這場熱潮暫時澆熄。</p>
+    <p>第二場前奏，是一九六〇年代中後期的「<strong>綜合企業</strong>」（conglomerate）泡沫。一批野心勃勃的企業——如 LTV、ITT、Litton、海灣西方——靠著不斷收購彼此毫不相干的公司（一家公司可能同時經營鋼鐵、保險、電影與旅館），把自己堆成龐大的帝國。他們玩的是一場精巧的會計魔術：一家高本益比的公司，去收購一家低本益比的公司，僅僅這個動作，就能在帳面上「變」出更高的每股盈餘，營造出「高速成長」的假象，於是股價又漲，又能用更貴的股票去收購下一家……這場用會計戲法堆砌的成長幻覺，本質上與三十年前的投資信託金字塔、四十年後的金融工程，是同一種把戲。當時操盤這些狂熱的，是一批被神化的「明星基金經理人」（gunslingers），如蔡至勇，他們追逐動能、頻繁進出，被群眾當作點石成金的偶像。</p>
+    <p>這兩場前奏，在一九六九到七〇年的熊市中雙雙退潮，會計戲法的真相被戳破，綜合企業的股價崩落。可是市場的情緒並沒有就此清醒，它只是換了個更「優雅」的對象——從浮誇的電子股與綜合企業，轉向了那些貨真價實的績優成長股，也就是漂亮五十。<strong>這正是情緒最狡猾的地方：一場狂熱破滅後，貪婪不會消失，它只會替自己尋找一件更體面、更難被識破的新外衣。</strong>從「沸騰歲月」到漂亮五十，是同一股投機熱情，從粗糙走向精緻、從明顯走向隱蔽的連續光譜——而它最終,在一九七三到七四年那場大熊市裡，連同最體面的那件外衣，一起被剝得精光。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 貪婪最體面的偽裝</span>
+      <p>漂亮五十，是這部書裡一個特別重要的案例，因為它示範了貪婪如何穿上「理性」與「穩健」的外衣，騙過連最謹慎的人。它不像鬱金香那樣張牙舞爪，它溫文爾雅地說：「我只買最好的公司，我很保守。」可是當「買最好的公司」這個正確的念頭，遇上「不計價格」這個致命的盲點，再優質的資產也會變成泡沫。這也再一次羞辱了上一章的效率市場假說——如果市場永遠理性，可口可樂怎麼會在一九七二年「正確」地值五十倍本益比，又在一九七四年「正確」地只值十幾倍？同一家公司，同樣的偉大，價格卻在兩年內天差地別，變的不是公司，是情緒。漂亮五十替全書的後半段埋下了一個關鍵問題：既然連「買績優股」這種看似最理性的策略都會被情緒帶偏，那麼，有沒有可能把「情緒」本身，變成一門可以研究、可以量化、可以防範的科學？這個問題的答案，將由兩位以色列心理學家，在下一部裡，徹底改寫。</p>
+    </div>
+  </div>
+</section>
+
+<div class="part-div reveal" id="part-5">
+  <span class="pn">第五部</span>
+  <h2 class="ptitle pt">情緒的科學</h2>
+  <div class="pe">The Science of Emotion — How Two Psychologists Proved Mr. Market Was Real</div>
+  <div class="pline"><span></span><span class="dot">▲</span><span></span></div>
+</div>
+
+<!-- ===== 第十三章 ===== -->
+<section class="act reveal" id="ch-13">
+  <div class="act-head">
+    <span class="act-num">第十三章 · Kahneman &amp; Tversky</span>
+    <h2 class="act-title">人不是機器：兩個心理學家，拆解了「理性人」</h2>
+    <p class="act-sub">Kahneman &amp; Tversky — The Two Psychologists Who Dismantled Homo Economicus</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>效率市場假說的整座大廈，建立在一個地基上——「理性人」（homo economicus）：一個冷靜、自利、會精確計算機率與效用、永不被情緒左右的決策者。經濟學整整一個世紀，都默認人是這樣一種生物。然後，在一九七〇年代，兩個和經濟學八竿子打不著的以色列心理學家，用一連串巧妙得近乎刁鑽的實驗，把這個地基，一塊一塊地敲碎了。他們是丹尼爾·卡尼曼（Daniel Kahneman）與阿莫斯·特沃斯基（Amos Tversky）。他們沒有去爭論「人應不應該理性」，而是冷靜地測量「人實際上如何決策」——結果發現，真實的人類，在面對風險與不確定時，系統性地、可預測地、一次又一次地，違背了理性人的每一條假設。</p>
+
+    <p>一九七四年，他們在《科學》期刊發表了關於「捷思與偏誤」（heuristics and biases）的研究，揭示人腦為了省力，會依賴一些便捷的「心理捷徑」，而這些捷徑在許多情況下會導致系統性的錯誤。例如「<strong>錨定效應</strong>」（anchoring）：人們的判斷會被一個無關的初始數字牢牢拖住——這解釋了為什麼投資人會死守著「我的成本價」，明明公司早已今非昔比，卻非要等「漲回我買的價格」才肯賣。又如「<strong>可得性偏誤</strong>」（availability）：人們會高估那些容易想起、印象鮮明的事件的機率——這解釋了為什麼一場剛發生的崩盤，會讓人過度恐懼、遲遲不敢進場（記憶太鮮明）；而一段太平日子，又會讓人低估風險（想不起危險長什麼樣）。還有「<strong>近因偏誤</strong>」（recency bias）：人們傾向相信，剛剛發生的趨勢會一直延續下去——漲時覺得會永遠漲，跌時覺得會跌到歸零。每一條偏誤，都是市場集體情緒的一塊拼圖。</p>
+
+    <h3>展望理論：為什麼賠錢的痛，遠大於賺錢的爽</h3>
+    <p>而他們最重磅的貢獻，是一九七九年發表的「<strong>展望理論</strong>」（Prospect Theory）。它的核心發現，一句話就能說清，卻足以解釋市場上一半的非理性行為：<strong>人們對「損失」的痛苦感受，大約是對「等量獲利」的快樂感受的兩倍。</strong>賠一千塊的難受，要賺到兩千塊左右，才能抵消。這就是著名的「<strong>損失趨避</strong>」（loss aversion）。這個看似簡單的不對稱，後果極其深遠。它解釋了投資人最常犯、也最致命的一個錯誤——「<strong>處置效應</strong>」（disposition effect）：人們傾向太早賣掉賺錢的股票（急著把「快樂」鎖進口袋），卻死抱著賠錢的股票不放（因為「實現虧損」的痛苦太強烈，只要不賣，就還能自欺欺人地說「這只是帳面虧損」）。結果，散戶系統性地「砍掉獲利、抱住虧損」，做的恰恰是與「截斷虧損、讓獲利奔跑」這條鐵律完全相反的事。三百年前德拉維加在阿姆斯特丹觀察到的「賺錢時得意、賠錢時呼天搶地」，至此，被精確地量化、實驗證明、寫成了理論。</p>
+
+    <p>損失趨避，也是崩盤之所以如此凶猛、恐慌之所以如此會踩踏的深層心理機制。當股價開始下跌，損失趨避讓那份痛苦被放大成兩倍，逼著人們不惜代價、奪門而出，只求停止那難以忍受的痛——這就是為什麼市場「跌的時候，總是比漲的時候快、比漲的時候猛」。貪婪是溫吞的、漸進的，它讓泡沫慢慢吹大；恐懼卻是爆裂的、瞬間的，它讓崩盤一夕降臨。鐘擺的兩端，速度並不對稱——而展望理論，第一次替這份不對稱，找到了人腦深處的根源。卡尼曼後來在二〇〇二年獲得諾貝爾經濟學獎（特沃斯基已於一九九六年辭世，無緣分享，諾獎不追授已故者），一個心理學家拿下經濟學的最高榮譽，本身就象徵著一件事：經濟學，終於不得不承認，它研究的對象，是人，不是機器。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>心理偏誤</th><th>它讓投資人做什麼蠢事</th><th>對應的市場現象</th></tr></thead>
+        <tbody>
+          <tr><td><strong>損失趨避</strong></td><td>砍掉獲利、死抱虧損；恐慌中不計價拋售</td><td>崩盤比上漲更快更猛</td></tr>
+          <tr><td><strong>錨定效應</strong></td><td>死守「我的成本價」才肯賣</td><td>套牢盤、解套賣壓</td></tr>
+          <tr><td><strong>近因偏誤</strong></td><td>把剛發生的趨勢無限外推</td><td>追高殺低、趨勢自我強化</td></tr>
+          <tr><td><strong>可得性偏誤</strong></td><td>剛崩過盤就過度恐懼，太平久了就低估風險</td><td>恐懼與貪婪的循環</td></tr>
+          <tr><td><strong>過度自信</strong></td><td>高估自己選股、擇時的能力</td><td>過度交易、集中下注</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>賠錢的痛，真的會痛：情緒的腦科學</h3>
+    <p>展望理論說「賠錢的痛苦約是賺錢快樂的兩倍」，這原本是從問卷與實驗推導出的行為規律；但後來神經科學的進展，給了它一個更震撼的生理註腳。當研究者用功能性磁振造影（fMRI）掃描人們在面對金融損失時的大腦，他們發現：<strong>金錢損失所激活的腦區，與身體疼痛、與面對威脅時的恐懼反應，高度重疊。</strong>換句話說，「賠錢」對大腦而言，不只是一個抽象的數字變小，它幾乎是一種真實的、生理層次的「痛」與「危險」。難怪在崩盤中，人們會不計代價地奪門而出——他們的大腦，正把那份虧損當成一頭撲面而來的猛獸在處理。理性的計算，在這種原始的疼痛與恐懼面前，幾乎無力招架。</p>
+    <p>這也解釋了一個投資人最熟悉、卻最難克服的現象——「<strong>知道</strong>」與「<strong>做到</strong>」之間，為什麼有一道幾乎跨不過去的鴻溝。在風平浪靜時，每個人都能在理智上同意「別人恐懼時我要貪婪」；可是當崩盤真的來臨、當帳戶的數字以肉眼可見的速度蒸發、當那份源自遠古、會激活疼痛迴路的恐懼攫住你時，那個冷靜的「系統二」會瞬間被劫持，只剩下「系統一」在尖叫:賣！快賣！這就是心理學說的「冷熱同理鴻溝」——人在冷靜（冷）的時候，永遠低估了自己在激動（熱）的時候會有多麼不理性。<strong>這正是為什麼，所有的投資紀律，本質上都是一套「在冷靜時預先綁住自己、好讓自己在激動時無法做蠢事」的設計</strong>——就像奧德修斯，明知將經過海妖塞壬的歌聲，於是事先把自己綁在桅杆上。行為金融學最實用的教訓，或許就是：不要相信激動中的自己，要在冷靜時，替那個未來必將激動、必將恐懼的你，預先設好不可違背的規則。</p>
+
+    <h3>框架、心理帳戶，與兩個系統</h3>
+    <p>卡尼曼與特沃斯基的拆解，遠不止損失趨避一項。他們發現了「<strong>框架效應</strong>」（framing）：同一個選擇，只要換個說法呈現，人們的決定就會逆轉——同樣是九成存活率與一成死亡率，明明是同一回事，前者的說法卻會讓人勇於行動，後者讓人退縮。這解釋了為什麼市場對同一則消息的反應，會因為媒體「怎麼說」而天差地別；為什麼「本益比三十倍」聽起來嚇人，包裝成「本益成長比合理」就讓人安心。他們還揭示了「<strong>心理帳戶</strong>」（mental accounting）：人們會把錢依來源、用途貼上不同標籤，分開對待——剛在股市賺到的錢，會被當成「賭場的籌碼」（house money）而更敢於亂花亂賭，這正是牛市後期人們越賺越大膽的心理根源；而「成本價」「已實現／未實現損益」這些人為的劃分，又讓人做出種種不理性的買賣。</p>
+    <p>還有那個讓無數投資人越套越深的「<strong>沉沒成本謬誤</strong>」（sunk cost fallacy）：一檔股票套牢了，理性上早該認賠，可是「都已經賠這麼多了，賣掉不就血本無歸」的念頭，反而逼著人不斷向下攤平、把更多的好錢丟進壞投資裡，只為了不去面對「我當初錯了」這個痛苦。卡尼曼晚年在暢銷書《快思慢想》裡，把這一切歸結為人腦的兩套思考系統：又快又直覺、靠情緒驅動的「系統一」，與又慢又費力、講邏輯的「系統二」。市場上絕大多數的當下決定——追高、殺低、恐慌、貪婪——都是系統一的傑作；而系統二，那個本該冷靜計算的理性，往往姍姍來遲，甚至淪為替系統一的衝動「事後找藉口」的辯護律師。<strong>這正是市場的悲劇核心：股市是一台以毫秒運轉、不斷刺激你做決定的機器，而它刺激的，恰恰是人腦裡那個最衝動、最情緒化、最容易犯錯的系統一。</strong></p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 把市場先生請進實驗室</span>
+      <p>卡尼曼與特沃斯基，是這部書的轉捩點。在他們之前，「市場由情緒驅動」這個論點，雖然從德拉維加到凱因斯都有人說過，卻始終停留在敏銳的觀察、生動的比喻層次，缺乏科學的硬度，因而被效率市場假說那套漂亮的數學壓著打。在他們之後，情緒不再只是文人的感嘆，而成了可實驗、可測量、可預測的科學對象。他們等於把那個躁鬱的「市場先生」，從葛拉漢的比喻，請進了實驗室，量了他的血壓、做了他的腦波圖——並證明了：市場先生的躁鬱，不是個別人的毛病，而是寫在每一顆人腦深處的、普世的程式碼。這把全書的第一、二把鑰匙（鐘擺、群眾）從「現象」升級成了「機制」：我們終於知道，鐘擺為何擺、群眾為何瘋。下一章，這門新科學將長成一整個學派——行為金融學——並由一個人，在二〇〇〇年，喊出那句完美命中泡沫頂點的預言。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第十四章 ===== -->
+<section class="act reveal" id="ch-14">
+  <div class="act-head">
+    <span class="act-num">第十四章 · Behavioral Finance</span>
+    <h2 class="act-title">行為金融的崛起：替市場先生畫一張情緒地圖</h2>
+    <p class="act-sub">Behavioral Finance — Mapping the Emotions of Mr. Market</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>卡尼曼與特沃斯基揭開了人腦的非理性，但把這套洞見正式帶進金融市場、開創出「行為金融學」（behavioral finance）這門新學科的，是另一批人。其中的領軍人物，是芝加哥大學的理查·塞勒（Richard Thaler）——一個敢在效率市場假說的大本營、就坐在法馬隔壁的辦公室裡，公然主張「人是不理性的」的異端。塞勒和同事用一個又一個實證研究，記錄下市場上那些用 EMH 根本無法解釋的「異常現象」（anomalies）。例如他與德邦特（Werner De Bondt）發現的「<strong>過度反應</strong>」：過去幾年表現最差的一批「輸家」股票，在隨後幾年的報酬，竟系統性地超越過去最風光的「贏家」股票——這直接證明了市場會集體地反應過頭，把壞消息殺過頭、把好消息追過頭，然後再慢慢回歸。這正是鐘擺「總是擺過頭」那條鐵律的學術鐵證。塞勒後來在二〇一七年也拿下了諾貝爾經濟學獎。</p>
+
+    <p>行為金融學替「市場先生」畫出了一張越來越精細的情緒地圖。除了前一章的損失趨避與各種偏誤，它還編目了一連串集體情緒的病徵：「<strong>羊群效應</strong>」（herding）——人們傾向跟隨群眾，因為「跟大家一起錯」帶來的痛苦，遠小於「獨自一人錯」；「<strong>過度自信</strong>」（overconfidence）——絕大多數投資人都自認操盤能力高於平均，於是過度交易、過度集中，而研究顯示，交易越頻繁的散戶，報酬往往越差；「<strong>確認偏誤</strong>」（confirmation bias）——人們只看得見支持自己既有立場的資訊，於是抱著一檔爛股票時，會自動過濾掉所有的壞消息。每一條，都是把勒龐筆下那個模糊的「烏合之眾」，拆解成了具體、可命名、可在每個人身上驗證的心理機制。</p>
+
+    <h3>席勒：在泡沫的頂點，喊出它的名字</h3>
+    <p>而行為金融學最戲劇性的一刻，屬於耶魯大學的羅伯特·席勒（Robert Shiller）。席勒長期研究市場的「過度波動」——他發現，股價的上下起伏，遠遠大於其背後真實基本面（如股息）的波動所能解釋的幅度，這意味著，驅動價格大起大落的，主要不是理性的基本面，而是某種會自我膨脹、自我崩塌的東西。他借用了一個一九九六年從聯準會主席葛林斯潘口中蹦出的詞，來形容這種東西——「<strong>非理性繁榮</strong>」（irrational exuberance）。二〇〇〇年初，就在網路股泡沫吹到最大、那斯達克即將見頂的歷史性時刻，席勒出版了一本就叫《非理性繁榮》（<em>Irrational Exuberance</em>）的書，冷靜而系統地論證：眼前這場狂熱，是一個由心理與敘事驅動的典型泡沫，終將破滅。幾週之後，那斯達克崩盤，席勒一夜之間成了先知。他後來在二〇一三年獲頒諾貝爾獎——有趣的是，與他同年共享這個獎的，正是效率市場假說之父法馬。<em>諾貝爾委員會把同一年的獎，同時頒給了「市場是理性的」與「市場是情緒的」這兩個針鋒相對的人——這個耐人尋味的安排，本身就承認了：市場，這兩者都是。</em></p>
+
+    <p>席勒晚年還提出一個格外貼合這部書的概念——「<strong>敘事經濟學</strong>」（narrative economics）。他主張，經濟與市場的大起大落，是由「會像病毒一樣傳染的故事」所驅動的：一個動人的故事（這支股票會讓你致富、這項技術會改變世界、這次真的不一樣）在人群中口耳相傳、不斷複製，推動人們做出買進或拋售的集體行動，而這些行動又反過來「印證」了那個故事，形成自我實現的循環。這幾乎是把第三把鑰匙「敘事」，正式寫成了一門經濟學。從索羅斯憑直覺與實戰悟出的「反身性」，到席勒嚴謹論證的「敘事經濟學」，殊途同歸地指向同一個真相：在市場裡，<strong>人們相信的故事，會真的改變現實——直到故事再也撐不住的那一刻。</strong></p>
+
+    <div class="pull"><p>行為金融學沒有發明任何新的情緒——貪婪與恐懼，自阿姆斯特丹的第一天就在那裡了。它做的，是替這些古老的情緒，編出一份精確的目錄，畫出一張詳盡的地圖。從此，市場先生的躁鬱，不再是無法言說的神秘，而是一份可以被診斷、甚至被防範的病歷。</p></div>
+
+    <h3>反身性、套利的極限，與一把測量泡沫的尺</h3>
+    <p>行為金融學還必須回答效率市場假說最有力的一記反擊：就算有些人不理性，難道市場上那些絕頂聰明的「套利者」，不會立刻抓住這些錯誤、把價格修正回正確嗎？換句話說，非理性難道不會被聰明錢「套利掉」嗎？學者們的回答，是「<strong>套利的極限</strong>」。聰明錢就算看出了泡沫，也未必敢下手做空——因為泡沫可能漲得更久、更高（凱因斯的鐵律），做空者可能在被證明正確之前就先被軋爆。LTCM、《大賣空》裡的貝瑞，都是活生生的例證。於是一個殘酷的現實浮現：理性的少數，往往沒有足夠的火力與膽量，去對抗非理性的多數；市場的錯誤，不但不會被即時修正，反而可能因為「連聰明錢都不敢逆勢」而被放任、被延長。這在理論上，徹底動搖了效率市場假說「錯誤會被自動糾正」的根基。</p>
+    <p>而索羅斯的「反身性」，正是這一切的實戰版。他主張，市場參與者的偏見不是被動的，而會主動地改變基本面本身，形成「漲→更敢借貸擴張→基本面真的變好→更漲」的自我強化循環，直到偏離現實太遠、難以為繼，再反向崩跌。一九九二年，他正是看準了這種反身性，重押放空英鎊，逼得英格蘭銀行棄守、英鎊狼狽貶值，一役賺進約十億美元，被封為「擊垮英格蘭銀行的人」。為了給市場的長期情緒一把可測量的尺，席勒則發明了「<strong>週期調整本益比</strong>」（CAPE，又稱席勒本益比）——用過去十年經通膨調整的平均盈餘來計算估值，藉以濾掉短期波動，看清市場整體是處在「貪婪的昂貴」還是「恐懼的便宜」。當 CAPE 飆上歷史極端的高位（如一九二九、二〇〇〇），往往就是鐘擺盪向貪婪極致的警訊。二〇〇九年金融海嘯後，席勒更與經濟學家艾克羅夫合著《動物本能》一書，直接接續了凱因斯七十年前的那個詞，主張正是信心、公平、貪腐、貨幣幻覺與集體故事這些「動物本能」，而非冷靜的計算，在主宰著總體經濟的興衰。<strong>從凱因斯到索羅斯到席勒，一條清晰的線索貫穿了整個二十世紀：經濟學一步步地，把「情緒」從它假設的世界邊緣，請回了舞台的正中央。</strong></p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 從觀察，到科學，到預言</span>
+      <p>這一章，全書的三把鑰匙第一次有了完整的「科學版本」：鐘擺，被席勒的「過度波動」與塞勒的「過度反應」量化了；群眾，被「羊群效應」「過度自信」拆解了；敘事與遺忘，被席勒的「敘事經濟學」與索羅斯的「反身性」理論化了。值得玩味的是，行為金融學最大的勝利——席勒在二〇〇〇年精準預言網路泡沫——也同時暴露了它最大的侷限：席勒「知道」那是泡沫，卻無法告訴你它何時破（凱因斯的幽靈：市場非理性的時間，可以長過你的耐心）。知道市場由情緒驅動，並不等於就能戰勝它——這道「知易行難」的鴻溝，正是後面第二十四章的核心。而現在，就讓這門剛剛成形的情緒科學，去面對一個它無法迴避的考驗：一九八七年那一天，市場在沒有任何壞消息的情況下，憑空蒸發了四分之一。如果市場是理性的，那一天，根本不該存在。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第十五章 ===== -->
+<section class="act reveal" id="ch-15">
+  <div class="act-head">
+    <span class="act-num">第十五章 · Black Monday 1987</span>
+    <h2 class="act-title">黑色星期一：一場沒有理由的崩盤，與機器的第一次反撲</h2>
+    <p class="act-sub">Black Monday 1987 — A Crash Without a Cause, and the Machines&rsquo; First Revolt</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>一九八七年十月十九日，星期一。這一天，美國道瓊工業指數在短短一個交易日內，暴跌了<strong>百分之二十二點六</strong>——這是它有史以來最大的單日百分比跌幅，至今未被打破，比一九二九年任何一個「黑色」的日子都要慘烈。一天之內，市場蒸發了超過五分之一的價值。然而，當所有人事後翻遍報紙、想找出究竟是什麼驚天動地的壞消息引爆了這場災難時，他們發現了一件令人毛骨悚然的事：<strong>什麼都沒有。</strong>沒有戰爭爆發，沒有總統遇刺，沒有銀行倒閉，沒有任何一則足以解釋如此崩跌的重大利空。市場，就這樣在一個尋常的星期一，毫無「理由」地，崩潰了。</p>
+
+    <p>對效率市場假說而言，這一天是一場無法癒合的災難。如果股價永遠正確地反映所有資訊，那麼在沒有任何新資訊出現的情況下，市場的「正確價值」怎麼可能在一天之內蒸發兩成？除非——除非驅動價格的，根本就不是資訊，而是別的東西。那個東西，就是這部書從頭到尾在講的：情緒，與恐慌的自我加速。一九八七年的黑色星期一，是市場親口給效率市場假說的最響亮的一記耳光，也是行為金融學最有力的一份證物。它赤裸裸地證明了：市場可以在基本面毫無變化的情況下，純粹因為「賣壓引發更多賣壓、恐懼傳染更多恐懼」，而自己把自己嚇崩。</p>
+
+    <h3>當「保險」變成了縱火</h3>
+    <p>但一九八七年還帶來了一個全新的、將定義未來的元素——這一次，放大恐慌的，不只是人的情緒，還有人寫出來的程式。當時華爾街流行一種叫「<strong>投資組合保險</strong>」（portfolio insurance）的避險策略。它的邏輯聽起來很聰明：當市場下跌時，電腦程式會自動賣出股指期貨來「保護」投資組合、鎖住損失。單獨看，每一家機構這麼做都很理性。可是當市場真的開始下跌，成百上千套這樣的程式，在同一時間、收到同一個訊號、做出同一個動作——拋售。而這些自動拋售，又把價格砸得更低；更低的價格，觸發了更多程式的拋售訊號；於是「下跌→程式拋售→更下跌→更多程式拋售」，形成一個瘋狂自旋、無人能喊停的死亡螺旋。那個本意是「保險」的工具，反而成了把火災變成燎原大火的<strong>助燃劑</strong>。</p>
+
+    <p>這是一個劃時代的、也是不祥的轉折。人類發明機器，本意是讓市場更有效率、更理性、剔除情緒的干擾；可是黑色星期一證明了一件相反的事：<strong>機器不會消除情緒，它只會用光速去執行人類預先寫進它的情緒。</strong>那些程式裡編碼的「下跌就賣」，本質上就是「損失趨避」與「恐慌出逃」這種最古老的人類情緒，只是被翻譯成了程式碼，並以人類手指永遠跟不上的速度執行。一七二〇年的恐慌靠口耳相傳要好幾天，一八六七年的報價機把它縮短到幾分鐘，而一九八七年的程式交易，把它壓縮到了幾秒鐘。情緒沒有變，變的只是它傳染與引爆的速度——而速度越快，崩盤就越猛、越不可控。這條線索，將一路延伸到二〇一〇年那場幾分鐘內上演的「閃電崩盤」，與今天由演算法與高頻交易主宰的市場（見第二十、二十五章）。</p>
+
+    <p>事後，由布雷迪委員會（Brady Commission）領銜的調查，把矛頭直指投資組合保險與程式交易的回饋循環。而監管者學到的教訓，又一次以「護欄」的形式落地——交易所引進了「<strong>熔斷機制</strong>」（circuit breakers）：當市場單日跌幅達到某個門檻，就強制暫停交易一段時間，等於給瘋狂奔逃的群眾按下一個暫停鍵，逼大家冷靜幾分鐘，打斷那個自我加速的恐慌螺旋。這是人類馴服情緒機器的又一道防線——繼存款保險（擋住擠兌的恐懼）、保證金限制（擋住槓桿的貪婪）之後，熔斷機制，是專門用來打斷「恐慌正回饋」的閘門。然而和所有護欄一樣，它能減緩崩盤的速度，卻擋不住下一場崩盤的到來——因為它管得住機器，管不住人心。</p>
+
+    <h3>全球同步的恐慌，與一隻看不見的手的誕生</h3>
+    <p>一九八七年的黑色星期一，還有一個劃時代的特徵——它是第一場真正「全球同步」的崩盤。在過去，恐慌的傳染需要時間跨越大洋；可是到了一九八七年，衛星通訊與全球連動的市場，讓恐懼幾乎在同一個鐘點，掃過了世界各地。當紐約崩跌，恐慌如骨牌般傳遍東京、倫敦、香港、雪梨——香港股市甚至因為跌勢太猛、違約太多，乾脆關閉了整整四天，企圖斬斷這場傳染，結果重新開市後反而跌得更兇。報價機那條「讓恐懼傳染得更快」的線索，在這一天，第一次擴展到了全球的尺度：人類發現，自己打造的這張全球金融大網，在帶來繁榮的同時，也讓任何一地的恐慌，都能瞬間變成所有人的恐慌。</p>
+    <p>然而，一九八七年最耐人尋味的結局是：儘管創下了史上最大單日跌幅，這場崩盤對實體經濟的衝擊，卻遠比所有人預期的輕微——它沒有引發第二次大蕭條，美國經濟幾乎毫髮無傷，股市更在當年年底就收復了大部分失土，全年甚至還小幅收紅。為什麼？一個關鍵原因，是剛上任不久的聯準會主席葛林斯潘，在崩盤次日，立刻發表聲明、大舉注入流動性，明確宣示央行將不惜代價支撐金融體系。市場應聲穩住。</p>
+    <p>這個看似不起眼的舉動，意義卻極為深遠——它被許多人視為「<strong>葛林斯潘賣權</strong>」（the Greenspan put）的誕生時刻，也就是後來那個「跌深了央行一定會出手相救」的信念的源頭。從一九〇七年摩根單槍匹馬救市、到聯準會成立、到一九八七年葛林斯潘的迅速馳援，那條馴服市場恐懼的「最後貸款人」線索，在這一天，悄然進化成了一個更主動、更系統、市場也更加依賴的角色。<strong>一九八七年於是成了一個雙重的轉折點：它一方面證明了，純粹的情緒與市場結構，可以在毫無基本面理由的情況下引爆崩盤；另一方面又示範了，一隻來自央行的、看得見的手，可以多快地安撫住那場恐慌。</strong>而這隻手在往後三十年裡越伸越長、市場對它越來越上癮的故事，將在第二十章迎來它的高潮與隱憂。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 沒有理由，才最有道理</span>
+      <p>黑色星期一是這部書的一個關鍵錨點，因為它把「市場由情緒而非資訊驅動」這個論點，證明到了無可辯駁的地步——一場找不到任何基本面理由的崩盤，本身就是最強的理由。它同時開啟了一條全新的、將主導後半部全書的線索：<strong>機器與情緒的合謀。</strong>我們總以為自動化會讓市場更冷靜，但一九八七年揭示了相反的真相——機器是情緒的放大器，它用光速執行著被編碼進它的人類恐慌。從這一天起，每一次崩盤的速度都會更快，因為每一次，背後都有更多、更快的機器，在替人類的貪婪與恐懼按下扳機。下一部，我們將離開美國，飛越太平洋與大西洋，去看這台情緒機器如何全球化——當貪婪與恐懼跨越國界、以資本流動的速度傳染，會釀成怎樣的災難。第一站，是一個把鐘擺盪到人類史上最高、然後用了三十年才盪回來的國家：日本。</p>
+    </div>
+  </div>
+</section>
+
+<div class="part-div reveal" id="part-6">
+  <span class="pn">第六部</span>
+  <h2 class="ptitle pt">全球化的情緒</h2>
+  <div class="pe">Globalized Emotion — Japan&rsquo;s Slow Sorrow, Contagion Across Borders, and the New Economy</div>
+  <div class="pline"><span></span><span class="dot">▲</span><span></span></div>
+</div>
+
+<!-- ===== 第十六章 ===== -->
+<section class="act reveal" id="ch-16">
+  <div class="act-head">
+    <span class="act-num">第十六章 · The Japanese Bubble</span>
+    <h2 class="act-title">日本的泡沫：當一座皇居，貴過整個加州</h2>
+    <p class="act-sub">The Japanese Bubble — When the Imperial Palace Was Worth More Than California</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>一九八〇年代的日本，是整個世界既羨慕又恐懼的對象。戰後從廢墟中崛起的日本，靠著精良的製造業、源源不絕的出口，累積了驚人的財富。豐田、新力、本田橫掃全球市場，日本企業大手筆收購美國的地標——洛克斐勒中心、好萊塢的哥倫比亞影業、加州的圓石灘高爾夫球場。當時最暢銷的書叫《日本第一》，西方瀰漫著一種「日本將買下全世界、二十一世紀是日本的世紀」的焦慮。而日本人自己，更是被一種民族性的自信沖昏了頭——他們真心相信，日本的經濟模式優越於一切，傳統的估值法則，對日本不適用。又一次，那句最昂貴的咒語響起：<strong>「日本不一樣。」</strong></p>
+
+    <p>這份舉國的亢奮，灌進了股市與房市，吹出了人類史上規模最大、也最匪夷所思的資產泡沫之一。日經二二五指數，從一九八〇年代初的不到八千點，一路狂飆，到一九八九年十二月二十九日——這個日子值得記住，因為它是一整個時代的最高點——攀上了<strong>三八,九一五點</strong>的歷史巔峰。日本股票的本益比被推到六、七十倍，是美國的數倍。而房地產更瘋狂：東京的地價漲到一個荒謬的程度，當時流傳一個著名的計算——光是東京皇居底下那一小塊土地的理論地價，就足以買下整個美國加州；而整個日本的土地總值，據估超過了全美國土地總值的好幾倍——一個面積只有加州大小的島國，「帳面上」比整個美洲大陸還值錢。銀行瘋狂放貸，企業拿著漲上天的股票與土地當抵押，再去買更多的股票與土地，一個典型的、由信貸層層堆疊的金德爾伯格式泡沫，膨脹到了極致。</p>
+
+    <h3>最緩慢、最哀傷的破滅</h3>
+    <p>然後，鐘擺開始回擺。一九九〇年初，日本央行為了給過熱的經濟降溫而升息，刺破了泡沫。股市開始下跌——但與一九二九或一九八七那種驚心動魄的崩盤不同，日本泡沫的破滅，是這部書裡最緩慢、最漫長、也最哀傷的一場。它不是一夕崩塌，而是用了將近二十年的時間，一點一點地、看不到盡頭地往下滲漏。日經指數從三八,九一五點起步，跌跌不休，到二〇〇三年只剩約八千點，到二〇〇九年金融海嘯後更跌破七千點——從最高點算起，蒸發了超過<strong>八成</strong>。地價同樣崩跌，無數在高點借錢買地的企業與個人，背上了一輩子也還不清的債務，淪為「負資產」。</p>
+
+    <p>日本泡沫破滅的後果，催生了一個經濟學的新名詞——「<strong>失落的十年</strong>」，後來不得不延長為「失落的二十年」、「失落的三十年」。泡沫破滅後，日本陷入了一種揮之不去的通貨緊縮與經濟停滯：企業忙著還債而不敢投資，銀行抱著大量壞帳而不敢放貸，消費者預期物價會更便宜而不敢消費，整個社會被一種集體的、結構性的悲觀情緒所籠罩。這是大蕭條那種「集體恐懼凍結整個經濟」的日本版，只是它不像大蕭條那樣劇烈而短暫，而是溫水煮青蛙般，緩慢地、持續了一代人之久。<em>日經指數要一直等到二〇二四年二月，才終於、時隔三十四年，重新越過一九八九年的那個高點。</em>一個在頂點買進的日本人，要等整整一輩子——三十四年——才能解套。沒有任何一個案例，比日本，更能說明鐘擺盪到極端後，回程可以有多麼漫長而痛苦。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">38,915</div><div class="lbl">日經高點<br>1989/12/29</div></div>
+      <div class="stat"><div class="num">−82%</div><div class="lbl">跌至谷底<br>（2009）</div></div>
+      <div class="stat"><div class="num">34年</div><div class="lbl">收復高點<br>直到 2024/2</div></div>
+      <div class="stat"><div class="num">1×加州</div><div class="lbl">東京皇居<br>理論地價傳說</div></div>
+    </div>
+
+    <h3>當所有人同時還債：一種貨幣政策救不了的衰退</h3>
+    <p>日本「失落三十年」最深刻的經濟學遺產，是一個叫「<strong>資產負債表衰退</strong>」的概念（由經濟學家辜朝明提出）。它的邏輯是這樣的：泡沫破滅後，企業帳上那些用泡沫價買來的資產（股票、土地）價值暴跌，但當初借的債務一分都沒少——於是無數企業在技術上「資不抵債」。在這種情況下，企業的首要目標，不再是「借錢擴張、追求利潤最大化」，而變成了「拚命還債、修復千瘡百孔的資產負債表」。哪怕日本央行把利率降到了零、甚至想盡辦法塞錢給企業，企業也不願意借——因為它們滿腦子想的，是怎麼把已經欠下的債還掉。</p>
+    <p>這就是為什麼日本的困境，是傳統貨幣政策幾乎無能為力的。央行能做的是「降低借錢的成本」，可是當整個社會集體陷入「不計代價也要還債、絕不再借」的心態時，再低的利率也推不動經濟——你可以把馬牽到水邊，卻無法逼牠喝水。<strong>而這背後，本質上是一種被恐懼徹底主宰的集體心理：一次足夠慘烈的泡沫破滅，能讓整個社會的「動物本能」由貪婪的擴張，翻轉為恐懼的收縮，並且一收縮就是二、三十年。</strong></p>
+    <p>這個日本獨有的痛苦教訓，在二〇〇八年金融海嘯後，成了西方央行最深的夢魘與最重要的指南。正是因為親眼見過日本如何因為「行動太慢、太溫吞」而陷入長達數十年的泥沼，柏南克領導的聯準會，才會在二〇〇八年果斷地、不計毀譽地祭出史無前例的量化寬鬆——他們最大的恐懼，就是重蹈日本的覆轍。<em>日本用三十年的代價，替全世界上了一堂關於「集體恐懼能造成多深、多久的傷害」的課；而這堂課，深刻地塑造了此後西方央行對待每一次危機的方式。</em></p>
+
+    <h3>當公司不再靠本業賺錢：財技與殭屍的二十年</h3>
+    <p>日本泡沫的頂峰，瀰漫著一種把實業拋諸腦後、人人沉迷於「錢滾錢」的氛圍，當時有一個專門的詞來形容它——「<strong>財技</strong>」（zaitech，財務工程）。許多日本大企業發現，與其辛辛苦苦地造車、造電器，不如把資金拿去炒股票、炒土地來得快；於是不少製造業巨頭，靠金融投機賺到的錢，竟一度超過了它們的本業利潤。整個國家的資本，從「創造價值」滑向了「轉手價格」——這正是投機取代投資、鐘擺盪向極致的典型徵兆。狂熱蔓延到每一個角落：高爾夫球場的會員證被當成金融商品炒作，價格漲到天文數字；銀行則在「土地永遠會漲」的信念下，瘋狂地以高估的土地為抵押放貸，把整個金融體系與這個泡沫，死死地綁在了一起。</p>
+    <p>正因為綁得這麼深，破滅的後果才這麼長。泡沫一破，那些以泡沫價土地為抵押的貸款，全部變成了還不出來的壞帳。但日本的銀行與企業，沒有像美國那樣壯士斷腕、迅速認賠出清，而是選擇了拖延與掩蓋——銀行不願承認壞帳、繼續對早該倒閉的企業「續命」放貸，於是養出了一大批靠輸血苟活、卻再也無力投資與成長的「<strong>殭屍企業</strong>」。這種「不願面對痛苦、選擇慢性拖延」的集體心態，讓日本經濟陷入了一種詭異的、長達二十年的半死不活：沒有劇烈的崩潰，卻也永遠等不到真正的復甦。</p>
+    <p>這背後，是一種與大蕭條截然不同的恐懼。大蕭條的恐懼是劇烈而外顯的——擠兌、崩盤、失業遊行；而日本「失落三十年」的恐懼，是溫吞而內化的——它表現為一種瀰漫全社會的悲觀、保守與認命。企業怕負債而不敢投資，銀行怕壞帳而不敢放貸，家庭怕未來而不敢消費，年輕人對成功與冒險失去了胃口。價格只要預期會更便宜，今天就沒有人願意買，於是通貨緊縮像一張濕冷的網，把整個社會的「動物本能」悶死。<strong>日本證明了，鐘擺盪向恐懼的谷底，未必是一場轟轟烈烈的崩盤，它也可以是一場長達一代人、溫水煮青蛙般的集體消沉——而後者，對一個民族精神的腐蝕，甚至可能更深、更難治癒。</strong></p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 一個民族的「這次不一樣」</span>
+      <p>日本泡沫，是「這次不一樣」這句咒語的最高級形態——它不只迷惑了投機客，而是被一整個民族、連同它的菁英、央行、媒體，集體地信奉為國運的證明。這提醒我們，鐘擺擺向貪婪的那一端，不只發生在個人或某個產業，它可以放大成一整個國家的集體幻覺。而日本最深刻的教訓，藏在它破滅的「形態」裡：崩盤不一定是轟然一聲的雪崩，它也可以是長達三十年、溫水般的滲漏——而後者，對社會心理的腐蝕，甚至更深。大蕭條的恐懼，催出了憤怒與改革；日本的失落，卻催出了一種更難治癒的東西——集體的認命與低欲望。同樣是鐘擺盪向恐懼的谷底，美國花了二十五年走出來，日本走了三十四年。下一章，我們將看到這台情緒機器如何徹底全球化——當資本可以在幾秒鐘內跨越國界，恐懼，也學會了在幾天之內，傳染整個大陸。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第十七章 ===== -->
+<section class="act reveal" id="ch-17">
+  <div class="act-head">
+    <span class="act-num">第十七章 · Contagion &amp; the Smartest Men</span>
+    <h2 class="act-title">傳染與最聰明的人：當恐懼跨越國界，當模型敗給人性</h2>
+    <p class="act-sub">Contagion &amp; the Smartest Men — When Fear Crossed Borders and Models Met Panic</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>一九九〇年代，全球化把世界各國的金融市場，連成了一張前所未有的大網。資本可以在彈指之間，從紐約流向曼谷、從倫敦流向首爾。這張網帶來了繁榮，也帶來了一種全新的、可怕的東西——情緒的「跨國傳染」。當年報價機讓恐懼在一國之內以光速傳染；如今，全球資本流動，讓恐懼學會了跨越大洋、傳染整片大陸。一九九七年，這場傳染，以「亞洲金融風暴」的形態，第一次完整爆發。</p>
+
+    <p>故事從泰國開始。一九九〇年代，大量的外國熱錢湧入泰國等東南亞國家，追逐高速成長的「亞洲奇蹟」，吹起了股市與房市的泡沫。可是當一些投機者開始懷疑泰銖被高估、發動攻擊時，一九九七年七月，泰國被迫放棄固定匯率、讓泰銖貶值——這成了引爆整張網的火星。一個國家的危機，透過全球資本的恐慌性撤離，瞬間傳染給下一個：投資人一看泰國出事，立刻不分青紅皂白地從所有「看起來類似」的國家抽走資金——印尼、馬來西亞、南韓、菲律賓接連淪陷。這正是勒龐筆下的羊群效應，被放大到了國家的尺度：熱錢像受驚的羊群，朝同一個方向沒命地奔逃，而它們的奔逃本身，就把一個個原本只是「有點問題」的經濟體，硬生生踩踏成了全面崩潰。貨幣暴跌、股市腰斬、銀行倒閉、企業破產，南韓、印尼等國不得不向國際貨幣基金（IMF）求援，接受苛刻的紓困條件。<strong>恐懼，第一次證明了它可以在幾週之內，掃平半個地球的繁榮。</strong></p>
+
+    <h3>長期資本：諾貝爾獎得主如何輸光一切</h3>
+    <p>而這場全球恐慌的餘波，又掀翻了一個華爾街最不可思議的傳奇，留下了這部書最深刻的一則寓言。這個故事的主角，是一家叫「<strong>長期資本管理公司</strong>」（Long-Term Capital Management，LTCM）的避險基金。它堪稱史上「智商最高」的金融機構——它的合夥人裡，包括兩位剛剛因為發明選擇權定價模型而獲得諾貝爾經濟學獎的經濟學家（麥倫·休斯與羅伯特·默頓），還有前聯準會副主席，以及一批華爾街最頂尖的數學交易員。他們用最精密的數學模型，在全球市場上尋找微小的定價偏差，再用極高的槓桿（借來的錢可達自有資本的二、三十倍）去放大那微薄的利潤。在頭幾年，他們賺得盆滿缽滿，被奉為「市場上最聰明的一群人」。</p>
+
+    <p>但他們的模型裡，藏著一個和效率市場假說同樣致命的盲點：它假設市場大體上是理性的、波動是可以用常態分布來估算的，那種「百年一遇」的極端恐慌，幾乎不可能發生。然後，一九九八年八月，俄羅斯出人意料地宣布債務違約。這個「模型說幾乎不可能發生」的極端事件，引爆了一場席捲全球的恐慌。在恐慌中，所有人同時拋售風險資產、搶買最安全的美國公債——市場上每一個資產的價格，都朝著與 LTCM 的模型預測完全相反的方向劇烈狂奔。更致命的是，高槓桿讓 LTCM 在巨額虧損下面臨追繳，被迫在最糟的價格上拋售，而它的拋售又加劇了市場的混亂。<strong>那些全世界最聰明的頭腦，眼睜睜看著自己無懈可擊的數學模型，被人類赤裸裸的集體恐慌，碾成了齏粉。</strong>LTCM 在幾週內瀕臨倒閉，由於它的部位巨大到可能拖垮整個金融體系，最後聯準會不得不出面，召集華爾街各大銀行集資接管——這是繼摩根、聯準會之後，「最後貸款人」這條線索的又一次登場，也是二〇〇八年「大到不能倒」紓困的一次預演。</p>
+
+    <p>LTCM 的故事，是對牛頓那一課的完美呼應，隔了兩百七十八年。牛頓算得出天體運行，算不出人類的瘋狂；LTCM 的諾貝爾獎得主算得出選擇權的價格，卻算不出俄羅斯違約那一天，全世界的恐懼會同時爆發。<em>這兩個故事合起來，構成了這部書最核心的一條鐵律：再高的智商、再精密的模型，都無法馴服人類的集體情緒；事實上，過度自信於自己的聰明，本身就是最危險的情緒。</em>LTCM 的合夥人不是不懂風險——他們是發明風險公式的人；打敗他們的，是那份「我們的模型不可能錯」的傲慢，以及槓桿在恐慌來襲時，逼著他們把模型的「長期正確」，拖死在「短期破產」之前——又一次，凱因斯的幽靈獰笑著現身。</p>
+
+    <div class="pull"><p>牛頓算不出人類的瘋狂，LTCM 的諾貝爾獎得主也算不出。相隔近三個世紀，最聰明的頭腦栽在同一個地方：他們以為自己在和數字打交道，其實，他們始終在和人心打交道——而人心，從來不服從任何公式。</p></div>
+
+    <h3>撿拾壓路機前的銅板：當「幾乎不可能」發生了</h3>
+    <p>亞洲金融風暴並非毫無預兆。早在一九九四年底，墨西哥就爆發過一場「<strong>龍舌蘭危機</strong>」（Tequila Crisis）——披索突然崩貶，引發資金奪命般逃離整個拉丁美洲，是全球化時代「跨國傳染」的第一次彩排。可惜，市場的記憶一如既往地短暫，三年後，同樣的劇本在亞洲原封不動地重演，而且規模更大。這正是高伯瑞那條鐵律的又一次驗證：金融記憶極其短暫，剛發生過的災難，換個地名就能重新騙過所有人。</p>
+    <p>而 LTCM 的覆滅，值得再拆解得細一點，因為它把「聰明的詛咒」演繹得淋漓盡致。LTCM 的核心策略，叫「收斂交易」——它在全球市場上尋找兩個理應趨同、卻暫時出現微小價差的資產，然後賭它們的價差「終將收斂」。這種價差通常小得可憐，所以他們必須動用極高的槓桿（借來的錢一度是自有資本的二、三十倍，加上衍生品的名目本金更高達上兆美元）去放大那微薄的利潤。有人精準地形容這種策略：<strong>像是彎腰去撿一台正在駛來的壓路機前面的銅板</strong>——大部分時候你能輕鬆撿到錢，可是只要有一次失手，你就會被輾得粉身碎骨。</p>
+    <p>一九九八年八月，俄羅斯違約，就是那台壓路機。在席捲全球的恐慌中，所有人同時拋售風險、搶買最安全的資產，市場上每一個原本「理應收斂」的價差，反而瘋狂地擴大——而高槓桿讓 LTCM 在巨虧下被迫斷頭拋售，它的拋售又進一步扭曲了市場，形成死亡螺旋。由於它的部位巨大到一旦違約就可能拖垮整個華爾街，聯準會不得不出面，召集十幾家大銀行集資約三十六億美元，接管並有序清算了 LTCM。<em>那些發明了風險公式、拿了諾貝爾獎的天才，最終是被一場他們的模型判定為「百年難遇、幾乎不可能」的人類集體恐慌，給活活輾碎的。</em></p>
+    <p>LTCM 留下的，不只是一則「聰明反被聰明誤」的寓言，還有一顆危險的種子——「<strong>大到不能倒</strong>」的紓困先例。當一家私人機構闖了禍，卻因為「倒了會牽連所有人」而由體系出手相救時，一個微妙的訊息就被釋放了出去：盡情冒險吧，賺了是自己的，賠到危及體系時，自有人來收拾。這個在一九九八年還只是小試身手的邏輯，十年之後，將在二〇〇八年，以納稅人數千億美元的代價，被放大到極致——而它馴服了當下恐懼的同時，究竟餵養了多少日後的貪婪，至今仍是懸而未決的爭論。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 傳染的速度，與聰明的詛咒</span>
+      <p>這一章把前面兩把鑰匙推向了全球化的極致。「群眾」不再侷限於一座交易所、一個國家，而是擴張成了跨國流動的資本羊群——亞洲金融風暴證明，恐懼可以在幾週內踏平半個地球。而 LTCM 則替全書補上了一則關於「聰明」的終極寓言：它與牛頓、與 LTCM 之後十年的二〇〇八，三者一脈相承，反覆訴說同一件事——智商不是情緒的解藥，過度自信反而是最毒的情緒。這也預告了「最後貸款人」這條線索的全面升級：當市場全球化、槓桿化、且機構「大到不能倒」，每一次恐慌的解決，都越來越依賴一個更大的救火員出手相救——而這，正在悄悄改變貪婪與恐懼的賽局規則。下一章，我們回到美國，去見證這部書裡「這次不一樣」唱得最響亮、也最純粹的一場大合唱——網路泡沫。它幾乎是十九世紀鐵路狂熱，在數位時代的完美重演。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第十八章 ===== -->
+<section class="act reveal" id="ch-18">
+  <div class="act-head">
+    <span class="act-num">第十八章 · The Dot-com Mania</span>
+    <h2 class="act-title">網路狂熱：「這次不一樣」唱得最響的一次</h2>
+    <p class="act-sub">The Dot-com Mania — The Loudest Chorus of &ldquo;This Time Is Different&rdquo;</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>一九九〇年代下半葉，一樣將真正改變人類文明的東西，從實驗室走進了千家萬戶——網際網路。和當年的鐵路一樣，網路的願景千真萬確、無比壯麗：它將顛覆零售、媒體、通訊、商業的一切規則，開啟一個全新的數位時代。也和鐵路一樣，正因為這個願景如此真實偉大，它孕育的泡沫才格外凶猛。一個熟悉的劇本，又一次上演了，只是這一次，舞台是那斯達克，主角是名字後面加著「.com」的新創公司。</p>
+
+    <p>網路泡沫最瘋狂之處，在於它公然拋棄了所有衡量價值的傳統標準。這些網路公司大多沒有獲利，許多甚至沒有像樣的營收，可是它們的股價卻一飛沖天。華爾街發明了一套全新的、為狂熱量身訂做的「估值」語言：別管盈餘了，要看「<strong>眼球數</strong>」（eyeballs，網站訪客數）、看「點擊率」、看「黏著度」、看那個聽起來無限美好的「網路經濟想像空間」。一家公司只要在名字後面加上「.com」，股價就能在上市第一天翻好幾倍。創投資金像潮水般湧入，無數連商業模式都說不清楚的新創，輕鬆募到鉅資，然後把錢燒在鋪天蓋地的廣告上。其中最著名的反面教材，是賣寵物用品的 Pets.com，它花大錢打廣告、做了個紅極一時的襪子玩偶吉祥物，卻從未找到賺錢的方法，上市不到一年就燒光錢、倒閉清算，成了整個時代非理性的墓誌銘。</p>
+
+    <h3>葛林斯潘的警告，與被忽略的四年</h3>
+    <p>這場狂熱裡，有一個極具反諷意味的時刻。早在一九九六年十二月，當泡沫才剛開始膨脹時，聯準會主席葛林斯潘就在一場演講中，憂心忡忡地提出了那個後來無比著名的問句：我們如何判斷，資產價格是不是已經被「<strong>非理性繁榮</strong>」（irrational exuberance）不當地推高了？這是全世界最有權力的中央銀行家，親口對市場的過熱發出的警告。然而——這正是「敘事」與「群眾」力量最赤裸的展示——市場對這個警告的反應是：聳聳肩，然後繼續瘋漲了整整四年。葛林斯潘喊出「非理性繁榮」時，那斯達克約莫一千三百點；四年後它見頂時，已經漲到五千多點。<strong>連聯準會主席的當頭棒喝，都攔不住一場全民相信「這次不一樣」的狂熱。</strong>這再一次印證了凱因斯的鐵律：市場保持非理性的時間，可以長過任何一個清醒者的耐心——包括聯準會主席。（也正是這個詞，四年後成了席勒那本精準命中頂點的書名。）</p>
+
+    <p>二〇〇〇年三月十日，那斯達克綜合指數攀上五,〇四八點的歷史頂峰。然後，鐘擺開始反向。沒有單一的致命消息，只是某個時刻，群眾的信心悄悄動搖了：人們開始問那個在狂熱中無人敢問的問題——這些公司，到底什麼時候才會真的賺錢？一旦這個問題被問出口，整座建立在「想像」而非「盈餘」上的大廈，就開始崩塌。資金撤離，股價崩跌，那些沒有獲利、只靠融資續命的網路公司，一家接一家燒光現金、宣告倒閉。到二〇〇二年下半年，那斯達克從五千多點，跌到只剩約一千一百點，<strong>蒸發了將近百分之七十八</strong>。無數在狂熱頂點、用畢生積蓄追高的散戶（這也是史上第一次，普通人能透過網路券商在家裡「當沖」，親手參與這場狂歡），財富一夕歸零。</p>
+
+    <p>但網路泡沫，也再一次完美演繹了鐵路狂熱那個深刻的弔詭——<strong>泡沫破滅，與技術成功，可以並存。</strong>網路確實改變了世界，就像鐵路真的鋪成了。泡沫殺死的，是那些沒有商業模式的投機標的（Pets.com、Webvan）；而真正有實力的倖存者，則在廢墟中活了下來，長成了參天大樹。最好的例子是亞馬遜——它的股價在泡沫破滅中也一度從約一百美元崩跌超過九成、跌到剩個位數，許多人斷言它會倒閉；可是它活了下來，並在往後二十年成長為地表最強大的公司之一。這替投資人留下一道極難的考題：<em>當一項技術真的會改變世界時，最大的挑戰不是判斷「它會不會成功」，而是在所有同類標的中，分辨出哪一個是會漲百倍的亞馬遜，哪一個是會歸零的 Pets.com——以及，你能不能在它從一百跌到剩個位數的那段絕望裡，抱得住。</em>而這，幾乎沒有人做得到。</p>
+
+    <h3>新的尺，與一群啦啦隊長</h3>
+    <p>每一場泡沫的頂峰，都會有人發明一套「全新的估值標準」，來替那些用舊標準怎麼算都荒謬的價格辯護——網路泡沫把這件事做到了極致。當這些公司大多沒有獲利、甚至沒有營收時，華爾街索性宣布：盈餘已經過時了。於是各種光怪陸離的新指標粉墨登場：看「眼球數」（網站有多少訪客）、看「點擊率」、看「黏著度」、看「每位用戶的潛在價值」。一家公司虧得越多，有時反而被解讀成「它在積極搶占市場、投資未來」而更受追捧。<strong>當人們開始拋棄「這家公司賺不賺錢」這個最樸素的問題、轉而擁抱一套誰也說不清的新尺時，那本身，就是泡沫見頂最可靠的警訊之一。</strong></p>
+    <p>替這套狂熱搖旗吶喊的，是一批被神化的「明星分析師」。他們任職於知名投資銀行，頻頻上電視、發報告，喊出一個比一個驚人的目標價，被散戶奉為先知。然而泡沫破滅後的調查揭穿了一個醜陋的真相：其中一些分析師，一邊在公開報告裡把某檔股票吹上天、喊「強力買進」，一邊卻在私下的電子郵件裡，把同一檔股票貶為「垃圾」——因為他們的薪酬，與所屬投行能從這些公司拉到多少承銷生意掛鉤。這場利益衝突的醜聞，後來引發了大規模的監管整頓與和解。財經電視台則扮演著二十四小時不打烊的啦啦隊，把節節高升的股價，播報得像一場永不散場的嘉年華。</p>
+    <p>狂熱的頂點，留下了一個極具象徵意義的畫面：二〇〇〇年三月，網路設備商思科（Cisco）的市值一度超越所有公司，登上「全世界最有價值企業」的寶座，被許多人預言將成為「第一家市值上兆美元的公司」。然而那幾乎就是頂點本身——此後它的股價崩跌超過八成，再也未曾回到二〇〇〇年的高峰。<em>當一個東西被捧為「不可能再高」的那一刻，往往正是它最高的一刻。</em>這是「敘事」這把鑰匙又一次冷酷的示範：最動聽的故事、最權威的背書、最熱烈的掌聲，總是在崩盤前的最後一秒，達到最大的音量。</p>
+
+    <h3>在家當沖的一代，與一場全民的線上賭局</h3>
+    <p>網路泡沫之所以特別，還因為它第一次，把投機的狂熱，搬進了普通人家的客廳。一九九〇年代末，網路券商（E*Trade、Datek、Ameritrade）讓任何人都能坐在家裡的電腦前，用低廉的手續費即時買賣股票。於是一個前所未見的群體誕生了——「<strong>當日沖銷客</strong>」（day traders）。有人辭去了穩定的工作，有人辭去了醫生、律師的職業，全職在家盯著螢幕，靠當天買進、當天賣出的價差維生。報紙上充斥著「某某靠當沖賺進百萬」的傳奇，財經電視台 CNBC 成了全民收看的娛樂節目，主播報導股價的亢奮，與賭場裡的荷官沒有兩樣。這是報價機那條「讓情緒傳染得更快、讓群眾參與得更廣」的線索，一次劃時代的躍進——市場第一次，真正地走進了千家萬戶的日常。</p>
+    <p>而這場全民賭局最瘋狂的儀式，是新股上市（IPO）。一家成立不過一兩年、從未賺過一毛錢的網路公司，可以在掛牌上市的第一天，股價就翻一倍、兩倍、甚至三倍。承銷的投資銀行與被收買的「明星分析師」，扮演著啦啦隊長的角色，喊出一個比一個離譜的目標價，替狂熱火上澆油。整個矽谷的信條變成了「快速做大」（get big fast）與「先搶眼球、再想怎麼賺錢」，公司比的不是獲利，而是「燒錢速度」（burn rate）——誰能把創投的錢燒得更快、把名氣衝得更響。二〇〇〇年的美式足球超級盃，被戲稱為「.com 超級盃」，因為廣告時段被一堆很快就要倒閉的網路公司包了下來——這幾乎成了泡沫頂點的一個黑色幽默註腳。</p>
+    <p>泡沫破滅後的清算，慘烈而徹底。那些只有故事、沒有獲利的當沖客與網路公司，絕大多數血本無歸、灰飛煙滅。但這裡再次浮現那個鐵路時代就有的深刻弔詭：泡沫殺死了投機，卻沒有殺死技術。亞馬遜的股價一度從約一百美元崩跌超過九成、跌到剩個位數，貝佐斯被無數人嘲笑，許多人斷言它撐不過去；可它活了下來，並在往後二十年長成了地表最強大的公司之一。<strong>泡沫是一場殘酷的篩選：它用最痛的方式，把「真正會改變世界的公司」與「只會說故事的公司」分開——代價是,絕大多數在頂點滿懷希望進場的人，都成了這場篩選的祭品。</strong>而那些在狂熱中鋪設的海底光纖、數據中心，則像當年的鐵軌一樣留了下來，默默成為日後行動網路與雲端時代的基礎。情緒燒掉了金錢，卻意外地，替文明鋪好了路。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 數位時代的鐵路狂熱</span>
+      <p>網路泡沫，是這部書三把鑰匙的一次教科書級的合奏，也是第三把鑰匙「敘事」最純粹的勝利。它的劇本，與一百五十年前的鐵路狂熱幾乎一字不差：一項真正偉大的新技術（敘事）→ 把「技術會贏」誤當成「股票會漲」→ 拋棄一切估值標準的全民狂熱（群眾把鐘擺推向極端）→ 某個尋常時刻信心動搖、崩盤 → 泡沫死去，但技術與少數倖存者留下。唯一的新元素，是網路券商讓散戶第一次能在家中、即時、親手參與這場狂歡——這是報價機那條「讓情緒傳染得更快」的線索，又一次的躍進，並直接預告了二十年後迷因股那個「人人都是當沖客」的時代。網路泡沫也讓我們看清了「最後貸款人」這條線的另一面：葛林斯潘事前的警告無人理會，但泡沫破滅後，他卻大幅降息來收拾殘局、安撫市場——而這份「闖了禍有央行收拾」的預期，正在悄悄地、危險地，餵養著下一場、規模更大的貪婪。那場貪婪的名字，叫房地產。</p>
+    </div>
+  </div>
+</section>
+
+<div class="part-div reveal" id="part-7">
+  <span class="pn">第七部</span>
+  <h2 class="ptitle pt">新世紀的崩潰</h2>
+  <div class="pe">The New Century of Crashes — Leverage, the Central Bank, and a Pandemic</div>
+  <div class="pline"><span></span><span class="dot">▲</span><span></span></div>
+</div>
+
+<!-- ===== 第十九章 ===== -->
+<section class="act reveal" id="ch-19">
+  <div class="act-head">
+    <span class="act-num">第十九章 · 2008</span>
+    <h2 class="act-title">房子永遠不會跌：二〇〇八，當一個信念崩塌</h2>
+    <p class="act-sub">2008 — &ldquo;House Prices Never Fall&rdquo;, and the Day a Belief Collapsed</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>網路泡沫破滅後，聯準會大幅降息來收拾殘局，把利率壓到極低。廉價的資金，總要找個地方去——這一次，它湧向了一個被普遍認為「最安全、最務實」的資產：房地產。畢竟，股票會崩，網路是虛的，但房子是看得見、摸得著的磚瓦，是每個家庭安身立命的根本。於是，二〇〇〇年代中期，一場新的狂熱在美國的房市裡悄悄升溫，而它背後那個讓所有人深信不疑的核心信念，樸素得近乎天經地義——<strong>「房價，在全國範圍內，從來不曾下跌。」</strong>區域性的漲跌或許有，但放眼整個美國，房價只會往上，這是過去幾十年數據「證明」了的鐵律。整座金融大廈，最終都建立在這一個假設之上。</p>
+
+    <p>而華爾街的金融工程，把這個信念變成了一台巨大的、層層加槓桿的賺錢機器。銀行大量發放房貸，包括給那些信用很差、根本還不起的人的「次級房貸」（subprime）；反正房價只會漲，就算還不出來，把房子收回來賣掉也穩賺不賠。然後，銀行把成千上萬筆房貸「打包」成一種叫「不動產抵押貸款證券」（MBS）的金融商品賣給投資人，再把這些東西進一步切割、重組成更複雜的「擔保債務憑證」（CDO），透過一層層的數學魔術，硬是把一堆爛房貸，包裝成被信評機構蓋上「最高評等」的安全資產，賣給全球的退休基金、銀行與保險公司。風險，看似被分散、被稀釋到了全世界，實則被掩蓋、被放大、被槓桿堆疊到了一個無人看得清的程度。整個系統，都在「房價不會跌」這個前提下，運轉得天衣無縫。</p>
+
+    <h3>當不可能的事發生了</h3>
+    <p>然後，從二〇〇六年起，那件「不可能」的事，發生了——全美房價，開始下跌。骨牌應聲倒下：房價一跌，那些次級貸款人發現房子的價值低於貸款，乾脆違約走人；違約潮讓 MBS 與 CDO 的價值崩塌；而由於這些有毒資產被槓桿放大、且賣到了全球金融體系的每一個角落，沒有人說得清楚，究竟哪家機構手裡藏著多少地雷、哪家已經資不抵債。於是，最致命的東西出現了——<strong>不信任。</strong>銀行不敢借錢給銀行，因為不知道對方會不會明天就倒；整個金融體系賴以運轉的信用，像被抽乾的血液一樣，瞬間凍結。二〇〇八年三月，老牌投資銀行貝爾斯登（Bear Stearns）瀕臨倒閉，被摩根大通在聯準會撮合下賤價收購。所有人都屏住呼吸，希望這是最後一張倒下的骨牌。</p>
+
+    <p>但它不是。二〇〇八年九月十五日，這部書裡最黑暗的日子之一，擁有一百五十八年歷史的投資銀行巨頭<strong>雷曼兄弟</strong>（Lehman Brothers），宣告破產——這是美國史上最大的破產案。這一次，政府選擇不出手相救。雷曼的倒下，把市場僅存的信心徹底擊碎，引爆了自大蕭條以來最嚴重的全球金融恐慌。保險巨頭 AIG 因為替天量的 CDO 承保而瀕臨崩潰，由政府緊急接管；貨幣市場基金「跌破淨值」，連最保守的投資人都嚇得奪命奔逃；股市開始自由落體。那份在過去幾年裡支撐起一切的貪婪，在幾天之內，翻轉成了同等規模的、系統性的恐懼。第二把鑰匙「群眾與循環」走到了它最猙獰的「恐慌與厭惡」階段，只是這一次，恐慌的不只是散戶，而是整個全球金融體系的每一個機構。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">1,565</div><div class="lbl">標普高點<br>2007/10</div></div>
+      <div class="stat"><div class="num">666</div><div class="lbl">標普盤中谷底<br>2009/3/9</div></div>
+      <div class="stat"><div class="num">−57%</div><div class="lbl">高峰到谷底</div></div>
+      <div class="stat"><div class="num">158年</div><div class="lbl">雷曼歷史<br>一夕歸零</div></div>
+    </div>
+
+    <h3>「大到不能倒」與一個道德的兩難</h3>
+    <p>恐慌失控之際，那條從摩根、聯準會、LTCM 一路延伸下來的「最後貸款人」線索，迎來了它史上最大規模的一次動用。美國政府推出七千億美元的「問題資產紓困計畫」（TARP），出手拯救瀕死的銀行體系；聯準會則把利率砍到趨近於零，並史無前例地大量印鈔、購買資產（即「量化寬鬆」，QE），向凍結的市場強行注入流動性。標普五百指數從二〇〇七年的高點，一路崩跌到二〇〇九年三月九日，盤中觸及六六六點的谷底，跌幅約百分之五十七。最終，是政府與央行那台「印鈔機」的全力動員，才在懸崖邊接住了墜落的市場，避免了第二次大蕭條。</p>
+
+    <p>但這場救援，留下了一個將困擾世界至今的道德兩難。那些因為過度貪婪、過度槓桿而闖下大禍的金融巨獸，因為「大到不能倒」（too big to fail）——倒了會拖垮所有人——而被納稅人的錢救了回來，許多闖禍的高管照領鉅額紅利；而真正承受苦果的，是數百萬失去房子、失去工作、失去畢生積蓄的普通人。<strong>賺錢時利潤歸華爾街，賠錢時帳單歸納稅人。</strong>這份深刻的不公與憤怒，後來催生了「占領華爾街」運動，也在更長的時間裡，撕裂了西方社會的政治。而對這部書而言，二〇〇八最深的教訓是一個古老母題的回歸：它幾乎是一七二〇年南海泡沫的現代放大版——當<em>槓桿、國家信用與全民狂熱</em>纏在一起，泡沫破裂的代價，就不再是投機客的個人損失，而是整個社會的系統性災難。三百年過去了，連牛頓都躲不過的那個陷阱，人類不但沒有避開，反而用更複雜的金融工程，把它造得更大、更深、更難看清。</p>
+
+    <div class="pull"><p>二〇〇八最深的恐怖，不在於某些股票跌了多少，而在於它擊碎的是一個「信念」——房價永遠不跌。當一個被所有人、所有模型、所有制度奉為地基的信念崩塌時，建立在它之上的整座大廈，會一起塌下來。泡沫真正的燃料從來不是貪婪本身，而是一個沒有人再去質疑的故事。</p></div>
+
+    <h3>那幾個看見了的人：與全世界的信念對賭</h3>
+    <p>在二〇〇八年那場集體的盲目裡，有極少數人，看穿了真相——而他們的故事，恰恰反過來印證了「敘事」這把鑰匙有多強大。麥可·路易士在《大賣空》一書裡記錄了這群「異類」：一位獨眼、患有亞斯伯格症、性格孤僻的避險基金經理人麥可·貝瑞（Michael Burry），埋首於成千上萬筆房貸的原始資料中，比所有華爾街的明星都更早看清，這些次級房貸注定要大規模違約，整座大廈建立在流沙之上。還有性格火爆、滿腔憤世嫉俗的史蒂夫·艾斯曼等人，同樣嗅到了那股腐臭。他們做了一件在當時看來近乎瘋狂的事——與整個世界的信念對賭，重金放空這個被所有人、所有評等機構、所有政府奉為「最安全」的市場。</p>
+    <p>他們用的武器，是一種叫「信用違約交換」（CDS）的衍生品——本質上，是替那些有毒的房貸債券買一份「違約保險」：只要房貸大規模違約，這份保險就會帶來鉅額賠付。可是，做這件「正確的事」，過程卻是一場煎熬的酷刑。在他們押下賭注之後、市場崩潰之前的那漫長一兩年裡，房市還在漲、泡沫還在吹，他們的部位每天都在淌血。貝瑞的投資人憤怒到了極點，痛斥他瘋了、要求撤資、甚至揚言告他，逼得他一度凍結了客戶的贖回。<strong>這是凱因斯那句鐵律最痛徹心扉的一次驗證：市場保持非理性（與愚蠢）的時間，可以長過你保持清醒（與不破產）的時間。</strong>「看對」與「活到被證明看對的那一天」，是兩件完全不同的事；而後者，需要的不是更聰明的腦袋，是更強韌的神經。</p>
+    <p>最終，當二〇〇八年崩盤來臨，這幾個人賺進了驚人的財富，被證明是對的。但《大賣空》真正的寓意，並不是「聰明人總會獲勝」這種勵志故事——恰恰相反。它揭示的是一個更黑暗的真相：當一個錯誤的信念（房價不會跌）被整個社會、整個體系、所有專家集體奉為真理時，那少數看穿它的人，反而會被當成瘋子，要承受巨大的孤獨、嘲笑與煎熬，甚至幾乎撐不到被證明正確的那一刻。<em>群眾的力量如此強大，以至於「眾人皆醉我獨醒」非但不是一種優勢，反而常常是一種詛咒。</em>這正是為什麼，能在泡沫中保持清醒並全身而退的人，永遠只是鳳毛麟角——因為市場考驗的，從來不只是你的判斷力，更是你能否獨自一人，扛住與全世界為敵的那份恐懼。</p>
+
+    <h3>「貪婪是好的」，與一筆算不清的道德帳</h3>
+    <p>二〇〇八年最深的傷口，不只在帳面上，更在人心裡。一九八七年的電影《華爾街》，曾借反派之口喊出一句成了整個時代精神註腳的台詞——「<strong>貪婪，是好的</strong>」（Greed is good）。這句本是諷刺的話，卻被許多華爾街人當成了真誠的信條。二〇〇八年，這套信條撞上了它的審判日：那些用過度槓桿、用看不懂的衍生品豪賭、把全球經濟推下懸崖的金融機構，因為「大到不能倒」，被納稅人的錢救了回來；而許多一手釀成災難的高管，事後照樣領走了天文數字的紅利。與此同時，數以百萬計的普通人，失去了房子、工作與畢生的積蓄。</p>
+    <p>「賺錢時利潤私有化，賠錢時虧損社會化」——這份赤裸裸的不公，在西方社會留下了一道至今未癒的裂痕。它直接催生了二〇一一年的「占領華爾街」運動，「我們是百分之九十九」的口號響徹街頭，矛頭直指那百分之一的金融菁英。但它的影響遠不止於此：這份對體制的深刻不信任與憤怒，在往後十餘年裡持續發酵，滋養了西方政治光譜兩端的民粹主義浪潮，撕裂了社會的共識。<strong>一場金融危機，最終竟改寫了一個時代的政治。</strong></p>
+    <p>而這筆怨恨的帳，還以一種誰也想不到的方式，在十三年後得到了清算。二〇二一年那場 GameStop 的散戶起義（見第二十二章），其情緒燃料之一，正是源自二〇〇八的舊恨——當年華爾街闖了禍卻全身而退，這一次，輪到我們這些「小散戶」，聯合起來，狠狠教訓那些做空的對沖基金巨鱷。<em>二〇〇八年種下的那份「平民對菁英」的怒火，隔了十三年，在社群網路上找到了它的出口。</em>這條從「貪婪是好的」到「占領華爾街」再到「散戶復仇」的伏線提醒我們：市場的情緒，從來不只是貪婪與恐懼這麼簡單，它還深深地纏繞著公平、怨恨、認同與復仇——而這些更複雜的人類情感，同樣會在某個意想不到的時刻，化作撼動市場的力量。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 一個信念，撐起整座大廈</span>
+      <p>二〇〇八把這部書的幾條主線編織到了一起。「敘事」這把鑰匙在這裡以最危險的形態現身——不是一個浮誇的致富夢，而是一個樸素到無人質疑的「常識」（房價不會跌）；越是不證自明的信念，崩塌時越是毀天滅地。「槓桿」這個從南海、一九二九一路放大恐懼的加速器，被金融工程推到了極致。而「最後貸款人」這條線，則升級成了「大到不能倒」的全面紓困，並埋下了一顆將定義往後十餘年的種子——當市場學到「闖了大禍，央行終究會來救」，恐懼被馴服了，可是貪婪呢？會不會被餵得更大？這正是下一章的核心問題。二〇〇八之後，世界進入了一個全新的時代：一個由中央銀行的資產負債表，而非企業盈餘，來主導市場情緒的時代。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第二十章 ===== -->
+<section class="act reveal" id="ch-20">
+  <div class="act-head">
+    <span class="act-num">第二十章 · The Fear Index &amp; the Central Bank</span>
+    <h2 class="act-title">恐懼的指數化：當央行成了情緒的管理員</h2>
+    <p class="act-sub">The Fear Index &amp; the Central Bank — When Policy Tried to Manage a Crowd&rsquo;s Emotion</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>到了二十一世紀，人類對市場情緒的執念，達到了一個新的層次——我們不只想理解它、馴服它，我們甚至想<strong>測量</strong>它，給它一個即時跳動的數字。一九九三年，芝加哥選擇權交易所推出了一個指數，它根據選擇權市場所隱含的「預期波動率」計算而來，名叫 VIX。但它很快有了一個更出名、更傳神的綽號——「<strong>恐慌指數</strong>」（the fear index）。當市場平靜、人人樂觀時，VIX 低伏在地；當恐慌來襲、人人爭相買進選擇權避險時，VIX 就會像受驚的心電圖一樣暴跳。二〇〇八年金融海嘯時，它衝上了八十多的歷史高位。人類，第一次把「集體的恐懼」這種最抽象的東西，做成了一條可以在螢幕上即時交易、即時觀看的曲線。德拉維加在阿姆斯特丹用文字描寫的那種恐懼，三百年後，變成了一個可以買賣的數字。</p>
+
+    <p>但這個時代真正的主角，不是一個指數，而是一個機構——中央銀行。二〇〇八之後，為了把經濟與市場從深淵裡拉出來，全球各大央行祭出了人類史上規模空前的貨幣政策：把利率壓到接近零、甚至負利率，並透過「量化寬鬆」（QE）創造出數以兆計的貨幣，去購買債券、壓低利率、把資金硬推進風險資產。這帶來了一個深遠的後果：當把錢存在銀行幾乎沒有利息、債券殖利率低到可笑時，投資人為了尋求報酬，被「逼著」把錢投進股市——市場把這種無可奈何的心態叫做 TINA（There Is No Alternative，別無選擇）。央行的資產負債表，取代了企業的盈餘，成了驅動股市的最強引擎。一場從二〇〇九年延續到二〇二〇年、長達十一年的史詩級大多頭就此展開——而它被稱為「<strong>史上最被討厭的牛市</strong>」，因為許多人從頭到尾都不相信它、覺得它是央行吹出來的假象，卻又眼睜睜看著它一路上漲，踏空十年。</p>
+
+    <h3>「央行賣權」與一個危險的馴化</h3>
+    <p>於是，市場慢慢養成了一個全新的、影響深遠的心理預期——「<strong>央行賣權</strong>」（the central bank put，又稱「聯準會賣權」）。所謂「賣權」，是一種在下跌時能保護你的金融合約；而市場相信，每當股市跌得夠深、恐慌夠大，聯準會就一定會出手相救——降息、印鈔、注入流動性——就像替所有投資人免費提供了一份下跌保險。歐洲央行總裁德拉吉在二〇一二年歐債危機最危急時那句著名的「<strong>不惜一切代價</strong>」（whatever it takes），更把這份信念推向極致。「別跟聯準會作對」（Don&rsquo;t fight the Fed）成了華爾街的新信條。從某個角度看，這是人類馴服市場恐懼的巔峰成就：那條從一九〇七年摩根單槍匹馬救市、到聯準會誕生的漫長線索，終於進化成了一個有意識地、系統性地管理整個市場集體情緒的龐大機器。每當恐懼來襲，就有一隻看得見的手，伸出來安撫群眾。</p>
+
+    <p>但這份馴化，藏著一個讓所有人不安的兩難，它正是二〇〇八那顆種子的發芽。如果投資人相信「跌深了央行一定會救」，那麼恐懼這個原本用來節制貪婪的天然煞車，就被拆掉了。人們會更敢於冒險、更敢於加槓桿、更敢於追逐泡沫——反正出了事有央行兜底。經濟學家把這種現象叫「<strong>道德風險</strong>」（moral hazard）：當你不必承擔失敗的全部後果，你就會去冒更大的險。<strong>於是出現了一個深刻的弔詭：央行為了馴服恐懼所做的一切，可能正在悄悄地、系統性地餵養著貪婪。</strong>它或許並沒有消滅市場的鐘擺，而只是改變了它的擺動方式——把一次次劇烈但短暫的崩盤，換成了一場越吹越大、越來越依賴央行續命的長期資產膨脹。這個時代的市場，在表面的平靜下，把風險越積越高。</p>
+
+    <h3>機器又一次反撲：閃電崩盤</h3>
+    <p>而就在這個由央行精心呵護的承平時代，一九八七年那條「機器放大情緒」的線索，又一次發出了不祥的警訊。二〇一〇年五月六日下午，在沒有任何重大消息的情況下，美國股市在短短幾分鐘內，毫無徵兆地暴跌了近百分之九——道瓊一度狂瀉約一千點——然後，又在接下來的二十幾分鐘內，幾乎一樣快地反彈了回來。這就是著名的「<strong>閃電崩盤</strong>」（Flash Crash）。事後調查發現，元凶是高頻交易（HFT）的演算法——當市場出現一筆異常的大額賣單，成千上萬台以毫秒為單位互相廝殺的交易機器，瞬間集體撤單、互相踩踏，在幾分鐘內製造出一場人類交易員根本來不及反應的、純粹由機器引發的恐慌。一九八七年的程式交易用幾秒鐘放大恐慌，二〇一〇年的演算法把它壓縮到了毫秒。<em>情緒的傳染速度，已經快到超越了人類的感知極限；崩盤，可以在你眨眼之前發生、又在你回過神之前結束。</em>這是一記來自未來的警告——關於當市場越來越交給機器來運轉時，我們究竟是消除了情緒，還是只是把它加速到了人類再也看不見、攔不住的程度。這個問題，將是本書倒數第二章的主題。</p>
+
+    <h3>最被討厭的牛市：當恐懼讓你錯過十年</h3>
+    <p>二〇〇九年三月觸底後展開的那輪大多頭，被冠上一個耐人尋味的稱號——「<strong>史上最被討厭的牛市</strong>」。為什麼一輪讓人賺大錢的牛市，會招人討厭？因為它幾乎沒有人相信。剛剛經歷過二〇〇八年那場世界末日般的恐慌，投資人的神經被嚇得草木皆兵，這正是第十三章「可得性偏誤」的活教材——那場崩盤的記憶太鮮明、太痛，以至於人們在隨後的好幾年裡，都信心十足地相信「下一次崩盤隨時會來」，於是抱著大量現金、遲遲不敢進場，或一有風吹草動就嚇得拋售。結果，這輪牛市就在一片「這是央行吹的假泡沫、撐不了多久」的懷疑與咒罵聲中，一路漲了十一年。</p>
+    <p>這是大蕭條那一課的精準重演（見第九、第十章）：一場夠慘烈的恐懼，會讓親歷者「記得太牢」，牢到在隨後的繁榮裡都不敢上車，眼睜睜錯過財富重新累積的歲月。它完美演繹了坦伯頓那句「牛市在悲觀中誕生、在懷疑中成長」的前半段——這輪牛市正是在二〇〇九年最深的悲觀中誕生，又在長達數年的懷疑中倔強成長。而那些被二〇〇八的恐懼凍住、始終不敢相信的人，付出的代價，是錯過了一代人難得一遇的複利機會。</p>
+    <p>這裡藏著一個對投資人至關重要的、卻反直覺的教訓：<strong>恐懼造成的損失，未必是「賠掉的錢」，更常是「沒賺到的錢」。</strong>市場的鐘擺一旦把你嚇到谷底、讓你在最便宜的時候離場、在隨後漫長的上漲中始終不敢回來，它對你財富的傷害，可能比一次崩盤本身更深、更久。貪婪會讓你在頂點買貴，恐懼卻會讓你在底部缺席——而後者的代價，因為看不見、摸不著，反而最容易被低估。這正是為什麼，馴服恐懼，與馴服貪婪，是同等重要、也同等困難的修煉。</p>
+
+    <h3>「不惜一切代價」與一場萬物的盛宴</h3>
+    <p>「央行賣權」最戲劇性的一次展演，發生在二〇一二年的歐洲。當時歐債危機愈演愈烈，希臘、義大利、西班牙的國債殖利率飆升，市場開始押注歐元即將解體，恐慌瀰漫。就在這懸崖邊上，歐洲央行總裁德拉吉，在倫敦的一場演講中說出了那句後來被奉為經典的話：歐洲央行將「<strong>不惜一切代價</strong>（whatever it takes）捍衛歐元——而且，相信我，那會足夠的」。神奇的是，他甚至還沒真正動用多少銀彈，光是這句話本身，就讓恐慌的市場瞬間冷靜下來，殖利率應聲回落，危機就此化解。這是「最後貸款人」這條線索一次近乎魔術的演示：當央行的「承諾」本身就足以扭轉市場的集體情緒，貨幣政策，已經在某種程度上，變成了一門管理群眾心理的藝術。</p>
+    <p>在零利率與量化寬鬆的長期澆灌下，二〇一〇年代演變成了一場「<strong>萬物齊漲</strong>」（the everything bubble）的盛宴。當把錢存銀行、買公債都幾乎沒有回報時，海量的資金被迫湧入一切能產生報酬的地方——股票、房地產、債券、新創、藝術品，乃至後來的加密貨幣——把幾乎所有資產的價格，都一起推上了歷史高位。「別跟聯準會作對」與「逢低買進」（buy the dip）成了顛撲不破的信條，而且屢試不爽：每一次市場稍有下跌，總有更多現金等著進場抄底，因為大家都相信央行終會托底。市場彷彿被馴化成了一隻溫順的寵物，波動越來越小，信心越來越強。</p>
+    <p>但這份表面的平靜底下，正是明斯基所警告的那種「穩定孕育不穩定」。當恐懼這個天然的煞車被央行長期壓制，當「跌深必被救」成了信仰，人們承擔風險的胃口就被越養越大——更高的槓桿、更激進的投機、更不計後果的追逐。央行或許並沒有消滅那座鐘擺，它只是改變了鐘擺的形態：把過去那種頻繁、劇烈、但能釋放壓力的中小型崩盤，換成了一場越吹越大、越來越仰賴央行持續輸液才能維繫的長期資產膨脹。<strong>這是一場宏大而危險的實驗：人類第一次，試圖用政策的力量，去長期地「關掉」市場的恐懼——而代價，可能是把恐懼壓抑成一座看不見、卻越積越高的堰塞湖。</strong>這座堰塞湖會不會、會在何時、以何種方式潰決，是懸在這個時代頭頂的最大問號。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 把恐懼做成指數，把貪婪交給央行</span>
+      <p>這一章，人類與自身情緒的關係，進入了一個前所未有的階段。我們把恐懼做成了可交易的 VIX 指數，把馴服恐慌的責任，從一個英雄銀行家（摩根）升級成了一台主動管理全市場情緒的央行機器。這是「最後貸款人」這條線索的終極形態，也是一場危險的實驗：當你用政策去壓制鐘擺盪向恐懼的那一端，鐘擺會不會在貪婪那一端，悄悄地越積越高？央行賣權馴服了短期的恐懼，卻可能餵養了長期的貪婪與道德風險——它沒有讓鐘擺停下，只是改變了它的節奏。同時，閃電崩盤提醒我們，機器這個情緒放大器，正變得越來越快、越來越不受控。這一切——被央行壓抑的恐懼、被餵養的貪婪、被機器加速的市場、以及無數因為利率太低而湧入股市的散戶——都在二〇二〇年初，被一個誰也沒料到的東西，同時引爆：一場全球大瘟疫。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第二十一章 ===== -->
+<section class="act reveal" id="ch-21">
+  <div class="act-head">
+    <span class="act-num">第二十一章 · The Fastest Crash, the Fastest Rebound</span>
+    <h2 class="act-title">史上最快的崩盤，與最快的反彈：二〇二〇</h2>
+    <p class="act-sub">2020 — The Fastest Crash and the Fastest Rebound in History</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>二〇二〇年初，當一種全新的冠狀病毒從中國蔓延向全世界、各國相繼宣布封城、全球經濟彷彿被按下暫停鍵時，金融市場經歷了一場前所未有的情緒過山車。二月下旬，當疫情失控的真相再也無法忽視，恐懼如海嘯般襲來。股市開始崩跌，而且崩得快得驚人——從二月十九日的歷史高點，標普五百指數在短短約三十三個交易日內，暴跌了約百分之三十四。這是有史以來最快進入「熊市」（自高點下跌兩成）的一次，比一九二九、比一九八七、比二〇〇八都要快。VIX 恐慌指數，飆上了與二〇〇八海嘯時並駕齊驅的歷史性高位。那是一種末日般的恐懼：人們不只擔心經濟，更恐懼自己與家人的生命，這份生存層次的原始恐慌，灌進了市場，化作不計代價的拋售。連黃金、連美國公債這些傳統避風港都一度被拋售——因為在最極致的恐慌裡，所有人只想要一樣東西：現金。</p>
+
+    <p>然而，這場崩盤真正載入史冊的，不是它的速度，而是它之後那場同樣快得不可思議的反彈。面對這場可能比大蕭條更可怕的災難，那台在二〇〇八之後已經演練純熟的「最後貸款人」機器，以光速、以前所未見的規模，全力開動了。聯準會在幾天之內把利率砍到零，宣布「無限量」的量化寬鬆，甚至史無前例地直接下場購買公司債；各國政府則推出天文數字的財政刺激，直接發現金給民眾。海量的流動性，像滅火的洪水一樣灌進金融體系。結果，市場在三月二十三日觸底之後，立刻掉頭暴力反彈，僅僅幾個月後，到了八月，標普五百就已經收復全部失土、再創歷史新高——儘管此時，真實世界裡疫情仍在肆虐、失業率仍在高位、實體經濟仍是一片狼藉。<strong>金融市場與真實經濟，從未如此公然地、令人錯愕地脫節。</strong></p>
+
+    <h3>當恐懼被現金澆熄，貪婪便接管一切</h3>
+    <p>二〇二〇年的這場 V 形反轉，是「央行賣權」這個概念最淋漓盡致、也最令人不安的一次實證。它彷彿向全世界的投資人，發了一張白紙黑字的證書：看吧，無論天塌下來——哪怕是百年一遇的全球大瘟疫——只要央行的印鈔機全力開動，市場就能在幾個月內滿血復活。這份「跌下去一定會被接住」的信念，被一場真實的災難，反向地、徹底地強化了。而當恐懼被海量的現金澆熄之後，剩下的，就只有被前所未有地餵飽的貪婪了。利率是零，政府發的現金在帳戶裡，待在家裡無事可做的人們打開了手機上的免佣金券商 App——一個由極致流動性、極致無聊與極致樂觀共同點燃的散戶狂歡，正在醞釀。市場的鐘擺，從三月那個生存恐懼的最深谷底，被一把推向了亢奮的另一端，而且推得又急又猛。</p>
+
+    <p>從某種意義上說，二〇二〇年是這部書四百年來所有主題的一次高速重演——它把鐘擺從恐懼到貪婪的完整擺盪，從過去需要好幾年的尺度，壓縮進了短短幾個月。一七二〇年的恐慌靠口耳相傳走好幾天，一八六七年的報價機縮短到幾分鐘，一九八七年的程式壓到幾秒，二〇一〇年的演算法壓到毫秒；而到了二〇二〇，整個「崩盤—絕望—救援—狂歡」的情緒循環，被壓縮、被加速到了一個前人無法想像的程度。<em>市場情緒的物理學，從未停止它加速的腳步；而二〇二〇年那批在手機上、在封城的無聊裡第一次買股票的年輕人，即將用一場最不可思議的群眾起義，把這份加速，推向它的下一個高潮。</em></p>
+
+    <h3>無聊、現金與一鍵下單：一場散戶的集體覺醒</h3>
+    <p>二〇二〇年那場「V 形」反轉的下半段，催生了一個前所未有的現象——一場席捲全球的散戶狂歡。它的燃料是三樣東西的奇異組合：極致的流動性、極致的無聊，與極致的樂觀。封城讓人們困在家中、無事可做；政府發放的現金支票，讓許多人帳戶裡突然多了一筆閒錢；零利率讓存款毫無意義。更巧的是，全球的職業運動賽事因疫情全面停擺，那些原本沉迷於運動賭博的人，無處下注，於是把目光轉向了一個剛好二十四小時開放、漲跌刺激、還能一鍵下單的新賭場——股市。手機上那些遊戲化的免佣金券商，正張開雙臂迎接他們。</p>
+    <p>於是市場上出現了種種匪夷所思的景象。當租車巨頭赫茲（Hertz）在疫情中宣告破產、股票理應一文不值時，蜂擁而入的散戶卻把它的股價硬生生炒高了好幾倍——人們買進一家「已經破產」的公司，理由近乎行為藝術。當紅的網路名人公開宣稱「股票只會漲，笨蛋才不買」，把投資變成了一場全民參與的線上娛樂。與此同時，一種叫 SPAC（特殊目的收購公司）的「空白支票公司」也掀起狂熱——投資人把錢交給一個「將來會去收購某家公司、但現在還不知道是哪家」的空殼，這幾乎是三百年前南海泡沫裡那家「無人知曉的偉大事業」的完美轉世。<strong>當鐘擺從三月的生存恐懼，被海量現金一把推向亢奮的另一端，群眾的貪婪，再一次找到了它最荒誕的表達方式。</strong></p>
+    <p>這場散戶覺醒，有它真實而深刻的一面：科技確實把投資的門檻降到了前所未有的低，讓千百萬過去被排除在外的普通人，第一次能參與資本市場。但它也把人性最危險的賭性，包裝得前所未有地誘人、便利、且令人上癮。這群剛剛覺醒、滿手現金、彼此在社群網路上即時串連、又被「跌深必被救」的信念餵得膽大包天的年輕散戶，正在累積成一股全新的、誰也沒見過的市場力量。他們很快就會發現，當千萬人的情緒透過網路同步起來，這股力量大到足以撼動華爾街最強大的巨鱷——而那場前所未有的群眾起義，就是下一章的故事。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 把四百年壓進幾個月</span>
+      <p>二〇二〇年是一次絕佳的「壓縮實驗」：它讓我們在短短幾個月內，目睹了這部書四百年來反覆上演的整個情緒循環——從最原始的生存恐懼（鐘擺盪到谷底），到央行救援（最後貸款人的終極動員），再到被現金餵飽的貪婪（鐘擺暴力盪回）。它也把兩條關鍵線索推到了極致：「央行賣權」被一場真實的世界級災難反向認證，讓「跌深必被救」的信念深植人心，從而埋下日後更大膽冒險的種子；而市場情緒「越傳越快」的物理學，也被壓縮到了以月計、甚至以日計的程度。當零利率、現金支票、滿手時間的居家群眾，與一支可以即時串連千萬人的手機 App 相遇，一種全新形態的「群眾」就要誕生了——它不再只是被動地被同一個報價感染，而是能主動地、即時地、用社群網路串連起來，集體行動。下一部，這個「群眾 2.0」，將在一檔誰也想不到的股票上，掀起一場資本市場史上最奇異的風暴。</p>
+    </div>
+  </div>
+</section>
+
+<div class="part-div reveal" id="part-8">
+  <span class="pn">第八部</span>
+  <h2 class="ptitle pt">散戶、機器與永恆的擺盪</h2>
+  <div class="pe">The Crowd 2.0, the Machines, and the Eternal Swing — and What the Wise Have Learned</div>
+  <div class="pline"><span></span><span class="dot">▲</span><span></span></div>
+</div>
+
+<!-- ===== 第二十二章 ===== -->
+<section class="act reveal" id="ch-22">
+  <div class="act-head">
+    <span class="act-num">第二十二章 · The Crowd&rsquo;s Revenge</span>
+    <h2 class="act-title">散戶的復仇：迷因股，與一個用網路串連的群眾</h2>
+    <p class="act-sub">The Crowd&rsquo;s Revenge — Meme Stocks and a Mob Wired Together in Real Time</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>二〇二一年一月，發生了一件資本市場史上前所未見的奇事，它的主角，是一檔誰也想不到的股票——遊戲驛站（GameStop，代號 GME）。這是一家在商場裡賣實體電玩光碟的連鎖店，在電玩全面數位下載的時代，生意每況愈下，被普遍認為是一家正在緩慢死去的「夕陽公司」。正因如此，華爾街上一些避險基金，重金「放空」這檔股票——他們借來股票賣出，賭它會繼續下跌，好在低價買回賺取差價。放空的規模大到一個離譜的程度：被放空的股數，一度超過了這家公司實際流通在外的全部股票。對沖基金們，自信滿滿地等著收割這家垂死公司的最後一程。</p>
+
+    <p>但他們忽略了一件事——一個全新的、他們從未認真對待過的對手，正在網路的另一端集結。在社群論壇 Reddit 一個叫「華爾街賭場」（r/wallstreetbets）的版上，聚集著數以百萬計的散戶。他們之中，有人發現了 GME 那異常龐大的放空部位，意識到一個機會：如果大家一起買進、把股價往上推，那些放空的對沖基金為了停損，就必須回頭買回股票，而他們的買回又會把股價推得更高，逼出更多停損買盤——這個自我加速的過程，叫「<strong>軋空</strong>」（short squeeze）。於是，一場由網路群眾自發串連、針對華爾街巨鱷的「逼空大作戰」就此打響。更妙的是，他們還大量買進「買權」（看漲選擇權），逼得賣出選擇權的造市商也必須買進股票來避險，形成另一重「伽瑪軋空」，火上澆油。</p>
+
+    <h3>當群眾學會了即時串連</h3>
+    <p>結果是驚人的。GME 的股價，從一月初的約十七美元，在短短幾週內如火箭般飆升，一月二十八日盤中一度衝上四百八十三美元——漲了將近三十倍。重押放空的梅爾文資本（Melvin Capital）損失慘重，瀕臨崩潰，不得不接受其他巨頭的緊急注資相救。一群在網路上集結的「散戶」，竟然把幾家華爾街頂級對沖基金逼到了牆角。這在過去是不可想像的——散戶一向是市場裡最分散、最無組織、最容易被宰割的「弱勢群眾」。可是社群網路改變了一切：它讓千萬個原本孤立的個體，第一次能夠即時溝通、互相打氣、協同行動，凝聚成一個有自我意識、有共同身分、甚至有共同「敵人」的集體。<strong>勒龐筆下那個十九世紀的「烏合之眾」，進化成了二十一世紀的「群眾 2.0」——它不再只是被同一個報價被動地感染，而是能主動地、即時地、用網路把自己組織起來，集體行動。</strong></p>
+
+    <p>而這場風暴的情緒燃料，也比過去任何一次都更複雜、更耐人尋味。它當然有貪婪——人人都想搭上這班三十倍的火箭，那種排山倒海的「踏空恐懼」（FOMO）把越來越多人捲了進來。但它還混雜著許多遠超「賺錢」的東西：有對二〇〇八年「華爾街闖禍、平民買單」那筆舊帳的憤怒與復仇快感（「這次輪到我們贏」）；有一種「我們是一夥的」的歸屬感與社群認同；有把投資變成一場全民參與的線上遊戲與行為藝術的娛樂衝動。它的領袖人物之一、綽號「咆哮小貓」（Roaring Kitty）的 Keith Gill，那句樸實的口頭禪「我就是喜歡這檔股票」（I like the stock），成了整場運動的精神圖騰。<em>這是一場一半是投機、一半是社會運動、再加上一點線上狂歡節的奇異混合體——貪婪、怨恨與歸屬感，在這裡被攪成了同一股力量。</em></p>
+
+    <h3>遊戲化的貪婪，與一個古老的結局</h3>
+    <p>這場狂歡的背景，是投資的「遊戲化」（gamification）。新一代的免佣金券商（如 Robinhood），把買賣股票做得像玩手機遊戲一樣簡單、刺激、令人上癮——買進成功會撒下慶祝的彩帶動畫，鮮紅嫩綠的數字在指尖即時跳動。它們號稱要「讓金融大眾化」，把投資的權力交還給普通人；但批評者指出，它們真正做的，是把人性最危險的賭性，包裝成了一款讓人欲罷不能的遊戲。風暴最戲劇性的一刻，是一月二十八日，當 GME 漲到最瘋狂時，Robinhood 突然「限制」用戶買進 GME（只准賣、不准買）——這個舉動引爆了散戶的滔天怒火，被斥為華爾街在關鍵時刻「拔網路線」、保護它的對沖基金朋友，最終鬧上了美國國會的聽證會。它也撕開了「免佣金」背後的真相：這些券商的獲利，來自把散戶的交易單賣給大型造市商（即「訂單流付費」），所以它們真正的商業模式，是盡可能誘使你「多交易」——而交易越頻繁的散戶，長期報酬往往越差，這是行為金融學早已證明的鐵律。</p>
+
+    <p>而這場前所未有的群眾起義，最終的結局，卻一點也不新——它和鬱金香、和南海、和過去四百年每一場狂熱，分毫不差。GME 的股價在觸及瘋狂的頂點後，劇烈震盪、大幅回落。那些在最高點、在亢奮與口號的最高潮中買進的人，多半被深深套牢、損失慘重；只有少數早期進場、並懂得在狂熱中獲利了結的人，真正賺到了大錢——這正是「更大的傻瓜理論」的鐵律：擊鼓傳花的遊戲裡，總得有人接最後一棒。同樣的劇本，後來在 AMC 院線、在二〇二二、二〇二三年的其他迷因股上，一再重演。<strong>群眾的工具，從報價機進化到了社群網路；群眾的規模，從一城一國擴張到了全球連線；可是群眾的情緒，與三百多年前那群在阿姆斯特丹搶購鬱金香的人，沒有一絲一毫的不同。</strong></p>
+
+    <div class="pull"><p>迷因股最深的啟示是：科技能讓群眾連得更緊、動得更快、喊得更響、甚至第一次讓散戶扳倒了巨鱷——但它改變不了那個最古老的結局。無論群眾用羽毛筆、報價機還是手機 App 集結，總得有人，在音樂停下時，手裡還抱著那朵最貴的鬱金香。</p></div>
+
+    <h3>當賭場免費，你就是被賣的商品</h3>
+    <p>迷因股風暴退去後，留下了幾個值得深思的餘韻。首先，它一再重演——二〇二一年夏天的 AMC 院線，二〇二二到二三年那家明明已瀕臨破產、卻被散戶反覆爆炒的 Bed Bath &amp; Beyond，都是 GameStop 的續集。每一次，劇本都一樣：一群在網路上集結的散戶，押注一檔被放空的「爛公司」，靠軋空把它炒上天，然後在頂點崩落，留下最後一批接棒的人血本無歸。群眾學會了這套打法，卻學不會這套打法的結局——這正是高伯瑞「遺忘」的迷你高速版，連間隔一代人都不需要，幾個月就能讓一批新韭菜忘記上一批的下場。</p>
+    <p>其次，它撕開了「免費投資」的真相。那些標榜「零佣金」的手機券商，並非做慈善——它們把散戶的交易委託單，賣給了大型造市商來執行（即「訂單流付費」，payment for order flow），交易量越大，它們賺得越多。換句話說，在這場遊戲裡，<strong>如果你沒有為產品付費，那麼你自己，就是被販賣的產品。</strong>於是這些 App 的整個設計，從慶祝的彩帶動畫到刺激的紅綠跳動，都在誘使你「多交易、多下注」——而行為金融學早已用無數數據證明，交易越頻繁的散戶，長期報酬越差。一個本意要「讓金融民主化」的工具，骨子裡的商業模式，卻是盡可能地放大你的賭性。</p>
+    <p>這份「遊戲化」的代價，有時是慘痛的。曾有一位年輕的 Robinhood 用戶，因為誤讀了 App 上一個顯示為鉅額負數的帳戶餘額、以為自己欠下天文數字的債務，在恐慌中結束了自己的生命——一場本不該發生的悲劇，赤裸裸地揭示了：當你把人性最危險的賭性，包裝成一款讓人上癮、卻又把風險隱藏得若隱若現的遊戲時，會出什麼樣的事。輿論的壓力下，那家公司後來悄悄拿掉了交易成功時的彩帶動畫。<strong>迷因股留給世界最深的一課或許是：科技可以把交易變得無比簡單、無比便宜、無比好玩，卻無法把它變得無比安全——因為螢幕背後那顆會貪婪、會恐懼、會 FOMO 的心，四百年來，從未升級過。</strong></p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 群眾 2.0，與不變的人性</span>
+      <p>迷因股風暴，是第二把鑰匙「群眾」在數位時代的終極形態。社群網路讓群眾第一次擁有了自我意識、即時協同與共同身分——這是勒龐、是麥凱都無法想像的進化。它甚至短暫地翻轉了權力，讓最弱勢的散戶扳倒了最強大的對沖基金，這份「大眾化」有它真實而動人的一面。但它同時把人性最危險的賭性，用「遊戲化」包裝得前所未有地誘人，並摻入了源自二〇〇八的怨恨與復仇——讓貪婪有了更崇高的偽裝。然而結局證明，工具的革命再徹底，也撼動不了那個四百年不變的核心：擊鼓傳花，總有最後一棒；鐘擺盪向亢奮的極端，終究要盪回來。下一章，我們將看到這同一股情緒，附身到一個更新、更純粹、也更狂野的載體上——一個沒有盈餘、沒有實體、純粹由信念與程式碼構成的東西：加密貨幣。它，是鬱金香狂熱在二十一世紀最赤裸的轉世。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第二十三章 ===== -->
+<section class="act reveal" id="ch-23">
+  <div class="act-head">
+    <span class="act-num">第二十三章 · New Vehicles, Old Emotions</span>
+    <h2 class="act-title">新瓶舊酒：從鬱金香到加密貨幣，工具進化，情緒不變</h2>
+    <p class="act-sub">New Vehicles, Old Emotions — From the Tulip to the Token</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>如果說鬱金香狂熱是這部書的「創世神話」，那麼加密貨幣，就是它在二十一世紀最忠實、也最赤裸的轉世重演。二〇〇九年，一個化名中本聰的神秘人物，創造了比特幣——一種不依賴任何政府或銀行、純粹由電腦網路與密碼學維繫的「數位貨幣」。它的背後，有一個無比動人的故事（敘事這把鑰匙，從未如此強大）：在二〇〇八年金融海嘯、人們對華爾街與央行信任崩潰的廢墟之上，比特幣承諾了一個去中心化、不受任何當權者操控、把金錢的主權還給個人的烏托邦。和鐵路、和網路一樣，這個願景裡，藏著真實而深刻的技術創新；也和它們一樣，正因為這個故事如此動人，它孕育的投機，才如此瘋狂。</p>
+
+    <p>而加密貨幣的價格史，幾乎就是這部書全部情緒曲線的高速、放大、循環播放版。比特幣在二〇一七年第一次掀起全民狂熱，價格從年初的不到一千美元，飆漲到年底的近兩萬美元，然後在二〇一八年崩跌約八成，跌回三千多美元。接著，在二〇二〇至二一年那個零利率、滿手現金、散戶狂歡的環境裡，它捲土重來，於二〇二一年十一月衝上約六萬九千美元的歷史高峰——然後在二〇二二年再次崩盤，跌掉七成以上。一個叫 Terra/Luna 的「穩定幣」項目在二〇二二年五月於幾天內歸零，蒸發數百億美元；同年十一月，當時最大的加密貨幣交易所之一 FTX，連同它那位被捧為「下一個巴菲特」的創辦人，在一場擠兌中轟然崩塌，被揭穿是一場巨大的舞弊——這幾乎是約翰·勞、是南海公司在二十一世紀的翻版。<strong>同樣的暴漲暴跌，同樣的「這次不一樣」，同樣的擠兌與崩塌，同樣在頂點接棒的散戶血本無歸——只是這一次，整個循環被壓縮、被加速到了以月、甚至以週計。</strong></p>
+
+    <h3>當投機標的本身，不再需要任何價值</h3>
+    <p>加密狂熱裡，最能說明問題的，是那些連「改變世界」的故事都懶得編的東西。狗狗幣（Dogecoin）——一個最初純粹是為了嘲諷加密貨幣熱潮、以一隻柴犬迷因為標誌的「玩笑幣」——竟在群眾與名人推文的鼓動下，市值一度衝上數百億美元。在二〇二一年的 NFT（非同質化代幣）熱潮裡，人們花費數十萬、甚至上百萬美元，去購買一張「擁有權登記在區塊鏈上」的猴子圖片；一位數位藝術家的拼貼作品，在拍賣會上以約六千九百萬美元成交。這些現象，把投機的本質剝得一絲不掛：<em>當一樣東西的價格，可以完全脫離它的任何實際用途或現金流，純粹由「我相信下一個人會用更高的價買走它」來支撐時，我們就回到了一六三七年那顆埋在土裡、隨時可能爛掉、卻換得到一棟房子的鬱金香球莖。</em>三百八十多年過去了，人類發明了區塊鏈、密碼學、智慧合約——這些真正了不起的技術，卻被用來重新演繹一場一模一樣的、關於「更大的傻瓜」的古老遊戲。</p>
+
+    <p>加密貨幣只是冰山一角。把鏡頭拉遠，會看見一條清晰的歷史軌跡——<strong>投機的「工具」一直在進化，而且每一次進化，都讓人們能用更高的槓桿、更快的速度，去表達同樣那兩種古老的情緒。</strong>一九二〇年代是保證金（融資）；之後是各種選擇權與衍生性商品；是讓你用幾倍槓桿做多做空的槓桿型 ETF；是二〇二〇年後爆紅、讓散戶當天買進當天到期、賭一把就走的「零日選擇權」（0DTE）；是二〇二〇至二一年那場借殼上市的 SPAC 狂熱；是加密世界裡可以開到一百倍槓桿的「永續合約」。每一樣新工具誕生時，都頂著「讓金融更有效率、更普惠、更民主」的光環；可它們最常被拿來做的，是讓貪婪與恐懼，用前所未有的倍率與速度，把自己放大。工具越來越精巧，玩家越來越年輕，循環越來越快——可是驅動這一切的引擎，依然是德拉維加在阿姆斯特丹看見的那兩樣東西。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>泡沫</th><th>年代</th><th>那個「這次不一樣」的故事</th><th>從高點到谷底</th></tr></thead>
+        <tbody>
+          <tr><td><strong>鬱金香</strong></td><td>1637</td><td>稀世奇花，永遠有人想要</td><td>幾天內崩跌九成以上</td></tr>
+          <tr><td><strong>南海／密西西比</strong></td><td>1720</td><td>壟斷新世界的無盡財富</td><td>數月內崩跌約九成</td></tr>
+          <tr><td><strong>鐵路狂熱</strong></td><td>1840s</td><td>鐵路將永遠改變文明</td><td>多數公司股價腰斬至歸零</td></tr>
+          <tr><td><strong>咆哮二〇年代</strong></td><td>1929</td><td>新時代，永遠的高原</td><td>道瓊 −89%（至 1932）</td></tr>
+          <tr><td><strong>日本資產泡沫</strong></td><td>1989</td><td>日本第一，日本不一樣</td><td>日經 −82%，失落三十年</td></tr>
+          <tr><td><strong>網路泡沫</strong></td><td>2000</td><td>新經濟，看眼球不看盈餘</td><td>那斯達克 −78%</td></tr>
+          <tr><td><strong>美國房市／次貸</strong></td><td>2008</td><td>房價在全國範圍永不下跌</td><td>標普 −57%，全球金融海嘯</td></tr>
+          <tr><td><strong>加密貨幣</strong></td><td>2017／2021</td><td>去中心化將顛覆一切</td><td>比特幣 −80% ／ −70%＋</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="map-note">八場相隔近四百年的狂熱，標的天差地別，跌幅卻驚人地相似——因為驅動它們的，從來是同一顆人心。</p>
+
+    <h3>把賭場開進口袋，與記憶的半衰期</h3>
+    <p>投機工具的進化，在近幾年達到了一個新的極致——「零日選擇權」（0DTE，當天到期的選擇權）的爆紅。它讓散戶可以用極小的本金，去賭「大盤在今天收盤前漲或跌」，輸贏在幾小時內見分曉，刺激得像一場高速輪盤。它幾乎完美復刻了一百多年前那些「空桶店」的本質——不真正投資任何東西，純粹對著一個跳動的數字下注漲跌；只是這一次，賭場不在街角，而在每個人的口袋裡，二十四小時隨身攜帶、一鍵下注。從鬱金香的「風中交易」，到空桶店，到 0DTE，人類「把投資變成純粹賭博」的衝動，每隔一段時間就會換一身新衣裳，捲土重來。</p>
+    <p>而為什麼這一切總在重演？答案，回到了高伯瑞那條冷酷的觀察——金融記憶的「半衰期」極短，大約只有一代人的時間。一場慘烈的崩盤，會讓親歷者刻骨銘心、戒慎恐懼；可是二十年後，當這批人逐漸老去、退場，一批從未嘗過苦頭的年輕人登場，他們對著同樣的瘋狂，會真心相信「我們這一代不一樣」。於是泡沫不是偶然的意外，而是有著近乎生物學節律的、週期性的復發。<strong>每一代人，似乎都註定要親手吹起、並親手戳破，屬於他們自己的那一個泡沫——因為關於貪婪與恐懼的教訓，是無法繼承的，每個人都得用自己的錢，重新學一遍。</strong></p>
+    <p>但這一章也必須有一個誠實的平衡。把加密貨幣、把網路、把鐵路斥為「純粹的泡沫」，是不公平的，也錯失了重點。正如鐵軌真的鋪成了、網路真的改變了世界，區塊鏈背後那些關於去中心化、關於數位所有權的技術構想，也可能蘊含著真實而長遠的價值——歷史要再過很久才能蓋棺論定。這部書的立場從來不是「所有新事物都是騙局」，而是一個更微妙的區分：<em>一項技術會不會改變世界，與此刻追逐它的價格是否瘋狂，是兩個必須分開回答的問題。</em>泡沫的悲劇，從來不在於那個故事是假的——恰恰相反，最危險的泡沫，總是建立在一個部分為真的故事之上；悲劇在於，群眾把「這項技術了不起」的正確判斷，與「所以現在用任何價格買它都對」的致命謬誤，混為了一談。分清這兩者，是這部書四百年來，反覆要教給我們、而我們又反覆學不會的，那一課。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 換湯不換藥的四百年</span>
+      <p>這一章，是全書「新工具、舊情緒」這條總綱的集大成。把鬱金香、南海、鐵路、一九二九、日本、網路、次貸、加密這八場狂熱並排在一起，標的從一朵花、一條鐵路、一家公司，到一串無形的程式碼，跨越了人類幾乎所有的技術革命；可是它們的劇本——一個動人的「這次不一樣」故事、買進理由從「擁有」變成「轉手」、群眾的相互傳染、頂點的全民亢奮、以及最後沒有明確原因的崩潰——卻像同一份藍圖印出來的一樣。這正是這部書最核心、也最令人謙卑的結論：<strong>市場的技術一直在進步，人心卻幾乎從未改變。</strong>既然劇本如此固定，那麼，我們能不能把它「解剖」出來，做成一張可以辨認的地圖，好讓自己在下一次身處其中時，認出自己正站在循環的哪一格？下一章，我們就來做這場解剖。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第二十四章 ===== -->
+<section class="act reveal" id="ch-24">
+  <div class="act-head">
+    <span class="act-num">第二十四章 · The Anatomy of a Bubble</span>
+    <h2 class="act-title">泡沫的解剖學：一張四百年不變的劇本</h2>
+    <p class="act-sub">The Anatomy of a Bubble — A Script Unchanged for Four Centuries</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>走過了四百年、十幾場狂熱之後，我們終於可以停下來，把這些看似各不相同的瘋狂，攤在解剖台上，回答一個核心問題：泡沫，有沒有一套固定的「解剖構造」？答案是肯定的。經濟史家查爾斯·金德爾伯格，在他那本經典的《瘋狂、恐慌與崩盤》裡，綜合了經濟學家海曼·明斯基的洞見，提煉出一套幾乎適用於所有泡沫的五階段模型。這套模型，就是這部書從頭到尾在每一場狂熱裡反覆指認的那條暗線，現在，讓我們把它完整地畫出來。</p>
+
+    <p><strong>第一階段：位移（Displacement）。</strong>一切始於某個真實的、足以改變世界的新事物，它打亂了人們對未來的舊有想像——可能是一項新技術（鐵路、網路、區塊鏈），一個新市場（南美貿易、新興亞洲），或一種新的金融環境（突然變得極度廉價的資金）。這個「位移」是真實的，它創造了真實的獲利機會，也播下了第一顆種子。<strong>第二階段：繁榮（Boom）。</strong>聰明的早期參與者開始獲利，價格穩步上漲，而最關鍵的燃料——信貸與槓桿——開始湧入，讓越來越多人能用借來的錢追逐這個機會，價格上漲的速度開始加快。<strong>第三階段：亢奮（Euphoria）。</strong>這是泡沫的高潮。價格脫離了任何理性的估值，「這次不一樣」成了不容質疑的真理，傳統的衡量標準被丟棄、被一套全新的（看眼球、看願景、看夢想）取代；群眾蜂擁而入，連最後一個懷疑者、連擦鞋童都下了場，FOMO 把鐘擺推向極限。</p>
+
+    <p><strong>第四階段：困境（Distress）。</strong>在亢奮的最高點，一件安靜卻致命的事發生了——最早、最聰明的那批錢，開始悄悄離場。他們或許說不清為什麼，只是嗅到了某種不對勁。價格的上漲開始失去動能，在高檔劇烈震盪，內部人賣出，「聰明錢」與「傻錢」開始換手。表面上一切照舊，底下的地基卻已被抽空。<strong>第五階段：恐慌與厭惡（Panic / Revulsion）。</strong>某個導火線——往往尋常得可笑——點燃了第一波恐懼；而由於槓桿的存在，下跌觸發追繳、追繳逼出拋售、拋售壓低價格、又觸發更多追繳，那個曾經把價格推上天的正回饋，此刻以同樣的力量反向運轉。貪婪在幾天之內翻轉成恐懼，群眾從爭相買進變成奪門而逃，崩盤降臨。然後是漫長的厭惡期：人們對這個資產避之唯恐不及，價格跌過了頭，跌到比「合理」還低得多——而這，弔詭地，正是下一個循環的種子。</p>
+
+    <div class="flow">
+      <span class="node">① 位移<br>真實的新事物</span><span class="arrow">→</span>
+      <span class="node">② 繁榮<br>信貸與槓桿湧入</span><span class="arrow">→</span>
+      <span class="node">③ 亢奮<br>這次不一樣</span><span class="arrow">→</span>
+      <span class="node">④ 困境<br>聰明錢離場</span><span class="arrow">→</span>
+      <span class="node">⑤ 恐慌<br>奪門而逃</span>
+    </div>
+
+    <h3>明斯基的弔詭：穩定，本身孕育著不穩定</h3>
+    <p>在這套解剖學底下，藏著明斯基一個更深刻、近乎哲學的洞見——「金融不穩定假說」。他指出一個違反直覺的真相：<strong>穩定，本身就孕育著不穩定。</strong>當市場長期平穩、繁榮持續夠久，人們會逐漸忘記風險的存在（高伯瑞的遺忘），於是膽子越來越大，借的錢越來越多，承擔的風險越來越高。明斯基把融資分成三種：能用收入同時還本付息的「避險型」、只夠付息的「投機型」、以及連利息都得靠借新還舊或資產增值來支撐的「龐氏型」。在一段長期的承平裡，整個體系會不知不覺地、集體地，從穩健的避險型，一步步滑向脆弱的龐氏型——直到某個臨界點，一個小小的擾動就足以引發連鎖崩潰。這個崩潰的瞬間，後來被命名為「<strong>明斯基時刻</strong>」（Minsky moment）。它告訴我們一件令人不安的事：危機的種子，恰恰是在歌舞昇平、人人都覺得最安全的時候，悄悄種下的。最危險的，從來不是恐懼瀰漫的時刻，而是無人恐懼的時刻。</p>
+
+    <p>把這套解剖學與情緒的循環疊在一起，整幅圖像就完整了：金德爾伯格的五階段，是泡沫的「骨架」；而貪婪與恐懼、希望與絕望的鐘擺擺盪，是流過這副骨架的「血液」。位移與繁榮，對應著希望與樂觀；亢奮，對應著貪婪與狂熱的頂點；困境，是焦慮與否認的掙扎；恐慌，則是恐懼的總爆發；而漫長的厭惡，是絕望的谷底——也是下一輪希望，將要重新萌芽的地方。這就是為什麼，這部書的序章說，最大的獲利機會，弔詭地，總藏在「絕望」那一格。</p>
+
+    <h3>一個誠實的告白：知道，與做到之間</h3>
+    <p>但這裡必須有一個誠實的告白，否則這套解剖學就成了另一個危險的幻覺。認得出泡沫的「構造」，與能夠在「當下」準確指認並避開它，是兩件天差地別的事。泡沫在事後回看，總是清晰得不可思議、荒謬得不可原諒；可是身處其中時，它卻偽裝得天衣無縫——因為每一場泡沫的核心，都有一個「真實的位移」，一個讓聰明人也信服的好故事。葛林斯潘在一九九六年就喊出「非理性繁榮」，市場卻又漲了四年；席勒「知道」那是泡沫，卻無法告訴你它哪天會破。<em>更折磨人的是，在泡沫裡，「太早清醒」的代價，常常比「跟著瘋狂」更慘——你會眼睜睜看著身邊的傻瓜一個個發財，看著自己因為「理性」而錯過、甚至（若你做空）被軋到破產。</em>凱因斯那句幽靈般的警告，在這裡第三次、也是最沉重地響起：市場保持非理性的時間，可以長過你保持不破產的時間。所以這套解剖學，不是一張能讓你精準逃頂抄底的藏寶圖；它頂多是一面鏡子，讓你在群眾的喧囂中，偶爾能瞥見自己此刻站在循環的哪一格，從而比身邊的人，多保留那麼一點點的清醒與謙卑。</p>
+
+    <div class="pull"><p>泡沫的解剖學，不會告訴你「何時」逃頂，因為沒有人做得到。它能告訴你的，只是一件更謙卑、卻也更有用的事：當所有人都說「這次不一樣」、當連最謹慎的人都開始焦慮自己錯過、當你發現自己正用一套全新的標準替瘋狂的價格辯護時——你，正站在循環的哪一格。</p></div>
+
+    <h3>泡沫的警訊：當你看見這些，請小心</h3>
+    <p>儘管沒有人能精準預測崩盤的時點，但歷史上每一場大泡沫，在膨脹到頂點時，都會反覆亮起一組驚人相似的警示燈。它們不是精準的賣出訊號，而是一份「該提高警覺、該保持懷疑」的徵兆清單——當你發現自己周遭同時出現越來越多這些跡象時，你大概正站在鐘擺盪向貪婪的高處。</p>
+    <div class="warn">
+      <div class="warn-tag">泡沫頂點的常見徵兆</div>
+      <p>● <strong>「這次不一樣」成了共識：</strong>傳統估值標準被宣告過時，人們發明全新的指標（看眼球、看願景、看 TAM）來合理化瘋狂的價格。</p>
+      <p>● <strong>外行大量湧入：</strong>從不碰股票的親戚、同事、計程車司機、擦鞋童，都開始給你報明牌、談他賺了多少。</p>
+      <p>● <strong>槓桿氾濫：</strong>融資餘額飆升，人們用借來的錢、用選擇權、用高倍合約追逐標的，「不下場」本身成了一種痛苦。</p>
+      <p>● <strong>新股與新標的狂歡：</strong>毫無獲利的公司上市首日股價翻倍，連笑話與迷因都能漲上天，發行量爆炸。</p>
+      <p>● <strong>價格走勢拋物線化：</strong>漲幅本身成了買進的唯一理由，「因為它在漲，所以我買；因為大家買，所以它漲」。</p>
+      <p>● <strong>懷疑者遭到嘲笑：</strong>提醒風險的人被斥為「不懂、過時、踏空」，清醒成了一種需要承受嘲諷的孤獨。</p>
+    </div>
+    <p>這份清單最殘酷的地方，不在於它難以辨認——事後看，它清晰得近乎可笑；而在於，當你身處其中時，每一條徵兆都會被一個動聽的理由重新解釋成「合理」。外行湧入？那叫「投資大眾化」。槓桿氾濫？那叫「善用工具」。價格拋物線？那叫「趨勢的力量」。懷疑者被嘲笑？因為「他們就是不懂」。<strong>泡沫之所以是泡沫，正因為它在膨脹的當下，總能替自己的每一個瘋狂之處，找到一個讓聰明人也點頭的解釋。</strong>所以這份清單真正的用處，不是讓你去精準逃頂，而是當你發現自己正在替上述每一條徵兆熱切辯護時，能在心底響起一個微弱的警鈴：你聽見的，是不是又一次「這次不一樣」的合唱？而你，是不是已經不知不覺地，成了合唱團裡的一員？</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 骨架與血液</span>
+      <p>這一章是全書的理論收束。金德爾伯格與明斯基的五階段模型，是泡沫的骨架；而貫穿全書的貪婪—恐懼鐘擺，是流過它的血液。明斯基那句「穩定孕育不穩定」，則替第三把鑰匙「遺忘」找到了最深的根源——危機的種子，總在最太平、最無人恐懼的時候種下。但這套解剖學最誠實、也最重要的一課是：認得構造，不等於躲得過命運。知道市場由情緒驅動、知道泡沫長什麼樣，與能在當下管好自己的貪婪與恐懼，中間隔著一道幾乎沒有人跨得過的鴻溝——「知道」與「做到」之間的鴻溝。那麼，那極少數真正跨過了這道鴻溝、在四百年的瘋狂裡活下來、甚至大獲全勝的人，究竟掌握了什麼祕密？下一章，我們去聽聽這些倖存者——他們無一例外地告訴我們：祕密，不在腦袋，而在性情。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第二十五章 ===== -->
+<section class="act reveal" id="ch-25">
+  <div class="act-head">
+    <span class="act-num">第二十五章 · Living with Mr. Market</span>
+    <h2 class="act-title">與情緒共存：少數倖存者的修煉</h2>
+    <p class="act-sub">Living with Mr. Market — The Discipline of the Few Who Survived</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>如果這部書到此為止，它將是一個徹底悲觀的故事：人類被自己的貪婪與恐懼反覆愚弄了四百年，從鬱金香到加密貨幣，毫無長進。但歷史也留下了一條救贖的線索——在每一個時代，總有極少數人，學會了與市場先生的躁鬱共存，甚至反過來利用它。他們的智慧，匯成了這部書最實用的一章。而這些智慧的共同點，出奇地一致，也出奇地反直覺：<strong>戰勝市場的關鍵，從來不在於更高的智商、更多的資訊、更複雜的模型——這些，牛頓有過，LTCM 有過，都輸了——而在於一樣樸素得多、卻也稀有得多的東西：性情（temperament）。</strong></p>
+
+    <p>這條線索的源頭，是我們在第十章見過的班傑明·葛拉漢。他留下的兩件法寶，本質上都是對抗情緒的工具。其一是「市場先生」——把市場的瘋狂報價，看成一個躁鬱合夥人每天上門的情緒化叫價，而非你必須服從的真理；於是他的恐慌成了你買進的機會，他的狂喜成了你賣出的時機。其二是「安全邊際」——永遠用遠低於價值的價格買進，替自己的判斷與運氣，都留下一層厚厚的緩衝。葛拉漢有一句話，是整章的總綱：<strong>「投資人最大的問題，甚至是最可怕的敵人，很可能是他自己。」</strong>市場不會毀掉你，是你在市場裡的情緒——你的貪婪、你的恐懼、你的不耐——毀掉你。</p>
+
+    <h3>巴菲特、坦伯頓、馬克斯：在別人的情緒裡逆行</h3>
+    <p>葛拉漢最出色的學生華倫·巴菲特，把這套哲學濃縮成了一句幾乎人人都聽過、卻幾乎沒有人做得到的話：<strong>「在別人貪婪時恐懼，在別人恐懼時貪婪。」</strong>這句話的全部難處，不在於理解，而在於執行——因為它要求你，在所有人都在狂歡、你的鄰居都在發財時保持冷靜抽身（與群眾為敵），又要求你在血流成河、世界彷彿要末日時鼓起勇氣買進（與恐懼為敵）。巴菲特反覆強調，投資成功與智商關係不大，他說：「如果你智商有一百六十，把超過一百三十的部分賣掉吧，你不需要它。」你真正需要的，是一種「在群眾失控時，能控制住自己情緒」的穩定性情。約翰·坦伯頓則用行動詮釋了這一點——一九三九年，當二戰爆發、市場一片恐慌絕望時，他借錢買進了紐約交易所裡每一檔股價低於一美元的股票，幾年後大賺。他那句不朽的名言，是整部情緒史的完美總結：「牛市在悲觀中誕生，在懷疑中成長，在樂觀中成熟，在亢奮中死亡。」而「最大的悲觀時刻，正是最佳的買進時機」。</p>
+
+    <p>當代的霍華德·馬克斯，則把這份逆行的智慧，提煉成了兩個更精確的概念。其一是貫穿本書的「<strong>鐘擺</strong>」——他教投資人不必去預測鐘擺的下一步（那不可能），但要時時意識到「我們此刻大概在鐘擺的哪個位置」：是貪婪過頭、該提高警覺的時候，還是恐懼過頭、該鼓起勇氣的時候。其二是「<strong>第二層思考</strong>」（second-level thinking）：第一層思考說「這是家好公司，買進」；第二層思考則問「沒錯它是好公司，但這個『好』是不是所有人都已經知道、並已經反映在過高的價格裡了？大家的共識，是不是已經錯了？」——真正的超額報酬，只可能來自「與眾不同、且正確」的判斷，而這必然意味著，你得在情緒上承受「與群眾為敵」的孤獨與煎熬。馬克斯有一句話道破天機：<em>「你不可能做和別人一樣的事，卻期待打敗他們。」</em></p>
+
+    <h3>柏格的終極謙卑：乾脆放棄打敗群眾</h3>
+    <p>但這套「逆群眾而行」的修煉，有一個誠實到殘酷的問題：絕大多數人，根本做不到。情緒的引力太強，逆行的孤獨太苦，連專業基金經理人長期下來都極少能持續打敗大盤。於是，有一個人提出了一條截然不同、卻同樣深刻的解方——他叫約翰·柏格（John Bogle）。一九七六年，柏格創立了世界上第一檔給普通人的「指數型基金」。他的邏輯是一種終極的謙卑：既然連專家都極少能長期打敗市場，既然頻繁交易只會餵養你的情緒、增加你的成本、損害你的報酬，那麼，<strong>普通人最聰明的選擇，不是去「戰勝」市場，而是乾脆「擁有」整個市場——用極低的成本買進一籃子的全市場指數，然後，什麼都不做，長期持有。</strong></p>
+
+    <p>柏格的指數基金，是這部書一個意味深長的轉折。它某種程度上，向第十一章那個「傲慢」的效率市場假說投降了——承認「你打不贏市場」這個經驗事實；但它又把這份投降，轉化成了普通人對抗自身情緒最有力的武器。指數化投資的全部威力，恰恰在於它「剝奪了你做蠢事的機會」：它讓你不必擇時（躲開了追高殺低）、不必選股（躲開了過度自信）、不必頻繁交易（躲開了處置效應與手續費），只需用紀律對抗那個唯一的敵人——想要「做點什麼」的衝動。在一個越來越快、越來越喧囂、越來越誘人下場賭一把的市場裡，柏格教給普通人的最高智慧，竟是「<strong>別動</strong>」——買進、持有、然後關掉螢幕，去過你的人生。這是對抗市場先生最樸素、卻也最有效的辦法：你贏不了他的情緒，那就乾脆不跟他玩這場情緒的遊戲。</p>
+
+    <div class="pull"><p>所有倖存者的智慧，最終都指向同一個地方：你無法戰勝市場，因為市場就是人心；你唯一能戰勝的，是你自己心裡的那個市場先生。投資這場遊戲，表面上是和別人比聰明，骨子裡，是一個人和自己的貪婪與恐懼，漫長的角力。</p></div>
+
+    <h3>「別站在那裡，什麼都別做」</h3>
+    <p>柏格的指數投資，有一句廣為流傳的格言，把它的全部智慧濃縮成了一個近乎禪意的命令：華爾街的信條是「別光站著，做點什麼！」（Don&rsquo;t just stand there, do something!），而成功投資人的信條，恰恰相反——「<strong>別做什麼，就站在那裡！</strong>」（Don&rsquo;t do something, just stand there!）。這句話之所以深刻，是因為它直指人性最大的弱點：我們天生就有一種「必須做點什麼」的衝動，尤其在市場劇烈波動、情緒高漲時，「按兵不動」幾乎是反人性的煎熬。可是數據冷酷地證明，對絕大多數人而言，每一次「做點什麼」（追高、殺低、換股、擇時），平均而言都在損害自己的報酬。市場最豐厚的獎賞，往往不是給最勤奮、最聰明的人，而是給最有紀律、最能忍住不動的人。</p>
+    <p>柏格還反覆強調一個樸素到容易被忽略的真相——「<strong>成本，至關重要</strong>」。投資的報酬無法保證，但你付出的成本（手續費、管理費、頻繁交易的損耗）是確定的、是會被複利無情放大的。一筆看似不起眼的年費，經過數十年的複利侵蝕，會吃掉你最終財富的一大塊。而頻繁交易，正是被情緒驅使、又同時推高成本的雙重殺手。指數基金的威力，一半來自「不擇時、不選股」省下的心理失誤，另一半就來自「極低成本」省下的真金白銀。</p>
+    <p>所以柏格留給普通人的，是一條與所有大師殊途同歸、卻最樸實可行的路：你不必去當巴菲特、不必去猜鐘擺、不必去和群眾鬥智——你只需要承認自己也是個會貪婪會恐懼的凡人，然後用「買進全市場、極低成本、長期持有、什麼都別做」這套紀律，把自己那顆躁動的心，牢牢綁在桅杆上。<strong>這是對抗市場先生最謙卑、也最有效的辦法：你贏不了他的情緒遊戲，那就乾脆退出這場遊戲，讓時間與複利，替你完成那場你自己永遠贏不了的戰鬥。</strong></p>
+
+    <h3>反過來想，與「在血流成河時買進」</h3>
+    <p>巴菲特一生的智慧搭檔查理·蒙格（Charlie Munger），替這套修煉補上了另一個關鍵的角度。蒙格最著名的思維工具，是「<strong>反過來想，永遠反過來想</strong>」（invert, always invert）：與其絞盡腦汁去想「我要怎樣才能成功」，不如先想清楚「我要怎樣才會慘敗」，然後，竭盡全力去避開那些必敗的行為。把這套「反向思考」用在投資上，得到的結論樸素而深刻——你不必是天才，你只需要持之以恆地「避免做蠢事」：別追高、別用槓桿賭身家、別在恐慌中割肉、別碰自己看不懂的東西、別讓嫉妒與貪婪主宰你。蒙格畢生鑽研人類「誤判心理學」，列舉了數十種會讓人在投資中犯錯的心理傾向——這幾乎是行為金融學的實戰版。他的結論與葛拉漢一脈相承：投資的成功，與其說來自做對了多少聰明事，不如說來自避開了多少愚蠢事；而避開愚蠢，靠的不是智商，是情緒的紀律。</p>
+    <p>這些道理聽起來簡單，但「在別人恐懼時貪婪」這件事，真正做起來有多難，看看那些大師親自下場的時刻就知道了。二〇〇八年金融海嘯最黑暗、人人都在預言世界末日的時候，巴菲特公開撰文，標題就叫〈買進美國，我正在買〉（Buy American. I am.），逆著滔天的恐慌大舉進場。坦伯頓更早在一九三九年二戰爆發、市場一片死寂時，借錢買進了紐約交易所裡每一檔低於一美元的股票。<strong>這些行動的共同點是：它們在當下，看起來全都像瘋了一樣。</strong>因為「在別人恐懼時貪婪」的真正考驗，不在於你懂不懂這個道理，而在於當全世界、你所有的朋友、所有的新聞都在尖叫「快逃」時，你能不能獨自一人，違抗那股深植於基因、會傳染、會踩踏的恐懼，平靜地伸出手去。</p>
+    <p>霍華德·馬克斯在他那些廣為流傳的「投資備忘錄」裡，反覆叩問的也是這件事。他說，投資人真正需要培養的，不是預測未來的能力（那不存在），而是一種「在週期中知道自己身處何處」的覺察，加上一種「敢於與群眾背道而馳」的情緒韌性。他有一句話，幾乎是這一整章的總結：<em>「在投資的世界裡，舒適與獲利，幾乎從不並存。」</em>——因為真正的好機會，總是出現在最令人不舒服、最違反直覺、最孤獨的時刻；而能不能忍受那份不舒服，從來不是智力問題，是性情問題。所有的大師，殊途同歸地指向同一個答案：你能戰勝的，從來不是市場，而只是你自己心裡那個會貪婪、會恐懼、會從眾、會後悔的市場先生。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 性情，而非智商</span>
+      <p>這一章是全書的救贖。它告訴我們，四百年的瘋狂史並非全然絕望——總有極少數人跨過了「知道」與「做到」之間那道鴻溝。而他們的祕密，殊途同歸：葛拉漢的「市場先生」與「安全邊際」、巴菲特與坦伯頓的「逆群眾而行」、馬克斯的「鐘擺」與「第二層思考」、柏格的「乾脆擁有市場、然後什麼都別做」——這些看似不同的方法，本質上是同一件事的不同版本：<strong>一套用紀律與謙卑，去馴服自己內在那個貪婪與恐懼的鐘擺的技術。</strong>它們無一例外地證明，這場遊戲的勝負手，不在腦袋，在性情；不在於戰勝別人，在於戰勝自己。它們也無一例外地誠實：這些道理「簡單，卻不容易」——知道，從來不等於做到。最後一個問題擺在眼前：在一個越來越多交易交給演算法、交給人工智慧的時代，這場「人與自己情緒的角力」，會不會終於被沒有情緒的機器終結？下一章，我們去面對這個關於未來的終極詰問。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 第二十六章 ===== -->
+<section class="act reveal" id="ch-26">
+  <div class="act-head">
+    <span class="act-num">第二十六章 · Do Machines Feel?</span>
+    <h2 class="act-title">機器會有情緒嗎？演算法時代的貪婪與恐懼</h2>
+    <p class="act-sub">Do Machines Feel? — Greed and Fear in the Age of the Algorithm</p>
+    <div class="ornament">▲ ◈ ▼</div>
+  </div>
+  <div class="prose">
+    <p>今天的股票市場，已經不再是德拉維加筆下那個人聲鼎沸的阿姆斯特丹交易所，甚至也不再是電影裡西裝筆挺、對著電話嘶吼的華爾街交易員。今天市場上絕大多數的交易，是由電腦、由演算法、由「高頻交易」（HFT）以毫秒、微秒為單位自動完成的；越來越多的資金，流入了不做任何主動判斷的被動式指數基金；而最前沿的量化基金，正用人工智慧與機器學習，在海量數據裡尋找人類肉眼無法察覺的微小規律。於是一個誘人的問題浮現了：當市場交給了沒有貪婪、沒有恐懼、不會 FOMO、不會恐慌的機器，這部書講了四百年的「情緒」，是不是終於要被終結了？市場，會不會終於變得理性？</p>
+
+    <p>答案，恐怕會讓樂觀者失望——而且它指向一個更深的真相。機器確實不會「感到」貪婪或恐懼，但它們做的，是<strong>用光速去執行人類預先寫進它們的情緒</strong>。一套「停損」程式，本質上就是把「恐懼」（虧損到某個程度就出場）翻譯成了程式碼；一套「動量／趨勢跟蹤」策略，本質上就是把「貪婪與從眾」（漲就追、大家買我也買）翻譯成了演算法。機器沒有消除這些情緒，它只是把人類做決定時那幾秒的猶豫、那一點點的遲疑與人性，給抽掉了，讓情緒的執行變得更純粹、更冷酷、也更快。這就是為什麼，自動化非但沒有讓市場更平靜，反而製造出了一種全新的災難形態——「閃電崩盤」：一九八七年的程式交易把恐慌壓縮到幾秒，二〇一〇年的高頻演算法把它壓縮到幾分鐘內崩跌千點又瞬間反彈。<strong>機器不是情緒的解藥，它是情緒的擴音器與加速器。</strong></p>
+
+    <h3>當機器開始研究人類的情緒</h3>
+    <p>更深一層看，被動投資與人工智慧，正在創造出前所未見的、新的反身性與不穩定。當越來越多的錢無腦地流入「整個市場」，不問估值地買進指數裡的每一檔成分股，這本身就成了一股巨大的、會自我強化的動量——它在上漲時推著大盤更高（錢進來就買，買就漲，漲就吸引更多錢），也可能在資金大規模撤出時，變成不分好壞、無差別拋售的下跌引擎。而人工智慧的角色，則更耐人尋味。今天的 AI，是用人類過去所有的行為數據「餵養」出來的——它學習的，正是人類的貪婪與恐懼留下的模式。一個被訓練來「賺取最大報酬」的 AI，在挖掘數據時，極可能會「發現」一個這部書講了四百年的祕密：市場最大的、最可預測的規律，就是人類的集體情緒本身。於是出現了一幅奇異的未來圖景——<em>機器並沒有消滅情緒，它反而成了研究、預測、並反過來利用人類情緒的、最冷靜也最高效的獵手。</em>當演算法學會在社群媒體上偵測群眾的恐慌與狂熱，搶先一步行動，它不是在消除鐘擺，而是在更精準地騎乘那座鐘擺。</p>
+
+    <p>但歸根結柢，無論市場披上多麼厚重的科技外衣，有一件事不曾改變，也或許永遠不會改變：在所有演算法的最上游，站著的，仍然是人。是人決定要不要把錢投進這檔基金，是人設定了風險的上限與停損的紅線，是人在真正的危機降臨、模型集體失靈時，會驚慌失措地按下那個「全部賣出、撤回現金」的按鈕。我們在 LTCM 看過了，在二〇〇八看過了——當百年一遇的恐慌真的來臨，再精密的機器與模型，都會被它們背後那些活生生的人的恐懼所推翻、所拋棄。機器讓承平的日子更平靜，卻讓危機來臨時更迅猛、更慘烈；它把鐘擺擺動的「頻率」調快了，卻沒有、也無法縮小鐘擺擺動的「幅度」。市場，到頭來仍是一群人的市場——只是這一次，是一群連得更緊、動得更快、還配備了會學習人性弱點的機器的人。<strong>群眾，依然是群眾，只是它如今以光速思考。</strong></p>
+
+    <h3>當所有人都買同一籃子：被動投資的新反身性</h3>
+    <p>演算法之外，另一股正在悄悄重塑市場的力量，是被動投資的全面崛起。柏格的指數基金，原本是普通人對抗自身情緒的謙卑武器（見第二十五章）；可是當它成長到主宰市場的規模——如今美國股市相當大的比例，已由不做任何主動判斷的指數型基金與 ETF 持有——它本身，就開始製造出一種全新的、誰也沒料到的不穩定。當海量的錢「不問估值、只按市值權重」地買進指數裡的每一檔成分股，最大的那幾家公司就會獲得最多的買盤，於是漲得更多、權重更高、又吸引更多被動資金流入——這形成了一種強大的自我強化動量，把市場越來越集中到極少數的巨頭身上（近年所謂的「七巨頭」便是寫照）。在上漲時，這是一台美妙的順風車；可是一旦資金大規模反向流出，同樣的機制會變成一台不分好壞、無差別拋售的絞肉機。被動投資的本意是「躺平、不犯錯」，但當所有人都躺在同一張床上，這張床本身，就成了新的風險來源。</p>
+    <p>而市場「機器化」的脆弱，早有預警。二〇〇七年八月，在次貸危機全面爆發之前，曾發生過一場鮮為大眾所知、卻讓業內膽寒的「<strong>量化地震</strong>」（quant quake）：許多頂尖的量化基金，因為使用了高度相似的模型、持有高度雷同的部位，當其中一家被迫拋售去籌資時，竟在幾天內引發了所有同類基金的連鎖虧損——它們的「聰明」彼此撞車了。這揭示了一個演算法時代特有的危險：<strong>當越來越多的參與者使用越來越相似的模型，他們就不再是互相制衡的獨立個體，而變成了一群會在同一時間、做出同一個動作的「電子羊群」</strong>——勒龐的烏合之眾，穿上了數學的外衣。</p>
+    <p>更深一層，社群媒體與推薦演算法，正在以前所未有的力量，餵養著市場的情緒。今天的敘事，不再靠報紙慢慢傳播，而是由那些專門「抓住你注意力」的演算法，把最聳動、最能引發貪婪或恐懼的內容，瞬間推送給千百萬人。一條煽動性的貼文、一張瘋傳的迷因、一個網紅的喊單，可以在幾小時內點燃一場群眾風暴（GameStop 就是明證）。<em>於是出現了一幅令人不安的當代圖景：一邊是執行交易的機器越來越快、越來越冷靜；另一邊是驅動人們情緒的演算法，越來越懂得如何挑動、放大、並利用人性的弱點。</em>機器的兩端——交易的這端與煽動的那端——都在加速，而夾在中間那顆做決定的人心，卻還是那顆古老的、會貪婪會恐懼的心。技術非但沒有把情緒趕出市場，反而給了它一對更有力的翅膀。</p>
+
+    <div class="investor">
+      <span class="tag">情緒的回聲 · 沒有情緒的機器，執行著最有情緒的指令</span>
+      <p>這一章回答了全書最後一個、也是最關於未來的問題：機器會終結情緒嗎？不會。機器不「感到」貪婪與恐懼，卻以光速執行著被編碼進它們的貪婪與恐懼——停損是程式化的恐懼，動量是程式化的從眾。從一九八七到二〇一〇的閃電崩盤證明，自動化是情緒的加速器，不是解藥。而 AI 更把這件事推向新境界：它用人類的情緒數據餵養自己，最終學會的，正是如何獵捕人類的情緒。但在一切的最上游，仍站著會在危機中拔掉插頭的人。所以三把鑰匙——鐘擺、群眾、敘事與遺忘——非但沒有過時，反而在演算法時代有了全新的、更快的形態。市場的技術一路狂奔了四百年，人心卻幾乎原地踏步。這，把我們帶回了最初的那個問題，也帶向了這趟旅程的終點。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">▲ ✦ ▼</div>
+
+<!-- ===== 終章 ===== -->
+<section class="finale">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">市場先生，永遠不會痊癒</h2>
+      <p class="act-sub">Mr. Market Will Never Be Cured</p>
+      <div class="ornament">▲ ◈ ▼</div>
+    </div>
+    <div class="prose">
+      <p>四百年的旅程走到了盡頭。我們從一六〇二年的阿姆斯特丹出發，看著人類為了馴服對海上風險的恐懼，發明了股票這台機器；卻沒料到，這台機器一旦運轉起來，就長出了一個它自己也控制不住的東西——一個讓貪婪與恐懼可以即時定價、即時傳染、即時放大的場所。我們走過了鬱金香、南海、鐵路、一九二九、日本、網路、次貸、迷因股與加密貨幣，標的從一朵花換成了一串程式碼，工具從羽毛筆換成了演算法，可是每一場狂熱的劇本，都像同一份藍圖印出來的：一個「這次不一樣」的動人故事，群眾的相互傳染，頂點的全民亢奮，以及最後，那場沒有明確原因、卻總在某個尋常日子突然降臨的崩潰。</p>
+
+      <p>如果要把這四百年濃縮成一句話，那會是：<strong>市場的技術一直在進步，人心卻幾乎從未改變。</strong>價格，從來不是一台計算機算出來的客觀真相，而是買方的貪婪與賣方的恐懼，在每一個當下達成的、脆弱的停火協議。而那座由貪婪與恐懼牽動的鐘擺，永遠在兩個極端之間擺盪，卻幾乎從不停在「合理」那個中點——它要嘛正衝向過熱，要嘛正盪回過冷。這就是為什麼，市場先生的躁鬱症，永遠不會痊癒：因為他不是某一個有病的人，他是我們所有人的情緒，在那面叫做「市場」的鏡子裡，匯聚而成的集體倒影。只要人性裡還住著「想要更多」的渴望與「害怕失去」的驚慌，這座鐘擺，就會一直擺下去。</p>
+
+      <h3>三把鑰匙，與一個謙卑的結論</h3>
+      <p>貫穿這趟旅程的三把鑰匙，此刻可以合成一句完整的話了。是<strong>鐘擺</strong>——人心天生在貪婪與恐懼間擺盪、且總是擺過頭——提供了能量。是<strong>群眾與循環</strong>——千萬人的情緒被同步、被放大，走完「位移、繁榮、亢奮、困境、恐慌」那套不變的循環——提供了規模。是<strong>敘事與遺忘</strong>——一個「這次不一樣」的故事點燃了貪婪，而人們的健忘讓同樣的故事每隔一代就能重新騙過一批新人——提供了燃料與週期。三者合力，把市場變成一台不斷重演同一齣悲喜劇的永動機。而這部書最終的結論，是謙卑的：你無法戰勝市場，因為市場不是別的，市場就是人心的總和，是人性本身；妄想用更高的智商去征服它的人——從牛頓到 LTCM——無一不敗。</p>
+
+      <p>但這份謙卑裡，藏著唯一的、也是真正的希望。你雖然無法改變那座由全人類的情緒共同推動的鐘擺，卻可以在它擺盪時，認得出它，並認得出自己。當所有人都在高喊「這次不一樣」、當連最謹慎的朋友都開始焦慮自己錯過了什麼、當你發現自己正用一套全新的標準替瘋狂的價格辯護時——你或許能比身邊的群眾，多保留那麼一點點的清醒。歷史上那極少數的倖存者反覆告訴我們：這場遊戲的勝負，不在腦袋，而在性情；不在於戰勝別人，而在於戰勝自己心裡的那個市場先生。讀懂了這四百年的人心，最大的收穫，或許不是學會了如何預測下一次崩盤——那沒有人做得到——而是學會了，在下一次群眾集體瘋狂或集體絕望時，如何認出自己內心那座正在劇烈擺盪的鐘擺，並，深吸一口氣。</p>
+      <p>四百年前，德拉維加在阿姆斯特丹寫下，股票交易是「全世界最公平、也最虛偽的生意；最高貴、也最惡名昭彰的買賣」。四百年後，這句話依然準確得令人心驚——因為它描寫的從來不是股票，而是人。市場是一面鏡子，它照出的，是人類同時擁有的精明與愚蠢、慷慨與貪婪、勇氣與怯懦。它既是我們用理性建造的最精密的機器，又是我們被情緒反覆愚弄的最古老的舞台。讀懂這四百年，最終讀懂的，從來不是市場，而是我們自己。而這，或許就是這部書最謙卑、也最珍貴的禮物：在下一次群眾集體狂熱或集體絕望、在下一個「這次不一樣」的故事響起時，願你能在那面鏡子裡，認出自己，然後，比身邊的人，多一分清醒，多一分從容。</p>
+    </div>
+    <div class="principle">
+      <span class="tag">貪婪與恐懼的終極啟示</span>
+      <p>市場最深的真相，不在它的數字、它的技術或它的理論裡，而在一個更古老、也更謙卑的地方：它是一面鏡子，照出的，是人類那顆永遠在「想要更多」與「害怕失去」之間擺盪的心。四百年來，我們發明了股票、報價機、選擇權、指數基金、高頻演算法與人工智慧，把這台機器造得越來越快、越來越複雜、越來越聰明；可是我們始終沒能、也或許永遠無法，發明出任何一樣東西，去馴服那個藏在所有圖表與程式碼背後、亙古不變的東西——人心。市場的「鬱金香與崩盤」（它那把一次次把人類推向毀滅的貪婪與恐懼之劍），是它最沉痛、也最反覆的教訓；而市場的「鐘擺與謙卑」（它那份在認清自己無法戰勝人性之後，轉而學習與之共存、戰勝自我的古老智慧），則是它獻給每一個願意聆聽者的，永不熄滅的火炬。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.8);margin-top:2.5rem">
+        從，一六三七年荷蘭人為一顆鬱金香球莖付出的一棟房子，到一串叫比特幣的程式碼<br>
+        從，一七二〇年連牛頓都算不出的人類瘋狂，到 LTCM 那群諾貝爾獎得主算不出的恐慌<br>
+        從，梧桐樹下二十四個經紀人的一紙協定，到毫秒之間互相廝殺的高頻演算法<br>
+        從，鐵路在群眾的狂熱中鋪向荒野，到網路在「這次不一樣」的合唱裡連起世界<br>
+        從，一九二九年那道把一代人嚇了一輩子的縱身一躍，到二〇二〇年壓進幾個月的崩盤與狂歡<br>
+        從，「永遠的高原」與「房價永不下跌」這兩句最昂貴的咒語，到手機螢幕上紅綠跳動的迷因<br>
+        從，德拉維加在阿姆斯特丹寫下的第一份病歷，到卡尼曼在實驗室裡量出的人心的偏誤<br>
+        從，那句「在別人貪婪時恐懼，在別人恐懼時貪婪」，到那座永遠擺盪、從不止息的鐘擺——<br>
+        這台為人類最古老的兩種情緒而生的機器<br>
+        在，貪婪的巔峰與恐懼的谷底之間，走過了四百年。<br>
+        而那顆推動著這一切的人心<br>如今依舊跳動<br>等待著下一個「這次不一樣」的故事，與下一次，將它重新騙過的，我們。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">▲ ✦ ▼</div>
+  <p>貪婪與恐懼：泡沫、崩盤，與股市四百年的人心</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM A TULIP BULB TO A TRILLION-DOLLAR PANIC · 1602 – 2026</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
+
