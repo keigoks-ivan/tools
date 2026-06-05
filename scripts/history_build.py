@@ -128,6 +128,10 @@ ENTRIES = [
          zh="孤獨、邊界，與一道永不癒合的傷口：匈牙利", en="Hungary: Alone, the Frontier & an Unhealing Wound", lat=47.50, lng=19.04),
     dict(src="歐洲歷史/波蘭史詩_消失與復活與夾在兩個巨人之間.html", slug="poland-epic", cat="nation",
          zh="消失、復活，與夾在兩個巨人之間：波蘭", en="Poland: Disappearance, Resurrection & a Nation Between Two Giants", lat=52.0, lng=19.5),
+    dict(src="歐洲歷史/馬爾他史詩_磐石十字路口與出租的島.html", slug="malta-epic", cat="nation",
+         zh="磐石、十字路口，與一座出租自己的島：馬爾他", en="Malta: The Rock, the Crossroads & an Island That Rents Itself Out", lat=35.9, lng=14.4),
+    dict(src="歐亞歷史/土耳其史詩_海峽帝國的幽靈與國父的工程.html", slug="turkey-epic", cat="nation",
+         zh="海峽、帝國的幽靈，與國父的工程：土耳其", en="Türkiye: The Strait, the Ghost of Empire & the Father's Project", lat=39.0, lng=35.2),
 
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
