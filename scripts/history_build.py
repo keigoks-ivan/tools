@@ -102,6 +102,8 @@ ENTRIES = [
          zh="島、帝國，與不流血的演化：英國", en="Britain: The Island, the Empire & Bloodless Evolution", lat=54.0, lng=-2.5),
     dict(src="歐洲歷史/法國史詩_革命與國家與一個自以為普世的民族.html", slug="france-epic", cat="nation",
          zh="革命、國家，與一個自以為普世的民族：法蘭西", en="France: Revolution, the State & a Nation That Believes Itself Universal", lat=46.6, lng=2.4),
+    dict(src="歐洲歷史/荷蘭史詩_海平面之下水合議與商人之國.html", slug="netherlands-epic", cat="nation",
+         zh="海平面之下：水、合議，與一個商人打造的國家：荷蘭", en="Netherlands: Below Sea Level — Water, Consensus & a Nation Built by Merchants", lat=52.13, lng=5.29),
     dict(src="歐洲歷史/愛爾蘭史詩_隔鄰與饑荒與一場驚人的翻轉.html", slug="ireland-epic", cat="nation",
          zh="隔鄰、饑荒，與一場驚人的翻轉：愛爾蘭", en="Ireland: The Neighbour, the Famine & an Astonishing Reversal", lat=53.4, lng=-8.0),
     dict(src="歐洲歷史/德國史詩_中央之地與遲到的國家與一場清算.html", slug="germany-epic", cat="nation",
