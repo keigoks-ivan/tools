@@ -104,6 +104,8 @@ ENTRIES = [
          zh="革命、國家，與一個自以為普世的民族：法蘭西", en="France: Revolution, the State & a Nation That Believes Itself Universal", lat=46.6, lng=2.4),
     dict(src="歐洲歷史/愛爾蘭史詩_隔鄰與饑荒與一場驚人的翻轉.html", slug="ireland-epic", cat="nation",
          zh="隔鄰、饑荒，與一場驚人的翻轉：愛爾蘭", en="Ireland: The Neighbour, the Famine & an Astonishing Reversal", lat=53.4, lng=-8.0),
+    dict(src="歐洲歷史/德國史詩_中央之地與遲到的國家與一場清算.html", slug="germany-epic", cat="nation",
+         zh="中央之地、遲到的國家，與一場與深淵的清算：德意志", en="Germany: The Land in the Middle, the Belated Nation & a Reckoning with the Abyss", lat=51.2, lng=10.4),
 
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
