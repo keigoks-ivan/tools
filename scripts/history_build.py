@@ -100,6 +100,8 @@ ENTRIES = [
          zh="大地盡頭，大海起點：葡萄牙的航海身世", en="Portugal: Where the Land Ends and the Sea Begins", lat=39.5, lng=-8.2),
     dict(src="歐洲歷史/英國史詩_島與帝國與不流血的演化.html", slug="uk-epic", cat="nation",
          zh="島、帝國，與不流血的演化：英國", en="Britain: The Island, the Empire & Bloodless Evolution", lat=54.0, lng=-2.5),
+    dict(src="歐洲歷史/法國史詩_革命與國家與一個自以為普世的民族.html", slug="france-epic", cat="nation",
+         zh="革命、國家，與一個自以為普世的民族：法蘭西", en="France: Revolution, the State & a Nation That Believes Itself Universal", lat=46.6, lng=2.4),
 
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
