@@ -120,6 +120,8 @@ ENTRIES = [
          zh="帝國的回聲、德意志的問題，與一座中立的橋：奧地利", en="Austria: The Echo of Empire, the German Question & a Neutral Bridge", lat=47.5, lng=14.5),
     dict(src="歐洲歷史/捷克史詩_歐洲的心臟與真理必勝與好兵帥克.html", slug="czech-epic", cat="nation",
          zh="歐洲的心臟、真理必勝，與好兵帥克：捷克", en="Czechia: The Heart of Europe, Truth Prevails & the Good Soldier Švejk", lat=49.8, lng=15.5),
+    dict(src="歐洲歷史/波蘭史詩_消失與復活與夾在兩個巨人之間.html", slug="poland-epic", cat="nation",
+         zh="消失、復活，與夾在兩個巨人之間：波蘭", en="Poland: Disappearance, Resurrection & a Nation Between Two Giants", lat=52.0, lng=19.5),
 
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
@@ -202,6 +204,8 @@ ENTRIES = [
          zh="從蒸汽到演算法：工業革命與 AI 時代的回聲", en="From Steam to Algorithm: The Industrial Revolution & the Age of AI", lat=None, lng=None),
     dict(src="世界史/帝國主義與非洲的兩百年.html", slug="africa-imperialism", cat="theme",
          zh="瓜分、枷鎖與未竟的獨立：帝國主義與非洲的兩百年", en="Imperialism in Africa: From the Scramble to the New Scramble", lat=None, lng=None),
+    dict(src="世界史/伊斯蘭世界_啟示商道與烏瑪.html", slug="islamic-world", cat="theme",
+         zh="從麥加出發：啟示、商道與烏瑪的一千四百年", en="Out of Mecca: Revelation, Commerce & the Umma — 1,400 Years of Islam", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
