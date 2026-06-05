@@ -53,7 +53,7 @@ html[data-lang="en"] .blk[lang-en]{display:block}
 .maplegend{display:flex;gap:16px;font-size:11px;color:#b9a982}
 .maplegend span{display:inline-flex;align-items:center;gap:6px}
 .maplegend .dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 6px 1px currentColor}
-.maplegend .dn{color:var(--gold-bright);background:var(--gold-bright)}.maplegend .dc{color:#f0a830;background:#f0a830}
+.maplegend .dn{color:var(--gold-bright);background:var(--gold-bright)}.maplegend .dc{color:#39c2d6;background:#39c2d6}
 #worldMap{width:100%;height:auto;display:block}
 .maptip{position:absolute;background:#2a2012;color:var(--parchment);border:1px solid var(--gold);
   border-radius:7px;padding:7px 12px;font-size:12.5px;pointer-events:none;display:none;z-index:30;max-width:240px;box-shadow:0 8px 22px rgba(0,0,0,.55)}
@@ -240,10 +240,11 @@ function drawMap(cat,land){
   geo.forEach(function(i,idx){
     var p=PROJ([i.lng,i.lat]); if(!p) return;
     var isCity=(i.cat==='city');
-    var col=isCity?'#f0a830':'#cda551';
+    var col=isCity?'#39c2d6':'#cda551';
+    var core=isCity?'#e9feff':'#fff4dc';
     svg+='<g data-i="'+idx+'" style="cursor:pointer">'+
-      '<circle class="glow" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isCity?2.6:4.2)+'" fill="'+col+'" filter="url(#imqglow)"/>'+
-      '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isCity?1.3:1.9)+'" fill="#fff4dc"/></g>';
+      '<circle class="glow" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isCity?3.0:4.2)+'" fill="'+col+'" filter="url(#imqglow)"/>'+
+      '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isCity?1.4:1.9)+'" fill="'+core+'"/></g>';
   });
   var el=document.getElementById('worldMap');
   el.innerHTML=svg;
