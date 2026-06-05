@@ -114,6 +114,8 @@ ENTRIES = [
          zh="帝國、多元，與兩個西班牙：西班牙", en="Spain: Empire, Plurality & the Two Spains", lat=40.2, lng=-3.7),
     dict(src="歐洲歷史/瑞士史詩_山與意志與一個中立的例外.html", slug="switzerland-epic", cat="nation",
          zh="山、意志，與一個中立的例外：瑞士", en="Switzerland: Mountains, Will & a Neutral Exception", lat=46.8, lng=8.2),
+    dict(src="歐洲歷史/義大利史詩_碎片光輝與一個比國家古老的民族.html", slug="italy-epic", cat="nation",
+         zh="碎片、光輝，與一個比國家古老得多的民族：義大利", en="Italy: Fragments, Glory & a People Far Older than Their State", lat=42.8, lng=12.6),
     dict(src="歐洲歷史/奧地利史詩_帝國的回聲與德意志的問題與一座中立的橋.html", slug="austria-epic", cat="nation",
          zh="帝國的回聲、德意志的問題，與一座中立的橋：奧地利", en="Austria: The Echo of Empire, the German Question & a Neutral Bridge", lat=47.5, lng=14.5),
 
