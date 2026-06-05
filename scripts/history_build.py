@@ -118,6 +118,8 @@ ENTRIES = [
          zh="碎片、光輝，與一個比國家古老得多的民族：義大利", en="Italy: Fragments, Glory & a People Far Older than Their State", lat=42.8, lng=12.6),
     dict(src="歐洲歷史/奧地利史詩_帝國的回聲與德意志的問題與一座中立的橋.html", slug="austria-epic", cat="nation",
          zh="帝國的回聲、德意志的問題，與一座中立的橋：奧地利", en="Austria: The Echo of Empire, the German Question & a Neutral Bridge", lat=47.5, lng=14.5),
+    dict(src="歐洲歷史/捷克史詩_歐洲的心臟與真理必勝與好兵帥克.html", slug="czech-epic", cat="nation",
+         zh="歐洲的心臟、真理必勝，與好兵帥克：捷克", en="Czechia: The Heart of Europe, Truth Prevails & the Good Soldier Švejk", lat=49.8, lng=15.5),
 
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
