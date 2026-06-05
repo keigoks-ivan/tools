@@ -112,6 +112,8 @@ ENTRIES = [
          zh="中央之地、遲到的國家，與一場與深淵的清算：德意志", en="Germany: The Land in the Middle, the Belated Nation & a Reckoning with the Abyss", lat=51.2, lng=10.4),
     dict(src="歐洲歷史/西班牙史詩_帝國與多元與兩個西班牙.html", slug="spain-epic", cat="nation",
          zh="帝國、多元，與兩個西班牙：西班牙", en="Spain: Empire, Plurality & the Two Spains", lat=40.2, lng=-3.7),
+    dict(src="歐洲歷史/瑞士史詩_山與意志與一個中立的例外.html", slug="switzerland-epic", cat="nation",
+         zh="山、意志，與一個中立的例外：瑞士", en="Switzerland: Mountains, Will & a Neutral Exception", lat=46.8, lng=8.2),
 
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
