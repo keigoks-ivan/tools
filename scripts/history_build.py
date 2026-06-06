@@ -220,6 +220,8 @@ ENTRIES = [
          zh="貪婪與恐懼：泡沫、崩盤，與股市四百年的人心", en="Greed & Fear: Four Centuries of the Market", lat=None, lng=None),
     dict(src="經濟史/信任_貨幣三千年.html", slug="money-trust", cat="theme",
          zh="信任：貨幣三千年的興衰與背叛", en="Trust: Money's 3,000 Years", lat=None, lng=None),
+    dict(src="經濟史/莊家通吃_賭博與賭性.html", slug="gambling", cat="theme",
+         zh="莊家通吃：賭博、機率，與人類的賭性", en="The House Always Wins: Gambling & the Itch", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
