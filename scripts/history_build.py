@@ -222,6 +222,10 @@ ENTRIES = [
          zh="信任：貨幣三千年的興衰與背叛", en="Trust: Money's 3,000 Years", lat=None, lng=None),
     dict(src="經濟史/莊家通吃_賭博與賭性.html", slug="gambling", cat="theme",
          zh="莊家通吃：賭博、機率，與人類的賭性", en="The House Always Wins: Gambling & the Itch", lat=None, lng=None),
+    dict(src="經濟史/打敗市場的人.html", slug="the-investors", cat="theme",
+         zh="打敗市場的人：投資史上的天才、信徒，與騙子", en="The Investors: Geniuses, Believers & Frauds", lat=None, lng=None),
+    dict(src="經濟史/時間的價格_利率與債券三千年.html", slug="bond-market", cat="theme",
+         zh="時間的價格：利率與債券的三千年", en="The Price of Time: 3,000 Years of Interest & Bonds", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
