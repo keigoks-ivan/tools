@@ -218,6 +218,8 @@ ENTRIES = [
          zh="從麥加出發：啟示、商道與烏瑪的一千四百年", en="Out of Mecca: Revelation, Commerce & the Umma — 1,400 Years of Islam", lat=None, lng=None),
     dict(src="世界史/基督教文明_十字架與兩把劍.html", slug="christian-world", cat="theme",
          zh="十字架與兩把劍：信仰、權力，與分裂的兩千年", en="The Cross & the Two Swords: Faith, Power & Schism — Two Thousand Years of Christendom", lat=None, lng=None),
+    dict(src="世界史/猶太文明_書盟約與離散.html", slug="jewish-world", cat="theme",
+         zh="書、盟約與離散：猶太人的四千年", en="The Book, the Covenant & the Diaspora — Four Thousand Years of the Jews", lat=None, lng=None),
     dict(src="經濟史/股市史詩_貪婪與恐懼.html", slug="stock-market", cat="theme",
          zh="貪婪與恐懼：泡沫、崩盤，與股市四百年的人心", en="Greed & Fear: Four Centuries of the Market", lat=None, lng=None),
     dict(src="經濟史/信任_貨幣三千年.html", slug="money-trust", cat="theme",
