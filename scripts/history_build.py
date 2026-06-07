@@ -230,6 +230,8 @@ ENTRIES = [
          zh="打敗市場的人：投資史上的天才、信徒，與騙子", en="The Investors: Geniuses, Believers & Frauds", lat=None, lng=None),
     dict(src="經濟史/時間的價格_利率與債券三千年.html", slug="bond-market", cat="theme",
          zh="時間的價格：利率與債券的三千年", en="The Price of Time: 3,000 Years of Interest & Bonds", lat=None, lng=None),
+    dict(src="世界史/絲綢之路_黃沙駝鈴與文明.html", slug="silk-road", cat="theme",
+         zh="絲綢之路：黃沙、駝鈴，與運送文明的兩千年", en="The Silk Road: Sand, Caravans & Two Millennia of Connection", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
