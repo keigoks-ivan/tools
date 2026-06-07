@@ -220,6 +220,8 @@ ENTRIES = [
          zh="十字架與兩把劍：信仰、權力，與分裂的兩千年", en="The Cross & the Two Swords: Faith, Power & Schism — Two Thousand Years of Christendom", lat=None, lng=None),
     dict(src="世界史/猶太文明_書盟約與離散.html", slug="jewish-world", cat="theme",
          zh="書、盟約與離散：猶太人的四千年", en="The Book, the Covenant & the Diaspora — Four Thousand Years of the Jews", lat=None, lng=None),
+    dict(src="世界史/佛教世界_佛僧伽與空.html", slug="buddhist-world", cat="theme",
+         zh="佛、僧伽與空：佛教的兩千五百年", en="The Buddha, the Sangha & Emptiness — 2,500 Years of Buddhism", lat=None, lng=None),
     dict(src="經濟史/股市史詩_貪婪與恐懼.html", slug="stock-market", cat="theme",
          zh="貪婪與恐懼：泡沫、崩盤，與股市四百年的人心", en="Greed & Fear: Four Centuries of the Market", lat=None, lng=None),
     dict(src="經濟史/信任_貨幣三千年.html", slug="money-trust", cat="theme",
