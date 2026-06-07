@@ -232,8 +232,16 @@ ENTRIES = [
          zh="打敗市場的人：投資史上的天才、信徒，與騙子", en="The Investors: Geniuses, Believers & Frauds", lat=None, lng=None),
     dict(src="經濟史/時間的價格_利率與債券三千年.html", slug="bond-market", cat="theme",
          zh="時間的價格：利率與債券的三千年", en="The Price of Time: 3,000 Years of Interest & Bonds", lat=None, lng=None),
+    dict(src="經濟史/提神的帝國_咖啡茶與糖.html", slug="stimulants", cat="theme",
+         zh="提神的帝國：咖啡、茶與糖如何叫醒了世界", en="The Empire of Stimulation: How Coffee, Tea & Sugar Woke the World", lat=None, lng=None),
     dict(src="世界史/絲綢之路_黃沙駝鈴與文明.html", slug="silk-road", cat="theme",
          zh="絲綢之路：黃沙、駝鈴，與運送文明的兩千年", en="The Silk Road: Sand, Caravans & Two Millennia of Connection", lat=None, lng=None),
+    dict(src="經濟史/看不見的手_經濟思想四百年.html", slug="the-economists", cat="theme",
+         zh="看不見的手：經濟思想四百年，與那場永不落幕的辯論", en="The Invisible Hand: Four Centuries of Economic Thought", lat=None, lng=None),
+    dict(src="經濟史/立足之地_土地與房地產文明史.html", slug="land-property", cat="theme",
+         zh="立足之地：土地、租金，與一部關於屋簷的文明史", en="Standing Ground: A History of Land, Rent & the Roof Over Our Heads", lat=None, lng=None),
+    dict(src="經濟史/銀行三千年_錢莊擠兌與大到不能倒.html", slug="banking", cat="theme",
+         zh="錢莊、擠兌，與大到不能倒：銀行三千年", en="Banks: 3,000 Years of Trust, Runs & Too-Big-to-Fail", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
