@@ -43,8 +43,31 @@ html[data-lang="en"] .blk[lang-en]{display:block}
 .hero .stats .s .n{font-family:'Cinzel',serif;font-size:26px;color:var(--gold-bright);font-weight:700}
 .hero .stats .s .l{font-size:10px;letter-spacing:.16em;color:#8aa;text-transform:uppercase;margin-top:2px}
 
-/* map — warm night-sky (C2) */
-.mapwrap{max-width:1180px;margin:-30px auto 0;padding:0 22px;position:relative;z-index:5}
+/* ===== featured ===== */
+.featured{max-width:1180px;margin:40px auto 0;padding:0 22px}
+.sec-h{text-align:center;font-family:'Cinzel',serif;font-size:13px;letter-spacing:.26em;color:var(--rust);
+  margin-bottom:22px;display:flex;align-items:center;justify-content:center;gap:16px;text-transform:uppercase}
+.sec-h::before,.sec-h::after{content:'';width:48px;height:1px}
+.sec-h::before{background:linear-gradient(90deg,transparent,var(--line))}
+.sec-h::after{background:linear-gradient(90deg,var(--line),transparent)}
+.sec-h .star{color:var(--gold-bright);letter-spacing:0}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px}
+.feat-card{position:relative;background:linear-gradient(160deg,var(--parchment-card),#efe7d2);border:1px solid var(--line);
+  border-top:4px solid var(--cat,var(--gold));border-radius:5px;padding:26px 24px 20px;transition:all .2s;
+  overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 5px rgba(22,20,15,.08)}
+.feat-card::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Ccircle cx='1' cy='1' r='.5' fill='%23a8842f' fill-opacity='0.06'/%3E%3C/svg%3E");pointer-events:none}
+.feat-card:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(22,20,15,.22);border-color:var(--cat,var(--gold))}
+.feat-card .tag{align-self:flex-start;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:#f3eee2;background:var(--cat,var(--gold));padding:3px 10px;border-radius:3px;margin-bottom:14px;position:relative}
+.feat-card .ft{font-size:21px;font-weight:800;line-height:1.32;color:var(--ink);margin-bottom:9px;position:relative}
+.feat-card .fs{font-size:13.5px;font-style:italic;font-family:'Cormorant Garamond',serif;color:var(--faint);
+  line-height:1.45;margin-bottom:18px;position:relative}
+.feat-card .rd{margin-top:auto;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.18em;color:var(--cat,var(--gold));
+  text-transform:uppercase;display:flex;align-items:center;gap:6px;opacity:.8;transition:all .18s;position:relative}
+.feat-card:hover .rd{opacity:1;gap:11px}
+
+/* map — warm night-sky */
+.mapwrap{max-width:1180px;margin:46px auto 0;padding:0 22px;position:relative;z-index:5}
 .mapcard{background:radial-gradient(ellipse at 50% 38%,#2a2012,#160f08 82%);
   border:1px solid var(--gold);border-radius:14px;overflow:hidden;
   box-shadow:0 16px 48px rgba(22,16,8,.5);padding:16px 18px 12px;position:relative}
@@ -64,13 +87,43 @@ html[data-lang="en"] .blk[lang-en]{display:block}
 @keyframes imqtw{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.15)}}
 #worldMap .glow{transform-box:fill-box;transform-origin:center;animation:imqtw 3.4s ease-in-out infinite}
 
-/* sections */
-.wrap{max-width:1180px;margin:0 auto;padding:46px 22px 70px}
-.catblock{margin-bottom:46px}
-.cathdr{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;border-bottom:2px solid var(--line);padding-bottom:8px}
-.cathdr .cn{font-family:'Cinzel',serif;font-size:13px;letter-spacing:.2em;color:var(--rust)}
-.cathdr h2{font-size:24px;font-weight:700;color:var(--ink)}
-.cathdr .ct{margin-left:auto;font-size:12px;color:var(--faint);font-family:'Cormorant Garamond',serif}
+/* ===== category tiles ===== */
+.tilewrap{max-width:1180px;margin:50px auto 0;padding:0 22px}
+.cattiles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.cattile{cursor:pointer;position:relative;background:linear-gradient(160deg,#fff,var(--parchment-card));
+  border:1px solid var(--line);border-left:5px solid var(--cat);border-radius:7px;padding:22px 22px 18px;
+  transition:all .2s;text-align:left;display:flex;flex-direction:column;gap:3px;font-family:inherit}
+.cattile::before{content:'';position:absolute;top:14px;right:18px;font-family:'Cinzel',serif;
+  font-size:30px;color:var(--cat);opacity:.14;content:attr(data-glyph)}
+.cattile:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(22,20,15,.17);border-left-width:7px}
+.cattile.active{background:var(--cat);background:linear-gradient(160deg,var(--cat),color-mix(in srgb,var(--cat) 78%,#000));border-color:var(--cat)}
+.cattile.active .cnum,.cattile.active .cname,.cattile.active .cdesc,.cattile.active .carrow{color:#f3eee2}
+.cattile.active .carrow{opacity:1}
+.cattile .cnum{font-family:'Cinzel',serif;font-size:36px;font-weight:700;color:var(--cat);line-height:1;margin-bottom:4px}
+.cattile .cname{font-size:17px;font-weight:700;color:var(--ink)}
+.cattile .cdesc{font-size:11.5px;color:var(--faint);font-family:'Cormorant Garamond',serif;font-style:italic}
+.cattile .carrow{margin-top:9px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.18em;color:var(--cat);
+  text-transform:uppercase;display:flex;align-items:center;gap:6px;opacity:.75;transition:all .18s}
+.cattile:hover .carrow{gap:11px;opacity:1}
+.cat-nation{--cat:#1d3640}.cat-city{--cat:#8a3a23}.cat-theme{--cat:#a8842f}.cat-sport{--cat:#33583f}
+
+/* ===== expandable category panel ===== */
+.catpanel{max-width:1180px;margin:30px auto 0;padding:0 22px;display:none}
+.catpanel.open{display:block;animation:imqfade .32s ease}
+@keyframes imqfade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.panel-head{display:flex;align-items:center;gap:14px;border-bottom:2px solid var(--cat,var(--line));
+  padding-bottom:10px;margin-bottom:22px;flex-wrap:wrap}
+.panel-head .ph-n{font-family:'Cinzel',serif;font-size:13px;letter-spacing:.2em;color:var(--cat,var(--rust))}
+.panel-head h2{font-size:24px;font-weight:700;color:var(--ink)}
+.panel-head .ph-c{font-size:12px;color:var(--faint);font-family:'Cormorant Garamond',serif}
+.panel-tools{margin-left:auto;display:flex;align-items:center;gap:10px}
+.panel-tools input{font-family:inherit;font-size:13px;padding:7px 13px;border:1px solid var(--line);border-radius:6px;
+  background:var(--parchment-card);color:var(--ink);width:190px;transition:border-color .15s}
+.panel-tools input::placeholder{color:#a89a7c}
+.panel-tools input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(168,132,47,.12)}
+.panel-close{cursor:pointer;background:transparent;border:1px solid var(--line);border-radius:6px;padding:7px 13px;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase;transition:all .15s}
+.panel-close:hover{border-color:var(--rust);color:var(--rust)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:18px}
 .card{background:linear-gradient(165deg,var(--parchment-card),#f3ecdb);border:1px solid var(--line);
   border-top:3px solid var(--cat,var(--gold));border-radius:4px;padding:20px 20px 16px;transition:all .18s;
@@ -84,15 +137,16 @@ html[data-lang="en"] .blk[lang-en]{display:block}
 .card .rd{margin-top:auto;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.18em;color:var(--cat,var(--gold));
   text-transform:uppercase;display:flex;align-items:center;gap:6px;opacity:.75;transition:all .18s}
 .card:hover .rd{opacity:1;gap:11px}
-.cat-nation{--cat:#1d3640}.cat-city{--cat:#8a3a23}.cat-theme{--cat:#a8842f}.cat-sport{--cat:#33583f}
 .grp{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.16em;color:var(--rust);margin:22px 0 4px;
   grid-column:1/-1;display:flex;align-items:center;gap:12px}
 .grp::after{content:'';flex:1;height:1px;background:var(--line)}
 .grp:first-child{margin-top:0}
+.noresult{color:var(--faint);font-style:italic;font-family:'Cormorant Garamond',serif;padding:24px 2px;grid-column:1/-1}
 
-footer{background:var(--sea-deep);color:#9a8f78;text-align:center;padding:24px;font-size:12px;letter-spacing:.04em}
+footer{background:var(--sea-deep);color:#9a8f78;text-align:center;padding:24px;font-size:12px;letter-spacing:.04em;margin-top:70px}
 footer a{color:var(--gold-bright)}
-@media(max-width:600px){.hero .stats{gap:22px}.cathdr h2{font-size:20px}}
+@media(max-width:760px){.cattiles{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.hero .stats{gap:22px}.panel-head h2{font-size:20px}.panel-tools input{width:140px}.cattile .cnum{font-size:30px}}
 </style>
 </head>
 <body>
@@ -117,6 +171,13 @@ footer a{color:var(--gold-bright)}
   </div>
 </section>
 
+<!-- 精選 featured -->
+<section class="featured" id="featSec" style="display:none">
+  <div class="sec-h"><span class="star">✦</span><span lang-zh>精選</span><span lang-en>Featured</span><span class="star">✦</span></div>
+  <div class="feat-grid" id="featGrid"></div>
+</section>
+
+<!-- 世界地圖 -->
 <div class="mapwrap">
   <div class="mapcard">
     <div class="maptop">
@@ -132,7 +193,14 @@ footer a{color:var(--gold-bright)}
   </div>
 </div>
 
-<div class="wrap" id="catRoot"></div>
+<!-- 分類入口 category tiles -->
+<div class="tilewrap">
+  <div class="sec-h"><span lang-zh>選一個門類，展開全部</span><span lang-en>Pick a category to browse</span></div>
+  <div class="cattiles" id="catTiles"></div>
+</div>
+
+<!-- 展開的分類列表 -->
+<div class="catpanel" id="catPanel"></div>
 
 <footer>
   <span lang-zh>INVESTMQUEST · PROPERTY MONITOR — 史詩敘事歷史長文 · </span>
@@ -143,66 +211,166 @@ footer a{color:var(--gold-bright)}
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script>
-var LANG = (localStorage.getItem('imqHistLang')||'zh');
-document.documentElement.setAttribute('data-lang', LANG);
+/* ============================================================
+   精選清單：編輯這裡換首頁精選（填 slug；自動略過不存在的）
+   ============================================================ */
+var FEATURED = ['jewish-world','christian-world','islamic-world'];
+
+var CAT_PREFIX={nation:'N',city:'C',theme:'T',sport:'S'};
+var CAT_GLYPH ={nation:'⬡',city:'◈',theme:'✦',sport:'⚑'};
+var CAT_DESC  ={
+  nation:{zh:'國家與區域的身世', en:'Nations & Regions'},
+  city  :{zh:'城市的身世',       en:'Cities'},
+  theme :{zh:'跨越時代的主題',   en:'Themes across the ages'},
+  sport :{zh:'運動的身世',       en:'Sports'}
+};
+
+var LANG=(localStorage.getItem('imqHistLang')||'zh');
+document.documentElement.setAttribute('data-lang',LANG);
+var openKey=null, curFilter='';
+
 function toggleLang(){
-  LANG = (LANG==='zh'?'en':'zh');
-  document.documentElement.setAttribute('data-lang', LANG);
-  localStorage.setItem('imqHistLang', LANG);
-  if(window.__catalog) render(window.__catalog);
+  LANG=(LANG==='zh'?'en':'zh');
+  document.documentElement.setAttribute('data-lang',LANG);
+  localStorage.setItem('imqHistLang',LANG);
+  if(window.__catalog){ renderFeatured(); renderTiles(); if(openKey) renderPanel(openKey); }
 }
-var MAP_W=1000, MAP_H=500, PROJ=null, PATH=null;
+function txt(it){ return LANG==='en'?(it.en||it.zh):(it.zh||it.en); }
+function pad(n){return (n<10?'0':'')+n;}
+function bySlug(slug){ return (window.__catalog.items||[]).filter(function(i){return i.slug===slug;})[0]; }
+
+var MAP_W=1000,MAP_H=500,PROJ=null,PATH=null;
 
 fetch('catalog.json').then(function(r){return r.json();}).then(function(cat){
-  window.__catalog = cat;
-  render(cat);
+  window.__catalog=cat;
+  document.getElementById('stNation').textContent=cat.items.filter(function(i){return i.cat==='nation';}).length;
+  document.getElementById('stCity').textContent=cat.items.filter(function(i){return i.cat==='city';}).length;
+  document.getElementById('stTotal').textContent=cat.items.length;
+  renderFeatured();
+  renderTiles();
   loadMap(cat);
+  // deep-link: #nation / #city / #theme / #sport
+  var h=(location.hash||'').replace('#','');
+  if(['nation','city','theme','sport'].indexOf(h)>=0){ openCategory(h,true); }
 }).catch(function(e){
-  document.getElementById('catRoot').innerHTML='<p style="color:#8a3a23">無法載入 catalog.json（'+e+'）</p>';
+  document.getElementById('catTiles').innerHTML='<p style="color:#8a3a23">無法載入 catalog.json（'+e+'）</p>';
 });
 
-function txt(it){ return LANG==='en' ? (it.en||it.zh) : (it.zh||it.en); }
-
-function render(cat){
-  // stats
-  var items=cat.items;
-  document.getElementById('stNation').textContent=items.filter(function(i){return i.cat==='nation';}).length;
-  document.getElementById('stCity').textContent=items.filter(function(i){return i.cat==='city';}).length;
-  document.getElementById('stTotal').textContent=items.length;
-
-  var root=document.getElementById('catRoot'); root.innerHTML='';
-  cat.cats.forEach(function(c){
-    var list=items.filter(function(i){return i.cat===c.key;});
-    if(!list.length) return;
-    var block=document.createElement('div'); block.className='catblock';
-    var head='<div class="cathdr"><span class="cn">'+(c.key).toUpperCase()+'</span>'+
-      '<h2>'+(LANG==='en'?c.en:c.zh)+'</h2><span class="ct">'+list.length+'</span></div>';
-    var grid='<div class="grid">';
-    var n={v:0};
-    // city: group by .group
-    if(c.key==='city'){
-      var groups={}; var order=[];
-      list.forEach(function(i){var g=i.group||'其他';if(!groups[g]){groups[g]=[];order.push(g);}groups[g].push(i);});
-      order.forEach(function(g){
-        grid+='<div class="grp">'+g+'</div>';
-        groups[g].forEach(function(i){grid+=cardHTML(i,c.key,++n.v);});
-      });
-    } else {
-      list.forEach(function(i){grid+=cardHTML(i,c.key,++n.v);});
-    }
-    grid+='</div>';
-    block.innerHTML=head+grid;
-    root.appendChild(block);
-  });
-}
-var CAT_PREFIX={nation:'N',city:'C',theme:'T',sport:'S'};
-function pad(n){return (n<10?'0':'')+n;}
-function cardHTML(i,catKey,num){
-  // 主標 = 當前語言；副標 = 另一語言（史詩雙語質感）
-  var primary = LANG==='en' ? (i.en||i.zh) : (i.zh||i.en);
-  var secondary = LANG==='en' ? (i.zh||'') : (i.en||'');
+/* ---------- featured ---------- */
+function featCardHTML(i){
+  var primary = LANG==='en'?(i.en||i.zh):(i.zh||i.en);
+  var secondary= LANG==='en'?(i.zh||''):(i.en||'');
   var sub = i.blurb || secondary;
-  var label = LANG==='en' ? 'Read chronicle' : '閱讀全文';
+  var c=window.__catalog.cats.filter(function(x){return x.key===i.cat;})[0];
+  var catName = c ? (LANG==='en'?c.en:c.zh) : i.cat;
+  var label = LANG==='en'?'Read chronicle':'閱讀全文';
+  return '<a class="feat-card cat-'+i.cat+'" href="'+i.slug+'.html">'+
+    '<span class="tag">'+catName+'</span>'+
+    '<div class="ft">'+primary+'</div>'+
+    (sub?'<div class="fs">'+sub+'</div>':'')+
+    '<div class="rd">'+label+' <span>→</span></div></a>';
+}
+function renderFeatured(){
+  var picks=FEATURED.map(bySlug).filter(Boolean);
+  var sec=document.getElementById('featSec');
+  if(!picks.length){ sec.style.display='none'; return; }
+  sec.style.display='';
+  document.getElementById('featGrid').innerHTML=picks.map(featCardHTML).join('');
+}
+
+/* ---------- category tiles ---------- */
+function renderTiles(){
+  var cat=window.__catalog;
+  var html=cat.cats.map(function(c){
+    var n=cat.items.filter(function(i){return i.cat===c.key;}).length;
+    if(!n) return '';
+    var name=LANG==='en'?c.en:c.zh;
+    var desc=CAT_DESC[c.key]?(LANG==='en'?CAT_DESC[c.key].en:CAT_DESC[c.key].zh):'';
+    var arrow=(openKey===c.key)?(LANG==='en'?'Close ✕':'收合 ✕'):(LANG==='en'?'Browse →':'瀏覽 →');
+    return '<button class="cattile cat-'+c.key+(openKey===c.key?' active':'')+'" data-glyph="'+(CAT_GLYPH[c.key]||'✦')+'" onclick="openCategory(\''+c.key+'\')">'+
+      '<div class="cnum">'+n+'</div>'+
+      '<div class="cname">'+name+'</div>'+
+      '<div class="cdesc">'+desc+'</div>'+
+      '<div class="carrow">'+arrow+'</div></button>';
+  }).join('');
+  document.getElementById('catTiles').innerHTML=html;
+}
+
+/* ---------- expandable panel ---------- */
+function openCategory(key,noScroll){
+  if(openKey===key){ closeCategory(); return; }
+  openKey=key; curFilter='';
+  try{ history.replaceState(null,'','#'+key); }catch(e){}
+  renderTiles();
+  renderPanel(key);
+  if(!noScroll){
+    var p=document.getElementById('catPanel');
+    setTimeout(function(){ p.scrollIntoView({behavior:'smooth',block:'start'}); },60);
+  }
+}
+function closeCategory(){
+  openKey=null; curFilter='';
+  try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  var p=document.getElementById('catPanel'); p.className='catpanel'; p.innerHTML='';
+  renderTiles();
+}
+function renderPanel(key){
+  var cat=window.__catalog;
+  var c=cat.cats.filter(function(x){return x.key===key;})[0];
+  var name=LANG==='en'?c.en:c.zh;
+  var total=cat.items.filter(function(i){return i.cat===key;}).length;
+  var ph=LANG==='en'?'Filter…':'篩選…';
+  var closeL=LANG==='en'?'Close ✕':'收合 ✕';
+  var p=document.getElementById('catPanel');
+  p.className='catpanel cat-'+key+' open';
+  p.innerHTML=
+    '<div class="panel-head">'+
+      '<span class="ph-n">'+key.toUpperCase()+'</span>'+
+      '<h2>'+name+'</h2>'+
+      '<span class="ph-c" id="phCount">'+total+'</span>'+
+      '<div class="panel-tools">'+
+        '<input id="panelFilter" type="text" placeholder="'+ph+'" value="'+curFilter.replace(/"/g,'&quot;')+'" oninput="filterPanel(this.value)" autocomplete="off">'+
+        '<button class="panel-close" onclick="closeCategory()">'+closeL+'</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="grid" id="panelGrid"></div>';
+  fillGrid(key,curFilter);
+}
+function matches(i,q){
+  if(!q) return true; q=q.toLowerCase();
+  return (i.zh||'').toLowerCase().indexOf(q)>=0 ||
+         (i.en||'').toLowerCase().indexOf(q)>=0 ||
+         (i.blurb||'').toLowerCase().indexOf(q)>=0 ||
+         (i.group||'').toLowerCase().indexOf(q)>=0;
+}
+function filterPanel(v){
+  curFilter=v;
+  fillGrid(openKey,v);
+}
+function fillGrid(key,q){
+  var cat=window.__catalog;
+  var list=cat.items.filter(function(i){return i.cat===key && matches(i,q);});
+  var grid=document.getElementById('panelGrid');
+  var cnt=document.getElementById('phCount'); if(cnt) cnt.textContent=list.length;
+  if(!list.length){ grid.innerHTML='<div class="noresult">'+(LANG==='en'?'No chronicles match.':'沒有符合的篇章。')+'</div>'; return; }
+  var n=0,html='';
+  if(key==='city'){
+    var groups={},order=[];
+    list.forEach(function(i){var g=i.group||'其他';if(!groups[g]){groups[g]=[];order.push(g);}groups[g].push(i);});
+    order.forEach(function(g){
+      html+='<div class="grp">'+g+'</div>';
+      groups[g].forEach(function(i){html+=cardHTML(i,key,++n);});
+    });
+  }else{
+    list.forEach(function(i){html+=cardHTML(i,key,++n);});
+  }
+  grid.innerHTML=html;
+}
+function cardHTML(i,catKey,num){
+  var primary = LANG==='en'?(i.en||i.zh):(i.zh||i.en);
+  var secondary= LANG==='en'?(i.zh||''):(i.en||'');
+  var sub = i.blurb || secondary;
+  var label = LANG==='en'?'Read chronicle':'閱讀全文';
   return '<a class="card cat-'+catKey+'" href="'+i.slug+'.html">'+
     '<div class="no">'+CAT_PREFIX[catKey]+' · '+pad(num)+'</div>'+
     '<div class="t">'+primary+'</div>'+
@@ -210,6 +378,7 @@ function cardHTML(i,catKey,num){
     '<div class="rd">'+label+' <span>→</span></div></a>';
 }
 
+/* ---------- d3 world map (warm night-sky) ---------- */
 function loadMap(cat){
   if(typeof d3==='undefined'||typeof topojson==='undefined'){return;}
   fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')
@@ -222,19 +391,14 @@ function loadMap(cat){
     }).catch(function(){});
 }
 function drawMap(cat,land){
-  // defs: glow filter + warm radial sea
   var svg='<defs>'+
     '<filter id="imqglow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
     '<radialGradient id="imqsea" cx="50%" cy="38%" r="70%"><stop offset="0%" stop-color="#3a2c18"/><stop offset="100%" stop-color="#160f08"/></radialGradient>'+
     '</defs>';
-  // sea sphere
   svg+='<path d="'+PATH({type:'Sphere'})+'" fill="url(#imqsea)"/>';
-  // deterministic warm stars
   for(var s=0;s<140;s++){var sx=(s*137.5)%1000,sy=(s*97.3)%500,sr=(s%3)*0.35+0.25,op=((s%5)+2)/12;
     svg+='<circle cx="'+sx.toFixed(0)+'" cy="'+sy.toFixed(0)+'" r="'+sr.toFixed(2)+'" fill="#cdb98a" fill-opacity="'+op.toFixed(2)+'"/>';}
-  // graticule faint warm
   var gd=PATH(d3.geoGraticule().step([30,30])()); if(gd) svg+='<path d="'+gd+'" fill="none" stroke="#6b4f25" stroke-opacity="0.35" stroke-width="0.5"/>';
-  // land — dark warm with bronze edge
   land.features.forEach(function(f){var d=PATH(f);if(d)svg+='<path d="'+d+'" fill="#251a0e" stroke="#5e4520" stroke-width="0.6"/>';});
   var geo=cat.items.filter(function(i){return i.lat!=null&&i.lng!=null;});
   geo.forEach(function(i,idx){
