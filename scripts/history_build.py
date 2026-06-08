@@ -144,6 +144,8 @@ ENTRIES = [
          zh="豐饒與衰落，與永遠不來的未來：阿根廷", en="Argentina: Abundance, Decline & the Future That Never Comes", lat=-38.4, lng=-63.6),
     dict(src="美洲歷史/墨西哥史詩_血與玉米與一座建在神廟上的城.html", slug="mexico-epic", cat="nation",
          zh="血與玉米，與一座建在神廟上的城：墨西哥", en="Mexico: Blood, Corn & a City on a Temple", lat=23.6, lng=-102.5),
+    dict(src="美洲歷史/巴西史詩_未來之國混血的大陸與縫隙裡的即興.html", slug="brazil-epic", cat="nation",
+         zh="未來之國、混血的大陸，與縫隙裡的即興：巴西", en="Brazil: The Country of the Future, the Mixed Continent & the Jeitinho", lat=-14.2, lng=-51.9),
 
     # ---------- 城市史詩 ----------
     dict(src="台灣歷史/台北_盆地之城.html", slug="taipei", cat="city", group="台灣 Taiwan",
