@@ -132,6 +132,8 @@ ENTRIES = [
          zh="磐石、十字路口，與一座出租自己的島：馬爾他", en="Malta: The Rock, the Crossroads & an Island That Rents Itself Out", lat=35.9, lng=14.4),
     dict(src="歐亞歷史/土耳其史詩_海峽帝國的幽靈與國父的工程.html", slug="turkey-epic", cat="nation",
          zh="海峽、帝國的幽靈，與國父的工程：土耳其", en="Türkiye: The Strait, the Ghost of Empire & the Father's Project", lat=39.0, lng=35.2),
+    dict(src="歐亞歷史/俄羅斯史詩_平原與垂直線與第三羅馬.html", slug="russia-epic", cat="nation",
+         zh="無垠的平原、權力的垂直線，與第三羅馬：俄羅斯", en="Russia: The Boundless Plain, the Vertical of Power & the Third Rome", lat=61.5, lng=105.3),
 
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
