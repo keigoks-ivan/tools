@@ -242,6 +242,8 @@ ENTRIES = [
          zh="提神的帝國：咖啡、茶與糖如何叫醒了世界", en="The Empire of Stimulation: How Coffee, Tea & Sugar Woke the World", lat=None, lng=None),
     dict(src="世界史/絲綢之路_黃沙駝鈴與文明.html", slug="silk-road", cat="theme",
          zh="絲綢之路：黃沙、駝鈴，與運送文明的兩千年", en="The Silk Road: Sand, Caravans & Two Millennia of Connection", lat=None, lng=None),
+    dict(src="世界史/文藝復興_重生人與一枚金幣.html", slug="renaissance", cat="theme",
+         zh="重生、人，與一枚金幣：文藝復興與現代的誕生", en="The Renaissance: Rebirth, Man & the Florin", lat=None, lng=None),
     dict(src="經濟史/看不見的手_經濟思想四百年.html", slug="the-economists", cat="theme",
          zh="看不見的手：經濟思想四百年，與那場永不落幕的辯論", en="The Invisible Hand: Four Centuries of Economic Thought", lat=None, lng=None),
     dict(src="經濟史/立足之地_土地與房地產文明史.html", slug="land-property", cat="theme",
