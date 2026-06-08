@@ -134,6 +134,8 @@ ENTRIES = [
          zh="海峽、帝國的幽靈，與國父的工程：土耳其", en="Türkiye: The Strait, the Ghost of Empire & the Father's Project", lat=39.0, lng=35.2),
     dict(src="歐亞歷史/俄羅斯史詩_平原與垂直線與第三羅馬.html", slug="russia-epic", cat="nation",
          zh="無垠的平原、權力的垂直線，與第三羅馬：俄羅斯", en="Russia: The Boundless Plain, the Vertical of Power & the Third Rome", lat=61.5, lng=105.3),
+    dict(src="歐亞歷史/烏克蘭史詩_邊地哥薩克的自由與被打出來的民族.html", slug="ukraine-epic", cat="nation",
+         zh="邊地、哥薩克的自由，與一個被打出來的民族：烏克蘭", en="Ukraine: The Borderland, the Cossack's Freedom & a Nation Forged in Fire", lat=49.0, lng=31.5),
 
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
