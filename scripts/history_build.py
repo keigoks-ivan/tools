@@ -244,6 +244,8 @@ ENTRIES = [
          zh="絲綢之路：黃沙、駝鈴，與運送文明的兩千年", en="The Silk Road: Sand, Caravans & Two Millennia of Connection", lat=None, lng=None),
     dict(src="世界史/文藝復興_重生人與一枚金幣.html", slug="renaissance", cat="theme",
          zh="重生、人，與一枚金幣：文藝復興與現代的誕生", en="The Renaissance: Rebirth, Man & the Florin", lat=None, lng=None),
+    dict(src="世界史/理性時代_觀測理性與敢於求知.html", slug="age-of-reason", cat="theme",
+         zh="觀測、理性，與一句「敢於求知」：科學革命與啟蒙", en="The Age of Reason: Observation, Reason & 'Dare to Know'", lat=None, lng=None),
     dict(src="經濟史/看不見的手_經濟思想四百年.html", slug="the-economists", cat="theme",
          zh="看不見的手：經濟思想四百年，與那場永不落幕的辯論", en="The Invisible Hand: Four Centuries of Economic Thought", lat=None, lng=None),
     dict(src="經濟史/立足之地_土地與房地產文明史.html", slug="land-property", cat="theme",
