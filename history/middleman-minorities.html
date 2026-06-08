@@ -341,6 +341,7 @@ footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-s
 .act,.finale{scroll-margin-top:70px}
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
 <body>
 <!-- imq-auto-toc -->
@@ -1396,6 +1397,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       <div class="stat"><span class="num">~69%</span><span class="lbl">2020 年代烏干達稅收來自印度裔企業</span></div>
     </div>
 
+    <div class="mm-chart" style="margin:30px 0 6px;padding:20px 18px 14px;background:linear-gradient(180deg,#faf5e9,#efe4cd);border:1px solid #c9b893;border-radius:6px;box-shadow:0 2px 14px rgba(26,20,16,.10)">
+      <div style="font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.1em;color:#8c3a21;text-transform:uppercase;text-align:center;margin-bottom:2px">Market-Dominant Minority</div>
+      <div style="font-family:'Noto Serif TC',serif;font-weight:600;font-size:1.05rem;color:#1a1410;text-align:center;margin-bottom:12px">市場主導的少數：人口佔比 vs 經濟比重</div>
+      <div id="mm-chart" style="width:100%;height:330px"></div>
+      <div style="font-family:'Noto Serif TC',serif;font-size:.74rem;color:#6b5d48;text-align:center;margin-top:8px;line-height:1.55">綠＝人口佔比，紅＝掌握的經濟比重——兩者的懸殊，正是「成功」與「詛咒」共同的根。烏干達 1972 → 今日：被驅逐、又被迎回——決定一切的，是那道門，而非那群人的血。資料：Amy Chua《World on Fire》、各國統計（2020 年代）</div>
+    </div>
+
     <h3>竹網：看不見的亞洲引擎</h3>
     <p>另一端，在南洋，是「竹網」(Bamboo Network)——海外華人的家族企業，如竹子的地下根莖般，在馬來西亞、印尼、新加坡、泰國、菲律賓、越南……彼此盤根錯節地連結，又一路向北，接上了大中華(中國大陸、香港、台灣)的經濟。直到今天，華人雖然只佔東南亞總人口約百分之七，卻仍掌握著馬來西亞、泰國、菲律賓過半的民間財富。這張網的運作邏輯，和兩百年前的會館，竟一脈相承：它依然以家族為核心，依然靠著血緣、方言與個人信任——而非冷冰冰的書面合約——來連結。當年廈門商人與馬尼拉同鄉之間那份「鄉音即信用」的默契，如今只是換上了西裝、用上了手機，本質從未改變。更深遠的是：在中國一九八〇年代改革開放、最缺資本與門路的那個關口，正是這張遍佈南洋的「竹網」,率先把資金、技術與訂單，源源不絕地引回了祖籍的故土——海外華人的離散網絡，成了中國重新接入世界經濟的第一道橋。</p>
 
@@ -1500,6 +1508,46 @@ const io=new IntersectionObserver((es)=>{
   es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
 },{threshold:.1});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+<script>
+(function(){
+  function draw(){
+    if(!window.echarts){return;}
+    var el=document.getElementById('mm-chart'); if(!el||el._done){return;} el._done=1;
+    var ink='#1a1410',faint='#6b5d48',line='#c9b893',jade='#3a5f48',rust='#8c3a21';
+    var rows=[
+      {name:'烏干達印度裔 · 今日',pop:0.6,econ:69,popL:'«1%',econL:'~69%',note:'門重開後回流，2020 年代約 69% 稅收來自印度裔企業'},
+      {name:'烏干達印度裔 · 1972',pop:1.2,econ:90,popL:'<1%',econL:'~90%',note:'僅約 8 萬人，卻擁九成企業、九成稅收——隨即被阿敏驅逐'},
+      {name:'東南亞華人',pop:7,econ:52,popL:'≈7%',econL:'>50%',note:'佔東南亞人口約 7%，卻掌握馬泰菲過半民間財富'}
+    ];
+    var chart=echarts.init(el);
+    chart.setOption({
+      textStyle:{fontFamily:"'Noto Serif TC',serif",color:ink},
+      legend:{data:['人口佔比','掌握的經濟比重'],top:2,textStyle:{color:faint,fontFamily:"'Noto Serif TC',serif"},itemWidth:14,itemHeight:10},
+      grid:{left:122,right:60,top:38,bottom:34},
+      tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fbf6ea',borderColor:line,borderWidth:1,
+        textStyle:{color:ink,fontFamily:"'Noto Serif TC',serif"},
+        formatter:function(p){var r=rows[p[0].dataIndex];return '<b>'+r.name+'</b><br/>人口佔比　'+r.popL+'　·　經濟比重　'+r.econL+'<br/><span style="color:'+faint+'">'+r.note+'</span>';}},
+      xAxis:{type:'value',min:0,max:100,interval:25,name:'佔比（%）',nameLocation:'middle',nameGap:24,nameTextStyle:{color:faint,fontSize:11},
+        axisLine:{lineStyle:{color:line}},axisTick:{show:false},axisLabel:{color:faint,fontSize:11},splitLine:{show:false}},
+      yAxis:{type:'category',data:rows.map(function(r){return r.name;}),
+        axisLine:{lineStyle:{color:line}},axisTick:{show:false},
+        axisLabel:{color:ink,fontFamily:"'Noto Serif TC',serif",fontSize:12,fontWeight:600}},
+      series:[
+        {name:'人口佔比',type:'bar',barGap:'12%',barWidth:'30%',data:rows.map(function(r){return r.pop;}),
+          itemStyle:{color:jade,borderRadius:[0,3,3,0]},
+          label:{show:true,position:'right',color:jade,fontFamily:"'Noto Serif TC',serif",fontSize:11,
+            formatter:function(p){return rows[p.dataIndex].popL;}}},
+        {name:'掌握的經濟比重',type:'bar',barWidth:'30%',data:rows.map(function(r){return r.econ;}),
+          itemStyle:{color:rust,borderRadius:[0,3,3,0]},
+          label:{show:true,position:'right',color:rust,fontFamily:"'Noto Serif TC',serif",fontSize:12,fontWeight:600,
+            formatter:function(p){return rows[p.dataIndex].econL;}}}
+      ]
+    });
+    window.addEventListener('resize',function(){chart.resize();});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',draw);}else{draw();}
+})();
 </script>
 </body>
 </html>
