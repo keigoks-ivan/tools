@@ -50,6 +50,8 @@ ENTRIES = [
     # ---------- 國家／區域史詩 ----------
     dict(src="台灣歷史/台灣史詩_海上孤舟.html", slug="taiwan-epic", cat="nation",
          zh="海上孤舟：台灣四百年的身世", en="Taiwan: Four Centuries Adrift", lat=23.7, lng=121.0),
+    dict(src="東北亞歷史/中國史詩_天下王朝與大一統.html", slug="china-epic", cat="nation",
+         zh="天下、王朝循環，與大一統的千年回歸：中國", en="China: All-Under-Heaven, the Dynastic Cycle & the Return to Unity", lat=35.0, lng=104.0),
     dict(src="澳洲史詩_最古老的土地最年輕的國家.html", slug="australia-epic", cat="nation",
          zh="最古老的土地，最年輕的國家：澳洲", en="Australia: Oldest Land, Youngest Nation", lat=-25.3, lng=133.8),
     dict(src="紐西蘭史詩_最後的島嶼與兩個民族的條約.html", slug="newzealand-epic", cat="nation",
