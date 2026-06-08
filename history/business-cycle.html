@@ -341,6 +341,7 @@ footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-s
 .act,.finale{scroll-margin-top:70px}
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
 <body>
 <!-- imq-auto-toc -->
@@ -1930,6 +1931,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       <div class="stat"><span class="num">125%</span><span class="lbl">美國聯邦債務／GDP（債務鐘走到極晚）</span></div>
     </div>
 
+    <div class="bc-chart" style="margin:30px 0 6px;padding:20px 18px 14px;background:linear-gradient(180deg,#faf5e9,#efe4cd);border:1px solid #c9b893;border-radius:6px;box-shadow:0 2px 14px rgba(26,20,16,.10)">
+      <div style="font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.1em;color:#8c3a21;text-transform:uppercase;text-align:center;margin-bottom:2px">The Five Clocks · 2026</div>
+      <div style="font-family:'Noto Serif TC',serif;font-weight:600;font-size:1.05rem;color:#1a1410;text-align:center;margin-bottom:14px">五座鐘的此刻：各自走到了循環的哪一段</div>
+      <div id="bc-clocks" style="width:100%;height:360px"></div>
+      <div style="font-family:'Noto Serif TC',serif;font-size:.74rem;color:#6b5d48;text-align:center;margin-top:8px;line-height:1.55">橫軸＝此刻在自身循環中的位置（0＝剛觸底·低風險，100＝波峰·極晚），為作者綜合判讀、非精確量化。越往上的鐘走得越晚——短針（存貨·設備）仍在中段，長針（建設·債務）已逼近頂端。資料：ISM、美國公債殖利率曲線、聯準會、達里歐、哈里森（2026 年中）</div>
+    </div>
+
     <div class="cf">
       <span class="cfh">換個角度看 · 為什麼這些指標總會「這次失靈」</span>
       <p>讀到這裡，必須潑一盆冷水。上面這些指標，沒有一個是水晶球。最好的例子，正是殖利率曲線本身：它在二〇二二年就倒掛了，照歷史劇本，衰退本該在一年多後降臨——可是它遲遲沒來，這條「最可靠」的指標，這一次硬是失靈了一兩年（多半是因為疫情後的財政撒錢與民間的超額儲蓄，撐住了需求）。這提醒我們三件事。其一，<strong>每一個指標都是「機率」，不是「命運」</strong>——它告訴你風險偏高或偏低，從不告訴你確切的日期。其二，<strong>永遠要讀「一組」指標，而非押注單一一根針</strong>——當 PMI、殖利率曲線、薩姆規則、信用利差開始「一起」轉向，那才是真正值得警惕的合奏；任何單獨一根針的尖叫，都可能是假警報。其三，也是最重要的——<strong>定位的目的，是調整你的「傾斜」與「準備」，不是賭一個精準的轉折點。</strong>你讀懂了潮汐表，不是為了賭哪一秒漲到最高，而是為了知道此刻該多帶幾分謹慎、還是多帶幾分膽量。下一章，我們就來談，這份「定位」，究竟該如何化成你對自己那筆錢的具體決定。</p>
@@ -2051,6 +2059,48 @@ const io=new IntersectionObserver((es)=>{
   es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
 },{threshold:.1});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+<script>
+(function(){
+  function draw(){
+    if(!window.echarts){return;}
+    var el=document.getElementById('bc-clocks'); if(!el||el._done){return;} el._done=1;
+    var ink='#1a1410',faint='#6b5d48',line='#c9b893',jade='#3a5f48',gold='#b08d34',rust='#8c3a21',crimson='#7a2418';
+    var rows=[
+      {name:'存貨鐘',sub:'基欽 · 3–4 年',value:30,tag:'補庫存早段',read:'PMI 54、客戶端庫存「太低」，補庫存的早段',c:jade},
+      {name:'長波',sub:'康德拉季耶夫 · 約 50 年',value:42,tag:'新上升期？',read:'AI 或開啟新一波長波，但通膨暗流未消',c:gold},
+      {name:'設備鐘',sub:'朱格拉 · 7–11 年',value:52,tag:'擴張中段',read:'軟著陸：殖利率曲線回正、薩姆規則 0.13，無立即衰退',c:gold},
+      {name:'建設鐘',sub:'顧志耐 · 約 18 年',value:85,tag:'波峰危險區',read:'哈里森標記 2026 為十八年週期波峰',c:rust},
+      {name:'債務鐘',sub:'達里歐 · 75–100 年',value:92,tag:'逼近末段',read:'美債 125% GDP、利息超國防，逼近大週期末段',c:crimson}
+    ];
+    var chart=echarts.init(el);
+    chart.setOption({
+      textStyle:{fontFamily:"'Noto Serif TC',serif",color:ink},
+      grid:{left:84,right:104,top:28,bottom:46},
+      tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fbf6ea',borderColor:line,borderWidth:1,
+        textStyle:{color:ink,fontFamily:"'Noto Serif TC',serif"},
+        formatter:function(p){var r=rows[p[0].dataIndex];return '<b>'+r.name+'</b>　'+r.sub+'<br/>位置　'+r.value+' / 100　·　'+r.tag+'<br/><span style="color:'+faint+'">'+r.read+'</span>';}},
+      xAxis:{type:'value',min:0,max:100,interval:25,
+        name:'早段　→　中段　→　晚段',nameLocation:'middle',nameGap:26,nameTextStyle:{color:faint,fontSize:11},
+        axisLine:{lineStyle:{color:line}},axisTick:{show:false},axisLabel:{color:faint,fontSize:11},splitLine:{show:false}},
+      yAxis:{type:'category',data:rows.map(function(r){return r.name;}),
+        axisLine:{lineStyle:{color:line}},axisTick:{show:false},
+        axisLabel:{color:ink,fontFamily:"'Noto Serif TC',serif",fontSize:13,fontWeight:600}},
+      series:[{type:'bar',barWidth:'54%',
+        data:rows.map(function(r){return {value:r.value,itemStyle:{color:r.c,borderRadius:[0,4,4,0]}};}),
+        label:{show:true,position:'right',color:ink,fontFamily:"'Noto Serif TC',serif",fontSize:12,
+          formatter:function(p){return rows[p.dataIndex].tag;}},
+        markArea:{silent:true,data:[
+          [{xAxis:0,itemStyle:{color:'rgba(58,95,72,.07)'}},{xAxis:33}],
+          [{xAxis:33,itemStyle:{color:'rgba(176,141,52,.08)'}},{xAxis:66}],
+          [{xAxis:66,itemStyle:{color:'rgba(140,58,33,.09)'}},{xAxis:100}]
+        ]}
+      }]
+    });
+    window.addEventListener('resize',function(){chart.resize();});
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',draw);}else{draw();}
+})();
 </script>
 </body>
 </html>
