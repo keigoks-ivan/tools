@@ -264,6 +264,8 @@ ENTRIES = [
          zh="錢莊、擠兌，與大到不能倒：銀行三千年", en="Banks: 3,000 Years of Trust, Runs & Too-Big-to-Fail", lat=None, lng=None),
     dict(src="經濟史/七肥年與七瘦年_景氣循環五座鐘.html", slug="business-cycle", cat="theme",
          zh="七肥年與七瘦年：景氣循環，與五座永不停歇的鐘", en="Seven Fat Years, Seven Lean: The Business Cycle & the Five Clocks", lat=None, lng=None),
+    dict(src="經濟史/中間人_離散貿易少數民族.html", slug="middleman-minorities", cat="theme",
+         zh="中間人：被關上的門、織起的網，與成功的詛咒", en="The Middleman: The Shut Door, the Woven Web & the Curse of Success", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
