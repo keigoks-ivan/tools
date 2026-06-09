@@ -278,6 +278,8 @@ ENTRIES = [
          zh="七肥年與七瘦年：景氣循環，與五座永不停歇的鐘", en="Seven Fat Years, Seven Lean: The Business Cycle & the Five Clocks", lat=None, lng=None),
     dict(src="經濟史/中間人_離散貿易少數民族.html", slug="middleman-minorities", cat="theme",
          zh="中間人：被關上的門、織起的網，與成功的詛咒", en="The Middleman: The Shut Door, the Woven Web & the Curse of Success", lat=None, lng=None),
+    dict(src="經濟史/黑金_石油能量權力與帳單.html", slug="oil-epic", cat="theme",
+         zh="黑金：石油，與一部關於能量、權力，與帳單的文明史", en="Black Gold: Oil, and a History of Energy, Power & the Bill Coming Due", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
