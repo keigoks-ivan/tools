@@ -136,6 +136,8 @@ ENTRIES = [
          zh="海峽、帝國的幽靈，與國父的工程：土耳其", en="Türkiye: The Strait, the Ghost of Empire & the Father's Project", lat=39.0, lng=35.2),
     dict(src="非洲歷史/埃及史詩_尼羅河永恆與被征服的兩千年.html", slug="egypt-epic", cat="nation",
          zh="尼羅河、永恆，與被征服的兩千年：埃及", en="Egypt: The Nile, Eternity & a Civilization Ruled by Others", lat=26.8, lng=30.8),
+    dict(src="非洲歷史/衣索比亞史詩_高原所羅門與多民族帝國.html", slug="ethiopia-epic", cat="nation",
+         zh="高原、所羅門的血脈，與一個多民族帝國：衣索比亞", en="Ethiopia: The Highlands, the Line of Solomon & an Empire of Nations", lat=9.1, lng=40.5),
     dict(src="歐亞歷史/伊朗史詩_波斯什葉與強權的棋盤.html", slug="iran-epic", cat="nation",
          zh="波斯、什葉，與強權棋盤上的古老文明：伊朗", en="Iran: Persia, Shiism & a Civilization on the Chessboard", lat=32.4, lng=53.7),
     dict(src="非洲歷史/沙烏地阿拉伯史詩_沙漠聖地與劍與經.html", slug="saudi-epic", cat="nation",
