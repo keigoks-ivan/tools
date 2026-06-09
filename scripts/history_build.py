@@ -138,6 +138,8 @@ ENTRIES = [
          zh="尼羅河、永恆，與被征服的兩千年：埃及", en="Egypt: The Nile, Eternity & a Civilization Ruled by Others", lat=26.8, lng=30.8),
     dict(src="歐亞歷史/伊朗史詩_波斯什葉與強權的棋盤.html", slug="iran-epic", cat="nation",
          zh="波斯、什葉，與強權棋盤上的古老文明：伊朗", en="Iran: Persia, Shiism & a Civilization on the Chessboard", lat=32.4, lng=53.7),
+    dict(src="非洲歷史/沙烏地阿拉伯史詩_沙漠聖地與劍與經.html", slug="saudi-epic", cat="nation",
+         zh="沙漠、聖地，與劍與經的契約：沙烏地阿拉伯", en="Saudi Arabia: Desert, the Holy Cities & the Pact of Sword and Book", lat=24.0, lng=45.0),
     dict(src="歐亞歷史/俄羅斯史詩_平原與垂直線與第三羅馬.html", slug="russia-epic", cat="nation",
          zh="無垠的平原、權力的垂直線，與第三羅馬：俄羅斯", en="Russia: The Boundless Plain, the Vertical of Power & the Third Rome", lat=61.5, lng=105.3),
     dict(src="歐亞歷史/烏克蘭史詩_邊地哥薩克的自由與被打出來的民族.html", slug="ukraine-epic", cat="nation",
