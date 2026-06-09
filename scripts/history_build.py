@@ -284,6 +284,12 @@ ENTRIES = [
          zh="中間人：被關上的門、織起的網，與成功的詛咒", en="The Middleman: The Shut Door, the Woven Web & the Curse of Success", lat=None, lng=None),
     dict(src="經濟史/黑金_石油能量權力與帳單.html", slug="oil-epic", cat="theme",
          zh="黑金：石油，與一部關於能量、權力，與帳單的文明史", en="Black Gold: Oil, and a History of Energy, Power & the Bill Coming Due", lat=None, lng=None),
+    dict(src="經濟史/戰爭的生意_軍火傭兵與國防工業.html", slug="war-business", cat="theme",
+         zh="軍火、傭兵，與把恐懼變成利潤的人：戰爭的生意三千年", en="The Business of War: Arms, Mercenaries & the Trade in Fear", lat=None, lng=None),
+    dict(src="經濟史/保險_把不確定變成生意三千年.html", slug="insurance", cat="theme",
+         zh="把不確定變成生意：保險，與一份關於明天的承諾三千年", en="Insurance: 3,000 Years of Turning Uncertainty into Business", lat=None, lng=None),
+    dict(src="經濟史/稅_國家如何伸手進你的口袋.html", slug="taxation", cat="theme",
+         zh="國家如何伸手進你的口袋：稅，與一部討價還價的文明史", en="Taxation: How the State Reaches Into Your Pocket", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
