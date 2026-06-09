@@ -284,6 +284,8 @@ ENTRIES = [
          zh="中間人：被關上的門、織起的網，與成功的詛咒", en="The Middleman: The Shut Door, the Woven Web & the Curse of Success", lat=None, lng=None),
     dict(src="經濟史/黑金_石油能量權力與帳單.html", slug="oil-epic", cat="theme",
          zh="黑金：石油，與一部關於能量、權力，與帳單的文明史", en="Black Gold: Oil, and a History of Energy, Power & the Bill Coming Due", lat=None, lng=None),
+    dict(src="經濟史/沙摩爾定律與矽片上的世界戰爭.html", slug="semiconductor-epic", cat="theme",
+         zh="沙、摩爾定律，與一塊矽片上的世界戰爭", en="Of Sand & Moore's Law: The World War Fought on a Sliver of Silicon", lat=None, lng=None),
     dict(src="經濟史/戰爭的生意_軍火傭兵與國防工業.html", slug="war-business", cat="theme",
          zh="軍火、傭兵，與把恐懼變成利潤的人：戰爭的生意三千年", en="The Business of War: Arms, Mercenaries & the Trade in Fear", lat=None, lng=None),
     dict(src="經濟史/保險_把不確定變成生意三千年.html", slug="insurance", cat="theme",
