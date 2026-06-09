@@ -126,6 +126,8 @@ ENTRIES = [
          zh="光、海，與永恆的重生：希臘", en="Greece: The Light, the Sea & the Eternal Resurrection", lat=37.98, lng=23.73),
     dict(src="歐洲歷史/丹麥史詩_海收縮與信任.html", slug="denmark-epic", cat="nation",
          zh="海、收縮，與信任：丹麥", en="Denmark: The Sea, the Shrinking & Trust", lat=55.68, lng=12.57),
+    dict(src="歐洲歷史/挪威史詩_峽灣海與全民的石油.html", slug="norway-epic", cat="nation",
+         zh="峽灣、海，與一筆全民共有的石油：挪威", en="Norway: The Fjord, the Sea & a Trillion-Dollar Trust", lat=61.0, lng=9.0),
     dict(src="歐洲歷史/匈牙利史詩_孤獨邊界與一道永不癒合的傷口.html", slug="hungary-epic", cat="nation",
          zh="孤獨、邊界，與一道永不癒合的傷口：匈牙利", en="Hungary: Alone, the Frontier & an Unhealing Wound", lat=47.50, lng=19.04),
     dict(src="歐洲歷史/波蘭史詩_消失與復活與夾在兩個巨人之間.html", slug="poland-epic", cat="nation",
