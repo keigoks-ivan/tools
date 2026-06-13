@@ -271,6 +271,12 @@ ENTRIES = [
     dict(src="美國/聖地牙哥_海灣邊界與軍港.html", slug="san-diego", cat="city", group="美國 United States",
          zh="海灣、邊界，與一座面朝太平洋的軍港：聖地牙哥", en="San Diego: The Bay, the Border & the City Facing the Pacific", lat=32.72, lng=-117.16),
 
+    # ---------- 歐洲／歐亞城市 ----------
+    dict(src="歐洲歷史/威尼斯_潟湖商人與海上帝國.html", slug="venice", cat="city", group="義大利 Italy",
+         zh="潟湖、商人，與一個把海變成帝國的共和國：威尼斯", en="Venice: The Lagoon, the Merchants & the Republic That Sold the Sea", lat=45.44, lng=12.34),
+    dict(src="歐洲歷史/伊斯坦堡_海峽城牆與三帝國首都.html", slug="istanbul", cat="city", group="土耳其 Türkiye",
+         zh="海峽、城牆，與三個帝國的首都：伊斯坦堡", en="Istanbul: The Strait, the Walls & the Capital of Three Empires", lat=41.01, lng=28.98),
+
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
          zh="海權、契約與資本：六百年特許公司興衰", en="The Age of Sail", lat=None, lng=None),
