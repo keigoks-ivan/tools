@@ -285,6 +285,14 @@ ENTRIES = [
     dict(src="美國/聖地牙哥_海灣邊界與軍港.html", slug="san-diego", cat="city", group="美國 United States",
          zh="海灣、邊界，與一座面朝太平洋的軍港：聖地牙哥", en="San Diego: The Bay, the Border & the City Facing the Pacific", lat=32.72, lng=-117.16),
 
+    # ---------- 亞洲與中東城市 ----------
+    dict(src="東北亞歷史/上海_界面之城.html", slug="shanghai", cat="city", group="中國 China",
+         zh="界面之城：上海從棉布縣城到外灘與浦東的身世", en="Shanghai: The Interface Between China and the World", lat=31.23, lng=121.47),
+    dict(src="南亞歷史/孟買_從海裡填出來的錢袋之城.html", slug="mumbai", cat="city", group="印度 India",
+         zh="從海裡填出來的錢袋之城：孟買的身世", en="Mumbai: The Wallet of India, Built from the Sea", lat=19.08, lng=72.88),
+    dict(src="中東歷史/杜拜_瞬間之城.html", slug="dubai", cat="city", group="阿聯酋 United Arab Emirates",
+         zh="瞬間之城：杜拜從採珍珠的小漁村到憑空長出的全球之城", en="Dubai: The Instant City on the Sand", lat=25.20, lng=55.27),
+
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
          zh="海權、契約與資本：六百年特許公司興衰", en="The Age of Sail", lat=None, lng=None),
