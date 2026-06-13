@@ -254,6 +254,8 @@ ENTRIES = [
     # ---------- 美國城市 ----------
     dict(src="美國/紐約_港口金錢與屬於全世界的城.html", slug="newyork", cat="city", group="美國 United States",
          zh="如果你能在這裡成功：紐約的身世", en="New York: From New Amsterdam to the Capital of the World", lat=40.71, lng=-74.01),
+    dict(src="美國/波士頓_山巔之城靠頭腦重生.html", slug="boston", cat="city", group="美國 United States",
+         zh="山巔之城：波士頓靠頭腦重生的身世", en="Boston: A City upon a Hill — From the Puritan Errand to the Capital of the Mind", lat=42.36, lng=-71.06),
 
     # ---------- 美國城市 ----------
     dict(src="美國/西雅圖_雨木與重新發明.html", slug="seattle", cat="city", group="美國 United States",
