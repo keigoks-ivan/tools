@@ -231,6 +231,14 @@ ENTRIES = [
     dict(src="歐洲歷史/紐卡索_運煤到紐卡索.html", slug="newcastle", cat="city", group="英國 United Kingdom",
          zh="運煤到紐卡索：煤、船與泰恩河的傲骨", en="Newcastle upon Tyne: Coal, Ships & Geordie Pride", lat=54.98, lng=-1.61),
 
+    # ---------- 美國城市 ----------
+    dict(src="美國/西雅圖_雨木與重新發明.html", slug="seattle", cat="city", group="美國 United States",
+         zh="雨、木，與一座不斷重新發明自己的城：西雅圖", en="Seattle: Rain, Timber & the City That Keeps Reinventing Itself", lat=47.61, lng=-122.33),
+    dict(src="美國/洛杉磯_水夢與無中生有.html", slug="los-angeles", cat="city", group="美國 United States",
+         zh="水、夢，與一座無中生有的沙漠巨城：洛杉磯", en="Los Angeles: Water, Dreams & a Metropolis Conjured from a Desert", lat=34.05, lng=-118.24),
+    dict(src="美國/聖地牙哥_海灣邊界與軍港.html", slug="san-diego", cat="city", group="美國 United States",
+         zh="海灣、邊界，與一座面朝太平洋的軍港：聖地牙哥", en="San Diego: The Bay, the Border & the City Facing the Pacific", lat=32.72, lng=-117.16),
+
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
          zh="海權、契約與資本：六百年特許公司興衰", en="The Age of Sail", lat=None, lng=None),

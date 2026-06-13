@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>水、夢，與一座無中生有的沙漠巨城：洛杉磯的身世</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ===== econ-layer callout boxes (deepen / counterfactual) ===== */
+.deepen{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(176,141,52,.07);border:1px solid rgba(176,141,52,.32);border-left:4px solid var(--gold);border-radius:3px}
+.deepen .dh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--rust);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.deepen p{margin:.7rem 0;text-align:justify}
+.cf{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(30,58,76,.05);border:1px dashed rgba(30,58,76,.4);border-radius:3px}
+.cf .cfh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--sea-deep);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.cf p{margin:.7rem 0;text-align:justify}
+/* ===== dark-section legibility (boxes + stats + pull + timeline + interlude) ===== */
+.dark .deepen{background:rgba(216,196,160,.06);border-color:rgba(212,175,90,.4);border-left-color:#d4af5a}
+.dark .deepen .dh{color:#e2a878}
+.dark .cf{background:rgba(255,255,255,.045);border-color:rgba(212,175,90,.32)}
+.dark .cf .cfh{color:#d8c4a0}
+.dark .deepen p,.dark .cf p{color:#cdb494}
+.dark .deepen strong,.dark .cf strong{color:#c87a5a}
+.dark .deepen em,.dark .cf em{color:#d8a878}
+.dark .pull{background:linear-gradient(135deg,rgba(216,196,160,.07),rgba(176,141,52,.1));border-top-color:#d4af5a;border-bottom-color:#d4af5a}
+.dark .pull p{color:#ecd9b4}
+.dark .pull::before{color:#d4af5a}
+.dark .stat{background:rgba(216,196,160,.06)}
+.dark .stat .num{color:#d4af5a}
+.dark .stat .lbl{color:#c4af88}
+.dark .tl-text{color:#cdb494}
+.dark .tl-year{color:#e2a060}
+.dark .interlude p{color:rgba(243,238,226,.9)}
+.dark .interlude p .hl{color:#e2a060}
+/* ---- 修正：深色章節內，擁有淺色背景的卡片組件須維持深色文字，避免淺底淺字 ---- */
+/* ---- 修正：深色章節內的對比度 ----
+   實心淺底組件(method-card / twocol)→ 深色文字；
+   shift-body 無背景貼深底 → 淺色文字。 ---- */
+.dark .method-card p,
+.dark .twocol p{color:var(--ink)}
+.dark .method-card p strong,
+.dark .twocol p strong{color:var(--crimson)}
+.dark .method-card p em,
+.dark .twocol p em{color:var(--sea-deep)}
+.dark .method-card h5{color:var(--sea-deep)}
+.dark .method-card .tool{color:var(--rust)}
+.dark .method-card .eg{color:#6b5d48}
+.dark .minihead{color:var(--rust)}
+.dark .shift-body{color:#cdb494}
+.dark .shift-body strong{color:#c87a5a}
+.dark .shift-body em{color:#d8a878}
+.dark .stat{background:rgba(212,175,90,.07)}
+.dark .stat .num{color:var(--gold-bright)}
+.dark .stat .lbl{color:#b9a784}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+.twocol>div{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left;color:var(--ink)}
+.method-card p strong{color:var(--crimson)}
+.method-card p em{color:var(--sea-deep)}
+.method-card .eg{font-size:.86rem;color:#6b5d48;font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+<style id="imq-depth-modules">
+.deepen{margin:2.8rem 0;padding:1.7rem 1.9rem;background:rgba(51,88,63,.06);border:1px solid rgba(120,100,60,.38);border-left:5px solid #33583f;border-radius:2px}
+.deepen .dh{font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:.22em;color:#33583f;text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.deepen .dh::before{content:"\25C9";font-size:.85rem}
+.deepen p{font-size:.97rem;line-height:1.82;margin:.6rem 0;text-align:left}
+.deepen strong{color:#8a2014}
+.deepen em{color:#33583f;font-style:italic}
+.dark .deepen{background:rgba(255,255,255,.03);border-left-color:#5a8a68;border-color:rgba(255,255,255,.1)}
+.dark .deepen .dh{color:#8db89a}.dark .deepen p{color:#cbb292}.dark .deepen em{color:#9cc0a8}
+.cf{margin:2.6rem 0;padding:1.6rem 1.8rem;background:linear-gradient(135deg,rgba(116,34,26,.05),rgba(168,132,47,.05));border:1px dashed #8a3a23;border-radius:3px;position:relative}
+.cf .cfh{font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:.2em;color:#8a3a23;text-transform:uppercase;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.cf .cfh::before{content:"\21BA";font-size:1.1rem}
+.cf p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.cf strong{color:#8a2014}.cf em{color:#0e2128;font-style:italic}
+.dark .cf p{color:#cbb292}.dark .cf em{color:#d6a676}
+.concept,concept{display:inline-block;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.04em;padding:.05rem .5rem;margin:0 .15rem;border:1px solid #a8842f;border-radius:20px;color:#8a3a23;background:rgba(168,132,47,.06);white-space:nowrap;vertical-align:middle}
+.dark .concept,.dark concept{color:#d6a676}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){heads=[].slice.call(document.querySelectorAll('h2'));}
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>=1480)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Los Angeles · Water, Dreams, and a Metropolis Conjured from a Desert</span>
+    <h1>水、夢，與一座<br><span class="em">無中生有</span>的<br>沙漠巨城</h1>
+    <p class="sub">從通格瓦族的家園、西班牙人取名「天使之后」的小村，<br>到一條偷走整座山谷之水的水道、後院冒出的油井，<br>再到把夢賣給全世界的好萊塢、用高速公路鋪成的無邊蔓城——<br>一座在不該有大城的地方、靠搶來的水與賣出的夢，<br>硬生生變出來的巨城。</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">這</span>裡本來不該有一座大城。南加州是半沙漠，一條像樣的河都沒有，夏天乾得能點著火，能養活的人口本該很有限。可洛杉磯偏偏長成了全美第二大城——它不是順著地理長出來的，而是被人<em>硬生生變出來的</em>。它先是通格瓦族（Tongva）採橡實、結蘆葦舟的家園；接著是 1781 年西班牙人取名「天使之后聖母小鎮」的四十四戶移民村；然後是墨西哥的牧場、被美國奪走的加州、一場把整個唐人街吊死街頭的私刑。真正讓它起飛的，是兩樣偷來與賣出的東西：威廉·穆赫蘭從歐文斯谷<em>偷來</em>的水，沿著一條兩百多公里的水道流進這片乾土；以及好萊塢<em>賣出</em>的夢，把陽光、明星與無限可能，行銷給了全世界。石油從後院噴出，飛機在廠房裡造起，高速公路把城攤成一張看不到邊的網。但這座靠水與夢撐起的天堂，也藏著它的帳單——乾涸的山谷、燒不完的山火、與在 1965 和 1992 兩度爆裂的種族裂痕。讓我們從天使之河走起，看一座城如何在不可能的地方，<span style="color:var(--rust);font-weight:600">把自己變了出來</span>。</p>
+</section>
+
+<div class="div-orn">☀ 🎬 🌴</div>
+
+<section id="ch0" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · Tovaangar</span>
+    <h2 class="act-title">在城之前，這裡是通格瓦族的世界</h2>
+    <p class="act-sub">Before the City: The Tongva and a River in a Dry Land</p>
+    <div class="ornament">☀ ✦ 🌾</div>
+  </div>
+  <div class="prose">
+    <p>要理解洛杉磯，得先理解一件殘酷而簡單的事：<strong>這片土地，本來養不起一座大城。</strong>把高速公路、好萊塢的招牌、無邊無際的住宅街廓全都從眼前抹去，讓地景退回它被任何人命名之前的模樣——你會看到一片陽光氾濫、雨水吝嗇的半乾旱平原。這裡有全美數一數二慷慨的日照，卻沒有一條像樣的大河；雨季短得近乎敷衍，而漫長的夏天乾燥到草木一點就燃。世上多數的大城，是被一條大河、一座良港、或一片沃野「請」到那裡去的；洛杉磯卻是被它的地理判了死刑的地方。記住這個「不可能」——這部史詩接下來講的每一件事，本質上都是人如何把它一步步推翻。</p>
+
+    <h3>地理的吝嗇：陽光無限，水卻稀缺</h3>
+    <p>南加州屬於地中海型與半乾旱之間的氣候。它的好，全寫在天上：一年裡大半時候是乾爽的晴天，冬天溫和，霜雪罕至，那種近乎奢侈的光線，日後會把無數人——種柑橘的、拍電影的、養病的、逃離寒冬的——一批批吸引到這裡來。但它的壞，全藏在地下：這片平原沒有一條能撐起大城的水脈，降雨集中在短短幾個冬月，其餘大半年滴雨不下。土地表面看似遼闊平坦、任人鋪展，實則它能供養的人口，被一條看不見的線死死框住——那條線，就是<strong>水</strong>。</p>
+    <p>這種「陽光與缺水」的錯位，是理解洛杉磯一切的鑰匙。一座城能長多大，從來不只看它有多少地、多少陽光，而看它能取得多少水。南加州的陽光可以無限地灑，地可以一直向著沙漠與群山的方向鋪過去，唯獨水，是這片土地天生短缺、無法憑空變出的東西。於是這裡的故事，從一開始就注定不是「如何利用既有的豐饒」，而是「如何把不存在的東西弄出來」。<em>這是一座必須持續對抗自己地理本性，才能存在的城。</em></p>
+
+    <h3>一條任性的河</h3>
+    <p>這片乾土上唯一稱得上河的，是<strong>洛杉磯河（the Los Angeles River）</strong>。後來的西班牙人替它取了個冗長華麗的名字——<em>Río de Porciúncula</em>，波西恩庫拉河。但這個堂皇的名字，配不上它真實的脾性。大半年裡，它只是一條淺淺的、時斷時續的溪流，水量小得令初來的外鄉人失望；可一旦冬雨傾盆，它又會在幾個小時內暴漲成一條吞噬一切的濁流，漫過河岸、沖毀田畝，甚至反覆改換自己的河道——這一回它向南奔向某處出海，下一場大水後，它可能已經在別的方向另闢了一條河床。</p>
+    <p>這是一條任性而不可靠的河。它既不像尼羅河那樣每年定時氾濫、留下沃泥，也不像泰晤士或哈德遜那樣終年可航、把船一路送進內陸。它給得吝嗇，發起脾氣來又毫無節制——平時養不活一座大城，暴怒時還要反過來威脅人。<em>一條任性的河，配一片缺水的地</em>，這就是洛杉磯起初手裡所有的牌。任何想在這裡建立宏圖大業的人，遲早都得面對同一個問題：這條河，遠遠不夠。</p>
+    <div class="pull"><p>世上多數大城被一條大河請去；洛杉磯卻是被它的乾旱判了死刑的地方。它後來的整部歷史，就是一場與這紙判決的角力。</p></div>
+
+    <h3>通格瓦族：在乾土上節制地生活的人</h3>
+    <p>然而，「養不起一座大城」並不等於「無法生活」。在西班牙人的帆影出現之前，這片土地早已有人世代居住——他們是<strong>通格瓦族（Tongva）</strong>。後來的西班牙傳教士依附近的聖蓋博傳教站，把他們稱作<strong>蓋布里埃利諾（Gabrieleño）</strong>；但這是一個外來的名字。在他們自己的語言裡，這整個世界被稱為 <strong>Tovaangar</strong>——意思就是「世界」。他們的村落星散在這片平原與海岸之間，其中一座叫做 <strong>Yaanga（亞安加）</strong>，就坐落在日後洛杉磯市中心附近的河畔。當這座城後來在這裡崛起時，它腳下踩著的，是一個已經存在了數千年的世界。</p>
+    <p>通格瓦人沒有試圖把這片乾土改造成它不是的模樣。他們順著它的吝嗇，學會了一種<em>節制而精巧</em>的生活。橡實（acorn）是他們的主食——把橡樹的果實採來、搗碎、反覆用水濾去其中的苦澀單寧，再煮成糊與餅；這片土地不長麥也不產稻，卻有的是橡樹，於是橡實就成了維繫他們的穀物。除此之外，他們採集種籽與野果，在溪河與海邊捕魚，按季節的給予來安排取用，從不向這片土地索求它給不起的東西。</p>
+    <p>他們也懂得就地取材，把自然的饋贈用到極致。這一帶有天然的<strong>瀝青坑</strong>——最著名的就是日後被稱為 <strong>La Brea</strong> 的那片黑色焦油湖，地下的瀝青不斷滲出地面，數萬年來吞沒了無數動物，連巨大的劍齒虎與長毛象都陷在其中。對通格瓦人而言，這滲出地表的黑瀝青是寶物：他們用它來防水、黏合、封補容器與舟船的縫隙。而正是靠著這種防水的技藝，他們造出了<strong>編結蘆葦舟（ti'at）</strong>——用蘆葦捆紮成形、以瀝青封縫的船，能載著人渡過開闊的海域，抵達外海的島嶼。一片養不起大城的乾土，卻養出了一個能採橡實、能編舟渡海、與海陸都建立了深刻關係的民族。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 乾旱之地的承載上限，與兩種對待它的方式</span>
+      <p>每一片土地，都有一個由它的水、土、氣候共同決定的「承載上限」——它最多能供養多少人、撐起多大的聚落。在水量充沛的地方，這個上限高得讓人幾乎感覺不到它的存在；但在南加州這樣的半乾旱之地，上限低、且硬，像一道近在眼前的牆。如何對待這道牆，本質上有兩種截然不同的態度，而通格瓦人與後來者，恰好各自代表了一種。</p>
+      <p>通格瓦人的選擇，是<strong>把自己的生活方式，貼合在這道上限之內</strong>——人口、聚落、取用，都節制在這片土地給得起的範圍裡，數千年安然無事。而後來建城的人，選的是相反的路：他們不接受這道牆，而是要<strong>把牆本身往外推</strong>——既然這裡的水撐不起一座大城，那就從別處把水「弄」過來，硬生生地抬高這片土地的承載上限。<em>一邊是節制地活在限度之內，一邊是不認限度、要把上限變出來。</em>這兩種態度的對撞，正是洛杉磯整個故事的母題；而它最終選擇了後者，並為這個選擇，付出了一張至今仍在攤還的長帳單。</p>
+    </div>
+
+    <h3>一個沉默的伏筆</h3>
+    <p>關於通格瓦人，有一件事必須在這裡鄭重地記下，因為它會像一道暗流，潛伏在這部史詩的底層，直到很久以後才浮上來：<strong>直到今天，通格瓦族仍未獲得美國聯邦政府的正式承認。</strong>那個把名字、把土地、把這整個被稱為 Tovaangar 的「世界」都接收了過去的後來者，在法律上幾乎沒有為它最初的主人，留下一個位置。一個在這片土地上生活了數千年、最早讀懂它脾性的民族，在那座踩著他們村落崛起的世界級大城裡，竟近乎不存在於官方的名冊上。</p>
+    <p>這就是城之前的世界：一片陽光氾濫卻滴水難求的平原，一條時而乾涸、時而暴怒的任性河流，與一個學會了在乾土上節制度日、編舟渡海的民族。他們不知道，海平線上即將出現的帆影，會在此後幾百年裡，把這個自足的世界連根翻轉；更不會料到，這片被地理判了「養不起大城」的土地，有一天竟會被人用偷來的水、賣出的夢與不肯認命的意志，硬是變成全美第二大城——而那座城最深的地基，將永遠疊在他們的名字與沉默之上。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座城的命運，寫在它的水文裡</span>
+      <p>洛杉磯最初的這一課，是關於「先天條件」的：<strong>一個地方最深的命運，往往不是寫在它的雄心裡，而是寫在它的水文裡。</strong>這片土地的陽光再慷慨、地再遼闊，都改不了一個冷硬的事實——它天生缺水，天生養不起一座大城。通格瓦人讀懂了這份吝嗇，於是節制地、長久地活了下來；他們不是不能做大，而是這片地理不允許「大」，他們選擇了與限度和解。</p>
+      <p>而更深、也更耐人尋味的一層是：<em>洛杉磯的全部故事，本質上是一場與「這裡不該有大城」這紙地理判決的角力。</em>面對這紙判決，一座城只有兩條路——要嘛認命，把規模收進土地給得起的限度裡；要嘛不認命，把水、把人、把繁榮，從別的地方「變」過來，強行抬高這片土地的上限。洛杉磯選了後者。它接下來所有的奇蹟與所有的代價，所有偷來的水、賣出的夢、與轉嫁到別處的帳單，根子都在這個最初的、近乎傲慢的選擇裡：它拒絕接受自己的地理本性，並決心用人的意志，去推翻一片乾土的天命。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">☀ ✦ ✝</div>
+  <p>數千年的節制，即將被另一種意志打斷。<br>一隊帶著十字架與冊封狀的西班牙人，正沿著加州的海岸北上——<br><span class="hl">他們會在這條任性的小河邊停下，用一個冗長的聖名，為一座還不存在的城，立下第一根樁。</span></p>
+</div>
+
+<section id="ch1" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · El Pueblo, 1781</span>
+    <h2 class="act-title">天使之后：四十四個人的小村</h2>
+    <p class="act-sub">The Pueblo of Our Lady the Queen of the Angels</p>
+    <div class="ornament">⛪ ✦ 🌿</div>
+  </div>
+  <div class="prose">
+    <p>一座城最初的樣子，往往與它後來自我宣傳的樣子，差得很遠。今天提起洛杉磯，世人腦海裡浮現的是金髮、棕櫚、陽光、與一望無際的好萊塢笑容。但若把時光倒回到一七八一年的那個秋天，站在洛杉磯河（the Los Angeles River）畔的，是另一幅完全不同的畫面：四十四個風塵僕僕的男女老幼，多數膚色是棕的、是黑的，操著西班牙語，剛剛走完一段穿越沙漠的漫長跋涉，奉一個遙遠帝國的命令，要在這片半乾旱的河谷裡，憑空種出一座村莊。</p>
+    <p>那一天是<strong>一七八一年九月四日</strong>。這座城的故事，就從這四十四個人，和一條他們即將親手挖出的水渠，開始說起。</p>
+
+    <h3>一個被帝國遺忘的邊陲</h3>
+    <p>要理解這座小村為何而生，得先理解十八世紀的西班牙加州，在帝國眼中是什麼地位——答案是：幾乎什麼都不是。它太遠了。從墨西哥城出發，越過層層沙漠與山脈，才能抵達這片被稱為「上加利福尼亞（Alta California）」的北方邊地。對馬德里而言，這裡是新西班牙最偏遠、最荒涼、最無利可圖的角落，唯一的戰略意義，是擋住俄國人與英國人從太平洋方向南下的野心。帝國對它的投資，吝嗇到近乎敷衍。</p>
+    <p>正因如此，西班牙在加州的拓殖採取了一種廉價而務實的三件套：傳教站（mission）負責宗教與勞動，要塞（presidio）負責軍事，而<strong>民村（pueblo）</strong>負責糧食。帝國不願花大錢養兵運糧，便指望這些自給自足的小村種出玉米與小麥，就近供養駐軍。洛杉磯，正是這套廉價邊陲算盤下，被刻意設計出來的一顆棋子——它不是自然生長的聚落，而是一份由總督簽署、由規劃藍圖催生的<em>行政產物</em>。</p>
+    <p>下令建村的，是當時的加州總督<strong>菲利佩·德·內維（Felipe de Neve）</strong>。他親自為這座新村選址、規劃格局，依循西班牙《印度法》（Leyes de Indias）裡那套行之百年的殖民城鎮藍圖：一個中央廣場、環繞廣場的住宅、外圍的農田與公共牧地。一切都在動工之前，就已在紙上被丈量、被分配。這座城從第一天起，就是「規劃」出來的，而不是「長」出來的——這個出身，將以驚人的方式預示它的未來。</p>
+
+    <h3>四十四個人，和一個被淡化的真相</h3>
+    <p>這座村莊全名極長，極其虔誠：<em>El Pueblo de Nuestra Señora la Reina de los Ángeles</em>——「天使之后聖母小鎮」。後人從這串華麗的名字裡，只取了最詩意的兩個字：<strong>Los Ángeles</strong>，「天使」。一座日後被無數電影、歌曲、明信片浪漫化的「天使之城」，名字的源頭，原來是一句獻給聖母的禱詞。</p>
+    <p>但名字的浪漫，與建村者的真實面貌之間，藏著一道這座城後來極力淡化的鴻溝。那四十四名最初的建村者，西班牙語稱之為 <strong>pobladores</strong>（拓殖者）。歷史記錄清楚地告訴我們：他們<em>絕大多數並不是純血統的西班牙白人</em>。他們是從新西班牙（今墨西哥）一路招募而來的窮苦移民，當中有原住民、有非洲裔的後代、有西班牙人與原住民混血的<strong>梅斯蒂索（mestizo）</strong>、有歐非混血的<strong>穆拉托（mulatto）</strong>。棕色與黑色的膚色，才是這支建村隊伍的主色調。</p>
+    <p>這個事實，與洛杉磯日後精心打造的「金髮陽光」形象，形成了近乎反諷的反差。換句話說：<strong>這座二十世紀以「白人加州夢」聞名於世的城，從建立的第一天起，就是一座由棕色與黑色的人共同建起的、多族裔的城。</strong>族裔的多元不是它後來才染上的色彩，而是它與生俱來的胎記——只是這枚胎記，曾被它自己的神話刻意遮蓋了很長一段時間。</p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">名字 · 天使的浪漫</div>
+        <p style="text-align:left;font-size:.96rem">「天使之后聖母」——一個獻給聖母的虔誠長名，被後世簡化成「天使」二字。從此這座城擁有了一個天生詩意、天生適合被浪漫化的名字。</p>
+      </div>
+      <div>
+        <div class="minihead">建村者 · 棕與黑的胎記</div>
+        <p style="text-align:left;font-size:.96rem">四十四名 pobladores，多為墨西哥的原住民、非洲裔與各種混血後代。<strong>多族裔不是後來的添加，而是建城那一刻的底色。</strong></p>
+      </div>
+    </div>
+    <div class="pull"><p>世人記住了「天使」這個名字的浪漫，卻忘了替天使蓋房子的，是一群棕皮膚與黑皮膚的窮人。洛杉磯的第一張臉，從來不是金髮的。</p></div>
+
+    <h3>聖加百列：傳教站的影子</h3>
+    <p>這座小村並非憑空孤立。在它建立的十年之前——<strong>一七七一年</strong>——方濟各會的傳教士已在不遠處建起了<strong>聖加百列傳教站（Mission San Gabriel Arcángel）</strong>。在西班牙的拓殖體系裡，傳教站是真正的經濟與宗教支柱：它擁有廣袤的田地與牲畜，是這片地區最早、最具規模的生產中心。新生的小村，某種意義上是依偎在這座傳教站的影子下，才得以立足。</p>
+    <p>然而傳教站的繁榮，建立在一套沉重的代價之上。這片土地的原住民，是世居於此、被西班牙人稱為<strong>「加百列人（Gabrieleño）」的通格瓦人（Tongva）</strong>——他們在洛杉磯盆地生活了數千年，自有語言、信仰與社會。傳教站體系把他們納入其中，名義上是教化與救贖，實際上則是將他們編入一套嚴格的勞動與管束秩序：在傳教士的監管下耕作、放牧、建造，生活方式、信仰與自由都被深刻地改變。對通格瓦人而言，新來者帶來的不只是十字架，還有疾病、勞役，與一個正在崩解的舊世界。</p>
+    <p>我們在此不渲染、不誇大具體的數字，但歷史的脈絡是清楚的：這座小村腳下這片看似空曠的土地，從來不是「無人之地」。在四十四名 pobladores 到來之前，這裡早已有人世居千年。建村，從一開始就是一場疊加——新的秩序，疊在一個被改寫、被邊緣化的舊秩序之上。</p>
+    <div class="warn">
+      <div class="warn-tag">警示 · 土地從來不是空的</div>
+      <p>「拓殖」一詞容易讓人以為移民來到了一片無主的荒野。事實是，洛杉磯盆地早有通格瓦人世居數千年。傳教站體系將他們納入勞動與管束，伴隨而來的疾病與社會解體，使原住民人口承受了沉重而難以復原的衝擊。這座城最初的繁榮，與這段被長期淡化的創傷，無法切割。我們記述它，是為了不讓它被遺忘。</p>
+    </div>
+
+    <h3>母渠：與水的角力，從第一天就開始</h3>
+    <p>現在，要說到這座城最關鍵、也最具預言性的那件事——水。</p>
+    <p>內維選的這塊地，靠近洛杉磯河，但這條河並不慷慨。這裡是半乾旱的氣候，雨水稀少且集中在冬季，河水時豐時枯，喜怒無常。要在這樣的土地上種出玉米、小麥與葡萄，光靠老天下雨遠遠不夠。於是，建村者做的第一批大事之一，就是<strong>動手把水「引」過來</strong>。</p>
+    <p>他們挖出一條人工水渠，從洛杉磯河取水，導入村莊與田地。這條渠，西班牙語稱為 <strong><em>la Zanja Madre</em>，意思是「母渠」</strong>——「母親之渠」。這個名字本身就是一則隱喻：在這片留不住水的土地上，是這條人工的渠，而非那條任性的河，餵養了村莊的生命。沒有母渠，就沒有莊稼；沒有莊稼，就沒有村莊。</p>
+    <p>請記住這個畫面，因為它是這整部洛杉磯史的<em>第一個音符</em>：一座城，在它存在的最初時刻，就已經在「想方設法把水引到自己這裡來」。這不是二十世紀才開始的故事。早在一七八一年，當第一鏟泥土被挖開、第一道渠被引通，這座城就已經立下了它與水之間那場永無止境的角力——而這場角力，日後將擴大到偷取整條山谷的河水、抽乾一整座湖泊的地步。母渠，是這一切的小小源頭。</p>
+    <div class="pull"><p>養活這座村莊的，不是那條任性的河，而是一條人工挖出的「母渠」。從第一天起，洛杉磯就明白了一件事：在這片土地上，水不會自己來——你得去把它引過來，甚至，去把它奪過來。</p></div>
+
+    <h3>緩慢的數十年</h3>
+    <p>建村之後的故事，並不戲劇化。在西班牙統治的數十年裡，這座小村人口稀少、發展遲緩，安靜得近乎被遺忘。它只是新西班牙最北邊陲上，一個種著玉米與葡萄、向附近駐軍供糧的農業小聚落。沒有港口的喧囂，沒有礦藏的暴富，沒有任何跡象顯示，它有朝一日會膨脹成一座全美第二大的巨城。帝國對它的態度始終是淡漠的——遠在天邊的馬德里，幾乎不會多看這片乾燥河谷一眼。</p>
+    <p>但種子已經埋下了。一個由規劃藍圖催生的出身、一張多族裔的面孔、一條與水角力的命脈——這三樣東西，在這座沉睡的小村裡靜靜地沉澱著，等待一個世紀又一個世紀的歷史，把它們一一喚醒、放大、推向極致。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 出身藏著被淡化的真相</span>
+      <p>洛杉磯的誕生，藏著兩個它後來親手淡化的真相。其一：<strong>它是棕色與黑色的人建起的城。</strong>那四十四名 pobladores 多為原住民、非洲裔與混血後代——族裔的多元是它的胎記，不是二十世紀移民潮才帶來的新鮮事。日後那個「金髮加州夢」的形象，是一層被刷上去的漆，而非它真正的底色。一座城若忘了自己最初的臉，就會誤把後來的神話，當成永恆的真相。</p>
+      <p>其二：<strong>它從建村第一天就靠「引水」維生。</strong>那條母渠，是這座城與水之間漫長角力的起點。在一片養不起大城的半乾旱土地上，水從來不是天賜，而是要靠人去挖、去引、去爭奪的東西。這個宿命，不是二十世紀的工程師發明的，而是一七八一年那群拿著鏟子的建村者，就已親手寫下的。<em>一個地方最深的性格，往往在它出生那一刻，就已悄悄定了調——日後的一切，不過是把這份出身，演到淋漓盡致。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">🌿 ✦ 🐂</div>
+  <p>西班牙的小村沉睡了數十年，安靜得像不曾存在。<br>但帝國的旗幟終將更換，土地的主人也將易手——<br><span class="hl">先是墨西哥的牧場與牛皮，再是一面從東方殺來、勢不可擋的星條旗。</span></p>
+</div>
+
+<section id="ch2" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · Ranchos & Conquest</span>
+    <h2 class="act-title">牧場、牛皮，與換了國旗的加州</h2>
+    <p class="act-sub">The Californios, the Cattle Hides, and the American Takeover</p>
+    <div class="ornament">🐂 ✦ 🇲🇽</div>
+  </div>
+  <div class="prose">
+    <p>有一段時光，洛杉磯不是一座城，而是一片牧場。確切地說，是許多片彼此相連、綿延到地平線盡頭的牧場——牛群在乾草色的山坡上漫遊，騎手駕著馬橫越開闊的河谷，宅院（hacienda）的白牆在午後的烈日下發燙。那是一個慢的世界，慢到幾乎沒有意識到自己正站在一場巨變的前夜。等到變局來臨，這個世界會在一兩個世代之內幾乎整個消失，只留下一些地名、一些教堂、一些被後人浪漫化的傳說。要理解今天的洛杉磯為何同時是個「西語城市」又被盎格魯資本徹底改寫，得先走進這片牧場，看清它如何在一面國旗換成另一面國旗之後，悄悄地也換了主人。</p>
+
+    <h3>當墨西哥接手了一片沙漠邊緣</h3>
+    <p>故事的轉折點，是一八二一年。那一年，墨西哥經過十餘年的獨立戰爭，終於擺脫西班牙的統治，宣告成為一個主權國家。遠在帝國最北邊陲的上加利福尼亞（Alta California）——洛杉磯正座落其間——也就此換了歸屬：它從西班牙王室的領地，變成了新生墨西哥共和國的一個邊遠省份。對住在這裡的人而言，改朝換代起初並沒有立刻改變什麼。天還是一樣乾，水還是一樣稀，從墨西哥城傳來的命令，要翻山越嶺走上好幾個月才會抵達。這裡太遠了，遠到中央政府幾乎管不到，也遠到它必須學會自己照顧自己。</p>
+    <p>真正改變這片土地命運的，是一八三三年墨西哥政府推動的一項政策：<strong>傳教站世俗化（secularization）</strong>。西班牙殖民時期，加州的核心是一連串由方濟會修士經營的傳教站（mission），它們名義上為了教化原住民而存在，實際上掌控著沿岸最肥沃的大片土地、最龐大的牛群與最廉價的勞動力。墨西哥的自由派政府視這些教會勢力為舊殖民秩序的殘餘，於是下令沒收傳教站的土地，將其從教會手中解放出來。理想的版本是：這些土地應當分還給為傳教站勞動了幾代的原住民。但理想與現實之間，隔著一整個權力結構。</p>
+    <p>實際發生的，是這片廣袤的土地被切割成一塊塊巨大的<strong>私人牧場（ranchos）</strong>，分封給少數有關係、有地位的家族。在洛杉磯一帶，動輒數萬英畝的牧場被劃給了一個個姓氏——這些家族就是日後人們所稱的「<strong>加州人（Californios）</strong>」，也就是在加州土生土長、操著西班牙語的墨裔精英。原本屬於教會、本應歸於原住民的土地，繞了一圈，落進了一個新的莊園貴族階層手裡。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 「世俗化」如何變成一次土地的重新分配</span>
+      <p>世俗化在紙面上是一場進步的改革——把土地從教會壟斷中解放出來。但任何一次大規模的土地「解放」，真正的問題從來不是「從誰手中拿走」，而是「最後落進誰手中」。當一塊土地脫離舊的所有者，它不會自動流向最弱勢、最該得到它的人；它會流向當下最有權力、最懂得操作規則的那一群。</p>
+      <p>加州的世俗化正是如此。原住民被許諾為受益者，最終卻多半淪為新牧場上的勞工；而與省級官員沾親帶故的家族，則一紙公文便擁有了一整片山谷。<em>這是一條會在洛杉磯歷史上反覆出現的規律：每一次土地與資源的「重新洗牌」，都宣稱要還富於民，卻總在過程裡，把財富更牢地集中到了少數人手上。</em>幾十年後，當盎格魯人帶著新的法律來重新洗牌時，輪到 Californios 自己嚐到這個道理。</p>
+    </div>
+
+    <h3>牛皮：加州的鈔票</h3>
+    <p>牧場時代（rancho era）的加州，過著一種奇特而悠閒的經濟生活。這裡幾乎不出產什麼工業品，貨幣稀少，城鎮零星，但牛——成千上萬頭半野生的牛——卻多到漫山遍野。對 Californio 家族而言，財富不是存在銀行裡，而是走在草地上。牛群幾乎不需要照料，自己在開闊的牧場上繁衍，到了季節，騎手（vaquero，墨西哥牛仔，正是日後美國 cowboy 的原型）便縱馬將牠們圍攏、宰殺、剝皮、熬脂。</p>
+    <p>真正值錢的，不是牛肉——在沒有冷藏、市場又遠的年代，大量的牛肉往往就地腐爛或餵了野獸——而是<strong>牛皮與牛脂（hides and tallow）</strong>。牛皮被晾乾、捆紮，賣給遠道而來的商船，運往美國東岸的新英格蘭去製成皮革、鞋子與機器傳動帶；牛脂則被熬煉成塊，運去做蠟燭與肥皂。一張張曬硬的牛皮，在這個幾乎沒有現金的社會裡，扮演著通貨的角色，被人們半開玩笑半認真地稱作「<strong>加州的鈔票（California banknotes）</strong>」。一個莊園主的身家，可以用他一年能交出多少張牛皮來衡量。</p>
+    <div class="pull"><p>在這片養不起一座大城的乾旱土地上，最早的財富不是金、不是水，而是一張張曬硬的牛皮——加州的第一種貨幣，是從牛背上剝下來的。</p></div>
+    <p>圍繞著牛皮貿易，一個階層分明的莊園社會緩緩成形。頂端是擁有遼闊土地的 Californio 家族，他們騎著裝飾華麗的馬、辦著綿延數日的婚禮與節慶（fiesta），過著一種被後世反覆傳頌的、田園詩般的貴族生活。但這份悠閒的底下，墊著的是另一群人的勞動——被世俗化政策剝奪了土地、如今在牧場上放牛、剝皮、做工的原住民，以及處於社會底層的混血勞工。莊園主的閒適，是建立在這些人幾乎沒有報酬的勞動之上的。那不是一個平等的伊甸園，而是一個秩序森嚴、有人騎馬有人徒步的階層世界。</p>
+    <div class="aside"><span class="hl">一個被浪漫化的細節：</span><em>後來盎格魯人入主加州後，反而格外熱愛把這段牧場時代描繪成優雅的「西班牙黃金歲月」——白牆紅瓦、吉他與披風。但這份懷舊，恰恰是在他們親手終結了那個世界、奪走了那些土地之後，才被精心打造出來的。被浪漫化的，往往是已經被消滅、再也構不成威脅的東西。</em></div>
+
+    <h3>國旗換了：一場戰爭與兩紙條約</h3>
+    <p>這個慢世界的終結，來得既突然又徹底。一八四○年代，美國正被一股名為「<strong>昭昭天命（Manifest Destiny）</strong>」的信念所驅動——一種相信美國注定要將疆域向西擴張、橫貫整個大陸直抵太平洋的擴張主義。橫亙在這條路上的，正是地廣人稀、防務空虛的墨西哥領土，而加州，是這顆皇冠上最誘人的明珠。</p>
+    <p>一八四六年，美墨之間爆發戰爭（Mexican–American War）。在洛杉磯一帶，當地的 Californio 居民並沒有束手就擒——他們對美軍佔領的傲慢與壓迫感到憤怒，發起過幾次抵抗，一度將佔領的美軍逐出洛杉磯。這些衝突規模不大，卻顯示這片土地的舊主人並不甘心拱手相讓。然而力量的天平終究是傾斜的。一八四七年一月，雙方在洛杉磯近郊的 <strong>Campo de Cahuenga</strong> 簽署了《<strong>卡惠加協定（Treaty of Cahuenga）</strong>》，結束了加州境內的戰事——這是一份相對寬大的停戰安排，讓放下武器的 Californios 得以保有其權利與財產。對加州這塊戰場而言，槍聲就此止息。</p>
+    <p>而整場戰爭的句點，落在一年之後。一八四八年，美墨兩國簽訂《<strong>瓜達盧佩-伊達爾戈條約（Treaty of Guadalupe Hidalgo）</strong>》，墨西哥將包括加州在內的廣大西部領土正式割讓給美國。一夜之間，洛杉磯不再屬於墨西哥。住在這裡的 Californio 家族，並沒有搬家，並沒有遠行，他們腳下的土地一寸也沒挪動——但他們忽然發現，自己從一個國家的公民，變成了另一個國家裡說著「外語」的少數族裔。國旗換了，而他們，連同他們的牧場、他們的牛、他們的整個世界，被一併劃進了一個陌生的新主權之下。</p>
+    <div class="cf">
+      <span class="cfh">歷史的岔路 · 若加州留在墨西哥治下</span>
+      <p>設想一下，如果美墨戰爭走向不同，加州始終留在墨西哥版圖之內。那麼一八四八年那場改變一切的事件——在加州內陸發現黃金、引發席捲全球的淘金熱——將在一面墨西哥國旗下發生。湧入的人潮、爆發的財富、隨之而來的人口洗牌，會把這片土地推往一個完全不同的方向。</p>
+      <p>但這只是假設。真實的歷史是：金子是在條約簽訂的同一年、加州剛剛易主之際被發現的。彷彿命運刻意安排，讓美國在剛剛把這片土地收入囊中的那一刻，才掀開它腳下埋藏的寶藏。<em>舊主人交出了土地，卻不知道自己同時交出的，是一座尚未被打開的金庫。</em></p>
+    </div>
+
+    <h3>用法律奪地：一個族群在自己的土地上被邊緣化</h3>
+    <p>《瓜達盧佩-伊達爾戈條約》白紙黑字地承諾：墨裔地主原有的土地權利，將受到美國政府的尊重與保障。理論上，Californios 可以安然地繼續做他們牧場的主人。但接下來的數十年證明，奪走一片土地，未必需要動用軍隊——一套程序、一疊文件、一張稅單，有時就足夠了。</p>
+    <p>問題出在土地所有權的「證明」方式上。墨西哥時代的牧場地契，往往邊界模糊、以自然地貌（一條河、一座山、一棵老樹）為界，依賴的是世代相傳的習慣與鄰里的共識。而美國的新法律體系，要求的是精確的測量、明確的文書、經得起法庭質詢的憑證。一八五一年，美國國會通過法案，要求加州的每一位墨裔地主，都必須向一個土地委員會證明自己的產權合法有效——舉證的責任，落在了原本的擁有者身上。</p>
+    <p>於是，Californio 家族被迫捲入一場漫長、昂貴、用陌生語言進行的法律泥沼。為了證明那片他們祖祖輩輩放牛的土地真的屬於自己，他們得聘請說英語的律師、支付高昂的訴訟費、年復一年地往返於法庭之間。許多案子拖延了十幾二十年。即便最終勝訴、保住了地契，許多家族也早已為了打官司而債台高築，不得不變賣、抵押大片土地來償付費用與稅金。法律沒有判他們有罪，卻讓他們在贏得官司的過程中，輸掉了土地。</p>
+    <div class="pull"><p>奪走一片土地，未必需要刀劍。一套用陌生語言寫成的程序——法庭、地契、稅單——有時是比征服更徹底、也更體面的奪取方式。它甚至會在判你「勝訴」的同時，讓你失去一切。</p></div>
+    <p>壓垮這個舊世界的最後一擊，來自天空。一八六○年代初，南加州遭遇了一場毀滅性的<strong>大乾旱</strong>——草場枯死，水源斷絕，曾經漫山遍野的牛群成批渴死、餓死，屍骸鋪滿乾裂的土地。對一個全部財富都建立在牛背上的社會而言，這幾乎是滅頂之災。牛群死了，牛皮這種「加州的鈔票」也就一文不值，靠養牛維生的牧場經濟，在這場旱災中徹底崩潰。許多苦撐過了法律訴訟的 Californio 家族，最終在這場乾旱裡破了產，被迫以低廉的價格，把世代相守的土地賣給了正源源不斷湧入的盎格魯買家。</p>
+    <p>就這樣，在易主之後短短二三十年間，加州那個說西班牙語的舊精英階層，幾乎整個沒落了。他們沒有被驅逐，沒有被屠殺，他們的名字甚至被保留下來，刻在街道、城鎮與山谷的招牌上。但土地——真正的權力所在——已經悄悄地、合法地，從他們手中轉移到了新的盎格魯統治階層那裡。一個族群，在自己生長的土地上，被一步步推到了邊緣。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 比刀劍更徹底的，是程序</span>
+      <p>洛杉磯的這段易主史，揭開了一個常被忽略的真相：<strong>最徹底的征服，往往不是用武力完成的，而是用「合法性」完成的。</strong>美墨戰爭的槍聲只響了一兩年，真正把土地從一個族群手中轉移到另一個族群手中的，是其後數十年的法庭、地契、稅單與訴訟費——一套看似中立、人人平等的程序。它不流血，不違法，甚至贏家輸家都按規矩走完了流程，但結果卻是一整個階層被連根拔起。</p>
+      <p>更耐人尋味的是新主人對待舊世界的姿態：他們一面在法庭上剝奪 Californios 的土地，一面又熱切地把那段牧場歲月浪漫化，包裝成洛杉磯獨有的「西班牙風情」拿去出售——白牆、紅瓦、吉他、披風，成了招徠移民與遊客的賣點。<em>這是這座城日後將反覆使用的伎倆：先奪走某樣東西的實體，再把它的形象高價賣回。</em>被偷走的是土地，被賣出的是夢——而洛杉磯，正是在這「一手剝奪、一手販賣」之間，學會了它日後賴以為生的本領。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🐂 ✦ ⛓</div>
+  <p>舊精英沒落了，盎格魯人帶著法律、資本與野心湧入這座小鎮。<br>但這個正在易主的洛杉磯，遠不是一個太平的地方——它狹小、混亂、充滿暴力，<br><span class="hl">而在它最黑暗的一夜，仇恨將把矛頭，指向另一群剛剛渡海而來的異鄉人。</span></p>
+</div>
+
+<section id="ch3" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The 1871 Massacre</span>
+    <h2 class="act-title">1871，被吊死在街上的人</h2>
+    <p class="act-sub">The Chinese Massacre and the Town's Buried Shame</p>
+    <div class="ornament">⚠ ✦ 🕯</div>
+  </div>
+  <div class="prose">
+    <p>每一座把自己賣成天堂的城，地基裡都埋著一些它不願再提起的事。洛杉磯日後將靠著陽光、棕櫚與電影，把自己包裝成全世界最會販賣夢的地方；但在它成為那個明亮符號之前，它先是一座塵土飛揚、槍聲不絕的邊疆小鎮。而在這座小鎮的歷史裡，有一個夜晚，它沉默了一百多年——一八七一年十月二十四日的夜晚。那一夜發生在這裡的事，是美國史上規模最慘烈的集體私刑之一。</p>
+
+    <h3>一八七一年的洛杉磯：一座還沒長大的邊城</h3>
+    <p>要理解那個夜晚，得先理解那是一座什麼樣的城。一八七○年代初的洛杉磯，遠不是今天的模樣。它人口不過數千，街道是泥土路，下雨成泥、天晴起塵；它沒有可靠的水、沒有像樣的港、更沒有鐵路把它接上全國的血脈。它是一座被舊金山的光芒遠遠拋在後頭的南方小鎮，治安敗壞、私刑橫行，當時甚至被一些人冠上「美國最暴力的小鎮」之名。在這樣一個法律稀薄、暴力廉價的地方，一場衝突要釀成屠殺，所需要的火星，其實少得驚人。</p>
+    <p>而在這座城最擁擠、最被輕視的一個角落，住著它的華人。那條街叫做 <strong>Calle de los Negros</strong>——後世常譯作「黑人巷」，但這名字其實與非裔無關，而是源自早年居住於此、膚色較深的西班牙裔居民。它是一條狹窄、雜亂、聲名狼藉的小巷，賭館、酒肆與廉價住所擠在一起。當時全洛杉磯的華人，總數不過約莫兩百人——在一座數千人的城裡，這是一個小到幾乎可以被忽略的群體。他們大多是男性移工，做著這座城不願意做、卻又離不開的活：洗衣、雜役、菜販、廚工，以及替全加州鋪設鐵路的苦力。</p>
+    <p>他們來到這裡，是因為加州曾經迫切需要他們的雙手。一八六○年代，橫貫大陸的鐵路靠著成千上萬名華工的血汗，硬是穿過了內華達的雪山與沙漠。可是當鐵路鋪完、淘金熱退潮、經濟轉冷，曾經被需要的雙手，瞬間變成了「搶飯碗的外人」。一種瀰漫全加州、乃至全美西部的排華情緒，正在迅速升溫——它將在十一年後，於一八八二年凝結成臭名昭著的《排華法案》（Chinese Exclusion Act），那是美國史上第一部明文以族裔為由禁止特定民族移民的聯邦法律。一八七一年的洛杉磯華人，就生活在這股越來越冷的逆風裡。</p>
+
+    <h3>那個夜晚</h3>
+    <p>導火線本身，與這座城的多數人毫無關係。那是一場華人社群內部、兩個敵對堂口之間的爭執，演成了 Calle de los Negros 上的一場槍戰。混亂之中，一名前來的白人——一說是試圖介入、一說只是被流彈波及——中槍身亡。消息傳開，整座城像被點燃的乾草。</p>
+    <p>不到多久，一群暴民聚集到了華人聚居的街區。人數越滾越大，據後世記載，最終湧入的人潮多達<strong>約五百人</strong>——這意味著，在那個夜晚，這座城將近<em>十分之一</em>的人口，走上街頭，加入了一場對華人的圍捕。他們封鎖了 Calle de los Negros 的出口，把躲在屋裡的華人男子與男孩一個個拖了出來。接下來發生的事，這座城用了一個多世紀才願意正視：他們在當街、在門廊、在臨時搭起的繩索下，吊死、槍殺了這些人。</p>
+    <div class="warn">
+      <div class="warn-tag">警示 · 一八七一年十月二十四日</div>
+      <p>那一夜，約莫<strong>十八到十九名</strong>華人男子與男孩，在洛杉磯街頭被暴民圍捕後吊死或槍殺。他們之中，幾乎全部與最初引發槍戰的爭執毫無干係——一說，遇害者裡至多只有一人可能與那場堂口衝突有關，其餘的人，僅僅因為是華人，便在那一夜失去了性命。</p>
+      <p>對照當時洛杉磯全城華人總數不過約兩百人，這意味著<strong>近一成的華人社區，在短短一個夜晚被屠殺殆盡</strong>。本文不重述那一夜每一條人命如何結束的細節——對受害者最起碼的尊重，是記住他們是人，而不是把他們的死當成獵奇的素材。</p>
+    </div>
+    <p>我們今天無法、也不該假裝精確還原那一夜每一個細節。許多受害者的姓名已經湮沒，許多情節在事後的記述裡彼此矛盾。但有些事是清楚的：被殺的人裡，有醫者、有商販、有不過十來歲的少年；他們大多手無寸鐵，許多人是從藏身處被搜出來的。這不是一場勢均力敵的衝突，而是一場由絕對多數針對絕對少數、由有權者針對無權者的單向施暴。</p>
+    <div class="pull"><p>被殺的人裡，幾乎沒有人與那場爭執有關。他們唯一的「罪」，是在一個錯誤的夜晚，剛好是這座城裡最沒有權力的那種人。</p></div>
+
+    <h3>沒有人真正負責</h3>
+    <p>屠殺之後，這座城曾短暫地震動過。輿論一度譁然，大陪審團返回了二十餘項謀殺起訴。然而，當塵埃落定，真正走上審判台的只有十人；其中八人最終被判的也僅是<em>過失殺人</em>（manslaughter）——彷彿那一夜發生的，不是一場有預謀的集體獵殺，而只是一連串失控的意外。</p>
+    <p>而連這輕得不成比例的刑責，最後也化為烏有。這幾樁定罪因為一個法律上的技術瑕疵被推翻，而被告——再也沒有被重新起訴。換句話說，在這場奪走近二十條人命的屠殺裡，<strong>最終，幾乎沒有任何一個人，真正為它付出代價</strong>。法律來過、轉了一圈，然後悄悄地把門關上，假裝什麼都沒發生。</p>
+    <p>接下來的，是更漫長的一件事：遺忘。在此後的幾十年裡，當洛杉磯開始發力把自己重新發明成「南加州的陽光天堂」，當它忙著用棕櫚、橙花與蔚藍天空招徠全美的移民與資本，一八七一年那個夜晚，被有意無意地從這座城的官方記憶裡抹去了。它不被寫進城市的自我敘事，不被立碑、不被紀念、不被提起。一座正在學習販賣美好夢境的城，當然不會主動把自己地窖裡的屍骨拿出來示人。這場屠殺，於是沉入了這座城刻意營造的明亮之下，沉默了超過一個世紀。</p>
+    <div class="cf">
+      <span class="cfh">歷史的岔路 · 若那一夜被真正記住</span>
+      <p>設想另一種可能：洛杉磯在屠殺之後，沒有選擇遺忘，而是讓兇手真正受審、讓死者真正被悼念、讓這場暴行成為城市記憶裡一道公開的傷疤。那麼，這座城面對「外人」的方式，會不會從此有所不同？</p>
+      <p>歷史沒有給出這個版本。被掩埋的創傷不會消失，它只會改換形式、等待重演。同一個母題——當經濟與社會的焦慮無處宣洩，便由最沒有權力的群體來承受——將在此後的洛杉磯一次次回來：一九四三年的「祖特裝暴動」（Zoot Suit Riots）對準墨西哥裔青年，一九六五年的瓦茨（Watts）與一九九二年的大暴動撕開黑人社區與這座城之間長期的裂痕。<em>一座不肯記住自己如何傷害弱者的城，注定要把同一種傷害，反覆地、換一批人地，再做一遍。</em></p>
+    </div>
+
+    <h3>地基裡的東西</h3>
+    <p>把這一章放回整部故事裡，它的位置其實很關鍵。洛杉磯這部史詩的主線，是「水、夢，與一座無中生有的沙漠巨城」——是靠偷來的水、賣出的夢，在一片半乾旱的土地上硬變出全美第二大城。而一八七一年提醒我們的，是這座夢之城最不願示人的另一面：在它學會販賣天堂之前，它先示範了當焦慮無處安放時，這座城會把帳，結到誰的頭上。</p>
+    <p>賣陽光、賣橙花、賣「重新開始」的人生——這套生意需要一個明亮、無瑕、彷彿沒有過去的城市形象。而要維持那個形象，最簡單的辦法，就是把不堪的部分埋起來、不去看它。一八七一年的華人，於是成了這座城為了乾淨的自我形象，所選擇遺忘的那一頁。但歷史的鐵律是：被埋起來的東西，從不會因為被埋起來就消失；它只是換了個地方，繼續在這座城的地基裡，發出沉默的回聲。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 帳，總是先結到最沒有權力的人頭上</span>
+      <p>一八七一年留給後世最冷峻的一課是：<strong>每當一個社會的經濟與情緒陷入焦慮，那筆焦慮的帳，幾乎總是最先落到最沒有權力的群體頭上。</strong>鐵路修完了、淘金熱退了、日子變難了——這些挫折本與華人移工無關，但他們人數最少、語言不通、最易辨識、最無力還手，於是順理成章地被推上了代罪羔羊的位置。種族化的仇恨，從來不是憑空的瘋狂，它往往是更深層的經濟與權力焦慮，找到了一個最廉價的宣洩出口。</p>
+      <p>更值得記住的是這座城後來如何處理它：<em>不是糾正，而是遺忘。</em>一座日後將自己包裝成「陽光天堂」的城，地基裡埋著一場它不願提起的私刑。要把一座繁榮的城真正讀懂，你不能只讀它放在櫥窗裡的部分——你必須先去讀它選擇遺忘的部分。因為一座城願意對誰下手、又願意把什麼遺忘，遠比它的天際線，更誠實地說出它究竟是誰。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">🕯 ✦ 🚂</div>
+  <p>一八七一年的洛杉磯，還只是一座塵土飛揚、會把人吊死在街上的邊疆小鎮。<br>但就在這片血腥與遺忘之上，兩樣東西即將降臨，把它徹底改頭換面——<br><span class="hl">一條從東部伸來的鐵路，和一門前所未見的生意：把南加州的陽光，賣給全美國。</span></p>
+</div>
+
+<section id="ch4" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · Selling Sunshine</span>
+    <h2 class="act-title">賣陽光的城：鐵路、橘子與一場無中生有的繁榮</h2>
+    <p class="act-sub">The Railroads, the Boom, and the Invention of a Destination</p>
+    <div class="ornament">🚂 ✦ 🍊</div>
+  </div>
+  <div class="prose">
+    <p>十九世紀中葉的洛杉磯，按理說沒有理由變成一座大城。它不臨良港——最近的海岸是一片淺灘與泥沼；它沒有大河——那條叫洛杉磯河（Los Angeles River）的水道，一年裡有大半時間只是河床上一道細流；它沒有煤、沒有鐵、沒有任何讓工廠非落腳於此不可的天賦。它有的，是充足得近乎奢侈的陽光，是溫煦的冬天，是一片需要灌溉才肯長出東西的半乾旱土地。在一個城市靠港口、礦藏與工業崛起的年代，這樣的條件，幾乎注定它只能當一座安靜的牧牛小鎮。</p>
+    <p>然而接下來的二十年，洛杉磯做了一件在美國城市史上極為罕見的事——它沒有等待天賦把它推上舞台，而是<em>把自己「賣」了出去</em>。它學會了一門全新的本事：不是生產貨物，而是生產一個念頭、一種嚮往、一張關於未來的圖像，然後把這張圖像，賣給遙遠寒冷東部那些渴望陽光與重生的人。這門生意的第一塊基石，是兩條鐵軌。</p>
+
+    <h3>兩條鐵軌，把孤城接上世界</h3>
+    <p>一八七六年，<strong>南太平洋鐵路（Southern Pacific）</strong>的鐵軌終於修進了洛杉磯，把這座一直被群山與沙漠半圍困的小鎮，接上了橫貫全美的鐵路網。在這之前，從東部來洛杉磯是一趟漫長、昂貴、近乎冒險的旅程；在這之後，理論上任何一個芝加哥或紐約的人，都能坐著火車一路抵達太平洋岸。鐵路是一座城的血管——它通了，貨進得來、人進得來、東部的資本與想像也進得來。洛杉磯第一次，與整個國家連在了同一張網上。</p>
+    <p>但南太平洋是一家壟斷者。它獨家把持著這條進入南加州的通道，票價由它說了算，整座城等於被一條鐵路捏在手心。真正改變局面的，是一八八五年——這一年，<strong>聖塔菲鐵路（Santa Fe）</strong>另闢路線抵達洛杉磯，南太平洋的獨家壟斷被打破了。兩條鐵路，兩個對手，同時盯著同一座城、同一批願意西遷的旅客。當兩個壟斷者變成兩個競爭者，一場誰也沒料到的價格廝殺，就此引爆。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1876</div><div class="lbl">南太平洋鐵路接通</div></div>
+      <div class="stat"><div class="num">1885</div><div class="lbl">聖塔菲鐵路抵達</div></div>
+      <div class="stat"><div class="num">$1</div><div class="lbl">票價戰最低車票</div></div>
+      <div class="stat"><div class="num">1887</div><div class="lbl">地產狂潮頂峰</div></div>
+    </div>
+
+    <h3>一塊美金的車票，與一場票價戰</h3>
+    <p>一八八六到一八八七年間，南太平洋與聖塔菲為了搶客，把車票價格一路往下砍，砍進了一場後來被稱為「票價戰（rate war）」的瘋狂競賽。兩家公司你削一塊、我減兩塊，互不相讓，從密蘇里河流域到洛杉磯的車票，在某些日子裡竟一路跌到了象徵性的<strong>一美元</strong>——這個價格早已遠低於成本，純粹是兩個對手賭氣式的肉搏，誰也不肯先收手。對鐵路公司而言，這是一場虧本的意氣之爭；但對成千上萬住在嚴寒中西部與東部的人來說，這是一張幾乎免費的、通往陽光與新生活的門票。</p>
+    <p>於是人來了，像潮水一樣地來。火車一列接一列，把農夫、退伍軍人、養病者、投機客、夢想家，一車車地從寒冷的東部運到南加州的暖陽下。他們之中，有人是為了健康——當時醫學相信溫暖乾燥的氣候能治療肺結核；有人是為了土地——東部地價高昂，這裡的土地看似遍地都是；更多的人，只是為了一個模糊卻誘人的念頭：<em>在那遙遠的西海岸，也許有一個更好的、可以重新開始的人生。</em>一條本該理性運作的鐵路票價，意外地變成了一台把人口從東向西大規模搬運的機器。而這些被廉價運來的人，落地之後要做的第一件事，就是買地。</p>
+    <div class="pull"><p>一塊美金的車票，買不到一段體面的旅程——但它買到了一個念頭：在西海岸，或許有一個可以重新開始的人生。而洛杉磯，正準備把這個念頭，賣給每一個願意上車的人。</p></div>
+
+    <h3>「八〇年代大繁榮」：憑空畫出的市鎮</h3>
+    <p>人潮湧入，地價狂飆，一場史稱「<strong>八〇年代大繁榮</strong>（the Boom of the Eighties）」的地產投機狂熱，席捲了整個南加州。它的邏輯近乎瘋狂而又自洽：人來得越多，土地越搶手；土地越搶手，價格漲得越兇；價格漲得越兇，就吸引越多人帶著錢來投機——一個自我膨脹的循環，像吹氣球一樣越鼓越大。地產業者在乾燥的曠野上插下木樁、畫出方格，憑空「創造」出一個又一個從未存在的新市鎮。他們印製華麗的地圖與廣告，把一片片連水都還沒接通的荒地，描繪成繁華可期的未來都市，鼓樂喧天地辦著拍賣會，把地皮一塊塊高價賣給狂熱的買家。</p>
+    <p>那是一段近乎集體癲狂的歲月。同一塊地，一天之內可以轉手好幾次，每轉一次價格就往上跳一截；買家根本不在乎那塊地能不能住人、種不種得出東西，他們買的不是土地，而是「明天能用更高的價錢賣給下一個人」的指望。許多被畫在地圖上的「城市」，其實只有幾根木樁、一塊招牌、和一個響亮的名字——它們存在於宣傳冊上，存在於買賣契約上，唯獨不存在於現實的地面上。投機，餵養著更狂熱的投機；繁榮，建立在對更大繁榮的信念之上。</p>
+    <p>然後，氣球破了。一八八七年，狂潮衝上頂峰之後，泡沫迅速崩解。人潮終究跟不上憑空畫出的市鎮，需求撐不起被吹到天上的地價，後來的買家發現自己接到的是最後一棒。價格雪崩，無數紙上財富一夜蒸發，那些只存在於地圖上的「城市」，許多就此荒在曠野裡，連名字都被風吹散。投機客血本無歸，破產者比比皆是——一場無中生有的繁榮，以無中生有的方式收場。</p>
+
+    <h3>泡沫散了，地基卻留下了</h3>
+    <p>但這場崩盤，並沒有像它在別處常見的那樣，把一座城徹底打回原形。泡沫破滅之後，洛杉磯沒有變回那個沉睡的牧牛小鎮——因為這場狂潮，留下了一些泡沫帶不走的東西。它留下了人：許多被一美元車票運來的人，破產了卻沒有離開，他們把根紮在了這片陽光下。它留下了城鎮：許多在繁榮中草草畫出的市鎮，雖然多數凋零，卻也有一部分真的活了下來，成為日後大洛杉磯都會區的雛形。它更留下了一樣最關鍵、卻最看不見的東西——<em>一種「賣未來」的基因</em>。</p>
+    <p>洛杉磯在這場狂熱裡，第一次完整地學會並驗證了一件事：<strong>一座城最值錢的商品，可以不是它腳下的土地，而是人們對這塊土地的「想像」。</strong>地皮的價格，從來不是由它真實的產出決定的，而是由買家相信它「將會」變成什麼決定的。這座城從牛皮拍賣會與紙上市鎮裡學到的這門手藝——把一個尚不存在的未來，包裝成今天就能交易的商品——將成為它此後一個多世紀反覆施展、屢試不爽的看家本領。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一座被「行銷」出來的城市</span>
+      <p>絕大多數偉大城市的崛起，背後都有一個堅實的物質理由：紐約有深水良港，芝加哥是大陸鐵路與五大湖航運的樞紐，匹茲堡坐在煤與鐵的交會點上。它們先有了「非在此不可」的天賦條件，人與財富才隨之聚攏。洛杉磯卻幾乎是反過來的——它缺乏這一切，於是它做了一件當時罕見的事：<strong>把「人為什麼要來」這個問題，從一道地理難題，變成了一道行銷課題。</strong></p>
+      <p>它不問「我擁有什麼讓你不得不來」，而問「我能向你販賣一個怎樣的嚮往讓你願意來」。土地、氣候、健康、機會、重生——這些原本抽象的東西，被它仔細地包裝、命名、印刷、推銷，變成了可以裝進廣告冊、寄往全國的商品。洛杉磯因此成了美國第一座主要靠「需求創造」而非「天賦稟賦」長大的大城。它證明了一件顛覆直覺的事：<em>一座城可以不靠它真實擁有的東西，而靠它讓人「相信」它擁有的東西，硬生生長成龐然大物。</em>這是洛杉磯一切故事的底層密碼。</p>
+    </div>
+
+    <h3>賣陽光的人：商會、橘子，與一張全國餐桌上的加州夢</h3>
+    <p>泡沫破滅之後，洛杉磯沒有放棄「賣自己」這門生意，反而把它做得更系統、更精緻。一八八八年前後成立的<strong>商會（Chamber of Commerce）</strong>，把過去地產業者各自為政的吆喝，升級成了一場有組織、有預算、有策略的全國性行銷戰役。它的產品很清楚，清楚到可以用一個詞概括——<em>陽光</em>。商會與鐵路、地產業者聯手，把南加州的氣候本身，當成一件足以致富的商品來販賣：溫暖的冬天、治病的乾燥空氣、四季不歇的橙色果園、以及那個籠罩在這一切之上、最值錢的承諾——「無限可能」。</p>
+    <p>而要把抽象的「陽光」變成看得見、摸得著、可以擺上餐桌的東西，洛杉磯找到了一個完美的代言人：<strong>橘子</strong>。十九世紀後期，一種引進自巴西、果肉飽滿無籽、容易剝皮的<strong>華盛頓臍橙（Washington navel orange）</strong>，在南加州的陽光與灌溉下長得極好，成了這片土地的金字招牌。鮮亮的橙色果實，被一箱箱裝上冷藏火車，運往冰天雪地的東部與中西部。每一顆運到芝加哥、紐約、明尼蘇達餐桌上的加州橘子，都不只是一份水果——它是一小塊可以吃下肚的加州陽光，一張寄到寒冷北方的明信片，無聲地訴說著那個遙遠國度的溫暖與富饒。</p>
+    <p>果農們為了把橘子賣到全國，組成了合作社，並打造出一個日後家喻戶曉的品牌——<strong>Sunkist</strong>（意為「陽光親吻過的」）。這個名字本身就是整套行銷哲學的縮影：他們賣的從來不只是橘子，而是橘子所象徵的那個生活——明亮、健康、溫暖、充滿希望。鋪天蓋地的廣告把金黃的果實、燦爛的陽光、與「加州」這三個字緊緊綁在一起，印上了全美無數家庭的餐桌與想像。對東部那些在漫長寒冬裡剝開一顆加州橘子的人來說，「加州」早已不只是地圖上一塊地，而是一個被精心建構出來的<em>夢</em>。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 賣夢的人，與夢的複利</span>
+      <p>洛杉磯在十九世紀末教會了世界一件事：<strong>當一個地方缺乏非它不可的天賦時，它可以轉而販賣一種「嚮往」——而嚮往，是這世上利潤最高、也最難被取代的商品。</strong>港口會被新港口取代，礦藏會被挖空，工廠會外移，但「人們相信這裡能讓我過上更好的人生」這個念頭，一旦被成功植入千百萬人的腦海，就會自我繁殖、自我強化。來的人越多，這個夢看起來就越真實；夢越真實，就吸引越多人前來。這是一種念頭的複利。洛杉磯的核心產品，從一開始就不是腳下的土地，而是這個關於土地的「夢」本身。</p>
+      <p>更深一層是：<em>一座靠「賣夢」長大的城，它真正出口的，是人的渴望。</em>橘子、陽光、健康、重生——這些都只是包裝，包裝裡裝的，是寒冷北方那億萬顆不甘於現狀、渴望換一種人生的心。洛杉磯比同時代任何城市都更早參透：在一個人人都想重新開始的時代，最暢銷的商品，就是「重新開始」這個承諾本身。它把這門手藝練到了爐火純青——而當它把這套「販賣夢想」的本事，從橘子與地皮，搬上一塊塊銀幕的那一天，一個比所有地產狂潮都更巨大、更持久的夢工廠，就要在這片陽光下誕生了。它的名字，叫好萊塢。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🍊 ✦ 💧</div>
+  <p>火車載來了人，廣告賣出了夢，橘子把加州的陽光寄往全國的餐桌。<br>一座無中生有的城，就這樣在半乾旱的土地上，被想像力一寸寸地催大。<br><span class="hl">但這成千上萬被夢吸引而來、紮根在陽光下的人，很快就會撞上一個夢無法迴避的現實——這座半沙漠的城，缺一樣最致命、也最不浪漫的東西：水。</span></p>
+</div>
+
+<section id="ch5" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · There It Is. Take It.</span>
+    <h2 class="act-title">偷來的水：穆赫蘭與歐文斯谷</h2>
+    <p class="act-sub">Mulholland, the Aqueduct, and the Valley That Was Drained</p>
+    <div class="ornament">💧 ✦ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>每一座大城，最終都會撞上同一道牆——不是地價、不是人心，而是水。一座城可以靠鐵路、靠廣告、靠晴朗的天氣與賣不完的夢，把人潮一波波吸進來；但人會喝水、會洗澡、會澆灌庭院與柑橘園，工廠會用水，旅館會用水，一座要長成百萬人口的城，每一天都需要海量的水。而洛杉磯偏偏坐落在一片半乾旱（semi-arid）的盆地上——這裡年雨量稀薄，本地唯一的活水洛杉磯河（the Los Angeles River），一到旱季就瘦成一道淺溪，雨季又暴漲成濁流。它養得起一座幾萬人的小鎮，卻無論如何養不起一座注定要成為全美第二大城的巨城。二十世紀初，當這座城正以驚人的速度膨脹，一個冷酷的算術擺在所有人面前：<strong>沒有更多的水，洛杉磯的成長就會在某一天，硬生生地撞牆停下。</strong></p>
+
+    <h3>那個從愛爾蘭來的、自學成才的水利沙皇</h3>
+    <p>站在這道牆前的，是一個極富傳奇色彩的人物——<strong>威廉·穆赫蘭（William Mulholland）</strong>。他生於愛爾蘭，少年時當過水手，輾轉漂洋過海來到加州，最初不過是洛杉磯供水系統裡一名挖溝渠的工人。他幾乎沒受過正規工程教育，全靠在工地上摸爬滾打、夜裡苦讀，把水力學、地質與測量一點一滴自學成才。憑著過人的精力與對水的近乎本能的直覺，他一路爬升，最終執掌了整座城的供水大權，成了洛杉磯水利系統實質上的「沙皇」。當這座城的水荒迫在眉睫，所有人的目光，都落在這個沉默寡言、雙手粗糙、滿腦子都是水從哪裡來的愛爾蘭人身上。</p>
+    <p>穆赫蘭的答案，大得近乎狂想：既然腳下這片土地沒有足夠的水，那就<em>到遠方去把水搬過來</em>。他的目光越過洛杉磯盆地，越過沙漠，落在約莫三百多公里外、東邊內華達山脈（the Sierra Nevada）腳下的一座山谷——<strong>歐文斯谷（Owens Valley）</strong>。那裡，內華達山融化的雪水順著山勢奔流而下，匯成水量豐沛的歐文斯河，滋養著一片綠意盎然、農牧興旺的谷地。穆赫蘭的構想是：修一條長達三百多公里的水道，把歐文斯谷的水，全程靠著<em>重力自然下流</em>，穿過沙漠、翻過丘陵，一路引進洛杉磯——不用一台抽水機，純粹讓水順著精密計算的坡度，自己流進城裡。</p>
+
+    <h3>暗中買斷一座山谷的命脈</h3>
+    <p>然而，這條水道真正的爭議，不在工程，而在「水從哪裡來」這件事的<strong>手段</strong>。歐文斯谷的水，原本屬於那裡的農民。要把它調走，洛杉磯就必須先取得那片谷地的土地與水權。而取得的方式，日後成了美國城市史上最具爭議的一頁。</p>
+    <p>洛杉磯派出代理人——其中關鍵人物是前洛杉磯市長<strong>弗雷德·伊頓（Fred Eaton）</strong>——進入歐文斯谷。他們並不亮出真實身分與意圖，而是以個人投資、農牧開發之類的名義，<em>在當地農民並不清楚背後是誰、要做什麼的情況下</em>，一塊一塊地悄悄收購沿河的關鍵土地與水權。當地人起初以為來的不過是些尋常買主，渾然不覺自己正在把整座山谷的命脈，一筆筆賣斷給一座三百公里外、素未謀面的城市。等到歐文斯谷的居民終於拼湊出全貌——他們賴以維生的水，將被整條調往洛杉磯——關鍵的水權，多半已經易主。一座農業山谷的生命線，就這樣在一連串外人看不懂的交易裡，被靜悄悄地買走了。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 把成本外部化：繁榮如何「搬」自他處</span>
+      <p>歐文斯谷的故事，是一堂關於「成本外部化（externalization）」的經典課。洛杉磯需要水——這是它的成本。但它沒有在自己這片缺水的土地上、用自己的代價去解決，而是把這筆成本<strong>轉嫁</strong>到三百公里外的另一群人身上：歐文斯谷的農民付出了乾涸的代價，洛杉磯收穫了繁榮的果實。城市的帳面上，水道是一項輝煌的公共建設；但在這本帳的另一頁——一頁洛杉磯自己不必看見的帳——記著一座山谷被抽乾的農田、破產的牧場與離散的人家。</p>
+      <p>這正是「資源攫取」最隱蔽也最高效的形態：<em>不是明火執仗地搶，而是用合法的交易、漫長的距離與資訊的不對稱，把一個地方的資源，悄無聲息地搬到另一個地方去。</em>受益的城市看見的是噴湧的活水與飆漲的地價，付帳的山谷承受的是揚塵與蕭條。當繁榮與代價在地理上被拉開三百公里，受益者便很容易說服自己：這一切，都是憑本事換來的。</p>
+    </div>
+
+    <h3>「水到了，拿去吧。」</h3>
+    <p>不論手段如何，這條水道本身，是一項驚人的工程壯舉。<strong>洛杉磯水道（the Los Angeles Aqueduct）</strong>從一九〇八年動工，歷時約五年，動用了數以千計的工人，穿越沙漠、隧道與崎嶇地形，於一九一三年完工。它的設計核心是一種近乎優雅的簡約：全程不靠動力抽水，僅憑沿線精確到極致的坡度計算，讓歐文斯谷的水一路順著重力，自然而然地流向洛杉磯。在那個年代，這是一項足以與任何國家級工程比肩的成就，而它的總設計師與總工程師，正是那個自學成才的穆赫蘭。</p>
+    <p>一九一三年十一月五日，通水典禮在洛杉磯北郊的水道出口舉行。成千上萬的市民聚集在那裡，等著看遠方引來的水第一次奔流進城。當閘門開啟，歐文斯谷的水順著水泥渠道轟然傾瀉而下時，全場歡聲雷動。輪到穆赫蘭致詞——人們等著這位締造奇蹟的工程師說一段宏大的話。但這個沉默的愛爾蘭人，只是望著那道奔湧而下的水，對著洛杉磯的市民，說了一句極短、極乾、卻從此載入史冊的話：</p>
+    <div class="pull"><p>「There it is. Take it.（水到了，拿去吧。）」</p></div>
+    <p>沒有華麗的修辭，沒有冗長的感謝。五個英文字，把一座城此後一個世紀的命運，乾淨利落地交到了它自己手裡。這句話之所以傳世，正因為它既是工程師對市民的交代，又像是一句意味深長的讖語——水，就在那裡了；至於是怎麼拿來的、拿走它的代價落在了誰身上，這句話一概沒有提。它只說：拿去吧。洛杉磯接過了這道水，也接過了與它捆綁在一起、卻被刻意留在三百公里外的那筆帳。</p>
+
+    <h3>乾涸的湖，與炸開的水道</h3>
+    <p>水道通了，洛杉磯如獲新生，從此放開手腳地膨脹。但在歐文斯谷，故事正朝著相反的方向沉淪。隨著歐文斯河的水被整條調走，原本承接著這條河、波光粼粼的<strong>歐文斯湖（Owens Lake）</strong>，失去了補給，水位年復一年地退縮，最終<em>幾乎徹底乾涸</em>，露出一大片白茫茫、含鹽鹼的湖底。每逢起風，乾涸湖床上的細微鹽塵與粉塵便被捲上半空，化作遮天蔽日的揚塵——一座曾經滋潤一方的湖泊，變成了一片會吃人的沙塵之地。賴水而生的農田與牧場跟著枯萎，歐文斯谷的農業經濟，一步步走向凋敝。</p>
+    <p>谷地的居民並沒有默默認命。一九二〇年代，憤怒在歐文斯谷積累到了沸點。眼看著家園被一座遙遠城市的渴求抽乾，一些走投無路的農民拿起了炸藥——他們在夜裡多次<strong>炸毀洛杉磯水道</strong>的渠段，試圖奪回、至少是中斷那道帶走他們命脈的水流。城市與山谷之間，圍繞著水，爆發了一連串緊張的對峙、破壞與衝突，這段歷史，後世稱之為<strong>「加州水戰（California Water Wars）」</strong>。它沒有戰場上那種大規模的殺戮，卻是一場關於生存資源的、實實在在的鬥爭——一邊是不肯認命的山谷，一邊是停不下來的巨城，而雙方爭奪的，只是世上最尋常、也最不可或缺的一樣東西：水。</p>
+    <p>這段水與權力、繁榮與掠奪交纏的黑暗往事，深深烙進了這座城的集體記憶。許多年後，它成了一部電影的藍本——一九七四年的經典之作<strong>《唐人街（Chinatown）》</strong>。那部電影以陰鬱的筆觸，講述一樁圍繞著洛杉磯水源的陰謀、欺瞞與罪惡，把「這座城的水，是怎麼來的」這個問題，拍成了一則關於權力如何在暗處運作的寓言。歐文斯谷的真實悲劇，就這樣化為虛構的故事，繼續在大銀幕上拷問著洛杉磯的良心。</p>
+    <div class="warn">
+      <div class="warn-tag">警示 · 一座湖的消失</div>
+      <p>歐文斯湖的乾涸，是這條水道最沉重的一筆代價。一片曾經養活一方水土的湖泊與農谷，因為遠方城市的需索而枯萎；揚塵問題在此後數十年裡，始終是當地揮之不去的環境與健康陰影。這不是一場天災，而是一連串人為抉擇累積的結果——是「人定勝天」這句豪語，落在另一群人身上時，所顯露出的另一張面孔。歷史記住洛杉磯水道的工程榮光，也應當記住，在這份榮光的另一端，有一座湖、一條河、一整個山谷的人，無聲地付出了代價。</p>
+    </div>
+
+    <h3>水壩潰決：締造奇蹟的人，被自己的奇蹟反噬</h3>
+    <p>穆赫蘭的事業，最終以一場慘烈的災難收場。為了儲存與調節水道引來的水，他主持設計、興建了多座水利設施，其中包括位於洛杉磯北方的<strong>聖法蘭西斯水壩（the St. Francis Dam）</strong>。一九二八年三月，這座剛啟用不久的混凝土大壩，在一個深夜突然<strong>潰決</strong>。蓄積的洪水如脫韁巨獸般傾瀉而下，沿著河谷一路狂奔數十公里，沖毀沿途的村鎮與農場，奪走了<em>約莫四百多條人命</em>，是加州二十世紀最慘重的工程災難之一。</p>
+    <p>對年事已高的穆赫蘭而言，這是無可挽回的終點。災後的調查雖然牽涉到當時人們尚未完全理解的地質因素，但作為這座水壩的最高負責人，他公開承擔了責任，沉痛地表示願一肩扛起這場悲劇。那個曾經對著奔流的活水說出「拿去吧」的水利沙皇，如今面對的是被自己親手放出的洪水所吞噬的數百條生命。他的職業生涯就此終結，在世人複雜的目光中黯然退場。<em>那個用水把一座城從沙漠裡變出來的人，最終也被水擊倒</em>——這幾乎是一則太過工整、令人不寒而慄的隱喻。</p>
+    <div class="cf">
+      <span class="cfh">歷史的岔路 · 若洛杉磯拿不到歐文斯谷的水</span>
+      <p>設想一下，倘若伊頓那批代理人沒能在歐文斯谷悄悄買斷水權，倘若那條水道從未建成——洛杉磯會變成什麼模樣？答案恐怕是：一座被自己的乾渴牢牢鎖住的城。沒有遠方引來的活水，這片半乾旱的盆地，無論如何養不起數百萬人口。它或許會停在某個中等規模、自給自足的尺度上，成為加州南部一座宜人卻有限的城市，而把「全美第二大城」的桂冠，讓給某個水源更充沛的對手。</p>
+      <p>但這條岔路也提醒我們：洛杉磯後來那種「無中生有」的爆炸式成長，<strong>從一開始就不是這片土地本身的能力，而是一種借來的、搬來的能力。</strong>它的偉大，不是長在自己根上的，而是靠一條三百公里的水道，從別人的根上移植過來的。沒有那條偷來水的渠道，這座沙漠巨城的整部後續歷史——它的人口、它的產業、它的好萊塢與它的車海——都將失去最底層的那塊基石。</p>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 每一個奇蹟，背後都有一筆轉嫁的帳</span>
+      <p>洛杉磯水道，是這座「無中生有之城」最赤裸的自白。在一片養不起大城的土地上，它硬是長成了全美第二大城——靠的不是腳下真有那麼多水，而是把另一個地方的水<strong>「搬」</strong>了過來。一座城的繁榮，建立在另一座山谷的乾涸之上；洛杉磯每一座噴泉、每一片草坪、每一個游泳池的波光裡，都倒映著歐文斯湖那片白茫茫、揚著塵的湖床。這是這整部史詩的核心隱喻：<em>每一個被意志硬生生變出來的奇蹟，背後都有一筆轉嫁給他者的帳單。</em></p>
+      <p>這個道理，遠不止於水。一切看似憑空而起的繁榮，幾乎都藏著一處「他方」在默默付帳——它可能是被抽乾的山谷、被耗竭的礦脈、被傾倒的廢料，也可能是被外部化的某種代價，只是因為它落在足夠遠的地方、足夠陌生的人身上，便不再被計入勝利者的帳本。穆赫蘭那句「拿去吧」之所以令人久久難忘，正因為它道破了這種繁榮的本質：水，就在那裡了；至於它從何而來、誰為它付了代價，這句話，從來不必回答。<strong>看懂了洛杉磯的水，就看懂了一切「人定勝天」式奇蹟最不願明說的那一面——天，從來沒有被勝過；只是它的脾氣，被轉嫁到了別人頭上。</strong></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">💧 ✦ ⛽</div>
+  <p>水，是從三百公里外，一寸一寸引來的；<br>可是這座城腳下，還埋著另一樣東西——它不必去遠方搬運，只需要鑽開地殼，<br><span class="hl">就會自己從黑暗裡噴湧而出，把整座城，再一次澆灌成另一個模樣的夢。</span></p>
+</div>
+
+<section id="ch6" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · Black Gold</span>
+    <h2 class="act-title">後院裡的油井</h2>
+    <p class="act-sub">Oil, Derricks, and the Petroleum Boom</p>
+    <div class="ornament">🛢 ✦ 🔥</div>
+  </div>
+  <div class="prose">
+    <p>把水偷進來之後，洛杉磯解決了「能不能住人」的問題。但這座城接下來要面對的，是一個更貪婪的問題：它憑什麼繼續長大？答案，不在天上，也不在遠處的內華達山脈——這一次，它在腳下。在這片乾燥土地的地底深處，封存著一個與河水同樣古老的祕密：石油。當人們開始往下挖，他們挖出的不只是黑色的原油，更是一整個讓城市再度膨脹的理由。</p>
+
+    <h3>一個礦工，挖出了一座城的第二口井</h3>
+    <p>故事要從一個失意的礦工說起。<strong>愛德華·多希尼（Edward Doheny）</strong>大半輩子都在美國西部各地的礦坑裡碰運氣，找金、找銀，幾乎一無所獲。一八九二年，他流落到洛杉磯，據說是在街上看見一輛馬車載著一種黑色、黏稠、會滲油的泥土經過——那是當地人拿來當燃料的「瀝青」。多希尼的直覺被點燃了：地底下，有東西。</p>
+    <p>那一年，他和合夥人在今天洛杉磯市中心西邊不遠處——大致是西湖（Westlake）一帶——租下一塊地，用最原始的辦法開挖。沒有鑽機，他們就用削尖的桉樹幹當鑽桿，靠人力一點一點往下捅。挖到大約一百五十英尺深時，原油湧了上來。<em>這是洛杉磯城市範圍內第一口真正意義上的商業油井。</em>消息傳開，整座城像被點著了一樣——短短幾年內，洛杉磯市中心的居民區裡，竟豎起了上百座鑽井架，人們在自家後院、在房子之間的空地上鑽井，城市的天際線上密密麻麻插滿了木造的井塔。一座本該是住宅與街道的城，瞬間長出了一片鋼鐵與木頭的森林。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1892</div><div class="lbl">多希尼挖出洛杉磯第一口油井</div></div>
+      <div class="stat"><div class="num">~150</div><div class="lbl">英尺<br>第一口井的深度</div></div>
+      <div class="stat"><div class="num">1920s</div><div class="lbl">加州石油大爆發</div></div>
+    </div>
+
+    <h3>插滿山坡的鑽井架</h3>
+    <p>如果說一八九二年只是火星，那麼一九二○年代就是燎原。進入二十世紀二○年代，南加州接連在好幾處地方鑽到了驚人豐沛的大油田。最傳奇的是<strong>信號山（Signal Hill）</strong>——一座俯瞰長灘的小丘，一九二一年在那裡鑽出的油井噴湧而出，產量豐厚得近乎荒謬。緊接著是<strong>亨廷頓海灘（Huntington Beach）</strong>與<strong>長灘（Long Beach）</strong>一帶的油田，一個接一個被發現。一時之間，整個南加州盆地彷彿就是一塊浸透了石油的海綿。</p>
+    <p>那景象，今天看來幾乎超現實。在信號山，鑽井架密集到彼此的支腳幾乎相觸，從遠處望去，整座山被木造井塔覆蓋得不見天日，人們給它取了個外號，叫「<em>井架之丘</em>」。油田不認得人類劃下的界線——它鑽進住宅區、貼著學校、緊挨著墓園。有人在後院鑽到油，一夜暴富；鄰居眼紅，也跟著往下鑽。土地的價值不再看它地面上長什麼，而看它地底下藏什麼。在那幾年裡，加州一躍成為全美、乃至全球數一數二的產油區之一，南加州的原油，源源不絕地湧出地面，灌進日益膨脹的工業文明的血管裡。</p>
+    <div class="pull"><p>洛杉磯先是從幾百英里外偷來了水，又從自家後院挖出了油——它彷彿總能在最不該有的地方，變出讓城市繼續膨脹的燃料。</p></div>
+
+    <h3>石油如何重塑了一座城</h3>
+    <p>石油帶來的，遠不只是井口噴出的黑色液體，而是一場徹底的城市性格改造。首先是資本：原油換成的真金白銀，灌進了這座年輕的城市，催生出一批暴發戶——昨天還是租地的小農，今天就成了坐擁油田的富翁。多希尼本人從一個身無分文的破產礦工，搖身成為全美最富有的人之一。財富的故事在街頭巷尾流傳，又一次坐實了那個關於洛杉磯的承諾：在這裡，命運可以一夜翻轉。</p>
+    <p>更深遠的，是石油與這座城另一重性格的相互餵養。原油需要被提煉、被運輸、被燃燒——於是煉油廠沿著盆地與港口拔地而起，化工、輪胎、汽車相關產業隨之聚集。而這些工業生產出來的東西，又恰好餵養了洛杉磯正在養成的另一個習慣：開車。<em>有油，有車，有路</em>——三者像齒輪一樣彼此咬合。便宜而充沛的本地石油，讓加油變得理所當然；汽車工業的興盛，讓開車成為生活方式；而為了開車，這座城又攤開成一片沒有盡頭、必須靠汽車才能連結的低密度蔓延之城。腳下的油，就這樣悄悄地替洛杉磯日後那個「汽車之城」的命運，鋪好了第一桶燃料。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 資源如何塑造性格</span>
+      <p>洛杉磯的石油故事，藏著一條關於「資源」的深刻規律：<strong>一個地方擁有什麼，最終會決定它變成什麼樣的地方。</strong>底特律因為有鋼鐵與裝配線，長成了汽車製造之城；休士頓因為有石油，長成了能源之都。而洛杉磯，因為腳下有便宜得近乎奢侈的原油，便在還沒意識到的時候，就把自己的肉身與汽車焊死在了一起——它養成了開車的習慣、攤開了城市的骨架、把空間揮霍成了一種生活方式。</p>
+      <p>更值得玩味的是這份慷慨的代價。<em>當一種資源唾手可得，人們便會圍繞著「揮霍它」來組織整個生活，而很少去想，這份慷慨會在哪一天反過來索債。</em>洛杉磯腳下的油，餵飽了它的引擎，卻也預支了它日後最沉重的兩筆帳單——把天空染成褐色的霧霾，與把城市撕成碎片的車陣。資源從不只是禮物，它同時也在悄悄地、不可逆地，雕刻一座城的命運。</p>
+    </div>
+
+    <h3>暴利的另一面：茶壺頂上的陰影</h3>
+    <p>然而，從石油湧出地面的第一天起，這份財富就與投機、貪婪和腐敗糾纏在一起。最刺眼的一筆，正落在那位點燃了一切的開創者身上。一九二○年代，一樁震動全國的政治醜聞爆發——史稱「<strong>茶壺頂醜聞（Teapot Dome）</strong>」。事件的核心，是聯邦政府原本保留給海軍的幾處戰略石油儲備地，被當時的內政部長以不正當的方式，私下租給了石油商開採。而牽涉其中、向那位部長輸送了一筆鉅款的石油商，正是愛德華·多希尼。</p>
+    <p>這樁醜聞在當時被視為美國歷史上最嚴重的政府貪腐案之一，那位收賄的內政部長最終被定罪入獄。多希尼本人雖在漫長的審判後於行賄的指控上獲判無罪，但他的名字，從此與那個時代石油暴利底下的污濁，永遠連在了一起。<em>那個曾經削尖桉樹幹、靠雙手在洛杉磯地底捅出第一口井的礦工，最終成了一個時代腐敗的註腳。</em></p>
+    <div class="aside"><span class="hl">一個耐人尋味的後話。</span><em>多希尼晚年富可敵國，卻也飽嘗醜聞與喪子之痛。後世有作家從這位石油大亨的傳奇與陰暗中汲取靈感，寫進了關於美國石油原罪的小說與電影——那個關於野心、原油與人性如何一同被掘出地面的母題，自此成了美國文化裡反覆迴響的一則寓言。</em></div>
+    <p>茶壺頂醜聞之所以重要，不只因為它毀了幾個人的名聲，更因為它揭示了石油這種財富的本質：它來得太快、太多、太容易，巨大的利益足以腐蝕掉一切原本該有的規矩與分際。在洛杉磯，石油從地底噴湧而出的同時，也把投機的狂熱、暴富的眩暈與權錢交易的污水，一併帶到了地面。<strong>這座城用偷來的水換得了人口，用挖出的油換得了財富，而它支付的代價，從一開始就不只是金錢——還有它的清白。</strong></p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 變出燃料的城</span>
+      <p>把水與油的故事疊在一起看，洛杉磯展現出一種近乎魔術般的能力：<strong>它總能在不可能的地方，無中生有地變出讓自己繼續膨脹的東西。</strong>沒有河，它就從幾百英里外把整條河引過來；土地貧瘠，它就往下挖，掘出黑色的財富。水讓它能住人，油讓它能發動引擎——兩者合起來，恰好替那座即將攤開成無邊蔓城的洛杉磯，同時備齊了燃料，與繼續擴張的藉口。</p>
+      <p>但「無中生有」從來都是有代價的，只是帳單被推遲、被轉嫁、被埋進了未來。偷來的水，要由失去河流的歐文斯谷來償還；挖出的油，要由日後窒息的天空與不可逆的依賴來償還。<em>這正是洛杉磯最核心的母題：它從不接受「這片土地養不起一座大城」這個命運，而是用意志、金錢與技術硬把它扭轉過來——然後把扭轉的代價，留給後來的人。</em>水與油餵飽了這座城的身體，讓它能呼吸、能奔跑。但讓洛杉磯真正征服世界的，從來不是它腳下的東西，而是它即將賣向全球的、最虛無也最有力的商品——夢。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🛢 ✦ 🎬</div>
+  <p>水讓它能住人，油讓它能奔跑——洛杉磯的身體，已被餵得壯碩。<br>但讓這座沙漠之城真正征服世界的，不是它腳下挖出的黑金，<br><span class="hl">而是它即將從陽光與膠片裡，賣向全人類的那場夢。</span></p>
+</div>
+
+<section id="ch7" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Dream Factory</span>
+    <h2 class="act-title">好萊塢：把夢賣給全世界</h2>
+    <p class="act-sub">How the Movies Fled West and Built a Dream Factory</p>
+    <div class="ornament">🎬 ✦ ⭐</div>
+  </div>
+  <div class="prose">
+    <p>洛杉磯最了不起的發明，不是水管，也不是橘子，而是一種看不見、摸不著、卻能換成真金白銀的東西——<strong>夢</strong>。在前面的章節裡，這座城已經學會了把陽光裝箱、把健康打包、把「未來」當成地產賣出去。現在，它要把這門生意推向極致：它將把陽光、浪漫、財富、與「任何人都能在這裡重新開始」的承諾，全部封進一卷卷膠片，賣給全世界每一塊銀幕。而這一切的起點，竟是一場逃亡——一群人，從三千英里外的東岸，逃到了這片陽光裡。</p>
+
+    <h3>一場從東岸開始的逃亡</h3>
+    <p>電影誕生於十九世紀末，而它最初的家在東岸。紐約、紐澤西的工作室，曾是這門新生意的心臟。問題出在一個名字上——<strong>湯瑪斯·愛迪生（Thomas Edison）</strong>。這位「發明大王」手握早期電影攝影與放映技術的大量專利，一九〇八年前後，他聯合幾家主要廠商成立了<em>電影專利公司（Motion Picture Patents Company，MPPC）</em>，業界後來直接稱它為「托拉斯（the Trust）」。這個聯盟的算盤很簡單：誰要拍片、放片，就得用他們授權的設備、付他們的權利金；不從者，便等著吃官司。</p>
+    <p>對手無寸鐵的獨立製片人來說，這是一張收得越來越緊的網。托拉斯派人巡查、提告，甚至傳出有人砸設備、施壓的說法。獨立製片於是開始往外逃——逃離律師、逃離禁制令、逃離那隻從東岸伸過來的手。而他們逃亡的方向，恰好指向一片正在拚命招攬世人的陽光之地：南加州。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 壟斷如何把產業逼出一座城</span>
+      <p>托拉斯的故事藏著一個耐人尋味的規律：<strong>過度的控制，往往會把它想掌握的東西逼到自己夠不著的地方去。</strong>愛迪生想用專利把電影業鎖在掌心，結果卻替南加州送來了整整一個產業。距離，在那個沒有州際公路、靠律師上門才能執法的年代，本身就是一種保護——洛杉磯離紐約三千英里，也就離托拉斯的傳票三千英里。</p>
+      <p>這不是洛杉磯第一次靠「遠」獲利。它一向是那種「邊緣即機會」的城——遠離既有秩序的中心，反而成了不受管的試驗場。對逃亡的製片人而言，這裡的吸引力，一半是陽光，一半正是這份天高皇帝遠的自由。</p>
+    </div>
+
+    <h3>為什麼是這裡：陽光、地形，與便宜</h3>
+    <p>南加州能接住這群逃亡者，靠的不只是距離。一九一〇年代的膠片感光度低，拍片極度依賴<em>充足而穩定的自然光</em>——而洛杉磯一年裡有數不清的晴天，等於把攝影棚開在了一盞永不熄滅的免費大燈下。東岸的冬天會讓拍攝停擺數月，這裡卻幾乎全年可拍。光，就是錢；而這座城有的是光。</p>
+    <p>還有地形。在洛杉磯方圓不遠之內，你能找到沙漠、雪山、海岸、峽谷、棕櫚與牧場——一個取景隊不必跑遍全國，就能拍出西部荒野、南海孤島、阿拉伯沙丘或瑞士山村。多變的地貌，讓這裡成了一座天然的露天片廠。加上廉價的土地與勞力、不受工會與舊規矩束縛的環境，所有條件疊在一起，答案幾乎是注定的。一個原本安靜的小社區——<strong>好萊塢（Hollywood）</strong>——就這樣被歷史選中，從一片果園與田地，變成了「電影」這個字的同義詞。</p>
+    <div class="pull"><p>愛迪生想用專利把電影鎖在東岸，卻反而把整個產業，連同它的夢，一起推進了西岸的陽光裡。</p></div>
+
+    <h3>製片廠制度：一座量產夢的工廠</h3>
+    <p>到了一九二〇年代，最初那群逃亡的拓荒者，已經建起了一套精密得驚人的機器。<strong>製片廠制度（the studio system）</strong>成形了：派拉蒙（Paramount）、米高梅（MGM）、華納兄弟（Warner Bros.）等大廠，把電影製作變成了一條近乎工業化的生產線。他們在自家廠房裡擁有片場、佈景、技師、編劇、導演，更用長期合約綁住一批又一批演員——明星不再只是會演戲的人，而是被廠方<em>製造、命名、包裝、推銷</em>出來的產品。</p>
+    <p>這套制度高效得像底特律的汽車廠：劇本是零件，明星是品牌，發行通路是經銷網，一部接一部地產出、上市、回收。「夢工廠（dream factory）」這個說法，正是從這裡來的——它精準得近乎諷刺。因為好萊塢確實在用工廠的邏輯，生產一種最不像工業品的東西：浪漫、英雄、眼淚、與圓滿的結局。一座城，把「造夢」變成了可以排班、可以結算、可以規模化量產的生意。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 慾望，是最好賣的商品</span>
+      <p>好萊塢做的，本質上是一門<strong>「形象經濟」</strong>的生意——它賣的從來不是膠片本身，而是膠片裡那份令人嚮往的東西。觀眾掏錢進戲院，買的是兩小時的逃離、是成為別人的幻覺、是「我的人生也可能是這樣」的一閃念。這是一種比鋼鐵、比糧食都更難複製、利潤也更高的商品：<em>慾望本身。</em></p>
+      <p>這背後是一個被低估的真理：<strong>當一個地方學會販賣「形象」與「渴望」，它就掌握了一種近乎無限的資源。</strong>陽光會被烏雲遮住，橘子會爛在樹上，但人對美好生活的想像，永遠不會供過於求。洛杉磯比任何城市都更早領悟這一點——它把自己最稀缺的實體資源（水、土）藏在幕後，把自己最不費成本的東西（陽光、夢、可能性）推到鎂光燈前，賣給全世界。</p>
+    </div>
+
+    <h3>它賣的不是電影，是一種叫「加州」的人生</h3>
+    <p>夢工廠真正的天才之處，在於它賣的從來不只是一部部電影。透過銀幕，洛杉磯把<em>它自己</em>變成了一個願景。鏡頭裡的棕櫚樹、海灘、敞篷車、與灑滿陽光的明亮房子，把「加州夢」乃至整個「美國夢」，包裝成了一種可以渴望、甚至可以動身前往的生活。世界各地的觀眾在黑暗的戲院裡仰望銀幕，看見的不僅是故事，更是一個關於「在洛杉磯，任何人都能重新成為任何人」的邀請。</p>
+    <p>於是電影成了這座城最強大的廣告。它行銷的不是商品，而是一種對「洛杉磯式生活」的飢渴——而這份飢渴，又化作一波又一波湧入的人潮：懷抱明星夢的年輕人、想換一種活法的家庭、被陽光與承諾召喚的移民。這是前一個時代「賣陽光、賣橘子」那套行銷術的放大版，只是這一次，廣告會動、會說話、會在全世界同步上映。<strong>橘子賣的是水果，電影賣的是人生；而後者的市場，沒有邊界。</strong></p>
+
+    <h3>鏡頭裡的金光，與鏡頭外的暗影</h3>
+    <p>然而一座最擅長「只給世界看它想被看見那一面」的城，必然也最擅長把另一面藏進陰影。鏡頭裡的洛杉磯金光燦爛、人人微笑；鏡頭外，它和當時的美國一樣，有著它不願拍進膠片的部分——僵固的種族隔離與排他、被排除在加州夢之外的底層與少數族裔、地產與權力交織的腐敗。陽光打在某些人的臉上，也必然在另一些人身上投下長長的影子。這份反差，正是「夢之城」最深的矛盾：它越善於販賣明亮，就越需要把陰暗收進畫框之外。</p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">鏡頭裡 · 被打亮的洛杉磯</div>
+        <p style="text-align:left;font-size:.96rem">陽光、棕櫚、海灘、敞篷車、白牆紅瓦的明亮房子。人人都有機會成名，人人都能重新開始——一個被精心打光、剪輯、配樂過的加州夢。</p>
+      </div>
+      <div>
+        <div class="minihead">鏡頭外 · 被剪掉的洛杉磯</div>
+        <p style="text-align:left;font-size:.96rem">種族隔離與排他、被夢拒之門外的底層、權力與地產的腐敗。這些不會出現在宣傳片裡——一座賣夢的城，最懂得把不利的鏡頭留在剪輯室的地板上。</p>
+      </div>
+    </div>
+    <p>這並非要否定那些真實在這裡實現的夢——確實有人從無名走到了星光大道。但一座以「夢」為出口品的城，註定要永遠活在幻象與真實的夾縫裡。它向世界兜售一個被打亮、被剪輯過的自己，久而久之，連它自己也分不清哪一個才是真的。這份「不斷在幻象與現實之間擺盪」的宿命，從膠片時代起，就刻進了洛杉磯的骨子裡。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當一座城的出口品，變成了夢</span>
+      <p>把第四章「賣陽光」的基因，與這一章「賣夢」的躍升並排來看，洛杉磯的故事便顯出它最核心的那條主線：<strong>它的真正出口品，從橘子與陽光，一路升級成了「夢」本身。</strong>這是人類城市史上罕見的轉向——多數大城靠的是它生產的「物」（鋼、煤、布、糧）；而洛杉磯靠的，是它生產的「想望」。夢工廠，就是這個邏輯所能造出的最強大的機器。</p>
+      <p>但這份天賦也是這份詛咒。一座靠賣夢維生的城，永遠得維持那個被打亮的形象，永遠得把陰影留在鏡頭外，永遠得在「世人以為的洛杉磯」與「真實的洛杉磯」之間，活成自己最複雜的矛盾。<em>它最大的資產是幻象，而幻象，需要被不斷地餵養與守護。</em>看懂了這台造夢機器，就看懂了洛杉磯何以既璀璨又虛幻、既慷慨又殘酷——因為它賣的，從來就是一個註定無法人人兌現、卻又非賣不可的承諾。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">⭐ ✦ 🚗</div>
+  <p>夢工廠把世界召喚到了這片陽光裡，人潮一波波湧來，要的是銀幕上那座有院子、有陽光、人人重新開始的城。<br>可這麼多人、這麼大的夢，需要的是空間——好大好大的空間。<br><span class="hl">於是這座城不再向上長，而是向外攤開，攤成一張看不到邊的網，用鐵軌與柏油，把夢鋪滿整片盆地。</span></p>
+</div>
+
+<section id="ch8" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Car City</span>
+    <h2 class="act-title">紅色電車、高速公路，與攤成一張網的城</h2>
+    <p class="act-sub">Red Cars, Freeways, and the Metropolis Without a Center</p>
+    <div class="ornament">🚗 ✦ 🛣</div>
+  </div>
+  <div class="prose">
+    <p>一座城的形狀，往往洩漏了它的靈魂。歐洲的古城圍著一座大教堂或一個廣場長大，街道像年輪一樣一圈圈向外蔓延，市中心是它的心臟，也是它的記憶；紐約把人疊進一座座垂直的高樓，向天空要空間。可是洛杉磯不一樣。你若從空中俯瞰它，會看見一片幾乎望不到邊的低矮蔓延——獨棟的房子、棕櫚的行道樹、一條條筆直的大道，向四面八方鋪展開去，看不出哪裡是中心，也看不出哪裡是邊界。這不是一座城，倒像是無數小鎮被一張公路的網，鬆鬆地縫在了一起。</p>
+    <p>這副獨特的形狀，不是偶然長成的。它是被兩種交通工具先後塑造的——先是一種紅色的電車，後來是一條條灰色的高速公路。要看懂洛杉磯，就得先看懂它腳下這張網是怎麼織起來的，又付出了什麼代價。</p>
+
+    <h3>紅色電車：把城攤開的第一隻手</h3>
+    <p>故事要從二十世紀初的一種電車說起。當時的洛杉磯雖然靠著鐵路與賣夢的廣告快速膨脹，城市的市鎮卻還是一塊塊散落在平原上的孤島。把這些孤島連起來的，是一個叫<strong>亨利·杭廷頓（Henry Huntington）</strong>的鐵路鉅子。他建起的<strong>太平洋電車公司（Pacific Electric）</strong>，運營著一支漆成紅色的城際電車隊伍——人們暱稱它們為「<em>紅色電車（Red Cars）</em>」。</p>
+    <p>在它的全盛期，太平洋電車是世界上規模最大的城際電車系統之一，軌道綿延數以百計的英里，像血管一樣伸進南加州的四面八方：往北到聖費南多谷，往東到聖貝納迪諾，往南到長堤與紐波特海灘，把分散各處的市鎮、果園與海濱，全都串進了同一張運輸網。你可以在清晨從一個小鎮搭上紅色電車，搖搖晃晃穿過一片片橘子園，傍晚抵達海邊。對當時的人而言，這是不可思議的自由。</p>
+    <p>但這裡藏著一個關鍵的、常被忽略的真相：<strong>杭廷頓真正的生意，不是賣車票，而是賣土地。</strong>電車軌道鋪到哪裡，他與其他地產商手中那些原本一文不值的荒地，就在哪裡瞬間升值。電車不是為了服務既有的城市而建，而是為了<em>創造</em>新的郊區——先把軌道伸進空曠的平原，再沿線把土地切成一塊塊住宅用地賣出去。於是城市不是先有人、再有交通；而是先有電車、再順著電車的軌道，一路向外長出新的社區。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 交通工具如何決定一座城的形狀</span>
+      <p>一座城的密度與形態，幾乎是被它的主流交通工具「逼」出來的。靠雙腳的中世紀城市必須緊湊，因為人走不遠；靠地鐵與電梯的紐約必須垂直，因為要在站點周圍把人疊高。而洛杉磯，從電車時代起，走的就是相反的路——<strong>沿線蔓延</strong>。</p>
+      <p>紅色電車是一種「線性」的工具：它沿著軌道把城市拉成一條條長長的觸手，而不是壓成一個密實的核。地產商沿著每一條線鋪開低密度的獨棟住宅，於是「人人有一棟自己的房子、一片自己的院子」這個加州夢，從一開始就被寫進了城市的骨架裡。洛杉磯「沒有單一市中心、由許多分散社區拼成」的形態，並不是後來汽車造成的——早在電車的年代，這個底色就已經定了型。汽車只是把它推到了極致。</p>
+    </div>
+
+    <h3>誰殺了紅色電車</h3>
+    <p>諷刺的是，這個把城市攤開的系統，最終卻被它自己催生出的蔓延給害死了。電車沿線造出了無數低密度的郊區，而低密度的郊區，恰恰是電車最難服務、卻最適合私家車的地方——當每個家庭都住得很開、目的地散落在四面八方時，固定軌道的電車就顯得處處掣肘，而一輛能隨時掉頭、隨處停靠的汽車，就成了無可抗拒的誘惑。</p>
+    <p>一九二○年代起，福特的流水線讓汽車變得便宜，私家車在南加州迅速普及。汽車多了，馬路上與電車爭道的車輛也多了，電車愈跑愈慢、愈來愈擠；乘客流失，票價收入下滑，公司無力維護，服務品質繼續惡化——一個向下的螺旋。與此同時，圍繞著汽車形成了一個龐大的利益共同體：賣石油的、造輪胎的、開車廠的，都樂見人們把電車換成汽車。一段時間裡，確實有公司買下了多個城市的電車系統、再把它們改成巴士。</p>
+    <p>於是後世留下了一樁著名的公案——「<strong>誰殺了紅色電車</strong>」。有人說是石油與汽車利益的合謀蓄意絞殺，有人說電車本就因蔓延與虧損而注定衰亡，汽車只是替它送了終。真相多半在兩者之間：既有結構性的命運，也有人為的推手。<em>但無論如何，結局是清楚的</em>——到二十世紀中葉，那支曾經世界第一的紅色電車隊伍，被一條條拆除、報廢，從南加州的地景上徹底消失了。洛杉磯，全心全意地，擁抱了汽車。</p>
+    <div class="pull"><p>紅色電車把城市攤開，攤開的城市又養不起電車——它親手造出了那個將要殺死自己的世界。一座城最深的諷刺，常是它最成功的那件事，最終要了它的命。</p></div>
+
+    <h3>高速公路之城</h3>
+    <p>汽車要跑得快，就需要一種全新的路——不設紅綠燈、不被行人打斷、車流可以一路飛馳的路。一九四○年，洛杉磯通車了一條叫<strong>阿羅約塞科林蔭道（Arroyo Seco Parkway）</strong>的快速道路，連接市中心與帕薩迪納（後來成為 110 號公路的一段）。它常被視為美國西部最早的現代高速公路之一。第一條路通車時，人們還不太懂怎麼開——上下匝道又短又急，是為慢速年代設計的。但它指向了未來。</p>
+    <p>二戰結束後，這個未來轟然降臨。聯邦與州政府投入巨資修築高速公路，洛杉磯盆地上很快織起一張愈來愈密的快速路網。一條條多線道的高速公路在城市上空交錯，巨大的立體交流道像混凝土的盤龍一樣盤旋升起。到二十世紀下半葉，「<em>高速公路（freeway）</em>」這個詞幾乎就等同於洛杉磯——通勤、塞車、永遠在路上，成了這座城最日常的生活方式。人們不再問「你住哪一區」，而是問「你開幾號公路」；一個人一天裡有相當一段清醒的時光，是握著方向盤、困在車陣裡度過的。</p>
+    <div class="cf">
+      <span class="cfh">歷史的岔路 · 若紅色電車沒有被拆除</span>
+      <p>設想一個沒拆掉紅色電車的洛杉磯。那支世界第一的城際電車網若被保留、升級、與後來的軌道整合，今天的南加州會是另一副模樣——人們或許能搭著電車往返各市鎮，城市可能圍繞著車站長出更密、更可步行的節點，而不是一味攤平成無邊的低密度蔓城。</p>
+      <p>但別把它想得太理想。電車衰亡的根子，是它自己造出來的蔓延——當城市已經被攤得那麼開、那麼散，固定軌道本就難以服務。即便電車不被拆，洛杉磯多半仍會是一座以汽車為主、向外無限延展的城；保留的電車能緩和它，卻很難根本扭轉它。<em>地理與早年的形態，已經替這座城選好了它的命。</em>後世花了大半個世紀、砸下巨資想重建軌道，才隱約體會到：當年拆掉的，遠比一條條鐵軌要多。</p>
+    </div>
+
+    <h3>蔓延，與棕色的天空</h3>
+    <p>汽車給了洛杉磯一樣它做夢都想要的東西——<strong>幾乎無限的空間</strong>。在電車與汽車之前，城市要長大，只能往上疊或往內擠；有了車，城市可以朝任何方向、無止盡地向外攤開。於是洛杉磯不再有「邊界」這回事，它就那樣一路鋪過盆地、翻過山坳、填滿河谷，把一個個原本獨立的市鎮吞進同一片連綿不絕的住宅之海。這是 ch4 那個「人人有獨棟、有院子、有陽光」的加州夢，被汽車兌現成了現實——也兌現成了一種全新的、世界從未見過的城市形態：<em>低密度、無中心、彼此用公路相連的巨型蔓城（sprawl）</em>。</p>
+    <p>可是這份自由，從一開始就掛著一張帳單。當數以百萬計的汽車在一座被群山環抱、空氣容易滯留的盆地裡日夜燃燒汽油，廢氣無處可去，只能積在盆地上空。<strong>一九四三年，洛杉磯爆發了第一場嚴重的煙霾。</strong>那是二戰期間，天空變得灰濛刺眼、人們眼睛刺痛、能見度驟降——起初許多人甚至以為這是敵軍的某種化學或毒氣攻擊。直到後來人們才慢慢明白，這片棕黃色的霧，不是敵人放的，而是這座城<em>自己造出來的</em>。汽車、工業、與那只困得住髒空氣的盆地地形，共同煮出了這鍋毒霧。從那以後，「洛杉磯煙霾（smog）」就成了這座城甩不掉的代名詞。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 蔓延的城，與一張轉嫁出去的帳單</span>
+      <p>無中心的蔓城有它迷人的承諾：每個家庭都能擁有一小塊屬於自己的土地，過上鏡頭裡那種有院子、有陽光的生活。但這份承諾，靠的是把成本悄悄轉嫁出去——攤得太散，意味著每一段路都得開車，意味著公共運輸難以為繼，意味著愈來愈多的時間被消磨在車陣裡，意味著愈來愈多的廢氣被吐進同一片天空。</p>
+      <p>這正是貫穿洛杉磯全書的那條暗線的又一次變奏：它總是<strong>先享受，再把帳單推給別處</strong>——水是從別人的山谷偷來的，夢是包裝給遠方的人買的，而蔓延的自由，則是用染棕的天空、堵死的公路、與後代人的肺，分期付款買來的。一座蔓城賣的是「自由」，但自由從來不是免費的；它只是讓帳單來得晚一點、藏得深一點。</p>
+    </div>
+
+    <h3>沒有中心的城，與自由的代價</h3>
+    <p>於是洛杉磯長成了一座極為奇特的城。它沒有一個像曼哈頓或巴黎那樣不容置疑的核心，沒有一條「全城都認得的主街」。它是一群分散社區的鬆散聯邦——你住的那一區、你開的那條公路、你常去的那個商場，幾乎就構成了你的整個世界，而隔著幾條高速公路之外的另一個洛杉磯，你可能一輩子都不曾踏進。這座城不是一個整體，而是無數個彼此平行、用公路勉強相連的小世界。</p>
+    <p>這副形狀，本身就是一則寓言。汽車給了洛杉磯它最渴望的兩樣東西——空間，與自由：人人能擁有自己的一片天地，能隨時開車去任何地方。可是同一輛車，也把這座城攤得太散、太破碎，讓它失去了一個能讓所有人共享的中心；把天空染成棕色，把人一個個關進各自的鐵盒子裡，困在永遠也疏通不完的車陣裡。它得到的自由，與它付出的代價，竟是同一件事的兩面。</p>
+    <div class="pull"><p>同一輛車，給了洛杉磯它最想要的自由，也奪走了它做為一座城最珍貴的東西——一個共同的中心。它的形狀本身，就是一則關於「自由的代價」的寓言。</p></div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 自由的代價，寫在城市的形狀裡</span>
+      <p>洛杉磯的蔓延教給我們一件事：<strong>每一種「自由」，背後都連著一張要有人付的帳單；只是聰明的時候，你會把帳單推遲、推遠、推給看不見的人。</strong>汽車許諾的自由是真實的——它讓普通家庭擁有了過去只有富人才有的空間與機動。但這份自由不是憑空冒出來的，它的成本被悄悄轉嫁成了堵死的公路、染棕的天空、與一座失去中心的破碎之城。當帳單終於到期，人們才驚覺，當初拆掉的紅色電車、攤開的低密度郊區，原來都是要還的。</p>
+      <p>更深一層是：<em>一個系統最初的設計，會把它的代價鎖進未來幾十年的命運裡。</em>洛杉磯在電車與汽車的年代，選擇了向外攤、而非向上疊；選擇了私人的車、而非公共的軌。這兩個選擇當時看來都是自由與進步，卻像複利一樣，在往後的歲月裡不斷生出塞車、污染與隔離的利息。一座城——乃至一個人、一個組織——最難掙脫的，往往不是眼前的困境，而是當年那個看似最自由、最進步的決定，早已替它鋪好的路。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal">
+  <div class="mark">🛣 ✦ ✈</div>
+  <p>公路織成了網，城市攤成了海，洛杉磯把所有人都裝進了同一片無邊的蔓延裡。<br>而就在這張網即將被一場戰爭塞滿之際——工廠日夜趕工，全國的人潮從四面八方湧來——<br><span class="hl">這座城才發現，它把那麼多不同的人裝進了同一片土地，卻從沒想過，該如何讓他們真正住在一起。</span></p>
+</div>
+
+<section id="ch9" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · The Arsenal</span>
+    <h2 class="act-title">兵工廠：飛機、戰爭與一座城的種族火藥</h2>
+    <p class="act-sub">Aerospace, the Great Migration, and the Zoot Suit Riots</p>
+    <div class="ornament">✈ ✦ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>洛杉磯賣過很多種夢——橘子的夢、健康的夢、銀幕上的夢。但在二十世紀中葉，這座城開始製造一種更沉重、也更致命的東西：飛機。當世界滑向第二次世界大戰，那片曾被房地產商說成「永遠陽光普照」的天空，成了人類最龐大的空中兵工廠的試飛場。陽光把這座城吹捧成度假天堂的廣告詞，如今變成了一句冷硬的工業理由——天氣好，所以飛機能整年試飛；地夠空，所以廠房能無限攤開。<em>同一片天空，先賣夢，後造劍。</em></p>
+
+    <h3>陽光底下的飛機廠</h3>
+    <p>早在戰爭之前，南加州就已悄悄聚起了一群造飛機的人。一九二○至三○年代，<strong>道格拉斯飛行器公司（Douglas Aircraft）</strong>在聖塔莫尼卡（Santa Monica）的廠房裡造出了它的客機與軍機；<strong>洛克希德（Lockheed）</strong>落腳於聖費南多谷地的伯班克（Burbank）；<strong>北美航空（North American Aviation）</strong>、以及由那位古怪富豪兼電影製片<strong>霍華·休斯（Howard Hughes）</strong>創立的休斯飛機公司，也都在這片盆地紮下了根。它們看中的東西其實很樸素：常年晴朗、可以全年試飛的氣候；大片平坦、地價尚廉、足以攤開巨型廠房與跑道的土地。航空這門新興工業，需要的正是洛杉磯最不缺的兩樣東西——天空與空間。</p>
+    <p>於是一種奇異的並置出現了：在同一片盆地裡，好萊塢的攝影棚搭著紙板做的歐洲城堡，而幾英里之外，工程師正用鋁與鉚釘拼出真正能上天的機器。夢工廠與兵工廠，比鄰而居。當珍珠港的炮火在一九四一年底把美國拖進戰爭，這群原本還算小眾的飛機廠，一夕之間被推上了國家命運的中心。</p>
+
+    <h3>不眠的廠房</h3>
+    <p>戰爭來了，訂單像潮水一樣湧來。美國需要飛機——數以萬計的轟炸機、戰鬥機、運輸機——而南加州的工廠成了把這個需求變成金屬的地方。廠房日夜不熄燈，生產線分三班輪轉，鉚釘槍的聲響徹夜不停。曾經造民航客機的道格拉斯，如今傾盡全力生產軍機；洛克希德、北美航空也都把產能開到極限。為了躲避想像中的空襲，有些龐大的廠房甚至在屋頂偽裝上假的街道、假的房屋與假的草坪，從空中看去，就像一片尋常的郊區住宅——一座造飛機的城，把自己偽裝成一座住人的城。</p>
+    <p>這場工業總動員，徹底改寫了洛杉磯的經濟底色。它從一座靠橘子、石油、電影與房地產撐起來的城，變成了一座貨真價實的重工業重鎮。航空——日後將與火箭、太空、軍工合流為「航太（aerospace）」——成了南加州往後半個世紀最核心的支柱之一。戰爭結束時，這座城已經不只是夢的產地，更是美國軍事力量的鍛造爐。</p>
+    <div class="pull"><p>陽光把洛杉磯捧成度假天堂的那套說辭，原封不動地變成了它造飛機的理由——這座城最擅長的，就是把同一份地理稟賦，賣給每一個願意付錢的時代。</p></div>
+
+    <h3>從南方來的人</h3>
+    <p>飛機要有人造。海量的軍工訂單，創造了海量的工作機會，而這些工作像一塊巨大的磁鐵，把全國各地的人吸向洛杉磯。其中最具歷史份量的一股人流，來自美國南方的黑人。</p>
+    <p>二十世紀上半葉，數百萬非裔美國人為了逃離南方根深柢固的種族隔離與貧困、為了尋找工廠裡的工作機會，離開故土，向北、向西遷徙——史稱「<strong>大遷徙（the Great Migration）</strong>」。戰時的洛杉磯，正是這股西進浪潮的一個重要終點。軍工廠的好薪水、加州「自由」的想像，吸引著一批又一批黑人家庭跨越半個大陸而來。洛杉磯的黑人人口在戰爭年代急遽增長，他們多半聚居在<strong>中央大道（Central Avenue）</strong>沿線與南洛杉磯一帶——這裡成了西岸黑人文化與商業的心臟，爵士樂的音浪夜夜從俱樂部裡流淌出來。</p>
+    <p>然而，工廠的大門並不是對所有人一樣敞開的。許多軍工廠起初拒絕雇用黑人，或只把他們塞進最低階、最辛苦的崗位。是聯邦層級的反歧視壓力與戰時對人力的極度渴求，才一點一點撬開了一些機會的縫隙。對許多從南方來的人而言，加州確實比他們逃離的地方更好——但它遠不是廣告裡那個沒有膚色之分的應許之地。</p>
+
+    <h3>圈進牆裡的城</h3>
+    <p>人口的暴增，撞上了一道早已存在、卻看不見的牆。在洛杉磯，許多社區的房屋契約裡都寫著「<strong>限制性契約（restrictive covenants）</strong>」——這些條款明文禁止把房屋出售或出租給黑人、亞裔、墨西哥裔等「有色人種」。一張地契，就能把一整片街區劃成「只准白人居住」。於是無論新來的人有多少、口袋裡有多少工資，他們能落腳的地方，都被牢牢框死在城市的某幾個角落。</p>
+    <p>結果是一種殘酷的擠壓：成千上萬的新移民被迫塞進有限的、被允許的街區裡，房屋超載、租金被哄抬、公共設施不堪負荷。城市在地圖上明明還有大片空地，但對某些膚色的人來說，那些空地是禁區。<em>洛杉磯一面向全國招手「來吧，這裡有工作、有陽光、有夢」，一面用一張張地契把來的人圈進不同的圍欄。</em>繁榮是真的，隔離也是真的，而這兩者之間日積月累的張力，正在悄悄變成一桶火藥。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一張地契如何畫出一座種族城市</span>
+      <p>限制性契約是二十世紀美國種族隔離最隱蔽、也最有效的工具之一。它不靠法律明文規定「黑人不准住這裡」——那太顯眼；它靠的是一張張私人之間的房屋契約，由開發商與業主協會自願簽訂、彼此監督執行。一塊街區只要家家戶戶的地契裡都嵌進這一條，這片街區就被「合法地」漂白成單一膚色，而政府的手始終藏在幕後。</p>
+      <p>這種做法的可怕之處，在於它把隔離寫進了財產本身。房子是美國家庭累積財富最主要的方式，而一個被禁止在好地段買房的群體，等於被切斷了世代累積資產的管道。<em>當年的一條契約款，會在幾十年後變成不同社區之間懸殊的房價、學區與財富鴻溝。</em>洛杉磯這座以「人人都能擁有獨棟住宅」為夢想招牌的城，恰恰用最細密的方式，決定了這個夢對誰開放、對誰上鎖——它賣的是同一個夢，發的卻是不同的門票。</p>
+    </div>
+
+    <h3>一九四三年六月的街頭</h3>
+    <p>火藥終於被點燃，是在一九四三年的六月。導火線，是一種衣服。</p>
+    <p>當時，許多墨西哥裔（以及部分非裔、菲律賓裔）的年輕人，喜歡穿一種被稱為「<strong>阻特裝（zoot suit）</strong>」的服飾——寬肩長擺的西裝外套、高腰肥褲、長錶鏈，誇張、招搖、充滿自我宣告的姿態。在戰時布料配給、人人被要求節約的氛圍裡，這身張揚的行頭被一些人視為對國家、對戰爭犧牲的某種不敬與挑釁；它更被疊加上既有的種族偏見，成了「不良少年」的標籤。對穿著它的年輕人而言，這身衣服卻是一種尊嚴、一種身分、一種在處處被矮化的城市裡為自己撐起的姿態。</p>
+    <p>那年六月，洛杉磯街頭的緊張驟然引爆。一連數日，大批美軍士兵與水兵成群結隊湧入市區，搜尋穿著阻特裝的年輕人，將他們攔下、毆打、剝去衣服、當街羞辱。受害者絕大多數是墨西哥裔青少年。而在這場街頭暴力裡，警方的角色尤其令人不安：他們多半袖手旁觀，任由施暴發生；甚至在事後，被逮捕、被起訴的，往往是遭到攻擊的受害者一方，而非動手的士兵。當地一些報紙的渲染與煽動，更為這股暴力火上澆油。這就是後世所稱的「<strong>阻特裝暴動（Zoot Suit Riots）</strong>」。</p>
+    <div class="warn">
+      <div class="warn-tag">警示 · 一九四三 · 阻特裝暴動</div>
+      <p>一九四三年六月，洛杉磯爆發針對少數族裔青年的群體暴力。大批身著軍服的士兵與水兵在街頭攻擊穿著阻特裝的青年——絕大多數為墨西哥裔，亦包括非裔與菲律賓裔——施以毆打與當眾羞辱。執法者多半未加制止，事後遭到逮捕與起訴的，反而常是受害者一方。</p>
+      <p>這場暴力的根源，不在一件衣服，而在戰時人口劇變所放大的種族偏見、媒體的煽動，以及體制對有色族群長期的漠視與排斥。今日回望，它被廣泛視為一場由種族敵意驅動的不義事件。記下它，是為了不讓受害者的遭遇被輕描淡寫，也是為了看清這座城繁榮表象底下的裂縫。</p>
+    </div>
+
+    <h3>消失的小東京，與一個叫 Bronzeville 的名字</h3>
+    <p>幾乎在同一段歲月裡，這座城的另一群人，正經歷著另一種形式的不義。珍珠港事變之後，恐懼與偏見的浪潮席捲全美西岸。一九四二年，依據第 <strong>9066 號行政命令</strong>，西海岸的日裔美國人——其中許多是在美國土生土長的公民——被以「軍事安全」之名，強制驅離家園，遷入內陸的拘禁營。他們被迫在極短時間內變賣或拋下房屋、商店、農場與一生的積累，只能帶著隨身行李離開。</p>
+    <p>洛杉磯市中心一隅的<strong>小東京（Little Tokyo）</strong>，是當時西岸最重要的日裔社區之一。隨著居民被一夕拘走，這片街區幾乎在一夜之間人去樓空。但城市的房荒不會等人——被限制性契約圈住、又因戰時工作潮不斷湧入的黑人勞工，正苦於無處可住。於是這片騰空的街區迅速被填滿，一度被稱為「<strong>Bronzeville</strong>」，成了黑人社區。等到戰爭結束、被拘禁的日裔陸續獲釋返鄉，他們回到的，已是一個面貌全然改變、住著另一群同樣被城市排擠之人的故里。</p>
+    <p>這是一幅意味深長、也格外沉重的畫面：<em>同一片屋簷下，兩個不同的族群，先後被同一座城市的偏見推來搡去。</em>一群人被趕走，騰出的空間立刻被另一群同樣無處可去的人填上——他們彼此並無宿怨，卻共同被一張看不見的種族地理之網，安排了各自的位置。小東京與 Bronzeville 在同一塊街區上的交疊，是這座戰時之城最赤裸的一道切片。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 繁榮從不平均落地</span>
+      <p>第二次世界大戰把洛杉磯推上了工業的頂峰。它成了美國的空中兵工廠，飛機從這片陽光下的廠房裡源源不絕地飛出，全國各色人種被戰時的好工作裝進了這座不斷向外蔓延的城。論產值、論人口、論在國家機器中的份量，這都是洛杉磯前所未有的鼎盛時刻。但一座城的繁榮，從來不是均勻地灑在每一個人頭上的——它落地時，會沿著早已劃好的種族界線，把財富、安全與尊嚴分配得極不平等。</p>
+      <p>這裡藏著一個被反覆驗證的道理：<strong>增長能讓一座城更大、更富，卻不會自動讓它更公平。</strong>當一張地契就能決定一個家庭能不能買房、累不累得起財富，當穿一件衣服就可能招來街頭的拳頭，繁榮便成了一種有門檻的東西。一九四三年那幾個夜晚的街頭火光，是這座「多元卻分裂」之城的第一次正式預警——它告訴所有願意看的人：被圈進不同圍欄裡的怒火，正在無聲地累積。這道裂縫沒有隨戰爭結束而癒合，它只是被壓住、被推遲。<em>一九六五年的瓦茨，與一九九二年的更大一場火，都早已在這幾個夏夜裡，埋下了引信。</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">✈ ✦ 🗺</div>
+  <p>戰爭把全國各色人種，一齊裝進了這座向四面攤開的蔓城——<br>可城市用一張張地契、一條條紅線，把他們圈進了各自的角落。<br><span class="hl">讓我們攤開這張地圖，看清這座城究竟住著哪些「不同的洛杉磯」。</span></p>
+</div>
+
+<section id="ch10" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Many L.A.s</span>
+    <h2 class="act-title">許多個洛杉磯：一座城裡的數座城</h2>
+    <p class="act-sub">Black L.A., Brown L.A., and the Geography of Segregation</p>
+    <div class="ornament">🗺 ✦ 🏘</div>
+  </div>
+  <div class="prose">
+    <p>如果你把一張洛杉磯的地圖攤在桌上，光看那些蔓延無際、彼此咬合的街區，你會以為這是一座城。但若你能在這張地圖上，替每一個街區的居民塗上他們的膚色、他們的母語、他們祖先渡海或越境的路線——你會看見的，其實不是一座城，而是<em>許多座城</em>，緊緊地、卻又涇渭分明地擠在同一片陽光底下。洛杉磯一向以「多元」自豪，這是真的：它是全美種族、語言、文化最豐富的大都會之一。但「多元」這個漂亮的詞，藏起了一個更冷硬的事實——<strong>多元與隔離，在這裡是並存的</strong>。不同的人來到了同一座城，卻被劃進了不同的地理。</p>
+
+    <h3>黑人洛杉磯：中央大道上的爵士樂</h3>
+    <p>讓我們先沿著一條街走。這條街叫<strong>中央大道（Central Avenue）</strong>，它南北縱貫南洛杉磯。二十世紀上半葉，當「大遷徙」把成千上萬南方的非裔美國人推向北方與西岸的工廠，洛杉磯是他們的目的地之一。他們躲開了南方的種族隔離法，卻在這座號稱自由的西岸之城，發現自己同樣被一道無形的線圈了起來——能買房、能租屋的地方，被限制在特定的幾個街區裡。於是中央大道一帶，成了黑人洛杉磯的心臟。</p>
+    <p>被圈住的社區，往往在圍牆之內長出最旺盛的生命力。一九二○到四○年代，中央大道是<em>美國西岸的爵士樂重鎮</em>。沿街的俱樂部、劇院與旅館裡，夜夜有樂聲。那座著名的<strong>都柏旅館（Hotel Dunbar）</strong>，是黑人音樂家與名流落腳的所在——因為城裡多數高級旅館不接待他們。在這條街上，被主流社會拒之門外的人們，自己造出了一個璀璨的世界。這是隔離最殘酷的悖論：<em>它一面剝奪，一面卻意外地鍛造出一種濃烈而自足的社區文化。</em>後來人們用「South Central（南中央）」這個名字來代稱黑人洛杉磯——它既是一個地理座標，也是一個族群被安放的位置。</p>
+
+    <h3>棕色洛杉磯：東邊那座最古老的城</h3>
+    <p>把目光移向城市的東邊。穿過洛杉磯河，便是<strong>東洛杉磯（East L.A.）</strong>——全美最大的墨西哥裔聚居區之一。這個社區的根，比這座城作為美國城市的歷史還要老。別忘了，洛杉磯原本就是西班牙人建的傳教站，是墨西哥的領土；它最初的名字、最初的街道、最初的居民，都說西班牙語（呼應本篇第一、二章）。一八四八年美墨戰爭後，加州易主，原本的主人一夕成了異鄉人。墨西哥裔並沒有從這座城消失——他們始終在這裡，是這座城最古老的血脈。</p>
+    <p>但「最古老」不等於「最被善待」。隨著盎格魯白人主導的洛杉磯急速擴張，墨西哥裔被一步步推向城市的邊緣與內陸——東洛杉磯、博伊爾高地（Boyle Heights）一帶。他們承接了這座城最深的西語根，卻長期在政治、經濟與文化上被邊緣化，被當成廉價勞動力，被擋在某些街區之外。<em>一個族群可以是一塊土地最早的居民，卻在自己的故土上，被劃成了客人。</em>東洛杉磯就是這個矛盾的具象——它是奇卡諾（Chicano）文化的搖籃，是壁畫、音樂與抗爭精神的源頭，也是一座被主流洛杉磯長期忽視的城中之城。</p>
+    <div class="pull"><p>同一座城，可以同時是某些人的天堂與另一些人的圍城。洛杉磯向世界兜售「人人都能追夢」的形象，但這張夢的地圖，對不同膚色的人開放的程度，天差地別。</p></div>
+
+    <h3>無數塊飛地拼成的馬賽克</h3>
+    <p>黑人洛杉磯與棕色洛杉磯，只是這幅巨大馬賽克裡的兩塊。把鏡頭拉遠，你會看見更多的「城中之城」。市中心邊上的<strong>小東京（Little Tokyo）</strong>，是日裔美國人的社區，在二戰拘禁的創傷之後重新立起（這道傷口，本篇上一章已經寫過）。它的西邊，<strong>韓國城（Koreatown）</strong>在戰後逐漸成形——尤其是一九六五年那部廢除種族配額、重開亞洲移民大門的移民法之後，韓裔人口快速壯大，把幾條街區變成了太平洋彼岸文化的飛地。再加上來自中國、菲律賓、越南、薩爾瓦多、瓜地馬拉……世界各地的人，在這座蔓城裡各自圈起一塊塊街區，說著各自的語言，開著各自的店鋪，過著各自的節慶。</p>
+    <p>於是洛杉磯成了一個奇特的存在：它是<strong>一座由無數族裔飛地（enclave）拼貼而成的馬賽克</strong>。每一塊瓷磚都鮮明、自足、各有光彩；但瓷磚與瓷磚之間，是真實存在的邊界。人們同住一城，日日擦肩，卻常常生活在彼此不太進入的平行世界裡。多元，是這些瓷磚的總和之美；隔離，是瓷磚之間那一道道看不見、卻無比堅硬的縫。</p>
+
+    <h3>織網的手：紅線、契約、學區與高速公路</h3>
+    <p>這些縫不是自然長出來的，也不是各族群「自願選擇」的結果。它們是被一隻隻看不見的手，刻意織出來的。要讀懂「許多個洛杉磯」，就得看懂這張網是怎麼編成的。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 種族地理是怎麼被造出來的</span>
+      <p>第一根線是<strong>限制性契約（restrictive covenants）</strong>。在二十世紀上半葉，許多房產的地契裡白紙黑字寫著：此屋不得出售或出租給非白人。這不是私下的默契，而是有法律效力的條款，把有色人種<em>合法地</em>擋在大片街區之外。一九四八年，美國最高法院裁定這類契約不得由法院強制執行，但其影響早已滲入這座城的骨架，並以更隱蔽的方式延續。</p>
+      <p>第二根線是<strong>紅線（redlining）</strong>。一九三○年代，聯邦支持的房貸機構為各城市的街區評等、繪製地圖，把黑人與其他少數族裔聚居的區域，用紅色圈起，標為「高風險」、拒絕放貸。一條紅線，就斷了一整個社區累積資產、改善房屋、向上流動的金融命脈。白人家庭能靠低利房貸買房、讓財富隨房價增值代代相傳；被紅線圈住的家庭，連起跑線都站不上。<em>這是一條決定了「誰能累積財富、誰被困在原地」的線</em>，它的陰影綿延至今。</p>
+      <p>第三、第四根線，是<strong>學區</strong>與<strong>高速公路</strong>。學校經費與房產稅綁定，於是隔離的居住地圖，直接複製成隔離的教育地圖——窮街區的孩子，上的是窮學校。而當二十世紀中葉高速公路網大舉鋪開，那些寬闊的混凝土巨帶，往往被刻意劃過、甚至硬生生切開有色人種的社區：拆掉他們的房子，斬斷他們的街道，把一個原本完整的社區攔腰截斷。高速公路一面餵養著郊區白人的通勤生活，一面碾過了城中有色社區的肌理。</p>
+    </div>
+    <p>把這四根線——紅線、限制性契約、學區、高速公路——疊在一起，你就得到一張看不見、卻無比真實的<strong>種族地理網</strong>。它不在任何一張官方地圖上標出顏色，卻精準地決定了：誰住在哪裡，誰能讀好學校，誰能買得起房、讓財富滾雪球，而誰被困在被斷了金流、切碎了街區、辦不好學校的地方，動彈不得。隔離從來不只是「住得分開」這麼簡單；它是一台把不平等代代複製下去的機器。</p>
+
+    <div class="twocol">
+      <div>
+        <div class="minihead">明信片上的洛杉磯</div>
+        <p style="text-align:left;font-size:.96rem">棕櫚樹、海灘、好萊塢、永遠的陽光。城市向全世界兜售一個承諾——只要你來，就能重新開始，就能追到你的夢。這是賣給移民、賣給全美、賣給全世界的形象。</p>
+      </div>
+      <div>
+        <div class="minihead">地圖上的洛杉磯</div>
+        <p style="text-align:left;font-size:.96rem">同一座城，被紅線、契約與高速公路劃成一塊塊。你的膚色，很大程度決定了你能住進哪一塊、能不能離開、能累積多少。夢的大門，對不同的人，開的縫隙寬窄不一。</p>
+      </div>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 兩張並不重合的地圖</span>
+      <p>洛杉磯這座城最深的張力，在於它同時存在著兩張地圖。一張是它賣給世界的<strong>明信片地圖</strong>：陽光、海灘、夢工廠，「人人都能在這裡重新開始」。另一張，是寫在地契、貸款評等與高速公路路線裡的<strong>種族地圖</strong>：它默默規定了，這個「人人」當中，誰能真正走進那扇夢之門，而誰只能隔著一道看不見的牆，望著別人的天堂。一座賣夢的城，最諷刺也最沉重的真相，就是它的夢從來不是對所有人均等地開放。</p>
+      <p>這裡藏著一個遠超洛杉磯的道理：<em>真正塑造一個社會命運的，往往不是寫在憲法與宣傳裡的「機會平等」，而是那些不被言說、卻被精密設計進制度肌理的線</em>——你住在地圖的哪一格，常常比你多努力，更能決定你的下一代會擁有什麼。隔離最可怕之處，不是它一時的不公，而是它把不公變成了可以複利滾動、代代相傳的結構。明信片會褪色，但地圖上的那些線，會活得很久很久。</p>
+    </div>
+
+    <p>於是我們攤開了「許多個洛杉磯」的地圖。它告訴我們，這座城從來不是鐵板一塊的單數，而是被一道道線切割開的複數。讀懂了這張地圖——讀懂了誰被圈在哪裡、為什麼被圈、被圈住的人在牆內如何既璀璨又窒息——我們才有資格走向接下來那兩個章節。因為當一座城把怒火、貧窮與不義，連同一群人一起圈進高牆之內，牆，終究是關不住火的。</p>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">🗺 ✦ 🔥</div>
+  <p>地圖上的線是安靜的，安靜到讓城市以為它們不存在。<br>但被圈住的，從來不只是一群人——還有他們積壓了數十年的怒火。<br><span class="hl">一九六五年的某個夏夜，在南洛杉磯一個叫瓦茨的街區，這團被圈住的怒火，第一次燒上了天。</span></p>
+</div>
+
+<section id="ch11" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · Watts, 1965</span>
+    <h2 class="act-title">瓦茨：被圈住的怒火</h2>
+    <p class="act-sub">The Watts Uprising and the Long Shadow of the Line</p>
+    <div class="ornament">🔥 ✦ ✊</div>
+  </div>
+  <div class="prose">
+    <p>那是一九六五年八月十一日，盛夏的傍晚，南洛杉磯（South Los Angeles）燠熱得讓人透不過氣。瓦茨（Watts）一帶的街道上，一切看起來都和任何一個普通的夏夜沒有兩樣——孩子還在外頭玩，雜貨店亮著燈，柏油路面蒸著一整天積下來的暑氣。那天傍晚，一名加州公路巡警在這一帶攔下了一輛被懷疑酒駕的車。這是一次再尋常不過的路邊攔檢，全美國的城市，每一個夜晚都在發生千百次。沒有人會想到，就是這樣一次尋常的攔檢，會成為一根引信，點燃一座城藏了太久、壓了太深的怒火。</p>
+
+    <h3>一次攔檢，點燃六天</h3>
+    <p>攔檢的細節，後來在無數調查、報導與回憶裡被反覆陳述，版本與角度各不相同。能確定的是：盤查很快變了調。被攔下的駕駛、聞訊趕來的家人、以及越聚越多的圍觀群眾，與警方之間的氣氛迅速緊繃。推擠、爭執、然後是肢體衝突。圍觀的人群越來越大，傳言比事實跑得更快——在這個對警察早已積滿不信任的社區裡，一場路邊衝突，被瞬間讀成了又一次羞辱與壓迫的證據。</p>
+    <p>那一晚，怒火沒有熄。它在街區之間蔓延開來，並在接下來的日子裡迅速擴大，演成了一場持續約莫六天、波及南洛杉磯廣大街區的大規模動亂。商店被砸、被搶、被縱火，整條街陷入火海與濃煙；警方與隨後開進來的國民兵（National Guard）試圖封鎖、戒嚴、鎮壓。當煙終於散去，根據官方統計，這場事件約有三十四人喪生，逾千人受傷，數千人被逮捕，大片街區被焚成焦土，財產損失以千萬美元計。這是當時美國現代史上最嚴重的城市動亂之一。</p>
+    <div class="warn">
+      <div class="warn-tag">警示 · 一個社區的六天</div>
+      <p>本章所述的傷亡與毀壞，採自當年官方與後續調查的統計：約三十四人喪生、上千人受傷、數千人被捕、大片南洛杉磯街區被焚。這些數字背後，是一個個真實的人——喪命者、失去店面與家園者、在恐懼中度過六個夜晚的居民。本書記下這場事件，不為獵奇，不替任何一方宣傳，只為理解：一座城的怒火，從來不是憑空燒起來的。</p>
+    </div>
+
+    <h3>引信只是引信：火藥早已堆滿</h3>
+    <p>若只看那次攔檢，瓦茨像是一場偶發的意外。但歷史很少這樣讀。一次攔檢能點燃六天的大火，前提是火藥早已堆滿了整個房間——而堆下這些火藥的，是上一章寫過的那張「看不見的種族地理網」。</p>
+    <p>瓦茨所在的南洛杉磯，正是大遷徙（Great Migration）以來非裔聚居的核心地帶。限制性契約（restrictive covenants）與紅線（redlining）把黑人居民圈進特定街區；即使限制性契約在一九四八年已被聯邦最高法院判定不可由法院強制執行，種族隔離的格局卻早已透過慣例、歧視與恐懼牢牢固定下來。被圈住的，不只是地理——還有機會。工作機會隨著工廠與白人中產一起遷往郊區，留下來的社區面對的是更高的失業、更低的薪資、更擁擠惡劣的居住條件，以及一所所被資源拋下的學校。陽光天堂的明信片，從不寄到這裡。</p>
+    <p>而最尖銳的那道摩擦，落在社區與警力之間。當時的洛杉磯警局幾乎是一支全白的隊伍，奉行強硬、軍事化的執法風格；而它日復一日巡邏、盤查、執法的對象，卻是一個它幾乎不屬於、也不信任的黑人社區。對許多瓦茨居民而言，警察不是來保護他們的，而是來管束他們的——是這道「被圈住」的牆，最日常、最具體、最常出現在街角的那張臉。日積月累的盤查、羞辱與無處申訴的委屈，把不信任熬成了仇恨。攔檢只是引信，火藥是結構性的不義。</p>
+    <div class="pull"><p>一次攔檢之所以能燒掉半個南洛杉磯，不是因為那次攔檢有多特殊，而是因為火藥早已堆滿了整個房間——堆火藥的，是幾十年來那道把人圈住、把機會關在門外的線。</p></div>
+
+    <h3>火，是誰的火</h3>
+    <p>要誠實地寫下瓦茨，必須同時握住幾種彼此拉扯的真實，不偏廢任何一邊。</p>
+    <p>一邊是這場怒火的根源：一個被長期隔離、貧困、歧視與警民對立壓到喘不過氣的社區，在那六天裡，把幾十年積壓的絕望與憤怒，一次性地吐了出來。對許多親歷者與後來的研究者而言，這不只是一場「暴動」（riot），更是一場「起義」（uprising）、一聲不再忍耐的吶喊——當所有正常的申訴管道都被堵死，當年復一年的不公得不到任何回應，憤怒便會自己找出口。火，是說不出口的話，用最極端的方式喊了出來。</p>
+    <p>但另一邊同樣真實、同樣不能迴避：這場火，燒毀最多的，正是社區自己。被焚的商店、被搶的店面、化為焦土的街區，大多就坐落在瓦茨居民每天生活、購物、賴以為生的地方。三十多條人命的逝去，是真實的悲劇。動亂沒有換來更好的學校、更多的工作或更公平的對待；它留下的，是更深的創傷、更殘破的街景、以及一個更難重建的社區。把它簡化為「暴民作亂」固然失之刻薄、抹去了背後的結構性不義；但反過來把暴力浪漫化、當成乾淨俐落的解放，也同樣失真——它忽略了那些在火裡失去生命、失去家業的人。</p>
+    <p>歷史的莊重，正在於同時容得下這兩種真實：火的根源值得被理解、被嚴肅對待；而火本身的代價，也必須被誠實地記下。理解不等於美化，記下代價也不等於否認根源。</p>
+
+    <h3>麥康委員會：看見了病根，卻沒拆掉那道牆</h3>
+    <p>動亂平息後，加州州長指派了一個調查委員會，由前中央情報局局長約翰·麥康（John McCone）領銜，史稱「麥康委員會」（McCone Commission）。委員會走訪、聽證、調查，最後提出了一份報告。</p>
+    <p>這份報告的可貴之處在於：它並沒有把瓦茨單純歸咎為一小撮「暴徒」的胡作非為，而是相當清楚地指出了火藥的真正成分——盤桓不去的貧窮、居高不下的失業、惡劣的居住條件、不足的教育與交通，以及社區與警方之間深刻的不信任。它看見了病根。然而，報告的診斷雖然切中要害，後續的實質改變卻遠遠跟不上。建議停留在紙上的多，化為政策與資源的少；那道把人圈住的牆，那張製造種族地理的網，並沒有因為一份報告而被拆掉。委員會看見了結構，城市卻沒有改造結構。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 清理灰燼，不等於拆牆</span>
+      <p>瓦茨留下的最深一課，與其說是關於那六天的火，不如說是關於火之後的選擇。一座城在災難之後，永遠面對兩種工作：一種是<strong>清理灰燼</strong>——修復街道、重建店面、撫平表面、讓城市看起來恢復如常；另一種是<strong>拆掉那道造成怒火的牆</strong>——改造製造了貧窮、隔離與對立的結構本身。前者容易、見效快、皆大歡喜；後者艱難、昂貴、要動到既得利益，於是常被無限期推遲。</p>
+      <p>麥康委員會指出了牆在哪裡，洛杉磯卻只清理了灰燼。這對應一個殘酷而普遍的道理：<em>當一個系統只處理症狀、不觸碰病灶，問題不會消失，只會潛伏——並在下一次積累到臨界點時，以更大的規模重新爆發。</em>火藥還在，引信還在，牆也還在。看懂了這一點，就會明白：瓦茨不是一個結束，而是一個被忽視的警告。</p>
+    </div>
+
+    <h3>燒穿明信片的那道光</h3>
+    <p>在瓦茨之前，洛杉磯向全世界兜售的，是一張幾近完美的明信片：永遠的陽光、棕櫚樹、好萊塢、人人都能在這裡重新開始的應許之地。這座賣夢的城，太擅長把難堪的東西藏到鏡頭之外——藏到分區地圖的另一側，藏到高速公路劃過的那道線後面，藏到明信片不會寄到的街區裡。</p>
+    <p>瓦茨的火，把這張明信片燒穿了一個洞。透過那個焦黑的洞口，全美國、乃至全世界，第一次被迫看見了洛杉磯藏起來的另一半——那個在陽光天堂的陰影裡，被圈住、被遺忘、被壓抑了太久的洛杉磯。一座靠賣夢起家的城，終於在自己點燃的火光裡，看見了夢沒能照進的角落。</p>
+    <div class="aside"><span class="hl">一座城最難承認的，</span><em>往往不是它沒做到的夢，而是它一直假裝不存在的那一半自己。瓦茨的火，逼洛杉磯照了一次鏡子——只是它很快又把鏡子蓋了起來。</em></div>
+    <p>然而，看見，不等於改變。火光過後，明信片被重新修補，陽光照常升起，城市繼續向世界兜售它的夢。結構未改，火藥未清，那道牆依舊矗立。於是這道傷口並沒有癒合，它只是結了一層薄薄的痂，潛伏下來——並將在二十七年後，於一九九二年，以更大的規模、更慘烈的方式，再一次炸開。</p>
+    <div class="pull"><p>一座城若只清理灰燼、不拆掉造成怒火的牆，火就一定會再來。瓦茨燒過一次，城市選擇遺忘；於是火，記住了回來的路。</p></div>
+
+    <p>這，正是瓦茨真正的長影。它讓我們看清：洛杉磯這座「無中生有」的奇蹟之城，它的偉大，從來不是均勻地分給每一個人的。它偷別處的水、賣動人的夢、把成本轉嫁給看不見的他方與後來的人——而被轉嫁的，不只有歐文斯谷乾涸的湖、不只有盆地裡日益渾濁的空氣，還有那些被圈進南洛杉磯、領不到那份夢、卻要替整座城的繁榮埋單的人。陽光天堂的帳，一筆記在它的水與空氣裡，另一筆，記在它的圍牆與街角裡。兩筆帳，遲早都要到期。</p>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">🔥 ✦ 🧾</div>
+  <p>火終於熄了，明信片被重新貼好，陽光照常升起。<br>但這座賣夢的城，欠下的帳不只記在它的圍牆與街角——<br><span class="hl">還有更早就開始累積的另一筆，正寫在它呼吸的空氣，與它偷來的水裡。</span></p>
+</div>
+
+<section id="ch12" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Bill Comes Due</span>
+    <h2 class="act-title">天堂的帳單：煙霾、乾涸與透支的未來</h2>
+    <p class="act-sub">Smog, the Drying Valleys, and the Ecological Ledger</p>
+    <div class="ornament">🌫 ✦ 🧾</div>
+  </div>
+  <div class="prose">
+    <p>每一座靠意志違逆地理而建起的城，都在偷偷記著一本帳。這本帳不寫在市政廳的財報裡，也不掛在房地產商的廣告看板上。它記在天空的顏色裡，記在一座乾涸湖床揚起的鹽塵裡，記在三百公里外那條被抽乾的河谷的沉默裡。洛杉磯花了將近一個世紀，賣力地把一片半乾旱的沙漠，變成全世界都嚮往的花園與夢工廠。可花園需要水，夢需要呼吸，而水與空氣，遲早是要有人結帳的。</p>
+    <p>前面十一章寫的，幾乎全是洛杉磯如何「無中生有」——把遠方的水引來、把腳下的油抽出、把空白的膠片變成黃金、把無邊的郊區攤成一座城。這一章要翻到帳本的另一頁，看看這場奇蹟的<em>成本</em>，究竟被記在了哪裡。答案令人不安：它大多沒有被當場付清，而是被遞延、被外部化、被悄悄轉嫁給了別處的人，與未來的人。</p>
+
+    <h3>棕色的天空：一座城被自己的呼吸嗆到</h3>
+    <p>一九四三年的一個夏日，洛杉磯市區突然陷入一片刺鼻的灰棕色濃霧裡。人們眼睛刺痛、喉嚨灼燒，能見度驟降到只剩幾個街區。在那個太平洋戰爭正酣的年頭，許多市民的第一反應是恐慌——他們以為這是日軍發動的某種化學毒氣攻擊。直到濃霧一次又一次回來，人們才慢慢明白，敵人不在海的那一頭，而在自己的車庫裡、自己的後院上空。這團東西後來有了一個名字：<strong>洛杉磯煙霾（smog）</strong>。</p>
+    <p>它的成因，幾乎是為洛杉磯量身打造的一場災難。回到第八章寫過的那座蔓城——數百萬輛汽車在無邊的高速公路網上日夜奔流，排出大量的廢氣；南加州幾乎終年不散的烈日，把這些廢氣在空氣中催化成一種全新的污染物——<strong>光化學煙霧（photochemical smog）</strong>，其中的臭氧與氧化物正是刺眼傷肺的元兇。而洛杉磯的盆地地形，三面環山、向海敞開，又常被一層溫暖的「逆溫層」像鍋蓋一樣扣住，把髒空氣牢牢悶在城市上空，散不出去。<em>陽光、汽車、盆地——這三樣讓洛杉磯成為人間天堂的條件，恰好也是讓它成為全美煙霾最毒之城的配方。</em></p>
+    <p>從一九四○年代到一九七○年代，這層棕色的天空時好時壞，最嚴重時學校會發出「煙霾警報」，叫孩子們別在戶外奔跑，叫患有肺病與心臟病的人留在屋裡。陽光之城最諷刺的真相，是它的居民有時連好好呼吸一口它賴以聞名的空氣，都成了奢侈。這座靠著「賣陽光、賣健康氣候」吸引全美移民的城（第六章那些療養與柑橘廣告言猶在耳），如今竟被自己賣出去的那份陽光，催化成了一座毒氣之城。</p>
+    <div class="pull"><p>它曾向全美兜售自己純淨的陽光與宜人的氣候——而正是同一片陽光，把這座城呼出的廢氣，烤成了懸在頭頂、揮之不去的棕色毒霧。</p></div>
+
+    <h3>被代價逼出來的改革</h3>
+    <p>然而，洛杉磯的煙霾故事，並不只是一則關於污染的悲歌。它還是一則關於「被自己的代價逼著改革」的故事，而這正是這本生態帳本裡，少有的、帶著光的一頁。</p>
+    <p>正因為這裡的空氣壞到無可迴避、壞到家家戶戶切膚之痛，洛杉磯與加州被迫成了全美對抗空氣污染的先鋒。早在一九四〇年代末，洛杉磯郡便設立了專責機構處理空污；加州理工學院的化學家亞瑞·哈根-斯密特（Arie Haagen-Smit）在五〇年代解開了光化學煙霧的成因，第一次科學地指認出汽車廢氣與陽光是禍首，把一個模糊的城市怨氣，變成了可以被立法對付的具體目標。到了一九六〇年代，加州率先要求新車裝設廢氣控制裝置，走在聯邦政府前頭。</p>
+    <p>這份「先行者」的地位後來被寫進了制度：當一九七〇年聯邦《清潔空氣法》（Clean Air Act）確立全國標準時，加州因為它獨一無二的空污歷史與既有法規，獲得了一項特殊豁免——它可以制定<strong>比聯邦更嚴格的</strong>自有排放標準。於是加州的車輛排放規範，數十年來一直是全美最嚴的那一把尺；因為加州的汽車市場太過龐大，車廠往往乾脆按加州標準造車，使得這把尺實際上牽動了整個美國、乃至全球車廠的工程選擇。<em>一座被廢氣嗆到幾乎窒息的城，最終把自己的痛，淬煉成了全國環保立法的標竿。</em></p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 危機如何反推出進步</span>
+      <p>有一類進步，並非源於遠見，而是源於痛到無路可退。洛杉磯不是因為高尚才率先治理空污，而是因為它的天空壞得最早、最徹底，逼得它不得不第一個動手。它沒有「選擇」當環保先鋒，是被自己親手釀出的代價，推到了那個位置上。這是一種苦澀的領先——<strong>痛得最深的地方，往往最先學會療傷的方法，而這套方法，再回頭惠及那些痛得還不夠深、尚不肯改變的人。</strong></p>
+      <p>這背後是一條普遍的規律：當一個系統把成本累積到某個臨界點，改革就不再是道德議題，而是生存議題。洛杉磯的可貴，不在於它沒犯錯——它犯的錯巨大而明顯；而在於當帳單以煙霾的形式拍在臉上時，它沒有別過頭去，而是動手改寫了規則。<em>奇蹟會帶來帳單，但一座城是否值得敬重，要看它收到帳單之後，是裝作沒看見，還是真的開始償還。</em></p>
+    </div>
+
+    <h3>乾涸的湖床：一筆遲到的水帳</h3>
+    <p>如果煙霾是洛杉磯燒掉的那份「共有的空氣」之帳，那麼水的帳，則更早、也更遠地被記了下來——而且那筆帳，並非記在洛杉磯自己身上，而是記在三百公里外一座它親手抽乾的山谷裡。</p>
+    <p>回到第五章那條由穆赫蘭築成、靠重力把歐文斯谷（Owens Valley）之水穿越沙漠送進城裡的水道。當水被引走，歐文斯湖（Owens Lake）這座曾經寬廣的內陸湖泊，便一年年退縮、見底，最終乾涸成一片白茫茫的鹽鹼湖床。問題並未隨著湖水的消失而消失，反而以另一種形式回來討債：每當大風掠過這片乾涸的湖床，便捲起漫天的鹽鹼粉塵，其中含有對人體有害的細微顆粒。歐文斯湖一度被指為全美最嚴重的揚塵污染源之一，下風處居民的呼吸健康深受其害。</p>
+    <p>那座因為洛杉磯而乾涸的湖，最終以塵暴的方式，把帳單寄了回來。在後來的數十年裡，洛杉磯的水務部門被迫投入極為龐大的金錢與工程，去馴服這片它親手造出的揚塵之地——以淺水覆蓋、植被固塵、鋪設礫石等種種辦法，年復一年地壓制那片不肯安靜的鹽塵。<em>當年「There it is. Take it.（水到了，拿去吧。）」那句傳世名言裡，被一筆勾銷的成本，原來只是被遞延了大半個世紀，如今連本帶利，分期償還。</em></p>
+    <div class="pull"><p>它曾把一座山谷的水悄悄買斷、運走，卻買不斷那片乾涸湖床的記憶——幾十年後，鹽塵化作風暴，把當年那筆勾銷的帳，一陣陣吹回洛杉磯的良心裡。</p></div>
+    <p>歐文斯谷的水仍嫌不足，洛杉磯又把手伸向了更北、更高處的莫諾湖（Mono Lake）盆地，引走它支流的溪水。莫諾湖的水位也隨之下降，生態受損，引發了長年的訴訟與抗爭。經過環保團體鍥而不捨的法律奮鬥，加州最終確立了取水的限制，要求洛杉磯讓莫諾湖的水位回復到一定高度——這成了美國環境法上一個重要的里程碑，把「就算合法擁有水權，也不能把一個生態系統用乾」這條原則，寫進了判例裡。</p>
+
+    <h3>越借越大的水癮</h3>
+    <p>與此同時，這座城對水的胃口從未停止膨脹。歐文斯谷、莫諾湖之外，洛杉磯與整個南加州越來越深地依賴兩條更遠的生命線：東邊的<strong>科羅拉多河（Colorado River）</strong>，與北方的<strong>北加州調水工程</strong>——把濕潤的北加州之水，靠龐大的渠道與抽水站，一路翻山越嶺送到乾渴的南方。把第五章那個「借水度日」的隱喻放大到極致：今天的洛杉磯，是一座靠著一整套橫跨數百公里、抽取數條河流的調水體系才得以續命的城。它喝的每一口水，幾乎都來自別處。</p>
+    <p>這是一種規模驚人的依賴。它意味著洛杉磯的命運，與遙遠的內華達山脈積雪厚薄、與科羅拉多河水位高低、與整個美國西南部是否乾旱，被牢牢綁在了一起。當西部進入長期乾旱、當科羅拉多河的水位降到歷史低點、當各州為日益稀缺的河水爭執不休，這座沙漠巨城那份「借水度日」的脆弱，便一次次被攤在陽光下。<em>它把養活自己的能力，抵押給了三百公里、五百公里外的雪與河——而那些雪與河，並不為它一座城而下、而流。</em></p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把帳單寄給遠方與未來</span>
+      <p>洛杉磯這場「無中生有」的奇蹟，拆到最底層，是一套精巧的<strong>成本轉嫁術</strong>。它偷別處的水——把成本轉嫁給歐文斯谷的農民與那片乾涸的湖；它燒掉共有的空氣——把成本轉嫁給每一個被迫吸進棕色天空的肺；它向未來借支環境的額度——把成本轉嫁給後代、給尚未誕生就已欠下水債與碳債的人。奇蹟從來不是免費的，它只是把帳單，寄去了一個當下看不見、當下不必付的地址。</p>
+      <p>這就是「外部化」最深的詭計：它讓得利者與付費者，在空間上、在時間上被巧妙地隔開，於是繁榮顯得像是憑空生出的禮物。但帳本是守恆的。歐文斯湖的鹽塵會吹回來，乾旱的河會逼著限水，棕色的天空會嗆進孩子的肺——遞延的帳，終究會找到它的債主。<em>一切看似「無中生有」的奇蹟，本質上都是「把成本移到別處」的魔術；而魔術會散場，移走的成本，遲早會循著某條看不見的線，回到它真正的源頭。</em></p>
+    </div>
+
+    <h3>偉大與透支，是同一件事的兩面</h3>
+    <p>把這一整章的帳合起來看，會浮現一個令人五味雜陳的真相：洛杉磯的<strong>偉大</strong>，與它的<strong>透支</strong>，根本就是同一件事的兩面。讓它從半乾旱的荒地長成全美第二大城的那股力量——那種「不肯認命、人定勝天、要把沙漠變成花園」的意志——正是同一股力量，讓它抽乾了一座湖、染棕了一片天、透支了一份它本不該獨享的環境額度。你無法只要那份輝煌，而不要這份帳單；它們是同一筆交易的兩端。</p>
+    <p>可這個故事並不全然是黑暗的。恰恰因為代價如此慘重、如此切膚，洛杉磯與加州被逼成了全球環保與清潔能源法規的領頭羊——從最嚴格的車輛排放標準，到日後在推動電動車、再生能源與氣候立法上的全國先行。它治理歐文斯湖揚塵的巨額投入，它在莫諾湖案上被法律重新校正的水權觀念，都是危機反推出來的進步。<em>這座城一邊欠著最大的生態債，一邊也在最賣力地學習如何償還——它既是問題最尖銳的範本，也是解法最前沿的試驗場。</em></p>
+    <p>所以洛杉磯最終學到的，或許是一句樸素到近乎殘酷的道理：<strong>人確實可以在沙漠裡造出一座花園——但澆那座花園的水，與在花園裡呼吸的空氣，遲早要有人結帳。</strong>它用一個世紀證明了人的意志可以違逆地理；又用同一個世紀證明了，違逆地理從來不是免費的，只是帳單來得晚一些、繞得遠一些。天堂是真的，帳單也是真的，而這座城最深刻的成熟，是它終於開始正視：兩者，本就是一體。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 沒有一座奇蹟之城，逃得過結帳</span>
+      <p>每一座靠意志違逆地理而造出的城，都在偷偷記著一本生態的帳。洛杉磯只是把這件事做到了極致——它在一片養不起大城的土地上，硬生生變出了全美第二大城，於是它欠下的帳，也比誰都來得龐大、來得醒目。它的偉大有多麼不可思議，它的透支就有多麼深。這不是它的失敗，這是它的本質：<strong>奇蹟與帳單，從來是同一枚硬幣的正反面。</strong></p>
+      <p>而這條道理，遠不止於一座城。任何把成本遞延、把代價外部化、靠著「向遠方與未來借支」來成就眼前繁榮的系統——無論是一座城、一個產業，還是一整個時代——都在記著同一本看不見的帳。帳本沉默，卻從不遺漏；它只是耐心地等待結算的那一天。<em>真正成熟的不是那些以為自己能永遠賒帳的人，而是那些終於肯翻開帳本、開始一筆一筆償還的人。</em>洛杉磯的這份成熟，來得很痛，卻來得真實——它終於明白，它欠的，不只是水與空氣，還有一份對「無中生有」這四個字的，遲到的誠實。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">🧾 ✦ 🔥</div>
+  <p>水的帳、空氣的帳，洛杉磯總算學會了正視——<br>但一座城欠下的，從來不只是生態的債。<br><span class="hl">在那片棕色的天空之下，還有一筆社會的帳，正在到期；它的引信，已經點到了一九九二年。</span></p>
+</div>
+
+<section id="ch13" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十三章 · 1992</span>
+    <h2 class="act-title">1992，第二次火：四個方向的怒火</h2>
+    <p class="act-sub">The Uprising, Sa-I-Gu, and a City of Many Fractures</p>
+    <div class="ornament">🔥 ✦ 💔</div>
+  </div>
+  <div class="prose">
+    <p>瓦茨的火，在一九六五年燒過一次。當時許多人以為，那是一場可以被撲滅、被遺忘、被歸檔進「那一年那一夏」的意外。可是火只是被壓下去了，沒有被熄滅。它退回地底，沿著一條條沒有被縫合的裂縫，悶燒了二十七年。然後，在一九九二年的春天，它再次冒出地表——只是這一次，它不只從一個方向燒來。</p>
+
+    <h3>一卷錄影帶，與一場全國都看見的毆打</h3>
+    <p>一切的引信，可以追溯到一九九一年三月一個深夜的高速公路旁。一名非裔男子<strong>羅德尼·金（Rodney King）</strong>在飆車後被洛杉磯警察攔下，繼而遭數名警員圍住、反覆擊打。事件本身並不罕見——罕見的是，附近一棟公寓的住戶，用當時還算新奇的家用攝影機，把這段過程錄了下來。那卷模糊、晃動、長達數十秒的影像，很快被電視台播出，傳遍全美、傳向全世界。</p>
+    <p>過去，警察暴力多半是「他說、她說」的羅生門——受害者控訴，警方否認，沒有第三隻眼睛。而這一次，全國的客廳裡都坐著那第三隻眼睛。對洛杉磯、乃至全美數以百萬計的非裔觀眾而言，這段影像並不是什麼新聞，而是一個他們早已熟知、卻從未被外界相信的真相，第一次被擺上了所有人的眼前。它像一面鏡子，照出了瓦茨之後二十多年裡，城市深處那道從未癒合的傷。</p>
+    <p>影像之外，還有一條更安靜、卻同樣關鍵的伏線。就在金被毆打的兩週後，南洛杉磯一家小雜貨店裡，一名非裔少女<strong>拉塔莎·哈林斯（Latasha Harlins）</strong>因一瓶柳橙汁，與韓裔女店主發生爭執，被店主開槍擊中後腦致死。涉案店主後來被定罪，卻只獲緩刑與罰款，未入監服刑。對許多非裔居民而言，這個判決傳達了一個冰冷的訊息：他們的生命，在這座城的天平上，似乎輕得近乎無物。兩條伏線——一條關於警察，一條關於鄰里——在此後一年裡各自悶燒，等待著同一個引爆點。</p>
+    <div class="warn">
+      <div class="warn-tag">警示 · 火為何而起</div>
+      <p>本章記述的，是二十世紀美國最嚴重的城市暴動之一。它牽涉警察暴力、司法不公的感受、長期的結構性貧困，以及被擠在同一片貧瘠地理裡的多個族群之間的張力。下文力求中立呈現各方的傷痛，既不美化任何暴力行為，也不迴避警暴與不義這個最根本的源頭。每一個被捲入這場火的人——被打的、被劫的、被燒的、被波及的——都不該被簡化為一張單一的、非黑即白的臉。</p>
+    </div>
+
+    <h3>四月二十九日：判決，與瞬間引爆的城</h3>
+    <p>一九九二年四月二十九日下午，案件在洛杉磯郊外一個以白人為主的社區開庭審理。陪審團對涉案警員作出了大致無罪的裁決。消息傳出，那卷全國都看過的影像，與這個「無罪」的判決之間，形成了一道在許多人看來無法理解、無法忍受的鴻溝——他們親眼看見了那場毆打，而法律卻說，沒有人需要為它負責。</p>
+    <p>積壓了一年、乃至積壓了二十七年的憤怒，在幾個小時內爆發。先是南洛杉磯街頭的零星衝突，繼而蔓延成持續數日、波及城市大片地區的大規模暴動。建築被縱火，店鋪被劫掠，街頭出現暴力攻擊，黑煙從地平線的好幾處同時升起。國民兵與聯邦部隊最終被調入，宵禁籠罩全城。當火終於被壓下，根據官方統計，這場動亂造成約六十餘人喪生、逾兩千人受傷、數千棟建築被焚毀或損毀，財產損失高達數以十億美元計——它是二十世紀美國最致命、破壞最廣的城市暴動之一。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1992</div><div class="lbl">四月二十九日<br>判決後引爆</div></div>
+      <div class="stat"><div class="num">約 60 餘</div><div class="lbl">喪生人數<br>（官方統計）</div></div>
+      <div class="stat"><div class="num">數千棟</div><div class="lbl">建築被焚毀<br>或損毀</div></div>
+      <div class="stat"><div class="num">數日</div><div class="lbl">動亂持續<br>至軍隊入城</div></div>
+    </div>
+    <p>但若只把這幾天讀成「黑與白的衝突」，便讀偏了。一九九二的洛杉磯，已經是一座由無數個不同的洛杉磯拼貼而成的城（如前文所述）。當火燒起來，它並非沿著一條清晰的種族界線蔓延，而是同時沿著好幾條早已存在的裂縫——黑與白、黑與韓、各族與警察、貧與富——一齊撕裂開來。</p>
+
+    <h3>Sa-I-Gu：韓國城的灰燼</h3>
+    <p>這場動亂最深、也最容易被外界忽略的一道傷，落在<strong>韓國城（Koreatown）</strong>。這片由韓裔移民胼手胝足經營起來的商業街區，在那幾天裡成了重災區之一——大量韓裔店主的雜貨店、酒類專賣店、商場被縱火、被劫掠，許多人一生的積蓄在幾個小時內化為灰燼。在混亂與警力被優先調往他處的真空裡，一些店主只能持槍站上自家屋頂，自保家業。韓裔社區後來以韓語把這場創傷稱為<strong>「Sa-I-Gu」</strong>——意即「四．二九」，那個判決與火起的日子。對這個社區而言，這四個音節是一道再也抹不去的集體記憶。</p>
+    <p>韓國城之所以首當其衝，背後是一段更長、更難說清的故事。許多韓裔是抱著「美國夢」的新移民，語言不通、人脈有限，在主流經濟的縫隙裡，選擇了在內城開設小本生意這條艱辛的路。於是，一群同樣被城市邊緣化的新移民，與一群被結構性不義長期壓在底層的非裔居民，被命運擠進了同一片貧困地理——一方是櫃檯後的店主，一方是門前的顧客，彼此語言不通、文化陌生、又因拉塔莎·哈林斯案那樣的悲劇而累積了深深的不信任。<em>這不是誰天生與誰為敵，而是兩群同樣弱勢的人，被放進了一個逼他們彼此競爭、彼此誤解的位置。</em></p>
+    <div class="pull"><p>火燒進韓國城那一刻，揭穿了一個殘酷的真相：在這座城最底層的地理裡，受傷的人，往往是被另一群同樣受傷的人，推到了對立面。</p></div>
+    <p>而拉丁裔社區，是這場動亂裡最常被遺忘的一群。事實上，到了一九九二年，南洛杉磯與韓國城周邊已住著大量拉丁裔移民——他們是被波及的居民、是失去工作的人、是在混亂中被捲入的店員與路人，也佔了被逮捕者中相當大的比例。一座「許多個洛杉磯」的城，在這幾天裡讓世人看見：它的裂縫，遠不只黑白兩色那麼簡單。</p>
+    <p>值得停下來想一想這道地理的殘酷。瓦茨、南洛杉磯、韓國城——這些被火吞噬最深的街區，幾乎都不是富人區，而是這座城裡最貧、被投資最少、被遺忘最久的角落。富裕的西區、海灘邊的別墅、山丘上的豪宅，大多在這幾天裡安然無恙。火，幾乎只在窮人的地圖上燒。這意味著動亂不只暴露了族裔的斷層，也照亮了一條更隱蔽、卻同樣致命的裂縫——階級的斷層。被推到第一線彼此相殺的，從來不是這座城裡資源最多的人，而是它早已圈在底層、任其在稀缺裡互相消耗的那些人。</p>
+
+    <h3>火藥從未被清走</h3>
+    <p>要理解一九九二，不能只看那卷錄影帶與那場判決。它們是引信，不是火藥。真正的火藥，是從一九六五年瓦茨那場火之後，就一直堆在原地、從未被清走的東西。</p>
+    <p>瓦茨之後，曾有一份著名的官方調查報告（麥孔報告，the McCone Report）指出南洛杉磯積累的問題，並開出藥方。可是此後二十多年裡，結構性的處境並沒有根本好轉：製造業外移帶走了穩定的工作，去工業化掏空了內城的經濟基礎；當年用紅線圈出的貧困地帶（如前文所述），依舊被困在投資不足、機會稀薄的循環裡；警民之間的對立日益尖銳，警政文化在不少居民眼中，更像是占領而非服務。一九八〇年代的經濟蕭條與毒品、幫派問題，又在這片本已貧瘠的土地上雪上加霜。</p>
+    <p>於是當羅德尼·金的判決傳來，它點燃的，並不是一時一地的怒氣，而是一整代人積壓的、關於「這座城從來沒有真正把我們當人看」的絕望。火從不是憑空而來。它需要長年累月的不義、貧困與被忽視，悄悄堆成一座看不見的火藥庫——而判決，只是劃了那一根火柴。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 沒有縫合的傷，會沿著更多裂縫迸裂</span>
+      <p>一九九二的洛杉磯給出一個沉重的教訓：<strong>一道被壓下去而非被治癒的傷口，不會消失，它只會等待，並在下一次迸裂時，沿著比上一次更多的方向撕開。</strong>一九六五年，火大致沿著一條黑白界線燒；一九九二年，同一道沒被縫合的傷，卻同時沿著黑與韓、各族與警察、新移民與舊居民好幾條斷層一齊裂開。創傷不會自己癒合，它只會在沉默裡，把裂縫越拉越多。</p>
+      <p>更深一層的道理，與這座城「賣夢」的本質有關。洛杉磯向全世界推銷「人人可以在這裡重新開始」的夢，把一群又一群懷抱希望的人——非裔、韓裔、拉丁裔——吸引到同一座蔓延的城裡。可它在賣夢時，從不提這個夢的小字條款：它把這麼多「不同的洛杉磯」擠進同一片土地，卻任由他們在不平等的稀缺裡彼此競爭、彼此誤解，而把化解張力的成本，留給最沒有資源去承擔的人。<em>當一座城只負責賣夢、卻不負責經營「夢與夢之間如何共處」，火，遲早會從不只一個方向燒來。</em></p>
+    </div>
+
+    <h3>灰燼之後，一門躲不掉的功課</h3>
+    <p>火終究熄了。國民兵撤離，宵禁解除，店主開始清理燒焦的瓦礫，居民回到滿目瘡痍的街區。羅德尼·金本人在動亂最烈時，曾對著鏡頭說出那句後來廣為流傳、近乎哀求的話——他問，大家能不能就好好相處。那不是一句口號，而是一個被捲入風暴中心的人，最樸素也最艱難的願望。</p>
+    <p>重建是緩慢而痛苦的。許多韓裔店主再也沒能重回原址，韓國城的面貌就此改變；南洛杉磯的傷，許多至今仍未真正復元。但也正是從這片灰燼裡，這座城被迫開始學習一件它賣夢時從不情願面對的事：在它的廣告詞之外，真實的洛杉磯是一座由太多不同族群、太多不同的夢拼貼而成的城——而這些夢若要共存，需要的不只是同一片陽光，還有彼此的理解、看見，與這座城從未認真支付過的、那筆關於公平的帳。</p>
+    <p>一九九二之後，洛杉磯沒有變成一座沒有裂縫的城。但它至少不再能假裝那些裂縫不存在。多族裔如何在同一片貧瘠土地上共處——這門艱難、漫長、沒有捷徑的功課，從此被火逼到了這座城的面前，再也躲不掉。</p>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">🔥 ✦ 🎞</div>
+  <p>火熄了，灰燼裡，這座城第一次被迫誠實地看自己一眼。<br>而洛杉磯凝視自身黑暗的方式，從來不只在街頭——<br><span class="hl">它還躲在電影院的銀幕後面，在那一格格虛構的膠片裡，誠實或不誠實地，照著自己的臉。</span></p>
+</div>
+
+<section id="ch14" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十四章 · Noir and the Mirror</span>
+    <h2 class="act-title">諾爾與鏡子：城如何凝視自己的黑暗</h2>
+    <p class="act-sub">Chinatown, Noir, and the City's Dark Self-Portrait</p>
+    <div class="ornament">🎞 ✦ 🌃</div>
+  </div>
+  <div class="prose">
+    <p>洛杉磯花了大半個世紀，向全世界推銷它的陽光。橘子箱上的金色標籤、明信片上永遠湛藍的天、電影裡灑滿棕櫚樹影的街道——這座城最擅長的，就是把自己拍成一座沒有陰影的天堂。可奇怪的是，當它終於坐下來，誠實地端詳自己一眼，它在鏡子裡看見的，不是天堂，而是一座潮濕、陰暗、充滿謊言與腐敗的城。最會賣夢的城，竟也是最會拆夢的城——這個矛盾，正是這一章的全部。</p>
+
+    <p>前面幾章寫的是洛杉磯如何「被造出來」：偷來的水、噴出的油、攤開的路、賣出的夢。這一章要寫的，是它造出來之後，如何回過頭去<em>想像自己</em>——在小說裡、在膠卷裡，反覆地審判自己偷的水、埋的事、撕裂的人。一座城如何敘述自己的黑暗，與它實際做過什麼，是同一個故事的兩面。</p>
+
+    <h3>陽光底下，一座道德上潮濕的城</h3>
+    <p>要理解洛杉磯如何凝視自己，得先認識一種文學與電影的氣質，後人稱之為<strong>黑色（noir）</strong>。「noir」是法語的「黑」，這個標籤最初是二戰後的法國影評人貼上去的——他們在戰後湧進歐洲的好萊塢電影裡，看見一批調性陰冷、光影斑駁、道德含混的作品：偵探、罪犯、致命的女人、永遠下著雨或亮著霓虹的夜街。而這種陰暗美學最自然的舞台，竟然就是那座號稱永遠陽光普照的城——洛杉磯。</p>
+    <p>這不是巧合。黑色電影需要的，正是<em>反差</em>：越是金光燦爛的表面，越能襯出底下的腐敗有多深。一座灰濛濛的工業城，本就沒什麼好揭穿的；可一座號稱天堂、號稱無限可能的城，它的謊言才真正刺痛人。洛杉磯把自己賣成了夢，於是它也成了拆穿夢最理想的現場——在這裡，你永遠不確定那燦爛的笑容後面藏著什麼，那棟漂亮的別墅是用誰的眼淚換來的。</p>
+
+    <h3>菲力普·馬羅：在天使之城走過陰溝的人</h3>
+    <p>把這種氣質寫成文學的，是一位作家：<strong>雷蒙·錢德勒（Raymond Chandler）</strong>。他並非生於洛杉磯，年輕時在英國受教育，中年才落腳南加州，先在石油公司做事，丟了工作之後才在中年提筆寫起冷硬派偵探小說。也正因為他是個半路出家、帶著外人眼光的局內人，他比誰都看得清這座城既迷人又虛偽的兩張臉。</p>
+    <p>錢德勒筆下的偵探叫<strong>菲力普·馬羅（Philip Marlowe）</strong>。馬羅不是英雄，他只是一個拿著微薄報酬、嘴上刻薄、骨子裡卻不肯被收買的私家偵探。他穿過洛杉磯的每一層——好萊塢山上揮金如土的富豪宅邸、市中心廉價旅館的霓虹、油田邊的荒地、警局裡的陰影——一路看見的是同一件事：在這座城，金錢可以買到一切，包括真相、警察與正義。錢德勒在小說裡寫過一句被反覆引用的話，大意是：在這條卑劣的街上，必須有一個自己並不卑劣的人走過去。馬羅就是那個人——他不能讓城變乾淨，他只能讓自己不被弄髒。</p>
+    <p>錢德勒的偉大，不只在情節，更在他寫洛杉磯的方式。他用一種冷峻、機鋒、帶著疲憊詩意的文字，把這座城的氣味、光線、與道德溫度寫了下來：午後乾熱的聖塔安娜風、棕櫚樹下的陰影、富人區草坪上灑水器的水聲——所有那些被明信片美化的元素，在他筆下都透著一股不對勁的甜膩。<em>他寫的不是一座城的地理，而是一座城的良心，或者說，它良心的缺口。</em>這是這座「賣夢之城」對自己最誠實的一次自畫像：陽光是真的，可陽光底下，是一座道德上潮濕陰暗、隨時在出賣自己的城。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼洛杉磯是黑色電影的天然主場</span>
+      <p>黑色電影可以發生在任何城市，但它與洛杉磯之間，有一種近乎宿命的契合。原因有三。其一是<strong>反差</strong>：noir 靠的是「光鮮表象」與「底層腐敗」之間的落差製造張力，而沒有哪座城比這座號稱天堂的城，落差更大。其二是<strong>地理</strong>：洛杉磯沒有傳統市中心、沒有清晰的階級分區，它是攤開的、破碎的、彼此隔絕的——富與貧只隔一道山脊，光與暗只隔一條街，這種空間結構本身就充滿了「表面之下另有世界」的懸疑感。</p>
+      <p>其三，也是最深的一層，是<strong>自我意識</strong>：好萊塢就在這裡。一座生產夢的工廠，最清楚夢是怎麼造出來的，也最清楚它有多假。當電影人日復一日地製造幻象，他們對「幻象底下是什麼」這件事，懷著一種職業性的犬儒與清醒。於是這座城批判自己時，用的正是它造夢的同一套工具——攝影機、燈光、剪接。<em>造夢機器與拆夢機器，在洛杉磯，是同一台機器。</em></p>
+    </div>
+
+    <h3>《唐人街》：把一座城的原罪，拍成一則寓言</h3>
+    <p>如果說錢德勒寫出了洛杉磯的氣質，那麼把這座城的<em>原罪</em>拍成不朽寓言的，是一部一九七四年的電影——<strong>《唐人街（Chinatown）》</strong>。它由羅曼·波蘭斯基（Roman Polanski）執導、傑克·尼克遜（Jack Nicholson）主演，編劇羅伯特·唐恩（Robert Towne）的劇本，至今被許多人視為電影史上最完美的劇本之一。</p>
+    <p>這部電影的故事設在一九三○年代的洛杉磯，表面上是一樁偵探案：私家偵探傑克·吉茨（Jake Gittes）受託調查一樁外遇，卻一步步被捲進一場龐大的陰謀。而那場陰謀的核心，正是<strong>水</strong>——權貴如何在乾旱中操弄水的供給、製造危機、賤價買下農民的土地，再把遠方的水引來、坐收暴利。看過第五章的人會立刻認出來：這正是穆赫蘭與歐文斯谷那場「加州水戰」的回聲。《唐人街》並非紀錄片，它把史實拆解、重組、虛構化，但它捕捉到的那個內核是真的——<em>這座城，是靠不可告人的權力與貪婪變出來的</em>。它把第五章那筆「轉嫁給他者的帳單」，拍成了一則人人都看得懂的寓言。</p>
+    <p>《唐人街》最殘酷的地方，在於它不給觀眾任何救贖。偵探查到了真相，卻無力阻止任何事；惡人逍遙，無辜者受害，腐敗的結構紋風不動。片名「唐人街」在片中幾乎沒有作為地點出現，它是一個隱喻——一個吉茨年輕時辦案受過創、從此不願再碰的地方，一個「你越想做對的事、越會把事情弄得更糟」的所在。電影結尾，當一切墜入無可挽回的悲劇，吉茨的同伴只能拉著呆立的他，說出那句道盡一切的台詞。</p>
+    <div class="pull"><p>「Forget it, Jake. It's Chinatown.（算了吧，傑克。這裡是唐人街。）」</p></div>
+    <p>這句話之所以不朽，是因為它說的根本不只是那條街。它說的是一種面對結構性腐敗時的徹底無力——當權力與金錢早已寫好結局，當「真相」根本撼動不了什麼，一個正直的人能做的，只剩下認了。它是一句絕望的話，也是一句清醒的話。一座城願意讓自己最受歡迎的電影，以這樣一句台詞收場，本身就是一種驚人的誠實：它承認自己是被偷來的水澆灌大的，承認奇蹟底下埋著屍，承認有些罪，是連偵探查清了也無法討回的。</p>
+    <div class="aside"><span class="hl">耐人尋味的一筆</span>—— 《唐人街》虛構的水利陰謀，與第五章真實的歐文斯谷水戰，並非一一對應；電影壓縮、挪移、戲劇化了歷史。但它抓住的那個道德真相——<em>這座城的繁榮，奠基於一場對另一片土地的悄然掠奪</em>——卻比任何史料都更深地印進了大眾的記憶。有時候，虛構比事實更能讓人記住事實。</div>
+
+    <h3>造夢機器，也是拆夢機器</h3>
+    <p>於是我們看見了洛杉磯最深的一重矛盾。第七章寫過，好萊塢是人類史上最強大的造夢機器，它向全世界兜售加州夢、美國夢、一種對「洛杉磯式生活」的無盡渴望。可同樣是這座城、同樣是這批電影人，又透過黑色電影、透過《唐人街》、透過後來無數部解構自己的作品，親手把這個夢一層層拆穿給世界看。它一手把夢吹得最大，另一手又把夢戳得最狠。</p>
+    <p>這在城市史裡是罕見的。大多數城市對自己的敘述，是歌功頌德式的——把光榮放大，把瘡疤藏起。可洛杉磯卻發展出一種近乎成癮的<em>自我審判</em>傳統：從錢德勒到《唐人街》，從《日落大道》對好萊塢自身的嘲諷，到後世一部部把這座城寫成欲望與幻滅之都的作品，它一次又一次地、大規模地、藝術化地，批判與解構自己。它不只把自己拍成天堂，更把自己拍成天堂底下的地獄——而且拍得比誰都好。</p>
+    <p>為什麼是它？或許正因為這座城太清楚「形象」是怎麼一回事。一座靠賣夢維生的城，骨子裡是懂得幻象與真實之間那道裂縫的——它每天都在製造幻象，也就每天都站在幻象的背面，看著支撐幻象的繩索與布景。當一個人靠化妝維生，他對素顏的真相反而格外敏感。洛杉磯既是化妝師，也是那個在卸妝鏡前看清一切的人。</p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">造夢 · 賣給世界的洛杉磯</div>
+        <p style="text-align:left;font-size:.96rem">陽光、明星、棕櫚樹、無限可能。好萊塢把「加州夢」包裝成膠卷，向全世界兜售一種對這座城的渴望，吸來一代代懷抱夢想的移民。這是它的<strong>明面</strong>。</p>
+      </div>
+      <div>
+        <div class="minihead">拆夢 · 留給自己的洛杉磯</div>
+        <p style="text-align:left;font-size:.96rem">貪婪、謊言、腐敗、被偷的水、被埋的事。黑色電影與《唐人街》把同一座城拍成欲望與幻滅之都。這是它對自己的<strong>暗面審判</strong>。</p>
+      </div>
+    </div>
+
+    <h3>懂得凝視自己黑暗的城</h3>
+    <p>把鏡頭拉遠，這一章其實在問一個關於所有城市、甚至所有人的問題：一個地方<em>如何想像自己</em>，與它<em>實際是什麼</em>，哪一個更重要？答案是——同樣重要。因為一座城的自我形象，會反過來塑造它的行為、它吸引的人、它願意面對與不願面對的真相。</p>
+    <p>洛杉磯最迷人的地方，正在於它從不假裝自己是清白的。它清楚自己是一個奇蹟——一座在養不起大城的半乾旱土地上，靠偷來的水、賣出的夢、攤開的路硬生生變出來的巨城；可它也同樣清楚，這奇蹟底下壓著沉甸甸的代價。它沒有把這代價藏進歷史的暗格，反而把它放上銀幕，一遍又一遍地公開審判——審判它偷的水、埋的事、撕裂的人。一座懂得凝視自己黑暗的城，或許比一座只會歌頌自己的城，更接近某種成熟。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 自我認識，是一種更深的力量</span>
+      <p>洛杉磯給出的這一課，遠遠超出電影。它告訴我們：<strong>真正成熟的個體，不是那個只會講述自己光榮故事的，而是那個敢於正視自己陰影、並把陰影攤開來檢視的。</strong>一個人、一家企業、一個國家，最危險的時刻，往往不是犯了錯，而是建立起一套只准歌頌、不准質疑自己的敘事——因為那套敘事一旦封閉，它就再也看不見自己腳下的裂縫。</p>
+      <p>洛杉磯的不凡，在於它把「自我批判」內建成了文化的一部分。它一面造夢，一面拆夢；一面相信自己是天堂，一面在膠卷裡反覆承認天堂的帳是怎麼算來的。<em>能夠同時相信一件事、又清醒地懷疑它，是極難的修養——對一座城是如此，對一個人更是如此。</em>看清自己的黑暗，不會讓奇蹟褪色；恰恰相反，唯有看清了代價，那奇蹟才真正令人敬畏。這，或許就是這座城留給世界、最不像它、卻最深刻的一份禮物。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">🎞 ✦ 〰</div>
+  <p>洛杉磯在膠卷裡審判了自己——偷的水、賣的夢、埋下的事，全攤在銀幕上。<br>可在所有人造的夢與噩夢之上，還站著一個它編不進任何劇本的對手——<br><span class="hl">那是不講道理、也不肯被說服的地球本身：會搖的斷層，與會燒的山。</span></p>
+</div>
+
+<section id="ch15" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十五章 · Quake and Fire</span>
+    <h2 class="act-title">地震與火：搖晃的天堂</h2>
+    <p class="act-sub">The San Andreas, Northridge, and the Precarious Paradise</p>
+    <div class="ornament">〰 ✦ 🔥</div>
+  </div>
+  <div class="prose">
+    <p>把這一整部洛杉磯的故事讀到這裡，你會發現它幾乎全是「人」的勝利——人偷來了水，人賣出了夢，人把一座城從半沙漠裡硬生生地攤了開來。但這座城底下、四周，還躺著另一個角色。它不說話，不上鏡，不在任何房地產廣告裡出現；它只是偶爾，在某個清晨，提醒所有人：這片土地，從來沒有真正屬於你們。它叫做<strong>地</strong>——會搖的地，會燒的山。要把洛杉磯的傳奇講完整，最後必須回到序章那個被刻意忽略的低音：這座天堂，是蓋在一條巨大的裂縫之上的。</p>
+
+    <h3>地底下的那道縫</h3>
+    <p>加州坐在兩塊巨大的地殼板塊交界處。西邊是<strong>太平洋板塊（the Pacific Plate）</strong>，東邊是<strong>北美板塊（the North American Plate）</strong>，它們以每年數公分的速度，沿著一條貫穿整個加州的巨大斷層彼此磨蹭、彼此較勁——這條斷層，就是<strong>聖安德烈亞斯斷層（the San Andreas Fault）</strong>。它從加州北部一路向南延伸，穿過大地裂出一道綿延上千公里的疤痕，從洛杉磯都會區的東緣切過。兩塊板塊並非平順地滑行，而是一段段地卡住、累積應力、再在某一刻猛然錯動釋放——那一刻的釋放，就是地震。</p>
+    <p>地質學家早就知道，沿著聖安德烈亞斯，一場巨大的地震——人們半敬畏半恐懼地稱之為「<strong>大震（the Big One）</strong>」——並非會不會發生的問題，而是何時發生的問題。應力一年年地積累，總有一天要還。這是一筆無法偷、無法賣、也無法轉嫁的帳：在這條斷層面前，洛杉磯一個多世紀以來積攢的所有工程、財富與聰明，都只是借來的安穩。土地會在它選定的時刻，把利息一次討回。</p>
+    <div class="warn">
+      <div class="warn-tag">警示 · 等待中的大震</div>
+      <p>聖安德烈亞斯斷層的某些段落，已經許久未曾發生大規模錯動，意味著巨量的應力仍在地底積累。科學家普遍認為，南加州在可預見的未來，極有可能遭遇一場規模龐大、足以重創整個都會區的強震。沒有人能準確預測它的日期，但幾乎沒有人懷疑它終將到來。一座兩千萬人的巨城，就生活在這個被推遲、卻無法取消的約定之上。</p>
+    </div>
+
+    <h3>一九九四，清晨四點半</h3>
+    <p>洛杉磯不需要等「大震」才嚐到搖晃的滋味。一九九四年一月十七日，天還沒亮，凌晨四點半左右，一場規模約六點七的地震從聖費爾南多谷（San Fernando Valley）底下爆發——震央在北嶺（Northridge）一帶，史稱<strong>北嶺地震（the Northridge earthquake）</strong>。它並非發生在聖安德烈亞斯這條主斷層上，而是來自一條此前不甚顯眼、深埋地下的盲斷層；這個細節本身就令人不安——原來危險不只來自那條人盡皆知的大裂縫，也來自城市底下無數條尚未被完全認識的暗縫。</p>
+    <p>地震發生在睡夢中的清晨，這既是不幸，也是萬幸。不幸的是人們毫無防備，公寓在黑暗中傾頹；萬幸的是，若它發生在白晝的上班尖峰、車滿為患的高速公路上，傷亡恐怕要慘重數倍。即便如此，這場地震仍奪走了約五十餘條人命，數以千計的人受傷。一棟公寓樓房整層壓垮，奪去了其中許多居民的生命；多條高速公路的橋面與交流道在劇烈的搖晃中斷裂、坍塌——那些被洛杉磯人視為生命線、攤開了整座城的鋼筋水泥動脈，在地的力量面前折成了碎塊。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1994</div><div class="lbl">北嶺地震</div></div>
+      <div class="stat"><div class="num">M6.7</div><div class="lbl">約略規模</div></div>
+      <div class="stat"><div class="num">04:31</div><div class="lbl">清晨來襲</div></div>
+    </div>
+    <p>論財產損失，北嶺地震是美國史上代價最高昂的天災之一，估計造成數百億美元的損失。它沒有把洛杉磯擊倒——城市以驚人的速度重建，倒塌的高速公路在短短數月內就修復通車，這份效率本身又是另一場「人定勝天」的表演。但它在這座城的集體記憶裡，留下了一道清醒的裂痕：原來這片被攤得這麼開、蓋得這麼滿的土地，每一吋都坐在會搖的地上。你可以偷來水、賣出夢、攤平整片盆地，卻無法替它換一塊安穩的地基。</p>
+    <div class="pull"><p>那一夜過後，洛杉磯人重新學會了一件被繁榮掩蓋了太久的事——你買得起山景，買得起泳池，買得起整片陽光；唯獨腳下這塊地，從來不賣，只是暫時借你站著。</p></div>
+
+    <h3>聖塔安娜風起時</h3>
+    <p>如果說地震是這座城底下的威脅，那麼火，就是它四周的威脅。洛杉磯所在的南加州，有著典型的地中海型氣候——濕潤的冬季孕育出滿山坡的灌叢與草木，而漫長乾熱的旱季，又把這些植被烤成一觸即燃的火藥。每到秋冬，一種特殊的風會從內陸的沙漠高地往海岸俯衝而下——這就是惡名昭彰的<strong>聖塔安娜風（the Santa Ana winds）</strong>。它乾燥、灼熱、來勢凶猛，掠過乾透的山坡時，能把一星火苗在幾分鐘內催成一片火海，並推著火舌以驚人的速度向前奔竄。</p>
+    <p>於是，野火（wildfire）成了南加州年復一年的宿命。每逢火季，山坡上的灌叢燃起熊熊大火，火線在聖塔安娜風的助推下逼近一個又一個社區，逼近那些蓋在山腰、坐擁無敵景觀的豪宅。而災難往往不止於火本身——一場大火燒光了山坡的植被，緊接著一場冬雨落下，失去根系固結的土石便可能化為洶湧的泥流，從焦黑的山坡傾瀉而下，淹沒火劫餘生的家園。先是火，再是水，這片土地用兩種相反的方式，輪番討回它的代價。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 把家蓋在火的路徑上</span>
+      <p>洛杉磯一個多世紀的成長，本質是一場不斷向外攤開的擴張——人口與房屋從盆地中心，一圈圈往山坡、往峽谷、往荒野的邊緣推進。地產的邏輯很簡單：景觀越好、越靠近自然，房子越值錢，於是人們爭相把家安在山的更高處、荒野的更深處。但這片荒野，正是灌叢野火世世代代燃燒的舞台。城市與荒野交錯的那條地帶——學界稱之為「<strong>荒野—都市介面（wildland-urban interface）</strong>」——也正是火災風險最高的前線。</p>
+      <p>換句話說，洛杉磯越是把人往風景最美的地方送，就送了越多人住進火與滑坡的路徑上。這是「人定勝天」這場豪賭裡，一筆常被忽略卻持續累積的隱形帳單：每一棟蓋進山林的夢想之屋，都同時是一份押在野火季節上的賭注。土地給你美景，也向你索取風險，而這份帳，往往要到某個聖塔安娜風起的夜晚，才會被一次結清。</p>
+    </div>
+
+    <h3>變暖的天，更脆弱的邊界</h3>
+    <p>而這一切，正在變得更難。氣候變遷讓南加州的乾旱拖得更長、熱浪燒得更烈、火季來得更早也走得更晚。本就稀缺的雨水變得更不可靠，餵養這座巨城的遠方水源——那些當年費盡心機從歐文斯谷、從科羅拉多河引來的水——在更頻繁的乾旱裡承受著更大的壓力；而被烤得更乾的山坡，則讓野火一年比一年凶猛、難以撲滅。這座本就建在「不可能」之上的城，賴以維生的兩道生命邊界——水的供給，與安全的界線——正同時變得更薄、更脆。</p>
+    <p>這是洛杉磯故事最深的反諷。它用一個多世紀證明了人的意志可以多麼壯闊：能把河流改道、能讓沙漠開花、能在地震與火災之後一次次站起來重建。然而它賴以成立的每一項條件——足夠的水、可控的火、不致命的搖晃——卻沒有一項是它真正掌握的。繁榮越是壯麗，底下那筆向自然借來的帳，就越是龐大。</p>
+    <div class="warn">
+      <div class="warn-tag">警示 · 收緊的兩道邊界</div>
+      <p>水與火，是這座城兩條最古老的命脈，如今正同時承壓。一邊是供水系統在更深、更長的乾旱裡愈發吃緊；另一邊是野火在更乾、更熱的山林裡愈發失控。氣候的變化並未替洛杉磯創造一個全新的威脅，而是把它一直以來最根本的兩種脆弱——缺水與易燃——同時放大。一座靠「說服自然」才得以存在的城，正面對一個越來越不容易被說服的自然。</p>
+    </div>
+
+    <h3>借來的安穩</h3>
+    <p>把鏡頭拉到最遠，俯瞰這整座城吧。夜裡，從聖塔莫尼卡的海岸到聖蓋博山腳，燈火攤成一張無邊無際的金色巨網，亮得像把整片夜空翻轉到了地面。這是人類在一片半乾旱土地上，所創造過最壯麗的景象之一。它證明了，只要意志夠強、夢夠大、肯為之轉嫁足夠的代價，人幾乎可以在任何地方，造出一座城來。</p>
+    <p>但這張金網的底下，是一條會錯動的斷層；它的四周，是一圈會燃燒的山。洛杉磯花了一百多年，用偷來的水、賣出的夢、攤開的路，把一座巨城從半沙漠裡變了出來；可是在斷層與野火面前，所有的工程與財富，都只是借來的安穩。它是人類「人定勝天」最壯麗的一次實踐，也是一場最未完成的賭注——天，從來沒有真正被勝過，只是暫時被說服了。而被說服的東西，總有一天會改變主意。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 沒有真正被征服的自然</span>
+      <p>洛杉磯給我們上的最後一課是：<strong>人類最了不起的成就，往往是把風險推遲，而不是把風險消除。</strong>它沒有讓沙漠不再缺水，只是把水從遠方搬了過來；它沒有讓土地不再搖晃，只是學會在搖晃之後迅速重建；它沒有讓山坡不再燃燒，只是一次次在火後重新蓋起房子。每一次「勝利」，其實都是一次把帳單往後推、往別處挪的轉嫁。</p>
+      <p>這對應一個遠比一座城更大的真理：<em>當一個系統的繁榮，建立在持續向某個無法討價還價的對象借貸之上時，它的壯麗程度，恰恰標示了它欠下的規模。</em>洛杉磯的燈海越亮，它向斷層與野火、向那筆名為「自然」的本金借得就越多。真正的智慧，或許不在於如何更徹底地戰勝自然，而在於誠實地承認：我們腳下的安穩，始終是借來的——而懂得自己站在借來的地上，正是與這片土地長久共處的開始。</p>
+    </div>
+  </div>
+</section>
+
+<div class="interlude reveal on-dark">
+  <div class="mark">🔥 ✦ 〰</div>
+  <p>偷來的水、賣出的夢、會搖的地、會燒的山——一座城的全部矛盾，都攤在這片陽光底下。<br>當第一個百年的故事說盡，下一個百年的問題已經浮現——<br><span class="hl">在水更少、火更烈、地仍會搖的明天，這座無中生有的巨城，要如何繼續把自己變下去？</span></p>
+</div>
+
+<section id="ch16" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十六章 · Still Conjuring</span>
+    <h2 class="act-title">還在變：下一個世紀的洛杉磯</h2>
+    <p class="act-sub">2028, Silicon Beach, and the Unfinished Miracle</p>
+    <div class="ornament">☀ ✦ 🔮</div>
+  </div>
+  <div class="prose">
+    <p>一座靠變魔術變出來的城，最怕的就是停下來。因為一旦停下來，人們就會看清楚：腳下這片土地，本來是養不起一座大城的。它太乾、太曬、河水太少、地震太頻，按照地理最樸素的算術，這裡頂多該是一座沿著河谷散落的中型城鎮。可是兩百多年過去，這裡卻長成了一片向四面攤開、住著上千萬人的巨大都會——靠的是偷來的水、賣出的夢，和一代又一代不肯認命的人，硬把不可能變成了日常。走到二十一世紀的第三個十年，洛杉磯回頭一望，那條時間軸上排著一連串相同的動作：每隔一段日子，它就重新發明一次自己，然後把這次的新身分，當成永遠的未來賣出去。如今煙塵未定，它又一次站在了路口上，手裡攥著幾樣新東西，問的卻還是建城第一天那個老問題——這座不該存在的城，還能不能繼續存在下去。</p>
+
+    <h3>第三次點燃聖火</h3>
+    <p>它選擇的回答，一如既往，是把賭注押向未來，並且要押得全世界都看見。<strong>二〇二八年</strong>，奧運聖火將第三度在洛杉磯點燃——繼一九三二與一九八四之後，它成為極少數三度主辦夏季奧運的城市之一。這個選擇本身就很「洛杉磯」：一九三二年，它在大蕭條的谷底辦了一屆奧運，用體育的盛景替自己打了一劑強心針；一九八四年，它又在許多城市因財政恐懼而退避時接下這燙手的盛會，並罕見地把它辦成了一門賺錢的生意——靠企業贊助與既有場館，避開了讓無數主辦城負債纍纍的大興土木，留下了一筆可觀的盈餘。如今它要第三次來過，依舊打著「不必為奧運從零蓋一座新城」的算盤，要用既有的場館、既有的天空，再辦一屆「節儉」的盛會。</p>
+    <p>奧運從來不只是運動會。對洛杉磯而言，它是一面舉給世界看的鏡子，也是一根逼著自己加快收拾門面的鞭子——交通要疏通、街道要清整、地鐵要趕在聖火之前多通幾段。一座以「賣形象」立國的城，沒有比奧運更趁手的舞台。它太懂得怎麼把自己的好的一面，剪進一支全球同步播放的片子裡。只是這一次，全世界的鏡頭會比以往任何時候都更銳利——它們不只會拍到陽光下的賽場，也會拍到賽場之外，那些它一向不願入鏡的角落。</p>
+    <div class="pull"><p>一九三二、一九八四、二〇二八——洛杉磯三次點燃聖火，每一次都是在替自己拍一支廣告：來看哪，奇蹟還在這裡。問題是，鏡頭挪開一寸，奇蹟的帳單就露了出來。</p></div>
+
+    <h3>矽灘，與一座還在造夢的工廠</h3>
+    <p>支撐著這份底氣的，是它依舊強悍的造夢引擎，只是引擎的形狀變了。在西邊靠海的一帶——從威尼斯（Venice）到聖塔莫尼卡（Santa Monica）一線——人們開始管它叫「<strong>矽灘（Silicon Beach）</strong>」：一片聚集了科技公司、新創團隊與創投資金的海濱地帶，把矽谷那套「在陽光下寫程式、把點子變成估值」的玩法，搬到了棕櫚樹與衝浪板之間。洛杉磯本就不缺創意人才與設計能量，當娛樂、廣告、時尚與科技開始彼此滲透，這座城便又給自己接上了一具新的、屬於數位時代的造夢機。</p>
+    <p>而那具舊的造夢機——好萊塢——仍是全球娛樂無可爭議的心臟，只是它正經歷一場深刻的動盪。串流平台改寫了人們看片的方式，也改寫了錢從哪裡來、流向哪裡去；人工智慧開始叩問編劇、配音、特效乃至演員形象的飯碗，逼出了關於創作與生計的激烈爭論；而為了省成本，越來越多的拍攝離開了加州，飛往稅務減免更慷慨的他州與他國——人們憂心地稱之為「製作外流（runaway production）」。好萊塢仍在賣夢，但它第一次發現，自己賣夢的這門獨門生意，正被技術與成本從四面八方拆解。<em>那座教全世界做夢的工廠，如今得先想辦法，把自己的夢做下去。</em></p>
+
+    <h3>繞了一圈，回到出身</h3>
+    <p>比產業更深的變化，發生在這座城的面孔上。經過一個多世紀的移民潮，洛杉磯——連同整個加州——已是一座<strong>拉丁裔為相對多數</strong>的城，是全美最大的移民門戶之一：來自墨西哥與中美洲、來自亞洲各地、來自世界每一個角落的人，在這裡彼此相鄰而居，說著上百種語言，讓它成了地球上族裔最繁複的都會之一。那個曾被「金髮、陽光、海灘」的形象擦得發亮的洛杉磯，如今在街上、在餐桌上、在學校裡，露出的是另一張更真實、也更古老的臉。</p>
+    <p>說它古老，是因為這張臉，正是它最初的胎記。回到一七八一年那四十四個建村者——他們絕大多數不是純白的西班牙人，而是來自墨西哥的原住民、非洲裔與各種混血的後代。洛杉磯從第一天起，就是一座<strong>棕色與黑色的人共同建起的城</strong>。後來的一百多年，它把這個出身淡化、漂白，包裝成一個金髮陽光的夢賣給全世界；而如今，它幾乎是繞了一整圈，重新走回了自己的起點。多元，從來不是它後來才添上的妝，而是刻在它出生證明上的第一行字。它只是花了兩百年，才重新認得鏡子裡的自己。</p>
+    <div class="cf">
+      <span class="cfh">歷史的岔路 · 若洛杉磯始終不正視它的帳單</span>
+      <p>設想一種未來：洛杉磯繼續沿用它最擅長的那套魔術——把成本轉嫁給未來與他方，把不願入鏡的角落剪出畫面之外。水繼續從越來越乾的科羅拉多河調來，街頭的帳篷被一次次清走又一次次長回，住不起的人被擠到更遠的城郊，而城市則繼續在鏡頭前，賣它陽光燦爛的夢。表面上，魔術還在奏效，奇蹟還在延續。</p>
+      <p>但帳單不會因為被遞延就消失，它只會生息。偷來的水有偷盡的一天，當上游的雪線退縮、河量下降，被轉嫁的代價終會反噬到轉嫁者自己頭上；被掃到鏡頭外的不平等，會在某個無人預料的時刻，沿著某條族裔或階級的斷層再度迸裂——一九六五與一九九二都示範過火是怎麼燒起來的。<em>一座靠「把帳推給以後」維生的城，最大的風險不是某一張帳單，而是它從未學會結帳這件事本身。</em>洛杉磯的下一個世紀若還想是個奇蹟，它遲早得做一件它兩百年來最不擅長的事：誠實地，把欠的還上。</p>
+    </div>
+
+    <h3>還沒到期、卻已逾期的帳</h3>
+    <p>因為那些帳，此刻正一張張攤在它面前。最刺眼的一筆，是規模驚人的<strong>無家可歸</strong>危機——在這座以陽光與富庶聞名的城裡，數以萬計的人露宿街頭，帳篷沿著高架橋下、河床邊與市中心的人行道綿延成一片片臨時的聚落，使洛杉磯成為全美遊民人數最龐大的城市之一。這不是一場突如其來的天災，而是住不起的房、太貴的生活、與長期失衡的不平等，日積月累結出的果。當一座城把房子變成最賺錢的夢來賣（呼應它郊區神話的那一章），它也就同時製造了一大群再也買不起、租不起這個夢的人。</p>
+    <p>另一筆帳，是水——那條從建城第一天就纏著它的舊賬。它早年靠偷歐文斯河谷的水才得以暴長，如今它賴以維生的科羅拉多河，正因長年的乾旱與氣候變遷而水量持續下降，整個美國西南的用水分配陷入空前的緊張。缺水的焦慮，從來沒有真正離開過這座城；它只是被一條又一條越接越遠的水管，暫時推到了視線之外。再加上汽車蔓城留下的塞車與空污——盆地的地形依舊把廢氣困在城市上空，儘管加州幾十年來最嚴格的環保法規已讓天空比煙霾最濃的年代清朗了許多。生態的帳、社會的帳，都還遠遠沒有結清。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 奇蹟與透支，是同一件事的兩面</span>
+      <p>洛杉磯逼我們看清一個關於「成就」的殘酷真相：<strong>許多看似無中生有的偉大，其本質是一筆尚未結清的借款。</strong>它在不該有大城之地造出一座千萬人的巨城，靠的不是憑空變出資源，而是把成本搬到了別處與別時——偷上游的水、燒共有的空氣、向後代借環境的額度、把不平等掃到鏡頭之外。奇蹟與透支，從來不是兩件事，而是同一筆交易的正反兩面：你今天看到的繁華有多耀眼，那張被遞延的帳單，就有多沉。</p>
+      <p>但這枚硬幣還有第二面，同樣值得記住：<em>正因為代價慘重，被代價逼到牆角的地方，往往也最早被逼出改革。</em>洛杉磯燒壞了自己的天空，於是成了全美空氣與清潔能源立法的先鋒；它在街頭與火光中一次次受傷，於是被迫去學「多元如何共存」這門它躲不掉的功課。一個地方真正的成熟，不在於它有沒有欠帳——幾乎所有的崛起都在欠帳——而在於它願不願意，在帳單到期時，誠實地坐下來結算，而不是再變一個新的魔術，把它推給下一個十年。</p>
+    </div>
+
+    <h3>一個還沒寫完的奇蹟</h3>
+    <p>話雖如此，要低估這座城，從來都是不智的。它手裡握著的，是這顆星球上最強的兩樣本事：把任何東西變成夢的能力，和一次次把自己整個拆掉、重新發明的本能。它有源源不絕的移民活力——每一波新來的人，都帶著「在這裡，我也能重新開始」的那股勁，而這股勁，正是它兩百年來最深的燃料。它有多元的引擎在同時運轉：娛樂與科技在西邊造夢，太平洋的貿易在南邊吞吐——緊鄰的長灘港（Port of Long Beach）與洛杉磯港，是全美最繁忙的貨櫃門戶，把這座城牢牢接在通往亞洲與世界的航線上。陽光、人才、資本、與面向太平洋的地利，依舊在這裡彙聚。</p>
+    <p>於是洛杉磯的下一個世紀，問的還是它建村第一天那個老問題——一座在不該有大城之地、純靠意志硬變出來的城，能不能一直撐下去；以及，它願不願意，把那張一再被遞延、被轉嫁的帳單，水、空氣、與不平等，誠實地結了。它是一座永遠在「造夢」與「還債」之間擺盪的城：一邊還在點燃聖火、還在海邊寫程式、還在教全世界做夢，一邊街頭睡著它接不住的人、上游流著越來越少的水。它從未停止變魔術，也從未真正學會結帳——而它的未來，恰恰取決於它能不能在這兩件事之間，找到一個它過去兩百年從未找到的平衡。它不是一個已經完成的奇蹟，也不是一個就要破滅的幻覺。它是一個<strong>還沒寫完</strong>的奇蹟——筆，還握在它自己手裡。</p>
+  </div>
+</section>
+
+<!-- ===== 終章 ===== -->
+<section id="chF" class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是，今天的洛杉磯人</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">Water, Dreams, and the City That Willed Itself into Being</p>
+      <div class="ornament" style="color:var(--gold-bright)">☀ 🎬 🌴</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的洛杉磯之所以是這個模樣，是幾層層層相扣的力量疊加而成的——而它們共同回答了一個問題：<strong>在一個不該有大城的地方，怎麼會長出一座巨城？</strong></p>
+
+      <h3>第一層：一片半沙漠，先設下了不可能</h3>
+      <p>一切的底色，是<strong>地理的吝嗇</strong>。南加州陽光無限，水卻幾近於無——沒有大河，雨季短暫，本該只能撐起幾座小鎮。通格瓦人懂得在這片乾土上節制地生活，西班牙人也只敢蓋一座小村。洛杉磯的全部故事，本質上是一場與這個「不可能」的角力：它要嘛接受地理給的上限，要嘛想辦法<em>把上限買來、偷來、變出來</em>。它選了後者。</p>
+
+      <h3>第二層：偷來的水，與賣出的夢</h3>
+      <p>讓不可能變可能的，是兩樣東西。一是<strong>水</strong>——穆赫蘭那條從歐文斯谷一路引來的水道，讓一座本該渴死的城有了無限擴張的本錢，代價是另一座山谷的乾涸。二是<strong>夢</strong>——好萊塢把陽光、棕櫚與明星，包裝成全世界都想買的幻象，吸來了一波又一波懷著夢想的移民。石油從地底噴出，飛機在沙漠邊造起，這座城靠著「搶來的水」和「賣出的夢」，完成了人類史上最不可思議的一次造城。</p>
+
+      <h3>第三層：攤開的城，與被劃開的人</h3>
+      <p>接著是<strong>蔓延</strong>。紅色電車先把城拉長，高速公路再把它攤成一張無邊的網——洛杉磯成了一座沒有中心、由汽車定義的城。但這張網不是對所有人都平等：它把黑人圈進南中央、把墨西哥裔擠進東洛城、用一條高速公路硬生生切開一個社區。<em>同一座城，對有些人是無限的夢，對另一些人是上鎖的門。</em>這道裂痕，在 1965 年的瓦茨、在 1992 年的街頭，兩度燒成了火。</p>
+
+      <h3>第四層：帳單，與不肯醒來的夢</h3>
+      <p>最後是<strong>代價</strong>。偷來的水終要還——歐文斯谷乾了，科羅拉多河也在退；賣出的夢有暗面——諾爾片裡那個陽光底下的洛杉磯，藏著貪婪與謊言；攤開的城留下了煙霾、塞車與燒不完的山火。可這座城始終不肯醒：它一邊還著帳，一邊繼續造夢，把賭注押向 2028 的奧運、押向矽灘的新科技、押向一個橫跨族裔與邊界的未來。<em>它從一開始就是個奇蹟，而奇蹟的代價，是永遠不能停下來。</em></p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 一座靠意志撐起的城</span>
+        <p>所以，今天的洛杉磯是什麼？它是<strong>一座靠人的意志、而非地理的恩賜撐起來的城</strong>。它沒有天然的大河、沒有現成的良港、沒有非它不可的理由——它擁有的，只是陽光、一條偷來的水道，和一個賣給全世界的夢。它是人類「人定勝天」這句話，最壯麗也最危險的一次實踐。</p>
+        <p>但奇蹟總有兩面。<em>同樣的意志，能變出一座巨城，也能變出一筆遲早要還的帳。</em>洛杉磯的無限陽光與它乾涸的水源，是同一個賭注的兩面；它向全世界兜售的夢，與它街頭兩度燃起的怒火，是同一座城的兩端。洛杉磯最深刻的真相是：它證明了人可以在不可能的地方造出一座城——但它還沒證明，這座城能不能一直撐下去。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">通格瓦人的乾土孕育了它，偷來的水餵活了它，賣出的夢吸來了它的人，石油與飛機鋪起了它的路——而那輪永不下班的太陽，照著一座靠意志、在沙漠裡硬生生變出來的城。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座城的終極啟示</span>
+      <p>一座城的偉大，有時不在於它順著天命長成什麼，而在於它敢違逆天命、把自己變成什麼。洛杉磯生在一片養不起大城的乾土上，卻靠偷來的水、賣出的夢與不肯認命的意志，造出了全美第二大的巨城。它用兩百多年證明：人的想像力，足以在沙漠裡開出一座花園——但它也提醒著：每一座靠意志撐起的奇蹟，背後都有一張遲早要還的帳單，而誰來還、由誰先還，往往才是一座城真正的考題。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從通格瓦人結蘆葦舟的天使之河，<br>
+        到西班牙人取名「天使之后」的四十四戶小村，<br>
+        從穆赫蘭引水進城那句「水到了，拿去吧」、後院噴出的油井，<br>
+        到好萊塢賣給全世界的陽光與明星、攤成無邊蔓城的高速公路，<br>
+        再到瓦茨與九二年街頭那兩場燒不熄的火——<br>
+        這段在不可能之地硬生生造城的歷史，<br>
+        最終回答了那個最初的問題：<br>
+        一座大城，<br>究竟能不能無中生有。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">☀ 🎬 🌴</div>
+  <p>水、夢，與一座無中生有的沙漠巨城 · 洛杉磯的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">LOS ANGELES · CONJURED FROM WATER AND DREAMS</p>
+</footer>
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
