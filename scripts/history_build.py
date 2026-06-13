@@ -268,6 +268,8 @@ ENTRIES = [
          zh="鐵路造出來的城：芝加哥把草原變成錢的身世", en="Chicago: The City the Portage Chose, the Railroad Built, the Fire Reinvented", lat=41.88, lng=-87.63),
     dict(src="美國/紐奧良_最不像美國的美國城.html", slug="neworleans", cat="city", group="美國 United States",
          zh="最不像美國的美國城：紐奧良的克里奧爾與爵士身世", en="New Orleans: The Most Un-American American City — River, Creole & Jazz", lat=29.95, lng=-90.07),
+    dict(src="美國/底特律_汽車之城的暴起與暴落.html", slug="detroit", cat="city", group="美國 United States",
+         zh="汽車之城的暴起與暴落：底特律，廢墟裡剩下什麼", en="Detroit: The City That Put the World on Wheels — and Then Fell", lat=42.33, lng=-83.05),
 
     # ---------- 美國城市 ----------
     dict(src="美國/西雅圖_雨木與重新發明.html", slug="seattle", cat="city", group="美國 United States",
