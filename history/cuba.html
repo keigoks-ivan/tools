@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>糖、奴隸、革命，與九十英里外的帝國：古巴的身世</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#15565e;
+  --sea-deep:#0a3138;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(21,86,94,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(21,86,94,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #1c6670 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(21,86,94,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(10,49,56,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(21,86,94,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ===== econ-layer callout boxes (deepen / counterfactual) ===== */
+.deepen{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(176,141,52,.07);border:1px solid rgba(176,141,52,.32);border-left:4px solid var(--gold);border-radius:3px}
+.deepen .dh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--rust);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.deepen p{margin:.7rem 0;text-align:justify}
+.cf{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(21,86,94,.05);border:1px dashed rgba(21,86,94,.4);border-radius:3px}
+.cf .cfh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--sea-deep);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.cf p{margin:.7rem 0;text-align:justify}
+/* ===== dark-section legibility (boxes + stats + pull + timeline + interlude) ===== */
+.dark .deepen{background:rgba(216,196,160,.06);border-color:rgba(212,175,90,.4);border-left-color:#d4af5a}
+.dark .deepen .dh{color:#e2a878}
+.dark .cf{background:rgba(255,255,255,.045);border-color:rgba(212,175,90,.32)}
+.dark .cf .cfh{color:#d8c4a0}
+.dark .deepen p,.dark .cf p{color:#cdb494}
+.dark .deepen strong,.dark .cf strong{color:#c87a5a}
+.dark .deepen em,.dark .cf em{color:#d8a878}
+.dark .pull{background:linear-gradient(135deg,rgba(216,196,160,.07),rgba(176,141,52,.1));border-top-color:#d4af5a;border-bottom-color:#d4af5a}
+.dark .pull p{color:#ecd9b4}
+.dark .pull::before{color:#d4af5a}
+.dark .stat{background:rgba(216,196,160,.06)}
+.dark .stat .num{color:#d4af5a}
+.dark .stat .lbl{color:#c4af88}
+.dark .tl-text{color:#cdb494}
+.dark .tl-year{color:#e2a060}
+.dark .interlude p{color:rgba(243,238,226,.9)}
+.dark .interlude p .hl{color:#e2a060}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(21,86,94,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* ===== ACT / PART DIVIDER ===== */
+.part-div{max-width:900px;margin:5.5rem auto 1rem;padding:0 1.6rem;text-align:center;position:relative;z-index:2;scroll-margin-top:80px}
+.part-div .pn{font-family:'Cinzel',serif;font-size:.76rem;letter-spacing:.34em;color:var(--rust);text-transform:uppercase}
+.part-div .pt{font-family:'Noto Serif TC',serif;font-weight:900;font-size:1.7rem;color:var(--sea-deep);margin:.7rem 0 .3rem;letter-spacing:.05em}
+.part-div .pe{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--faint)}
+.part-div .pline{display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:1.1rem;color:var(--gold)}
+.part-div .pline span{height:1px;width:80px;background:linear-gradient(90deg,transparent,var(--gold))}
+.part-div .pline span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+.part-div .pline .dot{font-size:1rem;opacity:.8}
+.back-toc{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;color:var(--faint);text-decoration:none;text-transform:uppercase;transition:color .25s ease}
+.back-toc:hover{color:var(--gold)}
+.act,.finale{scroll-margin-top:70px}
+
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){heads=[].slice.call(document.querySelectorAll('h2'));}
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>=1480)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Sugar, the Shadow of the Giant, and an Island That Would Not Bow — Ninety Miles from the Empire</span>
+    <h1>糖、奴隸、革命，<br><span class="em">與九十英里外的帝國</span><br>古巴的身世</h1>
+    <p class="sub">這是一座被糖塑造、又被一個巨人的陰影籠罩了兩百年的島。它肥沃的紅土，曾長出全世界最多的糖；而那糖，是用一船船從非洲擄來的奴隸的血汗種出來的——古巴，因此成了一座「加勒比的非洲」。它扼守著墨西哥灣的咽喉，是「通往新世界的鑰匙」，於是北方那個日益強大的鄰居，早早就盯上了這枚成熟的果實——一八九八年，美國在古巴人即將贏得獨立的最後一刻介入，把勝利攫為己有，又用一紙「普拉特修正案」，把這座新生的共和國，變成了自己的後院、賭場與遊樂場。直到一九五九年，一群從山裡走下來的鬍子兵，推翻了這一切，宣布了一場社會主義革命——就在離邁阿密只有九十英里的地方。從此，這座小島成了冷戰最危險的前線：豬玀灣、十三天的飛彈危機、長達六十餘年的封鎖。它失去了蘇聯的靠山，在「特殊時期」的飢餓裡幾乎崩潰，卻始終沒有低頭。今天，它停著電、空著架、年輕人一波波渡海出走，可這座島依舊在那裡——倔強、疲憊，卻仍唱著它的音樂。這是糖、革命，與九十英里倔強的身世。</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">九</span>十英里。從古巴最北端的海岸，到美國佛羅里達的礁島，直線距離不過約一百五十公里——一個夏日午後，一艘快艇就能跨越的距離。可就是這短短九十英里的海，劃開了兩個世界：一邊是地球上最強大的資本主義帝國，一邊是西半球唯一的社會主義國家；一邊是邁阿密閃爍的天際線，一邊是哈瓦那（Havana）斑駁褪色、卻依舊優雅的老城。這九十英里的距離，幾乎是理解古巴一切的鑰匙——它太近了，近到無法擺脫北方那個巨人的呼吸；又太不肯屈服，倔強到寧可在封鎖與飢餓裡獨自撐著，也不肯低頭。一座加勒比的小島，何以會成為冷戰最危險的前線、何以會讓兩個超級強權把世界推到核戰的邊緣、何以會在失去一切靠山之後，依然固執地站著？要讀懂古巴，要讀懂這座島的光榮與它的疲憊，我們需要三把鑰匙。</p>
+  <p>第一把，是<strong>糖的詛咒（the Curse of Sugar）</strong>。古巴的命運，是被一種白色的結晶寫成的。它肥沃的紅土與溫暖的氣候，使它成為種植甘蔗的天堂；而當一七九一年，海地（Haiti）那場奴隸大革命，摧毀了當時世界第一的產糖殖民地之後，古巴便接過了那頂王冠，在十九世紀躍升為全世界最大的糖生產國。然而，糖是一種貪婪的作物——它需要大量的廉價勞力，於是古巴成了西半球最後、也是最密集的奴隸社會之一，一船船的非洲人被擄到這座島上，在甘蔗田與糖廠（ingenio）裡耗盡生命。糖，給了古巴財富，也給了它枷鎖：它讓這座島淪為單一作物的奴隸，把經濟的命脈，繫在一種商品的價格、與一個遙遠市場的胃口之上；它也讓非洲，永久地住進了這座島的血脈、信仰與鼓點裡，鍛造出一個全新的、混血的民族。<strong>糖，既是古巴的搖籃，也是它最初的鎖鏈——它塑造了這座島的財富、它的人民，與它日後一切依賴與反抗的底色。</strong></p>
+  <p>第二把，是<strong>北方巨人的陰影（the Shadow of the Giant）</strong>。古巴的地理，是一種宿命。它是加勒比海最大的島，橫臥在墨西哥灣的出口，自古就被稱作「通往新世界的鑰匙」——誰握住古巴，誰就扼住了整片加勒比的咽喉。於是，當北方那個年輕的共和國日益強大，它便像盯著一枚成熟的果實一樣，盯上了這座島，認定它遲早會「因地心引力而落入」自己手中。一八九八年，就在古巴人經過數十年的浴血苦戰、即將從西班牙手中贏得獨立的最後一刻，美國介入了那場戰爭，把勝利攫為己有；隨後一紙「普拉特修正案」（the Platt Amendment），賦予了美國隨意干預古巴內政的權利、租下了關塔那摩（Guantánamo），把這座剛剛誕生的共和國，變成了一個名義獨立、實則被監護的保護國。在此後的半個世紀裡，美國的資本擁有了古巴的糖、它的電力與電話，而哈瓦那，則淪為美國人的賭場、酒吧與後院。<strong>獨立，在贏得的那一刻就被偷走了；而此後古巴的全部歷史，都成了一場與這個近在九十英里之外的巨人，糾纏不清的愛恨。</strong></p>
+  <p>第三把，是<strong>革命與堅持：一座孤島的意志（the Revolution and the Will to Endure）</strong>。一九五九年，一場革命，試圖一舉斬斷這兩道枷鎖。一群由卡斯楚（Fidel Castro）與切·格瓦拉（Che Guevara）領導、從馬埃斯特拉山（the Sierra Maestra）裡走出來的鬍子兵，推翻了親美的獨裁者，並做出了一個讓全世界都屏住呼吸的選擇：在離美國只有九十英里的地方，建立一個社會主義國家，投入蘇聯的懷抱。這個選擇，把古巴推上了冷戰最危險的前線——豬玀灣的入侵、把世界推到核戰邊緣的十三天飛彈危機、長達六十餘年的經濟封鎖。它也讓這座小島，迸發出一種與它的體量完全不成比例的能量：它把軍隊派往非洲、把醫生派往全世界，在國際舞臺上扮演著一個「小巨人」。可這份堅持的代價同樣沉重——一黨專政、異見的壓制、一波波渡海出走的流亡者，以及一九九一年蘇聯崩塌後，那段在飢餓與黑暗中幾乎崩潰的「特殊時期」。<strong>糖的詛咒、北方巨人的陰影、革命與堅持</strong>——這三道密碼，織成了一座小島不成比例的、悲壯而倔強的身世。讓我們從那枚扼住海灣咽喉的「鑰匙」開始，一路走到今天那個停著電、卻仍不肯低頭的古巴，在每一個轉折處，聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-0">
+  <div class="act-head">
+    <span class="act-num">序章 · Ninety Miles and Three Codes</span>
+    <h2 class="act-title">九十英里之外：糖、巨人的陰影，與一座不肯低頭的島</h2>
+    <p class="act-sub">Ninety Miles from the Empire — Sugar, the Giant's Shadow, and an Island That Would Not Bow</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>翻開美洲的地圖，把目光落在墨西哥灣（the Gulf of Mexico）的入口處，你會看見一條狹長彎曲、像一條臥龍、又像一把鑰匙的島嶼，橫在加勒比海與大西洋之間——那就是古巴（Cuba）。它離美國佛羅里達的礁島群（the Florida Keys），只有約九十英里，一個晴朗的日子，從哈瓦那（Havana）的海堤上望出去，幾乎能感覺到那個龐然大物的呼吸。就是這九十英里的距離，定義了這座島一生的命運。因為一座島若離一個帝國這樣近，它就再也無法只屬於自己。古巴的悖論，近乎殘酷，也近乎荒誕：<strong>它是一座小小的島，人口從未超過一千兩百萬，土地不及一個中等省份；可它在過去兩個世紀裡所牽動的世界史的分量，卻大得不成比例。</strong>它曾是世界第一的產糖國，用甘蔗的甜，餵養了半個地球的餐桌，也用同一片甘蔗田，囚禁了上百萬從非洲被擄來的奴隸，成了西半球最密集的奴隸社會、人稱「加勒比的非洲」。它曾在獨立即將到手的最後一刻，被北方的巨人攫走了勝利，淪為一個有國旗卻無主權的「被監護的共和國」、一座屬於美國人的後院與遊樂場。然後，在一九五九年，這座島做了一件全世界都認為不可能的事：它在離超級強國只有九十英里的鼻尖底下，舉起了一面社會主義的紅旗，並且——在被封鎖、被孤立、被自己的盟友拋棄之後——它倔強地、不可思議地，撐過了六十餘年，至今未倒。要讀懂這座島為何能同時如此渺小又如此巨大、如此貧困又如此驕傲，你必須先握住三把鑰匙。</p>
+
+    <h3>第一把鑰匙：糖的詛咒——一根甘蔗如何鑄成一座島的命運</h3>
+    <p>第一把鑰匙，是<strong>糖的詛咒（the Curse of Sugar）</strong>——古巴一切財富、一切苦難、一切身世的最初源頭。要理解這座島，你必須先理解一根甘蔗。古巴的紅色沃土、充沛的雨水與漫長的陽光，幾乎是為甘蔗量身打造的；而真正把它推上世界之巔的，是一場發生在鄰島的革命的空缺。十八世紀末，加勒比最富庶的法屬殖民地聖多明各（Saint-Domingue，即日後的海地）爆發了人類史上唯一一場成功的大規模奴隸起義，曾經供應全歐洲糖與咖啡的「安地列斯明珠」，在烈火中化為灰燼。世界的糖，一夕之間出現了一個巨大的窟窿。古巴的種植園主，敏銳地嗅到了這個機會，他們把整座島變成了一架巨大的製糖機器——森林被砍倒，村莊被甘蔗淹沒，一座座冒著黑煙的糖廠（ingenio）拔地而起。到了十九世紀中葉，這座島生產了全世界約三分之一的糖，成了名副其實的「世界糖罐」。然而，糖是一種貪婪的作物。它需要在採收的瞬間集中投入海量的、廉價的、可被驅使到死的勞動力——而在那個時代，這意味著一件事：奴隸。當英美各國已逐漸廢止奴隸貿易時，古巴的甘蔗田反而張開了血盆大口，把跨大西洋奴隸貿易的最後、也最殘酷的高潮，吸納進自己的咽喉。據估計，前後約有近百萬名非洲人，被裝進船艙、橫渡大西洋、被傾倒在這座島上，在甘蔗的甜味裡耗盡生命。<strong>於是，糖在創造財富的同時，也鑄造了古巴社會最深的兩道烙印：一是它把一座島的命脈，整個繫在了一種商品的價格、與一個遙遠市場的胃口之上；二是它把成千上萬的非洲靈魂，連同他們的神明、鼓點、語言與意志，永遠地種進了這片土地——讓古巴在血統、信仰與靈魂深處，成了「加勒比的非洲」。</strong></p>
+
+    <h3>第二把鑰匙：北方巨人的陰影——成熟的果實與被偷走的獨立</h3>
+    <p>第二把鑰匙，是<strong>北方巨人的陰影（the Shadow of the Giant）</strong>——這座島再也無法掙脫的地緣宿命。古巴的不幸，在於它生得太是地方了。它橫臥在墨西哥灣的咽喉，扼住了通往新奧爾良、通往美國整個南方腹地的海上門戶——西班牙人很早就稱它為「通往新世界的鑰匙」，並把這把鑰匙，印上了哈瓦那的城徽。一座扼住咽喉的島，注定會被它身旁那個正在崛起的巨人，日夜覬覦。早在十九世紀初，美國的開國元勳們就用一句意味深長的比喻，道破了華盛頓的心思：古巴，是一顆「成熟的果實」——當西班牙這棵老樹終於枯朽，這顆果實，將「因萬有引力的法則」，自然而然地，落進美國的手心。他們不必急著去摘，只需耐心地等待它墜落。這份耐心，等了將近一個世紀。一八九五年，古巴人在民族英雄馬蒂（José Martí）的號召下，發動了第三次、也是最後一次獨立戰爭，用三年的血戰，幾乎已經把疲憊的西班牙人逼到了崩潰的邊緣。然而，就在獨立即將瓜熟蒂落的最後一刻，一八九八年，緬因號（USS Maine）在哈瓦那港神秘爆炸，美國藉此投入戰爭，僅僅幾個月，便擊潰了西班牙，然後——在巴黎的談判桌上，把古巴人用鮮血換來的勝利，整個攫了過去。古巴人沒有被邀請參加那場決定自己命運的談判。果實，終於落地了，卻不是落進古巴人自己的手裡。<strong>更深的羞辱還在後頭：美國雖讓古巴名義上「獨立」，卻在它的憲法裡，強行塞進了一條普拉特修正案（the Platt Amendment）——它賦予美國隨時出兵干預古巴內政的「合法」權利，並永久租走了關塔那摩（Guantánamo）的海灣作為軍事基地。於是，這個新生的共和國，從誕生的第一天起，就不是一個真正主權的國家，而是一座被巨人監護的後院、一座供北方人縱情聲色的遊樂場——獨立的果實，剛剛落地，就被插上了一根帝國的吸管。</strong></p>
+
+    <h3>第三把鑰匙：革命與堅持——九十英里外的一座孤島的意志</h3>
+    <p>第三把鑰匙，是這座島最壯烈、也最孤獨的底色——<strong>革命與堅持：一座孤島的意志（the Revolution and the Will to Endure）</strong>。如果說前兩道密碼，講的是古巴如何被糖奴役、被巨人吞噬的那一面，那麼這第三道密碼，講的，就是它如何反過來，用一場驚天動地的革命，向這兩者同時宣戰、並為此付出與堅守了六十餘年的那一面。一九五九年的元旦，當卡斯楚（Fidel Castro）的鬍子兵，帶著切·格瓦拉（Che Guevara）這位阿根廷醫生出身的革命家，從馬埃斯特拉山（Sierra Maestra）一路打進哈瓦那時，他們所推翻的，不只是一個腐敗的獨裁者巴蒂斯塔（Fulgencio Batista），更是上述那整套延續了半世紀的秩序——對糖的依賴、對美國的依附。這場革命做出了一個讓全世界目瞪口呆的抉擇：它要在離華盛頓只有九十英里的地方，建立一個社會主義國家，並一頭投入冷戰另一極——蘇聯——的懷抱。於是，這座小島，瞬間從一個不起眼的後院，變成了冷戰最危險的前線。一九六一年的豬玀灣（Bay of Pigs），古巴擊退了美國中情局策動的入侵；一九六二年的飛彈危機（the Cuban Missile Crisis），蘇聯的核彈頭運抵這座島，整個人類，在十三天裡，被推到了核戰爭的懸崖邊上，比歷史上任何時刻都更接近毀滅。此後是長達六十餘年、至今未解的經濟封鎖。<strong>而當一九九一年蘇聯轟然解體、補貼一夕斷絕，古巴墜入了被稱為「特殊時期」（el Período Especial）的至暗深淵——飢餓、停電、牛車重新上路——幾乎所有人都斷定，這座島撐不過那個冬天。可它，竟又一次站住了。</strong>這份不肯低頭，付出了極其沉重的代價：一黨的專政、對異見的壓制、以及一波又一波乘著木筏、橫渡那要命的九十英里、逃向北方的出走者。可它也換來了一些不成比例的東西：一套讓嬰兒死亡率低於美國、讓醫生輸出到全球的醫療體系；一場幾乎掃除了文盲的教育革命；以及，一種小國對著超級強國說「不」、並真的撐住了的、近乎倔強的主權尊嚴。代價與成績，恥辱與光榮，就這樣，被同一場革命，永遠地擰在了一起。</p>
+
+    <div class="pull"><p>古巴的身世，藏在一個近乎悖論的句子裡：一座因糖而富、卻也因糖而被奴役、被繫於外部市場的小島，因地理而被九十英里外的巨人盯上、收為被監護的後院；而最終，正是對「糖的依賴」與「巨人的陰影」的雙重反抗，催生了一場在強權鼻尖底下倔強堅持了六十餘年、代價與光榮並存的革命。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 三道將貫穿全書的密碼</span>
+      <p>這本書接下來的故事，將圍繞三把總鑰匙，反覆迴響。第一把是「<strong>糖的詛咒（the Curse of Sugar）</strong>」——從聖多明各的烈火留下的空缺，到古巴登上世界糖王寶座；甘蔗如何召喚奴隸船、把這座島變成西半球最密集的奴隸社會、種下「加勒比的非洲」的血脈與鼓點；以及單一作物如何把一座島的全部命運，鎖死在一種商品的價格、與一個遙遠市場的胃口之上。第二把是「<strong>北方巨人的陰影（the Shadow of the Giant）</strong>」——從扼住海灣咽喉的「鑰匙」地理，到華盛頓「成熟果實」的世紀等待；一八九八年的介入如何在獨立的最後一刻偷走勝利、普拉特修正案與關塔那摩如何把新共和國變成一座被監護的後院與遊樂場。第三把是「<strong>革命與堅持（the Revolution and the Will to Endure）</strong>」——卡斯楚與切·格瓦拉如何在巨人的鼻尖下舉起紅旗、豬玀灣與飛彈危機如何把這座島推上冷戰最危險的前線、特殊時期的飢餓如何幾乎將它擊垮，以及它在一黨壓制與木筏出走的代價之下，所固執守住的醫療、教育與主權尊嚴。</p>
+      <p>而本書最深的洞察，將是這三者，其實是一條<strong>因果相連的鎖鏈</strong>。<em>糖，首先造就了一個依賴外部、極度不平等的殖民社會，把古巴的命脈整個繫在了單一商品與單一市場之上（糖的詛咒）；接著，正是這份甘蔗的甜、與這座島扼住海灣咽喉的地理，共同招來了北方的巨人——它在獨立即將到手的最後一刻介入、偷走了勝利，把古巴從西班牙的殖民地，換成了美國監護下的後院，把那份對糖的依賴，原封不動地轉嫁到了一個新的主人手上（從糖的詛咒，到巨人的陰影）；而正是對這雙重枷鎖的徹底反抗——既要砸碎對糖與單一市場的依賴，又要掙脫北方巨人半世紀的監護——才終於在一九五九年，引爆了那場義無反顧的革命，並換來此後九十英里之外、代價慘重卻不肯低頭的倔強堅持（從巨人的陰影，到革命與堅持）。</em>糖給了它依賴的鎖鏈，地理給了它被吞噬的宿命，而革命，則給了它在依賴與吞噬之後，依然要做自己主人的、近乎悲壯的意志——三者咬合，就是這座九十英里之外、渺小卻又巨大的孤島。理解了這三把鑰匙如何彼此咬合，你就讀懂了古巴：一座被糖鑄就、被巨人覬覦、卻終究不肯低頭的島。而這一切，要從哥倫布登上這片土地、驚嘆它是「人類眼睛所見過最美的地方」的那個清晨，開始說起。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<div class="part-div reveal" id="part-1">
+  <span class="pn">第一部</span>
+  <h2 class="ptitle pt">糖與枷鎖</h2>
+  <div class="pe">Sugar and Chains</div>
+  <div class="pline"><span></span><span class="dot">❂</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-1">
+  <div class="act-head">
+    <span class="act-num">第1章 · The Key to the Gulf</span>
+    <h2 class="act-title">海灣的鑰匙：加勒比最大島的地理身世</h2>
+    <p class="act-sub">Geography, the Taíno and Columbus</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>要讀懂古巴，得先把一張加勒比海的地圖攤開，然後讓目光停在那道從佛羅里達半島尖端一路向東南、像一柄細長彎刀般橫臥在海面上的島影。那是古巴——加勒比海最大的島，東西長約一千二百公里，南北最窄處卻不過三十多公里，狹長得彷彿大自然刻意把它拉成了一條封鎖線。它躺在墨西哥灣（the Gulf of Mexico）的出口上，西端的尖角幾乎要去觸碰猶加敦半島（the Yucatán），北面隔著一道窄窄的海峽與佛羅里達相望，東面則守著向風海峽（the Windward Passage）通往伊斯帕尼奧拉。任何一艘滿載著墨西哥白銀、要從加勒比駛回西班牙的大帆船，都必須先穿過古巴守著的這道水門；任何一支想從大西洋潛入新世界腹地的艦隊，也都得先過古巴這一關。於是，早在任何一個民族在這座島上建立國家之前，地理就已經替它寫好了第一行命運的判詞：它不只是一座島，它是一把鑰匙——一把扼住整個新世界海上咽喉的鑰匙。</p>
+
+    <p>西班牙人很早就看懂了這件事，並且毫不掩飾地把它說了出來。他們稱古巴為<strong>「通往新世界的鑰匙」</strong>（the Key to the Gulf，西語作 <em>la Llave del Nuevo Mundo</em>）。這不是一句詩意的恭維，而是一句冷靜的戰略判斷：誰握住了古巴，誰就握住了進出墨西哥灣與加勒比的開關。這個身分如此深地烙進了這座島的自我認知，以至於數百年後，當古巴終於成為一個獨立國家、設計自己的國徽時，他們在盾形紋章的上方，正中央，鄭重地畫上了一把金色的鑰匙——懸在佛羅里達與猶加敦兩塊陸地之間，鑰匙下方是初升的太陽。直到今天，這把鑰匙仍然在古巴的國徽上閃著光。一個國家把自己對外宣告的第一個象徵，不是猛獸、不是星辰、不是某位英雄，而是一把鎖匙——這本身就說盡了地理對古巴的全部安排：你的價值，從一開始就不在於你是誰，而在於你扼住了誰的去路。</p>
+
+    <h3>紅土、暖風與一座甘蔗的天堂</h3>
+    <p>然而地理給古巴的，遠不只是一個尷尬而危險的位置。它還給了這座島一份足以讓任何農人垂涎的厚禮：肥沃得近乎奢侈的土壤，與溫暖而慷慨的氣候。古巴的大部分土地覆蓋著一種深紅近紫的黏質紅土，當地人後來給它取了個帶著敬意的名字——「馬坦薩斯紅土」（matanzas），那是熱帶風化作用千萬年積累下來的沃壤，鬆軟、深厚、排水良好，含著作物渴求的養分。島上沒有真正的高山屏障切割出極端氣候，東部雖有馬埃斯特拉山脈（the Sierra Maestra）隆起，但廣大的中西部是綿延起伏的平原與緩坡。一年之中，氣溫終年溫暖，雨季與旱季分明，海風從兩面吹來，調節著濕熱。這樣的紅土，這樣的暖風，這樣的雨水節奏，對某一種植物而言，簡直就是上帝預先備好的天堂——那種植物，叫甘蔗。</p>
+    <p>同樣得天獨厚的，還有菸草。古巴西部比那爾德里奧（Pinar del Río）一帶的紅土與石灰岩地形，配上恰到好處的濕度與日照，孕育出後來令全世界癮君子魂牽夢縈的菸葉——那是日後「哈瓦那雪茄」傳奇的物質根基。甘蔗與菸草，一甜一辛，將成為這座島寫給世界的兩封名片。但在這一切繁華降臨之前，沒有人能預見，這份土壤的慷慨，竟會是一道偽裝成祝福的詛咒。肥沃的紅土招來的不只是農夫，還有種植園；招來的不只是甘蔗，還有為了榨取這份甜蜜而被成批擄來、鎖在這座島上勞作至死的數十萬非洲人。地理給古巴的第一份禮物是位置，第二份禮物是土壤；而這兩份禮物，恰好分別埋下了這座島日後兩道最深的宿命——一道叫「巨人」，一道叫「糖」。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一把鑰匙如何決定一座島的命運</span>
+      <p>在帆船時代，海洋不是一片自由的水域，而是一張由洋流、季風與航道編織成的高速公路網。從新世界滿載金銀返回歐洲的西班牙寶船隊（the Flota），幾乎別無選擇，必須順著墨西哥灣流，沿古巴北岸、穿過佛羅里達海峽，才能借助洋流之力橫渡大西洋。這意味著，古巴的首府哈瓦那（Havana），恰好坐落在整個西屬美洲財富外運的唯一咽喉上。誰控制了哈瓦那的港口，誰就能補給、護衛、或截斷這條黃金血管。這把「鑰匙」的價值，不在於島上產出什麼，而在於它鎖住了什麼。也正因如此，古巴的歷史從一開始就不是一部安靜的農業史，而是一部被海權、被帝國、被列強反覆爭奪的戰略史——它的肥沃使它富有，它的位置使它永遠不得安寧。一座扼住咽喉的島，注定要替別人流很多血。</p>
+    </div>
+
+    <h3>白板之前：泰諾人的島嶼</h3>
+    <p>在歐洲人的帆影出現在地平線上之前，這座島並非無人之境。它早已有了自己的主人、自己的語言、自己的神明與節奏。住在這裡的，主要是泰諾人（the Taíno）——屬於阿拉瓦克語族的一支，數千年前乘著獨木舟，從南美洲的奧里諾科河流域，沿著加勒比的島鏈一路北遷而來，最終在這片溫暖的島上定居。他們是農人，也是漁人。他們用一種叫「coa」的木棒，在堆起的土丘上種植木薯（cassava）、玉米、番薯、辣椒與棉花；他們把有毒的木薯巧妙地加工成可食的麵餅，這是足以維繫稠密人口的精緻農業智慧。他們住在以茅草與木柱搭建、被稱作「bohío」的圓形屋舍裡，村落由一位叫「cacique」的酋長統領。他們崇拜被稱作「zemí」的神靈，在莊嚴的球賽與儀式中與神溝通。據後世學者估計，在歐洲人到來的前夕，這座島上的泰諾人或許有數十萬之眾——確切數字已永遠無法得知，但那無疑是一個生機盎然、自成天地的世界。</p>
+    <p>泰諾人也在古巴的肌理裡留下了一些字眼，那些字眼穿越了五百年的腥風血雨，至今仍掛在這座島的嘴邊。他們把一種用葉子捲起、點燃吸食的東西叫做「tabaco」——那便是「菸草」一詞的源頭；他們把一張用棉繩織成、懸掛在兩樹之間用以安睡的網，叫做「hamaca」——那便是「吊床」的由來。甚至「古巴」（Cuba）這個名字本身，多半也來自泰諾語，意思眾說紛紜，或指「肥沃之地」，或指「廣大的地方」。一個民族幾乎被從地球上抹去，卻把自己對這座島最樸素的命名，留在了征服者的舌尖上，留在了全世界的語言裡。這是歷史最殘酷也最溫柔的弔詭：消失的人，仍在替活著的人說話。</p>
+
+    <h3>1492年：最美的土地，與一塊被抹平的白板</h3>
+    <p>1492年10月，一支由三艘小船組成的船隊，在橫渡了令人絕望的茫茫大西洋之後，抵達了加勒比的島嶼。船隊的領航者，是熱那亞人哥倫布（Christopher Columbus）——他原本要去尋找通往亞洲的西航路，卻在不知情中撞上了一塊歐洲人聞所未聞的大陸的門檻。10月28日，他的船首次靠上古巴的海岸。眼前的景象讓這位見慣風浪的航海家也為之屏息：蒼翠的山巒、清澈的河流、芬芳的草木、成群斑斕的飛鳥。他在航海日誌裡寫下了那句後來被反覆引用的讚嘆——這是<strong>「人類眼睛所見過最美的土地」</strong>（the most beautiful land that human eyes have ever seen）。他甚至一度誤以為這片美麗的海岸，就是傳說中盛產香料與黃金的亞洲大陸。那一刻，他看見的是天堂；他沒有看見的是，他的到來，將為這座天堂帶來一場近乎滅頂的浩劫。</p>
+    <p>讚嘆過後，便是征服。西班牙人並未立刻佔據古巴，他們先在鄰近的伊斯帕尼奧拉島站穩腳跟，直到1511年，迪亞哥·貝拉斯克斯（Diego Velázquez）才率軍正式登島，開始系統性的征服。征服的過程伴隨著殘酷的鎮壓——泰諾酋長阿圖埃（Hatuey）率眾抵抗，兵敗被俘，最終被綁上火刑柱燒死，據傳說，當神父勸他臨終受洗、好讓靈魂上天堂時，他反問：天堂裡有沒有西班牙人？得到肯定的答覆後，他寧可不上那樣的天堂。阿圖埃成了古巴最早的反抗象徵。但真正讓泰諾人迅速近乎滅絕的，並不主要是刀劍與火刑，而是兩樣更無形也更致命的東西：一是被強迫投入金礦與田地的勞役制度（encomienda），把整個族群當作可消耗的勞動牲口；二是隨歐洲人一同登陸的天花、麻疹、流感等舊大陸疾病——對這些病菌，從未接觸過的泰諾人毫無任何免疫力。在短短幾十年內，這座島上原本數十萬的原住民人口，便以一種令人不忍卒讀的速度崩塌、凋零，幾近消失。一個延續了數千年的世界，在一兩個世代之間，被抹得近乎乾淨。</p>
+
+    <div class="warn">
+      <p>泰諾人的消亡，是人類史上最沉重的相遇悲劇之一。其崩塌的主因——舊大陸傳入的疾病與被迫的奴役勞動——使精確的死亡數字無從計算，後世估計差異極大，本文不為任何單一數字背書。需要被記住的不是統計，而是事實本身：一個完整的人類社群，連同它的語言、信仰與生活方式，在征服的洪流中被沖刷到近乎絕跡。對這段歷史，唯一誠實的態度是哀矜，而非獵奇。</p>
+    </div>
+
+    <p>泰諾人的迅速凋零，在這座島的命運裡撕開了一道巨大而致命的真空。一塊本已有人耕耘、有人歌唱、有人崇拜的土地，在短短數十年內，被抹成了一塊近乎空白的白板——肥沃依舊，紅土依舊，暖風依舊，唯獨原來的主人不在了。而大自然厭惡真空，歷史更厭惡真空。一片如此肥沃、又如此渴求勞動力的土地，必然要被重新填滿。征服者很快發現，被抹去的原住民無法再為他們的甘蔗田提供足夠的雙手，於是他們把目光投向了大西洋的另一岸——非洲。一艘艘載滿被擄掠的非洲人的船隻，將開始橫渡那片哥倫布曾經橫渡的海洋，駛向這座「最美的土地」。古巴的人口、血脈、文化、音樂與信仰，都將在這塊被抹平的白板上，由歐洲人與非洲人重新書寫。今日古巴人臉上交織的膚色，鼓聲裡跳動的非洲節拍，信仰中歐非神靈共處的薩泰里亞（Santería），全都源於這一刻——源於一個世界的消失，與另一場填補的開始。</p>
+
+    <div class="aside">值得一提的是，那位記錄並痛斥這場浩劫的人，正是隨征服者同行的道明會修士拉斯·卡薩斯（Bartolomé de las Casas）。他曾親眼目睹古巴的征服，甚至一度自己也持有泰諾勞工，後來良心覺醒，餘生奔走疾呼，為原住民的權利向西班牙王室上書、辯論、著書。他留下的文字，成為後世理解這場悲劇最重要、也最沉痛的見證之一。歷史的弔詭在於：替消失者發聲的，往往來自加害者的陣營。</div>
+
+    <div class="pull"><p>地理給了古巴兩份禮物——一個扼喉的位置，與一片肥沃的紅土；而這兩份禮物，恰好分別是「巨人」與「糖」這兩道宿命的引信。</p></div>
+
+    <p>於是，在任何人喊出「自由古巴」這個口號之前的最初時刻，這座島的劇本就已經寫好了開頭：它是一把鑰匙，扼住新世界的海上咽喉；它是一片紅土，是甘蔗與菸草的天堂；而它原本的主人，已在征服的洪流中近乎消失，把這座島變成一塊等待被重新填滿的白板。後來發生在古巴的一切——奴隸的鎖鏈、糖價的起落、北方鄰國貪婪的目光、一場又一場為自由與尊嚴而起的反抗——都能在這個開頭裡，找到最初的伏筆。理解了這把「鑰匙」，你就握住了讀懂古巴一切矛盾的第一把鑰匙：它的甜蜜與苦難、它的美麗與不安，從來都不是後來才染上的，而是它出生時就刻在地理裡的胎記。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>古巴日後最揮之不去的陰影——那個盤踞在它北方、只隔一道海峽的龐然鄰國——其實在哥倫布登陸之前，就已由地理悄悄寫下了引信。當西班牙人把這座島命名為「通往新世界的鑰匙」時，他們道破的是一個將糾纏古巴數百年的真相：一把鑰匙，永遠是別人爭奪的對象。誰握住了它，誰就握住了進出墨西哥灣的開關。這個扼喉的位置，今天讓它在西班牙寶船隊的航道上不得安寧，明天就會讓它落入另一個崛起於北方的強權的凝視之中。當這個強權在十九世紀成熟、開始把整個加勒比視為自家後院時，那把畫在國徽上的金色鑰匙，便註定要成為它念茲在茲、必欲收入囊中的東西。古巴與北方巨人之間長達兩個世紀的拉扯，第一道密碼，是地理在這把「鑰匙」上先刻下的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-2">
+  <div class="act-head">
+    <span class="act-num">第2章 · The Fortress of the Fleets</span>
+    <h2 class="act-title">艦隊、要塞與哈瓦那</h2>
+    <p class="act-sub">Havana, Key to the New World</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>在哥倫布（Christopher Columbus）的眼睛離開古巴海岸之後的最初一個世紀裡，這座島嶼幾乎不是任何人心中的目的地，而只是一道屏息以待的門檻。西班牙人來到加勒比，眼裡看的是黃金；而黃金不在古巴。當墨西哥的阿茲特克（Aztec）王座被科爾特斯（Hernán Cortés）推倒、當秘魯的印加（Inca）帝國在皮薩羅（Francisco Pizarro）的劍下崩解，整個西屬美洲的財富重心，便牢牢地釘在了大陸的內臟——墨西哥的塔斯科、薩卡特卡斯，秘魯安地斯高原上那座海拔四千公尺、被稱作「富山」的波托西（Potosí）銀礦。古巴本身的少量沖積金，在征服初期就被淘洗殆盡，原住民泰諾（Taíno）人也在勞役與瘟疫中急速凋零。於是這座原本被瓜納哈塔貝伊與泰諾人世代居住的島，在西班牙人的帳本上，幾乎被劃成了一片空白。然而正是這片「空白」，後來被一樣比黃金更難取代的東西填滿了——那就是<strong>位置</strong>。古巴不在財富的源頭，卻恰好坐在財富回家的路口上。</p>
+
+    <p>要明白這一點，得先讀懂風與洋流如何替帝國畫好了航線。從加勒比滿載白銀的船隊，無法逆著信風直接東返伊比利亞，它們必須先北上，鑽進佛羅里達海峽（the Florida Straits）那道狹窄而湍急的水道，借灣流（the Gulf Stream）這條天然的輸送帶，被一路向北、向東甩進大西洋，再順著西風橫渡返鄉。而這條唯一可行的歸途，它的咽喉就掐在古巴西北角。一艘從韋拉克魯斯或卡塔赫納啟航的船，無論裝的是墨西哥的銀錠還是秘魯的銀條，幾乎都得先在古巴的某個港灣裡停下，補水、修帆、等待同伴、等待季風。而在這座島所有的港灣裡，有一個深邃、避風、入口窄而內裡寬闊得足以藏下整支艦隊的天然良港——哈瓦那（Havana）。地理沒有給古巴黃金，卻給了它一把鑰匙；而這把鑰匙能打開的，是整個西班牙帝國的金庫之門。</p>
+
+    <h3>一座為白銀而生的港</h3>
+    <p>哈瓦那的命運，是被一個制度坐實的。十六世紀中葉，為了對抗在加勒比愈來愈猖獗的法國與英國私掠船，西班牙王室確立了著名的「艦隊體系」（the flota system）——禁止單船散航，所有往返美洲的貿易船隻必須編成龐大的武裝船隊，每年定期、結伴、在戰艦護衛下集體橫渡大西洋。每年春天，兩支主要的艦隊分頭駛向新大陸：一支開往墨西哥的韋拉克魯斯，承接來自北方銀礦的白銀；另一支開往巴拿馬地峽外的波托韋洛，那裡堆放著由騾隊翻越地峽、自秘魯波托西運來的安地斯之銀。兩支艦隊在各自的港口裝滿財寶之後，會在約定的時節，齊集於同一個地點會師、整編，再以一支密不透風的鋼鐵船陣，一同踏上歸途。<strong>那個會師的地點，就是哈瓦那。</strong>每年夏末，當數十艘乃至上百艘大帆船桅杆如林地擠滿哈瓦那港時，這座小城短暫地成為地球上最富有的一塊水面——它的港灣裡，漂浮著足以撼動整個歐洲物價的白銀。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼帝國的命脈會掛在一個港口上</span>
+      <p>近代早期的全球貿易，是一場與風、洋流和海盜的三方博弈。在帆船時代，航線不是人選的，是風選的——灣流與信風決定了從美洲返歐只有「經佛羅里達海峽北上」這唯一一條高效路徑，而這條路徑的出發整備點，幾乎只能是哈瓦那。當西班牙把分散的貿易強行集中成一年一度的武裝艦隊，它就同時做了兩件事：一方面，集中護航讓白銀更安全地抵達塞維亞，餵養著哈布斯堡王朝在歐洲的戰爭機器；另一方面，它也把整個帝國的經濟命脈，壓縮成了一個可以被一擊致命的單點。誰若能在哈瓦那港外攔下、或在港內焚毀那支艦隊，誰就能讓馬德里的國庫瞬間失血。於是這座島嶼的價值被徹底重新定義：它不靠生產任何東西致富，它靠的是「扼守一條別人非走不可的路」。這種純粹由地理位置帶來的戰略價值，將成為古巴此後四百年命運的底色——它永遠是某個大國眼中那把不容他人染指的鑰匙。</p>
+    </div>
+
+    <p>正因為哈瓦那承載著如此致命的重量，它也立刻成為敵人最垂涎的獵物。一五五五年，法國私掠者雅克·德·索爾（Jacques de Sores）率船攻入幾乎不設防的哈瓦那，洗劫並焚毀了這座城——這場奇恥大辱，徹底驚醒了西班牙王室。一個道理變得鐵一般清楚：你不能讓帝國的咽喉裸露在外。從此，西班牙不再把哈瓦那當作一個普通的殖民港口，而是當作一座必須以舉國之力守護的堡壘。石頭，開始一車一車地運來；要塞，一座接一座地拔地而起。哈瓦那從一個避風的良港，被改造成了西班牙在新大陸最堅固的拳頭。</p>
+
+    <h3>鑰匙之城與它的鎖</h3>
+    <p>守護哈瓦那的工程，是十六、十七世紀美洲最浩大的軍事建設。在港口入口的東岸，西班牙人用珊瑚礁石砌起一座扼守航道的巨大要塞——莫羅城堡（Castillo de los Tres Reyes del Morro），它高踞於岬角之上，火砲俯瞰著每一艘想要進出哈瓦那的船。在它對面與港內，又陸續築起了拉富爾薩（La Real Fuerza）與拉蓬塔（La Punta）等堡壘，與莫羅構成交叉火網。到了夜裡，一條粗重的鐵鏈會從莫羅腳下橫拉到對岸的拉蓬塔，像一道鎖鏈封住港口的咽喉，任何不速之客都別想趁夜潛入。哈瓦那不再只是一座城，而是一整套精密的鎖。也正是在這個時期，西班牙王室賜給了它一個沉甸甸的稱號——<strong>「通往新世界的鑰匙」</strong>（La Llave del Nuevo Mundo），這四個字後來甚至被鑄進了城市的紋章。一把鑰匙，配上一整套鎖，這就是早期哈瓦那的真面目。</p>
+
+    <p>而在這座要塞之城的城牆之內，生長出的並不是一個尋常的殖民社會。十六、十七世紀的古巴，與後來人們想像中那片甘蔗無垠、奴工成群的「糖島」幾乎毫無相似之處。這裡沒有龐大的種植園，沒有滾滾的蔗糖財富，島嶼內陸的大片土地仍是放牧牛群、出產獸皮與煙草的鬆散莊園。真正讓哈瓦那繁榮的，是艦隊。每年艦隊停泊的那幾個月，整座城市為之沸騰——船需要修補，於是造船廠日夜敲打，哈瓦那後來成為整個西屬美洲最重要的造船基地，用古巴堅硬的硬木為國王打造戰艦；數以千計的水手、士兵、商人湧入城中，他們要吃、要喝、要住、要尋歡，於是旅店、酒館、市集、教堂應運而生。古巴的早期經濟，幾乎完全是「艦隊的隨從經濟」——它靠服務那支過境的白銀船隊而活。</p>
+
+    <div class="cards">
+      <div class="card"><h5>不是種植園</h5><p>早期古巴沒有大規模蔗糖種植，內陸以牧牛、獸皮與煙草為主。真正的財富不在土地，而在過境的艦隊。</p></div>
+      <div class="card"><h5>而是中繼站</h5><p>哈瓦那是寶藏艦隊每年會師、補給、整編的樞紐。城市為服務白銀船隊而生，是帝國海路上的驛站。</p></div>
+      <div class="card"><h5>更是兵工廠</h5><p>士兵、水手、造船廠構成了城市的骨架。哈瓦那的硬木造船業，為西班牙艦隊打造一艘艘戰艦。</p></div>
+    </div>
+
+    <p>因此，若要為早期的哈瓦那畫一幅肖像，它更像一座由士兵、水手與造船廠構成的軍事中繼站，而非一片農耕殖民地。城裡的節奏，不是隨著耕種與收穫的農時，而是隨著艦隊的來去而起伏。艦隊在，則百業興旺、銀錢如水；艦隊一走，城市便陷入漫長的等待，重新沉入熱帶午後的慵懶。一代又一代的哈瓦那人，就在這種「等待艦隊—服務艦隊—送別艦隊」的循環中過活。他們的財富不從腳下的土地裡長出來，而從海上的桅杆林裡漂進來。這是一種奇特的存在——一座靠著「位置」而非「生產」維生的城市。它告訴我們一個關於古巴最古老的真相：在很長的歲月裡，這座島的價值，從不在於它「有什麼」，而在於它「在哪裡」。</p>
+
+    <div class="pull"><p>地理沒有給古巴黃金，只給了它位置；而位置，是一把所有強者都想攥在手裡、絕不容他人染指的鑰匙。</p></div>
+
+    <h3>一七六二：被英國人撬開的那扇門</h3>
+    <p>這種以「位置」為唯一價值的格局，維持了將近兩百年，直到一場席捲全球的戰爭把它撕開了一道口子。十八世紀中葉的七年戰爭（the Seven Years' War），是人類史上第一場真正意義的世界大戰，戰火從歐洲一路燒到北美、印度與加勒比。一七六二年，當西班牙不智地捲入這場戰爭、站到了英國的對立面，英國的目光立刻投向了那把眾所周知的鑰匙——哈瓦那。當年夏天，一支龐大的英國艦隊與陸軍突然出現在哈瓦那城外。守軍倚仗的莫羅城堡固然堅固，卻擋不住英軍從陸路迂迴、耐心圍攻；經過數週慘烈的攻防、付出了酷暑與熱病奪走的大量性命之後，莫羅終於陷落，哈瓦那這座「通往新世界的鑰匙」，第一次落入了西班牙以外的強權之手。消息傳到馬德里，舉國震動——帝國的咽喉，竟被人攥住了。</p>
+
+    <div class="aside">英國對哈瓦那的佔領只持續了大約十一個月，卻像一道閃電，照亮了西班牙重商主義鎖鏈下被壓抑了兩百年的可能性。佔領期間，英國商人立刻向這座一向只准與西班牙做生意的港口，傾瀉進大量的商品與——最致命的——奴隸。歷史學者估計，在這短短不到一年裡，輸入古巴的非洲奴隸數量，竟可與此前數十年的總和相比。英國人帶來的不是別的，正是把一座軍事中繼站改造成一片種植園殖民地所需的兩樣燃料：自由的貿易，與廉價的人力。當西班牙人在一七六三年的巴黎和約中，以割讓佛羅里達（Florida）為代價換回哈瓦那時，他們拿回的，已不再是原來那座只懂得等待艦隊的城——那扇通往「糖」的大門，已經被英國人短暫的手，永遠地推開了一條縫。</div>
+
+    <p>這便是一七六二年那場短暫佔領最深遠的弔詭：英國人想奪取的，是哈瓦那作為戰略「位置」的價值；他們真正留下的，卻是一把點燃古巴「生產」之火的火種。當這座島嶼第一次嚐到自由貿易的甜頭、第一次見識到大批奴隸湧入所能釋放的勞動力，古巴的地主與商人們忽然意識到：這片一直被當作「驛站」的土地，本身其實肥沃得足以長出黃金——那不是金屬的黃金，而是甘蔗熬煮出的、白色的黃金。西班牙重新接管後，雖然恢復了部分管制，卻再也無法把這扇門重新關死。<strong>古巴的身分，正在從「帝國的鑰匙」，悄悄地轉變為「帝國的糖罐」。</strong>兩百年來那座由士兵與水手定義的中繼站，即將被一片由奴隸與甘蔗定義的種植園所覆蓋。</p>
+
+    <p>於是，在這座為艦隊而生、為白銀而設防的鑰匙之城裡，古巴歷史的兩道主線第一次清晰地交會了。第一道線，是它扼守咽喉的「位置」——這份地理的稟賦，讓它從誕生之日起就注定要活在強者的覬覦之中，先是西班牙傾舉國之力把它鎖成帝國的堡壘，往後則將招來一個更年輕、更貪婪、就在它北方九十海里之外虎視眈眈的新巨人。第二道線，是「糖」——那把被一七六二年英國人意外點燃的火，將在此後一個世紀裡席捲整座島嶼，把它從一座軍事驛站，徹底改造成大西洋世界裡最殘酷、也最暴利的糖與奴隸之島。位置招來了陰影，貿易點燃了糖；而當這兩者疊加在同一座島上，古巴此後三百年的命運，便已在哈瓦那港深邃的水面上，映出了它最初的輪廓。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>古巴最深的宿命，是它從不被允許只屬於自己。早在十六世紀，當西班牙把哈瓦那砌成「通往新世界的鑰匙」、用莫羅城堡的火砲守護整支白銀艦隊時，這座島就已經被定義為一份「太重要而不能放手」的戰略資產。一七六二年英國人攻佔哈瓦那，第一次向世界示範了奪取這把鑰匙的誘惑有多大；而真正的<span style="color:var(--rust);font-weight:600">回聲</span>，要到一個世紀後才會完整響起——當西班牙的帝國日落西山，一個剛剛在北美崛起、近在咫尺的年輕共和國，將用同樣貪婪的目光，重新打量這把懸在它南方門口的鑰匙。古巴的位置先招來了舊世界的帝國，再注定要招來新世界的巨人。它扼守的那道咽喉，從來不只是航道，更是它永遠無法獨自決定自身命運的詛咒。北方巨人的陰影，早在它還只是一座等待艦隊的要塞時，就已隱隱投下。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-3">
+  <div class="act-head">
+    <span class="act-num">第3章 · The Ghost of Haiti</span>
+    <h2 class="act-title">海地的幽靈與糖的爆炸</h2>
+    <p class="act-sub">When Cuba Became the Sugar King</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一七九一年八月那個悶熱的夜晚，在加勒比海另一座島嶼上，一場大火照亮了整片夜空。那座島當時叫聖多明哥（Saint-Domingue），是法蘭西王國最珍貴的海外財產——一塊面積不大、卻富裕到令整個歐洲眼紅的殖民地。它一島之地，供應了全世界將近四成的蔗糖與超過一半的咖啡；它的港口堆滿了糖桶與咖啡袋，它的莊園主在巴黎與波爾多揮金如土，被稱作「安地列斯的明珠」（the Pearl of the Antilles）。然而支撐這份財富的，是地表上最殘酷的一套機器：將近五十萬名來自非洲的奴隸，被囚禁在這座島上，在熱帶的烈日與監工的皮鞭下，以平均不到十年的壽命，被糖榨乾。那一夜燃起的大火，是這台機器的崩潰——北部平原上的奴隸同時舉起火把，焚燒甘蔗田與莊園主的宅邸。那不只是一場暴動，那是美洲歷史上唯一一場最終取得勝利的奴隸大革命的開端。而在不到一百公里外、隔著向風海峽（the Windward Passage）遙望的古巴，種植園主們站在自家的陽臺上，看著遠方那片不該出現在夜裡的紅光，心中同時升起了兩種念頭：恐懼，與貪婪。</p>
+
+    <h3>明珠的崩塌</h3>
+    <p>聖多明哥的革命，從一七九一年燃燒到一八○四年，前後十三年，是一段足以讓任何蓄奴社會夜不能寐的歷史。起義的奴隸先是與法國革命政府、與入侵的英國和西班牙軍隊周旋，又在杜桑·盧維杜爾（Toussaint Louverture）這位天才將領的統領下，把一群被鎖鏈束縛的人，鍛造成一支能擊敗歐洲正規軍的隊伍。一八○二年，拿破崙（Napoléon）派出由其妹夫勒克萊爾（Leclerc）率領的數萬大軍渡海而來，企圖恢復奴隸制；杜桑被誘捕，押往法國的牢獄中凍餓而死。然而島上的抵抗並未隨他而滅——黃熱病像一把無形的鐮刀，把法軍成批成批地割倒；倖存的起義者在德薩林（Jean-Jacques Dessalines）的率領下，將最後的法軍逐入大海。一八○四年元旦，他們宣布獨立，並為這個新國家取回了一個原住民泰諾人（Taíno）的舊名——海地（Haïti），意為「多山之地」。世界上第一個由奴隸自己建立的共和國，就此誕生。但代價是徹底的：戰火、屠殺與焦土，把那顆「安地列斯的明珠」燒成了一片廢墟。曾經供應全世界四成蔗糖的甘蔗田，化為灰燼；龐大的莊園機器，永遠地停了下來。</p>
+    <p>對於遠在歐洲的糖商、阿姆斯特丹與倫敦的咖啡館、以及每一個習慣了在茶裡加糖的家庭而言，這意味著一件再實際不過的事：世界突然缺糖了。那塊曾經填滿全球甜味的巨大缺口，一夜之間敞開。十八世紀末的歐洲，對糖的胃口正以驚人的速度膨脹——糖早已從王公貴族餐桌上的奢侈品，變成連工人階級也離不開的日常。需求在那裡，供給卻塌了一角。市場像一隻飢餓的巨獸，四下張望，尋找誰能接替那顆殞落的明珠。而它的目光，很快就落在了那座一直以來安安靜靜、不慍不火地長著甘蔗的大島身上——古巴。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 海地革命如何同時成就與恐嚇了古巴</span>
+      <p>海地革命對古巴的影響，是一把雙刃劍，兩面都鋒利得驚人。一面是經濟的成就：聖多明哥的毀滅，等於把全世界最大的糖與咖啡市場，憑空送到了古巴門口。價格飆漲、需求若渴，古巴的種植園主只要肯擴張，就有花不完的訂單在等著。更妙的是，許多逃離戰火的法國莊園主，帶著資金、人脈與最先進的製糖技術，渡海來到古巴東部的聖地牙哥（Santiago de Cuba）一帶落腳——他們把聖多明哥那套高效而冷酷的莊園經營術，連同它的全部知識，一併移植到了新的土地上。另一面，卻是心理的恐嚇：海地證明了一件全加勒比海蓄奴者最不願承認的事——奴隸能贏。被視為財產、工具、會說話的牲口的那些人，竟然能組織、能作戰、能建國，甚至能把宗主國的軍隊趕下海。從此，「另一個海地」這五個字，成了懸在每一位古巴莊園主頭頂的達摩克利斯之劍。他們一邊瘋狂地擴大蔗田、輸入更多奴隸去賺那筆送上門的橫財，一邊又日夜恐懼著：當島上的奴隸多到某個臨界點，古巴會不會就是下一個聖多明哥？成就與恐懼，是同一場大火投下的兩道影子。</p>
+    </div>
+
+    <h3>古巴一把接過糖王的冠冕</h3>
+    <p>機會來了，古巴接住了。十九世紀的最初幾十年，這座島上發生了一場可以稱之為「糖的爆炸」的劇變。在此之前，西班牙的重商主義一直像一道閘門，死死卡住古巴的咽喉——只准與宗主國貿易、稅捐繁重、什麼都要管。但一七六二年英國人短暫佔領哈瓦那（Havana）那一年，曾經把這道閘門猛地撞開了一條縫：英國商人湧入，奴隸與商品自由流通，哈瓦那人第一次嘗到了開放貿易的甜頭。西班牙在次年收回哈瓦那後，被迫逐步鬆綁，承認古巴需要更自由的貿易與更多的勞動力才能繁榮。等到聖多明哥在大西洋彼端化為灰燼，這扇半開的門便再也關不上了。資本、技術、奴隸與野心，從四面八方湧入古巴。一座座新的莊園在西部的平原上拔地而起，一片片原始森林被砍倒、焚燒，讓位給一望無際的甘蔗。古巴的製糖量在短短幾十年間翻了數倍，又數倍——到了十九世紀中葉，這座加勒比海的島嶼，已經穩穩地戴上了那頂從海地頭上滾落的冠冕：<strong>全世界最大的糖生產國</strong>。世界每三匙糖裡，大約就有一匙，來自古巴的甘蔗田。</p>
+    <p>這場爆炸，是技術與制度合力推動的。十九世紀初，蒸汽機被引入製糖廠，取代了過去靠牛、靠風、靠人力推動的壓榨機；甘蔗從田裡砍下後，被送進冒著黑煙的「中央糖廠」（ingenio），蒸汽驅動的滾筒把蔗汁榨出，再經一連串巨大的銅鍋熬煮、結晶。更戲劇性的一步發生在一八三七年：古巴鋪設了拉丁美洲的第一條鐵路——比宗主國西班牙本土的第一條鐵路還要早了十一年。這條鐵路不是為了運人，而是為了運糖：把內陸蔗田的甘蔗，飛快地送到港口，再裝船運往世界。一座島嶼，為了一種作物，搶在自己的宗主國之前邁進了工業時代。這是一個意味深長的畫面——古巴的現代化，從一開始就不是為了它自己的人民，而是為了讓糖更快、更多、更有效率地流出去。鐵軌的方向，永遠指向港口；港口的另一端，永遠是別人的市場。</p>
+
+    <div class="pull"><p>古巴搶來了糖王的冠冕，卻沒有意識到：那頂冠冕的內裡，縫著鎖鏈。</p></div>
+
+    <h3>財富的另一面：鎖鏈與恐懼</h3>
+    <p>糖的爆炸，需要無數雙手。而在那個時代的加勒比海，「無數雙手」幾乎只意味著一件事：奴隸。當英國在一八○七年宣布廢除奴隸貿易、其他列強陸續跟進、人道呼聲在大西洋兩岸日漸高漲之際，古巴卻反其道而行，把奴隸的輸入推向了歷史的高峰。據估計，從十六世紀到十九世紀，先後有近百萬名非洲人被裝上船、橫越大西洋、運抵古巴的港口；而其中相當大的一部分，正是在這場十九世紀的糖業狂飆中被擄掠而來。販奴船在表面上的禁令下偷偷靠岸，把一船船的男女老幼卸在甘蔗田的邊緣。他們在中央糖廠那地獄般的高溫與長工時下勞作，在收穫季節，常常連續工作到深夜，許多人在抵達後短短幾年便耗盡了生命。古巴愈是富裕，它的土地上就埋著愈多無名的屍骨；糖愈甜，鞭痕就愈深。這座島嶼戴上糖王冠冕的同時，也把自己變成了西半球最後幾個、也是最頑固的奴隸社會之一。</p>
+    <p>而海地的幽靈，從未真正離開。它日復一日地在每一位莊園主的夢裡徘徊。當古巴的非洲裔人口比例隨著奴隸輸入而節節攀升，當某些地區的黑人數量逼近、甚至超過白人，那個從聖多明哥飄來的念頭就愈發清晰而冰冷：我們會不會養出自己的掘墓人？這份「另一個海地」的恐懼，深刻地扭曲了古巴的政治。它讓白人種植園主階級在面對西班牙時，變得格外猶豫與保守——許多人本來對宗主國的橫徵暴斂與專制統治怨聲載道，渴望像美洲大陸上的鄰居那樣獨立；可是一想到獨立可能意味著秩序鬆動、奴隸趁亂而起，重演聖多明哥的烈火，他們又縮回了西班牙的羽翼之下。對他們而言，西班牙的軍隊與枷鎖，雖然可恨，卻是壓住底層那座火山的唯一蓋子。於是一個荒謬而沉重的結扣形成了：<strong>對自由的恐懼，綁住了對獨立的渴望。</strong>古巴比拉丁美洲幾乎所有的鄰居，都更晚才走向獨立，這份遲到的背後，有很大一部分，正是海地那場大火投下的長長陰影。</p>
+
+    <div class="cf">
+      <p>對照兩座島嶼的命運，會看見一道令人心驚的岔路。海地，那座率先被糖榨乾、卻也率先以血與火砸碎鎖鏈的島——它贏得了人類史上最徹底的一次自由，卻為此付出了被孤立、被勒索鉅額「賠款」、經濟長期凋敝的代價：勝利者反而墮入貧窮的深淵。古巴，那座站在鄰島廢墟上接過糖王冠冕的島——它換來了十九世紀眩目的財富與繁華，卻為此把奴隸制延續到了文明的最後一刻，把整個社會的命運押在了一種作物與一群被奴役者的沉默之上。一島以自由換貧窮，一島以財富換枷鎖。這道分岔提出了一個沒有答案的問題：在那個時代的加勒比海，究竟有沒有第三條路，能讓一座島既不必焚燒自己、也不必出賣他人，就走向真正的繁榮？</p>
+    </div>
+
+    <p>於是，當十九世紀的古巴在世界糖業的版圖上熠熠生輝、當它的中央糖廠日夜不息地冒著黑煙、當它的鐵路把財富源源不絕地送往哈瓦那的碼頭時，這座島其實已經悄悄地把自己鎖進了一座華麗的牢籠。它的繁榮，建立在一種作物之上——一旦糖價波動、一旦市場轉向，整座島的命脈便會隨之顫抖。它的繁榮，建立在奴役之上——而奴役所豢養的恐懼，又反過來捆住了它走向自由的腳步。它接過了海地的市場，也接過了海地的詛咒：對糖的依賴，會愈陷愈深，深到後來無論換了什麼樣的旗幟、什麼樣的主人，這座島都再難從這一種甜膩的單一作物裡掙脫出來。糖，這個曾經把財富傾倒在古巴腳下的恩主，從十九世紀起，正式成為主宰這座島命運的暴君。它給的愈多，索取的也愈多；它讓古巴富過，也將讓古巴，為這份富，付上一個多世紀的代價。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 糖的詛咒 the Curse of Sugar</span>
+      <p>古巴的糖王之位，是踩著鄰島奴隸的解放而登上的——海地以一場焚天大火砸碎了鎖鏈，留下的市場空缺，被古巴一把接住。它接過的，不只是世界第一糖國的<span style="color:var(--rust);font-weight:600">財富</span>，還有兩樣更沉重的東西：一套靠奴役運轉的莊園機器，與一份對「另一個海地」永不消散的恐懼。從此，「糖的詛咒」全面降臨——對單一作物的依賴愈陷愈深，深到綁住了這座島的經濟、政治，乃至它走向自由的勇氣。後來無論古巴換上多少面旗幟、迎來多少個主人，每當它試圖掌握自己的命運，總會在某個轉角，重新撞見十九世紀那座冒著黑煙的中央糖廠。糖既是它的王冠，也是它的枷鎖；這座島最深的身世密碼，是用甘蔗的甜，與奴隸的血，一同寫成的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-4">
+  <div class="act-head">
+    <span class="act-num">第4章 · The Africa of the Caribbean</span>
+    <h2 class="act-title">加勒比的非洲：奴隸與糖廠</h2>
+    <p class="act-sub">Slavery, the Ingenio and a Brutal Boom</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>十九世紀初的某個清晨，一艘從西非海岸啟航、在海上漂了數十天的船，悄悄駛近古巴北岸某處隱蔽的海灣。它沒有掛旗，沒有報關，趁著退潮與夜色的掩護，把船艙裡那批活著的貨——數百名被鎖鏈串在一起、半數已在航程中死去或瀕死的非洲男女——卸到了岸上。這樣的景象，在那半個世紀裡，沿著古巴的海岸線一次又一次地重演。它之所以必須在夜裡、在沒有名字的海灣裡進行，是因為那時跨大西洋的奴隸貿易，名義上已被宣布為非法。但法律的禁令，攔不住糖的胃口。古巴正站在它歷史上最瘋狂的一次經濟狂飆的起點，而推動這場狂飆的燃料，不是煤、不是蒸汽，而是被一船一船運來、然後一批一批被吞噬掉的非洲人的生命。<strong>糖，把一整個非洲，搬進了這座加勒比的島。</strong></p>
+
+    <p>要理解這件事為何發生在古巴、發生在那個時刻，得先把鏡頭往東邊挪一點。在加勒比海的另一端，曾有一座比古巴更富庶、更耀眼的法屬殖民地——聖多明哥（Saint-Domingue），也就是後來的海地（Haiti）。那是十八世紀全世界最賺錢的一塊殖民地，它的糖與咖啡供養著巴黎的繁華。然而 1791 年，那座島上的奴隸起義了。經過十餘年血與火的革命，1804 年，海地宣布獨立，成為人類史上第一個由奴隸推翻奴隸制、自己建國的國家。對被奴役者而言，那是一道劃破黑暗的閃電；但對加勒比所有種植園主而言，那是一場噩夢的開端，也是一個騰出來的巨大市場空缺。世界對糖的渴求並未消失，只是那座生產它的工廠崩塌了。於是所有的目光，都轉向了那座一直慵懶地躺在旁邊、尚未被完全開發的大島——古巴。</p>
+
+    <h3>一座島，補上一場革命的缺口</h3>
+    <p>機會主義是歷史最忠實的引擎。海地革命摧毀的，不只是一個殖民地，更是當時全球糖業的中樞。糖價在恐慌中飆升，種植園主、投機者、逃離海地的法國技師，紛紛帶著資本、種苗與製糖的技藝，湧向古巴西部的平原。古巴的種植園主們敏銳地嗅到了這個千載難逢的時刻：只要有足夠的土地、足夠的資本，以及——這是最關鍵的——足夠的勞動力，他們就能填補海地留下的那個巨大的空缺，把古巴變成新的「世界糖罐」。土地，這座島不缺；資本，從西班牙、從美國、從各地流入；唯一需要被瘋狂榨取、瘋狂進口的，是人。於是，從十九世紀的最初幾年起，古巴開啟了一段堪稱美洲奴隸史上最黑暗、最密集的篇章。在這之前的三個世紀裡，整個西屬美洲對非洲奴隸的需求都相對節制；而在這之後的短短數十年裡，古巴一座島輸入的非洲人，據估計逾八十萬，這個數字，超過了此前西班牙在美洲全部殖民歷史的總和。</p>
+    <p>這便是「糖的詛咒」最沉重、也最殘酷的一頁。古巴的繁榮，是用一種無法計量的人類苦難換來的。當倫敦與費城的客廳裡，人們把白糖優雅地撒進紅茶，把蘭姆酒倒進玻璃杯，他們杯中的甜，背後是一條跨越大西洋、由鎖鏈與屍體鋪成的航路。經濟史學家後來會用冷靜的數字描述這段「糖業繁榮」（the sugar boom）：產量如何翻倍再翻倍，出口如何屢創新高，古巴如何在十九世紀中葉一度生產了全世界近三分之一的糖。但這些光鮮的數字之下，是一個被刻意掩蓋的事實——這座島的財富，是被奴役者用他們的身體、汗水與性命，一寸一寸鑄出來的。</p>
+
+    <div class="warn">
+      <p>關於這段歷史的規模與殘酷，必須以審慎而誠實的態度陳述。跨大西洋奴隸貿易的精確數字無法完全還原，但歷史學界的研究指出，輸入古巴的非洲奴隸總數據估計超過八十萬，且其中相當大的比例，是在 1820 年西班牙與英國條約名義上禁止奴隸貿易之後，仍以走私方式運入的——換言之，是在它已被宣布為非法之後。航程本身（即所謂「中間航段」the Middle Passage）的死亡率極高，許多人在抵達之前就已葬身海中。這些不是抽象的統計，而是數十萬個被剝奪了姓名、家鄉與自由的具體生命。本章對這段歷史的任何陳述，都旨在尊重受害者、定性其殘酷，而非將苦難化約為冰冷的數字。</p>
+    </div>
+
+    <h3>糖廠：一座吞噬人命的機器</h3>
+    <p>奴隸制的殘酷，在古巴有一個具體的、物理的形狀，那就是「糖廠」（ingenio）。這個西班牙語詞彙，字面意思是「機巧」「裝置」，後來成了整座製糖莊園的代稱——它既指那片種滿甘蔗的廣袤田地，也指田地中央那座日夜冒著黑煙、煮沸蔗汁的工廠，更指支撐這一切運轉的、慘無人道的勞動體制。一座 ingenio 就是一個自成一體的世界：田裡是無盡的甘蔗，廠裡是熊熊的爐火與翻滾的糖鍋，四周是奴隸居住的、形同囚牢的工棚（barracón），而籠罩這一切之上的，是監工的皮鞭與槍。在這個世界裡，人不是人，而是被計入帳本的「資產」，是一種會折舊、會耗損、用壞了就再買的生產工具。</p>
+    <p>糖這種作物，有一個近乎詛咒般的特性：甘蔗一旦砍下，糖分便迅速流失，必須在數小時內榨汁、煮製，否則整批就會腐壞。這個「與時間賽跑」的特性，決定了製糖勞動的非人本質。在收穫季（la zafra），糖廠的爐火必須日夜不熄，甘蔗必須源源不斷地被砍下、運進、壓榨、熬煮。於是奴隸被迫在收穫季裡，以每天十六到二十小時的勞動強度連續工作數月，睡眠被剝奪到最低限度。在壓榨甘蔗的滾筒旁、在沸騰的糖鍋邊，事故頻仍——疲憊到極點的工人，手臂被滾筒捲入，或被滾燙的糖漿灼傷，是司空見慣的慘劇。一座糖廠對人命的消耗速度，快到讓種植園主在帳本上做出一個冷酷的計算：與其花錢改善奴隸的待遇、讓他們活得久一點，不如把他們在最短時間內榨乾，然後用走私來的、更廉價的新奴隸補上。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 糖廠如何把人折算成耗材</span>
+      <p>古巴糖廠的殘酷，有一層令人不寒而慄的經濟邏輯。當奴隸貿易合法、奴隸價格相對低廉時，種植園主在帳面上會發現：把一個奴隸「用壞」再買一個新的，竟比善待他、讓他長久存活更「划算」。這是一種把人徹底物化的會計——奴隸不再是生命，而是一筆可以折舊、可以替換的成本項目。製糖在當時是一門資本密集、與時間賽跑的工業：收穫季裡爐火不能停、滾筒不能慢，於是勞動被推到人類體能的極限之外。許多糖廠的奴隸人口無法靠自然生育維持，必須靠不斷進口新人來「補充」——這正是即便貿易已被宣布非法、走私船仍絡繹不絕的根本原因。糖的甜，是用這樣一套把人折算成耗材的冷酷算術換來的。這是「糖的詛咒」在制度層面最深的烙印。</p>
+    </div>
+
+    <p>在這座吞噬人命的機器裡，生與死構成一個殘酷的循環。種植園主追求的不是奴隸的繁衍與安居，而是即時的、最大化的勞動產出。許多糖廠刻意維持男多女少的人口結構，因為他們要的是壯勞力，而非一個會自然生長、需要撫養孩子的社群。其結果是，這些莊園的奴隸人口往往無法靠自身生育維持，死亡的速度超過出生的速度，只能靠不斷地、源源不絕地從海上運來新人填補。一座糖廠，就像一個無底的胃，把一船船的非洲人吞進去，把一袋袋的白糖吐出來。當你下一次看見「十九世紀古巴糖業奇蹟」這樣的字眼，請記得，那個「奇蹟」的另一面，是一場以非洲人生命為燃料、持續了數十年的、緩慢的浩劫。</p>
+
+    <div class="pull"><p>一座糖廠就像一個無底的胃：把一船船的非洲人吞進去，把一袋袋的白糖吐出來。</p></div>
+
+    <h3>反抗、鎮壓，與一道遲到太久的曙光</h3>
+    <p>被奴役，從來不意味著順從。在古巴的種植園上，反抗以各種形式存在——有的隱微，有的劇烈。逃亡者（cimarrones）躲進山林與沼澤，在人跡罕至處建起自己的隱蔽聚落（palenques），組成自由的逃奴社群；有人在田裡放慢手腳、暗中破壞工具、燒毀甘蔗；也有人鼓起最決絕的勇氣，揭竿而起。然而，每一次反抗的浪頭，都撞上了種植園主與殖民當局極度的恐懼，以及由這恐懼催生的殘酷鎮壓。1844 年，一場後來被稱為「階梯陰謀」（La Escalera）的事件，把這種恐懼與殘暴推到了頂點。當局聲稱偵破了一場由自由黑人與奴隸串聯、意圖推翻奴隸制的大規模叛亂陰謀，隨即展開了一場血腥的清洗——數以千計的黑人（包括許多自由身份者）被逮捕、審訊、刑求；那個名稱「階梯」，據說正源自一種酷刑：受審者被綁在梯子上鞭打逼供。許多人在拷問中喪命，許多人被處決或流放。這場鎮壓的陰影之深，連古巴最偉大的混血詩人之一普拉西多（Plácido）也被牽連、處死。歷史學家至今仍爭論這場「陰謀」究竟在多大程度上真實存在，抑或是當局用以恫嚇、震懾整個有色人口的一場恐怖手段。無論真相如何，它留下的，是一個被恐懼與暴力牢牢箝制的種植園社會。</p>
+    <p>而真正的、制度性的解放，在古巴姍姍來遲，遲到了令人難堪的地步。當大西洋兩岸的世界一個接一個廢除奴隸制——英國在 1830 年代，法國在 1848 年，美國在 1865 年——古巴卻仍把這套制度死死攥在手裡。直到 1886 年，西班牙才終於正式廢除了古巴的奴隸制，這已是整個美洲最晚的幾個之一，僅比巴西（1888 年）早了兩年。為什麼這麼晚？答案依然是糖。古巴的整個經濟命脈，深深地、徹底地依附在奴隸勞動之上，以至於種植園主階級拼盡全力，用每一種拖延與妥協（包括所謂「准徒制」el patronato 這種介於奴役與自由之間的過渡安排）來延緩這一天的到來。當解放終於降臨，距離第一艘奴隸船駛近這座島，已經過去了將近四個世紀。</p>
+
+    <h3>契約華工，與一座變成「非洲」的島</h3>
+    <p>當奴隸貿易因國際壓力而日益難以為繼、勞動力的缺口卻仍如飢似渴時，古巴的種植園主把目光投向了地球的另一端，找到了另一群可供榨取的人——來自中國的契約華工（在當時的語境裡被稱為 coolies）。從 1840 年代末到 1870 年代，超過十萬名華工，主要從廣東、福建一帶，被或誘騙、或半強迫地簽下契約，登上開往古巴的船。名義上，他們是「自由的契約勞工」，但實際上，他們在糖廠裡的處境與奴隸相去無幾：同樣的超長工時、同樣的皮鞭、同樣被困在莊園裡無法脫身的境地，許多人甚至在契約期滿後仍被以各種手段繼續扣留。許多華工在絕望中自盡，留下了一段同樣血淚斑斑、卻長期被歷史忽略的篇章。他們的後裔，連同那段記憶，融進了古巴複雜的人口光譜裡——哈瓦那（Havana）至今留有一片曾是西半球最大華埠之一的街區痕跡。</p>
+    <p>於是，到了十九世紀末，當我們回頭審視這座島，會發現它在人口與文化上，已經被徹底地重塑了。數十萬非洲人——他們來自約魯巴、剛果、達荷美等不同的族群與文明——連同他們的後裔，與西班牙人、與華工、與原本就所剩無幾的原住民後裔，共同構成了這座島的血肉。但非洲，無疑是其中最深、最厚的一層底色。古巴在人口與文化上，成了一座「非洲的島」。這句話絕非誇張。走在古巴的土地上，你會在無數地方撞見非洲——它在人們的膚色與面容裡，在街頭巷尾流淌的節奏裡，在那些被偷偷保存、與天主教聖徒巧妙融合的神祇信仰裡。</p>
+
+    <div class="cards">
+      <div class="card"><h5>血</h5><p>數十萬非洲人的後裔，連同西班牙人與華工，共同織成古巴的人口。膚色與面容裡，寫著一部跨大西洋的遷徙史。</p></div>
+      <div class="card"><h5>鼓</h5><p>從非洲帶來的節奏與打擊樂，在種植園的工棚與宗教聚會裡存活下來，日後將孕育出倫巴、頌樂，乃至整個古巴音樂的靈魂。</p></div>
+      <div class="card"><h5>神</h5><p>約魯巴的奧里莎諸神被藏進天主教聖徒的外衣下，化身為薩泰里阿（Santería）等信仰，在壓迫的縫隙裡頑強地活了下來。</p></div>
+    </div>
+
+    <p>這便是「糖的詛咒」鑄下的、最深刻也最弔詭的遺產。糖業帶來的奴隸制，曾是這座島上最殘酷的暴行；但被它強行運來的這幾十萬非洲人，卻也在無盡的苦難中，把他們的鼓、他們的神、他們的舞步、他們對生命的韌性，永遠地種進了這片土地。壓迫者本想把他們當作可耗損的工具，最終卻發現，這些被奴役者用他們倖存下來的文化，反過來重新定義了古巴本身。日後當古巴人為自己的身份感到驕傲時，他們所驕傲的那份獨一無二的混血氣質、那份滲透在音樂與信仰裡的非洲魂魄，恰恰是這段最黑暗歷史的、苦澀而輝煌的回贈。一座島的血、它的鼓、它的神，從此有了非洲的形狀。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 糖的詛咒 the Curse of Sugar</span>
+      <p>糖在這一章，露出了它最猙獰的一面。它不只是一種作物、一門生意，而是一頭需要不斷以人命餵養的巨獸——它把一整個非洲，搬進了這座加勒比的島。十九世紀那場「糖業奇蹟」的每一袋白糖，背後都是被走私運來、被糖廠（ingenio）榨乾的非洲人的身體。<span style="color:var(--rust);font-weight:600">這場詛咒</span>，鑄成了古巴最深的底色：它的血、它的鼓、它的神，從此都帶著非洲的形狀。而更長遠的回聲在於——一個經濟、人口與道德都被一種單一作物徹底綁架的社會，等於把自己的命運，連同它最沉重的原罪，一併押在了糖價的漲落與一套無法持久的殘酷制度之上。當這套制度終於在 1886 年崩解，古巴失去的不只是奴隸勞動，更是它賴以運轉的整個舊世界的地基。糖給了古巴財富，也給了它一道至今仍隱隱作痛的傷口。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-5">
+  <div class="act-head">
+    <span class="act-num">第5章 · A New People</span>
+    <h2 class="act-title">一個新民族：非洲—古巴的文化</h2>
+    <p class="act-sub">Santería, Son and the Making of Cubanidad</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>把人從一塊大陸的西岸成千上萬地裝進船艙、運過大西洋、卸在加勒比的甘蔗田裡，這套制度算計的只有一件事——把人變成糖。種植園主在帳簿上記下的，是一具一具能砍蔗、能榨汁、能在烈日下勞作到死的身體，他們從未打算讓這些身體留下別的什麼。然而歷史最深的反諷，恰恰在這裡開始：被當作牲口運來的人，不是空手而來的。他們帶來了看不見、也奪不走的東西——記憶裡的神祇、舌尖上的節奏、手指間的鼓點、心裡關於秩序與來世的整套想像。當西班牙人以為自己只是在進口勞動力時，他們其實在一座海島上，無意間混合了兩個世界的靈魂。約魯巴（Yoruba）、剛果（Kongo）、卡拉巴爾（Calabar）的非洲，撞上了卡斯提爾（Castilla）與安達盧西亞（Andalucía）的西班牙，撞出的不是其中任何一個的複製品，而是一個前所未有的新東西。糖建起了種植園，但被奴役的人，卻在枷鎖之下，建起了一種文化——它日後將成為這座島的靈魂。</p>
+
+    <p>要替這個過程命名的，是一位古巴自己的學者，斐迪南多·奧爾蒂斯（Fernando Ortiz）。二十世紀上半葉，當主流的人類學還習慣用「同化」（assimilation）來描述弱勢文化被強勢文化吞沒的單向過程時，奧爾蒂斯看出這套說法根本配不上他眼前的古巴。他在 1940 年的著作《古巴對位法：菸草與糖》（Contrapunteo cubano del tabaco y el azúcar）裡，鑄造了一個新詞——「文化互滲」（transculturación）。他要強調的是：當兩種、甚至多種文化在同一塊土地上長期碰撞，沒有一方是純粹的施與者、另一方是純粹的承受者；每一方都在失去舊有的某些東西（去文化的痛），都在獲得對方的某些東西，最終共同孕育出一個既不屬於來源 A、也不屬於來源 B 的第三者。古巴，就是這個「第三者」最完整的標本。它不是被西班牙化的非洲，也不是被非洲化的西班牙，而是一種全新的存在。</p>
+
+    <h3>阿希亞科：一鍋還在沸騰的雜燴湯</h3>
+    <p>奧爾蒂斯為「古巴性」（cubanidad）找到的最動人的比喻，是一道菜——阿希亞科（ajiaco）。那是加勒比常見的雜燴濃湯，鍋裡丟進印第安人留下的玉米與木薯、西班牙人帶來的南瓜與牛肉、非洲人引進的山藥與大蕉，加上各色辣椒與香料，在火上慢慢燉。奧爾蒂斯說，古巴民族就像這鍋 ajiaco：底層沉澱著最早被消滅的原住民泰諾人（Taíno）留下的食材，中間翻滾著西班牙與非洲一波波加入的肉與菜，表面則隨時可能再撒下新移民帶來的料。它永遠不會「燉好」——火還在燒，新的東西還在被丟進去，舊的東西在湯裡慢慢溶解、改變彼此的味道。古巴性不是一份已經完成的食譜，而是一個持續進行的烹煮過程。這個比喻之所以偉大，是因為它拒絕了「純種」的幻覺：在這鍋湯裡，沒有誰能把自己的食材原封不動地撈回來，每一樣東西都已經沾染了別樣的滋味。</p>
+    <p>這鍋湯最濃稠的那一味，來自非洲。奴隸貿易把不同族群的人從西非與中非帶到古巴，在這片陌生的土地上，他們被迫忘記部分舊有的差異，又在共同的苦難中重新組合。西班牙殖民當局出於控制的目的，把同源的奴隸編進名為「卡比爾多」（cabildo）的互助結社——表面上是按天主教聖徒命名、由教會默許的兄弟會，骨子裡卻成了非洲人保存母語、傳承鼓樂、舉行祭儀、互相救濟的庇護所。殖民者以為自己在分而治之，卻在無意間替非洲諸神，蓋了一座座可以躲藏的屋子。正是在這些卡比爾多裡，被打散的記憶被一點一滴地縫合起來，非洲的神、非洲的鼓、非洲的舞，沒有死在大西洋上，反而在一座天主教的島嶼上，找到了重生的子宮。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 文化互滲：誰也沒贏，但誕生了第三者</span>
+      <p>「文化互滲」之所以比「同化」深刻，在於它看見了過程的雙向與創造性。同化假設有一個高位文化與一個低位文化，後者逐漸消失於前者；互滲則指出，碰撞中的每一方都經歷三件事：失去原有文化的一部分（奧爾蒂斯稱之為「去文化」）、吸收對方的一部分、以及最關鍵的——共同生出一個全新的、誰也預料不到的文化（「新文化」）。在古巴，西班牙的天主教沒有原封不動地存活，它被非洲的奧里莎滲透、改寫；非洲的信仰也沒有原樣保存，它披上了聖徒的外衣、學會了在新世界生存。鼓不是非洲的鼓的複製，吉他不是西班牙的吉他的複製，son 既不是非洲音樂、也不是西班牙音樂——它們都是那個「第三者」。理解了這一點，就理解了古巴：它的力量，恰恰來自它不是任何一種「純粹」。</p>
+    </div>
+
+    <h3>戴著聖徒面具的諸神：薩泰里亞</h3>
+    <p>在所有由這鍋湯燉出來的事物裡，最深、最神聖、也最常被外人誤解的，是非洲—古巴的宗教，其中流傳最廣的是薩泰里亞（Santería），信徒更願意稱之為「奧查之律」（Regla de Ocha）或盧庫米信仰（Lucumí）。它的根，深植於西非約魯巴人的信仰——一個由至高神奧洛杜瑪雷（Olodumare）統攝、底下有眾多被稱為奧里莎（orishas）的神靈的世界。每一位奧里莎掌管自然與人事的一個面向：象徵雷霆與正義的尚戈（Changó／Shangó）、掌管海洋與母性的耶瑪雅（Yemayá）、執掌愛與河流的奧舜（Ochún）、守護道路與十字路口、開啟一切溝通的埃雷瓜（Elegguá）。當約魯巴人被奴役、被禁止公開膜拜自己的神、被強迫受洗為天主教徒時，他們做了一件既是生存策略、也是深刻信仰智慧的事：他們把自己的奧里莎，悄悄地疊合到天主教的聖徒身上。</p>
+    <p>於是，雷神尚戈藏在了手持寶劍、騎著白馬的聖芭芭拉（Santa Bárbara）背後；海洋之母耶瑪雅，與身披藍袍、庇護水手的雷格拉聖母（Virgen de Regla）合而為一；河流與愛的奧舜，化身為古巴的主保聖母——身著金黃、慈愛動人的科夫雷慈悲聖母（Virgen de la Caridad del Cobre）；而守在門邊的埃雷瓜，則對應上了聖嬰耶穌與聖安東尼。當西班牙神父滿意地看著奴隸們跪在聖芭芭拉像前祈禱時，他不會知道——也或許不願知道——那些低垂的眼睛背後，呼喚的其實是橫掃天際的雷霆之神。這層「面具」不應被簡單地理解為偽裝或欺騙。對許多信徒而言，奧里莎與聖徒並非二選一，而是同一股神聖力量在不同文化裡的兩個名字、兩張面孔。在一座天主教的島上，非洲的眾神沒有被消滅，他們只是學會了用聖徒的語言說話。</p>
+
+    <div class="aside">薩泰里亞並非古巴唯一的非洲—古巴信仰。源自中非剛果文化的帕洛（Palo Monte／Regla de Congo），敬奉的核心不是奧里莎，而是裝著土壤、骨骸、樹枝與靈力的聖器「恩岡加」（nganga），講究與亡者及大自然力量的直接交涉，更貼近大地與根莖。而阿巴庫阿（Abakuá）則是源自西非卡拉巴爾地區埃菲克（Efik）文化的祕密兄弟會，只收男性、儀式不對外、以神祕的「伊雷梅」（íreme）裝束舞者聞名，長期紮根於哈瓦那與馬坦薩斯的港口碼頭工人之中。三者各有源頭、各有戒律，共同織成了古巴信仰世界的非洲底紋。它們都教人尊重而非獵奇地走近——這是別人的神聖。</div>
+
+    <h3>鼓的後裔：頌樂與倫巴</h3>
+    <p>如果說宗教是這個新民族的靈魂，那麼音樂就是它的脈搏，而脈搏的最深處，跳動的是一面鼓。在非洲的信仰裡，鼓從來不只是樂器——它是召喚神靈降臨的語言，是與奧里莎對話的聲帶。薩泰里亞最神聖的儀式，要用三面叫做「巴塔」（batá）的雙面沙漏形聖鼓來敲奏，每一位奧里莎都有專屬的節奏與歌詠，鼓手必須是受過啟引的人。當這種把節奏奉為神聖的傳統，與西班牙帶來的弦樂、旋律與歌詞傳統相遇，古巴的音樂便誕生了——而它的核心特徵，正是那種讓全世界都坐不住的、層層交錯的切分節奏（síncopa）。非洲給了古巴音樂律動的骨架，西班牙給了它旋律與和聲的血肉，兩者熔鑄出的，又是一個誰也預料不到的「第三者」。</p>
+    <p>這個「第三者」最關鍵的化身，是頌樂（son）。它約莫在十九世紀末、二十世紀初誕生於古巴東部的奧連特（Oriente）山區，那裡是西班牙農民的弦樂傳統與非洲後裔的鼓樂節奏交織最密的地方。頌樂的編制小而精：撥奏旋律的特雷斯吉他（tres）、低沉行走的低音、敲擊出靈魂節拍的邦戈鼓（bongó）與克拉維（claves）那兩根看似簡單卻定義一切的硬木棒。頌樂最迷人的結構，是它後半段的「蒙圖諾」（montuno）——主唱即興拋出樂句，合唱隊以固定的副歌應答，一來一往，正是非洲「呼應」（call and response）傳統在加勒比的迴響。它從東部山村一路傳進哈瓦那的酒館與舞廳，在二十世紀二、三十年代席捲全島，最終漂洋過海。許多年後，當它在紐約與其他拉丁節奏融合、被重新包裝，世人替它取了一個新名字——薩爾薩（salsa）。但薩爾薩的根，深深地紮在古巴頌樂的泥土裡。</p>
+
+    <div class="pull"><p>種植園主以為自己在進口會砍蔗的身體，卻不知道，每一具身體裡，都裝著一面奪不走的鼓。</p></div>
+
+    <p>與頌樂並肩生長的，是更貼近街頭與工人階級的倫巴（rumba）。這裡要分清楚：古巴的倫巴與後來歐美舞廳裡那種華麗的「倫巴」幾乎毫無關係。真正的古巴倫巴，是哈瓦那與馬坦薩斯港區的非洲後裔，在碼頭、在貧民院落、在工餘時光，用木箱（cajón）、用調羹敲瓶子、用最樸素的鼓與人聲，即興創造出來的音樂與舞蹈。它有幾種形態：抒情而緩慢、唱出生活辛酸的揚布（yambú）；節奏激越、由男女舞者以挑逗的「維庫尼亞」（vacunao）動作對舞的瓜瓜恩科（guaguancó）；以及純由男性炫技、近乎武鬥的哥倫比亞（columbia）。倫巴沒有貴族血統，它從最底層的生活裡長出來，是被剝奪了幾乎一切的人，用身體與聲音宣告「我還在、我還活著、我還能歡笑」的方式。日後，當人們把鼓的後裔——頌樂、倫巴、曼波、恰恰恰——一路追溯回源頭，總會回到這座島上那些卡比爾多的院落，回到那面被當作神來敬奉的鼓。</p>
+
+    <div class="cards">
+      <div class="card"><h5>巴塔聖鼓</h5><p>薩泰里亞儀式的核心。三面雙頭沙漏鼓，各有專屬節奏召喚不同奧里莎。鼓在此不是樂器，而是與神對話的語言。</p></div>
+      <div class="card"><h5>頌樂 son</h5><p>生於東部奧連特山區，弦樂與非洲節奏的結晶。「蒙圖諾」段的呼應結構，是薩爾薩的直接源頭。</p></div>
+      <div class="card"><h5>倫巴 rumba</h5><p>哈瓦那與馬坦薩斯港區的街頭創造。木箱、人聲、即興，工人階級在剝奪中宣告生命力的方式。</p></div>
+    </div>
+
+    <h3>菸草、蘭姆與一個民族的氣味</h3>
+    <p>奧爾蒂斯把菸草與糖選作他那本名著的兩位「主角」，自有深意。在他筆下，糖與菸草是古巴的兩種對立性格：糖是外來的、需要奴隸大莊園與龐大資本的、把人變成數字的、令人發胖的、屬於外國市場與大資本的「她」；菸草則是本土的、可以小農精耕細作的、講究個人手藝與品味的、提神醒腦的、更貼近古巴人自身的「他」。古巴的菸草——尤其是西部比那爾德里奧省（Pinar del Río）那片得天獨厚的紅土地上長出的菸葉——成就了世界公認最頂級的雪茄（puro）。一支古巴雪茄的誕生，從育苗、採葉、發酵、陳化到捲製，幾乎全憑捲菸工（torcedor）的雙手與經驗，那是一門帶著驕傲的手藝。而捲菸工廠裡那個獨特的傳統——僱一位「朗讀者」（lector）坐在高臺上，為埋頭工作的工人們大聲朗讀報紙、小說與政治評論——更讓哈瓦那的菸廠成了培育工人意識與古巴民族情感的奇特學堂。</p>
+    <p>如果菸草是古巴的氣味，那麼蘭姆酒（ron）就是它的血液。蘭姆從製糖過程的副產品——糖蜜——中蒸餾而來，它的存在本身，就是甘蔗、奴隸與這座島糾纏命運的縮影：糖的苦難，意外地釀出了歡愉的酒。古巴人發展出獨特的清淡型白蘭姆，再以它為基底，調出了名揚四海的雞尾酒——薄荷、青檸、糖與蘭姆攪成的莫希托（mojito），以及據說誕生於同名礦區、由蘭姆與青檸調成的黛綺莉（daiquirí）。雪茄的煙、蘭姆的甜、son 的節奏、奧里莎的鼓——這些日後被印在明信片上、被全世界當作「古巴風情」消費的符號，沒有一樣是憑空而來的浪漫。它們每一樣，都是從糖的種植園、從非洲與西班牙的碰撞、從一個被鍛造出來的新民族的血肉裡，長出來的真實。</p>
+
+    <p>於是，在這座島上，發生了一件殖民者既未計畫、也無力阻止的事。他們建起種植園，是為了把人變成糖；可是被他們鎖鏈起來的人，卻在同一片土地上，把記憶、信仰、節奏與苦難，鍛造成了一個全新的民族與文化。約魯巴的神戴上了聖徒的面具，剛果的靈力住進了恩岡加，卡拉巴爾的祕密守在阿巴庫阿的院落，東部山村的弦與鼓孕育出頌樂，港區的木箱與人聲敲打出倫巴，紅土地上長出最好的菸葉，糖蜜裡蒸餾出歡愉的酒——這一切，共同煮成了奧爾蒂斯那鍋永遠燉不完的 ajiaco。古巴性，從來不是西班牙的，也不是非洲的，而是這兩者在苦難中互滲、再生出的第三者。這座島最珍貴的東西，不是它出口了多少糖，而是它在出口糖的過程中，意外地創造了一個民族，以及一個民族的靈魂。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 糖的詛咒 the Curse of Sugar</span>
+      <p>糖的詛咒有一張人人都看得見的臉——單一作物、奴役、對外部市場的依賴；但它還有一張幾乎沒人預料到的臉。為了榨出糖，西班牙把整個非洲的一角搬到了加勒比，把約魯巴的神、剛果的鼓、卡拉巴爾的祕密，連同無數人的苦難，一起傾倒在這座島上。種植園是一座地獄，可就在這座地獄裡，一個全新的民族被<span style="color:var(--rust);font-weight:600">鍛造</span>了出來。這正是糖的詛咒最深的反諷：它本意是把人變成商品，結果卻造出了一種文化——薩泰里亞的奧里莎、頌樂的切分、倫巴的鼓點、雪茄的煙與蘭姆的甜。日後當這座島陷入革命、封鎖與飢餓，當貨架空了、配給本變薄，古巴人會發現，糖能被禁運、能被剝奪、能跌得一文不值，但那面在卡比爾多院落裡敲響的鼓，那位戴著聖徒面具的非洲之神，那種叫做「古巴性」的東西，卻是任何封鎖都奪不走的。糖建起了種植園，糖卻也在無意間，替這座島準備好了它在最黑暗的歲月裡，唯一不曾失去的家當。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<div class="part-div reveal" id="part-2">
+  <span class="pn">第二部</span>
+  <h2 class="ptitle pt">北方巨人的陰影</h2>
+  <div class="pe">The Shadow of the Giant</div>
+  <div class="pline"><span></span><span class="dot">❂</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-6">
+  <div class="act-head">
+    <span class="act-num">第6章 · José Martí and the Long War</span>
+    <h2 class="act-title">何塞·馬蒂與獨立的漫長戰爭</h2>
+    <p class="act-sub">The Ten Years' War and the Apostle</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一八六八年十月十日，破曉前的黑暗裡，在古巴東部一座叫拉德馬哈瓜（La Demajagua）的甘蔗莊園上，一位富有的種植園主敲響了他用來召集奴隸下田的那口鐘。鐘聲一如往常在熱帶的晨霧中傳開，奴隸們從工棚裡走出來，以為又是一個被汗水與甘蔗壓彎的尋常日子。但這一次，等著他們的不是工頭的皮鞭，而是一段他們從未聽過的話。莊園的主人卡洛斯·曼努埃爾·德·塞斯佩德斯（Carlos Manuel de Céspedes）站在他們面前，宣布從這一刻起，他們全都是自由人；他懇請——而不是命令——他們之中願意的人，拿起武器，與他一同為古巴的獨立而戰。這便是後來被古巴人世代傳誦的「亞拉之呼」（el Grito de Yara）。一個地主親手砸碎了自己財富的根基，把奴隸變成戰友，把私產變成義軍，向當時仍是西班牙女王陛下最珍貴殖民地的這座島嶼，扔下了第一把火。古巴人為獨立流血的三十年，就從這口鐘、這一聲呼喊開始。</p>
+
+    <p>這一聲呼喊之所以驚天動地，正因為它從一開始就把兩件在當時的古巴幾乎不可能並提的事捆在了一起：獨立，與廢奴。在一個經濟命脈完全建立在奴隸甘蔗之上的社會裡，喊出獨立，等於同時威脅到西班牙的王權與種植園主的錢袋；而塞斯佩德斯選擇從解放自己的奴隸開始這場戰爭，等於宣告：一個還靠著鎖鏈榨取財富的古巴，不配談自由。<strong>糖的詛咒在這裡第一次被一個古巴人正面挑戰</strong>——他要的不只是換一面旗幟，而是要這座島連同它賴以為生的那套殘酷邏輯，一起脫胎換骨。然而正是這份激進，注定了這場戰爭從一開始就背負著古巴社會內部最深的裂痕：富庶的西部、那些最依賴奴隸的大種植園主，遲遲不敢加入；戰火主要在貧瘠而多山的東部燃燒。一場為了全島的戰爭，卻始終只燒著半座島。</p>
+
+    <h3>十年戰爭：一場功敗垂成的史詩</h3>
+    <p>這場後來被稱為「十年戰爭」（the Ten Years' War，一八六八至一八七八）的衝突，是古巴近代史上第一場全面的獨立戰爭，也是一場悲壯而漫長的消耗。義軍——他們稱自己為「曼比塞」（los mambises），一個源自一位倒戈的黑人軍官之名的稱呼——大多是農民、被解放的奴隸、破產的小地主，他們沒有正規軍的訓練與裝備，卻在東部的群山與密林裡，把一場本該迅速被撲滅的叛亂，硬生生拖成了十年。他們發明了一種令西班牙正規軍聞之色變的戰術：「砍刀衝鋒」（la carga al machete）——騎兵手持本是用來砍甘蔗的彎刀，呼嘯著衝入敵陣肉搏。那把在莊園裡日復一日收割甘蔗、收割著奴隸血汗的鈍重彎刀，如今被同一雙手高舉，砍向壓迫者。工具的轉向，本身就是一則關於這座島命運的隱喻。</p>
+    <p>戰爭中升起了幾位日後被古巴尊為國父的將領。多明尼加裔的馬克西莫·戈麥斯（Máximo Gómez）以其冷峻的戰略頭腦，成為義軍最倚重的軍事大腦；而真正讓西班牙人膽寒、讓全世界記住的，是安東尼奧·馬塞奧（Antonio Maceo）——一位混血的自由黑人，人稱「青銅泰坦」（el Titán de Bronce）。他在整場戰爭中身負十餘處傷，憑著過人的勇氣與威望，從一名普通士兵一路升至高級指揮官，成為跨種族獨立軍最耀眼的象徵。在曼比塞的隊伍裡，黑人、白人、混血兒並肩作戰，一個剛被主人解放的奴隸，可能正聽命於一位克里奧爾（criollo）軍官，也可能反過來指揮著昔日的白人鄰居。<strong>這支軍隊本身，就是一個古巴尚未敢於想像的未來的雛形</strong>：一個不再以膚色劃分尊卑的共同體。在那個美洲多數地方仍視奴隸制為天經地義的年代，這幅景象本身就是一場革命。</p>
+
+    <div class="aside">十年戰爭中最令古巴人傳頌、也最令西班牙人羞愧的一刻，是一八七八年的「巴拉瓜抗議」（la Protesta de Baraguá）。當大多數義軍領袖在桑洪條約（el Pacto del Zanjón）下接受了西班牙提出的妥協、放下武器時，馬塞奧拒絕了。他在巴拉瓜當面對西班牙將領馬丁內斯·坎波斯（Martínez Campos）宣布：只要西班牙不給古巴獨立、不徹底廢除奴隸制，他絕不投降。這場明知不敵卻寧折不彎的抗議，雖然在軍事上毫無勝算，卻在精神上點燃了一盞不滅的燈——它告訴後來者，妥協可以簽，但有些原則不能讓。十七年後，這盞燈將被重新點亮。</div>
+
+    <h3>桑洪的妥協與漸進的廢奴</h3>
+    <p>然而英雄主義救不了一場缺乏統一指揮、缺乏外援、又被內部地域與階級分歧撕扯的戰爭。十年苦戰下來，義軍始終無法把戰火推進到富庶的西部，而西班牙則源源不斷地從本土調來援軍。一八七八年，精疲力竭的雙方簽訂桑洪條約，戰爭以一種令人心碎的方式收場：古巴沒有換來獨立。條約給了一些政治改革的承諾、特赦了參戰者、解放了在義軍中服役的奴隸，卻把最根本的兩件事——獨立與全面廢奴——留在了原地。三十萬人左右在這場戰爭與隨之而來的飢荒、疾病中喪生，一座本就被奴隸制扭曲的社會，又添了十年的瘡痍。<strong>第一次為獨立流的血，沒能換來獨立。</strong>古巴人學到了沉痛的一課：光有勇氣不夠，一場零散的、被地域與猜忌分割的起義，註定要被一個統一的帝國各個擊破。</p>
+    <p>但歷史的清算往往遲到而不缺席。奴隸制這座壓在古巴身上的大山，雖未被戰爭一舉推倒，卻在戰爭的震動下開始崩塌。一八八○年，西班牙在古巴頒布了所謂「監護制」（el patronato）——一種過渡安排，名義上廢奴，實則讓奴隸再被原主以「監護人」之名無償驅使數年。這是典型的漸進式廢奴：既向道義與國際壓力低頭，又盡可能拖延、稀釋種植園主必須付出的代價。直到一八八六年，這套虛偽的過渡才最終被廢除，古巴的奴隸制在法律上徹底終結——比鄰近的英屬、法屬殖民地晚了半個世紀，是整個美洲最後幾個廢奴的地方之一。獲得自由的非洲裔古巴人，從鎖鏈中走出，卻發現自己走進的，是一個依舊由膚色與甘蔗定義貧富的世界。法律上的自由，與真正的平等之間，還隔著一道漫長得看不到盡頭的距離。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼古巴廢奴來得這麼晚</span>
+      <p>整個美洲在十九世紀陸續廢奴，海地早在一八○四年便以奴隸革命立國，英帝國一八三三年廢奴，多數西屬美洲在獨立後也相繼解放奴隸。古巴卻拖到一八八六年，幾乎是吊車尾。原因正是糖。當別的地方因奴隸制衰落而較易割捨它時，古巴的奴隸甘蔗經濟卻正值巔峰——它是世界最大的蔗糖供應者，整座島的財富、整個種植園主階級的存在，都死死綁在奴隸的勞動上。經濟愈是依賴一套制度，廢除它的阻力就愈大。古巴的悲劇在於，它太「成功」了——成功到讓奴隸制變得太值錢、太難放手。糖既是這座島的繁榮，也是它道德上最深的負債；廢奴之所以姍姍來遲，正因為糖讓它變得「太貴」。這便是糖的詛咒最赤裸的一種寫法。</p>
+    </div>
+
+    <h3>使徒：在怪獸的肚子裡</h3>
+    <p>當塞斯佩德斯敲響那口鐘時，一個十五歲的哈瓦那少年正因為在報紙上寫了同情獨立的文字，而被西班牙當局逮捕、判處苦役，戴著腳鐐在採石場裡敲石頭。那道鐵鐐在他腳踝上磨出的傷疤，他帶了一生。這個少年，名叫何塞·馬蒂（José Martí）。他不是將軍，不會騎兵衝鋒，身材瘦削、體弱多病；他的武器是筆，是聲音，是一種幾乎能把鐵化成火的語言。後來，古巴人不稱他為元帥，不稱他為總統，而稱他為「使徒」（el Apóstol）——彷彿他帶來的不是一場政變，而是一種信仰。在十年戰爭失敗、古巴陷入長達十餘年的疲憊與沉默的歲月裡，正是馬蒂，在流亡中，一磚一瓦地，把一場潰散的夢想重新建成了一座教堂。</p>
+    <p>他的大半生在流亡中度過——西班牙、墨西哥、瓜地馬拉、委內瑞拉，而最關鍵的十五年，在紐約。他白天為各大報撰寫關於美洲的評論，以一手華麗而精準的西班牙文成為整個拉丁美洲最受敬重的記者與詩人之一；夜晚，他奔走於佛羅里達的坦帕（Tampa）與基韋斯特（Key West）那些古巴流亡菸草工人之間，在捲菸的長桌旁演講、募款、組織。他懂得一件他的前輩們不懂的事：上一場戰爭之所以失敗，不只敗於戰場，更敗於分裂——將領各自為政、地域彼此猜忌、種族與階級的裂痕從未彌合。於是他不急著打仗，而先用了十年，去做一件更難的事：把所有人縫合成「一個」。一八九二年，他在紐約創立「古巴革命黨」（el Partido Revolucionario Cubano），第一次為這場起義建立了統一的政治領導、統一的指揮、統一的資金，把流亡者、老將、工人、克里奧爾與黑人，全都裝進同一個容器。他要的，是一場有頭腦、有靈魂、不會再像上次那樣散沙般潰敗的戰爭。</p>
+
+    <p>而正是在紐約，在這個他流亡得最久、看得最深的地方，馬蒂得出了他一生最沉痛、也最有預言性的洞見。他親眼看著美國——這個在十九世紀末正高速崛起、財富與野心同步膨脹的北方巨人——如何用貪婪的目光注視著加勒比海。他看穿了美國政界與商界對古巴的覬覦：他們嘴上談自由，心裡卻盤算著如何在西班牙倒下後，把這座島連同它的糖、它的港口、它的戰略位置，一併收入囊中。他在給友人的信中寫下了那句後來被刻進每一個古巴人記憶裡的話：<strong>「我曾住在怪獸的肚子裡，我了解牠的五臟六腑。」</strong>（Viví en el monstruo, y le conozco las entrañas.）對馬蒂而言，西班牙是一個正在死去的舊帝國，而美國，是一個正在誕生的新帝國。他要為古巴爭取的，不只是脫離西班牙的獨立，更是一種能在這頭年輕巨獸的陰影下、依然挺直腰桿的<span style="color:var(--rust);font-weight:600">真正的</span>獨立。他比同時代的任何人都更早看清：把西班牙趕走，只是這場戲的上半場。</p>
+
+    <div class="pull"><p>我曾住在怪獸的肚子裡，我了解牠的五臟六腑。</p></div>
+
+    <p>馬蒂的恐懼不是空穴來風。他在紐約讀著美國報紙上那些關於「天定命運」（Manifest Destiny）的言論，看著美國一步步把勢力伸向墨西哥、伸向中美洲，他比哈瓦那任何一位種植園主都更清楚地意識到：對許多美國人而言，古巴從來不是一個應當獨立的鄰邦，而是一顆遲早要落入美國掌心的「熟透的果子」——這正是早在一八二○年代，美國政治家就用過的比喻。馬蒂畢生的政治工程，因此有了一個別人尚未察覺的雙重目標：既要打贏對西班牙的獨立戰爭，又要在勝利到來之前，搶先建立起一個強大到足以拒絕被北方吞併的古巴共和國。他要的是一場「快」的戰爭——快到在美國找到藉口介入之前，古巴人就已經靠自己贏得自由。他與時間賽跑，而他不知道的是，時間給他的，遠比他需要的要少。</p>
+
+    <h3>多斯里奧斯：使徒的隕落與未竟的洞見</h3>
+    <p>一八九五年，準備了十餘年的馬蒂終於發出了起義的號令——史稱「拜雷之呼」（el Grito de Baire）。他與老將戈麥斯一同，從多明尼加搭上一條小船，在古巴東部一處荒涼的海灘登陸，踏上他自十六歲被流放後便再未久留的故土。一個用半生在書桌與講臺上組織革命的文人，終於要親身走進他召喚出來的戰火。然而命運給了這位使徒一個近乎殘酷的結局。同年五月十九日，在東部一個叫多斯里奧斯（Dos Ríos，意為「兩河之間」）的地方，馬蒂在一次小規模的遭遇戰中，不顧戈麥斯要他留在後方的勸阻，騎著白馬迎向西班牙軍隊的火力，當場中彈身亡。他親手點燃的戰爭，才剛剛開始；而那個用一生洞察未來、警告同胞提防北方巨人的人，卻倒在了戰爭的第一個月。他沒能看到他預言的一切如何一一應驗。</p>
+    <p>使徒雖死，他縫合起來的這場戰爭卻沒有像上一次那樣崩解——這正是馬蒂十年苦工的回報。戈麥斯與馬塞奧扛起了軍事的大旗，這一次，他們吸取了十年戰爭的教訓，發動了著名的「西征」（la Invasión），把戰火第一次從東部一路燒進了西班牙人引以為傲的西部富庶之地，讓整座島——而不再只是半座島——燃燒起來。曼比塞們再度高舉砍刀，跨種族的義軍再度並肩。古巴人為獨立流血的時鐘，從亞拉之呼到此刻，已經走了將近三十年，而最後、也是最殘酷的一段路，才剛剛展開。<strong>他們即將贏得對西班牙的勝利，卻將在勝利的那一刻，迎面撞上馬蒂用一生警告過他們的那個東西。</strong>使徒倒下了，但他留下的最深的洞見——那頭潛伏在九十英里之外的北方巨獸——正從歷史的地平線上，緩緩抬起頭來。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>古巴人為了掙脫西班牙的鎖鏈，整整流了三十年的血——從塞斯佩德斯一八六八年砸碎自己奴隸的鐐銬，到馬蒂一八九五年倒在多斯里奧斯的白馬之下。然而這部獨立史詩最深刻的一筆，不是哪一場勝仗，而是它最偉大的先知在死前看穿的那個<span style="color:var(--rust);font-weight:600">回聲</span>：真正的威脅，不在大西洋對岸那個正在死去的舊帝國，而在九十英里之外那個正在誕生的新巨人。馬蒂住過怪獸的肚子，摸過牠的五臟六腑，於是他比所有人都早地懂得——把西班牙趕走，並不等於自由的到來；把西班牙的位置空出來，恰恰可能是替北方巨人鋪好了入主的床。三十年的血，買來的可能不是獨立，而只是換了一個主人。這道陰影，將在下一個世紀裡，一次又一次地落在這座島上。使徒的恐懼，正是古巴此後一切命運的序章。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-7">
+  <div class="act-head">
+    <span class="act-num">第7章 · 1898: The Ripe Fruit</span>
+    <h2 class="act-title">一八九八：成熟的果實落入北方之手</h2>
+    <p class="act-sub">Independence Snatched at the Moment of Winning</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一八九八年的春天，古巴的獨立彷彿已經近在咫尺，近到可以聞到它的氣味。從一八九五年起，這座島嶼已經為了掙脫西班牙而流血了三年。古巴獨立軍（the Cuban Liberation Army）——人們叫他們「曼比塞」（los mambises），那是一群衣衫襤褸、手持砍蔗刀、騎著瘦馬卻屢屢以寡擊眾的鄉野戰士——已經把這場戰爭從東部的奧連特（Oriente）一路打到了西部的比那爾德里奧（Pinar del Río），用一條橫貫全島的火與灰的軌跡，把整座島嶼變成了西班牙無法治理的焦土。馬西莫·戈麥斯（Máximo Gómez）那句冷酷的格言——「不投降，不接受任何形式的妥協」——已經成了這支軍隊的信條。西班牙派來了它最鐵腕的將軍魏勒爾（Valeriano Weyler），用慘無人道的「集中營」（la reconcentración）把鄉間百姓強行驅入城鎮、活活餓死了數以十萬計的平民，卻依然按不住這場燎原之火。到了一八九八年初，明眼人都看得出來：西班牙正在這座島上慢慢失血而死，古巴人贏得獨立，只是時間問題。然而正是在這個時刻——在勝利的果實即將成熟、即將墜入古巴人自己手中的這個時刻——一隻來自北方的手，悄悄伸了過來。</p>
+
+    <h3>「成熟的果實」：一則等了七十五年的預言</h3>
+    <p>要理解一八九八年發生了什麼，必須先回到一八二三年，回到一個叫約翰·昆西·亞當斯（John Quincy Adams）的美國國務卿寫下的一段話。那一年，亞當斯在一封給駐西班牙公使的訓令中，談起了古巴的命運。他寫道，古巴就像一顆「成熟的果實」（a ripe fruit）：一棵被風暴從樹上吹落的蘋果，除了墜向地面之外別無選擇；而古巴，這座因為地理與商業已與美國緊緊綁在一起的島嶼，一旦脫離西班牙，也同樣「除了倒向北美聯邦之外，別無歸宿」。亞當斯用了一個極其精妙、也極其傲慢的比喻來描述這種必然——他說這是一種「政治的地心引力」（political gravitation）。蘋果熟了，自然會落；古巴熟了，自然會落向美國。這不是慾望，這是物理定律；不是侵略，是自然法則。<strong>美國不必去摘那顆果實，只需耐心地，站在樹下，等它自己掉下來。</strong></p>
+    <p>這套「成熟果實論」（the ripe fruit doctrine），在此後七十五年裡，像一條低音線一樣，貫穿了美國對古巴的全部想像。它的核心是一種既懶散又貪婪的耐心：美國深知古巴遲早會脫離西班牙，因此真正的策略，從來不是幫古巴獨立，而是確保古巴在脫離西班牙的那一刻，不要落入任何第三方之手（尤其是英國），而要恰好、不偏不倚地，落進美國張開的手掌。整個十九世紀，美國曾數度想直接買下古巴——一八四八年波爾克（James K. Polk）出價一億美元，一八五四年的《奧斯坦德宣言》（the Ostend Manifesto）甚至露骨地暗示，若西班牙不肯賣，美國有權奪取。買賣不成，但那份「這顆果實終究是我的」的篤定，從未動搖。所以當一八九八年古巴人自己快要把果實搖落時，華盛頓真正焦慮的，並不是西班牙會不會輸——而是：果實落下的方向，會不會偏離了它該落的地方？會不會落進古巴人自己手裡，而不是美國手裡？</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 「成熟的果實」如何預演了整個美古關係</span>
+      <p>亞當斯的比喻之所以致命，在於它從根本上否定了古巴的主體性。在「果實」的隱喻裡，古巴不是一個會自己選擇命運的民族，而是一個被動的、無生命的客體——它不「決定」落向誰，它只是依循「地心引力」墜落。換句話說，古巴的獨立意志，在這套論述裡從一開始就被取消了：你不是一個要爭取自由的人民，你是一顆遲早要被收穫的水果。這個邏輯，將支配此後整整一個世紀的美古關係。從一八九八年的軍事佔領，到一九〇一年把附庸條款縫進古巴憲法的《普拉特修正案》（the Platt Amendment），到反覆的軍事干預、扶植傀儡、控制糖業與經濟命脈——每一次，華盛頓的潛臺詞都是同一句：這顆果實是我的，我有權決定它怎麼熟、何時落、落向哪裡。一八九八年不是這套邏輯的開端，而是它七十五年蓄勢後的第一次完整爆發。</p>
+    </div>
+
+    <h3>緬因號：哈瓦那港裡的一聲爆炸</h3>
+    <p>把「等待」變成「行動」的，是一艘軍艦，和一聲爆炸。一八九八年一月，為了「保護在古巴的美國僑民與利益」，美國派出戰艦緬因號（the USS Maine）駛入哈瓦那港，停泊在西班牙人的眼皮底下。這本身就是一個曖昧而具威脅的姿態。二月十五日深夜九點四十分，停泊中的緬因號突然發生劇烈爆炸，艦身在火光中裂開、迅速沉沒，二百六十餘名美國水兵當場罹難。爆炸的真正原因，至今仍是懸案——當時的美國調查委員會匆匆認定是船外的水雷所致，但後世多項技術分析傾向認為，更可能是艦內煤艙的自燃引燃了彈藥庫，是一場意外，而非西班牙的蓄意攻擊。然而在一八九八年的那個春天，真相是什麼，已經無關緊要了。重要的是這場爆炸被如何「使用」。</p>
+    <p>幾乎在沉船的硝煙還沒散去之前，一句口號就已經響徹了美國的大街小巷：「勿忘緬因號，西班牙人下地獄！」（Remember the Maine, to hell with Spain!）這句話像野火一樣燒遍全國，把一場原因不明的海上災難，瞬間鍛造成一樁需要血債血償的國恥。一個帝國介入另一座島嶼命運所需要的，往往不是一個真實的理由，而只是一個足夠響亮的口號——一句能讓憤怒蓋過審慎、讓復仇蓋過事實的咒語。緬因號的殘骸沉在哈瓦那港的淤泥裡，但它真正的作用，是替一場早已寫好劇本的戰爭，按下了開場的鈴。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 黃色新聞：把鉛字鑄成炮彈</span>
+      <p>緬因號爆炸之所以能在數週內把美國推向戰爭，背後有一臺強大的引擎——「黃色新聞」（yellow journalism）。當時，紐約兩大報業巨頭赫斯特（William Randolph Hearst）的《紐約日報》與普立茲（Joseph Pulitzer）的《世界報》，正陷入一場慘烈的發行量大戰。他們發現，沒有什麼比戰爭與暴行的故事更能賣報紙。於是西班牙在古巴的暴行被無限放大、緬因號的「謀殺」被繪聲繪影、煽情的標題與杜撰的插圖鋪天蓋地。流傳最廣的一則軼事說，赫斯特派去古巴的畫家發電報抱怨「這裡沒有戰爭」，赫斯特回電：「你提供圖畫，我提供戰爭。」這則軼事的真偽已不可考，但它精準地捕捉了那個時代的真相：報紙第一次擁有了製造民意、進而製造戰爭的能力。鉛字被鑄成了炮彈，而第一個被擊中的，是古巴的獨立。</p>
+    </div>
+
+    <h3>幾個月的戰爭，與三十年的鮮血</h3>
+    <p>一八九八年四月，在輿論的鼎沸與「成熟果實」的召喚下，美國國會通過決議，向西班牙宣戰。美西戰爭（the Spanish–American War）就此爆發。然而這場戰爭，與其說是一場戰爭，不如說是一場收割。它短得令人錯愕——從宣戰到西班牙求和，前後不過幾個月。在加勒比海與菲律賓兩個戰場，老朽的西班牙帝國幾乎一觸即潰：杜威（George Dewey）的艦隊在馬尼拉灣一個上午就殲滅了西班牙的太平洋艦隊；在古巴的聖地牙哥（Santiago de Cuba）外海，西班牙艦隊出港突圍，被守候的美國軍艦在數小時內悉數擊沉。陸地上，包括日後將成為美國總統的西奧多·羅斯福（Theodore Roosevelt）和他那支「莽騎兵」（the Rough Riders）在內的美軍，在聖胡安山（San Juan Hill）的衝鋒成了報紙上的英雄傳奇。到了那年夏天，戰事已定。羅斯福日後輕佻地稱這是一場「漂亮的小戰爭」（a splendid little war）——對美國而言，它確實漂亮：傷亡輕微、勝利迅速、收穫巨大。</p>
+    <p>然而，當美國人在幾個月內贏得這場「漂亮的小戰爭」時，他們腳下踩著的，是古巴人流了整整三十年的鮮血。古巴爭取獨立的戰爭，並非始於一八九五年，而是始於一八六八年的「十年戰爭」（the Ten Years' War）；從那時算起，到一八九八年，這座島嶼為了自由，已經斷斷續續地戰鬥、流血、犧牲了三十年。何塞·馬蒂（José Martí）——那位在紐約的流亡歲月裡為古巴獨立奔走、最終回到故土、卻在一八九五年戰爭剛開打就戰死沙場的詩人與革命之父——早已預見了這一刻的危險。他在臨死前未竟的信中留下一句沉痛的警告，他畢生最深的憂懼，正是古巴在掙脫西班牙之後，會落入「北方那個巨人」的腹中。馬蒂死了，他的曼比塞同志們又苦戰了三年，把西班牙逼到了崩潰的邊緣。如今，當勝利的果實終於成熟，那隻他畢生警惕的北方之手，果然伸了過來——不是來幫他們摘果，而是來把果實，整顆奪走。</p>
+
+    <div class="pull"><p>美國人用幾個月贏得了一場「漂亮的小戰爭」；古巴人用三十年的鮮血，換來了在勝利門檻上被奪走的獨立。</p></div>
+
+    <h3>巴黎和約：勝利者缺席的談判桌</h3>
+    <p>一八九八年十二月，西班牙與美國的代表在巴黎簽署和約（the Treaty of Paris）。在這張決定古巴命運的談判桌上，坐著兩個帝國——一個衰老、戰敗的舊帝國，一個年輕、勝利的新帝國。然而桌邊有一張椅子，是空的：流盡了鮮血、贏得了這場戰爭的古巴獨立軍，竟然沒有被允許派出任何一名代表。為自由戰鬥了三十年的人，在決定那份自由歸屬的會議上，連旁聽的資格都沒有。和約的條款冷酷而清晰：西班牙放棄對古巴的主權，但古巴並不因此獲得獨立——它被交給了美國，由美國實施軍事佔領（military occupation）。與此同時，西班牙把波多黎各、關島，並以二千萬美元的代價把整個菲律賓，一併割讓給美國。一場以「解放古巴」為旗號的戰爭，最終的結算清單，是美國一夜之間成為了一個橫跨兩洋的殖民帝國。</p>
+    <p>於是，最荒謬也最殘酷的一幕上演了。一八九九年元旦，當西班牙的國旗在哈瓦那的莫羅城堡（el Morro）緩緩降下時，升起取代它的，不是古巴人為之奮戰了三十年的那面孤星旗，而是美利堅合眾國的星條旗。古巴獨立軍——那些把西班牙趕下海的真正勝利者——被擋在了哈瓦那城外，不准進城參加這場本該屬於他們的儀式。曼比塞們望著城頭那面陌生的旗幟，心裡明白了一件他們不願承認的事：他們趕走了一個帝國，卻沒有等來自由，而是迎來了另一個帝國的佔領。<strong>他們贏得了戰爭，卻在勝利的那一刻，輸掉了戰爭的全部意義。</strong></p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 泰勒修正案：一個被悄悄架空的承諾</span>
+      <p>在這齣劇裡，有一份文件，本該保護古巴的獨立，卻最終成了承諾與現實落差的見證——那就是《泰勒修正案》（the Teller Amendment）。一八九八年四月美國宣戰時，國會中仍有不少議員與民眾對「美國會不會藉機吞併古巴」深感疑慮。為了平息這種疑慮，科羅拉多州參議員泰勒（Henry M. Teller）提出了一條修正案，被附加進宣戰決議。它鄭重宣告：美國對古巴「沒有行使主權、管轄權或控制權的意圖」，並承諾在平定局勢後，「將古巴的治理與控制權，交還給古巴人民」。這段文字，字面上是高尚的——它似乎為古巴的獨立上了一道法律的鎖。然而現實是：戰後等待古巴的，是長達數年的美國軍事佔領；而到了一九〇一年，當美國真要「交還」政權時，它的代價，是逼迫古巴把另一份文件——賦予美國隨時軍事干預古巴之權的《普拉特修正案》——寫進自己的憲法。泰勒承諾「我們不要你的主權」，普拉特卻拿走了主權最核心的部分。一個承諾被另一份文件悄悄架空，這正是一八九八年留給古巴最深的教訓：帝國的善意宣言，與帝國的實際行動之間，永遠隔著一道無法跨越的鴻溝。</p>
+    </div>
+
+    <p>一八九八年，因此成了古巴身世裡一道最深、最痛的折痕。它不是一場失敗——古巴人確實打贏了，西班牙確實被趕走了。但它也不是一場勝利——因為就在勝利兌現的那一瞬間，勝利的果實被一隻更近、更強的手，從半空中接走了。何塞·昆西·亞當斯七十五年前的那則預言，在這一年精準地應驗了：成熟的果實果然墜落，而它墜落的方向，果然不偏不倚地，落進了北方巨人張開的掌心。古巴人趕走了一個遠在大西洋彼岸、已經衰朽的舊帝國，卻在勝利的門檻上，迎來了一個近在咫尺、正值壯年、且自認對這座島嶼擁有「自然主權」的新帝國。<strong>獨立，在它被贏得的那一刻，被偷走了。</strong>這一道折痕，將決定此後整整六十年——直到下一場革命爆發之前——古巴與那個北方鄰居之間，一切扭曲、依附、屈辱與反抗的關係底色。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>一八九八年，是「北方巨人的陰影」第一次完整地、赤裸裸地降臨在古巴身上。在此之前，那道陰影只是亞當斯筆下一則關於「成熟果實」的比喻、一句關於「政治地心引力」的傲慢預言；而在這一年，它變成了哈瓦那莫羅城堡上空那面真實升起的星條旗。古巴日後與美國之間每一段糾纏——《普拉特修正案》、關塔那摩（Guantánamo）海軍基地的永久租借、被外資掌控的糖業命脈、半個世紀的傀儡與干預，乃至一九五九年那場以「終結北方控制」為核心怒火的革命——全都要回到一八九八年這個原點來重新理解。古巴的悲劇從來不是它打不過西班牙，而是它在打贏的那一刻，發現自己的勝利早已被亞當斯在七十五年前許諾給了別人。每當後來的古巴人問「我們究竟在為誰而戰、我們的島嶼究竟屬於誰」時，他們都會在這一年、在這顆「成熟的果實」前，撞見那道至今未曾真正退去的、北方巨人的長長陰影。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-8">
+  <div class="act-head">
+    <span class="act-num">第8章 · The Platt Amendment</span>
+    <h2 class="act-title">普拉特修正案：被監護的共和國</h2>
+    <p class="act-sub">A Republic Born on a Leash</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九〇二年五月二十日的清晨，哈瓦那（Havana）的莫羅城堡（El Morro）上，那面飄了將近四年的美國星條旗，緩緩降了下來。取而代之的，是一面藍底三色、單星紅三角的旗幟——古巴的國旗。岸邊與街頭擠滿了人，禮炮的轟鳴與教堂的鐘聲交織成一片，許多老人哭了，他們等這一刻，等了一輩子。十年戰爭（the Ten Years' War）的烽火、何塞·馬蒂（José Martí）在多斯里奧斯（Dos Ríos）倒下的身影、無數曼比塞（mambí）游擊隊員在甘蔗田裡灑下的血——彷彿都在這面升起的旗幟裡得到了償還。新共和國的第一任總統托馬斯·埃斯特拉達·帕爾馬（Tomás Estrada Palma）登臺就職，美國的軍事佔領在形式上結束了。古巴，這座在西班牙手裡熬了四百年的島嶼，終於有了自己的名字、自己的旗、自己的總統。然而在那片歡騰的喧囂底下，有一道幾乎沒人敢大聲說出的暗影：這個剛剛誕生的共和國，從睜開眼睛的第一刻起，脖子上就被拴了一條繩子。而握著繩子另一端的，不是別人，正是那位在海峽對岸、剛剛把西班牙趕走的「解放者」——美國。</p>
+
+    <p>這條繩子有一個冷冰冰的名字，叫普拉特修正案（the Platt Amendment）。它不是古巴人寫的，也不是古巴人想要的。它是一八〇一年——應作一九〇一年——由美國國會的一位參議員奧維爾·普拉特（Orville H. Platt）領銜，附加在一項軍隊撥款法案後面的條款。它規定了美國從古巴撤軍的條件，而這些條件，必須由古巴人自己，一字不漏地，抄進他們新生共和國的憲法裡。換句話說，美國對古巴人說：我可以把島還給你們，但你們得先在自己的根本大法上簽下一份「我自願讓你管著」的契約。這是一樁奇異的交易——勝利者要被解放者在獲得自由的同時，親手寫下限制自己自由的條文。古巴的制憲會議（the Constitutional Convention）為此爭辯、抗議、拖延了整整數月，可最終，在「不接受就繼續被佔領」的選擇題面前，他們以微弱的多數，含著屈辱，把那條繩子套上了自己的脖子。</p>
+
+    <h3>把監護寫進憲法</h3>
+    <p>要理解普拉特修正案的分量，得先看清它到底寫了什麼。它一共八條，每一條都像一根釘子，把古巴的主權釘在美國的意志之上。其中最致命的，是第三條與第七條。第三條賦予美國「干預古巴內政」的權利——只要美國認為古巴的「生命、財產與個人自由」受到威脅，或為了維持一個「足以保護生命、財產與個人自由的政府」，美國便可隨時出兵登島。這意味著，古巴政府是否合格、是否穩定、是否「值得存在」，最終的裁判權不在哈瓦那，而在華盛頓。第七條則要求古巴「出售或租讓」土地給美國，供其建立海軍與煤炭補給站——這便是日後關塔那摩灣（Guantánamo Bay）那塊飛地的法律源頭。此外，修正案還限制古巴不得與任何外國簽訂可能危及其獨立的條約、不得讓外國在島上立足、不得借超過自身償付能力的外債。一個國家的外交、財政、領土、乃至最終的存亡裁決權，就這樣被另一個國家，用八條文字，盡數收進了口袋。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 什麼叫「把監護寫進憲法」</span>
+      <p>近代主權國家的根基，是憲法——它是一個民族對「我們是誰、由誰作主」的最高宣告。一部憲法若由本國人民自主制定，它便是獨立的證書；而普拉特修正案的陰險之處，正在於它不是一紙外加的條約（條約理論上可以廢除、可以重談），而是被強行縫進了古巴憲法的本體，成為其附錄。這意味著，「美國有權干預」這件事，不再是古巴與美國之間的外部約定，而成了古巴對自己人民的內部承諾——是古巴憲法親口承認的、自身主權的缺口。法理上，一個國家最高的法，竟然明文授權外國凌駕於它之上。這是一種制度化、合法化、自我宣告的附庸：不是被征服的奴役，而是被「監護」的成年人——名義上有完全行為能力，實際上每一步都要監護人點頭。古巴拿到了憲法，卻在憲法的第一頁，就寫下了自己尚未長大的判詞。</p>
+    </div>
+
+    <p>美國為這條繩子準備了一套溫情脈脈的說辭。他們說，這是為了古巴好——古巴剛剛脫離西班牙，內部派系林立、財政空虛、政局未穩，若放任不管，恐怕又會淪為歐洲列強覬覦的獵物，或陷入無止境的內亂。普拉特修正案，據說是一道「保護」，是大哥對尚未站穩腳跟的小弟伸出的手。然而這套「保護」的邏輯，恰恰暴露了它的本質：保護的前提，是被保護者沒有能力照顧自己；而判定「有沒有能力」的權力，永遠握在保護者手裡。一個永遠由別人來判定你是否成熟的關係，注定讓你永遠長不大。古巴人很清楚這一點。制憲代表胡安·瓜爾韋托·戈麥斯（Juan Gualberto Gómez）——一位曾與馬蒂並肩、自身是非洲裔的革命者——憤然指出：接受普拉特修正案，等於「把古巴人變成一個附庸民族」，等於讓這個民族「淪為乞丐，向恩主乞討它本該天生擁有的東西」。他投下了反對票，但他輸了。</p>
+
+    <h3>名為獨立，實為附庸</h3>
+    <p>於是，一九〇二年那面升起的國旗，就帶著一個刺眼的悖論。它是真實的——古巴人確實有了自己的政府、議會、法律、貨幣與軍隊；但它又是殘缺的——這個政府的任何決定，都籠罩在一句潛臺詞之下：只要美國不滿意，這一切隨時可以被推翻。歷史學家後來給這種狀態起了個精準的名字：「新殖民」（neocolonialism）。舊式殖民，是宗主國派總督、掛自己的旗、直接統治；而新殖民，更精巧、也更難以反抗——它讓被統治者掛自己的旗、選自己的總統、唱自己的國歌，卻通過經濟的命脈、軍事的駐紮與一紙憲法條款，牢牢掌控它的實質命運。古巴成了這種新型支配關係的第一個、也是最典型的標本。它不是殖民地，卻也不是真正的獨立國家；它是介於兩者之間的一種新物種——一個「保護國」（protectorate）。一面飄揚的旗下，是一個被監護的靈魂。</p>
+
+    <div class="pull"><p>古巴拿到了一面國旗、一個總統，卻沒拿到真正的主權——它是一個被拴著繩子出生的共和國。</p></div>
+
+    <p>這種附庸的滋味，很快就從紙面變成了切膚的現實。一九〇六年，古巴爆發了第一場嚴重的內部政爭——埃斯特拉達·帕爾馬連任引發舞弊指控，自由派揭竿而起，國家陷入動盪。帕爾馬走投無路，竟然主動請求美國依據普拉特修正案出兵。於是繩子第一次被狠狠拉緊：美國海軍陸戰隊登陸，美國接管了古巴政府，一場長達兩年多的軍事佔領（the Second Occupation，一九〇六至一九〇九）就此展開，由美國人查爾斯·馬貢（Charles Magoon）出任臨時總督。一個成立才四年的共和國，它的元首竟要靠召喚外國軍隊來維持自己的權位——這比任何外敵入侵都更深地刺痛了古巴的尊嚴。此後數十年間，美國的干預成了懸在古巴頭頂的常態：一九一二年為鎮壓有色人種獨立黨（the Partido Independiente de Color）的起義，美軍再度登陸；一九一七年又一次。每一次出兵，都在重複同一句宣告——這座島嶼的命運，最終不歸古巴人自己作主。</p>
+
+    <div class="cards">
+      <div class="card"><h5>一八九八 · 入場</h5><p>美西戰爭，美國以「解放古巴」之名介入，將西班牙逐出加勒比。緬因號（the Maine）的爆炸成為開戰的引信。</p></div>
+      <div class="card"><h5>一九〇二 · 拴繩</h5><p>普拉特修正案寫入古巴憲法，古巴形式獨立。一面國旗升起，一條繩子套上脖子。</p></div>
+      <div class="card"><h5>一九〇六 · 收繩</h5><p>內亂爆發，總統自請美軍登島。第二次軍事佔領揭示了「保護」的真實重量。</p></div>
+    </div>
+
+    <h3>關塔那摩：一塊永遠不還的飛地</h3>
+    <p>在普拉特修正案的所有條文裡，有一條留下了最長久、也最荒誕的遺產，那就是第七條催生的關塔那摩灣海軍基地。一九〇三年，依據修正案，古巴「同意」將其東南端、那片優良的深水海灣租讓給美國，作為加煤站與海軍基地。租約規定的年租金，是一筆象徵性得近乎侮辱的數字——每年約兩千美元，後來折算為相當數量的黃金，金額長年凍結在兩三千美元之譜。更弔詭的是租約的期限：它沒有期限。協議寫明，這塊飛地的租借，唯有在美國「放棄」或美古「雙方同意」終止時才能結束——也就是說，只要美國一天不點頭，古巴就一天無權收回。這是人類條約史上罕見的設計：一方把自己領土的一部分，永久地、單方面無法贖回地，交到了另一方手裡。</p>
+
+    <div class="aside">關於那筆租金，後來衍生出一段意味深長的插曲。一九五九年革命勝利後，古巴政府視關塔那摩租約為帝國強加的恥辱，從此拒絕兌現美國每年寄來的租金支票。據卡斯楚（Fidel Castro）本人多年後所述，那些支票被原封不動地丟進辦公室的抽屜裡，年復一年地積攢，成了堆積如山、卻一張也不肯領的紙——古巴用這種沉默而固執的方式宣告：你佔著我的土地，但我一分錢也不會收，因為收下，就等於承認你佔得正當。那只抽屜，幾乎成了整個古巴對北方巨人態度的縮影：拒絕，卻又無力驅逐；不承認，卻也搶不回。</div>
+
+    <p>關塔那摩之所以成為「北方巨人的陰影」最具體、最刺眼的銘文，正在於它的「至今仍在」。從一九〇三年到今天，一個多世紀過去了，西班牙早已退場，蘇聯興起又崩解，冷戰打完，連那位丟支票的卡斯楚都已離世，但那塊飛地——古巴人稱之為「被佔領的土地」——上空，飄的依然是美國的旗。它是西半球唯一一塊由社會主義國家「主權所有」、卻被資本主義超級大國「實際控制」的領土；二十一世紀以後，它更因關押反恐戰爭囚犯而臭名遠揚，成了國際人權爭議的焦點。對古巴人而言，這片被鐵絲網與雷區隔開的海灣，不是抽象的歷史，而是每天都能在地圖上看見的、刺在自己身體上的一道未癒合的傷口。普拉特修正案本身早在一九三四年——富蘭克林·羅斯福（Franklin D. Roosevelt）推行「睦鄰政策」時——被正式廢除，幾乎所有條款都隨之失效，唯獨關塔那摩的租約，被特意保留了下來。繩子鬆了，可那個最深的結，至今未解。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一塊飛地如何凝固成國恥的象徵</span>
+      <p>領土，是主權最赤裸、最不容辯解的標誌。一個國家可以容忍經濟被滲透、文化被影響，這些都還抽象；但當你打開地圖，發現自己國境之內、自己海岸線上，有一塊插著外國旗、駐著外國兵、自己卻一寸也踏不進去的土地時，那種恥辱是具體而日常的。關塔那摩的特殊性，在於它把一段歷史的不平等，從會褪色的記憶，固化成了看得見、摸得著、無法迴避的地理事實。普拉特修正案的大部分條文是文字，文字可以廢、可以忘；而關塔那摩是土地，土地不會消失。正因如此，它超越了一紙條約，成為古巴民族主義最有力的動員符號——每一代古巴的政治人物，無論左右，都必須對著這塊飛地表態。它是新殖民時代留給古巴的、最沉重也最不肯離去的遺物：一道把「我們曾經、並且仍然不完全屬於自己」這句話，永久刻在版圖上的銘文。</p>
+    </div>
+
+    <h3>怨懟的種子</h3>
+    <p>普拉特修正案最深遠的後果，或許不在它具體限制了什麼，而在它在整整一代、又一代古巴人心裡，種下了一顆怎樣的種子。試想：一個民族流了半個世紀的血，犧牲了馬蒂、馬克西莫·戈麥斯（Máximo Gómez）麾下無數的曼比塞戰士，好不容易把西班牙趕走，等來的卻不是完整的自由，而是一個換了主人的枷鎖——舊主人說西班牙語，新主人說英語，但「不能自己作主」這件事，本質上沒有改變。這種「煮熟的鴨子飛了」式的幻滅，這種「我們明明贏了、卻仍然不是自己土地的主人」的屈辱，不會隨著時間淡去，反而會在每一次美軍登陸、每一次美國公司併吞古巴的糖廠、每一次華盛頓對哈瓦那政局的指手畫腳中，一層一層地加深、發酵、結痂。它變成了一種瀰漫在整個民族肌理裡的集體記憶：自由是被允許的，主權是有條件的，而那個條件的解釋權，永遠不在自己手裡。</p>
+
+    <p>正是這顆種子，在半個多世紀後，長成了一棵足以撼動整個西半球的大樹。當一九五九年，一群衣衫襤褸的鬍子兵從馬埃斯特拉山（the Sierra Maestra）走下來，當卡斯楚在哈瓦那的廣場上高呼革命時，他們要掙斷的，並不只是巴蒂斯塔（Fulgencio Batista）那個具體的獨裁者——那只是表象。他們真正要掙斷的，是那條從一九〇二年就拴在古巴脖子上的、看不見的繩子；是普拉特修正案所代表的那整套「被監護的命運」；是「古巴的事，最終由華盛頓說了算」這個延續了一甲子的潛規則。古巴革命之所以如此決絕、如此義無反顧地與美國徹底決裂，乃至寧可投入蘇聯的懷抱、承受長達數十年的禁運與孤立，其情感的根源，正深埋在普拉特修正案所釀成的那半個世紀的怨懟裡。要讀懂一九五九年那份決絕的烈度，就必須先讀懂一九〇二年那份屈辱的深度。一個被拴著繩子出生的孩子，長大以後，會用盡全身的力氣去扯斷那條繩子——哪怕扯斷的代價，是把自己摔得遍體鱗傷。</p>
+
+    <div class="cf"><p>反過來設想：如果一八九八年之後，美國真的信守它在《特勒修正案》（the Teller Amendment）裡的承諾——那份在開戰前夕、信誓旦旦聲明「美國無意兼併或控制古巴」的決議——讓古巴乾乾淨淨地、毫無附加條件地獨立，那麼古巴與美國的關係，或許會走上一條截然不同的軌道。一個從一開始就被當作平等鄰邦對待的古巴，未必會在六十年後，把美國視為必須以生命相搏的死敵。普拉特修正案，正是美國親手收回特勒承諾、把「解放者」變成「監護人」的那一筆。它省下了直接統治的麻煩，卻在加勒比海的對岸，為自己埋下了一個將糾纏它整個冷戰歲月、至今未消的宿敵。歷史最尖刻的諷刺，莫過於此：那條用來拴住古巴的繩子，最終也成了勒緊美國自己脖子的套索。</p></div>
+
+    <p>一九〇二年的那個五月清晨，當古巴的國旗在莫羅城堡上升起時，沒有人能預見這一切。歡呼的人群只看見了旗幟，看不見繩子。他們以為自己迎來了獨立的黎明，卻不知道那只是一場更漫長的、爭取真正主權之鬥爭的起點。共和國誕生了，但它不是自由的孩子，而是被監護的孩子——它有名字、有旗幟、有總統，卻沒有真正屬於自己的命運。這個悖論，這道張力，這份「名為獨立、實為附庸」的隱痛，將成為此後半個多世紀古巴歷史最深的底色。每一任總統的更迭、每一次政變的喧囂、每一場社會運動的浪潮底下，都隱隱搏動著同一個未被回答的問題：古巴，究竟什麼時候，才能真正成為古巴人自己的古巴？這個問題，要等到一群鬍子兵走下馬埃斯特拉山，才會以一種誰也沒料到的、激烈而決絕的方式，被重新提出。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>普拉特修正案，是「北方巨人的陰影」第一次落在古巴土地上、最清晰的一道輪廓。它揭示了一個貫穿古巴現代史的殘酷真相：對這座島嶼而言，威脅從來不只來自舊日的宗主西班牙，更來自那個近在咫尺、強大到令人窒息的鄰居。地理把古巴放在了佛羅里達海峽的咽喉，也就永久地把它放進了華盛頓的勢力範圍。一八九八年的「解放」、一九〇二年的「拴繩」、一九〇六年的「收繩」、乃至今日仍佔據著關塔那摩的那面旗——它們是同一道陰影在不同年代投下的不同形狀。這道陰影最具體的銘文，就是那塊至今未還的飛地：一塊插在古巴身體上、提醒它「主權尚未完整」的鐵釘。理解了普拉特修正案，就理解了一九五九年那場革命為何如此義無反顧——因為革命要掙斷的，正是這條從共和國誕生那天起就拴上的繩子。北方巨人的陰影有多深，古巴日後反抗的烈度，就有多強。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-9">
+  <div class="act-head">
+    <span class="act-num">第9章 · America's Playground</span>
+    <h2 class="act-title">美國的遊樂場：糖、賭場與貪腐</h2>
+    <p class="act-sub">The Republic, the Mob and the Dictators</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九〇二年五月二十日的正午，哈瓦那（Havana）的莫羅城堡（El Morro）上空，美國的星條旗緩緩降下，古巴的單星旗（la Estrella Solitaria）第一次升上桅頂。古巴人等了將近一個世紀的這一刻終於來了——一個名義上的共和國誕生了，第一任總統托馬斯·埃斯特拉達·帕爾馬（Tomás Estrada Palma）站上講臺。然而那面新升起的旗幟，從第一天起就籠罩在一道看不見的陰影裡。就在獨立宣告的前夕，美國國會已經把一份叫做《普拉特修正案》（the Platt Amendment）的條文，硬塞進了古巴的憲法——它規定美國有權「干涉」古巴內政以維持秩序，規定古巴不得與外國簽訂可能損及其獨立的條約，不得舉借超出償還能力的外債，並且必須把關塔那摩灣（Guantánamo Bay）租給美國海軍當基地。一個剛剛掙脫西班牙四百年枷鎖的島嶼，還沒來得及呼吸一口完全屬於自己的空氣，就被套上了另一副更精緻、更隱形的鎖鏈。古巴的獨立，從出生那一刻起，就被打上了一個刺眼的星號。</p>
+
+    <p>接下來的五十六年，史稱古巴的「共和國時代」（la República，一九〇二至一九五八）。這是一段表面光鮮、內裡腐爛的歲月。在這半個多世紀裡，哈瓦那會成為加勒比海最璀璨的城市，林蔭大道上跑著最新款的美國轎車，海濱大道馬萊孔（el Malecón）上夜夜笙歌，賭場的霓虹徹夜不熄，被稱作「加勒比海的巴黎」。但在這層璀璨的釉彩底下，是一座被北方資本與北方黑幫共同擁有的島：它的糖、它的電、它的電話、它的鐵路、它的港口，乃至它的命運，都不在哈瓦那的人手裡，而握在紐約的董事會與邁阿密的黑幫帳房裡。這一章要講的，正是這座光鮮與腐爛並存的共和國——它如何把整個身家壓在一種白色的結晶上，如何淪為美國人的熱帶遊樂場，又如何在賭場的霓虹與甘蔗田的血汗之間，孕育出一場無可避免的革命。</p>
+
+    <h3>一根綁在華爾街上的糖</h3>
+    <p>要理解共和國時代的古巴，得先理解一件事：這個國家的經濟，幾乎只剩一條腿——糖。十九世紀末的獨立戰爭把古巴的莊園燒成焦土，戰後重建需要巨額資本，而資本，來自北方。美國人帶著美元湧入，買下被戰火摧毀的莊園，用美元重建被稱作「中央糖廠」（los centrales）的巨型現代化製糖工廠。到了一九二〇年代，古巴的糖產量佔了全世界的四分之一，而這些糖廠裡，最大、最現代化的那些，幾乎全是美國公司的財產。美國的資本不只擁有糖，還擁有發電廠、電話公司、鐵路、港口設施與大片土地。一個外人若是清晨在哈瓦那醒來，他用的電是美國公司發的，打的電話走美國公司的線，搭的火車是美國公司的，而火車窗外一望無際的甘蔗田，也屬於美國公司。古巴名義上是個共和國，實質上更像一家總部設在紐約的企業的海外資產。</p>
+    <p>但真正把古巴經濟綁死在美國身上的，不是這些工廠與電纜，而是一個看不見的數字——「糖配額」（the sugar quota）。美國是世界上最大的糖消費市場，而它對進口糖徵收關稅以保護本國（主要是路易斯安那與夏威夷）的糖農。古巴糖能不能進得了這個市場、能進多少、用什麼稅率進，全由華盛頓的國會說了算。一九三四年的《互惠貿易協定》（the Reciprocity Treaty）與《瓊斯—科斯蒂根法案》（the Jones-Costigan Act）正式確立了配額制度：美國保證每年購買一定數量的古巴糖，給予優惠關稅；作為交換，古巴必須對美國的工業製成品開放市場、降低關稅。這看起來像是一份保障，實際上卻是一道絞索。古巴的整個經濟命脈，就這樣被一個它無權參與決定的數字掐住了喉嚨。華盛頓的一紙法案，國會裡幾位從沒到過古巴的議員的一次投票，就能決定古巴下一個收穫季是豐年還是饑荒。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一個數字如何綁架一個國家</span>
+      <p>「糖配額」是一種比直接殖民更隱蔽、卻同樣有效的控制術。它的運作邏輯是這樣的：因為美國保證高價收購固定數量的古巴糖，古巴人發現種糖比種任何別的東西都划算，於是越來越多的土地、資本、勞力被吸進甘蔗這一種作物裡——這叫「單一作物經濟」（monocultivo）。久而久之，古巴連餵飽自己的糧食都得從美國進口，整個國家成了一座巨大的、只會長一種東西的莊園。一旦如此，古巴就再也離不開美國了：放棄配額，等於放棄整個國民收入的命根；而要保住配額，就必須在政治上、外交上、貿易上對華盛頓百依百順。更陰險的是，配額把古巴的精英階層牢牢綁上了同一條船——糖廠主、出口商、銀行家、與糖利益掛鉤的政客，全都靠這個體制吃飯，因此他們最害怕的不是貧窮，而是「改變」。一根糖，就這樣同時鎖住了古巴的經濟、它的階級結構，與它的政治意志。</p>
+    </div>
+
+    <p>這套體制造就了一種畸形的繁榮節律。每年的「收穫季」（la zafra），從一月持續到五月，是甘蔗成熟、糖廠開工、現金流動的旺季；而其餘的「淡季」（el tiempo muerto，字面意思是「死去的時間」），糖廠停工，數十萬甘蔗工人無工可做、無錢可賺，只能在貧困中苦熬，等待下一個收穫季。古巴的鄉村就在這「豐」與「死」的鐘擺之間擺盪，一年富裕四五個月，餓著肚子過剩下的大半年。整個國家的脈搏，被綁在甘蔗的生長週期上，而甘蔗的價格，又被綁在華爾街的糖價行情與華盛頓的配額政策上。當一九二〇年那場史稱「肥碩舞會」（la Danza de los Millones）的糖價狂飆讓古巴一夜暴富、又在幾個月後崩盤讓無數人破產時，古巴人才痛切地明白：把一個國家的身家全押在一種白色結晶上，是何等危險的賭注。</p>
+
+    <h3>加勒比海的拉斯維加斯</h3>
+    <p>如果說白天的古巴屬於糖，那麼夜晚的哈瓦那，就屬於另一群北方來客——美國的黑幫。禁酒令時期（the Prohibition，一九二〇至一九三三），當美國本土的酒精被法律禁止時，距離佛羅里達只有一百四十多公里的哈瓦那，成了美國人合法縱酒尋歡的後花園。蘭姆酒、雪茄、陽光、海灘與寬鬆的法律，把這座城市變成一座永不打烊的享樂機器。而真正讓哈瓦那的夜晚成為傳奇的，是兩個名字：邁耶·蘭斯基（Meyer Lansky）與「幸運」盧西安諾（Lucky Luciano）。蘭斯基是美國黑幫的財務天才，被稱作「黑幫的會計師」；盧西安諾則是現代美國有組織犯罪的奠基者。一九四六年，盧西安諾在哈瓦那的國家飯店（el Hotel Nacional）召集了一場美國黑幫各大家族的高峰會議——史稱「哈瓦那會議」（the Havana Conference），在歌手法蘭克·辛納屈（Frank Sinatra）的歌聲掩護下，這座加勒比海的城市，被正式劃為美國黑幫的海外領地。</p>
+    <p>黑幫看中古巴，看中的正是那層《普拉特修正案》之外的「方便」——只要打點好古巴的當權者，他們就能在這裡經營在美國本土屬於違法的一切：賭場、夜總會、賣淫、毒品。蘭斯基與當權的巴蒂斯塔（Batista）達成了一筆心照不宣的交易：黑幫負責經營哈瓦那豪華賭場與飯店，繳納可觀的「規費」進獨裁者的私囊，而政府則保證黑幫的生意暢通無阻。於是哈瓦那的海濱矗立起一座座金碧輝煌的賭場飯店——里維埃拉（el Riviera）、卡皮托利奧旁的場子、國家飯店的賭廳——輪盤旋轉，骰子翻飛，美國的觀光客成群結隊飛來，在這裡揮霍他們在本土無處安放的慾望。哈瓦那成了「加勒比海的拉斯維加斯」，一座建在熱帶陽光下的罪惡與享樂之城。</p>
+
+    <div class="aside">蘭斯基曾誇口，他在哈瓦那的賭場「比拉斯維加斯任何一家都乾淨」——意思是不出老千、童叟無欺。這是黑幫式的荒誕邏輯：賭桌上絕不騙人，因為真正的暴利不在賭客的輸贏，而在於整座城市被當成一臺合法的吸金機器。觀光客以為自己在度假，其實他們每一筆消費，都在替遠在邁阿密與紐約的黑幫帳房，也替坐在總統府裡的獨裁者，數錢。光鮮的霓虹，是用來掩飾錢從哪裡來、又流向哪裡去的最好布幕。</div>
+
+    <p>然而這座享樂之城的繁華，是極度地理偏狹的。它幾乎全部集中在哈瓦那這一座城市，集中在那條馬萊孔海濱與韋達多（el Vedado）區的幾條街上。離開哈瓦那，往東走進廣袤的甘蔗鄉村，便是另一個古巴：泥土地的茅屋（el bohío），沒有電、沒有自來水、沒有醫生、沒有學校的村莊，在「死去的時間」裡餓著肚子的甘蔗工人，赤腳的孩童，與被瘧疾和寄生蟲折磨的農民。一邊是賭場輪盤上飛旋的籌碼，一邊是甘蔗田裡滴落的血汗；一邊是用美元結算的霓虹，一邊是用季節性飢餓計算的貧困。這道鴻溝不只是貧富之間的鴻溝，更是兩個古巴之間的鴻溝——一個是供北方人玩樂的櫥窗，一個是被遺忘在櫥窗背後的真實國土。</p>
+
+    <h3>獨裁者與軍士</h3>
+    <p>支撐這整套體制運轉的，是共和國時代一連串的腐敗與獨裁。早期的政客把選舉當成分贓的遊戲，把國庫當成私人提款機，貪汙（el peculado）幾乎是這個年輕共和國的官方語言。一九二五年上臺的赫拉爾多·馬查多（Gerardo Machado）把這種貪腐推向了暴政。他起初以建設者的形象出現——修了縱貫全島的中央公路，蓋了壯麗的國會大廈（el Capitolio，仿照華盛頓的國會山莊）——但很快就露出獠牙。他延長自己的任期、鎮壓反對者、用暗殺與酷刑對付學生與工會，被古巴人冠以「熱帶的墨索里尼」（el Mussolini tropical）的稱號。一九三三年，在經濟大蕭條的重壓與全島總罷工的怒潮中，馬查多眾叛親離，倉皇逃出古巴，他的垮臺引爆了短暫的革命狂歡——人們衝上街頭，獵殺他的爪牙（los porristas）。一個獨裁者倒了，但古巴並沒有因此得到自由。</p>
+    <p>因為就在馬查多倒臺的同一年，另一個更會玩弄權力的人登場了。一九三三年九月，一個名叫富爾亨西奧·巴蒂斯塔（Fulgencio Batista）的陸軍中士，領導了一場下級士官對軍官團的叛變——史稱「軍士政變」（la Sublevación de los Sargentos）。這個出身寒微、混血血統、靠著精明與膽識爬上來的人，一夜之間從中士變成上校，掌握了古巴軍隊，從此成為這個國家幕後真正的主宰。在此後將近二十年裡，巴蒂斯塔有時躲在幕後操縱傀儡總統，有時親自上陣——一九四〇年他甚至以相對乾淨的選舉當選總統，主持制定了一部在當時頗為進步的憲法。任滿後他退隱美國，住在佛羅里達。古巴人或許曾以為，這個善於審時度勢的強人，已經退出了歷史舞臺。</p>
+
+    <div class="pull"><p>一個獨裁者倒下，人們以為買到了自由；其實他們只是換來了下一個更懂得如何讓自己活得更久的獨裁者。</p></div>
+
+    <p>但巴蒂斯塔還會回來，而且是以最不堪的方式回來。一九五二年，眼看自己在即將舉行的總統大選中毫無勝算，巴蒂斯塔索性發動軍事政變，在投票前幾週推翻了合法政府，第二次攫取了權力——這一次，他撕下了所有面具，不再假裝是憲政的維護者，而成了一個赤裸裸的軍事強人。他中止憲法、解散國會、取消選舉，與美國的資本和黑幫達成了最緊密的勾結。蘭斯基的賭場在他治下生意興隆，美國公司的利潤源源不絕，而美國政府則樂見一個「穩定」、「反共」、好打交道的強人坐鎮哈瓦那。巴蒂斯塔的第二度當權，把共和國時代糖、賭場與貪腐的三位一體，推到了登峰造極的地步——也推到了崩潰的邊緣。正是這場一九五二年的政變，這場踐踏了憲法與選票的赤裸奪權，讓一整代古巴年輕人徹底放棄了透過合法途徑改變國家的幻想。其中一個年輕的律師，名叫菲德爾·卡斯楚（Fidel Castro），他本來準備循選舉之路進入國會，政變卻奪走了他的選票。從那一刻起，他開始相信：對付一個用槍奪權的人，唯一的辦法，就是用槍把他趕下去。</p>
+
+    <p>於是共和國時代走到了它的盡頭。在那層璀璨的釉彩之下，矛盾早已積累到無可化解：被糖配額綁死的經濟，被北方資本掏空的主權，被黑幫佔據的首都，被獨裁者踐踏的憲政，以及那道橫亙在哈瓦那霓虹與甘蔗田血汗之間、刺眼到無法視而不見的不平等。這個由糖、賭場與貪腐共同澆鑄的共和國，看似堅固，實則早已被自身的不義蛀空。它越是光鮮，就越顯出它的虛假；它越是繁華，就越提醒著那些被排除在繁華之外的人——這個國家究竟是誰的。一九五八年的最後一個夜晚，當巴蒂斯塔登上飛機、帶著搜刮來的財富倉皇逃離哈瓦那時，他逃離的不只是一場叛軍的進逼，更是一整個時代的清算。共和國的霓虹，終於要為它五十六年的賒帳，付出代價了。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>共和國時代是「北方巨人的陰影」最具體、最赤裸的樣貌。古巴名義上是個獨立的共和國，有自己的旗幟、總統與憲法；但它的糖被華盛頓的配額掐住，它的電與電話屬於紐約的公司，它的首都被邁阿密的黑幫佔據，它的獨裁者由華府的默許撐腰。這是一種比西班牙的直接殖民更難察覺、也更難掙脫的依附——因為它穿著「獨立」的外衣。賭場的霓虹照亮的，恰恰是一個被買下的國家的羞恥；甘蔗田裡的血汗澆灌的，則是一場即將到來的清算。當北方巨人把一座島當成自家的後花園、糖罐與賭場時，它沒有察覺，自己正在那片陰影最深處，親手養大了一場註定要把它趕出去的革命。下一道密碼，將由山上下來的人寫成。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<div class="part-div reveal" id="part-3">
+  <span class="pn">第三部</span>
+  <h2 class="ptitle pt">革命</h2>
+  <div class="pe">The Revolution</div>
+  <div class="pline"><span></span><span class="dot">❂</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-10">
+  <div class="act-head">
+    <span class="act-num">第10章 · Moncada and the Bearded Ones</span>
+    <h2 class="act-title">蒙卡達與山中的鬍子兵</h2>
+    <p class="act-sub">From the Assault to the Sierra Maestra</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>1953年7月26日的清晨，聖地牙哥（Santiago de Cuba）正沉浸在嘉年華的宿醉裡。前一夜的鼓聲、蘭姆酒與面具還沒散盡，整座城市像一頭睡熟的獸，連空氣都帶著甘蔗發酵後的甜膩。就在這片懈怠之中，一支不足一百三十人的隊伍，分乘十幾輛汽車，朝著城東那座漆成米黃色的蒙卡達兵營（the Moncada Barracks）駛去。那是古巴第二大的軍事據點，駐紮著上千名武裝士兵。領頭的，是一個二十六歲、戴著黑框眼鏡、身材高大的律師，名叫菲德爾·卡斯楚（Fidel Castro）。他的計畫近乎瘋狂：趁嘉年華的混亂奇襲兵營，奪取軍火，喚醒全島起義，一舉推翻一年多前靠政變上臺的軍事強人巴蒂斯塔（Fulgencio Batista）。那一天，是一場註定失敗的豪賭——但歷史後來證明，正是這場慘敗，替古巴的二十世紀劃下了真正的分水嶺。一個民族在糖與巨人的雙重枷鎖下憋了半個世紀的怒氣，終於找到了它的引信。</p>
+
+    <h3>嘉年華清晨的豪賭</h3>
+    <p>奇襲幾乎在第一分鐘就崩潰了。最熟悉路況的車輛在城裡迷了路，整支隊伍被切成幾段；一輛開在前頭的車撞上了崗哨的巡邏兵，槍聲過早響起，原本指望的奇襲頓時化為烏有。兵營裡的駐軍從酒醉中驚醒，憑著人數與火力的絕對優勢，把這群裝備簡陋的襲擊者一一壓制。卡斯楚的弟弟勞爾（Raúl Castro）在另一處的法院據點被困，本人則在槍林彈雨中眼睜睜看著計畫瓦解，不得不下令撤退。整場行動，攻方陣亡者不算太多，真正的血腥發生在事後——巴蒂斯塔的軍隊在盛怒與羞辱中展開報復，許多被俘的襲擊者遭到酷刑與處決，遺體被擺拍成「死於交火」的模樣，數十條年輕的生命就這樣消失。消息傳開，整個古巴在震驚之餘，也第一次聽見了一個陌生的名字：菲德爾·卡斯楚。失敗者，反而比任何勝利者都更深地烙進了人們的記憶。</p>
+    <p>卡斯楚本人逃進了城外的山區，幾天後在睡夢中被一名軍官逮捕。那名軍官違抗了「格殺勿論」的密令，沒有當場處決他——這個看似微不足道的偶然，後來改寫了整座島嶼的命運。被捕之後，等待他的是一場公開審判，而巴蒂斯塔大概沒有料到，他親手把一座最好的講臺，遞到了這個年輕律師的手裡。</p>
+
+    <div class="aside">蒙卡達之名，從此被卡斯楚的運動奉為圖騰。他把這場慘敗的日期——7月26日——鑄成了組織的名號「七二六運動」（the 26th of July Movement，西班牙文縮寫 M-26-7）。在政治的煉金術裡，一場軍事災難被反覆敘述、提煉，最終轉化為一種神聖的犧牲與起點。失敗不再是失敗，而是「第一槍」；死者不再是徒勞的犧牲者，而是先烈。對一場革命而言，懂得如何訴說自己的失敗，有時比贏得勝利更為要緊。</div>
+
+    <h3>「歷史將宣判我無罪」</h3>
+    <p>1953年10月，受審的卡斯楚解去了律師袍，卻在法庭上重新拾起了律師的口才。他被單獨提審，面對的是一群軍事法官與一個試圖把他塑造成普通暴徒的政權。然而他沒有為自己辯護，而是把被告席變成了控訴席。在長達數小時、後來被整理成綱領文獻的自辯詞裡，他歷數巴蒂斯塔政權的非法與腐敗，描繪古巴農村的赤貧——數十萬無地的農工、終年只在甘蔗收割的「旺季」（zafra）有活可幹、其餘月份在飢餓中煎熬的家庭、被外國公司與本地大地主把持的土地、簡陋的醫療與教育。他要求的，不是抽象的口號，而是土地改革、利潤分享、工業化、教育普及這些具體的訴求。最後，他以一句後來響徹整個拉丁美洲的話作結：「請宣判我吧，那不重要。<strong>歷史將宣判我無罪</strong>（History Will Absolve Me）。」</p>
+    <p>這篇自辯詞的分量，遠遠超出了那間法庭。它日後被祕密謄抄、印刷、傳播，成了「七二六運動」的綱領與聖經。它的力量，不在於提出了多麼新穎的思想——它所列舉的種種苦難，每一個古巴農民都早已親身嘗過——而在於它第一次把這些零散的怨憤，編織成了一套有頭有尾、有敵人有出路的敘事。在這套敘事裡，古巴的病根被清楚地指了出來：一個依附於單一作物（糖）、把命脈交到北方鄰國手裡、由腐敗政權與外國資本共同把持的畸形經濟。它沒有點名「美國」二字，卻處處指向那道盤踞在古巴頭頂的<span style="color:var(--rust);font-weight:600">陰影</span>。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一篇綱領為何勝過一千支步槍</span>
+      <p>軍事上，蒙卡達一無所獲；但政治上，它生產出了一份比任何戰利品都珍貴的東西——一套關於「我們為何而戰」的完整論述。一場革命最稀缺的資源，從來不是槍，而是正當性：說服千百萬本來只想安穩過日子的人，相信現有秩序不只是讓人不滿，而是根本不義、必須被推翻。《歷史將宣判我無罪》之所以重要，是因為它把抽象的不滿轉化成了具體的清單——無地的農民、失業的甘蔗工、被壟斷的土地、被外國掏空的財富——並承諾了一個可以想像的替代方案。它讓散落各地、互不相識的怨憤，認出了彼此，凝結成一個「我們」。後來的歷史一再證明：能定義問題的人，才有資格領導對問題的反抗。卡斯楚在牢房裡用鉛筆寫下的這幾頁文字，比他在蒙卡達打出的每一發子彈，都射得更遠、更久。</p>
+    </div>
+
+    <p>審判的結果，是十五年的徒刑。卡斯楚與同伴被關進了松島（Isla de Pinos）的監獄。然而牢獄並沒有讓他沉寂，反而給了他一段難得的、可以閱讀與思考的時光。他在獄中組織難友讀書、討論，把蒙卡達的散兵游勇，淬鍊成一個有理念、有紀律的核心。命運的轉折來得比預期更快：1955年，巴蒂斯塔為了粉飾太平、營造一個正常化的政治形象，宣布大赦政治犯。卡斯楚因此重獲自由——這是巴蒂斯塔犯下的又一個致命的輕慢。他放走的，不是一個被馴服的失敗者，而是一個剛剛磨利了刀刃的對手。出獄後不久，卡斯楚意識到島內已無立足之地，便流亡到了墨西哥，去籌劃下一場更周密的起義。</p>
+
+    <h3>墨西哥的相遇與格拉瑪號的劫難</h3>
+    <p>在墨西哥城，卡斯楚遇見了一個將與他的名字永遠並列的人——一個來自阿根廷、學醫出身、剛剛在瓜地馬拉親眼目睹一場進步政府被美國支持的政變推翻的年輕人，埃內斯托·格瓦拉（Ernesto Guevara）。古巴人習慣用阿根廷口頭禪「切」（che）來稱呼他，於是他成了世人所知的「切·格瓦拉」（Che Guevara）。瓜地馬拉的那場政變，讓切對北方那個巨人徹底斷了幻想，也讓他堅信：在拉丁美洲，溫和的改良終將被武力碾碎，唯有武裝革命才有出路。他與卡斯楚一見如故，徹夜長談，當即決定加入這支古巴人的隊伍——名義上是隨軍醫生，骨子裡卻是一個比多數古巴人更激進的革命者。兩個來自不同國度的人，在異鄉的夜裡，把各自對這片大陸命運的憤怒，匯成了同一道決心。</p>
+    <p>他們在墨西哥的山林裡祕密操練，準備了一年多。1956年11月底，八十二名武裝者擠上了一艘名叫「格拉瑪號」（the Granma）的小遊艇——那是一條設計載客至多二十餘人的舊船，如今卻塞滿了人、槍與彈藥，搖搖晃晃地駛離墨西哥海岸，橫渡墨西哥灣，向古巴東部進發。航程是一場災難：船嚴重超載，遭遇惡劣海象，眾人暈船嘔吐，延誤了整整兩天。原本與島內「七二六運動」城市網絡約定好的、同步發動的聖地牙哥起義，在格拉瑪號還沒靠岸時就被迫提前、隨即被鎮壓。等到這群疲憊不堪的人終於在古巴東南岸一片紅樹林沼澤裡踉蹌登陸時，等待他們的不是接應，而是巴蒂斯塔軍隊的伏擊。</p>
+
+    <div class="aside">登陸幾乎成了一場屠殺。八十二名遠征者，在隨後的潰散與圍剿中死的死、被俘的被俘，最終退入山中的倖存者，據後來的傳說只剩下十二人（也有史家認為實際倖存且重新集結者略多於此數）。卡斯楚、勞爾、切·格瓦拉都在這寥寥數人之中。多年後流傳一則軼事：當卡斯楚得知弟弟勞爾還活著、並且帶著幾支步槍找到他時，他激動地說——「現在，我們一定能贏。」憑著屈指可數的人和幾支槍，就敢斷言勝利，這在當時聽來近乎譫妄。但歷史，恰恰偏愛這種譫妄。</div>
+
+    <h3>馬埃斯特拉山的星火</h3>
+    <p>這群劫後餘生的人，鑽進了古巴東南端那道崎嶇、潮濕、被熱帶密林覆蓋的山脈——馬埃斯特拉山（the Sierra Maestra）。這是全島地勢最險峻、最偏僻、最難以用正規軍掃蕩的角落，巴蒂斯塔的坦克與卡車在這裡寸步難行。在接下來的兩年裡（1956至1958年），這座山成了革命的子宮。卡斯楚的隊伍從十幾人，慢慢吸納當地的農民（guajiros）、逃避抓壯丁與苛政的山民、從城市潛上山的青年學生。他們起初打不了硬仗，只能憑著對地形的熟悉，打了就跑，伏擊小股巡邏隊、襲擊孤立的哨所、繳獲對方的武器來壯大自己。每一場小勝，都被城市裡的地下網絡迅速傳播、放大，把這支山中的小隊伍，塑造成一個逐漸壯大的傳奇。</p>
+    <p>游擊隊深知，光靠槍是站不住腳的——他們真正的盔甲，是農民的支持。在馬埃斯特拉山，卡斯楚的隊伍刻意與巴蒂斯塔軍隊的暴行做出鮮明對比：他們為山民看病（切·格瓦拉的醫術派上了用場）、教不識字的農民讀書寫字、在控制區內推行初步的土地分配、嚴禁部隊搶掠百姓。對於世代被地主與政權踐踏、從未被任何一方當人看待的山民而言，這是頭一回有一支武裝力量站在他們這一邊。於是農民成了游擊隊的耳目、嚮導與糧倉——他們通報軍隊的動向、藏匿傷員、運送補給。沒有這張由貧苦山民織成的隱形之網，山中的鬍子兵（los barbudos，他們因長期在山中無法刮鬍而蓄起的鬍子，成了革命者的招牌形象）早已被剿滅無數次。革命的根，是先紮進了泥土，才長出了槍。</p>
+
+    <div class="cards">
+      <div class="card"><h5>山中 · 馬埃斯特拉的游擊核心</h5><p>卡斯楚、切、勞爾領導的武裝主力。打了就跑、繳槍壯大、爭取農民、推行土改與識字，把一座山變成革命的堡壘。</p></div>
+      <div class="card"><h5>城市 · 地下的「七二六」網絡</h5><p>遍布哈瓦那、聖地牙哥等城的祕密支部。負責募款、運送武器與人員、散播宣傳、發動罷工，是山與外界的血脈。</p></div>
+      <div class="card"><h5>輿論 · 被放大的傳奇</h5><p>1957年美國《紐約時報》記者祕密上山專訪卡斯楚，向世界證明「他還活著」，瞬間擊碎了政權「叛軍已滅」的謊言。</p></div>
+    </div>
+
+    <p>在這群山中的鬍子兵裡，除了卡斯楚兄弟與切·格瓦拉，還有一個日後同樣被神話化的名字——卡米洛·西恩富戈斯（Camilo Cienfuegos）。他出身哈瓦那的平民家庭，戴著寬邊草帽、留著一臉濃密的鬍子，性情豪爽、笑容燦爛，深得部下與農民的愛戴，是游擊隊裡最具人格魅力的指揮官之一。切冷峻、嚴苛、像一柄出鞘的理念之刃；卡米洛則熱情、隨和、像古巴民間最質樸的化身。兩人後來都成為卡斯楚最倚重的縱隊司令，並在戰爭的最後階段各自率軍揮師西進，把山中的星火，燒向整座島嶼。馬埃斯特拉山這個原本最不可能誕生勝利的角落，就這樣憑著一小撮人、一座山、一張農民的網，把一粒幾乎被掐滅的火種，養成了足以燎原的烈焰。</p>
+
+    <div class="pull"><p>巴蒂斯塔以為自己面對的是一群躲在山裡的亡命之徒；他沒有意識到，那座山裡正在生長的，是半個世紀積壓的怨氣終於找到的形狀。</p></div>
+
+    <p>站在後來的高度回望，蒙卡達到馬埃斯特拉山這短短五年，是古巴現代史最決定性的醞釀期。它的非凡之處在於，這場後來席捲全島、震動整個西半球的革命，竟是在最不可能的條件下被點燃的：一場一敗塗地的奇襲、一篇在牢房裡寫成的辯詞、一艘超載擱淺的破船、十幾個鑽進深山的倖存者。沒有外國的金援、沒有現成的軍隊、沒有勝算的精算，有的只是一個近乎偏執的信念——古巴必須同時掙脫兩道枷鎖：一道是讓它的經濟世代依附於甜膩甘蔗的糖的詛咒，一道是讓它的主權始終籠罩在北方巨人陰影下的不平等。卡斯楚在馬埃斯特拉山養大的，從來不只是一支游擊隊，而是一種敘事、一種承諾：要讓古巴第一次真正屬於古巴人自己。這承諾日後將如何兌現、又將付出怎樣的代價，是後話；但火種在此刻已經點燃，再難熄滅。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命與堅持 the Revolution and the Will to Endure</span>
+      <p>古巴革命最深的密碼，不在它的勝利，而在它的起點——一切都始於失敗。蒙卡達是一場軍事災難，格拉瑪號是一場海上劫難，退入馬埃斯特拉山的不過十餘人。然而正是這份在絕境中不肯熄滅的<span style="color:var(--rust);font-weight:600">堅持</span>，定義了此後古巴的整個性格：一個慣於在以小搏大、在被封鎖、在被斷言「撐不過幾個月」中存活下來的民族。卡斯楚要斬斷的，是糖的依賴與巨人的陰影這兩道纏了半世紀的枷鎖；他選的方法，是把一座山變成承諾，把一群鬍子兵變成傳奇。日後無論人們如何評價這場革命的功過，都繞不開一個事實：它證明了在最不可能的條件下，一小撮抱定信念的人，足以撼動一個政權、甚至改寫一道地緣的格局。第十道密碼，是在絕境裡點燃的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-11">
+  <div class="act-head">
+    <span class="act-num">第11章 · 1959: The Revolution Enters Havana</span>
+    <h2 class="act-title">一九五九：革命進城</h2>
+    <p class="act-sub">Triumph and Radicalization</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九五九年的元旦凌晨，當哈瓦那（Havana）的賭場還亮著霓虹、香檳還在新年的杯沿冒著泡時，總統官邸卻悄悄空了。富爾亨西奧·巴蒂斯塔（Fulgencio Batista）在午夜的派對結束後，帶著家眷、親信、與裝滿錢箱的行李，登上一架候命已久的飛機，趁著夜色逃往多明尼加（the Dominican Republic）。他統治古巴的歲月，就這樣在一個沒有告別、只有逃離的夜晚，戛然而止。消息在天亮後傳開，整座城市先是難以置信地安靜了一瞬，隨即爆發出一種近乎眩暈的狂喜。人們湧上街頭，按響汽車喇叭，揮舞著「七二六運動」（the 26th of July Movement）的紅黑旗幟，把沿途巴蒂斯塔黨羽控制的賭場與停車計時器砸得粉碎。短短幾天裡，那些從馬埃斯特拉山（the Sierra Maestra）的密林裡走出來的、蓄著鬍子、衣衫襤褸卻一臉勝利的起義者——古巴人親暱地叫他們「鬍子兵」（los barbudos）——分批開進首都。一月八日，菲德爾·卡斯楚（Fidel Castro）本人率隊抵達哈瓦那，沿途萬人空巷，鮮花與歡呼如雨落下。一隻白鴿在他演講時飛來，停在他的肩上，許多虔誠的古巴人當場視之為天意的祝福。那一刻，一個民族彷彿真的相信，他們等待了半個多世紀的東西——一個屬於自己、不再受人擺布的古巴——終於來了。</p>
+
+    <p>這份狂喜不是憑空而來。它累積了太久。從一八九八年那場「被偷走的獨立」，到普拉特修正案（the Platt Amendment）寫進憲法的羞辱，再到馬查多（Gerardo Machado）與巴蒂斯塔兩代強人的貪腐與暴政——古巴人對「自己當家作主」的渴望，已經像壓得太久的彈簧。卡斯楚的勝利，被許多人理解為何塞·馬蒂（José Martí）未竟之夢的完成：一場終於由古巴人自己打贏、不靠任何外力、要把這座島嶼從糖的依賴與北方巨人的陰影中一併解放出來的革命。在最初那些日子裡，幾乎沒有人去細想，這場以「自由」與「正義」為名的勝利，將會把古巴帶往何處。人們只知道暴君走了，而帶來這一切的，是一群年輕、理想、看起來無比正直的人。歷史的反諷恰恰藏在這裡：一場勝利愈是純粹、愈是承載了一個民族全部的期望，它之後的轉向，就愈是劇烈，也愈是叫人措手不及。</p>
+
+    <h3>革命法庭：正義，還是復仇？</h3>
+    <p>勝利的狂歡尚未散去，第一道沉重的陰影便已落下。巴蒂斯塔政權在其末期，為了鎮壓起義，動用了酷刑、暗殺與處決，據後來各方估計，死於其暴政之手的反對者數以千計。當革命者進城，一個迫切的問題擺在眼前：那些雙手沾血的祕密警察、軍官與打手，該如何處置？卡斯楚與他的同志選擇了「革命法庭」（the revolutionary tribunals）。在勝利後的最初幾個月裡，這些臨時設立的軍事法庭，對被指控犯有酷刑、謀殺等罪行的巴蒂斯塔黨羽展開審判，判處了數以百計的死刑，並付諸槍決。其中規模最大、也最受國際矚目的一場，是在哈瓦那的體育場（the Sports Palace）裡進行的公開審判，數萬名群眾湧入旁聽，氣氛介於司法程序與政治集會之間。</p>
+    <p>關於這些審判，至今仍有截然不同的解讀，而一個持平的敘述必須同時容納這兩面。在許多古巴人眼中，這是遲來的正義：那些在巴蒂斯塔時代逍遙法外、對被捕的學生與工人施加酷刑的人，終於要為他們的罪行付出代價；若不清算，受害者的鮮血便白流了。但在批評者——尤其是當時的美國輿論與部分國際觀察者——看來，這些審判程序倉促、缺乏正當程序的保障、辯護權有限，公開審判的形式更帶有群眾裁判的色彩，使「正義」與「復仇」的界線變得模糊。卡斯楚本人對此並不退讓，他公開為審判辯護，反問那些指責他的人：當巴蒂斯塔的劊子手殺人時，你們在哪裡？無論如何定性，有一點是清楚的：在革命的最初時刻，古巴選擇了以雷霆手段清算舊政權，這既滿足了一個受傷民族對正義的飢渴，也在過程中悄悄確立了一種邏輯——以革命之名，可以越過尋常法律的繁瑣。這種邏輯，日後將不只用在巴蒂斯塔的黨羽身上。</p>
+
+    <div class="cf">
+      <p>同一場審判，兩種記憶。對受害者家屬，那是正義終於降臨的一刻；對流亡者與外部觀察者，那是程序正義被群眾激情吞沒的開端。革命常常如此——它最具爭議之處，往往正是它最真誠之處：它確實相信自己在伸張正義，也正因為這份確信，它不覺得需要對自己的手段設限。</p>
+    </div>
+
+    <h3>土地改革法：劃下第一道與巨人的裂痕</h3>
+    <p>如果說革命法庭觸動的是道德與司法的神經，那麼一九五九年五月頒布的《土地改革法》（the Agrarian Reform Law），觸動的則是財富、權力，以及與北方那位巨人關係的核心。這部法律是整場革命最具實質意義的舉措之一，也是它真正開始改變古巴社會結構的起點。長久以來，古巴的土地高度集中在少數人手中——大片大片的甘蔗園與牧場，屬於本地的寡頭與——這一點至關重要——美國的公司。法律規定，任何個人或企業持有的土地，超過一定面積（最初定在約四百公頃左右）的部分，將被國家徵收，分配給無地的農民，或轉為國營合作農場。對於數十萬世代為他人耕作、自己卻一無所有的甘蔗工人與佃農而言，這是天翻地覆的福音，是革命兌現其承諾的最有力證明。</p>
+    <p>然而，這部法律的鋒刃，無可避免地切向了美國的利益。當時，美國的企業擁有古巴最肥沃的大片土地、大半的糖業、以及公用事業與礦產的相當份額。土地改革徵收這些美資莊園，雖然名義上承諾以債券補償，但補償的金額是依照地主自己多年來為了避稅而刻意低報的地價來計算的——這讓美國公司認為自己遭到了實質的掠奪。一條裂痕，就此在哈瓦那與華盛頓（Washington）之間劃下。對古巴革命者而言，這恰恰是重點所在：要結束糖的詛咒、要斬斷北方巨人伸進這座島嶼經濟命脈的那隻手，就不可能不碰美國的財產。土地改革因此不只是一項經濟政策，它是一份宣言——宣告這座島嶼上的土地，從此要屬於古巴人，哪怕代價是與那個曾經主宰它命運的鄰居反目。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一場革命為何會「向左轉」</span>
+      <p>革命很少在勝利的那一刻就有完整的藍圖；它的方向，往往是在勝利之後，被一連串相互推擠的力量逐步「擠」出來的。古巴革命的激進化，可以理解為幾股力量的疊加。其一是內在邏輯：要真正擺脫對糖、對美國的依賴，溫和的修補不夠，必須動結構性的大手術——土地、糖業、銀行收歸國有——而每一刀都必然觸怒既得利益與美國。其二是反作用力的螺旋：古巴每邁出激進一步，美國便以制裁回應；制裁愈緊，古巴便愈需要向另一個方向尋找靠山與市場，於是蘇聯（the Soviet Union）的身影漸漸浮現，而與蘇聯愈靠近，又使革命的意識形態愈往左傾。其三是領袖的權力意志：在動盪中，最果決、最不妥協的一派，最容易壓倒主張漸進的溫和派。三股力量彼此餵養，把一場最初旗幟上寫著「自由」與「民主」的起義，一步步推向了社會主義與一黨體制。激進化不是某一天的決定，而是一條被自身慣性與外部壓力共同鋪成的下坡路。</p>
+    </div>
+
+    <h3>溫和派的退場：權力如何收攏到一人之手</h3>
+    <p>推翻巴蒂斯塔的，從來不只是卡斯楚一人，也不只是馬埃斯特拉山上的那群游擊隊。那是一場廣泛的聯盟：城市裡的地下抵抗者、罷工的工人、自由派的專業人士、要求恢復一九四〇年憲法與舉行自由選舉的民主派——他們各自懷著不盡相同的夢想，卻在「推翻暴政」這一點上短暫地結成同盟。勝利之初，這份多元似乎得到了尊重：革命政府最初的總統由溫和的法學家曼努埃爾·烏魯蒂亞（Manuel Urrutia）出任，內閣裡也不乏自由派的面孔。然而這種平衡維持得並不長久。隨著革命方向愈來愈左傾，那些主張舉行選舉、保障私有財產、與美國維持友好的溫和派與自由派，與卡斯楚一系的分歧愈來愈深。</p>
+    <p>一九五九年七月，當烏魯蒂亞公開批評共產主義的影響、與卡斯楚產生齟齬時，卡斯楚使出了他最擅長、也最具威力的武器——他宣布辭去總理職務，把矛盾直接訴諸群眾。在排山倒海的民意壓力下，烏魯蒂亞被迫去職。同年稍晚，曾在馬埃斯特拉山並肩作戰、戰功彪炳卻對革命日益親共的方向心懷疑慮的指揮官烏伯特·馬托斯（Huber Matos），因提出辭呈並批評共產主義的滲透而被逮捕，以「叛國」之名受審、判處長達二十年的監禁。這兩起事件像兩記分水嶺：它們向所有人宣告，在革命的隊伍裡，從此只容得下一種聲音。溫和派一個接一個地退場——有的被罷黜，有的被審判，更多的人選擇了沉默或離開。權力，正不可逆轉地向卡斯楚一人之手收攏。一場以反對一人獨裁為起點的革命，正在它的勝利裡，孕育出另一種形式的集權。</p>
+
+    <div class="cards">
+      <div class="card"><h5>理想的一面</h5><p>無地農民分到了土地，文盲開始識字，醫療與教育向窮人敞開。對社會最底層的數十萬古巴人而言，革命確實兌現了一個更公平的承諾。</p></div>
+      <div class="card"><h5>代價的一面</h5><p>異議的空間迅速關閉，溫和派與自由派被邊緣化，獨立的報業、政黨與選舉逐一消失。多元被「統一」取代。</p></div>
+      <div class="card"><h5>巨人的一面</h5><p>每一步激進化都拉開與美國的距離，也把古巴推向蘇聯。斬斷一條依賴，卻在不久後繫上了另一條。</p></div>
+    </div>
+
+    <h3>渡海者：流亡的開端</h3>
+    <p>就在窮人歡慶分到土地、識字班的燈火徹夜通明的同時，哈瓦那那些優雅街區的宅邸，卻一戶接一戶地暗了下來。土地改革徵收了莊園，企業國有化吞沒了私產，革命法庭的槍聲令人不安，而政治空間的迅速收窄，讓許多古巴的中上層階級——地主、企業主、專業人士、舊政權的官員、以及單純不認同這條道路的人——感到自己在這座島嶼上已無立足之地。於是，一場日後將深刻改變兩座城市的人口遷徙，悄然開始了。他們收拾起能帶走的細軟，登上飛往佛羅里達（Florida）的航班，或搭船渡過那道窄窄的、卻將從此愈來愈難以跨越的海峽，落腳在邁阿密（Miami）。最初的這一批流亡者，多半相信自己只是短暫離開——等到這場「混亂」過去，等到美國出手，他們很快就能回到自己的家、自己的莊園、自己的古巴。他們把鑰匙留在門上，把家具蓋好，以為一切只是暫別。</p>
+    <p>歷史卻沒有給他們回去的機會。這最初的涓涓細流，將在隨後的年月裡匯成滔滔人潮——一場持續數十年、最終帶走上百萬人的大流亡。它把一個古巴撕成了兩半：一半留在島上，在革命的旗幟下繼續它艱辛而孤絕的試驗；另一半渡海而去，在邁阿密的小哈瓦那（Little Havana）重建起一個記憶中的、再也回不去的故國。從此，「古巴人」這個身分，將永遠帶著一道海峽的裂痕——同一個民族，兩種命運，隔著九十海里的水，彼此凝望，彼此不解，也彼此再難和解。一九五九年那場進城的狂歡，在它最歡騰的時刻，已經悄悄埋下了這道將綿延半個多世紀的離散。</p>
+
+    <div class="pull"><p>一場以「自由」之名贏得的革命，在勝利之後最艱難的功課，不是如何打倒敵人，而是如何容下與自己意見不同的朋友。</p></div>
+
+    <p>於是，一九五九年這一年，像一枚被擲入半空、正在緩緩翻轉的硬幣，同時亮出它的兩面。一面是理想的光輝：暴君出逃，萬眾歡騰，土地回到耕者手中，識字的燈火照亮窮鄉，一個飽受欺凌的民族第一次嘗到「自己當家」的滋味，要一舉斬斷糖的詛咒與巨人的陰影。另一面是集權的陰影：革命法庭的槍聲、溫和派的退場、異議空間的關閉、權力向一人收攏、以及渡海而去的第一批流亡者。這兩面並非先後發生，而是同時發生、彼此交纏——理想正是借著集權的手段在推進，而集權也正是打著理想的旗號在收緊。要持平地理解古巴革命，就不能只取其中一面：它既是一場真誠的、為窮人而戰的解放，也是一條通向一黨專政的單行道。一九五九年的偉大與悲劇，就在於這兩者本是同一件事的兩面。古巴在這一年掙脫了一副枷鎖，卻也在掙脫的同一個動作裡，開始為自己鍛造另一副。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命與堅持 the Revolution and the Will to Endure</span>
+      <p>一九五九年是古巴「堅持」的起點，也是這份堅持的全部弔詭所在。革命給了這座島嶼一種前所未有的東西——一個由古巴人自己定義、不向任何外力低頭的意志；正是這份意志，讓它日後得以在美國的封鎖、蘇聯的解體、與漫長的物資匱乏中咬牙撐過半個多世紀。但同樣是在一九五九年，這份「堅持」也顯露了它的代價：它愈是要對外不屈，便愈是要對內統一；愈是要斬斷糖與巨人的舊枷鎖，便愈是收緊了異議與多元的空間。日後人們爭論古巴，爭的其實一直是這同一個問題——一個民族為了不再受人擺布，究竟可以、又應該，付出多少自由作為代價？這場革命的偉大與它的傷口，從進城的那一天起，就是同一道回聲。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-12">
+  <div class="act-head">
+    <span class="act-num">第12章 · The Break with the North</span>
+    <h2 class="act-title">與北方巨人的決裂</h2>
+    <p class="act-sub">Nationalization, Embargo and the Soviet Embrace</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>1959年1月，當卡斯楚（Fidel Castro）的鬍子游擊隊從馬埃斯特拉山（the Sierra Maestra）走下來、開進哈瓦那（Havana）的時候，幾乎沒有人——無論是華府的決策者、哈瓦那的美國商人，還是革命者自己——能清楚地說出，這場勝利究竟意味著什麼。它會是又一次拉丁美洲式的權力更迭，一個新的強人取代舊的強人，糖照樣往北運、美元照樣往南流？還是一道真正的斷裂，一場要把這座島從它存在以來就被綁定的軌道上硬生生扳離的嘗試？在那最初的幾個月裡，連卡斯楚本人都還沒有把話說死。他訪問了華盛頓，戴著那頂後來成為標誌的軍帽，向美國人解釋他不是共產黨；他在電視機前一連講上幾個小時，談土地、談正義、談一個不再被北方擺布的古巴。沒有人知道，接下來不到三年的時間裡，一連串你來我往的反制與升級，會像一道無法回頭的階梯，把這座加勒比海的島嶼，一級一級地，推向地球另一端那個冰雪覆蓋的帝國的懷裡。<strong>與北方巨人的決裂，不是一夜之間的決定，而是一個被一步步逼出來、也一步步走進去的過程。</strong></p>
+
+    <h3>土地改革：碰了不該碰的東西</h3>
+    <p>裂痕從土地開始。1959年5月，革命政府頒布了《土地改革法》（the Agrarian Reform Law），這在任何一個被大地產與單一作物折磨了百年的國家，本該是天經地義的事。法令規定，單一持有者的土地面積有上限，超過的部分將被徵收、重新分配給無地的農民；同時禁止外國人持有古巴的農地。問題在於，這片土地上最大的地主，恰恰是美國人。幾家美國糖業公司——它們的名字在前面的篇章裡已經反覆出現——擁有古巴最肥沃的甘蔗田中相當大的一塊，動輒數十萬英畝連成一片。一紙土地改革法，等於直接伸手按住了美國資本在古巴最核心的那塊命脈。更讓華府與華爾街不安的，是補償的方式：政府承諾以債券支付徵收的土地，而債券的計價，依據的是這些公司自己當年為了少繳稅而向古巴稅務機關低報的地價。換句話說，古巴人用美國公司自己填寫的數字，來償付它們的土地——這在法律上幾乎無懈可擊，在情感上卻是一記響亮的耳光。</p>
+    <p>對華盛頓而言，土地改革法觸動的不只是幾家公司的帳本，而是一整套關於「古巴是什麼」的默契。自1898年以來，美國早已習慣把這座島看作自家後院裡的一塊糖園——可以扶植強人，可以派遣陸戰隊，可以在憲法裡塞進一條允許自己隨時干涉的條款。如今，一個留著鬍子的年輕律師，居然要重新定義誰才是這片土地的主人。最初幾個月，美國政府的反應還算克制——只是透過外交照會表達「關切」，要求「迅速、充分、有效」的補償。但克制底下，一種更深的判斷正在華府成形：這個卡斯楚，恐怕不只是想分一點地給農民那麼簡單。<strong>真正讓兩國走向決裂的，從來不是某一條法律，而是雙方對「古巴的命運該由誰決定」這個問題，給出了不可調和的答案。</strong></p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 升級的動力學</span>
+      <p>古巴與美國的決裂，最致命之處不在於任何單一事件，而在於它的「升級結構」——一種你出一拳、我還一拳，每一拳都比上一拳更重的咬合螺旋。它的邏輯是這樣的：古巴採取一個觸動美國利益的措施（土地改革、國有化），美國以制裁回應（削減糖配額、停運石油），古巴再以更激進的反制升級（收歸更多美國資產），美國再以更嚴厲的手段報復（全面禁運、斷交）。每一輪，雙方的迴旋餘地都變得更小，妥協的成本都變得更高，而第三方——那個正樂於見到美國後院起火的蘇聯——介入的縫隙，都被撐得更大。這種動力學的可怕在於，它不需要任何一方「想要」最終的結局；它只需要雙方都不肯先收手。當華府以為削減糖配額能讓古巴屈服時，它其實是在替莫斯科遞上一張請帖；當卡斯楚以國有化回敬時，他也在替自己關上回頭的門。決裂不是被某個人決定的，而是被這套你來我往的機械邏輯，一級一級推出來的。</p>
+    </div>
+
+    <h3>糖與石油：兩記交換的重拳</h3>
+    <p>1960年，升級的螺旋開始高速轉動。這一年的2月，蘇聯第一副總理米高揚（Anastas Mikoyan）訪問哈瓦那，帶來了一份在當時看來幾乎是雪中送炭的協議：蘇聯將在五年內購買古巴的糖，並向古巴提供低息貸款與石油。對一個剛剛得罪了唯一大買家的島國而言，這份協議的意義無法估量——它意味著，就算華府關上糖的大門，東方還有另一扇門開著。緊接著，矛盾在石油上引爆。蘇聯運來的原油遠比美國的便宜，古巴政府要求島上那幾家美國與英國資本的煉油廠——殼牌（Shell）、埃索（Esso，即標準石油）、德士古（Texaco）——加工這些蘇聯原油。在美國國務院與財政部的暗示下，這些煉油廠拒絕了。對卡斯楚來說，這是一個再清楚不過的訊號：這些設在古巴土地上、賺著古巴錢的工廠，在關鍵時刻聽的不是哈瓦那，而是華盛頓。1960年6月底到7月初，古巴政府將這些拒絕加工蘇聯原油的煉油廠，盡數收歸國有。</p>
+    <p>美國的報復來得又快又準，而且打在古巴最痛的地方——糖。1960年7月，艾森豪（Dwight D. Eisenhower）總統動用國會授予的權力，大幅削減了當年剩餘的古巴糖進口配額，幾乎一刀砍掉了古巴在美國市場上最大的那塊份額。這是一記瞄準心臟的重拳。一個世紀以來，美國的糖配額一直是古巴經濟的生命線——它保證了古巴的糖能以高於世界市場的價格、固定地賣進美國。砍掉配額，等於是要扼住古巴的呼吸。然而華府算錯了一件事：就在艾森豪宣布削減配額的同一時段，莫斯科宣布，蘇聯將買下被美國拒收的那部分古巴糖。<strong>美國用糖配額作為武器，本想讓古巴窒息屈服；結果這一刀，反而割斷了把古巴綁在美國身上的最後一根經濟臍帶，而割斷的瞬間，另一根臍帶已經從莫斯科伸了過來。</strong>古巴沒有窒息，它只是換了一個供氧的人。</p>
+
+    <div class="cf">
+      <p>設想華府當年沒有削減糖配額，而是選擇隱忍，繼續高價買古巴的糖——卡斯楚是否還能如此理直氣壯地倒向蘇聯？很難說。糖配額曾是美國馴服古巴的韁繩：只要這條韁繩還在，古巴的經濟就被牢牢拴在北方。但1960年的華府，把這條韁繩當成了鞭子來抽。問題是，當你用一條韁繩去抽打一匹馬時，你也就鬆開了它——馬一旦掙脫，便再不會回到原來的槽邊。削減配額，本意是懲罰，結果卻是解放：它替卡斯楚做了一件他自己未必敢做、也未必做得成的事——把古巴從美國糖市場上一刀切下來。一個本想收緊的動作，反而成了鬆綁。</p>
+    </div>
+
+    <h3>全面國有化與禁運：互相關門</h3>
+    <p>從1960年夏天到秋天，國有化的浪潮以驚人的速度席捲全島。煉油廠之後，是電力公司、電話公司、糖廠、銀行——一家接一家曾經掛著美國招牌的企業，被收歸古巴國有。到了這年年底，幾乎所有的美國在古巴的大型資產都已易主。對美國資本而言，這是一場數以十億美元計的損失；對卡斯楚而言，這是一次徹底的清算——把那個自殖民時代以來就盤踞在古巴經濟血管裡的外國軀體，連根拔起。每一輪國有化，都引來美國一輪新的報復；而每一輪報復，又替下一輪國有化提供了理由。雙方都在關門，而且都在用力地、報復性地，朝對方的臉上摔門。</p>
+    <p>1960年10月，華府打出了它的下一張牌——禁運（the embargo）。美國宣布，除了食品與藥品之外，禁止向古巴出口幾乎所有商品。對一個工業基礎薄弱、連機器零件、卡車輪胎、發電廠配件都高度依賴美國進口的國家來說，這是一記沉重的打擊。隨後在1961年初，禁運進一步收緊，而到了1962年，甘迺迪（John F. Kennedy）政府將其擴大為近乎全面的封鎖。1961年1月，在艾森豪卸任前的最後幾天，美國正式與古巴斷絕了外交關係——哈瓦那的美國大使館關門，旗子降下，那面在古巴上空飄揚了半個多世紀的星條旗，撤了下來。兩個曾經親密到近乎共生的國家，從此在官方層面上，成了彼此的敵人。這道禁運的牆，一旦砌起，就再也沒有真正拆除過——它將矗立超過半個世紀，成為冷戰留給這座島嶼最頑固、最漫長的傷疤。</p>
+
+    <div class="pull"><p>古巴想掙脫的，是「對美國」與「對糖」這兩重纏了它一百年的依賴；可它最後換來的，是把同一條鎖鏈的另一端，從華府的手裡，交到了莫斯科的手裡。</p></div>
+
+    <h3>革命亮出底牌：社會主義的宣告</h3>
+    <p>1961年4月，事情走到了攤牌的時刻。一支由美國中央情報局（CIA）訓練、武裝、運送的古巴流亡者部隊，在島嶼南岸的豬玀灣（the Bay of Pigs，西語稱 Playa Girón）登陸，企圖以武力推翻卡斯楚政權。這場入侵在七十二小時內就被擊潰，成了華府一場難堪的慘敗。而就在入侵前夕、為陣亡者舉行的葬禮上，卡斯楚第一次公開地、毫不含糊地宣告了這場革命的性質——這是一場社會主義革命（socialist revolution）。這句話的分量極重。在此之前，卡斯楚一直在「民族主義者」與「共產主義者」之間保持著一種刻意的模糊；而現在，面對美國赤裸裸的軍事顛覆，他乾脆把底牌全部亮了出來。同年稍晚，他更進一步宣稱自己是馬克思列寧主義者（Marxist-Leninist），並表示將一直如此到生命的最後一天。模糊的時代結束了。古巴，正式站到了冷戰的東方陣營這一邊。</p>
+    <p>回頭去看這條路，每一個轉折似乎都帶著某種被逼出來的、卻又主動踏進去的雙重性。土地改革觸動了美資，美國以照會施壓；古巴收歸煉油廠，美國削減糖配額；古巴全面國有化，美國祭出禁運與斷交；美國策動豬玀灣入侵，古巴則公開宣告社會主義、徹底投入蘇聯陣營。這不是一條任何一方事先規劃好的路線，而是兩個對手在互相試探、互相報復中，一步步走出來的死局。華府的每一記反制——配額、禁運、入侵——本意都是要逼古巴回頭，結果卻無一例外地，把古巴推得離自己更遠、離莫斯科更近。<strong>美國想用懲罰換取屈服，得到的卻是疏離；想用孤立逼出妥協，得到的卻是古巴投入另一個超級大國的懷抱。</strong>當豬玀灣的硝煙散去，當哈瓦那的廣場上響起「社會主義或死亡」的口號時，那個一百年來一直主宰著古巴命運的北方巨人，才驚覺它親手把這座島，推進了自己最不願意看到的那個結局裡。</p>
+
+    <p>於是，到了1961年底，這場決裂的輪廓已經徹底清晰。古巴掙脫了美國——它趕走了美國的公司、收回了美國的工廠、降下了美國的旗、宣告了與美國對立的意識形態。然而，它真的「獨立」了嗎？答案是一個令人沉吟的「否」。它不再依賴美國的糖配額，卻開始依賴蘇聯的糖採購；它不再進口美國的石油，卻開始燃燒蘇聯的原油；它不再仰賴美國的市場與貸款，卻把整個經濟的存續，押在了一個遠在八千多英里之外、文化語言全然陌生的共產帝國身上。古巴用一種依賴，換了另一種依賴；用一個靠山，換了另一個更遠、卻同樣絕對的靠山。它擺脫了一頭近在咫尺的巨象，卻爬上了一頭遠在天邊的北極熊的背。<strong>與北方巨人的決裂，並沒有讓古巴真正成為自己命運的主人——它只是換了一個主人，一個更遠、更難看清、最終也將證明同樣靠不住的主人。</strong>這座島嶼掙脫了百年的舊鎖鏈，卻在掙脫的同一個動作裡，把自己鎖進了一條新的。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>1959到1961這短短三年，是「北方巨人的陰影」這道主線最戲劇性的一次顯影——也是最弔詭的一次。古巴有史以來第一次，用最決絕的姿態，試圖走出那道籠罩了它一個世紀的陰影：它收歸國有、它驅逐資本、它降下星條旗。可這場決裂的最終結果，卻不是陽光，而是換了一道更長、更冷的陰影。問題的根源在於，古巴始終沒能解開那道更深的結——對單一作物、單一買家、單一靠山的結構性依賴。它把靠山從華府換成了莫斯科，卻沒有把「需要一個靠山」這件事本身改掉。於是當三十年後蘇聯轟然解體、莫斯科的糖款與石油一夜斷流時，古巴將墜入它歷史上最慘烈的飢餓與黑暗——那個被稱為「和平時期特殊階段」的年代。北方巨人的陰影，從來不只是地理上那個近鄰的陰影；它是一種更深的宿命：一座只會種糖的島，永遠需要有人來買它的糖、養它的命。掙脫了一個巨人，只是讓你看清，你需要的從來不是擺脫某個特定的巨人，而是擺脫「需要巨人」本身——而這一課，古巴還要用更慘痛的方式，再學一次。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-13">
+  <div class="act-head">
+    <span class="act-num">第13章 · The Bay of Pigs and Thirteen Days</span>
+    <h2 class="act-title">豬玀灣與十三天：冷戰最危險的島</h2>
+    <p class="act-sub">The Cold War's Most Dangerous Frontier</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>地圖上，古巴只是加勒比海上一道細長的綠色魚影，從哈瓦那（Havana）的西端到關塔那摩（Guantánamo）的東角，全長不過一千兩百公里。它離佛羅里達州的基韋斯特（Key West）僅約九十英里——比一個美國人從家裡開車去鄰州還近。在很長的歲月裡，這份近，意味著糖、雪茄、賭場與蜜月旅行；意味著美國資本可以在一夜之間越過海峽，把這座島嶼當成自家的後院。然而從一九六一到一九六二這短短不到兩年裡，這九十英里的距離，卻被重新賦予了一種誰也不曾預料的意義：它成了人類有史以來離核子毀滅最近的一段海。兩個各自握有足以毀滅對方數十次的核武庫的超級強權，把它們最尖銳的對峙，放在了這座小島的海岸線上。一座連自己的糖價都做不了主的島，竟在十八個月裡，先後成為一場入侵的屠場與一場核邊緣豪賭的賭桌。<strong>北方巨人的陰影，在這裡終於濃縮成一朵蕈狀雲的輪廓</strong>——只是那朵雲，最終沒有升起。</p>
+
+    <h3>豬玀灣：流亡者的三天與甘迺迪的恥辱</h3>
+    <p>故事要從那些離開的人說起。革命勝利後，數以十萬計的古巴人——大莊園主、賭場經理、舊政權的官員、被沒收了財產的中產、單純恐懼共產主義的家庭——湧向了北方九十英里外的邁阿密（Miami）。在那座迅速膨脹的流亡之城裡，仇恨與鄉愁發酵成一種共同的執念：回去，把卡斯楚（Fidel Castro）拉下來。美國中央情報局（the CIA）看見了這股能量，並決定加以利用。早在艾森豪（Dwight Eisenhower）任內，中情局就已經在祕密訓練一支由古巴流亡者組成的武裝——代號「二五〇六突擊旅」（Brigade 2506），在瓜地馬拉的叢林營地裡操練。計畫的邏輯簡單而傲慢：讓這支流亡軍在古巴海岸登陸，建立灘頭堡，島內不滿卡斯楚的群眾將群起響應，一場「人民起義」便會推翻革命。一切都以美國的手不直接沾血為前提。</p>
+    <p>一九六一年一月，甘迺迪（John F. Kennedy）就任美國總統，接手了這個已成形的計畫。這位年輕的總統一方面渴望在冷戰中展現強硬，一方面又極力避免讓美國的角色暴露在世人眼前。為了「可否認性」，他在最後關頭削減了空中支援、更改了登陸地點——把原訂的目標改到了古巴南岸一處名為「豬玀灣」（the Bay of Pigs，西班牙語稱「吉隆灘」，Playa Girón）的偏僻沼澤海岸。那是一片紅樹林與鱷魚出沒的澤地，遠離任何城市，島內群眾根本無從響應。一九六一年四月十七日凌晨，約一千四百名流亡軍從海上登陸。等待他們的，不是簞食壺漿的人民，而是卡斯楚親自指揮、早有戒備的革命軍與民兵。</p>
+    <p>結局來得又快又殘酷。古巴空軍——人們原以為已被先前的空襲摧毀，實則保存了幾架可用的戰機——擊沉了載運彈藥與通訊設備的補給船。灘頭上的流亡軍很快彈盡援絕，被坦克與火砲壓制在那片無處可退的沼澤裡。甘迺迪在最後關頭仍拒絕投入美軍正規空中與海上力量，唯恐那會徹底撕破「這不是美國行動」的遮羞布。<strong>不到三天，戰鬥就結束了。</strong>超過一千一百名流亡軍被俘，一百餘人陣亡。被俘者後來經過漫長談判，由美國以價值數千萬美元的食品與藥品為「贖金」換回。這場入侵，從構想到執行都建立在一連串致命的誤判之上：誤判了卡斯楚的軍事準備，誤判了島內民心，更誤判了「乾淨的隱蔽行動」這種幻想本身的可能性。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一場「乾淨入侵」的內在矛盾</span>
+      <p>豬玀灣的失敗，根子在於一個無法調和的矛盾：計畫既要達成軍事上的成功，又要維持政治上的「可否認性」。要登陸成功，需要壓倒性的空中支援去摧毀古巴空軍、掩護灘頭；但只要美軍戰機公然參戰，全世界都會看穿這是華府的行動，可否認性便蕩然無存。甘迺迪選擇了犧牲軍事必要性去保全政治顏面——削減空襲、隱去美國旗號——結果兩頭落空：軍事上慘敗，政治上美國的角色仍被全世界看得一清二楚。中情局後來在內部檢討中承認，這種隱蔽行動的規模一旦大到需要一支軍隊，就再也藏不住了。隱蔽與規模，本質上互相排斥。這是冷戰時代所有「祕密戰爭」反覆撞上的同一堵牆。</p>
+    </div>
+
+    <h3>卡斯楚的勝利：把革命焊進蘇聯陣營</h3>
+    <p>對甘迺迪而言，豬玀灣是上任不到百日就嚐到的奇恥大辱。他在私下痛斥自己竟然會批准如此愚蠢的計畫，並承擔了公開的責任。但歷史的弔詭在於：這場美國的慘敗，恰恰是卡斯楚求之不得的大勝。在入侵的隆隆砲聲中，這位革命領袖獲得了一份任何宣傳都買不到的禮物——一個來自北方巨人的、活生生的侵略證據。古巴人世世代代對美國干涉的恐懼與屈辱記憶，在豬玀灣的灘頭被瞬間點燃並坐實。卡斯楚不再需要費力說服人民「美帝國主義要吞掉我們」；華府親手把這句話演成了現實。革命的合法性，在抵禦入侵的三天裡，被澆鑄成了鋼。</p>
+    <p>就在入侵前夕，一九六一年四月十六日——也就是流亡軍登陸的前一天——卡斯楚在哈瓦那為空襲中犧牲者舉行的葬禮上，第一次公開宣布：這是一場「社會主義革命」。<strong>古巴革命的社會主義性質，是在面對美國利刃的那一刻，被正式命名的。</strong>這個時間點意味深長：它把「轉向社會主義」與「抵抗侵略」這兩件事，在民族情感上焊接成了同一件事。日後再有人質疑古巴為何要投入蘇聯懷抱，答案早已寫在那片沼澤的硝煙裡——是北方的入侵，把這座島推向了北方的敵人。地理上九十英里的近，與政治上的敵對，把古巴擠進了一條別無選擇的窄路：要在巨人的陰影下活命，就只能去尋找另一個巨人的庇護。</p>
+    <p>於是莫斯科（Moscow）的角色變得不可逆轉。豬玀灣之後，蘇聯對古巴的軍事與經濟援助加速湧入，蘇聯領導人赫魯雪夫（Nikita Khrushchev）在這座離美國本土如此之近的島嶼上，看見了冷戰棋盤上一個誘人到難以抗拒的位置。而卡斯楚——剛剛親身領教了美國決心要除掉他——比任何時候都更需要一把足以嚇阻入侵的保護傘。一方想要前哨，一方想要盾牌，兩種需求一拍即合。豬玀灣熄滅的砲火，竟成了下一場、也是更可怕一場危機的引信。</p>
+
+    <div class="cf">
+      <p>設想甘迺迪當初批准了完整的空中支援，流亡軍或許真能在灘頭站穩數日。但歷史的更深層幾乎不會因此改寫：島內並無等待起義的群眾，而美國公然參戰只會把局部入侵升級為一場美古全面戰爭，甚至更早地把蘇聯捲入。豬玀灣真正的教訓，不是「火力給得不夠」，而是這場入侵賴以成立的前提——「古巴人民會倒戈」——本身就是邁阿密流亡圈一廂情願的幻覺。建立在幻覺之上的計畫，加多少火力都救不回來。</p>
+    </div>
+
+    <h3>十三天：世界站到了懸崖邊緣</h3>
+    <p>一九六二年的夏天與初秋，一場無聲的部署正在加勒比海上展開。蘇聯的貨輪一艘接一艘駛向古巴，甲板下藏著的，是中程與中遠程的核子彈道飛彈，以及成千上萬的蘇聯軍事人員。赫魯雪夫的算盤是：在古巴祕密建好飛彈陣地，等其成為既成事實後再向世界攤牌，以此一舉抵銷美國在飛彈數量上的優勢，並把保護傘實實在在地撐在卡斯楚頭上。然而祕密沒能瞞住。一九六二年十月，美國的U-2高空偵察機飛越古巴上空，鏡頭清晰地拍下了正在興建中的飛彈發射場。照片送到甘迺迪的辦公桌上時，那段後來被稱為「十三天」（Thirteen Days）的人類歷史上最危險的時刻，開始倒數計時。</p>
+    <p>從十月十六日得知飛彈的存在，到二十八日危機落幕，甘迺迪與他緊急召集的決策核心（後稱「執行委員會」，the ExComm）在白宮裡日夜辯論。鷹派主張立即空襲飛彈陣地、甚至全面入侵古巴；謹慎者則警告，任何一發砸向蘇聯設施的炸彈，都可能引爆全面核戰。最終，甘迺迪選擇了一條居於戰爭與退讓之間的鋼索——海上「隔離」（quarantine），實質就是封鎖：美國海軍在古巴周圍劃出一道警戒線，攔截一切駛向古巴、可能載有軍事物資的蘇聯船隻。十月二十二日，甘迺迪透過電視向全美與全世界公布了飛彈的存在與封鎖的決定。那一夜，整個地球屏住了呼吸。</p>
+    <p>接下來的幾天，是兩個超級強權的意志在公海上正面相撞。一隊蘇聯貨輪向著封鎖線駛來，美國軍艦嚴陣以待。全世界都在計算：如果蘇聯船隻拒絕停船、美軍開火，會發生什麼？人們在城市裡囤積食物，孩子在學校演練躲進課桌底下的防核演習，許多家庭在那幾個夜晚甚至不確定自己還能否看到明天的太陽。<strong>這是冷戰四十餘年裡，人類唯一一次如此真切地站到了核子全面戰爭的懸崖邊緣。</strong>而所有這一切的地理中心，那座被兩個巨人的目光死死鎖住的舞臺，正是哈瓦那以南那片曾經只關心糖價的島嶼。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼是「九十英里」改變了一切</span>
+      <p>核武器的威懾，很大程度上取決於「飛行時間」——對手的飛彈從發射到擊中目標需要多久，決定了你有多少預警與反應的餘地。一九六二年，蘇聯部署在本土的洲際飛彈飛抵美國需要約三十分鐘，這給了美國寶貴的預警窗口。可一旦核飛彈架設在古巴，距離佛羅里達僅九十英里，飛抵華府、紐約乃至更遠城市的時間驟減到僅僅幾分鐘——預警幾乎歸零，先發制人的誘惑與被突襲的恐懼同時飆升，整個核威懾的脆弱平衡被徹底攪亂。這正是甘迺迪無論如何不能接受飛彈留在古巴的根本原因。古巴的價值，從來不在它本身，而在那九十英里——它把「世界末日」的計時器，從半小時撥快到了眨眼之間。</p>
+    </div>
+
+    <h3>祕密的交易：兩個巨人如何從懸崖邊退回</h3>
+    <p>退路，是在公開的劍拔弩張與私下的祕密溝通之間，一寸一寸找到的。表面上，甘迺迪與赫魯雪夫透過正式信函互相施壓；暗地裡，華府與莫斯科之間透過各種非正式管道急切地傳遞著彼此的底線。最終達成的協議，是一筆精心設計的交換：蘇聯公開承諾撤走部署在古巴的飛彈；美國則公開承諾，今後不再入侵古巴。而真正讓赫魯雪夫得以體面收場的，是協議裡那一條祕而不宣的條款——美國暗中允諾，將撤走部署在土耳其的「朱比特」（Jupiter）中程飛彈，那些飛彈正抵著蘇聯的南部國門。這項交換是祕密的：對外，美國絕不承認自己用土耳其的飛彈換了古巴的飛彈，以免顯得是向蘇聯讓步；數十年後，這段隱情才被完整披露。十月二十八日，赫魯雪夫宣布撤回飛彈，十三天的窒息終於鬆開。</p>
+    <p>在這場兩個巨人的對弈裡，最被冷落、也最憤怒的，恰恰是棋盤所在的那座島的主人。整場危機的談判，幾乎是莫斯科與華府越過哈瓦那的頭頂直接拍板。卡斯楚是在赫魯雪夫已經決定撤飛彈之後，才從廣播裡得知這個結果的。他勃然大怒——他曾準備好與這座島共存亡，蘇聯卻在沒有充分知會他的情況下，把他頭上的盾牌撤走，當作與美國交易的籌碼。這一刻赤裸裸地揭示了小國在超強博弈中的宿命：<strong>古巴既是讓兩個巨人都不得不正視的主角，又始終只是他們棋盤上的一枚棋子。</strong>它有能力把世界拖到核戰邊緣，卻沒有能力決定自己這枚棋子最終被如何擺放。能讓地球顫抖，卻不能替自己作主——這就是身處巨人陰影中心的全部悖論。</p>
+    <p>然而，若冷靜清點，卡斯楚也並非全盤皆輸。那條「美國承諾不入侵古巴」的條款，成了革命政權日後安全的真實基石。在豬玀灣之後，這是古巴第一次從北方巨人手中，換得了一紙——儘管附帶條件、儘管心照不宣——不再以武力傾覆它的保證。從此，華府推翻卡斯楚的工具，從公開的軍事入侵，更多地轉向了長期的經濟封鎖、外交孤立與一次次祕密的暗殺圖謀。巨人沒有再踏上這座島的灘頭，但它的陰影，從此化為一道幾乎永不解除的禁運高牆，籠罩了古巴往後數十年的命運。十三天的核對峙落幕了，半個世紀的圍困，才剛剛開始。</p>
+
+    <div class="pull"><p>九十英里外的世界末日：一座連糖價都做不了主的島，卻一度握著全人類的生死倒數。</p></div>
+
+    <p>當蘇聯的貨輪載著拆下的飛彈駛離古巴海岸，世界長長地鬆了一口氣。事後人們把這十三天稱作冷戰的轉捩點：兩個巨人都被自己親手逼近的深淵嚇住了，從此架起了華府與莫斯科之間的「熱線」，並在隨後的歲月裡開始摸索軍備控制的種種約束。核戰的恐怖，在這座加勒比小島的上空被預演了一次，然後被雙方共同的恐懼按了回去。但對古巴而言，這場危機的意義要更為複雜而沉重。它在這十三天裡，攀上了它在世界舞臺上前所未有、日後也再難企及的高度——一座島，竟成了人類文明存續與否的支點。可它也在同一刻，清醒地照見了自己的卑微：當兩個巨人在它頭頂上方握手言和，它連在場的資格都沒有。從糖的詛咒，到北方的入侵，再到核邊緣的十三天，這座島一次次被更大的力量推著走，卻又一次次以遠超其體量的倔強，在歷史的正中央留下自己的身影。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命與堅持 the Revolution and the Will to Endure</span>
+      <p>豬玀灣與十三天，是古巴「以小搏大」的命運最戲劇化的一次顯影。北方的入侵沒有摧毀革命，反而把革命焊成了民族的脊樑；核飛彈的對峙沒有換來安全，卻換來一紙「不入侵」的承諾與一道綿延半世紀的封鎖。古巴在這兩場危機裡學到的，是一種日後反覆塑造其性格的生存哲學：它無法擺脫巨人的陰影，便選擇在陰影裡站得格外筆直——既當棋子，又不甘只當棋子。這份在絕對的力量懸殊面前依然要為自己作主的倔強，正是「革命與堅持」這條主線最滾燙的內核。世界末日從這座島的上空掠過又退去，而古巴，學會了在末日的餘溫裡，繼續活著，並繼續說「不」。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<div class="part-div reveal" id="part-4">
+  <span class="pn">第四部</span>
+  <h2 class="ptitle pt">紅色的島</h2>
+  <div class="pe">The Red Island</div>
+  <div class="pline"><span></span><span class="dot">❂</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-14">
+  <div class="act-head">
+    <span class="act-num">第14章 · The Soviet Sugar</span>
+    <h2 class="act-title">蘇聯的糖：一場新的依賴</h2>
+    <p class="act-sub">Trading One Dependence for Another</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九六二年十月，當美國的軍艦在加勒比海上拉起封鎖線、整個世界屏住呼吸等待核戰爆發的那十三天裡，很少有人注意到，這場危機真正改寫的，不只是冷戰的地緣版圖，還有一座島嶼的經濟命脈。飛彈最終撤走了，蘇聯的船隊掉頭駛回黑海，但有一樣東西，卻從此牢牢地紮進了古巴（Cuba）的土壤裡——那不是飛彈，而是一紙貿易協定，一條從哈瓦那（La Habana）通往莫斯科的、看不見的輸送帶。革命勝利不過三年，這個剛剛喊出「要從帝國主義的鎖鏈中解放」的國家，便發現自己正一步步走進另一條鎖鏈。只是這一次，鏈條的另一端，不在華爾街，而在克里姆林宮（the Kremlin）。歷史在這裡開了一個它最擅長的玩笑：一場以掙脫依賴為名而發動的革命，最終把古巴交給了一個新的、同樣龐大的主人。而連接這對新主僕的媒介，竟還是那同一樣東西——<strong>糖</strong>。</p>
+
+    <h3>從華爾街到克里姆林宮</h3>
+    <p>要理解這場交接的分量，得先回到斷裂的那一刻。一九六○年，美國一面凍結對古巴的糖配額，一面對這座島嶼實施全面禁運。對一個糖佔出口八成以上、市場高度仰賴北方鄰居的國家而言，這幾乎等同於掐住咽喉。一船船砍下的甘蔗、一袋袋熬煉的原糖，原本都該運往佛羅里達海峽對岸那個近在咫尺的巨大市場，如今卻無處可去。就在這個生死關頭，蘇聯伸出了手。早在一九六○年二月，蘇聯第一副總理米高揚（Anastas Mikoyan）便造訪哈瓦那，簽下協議，承諾在五年內購入古巴的糖，並提供貸款與石油。當美國的禁運在當年夏天全面收緊時，蘇聯順勢承接了被美國拋下的整批糖。一個賣方失去了它唯一的買家，另一個買家恰好需要一個忠誠的盟友——在冷戰那架冰冷的天平上，這筆交易幾乎是注定要成交的。</p>
+    <p>於是，一條全新的經濟動脈在兩個相隔半個地球的國度之間搭建起來。蘇聯與東歐的貨輪滿載著原油、機械、麵粉、武器與工業製品，越過大西洋駛抵哈瓦那的碼頭；卸下貨物後，再裝上一袋袋古巴的原糖，原路返航。這條跨越萬里的航線，在地圖上荒謬得近乎不可思議——世界上甜度最高、最不缺糖的熱帶島嶼，把糖賣給了一個自己也能種甜菜、地處嚴寒的大陸國家；而那個國家，則把自己根本不缺的石油，運給一座連一滴原油都產不出的島。這不是經濟學課本裡那種「比較利益」的優雅交換，而是兩個被冷戰邏輯綁在一起的政權，用各自手裡最不缺的東西，去填補對方政治上的需要。糖與油，自此成了哈瓦那與莫斯科之間心照不宣的暗語。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 補貼價：一根扭曲市場的魔杖</span>
+      <p>蘇聯收購古巴糖的真正關鍵，不在「買」，而在「以什麼價格買」。國際糖價長年在世界市場上劇烈波動，常因供過於求而跌至成本線以下。但蘇聯與古巴之間，逐步建立起一套「優惠價」機制：莫斯科以遠高於、且相對穩定的價格收購古巴的糖，到了一九七○年代後期，更引入與蘇聯出口給古巴的石油價格相掛鉤的條款——糖價隨油價浮動，等於替古巴撐起一張價格的保護傘。在最慷慨的年份，蘇聯付給古巴的糖價，可達國際市價的數倍。這筆差額，本質上是一種政治補貼：莫斯科用高價買糖、低價賣油，把實打實的資源源源不絕地輸進這座島，換取一個橫在美國家門口的盟友。然而補貼是一根魔杖——它能讓一個本該因低效而崩潰的產業繼續存活，卻也讓接受補貼的一方喪失了改革的痛感與動力。古巴的糖業，就在這根魔杖的庇蔭下，既活了下來，又被永遠地困住了。</p>
+    </div>
+
+    <h3>計畫的島嶼</h3>
+    <p>隨著經濟臍帶的接通，蘇聯的整套經濟模式也隨之移植上島。一九六○年代中期之後，古巴愈來愈深地嵌入社會主義陣營的運作邏輯：生產資料國有化、市場被中央計畫取代、價格由政府訂定、農場與工廠按指令運轉。到了一九七二年，古巴正式加入經濟互助委員會（Comecon，「經互會」），這個以蘇聯為核心、囊括東歐諸國的社會主義經濟集團。加入經互會，意味著古巴的進出口、信貸、生產分工，從此被納入一個由莫斯科主導的更大棋盤。在這張棋盤上，每個成員國被分派各自的角色——東德出機械、捷克斯洛伐克出工業品、保加利亞出農產，而古巴被指定的角色，再清楚不過：<strong>替整個陣營提供糖</strong>。一座島嶼的經濟命運，被寫進了一份由遙遠官僚擬定的分工表裡。</p>
+    <p>計畫經濟給古巴帶來的，是一種奇異的雙面性。一方面，它確實托住了一個被禁運圍困的社會：穩定的糧食配給、近乎免費的教育與醫療、被壓低的房租與物價，讓最底層的人民第一次擁有了某種有保障的生活。蘇聯的補貼，是這套社會工程得以維繫的隱形地基。但另一方面，計畫的邏輯也悄悄抽走了這座島嶼的某種活力。當價格不再反映稀缺、當努力與報酬脫鉤、當每一個生產決定都要等上級的指令，效率便在層層指令中漏失。倉庫裡堆著賣不掉的東西，貨架上卻缺著最需要的東西；田裡的甘蔗有人砍，工廠裡的機器卻常因缺零件而停擺。古巴成了一座被計畫精密規劃、卻又處處運轉不靈的島。而所有這些低效的縫隙，最終都由莫斯科的補貼來填補——只要蘇聯的船還在來，島就還能轉。</p>
+
+    <h3>一千萬噸的豪賭</h3>
+    <p>如果說有哪一個事件，最赤裸地暴露了這個體制的雄心與它的脆弱，那一定是一九七○年的「一千萬噸大豐收」（la Zafra de los Diez Millones）。在一九六○年代後期，古巴領導層立下了一個近乎神話的目標：在一九七○年的這一季甘蔗收成中，產出一千萬噸的糖——這個數字，遠遠超過古巴歷史上任何一年的紀錄，幾乎是把整個國家的力氣，押在一場單一的賭局上。這場豐收被賦予了遠超經濟的意義：它要向世界證明，社會主義的古巴有能力創造資本主義時代從未達到的奇蹟；它要一舉償清欠蘇聯的債、為國家掙得發展的本錢；它更要成為革命意志的一座豐碑，證明在領袖的號召下，一個民族的精神力量足以翻越任何物質的高牆。</p>
+    <p>於是，整座島被動員了起來。這不是一句修辭，而是字面意義上的總動員。學生離開課堂、工人離開工廠、職員離開辦公桌、士兵離開營房，連外交官與藝術家都被號召走進蔗田，拿起砍刀（machete），在烈日下揮汗如雨。城市幾乎被抽空，舉國上下湧向甘蔗田，彷彿一場聖戰。報紙以倒數計時的方式追蹤進度，廣播裡日夜播報著各省的數字，整個國家的神經，都繃在那一個遙遠的數字上。為了多收一噸糖，許多本該休耕養地的蔗田被提前砍伐，許多本該留作種苗的甘蔗被送進了糖廠，許多工廠因為熟練工人都跑去砍蔗而陷入停頓。一個國家為了一個數字，幾乎押上了它全部的肌理。</p>
+
+    <div class="aside">那一年的砍蔗大軍裡，有教授、有醫生、有芭蕾舞者，也有最高領導人本人——卡斯楚（Fidel Castro）親自走進蔗田揮舞砍刀，讓攝影機拍下他汗濕的身影。這既是一種真誠的姿態，也是一場精心編排的儀式：領袖與人民同甘苦，把一場農業收成，昇華成一次全民的精神洗禮。然而砍刀揮得再賣力，甘蔗的生長、糖廠的產能、運輸的瓶頸，都不是意志能夠超越的物理極限。到了那年夏天，當最後一車甘蔗被榨乾，官方公布的數字定格在約八百五十萬噸左右——這是古巴有史以來最高的產糖紀錄，卻仍離那個神聖的「一千萬」差了一大截。一場以全國之力發起的豪賭，最終以一場光榮卻苦澀的未達標收場。</div>
+
+    <p>然而真正的代價，遠不在那道未能跨越的數字鴻溝。為了把舉國之力都投向甘蔗，其餘的經濟部門被抽乾了血。工廠停擺、運輸混亂、其他作物無人照料、各行各業的生產計畫全盤打亂——當砍蔗大軍終於放下砍刀、回到各自的崗位時，他們發現自己留下的，是一片狼藉的爛攤子。本想用一場豐收為國家換來騰飛的本錢，結果卻拖垮了整個經濟的元氣，留下數年都難以平復的創傷。卡斯楚在當年七月的演說中罕見地公開承認了失敗，甚至一度提出辭職——當然，這辭呈被群眾的呼喊「擋」了回去。但那一刻的坦白，標誌著一個烏托邦式幻想的破滅：精神的意志，終究無法替代經濟的規律；一個國家無法靠喊口號與揮砍刀，砍出一座現代化的未來。</p>
+
+    <div class="pull"><p>他們本想用一千萬噸糖，砍斷對糖的依賴；結果砍刀落下，斷的卻是其他一切，唯獨那道對糖的依賴，更深地紮進了土裡。</p></div>
+
+    <h3>換了主人的詛咒</h3>
+    <p>一九七○年的失敗之後，古巴的政策悄然轉向。既然以一場運動式的豪賭去掙脫糖、躍向多元工業化的夢想已經破滅，那麼最務實的選擇，反而是回過頭去，把糖種得更好、更穩、更有效率——畢竟，蘇聯願意用高價買下它能產的每一噸糖。於是在整個一九七○與一九八○年代，古巴與其說是擺脫了糖，不如說是與糖達成了一種新的、被補貼撐起的和解。蘇聯提供農機、肥料、技術與穩定的市場，古巴則安心地把自己的經濟，重新建築在這唯一一根甜蜜的支柱上。表面上看，這是一段相對安穩、甚至堪稱寬裕的歲月：商店裡有蘇聯來的貨，學校與醫院照常運轉，人民的生活在補貼的庇護下維持著體面。但在這份安穩的底下，那道古老的結構性宿命，從未鬆動分毫。</p>
+    <p>這正是整個故事最深的反諷所在。我們把鏡頭拉遠，回望這座島嶼數百年的身世：殖民時代，它是西班牙與後來的美國資本的糖罐子，命運繫於一種作物、一個市場、一個價格；它整個二十世紀上半葉的政治動盪、它的革命之所以能點燃人心，很大一部分正是源於對這種<span style="color:var(--rust);font-weight:600">「單一作物—單一市場」</span>的依附型經濟的憤怒與反抗。革命者高舉的旗幟上寫著：我們要終結糖的暴政，要讓古巴成為一個經濟自主、不再仰人鼻息的國家。然而二十年過去，當我們再次清點這座島的家當，赫然發現：它依舊靠賣糖過活，它的繁榮與匱乏依舊隨單一買主的臉色而起落，它的石油、信貸、機械、麵包，依舊握在一個遙遠帝國的手裡。<strong>一切都變了，又彷彿什麼都沒變。</strong></p>
+    <p>差別只在於名字。從前，買糖的是美國，定價的是紐約的交易所，撐起這套體系的是華爾街的資本；如今，買糖的是蘇聯，定價的是莫斯科的官僚，撐起這套體系的是克里姆林宮的政治補貼。從前那條輸送帶通向北方九十英里外的佛羅里達，如今這條輸送帶橫越大西洋，通向幾千英里外的黑海。糖還是那個糖，島還是那座島，依賴還是那份依賴——被替換掉的，只是鏈條另一端的那隻手。古巴像一個試圖逃離一段關係的人，掙脫了舊主人的懷抱，轉身卻投入了一個新主人的臂彎，而那新主人給的，竟是同一種模樣的擁抱與枷鎖。革命許諾要打破的詛咒，並沒有被打破；它只是被悄悄地、徹底地，移交了主人。</p>
+
+    <p>這份移交，在當下看來甚至像是一種幸運。蘇聯的補貼是慷慨的，它的庇護是穩固的，整個社會主義陣營的後盾，讓這座小島得以在強鄰的禁運之下昂然挺立、甚至向外輸出它的革命理想。在一九七○與八○年代的多數時間裡，古巴人有理由相信，他們已經找到了一個比舊秩序更公正、更可靠的依靠。然而依賴的危險，從來不在它平順的時候顯現，而在那個被依賴的對象自身動搖的時候才會引爆。沒有人在當時想到，那個看似永恆的紅色帝國，會在十幾年後轟然解體；沒有人想到，當莫斯科的船隊有一天不再駛來，這座把全部身家都押在蘇聯之糖上的島嶼，將跌進怎樣一場深不見底的飢餓與黑暗。補貼這根魔杖一旦撤走，被它撐起的一切，都將在一瞬間失去支點。但那是後話了。在這一章的盡頭，蘇聯的糖依然甜美，輸送帶依然轟鳴，而那道換了主人的詛咒，正安靜地、耐心地，等待著它最殘酷的一次兌現。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 糖的詛咒 the Curse of Sugar</span>
+      <p>「糖的詛咒」是這部古巴史最深的一道暗流：一座島嶼把全部命運押在一種甜美的作物上，於是它的興衰、它的自由與不自由，都隨著一根甘蔗的價格起落。革命者曾相信，只要砍掉資本主義的鎖鏈，便能砍斷這道詛咒。然而蘇聯時代給出的答案是殘酷的——詛咒從未被破解，只是被換了一個主人。古巴依舊靠賣糖過活，依舊靠單一買主的補貼維生，只不過買主從華爾街換成了克里姆林宮，定價權從紐約移到了莫斯科。一九七○年那場一千萬噸的豪賭，本是想以全國之力一舉斬斷此咒，結果卻拖垮其他部門、讓島嶼比從前更深地嵌進糖的宿命裡。真正的詛咒，從來不是糖本身，而是「把整座島的命運，交給一樣東西、一個主人」這件事——而這一課，這座島還要再用一場大饑荒的代價，才會被迫重新學習。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-15">
+  <div class="act-head">
+    <span class="act-num">第15章 · Exporting the Revolution</span>
+    <h2 class="act-title">輸出革命：安哥拉與全球的小巨人</h2>
+    <p class="act-sub">The Small Island That Punched Far Above Its Weight</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>攤開一張世界地圖，古巴（Cuba）只是加勒比海上一道細長的綠影，面積約十一萬平方公里，人口在二十世紀後半從未超過一千兩百萬。按任何尋常的尺度衡量，這都是一個小國——小於它北方鄰居的任何一個州，小於它在冷戰中所對抗的那台龐大機器的一個零頭。然而從一九六〇年代到一九八〇年代，這座小島卻做了一件幾乎沒有任何同等體量的國家敢於想像的事：它把自己的士兵、醫生、教師與理想，投射到了半個地球之外，投射到安哥拉（Angola）的紅土草原、衣索比亞（Ethiopia）的高原、玻利維亞（Bolivia）的密林，乃至上百個第三世界國家的醫院與學校。一個剛剛把自己的命運從一場革命中奪回來的窮國，竟轉身要去改寫別人的命運。這份不成比例的雄心，是「革命與堅持」這道主線最炫目、也最爭議的一面：它讓世界看見，意志與信念若被推到極致，一座小島也能在大國的棋盤上落下自己的子。</p>
+
+    <h3>切·格瓦拉：把革命當成一種義務</h3>
+    <p>要理解古巴為何不甘於只當一座小島，得先理解一個人——切·格瓦拉（Che Guevara）。這個出生於阿根廷、學醫出身的青年，在墨西哥遇見卡斯楚（Fidel Castro），隨那艘擁擠的「格拉瑪號」（Granma）登上古巴，在馬埃斯特拉山（the Sierra Maestra）的游擊戰中成為傳奇。革命勝利後，他做過國家銀行行長、工業部長，簽署過古巴的鈔票，卻始終覺得辦公桌囚禁了他。在格瓦拉的世界觀裡，古巴的革命不是終點，而是一顆火種；真正的勝利，要等到拉丁美洲、乃至整個第三世界都被點燃的那一天。他相信一種被稱為「灶心論」（foco theory）的學說：只要一小群堅定的武裝者，在恰當的地方點燃游擊的火苗，就能像他們在古巴所做的那樣，把人民的不滿匯聚成燎原之勢。他要把這套經驗，當成一份義務，輸出到世界的每一個角落。</p>
+    <p>一九六五年，格瓦拉悄然離開古巴，留下一封後來被廣為傳誦的告別信，信中說他將奔赴世界其他戰場。他先去了剛果（the Congo），帶著一隊古巴黑人志願者，試圖協助當地的反政府游擊隊。那是一場挫敗：當地的指揮混亂、紀律渙散、政治條件遠不如他想像，格瓦拉在叢林裡染上瘧疾、灰心喪志，最終不得不撤出，並在私下的日記裡承認這是一場失敗。然而失敗沒有澆熄他。一九六六年底，他化裝潛入玻利維亞，要在南美洲的心臟地帶再點一把火。這一次的結局更為悲壯：他低估了當地共產黨的不合作、農民的冷漠與美國訓練的玻利維亞軍隊。一九六七年十月，他在玻利維亞東南部的尤羅峽谷（the Quebrada del Yuro）被俘，隔日在一座小學校的教室裡被處決，年僅三十九歲。</p>
+
+    <div class="aside">
+      格瓦拉死後，玻利維亞軍方為了證明他確已身亡，把他的遺體攤放在巴耶格蘭德（Vallegrande）一家醫院的洗衣間水槽上，讓記者拍照。那張照片裡，他雙眼半睜、神情安詳，竟與西方繪畫中卸下十字架的基督有著驚人的相似——許多評論者後來都注意到了這一點。軍方原本想用屍體粉碎傳奇，結果卻親手把他送上了聖壇。他們還砍下他的雙手保存以供指紋辨識，倉促將遺體埋在機場跑道旁的無名坑中，直到一九九七年才被尋獲、迎回古巴。一個被當作戰利品示眾的死者，就這樣在底片上完成了從人到偶像的最後一道轉化。
+    </div>
+
+    <p>格瓦拉死了，但作為符號的「切」才剛剛誕生。攝影師柯爾達（Alberto Korda）早在一九六〇年的一場葬禮上，無意間捕捉到他凝望遠方、戴著綴星貝雷帽的那張臉。這幅後來被命名為《英勇的游擊隊員》（Guerrillero Heroico）的肖像，在他殉難後被印上海報、旗幟、T恤、馬克杯，成為二十世紀流傳最廣的影像之一。從巴黎五月風暴的街壘，到拉美的礦工罷工，再到全球大學宿舍的牆面，那張臉成了反抗本身的代名詞。諷刺的是，這個畢生痛恨資本與商品的人，最終以一件商品的形式征服了全世界；而對古巴而言，這個為了「輸出革命」而死在異國的兒子，恰恰證明了這座小島的雄心，可以遼闊到讓一個人甘願死在地圖的另一端。</p>
+
+    <h3>安哥拉：小島最遙遠的戰場</h3>
+    <p>如果說格瓦拉是一個人的遠征，那麼安哥拉就是一整個國家的遠征。一九七五年，葡萄牙這個老朽的殖民帝國終於在一場本土革命後撤離非洲，留下安哥拉這塊資源豐饒卻群龍無首的土地，三股勢力立刻為爭奪政權而火併。其中傾向馬克思主義的「安哥拉人民解放運動」（MPLA）向哈瓦那求援，而它的對手則得到南非種族隔離政權與美國中央情報局的支持——南非軍隊甚至越過邊境、向首都魯安達（Luanda）長驅直入。就在這個千鈞一髮的關頭，卡斯楚做了一個連他的蘇聯盟友事前都未必首肯的決定：跨越整個大西洋，向安哥拉派兵。這場代號「卡洛塔行動」（Operation Carlota）的遠征，把古巴的軍人從加勒比海運往非洲西南岸，在前後十六年的時間裡，累計投入的兵力據估計達到數以萬計，最高峰時島上同時有數萬名古巴官兵駐紮在安哥拉的土地上。</p>
+    <p>這是現代史上罕見的一幕：一個第三世界的小國，主動跨洋遠征，去與一個地區強權的正規軍正面對抗，而且並非完全聽命於莫斯科的指揮棒。卡斯楚把這場介入詮釋為一種國際主義的義務——是對非洲的償還，因為許多古巴人的血管裡，正流著當年被販賣到加勒比海的非洲奴隸的血。在他的敘事裡，古巴人不是去當蘇聯的代理人，而是去償還一筆橫跨數百年的歷史債務。當然，現實要複雜得多：這場遠征也服務於古巴在不結盟世界裡的領袖地位、服務於冷戰的全球博弈，蘇聯則提供了維持這場遠征所需的武器與燃料。理想與算計，在安哥拉的紅土上難分難解地纏繞在一起。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 奎托·夸納瓦萊：一場改變南部非洲的戰役</span>
+      <p>古巴在安哥拉最重要的一役，發生在一九八七至一九八八年間，地點是安哥拉東南部一個叫奎托·夸納瓦萊（Cuito Cuanavale）的小鎮。當安哥拉政府軍在南非裝甲部隊的攻勢下瀕臨崩潰時，卡斯楚再度孤注一擲，增派部隊與精銳裝備南下，與安哥拉軍及納米比亞的游擊隊並肩，擋住了南非的推進，並反向逼近納米比亞邊境。這場戰役的具體勝負，各方至今仍各執一詞——南非堅稱自己在戰術上未嘗敗績，古巴與安哥拉則視之為決定性的轉折。但其戰略後果是清楚的：它把南非逼上了談判桌。一九八八年的協議，最終促成南非從納米比亞撤軍、納米比亞走向獨立，並間接動搖了種族隔離政權對外擴張的信心。南非的曼德拉（Nelson Mandela）出獄後曾公開感念古巴：奎托·夸納瓦萊「打破了壓迫者不可戰勝的神話」。一座加勒比小島的士兵，竟在非洲大陸的命運轉折處，留下了自己的名字。</p>
+    </div>
+
+    <p>然而遠征的另一面，是沉重的代價。十六年裡，數千名古巴青年永遠留在了安哥拉的土地上——確切數字各方說法不一，但以這座小島的人口而言，這是一筆切膚之痛的損失。許多家庭在多年後才迎回親人的遺骨，島上幾乎沒有一個社區不曾與這場遙遠的戰爭發生牽連。在哈瓦那，這場遠征被頌揚為英雄主義的史詩；但在私下，不少古巴人也質疑：一個連麵包都時常短缺的窮國，為何要在地球的另一端流血？衣索比亞的介入更引發了爭議——古巴軍隊在那裡幫助門格斯圖（Mengistu）政權，而這個政權後來以殘暴聞名。理想主義的遠征，並不總能站在道德無瑕的一邊；當意志被投射到陌生的土地上，它也可能與當地的權力鬥爭、與並不光彩的盟友，糾纏在一起。一部持平的歷史，必須同時記下奎托·夸納瓦萊的榮光，與那些寫在陣亡名單上、再也回不了家的名字。</p>
+
+    <div class="pull"><p>一個連麵包都時常短缺的窮國，為何要在地球的另一端流血——這個問題的答案，既是理想，也是代價。</p></div>
+
+    <h3>白袍的軍團：醫療國際主義</h3>
+    <p>並非古巴所有的遠征都扛著步槍。在士兵之外，這座小島還派出了另一支更綿長、也更少爭議的軍團——穿白袍的醫生。早在一九六三年，剛剛獨立的阿爾及利亞向哈瓦那求援，古巴便派出第一批醫療隊跨海前往。從那以後，「醫療國際主義」（medical internationalism）成了古巴外交最獨特的一根支柱。這個本身物資匱乏的國家，把培養醫生當成國策，在哈瓦那設立了招收第三世界貧困學生的拉丁美洲醫學院（ELAM），免費為數十國培育醫師。古巴醫生的足跡遍及非洲的村落、拉美的山區、加勒比的孤島，他們常被派往別國醫生不願前往的偏遠之地，去接生、去防疫、去做白內障手術讓人重見光明。</p>
+    <p>這支白袍軍團的規模，在某些時期甚至超過了世界衛生組織派出的醫療人員總和。二〇一四年西非伊波拉（Ebola）疫情最凶險之際，當許多國家還在猶豫時，古巴率先派出數百名醫護逆行進入疫區，連向來敵對的華府都不得不公開致謝。在加勒比與拉美，古巴還用「奇蹟行動」（Operación Milagro）為數以百萬計的貧民免費治療眼疾。對哈瓦那而言，這既是革命博愛精神的真誠延伸，也是一門精明的生意與外交：委內瑞拉曾以石油交換古巴的醫療服務，醫生的外派也為這個被長期封鎖的經濟體換來寶貴的外匯。批評者指出，外派醫生的薪資大半被國家抽取，行動也受到嚴格管控，個別人甚至選擇出走。但無可否認的是，當一座小島能夠把「健康」當作一種可以輸出的力量時，它就在大國壟斷的硬實力之外，為自己開闢了一條獨一無二的軟實力航道——這根支柱延續至今，仍是古巴在世界上最被認可的名片。</p>
+
+    <div class="cards">
+      <div class="card"><h5>槍 · 安哥拉與衣索比亞</h5><p>跨洋遠征，前後十六年、數以萬計的兵力。在奎托·夸納瓦萊擋住種族隔離的南非，間接催生納米比亞獨立——也付出數千條人命的代價。</p></div>
+      <div class="card"><h5>火種 · 格瓦拉的灶心</h5><p>從剛果到玻利維亞，一個人的遠征。游擊的火苗多以失敗告終，他本人殞命異鄉，卻在底片上完成了從人到全球偶像的蛻變。</p></div>
+      <div class="card"><h5>白袍 · 醫療國際主義</h5><p>自一九六三年延續至今。數萬名醫生派往上百國的偏遠角落，從伊波拉到白內障——小島最持久、也最少爭議的軟實力。</p></div>
+    </div>
+
+    <h3>不結盟運動的精神領袖</h3>
+    <p>士兵與醫生之外，古巴還用言語在世界舞臺上發聲。一九七九年，哈瓦那主辦了不結盟運動（the Non-Aligned Movement）的高峰會，卡斯楚當選為這個橫跨亞非拉、聚集了上百個發展中國家的組織的輪值主席。對一座小島而言，這是一個象徵性的巔峰：它不再只是冷戰兩大陣營之間的棋子，而成了第三世界集體發聲的講臺中央。卡斯楚在這裡反覆陳述他的世界圖景——南方對北方的不平等、殖民遺產的清算、外債如何成為窮國的枷鎖。他那場著名的演說呼籲富國免除窮國的債務，至今仍被許多發展中國家引用。古巴在這個舞臺上扮演的角色，遠遠超出了它的經濟與軍事體量；它靠的不是財富與軍備，而是一種敢於替弱者說話、敢於對巨人說「不」的姿態。</p>
+    <p>當然，這份領袖地位也並非毫無瑕疵。批評者指出，古巴一面標榜「不結盟」，一面卻在冷戰中與蘇聯緊密綁定，這讓它的中立姿態屢遭質疑；當蘇聯入侵阿富汗時，身為主席的哈瓦那的立場便顯得尷尬。但無論如何，把這一切合起來看——格瓦拉死在玻利維亞、軍團遠征安哥拉、白袍醫生散布全球、卡斯楚在不結盟講臺上的雄辯——你看見的是同一種精神的不同投影：一座約千萬人口的小島，拒絕接受地圖賦予它的渺小，硬是要在世界史上佔據一個與其體量遠不相稱的位置。這是「革命與堅持」最眩目的演出，也是它最沉重的賬單。意志可以讓小島變大，但意志的代價，最終要由島上每一個普通人來償還。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命與堅持 the Revolution and the Will to Endure</span>
+      <p>把士兵與醫生投射到半個地球之外，古巴向世界證明了一件事：國家的分量，不必與它的面積成正比。一座小島之所以能在安哥拉的紅土、衣索比亞的高原、不結盟的講臺上留下自己的名字，靠的是一種被推到極致的<span style="color:var(--rust);font-weight:600">意志</span>——堅信一個窮國也有義務、也有資格去改寫世界的命運。這份意志締造了奎托·夸納瓦萊的榮光，也延續出至今仍在派遣的白袍軍團；但它同樣寫下了陣亡名單，讓飢餒的島民為遠方的理想付出血與糧。古巴的全球遠征，因此是這道主線最完整的縮影：它既展示了堅持能把一個小國放大到何種程度，也提醒人們，當理想被投射到地圖之外時，回聲傳得有多遠，賬單就有多重。小島的偉大與小島的負荷，原是同一枚硬幣的兩面。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-16">
+  <div class="act-head">
+    <span class="act-num">第16章 · The Balance Sheet: Achievements</span>
+    <h2 class="act-title">識字、醫療與革命的成績單</h2>
+    <p class="act-sub">Literacy, Health and the Gains</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>任何想誠實地評斷古巴革命的人，都得學會同時握住兩本帳冊。一本記著代價——驅逐、配給、沉默與離散；那一本，留待下一章。而這一章，要攤開的是另一本：成就的那一本。因為若只盯著代價而不看成績，便會錯讀這座島嶼最關鍵的謎題——一個物資如此匱乏、被封鎖了一甲子、領袖一再食言、街上常年排著長隊的政權，為什麼仍能在它的人民心中、在拉丁美洲廣袤的窮人心中，喚起一種近乎宗教的忠誠？答案不在槍口，也不只在卡斯楚（Fidel Castro）的口才。答案藏在一個更樸素、卻更難辯駁的地方：對一個出生在馬埃斯特拉山（Sierra Maestra）腳下的農家孩子而言，革命確確實實改變了他能不能讀書、會不會在五歲前夭折、有沒有機會當醫生。這些改變是真實的，是國際組織反覆確認過的，也是革命用以自豪、用以正當化自身一切犧牲的根據。要持平，就得先把這一頁，工工整整地讀完。</p>
+
+    <p>1959年元旦，當巴蒂斯塔（Fulgencio Batista）的飛機載著他與親信飛離哈瓦那（Havana）時，他留下的是一個外表光鮮、內裡撕裂的國家。哈瓦那的霓虹、賭場與凱迪拉克，是給遊客與糖業權貴看的櫥窗；櫥窗背後，是另一個古巴。全國約莫四分之一的成年人不識字，而在甘蔗田與山村裡，這個比例還要更高——許多割蔗工一輩子沒摸過一支鉛筆，一年裡有大半年沒有工作，住在沒有電、沒有自來水、沒有醫生的泥屋。鄉村的嬰兒在出生的第一年就大批死去，死於本可預防的腹瀉與感染；瘧疾、肺結核與寄生蟲，是田裡人習以為常的伴侶。革命要對抗的，正是這個被櫥窗遮住的古巴。它選擇的第一個戰場，不是經濟，而是——出人意料地——識字。</p>
+
+    <h3>1961年：一支由青年組成的軍隊，武器是鉛筆</h3>
+    <p>1961年，革命剛滿兩歲，卡斯楚向聯合國宣布：這一年，古巴將徹底消滅文盲。在當時，這像是一句豪語。但革命把它變成了一場全國總動員——古巴史上、或許也是二十世紀世界史上規模最驚人的一場掃盲運動，史稱「識字運動」（the Literacy Campaign，西班牙語 la Campaña de Alfabetización）。學校在那一年索性停課，把整整一個世代的城市青少年，變成了教師。約莫十萬名十幾歲的少年少女——他們被稱為「掃盲隊」（los brigadistas）——背起政府發的橄欖綠背包，帶著一盞煤油燈、一本識字課本與一面隊旗，搭著卡車、騎著騾子，甚至徒步走進他們此前從未踏足的窮鄉僻壤。一個哈瓦那中產家庭的女兒，可能就此住進馬埃斯特拉山一戶割蔗工的茅屋，白天下田幫忙，夜裡就著那盞煤油燈，一個字母、一個字母地，教那家的父母與孩子寫下自己的名字。</p>
+    <p>那盞煤油燈後來成了整場運動的圖騰——因為大多數待掃盲的人家根本沒有電，識字只能在農活之後、在夜色裡進行。課本的第一課，教的是寫「O-S-A」（熊）這樣的簡單音節；但課文的內容，從一開始就浸透著革命的語彙——農地改革、帝國主義、人民、祖國。沒有人會假裝這是一場「中立」的教育；它既是掃盲，也是政治的洗禮，這一點，連同它的成就，都該被誠實地記下。然而，當那一年年底，卡斯楚在哈瓦那革命廣場（Plaza de la Revolución）面對百萬群眾宣布古巴已成為「美洲第一個無文盲領土」時，無論人們如何評價它的政治色彩，有一個事實是難以推翻的：在不到一年裡，數十萬個此前一輩子被印刷文字拒之門外的成年人，第一次能讀懂一封信、簽下自己的名字。聯合國教科文組織（UNESCO）後來把這場運動列為人類掃盲史上的典範。一個民族的識字率，從約莫七成多，被推升到接近百分之百——這個成績，至今穩居全球前列，從未倒退。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼是識字先行</span>
+      <p>革命為何把掃盲擺在經濟重建之前？這是一步深思熟慮的政治棋。其一，識字是最便宜、最快見效、也最能凝聚民心的成就——它幾乎不需要外匯，只需要動員青年的熱情；在封鎖與資金枯竭的年代，這是革命少數能「自給」的勝利。其二，一場全國掃盲，把城市青年送進鄉村、讓窮人第一次感到自己被國家看見，這本身就是一種把革命「織」進每一戶人家的工程——它創造的不只是讀者，更是對革命懷有切身感激的群眾。其三，識字是其餘一切社會工程的地基：沒有能讀字的人民，後續的醫療衛教、技術培訓、思想宣傳都無從談起。掃盲運動因此既是慈善，也是治理——它同時點亮了煤油燈下的課本，與革命賴以站立的群眾基礎。把這兩面分開看，便讀不懂它的力量。</p>
+    </div>
+
+    <h3>把醫生送進每一座山村</h3>
+    <p>如果說識字是革命遞出的第一張名片，那麼醫療，便是它最持久、也最令對手難堪的一張。革命勝利之初，古巴約有六千名醫生，其中近半在頭幾年隨著流亡潮去了邁阿密（Miami）——這是一記重創，幾乎抽空了哈瓦那的醫界精英。革命的回應不是退讓，而是加碼：它把醫療徹底國有化、徹底免費，並且立下一個在拉丁美洲幾乎是異想天開的目標——讓每一個古巴人，無論住在哈瓦那的公寓還是奧連特省（Oriente）最偏遠的山坳，都能找到一位醫生。為此，它大規模擴建醫學院，把培養醫生當成國家最優先的投資之一；數十年下來，這座只有一千一百萬人口的島嶼，竟訓練出了人均數量冠絕全球的醫師隊伍——平均每千人擁有的醫生數，長年高於美國、高於絕大多數西歐富國。</p>
+    <p>更關鍵的是這套體系的組織方式。古巴建立了所謂「家庭醫生與護士」（el médico y la enfermera de la familia）的基層網絡：一名醫生帶一名護士，常駐在一個社區，負責方圓幾條街、幾百戶人家的健康——他們認得每一個孩子的名字，知道哪戶老人有高血壓，挨家挨戶做預防接種與產前檢查。醫療的重心，被刻意地從昂貴的大醫院，前移到便宜而綿密的社區預防。這套以預防為先、深入毛細血管的公衛模式，花的錢少，產生的效果卻驚人。它的成績，被寫進了那幾項最冷峻、最不容情的數字裡——而正是在這幾個數字上，古巴讓許多比它富裕幾十倍的國家都相形見絀。</p>
+
+    <div class="pull"><p>衡量一個社會良心的，從來不是它的霓虹有多亮，而是它的嬰兒能不能活過第一個生日，它的窮人能不能在病時找到一位醫生。</p></div>
+
+    <p>嬰兒死亡率，是公衛學者公認最能照見一國基層醫療真相的指標——因為它無法靠少數豪華醫院粉飾，只能靠普及到每一個產婦、每一個新生兒的綿密照護才能壓低。革命前的古巴，鄉村嬰兒成批死於可預防的疾病；而到了二十世紀末與二十一世紀初，古巴的嬰兒死亡率已降到每千名活產約五至六名以下——這個數字，不僅遠優於整個拉丁美洲，甚至常年低於美國本身。一個被封鎖、缺藥、人均所得只有美國零頭的島嶼，在這項最誠實的指標上贏過了那個封鎖它的超級大國，這是革命最愛引用、也確實最難反駁的一張王牌。與此並肩的，是平均壽命：古巴人的預期壽命攀升到接近八十歲，與許多富裕國家並列，遠超它的經濟水平所「應有」的高度。世界銀行與世界衛生組織的學者，因此造出一個專門的詞——古巴在「以低所得換取高健康成果」這件事上，是全球公認的異數。</p>
+
+    <div class="cards">
+      <div class="card"><h5>識字 · 從約七成到近乎普及</h5><p>1961年一年掃盲，識字率推升至接近百分之百，獲UNESCO列為典範，至今穩居全球前列，從未倒退。</p></div>
+      <div class="card"><h5>醫療 · 免費、人均醫師全球居冠</h5><p>全民免費醫療，以家庭醫生為核心的社區預防網。嬰兒死亡率低於美國，平均壽命近八十歲，比經濟水平「應有」的高得多。</p></div>
+      <div class="card"><h5>教育 · 免費直到大學</h5><p>從小學到大學一律免費，鄉村廣設學校。一個割蔗工的孩子，第一次有了當醫生、當工程師的真實可能。</p></div>
+    </div>
+
+    <h3>免費的階梯：從村小到大學</h3>
+    <p>掃盲只是起點。革命接著做的，是把整座教育的階梯，從最底層到最頂端，一律敞開、一律免費。它在從前連學校都沒有的山村裡蓋起小學，讓農家孩子第一次能在家門口上學；它擴建中學、技職學校與大學，並且立下原則：不論貧富、不論城鄉、不論膚色，受教育不必繳一分學費。對一個革命前四分之一人口不識字、高等教育幾乎是城市權貴專利的國家而言，這是一場靜默的階級革命。一個出生在甘蔗田邊、父母不識字的孩子，如今真有可能一路念到大學，成為醫生、工程師或教師——這條向上的階梯，在舊古巴對他而言根本不存在。革命把它造了出來，並且不收過路費。日後，當古巴培養出遠超自身所需的醫生、把醫療隊派往委內瑞拉、非洲與災區時，那支隊伍的根，正是扎在這座免費而綿密的教育金字塔裡。</p>
+    <p>教育的普及，也悄悄重寫了這座島嶼的社會肌理。舊古巴的黑人與混血人口——他們是被奴役者的後代——長期被擋在好學校、好職業與體面社交的門外；種族隔離雖不像美國南方那樣寫進法律，卻牢牢刻在俱樂部、海灘與升遷的潛規則裡。革命以雷霆手段廢除了這些隔離：海灘、學校、職場一律向所有膚色敞開。沒有人會說種族主義的幽靈就此在古巴人心裡徹底消失——它沒有——但在制度層面，革命確實大幅拉近了黑人與白人在教育、健康與就業上的差距，這是拉丁美洲少有國家做到的。同樣被推上前台的還有婦女：革命大規模把女性帶進職場、教室與醫院，成立婦女聯盟，推動女性受教育與就業。今日古巴的醫生、教師、工程師裡，女性比例之高，在發展中世界名列前茅。這些進步並不完美，上層權力的核心仍長期由男性與少數人把持——但對千千萬萬普通的黑人婦女、農村女孩而言，她們的人生選項，確實被革命撐大了。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 「低所得高健康」之謎與它的代價</span>
+      <p>學界長年困惑於古巴現象：一個人均所得低、長期短缺、連阿司匹靈都得排隊的國家，怎能擁有富國等級的健康指標？答案有三層。其一，是政治意志——革命把醫療與教育列為最高優先，即便外匯枯竭也優先保證；資源不是更多，而是被刻意傾注於此。其二，是預防為先的模式——把錢花在便宜的疫苗、產檢與社區家庭醫生上，而非昂貴的尖端設備，用最少的成本壓低最致命的風險。其三，是高度的組織與動員能力——一個能把十萬青年送進鄉村掃盲的體制，同樣能把護士送進每一條街、把疫苗打進每一個孩子。但誠實也要求補上另一面：這套成就的可持續，部分依賴外部輸血——先是蘇聯的補貼，後是委內瑞拉的石油；當輸血中斷（如1990年代蘇聯解體後的「特殊時期」），連這些引以為傲的指標也曾承受沉重壓力。成就是真的，地基卻並非全然自立——這個張力，是讀懂古巴帳本兩面的關鍵。</p>
+    </div>
+
+    <h3>被消除的，是最底層那種赤貧</h3>
+    <p>把這些單項成績拼起來，會浮現出革命最核心、也最難被否認的一項功績：它消滅了舊古巴最殘酷的那種鄉村赤貧。革命前，最底層的割蔗工過著一種週期性的飢餓——甘蔗收割季有工開、有飯吃，淡季則陷入無工、無糧、無醫的絕境，史稱「死季」（el tiempo muerto，意為「死掉的時節」）。那是一種讓孩子餓著肚子、病了等死、一輩子被文字與醫生拒於門外的貧窮。革命做不到讓所有人富裕——它從未做到，物資的匱乏與排隊將纏繞古巴至今——但它做到了一件對最底層而言意義重大的事：它把那種會餓死人、會讓孩子夭折、會讓人病死在沒有醫生的山村裡的「絕對赤貧」，大致掃除了。在革命後的古巴，一個人可能買不到他想要的東西、可能為一塊肥皂排上半天的隊、可能對單調的配給憤懣不已——但他的孩子大概率能活過五歲、能免費讀書直到大學、生病時能找到一位醫生。對一個曾在「死季」裡挨餓的家庭來說，這兩種貧窮之間的差別，是天與地。</p>
+    <p>這正是革命最有力的辯護，也是它能在六十年的封鎖、短缺與失望中撐住不倒的真正祕密。一個只靠槍口與祕密警察維繫的政權，撐不了這麼久；強制能換來服從，換不來那種在卡斯楚葬禮上排了幾公里、在他名字前真心落淚的情感。革命之所以能持續，是因為它在槍口之外，還握著一份對普通古巴人生活的真實改善——它讓一個曾經與書本、醫生、尊嚴絕緣的階級，第一次被國家正眼看見、被制度托住。當外界質問「革命究竟給了人民什麼」時，革命會指向這份成績單：指向那盞掃盲的煤油燈，指向那位走進山村的家庭醫生，指向那個比美國還低的嬰兒死亡率，指向那個割蔗工的孩子如今穿著白袍。這份成績單是真實的、是國際認可的，也是它最理直氣壯的自我辯護。</p>
+
+    <p>但帳本有兩頁。誠實地讀完這光亮的一頁，並不等於可以闔上書。同樣真實的，是換取這些成就所付出的代價——是配給本上日益縮水的份額，是不能公開異議的沉默，是把整整一代精英推向海峽對岸的離散，是經濟在意識形態與封鎖的雙重絞索下長年的窒息。成就與代價，不是兩種互相否定的敘事，而是同一場革命同時記在兩頁上的兩筆帳。只看其一者，無論是替它辯護還是替它定罪，都讀錯了古巴。下一章，我們將翻過這一頁，誠實地讀那另一本帳冊——讀完了兩頁，才算真正讀懂了這座島嶼為何如此驕傲，又如此疲憊。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命與堅持 the Revolution and the Will to Endure</span>
+      <p>「革命與堅持」這道貫穿全書的主線，在這一章找到了它最堅實的地基。一個被封鎖六十年、領袖一再食言、街上常年排著長隊的政權，憑什麼還能撐住、還能喚起忠誠？答案不只在強制，更在於它握著一份真實的成績單——把識字率推到近乎普及，把嬰兒死亡率壓到比美國還低，把免費教育的階梯一路鋪到大學，把那種會餓死孩子的鄉村赤貧大致掃除。<span style="color:var(--rust);font-weight:600">回聲</span>在於：革命之所以能「堅持」，最有力的不是它的口號，而是它對普通古巴人生活的這份切實改善——這是它最理直氣壯的辯護，也是理解它韌性的鑰匙。但這份成績單記在帳本的一頁；它的代價，記在下一頁。要持平地評斷古巴的堅持，兩頁都得讀。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-17">
+  <div class="act-head">
+    <span class="act-num">第17章 · The Balance Sheet: The Price</span>
+    <h2 class="act-title">沉默的代價：一黨、異見與不自由</h2>
+    <p class="act-sub">The Other Side of the Ledger</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>上一章我們攤開了革命的資產欄——識字率、醫生、嬰兒死亡率、那些在拉丁美洲格外刺眼的數字。一張誠實的資產負債表，不能只記資產。任何一個試圖理解古巴的人，都必須在掌聲落定之後，把另一欄也補齊：那些不寫在統計年鑑裡、卻同樣真實的東西——被沒收的選票、被噤聲的報紙、被勞改的青年、被流放的詩人、被鄰居窗簾後的目光盯著的日常。革命替古巴贏得了它所宣稱的平等與主權，但這筆交易的另一端，付出的是自由。這不是一句可以輕巧帶過的修辭，而是一份需要逐項列明的帳單。本章不替任何一方宣傳——不替政權辯護，也不替它的反對者代言——只試著把這份代價，盡可能持平地攤在桌面上，讓讀者自己去掂量它的重量。</p>
+
+    <p>要誠實地談這件事，得先承認一個讓許多人不舒服的前提：捍衛者與批評者，各有其理。捍衛者會說，一個被全球最強大的鄰國長期封鎖、屢屢試圖顛覆與暗殺其領袖的小島，本就沒有奢侈去模仿那個鄰國的政治模式；圍城之中，團結是生存的必需，異見是裂縫。批評者則會說，把外部威脅當成內部一切壓制的萬能藉口，本身就是極權的經典話術；一個社會若連最溫和的不同意見都容不下，它所宣稱的解放，便已在某個地方背叛了自己。這兩種說法都不是稻草人，都對應著真實的處境與真實的痛苦。本章的任務，不是替你在兩者間裁判，而是把帳單上的每一筆，連同它的背景與爭議，原原本本地列出來。</p>
+
+    <h3>一黨的錶盤：沒有另一種選擇的選擇</h3>
+    <p>古巴政治體制的核心，是一個簡單卻決定一切的事實：自一九六五年古巴共產黨（the Communist Party of Cuba）正式成立以來，它是這個國家憲法承認的唯一合法政黨。其他政黨不被禁止參選，而是根本不被允許存在。選舉確實年復一年地舉行，公民也確實去投票，地方層級甚至有不止一名候選人可選；但在那個決定國家方向的層級，選民面對的從來不是「哪一條路」的選擇，而是「是否同意這一條路」的表態。沒有反對黨可以組織競選，沒有獨立媒體可以替不同的綱領辯論，沒有一場全國性的、可能讓執政者真正下臺的自由選舉。投票成了一種儀式，確認既定的方向，而非開啟一條岔路。</p>
+    <p>這套制度有它自洽的論證。它的辯護者主張，多黨制在拉丁美洲的歷史，往往不過是少數寡頭輪流分贓的遮羞布，是讓財閥與外國利益操縱政治的後門；一個真正屬於人民的革命，不需要這種被資本俘虜的「形式民主」，它要的是實質的、由先鋒黨領導的「人民政權」。這套論證在古巴的語境裡並非全然空洞——巴蒂斯塔（Fulgencio Batista）時代那種被金錢與黑幫浸透的所謂選舉，確實給了它一個現實的反面教材。但論證的自洽，不能取消它的代價：當一個政黨同時是裁判、是規則、又是唯一的球隊時，糾錯的機制便從根本上失靈了。一個無法被選票更換的政府，也就失去了被選票約束的理由。權力一旦沒有制度化的退路，它對待異見的方式，便不再取決於善意，而取決於需要。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 以自由換平等與主權的這筆交易</span>
+      <p>理解古巴，繞不開一筆它從未明說、卻處處兌現的交易：用一部分政治與個人自由，去換取它所宣稱的社會平等與民族主權。這筆交易不是憑空的修辭，它在現實裡有具體的兩端。一端是真實的所得——免費的醫療與教育、被大幅壓縮的貧富差距、一個不再聽命於華府的政府。另一端是真實的支出——你不能自由地組黨、辦報、罷工、公開反對國家的方向，也不能輕易離開或質疑這套體制。問題的尖銳之處在於：這兩端是否真的必須綑綁在一起？捍衛者說，在被封鎖的孤島上，自由是團結與生存的代價，鬆開一寸便會被外敵撕開整道防線；批評者說，這是一個被反覆使用的勒索式邏輯，平等與主權從來不必以噤聲為前提，把兩者捆在一起，只是為了讓壓制顯得像犧牲。這筆交易的爭議，不在於它有沒有買到東西——它確實買到了；而在於它的價格，是否被刻意抬高、又是否真的非付不可。</p>
+    </div>
+
+    <h3>被噤聲的報紙與被流放的詩</h3>
+    <p>在這套體制下，新聞與言論不是受到限制，而是被重新定義。憲法把媒體界定為「社會主義國家與社會的財產」，這意味著報紙、電臺、電視都是國家機器的延伸，存在的目的是傳達而非質疑。獨立的新聞工作者長期處於灰色地帶——他們的文字若觸碰了不該觸碰的題目，等待的可能是失業、騷擾、拘留，乃至更重的指控。對普通公民而言，言論的邊界同樣模糊而真實：你可以在廚房裡抱怨配給、抱怨公車、抱怨工資，但把這些抱怨組織起來、公開化、變成一種要求改變的政治行動，便越過了那條看不見卻人人都心知肚明的線。</p>
+    <p>這條線最著名的一次劃定，發生在文學的領域，史稱「帕迪利亞事件」（the Padilla affair）。詩人埃貝托·帕迪利亞（Heberto Padilla）的詩集《遊戲之外》（<em>Fuera del juego</em>）在一九六八年獲得了官方作家協會的獎，卻因其字裡行間的反諷與懷疑，被當局視為對革命的不忠。一九七一年，帕迪利亞被逮捕，數週後獲釋——但獲釋的方式，比逮捕本身更令人不寒而慄：他在作家同行面前，做了一場漫長而卑屈的「自我批判」，逐一檢討自己的「罪行」，甚至點名他人。那場表演的虛假，幾乎人人都看得出來。它在國際左翼知識界引爆了一場決裂——許多曾熱情支持古巴革命的歐美作家，從沙特（Jean-Paul Sartre）到後來的略薩（Mario Vargas Llosa），公開發表抗議信。<strong>帕迪利亞事件像一道分水嶺，讓世界看清：這場革命不只要求行動上的服從，還要求靈魂裡的順從。</strong>從那以後，「灰色五年」（el quinquenio gris）成了古巴文化史上的專有名詞，指那段創作被意識形態緊緊扼住、無數作家與藝術家或沉默、或流亡、或被邊緣化的歲月。</p>
+
+    <div class="pull"><p>逮捕奪走的是身體，自我批判奪走的是尊嚴——它要的不是你閉嘴，而是你親口承認自己錯了。</p></div>
+
+    <h3>UMAP：被官方承認的那道傷</h3>
+    <p>帳單上最沉重的一筆，需要格外謹慎地陳述，因為它牽涉的是真實的人所受的真實傷害。一九六五至一九六八年間，古巴設立了一種名為「生產援助軍事單位」（縮寫為 UMAP）的勞改營。它名義上是一種替代兵役的勞動服務，實質上卻成了收容「不符合革命道德」者的場所。被送進去的，包括拒服兵役的宗教信徒、神職人員、耶和華見證人，以及——這是其中最黑暗的一面——大量僅僅因為性傾向而被當局視為「問題」的男同性戀者。</p>
+    <div class="warn">
+      <p>關於 UMAP，需要以審慎與尊重來陳述。這些營區強迫勞動、紀律嚴苛，營門上甚至掛著「勞動使人成人」之類的標語；許多被關押者後來證言，在那裡承受了羞辱、虐待乃至更嚴重的傷害，個別案例涉及死亡與自殺。具體的人數與受害程度，不同來源說法不一，本文不替任何一個精確數字背書，但其作為一套以「改造」之名系統性侵犯人權的制度，是有充分證言支撐的。值得記下的是：UMAP 在運作約三年後即被關閉，而古巴的領導層後來公開承認，這是革命所犯下的嚴重錯誤——卡斯楚（Fidel Castro）本人在二〇一〇年的一次訪談中，曾為當年對同性戀者的迫害承擔個人責任，稱那是一段「不公正」的歲月。承認錯誤不能抹去傷害，但一份誠實的帳單，既要記下傷口，也要記下這道傷口曾被它的製造者自己承認。</p>
+    </div>
+    <p>UMAP 之所以重要，不只因為它本身的殘酷，更因為它揭示了這套體制的一種內在邏輯：當一個國家把「革命道德」當成衡量公民的尺，那麼任何不符合那把尺的人——信仰上的、性傾向上的、思想上的——都可能被劃為需要「矯正」的對象。對同性戀者的迫害並未隨 UMAP 的關閉而立即終結；在此後相當長的歲月裡，古巴的同志群體仍承受著制度性的歧視與社會性的污名，直到數十年後，社會態度才在緩慢的、伴隨著官方姿態轉變的過程中逐漸鬆動。這段歷史提醒我們：當自由被讓渡給一個宣稱掌握真理的政權時，最先付出代價的，往往是那些最不容易被「大多數」所代表的少數。</p>
+
+    <h3>窗簾後的目光：無所不在的注視</h3>
+    <p>壓制並不總是以逮捕和勞改的形式出現。它更日常、也更深入的形態，是一種瀰漫在街區之間的注視。一九六〇年成立的「保衛革命委員會」（縮寫為 CDR），最初被宣傳為社區自治與互助的組織——它組織疫苗接種、回收、防災演習、鄰里活動，在許多古巴人的記憶裡確實也辦過不少實事。但它的另一重職能，從未被掩飾：它是革命在每一條街、每一棟樓的眼睛。委員會的成員熟知街坊每一戶的動向——誰家半夜有陌生人進出、誰在抱怨配給、誰收聽境外電臺、誰有意離境。這些訊息匯聚起來，構成了一張覆蓋全島、毛細血管般細密的監控網。</p>
+    <p>這種監控的可怕之處，不在於它有多麼高科技，恰恰在於它有多麼平凡——監視你的，不是某個遙遠的祕密警察，而是樓下那位你天天打招呼的鄰居。它的效果不靠拘捕來實現，而靠一種瀰漫的不確定感：你永遠不確定誰在記錄、什麼會被記錄、哪一句牢騷會在哪一天回到你身上。於是人們學會了一種雙重生活——在廚房裡說一套，在街上說另一套；學會了用沉默、用模稜兩可、用心照不宣的眼神，來保護自己。一個社會最深的不自由，未必寫在法條裡，而長在這種人人自我審查、彼此不敢交心的日常質地中。這是帳單上一筆難以量化、卻無比沉重的支出：信任的萎縮。</p>
+
+    <div class="cards">
+      <div class="card"><h5>政治的不自由</h5><p>一黨體制、沒有可能更換政府的自由選舉、沒有合法的反對組織。糾錯機制從制度根部失靈。</p></div>
+      <div class="card"><h5>言論的不自由</h5><p>媒體為國家所有，獨立新聞處於灰色地帶；異見作家面臨自我批判、邊緣化與流亡。</p></div>
+      <div class="card"><h5>日常的不自由</h5><p>CDR 的鄰里監控、無所不在的不確定感，催生雙重生活與普遍的自我審查。</p></div>
+    </div>
+
+    <h3>一人，長坐的權力</h3>
+    <p>所有這些線索，最終都收束於一個事實：權力長期集中於一人之手。從一九五九年革命勝利到二〇〇八年因病退位，卡斯楚作為這個國家無可爭議的最高領導人，執掌了近半個世紀；其後權力交予其弟勞爾（Raúl Castro），仍未離開同一個家族。一人或一個小集團如此長久地掌握一切，意味著國家的方向、生死、榮辱，都繫於極少數人的判斷與壽命之上。它的支持者會強調領袖個人的清廉、堅韌與對小島命運的擔當，會說在那樣險惡的外部環境裡，穩定的領導是生存的保障。批評者則會指出，沒有任何個人——無論多麼有德——能夠在沒有制衡、沒有任期、沒有真正繼任機制的情況下，長久地不犯下需要付出整個社會代價的錯誤。權力的長坐本身，就是這份帳單上一筆隱形卻根本的負債：它讓一個國家的命運，過度地依賴於它無法選擇、也無法更換的少數人。</p>
+
+    <div class="cf">
+      <p>把這份帳單倒過來讀，會看見它的另一面——同樣這個體制，讓古巴在被封鎖的孤島上維持了內部的穩定，避免了許多拉美鄰國經歷的軍事政變、毒品內戰與社會崩解；它的集中與動員能力，也正是上一章那些醫療與教育成就得以實現的同一套機制。代價與所得，往往不是兩件事，而是同一枚硬幣的兩面。批評它噤聲的人，與讚美它團結的人，有時其實在描述完全相同的東西。</p>
+    </div>
+
+    <p>把這一章與上一章並排來讀，那張資產負債表才算完整。一邊是識字的孩童、低廉的嬰兒死亡率、不再仰人鼻息的尊嚴；另一邊是沉默的報紙、卑屈的詩人、勞改營裡的青年、窗簾後的目光、一人長坐的權力。革命用自由，換來了它所宣稱的平等與主權——這句話既不是控訴，也不是讚美，而是對一筆真實交易的如實記帳。它的捍衛者與批評者各有其理，而一個成熟的讀者，不必急著替他們做最後的裁決。歷史很少給出乾淨的結論，它只給出沉甸甸的帳本，要求我們同時記住兩欄的數字，誠實地，連同它們之間那道無法輕易抹平的張力，一起背負下去。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命與堅持 the Revolution and the Will to Endure</span>
+      <p>古巴最動人也最沉重的回聲，是「堅持」這個詞的雙重含義。它堅持了主權，堅持了平等的承諾，在最強鄰國的封鎖下堅持不倒——這是它的光榮。但同樣的堅持，也意味著一套不容更替、不容質疑、不容另一種聲音的體制，被堅持了半個多世紀——這是它的代價。捍衛者在「堅持」裡讀到不屈，批評者在「堅持」裡讀到僵固，而真相是：它們指的是同一種堅持。把這一章的帳單與上一章的成就疊在一起，你才會明白，所謂「革命與堅持」，從來不是一首單純的讚歌，而是一筆需要兩欄同時記下的、沉甸甸的歷史總帳——它買到的東西真實，它付出的代價也真實，而要不要、值不值得，這道題，歷史把它留給了每一個古巴人，也留給了每一個試圖讀懂它的我們。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-18">
+  <div class="act-head">
+    <span class="act-num">第18章 · The Tear of Ninety Miles</span>
+    <h2 class="act-title">九十英里的撕裂：流亡與木筏</h2>
+    <p class="act-sub">Mariel, the Rafters and the Divided Families</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>從哈瓦那（Havana）的馬列貢海堤（the Malecón）望出去，海平面盡頭並沒有任何陸地的影子，可是島上的每一個人都知道，就在那片墨藍色海水的另一端，只隔著九十英里，是佛羅里達（Florida）的礁岩與沙灘。九十英里——大約一百四十五公里——這是一段在地圖上短得可笑的距離，比哈瓦那到島東城市聖克拉拉（Santa Clara）還近。可是自從一九五九年那場革命之後，這短短的一段海，就成了全世界戒備最森嚴、也最致命的一道無形邊界。它不像柏林那道牆，沒有水泥、沒有鐵絲網、沒有探照燈下的瞭望塔，它只是水——溫暖的、湛藍的、看似平靜的加勒比海水。然而正是這片水，把一個本來完整的民族，沿著一條看不見的傷口，撕成了兩半。一半留在島上，一半漂到了海的那一邊。從此以後，「古巴」這個詞，不再單純指一座島，它指的是一個被九十英里海水縱向剖開的、彼此呼喊卻無法擁抱的民族。</p>
+
+    <p>這道撕裂並不是一夜之間發生的，它分成好幾波，像潮水一樣，一波接著一波地把人從島上捲走。每一波都有自己的名字、自己的時代、自己的傷口形狀。最早被捲走的，是革命剛勝利時的菁英與中產；接著是一九八〇年那場混亂而戲劇化的馬列爾偷渡潮；再來是一九九四年絕望者乘著自製木筏出海的「筏民危機」。三波大出走之間，還夾雜著無數次零星的、孤獨的、常常以死亡告終的橫渡。把這些人加總起來——超過兩百萬，相當於今日島上人口的近五分之一——你會發現一個驚人的事實：古巴是少數幾個把自己近五分之一的子民送到海對面去的國家。這不是移民，這是一個民族的失血。而每一滴流出去的血，最後幾乎都凝結在同一個地方：邁阿密（Miami）。</p>
+
+    <h3>第一波：菁英的出走與「彼得潘行動」</h3>
+    <p>第一批離開的人，是革命最先要對付、也最先感到恐懼的那群人。一九五九年初，當菲德爾·卡斯楚（Fidel Castro）的隊伍開進哈瓦那，巴蒂斯塔（Fulgencio Batista）政權的官員、軍警、與舊政權關係密切的商人，幾乎是連夜搭機逃往美國。但很快地，逃離的人群就遠遠超出了舊政權的殘餘。隨著革命愈來愈左傾、私人企業被收歸國有、土地被重新分配、與美國徹底決裂，那些醫生、律師、工程師、企業主、地主、專業人士——也就是這個社會受教育最多、最有產業、最懂得計算未來的階層——成批成批地離開。他們大多以為自己只是暫時避一避風頭，等局勢翻轉就回來，許多人甚至把房子的鑰匙交給鄰居保管，把家具原封不動地留著。他們不知道，這一別，對絕大多數人而言，就是一生。一九五九到一九六二年間，約有二十多萬古巴人經由所謂的「自由航班」之前的途徑離島，他們帶不走財產，卻帶走了這個國家最稀缺的東西——專業知識與經營能力。一個年輕的革命政權，在它最需要醫生與工程師的時刻，眼睜睜看著他們登上飛機。</p>
+
+    <p>在這第一波出走裡，有一段格外令人心碎的插曲，叫做「彼得潘行動」（Operation Pedro Pan）。一九六〇年底到一九六二年間，在天主教會與美國方面的協助下，有約一萬四千名古巴兒童，在沒有父母陪同的情況下，被單獨送往美國。他們的父母聽信了種種傳言——說革命政權即將剝奪父母對子女的監護權、要把孩子送去蘇聯接受洗腦——在恐懼與絕望中，做出了一個任何父母都難以想像的決定：把年幼的孩子先送走，自己留下，盼著日後團聚。然而一九六二年的飛彈危機之後，島與美國之間的直航中斷，許多父母被困在島上，與已經送出去的孩子，被那九十英里的海生生隔開了數年，有的甚至再也沒能團聚。那些孩子在美國的寄養家庭、孤兒院、教會收容所裡長大，許多人多年後才見到父母，有的見到時已認不出彼此。「彼得潘」這個取自童話的名字，講的卻是一個關於失去童年、失去父母、永遠長不大也回不去的真實故事。它是這道九十英里撕裂，最早也最稚嫩的一道傷。</p>
+
+    <div class="aside">那些第一波離開的人，許多人臨走前把家裡的鑰匙鄭重地交給留下來的親友，叮嚀說「我們很快就回來」。半個多世紀過去，那些鑰匙有的還掛在邁阿密某戶人家的牆上，鏽蝕、變形，再也打不開任何一扇門——因為門後的房子早已被收歸、被分配、被別人住了三代。鑰匙成了流亡最沉默的隱喻：它證明你曾經擁有過一個家，也證明你再也回不去那個家。</div>
+
+    <h3>第二波：馬列爾，混亂之港</h3>
+    <p>一九八〇年的春天，第二道大潮以一種誰也沒料到的方式爆發了。事情的起點幾乎是個意外：四月初，一小群想要離開古巴的人，開著一輛巴士衝撞秘魯駐哈瓦那大使館的大門，請求政治庇護。混亂中有一名古巴警衛喪生，卡斯楚一怒之下，撤走了使館的警衛，並宣布：凡是想走的，都可以到使館去。他大概以為這只是個姿態，沒想到短短幾天之內，竟有超過一萬人湧入那座原本只是普通宅邸的使館庭院，人擠人、肩並肩，連坐下的空間都沒有。這個畫面震驚了世界，也讓卡斯楚意識到，島上想離開的人，遠比他願意承認的多得多。於是他做了一個出人意表的決定：宣布短暫開放西北海岸的馬列爾港（the port of Mariel），任何在邁阿密有親人的古巴人，都可以派船來接走自己的家屬。</p>
+
+    <p>消息傳到邁阿密的流亡社群，立刻引發一場海上的瘋狂。成百上千的古巴裔美國人租船、買船、開著各式各樣的漁船與遊艇，浩浩蕩蕩橫渡那九十英里，奔向馬列爾港去接親人。然而卡斯楚的算盤遠比表面複雜。他不只放走了那些有親屬接應的人，還趁機把監獄裡的囚犯、精神病院的病患、以及他眼中的「社會渣滓」——包括他公開鄙夷的同性戀者——一併塞上船，讓他們混在人群裡離開。他要的是一石二鳥：既宣洩了島內積壓的不滿，又把美國描繪成一個接收罪犯與廢物的垃圾場。從一九八〇年四月到九月，短短五個月間，約有十二萬五千名古巴人經由馬列爾港湧入佛羅里達。這些人，後來被稱為「馬列爾人」（Marielitos）。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 把出走武器化</span>
+      <p>馬列爾偷渡潮揭示了一個冷峻的政治邏輯：在卡斯楚手裡，連「讓人民離開」這件事，都能被改造成一件武器。對內，他把難以管理的異議者、罪犯與邊緣人一次性清出島外，紓解了革命二十年累積的社會壓力，等於替自己做了一次政治放血。對外，他刻意在出走人群中混入囚犯與病患，敗壞「馬列爾人」的整體名聲，讓美國的接收行動變成一場狼狽的公關災難，也讓卡特（Jimmy Carter）政府焦頭爛額。一道本該象徵「人民用腳投票、唾棄這個政權」的出走，就這樣被巧妙地反轉成「看吧，是我大方放他們走，是美國貪婪地把渣滓全收下」。能把自己的失敗包裝成對手的醜聞，這正是這個政權最令對手難以招架之處。然而代價是真實的：十二萬五千個人，連同他們的家庭、技能與未來，永遠離開了這座島。</p>
+    </div>
+
+    <p>「馬列爾人」抵達美國後，命運並不平順。由於卡斯楚刻意混入的那一小撮囚犯與病患，加上美國媒體的渲染，整批馬列爾人一度被貼上「罪犯」的污名，許多人被關進拘留營等待審查，有的滯留數年。事實上，絕大多數馬列爾人只是普通的、想換一種人生的古巴人——工人、青年、想呼吸自由空氣的尋常百姓，他們之中後來出了無數兢兢業業的勞動者、生意人與藝術家。但那層污名，連同他們大多膚色較深、出身較底層的事實，讓他們在抵達後既要面對美國主流社會的歧視，有時還要面對早一批、出身較優渥的古巴流亡者的冷眼。同樣是逃離同一個政權、橫渡同一片海，卻在海的這一邊，依舊被島上帶來的階級與膚色刻痕所分隔。撕裂，原來不只發生在島與海之間，也發生在流亡者彼此之間。</p>
+
+    <h3>第三波：筏民，把命交給海</h3>
+    <p>如果說馬列爾潮還是「有船來接」的出走，那麼一九九四年的「筏民危機」（the balsero crisis），則是把命直接交給大海的絕望豪賭。一九九一年蘇聯解體，那根維繫古巴經濟近三十年的輸血管被猛然抽走，島上隨即墜入被官方諱稱為「和平時期特殊階段」（the Special Period）的大饑荒歲月。沒有石油、沒有進口、停電成了日常、配給的口糧縮水到難以維生，整個社會在飢餓與黑暗中近乎窒息。在這樣的絕境裡，那九十英里的海，重新對成千上萬人發出致命的召喚。人們開始用任何能找到的材料——汽車輪胎的內胎、保麗龍、木板、塑膠桶、門板、繩索——拼湊出一艘艘簡陋到不可思議的「筏」（balsa），趁著夜色，從海灘悄悄下水，朝著北方那片看不見的陸地划去。划這些筏的人，就叫「筏民」（balseros）。</p>
+
+    <p>一九九四年八月，當社會的不滿在哈瓦那街頭爆發成一場罕見的騷動之後，卡斯楚再次重演馬列爾的劇本：他宣布不再阻止任何想離開的人。於是，海岸線上瞬間冒出數以千計的木筏。那年夏末到秋初的幾個星期裡，估計有三萬多人，乘著這些連「船」都稱不上的浮具，投身於那片溫暖卻無情的海。佛羅里達海峽（the Florida Straits）的海面上，漂滿了輪胎與木板拼成的微小身影，海流湍急、烈日灼人、鯊魚環伺，許多筏在中途散架、傾覆、被海流捲走。沒有人能準確統計究竟有多少筏民葬身海底——可能是出海人數的四分之一，甚至更多——他們沒有墓碑，海就是他們的墓。那些活著被美國海岸巡防隊或漁船救起的，是幸運的少數；而每一個被救起的人背後，往往都有一個沒能上岸的同伴。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 「濕腳／乾腳」政策的由來</span>
+      <p>一九九四年的筏民洪流，逼使美國徹底改寫了它對古巴難民的政策。在此之前，幾乎任何踏上美國土地的古巴人，都因冷戰的政治意涵而幾乎自動獲得居留。但當木筏一週數千地湧來，美國再也無法照單全收，柯林頓（Bill Clinton）政府於是與古巴達成協議，並逐步演化出後來惡名昭彰的「濕腳／乾腳政策」（the wet-foot, dry-foot policy）：被攔截在海上、雙腳還「濕」著的古巴人，會被遣返古巴；而只要僥倖踩上美國的陸地、雙腳「乾」了的，就能留下並走上入籍之路。這條以「腳濕不濕」決定一個人命運的荒謬界線，把那片海變成了一場殘酷的賭局——同樣一批筏民，在離岸幾百公尺處被攔下就得回頭，多撐一口氣摸到沙灘就獲得新生。它一直施行到二〇一七年才被廢止，期間製造了無數在海灘上演的、近乎魔幻的生死爭奪。一道海，被一條人為的法律，劃成了天堂與地獄的分界。</p>
+    </div>
+
+    <h3>邁阿密：海那邊的另一個古巴</h3>
+    <p>三波大潮，連同其間無數的零星橫渡，最終都匯聚到同一座城市——邁阿密。在那裡，尤其是被稱為「小哈瓦那」（Little Havana）的街區，流亡者重建了一個古巴。咖啡館裡飄著濃縮咖啡與雪茄的氣味，街角的老人下著骨牌、激烈地爭論政治，西班牙語是這裡的通用語，餐桌上是黑豆飯與烤乳豬。這個流亡社群最鮮明的政治底色，是堅定而毫不妥協的反卡斯楚立場——許多人是被沒收了財產、囚禁了親人、撕裂了家庭才逃出來的，他們對島上那個政權的恨，是刻在骨頭裡的。隨著時間推移，這個社群在政治上組織起來，憑藉佛羅里達這個美國總統大選關鍵搖擺州的特殊地位，發展出對美國對古政策驚人的影響力。半個多世紀以來，美國對古巴的禁運是否鬆動、政策是否解凍，往往不只取決於白宮，更取決於邁阿密這群選民的態度。海對岸的古巴人，竟以這種方式，反過來深刻地左右著島上每一個人的日常生活——那道封鎖、那份匱乏，背後都有他們投下的一票。</p>
+
+    <p>於是出現了一個近乎悲劇性的循環：島上的政權，把流亡者描繪成背叛祖國、投靠敵人的「蠕蟲」（gusanos，這是官方對流亡者的貶稱）；而流亡者，則把島上的政權視為奪走他們一切的暴政。兩邊隔著九十英里互相指責，卻很少有人願意承認，被指責的對象，往往就是自己的兄弟、母親、兒女。一個家庭，一半在島上靠著配給度日，一半在邁阿密寄回美金接濟——那筆跨海的匯款（remittances），既是維繫親情的血脈，也常常是島上家人活下去的命根。海這邊的人省吃儉用寄錢回去，海那邊的人含淚收下，兩邊都在用各自的方式，對抗著那道把他們分開的海。親情頑強地穿越著政治的封鎖，可政治也頑強地切割著親情。</p>
+
+    <div class="pull"><p>那片海只有九十英里寬，卻比任何一道牆都更難跨越——因為它不只隔開兩塊陸地，更隔開了同一張餐桌的兩端。</p></div>
+
+    <p>到頭來，這道九十英里的撕裂，最深的傷口從來不在統計數字裡，而在無數張古巴家庭的餐桌上。幾乎每一個古巴家庭，都有人在海的那一邊。逢年過節，桌上總有一個或幾個永遠空著的位子——那是去了邁阿密的舅舅、十六歲就搭上「彼得潘」班機的姊姊、一九九四年乘筏出海後再無音訊的表哥。電話線那頭傳來熟悉又陌生的鄉音，照片裡的姪兒已經長成了不認識的大人，孫子說著一口流利的英語、聽不太懂阿嬤的西班牙語俚語。這就是被九十英里撕裂的民族的真實肖像：不是抽象的「兩百萬流亡者」，而是兩百萬個具體的、有名有姓的缺口。古巴從此成了一個民族、兩半身體——一半在島上，一半在海那邊，中間隔著一片溫暖、湛藍、奪走了無數性命、也奪走了無數團圓的海。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>九十英里的海，是「<span style="color:var(--rust);font-weight:600">北方巨人的陰影</span>」最痛、也最私密的一道銘文。其他章節裡，那個巨人是用艦隊、用禁運、用政變、用刺殺陰謀投下陰影；而在這一章，它的陰影落進了千萬個古巴家庭的客廳與餐桌。正因為海的那一端就是美國，逃離才有了去處，撕裂才如此徹底——若對岸是大洋而非佛羅里達，這場大出走或許根本不會發生。巨人既是壓迫者，又是收容所；既是島上政權詛咒的敵人，又是流亡者奔赴的應許之地。這份糾纏不清的雙重性，正是古巴與美國這對冤家最深的宿命：那九十英里，把一個民族剖成兩半，也把「敵人」與「親人」、「祖國」與「自由」這些本該分明的詞，攪成了一團再也分不清的、鹹澀的海水。第十八道密碼，是被海撕開、卻仍隔海相認的密碼。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<div class="part-div reveal" id="part-5">
+  <span class="pn">第五部</span>
+  <h2 class="ptitle pt">特殊時期與之後</h2>
+  <div class="pe">The Special Period and After</div>
+  <div class="pline"><span></span><span class="dot">❂</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-19">
+  <div class="act-head">
+    <span class="act-num">第19章 · The Special Period</span>
+    <h2 class="act-title">特殊時期：蘇聯崩塌後的飢餓</h2>
+    <p class="act-sub">Hunger, Blackouts and Survival</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>古巴人後來給那段歲月起了一個聽起來莊重、實則充滿黑色幽默的名字——「和平時期的特殊時期」（Período especial en tiempos de paz）。這個拗口的官方詞彙，原本是軍事術語，指一個國家在被全面圍困、隨時可能開戰時，所該採取的最高等級緊縮體制：物資管制、能源配給、全民動員。荒謬的是，當斐代爾·卡斯楚（Fidel Castro）在1990年下半年正式啟用這個詞的時候，外面並沒有戰爭，沒有飛機投彈，沒有軍隊登陸。敵人不是大砲，而是一個遠在地球另一端、正在自己崩解的龐然大物。1991年12月25日，蘇聯（the Soviet Union）的紅旗從克里姆林宮頂上緩緩降下，一個延續了近七十年的帝國，就這樣不流一滴血地消失在歷史裡。對莫斯科而言，那是一個時代的句點；對哈瓦那（Havana）而言，那卻是一道天塌下來的裂縫。三十年來，古巴的血脈裡流的，有一大半是蘇聯的血——而現在，輸血管被一刀剪斷了。</p>
+
+    <p>斷裂的猛烈程度，連最悲觀的人都未曾料到。整個1980年代，古巴約有八成的對外貿易，是與蘇聯及東歐的經濟互助委員會（the Council for Mutual Economic Assistance）成員國進行的。這是一場精心設計、卻也致命依賴的交換：古巴把糖以遠高於國際市場的「友誼價」賣給蘇聯，再用換來的盧布，以遠低於市價的價格買進石油。蘇聯每年運來約一千三百萬噸原油，古巴自己用掉一部分，剩下的甚至轉手在國際市場上賣掉、賺取硬通貨。這是一套靠政治善意撐起來的經濟煉金術。然而當蘇聯自身難保，這套煉金術便在一兩年內整個蒸發。石油供應驟減到原來的一小部分，糖失去了它的特權買家，零件、化肥、飼料、藥品——所有曾經理所當然從東方碼頭卸下的東西，一夜之間都不再到來。據各方估計，從1989到1993短短四年間，古巴的經濟萎縮了約三分之一，有些測算甚至更高。一個現代社會所依賴的能量與物資，被抽走了一大半。<strong>古巴不是慢慢變窮的，它是在幾個月之內，從一個有暖氣、有公車、有充足配給的社會，墜入了一個飢餓與黑暗的世界。</strong></p>
+
+    <h3>飢餓回到了餐桌</h3>
+    <p>最先被人們的身體記住的，是飢餓。配給本子（la libreta）上的份額一砍再砍，肉類成了傳說中的東西，食用油按滴計算，麵包縮成小小一塊。國營商店的貨架空蕩得發出回聲，而黑市上的食物貴到多數人買不起。古巴人開始學會用一切想得到的辦法填補胃裡的空洞：用葡萄柚皮做的「假牛排」、用香蕉皮入菜、把糖水當一餐。在這場全民的飢餓裡，連政府都不得不承認它的真實——這不是修辭，而是可以用磅秤量出來的事實。據後來的研究與聯合國相關機構的估計，在特殊時期最艱難的那幾年，<strong>古巴成年人的平均體重普遍下降，許多人掉了五到十公斤以上</strong>；長期的營養不良，甚至在1992至1993年間引爆了一場令醫界震驚的公共衛生事件——一種被稱為「流行性視神經病變」（epidemic optic neuropathy）的疾病在全島蔓延，數以萬計的人視力模糊、視野缺損，部分病例伴隨手腳麻木。醫學調查最終指向營養缺乏：當人們的飲食裡長期缺乏足夠的熱量與維生素B群，連視神經這樣精密的組織，也會開始凋萎。一個以「全民免費醫療」為驕傲的國家，竟眼睜睜看著自己的人民因為吃不夠而集體失明——這是特殊時期最刺痛的諷刺之一。</p>
+
+    <div class="warn">
+      <p>關於那段日子裡的苦難，史家應當謹慎而非獵奇。飢餓在古巴並沒有演變成大規模的死亡——這一點，與二十世紀其他幾場饑荒截然不同，部分要歸功於相對平均的配給與尚存的公共醫療。但「沒有餓死太多人」絕不等於「人們沒有受苦」。那是一種緩慢的、瀰漫的、深入日常每一個縫隙的匱乏：母親半夜為了孩子的一杯牛奶發愁，老人為了省下口糧而把份額讓給孫輩，無數家庭把記憶中的味道，過成了奢望。對親歷者而言，那是一段身體與尊嚴都被反覆磨損的歲月。我們記述它的數字與政策，是為了理解；而對那一代古巴人吞下的沉默，則應當報以敬意。</p>
+    </div>
+
+    <h3>黑暗中的島</h3>
+    <p>如果說飢餓佔據了人們的胃，那麼黑暗就佔據了他們的夜晚。沒有了蘇聯的石油，古巴的發電廠只能斷斷續續地運轉，停電（apagón）從偶發的意外，變成了生活的常態。在最糟的時候，一個城市每天有十二個、十六個、甚至更長的小時是沒有電的。冰箱裡的食物腐壞，孩子們在燭光下做功課，醫院靠著有限的柴油發電機勉強維持手術，整座城市在入夜後陷入一種近乎中世紀的漆黑。哈瓦那這座曾被稱為「加勒比明珠」的城市，夜裡看不見幾盞燈火，只剩下海堤上的人們在悶熱中乘涼、交談、等待電力不知何時歸來。停電不只是不便，它瓦解了現代生活賴以運轉的一切節奏——抽水馬達停了，自來水就斷了；電梯停了，住在高樓的老人便被困在家裡；製冷停了，本就稀少的食物與藥品更難保存。黑暗像潮水一樣，反覆淹沒這座島，再退去，再淹沒。</p>
+
+    <p>而當石油枯竭，最戲劇性的場景，發生在街道與田野上。汽車燃料配給到了形同虛設的地步，於是古巴向遙遠的中國訂購了上百萬輛——據估計超過一百二十萬輛——廉價而結實的「飛鴿」與「永久」牌腳踏車。一夜之間，這個曾經滿街美國老爺車的國度，變成了一個踩著踏板前行的社會。哈瓦那寬闊的林蔭大道上，川流的不再是引擎的轟鳴，而是成千上萬輛腳踏車安靜的鏈條聲。人們稱之為「腳踏車時代」。在郊外與鄉間，匱乏更顯出一種近乎回到過去的蒼涼：沒有柴油，曳引機便趴在田邊生鏽，於是政府重新引進、繁殖牛隻，讓公牛拉著犁，一步一步翻開甘蔗田與菜園的泥土。二十世紀末的古巴農村，竟在某種意義上，被推回了畜力耕作的年代。這不是浪漫的田園返璞，而是一個被掐斷了能量供給的社會，不得不從機械文明往後退的、痛苦的權宜。</p>
+
+    <div class="cards">
+      <div class="card"><h5>腳踏車時代</h5><p>逾百萬輛中國腳踏車湧入，取代了無油可加的汽車。引擎的轟鳴讓位給鏈條的低響，整座城市的速度與聲音都改變了。</p></div>
+      <div class="card"><h5>以牛代機</h5><p>曳引機因缺柴油而停擺，公牛被重新請回田裡拉犁。一個現代化的農業，倒退回畜力耕作的年代。</p></div>
+      <div class="card"><h5>無盡的停電</h5><p>發電廠斷續運轉，每天十數小時的 apagón 成為常態。抽水、製冷、照明同時失效，黑暗淹沒了夜晚。</p></div>
+    </div>
+
+    <h3>為什麼它沒有垮</h3>
+    <p>在那幾年裡，幾乎全世界都認定古巴撐不了多久。柏林圍牆已經倒了，東歐的共產政權如骨牌般相繼崩潰，蘇聯本尊都已不復存在——按照所有人的劇本，哈瓦那這座失去了所有靠山的孤島，理應是這場大崩塌的下一塊、也是最後一塊骨牌。華盛頓的許多人甚至已經在盤算「後卡斯楚時代」的安排；1992年的《托里切利法》（the Torricelli Act）與1996年的《赫爾姆斯—伯頓法》（the Helms-Burton Act）相繼收緊封鎖，正是為了在這個政權搖搖欲墜時，再推它一把，加速它的倒下。然而，預言落空了。古巴在飢餓與黑暗裡，咬著牙，一年又一年地，硬是沒有垮。</p>
+
+    <p>它為何沒有垮，至今仍是學者爭論的課題，答案大概不是單一的，而是多股力量的交織。其一，是高度集中的權力與尚存的組織能力：政權牢牢掌握著糧食的配給、街區的「保衛革命委員會」（the Committees for the Defense of the Revolution）、軍隊與警察，使得任何零星的不滿都難以匯聚成全國性的反抗。其二，是革命所累積的某種真實的合法性與民族情感——對許多古巴人而言，苦難固然是政權之過，卻也被詮釋為「北方巨人」封鎖下的圍城犧牲，於是怨氣的一部分，被導向了海峽對岸而非哈瓦那。其三，也是最關鍵的，是政權在絕望中展現的求變的決斷：它沒有死守教條坐等崩潰，而是做出了一連串在意識形態上痛苦、卻能換取生存的讓步。1993年，卡斯楚做了一件十年前不可想像的事——讓美元在古巴合法流通，承認那個來自敵國的綠色紙鈔，成了島上最硬的通貨。同年，國家允許部分個體戶（cuentapropistas）營業，農民市場被重新打開，外國資本被引進旅遊與合資企業。革命向它一生反對的市場與美元，低下了頭——不是因為相信，而是因為要活下去。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼骨牌效應在古巴失靈</span>
+      <p>東歐共產政權的崩潰，往往是「廣場上的人群」與「失去抵抗意志的高層」兩股力量同時出現的結果——人民走上街頭，而軍隊與菁英不再願意為舊體制流血。古巴的特殊之處，在於這兩個條件都被削弱了。一方面，封鎖與圍城的長期敘事，把外部敵人塑造得無比真實，使得「現在不是分裂的時候」成為一種能被廣泛接受的邏輯；1994年8月哈瓦那濱海大道上確實爆發過一場罕見的騷動（el Maleconazo），但它來得快、去得也快，沒有蔓延成燎原之勢。另一方面，革命菁英與斐代爾本人之間的綁定極深，沒有出現戈巴契夫式願意鬆手的改革派高層。再加上政權在最危急時主動「放氣」——開放美元、容許小生意、引進觀光——讓社會的高壓鍋有了一道洩壓的縫。崩潰需要絕望累積到無處可去，而古巴恰恰在每一次將近沸點時，找到了一道窄窄的活路。</p>
+    </div>
+
+    <h3>絕望中的求變</h3>
+    <p>於是特殊時期最深刻的弔詭浮現了：那場幾乎要了古巴命的災難，同時也逼出了它最大膽的轉身。當意識形態必須在「純粹」與「存活」之間二選一時，卡斯楚選擇了存活。美元合法化撕開了一道口子——海外古巴人寄回的僑匯（remesas）成了無數家庭的救命錢，那些有親戚在邁阿密的人，忽然之間能買到別人買不到的東西，一種新的、令革命尷尬的不平等，在「人人平等」的島上悄悄滋長。而比美元更深遠的，是政權把目光投向了一個它曾經唾棄、如今卻不得不擁抱的金礦——觀光。那片白沙、那片碧海、那些殖民時代的老城與沙啞的音樂，本是革命眼中「資產階級腐化」的象徵，如今卻被當作換取硬通貨的最後稻草，被重新擦亮、包裝、推向世界。一個曾經想要徹底告別舊世界的革命，在它最飢餓的時刻，回頭向舊世界伸出了手。這道轉身的全部代價與後果，要留待下一章來訴說。</p>
+
+    <p>站在這段歲月的盡頭回望，特殊時期之於古巴，像是一場漫長的、沒有硝煙的圍城戰，而被圍困的，是整整一代人的青春與身體。它沒有換來一座倒下的政權，卻換來了一個被永久改變的社會：人們學會了在匱乏中發明、在黑暗中相互扶持、在飢餓中保持一種倔強的尊嚴。許多古巴人至今談起那些年，眼神裡同時有傷痛與某種難以言說的驕傲——傷痛，是因為他們失去了太多；驕傲，是因為他們竟然沒有被擊垮。一座失去了所有靠山的孤島，在世界一致預言它將如蘇東骨牌般應聲倒下的時刻，硬是在飢餓與黑暗裡站住了腳。這不是一個關於勝利的故事，而是一個關於堅持的故事——關於一個民族，如何在能量被抽乾、未來被宣判的歲月裡，靠著意志、配給、腳踏車與公牛，把日子一天一天地，過了下去。</p>
+
+    <div class="pull"><p>全世界都在等它倒下；它卻在飢餓與黑暗裡，咬著牙，一年又一年地站住了。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命與堅持 the Revolution and the Will to Endure</span>
+      <p>特殊時期把「革命與堅持」這道主線，推到了它的<span style="color:var(--rust);font-weight:600">回聲</span>的極限。三十年來靠蘇聯輸血而活的革命，在輸血管被剪斷的瞬間，本該如所有人預言的那樣，成為共產陣營崩塌的最後一塊骨牌。它沒有。它付出的代價是慘烈的——下降的體重、失明的眼睛、漆黑的夜、田裡重新拉犁的公牛——但它在絕望中學會了一件比教條更要緊的事：為了活下去，可以向美元低頭、向觀光開放、向曾經唾棄的舊世界伸手。革命的純粹，被存活的本能改寫了。於是這座孤島留下了一個直到今天仍在迴響的問題：當一個政權願意犧牲它的理想來換取它的延續，那撐下來的，究竟還是不是當年那場革命？飢餓沒有擊垮它，但飢餓改變了它——而它選擇活著，本身就是這部身世裡，最沉重也最倔強的一筆。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-20">
+  <div class="act-head">
+    <span class="act-num">第20章 · Dollars, Tourists and a Fractured Society</span>
+    <h2 class="act-title">美元、觀光與裂開的社會</h2>
+    <p class="act-sub">The Cracks in the Socialist Dream</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九九一年的冬天，蘇聯解體，紅旗從克里姆林宮的旗桿上悄然降下，而九千多公里之外的哈瓦那（Havana），一座加勒比海的島嶼也隨之失去了它三十年來賴以呼吸的氧氣。蘇聯每年以高於國際行情的價格買走古巴的糖、以低於國際行情的價格供給古巴石油、機械、麵粉與化肥，這套被稱作「兄弟般的不等價交換」的補貼體系，曾佔古巴對外貿易的八成以上。如今，這條臍帶在一夜之間被剪斷。石油進口驟減一半以上，工廠停擺，公車班次稀疏到一天只剩寥寥幾班，田裡的曳引機因為沒有柴油而成了生鏽的鐵雕，人們把牛重新牽回了甘蔗田，彷彿時間倒流回了殖民時代。卡斯楚（Fidel Castro）把這段歲月命名為「和平時期的特殊階段」（el Período especial en tiempo de paz）——一個刻意淡化的官方詞彙，底下卻是全國性的飢餓與崩潰。據估計，在一九九〇年代上半，古巴人平均每人瘦了五到十公斤，城市裡甚至出現了因維生素缺乏而導致的視神經病變流行。社會主義的天堂，在它最大的施主消失之後，第一次直面了赤裸的生存問題。</p>
+
+    <p>而就在這片廢墟之上，革命被迫做出了它三十年來最不情願、也最具顛覆性的一個決定：向美元、向觀光客、向那個它鬥爭了一輩子的資本主義世界，打開一道窄窄的門縫。這道門縫一旦開啟，便再也關不上。它放進來的不只是外匯與遊客，還有一種足以從內部腐蝕整個平等主義理想的東西——不平等本身。本章要說的，正是這場由生存逼出來的局部開放，如何在「革命與堅持」的社會主義模型上，敲開第一道、卻是最深的一道裂縫。</p>
+
+    <h3>當蔗糖退場，海灘登台</h3>
+    <p>有四百年的時間，古巴的命運是用糖寫成的。從西班牙殖民者的甘蔗園，到美國資本掌控的糖業托拉斯，再到蘇聯按配額收購的「社會主義之糖」，這座島嶼始終是一座漂浮在加勒比海上的巨大糖廠。糖既是它的財富，也是它的詛咒——它讓古巴的經濟永遠依附於一種作物、一個買家、一張別人開出的價目表。如今蘇聯走了，糖價在國際市場上一文不值，那座運轉了四個世紀的糖廠，終於熄了火。一九八九年古巴還產出八百多萬噸糖，到了世紀末，產量腰斬再腰斬，大批國營糖廠在二〇〇二年被一紙命令永久關閉，鏽蝕的煙囪成了鄉間的墓碑。卡斯楚不得不去尋找一種新的作物，一種能在沒有蘇援的世界裡換回硬通貨的東西。</p>
+    <p>他找到的，是陽光、白沙與加勒比海的湛藍。觀光業——這個革命曾經最鄙夷的行業，曾被斥為「美國人的妓院與賭場」、被視為舊政權墮落腐敗的象徵——如今被恭恭敬敬地請回了島上，成為國家經濟的新引擎。政府與西班牙、加拿大的資本合資，在巴拉德羅（Varadero）那條二十公里長的雪白沙灘上，蓋起一座座全包式的度假飯店；在哈瓦那舊城斑駁的殖民建築群裡，整修出供遊客追憶往昔的酒店與廣場。一九九〇年來古巴的外國遊客約三十餘萬人，到二〇〇〇年已逼近兩百萬。觀光收入很快超越了糖，成為這座島嶼最大的外匯來源。海灘取代了蔗田，行李箱取代了麻布袋，革命用一種它曾經唾棄的方式，續上了自己的命。</p>
+
+    <div class="cf">
+      <p>這是歷史一個冷峻的對照：革命在一九五九年勝利時，曾以掃除舊古巴的「觀光—賭場—娼妓」經濟為傲，誓言把島嶼從美國人的後花園變回古巴人的祖國。三十多年後，同一場革命，卻不得不親手把觀光請回神壇。只是這一次，飯店的主人不再是邁阿密的黑幫，而是哈瓦那的國家；侍候遊客的，不再是被剝削的窮人，而是「為祖國賺取外匯」的勞動者。形式變了，依附的本質卻驚人地相似——這座島依舊在出售它的陽光與身體，只是換了一個更體面的說法。</p>
+    </div>
+
+    <h3>讓敵人的貨幣合法：一九九三年的轉折</h3>
+    <p>一九九三年八月，卡斯楚宣布了一項在革命詞典裡近乎異端的政策：持有與使用美元，從此合法。在此之前，一個古巴人若被搜出口袋裡藏著綠鈔，可能要面臨牢獄之災，因為美元是「帝國主義的貨幣」、是敵人的象徵。如今這道禁令被廢除，原因很簡單——國家急需美元，而大量的美元正以一種它無法阻擋的方式湧入民間：來自邁阿密（Miami）的僑匯。那些在革命後流亡美國、被官方稱作「蠕蟲」（gusanos）的古巴人，如今成了留在島上親人的救命繩。每個月，一張張二十、五十、一百美元的鈔票，透過各種正式與非正式的管道，從佛羅里達飛越那道九十英里寬的海峽，落進哈瓦那、聖地牙哥（Santiago de Cuba）千家萬戶的手中。據估計，到一九九〇年代末，僑匯每年已達八到十億美元之譜，遠遠超過糖出口的所得。革命最痛恨的那批叛逃者，竟成了革命在最艱難時刻的金主。歷史的諷刺，莫此為甚。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一個國家，兩種貨幣</span>
+      <p>美元合法化催生出古巴特有的「雙貨幣制」。島上同時流通兩套錢：一是發給本國人、用來支付薪水與配給的「古巴披索」（peso cubano，CUP）；二是後來推出、與美元掛鉤、面值一比一的「可兌換披索」（peso convertible，CUC）。兩者之間的官方兌換率長期維持在約二十四披索換一可兌換披索——也就是說，一個只領披索薪水的人，他一個月的全部收入，換成硬通貨後可能不到二十美元。問題的關鍵在於：島上絕大多數真正想要的東西——進口的食用油、肥皂、衣服、家電、稍好的食物——都只在收美元（可兌換披索）的「外匯商店」裡販售；而國家發給人民的薪水，卻是那種在外匯商店裡幾乎買不到任何東西的披索。於是貨幣的雙軌，悄悄地把全體國民也劈成了兩半：能弄到硬通貨的人，與弄不到的人。一道貨幣的縫，就此撕成了一道社會的裂。</p>
+    </div>
+
+    <p>雙貨幣制是一帖救急的藥，卻有著慢性的毒。它讓國家得以回收民間流通的美元、補貼國庫，卻也在日常生活的最底層，植入了一種前所未有的荒謬：你的價值，不再取決於你的勞動，而取決於你能否觸碰到那種「另一種錢」。一個社會被分成了「有美元的」與「沒美元的」，而這條分界線，往往與一個人對革命的忠誠、貢獻、學歷、努力，毫無關係。</p>
+
+    <h3>當醫生的薪水不如行李員的小費</h3>
+    <p>沒有任何一個畫面，比下面這個更能概括「特殊時期」的悖論了：一位在大學苦讀七年、肩負救人性命之責的醫生，他一個月的國家薪水，可能比不上巴拉德羅一家飯店裡，那個替遊客提行李、開車門的年輕行李員，一個下午所收到的美元小費。醫生領的是披索，行李員賺的是美元；醫生的收入被牢牢釘在計畫經濟的工資表上，行李員的收入卻直接連著國際遊客慷慨的口袋。於是出現了革命締造者做夢也想不到的景象：受過高等教育的工程師、教師、外科醫師，紛紛辭去他們「崇高」的崗位，跑去飯店當門房、去當計程車司機、去街頭兜售雪茄與蘭姆酒——只因為那些低技術、卻能接觸到遊客與美元的工作，能讓他們與家人活得稍微體面一點。一個社會的人才結構，被一種扭曲的貨幣激勵，整個倒轉了過來。知識的尊嚴，敗給了小費的厚度。</p>
+
+    <div class="pull"><p>一個社會最深的病，不是窮，而是當勤奮與學識，竟換不來一個替遊客拉車門的人手中那疊綠色的鈔票。</p></div>
+
+    <p>新的不平等，沿著一條任性而殘忍的線蔓延開來。它不再依循階級、財產或政治立場——這些舊世界的標尺，革命早已用四十年的時間努力抹平——而是依循一個全新的、近乎隨機的標準：你，能不能碰到美元？這條線，把古巴人分成了幾類幸運與不幸運的人。能接觸遊客的，是幸運的：飯店員工、計程車司機、餐館跑堂、樂手、導遊。在邁阿密有親戚、每月能收到僑匯的，也是幸運的。而那些恰恰構成了革命最引以為傲的成就的人——醫生、科學家、教師、工程師、軍官、忠誠的黨工——若沒有海外的親人、又不肯放下身段去伺候遊客，便成了這場新分配裡最尷尬的失意者。更殘酷的一層，這條僑匯的線還暗藏著膚色的維度：流亡邁阿密的古巴人以白人後裔居多，於是來自北方的美元，更多地流進了島上白人的家庭；而島上的黑人與混血族群，本就較少有海外親戚，在新的不平等裡，往往被甩在了最後。革命曾莊嚴承諾要消滅的種族不公，竟以一種它始料未及的方式，借著美元，悄悄地回到了人間。</p>
+
+    <h3>廚房裡的革命：個體戶與私營餐館的興起</h3>
+    <p>生存的壓力，不只逼開了國門，也逼鬆了革命對私有經濟的鐵腕。一九九三年起，政府小心翼翼地核准了一份清單，允許人民在一百多個指定行當裡「自雇」——這些人被稱作「個體戶」（cuentapropistas），他們可以是修鞋匠、理髮師、計程車司機、街頭小販。其中最具象徵意義的，是私營餐館的合法化。古巴人把這些開在自家客廳、由一家人經營的小餐館，喚作「paladar」——這個詞借自一齣巴西電視劇裡女主角白手起家的餐飲品牌，意思是「味蕾」。最初的規定嚴苛得近乎滑稽：每家 paladar 座位不得超過十二個，不准雇用家族以外的人，不准供應牛肉與海鮮（這些是國家壟斷的稀缺品）。但即便戴著這樣的鐐銬，paladar 仍如雨後春筍般在哈瓦那的老城區與住宅街巷裡冒了出來。在那些燭光搖曳、擺著祖母舊瓷盤的小餐桌旁，遊客吃到了國營餐廳永遠端不出的美味，而一個個古巴家庭，則第一次嚐到了「為自己工作、賺自己的錢」的滋味。</p>
+    <p>這是一場靜悄悄的、發生在廚房裡的革命。它的意義遠遠超出了餐飲本身。當一個人可以靠自己的手藝、自己的小本生意，賺到比國家薪水多上數倍的收入時，他與國家之間那條「國家供養一切、人民依附國家」的臍帶，便被悄悄地剪開了一個小口。個體戶與 paladar 的主人，成了社會主義古巴境內第一批不完全依賴國家而活的人。他們不多、不富、處處受限，國家對他們又是放、又是收，政策時鬆時緊，徵以重稅、設下天花板，深怕這些「小資本家」尾大不掉。但他們的存在本身，就是對「人人只能、也只該為國家工作」這條革命鐵律的一次溫和卻致命的背叛。平等主義的理想，正是從這些飄著大蒜與烤肉香氣的小廚房裡，開始一寸一寸地被侵蝕。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 「觀光飛地」與一道隱形的隔離牆</span>
+      <p>為了保護寶貴的外匯來源、也為了把遊客的世界與本國人的世界隔開，古巴的觀光業在很大程度上被經營成一座座「飛地」（enclave）。巴拉德羅那條最美的海灘、最好的全包式度假村，在很長一段時間裡，本國古巴人是不得進入的——這項被民間譏為「觀光種族隔離」（apartheid turístico）的潛規則，意味著一個古巴人，竟不能踏上自己國土上最美的那片沙灘。遊客在飯店裡享用豐盛自助餐、喝著加冰的莫希托，而圍牆外的當地居民，仍在為一塊肥皂、一瓶食用油排著長隊。這道無形的牆，把島嶼分成了兩個平行的世界：一個是供外國人消費的、光鮮的、美元的古巴；一個是供本國人生活的、樸素的、披索的古巴。革命曾以「打破一切隔離與特權」自許，如今卻在自己的海灘上，親手豎起了一道新的隔離牆——只不過這一次，被擋在牆外的，是它自己的人民。</p>
+    </div>
+
+    <h3>當觀光成為新的「單一作物」</h3>
+    <p>於是，一個更深的歷史輪迴，在世紀之交悄然顯形。古巴用觀光取代了糖，以為自己掙脫了那個糾纏四百年的「單一作物」詛咒，殊不知，它只是把一種依附換成了另一種依附。糖曾讓這座島的命運，繫於國際糖價的漲跌、繫於蘇聯收購配額的有無；如今，觀光則讓它的命運，繫於遙遠國度的經濟景氣、繫於加勒比海的颶風季、繫於一場瘟疫是否會讓全球的航班停飛、繫於華盛頓是否會收緊或放鬆對美國公民赴古旅遊的禁令。本質上，這仍是一種把整座島嶼的生計，押在一張別人手中籌碼上的脆弱結構。觀光，成了「糖的詛咒」在當代的一次變奏——換了曲調，卻是同一個主題。陽光與沙灘，不過是另一種形態的甘蔗田；而那些湧入的美元，也像當年的糖一樣，既是這座島的救命錢，也是一條重新套上脖子的依附之鏈。</p>
+    <p>更微妙的是，這一次的依附，連著的恰恰是革命最大的敵人。觀光客有相當部分來自西方，僑匯則直接來自邁阿密——來自那個革命鬥爭了一輩子的「北方巨人」（el coloso del Norte）的腹地。古巴在生死關頭抓住的兩根救命稻草，竟都伸自大海對岸那隻它最不願承認需要的手。一座以「反抗美國」為立國根基的島嶼，到頭來，卻要靠流亡美國的子民寄回的美元、靠來自西方世界的遊客錢包，才能勉強撐過它最黑暗的歲月。這份依賴，是無聲的，卻比任何宣言都更深刻地，動搖了革命賴以自我證成的那套敘事。</p>
+
+    <p>「特殊時期」最終沒有壓垮卡斯楚的政權。當二〇〇〇年前後，委內瑞拉的查維茲（Hugo Chávez）帶著廉價石油出現，當觀光與僑匯漸漸穩住了外匯的基本盤，古巴從那場深淵般的危機裡，跌跌撞撞地爬了上來，活了下來。革命「堅持」住了——這是它向世界、也向自己反覆宣告的勝利。然而，活下來的，已不全然是它原本的模樣。當美元滲進了千家萬戶，當一個醫生開始羨慕一個行李員，當海灘上豎起了把本國人擋在外面的隔離線，當第一家 paladar 在燭光裡飄出香氣——那個曾經以「人人平等、無分貴賤」為最高理想的社會主義模型，其內部，已經裂開了一道再也無法彌合的縫。革命贏得了生存，卻在生存的代價裡，悄悄輸掉了一部分它最初的靈魂。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命與堅持 the Revolution and the Will to Endure</span>
+      <p>「堅持」從來不是免費的。古巴在「特殊時期」展現的那種近乎悲壯的存活意志，讓它撐過了蘇聯崩塌後足以摧毀任何政權的衝擊——這確實是「革命與堅持」最動人的一頁。但堅持的代價，是讓那個以平等為魂的理想，第一次被美元從內部撬開了縫。當生存逼著它向敵人的貨幣、敵人的遊客、敵人的僑匯低頭，革命便不得不在「純粹的理想」與「活下去」之間，做出痛苦的取捨。它選擇了活下去——於是社會裂成了有美元的與沒美元的兩半，醫生不如行李員，海灘豎起了隔離牆，而觀光，又成了一座新的「糖廠」。<span style="color:var(--rust);font-weight:600">回聲</span>在此交響：糖的詛咒以觀光之名重返，北方巨人的陰影化作了救命的美元，而革命的堅持，最終是以理想的龜裂為代價買來的。一個政權可以堅持很久很久，久到它自己也認不出，當年那個它誓死要守護的東西，究竟還剩下多少。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-21">
+  <div class="act-head">
+    <span class="act-num">第21章 · Baseball, Music and the Soul of an Island</span>
+    <h2 class="act-title">棒球、音樂與一座島的靈魂</h2>
+    <p class="act-sub">The Resilience and Joy Amid Scarcity</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一個國家可以失去它的糖、失去它的盟友、失去它貨架上的麵包與藥品，甚至失去它整整一代年輕人對未來的把握，卻依然在某個午後，從一扇敞開的窗子裡，傳出鼓聲與笑聲。這不是抒情的修辭，而是古巴最頑固的事實。把這座島的歷史攤開來看，你會看見糖價的崩塌、特殊時期（el Período Especial）的飢餓、半個世紀的封鎖（el bloqueo）、一波又一波撐著竹筏與輪胎渡海而去的逃亡者——這是一份漫長的、關於匱乏與失去的清單。然而就在這同一座島上，棒球從未停止過敲擊，頌樂（son）的低音從未斷過拍子，街角的人們依舊用一種近乎挑釁的活力，把破舊的東西修好、把短缺的東西湊齊、把沉重的日子過成可以跳舞的夜。要讀懂古巴最深的那一層身世，光看它失去了什麼遠遠不夠；你必須去聽它<strong>留下了什麼</strong>——那是任何法令、任何禁運、任何政權都沒收不了的東西：它的文化，與它的靈魂。</p>
+
+    <p>這份靈魂並非憑空而來。它是第五章那場非洲—古巴的鍛造留下的餘溫——是糖與奴隸在三百年的甘蔗園裡，用鼓、用神、用舞步，硬生生在這座加勒比海的島上，鍛打出來的一種混血的生命力。西班牙的吉他遇上了約魯巴（Yoruba）的鼓，天主教的聖徒披上了奧里沙（orisha）的外衣，種植園的汗水蒸餾成了蘭姆酒的烈，而那些被剝奪了一切、連名字都被改寫的人，把最後不能被奪走的東西——節奏——藏進了血液裡，代代相傳。於是當二十世紀的政治風暴一次次襲來，這座島最深的地基，竟不是它的甘蔗、不是它的礦、不是它的港，而是這套早在奴隸時代就鑄成的、無法被封鎖的文化密碼。它讓古巴在一切匱乏之上，依舊活著。</p>
+
+    <h3>球場上的另一場戰爭</h3>
+    <p>要理解古巴人對棒球——他們叫它「la pelota」，就是「那顆球」——的瘋狂，得先理解一個弔詭：這項全民激情，恰恰是從那位日後最大的敵人那裡學來的。十九世紀中葉，赴美國求學與經商的古巴青年，把棒球的規則帶回了島上；它很快就壓過了西班牙殖民者鍾愛的鬥牛，成為一種帶著政治意味的選擇。打棒球，在當時竟是一種反抗——它是「美洲的」、「現代的」、「自由的」，是對抗西班牙舊世界的姿態。西班牙當局甚至一度察覺到這層意味，在獨立戰爭期間禁過球。於是這顆球，從一開始就不只是運動，而是認同：古巴人用一根球棒，敲打出他們想成為什麼樣的人。</p>
+    <p>諷刺的是，當古巴在二十世紀後半與美國反目成仇，棒球卻成了兩個敵對國家之間，那條始終斷不掉的隱形臍帶。革命之後，職業棒球被廢除，球員不再為薪水而戰，而是為了「祖國的榮耀」；古巴的國家隊在數十年間幾乎橫掃國際賽場，奧運與世界盃的金牌一面面掛上，成了革命可以向世界炫耀的證明——一個被封鎖的窮島，竟能在這項美國人發明的運動上，把美國人的徒弟們一個個打敗。每一場對美國、對美洲的勝利，都被賦予了超出比分的重量。球場成了另一個戰場，而古巴人深知，在這個戰場上贏球，遠比甘蔗豐收更能撫慰一個民族的自尊。</p>
+    <p>然而正是這份榮耀的另一面，藏著最深的痛。對許多天賦異稟的古巴球員而言，島上的球場再大，也大不過海峽對岸那個用美金與大聯盟（Major League Baseball）築成的世界。於是從上世紀末開始，一個沉重的詞悄悄爬進了棒球的語彙：「叛逃」。球員們在出國比賽時消失在旅館的後門，搭上偷渡的快艇橫越佛羅里達海峽，把家人、把球衣上的國名、把可能再也見不到的故鄉，一起留在身後，只為了在大聯盟的燈光下，證明自己究竟有多好。每一次這樣的離去，都在島上掀起複雜的波瀾——有人罵他們是叛徒，有人懂他們是追夢的人，而更多人只是沉默地明白：那顆球，依舊是古巴與美國之間，剪不斷的牽連。</p>
+
+    <div class="aside">古巴棒球史上最動人的場景之一，發生在那種破舊的街角。在哈瓦那的中央公園（el Parque Central），常年有一群老人聚集，圍成一圈，唾沫橫飛地爭論球賽、球星與戰術——這個角落有個專屬的名字叫「la esquina caliente」，意為「火熱的角落」。沒有票、沒有轉播權、沒有任何商業，純粹是一群為了一顆球可以吵上一整天的人。在物資最匱乏的年代，他們連一顆像樣的球都湊不齊，孩子們就用布團、用瓶蓋、用任何能丟出去的東西，在坑坑窪窪的街上揮棒。那不是貧窮的湊合，那是一種拒絕被剝奪快樂的倔強。</div>
+
+    <h3>一座島的拍子：從頌樂到雷鬼動</h3>
+    <p>如果說棒球是古巴人的激情，那麼音樂就是古巴人的呼吸。沒有一個地方的人口比例如此之小，卻向世界輸出了如此巨大份量的節奏。這一切的源頭，是頌樂（son）——那誕生於東部奧連特（Oriente）山區、由西班牙的弦律與非洲的鼓點交媾而生的音樂形式。頌樂奠定了往後幾乎一切古巴音樂的骨架：那個被稱為「clave」的、兩小節五擊的基本節奏型，像一道隱形的脈搏，藏在每一首曲子的深處。從頌樂裡，長出了曼波（mambo）那狂熱的銅管與搖擺；長出了恰恰恰（cha-cha-chá）那輕快的步點。而當這些根脈在二十世紀中葉被帶到紐約的街區，與波多黎各人、與美洲各地的移民相遇、碰撞、再混血，便催生了那個席捲整個拉丁美洲、最終火遍全球的名字——薩爾薩（salsa）。世人常以為薩爾薩是某個地方的特產，卻少有人知道，它最深的根，扎在古巴這座島的紅土裡。</p>
+    <p>古巴音樂的傳統裡，還流著一條更古老、更素樸的支流，叫做遊吟歌謠（trova）。那是抱著一把吉他、在街頭與酒館之間遊走的歌者所唱的歌——關於愛情、關於故鄉、關於那些說不清的鄉愁與渴望。到了革命之後，這條傳統又演化出「新遊吟歌謠」（nueva trova），由席爾維奧·羅德里格斯（Silvio Rodríguez）這樣的歌手接過吉他，把詩、把理想、把對一個時代的複雜情感，唱進整整一代人的記憶裡。古巴的音樂從不只是用來跳舞的——它也是這座島用來思考、用來抒情、用來與自己對話的語言。</p>
+    <p>而真正讓世界在二十世紀末重新「發現」古巴靈魂的，是一張意外的唱片。一群早已被歲月遺忘的老樂手——他們大多在革命前的夜總會裡演奏過頌樂，後來在數十年的歲月裡或擦皮鞋、或務農、或沉寂——在一九九〇年代被重新召集到哈瓦那的錄音室裡。這就是「樂士浮生錄」（Buena Vista Social Club）。當這些七、八十歲的老人重新拿起樂器，那些被特殊時期的飢餓與封鎖幾乎掩埋的旋律，竟以一種飽經滄桑卻依舊滾燙的姿態，重新湧出。唱片賣遍全世界，老人們站上了卡內基音樂廳的舞臺——這是一個近乎神話的隱喻：古巴最珍貴的東西，從來不曾真正死去，它只是在等一個重新被聽見的時刻。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼音樂封鎖不了</span>
+      <p>禁運可以掐斷石油、藥品與外匯，卻對節奏束手無策。原因在於，古巴音樂的核心資產不是進口物資，而是世代相傳的身體記憶——那個藏在「clave」裡的脈搏，住在每個古巴人的血液與骨骼裡，不需要任何外來的零件就能運轉。一把破吉他、幾個鐵製的響棒（claves）、用木箱與鐵勺敲出的節奏，就足以讓一場派對成形。匱乏甚至反過來成了創造力的引擎：當買不起昂貴的電子設備，人們就回到最原始的鼓與人聲；當進口的唱片進不來，本土的廷巴（timba）便在九〇年代的舞廳裡爆發出更狂野的生命力。封鎖能讓一個國家的物質生活窒息，卻意外地把它的文化逼回了那個無法被沒收的源頭——人的身體本身。</p>
+    </div>
+
+    <p>而音樂從不停止生長。在那座物資最匱乏的島上，年輕一代仍持續創造著屬於他們的聲音。九〇年代特殊時期的廢墟裡，廷巴（timba）以一種更尖銳、更貼近街頭現實的姿態，把頌樂的傳統撞進當代的躁動；進入新世紀，雷鬼動（reggaeton）那帶著挑釁與慾望的節拍，從加勒比海一路滲入古巴的街巷，成了新一代年輕人的語言。老人們或許皺眉，但這恰恰證明了那道脈搏的鮮活——一座島的音樂若還在不斷讓老人皺眉、讓年輕人起舞，它就還活著。</p>
+
+    <h3>湊合的藝術：在匱乏中發明歡樂</h3>
+    <p>古巴人有兩個動詞，外人很難精確翻譯，卻是理解這座島最關鍵的鑰匙：「resolver」與「inventar」。前者字面是「解決」，後者字面是「發明」，但在古巴日常的語境裡，它們指的是同一種生存的藝術——在什麼都缺的情況下，<strong>想辦法湊合出一個辦法來</strong>。汽車的零件斷供了，就用自己車的零件、用拆下來的家電、用任何能咬合的金屬，把一輛一九五〇年代的美國老爺車，硬生生養活到二十一世紀——於是哈瓦那的街上，至今奔跑著全世界最大的一支古董車隊，那不是懷舊的觀光佈景，而是「resolver」逼出來的奇蹟。雞蛋沒有了，蛋糕照樣有人變得出來；藥品短缺了，民間的偏方與人情的網絡照樣把病人撐過去。這套生存哲學裡，藏著古巴人最深的尊嚴：他們拒絕讓匱乏定義自己的生活品質，他們用智慧、用幽默、用人與人之間的相互接濟，在物質的廢墟上，重建一種仍然可以歡笑的日常。</p>
+    <p>這份在匱乏中發明歡樂的能力，最終凝結成兩樣讓古巴聞名於世的奢侈品，弔詭的是，它們恰恰都不是為窮人準備的：雪茄（el habano）與蘭姆酒（el ron）。古巴雪茄，那由比那爾德里奧（Pinar del Río）的火紅土壤孕育、由捲菸工人指尖的手藝完成的東西，被視為全世界最頂級的菸草——一支古巴雪茄在自由的國際市場上身價不菲，卻誕生於一個多數國民買不起它的國度。蘭姆酒則是甘蔗最後的化身：當糖的時代落幕，甘蔗的甜被蒸餾成了酒的烈，注入哈瓦那的調酒杯裡。那杯由蘭姆、薄荷與糖調成的莫希托（mojito），那杯讓海明威（Hemingway）魂牽夢縈的代基里（daiquiri），把一座島的陽光、汗水與歡愉，一飲而盡。雪茄與蘭姆，是甘蔗園的詛咒最甜美的轉世——它們把奴隸的苦，釀成了世界的享受。</p>
+
+    <div class="cards">
+      <div class="card"><h5>resolver · 解決</h5><p>在斷供與短缺中，把壞掉的東西修好、把缺席的零件替代——讓五〇年代的老爺車跑到今天的生存智慧。</p></div>
+      <div class="card"><h5>inventar · 發明</h5><p>無中生有的本事。沒有的就想辦法湊出來，把匱乏逼成創造力，把日子過成可以跳舞的夜。</p></div>
+      <div class="card"><h5>relajo · 嬉鬧</h5><p>古巴式的幽默與不正經。在最沉重的處境裡也要開玩笑——用笑聲，把苦難稀釋成可以吞嚥的東西。</p></div>
+    </div>
+
+    <p>而貫穿這一切的，是古巴人那種近乎傳奇的熱情與幽默。他們說話大聲、動作誇張、笑點極低，把任何聚會都能變成派對；他們對陌生人毫無防備地親切，把「choteo」——那種拿一切開玩笑、連最神聖的事物都敢調侃的嬉鬧精神——當成抵禦苦難的盾牌。在排隊買麵包的長龍裡，在停電的悶熱夜晚，在又一艘載著親人的船消失在海平線後的悲傷裡，總有人會說出一句俏皮話，讓眾人苦笑出聲。這種幽默不是逃避，而是一種更高級的承受——它承認生活的荒謬與艱難，然後決定不被它擊倒。古巴人把這套態度活成了一門藝術：在最匱乏的地方，活出最不匱乏的精神。</p>
+
+    <div class="pull"><p>你可以封鎖一座島的港口、貨架與石油，卻封鎖不了它的鼓點與笑聲——文化，是這座島最後一樣不能被沒收的東西。</p></div>
+
+    <p>於是回到最初那個敞開的窗子，那從裡頭傳出的鼓聲與笑聲。它之所以重要，是因為它回答了一個關於這座島最根本的問題：當一個國家幾乎失去了一切——它的盟友、它的市場、它對未來的確定——它究竟靠什麼還活著？古巴的答案是：靠那由糖與奴隸在三百年裡鍛造出來、深深烙進血液裡的文化與靈魂。棒球與音樂、舞蹈與雪茄、resolver 的智慧與 choteo 的笑聲——這些不是苦難之餘的點綴，而是古巴人賴以為生的核心。它們是這座島最深、最不可被封鎖的軟實力：當政治與經濟的工程一個個失敗，唯有文化這座地基，始終穩穩地撐住了一個民族不至於崩塌。一座島最珍貴的東西，原來不在它的甘蔗田裡，也不在它的礦脈與海港裡，而在它的鼓裡、它的歌裡、它面對匱乏依舊揚起的那張帶笑的臉裡。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 糖的詛咒 the Curse of Sugar</span>
+      <p>糖的詛咒，在這一章顯出了它最意外的一面。三百年的甘蔗園是一座巨大的痛苦工廠——它榨乾了土地、奴役了非洲、把整座島的命運押在一種作物的價格上。然而正是這座痛苦的工廠，在它的鞭影與汗水之間，淬煉出了某種詛咒奪不走的東西：那由約魯巴的鼓、西班牙的弦、種植園的苦難共同鍛造的非洲—古巴文化（呼應第五章）。糖摧毀了古巴的經濟根基，卻意外地鑄成了它的靈魂——一種歷經革命、封鎖與特殊時期的飢餓，始終沒有失去鼓點與笑聲的不滅之魂。當糖價的詛咒讓這座島一次次跌入匱乏，正是這份從詛咒裡長出的文化，讓它在一切的失去之上，依舊活著。這是糖留給古巴最殘酷、也最慷慨的遺產：它奪走了一切，卻單單留下了一個無法被沒收的靈魂。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-22">
+  <div class="act-head">
+    <span class="act-num">第22章 · After Castro</span>
+    <h2 class="act-title">卡斯楚之後：解凍、再凍與兩兄弟的落幕</h2>
+    <p class="act-sub">Raúl, the Thaw and the End of an Era</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>二〇〇六年七月的最後一個夜晚，古巴人從電視與廣播裡聽到一則他們以為永遠不會聽到的消息：菲德爾·卡斯楚（Fidel Castro）病了，他將把國家的權力，暫時交到弟弟勞爾·卡斯楚（Raúl Castro）的手裡。對於一個已經習慣了由同一個聲音講述世界、由同一張嗓子主持每一場長達數小時的廣場演說的島嶼而言，這則消息近乎一種宇宙秩序的鬆動。自一九五九年那場勝利的元旦以來，菲德爾就不只是這個國家的領導人，他幾乎就是這個國家本身的人格化身——是它的修辭、它的脾氣、它對抗北方的姿態。如今，這個化身躺在了病榻上，而接過權柄的，是那個半個世紀以來總是站在他身後、沉默、寡言、被世界看作「另一個卡斯楚」的弟弟。哈瓦那（La Habana）的街頭沒有崩塌，沒有暴動，也沒有外界長年預言的那場「卡斯楚一死古巴就變天」的戲劇。日子照舊。配給本照舊發放，公車照舊誤點，馬萊孔海堤（el Malecón）上照舊坐著望向海平線的人。但所有人心裡都明白，某個漫長的章節，正在無聲地翻過去。</p>
+
+    <h3>沉默的弟弟接過了權柄</h3>
+    <p>勞爾·卡斯楚與他的哥哥，是兩種截然不同的氣質。菲德爾是演說家、是理想的縱火者、是那種能讓百萬人在烈日下站立數小時而不散去的領袖；勞爾則是組織者，是把革命熱情澆鑄成制度與軍隊的工程師。長年以來，他主掌著古巴的武裝部隊（las Fuerzas Armadas Revolucionarias），那是這座島上最有紀律、也最務實的機構。正是這種務實，定義了他接班之後的風格。二〇〇八年二月，菲德爾正式宣布不再擔任國務委員會主席，勞爾由「暫代」轉為「正式」接掌國家，這位已年屆七十六歲的弟弟，第一次以自己的名義，站到了島嶼的最前方。他講話簡短、不愛長篇，眼神裡少了哥哥那種燃燒的浪漫，多了一種會計師般冷靜的計算。他上臺後說的話，與其說是宣言，不如說是診斷：他承認古巴的經濟病了，承認那套高度集中的計畫體制無法再供養所有人，承認這個國家「必須學會勒緊褲帶過日子，但不能勒到斷氣」。從一個把意志凌駕於現實之上的哥哥，到一個願意低頭看帳本的弟弟，島嶼的舵，悄悄轉了一個角度。</p>
+    <p>勞爾的改革，從一開始就帶著他特有的審慎。他不喜歡「改革」這個聽起來像是背叛的詞，他偏愛說那是「更新」（actualización）——彷彿只是給一臺老機器換上幾個零件，而非更換引擎。但即便是這種小心翼翼的更新，在一個四十多年來幾乎不允許私人經濟存在的國度，已經是地動山搖。他逐步擴大了個體經營者（cuentapropistas）的空間，讓人們可以合法地開一家小餐館、修一臺單車、出租一間房給遊客、剪一顆頭。這些在別處再尋常不過的營生，在古巴卻是一個沉睡了半世紀的本能的甦醒。他還做了幾件在象徵意義上格外刺眼的事：允許古巴人買賣自己的房屋與汽車——在此之前，私人房產的交易幾乎是被凍結的；解除了古巴人不得入住涉外旅館、不得持有手機的禁令。這些今天聽來瑣碎的鬆綁，當年卻像是一扇扇被推開的窗，讓久居密室的人，第一次嗅到外頭的空氣。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 「更新」與「改革」之間的一字之差</span>
+      <p>勞爾·卡斯楚刻意不用「改革」（reforma）這個詞，而選擇「更新」（actualización），絕非單純的修辭潔癖。在社會主義陣營的歷史裡，「改革」是一個帶血的詞——它讓人想起戈巴契夫（Gorbachev）的「重建」（perestroika），而那場重建的終點，是蘇聯的解體與一個超級大國的灰飛煙滅。對古巴的執政者而言，蘇聯之死是刻在骨子裡的創傷與警鐘：經濟的鬆綁一旦失控，便會撕開政治的閘門，最終淹沒整個體制。於是勞爾走的是一條極窄的鋼索：他要讓經濟透一口氣，好讓人民不至於餓著肚子質疑制度；但他又絕不容許這口氣，吹動政治的牆。「更新而非改革」這個一字之差，正是這種焦慮的濃縮——它承諾的是修補，而非更換；是延續，而非告別。後來古巴經濟改革之所以總是走走停停、放一步又收半步，根源就在這裡：每一次鬆綁，都要先通過那道「會不會變成另一個蘇聯」的審查。</p>
+    </div>
+
+    <h3>九十英里外伸來的一隻手</h3>
+    <p>就在勞爾小心翼翼地給島內鬆綁的同時，島嶼與那個糾纏了它一個多世紀的「北方巨人」之間，竟也迎來了半個世紀以來最不可思議的一刻。二〇一四年十二月十七日，在梵蒂岡教宗方濟各（Pope Francis）與加拿大的秘密斡旋之下，美國總統歐巴馬（Barack Obama）與勞爾·卡斯楚，同時在華盛頓與哈瓦那發表電視講話，向各自的人民宣布：兩國將著手恢復斷絕了半個多世紀的外交關係。對於一個自一九六一年起就與美國斷交、被禁運（el bloqueo）勒了脖子數十年的島嶼來說，這幾乎是天方夜譚成真。歐巴馬在講話中說了一句後來被反覆引用的話：用同一套失敗的政策對待古巴半個世紀，卻指望得到不同的結果，這本身就是一種不理智。他主張，孤立沒有讓古巴改變，那麼，是時候試試接觸。</p>
+    <p>接下來的兩年，是這座島嶼近代史上罕見的、瀰漫著希望氣味的時節。二〇一五年七月，兩國正式恢復外交關係，塵封多年的大使館重新升起國旗——華盛頓的古巴國旗，與哈瓦那馬萊孔海堤旁那棟美國使館的星條旗，隔著九十英里的海，遙遙相望。美國放寬了對旅行、匯款、通訊與部分貿易的限制；美國的郵輪開始駛入哈瓦那的港口，遊客踏上這座曾被禁止前往的島；古巴的爵士樂手、棒球選手、藝術家，重新與北方的世界連上了線。而真正讓這一切達到頂點的，是二〇一六年三月——歐巴馬攜家人飛抵哈瓦那，成為自一九二八年柯立芝（Calvin Coolidge）之後，近九十年來第一位踏上古巴土地的美國在任總統。他在大革命劇院（el Gran Teatro）對古巴人民發表演說，他到馬萊孔海堤散步，他在傾盆大雨中坐在看臺上，看了一場古巴隊與美國職棒之間的友誼賽。那幾天，整座哈瓦那像是被某種久違的電流通過，許多古巴人第一次允許自己相信：也許，這一次，那道九十英里的詛咒真的要被解開了。</p>
+
+    <div class="pull"><p>用同一套失敗了半世紀的政策，卻指望得到不同的結果——歐巴馬如此形容對古巴的圍堵，於是他把手，伸過了那道海峽。</p></div>
+
+    <p>然而，希望在這座島上，歷來都是最易碎的東西。歐巴馬訪問哈瓦那僅僅八個月後，二〇一六年十一月二十五日深夜，古巴國家電視臺中斷了正常節目——勞爾·卡斯楚以沉重而平靜的聲音，向全國宣告：菲德爾·卡斯楚，這個與這座島嶼的二十世紀幾乎完全重疊的名字，於當晚辭世，享年九十歲。消息傳出，全島進入九天的國喪。哈瓦那的街頭沉默得反常，沒有西方某些人預期的狂歡，也沒有官方擔心的騷亂，只有一種複雜得難以名狀的沉靜：對許多年長者而言，那是革命之父、是民族尊嚴的象徵、是把古巴從美國後院的賭場與妓院中拽出來的人；對許多年輕人而言，那卻是匱乏、管制與一座彷彿被時間遺忘的島的代名詞。他的骨灰被裝進一具小小的木盒，沿著一九五九年那場勝利進軍的逆向路線，從哈瓦那一路東行，駛向革命起點的聖地牙哥（Santiago de Cuba），最後安葬在何塞·馬蒂（José Martí）長眠的同一片墓園裡。一個時代，連同它所有的光與所有的影，被裝進那只木盒，緩緩駛離了。</p>
+
+    <div class="aside">菲德爾·卡斯楚一生中躲過的暗殺，據其前安全主管的說法多達數百次起意——從爆炸的雪茄、塗了毒的潛水衣，到混進貝殼裡的炸藥，無奇不有，多數出自美國情報機構之手。他曾半開玩笑地說，如果躲過暗殺也算一項奧運項目，那他一定能拿金牌。最終，沒有任何一場陰謀、任何一枚子彈、任何一次入侵奪走他的性命；帶走他的，只是時間本身——一個連超級大國都調動不了的對手。</div>
+
+    <h3>潮水退回，希望再次結冰</h3>
+    <p>菲德爾辭世的那一刻，命運彷彿安排了一場殘酷的對位：就在這座島為它的革命之父送行的同時，九十英里外的美國，剛剛選出了一位將要把那扇剛被推開的門重新關上的新總統。二〇一七年，川普（Donald Trump）入主白宮，他幾乎是逐條地拆解歐巴馬留下的解凍遺產。他重新收緊了美國公民赴古巴旅行的規則，限制了郵輪與商業往來，加碼了對古巴實體的制裁，並讓那部蟄伏多年、允許美國公民就古巴革命中被沒收財產提起訴訟的《赫爾姆斯—伯頓法》（Helms-Burton Act）第三章正式生效——這一條款的解凍，幾乎掐斷了外國資本投資古巴的勇氣。一場神祕的、被稱為「哈瓦那綜合症」（Havana Syndrome）的不明病症在美國駐古巴外交官中傳出，更給了華盛頓撤離使館人員、降溫關係的理由。到了二〇二〇年底，川普政府在卸任前夕，更把古巴重新列入「支持恐怖主義國家」的名單——那是一頂沉重的帽子，會讓古巴在國際金融體系裡寸步難行。短短四年，歐巴馬辛苦推開的那扇窗，被一塊塊重新釘死。剛剛融化的海面，再一次結上了冰。</p>
+    <p>對島上的人而言，這是一種近乎宿命的重演。古巴與北方巨人的關係，從來不是一條向前的直線，而是一道反覆的潮汐：每一次靠近，都伴隨著一次更猛烈的退回。一八九八年美國以「解放者」之姿介入古巴的獨立戰爭，最後留下的卻是普拉特修正案（the Platt Amendment）與關塔那摩（Guantánamo）的鐵鏈；一九五九年的革命試圖一勞永逸地掙脫，換來的卻是禁運與孤立；而二〇一四年那次最溫柔的握手，也在短短兩年後鬆開了。仿佛這座島與那片大陸之間的九十英里海峽，本身就是一個帶著磁性的裝置：當兩端試圖靠近，某種更深的政治潮汐便會湧起，把它們重新推開。希望在這裡從不被允許停留太久，它總是先被點燃，再被海風吹熄。</p>
+
+    <div class="cf">
+      <p>設想歐巴馬的解凍若得以延續：制裁逐步取消、美國資本與遊客大量湧入、古巴年輕一代與北方的世界自由往來——那麼今日的古巴，會不會是一個截然不同的島？我們無從知曉。歷史沒有給這個假設一個機會。那扇窗只開了不到兩年，便被重新關上。古巴改革的悲劇之一，正在於它最關鍵的幾次轉身，往往不取決於自己的決心，而取決於九十英里外那位巨人，當天的心情與當屆的選舉。</p>
+    </div>
+
+    <h3>兩兄弟的落幕</h3>
+    <p>送走了哥哥，也送走了那段短暫的暖意，年邁的勞爾·卡斯楚開始有條不紊地安排自己的退場——這是他與菲德爾最深的不同。菲德爾掌權近半個世紀，幾乎到生命的盡頭才不情願地交出權柄；而勞爾從一開始就為自己設定了任期的界限，他要證明，這個由卡斯楚兄弟締造的體制，能夠在沒有卡斯楚的情況下繼續運轉。二〇一八年四月，勞爾卸下國家元首之職，把總統的位置交給了一位生於革命之後、與槍林彈雨的游擊歲月毫無干係的工程師——米格爾·迪亞斯—卡內爾（Miguel Díaz-Canel）。這是一個帶著巨大象徵意義的時刻：自一九五九年以來，第一次，古巴的最高領導人，不再姓卡斯楚。一個由「歷史世代」（la generación histórica）——那群曾跟著菲德爾打進哈瓦那的鬍子游擊隊——統治了近六十年的國家，終於開始把舵交給沒有打過那場仗的人。</p>
+    <p>交棒並不意味著立刻的鬆動。二〇一九年，古巴通過了一部新憲法，它在文字上做了一些微妙的調整——承認私有財產與外國投資的角色、設立總理一職、為國家元首設下任期與年齡的限制——卻在最根本的那一條上寸步不讓：古巴的社會主義性質「不可逆轉」，共產黨依舊是「社會與國家的領導力量」。這部憲法像極了勞爾本人的氣質：在邊緣處務實地讓步，在核心處毫不退讓。而最後一塊權力的拼圖，落定於二〇二一年四月——勞爾·卡斯楚在古巴共產黨第八次代表大會上，正式卸下他擔任的最後一個、也是最關鍵的職務：黨的第一書記。他把這個位置，也交給了迪亞斯—卡內爾。至此，從一九五九年那個勝利的元旦算起，整整六十二年，「卡斯楚」這個名字第一次徹底退出了古巴權力的最高層。一個以兩兄弟的名字命名的時代，正式落下了帷幕。</p>
+    <p>然而，帷幕落下，舞臺卻並未換景。迪亞斯—卡內爾接過的，是一個被疫情重創、被川普收緊的制裁勒緊、被經濟匱乏與青年外流持續啃食的島嶼。卡斯楚的名字退場了，但卡斯楚留下的兩道根本枷鎖——那套依賴單一作物與外援、始終未能真正自立的經濟結構，以及那道九十英里外永遠陰晴不定的巨人之影——卻原封不動地，落在了這位「首位非卡斯楚領導人」的肩上。他繼承的不只是一個國家，更是一份沉重的、由地理與歷史共同書寫的遺產。兩兄弟走了，但他們一生試圖回答、卻始終沒能回答的那個問題——一座如此靠近巨人、又如此倔強地不肯臣服的小島，究竟該如何在這個世界上安身立命——依舊懸而未決，留給了之後的每一個古巴人。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>解凍又再凍——這六個字，幾乎是古巴與美國兩百年關係的縮影。歐巴馬在二〇一四年伸出的那隻手，是這座島嶼近代史上最接近掙脫「九十英里詛咒」的一刻；而它在川普任內被逐條收回，又一次無情地證明：古巴的命運，從來不完全握在哈瓦那手裡，它也被書寫在華盛頓的選票與總統的更替之中。從一八九八年的「解放者」變成宗主，到一九六一年的斷交與禁運，再到這次兩年即逝的暖春——每一次靠近的希望，都被某種更深的政治潮汐，重新推回了海的對岸。卡斯楚兄弟用一生試圖對抗這道陰影，最終卻只能帶著它離場。那道九十英里的海峽依舊在那裡，像一面鏡子，映照著這座島永恆的困局：它太靠近巨人，近到無法忽視；又太倔強，倔到不願臣服。後卡斯楚的古巴，第一個要面對的，仍是這道從它誕生之日起就揮之不去的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-23">
+  <div class="act-head">
+    <span class="act-num">第23章 · Cuba Today</span>
+    <h2 class="act-title">今天的古巴：停電、抗議與新的大出走</h2>
+    <p class="act-sub">The Exhausted Revolution</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>要描述今天的古巴，最誠實的開場，或許不是一個數字，也不是一場演講，而是一個聲音——確切地說，是一個聲音的消失。傍晚時分，哈瓦那（La Habana）某個街區的冰箱嗡嗡聲突然停了，電風扇慢慢轉到不動，電視屏幕縮成一個白點然後熄滅，整條街陷入一種熱帶夜晚特有的、黏稠的黑。這樣的停電，在過去這幾年，已經不是天災般的偶然，而是日子本身的節奏。在島的一些地方，每天斷電八小時、十小時、乃至更久，成了常態；人們學會了看著電力公司公布的「輪流停電時段表」過活，學會了趕在來電的那幾個小時裡煮飯、抽水、給手機充電、把該洗的衣服洗完。一座曾經向全拉丁美洲輸出醫生與識字運動、向整個第三世界輸出「革命可以成功」這個信念的島，如今連最基本的、讓燈亮著的承諾，都時常兌現不了。這不是某一場危機的插曲，而是一場長達一甲子的革命，走到精疲力竭時，最日常、也最刺眼的症狀。</p>
+
+    <p>這份疲憊，是層層疊加、彼此咬合的。它有久遠的結構性病根——一個始終沒能擺脫對單一恩主（先是蘇聯，後是委內瑞拉）依賴、始終沒能真正自立的經濟；它有突如其來的外部重擊——一場讓旅遊業歸零的全球疫情，與一輪在二〇一七年後重新收緊、又添了上百項新措施的美國制裁；它還有一記自己打在自己身上的、本意是治病卻反而加重病情的改革。這幾股力量在二〇二〇年前後幾乎同時湧到，把一個本就脆弱的系統推到了臨界點。本章要講的，就是這場加深的危機，以及它逼出的兩件古巴當代史上空前的事——一場數十年來最大規模的街頭抗議，與一波這座島歷史上最洶湧的人口外流。我們會盡量持平地呈現各方的視角：把責任全推給封鎖的人，與把責任全推給體制的人，各自看見了真實的一半；而站在停電的黑暗裡的普通古巴人，承受的是兩半相加的全部。</p>
+
+    <h3>三股力量同時湧到的那一年</h3>
+    <p>把時鐘撥回二〇一九年，古巴的處境已經不妙。它最重要的恩主委內瑞拉（Venezuela）深陷自身的經濟崩潰，那條曾經以優惠石油換取古巴醫療服務的輸血管，正一點一點地細下去、堵起來。緊接著，華府的政策急轉——在歐巴馬（Barack Obama）時代短暫解凍、兩國一度互設大使館的緩和之後，川普（Donald Trump）政府逆轉了方向，不僅恢復許多舊有限制，更在卸任前夕把古巴重新列入「支持恐怖主義國家」名單，並陸續加碼，前後累積了兩百多項新措施。這些措施收緊了匯款渠道、限制了美國遊客、嚇阻了與古巴做生意的外國銀行與企業。封鎖這頭古老的巨獸，在二十一世紀的第三個十年裡，不僅沒有鬆口，反而咬得更緊。</p>
+    <p>然後，二〇二〇年，新冠疫情來了。對一個把旅遊業當成少數幾根經濟支柱之一的島來說，邊境關閉、航班停飛、酒店空置，意味著一條主要的外匯動脈被瞬間掐斷。遊客不來了，他們本會帶來的硬通貨——那些支撐著進口糧食、燃料、藥品的美元與歐元——也跟著消失。與此同時，全球供應鏈的紊亂推高了一切進口品的價格與運費，而古巴幾乎什麼都要進口：它的餐桌、它的油箱、它的藥櫃，無一不依賴從海外運來的貨。一個外部依賴極深、內部生產極弱的經濟，在這樣的三重打擊下，迅速地、肉眼可見地塌陷下去。商店的貨架空了，藥房的藥沒了，加油站排起了看不到頭的長龍，而停電——那個本章開頭的黑暗——成了所有匱乏裡最具象、最無法迴避的一種。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一場本想治病、卻加重病情的改革</span>
+      <p>在這場危機最深的時刻，古巴政府推出了一項醞釀已久的大手術，名為「整頓任務」（la Tarea Ordenamiento），於二〇二一年元旦正式啟動。它的核心，是終結古巴長期並行的雙重貨幣與多重匯率制度——這個畸形的金融架構曾把國家經濟切成兩個平行世界，扭曲了一切價格與帳目。從理論上說，統一貨幣、讓匯率回歸真實，是任何一個經濟學家都會點頭的正確方向。然而，這場手術選在了一個最壞的時機，在一個最虛弱的病人身上動刀。一旦匯率被一次性大幅調整、補貼被削減，被長期人為壓低的價格便如決堤般湧出真實的水位：物價飛漲，工資縮水，通貨膨脹在隨後的時間裡以驚人的速度吞噬普通家庭的購買力。一場本意是讓帳目回歸誠實的改革，在疫情與制裁的夾擊下，反而成了壓垮駱駝的最後一根稻草。它的辯護者說，病早晚要治，晚治更糟；批評者說，在傷口上動刀，本身就是一種失誤。無論如何，二〇二一年的古巴人，是在三股力量——疫情、制裁、與這場失敗的改革——的合力絞壓下，被推到了忍耐的盡頭。</p>
+    </div>
+
+    <h3>七月十一日：四十年來最大的一次怒吼</h3>
+    <p>二〇二一年七月十一日，一個原本平常的星期天，古巴爆發了一場讓世界都措手不及的事。它的引爆點微小得近乎偶然：在哈瓦那以南、一個叫聖安東尼奧德洛斯巴尼奧斯（San Antonio de los Baños）的小鎮，一群被停電、缺藥、缺食物折磨得忍無可忍的居民走上了街頭。不同於以往，這一次，有人用手機把抗議拍了下來，透過那幾年才剛剛在島上鋪開的移動網路，把畫面傳了出去。火星落進了乾草。幾個小時之內，抗議像野火般蔓延到全島數十個城鎮——哈瓦那、聖地亞哥（Santiago de Cuba）、卡馬圭（Camagüey）、馬坦薩斯（Matanzas）……成千上萬的人涌上街頭，高喊著「自由」「我們餓了」「打倒獨裁」。這是自一九五九年革命以來，古巴從未見過的景象：不是某一個城市、某一個群體的零星不滿，而是一場幾乎遍及全國的、自發的、跨越世代的公開怒吼。</p>
+    <p>這場抗議有一個聲音替它命名，那是一首歌——《祖國與生命》（<em>Patria y Vida</em>）。歌名本身就是一記精準而尖銳的顛覆：它把革命半個多世紀以來最神聖的口號「祖國或死亡」（Patria o Muerte，卡斯楚演說的標誌性結語）裡那個「死亡」，換成了「生命」；把那個要求人民隨時準備為祖國赴死的悲壯誓言，改寫成一句卑微卻有力的請求——我們要的不是死，是活。這首由幾位流亡與島內音樂人合作的歌曲，在抗議前幾個月發布，迅速成為一代古巴年輕人的精神暗號。當七月的人群在街頭高唱它時，那不只是一首歌，而是一種世代的宣告：那些從未經歷過革命勝利、從未享受過蘇聯補貼的黃金年代、一出生就活在匱乏與管制裡的年輕人，不再願意用沉默，去交換父輩口中那個越來越遙遠的承諾。</p>
+
+    <div class="pull"><p>把「祖國或死亡」改成「祖國與生命」——一個詞的替換，藏著整整一個世代對革命最溫和、也最致命的告別。</p></div>
+
+    <p>政權的反應，迅速而強硬。最高領導人迪亞斯-卡內爾（Miguel Díaz-Canel)——這位在二〇一八年從卡斯楚家族手中接過權力、古巴六十年來第一位不姓卡斯楚的領導人——在電視上發出了那句後來引發巨大爭議的號召：「上街的命令已經下達」(la orden de combate está dada)，呼籲革命的支持者走上街頭去「捍衛革命」。隨後，大規模的逮捕展開了。據多個人權組織的統計，在七月事件之後，有數以百計乃至上千的抗議者被拘留、起訴、判刑，其中不乏僅僅因為上街喊口號、或在社交媒體上轉發畫面的年輕人，被以「煽動」「藐視」「破壞公共秩序」等罪名，判處數年乃至十餘年的徒刑。網路在抗議期間一度被切斷，以阻止畫面繼續外傳。對這場鎮壓，捍衛政權的一方說，任何國家都有權維護公共秩序，何況背後有外部勢力煽動；批評的一方則說，用如此沉重的刑期去懲罰飢餓中的和平抗議者，本身就暴露了一個失去合法性的政權，只剩下恐懼這一種統治工具。這兩種敘事在二〇二一年的七月之後，再也無法被同一套官方語言縫合。</p>
+
+    <div class="warn">
+      <p>關於七月十一日事件的鎮壓，需以審慎陳述。被拘留與被判刑的具體人數，不同來源（政府、獨立人權團體、流亡組織）說法不一，本文不替任何單一精確數字背書；但大規模拘留、漫長刑期、以及對和平抗議者的重刑判決，有多方獨立記錄支撐。與此同時也須記下：政權指控抗議受到境外資金與社交媒體運動的推動，而抗議者與多數觀察者則強調，將數萬人推上街頭的，首先是真實的飢餓、停電與絕望。把這場事件簡化為「純粹的人民起義」或「純粹的外國顛覆」，都是對它的扭曲——它的根，深扎在古巴人真實的苦難裡，而它的外緣，也確實纏繞著島內外複雜的政治力量。</p>
+    </div>
+
+    <h3>用腳投票：一座島歷史上最大的出走</h3>
+    <p>如果說七月的抗議是一種留下來的怒吼，那麼緊隨其後的，是一種更沉默、卻規模空前的回答——離開。古巴的歷史，本就是一部由一波波出走寫成的歷史：革命之初富人與中產的逃離、一九六五年的卡馬里奧卡(Camarioca)、一九八〇年的馬列爾(Mariel)那場十二萬人的大撤離、一九九四年特殊時期裡乘著自製木筏漂向佛羅里達的「筏民」(los balseros)。每一次大出走，都是這座島把它的痛苦，以人的形式，向北方傾倒。然而，即便把這些刻骨銘心的歷史時刻全部加起來，也未必比得上二〇二一年之後這一波的規模。據各方估計，從二〇二一到二〇二三年的短短兩三年間，離開古巴的人數，以數十萬計——按一些統計，佔到了全島人口相當可觀的比例。這不再是一次性的、有明確起止的撤離，而是一場持續的、看不到盡頭的失血。</p>
+    <p>這一次的路線，也與從前不同。過去，出走多半意味著向北穿越那道九十英里的佛羅里達海峽；而這一波，大量的古巴人選擇了一條更迂迴、更漫長、也更艱險的陸路。他們先設法飛到中美洲——尼加拉瓜(Nicaragua)在某段時間對古巴人免簽，成了一個關鍵的中轉站——然後從那裡，加入那條由各國移民匯成的、向北跋涉的人流，穿過中美洲的叢林、河流與邊境，一路走到美墨邊界，在那裡尋求入境。這條路上，有勒索、有搶劫、有溺水、有失蹤，有把一生積蓄交給人蛇集團的賭博。會選擇這樣一條路的，往往正是這座島最寶貴的部分——年輕、受過良好教育(別忘了，古巴的免費教育曾是革命最自豪的成就)、有勇氣也有體力去賭一個未來的人。革命用幾十年培養出來的醫生、工程師、教師、技工，如今正一波波地，用腳，投下他們對這座島的不信任票。</p>
+
+    <div class="cf">
+      <p>把「留下抗議」與「離開出走」並排來看，會發現它們其實是同一種絕望的兩個出口。七月十一日喊「祖國與生命」的人，要的是在這座島上活得像個人；而踏上中美洲叢林之路的人，是在用最決絕的方式說——這座島，已經給不了他們那樣的生活。一個高喊著要改變，一個用消失來表態；一個賭這裡還有救，一個賭遠方才有路。對政權而言，這兩者構成一道殘酷的兩難：鎮壓抗議，會逼更多人離開；放任離開，則等於默認自己連最有活力的國民都留不住。憤怒與出走，像一把剪刀的兩刃，從兩個方向，同時剪向這座島的未來。</p>
+    </div>
+
+    <h3>正在老去、正在變空的島</h3>
+    <p>大出走最深、也最致命的後果，不在它走的那一刻，而在它留下的那個空洞。當一座島源源不斷地流失它最年輕、最能生育、最有生產力的那一代，它就同時被抽走了兩樣東西：今天的勞動力，與明天的人口。古巴正以肉眼可見的速度老去。它的出生率早已低迷多年，而青壯年的持續外流，更是雪上加霜——學校的教室空出來了，鄉鎮的店面拉下了鐵門，村莊裡只剩下守著老屋的長者。人口統計學家警告，這座島正滑向一種危險的失衡：越來越少的勞動者，要供養越來越多的老人；越來越空的搖籃，撐不起越來越長的人均壽命。一個曾以「我們有最健康、最長壽的人民」為傲的國家，如今最深的隱憂，恰恰來自這份長壽——當年輕人成批離去，長壽便不再是成就，而成了一道無人承接的重擔。</p>
+    <p>這就是今天古巴最根本的困境：它不只是缺電、缺藥、缺食物，它正在缺人。一個失去年輕人的社會，也就失去了它的未來時態——失去了那些本該去填補、去創造、去想像一個不同明天的人。革命曾經許諾要為「新人」(el hombre nuevo)——一個無私、奉獻、為集體而活的全新人類——而奮鬥；而六十多年後，這座島面對的現實是，它連讓「人」留下來的能力，都正在喪失。空著的搖籃與離港的渡船，構成了這場革命疲憊的最終形態：它或許還能維持表面的秩序，卻已經無法說服它的孩子，留下來，陪它一起老去。</p>
+
+    <div class="cards">
+      <div class="card"><h5>加深的經濟危機</h5><p>恩主委內瑞拉自顧不暇、疫情掐斷旅遊外匯、制裁再度收緊、貨幣統一改革引爆惡性通膨——數股力量在二〇二〇年前後合力絞壓。</p></div>
+      <div class="card"><h5>空前的抗議與鎮壓</h5><p>二〇二一年七月十一日遍及全島的自發示威，以《祖國與生命》為號；政權迅速以大規模逮捕與重刑回應。</p></div>
+      <div class="card"><h5>歷史最大的出走</h5><p>數十萬人在兩三年內離島，多取道中美洲陸路赴美——抽走的，正是這座島最年輕、最受教育的一代。</p></div>
+    </div>
+
+    <h3>站在兩個失敗之間</h3>
+    <p>那麼，今天的古巴究竟站在哪裡？最公允的回答，或許是：它站在一個失敗的舊模型，與一個尚未到來、也尚不確定的新方向之間，進退兩難。舊的模型——那個由國家計畫一切、由單一恩主輸血、由意識形態統攝經濟的蘇聯式社會主義——已經被歷史與現實一遍遍地證明走不通了；它留給今天的，是空貨架、長電荒與一代人的出走。然而，通向另一邊的路，卻佈滿了這座島自己也未必願意付的代價。近年來，政府確實謹慎地鬆動了一些口子：擴大了個體經營與私營中小企業(被稱作 mipymes)的空間，允許更多私人經濟活動，試圖讓市場的活水滲進僵硬的計畫之中。但這些改革始終是遲疑的、半截的、隨時可能因為意識形態的顧慮或既得利益的阻力而踩下煞車。開放怕失控，不開放則等死——這道兩難，是今天哈瓦那的掌權者每一天都要面對的真問題。</p>
+    <p>而在所有這些內部困境之外，那個貫穿了本書整整一部的因素，依然矗立在那裡：封鎖，仍在那裡。對於今天古巴的苦難，究竟該歸咎於誰，島內外從未停止爭論，而這場爭論本身，構成了理解今日古巴不可或缺的一環。政權及其同情者堅持，根源在於那道長達六十餘年、由世界最強經濟體單方面施加的禁運——它扼住了古巴的金融、貿易與發展的咽喉，任何一個經濟體在如此圍困下都難以正常呼吸。批評者則反駁，封鎖固然加重了苦難，卻不能解釋一切：同樣被封鎖的這些年裡，是這套拒絕改革、害怕放權、把失敗一律歸咎於外部的體制，親手放大並延長了人民的痛苦。真相，大概率不在任何一個極端，而在兩者交織的灰色地帶——一個被外部長期勒住、又被內部反覆貽誤的島，它的疲憊，是這兩隻手共同造成的。本書無意替任何一方做最後的判決；只想誠實地指出，把帳算清，需要兩本帳簿一起翻開。</p>
+
+    <p>於是，今天的古巴，是一座停著電的島。它的架子空著，它的年輕人一波波渡海而去，它的搖籃靜了下來，它的街頭曾在某個七月的星期天爆發出四十年來最響的怒吼，又在隨後的鎮壓與沉默裡，重新合上了嘴。這是一場疲憊的革命——「堅持」這兩個字曾經是它的光榮，是它在最強鄰國的封鎖下不倒的脊樑；而如今，同樣是這份「堅持」，把一套早該更新的模型、一種早該鬆開的管制，堅持到了讓整個社會精疲力竭的地步。它沒有崩潰，也沒有轉身；它就站在那裡，在一個失敗的昨天與一個不確定的明天之間，在黑暗中，等著下一次來電，也等著一個它自己也說不清的未來。這座島的故事，還沒有結局——它只是走到了一個所有人都疲憊不堪、卻誰也不知道下一步通向哪裡的路口。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 革命與堅持 the Revolution and the Will to Endure</span>
+      <p>全書的這道主線——「革命與堅持」——在今天的古巴，走到了它最沉重的一個音節。曾經，「堅持」是一個讓人肅然起敬的詞：在九十英里外帝國的封鎖、暗殺、入侵與孤立之下，這座小島竟然堅持了下來，沒有屈服，沒有回到從前。那是一種近乎奇蹟的意志。然而本章告訴我們，意志也會被磨損。當「堅持」不再意味著捍衛一個值得捍衛的承諾，而退化成對一套明顯失靈的模型的固執；當它讓燈一次次熄滅、讓藥房一次次空掉、讓最有希望的一代人一船船地離去——那麼「堅持」便從光榮，悄悄滑向了僵固。今天的古巴，是這份意志精疲力竭時的模樣：它還沒有放手，卻也再難前進。一座停著電、空著架、年輕人渡海而去的島，站在失敗的舊模型與不確定的開放之間，而那道貫穿了它整個現代史的封鎖，仍在那裡。所謂「革命與堅持」，終於走到了必須回答一個問題的時刻——當堅持本身成了苦難的一部分，這座島，還要堅持什麼，又該為誰、為什麼，鬆開那隻緊握了六十多年的手？這道題，歷史尚未作答，它把筆，交回了古巴人自己的手裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<div class="part-div reveal" id="part-6">
+  <span class="pn">第六部</span>
+  <h2 class="ptitle pt">一座島的明天</h2>
+  <div class="pe">The Island's Tomorrow</div>
+  <div class="pline"><span></span><span class="dot">❂</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-24">
+  <div class="act-head">
+    <span class="act-num">第24章 · The Eternal Neighbour</span>
+    <h2 class="act-title">永遠的近鄰：古巴與美國的下一章</h2>
+    <p class="act-sub">The Ninety Miles That Still Define Everything</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>站在哈瓦那（La Habana）老城的海濱大道（el Malecón）上往北望去，眼前只有一片被信風推皺的藍。海平線盡頭看不見任何陸地，但每一個古巴人都知道那後面有什麼。九十英里——大約一百四十五公里——之外，是基韋斯特（Key West），是佛羅里達（Florida），是那個從這座島嶼睜開眼睛的那一刻起，就壓在它頭頂的龐然存在。這九十英里，是這個故事裡反覆出現的數字，是那道度量了一切的距離。它近得讓任何一艘漁船、任何一隻拼湊的橡皮筏、任何一個鋌而走險的泳者都動過心思；它又遠得讓兩岸之間隔著的，是六十多年的禁運、敵意、猜忌與彼此無法放下的執念。整部古巴的身世，到了這最後一章，依然繞不開那片海，繞不開海對岸的那個鄰居。它是地理給古巴的判詞，也是歷史留給古巴的最後一道未解之題：<strong>那九十英里，至今仍定義著一切——無論是擁抱，還是敵對。</strong></p>
+
+    <p>這個鄰居太大、太近、又太糾纏，以至於古巴的政權與古巴的人民，都無法真正不去想它。對島上的政府而言，北方的巨人是一切苦難現成的解釋——只要禁運還在，任何短缺、任何停電、任何排隊，都可以歸咎於那道封鎖線。對華府而言，這座小島是一根扎了六十年仍拔不掉的刺，一個在自家門口公然挑戰的象徵，一張在國內政治棋盤上反覆被打出的牌。雙方都被對方困住，都在用對方來定義自己。古巴用「抵抗北方帝國」來證明革命的正當；美國則用「孤立卡斯楚政權」來安撫一群永遠不會原諒的選民。這是一場誰也贏不了、誰也不肯先鬆手的對峙，而被夾在中間、付出代價的，始終是那些只想過日子的普通人。</p>
+
+    <h3>世上最長的禁運</h3>
+    <p>故事要從一道命令說起。1960年，在哈瓦那接連沒收了美資的煉糖廠、煉油廠與公用事業之後，美國開始一步步收緊與古巴的貿易；1962年2月，甘迺迪（John F. Kennedy）總統簽署行政命令，把對古巴的全面禁運（el bloqueo，西語直譯為「封鎖」；美方則稱 the embargo，「禁運」）正式確立下來。有一則被反覆傳述的軼事是，甘迺迪在簽署前夕，先派人去替他搜購了一千兩百根古巴哈瓦那雪茄，囤好了私貨，才落筆斷絕了它的合法進口。無論真假，這個細節捕捉到了禁運某種荒誕的本質：一邊在政策上宣布徹底切割，一邊又對這座島嶼的產物難以忘情。此後六十多年，這道禁運歷經十一位美國總統，跨越冷戰的始終，熬過蘇聯的解體，竟一直延續至今，成為現代史上持續時間最長的禁運之一。它最初是冷戰的權宜之計，後來卻長成了一具誰也不願、也不易拆除的龐大機器。</p>
+    <p>1992年的《古巴民主法》（the Cuban Democracy Act）與1996年的《赫爾姆斯—伯頓法》（the Helms-Burton Act），把這道原本靠行政命令維繫的禁運，牢牢寫進了成文法律。後者尤其關鍵：它規定唯有古巴出現「民主化的過渡」，總統才能解除禁運——換言之，封鎖的鑰匙，從白宮的抽屜裡，被搬進了國會的保險庫。一任總統若想單方面終結它，已不再可能；它需要的是國會的多數同意。這一筆，讓禁運從一項可隨政局調整的政策，凝固成了一道近乎不可逆的制度。《赫爾姆斯—伯頓法》甚至試圖把制裁的手伸向第三國——任何「交易」了當年被沒收的美國資產的外國企業，都可能在美國被起訴。這條域外條款引發了加拿大、歐盟與墨西哥的強烈抗議，他們認為美國無權替全世界決定能否與古巴做生意。禁運於是不只是美古之間的事，它成了一個被反覆爭執的國際法與主權問題。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 禁運究竟是幫助，還是阻礙了改變？</span>
+      <p>這是圍繞古巴最古老、也最無解的爭論，而兩種立場都有其道理，誰也未能說服誰。支持維持禁運的一方主張：對一個壓制異見、不容反對黨、長期關押政治犯的政權，美國沒有理由用貿易與資本去輸血；鬆綁只會讓統治者拿到喘息的硬通貨，鞏固而非削弱它的權力；唯有持續施壓，才能逼出真正的政治讓步。反對禁運的一方則反駁：六十年的封鎖並沒有換來政權更迭，反而給了它一個現成的代罪羔羊——所有的匱乏都可推給「美帝的封鎖」，把內部治理的失敗洗成外部敵人的迫害；孤立餵養的是民族主義的悲情，而非民主的渴望；真正能鬆動一個封閉社會的，是交流、是遊客、是資訊、是讓島上的人親眼看見另一種生活的可能。雙方各自都能舉出證據，也各自都有盲點。一個誠實的觀察者必須承認：禁運是否「有效」，取決於你認為它的目的究竟是什麼——是懲罰，是施壓，是道德宣示，還是真心想促成改變？目的不清，效果自然永遠說不清。</p>
+    </div>
+
+    <h3>邁阿密：一座城市如何左右一國的政策</h3>
+    <p>要理解為什麼這道禁運如此難以撼動，必須把目光從哈瓦那移到三百多公里外的另一座城市——邁阿密（Miami）。革命之後的數十年裡，一波又一波的古巴人渡海北上：1959年後逃離的舊菁英與中產、1980年馬列爾偷渡潮（el Mariel）中湧出的十二萬人、九〇年代「特殊時期」乘筏漂流的「筏民」（los balseros）。他們大多落腳於佛羅里達南端，在邁阿密的小哈瓦那（Little Havana）一帶，重建了一個說西語、喝濃咖啡、永遠在街角爭論政治的古巴。這個流亡社群（el exilio）裡，第一代人幾乎人人都有一段被沒收的房產、被拆散的家庭、被迫離鄉的傷痕，他們對卡斯楚（Fidel Castro）政權的恨，是切膚的、不可調和的。對他們而言，任何與哈瓦那緩和的姿態，都形同對加害者的縱容，是對他們失去的一切的背叛。</p>
+    <p>而這份情感，恰好被放進了美國選舉制度最敏感的一個位置。佛羅里達是總統大選中分量最重的搖擺州之一，動輒以幾萬票、甚至更少的差距決定鹿死誰手——2000年布希（George W. Bush）與高爾（Al Gore）在此僅以五百餘票分勝負的往事，至今仍是美國政治的傷疤。而古巴裔選民在這個關鍵州內高度集中、投票率高、組織嚴密。於是一個結構性的事實浮現了：得罪邁阿密的古巴裔強硬派，可能就意味著輸掉佛羅里達，輸掉佛羅里達，可能就意味著輸掉整個白宮。對任何一位有志問鼎大位的政治人物來說，這筆帳算下來，對古巴示弱的政治成本太高、收益太低。於是一座城市的集體記憶與創傷，透過選舉的槓桿，被放大成了一個超級大國數十年對外政策的鎖定鍵。這正是民主政治幽微之處：最強烈、最不肯妥協的少數，往往能在均勢的縫隙裡，定義多數人的政策走向。</p>
+
+    <div class="aside">值得一提的是，這個社群本身也在悄悄變化。第一代流亡者凋零，在邁阿密土生土長的第二、三代，以及九〇年代之後因經濟而非政治離開的新移民，對古巴的態度遠比父祖輩複雜——許多人有留在島上的親人要匯款、要探望，他們未必反對緩和。民調顯示古巴裔內部對禁運的看法早已分裂，不再鐵板一塊。然而政治上最活躍、最敢於動員、最善於把選票轉化為影響力的，仍是那批立場最堅定的人。於是「邁阿密的聲音」在政策上的分量，長期高於它在人口上的實際比例。一個社群的世代更替，與它在政治上發出的聲音，未必同步。</div>
+
+    <h3>正常化的開與關</h3>
+    <p>這六十年並非鐵板一塊的敵對，其間有過幾次試圖打破僵局的努力，最戲劇性的一次發生在2014年12月17日。那一天，歐巴馬（Barack Obama）與勞爾·卡斯楚（Raúl Castro）幾乎同時向各自的國民宣布：美古兩國將重啟外交關係。這背後是長達十八個月、由加拿大牽線、梵蒂岡的教宗方濟各（Pope Francis）親自致函斡旋的祕密談判。接下來的兩年，是兩國關係半個多世紀以來最溫暖的一段：互設大使館、放寬旅行與匯款、恢復直航與郵輪、美國企業試探性地叩門。2016年3月，歐巴馬踏上哈瓦那的土地，成為近九十年來首位訪問古巴的在任美國總統——他與勞爾並肩出席的記者會、他在大劇院的演說、滾石樂團（The Rolling Stones）隨後在哈瓦那舉行的免費演唱會，都像是一個新時代即將開啟的信號。一時間，許多人以為那道延續了半世紀的高牆，終於要倒了。</p>
+    <p>然而牆並沒有倒。歐巴馬始終強調，他能做的只是放寬行政層面的限制，禁運的法律核心仍掌握在國會手中，而國會無意鬆綁。緩和的窗口，本就建立在脆弱的行政裁量之上。2017年政權更迭，川普（Donald Trump）政府逆轉了大半進展：收緊旅行、限制匯款、重新啟動《赫爾姆斯—伯頓法》中沉睡多年的訴訟條款、並在卸任前夕把古巴重新列入「支持恐怖主義國家」名單。短短幾年間，那扇剛剛推開一條縫的門，又被重重關上。這種「開—關」的反覆，本身就是美古關係最真實的寫照：它不是一條穩定的軌跡，而是一只隨著華府政治風向左右搖擺的鐘擺。每一位新總統都可以憑一紙行政命令，把前任的努力推翻重來。對島上的人而言，這意味著最殘酷的東西——希望，總是先被點燃，再被熄滅。剛剛回流的遊客與外匯戛然而止，剛剛冒頭的私營小館與民宿，又一次被推回不確定的寒夜。</p>
+
+    <div class="pull"><p>緩和建立在一紙行政命令之上，敵對卻牢牢寫進法律——這道不對稱，注定了希望總是比敵意更脆弱。</p></div>
+
+    <h3>關塔那摩：一塊不肯歸還的飛地</h3>
+    <p>在這場漫長的對峙裡，有一個地方像一根鯁在喉間的刺，提醒著雙方什麼叫「無解」——那就是關塔那摩灣（Guantánamo Bay）。早在1903年，趁著美國在美西戰爭後對古巴的軍事佔領，華府與當時的古巴政府簽下一紙永久租約，租下了島嶼東南端這片優良的天然深水港，設立海軍基地。租約規定，唯有經雙方「同意」才能終止；而美國，從未同意。革命之後，哈瓦那視這片基地為對其主權赤裸裸的侵犯，宣布拒收象徵性的年租支票——據說那一張張未兌現的支票，至今仍堆在某個抽屜裡，作為「絕不承認」的姿態。但拒收支票，並不能讓基地消失。於是出現了一個荒誕而真實的景象：在一個與美國斷交、視之為頭號敵人的國家領土上，飄揚著美國國旗的軍事基地，已經連續存在了一個多世紀，至今仍被佔據。</p>
+    <p>進入二十一世紀，關塔那摩又被賦予了一層更沉重、也更具爭議的身分。九一一事件後，美國在這片基地內設立了關押所謂「敵方戰鬥員」的拘留營。選擇這裡，正因為它在法律上處於一種曖昧的灰色地帶——名義上是古巴領土，實際上由美國控制，被援引來主張普通的憲法保障未必適用。多年來，這座拘留營因無限期羈押、未經審判、以及審訊手段的爭議，成為國際人權組織持續抨擊的對象，也成為美國自身價值的一道難堪的考題。對古巴而言，關塔那摩是雙重的傷口：既是領土主權被長期侵奪的象徵，又是它頭號敵人在自家土地上行使爭議權力的見證。這片小小的飛地，把美古關係裡所有的不對等、所有的歷史積怨、所有懸而未決，濃縮在了一道鐵絲網的兩側。</p>
+
+    <h3>島嶼與散居子民，依然彼此糾纏</h3>
+    <p>如果說禁運、邁阿密與關塔那摩，是國家層面的糾纏，那麼在更私密的層面，這九十英里割開的，是無數個家庭。革命之後的六十多年裡，古巴民族被那道海峽切成了兩半：一半留在島上，一半散落在以邁阿密為核心的海外。這兩半，從未真正分開過。海外的古巴人匯回島上的僑匯（las remesas），長年是古巴經濟最重要的外匯來源之一，支撐著無數家庭的日常開銷——這意味著，那個被官方斥為「叛徒」的流亡社群，其實在默默地養活著島上的親人。每一次禁運收緊、每一次匯款受限，傷的不是抽象的「政權」，而是某個哈瓦那老婦人能否拿到女兒從邁阿密寄來的那幾百美元。政治的鐘擺每擺動一次，就有千萬條這樣的家庭紐帶被牽動、被拉扯。</p>
+    <p>糾纏也寫在持續不斷的離去裡。每當島上的日子難熬到某個臨界點——九〇年代蘇聯撤援後的「特殊時期」、近年因疫情、制裁與經濟崩壞而起的新一波外逃——就會有成千上萬的古巴人，循著各種或合法或冒險的途徑，朝那九十英里之外、或繞道更遠的路線奔去。他們帶走的，是這座島嶼的青春與人才；他們留下的，是愈來愈空的村鎮與愈來愈老的人口。而那條「乾腳濕腳」（wet foot, dry foot）的特殊移民政策——曾規定古巴人只要踏上美國土地便可留下、在海上攔截則遣返——本身就是這段畸形關係的產物，它在2017年被取消，又一次改寫了無數人賭命渡海的計算。散居的子民與島上的母體，就這樣被一道海峽分隔，又被血緣、匯款、記憶與鄉愁，反覆縫合。他們是同一個民族被歷史撕成的兩半，誰也無法真正放下誰。</p>
+
+    <div class="cf"><p>試想另一種歷史：若那九十英里之外不是美國，而是一片無人在意的汪洋，古巴的革命還會不會走上「以反美定義自身」的道路？它的封閉、它的悲情、它對外部敵人的執著，是否有一大半，其實是被這個太近、太大的鄰居「逼」出來的？我們無從驗證，但這個反問本身提醒我們：一個國家的命運，有時不只由它自己決定，更由它無法選擇的鄰居決定。</p></div>
+
+    <p>於是，這部關於糖、關於革命、關於堅持的長卷，最終又回到了它開篇就埋下的那道陰影之下。從1898年美國的軍艦駛入哈瓦那港，到普拉特修正案把保護國的鎖鏈套上這座島；從革命用「反對北方帝國」點燃整整一代人的激情，到今日禁運、邁阿密、關塔那摩構成的這道死結——北方巨人的陰影，從未真正離開過古巴的天空。它換過形狀：時而是直接的軍事干預，時而是經濟的扼喉，時而是緩和的橄欖枝，時而又是收緊的鐵幕。但它從未消失。那九十英里，依然定義著古巴所能想像的一切——它的敵人是它，它的出路繞不開它，它流落海外的子民聚集在它的城市裡，連它最深的傷口也以它的名字命名。無論是擁抱，還是敵對，古巴始終無法走出這道陰影。這，就是地理寫給一座小島最殘酷、也最誠實的判詞。而下一章，至今仍懸而未決地，攤開在那片向北的、看不見盡頭的藍色海面上。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 北方巨人的陰影 the Shadow of the Giant</span>
+      <p>這是貫穿全書的第二道密碼，在當下最赤裸的延續。古巴的悲劇，從來不只是它做了什麼選擇，更是它身處什麼位置——緊鄰著地球上最強大的國家，又恰好近到無法被忽視，遠到無法被吞併。這個位置，既給了它無窮的誘惑（北方的市場、資本、僑匯），也給了它無盡的傷害（佔領、禁運、干預）。六十多年的禁運未能扳倒一個政權，卻完美地餵養了它賴以正當化自己的悲情；邁阿密的選票讓一個超級大國的政策被一座城市的記憶鎖死；關塔那摩讓主權的羞辱日復一日地飄揚在自家領土上空。當你下一次聽到「古巴問題」這四個字，請記得：它從來不是哈瓦那一個人的獨白，而是兩岸之間，那道誰也跨不過、又誰也離不開的九十英里。北方巨人的陰影，是讀懂這座島嶼一切愛恨的最後一把鑰匙。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-25">
+  <div class="act-head">
+    <span class="act-num">第25章 · After the Sugar</span>
+    <h2 class="act-title">糖盡之後：一個尋找新身分的古巴</h2>
+    <p class="act-sub">Searching for a New Identity</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>二○○二年的某一天，古巴政府宣布了一項在五百年歷史裡幾乎不可想像的決定：關閉全國一百五十六座糖廠中的七十一座，砍掉一半以上的甘蔗種植面積，把超過一百萬公頃曾經種滿甘蔗的土地，改作他用。這項計畫有一個聽起來頗為溫和的名字，叫「糖業重整」（la reestructuración azucarera），但任何一個古巴人都明白，這不是重整，這是告別。被關掉的糖廠，許多有上百年歷史，煙囪上還刻著西班牙文或英文的舊公司名；圍繞著它們，曾經長出整座整座的小鎮——磨季一到，汽笛長鳴，全鎮的男人走進廠房，空氣裡瀰漫著焦糖與蔗渣燃燒的甜膩氣味。如今，汽笛沉默了。鏽蝕爬上了齒輪，野草鑽進了軌道，那些被稱作「糖城」（bateyes）的聚落，一夜之間成了沒有心臟的軀殼。一種定義了這座島五百年的東西，正在我們眼前，安靜地死去。</p>
+
+    <p>這是全書最深的一道反諷，也是貫穿這部史詩的<span style="color:var(--rust);font-weight:600">回聲</span>，以一種誰都沒料到的方式，走向了它的終局。我們一路說「糖的詛咒」——說糖如何把這座島捆上單一作物的命運，如何召喚來百萬非洲奴隸，如何讓古巴的繁榮與貧困全繫於一條在倫敦與紐約跳動的價格曲線，如何讓它先依附西班牙、再依附美國、最後依附蘇聯。我們以為，這個詛咒若要收場，會是以一場糖價的崩盤、一次市場的背棄。但歷史給了一個更出人意表的結局：詛咒的解除，不是因為糖變得不值錢，而是因為糖，<strong>幾乎整個消失了</strong>。那個曾經讓古巴成為「世界糖罐」的島，今天，要從國外進口糖，才夠自己人民食用。</p>
+
+    <h3>一座島如何弄丟了它的甘蔗</h3>
+    <p>古巴糖業的崩塌，數字本身就帶著一種駭人的戲劇性。在一九七○年代與八○年代的全盛期，古巴一年能產出七、八百萬噸的糖，是世界數一數二的出口國，整個經濟、整個與蘇聯的交換關係，都建立在這座甜蜜的金山上。蘇聯解體後的「和平時期特殊階段」（el período especial）裡，產量開始下滑，但真正的斷崖出現在新世紀：二○○五年前後，年產跌破兩百萬噸；又過了十餘年，到二○一九、二○二○年的磨季，全國的糖產量只剩下大約一百二十萬噸上下；而到了二○二二、二○二三年那幾個格外慘澹的磨季，據估計產量甚至跌到僅約三、四十萬噸——這是一個多世紀以來，古巴從未見過的低點，比十九世紀中葉那個甘蔗剛剛興盛的年代還要少。一座曾經以糖傲視全球的島，如今連保障國內每月那一點點配給的糖，都捉襟見肘，不得不向哥倫比亞、巴西這些國家伸手進口。</p>
+    <p>崩塌的原因，是一連串災難的疊加，而每一個原因，又都纏繞著這座島更深層的病灶。最直接的，是設備的徹底老化：那些糖廠的機器，許多是蘇聯時代、甚至更早的遺產，零件早已停產，維修無門；磨蔗的效率一年低過一年。其次是甘蔗田本身的退化——肥料、農藥、燃油全部短缺，灌溉系統失修，單位面積的產量直直下墜。再來是運輸的崩潰：收割下來的甘蔗，必須在極短的時間內運進糖廠壓榨，否則糖分迅速流失，而古巴老舊的鐵路與卡車，連把蔗運到廠都成了奢望。最後，也最致命的，是人——年輕人不願意再回到甘蔗田裡，去做那種他們的曾祖父當年作為奴隸、祖父作為廉價勞力所做的、腰幾乎要折斷的苦工。當機器、土地、運輸與人心同時棄守，這個產業便不是衰退，而是塌方。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一個產業崩塌與一個產業被放棄的差別</span>
+      <p>產業會衰退，這在經濟史上稀鬆平常——某種商品被替代、某個市場被搶走、某項技術被淘汰。但古巴糖業的故事，比「衰退」更徹底，它更像是一種「放棄」。一個正常運作的市場經濟，會在糖廠老化時引入新的資本去汰換設備，會在勞力短缺時提高工資去吸引工人，會在運輸瓶頸出現時投資修路。但古巴的計畫經濟，在蘇聯補貼消失、美國禁運如鐵桶般罩住之後，根本拿不出這些資本與誘因。於是政府做了一個冷酷的算術：與其勉強維持一個高成本、低效率、世界糖價又長期低迷的產業，不如壯士斷腕，把資源轉向更划算的去處。換句話說，糖不是被市場淘汰的，而是被一個資源耗竭的國家，主動鬆開了手。當一個國家連維持自己立國根基的力氣都沒有了，那根基便不會體面地退場，而會直接坍塌。</p>
+    </div>
+
+    <h3>糖之後，這座島靠什麼活著</h3>
+    <p>糖退場後，留下一個巨大的真空，而古巴這二十多年來，一直在拼命尋找能填補它的東西。第一個被寄予厚望的，是觀光。哈瓦那（La Habana）斑駁卻迷人的舊城、巴拉德羅（Varadero）那條據說是加勒比海最美的白沙灘、五○年代的老爺車與雪茄、卡斯楚革命所散發的某種讓西方人著迷的滄桑浪漫——這些被打包成一種獨特的賣點，在好的年頭，能為這座島帶來數百萬遊客與數十億美元的外匯。第二個，是一種極為特殊的出口品：醫療服務。古巴傾全國之力培養出遠超人口比例的醫生，把他們成批派往委內瑞拉、巴西、非洲與拉美各地，換回石油或硬通貨——在某些年份，這些「白袍出口」帶來的收入，竟比觀光與其他所有商品出口加起來還多。此外，還有東部豐富的鎳礦、製藥與生技產業在某些利基領域意外的成就（古巴的肺癌疫苗與若干生物製劑曾引起國際注目），以及那條最沉默卻最關鍵的命脈——僑匯。</p>
+    <p>僑匯，是這幅新拼圖裡最耐人尋味的一塊。當年那些「背叛」革命、逃往邁阿密（Miami）的人，他們的子孫，如今每年從佛羅里達匯回島上的美元，成了無數古巴家庭真正賴以維生的依靠，其總額在好的年頭可達數十億美元，遠遠超過古巴自己任何一項實體出口所能掙得的。這是何等的反諷：那個被革命定義為敵人的「北方」，那些被官方斥為「蠕蟲」（gusanos）的流亡者，他們匯回的鈔票，竟在實質上補貼著、維繫著這個與他們為敵的政權所統治的社會。<strong>糖養活了舊古巴，而流亡者的匯款，養活著新古巴。</strong>但問題在於，這所有的替代品——觀光怕疫情與美國的政策反覆，醫療出口怕委內瑞拉自身的崩潰，鎳價隨國際行情起伏，僑匯則繫於一道隨時可能收緊的美國政策——沒有一個，能像當年的糖那樣，給這座島一個穩定的、可預期的、屬於自己的經濟脊樑。古巴換掉了一根折斷的拐杖，卻一直沒能長出自己的腿。</p>
+
+    <div class="cards">
+      <div class="card"><h5>觀光與僑匯</h5><p>老城、沙灘、雪茄與老爺車換來遊客；流亡者的後代每年匯回數十億美元。最大的外匯來源，卻也最受制於美國的政策與外部的風吹草動。</p></div>
+      <div class="card"><h5>醫療與生技</h5><p>把訓練有素的醫生成批外派，換回石油與硬通貨；在疫苗與生物製劑的利基上意外有成。國家最引以為傲的「軟出口」。</p></div>
+      <div class="card"><h5>鎳與殘存的糖</h5><p>東部的鎳礦仍是少數實體出口；而糖，這個五百年的主角，已淪為需要進口的配角。脊樑換了，卻始終沒有一根夠硬。</p></div>
+    </div>
+
+    <h3>糖盡之後，「我是誰」</h3>
+    <p>但「古巴靠什麼活著」這個問題，其實只是表層。在它底下，藏著一個更深、更令人不安的提問。當一樣東西定義了一個地方五百年——它的人口從何而來（為了種糖而運來的非洲奴隸）、它的財富如何積累、它的依附對象是誰、甚至它的革命為何而起——而這樣東西終於離開了，那麼這個地方，還是原來的它嗎？它，究竟是誰？古巴的處境之所以格外孤絕，是因為它在短短一個世代裡，接連失去了所有曾經定義它的東西。它失去了糖：那個五百年的經濟與身分基石。它失去了蘇聯：那個讓它在冷戰棋盤上找到位置、提供它石油與市場的靠山。它失去了菲德爾（Fidel Castro）：那個本身幾乎等同於「古巴」這個概念的、活生生的革命圖騰——二○一六年他的離世，象徵一個時代真正的落幕。而在這一切之上，它似乎正在失去的，是革命最初許諾的那個烏托邦本身——那個關於平等、尊嚴、不向北方屈膝的承諾，在排隊買麵包的長龍裡、在一次又一次的大停電裡、在年輕人決絕的背影裡，一點一點地褪了色。</p>
+    <p>失去這四樣東西，等於失去了支撐一個民族自我認同的四根柱子。沒有了糖，古巴不知道該靠什麼吃飯；沒有了蘇聯，古巴不知道該在世界上站哪一邊；沒有了菲德爾，古巴不知道誰能凝聚它分歧的人心；沒有了那個烏托邦的承諾，古巴不知道，這幾十年的犧牲與堅持，究竟換來了什麼。於是，今天的古巴，是一個正在四面真空中尋找重心的島。它的革命已經老去——掌權的，是一群平均年齡甚高、親歷過馬埃斯特拉山（la Sierra Maestra）游擊歲月、把那段歷史視為不可動搖之神聖的老人；而它的人民，尤其是年輕一代，卻渴望著一種他們的領導人既無法給予、也難以理解的東西：改變，與一個能讓他們留下來的未來。</p>
+
+    <div class="aside">在哈瓦那的街頭，常能看到一種奇異的並置：一面褪色的牆上，還刷著「社會主義或死亡」（Patria o Muerte）的口號，而牆角下，一個年輕人正低頭刷著手機，試圖連上那時斷時續、昂貴得令人卻步的網路，看著遠方表親在邁阿密或馬德里上傳的、屬於另一個世界的生活。革命的標語，與全球化的螢幕，在同一堵牆上彼此凝視——這幾乎就是當代古巴的全部隱喻。</div>
+
+    <p>而最尖銳的張力，凝結在「離去」這件事上。二○二一年起，古巴經歷了它革命史以來最大規模的一波出走潮——在短短兩、三年間，據估計有數十萬、甚至逾百萬的古巴人，主要是受過教育的年輕人，賣掉家當，經由種種艱險的路徑離開了這座島，奔向美國或其他國度。這個數字，相對於一個只有約一千一百萬人口的國家，是驚人的失血。一座島，正在被它最該指望的下一代，一波波地拋下。這逼出了一個古巴政權至今無法真正回答的問題：一場以「留下來、建設家園、不向北方低頭」為號召的革命，當它的年輕人用腳投票、成群結隊地奔向那個「北方」時，它還剩下什麼？開放——讓更多的私營經濟、更自由的資訊、更務實的對外關係進來，或許能挽留一些人，卻可能鬆動政權賴以為繫的管控；而管控——維持那套熟悉的、安全的舊秩序，或許能保住權力，卻只會加速人心與人口的流失。在開放與管控這兩端之間，懸著一個始終未解的張力，而時間，似乎並不站在那群老去的革命者這一邊。</p>
+
+    <div class="pull"><p>當定義了一座島五百年的東西終於離開，這座島，被迫從頭回答一個它從未真正問過自己的問題：糖盡之後，我，究竟是誰？</p></div>
+
+    <p>於是，我們這部關於古巴身世的長篇敘事，走到了一個並不圓滿、卻格外真實的結尾。它不是一個答案，而是一個懸在半空的問句。古巴曾經是西班牙的糖罐，是美國的後院與賭場，是蘇聯的前哨與樣板，是第三世界革命的燈塔——這每一個身分，都是別人賦予的，或是為了對抗別人而塑造的。而現在，當糖走了、蘇聯散了、菲德爾去了、連那個烏托邦也斑駁了，古巴第一次，必須在沒有任何外部坐標、沒有任何現成劇本的情況下，獨自面對鏡子，問自己到底想成為什麼。它會走向某種務實的開放，像它的鄰人那樣融入這個全球化的世界嗎？還是會在管控與停滯中，繼續守著一座愈來愈空的島？沒有人知道。這座加勒比海上的島，用了五百年，終於把它與糖的姻緣走到了盡頭；而它與「自己」的故事，此刻才剛剛掀開最艱難的一頁。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 糖的詛咒 the Curse of Sugar</span>
+      <p>這部史詩從一粒甘蔗開始，也在甘蔗的缺席裡結束。我們一路追蹤「糖的詛咒」——它如何把一座島綁上單一作物的命運，如何用一條外國的價格曲線決定古巴人的飢飽，如何讓繁榮與災難都從同一根莖上長出來。我們以為這詛咒會以價崩收場，歷史卻給了更深的一筆：詛咒沒有被打破，它只是隨著糖本身的消失，一起蒸發了——而它留下的真空，至今無物能填。糖養出的，從來不只是財富，還有一整套「我是誰」的答案：人口的來歷、依附的對象、革命的理由，全寫在那片甘蔗田裡。當田荒了、廠塌了、連糖都要進口了，那套答案也一併失效。<strong>糖的詛咒，最終以解除自身的方式，向古巴提出了它最難的一道問題：在糖之後、在蘇聯之後、在菲德爾之後、在烏托邦之後，你還剩下什麼，又願意成為什麼？</strong>這座島仍在尋找答案；而它能否找到，將決定它下一個五百年的身世，由誰來寫。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ❂ ✦</div>
+
+<section class="act reveal" id="ch-26">
+  <div class="act-head">
+    <span class="act-num">終章 · The Island That Would Not Bow</span>
+    <h2 class="act-title">不肯低頭的島：糖、革命，與九十英里的倔強</h2>
+    <p class="act-sub">Sugar, Revolution and the Defiance of Ninety Miles</p>
+    <div class="ornament">✦ ❂ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一座島，最深的命運，往往不是它做了什麼，而是它被什麼纏住、又如何拒絕被那東西吞沒。古巴的身世，若要收成一句話，便是這樣：它是一座小得幾乎可以忽略的島嶼，卻用自己整整五百年的歷史，與三股遠比它龐大的力量——糖、帝國、超級強權——糾纏不休、彼此撕扯，卻始終、倔強地，拒絕就此消失於其中任何一個。它被糖塑造，也被糖奴役；它被北方巨人覬覦，也被北方巨人定義；它試圖用一場革命，一舉斬斷這兩道捆綁了它兩百年的枷鎖。它沒有成功地擺脫貧窮，也沒有成功地擺脫那道海峽；可它做到了一件更難的事——它沒有低頭。走到這本書的盡頭，我們要做的，不是再添一筆新的史料，而是把這三道貫穿全書的密碼，收成一條弧線；然後，靜靜地，聽這座島自己說，它究竟是誰。</p>
+
+    <h3>第一道密碼：糖，塑造了它、奴役了它，而今已經消失</h3>
+    <p>先說糖。這是古巴最古老、也最深的詛咒。當西班牙人把第一批甘蔗插進這片紅土，他們也插下了這座島往後三百年的命運。<strong>糖是一種貪婪的作物：它要最好的土地，要最廉價的、可以被榨乾的人力，要一個願意無限量吞下它的市場。</strong>於是古巴有了單一作物的經濟——所有的田、所有的港、所有的鐵路，都為了同一件白色的結晶而存在。於是古巴有了奴隸——一船又一船從非洲被擄來的人，在熬糖的鍋爐邊耗盡生命，也把他們的神祇、他們的鼓、他們的血脈，永遠地種進了這座島的靈魂裡。於是古巴有了依賴——它的繁榮與飢餓，不繫於自己的雙手，而繫於倫敦、紐約、後來莫斯科的糖價單上那一個跳動的數字。糖讓古巴富過，富到哈瓦那一度比許多歐洲城市更奢華；糖也讓古巴一次次墜落，每當世界不再那麼需要它的甜。</p>
+    <p>而最深的反諷，藏在今天。當你走進二十一世紀的古巴鄉間，你會看見那些曾經是這座島心臟的巨大糖廠，如今鏽蝕、傾頹、被野草吞沒，像一具具被遺棄的鋼鐵骸骨。那個曾經年產八百萬噸、養活整座島、定義了整個民族的糖業，如今產量跌到歷史最低點，連自己人吃的糖，都要進口。<strong>那道捆綁了古巴三百年的詛咒，沒有被誰光榮地斬斷，它只是——靜靜地，死去了。</strong>它沒有留下勝利，只留下一片廢墟，和一個必須重新尋找自己究竟是誰的民族。糖把古巴帶上了世界的舞台，也最終，悄悄地、不告而別地，把它留在了空蕩的後台。</p>
+
+    <div class="pull"><p>糖塑造了這座島，奴役了這座島，定義了這座島整整三百年——而如今，它連一聲告別都沒有，就消失了。</p></div>
+
+    <h3>第二道密碼：北方巨人的陰影，兩百年揮之不去</h3>
+    <p>第二道密碼，是那九十英里。地理是一種無法上訴的判決。古巴的北端，距離佛羅里達的礁島，只有九十英里——一道短得近乎殘忍的距離，足以讓一個龐然大物的呼吸，永遠拂在這座島的後頸上。早在古巴還是西班牙殖民地時，華府裡的政治家就已經把它看作一枚遲早會「因萬有引力而墜入美國懷中」的成熟果實，一把扼住墨西哥灣與加勒比海的鑰匙。一八九八年，那聲在哈瓦那港炸響的爆炸，給了北方巨人一個登場的藉口；它趕走了垂死的西班牙帝國，卻在古巴新生的憲法裡，硬塞進一條普拉特修正案——一紙允許自己隨時派兵介入的條款，把「獨立」二字，活生生改寫成了「後院」。從那一刻起，古巴的命運便被一道陰影籠罩：它的糖賣給北方，它的政府看北方的臉色，它的賭場、它的酒、它的旅館，都成了北方巨人尋歡作樂的後花園。</p>
+    <p>而這道陰影最折磨人的地方在於：<strong>無論古巴選擇臣服，還是選擇反抗，它都揮之不去。</strong>當古巴臣服，它便是一個被當作後院、被當作糖罐、被當作賭城的附庸，尊嚴掃地；當古巴反抗——當一九五九年那群鬍子兵衝下馬埃斯特拉山、把革命的旗插上哈瓦那——它換來的，是一道延續了六十餘年、人類史上最漫長的經濟封鎖，是一場差點把世界推向核戰邊緣的飛彈危機，是無數次暗殺與顛覆的圖謀。北方巨人不曾真正放手。它要麼擁抱古巴到令它窒息，要麼孤立古巴到令它流血。兩百年過去，帝國的形式變了——從覬覦的鄰邦，到佔領的主人，到封鎖的對手——可那九十英里的引力，那道籠罩著整座島的陰影，至今，一寸也未曾退去。</p>
+
+    <div class="deepen"><span class="dh">概念深掘 · 為什麼九十英里是一種命運</span><p>對一個大國而言，九十英里只是一次短程飛行；對一座小島而言，它卻是一生都無法擺脫的地心引力。古巴的全部現代史，幾乎都可以讀成它與這道距離的搏鬥——既無法靠得太近（那意味著被吞併），也無法離得太遠（那意味著被封鎖到窒息）。它曾試圖用一個遠在地球另一端的超級強權（蘇聯）來抵銷近在咫尺的這一個，結果只是把自己變成了兩個巨人對賭的賭桌。地理沒有給古巴選擇強鄰的自由，只給了它一道功課：如何在一個龐然大物的呼吸下，仍然活成一個有自己名字的國家。</p></div>
+
+    <h3>第三道密碼：革命，斬斷了枷鎖、也付出了代價，如今疲憊卻不低頭</h3>
+    <p>於是有了第三道密碼，也是這座島最孤注一擲的一搏——革命。一九五九年的那場革命，其野心之大，在於它想做的不只是換一個政府，而是要<strong>一刀斬斷糖與帝國這兩道糾纏了古巴兩百年的枷鎖</strong>。它要終結對單一作物、單一市場的依賴，要把土地還給耕者，要把那座屬於北方巨人的賭城後花園，變回一座屬於古巴人自己的島。這是一個近乎不可能的夢，而它確實，在某些地方，成就了真實的東西。它讓一個文盲遍地的國度，識字率躍升到世界前列；它建起了一套讓貧者也能就醫、嬰兒夭折率低於許多富國的醫療體系；它把醫生與教師，送往全世界最貧困的角落，讓這座小島，在道義的版圖上，遠比它的面積龐大。這些，不是宣傳，是寫進了一代代古巴人骨血裡的、真實的尊嚴。</p>
+    <p>可革命也付出了真實的、沉重的代價。為了掙脫北方巨人的懷抱，它撲進了另一個巨人的懷抱——莫斯科用優惠的油與糖價，供養了古巴三十年，也讓這座島，再一次，把命運押在了一張遙遠的糖價單上。於是當蘇聯在一九九一年轟然崩塌，古巴的天，也跟著塌了。那段被稱為「特殊時期」的歲月，是這座島近代最深的飢餓：停電成了日常，公車變成牲口拉的車，成年人平均瘦了好幾公斤，人們在街頭，第一次認真地討論起，貓肉與葡萄柚皮，是否也能下鍋。革命撐過了那場幾乎致命的考驗，沒有崩潰，可它也再沒能真正地站直。<strong>它斬斷了舊的枷鎖，卻沒能換來承諾過的富足；它贏得了尊嚴與獨立，卻把自己的人民，長久地留在了匱乏裡。</strong>言論的自由被收緊，異議被消音，一波又一波的人，登上小船與木筏，朝著那九十英里外的燈火，賭上性命地離去。如今的古巴，是一個精疲力竭的革命——它的領袖凋零，它的模型失靈，它的年輕人用腳投票；可即便如此，它依然，沒有低頭。</p>
+
+    <div class="cf"><p>反過來想：若一九五九年那場革命不曾發生，古巴或許會更富裕——一座加勒比海的觀光天堂，遍布度假村與賭場，人均所得遠高於今日。可它也很可能，永遠只是北方巨人的一座後花園，一個沒有自己面孔的附庸。革命用富足，換來了尊嚴；而歷史最殘酷的提問是：當這份尊嚴，也養不活它的人民、留不住它的孩子時，這筆交易，還算不算值得？這個問題，沒有人能替古巴人回答——它只能由那些選擇留下的人，與那些選擇離開的人，用各自的一生，去各自回答。</p></div>
+
+    <h3>一座小島，與比它龐大的一切</h3>
+    <p>把這三道密碼放在一起看，你會發現它們其實是同一個故事的三重變奏。糖、帝國、超級強權——這是三股遠比古巴龐大的力量，每一股，都足以把這座小島徹底吞沒、徹底改寫、徹底抹去它的名字。而古巴的全部歷史，就是它用自己渺小的身軀，與這三股力量輪番糾纏、輪番搏鬥的歷史。它輸掉了很多：它沒能擺脫貧窮，沒能填平那九十英里的海峽，沒能兌現革命許諾的繁榮，甚至連那曾經定義它的糖，都已從指縫間流走。可它始終守住了一件最難守住的東西——它沒有消失於其中任何一個。它沒有變成糖的殖民地裡一個沒有靈魂的工廠，沒有變成北方巨人地圖上一塊沒有名字的後院，也沒有變成超級強權對賭時一枚被輕易棄掉的棋子。它始終，是古巴。倔強地、頑固地、不肯低頭地，是它自己。</p>
+    <p>而今天的古巴，正站在一個它從未真正面對過的十字路口上。舊的模型，那個由蘇聯的補貼、由配給本、由一個中央計劃的經濟所撐起的模型，已經明明白白地失敗了，再也回不去；可前方那條路——更多的市場，更多的開放，更多與世界（包括那個北方巨人）的接軌——卻不確定、不平坦，且充滿了它最害怕的東西：失去控制。它的人民，正一波又一波地離去，這一次，不再是冒險渡海的木筏，而是一張張合法的機票，飛向馬德里、飛向邁阿密、飛向墨西哥城——這是它建國以來最大的一次人口流失，一整代年輕人，正用離開，書寫他們對未來的判決。然而，就在這樣一座似乎正在被掏空的島上，<strong>音樂卻仍然在播放。</strong>哈瓦那的夜裡，頌樂與倫巴的鼓點，依舊從斑駁的牆後、從昏黃的陽台上、從每一條坑窪的街道盡頭，固執地響著。那鼓點，不是繁榮的證明，而是倔強的證明——它告訴所有人，這座島還活著，還在跳動，還沒有，也不打算，低頭。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 糖、革命，與九十英里的倔強</span>
+      <p>所以這本書，從一座被甘蔗與奴隸的血汗澆灌出來的島嶼開始，問的始終是同一個問題：<em>一座如此渺小的島，如何在三股遠比自己龐大的力量——糖、帝國、超級強權——的反覆碾壓下，依然守住自己的名字？</em>走到終點，我們看到的答案，藏在那三道密碼最終匯成的一條弧線裡。<strong>糖</strong>塑造了它、奴役了它、定義了它三百年，給了它非洲的鼓與單一作物的詛咒，而今，這道詛咒已在一片鏽蝕的廠房裡，悄然死去；<strong>那九十英里</strong>的陰影，從一八九八到普拉特修正案、到飛彈危機、到延續至今的封鎖，籠罩了它兩百年——無論它臣服還是反抗，都揮之不去；而那場<strong>革命</strong>，曾試圖一舉斬斷這兩道枷鎖，成就了識字、醫療與尊嚴這些真實的東西，也付出了匱乏、離散與失語這些真實的代價，如今精疲力竭、模型失靈，卻仍倔強地，不肯認輸。古巴真正的故事，從來不是它贏得了什麼——它輸掉了太多；而是它在輸掉了那麼多之後，<em>依然拒絕消失</em>。它是一座用自己的全部歷史，向所有龐大的力量證明了一件事的小島：渺小，不等於可以被抹去；貧窮，不等於必須低頭。</p>
+      <p>站在這個失敗的舊模型，與不確定的開放之間，站在人民一波波離去、音樂卻仍在播放的此刻，沒有人知道，明天的古巴，會成為什麼。它可能在開放中，慢慢變回一座被資本與觀光重新塑造的島，找回繁榮，卻也許再次，丟掉一部分它流血換來的尊嚴；它也可能，在封鎖與固守中，繼續凋零、繼續被掏空，直到只剩下一座空城與一段傳奇。但無論它走向哪一條路，它已經用五百年的時間，回答了一個比繁榮更深的問題——<strong>一座小島，能不能，在被糖、被帝國、被超級強權輪番糾纏了一生之後，依然，倔強地，是它自己？</strong>古巴的答案，至今，是肯定的。</p>
+    </div>
+
+    <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">古巴是人類史上罕見的一座，把「最龐大的纏縛」與「最渺小的倔強」鍛造在同一片紅土上的島。它的力量，不在於它從未受苦——它受過奴隸、封鎖、飢餓與離散；而在於它證明了：即便被糖奴役了三百年、被帝國覬覦了兩百年、被超級強權當作賭桌押了半個世紀，一座小島，依然可以拒絕消失於其中任何一個，依然可以在精疲力竭時，讓音樂繼續播放。那一船船甘蔗與奴隸，那九十英里的海峽，那普拉特修正案的恥辱，那飛彈危機的險峰，那馬埃斯特拉山下衝出的革命，那特殊時期的飢餓，那此刻仍在響著的、哈瓦那的鼓點——如今，依舊定義著這座不肯低頭的島的命運。</p></div>
+  </div>
+  <div class="principle">
+    <span class="tag">不肯低頭的島的終極啟示</span>
+    <p>一個民族真正的尊嚴，從來不是用它擁有多少財富來衡量的，而是用它在被遠比自己龐大的力量輪番碾壓時，是否仍守住了自己的名字來衡量的。古巴證明了，一座小到可以被忽略的島，可以倔強到，即便糖盡、即便被封鎖、即便人民一波波離去，依然拒絕消失於糖、帝國與超級強權的任何一個之中；但它也提醒著世人，尊嚴若不能化作富足，獨立若不能換來人民的安居，再悲壯的倔強，也終將被它自己的孩子，用離開來投票。如何在守住名字的同時，也守住人民；如何在拒絕低頭的同時，也讓人民不必受苦——這不只是古巴的功課，也是這個由無數小國，在龐大力量的陰影下艱難求存的世界裡，最沉重也最動人的功課。</p>
+  </div>
+  <div class="prose">
+    <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+      從，第一株插進紅土的甘蔗，到一船船被擄來、在熬糖的鍋爐邊耗盡的非洲靈魂<br>
+      從，哈瓦那港那聲炸響的爆炸，到憲法裡硬塞進的、那一頁普拉特修正案的恥辱<br>
+      從，那道短得近乎殘忍的、九十英里的海峽，到永遠拂在後頸上的、北方巨人的呼吸<br>
+      從，馬埃斯特拉山下衝出的鬍子兵，到插上哈瓦那的、那一面孤注一擲的旗<br>
+      從，識字的課本與低於富國的嬰兒夭折率，到差點把世界推向核戰的、那十三天<br>
+      從，莫斯科優惠的糖價，到蘇聯崩塌後，那段以貓肉與葡萄柚皮下鍋的、特殊時期的飢餓<br>
+      從，鏽蝕傾頹、被野草吞沒的糖廠骸骨，到再也回不去、卻也走不通的那道十字路口<br>
+      從，登上木筏賭命的人，到搭上飛機合法離去的、一整代年輕的臉——<br>
+      這座，被糖奴役了三百年、被帝國覬覦了兩百年、被超級強權押在賭桌上半個世紀的小島<br>
+      在，渺小的身軀，與龐大的纏縛之間，倔強了整整五百年。<br>
+      而，今天，這座精疲力竭、卻仍不肯低頭的島——一座輸掉了太多、卻始終拒絕消失的島<br>站在失敗的舊模型，與不確定的開放之間<br>人民一波波離去，可那哈瓦那的鼓點，依舊在響<br>依舊，倔強地，是它自己。
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">✦ ❂ ✦</div>
+  <p>糖、奴隸、革命，與九十英里外的帝國 · 古巴的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE KEY TO THE GULF AND THE CANE FIELDS TO NINETY MILES OF DEFIANCE · 1492 – 2026</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

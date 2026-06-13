@@ -52,6 +52,8 @@ ENTRIES = [
          zh="海上孤舟：台灣四百年的身世", en="Taiwan: Four Centuries Adrift", lat=23.7, lng=121.0),
     dict(src="東北亞歷史/中國史詩_天下王朝與大一統.html", slug="china-epic", cat="nation",
          zh="天下、王朝循環，與大一統的千年回歸：中國", en="China: All-Under-Heaven, the Dynastic Cycle & the Return to Unity", lat=35.0, lng=104.0),
+    dict(src="東北亞歷史/蒙古史詩_草原成吉思汗與最大的陸地帝國.html", slug="mongolia", cat="nation",
+         zh="草原、成吉思汗，與史上最大的陸地帝國：蒙古", en="Mongolia: The Steppe, Genghis Khan & the Largest Land Empire", lat=46.9, lng=103.8),
     dict(src="澳洲史詩_最古老的土地最年輕的國家.html", slug="australia-epic", cat="nation",
          zh="最古老的土地，最年輕的國家：澳洲", en="Australia: Oldest Land, Youngest Nation", lat=-25.3, lng=133.8),
     dict(src="紐西蘭史詩_最後的島嶼與兩個民族的條約.html", slug="newzealand-epic", cat="nation",
@@ -142,6 +144,8 @@ ENTRIES = [
          zh="海峽、帝國的幽靈，與國父的工程：土耳其", en="Türkiye: The Strait, the Ghost of Empire & the Father's Project", lat=39.0, lng=35.2),
     dict(src="非洲歷史/埃及史詩_尼羅河永恆與被征服的兩千年.html", slug="egypt-epic", cat="nation",
          zh="尼羅河、永恆，與被征服的兩千年：埃及", en="Egypt: The Nile, Eternity & a Civilization Ruled by Others", lat=26.8, lng=30.8),
+    dict(src="非洲歷史/摩洛哥史詩_柏柏爾馬格里布與從未被完全征服的西大門.html", slug="morocco", cat="nation",
+         zh="柏柏爾、馬格里布，與從未被完全征服的西大門：摩洛哥", en="Morocco: The Berbers, the Maghreb & the Gate of the Far West", lat=31.8, lng=-7.1),
     dict(src="非洲歷史/衣索比亞史詩_高原所羅門與多民族帝國.html", slug="ethiopia-epic", cat="nation",
          zh="高原、所羅門的血脈，與一個多民族帝國：衣索比亞", en="Ethiopia: The Highlands, the Line of Solomon & an Empire of Nations", lat=9.1, lng=40.5),
     dict(src="非洲歷史/奈及利亞史詩_三百個民族黑金與比國家更強大的人民.html", slug="nigeria-epic", cat="nation",
@@ -150,6 +154,8 @@ ENTRIES = [
          zh="黃金與鑽石、種族的高牆，與一道拆得掉與一道拆不掉的牆：南非", en="South Africa: Gold, Diamonds, the Wall of Race & the Two Walls", lat=-29.0, lng=24.5),
     dict(src="歐亞歷史/伊朗史詩_波斯什葉與強權的棋盤.html", slug="iran-epic", cat="nation",
          zh="波斯、什葉，與強權棋盤上的古老文明：伊朗", en="Iran: Persia, Shiism & a Civilization on the Chessboard", lat=32.4, lng=53.7),
+    dict(src="歐亞歷史/伊拉克史詩_兩河文明的搖籃與巴格達的黃金與灰燼.html", slug="iraq", cat="nation",
+         zh="兩河、文明的搖籃，與巴格達的黃金與灰燼：伊拉克", en="Iraq: Two Rivers, the Cradle of Civilization & the Gold and Ash of Baghdad", lat=33.2, lng=43.7),
     dict(src="非洲歷史/沙烏地阿拉伯史詩_沙漠聖地與劍與經.html", slug="saudi-epic", cat="nation",
          zh="沙漠、聖地，與劍與經的契約：沙烏地阿拉伯", en="Saudi Arabia: Desert, the Holy Cities & the Pact of Sword and Book", lat=24.0, lng=45.0),
     dict(src="歐亞歷史/以色列史詩_應許之地避難所與兩個民族.html", slug="israel-epic", cat="nation",
@@ -158,6 +164,16 @@ ENTRIES = [
          zh="無垠的平原、權力的垂直線，與第三羅馬：俄羅斯", en="Russia: The Boundless Plain, the Vertical of Power & the Third Rome", lat=61.5, lng=105.3),
     dict(src="歐亞歷史/烏克蘭史詩_邊地哥薩克的自由與被打出來的民族.html", slug="ukraine-epic", cat="nation",
          zh="邊地、哥薩克的自由，與一個被打出來的民族：烏克蘭", en="Ukraine: The Borderland, the Cossack's Freedom & a Nation Forged in Fire", lat=49.0, lng=31.5),
+
+    # ---------- 中東／黎凡特史詩 ----------
+    dict(src="中東歷史/敘利亞史詩_十字路口鑲嵌畫與吞噬自身的戰爭.html", slug="syria-epic", cat="nation",
+         zh="文明的十字路口、碎裂的鑲嵌畫，與一場吞噬自身的戰爭：敘利亞", en="Syria: The Crossroads, the Shattered Mosaic & a War That Devoured Itself", lat=35.0, lng=38.5),
+    dict(src="中東歷史/黎巴嫩史詩_山海港與十八個教派.html", slug="lebanon-epic", cat="nation",
+         zh="山、海港，與十八個教派的脆弱平衡：黎巴嫩", en="Lebanon: The Mountain, the Port & the Fragile Balance of Eighteen Sects", lat=33.9, lng=35.9),
+    dict(src="中東歷史/葉門史詩_幸福的阿拉伯咖啡與被遺忘的戰爭.html", slug="yemen-epic", cat="nation",
+         zh="幸福的阿拉伯、咖啡的故鄉，與一場被遺忘的戰爭：葉門", en="Yemen: Arabia Felix, the Birthplace of Coffee & a Forgotten War", lat=15.5, lng=47.6),
+    dict(src="中東歷史/約旦史詩_沙漠綠洲難民方舟與被維繫的王國.html", slug="jordan-epic", cat="nation",
+         zh="沙漠中的綠洲、難民的方舟，與一個被精心維繫的王國：約旦", en="Jordan: The Desert Oasis, the Ark of Refugees & a Kingdom Carefully Kept", lat=31.2, lng=36.5),
 
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
@@ -170,6 +186,10 @@ ENTRIES = [
          zh="血與玉米，與一座建在神廟上的城：墨西哥", en="Mexico: Blood, Corn & a City on a Temple", lat=23.6, lng=-102.5),
     dict(src="美洲歷史/巴西史詩_未來之國混血的大陸與縫隙裡的即興.html", slug="brazil-epic", cat="nation",
          zh="未來之國、混血的大陸，與縫隙裡的即興：巴西", en="Brazil: The Country of the Future, the Mixed Continent & the Jeitinho", lat=-14.2, lng=-51.9),
+    dict(src="美洲歷史/秘魯史詩_安地斯印加與波托西的銀山.html", slug="peru", cat="nation",
+         zh="安地斯、印加，與波托西吃人的銀山：秘魯", en="Peru: The Andes, the Inca & the Silver of Potosí", lat=-9.2, lng=-75.0),
+    dict(src="美洲歷史/古巴史詩_糖奴隸革命與九十英里外的帝國.html", slug="cuba", cat="nation",
+         zh="糖、奴隸、革命，與九十英里外的帝國：古巴", en="Cuba: Sugar, Slavery, Revolution & the Empire Ninety Miles Away", lat=21.5, lng=-79.5),
 
     # ---------- 城市史詩 ----------
     dict(src="台灣歷史/台北_盆地之城.html", slug="taipei", cat="city", group="台灣 Taiwan",
@@ -230,6 +250,10 @@ ENTRIES = [
     # ---------- 歐洲城市 ----------
     dict(src="歐洲歷史/紐卡索_運煤到紐卡索.html", slug="newcastle", cat="city", group="英國 United Kingdom",
          zh="運煤到紐卡索：煤、船與泰恩河的傲骨", en="Newcastle upon Tyne: Coal, Ships & Geordie Pride", lat=54.98, lng=-1.61),
+
+    # ---------- 美國城市 ----------
+    dict(src="美國/紐約_港口金錢與屬於全世界的城.html", slug="newyork", cat="city", group="美國 USA",
+         zh="如果你能在這裡成功：紐約的身世", en="New York: From New Amsterdam to the Capital of the World", lat=40.71, lng=-74.01),
 
     # ---------- 美國城市 ----------
     dict(src="美國/西雅圖_雨木與重新發明.html", slug="seattle", cat="city", group="美國 United States",
