@@ -248,6 +248,10 @@ ENTRIES = [
          zh="棕蛇之河、流放與奧運：布里斯本的身世", en="Brisbane: The Penal River That Became an Olympic City", lat=-27.47, lng=153.02),
 
     # ---------- 歐洲城市 ----------
+    dict(src="歐洲歷史/倫敦_羅馬渡口金融城與帝國心臟.html", slug="london", cat="city", group="英國 United Kingdom",
+         zh="羅馬的渡口、世界的金融城，與日不落帝國的心臟：倫敦", en="London: The Roman Crossing, the Financial City & the Heart of Empire", lat=51.51, lng=-0.13),
+    dict(src="歐洲歷史/巴黎_島與河革命之都與光之城.html", slug="paris", cat="city", group="法國 France",
+         zh="島與河、革命之都，與光與藝術之城：巴黎", en="Paris: The Island, the Capital of Revolution & the City of Light", lat=48.86, lng=2.35),
     dict(src="歐洲歷史/紐卡索_運煤到紐卡索.html", slug="newcastle", cat="city", group="英國 United Kingdom",
          zh="運煤到紐卡索：煤、船與泰恩河的傲骨", en="Newcastle upon Tyne: Coal, Ships & Geordie Pride", lat=54.98, lng=-1.61),
 
@@ -262,6 +266,8 @@ ENTRIES = [
          zh="瞬間之城：舊金山從黃金到程式碼的身世", en="San Francisco: The Instant City on a Fault Line — From Gold to Code", lat=37.77, lng=-122.42),
     dict(src="美國/芝加哥_鐵路造出來的城.html", slug="chicago", cat="city", group="美國 United States",
          zh="鐵路造出來的城：芝加哥把草原變成錢的身世", en="Chicago: The City the Portage Chose, the Railroad Built, the Fire Reinvented", lat=41.88, lng=-87.63),
+    dict(src="美國/紐奧良_最不像美國的美國城.html", slug="neworleans", cat="city", group="美國 United States",
+         zh="最不像美國的美國城：紐奧良的克里奧爾與爵士身世", en="New Orleans: The Most Un-American American City — River, Creole & Jazz", lat=29.95, lng=-90.07),
 
     # ---------- 美國城市 ----------
     dict(src="美國/西雅圖_雨木與重新發明.html", slug="seattle", cat="city", group="美國 United States",
@@ -270,12 +276,6 @@ ENTRIES = [
          zh="水、夢，與一座無中生有的沙漠巨城：洛杉磯", en="Los Angeles: Water, Dreams & a Metropolis Conjured from a Desert", lat=34.05, lng=-118.24),
     dict(src="美國/聖地牙哥_海灣邊界與軍港.html", slug="san-diego", cat="city", group="美國 United States",
          zh="海灣、邊界，與一座面朝太平洋的軍港：聖地牙哥", en="San Diego: The Bay, the Border & the City Facing the Pacific", lat=32.72, lng=-117.16),
-
-    # ---------- 歐洲／歐亞城市 ----------
-    dict(src="歐洲歷史/威尼斯_潟湖商人與海上帝國.html", slug="venice", cat="city", group="義大利 Italy",
-         zh="潟湖、商人，與一個把海變成帝國的共和國：威尼斯", en="Venice: The Lagoon, the Merchants & the Republic That Sold the Sea", lat=45.44, lng=12.34),
-    dict(src="歐洲歷史/伊斯坦堡_海峽城牆與三帝國首都.html", slug="istanbul", cat="city", group="土耳其 Türkiye",
-         zh="海峽、城牆，與三個帝國的首都：伊斯坦堡", en="Istanbul: The Strait, the Walls & the Capital of Three Empires", lat=41.01, lng=28.98),
 
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
