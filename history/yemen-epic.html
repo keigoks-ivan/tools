@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>幸福的阿拉伯、咖啡的故鄉，與一場被遺忘的戰爭：葉門的身世</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#5e3a24;
+  --sea-deep:#2c1a10;
+  --gold:#c6982f;
+  --gold-bright:#e0b94e;
+  --rust:#9c3b1f;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(94,58,36,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(94,58,36,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #714a2e 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23e0b94e' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23e0b94e' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23e0b94e' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(94,58,36,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(44,26,16,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(94,58,36,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23e0b94e' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ===== econ-layer callout boxes (deepen / counterfactual) ===== */
+.deepen{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(176,141,52,.07);border:1px solid rgba(176,141,52,.32);border-left:4px solid var(--gold);border-radius:3px}
+.deepen .dh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--rust);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.deepen p{margin:.7rem 0;text-align:justify}
+.cf{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(94,58,36,.05);border:1px dashed rgba(94,58,36,.4);border-radius:3px}
+.cf .cfh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--sea-deep);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.cf p{margin:.7rem 0;text-align:justify}
+/* ===== dark-section legibility (boxes + stats + pull + timeline + interlude) ===== */
+.dark .deepen{background:rgba(216,196,160,.06);border-color:rgba(212,175,90,.4);border-left-color:#e0b94e}
+.dark .deepen .dh{color:#e2a878}
+.dark .cf{background:rgba(255,255,255,.045);border-color:rgba(212,175,90,.32)}
+.dark .cf .cfh{color:#d8c4a0}
+.dark .deepen p,.dark .cf p{color:#cdb494}
+.dark .deepen strong,.dark .cf strong{color:#c87a5a}
+.dark .deepen em,.dark .cf em{color:#d8a878}
+.dark .pull{background:linear-gradient(135deg,rgba(216,196,160,.07),rgba(176,141,52,.1));border-top-color:#e0b94e;border-bottom-color:#e0b94e}
+.dark .pull p{color:#ecd9b4}
+.dark .pull::before{color:#e0b94e}
+.dark .stat{background:rgba(216,196,160,.06)}
+.dark .stat .num{color:#e0b94e}
+.dark .stat .lbl{color:#c4af88}
+.dark .tl-text{color:#cdb494}
+.dark .tl-year{color:#e2a060}
+.dark .interlude p{color:rgba(243,238,226,.9)}
+.dark .interlude p .hl{color:#e2a060}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(94,58,36,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* ===== ACT / PART DIVIDER ===== */
+.part-div{max-width:900px;margin:5.5rem auto 1rem;padding:0 1.6rem;text-align:center;position:relative;z-index:2;scroll-margin-top:80px}
+.part-div .pn{font-family:'Cinzel',serif;font-size:.76rem;letter-spacing:.34em;color:var(--rust);text-transform:uppercase}
+.part-div .pt{font-family:'Noto Serif TC',serif;font-weight:900;font-size:1.7rem;color:var(--sea-deep);margin:.7rem 0 .3rem;letter-spacing:.05em}
+.part-div .pe{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--faint)}
+.part-div .pline{display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:1.1rem;color:var(--gold)}
+.part-div .pline span{height:1px;width:80px;background:linear-gradient(90deg,transparent,var(--gold))}
+.part-div .pline span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+.part-div .pline .dot{font-size:1rem;opacity:.8}
+.back-toc{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;color:var(--faint);text-decoration:none;text-transform:uppercase;transition:color .25s ease}
+.back-toc:hover{color:var(--gold)}
+.act,.finale{scroll-margin-top:70px}
+
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){heads=[].slice.call(document.querySelectorAll('h2'));}
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>=1480)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Arabia Felix, the Birthplace of Coffee and a Forgotten War</span>
+    <h1>幸福的阿拉伯、<br><span class="em">咖啡的故鄉</span><br>葉門的身世</h1>
+    <p class="sub">阿拉伯半島幾乎整片都是沙漠，唯獨它的西南角，因為季風帶來的雨，是綠的。三千年前，這片綠色的高地，是示巴女王（Queen of Sheba）的國度，是乳香與沒藥的產地，富庶到讓羅馬人給它取了一個名字——「幸福的阿拉伯（Arabia Felix）」。一千年前，全世界第一杯咖啡，從它的港口摩卡（Mocha）出海，叫醒了整個世界。可就是這塊曾經最富庶、最文明的阿拉伯角落，在二十一世紀，成了聯合國口中「全球最嚴重的人道危機」——飢餓、霍亂、空襲，與一場被世界遺忘的戰爭。一塊被高地與低地、什葉與遜尼、部落與部落分割了千年的土地，如何從「幸福的阿拉伯」，淪為今天這個模樣。這是一個關於季風的恩賜、高地的信仰，與分裂之詛咒的故事——一塊餵養過古代世界、又被現代世界遺忘的土地。</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">那</span>是一杯咖啡開始的地方。十七世紀，當歐洲的咖啡館一間間開張、當伊斯坦堡與開羅的人們為這種黑色的、能驅走睡意的飲料著迷時，全世界的咖啡豆，幾乎都來自同一個地方——阿拉伯半島西南角，一座叫摩卡（Mocha，阿拉伯語 al-Makha）的紅海港口。葉門高地的梯田上種出的咖啡，被駱駝馱下山、在摩卡港裝船，運往世界的每一個角落；以至於到今天，當你在地球另一端點一杯「摩卡」時，你唸出的，仍是這座葉門港口的名字。那時的葉門，掌握著全世界唯一的咖啡貨源，富甲一方——這已是它第二次，靠著一種別人求之不得的東西，富甲天下。第一次，是在更久遠的三千年前：那時，這片土地上矗立著示巴（Saba，即《聖經》裡的示巴女王之國）等一連串香料王國，壟斷著乳香（frankincense）與沒藥（myrrh）的生產——那是古代世界用來祭神、防腐、治病的珍寶，貴比黃金。靠著季風帶來的雨水、與一座人類最古老的水利奇蹟——馬里卜大壩（the Marib Dam），這片綠色的高地，曾是整個阿拉伯半島上最富庶、最文明的角落。古羅馬人望著這片遙遠而富裕的南方，給它取了一個充滿嚮往的名字——「Arabia Felix」，幸福的、豐饒的阿拉伯。可是請記住這個對照——一塊曾被稱作「幸福的阿拉伯」、把咖啡與乳香賣給全世界的土地——因為今天，當人們提起葉門，腦海裡浮現的，卻是另一組截然相反的畫面：餓得只剩皮包骨的孩子、爆發的霍亂、被空襲炸毀的婚禮與醫院，與一場打了快十年、卻幾乎沒有人關心的戰爭。一塊餵養過古代世界的土地，如何淪為現代世界裡最深的人道傷口？要回答這個問題，我們必須認識構成這個國家的三道密碼。第一道，是<strong>幸福的阿拉伯（Arabia Felix）</strong>。葉門之所以特別，全因為水——印度洋的季風，在阿拉伯半島唯一一個角落帶來了足夠的雨，讓這裡長出了綠色的高地與梯田。是這份得天獨厚的水，孕育了示巴的香料王國、馬里卜的大壩、與摩卡的咖啡——讓葉門成為這片乾旱半島上，唯一一個能孕育稠密人口與古老文明的地方。第二道密碼，是<strong>高地與教派（The Highlands &amp; the Sects）</strong>。葉門是一塊被地形劈成兩半的土地：北方多山的高地，住著什葉派的一支——宰德派（Zaydi），他們的伊瑪目（Imam）在這片山裡，建立了一個斷斷續續延續了一千年的神權王國；而南方的低地與紅海、阿拉伯海的海岸，則多是遜尼派的沙斐儀派（Shafi’i）。高地與低地、什葉與遜尼、再加上盤根錯節、比國家更古老的部落（如哈希德 Hashid 與巴基爾 Bakil 兩大部落聯盟）——葉門從來就不是一塊鐵板，而是一塊被山與信仰反覆分割的土地。第三道密碼，是<strong>分裂與代理戰爭（Division &amp; the Proxy War）</strong>。這份與生俱來的分裂，在現代被一次次放大：葉門曾長期分成「北葉門」與「南葉門」兩個國家（南葉門甚至是阿拉伯世界唯一的馬克思主義國家），1990 年才統一，旋即又陷入內戰；而當胡塞（Houthi）這支來自北方高地的宰德派武裝崛起、當沙烏地領導的聯軍在 2015 年介入時，葉門便徹底淪為沙烏地與伊朗角力的代理戰場——一場讓數十萬人喪生、讓數百萬人瀕臨饑荒的浩劫。幸福的阿拉伯、高地與教派、分裂與代理戰爭——季風的恩賜、被地形與信仰劈開的身世，與一個分裂之國淪為他人戰場的宿命。這本書要追的，就是這三道密碼，如何把一塊孕育了乳香與咖啡的「幸福阿拉伯」，鍛造成今天這個被世界遺忘的人道廢墟。讓我們從那場帶來雨水的季風、與那座最古老的大壩開始，一路走到今天那個飢餓、分裂、卻仍在紅海上攪動著全球航運的葉門，在每一個轉折處，聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-0">
+  <div class="act-head">
+    <span class="act-num">序章 · The Three Keys</span>
+    <h2 class="act-title">曾經幸福，如今含淚：葉門的三道密碼</h2>
+    <p class="act-sub">Once Felix, Now in Tears — Yemen’s Three Codes</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>兩千年前，當羅馬人攤開他們心目中的世界地圖，把阿拉伯半島南端那塊綠意盎然、富庶得近乎傳說的角落，鄭重其事地命名為「幸福的阿拉伯」（Arabia Felix）——意思是「幸運的」「豐饒的」阿拉伯——的時候，他們大概無論如何也想不到，這片曾經讓帝國垂涎、讓商旅絡繹、讓乳香與咖啡的芬芳飄過半個地球的土地，會在兩千年後，被聯合國反覆稱作「全球最嚴重的人道危機」。今天，當人們提起葉門（Yemen），腦中浮現的不再是香料王國的駝隊與摩卡港口的咖啡帆船，而是空襲後的瓦礫、霍亂的疫情、瘦得只剩骨架的孩子，與紅海上突然飛起的飛彈。從「幸福」（Felix）到「含淚」，這片土地走過了一條令人心碎的長路。而要讀懂這條長路為何如此曲折、為何這個古老文明的搖籃會跌進如此深的深淵，我們需要三把鑰匙——三道貫穿這片土地數千年命運的密碼。它們彼此咬合，環環相扣，像一條從不鬆脫的因果鎖鏈。</p>
+
+    <h3>第一把鑰匙：幸福的阿拉伯——半島上唯一的綠</h3>
+    <p>第一把鑰匙，是水。攤開整個阿拉伯半島，目力所及幾乎全是焦黃——魯卜哈利沙漠（Rub' al-Khali）那片「空曠的四分之一」橫亙其中，沒有一條常年流淌的河，沒有可以託付生命的湖。可就在這片巨大的乾渴的西南一角，地圖的色調卻悄悄變了：群山自紅海岸邊拔地而起，最高處逼近三千多公尺，當印度洋的西南季風（monsoon）載著濕氣撞上這道高聳的山牆，便被逼著抬升、凝結、化作雨水傾瀉而下。於是在整片不毛的半島上，唯獨這個角落是綠的——梯田一層層沿著山坡盤旋而上，咖啡與穀物在雨季裡抽芽，泉水從岩縫裡滲出。這份得天獨厚的雨，便是「幸福的阿拉伯」之所以幸福的全部祕密。正是這份水，讓葉門成了整個半島上唯一能孕育稠密人口與古老文明的角落：它餵養了示巴（Sheba）的香料王國與那位傳說中朝見所羅門王的示巴女王，撐起了人類古代工程奇蹟之一的馬里卜大壩（Marib Dam），也在後來的歲月裡，催生出一種將要征服全世界味蕾的飲料——從摩卡（Mocha）港啟航的咖啡。當半島其餘的角落還只能養活逐水草而居的貝都因部落時，葉門已經有了城市、神廟、灌溉與文字。它是半島的例外，是沙海裡的一座綠洲文明。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 季風為何只眷顧這一角</span>
+      <p>阿拉伯半島絕大部分位於副熱帶高壓帶之下，空氣常年下沉、乾燥少雨，這正是沙漠成形的氣候根源。然而每年夏季，印度洋上空的西南季風會帶來大量水氣向北推進；當這股濕潤氣流抵達葉門西南那道陡然隆起的高地時，被山勢強行抬升、冷卻、成雲致雨——這就是地理學上所謂的「地形雨」。</p>
+      <p>於是同一片半島，命運被一道山牆劈成兩半：迎風的西南坡綠意盎然、可耕可居，背風的內陸與北方則回歸焦渴的荒漠。葉門的「幸福」不是神恩的偶然，而是季風與高山相撞的必然——這份必然，既是它千年富庶的源頭，也埋下了它日後被地形反覆切割的命根。</p>
+    </div>
+
+    <h3>第二把鑰匙：高地與教派——被山與信仰切碎的拼圖</h3>
+    <p>可是，賜予葉門生命的那道高山，也同時是它的詛咒。第二把鑰匙，藏在地形裡。讓葉門富庶的崎嶇山勢，反過來把這片土地切割得支離破碎——它從來不是一塊鐵板，而是一幅被山與信仰反覆切碎的拼圖。地理上，葉門被劈成涇渭分明的兩半：北方是層巒疊嶂的高地，山高谷深、易守難攻，雨水較豐、人口稠密；南方則是低地與沿海平原，連著綿長的海岸線，向著阿拉伯海與印度洋敞開。這道地理的裂縫，又恰好疊上了一道信仰的裂縫。在北方的高山上，盤踞著什葉派中一個獨特的支派——宰德派（Zaydi）；正是在這些難以攻克的群山裡，宰德派的伊瑪目（Imam）建立起一個政教合一的神權政體，延續了將近一千年，是伊斯蘭世界存續最久的伊瑪目國之一。而在南方的低地與海岸，居民則多半屬於遜尼派裡的沙斐儀學派（Shafi'i）。北山是什葉的宰德，南海是遜尼的沙斐儀——一道地形的線，幾乎就是一道教派的線。</p>
+    <p>而在國家與教派之下，還埋著一層比兩者都更古老、也更頑固的東西——部落。在葉門的高地上，盤踞著一些可以上溯千百年的龐大部落聯盟，其中最著名的兩支，便是哈希德（Hashid）與巴基爾（Bakil）。這些部落有自己的武裝、自己的法度、自己的世仇與盟約，效忠的對象往往是血緣與酋長，而非任何坐在首都裡的政權。一句在當地流傳已久的話，把部落與伊瑪目的關係說得入木三分：部落是伊瑪目的羽翼。沒有部落的點頭，山裡的任何統治者都坐不穩；可一旦部落離心，再強的政權也會在山谷間土崩瓦解。於是葉門的政治，從來不是一個中央對一片臣民的簡單關係，而是一張由高地與低地、什葉與遜尼、這個部落與那個部落層層交疊、彼此牽制的網。要統治葉門，意味著要同時駕馭這張網上每一個打結的地方——這幾乎是一件不可能完成的事。</p>
+
+    <div class="pull"><p>賜予葉門生命的那道高山，也同時是它分裂的源頭。同一道山勢，向天空索來了雨水與文明，卻向人間遞下了割裂與紛爭——北是什葉的高地，南是遜尼的海岸，山谷之間，是比任何國家都古老的部落。</p></div>
+
+    <h3>第三把鑰匙：分裂與代理戰爭——當破碎被外力撬開</h3>
+    <p>第三把鑰匙，是前兩把咬合之後必然滾出的結果。一片與生俱來就如此破碎的土地，極難自我凝聚成一個統一而穩固的國家；而越是難以統一、內部裂縫越多的地方，就越容易被外部的力量伸進手來、沿著那些既有的裂縫去撬動、去分化、去爭奪。於是在現代，葉門那份古老的分裂被一次又一次地放大、利用，最終讓這片土地淪為他人的棋盤。二十世紀的大半時間裡，葉門索性被分成了兩個國家：北方，是脫胎自千年伊瑪目國、後來歷經革命的阿拉伯共和國；南方，則在英國勢力撤出後，走上了一條獨一無二的道路——南葉門成了整個阿拉伯世界唯一一個正式宣告信奉馬克思主義的國家，與蘇聯陣營結盟。一個阿拉伯半島的角落，竟在冷戰的版圖上插上了一面紅旗，這本身就是葉門那種「半島例外」性格的又一次回響。</p>
+    <p>一九九〇年，南北終於合而為一，可統一的喜悅維持得極短——僅僅四年之後便爆發內戰，裂縫從未真正癒合，只是被暫時縫上。進入二十一世紀，源自北方高地、屬於宰德傳統的胡塞運動（Houthi）逐漸崛起，與中央政權的矛盾愈演愈烈；二〇一五年，胡塞勢力席捲首都，以沙烏地阿拉伯（Saudi Arabia）為首的多國聯軍隨即介入軍事行動，意圖恢復其支持的政府。從此，葉門不再只是葉門人自己的戰場——它成了區域兩大強權沙烏地與伊朗（Iran）相互角力的代理戰場（proxy war）：各方對立的敘事南轅北轍，有人稱之為抵抗外來干涉，有人稱之為遏制擴張，而夾在所有宏大說辭之間被碾碎的，是千百萬普通葉門人的生計、健康與性命。聯合國一再以「全球最嚴重人道危機」來形容這裡——飢荒的陰影、霍亂的反覆、流離失所的家庭。截至目前，這場衝突的結局仍未明朗，各方仍在拉鋸，任何斷言都為時過早。我們只能審慎地說：那片曾被羅馬人稱為「幸福」的土地，此刻正含著淚。</p>
+
+    <div class="warn">
+      <span class="warn-tag">含淚的阿拉伯</span>
+      <p>本書將不得不反覆觸及戰爭、飢荒、疫病與流離的篇章。我們會誠實地寫，因為這是這片土地真實命運的一部分，迴避便是不敬；但我們會盡力保持分寸——對暴行與苦難定其性質與量級，而非編造細節或數字；呈現衝突各方彼此衝突的敘事，而非替任何一方代言；並始終記得，所有宏大的地緣博弈之下，最終承受代價的，是一個個具體的、有名有姓的葉門人。對仍在進行、尚無定論的當代事件，我們留有餘地，不把未定之事說成定局。</p>
+    </div>
+
+    <h3>三把鑰匙，一條鎖鏈</h3>
+    <p>現在，把三把鑰匙並排放在一起，這片土地的命運便顯出了它內在的邏輯——它不是三件互不相干的事，而是一條從不鬆脫的因果鎖鏈。季風的雨，孕育了富庶與文明，這是第一環：幸福的阿拉伯。可帶來雨的那道崎嶇高山，又把這片土地劈成高地與低地、什葉與遜尼、部落與部落，這是第二環：分裂的身世。而這份與生俱來、刻進地形與信仰的破碎，又讓葉門極難凝聚、極難統一，因而極易被外力沿著裂縫撬開、淪為他人爭奪的代理戰場，這是第三環：含淚的今日。水生出了富庶，富庶坐落在崎嶇之上，崎嶇造就了分裂，分裂招來了干涉——「幸福」與「含淚」，原來是同一道地理在不同時代投下的兩重影子。讀懂了這條鎖鏈，便讀懂了葉門：它不是無端墜落的，它的災難根植於它最初的福分，它的破碎來自它最早的豐饒。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">古代</div><div class="tl-text">季風之雨澆灌西南高地，孕育示巴香料王國與馬里卜大壩——「幸福的阿拉伯」</div></div>
+      <div class="tl-item"><div class="tl-year">中世紀起</div><div class="tl-text">宰德派伊瑪目在北方高地建立政教合一政體，延續近千年；南方海岸多屬遜尼沙斐儀</div></div>
+      <div class="tl-item"><div class="tl-year">二十世紀</div><div class="tl-text">南北分立——北方共和、南方成為阿拉伯世界唯一的馬克思主義國家</div></div>
+      <div class="tl-item"><div class="tl-year">1990 起</div><div class="tl-text">統一旋即內戰；胡塞崛起；2015 沙烏地領導聯軍介入——葉門淪為代理戰場與人道危機</div></div>
+    </div>
+
+    <p>接下來的章節，我們將提著這三把鑰匙，一道走過這片土地漫長而曲折的旅程。我們會回到示巴女王的香料駝隊與馬里卜大壩潰決的那一刻，去看「幸福的阿拉伯」如何崛起、又如何第一次嚐到崩塌的滋味；我們會走進北方的群山，看宰德派的伊瑪目如何在易守難攻的高地上建起一個延續千年的神權，看哈希德與巴基爾的部落旗幟如何在山谷間飄揚；我們會聞到摩卡港飄出的咖啡香——那是葉門曾經獨步全球的財富，看它如何被偷走、被取代；我們也將沉重地走進現代的裂變——南北的分合、革命與內戰、胡塞的崛起與聯軍的介入，直到今天紅海航道上突然亮起的飛彈尾焰，與內陸那場被世界一再遺忘的飢荒。這是一個關於水、關於山、關於信仰，最終關於一個古老文明如何從「幸福」跌入「含淚」的故事。讓我們，從那場帶來雨的季風開始。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 三道密碼（一條鎖鏈）</span>
+      <p>這序章，把貫穿全書的三把鑰匙一次性交到你手裡。請記住它們咬合的方式，因為葉門此後的每一個轉折，都會是這條鎖鏈的又一次回響。第一把——「幸福的阿拉伯」：在幾乎整片是沙的半島上，唯獨葉門西南角因印度洋季風撞上高山而是綠的，這份得天獨厚的水，孕育了示巴、馬里卜與摩卡，讓葉門成為半島上唯一的稠密文明。第二把——「高地與教派」：可正是那道帶來雨的崎嶇高山，把葉門劈成北方什葉的宰德高地與南方遜尼的沙斐儀海岸，再疊上比國家更古老的哈希德與巴基爾部落，使它從來不是鐵板，而是被山與信仰反覆切碎的拼圖。第三把——「分裂與代理戰爭」：這份與生俱來的破碎，讓葉門極難統一、極易被外力撬動——南北曾分立，1990 統一旋即內戰，胡塞崛起，2015 沙烏地領導聯軍介入，使這片土地淪為沙烏地與伊朗的代理戰場與「全球最嚴重的人道危機」。水生富庶，富庶坐落崎嶇，崎嶇造就分裂，分裂招來干涉——「幸福」與「含淚」，本是同一道地理的兩重影子。從示巴的香料與摩卡的咖啡，到今天紅海上的飛彈與被遺忘的飢荒，我們的旅程，就此啟程。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<div class="part-div reveal" id="part-1">
+  <span class="pn">第一部</span>
+  <h2 class="ptitle pt">幸福的阿拉伯：香料、大壩與咖啡</h2>
+  <div class="pe">Arabia Felix — Incense, the Dam and Coffee</div>
+  <div class="pline"><span></span><span class="dot">✶</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-1">
+  <div class="act-head">
+    <span class="act-num">第一章 · South of the Monsoon</span>
+    <h2 class="act-title">季風之南：阿拉伯半島上唯一的綠</h2>
+    <p class="act-sub">South of the Monsoon — The Only Green Corner of Arabia</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>攤開阿拉伯半島的地圖，目光所及幾乎是一整片連綿的黃——北方是敘利亞沙漠的礫石荒原，中央是內志（Najd）那片孤立的高地，南方橫亙著人類所知最大的連綿沙海魯卜哈利沙漠（Rub' al-Khali），它的名字在阿拉伯語裡就是「空曠的四分之一」。在這樣一片乾渴的土地上，沒有一條常年流淌的大河，沒有融雪的群山，雨水稀少到近乎傳說。可就在這片黃色版圖的最西南角，靠近紅海與印度洋交會的地方，地圖的顏色卻倏然變了——那裡是綠的。那一小塊綠，就是葉門（Yemen）。它是這整片半島上，唯一一處能讓季風帶來雨、讓雨長出梯田、讓梯田養活稠密人口與古老文明的角落。古羅馬人遠遠望見這片豐饒，給它取了一個流傳千年的名字——「幸福的阿拉伯」（Arabia Felix）。一個國家的命運，往往先寫在它腳下的土地上；而葉門的命運，從一開始，就寫在那一點點別處沒有、它卻獨有的雨水裡。</p>
+
+    <h3>季風的恩賜：為何唯獨這一角是綠的</h3>
+    <p>要理解葉門，得先理解一場風。每年夏天，當印度次大陸的陸地被烈日烤熱，空氣上升，便會從南方的印度洋上拉來濕潤而沉重的氣流——這就是季風（the monsoon）。這股挾著海洋水汽的季風，向北吹掠過阿拉伯海，絕大部分的阿拉伯半島都太過低平、太過偏離它的路徑，接不到這份雨水；可半島最西南端那一道高聳的山牆，恰好攔在了季風的去路上。當濕潤的氣流被迫沿著陡峭的山坡上升、冷卻、凝結，雨，就在這裡落了下來。於是一個近乎奇蹟的地理現象出現了：在一個年降雨量普遍只有幾十毫米、許多地方數年不見一場像樣的雨的半島上，葉門西部高地的某些坡面，一年竟能迎來數百毫米的雨。這雨量在濕潤的東亞或許微不足道，可在阿拉伯的尺度上，已足以區分荒漠與文明、死亡與生命。整個葉門的繁榮，都繫於這一道把季風攔下、把雨水留住的山。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 地形雨與半島的例外</span>
+      <p>所謂地形雨，是濕潤氣流被山脈強迫抬升、在迎風坡上凝結降下的雨。它解釋了一件看似矛盾的事——為什麼最乾的半島上，偏偏在邊角藏著最綠的一塊。葉門的西部高地，正是阿拉伯半島少數能與印度洋季風「正面相遇」的高牆；它把本該掠過半島、徑直奔向別處的水汽，硬生生攔下了一部分。</p>
+      <p>這也意味著：葉門的綠，並非半島整體濕潤的結果，而是一個極其侷限、極其偶然的地理例外。它依賴的不是一片穩定的雨帶，而是一場每年是否準時、是否充沛都充滿變數的季風。恩賜與脆弱，在這裡是同一枚硬幣的兩面——當雨來，這裡是幸福的阿拉伯；當雨遲遲不來，這裡便比任何地方都更接近災難。</p>
+    </div>
+
+    <h3>四重地貌：從高地到海，從河谷到沙</h3>
+    <p>這片被季風祝福的土地，並不是一塊平整的綠毯，而是被高度與水分切成了截然不同的數重世界。最核心的，是那道攔雨的西部高地（the Western Highlands）——一道由古老火山岩與層層斷塊堆疊起來的高聳山地，平均海拔在兩千公尺以上，有些山峰逼近三千八百公尺，是整個阿拉伯半島的屋脊。也正是在這片高地上，坐落著葉門的首都薩那（Sana'a）：它海拔逾兩千兩百公尺，氣候涼爽，四周環山，是世界上有人持續居住至今、最古老的城市之一。傳說它由挪亞的兒子閃（Shem）所建，老城裡那一棟棟以夯土與燒磚壘起、外牆飾以白色幾何花紋、彷彿從童話裡長出來的多層塔樓，已在這片高地上佇立了上千年。在沒有大河的半島心臟，竟有一座兩千多公尺高的古城——這本身就是季風寫給葉門的一封情書。</p>
+    <p>從高地向西，地勢急遽下墜，墜入紅海邊那一條濕熱的沿海平原——提哈瑪（Tihama）。這裡低平、酷熱、潮濕，氣候與高地判若兩個國度；它接住了從高地奔流而下的季節性洪水，灌溉出一片片農田，沿海的港口則自古就是貨物、朝聖者與思想進出葉門的門戶。而從高地向東、向北，雨水的恩賜便迅速遞減：地勢漸漸轉為乾旱的高原與荒漠，最終沒入魯卜哈利那片「空曠的四分之一」的沙海邊緣。在這片乾旱地帶的東部，藏著葉門另一處奇特的文明搖籃——哈德拉毛（Hadhramaut）河谷：那是一條深切進荒漠高原、靠著季節性洪水與地下水維生的長谷，谷底排列著一座座以泥磚壘成、高達數層、宛如沙漠裡的摩天樓群的古城，孕育出一支以遠航經商著稱、足跡遠達東非與東南亞的哈德拉毛人。</p>
+
+    <div class="cards">
+      <div class="card"><div class="flag">屋脊</div><h5>西部高地</h5><p>海拔逾兩千公尺的攔雨高牆，季風在此降雨；薩那即坐落於此，是世界最古老的有人居城之一。</p></div>
+      <div class="card"><div class="flag">海岸</div><h5>提哈瑪平原</h5><p>紅海沿岸濕熱低地，接住高地奔下的洪水；港口自古是進出葉門的門戶。</p></div>
+      <div class="card"><div class="flag">河谷</div><h5>哈德拉毛</h5><p>東部荒漠中深切的長谷，泥磚高樓如沙漠摩天樓；孕育遠航經商的哈德拉毛人。</p></div>
+      <div class="card"><div class="flag">咽喉</div><h5>曼德海峽</h5><p>紅海與印度洋之間的窄門，「淚之門」；扼守全球航運與香料、石油的命脈。</p></div>
+    </div>
+
+    <h3>梯田：把雨水雕進山坡的千年工程</h3>
+    <p>季風送來了雨，可雨落在陡峭的山坡上，若不加駕馭，便會在頃刻間化作沖刷一切的洪流，連同寶貴的表土一併奪走，奔向大海。於是葉門人做了一件需要數十代人接力、足以稱為文明奇蹟的事——他們把整片整片的山坡，雕成了梯田。沿著高地那些近乎垂直的山壁，一道道用石塊壘成的矮牆層層疊起，把陡坡切成無數條窄窄的、近乎水平的台階；每當季風的雨降下，水便被這一級級的台階一層層接住、留住、滲入，而非白白流走。土被牆攔住，水被田蓄住，原本守不住一滴水的峭壁，就這樣被改造成可以耕作的良田。葉門的梯田有些已連續耕作上千年，遠遠望去，整座山彷彿被人用刻刀一圈圈旋轉著雕琢過——這是人類與一片苛刻土地之間，一場曠日持久而成果驚人的協商。它告訴我們：葉門的綠，從來不只是天賜，更是人在天賜的基礎上，一寸寸用石牆與汗水掙來的。</p>
+
+    <h3>香料、咖啡，與一座大壩：水如何長出文明</h3>
+    <p>有了雨、有了梯田，葉門便在這片乾渴的半島上長出了別處長不出的東西——稠密的人口，與富庶的文明。這片土地最早的傳奇，是香料：古代世界視若珍寶的乳香與沒藥，產自葉門及其周邊，沿著穿越半島的商路北運，換回黃金。靠著掌控這條商路與這些香料，葉門古代崛起了一連串令後世神往的王國，其中最著名的便是示巴（Sheba/Saba'）——那個在希伯來與阿拉伯傳說中，由一位女王統治、富甲一方、遠赴耶路撒冷覲見所羅門王的香料之國。而支撐起示巴繁榮的核心工程，是一座大壩：馬里卜大壩（the Marib Dam）。葉門人在馬里卜攔住季節性洪水，把水導入縱橫的灌溉渠網，讓荒漠邊緣的綠洲養活了一座繁華的古城——這座大壩，是古代世界最了不起的水利工程之一，也是「以水立國」這四個字最古老的註腳。</p>
+    <p>而到了近世，葉門又因水與高地的涼爽，獻給了世界另一樣足以改變人類日常的東西——咖啡。咖啡原生於對岸的衣索比亞高地，卻是在葉門的高地梯田上，第一次被大規模栽培、烘焙、沖煮成飲品；經由葉門西南那座古老的紅海港口摩卡（Mocha）出口，它走向了整個世界。直到今天，全世界數不清的咖啡館裡，人們點一杯「摩卡」時，多半並不知道，自己念出的，正是葉門海岸那座小港的名字——是季風的雨、高地的涼、與梯田的土，一起把它送上了人類的餐桌。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">約 公元前8世紀</div><div class="tl-text">示巴等香料王國於葉門崛起，掌控乳香、沒藥的北運商路。</div></div>
+      <div class="tl-item"><div class="tl-year">古代</div><div class="tl-text">馬里卜大壩攔洪灌溉，養活荒漠邊緣的繁華古城，為古世界最重要的水利工程之一。</div></div>
+      <div class="tl-item"><div class="tl-year">約6世紀</div><div class="tl-text">馬里卜大壩在歷經多次修補後最終潰決，灌溉系統瓦解，被後世記為一場文明的轉折。</div></div>
+      <div class="tl-item"><div class="tl-year">近世</div><div class="tl-text">咖啡在葉門高地大規模栽培，經紅海港口摩卡出口，「摩卡」之名走向全世界。</div></div>
+    </div>
+
+    <h3>咽喉與裂縫：恩賜的另一面</h3>
+    <p>葉門的地理，還藏著一把雙刃。在它西南的尖端，紅海與印度洋之間收束成一道狹窄的水門——曼德海峽（Bab-el-Mandeb），這個名字在阿拉伯語裡意為「淚之門」。它最窄處只有約三十公里，卻是全世界最關鍵的海上咽喉之一：所有從歐洲經蘇伊士運河、紅海前往亞洲，或反向而行的船隻——載著貨物、糧食，尤其是石油——都必須擠過這道窄門。誰扼住了曼德海峽，誰就把手按在了全球貿易的一條主動脈上。這份地利，是葉門得天獨厚的籌碼，卻也注定讓它無法被世界忽視——一個守著全球咽喉的角落，永遠會被大國的目光與野心反覆掃過。</p>
+    <p>可比咽喉更深刻的，是這片地形給葉門埋下的另一道裂縫。攔雨的高地與濕熱的海岸、東部的荒漠與哈德拉毛的長谷——同一個葉門，被山與水切成了彼此隔絕、各自為政的小世界。陡峭的群山讓中央政權的命令難以翻越，讓每一道山谷都足以孕育出自己的部落、自己的方言、自己的忠誠。季風帶來的那份綠，固然餵養了文明；可那些把雨攔下的高山，同時也把這片土地切成了難以縫合的碎片。葉門的富庶與葉門的分裂，竟出自同一道山脊——這是讀懂它後來一切故事的第一把鑰匙。</p>
+
+    <div class="warn">
+      <span class="warn-tag">脆弱的根</span>
+      <p>葉門一切繁榮的源頭是水，而它一切危機的核心也是水。古代，當馬里卜大壩在反覆修補後最終潰決，依賴它灌溉的繁華便隨之凋零，被後世記成一則關於盛極而衰的古老警示。而到了今天，葉門面對的是另一場更安靜、卻可能更致命的水的危機——人口激增、抽取地下水的速度遠超補注，使這個原本就缺水的國家，地下水位持續下探。首都薩那，更被反覆提及為世界上最可能率先耗盡可用水源的大型都市之一。季風的恩賜何其脆弱：它把這片土地餵成了半島上唯一的綠，卻也讓這片綠，始終吊在一根名為「雨水與山泉」的細線上。</p>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 幸福的阿拉伯（水即命運）</span>
+      <p>這第一章，奠下了貫穿全書的第一把鑰匙——「幸福的阿拉伯」。請記住那一場攔在西南高山前的季風：是它，讓葉門在一片乾渴的半島上成為唯一的綠；是這份綠，讓葉門成了阿拉伯半島上唯一能孕育稠密人口與古老文明的角落，長出了示巴的香料、馬里卜的大壩、與摩卡的咖啡。在一個沙與石的世界裡，葉門是那個因水而活、因水而貴的例外。可恩賜從來不是無償的。同樣這片把雨攔下的高山，也把葉門切成了高地與海岸、什葉與遜尼、一座座彼此隔絕的山谷——富庶與分裂，本就出自同一道山脊；這道裂縫，將在後面的篇章裡被信仰、被部落、被現代的代理戰爭一再撕開、放大。而那條餵養了一切的細線——脆弱的雨水與山泉——古代曾因一座大壩的潰決而斷過一次，今日又在地下水的枯竭裡被悄悄拉緊。葉門的故事，是一個關於水的故事：水給了它一切繁榮的起點，也埋下了它一切危機的核心。要讀懂這片土地此後所有的光榮與苦難，都得先回到這裡——回到季風之南，那一塊半島上唯一的綠。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-2">
+  <div class="act-head">
+    <span class="act-num">第二章 · Sheba and the Incense Road</span>
+    <h2 class="act-title">示巴與香料之路</h2>
+    <p class="act-sub">Sheba and the Incense Road</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>如果你站在公元前八世紀的某個清晨，從地中海東岸一路向南眺望整片阿拉伯半島，你看到的會是一望無際的焦黃——沙、石、烈日，與一條條被駝隊踩出的細線。可在這片黃色的盡頭、半島最西南的那個角落，地圖突然換了顏色：那裡是綠的。季風從印度洋吹來，在葉門高地的群山上撞出雨，把山坡澆成一級級的梯田，把谷地養成一片片的果園。古代世界的人並不全懂這套季風與雨影的氣象學，但他們知道一件更直接的事——那個遙遠的南方角落，物產豐饒得近乎神話，而且它獨家掌握著一種別處長不出來、卻人人求之不得的東西。靠著這種東西，葉門第一次站上了世界舞台的中央，富甲一方，被遠方的希臘人與羅馬人用一個帶著羨慕與想像的名字稱呼——「幸福的阿拉伯」（Arabia Felix）。這一章，要說的就是這份「幸福」最初的來歷：一串富庶的王國、兩種凝結了陽光與樹脂的珍寶，與一條穿越死亡之沙、把南方的財富運往北方諸神祭壇的漫長商道。</p>
+
+    <h3>長在沙漠邊緣的兩種珍寶</h3>
+    <p>故事要從兩棵不起眼的樹說起。在葉門南部與哈德拉毛（Hadhramaut）那片半乾旱的高地與石灰岩坡上，生長著兩種低矮、多刺、其貌不揚的灌木——乳香樹（the frankincense tree）與沒藥樹（the myrrh tree）。它們不開絢麗的花、不結甜美的果，卻在被割破樹皮後，會緩緩滲出乳白或暗紅的樹脂，凝結成一粒粒半透明的「淚珠」。這便是乳香（frankincense）與沒藥（myrrh）。把它們投入炭火，乳香會升起一縷潔白濃郁、近乎神聖的青煙；沒藥則散發出一種苦中帶甘、能驅蟲防腐的氣息。在一個還沒有香水工業、沒有防腐劑、連體味與屍臭都無從遮掩的古代世界裡，這兩縷煙，就是通向神明、通向潔淨、通向不朽的橋。</p>
+    <p>它們的用途之廣，幾乎覆蓋了古人生死之間的每一個莊嚴時刻。神廟裡，祭司焚乳香以娛神——從巴比倫的廟宇到耶路撒冷的聖殿，從希臘的祭壇到羅馬的萬神殿，凡有神之處，便有那縷白煙裊裊上升，被視為人間意願飄向天界的載體。喪葬中，沒藥是防腐與塗抹屍身的聖物——古埃及人製作木乃伊時大量使用它，讓肉身在乾燥的香氣裡抵抗腐朽。醫者的藥箱裡，乳香消炎、沒藥止血癒創，是當時最被信賴的良藥之一。而在富人的居室與衣袍間，它們又是掩蓋汗臭、彰顯身分的奢侈品。一樣東西若同時被神、死者、病人與權貴所需要，它的價格便不再由成本決定，而由渴望決定——在古代世界，乳香與沒藥貴比黃金，是真正意義上「凝固的財富」。而它們最優質的產地，幾乎只有一處：阿拉伯半島的西南角，葉門。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼「獨家」比「豐饒」更值錢</span>
+      <p>葉門的西南角能種出乳香與沒藥，靠的還是那份得天獨厚的水與氣候——季風帶來的雨、適中的乾濕節律，讓這兩種挑剔的樹只在這條狹窄的地帶與非洲之角隔海相望的對岸長得最好。可真正讓葉門暴富的，不只是「它有」，而是「幾乎只有它有」。一樣物產若到處都長，再有用也賤如泥土；唯有當一種被全世界渴求的東西，其供給被一小塊土地近乎壟斷時，這塊土地才握住了議價的權柄。</p>
+      <p>這就是葉門故事裡反覆出現的第一個母題：得天獨厚的稀缺。三千年前是乳香，後來是摩卡的咖啡，再後來是扼住紅海咽喉的航道——葉門一次又一次地證明，它的價值不在於遼闊或強盛，而在於它總在某個關鍵時刻，獨家握有別人求之不得的那一樣東西。而這一切的最初源頭，依然是那份季風帶來的、整片半島上別處沒有的豐饒。</p>
+    </div>
+
+    <h3>示巴、馬因、卡塔班與哈德拉毛：香料王國群</h3>
+    <p>壟斷了這份珍寶的，不是一個王國，而是一串王國。在公元前第一千紀的葉門高地與內陸谷地上，先後並立、興替著好幾個以香料貿易為命脈的政權，它們大致沿著一條由南向北通往沙漠商道的軸線排列。其中最古老、最顯赫的，是示巴（Saba）——它的都城馬里卜（Marib）坐落在內陸的谷口，扼守著香料北運的起點。在希伯來文的《聖經》裡，這個國度被寫作「示巴」，它那位帶著大批黃金、寶石與香料前去拜會所羅門王的示巴女王（the Queen of Sheba），千百年來成了東方財富與神秘的化身——無論這段相會在史實上有幾分真、幾分傳說，它本身就是一個明證：在古代近東人的想像裡，「示巴」這個名字，等於遙遠南方那座流著香料與黃金的富庶之國。</p>
+    <p>與示巴前後並立或先後接力的，還有幾個同樣靠香料致富的王國。馬因（Ma'in）以精於長途貿易著稱，它的商人把商站一路設到了半島北方，是這條商道上最善經營的「行商之國」。卡塔班（Qataban）控制著南部一段關鍵的產區與通道，一度相當強盛。而哈德拉毛（Hadhramaut）則扼守著最東邊、最重要的乳香產地本身——那片出產上等香料的山坡，正在它的境內。這幾個王國說著相近的南阿拉伯語、用著同一套南阿拉伯字母書寫、信奉著各自的神祇，彼此之間時而結盟、時而兼併、時而為了爭奪商道上的某一段抽稅權而兵戎相見。它們的興衰，幾乎都繞著同一根軸線打轉——誰控制了香料從產地到沙漠的那一段路，誰就握住了財富的閥門。到了公元前後，一個崛起於南方高地的新勢力——希木葉爾（Himyar）——逐步吞併並取代了這些古老的王國，把南阿拉伯第一次大致整合到一個政權之下，成為這串王國最後、也最強的一個繼承者。</p>
+
+    <div class="cards">
+      <div class="card"><div class="flag">最顯赫</div><h5>示巴 Saba</h5><p>都城馬里卜，扼香料北運起點；《聖經》中示巴女王之國，是古代近東想像裡「南方富庶」的代名詞。</p></div>
+      <div class="card"><div class="flag">行商之國</div><h5>馬因 Ma'in</h5><p>長於長途貿易，把商站設到半島北方，是這條商道上最善經營的商人之國。</p></div>
+      <div class="card"><div class="flag">守通道</div><h5>卡塔班 Qataban</h5><p>控制南部關鍵產區與通道，一度強盛，與示巴爭雄。</p></div>
+      <div class="card"><div class="flag">守產地</div><h5>哈德拉毛 Hadhramaut</h5><p>境內就是上等乳香的核心產地，扼住財富的源頭本身。</p></div>
+    </div>
+
+    <h3>香料之路：一條穿越死亡之沙的財富動脈</h3>
+    <p>有了珍寶，還要有把珍寶送到買主手中的路。乳香的買家在哪裡？在地中海世界——埃及的神廟、腓尼基的港口、希臘的城邦、後來羅馬的祭壇。而葉門，在半島最南端，與這些買家之間，橫亙著整片世界上最荒涼的沙海。把南方的樹脂運到北方的祭壇，便需要一條漫長、艱險、卻利潤驚人的商道——這就是「香料之路」（the Incense Road）。</p>
+    <p>這條路靠的是另一種葉門人馴服的造物——駱駝。一隊隊負重的駱駝商隊，從哈德拉毛與示巴的集散地出發，馱著一袋袋凝固的乳香與沒藥，沿著阿拉伯半島的西緣、一路向北跋涉。它們不走無水的沙海正中，而是循著一串綠洲與水井，像踩著沙漠裡的踏腳石那樣，一站一站地北上——經過半島西部那些因商道而興起的綠洲城鎮，最終抵達地中海東岸與兩河流域的市場。這趟旅程長達數千里，要走上好幾個月，穿越烈日、沙暴與盜匪。可正因為艱難，沿途每一個能提供水、草料、保護與歇腳的部落與城邦，都能向過路的商隊抽取一道稅、收一筆過路費——香料每向北走一站，就被層層加價一次，等它終於抵達地中海的市場時，價格已是產地的許多倍。這條路，因此不只養富了葉門的香料王國，也喂大了沿途一連串靠「收買路錢」維生的中間城鎮。它是古代世界最重要的長途貿易動脈之一，是把南阿拉伯的陽光與樹脂，一步步兌換成黃金的傳送帶。</p>
+
+    <h3>馴服那份豐饒：馬里卜大壩</h3>
+    <p>香料帶來的財富，要落地生根，終究還得回到水這件根本的事上。示巴的都城馬里卜之所以能養活一座繁榮的城、能成為香料王國的心臟，靠的是一項令古代世界讚嘆的工程——馬里卜大壩（the Marib Dam）。葉門高地的雨季短而猛，季風帶來的暴雨會在山谷裡匯成湍急卻轉瞬即逝的洪流，若不加馴服，雨水便白白衝過谷地、消失在沙漠裡。示巴人於是在馬里卜的谷口築起一道巨大的攔水壩，把季節性的洪水攔蓄下來，再經由一套精巧的水閘與溝渠，分流灌溉下游廣袤的綠洲農田。靠著這道壩，一片本該乾渴的谷地被馴化成連片的良田與棗園，足以供養一座大城與圍繞它的文明。</p>
+    <p>這道壩在往後上千年裡幾經修葺、屹立不倒，是南阿拉伯古代工程與組織能力的象徵——它證明葉門人不只是被動承接季風的恩賜，更懂得用集體的智慧去攔截、儲存、分配那份來得猛烈又短暫的水。值得停下來想一想這背後的邏輯：在幾乎整片是沙漠的阿拉伯半島上，唯有葉門擁有足夠的雨，去支撐這樣一道需要持續維護的大型水利工程，去孕育出能組織起這種工程的稠密人口與複雜社會。換句話說，馬里卜大壩本身就是「幸福的阿拉伯」的一座紀念碑——它是水的紀念碑，也是這份豐饒被人手馴服、轉化為文明的見證。</p>
+
+    <h3>幸福的阿拉伯：遠方的羨慕與羅馬折戟的遠征</h3>
+    <p>南方的富庶，終究瞞不過北方那些精明而貪婪的眼睛。希臘人與羅馬人雖多半沒有親身到過葉門，卻從香料商隊與層層轉手的傳聞裡，拼湊出一個關於南阿拉伯的瑰麗想像——那裡物產無雙、香料成林、黃金遍地，是阿拉伯半島上唯一稱得上「幸福」的角落。於是他們給這片土地起了個響亮的名字：Arabia Felix——「幸福的阿拉伯」，以區別於半島中部荒蕪的「沙漠的阿拉伯」與北部的「石頭的阿拉伯」。這名字裡，既有對其豐饒的承認，也藏著一份按捺不住的覬覦。</p>
+    <p>覬覦終於化為行動。大約在公元前一世紀後期，羅馬第一位皇帝奧古斯都治下，一位名叫埃利烏斯·加盧斯（Aelius Gallus）的羅馬將領，奉命率領一支大軍南征，目標直指這財富的源頭——他們要親手奪下那條流著香料與黃金的命脈。然而結果，是一場慘痛的失敗。羅馬人對這片土地一無所知，被嚮導引入歧途，在陌生的沙漠裡耗盡了時間與補給；酷熱、缺水、疾病與漫長的路途，比任何敵軍都更致命，大批士兵在抵達戰場之前就已倒下。這支遠征軍最終未能真正攻下南阿拉伯的核心，只得狼狽折返，無功而還。羅馬人這才痛切地領教到：守護「幸福的阿拉伯」的，從來不只是它的城牆與軍隊，更是它周圍那片不可逾越的死亡之沙——正如它南方的群山與雨，是先天賜它豐饒；它北方的沙漠與遠，則是先天賜它屏障。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">約前10世紀</div><div class="tl-text">示巴女王與所羅門王相會的傳說流傳，「示巴」成為近東想像中南方富庶之國的代名詞。</div></div>
+      <div class="tl-item"><div class="tl-year">前1千紀</div><div class="tl-text">示巴、馬因、卡塔班、哈德拉毛等香料王國並立興替，壟斷乳香沒藥，香料之路繁盛。</div></div>
+      <div class="tl-item"><div class="tl-year">約前26—前24年</div><div class="tl-text">羅馬將領加盧斯奉奧古斯都之命遠征「幸福的阿拉伯」，敗於沙漠與補給，無功而返。</div></div>
+      <div class="tl-item"><div class="tl-year">前後之交</div><div class="tl-text">希木葉爾崛起，逐步吞併古老諸國，首次大致整合南阿拉伯。</div></div>
+    </div>
+
+    <div class="pull"><p>守護「幸福的阿拉伯」的，從來不只是城牆與軍隊——南方的群山與雨先天賜它豐饒，北方的沙漠與遙遠先天賜它屏障。三千年前，葉門第一次靠著一種別人求之不得的東西，富甲一方。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 幸福的阿拉伯（豐饒的最初證明）</span>
+      <p>這一章，把全篇第一道密碼——「幸福的阿拉伯」——的論點第一次落到了實處。早在三千年前，當阿拉伯半島的其餘部分還只是貝都因人逐水草而居的曠野時，葉門的西南角已經建起了一串富庶的王國、一座座有大壩灌溉的城、一條把南方珍寶兌換成北方黃金的漫長商道。它富得讓遠在地中海的希臘人與羅馬人都心生嚮往，給了它「幸福的阿拉伯」這個名字，甚至不惜勞師遠征想奪取這財富之源——卻折戟在它的沙漠屏障之前。請記住這份「幸福」的真正根源：它不在乳香本身，乳香只是這份根源結出的第一顆果實。真正的根，是那份季風帶來的、整片半島上唯獨此地才有的雨與綠。是這份得天獨厚的水，才種得出別處沒有的香料，才築得起馴水的大壩，才養得活稠密的人口與古老的文明，才讓葉門在荒漠的半島上，成為唯一能孕育繁華的角落。這道密碼會在後面的章節裡一再迴響——當香料的時代過去，這份豐饒會換一種面貌歸來，化作摩卡港口飄出的咖啡香；而這份得天獨厚一旦被人爭奪、被山與信仰反覆切割，又會埋下日後無盡分裂的伏筆。但無論面貌如何更換，根，始終是那場從印度洋吹來、只肯落在這一角的雨。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-3">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Dam of Marib</span>
+    <h2 class="act-title">馬里卜大壩：一個文明的命脈與它的潰決</h2>
+    <p class="act-sub">The Dam of Marib — A Civilization’s Lifeline and Its Breaking</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>若要為「幸福的阿拉伯」這把鑰匙找一個最具體、最動人、也最殘酷的化身，那不是某一座宮殿，不是某一位女王，而是一道牆——一道橫在乾涸河谷裡、用泥土與石塊壘起來的牆。它坐落在葉門東部一片半沙漠的邊緣，一個叫馬里卜（Marib）的地方。今天的旅人若站在那道殘破的牆基前，看到的只是一截截被風蝕得發黃的石砌、幾堵孤零零矗立在荒野裡的閘門遺構，四周是望不到邊的灰黃礫漠，很難相信這裡曾經餵養過一個延續千年的繁華王國。可正是這道牆——馬里卜大壩（the Marib Dam）——讓示巴人（Sabaeans）在阿拉伯半島最不可能的角落裡，種出了一片綠洲、養出了一座都城、撐起了一條香料之路的起點。它是古代世界最了不起的水利工程之一，也是這整篇葉門史最深刻的一則寓言：水成就了文明，而當維繫水的能力崩解時，水會帶著文明一同退場。</p>
+
+    <h3>一道牆，攔住了天上落下的整季雨</h3>
+    <p>要理解這道牆的意義，得先理解葉門的雨是怎麼下的。葉門西南角的雨，並非溫柔均勻地灑落全年，而是隨著印度洋季風，在每年的雨季裡傾盆而至——短促、猛烈、來去如雷。雨水落在西部高地的山坡上，匯成一道道狂暴的季節性洪流，順著一條條平時乾涸的河谷（阿拉伯語稱 wadi，即旱谷）奔騰而下，直撲東邊的沙漠邊緣。其中最大的一條，是達納旱谷（Wadi Dhana）。這些洪水若任其奔流，不過幾日便會被沙漠吞沒、滲入地底、蒸發於烈日，什麼也留不下；可示巴人想出了一個辦法——在達納旱谷一處山勢收束的隘口上，築起一道橫貫河床的巨壩，把整季奔湧而下的洪水攔腰截住，再用精巧的閘門與渠道，把這些被馴服的水，引向兩側廣闊的平原。</p>
+    <p>這座大壩的雛形，可以追溯到約西元前八世紀甚至更早，此後在示巴歷代王者手中不斷加高、加固、增建。它的工程，以那個時代的標準衡量，堪稱駭人——壩體橫亙旱谷，以夯實的泥土為核心，外覆石塊護坡，兩端各設一座以巨石砌成的引水閘門與溢洪結構，把蓄起的水分別導入南北兩片灌區。它攔住的不是一條常年的河，而是一年裡只來那麼幾次、卻足以決定全年生死的暴洪；它要做的，是把「來去如雷的天賜」變成「全年可用的恩典」。當閘門開啟，被馴服的洪水順著層層渠道漫過田畝，這片本該是不毛的沙漠邊緣，便綻放出令古代旅人讚嘆不已的綠——史料與後世記述裡，那是一片可能廣達上萬公頃的灌溉綠洲，棕櫚成林、果園相連、穀物豐熟。一道牆，就這樣在半島最乾的地方，憑空變出了一座花園。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 水利文明的脆弱</span>
+      <p>人類學裡有一個古老而仍具啟發的觀察：凡是把生存高度押注在大型水利工程上的文明，都有一種與生俱來的脆弱——它的繁榮不是「自然而然」的，而是被一套持續運轉的人造系統「撐」起來的。大壩、運河、堤防、閘門，這些龐然之物一旦建成，便不能放著不管；泥沙會年復一年地淤積、抬高河床，壩體會被洪水反覆沖刷、被滲流悄悄掏空，渠道會堵塞、閘門會朽壞。要讓系統不崩，就必須有人——而且是被有效組織起來、世代不輟的一大群人——年年清淤、歲歲修補、統一調度。</p>
+      <p>這意味著：水利文明的命脈，從來不只是「水」，而是「維繫水的那套社會組織」。只要這套組織健全——有強有力的權威、有足夠的人力、有共同遵守的規矩——大壩就能餵養萬民；可一旦這套組織因戰亂、內鬨、人口流失或權威崩解而鬆弛，系統便會以驚人的速度反噬。最危險的，正是這份「繁榮看似牢固、實則全繫於持續維護」的錯覺。馬里卜大壩，把這條規律演成了一部跨越千年的活教材。</p>
+    </div>
+
+    <h3>水，如何長出一個王國</h3>
+    <p>有了這片人造的綠洲，馬里卜得以從一片旱谷邊的聚落，長成示巴王國的都城，也長成整條阿拉伯香料之路（the Incense Route）的北向起點。前一章已經說過，葉門高地是乳香（frankincense）與沒藥（myrrh）的故鄉，這些芳香的樹脂在古代地中海世界價比黃金；而要把南方的香料運往北方的埃及、地中海與美索不達米亞，駱駝商隊必須穿越半島腹地漫長的沙漠，沿途依賴一座座有水、有糧、有補給的中繼站。馬里卜，憑著它那座大壩餵養出的糧食與綠蔭，正好坐在這條黃金通道的咽喉上——它既是出產香料的源頭之一，又是供養商隊、徵收通行之利的樞紐。水、糧、香料、商道，在這一點上交匯，財富便如洪流般在此沉澱。</p>
+    <p>於是我們在古代的記述裡，讀到了一個富庶得近乎傳奇的示巴。它有神廟、有宮殿、有用水利養出的層層田園；它的女王——那位在《希伯來聖經》與後世傳說裡帶著黃金、香料與寶石遠赴耶路撒冷覲見所羅門王的示巴女王(Queen of Sheba)——成了「東方富庶」的永恆象徵。我們不必把傳說當成信史，也不必去坐實女王的每一個細節；真正重要的是：這份令古人神往的富庶，並非憑空而來，它的物質根基，就是那道攔住季節洪水的牆。把水留住，糧食便長出來；糧食長出來，人口便聚起來；人口聚起來，商道、神廟、王權與文明，才一層層壘了上去。整座王國，是從一道牆後的那汪蓄水裡，生長出來的。</p>
+
+    <div class="pull"><p>把水留住，糧食便長出來；糧食長出來，文明才一層層壘上去。整座示巴王國，是從一道牆後的那汪蓄水裡，生長出來的。</p></div>
+
+    <h3>潰決：當維護鬆弛，牆就還給了沙漠</h3>
+    <p>一道靠人持續看顧才能存在的牆，它的命運，便與看顧它的那個社會牢牢綁在一起。在示巴及其後繼者強盛的世紀裡，大壩被一代代人精心維護：淤積的泥沙被清走，沖損的壩體被補上，渠道被疏通，水的分配有章可循。可歷史不會永遠強盛。隨著古代南阿拉伯諸王國的此消彼長、政權更迭、內部紛爭與外力侵擾，加上香料之路因海運興起、羅馬與後世商路改道而漸趨衰落，馬里卜所依附的那個繁榮經濟與強固秩序，開始一點一點地鬆動。維護大壩所需的那種強有力的、世代不輟的集體組織，也隨之衰弛。</p>
+    <p>而泥沙不會等人。每一次被攔下的洪水，都在壩前留下一層淤泥；千百年累積下來，壩前的河床被淤積抬得越來越高，要維持同樣的蓄水與防洪能力，壩體就得不斷加高、結構就得不斷補強——這需要的人力與組織，只增不減。當社會的維護能力跟不上泥沙與歲月，危機便只是時間問題。史料記載，在西元紀年後的幾個世紀裡，大壩曾數度因失修而局部潰決、又被勉力修復；而最終，在大約西元六世紀，這道支撐了葉門文明一千多年的牆，迎來了它無可挽回的崩塌——洪水沖垮壩體，蓄水傾瀉而出，精心經營了千年的灌溉綠洲在失去水源後迅速旱化，田園荒蕪，人口四散。一道牆的倒下，等於一個文明賴以呼吸的肺，被抽走了空氣。</p>
+
+    <div class="warn">
+      <span class="warn-tag">阿里姆洪水 · 一場被記進聖典的潰決</span>
+      <p>馬里卜大壩的最終潰決，在阿拉伯人的集體記憶裡留下了深得難以磨滅的印記。連伊斯蘭的聖典《古蘭經》(the Qur'an)都以「阿里姆洪水」(Sayl al-Arim)之名提及這場災難：經文裡，示巴(Saba')之民本擁有左右兩側豐美的園圃、享盡富足的恩賜，卻因背離與驕奢而遭懲，洪水沖毀了他們的家園，昔日結滿甜果的園子，只剩下苦澀的灌木與稀疏的酸棗。在這則敘事裡，潰壩不只是一次工程的失敗，而被升華成一個道德與信仰的寓言——富足是恩賜，而辜負恩賜者，終將連恩賜一同失去。一座水壩的物理崩塌，就這樣被一整個文明，讀成了關於驕奢、忘恩與衰亡的永恆訓誡。</p>
+    </div>
+
+    <h3>潰壩之後：被洪水推著走的歷史</h3>
+    <p>大壩潰決的後果，遠不止於馬里卜一地的荒蕪。在阿拉伯人的傳統敘事裡，這場潰決被視為一次重大的歷史轉折——失去了綠洲與生計的南阿拉伯部族，被迫離開故土，向北、向四方遷徙。後世的譜系學者與史家，把許多日後散布在阿拉伯半島各處、乃至參與了往後大事件的部族，都追溯到這場「大壩之後的離散」。我們不必把每一條譜系都當成嚴格的信史——這些敘事裡，真實的歷史記憶與後世的追述、認同的建構，往往交織難分；但它所傳遞的那個核心意象，卻無比真切：一道牆的倒下，曾經把人從土地上連根拔起，推著他們走向未知的遠方。水退去的地方，文明也跟著退去；而被旱化逼出家門的人，則把對那座失落綠洲的記憶，帶進了往後的歲月。</p>
+    <p>於是馬里卜的故事，在這裡顯露出它最深的一層寓意。它告訴我們，「幸福的阿拉伯」這份得天獨厚的恩賜，從來不是一塊可以高枕無憂的福地；它是一份脆弱的、需要被集體不斷維護才能延續的契約。雨年年會下，可雨要變成田裡的莊稼、變成一座養得起女王與商隊的都城，中間隔著一道必須有人世代看顧的牆。當看顧的手鬆開，牆會塌，綠洲會死，文明會散——而它退場的速度，往往比當初建起它的速度，快得多、也殘忍得多。</p>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 倘若那道牆守住了</span>
+      <p>不妨設想：倘若示巴及其後繼者的社會秩序未曾崩解，倘若那道牆被無休止地清淤、加高、修補，馬里卜的綠洲會不會一直延續到今天？這只能是一場思辨，但它逼我們看清一件事——馬里卜之衰，衰的或許從來不是「天」，而是「人」。雨水並未停止落下，改變的是承接雨水的那套人造系統垮了。換句話說，終結這個文明的，與其說是自然的無常，不如說是社會維繫一項偉大公共工程的能力的喪失。這個教訓，在一千五百年後依然刺眼：讓土地荒蕪的，常常不是老天爺收回了水，而是人們失去了共同守住水的那份組織與秩序。</p>
+    </div>
+
+    <h3>水，至今仍是葉門最深的傷口</h3>
+    <p>馬里卜大壩的故事，之所以不只是一段考古學的陳跡，是因為它預示了葉門此後反覆上演的命運：這片土地的繁榮，始終繫於一份脆弱的、需要集體看顧的水之恩賜；而每當秩序崩解，水便首當其衝地離它而去。把時間快進到二十一世紀，我們會驚覺這則古老的寓言，正以另一種面貌重演——只是這一回，主角從季節洪水換成了地下水，從一道土石壩換成了整個國家的供水體系。</p>
+    <p>今天的葉門，是全世界水資源最匱乏、人均可用淡水量最低的國家之一。在現代，它早已不再靠攔截季風洪水度日，而是大量超抽地下含水層——抽水的速度遠遠快於雨水回補的速度，地下水位逐年下探，許多古老的水井相繼乾涸。雪上加霜的是，有限的水與耕地，有相當一部分被用來種植一種叫卡特(qat)的提神植物——它極耗水、卻因有龐大的咀嚼市場而利潤可觀，進一步擠壓了本就稀缺的水與糧食。而當二○一五年以後的戰爭把這個國家撕裂、把供水與基礎設施一塊塊打碎時，缺水便與飢荒、霍亂疊加成一場巨大的人道災難——這部分的故事，屬於後面的章節。但此刻值得在馬里卜的牆前駐足記住的是：無論古今，葉門最深的危機之一，始終都是水；而能不能守住水，從來都不只是天的事，更是人能不能維繫秩序與組織的事。一千五百年前那道牆教過的功課，葉門至今仍在艱難地重修。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 幸福的阿拉伯(水之恩賜的脆弱)</span>
+      <p>這一章，把全篇第一把鑰匙——「幸福的阿拉伯」——推到了它最深、也最沉重的底層。前一章我們看見季風的雨如何讓半島西南角獨自轉綠，孕育出香料王國的富庶；這一章，馬里卜大壩則揭穿了這份富庶的真相：它不是天上掉下來、可以坐享的福分，而是一份必須由整個社會世代不斷看顧、稍一鬆手就會崩解的契約。水成就了示巴，而當維繫水的那套組織衰弛，水帶著文明一同退場——這場連《古蘭經》都記下的潰決，成了阿拉伯人心中關於恩賜與辜負、繁榮與衰亡的永恆寓言。請把這條規律牢牢記住，因為它將像一道伏流，貫穿這部葉門史的始終：這片土地的命運，反覆繫於一份脆弱的、需要集體維護的恩賜之上；而它後來那些被山與信仰切割的分裂、那些一再耗盡秩序的戰爭，最終也都會在「水」這個最古老的問題上，結出最苦的果。馬里卜的牆早已倒下一千五百年，可它提出的那道考題——一個社會能否齊心守住自己的命脈——葉門至今仍未答完。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-4">
+  <div class="act-head">
+    <span class="act-num">第四章 · From Himyar to Islam</span>
+    <h2 class="act-title">從希木葉爾到伊斯蘭：猶太教、基督教，與「信仰是葉門的」</h2>
+    <p class="act-sub">From Himyar to Islam — Judaism, Christianity and a Prophet’s Praise</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>當示巴（Saba）的香料王國在馬里卜大壩（the Marib Dam）的滋養下走過它最輝煌的數百年之後，葉門西南角的這片高地與低地，並沒有就此沉寂。在伊斯蘭降臨之前的最後幾個世紀裡，這片由季風雨水灌溉出來的綠色角落，反而成了古代世界最特殊的一處宗教十字路口。當整片阿拉伯半島還籠罩在後世所謂「蒙昧時代」（Jahiliyyah）的多神崇拜裡時，葉門卻已經先後迎來了一神信仰的兩大支流——猶太教（Judaism）與基督教（Christianity）。一個個王朝在這裡為了上帝的名字而流血，一支支外來的軍隊為了控制這條香料與紅海的咽喉而踏入這片山谷。等到先知穆罕默德（the Prophet Muhammad）的訊息從北方的希賈茲（Hijaz）傳來時，葉門早已不是一張白紙，而是一幅由多種信仰反覆塗抹、層層覆蓋的鑲嵌畫。這片土地的「信仰多元」，和它腳下被山脈切割的地形一樣古老。</p>
+
+    <h3>希木葉爾與一位皈依猶太教的國王</h3>
+    <p>示巴之後，承接葉門霸權的是希木葉爾王國（the Himyarite Kingdom）。大約在公元前一世紀興起、定都於高地上的扎法爾（Zafar），希木葉爾人最終兼併了示巴與其他古代南阿拉伯諸邦，把葉門西南一隅大致統一在自己的旗下，國祚延續到公元六世紀。希木葉爾統治的這幾百年，恰逢古代南阿拉伯文明由盛轉衰的黃昏——香料貿易的陸路因羅馬人改走紅海海路而日漸式微，馬里卜大壩也在反覆的潰決與修補中走向它最後的崩塌。然而正是在這段衰落期裡，希木葉爾卻完成了一場古代世界罕見的精神轉向：大約在公元四世紀前後，這個王國的統治階層逐漸放棄了傳統的多神崇拜，轉向了一種一神信仰，而其中與猶太教的關係尤為密切。出土的銘文不再呼喚舊日那些以月、日、星辰為名的神祇，而是改稱一位至高、唯一的「天地之主」（Rahmanan，意即「仁慈者」）。一個位於阿拉伯半島最南端、遠離地中海猶太世界核心的王國，竟然走上了一神信仰、甚至親近猶太教的道路，這在整部古代史裡都是極為奇特的一幕。</p>
+    <p>這場轉向的高潮，落在一位名字本身就充滿傳奇色彩的國王身上——宰努瓦斯（Dhu Nuwas），意思約莫是「垂髮者」。他大致活躍於公元六世紀初，是一位明確皈依猶太教的希木葉爾君主。在他身上，宗教與地緣政治糾纏成了一個再也解不開的死結。當時的紅海，已經成為兩大基督教強權角力的舞台：北邊是信奉基督教的東羅馬（拜占庭）帝國，南邊隔著紅海與葉門相望的，是同樣皈依了基督教的衣索比亞阿克蘇姆王國（the Kingdom of Aksum）。對宰努瓦斯而言，基督教不只是一種異己的信仰，更是這兩個虎視眈眈的外部強權伸進葉門的觸手。於是，這位猶太教國王與葉門境內的基督徒社群之間的衝突，便不再是單純的教義之爭，而成了一場關乎王國存亡的政治對抗。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 紅海的咽喉，何以總是兵家必爭</span>
+      <p>要理解為什麼一個遠在阿拉伯半島最南端的王國，會被拜占庭與衣索比亞輪番惦記，關鍵在於葉門所扼守的那道海峽——曼德海峽（Bab al-Mandab），意思是「淚之門」。這道狹窄的水道，是紅海通往印度洋的唯一出口；誰控制了葉門西南角，誰就掐住了連接地中海世界與印度、東非乃至更遠東方的海上貿易命脈。</p>
+      <p>於是葉門的命運裡，埋下了一個將反覆迴響數千年的結構：它太重要，重要到大國永遠無法對它放手；可它又太破碎，破碎到永遠無法靠自己的力量擋住外人。從阿克蘇姆與薩珊，到後來的奧斯曼與英國，再到今天紅海航道上的緊張——這道「淚之門」一次次把外部強權引進葉門的山谷，也一次次把葉門自身的分裂放大成國際的角力。地理上的得天獨厚，與地緣上的身不由己，是同一枚硬幣的兩面。</p>
+    </div>
+
+    <h3>納季蘭的火坑：一場被銘記的殉教</h3>
+    <p>在葉門北方、靠近今日沙烏地邊境的綠洲城市納季蘭（Najran），有一個相當繁榮的基督教社群。這座綠洲是商路上的重鎮，當地的基督徒在城裡建有教堂、自成一個信仰共同體。對推行猶太教、又與基督教強權勢不兩立的宰努瓦斯來說，納季蘭的基督徒既是異信者，也是潛在的「第五縱隊」——一旦衣索比亞渡海來犯，這些人很可能成為內應。於是大約在公元六世紀二十年代，宰努瓦斯對納季蘭發動了一場血腥的鎮壓。據古代多種來源（包括敘利亞文的基督教文獻與後來的阿拉伯傳述）記載，拒絕改信的基督徒遭到大規模屠殺，許多人被投入火坑而死。這場慘劇的具體人數已難確證，但它的衝擊極為深遠：納季蘭殉教者的故事傳遍了基督教世界，連《古蘭經》中一段歷來被多數註釋家理解為影射此事的經文——關於「火坑的主人」（Ashab al-Ukhdud）——也將它的記憶凝固了下來。</p>
+    <p>納季蘭的火坑，是葉門宗教史上最沉重的一頁。它提醒我們，這片土地的信仰多元，從來不是一幅溫情脈脈、和睦共處的田園圖景——多元，意味著差異；差異，在政治與恐懼的催化下，隨時可能燃成火焰。一神信仰在葉門的早期登場，伴隨的不是寬容，而是血。而這場屠殺最直接的後果，是替外部的干預遞上了一個現成的藉口。</p>
+
+    <div class="warn">
+      <span class="warn-tag">火坑的陰影</span>
+      <p>納季蘭事件的細節，主要保存在基督教一方的記述裡，數字與場面難免帶著宗教書寫的色彩，後世史家對其具體規模仍有討論。但事件的核心——一個皈依猶太教的王權，對境內基督徒社群進行了致命的迫害——則為多種獨立來源所印證。在記述任何一場以信仰為名的殺戮時，我們既要正視受害者的苦難、不可輕慢其重量，也要警惕任何一方把對方妖魔化的敘事。葉門的悲劇，往往正始於把鄰人按信仰劃線、再把這條線變成生死的界線。</p>
+    </div>
+
+    <h3>阿克蘇姆與薩珊：兩個帝國踏進葉門</h3>
+    <p>納季蘭的血，很快招來了海對岸的刀。信奉基督教的衣索比亞阿克蘇姆王國，以保護同信仰的基督徒為名（背後同樣攙著拜占庭的支持與紅海貿易的利益），渡過紅海大舉入侵葉門。宰努瓦斯的軍隊不敵，這位猶太教國王最終敗亡——後世的傳說裡，留下了他騎馬躍入紅海、消失於波濤之中的悲壯畫面。希木葉爾的猶太教王朝就此終結，葉門落入了阿克蘇姆的勢力範圍，由衣索比亞人扶植的基督教政權統治了數十年。其中最著名的一位統治者，是大約在公元六世紀中葉割據葉門的阿布拉哈（Abraha）。後世的阿拉伯傳述，把他與一樁與先知誕生的年代相連、極富象徵意味的事件聯繫在一起——所謂率領帶象的軍隊北上、欲圖進犯麥加（Mecca）而功敗垂成的「象之年」（the Year of the Elephant），《古蘭經》中也有一章（「象章」）涉及這段記憶。傳述與史實在這裡交織，難以一一切割，但它折射出的歷史底色是真實的：六世紀的葉門，已經是一個由外來基督教強權所主導、深深捲入紅海地緣博弈的地方。</p>
+    <p>然而衣索比亞的統治並不穩固。大約在公元六世紀的後期，葉門本地的勢力轉而向東方的另一個超級強權求援——波斯的薩珊帝國（the Sasanian Empire）。薩珊派兵渡海，逐走了衣索比亞人，把葉門納為帝國最遙遠的一個行省，由波斯總督代管。於是在伊斯蘭降臨的前夜，葉門的天空下，先後飄過了多神教、猶太教、基督教的旗幟，又先後被衣索比亞的基督徒與波斯的祆教徒所統治。短短一兩個世紀之間，這片土地像一塊被反覆翻動的調色盤，疊印著一層又一層彼此衝突的信仰與帝國。當伊斯蘭的訊息到來時，它面對的葉門，正是這樣一個飽經更迭、信仰斑駁、卻又始終沒能被任何一種力量徹底統合的地方。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">約前1世紀</div><div class="tl-text">希木葉爾王國興起，日後統一古代南阿拉伯諸邦</div></div>
+      <div class="tl-item"><div class="tl-year">約4世紀</div><div class="tl-text">希木葉爾統治階層轉向一神信仰，與猶太教關係密切</div></div>
+      <div class="tl-item"><div class="tl-year">約6世紀初</div><div class="tl-text">皈依猶太教的國王宰努瓦斯在位；納季蘭基督徒遭迫害</div></div>
+      <div class="tl-item"><div class="tl-year">約6世紀前期</div><div class="tl-text">衣索比亞阿克蘇姆渡海入侵，宰努瓦斯敗亡，基督教政權建立</div></div>
+      <div class="tl-item"><div class="tl-year">約6世紀後期</div><div class="tl-text">波斯薩珊帝國逐走衣索比亞人，葉門成為其最遠的行省</div></div>
+      <div class="tl-item"><div class="tl-year">約7世紀30年代</div><div class="tl-text">伊斯蘭訊息傳入，葉門部落大規模皈依</div></div>
+    </div>
+
+    <h3>伊斯蘭的到來：最早皈依的土地之一</h3>
+    <p>就在薩珊的總督還名義上管轄著葉門的時候，北方的希賈茲傳來了一個將要重塑整個半島的訊息。公元七世紀初，先知穆罕默德在麥加與麥地那（Medina）傳布伊斯蘭，他的使者與書信，循著古老的商路南下，抵達了葉門的城鎮與部落。而葉門對這個訊息的回應，是出奇地迅速而徹底。原因並不難理解：這裡早已是一神信仰浸潤多年的土地，猶太教與基督教的觀念並不陌生；薩珊的異族統治本就缺乏深厚的根基，當地的領袖與部落也樂於擺脫波斯人的羈縻。於是，當伊斯蘭的訊息傳來時，葉門的許多部落與要人——包括那位代表薩珊管理葉門的波斯裔總督巴贊（Badhan，傳述中他被記為率眾歸信的第一位「波斯人」穆斯林）——紛紛歸信。葉門因此成為阿拉伯半島上最早、也最大規模皈依伊斯蘭的地區之一，幾乎是和平地、整片地匯入了這場新生的信仰浪潮。</p>
+    <p>而葉門對早期伊斯蘭的貢獻，遠不止於它皈依得早。在隨後席捲西亞與北非的早期阿拉伯大征服（the early Arab conquests）中，葉門出力甚多。這片土地人口稠密——這要再次歸功於那份半島上獨一無二的季風雨水與古老的農耕傳統——能夠源源不斷地提供精悍的部落戰士。許多在征服敘利亞、伊拉克、埃及乃至更遠之地的戰役中衝鋒陷陣的部族，其根源都可追溯到葉門。他們不只是兵源，更把葉門古老的部落組織、家系傳統與文化記憶，一併帶進了新興的伊斯蘭帝國，深深地融入了它的肌理。一個在政治上常被外人主宰的角落，卻在信仰擴張的洪流裡，扮演了遠超其疆域的角色。</p>
+
+    <h3>「信仰是葉門的，智慧是葉門的」</h3>
+    <p>葉門在早期伊斯蘭中的特殊地位，最終被凝練成一句流傳極廣、份量極重的話。在多部聖訓（Hadith）集裡，都記載了先知穆罕默德對葉門人的讚許，其中最常被引用的一句，意思是「信仰是葉門的，智慧是葉門的」（al-iman yamani，al-hikma yamaniyya）。對於一個信仰共同體而言，由先知親口給予的這份褒揚，是一種近乎無上的榮耀——它把葉門人安放在了早期伊斯蘭精神版圖的一個尊貴位置上，象徵著他們柔軟的心性、虔誠的信德與古老的智慧。直到今天，葉門人仍以這句話為傲，把它視為自己這片土地與這個民族的精神徽記。</p>
+    <p>然而，歷史在這裡留下了一道意味深長的反諷。同一片被許以「信仰」與「智慧」的土地，後來卻成了伊斯蘭世界內部教派分裂最深、最持久的角落之一。當伊斯蘭內部因繼承權與正統性的爭執而分流出遜尼（Sunni）與什葉（Shia）兩大支系之後，葉門很快就接納了什葉派中的一支——宰德派（Zaydi）。北方的多山高地，將成為宰德派伊瑪目（Imam）建立神權、延續千年的根據地；而南方的低地與海岸，則大多歸於遜尼派的沙斐儀學派（Shafi'i）。先知讚許的那份「信仰」，在葉門非但沒有把人凝聚成一塊鐵板，反而像它腳下的群山與峽谷一樣，沿著一道道看不見的教派界線，把這片土地切割成了一塊塊各自為政的拼圖。信仰，成了葉門最深沉的驕傲，也成了它最古老的裂痕。</p>
+
+    <div class="pull"><p>同一片被先知許以「信仰」與「智慧」的土地，後來卻成了伊斯蘭世界裡教派分裂最深的角落之一——信仰，成了葉門最深沉的驕傲，也成了它最古老的裂痕。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派（裂痕的源頭）</span>
+      <p>這一章，把全篇第二把鑰匙——「高地與教派」——的根，一直追溯到了伊斯蘭降臨之前。請記住：葉門的信仰從來不是單一的。早在先知的訊息到來之前，這片由季風雨水餵養、足以孕育稠密人口與古老文明的綠色角落，就已經是猶太教、基督教與本土多神信仰交會、碰撞、乃至流血的鑲嵌畫——希木葉爾的猶太國王、納季蘭的基督殉教者、阿克蘇姆的十字旗與薩珊的祆教總督，層層疊印在同一片山谷裡。正是這份「信仰多元」的古老底色，讓伊斯蘭到來後的葉門，又自然而然地分流出宰德派與沙斐儀派，沿著北方高地與南方低地的地形界線各據一方。地理把葉門劈成了兩半，信仰則沿著這道裂縫，把它劈得更深。一千多年後，當北方高地的宰德派後裔（胡塞運動的信仰底色）與南方、與外部強權再度在這片土地上兵戎相見時，那場被稱為「全球最嚴重人道危機」的浩劫，它最深的那道地層，其實早在希木葉爾的銘文與納季蘭的火坑裡，就已經寫下。葉門的「信仰多元」，和它的地形一樣古老；而它日後一切教派分裂的最深的根，就埋在這一章裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<div class="part-div reveal" id="part-2">
+  <span class="pn">第二部</span>
+  <h2 class="ptitle pt">伊瑪目、咖啡，與兩個外來者</h2>
+  <div class="pe">Imams, Coffee and Two Foreigners</div>
+  <div class="pline"><span></span><span class="dot">✶</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-5">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Imams of the Highlands</span>
+    <h2 class="act-title">宰德派的伊瑪目：高地上的千年神權</h2>
+    <p class="act-sub">The Imams of the Highlands — A Thousand-Year Theocracy</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>要讀懂今天的葉門，得先抬頭看山。從紅海岸邊那片悶熱低濕的窄條平原向內走，地勢便陡然拔起——一道又一道蜿蜒的山脊把雲都攔在半空，海拔節節攀升，直到兩三千公尺的高處，空氣轉涼，梯田一層層沿著山坡盤旋而上，石砌的村落像鳥巢一樣黏在峭壁的邊緣。這便是葉門的高地（the Highlands），半島上罕見的、被季風雨灌溉得發綠的山國。也正是在這片易守難攻、與世隔絕的高原上，一個信仰、一個王系、一種統治形態，悄悄紮下了根，並斷斷續續地延續了將近一千年。葉門那道貫穿全史的根本斷層——高地與低地、什葉與遜尼、山與海——並非天生就刻在地圖上，而是在這一章裡，被一群自稱先知後裔的伊瑪目，一刀一刀刻進了北方的骨血。</p>
+
+    <h3>一個來自北方的傳教士</h3>
+    <p>故事要從第九世紀末說起。彼時阿拉伯世界已被伊斯蘭統一了兩百多年，但統一之下暗潮洶湧。在遜尼派（Sunni）為主的哈里發帝國之外，什葉派（Shia）——那些堅信先知穆罕默德（Muhammad）的女婿阿里（Ali）及其後裔才是穆斯林合法領袖的人——分裂成了許多支派，散布在帝國的邊緣地帶。其中有一支較為溫和的，叫宰德派（Zaydi），得名於阿里的曾孫宰德（Zayd ibn Ali）。它溫和在哪裡呢？它不像更激進的什葉派那樣把歷代正統哈里發全盤否定，也不主張隱遁的救世主將在末世降臨；它更入世、更講求行動，認為合格的領袖不該躲起來等待，而該挺身而出、以劍奪取屬於自己的位子。這套務實而剛健的教義，需要的不是一片溫順的土壤，而是一片桀驁難馴、渴望秩序卻又不肯輕易臣服的土地。</p>
+    <p>大約在公元八九七年，一位名叫葉海亞（Yahya）的賽義德——也就是先知血脈的後裔——應葉門北方部落的邀請，從聖城麥地那（Medina）一帶風塵僕僕地南下，來到高地的核心城市薩達（Sa'dah）。那時的北方高地，正陷在無休止的部落械鬥裡：哈希德（Hashid）與巴基爾（Bakil）兩大部落聯盟世代為仇，血債層層相積，誰也壓不住誰，誰也信不過誰。他們需要一個外人——一個地位夠崇高、立場夠超然、誰都不好意思拒絕的仲裁者，來替他們主持公道、平息血仇。葉海亞正是這樣一個人：他不屬於任何一個本地部落，卻擁有所有人都敬畏的血統。他來了，調解、立法、講學，以公正贏得人心，於是部落奉他為伊瑪目（Imam），尊他為「導向真理者」——歷史上記下的稱號，叫哈迪（al-Hadi ila'l-Haqq）。一個王系，就此在薩達的群山之間誕生，後世稱之為拉西德王系（the Rassid dynasty）。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 宰德派的伊瑪目，為何不是世襲的國王</span>
+      <p>宰德派的「伊瑪目」是個極特殊的位子，它不能簡單地翻成「教士」或「國王」。按宰德派最嚴格的教義，一個合格的伊瑪目必須同時滿足一連串苛刻的條件：他必須是先知後裔（賽義德 sayyid），出自阿里與法蒂瑪的血脈；他必須學識淵博、能獨立判定教法；他必須身體健全、品行端正；而最關鍵的是——他必須親自「起事」（khuruj），公開召喚信眾、以行動奪取並捍衛伊瑪目之位。</p>
+      <p>這意味著伊瑪目之位在理論上並非父死子繼，而是要靠資格與實力去爭取的。一位伊瑪目去世，往往不會自動傳給長子，而會在眾多有資格的賽義德之間爆發角逐——誰學問最高、誰部落支持最廣、誰能最快號令起兵，誰就能宣稱伊瑪目之位。這套設計本意是防止神權淪為庸碌世襲，確保領袖永遠是賢能者；可它的副作用是讓繼承充滿不確定，每一次權力交接都可能引爆內戰。葉門高地千年政治的反覆動盪，一半的根源就埋在這套既崇高又危險的繼承邏輯裡。</p>
+    </div>
+
+    <h3>山，替信仰築起一座天然的堡壘</h3>
+    <p>宰德派為什麼偏偏在葉門北方高地紮根，而不是別處？答案藏在地形裡。這片高地海拔高、群峰夾峙、谷深路險，外來的大軍極難深入，糧道一拉長便陷入部落的伏擊與消耗。歷史上一波又一波的強權——倭馬亞（Umayyad）的哈里發、阿拔斯（Abbasid）的總督、後來的法蒂瑪派系、十六世紀的鄂圖曼（Ottoman）帝國——都曾試圖把這片山國納入版圖，卻幾乎沒有一個能長久地按住它。鄂圖曼人兩度征服葉門，兩度都在高地的反抗與瘧疾、地形的消磨下狼狽撤走；他們可以攻下沿海與低地的城市，卻始終拿那些躲進雲端梯田、化整為零的山民沒有辦法。山，成了宰德派伊瑪目最忠實的盟友——它把這個小小的、原本可能被大帝國輕易吞沒的教派，保護成了一個能延續千年的政權。</p>
+    <p>於是一道結構，就在這片山裡慢慢凝固下來：高地等於什葉，等於由先知後裔統治。住在北方山區的人，世世代代生活在宰德派伊瑪目的權威之下，習慣了由賽義德階層擔任宗教與政治的領袖，習慣了把血統與神聖、把山與信仰，視為理所當然連在一起的東西。這不是一紙法令強加的，而是上千年日復一日的生活，把它磨成了高地人的常識與身分。</p>
+
+    <h3>另一半葉門：低地、海岸，與遜尼的沙斐儀</h3>
+    <p>可葉門從來不只有高地。當你從那些涼爽的山巔一路向下、向西、向南，地勢漸漸鋪平，氣候轉為濕熱，便來到了另一個葉門——紅海沿岸悶熱的提哈瑪（Tihama）平原，與南方那些開向印度洋的港口和谷地。這裡才是葉門面向世界的窗口：商船在此靠岸，香料與咖啡在此裝船，朝聖者與商旅在此往來，外來的思想與貨物從這裡源源不斷地滲入。也正因為開放、因為與廣大的遜尼派世界貿易往來頻密，這片低地與海岸的居民，絕大多數信奉的不是宰德派，而是遜尼派四大法學派之一的沙斐儀派（Shafi'i）。</p>
+    <p>於是葉門被地形與信仰，乾淨利落地劈成了兩半：北方多山的高地，是宰德派什葉、是伊瑪目的神權腹地；南方與西部的低地海岸，是沙斐儀遜尼、是商人與港口的天下。一個向內、向上、封閉而剽悍，一個向外、向下、開放而善賈。這兩個葉門共用一個名字、說著同一種語言、信著同一部《古蘭經》，卻在教派、生計、性情與政治效忠上，分屬兩個世界。這道斷層，不是哪一場戰爭一夜之間挖出來的，而是這一章裡的山、這一章裡的雨、這一章裡那位從北方南下的傳教士，用上千年的時間慢慢沖刷、堆積而成的。</p>
+
+    <div class="twocol">
+      <div>
+        <div class="minihead">北方高地 · 宰德派</div>
+        <p>多山、涼爽、易守難攻；由先知後裔（賽義德）出任的伊瑪目兼領宗教與政治；倚靠哈希德、巴基爾等部落；封閉、剽悍、向內。薩達、薩那一帶為其核心。</p>
+      </div>
+      <div>
+        <div class="minihead">南方與沿海 · 沙斐儀遜尼</div>
+        <p>低地、濕熱、面向海洋；以港口、貿易與農耕為生；與廣大遜尼世界往來頻密；開放、善賈、向外。提哈瑪平原與南方諸港為其腹地。</p>
+      </div>
+    </div>
+
+    <h3>斷續千年的神權，與比國家更老的部落</h3>
+    <p>從哈迪在薩達立足的第九世紀末，到一九六二年那場推翻王室的革命，宰德派伊瑪目在北方高地的統治，斷斷續續地延續了將近一千年。要強調的是「斷續」二字——這一千年絕非一條平滑連貫的王朝直線。伊瑪目之位時而虛懸、時而並立著好幾個互不相讓的宣稱者；高地時而被外來強權壓制、時而又在反抗中復興；某些世紀裡伊瑪目權威如日中天、號令整個北方，另一些世紀裡他不過是困守一隅、勉強維繫名號的山中之主。真正讓這道神權能一次次從低谷裡爬起、屢仆屢興的，不是哪一位伊瑪目個人的雄才，而是那套深植人心的結構本身——只要高地人還相信「合格的領袖必須是先知後裔、必須是宰德派的伊瑪目」，那麼無論眼下這一位多麼孱弱、王系如何中斷，遲早會有新的賽義德舉起這面旗，重新把它召喚回來。</p>
+    <p>而在伊瑪目與部落之間，始終橫亙著一段微妙而緊張的關係。哈希德與巴基爾這兩大部落聯盟，比拉西德王系還要古老——它們是高地真正的肌肉與骨架。伊瑪目能夠統治，靠的從來不是一支常備軍，而是部落的效忠與槍桿；他像一個高踞其上的仲裁者與精神領袖，靠調解血仇、分配資源、訴諸共同的信仰，把這些桀驁的部落勉強攏在一面旗下。可這效忠是隨時可以收回的：部落今日捧你為王，明日便能因一筆未分的賞賜、一樁未平的舊怨，轉身投向你的敵人。葉門高地的政治，因此永遠是一場伊瑪目與部落之間沒有終局的討價還價——神聖的血統坐在上面，古老的部落撐在下面，誰也離不開誰，誰也壓不死誰。</p>
+
+    <div class="pull"><p>這道神權能屢仆屢興，靠的不是某位伊瑪目的雄才，而是一個結構：只要高地人還相信「領袖必須是先知後裔」，那麼無論眼下這一位多麼孱弱，遲早會有新的賽義德舉起這面旗。</p></div>
+
+    <h3>千年之後，高地依舊記得</h3>
+    <p>一九六二年，一場由埃及納瑟（Nasser）支持的軍官革命，推翻了最後一位伊瑪目，宣告北葉門共和國成立，宰德派近千年的神權，在形式上畫下了句點。隨之而來的，是一場拖延多年、把埃及與沙烏地拖下水的血腥內戰——共和派與保王派各擁外援、各據地盤，這是後話，留待下一章。但要在此刻記住的是：一個延續了上千年、把「血統即統治權」刻進整片高地骨血的結構，不會因為一紙共和宣言就憑空蒸發。它沉入地底，成了北方山民集體記憶裡的一道暗河。當二十世紀末、二十一世紀初，一場新的運動在薩達——正是哈迪當年立足的那座古城——的群山之間興起，它的領袖同樣出自宰德派、同樣訴諸高地被邊緣化的委屈、同樣能在這片土地上召喚起一種古老的認同時，人們會發現：歷史並沒有真的結束，它只是換了名字，又從同一片山裡走了回來。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">897</div><div class="tl-text">賽義德葉海亞應北方部落之邀南下薩達，受奉為伊瑪目哈迪，拉西德王系與宰德派神權在高地奠基。</div></div>
+      <div class="tl-item"><div class="tl-year">16–17 世紀</div><div class="tl-text">鄂圖曼帝國兩度征服葉門，皆在高地反抗與地形消磨下撤離；伊瑪目復興，一度統合大部北方。</div></div>
+      <div class="tl-item"><div class="tl-year">1962</div><div class="tl-text">軍官革命推翻末代伊瑪目，北葉門共和國成立，千年宰德神權形式上告終；保王派與共和派內戰隨之爆發。</div></div>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派（山如何鑄成斷層）</span>
+      <p>這一章，奠下了貫穿全書第二道密碼——「高地與教派」——最深的那一層地基。請記住公元八九七年那位從北方南下、被部落奉為伊瑪目的賽義德：正是從他開始，葉門被山、被雨、被信仰，一刀一刀劈成了兩半。北方多山的高地，等於什葉的宰德派，等於由先知後裔統治的神權；南方與沿海的低地，等於遜尼的沙斐儀，等於港口與商旅的世界。這道斷層不是天生畫在地圖上的，而是上千年的伊瑪目統治，把「高地＝什葉＝由賽義德統治」這道結構，一寸寸刻進了北方人的常識與身分。它解釋了為什麼葉門從來不是一塊鐵板，而始終是被山與信仰反覆切割的拼圖——比哈迪的王系更古老的哈希德與巴基爾部落，撐在這一切之下，讓任何想統一葉門的人，都不得不先學會與山、與血統、與部落討價還價。而它最深遠的回聲，要等到二十一世紀才完整響起：當胡塞運動（Houthi）同樣從薩達的群山裡升起、同樣高舉宰德派的旗、同樣訴諸高地被遺忘的委屈時，世人才驚覺——他們並不是憑空冒出的新勢力，而是一個可以追溯整整一千年的歷史原型，又一次從同一片山裡走了出來。山，先替分裂準備好了它的容器；剩下的分裂與代理戰爭，不過是後人在這只千年的容器裡，添進的新一輪血與火。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-6">
+  <div class="act-head">
+    <span class="act-num">第六章 · Mocha</span>
+    <h2 class="act-title">摩卡：叫醒世界的港口</h2>
+    <p class="act-sub">Mocha — The Port That Woke the World</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>香料的時代終究會過去，可幸福的阿拉伯（Arabia Felix）似乎天生就懂得，如何在世人遺忘它之前，再從口袋裡掏出一樣別人求之不得的東西。當示巴的乳香（frankincense）隨著羅馬的衰亡與信仰的更迭而失去市場，當那條串起阿拉伯西南角與地中海的香料之路漸漸冷清，葉門並沒有就此沉入沉默。它的高地——那片靠著印度洋季風的雨水而綠著的山坡——又一次酬報了它的子民，這一次，是一種深褐色的、會讓人睡不著的小小果實。它的名字，後來變成了一座港口的名字，再後來，幾乎變成了一整種飲料的代名詞。那座港口叫摩卡（Mocha），阿拉伯語裡寫作 al-Makha；而那種果實，叫咖啡（coffee）。在大約兩個世紀的時間裡，全世界想喝咖啡的人，都得把目光投向紅海口這個悶熱、多塵、其貌不揚的小港——因為當時地球上的咖啡，幾乎只從這裡出海。葉門又一次，靠著一樣別人沒有的東西，富甲一方。</p>
+
+    <h3>一種叫人睡不著的果實</h3>
+    <p>咖啡的故事，要從紅海對岸的非洲說起。咖啡樹（Coffea arabica）的原生地，是衣索比亞（Ethiopia）西南部的高地——那裡的森林裡，野生的咖啡灌木結著紅色的漿果，據說當地的牧人很早就知道，牲口吃了這種果實會變得格外亢奮。可衣索比亞只是咖啡的故鄉，卻不是咖啡成為「咖啡」的地方。把這種野生的漿果第一次大規模地栽培、處理、烘焙、研磨、沖泡成一種飲料，並且把它推向世界的，是隔著一道窄窄的曼德海峽（Bab-el-Mandeb）的對岸——葉門。大約在十五世紀，咖啡的種子越過紅海，落進了葉門西南高地那片得天獨厚的山坡。這裡海拔高、氣候涼、雨水足、排水好，正是咖啡樹最喜歡的環境。於是在示巴人曾經種過香料的同一片高地上，葉門的農人開始一畦一畦地種起咖啡，沿著陡峭的山勢闢出層層的梯田，把這種來自對岸的野果，馴化成了一門足以養活一整個地區的生意。幸福的阿拉伯，再一次把它的雨水，兌換成了財富。</p>
+
+    <h3>蘇非派的夜：為了不在祈禱中睡去</h3>
+    <p>可咖啡之所以能從一種山間的野果，變成風靡整個伊斯蘭世界的飲料，靠的不是商人，而是修士。最早把飲用咖啡變成一種習慣、一種制度的，是葉門的蘇非派（Sufi）修士——伊斯蘭教裡那一支追求與神親近、講究苦修與冥想的神祕主義者。蘇非派有夜間禮拜與長時間誦念真主之名（dhikr）的修行傳統，常常要在深夜裡持續數小時的儀式中保持清醒、保持專注。對於這些徹夜不眠的修士而言，咖啡簡直是天賜——一杯深褐色的、微苦的、滾燙的飲料下肚，倦意便退去，神思反而清明，正好讓他們在最該昏沉的時辰裡，依然能夠專心地朝向真主。於是咖啡先是在葉門的蘇非道堂（zawiya）裡流行起來，被修士們當作一種輔助修行的聖物，在夜禮的圈子裡傳遞、共飲。它從修道的圈子，溢向了清真寺，再溢向了市集與街巷；待人們發現這種飲料不分晝夜都令人愉悅、令人健談、令人清醒，咖啡便徹底掙脫了道堂的高牆，成了葉門城鎮裡尋常人家與商旅都離不開的日常。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 咖啡館——一種新的公共空間</span>
+      <p>咖啡所改變的，不只是人們喝什麼，更是人們如何聚在一起。在葉門，乃至隨後傳入的麥加（Mecca）、開羅（Cairo）、伊斯坦堡（Istanbul），咖啡催生出一種前所未有的場所——咖啡館（qahveh khaneh）。在伊斯蘭世界裡，酒是被禁止的，這意味著傳統上並沒有一個讓男人們在工作之餘公開聚會、清醒地談天說地的世俗空間。咖啡館填補了這個空白：它不是清真寺，不是私宅，而是一個中性的、向眾人敞開的地方，人們在這裡喝咖啡、下棋、聽說書、談生意、議論時政。</p>
+      <p>正因為它讓人「清醒地聚集」，咖啡館從一開始就帶著一絲叫統治者不安的氣味——一群清醒的人聚在一起談論國事，向來是權力最警惕的場景。十六世紀的麥加曾一度試圖查禁咖啡，鄂圖曼（Ottoman）的當局也數度對咖啡館下過禁令。可那一杯叫人睡不著的飲料，終究禁不住。葉門遞給世界的，不只是一種提神的飲品，還是一種把人從各自的屋簷下喚到同一張桌子旁的公共生活。</p>
+    </div>
+
+    <h3>摩卡：紅海口的咖啡之都</h3>
+    <p>高地的咖啡要賣到世界去，總得有一個出海的門戶。這個門戶，就是摩卡。摩卡坐落在葉門西南、紅海東岸靠近曼德海峽的位置，本是一個並不起眼的小漁港，可隨著咖啡貿易的興盛，它在十六、十七世紀迅速膨脹成整個紅海最繁忙、最富庶的港口之一。葉門高地的咖啡豆，用駱駝與騾子一袋一袋地馱下陡峭的山路，運到摩卡的貨棧裡集中、晾曬、過秤、裝船；再由一艘艘船隻載著，越過紅海，運往鄂圖曼帝國的各個港口、運往波斯（Persia）、運往印度，乃至更遠的地方。摩卡的碼頭上，操著各種語言的商人摩肩接踵——埃及人、土耳其人、波斯人、印度人，後來還有歐洲人。空氣裡混著海的鹹、塵土的乾、與咖啡生豆那股青澀而濃郁的氣味。在那兩個世紀裡，摩卡幾乎就是「世界的咖啡倉庫」——你想喝咖啡，全世界的咖啡，差不多都得先經過這個悶熱小港的秤與帳。一個名字從此被牢牢地、永久地焊在了這種飲料上：直到今天，「摩卡」二字，依舊在無數人的杯緣與菜單上，代表著咖啡。</p>
+
+    <div class="pull"><p>一座其貌不揚的紅海小港，因為一種叫人睡不著的果實，叫醒了半個世界。「摩卡」這兩個字，從一個港口的名字，變成了整種飲料的代名詞——這是一座港口所能得到的、最不朽的勳章。</p></div>
+
+    <p>這份壟斷的背後，是一道被精心看守的關卡。葉門的統治者——當時主要是統治高地的宰德派（Zaydi）伊瑪目（Imam）——很清楚他們手裡握著的是怎樣一張稀世的好牌。咖啡是當時葉門最重要的財源之一，而它之所以值錢，正因為全世界只有葉門能種、能賣。為了守住這份得天獨厚的壟斷，據說當局對咖啡的輸出設下了嚴格的規矩：可以賣烘焙過的熟豆、可以賣煮過或部分處理過的豆子，這些都無法再發芽；但有發芽能力的、活的生種與帶著果肉的種苗，則被嚴防死守，不許帶出國門。只要種子不出去，種咖啡的本事就永遠鎖在葉門的高地上，全世界就只能年復一年地把銀子送進摩卡的貨棧。這是一門近乎完美的生意——只要那道關卡守得住。</p>
+
+    <h3>偷走一棵樹：壟斷如何被破</h3>
+    <p>然而，再嚴密的關卡，也擋不住一整個世界對一種好東西的渴望。十七世紀起，崛起的歐洲海上強權——尤其是荷蘭與英國的東印度公司（the Dutch and English East India Companies）——把目光投向了摩卡。一開始，他們老老實實地在摩卡設立商館、用銀子購買葉門的咖啡運回歐洲；可精明的商人很快算清了這筆帳：與其永遠當葉門壟斷下的買家，任人定價，不如想辦法把這門生意連根搬走——把活的咖啡苗弄出葉門，種到自己控制的、氣候相宜的殖民地去。於是一場圍繞著「偷一棵樹」的漫長角力，悄悄展開了。在後世的傳說裡，這件事被一個名字串了起來——巴巴布丹（Baba Budan）：相傳這位印度的蘇非朝聖者，在前往麥加朝覲、途經摩卡時，違反禁令，把七顆活的咖啡生豆綁在腹間偷偷帶出，回到印度南部的山區種下，從此打開了葉門壟斷的第一道裂縫。這個故事真偽難辨、細節多半是後人附會，可它所講的那件事本身——咖啡的活種子如何被人想方設法地偷運出葉門——卻是不折不扣地發生了。</p>
+
+    <p>真正系統性地終結葉門壟斷的，是荷蘭人。十七世紀末到十八世紀初，荷蘭人把咖啡苗成功移植到了他們在東方的殖民地——爪哇（Java），隨後又擴及錫蘭（Ceylon）等地；那片熱帶的火山土壤與葉門的高地一樣適合咖啡，產量很快便起來了。「爪哇」（Java）一詞，後來也跟「摩卡」一樣，成了咖啡的別稱之一。緊接著，咖啡的種苗又從歐洲的溫室，被輾轉送往大西洋彼岸——加勒比海（the Caribbean）的島嶼、中南美洲的山坡，凡是氣候相宜的殖民地，都被一片片闢成了咖啡園。靠著殖民地廣袤的土地與低廉的勞動力，這些後來者的產量，很快就把葉高地那一畦畦辛苦的梯田遠遠拋在了身後。短短幾十年間，葉門從「全世界唯一的咖啡貨源」，跌成了眾多產地中一個漸漸無足輕重的小角色。摩卡港的帆檣日漸稀疏，貨棧裡的咖啡香一年淡似一年。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">15世紀</div><div class="tl-text">咖啡越過紅海傳入葉門高地，蘇非派修士用它在夜禮中提神，咖啡成為飲料</div></div>
+      <div class="tl-item"><div class="tl-year">16–17世紀</div><div class="tl-text">摩卡崛起為紅海最繁忙的咖啡港，幾乎是全世界唯一的咖啡貨源</div></div>
+      <div class="tl-item"><div class="tl-year">17世紀末起</div><div class="tl-text">荷蘭人把咖啡苗移植到爪哇，隨後擴及錫蘭、加勒比與中南美</div></div>
+      <div class="tl-item"><div class="tl-year">18世紀</div><div class="tl-text">殖民地產量大增，葉門壟斷瓦解，摩卡港的咖啡貿易逐漸沒落</div></div>
+    </div>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 如果那幾顆種子守住了</span>
+      <p>不妨設想，若葉門當年真能把活的咖啡種苗永遠鎖在高地之內，會發生什麼。答案恐怕仍是：守不住。一種如此誘人、利潤如此豐厚的作物，在一個對它如飢似渴的世界面前，被複製只是時間問題——殖民帝國有的是耐心、是船隊、是遍布熱帶的土地。即便沒有巴巴布丹，也會有別的朝聖者、別的商人、別的間諜，遲早把種子帶出去。葉門能壟斷咖啡兩個世紀，已是地理與運氣給的長假。真正的教訓不在於那幾顆種子是怎麼丟的，而在於：一份建立在「只有我有」之上的繁榮，本質上就是脆弱的——它不取決於你多努力，而取決於別人多久才學會。</p>
+    </div>
+
+    <h3>第二次的富甲與第二次的失去</h3>
+    <p>把咖啡的故事與千年前香料的故事並排來看，會讀出一種近乎宿命的迴響。這已是幸福的阿拉伯第二次，靠著一樣別人求之不得、而自己得天獨厚的東西，富甲一方。第一次是示巴的乳香——因為阿拉伯西南角是當時世人所知唯一能大量產出乳香沒藥的地方；第二次是摩卡的咖啡——因為這片高地一度是全世界唯一能種出咖啡並賣往各地的地方。兩次的劇本幾乎一模一樣：先是上天藉著那場印度洋的季風雨，把一份別處沒有的恩賜，獨獨降在這片綠色的西南角；葉門靠著這份獨佔的恩賜，搭起繁榮的橋、富庶的港；然後——恩賜終究被別人複製了、奪走了、繞過了。乳香敗給了信仰的更迭與市場的轉移，咖啡敗給了殖民地的移植與量產。一樣的開頭，一樣的結局。葉門的繁榮，彷彿總是繫於一種獨佔的賜予；而獨佔，從來不是一種可以永久持有的東西。</p>
+
+    <p>更深一層去想，這兩次興衰其實還共享著同一個結構性的軟肋：葉門的財富，向來不是建立在它「製造」了什麼不可替代的東西上，而是建立在它「擁有」了某種別處沒有的天然恩賜上。乳香是樹的眼淚，咖啡是高地的果實，二者都是大自然恰好賜給這片土地、而暫時還沒賜給別人的禮物。可禮物與本事不同：本事旁人學不走，禮物卻可以被移植、被搶奪、被繞道。當別人也學會了種咖啡、當別的航路繞開了紅海，葉門手裡那張獨一無二的牌，就一張接一張地變成了人人都有的廢牌。這座曾經叫醒世界的港口，最終連自己都沒能保住——這不是因為葉門人不夠勤勉、不夠精明，而是因為它賴以致富的根基，始終是一份借來的、隨時可能被收回的恩典。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 幸福的阿拉伯（恩賜的興與失）</span>
+      <p>摩卡這一章，是第一道密碼——「幸福的阿拉伯」——的第二次回響，也是第一次裂縫的浮現。請記住這個反覆出現的劇本：那場印度洋的季風雨，讓葉門的西南高地在整片沙漠的半島上獨獨綠著，於是它能孕育乳香、能種出咖啡，能在世人面前一次又一次地掏出別處沒有的好東西，富甲一方。這份得天獨厚的水，是葉門所有繁榮的源頭，也是它區別於整個半島的根本。可摩卡的興衰，同時也替後面的故事埋下了一句陰沉的伏筆：當繁榮繫於一種獨佔的恩賜，而非一門學不走的本事，這份繁榮便注定脆弱——恩賜一旦被別人複製或奪走，富庶就會像退潮一樣流走，只在港口的名字裡，留下一個關於黃金歲月的迴聲。香料如此，咖啡如此。記住這個模式，因為當這片土地走入近代、當它再一次被外力反覆切割與爭奪時，我們會看見：葉門的命運，總是在「上天獨厚的恩賜」與「恩賜被奪走的失落」之間擺盪。而那把第二道、第三道密碼——被山與信仰劈開的拼圖、與被放大成代理戰場的分裂——正等在前方，要把這份古老的脆弱，推向它最沉重的當代。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-7">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Ottomans and the Imams</span>
+    <h2 class="act-title">鄂圖曼的兩度征服與伊瑪目的抵抗</h2>
+    <p class="act-sub">The Ottomans and the Imams — Two Conquests, One Resistance</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>有些土地，是用來被佔領的；有些土地，只是用來被困住的。葉門的高地，屬於後者。當一支外來的軍隊跨過提哈瑪（Tihama）那條濕熱的紅海沿岸平原，一路推進到塔伊茲（Taʿizz）、薩那（Sanaʿa）腳下時，它往往會以為征服已近在咫尺——海岸拿下了、港口拿下了、低地的城鎮也插上了旗。可它不知道，真正的葉門並不在海邊，而在那一道道往北、往東層層升高的山裡。那裡海拔動輒兩三千公尺，村莊像鷹巢一樣釘在峭壁與山脊上，石砌的塔樓一座連著一座，每一道隘口都是天險，每一座山頭都站著一個記得自己祖先是誰、效忠於誰的部落人。在那裡，住著一位伊瑪目（Imam），與一群把忠誠獻給他的宰德派（Zaydi）山民。海岸可以被買、被佔、被駐軍；高地卻只能被進攻、被流血、被一次又一次地丟掉。鄂圖曼帝國（the Ottoman Empire）——這個橫跨三洲、號稱真主在大地上的影子的龐然大物——將在四百年裡，兩度為這道分野付出代價。</p>
+
+    <h3>第一次征服：為了一杯咖啡，與一片海</h3>
+    <p>十六世紀的紅海，忽然變成了世界的火藥桶。一四九八年，葡萄牙人達伽馬（Vasco da Gama）繞過非洲南端的好望角，闖進了印度洋——這群來自歐洲邊陲的航海者，憑著裝著火炮的帆船，開始一個港一個港地掐住東方香料貿易的咽喉。對統治著埃及、覬覦著聖城的鄂圖曼蘇丹而言，這是不能容忍的威脅：若讓葡萄牙人封死紅海的南口，麥加（Mecca）與麥地那（Medina）的朝聖航路、埃及的商稅、整個帝國在印度洋的臉面，都將不保。而紅海的南口，正鎖在葉門的手裡——亞丁（Aden）這座扼守曼德海峽（Bab-el-Mandeb）的港城，是進出整片大洋的鑰匙。於是在十六世紀上半葉，鄂圖曼人沿著紅海一路南下，把葉門納入了帝國的版圖。一五三八年，鄂圖曼艦隊以亞丁為跳板遠征印度的第烏（Diu）；薩那等城市也先後落入帝國之手。葉門第一次，被一個遠在伊斯坦堡的蘇丹寫進了賦稅與行省的名冊。</p>
+
+    <p>把鄂圖曼人牢牢拴在這片土地上的，除了戰略，還有一種更香的東西——咖啡。咖啡這種飲品最初在葉門的蘇非（Sufi）修士間流行，用以在徹夜誦念真主之名時提神；隨後它越過紅海、傳遍鄂圖曼世界，從開羅到伊斯坦堡的咖啡館裡座無虛席。而在當時，全世界能出口咖啡的港口，幾乎只有一個——葉門紅海岸邊那座叫摩卡（Mocha）的小城。「摩卡」這個名字，後來成了咖啡本身的代稱，足見它一度怎樣壟斷著這門新生的、利潤驚人的全球生意。控制葉門，就等於控制了世界唯一的咖啡水龍頭，也控制了麥加門前的這片海。對鄂圖曼來說，這座行省值得佔——只要佔得住。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼帝國要葉門</span>
+      <p>一個地處半島最南端、滿是窮山的角落，何以反覆引來遙遠帝國的軍隊？因為葉門從不只是它自己——它是一道閥門。它握著紅海進出印度洋的南大門，誰掌握了它，誰就能放行或封死麥加的朝聖、紅海的商旅、與整片東方貿易的船隊。香料時代如此，咖啡時代如此，到了輪船與蘇伊士運河的時代更是如此。</p>
+      <p>於是葉門的命運裡藏著一個悖論：它的海岸太重要，重要到大國非來不可；它的高地太難啃，難啃到大國從來待不久。外人為了那片海而來，卻被那片山困住——這道「海岸與高地」的撕裂，將一遍遍重演。</p>
+    </div>
+
+    <h3>山裡的另一個王：宰德派伊瑪目</h3>
+    <p>然而鄂圖曼人很快發現，他們征服的只是葉門的下半截。在北方那一片折疊起伏的高地上，存在著另一套權威，它比伊斯坦堡的蘇丹更古老、更貼近這片土地的骨血——那就是宰德派的伊瑪目制。宰德派是什葉派伊斯蘭中的一支，以先知後裔宰德（Zayd ibn ʿAli）為名；早在公元九世紀末，一位來自先知家族的賽義德（Sayyid）後裔便應北方部落之請進入葉門高地，建立了伊瑪目政權。此後一千多年裡，這套制度雖屢經中斷與更迭，卻始終在這片山地的精神深處延續著：伊瑪目不是世襲的國王，而須是先知後裔、學識與虔誠兼備、並能拔劍捍衛信仰的人——理想中，他要靠「起義」（khurūj）來證明自己配得上這個位子。這意味著高地宰德社會的政治正當性，天然帶著一種反抗外來不義統治的基因。</p>
+
+    <p>對北方的高地部落而言，伊瑪目不只是宗教領袖，更是把一盤散沙般的部落短暫凝聚起來的軸心。哈希德（Hashid）與巴基爾（Bakil）這兩大部落聯盟——後世稱它們是「伊瑪目的兩翼」——比任何國家都古老，平日各自為政、彼此爭鬥，可一旦伊瑪目以信仰與先知血脈的名義舉起義旗，召喚他們去驅逐山外來的異族統治者，這些桀驁的山民便能被號召到同一面旗下。鄂圖曼人是遜尼派、說突厥語、來自遙遠的北方；他們的駐軍與稅吏在高地人眼中，是闖進聖徒之鄉的外人。一個天然的對立，就此擺好了：海邊是帝國的行省，山裡是伊瑪目的王國。</p>
+
+    <h3>卡西姆王朝：把鄂圖曼人趕下山</h3>
+    <p>十七世紀初，這股山裡的力量終於匯成一場決定性的逐客令。一六九七年前後一位被尊為「偉大者」的伊瑪目曼蘇爾·卡西姆（al-Mansur al-Qasim）——他開創的這一脈，後世稱為卡西姆王朝（the Qasimid dynasty）——在高地舉起了反抗鄂圖曼的旗幟。他與其繼承者一代代向低地的鄂圖曼駐軍施壓，把部落的怒火、宰德的信仰、與對賦稅和異族統治的不滿，鍛成一股持久的山地戰爭。鄂圖曼人擅長的是平原上的列陣與攻城，可在葉門這種一夫當關的崎嶇地形裡，補給線被拉得又長又脆，每一次往高處的推進都要付出與收穫不成比例的代價。</p>
+
+    <p>到了十七世紀中葉，鄂圖曼帝國終於撐不住了。經過長年的消耗，帝國放棄了葉門——大約在十七世紀四十年代，鄂圖曼的軍隊與旗幟退出了這片土地，卡西姆的伊瑪目們收復了從高地到海岸、乃至摩卡咖啡港的廣袤疆域，建立起一個獨立的、由薩那的伊瑪目統治的葉門。第一次征服，就這樣以帝國的撤退告終。鄂圖曼人來時是為了咖啡與紅海，走時把這兩樣都留給了山裡的伊瑪目。這是高地對低地、本土對外來的第一次完整勝利，也成了葉門人世代相傳的記憶——山，是打不下來的。</p>
+
+    <div class="pull"><p>海岸可以被買、被佔、被駐軍；高地卻只能被進攻、被流血、被一次又一次地丟掉。</p></div>
+
+    <h3>第二次征服：運河重新點亮了這片海</h3>
+    <p>鄂圖曼人退出葉門近兩百年後，是一條人工開鑿的水道，把他們又拉了回來。一八六九年，蘇伊士運河（the Suez Canal）通航，地中海與紅海被一刀接通，紅海從一條盡頭封閉的死巷，重新變回連接歐洲與印度的世界級主航道。葉門所扼守的曼德海峽，再度成了全球航運的咽喉。而此時，英國人已在一八三九年佔據了亞丁，把它經營成帝國輪船加煤與補給的重鎮——這是後話，屬於南方與英國的故事。對風雨飄搖、被歐洲列強蠶食的鄂圖曼帝國而言，眼看紅海重新熱鬧、列強紛紛南下，它不能再讓葉門這扇大門完全旁落。於是在十九世紀後半葉，鄂圖曼軍隊第二次開進葉門，重新佔領了提哈瑪平原與薩那等高地城市，把葉門再度劃為帝國的一個行省。</p>
+
+    <p>可歷史像是抄了一遍舊稿。鄂圖曼人再一次牢牢握住了低地與海岸的城鎮，也再一次在北方高地撞上了同一堵牆。宰德派的伊瑪目——這一回是哈米德丁家族（the Hamid al-Din）——又從山裡發動了一波接一波的抵抗。二十世紀初，伊瑪目葉海亞（Imam Yahya）領導高地部落與鄂圖曼駐軍長期周旋，戰事在崎嶇的山地裡反覆拉鋸。帝國耗費大量兵力與錢糧，卻始終無法把伊瑪目連根拔起，最終只能與他達成妥協：一九一一年的一紙協議，實際上承認了伊瑪目對北方宰德高地相當程度的自治權，鄂圖曼則保住低地的行政與稅收。換句話說，連帝國自己都默認了那條看不見的分界——山下歸我，山上歸你。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1538</div><div class="tl-text">鄂圖曼艦隊以亞丁為跳板遠征印度第烏；葉門低地與海岸納入帝國，第一次征服展開</div></div>
+      <div class="tl-item"><div class="tl-year">17世紀初</div><div class="tl-text">伊瑪目卡西姆在高地舉起反鄂圖曼義旗，卡西姆王朝興起</div></div>
+      <div class="tl-item"><div class="tl-year">約1640s</div><div class="tl-text">鄂圖曼撤出葉門；卡西姆的伊瑪目收復高地與海岸，建立獨立的葉門</div></div>
+      <div class="tl-item"><div class="tl-year">1869</div><div class="tl-text">蘇伊士運河通航，紅海重回世界主航道，葉門的戰略價值再度點亮</div></div>
+      <div class="tl-item"><div class="tl-year">19世紀後半</div><div class="tl-text">鄂圖曼第二次征服，重佔低地與薩那；高地伊瑪目再起抵抗</div></div>
+      <div class="tl-item"><div class="tl-year">1911</div><div class="tl-text">鄂圖曼與伊瑪目葉海亞妥協，實際承認北方宰德高地的自治</div></div>
+      <div class="tl-item"><div class="tl-year">1918</div><div class="tl-text">第一次世界大戰結束、鄂圖曼瓦解，伊瑪目葉海亞建立獨立的葉門王國</div></div>
+    </div>
+
+    <h3>一道四百年都填不平的分界</h3>
+    <p>第一次世界大戰把鄂圖曼帝國本身送進了墳墓。一九一八年帝國崩解、駐軍撤離，伊瑪目葉海亞順理成章地成了北方的主人，建立起一個獨立的、政教合一的葉門王國，定都薩那——這是宰德伊瑪目制延續千年後，又一次以完整國家的形態君臨高地。鄂圖曼人兩度跨海而來，兩度耗盡兵力與錢糧，最終兩度把這片土地交還給了山裡的伊瑪目。低地與海岸，他們確曾握在手中；可北方那片折疊的高地，他們始終只能短暫地踩上去，卻從未真正消化、真正佔有。</p>
+
+    <p>值得退一步看的，是這個模式的驚人穩定。它不是某一場戰役的偶然結果，而是地形與信仰共同寫下的鐵律。地形給了高地天險——崎嶇難行、易守難攻、補給線一拉就斷，讓任何外來大軍的火力與紀律都在這裡打了對折；信仰則給了高地一個凝聚的核心——宰德伊瑪目以先知血脈與抵抗不義的名義，把哈希德、巴基爾這些平日彼此征伐的部落，在外敵當前時短暫地焊到同一面旗下。一個征服者可以買通海邊的港城、收編低地的稅吏，卻買不動那位住在山裡、自認對抗異族本就是其神聖職責的伊瑪目，也壓不服那群把效忠獻給他、把每一道隘口當作家門的部落人。</p>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 如果葉門是一片平原</span>
+      <p>設想葉門若像它北方的鄰居那樣，是一片無遮無攔的開闊地——沒有兩三千公尺的群山，沒有鷹巢般的塔樓村，沒有一夫當關的隘口。那麼鄂圖曼的火炮與騎兵，本可以像碾過敘利亞、伊拉克的平原那樣，一路碾過整個葉門；宰德伊瑪目失去了山的庇護，那套靠「起義」與山地游擊維繫的權威，恐怕撐不過第一個世紀，便會被帝國的行政與賦稅徹底消化。葉門大概會像許多鄂圖曼行省一樣，被熔進帝國的大鍋，失去它那份倔強的獨立性格。</p>
+      <p>正是那片山，保住了伊瑪目，也保住了「葉門終究是葉門」這件事。可同樣是那片山，把這個國家從一開始就劈成了海岸與高地兩半——它既是葉門得以不被吞沒的盾，也是葉門永遠難以彌合的傷。</p>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派（外人征服不了的山）</span>
+      <p>這一章，把貫穿全書的第二把鑰匙——「高地與教派」——擺到了最赤裸的位置。鄂圖曼人兩度跨海而來，兩度只能拿下提哈瑪的海岸與薩那、塔伊茲的低地城鎮，兩度在北方宰德高地的天險與部落面前流盡耐心、悻悻退場。請把這個模式牢牢記住，因為它是理解葉門此後一切戰爭的母題：地形把這個國家劈成「易取的低地」與「難啃的高地」，信仰又在高地裡安放了一個比任何外來政權都更古老、更頑強的權威核心——宰德伊瑪目，與哈希德、巴基爾這兩翼部落。</p>
+      <p>於是同一齣戲，往後還會以不同的戲服一演再演。英國人能經營南方的亞丁港，卻同樣管不了北方的山；二十世紀六十年代，埃及的納賽爾派出大軍支持共和派去推翻伊瑪目，數萬將士陷進這片高地動彈不得，後來被稱作「埃及的越南」；而到了二十一世紀，當沙烏地領導的聯軍從二〇一五年起介入、企圖把從這同一片北方高地崛起的胡塞（Houthi）武裝逐出薩那時，他們將再一次發現——海岸與低地或可奪取，那片山與山裡的人，外人始終無法真正征服。地形與信仰聯手鑄成的這道分界，四百年來沒有一支軍隊填得平。葉門的高地，是一塊吞得進去、卻消化不了的土地——這，正是讀懂它一切苦難的鑰匙。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-8">
+  <div class="act-head">
+    <span class="act-num">第八章 · Aden</span>
+    <h2 class="act-title">亞丁：大英帝國的加煤站</h2>
+    <p class="act-sub">Aden — The Coaling Station of the British Empire</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>葉門的故事，到這裡分了岔。我們一路看著的，是北方那片折疊起伏的高地——宰德派（Zaydi）的伊瑪目（Imam）盤踞山巔，部落在峽谷裡編織著比國家更古老的忠誠，整個社會像一座向內封閉、向上攀升的城堡。可在這座城堡的南方，沿著印度洋的岸邊，另一條道路正悄悄被一隻外來的手撬開。那隻手不屬於任何一位伊瑪目，也不屬於任何一個部落酋長，而屬於一個遠在歐洲北端、彼時正把版圖鋪滿全球的帝國——大英帝國。一八三九年，英國人的軍艦開進了一座沉睡的火山港，那座港叫亞丁（Aden）。從那一天起，葉門被劈成了兩半：一半留在山裡，向著過去；一半被推向海上，向著一個它自己也未必看得清的未來。</p>
+
+    <h3>一座死火山的咽喉</h3>
+    <p>先看這塊地。亞丁不是普通的海港，它是一座死火山塌陷後留下的天然要塞——黑褐色的火成岩崖壁從海面陡然拔起，環抱出一汪深而避風的水域，像一隻巨大的、半浸在印度洋裡的拳頭。古人很早就認得它的好。傳說中它是該隱（Cain）與亞伯（Abel）安葬之地，是聖經與古典世界都隱約知曉的東方門戶；在示巴與香料的時代，它就已是紅海口外一處轉運的泊點。可它真正的價值，要等到地理被重新丈量之後才會浮現——它恰好卡在紅海與印度洋交界、曼德海峽（Bab-el-Mandeb，意為「淚之門」）之外不遠的位置。誰握住亞丁，誰就把手指搭在了從蘇伊士到孟買、從歐洲到整個東方那條航線的咽喉上。對一個把命脈繫於海上的帝國而言，這樣一塊岩石，價值連城。</p>
+    <p>英國人來奪它，理由說來幾乎瑣碎。十九世紀初，英國的蒸汽船開始在紅海與印度之間試航，船需要靠岸補給淡水與燃料，亞丁是天造地設的中途站。一艘掛英國旗的船在附近遇難、船員與貨物據稱遭沿岸劫掠，便成了現成的口實。一八三九年一月，英屬印度的軍隊發動登陸，擊敗了當地拉赫吉（Lahej）蘇丹麾下的守軍，奪下了這座港。<strong>這是維多利亞女王（Queen Victoria）治下的大英帝國取得的第一塊海外領地</strong>——比她正式登基稱「印度女皇」還早了將近四十年。一個日後將「日不落」的帝國，它在女王時代海外擴張的起點，不在非洲、不在遠東，而在阿拉伯半島最南端這座焦黑的火山港裡。而它的主人，不是倫敦的外交部，而是加爾各答的英屬印度政府——亞丁從一開始，就是被當作「印度的前哨」來經營的。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 加煤站帝國</span>
+      <p>十九世紀的海權，建立在一種很物質的東西上——煤。風帆時代的船吃風，蒸汽時代的船吃煤；而煤一旦燒完，鋼鐵的巨獸便寸步難行。於是一個橫跨全球的蒸汽帝國，必須在它漫長的航線上，每隔幾百海里就插下一個能囤煤、能補水、能修船的據點。這些據點本身往往荒涼、貧瘠、不事生產，可它們是帝國這套循環系統裡的心臟瓣膜——直布羅陀（Gibraltar）、馬爾他（Malta）、亞丁、新加坡、香港，一串珠子似的散在地圖上，把不列顛、地中海、紅海、印度洋、南海連成一條輸送線。</p>
+      <p>亞丁就是這串珠子上極關鍵的一顆。它的存在邏輯，與北方的伊瑪目國度恰成兩極：伊瑪目國度是為了統治山裡的子民、護持一種信仰而存在；亞丁則純粹是為了讓別人的船能繼續往東開而存在。一個是向內的、為自己活的；一個是向外的、為一條航線活的。同一塊葉門的土地上，從此並存著兩種根本不同的生存邏輯。</p>
+    </div>
+
+    <h3>運河一開，世界都從這裡過</h3>
+    <p>真正讓亞丁從一塊岩石暴漲為一座大都會的，是一八六九年——那一年，蘇伊士運河（the Suez Canal）通航了。在此之前，從歐洲到印度的船要繞行整個非洲、繞過好望角，路途遙遠；運河一開，地中海與紅海被打通，歐洲到亞洲的航程驟然縮短了數千海里，而從運河南口出來、穿過紅海、駛向印度洋的每一艘船，都要從亞丁門前經過。亞丁的位置，一夜之間從「印度航線上的一個補給點」，變成了「歐亞海運大動脈上的必經咽喉」。</p>
+    <p>於是煤山堆了起來，棧橋伸進了海裡，加煤的駁船在港內穿梭如織。蒸汽船一艘接一艘靠港，黑色的煤塊由成群的苦力扛上甲板，水、糧、修理、補給在這裡一站辦齊。鼎盛之時，亞丁是全世界數一數二繁忙的港口——進出的船舶噸位在當時的英帝國體系裡僅次於少數幾個頂級大港。它不再只是一座加煤站，更成了一個巨大的轉口港（entrepôt）：紅海兩岸、東非、阿拉伯、印度的貨物在這裡集散、轉手、再分發。一座建在死火山口、本身幾乎不長一棵樹、連淡水都得靠海水淡化與遠處引水才勉強夠用的城市，竟靠著「過路」這門生意，活成了印度洋上一顆耀眼的明珠。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">1839</div><div class="lbl">英國奪取亞丁——維多利亞時代大英帝國的第一塊海外領地</div></div>
+      <div class="stat"><div class="num">1869</div><div class="lbl">蘇伊士運河通航，亞丁躍升為歐亞航線的必經咽喉</div></div>
+      <div class="stat"><div class="num">煤・水・轉口</div><div class="lbl">亞丁存在的全部理由——為了讓別人的船繼續往東</div></div>
+    </div>
+
+    <h3>一座由全世界拼成的城</h3>
+    <p>一座靠過路為生的港，必然是一座由四面八方的人拼成的城。亞丁吸來了整個印度洋世界的勞工、商人與冒險者：來自英屬印度的職員、士兵、放債人與店主，把這裡當作印度的延伸；來自對岸非洲之角的索馬利（Somali）人，扛煤、行船、做苦力；來自葉門各地——尤其是內陸哈德拉毛（Hadhramaut）那片乾旱谷地——的葉門人，世代有外出謀生的傳統，他們在亞丁當搬運工、開小鋪、跑南洋；還有波斯人、猶太人、希臘人、亞美尼亞人、帕西人（Parsi），各自帶著自己的語言、神祇與帳本，在這座火山港的窄巷裡比鄰而居。</p>
+    <p>於是亞丁長出了一種葉門其他地方都沒有的性格——世故、混雜、向著外面的世界睜著眼睛。這裡有英國人辦的學校與報紙，有貿易公司的洋行，有港務局的章程與時刻表，有一支由各色人等組成的勞動大軍，有一種在討價還價與裝卸接駁中磨出來的、見過世面的市井氣。一個在亞丁碼頭長大的少年，他的世界不是那道把北方高地圍起來的山，而是一張畫滿航線的海圖——孟買、桑吉巴（Zanzibar）、加爾各答、新加坡的名字，對他並不比鄰村更陌生。<strong>當北方的高地仍封閉在伊瑪目的神權與部落的血緣裡時，南方的這座港，已經被印度洋的潮水反覆沖刷成了另一種模樣。</strong></p>
+
+    <div class="pull"><p>同一片葉門的天空下，北方的少年抬頭看見的是山，南方的少年抬頭看見的是桅杆。一道海，把這片土地劈成了兩種命運。</p></div>
+
+    <h3>港口的後院：保護地的拼布</h3>
+    <p>可英國要的，遠不止那座港。一座加煤站要安穩，它的後院就不能亂。亞丁的腹地，是一大片散落著無數小邦的乾旱土地——這裡有拉赫吉的蘇丹、法德利（Fadhli）的蘇丹、上阿瓦里克與下阿瓦里克（Aulaqi）的酋長，有哈德拉毛深處的庫艾提（Qu'aiti）與卡蒂里（Kathiri）兩個世仇蘇丹國，林林總總，據稱有二十來個各自為政的部落政體，彼此攻伐、互不統屬。英國人不去一個個征服他們——那既費錢又無利可圖——而是用一套更廉價、更老練的辦法：簽約。</p>
+    <p>從十九世紀後期到二十世紀初，英國與這些蘇丹、酋長一個接一個簽下「保護條約」（protectorate treaties）：你保有你的內政與頭銜，但你的對外關係交給我，不得把土地割讓或租借給除英國以外的任何強權，作為交換，我給你津貼、給你保護、給你一紙承認你地位的文書。一張張這樣的協議拼接起來，便圍著亞丁港織出了一塊鬆散的緩衝帶——<strong>亞丁保護地（the Aden Protectorate）</strong>。它不是一個國家，也不是一塊直接統治的殖民地，而是一床由幾十個半獨立小邦拼起來的「政治拼布」：中央那塊高密度的英國直轄殖民地（亞丁港本身），外面包著一圈鬆散的、靠條約與津貼維繫的蘇丹國與酋長領。英國只需用很少的官員與很少的錢，便讓自己的咽喉據點睡得安穩。</p>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 假如英國當年放過了亞丁</span>
+      <p>設想一八三九年那艘遇難的英國船從未出事，設想英屬印度政府的目光掠過了這座火山港，沒有伸手。那麼蘇伊士運河通航後南下的船，會去別處加煤；亞丁或許仍是拉赫吉蘇丹治下一個尋常的漁港與小集市，南方腹地那幾十個蘇丹國，會繼續在彼此的攻伐裡緩慢度日，最終多半像北方一樣，被某種本土的權力——或是擴張中的伊瑪目國度，或是後來的鄂圖曼——慢慢收攏進去。沒有英國，就沒有那座世故的港埠都會，沒有那支見過世面的碼頭勞動大軍，也很可能不會有那道把南北劈成兩種文明取向的深溝。葉門未必更和睦，但它至少會少掉一道——很可能是最深的一道——人為刻下的裂縫。亞丁的故事提醒我們：有些裂縫不是天生的，是被一張海圖、一船煤、一紙條約硬生生鑿出來的。</p>
+    </div>
+
+    <h3>兩條路，越走越遠</h3>
+    <p>把鏡頭拉遠，這一章真正的分量便顯出來了。葉門本就被它的地形與信仰切割過一次——西南角那片得天獨厚的雨水，孕育了稠密的人口與古老的文明，可這文明又被高山劈成南北，被宰德與沙斐儀（Shafi'i）兩種教派、被哈希德（Hashid）與巴基爾（Bakil）這些比國家更老的部落，反覆撕成一塊塊。而現在，亞丁又在這之上，劃下了一道全新的、更現代的裂縫——不再是教派的、不再是部落的，而是「面向哪裡」的裂縫。</p>
+    <p>北方，仍封閉在高地之中，由伊瑪目以一種近乎中世紀的神權方式統治著，刻意與外部世界保持距離，保守、虔信、以部落為骨架。南方，則被英國的港口、英國的學校、英國的法律與印度洋的商貿，塑造成另一副樣子——相對世俗、相對開放、向著海洋與遠方睜著眼。一個向內看著山，一個向外望著海；一個活在伊瑪目的曆法裡，一個活在輪船的時刻表裡。同一個民族、同一塊土地，兩半身子卻在朝著相反的方向生長。這道二十世紀才被深深鑿開的南北之溝，日後不會輕易彌合：它將在英國撤離後，演成兩個分立的國家——一個保守的北也門，一個甚至成為整個阿拉伯世界唯一的馬克思主義國度的南也門；它將在一九九〇年那場倉促的統一之後，繼續在地底隱隱作痛；而直到今天，南方的分離主義者仍會指著亞丁港、指著那段被英國形塑的歲月說：我們本就與北方不同。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1839</div><div class="tl-text">英屬印度軍隊登陸，奪取亞丁——維多利亞時代大英帝國第一塊海外領地</div></div>
+      <div class="tl-item"><div class="tl-year">1869</div><div class="tl-text">蘇伊士運河通航，亞丁成為歐亞海運大動脈上的加煤站與轉口港</div></div>
+      <div class="tl-item"><div class="tl-year">19世紀末起</div><div class="tl-text">英國與南方數十個蘇丹、酋長逐一簽訂保護條約，拼出鬆散的「亞丁保護地」</div></div>
+      <div class="tl-item"><div class="tl-year">20世紀</div><div class="tl-text">南北分道——南方面向海洋、相對世故，北方封閉於高地、由伊瑪目統治</div></div>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派（再添一道南北之裂）</span>
+      <p>這一章要記住的，是葉門那道「分裂」的密碼又被加深了一層。葉門的不統一，最初是天生的——是山與雨把人口擠進西南一角，又是高地與教派、部落與部落把這一角反覆切碎。可亞丁的故事告訴我們，分裂也可以是外力後天鑿出來的。一八三九年英國奪下這座火山港，本只是為了一條航線、一船煤；蘇伊士運河一通，它又把整個印度洋世界的人與貨吸了進來，把南方的海岸塑造成一個世故、多元、向外開放的港埠社會；而那床由幾十個蘇丹國拼成的「亞丁保護地」，則讓南方在政治形態上也與北方那座向內封閉的伊瑪目城堡徹底分了家。於是葉門被劈出了第二道根本的裂縫——不是教派的、不是部落的，而是「南方面向海、北方面向山」的裂縫。這道溝，將在二十世紀演成兩個分立的國家，將在統一之後仍隱隱作痛，並一直延續到今天南方人那句不肯放下的話裡：我們，本就不一樣。請記住亞丁這座港——它是葉門被現代世界第一次正式拉進門的地方，也是這片土地被劃下第二道命運分界線的地方。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<div class="part-div reveal" id="part-3">
+  <span class="pn">第三部</span>
+  <h2 class="ptitle pt">兩個葉門：北方的神權與南方的紅旗</h2>
+  <div class="pe">Two Yemens — The Northern Theocracy and the Southern Red Flag</div>
+  <div class="pline"><span></span><span class="dot">✶</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-9">
+  <div class="act-head">
+    <span class="act-num">第九章 · 1962</span>
+    <h2 class="act-title">一九六二：高地革命與「埃及的越南」</h2>
+    <p class="act-sub">1962 — The Highland Revolution and “Egypt’s Vietnam”</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九六二年九月十九日，沙那（Sana'a）城裡的老伊瑪目阿赫邁德（Imam Ahmad bin Yahya）在睡夢中安然去世。這位統治北葉門近十五年的宰德派（Zaydi）君王，一生躲過了無數次暗殺、政變與行刺——子彈打進過他的身體，毒藥試探過他的飲食，他卻奇蹟般地一次次熬了過來，被臣民半敬半懼地喚作「魔鬼阿赫邁德」。然而最終結束他統治的，不是哪一顆子彈，而是衰老本身。他死在床上，這在葉門近代史裡幾乎是一件稀罕事。可他大概沒有料到，自己這場罕見的「善終」，恰恰成了一場大地震的前兆——他閉上眼睛的那一刻，一座延續了約一千年的神權體制，已經站在了崩塌的邊緣。九月二十六日，也就是他去世還不滿一週，沙那的夜空被炮聲撕裂。一千年的伊瑪目時代，在這一夜走向了它的終局。</p>
+
+    <h3>一座站在火藥桶上的王座</h3>
+    <p>要理解這場革命為何在一九六二年爆發，得先看清老伊瑪目阿赫邁德留下的，是一個怎樣的葉門。那是一個被刻意凍結在中世紀的國度。伊瑪目視現代化為威脅——學校會教出會質疑的頭腦，公路會運來危險的思想，外國人會帶進敗壞信仰的習氣。於是在二十世紀中葉，當鄰近的埃及、伊拉克、敘利亞都在電線、廣播與報紙的浪潮裡翻騰時，北葉門幾乎沒有現代學校、沒有幾條像樣的公路、沒有報業、沒有醫院體系，國門對外緊閉。伊瑪目把整個國家當作自家的私產來經營，把王室成員與親信派往各省當總督，靠著什葉派宰德派的教義與北方部落的效忠來維繫權力。</p>
+    <p>可問題在於，再緊的門也擋不住聲音。一九五〇年代，埃及總統納瑟（Gamal Abdel Nasser）的聲音正透過一種新東西——廉價的電晶體收音機——飄過紅海，落進葉門高地的村莊與軍營。納瑟的「阿拉伯民族主義」（Arab Nationalism）像一陣熱風，許諾一個擺脫君王、擺脫殖民、由阿拉伯人自己當家作主的新時代。對於那些被送出國受訓、見過外面世界的葉門年輕軍官而言，這聲音點燃了一種難以忍受的羞恥與渴望——他們回望自己的國家，看見的是一個還在用鎖鏈囚禁人質部落子弟、把人頭懸在城門示眾的中世紀王座。新舊兩個世界之間的張力，已經繃到了極限。老伊瑪目的死，只是抽掉了壓在火藥桶上的最後一塊石頭。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 宰德派伊瑪目制——一座千年的神權</span>
+      <p>要掂量一九六二年這場斷裂有多重，先得明白被推翻的是什麼。宰德派是什葉派伊斯蘭的一個古老支系，名字來自先知後裔宰德（Zayd ibn Ali）。它與主流的十二伊瑪目什葉派不同：宰德派不相信伊瑪目是隱遁的、等待重臨的救世主，而主張伊瑪目必須是先知家族（sayyid）的後裔中，那位最有學識、最虔誠、並且敢於起而帶領的人——他得靠自己「掙來」這個位子，而非血脈自動繼承。</p>
+      <p>大約在公元九世紀末，第一位宰德派伊瑪目進入葉門北方高地，在此建立起政教合一的統治。從那時起，斷斷續續、改朝換代，宰德派伊瑪目在這片山裡延續了約一千年——這是伊斯蘭世界裡存續最久的政教合一政體之一。它不是一個現代意義上的「國家」，更像是一張由伊瑪目的宗教權威、部落的效忠與聯姻、與高地的地形共同織成的網。理解了這張網的古老與堅韌，才能理解：一九六二年要剪斷的，不是一個朝代，而是一段一千年的連續性。</p>
+    </div>
+
+    <h3>九月二十六日：坦克開向王宮</h3>
+    <p>老伊瑪目阿赫邁德死後，王位傳給了他的兒子巴德爾（Imam Muhammad al-Badr）。巴德爾比他父親開明些，甚至帶著幾分對改革的嚮往，曾向埃及與蘇聯示好。然而他坐上王座還不到一週，命運就沒給他喘息的機會。九月二十六日深夜，一批受納瑟思潮感染的軍官，在一位名叫薩拉勒（Abdullah al-Sallal）的軍官帶領下發動兵變。坦克碾過沙那的街道，炮口對準了王宮。叛軍宣稱已將年輕的伊瑪目巴德爾炸死在宮中，隨即透過廣播向全國宣告：伊瑪目制已被推翻，「葉門阿拉伯共和國」（Yemen Arab Republic）就此誕生。一千年的神權，在一夜的炮火裡被宣布終結。</p>
+    <p>可是革命者算漏了一件事——巴德爾沒有死。他在王宮的廢墟裡死裡逃生，喬裝混出沙那，一路北逃，鑽進了北方高地那些他祖先世代盤踞、地形最險峻、部落最忠誠的山區。對於一個宰德派伊瑪目而言，這片山，是世上最後也最可靠的庇護所。他在那裡重新樹起旗號，召集仍效忠王室的部落武裝，宣告自己仍是合法的伊瑪目。於是，這場原本以為一夜可定的革命，瞬間裂變成一場曠日持久的內戰——一邊是定都沙那、自稱共和的「共和派」（Republicans），一邊是退守北方群山、要奪回王座的「保皇派」（Royalists）。葉門被它與生俱來的那道地形裂縫，再一次劈成了兩半。</p>
+
+    <h3>當大國把葉門當成棋盤</h3>
+    <p>內戰一旦爆發，外面的世界立刻嗅到了機會。這片貧瘠的高地，轉眼成了那個年代「阿拉伯冷戰」最炙手可熱的賭桌。</p>
+    <p>站在共和派背後的，是埃及的納瑟。對納瑟而言，葉門的革命是天賜良機——若能在阿拉伯半島的南端扶起一個共和盟友，就等於在保守君主制的腹地插下一面旗，向整個阿拉伯世界證明：君王的時代正在崩塌，民族主義的浪潮勢不可擋。他幾乎沒有猶豫，便把埃及軍隊大批渡海送進葉門。站在保皇派背後的，則是沙烏地阿拉伯（Saudi Arabia）。對利雅得的紹德王室而言，這場仗關乎生死存亡——他們自己也是一個君主制，若任由納瑟在南方扶起一個共和國、再讓革命之火順著半島燒上來，下一個被推翻的王座，可能就是自己的。於是沙烏地敞開金庫，向退守山區的伊瑪目與部落輸送金錢與軍火。約旦、英國乃至更遠的勢力，也各自在暗處下注。</p>
+    <p>就這樣，一場本屬於葉門人自己的新舊之爭，被迅速改寫成了一盤大國的棋局。葉門人或許是棋手，但更多時候，他們是棋盤上被推來搡去的棋子。山裡的部落不見得真懂什麼叫「共和」或「君主立憲」，他們效忠的對象、倒戈的時機，往往取決於哪一方此刻的賞金更厚、哪一方更尊重古老的部落體面。沙烏地的金幣與埃及的鈔票，在同一座山谷裡彼此競標著同一批部落的槍。</p>
+
+    <div class="pull"><p>納瑟以為自己派去的是一支解放的軍隊，葉門的群山卻把它變成了一台慢慢絞碎帝國雄心的磨。</p></div>
+
+    <h3>「埃及的越南」</h3>
+    <p>納瑟很快就明白，他踩進的不是一場速勝的革命，而是一片會吞人的泥沼。埃及的軍隊在開闊的沙場上或許所向披靡，可一旦開進葉門那縱橫交錯、海拔起伏動輒兩三千公尺的高地，一切優勢都倒了過來。保皇派的部落戰士生於斯、長於斯，熟悉每一道山脊、每一處隘口、每一個能藏身的山洞。他們不與埃及人正面決戰，而是化整為零，打了就跑，在崎嶇的地形裡神出鬼沒——伏擊運補的車隊，切斷孤立的據點，讓裝備精良的正規軍空有火力卻找不到敵人。埃及人控制了城市與公路，卻始終征服不了城市與公路之外的群山。</p>
+    <p>戰事一拖就是好幾年。埃及前後投入的兵力據估計多達數萬之眾，最盛時佔了其常備軍相當大的一部分，傷亡與耗費同樣以驚人的速度累積。更沉重的是國庫——這場遠在海外、看不到盡頭的戰爭，像一個無底的洞，把納瑟本該用於國內建設的資源一點點吸乾。一場戰爭，外有強敵、地形不利、師出無名感日深、久戰不決、國力被慢慢掏空——當這些特徵湊在一起，後世的觀察者便給葉門戰爭起了一個刺眼的綽號：「埃及的越南」（Egypt's Vietnam）。這個比喻或許不盡精確，卻一針見血地說出了它的本質——一個自負的強權，把自己拖進了一場它既贏不了、又抽不了身的消耗戰。</p>
+    <p>歷史還埋著一條更深的伏線。一九六七年六月，當以色列在「六日戰爭」（Six-Day War）裡以閃電般的速度擊潰埃及軍隊、奪走西奈半島時，許多分析者回頭追問：那支號稱阿拉伯第一強軍的埃及軍隊，為何如此不堪一擊？答案的一部分，正埋在葉門的群山裡。多年的高地纏鬥，已經抽走了埃及軍隊大量的精銳、彈藥、士氣與注意力，當以色列的突襲到來時，這支軍隊早已被一場遙遠的內戰悄悄掏空了筋骨。需要審慎的是，六七年的慘敗有著多重而複雜的成因，葉門絕非唯一的解釋；但說它是埋下那場敗局的若干伏筆之一，並不為過。具有諷刺意味的是，正是這場讓納瑟元氣大傷的六七年戰敗，反過來迫使他從葉門抽身——他再也撐不起兩條戰線。埃及軍隊陸續撤離，沙烏地與保皇派也漸漸失去了死戰到底的理由。一九七〇年前後，交戰各方在沙烏地的斡旋下達成妥協：共和國得以保全，但向宰德派與部落作出讓步，伊瑪目本人則永遠流亡海外。北葉門，以一種誰也沒有完全獲勝的方式，勉強縫合了傷口。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1962·9·19</div><div class="tl-text">老伊瑪目阿赫邁德病逝，子巴德爾繼位，神權體制走到崩塌邊緣</div></div>
+      <div class="tl-item"><div class="tl-year">1962·9·26</div><div class="tl-text">薩拉勒等軍官發動革命，宣告「葉門阿拉伯共和國」成立；巴德爾逃入北方高地</div></div>
+      <div class="tl-item"><div class="tl-year">1962–67</div><div class="tl-text">內戰：共和派（埃及撐腰）對保皇派（沙烏地撐腰），埃及深陷高地泥淖</div></div>
+      <div class="tl-item"><div class="tl-year">1967</div><div class="tl-text">六日戰爭埃及慘敗，納瑟被迫自葉門逐步撤軍</div></div>
+      <div class="tl-item"><div class="tl-year">約1970</div><div class="tl-text">沙烏地斡旋下達成妥協：共和國存續，向宰德派與部落讓步，伊瑪目永久流亡</div></div>
+    </div>
+
+    <h3>被推翻的，與沒能被消滅的</h3>
+    <p>從表面上看，一九六二年是一條清楚的分界線：在這一年之前，葉門北方是延續了約一千年的宰德派伊瑪目神權；在這一年之後，它名義上成了一個現代共和國。一座千年的王座倒了，一段一千年的連續性被剪斷——這是「高地與教派」這把鑰匙在葉門史上的一次大地震，其分量無論怎麼估計都不為過。</p>
+    <p>然而，真正值得在此停步深想的，是另一件更幽微的事。革命推翻了伊瑪目這個「人」與這個「位子」，卻沒有、也無法一併消除孕育出這個位子的那整片土壤——北方高地的宰德派認同。共和國的旗幟可以插上沙那的城頭，新政府的文告可以宣告君主制的死亡，可那些世代尊崇先知後裔、習慣了由宰德派伊瑪目來主持公道與信仰的高地部落，他們心裡那套關於「誰該領導、誰是正統」的古老觀念，並不會因為一紙宣告就煙消雲散。共和國為了結束內戰，最終不得不向宰德派與部落作出大量讓步——這本身就承認了一件事：你可以拆掉王座，卻拆不掉支撐王座的那座山，與山裡那群人的記憶。</p>
+    <p>一份被推翻的傳統，並不會就此死去；它只會退入地下，沉睡，等待一個重新被需要的時刻。被新生的共和國邊緣化的高地宰德派，那份不甘、那份「我們才是這片山真正的主人」的記憶，並沒有被一九六二年的炮火燒成灰燼。它只是被壓住了。數十年之後，當共和國的承諾在這片高地上一次次落空、當邊緣與被剝奪的感受重新發酵，這份被推翻卻未被消滅的千年傳統，將從同一片北方群山裡，以一個新的名字——胡塞運動（the Houthi movement）——捲土重來。歷史在這裡留下了一個它最擅長的圈套：你以為一九六二年關上了一扇門，其實它只是把那扇門推得很重，重到讓人忘了它有一天還會再被推開。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派（千年王座的崩與不滅）</span>
+      <p>一九六二年，是「高地與教派」這把鑰匙在整部葉門史裡敲得最響的一聲。延續約一千年的宰德派伊瑪目神權，在這一年的炮火中宣告終結——這是一道真實而深刻的斷裂，葉門由此名義上踏入了共和的現代。可這一章真正要留給後文的，不是「終結」，而是「終結之後沒能被一併帶走的東西」。革命推翻了伊瑪目，卻推不平那道把葉門劈成北方什葉派高地與南方遜尼派低地的地形與信仰裂縫；它趕走了一個君王，卻趕不走高地宰德派那份古老的正統意識與被剝奪的不甘。與此同時，這場內戰早早預演了葉門後來的宿命——「分裂與代理戰爭」的雛形已在此浮現：沙烏地與埃及隔著紅海，第一次把這片貧瘠的高地當成各自下注的賭桌，金錢與軍火競標著同一批部落的忠誠。半個世紀後，當胡塞運動從同一片高地崛起、當沙烏地與伊朗在這裡重演一場更慘烈的代理戰爭時，回望一九六二，人們才會驚覺：那一年倒下的，從來不是一段歷史的句點，而是另一段更長故事的破折號。被推翻的千年王座沒有真正死去——它只是退回了它出生的群山，等著有一天，從同一片高地上重新站起。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-10">
+  <div class="act-head">
+    <span class="act-num">第十章 · The Red Flag of the South</span>
+    <h2 class="act-title">南方的紅旗：阿拉伯世界唯一的馬克思之國</h2>
+    <p class="act-sub">The Red Flag of the South — The Arab World’s Only Marxist State</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九六七年十一月的最後幾天，一面米字旗在亞丁（Aden）的港灣上空緩緩降下。一百二十八年前，英國的軍艦炮轟這座城、把它變成大英帝國通往印度的加煤站；如今，最後一批英軍登船離去，連一場交接的典禮都來不及安排，便倉皇地把這片土地丟給了在叢林與街巷裡打贏了它的人。在葉門的歷史上，外來者撤退並不新鮮——鄂圖曼人來過又走，伊瑪目守住了山。可這一次不同。英國人走後，亞丁與它身後那片遼闊的南方腹地，沒有回到部落酋長手裡，也沒有迎來一位先知後裔的伊瑪目，而是升起了一面誰也沒料到的旗——一面紅色的旗。在整個阿拉伯世界，從大西洋岸的摩洛哥到波斯灣，唯獨在這裡，在葉門的南方，將要誕生一個自稱信奉馬克思列寧主義的國家。一個民族、一塊半島的兩半，就此沿著一條冷戰的裂縫，分立成了兩個葉門。</p>
+
+    <h3>叢林裡的旗：反英武裝鬥爭</h3>
+    <p>英國人並非心甘情願地走的。整個一九六〇年代，南方的反殖民怒火被一場席捲阿拉伯世界的浪潮點燃——埃及的納賽爾（Gamal Abdel Nasser）高舉著阿拉伯民族主義（Arab nationalism）的大旗，喊出把帝國主義者趕出阿拉伯土地的口號，他的廣播電台「阿拉伯之聲」越過紅海，傳進亞丁的工棚、碼頭與市集。亞丁是一座特殊的城：英國人在這裡建了煉油廠、軍港與兵營，把大批工人聚到一處，於是這裡比葉門任何角落都更早地有了工會、有了罷工、有了讀過書、領過薪、見過外面世界的工人與知識分子。民族主義的火，在這樣的土壤裡燒得最旺。一九六三年起，亞丁與它周邊那片由英國保護的部落酋長領地（the protectorates），相繼燃起武裝起義。</p>
+
+    <p>扛起槍的，主要是兩股勢力。一股叫「民族解放陣線」（the National Liberation Front，簡稱 NLF），它的根扎在內陸的部落與鄉村，組織嚴密、意識形態激進，越往後越向左轉；另一股叫「被佔領南葉門解放陣線」（FLOSY），更親近納賽爾的埃及、更偏城市與工會。兩股力量一面同英軍周旋，一面也彼此爭奪日後南方的繼承權。英國人在亞丁的最後幾年，陷進了一場典型的、贏不了的殖民地戰爭——城裡是手榴彈與冷槍，山裡是伏擊與游擊，兵營的鐵絲網外是越來越敵意的人群。一九六六年，倫敦索性宣布將從蘇伊士運河以東全面撤軍；亞丁這顆昔日帝國皇冠上的東方明珠，一夕之間從必守的戰略要地，變成了一個急著脫手的包袱。一九六七年十一月三十日，英軍撤離，NLF 在與對手的最後較量中勝出，接管了這座城。一個新國家就此誕生——它先叫「南葉門人民共和國」，三年後改稱「葉門人民民主共和國」（the People’s Democratic Republic of Yemen）。歷史，往往就在這樣一個倉皇的撤退裡，被擰出一道全新的方向。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 亞丁為何向左</span>
+      <p>整個阿拉伯半島都向著保守、部落、宗教的方向走，何以唯獨亞丁長出了一面紅旗？關鍵在於英國一百多年的殖民，意外地替這裡注入了別處沒有的東西——一個工業化的港口城市。煉油廠、軍港與轉口貿易，把成千上萬的人從部落的田地與帳篷裡抽出來，變成領薪水、住工棚、按班次上下工的工人。</p>
+      <p>而有了工人，就有了工會；有了工會，就有了罷工、組織、與一套用「階級」而非「部落」或「教派」來解釋世界的語言。當民族解放的浪潮湧來時，這座城已經備好了它的容器：一群不再以血緣與宗派、而以工人與資本來想像自身處境的人。馬克思的學說之所以能在阿拉伯世界唯獨在這裡落地，不是偶然，而是殖民資本主義親手鬆好了的土。</p>
+    </div>
+
+    <h3>升起紅旗：阿拉伯世界唯一的馬克思之國</h3>
+    <p>獨立之後的南葉門，沒有像多數新興阿拉伯國家那樣，在民族主義與溫和社會主義之間找個折衷的位置，而是一路向左，走到了整個阿拉伯世界誰都沒走過的盡頭。執政的 NLF 在一九七〇年代逐步改組、清洗，最終演化成一個信奉馬克思列寧主義的執政黨——後來定名為「葉門社會黨」（the Yemeni Socialist Party）。新國家把「人民民主共和國」幾個字鄭重地寫進國號，奉行一黨制、計畫經濟、與無神論的官方意識形態，並把自己牢牢綁進了以蘇聯（the Soviet Union）為首的社會主義陣營。在波斯灣那一片由王室、酋長、與石油美元構築的保守海洋裡，南葉門是一座孤零零的紅色島嶼——它是阿拉伯世界唯一的馬克思主義國家，這個「唯一」，本身就是它最醒目的身分。</p>
+
+    <p>蘇聯的影響滲進了這個年輕國家的每一根血管。莫斯科與其東歐盟友提供武器、顧問、貸款與技術援助；蘇聯的軍艦獲准停靠亞丁——這座曾經是大英帝國咽喉的港口，如今成了蘇聯海軍在印度洋的一個落腳點。在最緊張的冷戰年代裡，曼德海峽（Bab-el-Mandeb）這道紅海的南大門，一邊由親西方的力量把守，一邊卻泊著掛紅旗的軍艦。南葉門還在區域裡扮演了一個不安分的角色：它支持鄰近的左翼游擊運動，一度為阿曼（Oman）佐法爾地區的叛亂、為各路革命組織提供庇護與訓練，讓波斯灣的君主們對它又恨又怕。一塊在地圖上不算大的土地，因為插上了一面紅旗，便被推到了全球意識形態對抗的最前沿。</p>
+
+    <div class="pull"><p>在波斯灣那一片由王室、酋長與石油美元構築的保守海洋裡，南葉門是一座孤零零的紅色島嶼——而這座島，與山那頭的北方，本是同一個民族。</p></div>
+
+    <h3>對部落與宗教開戰：一場世俗的激進實驗</h3>
+    <p>馬克思列寧主義不只是寫在國號上的招牌，南葉門是當真要照著它去改造社會的，而它選定的頭號敵人，恰恰是這片土地上最古老的兩樣東西——部落與宗教。新政權推行土地改革，沒收大地主、蘇丹與宗教基金（waqf）名下的田產，分給無地的農民，並試圖把農村組織進合作社；它要拆掉的，是那套靠土地、血緣與酋長維繫了千百年的鄉村秩序。它打壓部落的權威，宣告部落酋長的世襲特權非法，企圖用黨組織與國家機器，去取代那一層層以血緣編織的忠誠——這在葉門，是一件石破天驚、近乎逆天的事，因為部落比任何國家都古老。</p>
+
+    <p>它同樣不放過宗教在公共生活裡的支配地位。作為一個官方無神論的國家，南葉門把宗教嚴格限縮到私人領域，削弱宗教界的政治與經濟力量。而它最為人記取、也最具顛覆性的一步，是在婦女地位上的激進改革。新政權頒布了在當時整個阿拉伯世界都堪稱最進步的家庭法（the family law）——它限制一夫多妻、提高結婚年齡、賦予婦女離婚與受教育的權利、鼓勵女性走出家門進入職場與公共生活。亞丁的街頭，一度可以看見不戴面紗、穿著職業裝去上班的女性，看見女學生、女工人、女幹部。在那個年代的阿拉伯半島，這是別處難以想像的景象。</p>
+
+    <p>該如何看待這場實驗，至今仍有截然不同的講法，而誠實的敘述應當把這些分歧本身呈現出來。在支持者的記憶裡，那是一段難得的世俗、平等、有秩序、女性能抬頭走路的歲月，是南方人日後懷念的一種尊嚴。在批評者眼中，那是一個一黨專政的高壓國家：政治反對被壓制，私有財產被剝奪，無數地主、商人與舊精英被迫流亡海外，激進的世俗化也曾粗暴地碾過虔誠者的信仰與部落的尊嚴。一場理想主義的激進實驗，與一套高壓的單一意識形態統治，在這裡是同一枚硬幣的兩面。</p>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 如果亞丁不曾向左</span>
+      <p>設想英國撤離後，接手南方的若不是那批向左轉的革命者，而是溫和的民族主義者或被收編的部落酋長——南葉門大概會像它周圍的海灣鄰邦那樣，走上一條保守、親西方、與部落和宗教妥協共存的路。它或許不會成為蘇聯軍艦的港口，不會去支援他國的左翼叛亂，也不會以土改與無神論去硬碰那套古老的鄉村秩序。</p>
+      <p>可正因為它選了最決絕的那條路，南北兩個葉門才被推到了冷戰與意識形態光譜的兩個極端——一個是剛推翻神權、保守而部落色彩濃厚的共和國，一個是激進世俗、信奉紅色教條的馬克思之國。這道由人為與信仰共同劃下的裂縫，後來既釀成了統一前後的兵戎相見，也把「南方自成一體」這個念頭，深深埋進了一代南方人的記憶裡——這念頭，至今未死。</p>
+    </div>
+
+    <h3>兩個葉門：同一個民族，兩端的命運</h3>
+    <p>把目光拉遠，南北兩個葉門的並立，是「分裂」這把鑰匙最戲劇性的一頁。這不是兩個不同的民族在各自的土地上立國——他們說同一種阿拉伯語，拜同一位先知，數百上千年來本是同一片名為葉門的土地上的子民。把他們劈開的，不是血緣，不是歷史，而是兩條人為的線：一條是殖民者畫下的疆界，把扼守紅海南口的亞丁與其腹地，從伊瑪目統治的北方割了出去；另一條，是冷戰的意識形態之線，把分開的兩半，硬生生推向了世界對抗的兩端。</p>
+
+    <p>於是在同一塊半島的西南角，並排站著兩個面貌截然相反的葉門。北方，是剛剛在一場漫長內戰裡推翻了千年神權、卻仍被部落與保守傳統深深纏繞的阿拉伯葉門共和國，倒向沙烏地與西方；南方，是世俗、激進、抑制了部落與宗教、把婦女送進職場、把紅旗插上港口的人民民主共和國，倒向蘇聯與東方陣營。一條無形的界線橫在中間，兩邊各有各的國旗、軍隊、盟友與信條，邊境上時有摩擦與交火。同一個民族，被分置在冷戰的兩個極端，過著兩種被外部對抗所塑造的命運——這是二十世紀葉門最深的悖論，也是它分裂這道宿疾在現代最赤裸的一次發作。</p>
+
+    <p>然而再決絕的分裂，也壓不住「我們本是一家」這個念頭。在南北兩邊，「統一的葉門」始終是一面被反覆舉起的旗，是雙方政權都要爭奪的正當性符號。歷史的諷刺正在於此：正因為他們本是一個民族，這道由人為與意識形態劃下的界線，才顯得格外刺眼、格外令人不甘——分裂愈深，對統一的渴望就喊得愈響。這份渴望，將在一九九〇年把兩個葉門拉到一起；可那份倉促的擁抱裡，南北之間從未真正彌合的差異，正埋著下一場悲劇的引信。那是後話。截至此刻，半島的西南角還站著兩個葉門，沿著一條冷戰的裂縫，各自走在通往一場未知重逢的路上。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1839</div><div class="tl-text">英國攻佔亞丁，將其經營為通往印度的加煤站與帝國要港</div></div>
+      <div class="tl-item"><div class="tl-year">1963</div><div class="tl-text">南方反英武裝起義爆發，NLF 與 FLOSY 等勢力與英軍周旋</div></div>
+      <div class="tl-item"><div class="tl-year">1967</div><div class="tl-text">英軍撤離亞丁，NLF 接管，南葉門宣告獨立</div></div>
+      <div class="tl-item"><div class="tl-year">1970</div><div class="tl-text">改國號為「葉門人民民主共和國」，正式走向馬克思列寧主義道路</div></div>
+      <div class="tl-item"><div class="tl-year">1970年代</div><div class="tl-text">推行土改、抑制部落與宗教、頒進步家庭法、倒向蘇聯陣營</div></div>
+    </div>
+
+    <div class="warn">
+      <span class="warn-tag">陰影 · 紅色教條的另一面</span>
+      <p>對一場以「解放」為名的革命，誠實的記述不能只記它的理想。執政的社會黨內部派系傾軋不斷，路線與權力的鬥爭一次次以清洗與流血告終——這個以「人民」為名的國家，對自己人也未必溫柔。理想與高壓在這裡糾纏難分，付出代價的，終究是那些被夾在教條與權鬥之間、沒有名字的普通南方人。</p>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 分裂與代理戰爭（同一民族，兩端的命運）</span>
+      <p>這一章，把貫穿全書的第三把鑰匙——「分裂與代理戰爭」——推到了它最戲劇化的一個瞬間。請記住這幅幾乎不可思議的圖景：同一個民族、同一塊土地的兩半，在二十世紀後半葉沿著一條冷戰的裂縫分立成兩個國家——北方是保守、部落、剛推翻神權的共和國，南方則是激進、世俗、信奉紅色教條、阿拉伯世界絕無僅有的馬克思之國。把他們分開的不是血緣，而是殖民者的疆界與意識形態的鋒刃；這道裂縫，是葉門那道與生俱來的分裂，在現代被外部世界的對抗放到最大的一次。</p>
+      <p>這道裂縫的後果，將一路延燒到我們所在的當下。一九九〇年的統一，並沒有真正彌合南北，反而把兩套不相容的制度、軍隊與精英倉促地塞進同一個國號，旋即在一九九四年迸出內戰；而南方人對那段獨立歲月與被北方吞併的記憶，至今仍是南方分離主義最深的根——時至今日，當北方山裡崛起的胡塞（Houthi）與一個四分五裂的葉門互相撕扯時，南方那面曾經的紅旗，仍以「南方過渡委員會」之類的形式，固執地提醒著世人：這片土地從來就不是鐵板一塊。請帶著這道由冷戰劃下、卻遠比冷戰更古老的裂縫，走進下一章——當兩個葉門終於決定走到一起時，那場擁抱究竟是和解，還是又一場悲劇的開端。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-11">
+  <div class="act-head">
+    <span class="act-num">第十一章 · Two Yemens</span>
+    <h2 class="act-title">兩個葉門的對峙</h2>
+    <p class="act-sub">Two Yemens — A Divided Standoff</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九六七年的最後一個冬天，英國人收起了在亞丁（Aden）飄揚了一百二十八年的米字旗，登船離去。可他們留下的，不是一個葉門，而是一張被切成兩半的地圖。從這一刻起，這片本是同一個民族、同一種語言、同一段古老記憶的土地上，並排站著兩個彼此承認、卻又彼此敵視的國家：北邊，是定都薩那（Sanaʿa）的阿拉伯葉門共和國（the Yemen Arab Republic），人們慣稱「北葉門」；南邊，是定都亞丁、剛剛從英國手裡奪下獨立的政權，幾年後改名為葉門人民民主共和國（the People's Democratic Republic of Yemen），人們慣稱「南葉門」。它們之間，橫著一道殖民者隨手畫下、卻硬生生把一個民族劈開的邊界。接下來的二十三年裡，這兩個葉門將以最荒謬也最真實的方式相處——一邊高喊著「我們本是一家、終須統一」，一邊在邊境上開槍、在對方境內豢養叛軍、在彼此的政壇上派人行刺。它們是兄弟，也是仇敵；分得越開，喊「統一」喊得越響。</p>
+
+    <h3>一條邊界，兩種葉門</h3>
+    <p>要理解這場對峙的烈度，得先看清這兩個葉門到底有多不一樣。北葉門承襲的是那片千年宰德派（Zaydi）高地的骨血——一九六二年的革命雖然推翻了延續千年的伊瑪目（Imam）王朝、隨之而來的內戰又把埃及與沙烏地都拖了進去，可革命結束後的北方，骨子裡仍是一個由部落、宗教與保守鄉土編織成的社會。哈希德（Hashid）與巴基爾（Bakil）這兩大部落聯盟依舊是高地真正的權力肌理，任何坐進薩那總統府的人，都得先學會與這些桀驁的部落大佬討價還價。北葉門是個共和國，卻是一個被部落與傳統牢牢拽住、政權更迭頻繁、總統一個接一個被推翻或暗殺的脆弱共和國。</p>
+
+    <p>南葉門則走上了一條在整個阿拉伯世界都絕無僅有的路。從英國人手中接過亞丁的，是一批信奉馬克思列寧主義的革命者；他們把這個國家改造成了阿拉伯世界唯一一個正式的馬克思主義國家——蘇聯（the Soviet Union）的軍艦停進了亞丁港，東德的顧問走進了它的政府部門，土地被收歸國有，部落的權威被刻意打壓，宗教被推到一旁。亞丁這座因英國海軍與蘇伊士航運而生的港城，本就比北方的高地更世故、更外向、更不信任部落那一套；如今它又披上了科學社會主義的外衣，與北方那個跪在清真寺裡、聽命於部落酋長的葉門，幾乎像是兩個世紀的人。同一個民族，被殖民、地形與冷戰，硬生生分成了高地的傳統共和國與海岸的革命社會主義國——這就是兩個葉門對峙的底色。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一個民族，為何能養出兩個敵國</span>
+      <p>南北葉門的分裂，是好幾層裂縫疊在一起的結果：最底下是地形——北方是難啃的宰德高地，南方是外向的海岸與亞丁港，這道撕裂從鄂圖曼時代就在；中間一層是殖民——英國只佔了南方的亞丁與其腹地，北方則由伊瑪目獨立統治，於是同一個民族被兩套截然不同的政治經驗分別塑造了一個多世紀；最上面一層，是冷戰——北方倒向沙烏地與西方的保守陣營，南方倒向蘇聯的社會主義陣營，把一道本地的裂縫，接上了全球意識形態對抗的高壓電。</p>
+      <p>於是「葉門是一個民族」與「葉門是兩個國家」這兩句話，在當時竟同時為真——而正是這種「明明是一家、偏偏勢不兩立」的撕扯，讓南北關係比尋常的鄰國敵對更扭曲、更難解。</p>
+    </div>
+
+    <h3>邊境上的槍聲與對方境內的叛軍</h3>
+    <p>兩個葉門的敵意，並不只停留在廣播裡的對罵。一九七二年與一九七九年，南北之間兩度爆發真槍實彈的邊境戰爭——軍隊越過那條分界線，在乾旱的山口與荒原上交火。耐人尋味的是，每一次打完仗，雙方坐到談判桌前簽下的，竟都是一紙「我們要統一」的協議。一九七二年的戰事剛歇，兩國領導人便在開羅與的黎波里會晤，鄭重宣布要走向統一；一九七九年的衝突一停，又是一輪統一的承諾。槍口還沒涼，統一的宣言已經發出——這幅景象本身，就道破了這場對峙的全部荒謬：他們真心相信彼此是一個民族、應當合為一體，卻誰也不肯在「由誰來統一、按誰的制度統一」這件事上讓步，於是只能打完了喊統一、喊完了再打。</p>
+
+    <p>比正面交火更陰冷的，是彼此在對方體內豢養的火種。南葉門收容並武裝北方的左翼反對派——尤其是一個被稱為「全國民主陣線」（the National Democratic Front）的武裝組織，讓它從南方滲透回北葉門，在邊境地帶與山區掀起持續的叛亂，一度讓薩那政權頭痛不已。北葉門則反過來收容並支持那些被南方馬克思政權清洗、流亡出來的部落首領與政敵，讓他們從北方反攻南葉門。兩個國家就這樣，各自握著一把插在對方心臟附近的刀子——這既是冷戰代理對抗的縮影，也是葉門式內鬥的本能：當一個葉門人想打擊另一個葉門人時，最順手的辦法，從來都是去資助他的敵人。</p>
+
+    <div class="pull"><p>槍口還沒涼，統一的宣言已經發出——他們真心相信彼此是一個民族，卻誰也不肯讓步說該由誰來統一。</p></div>
+
+    <h3>亞丁的血：一九八六的自相殘殺</h3>
+    <p>如果說南北之間的敵意尚屬「兄弟鬩牆」，那麼南葉門內部的權力鬥爭，則殘酷到連自己人都不放過。馬克思主義的執政黨內，派系傾軋從未停歇，鬥爭的方式往往不是辯論或選舉，而是肉體上的消滅。一九七八年，南葉門一位國家元首在辦公室裡被一只藏著炸彈的公事包炸死——這樁離奇的暗殺，至今仍籠罩在迷霧裡，卻典型地映照出那個政權處理分歧的方式。</p>
+
+    <p>而最慘烈的一頁，發生在一九八六年一月的亞丁。執政黨內兩大派系的矛盾累積到頂點，當溫和派的總統召集政治局開會時，據多方記述，對立派系的衛兵在會議室裡突然開火，當場打死數名最高層領導人。這一槍，點燃了首都的全面火拼——它不是邊境上的對外戰爭，而是一個政權對自己內部的撕咬。坦克開上亞丁街頭，海港邊炮聲不絕，效忠不同派系的軍隊在城裡巷戰，平民被裹挾在交火之中。這場內鬥持續了大約十來天，據各方估計，死亡人數以數千計，亞丁城內滿目瘡痍，連停泊海外的蘇聯軍艦都被捲入撤僑與斡旋。最終一派獲勝、一派潰敗，大批戰敗的政要、軍人與其追隨者越過邊界，倉皇逃往北葉門避難——而北方，正樂於收下這批反對南方政權的人。</p>
+
+    <div class="warn">
+      <span class="warn-tag">一九八六·亞丁的十天</span>
+      <p>一九八六年一月那場在亞丁爆發的派系火拼，是冷戰末期阿拉伯世界最慘烈的一次政權內部自相殘殺之一。它沒有外敵入侵，沒有種族或教派的分野，純粹是同一個執政黨、同一支軍隊內部的兩派人，為了權力而在首都街頭兵戎相見。具體死亡數字眾說紛紜、難以核實，各方估計從數千到上萬不等；可以確定的是，一座城市在短短十來天裡被自己人打成了廢墟，無數平民在炮火中喪生或流離。這場血光，提前耗盡了南葉門政權的元氣，也讓「南方更穩、更現代」的神話徹底破滅。</p>
+    </div>
+
+    <h3>北方的鋼索：薩利赫上場</h3>
+    <p>與南方的血腥動盪相比，北葉門在這二十年裡走出了一條看似相反、實則同樣兇險的路。北葉門的總統職位，曾經是阿拉伯世界最危險的工作之一——前幾任元首接連在政變或暗殺中橫死，薩那的政壇像一條繃緊的鋼索，誰上去都站不穩。轉折出現在一九七八年：一位出身哈希德部落聯盟、軍人背景的中年人——阿里·阿卜杜拉·薩利赫（Ali Abdullah Saleh）——在前任總統被暗殺後，登上了這個被許多人預言「活不過幾個月」的位子。</p>
+
+    <p>然而薩利赫活了下來，而且一站就是幾十年。他沒有什麼宏大的意識形態，靠的是一套極其務實、也極其葉門的本事——在部落、軍隊、宗教勢力與外部金主之間反覆周旋、合縱連橫。他後來用一句廣為流傳的話形容自己的統治，說治理葉門就像「在蛇群的頭頂上跳舞」：你既不能踩死任何一條蛇，也不能停下舞步，只能不斷地給這個一點好處、給那個一點安撫，靠著精準的平衡讓彼此牽制的各方誰也吞不掉誰、也吞不掉你。靠著這套蛇群之舞，薩利赫一點一點地把那條曾經人人墜落的鋼索，走成了自己的舞台。到一九八〇年代末，當南方還在亞丁的血泊裡元氣大傷時，北葉門已在薩利赫手裡漸漸穩住了陣腳——這份穩定，將讓他在下一幕的統一大戲裡，成為那個笑到最後、把整個葉門收進掌心的人。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1967</div><div class="tl-text">英國撤離亞丁，南葉門獨立；阿拉伯半島上自此並立兩個葉門</div></div>
+      <div class="tl-item"><div class="tl-year">1972</div><div class="tl-text">南北爆發第一次邊境戰爭，戰後雙方旋即宣布要走向統一</div></div>
+      <div class="tl-item"><div class="tl-year">1978</div><div class="tl-text">薩利赫在前任總統遇刺後接掌北葉門；同年南葉門元首遭炸彈暗殺</div></div>
+      <div class="tl-item"><div class="tl-year">1979</div><div class="tl-text">南北第二次邊境戰爭爆發，戰後再度簽署統一協議</div></div>
+      <div class="tl-item"><div class="tl-year">1986</div><div class="tl-text">一月，亞丁爆發毀滅性的執政黨內部火拼，死亡以數千計，戰敗派系大批逃往北方</div></div>
+      <div class="tl-item"><div class="tl-year">1990</div><div class="tl-text">南北葉門宣布統一（下一章的故事）</div></div>
+    </div>
+
+    <h3>分裂之中的統一之夢</h3>
+    <p>奇特的是，正當這兩個葉門打邊境戰、養叛軍、相互暗殺、各自在內部流血時，「葉門是一個民族、終須統一」這個念頭，卻在南北兩邊都擁有真實而強大的號召力。這不是某一個政客的口號，而是深植於民間的情感——畢竟他們說同一種阿拉伯語的方言、共享示巴（Saba）與馬里卜（Marib）的古老記憶、在一條被殖民者隨手畫下的線兩邊住著相互通婚的親族。對南方那些在馬克思政權下日漸窒息、又目睹了亞丁自相殘殺的普通人來說，富庶而開放的北方鄰居不無吸引力；雙方的政府，也都樂於把「統一」掛在嘴上——它既是凝聚人心的旗幟，也是談判桌上壓倒對方的籌碼。</p>
+
+    <p>於是這二十三年，便定格成一幅葉門式的悖論畫像：兩個政權，一邊真刀真槍地敵對，一邊真心實意地嚮往合一。可值得警醒的是，這份統一之夢從未真正觸及那些把它們分開的東西——高地的部落與海岸的世故、宰德的傳統與馬克思的教條，都被「我們是一家」的熱望暫時遮住，卻一寸也沒有被化解。當一九九〇年統一真的倉促到來時，這些被擱置、卻從未消失的裂縫，將立刻從地底重新冒出來，把這個剛剛合體的葉門，再一次推向刀兵——這是下一章要講的故事。</p>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 如果兩個葉門慢慢長成兩個國家</span>
+      <p>設想南北葉門並未在一九九〇年急著合併，而是像歷史上許多被邊界分開的同族那樣，各自沿著自己的軌道緩緩走下去——北方繼續它部落共和的路，南方在亞丁的廢墟上重建一個或許不再那麼教條的政權。隨著時間推移、世代更替，兩種制度、兩套既得利益、兩種生活方式各自固化，「葉門是一個民族」的情感未必消失，「葉門該是一個國家」的衝動卻可能漸漸冷卻。</p>
+      <p>那樣的葉門，或許會少掉一場倉促統一後旋即引爆的內戰，也少掉日後南方那揮之不去的「被北方吞併」的怨恨。可真實的歷史，選擇了在差異尚未化解時就強行合一，於是把代價推給了未來——分裂的本能與統一的衝動，這一回沒有彼此抵消，而是疊加成了更大的悲劇。</p>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 分裂的本能（統一的夢與分裂的命）</span>
+      <p>這一章，把貫穿全書的第三把鑰匙——「分裂與代理戰爭」——的源頭擺在了最赤裸的位置。一九六七到一九九〇，兩個葉門的對峙，再一次印證了這塊土地與生俱來的「分裂的本能」：縱然南北兩邊都真心懷著「我們本是一個民族、終須合一」的理想，可意識形態的鴻溝（北方的部落保守對南方的馬克思教條）、部落的肌理、海岸與高地的地域差異，仍讓它們水火不容，打了邊境戰、養了彼此的叛軍、流盡了自己人的血。這正是葉門史一以貫之的母題——它從來不是一塊鐵板，而是被山、被信仰、被殖民、又被冷戰反覆切割的拼圖。</p>
+      <p>更值得記住的是這一章埋下的伏筆。兩個葉門對峙的真正悲劇，不在於它們的分裂，而在於它們從未真正面對分裂的根源就奢談統一——所有的差異都被「統一之夢」暫時蓋住，卻一寸也沒被化解。於是當一九九〇年那場倉促的合併終於到來時，這些並未消解的裂縫——南北的猜忌、薩利赫與南方政要的權力角力、被擱置的地域與意識形態鴻溝——將立刻反噬，把統一的喜悅迅速燒成另一場內戰的灰燼。葉門的歷史一再告訴我們：能把它分開的力量，遠比能把它縫合的力量更古老、也更頑強。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-12">
+  <div class="act-head">
+    <span class="act-num">第十二章 · Dancing on the Heads of Snakes</span>
+    <h2 class="act-title">薩利赫：在蛇頭上跳舞</h2>
+    <p class="act-sub">Saleh — Dancing on the Heads of Snakes</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九七八年的薩那（Sanaʿa），是一座吃人的城。在那之前的短短幾年裡，北葉門（the Yemen Arab Republic）已有兩位總統死於非命——一位被槍殺，一位在迎接南葉門特使時，被對方皮箱裡藏著的炸彈炸得粉碎。共和政權像一塊燙手的鐵，誰接誰死。就在這樣的血色背景下，一位三十出頭、出身寒微、軍階不高、在外界看來不過是過渡人選的軍官，被推上了總統之位。幾乎所有人都認定，他撐不過幾個月。他的名字叫阿里·阿卜杜拉·薩利赫（Ali Abdullah Saleh）。可這個被當成填空題的人，最終在這座吃人的城裡一坐就是三十三年——直到一場席捲整個阿拉伯世界的風暴，才把他掀下來。他究竟靠什麼活了下來？薩利赫自己留下了一句日後被無數人引用的答案：統治葉門，就像是「在蛇頭上跳舞」（dancing on the heads of snakes）。</p>
+
+    <h3>一個沒有國家的國家</h3>
+    <p>要懂這句話，得先懂薩利赫接手的，究竟是個什麼東西。從表面看，他當上了一國元首；可若真把葉門當成一個現代國家來治理，那是要送命的幻覺。在北葉門的高地上，真正握有實權的，從來不是首都的政府，而是那些比共和國古老得多的部落——哈希德（Hashid）與巴基爾（Bakil）這兩大聯盟，各自統轄著千百個武裝起來、只認自己酋長的山村。薩那的命令出不了城門，山裡的隘口由部落的槍把守。除了部落，還有宰德派（Zaydi）伊瑪目制崩塌後留下的宗教權威、靠政變與內戰起家而彼此猜忌的各路軍頭、納賽爾主義者與伊斯蘭主義者、以及南邊那個信奉馬克思主義、隨時想著統一或顛覆的南葉門政權。這不是一塊可以由上而下發號施令的版圖，而是一窩盤踞在同一片山裡、彼此撕咬、誰也吃不掉誰的「蛇」。</p>
+
+    <p>薩利赫的天才——如果這算一種天才——在於他從不幻想自己能把這些蛇收進籠子裡。他看清了一件殘酷的事實：在葉門，沒有人能真正「治理」這個國家，你只能在它身上「保持平衡」。一個聰明的統治者，要做的不是消滅那些彼此傾軋的力量，而是站到它們糾纏成團的蛇頭之上，靠著不斷地移動重心、收買這一條、挑撥那一條、結盟一群去制衡另一群，讓自己始終不被任何一口咬住。他出身於哈希德聯盟下的辛漢（Sanhan）部落——一個不算顯赫的小部落，這個出身既給了他一張入場券，又讓他不至於強大到引來眾人圍剿。他既是裁判，又是賭徒；既站在棋盤之外發牌，又把自己也押進了局裡。</p>
+
+    <div class="pull"><p>在葉門，沒有人能真正「治理」這個國家。你只能站到那一窩彼此撕咬的蛇糾纏成團的頭頂上，不停移動重心——讓自己始終不被任何一口咬住。</p></div>
+
+    <h3>恩庇之網：收買、聯姻、與「不發薪水的軍隊」</h3>
+    <p>薩利赫維持平衡的工具，說穿了並不神祕，卻運用得爐火純青——那是一張用金錢、職位、婚姻與槍編織起來的恩庇之網（patronage network）。在這張網的核心，是他自己的辛漢部落與血親：他把家族成員與同鄉子弟，安插進軍隊與情報機關裡最要害的位子——共和國衛隊、特種部隊、空軍、中央保安，幾乎都交到了兒子、姪子與堂表親手中，讓真正能調動坦克與飛機的暴力，牢牢攥在自家人的拳頭裡。在這個內圈之外，是與他相生相剋的盟友——哈希德聯盟的最高酋長艾哈邁爾（al-Ahmar）家族。其族長阿卜杜拉·本·侯賽因·艾哈邁爾（Abdullah bin Husayn al-Ahmar）長年擔任議長、又是葉門最大伊斯蘭政黨「改革集團」（Islah）的領袖，是整個高地部落世界的共主。薩利赫與這位大酋長維持著一種微妙的共生：彼此需要、彼此提防、誰也不肯讓對方獨大。</p>
+
+    <p>再往外一層，是那些被金錢餵養的部落酋長與軍頭。薩利赫深諳一套古老的籠絡術：定期給各酋長發放津貼、補助、汽車、土地與槍枝，把國庫與後來的石油收入，當成潤滑這張大網的油。在許多偏遠地區，「政府軍」的花名冊上掛著大量從不出操的「幽靈士兵」，餉銀流進了酋長與軍官的口袋——這與其說是軍隊，不如說是把部落首領拴在政權身上的買斷。誰乖順，誰就多得一份；誰生事，就斷他一筆、再扶植他的對頭去壓他。葉門的政治，於是被經營成一場永不結束的分贓——而坐在分贓桌主位上的，永遠是那位面帶笑容、深諳每一條蛇心思的舞者。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 平衡術型統治</span>
+      <p>世上的威權統治，大致有兩種路數。一種是「壓制型」——靠一支淩駕於社會之上的強大國家機器，把所有反對力量碾平、收編，社會被國家吞掉。另一種，是薩利赫所代表的「平衡型」——統治者並不擁有壓倒一切的力量，社會中盤踞著太多他消滅不了的山頭，於是他索性放棄消滅，轉而當一個操盤手：刻意維持各派系的分裂與對立，讓它們彼此牽制、誰也坐不大，自己則靠著在其間穿針引線、賞罰予奪，成為那個唯一無可替代的平衡支點。</p>
+      <p>這種統治術，短期看極其高明：它用最少的暴力，買到了最久的安穩，把一個本該幾個月就崩盤的政權，撐成了三十三年。可它有一個致命的代價——它從不建設，只維繫。它不去建立超越派系的法治、制度與認同，反而要把社會的裂縫一道道養大、一遍遍利用，因為唯有當各派彼此撕咬、誰也信不過誰時，那位居中調停的舞者才不可或缺。於是國家從未真正凝成一個國家，只是一張以統治者為中心、隨他喜怒鬆緊的恩庇之網。一旦這個中心垮掉，網就散了，被刻意養大的每一道裂縫，都會在同一瞬間裂開。</p>
+    </div>
+
+    <h3>讓蛇彼此咬，自己居中</h3>
+    <p>薩利赫平衡術裡最精微的一手，是製造並利用敵人。他從不讓任何一股力量強到能威脅他，哪怕那是曾幫他打天下的盟友。對付桀驁的部落，他扶植與之為敵的鄰部去牽制；對付坐大的軍頭，他另立新貴去分權；對付南方，他先聯合、再分化、再各個擊破。他能在早上與一個派系把酒言歡，下午暗中資助它的對手，晚上再出面調停這兩家的爭端，讓雙方都覺得欠了他一份人情——而真相是，這場爭端的火，往往正是他自己點的。在這套玩法裡，矛盾不是要被解決的問題，而是要被精心維護的資源；裂縫越多，他這個唯一能跨越所有裂縫的人，就越不可替代。</p>
+
+    <p>這套權術曾在最危險的時刻救過他的命。一九九〇年南北統一、緊接著一九九四年南方鬧分裂、爆發內戰，薩利赫之所以能擊敗南方、保住統一，靠的正是這套手腕——他拉攏了一批與南方社會黨有舊怨的勢力，包括部分伊斯蘭主義武裝與從阿富汗戰場歸來的老兵，把他們的槍口對準昔日的南葉門同志。仗打贏了，平衡又往對他有利的一邊傾斜了一格。可這也埋下了禍根：他為了贏一場仗而放進國家肌體裡的那些力量，日後一個個都長成了新的蛇。極端主義的種子、被邊緣化的南方人的怨恨、被他扶起又被他打壓的軍頭的記仇——全都被記在了那本永遠合不上的帳上。</p>
+
+    <div class="warn">
+      <span class="warn-tag">被養大的裂縫</span>
+      <p>平衡術最陰暗的一面，是它需要傷口才能運轉。薩利赫治下，南方人覺得統一後自己淪為被北方掠奪的二等公民，土地與職位被奪、石油財富被吸往北方，積怨在二〇〇七年後匯成了要求重新分家的「南方運動」；北方薩達（Saʿdah）一帶的宰德派宗教復興者，則在一場又一場被稱作「薩達戰爭」的圍剿中與政府軍反覆血戰，數以千計的人在山裡死去、流離——這支力量，正是日後的胡塞（Houthi）。每一道被他用來維持平衡的裂縫，背後都是真實的村莊與世仇。統治者在蛇頭上跳得越久、越穩，腳下那一窩蛇，就被踩得越憤怒。</p>
+    </div>
+
+    <h3>石油、修憲，與把「術」當成「制」</h3>
+    <p>一九八〇年代葉門開始出口石油，給薩利赫的這台平衡機器注入了它最需要的燃料——錢。石油收入雖在產油國裡微不足道，對貧瘠的葉門卻是命脈，讓統治者手裡的恩庇之網有了更豐厚的油水去餵養。可這份財富從不曾流向學校、醫院與水利，去把葉門變成一個能自立的現代國家；它絕大部分被吸進了那張網——化作酋長的津貼、軍官的肥缺、親信的工程合約、與統治家族難以估量的私產。一個本就缺水、缺糧、人口飛漲的窮國，就這樣把唯一一筆可觀的橫財，燒在了「維穩」這一件事上。等到二十一世紀油田漸漸枯竭時，這台機器最賴以運轉的潤滑油，也就快見底了。</p>
+
+    <p>更危險的是，舞者開始幻想自己能把這場舞永遠跳下去，甚至傳給兒子。他一再修憲延長任期、操弄選舉、為長子艾哈邁德（Ahmed）執掌最精銳的共和國衛隊鋪路，種種跡象都指向一個「共和國裡的世襲」。他把一套原本只是權宜的「平衡之術」，一步步當成了可以萬世一系的「立國之制」。然而平衡術的本質，是它依賴一個無可替代的人；而人會老、會病、會被時代拋下。當他把太多的力量集中到自家人手裡、把太多的盟友得罪到忍無可忍時，他親手把那張曾保護他的網，織成了一張困住他自己的網。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1978</div><div class="tl-text">前兩任總統接連遇刺後，薩利赫被推上北葉門總統之位，外界普遍認為他撐不久</div></div>
+      <div class="tl-item"><div class="tl-year">1980s</div><div class="tl-text">葉門開始出口石油，恩庇之網獲得新的財源</div></div>
+      <div class="tl-item"><div class="tl-year">1990</div><div class="tl-text">南北葉門統一，薩利赫成為統一葉門的總統</div></div>
+      <div class="tl-item"><div class="tl-year">1994</div><div class="tl-text">南方分裂內戰爆發，薩利赫靠縱橫捭闔擊敗南方、保住統一</div></div>
+      <div class="tl-item"><div class="tl-year">2004起</div><div class="tl-text">與北方薩達的胡塞勢力爆發多輪「薩達戰爭」</div></div>
+      <div class="tl-item"><div class="tl-year">2011</div><div class="tl-text">阿拉伯之春席捲葉門，廣場抗議、盟友倒戈，舞者開始失足</div></div>
+    </div>
+
+    <h3>失足之前的最後一支舞</h3>
+    <p>退一步看薩利赫的三十三年，會看到一個深刻的悖論。以「活下來」這個標準衡量，他堪稱大師中的大師——在一個吞噬統治者的國家裡，他憑著對人性、對部落、對矛盾的精準算計，把不可能的平衡維持了整整一代人的時間。可若換一個標準——他究竟給葉門留下了什麼——答案卻令人心寒。三十三年裡，他沒有建起一個真正的國家：沒有能超越部落的制度，沒有能讓財富惠及百姓的經濟，沒有能彌合南北與教派裂痕的認同。他留下的，是一張比他接手時更龐大、更盤根錯節、也更危險的恩庇之網，與一個被刻意維持在四分五裂狀態、好讓他得以居中操盤的社會。他治理葉門的方式，恰恰確保了葉門永遠無法被治理。</p>
+
+    <p>當二〇一一年那場席捲阿拉伯世界的風暴吹進薩那的廣場時，這位舞者第一次發現腳下的蛇開始集體翻身。曾與他共生的艾哈邁爾家族倒向了抗議者，曾為他掌兵的悍將阿里·穆赫辛（Ali Mohsen al-Ahmar，與部落同名而非同族）率部叛離，連他自己一手扶植的軍頭都嗅到了風向。他甚至在一次清真寺的爆炸襲擊中身受重傷、被緊急送往沙烏地救治。經過漫長的討價還價，他最終在一份由海灣國家斡旋的協議下，交出了總統權力，換取自身與家族的豁免。三十三年的舞，到此暫歇。可這位不甘心的舞者並沒有真正離場——他把恨意、人脈與殘存的軍中勢力都帶下了台，幾年後竟與昔日的死敵胡塞結盟，再度攪動風雲。那些被他踩了一輩子的蛇，這一次將不再容他全身而退。他最終的結局，屬於後面的章節。</p>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 如果薩利赫拿石油去建國</span>
+      <p>設想一下，倘若薩利赫在一九八〇年代石油湧出時，做了另一種選擇——把那筆橫財，不是拿去餵養部落酋長與親信，而是投進學校、診所、供水、農業與工業，去培育一個能超越部落與教派的中產社會、一支不靠分贓而靠國家認同的軍隊。那麼當油田在二十多年後枯竭時，葉門手裡或許已不只剩下一張靠錢維繫的網，而有了一點點真正屬於「國家」的東西。</p>
+      <p>可這恰恰是平衡術型統治者最不可能做的事。因為一個有制度、有法治、有共同認同的社會，恰恰是平衡者的天敵——當人們不再只忠於部落、不再只認得分贓的恩主，那位居中操盤的舞者，也就不再不可替代了。薩利赫沒有拿石油去建國，不是因為他愚蠢，而是因為建國本身會終結他賴以生存的那場舞。這正是這種統治術最深的詛咒：它的邏輯，必然與國家的長遠利益背道而馳。</p>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派、分裂與代理戰爭（被經營出來的破碎）</span>
+      <p>薩利赫的「在蛇頭上跳舞」，是讀懂葉門政治最鋒利的一把鑰匙。它告訴我們：這個國家從來不是被「治理」出來的，而是被一位高明的平衡者，靠著操弄各派系之間的矛盾，勉強拼湊、勉強維繫的。本書的第二把鑰匙——高地與教派——在他手裡，不再只是地形與信仰留下的天然裂痕，而被一個現代統治者主動拿來當作了統治的工具：哈希德與巴基爾的部落、宰德與沙斐儀的教派、南方與北方的舊怨，這一道道古老的縫隙，全被他編進了那張以自己為中心的恩庇之網，刻意維持、刻意利用，好讓自己成為唯一能跨越所有縫隙的人。</p>
+      <p>可這也正為第三把鑰匙——分裂與代理戰爭——埋下了最深的引線。一個被刻意維持在破碎狀態的社會，一旦那個居中的平衡支點垮掉，便不會回到平靜，而會沿著每一道被養大的裂縫同時崩裂：被掠奪的南方要分家，被圍剿的薩達山民化作胡塞舉起槍，被得罪的軍頭與部落各奔東西，而虎視眈眈的外部強權——沙烏地、伊朗——則順著這些裂縫長驅直入，把葉門變成一張供他們博弈的棋盤。薩利赫用一輩子證明，他能在蛇頭上跳得比誰都久；可他也用最後的結局證明，一旦舞者失足，那一窩被他踩了三十三年、也被他餵了三十三年的蛇，會在同一個瞬間，一齊咬上來。截至今日，葉門仍在為這場散了局的舞，付著它最沉重的代價。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<div class="part-div reveal" id="part-4">
+  <span class="pn">第四部</span>
+  <h2 class="ptitle pt">統一、聖戰，與崩解中的國家</h2>
+  <div class="pe">Unity, Jihad and a Hollowing State</div>
+  <div class="pline"><span></span><span class="dot">✶</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-13">
+  <div class="act-head">
+    <span class="act-num">第十三章 · 1990</span>
+    <h2 class="act-title">一九九〇：統一，與一九九四的內戰</h2>
+    <p class="act-sub">1990 — Unity, and the Civil War of 1994</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九九〇年五月二十二日，在亞丁（Aden）的港口，南北兩面分立了二十餘年的旗幟被同時降下，換上了一面共同的紅白黑三色旗。那一天，街上有人放槍慶祝，有人含淚相擁，廣播裡反覆播送著「葉門是一個葉門」的口號。南方的領導人與北方的領導人並肩站在一起，宣告一個從未在現代真正存在過的東西誕生了——一個統一的葉門共和國（Republic of Yemen）。對於一個被山脈、教派、部落與兩個世紀的外力反覆切割的民族而言，這一刻彷彿是傷口終於要被縫合。可歷史最殘酷的諷刺往往就藏在最動人的時刻裡：這場統一不是水到渠成的融合，而是一樁倉促的、各懷盤算的婚事；它縫合的針腳太淺，四年之後，便會在槍聲中崩裂，留下一道直到今天仍在淌血的傷口。</p>
+
+    <h3>兩個葉門，與把它們推到一起的三股力</h3>
+    <p>要理解一九九〇年的統一，得先記得在它之前，世上有兩個葉門。北邊是阿拉伯葉門共和國（Yemen Arab Republic），通稱北葉門，首都在高地上的薩那（Sana'a），由薩利赫（Ali Abdullah Saleh）這位出身宰德派部落、靠著在派系與部落間反覆權衡而存活下來的軍人總統統治——這是一個傳統、保守、與沙烏地關係深厚、被部落勢力層層牽制的國家。南邊則是葉門人民民主共和國（People's Democratic Republic of Yemen），通稱南葉門，首都在曾經是大英帝國商港的亞丁，是整個阿拉伯世界唯一一個正式奉行馬克思列寧主義的國家——它推行國有化、世俗化、政黨專政，與蘇聯和東方集團緊緊綁在一起。一個拜真主、敬部落，一個讀馬克思、信黨；一個倒向利雅德，一個倒向莫斯科。這兩個葉門，幾乎是同一個民族被冷戰劈成的兩半。</p>
+    <p>把它們重新推到一起的，不是浪漫，而是三股冷硬的現實力量。第一股，是南方的崩塌。一九八六年，南葉門執政黨內部爆發了一場極其慘烈的內鬥，僅僅十餘天的派系火併，便造成數以千計的死亡，國家元氣大傷；緊接著，作為其唯一支柱的蘇聯本身正走向解體，輸血般的援助迅速枯竭。失去莫斯科的南葉門，經濟瀕臨破產，已無力獨自支撐一個國家。第二股，是石油。就在兩國交界的馬里卜（Ma'rib）一帶與南方的沙布瓦（Shabwa），陸續探出了油田；油田恰恰騎在那條人為的邊界上，誰也無法獨吞，與其為一塊油田打仗，不如合併起來共同開發——石油，第一次以「黏合劑」的姿態出現，這個角色它在後面的故事裡還會反覆扮演，只是換了相反的方向。第三股，是民意。對許多葉門人而言，南北本是一族一語，被殖民與冷戰硬生生拆開，統一本就是壓在心底幾十年的夙願。三股力交匯，於是有了一九九〇年那場看似圓滿的合併。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 倉促的婚姻——當合併沒有真正融合</span>
+      <p>政治學裡，國家的合併大致有兩條路。一條是「融合」——兩套制度、軍隊、官僚、政黨，經過長時間的磨合與重組，逐步變成一套；另一條是「拼接」——兩套班子各自原封不動地保留，只在頂上掛一塊共同的招牌。一九九〇年的葉門走的是後者：北方的薩利赫當總統，南方的領導人比德（Ali Salim al-Beidh）當副總統；北方的全國人民大會黨與南方的社會黨，名義上共享權力，實則各擁各的軍隊、各管各的地盤、各保各的金庫。</p>
+      <p>這種「拼接式統一」最大的隱患在於：它把分裂的結構完整地保存進了統一的軀殼裡。兩支從未合編的軍隊、兩套互不信任的菁英、兩種南轅北轍的意識形態，被同一面旗幟罩著，卻從未真正交融。表面是一個國家，內裡仍是兩個。這樣的結構一旦遇到權力分配的爭執，沒有任何共同的制度能去仲裁，便只剩下最原始的裁判——武力。葉門的統一，從一開始就埋著這顆定時炸彈。</p>
+    </div>
+
+    <h3>四年的蜜月，與越來越響的算計</h3>
+    <p>統一之後的頭幾年，表面上是過渡與磨合，底下卻是日益尖銳的較量。問題的根子在於一個簡單的算術：北方的人口遠多於南方，大約是三比一甚至四比一。在這樣的人口比下，凡是按人頭計票的選舉，南方注定永遠是少數；而統一時南北「對等分權」的承諾，在選票面前迅速失重。一九九三年的議會選舉中，北方的政黨大獲全勝，南方的社會黨淪為國會裡的第三勢力，被夾在薩利赫的大會黨與一個崛起中的伊斯蘭主義政黨之間。南方人很快意識到，所謂「統一」，在數字上幾乎注定了他們的邊緣化——他們不是平等的合夥人，而是被多數吞沒的少數。</p>
+    <p>更深的怨，在於三件事的疊加。其一是石油。南方的土地與海域貢獻著國家相當大一部分的石油收入，可這些錢一旦匯進統一的國庫，分配的權柄便握在薩那手裡；南方人眼睜睜看著自己腳下的財富被輸往北方，而自己的地方建設卻遲遲不見起色，「我們的油，養肥了別人」的憤懣，一日深過一日。其二是菁英的失勢。南葉門那一整套世俗的、受過良好教育的官僚與軍官——許多人在亞丁的英式體制與東歐的院校裡受過訓——在統一後的權力洗牌中被擠到邊緣，位子被北方的人馬一個個接管。其三是恐懼。統一後的那幾年，南方多名社會黨的政治人物接連遭暗殺，數十起命案大多懸而未破；雖然始終沒有定論誰是主使，但在南方領導層心裡，這已被解讀成一場有計畫的清洗。被邊緣、被奪財、被恐嚇——到了一九九四年初，南方的副總統比德乾脆退守亞丁，拒絕北上履職，南北的同床異夢，已經到了攤牌的邊緣。</p>
+
+    <div class="pull"><p>統一掛上的是一面共同的旗，底下罩著的，卻仍是兩支從未合編的軍隊、兩套互不信任的菁英、兩個同床異夢的國家。</p></div>
+
+    <h3>一九九四：八十天的內戰，與「被征服」的南方</h3>
+    <p>一九九四年五月，零星的軍事摩擦終於升級成全面戰爭。南方領導層宣布脫離、另立「葉門民主共和國」，試圖把一九九〇年的婚姻一筆勾銷，重新做回那個獨立的南葉門。戰火主要燒在南方的土地上：薩那向南推進的軍隊與南方的部隊在低地與亞丁周邊激烈交火，飛彈一度落進對方的首都。但這場戰爭的結局，在實力對比擺出來的那一刻便已注定——北方人口更多、軍力更厚，而南方失去了蘇聯這個靠山之後，已是孤立無援。經過大約八十天的廝殺，數以千計的人喪生，北方軍隊在那年七月攻入亞丁，南方的分離宣告徹底失敗，分離派的領導人流亡海外。葉門以武力，而非以協商，再一次被「統一」了起來。</p>
+    <p>這場勝利背後，藏著一個日後將反覆糾纏葉門的伏筆。為了擊敗南方那些「無神論的社會主義者」，北方的薩利赫政權動員並倚重了一批伊斯蘭主義與聖戰背景的武裝力量——其中不少是剛從阿富汗戰場上下來、滿懷宗教熱忱的老兵。在當時的論述裡，討伐南方的馬克思主義者，被包裝成一場帶著「聖戰」色彩的義舉。這批被請來打仗的力量，戰後並沒有就此消失，反而被收編、安置進了統一葉門的軍隊、安全機關與宗教教育體系，在北方的政治版圖裡扎下根。薩利赫用一群激進的伊斯蘭主義者贏下了內戰，卻也親手把一股難以馴服的力量請進了國家的肌理——這筆帳，要在許多年後才會以恐怖主義與更深的教派裂痕的形式，被一一清算。</p>
+
+    <div class="warn">
+      <span class="warn-tag">統一的另一種名字——「征服」</span>
+      <p>一九九四年的勝利者把它寫成「捍衛統一、平定叛亂」，把南方的行動定性為背棄誓言的分裂。可同一段歷史，在許多南方人的記憶裡是另一個完全不同的故事：那不是一次平叛，而是一場征服。在他們的敘事中，戰後北方的軍政人馬大舉南下，接管亞丁與周邊的土地、產業與職位；許多南方的軍官與公務員被強制退役、被斷了生計；南方公有的資產在私有化的名義下被北方權貴瓜分。戰勝者的姿態，讓南方人確信：自己不是統一的「合夥人」，而是被擊敗、被佔領、被當作戰利品瓜分的「被征服者」。</p>
+      <p>同一個事件，兩種南轅北轍的記憶——這種記憶的分裂本身，比任何一場戰役都更難癒合。當勝利的一方稱之為「團結」，而戰敗的一方稱之為「佔領」時，這個國家其實從未對「自己是什麼」達成共識。</p>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1990</div><div class="tl-text">五月，南北葉門宣布統一，成立葉門共和國，薩利赫任總統、比德任副總統。</div></div>
+      <div class="tl-item"><div class="tl-year">1993</div><div class="tl-text">統一後首次議會選舉，北方政黨壓倒性勝出，南方社會黨淪為少數，分權承諾失衡。</div></div>
+      <div class="tl-item"><div class="tl-year">1994</div><div class="tl-text">五月至七月，南方宣布分離、爆發內戰；北方倚重伊斯蘭主義武裝，攻入亞丁，分離失敗。</div></div>
+    </div>
+
+    <h3>未癒的傷口：「南方的怨」如何成為日後的根</h3>
+    <p>一九九四年的硝煙散去之後，葉門地圖上仍是一個國家，可這個國家從此帶著一道不會結痂的內傷活著。對北方而言，統一是既成的勝利，南方的反抗已被武力終結；可對南方而言，這場戰爭非但沒有了結什麼，反而成了一切怨恨的源頭——它把抽象的「被邊緣化」的感受，淬鍊成了一個具體、灼熱、可以世代傳遞的集體創傷：我們的石油被拿走了，我們的菁英被清洗了，我們的土地被佔領了，我們連反抗都被打敗了。一個被打敗又被支配的群體，不會忘記，只會等待。</p>
+    <p>這份「南方的怨」，正是今天南方分離主義最深的根。許多年後，當一個名為「南方過渡委員會」（Southern Transitional Council，STC）的組織在亞丁打出旗號、公開要求南方重新獨立時，它所訴諸的，正是一九九四年那道未癒的傷——它把一九九〇年之前那個獨立的南葉門，追認成一個被北方非法吞併與征服的失樂園。對這些南方人來說，他們要的不是在統一葉門裡分得更公平的一杯羹，而是退出這場從一開始就讓他們吃虧的婚姻。統一這件事，在他們眼裡早已被一九九四年的炮火，徹底證偽。</p>
+    <p>於是我們看見了葉門歷史中一個近乎宿命的句式：每一次試圖彌合分裂的努力，最後都以一種新的形式，把分裂延續了下去。一九九〇年的統一，本是要終結南北兩個葉門的對立，可它用的是拼接而非融合的辦法，把舊的裂縫原封不動裝進了新的軀殼；一九九四年的內戰，本是要用武力坐實統一，可它留下的「征服」記憶，反而給未來的分離埋下了最堅實的種子。山與信仰早已把這片土地切成了拼圖，而現代政治的每一次手術，似乎都不是在拼回那塊拼圖，而是沿著舊的裂痕，又劃下一道新的線。</p>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 如果統一走的是「融合」而非「拼接」</span>
+      <p>設想一九九〇年的葉門，沒有急著在亞丁的港口降旗升旗，而是用更長的時間，先把兩支軍隊真正合編、把兩套官僚逐步打散重組、把石油收入的分配寫進一份南北都能接受、有制度保障的契約裡——統一是不是就能少掉一九九四年那場戰爭？或許吧。可這需要兩件葉門當時極度匱乏的東西：彼此的信任，與不急於攬權的耐心。在蘇聯崩塌、南方破產、北方坐大的那個時間點上，實力的天平已嚴重傾斜，握有優勢的一方很難按捺住「速戰速決」的誘惑。歷史沒有給葉門那份從容——它的統一，是在崩塌的廢墟上倉促拼起來的，而倉促拼起來的東西，往往也倉促地裂開。</p>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派、分裂與代理戰爭</span>
+      <p>這一章，是第三把鑰匙——「分裂與代理戰爭」——在現代正式落地的起點。葉門與生俱來的分裂，被山與信仰、被英帝國與冷戰反覆切割，到了一九九〇年似乎終於要被一面共同的旗幟收攏；可這場統一不是融合，而是拼接，它把舊的裂縫原封不動地縫進了新國家的身體裡。一九九四年的內戰，是這道裂縫第一次以血的形式裂開——北方借伊斯蘭主義武裝之力擊敗了南方的社會主義者，用「征服」完成了「統一」，也把一群日後尾大不掉的激進力量請進了國家的肌理（這一筆，與第二把鑰匙「高地與教派」的長線糾纏，會在後面的章節裡反覆回響）。而那道留給南方人的傷口——我們的油被拿走、我們的菁英被排擠、我們是被征服而非被統一——則沉澱成了「南方的怨」，成為今天南方分離主義最深的根。請記住這一章：統一非但沒有彌合葉門的分裂，反而以一種新的、更難拆解的形式，把分裂延續了下去。下一道裂痕，將從北方的宰德派高地裡升起——而那，又是另一把鑰匙的故事了。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-14">
+  <div class="act-head">
+    <span class="act-num">第十四章 · The Returning Jihadists</span>
+    <h2 class="act-title">聖戰者歸來與半島基地組織</h2>
+    <p class="act-sub">The Returning Jihadists and al-Qaeda in Arabia</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九八九年的某個冬天，當蘇聯的最後一隊裝甲縱隊隆隆駛過阿姆河上的友誼橋、退出阿富汗時，幾千公里之外的葉門高地，正有一批年輕人準備返鄉。他們是「阿富汗人」（the Afghan Arabs）——這個稱號並不指他們生於阿富汗，而指他們去過那裡，在興都庫什的雪山與峽谷裡，與來自整個阿拉伯世界的志願者並肩，打了一場被當時西方與半島君主一致祝福的「正義之戰」：抵抗無神論的蘇聯入侵者，保衛伊斯蘭的土地。在那十年裡，從沙烏地、埃及、阿爾及利亞、葉門湧向白沙瓦（Peshawar）的青年數以千計，而葉門人尤其多——這個半島上最窮、人口最稠密、最尚武好戰的角落，向那場聖戰輸送了格外大量的兵員。如今戰爭勝了，敵人走了，這些人帶著一身在真實戰場上淬鍊出的本事——使用武器、製造炸藥、組織地下網絡、以及一種被勝利餵養得無比膨脹的信念——回到了故鄉。問題在於，故鄉接不住他們。一個本已破碎、貧困、被山與教派切割的國度，迎回了一批無處安放的戰士；而這批戰士所帶回的火種，將在往後的二十年裡，把葉門一寸寸燒成全球反恐戰爭的前線。</p>
+
+    <h3>歸來者：一場聖戰結束之後</h3>
+    <p>要理解這些人為何危險，先要理解他們為何空虛。在阿富汗的戰場上，他們曾屬於一件比自己龐大得多的事業——一場被想像成善與惡終極對決的聖戰；他們曾有明確的敵人、明確的目標、明確的兄弟情誼，與一種「自己正站在歷史正確一邊」的灼熱確信。可當蘇聯撤走、戰事平息，這套意義的結構驟然崩塌了。許多歸來者發現，自己回到的不是一個感激他們的祖國，而是一個容不下他們的舊世界：他們在阿富汗學會的唯一技能是戰鬥，可葉門沒有正當的戰場給他們；他們帶著一身被神聖化的暴力，卻找不到下一個值得獻身的敵人。對其中一部分人而言，這份失落很快轉化成了一種新的、更激進的世界觀——既然蘇聯這個「遠敵」已倒，那麼真正的敵人，便是那些在他們眼中腐敗、世俗、依附西方的阿拉伯本地政權，以及站在這些政權背後的美國。聖戰沒有結束，只是換了戰場。這正是日後「全球聖戰主義」（global jihadism）那條由近敵轉向遠敵、再由遠敵反噬本土的危險邏輯，最初的雛形之一。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 聖戰歸來者的困境</span>
+      <p>歷史上，被動員去打一場大戰、戰後卻無法被社會重新吸納的武裝青年，幾乎總是動亂的火藥。他們握有暴力的技藝，卻失去了暴力的正當出口；他們被許諾了榮耀，回鄉卻只見貧困與冷遇。這種「復員的失落」並非葉門獨有——歐洲一戰後的義勇軍、各地內戰後的退伍者，都曾循類似的軌跡滑向極端。</p>
+      <p>但葉門把這個困境放大到了極致：它太窮，給不起退伍金與工作；它的中央政府太弱，管不住偏遠的山區與部落腹地；它的社會本就尚武，家家有槍。於是這些歸來的戰士，落進了一片幾乎為他們量身打造的沃土——有藏身的群山、有同情的部落、有失業的青年、有一個鞭長莫及的國家。</p>
+    </div>
+
+    <h3>薩利赫的權宜：用聖戰者打社會主義者</h3>
+    <p>而把這批火種真正引燃的，是葉門的統治者自己。一九九〇年南北葉門統一之後，北方的總統薩利赫（Ali Abdullah Saleh）面對著一個棘手的對手——曾統治南方、信奉馬克思主義的社會主義者（the Socialists）。在這位以權謀著稱的強人眼中，那些剛從阿富汗歸來、滿腔虔信而仇視一切無神論者的聖戰老兵，恰是一件趁手的武器：對這些人而言，沒有什麼敵人比信奉無神論的馬克思主義者更該被討伐。於是在一九九四年那場南北短暫的內戰裡，薩利赫順水推舟，默許甚至縱容這些聖戰者投入對南方社會主義者的攻擊。一個世俗的、靠平衡權力存活的政權，與一群激進的宗教戰士，就這樣結成了一段心照不宣的權宜聯姻——你替我清剿政敵，我給你容身的空間。這是一筆短視的交易。薩利赫以為自己在馴養一條看門狗，可他養大的，是一頭遲早會反噬主人的猛獸。當共同的敵人——南方的社會主義者——被擊潰之後，這些被養肥、被組織起來、嚐到了暴力甜頭的戰士，並不會就此解甲歸田；他們會掉過頭來，把矛頭指向下一個目標，包括這個曾經利用他們、卻在他們眼中同樣腐敗世俗的政權本身。</p>
+
+    <div class="pull"><p>薩利赫以為自己在馴養一條看門狗，可他養大的，是一頭遲早會反噬主人的猛獸——這是專制者反覆栽進去的同一道陷阱：你能召喚暴力，卻未必能在用完之後把它收回鞘裡。</p></div>
+
+    <h3>半島基地組織的誕生</h3>
+    <p>進入二十一世紀，這些零散的火種逐漸凝聚成了一個有名有姓、有組織有綱領的實體。它的名字叫「半島基地組織」（al-Qaeda in the Arabian Peninsula，簡稱 AQAP）——在二〇〇九年由沙烏地與葉門兩地的基地組織分支正式合併而成，總部設在葉門。它很快被廣泛視為基地組織（al-Qaeda）全球網絡裡最危險、最具行動力的分支之一。葉門之所以成為它的溫床，幾乎是把這個國家所有的脆弱疊加在了一起：得天獨厚卻又被詛咒的地理——崎嶇的群山與廣袤的沙漠腹地，為武裝分子提供了天然的庇護所，中央政府的軍隊難以深入；深重的貧困——大量失業的、看不到前途的青年，是極端思想最廉價的兵源；古老而強悍的部落——哈希德（Hashid）、巴基爾（Bakil）這些比國家更古老的力量，盤踞在政府管不到的腹地，有時為了自身利益庇護這些武裝分子，使他們得以在部落的羽翼下生根；以及一個本就被山與教派切割、從未真正一統的破碎國家——當一個國家的中央權威只能勉強籠罩首都與幾座大城，它廣袤的縫隙裡，便自然滋生出別的權力。AQAP 正是長在這片縫隙裡的東西。它不只在葉門境內製造襲擊，更屢次策劃針對國際目標的陰謀，使這個半島南端的窮國，一躍成為全球反恐版圖上一個刺眼的紅點。</p>
+
+    <div class="cards">
+      <div class="card"><div class="flag">地理</div><h5>群山與沙漠的庇護</h5><p>崎嶇的高地與廣袤的腹地，使中央軍隊難以深入，為武裝分子提供天然藏身之所。</p></div>
+      <div class="card"><div class="flag">貧困</div><h5>廉價的兵源</h5><p>大量失業、看不到前途的青年，是極端思想最易招募的對象。</p></div>
+      <div class="card"><div class="flag">部落</div><h5>比國家更古老的羽翼</h5><p>政府鞭長莫及的部落腹地，有時為自身利益庇護武裝分子，使其得以生根。</p></div>
+    </div>
+
+    <h3>科爾號：一艘戰艦與一個港灣</h3>
+    <p>二〇〇〇年十月十二日，這份威脅以一種讓全世界都記住的方式，撞進了亞丁港（the Port of Aden）。那天，美國海軍的飛彈驅逐艦科爾號（USS Cole）停泊在亞丁港中加油——這座港口，曾是英帝國時代地中海通往印度航線上最繁忙的補給站之一，如今卻成了全球聖戰主義獻給超級強權的一份血腥名片。兩名襲擊者駕著一艘看似尋常的小艇，滿載炸藥，從容地靠向這艘排水量八千多噸的戰艦，然後引爆了自己。一聲巨響，鋼鐵的艦身被炸開一個巨大的窟窿，十七名美國水兵當場罹難、數十人受傷。一艘代表著當時世界唯一超級強權之尖端武力的戰艦，竟在一座阿拉伯港口裡，被一艘自殺小艇炸出了一個洞——這個畫面所傳遞的象徵衝擊，遠遠超出了傷亡的數字本身。它向全球的聖戰者宣告：那個看似無敵的巨人，並非不可觸碰。這起被歸咎於基地組織的襲擊，發生在九一一之前將近一年，如今回看，它幾乎是一則被忽略的預告——一個更大的、即將改變整個世紀的攻擊，正在某處醞釀；而葉門，已經被劃進了那張地圖。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1989</div><div class="tl-text">蘇聯撤出阿富汗，大批葉門裔「阿富汗人」聖戰者陸續返鄉</div></div>
+      <div class="tl-item"><div class="tl-year">1994</div><div class="tl-text">南北內戰，薩利赫默許聖戰老兵參與打擊南方社會主義者</div></div>
+      <div class="tl-item"><div class="tl-year">2000</div><div class="tl-text">科爾號驅逐艦在亞丁港遭自殺小艇襲擊，十七名美軍喪生</div></div>
+      <div class="tl-item"><div class="tl-year">2009</div><div class="tl-text">沙烏地與葉門分支合併，正式成立「半島基地組織」（AQAP）</div></div>
+    </div>
+
+    <h3>無人機時代：奧拉基之死</h3>
+    <p>九一一事件之後，世界變了，葉門的命運也隨之改寫。當美國發動席捲全球的「反恐戰爭」（the War on Terror），葉門因其境內盤踞的 AQAP，被推上了這場戰爭的前線之一。薩利赫——這位向來精於在各種力量之間遊走牟利的強人——迅速調整了姿態：他向華府表態合作反恐，換取美國的軍援與政治支持，同時又在國內繼續他那套讓各方互相牽制、誰也無法獨大的權力把戲。而美國介入葉門的主要方式，是一種當時正快速成為新常態的武器——無人機（the drone）。在往後的歲月裡，美國的無人機常在葉門的天空盤旋，對被認定為 AQAP 成員的目標發動空襲。這種戰爭方式爭議極大：它讓美國得以在不派遣地面部隊、不冒士兵傷亡的情況下打擊目標，卻也屢屢造成平民傷亡，每一次誤炸婚禮、誤殺村民的消息，都在當地激起新的怨恨——而怨恨，恰是極端組織最樂見的招募養分。反恐的火，有時反倒替它要撲滅的東西添了柴。</p>
+    <p>這場無人機戰爭中最具標誌性、也最具爭議的一幕，是二〇一一年安瓦爾·奧拉基（Anwar al-Awlaki）之死。奧拉基是一名出生於美國、擁有美國公民身分的伊斯蘭傳道者，能說一口流利的英語，極善於透過網路向西方世界的年輕穆斯林佈道、鼓吹聖戰；美國情報部門認定他已從單純的鼓吹者轉為 AQAP 的行動策劃者，深度涉入針對美國本土的陰謀。那一年，一架美國無人機在葉門境內將他擊斃。此事在美國國內掀起了一場深刻的法律與道德辯論——一個政府是否可以在未經審判的情況下，定點清除自己的公民？這個問題至今仍無定論。但對葉門而言，奧拉基之死所昭示的是另一重意義：這個半島南端的破碎國度，已經徹底被捲進了一場屬於全球的、無遠弗屆的衝突——它的山谷與村莊，成了超級強權新式武器的試驗場與獵殺場。</p>
+
+    <div class="warn">
+      <span class="warn-tag">無人機的陰影</span>
+      <p>無人機戰爭把「殺戮」變成了一件可以在數千公里之外、隔著螢幕完成的事。它降低了發動攻擊一方的成本與風險，卻把代價轉嫁給了目標所在的土地——那裡的人們，要承受盤旋天際的嗡鳴、突如其來的爆炸、以及一次次誤炸之後破碎的家庭。被擊斃者究竟是武裝分子還是無辜村民，各方的說法往往南轅北轍，而真相在偏遠的葉門山區裡極難查證。可以確定的，只有怨恨在累積——每一個在空襲中失去親人的人，都可能成為極端組織下一份招募名單上的名字。</p>
+    </div>
+
+    <h3>破碎招來介入，介入又加深破碎</h3>
+    <p>退一步看，葉門與聖戰主義的這段糾纏，揭示的是一條貫穿這個國家全部現代命運的殘酷循環。它的破碎——貧困、教派切割、部落割據、中央羸弱——使它成了極端主義天然的溫床；而這份滋生於本土的威脅，又招來了外部最強大力量的介入：美國的軍援、無人機、與反恐戰爭。可外部的介入，非但沒有縫合這個國家的裂痕，反而往往把它撕得更開——空襲激起的怨恨餵養了極端組織，薩利赫拿反恐援助來鞏固自身權位、繼續他那套分而治之的權謀，而真正受苦的，始終是夾在中間的葉門平民。這正是這個國家最深的悲劇邏輯：它的破碎，總是不斷招來外部的力量；而外部的力量介入之後，又總是讓它更加破碎。從十九世紀英國人佔據的亞丁，到冷戰時期南北各自背後的莫斯科與利雅得，再到二十一世紀盤旋的美國無人機——外人來了又走，每一次都聲稱是為了秩序與安全，可每一次留下的，都是一個比從前更破裂的葉門。而這條循環，在下一個十年裡，將以一種更慘烈的形式——胡塞的崛起與沙烏地領導的聯軍介入——再度上演，並把這個國家推向一場被稱為「全球最嚴重人道危機」的深淵。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 分裂與代理戰爭（破碎如何招來外力）</span>
+      <p>這一章，把全篇第三道密碼——「分裂與代理戰爭」——推到了一個關鍵的轉折點上。請記住這條循環：葉門與生俱來的破碎，使它成了極端主義的溫床；而本土的威脅招來了外部的介入；外部的介入，又反過來加深了破碎。聖戰歸來者之所以能在這裡生根，正因為這片土地早已被山與教派切割得支離破碎——崎嶇的高地給了他們庇護，深重的貧困給了他們兵源，古老的部落給了他們羽翼，羸弱的中央給了他們縫隙。薩利赫對聖戰者的權宜利用，是這個國家統治者一貫的悲劇——以為能召喚暴力為己所用，卻終究馴服不了它。而科爾號的爆炸、奧拉基的隕落，則標誌著葉門已被無可挽回地織進了全球衝突的網裡：一個曾因印度洋季風而綠、因香料與咖啡而富庶、被古人喚作「幸福的阿拉伯」的角落，如今竟成了超級強權新式武器盤旋獵殺的天空之下，最不幸的土地之一。當外部的力量再一次大舉壓境時——那已是胡塞與沙烏地的故事——這個國家所承受的，將不再只是一場場零星的空襲，而是一整個民族被推向飢餓邊緣的浩劫。截至目前，這條由破碎招來介入、又由介入加深破碎的循環，仍未看到它的盡頭。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-15">
+  <div class="act-head">
+    <span class="act-num">第十五章 · Oil, Water and a Hollow State</span>
+    <h2 class="act-title">石油、清水與一個正在掏空的國家</h2>
+    <p class="act-sub">Oil, Water and a Hollowing State</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九九〇年那場倉促的統一，把南北兩個面孔縫進了同一面旗幟之下。可一個國家的命運，從來不只寫在它的旗幟上，更寫在它的地底、它的水井、它的人口曲線，與它的帳本裡。當二十一世紀的第一個十年走到尾聲，當薩那（Sana'a）的政府大樓裡依舊掛著統一的標語、薩利赫（Ali Abdullah Saleh）依舊年復一年地坐在總統的位子上，葉門這座國家的內裡，其實正在被三樣東西悄悄掏空——一桶日漸見底的石油、一口正在抽乾的水井，與一張把整個國家當作私產來分配的恩庇之網。表面上，這是一個有總統、有議會、有國旗與國歌的現代主權國家；可若把它解剖開來，會看見一具正在從內部風乾的軀殼。這一章要講的，便是阿拉伯之春的火星落下之前，那一整堆已經乾透了的柴薪是怎麼堆起來的。</p>
+
+    <h3>石油：一個薄薄的、正在消失的命脈</h3>
+    <p>葉門有石油——可它從來不是一個富裕的產油國。一九八〇年代，西方公司在馬里卜（Marib）一帶與南方的舍卜瓦（Shabwa）、哈德拉毛（Hadhramaut）盆地陸續探出了油田，產量在二〇〇〇年代初期達到高峰，大約一天三四十萬桶上下——這個數字放在波斯灣那些動輒日產數百萬桶的鄰居面前，幾乎不值一提。沙烏地的地底是一片浩瀚的油海，葉門的地底卻只有幾汪淺淺的油塘。然而，正是這幾汪淺塘，撐起了這個國家的整座財政骨架：在高峰時期，石油與天然氣的出口收入，占了葉門政府財政收入的七成上下、出口總額的九成左右。換句話說，這個阿拉伯世界最貧窮的國家，把它幾乎全部的家當，都押在了一筆註定會枯竭的收入上。</p>
+    <p>而枯竭來得比任何人預期的都快。葉門的油田本就蘊藏不豐，又開採得急、回注與維護的投資不足，產量在二〇〇〇年代初觸頂之後便一路下滑，到了統一二十年後的這個關口，已經跌去了一大半，並仍在持續探底。地質學家與經濟學家都看得清楚同一件殘酷的算術：照這個速度，葉門的石油出口將在不太遙遠的將來歸零。一個把七成財源繫於石油的政府，正眼睜睜看著那條命脈在自己手裡變細、變淡、變乾。這不是會不會的問題，只是早晚的問題。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一個「假的租金國家」</span>
+      <p>在中東，許多政權靠的是「租金國家」（rentier state）的邏輯——政府不向人民徵稅，而是直接坐收地底湧出的石油美元，再把這份天賜之財向下分配，以此換取統治的正當性與人民的沉默。海灣那些富裕的君主國，正是這套邏輯的極致：免稅、補貼、公務員的鐵飯碗，換來一個無須對納稅人負責的政府。</p>
+      <p>葉門也想當一個租金國家——可它手裡的租金太薄了。它有租金國家的政治習性（不靠稅收、靠分配油錢來收買忠誠），卻沒有租金國家的財力（油太少、人太多）。於是它成了一個「假的租金國家」：政府既學會了不向人民負責的傲慢，又從未真正富到足以餵飽所有人的嘴。當那點薄薄的石油開始枯竭，這套靠分配來維繫的統治機器，便注定要從根部斷糧——而它早已忘了該怎麼靠別的方式活下去。</p>
+    </div>
+
+    <h3>最貧窮的阿拉伯人</h3>
+    <p>把石油那層薄薄的金箔揭開，露出的是一個觸目驚心的現實：葉門，是整個阿拉伯世界最貧窮的國家。它沒有海灣鄰居那種令人目眩的高樓與高速公路，它的人均收入長年在阿拉伯國家裡敬陪末座，數以百萬計的人口在貧窮線下掙扎，許多孩子發育不良，廣大的鄉村缺電、缺路、缺學校、缺醫生。在這片土地上，現代國家所應提供的種種服務——教育、醫療、自來水、基本治安——在許多地方幾乎是缺席的；填補這片真空的，仍是那比國家更古老的東西：部落、宗族與清真寺。</p>
+    <p>這份貧窮，與半島另一端的景象構成了一種近乎殘酷的對照。同是阿拉伯人、同說阿拉伯語、同信伊斯蘭，葉門人隔著一條邊界，望著沙烏地那邊由石油堆砌起來的富庶——數以百萬計的葉門勞工曾在沙烏地與海灣打工，把辛苦掙來的匯款寄回家鄉，那曾是葉門經濟的一根重要支柱。然而在一九九〇至九一年的波斯灣戰爭中，葉門在外交上未明確譴責伊拉克入侵科威特，沙烏地一怒之下驅逐了近百萬名葉門勞工。一夕之間，匯款斷流、失業的人潮湧回本已脆弱的家鄉，這個窮國的傷口又被狠狠撕開一道。貧窮，從來不只是經濟數字，它是一種日復一日的、看不見出路的處境——而看不見出路的處境，最容易發酵成憤怒。</p>
+
+    <h3>薩那：一座可能率先渴死的首都</h3>
+    <p>如果說石油的枯竭還是一條看得見盡頭的緩坡，那麼水的危機，則是一柄懸在頭頂、隨時可能落下的劍。在這部史詩的開篇，我們講過葉門的命運是怎樣由水寫成的——印度洋的季風把雨帶到這片半島的西南角，讓它在一整片黃沙之中獨獨綠了起來，孕育了示巴的香料、馬里卜的大壩、摩卡的咖啡。「幸福的阿拉伯」（Arabia Felix），這個古老的名字，本就是對水的禮讚。可如今，這份得天獨厚的水，正在被它的子孫以驚人的速度抽乾。</p>
+    <p>首當其衝的，是首都薩那。這座坐落在海拔兩千多公尺高地上的古城，是世界上最古老的有人持續居住的城市之一，它的老城那些以幾何花紋裝飾的高聳泥磚塔樓，是全人類的文化遺產。可進入二十一世紀，薩那卻背上了一個遠不那麼浪漫的名號——它被許多水文學家列為全球最可能率先「耗盡水資源」的首都之一。城市與周邊綠洲的人口爆炸性膨脹、農業與生活用水無節制地超抽，使得這座城市賴以維生的地下含水層水位逐年急速下降，鑽井不得不越打越深，有的深井已要鑽到地下數百公尺才能見水，而抽出來的，是經年累月積蓄、無法在人類尺度上補回的「化石水」。一座建在高地上、本就遠離大河與海岸的古都，正面對著一個古老文明從未真正設想過的命題：水，可能會在某一代人的手裡，徹底見底。</p>
+    <div class="warn">
+      <span class="warn-tag">渴的陰影</span>
+      <p>水的枯竭，從來不只是水龍頭的問題。在葉門廣大的鄉村，超過半數的人口本就難以取得安全的飲用水；婦女與孩童每日要步行很遠去汲水、背水。當含水層下降、淺井乾涸，最先被推向絕境的，永遠是最窮、最沒有資源去打深井的那一群人。水的稀缺，會沿著舊有的不平等一路向下滲透，把貧窮放大成生存的威脅。一個無法為人民供水的國家，它失去的不只是水，更是人民對它最後的信任。</p>
+    </div>
+
+    <h3>卡特：一片葉子吞下的水、時間與家</h3>
+    <p>而在所有抽乾葉門之水的力量裡，有一股格外深植於這個社會的日常肌理之中，那就是卡特（qat）。卡特是一種灌木的嫩葉，含有一種輕度的興奮成分，嚼食之後會帶來一陣溫和的提神與亢奮。在葉門，嚼卡特不是少數人的惡習，而是一種全民的、社交的生活方式——午後的時光，男人們（在許多場合女人也有自己的聚會）聚在一間鋪著坐墊的房間裡，一邊把新鮮的卡特葉一片片塞進腮幫，把一頰嚼成鼓鼓的一團，一邊談天、議事、做生意、打發整個下午。這幾乎是葉門社會運轉的潤滑劑，一場場卡特聚會，是這個國家真正的客廳與議事廳。</p>
+    <p>可這片小小的葉子，是用整個國家的未來餵養出來的。卡特是一種極其耗水的作物，而它又遠比種糧食或咖啡賺錢，於是在水越來越貴、越來越少的葉門，農民紛紛把寶貴的水與良田轉去種卡特——據估計，這個缺水到極點的國家，把它本就所剩無幾的農業用水中極大的一部分，都澆灌在了這片不能當飯吃的葉子上。它吞噬的不只是水，還有時間——一個社會把無數個下午消磨在嚼食之中，生產力被一片片葉子蠶食；它吞噬的還有家庭的收入——許多並不寬裕的人家，把可觀的一份日常開銷花在了買卡特上，孩子的學費與飯錢，化作了父親腮幫裡那團綠色的渣。一片輕飄飄的葉子，竟同時抽乾了一個國家的水、它的時間、與它本就單薄的錢包。</p>
+    <div class="pull"><p>曾因水而「幸福」的阿拉伯，如今正親手把水嚼進腮幫、抽進深井、灌進一片不能充飢的葉子裡——而它腳下的含水層，正一寸一寸地，沉向人類再也夠不到的黑暗。</p></div>
+
+    <h3>太多的人，太少的國家</h3>
+    <p>把水的危機推到絕境的，還有一條陡峭得令人心驚的曲線——人口。葉門是阿拉伯世界生育率最高的國家之一，在二十世紀後半葉經歷了爆炸性的人口增長：統一前後不過一千多萬人的國家，到這個十年的尾聲已逼近兩千四五百萬，而且其中極大的比例是青少年與兒童——這是一個極其年輕的國家，街頭巷尾擠滿了等著長大的孩子。在一個富裕、就業充足、治理良好的社會裡，年輕本是最大的本錢；可在一個貧窮、缺水、就業匱乏、政府失能的葉門，這條向上猛衝的人口曲線，意味著每一年都有越來越多的年輕人離開校門（如果他們上得起學），卻找不到工作、看不見前途、娶不起親、攢不下積蓄。</p>
+    <p>於是我們看見了一個致命的剪刀差：一邊，是人口、用水需求、與年輕人對工作的渴求在急速地往上衝；另一邊，是石油收入、地下水、與政府供養社會的能力在無情地往下掉。兩條線交叉而過的地方，就是火藥。一個社會最危險的時刻，往往不是它最窮的時候，而是它的人口結構最年輕、期望最高、而現實的出路最窄的時候——那一大群有手有腳、有怒火、卻無處安放的年輕人，正是任何一場風暴最現成的燃料。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">≈ 70%</div><div class="lbl">石油與天然氣收入占政府財政之比重（高峰期）</div></div>
+      <div class="stat"><div class="num">最貧</div><div class="lbl">葉門長年位居阿拉伯世界最貧窮的國家</div></div>
+      <div class="stat"><div class="num">薩那</div><div class="lbl">全球最可能率先「耗盡水資源」的首都之一</div></div>
+    </div>
+
+    <h3>恩庇之網：一個被當作私產分配的國家</h3>
+    <p>面對石油見底、水井抽乾、人口暴增這三重壓力，一個健康的國家會去做困難的事——改革財政、節約用水、創造就業、把油錢拿去投資未來。可薩利赫治下的葉門，做的卻是另一件事：把那點正在縮水的家當，繼續用來餵養一張龐大的恩庇之網。薩利赫曾留下一句廣為流傳的自況，說統治葉門就像「在蛇頭上跳舞」——他確實是這門平衡之術的大師。他統治這個被山與部落與教派切割得支離破碎的國家，靠的不是建立一套公正而有效的制度，而是把石油美元、政府職位、軍隊指揮權、走私與生意的特許，當作籌碼，一份份地分配給部落酋長、軍中將領、與自己的親族同鄉，用利益把各方勢力暫時黏合在自己周圍。</p>
+    <p>這是一套精巧卻致命的玩法。它讓國家機器的每一個關節都繫於私人的忠誠而非公共的職責：軍隊的精銳部隊由總統的兒子與侄子們把持，肥缺與油水由親信瓜分，部落首領拿錢辦事、不拿錢就翻臉。在這套邏輯裡，貪腐不是制度的瑕疵，而幾乎就是制度本身——它是黏合劑，也是腐蝕劑。每一筆被截留、被分肥、被中飽私囊的油錢，都在同一個瞬間做了兩件事：它買來了某個人此刻的忠誠，也掏空了這個國家明天的根基。當油錢還足夠多時，這張網能勉強網住所有人；可當油越來越少、要分的餅越來越小，這張網注定要在內部為了爭奪殘羹而自相撕扯——而那些被網外拋下的人，那些什麼都分不到的部落、教派與年輕人，則早已在沉默中積攢著怨恨。</p>
+    <div class="cf">
+      <span class="cfh">反事實 · 如果那點油錢被用來投資未來</span>
+      <p>不妨設想：倘若薩利赫政府在石油尚在高峰、財源尚算寬裕的那十幾年裡，把油錢認真地投進教育、供水、與多元的產業，而非投進恩庇之網的無底洞——倘若它趁著還有本錢時，去未雨綢繆地節水、去為石油枯竭之後的日子鋪一條別的路——葉門或許仍然窮，仍然分裂，仍然多災多難，但它至少可能擁有一具更結實的軀殼，去承接那場必將到來的衝擊。歷史沒有給葉門這條岔路。那點本可以拿來買「未來」的油錢，被拿去買了「忠誠」；而忠誠是會過期的，未來卻一去不返。當風暴來臨，這個國家發現自己手裡，既沒有油，也沒有水，更沒有一具能扛事的國家機器。</p>
+    </div>
+
+    <h3>乾透的柴薪</h3>
+    <p>把這一章的線索收攏起來，二〇一〇年前後的葉門，是這樣一幅圖景：一點正在枯竭的石油，卻是政府幾乎唯一的財源；阿拉伯世界最深的貧窮；一座可能在這代人手裡渴死的首都，與一片被卡特一寸寸抽乾的土地；一條向上猛衝、把無數憤怒而無望的年輕人推上街頭的人口曲線；一個被恩庇與貪腐從內部掏空、只剩一層殼的國家機器。這些並不是彼此孤立的毛病，它們是同一個結構性病灶的不同切面——一個既無力供養人民、又無心改革自身的政權，正眼睜睜看著自己賴以維繫的一切資源同時見底。</p>
+    <p>這樣的一個葉門，就像一整堆在烈日下曬了太久、已經乾透了的柴薪：每一根都繃得脆而易燃，彼此之間又堆疊得緊密相連。它缺的，已不是任何一個單獨的條件，而只是一粒火星。當二〇一〇年底，一個遙遠的突尼西亞小販在絕望中點燃了自己，當那簇火苗化作席捲整個阿拉伯世界的燎原之勢——當「人民要推翻政權」的口號越過邊界、傳到薩那的街頭，這堆乾柴，再也按捺不住了。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 從「水的恩賜」到「水的耗竭」</span>
+      <p>這一章，是「幸福的阿拉伯」這把鑰匙最蒼涼的一次迴響。三千年前，是印度洋的季風雨，讓葉門在整片死亡之沙中獨獨綠了起來，孕育了示巴、馬里卜與摩卡——水，曾是這片土地之所以「幸福」的全部理由。三千年後，同樣一把鑰匙卻轉到了反面：水正在被抽乾，曾因水而興的綠洲文明，正面對著水的見底。馬里卜大壩當年的崩潰，曾讓一個古老王國緩緩衰敗；而今薩那含水層的下沉，威脅的是一整個現代國家的存續——歷史以一種殘酷的對稱，把恩賜與耗竭縫進了同一條經緯。</p>
+      <p>與此同時，這一章也讓「高地與教派」「分裂與代理戰爭」那兩把鑰匙在暗處繃緊：一個靠恩庇之網勉強黏合的掏空之國，從未真正彌合北方高地與南方低地的裂痕，從未真正安撫部落與被邊緣化的教派，只是用油錢把它們暫時按住。當油與水與信任同時見底，那些被山與信仰反覆切割過的裂縫，便會在火星落下的瞬間重新迸裂——而下一章，火星就要落下了。截至這一刻，這個國家還勉強完整地站著；但它腳下，已是一片乾透的柴薪。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-16">
+  <div class="act-head">
+    <span class="act-num">第十六章 · The Rise of the Houthis</span>
+    <h2 class="act-title">胡塞運動的崛起：高地的捲土重來</h2>
+    <p class="act-sub">The Rise of the Houthis — The Highlands Return</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>歷史很少走直線，它更愛繞圈。一九六二年，當北葉門的軍官們推翻了那位被困在皇宮裡的伊瑪目（Imam）、宣告共和、把延續了千年的宰德派（Zaydi）神權扔進歷史的垃圾堆時，所有人都以為高地的那段故事就此終結了——山裡的伊瑪目走了，薩那（Sana'a）換上了共和的旗。可是一塊被山與信仰反覆切割的土地，從來不會這麼乾脆地翻過一頁。半個世紀之後，就在那座被推翻的神權所盤踞過的同一片北方高地上，一支發源於最偏遠角落的宰德派武裝，會帶著它的旗幟、它的口號、它的不甘，捲土重來——而且這一次，它要改寫的，不只是高地的命運，而是整個葉門的權力版圖。這一章，講的就是這場捲土重來是怎麼在山裡悄悄發酵的。</p>
+
+    <h3>薩達：被遺忘的高地角落</h3>
+    <p>故事的起點，是一個多數人連名字都沒聽過的地方——薩達（Saada）。它坐落在葉門的最北端，緊貼著與沙烏地阿拉伯（Saudi Arabia）的邊界，是一片乾燥、貧瘠、被群山環抱的高地。在這裡，宰德派——什葉派伊斯蘭中一個古老而獨特的支派——並不是邊緣的少數，而是世世代代的主流。早在公元九世紀末，第一位宰德派伊瑪目就是在薩達落腳、建立教權的；可以說，整個葉門宰德派千年神權的根，就扎在這片土壤裡。然而到了二十世紀末，薩達卻成了共和國地圖上一塊被遺忘的角落：道路稀少、學校與醫院匱乏、政府的存在感薄弱，中央的資源很少流到這片邊陲的山裡。對住在這裡的宰德派部落而言，共和革命許諾過的「進步」與「平等」，半個世紀過去了，似乎更多落在了別處——而他們眼睜睜看著自己這一支古老的信仰，在自己的故鄉，一點一點被推到邊上。</p>
+    <p>更刺痛人心的，是身分上的失落。在伊瑪目時代，宰德派的賽義德（sayyid，先知後裔的世系，傳統上是伊瑪目與教權的來源階層）曾是社會的頂層；革命之後，這個階層連同它所代表的整套信仰秩序，一同被打成了「舊時代的遺物」。新的共和國信奉阿拉伯民族主義、信奉世俗的現代化，宰德派那套關於伊瑪目、關於先知後裔有權領導的古老學說，在官方的敘事裡成了需要被淡化、被掃進博物館的東西。一個曾經定義過這片高地千年之久的信仰傳統，發現自己在新國家裡無處安放——這份失落，是日後一切的火種。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 宰德派：最「靠近遜尼」的什葉支派</span>
+      <p>要理解胡塞運動的崛起，必須先理解它所從出的宰德派究竟是什麼。宰德派得名於八世紀的宰德·本·阿里（Zayd ibn Ali），是什葉派三大支派裡最古老、也在教義上最溫和、最接近遜尼派的一支。它不像十二伊瑪目派（Twelver，今日伊朗的主流）那樣相信一位「隱遁的伊瑪目」終將再臨，也沒有那一整套繁複的神秘主義；它主張伊瑪目應當是先知後裔中起而領導、敢於拔劍對抗暴政的賢者，強調的是行動與正義，而非血統的自動繼承。</p>
+      <p>正因為宰德派與遜尼派在教法與日常實踐上差異不大，葉門高地的宰德派與低地的遜尼派沙斐儀（Shafi'i）穆斯林，在歷史上長期相安、通婚共處，並沒有兩伊那種你死我活的教派血仇。這一點極其關鍵：胡塞運動的本質，最初並不是一場「什葉對遜尼」的宗教戰爭，而是一場高地宰德派對自身邊緣化處境的反彈——它是被現代政治一步步推著，才慢慢染上了越來越濃的教派與地緣色彩。</p>
+    </div>
+
+    <h3>胡塞家族與「信仰青年」</h3>
+    <p>把這份失落點燃成一場運動的，是薩達一個賽義德世家——胡塞（al-Houthi）家族。家族的精神領袖巴德爾丁·胡塞（Badreddin al-Houthi）是一位德高望重的宰德派學者；真正讓這個姓氏響徹葉門的，是他的兒子侯賽因·巴德爾丁·胡塞（Hussein Badreddin al-Houthi）。侯賽因曾經當過國會議員，遊歷過、思索過，他敏銳地感到自己這一支信仰正在凋零——年輕一代的宰德派子弟，許多已經不認得祖輩的學問了。一九九〇年代，他和一批志同道合的人發起了一場宰德派的復興運動，創辦學習營與夏令營，把青少年聚到一起誦讀、討論、重新認識自己的信仰傳統。這個鬆散的網絡，後來被稱作「信仰青年」（the Believing Youth）——它最初的面目，與其說是武裝組織，不如說是一場宗教與文化的覺醒運動。</p>
+    <p>然而，覺醒的背後，是一種越來越深的危機感，而這份危機感有一個非常具體的對手——薩拉菲派（Salafi）。</p>
+
+    <h3>薩拉菲的傳教，與高地的反彈</h3>
+    <p>就在宰德派衰落的同一段年月裡，一股截然不同的宗教潮流正從北方湧入薩達的山裡。那是受沙烏地阿拉伯影響、奉行嚴格教義的薩拉菲派——遜尼派內部一個強調「回歸最初、清除一切後世新生事物」的保守流派。一九八〇年代起，一所著名的薩拉菲學院就辦在薩達省境內，吸引了來自各地、乃至海外的學生；沙烏地的資金與宗教影響力，沿著漫長的邊界，源源不斷地滲進這片本是宰德派腹地的高地。</p>
+    <p>對宰德派而言，這不啻於在自家祖墳上插旗。薩拉菲的教義裡，把什葉派那套對先知後裔的尊崇、對聖徒墓地的造訪、那些獨特的儀式，統統視為應當鏟除的「異端」與「偏離」。當薩拉菲的傳教者在薩達的村莊裡宣講、把宰德派世代奉行的信仰斥為迷信時，高地人感到的不只是教義之爭，而是一種生存性的羞辱——他們千年的信仰，正在自己的故鄉，被外來的、有錢有勢的對手指著鼻子說「你們錯了」。侯賽因·胡塞的復興運動，正是在這股壓力下越燒越旺：它要做的，是讓宰德派的年輕人重新挺直腰桿，為自己的信仰感到驕傲，而不是在薩拉菲的進逼下默默改宗或羞於認祖。</p>
+
+    <div class="pull"><p>這最初不是一場「什葉對遜尼」的戰爭，而是一片古老高地對「自己正在故鄉裡被抹去」的反抗——是宰德派不肯就這樣，在自己一千年的土壤上，安靜地消失。</p></div>
+
+    <h3>那句震動薩那的口號</h3>
+    <p>把這場地方性的宗教復興，推向與政權正面衝撞的，是意識形態上的第三股力量——反美、反以。二〇〇一年九一一之後，美國發動全球反恐戰爭，二〇〇三年又入侵伊拉克；整個阿拉伯與伊斯蘭世界群情激憤，而薩利赫（Ali Abdullah Saleh）政府卻選擇與華府密切合作、配合反恐。侯賽因·胡塞抓住了這股民間的憤怒，提出了一句後來成為整個運動標誌的口號——大意是「真主至大、美國去死、以色列去死、詛咒猶太人、伊斯蘭必勝」。追隨者開始在薩那等地的清真寺裡，於主麻日禮拜後高呼這句口號。</p>
+    <p>對薩利赫政權而言，這是不可容忍的挑釁。它公然羞辱了政府的盟友、攪動了清真寺、而且把矛頭隱隱指向了當局本身——在政府眼中，這口號喊的雖是美以，劍鋒卻指著與美以合作的薩那。雙方的對峙急轉直下。當局開始逮捕高呼口號的人，侯賽因·胡塞則退回薩達的山裡。一場原本還停留在講壇與學習營層次的運動，眼看就要被推上戰場。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1990s</div><div class="tl-text">侯賽因·胡塞等人發起宰德派復興，「信仰青年」學習營在薩達一帶興起。</div></div>
+      <div class="tl-item"><div class="tl-year">2001–03</div><div class="tl-text">九一一與伊拉克戰爭激起反美反以情緒；著名口號開始在清真寺被高呼，與配合反恐的薩利赫政府衝突升高。</div></div>
+      <div class="tl-item"><div class="tl-year">2004</div><div class="tl-text">第一次薩達戰爭爆發；同年侯賽因·胡塞在交戰中身亡，運動以其姓氏被世人稱作「胡塞」。</div></div>
+      <div class="tl-item"><div class="tl-year">2004–2010</div><div class="tl-text">政府與胡塞之間先後爆發約六輪「薩達戰爭」，戰事斷續、邊打邊和，始終未能根除這支高地武裝。</div></div>
+    </div>
+
+    <h3>六次薩達戰爭：越打越強的悖論</h3>
+    <p>二〇〇四年夏天，政府軍開進薩達的山區，要捉拿侯賽因·胡塞。第一次薩達戰爭就此爆發。幾個月的激戰後，侯賽因本人在交戰中身亡——對薩利赫而言，這似乎是一場速勝；他大概以為，斬了首，這場山裡的小亂子也就平了。可他錯得離譜。侯賽因的死，非但沒有撲滅運動，反而給了它一個殉道者、一面旗幟、一個被世人叫開的名字——從此，這支武裝與這場運動，就以他的家族姓氏，被稱作「胡塞」（the Houthis），而他們自己更願意被稱為「真主的支持者」（Ansar Allah）。運動的領導棒，先後傳到家族其他成員手中，最終落在侯賽因的弟弟阿卜杜勒·馬利克·胡塞（Abdul-Malik al-Houthi）肩上，他至今仍是這場運動的最高領袖。</p>
+    <p>此後直到二〇一〇年，薩達的山裡前前後後打了大約六輪戰爭。每一輪，政府都宣稱要徹底剿滅胡塞；每一輪打完，胡塞卻活得更壯、控制的地盤更大、戰鬥經驗更老到。這裡藏著一個游擊戰爭裡反覆出現的悖論：在自己土生土長、地形險惡、民心相向的高地上打防禦戰，正規軍每一次笨重的進剿，都在替對手做兩件事——把更多原本中立的部落推向胡塞一邊，並把一群山裡的學習青年，一場仗一場仗地鍛造成一支身經百戰的勁旅。政府的炮火，成了胡塞最好的徵兵官。</p>
+
+    <div class="warn">
+      <span class="warn-tag">高地的創傷</span>
+      <p>六輪薩達戰爭給這片貧瘠的高地留下了沉重的代價：成千上萬人在斷續的戰火中流離失所，村莊被毀，平民傷亡與人道困境在這片本就缺醫少藥的邊陲不斷累積。沙烏地阿拉伯也在二〇〇九年至二〇一〇年間，因邊境衝突一度直接捲入北方的戰事。各方對於誰先開火、傷亡幾何，至今說法不一；但可以確定的是，這六輪戰爭把薩達徹底捲入了暴力的循環，也在高地人心裡，種下了對中央政府更深的怨恨與更硬的敵意——這份在山裡淬鍊出的仇與韌，將在數年後傾瀉而下。</p>
+    </div>
+
+    <h3>繞了一圈，回到原點</h3>
+    <p>退一步看，胡塞運動的崛起，有一種近乎宿命的歷史對稱。一九六二年被軍官們推翻、被宣告「永遠成為過去」的，是高地的宰德派神權；而二十一世紀初在同一片高地上拔地而起的胡塞運動，骨子裡正是這套宰德傳統的還魂——它由先知後裔的賽義德世家領導，以復興宰德信仰為旗，在伊瑪目們經營了一千年的薩達山區扎根。當年的伊瑪目靠的是教權與部落，今天的胡塞靠的是武裝與部落；當年的神權盤踞高地、俯視低地，今天的胡塞也正從高地向著薩那、向著低地步步逼近。那把貫穿葉門的鑰匙——「高地與教派」——繞了整整半個世紀的一大圈，竟又悄悄回到了它出發的原點。</p>
+    <p>當然，歷史的還魂從不是簡單的重複。胡塞不是要復辟那位被趕走的伊瑪目本人，它身上裹著現代的政治語言、反帝的口號、與一場真實的社會不滿；它所要召喚的部落——古老的哈希德（Hashid）與巴基爾（Bakil）——也並不全然站在它這邊，部落的向背，本身就是另一盤更複雜的棋。但無可否認的是，到了二〇一〇年前後，一支發源於葉門最偏遠、最被遺忘的高地角落的宰德派武裝，已經悄悄完成了脫胎換骨：它有了領袖、有了殉道者、有了旗幟、有了一支打老了的軍隊，更有了一筆對中央政權刻骨的舊賬。它站在薩達的山口上，望著南方那座千年的古都薩那——而那座城，以及整個風雨飄搖的葉門，還不知道一場將要把所有人都捲進去的風暴，正從這片高地裡，緩緩集結。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派（捲土重來）</span>
+      <p>這一章是「高地與教派」這把鑰匙最完整的一次迴響。葉門從來不是一塊鐵板，而是被山脈與信仰反覆切割的拼圖——北方多山的高地住著宰德派，伊瑪目曾在這裡建立延續千年的神權；一九六二年的革命以為自己關上了那扇門，可門後的東西並沒有消失，它只是退回最深的山裡，等待著被新的不滿重新點燃。胡塞運動的崛起證明了一件事：在葉門，被地形與信仰刻下的斷層線，比任何一部憲法、任何一面共和的旗都更古老、也更頑固。一個發源於薩達——這片連名字都少有人知的邊陲高地——的宰德派武裝，竟能在半個世紀後重新成為改寫全國權力版圖的力量，這本身就是對「葉門可以被輕易統一、被輕易抹平」這個幻想最有力的反駁。而當這支高地的力量真正傾瀉而下、衝向薩那的那一天到來時，它將不只喚醒「高地與教派」這把舊鑰匙，更會把第三把鑰匙——「分裂與代理戰爭」——一併從沉睡中擰開：因為一支宰德派武裝對薩那的進逼，在沙烏地與伊朗眼中，從來就不只是一場葉門的內政。山，正在歸來；而它身後，是更大的一盤棋。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<div class="part-div reveal" id="part-5">
+  <span class="pn">第五部</span>
+  <h2 class="ptitle pt">阿拉伯之春，與沙烏地的戰爭</h2>
+  <div class="pe">The Arab Spring and the Saudi War</div>
+  <div class="pline"><span></span><span class="dot">✶</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-17">
+  <div class="act-head">
+    <span class="act-num">第十七章 · 2011</span>
+    <h2 class="act-title">二〇一一：廣場上的葉門之春</h2>
+    <p class="act-sub">2011 — Yemen’s Spring in the Square</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>二〇一一年的冬末，一股看不見的熱風從北非吹來，越過紅海，灌進了阿拉伯半島最南端這個多山而貧瘠的國度。先是突尼西亞（Tunisia）的小販自焚點燃了整座馬格里布（Maghreb），接著開羅的解放廣場（Tahrir Square）逼退了統治三十年的穆巴拉克（Hosni Mubarak）。電視機前的葉門青年屏息看著這一切，心裡浮起一個幾乎不敢說出口的念頭——如果埃及做得到，我們為什麼不能。彼時統治薩那（Sana'a）的，是一個同樣已經盤踞權位三十多年的人——阿里·阿卜杜拉·薩利赫（Ali Abdullah Saleh）。他曾用一句後來被反覆引用的話，形容自己治理葉門的本事，說那就像「在蛇頭上跳舞」（dancing on the heads of snakes）——意思是周旋於部落、教派、軍頭與外國勢力這一窩永不安分的毒蛇之間，靠著賄賂、分化、結盟與背叛，一步不錯地把自己的權力維持到今天。而二〇一一年，這位舞者腳下的蛇，第一次有可能一齊昂起頭來。</p>
+
+    <h3>變革廣場：一場全民的集合</h3>
+    <p>抗議最初由大學生點燃。二〇一一年一月底起，薩那大學（Sana'a University）門外的一片空地上開始聚集起愈來愈多的年輕人，他們搭起帳篷、拉起橫幅、徹夜不散，把這片空地命名為「變革廣場」（Change Square，阿語 Maydan al-Taghyir）。在南方的港城亞丁（Aden）、在第二大城塔伊茲（Taiz）——日後被稱為「革命之城」的地方——也都升起了同樣的帳篷與口號。他們要求的並不複雜，只有一句反覆迴盪在阿拉伯各廣場的話：人民要推翻政權。葉門是阿拉伯世界最窮的國家之一，逾半人口生活在貧窮線下，青年失業率高得驚人，水資源瀕臨枯竭，貪腐像地下水一樣滲透到每一個層級——對這片土地上的年輕人而言，憤怒從來不缺燃料，缺的只是火種，而北非送來了火種。</p>
+    <p>變革廣場的動人之處，在於它短暫地把一個從不是鐵板一塊的社會聚到了一起。在那幾個月裡，帳篷底下並肩坐著的，有世俗的自由派學生，有伊斯蘭主義的「改革集團」（Islah）支持者，有南方要求平等乃至獨立的「南方運動」（al-Hirak）青年，有來自北方高地、信奉宰德派（Zaydi）的胡塞（Houthi）同情者，也有原本互不相干、彼此甚至世代為敵的部落子弟。女性走上街頭演講、組織、糾察，其中一位名叫塔瓦庫·卡曼（Tawakkol Karman）的女記者，因在這場運動中的角色，於同年獲頒諾貝爾和平獎（Nobel Peace Prize），成為阿拉伯世界第一位獲此殊榮的女性。那是葉門難得一見的時刻——山與信仰反覆切割出的拼圖，彷彿在「變革」這兩個字底下，第一次拼出了一張完整的臉。</p>
+
+    <div class="pull"><p>那是葉門難得一見的時刻——山與信仰反覆切割出的拼圖，彷彿在「變革」這兩個字底下，第一次拼出了一張完整的臉。</p></div>
+
+    <h3>尊嚴星期五：開槍與倒戈</h3>
+    <p>政權的回應，最初是賄賂與安撫，繼而是棍棒與子彈。薩利赫一面在電視上承諾不再連任、不傳位給兒子、要修憲分權，一面動用便衣與支持者衝撞廣場。真正的轉折發生在二〇一一年三月十八日——一個星期五。當天禮拜結束後，變革廣場周邊的高樓屋頂上，槍手向手無寸鐵的人群開火，數十名抗議者當場倒下，傷者更多。這一天後來被記住，被稱為「尊嚴星期五」（Friday of Dignity）。鮮血沒有嚇退人群，反而像潑進火裡的油。屠殺的畫面透過手機與衛星電視傳遍全國，原本還在觀望的力量，被這一天逼到了攤牌的關口。</p>
+    <p>最先攤牌的是軍方。事件後數日，葉門軍中最有權勢的將領之一——掌握第一裝甲師、與薩利赫同屬一個部落卻早已暗生嫌隙的阿里·穆赫辛（Ali Mohsen al-Ahmar）——公開宣布倒戈，率部「保護革命」。緊接著，葉門最大的部落聯盟之一哈希德（Hashid）的領袖家族阿赫馬爾（al-Ahmar）一脈也與薩利赫決裂，薩那城內一度爆發政府軍與部落武裝的巷戰。多年來被薩利赫用恩寵與威逼勉強拴在一起的軍頭、部落與權貴，此刻紛紛鬆手——「蛇頭上的舞者」第一次發現，腳下的蛇開始反咬。同年六月，總統府禮拜堂的一場爆炸，使薩利赫身受重傷，赴沙烏地就醫，一度生死不明，葉門進入了一段沒有總統卻也無人能取而代之的權力真空。</p>
+
+    <div class="warn">
+      <span class="warn-tag">尊嚴星期五</span>
+      <p>二〇一一年三月十八日，槍手自薩那變革廣場周邊屋頂向結束主麻禮拜的抗議人群開火，數十人死亡。各方對死亡人數與下令者的說法不一，責任歸屬至今爭議未息。這一天成為葉門起義的分水嶺——不是因為它的規模在那一整年的傷亡中最大，而是因為它撕破了「對話」的幻象，把一場街頭抗議推向了軍方與部落的公開分裂。流血從來不只是悲劇，它也是政治的催化劑。</p>
+    </div>
+
+    <h3>海灣的協議：以豁免換下台</h3>
+    <p>當葉門滑向全面內戰的邊緣，鄰近的富國坐不住了。對沙烏地阿拉伯（Saudi Arabia）與其領導的海灣合作委員會（Gulf Cooperation Council，GCC）而言，一個失控、戰亂、可能被「基地」組織阿拉伯半島分支（AQAP）滲透的葉門，就在自家後院，是無法承受的夢魘。於是，由海灣君主國牽頭、得到美國與聯合國背書的一紙方案被推上桌面，史稱「海灣倡議」（GCC Initiative）。它的核心是一筆冷靜到近乎冷酷的交易：薩利赫交出權力，換取本人及其家族、親信免於起訴的豁免權（immunity）；權力移交給他的副手，並籌組一個朝野共治的過渡政府。</p>
+    <p>薩利赫不愧是周旋的高手。在長達數月裡，他三度走到簽字桌前又三度反悔，把「即將下台」當成籌碼一再兜售，逼出更優渥的條件。直到二〇一一年十一月，他終於在利雅德（Riyadh）簽下這紙協議。次年二月，葉門舉行了一場只有一名候選人的總統選舉——這名候選人，正是薩利赫多年的副手、來自南方的阿卜杜拉布·曼蘇爾·哈迪（Abd Rabbu Mansour Hadi）。哈迪以近乎全票「當選」，於二〇一二年二月正式接任總統。薩利赫，這位統治了北葉門乃至統一後葉門共三十三年的強人，就這樣以一種在阿拉伯之春諸國中堪稱「體面」的方式退場——沒有像穆巴拉克那樣坐上被告席，沒有像格達費那樣陳屍街頭，而是帶著一身豁免、留在國內、保住了他龐大的人脈、財富與一支仍效忠於他的共和國衛隊。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">33 年</div><div class="lbl">薩利赫統治北葉門與統一葉門的總年數（1978–2011）</div></div>
+      <div class="stat"><div class="num">1</div><div class="lbl">2012 年過渡選舉中的總統候選人——哈迪一人「同額競選」</div></div>
+      <div class="stat"><div class="num">immunity</div><div class="lbl">海灣協議的核心對價——以豁免權換取薩利赫下台</div></div>
+    </div>
+
+    <h3>換頭不換身：一場不徹底的革命</h3>
+    <p>表面上，葉門之春似乎交出了整個阿拉伯之春中最「成功」的答卷——沒有北約轟炸如利比亞，沒有滑入慘烈內戰如敘利亞，一位老獨裁者透過談判和平交權，一切看似有序。然而，正是這份「有序」，藏著最深的病根。海灣協議本質上不是一場由下而上的革命，而是一場由上而下、各方分贓的精英妥協——廣場上那些青年的鮮血與帳篷，被換算成了利雅德談判桌上的籌碼；真正坐下來分配權力的，仍是舊有的那幾股勢力：薩利赫的殘餘集團、倒戈的阿里·穆赫辛、哈希德部落的阿赫馬爾家族、伊斯蘭主義的改革集團。它換掉了蛇頭上那名舞者，卻一根毫毛也沒動底下那一窩盤根錯節的蛇。</p>
+    <p>更致命的是，這場交易留下了兩樣彼此矛盾的遺產。其一，是一個權威盡失的弱勢過渡政權。哈迪本是一個刻意被選中的「過渡人物」——溫和、缺乏自己的部落與軍隊根基、不對任何一派構成威脅，正因如此他也指揮不動任何一派。他主持的「全國對話會議」（National Dialogue Conference）開了近一年，談出了把葉門劃為六個聯邦區的方案，卻幾乎沒有人真正服膺。其二，是一個獲得豁免、毫髮無傷、仍盤踞國內的薩利赫。他從未真正離場，只是退到幕後，緊握著他經營三十年的軍中與部落網絡，冷眼等待過渡政權自己虛弱下去的那一天。被廣場趕下台的人，與被廣場推上台的人，就這樣同處一城，一個有實力而無名分，一個有名分而無實力。</p>
+
+    <div class="cf">
+      <span class="cfh">反事實 · 若薩利赫真的離場</span>
+      <p>不妨設想，若海灣協議當年不曾附帶那紙豁免，或若薩利赫真如穆巴拉克般被徹底逐出權力與國境，葉門的崩潰是否仍會以後來那種方式發生。薩利赫此後最驚人的一步，是與他自己鎮壓了六場戰爭的宿敵——北方高地的宰德派胡塞武裝——結成了不可思議的同盟，正是憑著他殘留的軍隊與部落人脈，胡塞才得以在二〇一四年勢如破竹地南下、攻入薩那。沒有那紙豁免換來的「全身而退」，便沒有後來那個反撲的薩利赫。當然，葉門底層的分裂、貧困與教派裂痕本就深重，即便薩利赫離場，動盪未必能免——但歷史至少不會以「舊王借敵還朝」這般荒謬而慘烈的劇本展開。</p>
+    </div>
+
+    <p>於是，二〇一一年那場開在變革廣場上的葉門之春，最終結成了一枚酸澀的果。青年們確實趕走了那名舞者，卻沒能拆掉那座供人起舞的舞台；他們贏得了一場談判，卻輸掉了一場革命。底層的權力結構紋絲未動，南北的舊裂痕、教派的舊鴻溝、部落的舊宿怨，全都原封不動地被交接給了下一個更虛弱的政權。廣場上的帳篷一頂頂收起時，許多人以為這是新葉門的清晨；事後回望，那其實是暴風雨前最後一段虛假的平靜。一場不徹底的革命，沒有解決任何一道古老的難題，卻為接下來的全面崩潰，安靜地埋下了引信。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地、教派與分裂（妥協如何餵養崩潰）</span>
+      <p>葉門之春，是這個國家「分裂」這把鑰匙的又一次冷酷示範。這片土地從來不是一個整體——它被高山劈成北方什葉宰德派的高地與南方遜尼沙斐儀的低地，被哈希德與巴基爾這些比國家更古老的部落切成碎塊，被一段南北分立、倉促統一、旋即內戰的近代史反覆撕扯。二〇一一年，廣場上的青年曾短暫地讓這張破碎的拼圖拼出一張完整的臉，可一旦勝利的果實被端上利雅德的談判桌，這張臉便立刻沿著舊有的裂縫重新崩解：分到權力的，仍是那幾股舊勢力；被晾在一旁的，是真正流過血的青年與始終不服的胡塞。一場以「豁免換下台」收場的妥協，換了蛇頭上的舞者，卻餵養了蛇——它把一個權威盡失的弱勢政權與一個伺機反撲的舊王同時留在了城裡。下一章，那條退到幕後的蛇將從北方的高地裡找到一個更兇悍的盟友，而這個被山與信仰反覆切割、又被一場不徹底的革命掏空了重心的國家，將墜入它現代史上最深的深淵。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-18">
+  <div class="act-head">
+    <span class="act-num">第十八章 · The Houthis Sweep Down</span>
+    <h2 class="act-title">過渡的失敗與胡塞的進軍</h2>
+    <p class="act-sub">The Failure of Transition and the Houthi Sweep</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>二〇一二年初，當薩利赫（Ali Abdullah Saleh）終於在一紙海灣國家斡旋的協議上，把總統的位子交給他多年的副手哈迪（Abd Rabbuh Mansur Hadi）時，整個阿拉伯世界都鬆了一口氣。在突尼西亞、埃及、利比亞的強人或被審判、或被擊斃、或在街頭被群眾拖行的那個年頭，葉門似乎走出了一條最體面的路——一個統治了三十餘年的老人，沒有死在槍下，而是簽了字、體面地下了台，換來一個由國際社會背書、有時間表、有路線圖的政治過渡。可只有真正懂葉門的人才明白：薩利赫下的不是台，而是一步退。他保住了性命、保住了財產、保住了盤根錯節的舊部，唯獨沒有交出他畢生最珍視的東西——對權力本身的執念。一個沒有被清算的舊王，從來不會甘心只當一名旁觀者。</p>
+
+    <h3>一個簽了字卻沒有交權的下台</h3>
+    <p>海灣合作委員會（Gulf Cooperation Council，GCC）主導的那份過渡協議，本質上是一樁交易：薩利赫交出總統職位，換取本人與家族「免於追訴」的豁免。這份豁免，是日後一切麻煩的種子。它意味著，那個被千百萬走上街頭的葉門人視為腐敗與獨裁化身的人，沒有受審、沒有流亡、沒有失去自由，只是換了一個頭銜——從「總統」變回「全國人民大會黨（General People's Congress）主席」，依舊住在薩那（Sana'a），依舊在他經營了三十多年的軍隊、部落、安全機關與商業網絡裡呼風喚雨。葉門人有一句被反覆引用的話形容薩利赫的統治術——治理葉門，就像「在蛇頭上跳舞」。如今這位舞者退到了幕後，可那些蛇，仍盤踞在原地，依舊聽他的笛聲。</p>
+    <p>更要命的是軍隊。多年來，薩利赫把國家最精銳、裝備最好的部隊——共和國衛隊與中央安全部隊——交在自己的兒子與侄子手裡，把它們經營成家族的私兵而非國家的軍隊。哈迪雖然名義上是三軍統帥，卻指揮不動這些部隊的真正效忠。新總統坐進了總統府，可這座國家的鋼鐵骨架，仍牢牢攥在他前任的家族手裡。一個沒有軍隊的總統，與一個沒有頭銜卻仍掌著槍的舊王——這便是過渡之初，葉門權力結構裡那個致命的裂縫。</p>
+
+    <h3>軟弱的過渡：一個沒有抓手的總統</h3>
+    <p>哈迪本人，是一位謹慎、溫和、出身南方阿比揚（Abyan）的職業軍人，而非長袖善舞的政治強人。他在二〇一二年二月的那場「選舉」中當選總統——那其實是一場只有他一個候選人的信任投票，是過渡協議安排好的形式。這位過渡總統從上任的第一天起，就缺少薩利赫那種編織恩庇網絡、在部落與派系間反覆權衡的本事；他既沒有自己的軍隊，也沒有自己的部落基本盤，更沒有國庫的充裕財源。他像一個被請來看守一座正在傾斜的大廈的人，手裡卻沒有一根可以支撐它的柱子。</p>
+    <p>過渡的核心工程，是一場名為「全國對話會議」（National Dialogue Conference，NDC）的盛大協商。從二〇一三到二〇一四年，來自各黨派、各地區、各群體——南方人、胡塞（Houthi）的代表、部落、婦女、青年——的數百名代表齊聚薩那，要為葉門擬出一部新憲法、設計一套新的國家結構，解決從南方獨立訴求到北方教派張力的所有積弊。這場對話在紙面上雄心勃勃，討論了把葉門改組成聯邦制國家的方案，可它最終卡在了最敏感的一處——如何劃分聯邦的「區」。一個把葉門分成六個區的方案立刻引爆爭議：南方人覺得這把南方拆散、稀釋了他們重新獨立的籌碼；而盤踞西北高地的胡塞，則發現按這套劃法，他們的根據地薩達（Sa'dah）一帶被圈進一個既窮、又不臨海、缺乏資源的內陸飛地。全國對話開出了許多漂亮的承諾，卻在最關鍵的權力與資源分配上，讓幾乎每一方都覺得自己吃了虧；協商越是遲緩，街頭的耐心就越是稀薄。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 過渡期的權力真空——當舊秩序已倒、新秩序未立</span>
+      <p>革命或強人下台之後最危險的，往往不是那一刻本身，而是隨之而來的那段「過渡期」。政治學裡有一個樸素的洞察：當一個舊的權力中心被移走，而一個有足夠力量與正當性的新中心尚未長成時，這中間會出現一段真空。在這段真空裡，國家機器的權威被掏空了，可那些舊的、地方性的、武裝化的勢力——部落、私兵、教派民兵——卻原封不動地保留著它們的槍與地盤。</p>
+      <p>葉門二〇一二至一四年的過渡，正是這種真空的教科書案例。哈迪的中央政府名義上合法、被國際承認，卻虛弱得近乎透明；而真正握有實力的兩股力量——薩利赫的舊部與崛起中的胡塞——都游離在這個正式結構之外。真空裡，誰有最硬的拳頭，誰就有最大的話語權；一個沒有抓手的過渡政府，等於是向所有手握武裝的玩家發出邀請：秩序的空位，正等著被填上。</p>
+    </div>
+
+    <h3>壓垮駱駝的最後一根稻草：燃油補貼</h3>
+    <p>真正把民怨點燃成燎原之火的，是一件聽起來極其技術性、卻直接砸在每一個葉門人飯碗上的事——燃油補貼。葉門長年用國庫的錢補貼汽油與柴油，讓老百姓買到便宜的燃料；可這筆補貼吃掉了政府預算極大的一塊，又因為走私與貪腐而漏得厲害，早已是財政上一個流血不止的傷口。在國際金融機構的壓力與空虛的國庫面前，哈迪政府於二〇一四年七月底，毅然削減了燃油補貼——一夜之間，汽油與柴油的價格幾乎翻倍。</p>
+    <p>對一個本就赤貧、過半人口在溫飽線上下掙扎的國家而言，這一刀砍得又快又狠。燃油漲價，意味著公車漲價、抽水灌溉漲價、麵粉與食物漲價、發電機的柴油漲價——它像一塊投入水面的石頭，漣漪迅速擴散到生活的每一個角落。憤怒在街頭蔓延，而胡塞，精準地嗅到了這個時機。他們把自己包裝成被腐敗的過渡政府盤剝的窮苦民眾的代言人，打出反腐敗、反漲價、要求政府下台的旗號，從北方高地動員追隨者，在薩那的城郊搭起一頂頂抗議的帳篷，組織起一波又一波示威。一場關於油價的經濟怨憤，被迅速地、嫻熟地，轉化成了一場奪取政治權力的動員。</p>
+
+    <div class="pull"><p>哈迪用一刀削向燃油補貼來填補空虛的國庫，卻不知這一刀同時也劃開了民怨的閘門——而站在閘門外、等著潮水湧出的，正是來自北方高地的胡塞。</p></div>
+
+    <h3>宿敵的握手：薩利赫與胡塞</h3>
+    <p>這裡，便是整個葉門現代政治中最赤裸、最令人錯愕的一幕——薩利赫與胡塞的結盟。要明白這場結盟有多麼荒謬，必須記得他們是怎樣的一對宿敵。從二〇〇四到二〇一〇年，正是薩利赫的政府，對胡塞的根據地薩達發動了六輪殘酷的戰爭，並在二〇〇四年擊斃了這場運動的創始人侯賽因·胡塞（Hussein al-Houthi），胡塞家族的許多人都死在薩利赫的炮火之下。沒有人比薩利赫更想置胡塞於死地，也沒有人比胡塞更有理由恨薩利赫入骨。可此刻，這對血債累累的死敵，竟為了一個共同的目標——扳倒哈迪——而並肩站到了一起。</p>
+    <p>算盤其實一點都不複雜。對薩利赫而言，哈迪是那個搶走他位子、又試圖在過渡中一點點剝奪他家族軍權的人；他要復辟，要證明沒有他葉門就轉不動，最好的辦法，就是讓哈迪的過渡政府徹底失敗、灰頭土臉地垮掉，好讓人們懷念他薩利赫時代的「秩序」。而胡塞，則需要一把能打開薩那城門的鑰匙——他們有信仰、有動員力、有從六輪戰爭裡磨礪出來的剽悍戰士，卻缺少對首都那些軍營、要害與官僚機器的內部掌控。薩利赫，恰恰握著這把鑰匙：那些仍效忠於他的軍官與部隊，可以在關鍵時刻按兵不動、開門揖盜，甚至暗中配合。一個要復辟，一個要奪城；昔日的劊子手與昔日的獵物，為了各自的盤算，做成了這樁誰也不真正信任誰的交易。這是葉門「分裂與權謀」政治最極致的展演——在這片土地上，沒有永遠的敵人，只有永遠在算計的利害。</p>
+
+    <div class="warn">
+      <span class="warn-tag">人人都在利用人人</span>
+      <p>這場結盟不是和解，而是各取所需的合謀，雙方心裡都清楚對方遲早會反咬一口。薩利赫以為自己在借胡塞這把刀替自己復仇、鋪一條重返權力的路，算準了等哈迪倒下、亂局已成，這個老謀深算的舊王終能憑舊部重主棋局——他把胡塞當成用完即棄的工具；而胡塞同樣清楚，薩利赫不過是替他們打開城門、穩住舊軍隊的一時同路人。每一個人都自以為是最聰明的操盤手，都打算在利用完對方之後全身而退。可這正是權謀政治最深的陷阱：當所有玩家都只顧著算計彼此、把對手當棋子，沒有人在看護那個叫「國家」的棋盤本身——他們以為自己在下一盤可控的棋，實際上正合力把整個葉門推向一個誰也收不了場的深淵。這筆「宿敵結盟」的帳，要在不到三年之後，以薩利赫自己的性命來償還——這是後話了。</p>
+    </div>
+
+    <h3>薩那陷落，與哈迪的軟禁與流亡</h3>
+    <p>有了薩利赫舊部的默許與配合，胡塞的進軍勢如破竹。二〇一四年的夏秋之交，他們的武裝從西北的薩達高地一路南下，沿途幾乎沒有遇到有組織的抵抗——許多本應拱衛首都的部隊，在關鍵時刻選擇了袖手旁觀，甚至打開了營門。到了九月，戰火已逼近薩那的城郊；經過短暫的交火，胡塞的戰士在那年九月下旬，涌入了首都的街道，占據了政府部會、軍營、廣播電台與機場。國際社會匆忙促成了一紙「和平與全國夥伴協議」，試圖把胡塞納入一個分權的框架，可協議的墨跡未乾，槍口已經頂在了過渡政府的太陽穴上。一個高地裡走出的武裝運動，第一次，把整個國家的首都攥進了手心。</p>
+    <p>接下來的幾個月，胡塞步步進逼，逐漸把哈迪政府架空。到了二〇一五年初，他們索性撕下偽裝，正式宣布解散議會、接管政權，把哈迪總統與他的內閣成員軟禁在官邸裡。被囚於自己首都的哈迪，在那年二月設法逃出薩那，南下退守南方的港口城市亞丁（Aden），在那裡宣布自己仍是葉門合法的總統，撤回被迫簽下的辭呈。可胡塞的兵鋒並未停步，繼續南推直逼亞丁；三月下旬，眼看亞丁也將不保，哈迪被迫再次出逃——這一次，他跨過邊境，流亡到了沙烏地阿拉伯（Saudi Arabia）的首都利雅德。一個被國際承認的合法總統，先丟了首都、再丟了臨時駐地，最後連自己的國土都待不住，只能在鄰國的庇護下，遙領一個正在崩解的國家。</p>
+    <p>退一步看，胡塞這一路南下、攻陷薩那、把哈迪逼出國門的全過程，遠不只是一次政變或一場奪城。它是「高地」這股力量——那個在北方群山裡建立過延續千年神權、被宰德派（Zaydi）的信仰與哈希德、巴基爾這些古老部落反覆滋養的山地世界——對整個葉門國家的一次空前奪權。一千多年來，高地的伊瑪目們也曾屢屢南下，試圖把低地與海岸納入版圖，卻從未真正、長久地統治過整片葉門；而這一次，從薩達山溝裡走出來的胡塞，竟一路打進了首都，把一個本就脆弱的共和國的中樞徹底攥在手裡。山，再一次居高臨下地俯衝了下來。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">2012</div><div class="tl-text">薩利赫依海灣協議交出總統職位、換取豁免，哈迪在單一候選人的投票中就任過渡總統。</div></div>
+      <div class="tl-item"><div class="tl-year">2013–14</div><div class="tl-text">全國對話會議召開，聯邦劃區方案引爆爭議，南方與胡塞皆覺吃虧，過渡停滯。</div></div>
+      <div class="tl-item"><div class="tl-year">2014 · 7月</div><div class="tl-text">哈迪政府削減燃油補貼，燃油價格近乎翻倍，民怨沸騰，胡塞趁勢動員。</div></div>
+      <div class="tl-item"><div class="tl-year">2014 · 9月</div><div class="tl-text">胡塞在薩利赫舊部默許下自北方南下，攻入薩那，逐步架空過渡政府。</div></div>
+      <div class="tl-item"><div class="tl-year">2015 · 2–3月</div><div class="tl-text">胡塞宣布接管政權、軟禁哈迪；哈迪逃往亞丁，再流亡沙烏地利雅德。</div></div>
+    </div>
+
+    <p>哈迪那一趟跨越邊境的流亡，按下了一個誰都未曾料到其後果之深重的開關。當這位合法總統站在利雅德，向他的鄰居——沙烏地——求援，請求出兵，把胡塞趕出他的首都、恢復他的政府時，他遞出的，是一封足以改變整個區域格局的請柬。在沙烏地眼中，胡塞，是它南方邊境上一支與宿敵伊朗（Iran）關係日益密切的什葉派武裝；一個由伊朗在背後撐腰的力量奪取了阿拉伯半島南端的整個國家、就頂在自己的後門口——這是利雅德無論如何不能容忍的噩夢。於是，就在哈迪流亡的同一個三月，沙烏地拉起了一支阿拉伯國家聯軍，對胡塞控制下的葉門，發動了大規模的空襲。胡塞自高地俯衝而下的這場奪權，終於把一場本屬葉門內部的權力傾軋，變成了一場區域強權的對撞；而那把第三道密碼所預言的「代理戰爭」的大門，就此被轟然推開——這，是下一章的故事了。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派、分裂與代理戰爭</span>
+      <p>這一章，是第二把鑰匙「高地與教派」與第三把鑰匙「分裂與代理戰爭」狠狠交纏在一起的時刻。胡塞的南下與薩那的陷落，從來不只是一場奪城——它是「高地」這股最古老的力量，對整個葉門國家的一次空前奪權：那個在北方群山裡孕育出宰德派伊瑪目的神權、被哈希德與巴基爾部落反覆滋養的山地世界，第一次把一整個共和國的中樞攥進了手心，完成了千年來歷代伊瑪目都未能長久做到的事。而把這場奪權變得如此荒謬、如此赤裸的，是薩利赫與胡塞這對血債累累的宿敵，竟為了各自的算計而短暫握手——昔日的劊子手想借昔日的獵物復辟，獵物則借劊子手打開了首都的城門。這正是葉門「分裂與權謀」政治最極致的一幕：每個人都在利用每個人，每個人都自以為是最後的贏家，卻沒有人在看護那個叫「國家」的棋盤——直到他們合力把整片土地一齊拖下深淵。請記住這一刻：當高地的兵鋒攻下首都、合法的總統流亡到利雅德，他遞出的那封求援的請柬，將把這片土地的內傷，撕成一道引來區域強權對撞的巨口。截至此章，這場奪權尚未引爆它最深重的後果——但沙烏地的轟炸聲，已在邊境的另一頭響起。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-19">
+  <div class="act-head">
+    <span class="act-num">第十九章 · Decisive Storm</span>
+    <h2 class="act-title">二〇一五：果斷風暴——沙烏地的戰爭</h2>
+    <p class="act-sub">2015 — Decisive Storm, the Saudi War</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>二〇一五年三月二十五日深夜，利雅德（Riyadh）的天空沒有星光，而沙那（Sana'a）的天空，卻被火光撕開了。那一夜，以沙烏地阿拉伯（Saudi Arabia）為首、聯合了阿拉伯聯合大公國（the United Arab Emirates）、巴林（Bahrain）、科威特（Kuwait）、卡達（Qatar）、約旦（Jordan）、埃及（Egypt）、蘇丹（Sudan）、摩洛哥（Morocco）等近十個阿拉伯國家的聯軍，發動了一場代號「果斷風暴」（Operation Decisive Storm）的大規模空襲。第一批炸彈落在胡塞（Houthi）武裝控制的首都沙那，落在他們盤踞的軍事基地與防空陣地上。一個本來在阿拉伯半島最南端、被世界長期遺忘的角落裡發生的內部權力之爭，從這一夜起，被一把推上了區域強權對撞的火線。葉門（Yemen）的天空，從此屬於別人；而葉門的土地與人民，要承受接下來這一切的全部代價。</p>
+
+    <h3>風暴從何而來</h3>
+    <p>要理解這場戰爭為何在二〇一五年三月猝然爆發，得先回到它前面那短短幾個月。前一年九月，源自北方薩達省（Sa'dah）高地、信奉什葉派宰德派（Zaydi）支系的胡塞武裝——他們以家族領袖之名自稱「真主的支持者」（Ansar Allah）——揮師南下，幾乎兵不血刃地拿下了首都沙那。到了二〇一五年初，他們軟禁了過渡政府的總統哈迪（Abdrabbuh Mansur Hadi），解散議會，擺出接管整個國家的姿態。哈迪先是逃往南方的港城亞丁（Aden），在那裡宣布自己仍是合法總統、撤回辭呈；當胡塞的兵鋒繼續向南、逼近亞丁時，他再度出逃，越過國境，抵達利雅德。一位流亡的、被國際社會承認的總統，向他的鄰國發出了求援。</p>
+    <p>對利雅德而言，這是一條不能容忍的紅線。沙烏地與葉門共有一條長達一千多公里的邊界，南方那片動盪的山地，向來被沙烏地視為自家的後院與軟肋。而真正令利雅德寢食難安的，是它在胡塞背後讀出的那個名字——伊朗（Iran）。在沙烏地的敘事裡，胡塞是德黑蘭（Tehran）伸進阿拉伯半島腹地的一隻手，是繼黎巴嫩真主黨（Hezbollah）、敘利亞與伊拉克之後，伊朗「什葉新月」包圍網合龍的最後一塊拼圖；若坐視胡塞掌控整個葉門，等於讓伊朗的勢力直接抵在沙烏地的南大門上，扼住紅海與曼德海峽（Bab-el-Mandeb）這條全球航運的咽喉。於是，一位剛接掌大權不久、亟欲展現魄力的年輕王子——時任國防大臣的穆罕默德·本·薩勒曼（Mohammed bin Salman）——主導下，沙烏地選擇了最強硬的回應：以空中力量，把胡塞打回北方去，把哈迪扶回沙那的寶座。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 代理戰爭如何點燃</span>
+      <p>一場「代理戰爭」（proxy war）很少是憑空捏造的——它幾乎總是嫁接在一場真實的本地衝突之上。葉門內部本就有一道古老的裂縫：北方高地的宰德派傳統，與低地、海岸的遜尼派沙斐儀（Shafi'i）社群；有伊瑪目神權的千年記憶，有南北曾經分立的怨懟，有部落與中央、邊緣與核心的長期角力。胡塞之崛起，根子扎在這片本土的土壤裡。</p>
+      <p>而所謂代理戰爭，便是區域強權各自選定本地衝突中的一方，向其輸送武器、金錢、訓練與外交掩護，借對方之手去打一場自己不願、也不必親自下場流血的戰爭。它的殘酷在於：點火與澆油的是外人，按下停火鍵的權力也握在外人手裡，可在戰場上倒下、在飢荒裡死去的，卻全是本地人。葉門，正是這樣被一把點燃、又被嵌進一個它自己無從決定的更大棋局。</p>
+    </div>
+
+    <h3>制空權與封鎖：一場不對稱的戰爭</h3>
+    <p>「果斷風暴」一開始，便是一場極度不對稱的戰爭。沙烏地聯軍握有現代化的空軍——美製與歐製的戰機、精確制導炸彈、空中加油與預警機，背後還有美國（the United States）與英國（the United Kingdom）提供的情報、後勤與源源不絕的軍售。聯軍迅速奪取了葉門上空的制空權，並對其漫長的海岸線實施海上封鎖，名義上是攔截伊朗向胡塞偷運武器的船隻。從空中看，這似乎是一場勝負已定的戰爭：一方擁有二十一世紀的空中力量，另一方不過是一支沒有空軍、裝備混雜的山地武裝。</p>
+    <p>然而戰爭很快顯露出它另一張面孔。空中力量能炸毀基地、橋梁、車隊與指揮所，卻無法佔領一座城市，更無法征服一片崇山峻嶺。胡塞所盤踞的，正是葉門人口最稠密、地勢最險峻的北方高地——那裡是宰德派世代生息的家園，村莊嵌在海拔兩三千公尺的山褶之間，部落網絡盤根錯節。炸彈從天而降，他們便鑽進山地與民居之間；而每一輪空襲若誤炸了婚禮、市集、醫院或校車，反而把更多悲憤的青年推向他們一方。一場本想速戰速決的「果斷」風暴，從一開始就埋下了曠日持久的伏筆。</p>
+
+    <div class="warn">
+      <span class="warn-tag">天空之下的平民</span>
+      <p>戰爭頭幾年，最沉重的爭議落在空襲與封鎖對平民的傷害上。多個國際人權組織與聯合國機構記錄到，聯軍空襲屢屢擊中婚禮、葬禮、市集、醫院與民用設施，造成大量平民死傷；而對港口的封鎖，則切斷了一個約九成糧食、燃料與藥品都依賴進口的國家的生命線，把無數人推向飢餓與疫病。聯軍一方堅稱以軍事目標為打擊對象、並指責胡塞把武器藏於民居、徵用平民為盾。各方說法南轅北轍，獨立查證在戰時極為困難。可以確定的是：無論誰之過，付出代價的，是那些既不在利雅德、也不在德黑蘭，只想活下去的葉門尋常人家。</p>
+    </div>
+
+    <h3>誰也無法決定性地取勝</h3>
+    <p>戰爭並未如它的代號所許諾的那樣「果斷」。短短一個多月後，沙烏地便宣布「果斷風暴」行動結束、轉入名為「恢復希望」（Operation Restoring Hope）的新階段——可炸彈並未停，戰爭只是換了名字繼續打下去。在南方，聯軍支持的勢力與當地抵抗力量，在阿聯地面與訓練的協助下，於二〇一五年夏天奪回了亞丁，把胡塞逐出了南部大部分地區；哈迪政府得以名義上重返這座臨時首都。可在北方，胡塞牢牢守住了沙那與整片高地——那裡住著葉門大半的人口，是這個國家真正的心臟。</p>
+    <p>於是戰線就這樣凝固下來，成了一道誰也推不動的僵局。聯軍掌握制空與海上，卻啃不下北方的群山；胡塞固守高地與人口重鎮，卻衝不破南方與西岸的防線、也奪不回紅海的天空。曾被視為勝負手的西岸大港荷台達（Hodeidah）——這個國家最重要的糧食入口——成了反覆拉鋸、又因人道後果太過慘烈而誰都不敢真正強攻的死結。胡塞則把戰火反向延燒：向沙烏地境內發射越來越遠的彈道飛彈與無人機，襲擊機場、油田與城市，把戰爭的代價也送回了發動者的家門口。一年又一年，這個被聯合國一再稱為「全球最嚴重人道危機」的國度，就在這道推不動的僵持線上慢慢淌血。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">2015.3.25</div><div class="lbl">「果斷風暴」首夜空襲沙那，沙烏地領導聯軍正式介入</div></div>
+      <div class="stat"><div class="num">~10 國</div><div class="lbl">參與聯軍的阿拉伯國家，背後有美、英的情報與軍售支援</div></div>
+      <div class="stat"><div class="num">~90%</div><div class="lbl">葉門糧食、燃料、藥品依賴進口——封鎖即扼住生命線</div></div>
+    </div>
+
+    <h3>本是內政，化作博弈</h3>
+    <p>退一步看，這場戰爭最深的悲劇，在於它身分的錯位。在它最本真的層次上，這原是一場葉門人之間的權力之爭：北方高地崛起的胡塞，對上被國際承認、卻早已失去地面的流亡政府；是宰德派與沙斐儀的古老分野，是部落與中央的角力，是統一三十年來未曾真正彌合的南北裂痕。這些爭執，本該由葉門人在葉門的土地上，以葉門的方式去解決——無論那會多麼漫長而痛苦。</p>
+    <p>可是當沙烏地與伊朗各自選邊、把這場本土之爭嵌進它們橫跨整個中東的對峙時，戰爭的性質就被徹底改寫了。它被講述成一場遜尼與什葉的教派對決，一場利雅德與德黑蘭的區域爭霸，一場美俄影子在背後晃動的大棋。葉門人發現，自己頭頂的天空、海上的港口、談判桌上的籌碼，都不再由自己作主——打不打、打到哪一步、何時停，取決於遠在利雅德、德黑蘭、阿布達比乃至華府的算計。一個民族的存亡，成了別人棋盤上的一枚子。這正是「分裂與代理戰爭」這把鑰匙最痛的應驗：葉門與生俱來的分裂，被外部強權當作可資利用的裂口，一把撬開、注滿了火藥。</p>
+
+    <div class="pull"><p>火，是外人點的；油，是外人澆的；停火鍵，也握在外人手裡。可在沙塵與飢餓裡倒下的，卻全是葉門人。</p></div>
+
+    <p>必須誠實地說，這場戰爭沒有一方是清白的，也沒有一方該被輕易封為正義。聯軍可以申辯，他們是應一位合法總統之請、為阻止伊朗在半島腹地立足、為恢復一個被武力推翻的秩序而戰；胡塞可以申辯，他們是源自本土的政治力量，是抵抗外國轟炸與封鎖、捍衛家園主權的一方。伊朗否認對胡塞的直接指揮，沙烏地強調自己只想自衛與復原。每一方都握著一套自圓其說的敘事，而這些敘事彼此抵牾、難分真偽——這種敘事本身的分裂，恰恰是這片土地最真實的寫照。一個負責任的講述者，能做的不是替誰背書，而是把這些相互衝突的聲音如實並陳，並始終記得：在所有宏大的理由之下，是一個真實的、正在受苦的民族。</p>
+
+    <p>截至目前，這場戰爭的結局仍未明朗。多年僵持之後，各方在區域局勢的牽動下時有停火與斡旋的跡象，沙烏地與伊朗之間也一度出現緩和的訊號；可葉門的命運是否就此轉向和平，還是只是漫長拉鋸中又一次短暫的喘息，沒有人能斷言。能確定的，只有已經發生的事實：一個曾被古人讚為「幸福的阿拉伯」的綠色角落，在這場由外力點燃、又由外力主導的戰爭裡，墜入了它有史以來最深的黑暗。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 分裂與代理戰爭（外人決定打不打，葉門人承受全部代價）</span>
+      <p>「果斷風暴」是這部史詩裡，「分裂與代理戰爭」這把鑰匙最痛、也最赤裸的一次迴響。請記住這條因果鏈：葉門的分裂從不是新鮮事——它早被山與信仰反覆切割，被宰德與沙斐儀的教派分野、被哈希德（Hashid）與巴基爾（Bakil）那些比國家更古老的部落、被南北曾經分立的記憶，一道道刻進了骨子裡。本章所寫的，正是這份與生俱來的裂縫，如何在現代被外部強權當作可乘之機，一把撐大、引爆成一場區域代理戰爭。</p>
+      <p>而它最殘忍的地方在於主體的錯位：這原是葉門人自己的事，卻變成了利雅德與德黑蘭的事；按鈕在別人手上，賬單卻記在葉門人頭上。回望全篇開頭那片因季風之雨而獨綠的土地、那座潤澤了示巴與馬里卜的綠洲文明——「幸福的阿拉伯」(Arabia Felix)這個古老的名字，在這一章顯得格外刺痛。得天獨厚的水曾讓這個角落在荒漠半島上孕育出稠密的人口與古老的文明；而正是這份稠密與深厚，使得當戰火降臨時，有那麼多的人無處可逃。截至目前，這場戰爭尚未落幕，結局仍懸而未決——歷史在此留白，而我們所能做的，是不把任何一方的說法當作全部的真相，並始終把目光，放回那些既不在利雅德、也不在德黑蘭，只想讓孩子吃上一頓飽飯的葉門人身上。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-20">
+  <div class="act-head">
+    <span class="act-num">第二十章 · The Worst Humanitarian Crisis</span>
+    <h2 class="act-title">世界最嚴重的人道危機</h2>
+    <p class="act-sub">The World’s Worst Humanitarian Crisis</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>當人們談論一場戰爭，往往把目光投向前線——投向誰佔了哪座城、誰丟了哪個港、哪一方的旗幟升起又落下。可在葉門（Yemen），自二〇一五年沙烏地（Saudi Arabia）領導的聯軍介入以來，這場戰爭最深、最廣、最持久的傷害，從來不在前線，而在後方——在那些從未握過槍、也從未被任何一方問過意見的人身上。聯合國（the United Nations）一次又一次地，把這裡稱作「全球最嚴重的人道危機」（the world’s worst humanitarian crisis）。這句話被重複了太多次，以至於它幾乎磨損成了一句外交辭令；可若把它拆開來看，每一個字背後，都壓著一個量級駭人的數字，與無數張具體的、餓著肚子的臉。這一章，我們要暫時離開政治與戰場，去看看戰爭真正落在了誰的身上。</p>
+
+    <h3>九成依賴進口的土地</h3>
+    <p>要理解這場饑荒的陰影，得先回到本書反覆敲響的第一把鑰匙——「幸福的阿拉伯」（Arabia Felix）。葉門曾經因季風的雨而綠、而富足、而稠密；可這份綠，從來只夠養活山間梯田上的人，遠遠不夠餵飽一個近三千萬人口的現代國家。事實上，葉門早已是阿拉伯世界裡最貧窮的國家之一，它約有九成的糧食依賴進口——小麥、稻米、油，幾乎都得從海外運來，從紅海與印度洋的港口卸下，再分送到內陸的高地與城鎮。這意味著，葉門的餐桌，懸在一條漫長而脆弱的補給線上。而戰爭做的第一件事，就是切斷這條線。</p>
+    <p>聯軍對葉門海空門戶實施了長期的封鎖與管制，尤其是胡塞（Houthi）控制下、承擔了全國大部分進口吞吐的荷台達港（Hodeidah）。封鎖的官方理由，是防止伊朗（Iran）向胡塞偷運武器；可封鎖一視同仁地攔下的，還有糧食、燃料與藥品。燃料一旦短缺，抽水的泵停了、磨麵的廠停了、運糧的卡車也停了——飢餓於是順著這條因果鏈，從港口一路蔓延到最偏遠的山村。與此同時，葉門的貨幣里亞爾（rial）一路崩跌，物價飛漲；對許多家庭而言，問題並非市場上買不到糧，而是他們再也買不起。經濟的崩塌，與物理的封鎖，像兩隻手一起掐住了一個本就營養不良的國家的咽喉。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 人為饑荒</span>
+      <p>現代世界的大饑荒，極少是「天不下雨」這樣單純的天災。經濟學家阿馬蒂亞·森（Amartya Sen）早已指出：饑荒往往不是因為某地突然沒有了糧食，而是因為某一群人突然失去了「取得糧食的權利」——他們的收入崩了、貨幣廢了、道路斷了、市場被圍了。葉門正是這個冷酷規律的當代註腳。它的土地並非一夕變得寸草不生，全球也並不缺那些麥子；缺的，是把麥子運進來的燃料、是買得起麥子的薪水、是讓卡車安全通過的前線。</p>
+      <p>這就是為什麼聯合國一再強調，葉門的飢餓「絕大部分是人為的」（man-made）。它不是一場地震或旱災般無從歸咎的不幸，而是一連串封鎖、轟炸與經濟絞殺所累積出的結果——每一個環節的背後，都站著一個做了決定的人。</p>
+    </div>
+
+    <h3>霍亂：一場本不該發生的瘟疫</h3>
+    <p>飢餓尚未鬆手，瘟疫便接踵而至。自二〇一六年底起，葉門爆發了現代史上規模最大的霍亂（cholera）疫情之一。霍亂是一種古老而幾乎可被輕易遏止的疾病——它靠著被汙染的水傳播，只要有乾淨的水、可運作的下水道與及時的補液治療，本不該在二十一世紀奪走多少人命。可戰爭恰恰摧毀了一切阻擋它的東西：供水系統被炸毀或因斷電停擺，汙水四溢；醫護人員領不到薪水、醫院缺電缺藥；數百萬被戰火驅趕、擠在臨時棲身處的人們，喝著不潔的水。於是這座本已築好的防波堤，在戰爭裡全線潰決。</p>
+    <p>疫情如野火般蔓延。據世界衛生組織（WHO）與聯合國機構的統計，疑似霍亂病例累計達到數以百萬計的駭人量級，是當代有紀錄以來最大的單一疫情之一；其中相當大的比例，是孩子。一個被反覆提及的、令人心碎的細節是：霍亂奪去的，往往正是那些早已因飢餓而虛弱的身體——營養不良讓孩子更容易染病，染病又讓他們更難進食，飢餓與瘟疫於是手挽著手，在同一具瘦小的身體裡完成一場殘酷的合圍。</p>
+
+    <div class="warn">
+      <span class="warn-tag">陰影 · 醫療體系的崩塌</span>
+      <p>戰爭爆發前，葉門的公共服務本就脆弱；戰爭則幾乎將其連根拔起。據聯合國與多個救援組織的評估，葉門有相當大比例的醫療設施在衝突中停止運作、被毀，或因缺電、缺藥、缺人而名存實亡。空襲屢次擊中醫院、市場、水廠與校舍——各方對於這些打擊是「誤炸」抑或違反國際人道法，說法南轅北轍，而獨立調查在持續進行中的戰爭裡始終舉步維艱。可無論責任如何歸屬，事實的另一端是確定的：當一個社會的醫院熄了燈、水廠停了泵、學校關了門，最先付出代價的，永遠是最沒有能力自保的人——傷者、病人、孕婦，與孩子。</p>
+    </div>
+
+    <h3>飢餓中的孩子</h3>
+    <p>在所有的數字裡，最沉重的一組，關於孩子。據聯合國兒童基金會（UNICEF）與聯合國的長期評估，葉門有數以百萬計的兒童面臨嚴重的營養不良，其中很大一部分處於危及生命的急性重度營養不良狀態。聯合國機構曾反覆警告，平均每隔短短一段時間，便有一名葉門兒童因戰爭相關的、本可預防的原因而死去——飢餓、可治癒的疾病、或缺乏基本醫療。這些孩子裡的絕大多數，從未見過這場戰爭的任何一場戰役，也叫不出利雅德（Riyadh）或德黑蘭（Tehran）任何一位決策者的名字。</p>
+    <p>聯合國對這場戰爭總體死亡人數的估計，是直接死於戰火者與間接死於飢餓、疾病的人之和——而後者，往往遠多於前者。據聯合國有關機構的估計，這場戰爭在數年間造成的直接與間接死亡，合計達到數十萬之譜（這是估計的量級，並非可精確點算的數字；在一個統計系統早已崩潰、許多死亡從未被登記的國家裡，真實的數字恐怕永遠無法被確知）。在這數十萬人當中，數以萬計是五歲以下、本該無憂無慮的幼童。把這些抽象的數字翻譯成人話，便是：在葉門，更多的人不是死於子彈，而是死於子彈所引發的飢餓與瘟疫——戰爭最致命的武器，竟是它所製造的匱乏本身。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">≈ 90%</div><div class="lbl">戰前葉門依賴進口的糧食比例——一條被戰爭切斷的補給線</div></div>
+      <div class="stat"><div class="num">數百萬</div><div class="lbl">疑似霍亂病例累計量級，當代規模最大的疫情之一</div></div>
+      <div class="stat"><div class="num">數十萬</div><div class="lbl">聯合國估計的戰爭直接與間接死亡量級（估計值，非精確數）</div></div>
+    </div>
+
+    <h3>一場被遺忘的戰爭</h3>
+    <p>而最教人不忍的，或許是這一切所遭遇的世界性的沉默。葉門地處阿拉伯半島的西南角，遠離全球新聞的鎂光燈；它沒有令人矚目的石油巨富，沒有牽動大國神經的核計畫，它的苦難既不夠「戲劇化」，也不易被簡化成一句口號。於是，在一個資訊過載、注意力稀薄的時代，這場奪走數十萬人性命、把整個世代的孩子推向飢餓的浩劫，竟長期被冠以一個冷漠的稱號——「被遺忘的戰爭」（the forgotten war）。世界並非不知道它的存在，只是大多時候，選擇不去長久地凝視它。</p>
+    <p>當然，這份遺忘並非全然。聯合國的各個機構、世界糧食計畫署（WFP）、無國界醫生（MSF）等無數救援組織，在極度危險、補給屢屢受阻的環境裡，年復一年地把糧食、潔淨水與疫苗送進這個國家，撐起了千百萬人賴以活命的生命線——這是這場黑暗裡真實而頑強的光。可即便如此，援助的規模始終追不上苦難擴張的速度，資金時常短缺，通道時常受阻。截至目前，戰事雖在某些時段趨於緩和、停火與和談時有進展，但葉門的人道狀況遠未脫離險境，數以千萬計的人仍依賴外援度日，飢荒的陰影仍未真正散去——這一切，仍是一個尚未寫完、結局尚未明朗的故事。</p>
+
+    <div class="pull"><p>下令開戰與停火的，是利雅德與德黑蘭的決策者；承受飢餓、霍亂與轟炸的，卻是與這場大國博弈毫不相干的葉門平民，尤其是孩子。</p></div>
+
+    <p>這便是「代理戰爭」（proxy war）最殘酷的算術。在這道算式的一端，是兩個遠方都城裡的戰略盤算——勢力範圍、紅海航道、宗派威望、地區霸權的此消彼長；在另一端，是一個個被簡化為傷亡統計的、有名有姓的葉門人。決策者承擔的，是地圖上的得失與談判桌上的籌碼；而平民承擔的，是真實的飢餓、潰爛的傷口，與一具又一具來不及長大的小小身軀。代理戰爭之所以格外殘酷，正在於這種徹底的錯位——做決定的人不必付出代價，付出代價的人不曾參與決定。葉門，把這道殘酷的算術，赤裸裸地攤在了世人面前。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 三把鑰匙的悲劇性合流</span>
+      <p>這一章，是本書三把鑰匙在當代的一次悲劇性合流。那曾因季風之雨而被稱作「幸福的阿拉伯」的土地，如今九成的口糧要仰賴海外運來，它的「綠」終究撐不起一個被戰爭絞殺的現代國家；那被山與信仰反覆切割、從不是鐵板一塊的拼圖，讓任何外力都能輕易找到楔入的縫隙；而那份與生俱來的分裂，最終被放大成一場由利雅德與德黑蘭遠程操盤的代理戰爭。三道古老的密碼，在二十一世紀交織成了一張誰也掙脫不開的網。可在這一切結構性的解釋背後，我們不該忘記那個最樸素、也最沉重的事實：歷史的代價，從來不是由寫歷史的人來償還的。當大國在棋盤上推演它們的勝負時，是葉門的孩子，在替這盤棋付帳——用他們本該用來長大的時間，與本不該失去的性命。記住這一點，是我們在合上這一章之前，能為他們做的最起碼的事。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<div class="part-div reveal" id="part-6">
+  <span class="pn">第六部</span>
+  <h2 class="ptitle pt">分裂、紅海，與未知的明天</h2>
+  <div class="pe">Fragmentation, the Red Sea and an Uncertain Tomorrow</div>
+  <div class="pline"><span></span><span class="dot">✶</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-21">
+  <div class="act-head">
+    <span class="act-num">第二十一章 · The Fracturing Coalition</span>
+    <h2 class="act-title">破碎的陣營：南方分離主義的回歸</h2>
+    <p class="act-sub">The Fracturing Coalition — The Return of Southern Separatism</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>從遠處看，葉門的這場戰爭似乎只有兩造：一邊是盤踞北方高地、自薩那（Sana'a）發號施令的胡塞（Houthi）運動，背後隱約站著伊朗；另一邊是流亡的合法政府，由沙烏地阿拉伯（Saudi Arabia）領導的多國聯軍撐腰。電視新聞與地圖上的箭頭，總愛把世界塗成兩種顏色——這一塊是「叛軍」，那一塊是「政府」，中間是一條清楚的戰線。可只要把鏡頭推近，把地圖的比例尺放大，那條看似分明的戰線就會碎裂、暈染、長出無數條更小的縫。所謂「反胡塞陣營」，從來不是一塊鐵板；它更像一面早已布滿裂紋的鏡子，只是被胡塞這個共同的敵人暫時拼在一起。一旦敵人後退、地盤鬆動，每一道舊裂痕都會重新裂開、滲血。這一章要講的，正是這面鏡子的裂法——以及為什麼說葉門不是裂成了兩塊，而是碎成了好幾塊。</p>
+
+    <h3>同盟裡的兩個主人</h3>
+    <p>第一道裂縫，藏在那支「多國聯軍」的內部。表面上，沙烏地阿拉伯與阿拉伯聯合大公國（United Arab Emirates）並肩作戰，同在二〇一五年那場代號「果斷風暴」（Operation Decisive Storm）的軍事行動裡出兵；可這兩個海灣鄰邦，從一開始就把賭注押在了不同的牌上。沙烏地關心的，是它南方那條漫長的邊界、是把胡塞這個被它視為伊朗代理人的勢力擋在門外，因此它支持那個在國際上被承認的、象徵著「一個葉門」的哈迪（Abd Rabbuh Mansur Hadi）政府，要的是一個統一而順從的鄰國。阿聯的算盤卻不一樣——它對哈迪政府裡那些與穆斯林兄弟會（Muslim Brotherhood）淵源深厚的派系（在葉門以伊斯拉黨〔al-Islah〕為代表）始終戒慎，它更在意的是紅海與亞丁灣（Gulf of Aden）那條航道的咽喉，是港口、是島嶼、是海上的影響力。於是阿聯把資源與訓練，慷慨地灌注給了葉門南方的地方武裝——尤其是那些懷抱著「南方人」身分認同、夢想著讓南葉門重新獨立的力量。同一頂聯軍的帳篷下，兩個主人各自豢養著各自的人馬，各自做著不同的夢。葉門政府陣營的第一道裂痕，不是被胡塞撕開的，而是被它自己的兩個贊助者，用不同方向的手，悄悄拉扯出來的。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 代理戰爭裡的「次代理」</span>
+      <p>人們慣於把葉門戰爭理解成沙烏地與伊朗的代理戰——大國隔著一個小國，用別人的子彈互相試探。可現實遠比這更層疊。在代理之下，還有次代理；在贊助者之上，還有更大的贊助者。胡塞之於伊朗、哈迪政府之於沙烏地、南方武裝之於阿聯——每一層都不是簡單的提線木偶，而是各懷盤算、隨時可能脫線自走的活物。</p>
+      <p>這正是代理戰爭最危險也最容易失控之處：贊助者以為自己握著線，被扶植者卻有自己的土地、自己的部落、自己的舊恨與新仇。當沙烏地與阿聯這兩個本應同盟的贊助者，在葉門境內各自扶植起目標相左的武裝時，這場戰爭便不再只是「外人打外人」，而成了「同一張桌上的人，用別人的手互相暗算」。外力沒有把破碎的葉門黏合，反而沿著它原有的每一道裂縫，又各自下了一根楔子。</p>
+    </div>
+
+    <h3>南方，一道從未癒合的舊傷</h3>
+    <p>要理解那群「南方人」為何而戰，得把時間的卷軸往回拉得很長很長。葉門的南北之分，遠比這場戰爭古老。一八三九年，當英國的軍艦駛入亞丁（Aden）那座天然良港、把它變成大英帝國通往印度航線上的一座加煤站時，南方便走上了一條與北方截然不同的路——它成了一塊被殖民、被開放、被海洋與商旅塑造的土地，而北方的高地，仍由宰德派（Zaydi）的伊瑪目以一種近乎中世紀的方式統治著。一九六七年，英國人在一場激烈的反殖民鬥爭後黯然撤離亞丁，南方建立起一個獨立的國家，並很快走上了一條令整個阿拉伯世界側目的道路——它成了阿拉伯世界唯一信奉馬克思主義的國家，與蘇聯結盟、實行國有化、推行世俗化。北方則是另一個共和國。兩個葉門，兩種制度，兩面旗幟，隔著一條山與沙的界線對峙了二十餘年。</p>
+    <p>一九九〇年，冷戰將盡、蘇聯的庇蔭枯竭，南北兩個葉門在一片樂觀的氣氛裡宣布統一，組成了今天地圖上的那個葉門共和國。可這場婚姻並不平等——統一後的權力、財富與石油收益，迅速向以薩那為中心的北方傾斜，許多南方人覺得自己不是平等的合夥人，而像是被吞併的一方。四年之後，積怨爆發，一九九四年南方試圖重新分裂，旋即被北方以武力強行壓下。那場短促的內戰，沒有縫合裂痕，只是把它焊在了沉默之下。此後的二十年裡，「南方運動」（al-Hirak）以抗議、罷工、街頭的旗幟，一次次提醒著世人：那道因亞丁而起於一八三九、因獨立而深於一九六七、因內戰而焊死於一九九四的南北之裂，從未真正癒合。它只是在等一個機會，重新裂開。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1839</div><div class="tl-text">英國佔領亞丁，南方走上被殖民、向海洋開放的歧路，與北方分道。</div></div>
+      <div class="tl-item"><div class="tl-year">1967</div><div class="tl-text">英軍撤離，南葉門獨立，日後成為阿拉伯世界唯一的馬克思主義國家。</div></div>
+      <div class="tl-item"><div class="tl-year">1990</div><div class="tl-text">南北葉門統一為單一共和國，然權力與財富迅速向北方傾斜。</div></div>
+      <div class="tl-item"><div class="tl-year">1994</div><div class="tl-text">南方試圖重新分裂，被北方以武力壓平，裂痕被焊在沉默之下。</div></div>
+      <div class="tl-item"><div class="tl-year">2017</div><div class="tl-text">「南方過渡委員會」成立，舊傷在新的戰火中重新裂開。</div></div>
+    </div>
+
+    <h3>南方過渡委員會的誕生</h3>
+    <p>機會在二〇一七年到來。那一年的春天，哈迪政府以「不忠」為由，撤換了亞丁省長艾達魯斯·祖貝迪（Aidarus al-Zubaidi）——一個在南方頗有號召力、與阿聯關係密切的人物。這道撤職令，反倒像是替南方分離主義點了一把火。同年五月，祖貝迪聯合一批南方的政治與軍事領袖，宣布成立「南方過渡委員會」（Southern Transitional Council, 縮寫 STC），公開揭櫫一個目標：恢復一九九〇年之前那個獨立的南葉門。在阿聯的訓練與裝備下，效忠於 STC 的地方武裝——尤其是那支被稱為「安全帶」（Security Belt）的部隊——逐漸控制了亞丁周邊的大片地區。於是葉門出現了一個荒謬而真實的局面：在同一座被聯軍宣稱為「臨時首都」的城市亞丁裡，名義上的合法政府與一個公開要求分裂的委員會，竟並肩而立、各擁武裝、共享同一個敵人胡塞，卻彼此把槍口悄悄對準了對方。</p>
+    <p>這份荒謬，沒能維持太久。二〇一九年八月，亞丁的街頭終於響起了不該響起的槍聲——這一次，不是政府軍對胡塞，而是 STC 的武裝攻向了哈迪政府的據點，一度奪下了總統府與多處軍營。同盟之內，刀兵相見。沙烏地與阿聯這兩個本該同心的贊助者，被自己扶植的兩支人馬逼到了尷尬的對立面，只得出面斡旋，在當年年底促成了一紙「利雅德協議」（Riyadh Agreement），試圖把 STC 納入一個共享權力的政府。可協議的墨跡未乾，亞丁與南方各地的零星衝突便又起又落——紙上的和解，壓不住地底的裂縫。葉門的破碎，至此已昭然若揭：這不只是「胡塞對政府」的兩造之爭，更是政府陣營內部「統一派對南方分離派」的二度撕裂。一個原本就難稱統一的國家，連它「反分裂的那一方」，自己也分裂了。</p>
+
+    <div class="warn">
+      <span class="warn-tag">城市裡的內戰</span>
+      <p>二〇一九年亞丁的那場交火，最沉重的代價照例落在平民身上。一座本已被戰爭、停電、缺水與物價飛漲折磨得喘不過氣的港口城市，又在自己人之間的巷戰裡承受了新的死傷與流離。當「反胡塞」的兩支力量在街頭互相開火時，薩那的胡塞當局正隔著戰線冷眼旁觀——敵人的自相殘殺，於他們而言，是不必出一兵一卒的勝利。葉門人最深的悲哀莫過於此：無論戰線怎麼劃，挨子彈的，總是同一群本該被保護的人。</p>
+    </div>
+
+    <h3>蛇頭上的舞者，終於被蛇咬死</h3>
+    <p>就在南方的裂痕公開化的同時，北方也上演了一幕足以載入葉門政治史的死亡。主角是阿里·阿卜杜拉·薩利赫（Ali Abdullah Saleh）——那個統治了北葉門、又統治了統一後的葉門長達三十餘年的男人。早在他權傾一時的歲月裡，他便用一句傳誦極廣的比喻，形容自己在葉門治理之難：那是一種「在蛇頭上跳舞」的技藝——在部落、教派、外援與野心的縫隙之間，靠著不斷地結盟、背叛、再結盟，維持著一種隨時可能崩塌的平衡。二〇一一年的阿拉伯之春把他逼下了台，可他並未真正退場；他帶著仍效忠於他的大批軍隊與部落人脈，做出了一個令許多人錯愕的選擇——與他昔日的死敵胡塞結盟。要知道，正是他在位的最後幾年裡，曾發動六輪戰爭去圍剿薩達省（Sa'dah）的胡塞武裝。如今，這對舊仇人為了共同推翻接替他的哈迪政府，竟握手言和，聯手攻下了薩那。蛇頭上的舞者，這一次選擇與蛇共舞。</p>
+    <p>可這支同盟，從第一天起就建立在互不信任之上。三年裡，薩利赫的人馬與胡塞在薩那共治一城，明爭暗鬥、互相提防。到了二〇一七年的十二月，薩利赫終於再一次伸出了他那雙最擅長轉向的手——他公開向沙烏地領導的聯軍喊話，表示願意翻開「新的一頁」，這在所有人眼裡，都是一次清晰無誤的倒戈：他要拋下胡塞，轉投沙烏地的陣營。然而這一次，那條被他騎了多年的蛇，沒有再給他第三次轉身的機會。倒戈宣言發出後僅僅數日，薩那城內爆發激戰，薩利赫在試圖逃離首都的途中被胡塞武裝攔截、殺害。那個自詡為「蛇頭上的舞者」、靠著無數次精準變節而存活了大半生的政治老手，最終死在了他最後一次變節的途中——被他親手扶起、又企圖再次背棄的盟友，咬斷了喉嚨。</p>
+
+    <div class="pull"><p>那個在蛇頭上跳了三十年舞的男人，終於被蛇咬死。他一生靠變節而活，也死於最後一次變節——這既是一個人的結局，也是整個葉門政治邏輯的縮影：在這裡，沒有永遠的敵人，也沒有永遠的盟友，只有永遠的裂縫。</p></div>
+
+    <p>薩利赫之死，象徵性地關上了一個時代的門。那個靠著個人權術、把部落與教派的碎片勉強攏在一個人手裡的「強人時代」，隨著他的倒下而終結。可它沒有迎來一個更整合的葉門，反而讓所有被他生前那雙手暫時按住的碎片，一齊彈跳了出來——北方歸了胡塞，南方裂出了 STC，東部的省份各擁部落與地方勢力，紅海岸邊還有別的武裝割據著港口。葉門地圖上的顏色，不再是兩種，而是斑駁的好幾種。</p>
+
+    <h3>不是兩塊，而是好幾塊</h3>
+    <p>退一步看，這一章揭示的，正是「分裂」這把鑰匙最徹底、最赤裸的展開。葉門的破碎，從來不是單一的一刀兩斷，而是多層的、嵌套的、沿著歷史的每一道舊痕同時裂開的。最外層，是胡塞與政府的對抗；往裡一層，是政府陣營內部統一派與南方分離派的撕裂；再往裡，是沙烏地與阿聯這兩個贊助者方向相左的拉扯；最深處，則是那些比任何國家、任何政權都更古老的部落與地方認同——哈希德（Hashid）與巴基爾（Bakil）這樣的部落聯盟，亞丁與哈德拉毛（Hadhramaut）這樣各有性格的地域，它們的忠誠，從來只屬於更小、更近、更切身的單位。當中央的權威崩解，這些更古老的歸屬便重新浮上水面，成為人們真正願意為之拿起槍的東西。</p>
+    <p>於是，那道貫穿全篇的南北之裂，在二十一世紀的戰火裡，以最具體的方式重新顯影了——一八三九年的亞丁、一九六七年的獨立、一九九四年的內戰，所有這些被以為已經翻過去的篇章，原來只是被壓在了書頁之下，從未真正被讀完。如今，當外力的介入把整個國家攪成一鍋亂局，這道古老的縫便沿著它原來的走向，再一次裂了開來。截至目前，葉門的政治版圖仍在流動之中——南方過渡委員會與政府的關係時和時戰，沙烏地與胡塞之間斷續的接觸尚未結出明確的果實，紅海上的危機又給這盤棋添了新的變數。沒有人能斷言這個國家最終會以幾塊、以什麼樣的形狀，重新拼合或徹底散開。可有一件事是清楚的：談論葉門時，若還以為它只裂成了「南」與「北」兩塊，便是把一面早已碎成蛛網的鏡子，誤看成了只有一道裂痕的玻璃。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 分裂與代理戰爭（碎成好幾塊）</span>
+      <p>這一章，把「分裂與代理戰爭」這把鑰匙轉到了最深的一格。我們一路看著葉門被它的地理與信仰反覆切割——被山劈成高地與低地，被教派分成宰德與沙斐儀，被比國家更古老的部落割成一片片忠誠的碎塊。而當現代的代理戰爭降臨，它沒有抹去這些舊痕，反而像放大鏡一樣，把每一道與生俱來的裂縫都照得更亮、撕得更開。所謂「反胡塞陣營」的崩解，正是這份古老分裂在當代的迴響：阿聯扶植的南方過渡委員會重拾一九九〇年前的獨立之夢，與哈迪政府在亞丁的街頭兵戎相見；而薩利赫——那個試圖以一己之力按住所有碎片的「蛇頭上的舞者」——終於被他最後一次背棄的盟友所殺，連同他一起逝去的，是葉門用強人權術勉強維繫整合的最後可能。請記住這一章最樸素也最沉重的結論：葉門不是裂成了兩塊，而是碎成了好幾塊。一個曾因印度洋季風的雨水而成為「幸福的阿拉伯」、孕育出示巴香料王國的角落，如今正沿著它每一道古老的縫，被外力與內怨一同撕扯。它最終會走向何方，截至目前，仍無人能夠斷言——而能否讓那些古老的裂縫不再流血，將是這個飽經苦難的民族，留給未來最艱難的一道考題。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-22">
+  <div class="act-head">
+    <span class="act-num">第二十二章 · The Houthi State</span>
+    <h2 class="act-title">胡塞之國：高地神權的現代回歸</h2>
+    <p class="act-sub">The Houthi State — A Highland Theocracy Returns</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九六二年，葉門北方的高地上，一群軍官在薩那（Sanaa）推翻了統治這片山地千年之久的宰德派（Zaydi）伊瑪目（Imam），宣告共和。那一刻，許多人以為，盤踞在葉門群山之上、把宗教與權柄合為一體的「高地神權」，就此被埋進了二十世紀的塵土裡。可歷史很少把門關得這麼乾淨。半個多世紀之後，當外人再一次把目光投向薩那，他們看到的，是一面陌生而刺眼的旗幟，與一句迴盪在清真寺與街頭的口號；發出這句口號的，是一支發源於最偏遠北方山區、一度被各方輕蔑為「山裡的麻煩製造者」的武裝運動——胡塞（Houthi）。而今天，正是這支運動，統治著葉門人口最稠密的北方與那座失而復得的首都。那個被認為已死去的高地神權，並沒有死；它只是換了一身二十一世紀的軍裝，重新走下了山。</p>
+
+    <h3>從薩達山區走出的運動</h3>
+    <p>胡塞的根，扎在葉門最北端、與沙烏地阿拉伯接壤的薩達省（Saada）——那是一片貧瘠、多山、長期被薩那的中央政府忽視的邊陲高地，也正是宰德派最古老、最濃厚的腹地。這支運動的名字，來自一個家族：胡塞家（the Houthi family）。其精神領袖侯賽因·胡塞（Hussein al-Houthi）在世紀之交，於這片山區發起了一場宗教與政治的復興運動，名為「青年信士」（Ansar Allah，意為「真主的支持者」，也是這支運動的正式名稱）。他們訴求的，是宰德派傳統的尊嚴、是邊緣高地對抗中央漠視的怨懟、是對當時與美國結盟的薩那政府的強烈不滿。二〇〇四年，侯賽因·胡塞被葉門政府軍擊斃；可這場死亡非但沒有撲滅運動，反而為它鑄出了一位殉道者，把零散的不滿淬煉成一面旗幟。其後數年間，胡塞與中央政府在薩達山區反覆交戰六輪之多，這支運動非但沒有被剿滅，反而在一次次圍剿中愈打愈強、愈打愈韌——他們熟悉這片山、屬於這片山，而政府軍的火力，始終啃不動高地的崎嶇與民心。</p>
+
+    <p>真正的轉折在二〇一一年之後到來。當阿拉伯之春（Arab Spring）的浪潮席捲葉門、迫使統治三十餘年的強人下台、把國家拋進混亂的權力真空時，這支在山裡磨礪了多年的運動，看到了它一直等待的縫隙。二〇一四年秋，胡塞武裝順著山勢南下，幾乎兵不血刃地拿下了薩那。他們從一個邊陲的反叛者，一躍成為首都的主人。對許多葉門人和外部觀察者而言，這個轉變來得猝不及防；可若把鏡頭拉遠，便會發現：一支自始至終扎根於高地、以宰德派為魂、在被低估中悄然壯大的力量，回到這片它的祖先曾統治千年的土地，其實並不偶然。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">2004</div><div class="tl-text">精神領袖侯賽因·胡塞於薩達山區被政府軍擊斃，運動由其家族延續，第一次薩達戰爭爆發。</div></div>
+      <div class="tl-item"><div class="tl-year">2004–10</div><div class="tl-text">胡塞與葉門政府在北方山區歷經多輪交戰，運動在反覆圍剿中不斷壯大。</div></div>
+      <div class="tl-item"><div class="tl-year">2011</div><div class="tl-text">阿拉伯之春席捲葉門，長期統治的強人下台，國家陷入權力真空。</div></div>
+      <div class="tl-item"><div class="tl-year">2014</div><div class="tl-text">胡塞武裝南下，攻入並控制首都薩那，由邊陲反叛者轉為首都的主人。</div></div>
+    </div>
+
+    <h3>一個事實上的政權</h3>
+    <p>奪下薩那，只是開始；真正讓胡塞與一支普通武裝判然有別的，是它此後所做的事——它不只佔領，它治理。經過多年戰爭與沙烏地領導之聯軍（Saudi-led coalition）的介入，葉門被切成數塊；而在北方那一塊——也就是葉門人口最稠密、城鎮最密集、歷史最悠久的核心地帶——胡塞建立起的，已是一個事實上的政權（a de facto state）。它控制著薩那，控制著全國大半的人口；它有自己的部會、法庭、稅收、安全機構與宣傳機器。對於生活在那片土地上、佔葉門人口大多數的民眾而言，無論國際社會承不承認，胡塞就是日常生活裡那個發號施令、收稅徵糧、管理生死的權力。</p>
+
+    <p>這套治理的核心，是一個被廣泛談論的職位——「監督員」（mushrifin）。胡塞向各級政府機構、各個地區、乃至基層社群，派駐這些帶有意識形態與監督職能的人員；他們的權力往往凌駕於原有的行政官僚之上，負責確保各級單位對運動的忠誠、貫徹運動的路線、監控潛在的異議。透過這張層層下沉的監督網絡，胡塞把一個原本鬆散的反叛運動，逐步織成了一套能滲透到社會毛細血管的權力結構。與此同時，它建立起一套強大的動員與徵兵體系——透過清真寺、學校、夏令營與遍布城鄉的宣傳，把宗教熱忱、戰爭動員與對運動的效忠捆綁在一起，源源不斷地把年輕人送上前線，也把一套意識形態澆灌進下一代的心裡。據各方人權組織與聯合國機構長期記錄，這套體系亦伴隨著對異議者的壓制、對媒體與公民社會的箝制，以及招募未成年人入伍等爭議——這是這個政權治理之下，被反覆指出的陰影。</p>
+
+    <div class="warn">
+      <span class="warn-tag">治理之下的陰影</span>
+      <p>一個能有效收稅、動員、維持秩序的權力，未必是一個善待治下子民的權力。聯合國機構與多個獨立人權組織長年記錄，胡塞控制區內存在對政治異議與新聞自由的壓制、對少數群體的歧視、強制失蹤與任意拘押的指控，以及將未成年人捲入戰爭的爭議。對於困在這套體系裡的尋常葉門人——他們既要承受戰爭與封鎖帶來的飢餓，又要面對一個不容置疑的權力——「事實上的政權」這個詞背後，是無數沉默而具體的處境。</p>
+    </div>
+
+    <h3>宰德的魂與抵抗的軸</h3>
+    <p>讓胡塞成其為胡塞的，不只是槍與監督員，更是一套濃厚的意識形態——而它的底色，正是宰德派。宰德派是什葉派伊斯蘭中一個古老而特殊的支系，千餘年來，它始終是葉門北方高地的主流信仰，也曾是那位被一九六二年革命推翻的伊瑪目所代表的傳統。胡塞運動把這份宰德派的宗教與歷史記憶，重新擦亮、重新政治化，鑄成了動員的核心：對運動的效忠，被詮釋成一種信仰的責任；領袖的話語，被賦予近乎宗教的權威；運動的標誌性口號，把對美國、以色列與其敵人的對抗，提升為一場神聖的鬥爭。對信奉者而言，這不只是一場政治運動，而是一份延續千年的高地宗教傳統，在現代世界裡的捍衛與復興。</p>
+
+    <p>與這份內向的宗教認同同時生長的，是一條日益緊密的外向聯繫——胡塞與伊朗（Iran），以及伊朗所主導、自稱的「抵抗軸心」（Axis of Resistance）。這條軸心，串起了區域內若干反對美國與以色列的勢力；胡塞被廣泛視為其中最年輕、卻也最敢於出手的一環。德黑蘭與胡塞究竟親密到何種程度，各方說法不一：沙烏地與西方政府指控伊朗為胡塞提供武器、技術與訓練，使其導彈與無人機的能力遠超一支本土山地武裝所應有；伊朗與胡塞則一貫強調，胡塞是一支自主的、土生土長的葉門運動，並非任何人的代理。可以確定的是，無論這份關係的精確分量為何，它都已經把一支發源於葉門北方山區的運動，接上了一張橫跨區域的網絡——讓薩達的群山，與更遼闊的地緣棋局，連成了一線。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 代理與自主之間</span>
+      <p>「代理」（proxy）是理解當代中東衝突最常被使用、卻也最容易被濫用的一個詞。把胡塞簡單稱作「伊朗的代理」，會抹去它深植於葉門本土的根——它有自己的怨懟、自己的信仰傳統、自己的部落與地域基礎，不是被外力憑空製造出來的。可若反過來否認任何外部聯繫，又會忽視它在武器與能力上的躍升，以及它在「抵抗軸心」敘事裡所扮演的角色。</p>
+      <p>真實往往落在兩者之間：胡塞既不是被遙控的傀儡，也不是與外界全然絕緣的孤島；它是一支有著自己議程的本土力量，同時懂得借力於一張更大的網絡，並在這場互相成就裡，把自身的分量放大。理解這種「既自主又連結」的雙重性，是看懂今日葉門——乃至整個區域代理戰爭——的關鍵。</p>
+    </div>
+
+    <h3>繞了整整一圈的鑰匙</h3>
+    <p>如果把葉門的歷史比作一首反覆迴響的樂曲，那麼「高地與教派」這把鑰匙，到了胡塞這裡，恰好完成了一次完整的循環。樂曲的第一個樂句，是宰德派的伊瑪目在北方群山裡建立起的、延續千年的神權——宗教領袖即政治君主，山就是他們的城堡，信仰就是他們的合法性。第二個樂句，是一九六二年的共和革命，軍人推翻伊瑪目，宣告一個世俗共和國的誕生，似乎為那段神權的歷史畫上了句點。而第三個樂句，便是胡塞的捲土重來——那個被推翻的高地宰德神權，並未真正消失，它只是潛入民間、潛入山區、潛入記憶，等待一個權力真空的縫隙，然後以一支現代武裝運動的形式，重新走下山、重新君臨大半個國家。</p>
+
+    <p>當然，胡塞之國與昔日的伊瑪目王朝並不全然相同——它披著現代運動的外衣，有政黨式的組織、有導彈與無人機、有跨國的聯繫、有一套面向二十一世紀的宣傳語言。可它的精神內核，卻與那段被埋葬的歷史一脈相承：都發源於同一片北方高地，都以宰德派為魂，都把宗教權威與政治權力熔鑄為一。從伊瑪目，到共和，再到胡塞，這把「高地與教派」的鑰匙，繞了整整一圈，又回到了它出發的地方。一支曾被各方輕視、被認為翻不起大浪的山地運動，如今成了葉門武裝最強、最難撼動的力量——多年的戰爭與外部聯軍的空襲，未能把它趕出薩那，反而在某種程度上鞏固了它對北方的掌控。理解今日的葉門，無論你站在哪一方的立場，都繞不開這個從最偏遠的高地走出、重新坐上首都王座的勢力。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">2014</div><div class="lbl">胡塞控制首都薩那，由邊陲反叛者轉為事實上的執政者</div></div>
+      <div class="stat"><div class="num">1962→今</div><div class="lbl">高地宰德神權：從被共和革命推翻，到以武裝運動形式回歸</div></div>
+      <div class="stat"><div class="num">mushrifin</div><div class="lbl">「監督員」——層層下沉、貫穿治理的意識形態監督網絡</div></div>
+    </div>
+
+    <p>必須說明的是，這一切仍在進行之中。截至目前，葉門的戰爭尚未真正落幕，胡塞與其對手之間的對峙、與沙烏地的時談時戰、與紅海航道相關的緊張，都仍處在反覆變動的局勢裡；這個事實上的政權能否被國際社會接納、能否與其他葉門勢力達成某種持久的安排、它的統治會走向鞏固還是動搖，沒有人能夠斷言。歷史尚未在此寫下定論，我們能做的，只是看清這支力量從何而來、為何如此難以撼動——以及它如何讓一段被以為已經終結的高地神權，在二十一世紀重新成為理解葉門無法迴避的現實。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 高地與教派（神權的循環）</span>
+      <p>胡塞之國，是「高地與教派」這把鑰匙最完整、也最令人深思的一次迴響。回顧整部葉門史：這片土地從一開始就被地形劈成兩半——北方多山的高地住著什葉派的宰德人，伊瑪目在群山之上建起延續千年的神權；南方的低地與海岸則多屬遜尼派的沙斐儀；而比國家更古老的哈希德（Hashid）與巴基爾（Bakil）等部落，又在這之上再切一刀。葉門從來不是一塊鐵板，而是一幅被山與信仰反覆切割的拼圖。一九六二年的革命曾以為能用「共和」一詞抹平這道千年的高地神權裂痕，可裂痕只是被覆蓋，從未被填平；當二十一世紀的權力真空降臨，那道最古老的裂痕，便沿著它原本的走向，重新裂開——胡塞，正是從這道裂縫裡長出來的。它提醒我們一件關於這片土地的根本事實：在葉門，地形與信仰所劃下的界線，比任何一紙憲法、任何一次革命都更為久遠；誰若想真正治理這片土地，就必須先讀懂這幾道刻在山與心裡的線。而下一個樂句會如何延續，這首迴響了千年的樂曲將走向何處，至今仍懸而未決。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-23">
+  <div class="act-head">
+    <span class="act-num">第二十三章 · A Fragile Truce</span>
+    <h2 class="act-title">二〇二二：脆弱的停火與沙伊和解</h2>
+    <p class="act-sub">2022 — A Fragile Truce and the Saudi–Iran Détente</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>戰爭最殘忍的地方，不只在於它如何開始，更在於它如何拖延——當第一波激情燒盡、最初的口號喊到沙啞、雙方都明白誰也吞不下誰之後，那把火並不熄滅，只是轉成一種陰燃的、看不見盡頭的悶燒，一年又一年地灼著最底層的人。到了二〇二二年的春天，葉門（Yemen）的這場戰爭已經燒了將近八個年頭。前線在一些山口與港城之間反覆拉鋸，誰也推不動誰；地圖上的色塊大致定型——北方的高地與首都薩那（Sanaa）牢牢攥在胡塞（Houthi）手裡，南方的港城亞丁（Aden）與東部的大片荒漠則屬於那個名義上「被國際承認」、實則四分五裂的政府陣營。戰爭打成了僵局，可僵局並不等於和平——它只意味著，殺戮的速度慢了下來，而苦難的累積，從未停止。也正是在這樣一片精疲力竭的死寂裡，二〇二二年帶來了八年來第一次像樣的喘息。</p>
+
+    <h3>第一口氣：聯合國斡旋下的停火</h3>
+    <p>二〇二二年四月，在聯合國（the United Nations）駐葉門特使的長期穿梭斡旋之下，交戰各方終於談成了一紙全國性的停火協議——起初議定為期兩個月，隨後又兩度延長。這紙協議的內容並不華麗，甚至可以說是卑微得令人心酸：暫停前線的地面軍事行動，暫停跨境的空襲與導彈攻擊；讓裝載燃油的商船得以重新駛入胡塞控制的荷台達（Hodeidah）港，讓薩那的機場得以恢復一部分商業航班，使重病者與滯留者能夠飛往外地求醫或團聚。換句話說，它要的不是和平，而僅僅是讓物資與人，能夠重新流動——讓一座被圍困了多年、燃油短缺到醫院發電機都快停擺的城市，重新呼吸。</p>
+    <p>對於一個被聯合國反覆稱為「全球最嚴重人道危機」的國家而言，這一口氣來得太遲，卻仍是無比珍貴。停火生效的那幾個月裡，平民傷亡的數字明顯下降，前線一些地段安靜了下來，被戰火驅離家園的人裡，有一部分得以在沉寂的炮聲中試著返鄉。荷台達港重新湧入的燃油，讓糧食與藥品的運輸鬆動了一截；薩那機場時隔六年重開的商業航班，載走了第一批前往外地就醫的病人——對那些等待已久的家庭來說，這一架普通的客機，幾乎是一條生路。</p>
+    <p>然而必須誠實地說，這紙停火從一開始就佈滿裂縫。它的正式期限在二〇二二年十月到期後，各方未能就延長與擴大條款談攏，協議在文本意義上宣告中止。可吊詭的是——也正是這一點值得細細體會——即便正式的停火文件失了效，那種「不再大打」的狀態，卻在事實上大致延續了下來。前線零星的交火、互相指責對方違約的聲音始終不曾斷絕，可八年來那種大規模、成建制的攻防，確實罕見地停了下來。一紙到期的文件，意外地凝結成了一種心照不宣的疲憊默契：雙方都打不動了，也都不想再率先承擔重啟全面戰爭的代價。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">2022.04</div><div class="tl-text">聯合國斡旋下達成全國性停火，初期為期兩個月，後兩度延長——八年戰火後第一次大規模喘息。</div></div>
+      <div class="tl-item"><div class="tl-year">2022.05</div><div class="tl-text">薩那機場時隔約六年重開部分商業航班；荷台達港恢復燃油船進港。</div></div>
+      <div class="tl-item"><div class="tl-year">2022.10</div><div class="tl-text">停火正式期限到期，未能談妥延長；但「不再大打」的狀態在事實上大致維持。</div></div>
+      <div class="tl-item"><div class="tl-year">2023.03</div><div class="tl-text">在中國斡旋下，沙烏地與伊朗達成和解、同意恢復邦交。</div></div>
+    </div>
+
+    <h3>誰真正握著開關</h3>
+    <p>要看懂這場停火，得先退一步，看清這場仗究竟是誰在打。表面上，這是葉門人與葉門人之間的戰爭——胡塞與政府陣營，北方與南方，高地的宰德派（Zaydi）什葉與低地的沙斐儀（Shafi'i）遜尼。可只要把鏡頭拉遠一格，一個更冷峻的結構便浮現出來：自二〇一五年沙烏地（Saudi Arabia）領導的多國聯軍介入、與背後支持胡塞的伊朗（Iran）隔空角力以來，葉門早已不只是葉門人的戰場，而是這兩個區域宿敵——遜尼派的沙烏地與什葉派的伊朗——彼此較勁的一塊代理棋盤。</p>
+    <p>於是，到了二〇二二年，把交戰各方推向談判桌的，與其說是葉門內部終於談攏了什麼，不如說是那兩個外部的金主，各自改變了算計。對沙烏地而言，這場原本被設想為「速戰速決」的干預，早已淪為一個耗盡資金、磨損聲譽、又看不到出口的泥沼；它的南部邊境城鎮屢遭跨境的無人機與導彈襲擊，它在國際輿論場上因葉門的人道災難而背負沉重的指責。一個正試圖把目光投向經濟轉型與大型願景的王國，迫切地想要從這場戰爭裡，體面地脫身。也正是在這樣的盤算下，沙烏地繞過了它名義上扶持的那個葉門政府，開始與胡塞展開某種程度的直接接觸與談判——這個細節本身，便已說得很清楚：在真正的決策層面，葉門政府的角色被擱在了一旁，而棋手與棋手之間，開始直接對話。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 代理戰爭的「遙控開關」</span>
+      <p>所謂「代理戰爭」（proxy war），其最殘酷的特徵，往往不在於它如何被點燃，而在於它的「開關」握在誰的手裡。當一場本地衝突被嫁接到兩個外部強權的對抗上，本地的當事人——無論其訴求多麼真實、多麼源於自身的歷史委屈——都會漸漸發現，戰爭能否升級、能否降溫、能否走向桌前，越來越取決於遠在他方的兩個首都怎麼算計，而不取決於戰場上自己人的意願。</p>
+      <p>葉門二〇二二年的這次喘息，恰恰是這條規律的一次冷峻演示：停火之所以可能，並非因為高地與低地、北方與南方之間那些古老而真實的裂痕被彌合了——它們一道也沒有被彌合；而是因為利雅德與德黑蘭，各自基於自身的成本與收益，同時鬆開了手裡那根繃緊已久的繩索。能開戰、也能停戰，可決定權從來不全在葉門人自己手裡——這既是這次喘息的由來，也是它最深的隱憂。</p>
+    </div>
+
+    <h3>北京斡旋下的和解：宿敵的握手</h3>
+    <p>如果說二〇二二年的停火，是兩個金主各自鬆手的結果，那麼二〇二三年三月發生在北京的那一幕，則像是把這份「鬆手」推向了一個更高的層次。在中國（China）的斡旋之下，沙烏地與伊朗——這兩個自二〇一六年便已斷交、在從敘利亞到黎巴嫩、從伊拉克到葉門的整片中東棋盤上彼此較量了多年的區域宿敵——出人意料地達成了和解，同意恢復外交關係、重開使館。</p>
+    <p>這一握手之所以震動四方，原因有二。其一，是和解本身：兩個把整個地區切割成遜尼與什葉兩大陣營的對手，竟然坐到了一起。其二，則是斡旋者的身分：促成這場和解的，不是傳統上主導中東外交的華盛頓，而是北京——這被許多觀察者視為地緣政治格局正在悄然挪動的一個信號。對葉門而言，這場發生在千里之外的和解，意義卻是切身而具體的：既然這場戰爭的本質是沙烏地與伊朗的代理角力，那麼當這兩個金主在最高層級上選擇緩和，葉門那場代理戰爭走向某種政治解決的可能性，似乎也就被推開了一條從未有過的縫隙。一線希望，就這樣燃了起來。</p>
+
+    <div class="pull"><p>這場仗的開打與停火，決定權從來不全在葉門人手裡——它的火苗，是在利雅德與德黑蘭點起的；它的降溫，也是在那兩座首都之間，被悄悄擰小的。</p></div>
+
+    <h3>被推開一條縫的窗，與窗外模糊的風景</h3>
+    <p>於是到了這一章所站立的時點，葉門的天空，確實透進了八年來難得的一線光。槍聲稀了，封鎖鬆了，那兩個在背後角力的強權，在最高層級上選擇了緩和。一扇緊閉多年的窗，似乎被推開了一條縫。可在為這條縫感到欣慰之前，必須極其誠實地承認：被推開的，僅僅是一條縫——而窗外的風景，依舊一片模糊。</p>
+    <p>那些真正決定葉門未來的問題，沒有一個因為停火與和解而得到了回答。胡塞控制著首都與北方人口最稠密的高地，已然是一個事實上的執政力量——可由誰來治理一個統一的葉門？高地的宰德派與低地的沙斐儀、武裝派系與部落、那個四分五裂的政府陣營，如何重新分配權力、共處於一個屋頂之下？尤其是那個始終揮之不去的幽靈——南方何去何從？在這片土地上，南北曾經分立為兩個國家，其中之一更曾是阿拉伯世界唯一的馬克思主義國家；一九九〇年的統一，緊接著便是內戰，南方分離的訴求從未真正熄滅。如今南方的分離主義勢力，在戰爭中再度坐大，他們要的，未必是一個統一葉門裡的一席之地，而可能是重新走向分家。這些盤根錯節、比這個國家本身更為古老的裂痕，沒有一道是一紙停火或一場大國和解所能撫平的。</p>
+    <p>更何況，所有這些和緩，本質上都還很脆弱。停火的正式文本早已到期，它的延續靠的是一種隨時可能破裂的默契；北京斡旋下的沙伊和解，是兩個宿敵在權衡利弊後的策略選擇，而非根本互信的建立，它能維繫多久、能否真正轉化為葉門地面上的政治安排，截至此刻仍是一個未知數。歷史一再提醒人們，停火與和平之間，隔著的往往是最艱難、也最容易功虧一簣的一段路。葉門人等到了喘息，可他們是否能等到一個由自己決定的未來——這扇窗，究竟會被推得更開，還是會重新合上——在這一章落筆的時刻，仍然懸而未決，無人能夠斷言。對於一場仍在進行、結局尚未明朗的故事，誠實的寫法，是停在這條被推開的縫前，不去預測窗外。</p>
+
+    <div class="warn">
+      <span class="warn-tag">陰影 · 喘息不等於癒合</span>
+      <p>即便槍聲變稀，葉門那場被反覆稱為「全球最嚴重人道危機」的災難，並未隨停火而結束。經年的戰火、封鎖、經濟崩潰與貨幣貶值，已將數以百萬計的人推入飢餓、營養不良與疫病的邊緣；被摧毀的供水、醫療與基礎設施，不會因為前線安靜下來就自動復原。停火帶來的，是傷口不再被反覆撕開的機會，而不是傷口本身的癒合。對在這場戰爭中失去家園、親人與健康的無數普通葉門人而言，一紙脆弱的停火，是一線喘息，卻遠遠不是正義，更不是補償。</p>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 分裂與代理戰爭（開關不在自己手裡）</span>
+      <p>這一章把我們帶回貫穿全書的第三道密碼——「分裂與代理戰爭」——而它在此刻顯露出的，是這道密碼最冷峻的一面。葉門這場戰爭的降溫，不是因為高地與低地、北方與南方、宰德與沙斐儀之間那些古老的裂痕被縫合了；那些根植於山與信仰、比這個國家更為古老的分裂，一道也未曾消失。戰爭之所以喘了口氣，是因為兩個外部的金主——沙烏地與伊朗——各自改變了算計，並在北京的斡旋下選擇了和解。一場仗的開打與停火，決定權從來不全在葉門人手裡，這恰恰再一次印證了「代理戰爭」的本質：當本地的裂痕被嫁接到強權的對抗之上，本地人便連自己土地上的硝煙何時升起、何時散去，都難以完全做主。</p>
+      <p>於是這一線難得的希望裡，藏著一份難以言說的苦澀。窗被推開了一條縫，可推窗的手是別人的，窗外的風景——誰來治理、如何分權、南方何去何從——依舊一片模糊。回到第一道密碼，那片因印度洋季風而獨獨青綠、曾孕育示巴與摩卡的「幸福的阿拉伯」（Arabia Felix），與第二道密碼那被山與教派反覆切割的高地拼圖，此刻都靜靜地等在這扇半開的窗後，等著葉門人——而不只是他們身後的金主——去回答那個最古老也最艱難的問題：這片被天賜之水滋養、又被地形與信仰一再撕裂的土地，究竟能不能由它自己的子民，拼回一個完整的家。這個問題，截至此刻，仍然沒有答案。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-24">
+  <div class="act-head">
+    <span class="act-num">第二十四章 · The Red Sea</span>
+    <h2 class="act-title">紅海：被遺忘的戰爭如何重回世界舞台</h2>
+    <p class="act-sub">The Red Sea — How the Forgotten War Returned to the World Stage</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>有一種戰爭，世界曾經盯著它看，後來厭倦了，便把目光移開。葉門的戰爭就是這樣一場戰爭。自從二〇一五年沙烏地（Saudi Arabia）領導的聯軍介入、把這片土地推入無止境的廝殺之後，國際媒體曾用「全球最嚴重的人道危機」這樣的字眼描述它；可隨著年復一年的僵持、隨著敘利亞、烏克蘭、加薩接連把鏡頭奪走，葉門漸漸從頭條退到了內頁，又從內頁退進了那片只有人道組織還在記得的灰色地帶。數以千萬計的葉門人仍在飢餓與斷壁殘垣裡掙扎，可世界已經學會了不去看。歷史有一種殘忍的韻律——它讓最深的苦難，安靜地沉入背景。然而到了二〇二三年的年底，這場被遺忘了將近十年的戰爭，竟以一種誰也沒有預料到的方式，重新攫住了全世界的注意力。它靠的不是苦難——苦難從來攫不住誰——而是地理。它把一隻手，按在了全球貿易的咽喉上。</p>
+
+    <h3>加薩的烽火，點燃了曼德海峽</h3>
+    <p>故事的引信，並不在葉門點燃。二〇二三年十月，巴勒斯坦的加薩（Gaza）爆發了與以色列（Israel）之間一場極為慘烈的戰爭，傷亡與廢墟的影像傳遍全球，整個阿拉伯與穆斯林世界為之沸騰。就在這片憤怒的浪潮裡，控制著葉門北方高地與首都薩那（Sana'a）的胡塞（Houthi）武裝——這個源自宰德派（Zaydi）什葉傳統、自稱「真主支持者」（Ansar Allah）的運動——宣布它要站到加薩這一邊。胡塞的領袖宣稱，只要以色列對加薩的軍事行動不停止，他們便要讓往來於紅海（the Red Sea）的、與以色列有關的船隻付出代價。聲援巴勒斯坦人，是這套說辭的正面；而對胡塞而言，這也是一個將自己從一場被遺忘的內戰主角，一躍升格為「抵抗陣線」（the Axis of Resistance）一員的契機——在他們的敘事裡，他們不再只是葉門山裡的一支武裝，而是與伊朗（Iran）、與黎巴嫩真主黨（Hezbollah）並肩、對抗以色列與美國的區域力量。自二〇二三年的年底起，胡塞開始用無人機、巡弋飛彈與反艦飛彈，攻擊行經紅海與曼德海峽（Bab-el-Mandeb）的商船。</p>
+
+    <p>曼德海峽——這個名字，正是這部葉門史詩在第一章就已經寫下的那道地理咽喉。「眼淚之門」，古人這樣稱呼它。它是紅海南端唯一的出口，最窄處不過數十公里寬，葉門扼守著它的東岸。在它之上，是通往蘇伊士運河（the Suez Canal）的航線；穿過蘇伊士，便是地中海與整個歐洲。世界上最繁忙、最關鍵的貿易動脈之一，就從這道窄門裡穿過——亞洲的貨櫃、波斯灣的石油與天然氣、歐洲的工業品，年復一年地在這裡來來往往。胡塞所做的，不過是站在這道窄門邊，向穿門而過的船隻舉起了武器。地理，再一次成了葉門與世界之間最硬的那條線。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 咽喉點（Chokepoint）的不對稱力量</span>
+      <p>所謂「咽喉點」，是指全球貿易必經、又狹窄到無法繞開的關鍵節點——曼德海峽、荷莫茲海峽、麻六甲海峽、蘇伊士與巴拿馬運河都屬此類。它的特殊之處在於一種極端的不對稱：守在咽喉旁的一方，哪怕力量微小、裝備簡陋，也能憑著地理位置，對遠比自己強大的全球體系施加壓力。一枚廉價的反艦飛彈，逼得船東為一艘上億美元的貨輪重新計算風險；幾次攻擊累積起來的不確定感，便足以讓整條航線的保險費飆升、讓船公司寧可繞遠路。</p>
+      <p>這正是胡塞在紅海所利用的邏輯。他們無力在戰場上擊敗沙烏地，更無力撼動美國的海軍；但他們不需要擊敗誰——他們只需要讓世界相信，這條航道不再安全。咽喉點的力量，不在於你能摧毀多少，而在於你能讓多少人不敢通過。</p>
+    </div>
+
+    <h3>當世界的貨輪開始繞道</h3>
+    <p>攻擊的效果，很快就以一種全球性的、具體到能被換算成金錢的方式顯現出來。面對紅海日益升高的風險，越來越多的航運公司做出了同一個選擇——不走了。包括全球最大的幾家貨櫃航運巨頭在內，許多船東決定讓船隻避開紅海與蘇伊士運河，轉而繞行非洲大陸的最南端、繞過好望角（the Cape of Good Hope）。這是一條被現代航運遺忘了一個多世紀的老路——自從一八六九年蘇伊士運河開通，正是為了讓船隻不必再繞這條漫長的彎路。如今，因為葉門山裡一支武裝的飛彈，世界的貨輪又一次被趕回了那條古老的、繞著整個非洲走的航線。</p>
+
+    <p>繞道的代價是沉重的。一趟亞洲到歐洲的航程，因此要多走數千海里、多花上一兩週的時間，多燒大量的燃油。運費應聲而漲，某些航線的貨櫃價格在數週之內翻了數倍；船舶的戰爭風險保險費急劇攀升；蘇伊士運河的通行量大幅下滑，連帶衝擊到仰賴過路費的埃及（Egypt）財政。供應鏈的延遲，像漣漪一樣擴散到全球的工廠與貨架——在那段時間裡，從歐洲的車廠到亞洲的港口，都在重新計算一件事：穿過曼德海峽的那一刻，到底值不值得冒險。一場發生在世界最貧窮國家之一的、被遺忘的內戰，竟透過這道窄門，攪動了從上海到鹿特丹的賬本。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">~30 km</div><div class="lbl">曼德海峽最窄處寬度——「眼淚之門」</div></div>
+      <div class="stat"><div class="num">1869</div><div class="lbl">蘇伊士運河開通之年；如今貨輪被逼回繞行好望角的老路</div></div>
+      <div class="stat"><div class="num">+數千海里</div><div class="lbl">繞行好望角較走蘇伊士多出的航程，推高全球運費與保險</div></div>
+    </div>
+
+    <h3>繁榮衛士，與紅海上空的轟鳴</h3>
+    <p>世界不可能對自己的貿易動脈被掐住而無動於衷。二〇二三年底，美國（the United States）出面組織了一個多國海軍護航與聯防的安排，取名為「繁榮衛士行動」（Operation Prosperity Guardian），召集若干國家的軍艦進入紅海與亞丁灣海域，為過往商船提供保護、攔截來襲的無人機與飛彈。然而參與的國家各有顧慮——有的不願公開掛名、有的只願在外圍協助，反映出這片水域裡錯綜的政治。護航能攔下飛彈，卻攔不住源頭；胡塞的攻擊並未止息。於是到了二〇二四年初，美國與英國（the United Kingdom）進一步採取行動，對胡塞在葉門境內的飛彈陣地、無人機設施與雷達目標發動了空襲，並在此後維持了一連串的打擊。一支曾被世界遺忘的山地武裝，與全球頭號海軍強權，竟在紅海的上空與兩岸，直接交起手來。</p>
+
+    <p>各方對這一連串交火的解讀，南轅北轍。在美英及其盟友的敘事裡，這是為了捍衛航行自由、保護無辜的國際商船與全球經濟，是對一支威脅公海安全的武裝的正當回應。在胡塞的敘事裡，他們是為加薩受難的巴勒斯坦人挺身而出、抵抗以色列與西方的「義舉」，而美英的空襲，恰恰證明了他們所對抗的霸權是真實存在的——每一次被轟炸，都被轉化為動員與正當性的燃料。在伊朗一方，德黑蘭（Tehran）否認直接指揮胡塞的行動，將其描述為葉門人自主的決定；而華府與許多西方分析則指出，胡塞所用的武器與技術，與伊朗的支援脫不了關係。同一片紅海，同一串爆炸，在不同的鏡頭裡，是截然不同的故事。歷史學家在此只能誠實地並陳這些彼此衝突的敘事，並指出這種分歧本身——它正是這場危機最難解的部分。截至目前，這場較量仍在進行，沒有人能說它將如何收場。</p>
+
+    <div class="warn">
+      <span class="warn-tag">陰影 · 海上的人與被擱置的危機</span>
+      <p>在大國的飛彈與護航之間，最容易被忽略的，是兩個沉默的群體。其一是船員——那些來自世界各地、在貨輪上討生活的普通海員，他們既非政客也非軍人，卻被迫航行於這片隨時可能落下飛彈的水域；有船隻被擊中、被扣押，有人因此喪命或被俘，他們是這場地緣賭局裡最無辜的籌碼。其二是葉門人自己——當世界的目光因紅海而重新投向這片土地時，照見的卻往往只是航道與運費，而非那數以千萬計仍困在飢餓、疾病與廢墟中的葉門平民。戰爭重回舞台的方式，是經由錢包而非經由良心；被照亮的是水道，被留在暗處的，依舊是人。</p>
+    </div>
+
+    <h3>地理的回返：被遺忘者如何重奪聚光燈</h3>
+    <p>退一步看，這整件事有一種近乎殘酷的諷刺。將近十年裡，葉門人用最深重的苦難——飢荒、霍亂、被炸毀的醫院與學校、數以萬計的死亡——都未能讓世界把目光長久地停留在這片土地上。苦難太多、太遠、太難理解，世界選擇了遺忘。可是當胡塞把手按在曼德海峽這道咽喉上、當貨輪開始繞行好望角、當歐洲貨架上的商品開始延遲、當運費與保險的數字開始跳動——世界在一夜之間，重新記起了葉門的存在。讓世界回頭的，不是同情，而是賬單。</p>
+
+    <p>而這賬單之所以能被遞到全世界面前，靠的正是這部史詩自始至終反覆迴響的那把第一鑰匙——幸福的阿拉伯（Arabia Felix）那份得天獨厚的地理。當年，是印度洋的季風把雨送到葉門西南角、孕育了示巴的香料王國與摩卡的咖啡，讓這個半島的角落成了文明的搖籃；也正是同一份地理，讓葉門扼守著紅海的南大門、坐落在連通三大洲的航道之側。數千年前，這份位置讓葉門富甲一方、商旅雲集；數千年後，這份同樣的位置，讓一支山地武裝得以掐住全球貿易的脖子。土地從不曾改變它賦予葉門的那張底牌——扼守紅海咽喉的位置；改變的，只是握牌的人，與他們選擇怎樣去打。</p>
+
+    <div class="pull"><p>讓世界回頭的，從來不是同情，而是賬單。一場被遺忘了近十年的戰爭，靠的不是它的苦難，而是它腳下那道扼守紅海的窄門——地理，再一次決定了葉門與世界的關係。</p></div>
+
+    <p>截至這部史詩擱筆之際，紅海的危機仍在持續演變，加薩的局勢、胡塞的攻擊、各國的反制，環環相扣、起伏未定，沒有任何人能斷言它將走向何方。我們能確定的，只有一件被反覆驗證的事——只要葉門還守在曼德海峽的東岸，只要那道窄門還是世界貿易必經的咽喉，這片被山與信仰反覆切割、被內戰與飢荒反覆碾過的土地，就永遠不會真正從世界的視野裡消失。它或許會被遺忘，但只要它願意，它隨時能讓全世界重新想起它在哪裡——因為它就站在世界的門口。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 幸福的阿拉伯（地理決定關係）</span>
+      <p>這一章，把全書的第一把鑰匙——「幸福的阿拉伯」——推到了它最尖銳、也最當代的一面。我們曾在開篇看見，正是印度洋季風帶來的那場雨，讓阿拉伯半島這片幾乎全是沙漠的土地，唯獨在西南一角綠了起來，孕育出示巴的香料、馬里卜的大壩與摩卡的咖啡；而這份地理同時還附帶了另一重恩賜與詛咒——扼守紅海與曼德海峽的位置。香料時代，這份位置讓葉門富甲一方；咖啡時代，它讓摩卡的名字傳遍歐洲；而到了二十一世紀，當這片土地早已被內戰、教派與代理戰爭切得支離破碎，正是這同一份位置，讓一支源自北方高地宰德派傳統的胡塞武裝，得以憑著掐住世界貿易的咽喉，把一場被遺忘的戰爭重新推回全球的頭條。三把鑰匙在此交織成一個閉環——得天獨厚的地理（第一把）成就了葉門的古老與富庶，高地與教派的分裂（第二把）孕育了胡塞，而南北分立、外力介入的代理戰爭（第三把）把胡塞推上了今日的位置；最後，又是最初那份地理，決定了這一切將如何被世界看見。葉門的命運，自始至終都寫在它腳下那道扼守紅海的土地上。它太窮、太亂、太常被遺忘；可它站在世界的門口——而站在門口的人，永遠有能力，讓門外的世界停下腳步。這場危機尚未落幕，結局仍懸而未決，但有一件事這部史詩可以肯定地說：理解葉門，永遠要從理解它腳下那道窄門開始。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="act reveal" id="ch-25">
+  <div class="act-head">
+    <span class="act-num">第二十五章 · A Divided Tomorrow</span>
+    <h2 class="act-title">分裂的明天：葉門能否重新拼起</h2>
+    <p class="act-sub">A Divided Tomorrow — Can Yemen Be Pieced Together Again</p>
+    <div class="ornament">✦ ✶ ✦</div>
+  </div>
+  <div class="prose">
+    <p>當一場戰爭打到再也分不出勝負，它並不會就此結束——它只是凝固下來。今天的葉門，便處在這樣一種凝固的狀態裡：槍聲大半止息了，前線大致定住了，可那把當初點燃這一切的火，並沒有被熄滅，只是被一層薄薄的、隨時可能裂開的灰燼蓋住。自二〇二二年那紙由聯合國斡旋的停火以來，這片土地進入了一種既非戰爭、也非和平的曖昧地帶——人們把它叫做「不戰不和」。對一個在炮火與飢餓中熬了將近十年的民族而言，這份脆弱的平靜，已經是天大的恩賜；可對於那個始終懸在所有人頭頂的問題——這個被劈成數塊的國家，究竟還能不能重新拼成一個整體——這份停火，沒有給出任何答案。它只是按下了暫停鍵，把問題原封不動地，留給了明天。</p>
+
+    <h3>一個國家，事實上的數塊</h3>
+    <p>要看懂今天的葉門，得先放下「一個國家」這個念頭。從地圖上看，葉門依然是一塊完整的、印著國界的土地；可在這條國界的內部，權力早已碎裂成數塊互不統屬的版圖。最大的一塊，在北方——胡塞（Houthi）武裝控制著包括首都薩那（Sana'a）在內的西北高地，那是葉門人口最稠密的心臟地帶，全國大半的人，都生活在他們的治理之下。胡塞在那裡，已經從一支山地的反抗武裝，演變成一個事實上的政權：他們收稅、辦學、管制媒體、建立起一套貫徹其宗教與政治理念的統治機器，並把這片他們稱之為「正統」的領地，治理得愈來愈像一個自成一體的國家。</p>
+    <p>另一塊，在南方。國際社會承認的葉門政府，退守到了南方的港城亞丁（Aden）一帶——但即便在這片「合法政府」的轄區裡，權力也並不統一。二〇二二年起，這個政府被改組成一個八人的「總統領導委員會（Presidential Leadership Council）」，名義上把各路反胡塞的派系兜在一起，實則是把彼此猜忌、各擁兵馬的山頭，勉強塞進同一間屋子。而在這間屋子裡，坐著一個心思根本不在「統一葉門」上的力量——尋求南方獨立的「南方過渡委員會（STC, Southern Transitional Council）」。STC 由阿拉伯聯合大公國（UAE）扶植，掌握著亞丁的實權與相當兵力，打的是那面一九九〇年才併入北方的南葉門舊旗；他們真正想要的，不是把葉門拼起，而是把南方再一次分出去。於是有了一幅荒誕的圖景：在同一個「合法政府」內部，並肩坐著一群想統一葉門的人，與一群想分裂葉門的人。</p>
+    <div class="cards">
+      <div class="card"><div class="flag">北方</div><h5>胡塞 · 薩那</h5><p>控制西北高地與首都薩那，統治全國大半人口；已從反抗武裝演變為事實上的政權，自成一套統治機器。</p></div>
+      <div class="card"><div class="flag">南方</div><h5>政府 · 亞丁</h5><p>國際承認的政府退守亞丁，二〇二二年改組為八人「總統領導委員會」，內部各派系彼此猜忌、各擁兵馬。</p></div>
+      <div class="card"><div class="flag">南方之南</div><h5>STC · 分離主義</h5><p>UAE 扶植的南方過渡委員會掌握亞丁實權，打的是舊南葉門旗幟，志在讓南方再度獨立——與其名義上的盟友同床異夢。</p></div>
+    </div>
+    <p>除了這三大塊，葉門的版圖上還散落著更多更碎的拼片：東部廣袤的馬里卜（Marib）與哈德拉毛（Hadhramaut）各有勢力盤踞，沙烏地與 UAE 在不同地帶各有代理與駐軍，蓋達組織的分支與曾經的伊斯蘭國殘部仍在荒僻處活動。這已經不是一個「中央與地方」的國家，而是一張被撕成數十片、彼此重疊又互不信任的權力拼圖——它與這部書從頭講到尾的那道密碼，<strong>高地與低地、什葉與遜尼、北方與南方、部落與部落</strong>，嚴絲合縫地對上了。今天的破碎，不是戰爭憑空造出來的；戰爭只是把那道千年的舊裂縫，重新撕得更深而已。</p>
+
+    <div class="deepen">
+      <span class="dh">概念深掘 · 凍結衝突</span>
+      <p>國際政治裡有一個詞，叫「凍結衝突（frozen conflict）」——指的是一場戰爭在軍事上停了下來，前線固定、槍聲沉寂，可它賴以爆發的那些根本爭議，一個都沒有解決：沒有和平條約，沒有最終地位的安排，誰是合法的主人、邊界畫在哪裡、權力如何分配，全都懸而未決。它的危險在於，這種「凍結」往往不是通往和平的中途站，而會成為一種可以無限期維持下去的常態——雙方都打不下去、也都不肯讓步，於是就這樣僵著，一僵可能就是幾十年。</p>
+      <p>葉門今天，正滑向這樣一種凍結。停火止住了大規模的會戰，卻把這個國家「事實上的分裂」固化了下來：胡塞守著北方，政府與 STC 各據南方，誰也吃不掉誰，誰也不願在談判桌上交出已經到手的東西。對平民而言，不打仗當然好過打仗；可對這個國家而言，一個被凍結的分裂，距離「重新拼成一個整體」，可能比戰爭時還要更遠——因為當每一塊碎片都在各自的地盤上坐穩、生根、建立起自己的秩序之後，要再把它們勸回同一個屋簷下，就難上加難了。</p>
+    </div>
+
+    <h3>懸而未決的四道難題</h3>
+    <p>所以，當人們問「葉門的明天會怎樣」時，真正該問的，是那幾道至今無人能答的難題。它們像四塊壓在棋盤上的巨石，每一塊都動彈不得，而只要有一塊還壓著，這盤棋就走不到終局。</p>
+    <p>第一道，是<strong>胡塞</strong>。經過將近十年的戰爭，這支當初被沙烏地聯軍誓言要打回北方山溝裡去的武裝，不但沒有被消滅，反而坐大了——它頂住了一個富裕王國領導、得到西方武器支援的聯軍將近十年的轟炸，守住了首都與大半人口，最後逼得對手坐下來談停火。一個在戰場上「沒有輸」的力量，是不會在談判桌上輕易交權的。胡塞與伊朗（Iran）的關係，更讓這道難題複雜：它在意識形態、武器與訓練上與德黑蘭的牽連已是公開的事實，可它究竟在多大程度上聽命於伊朗、又在多大程度上是一支有自己盤算的本土勢力，外界各執一詞——它既被對手描繪成伊朗伸進阿拉伯半島的一隻手，也堅稱自己只是葉門高地子民的代言者。這個分歧本身，就是難題的一部分。</p>
+    <p>第二道，是<strong>南方</strong>。STC 與南方的分離主義者，要的是一個明確的東西——讓一九九〇年合併進來的南葉門，重新成為一個獨立的國家。他們有歷史的依據（南北本就分立過數十年）、有現實的力量（手握亞丁與 UAE 的支持）、也有民間相當的同情（許多南方人始終覺得統一之後自己被北方虧待）。可一旦南方真的分出去，葉門作為一個統一國家的根基便不復存在——而北方的胡塞、南方內部不認同 STC 的派系、乃至擔心連鎖效應的各方，又絕不會輕易答應。「統一」還是「分家」，這個自一九九〇年起就沒有被真正回答過的問題，如今重新攤在桌面上，比那時更尖銳。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">2014–15</div><div class="lbl">胡塞拿下薩那、沙烏地領導聯軍介入——戰爭的起點</div></div>
+      <div class="stat"><div class="num">2022</div><div class="lbl">聯合國斡旋下達成停火，戰事大致凍結至今</div></div>
+      <div class="stat"><div class="num">數塊</div><div class="lbl">今日葉門事實上的版圖——北方胡塞、南方政府、STC 與更碎的拼片</div></div>
+    </div>
+    <p>第三道，是<strong>紅海</strong>。自二〇二三年底起，胡塞以聲援加薩、打擊以色列為名，在紅海與曼德海峽（Bab-el-Mandeb）上攻擊往來商船——這條全球航運的咽喉一被攪動，葉門這場「被世界遺忘的戰爭」，便以誰也沒料到的方式，重新與全球經濟的命脈勾連在一起。美國與英國對胡塞發動空襲，航運繞道、運費飆漲，整個世界忽然意識到，這個被遺忘的角落，原來扼著一條自己離不開的水道。截至目前，這場紅海危機與遠在加薩的戰火高度綁定，它會隨區域局勢如何收尾、又會給葉門境內那紙脆弱的停火帶來什麼後果，沒有人說得準——它把一場本已極其複雜的內戰，又接上了一條通往整個中東乃至全球的引線。</p>
+    <p>第四道，也是最大的一道，是<strong>沙烏地與伊朗</strong>這兩個區域強權的博弈走向。葉門之所以從一場內部的權力之爭，膨脹成一場曠日持久的浩劫，正因為它被嵌進了利雅德與德黑蘭的對抗裡——胡塞背後被指有伊朗，政府背後站著沙烏地。二〇二三年，這兩個宿敵在中國的斡旋下，出人意料地恢復了邦交，一度讓人燃起「外部的手鬆開了，葉門人或許能自己談了」的希望；沙烏地也確實顯露出想從這場代價高昂、贏不了的戰爭裡脫身的意願。可區域和解究竟有多深、能維持多久，又能在多大程度上轉化成葉門地面上的真正和平，依然是一個進行中的、充滿變數的問號。葉門的命運，從來不只握在葉門人手裡——這，正是它最深的悲劇。</p>
+
+    <div class="warn">
+      <span class="warn-tag">停火之下，未癒的傷</span>
+      <p>必須說清楚的是：戰事的凍結，並不等於苦難的結束。將近十年的戰爭、封鎖與經濟崩潰，在這片土地上留下的創傷，遠不是一紙停火能撫平的——大半人口仍需人道援助才能維生，醫療與基礎設施殘破，一整代孩子在戰火與營養不良中長大。聯合國一次次稱葉門為「全球最嚴重的人道危機」之一，這個判斷並未因停火而改變。當外界把目光投向前線是否再起、強權如何博弈時，最容易被忽略的，恰恰是那數以百萬計、在這場「凍結」裡仍每天為下一頓飯與一口乾淨的水掙扎的普通葉門人——對他們而言，戰爭從未真正遠去，只是換了一種更安靜、卻同樣磨人的形態。</p>
+    </div>
+
+    <h3>沒有外人做主，沒有強人壓服</h3>
+    <p>把這四道難題擺在一起看，會浮現出一個更深的結構性困局。回顧葉門這數千年的歷史，這片土地每一次的「統一」，幾乎都靠的是兩種力量之一：要嘛是一個強悍的內部強人，用刀劍把所有部落與山頭暫時壓服——從古代的伊瑪目，到一九九〇年代靠權謀與武力勉強縫合南北的薩利赫（Saleh）；要嘛是一個外來的強權，把自己的秩序強加在這片破碎的土地上——奧斯曼人、英國人，乃至今天試圖塑造結局的沙烏地與 UAE。可這兩條路，今天似乎都走到了盡頭。</p>
+    <p>外來強權做主這條路，已被將近十年的戰爭證明走不通——沙烏地用一個富國的財力與西方的武器打了近十年，沒能替葉門「擺平」胡塞，反而把自己拖進泥潭、把葉門打成廢墟；外人能炸毀一個葉門，卻造不出一個葉門。而內部強人壓服一切這條路，同樣看不到人選：胡塞守得住北方，卻征服不了南方、更不被南方認同；政府與 STC 連自己這邊都統不起來；沒有任何一支力量，強大到足以把所有碎片重新攥進一隻拳頭裡。</p>
+    <div class="pull"><p>外人能炸毀一個葉門，卻造不出一個葉門；而葉門內部，又再沒有一隻拳頭，攥得住所有的碎片。</p></div>
+    <p>於是，葉門被推到了一個它在歷史上極少真正面對過的十字路口——一個既沒有外來強權能替它做主、也沒有內部強人能壓服所有人的時刻。剩下的，似乎只有一條路，也是最難的一條：靠葉門人自己，在沒有刀劍、也沒有外援強加的秩序之下，談出一種讓高地與低地、什葉與遜尼、北方與南方、部落與部落都能勉強共處的安排。這意味著一種葉門幾乎從未有過的政治：不是某一方贏者通吃，而是各方在承認彼此都消滅不了對方之後，學會分享這片土地。它需要的，遠不止停火與援助，而是一場關於「葉門究竟還要不要、能不能成為一個整體」的、漫長而艱難的自我談判。</p>
+    <p>這條路能不能走通，截至目前，沒有人知道。停火脆弱地維持著，正式的和談時斷時續、進兩步退一步；外部的博弈時鬆時緊；而那道把葉門劈成數塊的千年裂縫，依舊橫在那裡，一寸都沒有被填平。歷史上一次次，這片土地都在短暫的喘息之後，重新墜回分裂與戰爭——這一次會不會不同，會不會終於有一代葉門人，在這難得的窗口裡，把破碎拼回完整，這一切都還是進行式，都還沒有答案。我們這部書能做的，不是替它預言一個結局，而是把這道懸而未決的終極考題，原原本本地，交到下一章——也是最後一章——的手上。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 分裂的十字路口</span>
+      <p>這第二十五章，把這部書三道密碼最終的較量，攤在了我們眼前。葉門站在一個<strong>分裂的十字路口</strong>上：舊的那場戰爭，大致被凍結了；可讓這塊土地破碎的那些根本力量——那道源自地形的<strong>高地與低地</strong>，那道源自信仰的<strong>什葉與遜尼</strong>，那道源自身世的<strong>北方與南方</strong>，以及那條把它一再拖進<strong>外部強權代理戰爭</strong>的宿命——一個都沒有被真正解決。它們只是從炮火裡，退回到了談判桌與凍結的前線背後，繼續盤踞著。</p>
+      <p>而最深的那道考題，至此已經逼到了眼前：一塊被山、被信仰、被部落反覆切割了千年，又被強鄰反覆撕扯的土地，究竟能不能在沒有一個外來強權替它做主、也沒有一個內部強人壓服所有人的情況下，第一次，靠葉門人自己的手，把這塊碎成數片的土地，重新拼成一個家？這個問題，連著它最古老的那把鑰匙——那片因季風而綠、曾被羅馬人豔羨地喚作「幸福的阿拉伯（Arabia Felix）」的土地，能不能在飢餓與分裂的灰燼裡，重新找回一點屬於它的幸福。答案不在這一章裡。它甚至還不在今天的任何地方——它仍懸在進行中的時間裡。讓我們帶著這道沒有答案的考題，走進終章，去看看這趟從示巴的香料、摩卡的咖啡，一路走到被遺忘的廢墟的旅程，究竟把我們引向了一個關於「幸福的阿拉伯，能否重新幸福」的怎樣的叩問。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✶ ✦</div>
+
+<section class="finale reveal" id="ch-finale">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">幸福的阿拉伯，能否重新幸福</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">Can Arabia Felix Be Happy Again</p>
+      <div class="ornament" style="color:var(--gold-bright)">✦ 季風 ✶ 重生 ✦</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把這趟跨越三千年、追隨一塊「幸福的阿拉伯」如何一步步淪為「全球最嚴重人道危機」的旅程，收攏成一條線。今天的葉門之所以是這個模樣——一個曾經富庶到讓羅馬人豔羨、把乳香與咖啡賣給全世界的土地，如今卻有大半人口需要援助才能活下去；一個被高地與低地、什葉與遜尼、部落與部落分割了千年的國家；一個統一了又分裂、被沙烏地與伊朗當成代理戰場、又在紅海上攪動著全球航運的破碎之邦——是它那「幸福的阿拉伯、高地與教派、分裂與代理戰爭」三道密碼，纏繞了數千年的結果。從示巴（Saba）的香料王國與馬里卜（Marib）那座最古老的大壩，到摩卡（Mocha）港口運往全世界的第一杯咖啡；從宰德派（Zaydi）伊瑪目在北方高地延續千年的神權王國，到英國人在亞丁（Aden）那座扼守紅海咽喉的煤站與港口；從一九六二年北葉門推翻伊瑪目的革命與那場「埃及的越南」，到南方那個阿拉伯世界唯一的馬克思主義國家；從一九九〇年的統一與一九九四年的內戰，到二〇一四年胡塞（Houthi）武裝拿下薩那、二〇一五年沙烏地領導聯軍的介入；從飢餓與霍亂的蔓延，到二〇二四年胡塞在紅海上射向商船的飛彈——這塊土地，始終在重複同一個悲劇：它本該因季風的恩賜而富足，卻因身世的分裂而永無寧日；它一次次被山與信仰劈開，又一次次淪為比它更大的勢力，博弈的棋盤。</p>
+
+      <h3>第一重：幸福的阿拉伯——水的恩賜與失落</h3>
+      <p>葉門最底層的密碼，是那份<strong>幸福的阿拉伯（Arabia Felix）</strong>。在一片幾乎整個是沙漠的半島上，唯獨葉門的西南角，因為印度洋季風帶來的雨，是綠的——是這份得天獨厚的水，孕育了梯田與高地、孕育了示巴的香料、馬里卜的大壩與摩卡的咖啡，讓葉門成為整個阿拉伯半島上，唯一能孕育稠密人口與古老文明的角落。可這份恩賜，從來都伴隨著一個古老的警告：馬里卜大壩的最終潰決，曾讓示巴文明走向衰亡——水，既能成就一個文明，也能在它失去時帶走一切。今天的葉門，正面臨著這份古老恩賜最殘酷的反面：它是世界上水資源最匱乏的國家之一，地下水正在枯竭，氣候變遷與人口暴增讓「水」重新成為生死攸關的問題。<strong>葉門的故事，從頭到尾都是一個關於水的故事——它因水而幸福、因水的失去而衰亡；而今天它最深的危機之一，依然是水。</strong></p>
+
+      <h3>第二重：高地與教派——被地形劈開的身世</h3>
+      <p>而沉積在這份恩賜之上的，是那道<strong>高地與教派（The Highlands &amp; the Sects）</strong>的分裂。葉門是一塊被地形劈成數塊的土地：北方多山的高地，是宰德派什葉的世界，他們的伊瑪目在這片易守難攻的山裡，建立了一個斷斷續續延續了千年的神權王國；南方的低地與漫長的海岸，則多屬遜尼派的沙斐儀；而貫穿其間、比任何國家都更古老、更真實的，是盤根錯節的部落——對許多葉門人而言，效忠的對象從來不是「葉門」這個國家，而是自己的部落、自己的山谷、自己的教派。<strong>葉門從來就不是一塊鐵板，而是一幅被山脈、信仰與部落反覆切割的拼圖——任何想統治整個葉門的力量，無論是伊瑪目、殖民者、共和國，還是今天的胡塞，都會在這片破碎的地形與忠誠面前，碰得頭破血流。</strong>這份與生俱來的分裂，是理解葉門一切動盪的鑰匙——它讓這個國家極難被真正統一，也極易被外力撬動。</p>
+
+      <h3>第三重：分裂與代理戰爭——他人棋盤上的棋子</h3>
+      <p>而貫穿這份分裂的命運、也最攸關葉門今天去向的，是第三道密碼——<strong>分裂與代理戰爭（Division &amp; the Proxy War）</strong>。葉門與生俱來的破碎，在現代被一次次放大、利用：冷戰時它被劈成親西方的北葉門與信奉馬克思主義的南葉門；統一後旋即內戰；而當胡塞這支北方高地的宰德派武裝崛起、拿下首都，沙烏地便領導聯軍介入，要把它打回去——一場本是葉門內部的權力之爭，就此被嵌進了沙烏地與伊朗、遜尼與什葉的區域大博弈，成了一場曠日持久的代理戰爭。代價，是慘烈到難以名狀的：數十萬人在戰火與飢餓中喪生，數百萬人流離，霍亂大規模爆發，大半人口需要援助才能活命——聯合國一次次稱之為「全球最嚴重的人道危機」。<strong>葉門最深的悲劇，是它太破碎、又太居於要衝（扼守著紅海的咽喉曼德海峽），於是它的每一次內部分裂，都會招來外部勢力的插手；而每一次外部的插手，又都讓它分裂得更深——這是一個它自己幾乎無力打破的惡性循環。</strong></p>
+
+      <h3>第四重：廢墟之中，一塊被遺忘的土地</h3>
+      <p>而當我們掀開引擎蓋、拆解這個國家「當代的形態」時，我們看到的，是一幅令人心碎、卻又被世界大半遺忘的圖景。它的創傷，是觸目驚心的——這場始於二〇一五年的戰爭，造成了當代最深重的人道災難之一：饑荒的陰影、崩潰的醫療、失學的一代、與一個被炸成碎片的國家。它的格局，是破碎的——胡塞武裝控制著北方與首都薩那、統治著大半的人口；國際承認的政府退守南方的亞丁；而南方又有尋求獨立的「南方過渡委員會（STC）」——這個國家事實上已經分裂成數塊。它的處境，是詭譎的——二〇二二年以來，一紙聯合國斡旋的停火大致維持住了脆弱的平靜；二〇二三年沙烏地與伊朗在中國斡旋下的和解，更燃起了一線政治解決的希望；可與此同時，自二〇二三年底起，胡塞又以聲援加薩為名，在紅海上攻擊往來商船，攪動了全球航運、招來美英的空襲——讓這個「被遺忘的戰爭」，以一種出人意料的方式，重新與世界經濟的命脈勾連在一起。而最深的那道考題是：<strong>一塊被山與信仰劈開了千年、又被外力反覆撕扯的土地，究竟能不能，在這難得的停火窗口裡，找到一種讓高地與低地、什葉與遜尼、各個部落都能共處的安排——還是會像歷史上無數次那樣，在短暫的喘息後，重新墜回分裂與戰爭？</strong>截至目前，停火脆弱地維持著，和談時斷時續，這一切都還是進行式，都還沒有答案。<em>這是一塊曾被稱作「幸福」、如今卻深陷苦難的土地；它的傷口深得驚人，可它那份因季風而生、延續了三千年的堅韌，至今仍未被徹底掐滅。</em></p>
+
+      <div class="flow">
+        <span class="node">示巴的香料</span><span class="arrow">→</span>
+        <span class="node">摩卡的咖啡</span><span class="arrow">→</span>
+        <span class="node">高地的伊瑪目</span><span class="arrow">→</span>
+        <span class="node">南北分裂</span><span class="arrow">→</span>
+        <span class="node">統一與內戰</span><span class="arrow">→</span>
+        <span class="node">代理戰爭</span><span class="arrow">→</span>
+        <span class="node">被遺忘的廢墟</span>
+      </div>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 今天的葉門人</span>
+        <p>所以今天的葉門人，是誰？他，是<strong>那片綠色高地與那份古老恩賜最新的子孫</strong>——身上流著示巴的香料商、摩卡的咖啡農、與高地部落的記憶，住在這片阿拉伯半島上唯一因季風而綠的土地上。可他更可能是一個在戰火與封鎖中，為一家人的下一頓飯發愁的父親；是一個在霍亂與營養不良的陰影下長大、從沒見過和平的孩子；是一個守著祖傳的咖啡梯田、卻發現市場與道路都被戰爭切斷的農人。他既是那個把乳香與咖啡賣給全世界、讓羅馬人豔羨地稱之為「幸福的阿拉伯」的偉大傳統的繼承者，也是那個被高地與低地的地形、被什葉與遜尼的信仰、被一場本不屬於他的區域博弈所撕裂的承受者；更是那個，至今仍在替所有「被分裂所詛咒、被強鄰所利用」的破碎之地，提前掂量一道終極難題的先行者——那道難題是：<em>一塊被山、被信仰、被部落反覆切割的土地，能不能在沒有一個外來強權替它做主、也沒有一個內部強人壓服所有人的情況下，靠著葉門人自己，找到一種共處的方式？</em></p>
+        <p>這本書，從那座運出全世界第一杯咖啡的摩卡港、與那片曾被稱作「幸福」的綠色高地開始，問的是一個核心的問題：<em>一塊餵養過古代世界、富庶到讓羅馬人嚮往的土地，如何淪為現代世界裡最深、卻最少人關心的人道傷口？</em>走到終點，我們看到的答案是：葉門真正的考驗，從來不是它缺不缺資源或才智——它曾兩度靠著別人求之不得的東西富甲天下。它真正的考驗，在於一件遠為艱難的事——<strong>它能不能，掙脫那道把它劈成高地與低地、什葉與遜尼、北方與南方的千年裂縫，也掙脫那個讓它一再淪為他人戰場的宿命，第一次，靠葉門人自己的手，把這塊破碎的土地重新拼成一個家。</strong>而這，需要的不只是停火與援助，更是一場關於這個國家「究竟能不能成為一個整體」的、艱難的自我重建。它是一塊被季風所眷顧、被地形所分裂、被強鄰所利用的土地；一塊曾經幸福、如今含淚、卻仍在等待著重新幸福起來的、季風之南的高地。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">葉門是人類史上罕見的一塊，把「最幸福的阿拉伯」與「最深重的苦難」疊在同一塊土地上的地方。它的悲劇，不在於它不夠富饒、不夠古老——恰恰相反，它曾那麼富饒、那麼文明，是整個半島上唯一因雨水而綠的角落。那片示巴的香料、那座馬里卜的大壩、那杯從摩卡出海的咖啡，與那道把它劈成數塊的山與信仰——如今，正一同壓在每一個在飢餓與戰火中，仍守著那片梯田、等待著雨水與和平的葉門人的肩上。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">分裂之地的終極啟示</span>
+      <p>一個國家真正的考驗，未必是它有沒有資源或文明——葉門曾兩度富甲天下，卻依然走到了今天。它可能是一個更隱微、卻更艱難的東西：如何讓一塊被地形、信仰與部落天然劈開的土地，找到一種屬於它自己的、共處的方式。葉門證明了，再豐厚的恩賜，也擋不住分裂的反覆侵蝕；它更提醒著世人，當一塊破碎的土地恰好又位居要衝時，它的每一次內部之爭，都極易被外部強權點燃、利用，化為一場誰也贏不了、平民卻輸光一切的代理戰爭。如何在「高地與低地」之間、在「什葉與遜尼」之間、在「分裂的本能」與「共處的必要」之間，找到那條從未有人在這塊土地上真正走通的路——這不只是葉門人的功課，也是這個依然遍布著被地形與信仰所分裂、被強鄰所覬覦之破碎角落的世界裡，每一個被夾在大國博弈之間的弱小之地，共同的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從，示巴女王的香料王國，到馬里卜那座最古老的大壩<br>
+        從，運出全世界第一杯咖啡的摩卡港，到高地上延續千年的宰德派伊瑪目<br>
+        從，英國人扼守紅海的亞丁港，到一九六二年推翻伊瑪目的那場革命<br>
+        從，阿拉伯世界唯一的馬克思主義之國，到一九九〇年南北的統一<br>
+        從，一九九四年的內戰，到二〇一四年胡塞拿下首都薩那<br>
+        從，二〇一五年沙烏地聯軍的介入，到飢餓、霍亂與被炸毀的醫院<br>
+        從，數十萬條在戰火與飢餓中逝去的生命，到大半個國家對援助的依賴<br>
+        從，二〇二二年那紙脆弱的停火，到二〇二四年射向紅海商船的飛彈——<br>
+        這塊，被季風所眷顧、被地形所分裂、被強鄰所利用的、曾經幸福的土地<br>
+        在，「幸福的阿拉伯」，與「被遺忘的戰爭」之間，跋涉了三千年。<br>
+        而，今天，這塊曾經幸福、如今含淚的土地——一塊仍守著梯田、等待雨水的高地<br>依舊記得那杯叫醒了世界的咖啡、與那座最古老的大壩<br>在分裂與停火之間，等待著一個能讓它重新幸福起來的、屬於葉門人自己的明天。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">✦ ✶ ✦</div>
+  <p>幸福的阿拉伯、咖啡的故鄉，與一場被遺忘的戰爭 · 葉門的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM SHEBA AND MOCHA TO THE FORGOTTEN WAR · 1000 BCE – 2026</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
