@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>世紀末的崩落：維也納，帝國的頭顱、廢墟上的天才，與一座懷念著消失世界的城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#2a2718;
+  --sea-deep:#16140c;
+  --gold:#b89030;
+  --gold-bright:#e6c352;
+  --rust:#9c5a1e;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(184,144,48,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(42,39,24,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(42,39,24,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #3a3520 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23e6c352' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23e6c352' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23e6c352' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(42,39,24,.04), rgba(184,144,48,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(22,20,12,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(184,144,48,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(42,39,24,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23e6c352' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ===== econ-layer callout boxes (deepen / counterfactual) ===== */
+.deepen{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(184,144,48,.07);border:1px solid rgba(184,144,48,.32);border-left:4px solid var(--gold);border-radius:3px}
+.deepen .dh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--rust);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.deepen p{margin:.7rem 0;text-align:justify}
+.cf{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(42,39,24,.05);border:1px dashed rgba(42,39,24,.4);border-radius:3px}
+.cf .cfh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--sea-deep);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.cf p{margin:.7rem 0;text-align:justify}
+/* ===== dark-section legibility (boxes + stats + pull + timeline + interlude) ===== */
+.dark .deepen{background:rgba(216,196,160,.06);border-color:rgba(212,175,90,.4);border-left-color:#e6c352}
+.dark .deepen .dh{color:#e2a878}
+.dark .cf{background:rgba(255,255,255,.045);border-color:rgba(212,175,90,.32)}
+.dark .cf .cfh{color:#d8c4a0}
+.dark .deepen p,.dark .cf p{color:#cdb494}
+.dark .deepen strong,.dark .cf strong{color:#c87a5a}
+.dark .deepen em,.dark .cf em{color:#d8a878}
+.dark .pull{background:linear-gradient(135deg,rgba(216,196,160,.07),rgba(184,144,48,.1));border-top-color:#e6c352;border-bottom-color:#e6c352}
+.dark .pull p{color:#ecd9b4}
+.dark .pull::before{color:#e6c352}
+.dark .stat{background:rgba(216,196,160,.06)}
+.dark .stat .num{color:#e6c352}
+.dark .stat .lbl{color:#c4af88}
+.dark .tl-text{color:#cdb494}
+.dark .tl-year{color:#e2a060}
+.dark .interlude p{color:rgba(243,238,226,.9)}
+.dark .interlude p .hl{color:#e2a060}
+/* ---- 修正：深色章節內，擁有淺色背景的卡片組件須維持深色文字，避免淺底淺字 ---- */
+/* ---- 修正：深色章節內的對比度 ----
+   實心淺底組件(method-card / twocol)→ 深色文字；
+   shift-body 無背景貼深底 → 淺色文字。 ---- */
+.dark .method-card p,
+.dark .twocol p{color:var(--ink)}
+.dark .method-card p strong,
+.dark .twocol p strong{color:var(--crimson)}
+.dark .method-card p em,
+.dark .twocol p em{color:var(--sea-deep)}
+.dark .method-card h5{color:var(--sea-deep)}
+.dark .method-card .tool{color:var(--rust)}
+.dark .method-card .eg{color:#6b5d48}
+.dark .minihead{color:var(--rust)}
+.dark .shift-body{color:#cdb494}
+.dark .shift-body strong{color:#c87a5a}
+.dark .shift-body em{color:#d8a878}
+.dark .stat{background:rgba(212,175,90,.07)}
+.dark .stat .num{color:var(--gold-bright)}
+.dark .stat .lbl{color:#b9a784}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+.twocol>div{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left;color:var(--ink)}
+.method-card p strong{color:var(--crimson)}
+.method-card p em{color:var(--sea-deep)}
+.method-card .eg{font-size:.86rem;color:#6b5d48;font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(42,39,24,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+<style id="imq-depth-modules">
+.deepen{margin:2.8rem 0;padding:1.7rem 1.9rem;background:rgba(51,88,63,.06);border:1px solid rgba(120,100,60,.38);border-left:5px solid #33583f;border-radius:2px}
+.deepen .dh{font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:.22em;color:#33583f;text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.deepen .dh::before{content:"\25C9";font-size:.85rem}
+.deepen p{font-size:.97rem;line-height:1.82;margin:.6rem 0;text-align:left}
+.deepen strong{color:#8a2014}
+.deepen em{color:#33583f;font-style:italic}
+.dark .deepen{background:rgba(255,255,255,.03);border-left-color:#5a8a68;border-color:rgba(255,255,255,.1)}
+.dark .deepen .dh{color:#8db89a}.dark .deepen p{color:#cbb292}.dark .deepen em{color:#9cc0a8}
+.cf{margin:2.6rem 0;padding:1.6rem 1.8rem;background:linear-gradient(135deg,rgba(116,34,26,.05),rgba(168,132,47,.05));border:1px dashed #8a3a23;border-radius:3px;position:relative}
+.cf .cfh{font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:.2em;color:#8a3a23;text-transform:uppercase;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.cf .cfh::before{content:"\21BA";font-size:1.1rem}
+.cf p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.cf strong{color:#8a2014}.cf em{color:#0e2128;font-style:italic}
+.dark .cf p{color:#cbb292}.dark .cf em{color:#d6a676}
+.concept,concept{display:inline-block;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.04em;padding:.05rem .5rem;margin:0 .15rem;border:1px solid #a8842f;border-radius:20px;color:#8a3a23;background:rgba(168,132,47,.06);white-space:nowrap;vertical-align:middle}
+.dark .concept,.dark concept{color:#d6a676}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){heads=[].slice.call(document.querySelectorAll('h2'));}
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>=1480)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Wien · The Head of a Vanished Empire</span>
+    <h1>一座懷念著<span class="em">消失帝國</span>的城<br><span class="em">維也納</span><br>世紀末的天才，與崩落</h1>
+    <p class="sub">從多瑙河畔一座羅馬邊疆的軍營，到哈布斯堡家族靠聯姻、而非征服建立的、橫跨十幾個民族的帝國頭顱，<br>從兩度擊退土耳其大軍的基督教世界壁壘，到海頓、莫札特、貝多芬的音樂之都與環城大道的華麗舞台，<br>到佛洛伊德、克林姆、馬勒與一整代天才在帝國腐朽的同時、迸放出的「歡快的末日」，<br>再到一九一八年帝國解體、只剩一顆與身體脫離的巨大頭顱，與一九三八年廣場上的歡呼——<br>一座在崩落之上開出最燦爛文明、又眼睜睜看著那文明被自己謀殺的城</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- LEDE -->
+<section class="lede reveal">
+  <p><span class="drop">這</span>是一座頭顱，一顆在一九一八年被人從身體上切下來、卻奇蹟般沒有死去的巨大頭顱。要理解維也納（Wien／Vienna），得先理解它曾是什麼：它是哈布斯堡（Habsburg）王朝的座城，是一個橫跨十幾個民族、五千萬人口、從阿爾卑斯山一直延伸到喀爾巴阡山與亞得里亞海的多民族帝國的中樞。這個帝國有一句傳了幾百年的格言：「讓別人去打仗吧；你，幸福的奧地利，只管聯姻。」（<em>Bella gerant alii, tu felix Austria nube.</em>）它不是靠刀劍，而是靠一樁樁精心安排的婚姻，把半個歐洲的王冠戴到了自己頭上。維也納就是這顆帝國之心——德意志世界與斯拉夫、馬札爾、義大利世界之間的橋，兩度擋下鄂圖曼大軍、自詡為基督教世界壁壘的東方門戶。然後，最弔詭的事發生了：正當這個古老帝國在十九世紀末、二十世紀初一天天腐朽、一步步走向那場由它親手在塞拉耶佛點燃的大戰時，維也納卻迸放出人類文明史上最稠密的一次天才大爆發——佛洛伊德（Freud）在這裡剖開了人的潛意識，克林姆（Klimt）與分離派（Secession）在這裡為藝術掙脫枷鎖，馬勒（Mahler）與荀貝格（Schoenberg）在這裡改寫了音樂，維根斯坦、馬赫、施尼茨勒、霍夫曼斯塔爾……一整代人，在咖啡館的大理石桌上，在一個正在崩塌的世界邊緣，創造了現代。人們把這叫作「歡快的末日」（die fröhliche Apokalypse）。而這場盛宴的引擎，很大一部分，是這座城裡那個極富活力的猶太資產階級。然後一切都來了：一九一八年帝國解體，這座兩百萬人的大都會，成了一個六百萬人小國頭上、大得荒謬的「水腦」；一九三四年的內戰，一九三八年希特勒站上英雄廣場時山呼海嘯的歡呼，與隨之而來的、對猶太維也納的徹底毀滅——它親手謀殺了自己天才的源頭。讓我們從多瑙河畔那座羅馬軍營走起，看一座城如何成為帝國的頭顱，如何在崩落之上開出最後的燦爛，又如何在失去一切之後，學會了<span style="color:var(--rust);font-weight:600">懷念</span>。</p>
+</section>
+
+<div class="div-orn">♪ ✦ 👑</div>
+
+<section id="ch0" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Danube Frontier</span>
+    <h2 class="act-title">多瑙河、邊疆，與一道東方的門</h2>
+    <p class="act-sub">Vindobona & the Seam Between Worlds</p>
+    <div class="ornament">🏞 ✦ 🛡</div>
+  </div>
+  <div class="prose">
+<p>要理解維也納（Wien／Vienna）這座城，得先把眼睛從那些金色的宮殿、咖啡館與華爾滋上移開，往下看，看一條河，與它兩岸截然不同的兩個世界。這座城坐落在<strong>多瑙河（Danube）</strong>畔——這條歐洲第二長的大河，從西邊的德意志腹地一路向東奔流，最後注入黑海。而維也納，恰恰落在這條河的一個關鍵轉折處：它的背後，是<strong>阿爾卑斯山（Alps）</strong>向東緩緩消逝的最後幾道丘陵——所謂的「維也納森林」（Wienerwald）；它的前方，山勢一斷，大地豁然開朗，一路平坦地鋪展開去，那便是廣袤無垠的<strong>匈牙利平原（Pannonian Plain）</strong>，是東方草原伸進歐洲心臟的一隻長臂。</p>
+<p>山在這裡終結，平原在這裡開始。維也納，就站在這道地理的縫上。</p>
+
+<h3>世界與世界的接縫</h3>
+<p>這道縫，遠不只是山與平原的分界。它是好幾條更深的界線在此重疊、糾纏、打結的地方。往西、往南，是拉丁與德意志的世界——羅馬的法統、天主教的教會、神聖羅馬帝國的版圖；往東、往北，則是另一片廣大的、說著不同語言、信著不同教派的世界——斯拉夫人（Slavs）的諸民族，與從亞洲草原一路遷徙而來、語言與周遭格格不入的<strong>馬札爾人（Magyars）</strong>，也就是日後的匈牙利人。在這兩大塊文明的板塊之間，並沒有一條清楚的線，而是一片寬闊的、互相滲透又互相摩擦的過渡地帶——而維也納，正坐在這片過渡地帶最關鍵的咽喉上。</p>
+<p>這個位置，給了維也納一個它將背負兩千年的身分：<strong>歐洲的東方門戶</strong>。從西邊來的人、貨、軍隊、信仰與觀念，要往東去，多半得經過這裡；從東邊來的草原民族、商旅、瘟疫與大軍，要往西闖進歐洲的腹心，也往往得先撞上這座城。它是一道門——是西方世界面向東方時的最後一座大城，也是東方世界叩擊西方時的第一道門檻。守住這道門的人，就守住了半個歐洲的安危；而坐在這道門上的城，注定要一輩子面對一個別處的城從不必認真思考的問題：<em>我究竟屬於哪一邊？</em></p>
+<div class="deepen">
+  <span class="dh">概念深掘 · 為什麼「接縫上的城」既是橋，也是傷口</span>
+  <p>攤開歐亞大陸的地圖，許多命運多舛卻又異常重要的城市，並非坐落在某個文明安穩的核心，而是坐落在<strong>兩個世界的接縫上</strong>——拉丁與斯拉夫的接縫、基督教與伊斯蘭的接縫、定居農耕與游牧草原的接縫。這樣的位置是一把雙刃劍。在和平的年代，接縫處是天然的橋：兩邊的人、貨、語言、信仰都得在這裡交會、翻譯、換手，於是這裡聚集起商人、通譯、教士、外交官，長出一種兼容並蓄、多語多族的繁華。但在衝突的年代，同一個位置就成了最先流血的傷口：每一次東西方板塊的擠壓，斷層線上的這座城，都得首當其衝。</p>
+  <p>維也納正是這個規律最典型、也最戲劇性的範本。它的偉大，從來不在於它「擁有」什麼——這裡沒有金礦，沒有出海口，腹地的奧地利更是個多山而不算富庶的小邦。它的偉大，在於它<em>卡在什麼東西的中間</em>：拉丁與斯拉夫之間，德意志與馬札爾之間，西方與東方之間。看懂這一點，就拿到了理解維也納全部故事的鑰匙——它一生的榮耀與災難，都源於同一件事：它坐在文明的斷層線上。</p>
+</div>
+
+<h3>文多博納：羅馬人的邊疆軍營</h3>
+<p>第一批看懂這個位置的人，是羅馬人。大約在公元一世紀，當羅馬帝國的版圖向北擴張到多瑙河一線，這條大河就成了帝國天然的北方國境——羅馬人稱這道由要塞、瞭望塔與駐軍串連起來的防線為<strong>「界牆」（Limes）</strong>。多瑙河的北岸，是羅馬人眼中尚未馴服的「蠻族」世界——日耳曼諸部族縱橫其間；南岸，則是帝國的文明秩序。為了守住這道漫長的水上邊疆，羅馬人沿河設下了一連串的軍團要塞，而在今天維也納內城的所在，他們建起了一座軍營，取名<strong>文多博納（Vindobona）</strong>。</p>
+<p>這個名字，據信源自當地凱爾特語，大意近於「白色的田野」或「明亮的村落」。它從一開始，就不是一座為享受、為繁榮而生的城，而是一座<em>為防守而生</em>的城——一座面朝北方蠻荒、背靠帝國腹地的前哨。駐紮在此的羅馬軍團，日復一日地巡視著對岸，等待著從那片黑暗森林裡可能湧出的威脅。它的存在本身就是一句宣言：這裡是文明世界的邊界，過了這條河，就是另一個世界。維也納作為「門戶」與「壁壘」的命運，早在它還叫文多博納、還只是一座泥牆木柵的軍營時，就已經被羅馬人的戰略眼光寫定了。</p>
+<p>羅馬人在這裡留下的，還不只是一座軍營。相傳，那位以《沉思錄》傳世、史稱「哲學家皇帝」的<strong>馬可·奧理略（Marcus Aurelius）</strong>，正是在對多瑙河北岸日耳曼部族的長年征戰中，於公元一八〇年，病逝在這一帶的軍營裡。一位在邊疆的帳篷中、一邊寫著關於死亡與宇宙秩序的沉思、一邊指揮著抵禦蠻族大軍的皇帝，最終把生命終結在這道文明的斷層線上——這幾乎像是為維也納此後兩千年的命運，預先寫下的一則寓言：在這座城，最深刻的思想，總是與最殘酷的崩壞，並肩而生。</p>
+<div class="pull"><p>哲學家皇帝馬可·奧理略，相傳病逝在多瑙河畔這座邊疆軍營裡——一位在帳篷中寫著《沉思錄》、同時抵禦著蠻族大軍的皇帝。在這座城，最深刻的思想，總是與最殘酷的崩壞，並肩而生。</p></div>
+
+<h3>從廢墟到公國的首邑</h3>
+<p>羅馬帝國終究退場了。多瑙河的界牆崩解，文多博納在民族大遷徙的洪流中沒落、荒廢，幾乎被遺忘。接下來的幾百年，這片土地在斯拉夫人、阿瓦爾人、馬札爾人與法蘭克人之間反覆易手——這正是「接縫之地」的宿命：當大帝國退潮，斷層線上最先陷入動盪。直到公元十世紀末、十一世紀初，一個來自法蘭克世界的家族被神聖羅馬皇帝派來治理這片東部邊區（Ostmark，「東方的疆界」，「奧地利／Österreich」之名即由此而來），這片土地才重新有了穩定的主人。這個家族，就是<strong>巴本堡（Babenberg）</strong>。</p>
+<p>巴本堡家族在這道邊疆上經營了將近三百年。他們把這片不起眼的東部邊區，一步步抬升為一個有分量的政治實體。一一五六年，皇帝頒下著名的《小特權》（Privilegium Minus），把奧地利從一個邊區（Mark）升格為一個<strong>公國（Duchy）</strong>——而維也納，這座從羅馬廢墟上重新長起的城，便成了這個新生公國的首邑。十二世紀的維也納，已不再只是一座軍營的殘跡：它有了城牆，有了市集，有了教堂，多瑙河上的商船在此停泊換手，西方與東方的貨物在這裡交易。那個「東方門戶」的古老角色，在沉睡數百年之後，重新甦醒了。</p>
+<p>但巴本堡家族的故事，在一二四六年戛然而止——這一年，家族最後一位男性公爵在與匈牙利人的戰役中陣亡，無嗣而終。一片富庶而戰略地位關鍵的土地，突然懸空。接下來的三十多年，奧地利成了周邊強鄰垂涎爭奪的獵物。而最終勝出、把這片土地連同維也納一併攬入懷中的，是一個此前默默無聞、來自西南方的伯爵家族——一二七八年，這個家族的當主在一場決定性的戰役中擊敗了強敵，正式入主奧地利。</p>
+<p>這個家族的名字，叫<strong>哈布斯堡（Habsburg）</strong>。它將在這座城裡，統治整整六百四十年——直到一切崩落為止。但那，是下一章的故事了。</p>
+
+<h3>一座注定要追問「我屬於哪一邊」的城</h3>
+<p>退一步看，維也納的序章，其實只講了一件事：<em>位置</em>。它不是一座坐擁天賜之富的城——它沒有出海口，沒有金銀礦脈，腹地的奧地利不過是阿爾卑斯山東緣一個多山的中等邦國。它唯一的、卻也是決定性的本錢，是它<strong>正好坐在歐洲文明最深的一道斷層線上</strong>：山與平原的接縫，拉丁與斯拉夫的接縫，定居世界與草原世界的接縫，西方與東方的接縫。誰守住了這道門，誰就掌握了東西方往來的咽喉。</p>
+<p>羅馬人懂這一點，所以他們在這裡建起文多博納，守衛多瑙河的界牆。巴本堡家族懂這一點，所以他們在這片邊區上苦心經營，把它抬升為一個公國的首邑。而即將登場的哈布斯堡家族，將比所有人都更深刻地懂這一點——他們將把這座門戶之城，變成一個橫跨十幾個民族的龐大帝國的頭顱。一代又一代的人，從不同的方向走來，做著不同的事，卻都是被同一個地理事實吸引到此：這裡是兩個世界相接的縫。</p>
+<p>這道縫，將是這整部史詩反覆回響的母題。它給了維也納成為橋樑與門戶的榮耀——也注定了它永遠要面對那個別處的城不必回答的難題：<em>當我連接的兩個世界開始彼此撕裂，我，究竟站在哪一邊？</em>接下來的篇章，將沿著三條彼此交纏的主線展開：<strong>其一，是「帝國的頭顱」</strong>——維也納如何成為一個多民族帝國的中樞與大腦，又如何在一九一八年，眼睜睜看著自己的身體被切除，只剩下一顆與軀幹脫離、卻奇蹟般沒有死去的巨大頭顱。<strong>其二，是「世紀末的天才」</strong>——在這個古老帝國一天天腐朽、走向毀滅的同時，這座城卻迸放出人類文明史上最稠密的一次創造大爆發，在崩落的邊緣，親手發明了「現代」。<strong>其三，是「崩落」本身</strong>——帝國的解體、被併吞、被毀滅，以及那最終的、最奇特的轉化：當一切都失去之後，這座城學會了用「懷念」來活著。</p>
+<p>頭顱、天才、崩落。一切，都從多瑙河畔那座面朝北方蠻荒的羅馬軍營開始——從文多博納的城牆，望向對岸那個它注定要連接、又注定要被它撕裂的世界開始。</p>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 坐在接縫上的城</span>
+  <p>維也納誕生的第一課是：<strong>一座城最深的命運，往往不取決於它擁有什麼，而取決於它「正好坐在什麼東西的中間」。</strong>這裡沒有出海口，沒有礦脈，沒有特別肥沃的腹地——它唯一的本錢，是它卡在了歐洲文明最深的一道斷層線上：西方與東方、拉丁與斯拉夫、山與平原的接縫。這個由地理決定的位置，比任何王朝、任何制度都長壽：羅馬人來了又走，巴本堡家族絕嗣而終，但「這裡是東西方相接的咽喉」這個事實，從未改變。</p>
+  <p>但接縫上的位置，是一份禍福同源的禮物。一座坐在文明接縫上的城，注定要成為連接彼此的橋——商人在這裡換手，語言在這裡翻譯，帝國在這裡向兩邊伸展。可同樣的位置也埋下了最深的隱憂：<em>橋的存在，仰賴於它兩端的世界願意彼此往來。</em>一旦那個被它連接的世界開始崩解、彼此仇視、各自撕裂，這座橋就會在頃刻間失去它存在的全部理由——它將不再是連接一切的中樞，而會變成一顆與身體脫離的頭顱，孤零零地，懸在一片它再也無法縫合的裂縫之上。維也納兩千年的榮耀與悲劇，都藏在這一句話裡：成也接縫，敗也接縫。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch1" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · An Empire by Marriage</span>
+    <h2 class="act-title">哈布斯堡：用婚姻建立的帝國</h2>
+    <p class="act-sub">Let Others Wage War; You, Happy Austria, Marry</p>
+    <div class="ornament">💍 👑 ✦</div>
+  </div>
+  <div class="prose">
+<p>歐洲歷史上，要把半個大陸拼成一個帝國，通常得先流很多血。要嘛像羅馬那樣靠軍團一寸一寸征服，要嘛像拿破崙那樣靠砲火橫掃，要嘛像後來的普魯士那樣靠「鐵與血」鍛打。可是在這條由刀劍寫成的長河裡，有一個家族走的是另一條近乎離奇的路——它幾乎沒怎麼打仗，卻把從西班牙到匈牙利、從低地到那不勒斯、乃至大半個新大陸的疆土，一塊塊收進了自己手裡。它的武器不是劍，而是<strong>婚床</strong>；它的戰場不是沙場，而是<strong>聯姻的談判桌</strong>。這個家族，叫做<strong>哈布斯堡（Habsburg）</strong>。而它最終的座城，就是多瑙河畔那座我們正在講的城——<strong>維也納（Wien／Vienna）</strong>。</p>
+    <p>哈布斯堡留給後世最著名的一句話，幾乎就是它整套生存哲學的廣告詞：「<strong>讓別人去打仗吧；你，幸福的奧地利，只管聯姻。</strong>」（<em>Bella gerant alii, tu felix Austria nube.</em>）這句拉丁格言被一代代人傳誦、引用、嘲諷，正是因為它出奇地準確——這個家族真的就是靠「結婚」起家、靠「結婚」壯大、最後靠「結婚」坐上了歐洲的頂端。</p>
+
+    <h3>一座瑞士山堡裡的普通貴族</h3>
+    <p>很少有人記得，哈布斯堡這個名字本身，其實毫不顯赫。它源自十一世紀矗立在今天瑞士北部一座叫<strong>鷹堡（Habsburg／Habichtsburg，意為「鷹之堡」）</strong>的山間城堡——家族最初不過是神聖羅馬帝國境內無數中等貴族裡尋常的一支，領地零散、人脈有限，在群雄環伺的德意志世界裡毫不起眼。真正讓他們跨出第一步的，是<strong>一二七三年</strong>：在帝位長期空懸、諸侯彼此忌憚之後，一群選帝侯出於一個微妙的算計——選一個「看起來不太強、不會威脅到大家」的人來當皇帝——把神聖羅馬皇帝的頭銜，交給了當時並不被看好的<strong>魯道夫一世（Rudolf I）</strong>。</p>
+    <p>諸侯們以為自己挑了一個軟弱的傀儡，卻沒料到這恰恰是一場誤判的開端。魯道夫趁勢擊敗了強大的波希米亞國王，把<strong>奧地利（Austria／Österreich，「東方的邊區」之意）</strong>連同周邊幾塊領地收入家族囊中——多瑙河畔的維也納，就此第一次落進哈布斯堡手裡。這個原本默默無聞的瑞士家族，從此把根從阿爾卑斯山的山堡，移到了中歐的多瑙河谷。一個帝國日後的頭顱，在這時悄悄找到了它將要安放的位置。</p>
+    <div class="aside"><span class="hl">不起眼，反而是優勢</span>哈布斯堡的崛起，第一步靠的不是實力，而是「看起來無害」——它被選為皇帝，正因為別人覺得它弱到不足為懼。這個家族日後反覆證明：在群雄相忌的世界裡，不被當成威脅，本身就是一種可以一路坐大的本錢。</div>
+
+    <h3>用婚姻佈局的棋手：馬克西米連一世</h3>
+    <p>把「聯姻」從偶然的好運，升級成一套自覺的、跨代的<em>國家戰略</em>的，是<strong>馬克西米連一世（Maximilian I，一四九三至一五一九年在位）</strong>。這位皇帝本人就是這套戰略最成功的第一手棋——一四七七年，他迎娶了<strong>勃艮第的瑪麗（Mary of Burgundy）</strong>。勃艮第在當時是歐洲最富庶的領地之一，名下握有今天荷蘭、比利時、盧森堡一帶繁華的<strong>低地（the Low Countries）</strong>——城市林立、工商鼎盛、財富驚人。瑪麗的父親戰死、家族絕嗣，這份龐大的遺產，便隨著一紙婚約，整個流進了哈布斯堡的名下。一場婚禮，等於兵不血刃地併吞了西歐最肥沃的一片土地。</p>
+    <p>嘗到甜頭的馬克西米連，把婚姻當成棋子來下。他替自己的兒子<strong>美男子腓力（Philip the Handsome）</strong>安排了一樁石破天驚的婚事——娶了西班牙卡斯提爾與亞拉岡兩大王室合併後的繼承人<strong>「瘋女」胡安娜（Joanna of Castile）</strong>。這一步棋的份量，當時恐怕連馬克西米連自己都未必完全算得清：因為西班牙王室在隨後一連串令人瞠目的死亡與絕嗣中，繼承權竟一條條全都收束到了腓力與胡安娜所生的長子身上。哈布斯堡用兩代人、兩場婚姻，把奧地利、低地與整個西班牙——連同西班牙正在新大陸開疆拓土的龐大殖民帝國——縫進了同一條血脈。</p>
+    <div class="pull"><p>馬克西米連把婚姻變成了戰略：一場婚禮等於一次併吞，一份婚約抵得上一支軍隊。哈布斯堡的疆域不是用劍劃出來的，而是用一樁樁精心安排的婚事，一塊塊談出來的。</p></div>
+
+    <h3>一個人，一個日不落的帝國：查理五世</h3>
+    <p>所有這些婚姻的線頭，最終都繫在一個人身上——馬克西米連的孫子，<strong>查理五世（Charles V，一五〇〇至一五五八）</strong>。這個生在低地根特的年輕人，靠著祖父與外祖父兩邊的繼承權，在短短幾年內接連繼承了人類歷史上少見的一份遺產清單：來自父系的<strong>奧地利與哈布斯堡的德意志世襲領地</strong>、來自祖母的<strong>勃艮第與富庶的低地</strong>、來自外祖父母的<strong>西班牙的卡斯提爾與亞拉岡</strong>、附帶的<strong>那不勒斯、西西里與薩丁尼亞</strong>，以及——最驚人的——西班牙征服者正在墨西哥、祕魯一路開拓的<strong>整個美洲殖民地</strong>。一五一九年，他又當選為<strong>神聖羅馬皇帝</strong>。</p>
+    <p>於是出現了一句後來常被掛在他名下的話：在他的帝國裡，「<strong>太陽永不落下</strong>」。從早晨照亮維也納與馬德里的陽光，到傍晚仍灑在美洲新征服地上的餘暉，全都落在同一個人的領土上。一個出身瑞士山堡的家族，在不到三百年裡，靠著繼承與聯姻，把一個普通貴族的姓氏，變成了一個橫跨歐洲與新大陸的<strong>「日不落」帝國</strong>的代名詞。沒有哪一場決定性的大會戰締造了它——締造它的，是一連串生死、婚約與繼承權的精確咬合。</p>
+    <p>可是這份遺產實在太大、太散，大到任何一個人都無法獨力統治。查理五世退位時，做了一個影響歐洲數百年的決定：他把這個龐大的帝國<strong>一分為二</strong>。<strong>西班牙、低地、義大利領地與美洲殖民地</strong>，傳給兒子腓力，是為<strong>西班牙哈布斯堡支系</strong>；<strong>奧地利的世襲領地與神聖羅馬皇帝的頭銜</strong>，則傳給弟弟斐迪南，是為<strong>奧地利哈布斯堡支系</strong>。從此哈布斯堡分作兩房，各據歐洲一端，而維也納，正式成為其中那個「奧地利支」的中樞與居所。我們這個關於維也納的故事，從這一刻起，真正開始。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1273</div><div class="lbl">魯道夫一世當選皇帝，奧地利首入哈布斯堡之手</div></div>
+      <div class="stat"><div class="num">1519</div><div class="lbl">查理五世一身兼領奧、西、低地、那不勒斯與美洲</div></div>
+      <div class="stat"><div class="num">兩支</div><div class="lbl">帝國一分為二：西班牙支與奧地利（維也納）支</div></div>
+    </div>
+
+    <h3>不是一個民族，而是一頂王冠下的拼圖</h3>
+    <p>要真正看懂維也納日後的全部命運，必須先弄清楚：哈布斯堡所統治的，從來就<strong>不是一個民族國家</strong>。它不像法蘭西那樣，有一片大致連續的疆土、一種主導的語言、一個逐漸成形的「法蘭西人」認同。哈布斯堡治下的，是後世史家所稱的<strong>「複合君主國」（composite monarchy）</strong>——一種把許多本各自獨立的王國、公國、邊區、自由市，靠著「同一位君主」這條紐帶，鬆散地縫在一起的奇特政體。</p>
+    <p>在這頂王冠之下，住著彼此語言不通、習俗各異、歷史記憶毫不相干的人群：<strong>德意志人</strong>、<strong>捷克人（波希米亞）</strong>、<strong>匈牙利人（馬札爾人）</strong>、<strong>義大利人</strong>、<strong>克羅埃西亞人</strong>、<strong>斯洛維尼亞人</strong>、<strong>波蘭人</strong>、<strong>羅馬尼亞人</strong>……他們之所以同屬一國，理由極其單純，也極其脆弱——<em>因為他們碰巧效忠於同一個哈布斯堡的君主</em>。維也納的皇帝在波希米亞是波希米亞國王，在匈牙利是匈牙利國王，在奧地利是大公，在帝國是皇帝——他用十幾頂不同的頭冠、十幾種不同的法統，同時統治著十幾個不同的世界。把這個帝國綁在一起的，不是統一的民族認同，不是共同的語言，甚至不是同一套法律，而是<strong>繼承權</strong>與對<strong>王室本身</strong>的<strong>個人忠誠</strong>。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 「人身聯合」：靠一個人，而非一個民族，把帝國縫起來</span>
+      <p>近代歐洲的國家，大致可分成兩種拼法。一種是<strong>民族國家（nation-state）</strong>：一群自認屬於同一個民族的人，住在一片大致連續的土地上，共享語言、歷史與認同，國家的邊界與「民族」的邊界大致重合——法國、後來的德國、義大利，都朝這個方向收斂。另一種是<strong>人身聯合（personal union）</strong>下的複合君主國：好幾個原本獨立的政治體，因為繼承的巧合，碰巧落到同一位君主頭上，於是「共戴一君」便成了它們唯一的共同點。它們各保各的議會、法律、語言、特權，彼此之間並沒有「我們是同一個民族」的感覺——把它們聯在一起的，是<em>那一個人</em>，不是<em>那一群人</em>。</p>
+      <p>哈布斯堡帝國，是人身聯合這種拼法在歐洲最龐大、也最極端的範本。它的強處在於彈性：靠一樁婚事就能把一整個王國併進來，無須開戰，無須整合，只要「換一頂王冠戴在同一顆頭上」。但它的命門也正埋在這裡——當有朝一日，這十幾個民族不再滿足於「共戴一君」，而開始各自追問「<em>為什麼我們不能有自己的國家？</em>」這條靠一個人縫起來的線，就會從每一道民族的接縫處，一齊繃斷。</p>
+    </div>
+
+    <h3>一座天生世界主義的帝國之都</h3>
+    <p>正是這種「複合」的本質，決定了維也納會長成一座什麼樣的城。一個民族國家的首都，往往就是那個民族的首都——巴黎屬於法國人，倫敦屬於英國人。可維也納不一樣：它不屬於任何單一民族，它屬於<strong>整個帝國</strong>。它是這頂王冠的所在地，是十幾個民族共同仰望的中樞，是德意志世界與斯拉夫、馬札爾、義大利世界之間的<strong>橋</strong>。</p>
+    <p>於是維也納從一開始，就是一座<strong>天生世界主義（cosmopolitan）的城</strong>。捷克的貴族、匈牙利的伯爵、義大利的建築師與作曲家、波蘭的軍官、來自帝國四面八方的官員、商人、工匠、僕役，全都被這頂王冠吸引而來，聚到多瑙河畔。皇帝的宮廷說德語，但帝國的血液裡流著十幾種語言；街上的口音五花八門，廚房裡的菜餚混著波希米亞的、匈牙利的、義大利的味道。維也納之所以能在日後迸放出那場舉世無雙的文化大爆發，根子就在這裡——它從誕生起，就是一個由「來自各方的人」匯聚而成的容器，一座靠帝國的繼承權、而非某個民族的血統，被填滿的城。它是帝國的頭顱，自然也就裝著整個帝國的腦子。</p>
+    <p>但我們必須在這裡，先埋下一個沉重的伏筆。這座靠繼承與聯姻綑起來的帝國，這頂同時戴在十幾個民族頭上的王冠，在它最輝煌的時候，看不出半點裂痕。然而歷史的鐘擺，正悄悄盪向一個它完全沒有準備、也無法準備的時代——一個叫做<strong>「民族主義」</strong>的時代。當捷克人開始說「我們是捷克人」，當匈牙利人開始要「匈牙利人的匈牙利」，當每一個民族都開始相信「一個民族，就該有一個屬於自己的國家」時，這種把十幾個民族縫在一頂王冠下、靠一個人勉強維繫的安排，將會遇上一道它根本無解的難題。那道難題如何一步步撕裂這座城、撕裂這個帝國，是我們後面章節要慢慢講的故事。此刻，只需先記住：它的全部力量，與它全部的脆弱，都來自同一件事——<em>繼承</em>。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一個靠婚姻、而非刀劍建立的帝國</span>
+      <p>哈布斯堡帝國，是人類政治史上最奇特的造物之一：<strong>它不是靠征服打出來的，而是靠繼承與聯姻「娶」出來的。</strong>一個出身瑞士山堡的尋常貴族，幾乎不費一兵一卒，便在三百年裡把西班牙、奧地利、低地、那不勒斯與半個新大陸的王冠，一頂頂戴到了同一顆頭上。它的武器是婚床，它的兵法是繼承權，它的座城維也納，則成了這顆帝國頭顱安放之處——一座天生屬於整個帝國、而不屬於任何單一民族的世界主義之都。</p>
+      <p>但這份奇特，藏著一個致命的對稱：<em>它的力量來自繼承，它的脆弱也來自繼承。</em>當一個帝國是靠「十幾個民族碰巧共戴一君」縫起來的，那麼只要這些民族裡有人開始追問「為什麼我們不能有自己的國家」，這頂縫合一切的王冠，就會從每一道民族的接縫上一齊崩開。一個用婚姻而非民族認同建立的帝國，在民族主義興起的時代，注定成為一個<strong>與時代為敵的時代錯置</strong>——它最大的成就，恰恰也是它最深的詛咒。看懂這一點，就拿到了讀懂維也納此後全部命運的第一把鑰匙。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch2" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · The Walls of Christendom</span>
+    <h2 class="act-title">兩次土耳其圍城</h2>
+    <p class="act-sub">1529, 1683 & the Bulwark of Europe</p>
+    <div class="ornament">☪ ✦ ⚔</div>
+  </div>
+  <div class="prose">
+<p>有一種偉大，是用恐懼餵養出來的。維也納在十六、十七世紀那段最關鍵的成長期，所吸收的養分裡，最濃的一味不是財富，也不是藝術，而是一支從東南方逼近的大軍在地平線上揚起的塵土。哈布斯堡（Habsburg）靠聯姻把半個歐洲的王冠戴上了頭，可這頂華冠的東緣，正好頂在一個正值鼎盛、向著歐洲心臟一路推進的超級帝國的刀鋒上——<strong>鄂圖曼帝國（Ottoman Empire）</strong>。維也納恰恰坐在這場碰撞的最前線：它不是歐洲腹地一座安穩的都城，而是基督教世界面向東方的一扇門——門後是多瑙河谷、是通往整個中歐的坦途；門前，是一個自認天命所歸、要把疆域一路推到「紅蘋果」（土耳其人對維也納的稱呼）的伊斯蘭強權。它甚至給自己起了一個拉丁名號：<strong>Antemurale Christianitatis</strong>——「基督教世界的壁壘」、「前牆」，意思是我不是普通的城，我是那道擋在文明與蠻荒之間、替整個基督教世界承受第一擊的牆。維也納日後那種把自己當成「文明守護者」的自我意識，就是在這道門檻上，被兩場圍城用血鑄出來的——這個身分，是它最深的驕傲，也將是它最深的焦慮。</p>
+
+    <h3>蘇丹的大軍，與一五二九年的第一道牆</h3>
+    <p>十六世紀初，鄂圖曼正處在它權力的頂峰。掌舵的是被歐洲人稱為「大帝」、被自己人稱為「立法者」的<strong>蘇萊曼一世（Suleiman the Magnificent）</strong>——一個在位四十六年、把帝國疆域與威望都推到極致的蘇丹。一五二六年，他在<strong>摩哈赤戰役（Battle of Mohács）</strong>裡一日之間摧毀了匈牙利王國，年輕的匈牙利國王死在潰逃的泥沼裡，匈牙利這個橫在鄂圖曼與維也納之間的緩衝國，就此塌掉了一大半。緩衝消失，門就直接暴露在刀口下。鄂圖曼的前鋒，第一次真正逼到了維也納的家門口。</p>
+    <p>一五二九年秋天，蘇萊曼親率一支龐大的軍隊溯多瑙河而上，兵臨維也納城下。這是維也納第一次直接承受鄂圖曼主力的全力一擊。守城的條件並不樂觀——城牆還是中世紀的舊式工事，守軍人數也遠遠少於圍城大軍。但維也納手裡握著兩張別人看不見的牌。第一張是<em>距離</em>：蘇萊曼的大軍從遙遠的伊斯坦堡一路開拔而來，補給線拉得極長，行軍又恰好撞上一個多雨的季節，泥濘的道路讓最沉重、最致命的攻城重炮根本拖不到城下——少了重炮，鄂圖曼擅長的、用挖地道埋火藥炸塌城牆的攻堅戰術，威力大打折扣。第二張牌是<em>季節</em>：圍城拖進了深秋，中歐的寒冬正在逼近，而一支離家數千里的大軍，是經不起在異鄉的城牆下熬冬的。</p>
+    <p>守軍靠著一輪輪頑強的反擊、靠著及時填補被地道炸開的缺口、也靠著老天爺幫忙的雨與寒，硬是把這支看似不可阻擋的大軍拖在了城下。十月中旬，補給見底、寒冬將至的蘇萊曼下令撤圍。維也納，守住了。這一次圍城在軍事上算不上一場輝煌的會戰，更多是一場耐力與後勤的比拚——但它的象徵意義無比巨大：歐洲基督教世界向東的這道門，第一次在鄂圖曼的全力撞擊下，沒有破。「壁壘」這個自我認知，從這一年起，開始在維也納人的骨子裡生根。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼一座「門口的城」會被距離與季節所救</span>
+      <p>維也納兩度從鄂圖曼手裡逃生，靠的不全是城牆有多厚、守軍有多勇，還有一個冷冰冰的地理事實：<em>它正好處在鄂圖曼這台戰爭機器力量能投射到的最遠邊緣。</em>一支前現代的大軍能走多遠、打多久，被一條看不見的線死死框住——那條線就是補給。從伊斯坦堡到維也納是上千公里的路，糧草、火藥、重炮全得靠人力獸力沿著多瑙河艱難往前推；等大軍好不容易抵達，往往已是夏末，留給攻城的只剩入冬前那短短幾週。</p>
+      <p>這就是「邊疆城市」的弔詭命運：維也納既因坐在門口而最危險，也因坐在對手力量射程的盡頭而最幸運——它要扛的，是對方最遠、最疲憊、最趕時間的那一拳。一座城的安危，有時不取決於它自己有多強，而取決於它<em>正好站在對手強弩之末的位置上</em>。這個由地理決定的隱形保護，比任何一段城牆都更深地寫定了維也納的命運。</p>
+    </div>
+
+    <h3>一六八三：紅蘋果，與最後一次叩門</h3>
+    <p>第一次圍城之後，鄂圖曼與哈布斯堡在這條邊境上拉鋸、停戰、再開戰，斷斷續續糾纏了一個半世紀，維也納始終活在那片東南方塵土的陰影裡。真正的高潮，要到一百五十多年後的<strong>一六八三年</strong>才到來——而這一次，將是鄂圖曼在歐洲最後一次、也是規模最大的一次叩門。</p>
+    <p>這一年的大軍，由蘇丹的大維齊（首相）<strong>卡拉·穆斯塔法（Kara Mustafa）</strong>統領——「Kara」在土耳其語裡是「黑色」的意思，這個綽號日後讀來竟像一句不祥的預言。他率領一支號稱十幾萬之眾的龐大軍隊，挾著恢復帝國榮光的雄心，直撲那顆讓鄂圖曼覬覦了百餘年的「紅蘋果」。一六八三年七月，大軍把維也納團團圍住。城內守軍只有萬餘人，城外是黑壓壓望不到邊的帳篷海。皇帝利奧波德一世（Leopold I）早已帶著朝廷倉皇出走；留下來的守將與市民，要在這道牆後，獨力撐到援軍到來——如果援軍真的會來的話。</p>
+    <p>圍城慘烈而漫長。鄂圖曼工兵日夜不停地挖地道、埋火藥，一次次把維也納的稜堡炸開缺口；守軍一次次用血肉與瓦礫把缺口堵回去。城裡糧食見底，疫病蔓延。整整兩個月，這座「壁壘」在炮火與地雷下一寸寸地被啃噬，眼看就要撐不住了。歐洲的命運，懸在維也納這幾段隨時可能崩塌的城牆上。就在最危急的關頭，西方的地平線上出現了援軍——神聖羅馬帝國的各路諸侯、巴伐利亞與薩克森的軍隊，集結起來向維也納馳援；而這支聯軍的統帥與靈魂人物，是一位從遠方趕來的國王：<strong>波蘭國王索別斯基（Jan III Sobieski，揚三世·索別斯基）</strong>。波蘭與哈布斯堡結盟，他親率波蘭大軍翻過維也納西北方的山地，與神聖羅馬聯軍會合。一場決定歐洲走向的大戰，即將在城外那座俯瞰全城的山丘上展開。</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1526</div><div class="tl-text">摩哈赤戰役，匈牙利王國覆滅，維也納的緩衝崩塌</div></div>
+      <div class="tl-item"><div class="tl-year">1529</div><div class="tl-text">第一次維也納之圍：蘇萊曼大帝撤兵，門守住</div></div>
+      <div class="tl-item"><div class="tl-year">1683</div><div class="tl-text">第二次維也納之圍：卡拉·穆斯塔法圍城兩月</div></div>
+      <div class="tl-item"><div class="tl-year">1683.9.12</div><div class="tl-text">卡倫山之戰：索別斯基率翼騎兵衝鋒解圍</div></div>
+      <div class="tl-item"><div class="tl-year">1718</div><div class="tl-text">歐根親王屢勝，鄂圖曼在歐洲全面退潮</div></div>
+    </div>
+
+    <h3>卡倫山上的衝鋒</h3>
+    <p>一六八三年九月十二日，會戰在維也納西北方的<strong>卡倫山（Kahlenberg）</strong>一帶打響。聯軍從覆滿葡萄園與森林的山坡高處，朝著鄂圖曼的大營一波波壓去。戰鬥從清晨打到傍晚，鄂圖曼軍隊節節抵抗；直到日將西斜，索別斯基把握住戰機，發動了那場日後被反覆傳唱的一擊——他親率<strong>波蘭翼騎兵（Husaria／winged hussars）</strong>，從卡倫山的高處發起總衝鋒。</p>
+    <p>翼騎兵是當時歐洲最令人膽寒的重騎兵：背後綁著高高的、插滿羽毛的木製羽翼，據說奔馳起來會發出令敵馬驚懼的呼嘯，長矛如林，一往無前。當這支據稱是當時史上規模最大之一的騎兵洪流，從山頂排山倒海地衝進鄂圖曼陣中時，本已苦戰整日的圍城大軍再也撐不住，陣線崩潰，全軍潰逃。卡拉·穆斯塔法丟下大營倉皇南撤——他留下的，是堆積如山的帳篷、輜重、金銀、武器，以及據說還有成袋來不及帶走的<em>咖啡豆</em>。維也納第二次守住了；而這一次不只是守住，更是徹底反敗為勝。</p>
+    <p>卡倫山之戰的意義，遠遠超出一座城的得救。它是鄂圖曼帝國在歐洲擴張的<strong>轉捩點</strong>。在此之前的兩百多年，鄂圖曼的故事大體是一部不斷向歐洲推進的故事；在此之後，潮水開始倒流——維也納城下這一敗，標誌著鄂圖曼向中歐擴張的攻勢就此終結，此後是漫長的退潮。至於那位「黑色的」卡拉·穆斯塔法，等待他的不是寬恕，而是蘇丹賜下的絞索——他被處死，用性命為這場叩響歐洲大門卻被反鎖在門外的失敗付了帳。</p>
+    <div class="pull"><p>一六八三年九月十二日，卡倫山的高處衝下一片插著羽翼的洪流。那一刻，不只是維也納得救了——是鄂圖曼向歐洲推進的兩百年潮水，在這座城的城牆下，第一次開始倒退。</p></div>
+
+    <h3>咖啡、可頌，與一則太美的傳說</h3>
+    <p>勝利會生出神話，而圍城這樣的大事件更是傳說的溫床。圍繞著一六八三年，維也納流傳著兩則家喻戶曉、卻必須誠實打上問號的故事。第一則關於<strong>咖啡</strong>：傳說鄂圖曼大軍潰逃時在大營裡丟下成袋的咖啡豆，一位曾在敵營臥底、熟悉這種神秘黑色飲料的信使——常被說成名叫科爾席茨基（Kolschitzky）——取得這些豆子，在維也納開了第一家咖啡館，從此奠定了這座城聞名世界的咖啡館文化。第二則關於<strong>可頌</strong>：傳說維也納的麵包師傅為慶祝戰勝，把麵包烤成了鄂圖曼旗幟上那彎新月的形狀，一口咬下這彎「新月」（德語 <em>Kipferl</em>，即可頌 croissant 的前身），象徵把敵人吞進肚裡。</p>
+    <p>這兩則故事流傳極廣，幾乎成了維也納的城市名片。但必須老老實實地說：<em>它們大半是後世層層附會的傳說，而非經得起考證的信史。</em>維也納咖啡館文化的真實源頭遠比這浪漫故事複雜，科爾席茨基的傳奇細節有不少站不住腳；新月麵包的起源更是眾說紛紜、年代與地點都對不上。這些傳說之所以能流傳幾百年，恰恰因為它們太貼合維也納想說的那個故事：一座在東方門檻上戰勝了異教大軍的城，連桌上的一杯咖啡、一塊麵包，都成了那場勝利的紀念碑。<em>傳說的真假是一回事，它揭示的城市自我想像，是另一回事。</em></p>
+
+    <h3>巴洛克的凱旋</h3>
+    <p>圍城解了，威脅退了，隨之而來的，是一種前所未有的安全感與自信。當東南方那片纏繞了維也納一個半世紀的塵土終於散去，這座城像一個剛從噩夢中醒來、發現自己不但活著、還贏了的人——它要把這份劫後餘生的狂喜，澆築成石頭與穹頂。維也納的<strong>巴洛克黃金時代</strong>，就在這勝利的餘暉裡轟然展開。</p>
+    <p>戰功最赫赫的英雄，是接過抗土大旗、在此後數十年裡把鄂圖曼一路向南打退的天才統帥——<strong>歐根親王（Prince Eugene of Savoy，薩伏依的歐根）</strong>。他出身法國卻效忠哈布斯堡，在巴爾幹的一連串戰役裡屢屢大勝，幾乎以一己之力把鄂圖曼的邊界推得遠遠離開了維也納。當這位將軍把財富與榮耀帶回京城，他為自己建起一座配得上其功業的宮殿——<strong>美景宮（Belvedere）</strong>。這座坐落在山坡上、上下兩宮以階梯式花園相連、俯瞰全城的巴洛克傑作，本身就是一篇用建築寫成的勝利宣言：曾經被大軍圍困、終日仰望地平線提防敵蹤的城，如今有餘裕在山坡上修建純為享樂與炫耀的花園宮殿了。</p>
+    <p>與此同時，皇室也用最虔誠也最華麗的方式還願，興建了<strong>卡爾教堂（Karlskirche，聖卡爾·博羅梅奧教堂）</strong>——它那兩根模仿羅馬圖拉真柱、刻滿浮雕的巨大圓柱，與綠色的大穹頂，是維也納巴洛克最自信的一筆。設計它的，是把維也納巴洛克推上巔峰的建築師<strong>費舍爾·馮·埃爾拉赫（Johann Bernhard Fischer von Erlach）</strong>——他與同代人用一座座宮殿、教堂與貴族府邸，把這座劫後餘生的城重塑成一座華麗的巴洛克劇場。每一道金色的渦卷、每一個飛升的穹頂，都在無聲地宣告同一件事：威脅過去了，我們贏了，現在輪到我們盛放。</p>
+    <p>這就是兩場圍城留給維也納最深的遺產：它的偉大、它的華麗、它那種把自己當作文明前線的莊嚴自我意識，都是在「守住東方門戶」這件事上鑄成的。維也納之所以是維也納——西方與東方碰撞的最前線——正因為它在這道門檻上，兩度承受了東方最猛烈的一擊而沒有倒下。它的身分，是被圍城打出來的。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 守門人的驕傲，與它的陰影</span>
+      <p>維也納偉大的一部分，確實來自它「守在門口」——它是歐洲面向東方的那道盾，替整個基督教世界承受了第一擊。卡倫山上那場衝鋒，連同隨之而來的巴洛克盛放，是這座城最值得驕傲的一刻：它證明了自己配得上「壁壘」這個名號。</p>
+      <p>但這裡藏著一個更幽暗的真理：<strong>一座長年以「壁壘」自居的城，很容易養出一種把自己當成文明守護者的傲慢與焦慮。</strong>當你日復一日告訴自己「我是擋在文明與蠻荒之間那道牆」，你會驕傲，也會永遠提防著門外那個被你定義為「異類」的他者。這種守門人心態，在一六八三年面對城外的鄂圖曼大軍時是救命的勇氣；可一旦門外的敵人散去，這股向外的警覺若失去了對象，便有可能轉而向內，去尋找城牆<em>之內</em>的「異類」。同一種把自己當文明守護者的心態，幾百年後將以遠為陰暗的形式回返——那時被指為「異類」的，不再是城外的大軍，而是城內最有才華的一群自己人。守門人的驕傲與守門人的偏執，原本就是同一枚硬幣的兩面。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch3" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · The Baroque Theatre</span>
+    <h2 class="act-title">巴洛克的劇場與虔誠</h2>
+    <p class="act-sub">Pietas Austriaca & the Hofburg</p>
+    <div class="ornament">⛪ ✦ 🎭</div>
+  </div>
+  <div class="prose">
+<p>當一六八三年九月，鄂圖曼大軍的營帳被翻譯官與軍鼓一同丟在維也納城下的泥地裡時，哈布斯堡的勝利就不只是一場軍事的解圍，它更是一場宇宙觀的確認。在哈布斯堡人自己的理解裡，這座城——以及它背後的整個王朝——之所以能兩度擋下異教徒的大軍，不是因為砲多兵勇，而是因為上帝站在他們這一邊。維也納不是一座普通的首都，它是天主教世界（Catholic Christendom）伸向東方的最前線，是真信仰在一片被新教與伊斯蘭夾擊的歐洲裡，最堅實的一座壁壘。而守護這座壁壘的家族，自然也就成了天主上帝在塵世間的劍與盾。整個十七、十八世紀的維也納，就是在這個信念上，被一磚一瓦地、極盡華麗地建造起來的。</p>
+
+<h3>奧地利式的虔誠</h3>
+<p>歐洲在十六世紀被宗教改革（Reformation）撕成了兩半。馬丁·路德的吶喊在德意志北方點起燎原大火，半個神聖羅馬帝國改宗新教，連維也納所在的奧地利本土，一度也有大批貴族與市民倒向路德派。對哈布斯堡而言，這不只是神學的歧異，更是統治根基的鬆動——他們的權力，本就建立在「天主教皇帝」這個身份之上。於是，當反宗教改革（Counter-Reformation）的浪潮從特利騰大公會議（Council of Trent）湧出，哈布斯堡毫不猶豫地把自己放到了這場運動的最前列。他們召來耶穌會（Jesuits），讓他們掌管教育與良心；他們重整大學、新建神學院、迎回被新教掃地出門的修會。一場由上而下、雷厲風行的「再天主教化」，把奧地利重新熔鑄成一塊堅定的舊信仰之地。</p>
+<p>但哈布斯堡做的遠不止恢復信仰。他們把虔誠本身，提煉成了一套王朝的政治神學，後世史家給它取了一個專有名詞——<strong>「奧地利式的虔誠」（Pietas Austriaca）</strong>。它的核心，是一種被精心經營的、可被觀看的敬神姿態：歷代皇帝公開地、近乎表演性地崇拜聖體（the Eucharist），在聖體遊行（Corpus Christi）的隊伍裡，皇帝親自步行、脫帽、下跪，走在華蓋之下的聖體之前——讓全城看見，連世上最有權勢的人，也匍匐在這片小小的聖餅面前。他們同樣狂熱地崇拜聖十字架，把「真十字架的碎片」當作王朝最珍貴的聖物供奉；他們把對聖母的奉獻寫進國家儀典，甚至以宣誓的形式，把整個奧地利「獻給」聖母瑪利亞。虔誠，在這裡不是私人的心事，而是一樁公開的、制度化的、世代相傳的國家事業。</p>
+<div class="deepen">
+  <span class="dh">概念深掘 · 當虔誠成了統治的正當性</span>
+  <p>每一個王朝都需要回答一個最根本的問題：<strong>憑什麼是我，而不是別人，坐在這個位子上？</strong>有的靠武功（我打贏了，所以我統治），有的靠血統（我生來高貴），有的靠契約（人民授權於我）。哈布斯堡選的，是另一條路——<em>憑虔誠</em>。他們把自己塑造成上帝在人間特別揀選的家族：因為我們比誰都更敬神、更護教、更願意在聖體前下跪，所以上帝把這個多民族的帝國託付給我們，也透過讓我們戰勝土耳其，一次次確認了這份託付。</p>
+  <p>這套邏輯極其高明，也極其危險。高明在於，它把抽象的權力，錨定在一個全城、全帝國都能親眼看見、親身參與的東西上——遊行、彌撒、聖物、節慶。統治的正當性，不再寫在難懂的法理裡，而活在每一場可被觀看的儀式中。危險則在於，當正當性建立在「表演虔誠」之上，王朝就漸漸把<strong>「做出敬神的樣子」</strong>等同於<strong>「真正在治理」</strong>。形式一旦被當成本質，那麼當有一天形式還在、現實卻已改變，崩落便不會有預警。</p>
+</div>
+
+<h3>把帝國演出來：霍夫堡與西班牙式禮儀</h3>
+<p>如果虔誠是哈布斯堡向上帝呈現自己的方式，那麼宮廷禮儀，就是它向人間呈現自己的方式。而這齣大戲的舞台，是<strong>霍夫堡（Hofburg）</strong>——這座盤踞在維也納心臟、歷經幾百年不斷增建的龐大皇宮。它不是一座為了居住的房子，而是一架為了「上演權威」而設計的精密機器。每一道門廊、每一級台階、每一間覲見室，都對應著一層森嚴的等級；誰能走到哪一道門前、誰能在皇帝面前坐下、誰只能站著、誰連抬眼直視都不被允許——這些都不是瑣碎的規矩，而是把帝國的整個秩序，一寸一寸地刻進空間與動作裡。</p>
+<p>支配這架機器運轉的，是一套以繁複森嚴聞名全歐的<strong>西班牙式宮廷禮儀（Spanish ceremonial）</strong>。它隨著哈布斯堡家族與西班牙分支的聯姻而傳入維也納，把伊比利半島那種近乎僵硬的莊嚴，移植到了多瑙河畔。在這套禮儀下，皇帝的每一個日常動作——起床、用膳、更衣、就寢——都被改寫成一場有固定腳本、固定角色、固定走位的儀式。誰有資格替皇帝遞上水盆、誰能捧著餐巾、誰能在用餐時站在哪個位置，都由出身與品級嚴格規定，半步不能逾越。皇帝幾乎從不單獨吃飯，他「公開地」用膳，讓貴族與外賓觀看一個凡人如何被儀式抬升為近乎神聖的存在。在這裡，連最私密的生理需求，都成了權力的劇場。</p>
+<div class="pull"><p>霍夫堡不是一座供人居住的宮殿，而是一座供人觀看的劇場——在這裡，皇帝不只是統治，他更是在「扮演」統治；權威不只是被擁有，它必須被一場接一場地、華麗地上演出來。</p></div>
+<p>羅馬的巴洛克教廷曾把整座城變成一齣榮耀上帝的大戲——噴泉、廣場、教堂正面，全是為了讓信徒在驚嘆中被信仰征服。維也納學到了同樣的語法，卻把主角換成了王朝。如果說羅馬的巴洛克是「城市即劇場」，那麼維也納的巴洛克，就是「<em>帝國即劇場</em>」。哈布斯堡用同樣繁複、同樣令人目眩的視覺與儀式語言，上演的不是天主的榮耀，而是哈布斯堡的榮耀——當然，在他們自己的理解裡，這兩者本就是同一回事。</p>
+
+<h3>石頭裡的天國</h3>
+<p>這場帝國大戲，需要與之相稱的布景，於是維也納迎來了一個建築的黃金時代。土耳其退兵之後，被解放的城市與貴族們，把劫後餘生的能量與財富，全都傾注進石頭裡。<strong>菲舍爾·馮·埃爾拉赫（Johann Bernhard Fischer von Erlach）</strong>與<strong>希爾德布蘭特（Lukas von Hildebrandt）</strong>這樣的建築巨匠，為皇帝與權貴設計出一座座金碧輝煌的宮殿與教堂。為了還願於擊退瘟疫，皇帝下令建起了恢宏的<strong>卡爾教堂（Karlskirche）</strong>，它那兩根仿羅馬圖拉真柱、纏繞著浮雕的巨柱，與其說是建築構件，不如說是把帝國的歷史與虔誠，直接豎立成了向天空伸出的宣言。貴族們則競相在城外建起夏宮，歐根親王——正是那位擊潰土耳其的名將——的<strong>美景宮（Belvedere）</strong>，便是這場炫耀的巔峰。</p>
+<p>而真正把巴洛克的虔誠推向極致的，是修道院。在維也納上游的多瑙河畔，本篤會的修士們把古老的<strong>梅爾克修道院（Stift Melk）</strong>，重建成了一座懸在懸崖之上的金色宮殿。它那燦爛奪目的圖書館與教堂，金漆、大理石、漫天的濕壁畫鋪天蓋地，幾乎要讓走進去的人喘不過氣——這不是一座供人謙卑沉思的隱修院，而是一座把天國的榮耀，提前在塵世搭建出來的舞台。巴洛克的邏輯在這裡達到頂點：信仰不該是樸素的、隱藏的、內省的，信仰應該是壓倒性的、輝煌的、讓人在感官的眩暈中俯首的。整個帝國，從皇宮到祭壇，都在用同一種華麗的語言說話。</p>
+
+<h3>權力的配樂</h3>
+<p>一齣盛大的戲劇，不能只有布景，還要有音樂。哈布斯堡的宮廷，本就有著綿長的音樂傳統——幾位皇帝自己就是相當有造詣的作曲家與演奏者，他們深知聲音的力量：彌撒中升起的合唱、慶典上奏響的器樂、宮廷劇院裡上演的歌劇，都是帝國自我呈現不可或缺的一環。為了排場，哈布斯堡從義大利重金禮聘作曲家、歌者與樂師，讓維也納的宮廷漸漸成為一塊吸納全歐音樂人才的磁石。教堂裡有為榮耀上帝而寫的莊嚴聖樂，宮廷裡有為娛樂君王而寫的歌劇與舞曲——音樂，和建築、儀典一樣，都是這座城用來「上演」自己的工具。</p>
+<p>沒有人在當時意識到，這份為了排場而豢養起來的音樂傳統，正在悄悄積累一種別的東西。當一座城把如此巨大的資源與熱情長年投注在音樂上——當作曲是體面的職業、當每座教堂與沙龍都渴求新曲、當整座城都養成了聆聽的耳朵——它便在不知不覺中，為一個尚未到來的時代備好了土壤。那個時代裡，海頓、莫札特、貝多芬將會走進這座城，維也納將不再只是帝國的頭顱，更會成為人類的音樂之都。但那是後話了。在巴洛克的維也納，音樂還只是權力的配樂——只是這配樂，已經開始有了自己的生命。</p>
+
+<h3>一座學會了表演的城</h3>
+<p>退一步看整個巴洛克時代，維也納在這幾百年裡學會的，其實是一件貫穿它此後全部歷史的本事——<strong>表演</strong>。它學會了把抽象的東西，化為可被觀看的華麗形式：把對上帝的信仰，化為聖體遊行裡皇帝下跪的身影；把統治的權威，化為霍夫堡裡一絲不苟的禮儀；把王朝的榮耀，化為卡爾教堂的巨柱與梅爾克金色的天頂。在維也納，沒有什麼是「只是內在的」——信仰要被看見，地位要被看見，權力要被看見。一切重要的東西，都必須被翻譯成形式、儀式與門面，被搬上一座供全城、全帝國觀看的舞台。</p>
+<p>這種把一切美學化、儀式化的傾向，從此沉澱進了這座城的性格深處。它讓維也納變得無比優雅、無比講究——講究禮節，講究排場，講究一個人該如何得體地出現在世人面前。這份對形式的執著，後來會孕育出維也納獨有的精緻文化：咖啡館裡的儀態、華爾滋裡的旋轉、對「美的生活」近乎宗教般的虔誠。但同一種傾向，也埋著一個隱憂。當一座城如此擅長把一切變成優雅的形式，它便也學會了用形式去取代、去掩蓋現實。許多年後，當帝國真的衰朽、真的崩落，維也納還會用同一種本事，把那個已經死去的「過去」，美學化成一縷甜美而傷感的鄉愁——把失去，也演成一齣優雅的戲。</p>
+<div class="aside"><span class="hl">維也納的靈魂裡</span>有一種把一切變成劇場與形式的傾向——優雅、講究、重儀式、重門面。它太擅長把信仰、權力與地位，化為可被觀看的華麗形式；而一座如此擅長表演的城，遲早也會擅長用表演來掩蓋自己已經不再擁有的東西。</div>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 當統治活成了一場演出</span>
+  <p>巴洛克的維也納揭示了一條關於權力的深刻規律：<strong>當一個體系把它的正當性，建立在「虔誠的表演」與「儀式的華麗」之上，它便同時打造了無與倫比的優雅，也為自己埋下了脫離現實的種子。</strong>哈布斯堡把統治化為一場永不落幕的大戲——皇帝在聖體前下跪，宮廷在西班牙禮儀裡走位，整座城用石頭與音樂上演著上帝對這個家族的揀選。這一切確實壯麗，也確實有效；它讓一個靠聯姻拼湊起來的多民族帝國，有了一個全帝國都能親眼看見、親身參與的共同舞台。</p>
+  <p>但這正是「帝國的頭顱」最深的隱患所在。當形式被如此精心地經營，它就有了自己的慣性與重量，慢慢地，維護形式本身，會比應對現實更被當成正事。儀式照舊、禮儀照舊、華蓋下的腳步照舊，於是即使外面的世界已經天翻地覆——新的階級在崛起，新的民族在覺醒，新的時代在敲門——宮廷裡的人，仍可能在那套完美的形式裡，覺得一切如常。<em>當形式與現實脫節，崩落便只是時間問題；而一個越是優雅的體系，往往越是看不見這道裂縫，因為它早已習慣了活在形式裡。</em>維也納日後的全部命運——它的燦爛，它的盲目，它對崩落的後知後覺，以及它最終把崩落本身也釀成鄉愁的本事——其根，都深深扎在這個學會了表演的巴洛克時代。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch4" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · Maria Theresa & Joseph II</span>
+    <h2 class="act-title">瑪麗亞·特蕾莎與約瑟夫二世</h2>
+    <p class="act-sub">The Empress, the Reformer & the Bureaucratic Empire</p>
+    <div class="ornament">👑 ✦ 📜</div>
+  </div>
+  <div class="prose">
+<p>一七四〇年十月，神聖羅馬皇帝<strong>查理六世（Charles VI）</strong>在維也納病逝。他沒有兒子。對哈布斯堡這個靠聯姻、靠「血脈不斷」才縫得起來的帝國而言，這幾乎是滅頂之災。因為哈布斯堡的領地——奧地利、波希米亞、匈牙利、米蘭、尼德蘭——本就不是一個統一的國家，而是一束靠同一頂王冠勉強捆在一起、各有各的法律與議會的「領地」。維繫它們的，是一條看不見的線：哈布斯堡家的血。如今這條線斷在了一個女人身上。</p>
+    <p>那個女人，就是查理六世二十三歲的女兒——<strong>瑪麗亞·特蕾莎（Maria Theresa）</strong>。</p>
+
+    <h3>一紙詔書，與一場必然的戰爭</h3>
+    <p>查理六世早就預見了這一天。為了讓女兒能完整繼承全部領地，他在一七一三年頒布了一份著名的文件——<strong>《國事詔書》（Pragmatic Sanction）</strong>。它做了兩件事：宣布哈布斯堡的領地<em>不可分割</em>，必須作為一個整體傳承；並允許在沒有男嗣時由<em>女性</em>繼承。為了讓這份家規變成歐洲公認的承諾，查理六世幾乎把畢生外交精力都花在向各國君主「買」簽字上——他用領土、用特權，換取普魯士、法國、英國一個個點頭，承認他女兒的繼承權。</p>
+    <p>結果，墨跡未乾，承諾就成了廢紙。查理六世一閉眼，年僅二十三、剛剛生產不久的瑪麗亞·特蕾莎，接手的是一個國庫空虛、軍隊渙散、四面都是虎視眈眈鄰居的帝國。普魯士那位年輕的新國王<strong>腓特烈二世（Frederick II，腓特烈大帝）</strong>第一個撕毀詔書，揮軍搶走了哈布斯堡最富庶的省份——<strong>西里西亞（Silesia）</strong>。緊接著，法國、巴伐利亞一擁而上，企圖瓜分這個「群龍無首」的帝國。這就是延燒八年的<strong>奧地利王位繼承戰爭（War of the Austrian Succession，1740–1748）</strong>。</p>
+    <p>所有人都以為這個女人會崩潰。她沒有。她最關鍵的一招，是一七四一年親赴匈牙利，在議會上抱著襁褓中的幼子，向那些向來桀驁不馴的匈牙利貴族發出呼告。據說貴族被這一幕打動，當場拔劍高呼：「我們將為我們的國王瑪麗亞·特蕾莎，獻出生命與鮮血！」——他們用的是陽性的「國王（rex）」，而非「女王」。匈牙利的兵源與糧餉，救了她的家業。戰爭最終她保住了幾乎全部領地，只丟了西里西亞。但帝國，活下來了。一個二十出頭的女人，在所有人都等著看她垮台時，把一個搖搖欲墜的帝國硬生生扛了下來。</p>
+
+    <h3>一個務實的女人，與她的改革</h3>
+    <p>戰火教會了瑪麗亞·特蕾莎一件最樸素、也最深刻的事：<em>一個帝國若想活下去，光有血脈與虔誠是不夠的，它必須有錢、有兵、有一架能運轉的機器。</em>她不是被啟蒙哲學點燃的理想主義者——她虔誠、保守，甚至對新教徒與猶太人始終缺乏好感；她改革，不是因為相信什麼進步的大道理，而是看清了一個冷冰冰的現實：散沙一盤的領地，撐不過下一場戰爭。</p>
+    <p>於是這位務實到近乎冷靜的女皇，啟動了一連串日後被稱為「<strong>特蕾莎改革</strong>」的工程。目標只有一個：把那束鬆垮垮的領地，擰成一架由維也納統一指揮的機器。在<strong>財政</strong>上，她繞過各地議會討價還價的舊習，推行更能直達中央的稅制，讓貴族也得乖乖納稅。在<strong>軍事</strong>上，她建立常備軍、設立軍校，讓帝國不必每逢戰事就臨時東拼西湊。在<strong>行政</strong>上，她設立直屬中央的新機構，把過去由地方貴族把持的權力，一點一點收回維也納手裡。</p>
+    <p>而她最深遠、也最「現代」的一筆，落在<strong>教育</strong>上。一七七四年，她頒布《普通學校法令》，規定六歲到十二歲的兒童——無論男女、無論出身——都應接受基礎教育，並由國家而非教會主導學校。這在當時的歐洲是革命性的：教育第一次被當成「國家的事」，而非教會的恩典或貴族的特權。一個帝國要的，是識字、能算、聽得懂規章的臣民——這背後的邏輯，正是後來那架龐大官僚機器所需要的「原料」。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 何謂「開明專制」：用啟蒙的工具，行君權的目的</span>
+      <p>瑪麗亞·特蕾莎與她的兒子約瑟夫二世，常被歸入十八世紀那批「<strong>開明專制君主（enlightened despots）</strong>」——同列的還有普魯士的腓特烈大帝、俄國的凱薩琳大帝。這是一個聽來自相矛盾的詞：既「開明」（吸收了啟蒙運動關於理性、效率、寬容、世俗化的主張），又「專制」（權力高度集中於君主一人，由上而下、不容置喙地施行）。</p>
+      <p>它的核心邏輯是：君主把自己重新定義為「<em>國家的第一公僕</em>」，用理性與效率治理，廢除最荒謬的舊制度（農奴的枷鎖、教會的特權），但這一切都<strong>不是</strong>為了還權於民，而是為了讓國家這架機器更強、更富、更聽話。改革的動力來自王座，而非街頭。約瑟夫二世有一句話把這套哲學說得淋漓盡致：「<em>一切為了人民，但絕不靠人民。</em>」——這正是開明專制的精髓，也是它最終的死穴。</p>
+    </div>
+
+    <h3>歐洲的岳母</h3>
+    <p>在當女皇、改革帝國、打了兩場大仗的同時，瑪麗亞·特蕾莎還生了<strong>十六個孩子</strong>。這不只是私事——對哈布斯堡這個「靠聯姻立國」的家族而言，子女本身就是最重要的外交資產。她把女兒們一個個嫁進歐洲各國的王室，用最古老的哈布斯堡手段為帝國編織安全網。其中最有名的一個遠嫁法國，成了路易十六的王后——<strong>瑪麗·安東妮（Marie Antoinette）</strong>，那位日後將在大革命中走上斷頭台的女人。透過這一樁樁婚姻，瑪麗亞·特蕾莎成了名副其實的「<strong>歐洲的岳母</strong>」。一個用最現代的手段重塑帝國內裡的女皇，在帝國外部，依然動用著哈布斯堡最中世紀的工具——聯姻。她不為任何主義所縛，只認一件事：什麼對家業最有利。</p>
+    <div class="pull"><p>她用最現代的手段改革帝國的內裡，卻用最古老的聯姻維繫帝國的外緣——瑪麗亞·特蕾莎一手締造未來，一手延續傳統。對她而言，沒有什麼主義，只有一件事：什麼對哈布斯堡的家業最有利。</p></div>
+
+    <h3>那個太著急的兒子</h3>
+    <p>一七六五年瑪麗亞·特蕾莎的丈夫去世後，她讓長子<strong>約瑟夫二世（Joseph II）</strong>成為共治者；一七八〇年她過世，約瑟夫終於得以獨立執政。如果說母親是被現實逼著、走一步算一步的務實改革者，那麼兒子，則是被啟蒙運動的理想徹底點燃、燒得發燙的<em>激進派</em>。他不滿足於母親那種小心翼翼的修補。他要的，是用理性的尺，把整個帝國從上到下徹底重畫一遍——而且要快，要在有生之年全部完成。</p>
+    <p>約瑟夫二世在短短十年裡頒布了超過六千道法令，平均每天近兩道，其猛烈、全面在十八世紀的歐洲幾乎找不到第二例。一七八一年，他頒布《廢除農奴制詔令》，解除了農民對領主人身依附的部分束縛——農民可以遷徙、通婚、學手藝，不必再事事經領主批准。同年，他頒布那道載入史冊的<strong>《寬容詔令》（Toleranzpatent）</strong>：在一個天主教幾乎等於國教、新教徒長期遭壓制的帝國裡，他放寬了對<strong>路德派、喀爾文派與東正教徒</strong>的限制，准許他們私下禮拜、興建禮拜堂、擔任公職；隨後又逐步放寬對<strong>猶太人</strong>的種種歧視性束縛，准許他們從事更多行業、進入學校。這在當時的中歐是石破天驚之舉。</p>
+    <p>他同時把刀鋒對準了<strong>教會</strong>。在他眼中，那些不從事教育、醫療、濟貧等「實際用途」、只關起門祈禱的修道院純屬浪費。於是他大筆一揮，解散了帝國境內數以百計的修道院，沒收其財產，用來興辦學校、醫院與教區。他把教會牢牢踩在國家腳下，連教宗親自跑到維也納勸阻都無功而返。他要建立的，是一個由<em>國家</em>、而非由<em>教會</em>說了算的帝國。</p>
+
+    <h3>「為人民做一切，但不靠人民」</h3>
+    <p>約瑟夫二世的問題，從來不是方向錯了，而是<em>方式</em>錯了。他堅信自己手握真理，相信只要由上而下、用理性的命令把對的事強加下去，臣民終會感激。他完全不在乎人民是否願意、是否準備好——甚至連協商的耐心都沒有。他推行<strong>德語</strong>作為全帝國統一的行政語言，這在效率上無可厚非，卻一刀踩中了匈牙利、波希米亞那些以自己語言為傲的民族的痛處，激起強烈反彈。他連最私密的領域都要管：嫌傳統葬禮鋪張浪費棺木，竟下令推行可重複使用的「節約棺材」——遺體用麻布裹了下葬，棺材抽走再用。維也納人厭惡之強烈，逼得他不得不收回成命。</p>
+    <p>到了晚年，約瑟夫眾叛親離。貴族恨他削權，教會恨他奪產，匈牙利幾乎要叛亂，連他想解放的農民也未必領情。一七九〇年他病逝時，許多改革已被迫收回，帝國一片動盪。他為自己寫的墓誌銘，是這一整套開明專制最淒涼的註腳：「<em>這裡躺著約瑟夫二世，他凡事用心良苦，卻一事無成。</em>」他想為人民做一切，卻從未想過要靠人民、與人民同行——這正是「為人民做一切，但不靠人民」這句話最終的代價。</p>
+    <div class="warn">
+      <span class="warn-tag">改革的悖論：太對的事，太快地強加</span>
+      <p>約瑟夫二世的悲劇，是一則關於「正確」的寓言。他的許多主張——宗教寬容、解放農奴、教育普及——按今天的標準幾乎全是對的，甚至遠遠走在時代前面。但他失敗了，敗在把「正確」當成了可以無視一切阻力、由上而下強行灌注的命令。他不信任過程，不信任協商，不信任人民自己慢慢長出共識的能力。他以為理性的真理只要一聲令下就能落地——結果是，連他想造福的人都起來反對他。這提醒我們：在治理裡，<em>對的方向</em>若配上<em>錯的方式</em>，往往比什麼都不做更糟。改革不只是知道什麼是對的，更是懂得人心能承受多快的改變。</p>
+    </div>
+
+    <h3>維也納：一座帝國的大腦</h3>
+    <p>退一步看，這對母子在維也納留下的最深遠的東西，不是哪一道具體的法令——許多法令在約瑟夫死後就被廢了——而是一種<em>結構</em>：一架至今仍在運轉的龐大<strong>官僚機器</strong>，以及一座為它而生的城。為了把十幾個語言不通、法律各異、議會林立的領地統一在維也納的指揮之下，他們造出了一個前所未有的東西——一個由<strong>受薪的、職業的、效忠於國家而非地方領主的公務員</strong>構成的龐大文官體系。他們不靠出身，靠考核與資歷；武器不是刀劍，而是<strong>公文、檔案、表格與規章</strong>。一道命令從霍夫堡發出，經由層層部門、層層簽署、層層歸檔，傳遞到帝國最偏遠的一座波希米亞村莊或加利西亞小鎮。維也納，從此不再只是皇帝住的地方，而成了一座<em>用紙張統治十幾個民族的行政首都</em>。</p>
+    <p>這就是維也納那股綿延至今、聞名於世的「<strong>官僚文化</strong>」的源頭——那種對頭銜的講究（每個人都該被精確稱呼為「樞密顧問」或「宮廷參事」），那種對蓋章、對歸檔近乎宗教般的執著，那種「<em>先填好表格</em>」的城市性格。它有時令人發噱，有時令人窒息，卻確實是一套真正運轉了一百多年、把中世紀拼盤勉強維持成現代政體的機器。維也納的咖啡館裡後來會坐滿天才；但更早，維也納的辦公室裡就坐滿了無數埋頭於卷宗的公務員——正是他們，日復一日，用墨水把那個靠聯姻拼起來的帝國，一頁一頁地黏合在一起。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 帝國的大腦在此成形</span>
+      <p>如果說早先的維也納是哈布斯堡帝國的<strong>頭顱</strong>——那顆戴著王冠、坐在多瑙河畔、象徵著整個帝國的頭，那麼瑪麗亞·特蕾莎與約瑟夫二世做的，是在這顆頭顱裡裝進了一副<strong>大腦</strong>。在他們之前，帝國是靠血脈、婚姻與虔誠勉強捆在一起的中世紀拼盤；在他們之後，帝國第一次擁有了一架真正的中樞神經系統——一套由維也納發號施令、用公文與規章管理十幾個民族的行政機器。維也納，從一座皇帝的居城，升格為一個龐大官僚帝國真正的指揮中心。這是哈布斯堡「理性化、現代化」最了不起的成就：把一個靠運氣與聯姻攢起來的家族領地，改造成了一個由首都統一治理的國家。</p>
+      <p>但這套由上而下的理性，從一開始就藏著一個它無力解決的問題。約瑟夫二世推德語、設部門、發法令，想的是「更好的管理」。然而那十幾個民族，遲早想要的<em>不是更好的管理</em>。再精密的官僚機器、再寬容的詔令，都餵不飽一樣東西——一個民族想要<strong>自己當家作主</strong>的渴望。維也納可以把他們管理得很好，卻永遠給不了他們最想要的那件東西：他們自己的國家。這對母子用紙張把帝國黏合得空前牢固，卻也在無意間，為一個世紀後那場讓帝國分崩離析的「民族問題」悄悄拉開了序幕。帝國的大腦愈是清醒、愈是高效，就愈清楚地照見了它最終的宿命：管理，永遠代替不了認同。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch5" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Capital of Music</span>
+    <h2 class="act-title">音樂之都</h2>
+    <p class="act-sub">Haydn, Mozart, Beethoven & Why Here</p>
+    <div class="ornament">♪ ✦ 🎻</div>
+  </div>
+  <div class="prose">
+<p>如果說維也納是一顆帝國的頭顱，那麼這顆頭顱裡，始終迴盪著一種別的城市不曾擁有的東西——<em>聲音</em>。不是鐘聲，不是市集的喧囂，而是<strong>音樂</strong>。在一段不算很長的歲月裡——大約從十八世紀中葉到十九世紀末——這座多瑙河畔的城市，竟然集齊了人類有史以來最稠密的一群作曲天才。海頓、莫札特、貝多芬，這三個名字本身就構成了所謂「<strong>維也納古典樂派（Wiener Klassik）</strong>」的全部脊樑；緊接著是舒伯特、布拉姆斯、布魯克納、馬勒，以及把整座城旋到三拍子裡的史特勞斯家族。世界上有過許多偉大的城市，但只有一座城，當人們提起它的名字，腦中響起的不是它的疆界、不是它的戰役，而是一段旋律。維也納把自己活成了一首曲子。</p>
+    <p>這不是偶然。一座城要成為「音樂之都」，光有幾個天才是不夠的——天才到處都會出生，問題是他們能不能在某個地方<em>活下去、被聽見、被供養</em>。要理解海頓為何能寫出一百多首交響曲，貝多芬為何從萊茵河畔遠道而來、終生不肯離開，得先理解這座城底下那台默默運轉的、把音樂變成可能的機器。</p>
+
+    <h3>一台把音樂變成可能的機器</h3>
+    <p>第一根支柱，是<strong>宮廷</strong>。哈布斯堡王朝有一個別處少見的傳統：它的皇帝，許多本身就是相當夠格的音樂行家——查理六世會彈鍵盤、能指揮，約瑟夫二世更是個近乎癡迷的樂迷。當帝國最高的權力中心把音樂當作統治者必備的修養時，整個社會的價值天平便傾向了這門藝術。宮廷需要彌撒、慶典音樂與歌劇來裝點它的盛大——這就創造出穩定而高端的需求。</p>
+    <p>第二根支柱，是<strong>貴族</strong>。那些擁有龐大領地的親王家族——埃斯特哈齊（Esterházy）、洛布科維茨（Lobkowitz）、金斯基（Kinsky）——冬天大多住進維也納的宮邸。對他們而言，供養一支私人樂團、贊助一位作曲家、在自家沙龍裡首演一部新作，是身分與品味的象徵，是貴族之間無聲的競賽。一位作曲家若得到親王的庇護，就有了俸祿、有了樂手、有了懂得欣賞的聽眾。這套<strong>贊助制度（Patronage）</strong>，是維也納古典樂派得以成形的經濟基礎——它讓天才不必餓著肚子寫作。</p>
+    <p>但宮廷與貴族還不夠。維也納真正特別的地方在於，它同時擁有一個極其活躍的<strong>市民音樂市場</strong>：教堂需要管風琴師與唱詩班，劇院日夜上演歌劇，市民家庭以家裡有人會彈琴為榮，業餘的弦樂四重奏在無數客廳裡響起。這座城裡有發達的<strong>樂譜出版業</strong>，把新作販售到全歐洲；有精良的<strong>樂器製造</strong>，尤其是鋼琴工坊，讓作曲家能不斷嘗試新的音色與力度。需求、供養、出版、製造、聽眾——五樣東西在這裡同時齊備。一個天才被丟進這樣的城市，就像一粒種子落進了最肥沃的土壤。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼天才會「成群」出現在同一座城</span>
+      <p>歷史上的天才，極少均勻地散落在時空裡，而是傾向於<strong>成群、紮堆地爆發</strong>——文藝復興的佛羅倫斯、世紀末的維也納、戰後的紐約畫派。原因往往不在於某個地方的人天生更聰明，而在於那裡恰好同時備齊了天才得以存活與相互激盪的條件：穩定的金主（讓人不必為生計分心）、密集的同行（讓人有對手可較量、有夥伴可切磋）、成熟的市場與媒介（讓作品能被傳播、被檢驗）、以及一種把這門技藝看得無比重要的<em>集體價值觀</em>。</p>
+      <p>維也納的音樂奇蹟正是這個規律最純粹的範本。它的偉大不在於誕生了幾個天才，而在於它建造了一套生態，能把四面八方湧來的天才<em>留住、餵飽、逼到極限</em>。海頓、莫札特、貝多芬，沒有一個是維也納本地土生的——他們分別來自下奧地利的鄉村、薩爾茲堡、與萊茵蘭的波昂。是這座城把他們吸了過來。<em>一座偉大的文化之城，往往不是天才的產地，而是天才的磁場。</em></p>
+    </div>
+
+    <h3>三巨頭之一：海頓，交響曲之父</h3>
+    <p>三巨頭裡年紀最長、也最像一個「制度的產物」的，是<strong>約瑟夫·海頓（Joseph Haydn，1732–1809）</strong>。他出身下奧地利一個製車匠的貧寒家庭，靠著一副好嗓子進了維也納聖斯德望主教座堂的唱詩班，在街頭與閣樓裡熬過了漫長的學徒歲月。真正改變他一生的，是一七六一年起，他受雇於匈牙利最顯赫的貴族——<strong>埃斯特哈齊家族（Esterházy）</strong>，擔任宮廷樂長，一做就是近三十年。</p>
+    <p>這段漫長的贊助關係，是理解海頓的鑰匙。在埃斯特哈齊家偏遠的宮廷裡，他手握一支固定的樂團，有義務源源不斷地為主人寫出新曲、排練、演出。他後來自己說，正因為與世隔絕、無人可模仿，他「不得不變得原創」。就在這種近乎工匠般的穩定供養與持續產出中，海頓一手把兩種日後統治整個古典音樂的形式打磨成熟：<strong>交響曲</strong>與<strong>弦樂四重奏</strong>。他寫了一百多首交響曲、近七十首弦樂四重奏，為這兩種體裁奠定了結構與語法——後世尊他為「<strong>交響曲之父</strong>」與「<strong>弦樂四重奏之父</strong>」，並非虛譽。他是莫札特敬愛的長者，也是貝多芬的老師。維也納古典樂派的地基，是這位謙和、勤勉、被一個貴族家族供養了一輩子的車匠之子砌起來的。</p>
+
+    <h3>三巨頭之二：莫札特，輝煌與潦倒</h3>
+    <p>如果海頓代表了贊助制度最穩妥的一面，那麼<strong>沃夫岡·阿瑪迪斯·莫札特（Wolfgang Amadeus Mozart，1756–1791）</strong>，代表的就是天才掙脫這套制度時的眩目與危險。他是人類歷史上最接近「神童」這個詞的存在——三歲辨音、四歲彈琴、五歲作曲，父親帶著他遍遊歐洲宮廷，把他當作上帝的奇蹟展示。但神童會長大，而長大的莫札特，受不了薩爾茲堡大主教那種把音樂家當僕役使喚的對待。一七八一年，他與大主教決裂，搬到維也納，做了一個在當時相當大膽的決定：他要當一個<strong>自由音樂家</strong>，靠教學、演出、出版與委約維生，不再依附任何單一的主人。</p>
+    <p>起初，這座城回報了他。維也納為他的鋼琴協奏曲瘋狂——他一邊作曲一邊在音樂會上親自獨奏，把鋼琴協奏曲這個形式推上了前所未有的高度；他的歌劇《費加洛的婚禮》《唐·喬望尼》《魔笛》，在喜劇的外殼下藏著對人性最深的洞察，至今仍是世界各大歌劇院的常演劇目。有那麼幾年，他是維也納最炙手可熱的音樂家，收入豐厚，出入上流。</p>
+    <p>但自由是有代價的。沒有了固定俸祿的保護，莫札特的命運便完全交給了反覆無常的市場與他自己拙劣的理財。風尚會變，聽眾會移情別戀。他晚年陷入債務，一封封向友人借錢的信讀來令人心碎。一七九一年十二月，他在貧病中猝逝，年僅三十五歲，留下未完成的《安魂曲》。一場草率的葬禮之後，他被葬進維也納城外一座<strong>平民的共同墓穴</strong>——一座沒有標記的<strong>無名墓</strong>，以至於後人再也找不到他確切的長眠之處。人類歷史上最璀璨的音樂心靈之一，就這樣消失在一片無名的泥土裡。</p>
+    <div class="pull"><p>它能把你捧到天上，也能任你跌進無名的塵土。莫札特把人類最璀璨的旋律留給了世界，自己卻消失在維也納城外一座無人能再找到的共同墓穴裡。</p></div>
+
+    <h3>三巨頭之三：貝多芬，在失聰中寫下《第九》</h3>
+    <p>第三位巨人，也是把這個樂派推向頂峰、再一腳踏進新時代的人，是<strong>路德維希·凡·貝多芬（Ludwig van Beethoven，1770–1827）</strong>。他不是奧地利人——他來自萊茵河畔的<strong>波昂（Bonn）</strong>，一七九二年，二十出頭的他懷著「向海頓學習」的名義來到維也納，從此再未長期離開。這座音樂之都，看了他幾乎全部的傑作誕生：九首交響曲、五首鋼琴協奏曲、三十二首鋼琴奏鳴曲、晚期那些深不可測的弦樂四重奏——維也納就是貝多芬的工坊。</p>
+    <p>而貝多芬也改寫了作曲家在這座城裡的身分。他接受洛布科維茨、金斯基、魯道夫大公等貴族的年金供養，卻拒絕像海頓那樣俯首為僕——他要貴族把他當作一個獨立的、值得平等對待的<em>藝術家</em>。他用一種前所未有的傲岸告訴整個維也納：親王有的是，貝多芬只有一個。</p>
+    <p>但命運給了他最殘酷的試煉。從二十多歲起，他的<strong>聽力</strong>就開始衰退，最終幾乎全聾。對一個音樂家而言，這是比死亡更深的剝奪。他一度寫下絕望到想自盡的遺書，卻又咬牙活了下來，理由是「我覺得我還有許多音樂要寫」。於是出現了人類精神史上最不可思議的一幕：一個聽不見自己作品的人，在徹底的寂靜中，寫下了規模空前的<strong>《第九號交響曲》</strong>。一八二四年，《第九》在維也納首演，末樂章第一次把人聲合唱引進交響曲，唱出席勒的《歡樂頌》——「億萬人民團結起來」。演出結束時，全聾的貝多芬背對著爆發的掌聲渾然不覺，要等人把他輕輕轉過身來，他才看見全場起立、淚流滿面。一個聽不見的人，為全人類寫出了關於團結與歡樂的頌歌。維也納古典樂派，在這一刻達到了無法再被超越的頂峰。</p>
+
+    <h3>歌曲與圓舞曲：另兩種維也納的聲音</h3>
+    <p>三巨頭之後，這座城的音樂並未停歇，反而生出兩種截然不同、卻同樣深植於維也納靈魂的聲音。第一種，屬於一個短命而溫柔的天才——<strong>法蘭茲·舒伯特（Franz Schubert，1797–1828）</strong>。他是三巨頭裡唯一真正在維也納土生土長的人，一生窮困、籍籍無名，三十一歲便病逝。但他在短短的歲月裡，寫下了六百多首<strong>藝術歌曲（Lied）</strong>——把德語詩歌與鋼琴伴奏融成一體，用最精煉的篇幅道盡人世的悲歡。他與一群文藝青年朋友常聚在一起彈唱新作，那種親密的、客廳裡的音樂之夜，後人稱為「<strong>舒伯特之夜（Schubertiade）</strong>」。如果說交響曲是維也納面向世界的宏大宣言，那麼舒伯特的歌曲，就是這座城最私密、最深情的喃喃自語。</p>
+    <p>第二種聲音，則把整座城旋進了三拍子裡。十九世紀中葉，<strong>圓舞曲（Walzer）</strong>從一種民間舞蹈，被史特勞斯家族打磨成風靡全歐的時尚，而其中的王者，是「<strong>圓舞曲之王</strong>」<strong>小約翰·史特勞斯（Johann Strauss II，1825–1899）</strong>。他寫的《藍色多瑙河》，旋律一響起，幾乎就等於維也納本身——那是這座城在帝國黃昏裡，獻給自己的一首慵懶、優雅、帶著甜美愁緒的情書。如果說古典樂派是維也納獻給人類文明的禮物，那麼圓舞曲就是維也納<em>關於自己</em>的聲音符號——是這座城聽見自己心跳的方式。</p>
+    <div class="aside"><span class="hl">兩種聲音</span>貝多芬的《第九》是維也納面向全人類的吶喊；史特勞斯的《藍色多瑙河》是維也納對著鏡子的低吟。一座城同時擁有它最崇高與最甜美的兩種聲音。</div>
+
+    <h3>當一座城把靈魂寄託在旋律裡</h3>
+    <p>於是音樂變成了維也納的<strong>身分</strong>本身。今天，維也納的<strong>金色大廳（Musikverein）</strong>被公認為世界聲學最完美的音樂廳之一；每年一月一日，<strong>維也納新年音樂會</strong>從這裡播向全球數十個國家，億萬人聽著史特勞斯的圓舞曲迎接新年——那已不只是一場音樂會，而是一個城市每年向世界遞出的名片。市民的日常裡浸著音樂：合唱團、業餘樂團、咖啡館的鋼琴、歌劇院門口的站票長龍。對一個維也納人而言，音樂不是高高在上的藝術，而是空氣，是這座城呼吸的方式。</p>
+    <p>這背後藏著一個更深的東西。哈布斯堡帝國是一個橫跨十幾個民族、說著德語、匈牙利語、捷克語、義大利語的<strong>多民族帝國</strong>——它沒有一個單一的「民族」可以作為認同的根。而音樂，恰恰是一種<em>無國界、無民族</em>的語言：它不問你說哪種母語，旋律響起，所有人都聽得懂。當這座帝國首都把它的靈魂，部分地寄託在音樂這種藝術上時，它其實是在表達自己的本質——它不是任何單一民族的城，而是一座<strong>超越民族的、世界主義的文化之都</strong>。海頓來自鄉村，貝多芬來自波昂，李斯特是匈牙利人，馬勒是波希米亞的猶太人……他們在這裡相遇、競爭、融合，正如這座帝國本身。音樂，是維也納用來盛放它那不屬於任何單一民族之靈魂的容器。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一顆頭顱靠旋律活著</span>
+      <p>這一章講的，表面是三個天才，深處卻是一座帝國首都最深的<strong>軟實力</strong>。維也納用宮廷、貴族、市場、出版與聽眾，建起了一台把音樂變成可能的機器，從四面八方吸來天才、餵養他們、逼他們抵達極限——海頓的交響曲、莫札特的歌劇、貝多芬在寂靜中寫下的《第九》、舒伯特的歌曲、史特勞斯的圓舞曲，全都從這片土壤裡長出。音樂不是維也納的點綴，而是它的本質。</p>
+      <p>而這正是這顆「帝國頭顱」日後得以不死的真正原因。半個世紀後，當哈布斯堡的政治版圖在一九一八年崩解，當帝國的身體被一刀切除、只剩下這顆過大的頭顱孤懸在一個小國之上時——支撐它繼續活下去的，不是它早已消失的疆界，而正是<em>這份文化的分量</em>。世人記得維也納，不是因為它曾統治多少民族，而是因為它響起過《第九》與《藍色多瑙河》。<em>一座城最持久的遺產，未必是它能守住多少土地，而可能是它留給世界的，那一段不會老去的旋律。</em>帝國會死，旋律不會。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch6" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Congress Dances</span>
+    <h2 class="act-title">一八一四：歐洲在維也納跳舞</h2>
+    <p class="act-sub">Metternich, Restoration & Biedermeier</p>
+    <div class="ornament">💃 ✦ 🕯</div>
+  </div>
+  <div class="prose">
+<p>一八一四年的秋天，維也納的人口在幾個星期內暴漲。從九月起，一輛接一輛的馬車碾過石板路駛進城門，車上坐著兩位皇帝、四位國王、十一位親王、二百一十五位邦國的元首與使節，以及數不清的外交官、副官、情婦、間諜、僕役與裁縫。據估計，光是需要被接待、被供養、被安排住處的權貴與隨從，就讓這座城多出了近十萬張嘴。整個歐洲——確切地說，是整個歐洲的統治階層——幾乎都搬到了多瑙河畔。他們來這裡，要做一件人類歷史上罕見的事：在一張地圖被一個科西嘉砲兵軍官撕碎之後，把它重新拼起來。</p>
+<p>那個撕碎地圖的人，叫<strong>拿破崙（Napoléon Bonaparte）</strong>。在他橫掃歐洲的二十年裡，神聖羅馬帝國被他一筆勾銷，王朝被他廢立，邊界被他像捏黏土一樣反覆改寫。一八一四年春，反法同盟攻入巴黎，拿破崙退位、被流放到地中海的厄爾巴島。歐洲終於從戰火中喘過一口氣——然後立刻面對一個更棘手的問題：拿破崙拆掉的那個舊世界，已經回不去了；可新的秩序，又該長成什麼樣子？這個問題，沒有戰場可以解決，只能靠談判。而談判的地點，選在了維也納。</p>
+
+<h3>東道主梅特涅</h3>
+<p>會議選在維也納，不是偶然。哈布斯堡的奧地利，是這場反法戰爭裡碩果僅存、地位最居中的老牌列強——它既不像俄國那樣身在東方邊緣，也不像英國那樣隔著海峽，更不像普魯士那樣是個野心勃勃的後起之秀。它就坐在歐洲的正中央，是天然的協調者。而真正讓維也納成為棋局中心的，是一個人：奧地利外相<strong>克萊門斯·馮·梅特涅（Klemens von Metternich，1773–1859）</strong>。</p>
+<p>梅特涅是這場會議的東道主，也是它真正的導演。他出身萊茵蘭的貴族世家，年輕時親眼目睹法國大革命如何把他熟悉的舊世界連根掀翻，那段經歷在他心裡種下了一生的信念：革命是一場瘟疫，秩序是唯一的解藥。他冷靜、優雅、虛榮，極善於周旋，是那種能在舞會上微笑著把一個王國的命運談妥的人。在維也納，他不只是奧地利的代表，更自命為整個歐洲的醫生——他要為這片被革命與戰爭折騰了二十年的大陸，開出一帖回歸舊秩序的藥方。會議的議程、節奏、座次、甚至每一場宴會的賓客名單，都在他的掌控之中。維也納，第一次成為整個歐洲外交的中央舞台，而站在舞台中央的，是這位哈布斯堡的外相。</p>
+
+<h3>會議不前進，只跳舞</h3>
+<p>但維也納會議最為後世記住的，並不是它談成了什麼，而是它的<em>排場</em>。哈布斯堡宮廷為這場曠世聚會傾盡了家底：連續數月，舞會、宴會、狩獵、歌劇、雪橇遊行、煙火、化妝舞會一場接一場，幾乎沒有停歇的夜晚。霍夫堡宮的大廳裡，水晶吊燈下旋轉著歐洲最顯赫的身軀；新興的圓舞曲——華爾滋——正是在這幾個月裡，從一種被視為輕佻的民間舞步，登堂入室，成為整個歐洲上流社會的時尚。供養這一切的開銷之巨，據說讓奧地利的國庫幾乎見了底。</p>
+<p>正是在這片燈火與旋律之中，一句流傳千古的俏皮話誕生了。據傳，年邁的奧地利元帥<strong>德利涅親王（Prince de Ligne）</strong>看著這沒完沒了的社交、看著各國代表把更多時間花在舞池與牌桌而非談判桌上，譏諷地說：「<strong>會議不前進，它跳舞（Le congrès ne marche pas, il danse）。</strong>」這句話精準得令人莞爾——數月過去，真正的領土問題遲遲談不攏，倒是舞會一場比一場盛大。</p>
+<div class="pull"><p>「會議不前進，它跳舞。」這句俏皮話的背後，是一個被嚴重低估的事實：在那些舞池與牌桌上，歐洲的版圖正在被悄悄重劃——華爾滋的旋律，掩護的是一場關於大陸命運的暗中博弈。</p></div>
+<p>然而，把維也納會議當成一場純粹的縱情享樂，就誤解了它。那些舞會、宴會與沙龍，並不是談判的<em>對立面</em>，而是談判的<em>另一種形式</em>。在正式的會議桌上，列強往往各執己見、僵持不下；可在燭光搖曳的舞會角落，在歌劇院的包廂裡，在某位女主人精心安排的晚宴上，真正的交易才得以低聲達成。梅特涅本人就是個中高手——他與情人在沙龍裡的周旋，與沙皇在舞會上的試探，常常比正式照會更能推進大局。同時，這也是歐洲史上最龐大的一次情報集會：奧地利的祕密警察拆閱與會者的每一封信，僕役、車夫、舞伴背後可能都站著某國的耳目。優雅的社交場，同時是冷酷的情報場。維也納在這幾個月裡，既是歐洲的舞廳，也是歐洲的諜報中樞。</p>
+
+<h3>梅特涅體系：把革命關回瓶子</h3>
+<p>跳舞之餘，會議終究還是談出了結果——而那個結果，深深烙著梅特涅的印記。一八一五年，列強簽下協議，為此後的歐洲奠定了一套秩序，後世稱之為<strong>梅特涅體系（Metternich system）</strong>，或更廣義的<strong>「歐洲的協調」（Concert of Europe）</strong>。它建立在三根支柱之上。</p>
+<p>第一根是<strong>正統（legitimacy）</strong>：被拿破崙趕下台的合法王朝，要盡可能地復辟歸位——法國的波旁王室回來了，各邦的君主回來了，彷彿那二十年的革命與帝國，是一場該被抹去的噩夢。第二根是<strong>均勢（balance of power）</strong>：誰也不能太強，要讓列強彼此牽制，沒有任何一國能再像拿破崙的法國那樣獨霸歐洲——於是法國被適度地保全而非肢解，普魯士、俄國、奧地利、英國在版圖上互相制衡。第三根，也是梅特涅最在意的一根，是<strong>壓制（repression）</strong>：對革命、自由主義與正在覺醒的民族主義，要嚴防死守、絕不姑息。在他眼裡，民族要求自決、人民要求憲法，都是一八九年那場瘟疫的餘毒，必須在它再次燎原之前撲滅。</p>
+<div class="deepen">
+<span class="dh">概念深掘 · 一套「凍結時間」的秩序，為什麼能維持得這麼久</span>
+<p>梅特涅體系最驚人之處，是它的<strong>持久</strong>。在它之後，歐洲列強之間竟維持了將近一個世紀沒有爆發全面性的大戰——直到一九一四年。後世的史家因此既佩服又惋惜：佩服它確實換來了難得的長期和平，惋惜它換取和平的方式，是試圖<em>凍結時間</em>——用復辟的王朝、密探的網絡與層層的審查，把整個歐洲社會強行按回革命之前的模樣。</p>
+<p>但時間是凍不住的。工業化在加速，市民階級在壯大，民族意識在發酵，要求憲政與自由的呼聲在地底滾動。梅特涅體系能維持，靠的不是順應這股潮流，而是用強力把它<em>壓住</em>。這就埋下了一個根本的矛盾：一套秩序若只能靠壓制來存續，那麼它維持得越久，被壓住的能量就積得越厚。它買來的不是真正的安定，而是一段被延後的動盪——延後，但從未取消。</p>
+</div>
+<p>而執行這套壓制秩序的指揮所，正是維也納。在奧地利境內，梅特涅建起了當時歐洲最縝密的審查與警察制度之一：報刊受到嚴格管制，大學裡布滿了監視思想的眼睛，書信被拆閱，集會被盯防，任何散發著自由主義或民族主義氣味的言論，都可能招來祕密警察的造訪。維也納在外交上達到了它聲望的巔峰——它是歐洲秩序的首都；可在內政上，它也成了一座優雅而窒息的籠子。</p>
+
+<h3>退回客廳的時代：比德麥雅</h3>
+<p>當一個社會的公共空間被審查與密探佔據，當談論政治成了一件危險的事，人們會往哪裡去？答案是：往內、往家裡、往那扇關上的門背後去。這就是<strong>比德麥雅時代（Biedermeier，約1815–1848）</strong>——維也納在梅特涅統治下，那段奇特而精緻的文化歲月。</p>
+<p>「比德麥雅」這個名字本身帶著一絲反諷，源自當時諷刺刊物上一個虛構的、滿足於小日子的市民形象。它指的正是這樣一種生活姿態：既然外面的天地不容你過問，那就把全副心力，傾注到自己的客廳裡來。這個時代的維也納市民，把家居佈置得溫暖而講究——線條簡潔優雅的家具、擦得發亮的木質地板、窗台上的盆栽、牆上的小幅風景畫。他們在家中舉辦小型的音樂會，圍坐在鋼琴旁，朋友與家人輪流演奏、歌唱。生活的重心，從廣場退回到了客廳，從公共退回到了私密，從宏大的政治理想，退回到一杯咖啡、一首歌、一個寧靜傍晚的小確幸。</p>
+<p>這個內向時代最動人的化身，是<strong>法蘭茲·舒伯特（Franz Schubert，1797–1828）</strong>。他短暫的一生幾乎沒有離開過維也納，沒有顯赫的宮廷職位，也不曾被權貴供養，而是在朋友圈裡度過——那些被後人稱為「舒伯特黨（Schubertiade）」的家庭聚會，一群文藝青年聚在某人的小公寓裡，舒伯特坐在鋼琴前，彈唱他剛寫好的藝術歌曲。他一生寫下六百多首這樣的<em>歌曲（Lieder）</em>，把歌德、海涅的詩句譜成旋律，唱的是流浪、思念、孤獨、對美好事物轉瞬即逝的悵惘。那不是革命的吶喊，而是一個被禁止吶喊的時代，把所有情感都收進了私密的、室內的、近乎耳語的歌聲裡。比德麥雅的精緻，本質上是一種<strong>向內的逃避</strong>——當你不能改變外面的世界，你便退回來，把自己的小世界經營得無可挑剔。</p>
+<div class="aside"><span class="hl">內向的美學</span>比德麥雅的家具至今仍被收藏——它的優雅，恰恰來自一個不能談論大事的時代，人們把全部的講究，傾注進了一張椅子、一只茶杯、一首家庭演唱的歌。</div>
+
+<h3>華爾滋底下的暗流</h3>
+<p>於是，這個時代的維也納，呈現出一幅奇異的雙重畫面。表面上，它是全歐洲最優雅、最有教養、最懂得生活的城市：街上流淌著圓舞曲，咖啡館裡飄著咖啡香，客廳裡迴響著舒伯特的歌，秩序井然，歲月靜好。可在這層精緻的表皮之下，是另一套東西在運轉——拆信的密探、查禁的書目、噤聲的報館、不敢深談的話題。優雅，是被審查修剪出來的優雅；平靜，是被警察維持的平靜。維也納人學會了一種特殊的生存智慧：在公共場合說漂亮話，把真心話留給客廳裡最信得過的幾個人。</p>
+<p>這幅畫面美則美矣，卻是建立在一座壓力鍋上的。市民階級在比德麥雅的客廳裡待得越久，他們對參與公共生活、對憲政、對自由的渴望，就壓抑得越深。被禁止談論政治的知識分子、被排斥在權力之外的中產、被哈布斯堡多民族帝國壓著的各個民族——他們的不滿，並沒有因為被禁止表達而消失，只是被趕到了地底，在華爾滋的旋律下無聲地累積。梅特涅以為他用警察與審查，為歐洲買來了永久的平靜；他不知道，他只是替一場更大的爆發，按下了暫停鍵。圓舞曲跳得越歡快，鍋底下的火，就燒得越旺。</p>
+<p>這個被壓住的時代，會在一個確切的年份炸開：<strong>一八四八</strong>。那一年，革命的浪潮席捲整個歐洲，維也納的街頭也將築起街壘，憤怒的人群將直接衝向梅特涅本人——這位坐鎮歐洲秩序三十餘年的老人，最終將狼狽地逃離他親手經營的這座城。但那是下一章的故事了。此刻，在一八一四到一五年的霍夫堡宮裡，吊燈依舊輝煌，圓舞曲依舊旋轉，歐洲還在維也納的舞池裡，優雅地跳著它那場盛大而短暫的舞。</p>
+
+<div class="investor">
+<span class="tag">歷史的回聲 · 跳得越歡，壓得越深</span>
+<p>維也納會議，是這座城外交聲望的絕頂時刻。在那幾個月裡，整個歐洲的命運都攥在多瑙河畔——兩位皇帝在這裡跳舞，幾百個邦國的版圖在這裡重劃，一套將維持近一個世紀的秩序在這裡誕生。哈布斯堡的頭顱，從未如此清晰地成為歐洲的大腦；維也納，是貨真價實的歐洲指揮所。這是它作為「帝國的頭顱、歐洲中心」的最高光時刻。</p>
+<p>但這頂桂冠底下，藏著一個會反覆出現在人類歷史裡的教訓：<strong>用壓制換來的秩序，從來不是真正的安定，而是被延後的動盪。</strong>梅特涅以警察與審查為歐洲鑄了一只精美的籠子，籠子裡奏著舒伯特，跳著華爾滋，一切看似妥帖。然而被壓住的能量不會憑空消失，它只會在表面的平靜下越積越厚。華爾滋跳得越歡，底下那股渴望自由、渴望改變的力量就積得越深——直到某一天，鍋蓋再也壓不住。維也納在一八一四年攀上了它的頂峰，卻也在同一刻，悄悄為三十多年後的崩裂，上緊了發條。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch7" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · 1848 & Franz Joseph</span>
+    <h2 class="act-title">一八四八，與法蘭茲·約瑟夫的登場</h2>
+    <p class="act-sub">Revolution, Suppression & the Eternal Emperor</p>
+    <div class="ornament">⚔ ✦ 👑</div>
+  </div>
+  <div class="prose">
+<p>一八四八年的春天，整個歐洲像一座被同時點燃的乾草棚。先是巴黎，二月裡推翻了七月王朝；火星順著電報與報紙的速度向東飛去，幾個星期內，柏林、米蘭、布達佩斯、布拉格——還有維也納——一座接一座地燒了起來。後人把這一年稱作「<strong>民族之春（Springtime of Nations）</strong>」。對哈布斯堡而言，這把火格外凶險，因為這個帝國本身就是一捆綁在一起的乾柴：日耳曼人、匈牙利人、義大利人、捷克人、波蘭人、克羅埃西亞人……一旦其中任何一束點著，火就會順著民族的紋理向四面竄。</p>
+<p>而維也納，是這捆乾柴的繩結。三月十三日，這座一向以恭順與享樂聞名的帝都，街頭忽然站滿了人。市民要求憲法與新聞自由，大學生組成了武裝的「<strong>學術軍團</strong>」，城郊工廠區的工人則為麵包與工作走上街。一個統治了維也納近四十年、把整個歐洲的秩序攥在掌心的名字，在這一天轟然崩塌——<strong>梅特涅（Klemens von Metternich）</strong>，那位拿破崙之後歐洲協調體系的總設計師、書報檢查與秘密警察的化身，被自己親手維護了三十多年的城市趕了出去。他化裝、潛行，最後逃往倫敦。一個被認為堅不可摧的時代，在幾天之內就漏了氣。</p>
+<div class="pull"><p>梅特涅的逃亡，是一個象徵：當一個體系把全部本事都用在「讓什麼都不要改變」上，它就會在改變真正來臨的那一刻，發現自己連一寸後退的餘地都沒有。</p></div>
+
+<h3>火燒到帝國的每一道紋理</h3>
+<p>維也納街頭的勝利，只是這場大火的起點。梅特涅一倒，被他壓了三十年的力量同時鬆綁，帝國的每一個民族都聽見了自己的鐘聲。在<strong>匈牙利</strong>，以<strong>科蘇特（Lajos Kossuth）</strong>為首的議會迅速通過了一整套近乎獨立的憲政法案，把布達佩斯推向一個民族國家的雛形；不久之後，匈牙利乾脆宣布廢黜哈布斯堡王朝。在義大利北部的<strong>倫巴底</strong>與<strong>威尼斯</strong>，米蘭人在「五日起義」中把奧地利駐軍逐出城外，威尼斯重建了中斷半世紀的共和國。在波希米亞的<strong>布拉格</strong>，捷克人召開泛斯拉夫大會，要求與日耳曼人平等的地位。一時之間，這個橫跨中歐的龐然大物，像是要從每一條接縫處同時裂開。</p>
+<p>表面上看，這是一場關於「自由」的革命——憲政、議會、新聞、選舉。但它更深的引擎，是「<strong>民族</strong>」。十九世紀的歐洲，正在用一種全新的語言重新想像政治：一個國家，應當由「一個民族」組成；說同一種語言、共享同一段記憶的人，理應擁有屬於自己的國家。這套邏輯對英、法這樣的單一民族大國是養分，對哈布斯堡卻是劇毒——因為這個帝國的全部存在理由，恰恰建立在「多民族同戴一頂王冠」之上。一八四八年真正向它提出的，不是某一條改革訴求，而是一個它永遠無法回答的問題：<em>當每個民族都想要自己的國家，一個由十幾個民族拼成的帝國，還有什麼存在的道理？</em></p>
+<div class="aside"><span class="hl">維也納的兩難</span>同一場革命裡，維也納的日耳曼自由派既想要憲政，又不願帝國解體——他們既是革命者，也是帝國的繼承人，這個內在矛盾，注定了維也納無法真正領導這場風暴。</div>
+
+<h3>軍隊回來了</h3>
+<p>然而火勢雖猛，柴堆下面那塊鐵砧——軍隊與王朝——並沒有真正被砸碎。哈布斯堡最堅硬的地基從來不是民意，而是它那支由各民族士兵組成、只效忠於皇帝的軍隊。當最初的慌亂過去，將領們開始一個戰場一個戰場地把秩序奪回來。在義大利，老將<strong>拉德茨基（Joseph Radetzky）</strong>接連擊潰薩丁尼亞王國，重新踏平了倫巴底與威尼斯——史特勞斯為他譜寫的《拉德茨基進行曲》，至今仍是維也納新年音樂會的壓軸，那輕快得近乎天真的旋律背後，是一支重新征服的軍隊。同年十月，當維也納城內爆發更激進的第二波起義，溫迪施格雷茨親王索性掉轉炮口，<strong>圍攻並炮轟了帝國自己的首都</strong>，把這座最先點火的城市重新踩在腳下。</p>
+<p>最慘烈、也最具象徵意義的，是匈牙利。科蘇特領導的匈牙利軍隊一度節節勝利，甚至把奧地利人逼到絕境。年輕的維也納朝廷於是做了一件意味深長的事：它向北方的<strong>沙皇尼古拉一世（Nicholas I）</strong>求援。一八四九年夏天，數十萬俄軍越過喀爾巴阡山，與奧軍南北夾擊，匈牙利的抵抗終於在絕對的兵力差距下崩潰。一個哈布斯堡皇帝，為了鎮壓自己治下的子民，不惜把另一個帝國的軍隊請進門——這個畫面，把整場革命的結局說盡了：<strong>舊秩序贏了，但它是靠借來的刺刀贏的。</strong></p>
+<div class="warn">
+  <span class="warn-tag">勝利的代價：阿拉德的十三人</span>
+  <p>鎮壓之後是清算。一八四九年十月六日，十三名匈牙利革命軍將領在<strong>阿拉德（Arad）</strong>被處決，史稱「阿拉德十三烈士」；同一天，匈牙利第一任立憲政府總理在布達佩斯被槍決。這些名字，至今仍是匈牙利民族記憶中最深的傷口之一。哈布斯堡用這樣的方式重建了它的秩序，也在帝國最重要的夥伴民族心中，種下了一道長達數十年都未能癒合的裂痕——這道裂痕，將在不到二十年後逼出一八六七年的妥協。記住這一點，不是為了審判，而是為了理解：這個帝國此後所有的「穩定」，都是建立在這樣一場以血換來的恢復之上。</p>
+</div>
+
+<h3>一個十八歲少年戴上了皇冠</h3>
+<p>就在這場大火還在各地悶燒的一八四八年底，哈布斯堡王朝做出了一個冷靜到近乎冷酷的決定。深陷革命泥淖、聲望盡失的老皇帝斐迪南一世退位；他的弟弟也放棄了繼承權。十二月二日，在摩拉維亞的奧爾米茨，一個年僅<strong>十八歲</strong>的少年被推上了帝位——他就是<strong>法蘭茲·約瑟夫一世（Franz Joseph I，1848–1916 在位）</strong>。王朝挑中他，正因為他年輕、未被革命的承諾所玷污、可以與舊政府的一切過失切割，重新開始。沒有人——包括他自己——能想到，這個在革命的灰燼中匆匆加冕的少年，將要在這頂皇冠下坐整整<strong>六十八年</strong>，直到一九一六年第一次世界大戰的炮火中才闔上眼睛。</p>
+<p>他幾乎是被歷史精心鑄造出來，用來扮演「皇帝」這個角色的。法蘭茲·約瑟夫一生勤勉得近乎機械：每天清晨四點起床，伏案批閱公文直到深夜，把自己活成了帝國這部龐大官僚機器裡最盡責的一顆螺絲。他端莊、刻板、節制、保守，討厭一切新奇的東西——他不信任電話，住在金碧輝煌的美泉宮裡卻睡一張簡樸的軍用鐵床。他不是暴君，也談不上昏庸；他只是用整整一生，固執地相信一件事：<strong>只要他自己什麼都不改變，這個世界就還能維持原狀。</strong></p>
+<div class="deepen">
+  <span class="dh">概念深掘 · 當一個人成為一個時代的人格化身</span>
+  <p>歷史上很少有統治者像法蘭茲·約瑟夫這樣，與他所統治的東西長到難以分辨。他在位六十八年，意味著到他晚年，絕大多數臣民終其一生都只認識這一位皇帝。在他們的想像裡，「奧匈帝國」與「法蘭茲·約瑟夫」幾乎是同一個詞；那張蓄著白色頰鬚、神情永遠肅穆的臉，就是帝國本身的臉。</p>
+  <p>這種「人格化」既是力量，也是詛咒。它讓帝國在一個民族離心、思潮翻湧的時代，仍有一個共同效忠的對象、一根把所有碎片暫時攏住的軸。但它也意味著，整個帝國的穩定，被押注在一個人的長壽與「不變」之上。當這位皇帝把「不改變」當成最高美德，這個國家就漸漸喪失了自我更新的能力——它不再隨時代呼吸，而是屏住了氣，賭那位老人能比時代活得更久。這是一場它注定要輸的賭局。</p>
+</div>
+
+<h3>孤獨皇帝與他被詛咒的家族</h3>
+<p>如果說公務上的法蘭茲·約瑟夫是一台不知疲倦的機器，那麼他的私人生活，則是一連串幾乎不近人情的悲劇。命運像是要懲罰這份過度的端正，把他身邊最親近的人，一個接一個地奪走，而且方式一個比一個慘烈。</p>
+<p>他的弟弟<strong>馬克西米連（Maximilian）</strong>，被拿破崙三世扶上墨西哥皇帝的虛位，最終在當地革命中眾叛親離，一八六七年被行刑隊槍決於克雷塔羅。他深愛的妻子，美麗、憂鬱、厭惡宮廷、終生在歐洲漫遊以逃避維也納的<strong>伊麗莎白皇后（Elisabeth，世人暱稱「茜茜」Sisi）</strong>，一八九八年在日內瓦湖畔散步時，被一名義大利無政府主義者用一柄銼刀刺穿心臟。他唯一的兒子、帝國的繼承人<strong>魯道夫皇太子（Rudolf）</strong>，一八八九年在維也納近郊的<strong>梅耶林（Mayerling）</strong>狩獵行宮裡，與年輕情人一同走向死亡——一樁震驚全歐、至今仍籠罩在迷霧中的殉情自殺。多年以後，當王位最終要傳給姪子<strong>斐迪南大公（Franz Ferdinand）</strong>時，一九一四年塞拉耶佛的兩聲槍響又奪走了這最後一位繼承人——而那兩聲槍響，將把整個世界拖進深淵。</p>
+<p>弟弟被槍決，妻子被刺殺，兒子自盡，姪子遇刺——一個人能承受的家族災難，幾乎都壓在了這一位皇帝身上。他用唯一懂得的方式回應這一切：更深地埋進公文，更牢地抓住那套讓他覺得安全的規矩與儀式。他最終成了一座活著的紀念碑，一個用個人的孤獨，為一個正在崩解的世界守靈的老人。</p>
+
+<h3>用「不變」對抗變動的時代</h3>
+<p>回到一八四八年之後的政局。革命被鎮壓了，但鎮壓並不能讓問題消失。年輕的法蘭茲·約瑟夫與他的大臣們，最初選擇的道路是「<strong>新專制（Neoabsolutism）</strong>」——既然憲政帶來動亂，那就乾脆收回革命年代被迫許下的一切承諾，回到一個沒有議會、沒有憲法、由皇帝與官僚直接統治的中央集權帝國。它確實也推行了一些現代化措施：統一關稅、廢除農奴殘餘、整頓財政。但這套「開明的高壓」缺了最關鍵的一塊——它沒有給那些覺醒了的民族任何政治上的位置，只是把蓋子重新蓋緊，假裝下面的水沒有在燒。</p>
+<p>真正戳破這個假象的，不是內政，而是戰場。一個拒絕改變的帝國，在一個飛速變動的世界裡，很快就在它最看重的軍事與外交上連連失手。一八五九年，在義大利統一運動的浪潮中，奧地利在<strong>索爾費里諾（Solferino）</strong>慘敗於法國與薩丁尼亞聯軍，丟掉了富庶的倫巴底。七年之後的一八六六年，更致命的一擊到來：在<strong>普奧戰爭</strong>的<strong>克尼格雷茨（Königgrätz）</strong>戰役中，奧地利被俾斯麥治下、裝備了後膛槍與鐵路動員體系的<strong>普魯士</strong>徹底擊潰。後果是歷史性的：哈布斯堡被永遠擠出了德意志世界，幾百年來「德意志諸邦之首」的身份從此化為烏有。德意志的未來，將由柏林、而非維也納來書寫。</p>
+<div class="stats">
+  <div class="stat"><div class="num">68 年</div><div class="lbl">法蘭茲·約瑟夫在位（1848–1916）</div></div>
+  <div class="stat"><div class="num">1859</div><div class="lbl">索爾費里諾敗於法國、薩丁尼亞，失倫巴底</div></div>
+  <div class="stat"><div class="num">1866</div><div class="lbl">克尼格雷茨敗於普魯士，被逐出德意志</div></div>
+  <div class="stat"><div class="num">18 歲</div><div class="lbl">登基時的年齡</div></div>
+</div>
+<p>接連的軍事與外交挫敗，把這個一心想「什麼都不變」的帝國，逼到了非變不可的牆角。財政枯竭、軍隊蒙羞、德意志霸權旁落、匈牙利的不滿從未平息——所有舊專制掩蓋的裂縫，此刻都一齊裂開。維也納終於不得不承認：靠借來的刺刀和緊蓋的鍋蓋，已經撐不下去了。它必須與帝國裡那個最強大、也最不馴服的民族——匈牙利人——坐下來談判，把帝國重新拼成另一種形狀。這場談判的結果，將是一八六七年那場改寫了帝國體制的「<strong>大妥協（Ausgleich）</strong>」——以及那條圍著舊城牆原址鋪開、金光燦爛的環城大道。但那，是下一章的故事了。</p>
+<p>而在這一切變動的中心，那位皇帝始終端坐不動。革命之火燒過，硝煙散去，新專制試過又失敗，兩場大戰輸掉了倫巴底與整個德意志——時代在他眼前翻天覆地，而法蘭茲·約瑟夫只是每天清晨四點起床，繼續批閱他那看不完的公文。他像一塊立在湍流中央的礁石，固執地相信只要自己一動不動，洪水終會繞著他流回原來的河道。他不知道的是，洪水從不繞行——它只是漫過礁石，繼續向前，把那塊不肯移動的石頭，慢慢沖刷成一件時代的遺物。</p>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 用長壽對抗時間</span>
+  <p>一八四八年是哈布斯堡的一道分水嶺：革命向它提出了那個它永遠無法回答的問題——多民族的帝國，如何在一個只認「民族國家」的時代裡繼續存在？它的回答，最終濃縮成了一個人、一張臉、一頂戴了六十八年的皇冠。當一個帝國把全部的穩定，寄託在一位皇帝「什麼都不改變」的勤勉與長壽之上，它換來的並不是它渴望的永恆，而是一種華麗的僵化。它在原地穩穩地站了六十八年——而世界，早已走遠。</p>
+  <p>這就是「帝國的頭顱」這條主線在十九世紀最深的一課：把一個複雜系統的生死，押注在一個人的「不犯錯」與「不衰老」上，是最危險的穩定。法蘭茲·約瑟夫活得越久，他所人格化的那個舊世界，就越像一具精緻的時代錯置——一座還在準時報時、卻早已指向錯誤時刻的華麗大鐘。一個拼命用「不變」去抵擋「變動」的帝國，最終會發現，它對抗的不是某一場革命，而是時間本身——而沒有人，能贏過時間。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch8" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Ringstrasse</span>
+    <h2 class="act-title">拆掉城牆：環城大道</h2>
+    <p class="act-sub">The Boulevard of the Liberal Bourgeoisie</p>
+    <div class="ornament">🏛 ✦ 🌳</div>
+  </div>
+  <div class="prose">
+<p>一八五七年聖誕節後第三天，維也納的官方公報《維也納日報》上刊出一封短信。寫信人是皇帝法蘭茲·約瑟夫一世（Franz Joseph I，1848–1916 在位），收信人是內政大臣。信只有一頁，卻決定了這座城日後一百多年的長相。皇帝寫道：<em>「朕之意旨：將維也納內城周圍之城牆與防禦工事，連同其外緣之空地，盡數拆除。」</em>——德文裡那個關鍵的詞是「<strong>Es ist Mein Wille</strong>」，「這是朕的意志」。一句話，就要把一道從中世紀守到拿破崙時代的環形城牆，連同它腳下那一圈空蕩蕩的射界，從地圖上抹去。</p>
+
+<p>要懂得這道命令的份量，得先懂得那道城牆是什麼。維也納的內城（Innere Stadt）被一圈厚實的稜堡城牆團團圍住，城牆之外，是一片刻意保持空曠的緩衝帶，叫做<strong>外緣空地（Glacis）</strong>——軍事術語裡指城牆前向外傾斜、清空一切遮蔽物的開闊地，好讓守軍的火炮能無遮無攔地轟擊來犯之敵。幾百年來，這圈牆與這片空地，是維也納抵禦外敵的命根子：一五二九年與一六八三年兩度擋下鄂圖曼大軍的，正是它。但到了十九世紀中葉，火炮的射程早已遠遠超過這道牆的設計，城牆作為軍事工事，已經過時。它真正還在阻擋的，不是敵人，而是這座城自己——把擁擠不堪的內城，和外圍迅速膨脹的市郊，硬生生切成兩個世界。</p>
+
+<h3>一道命令拆掉一座中世紀</h3>
+
+<p>於是這道牆的命運，從一個軍事問題，變成了一個都市問題，最後變成了一個政治問題。拆牆，意味著釋放出一條環繞舊城、寬達數十公尺、總長約四公里的巨大環形地帶——那是當時歐洲任何一座老城都不可能憑空獲得的、夢寐以求的空白畫布。問題只剩一個：在這條空白上，要畫什麼？</p>
+
+<p>皇帝給的答案，是一條大道。一條沿著舊城牆的走向、環繞整個內城一圈的寬闊林蔭大道——它後來的名字，叫<strong>環城大道（Ringstrasse），</strong>字面意思就是「環形街」。但若以為這只是修一條路，就太小看這件事了。環城大道從一開始就不是「一條路」，而是「一整套都市計畫」：它是一條大道，更是大道兩側將要矗立起來的一整圈紀念性建築——議會、市政廳、劇院、歌劇院、博物館、大學、教堂、銀行、宮殿般的私人宅邸。皇帝拆掉的是一圈牆，要換上的，是一圈這座帝國最想向世界展示的東西。</p>
+
+<div class="aside"><span class="hl">Es ist Mein Wille</span>「這是朕的意志」——這句開場白，本身就是個反諷。一條日後將成為市民資產階級紀念碑的大道，是由一位專制君主的一道御旨啟動的。</div>
+
+<p>一八五八年，當局舉辦了國際競圖，向全歐徵集規劃方案。最終採納的，是一個融合了多份提案的綜合方案：一條兩側植滿樹木、設有人行步道與騎馬道的寬闊大道，沿線預留出一塊塊建築用地，要蓋的不是住宅區，而是一座城市想對自己、對帝國、對世界說的話。一八六五年五月一日，環城大道的第一段正式通車，皇帝親自乘車繞行。一座中世紀的維也納，就此讓位給一座十九世紀的維也納。</p>
+
+<h3>把整部歐洲建築史排成一圈</h3>
+
+<p>環城大道最令人嘆為觀止、也最堪玩味的，是它沿線那一棟棟建築的「樣式」。它們不屬於同一種風格——它們刻意地、自覺地，分屬於歐洲建築史上每一個輝煌的時代。這背後，是十九世紀一套主導性的美學思想，叫做<strong>歷史主義（Historicism）</strong>：建築師不再發明新風格，而是回到歷史的倉庫裡，為每一棟建築挑選一種「最契合其功能與精神」的舊風格，重新演繹。在環城大道上，這套思想被推到了極致——它幾乎成了一場露天的、永久的歐洲建築史博覽會。</p>
+
+<p>看看這串名單背後的用心：<strong>議會大廈（Parlament）</strong>，採用古典希臘風格——因為民主誕生於雅典，這座代議制的殿堂便要披上民主搖籃的衣裳，門前還立起一尊雅典娜女神像。緊鄰它的<strong>市政廳（Rathaus）</strong>，卻是高聳的<em>哥德式</em>尖塔——因為哥德式是中世紀自由市的建築語言，是市民自治、行會與市政自豪感的象徵。再過去，<strong>城堡劇院（Burgtheater）與宮廷歌劇院（後來的國家歌劇院）</strong>，用的是華麗的新文藝復興與巴洛克語彙，對應戲劇與音樂作為人文藝術之巔的身分。</p>
+
+<div class="cards">
+  <div class="card"><span class="flag">議會大廈</span><h5>古希臘式</h5><p>代議制的殿堂，要披上民主搖籃雅典的衣裳——以一種「最古老的自由」為自己背書。</p></div>
+  <div class="card"><span class="flag">市政廳</span><h5>哥德式</h5><p>哥德是中世紀自由市的語言，高聳尖塔宣告市民自治的悠久傳統。</p></div>
+  <div class="card"><span class="flag">大學</span><h5>文藝復興式</h5><p>文藝復興＝人文與理性的重生，正配得上知識殿堂的自我期許。</p></div>
+  <div class="card"><span class="flag">雙博物館</span><h5>新文藝復興式</h5><p>藝術史與自然史博物館隔廣場對望，把帝國的收藏與科學一同供上。</p></div>
+</div>
+
+<p><strong>維也納大學（Universität Wien）</strong>的新校舍，選了文藝復興式——因為文藝復興象徵著古典學問與理性的重生，正配得上一座知識殿堂的自我想像。而在大道與舊皇宮之間那片開闊的廣場上，兩座造型幾乎一模一樣、隔著廣場彼此對望的龐然大物，是<strong>藝術史博物館與自然史博物館</strong>——一座供奉哈布斯堡幾百年累積的繪畫與珍寶，一座供奉礦石、化石與標本，用新文藝復興的華貴外殼，把帝國的藝術與科學一同捧到世人眼前。一條大道走下來，你彷彿從雅典走到中世紀，再走進文藝復興，最後抵達巴洛克——整部歐洲文明的精華，被排成了一個圈。</p>
+
+<div class="deepen">
+  <span class="dh">概念深掘 · 為什麼十九世紀的建築要「向歷史借衣裳」</span>
+  <p>歷史主義並非偷懶，而是一種深刻的時代心理。十九世紀的歐洲資產階級，是一個剛剛崛起、卻還缺乏「血統」的新階級——他們有錢、有教養、有抱負，卻沒有貴族那套世代相傳的正當性。於是他們轉向歷史尋找認同：用希臘為政治背書，用哥德為市民自由背書，用文藝復興為理性與學問背書。每一種借來的舊風格，都是一張遞給未來的名片，上面寫著：<em>我們不是暴發戶，我們是整部西方文明的繼承人。</em></p>
+  <p>這正是環城大道最迷人也最脆弱之處。它用一整圈「正確的歷史引用」來證明自己的高貴，每棟樓都像在引經據典。但引用得越完美，就越暴露出一個祕密：這個階級的自信，其實建立在不斷向過去借貸之上。它擁有財富與品味，卻還沒能長出一種<em>屬於自己時代的</em>聲音。這個未說出口的焦慮，將在一代人之後爆發成一場美學革命。</p>
+</div>
+
+<h3>這是誰的舞台</h3>
+
+<p>那麼，建起這一切的，究竟是誰？答案，是十九世紀下半葉維也納崛起的<strong>自由派資產階級（liberal bourgeoisie）</strong>。一八四八年革命雖然失敗，但它釋放出的力量並未消失；隨後幾十年的經濟自由化，催生出一個富裕、自信、信奉進步與理性的市民階層——銀行家、工業家、律師、醫生、教授、報人、藝術贊助者。環城大道，就是他們的紀念碑。他們在這裡蓋起一棟棟氣派的公寓宮殿，叫做「<strong>環城大道宅邸（Ringstrassenpalais）</strong>」——外觀仿照貴族府邸，門面雕梁畫棟，住的卻不是世襲貴族，而是新富的市民家庭。他們也在這裡建起銀行與交易所，把金融的心臟安放在這條大道上。</p>
+
+<p>值得特別一提的是，這個自由派資產階級裡，有相當可觀的一部分，是已經高度同化的<strong>猶太富商與專業人士</strong>。十九世紀中葉的鬆綁，讓維也納的猶太人第一次得以擺脫種種限制，全面進入金融、法律、醫學、新聞、學術與藝術的世界。許多最顯赫的銀行世家、最活躍的文化贊助者、最傑出的醫生與律師，都出自這個剛剛獲得公民權的群體。對他們而言，環城大道不只是一條街，更是一張入場券——一個宣告「我們已經是這座城、這個帝國的正式市民」的舞台。日後維也納世紀末那燦爛得近乎奇蹟的思想與藝術爆發，其土壤，正是在這條大道兩側的客廳與沙龍裡悄悄培育的。</p>
+
+<div class="pull"><p>皇帝拆掉一圈軍事的牆，市民階級在原址豎起一圈文化的牆——一圈用議會、劇院、博物館與銀行砌成的牆，宣告一個世俗的、進步的、屬於市民的維也納。</p></div>
+
+<p>於是「<strong>環城大道風格（Ringstrassenstil）</strong>」這個詞，漸漸超出了建築的範疇，成了一整個時代的代名詞。它指的不只是那些仿古的立面，更是那個階級的整套世界觀：對進步的信仰、對理性的崇拜、對教養與藝術的虔誠、對「文明會不斷向上」的樂觀。這是維也納自由主義的黃金年代，是一個相信音樂廳、博物館與議會能把人類載往更好未來的年代。維也納再一次重塑了自己的面貌——只是這一次，動手的不是皇帝，也不是教會，而是這座城自己的市民。他們把一座古老的帝國之都，改建成了自己的舞台。</p>
+
+<h3>華麗外殼下的裂縫</h3>
+
+<p>但就在這片光彩奪目的全盛景象之中，一道裂縫已經悄悄裂開。問題恰恰出在那套引以為傲的「借來的歷史風格」上。當第一代環城大道的建造者沉醉於用希臘、哥德、文藝復興的衣裳裝點自己時，下一代人卻開始覺得，這一切華麗，是一場巨大的<em>虛飾</em>。一棟用石膏與灰泥仿造大理石、用貼面冒充承重結構的「文藝復興宮殿」，在他們眼中不是高貴，而是謊言——它假裝自己是它並不是的東西。</p>
+
+<p>最早、也最激烈地喊出這聲反叛的，是兩個名字。一位是建築師<strong>奧托·華格納（Otto Wagner，1841–1918）</strong>——他自己年輕時正是環城大道風格的能手，卻在中年幡然轉向，喊出那句日後成為現代建築宣言的話：<em>「不實用的東西，不可能是美的。」</em>他要求建築誠實面對自己的材料與功能，把所有為了「像古代」而堆上去的裝飾統統剝掉。另一位，是言辭更尖刻的批評家<strong>阿道夫·路斯（Adolf Loos，1870–1933）</strong>——他日後寫下那篇驚世駭俗的文章《裝飾與罪惡》，把多餘的裝飾直接斥為一種文明的退化與罪行。對路斯而言，環城大道那一圈精雕細琢的立面，正是他要對抗的整個舊世界的象徵。</p>
+
+<div class="timeline">
+  <div class="tl-item"><div class="tl-year">1857</div><div class="tl-text">皇帝下令拆除城牆與外緣空地，啟動環城大道計畫</div></div>
+  <div class="tl-item"><div class="tl-year">1865</div><div class="tl-text">環城大道第一段通車，皇帝親自乘車繞行</div></div>
+  <div class="tl-item"><div class="tl-year">1873–88</div><div class="tl-text">議會、市政廳、城堡劇院、雙博物館等紀念建築陸續落成</div></div>
+  <div class="tl-item"><div class="tl-year">1890s起</div><div class="tl-text">華格納、路斯一代起而反叛，世紀末現代主義萌生</div></div>
+</div>
+
+<p>這就是環城大道最深刻的歷史弔詭：它越是把自己打扮得無懈可擊，就越是把自己變成了一個非反叛不可的對象。那一圈完美的歷史引用，那一整套「向過去借衣裳」的自信，恰恰成了下一代人眼中必須掙脫的束縛。維也納的市民階級在這裡寫下了他們最華麗的全盛宣言；而正是這份宣言裡那一絲不易察覺的不安——用一整圈借來的歷史，來證明一個沒有歷史的新階級——，將在他們的兒子與孫子手中，引爆一場名為「世紀末」的現代爆發。</p>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 一圈借來的歷史</span>
+  <p>環城大道是維也納資產階級的全盛宣言，是這座城第三度重塑自己面貌的傑作——前兩次由皇帝與信仰主導，這一次，動手的是崛起的市民。但細看之下，一個耐人尋味的事實浮了出來：這個自信滿滿的新階級，竟需要用一整圈「借來的歷史風格」來宣告自己。議會要扮成雅典，市政廳要扮成中世紀，宅邸要扮成貴族府邸——每一棟樓，都在引用一個它並不真正屬於的過去。這份對歷史的引用越是周密，就越透露出一種深層的不安：一個剛剛獲得財富與地位、卻還沒能長出自己聲音的階級，只能向過去借貸正當性。</p>
+  <p>而歷史最深的諷刺往往在此：一個時代最華麗的自我宣告，常常也埋著它自我否定的種子。正是對這種富麗虛飾的反叛——對「假裝自己是別的東西」的厭倦——將在下一代華格納與路斯手中，催生出維也納「世紀末」那場照亮二十世紀的現代爆發。這座帝國的頭顱，在它最自滿的時刻，已經悄悄孕育了下一場革命。最堅固的牆，從來不是石頭砌的，而是一個時代對自己的想像；而推倒它的，永遠是它親手養大的下一代。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch9" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · A Two-Headed Empire</span>
+    <h2 class="act-title">一八六七，與一個雙頭的帝國</h2>
+    <p class="act-sub">The Compromise, the Nationalities & Kakania</p>
+    <div class="ornament">🦅 ✦ 🦅</div>
+  </div>
+  <div class="prose">
+<p>一八六六年七月三日，在波希米亞一個叫做<strong>柯尼希格雷茨（Königgrätz，今捷克赫拉德茨-克拉洛韋）</strong>的村莊附近，奧地利的軍隊在一個下午之內輸掉了一場戰爭，也輸掉了一個延續數百年的夢。對陣的是普魯士。這場仗短得近乎屈辱——史稱「七週戰爭」，從開打到結束不過一個多月，卻像一道地裂，把哈布斯堡的歷史劈成了之前與之後。在這一天之前，維也納還能自認為是德意志世界的天然首領，是那個鬆散的、由幾百個邦國組成的德意志聯邦的領袖；在這一天之後，這個身份被普魯士乾淨俐落地剝奪了。</p>
+
+<p>失敗的原因並不神祕：普魯士有更好的步槍（能臥倒裝填的後膛擊針槍）、更快的鐵路動員、更現代的參謀本部。但對維也納而言，柯尼希格雷茨的真正意義不在軍事，而在一個身份的崩塌：哈布斯堡被永久地<strong>逐出了德意志事務</strong>。四年後，普魯士在凡爾賽宮的鏡廳加冕德意志皇帝，一個以柏林為中心、把奧地利徹底排除在外的德意志民族國家就此誕生。那個延續了四百年、由維也納戴著神聖羅馬皇帝冠冕號令德意志的時代，到此徹底結束。</p>
+
+<h3>頭顱轉向了東方</h3>
+
+<p>一個被趕出客廳的人，會回到自己的內室。哈布斯堡被逐出德意志之後，它賴以維生的重心，被迫從西邊的德意志，轉向了它龐大而駁雜的內部——那個由十幾個民族拼湊而成的多瑙河帝國。而在這個內部，有一股力量是維也納再也壓不住、也再不敢得罪的：<strong>匈牙利人</strong>。</p>
+
+<p>匈牙利的不滿由來已久。一八四八年那場席捲全歐的革命中，匈牙利曾掀起聲勢浩大的獨立運動，宣布脫離哈布斯堡，年輕的法蘭茲·約瑟夫（Franz Joseph，1848–1916 在位）是借了俄國沙皇的軍隊才把它血腥鎮壓下去的。此後近二十年，維也納以高壓統治匈牙利，匈牙利則以消極抵抗回應——抗稅、行政癱瘓，整個王國像一塊嚥不下也吐不出的硬骨頭，卡在帝國的喉嚨裡。柯尼希格雷茨之後，這塊硬骨頭突然有了致命的議價能力：一個剛剛慘敗、隨時可能被普魯士進一步肢解的帝國，承受不起匈牙利在背後再捅一刀。維也納別無選擇，只能與這個最棘手的內部民族，坐下來談一筆交易。</p>
+
+<p>主導這筆交易的，是匈牙利溫和派政治家<strong>德阿克·費倫茨（Deák Ferenc，1803–1876）</strong>與<strong>安德拉希·久洛伯爵（Gyula Andrássy，1823–1890）</strong>。他們開出的條件並不天真——他們不要徹底的獨立（那只會招來鎮壓），而要一種精巧的<em>共治</em>：匈牙利承認共戴一位君主，但要求一個與奧地利完全平等的地位。一八六七年，雙方達成協議。歷史稱之為《<strong>奧匈折衷方案</strong>》（德文 Ausgleich，匈牙利文 Kiegyezés，意即「和解」或「妥協」）。</p>
+
+<h3>一個君主，兩個王國</h3>
+
+<p>《折衷方案》的設計，堪稱十九世紀政治工程中最奇特的一件作品。它把這個古老的帝國重組為一個全新的、史上絕無僅有的政體——<strong>奧匈帝國（Austria-Hungary）</strong>，一個「<strong>雙元君主國</strong>」（Dual Monarchy）。</p>
+
+<p>它的構造可以這樣理解：原本一個帝國，被沿著萊塔河（Leitha）一分為二，成為兩個幾乎完全獨立的半邊。西半邊通稱「<strong>內萊塔尼亞（Cisleithania）</strong>」，習慣上稱奧地利，首都維也納；東半邊通稱「<strong>外萊塔尼亞（Transleithania）</strong>」，即匈牙利王國，首都布達佩斯。兩個半邊各有<em>自己的議會、自己的政府、自己的首相、自己的內政</em>。它們不是中央與地方的關係，而是兩個平起平坐的國家。</p>
+
+<p>把它們繫在一起的，只有三樣東西。第一，也是最核心的，是<strong>同一位君主</strong>：法蘭茲·約瑟夫一個人，同時是「奧地利皇帝」與「匈牙利國王」——他甚至要在布達佩斯另行加冕，戴上那頂相傳屬於聖伊什特萬的古老匈牙利王冠。第二與第三，是兩個半邊<strong>共享的外交與軍事</strong>（以及為此共同分攤的財政）。除此之外的一切，兩邊各管各的。這就是那個著名縮寫的由來——所有屬於共同事務的機構冠以「<strong>k.u.k.</strong>」（kaiserlich und königlich，皇家兼王家）；只屬於奧地利一側的，則冠以「k.k.」。一個帝國的官印上，竟要靠標點符號般的細微區別，來標示一件物事究竟效忠於皇帝、還是國王、還是兩者兼有。</p>
+
+<div class="deepen">
+  <span class="dh">概念深掘 · 雙元君主國：一種用妥協換來的奇蹟，與它內建的矛盾</span>
+  <p>《折衷方案》在當時看是一記漂亮的政治手腕：它用一紙協議把一個瀕臨解體的帝國重新黏合，讓哈布斯堡又多活了半個世紀。匈牙利人得到夢寐以求的平等地位，奧地利人保住帝國的完整與大國身份，法蘭茲·約瑟夫保住王冠——三方皆贏，看似圓滿。</p>
+  <p>但這個設計裡藏著一顆無法拆除的炸彈。它的邏輯是：<em>只要安撫住最強的那個民族，帝國就能存續。</em>問題是，帝國裡不只有奧地利人與匈牙利人——還有十幾個。當這兩個「主人民族」聯手把帝國的權力瓜分為二，也就同時把其餘所有民族按在了腳下。一八六七年的妥協安撫了一個民族，卻同時激怒了其餘所有民族。它買到的不是和平，而是時間——代價是把帝國最深的傷口，從一道變成了十幾道。</p>
+</div>
+
+<h3>無解的死結：民族問題</h3>
+
+<p>這就觸到了奧匈帝國最深、也最終致命的病灶——史家稱之為「<strong>民族問題（the nationalities question）</strong>」。</p>
+
+<p>攤開這個帝國的人口構成，沒有任何一個民族佔到多數。<strong>德意志人</strong>與<strong>匈牙利人</strong>是兩個統治民族，但加起來也不過約四成多。其餘的，是一片令人眼花的拼圖：<strong>捷克人</strong>、<strong>波蘭人</strong>、<strong>烏克蘭人</strong>（當時多稱羅塞尼亞人）、<strong>斯洛伐克人</strong>、<strong>斯洛維尼亞人</strong>、<strong>克羅埃西亞人</strong>、<strong>塞爾維亞人</strong>、<strong>羅馬尼亞人</strong>、<strong>義大利人</strong>……十幾個民族，說著互不相通的語言，信著不盡相同的教，懷著各自的歷史記憶與各自的怨恨。</p>
+
+<p>在過去的世紀裡，這原本不成問題。一個農民效忠的是他的皇帝、他的教會、他的村莊，而不是一個抽象的「民族」。但十九世紀是<strong>民族主義</strong>的世紀。一個極具煽動力的觀念正像野火一樣燒遍歐洲：<em>每一個民族，都應該擁有屬於自己民族的國家。</em>它在西邊締造了統一的德意志與統一的義大利；而在奧匈帝國這個十幾個民族犬牙交錯、根本無法乾淨切割的地方，它卻是一劑毒藥。</p>
+
+<p>於是各民族紛紛起來，要求愈來愈多：先是要求用自己的語言辦學校、上法庭、印公文；繼而要求自治；最終，某些人開始夢想徹底的獨立。而《折衷方案》在這場風暴中扮演的角色最是尷尬：它證明了帝國<em>可以</em>對民族讓步——但只對最強硬、最危險的那一個。這等於向其他民族宣告：你們要的東西，匈牙利人靠施壓拿到了；你們拿不到，只因為你們還不夠強。</p>
+
+<div class="warn">
+  <span class="warn-tag">被激怒的捷克人</span>
+  <p>在所有被《折衷方案》激怒的民族裡，<strong>捷克人</strong>的怨恨最深、也最有代表性。波希米亞是帝國工業最發達、文化最昌盛的地區之一，布拉格的歷史與布達佩斯一樣古老輝煌。捷克的民族主義者問了一個無法反駁的問題：憑什麼匈牙利人能升格為帝國的共同主人，享有自己的王國與議會，而同樣古老、同樣自成一體的波希米亞，卻只能繼續做維也納治下的一個省份？他們要求「三元制」——讓波希米亞與奧地利、匈牙利並列為帝國的第三根支柱。但這個要求被一再擱置、敷衍、否決，因為匈牙利人絕不容許自己的特權被稀釋。捷克問題就此化膿——而一九一八年第一個從帝國廢墟上獨立出來的國家之一，正是捷克斯洛伐克。</p>
+</div>
+
+<h3>卡卡尼亞：一個時代的反諷</h3>
+
+<p>奧匈帝國最深刻的肖像，不是史家畫的，而是一位小說家畫的。奧地利作家<strong>羅伯特·穆齊爾（Robert Musil，1880–1942）</strong>在他那部未完成的鴻篇巨著《<strong>沒有個性的人</strong>》（Der Mann ohne Eigenschaften）裡，為這個帝國取了一個流傳後世的綽號——「<strong>卡卡尼亞（Kakanien）</strong>」。</p>
+
+<p>這個詞的由來是個冷峻的玩笑。它取自那個無所不在的縮寫「k.u.k.」（皇家兼王家）——把兩個 K 連起來念，便成了 Kakania。穆齊爾用這個半是親暱、半是嘲弄的名字，捕捉了這個帝國最本質的氣味：它臃腫，矛盾，行政繁瑣到荒謬，一件公文要分清楚究竟是皇家的、王家的、還是兩者兼有的；它在進步與守舊之間永遠舉棋不定，自稱「歐洲最進步的國家」，骨子裡卻被一套巴洛克式的官僚禮儀拖著走。</p>
+
+<div class="pull"><p>卡卡尼亞——一個臃腫、矛盾、繁文縟節到滑稽，卻又奇異地有人情味的世界；一個明明在每件事上都落後於它的時代，卻又對自己的不合時宜，懷著一種溫柔的、近乎悲憫的自覺的帝國。</p></div>
+
+<p>但穆齊爾的反諷裡，藏著一份深情。卡卡尼亞固然荒謬，卻也<em>奇異地有人情味</em>。在這個帝國裡，一個捷克人、一個猶太人、一個波蘭人、一個義大利人，可以同在維也納的咖啡館裡爭辯哲學，同在帝國的軍隊裡服役，同操著一口帶各種口音的德語，共享一種誰也說不清、卻真實存在的「奧地利性」。它不是一個民族的國家，而是一個容得下許多民族的、世界主義的舊世界。穆齊爾寫《沒有個性的人》時，這個世界已經灰飛煙滅——他是在為一個剛剛死去、而他既鄙夷又眷戀的故鄉，寫一篇漫長的悼詞。</p>
+
+<h3>與時代為敵的帝國</h3>
+
+<p>把這一切放在一起看，奧匈帝國的悲劇便顯出它真正的輪廓：它是一個<strong>與時代為敵的政體</strong>。</p>
+
+<p>十九世紀下半葉，整個歐洲的歷史正朝著一個方向奔流——民族國家。德意志統一了，義大利統一了，巴爾幹的各個民族一個接一個從鄂圖曼的版圖裡掙脫出來，建立自己的國家。「一個民族，一個國家」成了那個時代不容置疑的政治信條。而奧匈帝國，偏偏代表著與此完全相反的原則：它是一個<em>超越民族</em>的構造，一頂王冠之下共戴著十幾個民族，靠的不是血緣與語言的同一，而是對同一個古老王朝的共同效忠。</p>
+
+<p>這在一個王朝至上的時代是天經地義；在一個民族至上的時代，卻成了不可饒恕的時代錯置。帝國的存在本身，就違背了它所處時代最強大的那股潮流——它像一塊屬於舊世界的礁石，固執地立在民族主義的洪流中央，而洪流遲早會把它沖垮。法蘭茲·約瑟夫在位六十八年，幾乎憑一己的長壽與堅忍把這個搖搖欲墜的構造硬撐了下來；但所有人都隱約知道，這個帝國與這位老皇帝，是同一具行將就木的軀體——他一旦闔眼，帝國也就到了盡頭。</p>
+
+<p>而維也納，正是這具軀體的<strong>頭顱</strong>。它是兩個首都中更古老、更具帝國象徵的那一個，是共同的外交部與陸軍部所在地，是法蘭茲·約瑟夫的霍夫堡宮所在地，是這個超民族帝國的大腦與門面。帝國所有的矛盾都在這顆頭顱裡交匯：德意志人在這裡是統治民族，卻同時被柏林那個「真正的」德意志國家排斥在外；捷克人、波蘭人、猶太人、匈牙利人從四面八方湧入這座首都，把它變成歐洲最世界主義的城市，也把帝國最尖銳的民族對立搬進了它的市議會與街頭。維也納的輝煌，正建立在它所承載的這個巨大矛盾之上。</p>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 一頂王冠下的十幾個民族</span>
+  <p>一八六七年的奧匈帝國，是一個美麗而過時的構想。在一個人人都想要「<strong>自己民族的國家</strong>」的時代，它固執地維繫著一個「<strong>十幾個民族共戴一頂王冠</strong>」的世界。它不是輸給哪一場戰爭，也不是敗給哪一個敵人——它是敗給了時間，敗給了一個它無論如何也無法認同的時代信條。它代表的那種超越血緣、超越語言、以共同效忠取代共同血統的舊秩序，曾經是歐洲的常態，如今卻成了一件博物館裡的古物：優雅，珍貴，卻再也無人願意用它來組織自己的生活。</p>
+  <p>維也納，是這個時代錯置的大腦。它把十幾個民族的才華、財富與怨恨全都吸納進這一座城裡，煉成了世紀末歐洲最眩目的文明——而正是這同一股向心力，也把帝國所有的撕裂都聚焦在它身上。這便是它最深的宿命：<em>它的優雅，與它的注定崩解，是同一件事。</em>一個容得下所有人的世界，恰恰因為它容得下所有人，而再也容不進那個只認一個民族的新時代。維也納的燦爛從來不是穩固的標誌，而是一場盛大告別的最後燈火——愈是輝煌，便愈是接近熄滅。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch10" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · Jewish Vienna</span>
+    <h2 class="act-title">猶太人的維也納</h2>
+    <p class="act-sub">Migration, Emancipation & the Engine of Genius</p>
+    <div class="ornament">✡ ✦ 📖</div>
+  </div>
+  <div class="prose">
+<p>在維也納的故事裡，有一個社群的命運，幾乎與這座城世紀末最燦爛的那場文化爆發完全重疊——重疊到一個程度，使得若把它抽走，那場爆發便會塌掉大半。這個社群，就是維也納的猶太人。他們在這座城裡存在的時間，比哈布斯堡王朝的多數成就都更古老；而到了十九世紀末，他們對這座城的精神生活的貢獻之深、之廣，已經到了難以用「少數族群」這幾個字來概括的地步。要講清楚世紀末的維也納，就必須先講清楚這個社群是怎麼來的、怎麼活的，以及它在這座城裡始終背負著的那份不安。</p>
+
+<h3>驅逐與回返：一段反覆的中世紀</h3>
+<p>猶太人在維也納的存在，可以一直追溯到中世紀。早在十二、十三世紀，維也納就有了相當規模的猶太社區，集中在今天舊城中心一帶；他們有自己的會堂、學校與墓地，也出過幾位在中歐猶太學界舉足輕重的拉比。但這份存在從一開始就是脆弱的——它依附於統治者一時的需要與保護，而這份保護隨時可能被收回。中世紀的猶太人被禁止擁有土地、被排除在大多數行會與職業之外，於是被推向放貸、典當、長途貿易這類「邊緣卻必要」的營生；而每當經濟出問題、瘟疫來襲、或統治者需要轉移民怨，他們便成了最現成的代罪羔羊。</p>
+<p>一四二〇至一四二一年的那場災難，是這段歷史最黑暗的一頁：在公爵阿爾布雷希特五世（Albrecht V）治下，維也納的猶太社區遭到系統性的迫害——財產被沒收，許多人被強制改宗，拒不改宗者遭到囚禁、驅逐，最終有約兩百名猶太人被公開處死，會堂被夷平。這場後世稱為「維也納大迫害（Wiener Gesera）」的浩劫，幾乎抹去了維也納的中世紀猶太社區。此後數百年間，猶太人一次次被驅逐、又一次次在統治者「需要他們的錢與技能」時被默許回返；一六七〇年，皇帝利奧波德一世（Leopold I）再次下令驅逐，把猶太人趕出當時仍以他們命名的「下城島」一帶。<strong>存在、被逐、回返、再被逐</strong>——這就是維也納猶太人中世紀到近代早期命運的節奏：他們從未真正被允許「屬於」這座城，卻又從未被這座城徹底捨棄，因為這座城始終用得上他們。</p>
+
+<h3>從《寬容詔令》到全面解放</h3>
+<p>轉折來得很慢，而且來得很有「啟蒙專制」的味道——它最初不是出於對平等的信念，而是出於對效用的計算。一七八二年，皇帝約瑟夫二世（Joseph II，1780–1790 在位）頒布了針對猶太人的《寬容詔令（Toleranzpatent）》。這份詔令並沒有給予猶太人平等的公民權，它甚至保留了大量歧視性的限制與特別稅；但它確實放鬆了束縛——猶太人被允許進入更多行業、興辦工廠、讓子弟進入一般學校與大學、學習工藝。約瑟夫二世的算盤很清楚：讓猶太人「更有用」於國家經濟，而不是讓他們「更自由」。然而歷史常常如此——一道為了效用而開的門，最終放進來的，是一整個時代。</p>
+<p>真正的解放，要等到近一個世紀之後。十九世紀中葉，隨著自由主義在哈布斯堡帝國抬頭，猶太人身上的限制一層層被剝除。一八六七年——也就是奧匈帝國「妥協（Ausgleich）」、立憲改革的那一年——帝國憲法正式賦予猶太人完整而平等的公民權：他們可以自由遷徙、自由擇業、自由置產、擔任公職、進入任何一所大學的任何一個科系。這一年，是維也納猶太人歷史的分水嶺。一道延續了數百年的玻璃天花板，在法律上一夕之間消失了。對一個被壓抑了如此之久、卻又如此渴望教育與上升的社群而言，這道門一旦打開，湧出來的能量是驚人的。</p>
+<div class="timeline">
+  <div class="tl-item"><div class="tl-year">約 1200</div><div class="tl-text">維也納已有具規模的猶太社區，會堂、學校、墓地俱全</div></div>
+  <div class="tl-item"><div class="tl-year">1420–21</div><div class="tl-text">「維也納大迫害」：社區遭系統性摧毀，約兩百人被處死</div></div>
+  <div class="tl-item"><div class="tl-year">1670</div><div class="tl-text">利奧波德一世再次下令驅逐維也納猶太人</div></div>
+  <div class="tl-item"><div class="tl-year">1782</div><div class="tl-text">約瑟夫二世《寬容詔令》：放寬職業與教育限制，但非平等</div></div>
+  <div class="tl-item"><div class="tl-year">1867</div><div class="tl-text">奧匈帝國憲法賦予猶太人完整平等的公民權（解放）</div></div>
+</div>
+
+<h3>大遷徙：來自東方與北方的人潮</h3>
+<p>解放的法律一頒布，遷徙就開始了。在這之前，帝國境內的猶太人多半被限制在特定的城鎮與鄉間；解放之後，他們終於可以合法地搬到自己想去的地方——而對中歐猶太人而言，沒有哪個地方比帝國的首都維也納更具吸引力。於是，從帝國的四面八方，人潮湧向這座城：來自<strong>波希米亞（Bohemia）</strong>與<strong>摩拉維亞（Moravia）</strong>的、操德語、相對同化的猶太人；來自<strong>匈牙利</strong>的；以及——數量最龐大、文化上也最虔誠、最「東方」的——來自帝國東北角<strong>加利西亞（Galicia）</strong>的猶太人。加利西亞的猶太人說意第緒語、生活貧困、宗教生活濃厚，他們的湧入，後來既為維也納猶太社群注入了人口與活力，也在社群內部製造了微妙的張力：那些早已落腳、衣冠楚楚、自視為德意志文化人的維也納猶太資產階級，常常對這些「東方來的窮親戚」感到尷尬。</p>
+<p>成長的速度是驚人的。十九世紀初，維也納在冊的猶太人不過寥寥數千；到了一九〇〇年前後，維也納的猶太人口已逼近<strong>十五萬</strong>，約占全城人口的<em>近一成</em>。這個比例，使維也納成為西歐與中歐猶太人口最集中的大城市之一。他們主要聚居在多瑙運河與市中心之間的<strong>利奧波德城（Leopoldstadt，即維也納第二區）</strong>——這一帶猶太人密度極高，會堂、商店、咖啡館、報館林立，被外人半帶戲謔、半帶敬意地稱為「馬佐島（Mazzesinsel，意第緒語『無酵餅之島』）」。</p>
+<div class="stats">
+  <div class="stat"><div class="num">~15萬</div><div class="lbl">1900 年前後維也納猶太人口</div></div>
+  <div class="stat"><div class="num">近 10%</div><div class="lbl">占全城人口比例</div></div>
+  <div class="stat"><div class="num">1867</div><div class="lbl">完整公民權（解放）之年</div></div>
+  <div class="stat"><div class="num">數百年</div><div class="lbl">驅逐與回返反覆的前史</div></div>
+</div>
+
+<h3>不成比例的貢獻</h3>
+<p>占人口不到一成，卻在這座城的諸多核心領域占據了遠超人口比例的份額——這是理解維也納猶太人最關鍵、也最需要謹慎陳述的一個事實。謹慎，是因為這個事實在歷史上一再被反猶者扭曲成陰謀論的彈藥；但若因此而避而不談，又會抹去這個社群真實的、了不起的成就。比較公允的看法是：一個被壓抑了數百年、極度重視教育與才智、又恰好趕上解放浪潮的社群，一旦門被打開，便會以驚人的密度湧入那些<em>對出身與人脈門檻較低、純粹比拚才能</em>的領域。</p>
+<p>於是我們看到：在金融與工商業，猶太家族（如羅斯柴爾德〔Rothschild〕在維也納的分支）成為帝國經濟的支柱之一；在<strong>醫學</strong>，維也納大學醫學院——當時全世界最頂尖的醫學重鎮之一——的醫生與教授裡，猶太人比例極高；在<strong>法律</strong>與<strong>新聞</strong>，他們同樣舉足輕重，維也納最具影響力的自由派報紙《新自由報（Neue Freie Presse）》，其編輯與作者群中猶太人比比皆是。在大學裡，在律師事務所裡，在診間裡，在報館裡，在音樂廳與劇院裡——這個社群把幾代人被壓抑的能量，一次傾注了出來。</p>
+<div class="aside"><span class="hl">為何是這些領域</span>當貴族與舊基督教資產階級仍把持著軍隊、外交、高級官僚與大地產時，新解放的猶太人自然湧向那些「才能比血統重要」的自由職業與新興行業——這既是選擇，也是排擠的結果。</div>
+
+<h3>同化的渴望，與它的陰影</h3>
+<p>維也納猶太人最動人、也最令人心碎的，是他們對這座城、對德意志文化那份近乎熱戀的認同。對絕大多數維也納猶太資產階級而言，他們<strong>不覺得自己是「住在維也納的猶太人」，而覺得自己就是維也納人</strong>——說著最講究的德語，熟讀歌德與席勒，把莫札特與貝多芬奉為自己的神，在城堡劇院（Burgtheater）裡為德語戲劇落淚，在咖啡館裡為德意志文化的命運爭辯。許多人淡化、甚至放棄了宗教實踐；不少家庭受洗改宗，以求徹底融入。維也納，是他們心甘情願選擇的文化故鄉——也許比任何人都更虔誠地愛著它。</p>
+<p>但這份愛，始終籠罩在一道陰影裡。同化得再徹底，也擋不住一個揮之不去的問題：<em>究竟要同化到什麼程度，才算「真正的」維也納人、「真正的」德意志人？</em>受了洗，是不是就不再是猶太人？改了姓氏、進了最好的學校、寫出最漂亮的德語，外面那個世界就會把你當成「自己人」嗎？反猶的暗流從未真正退去——它潛伏在大學的社團裡、在某些報紙的字裡行間、在沙龍的一句玩笑裡、在升遷時那道看不見的天花板裡。一個維也納猶太知識分子，可能在白天被歡呼為這座城的驕傲，在夜裡卻被提醒：你終究是「他者」。這種被接納與被排斥之間的撕扯，這種<strong>身分的雙重性與永恆的不安</strong>，正是世紀末維也納猶太知識界那種特有的敏感、自省與焦慮的深層來源。</p>
+<div class="pull"><p>他們愛這座城，可能比任何人都深；而這座城，始終沒有完全決定要不要愛他們。</p></div>
+
+<h3>世紀末的引擎</h3>
+<p>現在，我們可以把這一章扣回主線了。當我們談論即將到來的「世紀末（Fin de siècle）」——那場讓維也納在精神分析、現代音樂、現代文學、現代哲學與現代藝術上同時改寫人類認知的文化大爆發——我們談論的，很大一部分，正是這個社群的子弟。</p>
+<p>精神分析的創立者<strong>西格蒙德·佛洛伊德（Sigmund Freud，1856–1939）</strong>，是來自摩拉維亞的猶太家庭，在利奧波德城長大；把交響樂帶向崩潰邊緣又重新縫合的作曲家兼維也納歌劇院總監<strong>古斯塔夫·馬勒（Gustav Mahler，1860–1911）</strong>，出身波希米亞的猶太家庭（後為事業受洗）；用手術刀般的精準解剖維也納情慾與虛偽的劇作家兼小說家<strong>阿圖爾·施尼茨勒（Arthur Schnitzler）</strong>，是維也納猶太醫生之子；把哲學逼到語言極限的<strong>路德維希·維根斯坦（Ludwig Wittgenstein）</strong>，出身維也納最富有、最有教養、亦有猶太背景的鋼鐵巨富家族；日後為這整個世界寫下最深情輓歌的作家<strong>斯特凡·茨威格（Stefan Zweig）</strong>，同樣是維也納猶太資產階級之子。名單可以一直列下去：作家、樂評、哲學家、醫生、律師、出版人、沙龍女主人——他們是那座文化火山的<em>燃料</em>。</p>
+<div class="deepen">
+  <span class="dh">概念深掘 · 為什麼「被壓抑的能量」會點燃天才</span>
+  <p>世紀末維也納的天才密度，並非偶然從天而降。它是幾股力量在一個特定時空裡的交會：一個極度重視學習、把教育視為唯一可靠資產的文化傳統；數百年壓抑之後突然解放所釋放的、想要證明自己、想要被接納的巨大渴望；以及——這一點最微妙——那份「永遠不確定自己是否真正被接納」的不安。一個完全安穩、毫無疑問屬於主流的人，往往不會去質疑那些被視為理所當然的東西；而一個站在「之內」與「之外」邊界上的人，卻被迫不斷地觀察、剖析、追問。</p>
+  <p>佛洛伊德之所以能看穿文明表象下被壓抑的衝動，施尼茨勒之所以能戳破維也納甜美外殼下的虛偽與情慾，維根斯坦之所以會去拷問語言本身的根基——這種<strong>從邊緣回望中心、把被視為理所當然之物重新陌生化</strong>的能力，與這個社群「身在其中卻又被推到邊上」的處境，有著難以割斷的聯繫。痛苦不必然產生天才，但邊緣的視角，確實常常看見中心看不見的東西。</p>
+</div>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 天才的源頭</span>
+  <p>維也納最燦爛的那場文化爆發，有一個常被輕描淡寫的事實——它的核心引擎，是這座城的猶太社群。佛洛伊德、馬勒、施尼茨勒、維根斯坦家族、茨威格……世紀末那串照亮二十世紀的名字，許多都出身於這個占維也納人口不到一成、卻把幾代人被壓抑的全部才智一次傾注出來的社群。它不是維也納榮光的「旁支」或「點綴」，它是那道光本身的燃料。</p>
+  <p>記住這一點，是為了讓後來的毀滅顯出它真正的重量。維也納日後所謀殺、所驅逐、所焚燒的，並不是什麼「外人」、什麼侵入者——而是它自己天才的源頭，是讓它在人類文明史上留名的那股創造力本身。一座城最終轉過身來，毀掉的正是讓它成為「維也納」的東西。這悲劇的全部分量，要到後面的章節才會落下；但它的種子，就埋在這個社群被熱愛與被懷疑、被接納與被排斥的那道裂縫裡。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch11" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · Vienna 1900</span>
+    <h2 class="act-title">世紀末：維也納一九〇〇</h2>
+    <p class="act-sub">Freud, Klimt & the Merry Apocalypse</p>
+    <div class="ornament">🎨 ✦ ♪</div>
+  </div>
+  <div class="prose">
+<p>一九〇〇年前後的維也納，是一個自相矛盾到近乎不可思議的地方。從表面看，它是一座沉醉於體面與秩序的城。環城大道（Ringstraße）上那一圈仿古的宮殿——希臘神廟式的國會、哥德式的市政廳、文藝復興式的歌劇院——把整個帝國的自我想像，凝固成石頭。市民們穿著漿挺的衣領，謹守繁複的禮數，在咖啡館裡讀著三份報紙，對任何越界的、赤裸的、難堪的東西，都有一套精緻的迴避術。這是一座把「壓抑」當成文明標誌的城。</p>
+<p>然而恰恰是在這座城，在這同一段年月，一群人正一個接一個地，把這層體面的表皮，從裡到外撕開。他們剖開人的潛意識，畫出赤裸的肉身與死亡的慾望，把調性音樂的舊秩序砸碎，宣布裝飾本身就是一種罪。人類二十世紀的思想版圖，幾乎有半壁，是在這幾條維也納的街道上、這幾家咖啡館的大理石桌邊，被同時點燃的。歷史學界後來給這場爆發起了一個專名：<strong>維也納一九〇〇（Wien um 1900）</strong>。而它最深的弔詭在於——這一切，發生在這個帝國最腐朽、最接近崩潰的時刻。</p>
+
+<h3>佛洛伊德：在體面之城剖開潛意識</h3>
+<p>一九〇〇年，一本後來改變了人類自我認知的書，在維也納出版，初版幾乎無人問津——<strong>《夢的解析》（Die Traumdeutung）</strong>，作者是一位住在伯格巷十九號（Berggasse 19）的猶太裔神經科醫師<strong>西格蒙德·佛洛伊德（Sigmund Freud，1856–1939）</strong>。在這本書裡，他提出一個在當時近乎冒犯的主張：人的心智，遠不止於我們意識得到的部分；在那層理性的表面之下，有一片廣大的、我們自己也看不見的<strong>潛意識</strong>，裡面翻滾著被壓抑的慾望——尤其是性的慾望——它們無法直接浮上來，便借著夢、口誤、症狀，喬裝改扮地洩漏出來。夢，他說，是「通往潛意識的康莊大道」。</p>
+<p>這個學問誕生在維也納，本身就是最大的反諷。一座把壓抑奉為美德的城——越是體面的家庭，越是把性與一切難堪的真相，深深鎖進客廳的帷幕後面——偏偏孕育出了一門專門研究「被壓抑之物如何捲土重來」的學問。佛洛伊德的病人，多半正是這座城培養出來的、被禮教綁得最緊的中上層女性；她們身上那些找不到生理病因的癱瘓、失語、抽搐，在他看來，正是被禁錮的慾望在身體上找到的出口。正因為維也納把蓋子壓得這麼緊，鍋裡的東西才這麼劇烈地翻騰——也才這麼清楚地，被一個願意掀蓋子的人看見。</p>
+<div class="pull"><p>一座把壓抑奉為文明標誌的城，孕育出了一門探究壓抑的學問。維也納越是用力把真相鎖進帷幕後面，那真相就越是清晰地，被一個願意掀開帷幕的人看見。</p></div>
+
+<h3>克林姆與分離派：給藝術它的自由</h3>
+<p>幾乎在同一時刻，視覺藝術也在造反。一八九七年，一群年輕畫家受夠了官方藝術協會的保守與沉悶，集體出走，另立門戶，自稱<strong>分離派（Secession）</strong>，領頭的是當時已享盛名的<strong>古斯塔夫·克林姆（Gustav Klimt，1862–1918）</strong>。他們在自己的展館門楣上，刻下一句後來響徹整個現代藝術史的口號：<strong>「給每個時代它的藝術，給藝術它的自由。」（Der Zeit ihre Kunst, der Kunst ihre Freiheit.）</strong>那座覆著金色月桂葉圓頂的白色展館——維也納人半敬半謔地叫它「金色甘藍菜」——本身就是一份宣言：藝術要從仿古宮殿的虛飾裡掙脫出來，自己決定自己長什麼樣子。</p>
+<p>克林姆的畫，是這場掙脫最華麗的象徵。一九〇二年，分離派為一場以貝多芬為主題的展覽，請他繪製一道環繞展廳的巨幅壁畫——《<strong>貝多芬橫飾帶</strong>》（Beethovenfries），把人類對幸福的追尋、對敵意力量的抗爭、最終在藝術中得到的救贖，畫成一條流動的金色長卷。而他最著名的《<strong>吻</strong>》（Der Kuss，1907–1908），用金箔把一對相擁的戀人裹進一片近乎宗教聖像般的光暈裡——美得令人屏息，卻也透著一絲世紀末特有的甜美與頹靡。克林姆把情慾、死亡與裝飾的金光熔在一起，畫的是維也納這座城自己的潛意識。</p>
+<p>但分離派的造反還不夠激烈，更年輕的一代很快走得更遠。<strong>埃貢·席勒（Egon Schiele，1890–1918）</strong>把人體畫成扭曲、嶙峋、神經質的線條，赤裸而不加美化，逼視肉身的脆弱與性的焦慮，激怒了道德衛士，甚至為此入獄。<strong>奧斯卡·柯克西卡（Oskar Kokoschka，1886–1980）</strong>則撕掉克林姆那層金色的優雅，畫出人物內在的躁動，自稱「心靈的肖像」。如果說克林姆用金箔包裹住世紀末的甜美，席勒與柯克西卡，就是把那層金箔撕掉，露出底下顫抖的神經。</p>
+
+<h3>馬勒與荀貝格：把舊秩序推上巔峰，再砸碎它</h3>
+<p>音樂上的故事同樣劇烈。一八九七年——又是這個關鍵的年份——<strong>古斯塔夫·馬勒（Gustav Mahler，1860–1911）</strong>出任宮廷歌劇院（Hofoper）的總監。他是一位近乎暴君式的完美主義者，為了藝術可以六親不認，把整座歌劇院從上到下徹底改造，重新訓練樂團與歌手，整治舞台與演出陋習，把這座帝國的音樂殿堂推上了有史以來的藝術巔峰。他自己的交響曲則動輒龐大如宇宙，把整個世界——民謠、軍號、送葬進行曲、對死亡與永恆的叩問——全塞進一部作品裡，是這個舊世界最後、也最輝煌的集大成者。值得一提的是，馬勒是猶太人，為了能坐上這個天主教帝國的最高音樂職位，他不得不在一八九七年改宗受洗——這個細節，本身就是世紀末維也納那層華麗體面之下，反猶暗流的一道注腳。</p>
+<p>而當馬勒把調性音樂推到極致的同時，他的同城晚輩<strong>阿諾·荀貝格（Arnold Schoenberg，1874–1951）</strong>，正準備把它整個拆掉。幾百年來，西方音樂建立在一套以主音為中心、有明確歸宿感的<strong>調性</strong>系統之上——音樂像有地心引力，總要回到「家」。荀貝格逐步鬆開這道引力，最終在二十世紀初寫出了<strong>無調性（atonality）</strong>的作品：沒有調中心，沒有「家」可回，每一個音都同等自由，也同等懸浮。這在當時聽來是刺耳的、令人不安的、甚至被當成噪音的——一場音樂會曾為此爆發肢體衝突，史稱「掌摑音樂會」。但荀貝格瓦解的，不只是和聲規則，而是一整套關於「秩序終將回歸」的世界觀。一個音樂裡再也回不了家的世界，恰恰預言了那個政治上即將失去歸宿的世界。</p>
+<div class="deepen">
+<span class="dh">概念深掘 · 為什麼天才會「成群」出現</span>
+<p>維也納一九〇〇最令人費解的地方，不是出了某一個天才，而是同時、同地，出現了一<em>整代</em>各領域的開創者。這通常不是偶然，而是一種「<strong>稠密效應</strong>」的結果：當一座城把足夠多、足夠聰明、足夠不安分的人，塞進足夠小的空間裡，讓他們在同樣的咖啡館、沙龍、講堂、報紙上不斷相互碰撞，思想就會像臨界質量的核燃料一樣，開始連鎖反應。</p>
+<p>佛洛伊德的潛意識、克林姆的情慾、荀貝格的失序、施尼茨勒的內心獨白，其實是同一個問題在不同領域裡的回響——人的理性表面之下，藏著什麼？這些人未必彼此同意，甚至常常互相鄙夷，但他們呼吸著同一片空氣，攻擊著同一個敵人（環城大道那套虛飾的體面）。天才之所以成群，是因為他們其實是在同一張看不見的網上，彼此點火。</p>
+</div>
+
+<h3>路斯與華格納：裝飾就是罪惡</h3>
+<p>連建築與設計，也在這場大爆發裡選了邊。環城大道那一圈仿古宮殿，到了世紀末，在新一代眼中已經成了虛偽的代名詞——用石膏與假石頭，把一個十九世紀的帝國，喬裝成希臘、哥德與文藝復興的混血兒。反叛由此而生。<strong>奧托·華格納（Otto Wagner，1841–1918）</strong>主張建築要誠實地服務於現代生活，他設計的維也納城市鐵路車站、郵政儲蓄銀行，捨棄了堆砌的裝飾，讓功能、材料與結構自己說話，被視為現代建築的先聲。</p>
+<p>而把這場反叛喊得最尖銳的，是建築師<strong>阿道夫·路斯（Adolf Loos，1870–1933）</strong>。一九〇八年前後，他寫下那篇日後成為現代主義信條的檄文——《<strong>裝飾與罪惡</strong>》（Ornament und Verbrechen，英譯 Ornament and Crime）。他的論點驚世駭俗：文化的進步，就是把裝飾從日用器物上一件件剝除的過程；在他眼裡，無謂的裝飾不只是醜，更是一種道德上的墮落，近乎「罪」。他在緊鄰皇宮蓋的那座光禿禿、毫無線腳的「路斯樓」，據說讓厭惡它的皇帝從此寧可繞道也不願從正門出入。一座沒有眉毛的房子，公然頂撞著一整條街的繁複華麗——這正是維也納一九〇〇的縮影：新與舊，在同一條街的兩側，怒目相視。</p>
+
+<h3>咖啡館：承載這一切的那張網</h3>
+<p>把以上這些人——醫生、畫家、作曲家、建築師、作家——連在一起的，不是學院，不是政府，而是一個更鬆散、也更迷人的東西：<strong>咖啡館文化（Kaffeehaus）</strong>。在維也納，咖啡館不只是喝咖啡的地方，它是知識分子的「客廳」——你只消點一杯咖啡，就能坐上一整天，讀遍店裡所有報紙，會見朋友與敵人，爭論政治、藝術、哲學與緋聞。許多人甚至把信件寄到常去的咖啡館，因為那裡才是他們真正的地址。</p>
+<p>文學與思想的火花，多半就在這些大理石桌邊迸出。劇作家與小說家<strong>阿圖爾·施尼茨勒（Arthur Schnitzler，1862–1931）</strong>——佛洛伊德私下稱他為自己在文學上的「分身」——用「內心獨白」的筆法，剖開維也納中產階級在性與謊言之間的虛偽。早慧的詩人<strong>胡戈·馮·霍夫曼斯塔爾（Hugo von Hofmannsthal，1874–1929）</strong>少年成名，後來寫出了那一代對語言本身的信任危機。而最尖刻的，是諷刺作家<strong>卡爾·克勞斯（Karl Kraus，1874–1936）</strong>，他幾乎以一己之力辦著刊物《火炬》（Die Fackel），用手術刀般的文字解剖這座城的偽善、媚俗與腐敗，誰也不放過。在更深處，馬赫（Ernst Mach）對感覺與實在的追問、年輕的維根斯坦（Ludwig Wittgenstein）對語言界限的思索，也都在這片空氣裡醞釀。整座城像一個巨大的回音室，每一個聲音都在彼此身上激起回響。</p>
+
+<h3>歡快的末日</h3>
+<p>而這一切的背景，是一個正在死去的帝國。哈布斯堡這架由十幾個民族、語言與宗教勉強拼湊起來的龐大機器，到了世紀末，已經被內部的民族主義拉扯得吱嘎作響。年邁的皇帝<strong>法蘭茲·約瑟夫（Franz Joseph，1848–1916 在位）</strong>固執地維持著一切舊禮儀，彷彿只要程序不變，世界就不會崩塌。城裡的反猶政治正在抬頭，民族間的仇恨日益公開，每個有眼睛的人都隱約感覺到：這個世界撐不了太久了。</p>
+<p>奧地利作家赫爾曼·布洛赫（Hermann Broch）後來給這段時光起了一個精準而又心碎的名字：<strong>「歡快的末日」（die fröhliche Apokalypse）</strong>。一個明知大限將至的世界，反而把全部的生命力，毫無保留地燃成了藝術。正因為政治的出口被堵死、未來顯得灰暗，這座城最聰明的頭腦，才把全部的精力轉向了內在——轉向潛意識、轉向藝術、轉向對人性最徹底的追問。維也納一九〇〇那令人目眩的創造力，某種意義上，正是一場盛大的、燦爛的、心知肚明的告別。它像一根蠟燭，在熄滅前的最後一刻，把自己燒得最亮。</p>
+<div class="timeline">
+<div class="tl-item"><div class="tl-year">1897</div><div class="tl-text">分離派成立；馬勒出任宮廷歌劇院總監——造反與巔峰，同年並起。</div></div>
+<div class="tl-item"><div class="tl-year">1900</div><div class="tl-text">佛洛伊德《夢的解析》出版，潛意識的學問就此誕生。</div></div>
+<div class="tl-item"><div class="tl-year">1902</div><div class="tl-text">克林姆《貝多芬橫飾帶》在分離派展館亮相。</div></div>
+<div class="tl-item"><div class="tl-year">1908</div><div class="tl-text">路斯發表《裝飾與罪惡》；克林姆《吻》問世。</div></div>
+<div class="tl-item"><div class="tl-year">1914</div><div class="tl-text">薩拉熱窩槍聲；那個孕育了這一切的世界，開始真正崩塌。</div></div>
+</div>
+<p>不到二十年，這一切就被戰爭與帝國的解體沖散。佛洛伊德晚年將被納粹逼出維也納，客死倫敦；席勒與克林姆同在一九一八年那場大流感中早逝；荀貝格與柯克西卡流亡海外。那個生出了維也納一九〇〇的世界，連同它的咖啡館與它歡快的末日，一起沉入了歷史。但它在熄滅前迸出的那道光，照亮的卻是整個二十世紀——精神分析、現代藝術、現代建築、現代音樂，幾乎全能在這幾條街上找到源頭。</p>
+<div class="investor">
+<span class="tag">歷史的回聲 · 在崩落之上開花</span>
+<p>維也納一九〇〇講出了歷史最殘酷、也最動人的弔詭之一：<strong>最燦爛的文明，常常盛開在崩潰的前夕。</strong>我們總以為偉大的創造需要安定、繁榮與信心作土壤；但這座城證明了相反的事——當一個舊世界開始解體，當未來變得無可指望，被堵死的能量反而會掉頭向內，在鬆動的裂縫裡，迸出照亮整個未來的光。佛洛伊德、克林姆、馬勒、荀貝格、路斯，全都是在一座自知將死的城裡，做出了讓世界永遠記住的事。</p>
+<p>只是這道光，往往要等很久才看得真切。身在「歡快的末日」裡的人，未必知道自己正站在一座文明的頂峰；他們只是在一個令人窒息的時代裡，拼命想說出一點真話。我們之所以能看清那束光有多亮，恰恰是因為我們已經知道了後來發生的一切——知道那個世界真的崩塌了，也知道從它裂縫裡飛出的火星，後來燒遍了整個二十世紀。最深的光，常常要在黑暗真正降臨之後，才被認出來。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch12" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Poison Beneath</span>
+    <h2 class="act-title">反猶，與一個年輕人的養成</h2>
+    <p class="act-sub">Lueger, Pan-Germanism & the Young Hitler</p>
+    <div class="ornament">⚠ ✦ 🕳</div>
+  </div>
+  <div class="prose">
+<p>上一章我們站在維也納世紀末的光裡——佛洛伊德（Sigmund Freud，1856–1939）在診療椅旁傾聽夢的呢喃，克林姆（Gustav Klimt，1862–1918）用金箔重畫人的慾望，馬勒（Gustav Mahler，1860–1911）讓交響樂裝下整個宇宙。那是人類心智少有的高潮時刻。但同一座城、同一個十年，在那片金光的正下方，正悄悄培養著二十世紀最深、最毒的政治思潮。本章要寫的，是這同一座城的另一張臉——一張當時看來不過是市政效率與街頭口號的臉，卻在幾十年後，化身為人類史上最大的罪。</p>
+
+<p>這不是兩座城。這是同一座城。佛洛伊德與年輕的希特勒（Adolf Hitler，1889–1945），在同一段年份裡，呼吸著維也納同一片空氣，走過同一條街，讀著同一批報紙上的同一批口號。文明的最高成就與最深的野蠻，不是發生在不同的時空——它們是同一座城、同一個年代，並肩生長的兩株植物。理解這一點，比記住任何一個年份都重要。</p>
+
+<h3>一個市長的弔詭</h3>
+
+<p>要懂維也納的反猶，得先懂一個人——<strong>卡爾·呂格（Karl Lueger，1844–1910）</strong>。他是這座城自一八九七到一九一〇年的市長，是維也納近代史上最受歡迎、也最有能力的市政首長之一。任何只把他寫成「煽動仇恨的惡棍」的敘述，都會錯過他真正令人不安的地方。因為呂格的可怕，恰恰在於他<em>不是</em>一個無能的瘋子，而是一位高效的、深受愛戴的、把城市治理得有聲有色的現代化改革者。</p>
+
+<p>數字會說話。在呂格任內，維也納把電車收歸市營、把瓦斯與電力廠收歸市營，鋪設第二條從阿爾卑斯山引來純淨飲水的高山水道，興建學校、醫院、公園與綠帶。他口中的「市政社會主義（municipal socialism）」，讓這座城在水、電、交通與公共衛生上，一度走在歐洲前列。對成千上萬的維也納小市民——小店主、工匠、低階職員——呂格是那個真正讓他們的日子變好的人。他死時，據說有數十萬人湧上街頭送葬。他不是被人民唾棄的暴君，他是被人民熱愛的市長。</p>
+
+<p>而正是這同一個人，把<strong>政治化的反猶主義</strong>，第一次系統性地當成動員群眾的工具來使用。他的基督教社會黨（Christlichsoziale Partei），把社會的種種焦慮——經濟競爭的壓力、傳統行會的衰落、大都市裡無所適從的小人物的恐懼——統統打包，指向同一個現成的代罪者：猶太人。在他的政治語言裡，自由派的銀行家是猶太人，左派的報紙是猶太人，廉價傾銷的百貨公司是猶太人，現代世界一切讓小市民不安的東西，背後都是猶太人。仇恨在這裡，第一次被組織成一台可以贏得選舉的機器。</p>
+
+<div class="deepen">
+<span class="dh">概念深掘 · 「誰是猶太人由我決定」：機會主義如何比信念更危險</span>
+<p>呂格留下一句惡名昭彰的話。當有人指出他不少私人朋友、合作對象其實是猶太人，與他的政治口號自相矛盾時，他冷冷地回應：「<strong>誰是猶太人，由我決定（Wer ein Jude ist, bestimme ich）</strong>。」這句話常被引用，卻常被誤解。它真正透露的，不是狂熱，而是<em>機會主義</em>——對呂格而言，反猶主義並非深植骨髓的信仰，而是一件趁手的政治工具，一個可以隨他需要而開關、伸縮、定義的開關。</p>
+<p>這恰恰是它最陰險的地方。一個真心相信仇恨的狂人，至少還受其信念本身的邊界所限；而一個把仇恨當工具的精明政客，能夠冷靜地、按比例地、按選情需要地施放它——今天罵得兇一點，明天若有利益就放朋友一馬。呂格示範了一件後世將反覆領教的事：當仇恨被「正常化」成一種可接受的政治修辭、一種贏選票的常規手段時，它就不再需要狂熱者來推動了。它會被一整套理性的、計算的、體面的政治機制，安安穩穩地承載下去。毒，一旦被裝進日常政治的瓶子裡，就比赤裸的瘋狂傳播得更遠。</p>
+</div>
+
+<h3>更純粹的毒：舍納勒的種族主義</h3>
+
+<p>如果說呂格的反猶是機會主義的、宗教外衣下的、可以討價還價的，那麼<strong>格奧爾格·馮·舍納勒（Georg von Schönerer，1842–1921）</strong>的反猶，則是另一種更冰冷、更現代、也更致命的版本。舍納勒是<strong>泛德意志民族主義（Pan-Germanism）</strong>的鼓吹者。他憎恨多民族的哈布斯堡帝國本身——在他眼中，那是一個讓「劣等」的斯拉夫人、猶太人與日耳曼人混居的、注定衰朽的雜種帝國。他夢想的，是奧地利的德意志人脫離維也納的哈布斯堡王室，併入北方俾斯麥的德意志帝國，匯成一個純粹的、以血統界定的大德意志民族。</p>
+
+<p>關鍵的差別在於：呂格的反猶，理論上一個猶太人只要改信基督教，便可能被「重新定義」出仇恨的範圍；而舍納勒的反猶，是<strong>種族性</strong>的——它認定猶太人的「劣等」不在於信仰，而在於血液，因此無從改變、無從贖回、無從逃脫。受洗救不了你，財富救不了你，貢獻救不了你，因為被定罪的不是你做了什麼，而是你生而為何。這種以血統為唯一標準、把一整個群體永久排除在「我們」之外的種族主義，正是日後將被推到極致、推向毒氣室的那種邏輯的雛形。舍納勒在政治上始終是邊緣人物，他的議席與聲勢遠不及呂格；但他散播的那套思想病毒，其毒性遠在呂格之上。</p>
+
+<div class="cards">
+<div class="card"><span class="flag">機會主義版</span><h5>呂格的反猶</h5><p>宗教與政治工具，可定義、可伸縮、可討價還價；理論上改信便可脫身。最大的危害是把仇恨「正常化」為贏選票的常規手段，讓它登堂入室。</p></div>
+<div class="card"><span class="flag">種族主義版</span><h5>舍納勒的反猶</h5><p>以血統定罪，不可改變、無從贖回。把猶太人永久排除在民族之外。聲勢遠不及呂格，毒性卻遠在其上——這是通往滅絕邏輯的雛形。</p></div>
+</div>
+
+<p>世紀末的維也納，就同時瀰漫著這兩股氣味。報攤上的小報日復一日地餵養著它，啤酒館的演講夜復一夜地放大著它，市政廳裡最受歡迎的市長公然地操弄著它。對一個在這座城裡無所事事、四處遊蕩、滿心怨懟的窮青年而言，這些並非什麼隱晦的、需要刻意尋找的思想——它們是空氣，是日常，是每天迎面撲來的東西。</p>
+
+<h3>一個落選美術生的維也納</h3>
+
+<p>一九〇八年前後，一個來自奧地利邊境小鎮、剛失去雙親、口袋裡揣著一點微薄遺產的青年，來到了維也納。他叫阿道夫·希特勒，當時不到二十歲。他來這座帝國之都，懷著一個具體的夢想：成為一名畫家。他兩度報考<strong>維也納美術學院（Akademie der bildenden Künste Wien）</strong>，兩度落榜。考官的評語大意是，他的素描缺乏對人的描繪能力，建議他或許更適合建築。這個打擊，連同隨之而來的潦倒，構成了他在維也納那幾年的底色。</p>
+
+<p>那幾年（約一九〇八至一九一三）的希特勒，是一個失敗的、邊緣的、看不到出路的年輕人。他變賣了遺產，靠賣自己畫的明信片與小幅水彩維生，一度住進收容無家者的男子宿舍，在維也納的社會底層浮沉。他沒有正當職業，沒有朋友圈，沒有學歷，沒有前途。就是在這樣一種失敗、屈辱與滿腔不得志的怨憤之中，這座城那無所不在的政治氛圍，滲進了他的腦子。</p>
+
+<p>這不是後人的推測。希特勒自己，日後在《我的奮鬥》（Mein Kampf）中，明白地把維也納稱作他<strong>「世界觀（Weltanschauung）的學校」</strong>——他自承，正是在這座城裡，他形成了一生不變的那套思想框架的根基。他寫到自己如何崇拜呂格的群眾動員手腕——那種把街頭、把報紙、把宗教情緒、把小市民的怨恨統統調動起來，凝成一股政治力量的本事；他也寫到自己如何吸收了舍納勒那套泛德意志的、以血統論優劣的種族思想。維也納教給他的，不是某一條具體的政策，而是一整套<em>看待世界的方法</em>：把複雜的社會困境，化約為一個民族對另一個「敵人」的鬥爭；把所有的不滿，導向一個現成的代罪者。</p>
+
+<div class="warn">
+<span class="warn-tag">關於這段歷史，必須說清楚的事</span>
+<p>陳述「希特勒在維也納吸收了反猶與泛德意志思想」，絕不等於為他開脫，更不等於把罪責推給一座城或一個時代。一個人最終如何處置他所吸收的東西——是化為一生的良知，還是化為將數百萬人送進毒氣室的決心——終究是他自己的選擇與責任。維也納餵養過無數窮青年同樣的怨懟，絕大多數人並未因此成為屠夫。</p>
+<p>我們在此冷靜地陳述思想的來路，是為了一個更沉痛的目的：理解仇恨如何養成。它從不從天而降。它是被一份份小報、一場場演講、一次次選舉、一句句「正常」的政治口號，日復一日地餵養出來的。把這個養成的過程看清楚，不是為了減輕加害者的罪，而是為了讓後人有能力，在下一次它伸出觸手時，認得出它的樣子。這套思想是毒——本章從頭到尾，都只在記錄這劑毒如何被調製、如何被吞下，而絕無一字為它辯護。</p>
+</div>
+
+<h3>同一條街，兩種人類</h3>
+
+<p>現在，把鏡頭拉開，看這座城在一九一〇年前後的全景，你會看見一幅令人脊背發涼的並置。</p>
+
+<p>在城的這一頭，佛洛伊德正在貝格街十九號（Berggasse 19）的書房裡，傾聽人類潛意識的低語，試圖把同情、理解與療癒，帶進那些最幽暗的心靈角落——他本人，正是一位猶太人。在城的那一頭，年輕的希特勒正在某間廉價宿舍裡，把報攤上的反猶口號，一句句咀嚼進骨髓。同一座城裡，馬勒在指揮台上把全人類的悲憫熔進交響樂；同一座城裡，呂格在市政廳的演講台上把全人類的恐懼煉成選票。克林姆在畫布上歌頌生命與慾望的金光，舍納勒在傳單上散播血統與滅絕的寒霜。</p>
+
+<div class="pull"><p>維也納是現代人文最高成就的搖籃，也是二十世紀最深罪惡的搖籃——而它們，是同一個搖籃。佛洛伊德與希特勒呼吸過同一座城的空氣；文明與野蠻，從來不在不同的時空，它們常常是同一座城、同一個年代的兩張臉。</p></div>
+
+<p>這是維也納給人類上的、最沉痛的一課。我們總願意相信，光明與黑暗分屬兩個世界——彷彿野蠻發生在遙遠的、落後的、與我們不同的地方，而文明屬於我們這邊。但維也納粉碎了這個自我安慰的幻覺。它告訴我們：人類心智所能抵達的最高處，與人類所能墮入的最深處，竟可以共用同一片天空、同一條街道、同一個十年。產生佛洛伊德的土壤，與餵養希特勒的土壤，是同一塊土壤。這不是巧合，也不是諷刺——這是關於人性本身的、最該被記住的真相。</p>
+
+<p>更令人不寒而慄的是時間的順序。世紀末那燦爛的一張臉，在前；那陰暗的一張臉，在後。而歷史最終的走向是——後者吞掉了前者。一九三八年，當希特勒的軍隊開進維也納、當這座城以驚人的熱情迎接「德奧合併（Anschluss）」、當街頭的維也納人逼迫猶太鄰居跪著用牙刷擦洗人行道時，那個曾經孕育了佛洛伊德、馬勒、克林姆的維也納，就被它自己餵養出來的那張臉，活活吞沒了。佛洛伊德本人，那一年被迫逃離他生活了一輩子的城，流亡倫敦，翌年客死異鄉。燦爛的臉，終究沒能戰勝陰暗的臉——而最叫人痛心的是，那兩張臉，本是同一張。</p>
+
+<div class="investor">
+<span class="tag">歷史的回聲 · 同一座城的兩張臉</span>
+<p>這一章是這部維也納史詩裡最暗的一頁。它要說的，與前一章的金光，是同一個故事的正反兩面：那座孕育了佛洛伊德的深刻同情、克林姆的絢爛慾望、馬勒的宇宙悲憫的城，也在同一條街上、同一片報攤前、同一個市政廳裡，餵養出了二十世紀最深的仇恨。<strong>文明與野蠻，並非處於不同的時空。它們常常是同一座城、同一個年代的兩張臉。</strong></p>
+<p>而我們太晚才明白一件事：那張陰暗的臉，若不被及時認出、及時阻止，最終會反過來吞掉那張燦爛的臉。一九三八年的維也納，就是這場吞噬的鐵證——孕育人文之光的城，被自己縱容了數十年的毒所反噬。這不是某座城獨有的詛咒，而是一則對所有時代、所有城市的警告：當你為一座城的天才而驕傲時，請別忘了回頭看看，在同一片光的陰影裡，是否正有什麼東西，被默許著、被正常化著、被一票票地餵養著長大。因為歷史一再證明，毒從不在遠方——它就在最燦爛的那盞燈下面，安靜地，等著。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch13" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十三章 · 1914: The End of Empire</span>
+    <h2 class="act-title">一九一四，與帝國的終結</h2>
+    <p class="act-sub">Sarajevo, the Great War & Dissolution</p>
+    <div class="ornament">💥 ✦ ⚰</div>
+  </div>
+  <div class="prose">
+<p>一九一四年六月二十八日，那是一個星期日。陽光照在波士尼亞首府塞拉耶佛（Sarajevo）狹窄的街道上，奧匈帝國的皇位繼承人、皇儲斐迪南大公（Archduke Franz Ferdinand，1863–1914）乘著一輛敞篷汽車，沿著阿佩爾濱河大道緩緩行進。他來這座新近被帝國吞併的城市視察軍事演習，身旁坐著他深愛、卻因出身不夠高貴而被維也納宮廷百般刁難的妻子蘇菲。那天，是他們結婚十四週年的紀念日——在維也納，因為這場「下嫁」的婚姻，蘇菲永遠不能與丈夫並肩出席正式場合；而在這座邊陲小城，她終於可以坐在他身邊。這個小小的、近乎卑微的幸福，成了那天唯一柔軟的東西。</p>
+
+<p>當天上午，一群塞爾維亞民族主義青年早已埋伏在沿途。第一次行刺失敗了——擲出的炸彈滾到車後，炸傷了隨行人員。車隊改道，卻在一個轉角因司機走錯路而停了下來。就在那一瞬間，十九歲的<strong>加夫里洛·普林西普（Gavrilo Princip）</strong>——一個身患肺結核、瘦弱而堅定的青年——恰好站在幾步之外。他拔出手槍，連開兩槍。一槍打中斐迪南的頸部，一槍打中蘇菲的腹部。幾分鐘內，這對夫婦雙雙死在血泊裡。斐迪南臨終前據說一再喚著妻子的名字，求她為孩子活下去。</p>
+
+<p>兩聲槍響，在塞拉耶佛的街角悄然落定。沒有人在那一刻意識到，這兩槍將在接下來的幾個月裡，把整個歐洲拖進它有史以來最龐大的屠殺；也沒有人意識到，這兩槍最終要了結的，不只是一位大公的性命，而是一個延續了六百年、橫跨十幾個民族、統治著五千萬人口的龐大帝國。</p>
+
+<h3>七月危機：一張遞向深淵的最後通牒</h3>
+
+<p>諷刺的是，死去的斐迪南，在維也納的鷹派眼中，恰恰是個礙事的「鴿派」。這位皇儲一向反對與塞爾維亞開戰，他甚至設想過把二元的奧匈帝國改造成包含斯拉夫人在內的「三元」乃至聯邦結構，以紓解民族矛盾。他活著，是帝國內部那股主張克制的力量的象徵。他一死，這股力量也隨之消失——主戰派終於可以放手了。</p>
+
+<p>刺殺發生後，維也納的軍政高層認定塞爾維亞政府難脫干係，決意藉此一勞永逸地解決這個在巴爾幹不斷煽動南斯拉夫民族主義、威脅帝國南疆的鄰邦。但奧匈帝國並不敢獨自動手，因為塞爾維亞背後站著龐大的俄羅斯。於是維也納轉向柏林求援。一九一四年七月初，德國皇帝威廉二世與其政府向奧匈帝國開出了那張日後惡名昭彰的<strong>「空白支票」（blank cheque）</strong>——無條件支持奧匈對塞爾維亞採取任何行動，哪怕引發更大規模的戰爭。</p>
+
+<p>有了柏林撐腰，維也納於七月二十三日向貝爾格勒遞出了一份措辭嚴苛到近乎不可能被接受的<strong>最後通牒</strong>。其中包括要求奧匈帝國的官員進入塞爾維亞境內參與調查刺殺案——這實質上是要求一個主權國家交出自己的主權。塞爾維亞幾乎全盤接受了所有條款，唯獨對這一條保留。在維也納看來，這就夠了。七月二十八日，刺殺發生整整一個月後，奧匈帝國正式對塞爾維亞宣戰。</p>
+
+<div class="timeline">
+  <div class="tl-item"><div class="tl-year">6/28</div><div class="tl-text">斐迪南大公夫婦在塞拉耶佛遇刺</div></div>
+  <div class="tl-item"><div class="tl-year">7/5–6</div><div class="tl-text">德國向奧匈開出「空白支票」</div></div>
+  <div class="tl-item"><div class="tl-year">7/23</div><div class="tl-text">維也納向塞爾維亞遞出最後通牒</div></div>
+  <div class="tl-item"><div class="tl-year">7/28</div><div class="tl-text">奧匈帝國對塞爾維亞宣戰</div></div>
+  <div class="tl-item"><div class="tl-year">8月初</div><div class="tl-text">俄、德、法、英相繼捲入，大戰爆發</div></div>
+</div>
+
+<p>接下來發生的，是一場連鎖反應式的崩塌。俄羅斯為保護塞爾維亞而動員，德國隨即向俄、法宣戰並取道比利時進攻法國，英國因比利時中立被破壞而對德宣戰。在短短一週多的時間裡，一張由同盟與宿怨織成的密網，把整個歐洲一寸寸絞進戰爭。而這張網被點燃的第一根引線，正是從維也納的決策桌上拉出的。<strong>第一次世界大戰，是從這座華爾滋之城、這座以優雅與精緻聞名於世的帝都，親手點燃的。</strong></p>
+
+<div class="pull"><p>一座以圓舞曲、咖啡館與精緻禮儀聞名於世的城市，向世界遞出了那張通牒。二十世紀最慘烈的浩劫，是從維也納的決策桌上點燃的。</p></div>
+
+<h3>消耗：被拖垮的龐大身體</h3>
+
+<p>維也納的將軍們曾以為這只是一場對付塞爾維亞的「懲罰性」短促戰爭，到聖誕節就能結束。他們錯得離譜。奧匈帝國這個龐大的軍事機器，幾乎從一開始就暴露出它致命的虛弱。它必須同時在三條乃至更多戰線上作戰：南方對塞爾維亞，東北方對俄羅斯，而隨著一九一五年義大利倒戈協約國，西南方又添了一條阿爾卑斯山的血腥戰線。對一個工業基礎、財政能力與軍事組織都遠遜於德國的帝國而言，這是無法承受之重。</p>
+
+<p>更深的裂痕，藏在軍隊內部。奧匈帝國的軍隊，本身就是這個多民族帝國的縮影——士兵說著十幾種語言，軍官的命令往往需要翻譯才能傳達。在和平年代，這種拼貼勉強能靠對皇帝的共同效忠維繫；可一旦戰火持續、傷亡累積、民族主義被戰爭點燃，這支軍隊內部的張力便開始顯現。捷克士兵不願為壓迫自己的帝國去死，斯拉夫士兵在面對同為斯拉夫人的俄軍或塞軍時陣前倒戈、成建制投降的情形屢有發生。把十幾個民族焊在一面雙頭鷹軍旗下的，從來不是認同，而是慣性；戰爭，正是慣性最容易斷裂的地方。</p>
+
+<p>而在後方，維也納——這顆曾經指揮整個中歐的頭顱——正在慢慢餓下去。協約國的封鎖切斷了海外糧食與原料，農業勞動力被抽去前線，運輸系統在多線作戰的重壓下瀕臨癱瘓。麵包、馬鈴薯、煤炭、肉類，一樣接一樣地短缺。曾經那個咖啡館裡擺著奶油蛋糕、街頭飄著烤栗子香氣的維也納，如今排起了長長的領取配給的隊伍，食物攙進了越來越多的代用品。戰爭後期，這座帝都的市民在飢餓與寒冷中艱難度日；昔日歐洲最講究生活藝術的城市，連最基本的溫飽都成了奢望。帝國的身體，正從內部一寸寸枯萎。</p>
+
+<div class="warn">
+  <span class="warn-tag">後方的飢餓</span>
+  <p>第一次世界大戰是一場「總體戰」——它消耗的不只是前線士兵的生命，還有後方平民的胃。對奧匈帝國這樣工業與農業根基相對薄弱、又被海上封鎖的國家而言，飢餓成了一條看不見的戰線。維也納等城市的市民在戰爭後期長期忍受嚴重的糧食與燃料短缺，營養不良削弱了整整一代人的健康，也悄然瓦解著民眾對帝國的最後忠誠。一個無法餵飽自己子民的帝國，在它軍隊崩潰之前，其實已經先在廚房與餐桌上輸掉了戰爭。</p>
+</div>
+
+<h3>老皇帝之死：支柱倒下</h3>
+
+<p>一九一六年十一月二十一日，在戰爭最黑暗的時刻，那位幾乎與這個帝國本身融為一體的老人，閉上了眼睛。<strong>法蘭茲·約瑟夫一世（Franz Joseph I，1848–1916 在位）</strong>駕崩了，享年八十六歲，在位整整六十八年。對於這個帝國裡絕大多數的臣民來說，他們的祖父、父親、乃至他們自己，畢生只認得這一位皇帝。他登基時，馬克思剛寫完《共產黨宣言》；他離世時，坦克與毒氣已在戰場上轟鳴。他活過了無數的失敗——丟掉了義大利的領土，敗給了普魯士，眼看著弟弟在墨西哥被槍決、獨子在獵宮自戕、妻子被無政府主義者刺殺；如今，他又把自己一手遞出戰書的帝國，連同它的命運，一起留給了身後。</p>
+
+<p>這位老皇帝，是這個龐大而脆弱的多民族拼貼國家最後的、也是唯一的黏合劑。他不代表任何一個民族，他超越所有民族——他是德意志人、匈牙利人、捷克人、波蘭人、克羅埃西亞人共同效忠的那個抽象符號，是把「奧地利」這個本身並不存在的東西凝聚起來的人格化身。當他還活著時，無論帝國多麼分崩離析，至少還有「對老皇帝的忠誠」這一條無形的紐帶把人們繫在一起。他一死，這條紐帶也隨之鬆脫。舊秩序最後的支柱，倒了。</p>
+
+<p>繼位的，是斐迪南遇刺後成為儲君的姪孫——年輕的<strong>卡爾一世（Karl I，1916–1918 在位）</strong>。他登基時還不到三十歲，是個善良、虔誠、卻幾乎無力回天的青年。他敏銳地看出帝國正走向毀滅，因而做了一件他的前任絕不會做的事：他試圖求和。他通過妻子的法國親屬，秘密向協約國伸出橄欖枝（即後世所稱的「西克斯圖斯事件」），希望以單獨媾和換取帝國的存續。但和談最終失敗、甚至外洩，反而激怒了德國盟友，也讓奧匈帝國更深地淪為柏林的附庸。卡爾想當那個拯救帝國的人，可他繼承的，是一艘早已注定要沉沒的船。</p>
+
+<h3>解體：頭顱與身體的分離</h3>
+
+<p>一九一八年，隨著德國在西線的最後攻勢被擊退、協約國在美國參戰後佔據壓倒性優勢，同盟國的崩潰已成定局。而對奧匈帝國而言，崩潰不是來自一場決定性的戰敗，而是來自<em>從內部的瓦解</em>。當帝國再也無力提供勝利、麵包與秩序時，把它捆綁在一起的那根慣性的繩索，終於繃斷了。戰敗的陰影一臨頭，那些被縫在雙頭鷹旗下幾百年的民族，便爭先恐後地撕開縫線，各自奪門而出。</p>
+
+<p>這一次，沒有戰場，沒有攻城，沒有炮火指向維也納。帝國的解體，是以一種近乎安靜的、卻又雷霆萬鈞的方式發生的。在布拉格，捷克與斯洛伐克人宣告成立<strong>捷克斯洛伐克</strong>；在札格瑞布，南方的斯拉夫人脫離出去，與塞爾維亞合組日後的<strong>南斯拉夫</strong>；波蘭人重新拼回了自己消失百年的國家；匈牙利宣布與奧地利分道揚鑣，終結了那段「奧匈」的雙重婚姻。短短幾週之內，一個延續六百年的哈布斯堡王朝，一個橫跨中歐、君臨五千萬人的龐大帝國，就像一具被抽去骨架的身軀，無聲地癱軟、散落了一地。</p>
+
+<p>一九一八年十一月十一日——正是西線停火的同一天——卡爾一世簽署文件，放棄參與國政。哈布斯堡家族六百多年的統治，就此落幕。第二天，<strong>德意志-奧地利共和國</strong>宣告成立。當塵埃落定，人們環顧四周，赫然發現：那個曾經統治著從加里西亞到亞得里亞海、從波希米亞到外西凡尼亞的龐然大物，已經不復存在。剩下的，只是一個小小的、講德語的、被群山環抱的內陸共和國——而維也納，這座為了統治五千萬人、君臨整個中歐而被打造出來的恢宏帝都，就那樣突兀地、孤零零地，戴在了一個只有六百多萬人口的小國頭上。</p>
+
+<div class="cf">
+  <span class="cfh">如果 · 帝國能撐過一九一八</span>
+  <p>歷史學家至今仍在爭辯：奧匈帝國的解體，究竟是早已注定的「民族監獄」之必然崩塌，還是一場戰敗所引發的、本可避免的意外？倘若維也納在一九一四年沒有遞出那張通牒，倘若斐迪南未死、他的「三元」或聯邦改革得以推行，這個多民族的龐大共同體，是否可能演化成一個中歐版的鬆散邦聯，把捷克人、波蘭人、南斯拉夫人都安頓在同一個屋簷下？沒有人知道答案。但可以確定的是：一九一四年那兩聲槍響，不只殺死了一位大公，也關上了帝國一切「另一種可能」的大門。</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">68 年</div><div class="lbl">法蘭茲·約瑟夫在位時長</div></div>
+  <div class="stat"><div class="num">~5,000 萬</div><div class="lbl">帝國解體前的總人口</div></div>
+  <div class="stat"><div class="num">十餘個</div><div class="lbl">帝國境內的主要民族</div></div>
+  <div class="stat"><div class="num">~650 萬</div><div class="lbl">解體後奧地利共和國人口</div></div>
+</div>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 被切下來的頭顱</span>
+  <p>一座城最深的創傷，未必是被摧毀。維也納在這場大戰中，沒有挨過一顆落在市中心的炮彈，沒有一條街道被夷平，它的環城大道、它的歌劇院、它的宮殿，都好端端地立在那裡。然而它所承受的，是一種比物理摧毀更難以言喻的損失：它失去了它所連接的那個世界。一八六七年，它被打造成一顆要指揮五千萬人、君臨整個中歐的「頭顱」；而到了一九一八年，這顆頭顱還在，身體卻沒了——那個橫跨十幾個民族、從亞得里亞海延伸到加里西亞平原的龐大軀體，在短短幾個月裡，被一一切走了。</p>
+  <p>於是維也納成了一個吊詭的存在：一個為帝國而生、卻在一夜之間失去了帝國的首都；一顆巨大的、被精心鍛造的頭顱，孤懸在一具早已不存在的身體之上，對著一張再也找不到的版圖發號施令，卻聽不見任何回應。它沒有被炸平，但它失去了它的帝國、它的理由、它的身體。一座城最真實的死亡，有時不是廢墟，而是當它睜開眼睛，發現自己曾經連接的整個世界，已經悄然從它身上被剝離——它還活著，卻已不知道自己為何而存在。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch14" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十四章 · The Hydrocephalic Capital</span>
+    <h2 class="act-title">水腦症的首都：紅色維也納</h2>
+    <p class="act-sub">The Severed Head & the Socialist Experiment</p>
+    <div class="ornament">🏚 ✦ 🚩</div>
+  </div>
+  <div class="prose">
+<p>一九一八年十一月十一日，最後一位哈布斯堡皇帝<strong>卡爾一世（Karl I，1916–1918 在位）</strong>簽下一紙聲明，放棄參與國政。第二天，在維也納的國會大廈外，人們宣告了一個前所未聞的共和國——「<strong>德意志-奧地利共和國（Republik Deutschösterreich）</strong>」。連這個名字本身，都洩露了一種茫然：它不叫「奧地利」，而叫「德意志-奧地利」，因為當時幾乎沒有人相信，這個剩下來的小國真能獨立存在。一座為五千萬人的帝國而生的首都，一覺醒來，發現自己頭上的那頂皇冠，連同它腳下的整個身體，都不見了。</p>
+<p>這是一場規模難以想像的截肢。戰前的奧匈帝國橫跨中歐，從今天的捷克、斯洛伐克、匈牙利，到波蘭南部、克羅埃西亞、斯洛維尼亞，乃至義大利北部的一角。維也納是這個多民族龐然大物的心臟與大腦：帝國的軍隊在這裡受命，鐵路在這裡交會，銀行在這裡放款，宮廷在這裡供養著整個歐洲最華麗的文化生活。如今，帝國解體成一串獨立的民族國家，維也納身後那片由五千萬人組成的腹地，在幾個月內硬生生縮成了一個只有六百多萬人口、以德語阿爾卑斯山區與多瑙河谷為主的內陸小國。</p>
+
+<h3>水腦症的首都</h3>
+<p>當時的人為這種荒謬找到了一個刺耳卻精準的醫學詞：<strong>「水腦症」（Wasserkopf）</strong>。水腦症是一種腦部積水、使頭顱異常腫大的疾病——一顆大得不成比例的頭，頂在一具瘦小的身體上。這正是一九一八年後奧地利的寫照。維也納這顆「頭」，仍是一座近兩百萬人口的世界級大都會，住著全國將近三分之一的人口；可它底下那具「身體」，卻只剩下幾個人口稀疏的阿爾卑斯山省份。一個曾經統御半個中歐的首都，被留在了一個它自己都嫌太大的國家裡。</p>
+<p>這不只是一個比喻，而是一套實實在在、卻突然失去意義的機器。維也納養著一支為治理五千萬人而存在的龐大官僚隊伍；如今帝國沒了，這些部會、檔案、官員卻還在，只是再也沒有那麼大的國家需要他們去管。它有為帝國服務的大學、歌劇院、醫院、研究所與咖啡館文化，有足以撐起一個大帝國的金融與工業總部；而現在，要由一個小小的共和國，用它微薄的稅基，去供養這一整套為昔日巨人量身打造的器官。頭顱太重，身體太輕——這就是水腦症。</p>
+<div class="aside"><span class="hl">Wasserkopf</span>「水腦症的首都」這個說法，殘忍地點破了戰間期奧地利的根本困境：不是維也納太小，而是它對於剩下來的國家來說，大得近乎畸形。</div>
+<p>比物理上的失衡更深的，是一種身分的茫然。帝國解體後，維也納人——以及多數奧地利德語居民——幾乎集體陷入一個問題：<em>我們到底是誰？</em>幾百年來，他們的認同是「哈布斯堡的臣民」，是一個跨民族帝國的德語核心；如今帝國沒了，他們既不再是某個大東西的中心，又不確定自己算不算一個獨立的「民族」。許多人——從社會民主黨到後來的右翼——都認為答案很簡單：我們是德國人，理當併入德國。一九一八到一九年間，「<strong>與德國合併（Anschluss）</strong>」的呼聲跨越了大半政治光譜。只是這條路被戰勝國的和約明令禁止了：《聖日耳曼條約》強迫這個國家改名為「奧地利共和國」，並嚴禁它併入德國。於是維也納被困在一個它不確定撐不撐得起的小國裡，頂著一顆失去身體的巨大頭顱。</p>
+
+<h3>把失落的能量轉向內部</h3>
+<p>面對這樣的崩落，維也納本來大可以只是沉溺。一座失去帝國的都城，最自然的姿態，是哀悼——緬懷昔日的盛宴、軍樂與華爾滋，把自己活成一座巨大的紀念碑。許多維也納人確實這麼做了，那種對「昨日世界」的鄉愁，後來被作家<strong>褚威格（Stefan Zweig，1881–1942）</strong>寫成了傳世的輓歌。但在政治上，這座城卻選擇了一條截然不同的路：既然再也無法當帝國的頭顱，那就把這顆頭顱裡蓄積的全部能量——行政的、智識的、組織的——統統轉向<em>內部</em>，轉向城裡那兩百萬普通人的生活本身。</p>
+<p>機會來自一場政治上的地殼變動。一九一九年，維也納舉行了戰後第一次普選——這也是奧地利歷史上首次包含女性的全民選舉——<strong>社會民主黨（Sozialdemokraten）</strong>贏得了維也納市議會的絕對多數。從此直到一九三四年，社民黨在這座城連續執政了十五年。一九二二年，維也納更脫離下奧地利省，升格為獨立的「<strong>聯邦邦（Bundesland）</strong>」——這意味著它同時是一座城市，也是一個省，擁有自己徵稅與立法的權力。一座社會主義執政的大都會，就此握有了在自己疆界內大膽實驗的法律工具。歐洲現代史上最雄心勃勃的市政社會主義實驗，<strong>「紅色維也納」（Rotes Wien，1919–1934）</strong>，正式登場。</p>
+<div class="pull"><p>它再也無法當帝國的頭顱，於是試著成為全世界最進步的市政實驗室——把懷舊的能量，改鑄成一場為普通人改善生活的工程。</p></div>
+
+<h3>給工人的、文明的城</h3>
+<p>紅色維也納的核心信念，可以濃縮成一句話：<em>一座城，有義務讓最普通的工人，也過上有尊嚴、有文化、健康而體面的生活。</em>支撐這個信念的，是一套在當時堪稱激進的財政設計。市政府開徵了一系列高度<strong>累進的稅</strong>——對奢侈消費、僱傭家僕、豪宅、賽馬與夜總會課以重稅，本質上是向城裡的富人徵錢，去支付窮人與工人的住房、健康與教育。這套「<strong>布雷特諾稅制（Breitner-Steuern）</strong>」以主導它的市議員命名，被保守派痛罵為劫富，卻讓維也納得以在幾乎不舉債的情況下，撐起一個龐大的社會建設計畫。</p>
+<p>這套錢，最壯觀的去處是住房。戰後的維也納，工人住在擁擠、潮濕、缺乏陽光與廁所的出租公寓裡，房東壟斷、租金高昂、傳染病橫行。紅色維也納的回應，是國家直接下場蓋房——在一九二三到一九三四這十餘年間，市政府興建了超過六萬套<strong>市政公共住宅（Gemeindebau）</strong>，以低廉的租金分配給工人家庭，安置了全城近十分之一的人口。這些不是貧民窟，恰恰相反：它們是帶著巨大內庭花園、設有公共澡堂、洗衣房、幼兒園、圖書館、診所與合作社商店的「工人宮殿」，外牆刷著明亮的色彩，刻著浮雕，氣派得像獻給普通人的紀念碑。</p>
+<div class="stats">
+  <div class="stat"><div class="num">六萬餘</div><div class="lbl">紅色維也納時期興建的市政公共住宅套數</div></div>
+  <div class="stat"><div class="num">約 1/10</div><div class="lbl">入住公共住宅的全城人口比例</div></div>
+  <div class="stat"><div class="num">1,100+ 公尺</div><div class="lbl">卡爾·馬克思大院的連續長度</div></div>
+  <div class="stat"><div class="num">15 年</div><div class="lbl">社民黨在維也納連續執政（1919–1934）</div></div>
+</div>
+<p>這場運動的圖騰，是<strong>卡爾·馬克思大院（Karl-Marx-Hof）</strong>。它於一九二七至一九三〇年建成，主立面綿延一公里多，是世界上最長的單體住宅建築之一，內含一千多套公寓，住著五千多人，卻只占用基地面積的不到三成——其餘全是給孩子奔跑、給大人乘涼的開放庭園。它有自己的洗衣中心、幼托、診所、藥房、郵局與圖書館，幾乎是一座自成一體的微型城市。它高聳的拱門、塔樓與紅黃外牆，像一座工人的城堡，公然宣告：在這座城，連最普通的人，也配得上美與尊嚴。</p>
+<div class="deepen">
+  <span class="dh">概念深掘 · 市政社會主義：不掀桌的革命</span>
+  <p>紅色維也納最耐人尋味之處，在於它走的不是俄國式的暴力革命路線，而是一條「在既有法律框架內、用市政府的權力慢慢改造一座城」的改良路線。它不沒收工廠、不處決資產階級，而是用選票拿下市政權，用累進稅把資源重新分配，用公共住宅、公共醫療、公共教育，一磚一瓦地改善工人的物質與精神生活。它的旗手相信，社會主義不必靠流血降臨，而可以靠日復一日把城市治理得更公平、更文明，「教育」出新一代有文化、有自信、懂得當家作主的工人。</p>
+  <p>這套思路後來被稱為「<strong>奧地利馬克思主義（Austromarxism）</strong>」，是介於革命與議會妥協之間的第三條路。它在維也納一城創造了當時歐洲最先進的市政福利體系——免費的學校牙醫、產婦與嬰兒照護、結核病防治、成人教育、工人圖書館與運動設施。但它也有一個致命的弱點：它把社會主義局限在一座城的圍牆之內，而圍牆之外的整個國家，正一步步落入它的死敵手中。</p>
+</div>
+
+<h3>紅色的城，黑色的鄉</h3>
+<p>因為，紅色維也納並不是一個紅色國家的首都。它是一座紅色的孤島，被一片「黑色」的海洋包圍著——這裡的「黑色」，指的是天主教保守派的代表色。除了維也納，戰間期奧地利的廣大鄉村與小城，幾乎全是<strong>基督教社會黨（Christlichsoziale Partei）</strong>的天下：虔誠的天主教、保守的價值、對教會與傳統權威的服從、對農民與小資產階級利益的維護。於是這個小小的國家，從一開始就裂成兩半——一邊是世俗的、社會主義的、現代主義的、由工人與知識分子構成的紅色維也納；另一邊是篤信天主教的、保守的、對城市的「無神論」與「自由放蕩」深惡痛絕的黑色鄉村。</p>
+<p>這道裂縫不只是政策之爭，而是兩種對「奧地利該是什麼」的根本想像在對撞。對保守派而言，維也納那些公共住宅、性教育、火葬場與無神論的工人文化，是道德的淪喪、是對神聖秩序的褻瀆，是必須剷除的紅色瘟疫；對社民黨而言，鄉村的教權、王朝鄉愁與對民主的不信任，則是通往反動與獨裁的溫床。雙方都逐漸把對方當成必須擊敗的敵人。更危險的是，兩邊都養起了自己的<strong>準軍事組織</strong>——保守派的「<strong>家鄉衛隊（Heimwehr）</strong>」與社民黨的「<strong>共和國護衛同盟（Schutzbund）</strong>」——在街頭遊行、互毆，把政治對立一步步推向武裝對峙的邊緣。一個只有六百多萬人的小國，竟同時擁有兩支街頭軍隊。</p>
+<div class="cf">
+  <span class="cfh">如果 · 紅色維也納沒有被孤立</span>
+  <p>設想紅色維也納的實驗不是被困在一城之內，而是能延伸到整個國家——或設想戰後的奧地利沒有那麼徹底地裂成「紅城」與「黑鄉」兩個互不相讓的世界。也許市政社會主義的成果，本能在一個團結的共和國裡生根、傳播，成為歐洲社會福利國家的早期範本。但歷史沒有給它這個機會：它的光芒愈耀眼，就愈刺激黑色鄉村的恐懼與敵意。一座過於成功的紅色孤島，反而招來了整片黑色海洋的圍剿——這正是下一章那場短暫而血腥的內戰的伏筆。</p>
+</div>
+
+<h3>失去身體的頭顱，選擇向前</h3>
+<p>退一步看，紅色維也納是一座城面對「崩落」時，所能給出的最了不起的回應之一。帝國沒了，腹地沒了，五千萬人的舞台縮成六百萬人的窄台，連自己是誰都答不上來。在這樣的廢墟上，這座城本可以只剩懷舊與怨懟。但它沒有。它把那顆「水腦症」的頭顱裡蓄積的一切——帝國留下的行政能力、智識傳統、組織才幹與龐大的人才——調轉方向，全數傾注到一件樸素卻偉大的事業上：讓城裡每一個普通工人，住得更好、活得更健康、學得更多、過得更有尊嚴。</p>
+<p>它沒能再當帝國的大腦，於是它努力去當人類的良心實驗室。它無法再向外統御，於是它向內深耕。那一棟棟刻著浮雕、圍著花園的工人宮殿，那一所所免費的診所與學校，本質上都是同一句宣言的不同寫法：<em>就算我們失去了帝國，我們也不打算把失去當成沉淪的藉口。</em>這是把鄉愁鍊成行動的煉金術，是一座城在被截肢之後，仍倔強地把殘存的力氣，用來建設而非哀悼。</p>
+<p>然而，這場了不起的實驗，從第一天起就站在火山口上。它太成功、太刺眼、太挑釁，而它賴以生存的民主共和國，正一寸寸地被它周圍那片黑色海洋、被歐洲整體向右翼極權傾斜的大潮所侵蝕。紅色維也納用十五年寫下的詩篇，將在一九三四年二月的炮火中被強行劃上句號——而開炮的，正是用大砲轟擊卡爾·馬克思大院的奧地利自家政府。一座失去身體的頭顱，曾經如此勇敢地選擇向前；可前方等著它的，是一場它無力阻擋的政治風暴。</p>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 崩落之後，仍可向前</span>
+  <p>維也納的這一章，講的是一種面對「崩落」的尊嚴。一九一八年，這座城失去了它存在了幾百年的理由——它不再是帝國的頭顱，只剩下一具大得荒謬、無處安放的軀殼。最容易、也最誘人的選擇，是沉溺於昔日的輝煌，把整座城活成一場無止盡的追悼會。但紅色維也納證明了另一種可能：一座失去身體的頭顱，仍然可以選擇向前——把懷舊的能量，轉化為一場為普通人改善生活的偉大實驗，把「我們曾經多偉大」的鄉愁，改寫成「我們還能為最平凡的人做些什麼」的行動。</p>
+  <p>這是「崩落」這條主線最動人的一個變奏：真正定義一座城的，往往不是它失去了什麼，而是它在失去之後選擇做什麼。維也納被截去帝國之後，沒有變成一具標本，而是把殘存的全部才幹，傾注給了腳下最普通的居民。只可惜，歷史並不總是獎賞勇敢——這場了不起的回應，終將被即將到來的政治風暴血腥終結。但它曾經存在過這件事本身，已足以說明：即使在最徹底的崩落裡，向前，始終是一個可以做出的選擇。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch15" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十五章 · 1934 & 1938</span>
+    <h2 class="act-title">一九三四與一九三八：內戰與歡呼的併吞</h2>
+    <p class="act-sub">Civil War, the Anschluss & the Murder of a City</p>
+    <div class="ornament">🔥 ✦ 🕯</div>
+  </div>
+  <div class="prose">
+<p>進入一九三〇年代，維也納身上同時壓著兩重重量。一重是經濟的：一九二九年華爾街崩盤掀起的世界大蕭條，把這座本已失去帝國腹地、靠著「紅色維也納」社會工程勉強維繫的城市，重新拖回失業與貧困的深淵；街頭排隊領救濟的人愈來愈長，銀行接連倒閉，一九三一年奧地利最大銀行<strong>信貸銀行（Creditanstalt）</strong>的崩潰更引爆了波及全歐的金融恐慌。另一重是政治的：威瑪德國的政壇正一步步滑向希特勒，而在多瑙河這一岸，那道從建國第一天起就撕裂奧地利的左右鴻溝——社會民主黨的「紅色維也納」與天主教保守派把持的鄉村及聯邦政府——已經繃緊到隨時會斷的地步。雙方各自擁有準軍事武裝，街頭械鬥成了日常。這個共和國，是一個從未真正學會和解的共和國。</p>
+
+<h3>一個總理的右轉</h3>
+<p>一九三二年，一位身材矮小、信仰虔誠、來自基督教社會黨的政治家登上總理之位——<strong>恩格爾伯特·陶爾斐斯（Engelbert Dollfuss，1892–1934）</strong>。他面對的是一個議會多數僅靠一票維繫、左右兩翼都不願妥協的死局。一九三三年三月，國會在一次程序混亂中三位議長相繼辭職、議事陷入僵局，陶爾斐斯抓住這個機會，宣稱議會已「自我解散」，從此拒絕讓它重新召開。這實質上是一次靜悄悄的政變。他援引一戰時期留下的緊急授權法令，繞過議會，以行政命令統治。</p>
+<p>接下來的一年多，陶爾斐斯一步步搭建起一套後人稱為「<strong>奧地利法西斯（Austrofascism）</strong>」或「<strong>教權威權主義</strong>」的體制。它與北方的納粹主義並不相同——它沒有種族滅絕的綱領，反而以天主教信仰、奧地利愛國主義與墨索里尼的義大利為靠山，刻意抵擋希特勒的吞併野心；但它同樣取締政黨、壓制言論、解散議會、迷信領袖與權威。陶爾斐斯查禁了奧地利共產黨，也查禁了奧地利納粹黨，更把矛頭對準他最大的敵人：社會民主黨，以及它的武裝<strong>共和國保護同盟（Republikanischer Schutzbund，簡稱保護同盟）</strong>。一九三三年起，政府以搜查武器為名，不斷進逼工人組織。彈簧被一圈圈壓到極限。</p>
+
+<h3>二月：砲彈打進工人的家</h3>
+<p>一九三四年二月十二日清晨，導火線在林茨點燃。當警察再次闖入社會民主黨在當地的據點搜查武器時，保護同盟的成員選擇了武裝抵抗。消息傳開，社會民主黨倉促號召全國總罷工與武裝起義。零星而缺乏統一指揮的戰鬥，在維也納、林茨、施泰爾等工業城鎮爆發。這就是奧地利的<strong>二月內戰</strong>——一場左翼工人對抗右翼威權政府的、絕望而注定失敗的起義，前後只持續了短短數日。</p>
+<p>在維也納，政府的回應是壓倒性的。陶爾斐斯動用了軍隊、警察與右翼的<strong>護國團（Heimwehr）</strong>民兵，並做出了一個在這座城市記憶裡留下永久傷疤的決定：對工人聚居的市政住宅<strong>動用火砲</strong>。那些被「紅色維也納」引以為傲、由市府出資興建、被視為工人新生活象徵的巨大住宅院落，此刻成了起義者的據點，也成了砲擊的目標。其中最著名的，正是那座長達一公里、被全世界進步人士當作朝聖地的<strong>卡爾·馬克思大院（Karl-Marx-Hof）</strong>。政府軍的火砲架在街上，砲彈打進了人們的家。窗戶、陽台、樓道——那些剛剛讓工人擁有陽光、空氣與尊嚴的設計，如今在砲火中崩裂。</p>
+<div class="warn">
+  <span class="warn-tag">一座理想的住宅，成了砲擊的目標</span>
+  <p>卡爾·馬克思大院從來不只是建築。它是「紅色維也納」社會實驗最驕傲的宣言——一個城市可以為它最窮的市民，蓋出有陽光、有花園、有公共澡堂與圖書館的家。一九三四年二月，這個宣言被自己國家的火砲擊穿。據估計，這場僅持續數日的內戰造成了數百人死亡（雙方合計約兩、三百人，另有許多人受傷），起義迅速被鎮壓。事後政府查禁了社會民主黨，逮捕、處決或流放了它的領袖，市政府被改組，「紅色維也納」這個歐洲社會改革史上最大膽的市政實驗，就此被血腥終結。多年後砲彈在牆上留下的彈孔，仍被刻意保留下來——作為一道不准遺忘的傷口。</p>
+</div>
+<p>二月內戰是奧地利第一共和國的轉捩點，也是它的喪鐘。它向所有人證明了：這個共和國已經無法靠投票與議事解決分歧，只能靠武力。左翼被擊垮、被噤聲之後，奧地利的政治天平徹底倒向威權右翼——可諷刺的是，這場自相殘殺最大的受益者，並不是陶爾斐斯，而是他正全力抵擋的那一方。同年五月，陶爾斐斯頒布新憲法，正式確立「教權法團國家」。但他的時日已經不多了。一九三四年七月二十五日，一群奧地利納粹黨人闖入總理府，將他刺殺。這位以鐵腕摧毀了紅色維也納、卻又以生命抵抗納粹吞併的總理，倒在了他自己一手締造的暴力邏輯裡。</p>
+<div class="pull"><p>一個共和國若學不會在投票箱裡解決分歧，就遲早會在街壘與砲火裡失去自己。二月內戰之後，奧地利剩下的，只是一具還在呼吸、卻已沒有靈魂的民主軀殼。</p></div>
+
+<h3>一九三八年三月：歡呼聲中的末日</h3>
+<p>陶爾斐斯死後，繼任的<strong>許士尼格（Kurt Schuschnigg）</strong>勉力維持著這個搖搖欲墜的威權國家，並繼續抵擋北方的壓力。但靠山正在一個個倒下：墨索里尼的義大利已倒向希特勒，奧地利在國際上愈來愈孤立。一九三八年二月，希特勒把許士尼格召到貝希特斯加登，當面威逼。走投無路的許士尼格在三月初孤注一擲，宣布就「奧地利是否要維持獨立」舉行公民投票，希望用民意為這個國家爭得最後一線生機。希特勒不容他賭這一把。三月十一日，在德國軍事入侵的最後通牒下，許士尼格被迫辭職；三月十二日，德國軍隊開進奧地利，未放一槍。三月十三日，奧地利被正式併入德意志第三帝國——這就是<strong>德奧合併（Anschluss）</strong>。</p>
+<p>真正令後世不安的，不是德軍的坦克，而是迎接它們的場面。在許多奧地利城鎮，德軍是在夾道揮舞的旗幟、拋灑的鮮花與震天的歡呼聲中開進來的。三月十五日，希特勒本人來到維也納，站上<strong>英雄廣場（Heldenplatz）</strong>——那座哈布斯堡帝國昔日炫耀武功的廣場——向廣場上據估計多達二、三十萬的人群發表演說，宣告他的故鄉「回歸」帝國。廣場上山呼海嘯的群眾，不是被槍口逼來的。許多奧地利人是真心地、狂熱地歡迎這場吞併——出於民族主義的迷夢、對經濟蕭條的絕望、對「強大德國」的嚮往，也出於日後他們極不願承認的、對反猶綱領的認同。</p>
+<div class="cf">
+  <span class="cfh">如果 · 那場沒舉行的公投</span>
+  <p>許士尼格原訂的公投從未舉行——希特勒搶在它之前動手了。德國併吞後反倒補辦了一場自己的「公投」，在納粹完全控制、反對者已遭逮捕的恐怖氣氛下，得出逾百分之九十九「贊成合併」的荒謬結果，毫無參考價值。於是「當時奧地利人究竟有多少真心歡迎」，成了一個永遠無法精確回答、卻又無比沉重的問題。但英雄廣場上那片真實的、自發的歡呼，已經給出了一個足夠令人羞愧的答案——它徹底拆穿了戰後奧地利為自己編織的那則「第一個受害者」神話。維也納不只是被吞併的，它也有很大一部分，是張開雙臂迎上去的。</p>
+</div>
+
+<h3>對猶太維也納的立即毀滅</h3>
+<p>歡呼聲還沒散去，暴行已經開始。德奧合併之惡毒，在於它幾乎是在一夜之間，就把這座城市對猶太鄰人的仇恨，從話語變成了行動——而且其速度與殘忍，據許多歷史學者觀察，甚至超過了德國本土自一九三三年以來循序漸進的迫害。併吞後的最初幾天幾週，維也納街頭就出現了令人髮指的景象：成群的猶太人——其中不乏年長者、體面的中產市民、學者——被暴徒拖到街上，被迫跪在地上，用刷子和酸液擦洗人行道上反納粹的標語。圍觀的人群嘲笑、辱罵、拍照取樂。這就是惡名昭彰的「<strong>擦洗隊（Reibpartien）</strong>」——一場以羞辱為目的的公開儀式，把一個人從鄰居貶為可被任意凌辱的對象。與此同時，猶太人的住宅與店鋪遭到洗劫，逮捕大規模展開。</p>
+<p>同年十一月九日至十日，席捲全德的「<strong>水晶之夜（Kristallnacht）</strong>」在維也納尤其慘烈。據估計，維也納幾乎所有的猶太會堂與祈禱所——數十座之多——在那一夜被縱火焚毀或搗毀，櫥窗碎裂，店鋪被砸，無數猶太人被毆打、被捕、被送往集中營。這座曾以「世紀末天才」照耀世界、曾讓猶太知識分子在咖啡館裡縱論藝術與科學的城市，此刻把火把投向了自己同胞的祈禱之所。</p>
+<p>緊接著的，是系統性的掠奪與驅逐。納粹在維也納設立了一套高效得令人不寒而慄的機器，由<strong>艾希曼（Adolf Eichmann）</strong>主持的「猶太人移民中央局」運作——它的「效率」後來甚至被當作範本推廣。所謂「移民」，實質是赤裸裸的勒索：先沒收猶太人的財產、企業、銀行存款與藝術收藏（「雅利安化」），再逼他們繳清層層稅費，換取一紙離境許可，淨身出戶地逃離自己的祖國。逃得出去的，是幸運的；逃不出去的，在戰爭爆發、各國邊境關閉之後，等待他們的，是被驅逐至東方的滅絕營。</p>
+<div class="stats">
+  <div class="stat"><div class="num">約 18–19 萬</div><div class="lbl">合併前夕維也納的猶太人口（占全市人口近一成，全歐重要的猶太文化中心之一）</div></div>
+  <div class="stat"><div class="num">逾 6.5 萬</div><div class="lbl">據估計，維也納猶太人在大屠殺中遇害的人數</div></div>
+  <div class="stat"><div class="num">約 12 萬</div><div class="lbl">在戰前設法流亡海外的維也納猶太人（多數從此再未歸來）</div></div>
+  <div class="stat"><div class="num">數十座</div><div class="lbl">據估計毀於水晶之夜的維也納猶太會堂與祈禱所</div></div>
+</div>
+<p>流亡的名單，就是一份維也納精神的訃聞。早已年邁、病重的<strong>佛洛伊德（Sigmund Freud）</strong>——這座城市最偉大的心靈探索者，他的精神分析正是在維也納的咖啡館與診室裡誕生的——在友人多方營救與繳交鉅額「離境稅」之後，於一九三八年六月被迫離開他生活了近八十年的維也納，流亡倫敦，並於翌年一九三九年九月在異鄉病逝。他的四個妹妹未能逃出，後來都死於納粹之手。佛洛伊德的離去，幾乎是一個象徵：那個孕育了精神分析、孕育了馬勒的音樂、孕育了克林姆的金色、孕育了維根斯坦的哲學、孕育了無數諾貝爾獎得主的維也納，正被它自己連根拔起。</p>
+
+<h3>它謀殺了自己最好的部分</h3>
+<p>這是維也納故事裡最沉痛、也最難以面對的一章。要記住的是：那個讓維也納在世紀之交光耀全球的「天才之源」——精神分析、無調性音樂、分離派的藝術、邏輯實證論的哲學、無數的科學家與醫師——其中極大一部分，正是由它的猶太社群所孕育、所滋養、所創造的。維也納的猶太人不是這座城市的客人，他們是它最具創造力的核心，是它現代文明成就中最閃亮的那一部分。</p>
+<p>而一九三八年的維也納，親手摧毀了這一切。它沒有被外敵夷平——它的歌劇院還在，它的環城大道還在，它的咖啡館還在——但它把那些讓這些建築有靈魂的人，羞辱了、洗劫了、驅逐了、謀殺了。它毀掉的，是它自己最好的部分。那場曾經以「歡快的末日」自嘲、在咖啡館的圓舞曲與機智談笑中緩緩走向衰亡的維也納，如今以一種最不歡快、最殘酷的方式，迎來了真正的末日——不是優雅地凋零，而是被仇恨從內部撕裂、自我了斷。</p>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 它謀殺的，是它自己的靈魂</span>
+  <p>一座城最深的悲劇，從來不是被外敵攻破城牆。維也納的城牆早在十九世紀就拆掉了，換成了世界上最華美的環城大道。它真正的毀滅，是從內部開始的——它被仇恨說服，親手殺死、趕走了自己最有創造力的那一群人。它謀殺的，正是孕育了佛洛伊德與馬勒、克林姆與維根斯坦的那個世界。那個世界一旦被毀，便再也沒有回來。戰後重建的維也納，可以修好被砲彈打穿的卡爾·馬克思大院，可以重建被焚的會堂，卻永遠無法把那些被殺害的天才、被嚇走的後代、被斬斷的傳承重新長回來。</p>
+  <p>這是貫穿維也納全篇最殘酷的一條主線在此刻的匯流：它崩落的最深一層，不是帝國的瓦解，不是經濟的破產，而是它對自己靈魂的背叛。一座城可以失去版圖、失去財富、失去地位而仍舊偉大；但當它被仇恨蠱惑，去摧毀那些讓它之所以為它的人時，它失去的，就不只是受害者的生命，更是它自己的未來與靈魂。維也納用最慘痛的代價證明了一件事——文明最脆弱之處，從來不在它的城牆，而在它能否守住「不把鄰人變成獵物」的那一條底線。</p>
+</div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ✦ ✦</div>
+
+<section id="ch16" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十六章 · The Third Man & After</span>
+    <h2 class="act-title">第三人：廢墟、佔領與中立</h2>
+    <p class="act-sub">Occupation, Neutrality & the Nostalgia Industry</p>
+    <div class="ornament">🎻 ✦ 🕊</div>
+  </div>
+  <div class="prose">
+<p>一九四五年四月初，春天的維也納再一次聞到了硝煙。這一次，從東邊壓過來的，不是奧斯曼的彎刀，也不是拿破崙的鷹旗，而是<strong>蘇聯紅軍（Red Army）</strong>的鋼鐵洪流。經過幾天巷戰，四月十三日，紅軍攻佔了這座城。比起被夷為平地的柏林，維也納算是幸運的——但它也絕非毫髮無傷。盟軍的空襲與最後的地面戰，在這座以美麗自詡的城裡留下了難看的傷口：<strong>國家歌劇院（Staatsoper）</strong>在一場空襲中被炸得只剩外牆與門廳，舞台與觀眾席化為焦土；老城上空那根千年的指針——<strong>聖史蒂芬主教座堂（Stephansdom）</strong>——在戰爭最後幾日的混亂大火中，屋頂坍塌、巨鐘墜地碎裂。維也納人後來把那場火，歸咎於誰並不重要了；重要的是，連這座城最神聖的地標，也未能在這場它自己也曾鼓掌歡迎過的戰爭裡全身而退。</p>
+
+<p>戰爭結束了。但對維也納而言，真正奇特的處境，此刻才剛剛開始。</p>
+
+<h3>四個佔領者，一座共管的城</h3>
+
+<p>德國戰敗後，奧地利與德國一樣，被勝利的四大強權瓜分佔領。整個奧地利被切成四塊，分別由<strong>美國、英國、法國與蘇聯</strong>管轄。而維也納——這座位於蘇聯佔領區深處的首都——本身又被單獨切成四份，四國各管一區。最詭異、也最具象徵意義的，是城市最核心的那一圈：環城大道以內的<strong>內城（Innere Stadt，第一區）</strong>，被劃為四國<em>共同管理</em>的「國際區（International Zone）」。</p>
+
+<p>於是出現了二十世紀最超現實的政治景觀之一：一輛吉普車上，並排坐著一名美軍、一名英軍、一名法軍與一名蘇軍憲兵，四個彼此語言不通、立場各異、剛剛還在不同戰線上廝殺的軍人，被迫一起在維也納市中心巡邏。這支「四人吉普」隊伍每月輪值由不同國家領頭，成了戰後維也納的標誌。曾經統治過半個歐洲的帝國首都，如今連自己的市中心，都得由四個外國軍人擠在一輛車裡共管。哈布斯堡的雙頭鷹早已不再，取而代之的，是四面互不信任的軍旗，在同一片廢墟上交疊。</p>
+
+<div class="aside"><span class="hl">四人吉普</span>「四個人騎一匹馬（Four men in a jeep）」成了戰後維也納的綽號——四國憲兵同車巡邏，象徵這座城被共管、卻不屬於任何一方的曖昧處境。</div>
+
+<h3>《第三人》：一座城的黑白肖像</h3>
+
+<p>沒有任何史書，能比一部電影更精準地定格戰後維也納的氣質。一九四九年，英國導演卡羅·里德（Carol Reed）拍攝的<strong>《第三人》（The Third Man）</strong>，把鏡頭對準了這座四國佔領下、滿目瘡痍、黑市橫行的城。影片裡的維也納，是一座永遠下著雨、永遠籠罩在傾斜陰影裡的城；斷垣殘壁間，盤尼西林被摻假倒賣，間諜在邊界線上滑來滑去，一個人可以在這個區是英雄、過一條街在那個區就成了通緝犯。</p>
+
+<p>這部電影留給世界三個無法磨滅的意象。其一，是安東·卡拉斯（Anton Karas）那首用<strong>齊特琴（zither）</strong>單獨彈奏的主題曲——那種叮叮咚咚、輕快裡藏著無盡蒼涼的旋律，成了「戰後維也納」這四個字的聲音。其二，是反派哈利·萊姆（Harry Lime）在城市<strong>下水道</strong>中那場著名的追逐與末路：這座金碧輝煌的音樂之都，它最後的戲劇，竟發生在它華美地表之下、污水橫流的陰暗腸道裡。其三，是<strong>普拉特公園（Prater）那座巨大的摩天輪</strong>上，萊姆俯瞰著腳下渺小如螻蟻的人群，說出那段關於「人命不過是地上小黑點」的冷酷獨白。</p>
+
+<p>這三個意象拼在一起，就是一張戰後維也納的肖像：一座失去了一切光彩、在廢墟與黑市裡苟活、道德與忠誠都變得模糊曖昧的城。曾經誕生過莫札特與佛洛伊德的天才之都，此刻給世界的形象，是陰影、是齊特琴的哀音、是下水道裡的奔逃。它不再是帝國的心臟，而成了冷戰最前線上一個破敗、失落、誰也說不清究竟屬於誰的角落。</p>
+
+<div class="pull"><p>《第三人》把戰後維也納釘進了世界的記憶：一座永遠在下雨、永遠拖著長影的城，它最美的旋律出自一把齊特琴，它最後的追逐發生在自己的下水道裡。</p></div>
+
+<h3>「奧地利自由了」</h3>
+
+<p>四國佔領延續了整整十年。在冷戰的鐵幕逐漸落下、東西陣營劍拔弩張的年代裡，維也納成了一座被困在縫隙裡的城——它身處蘇聯勢力的最前沿，卻又有西方三國的駐軍，是諜報與談判的灰色地帶。轉機出現在一九五五年。這一年五月十五日，四大強權與奧地利在維也納的<strong>美景宮（Belvedere）</strong>簽署了《<strong>奧地利國家條約</strong>（Austrian State Treaty）》。條約規定：四國軍隊全數撤離，奧地利重獲完整的主權與獨立。作為交換，奧地利以憲法形式宣告<strong>永久中立（permanent neutrality）</strong>——不加入任何軍事同盟，不允許外國在其領土上設立軍事基地。</p>
+
+<p>簽約之後，奧地利外長走上美景宮的陽台，向樓下廣場上聚集的人群高高舉起那份簽好的條約，說出了那句載入史冊的話：「<strong>奧地利自由了（Österreich ist frei）</strong>。」十年的佔領結束了，最後一名外國士兵在當年十月撤離。這是維也納在二十世紀少有的、純粹幸福的時刻之一。</p>
+
+<div class="timeline">
+  <div class="tl-item"><div class="tl-year">1945</div><div class="tl-text">紅軍攻佔維也納；歌劇院、聖史蒂芬主教座堂受損；四國分區佔領，內城為共管國際區</div></div>
+  <div class="tl-item"><div class="tl-year">1949</div><div class="tl-text">《第三人》上映，定格戰後維也納的破敗與曖昧</div></div>
+  <div class="tl-item"><div class="tl-year">1955</div><div class="tl-text">《奧地利國家條約》於美景宮簽署，四國撤軍，奧地利重獲主權並宣告永久中立</div></div>
+  <div class="tl-item"><div class="tl-year">1979</div><div class="tl-text">聯合國維也納辦事處（UNO City）啟用，維也納成為第三座聯合國總部城市</div></div>
+</div>
+
+<p>中立，意外地成了維也納最聰明的活法。一座不站隊的城市，恰好可以成為兩邊都能來的地方。冷戰期間，這裡是東西方間諜碰頭、外交斡旋、領袖會晤的中立沙龍——甘迺迪與赫魯雪夫一九六一年的高峰會，就選在維也納。一九七九年，<strong>聯合國維也納辦事處（UNO City）</strong>在多瑙河畔落成，使維也納繼紐約、日內瓦之後，成為第三座聯合國總部城市；<strong>石油輸出國組織（OPEC）</strong>、國際原子能總署等一連串國際機構，也把總部設在了這裡。那座曾經統治萬民的帝國首都，如今換了一種方式重新變得重要——不再靠統治，而靠居中；不再是命令的發出地，而是各方坐下來談的桌子。被切成四塊的城，最終把「夾在中間」這件事，做成了自己的新身份。</p>
+
+<h3>第一個受害者：一則便利的神話</h3>
+
+<p>然而，在這幅中立而宜居的新圖景背後，藏著一筆遲遲未結的舊賬。戰後的奧地利，為自己選擇了一個極其便利的歷史敘事：它把自己定位成「<strong>納粹德國的第一個受害者</strong>（the first victim of Nazi Germany）」。這個說法的依據是一九三八年的德奧合併——奧地利是被德國「吞併」的，因此奧地利人也是希特勒侵略下的受害者。</p>
+
+<p>這個神話有它方便之處：它讓奧地利得以與納粹的罪行切割，把一切責任都推給「德國人」，從而在道德上輕裝上陣，專心重建。但它迴避了一個刺眼的事實——一九三八年三月，當希特勒進入維也納時，迎接他的，是英雄廣場上數十萬狂熱歡呼的奧地利人群；此後，許多奧地利人並非被動的受害者，而是納粹機器裡積極的共謀者：從蓋世太保到集中營，奧地利人的參與比例，遠高於他們在帝國人口中的占比。被害者與加害者，在這同一群人身上重疊。</p>
+
+<div class="warn">
+  <span class="warn-tag">遲來的清算</span>
+  <p>「第一個受害者」的神話，讓奧地利在戰後數十年裡，幾乎不曾認真面對自己人民在納粹罪行中的角色。轉折點要等到一九八〇年代的<strong>華德翰事件（Waldheim affair）</strong>：前聯合國秘書長庫爾特·華德翰（Kurt Waldheim）在競選奧地利總統時，被揭發隱瞞了自己戰時在德軍中的經歷。風波之中，奧地利社會才被迫開始較為誠實地檢視自己的共謀過往。這與柏林形成了鮮明的對照——德國早早選擇了直視罪責、把懺悔刻進城市的記憶文化；而維也納，用了將近半個世紀，才肯把目光從「我們也是受害者」這句話上，緩緩移開。</p>
+</div>
+
+<h3>鄉愁，一門巨大的生意</h3>
+
+<p>面對一個失去的帝國、一段不願直視的過往，戰後的維也納找到了一種獨特的生存之道：它把哈布斯堡王朝的昔日輝煌，打包成了一門巨大的生意。那個已經消失的世界——華爾滋、皇帝、金色大廳、利皮札白馬、咖啡館裡的悠長午後——被精心地保存、擦亮、重新上演，賣給一年又一年湧入的觀光客。</p>
+
+<p>這門「鄉愁工業」有它的明星與儀式。最受寵的，是皇后<strong>伊麗莎白（Elisabeth，暱稱茜茜公主／Sisi）</strong>——這位生前憂鬱、最終被刺殺的皇后，死後被改寫成一則甜美的童話，她的肖像印在巧克力盒、咖啡杯與無數紀念品上，成了維也納最暢銷的形象。<strong>西班牙騎術學校</strong>的利皮札白馬，依舊在巴洛克大廳裡跳著古典的舞步；每年元旦，金色大廳裡的<strong>維也納新年音樂會</strong>，把約翰·史特勞斯的圓舞曲送進全球億萬個客廳——那旋律裡迴盪的，是一個早已不存在的帝國的歡愉。</p>
+
+<div class="stats">
+  <div class="stat"><div class="num">1955</div><div class="lbl">重獲主權、宣告中立之年</div></div>
+  <div class="stat"><div class="num">1979</div><div class="lbl">成為第三座聯合國總部城市</div></div>
+  <div class="stat"><div class="num">No.1</div><div class="lbl">近年屢居「全球最宜居城市」榜首</div></div>
+</div>
+
+<p>於是維也納活成了一座奇特的城：它一面為一個消失的世界守靈，把帝國的餘暉一遍遍地重播；一面又年復一年地高居各種「全球最宜居城市」榜單的首位。它乾淨、安全、優雅、從容，有著歐洲一流的公共住宅、文化與生活品質。失去了帝國、失去了那顆曾經孕育出莫札特、佛洛伊德、維根斯坦的天才頭顱之後，維也納最終學會的活法，是把「過去」本身——那段金色的、再也回不去的過去——美學化、商品化，釀成一種叫做<strong>鄉愁</strong>的東西。它用對昔日的懷念，填補了那顆被砍下的頭顱，與已經消失的帝國身體之間，那片巨大的空洞。</p>
+
+<div class="investor">
+  <span class="tag">歷史的回聲 · 崩落，最終化為懷念</span>
+  <p>這一章回答了貫穿全篇的那個沉重問題：<strong>當你是一個再也不存在之物的首都，你要如何活下去？</strong>維也納的答案，出人意料地優雅——懷念。它沒有像柏林那樣咬牙重建一個新的中心，也沒有真的死去；它選擇把自己的失落，釀成一種精緻的、可供觀光的鄉愁。圓舞曲照舊旋轉，白馬照舊起舞，茜茜公主的笑容印在每一只咖啡杯上。崩落之後剩下的那片空洞，被它用金色的回憶，溫柔而體面地填滿了。</p>
+  <p>這活法美麗，卻也藏著危險。沉溺於懷念昔日的金色，有時恰恰是為了不去直視那金色底下、自己親手造成的黑暗——「第一個受害者」的神話與遲來的清算，正是這同一種心理的另一面。一座太懂得懷舊的城，也最容易把懷舊當成遺忘的工具。維也納把過去釀成了鄉愁，也把鄉愁，悄悄釀成了一層遮光的紗。而當一座城開始用懷念來定義自己的時候，真正值得追問的，已經不再是它失去了什麼——而是，它究竟想記住什麼，又想忘掉什麼。</p>
+</div>
+  </div>
+</section>
+
+<!-- FINALE -->
+<section id="chF" class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是，今天的維也納人</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">The Capital of a World That No Longer Exists</p>
+      <div class="ornament" style="color:var(--gold-bright)">♪ 👑 ✦</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的維也納之所以是這個模樣——一座華麗、優雅、年年高居「全球最宜居」榜首，卻又彷彿被一層淡淡的鄉愁籠罩、永遠在懷念什麼的城——是三股反覆出現的力量疊加而成的。它們，全都源自多瑙河畔那座帝國頭顱的命運。</p>
+
+      <h3>第一層：頭顱——一個消失帝國留下的首都</h3>
+      <p>一切的根源是<strong>帝國</strong>。維也納是哈布斯堡那個多民族帝國的頭顱——一個靠聯姻而非征服、把十幾個民族縫在一頂王冠下的龐大政體的中樞。它生來就不是一座德意志城市，而是一座世界主義的帝國之都，是德意志與斯拉夫、馬札爾、義大利世界之間的橋。然後，一九一八年，身體被切掉了——五千萬人的帝國解體成一串民族國家，只剩下這顆兩百萬人的頭顱，戴在一個六百萬人小國的脖子上。維也納此後的全部惆悵，都源於這個事實：它是一個再也不存在的東西的首都。</p>
+
+      <h3>第二層：世紀末的天才——在崩落之上開出的花</h3>
+      <p>接著是<strong>天才</strong>，與一個殘酷的弔詭。維也納文化史上最燦爛的一次大爆發——佛洛伊德、克林姆、馬勒、荀貝格、維根斯坦——偏偏盛開在帝國最腐朽、最接近崩潰的那幾十年。彷彿一個文明在預感到自己將死時，把全部的生命力，一次性地燃燒成了藝術與思想。人們叫它「歡快的末日」。而這場盛宴的引擎，很大一部分是這座城的猶太資產階級——這也讓後來的毀滅，格外不堪：它親手殺死、趕走了自己天才的源頭。</p>
+
+      <h3>第三層：崩落——從帝國的解體，到對過去的懷念</h3>
+      <p>最後是<strong>崩落</strong>，一個反覆上演的母題。帝國的解體、紅色維也納與右翼的內戰、一九三八年英雄廣場上的歡呼、對猶太維也納的毀滅、一九四五年的瓦礫與四國佔領……一次又一次，這座城眼睜睜看著自己所是的東西被奪走。而它最終找到的活法，是把崩落轉化成<em>懷念</em>——華爾滋、皇帝、茜茜公主、利皮札馬、咖啡館，被包裝成一門巨大的鄉愁生意；它甚至一度把自己說成「希特勒的第一個受害者」，以迴避更難堪的真相。維也納成了一座為消失世界守靈的博物館之城。</p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 一座為消失世界守靈的城</span>
+        <p>所以，今天的維也納是什麼？它是<strong>一座消失帝國的頭顱、一座在崩落之上開出最燦爛文明、又眼睜睜看它被謀殺的城</strong>。它和柏林相反：柏林選擇直視自己的罪、把傷疤刻進地面；維也納則更傾向把過去裹進金箔與華爾滋，做成一門優雅的鄉愁。它的宜居、它的優雅、它那股揮之不去的憂鬱，全都是同一件事的兩面——一座再也回不去、卻又放不下昔日輝煌的城。</p>
+        <p>維也納最深刻的真相是：<em>一個文明真正的悲劇，不是它被外敵摧毀，而是它親手殺死了自己最好的部分。</em>那場「歡快的末日」之所以動人，正因為我們知道後來發生了什麼——那些咖啡館裡的天才，大半將流亡、被殺、或老死他鄉；那顆曾經連接整個中歐的頭顱，最終只能對著空蕩的基座，懷念一個由它自己親手送葬的世界。維也納提醒我們：最燦爛的文明，可能就盛開在崩落的前夕；而懂得珍惜，往往要等到一切都已經來不及。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">一樁樁聯姻造出了帝國，一顆頭顱在身體被切除後奇蹟般活著，一場歡快的末日在崩塌前夕燃盡了全部天才——而當煙塵落定，這座城只剩下對一個被它親手送葬的世界的，無盡懷念。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座城的終極啟示</span>
+      <p>有些城靠資源，有些城靠位置，而維也納靠的是一個帝國的記憶。它告訴世界：一座城可以在身體被切除之後，僅憑一顆頭顱的文化分量繼續活著——但那活法，是一種永恆的鄉愁。它也是一則最沉痛的警告：最璀璨的文明，可能正盛開在毀滅的邊緣；而當一座城被仇恨說服、去殺死自己最有創造力的那群人時，它毀掉的不只是受害者，更是它自己的未來。維也納的優雅底下，藏著這個世紀最該被記住的教訓。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從多瑙河畔的一座羅馬軍營，<br>
+        到靠聯姻縫起十幾個民族的帝國頭顱，<br>
+        從海頓莫札特的音樂之都，到佛洛伊德與克林姆的世紀末，<br>
+        從帝國解體後那顆孤懸的頭顱，到英雄廣場上的歡呼與隨之而來的毀滅，<br>
+        再到一座把昔日裹成華爾滋與金箔、為消失世界守靈的城——<br>
+        這段關於帝國、天才與崩落的歷史，<br>
+        最終回答了那個最初的問題：<br>
+        當你是一個再也不存在之物的首都，<br>你要如何活下去。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">♪ 👑 ✦</div>
+  <p>世紀末的崩落 · 帝國的頭顱、廢墟上的天才，與一座懷念著消失世界的城</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">WIEN · THE CAPITAL OF A WORLD THAT NO LONGER EXISTS</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
