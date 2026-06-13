@@ -252,7 +252,7 @@ ENTRIES = [
          zh="運煤到紐卡索：煤、船與泰恩河的傲骨", en="Newcastle upon Tyne: Coal, Ships & Geordie Pride", lat=54.98, lng=-1.61),
 
     # ---------- 美國城市 ----------
-    dict(src="美國/紐約_港口金錢與屬於全世界的城.html", slug="newyork", cat="city", group="美國 USA",
+    dict(src="美國/紐約_港口金錢與屬於全世界的城.html", slug="newyork", cat="city", group="美國 United States",
          zh="如果你能在這裡成功：紐約的身世", en="New York: From New Amsterdam to the Capital of the World", lat=40.71, lng=-74.01),
 
     # ---------- 美國城市 ----------
