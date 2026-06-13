@@ -258,6 +258,8 @@ ENTRIES = [
          zh="山巔之城：波士頓靠頭腦重生的身世", en="Boston: A City upon a Hill — From the Puritan Errand to the Capital of the Mind", lat=42.36, lng=-71.06),
     dict(src="美國/費城_發明美國卻被超越.html", slug="philadelphia", cat="city", group="美國 United States",
          zh="第一個首都：費城發明美國卻被超越的身世", en="Philadelphia: The City That Invented America and Was Overtaken by It", lat=39.95, lng=-75.16),
+    dict(src="美國/舊金山_瞬間之城淘金潮.html", slug="sanfrancisco", cat="city", group="美國 United States",
+         zh="瞬間之城：舊金山從黃金到程式碼的身世", en="San Francisco: The Instant City on a Fault Line — From Gold to Code", lat=37.77, lng=-122.42),
 
     # ---------- 美國城市 ----------
     dict(src="美國/西雅圖_雨木與重新發明.html", slug="seattle", cat="city", group="美國 United States",
