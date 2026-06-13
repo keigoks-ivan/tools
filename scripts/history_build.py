@@ -258,6 +258,14 @@ ENTRIES = [
          zh="島與河、革命之都，與光與藝術之城：巴黎", en="Paris: The Island, the Capital of Revolution & the City of Light", lat=48.86, lng=2.35),
     dict(src="歐洲歷史/紐卡索_運煤到紐卡索.html", slug="newcastle", cat="city", group="英國 United Kingdom",
          zh="運煤到紐卡索：煤、船與泰恩河的傲骨", en="Newcastle upon Tyne: Coal, Ships & Geordie Pride", lat=54.98, lng=-1.61),
+    dict(src="歐洲歷史/羅馬_永恆之城.html", slug="rome", cat="city", group="義大利 Italy",
+         zh="永恆之城：羅馬靠中心不死、在廢墟上一次次重生的身世", en="Rome: Caput Mundi — The City That Has Died Too Often to Die", lat=41.90, lng=12.50),
+    dict(src="歐洲歷史/阿姆斯特丹_水上之城.html", slug="amsterdam", cat="city", group="荷蘭 Netherlands",
+         zh="水上之城：阿姆斯特丹用木樁、帳本與寬容造出的世界之都", en="Amsterdam: Built on Piles, by Merchants, in a Bog", lat=52.37, lng=4.90),
+    dict(src="歐洲歷史/柏林_永遠在變成的城.html", slug="berlin", cat="city", group="德國 Germany",
+         zh="永遠在變成的城：柏林，沙地上的軍營、現代的首都，與那道牆", en="Berlin: Forever Becoming — The City on Sand and the Wall", lat=52.52, lng=13.40),
+    dict(src="歐洲歷史/維也納_世紀末的崩落.html", slug="vienna", cat="city", group="奧地利 Austria",
+         zh="世紀末的崩落：維也納，帝國的頭顱與廢墟上的天才", en="Vienna: The Head of a Vanished Empire & the Fin-de-Siècle", lat=48.21, lng=16.37),
 
     # ---------- 美國城市 ----------
     dict(src="美國/紐約_港口金錢與屬於全世界的城.html", slug="newyork", cat="city", group="美國 United States",
@@ -284,14 +292,6 @@ ENTRIES = [
          zh="水、夢，與一座無中生有的沙漠巨城：洛杉磯", en="Los Angeles: Water, Dreams & a Metropolis Conjured from a Desert", lat=34.05, lng=-118.24),
     dict(src="美國/聖地牙哥_海灣邊界與軍港.html", slug="san-diego", cat="city", group="美國 United States",
          zh="海灣、邊界，與一座面朝太平洋的軍港：聖地牙哥", en="San Diego: The Bay, the Border & the City Facing the Pacific", lat=32.72, lng=-117.16),
-
-    # ---------- 亞洲與中東城市 ----------
-    dict(src="東北亞歷史/上海_界面之城.html", slug="shanghai", cat="city", group="中國 China",
-         zh="界面之城：上海從棉布縣城到外灘與浦東的身世", en="Shanghai: The Interface Between China and the World", lat=31.23, lng=121.47),
-    dict(src="南亞歷史/孟買_從海裡填出來的錢袋之城.html", slug="mumbai", cat="city", group="印度 India",
-         zh="從海裡填出來的錢袋之城：孟買的身世", en="Mumbai: The Wallet of India, Built from the Sea", lat=19.08, lng=72.88),
-    dict(src="中東歷史/杜拜_瞬間之城.html", slug="dubai", cat="city", group="阿聯酋 United Arab Emirates",
-         zh="瞬間之城：杜拜從採珍珠的小漁村到憑空長出的全球之城", en="Dubai: The Instant City on the Sand", lat=25.20, lng=55.27),
 
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
@@ -372,6 +372,18 @@ ENTRIES = [
          zh="網的兩端，零接觸：排球", en="Volleyball: No Contact", lat=None, lng=None),
     dict(src="運動歷史/小球與大國 桌球一百二十年.html", slug="tabletennis-history", cat="sport",
          zh="小球與大國：桌球一百二十年", en="Table Tennis: Small Ball, Big Power", lat=None, lng=None),
+    dict(src=None, slug="cricket-history", cat="sport",
+         zh="草坪上的帝國：板球三百年", en="Cricket: The Empire on Grass", lat=None, lng=None),
+    dict(src=None, slug="olympics-history", cat="sport",
+         zh="更快、更高、更強：奧林匹克與田徑", en="Olympics & Athletics: Faster, Higher, Stronger", lat=None, lng=None),
+    dict(src=None, slug="f1-history", cat="sport",
+         zh="速度的代價：一級方程式賽車", en="Formula 1: The Price of Speed", lat=None, lng=None),
+    dict(src=None, slug="boxing-history", cat="sport",
+         zh="繩圈裡的孤獨：拳擊三百年", en="Boxing: The Lonely Ring", lat=None, lng=None),
+    dict(src=None, slug="golf-history", cat="sport",
+         zh="果嶺上的階級：高爾夫六百年", en="Golf: Class on the Green", lat=None, lng=None),
+    dict(src=None, slug="esports-history", cat="sport",
+         zh="螢幕裡的競技場：電子競技", en="Esports: The Arena in the Screen", lat=None, lng=None),
 ]
 
 # ============================================================
