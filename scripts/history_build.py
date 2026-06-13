@@ -175,6 +175,10 @@ ENTRIES = [
     dict(src="中東歷史/約旦史詩_沙漠綠洲難民方舟與被維繫的王國.html", slug="jordan-epic", cat="nation",
          zh="沙漠中的綠洲、難民的方舟，與一個被精心維繫的王國：約旦", en="Jordan: The Desert Oasis, the Ark of Refugees & a Kingdom Carefully Kept", lat=31.2, lng=36.5),
 
+    # ---------- 巴爾幹史詩 ----------
+    dict(src="歐洲歷史/巴爾幹南斯拉夫史詩_火藥桶兄弟之邦與七個國家.html", slug="yugoslavia-epic", cat="nation",
+         zh="火藥桶、兄弟之邦，與七個國家的誕生與死亡：巴爾幹與南斯拉夫", en="The Balkans & Yugoslavia: The Powder Keg, the Brotherhood & the Birth and Death of Seven Nations", lat=44.0, lng=19.5),
+
     # ---------- 美洲史詩 ----------
     dict(src="美洲歷史/美國史詩_自由與枷鎖與永不止息的邊疆.html", slug="usa-epic", cat="nation",
          zh="自由與枷鎖，與永不止息的邊疆：美利堅", en="America: Liberty, Bondage & the Frontier", lat=39.5, lng=-98.35),
