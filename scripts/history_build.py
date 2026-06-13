@@ -274,6 +274,8 @@ ENTRIES = [
          zh="最不像美國的美國城：紐奧良的克里奧爾與爵士身世", en="New Orleans: The Most Un-American American City — River, Creole & Jazz", lat=29.95, lng=-90.07),
     dict(src="美國/底特律_汽車之城的暴起與暴落.html", slug="detroit", cat="city", group="美國 United States",
          zh="汽車之城的暴起與暴落：底特律，廢墟裡剩下什麼", en="Detroit: The City That Put the World on Wheels — and Then Fell", lat=42.33, lng=-83.05),
+    dict(src="美國/華盛頓特區_憑空造在沼澤上的首都.html", slug="washingtondc", cat="city", group="美國 United States",
+         zh="憑空造在沼澤上的首都：華盛頓特區，一座為權力而生的城", en="Washington, D.C.: A Capital Conjured from Nothing — America Made Visible", lat=38.90, lng=-77.04),
 
     # ---------- 美國城市 ----------
     dict(src="美國/西雅圖_雨木與重新發明.html", slug="seattle", cat="city", group="美國 United States",

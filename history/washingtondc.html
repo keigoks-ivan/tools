@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>憑空造在沼澤上的首都：華盛頓特區，一座為權力而生的城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#26354f;
+  --sea-deep:#121a2a;
+  --gold:#b9962f;
+  --gold-bright:#dcbb57;
+  --rust:#8c3a2a;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(38,53,79,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(38,53,79,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #324464 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23dcbb57' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23dcbb57' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23dcbb57' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(38,53,79,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(18,26,42,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(38,53,79,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23dcbb57' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ===== econ-layer callout boxes (deepen / counterfactual) ===== */
+.deepen{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(176,141,52,.07);border:1px solid rgba(176,141,52,.32);border-left:4px solid var(--gold);border-radius:3px}
+.deepen .dh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--rust);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.deepen p{margin:.7rem 0;text-align:justify}
+.cf{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(38,53,79,.05);border:1px dashed rgba(38,53,79,.4);border-radius:3px}
+.cf .cfh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--sea-deep);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.cf p{margin:.7rem 0;text-align:justify}
+/* ===== dark-section legibility (boxes + stats + pull + timeline + interlude) ===== */
+.dark .deepen{background:rgba(216,196,160,.06);border-color:rgba(212,175,90,.4);border-left-color:#dcbb57}
+.dark .deepen .dh{color:#e2a878}
+.dark .cf{background:rgba(255,255,255,.045);border-color:rgba(212,175,90,.32)}
+.dark .cf .cfh{color:#d8c4a0}
+.dark .deepen p,.dark .cf p{color:#cdb494}
+.dark .deepen strong,.dark .cf strong{color:#c87a5a}
+.dark .deepen em,.dark .cf em{color:#d8a878}
+.dark .pull{background:linear-gradient(135deg,rgba(216,196,160,.07),rgba(176,141,52,.1));border-top-color:#dcbb57;border-bottom-color:#dcbb57}
+.dark .pull p{color:#ecd9b4}
+.dark .pull::before{color:#dcbb57}
+.dark .stat{background:rgba(216,196,160,.06)}
+.dark .stat .num{color:#dcbb57}
+.dark .stat .lbl{color:#c4af88}
+.dark .tl-text{color:#cdb494}
+.dark .tl-year{color:#e2a060}
+.dark .interlude p{color:rgba(243,238,226,.9)}
+.dark .interlude p .hl{color:#e2a060}
+/* ---- 修正:深色章節內,擁有淺色背景的卡片組件須維持深色文字,避免淺底淺字 ---- */
+/* ---- 修正:深色章節內的對比度 ----
+   實心淺底組件(method-card / twocol)→ 深色文字;
+   shift-body 無背景貼深底 → 淺色文字。 ---- */
+.dark .method-card p,
+.dark .twocol p{color:var(--ink)}
+.dark .method-card p strong,
+.dark .twocol p strong{color:var(--crimson)}
+.dark .method-card p em,
+.dark .twocol p em{color:var(--sea-deep)}
+.dark .method-card h5{color:var(--sea-deep)}
+.dark .method-card .tool{color:var(--rust)}
+.dark .method-card .eg{color:#6b5d48}
+.dark .minihead{color:var(--rust)}
+.dark .shift-body{color:#cdb494}
+.dark .shift-body strong{color:#c87a5a}
+.dark .shift-body em{color:#d8a878}
+.dark .stat{background:rgba(212,175,90,.07)}
+.dark .stat .num{color:var(--gold-bright)}
+.dark .stat .lbl{color:#b9a784}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+.twocol>div{background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;padding:1.3rem 1.5rem}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left;color:var(--ink)}
+.method-card p strong{color:var(--crimson)}
+.method-card p em{color:var(--sea-deep)}
+.method-card .eg{font-size:.86rem;color:#6b5d48;font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(38,53,79,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+</style>
+<style id="imq-depth-modules">
+.deepen{margin:2.8rem 0;padding:1.7rem 1.9rem;background:rgba(51,88,63,.06);border:1px solid rgba(120,100,60,.38);border-left:5px solid #33583f;border-radius:2px}
+.deepen .dh{font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:.22em;color:#33583f;text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.deepen .dh::before{content:"\25C9";font-size:.85rem}
+.deepen p{font-size:.97rem;line-height:1.82;margin:.6rem 0;text-align:left}
+.deepen strong{color:#8a2014}
+.deepen em{color:#33583f;font-style:italic}
+.dark .deepen{background:rgba(255,255,255,.03);border-left-color:#5a8a68;border-color:rgba(255,255,255,.1)}
+.dark .deepen .dh{color:#8db89a}.dark .deepen p{color:#cbb292}.dark .deepen em{color:#9cc0a8}
+.cf{margin:2.6rem 0;padding:1.6rem 1.8rem;background:linear-gradient(135deg,rgba(116,34,26,.05),rgba(168,132,47,.05));border:1px dashed #8a3a23;border-radius:3px;position:relative}
+.cf .cfh{font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:.2em;color:#8a3a23;text-transform:uppercase;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.cf .cfh::before{content:"\21BA";font-size:1.1rem}
+.cf p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.cf strong{color:#8a2014}.cf em{color:#0e2128;font-style:italic}
+.dark .cf p{color:#cbb292}.dark .cf em{color:#d6a676}
+.concept,concept{display:inline-block;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.04em;padding:.05rem .5rem;margin:0 .15rem;border:1px solid #a8842f;border-radius:20px;color:#8a3a23;background:rgba(168,132,47,.06);white-space:nowrap;vertical-align:middle}
+.dark .concept,.dark concept{color:#d6a676}
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){heads=[].slice.call(document.querySelectorAll('h2'));}
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>=1480)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Washington, D.C. · A Capital Conjured from Nothing, Built for Power Alone</span>
+    <h1>憑空造在<span class="em">沼澤上</span>的首都<br><span class="em">華盛頓特區</span><br>一座為權力而生的城</h1>
+    <p class="sub">從一場餐桌上的政治交易，到一片波多馬克河畔被刻意選為「不屬於任何一州」的低窪地，<br>從由被奴役者砌起的自由神殿，到向全世界投射權力的帝國首都——<br>一座唯一的產業是「治理」、卻不給自己居民投票權的城，<br>如何把美國最崇高的理想與最深的矛盾，同時刻進同一片大理石裡</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">大</span>多數城市是先有了人，才慢慢長成城。華盛頓特區（Washington, D.C.）卻是倒過來的：先有了一個念頭、一張藍圖、一場交易，然後才憑空在一片波多馬克河（the Potomac）畔的低窪農地與沼澤上，造出一座城來。一七九○年，在一場由傑佛遜（Thomas Jefferson）撮合的著名餐桌交易裡，新生的美國決定——聯邦政府承接各州的獨立戰爭債務，作為交換，把永久首都設在南方的波多馬克河畔。為什麼選在這片荒地？正因為它<em>不屬於任何一州</em>。年輕的共和國深怕，若把首都放進任何一座既有的大城（像費城、像紐約），那座城、那個州，就會挾「首都」之利凌駕眾人。於是他們寧可在一塊誰也不偏袒的中性土地上，從零造一座城，並以開國總統之名替它命名。這座城從誕生的第一天起，就只有一個存在的理由：<em>安放權力</em>。它沒有港口、沒有工廠、沒有腹地——它唯一的產業，是「治理美國」。它是一座由被奴役者親手砌起的「自由神殿」，是一座向全世界投射力量的帝國首都，卻也是一座連自己七十萬居民都不給國會投票權的城——「無代表的納稅」就印在它的車牌上。它用一片大理石，把美國最崇高的理想與最刺眼的虛偽，並排刻在了一起。讓我們從那場餐桌交易與那片沼澤走起，在每一個轉折處，聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">🏛 ⚖ ✦</div>
+
+<section id="ch0" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">序章 · The Compromise</span>
+    <h2 class="act-title">一場交易與一片沼澤</h2>
+    <p class="act-sub">A Capital Conjured from Nothing</p>
+    <div class="ornament">🏛 ✦ 🌊</div>
+  </div>
+  <div class="prose">
+    <p>世界上絕大多數的偉大城市，都是先有了城，才有了名字與意義。它們長在能讓人活下去的地方——河的彎處、海的口岸、兩條商路的交會點、一座礦山的腳下。人因為某個現實的理由聚過來，市集擺起來了，房子蓋起來了，城牆圍起來了，然後某一天，這團人煙才被授予一個身分。城市是長出來的，像樹，先有根，後有冠。</p>
+    <p>華盛頓特區（Washington, D.C.）不是這樣誕生的。它是這條規律的例外，甚至是這條規律的反證。它不是長出來的，而是被造出來的；不是因為人聚過來才有了城，而是因為有人決定要在這裡安放一樣東西——<strong>權力</strong>——才憑空召喚出一座城。在它的第一塊石頭被搬動之前，它已經先以一個念頭、一份藍圖、一筆交易的形式存在了。它是倒過來生長的：先有意義，後有實體；先有用途，後有居民。要理解這座城，就得先理解：它為什麼必須被造在一片什麼都沒有的地方。</p>
+
+    <h3>一七九○年那頓晚餐</h3>
+    <p>故事要從一頓飯說起。一七九○年的夏天，年輕的合眾國正卡在一個幾乎要把它撕開的僵局裡。財政部長<strong>漢密爾頓（Alexander Hamilton）</strong>有一個大膽的構想：讓新生的聯邦政府，把各州在獨立戰爭期間欠下的債務全部承接過來——這就是後世所稱的「承債計畫（assumption of state debts）」。漢密爾頓的算盤遠不只是還錢。他要的是，讓所有借錢給各州的人——商人、銀行家、投機者——從此把希望寄託在<em>聯邦</em>而非各州身上；債權人會因為自身的利益，而忠於這個新政府。承債，是把一個鬆散的邦聯，用金錢的繩索綁成一個真正國家的手段。</p>
+    <p>但南方各州激烈反對。維吉尼亞（Virginia）等州早已償清了自己的大部分戰債，憑什麼要替北方那些揮霍無度的州背書？在他們眼裡，承債計畫是北方金融利益對南方農業利益的一次明搶。國會裡，由<strong>麥迪遜（James Madison）</strong>領頭的反對派，一票又一票地把漢密爾頓的提案擋了下來。僵局凝固了，新生的共和國，在它最初的幾個月裡，就因為「錢」而瀕臨分裂。</p>
+    <p>打破僵局的，是一頓晚餐。國務卿<strong>傑佛遜（Thomas Jefferson）</strong>後來在文字裡描述了這場著名的「<em>餐桌交易（the Dinner Table Bargain）</em>」：他把劍拔弩張的漢密爾頓與麥迪遜請到自己的寓所，讓兩人坐下來，邊吃邊談。談判的核心，是一筆赤裸裸的政治交換。北方要承債，南方要首都。於是兩邊各退一步、各取所需：麥迪遜不再死命阻擋承債計畫，換來的，是把這個共和國的永久首都，定在<strong>南方</strong>——定在<strong>波多馬克河（the Potomac）</strong>畔。</p>
+    <div class="pull"><p>華盛頓特區的受孕之夜，不是一場神聖的建國儀式，而是一頓晚餐上的政治交易。它從一開始，就是用權力交換權力的產物。</p></div>
+
+    <h3>《首都選址法》：把交易寫進法律</h3>
+    <p>這場餐桌上的口頭默契，很快被寫成了白紙黑字。一七九○年，國會通過了《<strong>首都選址法</strong>（the Residence Act）》。法案規定，聯邦政府將先暫駐<strong>費城（Philadelphia）</strong>十年，再於一八○○年遷入波多馬克河畔一塊新設的永久首都。確切的選址權，交到了一個人手裡——總統<strong>華盛頓（George Washington）</strong>本人。</p>
+    <p>這個安排本身就意味深長。新生的合眾國，把自己未來心臟的位置，託付給了它最信任的那一個人。而華盛頓沒有辜負——也沒有迴避——這份信任。他親自勘察、親自拍板，選定了波多馬克河與其支流安納科斯蒂亞河（the Anacostia）交會處的這一片土地。這塊地橫跨<strong>馬里蘭（Maryland）</strong>與<strong>維吉尼亞</strong>兩州，被切割成一個面積一百平方英里、四邊各十英里的<em>菱形</em>——一個在地圖上幾乎像是用尺與規畫出來的、完美的幾何圖形。它後來被稱為「哥倫比亞特區（the District of Columbia）」，城本身則以這位選址的總統命名，叫做華盛頓。</p>
+    <p>值得留意的是，這塊地離華盛頓自己的莊園<strong>維農山莊（Mount Vernon）</strong>不遠，就在波多馬克河的上游一點。後世不乏有人因此竊竊私語，懷疑這位國父在公與私之間是否毫無夾帶。但更深的真相是：波多馬克河這個位置，本就是南北之間一個誰都還能勉強接受的折衷點——它夠南，能安南方的心；又不至於太南，讓北方無法忍受。它是一條分界線，而首都，正要被造在這條線上。</p>
+
+    <h3>「沼澤」的迷思，與一塊中性的土地</h3>
+    <p>關於華盛頓的誕生，流傳最廣的一個說法是：它建在一片「沼澤（swamp）」之上。直到今天，人們仍愛用「抽乾沼澤（drain the swamp）」來譏諷這座城裡的政治。但這個說法，多半是迷思。</p>
+    <p>當年那片菱形土地，並不是一望無際的爛泥。它其實是一幅混合的圖景：有耕作中的農地與菸草田，有成片的林地，也有沿著兩條河岸的<em>潮汐低地</em>。波多馬克河與安納科斯蒂亞河在這裡交會，河口寬闊，水位隨潮汐漲落，岸邊確實有低濕、悶熱、夏天瘴氣瀰漫的地帶。它的夏季又濕又黏，蚊蟲成群，對習慣了費城或波士頓氣候的人來說，這裡的悶熱簡直難以忍受。但「悶濕的低地」與「整片的沼澤」之間，隔著一段不小的距離。把華盛頓說成建在沼澤上，與其說是地理描述，不如說是一種隱喻——彷彿這座城的根，從一開始就紮在某種曖昧、泥濘、不乾不淨的東西裡。</p>
+    <div class="warn">
+      <span class="warn-tag">被略過的代價</span>
+      <p>這塊「中性的土地」其實並非無主之地。它原是馬里蘭與維吉尼亞兩州劃出的轄區，土地上有既存的莊園與農場——而這些莊園的勞動，仰賴的是被奴役的黑人。這座要獻給「自由」的首都，從受孕的第一刻起，就坐落在一片由奴隸制供養的土地上。這個自城市誕生之初就埋下的矛盾，將在往後的篇章裡反覆浮現，成為華盛頓無法洗去的胎記。此處先記下，後文細說。</p>
+    </div>
+
+    <h3>為什麼要在荒地憑空造一座城？</h3>
+    <p>於是我們回到那個根本的問題：明明已經有費城、有紐約、有波士頓這些成熟、繁榮、現成的大城，年輕的合眾國為什麼偏要捨易求難，跑到波多馬克河畔一片農地與低地的混合處，從零開始，憑空造一座城？</p>
+    <p>答案，恰恰藏在「<em>它不屬於任何一州</em>」這件事裡。</p>
+    <p>這個年輕的共和國，是由十三個彼此猜忌、各懷心思的州勉強拼湊起來的。它最深的恐懼之一，就是權力的不對稱——任何一州，都不能比別州更大、更重、更接近權力的中心。而首都，正是權力最濃稠的所在。如果把首都設在費城，那賓夕法尼亞（Pennsylvania）州就等於把國家的心臟攬進了自己的懷裡；它的官員、它的商人、它的地方政治，都會因為近水樓臺而對聯邦施加一種別州無法抗衡的影響力。同樣的道理，首都也不能落在紐約，不能落在任何一個已經屬於某一州的大城。</p>
+    <p>解法，是把首都設在一塊<strong>誰都不屬於的中性地帶</strong>。哥倫比亞特區之所以要從馬里蘭與維吉尼亞「割」出來、之所以要成為一個不隸屬於任何州的特別行政區，正是為了確保：這座承載全國權力的城，不會偏袒任何一個成員，也不會被任何一個成員挾持。它要懸浮在所有州之上，像一塊政治上的飛地，一塊屬於「全體」而不屬於「任何一個」的土地。費城曾經短暫戴過的那頂首都王冠，最終沒有留在它頭上——王冠被取走，安放到一片刻意保持中立的土地上去了。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 聯邦為何要把首都設在「不屬於任何成員」的地方</span>
+      <p>華盛頓的選址邏輯，其實是所有聯邦制國家都要面對的一道難題：當許多個原本獨立、彼此平等的成員聯合成一個整體，這個整體的權力中心，該放在誰的地盤上？放在任何一個成員境內，都會打破成員之間的平等，給東道主一種結構性的優勢——近便、影響力、經濟外溢。於是，一個反覆出現的解法，就是創造一塊「<strong>不屬於任何成員的中性領地</strong>」來安放首都。</p>
+      <p>這不是美國獨有的智慧。後世的澳洲，正因為雪梨與墨爾本爭當首都互不相讓，才另闢一塊聯邦直轄的坎培拉；巴西為了把權力從濱海舊都遷往內陸、平衡區域，憑空造了巴西利亞。它們與華盛頓共享同一條深層邏輯：<em>首都不該是某個地方的勝利，而該是所有地方共同的、誰也獨佔不了的所在。</em>華盛頓特區那個不隸屬於任何州的奇特身分，正是這條邏輯最早、也最徹底的一次落實——代價，是這座城從此再也回不去「正常」城市的命運。</p>
+    </div>
+
+    <h3>一座只為安放權力而存在的城</h3>
+    <p>正因為如此，華盛頓從它存在的第一天起，就只有<strong>一個</strong>存在的理由。它沒有天然良港，不能像紐約那樣靠航運致富；它沒有礦藏，不能像匹茲堡那樣冶鋼鑄鐵；它沒有廣袤的腹地與肥沃的工廠帶，不能像芝加哥那樣成為大陸的集散中心。它什麼產業都沒有——除了一樣：<strong>治理美國</strong>。</p>
+    <p>這是一座為了「安放權力」而被設計、被建造、被命名的城。它的命運，不是去發現自己能做什麼，而是去履行一個早在它誕生之前就已被指派好的功能。它像一只精心打造的容器，被放在一片中性的土地上，等待著有一天，把一個國家的權力盛進去。而我們將會看到，當權力真的盛進來、滿出來、流淌到每一條放射狀的大道上時，這座為理念而生的城，將如何一面成為自由的神殿，一面又成為照見這個國家全部理想與全部虛偽的那面鏡子。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 倒過來生長的城</span>
+      <p>華盛頓誕生的第一課是：<strong>有些城市不是因為人需要它而出現，而是因為理念需要它才被造出來。</strong>它沒有港口、沒有工廠、沒有腹地，唯一的稟賦，是它「正好什麼都不是」——正好不屬於任何一州，正好是一塊可以安放全國權力而不偏袒任何人的中性土地。它的價值，恰恰在於它的空白。</p>
+      <p>這對應一個被低估的真理：<em>權力最怕的，不是沒有地方安放，而是被安放在某個既得利益者的家裡。</em>年輕的合眾國深諳此理，於是寧可在一片悶熱的低地上從零造城，也不願把首都的桂冠交給任何一個成員獨享。華盛頓特區因此成了一座倒過來生長的城——先有念頭，後有藍圖，再有交易，最後才有第一塊石頭。它的故事，從來不是地理寫就的，而是政治意志寫就的。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch1" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第一章 · L'Enfant's Plan</span>
+    <h2 class="act-title">朗方的大計畫</h2>
+    <p class="act-sub">A Stage Designed Before It Had People</p>
+    <div class="ornament">📐 ✦ 🏛</div>
+  </div>
+  <div class="prose">
+    <p>一塊中性的土地選定了，邊界丈量好了，這座城卻還只是地圖上一個菱形的輪廓，裡面除了農田、林子與河岸的低地，幾乎什麼都沒有。它需要一張臉，一副骨架，一個能讓後人一眼就讀出「這是一個共和國的首都」的形狀。而給它這副形狀的，是一個法國人——一個帶著舊大陸的恢宏想像，來替新大陸的共和理想畫一座城的工程師。</p>
+
+    <h3>一個法國人的美國夢</h3>
+    <p>他的名字叫<strong>皮埃爾·朗方（Pierre Charles L'Enfant）</strong>。他生在巴黎，父親是凡爾賽宮的御用畫師，他從小看慣了那種把人壓得肅然起敬的宏大空間——筆直的林蔭大道、對稱的軸線、盡頭矗立著一座足以讓你停下腳步仰望的建築。年輕時，他渡海來到北美，投身美國獨立戰爭，在華盛頓麾下當過工程兵，負了傷，也贏得了這位將軍的信任。戰後，他留在了這個新生的國家，靠設計與裝飾維生——紐約那座供新政府就職、華盛頓在此宣誓成為第一任總統的聯邦廳（Federal Hall），就是經他改造的。</p>
+    <p>所以當一七九一年，需要有人來替波多馬克河畔的新首都繪製藍圖時，朗方幾乎是不二人選。他主動寫信給華盛頓，懇求承接這份工作。在信裡，他流露出一種近乎宗教般的雄心：他想要的，不是規劃一座夠用的市鎮，而是要為一個「將會偉大」的國家，造一座配得上它未來的首都。他不是在替當下的合眾國畫城——當時這個國家還只是大西洋岸邊一條瘦長、脆弱、人口不足四百萬的新生邦聯——他是在替它<em>還沒成為</em>的那個帝國畫城。</p>
+    <div class="pull"><p>朗方畫的不是一座當下的城，而是一座未來的城。他在這個國家還弱小的時候，就替它的偉大留好了位置。</p></div>
+
+    <h3>棋盤上的放射線</h3>
+    <p>朗方在一七九一年交出的藍圖，是一件大膽到近乎狂妄的作品。他先在土地上鋪開一張規整的<em>棋盤格</em>——南北、東西交錯的街道網，這是當時美國城市最熟悉、最務實的格局，整齊、好分割、好買賣。但他沒有停在這裡。他在這張棋盤格之上，又疊加了一層全然不同的東西：一道道斜斜切過格網的、寬闊的<strong>放射狀大道（diagonal avenues）</strong>。</p>
+    <p>這些大道從幾個關鍵的節點向四面八方輻射出去，像陽光，也像一隻張開的手。它們刻意違反棋盤的規矩，在城市裡撕開一道道對角線，製造出一個又一個開闊的圓環與廣場。這正是他從凡爾賽、從巴洛克時代的歐洲首都帶來的語言——<em>巴洛克式的城市設計（Baroque urban design）</em>，講究的就是宏大的視覺軸線、令人屏息的縱深、與盡頭那座必須讓你仰望的紀念物。棋盤格負責日常的、實用的城市生活；放射狀大道負責的，則是<strong>權力的戲劇性</strong>。它要你在轉過某個街角時，猛然看見一條筆直延伸、盡頭矗立著國家殿堂的大道，然後不由自主地放慢腳步。</p>
+    <p>朗方還做了一件意味深長的事：他把這些大道，用未來各州的名字來命名——賓夕法尼亞大道、麻薩諸塞大道、維吉尼亞大道……讓十三個州的名字，以放射的姿態，從首都的中心向外伸展，彷彿整個聯邦都從這一點生長出去。城市的形狀，本身就成了一則關於聯邦的政治寓言。</p>
+
+    <h3>等待紀念碑的基座</h3>
+    <p>整張藍圖的靈魂，在於朗方如何安放那兩座最重要的建築。他沒有把它們擺在方便的、平坦的地方，而是替它們尋找最能釋放威儀的位置。</p>
+    <p>他相中了一座叫<strong>詹金斯山（Jenkins Hill）</strong>的高地——一塊俯瞰著整片土地、向東可眺望河流的台地。他要把<strong>國會大廈（the Capitol）</strong>放在這裡。在寫給華盛頓的描述中，他留下了一句後世反覆引用的話：這座小丘，彷彿是一座「<em>等待著一座紀念碑的基座（a pedestal waiting for a monument）</em>」。這句話幾乎道盡了朗方全部的設計哲學——他眼中的土地，不是用來居住的，而是用來承托意義的；山丘不是地形，而是基座；建築不是房子，而是紀念碑。在他心裡，整座城都是一具尚未供奉神像的神龕。</p>
+    <p>從這座國會山的「基座」往外，朗方安排了一條筆直延伸、開闊宏大的<em>大軸線</em>——一片貫穿城市核心的綠色長帶，這便是後來舉世聞名的<strong>國家大草坪（the National Mall）</strong>的雛形。軸線的另一端、稍偏的位置，他安放了總統的官邸（後來的白宮）。國會與總統府，立法與行政，被他用一條對角的大道（賓夕法尼亞大道）連結起來——權力的兩極，在城市的肌理上彼此相望，又彼此牽制。這不只是美學，這是把一部憲法的結構，翻譯成了石頭與道路的語言。</p>
+    <div class="pull"><p>「一座等待著一座紀念碑的基座。」朗方眼中的土地，從來不是用來住人的，而是用來承托意義的。</p></div>
+
+    <h3>太傲的人，與解不開的衝突</h3>
+    <p>然而，能畫出如此宏偉藍圖的人，往往也是最難共事的人。朗方有著與他的才華同樣巨大的脾氣與固執。他堅信整張計畫是一個不可分割、不容妥協的整體；任何為了現實——為了籌錢、為了賣地、為了安撫地主——而對他的設計動刀的企圖，在他看來都是對藝術與理想的褻瀆。</p>
+    <p>於是衝突無可避免地爆發了。負責監管首都建設的三人委員會，需要靠拍賣城裡的地塊來籌措建城的資金，而要拍賣，就得先有可供公開的地圖；朗方卻遲遲不肯交出完整的雕版印刷圖，深恐他的整體構想被人零碎切割、廉價變賣。更激烈的一幕，是他下令拆掉了一棟正在興建中、位置擋住了他某條大道視線的房子——那房子的主人，偏偏是當地一位有權有勢的地主。朗方眼裡只有藍圖的完整，容不下半點對視覺軸線的妨礙；但在委員會眼裡，這是目無王法、不可控制。一七九二年，僅僅在他交出藍圖一年之後，朗方就被解除了職務。連華盛頓本人的居中調停，也未能挽回這位他賞識的天才。一個畫出了首都靈魂的人，卻在這座城真正動工之前，就被它逐出了門外。</p>
+    <div class="warn">
+      <span class="warn-tag">天才的代價</span>
+      <p>朗方離開時近乎一無所有，他拒絕了國會後來補償給他的款項，認為那遠不足以匹配他的貢獻。他在貧困與不被承認中度過餘生，於一八二五年去世，葬在一座默默無聞的墳裡。直到近一個世紀後的一九○九年，當這個國家終於意識到他留下的藍圖有多麼了不起，才把他的遺骨遷葬到阿靈頓國家公墓，俯瞰著他親手規劃、卻在生前無緣看其成形的那座城。畫出首都形狀的人，遲了八十多年，才被首都接納回家。</p>
+    </div>
+
+    <h3>丈量這片土地的，有一位自由黑人之手</h3>
+    <p>朗方被解職後，繪測首都邊界與街道的工作，落到了測量師<strong>安德魯·埃利科特（Andrew Ellicott）</strong>的肩上。埃利科特憑著記憶與既有的紀錄，把朗方的構想重新整理、修訂、印製成可用的地圖，讓建城得以繼續。但在這支測量隊伍裡，有一個身影格外值得在這裡停下來細看。</p>
+    <p>他叫<strong>班傑明·班尼克（Benjamin Banneker）</strong>——一位自學成才的天文學家、數學家與曆書作者，而他，是一個<strong>自由的黑人</strong>。在那個絕大多數黑人都還被奴役、被當作財產買賣的時代，班尼克以他對天象的精密計算，參與了哥倫比亞特區最初的疆界測量工作。他協助觀測星辰、校準儀器，用天文的方法替這座城的邊界定錨。</p>
+    <p>這個細節，輕得幾乎要被歷史的塵埃蓋過，卻重得足以照亮整座城的悖論。一座要獻給「人人生而平等」的首都，它最初的丈量，竟有一雙<em>自由黑人之手</em>參與其中；而與此同時，砌起這座城的磚石、清整這片土地的勞力，卻大量出自被奴役的黑人之軀。同一個族群，同一段歷史，一邊在用天文學替自由的神殿定界，一邊卻在鐐銬下替它搬運石塊。班尼克本人深知這份矛盾——他後來曾致信當時的國務卿傑佛遜，以自己的成就，溫和而堅定地質問這位寫下「人人生而平等」、自己卻蓄奴的人。<strong>首都的邊界裡，從一開始就刻著這個國家最深的裂縫。</strong></p>
+
+    <h3>一座先有舞台、後有人民的城</h3>
+    <p>退一步看，朗方留給後世的，是一件在城市史上極為罕見的東西：一座<strong>先有藍圖、後有居民</strong>的城。</p>
+    <p>絕大多數城市的形狀，是被人民「住」出來的——街道循著牛走出來的小徑，廣場長在市集自然聚攏的地方，城市的肌理是無數日常選擇日積月累的沉澱，沒有人總攬全局，也沒有人事先規劃。紐約如此，芝加哥如此，世上絕大多數城市都如此。它們是自然生長的，像森林。</p>
+    <p>華盛頓不是。在它還沒有人民、還只是一片農地與低地的時候，它的每一條大道、每一座圓環、每一道視覺軸線，就已經被一個人在圖紙上規劃停當了。它是<strong>由上而下</strong>設計出來的，是一座為了一個共和國的理念而「設計」出來的舞台。最關鍵的是：這個舞台被設計的目的，從一開始就不只是讓人方便地生活，而是要讓人<em>肅然起敬</em>。那些寬得不成比例的大道、那些盡頭矗立著殿堂的長軸線、那些把山丘當成基座的安排，全都是為了一件事——震懾。讓任何走進這座城的人，都能在它的尺度與秩序面前，感受到一個國家權力的莊嚴。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 由上而下設計的城 vs 自然生長的城</span>
+      <p>城市大致可分兩類。一類是「<strong>自然生長</strong>」的——沒有總設計師，形狀是千百年裡無數人為了生計、便利、習慣而做出的微小選擇層層疊加的結果。它們往往雜亂、有機、充滿意外的角落，街道彎曲、尺度親切，因為它們是「住」出來的，服務的是人的日常。倫敦、波士頓的老城區、世上絕大多數的古城，皆是如此。</p>
+      <p>另一類是「<strong>由上而下設計</strong>」的——有一個人或一群人，在它還空無一物時，就替它畫好了全局。這類城市往往規整、宏大、講究軸線與對稱，因為它們服務的不是日常，而是<em>意義</em>：是要表達某種理念、彰顯某種權力、震懾某種觀者。華盛頓、聖彼得堡、坎培拉、巴西利亞，都屬此類。它們的美在於壯麗，它們的代價，則常常是不近人情——尺度太大、缺乏街角的溫度，因為它們從來就不是先為「住在這裡的人」而設計的。看懂華盛頓屬於後者，就看懂了它日後那種既莊嚴又疏離、既偉大又空洞的雙重性格的根源。</p>
+    </div>
+    <p>這份「為理念而設計、為震懾而存在」的本質，是華盛頓與所有自然長出來的城最深的分野。它的形狀，從第一根線條起，就不是地理或市集的產物，而是<em>政治意志</em>的產物。它不是被人住成這個樣子的，而是被人想成這個樣子的。當這座城日後填滿了官員、遊說者、抗議者與遊客，當它的大道上奔流著權力與金錢，人們很容易忘記：在這一切之前，曾有一個倔強的法國人，在一片空地上，先替這個共和國的偉大，畫好了它該有的模樣。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 形狀即意圖</span>
+      <p>朗方留給華盛頓的第一課是：<strong>一座城的形狀，會洩露造它的人心裡想的是什麼。</strong>他畫的那些寬得不成比例的大道、那些把山丘當基座的安排、那條筆直貫穿核心的大軸線，沒有一樣是為了讓日子過得方便——它們全是為了讓人在權力面前低頭。華盛頓從圖紙上的第一根線開始，就不是一座給人住的城，而是一座給人看的城、給人敬畏的城。</p>
+      <p>這對應一個常被忽略的真理：<em>當你能在一個地方還空無一物時就替它畫好全局，你畫下的就不只是街道，而是一種權力的自我宣告。</em>自然生長的城，形狀是人民日常的總和；由上而下設計的城，形狀則是設計者意圖的化石。華盛頓那放射狀的、巴洛克式的、令人肅然的骨架，正是這個年輕共和國對自己未來的一次大膽下注——它在自己還弱小時，就為自己終將降臨的偉大，預留好了一座足以承托的舞台。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch2" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第二章 · Built by the Enslaved</span>
+    <h2 class="act-title">自由的神殿，由不自由的人砌成</h2>
+    <p class="act-sub">The Capital and Slavery</p>
+    <div class="ornament">⛓ ✦ 🕯</div>
+  </div>
+  <div class="prose">
+    <p>要理解華盛頓特區（Washington, D.C.），有一道矛盾是無論如何都繞不過去的。它不是這座城的某個污點，不是可以擦掉、可以蓋過、可以用更響亮的言辭掩飾的瑕疵——它就在地基裡，攪進了第一車砂漿，壓在了第一塊鋪設的石頭底下。這座城被造出來，是為了安放一個前所未有的政治理想：人皆生而平等，被造物主賦予某些不可剝奪的權利。而砌起承載這個理想的那些殿堂的手，有相當大一部分，屬於一群在當時的法律與習俗裡，根本不被當作「人」的人。</p>
+    <p>這不是事後的道德苛責，也不是用今日的尺去丈量昨日。這是一個必須被誠實說出口的史實：<strong>國會大廈（the Capitol）</strong>、<strong>白宮（the White House）</strong>，以及華盛頓最早的那批聯邦建築，是在被奴役者的勞動之上建成的。把這道矛盾看清楚、說明白，不是為了否定那個理想的價值——恰恰相反，是因為唯有先承認神殿的地基裡藏著什麼，才談得上理解這座城、這個國家此後兩百多年所有的掙扎，究竟在掙扎些什麼。</p>
+
+    <h3>租來的手</h3>
+    <p>一七九○年代，當聯邦城（Federal City）的工地在波多馬克河（the Potomac）畔的沼澤與緩坡上鋪開時，這片土地正深深地嵌在一個蓄奴的世界裡。它南邊是維吉尼亞（Virginia），北邊是馬里蘭（Maryland）——兩個蓄奴州，由它們割讓出來的土地拼成了這個新首都的方塊。在這樣的腹地上要找廉價而充足的粗工，當時的做法殘酷地直接：向奴隸主<em>租用</em>被他們占有的人的勞動力。</p>
+    <p>於是，採石場裡鑿開石灰岩與砂岩的、把沉重石料一車一車運上工地的、和泥砌牆把一面面外牆壘起來的人裡，有為數眾多的，是被奴役的黑人。他們的工錢不歸他們所有——按月計算的酬勞，付給了占有他們的主人。在工地的帳冊裡，他們以名字出現：山姆、查爾斯、傑瑞、戴維、傑斯……一個個被列在「向某某先生租用」的條目下，旁邊記著做了幾個月的工。這些名字之所以還留得下來，正是因為那是一筆筆要結算的開支——他們被當作可以租賃、可以計價的勞力，而非可以記名的工人。</p>
+    <div class="warn">
+      <span class="warn-tag">陰影 · 被租用的勞動</span>
+      <p>在華盛頓最早的公共工程裡，被奴役者承擔了大量最粗重、最危險的工作：在採石場開鑿與搬運石料、把建材一程程運抵工地、燒製石灰、和泥、砌築、清理。他們與自由的白人工匠、以及渡海而來的歐洲移工並肩勞動，卻處在一個截然不同的位置上——他們的身體被別人占有，他們的勞動被別人計價收租，他們的姓氏多半沒能被完整記下。今天我們無法給出一個精確的人數，只能誠實地說：那是一份<strong>相當大的、不可被輕描淡寫帶過的</strong>份額。承認這一點，是對他們最起碼的尊重。</p>
+    </div>
+    <p>需要說清楚的是，並非每一塊石頭、每一面牆都出自被奴役者之手——工地上也有領薪的自由工匠、有專程聘來的石匠、有為了工作橫渡大西洋的愛爾蘭與蘇格蘭移工。歷史不是非黑即白的單一畫面。但也正因如此，那道矛盾才更刺眼：在同一片工地上，有人為自己的工錢勞動、有人為別人能收的租金勞動；有人砌完牆可以回家，有人砌完牆要回到拴住他的那個身分裡去。同一道牆，兩種完全不同的人。</p>
+
+    <h3>視線之內的市場</h3>
+    <p>如果說工地裡的奴役還隔著一層帳冊的抽象，那麼這座城街道上的景象，則赤裸得多。整個十九世紀上半葉，華盛頓特區不只是一座蓄奴的城——它還是美國國內奴隸貿易（domestic slave trade）的一個重要樞紐。</p>
+    <p>當大西洋的奴隸進口在一八○八年被法律終止後，美國境內對被奴役者的買賣不僅沒有止息，反而隨著南方棉花帶（the Deep South）的擴張而愈發興旺。上南方（the Upper South）的人口被一批批往南賣，而華盛頓——因為它居中的位置、它通往南方港口的水運、它作為轉運站的便利——成了這條人口販運鏈上的一個結點。<strong>奴隸圈欄（slave pens）</strong>與買賣的場所，就開設在這座城裡；被囚禁待售的人，就關押在離權力中樞不遠的地方。</p>
+    <p>最令人無法迴避的，是那條視線。在國會山（Capitol Hill）的某些角度，人們能望見奴隸交易發生的街區；被買賣的人，就在那座以大理石歌頌自由的圓頂的<em>視野之內</em>，被估價、被成交、被帶走。一八二○年代起，造訪這座新首都的外國人與北方人，屢屢在他們的記述裡記下同一種震動：他們來瞻仰這個共和國的理想，卻在通往那理想殿堂的路上，撞見了它最徹底的否定。</p>
+    <div class="pull"><p>在以大理石鐫刻「自由」的圓頂視線之內，活生生的人被鎖鏈串起、被當作貨物押解過街——這座城同時供奉著它最高的理想與它最深的背叛，而兩者只隔著幾條街的距離。</p></div>
+    <p>那幅最常被當時的人寫進文字的畫面，是<strong>奴隸串列（coffle）</strong>：一隊被奴役的人，被鐵鏈彼此串連成一行，由販子押解著，公然走過首都的街道，往南方的市場去。男人、女人，有時還有孩子，腳步沉重地穿過這座號稱自由的城。對許多目睹者而言，最刺痛的不是殘酷本身——殘酷在那個時代並不罕見——而是它發生的<em>地點</em>：就在這個把「人皆生而平等」寫進立國文件的國家的首都，就在它的議事殿堂的眼皮底下，明目張膽，習以為常。</p>
+
+    <h3>一個被推遲的承認</h3>
+    <p>這座城花了很久，才肯對這道矛盾讓出哪怕一寸。轉折來得很晚，而且來得很有限。一八五○年那場著名的政治妥協（the Compromise of 1850）裡，作為各方拉扯之後的一項條款，特區內的奴隸「<em>貿易</em>」被禁止了——也就是說，從此不能再在首都的地界上公開買賣人口、設置奴隸市場。</p>
+    <p>但請務必看清這道界線劃在哪裡。被禁的是<strong>買賣</strong>，不是<strong>蓄奴</strong>本身。在這座城裡占有他人、役使他人，依然合法。圈欄被遷出城界之外，街上公然押解的串列收斂了，但被奴役的人仍在這座城的廚房裡、馬廄裡、工地上勞動著，他們的身分一寸未改。換句話說，這個共和國的首都，先學會了不要那麼<em>難看</em>，才在更久之後，才學會不要那麼<em>不義</em>。</p>
+    <p>而真正的廢止，要再等十二年。一八六二年，在內戰（the Civil War）的炮火中，國會通過法案，廢除了哥倫比亞特區（the District of Columbia）內的奴隸制——比解放整個南方早了一步。這座當年靠著被奴役者的手砌起的城，成了全國最早在法律上抹去奴役的地方之一。這當然是值得記住的一步。但它來得這麼遲、這麼曲折，本身就是那道地基裡的矛盾的最好註腳：把人當人，這座城用了整整七十年。</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1790s</div><div class="tl-text">聯邦城動工；被奴役者的勞動被大量租用於採石、搬運、砌築等粗重工作。</div></div>
+      <div class="tl-item"><div class="tl-year">1800</div><div class="tl-text">聯邦政府遷入這座尚未完工的新首都，奴隸貿易在城中持續運作。</div></div>
+      <div class="tl-item"><div class="tl-year">1850</div><div class="tl-text">妥協案禁止特區內的奴隸「貿易」——但蓄奴本身仍合法。</div></div>
+      <div class="tl-item"><div class="tl-year">1862</div><div class="tl-text">內戰中，國會廢除哥倫比亞特區內的奴隸制，比全國解放更早。</div></div>
+    </div>
+
+    <h3>無法直視的地基</h3>
+    <p>把這些放在一起，那道矛盾的形狀就清楚了。這座城被設計來頌揚一套關於人的尊嚴、自由與平等的理念——它的建築刻意借用古典神殿的語彙，白色的大理石、莊嚴的柱列、高聳的圓頂，都是要把一個抽象的政治信仰，凝固成可以仰望、可以朝聖的實體。它是一座<em>自由的神殿</em>。</p>
+    <p>可是這座神殿，從第一塊石頭起，就建立在它自己無法直視的東西上。砌起它的手，有許多屬於被它的法律拒絕當作人的人；供奉它的城裡，活生生的人被當作財產買賣，就在它的視線之內。它一邊用石頭宣告「人皆生而平等」，一邊把不平等砌進了那石頭的縫隙裡。這不是兩件事——這是<strong>同一件事的兩面</strong>：美國最高的理想，與美國最深的虛偽，在同一片工地上、用同一批石料、被同一群人，一起立了起來。</p>
+    <p>後人有時會問：既然如此，那理想還算數嗎？由不自由的人砌成的自由神殿，是不是一場徹頭徹尾的謊言？這個問題沒有輕巧的答案，但有一個誠實的方向。那道刻在山牆上的理想，正因為它與砌起它的現實如此尖銳地相悖，才成了一把懸在這個國家頭上的尺——它把美國自己許下卻遠未兌現的承諾，鑄成了石頭，逼著一代又一代的人去面對「我們說的，和我們做的，差了多遠」。這座城此後所有的掙扎——廢奴、內戰、重建、向華府進軍的民權遊行、在這同一片台階上發出的那些演說——本質上都是在向這道地基裡的矛盾追討一個交代。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 神殿與它的地基</span>
+      <p>華盛頓特區教給我們的第一課，沉重而誠實：<strong>一個社會最高的理想，與它最深的不義，常常不是分處兩端，而是被同一雙手、用同一批材料，一起砌進了同一座建築。</strong>把「自由」鐫刻在大理石上的城，正是在被奴役者的勞動之上、在公開的人口買賣的視線之內，被建造起來的。否認這一點，是怯懦；只記得這一點，又會錯過故事的另一半。</p>
+      <p>更耐人尋味的回聲是：那座神殿並沒有因為地基裡的矛盾而失去意義——反而正是這道矛盾，賦予了它最持久的力量。鐫在石頭上的承諾一旦立起，就再也收不回去；它成了一把後人可以據以追問、據以抗爭、據以丈量進步的尺。<em>一個理想最危險的時刻，不是它被高高供起，而是它被人們默許永遠停在牆上、不必兌現。</em>而華盛頓此後的全部歷史，幾乎都是一場不肯讓它永遠停在牆上的、漫長而未竟的追討。要讀懂這座城，得先在它最莊嚴的台階前，為那些砌起它、卻不被它承認的人，沉默地站一會兒。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch3" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第三章 · Burned &amp; Almost Abandoned</span>
+    <h2 class="act-title">一八一四：被燒掉、險被放棄的城</h2>
+    <p class="act-sub">The City That Nearly Failed</p>
+    <div class="ornament">🔥 ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>後人習慣把華盛頓特區（Washington, D.C.）想成一座從一開始就氣象恢弘、注定偉大的城。可如果有誰能回到一八○○年代初的這片土地上走一走，他看見的多半不是神殿與大道，而是一座泥濘、半成、處處令人尷尬的工地。寬得離譜的林蔭大道在圖紙上恢弘無比，落到地面卻是一條條被雨水泡爛的泥路，兩旁稀稀落落地杵著幾棟孤零零的建築，中間是大片的荒地、樹樁、沼澤與蚊蚋。它不像一座首都，倒像一個野心過大、資金不足的承諾，半懸在半空中。</p>
+    <p>當時的人替它取了一個流傳很廣的綽號，刻薄裡帶著精準：「<strong>宏偉距離之城（city of magnificent distances）</strong>」。意思是說，它什麼都隔得很遠——你要從一棟建築走到另一棟，得穿過漫長的、空無一物的距離。大道很宏偉，房子很稀疏；架構很龐大，內容很空洞。這座為了安放理念而憑空畫出來的城，最初給人的印象，不是莊嚴，而是一種<em>巨大的、尚未填滿的空</em>。</p>
+
+    <h3>沒人願意住的首都</h3>
+    <p>對被召喚到這裡辦公的人來說，華盛頓不是榮耀，而是流放。從費城（Philadelphia）那樣的繁華都會遷來的官員與議員，發現自己被丟進了一片荒涼的半成品裡：道路泥濘難行，住處奇缺，像樣的旅店、商鋪、社交場所幾乎都還不存在。國會議員們常常把家眷留在原籍，自己擠在簡陋的寄宿屋裡過著候鳥般的日子——開會時來，散會就逃也似地離開這座令他們渾身不自在的城。</p>
+    <p>怨言從來沒少過。在那些年裡，國會不止一次地、認真地討論過一個問題：要不要乾脆把首都<em>搬走</em>？搬回費城，或者另擇他處。這聽起來或許不可思議——一個國家的首都，怎麼會在落成之初就被反覆提議放棄？但這恰恰說明了華盛頓最初有多脆弱。它沒有現成的人口，沒有蓬勃的經濟，沒有非它不可的理由。它之所以在這裡，純粹是一場政治交易的產物、一個寫在紙上的折衷。而紙上的折衷，是可以被另一次表決推翻的。</p>
+    <div class="pull"><p>「宏偉距離之城」——這個綽號既是嘲諷也是診斷：架構恢弘，內容空洞。它道破了華盛頓最初的處境：一座靠理念召喚出來、卻還沒有任何現實理由讓人非住在這裡不可的城。</p></div>
+
+    <h3>一八一四年八月：火</h3>
+    <p>然後，在它最脆弱、最不像一座首都的時候，戰爭來了。一八一二年戰爭（the War of 1812）打到第三年，英軍把矛頭指向了這個新生的、防衛薄弱的首都。一八一四年八月，英軍登陸後一路推進，在城外不遠的布拉登斯堡（Bladensburg）擊潰了倉促集結的美軍，門戶洞開。當天晚上，英軍開進了華盛頓。</p>
+    <p>接下來發生的事，是這座城歷史上最黑暗、也最具象徵性的一夜。英軍縱火焚燒了這個共和國的公共建築——<strong>白宮</strong>被付之一炬，<strong>國會大廈（the Capitol）</strong>連同它收藏的書籍一起被點燃，其他公共建築也陷入火海。那些用被奴役者與移工的勞動、花了二十年才一磚一瓦砌起來的殿堂，在一夜之間被燒成焦黑的空殼。火光照亮了波多馬克河（the Potomac）的夜空，這座剛剛勉強立起來的首都，被它自己曾經的母國，親手點燃。</p>
+    <div class="warn">
+      <span class="warn-tag">陰影 · 焦黑的圓頂</span>
+      <p>一八一四年八月那場大火，把白宮與國會大廈燒成了空殼。對一個立國還不到四十年、首都才剛剛勉強成形的國家而言，這不只是建築的損失，更是一記直擊象徵核心的羞辱——它的權力中樞，被敵軍如入無人之境地占領、焚毀。那一刻，「美國能不能撐下去」這個問題，從抽象的憂慮，變成了眼前焦黑的廢墟。</p>
+    </div>
+    <p>在那場混亂裡，留下了一個被後世反覆傳誦的身影。第一夫人<strong>多莉·麥迪遜（Dolley Madison）</strong>在英軍逼近、眾人倉皇撤離之際，沒有只顧著逃命，而是設法搶救下了白宮裡那幅<strong>喬治·華盛頓（George Washington）</strong>的肖像，不讓這位開國者的形象落入敵手、淪為戰利品。這個舉動之所以被一再講述，不只因為它的鎮定與勇氣，更因為它的象徵分量：在這個國家最狼狽的時刻，有人選擇先救下它的<em>形象</em>、它的記憶、它賴以凝聚的那個人格化的理念。建築可以燒掉，但那個理念，要保住。</p>
+    <p>而真正替這座城滅火的，最後竟是天意。就在英軍占領的次日，一場猛烈的暴風雨——有記載說伴隨著罕見的旋風——橫掃華盛頓，傾盆大雨澆熄了未燒盡的火，狂風則給占領者添了不少麻煩。英軍在城裡停留的時間並不長，很快便撤離了。一座被焚的城，靠一場突如其來的風雨，撿回了它殘破的軀殼。</p>
+
+    <h3>重建，與那場勉強過關的表決</h3>
+    <p>大火之後，最尖銳的問題浮上了檯面，而且這一次格外迫切：既然首都都被燒成這樣了，何不順勢放棄它、把政府遷回更安全、更繁華的城市去？這個提議在戰後的國會裡正式成為議題，得到了不少支持。對許多議員來說，留在這片泥濘、脆弱、剛被敵軍踏平的荒地上重建一切，遠不如撤回一座現成的大城來得划算又安全。</p>
+    <p>華盛頓的存續，就懸在這一票上。最終，「遷都」的動議以<em>些微之差</em>沒有通過——支持留下的一方，僅僅以微弱的多數，保住了這座城作為永久首都的地位。請體會這個結果的分量：這個國家的首都會在華盛頓而不在別處，並不是因為什麼鐵打的天命，而是因為在一場勝負難分的表決裡，多了那麼幾票願意把它留下來。它的「永久性」，是被人們的意志，硬生生地、勉強地保住的。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1814</div><div class="lbl">英軍火燒華盛頓，白宮與國會大廈被焚</div></div>
+      <div class="stat"><div class="num">≈ 20 年</div><div class="lbl">才砌起的殿堂，一夜之間化為焦殼</div></div>
+      <div class="stat"><div class="num">些微之差</div><div class="lbl">戰後「遷都」動議以微弱差距未過</div></div>
+    </div>
+    <p>於是重建開始了。焦黑的牆被清理、修補，被燒燻過的總統官邸外牆重新粉刷成白色——後世流傳的一種說法，把「白宮」這個名字的由來與這次重新粉刷聯繫了起來，雖然這座官邸早在被焚之前就已被稱作白色的房子。無論名字的來歷如何，那層重新刷上的白，本身就是一個倔強的姿態：把焦痕蓋住，把殿堂重新立起來，彷彿在說，我們不走，我們要在原地，把它修回去。</p>
+
+    <h3>靠理念活下來的城</h3>
+    <p>退一步看，一八一四年這場大火與隨之而來的存亡之辯，照出了華盛頓身世裡一個常被忽略的真相：它並非一開始就注定偉大——它<strong>差一點就在襁褓中夭折、被放棄</strong>。它沒有港口都市那樣的天然航運紅利，沒有製造業重鎮那樣的工業引擎，沒有商埠那樣自發匯聚的人流與財富。它純粹是為了一個理念——「這個共和國需要一座屬於聯邦、不偏袒任何一州的永久首都」——而被憑空造出來的。</p>
+    <p>正因為它沒有經濟上的理由，它的存續就格外脆弱。一座靠航運活著的城，就算被燒了也會重建，因為船還要靠岸、貨還要進出，地理會逼著它活下去；可一座靠理念活著的城，一旦人們的意志動搖，它就真的可能被輕輕放下。華盛頓最終留了下來，靠的不是地利，不是經濟，而是一個國家「<em>決心要有一座永久首都</em>」的政治意志——是那多出來的幾票，是多莉·麥迪遜搶下的那幅肖像，是重新刷上的那層白漆所代表的那股不肯認輸的執念。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一座沒有經濟理由的城，靠什麼存活</span>
+      <p>絕大多數城市的存在，都有一個不需要任何人下決心去維護的<strong>現實引擎</strong>：它扼守渡口、它臨著良港、它坐落在礦脈或商道之上。這類城市哪怕屢遭天災兵燹，也總會被地理一次次重建——因為總有人需要在這裡過河、靠岸、交易。它們的生命力，寫在地理裡，不必靠誰的意志去支撐。</p>
+      <p>華盛頓不是這種城。它被造在一片刻意挑選的、中性的、沒有特別經濟優勢的土地上，唯一的存在理由是一個政治判斷。這讓它從一開始就背負著一種特殊的脆弱：它的存續，無法外包給地理或市場，只能由人們<em>持續地、主動地</em>選擇去維繫。一八一四年那場勉強過關的表決，正是這種脆弱第一次赤裸裸地暴露出來。<strong>一座為理念而生的城，連它能不能活下去，都得靠理念去支撐</strong>——這份「靠意志維繫」的命運，將貫穿它的全部歷史，也將是理解它日後種種堅持與困頓的一把鑰匙。</p>
+    </div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 靠意志維繫的城</span>
+      <p>華盛頓的第三課，是關於<strong>脆弱與堅持</strong>。它不是被地理選中、被經濟養大的那種城；它是被一個理念召喚出來、又被一場大火幾乎抹去、最後靠著人們勉強多出的幾票才保住的城。它的「永久性」並非天賦，而是被反覆的選擇一次次重新確認出來的——這是它身世裡最容易被宏偉的圓頂遮住、卻最值得記住的一頁。</p>
+      <p>這道回聲指向一個更普遍的真理：<em>凡是只為理念而存在的事物，它的存續就永遠不可能是理所當然的，而必須靠一代代人主動地、不嫌麻煩地去維護。</em>一座靠航運活著的城，可以躺在地理上睡覺；一座靠理念活著的城，只要人們鬆手，它就會塌。華盛頓能從一片泥濘的工地、一座焦黑的廢墟，走到後來那個莊嚴的模樣，靠的不是命定，而是那股「我們決心要它在這裡」的執拗。讀懂了這一點，就會明白：這座城此後一切看似牢不可破的莊嚴，底下都還壓著一八一四年那個險些被放棄的夜晚——它的偉大，是被選擇出來的，而不是被賜予的。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch4" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第四章 · The Civil War Capital</span>
+    <h2 class="act-title">內戰的神經中樞</h2>
+    <p class="act-sub">From Sleepy Town to Union HQ</p>
+    <div class="ornament">✦ 🏛 ✦</div>
+  </div>
+  <div class="prose">
+    <p>一八六一年的春天，華盛頓還是一座帶著南方氣味的睡城。賓州大道（Pennsylvania Avenue）一到雨季就化成泥濘，豬隻在街角覓食，國會山下的低地散著瘧疾的瘴氣，而尚未封頂的國會大廈（the Capitol）頂上，露出一截鏽紅色的鐵架，像一根伸向天空、卻還沒握住任何東西的手指。這座城被設計成首都已逾半世紀，可它從不曾真正像一個首都那樣呼吸過。它太鬆散、太悠閒、太半成品。然後，南卡羅來納州的炮口在四月十二日轟向了查爾斯頓港的桑特堡（Fort Sumter），戰爭來了——而華盛頓，幾乎在一夜之間，被推到了一個它從未承擔過的位置：一個流血國家的神經中樞。</p>
+
+    <h3>三面被蓄奴的土地包圍</h3>
+    <p>翻開地圖，就能明白華盛頓在這場戰爭裡的處境有多麼險惡。它坐落在波多馬克河（the Potomac）畔，背靠的馬里蘭（Maryland）是一個蓄奴州——雖然最終沒有脫離聯邦，但州內親南方的情緒濃烈，一八六一年四月巴爾的摩（Baltimore）就爆發了攻擊北方過境部隊的暴動。而河的對岸，是已經宣布脫離聯邦、加入邦聯（Confederacy）的維吉尼亞（Virginia）。換句話說，這座聯邦的首都，三面都被蓄奴、甚至已經敵對的土地圍著。從邦聯首都里奇蒙（Richmond）到華盛頓，直線距離不過一百多英里——兩個交戰政府的首都，近得彼此都聽得見對方的炮聲。</p>
+    <p>這個地理事實，把整場戰爭的張力都壓在了華盛頓身上。它既是聯邦的政治心臟，又是離前線最近、最暴露的城市之一。一旦它陷落，聯邦的正當性與士氣將遭受難以估量的打擊。於是，保衛華盛頓，從戰爭的第一天起，就不只是保衛一座城，而是保衛一個理念能不能在地圖上繼續存在。林肯（Abraham Lincoln）政府最深的焦慮，始終縈繞在這條河與這座城的脆弱上。</p>
+    <div class="pull"><p>兩個交戰政府的首都，近得彼此都聽得見對方的炮聲。保衛華盛頓，從來不只是保衛一座城，而是保衛一個理念能不能在地圖上繼續存在。</p></div>
+
+    <h3>一座城變成一台戰爭機器</h3>
+    <p>戰爭把這座睡城徹底改寫了。軍隊像潮水一樣湧入——成千上萬的志願兵在城外紮營，帳篷鋪滿了山丘與空地，操練的口令、軍號與馬蹄聲取代了往日的慵懶。為了不讓邦聯軍隊突入，華盛頓的四周築起了一圈龐大的防禦工事：一道由數十座堡壘、炮台與壕溝串成的環形防線，把整座城箍在中間。到戰爭中期，這座城已是當時防守最森嚴的城市之一。曾經半成品的首都，第一次以一種近乎軍事要塞的密度，被填滿、被武裝、被動員。</p>
+    <p>更深刻的轉變發生在城市的肌理裡。一棟棟建築被徵用為野戰醫院——教堂、學校、旅館、甚至國會大廈與專利局的廳堂，都鋪上了一排排病床，收容從前線運回的傷兵。詩人惠特曼（Walt Whitman）那幾年就在華盛頓的醫院裡照料傷者，他筆下的這座城，瀰漫著血、消毒水與年輕生命凋零的氣息。倉儲、軍需、運輸、後勤——一整套支撐戰爭的龐大機器，在這座城裡日夜運轉。華盛頓不再是一個象徵性的政治符號，它成了一個有血有肉、會流血也會發燒的戰時樞紐。</p>
+
+    <h3>奔向自由的人</h3>
+    <p>但這場戰爭給華盛頓帶來的，遠不止軍隊與傷兵。它還帶來了人——成千上萬逃離與獲釋的被奴役者。隨著聯邦軍隊向南推進、隨著邊境的鬆動，無數被奴役的黑人男女拋下種植園，朝著這座聯邦首都湧來，尋求自由與庇護。當時的軍事與官方語言，把這些逃抵聯邦防線的人稱作「contrabands」——一個冷硬、把人歸類為「戰時繳獲物」的詞，今天讀來令人不適，卻真實記錄了那個時代如何在法律與語言上，艱難地摸索著該如何安放這些奔向自由的生命。</p>
+    <p>他們在城郊搭起簡陋的營地，擠在臨時的居所裡，缺糧、缺藥、缺一切，許多人在抵達自由的門檻時染病死去。但他們仍然來，一波接著一波。因為對一個被奴役的人而言，這座三面被蓄奴土地圍著的城，恰恰是地圖上最近的一束光。<strong>華盛頓——這座由蓄奴者規劃、用被奴役者的雙手築起的城——在戰爭中第一次，成了被奴役者奔向自由的燈塔。</strong>這是它身世裡最深的反諷，也是它最動人的轉折。</p>
+
+    <h3>早了八個月的自由</h3>
+    <p>而這座城裡的被奴役者，等到了一個比全國更早的解放。一八六二年四月十六日，國會通過、林肯簽署了《特區補償解放法》（DC Compensated Emancipation Act）——這部法律廢除了哥倫比亞特區內的奴隸制，使特區的被奴役者獲得自由，並向原本的蓄奴者支付一筆補償。它比那部更為人銘記的全國性《解放宣言》（Emancipation Proclamation）早了大約八個月。在當年由蓄奴者主導劃出、深深嵌著奴隸制烙印的這片土地上，奴隸制竟率先在這裡，由法律之手解開。</p>
+    <p>這道時間差意義深遠。它讓華盛頓——這個曾經是奴隸買賣集散地、曾經眼睜睜看著被奴役者被鎖鏈拖過街道、賣往南方的首都——成了全國第一片以立法廢奴的聯邦土地。直到今天，特區仍以四月十六日為「解放日」（Emancipation Day）紀念這一刻。一座城最深的傷口，與它最早的救贖，落在了同一片土地上。</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1861.04</div><div class="tl-text">桑特堡炮響，內戰爆發；華盛頓一夕成為最前線的聯邦首都，軍隊與防禦工事湧入。</div></div>
+      <div class="tl-item"><div class="tl-year">1862.04</div><div class="tl-text">《特區補償解放法》簽署，特區被奴役者獲自由，比全國《解放宣言》早約八個月。</div></div>
+      <div class="tl-item"><div class="tl-year">1863</div><div class="tl-text">國會大廈圓頂在戰時堅持完工，自由女神像立上穹頂。</div></div>
+      <div class="tl-item"><div class="tl-year">1865.04</div><div class="tl-text">戰爭結束數日後，林肯在福特劇院遇刺。</div></div>
+    </div>
+
+    <h3>炮火中升起的圓頂</h3>
+    <p>而就在這座流血的城市中心，發生了一件看似不合時宜、卻意味深長的事：國會大廈的圓頂，在整場戰爭期間，一寸一寸地，繼續往上蓋。</p>
+    <p>戰爭爆發時，這座宏偉的鑄鐵穹頂還只完成了一半，露著鐵架。在一個錢都該拿去打仗、鐵都該拿去造炮的時刻，繼續花費鉅資去蓋一個純粹象徵性的圓頂，看上去近乎奢侈。有人主張停工。但林肯堅持施工不能停。據後世流傳的轉述，他把這座持續升起的圓頂，看作聯邦不會垮的證明——只要這個穹頂還在往上長，世人就該明白，這個國家、這個聯邦，打算繼續存在下去。一八六三年，圓頂終於封頂，一尊高近六公尺的青銅雕像被吊上穹頂之巔，那是<strong>自由女神像（Statue of Freedom）</strong>。她頭戴羽冠，按劍而立，俯瞰著腳下這座為戰爭所苦的城。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼一個圓頂值得在戰時完工</span>
+      <p>在一個生死存亡的關頭，把資源投在一個不能打仗、不能救命的建築上，看似不理性。但林肯的堅持，恰恰點破了華盛頓這座城最根本的本質——<strong>它不是因實用而存在，而是因理念而存在。</strong>它沒有港口的天然財富，沒有要塞的軍事必要，它唯一的、也是全部的理由，是去具象化一個抽象的東西：一個依憲法而立、宣稱人民自治的共和國。</p>
+      <p>所以，當這個共和國正在流血、正面臨分裂時，讓它的象徵性中心繼續一寸寸升起，本身就是一種戰略——一種對信念的宣示。圓頂不能擋住一發炮彈，但它能回答一個比炮彈更要命的問題：這個國家還相不相信自己會活下去？林肯的回答，是讓鐵與石頭替他說話。</p>
+    </div>
+
+    <h3>福特劇院的那一槍</h3>
+    <p>戰爭終於到了盡頭。一八六五年四月，邦聯主力投降，舉國從四年的血泊中緩緩抬起頭來。然而就在這勝利與和解的曙光裡，悲劇在華盛頓落下。四月十四日夜，林肯在城中的福特劇院（Ford's Theatre）觀劇時，被刺客從背後開槍擊中，次日清晨在劇院對街的一棟民宅中辭世。那位帶領國家穿過分裂、堅持讓圓頂在炮火中升起的總統，最終倒在了他守住的這座首都裡。</p>
+    <p>這是一個沉重得近乎殘酷的結局：華盛頓在戰爭中完成了它的成年禮，卻也在戰爭的尾聲，親手埋葬了那個讓它成年的人。林肯的靈柩此後長途北返，沿途無數民眾肅立送行，而這座城，從此把對他的記憶，深深地砌進了自己的身世。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 成年禮</span>
+      <p>內戰是華盛頓的成年禮。在那之前，它是一座可有可無的睡城，一個半成品的、被人懷疑「到底有沒有必要存在」的首都。內戰過後，它再也不是了——它成了一個國家命運的中樞，一台支撐戰爭與重建的龐大機器，也第一次，成為被奴役者奔向自由的燈塔。它三面被蓄奴的土地圍著，卻率先以法律解開了自己身上的奴隸枷鎖；它離前線只有一河之隔，卻在炮火中讓一個純象徵的圓頂繼續升起。</p>
+      <p>那座一寸寸升起的圓頂，把這座城「為理念而存在」的本質，凝成了一個最有力的形象。它告訴後世一件事：<strong>哪怕國家正在流血，這座城也要證明，它所代表的東西不會倒。</strong>實用的城市為財富而建，要塞的城市為防守而建，而華盛頓——它為一個信念而建，並在最危急的時刻，用石頭與青銅，賭上了這個信念的存亡。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch5" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第五章 · Black Washington</span>
+    <h2 class="act-title">黑色華盛頓：成就與隔離</h2>
+    <p class="act-sub">Howard, U Street &amp; Jim Crow</p>
+    <div class="ornament">🕯 ✦ 🕯</div>
+  </div>
+  <div class="prose">
+    <p>解放之後，那些曾在戰爭中奔向這座城的人，並沒有離開。他們留了下來，成家、立業、辦學、開店，把一座戰時收容自由的城，慢慢經營成一片真正屬於黑人美國的高地。在此後的半個多世紀裡，華盛頓崛起為全美黑人成就最璀璨的中心之一——它有最好的黑人學校、最龐大的黑人專業階層、最耀眼的黑人文化。然而，就在同一座城裡，同一段歲月中，吉姆·克勞（Jim Crow）的種族隔離也一寸寸收緊，把這些成就的締造者，系統性地擋在平等之外。這座宣稱「人皆平等」的首都，對它的黑人居民展開了一張最矛盾的面孔：一手遞上通往尊嚴的階梯，一手築起阻擋他們的牆。這一章，講的是這道撕裂——它是這座城，也是這個國家，最誠實的一幅自畫像。</p>
+
+    <h3>霍華德：一座大學作為一個民族的志氣</h3>
+    <p>故事的一個起點，是一八六七年。那一年，在華盛頓創立了<strong>霍華德大學（Howard University）</strong>——這所學校很快成為黑人高等教育的旗艦，是解放後的黑人美國為自己鍛造知識與專業菁英的熔爐。在一個絕大多數黑人連識字都被法律禁止過的國家，霍華德培養出醫生、律師、牧師、教師、學者，一代又一代。它的醫學院、法學院，為整個黑人社群輸送了支撐其尊嚴與自立的專業骨幹。</p>
+    <p>霍華德的意義遠不止於一所學校。它讓華盛頓成為黑人知識份子的引力中心，吸引全美最傑出的黑人學者前來任教、論學、著述。圍繞著它，一個龐大而傑出的黑人專業與知識菁英階層在這座城裡聚攏、生根。在二十世紀上半葉，若論黑人受過高等教育的人口密度、黑人專業人士的群聚，華盛頓在全美無出其右。這是一座城用幾代人的努力，為一個曾被否定一切的民族，砌出的一座智識的堡壘。</p>
+
+    <h3>U 街：黑色百老匯的燈火</h3>
+    <p>如果說霍華德是這座城的腦，那麼<strong>U 街（U Street）</strong>一帶，就是它跳動的心。從十九世紀末到二十世紀中葉，U 街沿線發展成一片繁華的黑人商業與文化區——劇院、戲院、舞廳、餐館、俱樂部鱗次櫛比，霓虹徹夜不熄。人們給它起了個響亮的名字：「黑色百老匯」（Black Broadway）。在種族隔離把黑人關在主流娛樂場所之外的年代，U 街自成一個璀璨的世界，是黑人音樂、戲劇與夜生活的中心，全美巡演的黑人藝人都以在此登台為榮。</p>
+    <p>這片街區最引以為傲的孩子，是<strong>艾靈頓公爵（Duke Ellington）</strong>——這位二十世紀爵士樂（jazz）史上最偉大的作曲家與樂團領班之一，一八九九年就出生在華盛頓，在 U 街的氛圍裡長大。他日後把那種優雅、複雜、自尊的音樂帶向世界，而那份氣質的根，正埋在這片街區的燈火裡。U 街證明了一件事：當一個社群被主流拒於門外，它不會就此沉默，反而會在被劃給自己的那方天地裡，長出最旺盛、最自成一格的生命力。</p>
+    <div class="pull"><p>霍華德是這座城的腦，U 街是它跳動的心。當一個社群被主流拒於門外，它在被劃給自己的那方天地裡，長出了最旺盛、最自成一格的生命力。</p></div>
+
+    <h3>同一座城，兩種法律</h3>
+    <p>然而，就在這片成就的光芒背後，另一套秩序也在悄悄、又公然地運轉。吉姆·克勞的種族隔離，牢牢套在這座城上。公共空間被隔離——餐廳、戲院、旅館、學校、公園，黑人與白人被分置兩端。一個霍華德的醫生、一位 U 街的名伶，無論多麼傑出，走出自己的街區，仍可能在某家餐館門口被拒之門外，仍得在某些場所走另一道門、坐另一個區。成就，並不能贖回平等。</p>
+    <p>而最刺痛人的一筆，來自聯邦政府本身。在二十世紀初之前，聯邦公務體系曾是黑人能憑能力獲得體面職位、進入中產的重要階梯之一，許多華盛頓黑人家庭的尊嚴正建立於此。然而在威爾遜（Woodrow Wilson）總統任內，大約一九一三年起，聯邦公務體系被正式重新隔離——辦公室、餐廳、盥洗室被按膚色分開，許多黑人職員遭降職或排擠。這不是地方的陋習，而是國家最高行政權力親手下達的隔離。在這座理應代表全體國民的首都，政府用自己的手，把一道種族的牆，砌進了自己的辦公樓裡。</p>
+    <div class="warn">
+      <span class="warn-tag">陰影 · 一九一九年的血色之夏</span>
+      <p>隔離之外，還有暴力。一九一九年的夏天，全美多座城市爆發針對黑人社區的種族暴動，史稱「血色之夏」（Red Summer），華盛頓是其中之一。那年七月，受謠言與報紙煽動，成群的白人暴民——其中包括身著軍服、剛從一戰戰場返回的軍人——湧入黑人社區，施加攻擊。但與許多人預期的不同，華盛頓的黑人社群並未束手就擒，而是組織起來、武裝自衛，奮力保衛自己的家園與性命。連續數日的衝突造成多人死傷。這場暴動沉痛地揭示了那個時代的殘酷悖論：黑人男子才剛為這個國家遠赴歐洲、為「民主」而戰，歸來時卻要在自己國家的首都，為自己的生命而戰。</p>
+    </div>
+
+    <h3>一張臉的兩半</h3>
+    <p>把這兩條線並排放在一起看，這座城最深的矛盾才真正顯形。</p>
+    <div class="twocol">
+      <div>
+        <div class="minihead">黑色成就的高地</div>
+        <p>霍華德大學作為黑人高等教育的旗艦，鍛造出一整代醫生、律師、學者；U 街成為「黑色百老匯」，艾靈頓公爵在此孕育；一個龐大傑出的黑人專業與知識菁英階層在此聚攏。華盛頓是全美黑人最有機會通往尊嚴與自立的城市之一。</p>
+      </div>
+      <div>
+        <div class="minihead">制度隔離的壁壘</div>
+        <p>公共空間全面隔離；聯邦公務體系在威爾遜任內被正式重新隔離（約一九一三）；一九一九年「血色之夏」的種族暴動。再傑出的成就，也換不回一張通往平等的入場券——膚色仍是一道走到哪都甩不掉的牆。</p>
+      </div>
+    </div>
+    <p>這正是貫穿全篇的核心矛盾，在「人」身上的具現。同一座宣稱「人皆平等」的首都，既孕育出黑人美國最璀璨的成就，又對黑人施加最系統性的隔離。它一面為黑人居民鋪設通往尊嚴的階梯——霍華德、U 街、聯邦的職位——一面又親手把他們擋在平等的門外，甚至縱容暴力闖進他們的街區。給予與剝奪，出自同一隻手；高地與壁壘，立在同一片土地。</p>
+    <p>而這份撕裂，最深刻的意義或許在於它的<em>誠實</em>。華盛頓不是一個偽善的例外，它是整個美國的縮影與放大。一個把「人皆平等」鐫刻在開國文件、又把奴隸制與隔離寫進自身運作的國家，它的首都，理所當然地、毫不掩飾地，把這份國家層級的分裂，呈現在自己的街道、學校與政府大樓裡。<strong>看華盛頓對它黑人居民的這張兩半的臉，就是看這個國家對著鏡子，照見自己最真實、也最難堪的模樣。</strong></p>
+
+    <h3>被寫淡的人</h3>
+    <p>還有一件事值得在這裡停留：在後世關於華盛頓的敘事裡，那座白色大理石的權力之城、那些紀念碑與圓頂，往往佔據了全部的鎂光燈，而霍華德的講堂、U 街的燈火、在隔離與暴動中堅守尊嚴的尋常黑人家庭，卻常常被寫得很淡，甚至被略去。可正是這些「被寫淡的人」，才構成了這座城最有血肉的另一半——他們在被否定一切的處境裡，硬是為自己、也為一個民族，掙出了學問、藝術、體面與抵抗的能力。一座只記得權力與大理石的華盛頓，是殘缺的；唯有把這些人重新寫回畫面中央，這座城的故事才算完整。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最誠實的自畫像</span>
+      <p>華盛頓對它的黑人居民，給了通往尊嚴的階梯，又親手把他們擋在平等之外。這道「成就與隔離並存」的撕裂，不是這座城的偶然瑕疵，而是它——以及它所代表的這個國家——最誠實的一幅自畫像。霍華德與 U 街，證明了一個被否定的民族能爬到何等高度；吉姆·克勞與血色之夏，則暴露了這個國家親手設下的天花板有多麼堅硬。</p>
+      <p>這提醒我們一個不舒服、卻必須記住的真理：<strong>成就從來不會自動兌換成平等，正義也從來不是被恩賜的，而是被爭取的。</strong>那些在這座矛盾之城裡辦學、登台、自衛、堅守尊嚴的黑人男女，用幾代人的努力，把「人皆平等」這句話，從一張開國文件上的漂亮辭藻，一寸寸地，逼向了現實。這座城日後將成為民權運動最重要的舞台，而舞台的地基，正是這些被寫淡的人，早早替它打下的。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch6" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Temple of Marble</span>
+    <h2 class="act-title">大理石的神殿</h2>
+    <p class="act-sub">The McMillan Plan and the Monumental Mall</p>
+    <div class="ornament">🏛 ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>到了一九○○年，當華盛頓準備慶祝建都一百週年時，這座城市低頭看了看自己，看到的卻是一場尷尬。一百年前，那位法國工程師<strong>朗方（Pierre Charles L'Enfant）</strong>曾在這片波多馬克河畔的泥沼上，劃出一道恢宏的中央大軸線——一條從國會山（Capitol Hill）筆直伸向波多馬克河的開闊綠地，他稱之為「宏大林蔭道（Grand Avenue）」。那是他整座城市最核心的構想：一條讓國家可以昂首闊步的脊樑。可是一個世紀過去，這條脊樑早已彎了、駝了、被踩亂了。</p>
+
+    <h3>一座火車站，蓋在了夢的中央</h3>
+    <p>朗方的大軸線——後世稱之為<strong>國家廣場（the National Mall）</strong>——在十九世紀並沒有被當成神聖的願景來守護，反倒像一塊無主的空地，誰需要就佔一塊。它的西半部曾是一片沼澤泥地，潮汐淹來退去，蚊蚋叢生。南北戰爭期間，這裡駐紮過軍隊、堆放過軍需、甚至豎起過屠宰場與牲口欄，牛羊的氣味飄散在後來將立起紀念碑的草地上。十九世紀中葉，造園家<strong>唐寧（Andrew Jackson Downing）</strong>還按浪漫主義的趣味，在廣場上種滿了蜿蜒的小徑、樹叢與灌木，把朗方原本筆直開闊的軸線，弄成了一座彎彎曲曲、視線處處被擋住的維多利亞式公園。</p>
+    <p>但最刺眼的一刀，是一條鐵路。十九世紀後期，<strong>巴爾的摩與波多馬克鐵路（the Baltimore and Potomac Railroad）</strong>竟把它的車站與一道道鐵軌，直接鋪進了國家廣場的腹地——蒸汽火車噴著黑煙，鳴著汽笛，橫切過朗方當年構想中那條最莊嚴的視線。對任何懂得朗方原意的人來說，這幾乎是一種褻瀆：在那條本該屬於國家的中央大道上，停著一列列冒煙的貨運列車。一八八一年，總統<strong>加菲爾德（James Garfield）</strong>正是在這座鐵路車站裡中彈遇刺，更為這塊地添上一筆陰影。到了世紀之交，朗方那道偉大的軸線，已經被切割、被遮蔽、被遺忘得幾乎認不出來了。</p>
+    <div class="pull"><p>一座為展示權力而生的城，卻在百年之後，發現自己最神聖的那條軸線上，停著一列冒著黑煙的貨運火車。修復這道軸線，將是一場關於「國家該長什麼樣子」的爭奪。</p></div>
+
+    <h3>四個人，一個委員會，一張地圖</h3>
+    <p>轉機來自一場百年紀念引發的反省，以及一個人的執著——密西根州參議員<strong>麥克米倫（James McMillan）</strong>。一九○一年，在他主導下，參議院成立了一個專責委員會，後世稱之為<strong>麥克米倫委員會（the McMillan Commission），又名參議院公園委員會（the Senate Park Commission）</strong>。委員會的任務聽起來平淡——重新規劃首都的公園系統——但它召集的人選，卻是當時美國最頂尖的一組藝術與建築頭腦。</p>
+    <p>主事者是建築師<strong>伯納姆（Daniel Burnham）</strong>，他剛在一八九三年的芝加哥<strong>哥倫布紀念博覽會（the World's Columbian Exposition）</strong>上，造出了一座震驚全美的「白城」——一整片以新古典主義列柱、白色立面、開闊軸線構成的夢幻都市，向數百萬遊客示範了城市可以多麼莊嚴而有秩序。與他同行的，還有景觀建築師<strong>奧姆斯特德二世（Frederick Law Olmsted Jr.）</strong>——他的父親正是設計紐約中央公園的那位奧姆斯特德；建築師<strong>麥金（Charles McKim）</strong>，新古典主義的大師；以及雕塑家<strong>聖高登斯（Augustus Saint-Gaudens）</strong>，當時美國最受推崇的紀念碑雕塑家。</p>
+    <p>這四個人做了一件當時罕見的事：他們自費結伴，遠渡重洋，到歐洲去「取經」。他們走訪羅馬、巴黎、凡爾賽、倫敦，研究那些帝國與王朝如何用石頭、軸線、噴泉與列柱，把權力安放進空間。他們帶著筆記與草圖回來，在一九○二年呈上了一份報告與一座精緻的模型——這就是日後改寫了華盛頓面貌的<strong>麥克米倫計畫（the McMillan Plan）</strong>。</p>
+
+    <h3>把火車趕走，把軸線還給國家</h3>
+    <p>麥克米倫計畫的核心，是重新發現並放大朗方那道被遺忘的願景。它要做的事可以歸結為幾項決心：第一，清空國家廣場——拆掉維多利亞式的蜿蜒花園與雜亂樹叢，把它重新整理成一片開闊、平整、筆直的開放綠地，讓視線可以從國會山一路延伸到河邊，毫無阻擋。第二，也是最關鍵的一步——把那條冒煙的鐵路與車站，徹底趕出廣場。</p>
+    <p>這一步靠的是一樁巧妙的交換。委員會說服鐵路公司，把分散的車站合併，遷到廣場之外的一處新址，興建一座宏偉的聯合車站。一九○七年，由伯納姆親自設計的<strong>聯合車站（Union Station）</strong>落成——那是一座羅馬式的大理石宮殿，仿照羅馬的戴克里先浴場與凱旋門，列柱巍峨，拱頂高敞，把旅人的抵達變成一場儀式。火車從此進站於此，而國家廣場上那道刺眼的黑煙與鐵軌，終於被抹去了。朗方的軸線，第一次有機會以它本該有的樣子，重新呼吸。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 紀念性建築：如何用大理石把抽象的「國家」變成可見、可信、可朝聖的東西</span>
+      <p>「美國」是一個抽象的概念。它不是一個人、一個王、一個可以指著看的東西；它是一份文件、一套理念、一個由幾百萬陌生人彼此想像出來的共同體。對一個年輕的共和國而言，最深的焦慮正在於此——你如何讓人民相信、敬畏、並願意為一個<em>看不見</em>的東西效忠？王朝有國王的肉身可以膜拜，教會有神的形象可以朝聖，而一個由抽象原則立國的共和國，手裡卻什麼具體的東西都沒有。</p>
+      <p>麥克米倫計畫的深層答案是：<strong>把抽象鑄成大理石。</strong>用列柱的高度讓人不自覺地仰望，用軸線的筆直讓人感到秩序與必然，用石頭的冷與重讓人相信恆久。當一個公民走進林肯紀念堂，在那尊巨大的坐像前抬起頭，他感受到的不是一段論證，而是一種<em>身體上的肅然</em>——膝蓋想彎、聲音想低。這就是紀念性建築的政治魔法：它不說服你的理智，它說服你的身體；它把「國家值得敬畏」這個無法證明的命題，變成一種你一走進去就會親身體驗到的感受。大理石不講道理，它讓你<strong>感覺</strong>到道理。</p>
+    </div>
+
+    <h3>城市美化：用美，來教化一個國家</h3>
+    <p>麥克米倫計畫並不是孤立的事件，它是一場席捲全美的思潮在首都的集中爆發——<strong>城市美化運動（the City Beautiful movement）</strong>。這場運動相信，一座規劃得宏偉、潔淨、有秩序的城市，本身就能教化它的市民：壯麗的公共空間會喚起公民的自豪與道德，雜亂骯髒的環境則孳生墮落與冷漠。伯納姆在芝加哥的白城，正是這套信念最炫目的展示；而華盛頓，因為它本就是一張可以重畫的政治畫布，順理成章成了城市美化運動最完整、最不受妥協的實驗場。</p>
+    <p>於是接下來的數十年裡，華盛頓的核心地帶，被一座座以新古典主義大理石築成的建築與紀念碑逐一填滿。它們大多有著同一種語彙：白色或淺色的石材、嚴整的列柱、三角形的山牆、對稱的立面——一種刻意借自古希臘與古羅馬的語言。借用，並非偶然：這些建國者與規劃者，把美國想像成古典共和的繼承人，於是讓首都穿上了雅典與羅馬的衣裳，彷彿在說，這個年輕的國家，承接的是西方文明最古老的政治理想。</p>
+    <p>這道核心軸線在隨後的歲月裡逐漸成形。一九二二年，<strong>林肯紀念堂（the Lincoln Memorial）</strong>在國家廣場最西端、原本是潮汐沼澤的填出之地上落成——那是一座仿希臘神廟的白色大理石殿堂，三十六根多立克式列柱環立，對應林肯遇刺時聯邦的州數，殿中那尊由<strong>法蘭奇（Daniel Chester French）</strong>雕成的林肯巨像安坐其間，目光越過長長的<strong>倒影池（the Reflecting Pool）</strong>，與遠處的華盛頓紀念碑、再遠處的國會圓頂，連成一線。朗方的軸線，至此終於以一種他本人都未必想像得到的莊嚴規模，被補全了。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1901</div><div class="lbl">麥克米倫委員會成立</div></div>
+      <div class="stat"><div class="num">1907</div><div class="lbl">聯合車站落成，火車遷出廣場</div></div>
+      <div class="stat"><div class="num">1922</div><div class="lbl">林肯紀念堂落成於軸線西端</div></div>
+      <div class="stat"><div class="num">36</div><div class="lbl">林肯紀念堂列柱數，對應林肯時聯邦州數</div></div>
+    </div>
+
+    <h3>一座供人朝聖的城</h3>
+    <p>退一步看，華盛頓在二十世紀初做的這件事，本質上是一場<em>刻意的自我神化</em>。它不是被動地長出紀念碑，而是主動地、有計畫地，把自己打造成一座「神殿」。當別的城市為了港口、工廠、市場而擴張，華盛頓擴張的理由卻是：這個年輕的共和國需要一個地方，讓它抽象的理念變得莊嚴、可見、恆久——而華盛頓自願擔起這個角色，替整個國家造了一座可以親眼仰望、可以動身朝聖的城。</p>
+    <p>這是一種非常獨特的政治：<strong>用石頭說服人民。</strong>當人們在獨立紀念日從全國各地湧來，沿著倒影池漫步，在巨大的列柱與雕像間仰起頭，他們其實是在進行一場世俗的朝聖——不向任何神，而向「美國」這個觀念本身。麥克米倫計畫最深遠的成就，不是造了幾座漂亮的建築，而是替這個由原則立國、卻看不見摸不著的國家，造出了一具可以被敬畏、被膜拜、被一代代人走進去親身感受的<em>身體</em>。從此以後，華盛頓最獨特、也最刻意的那一面，就此定型：它是一座為了震懾與認同而設計的城，一座用大理石寫成的國家信仰宣言。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 用石頭說服人民</span>
+      <p>麥克米倫計畫留下的最深啟示是：<strong>一個抽象的共同體，需要一個有形的身體，人們才願意對它效忠。</strong>「美國」是看不見的，但林肯坐像前那份膝蓋想彎的肅然是真實的；國家是一份文件，但走在開闊軸線上感到的那份秩序與恆久卻是身體記得住的。華盛頓做的，就是把無形的信念，鑄成有形的、可朝聖的大理石。</p>
+      <p>這對應一個被低估的真理：<em>持久的認同，往往不是靠論證建立的，而是靠反覆的、身體性的體驗養成的。</em>你說服不了一個人去愛一個概念，但你可以替那個概念造一座殿堂，讓他每次走進去都不自覺地肅然——久了，敬畏就長成了忠誠。華盛頓最深的政治智慧，藏在它的列柱與軸線裡：它從不爭辯美國值不值得敬畏，它只是讓你一走進來，就替它感到敬畏。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch7" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第七章 · The Company Town</span>
+    <h2 class="act-title">政府這門唯一的產業</h2>
+    <p class="act-sub">Power as the Only Industry</p>
+    <div class="ornament">🏢 ✦ ⚙</div>
+  </div>
+  <div class="prose">
+    <p>每一座城市，都圍著一樣東西運轉。匹茲堡圍著鋼，底特律圍著汽車，休士頓圍著石油，紐約圍著錢。這些城市的脈搏，跟著它們那樣核心產業的興衰一起跳動。華盛頓也圍著一樣東西運轉——只是它圍著的，既不是礦，也不是廠，更不是任何可以裝箱出口的實物。華盛頓圍著的，是<strong>美國政府本身</strong>。它沒有港口要餵養，沒有工廠要供料，沒有天然資源要開採；這座城唯一的、卻也取之不盡的產業，就是「治理」與「權力」。</p>
+
+    <h3>一個曾經很小的政府</h3>
+    <p>這件事並非從一開始就如此理所當然。在二十世紀之前的大半時間裡，美國聯邦政府其實相當精簡。建國者刻意把權力的重心留在各州，留在地方；華府的聯邦機器，長期只是一個處理外交、郵政、關稅與軍隊的小機構。十九世紀的華盛頓，常被來訪的歐洲人嘲笑為一座「宏偉計畫卻空蕩蕩」的城——寬闊的大道兩旁是泥濘的空地，宏大的軸線旁立著未完工的紀念碑，國會休會時，這座城甚至會半空下來，像個季節性的營地。聯邦政府雇用的人不多，這座圍著它運轉的城，自然也大不起來。</p>
+    <p>真正的轉折，發生在二十世紀的兩場巨變裡。第一場，是一九三○年代的<strong>新政（the New Deal）</strong>。當大蕭條（the Great Depression）把整個國家拖入深淵，總統<strong>羅斯福（Franklin D. Roosevelt）</strong>的回應，是讓聯邦政府以前所未有的規模，伸手進入經濟與社會的每一個角落——救濟失業、興建工程、監管銀行與市場、發放社會保障。每一項新政策，都意味著一個新的機構、一批新的官員、一棟新的辦公樓。一個又一個以英文縮寫為名的新機構在華盛頓冒出來，多到被戲稱為「字母湯（alphabet soup）」。聯邦政府從一個守夜人，膨脹成一個無所不在的管理者，而華盛頓，作為它的肉身所在，也隨之第一次真正地腫脹起來。</p>
+    <div class="pull"><p>別的公司城，圍著一座礦、一間廠運轉。而華盛頓這座城圍著的「公司」，是美國政府本身——一家不生產實物、只生產政策與權力的公司。</p></div>
+
+    <h3>戰爭，把政府吹成了巨人</h3>
+    <p>第二場、也是更猛烈的一場膨脹，是<strong>第二次世界大戰（World War II）</strong>。當美國在一九四一年捲入全球戰爭，整個國家被動員起來，而動員的神經中樞，就在華盛頓。軍事採購、戰時生產、情報、後勤、外交、宣傳——千頭萬緒，全都需要龐大的官僚體系來指揮。公務員如潮水般湧入這座城：打字員、文書、分析師、軍官、工程師，從全國各地擠進華盛頓尋找戰時的工作。住房嚴重短缺，人們合租、分租、輪班睡同一張床；政府甚至在國家廣場那片神聖的軸線旁，匆匆蓋起一排排臨時的木造辦公樓，醜陋而擁擠，一用就用了幾十年。</p>
+    <p>戰爭最具象的紀念碑，矗立在波多馬克河對岸。一九四一到一九四三年間，在維吉尼亞州的阿靈頓（Arlington），美國陸軍以驚人的速度，建起了一座五邊形的巨型辦公建築——<strong>五角大廈（the Pentagon）</strong>。它在落成時，是當時世界上最大的辦公建築：五層、五個同心環、五條放射狀走廊，據說裡頭任意兩點之間步行不超過七分鐘，卻容納了數以萬計的人員。這座龐然大物本身，就是一則隱喻：美國的軍事與行政機器，已經大到需要一棟自成一座小城的建築來盛裝。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1930s</div><div class="lbl">新政：聯邦機構爆炸性增生</div></div>
+      <div class="stat"><div class="num">1941–43</div><div class="lbl">五角大廈興建於阿靈頓</div></div>
+      <div class="stat"><div class="num">世界最大</div><div class="lbl">五角大廈落成時的辦公建築規模</div></div>
+      <div class="stat"><div class="num">7 分鐘</div><div class="lbl">五角大廈內任兩點據稱的最長步行時間</div></div>
+    </div>
+
+    <h3>一台永不關機的機器</h3>
+    <p>戰爭結束了，但那台被戰爭吹大的政府機器，卻沒有隨之縮回去。冷戰（the Cold War）緊接而來，美國從此進入一種「永遠處於準備狀態」的姿態——一套常設性的<strong>國家安全機器（national security apparatus）</strong>就此固定下來：龐大的國防部、新成立的中央情報機構、層層疊疊的軍方與外交體系，全都常駐華盛頓，再也沒有退場。二十世紀中葉以後的聯邦政府，不再是一個會在和平時期收縮的臨時巨人，而是一台永不關機的常設機器。而供養、操作、環繞這台機器的人與行業，就構成了華盛頓真正的經濟。</p>
+    <p>於是，圍著政府這個核心，一圈又一圈的衛星產業自然生長出來。最有名的，是那條後來成為「遊說」代名詞的<strong>K 街（K Street）</strong>——成排的律師事務所與遊說公司聚集於此，它們存在的全部理由，就是替企業、行業、外國政府向政府施加影響、爭取利益。還有星羅棋布的<strong>智庫（think tanks）</strong>，生產政策報告與思想；有靠政府合約維生的<strong>承包商（contractors）</strong>軍團，從軍火製造到資訊系統，從顧問諮詢到後勤外包，圍著聯邦預算這口井打轉。華盛頓不開採石油，但它開採的是<em>影響力</em>;它不生產鋼鐵，但它生產的是<em>政策</em>。這些東西看不見、摸不著，卻撐起了一整座城的生計。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 公司城：當一座城唯一的產業是「治理」</span>
+      <p>所謂「公司城（company town）」，原指那種完全圍繞單一企業而生的市鎮——一座礦山旁的礦工村，一間紡織廠旁的工人鎮。在那裡，住房是公司的，商店是公司的，連工資都常以公司發行的代幣支付；這家公司一旦垮了，整座城也跟著消亡。公司城的命運，被綁死在它所圍繞的那一樣產業上。</p>
+      <p>華盛頓是這個概念最極端、也最特殊的版本。它確實是一座公司城——但它圍繞的那家「公司」，不是任何私人企業，而是<strong>美國政府本身</strong>。這帶來幾個別處看不到的特質：其一，它的「產業」永遠不會倒閉，因為國家不會輕易消失，這讓華盛頓擁有一種其他公司城求之不得的穩定；其二，它生產的不是實物，而是政策、決定與影響力，於是這座城的繁榮，繫於聯邦預算與權力的流向，而非任何市場的供需；其三，它的人口是高度流動的——隨著每一次政權更迭，成千上萬的政務官員、幕僚與隨之而來的說客，會像潮汐一樣湧入又退去。<em>當一座城唯一的產業是「治理」，整座城的氣質，就被「為同一件事服務」這件事徹底塑形了。</em></p>
+    </div>
+
+    <h3>一座為運轉國家而存在的城</h3>
+    <p>這個獨特的經濟基礎，解釋了華盛頓身上那種別的城市沒有的氣質。這裡的人，很少談論自己「做什麼產品」，他們談論的是自己「在哪個機構、為哪位議員、替哪個部門做事」;這裡的對話，繞著法案、預算、聽證會、選舉週期打轉；這裡的繁忙與蕭條，不隨景氣循環起伏，而隨政治日程的潮汐漲落——國會開議時車水馬龍，政權交接時人事翻盤。整座城像一台精密的儀器，所有零件——官僚、說客、記者、智庫、承包商——都朝著同一個目的咬合運轉：讓這個國家被治理下去。</p>
+    <p>這也是華盛頓最深的矛盾與魅力所在。它是全世界權力最集中的城市之一，卻不生產任何你能拿在手裡的東西；它富裕、體面、教育程度極高，卻建立在一個看不見的基礎上——它的全部產出，是決定別處幾億人如何生活的<em>規則與選擇</em>。當你在這座城裡走動，你看不到煙囪、看不到生產線、看不到貨輪；你看到的，是一棟棟石造的辦公樓，裡頭坐著一群人，他們生產的東西叫做「治理」。而正是這一樣看不見的產業，撐起了這座為安放權力而生、也只為運轉這個國家而存在的——終極的公司城。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 圍著一家永不倒閉的公司</span>
+      <p>華盛頓給我們的一課是：<strong>一座城的命運，由它圍繞的那樣核心產業決定；而華盛頓圍繞的，是一門永遠不會倒閉的產業——治理。</strong>礦會挖空，廠會關門，市場會崩盤，唯獨「這個國家需要被治理」這件事不會消失。這讓華盛頓擁有一種近乎弔詭的穩定：它不生產任何實物，卻比任何工業城都更難衰亡。</p>
+      <p>這背後是一個被低估的真理：<em>最持久的經濟基礎，未必是看得見的鋼鐵與石油，有時恰恰是那些看不見的東西——規則、決定、影響力。</em>華盛頓不開採資源，它開採的是權力；它不出口貨物，它出口的是政策。一座完全建立在「治理」之上的城，提醒著我們：在現代世界裡，最稀缺、也最值錢的資源，往往不是埋在地下的，而是握在手裡的——那就是決定別人怎麼活的權力。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch8" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第八章 · The Nation's Stage</span>
+    <h2 class="act-title">國家的廣場</h2>
+    <p class="act-sub">The March on Washington</p>
+    <div class="ornament">✊ ✦ 🏛</div>
+  </div>
+  <div class="prose">
+    <p>一座為安放權力而生的城，最動人的時刻，往往不是權力運行的時刻，而是無權者走進來、站在權力面前，要求被聽見的時刻。華盛頓特區從一開始就被設計成一座屬於全國、卻不屬於任何一州的城——正因如此，它的中軸線、它的草坪、它那條從國會山一路鋪到河邊的長方形綠地，後來竟成了全美國人共有的一塊廣場。人們替它取了一個名字：<strong>國家廣場（the National Mall）</strong>。它是一座城的中心，更是一個國家的客廳；而每隔一段時間，就會有一群人從各地趕來，把這塊草坪當成向整個國家發聲的舞台。</p>
+
+    <h3>一塊屬於所有人的草坪</h3>
+    <p>要理解國家廣場的政治份量，得先理解它特殊的法律身分。它不屬於馬里蘭、不屬於維吉尼亞、也不屬於任何一個地方政府——它是聯邦的土地，是全體國民的公共空間。這個「不屬於任何一州」的特質，本是為了讓首都超然於地方利益之上；可副作用是，它讓這塊地天然地成了所有美國人都覺得「我也有份」的地方。你若對地方政府不滿，會去你那州的議會抗議；但你若對整個國家、對聯邦政府、對美國這個理念本身有話要說，你會來這裡。</p>
+    <p>更關鍵的是，這塊草坪兩端與兩側站著的，都是這個國家最神聖的符號：東邊是<strong>國會大廈（the Capitol）</strong>那座白色穹頂，象徵立法的權力與人民的代表；西邊是<strong>林肯紀念堂（the Lincoln Memorial）</strong>，端坐著那位在內戰中保住聯邦、簽下解放宣言的總統；中間矗立著華盛頓紀念碑那根方尖石塔。當一個人站在這塊草坪上開口，他不只是在對著一群聽眾說話——他是站在這個國家自我宣稱的全部理想之間說話。背景裡的每一座建築，都在替他的話加上重量，也在替他的話設下標準：你們聲稱相信的這些，做到了嗎？</p>
+    <div class="pull"><p>國家廣場是這座城最深的悖論：它為安放權力而生，卻成了無權者直面權力的地方。正因為這塊地屬於所有人、又緊鄰權力的核心，它才成了一面鏡子——讓國家在自己最神聖的符號面前，照見自己離理想還有多遠。</p></div>
+
+    <h3>請願者的長隊</h3>
+    <p>在二十世紀的進程裡，這塊草坪一次又一次被不同的隊伍佔據。每一支隊伍背後，都是一群覺得自己被國家辜負、卻仍相信這個國家可能兌現承諾的人。</p>
+    <p>一九一三年三月，威爾遜總統就職的前一天，數以千計的婦女走上賓州大道，舉行<strong>婦女參政遊行（the Woman Suffrage Procession）</strong>。她們要求一件在今天看來理所當然、在當時卻被視為激進的事：投票權。遊行隊伍沿途遭到圍堵、辱罵甚至推搡，場面一度失控，警方未能有效維持秩序——而這場混亂反而把婦女參政的議題推上了全國頭條。七年之後，憲法第十九修正案通過，美國女性贏得了投票權。她們選擇在首都遊行，正因為投票權是一個全國性的問題，而能回答這個問題的權力，就坐落在這條街的盡頭。</p>
+    <p>一九三二年夏天，草坪上來了一支更悲愴的隊伍。那是<strong>補償金大軍（the Bonus Army）</strong>——約一萬七千名第一次世界大戰的退伍軍人，帶著妻兒，從全國各地湧入華盛頓。大蕭條把他們打垮了，他們要求政府提前發放原定一九四五年才到期的服役補償金。他們在城南的安納科斯蒂亞河畔搭起簡陋的窩棚營地，一住就是好幾週，沉默而固執地守在權力的門口。國會最終否決了提前發放的法案。那年七月底，聯邦政府出動現役軍隊清場——騎兵、步兵、坦克開進了首都的街道，催淚瓦斯瀰漫在這群曾為國家上戰場的人頭上，營地被付之一炬。一群替國家流過血的人，被國家的軍隊趕出了國家的廣場。這一幕在全國引發震動，也成了胡佛政府聲望崩塌的標記之一。</p>
+    <div class="warn">
+      <span class="warn-tag">陰影 · 被驅離的退伍軍人</span>
+      <p>補償金大軍事件，是國家廣場史上最刺痛人心的一頁。那些紮營請願的人，不是暴民，是曾在歐洲戰壕裡為這個國家作戰的老兵；他們要求的，也不是施捨，而是政府早已承諾、只是希望提早兌現的補償。當催淚瓦斯與火光升起，被燒毀的不只是窩棚，還有一個樸素的信念——以為只要你曾為這個國家付出，這個國家就會聽你說話。它提醒我們：國家廣場固然是請願者的舞台，但這舞台從不保證請願會被善待。權力可以聆聽，也可以驅離。</p>
+    </div>
+
+    <h3>當歌聲取代了演說</h3>
+    <p>一九三九年復活節，林肯紀念堂前發生了一件不靠喊話、只靠歌聲的事。那一年，著名的黑人女低音歌唱家<strong>瑪麗安·安德森（Marian Anderson）</strong>原本要在華盛頓的<strong>憲法廳（Constitution Hall）</strong>登台演唱，卻因為膚色被拒絕——那座廳由「美國革命之女（the Daughters of the American Revolution）」管理，當時的規定不允許黑人藝術家在此演出。消息傳出，第一夫人埃莉諾·羅斯福（Eleanor Roosevelt）憤而退出該組織，並協助安排了一個遠比憲法廳更大的舞台：林肯紀念堂前的台階。</p>
+    <p>復活節那天，約七萬五千人聚集在紀念堂前的草坪與倒影池兩側，還有更多人守在收音機旁。安德森站在林肯坐像之下開口，第一首唱的是〈我的國家，是你〉（"My Country, 'Tis of Thee"）。那是一首歌頌「自由之地」的歌；而由一個剛剛被自由之地拒於門外的黑人女性，站在解放黑奴的總統像前唱出來，每一個字都成了沉默而尖銳的詰問。她沒有演說，沒有口號，只有歌聲——可那一刻，林肯紀念堂第一次清清楚楚地宣告了自己未來的角色：它將不只是紀念一位死去的總統，它將成為這個國家未竟的種族正義不斷被召喚、被檢驗的聖壇。</p>
+
+    <h3>那個面對國會的夢</h3>
+    <p>二十四年後，這座聖壇迎來了它最著名的一天。一九六三年八月二十八日，<strong>「為工作與自由向華盛頓進軍（the March on Washington for Jobs and Freedom）」</strong>把約二十五萬人帶到了國家廣場——這是當時美國史上規模最大的政治集會之一，黑人與白人並肩而行，從華盛頓紀念碑一路走到林肯紀念堂前。他們要求的，是就業、是公民權利、是法律之前的真正平等。</p>
+    <p>那天午後，最後一位上台的講者，是當時三十四歲的<strong>馬丁·路德·金恩（Martin Luther King Jr.）</strong>。他站在林肯坐像的台階上，面對著那片黑壓壓的人海，而人海的盡頭，正是國會大廈的白色穹頂。他講到後半段，把預先寫好的講稿放到一邊，順著心裡那股勢頭講了下去——他講起一個夢：一個關於這個國家有朝一日真正按它建國信條生活的夢，一個讓他的孩子們不再憑膚色、而是憑品格被評斷的夢。〈我有一個夢（"I Have a Dream"）〉這篇演說，從此成了二十世紀美國最被銘記的聲音之一。</p>
+    <p>值得停下來想一想金恩當時站立的位置所蘊含的意義。他選在林肯像前，不是偶然——他是刻意把自己的訴求，接到一百年前那紙解放宣言的延長線上。他在演說裡明白指出：林肯簽署解放宣言已過了一百年，黑人卻仍未獲得真正的自由。他站在簽署者的石像之下，面向著立法者所在的國會方向，等於是在當著這個國家全部理想符號的面，遞上一張遲到了一個世紀的帳單。他用的不是抽象的怨懟，而是這個國家自己寫進《獨立宣言》裡的那句話——人人生而平等。他不是在攻擊美國的理想，他是在要求美國把自己的理想當真。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 用一座城的理想，叩問這座城</span>
+      <p>金恩演說的力量，有一半來自他站立的<strong>地點</strong>。國家廣場上的每一座紀念物，都是這個國家替自己豎立的「理想的證物」——林肯像代表「保住聯邦、解放奴隸」，國會穹頂代表「人民自治」，而整塊草坪則自稱屬於「全體人民」。當一個無權者站在這些證物正中間說話，他便獲得了一種獨特的修辭武器：他不必從外部攻擊這個國家，他只需要指著這些證物說，「你們自己立的標準，做到了嗎？」</p>
+      <p>這就是為什麼華盛頓「為權力而生」會反過來成就它最動人的反面。正因為這座城把美國的全部理想都凝固成了大理石，它也就替每一個受委屈的人準備好了現成的論據。集會者向權力請願時，依靠的不是自己的力量，而是這座城自身的承諾。廣場上的每一次集會，都是這座城被它自己豎立的理想，當面驗收一次。</p>
+    </div>
+
+    <h3>一塊永遠在被檢驗的草坪</h3>
+    <p>一九六三年之後，國家廣場成了美國公共生活裡一個固定的劇場。反越戰的人群來過，數十萬人擠滿草坪要求結束戰爭；要求保障女性權利、移工權利、同志權利的隊伍來過；二十世紀末，名為「百萬黑人男子大遊行（the Million Man March）」的集會也來過。每一次，主辦者選擇這裡的理由都一樣：因為這塊草坪不屬於任何地方，它屬於全國；因為站在這裡說話，背景裡就站著整個國家的良心。</p>
+    <p>於是，這座為了把權力安放妥當而精心設計的城，最終長出了一個它的規劃者未必預料到的功能：它成了民主的儀式空間。在這裡，沒有議席、沒有選票、沒有遊說資金的人，也能用雙腳、用人數、用聲音，短暫地把自己擺到和權力同樣高的位置上。權力坐在國會山與白宮裡，請願者站在草坪上——兩者之間，只隔著一片開闊的、誰都能走進來的綠地。這片綠地，是這座城獻給民主的最大方的禮物。</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1913</div><div class="tl-text">婦女參政遊行：數以千計的女性走上賓州大道要求投票權，沿途遭圍堵，反把議題推上全國頭條。</div></div>
+      <div class="tl-item"><div class="tl-year">1932</div><div class="tl-text">補償金大軍：約一萬七千名一戰老兵紮營請願，遭聯邦軍隊以坦克與催淚瓦斯驅離、營地焚毀。</div></div>
+      <div class="tl-item"><div class="tl-year">1939</div><div class="tl-text">瑪麗安·安德森因膚色被憲法廳拒絕，改在林肯紀念堂前獻唱，約七萬五千人聆聽。</div></div>
+      <div class="tl-item"><div class="tl-year">1963</div><div class="tl-text">向華盛頓進軍：約二十五萬人聚集，金恩在林肯像前發表〈我有一個夢〉。</div></div>
+      <div class="tl-item"><div class="tl-year">此後</div><div class="tl-text">反越戰、女權、移工權利、同志權利……一支又一支隊伍把這塊草坪當成向全國發聲的舞台。</div></div>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 把理想立成石頭，就得準備被它檢驗</span>
+      <p>華盛頓的締造者把這個國家的理想，一座一座地砌成了大理石——他們以為那是在替權力築一個莊嚴的居所。他們或許沒料到，這些石頭日後會被無權者借走：當一個人站在林肯像前，他借用的正是這座城自己豎立的全部承諾。<strong>把理想刻成石頭的代價，是你從此再也無法躲開它的目光。</strong></p>
+      <p>這正是國家廣場最深的教訓：一個聲稱相信平等與自由的國家，等於是親手替每一個受委屈的人，預先寫好了控訴的劇本。它不能再說「這不關我的事」，因為它的事，就刻在那片草坪兩端的石頭上。於是這座為安放權力而生的城，注定要在它自己最神聖的舞台上，被自己的理想一次又一次當面盤問——而這份永遠無法被打發的盤問，恰恰是它仍然配得上那些理想的證明。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch9" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第九章 · 1968 &amp; Chocolate City</span>
+    <h2 class="act-title">一九六八與「巧克力城」</h2>
+    <p class="act-sub">Riots, Go-Go &amp; a Black Majority</p>
+    <div class="ornament">🔥 ✦ 🎶</div>
+  </div>
+  <div class="prose">
+    <p>從林肯紀念堂往北走不到兩英里，是一個與大理石廣場截然不同的世界。那裡沒有穹頂，沒有方尖碑，沒有從各地趕來的請願隊伍——那裡是住人的地方。商店、教堂、理髮店、爵士俱樂部、出租公寓沿著街排開，街上走著的，是世世代代住在這座城裡、卻幾乎從不出現在它官方形象裡的人。一九六三年金恩在廣場那頭講完那個夢，五年之後，正是在這片住人的街區，那個夢被一聲槍響擊碎了。</p>
+
+    <h3>四月那場大火</h3>
+    <p>一九六八年四月四日，馬丁·路德·金恩在田納西州孟菲斯被刺殺。消息傳到華盛頓的傍晚，悲痛迅速在黑人社區裡發酵成憤怒，而憤怒又找不到任何能安放它的出口。當晚起，沿著第十四街、U 街、第七街這幾條黑人商業走廊，動亂爆發了。窗戶被砸碎，店鋪被搶、被點燃，火光接連幾夜映紅了首都的天空。聯邦政府一度調動上萬名軍人與國民兵進駐華盛頓——機關槍架在了國會大廈的台階上，士兵在白宮草坪外巡邏。動亂持續數日，造成多人死亡、上千人受傷、數千人被捕，大片街區化為焦土。</p>
+    <p>必須以審慎與莊重來理解這場動亂的根源。它不是無緣無故的破壞。金恩之死，只是引爆點；真正的火藥，是長年積累的結構性絕望——被隔離的學校，被劃為「高風險」而拒貸的銀行紅線，找不到的工作，付不出的房租，以及一種日復一日、無從申訴的被忽視感。當一個社區被體制性地關在機會的門外太久，又眼睜睜看著那個始終主張「以非暴力爭取尊嚴」的人被槍殺，壓抑已久的東西便一齊崩開了。動亂中燒掉的，是這個社區自己的商店、自己的鄰里、自己的家當——這正是這類事件最深的悲劇：絕望往往最先吞噬的，是絕望者自己腳下的土地。</p>
+    <div class="warn">
+      <span class="warn-tag">陰影 · 一九六八，被燒掉的街區</span>
+      <p>第十四街與 U 街一帶，曾是華盛頓黑人社區引以為傲的心臟——「黑色百老匯」，爵士樂手、商家、知識分子聚集之地。一九六八年的大火，把這份繁華燒成了瓦礫。更殘酷的是事後：保險公司拒賠或撤離，商家不敢重建，銀行不肯放貸，這些街區陷入了長達二、三十年的凋敝。空置的店面、被釘上木板的窗、坍塌的牆，一直延續到上世紀末。一場幾天的動亂，留下的卻是兩代人的傷口。它清楚地說明了一件事：當一座城的一部分被它的其他部分長期遺忘，那份遺忘本身，遲早會以某種形式回過頭來，把整座城都灼傷。</p>
+    </div>
+
+    <h3>「巧克力城」</h3>
+    <p>要理解這場動亂為何發生在這座城，得先看清一個外人常常忽略的事實：到了二十世紀中葉，華盛頓早已是一座黑人佔多數的城。它是美國第一座黑人成為人口多數的大城市。這背後，是「大遷徙（the Great Migration）」——南方的黑人為了逃離種族隔離、尋找工作與尊嚴，大批北上與遷入各大城市，華盛頓正是重要的落腳地之一。而與此同時，戰後的白人家庭則大量遷往馬里蘭與維吉尼亞的郊區——這場被稱為「白人外移（white flight）」的人口流動，在一九六八年的動亂之後更加速了。城裡走的多是白人，留下的多是黑人，城市的膚色版圖就此被重新畫定。</p>
+    <p>一九七五年，放克樂團 Parliament 發行了一首歌，把這座城一個流傳已久的暱稱唱進了全國的耳朵裡——<strong>「巧克力城（Chocolate City）」</strong>。歌裡帶著一種驕傲的反諷：白宮（the White House）固然是白的，但圍著它的這座城，是巧克力色的。這個名字之所以動人，正因為它把一段沉重的人口史，轉化成了一種社區的自我認同與尊嚴。住在這裡的黑人居民，用這個名字宣告：這座城不只是聯邦政府的辦公地點，它也是我們的家，是一個有自己的文化、自己的聲音、自己的脈搏的黑人之城。</p>
+
+    <h3>Go-Go：一座城自己的節拍</h3>
+    <p>沒有什麼比音樂更能證明一座城有自己的靈魂。當紐約孕育嘻哈、底特律孕育摩城之時，華盛頓孕育出的，是一種只屬於它、別處幾乎聽不到的本土黑人音樂——<strong>Go-Go</strong>。</p>
+    <p>Go-Go 的核心，是一種綿延不斷、永不停歇的打擊樂節拍。傳統的歌一首一首之間有空隙，Go-Go 卻把整場演出連成一條不間斷的律動河流——鼓、康加鼓、牛鈴、銅鈸交織出一種叫人停不下腳的節奏，台上的樂手還會不停地與台下的觀眾呼應喊話，把整個現場捲成一個共同的、流動的儀式。它的精神領袖，是被尊為<strong>「Go-Go 教父」的查克·布朗（Chuck Brown）</strong>。Go-Go 從未像嘻哈那樣征服全美，它幾乎只活在華盛頓本地的派對、街角與俱樂部裡——但這恰恰是它的意義所在：它是一種不為外人準備、純粹屬於這座城自己人的聲音。在一座連投票權都長期不完整、連自我治理都受制於國會的城裡，Go-Go 是居民們牢牢握在手裡、誰也奪不走的東西——這是我們的節拍，這是我們的城。</p>
+    <div class="pull"><p>大理石的華盛頓有國歌、有閱兵、有莊嚴的儀式；街區的華盛頓有 Go-Go。一個屬於國家，一個屬於居民。同一座城，兩種完全不同的聲音，幾乎從不在同一個房間裡響起。</p></div>
+
+    <h3>馬里恩·巴里與一座城的自我治理</h3>
+    <p>「巧克力城」也產生了它自己的政治代表。其中最具標誌性、也最具爭議的，是市長<strong>馬里恩·巴里（Marion Barry）</strong>。他出身南方的民權運動，年輕時是學生非暴力協調委員會的活躍分子；當華盛頓在一九七三年終於從國會手中爭得部分自治權、可以選舉自己的市長與議會之後，巴里在這座新獲自治的城裡崛起，多次當選市長，成為「巧克力城」政治力量的化身。對許多黑人居民而言，他象徵著一件前所未有的事：這座城，終於開始由它自己的人來治理。</p>
+    <p>巴里的市長生涯，後來因一樁吸毒被捕的醜聞而蒙上巨大的爭議，他的施政也屢遭批評。但即便如此，他在許多本地黑人選民心中仍保有複雜而深厚的份量——他出獄後竟又一次當選市長，這件事本身，就道出了「兩座華盛頓」之間那道深刻的認知鴻溝：在城外的全國觀感裡，他或許是個墮落的政客；但在城內許多居民眼中，他始終是那個願意替被忽視的社區站出來、代表「我們」對抗「那個聯邦政府」的人。同一個人，在兩座城裡，是兩種截然不同的存在。</p>
+
+    <h3>兩座城，幾平方英里之內</h3>
+    <p>一九六八年那場大火，最深刻地揭開的，正是這道分裂：在同一片幾平方英里的土地上，並存著兩座幾乎互不相觸的華盛頓。</p>
+    <p>一座是大理石的、聯邦的華盛頓——它屬於全國，它的功能是安放權力、舉行儀式、向世界展示美國。來這裡的人，是國會議員、是官僚、是遊說者、是觀光客；他們看見穹頂、紀念碑、博物館，然後離開。另一座是街區的、在地的華盛頓——它以黑人為主體，住著清潔工、公車司機、教師、店主、樂手；它有自己的學校、教堂、音樂與市長，也有自己長年累積的貧窮、隔離與被忽視。這兩座城共用一個名字、一塊地，卻幾乎從不真正彼此看見：當權力在廣場那頭莊嚴運轉時，居民的城市可能正在燃燒、在凋敝、在無人聞問。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 當「全國功能」與「在地居民」彼此脫節</span>
+      <p>華盛頓的根本悖論，在於它同時要扮演兩個性質衝突的角色：它既是<strong>全國的首都</strong>——一個為了全體美國人、為了安放聯邦權力而存在的象徵空間；又是<strong>幾十萬人實際居住的家鄉</strong>——一座需要學校、垃圾車、警察、就業與尊嚴的真實城市。麻煩在於，這兩個角色的「主人」並不相同：首都的主人是全國，是國會；而家鄉的主人，理應是住在這裡的人。當這兩者的利益脫節，輸的幾乎總是後者。</p>
+      <p>這就是為什麼這座城會長期承受一種獨特的不公：它的居民曾長年沒有完整的投票權與自治權，他們的城市卻被全國當成自己的客廳隨意進出。聯邦看重的是廣場上的形象，居民需要的是街區裡的生活——而當資源、注意力與權力都向「全國功能」傾斜，「在地居民」便成了自己城市裡的隱形人。一九六八年的火，燒的正是這道脫節；而它至今仍是這座城最日常、也最少被外人看見的傷。</p>
+    </div>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座城，不該只是別人的象徵</span>
+      <p>一九六八年的灰燼裡藏著一個樸素卻常被忽略的真理：<strong>一座城首先是住人的地方，然後才是象徵什麼的地方。</strong>當華盛頓被全國當成權力的舞台、理想的櫥窗、自己的客廳時，人們太容易忘記，這幾平方英里之內，也住著幾十萬把這裡當成唯一家鄉的人——他們的孩子在這裡上學，他們的店面在這條街上，他們的音樂在這些街角響起。「巧克力城」這個名字，正是這群人對著那座大理石的城所做的溫柔而倔強的提醒：這裡也是我們的。</p>
+      <p>這道「聯邦 vs 在地」的裂縫，是這座為安放權力而生的城所付出的、最少被言說的代價。一座城若只被它的象徵意義所定義，它的居民便注定活在自己城市的陰影裡。而華盛頓真正的完整，不在於它的穹頂有多白、它的紀念碑有多高，而在於它能否有一天，既是全國的廣場，也是它自己居民——那些走在 U 街上、聽著 Go-Go、把這裡叫做家的人——真正當家作主的城。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch10" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十章 · No Representation</span>
+    <h2 class="act-title">無代表的納稅：民主之都的赤字</h2>
+    <p class="act-sub">The Democratic Deficit</p>
+    <div class="ornament">⚖ ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>把一輛車停在華盛頓的街邊，低頭看它的車牌，你會讀到一句奇怪的話：<strong>「無代表的納稅」（Taxation Without Representation）</strong>。這不是一句口號，也不是一張貼紙——這是這座城官方發行的車牌上，自二○○○年起印著的標準字樣。一座首都，把對自身政治地位的抗議，鑄在每一個居民的車尾，讓它在全國的高速公路上奔跑。這件事本身，就是這座城最深的弔詭：它是民主的首都，是全世界遊客來瞻仰自由與自治理念的聖地；它的中央矗立著國會，那是「人民的代議機構」的化身；可是住在這座城裡的七十餘萬人，自己卻在那座國會裡，沒有一張能表決的票。</p>
+    <p>這句印在車牌上的話，本身是一個歷史的回聲。兩百多年前，北美十三殖民地的人喊出「無代表，不納稅（No taxation without representation）」，把它當作反抗英國國王的道德旗幟——既然你要我繳稅，就得讓我在決定這些稅的議會裡有發言的份。美國因這句話而立國。而今天，這句立國的箴言，被它自己的首都居民撿了回來，掉轉槍口，對準了這個國家本身。</p>
+
+    <h3>一座沒有母州的城</h3>
+    <p>要理解這道赤字，得先回到憲法。當年的開國者刻意決定，國家的首都不該隸屬於任何一個州——否則那個州就會挾首都以自重，凌駕於其他州之上。於是憲法授權國會，對這片「不超過十英里見方」的特區，行使<strong>「在一切情形下的專屬立法權」（exclusive legislation in all cases whatsoever）</strong>。這句話寫得鏗鏘，當時也許還帶著理想——讓首都超然於地方利益之上。但它埋下了一個誰都沒太認真想過的後果：住在這裡的人，從此不屬於任何一個州。</p>
+    <p>而在美國的政治架構裡，<em>一個人的政治權利，幾乎全靠「州」這個身分來承載</em>。你的兩名聯邦參議員，代表的是你的州；你的眾議員，選自你的州；連總統，都是透過各州的選舉人團選出來的。一個不屬於任何州的人，等於從這套設計的縫隙裡掉了出去。當馬里蘭與維吉尼亞把土地割讓出來組成特區，住在那片土地上的人，也一併失去了他們原本作為馬里蘭人或維吉尼亞人所享有的全國代表權。他們沒有犯任何錯，只是恰好住在了那塊「為安放權力而清空」的地上。</p>
+    <div class="pull"><p>美國因「無代表，不納稅」而立國；兩百年後，它的首都把這句箴言鑄回車牌，對準了這個國家本身。</p></div>
+
+    <h3>被託管的城：從委員會到Home Rule</h3>
+    <p>長達近一個世紀，特區居民連自己的地方政府都無法選舉。十九世紀後期一場財政與治理的風波之後，國會乾脆收回了特區的自治權，改由<strong>總統指派的委員會（appointed commissioners）</strong>來治理這座城。也就是說，從一八七○年代直到一九七○年代，住在美國首都的人，既選不出能代表自己上國會的人，也選不出管理自己街道、學校、警察的市長與議會——管他們的人，是別人指派來的。</p>
+    <p>第一道裂縫在一九六一年才出現。那一年通過的<strong>憲法第二十三修正案（the Twenty-third Amendment）</strong>，第一次給了特區在總統大選中的選舉人票——數目上限為「不多於人口最少的州」，也就是三張。這意味著，從一九六四年的大選起，華盛頓的居民終於能在選總統時投下一票。這是遲來的一步，卻也只是一步：它解決了「選總統」，卻完全沒碰「在國會裡有沒有人代表你」這個更根本的問題。</p>
+    <p>真正讓這座城拿回一點自治的，是一九七三年的<strong>《自治法》（the Home Rule Act）</strong>。它讓特區自一九七五年起，可以選出自己的<strong>市長（mayor）</strong>與<strong>市議會（D.C. Council）</strong>。對一座被外人託管了一百年的城來說，這是歷史性的一刻——華盛頓人終於能選出管理自己城市的人。但這份自治，從一開始就被打了折扣：國會在《自治法》裡為自己保留了一道後門。它可以<em>否決特區議會通過的任何法律</em>，可以審查並動用特區的預算，甚至可以直接立法管轄這座城的內部事務。市長與議會做出的決定，在國會眼裡，永遠只是「可被推翻的提議」。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 為什麼民主的首都，反而最不民主</span>
+      <p>這聽起來像個悖論，其實有它冷酷的內在邏輯。一個國家的首都，是它把「主權」與「權力」供奉起來的地方；而為了讓這份權力<em>超然</em>，開國者刻意把首都從地方利益的版圖裡抽離出來，不讓它隸屬任何一州。問題在於，美國的政治權利是<strong>透過「州」來分配</strong>的——你越是把一座城從「州」的體系裡抽離以保其超然，就越是把住在那裡的人，從權利的體系裡也一併抽離了。</p>
+      <p>於是出現了這個刺眼的結構：權力被供奉在這座城的正中央，<em>但供奉它的祭壇腳下那群人，恰恰是被排除在權力之外的</em>。首都的「超然」，是用居民的「失語」換來的。理念上最該示範民主的地方，制度上卻成了民主到不了的盲區。這不是哪個人的惡意，而是一道沒人願意動手修補的設計縫隙——因為要修它，就得在已經穩定的權力分配格局裡，硬塞進新的票數，而那從來不是一件政治上輕鬆的事。</p>
+    </div>
+
+    <h3>一名不能表決的代表</h3>
+    <p>今天，華盛頓特區在眾議院有一名<strong>代表（Delegate）</strong>。她可以在委員會裡發言、提案、投票，可以在議事廳裡慷慨陳詞，但當法案進入全院最後表決的那一刻——也就是真正算數的那一刻——她不能投票。她是一個被允許參加全部排練、卻不准在正式演出時上台的演員。至於參議院，特區連一個席位都沒有。</p>
+    <p>把這件事放到數字裡，它的荒謬就更清楚了。華盛頓特區有七十餘萬居民，這個數字<em>多於懷俄明州（Wyoming），也多於佛蒙特州（Vermont）</em>。那兩個州各自在參議院有兩名參議員、在眾議院有自己的眾議員，他們的居民在國會裡有完整的、能表決的代表權。而人口更多的華盛頓，卻一票都沒有。住在這裡的人照樣繳聯邦所得稅——而且論人均，他們繳的聯邦稅相當高——照樣在戰時被徵召、照樣受聯邦法律約束，卻在制定這些稅、這些法律的那座國會裡，沒有一張屬於自己的選票。這就是車牌上那句話的全部分量。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">70萬+</div><div class="lbl">特區居民（多於懷俄明、佛蒙特等州）</div></div>
+      <div class="stat"><div class="num">0</div><div class="lbl">國會中能表決的席位</div></div>
+      <div class="stat"><div class="num">3</div><div class="lbl">總統選舉人票（1961年第23修正案）</div></div>
+      <div class="stat"><div class="num">1973</div><div class="lbl">《自治法》給予受限的民選市長與議會</div></div>
+    </div>
+
+    <h3>被剝奪選票的，恰是黑人佔多數的城</h3>
+    <p>這道民主赤字，還有一層更難以迴避的色彩。在二十世紀的大半時間裡，被剝奪國會選票的這座城，<strong>恰恰是一座黑人佔多數的城</strong>——它有「巧克力城（Chocolate City）」之名。於是「無代表的納稅」這件事，就不只是一個抽象的憲法技術問題，它在歷史的某些時刻，與「誰的聲音被聽見、誰的聲音被消音」的種族議題，緊緊纏繞在一起。</p>
+    <p>這裡需要分寸：建州與投票權的爭論，從來牽涉複雜的政治計算，各方有各方站得住腳的理由，本篇無意替任何一方下判斷。但有一個事實是中立而清楚的——當一座以黑人為主體的城，在這個國家最神聖的代議機構裡長期沒有一張能表決的票，這道赤字所承載的，就不只是制度的縫隙，還有這座城居民世代積累的、關於「被看見」的渴望與委屈。它讓「華盛頓人是不是二等公民」這個問題，變得格外尖銳。</p>
+    <div class="warn">
+      <span class="warn-tag">陰影 · 失語的城</span>
+      <p>一座七十餘萬人的城，繳著全額的聯邦稅、服著全部的聯邦義務，卻在決定這些稅與義務的國會裡無票可投——而它的市議會通過的法律，還隨時可能被一群並非由它選出的議員推翻。對住在這裡的人而言，這意味著一種日常的、結構性的失語：你可以喊，可以遊行，可以把抗議印上車牌，但在最後算票的那張表上，永遠找不到你的名字。這份失語，是這座「民主之都」獻給自己居民的，最沉默也最刺眼的禮物。</p>
+    </div>
+
+    <h3>「華盛頓·道格拉斯邦」：建州的夢</h3>
+    <p>於是有了建州（statehood）運動。主張者的邏輯很簡單：既然特區居民失去代表權，是因為他們不屬於任何州，那就讓這座城自己成為一個州。提案中的新州名為<strong>「華盛頓·道格拉斯邦」（the State of Washington, Douglass Commonwealth）</strong>——這個名字裡藏著巧思：縮寫仍是「D.C.」，但那個「D」不再指向哥倫比亞（Columbia），而是指向<strong>弗雷德里克·道格拉斯（Frederick Douglass）</strong>，那位從奴隸成為廢奴領袖、後半生就住在這座城裡的偉大黑人。把首都建成一個以道格拉斯命名的州，本身就是對這座城種族歷史的一次莊重致意。</p>
+    <p>這場運動在二十一世紀屢屢叩門：特區居民曾以壓倒性多數在公投中支持建州，眾議院也曾通過相關法案。但路依舊艱難——建州需要跨越國會兩院的重重關卡，而它所牽動的全國政治版圖之爭，使它每每停步。本篇不評斷它是否應當成功，只記下這個事實：在這座城裡，有一群人正試圖用最體制內、最合乎程序的方式，去補上那道刻在它出生證明上的赤字。</p>
+    <p>無論建州最終是否到來，這場爭論本身已經照亮了全篇的核心矛盾。美國把「民主」這座神龕供奉在這座城的正中央，年復一年迎接著從全世界趕來瞻仰自由理念的人；卻長期吝於把這份民主，分給住在這神龕腳下、為它掃地、為它報稅、為它送葬的人。這道赤字，是理解這座城「居民身分」的鑰匙——它告訴我們，這裡的人不只是首都的背景板，他們是一群在自由的中心，仍在為自己那一票而努力的公民。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 中心的盲區</span>
+      <p>華盛頓教給我們一課，關於權力與權利的微妙錯位：<strong>一個國家把某個理念供奉得越高、越居中，並不保證最靠近那座神龕的人，就最能享有那個理念。</strong>民主被擺在這座城的正中央，但民主的果實，卻長期繞過了住在中央腳下的人。最神聖的中心，反而成了一塊盲區。</p>
+      <p>這道赤字之所以重要，不只因為它涉及七十萬人的選票，更因為它是一面鏡子，照出任何一套理念落地時都會遇到的考驗——你能不能把你最珍視的價值，<em>毫無折扣地分給離你最近、也最容易被你視為理所當然的那群人</em>。車牌上那句「無代表的納稅」，與其說是抗議，不如說是提問：一座為民主而生的城，要花多久，才肯把民主，也給自己的居民。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch11" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十一章 · The Imperial Capital</span>
+    <h2 class="act-title">帝國的首都：權力這門生意</h2>
+    <p class="act-sub">K Street and the Superpower</p>
+    <div class="ornament">🌐 ✦ 🏛</div>
+  </div>
+  <div class="prose">
+    <p>一九四五年的夏天，戰爭結束，世界換了一副骨架。歐洲的舊帝國在廢墟裡奄奄一息，而隔著兩座大洋、本土未受戰火的美國，幾乎是一夜之間，成了這個星球上最強的力量。它握有原子彈，握有全球最大的工業與黃金儲備，也握有重建世界秩序的主導權。權力的重心，從倫敦、從巴黎、從柏林，悄悄地移到了波多馬克河畔這座一百五十年前還是沼澤的城。<strong>華盛頓，從一國之都，變成了帝國的首都。</strong></p>
+    <p>這個轉變，從根本上改寫了這座城的命運。一座原本只為「治理一個國家」而設計的城，被迫膨脹去承載一件大得多的事——向全世界投射影響力。它要供養一支隨時部署到任何大洋的軍隊，要監聽地球另一端的電波，要決定遠方一場政變該不該發生，要管理一個由盟邦、基地、援助與條約織成的全球網絡。為此，這座城長出了一套前所未有的龐大機器。</p>
+
+    <h3>冷戰煉成的國家安全機器</h3>
+    <p>戰後的恐懼——對蘇聯、對核戰、對全球共產主義的恐懼——成了這座城最強的肥料。一系列以縮寫為名的龐然機構，在這幾十年裡或誕生、或暴漲：<strong>中央情報局（CIA）</strong>潛伏在波多馬克河對岸維吉尼亞州蘭利（Langley）的林子裡，把觸角伸向全球；<strong>聯邦調查局（FBI）</strong>在賓夕法尼亞大道上立起它那座灰沉的總部；<strong>國家安全局（NSA）</strong>在馬里蘭州的米德堡（Fort Meade），用無數天線與後來的超級電腦，編織起一張覆蓋全球的監聽之網；河對岸維吉尼亞那座五個邊的巨樓——<strong>五角大廈（the Pentagon）</strong>——成了地球上最大的辦公樓之一，是<strong>國防部（the Department of Defense）</strong>的心臟；而<strong>國務院（the State Department）</strong>則在霧谷（Foggy Bottom）一帶，操持著與全世界打交道的外交。</p>
+    <p>這些機構合起來，構成了一套巨大的、以「國家安全」為名的官僚機器。它僱用數以十萬計的人——分析師、特工、外交官、軍官、語言學家、密碼員——把這座城變成了一個情報與決策的神經中樞。冷戰結束後，這套機器並未縮小，反而在新世紀的反恐戰爭中再度擴張。<em>權力一旦長到帝國的尺寸，圍繞它的官僚體系，就有了自己生長的慣性。</em></p>
+    <div class="pull"><p>一座原為治理一個國家而建的城，被迫膨脹去承載一件大得多的事——向全世界投射影響力。</p></div>
+
+    <h3>K街：一門叫「接近權力」的生意</h3>
+    <p>但帝國首都最耐人尋味的，不是這些掛著國徽的政府大樓，而是緊貼著它們長出來的另一片生態——那是政府的<em>影子</em>，是權力的<em>市場</em>。當一座城每天決定著數以兆計美元的開支、無數產業的法規、全球的戰和走向，那麼，「能影響這些決定」這件事，本身就成了世上最值錢的商品之一。於是，圍繞著國會與白宮，長出了一整個產業，專門經營一樣東西：<strong>接近權力（access to power）</strong>。</p>
+    <p>這個產業有一條象徵性的街，叫<strong>K街（K Street）</strong>。它本是市中心一條普通的橫向大道，卻因聚集了眾多<strong>遊說公司（lobbying firms）</strong>而成了整個說客行業的代名詞。所謂遊說，就是受企業、行業協會、外國政府或各種利益團體之託，去說服國會議員與官員，讓法律與政策朝有利於委託人的方向傾斜。它合法、它公開、它登記在案，但它經營的，本質上是一種無形的貨幣：<em>誰認識誰、誰能在對的時刻、把對的話，遞到對的人耳邊</em>。</p>
+    <p>K街只是冰山一角。在這座城與它郊區之間那條叫<strong>環城公路（the Beltway）</strong>的高速公路圈內外，還盤踞著另外幾種「靠近權力」的行當：<strong>智庫（think tanks）</strong>生產政策報告與思想，為決策提供彈藥，也為各種立場提供學理的外衣；<strong>承包商（contractors）</strong>則承接政府外包出去的一切——從替軍方造武器、寫軟體，到替情報機構分析數據、替國務院在海外蓋使館。「環城公路內（inside the Beltway）」於是成了一句帶刺的俗語，指的是這座城自成一格、與普通美國人生活脫節的權力小圈子。</p>
+
+    <h3>艾森豪的警告：軍事—工業複合體</h3>
+    <p>對這套機器看得最透、也最早發出警告的，不是它的批評者，而是它的締造者之一。一九六一年，五星上將出身的總統<strong>艾森豪（Dwight D. Eisenhower）</strong>在卸任前的告別演說裡，留下了一個此後反覆被引用的詞：<strong>「軍事—工業複合體」（the military-industrial complex）</strong>。他提醒美國人，一支龐大的常備軍與一個龐大的軍火工業，已經結成了利益共生的整體；這個複合體擁有巨大的影響力，若不加警惕，它可能會反過來扭曲國家的政策，讓「需要更多武器」這件事，變成一種自我繁殖的內在動力。</p>
+    <p>艾森豪的洞見之所以歷久彌新，是因為他指出了一個結構性的真相：<em>當「防衛」變成一門有人靠它賺錢的生意，這門生意就會有持續做大的衝動</em>，而這衝動未必總與國家的真實利益一致。這個邏輯不只適用於軍火，它適用於一切「靠近權力即可變現」的行業——情報、諮詢、遊說、承包，全都共享同一套動力學。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 影響力產業：為什麼「靠近權力」本身就能變現</span>
+      <p>多數產業靠生產東西賺錢——你做出車、種出糧、寫出程式，賣給需要的人。但華盛頓孕育出一種特殊的產業，它不生產任何實物，它生產的是<strong>「接近權力的能力」</strong>。它的邏輯是這樣的：既然政府的一紙決定能讓某個行業多賺或少賺數十億，那麼，能讓這紙決定偏向自己的人，就值得被付給一筆相對而言微不足道的酬勞。對委託人來說，花幾百萬遊說、去影響一項牽涉幾十億的法規，是世上回報率最高的投資之一。</p>
+      <p>這就是為什麼「靠近權力」本身能變現——它不是賣產品，而是賣<em>一個結果發生的機率被改變</em>。而能改變這個機率的，往往是人脈、是資歷、是「曾在裡面待過、知道門怎麼開」。於是這座城最值錢的資產，不是廠房，不是專利，而是<strong>關係與經驗</strong>。一個產業若以此為生，它就會本能地把自己越做越大、把與權力的距離越貼越近——因為距離，就是它的全部商品。</p>
+    </div>
+
+    <h3>旋轉門：在權力與業界之間來回</h3>
+    <p>把這套生意黏合在一起的，是一道<strong>「旋轉門」（the revolving door）</strong>。它描繪的是這樣一種人員流動：一個人先在政府裡任職——當議員、當官員、當監管者、當將軍——累積起人脈、知識與聲望；卸任後，他走進那道旋轉門，到業界去——成為說客、顧問、承包商的高管、董事——把當年在公門裡攢下的關係與內情，變現成豐厚的薪酬。而業界的人，也可能反向走進這道門，去政府裡擔任要職，把產業的視角帶進決策。門一直在轉，人來人往。</p>
+    <p>旋轉門本身在法律上多有規範與冷卻期，本篇也無意把所有走過這道門的人一概而論——許多人帶著真誠的公共服務之心進出。但作為一種<em>結構</em>，它清楚地說明了這座城的運作邏輯：在華盛頓，<strong>公職與私利之間的那道牆，是半透的</strong>。權力與財富並非兩個世界，而是同一條河的上下游；今天替政府制定規則的人，明天可能就受僱於被規則約束的一方，反之亦然。這道門，是「接近權力即可變現」這門生意最具體的零件。</p>
+    <div class="warn">
+      <span class="warn-tag">陰影 · 半透的牆</span>
+      <p>旋轉門最幽微的代價，不在於某一次具體的利益輸送，而在於它如何悄悄地<em>重塑判斷</em>。當一個官員知道，自己對某個行業的態度，可能影響到他卸任後的去路；當一個議員身邊圍滿了曾是同僚、如今是說客的舊識——「公共利益」與「個人前程」之間的界線，就會在無數細微的時刻被輕輕模糊。沒有人需要被收買，只要那道牆夠半透，水自然會往低處流。這是帝國首都最難根治的慢性病。</p>
+    </div>
+
+    <h3>富甲全美的郊區</h3>
+    <p>這門「靠近權力」的生意，最終在地圖上留下了清晰的印記——它讓華盛頓的郊區，成了全美最富有的地帶之一。順著環城公路向外，<strong>維吉尼亞州北部（Northern Virginia）</strong>與<strong>馬里蘭州（Maryland）</strong>的那一圈郊縣——維吉尼亞的費爾法克斯（Fairfax）、勞登（Loudoun），馬里蘭的蒙哥馬利（Montgomery）等地——靠著承包商、顧問公司、遊說機構、律師事務所與高薪的聯邦僱員，累積起驚人的財富。在全美「家庭收入中位數」的排行榜上，這幾個圍著首都的郡，長年位居最前列。這些地方沒有礦、沒有港、沒有大工廠，它們唯一的「礦藏」，就是那座近在咫尺的政府。</p>
+    <p>這是一個值得停下來細看的景象：一座城唯一的核心產業是「治理」，可正是這唯一的產業，孕育出了全國數一數二富裕的都會圈。權力不生產麵包，但<em>接近權力，本身就能生產財富</em>。環城公路內外的這片繁榮，是帝國這門生意最直白的紅利。</p>
+    <p>而正是這份紅利，照出了這座城最刺眼的裂縫。把它放到前一章那座被燒過、被忽視的「巧克力城」旁邊，對照便鋒利得近乎殘忍：權力的紅利，流向了環城公路內的菁英郊區，卻流不過那條河——它到不了城東的街區，到不了那些繳著稅卻在國會無票可投的居民腳下。同一座城，同一份權力，在波多馬克河的這岸與那岸，竟長出了兩種截然不同的命運。帝國的財富向外溢出，灌滿了郊區的草坪與停車場，卻在自己的城裡，留下了一道未被填平的鴻溝。</p>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 權力的引力場</span>
+      <p>華盛頓的二十世紀告訴我們一件關於權力的物理學：<strong>權力一旦聚集到帝國的量級，它就會像一顆恆星，在周圍形成一個強大的引力場</strong>,把資本、人才、影響力與財富，統統吸到它的近旁。遊說、智庫、承包、情報——所有這些行業，都是這個引力場裡的衛星，靠著「離恆星夠近」而發光發熱。這不是哪個人的陰謀，而是大權力周圍必然的生態。</p>
+      <p>但這課還有更冷的下半句：<em>引力場的好處，只惠及那些已經夠靠近的人。</em>財富繞著環城公路內的菁英旋轉，卻未必能溢到河對岸、溢到城東。於是這座帝國的首都，同時供奉著美國最大的權力與最深的不均——權力的紅利向外流向郊區，卻流不過一條河。理解了這座城是一台「把接近權力變成財富」的機器，你就理解了它為什麼既是全美最富的都會圈之一，又在自己的城裡，藏著一道過不了河的鴻溝。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch12" class="act reveal">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Two Cities</span>
+    <h2 class="act-title">兩座城：結構解剖與陰影</h2>
+    <p class="act-sub">Federal Marble vs Local Neighborhoods</p>
+    <div class="ornament">⚖ ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>要理解華盛頓究竟是一座什麼樣的城，得先放下那些明信片上的影像——映著粼光的潮汐湖、白得發亮的圓頂、櫻花樹下舉著相機的人群——然後問一個更素樸的問題：<strong>這座城靠什麼活著？</strong>幾乎所有的城市都有一個能回答這個問題的答案。底特律靠汽車，匹茲堡靠鋼，休士頓靠石油，紐約靠錢與字句，洛杉磯靠影像與夢。把這個問題丟給華盛頓，答案卻奇異地空：它不挖礦、不煉鋼、不種棉、不造車，它甚至沒有一座真正意義上的港或一條為貨物而生的鐵路樞紐。它唯一的、也是壓倒性的產業，是<strong>治理（governance）</strong>——制定規則、執行規則、解釋規則，以及圍繞著規則而生的整套生態。這座城不生產實物，它生產的是政策、判決、預算、影響力，以及對這一切的爭奪。</p>
+
+    <h3>為治理而生的城：一份結構解剖</h3>
+    <p>這個獨特的本質，不是這座城的某個側面，而是它的全部基因——它決定了華盛頓的人口、它的天際線、它的街道，乃至住在裡頭的人能不能替自己作主。把這座城放上解剖台，你會看見一套與別處都不一樣的器官構造。</p>
+    <p>先看它的<em>人口</em>。一座靠治理活著的城，吸引來的是一種特殊的人群——他們隨著選舉而來、隨著政權更迭而走。每四年、每八年，一場大選便像潮汐一樣，把成千上萬的幕僚、任命官員、說客、智庫研究員、律師與記者沖進這座城，又在下一次潮汐裡把另一批人沖出去。這是一座<strong>高流動（high-turnover）</strong>的城，一座永遠有人在打包行李、永遠有新名片在印的城。對許多在此工作的人而言，華盛頓不是家，而是履歷上的一站、人生某個階段的駐地。他們住在這裡，心卻常常掛在別處——掛在自己真正的家鄉，那個會把票投給他們、決定他們去留的選區。</p>
+    <p>再看它的<em>天際線</em>。別的大城用摩天樓彼此競高，華盛頓卻有一條近乎神聖的規矩：建築高度受到嚴格限制，沒有任何一棟樓可以僭越於紀念性的核心之上。於是它沒有曼哈頓那種垂直的、由資本堆疊出的峽谷，而是一片<strong>水平鋪展、紀念性的大理石核心（monumental core）</strong>——寬闊的林蔭大道、低矮而莊嚴的石造殿堂、刻意留白的廣場與綠地。這套地景不是為了讓人居住而設計的，它是為了讓人<em>仰望</em>而設計的。它要傳達的訊息很清楚：在這裡，至高無上的不是金錢，而是這個共和國本身。</p>
+    <p>最後，也是最沉重的一項：它的<em>居民被剝奪了選票</em>。這是這座城最深的悖論，也是它結構裡最尖銳的一根刺。住在華盛頓的人，繳聯邦稅，上聯邦戰場，卻在很長的歲月裡，在國會裡沒有任何一張能投的票。一座為「全國的民主」而存在的城，自己卻被排除在那套民主之外。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一座沒有「在地經濟」根基的城，會長成什麼樣子</span>
+      <p>一般的城市，經濟與居民是長在一起的：工廠雇用本地人，本地人撐起商店、學校、教會，幾代人的命運與這座城的興衰綁在同一條船上。城的繁榮就是人的繁榮，城的衰敗就是人的失業。這種血肉相連，正是「市民性格」得以生成的土壤。</p>
+      <p>華盛頓的結構卻在根本處不同。它的核心產業——治理——並不<em>需要</em>在地居民才能運轉；它需要的是從全國各地不斷輪替而來的政治人才。聯邦這台機器，理論上可以在不認識任何一個本地家庭的情況下，照常運行。於是這座城從一開始就分裂成兩個並不真正交疊的系統：一個是<strong>為全國服務的聯邦機器</strong>，另一個是<strong>世世代代住在這裡、卻不被那台機器需要的在地社群</strong>。理解了這一層脫節，就理解了華盛頓全部矛盾的源頭——它的繁榮未必流向它的居民，它的權力也從不真正屬於它的街區。</p>
+    </div>
+
+    <h3>兩座城：大理石的，與街區的</h3>
+    <p>於是，在同一片地理座標上，疊著兩座幾乎互不相觸的城。</p>
+    <p>第一座，是<strong>聯邦的華盛頓</strong>——大理石的、屬於全國的、屬於遊客的那一座。它是國會山莊與白宮，是史密森尼博物館群與林肯紀念堂，是每年湧入的數以千萬計訪客眼中的「華盛頓」。它登上明信片、登上教科書、登上每一則國際新聞的背景板。對住在堪薩斯或加州的美國人而言，這座大理石之城才是「他們的」華盛頓——那是他們共同擁有的國家象徵，一個抽象的、不需要真正住進去的首都。</p>
+    <p>第二座，是<strong>在地的華盛頓</strong>——屬於居民、屬於街區的那一座。它是 U 街（U Street）上的老店、安那柯斯提亞（Anacostia）的家庭教會、學校放學時的街角、幾代人住下來的排屋。它有自己的方言、自己的食物、自己的音樂、自己的記憶。這座城裡的人不是來「為國家服務」的過客，他們就是這座城本身。然而正是這一座城，最常被那一座大理石之城所遮蔽——遊客看不見它，新聞拍不到它，全國的目光越過它，落在圓頂上。</p>
+    <div class="pull"><p>華盛頓裝著兩座城：一座是這個國家的門面，一座是它居民的家。當權力與資本的紅利在大理石那頭流轉，街區那頭的人，卻常常連自己這座城都快住不起了。</p></div>
+
+    <h3>「巧克力城」的褪色</h3>
+    <p>要看清這兩座城如何彼此拉扯，最清楚的一面鏡子，是過去半個世紀華盛頓人口結構的劇變。</p>
+    <p>二十世紀的大半時間裡，華盛頓有一個廣為人知的別名——<strong>「巧克力城」（Chocolate City）</strong>。這不是貶語，而是一種帶著自豪的自我命名。經過二十世紀的大遷徙，大量非裔美國人北上來到首都；到了一九七○年代，黑人居民約佔全市人口的七成，華盛頓因此成為美國黑人政治、文化與中產生活的一座重鎮。它孕育出自己的本土音樂、自己的市政領袖、自己一整套以黑人社群為主體的城市生活。對許多人而言，這座城的靈魂，正住在那些以黑人家庭為核心的街區裡。</p>
+    <p>然而進入二十一世紀，這幅圖景被一股巨大的力量重新改寫——<strong>仕紳化（gentrification）</strong>。隨著聯邦周邊的就業、資本與高收入人口湧入，市中心與許多原本的黑人社區房價、租金急速攀升。據人口統計與多項研究顯示，華盛頓的非裔人口比例持續下滑，並在約二○一一年前後，跌破了延續數十年的「黑人多數」門檻——「巧克力城」這個稱號，自此開始褪色。原本世居於此的黑人家庭，被一波波上漲的居住成本，一步步推離他們生活了幾代的街區，向郊區、向城外散去。</p>
+    <p>關於仕紳化，必須持平地說：它帶來的並非只有失去。研究顯示，這個過程也伴隨著投資回流、犯罪率下降、商業復甦與市政稅基的擴大；對某些原居民而言，房產增值也意味著資產的累積。但同樣由數據與研究反覆指出的是，這些紅利的分配極不均勻——它更多地流向新遷入的、收入較高的人群，而原本撐起這些街區的中低收入家庭，往往在還來不及享受到「復甦」之前，就已經因為租金與房價被擠出了這座城。<em>一座城在數字上變得更富了，但「變富的城」與「被推走的人」，常常不是同一群人。</em></p>
+    <div class="warn">
+      <span class="warn-tag">陰影 · 復甦的另一面</span>
+      <p>仕紳化最尖銳的地方，在於它把「進步」與「驅離」綁在同一個過程裡。當一條街變得乾淨、安全、有了新的咖啡館與整修一新的排屋，這固然是好事；但若這一切的代價，是讓在這條街上住了三代的家庭再也付不起房租、不得不離開，那麼「誰的進步」與「誰的代價」之間，就橫著一道難解的倫理裂縫。華盛頓的不均，不只是有人富、有人窮這麼簡單；它是一座城在數字上整體向上、卻在過程中把自己相當一部分的歷史居民篩落出去的故事。本書無意把這個複雜的過程簡化成任何一方的對錯，只是如實指出：當紅利與代價落在不同的人頭上時，「繁榮」這個詞，就不再是一個單一的、人人共享的答案。</p>
+    </div>
+
+    <h3>一條河，分開兩個華盛頓</h3>
+    <p>如果說人口結構的變遷，是時間維度上的兩座城；那麼在空間維度上，把這兩座城劃分得最清楚的，是一條河——<strong>安那柯斯提亞河（the Anacostia River）</strong>。</p>
+    <p>這條河從城市的東南方蜿蜒而過，像一道無聲卻分明的界線，把華盛頓切成兩半。河的這一邊，是繁榮的<strong>西北區（Northwest）</strong>——這裡聚集著政治菁英、外交官、智庫、高等學府與最昂貴的住宅；這裡的街道綠蔭成排，這裡的學校資源充沛，這裡離權力與資本的中心最近。而河的<em>那一邊</em>，是長期以來資源最匱乏的<strong>第七與第八選區（Wards 7 &amp; 8）</strong>。據各類市政與社會研究的數據顯示，這兩個選區在收入中位數、就業機會、醫療可近性、學校資源與預期壽命等指標上，與河西的富裕區之間，存在著巨大且持續的落差。一條不算寬的河，兩岸卻是兩種幾乎不相往來的人生。</p>
+    <p>這條河的兩岸，正是「兩座城」最具體的肉身：一邊握著這個國家的權柄與財富，一邊承接著被忽略與被推離的命運。它們共用一個市名、一面市旗、一個郵遞區號系統，卻彷彿活在兩個不同的國度裡。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">~70%</div><div class="lbl">1970 年代非裔居民約佔全市比例</div></div>
+      <div class="stat"><div class="num">~2011</div><div class="lbl">非裔人口跌破「黑人多數」門檻的約略年份</div></div>
+      <div class="stat"><div class="num">7 &amp; 8</div><div class="lbl">安那柯斯提亞河以東、長期資源匱乏的兩個選區</div></div>
+    </div>
+
+    <h3>權力的城，對居民的虧欠</h3>
+    <p>把這一切收攏起來，便浮現出這座城最深的諷刺。華盛頓是為「全國」而生的——它憑空被造在一片中性的沼澤上，目的就是為了安放一個不偏不倚、屬於全體國民的權力中樞。它的整套設計，從寬闊的大道到莊嚴的殿堂，都在宣告它服務的是「人民」這個抽象的大寫概念。然而正是這座為了所有人而存在的城，最容易在現實裡<strong>顧不上具體住在它裡頭的人</strong>。它的目光永遠越過自家的街區，投向全國；它的紅利永遠先餵養那台聯邦機器，再考慮餵養本地的家庭。</p>
+    <p>這裡值得回望它的姊妹之城——<strong>費城（Philadelphia）</strong>。費城曾是這個年輕共和國的首都，是《獨立宣言》與憲法誕生的地方，卻在權力的版圖上失去了那頂首都的王冠——那頂王冠，最終被戴到了這座為「公平」「中性」而憑空造出的新城頭上。然而王冠的轉移，並沒有讓權力之城變得更善待它的居民。費城在失去首都之後，仍是一座有血有肉、為自己的市民而活的城；而華盛頓在戴上王冠之後，卻背上了一筆永遠難以還清的虧欠——它為全國保管權力，卻常常虧待了那些恰好住在權力腳邊的人。權力的王冠移到了此處，但權力之城，自有它對居民的虧欠。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 為全國而生，卻容不下自己的人</span>
+      <p>華盛頓的結構之謎，最終歸結為一句話：<strong>它是為了一個抽象的「全國」而被造出來的，於是它總是難以善待那個具體的「在地」。</strong>當一座城的唯一產業是治理，當它的人口隨潮汐輪替、它的天際線只為仰望而設、它的居民連選票都被剝奪——那麼它與自己土生土長的街區之間，便天生橫著一道裂縫。仕紳化把這道裂縫撕得更開，安那柯斯提亞河則把它畫成了地圖上一條看得見的線。</p>
+      <p>這對應一個被低估的真理：<em>一個機構越是宣稱自己服務於「所有人」，就越容易在不知不覺間，辜負那些離它最近、最仰賴它的具體的人。</em>華盛頓把這個真理放大到了極致——它向全國許諾公平，卻在自家的兩岸之間，活成了不平等最赤裸的範本。要看清這座城，就得同時看見它的兩座城：一座是國家的門面，一座是居民的家；而這兩座城之間那道走不過去的距離，正是它留給後人最沉重、也最誠實的一課。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ch13" class="act reveal dark">
+  <div class="act-head">
+    <span class="act-num">第十三章 · What Washington Means</span>
+    <h2 class="act-title">華盛頓之為鏡：理想與虛偽同在</h2>
+    <p class="act-sub">America Made Visible</p>
+    <div class="ornament">🏛 ✦ ✦</div>
+  </div>
+  <div class="prose">
+    <p>走過了這座城的全部故事——從那片被刻意選定的中性沼澤，到憑空畫出的大道與圓頂；從奴隸的雙手砌起的殿堂，到南北戰爭時環城的堡壘；從燒毀又重建的白宮，到大蕭條時的退伍軍人營地；從金恩博士在台階上的夢，到一座城在仕紳化裡褪去自己的顏色——到了最後，我們該問的，不再是「這座城發生過什麼」，而是「<strong>這座城，究竟意味著什麼</strong>」。</p>
+    <p>大多數城市反映的，是一方水土、一群人、一門產業。芝加哥反映的是中西部的肌肉與穀物，新奧爾良反映的是密西西比河口的混血與音樂，矽谷反映的是一種對未來近乎宗教的信仰。唯獨華盛頓，它反映的不是任何具體的一群人或一門生意——它反映的，是<strong>「美國」這個理念本身</strong>。它是一面鏡子，而鏡中映出的，是這個國家最赤裸、最毫無遮掩的一張臉，連同它全部的崇高，與它全部的虛偽。</p>
+
+    <h3>同一片土地上的三重悖論</h3>
+    <p>這面鏡子之所以誠實得令人不安，正因為它從不只照出美好的那一半。華盛頓把美國最高的理想，與美國最深的背叛，刻在了同一片土地上，逼著任何願意仔細看的人，同時面對兩者。</p>
+    <p>第一重悖論：<strong>這是一座自由的神殿，卻由不自由的人建成。</strong>那座象徵著民主自治的國會圓頂，那座供奉著「解放者」的林肯紀念堂所在的城市，它最初的一磚一石、它賴以站立的地基，有相當一部分，是由被奴役的黑人雙手砌起的。自由的殿堂，是用不自由的勞動換來的——這不是一段可以被輕輕帶過的插曲，而是這座城出身證明上一行洗不掉的字。</p>
+    <p>第二重悖論：<strong>這是民主的首都，卻不給自己的居民投票權。</strong>萬國前來觀摩的民主樣板之城，它的數十萬居民，在很長的歲月裡，在國會裡沒有一張能投的票。一座向全世界輸出「無代表，不納稅」這句立國信條的城，自己的人民卻長期在納著稅，卻沒有完整的代表。</p>
+    <p>第三重悖論：<strong>這是萬民向權力請願的廣場，廣場本身卻被權力所統治。</strong>從爭取勞權的退伍軍人，到爭取種族平等的二十五萬人，再到此後一波又一波的遊行者——人們從全國各地趕來，站在這座城的草坪與台階上，向權力喊出他們的訴求。然而這座城自己，卻長期不能完全自治，它的命運在許多時候由國會替它定奪。請願的場所，本身就活在被請願對象的管轄之下。</p>
+    <div class="deepen">
+      <span class="dh">概念深掘 · 一座「為理念而建的城」，如何顯影一個國家的全部矛盾</span>
+      <p>絕大多數城市是「長出來的」——它們因為某個港口、某條鐵路、某座礦山而自然聚集，它們的性格是無數偶然與利益層層沉積的結果，並不刻意承載任何抽象的宣言。華盛頓不同。它是被<strong>刻意設計、為了一個理念而憑空造出來的城</strong>：為了安放一個屬於全體國民的中性權力，為了把「共和國」這個概念變成可以觸摸的大理石。</p>
+      <p>正因為它是「為理念而建」的，它便不可避免地成為那個理念的<em>顯影液</em>——一個國家對自己許下了什麼承諾，又在哪裡背叛了那些承諾，全都會在這座城裡顯影出來。它把美國寫進憲法的那些大寫名詞——自由、平等、代表、人民——一字一句刻進石頭裡；同時，它也把美國真實做過的事——蓄奴、剝奪、忽視——藏進同一片土地的肌理裡。於是這座城成了一份永久的對照表：左欄是美國<em>宣稱</em>的樣子，右欄是美國<em>實際</em>的樣子。讀懂這份對照表，就讀懂了這個國家最核心的張力。</p>
+    </div>
+
+    <h3>另一座城裡，那些真正的「華盛頓人」</h3>
+    <p>然而，若這座城只是一面映照國家理念的冰冷鏡子，它便不會有真正的靈魂。靈魂，住在那群被大理石長期遮蔽的人身上——那些真正的<strong>華盛頓人（Washingtonians）</strong>。</p>
+    <p>必須把兩種人分開來看。一種是<strong>過客階層（the transient class）</strong>：隨選舉而來、隨政權而走的幕僚、官員、說客與記者，他們把這座城當成事業的中轉站，住上幾年便轉身離去。另一種，是<strong>世代居住於此的本地人</strong>：他們的祖父母、父母在這裡出生、勞動、安葬，他們的童年記憶長在這座城的某條街上。對前者，華盛頓是一份工作；對後者，華盛頓是一個家。這座城真正的市民認同，從來不在那些來來去去的過客身上，而在這群把根扎進土裡的本地人心裡。</p>
+    <p>這份認同，在最近的歲月裡，打過一場漂亮而動人的硬仗。故事的核心，是一種發源於此地黑人社群的本土音樂——<strong>Go-Go</strong>。它有著綿延不斷、鼓點密集的現場節奏，幾十年來一直是華盛頓街頭與社群生活的脈搏。二○一九年，一家位於 U 街的店鋪，因為新遷入的居民投訴而被要求關掉那播放了多年的 Go-Go 音樂——這個看似微小的衝突，瞬間點燃了一場名為 <strong>#DontMuteDC</strong>（別讓特區噤聲）的運動。人們聚集起來，在街頭放起 Go-Go，宣告這座城的在地黑人文化，不會被仕紳化悄悄抹去。這場運動的結果，是 Go-Go 在二○二○年被正式定為哥倫比亞特區的<strong>官方音樂</strong>。一種曾被視為「噪音」、險些被新來者投訴噤聲的街頭節奏，最終被寫進了這座城的官方認同裡——這是「在地的華盛頓」對「大理石的華盛頓」一次罕見而響亮的反擊。</p>
+    <div class="pull"><p>當有人要求關掉那播了幾十年的鼓聲，這座城的居民選擇把音量調得更大。別讓特區噤聲——這不只是為了一段音樂，而是為了不被自己這座城抹去。</p></div>
+    <p>市民的共同感，也來自別處。當<strong>國民隊（the Nationals）</strong>在二○一九年捧起世界大賽（World Series）的冠軍，當<strong>首都隊（the Capitals）</strong>在冰場上奪冠，整座城——不分河的東岸西岸、不分過客與本地人——會在同一個夜晚為同一面旗幟歡呼。在這些時刻，那兩座彼此疏離的城，短暫地合而為一；體育，給了一座結構上分裂的城，一個難得的共享的「我們」。一支球隊不問你住在西北的豪宅還是河東的排屋，不問你是來此謀職的過客還是世居於此的老住戶——它只問你願不願意，在同一個夜裡，喊同一個名字。對一座被河、被收入、被權力切割得如此分明的城而言，這種短暫卻真實的合一，本身就是一件稀罕而珍貴的事。</p>
+    <p>把這些細節擺在一起看，會發現它們其實在說同一件事：在那座大理石的、屬於全國的華盛頓之外，始終有另一座城在固執地活著、發聲、記得自己是誰。它不是明信片上的圓頂，而是 U 街上一段不肯被噤聲的鼓點、是奪冠夜裡擠滿街道的人群、是一份要求被當成完整公民的、遲遲未被滿足的訴求。這座城的居民，並不甘於只當國家舞台的背景；他們一次次地，把自己重新寫回這座城的故事裡。</p>
+    <p>而貫穿這一切的，是一場仍在繼續的訴求——<strong>建州運動（statehood movement）</strong>。要求把哥倫比亞特區升格為一個擁有完整國會代表權與自治權的州，要求結束那「納稅卻無完整代表」的悖論。這場運動至今未竟，但它本身就是這座城最深的自我主張：住在這裡的人，要的不只是被當成國家的背景板，而是要被當成完整的公民，要在自己這座城裡，真正地作主。</p>
+    <div class="warn">
+      <span class="warn-tag">陰影 · 未竟的代表權</span>
+      <p>必須持平地說，建州一事在這個國家是一個牽動黨派與憲法的爭議議題，各方立場分歧、至今懸而未決，本書無意替任何一方定論。但有一個事實本身是無從迴避的：在這座向全世界宣講「無代表，不納稅」的城裡，它自己數十萬納稅、服役、守法的居民，長期沒有完整的國會代表權。無論人們對解方的看法如何相左，這道立國信條與居民現實之間的落差，始終是這面鏡子裡，照得最刺眼的一塊。</p>
+    </div>
+
+    <h3>永遠在「宣稱的樣子」與「實際的樣子」之間拉扯</h3>
+    <p>於是我們抵達了這整篇故事的結穴。別的城反映一群人、一門產業、一方水土；唯有華盛頓，反映的是一整個國家的靈魂。它把林肯與金恩的理想刻進大理石——把「人人生而平等」「我有一個夢」這些字句，鑄成了可以仰望、可以朝聖的永恆形體；它也把奴隸市場與被剝奪的選票藏進同一片土地——把這個國家最不願正視的那些背叛，埋進了同一寸地基。理想與虛偽，在這裡不是先後發生的兩件事，而是同時刻在同一塊石頭上的正反兩面。</p>
+    <p>它因此成了一座<strong>永遠在拉扯中的城</strong>——永遠在它「宣稱的樣子」與它「實際的樣子」之間，被兩股力量同時拉著。它宣稱自由，卻記得鎖鏈；它宣稱民主，卻虧欠著自己的選民；它宣稱屬於人民，卻常常容不下住在它裡頭的人民。這份永恆的拉扯，不是它的失敗，反倒是它最真實的模樣——因為它所反映的那個國家，本身就活在同一場拉扯裡，活在「我們宣稱相信什麼」與「我們實際做了什麼」之間，那道從未真正彌合的縫隙裡。</p>
+    <p>也正因如此，這座城從來不是一座可以「完工」的城。別的城或許會在某個黃金年代抵達它的巔峰，然後在懷舊裡慢慢老去；華盛頓卻沒有這樣的終點。只要這個國家還在「它相信的」與「它做到的」之間掙扎，這座城就會繼續被拉扯、繼續在大理石的承諾與街區的現實之間搖盪。它的鏡像永遠不會凝固成一張定稿的臉——因為它所映照的那個國家，本身也還在書寫、還在背叛、還在贖回。這座城的故事之所以沒有結尾，正是因為美國的故事，也還沒有結尾。</p>
+    <p>回望這座城走過的全程——從一片無人願要的中性沼澤，到一座被全世界仰望的大理石之都；從奴隸砌起的地基，到金恩台階上的那個夢；從燒過的白宮，到河東被遺落的兩個選區——你會明白，這座城最動人的，從來不是它有多麼完美，而是它有多麼<em>誠實</em>。它不替這個國家修飾，它把崇高與虛偽一同攤開，逼人正視。一座肯如此誠實地照出自己的城，本身就是一種了不起的勇氣。</p>
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一個國家如何對待自己的首都與住在裡頭的人</span>
+      <p>華盛頓最終留給後人的，是這樣一面鏡子：<strong>要看清一個國家究竟相信什麼、又辜負了什麼，不必去讀它的宣言，只要去看它如何對待自己這座首都，以及住在裡頭的人。</strong>它把最崇高的理念刻進石頭，也把最深的背叛埋進土裡；它向全國許諾公平，卻在自家的兩岸之間活成了不平等的範本；它供奉解放者，卻由被奴役者建成；它輸出「無代表，不納稅」，自己的居民卻長期沒有完整的代表。</p>
+      <p>這對應一個被低估的真理：<em>一個共同體最真實的信念，不寫在它的宣言裡，而藏在它對待最弱者、最被遮蔽者的方式裡。</em>正因為華盛頓把一個國家全部的崇高與虛偽，同時攤在同一片陽光下，它才成了美國最重要的一面鏡子——它不允許這個國家只記得自己想記得的那一半。當在地的居民放大 Go-Go 的鼓聲、當建州的訴求一次次響起，那都是這面鏡子裡，被遮蔽的另一座城，在堅持把自己也照進去。一座城最終的尊嚴，或許就在於此：它既誠實地照出一個國家的理想，也誠實地照出它的虧欠，然後留給後人一個永遠不肯讓步的問題——你說你相信的，你做到了嗎？</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FINALE ===== -->
+<section id="chF" class="finale reveal">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是，今天的華盛頓人</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">A Capital Conjured from Nothing, Built for Power Alone</p>
+      <div class="ornament" style="color:var(--gold-bright)">🏛 ⚖ ✦</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把整個故事收攏成一條線。今天的華盛頓特區之所以是這個模樣，是幾股層層相扣的力量疊加而成的——而它們，全都源自那個最初的決定：造一座只為安放權力而存在的城。</p>
+
+      <h3>第一層：一座為「不偏袒」而憑空造出的城</h3>
+      <p>一切的源頭是<strong>那場交易</strong>。為了不讓首都落在任何一座既有大城手裡、給某一州不對稱的權力，年輕的共和國寧可在一片不屬於任何州的低窪河岸上，從零造一座城。這個選擇，賦予了華盛頓一個獨一無二的身分：它沒有家鄉、沒有產業、沒有腹地，它唯一的存在理由，就是「安放權力」。費城失去的那頂首都王冠，正是戴到了這座為「公平」而生的城頭上。</p>
+
+      <h3>第二層：由不自由的人，砌起的自由神殿</h3>
+      <p>接著是<strong>那道矛盾</strong>。國會大廈與白宮，有很大一部分是被奴役者親手砌起的；而在這座「自由神殿」的眼皮底下，曾有奴隸市場公然交易人口。從第一天起，華盛頓就把美國最深的矛盾築進了自己的地基：它用大理石歌頌自由，卻是由不自由的人建成。這道裂縫，將以各種形式——隔離、剝奪選票、兩座城的分隔——貫穿它的一生。</p>
+
+      <h3>第三層：權力長大，城也跟著長成帝國的首都</h3>
+      <p>然後是<strong>權力的膨脹</strong>。從新政與二戰讓聯邦政府爆炸性擴張，到冷戰後成為超級強權的中樞——華盛頓隨著美國權力的長大而長大。它從一座泥濘、半成、險些被放棄的小鎮，變成了一座向全世界投射影響力的帝國首都；遊說業、智庫、承包商與情報機構環繞著它，把它的郊區，變成了全美最富有的地帶。權力，是它唯一的、卻也是取之不盡的礦藏。</p>
+
+      <h3>第四層：兩座城，與一個民主的赤字</h3>
+      <p>最後是<strong>那兩座城</strong>。一座是大理石的、屬於全國的、遊客與權力的華盛頓；另一座是街區的、屬於居民的、曾是「巧克力城」的華盛頓。它們近在咫尺，卻幾乎互不相觸。而最刺痛的弔詭是：這座民主的首都，自己卻長期被剝奪民主——七十萬居民（多於某些州）至今在國會沒有投票權，「無代表的納稅」就印在他們的車牌上。<em>美國把它最高的理想供奉在這座城的中央，卻把這份理想，吝於分給住在它腳下的人。</em></p>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 一座把理想與虛偽刻在同一片大理石上的城</span>
+        <p>所以，今天的華盛頓是什麼？它是<strong>美國這個國家最赤裸的一面鏡子</strong>。別的城反映的是一方水土、一門產業、一群移民；華盛頓反映的，是「美國」這個理念本身——連同它全部的崇高與全部的虛偽。它是自由的神殿，卻由奴隸建成；它是民主的首都，卻不給自己的居民投票權；它是萬民前來向權力請願的廣場，本身卻被權力所統治。</p>
+        <p>華盛頓最深刻的真相是：<em>一座純粹為「安放權力」而生的城，會不由自主地，把它所代表的那個國家的靈魂——好的與壞的——全都顯影出來。</em>它把林肯與金恩的理想刻進大理石，也把奴隸市場與被剝奪的選票藏進同一片土地。它是一座永遠在「它宣稱的樣子」與「它實際的樣子」之間拉扯的城。而正因如此，它也成了美國最重要的一面鏡子：想看清這個國家究竟相信什麼、又辜負了什麼，不必看別處，只要看它如何對待自己這座首都，與住在裡頭的人。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">一場交易在沼澤上造出一座為權力而生的城，不自由的人砌起了自由的神殿，權力的膨脹把它變成帝國的首都——而它至今仍把民主供奉在中央、卻不分給腳下的居民。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">一座城的終極啟示</span>
+      <p>華盛頓是一則關於「理想與現實之距離」的寓言。它是人類少數幾座「為了一個抽象理念而憑空建造」的城——它本該是美國最好那一面的化身。但正因為它把全部身家押在「代表理想」上，它與生俱來的每一道矛盾——由奴隸建成的自由殿堂、不給居民投票的民主之都——就顯得格外刺眼。它提醒我們：一個國家把什麼供奉在它的首都中央，與它實際如何對待最靠近那中央的人，這兩者之間的落差，才是衡量它誠不誠實的真正尺度。華盛頓最深的價值，不在於它多麼莊嚴，而在於它逼著一個國家，永遠無法迴避地，照見自己。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從一場餐桌上的交易、一片被刻意選中的中性沼澤，<br>
+        到由被奴役者砌起的國會大廈與白宮，<br>
+        從被英軍燒成焦黑、險被放棄的泥濘小鎮，<br>
+        到林肯紀念堂前那句「我有一個夢」、向全球投射力量的帝國中樞，<br>
+        再到「巧克力城」的興衰與車牌上那行「無代表的納稅」——<br>
+        這段關於權力、理想與虛偽的歷史，<br>
+        最終回答了那個最初的問題：<br>
+        為什麼一座為理想而建的城，<br>會成為照見一個國家全部矛盾的鏡子。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">🏛 ⚖ ✦</div>
+  <p>憑空造在沼澤上的首都 · 一座為權力而生、照見一個國家的城</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">WASHINGTON, D.C. · A CAPITAL CONJURED FROM NOTHING — AMERICA MADE VISIBLE</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
