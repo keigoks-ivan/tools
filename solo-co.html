@@ -124,6 +124,29 @@
   }
   .expand-all:hover{border-color:var(--ink);color:var(--ink)}
 
+  /* ---------- COMPACT (auto-shrink on scroll) ---------- */
+  .controls{transition:padding .18s ease}
+  .ctrl-row{transition:max-height .25s ease, opacity .18s ease, margin-top .2s ease}
+  .ctrl-toggle{display:none}
+  .ctrl-toggle .arr{font-size:9px;transition:transform .2s ease}
+  .controls.compact{padding-top:10px;padding-bottom:10px}
+  .controls.compact .search input{font-size:13px}
+  .controls.compact #filters{
+    flex:1 1 100%;min-width:0;
+    flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
+    padding-bottom:3px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;
+    -webkit-mask-image:linear-gradient(90deg,#000 93%,transparent);
+            mask-image:linear-gradient(90deg,#000 93%,transparent);
+  }
+  .controls.compact #filters::-webkit-scrollbar{height:5px}
+  .controls.compact #filters::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .controls.compact #filters::-webkit-scrollbar-track{background:transparent}
+  .controls.compact .ctrl-toggle{display:inline-flex}
+  .controls.compact .ctrl-row{max-height:0;opacity:0;margin-top:0;overflow:hidden;pointer-events:none}
+  .controls.compact.show-more .ctrl-row{max-height:160px;opacity:1;margin-top:10px;overflow:visible;pointer-events:auto}
+  .controls.compact.show-more #filters{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none;mask-image:none}
+  .controls.compact.show-more .ctrl-toggle .arr{transform:rotate(180deg)}
+
   /* ---------- GRID ---------- */
   .grid{
     display:grid;
@@ -445,6 +468,7 @@
     </label>
     <div class="filters" id="filters"></div>
     <span class="count" id="count"></span>
+    <button class="chip ctrl-toggle" id="ctrlToggle"><span class="lbl">更多篩選</span><span class="arr">▾</span></button>
   </div>
   <div class="wrap ctrl-row">
     <span class="ctrl-tag">槓桿</span>
@@ -1865,6 +1889,28 @@ expandAllBtn.addEventListener('click',()=>{
   });
   expandAllBtn.textContent=allOpen?'▤ 全部收合':'▤ 全部展開';
 });
+
+/* ---------- auto-shrink sticky controls on scroll ---------- */
+const controlsEl=document.querySelector('.controls');
+const ctrlToggle=document.getElementById('ctrlToggle');
+const ctrlLbl=ctrlToggle.querySelector('.lbl');
+let ticking=false;
+function syncControls(){
+  const compact = window.scrollY > 90;
+  controlsEl.classList.toggle('compact', compact);
+  if(!compact){
+    controlsEl.classList.remove('show-more');
+    ctrlLbl.textContent='更多篩選';
+  }
+}
+window.addEventListener('scroll',()=>{
+  if(!ticking){requestAnimationFrame(()=>{syncControls();ticking=false;});ticking=true;}
+},{passive:true});
+ctrlToggle.addEventListener('click',()=>{
+  const on=controlsEl.classList.toggle('show-more');
+  ctrlLbl.textContent = on ? '收合篩選' : '更多篩選';
+});
+syncControls();
 
 render();
 </script>
