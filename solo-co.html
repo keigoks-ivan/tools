@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一人公司範例庫 · The Solo Co. Field Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+  :root{
+    --ink:#1b1a17;
+    --paper:#e9e3d6;
+    --card:#f6f2e8;
+    --line:#c4bba6;
+    --accent:#b5472d;      /* lacquer red */
+    --accent2:#2f5d50;     /* deep green */
+    --gold:#9a7b32;
+    --mute:#6b6354;
+    --shadow:rgba(40,35,25,.18);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader','Noto Sans TC',serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(181,71,45,.04), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(47,93,80,.05), transparent 45%);
+  }
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    border-bottom:2px solid var(--ink);
+    padding:46px 0 26px;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+  }
+  .eyebrow .spec{color:var(--mute)}
+  h1{
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-size:clamp(38px,7vw,76px);
+    line-height:.98;
+    letter-spacing:-.015em;
+    margin:.18em 0 .12em;
+  }
+  h1 em{font-style:italic;color:var(--accent)}
+  .lede{
+    max-width:680px;
+    font-size:clamp(16px,2.2vw,19px);
+    color:#3a352c;
+  }
+  .lede .mono{font-family:'IBM Plex Mono',monospace;font-size:.85em;background:var(--ink);color:var(--card);padding:1px 7px;border-radius:2px}
+
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    position:sticky;top:0;z-index:40;
+    background:rgba(233,227,214,.93);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    padding:14px 0;
+    margin-bottom:28px;
+  }
+  .controls-inner{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .search{
+    flex:1;min-width:200px;
+    display:flex;align-items:center;gap:8px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:2px;padding:9px 12px;
+  }
+  .search input{
+    border:0;background:transparent;outline:0;width:100%;
+    font-family:'Noto Sans TC',sans-serif;font-size:14px;color:var(--ink);
+  }
+  .search svg{flex:0 0 auto;opacity:.5}
+  .filters{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;letter-spacing:.04em;
+    padding:7px 12px;
+    border:1px solid var(--line);
+    background:transparent;color:var(--mute);
+    border-radius:999px;cursor:pointer;
+    transition:all .15s ease;
+    white-space:nowrap;
+  }
+  .chip:hover{border-color:var(--ink);color:var(--ink)}
+  .chip.active{background:var(--ink);color:var(--card);border-color:var(--ink)}
+  .count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);margin-left:auto}
+
+  /* ---------- GRID ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+    gap:20px;
+    padding-bottom:80px;
+  }
+
+  /* ---------- CARD ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:3px;
+    box-shadow:2px 3px 0 var(--shadow);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    transition:transform .18s ease, box-shadow .18s ease;
+    position:relative;
+  }
+  .card:hover{transform:translateY(-3px);box-shadow:4px 7px 0 var(--shadow)}
+  .card-top{
+    padding:16px 18px 12px;
+    border-bottom:1px dashed var(--line);
+    display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+  }
+  .specimen{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--mute);
+  }
+  .domain-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+    padding:3px 8px;border-radius:2px;white-space:nowrap;
+    border:1px solid currentColor;
+  }
+  .card h2{
+    font-family:'Newsreader',serif;
+    font-weight:600;font-size:23px;line-height:1.12;
+    margin:9px 18px 2px;letter-spacing:-.01em;
+  }
+  .role{
+    font-family:'Noto Sans TC',sans-serif;
+    font-size:12.5px;color:var(--mute);
+    margin:0 18px 14px;
+  }
+
+  /* pillars */
+  .pillars{padding:0 18px 4px;display:flex;flex-direction:column;gap:0}
+  .pillar{
+    display:grid;grid-template-columns:26px 1fr;gap:10px;
+    padding:9px 0;border-top:1px solid rgba(196,187,166,.55);
+    align-items:start;
+  }
+  .pillar:first-child{border-top:0}
+  .pnum{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;font-weight:600;
+    color:var(--card);background:var(--ink);
+    width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    margin-top:2px;
+  }
+  .pbody{font-family:'Noto Sans TC',sans-serif;font-size:13px;line-height:1.55}
+  .plabel{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent2);margin-bottom:2px;font-weight:600;
+  }
+  .lev{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;
+    border:1px solid var(--gold);color:var(--gold);border-radius:2px;
+    padding:1px 6px;margin:2px 3px 0 0}
+
+  /* fault line */
+  .fault{
+    margin-top:auto;
+    background:var(--ink);color:var(--card);
+    padding:13px 18px 15px;
+  }
+  .fault .flabel{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:#d8a597;font-weight:600;margin-bottom:5px;display:block;
+  }
+  .fault .live{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;line-height:1.5;margin-bottom:7px}
+  .fault .die{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;line-height:1.5;color:#c89a8f}
+  .fault b{color:#fff;font-weight:700}
+  .fault .die b{color:#e8b4a6}
+
+  /* moat ticker */
+  .moat-row{padding:11px 18px;background:rgba(154,123,50,.08);border-top:1px solid rgba(196,187,166,.55)}
+  .moat-row .plabel{color:var(--gold)}
+  .moat-row .pbody{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;color:#4a4438}
+
+  /* ---------- SECTION DIVIDERS ---------- */
+  .legend{
+    border:1px solid var(--line);background:var(--card);
+    border-radius:3px;padding:20px 22px;margin-bottom:26px;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;
+  }
+  .legend h3{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;grid-column:1/-1;font-weight:600}
+  .legend-item .li-h{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:3px}
+  .legend-item p{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;color:var(--mute);line-height:1.5}
+
+  /* ---------- PATTERNS ---------- */
+  .patterns{
+    border:1px solid var(--ink);
+    background:var(--card);
+    border-radius:3px;
+    box-shadow:3px 4px 0 var(--shadow);
+    padding:28px 26px 26px;
+    margin-bottom:30px;
+  }
+  .pat-head{max-width:760px;margin-bottom:24px}
+  .pat-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;
+  }
+  .pat-title{
+    font-family:'Newsreader',serif;font-weight:600;
+    font-size:clamp(24px,3.6vw,34px);line-height:1.08;
+    letter-spacing:-.01em;margin:.3em 0 .35em;
+  }
+  .pat-sub{font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.65;color:#4a4438}
+  .pat-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .pat-col{padding:20px;border-radius:3px}
+  .pat-fail{background:#211f1b;color:var(--card)}
+  .pat-win{background:rgba(47,93,80,.08);border:1px solid var(--accent2)}
+  .pc-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+    margin-bottom:14px;
+  }
+  .pat-fail .pc-label{color:#e0a695}
+  .pat-win .pc-label{color:var(--accent2)}
+  .pat-list{list-style:none;counter-reset:p;display:flex;flex-direction:column;gap:13px}
+  .pat-list li{
+    counter-increment:p;position:relative;padding-left:30px;
+    font-family:'Noto Sans TC',sans-serif;font-size:13px;line-height:1.6;
+  }
+  .pat-list li::before{
+    content:counter(p);position:absolute;left:0;top:1px;
+    font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+    width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .pat-fail .pat-list li::before{background:var(--accent);color:#fff}
+  .pat-win .pat-list li::before{background:var(--accent2);color:#fff}
+  .pat-fail .pat-list li{color:#d9d2c2}
+  .pat-fail .pat-list li b{color:#fff;font-weight:700}
+  .pat-win .pat-list li{color:#3a352c}
+  .pat-win .pat-list li b{color:var(--ink);font-weight:700}
+  .pat-list .tag{
+    display:inline-block;margin-top:4px;
+    font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;
+    padding:1px 7px;border-radius:2px;
+  }
+  .pat-fail .tag{background:rgba(224,166,149,.16);color:#e0a695}
+  .pat-win .tag{background:rgba(47,93,80,.14);color:var(--accent2)}
+  .pat-foot{
+    margin-top:16px;padding-top:13px;
+    font-family:'Noto Sans TC',sans-serif;font-size:12px;line-height:1.6;
+  }
+  .pat-fail .pat-foot{border-top:1px solid rgba(217,210,194,.2);color:#b3aa98}
+  .pat-win .pat-foot{border-top:1px solid rgba(47,93,80,.25);color:#3a352c}
+  .pat-win .pat-foot b{color:var(--accent2);font-weight:700}
+  @media(max-width:680px){.pat-cols{grid-template-columns:1fr}}
+
+  /* playbook insights */
+  .pb-block{margin-top:26px;padding-top:24px;border-top:2px solid var(--ink)}
+  .pb-head{max-width:780px;margin-bottom:20px}
+  .pb-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--gold);font-weight:600;display:block;margin-bottom:9px;
+  }
+  .pb-title{
+    font-family:'Newsreader',serif;font-weight:600;
+    font-size:clamp(20px,3vw,27px);line-height:1.12;letter-spacing:-.01em;margin-bottom:.35em;
+  }
+  .pb-intro{font-family:'Noto Sans TC',sans-serif;font-size:13.5px;line-height:1.65;color:#4a4438}
+  .pb-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  .pb-card{
+    position:relative;
+    background:rgba(154,123,50,.07);
+    border:1px solid rgba(154,123,50,.35);
+    border-radius:3px;padding:18px 18px 16px 46px;
+  }
+  .pb-num{
+    position:absolute;left:16px;top:17px;
+    font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;
+    width:22px;height:22px;border-radius:50%;
+    background:var(--gold);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .pb-h{
+    font-family:'Newsreader',serif;font-weight:600;font-size:17px;line-height:1.2;
+    margin-bottom:7px;color:var(--ink);
+  }
+  .pb-card p{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;line-height:1.62;color:#3a352c}
+  .pb-card b{font-weight:700;color:var(--ink)}
+  .pb-link{
+    display:block;margin-top:9px;
+    font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.04em;
+    color:var(--accent);
+  }
+  .pb-foot{
+    margin-top:18px;padding:14px 18px;
+    background:var(--ink);color:var(--card);border-radius:3px;
+    font-family:'Noto Sans TC',sans-serif;font-size:13px;line-height:1.6;
+  }
+  .pb-foot b{color:#fff;font-weight:700}
+  @media(max-width:680px){.pb-grid{grid-template-columns:1fr}}
+
+  footer{border-top:2px solid var(--ink);padding:26px 0 50px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);letter-spacing:.04em}
+  footer .axiom{font-family:'Newsreader',serif;font-style:italic;font-size:17px;color:var(--ink);letter-spacing:0;margin-bottom:10px}
+
+  .empty{grid-column:1/-1;text-align:center;padding:60px 20px;font-family:'IBM Plex Mono',monospace;color:var(--mute);font-size:13px}
+
+  /* expand toggle */
+  .expand-btn{
+    width:100%;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    background:transparent;border:0;border-top:1px dashed var(--line);
+    color:var(--accent);cursor:pointer;
+    padding:11px 18px;text-align:left;
+    display:flex;justify-content:space-between;align-items:center;
+    transition:background .15s ease;
+  }
+  .expand-btn:hover{background:rgba(181,71,45,.05)}
+  .expand-btn .arr{transition:transform .2s ease;font-size:13px}
+  .card.open .expand-btn .arr{transform:rotate(90deg)}
+
+  .deep{
+    display:none;
+    border-top:1px solid var(--line);
+    background:rgba(244,241,232,.6);
+  }
+  .card.open .deep{display:block}
+  .deep-block{padding:13px 18px 14px;border-top:1px solid rgba(196,187,166,.45)}
+  .deep-block:first-child{border-top:0}
+  .deep-block .dlabel{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+    font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:7px;
+  }
+  .deep-block .dlabel .dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+  .deep-block .dtext{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;line-height:1.62;color:#3a352c}
+  .dl-flow{color:var(--accent2)} .dl-flow .dot{background:var(--accent2)}
+  .dl-trap{color:var(--accent)} .dl-trap .dot{background:var(--accent)}
+  .dl-path{color:var(--gold)} .dl-path .dot{background:var(--gold)}
+
+  .expand-all{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;
+    background:transparent;border:1px solid var(--line);color:var(--mute);
+    padding:7px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:all .15s ease;
+  }
+  .expand-all:hover{border-color:var(--ink);color:var(--ink)}
+
+  @media(max-width:520px){
+    .grid{grid-template-columns:1fr}
+    .count{width:100%;margin-left:0;text-align:right}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <a href="/home.html" style="display:inline-flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);text-decoration:none;margin-bottom:18px;font-weight:600">
+      <span style="font-size:14px">←</span><span>Property Monitor · 投資工具站</span>
+    </a>
+    <div class="eyebrow">
+      <span>The Solo Co. · Field Guide</span>
+      <span class="spec" id="specCount">N=42 SPECIMENS · REV. 2026.06</span>
+    </div>
+    <h1>一人公司<br><em>範例標本庫</em></h1>
+    <p class="lede">每一張卡片是一隻被解剖的「一人公司」標本，依四支柱拆解：<span class="mono">可委派系統</span>、<span class="mono">無人力槓桿</span>、<span class="mono">AI 拿不到的護城河</span>、<span class="mono">財務韌性</span>，並標出那條決定生死的分水嶺。點開每張卡可看完整檔案:<span class="mono">具體流程與工具</span>、<span class="mono">隱藏陷阱</span>、<span class="mono">0→1 起步路徑</span>。橫向比較它們,公式不變、領域在變。</p>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="wrap controls-inner">
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="search" type="text" placeholder="搜尋角色、領域、槓桿、護城河…">
+    </label>
+    <div class="filters" id="filters"></div>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="wrap" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-right:4px">槓桿</span>
+    <div class="filters" id="levFilters"></div>
+    <button class="expand-all" id="expandAll" style="margin-left:auto">▤ 全部展開</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="legend">
+    <h3>解剖學圖例 · How to read a specimen</h3>
+    <div class="legend-item"><div class="li-h">① 可委派系統</div><p>把工作從「你的手」轉移到流程、AI、外包。收入不再綁在你的工時上。</p></div>
+    <div class="legend-item"><div class="li-h">② 無人力槓桿</div><p>用程式碼／內容／媒體／資本放大產出，邊際成本趨近零。</p></div>
+    <div class="legend-item"><div class="li-h">③ 護城河</div><p>AI 與競爭者拿不到的東西：數據、信任、領域縱深、品味。</p></div>
+    <div class="legend-item"><div class="li-h">④ 財務韌性</div><p>足夠 runway＋彈性成本，讓你不被迫做短期錯誤決策。</p></div>
+    <div class="legend-item"><div class="li-h">⚠ 分水嶺</div><p>同一條生死線反覆出現——多半不是「做不出」，而是「沒分銷」。</p></div>
+  </div>
+
+  <section class="patterns">
+    <div class="pat-head">
+      <span class="pat-eyebrow">META · 跨標本模式 / Cross-Specimen Patterns</span>
+      <h3 class="pat-title">把 42 個死法並排,規律浮現了</h3>
+      <p class="pat-sub">把每張卡的「隱藏陷阱」橫向看,大多數一人公司的死法不是技術或產品問題,而是反覆出現的同幾種結構性錯誤。對照之下,成功的也共享同幾個因子。領域天差地遠,公式驚人地一致。</p>
+    </div>
+
+    <div class="pat-cols">
+      <div class="pat-col pat-fail">
+        <div class="pc-label">⚠ 四種反覆出現的死法</div>
+        <ol class="pat-list">
+          <li><b>需求沒驗證就投入。</b>囤一倉庫賣不掉的庫存、閉門開發數年才發現沒人想要。先做再找客戶,把現金與時間燒在一個未經證實的假設上。<span class="tag">電商 · 實體產品 · 獨立遊戲</span></li>
+          <li><b>寄生在別人的平台上。</b>收入全靠演算法分潤、商店曝光、或平台政策。對方規則一改,整個生意一夜斷炊,而你毫無發言權。<span class="tag">自媒體 · App · 擴充 · 圖庫</span></li>
+          <li><b>停在 AI 能做的層次。</b>做的是可被生成、可被摘要、可被通用工具覆蓋的東西。被免費 AI 與低價市場兩面夾擊,失去付費理由。<span class="tag">翻譯 · 圖庫 · 配樂 · 資訊型內容</span></li>
+          <li><b>做得出,卻沒分銷。</b>產品很好、系統很爽,但沒人知道。最常見、最隱形的死法——不是不會做,是沒人看見。<span class="tag">幾乎每一個案例都有</span></li>
+        </ol>
+        <p class="pat-foot">補充殺手:用時間換錢觸到天花板(顧問/教練/接案)、流失率高於獲客的漏水桶(訂閱制)、客戶集中度過高的單點故障。</p>
+      </div>
+
+      <div class="pat-col pat-win">
+        <div class="pc-label">✓ 六個共通的成功因子</div>
+        <ol class="pat-list">
+          <li><b>先驗證,再投入。</b>用預購、登陸頁、免費版、願望清單,先確認「有人願意付錢」,再投入生產與開發。把賭注壓在已證實的需求上。</li>
+          <li><b>擁有觀眾,不只擁有流量。</b>把流量沉澱成自有資產:email 名單、自有社群、自有產品入口。平台會變,名單是你的。</li>
+          <li><b>上移到 AI 拿不到的層次。</b>判斷、品味、一手資料、關係、信任、領域縱深。AI 越強,這些越稀缺、越值錢。</li>
+          <li><b>把一次性變成經常性。</b>從賣專案、賣時間,轉向訂閱、留任、會員。讓收入脫離工時,在你睡覺時也持續。</li>
+          <li><b>窄而深,不寬而淺。</b>鎖定一個窄到大廠看不上、競品懶得做的利基,做到該領域的首選。寧可一千個死忠,不要一百萬個路人。</li>
+          <li><b>讓系統做事,你只做判斷。</b>把重複工作流程化、模板化、自動化,交給 AI 與外包。你的時間只花在機器做不好的事。</li>
+        </ol>
+        <p class="pat-foot">一句話收束:<b>先證明有人要 → 擁有觸及他們的管道 → 守住 AI 拿不到的價值 → 讓系統替你運轉。</b></p>
+      </div>
+    </div>
+
+    <div class="pb-block">
+      <div class="pb-head">
+        <span class="pb-tag">SOURCE · Anthropic《The Founder's Playbook: Building an AI-Native Startup》(2026)</span>
+        <h4 class="pb-title">四個來自官方手冊、會放大這些死法的 AI 時代陷阱</h4>
+        <p class="pb-intro">上面的死法在 AI 之前就存在;手冊的核心警告是——當「做出來」的成本趨近零,這些陷阱不是消失,而是被放大,且更難察覺。以下四點直接補強左欄。</p>
+      </div>
+      <div class="pb-grid">
+        <div class="pb-card">
+          <span class="pb-num">A</span>
+          <div class="pb-h">「能跑的原型」是假的驗證</div>
+          <p>一個會動的原型,看起來太像「方向對了」的鐵證——但它不是。原型真正的用途,是拿去跟真實用戶對話、逼出真實反應的道具;<b>那些對話本身才是證據</b>。手冊點名:有人會把流程做成「想到 → 做原型 → 把原型存在當成驗證」,從頭到尾沒測過假設是否為真。<span class="pb-link">↳ 放大左欄①「需求沒驗證就投入」</span></p>
+        </div>
+        <div class="pb-card">
+          <span class="pb-num">B</span>
+          <div class="pb-h">確認偏誤現在配了研究引擎</div>
+          <p>你叫 AI 驗證點子,它就找到支持的證據;叫它估市場,它就給一個讓 TAM 好募資的數字。一個不問難題的創辦人,能比以往更快為一個壞點子建起「看起來研究充分」的論述,還全程深信自己在做盡職調查。<b>解藥是同一個工具反過來用</b>:叫它當魔鬼代言人、去找推翻假設的反證。當對抗性思考逼出「需要修正」的證據,就是該轉向的訊號。<span class="pb-link">↳ 對抗左欄共通的自我欺騙</span></p>
+        </div>
+        <div class="pb-card">
+          <span class="pb-num">C</span>
+          <div class="pb-h">零摩擦的範圍蔓延</div>
+          <p>過去擋住「再加一個功能」的力量,是工程時間的真實成本——現在加功能從一個衝刺變成一個下午,那道煞車消失了。每個新增單獨看都合理(當然該支援那情境),產品卻在一堆站得住腳的小決定裡長到失去方向。<b>解法:動工前先寫下範圍定義</b>——做什麼、刻意不做什麼、什麼樣的真實用戶證據才足以加新東西。把問題從「該做嗎」變成「是否一群用戶說沒這個就無法用」。<span class="pb-link">↳ 新增死法:做太多 ≠ 做對</span></p>
+        </div>
+        <div class="pb-card">
+          <span class="pb-num">D</span>
+          <div class="pb-h">當建構變便宜,護城河有三層</div>
+          <p>「能做出來」不再是壁壘,真正的護城河來自累積出來的深度:<b>① 領域專業內化</b>——把只在你腦中的行話、法規眉角、邊緣案例,透過長對話與 Skills 編碼成 AI 能反覆執行的流程(通用工具會在罕見條款上出錯,你的不會)。<b>② 資料飛輪</b>——用戶在你產品裡的行為指紋,抄襲者買不到。<b>③ 工作流綁定</b>——用戶疊了自動化、接了資料源後,換掉你從「產品決定」變成「營運專案」。手冊把問題收斂成一句:<b>「資金雄厚的對手今天照抄你的產品,你的用戶會不會留下來?」</b><span class="pb-link">↳ 升級右欄③「上移到 AI 拿不到的層次」</span></p>
+        </div>
+      </div>
+      <p class="pb-foot">手冊最後一句:<b>「瓶頸已經從『你能做什麼』,移到了『你選擇做什麼』。」</b>判斷力與品味,成了新的稀缺品。</p>
+    </div>
+  </section>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <div class="axiom">「領域會變,公式不變。」</div>
+    一人公司範例標本庫 · 供參考之用,非投資或創業建議 · 每筆案例為原型化角色,非特定真人
+  </footer>
+</div>
+
+<script>
+const DATA = [
+  {
+    "id": "S-01",
+    "domain": "投資研究",
+    "color": "#b5472d",
+    "name": "獨立投資分析師",
+    "role": "把選股判斷系統化成訂閱研究",
+    "sys": "篩選器每日自動跑出候選清單；DD 報告 skill 半小時產出深度研究；財報季自動掃 200+ 標的。",
+    "lev": [
+      "程式碼",
+      "內容",
+      "資本"
+    ],
+    "moat": "十多年實戰判斷力＋無虧損年 track record＋自建估值資料庫。AI 算得出 ROIC，看不出護城河正在崩壞。",
+    "finance": "自有資金報酬本身就是現金流，研究平台是『順便』變現；固定成本可能不到傳統機構 1%。",
+    "live": "把自用系統變成別人願付費訂閱的產品，並找到觸及讀者的管道。",
+    "die": "停在『自己用得很爽，但沒人知道』。",
+    "flow": "每日 07:00 排程(GitHub Actions / cron)跑五條件篩選器,把通過清單推到網站。一檔 ticker 進來→AI skill 拉十年財報、自動算 ROIC/FCF margin/EPS CAGR、生成三方辯論初稿,自己只做最後的判斷與刪改。財報季用同一套 workflow 一天掃 200+ 標的,把『讀財報』從三天壓到幾小時。估值快照存成結構化資料庫(Excel/DB),累積成別人沒有的時間序列。",
+    "traps": "① 把『系統做得很爽』當成『有生意』——自用工具≠產品,中間隔著分銷這道深淵。② 報告若停在 AI 能從公開資料重組的層次,訂閱者會問『為何不自己問 AI』。③ 投資績效與研究訂閱混為一談:用自有資金賺錢 vs 賣研究,是兩種不同的能力,別假設前者強就能賣後者。④ 監管紅線——在某些法域『推薦個股』可能踩到投顧執照問題。",
+    "path": "先公開免費發布篩選結果與少量深度報告,養出一群會回頭的讀者(名單是資產,不是流量)。觀察哪幾篇被瘋傳、哪些問題被反覆問——那就是付費產品的雛形。等有穩定的免費讀者基數,再推付費層:獨家報告、即時警示、或資料庫存取。先驗證有人願付費,再投入做金流與付費牆。"
+  },
+  {
+    "id": "S-02",
+    "domain": "桌遊設計",
+    "color": "#2f5d50",
+    "name": "獨立桌遊設計師",
+    "role": "一人把遊戲從腦中帶到玩家桌上",
+    "sys": "AI 模擬上萬局找破壞性策略；美術 AI 生稿＋外包精修；生產物流全外包給履約夥伴。",
+    "lev": [
+      "內容",
+      "媒體",
+      "資本"
+    ],
+    "moat": "遊戲手感與『好不好玩』的直覺、長期經營的鐵粉社群、一看就認得的設計簽名。",
+    "finance": "群募預購金＝資金＋市場驗證＋首批分銷三合一，生產前就知道能否回本。",
+    "live": "每款累積會回購的社群，讓下一款募資越來越輕鬆，形成複利。",
+    "die": "只顧設計完美遊戲，不經營觸及與社群。",
+    "flow": "概念→用 AI 快速生成數十種規則變體與數值表→寫腳本模擬上萬局對戰,找出『最佳解一招獨大』的破壞性策略並修正平衡(把人工試玩一百次壓縮成幾小時)。風格定調後 AI 生插畫初稿→外包插畫師精修,自己只做藝術總監的取捨。製造、印刷、倉儲、出貨全交給群募平台的履約夥伴或 POD 廠商,自己碰不到一個紙箱。",
+    "traps": "① 數值平衡 AI 算得出,但『玩起來爽不爽』只能靠大量真人盲測——跳過這步的遊戲數據漂亮卻沒人想再玩。② 群募達標的興奮會掩蓋履約地獄:運費、關稅、缺件補寄、延遲開天窗,這些才是真正吃掉利潤與心力的地方。③ 美術外包的版權與授權範圍沒講清楚,後續再版或周邊會卡住。④ 第一款就想做大型策略遊戲,複雜度與成本失控。",
+    "path": "先做一款規則精簡、零件少的小品(降低試錯與生產成本),用免費 print-and-play 版在桌遊社群投放,蒐集真人回饋與口碑。累積到一批願意等你下一款的鐵粉,再開群募——這時募資不是冷啟動,是對既有社群收單。每款都把買過的人沉澱進名單,讓下一款募資越來越輕鬆。"
+  },
+  {
+    "id": "S-03",
+    "domain": "電子報",
+    "color": "#9a7b32",
+    "name": "利基電子報主筆",
+    "role": "專寫某垂直產業的深度週報",
+    "sys": "AI 協助蒐集／初稿／摘要；自動化排程寄送；付費牆與金流交給平台處理。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "產業內人脈與獨家消息來源、長年累積的讀者信任、無法被 prompt 的觀點與品味。",
+    "finance": "訂閱制帶來可預測的經常性收入（MRR）；成本只有寫作工具與平台抽成。",
+    "live": "把免費讀者持續轉換成付費，並維持低流失率（churn）。",
+    "die": "訂閱者成長停滯，內容變得可被 AI 摘要取代。",
+    "flow": "AI 協助蒐集產業動態、整理初稿、生成摘要,自己只做觀點注入與事實查核(AI 給草稿,你給判斷)。用電子報平台(如 Substack/beehiiv 類)處理寄送、付費牆、金流,完全不碰技術。固定節奏出刊(週報的『可預期』本身就是價值)。免費版當漏斗,付費版鎖獨家深度與資料。",
+    "traps": "① 內容若只是『把新聞摘要一遍』,正是 AI 最擅長、最該被取代的東西——必須有 AI 拿不到的一手消息或獨到觀點。② 免費讀者成長≠付費轉換,兩者是不同的漏斗,大量免費訂戶卻零付費是常態陷阱。③ 一旦停更,信任與排名同時崩塌,週報是不能斷的承諾。④ 把自己燃燒殆盡:一人週報的更新壓力會累積成倦怠。",
+    "path": "先純免費發 8–12 期,確認自己能持續產出且有人讀(別一開始就設付費牆勸退讀者)。觀察打開率與被轉發的內容,找出讀者真正願付費的『獨家層』。等免費名單到一定規模(有換算基礎),再推付費版,定價先低、看轉換率再調。重點是先建名單,名單是唯一不被平台綁架的資產。"
+  },
+  {
+    "id": "S-04",
+    "domain": "線上課程",
+    "color": "#b5472d",
+    "name": "技能課程創作者",
+    "role": "把專業技能打包成可重播課程",
+    "sys": "課程錄一次賣無限次；AI 生講義／字幕／測驗；客服 FAQ 用 AI 機器人首道過濾。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "教學法與把複雜講清楚的能力、學員成果案例、個人在該領域的權威感。",
+    "finance": "一次製作、長尾販售；可搭配社群會員制創造經常性收入。",
+    "live": "靠免費內容當漏斗持續導流，並用學員口碑滾動。",
+    "die": "課程一上架就不更新，被更新更便宜的競品淹沒。",
+    "flow": "把專業拆解成模組化課綱→AI 生講義、字幕、測驗題庫→錄一次,賣無限次。客服 FAQ 用 AI 機器人做第一道過濾,只有複雜問題才到你手上。課程掛在自有平台或課程市集,金流與分銷交給平台。搭配社群會員制,把一次性買課變成持續關係。",
+    "traps": "① 課程市場已飽和,『又一堂 XX 入門』沒有差異化就是沉沒成本。② 一上架就不更新,內容過時又被更便宜的競品蓋過——課程是會折舊的資產。③ 把錄製成本當一次性,忽略了行銷與導流才是持續的工作。④ 退費與盜版侵蝕利潤。⑤ 高估自己『會做』就等於『會教』,教學法是另一種專業。",
+    "path": "先用免費內容(短影片、文章、公開講座)建立『這人會教』的權威感與一批受眾。把受眾反覆問的問題,做成一堂小型付費課驗證需求(別一開始就做大部頭旗艦課)。賣得動再擴充成完整課程＋社群會員。免費內容是長期的導流漏斗,不能停。"
+  },
+  {
+    "id": "S-05",
+    "domain": "獨立軟體",
+    "color": "#2f5d50",
+    "name": "Micro-SaaS 開發者",
+    "role": "一人開發並營運一個小而專的工具",
+    "sys": "AI 加速開發；自動化部署／監控／計費；支援工單用 AI 草擬回覆。",
+    "lev": [
+      "程式碼",
+      "資本"
+    ],
+    "moat": "對特定利基痛點的深刻理解、轉換成本造成的黏著、累積的用戶資料與整合生態。",
+    "finance": "訂閱 MRR＋極低邊際成本；雲端費用隨用量彈性伸縮。",
+    "live": "找到願意持續付費的窄利基，把流失率壓低。",
+    "die": "做了個沒人非用不可的工具，或被大廠順手做進既有產品。",
+    "flow": "鎖定一個窄到大廠看不上的痛點→AI 加速開發出 MVP→自動化部署、監控、訂閱計費(Stripe 類)全程無人工。支援工單用 AI 草擬回覆。產品上線後,你的時間花在和用戶對話、找下一個該做的功能,而非寫每一行程式。",
+    "traps": "① 做了個『不錯但沒人非用不可』的工具——nice-to-have 留不住付費。② 利基太窄養不活、太寬又打不過大廠,拿捏極難。③ 最大風險:你解決的痛點被某個大平台『順手』做進既有產品,你的整個生意一夜蒸發。④ 流失率(churn)是 SaaS 的隱形殺手,獲客拼命拉、後門一直漏。⑤ 一人撐起開發+客服+行銷,容易顧此失彼。",
+    "path": "先確認痛點真實且有人願付費——在目標社群丟出問題、看有沒有人喊『這個我要』,甚至先賣概念(landing page 收 email 或預購)再開發。做最小可用版給少數種子用戶,緊盯他們是否真的天天用、是否願續訂。先把流失率壓住,再談獲客成長。"
+  },
+  {
+    "id": "S-06",
+    "domain": "接案設計",
+    "color": "#9a7b32",
+    "name": "品牌設計顧問",
+    "role": "高單價品牌識別接案",
+    "sys": "AI 生發想草稿／配色／文案變體，自己只做總監級判斷與提案；行政與合約模板化。",
+    "lev": [
+      "內容"
+    ],
+    "moat": "審美品味、提案說服力、過往作品集與口碑帶來的指名度。",
+    "finance": "高單價專案制，少量客戶即可維生；預收訂金管理現金流。",
+    "live": "把『時薪』思維換成『價值定價』，並靠作品集吸引指名客戶。",
+    "die": "接太多低價案做到累垮，又被 AI 拉低了基礎設計的市場行情。",
+    "flow": "AI 生發想草稿、配色方案、文案變體,自己只做總監級的取捨與提案(AI 給選項,你給品味)。提案、合約、報價全模板化,行政壓到最低。少量高單價客戶即可維生,把精力放在作品集與口碑,而非接案量。",
+    "traps": "① 用『時薪』思維報價,做到累垮還賺不多——品牌設計的價值在結果,不在工時。② AI 把基礎設計的市場行情拉低,停在『出圖』層次會被低價市場吞噬。③ 接太多低價案填滿時間,反而沒空做能吸引高價客戶的代表作。④ 客戶來源全靠人脈介紹,沒有主動的作品集導流系統,案源不穩。",
+    "path": "先做幾個『就算貼錢也要做好』的代表作(自發專案也行),建立有辨識度的作品集。把作品集放在能被目標客戶看到的地方(社群、設計平台)。從『按專案高價定價』取代按時計費開始,寧可少接、接好,讓每個案子都成為下一個高價客戶的誘餌。"
+  },
+  {
+    "id": "S-07",
+    "domain": "電商品牌",
+    "color": "#b5472d",
+    "name": "利基電商品牌主",
+    "role": "一個品類做深、自有品牌販售",
+    "sys": "設計外包、製造代工、3PL 倉儲出貨、AI 客服；自己只管選品與品牌。",
+    "lev": [
+      "媒體",
+      "資本"
+    ],
+    "moat": "品牌故事與情感連結、回購客群、對特定客群需求的獨到理解。",
+    "finance": "預購／預售降低庫存風險；毛利結構需能吸收廣告獲客成本。",
+    "live": "靠內容與社群建立品牌，讓回購率撐起獲利。",
+    "die": "純靠付費廣告獲客，CAC 一漲就虧損，淪為一次性買賣。",
+    "flow": "一個品類做深,設計外包、製造代工、3PL 倉儲出貨、AI 客服,自己只管選品判斷與品牌敘事。靠內容與社群建立品牌情感,把首購轉成回購。預購/預售先收款再生產,降低庫存壓力。",
+    "traps": "① 純靠付費廣告獲客,CAC(獲客成本)一漲就由賺轉虧,淪為一次性買賣而非品牌。② 毛利結構若吸收不了廣告成本+物流+退貨,規模越大虧越多。③ 庫存是現金的墳墓,押錯款式整批爛在倉裡。④ 供應鏈斷一環(代工延遲、品質出包)直接砸品牌。⑤ 把『開店』當成『建品牌』,沒有回購就只是不斷花錢買陌生人。",
+    "path": "先用最小批量或預購驗證『有人願意原價買』,別先囤貨。靠內容(而非純廣告)養出第一批認同品牌的客群,盯緊回購率——回購撐得起來才是品牌,撐不起來只是廣告套利。確認單位經濟(每筆訂單真的賺錢)成立後,再放大行銷。"
+  },
+  {
+    "id": "S-08",
+    "domain": "自媒體",
+    "color": "#2f5d50",
+    "name": "垂直領域創作者",
+    "role": "在單一平台深耕的內容創作者",
+    "sys": "AI 協助腳本／剪輯／字幕／多平台改寫；商業合作流程模板化。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "個人魅力與人設、難以複製的觀點、與粉絲的情感連結。",
+    "finance": "收入多元化：業配＋自有產品＋會員＋平台分潤，分散單一風險。",
+    "live": "把流量沉澱成自有名單／產品，不被單一平台演算法綁架。",
+    "die": "全部收入只靠平台分潤，演算法一改就斷炊。",
+    "flow": "AI 協助腳本發想、剪輯、字幕、多平台改寫(一條內容拆成多平台版本)。商業合作流程、報價、檔期模板化。收入刻意多元化:業配＋自有產品＋會員＋平台分潤,不把命押在單一來源。",
+    "traps": "① 全部收入只靠平台分潤,演算法一改就斷炊——這是創作者最致命的單點故障。② 追流量追到失去人設與觀點,變成可替換的內容農場。③ 個人 IP 與健康/隱私的代價:一人扛產製+出鏡+商務,倦怠與斷更風險高。④ 數據好看不等於變現好,百萬流量零收入是常態。⑤ 把粉絲數當資產,但沒有自有名單,平台一封號歸零。",
+    "path": "先在單一平台深耕到有辨識度的觀點與人設(別一開始就鋪滿所有平台分散精力)。流量起來後,第一要務是把粉絲沉澱成自有資產:email 名單、自有社群、自有產品入口。收入從業配起步,但盡快發展出不依賴平台的自有產品線。"
+  },
+  {
+    "id": "S-09",
+    "domain": "獨立顧問",
+    "color": "#9a7b32",
+    "name": "專業領域顧問",
+    "role": "高階知識型顧問服務",
+    "sys": "用 AI 加速研究／簡報製作／文件草擬；把交付物產品化成可重複的框架。",
+    "lev": [
+      "內容"
+    ],
+    "moat": "稀缺的專業判斷、產業關係網、解決過真問題的可信度。",
+    "finance": "高日費＋少量客戶；可發展出『生產化服務』（productized service）穩定收入。",
+    "live": "把一次性顧問變成可重複交付的方法論或訂閱式留任（retainer）。",
+    "die": "永遠在用時間換錢，一停下接案收入就歸零。",
+    "flow": "用 AI 加速研究、簡報製作、文件草擬,把交付物產品化成可重複套用的框架與方法論。高日費、少量客戶。從一次性顧問,發展出『生產化服務』(固定範圍、固定價格、可重複交付)或訂閱式留任(retainer),把收入從專案轉成經常性。",
+    "traps": "① 永遠在用時間換錢,一停下接案收入就歸零——這是顧問的天花板。② 客戶集中度過高,一個大客戶走了現金流腰斬。③ 知識若沒產品化,每個案子都從零開始,無法規模化也無法休息。④ AI 讓基礎研究與簡報變便宜,停在執行層的顧問價值被稀釋,必須上移到判斷與關係。",
+    "path": "先靠既有專業與人脈接下前幾個高價案,建立可信的成果紀錄。把重複出現的問題萃取成標準方法論(這是產品化的起點)。從『賣時間』轉向『賣固定範圍的成果』或『賣每月留任』,讓收入脫離工時。逐步發展出不需你親自到場的交付物(課程、框架、工具)。"
+  },
+  {
+    "id": "S-10",
+    "domain": "App 開發",
+    "color": "#b5472d",
+    "name": "獨立 App 開發者",
+    "role": "一人做小而美的行動／桌面應用",
+    "sys": "AI 加速開發與測試；App Store 處理金流與分銷；用戶回饋自動分類。",
+    "lev": [
+      "程式碼"
+    ],
+    "moat": "設計細節與使用體驗的講究、特定用戶群的死忠、持續迭代累積的口碑。",
+    "finance": "訂閱或一次買斷＋極低維運成本；可長尾收入。",
+    "live": "做出讓人願意每天打開的東西，並維持更新節奏。",
+    "die": "上架後就以為會自動被發現——App 商店裡的沉默墳場。",
+    "flow": "AI 加速開發與測試,App Store/Play 處理金流與分銷,用戶回饋自動分類成需求池。做出讓人願意每天打開的小而美應用,靠持續迭代與細節體驗累積口碑。訂閱或一次買斷,維運成本極低,可長尾收入。",
+    "traps": "① 上架後以為會被自動發現——App 商店是有數百萬殭屍 App 的沉默墳場,沒有 ASO 與導流就是沉底。② 平台抽成(常達 30%)＋審核政策變動是懸在頭上的刀。③ 一次買斷收入是脈衝式的,賣完就斷,難有經常性現金流(故訂閱漸成主流)。④ 跨平台維護(iOS/Android/系統更新)對一人是持續負擔。",
+    "path": "先做一個你自己每天會用、且有明確小眾需求的 App(自己是用戶,需求最準)。上架前就準備好導流:在相關社群、內容平台累積期待。盯緊留存率(次日/七日留存)——留不住人,拉再多下載都是漏水。留存站穩再考慮付費獲客。"
+  },
+  {
+    "id": "S-11",
+    "domain": "出版寫作",
+    "color": "#2f5d50",
+    "name": "獨立作家／自出版",
+    "role": "自寫、自出版、自行銷的作者",
+    "sys": "AI 協助研究／編輯／排版／多語翻譯；POD 隨需印刷免庫存；電子書全球分銷。",
+    "lev": [
+      "內容",
+      "資本"
+    ],
+    "moat": "獨特的敘事聲音、累積的讀者群、系列作品的世界觀資產。",
+    "finance": "版稅長尾＋系列作交叉銷售；前期靠其他收入養創作。",
+    "live": "靠系列作與讀者名單建立可重複的發書飛輪。",
+    "die": "寫完一本就指望爆紅，沒有讀者名單也沒有下一本。",
+    "flow": "AI 協助研究、編輯、排版、多語翻譯。POD(隨需印刷)免庫存,電子書全球分銷(Amazon KDP 類平台)。系列作品建立世界觀與讀者群,靠系列交叉銷售與讀者名單形成『發書飛輪』:每出一本,既有讀者帶動冷啟動。前期靠其他收入養創作。",
+    "traps": "① 寫完一本就指望爆紅,沒有讀者名單也沒有下一本——單本書幾乎不可能撐起生意。② AI 生成內容氾濫,通用題材的書被淹沒到零曝光。③ 把『寫完』當終點,忽略行銷與名單經營才是長期工作。④ 平台演算法與排名規則變動,自出版作者完全被動。",
+    "path": "先確立一個有辨識度的敘事聲音與一個能寫成系列的題材(系列比單本更能滾動)。用免費短篇或前幾章當漏斗,換取讀者 email。出第一本後立刻啟動下一本——飛輪需要持續的新作來轉。名單是核心資產:每個讀者都要想辦法留住。"
+  },
+  {
+    "id": "S-12",
+    "domain": "健身教練",
+    "color": "#9a7b32",
+    "name": "線上健身教練",
+    "role": "遠端課表與線上指導服務",
+    "sys": "課表模板化＋AI 個人化調整；自動化追蹤學員進度；社群答疑分時段處理。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "學員實際成果與見證、教練個人信任感、針對特定族群的專精。",
+    "finance": "月費會員制創造經常性收入；可加入課程與器材聯盟收入。",
+    "live": "靠學員成果案例做口碑行銷，維持高續訂率。",
+    "die": "一對一塞滿時間，無法規模化又難漲價。",
+    "flow": "課表模板化＋AI 依個人狀況微調,自動化追蹤學員進度與打卡,社群答疑分時段批次處理(而非隨時待命)。月費會員制創造經常性收入,搭配課程與器材聯盟分潤。靠學員實際成果案例做口碑行銷。",
+    "traps": "① 一對一塞滿所有時段,既無法規模化又難漲價——時間是硬天花板。② 學員成果與安全責任:線上遠端難以即時糾正動作,出事擔責。③ 健康/醫療相關的合規與宣稱紅線(療效保證會出事)。④ 高續訂靠成果,但成果靠學員自律,你能控制的有限,流失率難壓。",
+    "path": "先用一對一服務累積一批有明確成果的學員見證(成果案例是最強行銷)。把重複的課表與指導內容模板化,轉向可規模化的團體課或會員制(從賣時間轉成賣方案)。用免費內容(動作示範、知識)做漏斗,把學員成果故事當成口碑引擎。"
+  },
+  {
+    "id": "S-13",
+    "domain": "資料服務",
+    "color": "#b5472d",
+    "name": "利基資料庫營運者",
+    "role": "蒐集整理特定領域資料並販售存取權",
+    "sys": "AI＋爬蟲自動蒐集清洗；API 與訂閱自動計費；資料更新管線排程運行。",
+    "lev": [
+      "程式碼",
+      "資本"
+    ],
+    "moat": "獨家或難以蒐集的資料集本身、資料的完整度與即時性、累積的歷史縱深。",
+    "finance": "訂閱／API 計費的高毛利；資料一旦建立，維護成本遞減。",
+    "live": "擁有別人拿不到的資料源，並持續維持其新鮮度與完整。",
+    "die": "資料公開可得，或競品用 AI 更快地重建了你的資料庫。",
+    "flow": "AI＋爬蟲自動蒐集、清洗、結構化特定領域資料,API 與訂閱自動計費,更新管線排程運行(資料的新鮮度自動維持)。販售存取權:訂閱看資料、或 API 接入。資料一旦建立,維護成本遞減而價值隨時間縱深累積。",
+    "traps": "① 資料若是公開可得,客戶會問『為何不自己抓』——獨家性或整理成本是唯一護城河。② 競品用 AI 更快重建你的資料庫,先發優勢被抹平。③ 資料來源的合法性與授權(爬蟲可能違反服務條款或侵權)。④ 資料品質一旦出錯,信任崩塌且難挽回。⑤ 維護管線的隱性工作量被低估。",
+    "path": "先找一個『大家都需要、但蒐集很麻煩』的資料缺口(麻煩本身就是護城河)。手動或半自動建出第一版,賣給少數種子客戶驗證有人願付費。確認需求後再投入自動化管線。持續累積歷史縱深——時間序列是後來者最難複製的東西。"
+  },
+  {
+    "id": "S-14",
+    "domain": "翻譯本地化",
+    "color": "#2f5d50",
+    "name": "專業領域譯者",
+    "role": "高門檻領域的翻譯與本地化",
+    "sys": "AI 做初譯，自己只做專業審校與在地化判斷；術語庫與風格指南資產化。",
+    "lev": [
+      "內容"
+    ],
+    "moat": "AI 譯不準的專業領域知識、文化語感、客戶長期信任。",
+    "finance": "高單價專業審校取代低價純翻譯；少量穩定客戶即可。",
+    "live": "上移到 AI 取代不了的高專業審校與品質把關。",
+    "die": "停在 AI 已能勝任的基礎翻譯，被機器與低價市場兩面夾擊。",
+    "flow": "AI 做初譯,自己只做專業審校與在地化判斷(從『翻譯者』升級為『品質把關者』)。術語庫與風格指南資產化,讓品質可複現。鎖定 AI 譯不準的高門檻領域(法律、醫療、技術、文學),用高單價審校取代低價純翻譯。少量穩定客戶即可。",
+    "traps": "① 停在 AI 已能勝任的基礎翻譯,被機器與低價市場兩面夾擊——這是最大的存亡威脅。② 客戶誤以為『AI 翻譯免費』而砍價,需要教育客戶為何專業審校值錢。③ 專業領域出錯的擔責風險(法律/醫療誤譯後果嚴重)。④ 客戶集中度高,少數大客戶流失即重創。",
+    "path": "選定一個 AI 出錯後果嚴重、且需要深厚領域知識的利基(後果越嚴重,人工把關越值錢)。建立『AI 初譯＋你專業審校』的高效流程,以速度與品質兼具切入。累積該領域的可信交付紀錄與術語資產,讓客戶指名而非比價。"
+  },
+  {
+    "id": "S-15",
+    "domain": "攝影視覺",
+    "color": "#9a7b32",
+    "name": "視覺素材創作者",
+    "role": "販售圖庫／預設集／視覺資產",
+    "sys": "AI 輔助生成與後製變體；素材一次製作多平台上架；授權與金流交給市集平台。",
+    "lev": [
+      "內容",
+      "資本"
+    ],
+    "moat": "獨特的視覺風格、難以複製的審美、特定主題的完整度。",
+    "finance": "被動授權收入長尾；作品庫越大、被動收入越穩。",
+    "live": "建立有辨識度的風格，讓買家指名而非比價。",
+    "die": "產製通用素材，被海量 AI 生成內容淹沒到零曝光。",
+    "flow": "AI 輔助生成與後製變體,一次製作多平台上架(同一套素材鋪滿各圖庫市集),授權與金流交給市集平台。建立有辨識度的視覺風格,讓買家指名而非比價。作品庫越大,被動授權收入越穩。",
+    "traps": "① 產製通用素材,被海量 AI 生成內容淹沒到零曝光——這是圖庫創作者當前最嚴峻的衝擊。② 單張授權金微薄,需要極大作品庫才有可觀收入,前期投入回報慢。③ 平台演算法與抽成決定你的曝光與收益,完全被動。④ AI 生成圖的版權爭議與平台政策變動。",
+    "path": "先找一個 AI 生成搞不定、或市場上明顯缺貨的視覺利基(特定主題、特定風格、真實場景)。建立辨識度高的風格,讓你的作品成為某個主題的首選。持續累積作品庫——被動收入需要規模,前期靠量與差異化雙軌並進。"
+  },
+  {
+    "id": "S-16",
+    "domain": "地產研究",
+    "color": "#b5472d",
+    "name": "跨境置產顧問",
+    "role": "為外國買家做特定城市的置產研究",
+    "sys": "標準化評分框架＋AI 產出建案評分卡；資料庫累積數十建案；報告模板化複現。",
+    "lev": [
+      "內容",
+      "資本"
+    ],
+    "moat": "在地實勘的第一手 know-how、跨境法稅整合判斷、買家信任與人脈。",
+    "finance": "研究訂閱＋成交服務費；自身置產經驗即活廣告。",
+    "live": "把零散諮詢變成可訂閱的標準化研究產品與服務流程。",
+    "die": "資訊在地化不足，被免費的網路資料與本地仲介取代。",
+    "flow": "標準化評分框架＋AI 產出建案評分卡,資料庫累積數十個建案(別人沒有的在地資料縱深),報告模板化複現。自身的跨境置產經驗即活廣告。研究訂閱＋成交服務費雙收入。",
+    "traps": "① 資訊在地化不足,被免費網路資料與本地仲介取代——外國買家的價值在『你去過、你懂法稅』,不在『你會查資料』。② 成交服務費與研究中立性的利益衝突(推薦你能抽佣的建案?),信任一旦受損難挽回。③ 跨境法稅判斷出錯的擔責風險。④ 市場週期下行時,置產需求驟減,收入波動大。",
+    "path": "先深耕一個你親自踩過點、懂當地法稅的特定城市(深度勝過廣度)。把零散諮詢整理成標準化的評分研究產品,公開部分內容建立權威。用自身的置產經驗與第一手 know-how 當信任背書,讓買家因為你的在地縱深而付費。"
+  },
+  {
+    "id": "S-17",
+    "domain": "教育產品",
+    "color": "#2f5d50",
+    "name": "學習工具製作者",
+    "role": "做某科目的練習／學習工具",
+    "sys": "AI 生題庫與解析；自動批改與進度追蹤；工具網頁化自助使用。",
+    "lev": [
+      "程式碼",
+      "內容"
+    ],
+    "moat": "對學習痛點的理解、教學設計的巧思、家長與老師的口碑信任。",
+    "finance": "訂閱或一次買斷；製作後邊際成本極低。",
+    "live": "做出真正提升學習成效的工具，靠口碑在家長社群擴散。",
+    "die": "做出又一個通用題庫，沒有人非用它不可。",
+    "flow": "AI 生題庫與解析,自動批改與進度追蹤,工具網頁化讓學生自助使用(無需你即時介入)。訂閱或一次買斷,製作後邊際成本極低。靠真正提升學習成效的設計,在家長與老師社群口碑擴散。",
+    "traps": "① 做出『又一個通用題庫』,沒有人非用它不可——市場上免費題庫多如牛毛。② 教育成效難量化,家長付費前的說服門檻高。③ 兒少相關的資料隱私與合規要求嚴格。④ 學校採購週期長、決策慢,B2B 路線耗時。⑤ 把『有題目』當成『有教學』,缺乏教學設計的工具留不住人。",
+    "path": "先鎖定一個主流工具沒做好的特定學習痛點(特定科目的特定難關)。做出能明確展示成效的小工具,讓家長/老師一試就見效。靠真實的學習成效在家長社群(口碑傳播最快的地方)擴散。先 C 端口碑站穩,再考慮 B 端學校採購。"
+  },
+  {
+    "id": "S-18",
+    "domain": "音樂音訊",
+    "color": "#9a7b32",
+    "name": "獨立音樂／音效創作者",
+    "role": "製作並授權音樂與音效素材",
+    "sys": "AI 輔助編曲與母帶處理；素材庫多平台授權；金流交給市集。",
+    "lev": [
+      "內容",
+      "資本"
+    ],
+    "moat": "獨特音色與風格、為特定用途量身的精準度、長期累積的作品庫。",
+    "finance": "授權與訂閱長尾被動收入；作品庫即資產。",
+    "live": "建立有辨識度的聲音品牌，服務 AI 生成搞不定的特定需求。",
+    "die": "產製泛用配樂，與免費 AI 音樂庫正面對撞。",
+    "flow": "AI 輔助編曲與母帶處理,素材庫多平台授權,金流交給市集。建立有辨識度的音色與風格,服務 AI 生成搞不定的特定需求(特定情緒、特定用途的精準配樂)。授權與訂閱長尾被動收入,作品庫即資產。",
+    "traps": "① 產製泛用配樂,與免費 AI 音樂庫正面對撞——這是音訊創作者當前的核心衝擊。② 單次授權金微薄,需大量作品累積才有可觀被動收入。③ 平台抽成與曝光演算法決定收益,被動。④ AI 音樂的版權歸屬與平台政策仍在變動。",
+    "path": "找一個 AI 配樂做不好、或特定產業特別需要的音訊利基(特定情境、特定文化、高品質要求)。建立有辨識度的聲音品牌,讓需要精準配樂的客戶指名你。持續擴充作品庫,被動收入靠規模＋差異化雙軌。"
+  },
+  {
+    "id": "S-19",
+    "domain": "法律科技",
+    "color": "#2f5d50",
+    "name": "利基法務文件服務",
+    "role": "特定情境的合約／文件自動生成",
+    "sys": "AI 依問答生成客製文件草稿；模板庫資產化；複雜案件再轉介合作律師。",
+    "lev": [
+      "程式碼",
+      "內容"
+    ],
+    "moat": "特定法域與情境的專業判斷、合規可信度、把法律語言講白話的能力。",
+    "finance": "按件或訂閱計費；製作後邊際成本極低、毛利高。",
+    "live": "鎖定高頻又標準化的文件需求，建立合規信任。",
+    "die": "碰觸需要執照的業務或出錯擔責，或被大型法律平台覆蓋。",
+    "flow": "AI 依問答流程生成客製法律文件草稿,模板庫資產化(常見情境一次建好),複雜或需執照的案件再轉介合作律師。按件或訂閱計費,製作後邊際成本極低、毛利高。鎖定高頻又標準化的文件需求。",
+    "traps": "① 碰觸需要執照的業務(提供法律意見 vs 提供文件範本,界線必須極清楚),否則違法且擔責。② 文件出錯導致客戶損失的賠償責任,風險極高。③ 法規隨地域與時間變動,模板需持續更新維護。④ 被大型法律科技平台以規模與品牌覆蓋。",
+    "path": "先鎖定一個高頻、標準化、且明確不需執照的文件類型(風險最低的切入點)。與一位合作律師建立轉介關係(複雜案件有出口,也增加合規可信度)。把流程做到比找律師更快更便宜,靠效率與價格切入,逐步累積合規信任。"
+  },
+  {
+    "id": "S-20",
+    "domain": "旅遊規劃",
+    "color": "#9a7b32",
+    "name": "深度行程設計師",
+    "role": "為特定地區設計高客製旅遊行程",
+    "sys": "AI 生行程草稿與在地資訊；模板＋在地資料庫複現；訂房交通用聯盟連結。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "親身踩點的第一手知識、在地關係與隱藏門路、旅人對你品味的信任。",
+    "finance": "行程設計費＋聯盟分潤＋自辦小團；旺季預收降低風險。",
+    "live": "專精一個別人懶得深耕的地區，靠口碑與內容導流。",
+    "die": "做通用攻略，與免費部落格和 AI 行程生成器正面競爭。",
+    "flow": "AI 生行程草稿與在地資訊,模板＋在地資料庫複現,訂房交通用聯盟連結分潤。專精一個別人懶得深耕的地區,靠親身踩點的第一手知識與隱藏門路差異化。行程設計費＋聯盟分潤＋自辦小團多元收入。",
+    "traps": "① 做通用攻略,與免費部落格、AI 行程生成器正面競爭——免費可得的東西沒人付費。② 旅遊需求受疫情、匯率、地緣政治劇烈影響,收入波動大。③ 自辦小團的責任與後勤(意外、糾紛、退款)是另一個量級的工作。④ 在地資訊過時(店倒了、規定變了)損害信任。",
+    "path": "選一個你真正熟、且資訊稀缺的地區(深度與第一手是護城河)。用免費的深度內容(私房路線、踩雷提醒)建立『這人真的懂』的信任。從高客製行程設計費起步(賣你的在地 know-how),口碑穩了再發展聯盟分潤與小團。"
+  },
+  {
+    "id": "S-21",
+    "domain": "電子報",
+    "color": "#b5472d",
+    "name": "求職／職涯電子報",
+    "role": "特定產業的職缺彙整與職涯洞察",
+    "sys": "AI 爬蟲彙整職缺＋自動分類；排程寄送；付費牆與金流平台處理。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "產業內招募人脈、獨家內推管道、讀者對篩選品質的信任。",
+    "finance": "讀者訂閱＋雇主刊登付費的雙邊收入；經常性現金流。",
+    "live": "做大求職者社群，讓雇主願意付費觸及，形成雙邊網路。",
+    "die": "職缺資訊可免費取得，社群規模撐不起雇主付費意願。",
+    "flow": "AI 爬蟲彙整職缺＋自動分類,排程寄送,付費牆與金流平台處理。讀者訂閱＋雇主刊登付費的雙邊收入。靠產業內招募人脈與獨家內推管道,做大求職者社群,讓雇主願意付費觸及。",
+    "traps": "① 職缺資訊可免費取得(大型求職平台、公司官網),社群規模撐不起雇主付費意願——雙邊網路冷啟動極難。② 雞生蛋問題:沒求職者雇主不來,沒雇主求職者不留。③ 職缺資訊時效性高,過期內容損害信任。④ 求職季節性波動。",
+    "path": "先把『求職者這一邊』做大做好(免費、高品質的職缺彙整＋洞察),這邊容易冷啟動。求職者社群有規模後,雇主付費刊登的需求自然浮現(他們要觸及你的受眾)。獨家內推管道是與大型平台差異化的關鍵——提供別處沒有的職缺。"
+  },
+  {
+    "id": "S-22",
+    "domain": "獨立軟體",
+    "color": "#2f5d50",
+    "name": "瀏覽器擴充開發者",
+    "role": "解決特定工作流痛點的擴充工具",
+    "sys": "AI 加速開發；商店處理分銷；用戶回饋自動彙整成 roadmap。",
+    "lev": [
+      "程式碼"
+    ],
+    "moat": "對特定工作流的深刻理解、先發累積的用戶基數、持續迭代的口碑。",
+    "finance": "一次買斷或訂閱；維運成本極低，可長尾。",
+    "live": "鎖定一個高頻痛點做到最好,靠口碑在專業社群擴散。",
+    "die": "平台政策一改功能就失效，或被瀏覽器原生功能吃掉。",
+    "flow": "AI 加速開發,瀏覽器商店處理分銷,用戶回饋自動彙整成 roadmap。鎖定一個高頻工作流痛點做到最好,靠口碑在專業社群擴散。一次買斷或訂閱,維運成本極低,可長尾。",
+    "traps": "① 平台(瀏覽器)政策一改,擴充功能可能直接失效或下架——你的整個生意寄生在別人的平台上。② 痛點被瀏覽器原生功能吃掉,需求消失。③ 擴充功能的權限要求高,用戶對隱私的疑慮影響安裝。④ 免費競品多,付費意願低。",
+    "path": "鎖定一個你自己在工作中天天遇到、現有方案都不好用的痛點(自己是用戶,需求最準)。做出比現有方案明顯好用的版本,在該專業的社群(論壇、社群媒體)分享。先靠免費版累積用戶與口碑,找到願付費的進階功能再做收費層。"
+  },
+  {
+    "id": "S-23",
+    "domain": "手作工藝",
+    "color": "#9a7b32",
+    "name": "高客製手作品牌",
+    "role": "小批量、高設計感的手作商品",
+    "sys": "設計數位化＋部分製程外包；接單預購免庫存；社群展示即行銷。",
+    "lev": [
+      "媒體",
+      "資本"
+    ],
+    "moat": "手工質感與不可量產的稀缺、創作者個人故事、收藏者社群。",
+    "finance": "高單價預購制，先收款再製作；少量訂單即可維生。",
+    "live": "把手作的稀缺性與個人故事變成溢價，經營收藏客群。",
+    "die": "想衝量卻失去手作獨特性，又拼不過工廠成本。",
+    "flow": "設計數位化＋部分製程外包,接單預購免庫存,社群展示即行銷(製作過程本身就是內容)。把手工質感與不可量產的稀缺變成溢價,經營收藏者社群。高單價預購制,先收款再製作,少量訂單即可維生。",
+    "traps": "① 想衝量卻失去手作獨特性,又拼不過工廠成本——量與稀缺難兩全。② 手作產能是硬天花板,做不快又不能規模化。③ 受傷、生病或倦怠直接讓產能歸零(極度依賴創作者本人)。④ 材料成本與運費波動侵蝕利潤。",
+    "path": "先在社群展示創作過程與成品,累積一批欣賞你風格的追隨者(過程即內容,內容即行銷)。用預購/限量制驗證需求並先收款(消除庫存風險)。把手作的稀缺性與個人故事打造成溢價理由,經營收藏客群而非衝銷量——少量高價優於大量低價。"
+  },
+  {
+    "id": "S-24",
+    "domain": "自動化服務",
+    "color": "#b5472d",
+    "name": "流程自動化顧問",
+    "role": "幫中小企業串接 AI／自動化工作流",
+    "sys": "可重複的自動化模板庫；交付後設定遠端監控；首道諮詢用 AI 篩選需求。",
+    "lev": [
+      "內容",
+      "程式碼"
+    ],
+    "moat": "跨工具整合的實作經驗、看懂客戶真正瓶頸的判斷、成功案例可信度。",
+    "finance": "建置費＋月度維運留任費（retainer）形成經常性收入。",
+    "live": "把一次性建置變成持續維運的訂閱關係，並產品化常見方案。",
+    "die": "每個案子都從零客製,做到累垮又無法規模化。",
+    "flow": "建立可重複的自動化模板庫(常見需求一次建好),交付後設定遠端監控,首道諮詢用 AI 篩選需求。建置費＋月度維運留任費形成經常性收入。靠跨工具整合的實作經驗與看懂客戶真正瓶頸的判斷差異化。",
+    "traps": "① 每個案子都從零客製,做到累垮又無法規模化——這是顧問型生意的通病。② 客戶的工具或流程一變,你建的自動化就壞,維運責任在你。③ 客戶把『自動化』當一次性建置,不願付維運費,收入不穩。④ 低代碼/AI 工具越來越易用,客戶可能學會自己做。",
+    "path": "先接幾個案子,把反覆出現的需求萃取成標準模板(從客製走向產品化)。建置時就綁定月度維運留任(把一次性收入變經常性)。鎖定一個特定產業或特定工具組合做深,成為該領域的指名專家,而非什麼都接的萬用工。"
+  },
+  {
+    "id": "S-25",
+    "domain": "播客",
+    "color": "#2f5d50",
+    "name": "利基訪談播客主",
+    "role": "深耕特定圈層的訪談節目",
+    "sys": "AI 做剪輯／逐字稿／社群短片改寫；製作流程模板化；贊助洽談標準化。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "能請到關鍵來賓的人脈、主持人個人魅力、圈層內的信任度。",
+    "finance": "贊助＋會員＋衍生活動多元收入；聽眾名單是核心資產。",
+    "live": "把聽眾沉澱成自有社群與名單，發展付費衍生品。",
+    "die": "只靠平台曝光與微薄贊助,做很久卻變現困難。",
+    "flow": "AI 做剪輯、逐字稿、社群短片改寫(一集拆成多個社群素材),製作流程模板化,贊助洽談標準化。靠能請到關鍵來賓的人脈與主持人魅力差異化。贊助＋會員＋衍生活動多元收入,聽眾名單是核心資產。",
+    "traps": "① 只靠平台曝光與微薄贊助,做很久卻變現困難——播客是出了名的『叫好不叫座』。② 聽眾數據不透明,贊助商難評估,議價弱。③ 製作節奏的壓力,斷更即失去聽眾慣性。④ 把下載量當資產,但沒有自有名單與社群,變現基礎薄弱。",
+    "path": "先靠能請到的關鍵來賓做出差異化內容(來賓本身就是行銷)。把聽眾盡快沉澱成自有社群與 email 名單(下載量不是資產,名單才是)。變現從贊助起步,但發展付費會員、衍生活動或產品,讓收入不只靠贊助。圈層越垂直,贊助與會員的價值越高。"
+  },
+  {
+    "id": "S-26",
+    "domain": "模板素材",
+    "color": "#9a7b32",
+    "name": "數位模板賣家",
+    "role": "販售簡報／文件／Notion 模板",
+    "sys": "AI 輔助製作與變體；一次做多平台上架；金流交給市集。",
+    "lev": [
+      "內容",
+      "資本"
+    ],
+    "moat": "設計品味與實用性、特定情境的完整度、累積的作品庫與評價。",
+    "finance": "被動授權長尾；作品庫越大、被動收入越穩。",
+    "live": "鎖定特定職業或情境做到極致實用,靠口碑與評價滾動。",
+    "die": "做泛用模板,被海量免費與 AI 生成模板淹沒。",
+    "flow": "AI 輔助製作與變體,一次做多平台上架,金流交給市集。鎖定特定職業或情境做到極致實用,靠口碑與評價滾動。被動授權長尾收入,作品庫越大、被動收入越穩。",
+    "traps": "① 做泛用模板,被海量免費與 AI 生成模板淹沒——差異化是生死線。② 單個模板售價低,需大量銷售才有可觀收入。③ 平台抽成與曝光演算法決定收益。④ 模板被買家二次散布或盜版難防。",
+    "path": "鎖定一個特定職業/情境的真實需求(越具體越好,如『獨立顧問的提案簡報模板』)。做到比免費版明顯更實用、更省時。在該職業的社群推廣,累積好評(評價是市集裡的信任貨幣)。持續擴充同主題的模板系列,讓你成為該情境的首選。"
+  },
+  {
+    "id": "S-27",
+    "domain": "寵物服務",
+    "color": "#b5472d",
+    "name": "寵物垂直內容創作者",
+    "role": "特定品種／需求的寵物知識與選品",
+    "sys": "AI 協助內容產製與多平台改寫；選品聯盟＋自有商品；客服 FAQ 自動化。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "專科獸醫級知識或實務經驗、飼主社群信任、針對特定品種的精專。",
+    "finance": "聯盟分潤＋自有商品＋會員諮詢;社群即流量資產。",
+    "live": "專精一個窄到別人不做的利基，建立飼主信任社群。",
+    "die": "做泛用寵物內容,與大型媒體和 AI 內容正面競爭。",
+    "flow": "AI 協助內容產製與多平台改寫,選品聯盟＋自有商品,客服 FAQ 自動化。專精一個窄到別人不做的利基(特定品種、特定需求),建立飼主信任社群。聯盟分潤＋自有商品＋會員諮詢多元收入。",
+    "traps": "① 做泛用寵物內容,與大型媒體和 AI 內容正面競爭——大而全打不過,小而深才有活路。② 寵物健康建議的合規與擔責(誤導飼主延誤就醫)。③ 聯盟分潤受平台政策與佣金率變動影響。④ 社群信任一旦因推銷過度受損,難挽回。",
+    "path": "選一個窄到大型媒體懶得做的利基(特定品種、特定疾病、特定飼養情境)。用專業級知識或實務經驗建立飼主信任社群(信任是這個利基的核心資產)。內容免費導流,變現靠聯盟＋精選自有商品＋付費諮詢。寧可服務一千個死忠,不要一百萬個路人。"
+  },
+  {
+    "id": "S-28",
+    "domain": "財經工具",
+    "color": "#2f5d50",
+    "name": "個人理財工具開發者",
+    "role": "做特定情境的記帳／試算工具",
+    "sys": "AI 加速開發；自動化計費與更新；用戶回饋自動分類成需求池。",
+    "lev": [
+      "程式碼"
+    ],
+    "moat": "對特定理財痛點的理解、資料隱私帶來的信任、持續迭代的口碑。",
+    "finance": "訂閱 MRR＋極低維運;可長尾。",
+    "live": "解決一個主流工具沒做好的窄痛點,靠口碑擴散。",
+    "die": "做又一個通用記帳 App,沒有非用不可的理由。",
+    "flow": "AI 加速開發,自動化計費與更新,用戶回饋自動分類成需求池。解決一個主流工具沒做好的窄痛點,靠口碑擴散。訂閱 MRR＋極低維運,可長尾。",
+    "traps": "① 做又一個通用記帳 App,沒有非用不可的理由——理財工具市場已極度擁擠。② 財務資料的隱私與安全是信任底線,一次外洩即死。③ 與銀行/券商的資料串接受 API 政策與法規限制。④ 大型理財平台或銀行 App 順手覆蓋你的功能。",
+    "path": "鎖定一個主流工具明顯沒做好的特定理財情境(如特定族群、特定資產類別的記帳/試算)。把資料隱私做成賣點(信任是理財工具的護城河)。先服務一小群有明確痛點的用戶,確認他們願意為這個窄功能付費,再擴充。"
+  },
+  {
+    "id": "S-29",
+    "domain": "教育產品",
+    "color": "#9a7b32",
+    "name": "語言學習內容創作者",
+    "role": "特定語言／程度的教學內容與工具",
+    "sys": "AI 生例句／練習／發音回饋；課程錄一次賣多次;社群答疑分時段。",
+    "lev": [
+      "內容",
+      "程式碼"
+    ],
+    "moat": "教學法巧思、學習者成果見證、針對母語者痛點的精準設計。",
+    "finance": "訂閱＋課程＋會員;製作後邊際成本低。",
+    "live": "鎖定特定母語者學特定語言的痛點,靠成果口碑擴散。",
+    "die": "做泛用語言內容,與大型 App 和免費 AI 對話正面對撞。",
+    "flow": "AI 生例句、練習、發音回饋,課程錄一次賣多次,社群答疑分時段批次處理。鎖定特定母語者學特定語言的痛點(如『中文母語者學日語的特定難關』),靠成果口碑擴散。訂閱＋課程＋會員,製作後邊際成本低。",
+    "traps": "① 做泛用語言內容,與大型 App 和免費 AI 對話正面對撞——通用市場早被巨頭與免費 AI 佔據。② 語言學習者流失率極高(三分鐘熱度),續訂難維持。③ 成效難量化,付費說服門檻高。④ AI 即時對話/翻譯快速進步,部分教學需求被稀釋。",
+    "path": "鎖定一個特定母語者學特定語言的特定難關(越具體,AI 越難通用覆蓋)。用免費內容展示你能解決這個難關(成果展示是最強說服)。把學習者沉澱進社群(同儕＋陪伴能降低流失)。變現靠針對該難關的精準課程與會員陪伴。"
+  },
+  {
+    "id": "S-30",
+    "domain": "設計工具",
+    "color": "#b5472d",
+    "name": "創作者工具開發者",
+    "role": "幫創作者省時的小工具",
+    "sys": "AI 加速開發；自動化計費；用戶社群即測試與口碑來源。",
+    "lev": [
+      "程式碼"
+    ],
+    "moat": "自己也是目標用戶帶來的精準度、創作者社群口碑、快速迭代。",
+    "finance": "訂閱 MRR;維運成本低、毛利高。",
+    "live": "做自己每天都想用的工具,在創作者社群引爆口碑。",
+    "die": "做了個聽起來不錯但沒人天天用的工具。",
+    "flow": "AI 加速開發,自動化計費,用戶社群即測試與口碑來源。做自己每天都想用的工具,在創作者社群引爆口碑。訂閱 MRR,維運成本低、毛利高。自己是目標用戶,需求最準。",
+    "traps": "① 做了個聽起來不錯但沒人天天用的工具——『有趣』不等於『剛需』。② 創作者付費意願與能力參差,定價難拿捏。③ 功能容易被大型創作工具整合吃掉。④ 一人撐開發+客服+行銷,顧此失彼。",
+    "path": "從你自己創作時最痛的那個環節下手(自己是用戶,需求驗證成本為零)。做出 MVP 先自用、再給創作者社群的朋友試。靠『創作者推薦創作者』的口碑擴散(這個圈子口碑傳播極快)。盯緊『是否天天被打開』——高頻使用才撐得起訂閱。"
+  },
+  {
+    "id": "S-31",
+    "domain": "研究分析",
+    "color": "#2f5d50",
+    "name": "產業情報研究者",
+    "role": "特定產業的趨勢追蹤與深度報告",
+    "sys": "AI 蒐集彙整＋初稿；報告框架模板化;訂閱與金流平台處理。",
+    "lev": [
+      "內容",
+      "資本"
+    ],
+    "moat": "產業縱深判斷、獨家資料與訪談、長期累積的分析可信度。",
+    "finance": "高單價訂閱＋客製研究;少量機構客戶即可維生。",
+    "live": "提供 AI 摘要取代不了的獨家判斷與一手資料。",
+    "die": "報告內容可被 AI 從公開資料重組,失去付費理由。",
+    "flow": "AI 蒐集彙整＋初稿,報告框架模板化,訂閱與金流平台處理。提供 AI 摘要取代不了的獨家判斷與一手資料(訪談、實地、獨家數據)。高單價訂閱＋客製研究,少量機構客戶即可維生。",
+    "traps": "① 報告內容可被 AI 從公開資料重組,失去付費理由——必須有 AI 拿不到的一手素材。② 機構客戶決策慢、採購週期長,現金流前期吃緊。③ 客戶集中度高,少數大客戶流失即重創。④ 判斷出錯損害可信度,而可信度是這行的全部。",
+    "path": "選一個你有縱深判斷、且資訊不對稱明顯的產業(資訊越不透明,你的整理與判斷越值錢)。用公開的高品質短報告建立可信度與權威(展示判斷力)。鎖定願為獨家洞察付高價的機構客戶。一手資料(訪談、調研)是與『AI 重組公開資料』的根本差異。"
+  },
+  {
+    "id": "S-32",
+    "domain": "健康營養",
+    "color": "#9a7b32",
+    "name": "營養／健康顧問",
+    "role": "特定族群的飲食與健康規劃",
+    "sys": "飲食模板＋AI 個人化調整;進度追蹤自動化;社群答疑分時段。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "專業資格與成果見證、針對特定族群的精專、客戶信任。",
+    "finance": "月費會員＋課程＋諮詢;經常性收入。",
+    "live": "專精一個特定族群,靠真實成果建立口碑與續訂。",
+    "die": "做泛用健康內容,踩到醫療合規紅線或被免費資訊取代。",
+    "flow": "飲食模板＋AI 個人化調整,進度追蹤自動化,社群答疑分時段批次處理。專精一個特定族群(特定體質、特定目標),靠真實成果見證建立口碑與續訂。月費會員＋課程＋諮詢,經常性收入。",
+    "traps": "① 做泛用健康內容,踩到醫療合規紅線(療效宣稱、診斷建議會出事)或被免費資訊取代。② 成效因人而異且難保證,客戶期待落差導致流失與糾紛。③ 個人健康資料的隱私責任。④ 一對一諮詢的時間天花板。",
+    "path": "鎖定一個特定族群的特定健康目標(越具體,你越能成為該領域的指名專家)。嚴守合規界線(分享知識 vs 醫療建議)。用真實成果見證做口碑(成果是這行最強的行銷)。把一對一萃取成可規模化的會員制與課程,脫離時間天花板。"
+  },
+  {
+    "id": "S-33",
+    "domain": "遊戲開發",
+    "color": "#b5472d",
+    "name": "獨立遊戲開發者",
+    "role": "一人或極小團隊做小品電玩",
+    "sys": "AI 輔助美術／程式／關卡;發行與金流交給平台;社群即測試。",
+    "lev": [
+      "程式碼",
+      "內容",
+      "媒體"
+    ],
+    "moat": "獨特創意與玩法、美術風格辨識度、社群提前累積的期待。",
+    "finance": "買斷或內購;上市前靠願望清單與群募驗證需求。",
+    "live": "在上市前就用社群與內容累積一批等著買的玩家。",
+    "die": "閉門開發數年,上市時無人知曉,沉入發行墳場。",
+    "flow": "AI 輔助美術、程式、關卡設計,發行與金流交給平台(Steam 類),社群即測試與口碑。在上市前就用社群、內容、願望清單累積一批等著買的玩家。買斷或內購,上市前靠願望清單與群募驗證需求。",
+    "traps": "① 閉門開發數年,上市時無人知曉,沉入發行墳場——這是獨立遊戲最常見、最致命的死法。② 範圍蔓延(scope creep):一人想做大作,開發無止境、資金燒乾。③ 上市後的長尾行銷與更新壓力。④ 平台演算法與曝光決定生死,完全被動。",
+    "path": "先把範圍砍到一人能在合理時間完成的小品(完成 > 完美)。開發過程公開化:用 devlog、社群、demo 持續累積關注與願望清單(行銷從第一天就開始,不是上市才開始)。上市前的願望清單數量,直接決定首發成績。先驗證有人想玩,再投入完整開發。"
+  },
+  {
+    "id": "S-34",
+    "domain": "電商品牌",
+    "color": "#2f5d50",
+    "name": "訂閱制盒子品牌",
+    "role": "特定主題的月訂閱選物盒",
+    "sys": "選品＋採購標準化;履約 3PL 外包;會員管理與金流自動化。",
+    "lev": [
+      "媒體",
+      "資本"
+    ],
+    "moat": "選品品味與策展能力、訂閱者社群歸屬感、與供應商的關係。",
+    "finance": "訂閱經常性收入＋預收現金流;規模化攤平成本。",
+    "live": "靠策展品味與社群歸屬感壓低流失率,撐起經常性收入。",
+    "die": "流失率高於獲客,訂閱數像漏水的桶子留不住。",
+    "flow": "選品＋採購標準化,履約 3PL 外包,會員管理與金流自動化。靠選品品味與訂閱者社群歸屬感壓低流失率。訂閱經常性收入＋預收現金流,規模化攤平採購與物流成本。",
+    "traps": "① 流失率高於獲客,訂閱數像漏水的桶子留不住——訂閱盒子的核心生死指標。② 每月都要『驚喜』,選品壓力與成本持續累積。③ 物流、缺貨、損壞的履約問題隨規模放大。④ 採購規模不夠時毛利被壓垮。⑤ 預收現金流容易讓人誤判健康度,實則靠新客補舊客流失。",
+    "path": "先用小規模驗證『有人願意每月付費收到你的選物』(驗證留存,不只是首購)。把選品品味與社群歸屬感做成續訂理由(歸屬感比商品本身更能留人)。死盯流失率——在規模化之前先把桶子的洞補好,否則放大只會放大虧損。"
+  },
+  {
+    "id": "S-35",
+    "domain": "自媒體",
+    "color": "#9a7b32",
+    "name": "電子書／指南作者",
+    "role": "把專業整理成可下載的數位指南",
+    "sys": "AI 協助整理／編輯／排版;一次製作多管道販售;更新版本化。",
+    "lev": [
+      "內容"
+    ],
+    "moat": "把複雜經驗濃縮成可行動指南的能力、個人權威、讀者信任。",
+    "finance": "一次製作長尾販售;可當作高價課程或服務的漏斗。",
+    "live": "用免費內容當漏斗導流,把指南當成信任的起點。",
+    "die": "資訊型內容被 AI 免費生成,失去付費理由。",
+    "flow": "AI 協助整理、編輯、排版,一次製作多管道販售,更新版本化。把複雜經驗濃縮成可立刻行動的指南。一次製作長尾販售,可當作高價課程或服務的漏斗(指南是信任的起點)。",
+    "traps": "① 資訊型內容被 AI 免費生成,失去付費理由——純資訊的指南最易被取代。② 一次製作後不更新,內容過時。③ 把指南當終點而非漏斗,錯過後端更高價的變現。④ 定價低、銷量靠流量,沒有導流就賣不動。",
+    "path": "把你獨有的、難以從網路拼湊的經驗濃縮成『照做就能解決某問題』的指南(可行動性 > 資訊量)。用免費內容導流,把指南當成建立信任的低價入口。後端接更高價的課程、諮詢或服務——指南賺的是信任,不是售價本身。"
+  },
+  {
+    "id": "S-36",
+    "domain": "接案開發",
+    "color": "#b5472d",
+    "name": "專案型自由工程師",
+    "role": "高單價技術接案與系統建置",
+    "sys": "AI 大幅加速開發;可重複的架構模板;提案與合約模板化。",
+    "lev": [
+      "程式碼"
+    ],
+    "moat": "解決複雜問題的能力、可信交付紀錄、特定技術棧的稀缺專精。",
+    "finance": "高單價專案制;可發展成維運留任的經常性收入。",
+    "live": "上移到 AI 取代不了的架構與整合判斷,靠口碑指名。",
+    "die": "停在 AI 已能勝任的基礎開發,被低價與工具兩面擠壓。",
+    "flow": "AI 大幅加速開發,可重複的架構模板,提案與合約模板化。上移到 AI 取代不了的架構設計與系統整合判斷,靠可信交付紀錄指名。高單價專案制,可發展成維運留任的經常性收入。",
+    "traps": "① 停在 AI 已能勝任的基礎開發(切版、CRUD),被低價市場與 AI 工具兩面擠壓。② 純專案制收入起伏大,案子之間的空窗即斷炊。③ 客戶集中度高的風險。④ 範圍蔓延與報價不準,做越多虧越多。⑤ 一人難同時開發與開發新案源。",
+    "path": "把能力上移到架構、整合、疑難排解這類 AI 取代不了的層次(高價值 = 高判斷含量)。用幾個漂亮的交付案例建立可信紀錄,靠口碑指名(指名客戶才能談高價)。把專案收尾綁定維運留任,把一次性收入轉成經常性,平滑空窗期。"
+  },
+  {
+    "id": "S-37",
+    "domain": "藝術創作",
+    "color": "#2f5d50",
+    "name": "獨立視覺藝術家",
+    "role": "原創作品銷售與委製",
+    "sys": "AI 輔助發想與變體;線上藝廊與 NFT/印刷品分銷;委製流程標準化。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "不可複製的藝術語言、創作者故事與人格、收藏者社群與市場認可。",
+    "finance": "原作＋限量印刷＋委製多層收入;粉絲社群即市場。",
+    "live": "建立有辨識度的藝術語言與收藏社群,讓作品被指名。",
+    "die": "產製可被 AI 模仿的通用風格,淹沒在生成內容洪流中。",
+    "flow": "AI 輔助發想與變體,線上藝廊與印刷品/數位形式分銷,委製流程標準化。建立不可複製的藝術語言與創作者故事,經營收藏者社群與市場認可。原作＋限量印刷＋委製多層收入,粉絲社群即市場。",
+    "traps": "① 產製可被 AI 模仿的通用風格,淹沒在生成內容洪流中——辨識度是藝術家的命。② 藝術市場的價值極度主觀,收入難預測。③ 過度商業化稀釋藝術可信度與收藏價值。④ 創作者個人健康/狀態直接決定產能。",
+    "path": "投資於建立一個一看就認得是你的藝術語言(辨識度 = 護城河,需要時間沉澱)。公開創作過程與理念,把『人』與『故事』變成作品價值的一部分(收藏的是故事,不只是圖)。從限量印刷或委製這類較易入手的形式累積收藏社群,逐步建立市場認可。"
+  },
+  {
+    "id": "S-38",
+    "domain": "社群經營",
+    "color": "#9a7b32",
+    "name": "付費社群主理人",
+    "role": "經營特定主題的付費會員社群",
+    "sys": "AI 協助內容與活動策劃;會員與金流平台自動化;規範與 onboarding 模板化。",
+    "lev": [
+      "內容",
+      "媒體"
+    ],
+    "moat": "成員間的網路效應、主理人的號召力、難以複製的社群文化。",
+    "finance": "會員月費經常性收入;成員越多、價值越高的網路效應。",
+    "live": "創造成員彼此連結的網路效應,讓社群本身產生留存價值。",
+    "die": "社群淪為單向廣播,成員找不到留下來的理由而流失。",
+    "flow": "AI 協助內容與活動策劃,會員與金流平台自動化,規範與新人 onboarding 模板化。創造成員彼此連結的網路效應(社群的價值來自成員之間,不只是你)。會員月費經常性收入,成員越多、價值越高。",
+    "traps": "① 社群淪為單向廣播,成員找不到留下來的理由而流失——付費社群最常見的死法。② 冷啟動難:沒人氣的社群沒人想加入(雞生蛋)。③ 主理人成為唯一價值來源,你一忙社群就冷掉(沒做出成員間的網路效應)。④ 規模放大後的管理、衝突、品質維護負擔。",
+    "path": "先用免費或低價聚集一小群高契合度的種子成員(品質 > 數量,種子決定文化)。設計讓成員彼此互動、互助的機制(把價值從『你』轉移到『成員之間』,這才是留存關鍵)。等社群本身能產生留下來的理由,再放大。文化一旦壞掉極難修復。"
+  },
+  {
+    "id": "S-39",
+    "domain": "資料服務",
+    "color": "#b5472d",
+    "name": "API 服務開發者",
+    "role": "把某項能力包裝成開發者 API",
+    "sys": "AI 加速開發;自動化計費與監控;文件與 onboarding 自助化。",
+    "lev": [
+      "程式碼",
+      "資本"
+    ],
+    "moat": "獨特的資料源或演算法、開發者整合後的轉換成本、可靠度口碑。",
+    "finance": "用量計費高毛利;一旦被整合進客戶系統即高黏著。",
+    "live": "提供一個別人懶得自建、整合後就離不開的能力。",
+    "die": "能力被大廠 API 或開源方案以更低價覆蓋。",
+    "flow": "AI 加速開發,自動化計費與監控,文件與 onboarding 自助化(開發者能自己接上)。提供一個別人懶得自建、整合後就離不開的能力。用量計費高毛利,一旦被整合進客戶系統即高黏著(轉換成本是護城河)。",
+    "traps": "① 能力被大廠 API 或開源方案以更低價甚至免費覆蓋——這是 API 生意最大的結構性風險。② 客戶整合前的說服與技術門檻高,獲客慢。③ 可靠度要求極高,一次大當機可能流失關鍵客戶。④ 用量計費下,少數大客戶的用量波動劇烈影響收入。",
+    "path": "找一個『需要、但自建很麻煩』的能力缺口(麻煩程度 = 你的訂價權)。把 onboarding 與文件做到開發者能自助接上(降低獲客摩擦)。爭取被整合進客戶的核心流程——整合越深,轉換成本越高,黏著越強。可靠度是信任底線,不能省。"
+  },
+  {
+    "id": "S-40",
+    "domain": "教練諮詢",
+    "color": "#2f5d50",
+    "name": "專業領域教練",
+    "role": "一對一或團體的技能／職涯教練",
+    "sys": "框架與課程模板化;預約與金流自動化;團體課放大單位產能。",
+    "lev": [
+      "內容"
+    ],
+    "moat": "實戰成果與見證、個人可信度、針對特定轉變的方法論。",
+    "finance": "高單價一對一＋可規模化的團體課與課程組合。",
+    "live": "把一對一經驗萃取成可規模化的團體方案與課程。",
+    "die": "只做一對一,時間賣完就觸頂,無法成長。",
+    "flow": "框架與課程模板化,預約與金流自動化,團體課放大單位產能(一對多打破時間天花板)。靠實戰成果與見證、針對特定轉變的方法論差異化。高單價一對一＋可規模化的團體課與課程組合。",
+    "traps": "① 只做一對一,時間賣完就觸頂,無法成長——這是教練的硬天花板。② 成效依賴客戶執行,你能控制的有限,見證難穩定產出。③ 教練市場魚龍混雜,信任建立成本高。④ 個人品牌即生意,你一停業務就停。",
+    "path": "先用一對一累積一批有明確轉變的客戶見證(成果見證是教練最強的行銷)。把重複的指導內容萃取成方法論與框架(產品化的基礎)。從一對一逐步加入團體課、線上課程,把『賣時間』轉成『賣方法論』,讓收入脫離工時。"
+  },
+  {
+    "id": "S-41",
+    "domain": "製造設計",
+    "color": "#9a7b32",
+    "name": "實體產品設計師",
+    "role": "設計小眾實體產品並代工生產",
+    "sys": "設計數位化;製造代工＋3PL 外包;群募預售驗證需求。",
+    "lev": [
+      "媒體",
+      "資本"
+    ],
+    "moat": "產品設計巧思、解決特定痛點的洞察、早期支持者社群。",
+    "finance": "群募預售先收款再生產,消除庫存風險。",
+    "live": "用群募驗證需求＋累積首批客群,再滾動口碑。",
+    "die": "沒驗證需求就量產,壓了一倉庫賣不掉的庫存。",
+    "flow": "設計數位化,製造代工＋3PL 外包,群募預售先收款再生產(消除庫存風險)。靠產品設計巧思與解決特定痛點的洞察差異化,經營早期支持者社群。群募預售驗證需求＋累積首批客群,再滾動口碑。",
+    "traps": "① 沒驗證需求就量產,壓了一倉庫賣不掉的庫存——實體產品最致命的現金陷阱。② 群募達標後的履約地獄(生產延遲、品質、運費、關稅)。③ 代工 MOQ(最小起訂量)與品質控管對一人是大挑戰。④ 產品被快速抄襲(尤其無專利保護時)。",
+    "path": "先用群募或預售驗證『有人願意先付錢買』(需求驗證 > 直覺),絕不先囤貨。把首批支持者經營成社群與口碑來源(他們是你的第一批傳道者)。確認單位經濟成立後再考慮量產與通路。設計的差異化與痛點洞察,是抵擋抄襲的唯一辦法。"
+  },
+  {
+    "id": "S-42",
+    "domain": "內容授權",
+    "color": "#b5472d",
+    "name": "素材／IP 授權者",
+    "role": "創作可重複授權的 IP 或內容資產",
+    "sys": "AI 輔助產製與變體;多平台授權分銷;授權與金流標準化。",
+    "lev": [
+      "內容",
+      "資本"
+    ],
+    "moat": "有辨識度的 IP、累積的作品庫資產、授權關係網。",
+    "finance": "授權被動收入長尾;一次創作多次收費的複利結構。",
+    "live": "打造有辨識度、能反覆授權的 IP 資產。",
+    "die": "產製無差異化內容,在授權市場被低價與 AI 取代。",
+    "flow": "AI 輔助產製與變體,多平台授權分銷,授權與金流標準化。打造有辨識度、能反覆授權的 IP 或內容資產。授權被動收入長尾,一次創作多次收費的複利結構(資產越多,被動收入越穩)。",
+    "traps": "① 產製無差異化內容,在授權市場被低價與 AI 取代——辨識度決定能否反覆授權。② 單次授權金低,需大量資產累積才有可觀收入。③ IP 的版權保護與盜用追究成本高。④ 平台演算法與政策決定曝光與收益。",
+    "path": "投資於打造有辨識度的 IP 或風格(可被反覆授權的前提是『獨特到值得授權』)。建立作品/IP 庫,讓被動收入靠規模＋複利累積。把授權流程標準化,降低每次交易的摩擦。辨識度與資產庫的縱深,是抵擋 AI 與低價競爭的雙重護城河。"
+  }
+];
+
+const grid = document.getElementById('grid');
+const filtersEl = document.getElementById('filters');
+const levFiltersEl = document.getElementById('levFilters');
+const countEl = document.getElementById('count');
+const searchEl = document.getElementById('search');
+const specCountEl = document.getElementById('specCount');
+
+specCountEl.textContent = `N=${DATA.length} SPECIMENS · REV. 2026.06`;
+
+const domains = [...new Set(DATA.map(d=>d.domain))];
+const levTypes = ['程式碼','內容','媒體','資本'];
+let activeDomain = 'ALL';
+let activeLev = 'ALL';
+let query = '';
+
+function makeChip(label, val, isActive, onClick){
+  const b=document.createElement('button');
+  b.className='chip'+(isActive?' active':'');
+  b.textContent=label;
+  b.onclick=onClick;
+  return b;
+}
+function buildFilters(){
+  filtersEl.innerHTML='';
+  filtersEl.appendChild(makeChip('全部','ALL',activeDomain==='ALL',()=>{activeDomain='ALL';render();}));
+  domains.forEach(d=>filtersEl.appendChild(makeChip(d,d,activeDomain===d,()=>{activeDomain=d;render();})));
+  levFiltersEl.innerHTML='';
+  levFiltersEl.appendChild(makeChip('全部','ALL',activeLev==='ALL',()=>{activeLev='ALL';render();}));
+  levTypes.forEach(l=>levFiltersEl.appendChild(makeChip(l,l,activeLev===l,()=>{activeLev=l;render();})));
+}
+
+function card(d){
+  const el=document.createElement('article');
+  el.className='card';
+  el.innerHTML=`
+    <div class="card-top">
+      <span class="specimen">標本 ${d.id}</span>
+      <span class="domain-tag" style="color:${d.color}">${d.domain}</span>
+    </div>
+    <h2>${d.name}</h2>
+    <p class="role">${d.role}</p>
+    <div class="pillars">
+      <div class="pillar"><span class="pnum">1</span><div class="pbody"><span class="plabel">可委派系統</span>${d.sys}</div></div>
+      <div class="pillar"><span class="pnum">2</span><div class="pbody"><span class="plabel">無人力槓桿</span>${d.lev.map(l=>`<span class="lev">${l}</span>`).join('')}</div></div>
+      <div class="pillar"><span class="pnum">4</span><div class="pbody"><span class="plabel">財務韌性</span>${d.finance}</div></div>
+    </div>
+    <div class="moat-row"><div class="pbody"><span class="plabel">③ 護城河 · AI 拿不到</span>${d.moat}</div></div>
+    <div class="fault">
+      <span class="flabel">⚠ 生死分水嶺</span>
+      <div class="live"><b>成立 →</b> ${d.live}</div>
+      <div class="die"><b>失敗 →</b> ${d.die}</div>
+    </div>
+    <button class="expand-btn" aria-expanded="false"><span>展開完整檔案 · Full Dossier</span><span class="arr">›</span></button>
+    <div class="deep">
+      <div class="deep-block">
+        <div class="dlabel dl-flow"><span class="dot"></span>具體流程與工具 · How it runs</div>
+        <div class="dtext">${d.flow}</div>
+      </div>
+      <div class="deep-block">
+        <div class="dlabel dl-trap"><span class="dot"></span>隱藏陷阱與真實風險 · What kills it</div>
+        <div class="dtext">${d.traps}</div>
+      </div>
+      <div class="deep-block">
+        <div class="dlabel dl-path"><span class="dot"></span>0→1 起步路徑 · How to start</div>
+        <div class="dtext">${d.path}</div>
+      </div>
+    </div>`;
+  const btn=el.querySelector('.expand-btn');
+  btn.addEventListener('click',()=>{
+    const open=el.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open);
+    btn.querySelector('span').textContent = open ? '收合檔案 · Collapse' : '展開完整檔案 · Full Dossier';
+  });
+  return el;
+}
+
+function render(){
+  buildFilters();
+  const q=query.trim().toLowerCase();
+  const list=DATA.filter(d=>{
+    const domOk = activeDomain==='ALL' || d.domain===activeDomain;
+    const levOk = activeLev==='ALL' || d.lev.includes(activeLev);
+    if(!domOk || !levOk) return false;
+    if(!q) return true;
+    const hay=[d.name,d.role,d.domain,d.sys,d.moat,d.finance,d.live,d.die,d.lev.join(' ')].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+  grid.innerHTML='';
+  if(list.length===0){
+    grid.innerHTML='<div class="empty">沒有符合的標本。試試清空篩選或換個關鍵字。</div>';
+  } else {
+    list.forEach(d=>grid.appendChild(card(d)));
+    if(typeof allOpen!=='undefined' && allOpen){
+      grid.querySelectorAll('.card').forEach(c=>{
+        c.classList.add('open');
+        const b=c.querySelector('.expand-btn');
+        if(b){b.setAttribute('aria-expanded',true);b.querySelector('span').textContent='收合檔案 · Collapse';}
+      });
+    }
+  }
+  countEl.textContent=`顯示 ${list.length} / ${DATA.length} 筆`;
+}
+
+searchEl.addEventListener('input',e=>{query=e.target.value;render();});
+
+let allOpen=false;
+const expandAllBtn=document.getElementById('expandAll');
+expandAllBtn.addEventListener('click',()=>{
+  allOpen=!allOpen;
+  document.querySelectorAll('.card').forEach(c=>{
+    c.classList.toggle('open',allOpen);
+    const b=c.querySelector('.expand-btn');
+    if(b){b.setAttribute('aria-expanded',allOpen);b.querySelector('span').textContent=allOpen?'收合檔案 · Collapse':'展開完整檔案 · Full Dossier';}
+  });
+  expandAllBtn.textContent=allOpen?'▤ 全部收合':'▤ 全部展開';
+});
+
+render();
+</script>
+</body>
+</html>
