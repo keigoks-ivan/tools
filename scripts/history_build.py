@@ -158,6 +158,13 @@ ENTRIES = [
          zh="兩河、文明的搖籃，與巴格達的黃金與灰燼：伊拉克", en="Iraq: Two Rivers, the Cradle of Civilization & the Gold and Ash of Baghdad", lat=33.2, lng=43.7),
     dict(src="非洲歷史/沙烏地阿拉伯史詩_沙漠聖地與劍與經.html", slug="saudi-epic", cat="nation",
          zh="沙漠、聖地，與劍與經的契約：沙烏地阿拉伯", en="Saudi Arabia: Desert, the Holy Cities & the Pact of Sword and Book", lat=24.0, lng=45.0),
+    # ---------- 海灣產油國史詩 Gulf ----------
+    dict(src="中東歷史/卡達史詩_半島天然氣與小國的槓桿.html", slug="qatar-epic", cat="nation",
+         zh="半島、天然氣，與一個小國的槓桿：卡達", en="Qatar: The Peninsula, the Gas & a Small State's Leverage", lat=25.3, lng=51.2),
+    dict(src="中東歷史/阿聯史詩_聯邦轉口商城與後石油的豪賭.html", slug="uae-epic", cat="nation",
+         zh="聯邦、轉口商城，與一場後石油的豪賭：阿聯", en="The UAE: The Union, the Entrepôt & the After-Oil Bet", lat=24.3, lng=53.8),
+    dict(src="中東歷史/科威特史詩_商人石油與海灣唯一的議會.html", slug="kuwait-epic", cat="nation",
+         zh="商人、石油，與海灣唯一的議會：科威特", en="Kuwait: The Merchant, the Oil & the Gulf's Only Parliament", lat=29.3, lng=47.9),
     dict(src="歐亞歷史/以色列史詩_應許之地避難所與兩個民族.html", slug="israel-epic", cat="nation",
          zh="應許之地、避難所，與兩個民族的一塊土地：以色列", en="Israel: The Promised Land, the Refuge & One Land for Two Peoples", lat=31.4, lng=35.0),
     dict(src="歐亞歷史/俄羅斯史詩_平原與垂直線與第三羅馬.html", slug="russia-epic", cat="nation",

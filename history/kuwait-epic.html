@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商人、石油，與海灣唯一的議會：科威特的身世</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1410;
+  --parchment:#f4ecdc;
+  --parchment-deep:#e8dcc2;
+  --sea:#1e3a4c;
+  --sea-deep:#0f2330;
+  --gold:#b08d34;
+  --gold-bright:#d4af5a;
+  --rust:#8c3a21;
+  --crimson:#7a2418;
+  --jade:#3a5f48;
+  --faint:#6b5d48;
+  --line:#c9b893;
+  --shadow:rgba(26,20,16,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Serif TC',serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(176,141,52,.07), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(30,58,76,.06), transparent 50%),
+    var(--parchment);
+  color:var(--ink);
+  line-height:1.95;
+  font-size:18px;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ====== HERO ====== */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(30,58,76,.55), transparent 70%),
+    linear-gradient(165deg, var(--sea-deep) 0%, var(--sea) 45%, #244153 100%);
+  color:var(--parchment);overflow:hidden;padding:4rem 2rem;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6' opacity='0.16'%3E%3Ccircle cx='600' cy='600' r='560'/%3E%3Ccircle cx='600' cy='600' r='420'/%3E%3Ccircle cx='600' cy='600' r='280'/%3E%3Cpath d='M40 600 H1160 M600 40 V1160 M180 180 L1020 1020 M1020 180 L180 1020'/%3E%3Cpath d='M600 30 L630 600 L600 1170 L570 600 Z' fill='%23d4af5a' opacity='0.4'/%3E%3Cpath d='M30 600 L600 570 L1170 600 L600 630 Z' fill='%23d4af5a' opacity='0.25'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-repeat:no-repeat;background-size:contain;
+  animation:spin 220s linear infinite;opacity:.7;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;z-index:2;max-width:880px;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.hero .kicker{
+  font-family:'Cinzel',serif;letter-spacing:.42em;font-size:.8rem;
+  color:var(--gold-bright);text-transform:uppercase;margin-bottom:2rem;
+  padding-left:.42em;
+}
+.hero h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1.12;
+  letter-spacing:.02em;text-shadow:0 4px 30px rgba(0,0,0,.4);
+}
+.hero h1 .em{color:var(--gold-bright);display:inline-block}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.6vw,1.7rem);margin-top:1.8rem;
+  color:rgba(244,236,220,.82);font-weight:400;letter-spacing:.03em;
+}
+.hero .rule{width:90px;height:2px;background:var(--gold-bright);margin:2.4rem auto 0;position:relative}
+.hero .rule::before,.hero .rule::after{content:"";position:absolute;top:50%;width:6px;height:6px;background:var(--gold-bright);border-radius:50%;transform:translateY(-50%)}
+.hero .rule::before{left:-16px}.hero .rule::after{right:-16px}
+.scroll-hint{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.3em;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:820px;margin:0 auto;padding:0 1.6rem;position:relative;z-index:2}
+.lede{
+  max-width:820px;margin:5rem auto 2rem;padding:0 1.6rem;position:relative;z-index:2;
+}
+.lede p{
+  font-family:'Cormorant Garamond',serif;font-size:1.5rem;line-height:1.7;
+  color:var(--sea-deep);font-weight:500;
+}
+.lede p .drop{
+  float:left;font-family:'Cinzel',serif;font-size:5.2rem;line-height:.72;
+  padding:.55rem .55rem 0 0;color:var(--rust);font-weight:700;
+}
+
+/* ====== ACT HEADERS ====== */
+.act{margin:6rem auto 0;max-width:820px;padding:0 1.6rem;position:relative;z-index:2}
+.act-head{text-align:center;margin:0 auto 3rem;position:relative}
+.act-num{
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.4em;
+  color:var(--gold);text-transform:uppercase;display:block;margin-bottom:1rem;
+}
+.act-title{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(1.9rem,4.6vw,3rem);color:var(--sea-deep);line-height:1.2;
+}
+.act-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;
+  color:var(--faint);margin-top:.8rem;
+}
+.act-head .ornament{font-size:1.4rem;color:var(--gold);margin:1.4rem 0 0;letter-spacing:.5em}
+
+/* ====== PROSE ====== */
+.prose p{margin:1.5rem 0;text-align:justify}
+.prose h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  color:var(--rust);margin:3rem 0 1rem;padding-left:1rem;
+  border-left:4px solid var(--gold);line-height:1.4;
+}
+.prose h4{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.05rem;letter-spacing:.06em;
+  color:var(--sea-deep);margin:2.2rem 0 .8rem;
+}
+.prose strong{color:var(--crimson);font-weight:700}
+.prose em{font-style:italic;color:var(--sea-deep)}
+
+/* ====== PULL QUOTE ====== */
+.pull{
+  margin:3.4rem -1rem;padding:2.4rem 2.6rem;position:relative;
+  background:linear-gradient(135deg, rgba(30,58,76,.04), rgba(176,141,52,.06));
+  border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+}
+.pull p{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.55rem;
+  line-height:1.55;color:var(--sea-deep);text-align:center;margin:0;font-weight:500;
+}
+.pull::before{
+  content:"\201C";font-family:'Cormorant Garamond',serif;position:absolute;
+  top:-.2rem;left:1rem;font-size:5rem;color:var(--gold);opacity:.4;line-height:1;
+}
+
+/* ====== INVESTOR CALLOUT ====== */
+.investor{
+  margin:2.8rem 0;padding:1.8rem 2rem 1.8rem 2.4rem;position:relative;
+  background:var(--sea-deep);color:var(--parchment);border-radius:2px;
+  box-shadow:0 18px 40px -16px rgba(15,35,48,.6);
+}
+.investor::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--gold-bright),var(--rust));
+}
+.investor .tag{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;
+  color:var(--gold-bright);text-transform:uppercase;display:flex;align-items:center;
+  gap:.6rem;margin-bottom:.9rem;
+}
+.investor .tag::before{content:"\25C8";font-size:.9rem}
+.investor p{margin:.6rem 0;color:rgba(244,236,220,.92);font-size:1rem;line-height:1.8;text-align:left}
+.investor strong{color:var(--gold-bright)}
+.investor em{color:#e8c97a;font-style:italic}
+
+/* ====== TIMELINE STRIP ====== */
+.timeline{margin:3rem 0;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:.4rem 0 .4rem 2rem;}
+.tl-item::before{
+  content:"";position:absolute;left:-7px;top:1.3rem;width:11px;height:11px;
+  background:var(--parchment);border:2px solid var(--rust);border-radius:50%;
+}
+.tl-year{font-family:'Cinzel',serif;font-weight:600;color:var(--rust);font-size:.95rem;letter-spacing:.04em}
+.tl-text{font-size:.95rem;color:var(--ink);margin-top:.1rem}
+
+/* ====== COMPARISON CARDS ====== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin:2.6rem 0}
+.card{
+  background:var(--parchment-deep);border:1px solid var(--line);border-radius:3px;
+  padding:1.5rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -12px var(--shadow)}
+.card .flag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin:.3rem 0 .8rem}
+.card p{font-size:.9rem;line-height:1.7;color:var(--ink);margin:0;text-align:left}
+.card .model{display:inline-block;margin-top:.9rem;font-size:.78rem;font-family:'Cinzel',serif;letter-spacing:.05em;padding:.2rem .7rem;border:1px solid var(--gold);color:var(--rust);border-radius:30px}
+
+/* ====== TABLE ====== */
+.tbl-wrap{margin:2.6rem 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem;background:var(--parchment-deep);border:1px solid var(--line)}
+th{
+  background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;
+  font-weight:500;letter-spacing:.05em;font-size:.78rem;text-transform:uppercase;
+  padding:.85rem 1rem;text-align:left;
+}
+td{padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top;line-height:1.6}
+tr:nth-child(even) td{background:rgba(176,141,52,.045)}
+td strong{color:var(--crimson)}
+
+/* ====== STAT ROW ====== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:2.4rem 0}
+.stat{text-align:center;padding:1.2rem .6rem;background:rgba(30,58,76,.04);border-radius:3px;border-bottom:3px solid var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-weight:700;font-size:2rem;color:var(--rust);line-height:1}
+.stat .lbl{font-size:.82rem;color:var(--faint);margin-top:.5rem;line-height:1.4}
+
+/* ====== DIVIDER ====== */
+.div-orn{text-align:center;margin:4rem 0;color:var(--gold);font-size:1.2rem;letter-spacing:1.2rem;opacity:.7}
+
+/* ====== FINALE ====== */
+.finale{
+  margin-top:6rem;background:linear-gradient(165deg,var(--sea-deep),var(--sea));
+  color:var(--parchment);padding:5rem 0;position:relative;overflow:hidden;
+}
+.finale::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.5' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='280'/%3E%3Ccircle cx='300' cy='300' r='180'/%3E%3Cpath d='M20 300H580M300 20V580'/%3E%3C/g%3E%3C/svg%3E");
+  background-position:center;background-size:cover;
+}
+.finale .wrap{position:relative;z-index:2}
+.finale .act-num{color:var(--gold-bright)}
+.finale .act-title{color:var(--parchment)}
+.finale .prose p{color:rgba(244,236,220,.9)}
+.finale .prose strong{color:var(--gold-bright)}
+.finale .prose em{color:#e8c97a}
+.finale .prose h3{color:var(--gold-bright);border-left-color:var(--gold-bright)}
+.principle{
+  margin:3rem 0;padding:2.4rem;border:1px solid rgba(212,175,90,.4);border-radius:3px;
+  background:rgba(0,0,0,.18);
+}
+.principle .tag{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:.75rem;color:var(--gold-bright);text-transform:uppercase;margin-bottom:1rem}
+.principle p{font-family:'Cormorant Garamond',serif;font-size:1.4rem;line-height:1.6;font-style:italic;color:var(--parchment);font-weight:500;margin:0;text-align:left}
+
+/* ====== FOOTER ====== */
+footer{background:var(--ink);color:var(--parchment-deep);text-align:center;padding:3rem 1.6rem;font-size:.85rem}
+footer .orn{color:var(--gold);font-size:1.4rem;letter-spacing:.6rem;margin-bottom:1rem}
+footer p{margin:.4rem 0;opacity:.7;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+
+/* ====== PROGRESS ====== */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-bright),var(--rust));z-index:100;width:0%}
+
+/* ====== REVEAL ====== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease, transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:640px){
+  body{font-size:16.5px;line-height:1.85}
+  .pull{margin-left:0;margin-right:0;padding:1.8rem 1.4rem}
+  .pull p{font-size:1.3rem}
+  .lede p{font-size:1.3rem}
+}
+
+/* ===== additions for expanded edition ===== */
+.map-note{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--faint);text-align:center;font-size:1.05rem;margin:1rem 0 2rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:2.6rem 0;font-family:'Cinzel',serif;font-size:.85rem}
+.flow .node{padding:.6rem 1rem;background:var(--parchment-deep);border:1px solid var(--line);border-radius:30px;color:var(--sea-deep);letter-spacing:.04em}
+.flow .arrow{color:var(--gold);font-size:1.2rem}
+.dark{background:#1a1009 !important}
+.dark .act-title{color:#d8c4a0}
+.dark .prose p{color:#cdb494}
+.dark .prose strong{color:#c87a5a}
+.dark .prose em{color:#d8a878}
+.dark .prose h3{color:#c87a5a;border-left-color:var(--crimson)}
+.dark .act-sub{color:#8a7558}
+.dark .act-num{color:var(--gold)}
+/* ===== econ-layer callout boxes (deepen / counterfactual) ===== */
+.deepen{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(176,141,52,.07);border:1px solid rgba(176,141,52,.32);border-left:4px solid var(--gold);border-radius:3px}
+.deepen .dh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--rust);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.deepen p{margin:.7rem 0;text-align:justify}
+.cf{margin:2.4rem 0;padding:1.4rem 1.7rem;background:rgba(30,58,76,.05);border:1px dashed rgba(30,58,76,.4);border-radius:3px}
+.cf .cfh{display:block;font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.04rem;color:var(--sea-deep);margin-bottom:.65rem;letter-spacing:.01em;line-height:1.5}
+.cf p{margin:.7rem 0;text-align:justify}
+/* ===== dark-section legibility (boxes + stats + pull + timeline + interlude) ===== */
+.dark .deepen{background:rgba(216,196,160,.06);border-color:rgba(212,175,90,.4);border-left-color:#d4af5a}
+.dark .deepen .dh{color:#e2a878}
+.dark .cf{background:rgba(255,255,255,.045);border-color:rgba(212,175,90,.32)}
+.dark .cf .cfh{color:#d8c4a0}
+.dark .deepen p,.dark .cf p{color:#cdb494}
+.dark .deepen strong,.dark .cf strong{color:#c87a5a}
+.dark .deepen em,.dark .cf em{color:#d8a878}
+.dark .pull{background:linear-gradient(135deg,rgba(216,196,160,.07),rgba(176,141,52,.1));border-top-color:#d4af5a;border-bottom-color:#d4af5a}
+.dark .pull p{color:#ecd9b4}
+.dark .pull::before{color:#d4af5a}
+.dark .stat{background:rgba(216,196,160,.06)}
+.dark .stat .num{color:#d4af5a}
+.dark .stat .lbl{color:#c4af88}
+.dark .tl-text{color:#cdb494}
+.dark .tl-year{color:#e2a060}
+.dark .interlude p{color:rgba(243,238,226,.9)}
+.dark .interlude p .hl{color:#e2a060}
+.warn{margin:2.6rem 0;padding:1.6rem 1.8rem;border:1px solid var(--crimson);border-left:5px solid var(--crimson);background:rgba(122,36,24,.06);border-radius:2px}
+.warn-tag{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.28em;color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem}
+.warn p{margin:.4rem 0;font-size:.96rem;text-align:left}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin:2.4rem 0}
+@media(max-width:640px){.twocol{grid-template-columns:1fr}}
+.minihead{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--rust);margin-bottom:.5rem;font-weight:600}
+
+/* ===== dramatic edition: interlude bridges ===== */
+.interlude{max-width:720px;margin:0 auto;padding:4.5rem 1.6rem 1rem;text-align:center;position:relative;z-index:2}
+.interlude .mark{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:.5em;opacity:.6;margin-bottom:1.6rem}
+.interlude p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;line-height:1.65;color:var(--sea-deep);font-weight:500}
+.interlude p .hl{color:var(--rust);font-style:normal;font-weight:600}
+.interlude.on-dark p{color:rgba(244,236,220,.9)}
+.aside{margin:2rem 0;padding:.6rem 0 .6rem 1.6rem;border-left:3px solid var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--faint)}
+.aside .hl{color:var(--rust);font-style:normal}
+
+/* ===== legacy & empire-shift edition additions ===== */
+.shift{margin:2.6rem 0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shift-row{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+.shift-row:first-child{border-top:none}
+.shift-era{background:var(--sea-deep);color:var(--gold-bright);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;padding:1rem .9rem;display:flex;align-items:center;line-height:1.4}
+.shift-body{padding:1rem 1.2rem;font-size:.95rem;line-height:1.7}
+.shift-body strong{color:var(--crimson)}
+@media(max-width:640px){.shift-row{grid-template-columns:90px 1fr}.shift-era{font-size:.72rem;padding:.7rem .5rem}}
+.method{margin:2.4rem 0;display:grid;gap:1rem}
+.method-card{background:var(--parchment-deep);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:3px;padding:1.3rem 1.5rem}
+.method-card h5{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;color:var(--sea-deep);margin-bottom:.5rem}
+.method-card .tool{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;color:var(--rust);text-transform:uppercase;margin-bottom:.6rem}
+.method-card p{font-size:.95rem;line-height:1.75;margin:.4rem 0;text-align:left}
+.method-card .eg{font-size:.86rem;color:var(--faint);font-style:italic;margin-top:.5rem}
+.legacy-grid{margin:2.4rem 0;display:grid;gap:1.4rem}
+.legacy-block{background:rgba(30,58,76,.04);border-radius:4px;padding:1.6rem 1.7rem;border-top:3px solid var(--rust)}
+.legacy-block h4{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.25rem;color:var(--rust);margin-bottom:.7rem}
+.legacy-block p{font-size:.96rem;line-height:1.8;margin:.5rem 0;text-align:left}
+.legacy-block strong{color:var(--crimson)}
+.legacy-block em{color:var(--sea-deep);font-style:italic}
+.legacy-block .now{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--line);font-size:.9rem;color:var(--sea-deep)}
+.legacy-block .now::before{content:"今日 → ";font-family:'Cinzel',serif;font-weight:600;color:var(--gold);font-size:.78rem;letter-spacing:.05em}
+
+/* ===== ACT / PART DIVIDER ===== */
+.part-div{max-width:900px;margin:5.5rem auto 1rem;padding:0 1.6rem;text-align:center;position:relative;z-index:2;scroll-margin-top:80px}
+.part-div .pn{font-family:'Cinzel',serif;font-size:.76rem;letter-spacing:.34em;color:var(--rust);text-transform:uppercase}
+.part-div .pt{font-family:'Noto Serif TC',serif;font-weight:900;font-size:1.7rem;color:var(--sea-deep);margin:.7rem 0 .3rem;letter-spacing:.05em}
+.part-div .pe{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--faint)}
+.part-div .pline{display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:1.1rem;color:var(--gold)}
+.part-div .pline span{height:1px;width:80px;background:linear-gradient(90deg,transparent,var(--gold))}
+.part-div .pline span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+.part-div .pline .dot{font-size:1rem;opacity:.8}
+.back-toc{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.18em;color:var(--faint);text-decoration:none;text-transform:uppercase;transition:color .25s ease}
+.back-toc:hover{color:var(--gold)}
+.act,.finale{scroll-margin-top:70px}
+
+</style>
+</head>
+<body>
+<!-- imq-auto-toc -->
+<style id="imq-auto-toc-style">
+#imq-toc-prog{position:fixed;top:0;left:0;height:3px;z-index:10001;background:linear-gradient(90deg,#a8842f,#8a3a23);width:0}
+#imq-auto-toc{position:fixed;top:46px;left:0;z-index:9000;max-height:calc(100vh - 56px);width:314px;overflow-y:auto;
+  background:rgba(243,238,226,.98);border-right:1px solid #c6b58e;font-family:'Noto Serif TC',serif;
+  padding:18px 14px 44px;transform:translateX(-340px);transition:transform .25s ease;box-shadow:2px 0 20px rgba(22,20,15,.13)}
+#imq-auto-toc.open{transform:translateX(0)}
+#imq-auto-toc .imq-toc-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#8a3a23;font-weight:700;text-transform:uppercase;text-align:center;margin-bottom:14px}
+#imq-auto-toc .imq-toc-part{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;color:#a8842f;text-transform:uppercase;margin:14px 0 3px;padding-left:8px;border-left:2px solid #a8842f;line-height:1.5}
+#imq-auto-toc a{display:flex;gap:7px;align-items:baseline;color:#16140f;text-decoration:none;font-size:13px;line-height:1.42;padding:5px 8px;border-left:2px solid transparent;border-radius:3px}
+#imq-auto-toc a:hover{background:rgba(168,132,47,.1)}
+#imq-auto-toc a .imq-toc-n{font-family:'Cinzel',serif;font-size:10.5px;color:#8a3a23;min-width:2.5em;flex-shrink:0;letter-spacing:.02em;white-space:nowrap}
+#imq-auto-toc a.on{border-left-color:#8a3a23;background:rgba(168,132,47,.17);font-weight:600}
+#imq-auto-toc-toggle{position:fixed;top:54px;left:12px;z-index:9002;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#16140f;color:#cda551;border:1px solid #a8842f;border-radius:7px;font-size:17px;line-height:1;box-shadow:0 4px 14px rgba(22,20,15,.4)}
+#imq-auto-toc-toggle:hover{background:#231f15}
+@media(max-width:1479px){#imq-auto-toc{width:82vw;max-width:330px;transform:translateX(-105%)}}
+</style>
+<div id="imq-toc-prog"></div>
+<nav id="imq-auto-toc" aria-label="Contents"><div class="imq-toc-h">目錄 · Contents</div></nav>
+<button id="imq-auto-toc-toggle" title="目錄 Contents" aria-label="Contents">☰</button>
+<script>(function(){
+function init(){
+  var nav=document.getElementById('imq-auto-toc'),btn=document.getElementById('imq-auto-toc-toggle'),prog=document.getElementById('imq-toc-prog');
+  var heads=[].slice.call(document.querySelectorAll('h2.act-title, h2.ptitle'));
+  if(heads.length<3){heads=[].slice.call(document.querySelectorAll('h2'));}
+  if(heads.length<3){if(btn)btn.style.display='none';if(nav)nav.style.display='none';return;}
+  var links=[];
+  heads.forEach(function(h,i){
+    var txt=(h.textContent||'').trim().replace(/\s+/g,' ');
+    if(h.classList.contains('ptitle')){
+      var p=document.createElement('div');p.className='imq-toc-part';p.textContent=txt;nav.appendChild(p);return;
+    }
+    var sec=h.closest('section')||h; if(!sec.id) sec.id='imqsec-'+i;
+    var head=h.closest('.act-head')||h.parentNode;
+    var numEl=head?head.querySelector('.act-num'):null;
+    var num=numEl?(numEl.textContent||'').split('·')[0].trim():'';
+    var a=document.createElement('a');a.href='#'+sec.id;
+    var ns=document.createElement('span');ns.className='imq-toc-n';ns.textContent=num;
+    var ts=document.createElement('span');ts.textContent=txt;
+    a.appendChild(ns);a.appendChild(ts);
+    a.addEventListener('click',function(){if(window.innerWidth<1480)nav.classList.remove('open');});
+    nav.appendChild(a);links.push({a:a,sec:sec});
+  });
+  btn.addEventListener('click',function(){nav.classList.toggle('open');});
+  if(window.innerWidth>=1480)nav.classList.add('open');
+  var ticking=false;
+  function mark(){ticking=false;var y=window.scrollY+110,cur=null;
+    links.forEach(function(l){if(l.sec.offsetTop<=y)cur=l;});
+    links.forEach(function(l){l.a.classList.toggle('on',l===cur);});
+    var de=document.documentElement;if(prog)prog.style.width=(de.scrollTop/((de.scrollHeight-de.clientHeight)||1)*100)+'%';}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(mark);ticking=true;}},{passive:true});
+  mark();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();</script>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">The Merchant, the Oil, and the Gulf's Only Parliament</span>
+    <h1>商人、石油，<br><span class="em">與海灣唯一的議會</span><br>科威特的身世</h1>
+    <p class="sub">兩百多年前，一群採珠與貿易的商人，「選出」並供養了一個統治家族——這份「誰出錢、誰就有發言權」的契約，後來長成了整個阿拉伯海灣唯一一座真有牙齒的民選議會。然後，石油來了。它把窮港變成了搖籃到墳墓的福利國，卻也讓那座議會，從制衡權力的活力，異化成了凍結改革的癱瘓。這篇身世，要說的是海灣的先驅——第一支主權基金、第一部憲法、第一個議會——如何被「租金」與「否決權」一起鎖住，被它一手啟發的鄰居們，一一超越。</p>
+    <div class="rule"></div>
+  </div>
+  <div class="scroll-hint">向下展開 ▾</div>
+</header>
+
+<!-- ===== LEDE ===== -->
+<section class="lede reveal">
+  <p><span class="drop">二</span>〇二四年五月十日，科威特的電視螢幕上，年逾八旬的埃米爾謝赫米沙勒·艾哈邁德·薩巴赫，宣讀了一份足以改寫國本的命令。他宣布：解散國民議會，並中止憲法中的若干條文，為期最長可達四年。理由，是要「拯救國家」、整肅一場「已滲入大多數國家機構」的貪腐。對一個外人而言，這或許只是又一則中東強人收權的新聞；但對科威特，這是一道深可見骨的傷口——因為他關掉的，不是一座尋常的橡皮圖章式議會，而是<strong>整個阿拉伯海灣，唯一一座真有牙齒、能質詢部長、能逼閣員下台、曾能核可王儲的民選議會</strong>。更尖刻的諷刺藏在細節裡：被他一併中止的憲法條文之中，赫然有第一八一條——而那一條的內容，恰恰是「<strong>憲法不得中止</strong>」。換句話說，他中止了那條「禁止中止」的條文。一個曾經是整個地區政治最開放、報業最自由、最早給予人民選票的國家，它的統治者，在二〇二四年，親手按下了它民主的暫停鍵。這怎麼會發生？一個比挪威更早設立主權基金、比所有海灣鄰居更早擁有民選議會的「先驅之邦」，怎麼會走到這一步——富可敵國，卻動彈不得；給了人民聲音，卻換來數十年的僵局與停滯？這篇身世，就是要回答這個問題。答案，藏在三把鑰匙裡：<strong>商人</strong>、<strong>石油</strong>，與<strong>議會</strong>。讓我們從灣頂那個採珠造船的港市開始，一路走到今天這個被自己的成功與詛咒一起拖住的科威特，在每一個轉折處，聽一聽歷史那聲意味深長的<span style="color:var(--rust);font-weight:600">回聲</span>。</p>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-0">
+  <div class="act-head">
+    <span class="act-num">序章 · The Merchant, the Oil & the Majlis</span>
+    <h2 class="act-title">商人、石油，與海灣唯一的議會：一場關於「同意」的兩百年實驗</h2>
+    <p class="act-sub">The Merchant, the Oil & the Parliament — a Two-Century Experiment in Consent</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>每一個國家，都有一個定義它的核心問題。對沙烏地，那個問題是「劍與經書的契約」；對阿聯，是「趕在石油用完之前，把自己變成別的東西」；而對科威特——這個位於波斯灣最北端、本國公民僅約一百五十萬的小國——那個核心問題，是一道關於「同意」與「租金」之間，深刻矛盾的詰問。它幾乎可以寫成這樣一句兩難的問句：<strong>當一個國家，獨一無二地，是靠著商人的「同意」而立國的——它的統治者，從一開始就須向出錢的人交代，因而長出了整個海灣唯一一座真有牙齒的民選議會；可後來，石油又把它變成了一個只需「分配租金」、無須向人民徵稅的食租國家——那麼，當「同意的傳統」撞上「租金的邏輯」，這個國家會變成什麼模樣？</strong>這個問題之所以獨特，是因為科威特擁有它所有海灣鄰居都沒有的東西：一個真正能制衡統治者的議會。在一個君主專制如同空氣般理所當然的地區，這是何等珍貴的異數。然而，這個問題之所以沉重，是因為科威特的故事告訴我們：當這座珍貴的議會，遇上了不必徵稅、只需分糖的石油租金，它非但沒有結出善治的果實，反而陷入了長達數十年的僵局——政府反覆垮台、議會反覆解散、改革一一卡死。一個本該是海灣民主燈塔的國家，最終卻成了海灣現代化的落伍生。這篇身世，追的就是這個灣頂小國，與它那三把鑰匙——商人、石油、議會——纏繞在一起的故事。</p>
+
+    <h3>第一把鑰匙：商人——一個靠「同意」立國的港市</h3>
+    <p>第一把鑰匙，是<strong>商人（the Merchant / al-Tujjār）</strong>——科威特獨一無二的立國基因。大約在一七五二年，一群屬於巴尼烏特巴部族的家族，在波斯灣灣頂這個有著天然良港的沙洲上，做了一件在阿拉伯半島極其罕見的事：他們<em>推選</em>了薩巴赫家族中的薩巴赫一世，來當他們的統治者，負責對外交涉與內部司法；而城裡那些靠採珠、造船與轉口貿易致富的商人家族，則掌握著經濟的命脈。這就埋下了科威特政治的原始密碼——統治者的權威，不是來自征服，也不是來自神授，而是來自被治者、尤其是出錢的商人的<strong>同意</strong>。這是一筆心照不宣的契約：商人出錢，供養統治家族與城防；作為交換，他們有資格在統治者的「迪萬（dīwān）」或「馬吉利斯（majlis）」——也就是議事的客廳裡——說上一句話。而且，這份同意是可以收回的：歷史上，當統治者橫徵暴斂時，富有的商人們真的會「用腳投票」，舉家遷往巴斯拉或巴林，抽走整座城的財源。「課稅須經同意」這個在西方催生了議會的古老張力，竟在這片沙漠的港市裡，自然而然地生長了出來。「商人」這把鑰匙，是理解科威特一切與眾不同之處的起點。</p>
+
+    <h3>第二把鑰匙：石油——一份救贖，也是一道詛咒</h3>
+    <p>第二把鑰匙，是<strong>石油（the Oil）</strong>——那份把科威特從赤貧推上巨富、卻也悄悄改寫了它立國契約的洪流。在石油之前，科威特是個典型的海灣窮港，靠採珠、造船與轉口為生；當一九三〇年代日本的養殖珍珠與大蕭條一起摧毀了採珠業，它一度跌入飢饉的谷底。轉機，在一九三八年從地底湧出——那一年，地質學家在科威特發現了布爾甘油田，這是全世界僅次於沙烏地加瓦爾的第二大常規油田，一座幾乎深不見底的黑金寶庫。一九四六年，科威特開始出口原油，財富如洪水般灌入。在阿卜杜拉·薩利姆的手中，這筆錢被用來建起一個搖籃到墳墓的福利國：免費的醫療、免費的教育、保障的工作、低廉的水電。一九五〇、六〇年代的科威特，是整個海灣最先進、最富裕、最有文化的地方。然而，石油這份救贖，同時也是一道隱形的詛咒。它讓國家變成了一個「<strong>食租者（rentier）</strong>」——財富來自賣資源給外國人，而非向本國人民徵稅。一個不必向人民伸手要錢的政府，與人民之間那條「課稅換同意」的古老紐帶，便開始鬆動。石油給了科威特一切，卻也悄悄地，抽走了那份維繫它立國契約的、最根本的東西。</p>
+
+    <h3>第三把鑰匙：議會——海灣唯一的牙齒，與它的兩難</h3>
+    <p>第三把鑰匙，也是這個故事最核心、最令人唏噓的一把，是<strong>議會（the Majlis / 國民議會）</strong>——科威特把「商人的同意」制度化的結晶，與它陷入僵局的根源。一九六一年獨立後，科威特做了一件再次令全海灣側目的事：一九六二年，它頒布了一部憲法，設立了一個由五十名議員組成的民選國民議會（Majlis al-Umma）。這不是一個裝飾用的諮詢機構，而是一個真有牙齒的立法機關——它能制定法律、能審查預算、能公開「質詢（istijwāb）」部長、能提出不信任案逼閣員下台，甚至一度能核可王儲的人選。在一個民選議會幾乎不存在的地區，這是絕無僅有的政治成就，是「商人同意」傳統最輝煌的果實。科威特由此擁有了海灣最自由的報業、最活躍的公共辯論，並在二〇〇五年給予女性參政權。然而，正是這把珍貴的鑰匙，遇上了石油的租金，鑄成了科威特的兩難。一個有牙齒的民選議會，本該是善治的引擎；可當它面對的，是一個只需分配石油租金、任何削減福利的改革都形同政治自殺的食租國家時，這座議會，便從「制衡」異化成了「否決」——民選議員與委任的王室內閣陷入無休止的角力，政府一次次垮台，議會一次次被解散，重大的改革，一一卡死。「議會」這把鑰匙，於是同時寫著科威特最大的光榮，與它最深的困境。</p>
+
+    <div class="pull"><p>科威特的身世，藏在一個悲劇性的悖論裡：正因為它獨一無二地靠「商人的同意」立國，它才長出了整個海灣唯一一座真有牙齒的議會——這是它的光榮；可當「石油」把它變成一個只需分配租金、無須向人民徵稅的食租國家，那座議會，便從制衡權力的活力，異化成了凍結改革的癱瘓。富可敵國，卻動彈不得；給了人民聲音，卻換來數十年的停滯。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 三個將貫穿全書的密碼</span>
+      <p>這本書接下來的故事，將圍繞三把總鑰匙，反覆迴響。第一把是「<strong>商人（al-Tujjār）</strong>」——一七五二年，採珠與貿易的商人家族「選出」並供養了薩巴赫家族；這份「誰出錢、誰就有發言權」的同意契約，是科威特獨步海灣的立國基因，也是它日後議會的種子。第二把是「<strong>石油（the Oil）</strong>」——一九三八年發現的布爾甘油田（世界第二大），把窮港變成搖籃到墳墓的福利國，卻也把科威特變成一個只需分配租金、無須向人民徵稅的食租者，並招來一九九〇年薩達姆的入侵與七百口燃燒的油井。第三把是「<strong>議會（the Majlis）</strong>」——一九六二年憲法設立的、海灣唯一真有牙齒的民選國民議會；它把「商人的同意」制度化，帶來了自由與活力，卻在撞上石油租金後，異化成了反覆解散、凍結改革的僵局，直到二〇二四年被埃米爾按下暫停鍵。</p>
+      <p>而本書最深的洞察，將是這三者，其實是一條<strong>因果相連、卻自相絞殺的鎖鏈</strong>。<em>正因為科威特獨一無二地靠「商人的同意」立國，它才在整個海灣，唯一地長出了一座真有牙齒的「議會」</em>——這是它最珍貴、最值得驕傲的政治遺產，是它與所有專制鄰居最根本的不同。<em>然而，「石油」的降臨，卻在暗中抽掉了支撐這座議會的地基</em>——當一個政府不再需要向人民徵稅、只需把石油的租金分下去，那份「課稅換同意」的古老紐帶便鬆了，議會也就失去了它最初的著力點，淪為分配租金時的否決與角力。<em>於是，最弔詭的一幕上演了：科威特最大的光榮（議會），與它最大的財富（石油），不但沒有相輔相成，反而彼此絞殺</em>——有牙齒的議會，否決了一切觸動既得福利的改革；而食租的惰性，又讓議會的監督，失去了建設性的方向。理解了這三把鑰匙如何彼此咬合與絞殺——商人的同意催生了議會，石油的租金腐蝕了同意的根基，而議會與租金的碰撞，又把這個先驅之邦凍在了原地——你就讀懂了科威特：一個最早未雨綢繆、最早給人民聲音，卻被自己的成功與詛咒一起拖住的，海灣先驅。而這一切，要從灣頂那座採珠造船的港市，開始說起。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<!-- ===================== 第一部 ===================== -->
+<div class="part-div reveal" id="part-1">
+  <span class="pn">第一部</span>
+  <h2 class="ptitle pt">商人的城邦：一個靠同意立國的港市</h2>
+  <div class="pe">The Merchants' City — a Port Founded on Consent</div>
+  <div class="pline"><span></span><span class="dot">⚓</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-1">
+  <div class="act-head">
+    <span class="act-num">第一章 · A Harbor at the Head of the Gulf</span>
+    <h2 class="act-title">灣頂的沙洲：地理、海與一個天然良港</h2>
+    <p class="act-sub">Geography, the Sea, and a Natural Harbor</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>要讀懂科威特，得先把手指按在地圖上波斯灣的最頂端，按在那片海像一只口袋一樣收束、再也無路可去的盡頭。整片波斯灣自南方的荷莫茲海峽斜斜地向西北伸展，伸了一千公里，最後撞上幼發拉底河與底格里斯河攜帶千年泥沙堆出的三角洲，便戛然而止——而科威特，就坐落在這個句點上，坐落在灣頂那塊被太陽烤得發白、幾乎不長一棵樹的低平沙地上。它的北邊與西邊，是伊拉克；它的南邊，是沙烏地阿拉伯；隔著那一灣溫熱的海水向東望去，是伊朗的海岸。一個總面積不到一萬八千平方公里的小國，被三個遠比它龐大的鄰人圍在當中，腳下沒有一條長年奔流的河，身後沒有一畝可以仰賴的良田，頭頂是動輒攝氏五十度的酷夏。地理發給科威特的第一手牌，看上去和它所有的海灣兄弟一樣糟糕。然而，就在這片乾旱與酷熱之間，命運悄悄塞給了它一樣別處沒有的東西——一個深、靜、能避風的天然良港。這個港，是理解科威特一切的起點：它的財富、它的立國、它日後那座海灣唯一的議會，全都從這一彎海水裡，慢慢地長了出來。</p>
+
+    <h3>一只口袋的底</h3>
+    <p>先把這個「灣頂」的位置看清楚，因為它幾乎決定了科威特此後三百年的全部命運。波斯灣是一片半封閉的內海，它唯一的出口在南端的荷莫茲，而它的另一端——西北那個盡頭——正是兩河流域注入大海的地方。科威特就守在這個盡頭的咽喉上，守在通往美索不達米亞、通往巴斯拉那座古老貿易重鎮的海上門戶旁。對一個做生意的港市而言，這是天賜的位置：所有想從海路進出兩河流域的貨物，所有想把阿拉伯內陸的駱駝商隊與印度洋的帆船接駁起來的轉口貿易，都繞不開這個灣頂。但同樣這個位置，也是一道懸在頭頂的判詞。守著兩河出海口的咽喉，意味著它天生就站在一個太重要、也太敏感的位置上——北方那個龐大的鄰人，無論是鄂圖曼帝國的巴斯拉省，還是後來那個叫伊拉克的國家，都會反覆地、貪婪地，把目光投向這個替它們看守出海口的小小港市。科威特的戰略價值與它的戰略脆弱，是同一枚硬幣的兩面：正因為它的港口扼住了灣頂，它才富；也正因為它扼住了灣頂，它才一次又一次地，招來北方的覬覦。這道宿命，從它落腳在這只口袋的底部那一刻起，就已寫定。</p>
+
+    <h3>沒有河，沒有田，只有井與棗</h3>
+    <p>把鏡頭從海上拉回陸地，石油之前的科威特，是一塊嚴酷到近乎一無所有的土地。它幾乎全境是平坦的沙漠與礫漠，地勢起伏微小，沒有一座可以據守的山，更要命的是，沒有一條常年流淌的河——幼發拉底與底格里斯雖在它北方不遠處入海，那兩條偉大的河流卻一滴也沒有分給它，它們的恩澤盡數傾倒在伊拉克那片肥沃的沖積平原上，到了科威特這裡，便只剩下乾涸的旱谷與望不到頭的沙。沒有河，就沒有灌溉，就沒有農耕；這塊地養不起一畝像樣的莊稼，養不起一個能自給自足的內陸文明。科威特人能仰賴的，只有零星的地下水井、幾叢在鹽鹼地裡苦熬的椰棗，以及夏季那短暫得令人不敢眨眼的雨水。連最基本的飲水，這個國家都長期捉襟見肘——在海水淡化技術普及之前，科威特城的淡水，竟有相當一部分要靠木船從北方沙特阿拉伯河（Shatt al-Arab）一桶一桶地運回來販賣。一塊連自己的飲水都長不出來的地方，要活下去，就只剩一條路：背對著吝嗇的陸地，把整張臉，轉向那片慷慨的海。</p>
+
+    <h3>那一彎能避風的深水</h3>
+    <p>而那片海，恰恰給了它陸地給不了的一切。科威特城所倚靠的，是一個被後世稱為「科威特灣（Kuwait Bay）」的天然海灣——它向內陸凹進去，形成一彎弧形的深水，東面有海角與淺灘為它擋住灣外的風浪，使它成為波斯灣北部少有的、能讓木船安穩停泊與避風的良港。在一片大多是平直、淺灘密布、難以靠泊的海岸線上，這樣一個又深、又靜、又能避風的天然港灣，是何等罕見的恩賜。事實上，科威特這個地名的由來，本身就把這份「港」的宿命刻進了它的名字裡：「Kuwait」是阿拉伯語「kut」的小稱，意思是「小堡」或「靠水的要塞」——一座建在水邊、守著港灣的小小城堡。換句話說，這個國家從被命名的那一刻起，它的身分就是一座港、一座要塞、一處靠著海與水而存在的據點。地理在陸地上拿走的一切——河、田、樹蔭、安全的縱深——竟在這一彎海水裡，加倍地還了回來。所有後來的故事，採珠、造船、轉口、商人、財富、契約、議會，全都需要先有這一彎能讓木船安穩歸來的深水。沒有這個港，就沒有科威特。</p>
+
+    <h3>布比延與灣頂的島</h3>
+    <p>科威特的地理裡，還藏著幾塊不起眼、卻在日後牽動國運的島嶼。在它灣頂的北方海域，散落著幾座低平的島，其中最大的兩座，叫布比延（Bubiyan）與沃爾拜（Warbah）。它們大多是無人居住的沼澤泥灘，蘆葦叢生，看上去毫無價值——可正因為它們橫亙在科威特灣的北口、扼著通往伊拉克那條狹窄水道的咽喉，它們在地圖上的分量，遠遠超過它們在現實中的荒涼。一個被陸地封在灣頂、出海口又被島嶼半掩著的伊拉克，會在二十世紀一次又一次地把貪婪的手指，指向布比延與沃爾拜，宣稱自己需要它們才能「真正擁有」一條通向大海的航道。這幾座荒島，因此成了北方索求的永恆藉口之一。但這些都是後話。此刻我們只需記住：科威特這塊地的每一個細節——灣頂的位置、深水的良港、北方的荒島——沒有一樣是中性的；它們全都既是這個小國賴以為生的本錢，又是它日後揮之不去的危險。地理在這裡從不只是背景，它是命運本身。</p>
+
+    <h3>一切財富，都從這個港開始</h3>
+    <p>於是我們可以把石油之前的科威特，凝練成一句話：它是一個建在乾旱沙漠盡頭、卻擁有一個絕佳天然良港的港市。這個定義裡的每一個字都要緊。「乾旱沙漠盡頭」決定了它不可能靠土地致富——它沒有農業、沒有礦產、沒有縱深，是個徹頭徹尾的窮地方。而「絕佳天然良港」則決定了它唯一的活路在海上、在貿易、在把自己變成一個連接點。一個沒有腹地的港，要活，就必須把全世界都變成它的腹地：它向北接駁巴斯拉與兩河流域，向東接駁波斯與印度，向西接駁阿拉伯內陸的貝都因商隊，把這些原本互不相干的市場，用一艘艘獨桅木船與一隊隊駱駝，縫合在自己這一彎海水的兩端。商人，由此成為這個港市的主角——不是農夫，不是牧人，不是武士，而是那些懂得在巴斯拉買進、在印度賣出、靠著海與信用賺取差價的人。一個由商人主導、靠貿易而非靠土地存活的城邦，注定會發展出一套與內陸的部族王國截然不同的政治邏輯。這套邏輯的第一塊基石，就埋在這個港的地理裡。我們即將看到的那場「商人選出統治者」的奇異立國，並非橫空出世的偶然，而是這片灣頂沙洲、這一彎深水良港，一步步逼出來的必然。</p>
+
+    <div class="pull"><p>地理在陸地上對科威特極其吝嗇——沒有河、沒有田、沒有縱深；卻在海上對它格外慷慨——一彎又深又靜的天然良港。一個沒有腹地的港，要活下去，就必須把全世界都接成自己的腹地，而做這件事的人，叫商人。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一彎海水如何決定一個國家的活法</span>
+      <p>這一章看似只在講沙、講海、講一張地圖，實則已經把貫穿全書的三大密碼，全部埋進了灣頂這彎海水裡。第一把鑰匙「商人」，此刻已呼之欲出——一個沒有農田、沒有礦藏、只有良港的地方，財富只能來自貿易，而貿易的主角必然是商人；正是這座靠商人撐起來的港市，日後才會長出那筆「誰出錢、誰說話」的立國契約。第二把鑰匙「石油」，此刻仍深埋在這片沙地之下，連科威特人自己都毫無察覺——他們還不知道，腳下這塊看似一無所有的乾土裡，躺著全世界僅次於沙烏地加瓦爾的第二大常規油田。第三把鑰匙「議會」，它的種子也已在這片地理裡悄悄落下：一個靠商人、靠貿易、靠把外部世界接進來才能活的城邦，天生就需要一種「協商」而非「征服」的政治——這正是海灣唯一一座有牙齒議會的最初土壤。</p>
+      <p>把科威特放回海灣這張大棋盤上看，它的地理宿命與姊妹篇形成了鮮明的對照。沙烏地的故事另有專篇，那是一個靠廣袤內志腹地與兩聖地權威立身、向四方擴張的巨人；卡達則是一根插進海裡、夾在沙烏地與伊朗之間、毫無縱深的拇指。科威特與它們都不同：它最大的特徵，是那個扼住灣頂、守著兩河出海口的位置——這個位置給了它富甲一方的轉口貿易，也給了它一個永遠虎視眈眈的北方鄰人。日後那個叫伊拉克的國家，會反覆地以「巴斯拉省舊帳」為由索求它，乃至在一九九〇年八月二日，把坦克開進這座城——而那場浩劫的種子，早在這片灣頂沙洲被命名為「小堡」的那一刻，就已埋下。地理替科威特寫好了問題；接下來的每一章，都是這個港市對這道難題給出的答卷。而第一份答卷，是一件在整個阿拉伯半島都極其罕見的事——商人，竟然選出了他們自己的統治者。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-2">
+  <div class="act-head">
+    <span class="act-num">第二章 · 1752 — Merchants Choose a Ruler</span>
+    <h2 class="act-title">巴尼烏特巴與一七五二：商人選出一個統治者</h2>
+    <p class="act-sub">Bani Utbah and a Founding by Consent</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>在阿拉伯半島漫長的歷史裡，一個政體的誕生，通常只有一種劇本：一個強悍的部族首領，或憑著刀劍，或挾著信仰，征服一片土地、降服周邊的部族，然後把統治權像家產一樣傳給子孫。沙烏地的故事是這樣，半島內陸幾乎所有的酋長國也是這樣——權力，自上而下，來自征服。然而在灣頂那座採珠造船的港市裡，大約在一七五二年前後，卻上演了一齣完全不同的戲。在這裡，沒有一場決定性的征服，沒有一個揮著刀劍降服眾人的英雄；有的，是一群已經在城裡靠貿易與採珠安頓下來、彼此地位相當的家族，他們聚在一起，做了一個在這片土地上極其罕見的決定——他們從自己當中，<em>推選</em>出一個家族，請它來替大家處理對外的交涉與內部的糾紛。被選中的，是阿勒薩巴赫（Al-Sabah）家族；而那個被推到前台、成為科威特第一位統治者的人，叫薩巴赫一世（Sabah I bin Jaber）。這不是一場政變，也不是一次加冕，而更像是一份合夥契約的簽訂。科威特的立國，從第一天起，就建立在一個別處罕見的基礎上——同意。</p>
+
+    <h3>來自內志的遷徙者</h3>
+    <p>要理解這場奇異的立國，得先弄清楚這群人是誰、從哪裡來。阿勒薩巴赫家族並非灣頂的原住民，他們的根，在阿拉伯半島腹地的內志（Najd）。他們屬於一個叫「巴尼烏特巴（Bani Utbah）」的部族聯盟——這個名字本身意味深長，據說源自他們「遷徙（utbah）」的經歷。大約在十八世紀初，一場席捲內志的乾旱與部族衝突，把巴尼烏特巴的諸家族從半島深處向沿海驅趕，他們輾轉漂泊，最終在波斯灣灣頂這塊有著天然良港、又處在多方勢力交界、相對沒有強權直接管轄的沙洲上，停下了腳步、扎下了根。這段共同的遷徙史值得留意，因為巴尼烏特巴並不只生出了科威特的薩巴赫家族——同屬這個部族聯盟的另一支阿勒哈利法（Al-Khalifa）家族，日後南下建立了統治巴林至今的王朝；卡達的部分氏族，也與這條血脈相牽。換句話說，灣頂這幾個看似各自獨立的酋長國，骨子裡共享著同一段從內志出走、向海求生的記憶。而科威特這一支的特別之處在於：當這群遷徙者在灣頂安頓下來時，沒有任何一個家族強大到可以征服其餘，於是他們只能選擇另一條路——協商，與分工。</p>
+
+    <h3>一場沒有刀劍的推選</h3>
+    <p>於是就有了一七五二年前後那場關鍵的安排。隨著這座港市的人口與貿易日漸繁榮，城裡那些靠採珠、造船與轉口致富的家族，面臨一個任何一個共同體遲早都要面對的問題：誰來主持公道、誰來統一對外、誰來組織城防？單靠各家族各自為政，這座越來越富、也越來越招眼的港市便守不住、也理不順。他們需要一個共同認可的仲裁者與代表。而在眾多家族之中，阿勒薩巴赫被推到了這個位置上。為什麼是薩巴赫家族，後世的記載並不完全一致——或許因為它在部族中德高望重、長於折衝，或許因為它本身並非最巨富的商人世家、反而更容易被各方接受為一個相對中立的仲裁者。但無論具體緣由如何，這場安排的本質清清楚楚：薩巴赫一世的權威，不是他打出來的，而是別人讓出來的、託付給他的。他被推選去專責對外交涉、處理司法與安全，而城裡那些採珠與貿易的商人家族，則繼續牢牢掌握著經濟的命脈。權力與財富，在科威特的立國之初，就被有意地分置在兩雙不同的手裡——統治的歸薩巴赫，賺錢的歸商人。這是一種分權，更是一種彼此的依存。</p>
+
+    <h3>由下而上的權威</h3>
+    <p>這場推選之所以在阿拉伯半島的歷史上如此特殊，在於它徹底顛倒了權力的來源方向。在征服立國的劇本裡，權力是自上而下的：統治者先有了刀劍與土地，被治者只能服從。可在科威特，權力卻是自下而上的：是被治者——尤其是那些出錢的商人家族——主動把一部分權威，讓渡給了薩巴赫家族。統治者的正當性，不來自神授，不來自征服，而來自被統治者的<strong>同意</strong>。這個區別，看似只是立國方式的一處細節，實則埋下了科威特此後兩百多年政治性格的全部基因。一個權力來自征服的統治者，可以理直氣壯地把臣民當作戰利品，可以橫徵暴斂而無須交代；而一個權力來自推選與託付的統治者，從一開始就欠著選出他的人一份賬——他必須統治得讓那些把他抬上位的家族滿意，否則，那份被讓渡出去的同意，是可以收回的。薩巴赫家族日後當然會把統治權變成世襲，會逐步鞏固自己的地位，但「我們的權力是被同意出來的」這個立國的原初記憶，卻像一道無法磨滅的水印，深深印在了科威特的政治體質裡。它在兩百年後，會以一座有牙齒的議會的形式，再度浮現。</p>
+
+    <h3>分工的契約</h3>
+    <p>讓我們把這份立國契約的內容，再看得仔細一些，因為它的精妙處正在於那條「分工」的界線。薩巴赫家族拿到的，是對外與對內的政治權威：代表科威特與鄂圖曼的巴斯拉總督打交道、與周邊的部族與酋長周旋、組織城牆與防衛、在城內主持司法與仲裁糾紛。這些，都是維繫一個共同體存續所必需、卻又無法靠單個商人家族來承擔的「公共事務」。而商人家族保留在自己手裡的，是經濟——採珠船隊、造船廠、轉口貿易的渠道、放貸與外銷的網絡，以及由這一切堆積起來的、整座城最實在的財富。這條界線意味著什麼？它意味著統治者本身並不直接掌握財源——薩巴赫家族並沒有靠自己的土地或產業致富，它賴以運轉的城防、它支付的開銷，相當程度上要仰賴商人家族的供養與捐輸。一個不掌握財源、要靠別人出錢才能運轉的統治者，與那些出錢的人之間，便天然存在著一種討價還價的張力：你要我繼續出錢供養你，你就得統治得讓我滿意、就得在重大決定上聽聽我的意見。這條「出錢」與「同意」之間的紐帶，是科威特立國契約最核心的條款，也是它與所有靠石油租金、財源全握在自己手裡的後世海灣王室，最根本的不同。</p>
+
+    <h3>一份可以收回的同意</h3>
+    <p>而這份契約之所以是真的、而非一紙空文，全因為它背後有一個真實存在、且偶爾真會兌現的後手——商人可以「用腳投票」。這一點我們會在下一章詳細展開，但在這裡必須先點明，因為它正是一七五二年那場推選之所以具有約束力的根本保障。一個被推選出來的統治者，如果有朝一日忘了自己權力的來路，開始橫徵暴斂、損害商人的利益，會發生什麼？在內陸的部族王國裡，臣民幾乎無處可逃；可在科威特這座港市裡，商人們握著一張別人沒有的牌——他們的財富是流動的，是裝在船上、握在信用裡的，他們隨時可以拔錨起航，舉家遷往巴斯拉、遷往巴林、遷往任何一個願意善待他們的港口，把整座城的財源一併抽走。一座失去了商人的港，瞬間就什麼都不是了。這個「退出」的可能，像一把懸在統治者頭頂的無形之劍，時時提醒著薩巴赫家族：你的權力是被同意出來的，而同意，是可以收回的。一七五二年的那場推選，因此不是一個浪漫的傳說，而是一份有牙齒、有後手、可被執行的政治契約。它是科威特「商人」密碼真正的起點，也是這片沙漠裡那株最罕見的政治植物——一座真議會——最初的一粒種子。</p>
+
+    <div class="pull"><p>在一個習慣了刀劍立國的半島上，科威特卻是被「選」出來的。薩巴赫家族的權力，不是打下來的，而是商人讓渡的——而凡是讓渡出去的，便也可以收回。統治者從第一天起，就欠著選出他的人一份賬。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一場推選裡的立國基因</span>
+      <p>這一章是「商人」這把鑰匙真正插進鎖孔的一刻。一七五二年那場沒有刀劍的推選，把科威特與整個阿拉伯半島的立國邏輯，徹底分了道：別處的統治者靠征服立國，權力自上而下；科威特的統治者靠同意立國，權力自下而上。這份「商人同意」的原初契約，正是日後那座海灣唯一有牙齒議會的最深源頭——當一個統治者的權威從一開始就建立在「被治者的認可」之上，當他的城防與開銷要靠出錢的商人來供養，那麼「課稅須經同意、統治須向出資者交代」這條在西方催生了議會的古老張力，便在這片沙漠的港市裡，自然而然地生長了出來。至於另兩把鑰匙，此刻都還在沉睡：「石油」仍深埋地底，要等近兩百年後的布爾甘才會噴湧；而「議會」此刻只是一份口頭的、心照不宣的同意，要等到一九六二年的憲法，才會被白紙黑字地制度化。但它的基因，已經在這一年完整地寫好了。</p>
+      <p>把這場推選放回海灣的對照裡，它的獨特更顯刺眼。與科威特同出巴尼烏特巴的阿勒哈利法家族南下統治了巴林，卡達的阿勒薩尼則是另一支從內志遷來、靠周旋於鄂圖曼與英國之間而站穩的家族——卡達的故事另有專篇，那裡的商人傳統遠比科威特單薄，這條「商人同意」的線在巨額油氣租金湧入後便迅速被沖淡。沙烏地的故事也另有專篇，那更是一個靠劍與經書的契約、靠征服內志而擴張的巨人。唯有科威特，把「同意」這兩個字，刻進了立國的第一塊基石——這既是它日後光榮的根源，也是它日後困境的伏筆。而這份同意之所以有牙齒、之所以不是一句空話，全因為商人手裡那張「用腳投票」的王牌。下一章，我們就要走進石油之前科威特那座採珠造船、商賈雲集的港市，看清這群商人究竟是如何賺得他們的財富與權力，又是如何把這份財富，化作在統治者客廳裡說話的份量——化作議會那位遙遠的、尚未出世的遠祖。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-3">
+  <div class="act-head">
+    <span class="act-num">第三章 · Pearls, Dhows &amp; the Merchant's Power</span>
+    <h2 class="act-title">採珠、造船與轉口：商人的財富與權力</h2>
+    <p class="act-sub">Pearls, Shipbuilding, and the Roots of a Parliament</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一七五二年那份「商人選出統治者」的契約，之所以不是一紙空談，是因為在它背後，站著一群真正富可敵城、且手握退路的人。要看懂科威特的議會何以可能，就得先看懂在石油尚未湧出的漫長年代裡，這座灣頂港市究竟靠什麼活著、靠什麼致富、又靠誰致富。答案有三樣：採珠、造船，與轉口貿易。這三樣，沒有一樣依賴它腳下那塊一無所有的乾土，沒有一樣需要田地、礦藏或縱深；它們全都從海上來、從那一彎天然良港裡來、從商人那雙懂得在不同市場間穿針引線的手裡來。也正因如此，科威特的財富，從一開始就高度集中在一個特定的階層手裡——那些放貸的、收貨的、外銷的、擁有船隊的大商人。是他們用珍珠與貿易換來的白銀，供養著整座城、供養著城防，也供養著那個被他們推選出來的統治家族。而供養，在任何時代、任何地方，都意味著一件事：說話的權力。這一章要講的，就是這群商人如何把口袋裡的銀子，一點一點地，鍊成統治者客廳裡的發言權——鍊成議會那位遠在天邊的遠祖。</p>
+
+    <h3>用命換來的珍珠</h3>
+    <p>珍珠，是石油之前這片海灣唯一拿得出手的大宗財富，科威特也不例外。每年夏天，當海水暖到適宜下潛，這座港市便傾巢而出，成百上千的潛水夫從岸邊登上一艘艘獨桅木船，駛向海灣中那些世代口耳相傳的採珠淺灘。他們沒有任何裝備：沒有氧氣瓶，沒有潛水衣，全憑一口氣與一身的本事。潛水夫捏住鼻子，用骨製的夾子塞緊耳道以減緩水壓，腰上拴繩、腳邊墜石，一個猛子扎進溫熱的海裡，徑直下潛到十餘公尺深的海床，在那裡屏息一兩分鐘，徒手把一只又一只牡蠣從礁石上撬下、塞進掛在脖子上的網袋，再拽繩讓船上的人把自己拉回水面。如此一天反覆數十次、上百次，一去就是整個採珠季。代價刻在他們的身體上：常年的水壓讓許多人耳膜滲血、聽力受損，肺被反覆擠壓變形，不少人四十來歲就老得像六十歲的人，海裡還有鯊魚、海蛇與突發的溺斃在等著他們。這是一場用肺、用耳膜、用整條命去做的買賣。然而這趟拿命去換的生意，利潤的大頭，卻從來不歸下海的潛水夫，而歸岸上那群放債、收貨、外銷的人。財富在這條鏈條上，永遠是向上集中、向岸上流去的。</p>
+
+    <h3>木船的城</h3>
+    <p>與採珠相生相伴的，是造船。科威特那一彎深水良港，不只停泊船，它還製造船——這座港市以它精湛的木造船「dhow」工藝聞名整個波斯灣，成為區域內首屈一指的造船中心。在沿海的船塢裡，工匠們把從印度進口的柚木一塊塊鋸開、彎曲、拼接、捻縫，造出各式各樣的獨桅木船：有專門用於採珠的、有用於沿岸短途運貨的、也有能遠航至印度與東非的巨型遠洋商船。這門手藝意義非凡：它意味著科威特不只是被動地利用海，它還主動地掌握著「征服海」的工具。一座能自己造遠洋大船的港，便能組織起自己的遠洋貿易船隊，把生意做到千里之外，而不必受制於外人的船。每年夏天採珠季結束，冬季季風一起，科威特的遠洋商船便揚帆南下，載著椰棗與貨物駛往印度，再帶著木材、香料、布匹與稻米歸來。造船、採珠、遠航——這三者環環相扣，把科威特織成一座名副其實的「木船的城」。而能夠出資建造一支遠洋船隊、能夠承擔一趟跨海貿易全部風險的，當然又是那群最富有的商人。船，是他們財富的容器，也是他們權力的延伸。</p>
+
+    <h3>三條商路的終點</h3>
+    <p>但真正讓科威特這座窮地方的港市富甲一方的，既不只是珍珠，也不只是船，而是它那無可取代的轉口貿易——把不同的市場接駁起來，從中賺取差價的生意。憑著扼住灣頂、守著兩河出海口的絕佳位置，科威特成了三條商路交會的終點。向北，它接駁巴斯拉與整個美索不達米亞，是海路貨物進出兩河流域的門戶；向東與向南，它接駁波斯、印度乃至東非，是印度洋貿易網絡伸進波斯灣最頂端的一個節點；向西，它則是阿拉伯內陸貝都因駱駝商隊的終點——那些穿越沙漠、滿載著羊毛、酥油、馬匹與內陸物產的商隊，把貨運到科威特，再由科威特的商船轉運出海。一艘從印度來的船，可以在科威特卸下木材與布匹，換上椰棗與內陸物產；一支從內志來的駝隊，可以在科威特把貨換成現銀與海外商品。科威特商人賺的，就是這「縫合」的錢——他們本身或許不生產任何東西，但他們懂得在哪裡買進、在哪裡賣出，懂得用信用、用船隊、用人脈，把原本互不相干的市場接成一張網。一個沒有腹地的港，就這樣把整個區域都變成了自己的腹地。而掌握著這張貿易之網的，正是城裡那幾個最大的商人家族。</p>
+
+    <h3>供養者的客廳</h3>
+    <p>採珠、造船、轉口——這三樣財富，最終都匯聚到同一群人手裡：那些擁有船隊、放貸收貨、外銷致富的大商人家族，譬如後世仍赫赫有名的阿勒加尼姆（Al-Ghanim）、阿勒薩克爾（Al-Saqar）等氏族。他們是這座城真正的金主，是城防開銷與統治家族用度的供養者。而正是這份「供養」的關係，把財富，悄悄地轉化成了權力。在那個還沒有憲法、沒有選舉、沒有成文議事規則的年代，科威特的政治，運轉在一個半正式的場所裡——統治者的「迪萬（dīwān）」或「馬吉利斯（majlis）」，也就是他議事、接待、聽取意見的客廳。每一天，城裡有頭有臉的人物，尤其是那些出錢供養著這個統治家族的大商人，都會聚到統治者的 majlis 裡來，喝著咖啡，談論城裡的大小事務——貿易的行情、與巴斯拉總督的交涉、城防的安排、糾紛的仲裁。在這個客廳裡，出錢最多的人，說話自然最有份量。誰供養了統治者，誰就有資格在統治者的客廳裡，說上一句被認真對待的話。這就是「商人同意」契約在日常中的兌現方式：它不靠一部寫好的法律，而靠一間每天都坐滿了金主的客廳，靠那條「誰出錢、誰發言」的、繃得緊緊的線。</p>
+
+    <h3>用腳投票的權力</h3>
+    <p>然而，僅僅是「在客廳裡說話」，還不足以讓商人真正握有制衡統治者的力量——口頭的份量，終究敵不過刀劍的份量。真正讓這條「商人同意」的線變得有牙齒的，是商人手裡那張終極王牌：用腳投票。我們在上一章已點到，這裡要把它講透，因為它正是科威特議會最古老、最硬實的一塊地基。科威特商人的財富，與內陸地主的財富有一個根本的不同——它是流動的。地主的田跑不掉，可商人的財富是裝在船上、握在信用裡、存在海外往來戶頭裡的，可以隨時收攏、隨時帶走。這意味著，當一個統治者橫徵暴斂、損害到商人的根本利益時，商人並非只能忍氣吞聲——他們可以拔錨起航，舉家連同船隊、資本與貿易網絡，一併遷往巴斯拉、遷往巴林、遷往任何一個願意善待他們的港口。而這並不是一句空洞的威脅：在科威特的歷史上，確有商人家族因不滿統治者的政策而集體出走、或以出走相要挾的真實事件。一座失去了商人的港，財源瞬間枯竭，城防無以為繼，統治者手裡便只剩下一座空殼。於是「課稅須經同意」這條原則，在科威特有了最堅實的執行機制——統治者若想留住財源，就不能不顧及出錢人的意見。這種「出資者可以退出、因而必須被聽取」的張力，正是議會精神的本質。它在科威特，比這個地區任何一座真正的議會，都早了近兩百年。</p>
+
+    <div class="pull"><p>潛水夫用命換來珍珠，珍珠化作商人庫房裡的白銀，白銀供養了整座城與它的統治者——而凡是供養者，便有資格在客廳裡說話。誰出錢，誰發言；不滿意，便用腳投票。這條繃緊的線，就是議會那位尚未出世的遠祖。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一間客廳裡的議會遠祖</span>
+      <p>這一章把「商人」這把鑰匙，從一份立國的契約，落實成了一套日復一日運轉的權力機制。採珠、造船、轉口讓商人富可敵城，「供養統治者」讓財富轉化為發言權，而「用腳投票」則讓這份發言權真正長出了牙齒。三者合在一起，便構成了科威特獨步海灣的政治底層邏輯——統治者要錢，商人有錢且能帶著錢走，於是「課稅須經同意」這條在別處只屬於遙遠西方的原則，竟在這片沙漠的港市裡自然生長。這正是第三把鑰匙「議會」最直接的祖先：一九六二年那座能立法、能質詢、能倒閣、能審預算的海灣唯一真議會，並非憑空降臨，它不過是把那間坐滿金主的 majlis 客廳、那條「誰出錢誰說話」的線，用憲法的形式正式寫了下來。至於「石油」這把鑰匙，此刻仍沉睡在沙地之下——但讀者請記住一個將在後文反覆迴響的反諷：日後當石油的租金把財源全部握進統治者手裡、當政府不再需要商人供養、也不再向人民徵稅時，這條維繫了兩百年的「出錢換發言」的紐帶，將被悄悄抽掉地基，而那座由它催生的議會，也將從制衡的活力，異化為癱瘓的否決。</p>
+      <p>把這條「商人供養統治者」的線拉回海灣的全景，它在各地長成了截然不同的模樣。卡達的故事另有專篇，那裡的商人傳統相對單薄、採珠經濟的體量也小，這條線始終細弱，待油氣租金一灌進來便被徹底沖淡，統治家族得以用財富直接買下順從，而無須與商人討價還價。唯有在科威特，商人階層財雄勢大、組織嚴密，這條線粗壯到足以日後織成一座真正有牙齒的議會。然而，正是這份獨一無二的光榮，埋著它獨一無二的危險——它的脆弱，不只在內部，更在外部。守著灣頂、扼著兩河出海口的這座富庶港市，財富越是耀眼，便越是招來北方那個鄰人的覬覦。日後那個叫伊拉克的國家，會以「巴斯拉省舊帳」為由一次次索求它，乃至在一九九〇年把坦克開進這座城——這條呼應將在後面的篇章裡，化作這個小國最深的創傷。但在那之前，還有一把更近的傘要先撐開：當「大」穆巴拉克在世紀之交把目光投向遠方的大英帝國，當日本的養殖珍珠與一場席捲全球的大蕭條即將把這門用命換來的採珠生意一夜摧毀——一個窮港如何在絕境中撞上地底的黑金，是下一部的故事。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<!-- ===================== 第二部 ===================== -->
+<div class="part-div reveal" id="part-2">
+  <span class="pn">第二部</span>
+  <h2 class="ptitle pt">英國、珍珠崩潰與石油</h2>
+  <div class="pe">Britain, the Pearl's Death & Oil</div>
+  <div class="pline"><span></span><span class="dot">⚓</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-4">
+  <div class="act-head">
+    <span class="act-num">第四章 · The 1899 Secret Bond & the British Umbrella</span>
+    <h2 class="act-title">一八九九的密約：英國的保護傘，與一封改寫國本的信</h2>
+    <p class="act-sub">The Secret Bond of 1899, and a Letter That Rewrote a Nation</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一七五二年那筆「商人選出統治者」的契約，給了科威特一個獨步海灣的內部基因；但它解決不了一個更迫在眉睫的問題——這座灣頂的港市，太小了，小到擋不住任何一個鄰居把它一口吞下。它北方，是鄂圖曼帝國治下的巴斯拉省，視這片沙洲為自己的一塊邊地；它身後，是阿拉伯內陸正在崛起的拉希德家族與沙特家族；而它腳下，是當時整個世界都還沒看上眼的、平坦無奇的沙漠。一座靠商人同意立國的城邦，它的存續，從來不是理所當然的——它需要一把外來的保護傘。而在十九世紀末、二十世紀初的波斯灣，能撐起這把傘的，只有一個帝國：大英帝國。科威特這一段被英國「收編」的歷史，是它從一個半自治的鄂圖曼邊鎮，蛻變成一個邊界清晰、主權雛形已具的酋長國的關鍵；它也在同一時間，為這個國家埋下了兩道日後將反覆撕扯它的伏線——一道，是統治者的權力如何在外援的庇護下急速膨脹，壓過了商人的傳統；另一道，是那條「巴斯拉省」的舊賬，如何在半個多世紀後，成為伊拉克兩度索求科威特的藉口。一切，要從一個弒兄奪位的強人說起。</p>
+
+    <h3>「大」穆巴拉克：一場血腥政變，與一個強人的崛起</h3>
+    <p>一八九六年五月的一個深夜，科威特城裡發生了一樁震動全城的血案。當時的統治者穆罕默德·本·薩巴赫，與他的弟弟賈拉赫，在睡夢中被另一個弟弟——穆巴拉克·本·薩巴赫——派人刺殺。穆巴拉克踏著兄長的血登上了統治者之位，史稱「大」穆巴拉克（Mubarak the Great，又稱穆巴拉克一世）。這是科威特歷史上罕見的一次以暴力奪權，與一七五二年那場由商人推選、和平交接的立國場景，形成了刺眼的對照。穆巴拉克之所以鋌而走險，據傳是因為他不滿兄長對鄂圖曼帝國過於恭順、把科威特一步步推向被併入巴斯拉省的險境。他是一個眼光毒辣、手腕強硬的政治動物，深知這座小城夾在鄂圖曼與野心勃勃的鄰邦之間，命懸一線。他要做的第一件事，就是替科威特找到一把比鄂圖曼更可靠、也更不會干涉內政的保護傘。而當他環顧四周，那個正在波斯灣縱橫捭闔、急於遏制鄂圖曼與沙俄南下、又剛剛盯上德國人「巴格達鐵路」計畫終點站的帝國，正是大英帝國。穆巴拉克的崛起，標誌著科威特從一個內向的商人城邦，走向了一個必須在帝國博弈的棋盤上為自己謀求一席之地的時代。</p>
+
+    <h3>一八九九年一月二十三日：那封密約信</h3>
+    <p>一八九九年一月二十三日，穆巴拉克與英國駐波斯灣的政治專員梅德·辛德上校，秘密簽下了一份日後將徹底改寫科威特國本的協議——史稱《一八九九年英科密約》。這份協議的措辭簡短，內容卻份量驚人：穆巴拉克代表自己與後嗣承諾，未經英國政府同意，絕不接待任何其他列強的代表、絕不向任何外國割讓、出租或抵押科威特的任何一寸領土；作為交換，英國承諾給予穆巴拉克及其家族保護。這份密約之所以「密」，是因為在名義上，科威特此時仍屬鄂圖曼帝國巴斯拉省治下，公開倒向英國會立即招來伊斯坦堡的雷霆之怒。穆巴拉克得到的，是一份每年一萬五千盧比的英方津貼，與一個悄悄撐在頭頂的保護傘；他付出的，是科威特的外交主權與讓地權——這座港市自此成了大英帝國在波斯灣戰略體系裡的一枚棋子。這份協議，把科威特從一個隨時可能被鄂圖曼吞併、被列強瓜分的脆弱邊鎮，變成了一個英國明確標示「不准他人染指」的保護地。一封信，買來了一個小國半個多世紀的生存空間。</p>
+
+    <h3>保護傘的雙刃：被併入巴斯拉省的命運，與一道日後的舊賬</h3>
+    <p>一八九九年那把保護傘，最直接的功用，是讓科威特躲過了被正式併入鄂圖曼巴斯拉省的命運。在密約之前，鄂圖曼一度試圖把科威特降格為巴斯拉省下的一個縣（qadha），把穆巴拉克塞進省級官僚體系，使這座港市徹底淪為帝國的一塊行政邊地；是英國的介入，硬生生擋下了這道吞併的勢頭。然而，這把傘是一把雙刃劍。一方面，它保住了科威特的自治與身家；另一方面，它也把一個極其危險的歷史包袱，永久地留在了這片土地的法理身世裡——因為在鄂圖曼的官方地圖與檔案中，科威特始終被標註為巴斯拉省的一部分。這道「巴斯拉省」的舊賬，當時看來無關痛癢，卻像一顆埋在地下的種子，在半個多世紀後驚醒：一九六一年科威特剛獨立，伊拉克的卡西姆便援引這道鄂圖曼的舊籍，宣稱科威特本是「巴斯拉省」的一塊地、理應歸伊拉克所有；一九九〇年，薩達姆更是把這道舊賬翻到極致，索性宣布科威特是伊拉克的「第十九省」。穆巴拉克在一八九九年用一把保護傘換來的安全，竟也同時，替後世子孫埋下了一道糾纏不休的領土詛咒。</p>
+
+    <h3>強人的代價：當保護傘壓過了商人的傳統</h3>
+    <p>一八九九年的密約，還在科威特內部的權力天平上，悄悄地壓下了一塊沉重的砝碼。在此之前，薩巴赫家族的統治者，財政上高度依賴城裡採珠與貿易的商人——統治者要錢辦事、要錢養兵、要錢維繫城防，都得仰賴商人的捐輸與關稅，這正是「商人同意」這份契約的物質基礎：誰出錢，誰就有資格在統治者的客廳裡說話。可一八九九年之後，穆巴拉克手上多了一筆來自英國的津貼、與一把不靠商人也能撐住的外來保護傘；他不再像他的前任那樣，事事都得看商人的臉色。穆巴拉克借助這份外援，大力鞏固薩巴赫家族的世襲統治，把權力越收越緊——他向商人徵收日益沉重的稅捐，用以支持自己對阿拉伯內陸事務的雄心與奢靡的開銷。這就讓那條「課稅須經同意」的古老紐帶，第一次被外來的租金與庇護，繃到了斷裂的邊緣。商人們積壓的不滿，雖然在穆巴拉克強悍的鐵腕下暫時隱忍，卻並未消失——它只是潛入地底，等待著一個合適的時機，重新噴湧而出。穆巴拉克的集權，與商人傳統之間的這道張力，正是下一節故事的引信。</p>
+
+    <h3>一九二一與一九三八：商人 majlis 運動，議會基因的早期萌動</h3>
+    <p>穆巴拉克一九一五年去世後，科威特內部那條被他強壓下去的「商人同意」傳統，開始一次次地頑強反彈，化為兩場真切的政治運動——這正是日後海灣唯一真議會的、最早的基因萌動。第一次，是在一九二一年：當統治者賈比爾二世去世、王位繼承出現空檔時，城裡的主要商人家族趁機集結，向新登位的薩巴赫家族統治者提出一個明確的條件——他們要求成立一個諮詢性的議事會（majlis），讓商人能參與國政的決策；統治者被迫應允，一個短命的諮詢會議因此誕生。它雖然很快無疾而終，卻第一次把「商人要分享統治權」這個訴求，攤到了檯面上。第二次，也是更具份量的一次，是在一九三八年——史稱「一九三八年立法議會運動」（Majlis Movement）。這一年，受夠了薩巴赫家族壟斷石油特許權收益、把持稅收與貿易的科威特商人精英，組織起來，選出了一個十四人的立法議會，要求掌控國家財政、改革行政、把石油的初步收益用於公共建設。這個議會雖然只存活了短短半年便被統治者解散，卻是阿拉伯海灣有史以來，第一個由本地精英自下而上選出、明確要求分享統治權與財政權的代議機構。一七五二年種下的那粒「同意」的種子，在一八九九年被強人的保護傘壓抑了一代之後，於一九二一與一九三八，兩度頂破了土壤——科威特的議會基因，早在石油尚未真正噴湧、憲法尚未頒布之前，就已經在這片沙漠裡，倔強地發了芽。</p>
+
+    <div class="pull"><p>一八九九年，穆巴拉克用一封密約，替科威特換來了半個多世紀的生存空間，卻也同時押上了它的外交主權、埋下了一道「巴斯拉省」的領土詛咒，並用外來的津貼，第一次壓過了「商人同意」的古老傳統。然而那份傳統並未死去——它在一九二一與一九三八兩度頂破土壤，化為阿拉伯海灣有史以來最早的議會運動。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 保護傘下的三密碼</span>
+      <p>這一章，是三把鑰匙第一次在外部強權的陰影下交鋒。「<strong>商人</strong>」這把鑰匙，在一八九九年遭遇了它的第一道勁敵：當穆巴拉克拿到英國的津貼與保護傘，他便第一次擁有了「不必看商人臉色」的本錢——這正是日後「石油租金」腐蝕「商人同意」的一次預演，只不過此時抽掉「徵稅換同意」紐帶的，還不是石油，而是英國的庇護金。然而「<strong>議會</strong>」這把鑰匙，卻在同一段歷史裡，倔強地萌了芽：一九二一與一九三八的商人 majlis 運動，是阿拉伯海灣有史以來最早的、自下而上要求分享統治權的代議嘗試。它告訴我們，一九六二年那座有牙齒的國民議會，並非憑空而降，而是一七五二年「商人同意」的傳統，歷經穆巴拉克的壓抑後，頑強反彈的必然結果——議會的種子，早在石油噴湧之前，就已在這片土地裡發了芽。</p>
+      <p>而「<strong>石油</strong>」這把鑰匙，也已在一九三八年的議會運動裡，露出了它的第一道身影——那一年商人們之所以群起爭奪財政權，正是因為他們嗅到了石油特許權即將帶來的滔天財富，不願被薩巴赫家族獨吞。這是石油尚未噴湧、就已開始改寫科威特內部權力的徵兆。至於一八九九年那道「巴斯拉省」的舊賬，更是直接埋下了姊妹篇《伊拉克》中那兩次索求的法理引信：一九六一年卡西姆的併吞威脅，與一九九〇年薩達姆的「第十九省」，都從這道鄂圖曼的舊籍裡，找到了它們冠冕堂皇的藉口。穆巴拉克在灣頂用一封信換來的安全，正如同大鄰居沙烏地在阿拉伯內陸用劍與經書換來的版圖（其故事另有專篇），都是這片半島上的小邦與強權，在二十世紀初為求生存所做的、影響百年的豪賭——只是科威特押上的，是它的外交主權與一道日後讓它兩度命懸一線的領土詛咒。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-5">
+  <div class="act-head">
+    <span class="act-num">第五章 · The Death of the Pearl, and Burgan 1938</span>
+    <h2 class="act-title">珍珠之死，與一九三八年的布爾甘：從谷底到黑金</h2>
+    <p class="act-sub">When the Pearl Died and the Earth Gave Up Its Black Gold</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>在石油把科威特推上巨富之前，這座灣頂的港市，先狠狠地跌進了一個它幾乎不曾想像過的深淵。一八九九年的保護傘解決了它的外患，一九二一與一九三八的議會運動攪動了它的內政，可這些都比不上一個更原始、更殘酷的衝擊——它賴以為生的那門古老生意，珍珠，在短短十幾年間，從這片海灣的海床上，徹底消失了它的價值。科威特的經濟，幾乎是被一根針——日本人的養殖珍珠——與一場席捲全球的大蕭條，合力刺破的。這是這個港市在現代史上，最接近徹底崩潰的時刻：商人破產、潛水夫失業、整座城市陷入飢饉。然而，就在這最深的谷底，命運卻在它腳下的沙漠深處，悄悄藏好了一份足以改寫它全部身世的厚禮。一九三八年那個尋常的二月，當地質學家在科威特南方的沙地裡探到一座深不見底的油藏時，沒有人能想像，這座窮得快要餓死的採珠港，即將一夕之間，坐上全世界最厚的一張黑金寶座。這一章，講的就是科威特如何在「珍珠之死」的絕望裡，迎來「布爾甘」的救贖——一個關於墜落與重生，僅僅相隔十年的故事。</p>
+
+    <h3>珍珠：石油之前，這片海灣唯一拿得出手的財富</h3>
+    <p>要懂得珍珠崩潰對科威特的打擊有多深，得先懂得珍珠在石油之前，對這片海灣有多重要。在那個年代，珍珠幾乎是科威特唯一拿得出手的出口財富——每年夏天，成千上萬的潛水夫從獨桅的木船「dhow」上躍進溫熱的波斯灣，在沒有任何裝備的情況下，憑著一口氣下潛到十幾公尺深的海床，徒手撬開一只又一只牡蠣，只為那萬中無一的一粒珍珠。這是一門用命去換的生意：潛水夫的耳膜常年滲血、肺被水壓擠得變形，許多人四十歲就老得像六十歲。一八〇〇年代末至一九二〇年代初，是科威特採珠業的黃金時代——全城上下，從統治者到商人、從船長（nakhuda）到潛水夫，幾乎都被編織進這張龐大的採珠經濟網裡。據估計，在巔峰時期，科威特有數百艘採珠船、數以萬計的人口直接或間接依賴這門生意。珍珠換來的白銀，供養了整座城、也供養了統治它的薩巴赫家族——這正是「商人同意」契約得以維繫的物質基礎。然而，這座完全押注在一種天然奢侈品上的單一經濟，也意味著一旦這顆珍珠失去了價值，整座城便會跟著它一起崩塌。而這場崩塌，比任何人預料的都來得更快、更猛。</p>
+
+    <h3>一根針刺破的繁華：日本養殖珍珠與大蕭條的雙重絞殺</h3>
+    <p>摧毀科威特採珠業的，是兩股幾乎同時襲來的力量。第一股，來自遙遠的日本——一個名叫御木本幸吉的日本商人，早在一九〇〇年代初就成功研發出「養殖珍珠」（cultured pearl）的技術，並在一九二〇年代把這種品質均勻、價格低廉的人工珍珠，大量推向了世界市場。一顆需要潛水夫拿命去換、且品質參差的天然珍珠，如何競爭得過一顆可以批量生產、又圓又亮的養殖珍珠？海灣天然珍珠的價格，因此一瀉千里。第二股力量，是一九二九年從華爾街引爆、隨即席捲全球的經濟大蕭條——當歐美的富人連飯都快吃不上時，誰還買得起珍珠這種純粹的奢侈品？需求端的崩潰，與供給端的替代，兩股力量合在一起，幾乎在一夜之間，把科威特賴以為生的這門古老生意，徹底掏空了。一九二〇年代末到一九三〇年代，科威特的珍珠出口斷崖式下墜，採珠船一艘艘地爛在港裡，放債的商人血本無歸，欠著債的潛水夫無工可做。這座曾經富庶的港市，跌進了它記憶中最深的一場飢饉——人們挨餓、舉家外遷，整座城瀰漫著一種末日般的蕭索。一根來自日本的針，加上一場來自紐約的風暴，刺破了這片海灣維繫了數百年的繁華。</p>
+
+    <h3>一九三八年二月二十三日：布爾甘，世界第二大油田</h3>
+    <p>就在這最深的谷底，命運給了科威特一個它做夢也想不到的轉機。一九三八年二月二十三日，由英國的英伊石油公司（Anglo-Persian）與美國的海灣石油公司（Gulf Oil）合資組成的「科威特石油公司」（Kuwait Oil Company，KOC），在科威特城以南的沙漠裡，鑽探的布爾甘一號井（Burgan No. 1），噴出了滾滾原油。沒有人在當時就立刻明白他們究竟發現了什麼——但隨著勘探的深入，一個驚人的事實逐漸清晰：布爾甘，是一座深不見底的黑金寶庫。它是全世界僅次於沙烏地阿拉伯加瓦爾油田（Ghawar）的第二大常規油田，獨自佔了科威特已探明石油儲量的約七成。換句話說，這個剛剛因珍珠崩潰而瀕臨餓死的窮港，腳下竟然壓著一座足以與大鄰居沙烏地分庭抗禮的油海。布爾甘油田的發現，與大鄰居的加瓦爾，共同奠定了波斯灣作為「世界油庫」的地位——而科威特這個面積在海灣諸國中數一數二袖珍的小邦，竟分到了其中第二肥沃的一塊。命運的反差是如此之劇烈：在珍珠這顆天然奢侈品讓它跌入飢饉的同一個十年，地底那座無人知曉的油藏，又把它一舉抬上了富可敵國的起點。</p>
+
+    <h3>二戰的延宕，與一九四六年那第一船原油</h3>
+    <p>然而，布爾甘的黑金，並沒有在一九三八年就立刻轉化為財富——一場席捲全球的戰爭，把這份救贖往後推了整整八年。一九三九年第二次世界大戰爆發，波斯灣淪為戰略要衝，石油的開採與外運被迫中斷；更有甚者，出於對戰局的考量與防止油田落入敵手的疑慮，剛剛打通的布爾甘油井，竟在戰時被用混凝土暫時封堵了起來。於是科威特只能在飢饉裡，繼續苦熬了好幾年——明知腳下壓著巨富，卻一桶也運不出去。直到二戰結束、世界重回和平，這份遲來的救贖才終於兌現：一九四六年六月三十日，科威特的統治者阿赫邁德·賈比爾·薩巴赫，在岸邊親手轉動了一個象徵性的閥門，第一船科威特原油，從米納·艾哈邁迪（Mina Al-Ahmadi）港，正式啟運外銷。這一刻，是科威特身世的真正分水嶺——它從一個靠採珠造船、靠商人同意維生的傳統港市，正式跨進了一個靠出口石油、靠地租維生的新時代。那一年，這座窮港的人口還不足十萬；而它即將迎來的財富，將在短短十幾年間，把它變成整個海灣最富裕、最先進的地方。窮港，一夕之間，坐上了黑金的寶座。</p>
+
+    <h3>從珍珠到石油：一場財富來源的根本斷裂</h3>
+    <p>從珍珠到石油，這場看似只是「換了一門生意」的轉變，骨子裡卻是科威特立國邏輯的一次根本斷裂。珍珠，是一門高度仰賴人力、利潤層層分配的生意——它需要潛水夫的命、需要船長的經驗、需要放債商人的資本、需要外銷商人的網絡，財富在這條漫長的鏈條上層層流轉，最終把整座城的人都繫在了一起；正因如此，採珠時代的統治者，不得不依賴商人、不得不向出錢的人交代，「商人同意」的契約才得以維繫。然而石油完全不同——它幾乎不需要本地人的勞動（開採由外國公司負責），財富以「特許權收益」的形式，直接流進統治家族的金庫，再由國家自上而下地分配給人民。一條原本「由下而上、靠商人供養統治者」的財富鏈，在石油到來後，被徹底倒轉成了「由上而下、靠統治者分配租金」。這個轉變的全部後果，要在往後的章節裡才會徹底顯現；但它的種子，正是在一九四六年那第一船原油啟運的那一刻，悄悄種下的。科威特最珍貴的「商人同意」傳統，與最豐厚的「石油租金」之間那場長達數十年的角力，從此拉開了序幕。</p>
+
+    <div class="pull"><p>一根來自日本的養殖珍珠之針，加上一場來自紐約的大蕭條風暴，刺破了科威特維繫數百年的採珠繁華，把它推進了記憶中最深的飢饉；可就在這谷底，一九三八年布爾甘油田的噴湧——世界第二大常規油田——又在十年之內，把這個瀕臨餓死的窮港，一舉抬上了黑金的寶座。墜落與重生，僅僅相隔十年。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 從珍珠之死到黑金之生</span>
+      <p>這一章，是「<strong>石油</strong>」這把鑰匙，真正登上歷史舞台的時刻——也是它與「<strong>商人</strong>」這把鑰匙，第一次發生根本性碰撞的時刻。在珍珠時代，財富是「由下而上」的：它從潛水夫的命、商人的資本裡層層流出，把整座城繫在一起，逼著統治者必須向出錢的人交代——這正是「商人同意」契約得以維繫的物質基礎。而布爾甘的黑金，卻是「由上而下」的：石油的租金不經人民的勞動、直接流進統治家族的金庫，再自上而下地分配。一九四六年那第一船原油，因此不只是換了一門生意，而是倒轉了整個國家的財富邏輯——它埋下了日後「食租陷阱」最初的種子，也預示了那條「課稅換同意」的古老紐帶，將如何被石油的租金，一點一點地鬆開。珍珠之死，是「商人」時代的落幕；布爾甘之生，是「石油」時代的開場。</p>
+      <p>而這場「珍珠崩潰—石油黎明」的劇變，並非科威特獨有——它幾乎是整個波斯灣在二十世紀上半葉，集體經歷的一場宿命。正如姊妹篇《卡達》與《阿聯》所揭示的，海灣諸邦無一例外，都在一九二〇至三〇年代，被日本養殖珍珠與大蕭條的雙重絞殺，推進了採珠業的崩潰深淵；又都在隨後的數十年裡，被地底湧出的石油（卡達的杜坎、阿聯的穆爾班）一一拯救。然而科威特的幸運，在於它分到的那座布爾甘，是僅次於大鄰居沙烏地加瓦爾的世界第二大油田——這份得天獨厚的厚禮，將讓它比任何海灣鄰居都更早、更深地嘗到石油的甜頭，也更早地建起搖籃到墳墓的福利國。可正是這份過於豐厚的租金，日後也將讓它比誰都更深地，陷進食租的惰性與議會的僵局裡。命運給科威特的這份禮物，從一開始，就福禍相倚。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-6">
+  <div class="act-head">
+    <span class="act-num">第六章 · The Oil Flood & the Birth of a Welfare State</span>
+    <h2 class="act-title">石油的洪流：一個福利國的誕生，與食租模式的奠基</h2>
+    <p class="act-sub">The Oil Flood and the Making of a Cradle-to-Grave State</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九四六年那第一船原油啟運之後，科威特迎來的，不是涓滴細流，而是一場席捲一切的洪流。五〇與六〇年代，隨著布爾甘油田的全力開採，石油收入以一種此前任何人都不曾見過的速度，灌進了這座灣頂的港市——它從一個人口不足十萬、靠採珠造船維生的窮城，在短短十幾年間，膨脹成了整個阿拉伯海灣最富裕、最先進、最有文化的地方。然而，真正定義了科威特此後數十年命運的，並不只是這筆財富的數量，而是它被「如何花掉」的方式。在一個名叫阿卜杜拉·薩利姆·薩巴赫的統治者手中，這場石油的洪流，被引導著建起了一個搖籃到墳墓的福利國——免費的醫療、免費的教育、保障的工作、低廉的水電與糧食補貼。這是科威特最慷慨、也最光輝的一頁；它讓這個小國的人民，過上了當時連許多歐美國家都未必能企及的優渥生活。可也正是在這慷慨的背後，一種日後將深刻困住這個國家的經濟形態——「食租模式」（rentier state）——被悄悄地、卻是堅實地奠定了下來。這一章，講的就是科威特如何在石油的洪流裡，建起一座海灣的福利燈塔，又如何在同一座燈塔的地基裡，埋下了食租陷阱的第一塊磚。</p>
+
+    <h3>洪流：當石油收入以倍數狂湧而入</h3>
+    <p>五〇與六〇年代的科威特石油收入，是以一種近乎魔幻的速度暴增的。一九四六年第一船原油啟運時，科威特的石油收益還微不足道；可隨著布爾甘的全力投產與戰後世界對能源需求的爆炸式增長，到了一九五〇年代，科威特的石油年產量已躍居波斯灣首屈一指，一度成為中東最大的產油國之一。一九五〇年代初，科威特政府從石油中分得的年收益還只有數百萬英鎊；到了五〇年代末、六〇年代初，這個數字已經暴漲到數以億計。對一個人口僅有十幾萬本國公民的小國而言，這是一筆按人均計算堪稱天文數字的財富。一九五一年，科威特與石油公司重新談判，把收益分成從早年的固定權利金，改為對半分帳（fifty-fifty）的利潤分成模式，使流入國庫的石油收益再度倍增。短短十幾年間，這座曾因珍珠崩潰而餓殍遍地的窮港，搖身一變，成了人均財富傲視全球的暴發戶。問題只剩下一個：這樣一筆從天而降、又持續暴漲的鉅款，一個人口稀少的小國，究竟該拿它來做什麼？</p>
+
+    <h3>阿卜杜拉·薩利姆：「現代科威特之父」與他的選擇</h3>
+    <p>回答這個問題的，是科威特歷史上最受敬重的一位統治者——阿卜杜拉·薩利姆·薩巴赫（Abdullah al-Salim al-Sabah），他自一九五〇年繼位，被後世尊為「現代科威特之父」。面對這場前所未有的財富洪流，阿卜杜拉·薩利姆做出了一個影響深遠的選擇：他要把石油的收益，大規模、系統性地，投入到改善本國人民的福祉上。他下令在這片荒涼的沙漠港市裡，興建現代化的醫院、學校、道路、海水淡化廠與住宅；他把免費的醫療與教育，當作每一個科威特公民與生俱來的權利；他大舉擴張政府機構，為本國公民提供穩定而優渥的公職。在他的治理下，科威特城從一座靠土牆環繞、街道狹窄的傳統港鎮，迅速蛻變成一座擁有寬闊大道、現代建築與完善公共設施的新興都市。阿卜杜拉·薩利姆的慷慨，並非毫無章法的揮霍——他同時也延續了一九五三年設立主權基金（其先見之明，將在下一部詳述）的遠見，試圖為石油用完後的世代未雨綢繆。然而，他最深刻、也最具爭議的遺產，是他親手把石油的洪流，澆鑄成了一份「搖籃到墳墓」的社會契約——一份至今仍深刻地定義著、也困住著科威特的契約。</p>
+
+    <h3>搖籃到墳墓：一座福利國的成形</h3>
+    <p>阿卜杜拉·薩利姆所奠定的這份福利契約，其慷慨的程度，即便放在今天看來也令人咋舌。一個科威特公民，從出生到死亡，幾乎所有的人生需求，都由國家一手包辦：他在免費的公立醫院裡出生，在免費的公立學校裡受教育，成績優異者還能領著國家的全額獎學金，遠赴英美的名校深造；學成歸國，他幾乎篤定能在龐大的政府機構裡，謀得一份穩定、體面、薪資優渥的公職；他享受著國家高額補貼的水、電、燃料與基本糧食，住著國家興建或補貼的房屋；他結婚，國家給補助；他生病，國家全額埋單；而貫穿這一切的，是一條最關鍵的原則——他不必繳納一毛錢的個人所得稅。國家不向人民伸手要錢，反而源源不斷地，把石油的租金分到每一個公民的手裡。這份福利的慷慨，讓五〇與六〇年代的科威特公民，過上了當時整個阿拉伯世界、乃至許多西方國家的人民，都難以想像的優渥生活。它是阿卜杜拉·薩利姆獻給人民的一份厚禮，也是科威特這個小國，向全世界展示的一張閃亮名片——一個靠著腳下的黑金，把每一個國民都供養得無憂無慮的福利天堂。</p>
+
+    <h3>海灣的燈塔：五〇—六〇年代最先進、最有文化的地方</h3>
+    <p>五〇與六〇年代的科威特，不僅是海灣最富裕的地方，更是它最先進、最開放、最有文化的地方——它是當之無愧的、整個海灣的現代化燈塔。當鄰近的酋長國還停留在傳統的部落社會時，科威特已經建起了海灣首屈一指的現代化醫院與公共衛生體系；它在一九六六年創辦了科威特大學，是海灣最早的現代高等學府之一；它擁有當時阿拉伯世界最自由、最活躍的報業與出版業，書籍、報刊與思想在這裡自由流通；它有劇院、有電影院、有蓬勃的文藝生活，吸引了大批來自埃及、巴勒斯坦、敘利亞、黎巴嫩的阿拉伯知識分子、教師、醫生與工程師前來工作——這些外來的阿拉伯精英，反過來又進一步豐富了科威特的文化與思想。在那個年代，「科威特」這個名字，在整個阿拉伯世界，是現代、富裕、開明與進步的代名詞；許多海灣鄰居，都把科威特當作學習與仰望的範本。這是科威特最輝煌的一段時光——它證明了，一座沙漠裡的港市，竟能憑著石油與遠見，建起一座令整個地區為之側目的文明燈塔。然而，誰也沒有料到，這座燈塔的地基裡，已經埋下了日後讓它停滯、讓它被鄰居一一超越的，那顆食租的種子。</p>
+
+    <h3>食租模式的奠基：一份福，也是一份困</h3>
+    <p>當阿卜杜拉·薩利姆把石油的洪流，澆鑄成那份搖籃到墳墓的福利契約時，他也在不經意間，為科威特奠定了一種日後將深刻困住它的經濟與政治形態——經濟學家稱之為「食租國家」（rentier state）。它的核心邏輯是：國家的財政收入，絕大部分來自出口石油這種天然資源的「租金」，而非來自對本國人民與企業的徵稅。一個不必向人民徵稅、只需把石油租金分下去的政府，與它的人民之間，便建立起一種與歷史常理截然相反的關係——在世界多數地方，是「人民納稅、政府交代」（無代表，不納稅）；而在科威特，卻是「政府分糖、人民領取」。這個看似美好的安排，藏著一道深刻的隱患：當人民習慣了不勞而獲的福利、習慣了國家是慷慨的分配者而非索取者時，任何試圖削減福利、推動改革、要求人民承擔更多責任的舉措，都會變成政治上的劇毒；而當財富不必靠本國的生產與勞動、只需靠賣油就能源源不絕時，這個國家便會漸漸喪失發展其他產業、培養本國勞動力的動力與本事。食租模式，是科威特五〇—六〇年代繁榮的根基，也是它日後僵局的根源——它既是這個國家的福，也是它的困。阿卜杜拉·薩利姆種下的這顆種子，將在往後的數十年裡，慢慢長成一棵既蔭蔽人民、又困住國家的大樹。</p>
+
+    <div class="pull"><p>阿卜杜拉·薩利姆把石油的洪流，澆鑄成了一份搖籃到墳墓的福利契約，讓五〇—六〇年代的科威特，成為整個海灣最富裕、最先進、最有文化的燈塔。可就在這份慷慨的地基裡，他也埋下了「食租模式」的第一塊磚——一個只需分糖、無須徵稅的政府，與一群習慣了不勞而獲的人民。這份契約，既是科威特的福，也是它日後動彈不得的困。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 福利燈塔下的食租種子</span>
+      <p>這一章，是「<strong>石油</strong>」這把鑰匙，徹底改寫科威特命運的時刻——也是它與「<strong>商人</strong>」這把鑰匙，正式分道揚鑣的時刻。在採珠時代，財富靠商人由下而上地供養統治者，逼著統治者必須向出錢的人交代，「商人同意」的契約才得以維繫；可當阿卜杜拉·薩利姆把石油的租金，化作搖籃到墳墓的福利、自上而下地分給每一個不必納稅的公民時，那條「課稅換同意」的古老紐帶，便被徹底鬆開了。國家不再需要向人民伸手要錢，人民也就漸漸失去了「以納稅換取發言權」的著力點——這正是「食租模式」（rentier state）最深刻的政治後果。五〇—六〇年代的福利燈塔有多輝煌，這顆埋在地基裡的食租種子，日後就有多沉重：它讓任何削減福利的改革都成了政治劇毒，也為日後那座有牙齒的議會與委任內閣之間數十年的僵局，鋪好了最深的底色。</p>
+      <p>而最深的伏筆，在於「<strong>議會</strong>」這把鑰匙，將在下一部裡，與這座剛剛奠基的食租福利國正面相撞。一九六二年那座海灣唯一真有牙齒的國民議會，本是「商人同意」傳統最輝煌的果實；可當它面對的，是一個阿卜杜拉·薩利姆在五〇—六〇年代親手建起、任何削減福利都形同政治自殺的食租國家時，它便注定要從「制衡」異化成「否決」。科威特此刻在福利上的慷慨與先進，與它日後在改革上的僵局與落伍，其實是同一枚硬幣的兩面——這也正是它與姊妹篇《阿聯》最深刻的分野：阿聯用石油的洪流去趕在油用完前把自己變成「別的東西」（轉口、金融、旅遊），而科威特卻用同一股洪流，把自己澆鑄成了一個只靠分糖維生、學不會別的本事的食租者。同樣是石油的洪流，一個用它買來了未來，一個卻用它買來了一座既慷慨、又動彈不得的金籠子。海灣的先驅，正是在這最輝煌的時刻，埋下了它日後被一一超越的伏筆。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<!-- ===================== 第三部 ===================== -->
+<div class="part-div reveal" id="part-3">
+  <span class="pn">第三部</span>
+  <h2 class="ptitle pt">先驅之邦：第一支主權基金、第一部憲法、第一個議會</h2>
+  <div class="pe">The Pioneer — First Fund, First Constitution, First Parliament</div>
+  <div class="pline"><span></span><span class="dot">⚓</span><span></span></div>
+</div>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 一九九〇年八月二日 ✦</div>
+  <p>先驅之邦的光榮，在一夜之間被打斷。<br><span class="hl">薩達姆的坦克開進科威特城，把這個國家從地圖上抹去了七個月——而救它回來的，竟是它在三十七年前就埋下的一手棋。</span></p>
+</div>
+
+<section class="act reveal" id="ch-7">
+  <div class="act-head">
+    <span class="act-num">第七章 · 1953 — the World's First Sovereign Wealth Fund</span>
+    <h2 class="act-title">一九五三：世界上第一支主權財富基金</h2>
+    <p class="act-sub">Saving for the Day the Oil Runs Out</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>石油的洪流灌進科威特之後，最尋常的劇本，是把它喝個痛快。一個剛從採珠崩潰的飢饉裡爬出來的窮港，忽然之間每一桶原油都換成白花花的英鎊湧進國庫，最自然的反應，本該是把錢花掉——蓋更氣派的宮殿、買更多的金子、給每個家族分更厚的紅利，把祖祖輩輩餓過的肚子，一次補回來。整個產油世界，後來確實大多是這麼做的：錢來了就花，花光了就再抽，地底的黑金彷彿永遠抽不完。可是在一九五三年，當石油外銷才剛剛七年、國家連獨立都還要再等八年的時候，科威特卻在遙遠的倫敦，靜悄悄地做了一件當時沒有任何一個產油國想得到、也沒有任何一個產油國做得出的事——它把賣油換來的一部分錢，不花，存起來，交給倫敦金融城裡的人，去投資成股票、債券與不動產，替一個還沒出生的世代，存下一筆「等石油用完那一天」的家底。這個機構，叫科威特投資委員會（Kuwait Investment Board）。它，是這個星球上最早的主權財富基金——比挪威早了四十多年，比鄰居阿布達比早了二十多年，比科威特自己的國旗在聯合國升起，還早了整整八年。</p>
+
+    <h3>一個還沒獨立的國家，先學會了替未來存錢</h3>
+    <p>要明白這件事有多反常，得先把時間軸擺正。一九四六年六月，科威特的第一批原油才剛剛從礦特拉港（Mina al-Ahmadi）裝船外銷；一九六一年六月，它才正式從英國的保護傘下獨立建國。而科威特投資委員會的設立，是在一九五三年——夾在這兩個日子的正中間，距離第一桶外銷油僅僅七年，距離獨立還有八年。也就是說，當時的科威特，連一個完整意義上的主權國家都還不是，它的外交與國防仍由倫敦代管，它甚至還沒有自己的中央銀行與本國貨幣；可就在這樣一個「半個國家」的身分裡，它的統治者與顧問，竟已經想得比所有完整的主權國家都遠。這份先見，不是事後追認的傳奇，而是白紙黑字的制度——一個尚未獨立的酋長國，主動把它最值錢的收入切出一塊，鎖進倫敦的投資帳戶裡，明令這筆錢的本金不准花，只准它去生錢。一個連自己命運都還沒完全握在手裡的小國，卻先一步替它幾代之後的子孫，握住了一筆命運。這在整部能源史裡，幾乎是孤例。</p>
+
+    <h3>「為石油用完後的世代存錢」：一句寫進制度的先見</h3>
+    <p>支撐這個基金的，是一句聽起來樸素、做起來卻極難的信念——不可再生的東西，總有用完的一天。石油是地底的存貨，不是天上的活水；今天每抽走一桶，地下就永遠少了一桶，而換回來的那筆錢，若是花掉了，便連同那桶油一起，永遠地消失了。科威特的決策者很早就看穿了這層算術：賣油這件事，本質上不是「賺錢」，而是「把地底的資產，換成地面的資產」——是一場資產形態的轉換，而不是收入的進帳。如果換回來的錢被當成收入花光，那麼這個民族就是在一桶一桶地，把祖產變賣成宴席；等地底掏空的那天，子孫手裡將既沒有油，也沒有錢，只剩一座再也產不出財富的沙漠。於是這筆基金的使命，從一開始就被定義得清清楚楚：把今天賣油的所得，轉成一份能世世代代生息的金融資產，讓即使有一天科威特的最後一口井封了頂，這個國家依然有錢可花。這是一種對「枯竭」的深刻敬畏，一種把幾十年後的子孫放進今天決策裡的罕見眼光——它把「未雨綢繆」這四個字，從一句格言，變成了一部國家機器的引擎。</p>
+
+    <h3>從投資委員會到 KIO、再到 KIA：一條未中斷的血脈</h3>
+    <p>一九五三年的科威特投資委員會，只是這條血脈的源頭，它後來不斷地長大、改名、卻從未中斷。一九六五年，獨立後的科威特在倫敦設立了科威特投資局（Kuwait Investment Office，KIO），作為它在海外、尤其在歐洲市場操盤的前哨；一九八二年，國內又成立了科威特投資局（Kuwait Investment Authority，KIA），作為統管全國主權財富的母機構，把分散的海外資產與國內準備金，收攏進一個獨立於日常政府預算之外的專業管理體系。名字幾經更迭，建制幾經擴張，但那條從一九五三年延續下來的核心邏輯，始終沒變：本金不動，只取孳息；專業操盤，遠離政治；著眼長遠，跨越世代。尤為關鍵的，是這個體系後來長出了兩條分明的脈絡——一條是「未來世代基金」，依法每年從全國總收入裡至少提撥一成，本金未經特別立法不得動用，那是真正替子孫上鎖的鐵櫃；另一條是「一般準備金」，作為國庫日常運作與赤字時可被提領的活水。把「不能動的本金」與「能動的週轉」這樣涇渭分明地切開，正是這份制度最深的講究：它既要替未來守住底線，又要替當下留有餘地。到了今天，這條血脈已經長成全球規模名列前茅的巨型基金，管理的資產逾一兆美元——而它的起點，不過是一九五三年倫敦金融城裡，一個還沒獨立的小酋長國，做出的一個違反人性、卻無比清醒的決定。一棵後來蔭蔽了整個民族的大樹，種子早在它連國名都還不確定的年代，就已埋下。</p>
+
+    <h3>挪威晚了四十年，阿布達比晚了二十年</h3>
+    <p>把科威特這份先見，放回它的同儕之間，那份孤獨才真正刺眼。今天世人談起主權財富基金，最常引為典範的，是挪威那支靠北海石油養大的政府退休基金——它操作透明、規模龐大、被全球的財經教科書奉為「如何把資源財富轉成永續資產」的標準答案。可是挪威的這支基金，要到一九九〇年才立法、一九九六年才首次撥款，足足比科威特晚了四十多年。連科威特的海灣鄰居阿布達比，那支日後同樣富可敵國的阿布達比投資局（ADIA），也要遲至一九七六年才成立，晚了二十三年。換句話說，當挪威人、當阿布達比人都還沒想到「該替石油用完後的日子存錢」時，科威特早已默默存了二三十年。這是科威特對人類「資源治理」史，做出的一項真正原創的、被低估的貢獻——它不是跟著別人學的好學生，而是那個第一個想到答案、卻沒人記得是它先想到的開創者。先驅之邦的第一個「第一」，就誕生在這裡：在替未來存錢這件事上，全世界，科威特走在最前面。</p>
+
+    <h3>一份遲早會在國難中兌現的保險單</h3>
+    <p>然而一九五三年的人們不會知道，他們存下的這筆錢，日後將以何等戲劇性的方式，證明它的價值。當時的設想，是一份溫和而長遠的保險——防的是幾十年後石油枯竭那個遙遠的黃昏。沒有人預料到，這份保險真正被劇烈引爆的時刻，竟不是石油的枯竭，而是國家的滅亡。一九九〇年，當薩達姆的坦克碾過科威特城、當整個國家在數小時內被一個鄰居吞下、當阿勒薩巴赫王室倉皇流亡他鄉時，正是這筆從一九五三年滾存至今、躺在海外、伊拉克的手怎麼也搆不著的主權財富，成了這個被滅之國復活的本錢——它支付了盟軍的開銷、養活了流亡的公民、墊付了戰後的重建。一九五三年那個「為石油用完後存錢」的念頭，在一九九〇年，變成了「為國家被滅後復國而存錢」。這是後話，本書第十二章將細細道來；眼下我們只需記住：科威特最了不起的制度發明，不是哪一座油田、哪一棟高樓，而是這份在它最弱小、最不起眼的年代，就替自己買下的、一份遲早會在國難中兌現的保險單。</p>
+
+    <div class="pull"><p>賣油不是賺錢，而是把地底的資產，換成地面的資產——若換回來的錢被花光，這個民族就是在一桶一桶地，把祖產變賣成宴席。科威特很早就看穿了這層算術，於是在它還沒獨立的年代，就替還沒出生的子孫，存下了一筆「等石油用完那一天」的家底。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 先驅之邦的第一個「第一」</span>
+      <p>一九五三年這支世界最早的主權基金，是「石油」這把鑰匙第一次顯出它最清明的一面。布爾甘的黑金（密碼二）大多數產油國拿來換取一夕的揮霍，科威特卻把其中一塊鎖進倫敦的帳戶，明令本金不動、只取孳息——這份對「枯竭」的敬畏，本質上仍是「商人」基因（密碼一）的延伸。一個由採珠與貿易商人「選出來、並供養」的統治家族，骨子裡懂得的，正是商人最樸素的智慧：財富會一夜蒸發，所以要未雨綢繆、要留本錢、要替明天打算。把賣油的所得轉成可長存的金融資產，與一個精明的珠商把今年的盈餘投進明年的船貨，是同一種頭腦。科威特能成為全世界第一個替石油用完後的日子存錢的國家，不是偶然，而是它兩百年商人傳統，在石油時代結出的第一顆果實。</p>
+      <p>而這份先見，將在本書的兩端遙遙呼應。往後看，它在一九九〇年薩達姆入侵時兌現成復國的本錢——當伊拉克的坦克搆不著躺在海外的主權財富，這個被滅之國便有了重生的火種（第十二章詳述，亦呼應《伊拉克》一篇裡那場吞併的算計）。往遠看，它與挪威那支被全球奉為典範的石油基金形成尖銳的對照：挪威晚了四十多年才想到的事，科威特早已默默做了二三十年，這份原創的榮耀，世人卻多半忘了該記在科威特頭上。然而最深的反諷，也藏在這裡——這個最早替未來存錢、最早未雨綢繆的國家，日後卻被「議會」與「租金」一起鎖住，眼睜睜看著它一手啟發的鄰居們（《阿聯》《卡達》兩篇另有專述）一一超越。最厚的家底，配上最深的兩難，這道悖論的種子，就埋在一九五三年這份了不起、卻終究救不了它免於停滯的保險單裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-8">
+  <div class="act-head">
+    <span class="act-num">第八章 · 1961 — Independence &amp; Iraq's First Claim</span>
+    <h2 class="act-title">一九六一獨立，與伊拉克的第一次索求</h2>
+    <p class="act-sub">A Rehearsal for 1990</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九六一年六月十九日，科威特廢除了那份簽於一八九九年、把它的外交與讓地權交給倫敦換取保護的舊密約，正式宣告獨立。對一個曾經的採珠窮港而言，這本該是一個純然喜慶的日子——主權回到自己手中，國旗第一次以一個獨立國家的名義升起，六十二年的英國保護傘，光榮地收起。然而科威特的命運，從來不肯給它一個乾淨的喜悅。獨立的墨水還沒乾透，僅僅六天之後的六月二十五日，灣頂北邊那個剛剛在一九五八年經歷流血革命的鄰居——伊拉克——它的統治者卡西姆（Abd al-Karim Qasim），就在巴格達召開記者會，向全世界宣布了一件足以讓科威特剛剛升起的國旗，瞬間蒙上陰影的事：他說，科威特根本不是一個國家，而是伊拉克領土不可分割的一部分，是鄂圖曼時代「巴斯拉省」的一個縣，理應回歸巴格達的治下。一個小國獨立的第一週，它的鄰居就已經磨刀霍霍，準備把它一口吞下。科威特的生存脆弱，自獨立的第一天起，就被血淋淋地寫定了。</p>
+
+    <h3>獨立六天，鄰居就來索命</h3>
+    <p>六天。從一個國家宣告誕生，到一個鄰國宣稱要把它抹去，中間只隔了六天。這個時間差之短，本身就是科威特地緣宿命最赤裸的註腳。卡西姆的論據，並非全然的無中生有，而是把一段歷史的舊帳，扭曲成了併吞的藉口——他援引的，正是鄂圖曼帝國時代的行政劃分：在那個年代，名義上科威特曾被算作鄂圖曼巴斯拉省下轄的一個區；而伊拉克作為鄂圖曼在兩河流域舊省份的繼承者，便聲稱自己一併繼承了對科威特的主權。這套說辭的荒謬在於，它徹底無視了科威特自一七五二年起、由阿勒薩巴赫家族自主統治了兩百多年的事實，無視了它一八九九年起作為英國保護國的獨立地位，更無視了科威特人自己從不認為自己是巴斯拉一部分的鮮明認同。可是對一個剛剛獨立、軍力近乎於零的小國而言，鄰居的論據荒不荒謬並不重要——重要的是，那個鄰居有十倍於它的人口、有真正的軍隊，並且公開地、急切地，想要它腳下那座剛剛開始噴湧黑金的布爾甘油田。</p>
+
+    <h3>「先鋒行動」：剛收起的保護傘，又匆匆撐開</h3>
+    <p>面對卡西姆的恫嚇，剛剛獨立、無力自保的科威特，做了唯一能救命的選擇——它回頭向昨天才剛剛告別的保護者求援。獨立才幾天的它，緊急援引與英國新簽的防衛諒解，請求倫敦出兵。英國的反應之快，顯示出它對灣頂這座油港的利害看得多重：一九六一年七月初，英軍啟動了代號「先鋒行動（Operation Vantage）」的軍事部署，在短短數日內，從航空母艦、從亞丁、從鄰近基地，向科威特投送了逾七千名地面部隊，連同戰機、戰艦與裝甲，沿著科威特與伊拉克的邊境一線展開，擺出一副「誰敢越界、便要與大英帝國正面交鋒」的姿態。剛剛在六月十九日鄭重收起的那把英國保護傘，僅僅半個多月後，就又被匆匆地、然而堅決地撐了開來。這一幕本身就是一個酸楚的隱喻：科威特名義上獨立了，可它的生存，依舊離不開一個域外強權的軍事庇護——主權的證書是它的，安全的保證，卻仍要仰賴別人的軍艦。這道從獨立第一週就刻下的依賴，將在三十年後，以更深、更痛的方式重演。</p>
+
+    <h3>阿拉伯聯盟的接力：用兄弟之師換走英國之師</h3>
+    <p>然而，靠昔日殖民宗主的軍隊來保命，對一個剛剛掙脫殖民、又身處阿拉伯民族主義高漲年代的新國家而言，是一件政治上極其尷尬的事——它太容易被卡西姆與整個阿拉伯世界譏為「英國的傀儡」、「帝國主義的走狗」。科威特與英國都很清楚這層尷尬，於是迅速地謀求一個更體面的解法：把英軍換成阿拉伯人自己的軍隊。一九六一年，剛剛接納科威特為新成員的阿拉伯國家聯盟（Arab League）介入斡旋，組織起一支由沙烏地阿拉伯、約旦、埃及（當時的阿拉伯聯合共和國）、蘇丹、突尼西亞等國部隊組成的阿拉伯聯盟維和部隊，於這一年秋天陸續進駐科威特，接替英軍的防務。英軍隨之在數月內撤離，把保衛這座灣頂油港的責任，交到了阿拉伯兄弟之師的手裡。這一手轉換意味深長：它讓科威特的安全，從「殖民宗主的庇護」升級為「阿拉伯集體的承認與保護」，等於是整個阿拉伯世界，用實際的軍隊，為科威特這個新生國家的主權，背了書、站了崗。對一個被鄰居威脅要吞併的小國而言，沒有什麼比兄弟們真的派兵來護它，更能坐實它「確實是一個獨立國家」的身分。</p>
+
+    <h3>一九六三年的承認：政變翻過了索求的一頁</h3>
+    <p>卡西姆的索求，最終不是被科威特打退的，而是被巴格達自己的政局終結的。一九六三年二月，卡西姆在一場血腥的政變中被推翻、處決，伊拉克復興黨（Ba'th）勢力上台組成了新政府。對科威特而言，這場政變帶來了喘息的轉機：新政府為了爭取阿拉伯世界與國際的承認、也為了換取科威特豐厚的經濟援助，在一九六三年十月，正式簽署協議，承認了科威特的獨立與主權，並承認了兩國之間的邊界。困擾科威特兩年多的第一次併吞危機，至此暫告平息。然而，明眼人都看得出來，這份承認的根基有多脆弱——它不是出於伊拉克對科威特主權的真心尊重，而是出於一個新政權現實的政治算計與對科威特金錢的需要。那道「巴斯拉省」的舊帳，那份對布爾甘油田的覬覦，那種「科威特本該屬於我」的執念，並沒有真正被勾消，只是被一紙協議，暫時壓進了抽屜的最底層。它像一顆沒有被拆除、只是被重新埋好的地雷，靜靜地躺在兩國的邊界之下，等待著某一個更貪婪、更不擇手段的巴格達統治者，把它重新引爆。</p>
+
+    <h3>一九九〇的預演：脆弱，是寫進地理裡的</h3>
+    <p>站在後來的角度回望，一九六一年那場危機，幾乎是一九九〇年那場浩劫的逐字預演。同一個鄰居、同一套「巴斯拉省」的歷史論據、同一座令人垂涎的布爾甘油田、同一種「科威特不是國家、而是我的一個省」的吞併邏輯——只不過，一九六一年的卡西姆停在了口頭的恫嚇，而一九九〇年的薩達姆，把坦克真正開了進來；一九六一年來救命的，是英國與阿拉伯兄弟的軍隊，而一九九〇年來救命的，將是一支由三十多國組成的、人類史上罕見的龐大聯軍。這兩場相隔二十九年的危機，像一段主題與它日後的變奏，反覆敲打著同一個被寫進科威特地理裡的、無法更改的事實：它扼守著波斯灣的灣頂，緊貼著兩河流域的出海口，腳下又埋著世界第二大的油田——這份戰略上的重要與富庶，正是它招來覬覦的根源。一個太小、太富、又太重要的國家，注定要活在一個比它強大十倍的鄰居的陰影裡。科威特用了三十年才徹底學會這一課的代價：它的生存，從來不是理所當然，而是每一天都要重新爭取、重新守護的脆弱平衡。</p>
+
+    <div class="pull"><p>從一個國家宣告誕生，到鄰國宣稱要把它抹去，中間只隔了六天。科威特的脆弱，是寫進地理裡的——它太小、太富、又太重要，注定要活在一個比它強大十倍的鄰居的陰影裡；它的生存，從來不是理所當然。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一九九〇的逐字預演</span>
+      <p>一九六一年的這場危機，把「石油」這把鑰匙最危險的一面，第一次推到了台前。布爾甘油田（密碼二）給了科威特巨富，卻也把它變成了鄰居眼中一塊非吞不可的肥肉——卡西姆對「巴斯拉省」的索求，剝開那層歷史的外衣，骨子裡覬覦的正是那座剛剛開始噴湧黑金的油田。而科威特能在獨立第一週就化險為夷，靠的不是自己的軍隊，而是英國的「先鋒行動」與阿拉伯聯盟之師——這份「靠外力庇護才能生存」的宿命，與「商人」基因（密碼一）裡那份「用腳投票、靠交涉而非武力立身」的精明一脈相承：科威特從來不是靠拳頭活下來的，它靠的是讓自己對別人有用、靠的是把強權拉來當它的盾牌。一個太小、攔不住任何鄰居的港市，學會的第一門生存術，就是把自己藏進更大的傘下。</p>
+      <p>而這場危機最深的回聲，在於它是一九九〇年那場浩劫的逐字預演——同一個伊拉克、同一套「巴斯拉省」的論據、同一座布爾甘、同一種「科威特是我的一個省」的吞併邏輯（《伊拉克》一篇對這份執念另有專述）。一九六一年卡西姆停在恫嚇，一九六三年的政變用一紙協議把那顆地雷重新埋好；二十九年後，薩達姆把它引爆，坦克真正碾了進來（本書第十章詳述）。兩場相隔近三十年的危機之間，唯一不變的救命邏輯，是科威特對外部強權的深度依賴——一九六一年是英國與阿拉伯兄弟，一九九〇年將是美國領銜的多國聯軍，並由此換來日後深入骨髓的安全焦慮與對美依賴。至於那份在一九五三年就存好的主權財富（第七章），此刻還只是一份遠慮的保險；它將在三十年後的國難裡，從「為石油用完存錢」兌現成「為復國存錢」，證明科威特真正的護身符，從來不只是軍隊，更是它那份未雨綢繆的先見。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-9">
+  <div class="act-head">
+    <span class="act-num">第九章 · 1962 — the Gulf's First Real Parliament</span>
+    <h2 class="act-title">一九六二憲法：海灣第一個真有牙齒的議會</h2>
+    <p class="act-sub">Institutionalizing the Merchants' Consent</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>挺過了獨立之初的併吞危機，科威特做的下一件事，再一次讓整個海灣側目——它沒有趁著外患剛平、王室威望正隆，順勢把權力牢牢攥進統治家族的手裡；恰恰相反，它選擇了一條在這片由君主專制如同空氣般理所當然的土地上，幾乎無人走過的路：它要替自己，立一部憲法，並設一個真正的、由人民選出來的議會。一九六二年十一月十一日，獨立後的第一位埃米爾阿卜杜拉·薩利姆·薩巴赫，頒布了科威特的第一部憲法。這部由一個民選的制憲議會起草、再由埃米爾批准的根本大法，做了一件在阿拉伯海灣絕無僅有的事：它設立了一個名為「國民議會（Majlis al-Umma）」的立法機關，由五十名議員，經由科威特公民一人一票、直接選舉產生。這不是一個供統治者垂詢的諮詢會，不是一個只會鼓掌的橡皮圖章，而是一個真有牙齒、真能咬人的議會——它要把那份從一七五二年延續至今、藏在「商人同意」血脈裡的古老張力，第一次，正式地、白紙黑字地，制度化。</p>
+
+    <h3>把兩百年的「商人同意」，第一次寫進成文法</h3>
+    <p>要讀懂一九六二年這部憲法的份量，得把它放回科威特那條獨一無二的立國血脈裡。早在一七五二年，阿勒薩巴赫家族就是被城裡採珠與貿易的商人家族「選出來、並供養」的統治者；那份「誰出錢、誰就有資格在統治者的客廳（majlis）裡說話」的契約，兩百年來，一直是科威特政治那條看不見、卻始終繃緊的底線。它曾以非正式的方式運作——商人若不滿，可以斷供、可以遷走、可以在統治者的議事廳裡據理力爭；它也曾數度試圖正式化，在一九二一年、一九三八年兩度有商人推動「議會（majlis）運動」，要求參與治理，卻都半途夭折。一九六二年的憲法，做的正是把這條兩百年來時隱時現、屢屢萌動卻屢屢受挫的「商人同意」傳統，第一次完整地、不可逆地，鑄進了一部成文的根本大法裡。從此，統治者須向被治者交代，不再只是一種心照不宣的默契、一種可以隨時被王室收回的恩賜，而是一條寫在憲法上、有議席、有選票、有質詢程序作為憑藉的硬制度。「課稅須經同意」這個在西方催生了議會的古老原理，繞了大半個地球，竟在這片沙漠的港市裡，長成了整個阿拉伯海灣唯一的一棵成材的議會之樹。</p>
+
+    <h3>真有牙齒：立法、審預算、質詢、倒閣，曾能核可王儲</h3>
+    <p>科威特這個議會之所以配得上「真有牙齒」四個字，不在於它存在，而在於它真能咬。環顧整個海灣，掛著「議會」或「諮詢會」招牌的機構並不罕見，可它們絕大多數，不過是統治者用來裝點門面、聽取建言的擺設，既不能立法、也不能拒絕，更遑論逼一個部長下台。科威特的國民議會，卻擁有一整套足以讓行政權真正忌憚的實權：它能制定與否決法律——政府想推什麼政策，得先過議會這一關；它能審查與否決國家預算——錢怎麼花，議員說了算；它能對任何一位部長提出公開的「質詢（istijwāb）」，把閣員傳到議事廳裡，當著全國的面，一條一條地責問其施政；質詢之後，它還能提出不信任案，以投票逼一名部長、乃至整個內閣下台。更驚人的是，憲法甚至一度賦予國民議會核可王儲人選的權力——在一個王位繼承向來是王室家內密事的地區，竟讓民選的議員，對「下一個統治者是誰」握有發言權。這套權力的組合，在整個阿拉伯海灣，是獨一份的。它讓科威特的議會，不是統治者恩賜的花瓶，而是一個能與王室主導的內閣，真刀真槍地角力、制衡、乃至對撞的權力中心。</p>
+
+    <h3>自由的報業，與一個真正活著的公共領域</h3>
+    <p>一個真有牙齒的議會，從來不會孤零零地存在；它的周圍，必定生長出一整片與之呼應的、活著的公共領域。一九六二年的憲法，連同它催生的議會政治，讓科威特擁有了整個海灣最自由、最敢言的報業——報紙可以批評政府的政策、可以為議員的質詢搖旗、可以把部長的醜聞攤在頭版，這在周遭那些報禁森嚴的鄰國，是難以想像的奢侈。議事廳裡的辯論，不是關起門來的密議，而是會被報紙轉述、被市井議論、被選民記在心裡、並在下一次投票時算總帳的公共事件。咖啡館裡、迪萬尼亞（dīwāniyya，科威特特有的、男主人定期在家中招待賓客縱論時政的客廳聚會）裡，國事是可以公開爭論的話題；候選人要挨家挨戶地拜票，議員要向他的選區交代。一九五〇、六〇年代的科威特，本就是整個海灣最先進、最富裕、最有文化的地方——有先進的醫院、有大學、有出版、有劇院；而一九六二年的議會與報業，更為這份物質的先進，注入了一種精神的、政治的活力。它讓科威特人不只是富裕的食租者，更是一群有選票、有聲音、敢於對自己的統治者說「不」的公民。這份活躍的公共生活，是科威特與它所有專制鄰居之間，最根本、也最值得驕傲的不同。</p>
+
+    <h3>二〇〇五年的選票：女性走進了海灣最早的議會</h3>
+    <p>這座海灣最早的議會，它的牙齒，後來還咬出了一個連許多西方人都未必意識到其分量的里程碑。一九六二年的選舉權，最初只給了男性公民；但那份「同意須擴及全體被治者」的內在邏輯，終究會推著它往前走。經過數十年婦女運動的爭取與議會內外反覆的角力，二〇〇五年五月十六日，科威特國民議會通過修法，正式賦予科威特女性完整的選舉權與被選舉權——既能投票，也能參選。四年之後的二〇〇九年大選，科威特一舉選出了四位女性議員，這是整個阿拉伯海灣君主國裡破天荒的第一次：女性不是靠保障名額被「安排」進議會，而是在沒有任何性別配額的情況下，憑藉自己的選票實力，與男性候選人正面競爭、堂堂正正地勝選進場。在一個女性政治權利普遍受限的地區，這一頁，是科威特那座「真有牙齒的議會」結出的又一顆罕見的果實——它再一次坐實了「先驅之邦」的名號：第一支主權基金、第一部憲法、第一個民選議會，如今再加上海灣第一批靠真選票勝出的女議員。科威特，又一次走在了所有鄰居的前面。</p>
+
+    <h3>光榮的種子，與僵局的根源，原是同一顆</h3>
+    <p>然而，歷史最深沉的反諷，也恰恰藏在這份光榮裡。一九六二年那部憲法、那個議會，是科威特最大的驕傲，卻也同時埋下了它日後最深的困局的種子——而這兩者，原是同一顆種子。一個真有牙齒、能立法、能審預算、能質詢倒閣的民選議會，在一個正常的、靠徵稅維生的國家裡，本該是善治的引擎、是進步的推手；可它偏偏降生在一個靠石油租金維生的食租國度。當這座有牙齒的議會，面對的不是一個須向人民伸手要錢、因而必須與人民協商的政府，而是一個只需把石油的租金分配下去、任何削減福利的改革都形同政治自殺的食租體制時，它那副利牙，便漸漸從「制衡權力」的工具，異化成了「否決一切」的武器。民選的議員與王室主導的委任內閣陷入無休止的角力，政府一次次被質詢逼垮，議會一次次被埃米爾解散，重大的改革——發債、福利、多元化、外資——一一卡死在這場永不落幕的拉鋸裡。一九六二年播下的，是海灣唯一一座真議會的種子；可它日後長出的，卻既是這個國家的光榮，也是它數十年僵局與停滯的根源。種子是同一顆，結的果，卻一半是蜜，一半是毒。</p>
+
+    <div class="pull"><p>一九六二年播下的，是海灣唯一一座真議會的種子。它日後長出的，卻既是這個國家的光榮，也是它數十年僵局的根源——種子是同一顆，結的果，卻一半是蜜，一半是毒。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一半是蜜，一半是毒</span>
+      <p>一九六二年的憲法與議會，是「議會」這把鑰匙（密碼三）的正式誕生，也是「商人」這把鑰匙（密碼一）兩百年血脈最輝煌的結晶。一七五二年那份「誰出錢、誰就有資格在統治者的客廳裡說話」的同意契約，曾在一九二一年、一九三八年兩度試圖正式化卻夭折；直到一九六二年，它才終於被完整地鑄進成文法，長成整個阿拉伯海灣唯一一座真有牙齒——能立法、能審預算、能質詢倒閣、曾能核可王儲——的民選議會。從非正式的「商人用腳投票」，到正式的「公民用選票投票」，這是「同意」這一傳統最了不起的一次制度躍升。連二〇〇五年女性參政、二〇〇九年四位無保障名額的女議員勝選，都是這顆種子結出的、走在全海灣最前面的果實。先驅之邦的第三個「第一」，至此完備。</p>
+      <p>然而，這座議會的悲劇，恰恰在於它撞上了「石油」這把鑰匙（密碼二）。一個真有牙齒的議會，在一個靠徵稅維生的國家裡本是善治的引擎；可當布爾甘的租金把科威特變成一個只需「分配」、無須「徵稅」的食租者，那份「課稅換同意」的古老紐帶便鬆了，議會也就失去了最初的著力點，那副利牙從「制衡」異化成了「否決」——這正是本書第十六至十八章將細細剖開的、「活力與癱瘓」的死結，並最終在二〇二四年五月，被埃米爾米沙勒按下了暫停鍵。最深的洞察在此初次顯影：正因為科威特獨一無二地靠「商人同意」立國，它才唯一地長出了這座議會（這是它的光榮）；可正因為「石油」把它變成了食租者，這座議會才從活力異化成了癱瘓（這是它的詛咒）。它最早替未來存錢（第七章）、最早給人民選票，卻被自己一手催生的鄰居們（《阿聯》《卡達》《沙烏地》三篇另有專述）一一超越——一個先行者，如何被它自己的成功（民主）與詛咒（石油）一起拖住，這道海灣的終極考題，答案的兩端，都寫在一九六二年這顆一半是蜜、一半是毒的種子裡。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<!-- ===================== 第四部 ===================== -->
+<div class="part-div reveal" id="part-4">
+  <span class="pn">第四部</span>
+  <h2 class="ptitle pt">入侵：一九九〇，與七百口燃燒的油井</h2>
+  <div class="pe">The Invasion — 1990, and 700 Burning Wells</div>
+  <div class="pline"><span></span><span class="dot">⚓</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-10">
+  <div class="act-head">
+    <span class="act-num">第十章 · August 2nd — Saddam's "19th Province"</span>
+    <h2 class="act-title">八月二日：薩達姆與「第十九省」</h2>
+    <p class="act-sub">August 2nd — Saddam, the Tanks, and the Erasing of a Nation</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一座靠商人的同意立國、靠石油的洪流致富、靠海灣唯一的議會把這份同意制度化的小國，到了一九九〇年的夏天，依舊深信自己最大的保險，是它的「有用」與它的「金錢」——它供養著無數阿拉伯兄弟國的勞工，它的主權基金散布在倫敦、紐約、東京的核心資產裡，它的報業是阿拉伯世界最自由的，它的議會（雖然在一九八六年又一次被中止）是這片沙漠裡唯一長過牙齒的民主。科威特人相信，一個如此富有、如此精明、如此左右逢源的城邦，是不會被人用坦克輾過去的。然而歷史在這一年給了它最殘酷的一課：當鄰居的槍口頂上來時，金錢買不到當下的安全，議會擋不住越境的師團，而「有用」這個科威特賴以生存兩百年的信念，在一個負債累累、剛打完八年戰爭、急需一筆橫財的強人面前，竟脆弱得不堪一擊。一九九〇年八月二日凌晨，這個信念，連同這個國家本身，在數小時內被一併抹去。</p>
+
+    <h3>負債的強人：兩伊戰爭留下的一筆爛帳</h3>
+    <p>要理解八月二日，得先回到它的前夜——一九八八年八月，伊拉克與伊朗那場打了八年、死傷上百萬、卻幾乎一寸土地都沒換到的兩伊戰爭，終於停火。薩達姆·海珊從這場慘勝裡爬出來時，手裡握著中東最龐大的一支常備軍，腳下卻踩著一座債務的火山：伊拉克欠下的外債高達約八百億美元，其中對波斯灣鄰國——主要是科威特與沙烏地——的欠款就有數百億，而科威特一國，便借給了巴格達約一百四十億美元。薩達姆的邏輯，是一種典型的強人邏輯：這八年仗，是替整個遜尼派阿拉伯世界擋住了伊朗革命的東進，是替你們海灣的富國當了「東大門的盾牌」；既然我流血替你們擋了刀，你們這些躲在後方數錢的小國，憑什麼還要我連本帶利把錢還回去？在他的算盤裡，這筆借款根本不該是借款，而是科威特理應繳納的「保護費」——你們花錢買了八年的太平，如今戰事結束，賬就該一筆勾銷。他要求科威特勾銷那一百四十億的債務，並再援助他重建。對科威特而言，這是一筆它有理由拒絕的爛帳——可它沒料到，拒絕一個剛打完仗、手握重兵、財政告急的鄰人，需要付出的代價，是整個國家。</p>
+
+    <h3>超產、斜井與一場關於油價的指控</h3>
+    <p>債務之外，薩達姆還抓住了第二根導火索——石油，那把科威特的命運之鑰，這一次成了它的催命符。兩伊戰後，伊拉克唯一能換現金的，就是賣油；而油價每跌一美元，巴格達一年就少進帳近十億美元。偏偏在一九九〇年的上半年，國際油價疲軟，薩達姆把矛頭直指科威特與阿聯：他指控這兩個小國長期超出 OPEC 配額生產，用過剩的原油壓低了油價，等於是「對伊拉克發動了一場經濟戰爭」。他更拋出一項極具煽動性的指控——科威特在兩國交界的魯邁拉（Rumaila）大油田，用「斜鑽（slant drilling）」的技術，把鑽頭斜斜地伸進伊拉克境內的地層，偷走了價值約二十四億美元的伊拉克石油。這些指控真假難辨，技術細節更是各執一詞；但對一個一心想動手的人來說，指控的真偽從來不重要，重要的是它能不能拿來當開戰的藉口。石油，這個在一九三八年從布爾甘的地底湧出、把窮港變成巨富的恩賜，此刻露出了它作為「禍根」的另一張臉——正是因為科威特腳下埋著世界第二大的油田，它才同時成了負債鄰人眼中，那塊最肥、最該被吞下的肉。</p>
+
+    <h3>巴斯拉省的舊帳：一個從未承認的國家</h3>
+    <p>而薩達姆手裡還握著第三張牌，一張比債務與石油都更古老、也更惡毒的牌——歷史的領土索求。早在一九六一年科威特剛獨立的第六天，伊拉克的卡西姆政權就宣稱：科威特根本不是一個國家，它只是鄂圖曼帝國時代「巴斯拉省」治下的一個區，一塊在英帝國主義操弄下被人為從伊拉克身上切走的領土，理應「回歸祖國」。這道索求，在一九六三年被當時的伊拉克新政府正式放棄，可它從未真正死去——它像一具埋在淺土裡的屍體，每逢巴格達有強人需要一場對外的勝利來轉移內部的危機時，便被重新掘出。薩達姆在一九九〇年，正是這樣掘出了這具屍體。他把這三張牌——勾銷不掉的債務、壓不下去的油價、抹不掉的「第十九省」舊夢——疊成一手牌，告訴自己也告訴世界：吞下科威特，不是侵略，是收復；不是搶劫，是討債；不是滅國，是把一塊本就屬於伊拉克的失地，物歸原主。八月二日，他把這套說辭，化成了坦克的履帶。</p>
+
+    <h3>數小時的淪陷與「第十九省」的宣告</h3>
+    <p>一九九〇年八月二日凌晨兩點，約十萬名伊拉克士兵、上千輛坦克，越過邊界，沿著通往科威特城的公路長驅直入。一個常備軍僅約一萬六千人、把全部安全都押在「有用」與「金錢」上的城邦，幾乎沒有任何抵抗的能力——零星的科威特部隊在達斯曼宮（Dasman Palace）外與伊軍激戰，埃米爾的胞弟法赫德·艾哈邁德親王在保衛王宮時陣亡；空軍的少數戰機升空抵抗後飛往沙烏地保存實力；可這一切，至多只能拖延，無法阻擋。當天上午，伊拉克的旗幟已插上科威特城的政府建築。八月八日，薩達姆宣布吞併科威特；八月二十八日，他更進一步，正式宣告把科威特設為伊拉克的「第十九省」，連名字都不給它留——首都被改名為「卡澤馬（Kadhima）」，科威特這個存在了兩百多年的港市國家，在巴格達的地圖上，被一筆抹去。佔領下的科威特，迎來了長達約七個月的劫掠與恐怖：博物館被搬空，醫院的設備被拆運回伊拉克，連民宅裡的家電與汽車都被整批裝上卡車運往巴格達，反抗者被處決，數百名科威特人「失蹤」——其中許多人，直到戰後多年才在伊拉克的亂葬崗裡，被認出遺骨。一個曾是阿拉伯世界最開放、最富庶的城市，在數月之間，被系統性地搬空、抽乾、抹去身分。</p>
+
+    <h3>塔伊夫的流亡政府：把國家裝進行李</h3>
+    <p>然而，薩達姆抹掉了科威特的地圖，卻沒能抹掉科威特這個「國家」——因為這個國家最關鍵的兩樣東西，在坦克進城之前，已經安全地離開了。第一樣，是它的人。入侵當天，埃米爾謝赫賈比爾·艾哈邁德與王儲謝赫薩阿德，在伊軍衝向達斯曼宮之前數分鐘，匆匆穿越南部邊界，逃入沙烏地阿拉伯。沙烏地在西部山城塔伊夫（Taif）為他們提供了庇護，阿勒薩巴赫王室與大批高官在那裡組建起一個「流亡政府」——一個沒有領土、沒有人民在側、卻在國際法上仍被全世界承認為科威特唯一合法政府的政府。第二樣，是它的錢。科威特那份從一九五三年起便未雨綢繆、散布全球的主權財富——當國土淪陷時，它正安然躺在倫敦與其他金融中心的金庫裡，一分一毫都動不了薩達姆。一九五三年那一手棋，那個「為石油用完後的世代存錢」的先見，在三十七年後，以一種它的設計者從未想像過的方式兌現了：它存的，原來不只是「石油用完後」的本錢，更是「國家被滅後」復國的本錢。塔伊夫的流亡政府，就靠著這筆遠在天邊的財富，把整個科威特，裝進了行李，帶往了流亡之路——這個故事的下半截，要在解放與重建之後，才真正講完。</p>
+
+    <div class="pull"><p>薩達姆能抹掉科威特的地圖，把首都改名、把它設為「第十九省」；卻抹不掉這個國家——因為它最要緊的兩樣東西，在坦克進城前已安全離境：流亡塔伊夫的王室，與散布全球、一毫動不了的主權財富。一個國家，竟可以裝進行李帶走。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當鄰人來敲門</span>
+      <p>八月二日這一課，把三把密碼同時逼到了極限。「<strong>石油</strong>」這一次徹底顯出了它作為禍根的一面——正因為科威特腳下埋著世界第二大的布爾甘油田，它才成了一個負債強人眼中那塊非吞不可的肥肉；魯邁拉的斜井之爭、超產壓價的指控，全都繞著石油打轉。「<strong>商人</strong>」的金錢，這一次救不了當下——科威特散布全球的主權財富，雖在日後成為復國的本錢，卻擋不住八月二日凌晨那一千輛坦克；金錢能買來長期的影響力，買不來越境師團面前那幾個小時的安全。而「<strong>議會</strong>」——海灣唯一有牙齒的那座民選議會，此刻正被一九八六年的中止令封存著；倘若它還開著，科威特在危機前的決策會不會不同，是一個歷史學家無法回答、卻足以令人沉吟的反事實。</p>
+      <p>這一章與姊妹篇之間，迴響得格外清晰。早在《一九六一獨立，與伊拉克的第一次索求》一章裡我們便已埋下伏筆：科威特獨立的第六天，伊拉克的卡西姆就宣稱它是「巴斯拉省」的一部分——一九九〇年的「第十九省」，不過是那道一九六一年舊索求的、武裝化的重演。<em>伊拉克（iraq）這個名字，從科威特誕生的第一天起，就是它命運的另一極</em>，這是兩個國家共寫的一部宿命之書，另有專篇可供對照。而對整個海灣的小國而言，八月二日更是一記永遠的警鐘：再富有、再「有用」的小國，在一個有野心的大鄰居面前，安全終究是借來的。這道脆弱，在二十七年後以另一種形式重演——二〇一七年，卡達被沙烏地、阿聯等鄰國突然斷交封鎖（其故事另有卡達 qatar 專篇），雖未動刀兵，卻同樣印證了海灣小國那條鐵律：你永遠不能只靠鄰居的善意活著。科威特學到的對策，是把自己更深地綁上一個域外的強權；這份代價與依賴，是下下章的主題。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-11">
+  <div class="act-head">
+    <span class="act-num">第十一章 · Desert Storm & 700 Fires</span>
+    <h2 class="act-title">沙漠風暴與七百口火</h2>
+    <p class="act-sub">Desert Storm, Liberation, and a Sky Turned Black</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>佔領下的科威特，過了一個漫長而黑暗的秋天與冬天。在塔伊夫，流亡政府一邊用主權財富維持著數十萬流亡公民的生計，一邊在世界各國的首都裡，展開一場前所未有的外交動員——它要說服全世界相信，吞併科威特不是一樁可以被默認、被遺忘的既成事實，而是一個必須被武力扭轉的罪行。而在被佔領的科威特城裡，一場零星卻頑強的地下抵抗，在屋頂上、在小巷裡悄悄進行。所有人都在等一件事：等那個由三十多國組成、在沙烏地沙漠裡集結了逾五十萬大軍的國際聯軍，下定決心動手。一九九一年一月十七日，等待結束了——夜空被劃開，沙漠風暴行動（Operation Desert Storm）開始了。然而，沒有人料到，把科威特從伊拉克手中奪回來，竟不是這場戰爭最慘烈的部分；真正讓這片土地流血流到一九九一年深秋的，是撤退的伊軍在臨走前，留給科威特的那份焦黑的「臨別禮物」——七百口被點燃的油井。</p>
+
+    <h3>三十多國的聯軍與一道不可逾越的紅線</h3>
+    <p>八月二日之後，國際社會的反應，快得連薩達姆自己都沒料到。聯合國安理會在數日內接連通過決議，譴責入侵、要求伊拉克無條件撤軍、並對它實施全面的經濟制裁；美國總統老布希劃下一道清晰的紅線——「這場侵略不會得逞（This will not stand）」。一場代號「沙漠盾牌（Operation Desert Shield）」的大規模軍事集結隨即展開：美國領銜，英國、法國、沙烏地、埃及、敘利亞等三十多個國家，把一支總數逾五十萬、以美軍為骨幹的多國部隊，部署到了沙烏地的沙漠裡。安理會更在十一月通過第六七八號決議，給了薩達姆一個最後通牒的期限——一九九一年一月十五日之前撤軍，否則各國有權動用「一切必要手段」。期限過去了，巴格達紋風不動。於是在一月十七日凌晨，聯軍的戰斧巡弋飛彈與戰機，撕開了巴格達與科威特上空的夜——一場持續約六週的猛烈空襲，把伊拉克的指揮系統、防空網與前線補給，一寸一寸地碾碎。</p>
+
+    <h3>一百小時：地面戰與解放</h3>
+    <p>空襲打了將近四十天後，地面攻勢在一九九一年二月二十四日發動。這場被聯軍指揮官施瓦茨科夫戲稱為「左勾拳」的攻勢，並不從科威特正面強攻，而是讓主力裝甲部隊大幅西進、繞過伊軍重兵設防的科威特邊界，再從沙漠深處包抄伊軍的側翼與後路。早已被空襲打得士氣崩潰、補給斷絕的伊拉克軍隊，在地面戰一開打便兵敗如山倒——成建制的部隊投降，數以萬計的伊軍士兵舉著白旗走出戰壕。僅僅約一百個小時之後，戰局便已分曉：一九九一年二月二十六日至二十八日間，科威特城被解放，老布希在二月二十八日宣布停火。被劫掠了七個月的城市，重新升起了科威特的旗幟；阿勒薩巴赫王室將在三月返回這片焦土，而流亡塔伊夫的那個沒有國土的政府，也終於可以把自己重新安放回它真正的家。然而，當解放的歡呼還未落定，所有人抬頭望向天空時，卻看見了一幕末日般的景象——本該是正午的時分，天卻黑了。</p>
+
+    <h3>焦土政策：七百口井被點燃</h3>
+    <p>那片黑，來自伊拉克軍隊撤退前執行的一項蓄意的焦土政策。早在一九九一年一月起，眼見大勢已去的伊軍，便開始在科威特各大油田佈設炸藥；二月撤退的最後階段，他們系統性地引爆了這些炸藥，點燃了科威特境內約六百至七百多口油井——通常被人們以「近七百口」來記憶這場浩劫。一座座油井噴吐著數十公尺高的火柱，日以繼夜地燃燒，每天有數百萬桶的原油，化作沖天的黑煙與遍地的油湖。正午的太陽被濃煙完全遮蔽，科威特陷入一種詭異的、人造的黑夜；空氣裡瀰漫著嗆人的硫磺與焦油，黑色的「油雨」落在牲畜、植物與人的身上，沙漠表面凝結成一層黏稠的「油焦泥（tarcrete）」。沒有燒起來的井則大量噴湧，在沙漠裡匯成數百個油湖，吞噬一切落入其中的飛鳥與生命。波斯灣的水面上，也漂浮著從受損設施洩漏的大片浮油，焦黑的「黑潮」綿延數十公里，毒害著海龜、海鳥與漁場。這不是戰爭的附帶損害，這是一次蓄意的、針對一個國家賴以為生的命脈與賴以呼吸的天空的，環境屠殺。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">近七百口</div><div class="lbl">伊軍撤退時點燃的油井（約六百至七百多口），噴吐數十公尺火柱、原油成湖</div></div>
+      <div class="stat"><div class="num">約九個月</div><div class="lbl">滅火與封井歷時（1991 年初起火，最後一口 1991 年 11 月 6 日封堵），遠快於原估的二至三年</div></div>
+      <div class="stat"><div class="num">約 650 億</div><div class="lbl">入侵與佔領造成的損失（美元）；另有戰後重建約 250 億美元</div></div>
+    </div>
+
+    <h3>把火滅掉：一場與時間賽跑的工程</h3>
+    <p>滅火，是一場前所未見的工程惡戰。起初，最樂觀的專家估計，要把這近七百口熊熊燃燒、且大多井口已被高溫扭曲變形的油井一一封堵，恐怕得花上兩到三年。世界各地的滅火隊——包括以「紅·阿戴爾（Red Adair）」為代表的美國傳奇滅火團隊，以及來自加拿大、伊朗、匈牙利、中國等十餘國的隊伍——湧入了這片焦黑的沙漠。他們發明出各種奇招對付這場大火：有人用噴氣引擎把水霧高速噴向火舌，有人用炸藥在瞬間「吹熄」火焰、奪走它賴以燃燒的氧氣，再迅速封堵滾燙的井口。在科威特政府不惜代價的投入與全球工程隊的協力下，原估二三年的工程，被壓縮到了約九個月——一九九一年十一月六日，最後一口油井被成功封堵，那場遮天蔽日的人造黑夜，終於散去，正午的太陽，重新照回了科威特城。然而，這場戰爭與佔領留給科威特的帳單，無比沉重：入侵與佔領造成的損失估計高達約六百五十億美元，戰後的重建又花去約二百五十億美元——更不必說那些無法用金錢計算的損失，那些「失蹤」者的家庭，那道深深烙進整個民族記憶裡的、關於「我們可以在一夜之間失去一切」的創傷。</p>
+
+    <h3>焦土上的兩種記憶：石油，是禍根，也是救贖</h3>
+    <p>當最後一縷黑煙散去，科威特人站在這片被火灼傷、被油浸透的土地上，他們對腳下這份財富的感情，從此被永遠地改寫了。石油，在一九三八年是天賜的恩寵，把窮港推上巨富；可在一九九〇至九一年，正是這同一份石油，引來了負債的強人、招來了越境的坦克，最後又化作七百口火柱、化作遮蔽正午太陽的黑雲——它親手點燃了科威特的天空。然而，弔詭的是，也正是石油——更準確地說，是用石油換來、並被精明地存了起來的那份財富——在這同一場浩劫裡，成了科威特復國的救贖。當國土被佔、油井被焚、一桶原油都賣不出去時，是那筆躺在全球金庫裡的主權財富，養活了流亡的國民、付清了盟軍的開銷、最終支付了把這七百口火一一撲滅、把這個國家從焦土上重建起來的天文帳單。石油既是燒掉天空的火，也是復國的本錢；它同時是禍根，與救贖——這兩種記憶，從一九九一年起，便永遠地纏繞在每一個科威特人對「黑金」的感情裡。而那筆救命的財富，它的來歷、它的數目、它如何把一手一九五三年的閒棋下成了復國的勝著，是下一章要講的故事。</p>
+
+    <div class="pull"><p>解放只花了約一百個小時，滅火卻燒掉了約九個月、近七百口井、六百五十億美元的損失，與一片被人造黑夜遮蔽的天空。石油在一九三八年是恩寵，在一九九一年是燒掉天空的火——可它換來的那筆財富，又在同一場浩劫裡成了復國的本錢。禍根與救贖，從此永遠纏繞。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 燒掉天空的火，與救命的錢</span>
+      <p>七百口火，把「<strong>石油</strong>」這把密碼的兩張臉，第一次同時、且如此慘烈地攤在了科威特人眼前——它是引來坦克、燒黑天空的禍根，也是養活流亡國民、付清重建帳單的救贖。這正是本書關於石油最核心的母題：在科威特，黑金從來不是單純的祝福，它一手把窮港推上巨富，又一手在一九九〇年把整個國家推向毀滅的邊緣。而救了它的，不是井裡的油，而是「<strong>商人</strong>」那份精明的遠見所積攢下來的、躺在海外金庫裡的財富——「商人基金救國」，這是科威特立國基因在現代最戲劇性的一次兌現，下一章將把這筆帳算個清楚。至於「<strong>議會</strong>」，它在這段歲月裡是缺席的——一九八六年起便被中止——但解放後人民的一個普遍呼聲，正是「我們為國家流了血、流亡了七個月，現在請把我們的議會還給我們」；正是這股戰後的民意，催生了一九九二年議會的恢復，海灣唯一有牙齒的那座民主，在焦土之上，重新長出了牙。</p>
+      <p>這場浩劫的影子，落在所有姊妹篇上。它是<em>伊拉克（iraq）</em>那段共寫的宿命之書裡，最血腥的一頁——薩達姆撤退時的焦土政策，不只是軍事失敗的洩憤，更是一個強人對一個他「索求」而不得的國家，最惡毒的報復。對整個海灣而言，它也再一次印證了那條鐵律：小國的安全是借來的。卡達在二〇一七年遭鄰國封鎖時（其故事另有 qatar 專篇）固然未見坦克與焦土，卻同樣讓人想起科威特一九九〇年的教訓——當鄰人翻臉，再厚的家底也只能用來「撐過去」，而非「擋下來」。科威特從這片焦土上學到的最深一課，是它再也不敢只把安全押在「金錢」與「有用」上了；它把自己更緊地綁上了一個域外的強權，並由此染上了一種其他海灣國未曾經歷的、深入骨髓的風險趨避——這份創傷的後遺症，與那筆救命財富的來歷，正是下一章《主權財富的勝利》要一併講完的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-12">
+  <div class="act-head">
+    <span class="act-num">第十二章 · The Fund That Saved a Nation</span>
+    <h2 class="act-title">主權財富的勝利：當基金救了一個國家</h2>
+    <p class="act-sub">The Fund That Saved a Nation — a 1953 Move, Cashed In</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>每一個國家的歷史裡，都有那麼一兩手棋，當它落子時，沒有人看得出它的份量，要等到許多年後，整盤棋走到絕境，這手棋才突然亮起，成了那唯一一條活路。對科威特而言，這手棋，落子於一九五三年——那一年，這個尚未獨立、剛開始賣油不久的酋長國，在倫敦設立了一個叫做「科威特投資委員會」的小機構，把賣石油賺來的錢，一部分不拿去花、而是拿去投資，理由樸素到近乎天真：「為石油用完後的世代存錢」。在當時，這是一手看不出緊迫性的閒棋——油正源源不斷地湧出，誰會去操心幾代人之後的事？然而三十七年後的一九九〇年，當這個國家被鄰居一夜抹去、首都被改名、油井被焚、一桶原油都賣不出去、連政府都只能擠在沙烏地的一座山城裡時，正是這手一九五三年的閒棋，突然亮起，成了科威特復國的全部本錢。這一章，要算的就是這筆帳——一筆關於遠見如何在絕境中兌現、關於「為石油用完後存錢」的基金如何在「國家被滅後」救了一個國家的帳。</p>
+
+    <h3>一九五三那手棋，三十七年後兌現</h3>
+    <p>讓我們先把這手棋的份量說清楚。一九五三年的科威特投資委員會，是世界上最早的主權財富基金——比科威特一九六一年的獨立早了八年，比挪威、比阿布達比的同類基金都早了許多年。它後來演化為科威特投資局（KIA），其投資版圖遍及全球的股票、債券、房地產與企業股權，數十年如一日地把不可再生的石油財富，源源轉化為可以世代長存的金融資產。這份遠見的設計初衷，是應對一個遙遠而抽象的威脅——「石油有一天會用完」；可它從未想像過，真正考驗它的，竟是一個具體而急迫得多的災難——「國家有一天會被滅」。一九九〇年八月，這兩種威脅在最壞的意義上合而為一了：科威特不只暫時賣不了油，它根本已不存在於地圖上。而在這個它的設計者從未預演過的劇本裡，這份基金交出了一份完美的答卷——因為它的錢，恰恰存在薩達姆的坦克夠不著的地方。散布在倫敦、紐約、東京核心資產裡的那份財富，是這個被佔領的國家，唯一還能完全掌控、且分毫無損的東西。</p>
+
+    <h3>一七〇億美元：流亡政府的戰時錢包</h3>
+    <p>於是，在一九九〇至九一這復國的兩年裡，塔伊夫的流亡政府，動用了約一百七十億美元的主權財富，把它變成了一個沒有國土的國家賴以運轉的戰時錢包。這筆錢，至少撐起了三件事。其一，是養活流亡的國民——數十萬在入侵中逃離家園、散居各地的科威特公民，他們的生計、子女的學費、海外的安置，全靠這筆錢維繫；流亡政府甚至照常向公務員發薪，彷彿這個國家從未停止運轉。其二，是支付這場解放戰爭的巨大開銷——科威特向領銜的盟軍承擔了可觀的戰費分攤，等於是用自己的金庫，部分地買回了自己的國家。其三，也是最關鍵的，是為戰後的重建預先備好彈藥——那七百口火的撲滅、那被洗劫一空的城市的重建、那癱瘓的油田的修復，每一項都是天文數字。一九五三年那個「為石油用完後存錢」的撲滿，在三十七年後被砸開時，人們才驚覺：它存的，原來不只是「石油用完後」的養老金，更是「國家被滅後」的復國金。這是「life after oil（後石油時代的生活）」這個理念，在歷史上最戲劇、也最悲壯的一次兌現——它兌現的，竟是「life after the nation（亡國之後的國家）」。</p>
+
+    <h3>商人基金救國：立國基因的現代回響</h3>
+    <p>這一手救國的棋，其實深深植根於科威特最古老的立國基因——商人。回望兩百多年前，正是城裡採珠與貿易的商人，用他們的金錢供養了薩巴赫家族與城防，換來在統治者議事廳裡的發言權；「金錢即影響力、財富即保險」，是這個港市自誕生之日起就刻在骨子裡的智慧。一九五三年設立投資委員會、把石油財富存起來而非花光的決定，本質上正是這份商人智慧的現代延伸——一個由商人傳統塑造的國家，懂得的是「積累、保值、分散、未雨綢繆」，而不只是「開採、揮霍、坐吃山空」。所以當一九九〇年的災難降臨時，救科威特的，不是它的軍隊（它幾乎沒有軍隊），不是它的人口（它的人口太少），而是它那份由商人基因孕育、由幾代技術官僚悉心打理的全球金融資產。「商人基金救國」——這六個字，是科威特立國密碼在現代最輝煌的一次回響。一個靠商人的金錢立國的港市，在兩百多年後，又一次靠商人的金錢，把自己從亡國的深淵裡買了回來。歷史在這裡完成了一個漂亮而蒼涼的閉環。</p>
+
+    <h3>創傷的另一面：把安全押給一個域外強權</h3>
+    <p>然而，主權財富這場勝利，並非一個全然光明的故事；它的背面，刻著一道深刻的創傷，與一個影響至今的抉擇。一九九〇年的那幾個小時——金錢買不到的那幾個小時——讓科威特徹徹底底地看清了一件事：再厚的家底、再精明的算計、再深的「有用」，在一個有野心的鄰人的坦克面前，都換不來當下的安全。這份認知，化作了一種其他海灣國家未曾經歷過的、深入骨髓的風險趨避。解放之後，科威特做出了它的抉擇：它把自己的安全，更緊地綁上了一個遠方的強權——美國。一九九一年，兩國簽署了防衛合作協定；此後美軍在科威特長駐，阿里夫詹軍營（Camp Arifjan）等基地裡駐紮著約一萬三千多名美軍；二〇〇四年，科威特更被美國指定為「主要非北約盟友」。從此，科威特的國防，不再是它自己一國能獨立承擔的事——它把最後一道保險，托付給了一個域外的霸權。這是一筆用一九九〇年的創傷換來的安全，也是一份它不得不接受的依賴。它的議會、它的報業、它對自己內政的那份海灣罕見的自主，在「國防與外交」這道最敏感的領域上，悄悄地讓渡給了華盛頓——這是亡國的創傷，留給這個驕傲的小國的，最沉默、也最深長的後遺症。</p>
+
+    <h3>富可敵國，卻學會了恐懼</h3>
+    <p>於是，一九九〇至九一這場入侵與解放，給科威特留下的，是一份矛盾到極點的遺產。一方面，它證明了科威特最了不起的那項制度發明——主權財富基金——的價值：一個小國，竟可以靠著精明的積累與遠見，在被滅國之後把自己買回來。這是任何一支軍隊都做不到的奇蹟，是「商人之國」最高的榮光。可另一方面，它也在這個國家的靈魂深處，種下了一顆恐懼的種子：富可敵國的科威特，從此學會了恐懼——恐懼鄰居、恐懼動盪、恐懼任何可能打破現狀的變化。這份恐懼，日後將以一種誰也想不到的方式，與它的議會、它的食租體制糾纏在一起，化作一種對改革的深深疑懼、對守成的本能偏好。它再也不是一九五〇、六〇年代那個敢為海灣之先、銳意進取的先驅之邦了；它變成了一個坐擁全球最厚家底、卻動彈不得的守財者。那份救了它的財富，與那場差點滅了它的浩劫，一同把這個國家，推進了一個全新的、也更為複雜的時代——那是一個「富可敵國，卻動彈不得」的時代，是下一部要拆解的，食租陷阱的時代。</p>
+
+    <div class="pull"><p>一九五三年那手「為石油用完後存錢」的閒棋，在三十七年後的絕境裡突然亮起，成了「國家被滅後」復國的本錢——約一七〇億美元，把一個沒有國土的國家買了回來。這是商人之國最高的榮光；可它同時教會了這個富可敵國的小國一件事：恐懼。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一手閒棋，兌現成一個國家</span>
+      <p>這一章，是三把密碼罕見地同時奏響凱歌、又同時埋下隱憂的一章。「<strong>商人</strong>」的密碼在此達到它的高光——「商人基金救國」，一個靠商人金錢立國的港市，在兩百多年後又一次靠商人的金錢把自己從亡國深淵裡買回，立國基因完成了一個蒼涼而漂亮的閉環。「<strong>石油</strong>」則展示了它最深的辯證：救科威特的，不是井裡的油（油田正在燃燒），而是用石油換來、被精明存下的那份財富——禍根與救贖，在同一份黑金裡合而為一。而「<strong>議會</strong>」的伏筆也在此悄悄埋下：這場創傷種下的、深入骨髓的恐懼與風險趨避，日後將與議會、與食租體制糾纏，異化成一種對改革的本能疑懼——本書後半反覆出現的那種「富可敵國卻動彈不得」的僵局，它的心理根源，正始於一九九〇年那金錢買不到的幾個小時。</p>
+      <p>把這一章放回全書的脈絡，它正是《一九五三：世界上第一支主權財富基金》那一章，遲到了三十七年的回聲——當年那手看不出緊迫性的閒棋，在這裡兌現成了一整個國家的命。它也與後面的 econ 專篇遙遙相扣：那座在一九九〇年救了國的基金，便是日後 AUM 逾一兆美元、撐起全球最高淨外部資產的 KIA 的前身，其「未來世代基金」依法每年至少提撥全國收入一成、本金未經特別立法不得動用的鐵律，正是脫胎於這份「為最壞的一天存錢」的立國智慧。而對姊妹篇，這一章是<em>伊拉克（iraq）</em>那部宿命之書最深刻的反諷收尾——薩達姆能用坦克奪走科威特的國土，卻奪不走它存在海外的錢，於是這個被滅的小國，竟用自己的金庫把自己買了回來。至於那份深入骨髓的安全依賴，則是一面照向所有海灣小國的鏡子：卡達在二〇一七年遭鄰國封鎖時（其故事另有 qatar 專篇），靠的同樣是雄厚的主權財富撐過危機，並同樣把安全更深地托付給域外力量（在卡達是烏代德的美軍基地）。海灣小國的生存方程式，科威特在一九九〇年用最慘痛的方式，替它的鄰居們，先解了一遍。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<!-- ===================== 第五部 ===================== -->
+<div class="part-div reveal" id="part-5">
+  <span class="pn">第五部</span>
+  <h2 class="ptitle pt">食租的陷阱：富可敵國，卻動彈不得</h2>
+  <div class="pe">The Rentier Trap — Rich Beyond Measure, Yet Frozen</div>
+  <div class="pline"><span></span><span class="dot">⚓</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-13">
+  <div class="act-head">
+    <span class="act-num">第十三章 · Cradle to Grave</span>
+    <h2 class="act-title">從搖籃到墳墓：一個福利國的契約</h2>
+    <p class="act-sub">Cradle to Grave — the Welfare Compact of a Rentier State</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>一九五三年那支倫敦設立的投資委員會，把石油財富轉成了能長存的金融資產；一九六二年那部憲法，把商人的同意制度化成了海灣唯一有牙齒的議會。當解放的硝煙在一九九一年散去、最後一口火井在十一月被封堵之後，科威特人回到了一座必須從頭重建的城。可重建之後，迎接他們的並不是一場痛定思痛的改革，而是一份比戰前更慷慨、更難回頭的契約——國家對它的每一個公民許下了一個近乎神聖的承諾：你只要生而為科威特人，從你呱呱墜地的那一刻，到你入土為安的那一天，這個國家都會替你打點好一切。免費的醫療、免費的教育、一份政府裡的差事、便宜到幾乎不要錢的汽油與水電、結婚有補助、生子有津貼、住房由國家供給或低利貸款，而你一輩子不必繳一塊錢的個人所得稅。這就是「從搖籃到墳墓」的福利國——它是石油給科威特最甜美的禮物，也是這個富國日後動彈不得的、最深的那道枷鎖。</p>
+
+    <h3>不徵稅的國家：一個被顛倒過來的歷史邏輯</h3>
+    <p>要看懂科威特的困境，得先看懂一件被它悄悄顛倒過來的事。人類政治史上有一條鐵律，叫「無代表，不納稅（No taxation without representation）」——人民之所以能向統治者要求權利，是因為國庫裡的錢出自人民的口袋；統治者要花錢，就得回過頭來向出錢的人交代。這條鐵律，正是ch-3裡那份古老契約的精神內核：當年科威特的採珠與貿易商人之所以能在統治者的議事廳裡說上話，正是因為城防與王室的開銷，靠的是他們繳上來的銀子；誰出錢，誰就有發言的資格。可石油把這條鏈子整個倒了過來。科威特政府的收入有約九成來自地底湧出的原油，它幾乎不向自己的公民徵稅；於是它不是一個「向人民收稅、再向人民負責」的政府，而是一個「向世界賣油、再向人民發錢」的分配者。它分配的不是公共服務，而是租金（rent）——一塊大地給的、不勞而獲的地租。當一個國家靠分配租金而非徵收稅金來維繫，它與人民的關係就從根本上變了質：人民不再是出錢的納稅人，而成了領錢的受益人；政府不再需要爭取人民的同意去花錢，反倒是人民需要守住自己那一份津貼。這就是政治經濟學家所說的「食租國（rentier state）」——而科威特，是這個物種裡最純粹、也最古老的標本之一。它純粹到一個地步：政府與公民之間，幾乎不存在「稅」這個字；國家是一個慷慨的家長，而公民是它永遠長不大、也無須長大的孩子。</p>
+
+    <h3>八成公民吃公家飯：一張全民的薪資名單</h3>
+    <p>這份契約最具體、也最沉重的一筆，寫在政府的薪資名單上。在科威特，受僱的本國公民裡，大約有八成的人，端的是公家飯碗——公共部門僱用了超過七成六的本國勞動力，剩下那一小撮在私營部門上班的科威特人，許多還是在國營或半國營的公司裡。換句話說，對絕大多數科威特公民而言，「工作」這個詞幾乎等同於「在政府裡有個位子」。這不是因為政府真需要這麼多人手——許多部會人浮於事、一個崗位三個人坐，效率低落是公開的祕密——而是因為「給每個公民一份體面的差事」本身，就是這份福利契約不可分割的一部分。國家把就業當成一種福利在派發，把公務體系當成一個吸納公民、安頓人心的巨大蓄水池。於是科威特出現了一種奇特的勞動分工：本國人坐辦公室、領高薪、上半天班；真正幹活的——蓋樓的、開車的、做飯的、看病人的、清馬路的——幾乎全是外籍勞工。一個國家的脊梁，是由它幾乎不給予公民身分的那些人扛起來的。</p>
+
+    <h3>自己土地上的少數人：本國勞動力不到一成五</h3>
+    <p>把鏡頭再拉遠一點，這幅圖景會變得更加觸目驚心。在科威特整個勞動市場裡，本國公民所佔的比例，竟然不到百分之十五——也就是說，每七個在科威特工作的人裡，連一個科威特人都不到，其餘六個多都是從印度、埃及、孟加拉、菲律賓、敘利亞各地遠道而來的外籍勞工。這個比例在全世界都是極端的。它意味著科威特的經濟引擎，幾乎完全靠一群沒有投票權、沒有公民權、隨時可能被遣返的「客工」在驅動；而握有公民權、握有那座有牙齒的議會的本國人，反倒站在這台引擎之外，靠著引擎吐出的租金過活。這種結構，把ch-3裡那條「商人出錢、換取在統治者議事廳裡發言」的古老契約，悄悄改寫成了另一個版本——如今出錢的，是地底的石油與外來的勞力；而坐在議事廳裡發言的本國公民，享受的是一份不必出錢、只需出生的權利。商人的後裔，從一個冒著生命危險、把珍珠換成白銀的進取階級，漸漸變成了一個守著租金、警惕任何人來動它的食利階級。</p>
+
+    <h3>普惠的補貼：便宜到失去重量的一切</h3>
+    <p>租金不只化成薪水，還化成了一張幾乎覆蓋日常每一個角落的補貼大網。在科威特，加滿一箱油的錢，遠比海灣對岸許多國家都低；電費與水費被壓到接近免費，夏天那無休止運轉的冷氣，幾乎不必心疼帳單；麵粉、米、糖這些主食有平價供應，連結婚、買房、養育子女，國家都伸手補上一筆。這些補貼從不問貧富——它不是給窮人的救濟，而是給每一個公民、不分階層的普惠權利，是這份契約裡白紙黑字的承諾。一個剛成年的科威特青年，可以期待國家替他安排一份公職、發給他足以成家的薪水、為他的婚禮補貼一筆、再以低利甚至無償的方式幫他取得一塊地或一棟房；他這一生用的油、用的電、用的水、吃的主食，全都由國家的租金墊著一大半。光是薪資加上各種補貼這兩項，就吃掉了政府預算的七到八成；換言之，這個坐擁世界第二大油田的富國，把它從地底挖出來的絕大部分財富，並沒有拿去蓋未來、建工廠、養新產業，而是原封不動地、一年一年地，發還給了今天活著的這一代人去消費掉。這種把租金即時分配給當代、而非投資於未來的傾向，正是食租國最頑固的慣性——它讓國家活在一個永恆的當下，富裕得理所當然，卻從不為明天積蓄真正的生產能力。當一切都這麼便宜，便宜到失去了重量，人就很難再去想像一個必須精打細算、必須自己創造價值的世界——而這正是食租陷阱最隱蔽的那一層：它腐蝕的不只是財政，更是一整個民族對「努力」與「代價」的感受。</p>
+
+    <h3>從進取到守成：一個階級的馴化</h3>
+    <p>要真正體會這份契約改變了什麼，得把今天的科威特公民，與ch-3裡那個冒著生命危險下海採珠、駕著獨桅木船穿越風浪、把珍珠與椰棗運往巴斯拉與印度的祖先，並排放在一起看。那是一個何等進取的民族——他們的財富，每一分都從風險裡掙來：潛水夫拿命去換牡蠣，商人拿本錢去賭一趟季風，整座城的繁榮，建立在一群人敢於出海、敢於遷徙、敢於用腳投票的膽識之上。正是這份膽識，逼出了那份「課稅須經同意」的張力，逼出了議會的遠祖。可短短兩三代人之間，石油把這一切悄悄掏空了。當財富不再需要從風險裡掙、而只需從出生裡領，那股進取的精神便失去了用武之地，慢慢萎縮成一種守成的本能。今天的科威特公民，許多人一輩子不曾真正承擔過經濟風險、不曾在競爭的私營市場裡證明過自己的價值——他們不必如此，因為國家替他們把一切都安排好了。商人的後裔，就這樣從一個敢於開拓的進取階級，被馴化成了一個守著租金、警惕變動的食利階級。這是食租陷阱最深、也最難逆轉的代價：它改變的不是帳本，而是一個民族的性格本身。一旦人不再需要奮鬥就能富足，要再把奮鬥的火種重新點燃，幾乎是不可能的事。</p>
+
+    <h3>政治上的劇毒：為什麼這份契約改不動</h3>
+    <p>於是科威特的領導者撞上了一堵無形卻堅不可摧的牆。每一個稍有遠見的部長、每一份來自世界銀行與國際貨幣基金的報告，都會指出同一件事：這套靠普惠補貼與全民公職堆起來的福利模式，長期不可持續，必須瘦身、必須改革、必須把公民推向真正創造價值的私營經濟。道理人人都懂。可一旦真要動手——哪怕只是微微調漲一點汽油價、削減一點電費補貼、或是把臃腫的公務體系精簡幾分——立刻就會在那座有牙齒的議會裡，引爆排山倒海的反對。因為對科威特公民而言，這些福利早已不是「政府的恩賜」，而是「與生俱來的權利」；任何想削減它的內閣，都會被議員們群起質詢、逼宮、甚至倒閣。這正是「食租」與「真議會」這兩樣東西結合後最危險的化學反應：在沒有議會的鄰國，統治者尚能由上而下硬推不討喜的改革；可在科威特，每一個議員都得對選區裡那些把福利視為命根子的選民負責，於是削減福利的法案，從來走不出議事廳的大門。福利改革在科威特，是一帖政治上的劇毒——碰它的人，輕則丟官，重則拖垮整個政府。這就是食租契約最弔詭的地方：它讓國家極其富有，卻也讓國家被自己許下的承諾死死綁住，富而不能動，動則翻船。一份本該是恩典的契約，就這樣慢慢長成了一副誰都摘不掉的鐐銬。下一章，我們將看到這道死結如何把一個富可敵國的政府，逼到了差點發不出薪水的境地。</p>
+
+    <div class="pull"><p>當一個國家靠「分配租金」而非「徵收稅金」維生，它與人民的關係就被顛倒了：不再是出錢的人要求權利，而是領錢的人守護津貼——於是任何削減，都成了對與生俱來之物的剝奪。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 租金如何腐蝕同意</span>
+      <p>這一章是三密碼裡「石油」與「議會」相撞、相互異化的開始。布爾甘油田（密碼二）給了科威特一張幾乎不必徵稅的國庫，於是兩百多年前那份「商人出錢、換取發言」的同意契約（密碼一），被石油偷偷改寫了——當公民不再是出錢的納稅人、而成了領錢的受益人，那座本該制衡權力的有牙齒議會（密碼三），便漸漸轉過頭來，從「監督政府如何用錢」變成「守護每一份不可被削減的津貼」。石油租金，就這樣一點一點腐蝕了「同意」原本的進取與責任，把一個曾經敢冒險、敢遷徙、敢用腳投票的商人之邦，馴化成了一個守著家底、警惕一切變動的食利之國。</p>
+      <p>把目光投向海灣對岸，對照便格外刺眼。阿聯與卡達同樣坐在油氣之上、同樣是食租國，卻因為沒有一座能否決一切的真議會，反而能由上而下強推多元化——杜拜把自己變成轉口、金融與旅遊的樞紐（其故事另有《阿聯》專篇），多哈把天然氣的暴利投進航空、媒體與主權基金（見《卡達》專篇）。科威特恰恰相反：它擁有海灣唯一真正的民主，卻也因此擁有海灣最難改革的福利契約。這正是本書最深的兩難之始——它的光榮（有牙齒的議會）與它的詛咒（食租的惰性），原來是同一枚硬幣的兩面。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-14">
+  <div class="act-head">
+    <span class="act-num">第十四章 · Eight Years Without the Right to Borrow</span>
+    <h2 class="act-title">八年沒有借錢的權利：議會與行政的死結</h2>
+    <p class="act-sub">When a Trillionaire State Could Not Pay Its Civil Servants</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>有一個畫面，足以濃縮科威特這個富國全部的荒謬：一個坐擁逾一兆美元主權財富、淨外部資產高居全球之冠的國家，竟然在某個年頭，被官員警告說，再過幾個月，可能就發不出公務員的薪水了。這不是寓言，而是真實發生在二〇二〇年前後的事。一個如此有錢的國家，怎麼會差點付不出薪水？答案不在它的家底——它的家底厚得驚人——而在一道把行政與立法死死卡住的制度僵局：整整八年，從二〇一七到二〇二五，科威特政府竟然連發行一張主權債券的法律授權都拿不到。富國借不到錢，不是因為沒人肯借，而是因為它自己的議會，不准它借。這一章，講的就是這道把「最富」與「差點破產」這兩個極端，荒誕地縫在一起的死結。</p>
+
+    <h3>一張到期的舊法，與一道憑空消失的權力</h3>
+    <p>故事要從一張不起眼的舊法律說起。科威特政府過去之所以能在國際與本地市場上發債，靠的是一部設定了發債上限與期限的公共債務法。二〇一七年，這部舊法到期了——而它就這樣，靜悄悄地過期、失效，沒有續訂。從那一刻起，科威特政府在法律上就失去了發行新主權債的權力。對一個普通國家來說，續一張融資法不過是例行公事；可對科威特來說，這道看似技術性的關卡，卻一頭撞進了它最深的政治斷層，從此再也過不去。行政方面——也就是由薩巴赫家族主導、首相與國防、內政、外交多由王室成員出任的委任內閣——一再把新的發債法案送進議會，急切地想恢復這項權力；而那座有牙齒的國民議會，卻一次又一次地，把它否決了回去。一張本該幾年前就續好的法律，硬是被卡了八年——這在任何一個正常運轉的國家，都近乎不可思議。</p>
+
+    <h3>議員的條件：要借錢，先改福利</h3>
+    <p>議會為什麼非否決不可？這就要回到上一章那份政治劇毒的福利契約。在許多民選議員眼裡，行政之所以年年喊著要借錢，根子上是因為國家把太多錢花在了臃腫的公務員薪資與普惠補貼上，入不敷出；如果政府只是借新債來填這個無底洞，而不去動真正的病灶，那不過是把帳單推給子孫、用未來世代的錢去養今天的鋪張。於是議員們開出了條件：可以給你發債權，但你得把發債和財政改革綁在一起——削減浪費、整頓補貼、約束揮霍。這聽起來理直氣壯，甚至切中要害——畢竟這正是「真議會」存在的意義：它不該是一台替政府背書借錢的橡皮圖章，而該替人民盯住政府如何花錢。可問題在於，要削減的那些福利，恰恰是議員自己的選民最在乎、最不容侵犯的東西；真要他們投票通過削減選區福利的法案，等於政治自殺。於是同一批議員，一手高舉「反對亂借錢」的改革大旗，另一手卻死死護住「不准動福利」的選區紅線——他們要的，是一個既不發債、又不削福利的不可能解。於是雙方陷入了一個誰也不肯先退的僵局：行政說「先給我借錢的權力」，議會說「先答應我改革福利」，而改革福利又是議員們自己無論如何不敢真投的票。兩股力量頂在一起，動彈不得——這就是「食租＋真議會」這個組合最致命的副產品：慢性的、結構性的癱瘓。它不是某一屆政府的失誤，也不是某一批議員的私心，而是這套制度本身，在石油租金的浸泡下，必然會結出的那顆苦果。</p>
+
+    <h3>家底見底：一般準備金的乾涸</h3>
+    <p>沒有發債權，並不代表政府就能不花錢。薪水照樣要發、補貼照樣要付、龐大的公共開銷一天都停不下來——一個把七到八成預算押在薪資與補貼上的食租國，它的開支幾乎全是剛性的，砍不動、也停不了。可油價有起有落——尤其當OPEC+的減產配額把科威特的產量壓低、又遇上油價疲軟的年頭，政府的收入就會出現巨大的缺口。填這個缺口的錢，從哪裡來？發債的門被議會鎖死，動本金的門被法律鎖死，於是政府只剩下最後一池水可舀——科威特的「一般準備金（GRF, General Reserve Fund）」。這是國庫日常運作的活錢，是政府手頭可以隨時動用的那一池流動資金，與那筆鎖死本金、為子孫而存的「未來世代基金」截然不同；前者是錢包，後者是不能砸開的存錢罐。於是一個觸目驚心的數字出現了：這池活錢，在約莫十年前還有大約三百三十六億科威特第納爾的規模，到了發債權被卡死的這幾年裡，竟一路縮水到只剩約二十億第納爾左右——在二〇二〇到二一年間，幾乎見了底。一個富可敵國的政府，眼睜睜看著自己唯一能動的那池現金，像沙漏一樣一天天漏光，而通往外界的借錢之門，被自己的議會反鎖著；通往那筆最龐大財富的門，又被自己當年立下的鐵律反鎖著。富國的窮，從來不在它沒有財富，而在它拿不出可以立刻花的那一筆。</p>
+
+    <h3>差點發不出薪水：富國的破產陰影</h3>
+    <p>事情逼到最緊的關頭，是在二〇二〇年。隨著油價在那場席捲全球的疫情衝擊下崩跌，而一般準備金又即將見底，當時的財政部長公開發出了一個在富國史上罕見的警告：如果議會再不通過融資法、政府再借不到錢，那麼到了那年十月之後，國庫恐怕就拿不出錢來，支付公務員的薪資了。請記住這個畫面的全部分量——這個國家有逾一兆美元的主權基金擺在那裡，有全世界最高的淨外部資產，按帳面它富得流油；可它的薪資名單，卻可能在某一個月之後開天窗。當然，最後並沒有真的開不出薪水——政府用了種種權宜之計撐了過去，向央行、向社保基金、向KIA以各種變通方式調頭寸，甚至一度把一般準備金裡的部分資產與未來世代基金「對換」，用會計上的騰挪換取眼前的現金，把這場危機一次次往後推延。每一次推延，都讓人更清楚地看見問題的本質：這從來不是一場缺錢的危機，而是一場「有錢卻拿不出來」的危機。但這個「差點發不出薪水」的時刻，像一記響亮的耳光，打在了科威特那張光鮮的資產負債表上：原來最厚的家底，救不了一個被自己的制度反鎖在門外的政府。一個曾在一九九〇年靠主權基金復國的國家，竟在二十多年後，被同一套財富的守護機制，逼到了發薪日的懸崖邊上。</p>
+
+    <h3>本金不可動：先見之明築起的另一道牆</h3>
+    <p>有人或許會問：既然手頭緊到這個地步，為什麼不直接從那逾一兆美元的主權基金裡撥一點來用？這就觸到了科威特制度設計裡最深、也最反諷的一層。那筆最龐大的財富，鎖在「未來世代基金（FGF, Future Generations Fund）」裡——而這支基金自一九七六年立法設立之日起，就被一道近乎神聖的法律守護著：它的本金，非經特別立法，不得動用。這道牆，正是ch-7與ch-12裡那份「為石油用完後的世代存錢」之先見的延續——當年它在一九九〇年國家被滅時，曾是復國的本錢；可如今，這份先見之明卻反過來，成了綁住政府雙手的另一道枷鎖。一邊是動不得本金的未來世代基金，一邊是被議會卡死的發債權，中間夾著一池即將乾涸的一般準備金——科威特就這樣，被自己最聰明的兩項制度發明（主權基金的紀律、議會的牙齒），合力逼到了牆角。直到二〇二五年，在議會被中止、行政得以放手之後，那部塵封八年的融資法才終於以新的面貌通過——但那已是另一個故事，留待後文細說。眼下，我們先記住這個荒誕的真相：科威特不是缺錢，而是被制度鎖死，動彈不得。</p>
+
+    <div class="pull"><p>它有逾一兆美元的家底，卻差點付不出公務員一個月的薪水——因為富國的窮，從不在於沒有財富，而在於拿不出可以立刻花的那一筆，更在於它的議會，不准它去借。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 否決權如何鎖死富國</span>
+      <p>八年無權發債，是三密碼撞成死結後最赤裸的傷口。石油（密碼二）給了科威特一座靠普惠福利供養的食租國，於是當油價下行、國庫吃緊，政府只能靠借錢度日；可那座源自「商人同意」的有牙齒議會（密碼三、密碼一），手裡握著批准舉債的否決權，硬是把這道門反鎖了八年。商人後裔的「同意」，曾經是科威特立國的光榮——是它讓統治者不能橫徵暴斂；可一旦這份同意異化成對任何改革的本能抵制，它就從制衡權力的活力，變成了凍結國家的癱瘓。一個富可敵國的政府差點發不出薪水，這不是財務的失敗，而是制度的失敗——是「真議會」與「食租國」這對冤家，在一張資產負債表上同歸於盡的瞬間。</p>
+      <p>這道僵局，在海灣是科威特獨有的。沙烏地的穆罕默德王儲可以憑一句話就把PIF推向《2030願景》（其故事見《沙烏地》專篇），阿聯與卡達的統治者也能不經議會掣肘、由上而下地把油氣財富投向多元化——它們沒有否決權，所以也沒有這種「富而不能動」的困境（對照《阿聯》《卡達》專篇）。科威特用它海灣唯一的真民主，換來了海灣唯一的這種癱瘓。而比僵局更深的，是那份延續自ch-7、在ch-12救過國的先見——未來世代基金本金不可動的鐵律。連最聰明的制度，到了食租陷阱裡，都會反過來咬主人一口。下一章，我們將直視這個悖論的核心：最厚的家底，配上最低的評等。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-15">
+  <div class="act-head">
+    <span class="act-num">第十五章 · A Rich State With an Empty Till</span>
+    <h2 class="act-title">富國的窮國庫：最厚的家底、最低的評等</h2>
+    <p class="act-sub">A Rich State With an Empty Till — Wealth Without Liquidity</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>把前兩章的線索收攏到一處，就會撞見科威特這個國家最核心、也最違反直覺的悖論：它是地球上資產負債表最厚實的主權國家之一，卻長期背負著整個海灣最低的信用評等。一面，是逾一兆美元的主權財富、是全世界受評主權裡淨外部資產相對於經濟規模最高的那一個；另一面，是國際評等機構一次次的下調與警告，是它在海灣鄰居當中敬陪末座的信用等級。這兩件事擺在一起，乍看像是天大的誤會——一個這麼有錢的國家，憑什麼評等比它窮些的鄰居還低？可一旦你讀懂了前兩章，這個悖論就不再是誤會，而是一句精準的判詞：科威特是一個「富國，窮國庫（rich state, illiquid treasury）」——它的約束，從來不是財務性的，而是制度性的。</p>
+
+    <h3>淨外部資產六〇一％：全球之冠的家底</h3>
+    <p>先把家底攤開來看，那是一組足以讓任何國家眼紅的數字。科威特的主權財富——主要握在世界上最古老的主權基金、科威特投資局（KIA）手中——規模已逾一兆美元，名列全球前五。更驚人的是「淨外部資產」這個指標：它衡量的是一個國家在海外擁有的資產，扣掉它欠外國的負債之後，還淨剩多少。根據惠譽（Fitch）二〇二五年的評估，科威特的淨外部資產相當於它國內生產毛額的約百分之六百零一——也就是說，科威特握在海外的淨財富，是它整整一年經濟產出的六倍還多，這個比例，在全世界所有受評的主權國家裡，高居第一。這意味著什麼？意味著哪怕科威特一桶油都不再賣，光靠這筆海外資產每年生出的投資收益，就足以撐起這個國家的運轉。從帳面上看，這是一個幾乎不可能破產的國家，一個替子孫存了六年家當的、最有遠見的富翁。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">約 601% GDP</div><div class="lbl">淨外部資產相對國內生產毛額，全球受評主權之冠（Fitch, 2025）</div></div>
+      <div class="stat"><div class="num">逾 $1 兆</div><div class="lbl">KIA 主權財富規模，世界最古老主權基金、名列全球前五</div></div>
+      <div class="stat"><div class="num">約 90%</div><div class="lbl">石油佔政府收入比重——海灣最不多元的食租經濟</div></div>
+    </div>
+
+    <h3>海灣最低的評等：一個被下調的富翁</h3>
+    <p>然而就是這樣一個富翁，在信用市場的眼裡，卻被打了海灣最低的分。二〇二〇年，穆迪（Moody's）把科威特的主權評等從Aa2下調至A1——這是科威特史上首次被這家機構降級。請注意，被降級的不是某個負債纍纍的窮國，而是那個淨外部資產高達GDP六倍的富翁。穆迪給出的理由，句句不離前兩章那道死結：政府缺乏發行債券的法律授權（無發債權）、最龐大的財富被未來世代基金的法律鎖死無法動用（FGF鎖死）、行政與立法僵局導致的治理薄弱、以及由此而生的流動性風險。換句話說，評等機構看穿了科威特的命門——它們不是擔心科威特沒錢，而是擔心科威特在需要用錢的那一刻，拿不出可以立刻動用的那一筆。一個有六倍GDP海外資產卻差點發不出薪水的國家，在放款人眼裡，恰恰是最危險的那種富翁：家裡金山銀山，卻可能在某個月付不出帳單。評等，量的從來不是你有多少財富，而是你還錢的意願與能力之確定性——而科威特的不確定，全寫在它那座反覆否決、反覆解散的議會裡。</p>
+
+    <h3>約束是制度性的，不是財務性的</h3>
+    <p>這就把我們帶到了整個悖論的核心，也是這一章、乃至整個第五部最該被記住的那句話：科威特的約束，是制度性的，不是財務性的。它不缺錢——它缺的是把錢變成可以立刻花的流動性的權力，缺的是讓國家能順暢運轉、能果斷決策的制度通路。它的財富，像一座結了冰的湖：水量驚人，足以灌溉整片沙漠，可冰封得太死，舀不出一瓢來解眼前的渴。把湖水變成可飲之水的那道閘門，一端被「未來世代基金本金不可動」的鐵律封著，另一端被「議會不准發債」的否決權鎖著，中間還橫著一台反覆垮台、反覆解散、什麼都決定不了的政治機器。於是科威特陷入了一種其他海灣國從未經歷的困境：它的危機從不來自外部的市場——市場其實樂意借錢給它——而全部來自內部的制度。當別國在為「錢從哪裡來」發愁時，科威特在為「明明有錢卻動不了」而癱瘓。這是一種富裕的、然而徹底的無能為力。</p>
+
+    <h3>九成靠油：最不多元的食租經濟</h3>
+    <p>悖論的另一條根，扎在科威特那台幾乎只有單一汽缸的經濟引擎裡。在這個國家，石油佔了政府收入的約九成、佔了出口的約九成、佔了國內生產毛額的約一半——這是整個海灣地區最不多元、對單一資源依賴最深的經濟體。當阿聯把杜拜打造成轉口、金融與旅遊的樞紐，當卡達靠液化天然氣的暴利養出航空、媒體與一支橫掃全球的主權基金，當沙烏地舉全國之力推《2030願景》要在沙漠裡長出新產業——科威特卻幾乎原地踏步，它的經濟，仍舊只是布爾甘油田的一條延伸。這種單一依賴，讓它對油價的每一次波動、對OPEC+的每一次減產配額，都毫無還手之力——卡特爾喊一聲減產，科威特的整個GDP就跟著被拖進衰退。它的繁榮與蕭條，不掌握在自己手裡，而掌握在維也納的會議桌上、在一桶布蘭特原油的報價牌上。而要擺脫這種依賴、要多元化，就必須改革、必須投資、必須由國家果斷地把租金導向新的方向——可這恰恰是那座反覆否決、反覆解散的議會，最決定不了的事。多元化需要的是長期的、痛苦的、往往不討好的決策：要動補貼、要逼公民走出舒適的公職、要對外資開放、要容忍短期的陣痛去換長期的活路。每一項都觸碰福利契約的紅線，每一項都會在議事廳裡引爆否決。於是單一依賴與制度僵局互為因果，像兩條纏死的繩，把這個富國牢牢綁在原地：因為不多元，所以一遇油價就衰退、就缺錢；因為制度僵局，所以永遠改不了那個讓它不多元的根。繩越纏越緊，而拆繩的那把刀，恰恰握在最不肯下手的那雙手裡。</p>
+
+    <h3>絲綢城只在紙上：被自己超越的海灣先驅</h3>
+    <p>沒有什麼，比那座叫「絲綢城（Silk City, Madinat al-Hareer）」的巨型計畫，更能概括科威特這份富而不動的悲哀了。這是一個曾被反覆宣傳的宏圖：要在科威特灣的北岸，沿著朝向伊拉克的方向，建起一座嶄新的未來之城，配上港口、機場、金融區與一座傲視海灣的摩天塔，要把科威特重新變成連接亞歐的貿易樞紐——一如它珍珠與木船時代的舊夢。這個構想喊了許多年，藍圖一張比一張漂亮。可它至今，幾乎仍只停留在紙上。當杜拜的哈里發塔早已刺破雲霄、多哈的天際線一年一個樣、利雅德的NEOM在沙漠裡轟轟烈烈地動工，科威特的絲綢城，卻還是一幅鎖在抽屜裡的圖。絲綢城所在的那片北岸，正對著當年薩達姆大軍南下的方向，也正是布比延等島嶼扼守的灣頂咽喉——讓那片土地重新繁榮，本可同時是經濟的轉型與戰略的宣示；可它至今只是一張圖。這就是這個第五部最終、也最殘酷的判詞：科威特曾是海灣的先驅——它有海灣的第一支主權基金、第一部真憲法、第一個有牙齒的議會，一九九〇年以前，它是這片海岸最發達、最開放、最有文化的地方，是其他海灣酋長們派人來取經的範本。然後它停住了。它被自己一手催生的鄰居們，一個接一個地超越，淪為海灣的落伍生——不是因為它窮，恰恰是因為它太富，富到那座由「同意」築起的議會，再也下不了任何一個讓國家向前的決定。先行者被自己的先進拖住了腳步：它太早給了人民聲音，於是任何剝奪舒適的改革，都會被那些聲音否決；它太早替子孫存下財富，於是那筆財富也太早被鎖進了動不得的鐵律。富可敵國，卻動彈不得——這，就是食租陷阱的全部重量，也是科威特這個海灣先驅，留給後來者最沉重的一則警示。</p>
+
+    <div class="pull"><p>它的財富像一座結了冰的湖：水量足以灌溉整片沙漠，卻冰封得太死，舀不出一瓢解眼前的渴——科威特的約束，從來是制度性的，不是財務性的。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 富國，窮國庫</span>
+      <p>「富國，窮國庫」這句判詞，正是三密碼在當代收束成的那道結。石油（密碼二）給了科威特逾一兆美元的家底與全球之冠的淨外部資產，卻也把它鎖進約九成靠油、海灣最不多元的食租結構；而源自「商人同意」的有牙齒議會（密碼一、密碼三），既鎖死了發債權、又凍結了一切多元化的改革——於是這個資產負債表最厚的國家，背上了海灣最低的評等。評等機構看穿的，不是它的貧窮，而是它的癱瘓：當財富被「本金不可動」的鐵律與「議會的否決權」雙雙封死，最厚的家底也救不了一個動彈不得的政府。商人之邦的光榮（同意、議會），在石油的浸潤下，異化成了它落伍的根源。</p>
+      <p>把科威特擺進海灣的鏡廊裡，這份反諷便照得無所遁形。它曾以「第一支主權基金、第一部憲法、第一個議會」啟發了整片海岸，而後卻眼睜睜看著被它啟發的鄰居一一翻越過自己——杜拜的多元化、卡達的天然氣帝國、沙烏地的願景轉型（分見《阿聯》《卡達》《沙烏地》專篇），都是科威特做得到的家底、卻下不了的決心。絲綢城至今只在紙上，正是這道兩難最具體的墓碑。從先驅淪為落伍，從光榮陷入癱瘓——這便是接下來第六部要正面拆解的命題：那座有牙齒的議會，它的活力，與它的癱瘓，究竟是如何長在同一副身軀上的。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<!-- ===================== 第六部 ===================== -->
+<div class="part-div reveal" id="part-6">
+  <span class="pn">第六部</span>
+  <h2 class="ptitle pt">議會的活力與癱瘓</h2>
+  <div class="pe">The Parliament — Its Vigor and Its Paralysis</div>
+  <div class="pline"><span></span><span class="dot">⚓</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-16">
+  <div class="act-head">
+    <span class="act-num">第十六章 · Grilling & No-Confidence — the Gulf's Only Real Democracy</span>
+    <h2 class="act-title">質詢與倒閣：海灣唯一有牙齒的民主</h2>
+    <p class="act-sub">Grilling & No-Confidence — the Gulf's Only Real Democracy</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>前面五部，我們追著錢走：採珠商人的銀子、布爾甘湧出的黑金、一九五三年就埋下的那支主權基金、薩達姆的坦克奪走又被基金贖回的國家、以及那個富可敵國卻八年發不出債、差點付不出薪水的食租陷阱。現在，讓我們把目光從錢，移到權——移到科威特城那座灰白色的、由丹麥建築師約恩·烏松（Jørn Utzon，雪梨歌劇院的設計者）操刀的國民議會大樓裡。在那座大廳中，每週都上演著整個阿拉伯海灣絕無僅有的一幕：一名由人民選出來的議員，站起身，指著一位由埃米爾任命的部長——往往還是薩巴赫家族的王子——當著全國的面，一條一條地，質問他、羞辱他、要他下台。在這片君主專制如同空氣般理所當然的土地上，一個平民能公開逼問一位王子，這不是小事，這是一場政治奇蹟。本章要做的，就是把這座議會的「牙齒」一顆一顆數清楚——它究竟能做什麼，使它成為整個海灣，唯一一座不是橡皮圖章、而是真能咬人的民選議會。而這副牙齒的根，要一路追回到兩百多年前那筆「商人的同意」。</p>
+
+    <h3>五十張選票：一座不是橡皮圖章的議會</h3>
+    <p>先把這座議會的骨架立起來。依一九六二年憲法設立的國民議會（Majlis al-Umma），由五十名議員組成，全部由公民一人一票直接選出，任期四年；此外，內閣的部長（至多十六人）也依法為議會的當然議員，連同投票——這意味著一個由薩巴赫家族主導、人數可達十五六人的內閣，在五十名民選議員面前，始終是少數。這個席次的算術，本身就是一道分水嶺：在沙烏地，沒有民選議會，只有一個全員委任的協商會議（Majlis al-Shura）；在阿聯，那個聯邦國民議會半數委任、半數間選，且至今近乎只有諮詢之權（如阿聯篇所述，它的萌芽早被福利的蜜糖浸泡得無從生長）；在卡達，第一屆部分民選的協商會議遲至二〇二一年才姍姍登場，且權力受限。唯有科威特，從一九六三年的首屆選舉起，就讓五十名平民，握住了真正能立法、能否決、能逼宮的多數。它不是裝飾用的諮詢機構，而是一個能在法律意義上，與行政權正面對撞的立法機關。這副五十張選票撐起的骨架，是「商人同意」這個古老基因，在二十世紀被寫進成文憲法後，最堅硬的一塊骨頭。</p>
+
+    <h3>立法、審預算、核可王儲：寫在憲法裡的牙齒</h3>
+    <p>這座議會的第一顆牙，是立法權與財政權——而這正是「課稅須經同意」那條古老張力，最正統的現代化身。任何法律的通過，都須經國民議會表決；任何一筆國家預算，包括那支龐大的主權基金的撥款規則、那道發債的授權，都須經議會審查與批准。正是這顆牙，在後來釀成了第十四章那樁海灣奇景——整整八年，民選議員憑著手中的財政否決權，硬是不批准發債法，逼得一個坐擁兆元基金的富國，差點付不出公務員的薪水。而這座議會還曾握有一顆別處想都不敢想的牙：核可王儲。依憲法，埃米爾提名的王儲人選，須交付國民議會以絕對多數表決確認；若不通過，埃米爾須另提三人，由議會擇一。換言之，在科威特，連王位的繼承，理論上都須經人民代表的點頭——這在一個世襲君主制的海灣，是石破天驚的設計。它把一七五二年那筆「統治者須向出錢的人交代」的契約，推到了極致：不只課稅須經同意，連誰來統治，都須經同意。這些寫在憲法白紙黑字上的權力，使科威特議會的牙齒，不是慣例、不是恩賜，而是法定的、可主張的、能咬合的真權。</p>
+
+    <h3>伊斯提傑瓦布：當一個平民逼問一位王子</h3>
+    <p>然而，使科威特議會真正令鄰國側目、也最令本國內閣膽寒的，是那顆最尖利的牙——「伊斯提傑瓦布（istijwāb）」，即公開質詢，以及隨之而來的不信任投票。質詢的程序大致是這樣：任何一名議員，都可以對任何一位部長（包括首相），提出正式的書面質詢，列舉其失職、瀆職或政策過錯；該部長依法必須親自到議會大廳，當著全體議員與全國轉播的鏡頭，逐條答辯。這場答辯往往持續數小時，火藥味十足——議員引數據、揭弊案、翻舊賬，部長則疲於招架。質詢之後，議員可以進一步提出「不合作」或不信任動議：若議會以過半票數通過對某位部長的不信任，該部長必須辭職；而若矛頭直指首相，程序雖更複雜，亦足以迫使整個內閣總辭。在過去半個多世紀裡，無數位部長——包括多位薩巴赫家族的王子——正是在這樣的質詢與倒閣壓力下，黯然下台。試想這幅畫面在海灣意味著什麼：在沙烏地、在阿聯、在卡達，質疑一位統治家族的成員都可能招致牢獄；而在科威特，一個平民議員，可以站在國家最高殿堂，把一位手握實權的王子，逼問到辭職。這顆牙，是科威特與它所有專制鄰居之間，最根本、最驕傲的不同。</p>
+
+    <h3>自由的報業與沸騰的迪萬尼亞</h3>
+    <p>議會的牙齒之所以鋒利，是因為它背後立著整個海灣最活躍的公共領域——而這公共領域，又有兩根深植於科威特社會的支柱。第一根是自由的報業。長期以來，科威特擁有阿拉伯海灣最大膽、最多元的媒體：報紙公開批評部長、評論王室政策、揭露貪腐弊案，其尺度遠非鄰國的官方喉舌可比；正因如此，科威特在歷年的新聞自由評比中，常年位居海灣國家之首。第二根，是那個比議會還古老的草根機構——迪萬尼亞（dīwāniyya）。這是科威特男性家庭世代相傳的客廳聚會：入夜後，賓客圍坐，喝著苦咖啡，從家長里短聊到油價、從足球聊到部長的去留。在採珠的年代，迪萬尼亞就是商人們議事、施壓統治者的場所；到了二十世紀，它演化成一張覆蓋全國的、非正式的政治神經網——候選人在這裡拉票、議員在這裡聽取民情、輿論在這裡發酵成壓力。一九八九至九〇年，當議會被中止時，正是反對派在一場又一場「迪萬尼亞運動」中聚集，才逼出了議會的恢復。報業與迪萬尼亞，一上一下，給了那五十張選票以血肉與聲量；沒有它們，議會的牙齒會鈍，有了它們，那副牙齒才真正能咬。</p>
+
+    <h3>二〇〇五：當女性走進了投票所</h3>
+    <p>而這座議會最動人的一筆進步，發生在二〇〇五年。長期以來，科威特這座海灣民主的燈塔，藏著一個刺眼的盲點——它的選票，只屬於男性。歷經數十年的婦女運動、無數次法案在議會中因保守派與部落派的反對而功敗垂成，終於在二〇〇五年五月十六日，國民議會通過修法，賦予科威特女性完整的投票權與被選舉權。這在當時的海灣，是極具象徵意義的一步。然而真正的突破，還要再等四年——二〇〇九年五月的選舉中，瑪斯瑪·穆巴拉克（Massouma al-Mubarak）、阿西爾·阿瓦迪（Aseel al-Awadhi）、薩勒娃·賈薩爾（Salwa al-Jassar）、羅拉·達什提（Rola Dashti）四位女性，一舉當選國民議會議員。這是海灣君主國史上，第一次有女性，憑著自己的政綱、在沒有任何保障名額的情況下，純靠選票走進了民選議會的殿堂——不是被任命的點綴，而是被選出的代表。瑪斯瑪·穆巴拉克後來更出任部長，成為科威特第一位女性閣員。這一筆，把「商人的同意」這條原本只屬於男性家長的古老契約，擴展到了一半的人口身上；它證明了，科威特的議會雖屢陷僵局，卻終究是一個能自我矯正、能向前走的活的機構。這，是它身為海灣先驅，最值得驕傲的時刻之一。</p>
+
+    <div class="pull"><p>在整個阿拉伯海灣，唯有在科威特，一個平民能站在國家最高殿堂，當著全國的鏡頭，把一位手握實權的王子，質詢到辭職。這副牙齒，不是恩賜，是兩百多年前那筆「商人同意」契約，寫進憲法後最堅硬的一塊骨頭。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 海灣唯一有牙齒的民主</span>
+      <p>三密碼在這一章，第一次以「光榮」而非「枷鎖」的面貌登場。第一把鑰匙「<strong>商人</strong>」，在此結出了它最輝煌的果實——一七五二年那筆「誰出錢、誰就有發言權」的同意契約，被一九六二年的憲法，鍛造成了五十張真能立法、能審預算、能逼宮的選票；那道「課稅須經同意」的古老張力，化作了議會手中的財政否決權與伊斯提傑瓦布的質詢權。第三把鑰匙「<strong>議會</strong>」，在此露出它最珍貴的一面：它能讓平民逼問王子、能核可王儲、能讓報業放膽批評、能在二〇〇五年把選票交到女性手中——這是整個海灣絕無僅有的政治成就。而第二把鑰匙「<strong>石油</strong>」，這一章只是靜靜地立在背景裡：正是布爾甘的租金，養出了一個有閒、有錢、有文化去經營這座議會與這片公共領域的社會——只是這份租金日後將如何反噬這座議會，是下一章的故事。</p>
+      <p>把這份光榮放回它的姊妹之間，差異格外刺眼。同樣面對石油租金，沙烏地以「劍與經書」的契約換取順從，阿聯把議會的萌芽浸泡在福利的蜜糖裡（阿聯篇詳述了那個近乎象徵的聯邦國民議會），卡達遲至二〇二一年才辦了一場部分民選、權力受限的協商會議選舉——唯獨科威特，從一九六三年的首屆選舉起，就讓人民握住了真正的牙齒。這份不同，根子全在第二、三章那群採珠時代便財雄勢大的商人身上：因為唯獨科威特的統治者，從立國第一天就須向出錢的人交代，唯獨它，才在整個海灣長出了一座真議會。然而，本書最深的悲劇也正埋伏在這份光榮裡——這座令人驕傲的議會，當它撞上石油那不必徵稅、只需分糖的租金邏輯時，那副能逼問王子的牙齒，會不會反過來，把整個國家咬進一場誰也無法收場的僵局？下一章，我們就要看著這副驕傲的牙齒，如何一點一點，咬成了科威特的枷鎖。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-17">
+  <div class="act-head">
+    <span class="act-num">第十七章 · A Parliament Forever Dissolving</span>
+    <h2 class="act-title">一座永遠在解散的議會</h2>
+    <p class="act-sub">A Parliament Forever Dissolving</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>上一章，我們數清了科威特議會那副令全海灣側目的牙齒——它能立法、能審預算、能質詢與罷免部長、曾能核可王儲。那是它的光榮。可這一章，我們要看的，是同一副牙齒的另一面：當一座有牙齒的議會，撞上一個只需分配租金、無須向人民徵稅的食租國家時，那副牙齒，便從制衡權力的活力，異化成了凍結一切的癱瘓。科威特的當代政治史，因此讀起來像一張不斷重複的壞掉的唱片：議員質詢部長、內閣集體總辭、埃米爾解散議會、重新選舉、新議會上台、議員再質詢部長、內閣再總辭、議會再解散……周而復始，年復一年。一座本該推動國家前進的議會，把它驚人的精力，幾乎全耗在了與行政權無休止的角力上；而那些真正能決定科威特命運的重大改革——發債、福利、多元化、外資法——則在這場永無止境的拉鋸中，一件接一件，被卡死在了原地。本章要說的，正是這座「永遠在解散的議會」，與它癱瘓背後那道結構性的死結。</p>
+
+    <h3>民選議員 vs 委任王室內閣：一道結構性的死結</h3>
+    <p>要理解這場慢性僵局，得先看清它的結構。科威特的政治體制，是一個被刻意設計成「半截民主」的混合體：議會由人民選出，但內閣卻由埃米爾任命，而首相，連同最關鍵的國防、內政、外交三個部長之位，長期由薩巴赫家族的成員把持。於是，國家的行政權牢牢握在王室手中，立法權卻握在人民手中——兩股權力，誰也無法徹底壓倒誰。民選議員手握質詢與否決的牙齒，卻無權組閣、無法執政；委任的王室內閣掌握行政與資源，卻在五十名議員面前永遠是少數，每一條法案、每一筆預算，都得看議會的臉色。這道結構，在西方議會制裡本該由「贏得多數者組閣」來化解，可科威特偏偏割裂了「選舉」與「組閣」——人民能選議員，卻選不出政府。於是行政與立法之間，沒有一座橋，只有一條無休止的戰壕。更要命的是，科威特至今正式禁止政黨——議員多以個人、部落、教派或鬆散的「議會集團」之姿存在，缺乏能負責任地執政、也能負責任地反對的成熟政黨政治。一群無法組閣的議員，面對一個無法獲得多數的內閣，雙方能做的，便只剩下對撞：議員以質詢逼宮，內閣以總辭與解散反制。這道死結，是科威特一切僵局的源頭。</p>
+
+    <h3>解散、再解散：一座旋轉門裡的議會</h3>
+    <p>於是，「解散」成了科威特政治最頻繁的動作。自二〇〇六年以來，國民議會被解散約十到十二次，另有數度遭憲法法院宣告選舉無效、整屆議會作廢——這個數字，放在任何一個正常運轉的議會民主國家，都是匪夷所思的政治動盪。而動盪的密度，在進入二〇二〇年代後達到了駭人的頂點：光是二〇二〇到二〇二四這短短四年間，科威特就辦了四次國會大選、經歷了三次解散。一屆議會的壽命，常常短到還來不及通過任何一部像樣的法律，就在新一輪的質詢與總辭中夭折。議會成了一扇高速旋轉的門——議員進來、對撞、被解散、重選、再進來、再對撞，循環不息。與此同時，質詢的頻率也較早年暴增了數倍：伊斯提傑瓦布這顆原本是用來監督施政、追究重大過失的利齒，逐漸被濫用成了議員之間政治鬥爭、博取選民眼球的常規武器，動輒對部長發起，使得任何一位閣員都如坐針氈，內閣的平均壽命越來越短。一座議會若把絕大部分的精力，都用在了選舉、解散與質詢的循環上，它還剩下多少氣力，去做立法者本該做的事？</p>
+
+    <h3>當質詢變成武器：政治的空轉</h3>
+    <p>這場空轉的悲劇在於，它把科威特那副驕傲的牙齒，磨成了消耗自身的內傷。在一個健康的議會裡，質詢與不信任案是稀有而沉重的核武器，用以對付真正的失職與腐敗；可在科威特那道民選與委任割裂的死結裡，它們淪為了日常的政治籌碼。議員以發起質詢來向部落與選民邀功、來逼迫內閣在福利與補貼上加碼、來在派系鬥爭中為自己積累籌碼；而內閣為了躲避一場可能讓王室成員當眾難堪的質詢，往往不惜選擇集體總辭，或乾脆說服埃米爾解散整個議會——用解散，來掐滅一場質詢。於是一個荒謬的閉環形成了：議員越愛質詢，內閣越愛解散；內閣越愛解散，議員下一屆便越急著質詢。雙方都在用憲法賦予的正當權力，互相癱瘓對方，而國家治理的實質，則在這場無休止的攻防中被架空。部長換得太勤，無人能推動長期政策；內閣垮得太頻，無人敢承擔改革的政治風險。這座議會還在開會，還在投票，還在轉播那一場場火爆的質詢——可它早已不再「治理」，它只是在「對撞」。活力，異化成了內耗。</p>
+
+    <h3>改革的墳場：發債、多元化、外資法，一一卡死</h3>
+    <p>這場空轉最沉重的代價，是把科威特推進了一座改革的墳場。前面幾章已經見過最刺眼的那樁案例：舊融資法在二〇一七年到期後，整整八年，民選議會反覆否決新的發債法，要求把發債與福利改革綁定，行政與立法死結，逼得一個淨外部資產高居全球之冠的富國，眼睜睜看著一般準備金的流動性由十年前約三百三十六億第納爾，縮水到二〇二〇至二一年的近乎見底，竟有部長警告十月之後恐怕發不出公務員的薪水。而被這座旋轉門碾碎的，遠不止發債一項。經濟多元化的種種藍圖——把國家從九成靠油的食租結構中拉出來——在一屆又一屆短命議會的更迭中，從來無法形成連貫的政策；吸引外資的法案、放寬外資持股、發展非油產業的努力，一再被擱置、被推翻、被遺忘。那座被反覆描繪、被寫進無數份願景文件的「絲綢城（Silk City）」與布比延島的巨型開發計畫，喊了二十年，至今仍主要停留在紙上。當杜拜在這二十年裡平地起出一座全球之城、當多哈把一片氣田變成人均世界前列的財富、當利雅得正以萬億計的投資脫胎換骨，科威特這個曾經的海灣先驅，卻被自己那座有牙齒的議會與那道結構性死結，死死地凍在了原地。它什麼都沒做錯，又什麼都做不成。</p>
+
+    <h3>活力的代價，是癱瘓</h3>
+    <p>於是我們抵達了本書最核心、也最令人唏噓的那道悖論的正中央。科威特的議會，並非因為太弱而失敗，恰恰相反，它是因為太強而陷入了僵局——一座沒有牙齒的橡皮圖章議會，反而不會妨礙行政權快刀斬亂麻地推動（無論好壞的）政策，正如它那些專制鄰居所示範的。可科威特偏偏擁有一座真有牙齒、卻又無法組閣執政的議會，這便注定了它與委任內閣之間，那道無法調和的對撞。更深一層看，這道對撞之所以無解，根子全在「石油」身上。在一個正常的國家裡，政府向人民徵稅，人民便透過議會監督政府如何花這筆稅——「無代表，不納稅」，權責相符，議會的牙齒便有了建設性的方向。可在食租的科威特，政府不向人民徵稅，反而向人民分配石油的租金；於是議會的角色，就從「監督政府如何花我的錢」，扭曲成了「逼政府多分一點石油的錢給我的選民、絕不准它削減任何福利」。任何觸動既得福利的改革，在這座議會裡都形同政治自殺；而任何想繞過議會的行政，又會立刻撞上那副真實的牙齒。光榮的「商人同意」與惰性的「石油租金」，就這樣在這座議會裡，年復一年地彼此絞殺。活力的代價，是癱瘓——這便是科威特，一個被自己的成功與詛咒，一起拖住的海灣先驅。</p>
+
+    <div class="pull"><p>科威特的議會，不是因為太弱而失敗，而是因為太強而陷入僵局——一座有牙齒、卻無法組閣的議會，撞上一個只需分糖、無須徵稅的食租內閣，便只剩下無休止的對撞。活力的代價，是癱瘓。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 一座永遠在解散的議會</span>
+      <p>這一章，三密碼第一次露出了它們彼此絞殺的猙獰面目。「<strong>議會</strong>」這把上一章還閃著光榮的鑰匙，在此翻轉成了枷鎖——同一副能立法、能質詢、能逼宮的牙齒，在民選與委任割裂的死結裡，把自己磨成了消耗國家的內傷：二〇〇六年以來約十到十二次解散、光二〇二〇到二四就四次大選三次解散、質詢頻率暴增數倍，把活力空轉成了癱瘓。而推動這場絞殺的引擎，正是第二把鑰匙「<strong>石油</strong>」——因為國家分配租金而非向人民徵稅，議會的監督便失去了「無代表不納稅」那個建設性的著力點，異化成了「絕不准削減我選民福利」的否決機器，把發債、多元化、外資法、絲綢城，一一推進了改革的墳場。至於第一把鑰匙「<strong>商人</strong>」，這一章是它最辛酸的回聲：正因唯獨科威特的統治者，從一七五二年起就須向出錢的人交代，它才在海灣唯一地長出了這座真議會——可這份最珍貴的政治遺產，竟成了它停滯的根源。</p>
+      <p>把這份停滯放回它的姊妹之間，那道悲劇的弧線便清晰得刺眼。當這座有牙齒的議會在旋轉門裡空轉的這二十年，杜拜平地起出了一座全球之城、卡達把一片海底的氣田變成人均世界前列的財富（卡達篇與阿聯篇各自詳述了那場以小搏大的轉型豪賭）、利雅得正以萬億計的投資脫胎換骨——唯獨科威特，這個曾經啟發了所有鄰居的先驅，被自己一手締造的民主與一手坐擁的石油，一起凍在了原地。最尖刻的對照，藏在第四章那道傷口裡：一九九〇年薩達姆的入侵，靠的是外敵的坦克，才把科威特從地圖上抹去七個月；可這一回，把科威特凍住的，不是外敵，而是它自己——是它那副最值得驕傲的牙齒，咬住了自己前進的腳。而當一座議會把國家拖入這般無解的僵局，那位握有解散權的埃米爾，遲早會問出一個危險的問題：與其讓這副牙齒繼續咬下去，不如，把整座議會關掉？下一章，二〇二四年五月，這個問題有了答案。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-18">
+  <div class="act-head">
+    <span class="act-num">第十八章 · May 2024 — When the Emir Switched Off Parliament</span>
+    <h2 class="act-title">二〇二四年五月：當埃米爾關掉了議會</h2>
+    <p class="act-sub">May 2024 — When the Emir Switched Off Parliament</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>上一章那道危險的問題，在二〇二四年五月十日，有了它的答案。那一天，科威特的電視螢幕上，年逾八旬的埃米爾謝赫米沙勒·艾哈邁德·賈比爾·薩巴赫（Sheikh Mishal al-Ahmad al-Jaber al-Sabah），用沉緩而堅定的語氣，宣讀了一份足以改寫國本的命令：他宣布解散剛在當年四月選出的國民議會，並中止憲法中的若干條文，為期最長可達四年；在這期間，立法權將由埃米爾與內閣共同行使。理由，他說，是要「拯救國家」——科威特的政治僵局已經惡化到危及國本，貪腐已「滲入大多數的國家機構」，而那座永遠在解散、永遠在對撞的議會，已使國家無法被治理。對一個外人而言，這或許只是又一則中東強人收權的新聞；可對科威特，這是一道深可見骨的傷口——因為他關掉的，不是一座尋常的橡皮圖章議會，而是整個阿拉伯海灣，唯一一座真有牙齒、能質詢部長、能逼閣員下台、曾能核可王儲的民選議會。兩百多年前那筆「商人的同意」契約，在這一天，被它自己選出的統治者的後人，按下了暫停鍵。</p>
+
+    <h3>中止了「禁止中止」的那一條</h3>
+    <p>而這道命令裡，藏著一個尖刻到近乎黑色幽默的諷刺。在被米沙勒一併中止的憲法條文之中，赫然有第一八一條——而那一條的內容，恰恰是「憲法不得中止」。換句話說，埃米爾中止了那條「禁止中止憲法」的條文，再用這份被自己中止過的憲法，去中止整部憲法的運作。這不是文字遊戲，而是觸及了一切成文憲政最核心的悖論：當守護憲法的人，正是有權力踐踏它的人，那麼一紙白底黑字的「不得中止」，究竟還能擋住什麼？一九六二年那部憲法的起草者們，顯然早已預見了這一天可能到來——他們特意寫下第一八一條，像是給後世立下的一道神聖的禁令，一道理應永不被跨越的紅線。可六十二年後，這道紅線，被一句話輕輕抹去了。法律的力量，終究來自人們是否願意遵守它；而當握有最高權力的人決定不再遵守，那部曾經令全海灣側目的憲法，那座曾經能逼問王子的議會，便都在一夜之間，失去了它們的牙齒。米沙勒那道命令最深的寓意正在於此：科威特的民主，從來不是被外敵的坦克碾碎的，而是被守護它的人，親手關掉的。</p>
+
+    <h3>史上第三次：一座屢被關掉、又屢被喚回的議會</h3>
+    <p>不過，二〇二四年的這道命令，在科威特的歷史上，並非第一次。國民議會自一九六二年設立以來，已是第三次被中止。第一次在一九七六年——埃米爾薩巴赫·薩利姆以議會妨礙施政、危及國安為由，解散議會並中止了部分憲法，直到一九八一年才恢復選舉。第二次更為慘烈，發生在一九八六年：那一年，繼一九八二年那場名為「蘇克·曼納赫（Souk Al-Manakh）」的非正式股市崩盤——一場捲走了數百億美元、幾乎拖垮整個科威特金融體系的瘋狂投機泡沫——之後，政治壓力與經濟動盪交織，埃米爾賈比爾·艾哈邁德再度解散議會、中止憲法，這一中止，便長達六年，直到一九九二年才在強大的民間壓力下恢復。值得記住的是，前兩次中止，最終都在科威特那股深植於迪萬尼亞與自由報業的公民壓力下，被「喚回」了——人民走上街頭、商人施加壓力、知識界發聲，硬是把那座被關掉的議會，一次又一次地，重新打開。這正是科威特獨一無二之處：在別的海灣國家，被關掉的東西就永遠關掉了；唯有在科威特，那座議會像一株被反覆砍伐、卻總能再度抽芽的老樹。二〇二四年的這第三次，會不會也終將被喚回？沒有人知道。但歷史的兩次先例，在那道暫停鍵旁邊，靜靜地閃著一絲微光。</p>
+
+    <h3>薩巴赫家族的繼承：三年裡，兩度送葬</h3>
+    <p>要讀懂二〇二四年那道命令，還須看清下命令的這個人，以及他身後那個正在快速凋零、又急於穩住陣腳的統治家族。進入二〇二〇年代，薩巴赫家族的繼承，密集得近乎倉促。二〇二〇年九月，在位十多年、以斡旋外交聞名的埃米爾薩巴赫·艾哈邁德（Sabah al-Ahmad）逝世，享年九十一歲；其同父異母的弟弟、時任王儲的納瓦夫·艾哈邁德（Nawaf al-Ahmad）繼位。可納瓦夫的統治極為短暫——僅僅三年後，二〇二三年十二月，他便以八十六歲高齡辭世。於是，在不到三年半的時間裡，科威特兩度為它的埃米爾送葬。繼承王位的，是時任王儲、生於一九四〇年的米沙勒·艾哈邁德——他即位時已年逾八十三，成為科威特獨立以來的第十七位埃米爾。一個高齡的統治者，接手了一個陷入慢性僵局、繼承又青黃不接的國家；他登基不過數月，便在二〇二四年四月又遭遇一場毫無建樹的選舉與一個註定要與內閣對撞的新議會。對這位耐心已盡的老埃米爾而言，那座永遠在解散的議會，或許已不再是值得守護的光榮，而成了必須斬斷的亂麻。三年裡兩度送葬的倉促，與一位高齡新君想在有生之年「了結」這場數十年僵局的決心，共同構成了二〇二四年五月那道命令的背景。</p>
+
+    <h3>打破輪替的王儲，與一個契約的暫停</h3>
+    <p>米沙勒掌權後的另一步棋，同樣意味深長。二〇二四年六月，他任命謝赫薩巴赫·哈立德（Sabah al-Khalid）為王儲——這個任命之所以重要，是因為它悄然打破了薩巴赫家族延續已久的一條潛規則：王位在賈比爾（Jaber）與薩利姆（Salim）兩大支系之間輪流繼承的傳統。更關鍵的是，按照憲法，王儲須交付國民議會以絕對多數表決確認——可如今議會已被中止，這道「核可王儲」的、那顆曾令全海灣震驚的牙齒，便也隨之失效。換言之，米沙勒不只關掉了議會，他還在議會缺席的真空裡，重新安排了家族的繼承秩序，而無須再經人民代表的點頭。這一連串動作合起來看，輪廓便清晰了：一個高齡的埃米爾，在一個繼承倉促、僵局已久的時刻，選擇用中止憲法的方式，把權力從那座永遠在對撞的議會手中收回，重新集中到王室。兩百多年前，採珠的商人們「選出」並供養了第一位薩巴赫；六十二年前，那份同意被寫進了一部有牙齒的憲法；而二〇二四年五月十日，這份延續了兩個多世紀的「商人同意」契約，被它自己選出的家族的第十七代後人，按下了暫停鍵——按下時長，最長四年。這份契約，斷裂了；至於它會像前兩次那樣被喚回，還是就此永遠改寫，要由科威特接下來的歷史，自己回答。</p>
+
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">一九六二</div><div class="tl-text">埃米爾頒布憲法，設立五十席民選的國民議會——海灣第一座真有牙齒的民選議會，把「商人的同意」制度化。</div></div>
+      <div class="tl-item"><div class="tl-year">一九七六</div><div class="tl-text">第一次中止：埃米爾薩巴赫·薩利姆解散議會、中止部分憲法，至一九八一年恢復選舉。</div></div>
+      <div class="tl-item"><div class="tl-year">一九八二</div><div class="tl-text">蘇克·曼納赫非正式股市崩盤，捲走數百億美元，幾近拖垮金融體系——為下一次中止埋下動盪。</div></div>
+      <div class="tl-item"><div class="tl-year">一九八六</div><div class="tl-text">第二次中止：埃米爾賈比爾·艾哈邁德解散議會、中止憲法達六年，至一九九二年在民間壓力下恢復。</div></div>
+      <div class="tl-item"><div class="tl-year">二〇〇五</div><div class="tl-text">議會修法賦予女性完整參政權；二〇〇九年四位女議員當選——海灣首見、且無保障名額。</div></div>
+      <div class="tl-item"><div class="tl-year">二〇〇六起</div><div class="tl-text">慢性僵局加劇：此後十餘年議會被解散約十到十二次，多屆遭憲法法院宣告選舉無效。</div></div>
+      <div class="tl-item"><div class="tl-year">二〇二〇</div><div class="tl-text">埃米爾薩巴赫·艾哈邁德逝世，弟納瓦夫·艾哈邁德繼位；此後四年四次大選、三次解散。</div></div>
+      <div class="tl-item"><div class="tl-year">二〇二三</div><div class="tl-text">納瓦夫在位僅三年辭世，王儲米沙勒·艾哈邁德（生於一九四〇）繼任第十七位埃米爾。</div></div>
+      <div class="tl-item"><div class="tl-year">二〇二四</div><div class="tl-text">五月十日，米沙勒第三次中止議會與部分憲法達四年，並中止了「禁止中止憲法」的第一八一條；六月任命薩巴赫·哈立德為王儲，打破賈比爾／薩利姆兩支輪替。</div></div>
+    </div>
+
+    <div class="pull"><p>最尖刻的諷刺藏在細節裡：被一併中止的憲法條文之中，赫然有第一八一條——而那一條的內容，恰恰是「憲法不得中止」。科威特的民主，從不是被外敵的坦克碾碎的，而是被守護它的人，親手關掉的。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 當埃米爾關掉了議會</span>
+      <p>這一章，是三密碼那條因果鎖鏈，被按下暫停鍵的時刻。第一把鑰匙「<strong>商人</strong>」——那份一七五二年由採珠商人「選出」並供養統治者的同意契約，在二〇二四年五月十日，被它自己選出的家族的第十七代後人，親手中止；第三把鑰匙「<strong>議會</strong>」——那座把「商人同意」制度化、能逼問王子、曾能核可王儲的海灣唯一真議會，連同它最尖利的牙齒，被一道命令關掉了最長四年，連那條「禁止中止憲法」的第一八一條都一併中止。而推動這一切的，依舊是第二把鑰匙「<strong>石油</strong>」的長長陰影：正因國家靠分配租金而非徵稅，那座議會才異化成了凍結改革的否決機器，逼到一個耐心已盡的高齡埃米爾，寧可斬斷這份兩百年的契約，也要把那台空轉的機器關掉。光榮的同意，惰性的租金，僵局的議會——三者在這一天，絞殺成了一道暫停鍵。</p>
+      <p>把這道暫停鍵放回全書的脈絡，它的重量便顯出來了。回想第四章，一九九〇年薩達姆的坦克曾把科威特從地圖上抹去七個月，那是外敵加諸的傷口，靠的是一九五三年就埋下的主權基金與三十國的聯軍，才得以贖回（伊拉克的索求與沙烏地的塔伊夫流亡，皆在各自的姊妹篇中另有詳述）；可二〇二四年這道傷口，卻是自己加諸自己的——不是坦克，而是一紙命令，關掉了科威特最值得驕傲的東西。歷史在此留下了一絲微光：這已是議會史上第三次被中止，前兩次（一九七六與一九八六）終究都在迪萬尼亞與自由報業的公民壓力下，被「喚回」了——那座議會像一株被反覆砍伐卻總能抽芽的老樹。它會不會第三次被喚回？這道暫停鍵會解開，還是會把那份兩百多年的「商人同意」契約，就此永遠改寫？這正是接下來幾部要繼續追問的：當議會沉默，那十萬無國籍的比敦人、那由少數公民與多數外籍構成的奇特社會、那台靠石油驅動靠基金救命的引擎，將走向何方——一個曾經啟發了所有鄰居的海灣先驅，能否在沉默中，等到它的議會，再一次抽芽。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<!-- ===================== 第七部 ===================== -->
+<div class="part-div reveal" id="part-7">
+  <span class="pn">第七部</span>
+  <h2 class="ptitle pt">無國籍者、教派與一個少數的國家</h2>
+  <div class="pe">The Stateless, the Sects & a Nation of Minorities</div>
+  <div class="pline"><span></span><span class="dot">⚓</span><span></span></div>
+</div>
+
+<div class="interlude reveal">
+  <div class="mark">✦ 拆開引擎 ✦</div>
+  <p>兩百多年的故事講完了，現在，讓我們掀開引擎蓋。<br><span class="hl">一張全世界最厚的資產負債表，與一座最深的制度兩難——富裕，究竟能不能買來活力？</span></p>
+</div>
+
+<section class="act reveal" id="ch-19">
+  <div class="act-head">
+    <span class="act-num">第十九章 · The Bidoon — 100,000 Without a Country</span>
+    <h2 class="act-title">比敦人：十萬個沒有國籍的人</h2>
+    <p class="act-sub">The Bidoon — A Hundred Thousand Without a Country</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>我們已經看過了科威特的光榮：海灣唯一一座真有牙齒的議會、比挪威還早的主權基金、最自由的報業、最早讓女性走進議事廳的選票。然而，每一座照得太亮的燈塔，腳下都拖著一片它自己投下的、最深的陰影。在科威特，這片陰影有一個名字——「比敦（Bidoon）」。這個詞，是阿拉伯文「bidūn jinsiyya」的縮寫，字面意思就是「沒有國籍的人」。他們不是昨天才偷渡進來的外人；他們之中的絕大多數，世世代代生在這片土地、長在這片土地，講的是科威特的方言，當的是科威特的兵，流的血也曾為科威特而流——可在法律上，他們不屬於任何一個國家。在一個本國公民人均坐擁逾一兆美元主權基金、享受搖籃到墳墓福利的富國裡，有十萬以上的人，被排除在這一切之外，像幽靈一樣，活在自己出生的城市的縫隙裡。這是「商人同意」立國的科威特，最不願被人看見的一頁——當「公民」這個身分，意味著對一桶桶石油租金的繼承權時，誰能進門、誰被擋在門外，就成了一道殘酷到極點的界線。</p>
+
+    <h3>「bidūn」：一個被造詞造出來的群體</h3>
+    <p>要理解比敦，得先回到那道劃定身分的界線，是怎麼畫下的。一九五九年，獨立前夕的科威特頒布了第一部《國籍法》，把「誰是科威特人」這件事，第一次寫成了法律條文。法律規定：能證明自己一九二〇年（一說一九二〇年代）之前就定居於此的家族，可取得「原始國籍（bi al-ta'sis）」；其餘的，循「歸化」途徑。問題出在執行的縫隙——許多世代游牧於科威特、伊拉克、沙烏地之間沙漠邊界上的貝都因部落，以及一些識字率低、不明白「登記」為何物的家族，根本沒有去、或不知道要去登記。當一九六一年獨立、國境線把流動的沙漠硬生生切成幾個國家時，這些人就被卡在了所有國境的夾縫裡：他們不是任何鄰國的公民，卻也沒能擠進科威特那扇剛剛關上的門。一開始，政府其實視他們為「尚未登記的科威特人」，給他們發身分證、讓他們參軍、進政府工作——「比敦」這個說法，最初甚至帶著一種「自己人，只是手續沒辦完」的寬容。誰也沒想到，這道「尚未」，後來會凝固成一道跨越三代、長達六十多年的、永久的放逐。</p>
+
+    <h3>從「自己人」到「非法居留者」：一道身分的滑落</h3>
+    <p>真正的轉折，發生在一九八〇年代。一九八五年，科威特的埃米爾遭遇暗殺未遂；兩伊戰爭的烽火在邊境上燒，地區陷入動盪；而石油的價格，又在那幾年崩跌，福利國的蛋糕第一次顯出了它的邊界。在這樣的安全焦慮與財政壓力下，政府對比敦的態度，發生了一次冷酷的逆轉：一九八六年起，當局不再把他們當作「尚未登記的科威特人」，而改稱他們為「非法居留者（muqimūn bi-sūra ghayr qānūniyya）」——一個官方至今仍在使用的、把他們從「自己人」一筆勾銷的詞。一道行政命令，就把十多萬人，從「快要進門」推到了「根本不該在這裡」。其後果是系統性的、足以摧毀一個人一生的：比敦被取消了公職與軍職，被收走或拒發正式身分證件，孩子被排除在免費的公立學校之外，病了進不了免費的公立醫院，連結婚、出生、死亡這些最基本的人生節點，都因為拿不到合法的證書而陷入無解的死結——一個比敦生下的孩子，連一張出生證明都難求，於是他的「無國籍」，便這樣一代一代，像詛咒一樣繼承了下去。政府辯稱，他們之中許多人其實「藏匿了」鄰國的國籍，是為了騙取福利才裝作無國籍；人權組織則指出，這種「集體有罪推定」，正是把整個群體永久懸置的藉口。</p>
+
+    <h3>幽靈的日常：在富國裡，買不到一張紙</h3>
+    <p>對一個生在科威特的比敦人來說，「無國籍」不是一個抽象的法律名詞，而是滲進每一天、每一個毛孔的窒息。他想找一份體面的工作，雇主一看他沒有公民身分、只有一張臨時的、隨時可能不獲續發的「安全卡（security card）」，便搖頭；他想送孩子去那所免費而優良的公立學校，校門卻只為持有國籍的孩子敞開，他只能咬牙去付那些他根本付不起的私校學費；他病了，那座為科威特公民提供世界級免費醫療的醫院，把他擋在門外；他想開一個銀行帳戶、想領一本駕照、想出國一趟，每一樣都因為那本他永遠拿不到的護照而成為奢望。比敦人多半聚居在賈赫拉（Jahra）一帶的貧民區，住在科威特這座炫富之城的背面——當公民們開著名車、住著補貼的洋房時，他們擠在簡陋的屋子裡，從事著最低端、最不穩定的零工。最沉重的悲劇在於：許多比敦家庭，曾經把兒子送進科威特的軍隊與警察，在一九九〇年薩達姆入侵時，他們也曾為這個拒絕承認他們的國家而戰、而死——卻在戰後，連一紙感謝的國籍，都沒能換來。他們守護的這個國家，從未真正承認他們是它的孩子。</p>
+
+    <h3>絕望的迴聲：那些自焚的名字</h3>
+    <p>長年的窒息，會把人逼到絕路。二〇一一年的「阿拉伯之春」吹到科威特時，比敦人也曾走上賈赫拉的街頭，舉牌要求一個遲到了半個世紀的身分；他們得到的，多半是催淚瓦斯與逮捕。最令人心碎的，是那一連串以生命為代價的抗議——二〇一二、二〇一三年間，幾名走投無路的比敦青年，在絕望中當眾自焚，其中如二〇一四年的一些案例，名字曾短暫地點亮過國際新聞的角落，又很快被遺忘。他們用最慘烈的方式，向一個富可敵國的國家，索要一樣最廉價的東西：一個「我存在、我屬於這裡」的承認。政府的回應，是設立一個又一個「中央委員會」來「研究」比敦問題，承諾分批歸化一小部分人，再用「藏匿他國國籍」的指控，把絕大多數人繼續懸在半空。這場「研究」，研究了三十多年；委員會換了一屆又一屆；而比敦的人數，因為新生兒不斷地繼承無國籍，不減反增。一個能在一九五三年就為「石油用完後的世代」未雨綢繆的先驅之邦，卻在六十多年裡，連十萬個生在自己土地上的人「是不是人」，都決定不了。</p>
+
+    <h3>二〇二四：當撤銷國籍成為國策</h3>
+    <p>而比敦的傷口，在二〇二四年米沙勒埃米爾中止議會、以「整肅貪腐」之名收權之後，迎來了一個更黑暗的轉折。新政府把「整頓國籍」列為國家的優先要務，啟動了科威特史上規模最大的一輪「撤銷公民身分（withdrawal of citizenship）」行動——一個專責的最高國籍委員會，開始系統性地審查、並大批撤銷那些「以偽造文件、或不正當手段取得」的國籍。短短一年多裡，被撤銷國籍的人數，據報以數萬計，遠超此前數十年的總和；其中既包括被指控當年造假入籍者，也波及一些歸化者的家屬、乃至因婚姻取得國籍的女性。對科威特而言，這原本被宣傳為一場「淨化公民名冊、堵住租金外流」的整肅；可它的另一面，是把「公民身分」這個本應穩定終身的法律地位，變成了一樣可以被行政之手隨時收回的東西——今天他們撤銷別人的，明天誰又能保證自己的安全？對本就無國籍的比敦人，這場行動更是雪上加霜：當整個國家機器都繃緊了「誰才配當科威特人」這根弦時，那扇本就只對他們開了一條縫的門，被關得更死了。一個曾經以「同意」與「聲音」傲視海灣的國家，在二〇二四年，把「誰能屬於這裡」的權力，徹底收回了統治者一個人的手裡。</p>
+
+    <div class="pull"><p>在一個本國公民人均坐擁逾一兆美元主權基金的富國裡，有十萬以上生於斯、長於斯、甚至為它流過血的人，連一張出生證明都求不到——比敦人是科威特這座光榮燈塔，腳下投得最深的那片陰影：當「公民」意味著對石油租金的繼承權，那道分隔「自己人」與「幽靈」的界線，就殘酷得不容一絲縫隙。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 燈塔腳下的陰影</span>
+      <p>比敦的悲劇，把三把密碼擰成了一個最尖刻的死結。「<strong>商人（the Merchant）</strong>」的同意契約，原本是一份「誰出錢、誰有發言權」的開放邀請——可一九五九年的《國籍法》，把這份「同意」固化成了一道封閉的血緣與登記名冊，把那些游牧於沙漠邊界、來不及登記的人，永遠擋在了「同意者」的圈子之外。而真正讓這道界線變得如此致命的，是「<strong>石油（the Oil）</strong>」：當布爾甘的租金把「公民」變成一份可繼承的、價值連城的財產權——免費的醫療、教育、公職、補貼——「誰是科威特人」就不再是一個身分問題，而是一個分錢問題。一個食租國家分糖的口越窄，被擋在門外的代價就越殘酷，於是比敦從「尚未登記的自己人」，一路滑落為「非法居留者」。最後，「<strong>議會（the Majlis）</strong>」這把本該保護弱者的牙齒，也失靈了——海灣唯一真有牙齒的民選議會，數十年裡爭論發債、爭論福利、爭論部長去留，卻始終沒能、也沒太願意，為這十萬個沒有選票、因而沒有政治籌碼的幽靈，撬開那扇門。一座只對「同意者」負責的議會，對「不被承認為人」的人，是沉默的。</p>
+      <p>把這一章扣回前文，比敦的處境照出了科威特食租契約最冷的一面。第十三章裡那份「搖籃到墳墓」的福利，與第二十章即將細看的「公民只佔三成」的人口結構，正是比敦悲劇的兩堵高牆——蛋糕越大、分蛋糕的人越少，門口的守衛就越森嚴。而二〇二四年那場撤銷國籍的風暴，又與第十八章米沙勒「關掉議會」是同一道收權命令的兩面：當「同意」的傳統被按下暫停鍵，「誰能屬於這裡」便也收回了統治者一人之手。放眼海灣，這並非科威特獨有的暗角——阿聯與卡達同樣有龐大的、永無歸化之望的外籍底層（《阿聯》一篇細寫過杜拜工地上的南亞勞工），但科威特的比敦更刺痛，因為他們不是外人，而是自己人；一個曾以「人人都有聲音」自豪的國家，竟容不下這十萬個無聲者，這份反差，比任何專制鄰居的沉默，都更教人不忍。先驅之邦的人權暗角，藏的正是它光榮的反面。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-20">
+  <div class="act-head">
+    <span class="act-num">第二十章 · A Minority in Their Own Land</span>
+    <h2 class="act-title">自己國家裡的少數：公民與外籍</h2>
+    <p class="act-sub">A Minority in Their Own Land — Citizens and Expatriates</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>比敦人是被擋在門外的少數；可走進門內，科威特還藏著一個更深、更根本的、幾乎重寫了「國家」這個詞的事實——在科威特這片土地上，科威特人自己，才是少數。截至二〇二五年底，這個國家的總人口約有五百二十四萬；其中，持有科威特國籍的本國公民，僅約一百五十六萬，佔總人口的三成左右；其餘約三百六十七萬，都是來自世界各地的外籍人士，佔了整整七成。換句話說，在科威特街頭，每遇到十個人，只有三個是這個國家真正的主人，另外七個，是被請來、被雇來、把這個國家的日常運轉扛在肩上的客人。這是一個被「商人、石油、議會」三把鑰匙共同塑造出來的、極端而脆弱的人口結構：一小撮坐享石油租金的公民，騎在一大群沒有政治權利、隨時可能被遣返的外籍勞工之上。一個民選議會服務的選民，只佔了它所統治的人口的三成；而那真正讓這個國家動起來的七成，沒有一張選票。要讀懂今天的科威特，就不能不直視這道顛倒了「國民」與「外人」比例的、海灣最尋常卻最驚人的事實。</p>
+
+    <h3>三成的主人，七成的客人</h3>
+    <p>讓我們先把這幅人口圖景看清楚。約一百五十六萬的公民裡，有約八成在職者吃著公家飯——他們是這個國家的繼承者，從出生那一刻起就擁有了免費的醫療、教育、保障的公職、補貼的水電油糧，與對那份逾一兆美元主權基金的、抽象卻真實的所有權。而約三百六十七萬的外籍人口，則撐起了這個國家從頭到腳的肉身：他們是醫院裡的醫生與護士、學校裡的老師、油田與工地上的工人、寫字樓裡的工程師與會計、家裡的女傭與司機、街角小店的店主與夥計。本國公民佔總勞動力的比例，其實還不到一成五——也就是說，這個富裕福利國的引擎，從馬達到齒輪，幾乎完全是由外籍的雙手在轉動。最大的外籍群體來自印度，約佔總人口的兩成、人數逾百萬，是科威特境內最龐大的單一族群；其次是埃及人，再加上孟加拉、菲律賓、敘利亞、巴基斯坦等地的勞工，構成了一個微縮的全球南方。他們之中，絕大多數人無論在此生活、工作了多久——哪怕二十年、三十年、哪怕孩子就在科威特出生——都幾乎沒有任何歸化為公民的可能。他們是這個國家永遠的過客：可以建設它，卻永遠不能擁有它。</p>
+
+    <h3>kafala：把人綁在雇主身上的繩子</h3>
+    <p>是什麼制度，維繫著這道「三成主人、七成客人」的森嚴界線？答案是遍行於整個海灣的「卡法拉（kafala）」擔保制度。在這套制度下，每一個外籍勞工的居留與工作權，都被綁定在一個本國的「擔保人（kafīl）」——通常就是他的雇主——身上。沒有雇主的同意，勞工不能換工作、不能轉雇主、有時甚至不能離境；雇主握有的，幾乎是對這個人去留的生殺大權。這套制度，把一個有著一百五十六萬公民的小國，變成了一個能夠驅使三百多萬外人的龐大機器：公民是擔保人，外籍是被擔保者；公民坐享租金，外籍出賣勞力。它的殘酷，在低端勞工身上最為刺目——那些從南亞、東南亞遠道而來的建築工與家政女傭，常常被扣押護照、拖欠工資、超時勞動，求告無門。而它的高明（對食租國家而言），在於它確保了那七成的「客人」，永遠只是齒輪，而非主人——他們可以被一波經濟下行、一紙政策調整，就成批地遣返回國，像潮水一樣退去，絲毫不會動搖那三成公民對國家、對租金的壟斷。這是食租契約能夠維持的人口學基礎：用一道無法跨越的國籍之牆，把「分租金的人」與「出勞力的人」，永久地隔開。</p>
+
+    <h3>遜尼與什葉：公民內部那道更細的縫</h3>
+    <p>然而，即便在那三成「真正的主人」內部，也並非鐵板一塊——還有一道更細、卻在關鍵時刻會繃緊的縫，那就是教派。在約一百五十六萬的科威特公民裡，遜尼派穆斯林約佔七成，什葉派約佔三成。這個比例，在海灣是頗為特殊的：它的什葉人口比例，遠高於同為遜尼君主統治的沙烏地或阿聯，卻又不像隔灣的伊朗或鄰近的巴林那樣，什葉是多數。科威特的什葉社群，許多源自波斯（伊朗）與伊拉克的移民後裔，歷來在商業上頗有實力，與薩巴赫王室也維持著一種微妙的、互利的關係——在歷史上的多數時候，王室甚至傾向倚重相對「政治溫和」的什葉商人，來平衡那些在議會中聲勢浩大的遜尼伊斯蘭主義者與部落勢力。然而，這道教派的縫，並未因此癒合。它在每一次地區局勢緊張時隱隱作痛：兩伊戰爭期間，科威特境內曾發生過親伊朗勢力的爆炸與劫機；二〇一五年，伊斯蘭國（ISIS）更在科威特城一座什葉派清真寺製造了死傷慘重的自殺炸彈攻擊，那是科威特多年來最血腥的恐襲，撕開了教派之間那層脆弱的和平。在議會選舉中，遜尼、什葉、城市商人、部落各自有著盤根錯節的票倉，這道教派的縫，便時隱時現地，編織進了科威特政治那張複雜的網裡。</p>
+
+    <h3>部落、城商與哈達爾：選票背後的板塊</h3>
+    <p>要真正讀懂科威特那座有牙齒的議會在吵什麼，光看教派還不夠，還得看那道貫穿公民社會的、更古老的裂痕：城裡人（哈達爾，hadhar）與部落人（badu）。所謂「哈達爾」，是那些世代定居城內、靠採珠與貿易致富的老商人家族的後裔——他們是「商人同意」契約最原始的締約者，是科威特自由報業、世俗開放傳統的主要載體。而「部落人」，則是二十世紀中後期，從沙漠陸續被歸化、定居下來的貝都因部落後裔——他們人數眾多、組織嚴密，靠著部落內部的「初選」整合選票，是議會裡一股不容小覷的力量，也常與伊斯蘭主義勢力結盟。這兩個板塊，世界觀截然不同：哈達爾多半擁抱世俗、開放、親近王室的傳統秩序；部落則更保守、更虔誠，也更傾向於用議會的牙齒去質詢、去對抗政府。歷屆王室劃分選區、調整選制（如二〇〇六年的「五大選區」改革、屢次變動的「一人一票」規則），背後都藏著對這幾大板塊——城商、部落、遜尼伊斯蘭主義者、什葉——的精密算計。於是，那座海灣唯一有牙齒的議會，它的活力與它的僵局，便都深深紮根在這個僅佔總人口三成、卻內部裂成數塊的公民社會裡。</p>
+
+    <h3>一個由少數運轉、為少數服務的國家</h3>
+    <p>把這一切疊在一起，科威特呈現出一幅在人類國家史上都堪稱奇特的圖景：它是一個由「七成的人」運轉、卻只為「三成的人」服務、而真正掌權的，又只是這三成裡的一小部分的國家。那七成外籍人口，建設它、餵養它、照料它的老幼病殘，卻沒有一張選票、沒有一份租金、沒有一絲歸屬；那三成的公民，享盡了石油的福利，卻又被教派與部落的裂痕切成幾塊，在議會裡彼此角力；而那座議會本身，服務的選民只是全國人口的零頭。這個結構的脆弱，是顯而易見的：它的繁榮，建立在一群隨時可以被遣返、毫無權利的客人之上；它的政治，封閉在一個越來越小、越來越焦慮於「誰才配分租金」的公民圈子裡。當二〇二四年政府大舉撤銷國籍時，它要做的，正是把那「三成的主人」這個圈子，劃得更小、守得更嚴。一個曾以「人人有聲音」為傲的國家，最終發現自己面對的真正問題，不是「人民如何治理國家」，而是更根本的——「到底，誰才算是這個國家的人民？」</p>
+
+    <div class="pull"><p>在科威特，每遇到十個人，只有三個是這個國家真正的主人，另外七個是被雇來扛起它日常運轉的客人——一個由七成的人運轉、卻只為三成的人服務的國家。當「公民」意味著對石油租金的繼承權，「國民」與「外人」的比例便顛倒了過來，而那座有牙齒的議會，服務的選民只佔了它所統治人口的零頭。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 顛倒的國民與外人</span>
+      <p>這道「三成公民、七成外籍」的奇特結構，是三把密碼共同的產物。「<strong>商人（the Merchant）</strong>」的同意契約，劃定了一個封閉的「自己人」圈子——能在統治者客廳裡說話的，從來只是那些有家世、有財產的城商與後來被納入的部落，而非任何在這片土地上勞作的人。「<strong>石油（the Oil）</strong>」則把這個圈子變成了一座必須嚴防死守的金庫：當公民身分等於對一兆美元基金與終身福利的繼承權，把外人擋在門外、用 kafala 制度確保他們永遠只是過客，就成了維繫食租契約的鐵律——蛋糕越大，分蛋糕的圈子就守得越緊，於是科威特人成了自己國家裡的少數。而「<strong>議會（the Majlis）</strong>」這把牙齒，雖然真實，卻只長在這三成公民的嘴裡，且被教派、被城商與部落的裂痕咬得參差不齊——海灣唯一的民主，是一場只有三成人能參加、且彼此內鬥的民主。一座只代表少數、又自我分裂的議會，自然難以為那七成沉默的多數、或那十萬無國籍的比敦，發出任何聲音。</p>
+      <p>把這一章接回前後文，它正是第十九章比敦悲劇的人口學底座，也是第十三章食租契約的另一面——那「八成公民吃公家飯」的奢侈，正是靠著七成外籍勞動力的廉價支撐起來的。而教派那道縫，又把科威特扣回了它最危險的地緣處境：境內三成的什葉、與隔灣那個什葉大國伊朗、以及一九九〇年踏平它的遜尼伊拉克之間，始終牽著一條看不見的線（《伊拉克》與《沙烏地》兩篇細寫過這條跨越海灣的教派斷層）。放眼姊妹篇，這道「本國人是少數」的結構並非科威特獨有——阿聯本國公民僅佔一成、卡達更只佔約一成多，《阿聯》與《卡達》兩篇都剖析過這種「少數主人、多數客人」的海灣常態；但科威特的不同，在於它那三成的少數，手裡偏偏握著海灣唯一真有牙齒的選票。於是一個更尖銳的問題浮了上來：當「擁有民主的人」本身就是少數、且內部裂成數塊時，這民主，究竟是在為誰做主？這道海灣獨有的詰問，將把我們引向全書歷史線的最後一章——一個先驅，如何被自己一手催生的光榮，連同那道揮之不去的詛咒，一起拖向了落伍。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-21">
+  <div class="act-head">
+    <span class="act-num">第二十一章 · From Pioneer to Laggard</span>
+    <h2 class="act-title">從先驅到落伍：一個被自己超越的範本</h2>
+    <p class="act-sub">From Pioneer to Laggard — A Model Surpassed by Its Own Disciples</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>於是，我們走到了這趟歷史旅程的終點——也是科威特這齣大戲，最令人扼腕的一幕。前面二十章，我們看遍了它的光榮與它的暗影：商人選出統治者的古老契約、布爾甘油田的噴湧、比挪威還早的主權基金、海灣第一部憲法與第一座有牙齒的議會、薩達姆的入侵與七百口燃燒的油井、食租的陷阱、議會的活力與癱瘓、十萬比敦人的放逐、自己國家裡的少數。把這一切收攏起來，浮現的，是一條清晰得令人心痛的悲劇弧線——一個曾經是整個海灣最發達、最開放、最有遠見的「先驅之邦」，如何在數十年裡，眼睜睜地，被它自己一手啟發的鄰居們，一一超越，最終淪為海灣現代化的「落伍生」。這不是一個衰敗的故事——科威特至今富可敵國，家底比誰都厚；這是一個更深刻、更稀有的悲劇：一個關於「先行者，如何被自己的成功，連同自己的詛咒，一起拖在了原地」的故事。它擁有海灣最值得驕傲的兩樣東西——民主，與財富——可偏偏是這兩樣，把它鎖死了。</p>
+
+    <h3>那個曾經遙遙領先的科威特</h3>
+    <p>要讓「落伍」這個詞有分量，得先記起那個曾經遙遙領先的科威特，究竟領先到什麼地步。在一九五〇、六〇、七〇年代，當杜拜還只是個泥灘上的小漁村、多哈還是個採珠的窮港、利雅德還是內志高原上一座保守封閉的沙漠城市時，科威特，已經是整個阿拉伯海灣當之無愧的明珠。它在一九五三年設立了世界上最早的主權財富基金，比所有人都早地懂得「為石油用完後的世代存錢」；它在一九六二年頒布了海灣第一部現代憲法、設立了第一座真有牙齒的民選議會，一九六三年選出了第一屆議員；它擁有海灣最自由的報業、最活躍的出版與劇院、最先進的醫院與大學，連那本譽滿阿拉伯世界的文學期刊《阿拉比（al-Arabi）》，都誕生在科威特。它的城市規劃、它的社會福利、它的文化氛圍，是整個地區仰望、效仿的範本。那時若有人問「海灣的未來在哪裡」，所有人都會指向同一個方向——科威特。它是先驅，是燈塔，是那個替整個海灣，第一個睜開眼睛看見現代世界的人。記住這份輝煌，才能明白接下來這場超越，有多麼地令人唏噓。</p>
+
+    <h3>鄰居們的脫胎換骨：杜拜、多哈、利雅德</h3>
+    <p>然後，世界翻了一頁。當科威特停在原地時，它的鄰居們，一個接一個地，完成了它們的脫胎換骨。最戲劇性的是<strong>杜拜</strong>：這個本身石油就不多的酋長國，在謝赫拉希德與其子穆罕默德的擘劃下，從一九八〇年代起豪賭轉口、航空、旅遊、金融與房地產，硬是在一片沙漠上，造出了傑貝阿里自由港、阿聯酋航空、哈里發塔與一座令全球目眩的現代都會——它幾乎是把科威特「靠貿易與轉口立國」的古老基因，推到了極致，卻甩開了科威特（《阿聯》一篇細寫過這場豪賭）。其次是<strong>多哈</strong>：卡達靠著北方氣田那筆天賜的橫財，在哈邁德與塔米姆兩代埃米爾手中，創辦了攪動整個阿拉伯世界的半島電視台、辦成了二〇二二年的世界盃、把多哈變成一座教育與外交的樞紐（《卡達》一篇是它的專篇）。連最保守的<strong>利雅德</strong>，也在二〇一六年後，由穆罕默德·本·薩勒曼以「2030願景」掀起了天翻地覆的社會與經濟改革——開放娛樂、引入女性駕車、豪擲萬億建設新城（《沙烏地》一篇細述）。一個共同的、刺痛科威特的事實是：這些鄰居在轉型時，無不或明或暗地，研究、借鑒了科威特當年的先驅之舉——科威特的主權基金、它的轉口傳統、它的福利模式，啟發了它們；可它們學成之後，回過頭來，把它們的老師，遠遠地拋在了身後。</p>
+
+    <h3>是什麼把先驅凍住了？光榮與詛咒的合謀</h3>
+    <p>那麼，最關鍵的問題來了：是什麼，把這個跑在最前面的先驅，凍在了原地？答案，恰恰是它最引以為傲的兩樣東西——它的光榮（議會），與它的詛咒（石油），合起手來，鑄成了一座無形的牢籠。先看那道<strong>詛咒</strong>：石油的租金，把科威特變成了一個極端的食租國家，油佔了約九成的政府收入，國家不向人民徵稅、只向人民分糖，於是任何觸動既得福利的改革——削減補貼、收緊公職、向外資讓利——在政治上都形同自殺。而那份<strong>光榮</strong>，又把這道詛咒鎖死得無從掙脫：當這個食租國家，偏偏又擁有海灣唯一一座真有牙齒、能質詢、能倒閣、能否決的民選議會時，每一項痛苦卻必要的改革，都會在議會的角力中被否決、被拖延、被當成質詢部長與逼宮的籌碼。專制的鄰居們，能靠統治者一聲令下，就把痛苦的改革強推下去（沙烏地的 MBS 正是如此）；可科威特的統治者，卻被自己當年那份「商人同意」的慷慨所綑綁——它有議會，所以它不能獨斷；它又是食租國家，所以它的議會只會否決。光榮與詛咒，於是合謀，把這個先驅死死地，按在了原地。這是它與所有海灣鄰居最深刻的不同，也是它最深的悲哀。</p>
+
+    <h3>絲綢城與那些只在紙上的未來</h3>
+    <p>這座無形牢籠最具體、最令人嘆息的證物，是那一連串「只在紙上」的宏偉藍圖。最著名的，是「<strong>絲綢城（Madinat al-Hareer / Silk City）</strong>」——一座規劃中要建在科威特灣北岸、總投資高達千億美元級別的未來之城，藍圖裡有比哈里發塔還高的「穆巴拉克塔」、有自由貿易區、有橫跨海灣的大橋、要把科威特重新打造成連接歐亞的貿易與金融樞紐。它在二〇〇〇年代被提出，被一屆又一屆政府反覆地宣傳、規劃、再宣傳——可二十多年過去，它的主體，至今仍大半停留在效果圖與可行性報告裡。同樣命運的，還有那雄心勃勃的「2035 願景（New Kuwait 2035）」、那遲遲落不了地的經濟多元化計畫、那為吸引外資而難產的法律改革。為什麼？因為每一個巨型計畫，都需要立法、需要撥款、需要動既得利益，於是每一個，都一頭撞進了議會與政府那道無解的死結裡，動彈不得。當杜拜的哈里發塔早已聳入雲霄、多哈的世界盃球場早已人聲鼎沸時，科威特的穆巴拉克塔，還在圖紙上。一個曾經第一個替海灣描繪未來的國家，如今最擅長的，竟是把未來，一次又一次地，畫在紙上，然後束之高閣。先驅淪為落伍，沒有比這更刺眼的注腳了。</p>
+
+    <h3>悲劇的本質：被自己的成功與詛咒一起拖住</h3>
+    <p>於是，全書的歷史線，在這裡收束成一個沉甸甸的、近乎古希臘悲劇式的命題。科威特的悲劇，不是它做錯了什麼——恰恰相反，它在歷史的關鍵時刻，做對了兩件整個海灣最了不起的事：它最早未雨綢繆（一九五三年的主權基金），它最早給了人民聲音（一九六二年的議會）。可正是這兩件「對的事」，在石油租金的催化下，反過來成了綑綁它的繩索。它的遠見，攢下了富可敵國的家底，卻也養成了一種「反正有基金兜底」的、深入骨髓的惰性與風險趨避；它的民主，給了人民制衡權力的牙齒，卻在食租的土壤裡，異化成了否決一切改革的癱瘓。一個沒有議會、也沒有遠見的國家，或許會在某個強人手裡橫衝直撞地改革（無論成敗）；而科威特，這個既有遠見、又有民主的先驅，卻偏偏被這兩樣美德，連同石油這道詛咒，三方絞殺，凍在了原地。這就是為什麼，它的故事比任何一個海灣鄰居都更值得深思——它告訴我們一個殘酷的真理：富裕，不等於活力；聲音，不等於進步；甚至，連「做對的事」，都不能保證一個國家不被自己的成功，連同自己的詛咒，一起拖向落伍。海灣的先驅，就這樣，被它一手點亮的學生們，遠遠地超越了。</p>
+
+    <div class="pull"><p>科威特的悲劇，不是它做錯了什麼——恰恰相反，它最早未雨綢繆、最早給了人民聲音，做對了整個海灣最了不起的兩件事。可正是這兩件對的事，在石油租金的催化下，成了綑綁它的繩索：富裕不等於活力，聲音不等於進步，連「做對的事」，都救不了一個被自己的成功與詛咒一起拖住的先驅。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 先驅淪為落伍，全書歷史線的收束</span>
+      <p>這一章，把三把密碼擰成了一個完整的、自我絞殺的悲劇閉環，為全書的歷史線畫下句點。「<strong>商人（the Merchant）</strong>」的同意契約，是這一切的起點——正因為科威特獨一無二地靠商人的同意立國，它才在一九六二年，於整個海灣唯一地，長出了一座真有牙齒的議會，這是它領先所有鄰居的根本光榮。「<strong>石油（the Oil）</strong>」是這場悲劇的催化劑——布爾甘的租金把它推上巨富、建起搖籃到墳墓的福利國，讓它在二十世紀中葉遙遙領先，卻也把它變成一個任何改革都形同政治自殺的食租者，悄悄抽掉了「同意」的根基。而「<strong>議會（the Majlis）</strong>」，這把最珍貴的牙齒，便在租金的腐蝕下，從制衡權力的活力，異化成了否決改革的癱瘓——絲綢城停在紙上、2035願景遲遲落地、八年發不出主權債，每一樁僵局，都是光榮與詛咒合謀的傑作。三把密碼，在這裡合成了一句話：<em>科威特被它最大的光榮（民主），連同它最大的財富（石油），一起鎖死了。</em></p>
+      <p>把這一章扣回全書，它是序章那道「同意撞上租金」之問的最終答案，也是終章「今天的科威特人」的序曲。它呼應了第七章那支領先世界的主權基金、第九章那部領先海灣的憲法——昔日的每一個「第一」，如今都成了「先驅淪為落伍」這聲嘆息的注腳；它也呼應了第十六、十七、十八章那座「永遠在解散」、終被埃米爾關掉的議會——活力的代價，原來是停滯。而最刺痛的呼應，來自三篇姊妹篇：被科威特的轉口基因啟發、卻把它甩在身後的<strong>杜拜</strong>（《阿聯》），靠氣田橫財與半島電視台後來居上的<strong>多哈</strong>（《卡達》），以及由 MBS 強人之手強推改革的<strong>利雅德</strong>（《沙烏地》）——這三個學生，無不或明或暗地借鑒過它們的老師，學成之後，卻一一把老師遠遠拋下。海灣的故事，在這裡完成了一次最深的反諷：第一個睜眼看見現代世界的先驅，因為它太早擁有了民主、又太深陷於租金，反而成了最後一個走進那個世界的人。至此，歷史線收束；接下來的篇章，將拆開這台「靠石油驅動、靠基金救命」的當代引擎，看看這份最厚的家底，究竟能否撐過這道最深的兩難。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<!-- ===================== 第八部 ===================== -->
+<div class="part-div reveal" id="part-8">
+  <span class="pn">第八部</span>
+  <h2 class="ptitle pt">拆開引擎：科威特的當代經濟</h2>
+  <div class="pe">Opening the Engine — Kuwait's Contemporary Economy</div>
+  <div class="pline"><span></span><span class="dot">⚓</span><span></span></div>
+</div>
+
+<section class="act reveal" id="ch-22">
+  <div class="act-head">
+    <span class="act-num">第二十二章 · An Engine Run on Oil, Saved by a Fund</span>
+    <h2 class="act-title">一台靠石油驅動、靠基金救命的經濟引擎</h2>
+    <p class="act-sub">An Engine Run on Oil, Saved by a Fund</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>把前面二十一章的悲喜先擱在一旁，讓我們做一件冷靜到近乎冷酷的事：掀開引擎蓋，看這台機器究竟靠什麼轉動。一個本國公民僅約一百五十六萬的灣頂小國，如何撐起一張全世界都羨慕的資產負債表？答案，藏在兩個彼此咬合的零件裡——一個是地底那座叫布爾甘的巨型油田，另一個是一七五三年就埋下、如今逾一兆美元的主權基金。前者是燃料，後者是飛輪：當油價崩、當減產令來、當坦克開進城門，是那個飛輪靠著積攢的慣性，替整台引擎續了命。理解科威特的當代經濟，第一件該丟掉的，就是「開發中國家追趕已開發國家」這套尋常模板——科威特不在那條跑道上。它早在一九五〇年代就富得流油，它要面對的從來不是脫貧，而是另一道更刁鑽的問題：一台只會燒一種燃料的引擎，當那種燃料的價格不由自己決定、產量還被一個卡特爾摁住時，這個富國，要如何在富裕之中與自己的脆弱共處？這一章，先把這台引擎的規格、燃料與毛病，一個一個拆給你看。</p>
+
+    <h3>一張總量平庸、家底卻嚇人的成績單</h3>
+    <p>先看量級，後面的分析才不致失了座標。科威特的名目 GDP 約在 1,602 億美元（2024），這個規模在世界排名其實並不顯眼，與一個中型開發中國家相當；換成人均，約落在 3.2 萬美元上下。請特別記住這個人均數字，因為它藏著科威特最刺眼的當代真相：3.2 萬美元，不僅遠遠落後於卡達的六七萬與阿聯的五萬，更要命的是，它十年來幾乎停在原地、甚至在通膨與人口稀釋下被一點一點侵蝕。一個曾經是整個海灣最先進、最富裕的「先驅之邦」，它的人均所得，竟在過去十年被它一手啟發的鄰居們遠遠拋下。這台引擎的成績單因此分裂成兩半：論「流量」（每年生產多少），它平庸；論「存量」（家底有多厚），它卻富可敵國。這個流量與存量的巨大落差，正是貫穿後面三章的母題——一個攢下了全世界最厚家底、卻跑不出像樣速度的國家。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">約 1,602 億</div><div class="lbl">名目 GDP（美元，2024）</div></div>
+      <div class="stat"><div class="num">約 3.2 萬</div><div class="lbl">人均 GDP（美元，十年停滯）</div></div>
+      <div class="stat"><div class="num">約 90%</div><div class="lbl">石油佔政府收入（亦約佔出口 90%）</div></div>
+      <div class="stat"><div class="num">約 50%</div><div class="lbl">石油佔 GDP（海灣最不多元）</div></div>
+    </div>
+
+    <h3>引擎的燃料：油，油，還是油</h3>
+    <p>把這台引擎打開，會發現它的燃料供給管路，集中到了一種近乎危險的地步。石油約佔科威特政府財政收入的九成、佔出口收入的九成、佔 GDP 的約一半——這三個「九成、九成、一半」放在一起，標誌著科威特是整個海灣<strong>最不多元</strong>的經濟體，沒有之一。政府每收進一百塊錢，就有約九十塊來自地底同一份意外之財；國家賣往全世界的所有東西裡，幾乎每十塊就有九塊是原油與油品。對照卡達還能靠 LNG 與一點點轉口金融把雞蛋分到兩三個籃子、阿聯的杜拜更早把碳氫稀釋到 GDP 的個位數，科威特卻把全副身家，押在了同一桶油上。這份集中度若擺進任何一本投資教科書，都是「不可承受之集中風險」的標準範本。而支撐這一切的，是布爾甘——一九三八年發現的、僅次於沙烏地加瓦爾的世界第二大常規油田，它一座油田，就約佔了科威特儲量的七成。科威特的原油產能約在每日 3.2 百萬桶（mbd），並訂下了到二〇三五年提升至 4 mbd 的長期目標。一座深不見底的油田，一條只通往油的管路——這台引擎強勁，卻只會燒一種柴。</p>
+
+    <div class="deepen">
+      <span class="dh">機制 · 食租國家 rentier state</span>
+      <p>「食租國家（rentier state）」是理解科威特的第一把鑰匙，也是它與卡達、阿聯共用、卻演到最極端的一種體質。它指的是這樣一種經濟體：國家絕大部分的收入，不是來自向人民徵稅，而是來自向外國人出售一份天賜的資源租金（rent）——在科威特，這份租金就是石油。這個結構會反過來重塑整個政治契約。因為政府不靠稅收過活，它便無須向納稅人交代；反過來，它用租金供養人民——免費醫療、免費教育、無個人所得稅、保障的公職、低廉的水電油糧——以福利換取順從。經濟學裡有句老話：「無代表，不納稅」；食租國家把它倒了過來。但科威特的食租，比任何海灣鄰居都更弔詭——因為它偏偏又有一座真有牙齒的議會。當「不徵稅的租金邏輯」撞上「課稅須經同意的議會傳統」，便釀成了後面兩章要拆解的死結：一個會分配、卻學不會生產，更削不動福利的國家。食租養出的，從來是「分配的能力」，而非「生產的能力」。</p>
+    </div>
+
+    <h3>兩年的衰退：當一紙配額把整個國家拖下水</h3>
+    <p>要看清這台單缸引擎的脆弱，沒有比二〇二三到二四這兩年更清楚的標本了。這兩年，科威特陷入了一場罕見的、連續兩年的經濟衰退：實質 GDP 在二〇二三年萎縮約 3.6%，二〇二四年再萎縮約 2.6%。把這兩年的引擎聲拆開來聽，會發現一個耐人尋味的對比——二〇二四年，石油部門大幅萎縮約 6.9%，而非石油部門其實還溫和成長了約 1.8%。換句話說，這個國家明明有一塊在緩緩長大的非油經濟，整體卻被石油這一塊狠狠拖進了負成長。罪魁禍首，不是油田出了問題，也不是需求消失了，而是<strong>OPEC+ 的減產配額</strong>：作為卡特爾的忠實成員，科威特配合自願減產，把產量主動往下壓——於是「少賣油」直接翻譯成了「負成長」。到了二〇二五年，隨著減產逐步放鬆，實質 GDP 預估回升約 2.6%。這一跌一回之間，科威特給全世界上了一堂最直白的課：當一個國家的引擎只燒一種燃料，而那種燃料的產量還得聽命於一個遠在維也納的談判桌時，它連自己今年要不要衰退，都做不了主。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">-3.6%</div><div class="lbl">實質 GDP 成長（2023，衰退）</div></div>
+      <div class="stat"><div class="num">-2.6%</div><div class="lbl">實質 GDP 成長（2024，再衰退）</div></div>
+      <div class="stat"><div class="num">-6.9% / +1.8%</div><div class="lbl">2024 石油部門 / 非石油部門</div></div>
+      <div class="stat"><div class="num">+2.6%</div><div class="lbl">實質 GDP 成長（2025 預估，回升）</div></div>
+    </div>
+
+    <h3>卡特爾的兩面：配額是約束，也是托底</h3>
+    <p>不過，把 OPEC+ 只看成拖累，就誤讀了科威特的處境。減產配額是一把雙面刃：它在短期把產量摁住、把成長壓成負數，這是約束的一面；可它同時也是在替油價托底——若所有產油國都放開了產量，油價會崩得更兇，那對一個九成收入靠油的國家，是更致命的傷害。科威特之所以心甘情願戴上這副枷鎖，正因為它比誰都清楚：對一個食租國，「價」遠比「量」重要。少賣一點油、換一個體面的油價，這筆帳對科威特划得來。這也解釋了科威特在 OPEC＋裡為何始終是個守紀律的乖學生——它沒有沙烏地那種主導市場的野心，也沒有阿聯那種急著爭取更高配額的擴產衝動，它要的，只是一個能讓自己的食租契約穩穩運轉下去的、不太低也不太高的油價。這份「寧穩勿搏」的性格，與它一九九〇年被入侵後深入骨髓的風險趨避，其實是同一種氣質的延伸：一個曾經被人從地圖上抹去過七個月的國家，對任何劇烈的波動，都有一種近乎本能的戒懼。</p>
+
+    <h3>評等的悖論：最低的信評，最厚的家底</h3>
+    <p>最後，看這台引擎在國際評等機構眼中的成績，會撞見科威特當代經濟最大的悖論。三大評等機構給科威特的成績其實不差——惠譽（Fitch）評為 AA−，標準普爾（S&amp;P）在二〇二五年將其上調至 AA−，穆迪（Moody's）則評為 A1。乍看之下這是海灣的前段班，但細究起來卻另有文章：科威特的信評，長期是<strong>海灣產油國裡偏低的一個</strong>，穆迪甚至在二〇二〇年把它從 Aa2 一路降到 A1。一個坐擁逾一兆美元主權基金、淨外部資產高居全球受評主權之冠的國家，憑什麼被評得比家底薄得多的鄰居還低？答案，正是後面兩章的核心——它的問題從來不是「沒錢」，而是「錢動不了」：八年無權發行主權債、未來世代基金的本金被法律鎖死、政治僵局讓改革寸步難行、國庫的流動性一度逼近見底。評等機構看的不只是你有多少資產，更是你能否在需要時把資產變成現金、能否做出該做的決策。科威特的家底是全球最厚的，可它的<strong>約束是制度性的，而非財務性的</strong>——這句話，是讀懂科威特當代經濟的總鑰匙。</p>
+
+    <div class="pull"><p>它的人均所得十年停滯、它的成長被一紙配額摁成負數，可它腳下的家底卻富可敵國——科威特是一台流量平庸、存量驚人的引擎，問題從來不是沒錢，而是錢動不了。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 單缸引擎的富與險</span>
+      <p>這台引擎把三密碼一次點齊。<strong>石油</strong>，是引擎本身——九成的收入、九成的出口、約半的 GDP，全押在布爾甘那一座油田上，這是密碼二最赤裸的數字證明，也是科威特身為海灣「最不多元」經濟體的鐵證。<strong>商人</strong>的影子，藏在那組分裂的成績單裡：科威特的家底之所以厚到全球之冠，正源於兩百多年前那份「商人出錢、量入為出」的審慎基因，與一九五三年「為子孫存錢」的先見——這份攢錢的本事，是它最深的護城河。而<strong>議會</strong>的幽靈，則徘徊在那個評等悖論的背後——一個富可敵國的國家被評得比窮鄰居還低，不是因為帳上沒錢，而是因為那座有牙齒的議會與委任的內閣彼此絞殺，讓「八年無權發債」這種荒謬成了現實。約束是制度性的，這五個字，把三密碼的因果鎖鏈，第一次寫成了財務報表上的數字。</p>
+      <p>把這台引擎放回姊妹篇的座標裡，它的特殊更為分明。卡達的引擎是氣，且因財政平衡油價低到三四十美元，它能在中等油價下安睡（《卡達》一篇早有詳述）；阿聯的引擎則早已分岔，杜拜把碳氫稀釋到 GDP 的個位數，走的是把單一資源變成「別的東西」的多元化之路（《阿聯》一篇是這條路最完整的範本）。唯獨科威特，把全副身家死死押在同一桶油上，連卡達都不如它集中。更刺眼的對照是：當沙烏地用「願景 2030」豪賭轉型、阿聯與卡達把氣財鍊成了會議、賽事與全球資產，科威特卻在兩年的減產衰退裡原地打轉。正如《石油》主題篇反覆揭示的：資源租金能造就一夜富國，卻最容易養出「會分配、不會生產」的體質——而科威特，是這條鐵律演到最極端的那個樣本。所幸，它還有一個別人起步更晚的東西，替這台脆弱的引擎，續著命：那個一九五三年就轉起來的飛輪。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-23">
+  <div class="act-head">
+    <span class="act-num">第二十三章 · KIA — the Oldest Fund &amp; the Foresight</span>
+    <h2 class="act-title">世界最老的主權基金：KIA 與「後石油」的先見</h2>
+    <p class="act-sub">KIA — the Oldest Fund &amp; the Foresight</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>如果說石油是這台引擎的燃料，那麼科威特投資局（Kuwait Investment Authority，KIA）就是那個替整台機器續命的飛輪。這個飛輪的非凡，不在於它有多大——雖然它確實大到逾一兆美元、名列全球第五——而在於它有多老，以及它被造出來時，那份近乎先知的清醒。一九五三年，當科威特連獨立都還沒有（要等到一九六一年）、當布爾甘的油才剛開始外銷七年，這個窮港就在倫敦設立了「科威特投資委員會」，立意只有一句話：把不可再生的石油財富，趁早轉成可長存的金融資產，「為石油用完後的世代存錢」。這比挪威的主權基金早了約四十年，比阿布達比、比卡達都早——它，是全世界最早的主權財富基金，沒有之一。這一章，我們要拆的就是這個飛輪：它怎麼運轉、它分成哪兩半、它替科威特賺了多少、它又如何在一九九〇年國家被滅時，掏出鉅款買回了自己的國家。這是科威特三密碼裡，最值得驕傲、也最被低估的一頁——一個食租國家罕見的、把「今天的福」存成「明天的命」的智慧。</p>
+
+    <h3>世界上第一支主權基金的誕生</h3>
+    <p>讓我們把鏡頭拉回一九五三年的倫敦。那一年，科威特還是英國保護下的酋長國，它的統治者卻做了一個在當時看來幾乎不合常理的決定：與其把湧進來的油錢全部花掉、全部分掉，不如先撥出一部分，交給倫敦的金融機構去投資增值。這個決定背後的邏輯，今天聽來理所當然，在當年卻是石破天驚——它承認了一件絕大多數產油國要再過幾十年、甚至被詛咒折磨夠了才肯承認的事：<strong>石油會用完，而國家要活得比石油更久</strong>。這個「科威特投資委員會」後來幾經演化——一九六五年在倫敦設立科威特投資辦事處（KIO），一九八二年成立科威特投資局（KIA）作為總管轄機構。七十多年下來，這份一九五三年的先見，已長成一個逾一兆美元、穩居全球前五大的龐然主權基金。在一個「資源詛咒」屢試不爽、產油國一個接一個把油錢揮霍殆盡的世界裡，科威特是那個最早、也最徹底地對抗這道詛咒的國家。這是它身為「先驅之邦」最了不起的一個「第一」，比第一部憲法、第一個議會還要早。</p>
+
+    <div class="deepen">
+      <span class="dh">機制 · 未來世代基金 Future Generations Fund</span>
+      <p>KIA 的家底，分成涇渭分明的兩半，理解這兩半，就理解了科威特財政的全部玄機。第一半，是<strong>未來世代基金（Future Generations Fund，FGF）</strong>——一九七六年由法律正式設立，它的設計極其嚴格：依法，國家每年至少要從全國總收入中提撥 10%，注入這個基金；更關鍵的是，它的<strong>本金，未經特別立法，不得動用</strong>。這是一道法律築起的高牆，把石油財富的一部分，封存成只屬於未來世代的種子，今天的政府再缺錢，也不能擅自打開。它的名字本身就是一份誓言：這筆錢，是為那些還沒出生、將來見不到石油的科威特人存的。第二半，是<strong>一般準備金（General Reserve Fund，GRF）</strong>——這是國庫的運作金，是政府日常收支的緩衝池，赤字時可以提領、盈餘時可以回補。一個鎖死、一個流動；一個為未來、一個為當下。正是這兩半截然不同的命運，在後面釀成了科威特最荒謬的困局——一邊是封存著萬億的未來世代基金，動不得；另一邊是被提領到近乎見底的一般準備金，差點付不出薪水。富國的窮國庫，這道謎題的謎底，就藏在這兩個基金的設計裡。</p>
+    </div>
+
+    <h3>投資收益：足以與石油分庭抗禮的第二桶金</h3>
+    <p>這個飛輪轉了七十多年，到底替科威特賺了多少？一個足以讓所有人重新認識科威特的數字是：KIA 在二〇二五年的淨投資收益，約達 112 億科威特第納爾（KD），相當於該國 GDP 的約 23.2%。請把這個數字咀嚼一下——這意味著，科威特光是靠它那筆積攢了七十年的金融資產所滾出的<strong>投資收益</strong>，一年就能貢獻相當於近四分之一 GDP 的進帳。更耐人尋味的是時機：這份投資收益，恰恰是在前一章那場減產衰退、石油收入下滑的年頭裡，仍逆勢增長了約一成。一邊是被卡特爾配額摁住、節節下滑的石油收入，另一邊是穩穩增長、貢獻近四分之一 GDP 的投資收益——這一降一增之間，標誌著科威特當代經濟一個歷史性的轉折：<strong>那個一九五三年埋下的飛輪，如今滾出的收益，已足以與石油本身分庭抗禮</strong>。換句話說，科威特正在悄悄變成一個「靠錢生錢」的金融食租者，而不再只是一個「靠油換錢」的資源食租者。這是七十年前那份先見，在今天最漂亮的兌現。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">1953</div><div class="lbl">設立年份（世界最老主權基金）</div></div>
+      <div class="stat"><div class="num">逾 1 兆</div><div class="lbl">AUM（美元，2025，全球第五大）</div></div>
+      <div class="stat"><div class="num">KD 112 億</div><div class="lbl">淨投資收益（2025，約 GDP 的 23.2%）</div></div>
+      <div class="stat"><div class="num">至少 10%</div><div class="lbl">FGF 依法每年提撥的全國收入比例（本金不得擅動）</div></div>
+    </div>
+
+    <h3>戴姆勒與 BP：一個小國在世界資本市場的足跡</h3>
+    <p>這個飛輪的全球足跡，比它的低調名聲要顯赫得多。KIA 不是一個只買政府公債、躲在角落吃利息的保守基金；它是上世紀全球資本市場上一個真實、且時常引人側目的玩家。最著名的兩個例子，至今仍是金融史上的典故。其一，是德國的戴姆勒——賓士的母公司：科威特自一九七四年起入股戴姆勒，一度成為這家德國工業巨擘的最大單一股東之一，這在當年是「中東石油美元橫掃歐洲老牌工業」的標誌性事件。其二，更具戲劇性：一九八〇年代，KIO 在英國石油（BP）私有化的過程中大舉買進，持股一度逼近兩成——這個比例之高，驚動了英國政府，最終英方以涉及國家戰略利益為由，令科威特把持股減持到 9.9% 以下。一個本國公民才一百多萬的灣頂小國，竟能在德國汽車與英國石油的董事會裡掀起波瀾，逼得倫敦動用監管手段來限制它——這就是那個一九五三年飛輪，攢了三十年後所擁有的真實份量。科威特的存在感，從來不在它的領土或人口，而在它散佈於全球資本市場的那一筆筆股權。</p>
+
+    <h3>一九九〇：當飛輪買回了一個國家</h3>
+    <p>但這個飛輪最戲劇性、也最神聖的一次轉動，發生在一九九〇到九一年——當科威特城被薩達姆的坦克佔領、王室流亡沙烏地塔伊夫、國家從地圖上被抹去的那七個月裡。當一個國家連首都都丟了、連邊界都不存在了，它憑什麼還能組織流亡政府、支付盟軍開銷、養活流落異鄉的公民、並在解放後重建一片焦土？答案，就是那筆一九五三年起積攢的主權財富。流亡中的科威特政府，動用了約 170 億美元的基金資產，撐起了復國的全部開銷。這是人類歷史上極其罕見的一幕——一個國家，靠著它幾十年前為「石油用完之日」存下的錢，買回了自己被奪走的存在。一九五三年那句樸素的立意「為石油用完後的世代存錢」，在一九九〇年以一種誰都沒預料到的方式兌現了：它存的不只是後石油時代的生計，竟成了國破家亡時的復國本錢。從那以後，這個飛輪在科威特人心中，便不再只是一筆財富，而是一份近乎信仰的安全感——一份「無論發生什麼，我們都還有最後一道防線」的踏實。也正是這份用國難換來的踏實，讓科威特對「動用基金」這件事，有了一種近乎宗教般的審慎。</p>
+
+    <div class="cf">
+      <span class="cfh">如果 · 沒有那個一九五三年的飛輪</span>
+      <p>讓我們做一個沉重的反事實假設：如果科威特當年沒有那份先見、沒有在一九五三年就開始為後石油時代存錢，今天的它會是什麼模樣？首先，一九九〇年薩達姆入侵時，流亡政府將無錢支付盟軍、無錢養活流亡公民、無錢重建焦土——復國之路會艱難百倍，甚至可能改寫結局。其次，在前一章那場二〇二三到二四的減產衰退裡，當石油收入下滑，它將沒有那筆貢獻近四分之一 GDP 的投資收益來緩衝，國庫的窟窿會深得多。第三，當二〇一七年後它陷入八年無權發債的困局時，若沒有那筆萬億家底墊底，它的信評早已不是被降到 A1，而是會直接墜入垃圾等級。換句話說，科威特當代經濟所有的「失能」——衰退、僵局、無債權——之所以還沒釀成真正的災難，全靠那個一九五三年的飛輪在底下兜著。它是科威特一切矛盾得以「拖下去」而不崩盤的根本原因。先見救了它一次（一九九〇），又默默地，救了它千百次。</p>
+    </div>
+
+    <h3>飛輪的另一面：先見的勝利，與流動性的困局</h3>
+    <p>然而，這個值得驕傲的飛輪，也有它陰影的一面，而這個陰影，恰恰來自它最了不起的設計。未來世代基金的「本金不得擅動」這道法律高牆，在豐年是美德，在荒年卻成了枷鎖。當二〇二〇到二一年，國庫的一般準備金（GRF）被提領到近乎見底、有部長警告十月後恐發不出公務員薪水時，那筆封存在 FGF 裡的萬億資產，就近在眼前，卻碰不得——因為動用它需要特別立法，而那座彼此絞殺的議會與內閣，連一部發債法都通不過，遑論去打開那道為子孫封存的高牆。於是科威特陷入了一個荒謬到近乎黑色幽默的處境：它是全世界家底最厚的國家之一，卻在自己的萬億面前，差點付不出薪水。這就是「富國的窮國庫」的真正源頭——不是沒錢，而是錢被自己最珍貴的制度，分成了「動不得的未來」與「快見底的當下」兩半。先見的勝利與流動性的困局，原來是同一枚硬幣的兩面。而要理解這道困局為何遲遲無解、又如何在二〇二五年迎來突破，我們得走進下一章，去拆解那個最棘手的零件——食租陷阱，與改革的政治毒性。</p>
+
+    <div class="pull"><p>一九五三年，當油才剛外銷七年，這個窮港就決定為「石油用完後的世代」存錢——這份先見救了它一九九〇年的命，如今滾出的收益更可與石油分庭抗禮；可它最珍貴的那道「本金不得動用」的高牆，也成了富國窮國庫的根源。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 為子孫存下的飛輪</span>
+      <p>這個飛輪把三密碼擰成了一股繩。<strong>石油</strong>，是飛輪的初始動力——若沒有布爾甘的油財，一九五三年根本沒有錢可存；可飛輪存在的全部意義，又恰恰是為了「石油用完的那一天」，這份對自身命脈的清醒戒懼，是密碼二最深刻的一層。<strong>商人</strong>的基因，則是這個飛輪能誕生的根源——一個靠「商人出錢、量入為出」立國的港市，骨子裡就有著「攢錢過冬、未雨綢繆」的審慎，這份審慎，讓科威特比任何揮霍的產油國都更早懂得為明天存糧。而<strong>議會</strong>的影子，則陰沉地落在飛輪的另一面：正是那座有牙齒卻陷入僵局的議會，讓「本金不得動用」這道為子孫設下的美德高牆，在荒年異化成了「明明有萬億卻動不得」的枷鎖——光榮的制度，與癱瘓的制度，竟是同一道牆。</p>
+      <p>把這個飛輪放回姊妹篇的座標裡，科威特的先驅地位無人可及。挪威的主權基金常被奉為全球典範——透明、規範、為後代存油財，可它要到上世紀九〇年代才起步，比科威特晚了約四十年；換句話說，全世界都在學的那套「為後石油時代存錢」的智慧，科威特早在一九五三年就親手實踐了（這正是《銀行》主題篇所追溯的主權財富之源頭）。阿布達比的 ADIA、卡達的 QIA，論規模或許各有千秋，論年歲，都得叫科威特一聲前輩。然而最深的諷刺也在這裡：科威特擁有全世界最老、最值得驕傲的飛輪，卻沒能像阿聯、卡達那樣，把這筆財富鍊成國內的多元化引擎——它的錢，幾乎全投在了海外的股權與資產上，而不是用來在本土孵化出一個能取代石油的新經濟。它最會替子孫存錢，卻最不會替子孫造一台新引擎。這份「攢得最早、卻活得最僵」的矛盾，正是下一章「食租陷阱」要層層剝開的核心。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-24">
+  <div class="act-head">
+    <span class="act-num">第二十四章 · The Rentier Trap &amp; the Toxicity of Reform</span>
+    <h2 class="act-title">食租陷阱與改革的政治毒性</h2>
+    <p class="act-sub">The Rentier Trap &amp; the Toxicity of Reform</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>前兩章，我們拆開了引擎的燃料（石油）與飛輪（基金）。但科威特當代經濟最頑固的零件，既不是燃料也不是飛輪，而是一套看不見、卻把整台機器牢牢卡住的傳動系統——食租陷阱。這是一個最殘酷的悖論：科威特明明知道自己過度依賴石油、明明攢下了全世界最厚的家底、明明有一座能審預算、能提改革的議會，卻整整數十年動不了改革的分毫。為什麼？因為在一個食租國家裡，每一項該改的事——削減福利、縮編公職、引入稅收、開放外資——都直接觸動著公民最切身的既得利益，而觸動既得利益的政治代價，在一座有牙齒的議會面前，等同於政治自殺。這一章，我們要把這套傳動系統一個齒輪一個齒輪地拆開：食租契約如何運轉、為何改革如此劇毒、那場八年無債權的死結如何把富國逼到差點發不出薪水，以及——最關鍵的——二〇二五年，當議會被中止後，那道封死了數十年的閘門，如何終於裂開了第一道縫。</p>
+
+    <h3>分配，而非徵稅：一份顛倒的政治契約</h3>
+    <p>要懂食租陷阱，得先懂科威特的政治契約有多顛倒。在一個尋常國家，政府向人民徵稅、人民因此有資格問政，這是「稅收換代表權」的古老紐帶；可在科威特，這條紐帶被石油租金徹底倒轉了——政府不向人民收一毛所得稅，反過來把石油的租金分給人民。這份分配的慷慨，達到了驚人的程度：國家僱用了約八成的在職科威特公民，公共部門佔本國勞動力的逾七成六；本國公民其實只佔總勞動力的不到 15%，其餘全是外籍勞工——換句話說，多數科威特人不是在「生產」，而是在「領薪」，真正撐起這個社會日常運轉的，是那三百多萬不分租金、只領工資的外籍勞動者。而薪資加上各項補貼，約佔了政府預算的七到八成。這組數字勾勒出一個清晰的圖像：科威特政府的主要工作，不是治理一個生產性的經濟，而是把石油租金，盡可能平順地，分配給它約一百五十六萬的公民。在這樣的契約裡，「公職」不是一份工作，而是一項與生俱來的福利；「補貼」不是政策，而是一種權利。這就是食租陷阱的地基。</p>
+
+    <div class="deepen">
+      <span class="dh">機制 · 食租陷阱與改革的政治毒性</span>
+      <p>當「分配租金」變成國家的核心功能，一個致命的陷阱便悄然合攏。其一，福利從「政策」異化成了「既得權利」——免費醫療、保障公職、低廉水電油糧，在科威特人的觀念裡不是政府的恩賜，而是身為公民的天賦權利，一旦給出，便再難收回。其二，這讓任何「削減」都成了政治上的劇毒：對一個議員而言，投票支持削減選民的福利、縮編公職、開徵稅收，等同於親手斷送自己的政治生命。其三，科威特獨有的那座有牙齒的議會，把這份毒性放大到了極致——在專制的鄰國，統治者尚能繞過民意強推改革（如沙烏地的願景 2030、阿聯的補貼削減），可在科威特，任何改革都得先過議會這一關，而議員們為了選票，幾乎必然否決一切觸動福利的提案。於是「食租＋真議會」這個組合，釀成了一道慢性的、近乎無解的僵局：國家明知該改，卻在制度上被卡死，動彈不得。科威特的改革之難，不是因為它窮，也不是因為它沒民主——恰恰相反，是因為它太富、且太民主。這是「資源詛咒」最刁鑽的一種變體。</p>
+    </div>
+
+    <h3>八年沒有借錢的權利：富國差點發不出薪水</h3>
+    <p>食租陷阱最荒謬、也最具標誌性的案例，是那場長達八年的發債死結。事情的根源在於：科威特舊的融資法在二〇一七年到期後，整整八年（二〇一七到二〇二五），這個坐擁萬億家底的國家，竟<strong>無法發行任何主權債</strong>。原因正是前述的死結——民選議會反覆否決發債法，堅持要把「借錢的權利」與「福利改革」綁在一起：議員們的算盤是，若不趁機逼政府承諾改革，發了債只會讓政府有錢繼續無痛地分租下去；而薩巴赫主導的內閣，則不願在改革上向議會讓步。雙方僵持，發債法便一次次胎死腹中。後果是觸目驚心的：作為國庫運作金的一般準備金（GRF），其流動性從十年前的約 336 億科威特第納爾（KD），一路縮水到約 20 億 KD，在二〇二〇到二一年近乎見底，甚至有部長公開警告，十月之後恐怕發不出公務員的薪水。讓我們把這個畫面定格——一個淨外部資產高居全球之冠、主權基金逾一兆美元的國家，差一點，付不出自己公務員的工資。這不是貧窮，這是癱瘓；這不是沒錢，這是錢被制度鎖死。八年無債權，是食租陷阱寫給世界看的，最刺眼的一行註腳。</p>
+
+    <div class="cf">
+      <span class="cfh">如果 · 油價長期低於財政平衡點、又無政治授權改革</span>
+      <p>讓我們推演一個最壞的劇本：假設國際油價長期低迷、跌破科威特的財政平衡點，而那座僵局依舊、改革仍無政治授權通過——那麼，會發生什麼？首先，石油收入填不滿預算，國庫的一般準備金（GRF）會被持續提領，直到真正見底。其次，若連發債都被卡死、無法從外部融資，國家為了支付那七八成是薪資與補貼的剛性開支，就只剩下最後一條路——去敲響那道一九七六年立法封死的高牆，動用<strong>未來世代基金（FGF）的本金</strong>。可動用本金需要特別立法，而那正是那座癱瘓的議會最難跨過的門檻；更沉重的是，動用 FGF 本金，等於違背了一九五三年以來「為子孫存錢」的立國誓言，是把後代的種子糧，挪來填當代的窟窿。這是科威特當代最深的恐懼，也是它一切矛盾的終極引爆點：當「分配的剛性」撞上「收入的枯竭」，而「改革的閘門」又被「民主的否決權」死死頂住，那個最不該被動的飛輪，會不會被迫拆來燒？科威特七十年攢下的家底，會不會在它最珍貴的制度面前，被一勺一勺地舀空？這個假設沒有答案，但它是懸在科威特頭頂的一柄劍。</p>
+    </div>
+
+    <h3>二〇二五：當議會被中止，閘門裂開了第一道縫</h3>
+    <p>然後，歷史開了一個沉重的玩笑。那道數十年都打不開的改革閘門，竟是在二〇二四年五月埃米爾米沙勒中止議會、按下民主暫停鍵之後，才終於裂開了第一道縫。當那座彼此絞殺的議會被「關掉」，行政部門忽然得以繞過否決，做出它數十年都做不成的決定。二〇二五年，科威特通過了《60/2025 號融資與流動性法》——這部法律一舉終結了那場八年無債權的荒謬：它設定了 300 億科威特第納爾（KD，約合 980 億美元）的債務上限，並允許發行期限最長達五十年的主權債。八年來第一次，這個富國重新拿回了「借錢的權利」，得以平滑地管理它的財政、為巨型計畫融資、不必再眼睜睜看著國庫見底。這是一個歷史性的突破，卻也是一個苦澀的突破——因為它證明了一件令人不安的事：科威特要做成這件早該做的好事，代價竟是先關掉它最引以為傲的那座議會。改革的閘門，是在民主的暫停鍵被按下之後，才打開的。光榮與效能，在這一刻，被擺上了同一架天平的兩端。</p>
+
+    <h3>15% 的補充稅：無稅之國的第一道裂縫</h3>
+    <p>同樣在這個議會中止後的改革窗口裡，科威特做了另一件更具象徵意義的事——它開始向人收稅了。二〇二五年起，科威特引入了 15% 的「國內最低補充稅」（Domestic Minimum Top-up Tax，DMTT），這是響應 OECD「支柱二」全球最低稅負協議的安排，針對的是年營收超過 7.5 億歐元的大型跨國集團。從稅收的絕對規模看，這筆錢對一個九成收入靠油的國家而言，不過是九牛一毛；但它的象徵意義，遠遠大過它的財政意義。請記住前面反覆強調的那個底層程式碼：科威特是一個「分配租金、無須徵稅」的食租國家，「繳稅」對它而言是一個近乎抽象的概念。而 DMTT 的引入，是這道「無稅模式」上裂開的<strong>第一道縫</strong>——國家第一次，認真地，把手伸向了租金以外的財源。它當然還遠遠談不上動搖食租契約的根本（它只碰跨國企業，沒碰一根公民的福利汗毛），但它是一個方向的轉變：在油與基金之外，科威特開始試探「徵稅」這條被它倒轉了七十年的古老紐帶。一個一輩子靠分糖過活的國家，第一次學著伸手收錢——這道裂縫雖小，卻可能是科威特當代經濟最深遠的一次轉身。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">KD 300 億</div><div class="lbl">《60/2025 號融資法》債務上限（約 980 億美元）</div></div>
+      <div class="stat"><div class="num">最長 50 年</div><div class="lbl">主權債最長期限（終結 8 年無債權）</div></div>
+      <div class="stat"><div class="num">15%</div><div class="lbl">DMTT 國內最低補充稅（2025 起，無稅模式第一道裂縫）</div></div>
+      <div class="stat"><div class="num">約 8 成</div><div class="lbl">國家僱用的在職科威特公民比例</div></div>
+    </div>
+
+    <div class="pull"><p>科威特改革之難，不是因為它窮，也不是因為它沒民主——恰恰相反，是因為它太富、且太民主：福利成了天賦權利，削減等同政治自殺。那道數十年打不開的閘門，竟要等到議會被中止，才裂開第一道縫。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 租金的陷阱與改革的代價</span>
+      <p>這套傳動系統，把三密碼絞成了最痛的一個結。<strong>石油</strong>，是陷阱的源頭——正因為九成收入來自不必向人民徵稅的石油租金，國家才走上了「分配而非徵稅」的顛倒契約，這是密碼二把福變成困的關鍵一步。<strong>商人</strong>的古老智慧，在這裡被徹底背叛了——兩百多年前那份「課稅須經同意」的張力，本是要約束統治者的橫徵暴斂；可當石油抽掉了「徵稅」這一環，那份本該健康的張力，便異化成了「分糖須經議會、改革無從通過」的死結，DMTT 那 15% 的補充稅，正是這條被倒轉的紐帶，在七十年後第一次被小心翼翼地接回。而<strong>議會</strong>，是這道陷阱裡最尖銳、也最悲劇的齒輪——海灣唯一有牙齒的民選議會，本是科威特的光榮，卻因食租契約讓每一項改革都形同政治自殺，而把自己的牙齒，全咬在了否決改革上；最刺眼的證明，莫過於那道閘門竟要等到二〇二四年議會被埃米爾中止，才在二〇二五年裂開——光榮的制度，成了改革的牢籠。</p>
+      <p>把這套傳動系統放回姊妹篇的座標裡，科威特的兩難獨一無二。沙烏地能用「願景 2030」豪賭轉型、阿聯與卡達能果斷削減補貼、引入稅收、開放外資，靠的恰恰是它們<strong>沒有</strong>一座能否決王命的議會——統治者一聲令下，改革便能繞過民意強推（《阿聯》《卡達》兩篇的多元化，都建立在這份「不必經人民同意」的效率之上）。科威特偏偏有那座議會，於是它陷入了一個最尖刻的兩難：它擁有海灣唯一的「人民聲音」，卻也因此擁有海灣最難推動的「改革」。這正是貫穿全書最深的那道洞察——「同意」與「租金」彼此絞殺，「聲音」與「進步」竟成了反義詞。而二〇二五年那道在議會中止後才打開的閘門，更把這道兩難逼到了極處：難道科威特要進步，就非得先犧牲它最珍貴的民主不可？這個問題沒有輕鬆的答案，它把我們帶向了最後一章——給觀察者的那枚羅盤。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+
+<section class="act reveal" id="ch-25">
+  <div class="act-head">
+    <span class="act-num">第二十五章 · A Compass — the Richest Balance Sheet, the Deepest Dilemma</span>
+    <h2 class="act-title">給觀察者的羅盤：最富的家底，最深的兩難</h2>
+    <p class="act-sub">A Compass — the Richest Balance Sheet, the Deepest Dilemma</p>
+    <div class="ornament">✦ ⚓ ✦</div>
+  </div>
+  <div class="prose">
+    <p>我們已經把這台引擎徹底拆開了：燃料是石油，飛輪是基金，傳動系統是食租的陷阱。現在，讓我們把零件重新組裝起來，退後一步，遞給每一個試圖讀懂科威特的人——無論是投資者、政策觀察者，還是單純想看清這個國家命運的旅人——一枚羅盤。這枚羅盤不指向任何一個簡單的方向，因為科威特本身就是一個拒絕簡單結論的國家。它是這個世界上，少有的「最富的家底」與「最深的兩難」並存於一身的標本：它攢下了全世界最厚的資產負債表，卻被自己最珍貴的制度鎖在了原地。要為它定向，我們得同時握住兩端——一端是它驚人的優勢，一端是它制度性的風險；而真正的智慧，藏在這兩端之間那道古老的辯證裡：禍與福，原來總是相倚的。這最後一章，會比前面三章更慢、更重，因為它要收束的，不只是這台引擎，而是整本書——一個關於先驅如何被自己的成功與詛咒一起拖住的故事。</p>
+
+    <h3>羅盤的北端：一張全球最厚的資產負債表</h3>
+    <p>先看羅盤指向「優勢」的那一端，它厚實得令人安心。其一，是那筆逾一兆美元、世界最老的主權基金（KIA），一份積攢了七十多年、足以讓國家在任何風暴中都有最後防線的家底。其二，是那個堪稱全球之最的數字——科威特的淨外部資產，約相當於 GDP 的 601%，是全球受評主權國家中最高的，意味著它對世界的「淨債權」高到無人能及，它是世界的債主，而非欠債人。其三，是它巨大的經常帳順差——一個賣油、賣投資收益的國家，年復一年地從世界賺進遠多於它花出去的錢。其四，是經過二〇二五年那場改革之後，它終於重獲的「借錢的權利」——《60/2025 號融資法》設下的 KD 300 億（約 980 億美元）債務上限，讓這個無債的家底，從此能在需要時平滑地動用槓桿。把這四項加起來，科威特握著的，是一手在財務上幾乎無懈可擊的牌：它有現金、有債權、有順差、有信用。論「家底」，這個約一百五十六萬公民的小國，富可敵國，且富得最為安穩。</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">逾 1 兆</div><div class="lbl">主權基金 KIA（美元，世界最老、全球第五大）</div></div>
+      <div class="stat"><div class="num">約 601%</div><div class="lbl">淨外部資產佔 GDP（全球受評主權之最）</div></div>
+      <div class="stat"><div class="num">約 90%</div><div class="lbl">石油佔政府收入（海灣最不多元）</div></div>
+      <div class="stat"><div class="num">15% / KD 300 億</div><div class="lbl">DMTT 補充稅 / 新債務上限（2025 改革突破）</div></div>
+    </div>
+
+    <h3>羅盤的南端：一道制度性的、而非財務性的約束</h3>
+    <p>但若只看北端，就誤讀了科威特。把羅盤轉到「風險」那一端，會看見一道與它的財富同樣深刻的陰影。其一，它是整個海灣<strong>最不多元</strong>的經濟體——九成的收入、九成的出口、約半的 GDP，全押在石油上，「絲綢城」（Silk City）之類的宏大計畫，多半只停在紙上。其二，它的改革被政治僵局凍結了數十年，人均所得十年停滯，被它一手啟發的鄰居一一超越。其三，它還背著沉重的人口與比敦（Bidoon）問題——本國公民是自己國家裡的少數，而那十萬餘無國籍者的處境，是先進民主之邦的人權暗角。但這一切風險裡，最該被觀察者牢牢記住的，是那句貫穿全篇的總結——<strong>科威特的約束，是制度性的，而非財務性的</strong>。它的問題從來不是帳上沒錢（它的錢多到溢出來），而是那些錢、那些決策、那些早該做的改革，被一套彼此絞殺的制度死死卡住。這是一種比貧窮更難治的病：貧窮可以靠賺錢解決，制度性的癱瘓，卻要靠一個國家願不願意、能不能夠，動自己最深的政治結構——而那，恰恰是最難的。</p>
+
+    <div class="cf">
+      <span class="cfh">如果 · 最厚的資產負債表，撐不過最深的制度兩難</span>
+      <p>於是，給觀察者的核心問句浮現了，它可以濃縮成一句最冷靜的話：科威特那張全世界最厚的資產負債表，能不能撐過它那道全海灣最深的制度兩難？這個問句裡，藏著兩種截然不同的未來。樂觀的一種是：那筆萬億家底與逾 601% GDP 的淨外部資產，會像過去七十年一樣，繼續替這個國家「兜底」，讓它即便改革緩慢、即便僵局反覆，也總能拖下去、總能等到下一個油價的好年頭、總能靠投資收益緩衝過去——財富，買來了時間。悲觀的一種是：若那道制度兩難始終無解，若油價長期低迷、若那座被中止的議會恢復後僵局重演、若食租的剛性開支持續吞噬國庫，那麼再厚的家底，也會被一勺一勺地舀空，最厚的資產負債表，終將敗給最深的制度兩難。對任何想讀懂科威特的人而言，這就是那枚羅盤真正要校準的方位——不是去問它有多少錢（那毫無懸念），而是去問：它願不願意，動自己最深的結構？這道考題，至今懸而未決。</p>
+    </div>
+
+    <h3>第一重智慧：禍福相倚——石油是福也是詛咒，議會是光榮也是枷鎖</h3>
+    <p>拆完了引擎、校準了羅盤，這一章該往更深一層去了，因為科威特的故事，本質上是一則關於「禍福相倚」的古老寓言。老子說：「禍兮福之所倚，福兮禍之所伏。」沒有哪一個國家，比科威特把這八個字活得更透。它的石油，是福——它把一個珍珠崩潰後的飢饉窮港，一夕推上了搖籃到墳墓的巨富；可同一桶油，也是詛咒——它把國家變成只會分配、不會生產的食租者，招來了一九九〇年薩達姆的坦克與七百口燃燒的油井，更悄悄抽掉了「課稅換同意」那條維繫立國契約的紐帶。它的議會，是光榮——海灣唯一一座真有牙齒、能質詢部長、能逼閣員下台、曾能核可王儲的民選議會，是科威特在所有專制鄰居面前最大的驕傲；可同一座議會，也是枷鎖——當它撞上只需分糖、無須徵稅的石油租金，便從制衡的活力，異化成了否決一切改革的癱瘓。福與禍，光榮與枷鎖，在科威特身上，從來不是兩樣東西，而是同一樣東西的兩面。這是科威特給世界上的第一堂智慧課：天賜的厚禮裡，往往就埋著最深的詛咒；而最珍貴的制度，也可能在錯誤的土壤裡，長成最沉重的鐐銬。</p>
+
+    <h3>第二重智慧：富裕不等於活力，聲音不等於進步</h3>
+    <p>科威特給世界的第二堂課，更為刺耳，也更顛覆我們習以為常的信念。我們總以為，財富會帶來活力，民主會帶來進步——這幾乎是現代世界的兩條公理。可科威特，這個攢下全世界最厚家底、又是海灣唯一給了人民真選票的國家，卻用自己數十年的停滯，同時推翻了這兩條公理。它證明了：<strong>富裕，不等於活力</strong>——一個富得流油的國家，可以人均所得十年停滯、可以被巨型計畫的紙上談兵拖住、可以差點付不出公務員的薪水；財富若養出的是分配的惰性，而非生產的衝勁，那再厚的家底，也買不來一台跑得動的引擎。它更證明了：<strong>聲音，不等於進步</strong>——一個最早給人民選票、擁有海灣唯一真議會的國家，那份珍貴的「聲音」，非但沒有催生出最好的善治，反而在食租租金的腐蝕下，異化成了凍結改革的否決權，讓它從先驅淪為落伍生。富裕與活力之間、聲音與進步之間，原來都隔著一道幽深的鴻溝，而那道鴻溝裡，盛著的正是「同意」與「租金」這對矛盾。科威特最深的悲劇，不在於它缺什麼，而在於它最寶貴的兩樣東西——最厚的財富、最真的民主——偏偏把彼此鎖死了。</p>
+
+    <h3>給觀察者與投資人的最後一句</h3>
+    <p>那麼，最後，當你合上這本書、握緊這枚羅盤，該如何看科威特？答案是：別用看「開發中國家」的眼光去看它，也別用看「尋常產油國」的模板去套它。看科威特，看的是一道海灣的、乃至全人類的終極考題——<strong>最厚的資產負債表，能否撐過最深的制度兩難；而「民主」與「食租」，究竟能不能並存</strong>。對投資人而言，這意味著科威特的信用基本面（那筆萬億家底、那道全球之最的淨外部資產）幾乎無懈可擊，可它的真正變數，從來不在財務報表上，而在那座議會與內閣何時能解開僵局、那道二〇二五年才裂開的改革閘門能否繼續打開、那筆未來世代基金的高牆能否一直守住。對觀察者而言，科威特是一面鏡子，照出的是這個資源國林立、人人都想「既有錢、又有自由」的世界，最艱難的一道功課：當天賜的租金，遇上了人民的聲音，一個國家能不能既不背棄民主、又不困於僵局？科威特至今沒有給出答案——但正是它這份「懸而未決」，讓它成了海灣最深刻、最值得凝視的一個國家。它不是海灣最富的，卻可能是海灣最發人深省的。</p>
+
+    <div class="pull"><p>看科威特，看的不是它有多少錢——那毫無懸念；看的是那張全世界最厚的資產負債表，能否撐過全海灣最深的制度兩難，以及「民主」與「食租」，究竟能不能並存。這道考題，至今懸而未決。</p></div>
+
+    <div class="investor">
+      <span class="tag">歷史的回聲 · 最富的家底，最深的兩難</span>
+      <p>走到全書的最後一個 echo box，讓三密碼在這裡作最終的收束。<strong>商人</strong>——那份一七五二年「靠同意立國」的契約，是科威特一切光榮的源頭：它讓這個灣頂港市，在整個海灣獨自長出了一座真有牙齒的議會，也養成了「量入為出、為子孫存錢」的審慎，攢下了今天逾一兆美元的家底與 601% GDP 的淨外部資產。<strong>石油</strong>——布爾甘那桶油是福也是詛咒：它造就了巨富與福利國，卻把國家變成只會分配、不會生產的食租者，抽掉了「課稅換同意」的紐帶，更招來了一九九〇年的坦克與火海。<strong>議會</strong>——那座海灣唯一的民選議會是光榮也是枷鎖：它把「商人的同意」制度化成了驕傲，卻在撞上石油租金後，把自己的牙齒咬在了否決改革上，直到二〇二四年被埃米爾按下暫停鍵、二〇二五年那道閘門才在它的缺席中裂開。三密碼，是一條因果相連、卻自相絞殺的鎖鏈——商人的同意催生了議會，石油的租金腐蝕了同意，而議會與租金的碰撞，把這個先驅凍在了原地。</p>
+      <p>把這枚羅盤放回姊妹篇的座標裡，科威特的命運格外令人唏噓。它曾是海灣的範本——比挪威更早的主權基金、比所有鄰居更早的民選議會、最自由的報業、最先進的教育（《銀行》主題篇所追溯的主權財富之源，正起於它）。然後，當沙烏地用願景 2030 豪賭轉型、當阿聯把杜拜變成全球樞紐、當卡達把氣財鍊成了世界記得住的名字（這三條多元化之路，《阿聯》《卡達》兩篇各有詳述），科威特卻被自己的僵局凍住，被它一手啟發的鄰居一一超越——它最會替子孫存錢，卻最不會替子孫造一台新引擎；它最早給人民聲音，卻被那份聲音與租金一起鎖住。這就是禍福相倚最完整的演繹：石油是福也是詛咒，議會是光榮也是枷鎖，富裕不等於活力，聲音不等於進步。科威特真正的了不起，從來不是它的油——油，鄰居都有，且大多用得比它更好；而是它證明了一片沙漠的港市，也能靠「誰出錢、誰就有發言權」的古老契約，長出整個地區唯一一座有牙齒的議會。它也用自己的停滯告誡世人：再珍貴的制度，在錯誤的土壤裡，也會異化成枷鎖。一個攢下了最厚家底、給了人民最多聲音，卻被自己的成功與詛咒一起拖住的海灣先驅——這，就是今天的科威特，留給每一個觀察者的，最深的一道凝視。</p>
+    </div>
+  </div>
+</section>
+
+<div class="div-orn">✦ ⚓ ✦</div>
+<section class="finale reveal" id="ch-finale">
+  <div class="wrap">
+    <div class="act-head">
+      <span class="act-num">終章 · Finale</span>
+      <h2 class="act-title">於是，今天的科威特人：商人的同意、石油的租金，與一座被自己鎖住的議會</h2>
+      <p class="act-sub" style="color:rgba(244,236,220,.6)">The Kuwaitis Today — the Merchant's Consent, the Oil's Rent, and a Parliament That Locked Itself</p>
+      <div class="ornament" style="color:var(--gold-bright)">✦ 商 ◈ 議 ✦</div>
+    </div>
+    <div class="prose">
+      <p>讓我們把這趟追隨一個「靠商人同意立國」的灣頂港市的旅程，收攏成一條線。今天的科威特之所以是這個模樣——一個本國公民僅約一百五十萬、卻坐擁逾一兆美元主權基金、淨外部資產高居全球之冠的富國；一個曾經是整個海灣最先進、最自由、擁有第一支主權基金與第一個民選議會的「先驅之邦」；一個如今卻被政治僵局凍住、被它一手啟發的鄰居們紛紛超越、最終由埃米爾親手關掉了議會的落伍生——是它那「商人、石油、議會」三個密碼，纏繞在一起的結果。從一七五二年商人們推選出一個統治者的那筆古老契約，到採珠造船的繁華；從一九三八年布爾甘油田的噴湧，到搖籃到墳墓的福利國；從一九五三年比挪威還早的主權基金，到一九六二年海灣第一部憲法與第一座有牙齒的議會；從一九九〇年薩達姆的入侵與七百口燃燒的油井，到二〇二四年那道「中止憲法」的命令——這個國家始終在同一道矛盾裡掙扎：它擁有海灣唯一真正的「同意」傳統，卻又被石油的「租金」邏輯，一點一點地，腐蝕了那份同意的根基。</p>
+
+      <h3>第一重：商人——一份靠「同意」立國的契約</h3>
+      <p>科威特最底層的密碼，是那份<strong>商人的同意（the Merchant's Consent）</strong>。在一個統治權多半來自征服或神授的地區，科威特獨一無二地，是被商人「選」出來、並供養出來的。一七五二年那筆心照不宣的契約——商人出錢供養薩巴赫家族，作為交換，他們有權在統治者的客廳裡說話，甚至能用「舉家遷走、抽走財源」來收回這份同意——把一種在西方催生了議會的古老張力（課稅須經同意），種進了這片沙漠的港市。這是科威特一切與眾不同之處的源頭：它的統治者，從一開始就不是絕對的；它的權力，從一開始就須向出錢的人交代。這份「同意」的基因，讓科威特在整個海灣，獨自走上了一條通往代議政治的路。理解了這份契約，你就理解了為什麼唯獨科威特，能長出一座真有牙齒的議會——也理解了為什麼，當石油抽走了「徵稅」這個環節時，這份契約會開始鬆動。</p>
+
+      <h3>第二重：石油——一份救贖，與一份悄悄的腐蝕</h3>
+      <p>而改寫了這一切的，是<strong>石油（the Oil）</strong>。布爾甘——這座僅次於沙烏地加瓦爾的世界第二大油田——把科威特從珍珠崩潰後的飢饉，一舉推上了巨富，建起了一個搖籃到墳墓的福利國，讓一九五〇、六〇年代的科威特，成為整個海灣最先進、最有文化的地方。然而石油這份救贖，藏著一道隱形的腐蝕。它把科威特變成了一個極端的「食租國家」——油佔了約九成的政府收入、約九成的出口；國家不再需要向人民徵稅，而是反過來，把石油的租金分給人民：免費的醫療教育、保障的公職（約八成在職公民吃公家飯）、低廉的水電油糧。一個不必向人民伸手要錢的政府，與人民之間那條「課稅換同意」的紐帶，便鬆了。更慘烈的是，這份財富還招來了覬覦——一九九〇年，薩達姆的坦克為了石油與舊賬，把科威特從地圖上抹去了七個月，撤退時點燃了近七百口油井。是科威特那支一九五三年就埋下的主權基金，在流亡中掏出鉅款，買回了自己的國家。石油給了科威特一切：財富、福利、創傷，以及那份悄悄腐蝕著「同意」根基的、食租的惰性。</p>
+
+      <h3>第三重：議會——海灣唯一的牙齒，與它的自我絞殺</h3>
+      <p>而這個故事最核心、最令人唏噓的一重密碼，是<strong>議會（the Majlis）</strong>。一九六二年的憲法，把「商人的同意」制度化成了一座真有牙齒的民選國民議會——它能立法、能審預算、能質詢與罷免部長、曾能核可王儲，是整個海灣絕無僅有的政治成就，是「同意」傳統最輝煌的果實。科威特由此擁有了海灣最自由的報業、最活躍的辯論，並在二〇〇五年讓女性走進了投票所與議事廳。然而，正是這把最珍貴的鑰匙，遇上了石油的租金，鑄成了科威特的悲劇。當一座有牙齒的議會，面對的是一個只需分配租金、任何削減福利都形同政治自殺的食租國家時，它便從「制衡」異化成了「否決」：民選議員與委任的王室內閣陷入無休止的角力，政府反覆垮台，議會反覆解散——光是二〇二〇到二四這四年間，就辦了四次大選、三次解散。重大的改革——發債、福利、多元化——一一卡死。最荒謬的一幕，是科威特竟整整八年（二〇一七至二五）無法通過發債法，一個坐擁兆元基金的富國，差點付不出公務員的薪水。終於，在二〇二四年五月，埃米爾米沙勒按下了暫停鍵，連那條「禁止中止憲法」的條文一併中止。<strong>科威特最大的光榮，與它最大的財富，不但沒有相輔相成，反而彼此絞殺。</strong></p>
+
+      <h3>第四重：一張最厚的家底，與一道最深的兩難</h3>
+      <p>而當我們掀開引擎蓋、拆解這個國家的「當代形態」時，我們看到的，是一個富可敵國、卻動彈不得的矛盾體。它的家底厚得驚人：逾一兆美元的主權基金（世界最老的那一支，一九五三年生），淨外部資產約相當於 GDP 的六倍、高居全球受評主權之冠；它那支「未來世代基金」，依法每年從全國收入中提撥至少一成，本金不得擅動，其投資收益已可與石油收入分庭抗禮。然而引擎拆開來看，隱憂刺眼：它是海灣<strong>最不多元</strong>的經濟體——油佔了約九成收入、約半 GDP，「絲綢城」之類的宏大計畫多半只停在紙上；它陷入一場兩年期的減產衰退，人均所得十年來停滯，甚至被評為海灣信評最低者之一——不是因為它窮，而是因為它的約束是<strong>制度性的</strong>：八年無權發債、改革被政治僵局凍結。<em>這，是一個「最早未雨綢繆、攢下全世界最厚家底，卻被自己最珍貴的民主與最豐厚的石油一起鎖住、眼睜睜看著鄰居一一超越」的先驅之邦的典型處境——它富得流油，卻富得寸步難行。</em></p>
+
+      <div class="flow">
+        <span class="node">商人選出統治者</span><span class="arrow">→</span>
+        <span class="node">採珠的港市</span><span class="arrow">→</span>
+        <span class="node">布爾甘油田</span><span class="arrow">→</span>
+        <span class="node">第一支主權基金</span><span class="arrow">→</span>
+        <span class="node">1962 憲法與議會</span><span class="arrow">→</span>
+        <span class="node">1990 入侵</span><span class="arrow">→</span>
+        <span class="node">食租的僵局</span><span class="arrow">→</span>
+        <span class="node">2024 中止議會</span><span class="arrow">→</span>
+        <span class="node">被超越的先驅</span>
+      </div>
+
+      <div class="investor">
+        <span class="tag">歷史的回聲 · 今天的科威特人</span>
+        <p>所以今天的科威特人，是誰？他，是<strong>那份「商人同意」契約最新的繼承者</strong>——身上流著一個曾經最自由、最先進的海灣先驅的記憶與驕傲。他極可能是一個吃公家飯的公務員（約八成在職公民如此），享受著免費的醫療教育、低廉的水電、不必繳一毛所得稅，坐領著一張全世界最厚的國家資產負債表所撐起的福利。他生活在一個有真正議會、有自由報業、能公開罵政府的國家——這是他在所有海灣鄰居面前最大的驕傲。可他也眼睜睜看著，這座議會與它的政府，數十年來在彼此的角力裡空轉，看著發債法卡了八年、看著改革一一流產，看著杜拜、多哈、利雅德一座座拔地而起，而自己的國家，卻被凍在了原地；最後，看著埃米爾在二〇二四年，親手關掉了那座他既驕傲、又痛恨的議會。他是一個富裕的人，卻活在一種說不出的停滯與焦慮裡——他知道自己的國家擁有別人沒有的「聲音」，也擁有別人羨慕的「財富」，可這兩樣最寶貴的東西，偏偏把彼此鎖死了。</p>
+        <p>這本書，從二〇二四年五月那道「中止憲法」的命令，與一句「一個最早給人民選票、最早攢下主權基金的先驅之邦，怎麼會走到親手關掉自己議會這一步」的詰問開始，問的是一個核心的問題：<em>一個獨一無二地靠「商人的同意」立國、長出了海灣唯一真議會的國家，如何被「石油的租金」一點一點抽掉了那份同意的根基，讓它最大的光榮（議會）與最大的財富（石油）彼此絞殺，從海灣的先驅，淪為海灣的落伍生——而「民主」與「食租」，究竟能不能並存？</em>走到終點，我們看到的答案，帶著深深的唏噓：科威特真正的了不起，從來不是它的石油——石油，它的鄰居都有，且大多用得比它更好。它真正的了不起，在於那份獨一無二的政治遺產——<strong>它是整個海灣，唯一一個讓人民真正擁有「聲音」的國家，唯一一個把「課稅須經同意」的古老智慧，活成了一座有牙齒議會的國家。</strong>可它也用自己的命運，向世人提出了一道最深的警告：當「聲音」遇上了不勞而獲的「租金」，當民主的否決權遇上了食租的惰性，再珍貴的制度，也可能異化成停滯的枷鎖。它是一個攢下了最厚家底、給了人民最多聲音，卻被自己的成功與詛咒一起拖住的，海灣先驅。</p>
+      </div>
+
+      <div class="pull" style="background:rgba(0,0,0,.2);border-color:var(--gold-bright)"><p style="color:var(--parchment)">科威特是人類史上罕見的一個，把「同意」與「租金」這對矛盾，活到極致的國家。它的光榮，不在於它的油有多厚——油，是詛咒也是救贖；而在於它證明了：一片沙漠的港市，也能靠著「誰出錢、誰就有發言權」的古老契約，長出整個地區唯一一座有牙齒的議會。可它也用自己的停滯告誡世人：當這座議會撞上只需分糖、無須徵稅的石油租金，光榮也會異化成癱瘓。那座採珠造船的良港，那座一九五三年就為子孫存錢的基金，那座既是驕傲、又被親手關掉的議會——如今，依舊定義著一個富可敵國、卻動彈不得的海灣先驅的命運。</p></div>
+    </div>
+    <div class="principle">
+      <span class="tag">海灣先驅的終極啟示</span>
+      <p>一個國家真正的善治，未必來自它有多少財富，甚至未必來自它是否擁有民主的形式，而可能取決於一個更微妙的東西：財富與權力之間，那條「課稅換同意」的紐帶，是否還繃得緊。科威特證明了，即便在君主專制如同空氣的地區，一份「商人的同意」也能長出一座真有牙齒的議會，這是它無上的光榮；但它也提醒著世人，當石油的租金抽掉了「徵稅」這個環節，當政府只需分糖、無須向人民交代，再珍貴的議會，也可能從制衡的活力，異化成否決的癱瘓——富裕買不來活力，聲音換不來進步。如何在「同意的傳統」與「租金的惰性」之間、在「民主的監督」與「治理的效能」之間、在「最厚的家底」與「最深的改革」之間，找到那個既不背棄人民的聲音、又不困於僵局的平衡——這不只是科威特人的功課，也是這個資源國林立、人人都想「有錢又有自由」的世界裡，每一個試圖讓財富、權力與同意三者並存的國家，共同的、最艱難的功課。</p>
+    </div>
+    <div class="prose">
+      <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.25rem;color:rgba(244,236,220,.78);margin-top:2.5rem">
+        從，一七五二年商人們推選出一個統治者的那筆古老契約，到採珠造船的繁華港市<br>
+        從，一九三八年布爾甘油田的噴湧，到搖籃到墳墓的福利國<br>
+        從，一九五三年比挪威還早的主權基金，到為子孫存下的「未來世代」<br>
+        從，一九六二年海灣第一部憲法，到第一座能質詢部長、逼閣員下台的議會<br>
+        從，一九九〇年薩達姆的坦克與七百口燃燒的油井，到流亡中買回國家的那筆基金<br>
+        從，八年無法通過的發債法，到二〇二四年那道「中止憲法」的命令——<br>
+        這個，靠商人的同意立國、長出海灣唯一真議會的灣頂港市<br>
+        在，最珍貴的聲音，與最豐厚的租金彼此絞殺之間，掙扎了兩百多年。<br>
+        而，今天，這約一百五十萬公民——一個富可敵國、卻動彈不得的先驅之邦<br>依舊在同意與租金之間<br>守著一座既是驕傲、又被鎖住的議會，等待著那道兩難，有一天能被解開。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="orn">✦ ⚓ ✦</div>
+  <p>商人、石油，與海灣唯一的議會 · 科威特的身世</p>
+  <p style="font-size:.8rem;font-style:normal;font-family:'Cinzel',serif;letter-spacing:.15em;opacity:.5">FROM THE MERCHANTS' CONSENT TO THE OLDEST FUND · 1752 – 2026</p>
+</footer>
+
+<script>
+const pb=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  pb.style.width=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100+'%';
+});
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
+
