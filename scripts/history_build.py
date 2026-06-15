@@ -357,6 +357,11 @@ ENTRIES = [
     dict(src="經濟史/主權違約史_賴帳的國王與破產的國家.html", slug="sovereign-default", cat="theme",
          zh="賴帳的國王，與破產的國家：主權違約三千年", en="Sovereign Default: 3,000 Years of Kings & Nations That Did Not Pay", lat=None, lng=None),
 
+    dict(src="經濟史/融化的尺_通膨與惡性通膨史.html", slug="inflation", cat="theme",
+         zh="融化的尺：通膨與惡性通膨，與一部關於信任如何被偷走的歷史", en="The Melting Yardstick: Inflation, Hyperinflation & the Quiet Theft of Trust", lat=None, lng=None),
+    dict(src="經濟史/不朽之金_黃金史詩.html", slug="gold-epic", cat="theme",
+         zh="不朽之金：黃金，與一部關於永恆、枷鎖與避難所的文明史", en="The Imperishable Metal: Gold, Permanence, the Shackle & the Refuge", lat=None, lng=None),
+
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
          zh="草根、國旗與資本：足球一百六十年", en="Football: 160 Years", lat=None, lng=None),
