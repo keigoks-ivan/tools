@@ -853,6 +853,20 @@
   .act-item .at-w{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;color:var(--accent);flex:0 0 64px;letter-spacing:.04em}
   .plan-section-h{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:18px 0 8px;border-top:1px solid var(--line);padding-top:14px}
 
+  /* ---- AI 教練棚 (用訪客自己的 Claude/ChatGPT 月費方案) ---- */
+  .coach-intro{background:rgba(154,123,50,.08);border:1px solid rgba(154,123,50,.3);border-radius:10px;padding:15px 17px;margin-bottom:16px}
+  .coach-intro p{font-family:'Noto Sans TC',sans-serif;font-size:13px;line-height:1.65;color:#3a352c}
+  .coach-intro b{color:var(--ink)}
+  .coach-blurb{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;line-height:1.6;color:#3a352c;margin:14px 0 4px}
+  .coach-blurb b{color:var(--accent2)}
+  .coach-missing{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.02em;color:var(--accent);margin-top:8px;line-height:1.6;display:none}
+  .coach-missing.on{display:block}
+  .coach-open{display:flex;gap:9px;flex-wrap:wrap;margin-top:11px;align-items:center}
+  .coach-open .col{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.04em;color:var(--mute)}
+  .open-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.04em;font-weight:600;padding:8px 14px;border-radius:7px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .14s}
+  .open-btn:hover{background:var(--ink);color:var(--paper)}
+  .open-btn .ext{font-size:10px;opacity:.7}
+
   /* ---- print: only the flight plan ---- */
   @media print{
     body{background:#fff}
@@ -865,225 +879,294 @@
 </head>
 <body>
 
-<header class="hero">
+<style>
+/* ===================== STEP WIZARD (測驗模式) ===================== */
+.hero-slim{border-bottom:1px solid var(--ink);padding:16px 0 14px}
+.hero-slim .eyebrow{margin-bottom:6px}
+.hero-slim h1{font-family:'Newsreader',serif;font-weight:600;font-size:clamp(22px,4vw,30px);line-height:1;letter-spacing:-.01em;margin:0}
+.hero-slim h1 em{font-style:italic;color:var(--accent)}
+.stepbar{position:sticky;top:0;z-index:50;background:rgba(233,227,214,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.stepbar-prog{height:5px;background:rgba(40,35,25,.1)}
+.stepbar-prog .fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--accent));transition:width .3s ease}
+.stepbar-meta{display:flex;justify-content:space-between;align-items:center;padding:8px 22px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);max-width:760px;margin:0 auto}
+.stepbar-meta #stepCh{color:var(--accent);font-weight:600}
+.stepwrap{max-width:760px;margin:0 auto;padding:22px 22px 128px;min-height:62vh}
+.step{display:none}
+.step.active{display:block;animation:stepIn .34s ease}
+@keyframes stepIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.step-card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:2px 3px 0 var(--shadow);padding:26px 24px 28px}
+.kick{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+.step-h{font-family:'Newsreader',serif;font-weight:600;font-size:clamp(23px,4.4vw,32px);line-height:1.12;letter-spacing:-.01em;margin-bottom:8px}
+.step-h em{font-style:italic;color:var(--accent)}
+.step-lead{font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.72;color:#3a352c}
+.step-lead b{color:var(--ink)}
+.step-note{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mute);margin-top:16px;line-height:1.7;letter-spacing:.02em}
+.step-toolhead{font-family:'Newsreader',serif;font-weight:600;font-size:21px;line-height:1.2;color:var(--ink);margin-bottom:5px}
+.step-toolhead em{font-style:italic;color:var(--accent)}
+.step-subhead{font-family:'Noto Sans TC',sans-serif;font-size:13px;line-height:1.62;color:#3a352c;margin-bottom:15px}
+.step-subhead b{color:var(--ink)}
+details.more{margin-top:18px;border-top:1px dashed var(--line);padding-top:13px}
+details.more summary{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--accent2);cursor:pointer;font-weight:600;list-style:none;outline:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"▸  "}
+details.more[open] summary::before{content:"▾  "}
+details.more .mbody{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;line-height:1.7;color:#3a352c;margin-top:11px}
+details.more .mbody b{color:var(--ink);font-weight:700}
+details.more .mbody .cite{margin-top:8px}
+.stepnav{position:fixed;left:0;right:0;bottom:0;z-index:55;background:rgba(233,227,214,.97);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+.stepnav-in{max-width:760px;margin:0 auto;padding:12px 22px;display:flex;gap:12px;align-items:center}
+.snav{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.04em;font-weight:600;padding:13px 20px;border-radius:9px;cursor:pointer;border:1px solid var(--ink);transition:opacity .14s,background .14s}
+.snav.prev{background:transparent;color:var(--ink);flex:0 0 auto}
+.snav.next{background:var(--ink);color:var(--paper);flex:1;text-align:center}
+.snav:hover{opacity:.86}
+.snav.prev[disabled]{opacity:.28;cursor:default;pointer-events:none}
+.libtoggle{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.04em;font-weight:600;padding:12px 18px;border-radius:9px;border:1px dashed var(--line);background:transparent;color:var(--mute);cursor:pointer;width:100%;margin-top:14px}
+.libtoggle:hover{border-color:var(--ink);color:var(--ink)}
+.result-axiom{font-family:'Newsreader',serif;font-style:italic;font-size:17px;color:var(--accent);text-align:center;line-height:1.5;margin:22px 0 4px}
+@media(max-width:520px){.step-card{padding:20px 16px 22px}.stepwrap{padding:18px 14px 128px}.snav.prev{padding:13px 14px}}
+</style>
+
+<header class="hero hero-slim">
   <div class="wrap">
-    <a href="/home.html" class="backlink">
-      <span style="font-size:14px">←</span><span>Property Monitor · 投資工具站</span>
-    </a>
-    <div class="eyebrow">
-      <span>The Solo Co. · 互動創業課 / Founder Flight School</span>
-      <span class="spec">AI-NATIVE · REV. 2026.06</span>
-    </div>
-    <h1>一人創業<br><em>飛行學校</em></h1>
-    <p class="lede">不是讀完一篇文章,是<b>親手飛過一遍</b>。把 Anthropic《The Founder's Playbook》的心法,拆成一條你能走的航線:<span class="mono">選一條適合你的路</span> → 走過 <span class="mono">構想 · MVP · 上線 · 規模化</span> 四個階段 → 在每個會墜機的決策點用「<span class="mono">多鏡頭</span>」換角度想 → 最後印出你自己的飛行計畫。途中所有範例,都接這座站的 43 個一人公司標本。</p>
-    <div class="thesis">
-      <div class="th-q">當「做出來」幾乎免費,「<b>該做什麼</b>」就成了唯一真正難的問題。瓶頸已從「你能做什麼」,移到「你<b>選擇</b>做什麼」。</div>
-      <div class="th-src"><b>這門課只教這件事</b>它的每一個面向、每一個會在路上絆倒你的地方。框架取自 Anthropic《The Founder's Playbook: Building an AI-Native Startup》(2026)。</div>
-    </div>
+    <a href="/home.html" class="backlink"><span style="font-size:14px">←</span><span>Property Monitor · 投資工具站</span></a>
+    <div class="eyebrow"><span>The Solo Co. · 創業預演</span><span class="spec">AI-NATIVE · REV. 2026.06</span></div>
+    <h1>一人創業 <em>飛行預演</em></h1>
   </div>
 </header>
 
-<div class="railwrap">
-  <div class="rail-prog"><div class="fill" id="railFill"></div></div>
-  <nav class="rail" id="rail">
-    <a href="#m0" data-mod="m0"><span class="rn">心法</span>北極星</a>
-    <a href="#midea" data-mod="midea"><span class="rn">起點</span>你的點子</a>
-    <a href="#mpick" data-mod="mpick"><span class="rn">選路</span>你的航線</a>
-    <a href="#m1" data-mod="m1"><span class="rn">①</span>構想</a>
-    <a href="#m2" data-mod="m2"><span class="rn">②</span>MVP</a>
-    <a href="#m3" data-mod="m3"><span class="rn">③</span>上線</a>
-    <a href="#m4" data-mod="m4"><span class="rn">④</span>規模化</a>
-    <a href="#mend" data-mod="mend"><span class="rn">抵達</span>選擇</a>
-    <a href="#mplan" data-mod="mplan"><span class="rn">輸出</span>飛行計畫</a>
-    <a href="#mlib" data-mod="mlib"><span class="rn">附錄</span>標本庫</a>
-  </nav>
+<div class="stepbar">
+  <div class="stepbar-prog"><div class="fill" id="stepFill"></div></div>
+  <div class="stepbar-meta"><span id="stepCh">開始</span><span id="stepNum"></span></div>
 </div>
 
-<div class="course">
+<div class="stepwrap" id="stepwrap">
 
-  <!-- ============ M0 · 北極星 / 心法 ============ -->
-  <section class="mod" id="m0">
-    <div class="mod-divider"><span class="md-k">00 · 北極星 / Mindset</span><span class="md-l"></span></div>
-    <p class="lead-block">開始前,先換一顆腦袋。AI 原生創業最大的轉變不是工具,是<b>你的角色</b>:你不再是「親手把事做完的人」,而是「<em>指揮 AI 與系統的人</em>」。你的注意力,從「做這件事」移到「<b>決定做什麼、為什麼做</b>」。</p>
-    <div class="principle">
-      <div class="pl-h">三個座艙儀表 · <em>從 IC 到 Orchestrator</em></div>
-      <p>手冊把創辦人的日常拆成三種介面:<b>Chat</b>(快問快答)、<b>Cowork</b>(跨來源整合、寫文件)、<b>Code</b>(直接動程式)。重點不是會用哪個工具,而是:當執行幾乎免費,「精實十人獨角獸」從勵志神話變成可被系統性達成的常態——而傳統順序(<b>募資→請人→開做</b>)會反過來:<b>先驗證、先有營收,再擴編</b>。</p>
-      <div class="cite">Anthropic · Founder's Playbook (2026) · §角色轉變</div>
-    </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">🔄</span>心態翻轉牌組</div>
-      <div class="tool-sub">點每張牌翻面。左邊是「做事的人」的舊反射,右邊是「指揮者」的新反射——這是整門課的底層作業系統。</div>
-      <div class="flipgrid" id="flipMindset"></div>
+  <!-- 0 · 開始 -->
+  <section class="step active" data-ch="開始">
+    <div class="step-card">
+      <div class="kick">AI-NATIVE FOUNDER · 互動預演</div>
+      <h2 class="step-h">先別急著創業。<em>先飛一遍。</em></h2>
+      <p class="step-lead">這是一場一步一步的<b>創業預演</b>,不是一篇長文。大約 8–12 分鐘,你會:換上 AI 原生創辦人的腦袋、把自己的點子逼成一句話、選一條適合你的路,然後走過 <b>構想 → MVP → 上線 → 規模化</b>,在每個會墜機的決策點換角度想、誠實面對盲點。</p>
+      <div class="thesis" style="margin-top:18px">
+        <div class="th-q">當「做出來」幾乎免費,「<b>該做什麼</b>」就成了唯一真正難的問題。瓶頸已從「你能做什麼」,移到「你<b>選擇</b>做什麼」。</div>
+        <div class="th-src"><b>這場預演只練這件事</b>框架取自 Anthropic《The Founder's Playbook: Building an AI-Native Startup》(2026)。</div>
+      </div>
+      <p class="step-lead" style="margin-top:16px">最後給你一張<b>帶得走的飛行計畫</b>,還有一段能貼進你自己 Claude/ChatGPT 的 <b>AI 教練 prompt</b>。</p>
+      <p class="step-note">隨時可上一步 / 下一步 · 你寫的東西會自動存下來,關掉再回來還在 · 沒有對錯,這是預演不是考試</p>
     </div>
   </section>
 
-  <!-- ============ MIDEA · 你的點子 ============ -->
-  <section class="mod" id="midea">
-    <div class="mod-divider"><span class="md-k">起點 · Your Idea, In One Sentence</span><span class="md-l"></span></div>
-    <p class="lead-block">在學任何東西之前,先把<b>你自己的點子</b>逼到一句話。說不清楚的點子,通常是還沒想清楚的點子。這句話會跟著你走完整趟航程——後面每一個工具,都會拿它來磨你。<br><span style="font-size:14px;color:var(--mute)">(沒有具體點子也沒關係,先寫一個你最近想過的;這是用來「想」的,不是用來「對」的。)</span></p>
-    <div class="canvas">
-      <div class="canvas-line">
-        我想幫 <input class="cv-in" id="cvWho" placeholder="誰(越窄越好)" style="min-width:160px">
-        解決 <input class="cv-in" id="cvProblem" placeholder="什麼具體問題" style="min-width:180px"> 的麻煩。<br>
-        我的方式是 <input class="cv-in" id="cvHow" placeholder="怎麼做" style="min-width:180px">,
-        而他們現在是靠 <input class="cv-in" id="cvAlt" placeholder="現在怎麼湊合的" style="min-width:160px"> 在硬撐。
-      </div>
-      <div class="canvas-extra">
-        <label>我有、而 AI 與別人不容易拿到的「底」是?<span style="font-weight:400;color:var(--mute)">(深度專業／一手資料／人脈／品味／信任——沒有也先誠實寫「目前沒有」)</span></label>
-        <input type="text" id="cvEdge" placeholder="例:做過 8 年咖啡採購、認識上游 30 家烘豆商">
-      </div>
-      <div class="canvas-echo" id="cvEcho"></div>
+  <!-- 1 · 心法 -->
+  <section class="step" data-ch="心法">
+    <div class="step-card">
+      <div class="kick">00 · 心法 / Mindset</div>
+      <div class="step-toolhead">先換一顆<em>腦袋</em></div>
+      <p class="step-subhead">AI 原生創業最大的轉變不是工具,是你的角色:你不再是「親手做完的人」,而是「<b>指揮 AI 的人</b>」。點每張牌翻面,看左邊舊反射 → 右邊新反射。</p>
+      <div class="flipgrid" id="flipMindset"></div>
+      <details class="more"><summary>為什麼?(手冊原則)</summary><div class="mbody">手冊把創辦人的日常拆成三種介面:<b>Chat</b>(快問快答)、<b>Cowork</b>(整合、寫文件)、<b>Code</b>(動程式)。當執行幾乎免費,「精實十人獨角獸」變成可被系統性達成;傳統順序(募資→請人→開做)會反過來:<b>先驗證、先有營收,再擴編</b>。<div class="cite">Anthropic · Founder's Playbook (2026) · §角色轉變</div></div></details>
     </div>
-    <div class="tool" style="border-style:solid;background:var(--card)">
-      <div class="tool-h"><span class="ico">🔭</span>多鏡頭:先用四個身分看你這句話</div>
-      <div class="tool-sub">同一個點子,站在四種人的位置上各問一句最尖銳的話——這是在你燒錢之前,最便宜的壓力測試。</div>
+  </section>
+
+  <!-- 2 · 你的點子 -->
+  <section class="step" data-ch="點子">
+    <div class="step-card">
+      <div class="kick">起點 · Your Idea, In One Sentence</div>
+      <div class="step-toolhead">把你的點子<em>逼成一句話</em></div>
+      <p class="step-subhead">說不清楚的點子,通常是還沒想清楚的點子。這句話會跟著你走完整場預演。<br><span style="color:var(--mute)">(沒有具體點子也沒關係,先寫一個最近想過的——這是用來「想」的。)</span></p>
+      <div class="canvas">
+        <div class="canvas-line">
+          我想幫 <input class="cv-in" id="cvWho" placeholder="誰(越窄越好)" style="min-width:150px">
+          解決 <input class="cv-in" id="cvProblem" placeholder="什麼具體問題" style="min-width:170px"> 的麻煩。<br>
+          我的方式是 <input class="cv-in" id="cvHow" placeholder="怎麼做" style="min-width:170px">,
+          他們現在靠 <input class="cv-in" id="cvAlt" placeholder="現在怎麼湊合的" style="min-width:150px"> 硬撐。
+        </div>
+        <div class="canvas-extra">
+          <label>我有、而 AI 與別人不容易拿到的「底」是?<span style="font-weight:400;color:var(--mute)">(專業/一手資料/人脈/品味/信任——沒有就誠實寫「目前沒有」)</span></label>
+          <input type="text" id="cvEdge" placeholder="例:做過 8 年咖啡採購、認識上游 30 家烘豆商">
+        </div>
+        <div class="canvas-echo" id="cvEcho"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · 四種身分鏡頭 -->
+  <section class="step" data-ch="點子">
+    <div class="step-card">
+      <div class="kick">多鏡頭 · 利害關係人</div>
+      <div class="step-toolhead">站在<em>四種人</em>的位置看你這句話</div>
+      <p class="step-subhead">同一個點子,站在四種人的位置上各問一句最尖銳的話——在你燒錢之前,最便宜的壓力測試。</p>
       <div class="lens" id="lensStake"></div>
     </div>
   </section>
 
-  <!-- ============ MPICK · 選你的航線 ============ -->
-  <section class="mod" id="mpick">
-    <div class="mod-divider"><span class="md-k">選路 · Pick Your Flight Path</span><span class="md-l"></span></div>
-    <p class="lead-block">43 條路太多?先回答 5 題,讓系統從中篩出最契合你<b>資金、時間、急迫度、目標、底牌</b>的 3 條。挑一條,它會成為你接下來整趟航程的<b>實際範例</b>——四個階段都用它來示範。</p>
-    <section class="rk-sec" id="quizSec"></section>
-    <div id="pathbar"></div>
-    <div class="tool" id="pathTrapsTool" style="display:none">
-      <div class="tool-h" style="color:var(--accent)"><span class="ico">💀</span>你選的這條路,前人是怎麼摔的</div>
-      <div class="tool-sub">這不是嚇你,是讓你知道地雷在哪。下面是這個標本檔案裡記錄的真實陷阱——多數一人公司不是死於「做不出」,而是這幾種反覆出現的結構性錯誤。</div>
-      <div class="pathtraps" id="pathTraps"></div>
+  <!-- 4 · 選航線 -->
+  <section class="step" data-ch="航線">
+    <div class="step-card">
+      <div class="kick">選路 · Pick Your Flight Path</div>
+      <div class="step-toolhead">找出最<em>適合你</em>的那一條</div>
+      <p class="step-subhead">43 條路太多?回答 5 題,系統從中篩出最契合你<b>資金、時間、急迫度、目標、底牌</b>的 3 條。挑一條,它會成為你接下來的<b>實際範例</b>。</p>
+      <section id="quizSec"></section>
+      <div id="pathbar"></div>
+      <div class="tool" id="pathTrapsTool" style="display:none;margin-top:14px">
+        <div class="tool-h" style="color:var(--accent)"><span class="ico">💀</span>你選的這條路,前人怎麼摔的</div>
+        <div class="tool-sub">不是嚇你,是讓你知道地雷在哪。多數一人公司不是死於「做不出」,是這幾種反覆出現的結構性錯誤。</div>
+        <div class="pathtraps" id="pathTraps"></div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ M1 · 構想 ============ -->
-  <section class="mod" id="m1">
-    <div class="mod-divider"><span class="md-k">01 · 構想 / Ideation · 第 0–1 月</span><span class="md-l"></span></div>
-    <p class="lead-block">這個階段只有一個任務:<b>確認你要解的是一個「真問題」</b>。別急著做。AI 讓你一個下午就生出能跑的東西,但——</p>
-    <div class="principle">
-      <div class="pl-h">陷阱一 · <em>「能跑的原型」是假的驗證</em></div>
-      <p>會動的原型看起來太像「方向對了」的鐵證,但它不是。原型真正的用途,是拿去跟真實用戶對話的<b>道具</b>;<b>那些對話本身才是證據</b>。AI 會用幫你實現好點子時一模一樣的熱情,順著一個錯誤前提幫你生成、測試、除錯一整套東西——它不會替你踩煞車。</p>
-      <div class="cite">Anthropic · Founder's Playbook (2026) · §驗證陷阱</div>
-    </div>
-    <div class="principle">
-      <div class="pl-h">陷阱二 · <em>確認偏誤現在配了研究引擎</em></div>
-      <p>你叫 AI 驗證點子,它就找到支持的證據;叫它估市場,它就給一個讓 TAM 好募資的數字。一個不問難題的創辦人,能比以往更快為一個壞點子建起「看起來研究充分」的論述,還全程深信在做盡職調查。<b>解藥是同一個工具反過來用</b>:叫它當魔鬼代言人。</p>
-      <div class="cite">Anthropic · Founder's Playbook (2026) · §確認偏誤</div>
-    </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">🔭</span>多鏡頭:這是不是一個「真問題」?</div>
-      <div class="tool-sub">同一個點子,用五種思維模型輪流照一次。換鏡頭,你會看見單一視角藏起來的死角——這就是多模型思維。</div>
+  <!-- 5 · 構想:真問題鏡頭 -->
+  <section class="step" data-ch="構想">
+    <div class="step-card">
+      <div class="kick">01 · 構想 / Ideation · 第 0–1 月</div>
+      <div class="step-toolhead">這是不是一個<em>真問題</em>?</div>
+      <p class="step-subhead">構想期只有一個任務:確認你要解的是真問題。別急著做。用五種思維模型輪流照一次——換鏡頭,你會看見單一視角藏起來的死角。</p>
       <div class="lens" id="lensIdea"></div>
+      <details class="more"><summary>這階段最會墜機的兩個陷阱(手冊)</summary><div class="mbody"><b>① 「能跑的原型」是假的驗證。</b>原型只是「跟用戶對話的道具」,那些對話本身才是證據;AI 會用幫你實現好點子時一模一樣的熱情,順著錯誤前提幫你做完一整套。<br><b>② 確認偏誤配了研究引擎。</b>你叫 AI 驗證點子,它就找到支持的證據。解藥是同一個工具反過來用:叫它當魔鬼代言人。<div class="cite">Anthropic · Founder's Playbook (2026)</div></div></details>
     </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">😈</span>魔鬼代言人產生器</div>
-      <div class="tool-sub">把你的點子用一句話寫下來。系統會生出一組專門攻擊它的問題,外加一段可直接複製、貼給任何 AI 的對抗性 prompt——逼工具去找推翻你的反證,而不是討好你。</div>
+  </section>
+
+  <!-- 6 · 構想:失敗前測 -->
+  <section class="step" data-ch="構想">
+    <div class="step-card">
+      <div class="kick">構想 · Pre-mortem</div>
+      <div class="step-toolhead">失敗<em>前</em>測</div>
+      <p class="step-subhead">最強的驗證技巧之一:不要問「為什麼會成功」,先假設它<b>已經失敗</b>。把死因寫下來,你的大腦會誠實得多。</p>
+      <textarea class="reflect-in" id="premoIn" placeholder="假設一年後的今天,這個點子已經徹底失敗了。回頭看,最可能的單一死因是什麼?(誠實寫)" style="min-height:70px"></textarea>
+      <div style="font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--mute);margin-top:4px">你寫的死因,最接近哪一種?(跨 43 個標本,死法驚人地一致)</div>
+      <div class="premo-tags" id="premoTags"></div>
+      <div class="premo-note" id="premoNote"></div>
+    </div>
+  </section>
+
+  <!-- 7 · 構想:想一想 -->
+  <section class="step" data-ch="構想">
+    <div class="step-card">
+      <div class="kick">構想 · 寫給你自己看</div>
+      <div class="step-toolhead">想一想</div>
+      <p class="step-subhead">寫下你的真實想法——這些會進你的飛行計畫,也會餵給後面的 AI 教練。</p>
+      <div id="guideIdea"></div>
+    </div>
+  </section>
+
+  <!-- 8 · 構想:魔鬼代言人 -->
+  <section class="step" data-ch="構想">
+    <div class="step-card">
+      <div class="kick">構想 · Devil's Advocate</div>
+      <div class="step-toolhead">叫 AI <em>反過來攻擊你</em></div>
+      <p class="step-subhead">把點子寫成一句話(若上面已填會自動帶入)。系統生出一組專攻它的問題,外加一段可貼給任何 AI 的對抗性 prompt——逼工具去找推翻你的反證。</p>
       <textarea class="dev-in" id="devIn" placeholder="例:我想做一份『給獨立咖啡店主的每週採購情報』電子報…"></textarea>
       <button class="dev-btn" id="devBtn">生成反證問題 →</button>
       <div class="dev-out" id="devOut"></div>
     </div>
-    <div class="tool" style="border-style:solid;background:var(--card)">
-      <div class="tool-h" style="color:var(--accent)"><span class="ico">🎮</span>決策演練</div>
-      <div class="tool-sub">在花真錢真時間之前,先在腦中走一遍。選一個答案,看後果。這不是考試,是預演。</div>
-      <div class="gaunt" id="gauntIdea"></div>
-    </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">⚰️</span>失敗前測(Pre-mortem)</div>
-      <div class="tool-sub">最強的驗證技巧之一:不要問「為什麼會成功」,先假設它<b>已經失敗</b>。把死因寫下來,你的大腦會誠實得多。</div>
-      <textarea class="reflect-in" id="premoIn" placeholder="假設一年後的今天,這個點子已經徹底失敗了。回頭看,最可能的單一死因是什麼?(誠實寫,別客氣)" style="min-height:64px"></textarea>
-      <div style="font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--mute)">你寫的死因,屬於哪一種?(跨 43 個標本,死法驚人地一致——點一個最接近的)</div>
-      <div class="premo-tags" id="premoTags"></div>
-      <div class="premo-note" id="premoNote"></div>
-    </div>
-    <div id="guideIdea"></div>
-    <div class="pathex" id="pxIdea"></div>
   </section>
 
-  <!-- ============ M2 · MVP ============ -->
-  <section class="mod" id="m2">
-    <div class="mod-divider"><span class="md-k">02 · MVP / Prototype · 第 1–3 月</span><span class="md-l"></span></div>
-    <p class="lead-block">做一個最小版本,當作「跟用戶對話的道具」。注意:<b>對話才是目的,原型只是手段</b>。這個階段最會出事的,是一種幾乎無痛、因此最危險的東西——</p>
-    <div class="principle">
-      <div class="pl-h">陷阱 · <em>零摩擦的範圍蔓延</em></div>
-      <p>過去擋住「再加一個功能」的力量,是工程時間的真實成本——現在加功能從一個衝刺變成一個下午,那道煞車消失了。每個新增單獨看都合理(「當然該支援那情境」),產品卻在一堆站得住腳的小決定裡,<b>長到失去方向</b>。解法:動工前先寫「範圍定義」,把問題從「該做嗎」換成「<b>是否有一群用戶說『沒它就不能用』</b>」。</p>
-      <div class="cite">Anthropic · Founder's Playbook (2026) · §範圍蔓延</div>
+  <!-- 9 · 構想:決策演練 -->
+  <section class="step" data-ch="構想">
+    <div class="step-card">
+      <div class="kick">構想 · 決策演練</div>
+      <div class="step-toolhead">你會撞到的狀況</div>
+      <p class="step-subhead">在花真錢真時間之前,先在腦中走一遍。選一個答案,看後果。</p>
+      <div class="gaunt" id="gauntIdea"></div>
     </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">⚠️</span>功能蔓延模擬器</div>
-      <div class="tool-sub">下面每個功能「看起來都合理」。把你忍不住想加的勾起來,看「範圍蔓延」指針怎麼動——然後注意每個功能旁邊,有沒有「真有人說沒它就不能用」的證據。</div>
+  </section>
+
+  <!-- 10 · MVP:功能蔓延 -->
+  <section class="step" data-ch="MVP">
+    <div class="step-card">
+      <div class="kick">02 · MVP / Prototype · 第 1–3 月</div>
+      <div class="step-toolhead">功能蔓延<em>模擬器</em></div>
+      <p class="step-subhead">做一個最小版本當「跟用戶對話的道具」。下面每個功能「看起來都合理」——把你忍不住想加的勾起來,看指針怎麼動。</p>
       <div id="scopeSim"></div>
+      <details class="more"><summary>這階段的陷阱:零摩擦的範圍蔓延(手冊)</summary><div class="mbody">過去擋住「再加一個功能」的力量是工程時間的真實成本——現在加功能從一個衝刺變成一個下午,煞車消失了。每個新增單獨看都合理,產品卻在一堆站得住腳的小決定裡<b>長到失去方向</b>。解法:動工前先寫範圍定義。<div class="cite">Anthropic · Founder's Playbook (2026) · §範圍蔓延</div></div></details>
     </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">📐</span>範圍定義卡(寫下來才算數)</div>
-      <div class="tool-sub">動工前填這三格。這張卡會進你最後的飛行計畫。</div>
+  </section>
+
+  <!-- 11 · MVP:範圍定義卡 -->
+  <section class="step" data-ch="MVP">
+    <div class="step-card">
+      <div class="kick">MVP · 寫下來才算數</div>
+      <div class="step-toolhead">範圍定義卡</div>
+      <p class="step-subhead">動工前填這三格。把問題從「該做嗎」換成「<b>是否有人說沒它就不能用</b>」。</p>
       <div class="rc-grid" id="scopeDef" style="grid-template-columns:1fr">
         <div class="rc-in"><label>這版<b style="color:var(--accent2)">一定做</b><span class="hint">核心的那一件事,只一件</span><input type="text" id="sdDo" placeholder="例:每週一封,只給一個可立刻採購的決策"></label></div>
         <div class="rc-in"><label>這版<b style="color:var(--accent)">刻意不做</b><span class="hint">先砍掉的誘惑</span><input type="text" id="sdDont" placeholder="例:不做 App、不做社群、不做客製化報告"></label></div>
         <div class="rc-in"><label>什麼<b>證據</b>才值得加新東西<span class="hint">把門檻寫死</span><input type="text" id="sdEvid" placeholder="例:≥5 位付費讀者主動說『沒它就退訂』"></label></div>
       </div>
+      <div id="guideMvp" style="margin-top:6px"></div>
     </div>
-    <div class="tool" style="border-style:solid;background:var(--card)">
-      <div class="tool-h" style="color:var(--accent)"><span class="ico">🎮</span>決策演練</div>
+  </section>
+
+  <!-- 12 · MVP:決策演練 -->
+  <section class="step" data-ch="MVP">
+    <div class="step-card">
+      <div class="kick">MVP · 決策演練</div>
+      <div class="step-toolhead">你會撞到的狀況</div>
       <div class="gaunt" id="gauntMvp"></div>
     </div>
-    <div id="guideMvp"></div>
-    <div class="pathex" id="pxMvp"></div>
   </section>
 
-  <!-- ============ M3 · 上線 ============ -->
-  <section class="mod" id="m3">
-    <div class="mod-divider"><span class="md-k">03 · 上線 / Launch · 第 3–9 月</span><span class="md-l"></span></div>
-    <p class="lead-block">把東西送到人面前。這裡藏著<b>最常見、也最隱形的死法</b>——不是做不出來,是沒人看見。</p>
-    <div class="principle">
-      <div class="pl-h">原則 · <em>擁有觀眾,不只擁有流量</em></div>
-      <p>把流量沉澱成你<b>自有的資產</b>:email 名單、自有社群、直接關係。寄生在別人平台上(演算法分潤、商店排名、SEO 波動)的生意,對方規則一改就一夜斷炊,而你毫無發言權。領域天差地遠,公式驚人地一致:<b>先證明有人要 → 擁有觸及他們的管道</b>。</p>
-      <div class="cite">Anthropic · Founder's Playbook (2026) · §分銷 / 本站跨標本規律</div>
-    </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">📡</span>觸及體檢:你寄生,還是你自主?</div>
-      <div class="tool-sub">勾選你目前(或打算)用的觸及方式。左欄是「租來的」,右欄是「自己的」。看看你的觸及有多少比例,是別人改個規則就能拿走的。</div>
+  <!-- 13 · 上線:觸及體檢 -->
+  <section class="step" data-ch="上線">
+    <div class="step-card">
+      <div class="kick">03 · 上線 / Launch · 第 3–9 月</div>
+      <div class="step-toolhead">你寄生,還是<em>自主</em>?</div>
+      <p class="step-subhead">最隱形的死法不是做不出,是沒人看見。勾選你打算用的觸及方式——看看有多少比例,是別人改個規則就能拿走的。</p>
       <div id="distCheck"></div>
+      <details class="more"><summary>原則:擁有觀眾,不只擁有流量(手冊)</summary><div class="mbody">把流量沉澱成你<b>自有的資產</b>:email 名單、自有社群、直接關係。寄生在平台上(演算法分潤、商店排名)的生意,對方規則一改就一夜斷炊。公式驚人地一致:<b>先證明有人要 → 擁有觸及他們的管道</b>。<div class="cite">Anthropic · Founder's Playbook (2026) · §分銷</div></div></details>
     </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">🔭</span>多鏡頭:我該怎麼「被看見」?</div>
-      <div class="tool-sub">分銷不是只有「下廣告」一種解。換五個鏡頭看,你會找到最適合自己的那條。</div>
+  </section>
+
+  <!-- 14 · 上線:鏡頭 + 想一想 -->
+  <section class="step" data-ch="上線">
+    <div class="step-card">
+      <div class="kick">上線 · 多鏡頭 + 想一想</div>
+      <div class="step-toolhead">我該怎麼<em>被看見</em>?</div>
+      <p class="step-subhead">分銷不是只有「下廣告」一種解。換五個鏡頭看,再寫下你的真實答案。</p>
       <div class="lens" id="lensReach"></div>
+      <div id="guideLaunch" style="margin-top:16px"></div>
     </div>
-    <div class="tool" style="border-style:solid;background:var(--card)">
-      <div class="tool-h" style="color:var(--accent)"><span class="ico">🎮</span>決策演練</div>
+  </section>
+
+  <!-- 15 · 上線:決策演練 -->
+  <section class="step" data-ch="上線">
+    <div class="step-card">
+      <div class="kick">上線 · 決策演練</div>
+      <div class="step-toolhead">你會撞到的狀況</div>
       <div class="gaunt" id="gauntLaunch"></div>
     </div>
-    <div id="guideLaunch"></div>
-    <div class="pathex" id="pxLaunch"></div>
   </section>
 
-  <!-- ============ M4 · 規模化 ============ -->
-  <section class="mod" id="m4">
-    <div class="mod-divider"><span class="md-k">04 · 規模化 / Scale · 第 9 月＋</span><span class="md-l"></span></div>
-    <p class="lead-block">生意起來了。早期你親手做每件事是<b>資產</b>;現在同樣的行為變成<b>瓶頸</b>——決定拖一週、客服只有你會回、什麼都卡在你身上。是時候從「做事」轉向「<b>設計系統</b>」。</p>
-    <div class="principle">
-      <div class="pl-h">原則一 · <em>把判斷編碼成可交接的系統</em></div>
-      <p>把你親手做的事盤點成三類:<b>① 可全自動</b>、<b>② 要人但不必是你</b>、<b>③ 只有你能做</b>。把 ①② 交給 AI 與外包,把只存在你腦袋裡的判斷,變成可被檢查、可被交接的流程。警訊:一小時能拍板的決定拖成一週、客服請求排隊只因為「只有你知道答案」。</p>
-      <div class="cite">Anthropic · Founder's Playbook (2026) · §組織擴張</div>
-    </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">🗂️</span>工作盤點分流器</div>
-      <div class="tool-sub">點每一項工作,讓它在三個籃子間切換:全自動 / 委派 / 只有你。看看到最後,還有多少壓在你一個人身上。</div>
+  <!-- 16 · 規模化:工作盤點 -->
+  <section class="step" data-ch="規模化">
+    <div class="step-card">
+      <div class="kick">04 · 規模化 / Scale · 第 9 月＋</div>
+      <div class="step-toolhead">工作盤點<em>分流器</em></div>
+      <p class="step-subhead">生意起來了,親手做每件事從資產變成瓶頸。點每一項工作,讓它在三個籃子間切換,看最後還有多少壓在你一個人身上。</p>
       <div class="triage-grid" id="triage"></div>
       <div class="triage-hint">點一下切換籃子 · 目標:把「只有你」壓到最少</div>
       <div id="triageOut"></div>
+      <details class="more"><summary>原則:把判斷編碼成可交接的系統(手冊)</summary><div class="mbody">把親手做的事盤成三類:<b>①可全自動 ②要人但不必是你 ③只有你能做</b>;把 ①② 交給 AI 與外包,把只存在你腦袋裡的判斷,變成可被檢查、可被交接的流程。<div class="cite">Anthropic · Founder's Playbook (2026) · §組織擴張</div></div></details>
     </div>
-    <div class="principle">
-      <div class="pl-h">原則二 · <em>當建構變便宜,護城河有三層</em></div>
-      <p>「能做出來」不再是壁壘。真正的護城河來自累積的深度:<b>① 領域內化</b>(把行話、法規眉角、邊緣案例編碼成 AI 能反覆執行的流程)、<b>② 資料飛輪</b>(用戶在你產品裡的行為指紋,抄襲者買不到)、<b>③ 工作流綁定</b>(用戶疊了自動化、接了資料源,換掉你從「產品決定」變成「營運專案」)。手冊把問題收斂成一句——</p>
-      <div class="cite">Anthropic · Founder's Playbook (2026) · §護城河</div>
-    </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">🏰</span>護城河壓力測試</div>
-      <div class="tool-sub" style="font-family:'Newsreader',serif;font-style:italic;font-size:14px;color:var(--ink)">「一個資金雄厚的對手,今天直接照抄你的產品。你的用戶,會留下來嗎?」</div>
+  </section>
+
+  <!-- 17 · 規模化:護城河 -->
+  <section class="step" data-ch="規模化">
+    <div class="step-card">
+      <div class="kick">規模化 · 護城河壓力測試</div>
+      <div class="step-toolhead">對手照抄你,用戶<em>會留下來嗎</em>?</div>
+      <p class="step-subhead" style="font-family:'Newsreader',serif;font-style:italic;font-size:15px;color:var(--ink)">「一個資金雄厚的對手,今天直接照抄你的產品。你的用戶,會留下來嗎?」</p>
       <div id="moatTest"></div>
+      <details class="more"><summary>護城河有三層(手冊)</summary><div class="mbody">「能做出來」不再是壁壘。真正的護城河來自累積的深度:<b>① 領域內化</b>(把行話、法規眉角編碼成 AI 能反覆執行的流程)、<b>② 資料飛輪</b>(用戶行為指紋,抄襲者買不到)、<b>③ 工作流綁定</b>(換掉你從「產品決定」變成「營運專案」)。<div class="cite">Anthropic · Founder's Playbook (2026) · §護城河</div></div></details>
     </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">⛽</span>撐得過去嗎?(財務韌性)</div>
-      <div class="tool-sub">填三個你知道的數字,粗估你能撐多久、大概何時回本。AI 時代的好處:固定成本可以壓很低、先獲利再擴編。會依你選的航線「變現速度」推算。</div>
+  </section>
+
+  <!-- 18 · 規模化:撐得過嗎 -->
+  <section class="step" data-ch="規模化">
+    <div class="step-card">
+      <div class="kick">規模化 · 財務韌性</div>
+      <div class="step-toolhead">你<em>撐得過去</em>嗎?</div>
+      <p class="step-subhead">填三個你知道的數字,粗估你能撐多久、大概何時回本。會依你選的航線「變現速度」推算。</p>
       <div class="rc-grid">
         <div class="rc-in"><label>啟動資金<span class="hint">能燒的存糧(元)</span></label><input type="number" id="rcCap" value="300000" min="0" step="10000"></div>
         <div class="rc-in"><label>每月固定支出<span class="hint">房租生活費等(元)</span></label><input type="number" id="rcBurn" value="30000" min="0" step="1000"></div>
@@ -1091,58 +1174,93 @@
       </div>
       <div class="rc-out" id="rcOut"></div>
     </div>
-    <div class="tool" style="border-style:solid;background:var(--card)">
-      <div class="tool-h" style="color:var(--accent)"><span class="ico">🎮</span>決策演練</div>
-      <div class="gaunt" id="gauntScale"></div>
-    </div>
-    <div id="guideScale"></div>
-    <div class="pathex" id="pxScale"></div>
   </section>
 
-  <!-- ============ MEND · 抵達 / 選擇 ============ -->
-  <section class="mod" id="mend">
-    <div class="mod-divider"><span class="md-k">∞ · 抵達 / The Real Bottleneck</span><span class="md-l"></span></div>
-    <p class="lead-block">走完四個階段,你會發現它們指向同一件事:當執行幾乎免費,稀缺的不再是「能力」,而是<b>判斷力與品味</b>。工具會越來越強、人人都拿得到;能不能蓋出東西的差距會被快速抹平。拉開距離的,是你<b>選擇</b>把這幾乎免費的算力,指向哪裡。</p>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">🔭</span>多鏡頭:我該把稀缺的注意力花在哪?</div>
-      <div class="lens" id="lensFocus"></div>
+  <!-- 19 · 規模化:想一想 + 演練 -->
+  <section class="step" data-ch="規模化">
+    <div class="step-card">
+      <div class="kick">規模化 · 想一想 + 決策演練</div>
+      <div class="step-toolhead">只有你能做的事</div>
+      <div id="guideScale"></div>
+      <div class="gaunt" id="gauntScale" style="margin-top:16px"></div>
     </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">🛟</span>盲區雷達:你可能還沒想到的事</div>
-      <div class="tool-sub">大部分人栽的,不是想得到的風險,是<b>根本沒想到的那些</b>。下面每一條,勾起「我還沒想清楚」的——勾越多越好,代表你誠實。它們會列進你的飛行計畫,提醒你回去補。</div>
+  </section>
+
+  <!-- 20 · 抵達:盲區雷達 -->
+  <section class="step" data-ch="抵達">
+    <div class="step-card">
+      <div class="kick">∞ · 抵達 / 盲區雷達</div>
+      <div class="step-toolhead">你可能<em>還沒想到</em>的事</div>
+      <p class="step-subhead">栽人的,往往不是想得到的風險,是根本沒想到的那些。勾起「我還沒想清楚」的——勾越多越誠實,它們會列進你的飛行計畫。</p>
       <div id="blindspots"></div>
     </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">🎚️</span>信心三軸:你最有把握的,是對的那一件嗎?</div>
-      <div class="tool-sub">拉動三條,誠實標出你現在的信心。AI 時代最危險的錯覺,是「我做得出」遠比「有人要」更有把握——而真正決定生死的,是後者。</div>
+  </section>
+
+  <!-- 21 · 抵達:信心三軸 -->
+  <section class="step" data-ch="抵達">
+    <div class="step-card">
+      <div class="kick">抵達 · 信心三軸</div>
+      <div class="step-toolhead">你最有把握的,是<em>對的</em>那一件嗎?</div>
+      <p class="step-subhead">拉動三條,誠實標出你現在的信心。AI 時代最危險的錯覺,是「我做得出」遠比「有人要」更有把握——而真正決定生死的是後者。</p>
       <div id="confSliders"></div>
       <div id="confVerdict"></div>
     </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">🏁</span>里程碑與放棄線(先寫,才不會自欺)</div>
-      <div class="tool-sub">創業最難的不是堅持,是<b>知道何時該停</b>。在你還清醒、還沒投入感情之前,先把「成功長什麼樣」和「達不到什麼我就轉向」寫死。</div>
+  </section>
+
+  <!-- 22 · 抵達:里程碑 + 清單 -->
+  <section class="step" data-ch="抵達">
+    <div class="step-card">
+      <div class="kick">抵達 · 里程碑 / 起步清單</div>
+      <div class="step-toolhead">先寫,才不會<em>自欺</em></div>
+      <p class="step-subhead">創業最難的不是堅持,是知道何時該停。趁你還清醒,先把「成功長什麼樣」和「達不到什麼就轉向」寫死。</p>
       <div class="killgrid">
-        <div><label class="ok-l">✓ 成功長這樣(里程碑)</label><textarea id="killOk" placeholder="例:6 個月內有 30 位付費訂戶、且第 2 個月續訂率 >70%"></textarea></div>
-        <div><label class="stop-l">✗ 達不到什麼,我就停 / 轉向(放棄線)</label><textarea id="killStop" placeholder="例:連續問 20 個目標用戶,沒有 5 個說『願意付錢』,就回頭改題目"></textarea></div>
+        <div><label class="ok-l">✓ 成功長這樣(里程碑)</label><textarea id="killOk" placeholder="例:6 個月內 30 位付費訂戶、且第 2 個月續訂率 >70%"></textarea></div>
+        <div><label class="stop-l">✗ 達不到什麼,我就停 / 轉向(放棄線)</label><textarea id="killStop" placeholder="例:連問 20 個目標用戶,沒有 5 個說『願意付錢』,就回頭改題目"></textarea></div>
       </div>
-    </div>
-    <div class="tool">
-      <div class="tool-h"><span class="ico">✅</span>下海前的通用起步清單</div>
-      <div class="tool-sub">不論你選哪條路,這六件事都先做。勾掉再開始——它們會進你的飛行計畫。</div>
-      <div class="checklist" id="checklist"></div>
+      <div style="margin-top:18px">
+        <div class="step-toolhead" style="font-size:17px">這禮拜的起步清單</div>
+        <p class="step-subhead" style="margin:4px 0 8px">不論哪條路,這六件都先做。勾掉再開始。</p>
+        <div class="checklist" id="checklist"></div>
+      </div>
+      <details class="more"><summary>最後一個鏡頭:我該把注意力花在哪?</summary><div class="mbody"><div class="lens" id="lensFocus"></div></div></details>
     </div>
   </section>
 
-  <!-- ============ MPLAN · 飛行計畫 ============ -->
-  <section class="mod" id="mplan">
-    <div class="mod-divider"><span class="md-k">輸出 · Your Flight Plan</span><span class="md-l"></span></div>
-    <p class="lead-block">把你這趟航程的所有決定,收成一張可列印、可帶走的<b>飛行計畫</b>。它會隨你上面的操作即時更新。</p>
-    <div class="plan" id="planCard"></div>
+  <!-- 23 · 結果 -->
+  <section class="step" data-ch="結果">
+    <div class="step-card" style="border-width:2px;border-color:var(--ink)">
+      <div class="kick">結果 · Your Flight Plan</div>
+      <div class="step-toolhead">你的<em>飛行計畫</em></div>
+      <p class="step-subhead">把你這場預演的所有決定,收成一張可列印、可帶走的計畫。它會隨你上面的操作即時更新。</p>
+      <div class="plan" id="planCard"></div>
+
+      <div style="margin-top:26px">
+        <div class="kick" style="margin-bottom:6px">帶走你的 AI 教練 · Coach Studio</div>
+        <div class="step-toolhead" style="font-size:19px">把它變成<em>懂你這條路</em>的教練</div>
+        <p class="step-subhead">不花一毛錢——用你<b>自己的 Claude / ChatGPT 月費方案</b>。選一個教練,系統把你剛剛填的所有資料組成一段 prompt,複製,貼到你自己的 AI,它就接著教,而且記得你的處境。</p>
+        <div class="coach-intro"><p>💡 網站後端不能用我的訂閱替你付費,但<b>你自己的月費方案</b>本來就能用。所以把這場預演的「脈絡」打包成 prompt 帶走最划算——填得越多,教練越準。</p></div>
+        <div class="lens-tabs" id="coachTabs"></div>
+        <div class="coach-blurb" id="coachBlurb"></div>
+        <div class="coach-missing" id="coachMissing"></div>
+        <button class="dev-btn" id="coachGen">生成這位教練的 prompt →</button>
+        <div class="dev-out" id="coachOut"></div>
+      </div>
+
+      <button class="libtoggle" id="libToggle">📚 瀏覽全部 43 個一人公司標本 ↓</button>
+      <div class="result-axiom">「領域會變,公式不變。」</div>
+    </div>
   </section>
 
-</div><!-- /.course -->
+</div><!-- /.stepwrap -->
 
-<!-- ============ MLIB · 標本庫附錄 ============ -->
+<div class="stepnav">
+  <div class="stepnav-in">
+    <button class="snav prev" id="stepPrev" disabled>← 上一步</button>
+    <button class="snav next" id="stepNext">下一步 →</button>
+  </div>
+</div>
+
+<div id="libWrap" style="display:none">
 <div class="libhead" id="mlib">
   <div class="mod-divider"><span class="md-k">附錄 · 43 個一人公司標本 / The Specimen Library</span><span class="md-l"></span></div>
   <p class="lead-block">課程裡的範例,全部來自這座標本庫。每張卡是一隻被解剖的「一人公司」,依四支柱拆解(可委派系統 · 無人力槓桿 · AI 拿不到的護城河 · 財務韌性),附五維體質評分(可排序橫向比較)與完整檔案。<b>公式不變,領域在變。</b></p>
@@ -1265,6 +1383,7 @@
   </footer>
 </div>
 
+</div>
 <script>
 const DATA = [
   {
@@ -3017,24 +3136,20 @@ function buildQuiz(){
 function setPath(id, scroll){
   const d = DATA.find(x=>x.id===id); if(!d) return;
   curPath = d; P.path = d;
-  $('pathbar').innerHTML = `
+  const pb = $('pathbar');
+  if(pb){
+    pb.innerHTML = `
     <div class="pathbar">
       <span class="pl">你的航線</span>
       <span class="nm">${d.name}</span><span class="dom">· ${d.domain}</span>
       <button class="swap" id="pbSwap">↑ 換一條</button>
     </div>`;
-  $('pbSwap').addEventListener('click', ()=>$('mpick').scrollIntoView({behavior:'smooth'}));
+    const sw = $('pbSwap');
+    if(sw) sw.addEventListener('click', ()=>{ const q=$('quizSec'); if(q) q.scrollIntoView({behavior:'smooth', block:'start'}); });
+  }
   renderPathTraps(d);
-  // stage-by-stage worked example
-  const steps = parsePath(d.path);
-  const px = (h, b)=>`<div class="px-h">以你的航線示範 · <span class="nm">${d.name}</span></div><div class="px-b">${h}<b>${b}</b></div>`;
-  $('pxIdea').innerHTML   = px('構想期的真實第一步 ▸ ', steps[0] || d.live);
-  $('pxMvp').innerHTML    = px('做出 MVP 後的下一步 ▸ ', steps[1] || '把最小版本拿去跟人對話,而不是繼續加功能。');
-  $('pxLaunch').innerHTML = px('這條路要「活下來」的條件 ▸ ', d.live + `（反例:${d.die}）`);
-  $('pxScale').innerHTML  = px('它 AI 拿不到的護城河 ▸ ', d.moat);
   recomputeReality();
   updatePlan();
-  if(scroll) $('m1').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 /* ============================================================
@@ -3512,31 +3627,124 @@ function updatePlan(){
 }
 
 /* ============================================================
-   sticky rail · 進度與目前位置
+   AI 教練棚 · 用訪客自己的 Claude/ChatGPT 月費方案
+   把使用者親手填的脈絡組成可貼上的 prompt
    ============================================================ */
-function wireRail(){
-  const links = [...document.querySelectorAll('.rail a')];
-  const ids = links.map(a=>a.dataset.mod);
-  const secs = ids.map(id=>$(id)).filter(Boolean);
-  let curIdx = 0;
-  const setActive = idx=>{
-    curIdx = idx;
-    links.forEach((a,i)=>{ a.classList.toggle('on', i===idx); a.classList.toggle('done', i<idx); });
-    $('railFill').style.width = ((idx+1)/links.length*100)+'%';
-  };
-  const obs = new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        const idx = ids.indexOf(e.target.id);
-        if(idx>=0) setActive(idx);
-      }
-    });
-  }, {rootMargin:'-45% 0px -50% 0px', threshold:0});
-  secs.forEach(s=>obs.observe(s));
-  links.forEach(a=>a.addEventListener('click', ()=>{
-    const idx = ids.indexOf(a.dataset.mod); if(idx>=0) setActive(idx);
+function _ideaSentence(){
+  const i=P.idea; if(!i.who && !i.problem) return '';
+  return `幫「${i.who||'(未填)'}」解決「${i.problem||'(未填)'}」的麻煩,方式是${i.how||'(未填)'};他們現在靠${i.alt||'(未填)'}硬撐。${i.edge?`我的底:${i.edge}。`:''}`;
+}
+function _coreCtx(){
+  let s = `【我的點子】${_ideaSentence()||'(尚未寫成一句話)'}\n`;
+  if(P.path) s += `【我選的參照模型】${P.path.name}(${P.path.domain})——${P.path.role}\n`;
+  const q=P.quiz;
+  if(Object.keys(q).length===5) s += `【我的條件】${[QUIZ_LABEL.capital[q.capital],QUIZ_LABEL.time[q.time],QUIZ_LABEL.income[q.income],QUIZ_LABEL.goal[q.goal],QUIZ_LABEL.edge[q.edge]].join(' · ')}\n`;
+  return s;
+}
+function _fullCtx(){
+  let s = _coreCtx();
+  if(P.premo) s += `【我預測的失敗死因】${P.premo}${P.premoTag!=null?`(我歸類為:${DEATHS[P.premoTag].t})`:''}\n`;
+  const r=P.reflect, add=(l,k)=>{ if(r[k]) s += `【${l}】${r[k]}\n`; };
+  add('我最怕用戶說','idea:fear'); add('我這週去哪找人問','idea:find');
+  add('只能留一個功能','mvp:one'); add('第一批10人從哪來','launch:first10');
+  add('我打算怎麼養自有名單','launch:own'); add('只有我能做不放手的事','scale:onlyme');
+  if(P.scope.do) s += `【範圍·一定做】${P.scope.do}\n`;
+  if(P.scope.dont) s += `【範圍·刻意不做】${P.scope.dont}\n`;
+  if(P.dist.total) s += `【觸及】自主佔比約 ${Math.round(P.dist.owned/P.dist.total*100)}%\n`;
+  const onlyYou=Object.values(P.triage).filter(b=>b===3).length;
+  if(Object.keys(P.triage).length) s += `【工作盤點】仍有 ${onlyYou} 項「只有我」能做\n`;
+  if(P.moat.some(x=>x>0)) s += `【護城河自評】領域內化 ${P.moat[0]} / 資料飛輪 ${P.moat[1]} / 工作流綁定 ${P.moat[2]}(各 0–2)\n`;
+  s += `【信心三軸】有人要 ${P.conf.want} / 做得出 ${P.conf.build} / 撐得住 ${P.conf.last}(0–100)\n`;
+  if(P.blind.length) s += `【我還沒想清楚的盲區】${P.blind.map(x=>BLINDSPOTS[x].t).join('、')}\n`;
+  if(P.reality) s += `【財務】零收入存糧約撐 ${P.reality.runway===Infinity?'無壓力':Math.round(P.reality.runway)+'個月'},估第 ${P.reality.breakeven} 月回本\n`;
+  if(P.kill.ok) s += `【我的里程碑】${P.kill.ok}\n`;
+  if(P.kill.stop) s += `【我的放棄線】${P.kill.stop}\n`;
+  return s;
+}
+const COACHES = [
+  {k:'validate', name:'需求驗證', ico:'🔬',
+   blurb:'冷靜、只在乎真相的早期教練。專長:逼出你還沒驗證的假設、設計一週內就能跑的驗證。',
+   build:()=>`你是一位冷靜、誠實、只在乎真相的早期創業教練,專長是「需求驗證」。不要鼓勵我,只給反證與盲點。\n\n${_coreCtx()}${P.premo?`【我自己預測的死因】${P.premo}\n`:''}\n請做四件事:\n1. 點出我這個點子最致命的 3 個「未驗證假設」,並說明為何它們可能是錯的。\n2. 設計一個「一週內、幾乎零成本、而且有可能讓我失敗」的驗證實驗。\n3. 給我 8 個該去問真實用戶的問題(不要引導式、不要只會得到「不錯啊」的問題)。\n4. 告訴我:哪一個我一直在逃避、卻最該先問的問題?`},
+  {k:'distro', name:'分銷策略', ico:'📡',
+   blurb:'務實的 go-to-market 教練。專長:你的第一批用戶具體從哪來、怎麼擁有自己的名單。',
+   build:()=>`你是一位務實的 go-to-market / 分銷教練。我最大的風險是「做得出卻沒人看見」。\n\n${_coreCtx()}${P.reflect['launch:first10']?`【我目前的想法:第一批用戶從哪來】${P.reflect['launch:first10']}\n`:''}\n請做四件事:\n1. 列出我「第一批 10 個能叫出名字的用戶」具體從哪來(精確到社團/平台/類型的人,不要講空話)。\n2. 設計一個把流量沉澱成「自有名單」的具體機制。\n3. 給我一個 30 天、不靠買廣告的觸及計畫。\n4. 指出哪一個渠道是「大廠看不上、我能當第一名」的,為什麼。`},
+  {k:'moat', name:'護城河', ico:'🏰',
+   blurb:'想長期競爭優勢的教練。專長:資金雄厚的對手照抄你,你怎麼讓用戶留下來。',
+   build:()=>`你是一位專想長期競爭優勢(護城河)的創業教練。\n\n${_coreCtx()}${P.moat.some(x=>x>0)?`【我自評三層深度(各 0–2)】領域內化 ${P.moat[0]} / 資料飛輪 ${P.moat[1]} / 工作流綁定 ${P.moat[2]}\n`:''}\n假設一個資金雄厚的對手明天直接照抄我的產品。請做三件事:\n1. 評估我在「領域內化 / 資料飛輪 / 工作流綁定」三層各有多深、最弱在哪。\n2. 給我每一層「這個月就能動手」的一個具體加深動作。\n3. 告訴我最該集中火力的那一層是哪個、為什麼。`},
+  {k:'price', name:'定價', ico:'💰',
+   blurb:'定價教練。專長:幫你不靠猜定價,並戳破「不敢開價、用時間換錢」的傾向。',
+   build:()=>`你是一位定價教練。\n\n${_coreCtx()}\n請做三件事:\n1. 提出 2–3 種適合我的定價模型(一次性 / 訂閱 / 分級),各自適合的理由與風險。\n2. 給我一個「不靠猜」的定價驗證方法(這週就能做)。\n3. 老實說:我有沒有「不敢開價、把自己鎖在用時間換錢」的傾向?如果有,怎麼破。`},
+  {k:'master', name:'總教練', ico:'🧭',
+   blurb:'讀過你整份飛行計畫的長期教練。給你最大風險、30/60/90 計畫、戳破自我欺騙。',
+   build:()=>`你是我長期的 AI 創業教練,以下是我整場創業預演親手填下的完整處境。請認真讀完。\n\n${_fullCtx()}\n請做五件事:\n1. 用一段話誠實總結我「現在最大的單一風險」。\n2. 給我一個具體的 30 / 60 / 90 天行動計畫(每段最多 3 條,要可執行)。\n3. 指出我自己填的東西裡,哪裡前後矛盾、或在自我欺騙。\n4. 給我這禮拜「只做這一件」的明確指令。\n5. 最後反問我一個我一直在逃避的問題。\n\n之後請把你當成我的固定教練,我會回來跟你回報進度。`}
+];
+let curCoach = 0;
+function buildCoachStudio(){
+  const tabs=$('coachTabs'); if(!tabs) return;
+  tabs.innerHTML = COACHES.map((c,i)=>`<button class="lens-tab${i===0?' on':''}" data-i="${i}"><span class="li">${c.ico}</span>${c.name}</button>`).join('');
+  tabs.querySelectorAll('.lens-tab').forEach(t=>t.addEventListener('click',()=>{
+    tabs.querySelectorAll('.lens-tab').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on'); curCoach=+t.dataset.i; paintCoachBlurb(); $('coachOut').classList.remove('on');
   }));
-  setActive(0);
+  $('coachGen').addEventListener('click', genCoach);
+  paintCoachBlurb();
+}
+function paintCoachBlurb(){
+  const c=COACHES[curCoach];
+  $('coachBlurb').innerHTML = `<b>${c.ico} ${c.name}教練 ▸</b> ${c.blurb}`;
+  const m=$('coachMissing'), miss=[];
+  if(!_ideaSentence()) miss.push('你的點子');
+  if(!P.path && c.k!=='master') miss.push('你的航線');
+  if(miss.length){ m.classList.add('on'); m.textContent = '💡 回去填「'+miss.join('、')+'」會讓教練更準(沒填也能生成)。'; }
+  else m.classList.remove('on');
+}
+function genCoach(){
+  const c=COACHES[curCoach], prompt=c.build();
+  $('coachOut').innerHTML = `
+    <div class="dev-prompt"><button class="copybtn" id="coachCopy">複製</button><span class="dp-tag">↳ ${c.ico} ${c.name}教練 · 複製後貼到你自己的 Claude / ChatGPT</span>${prompt.replace(/</g,'&lt;')}</div>
+    <div class="coach-open"><span class="col">已備好,貼上即可 ▸</span>
+      <a class="open-btn" href="https://claude.ai/new" target="_blank" rel="noopener">開啟 Claude <span class="ext">↗</span></a>
+      <a class="open-btn" href="https://chatgpt.com/" target="_blank" rel="noopener">開啟 ChatGPT <span class="ext">↗</span></a></div>`;
+  $('coachOut').classList.add('on');
+  $('coachCopy').addEventListener('click',()=>{
+    navigator.clipboard?.writeText(prompt).then(()=>{ const b=$('coachCopy'); b.textContent='已複製 ✓'; setTimeout(()=>b.textContent='複製',1600); });
+  });
+}
+
+/* ============================================================
+   STEP WIZARD · 一步一題控制器
+   ============================================================ */
+function initSteps(){
+  const steps=[...document.querySelectorAll('.stepwrap > .step')];
+  const total=steps.length;
+  const prev=$('stepPrev'), next=$('stepNext'), fill=$('stepFill'), chEl=$('stepCh'), numEl=$('stepNum');
+  let cur=0;
+  function show(i, smooth){
+    cur=Math.max(0, Math.min(total-1, i));
+    steps.forEach((s,idx)=>s.classList.toggle('active', idx===cur));
+    fill.style.width=((cur+1)/total*100)+'%';
+    chEl.textContent=steps[cur].dataset.ch||'';
+    numEl.textContent=`${cur+1} / ${total}`;
+    prev.disabled = cur===0;
+    next.textContent = cur===total-1 ? '完成 ✓' : (cur===0 ? '開始預演 →' : '下一步 →');
+    try{ localStorage.setItem('soloStep', cur); }catch(e){}
+    window.scrollTo({top:0, behavior: smooth?'smooth':'auto'});
+  }
+  prev.addEventListener('click',()=>show(cur-1, true));
+  next.addEventListener('click',()=>{ if(cur<total-1) show(cur+1, true); });
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    if(e.key==='ArrowRight') show(cur+1, true);
+    if(e.key==='ArrowLeft') show(cur-1, true);
+  });
+  const lt=$('libToggle');
+  if(lt) lt.addEventListener('click',()=>{
+    const w=$('libWrap');
+    if(w.style.display==='none'){ w.style.display='block'; lt.textContent='📚 收起標本庫 ↑'; w.scrollIntoView({behavior:'smooth'}); }
+    else { w.style.display='none'; lt.textContent='📚 瀏覽全部 43 個一人公司標本 ↓'; }
+  });
+  let start=0; try{ start=Math.min(total-1, parseInt(localStorage.getItem('soloStep')||'0',10)||0); }catch(e){}
+  show(start, false);
 }
 
 /* ============================================================
@@ -3586,7 +3794,8 @@ setPath(P._pathId || 'S-03', false);       // 還原(或預設)航線
 });
 recomputeReality();
 updatePlan();
-wireRail();
+buildCoachStudio();
+initSteps();
 </script>
 </body>
 </html>
