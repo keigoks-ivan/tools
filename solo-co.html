@@ -565,6 +565,222 @@
     .rc-grid{grid-template-columns:1fr}
     .rk-t{font-size:19px}
   }
+
+  /* ============================================================
+     COURSE LAYER · 飛行學校 (新)
+     互動課程：旅程為骨、手冊原則為肉、多鏡頭思維貫穿
+     框架精神取自 Anthropic《The Founder's Playbook:
+     Building an AI-Native Startup》(2026)
+     ============================================================ */
+
+  /* ---- course hero thesis banner ---- */
+  .thesis{
+    margin:24px 0 0;background:var(--ink);color:var(--paper);
+    border-radius:4px;padding:22px 24px;box-shadow:3px 4px 0 var(--shadow);
+    display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;
+  }
+  .thesis .th-q{font-family:'Newsreader',serif;font-style:italic;font-size:clamp(19px,3vw,26px);line-height:1.3;flex:1;min-width:260px}
+  .thesis .th-q b{color:#e8b4a6;font-style:normal;font-weight:600}
+  .thesis .th-src{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#b3aa98;line-height:1.7;max-width:200px}
+  .thesis .th-src b{color:var(--gold);display:block;margin-bottom:3px}
+
+  /* ---- sticky stage rail ---- */
+  .railwrap{position:sticky;top:0;z-index:50;background:rgba(27,26,23,.97);backdrop-filter:blur(8px);border-bottom:1px solid #000}
+  .rail-prog{height:3px;background:rgba(255,255,255,.1)}
+  .rail-prog .fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--accent));transition:width .25s ease}
+  .rail{max-width:1240px;margin:0 auto;padding:0 22px;display:flex;gap:2px;align-items:stretch;overflow-x:auto;scrollbar-width:none}
+  .rail::-webkit-scrollbar{display:none}
+  .rail a{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.04em;
+    color:#b3aa98;text-decoration:none;padding:12px 13px;white-space:nowrap;
+    border-bottom:2px solid transparent;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:6px;
+  }
+  .rail a .rn{font-size:9px;opacity:.7}
+  .rail a:hover{color:#fff}
+  .rail a.on{color:#fff;border-bottom-color:var(--accent)}
+  .rail a.done .rn::after{content:" ✓";color:var(--accent2)}
+
+  /* ---- course module shell (extends .rk-sec) ---- */
+  .course{max-width:920px;margin:0 auto;padding:4px 22px 30px}
+  .mod{scroll-margin-top:58px}
+  .mod-divider{display:flex;align-items:center;gap:16px;margin:46px 0 4px}
+  .mod-divider .md-k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:600;white-space:nowrap}
+  .mod-divider .md-l{flex:1;height:2px;background:var(--ink);opacity:.25}
+  .lead-block{font-family:'Newsreader',serif;font-size:17px;line-height:1.62;color:#3a352c;margin:14px 0 4px}
+  .lead-block b{color:var(--ink)}
+  .lead-block em{font-style:italic;color:var(--accent)}
+
+  /* citation chip */
+  .cite{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:600;display:inline-flex;align-items:center;gap:5px;margin-top:2px}
+  .cite::before{content:"";width:13px;height:1px;background:var(--gold)}
+  .principle{background:rgba(154,123,50,.08);border:1px solid rgba(154,123,50,.32);border-radius:8px;padding:15px 17px;margin:14px 0}
+  .principle .pl-h{font-family:'Newsreader',serif;font-size:16px;font-weight:600;color:var(--ink);margin-bottom:5px}
+  .principle p{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;line-height:1.65;color:#3a352c}
+  .principle p b{color:var(--ink);font-weight:700}
+  .principle .pl-h em{font-style:normal;color:var(--accent)}
+
+  /* tool block header (sub-component inside a module) */
+  .tool{margin-top:20px;border:1px dashed var(--line);border-radius:10px;padding:18px 18px 19px;background:rgba(244,241,232,.5)}
+  .tool-h{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .tool-h .ico{font-size:15px}
+  .tool-sub{font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--mute);line-height:1.55;margin-bottom:13px}
+
+  /* ---- mindset flip cards ---- */
+  .flipgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:13px}
+  .flip{perspective:1100px;cursor:pointer;min-height:138px}
+  .flip-in{position:relative;width:100%;height:100%;min-height:138px;transition:transform .55s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
+  .flip.on .flip-in{transform:rotateY(180deg)}
+  .flip-f,.flip-b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:9px;padding:15px 16px;display:flex;flex-direction:column;justify-content:center}
+  .flip-f{background:#211f1b;color:#d9d2c2;border:1px solid #000}
+  .flip-b{background:rgba(47,93,80,.1);border:1.5px solid var(--accent2);transform:rotateY(180deg);color:#2c2a24}
+  .flip .tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;font-weight:600}
+  .flip-f .tag{color:#e0a695} .flip-b .tag{color:var(--accent2)}
+  .flip .txt{font-family:'Noto Sans TC',sans-serif;font-size:13px;line-height:1.5}
+  .flip-b .txt b{color:var(--accent2);font-weight:700}
+  .flip .turn{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--mute);margin-top:auto;padding-top:9px}
+  .flip-f .turn{color:#8a8275}
+
+  /* ---- LENS RACK (多鏡頭 / 多模型思維) ---- */
+  .lens{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper)}
+  .lens-q{font-family:'Newsreader',serif;font-size:16px;font-weight:600;color:var(--ink);padding:14px 16px 0}
+  .lens-q .lq-tag{display:block;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:3px}
+  .lens-tabs{display:flex;gap:0;flex-wrap:wrap;padding:12px 16px 0;border-bottom:1px solid var(--line)}
+  .lens-tab{font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:600;padding:8px 12px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--mute);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .14s}
+  .lens-tab .li{font-size:15px}
+  .lens-tab:hover{color:var(--ink)}
+  .lens-tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+  .lens-body{padding:15px 17px 17px}
+  .lens-body .lb-model{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);font-weight:600;margin-bottom:6px}
+  .lens-body .lb-text{font-family:'Noto Sans TC',sans-serif;font-size:13px;line-height:1.65;color:#2c2a24}
+  .lens-body .lb-text b{color:var(--ink);font-weight:700}
+  .lens-body .lb-ask{font-family:'Newsreader',serif;font-style:italic;font-size:14px;color:var(--accent);margin-top:9px;line-height:1.5}
+
+  /* ---- DEVIL'S ADVOCATE generator ---- */
+  .dev-in{width:100%;font-family:'Noto Sans TC',sans-serif;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);resize:vertical;min-height:62px;line-height:1.5}
+  .dev-in:focus{outline:none;border-color:var(--accent)}
+  .dev-btn{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;font-weight:600;padding:11px 20px;background:var(--accent);color:#fff;border:0;border-radius:7px;cursor:pointer;transition:opacity .15s}
+  .dev-btn:hover{opacity:.88}
+  .dev-out{margin-top:16px;display:none}
+  .dev-out.on{display:block}
+  .dev-q{display:flex;flex-direction:column;gap:8px;margin-bottom:15px}
+  .dev-qi{font-family:'Noto Sans TC',sans-serif;font-size:13px;line-height:1.55;color:#2c2a24;padding:10px 13px 10px 34px;position:relative;background:rgba(181,71,45,.05);border-left:2px solid var(--accent);border-radius:0 6px 6px 0}
+  .dev-qi::before{content:"?";position:absolute;left:11px;top:9px;font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--accent)}
+  .dev-prompt{position:relative;background:#211f1b;color:#d9d2c2;border-radius:8px;padding:15px 16px 16px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+  .dev-prompt .dp-tag{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:9px;font-weight:600}
+  .copybtn{position:absolute;top:11px;right:11px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;color:#d9d2c2;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:5px 9px;cursor:pointer}
+  .copybtn:hover{background:rgba(255,255,255,.2)}
+
+  /* ---- generic meter / gauge ---- */
+  .gauge{margin-top:14px}
+  .gauge-track{height:14px;background:rgba(40,35,25,.1);border-radius:8px;overflow:hidden}
+  .gauge-fill{height:100%;width:0;border-radius:8px;transition:width .35s ease,background .35s ease}
+  .gauge-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:7px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.04em;color:var(--mute)}
+  .gauge-row .gv{font-size:13px;font-weight:600;color:var(--ink)}
+  .verdict{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;line-height:1.6;padding:12px 15px;border-radius:8px;margin-top:13px}
+  .verdict b{font-weight:700}
+  .verdict.good{background:rgba(47,93,80,.11);color:#2c4a40;border-left:3px solid var(--accent2)}
+  .verdict.warn{background:rgba(154,123,50,.13);color:#6e561f;border-left:3px solid var(--gold)}
+  .verdict.bad{background:rgba(181,71,45,.1);color:#8a3018;border-left:3px solid var(--accent)}
+
+  /* ---- scope creep simulator ---- */
+  .feat{display:flex;align-items:flex-start;gap:11px;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);cursor:pointer;margin-bottom:8px;transition:all .14s}
+  .feat:hover{border-color:var(--mute)}
+  .feat.on{border-color:var(--accent);background:rgba(181,71,45,.05)}
+  .feat .box{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--line);flex:0 0 auto;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;transition:all .14s}
+  .feat.on .box{background:var(--accent);border-color:var(--accent)}
+  .feat .ft{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:#2c2a24;line-height:1.45}
+  .feat .ev{display:block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.02em;color:var(--mute);margin-top:3px}
+  .feat.on .ev.no{color:var(--accent)}
+  .feat.on .ev.yes{color:var(--accent2)}
+
+  /* ---- distribution check ---- */
+  .dist-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.dist-cols{grid-template-columns:1fr}}
+  .dist-col{border-radius:9px;padding:13px 14px}
+  .dist-col.parasite{background:#211f1b}
+  .dist-col.owned{background:rgba(47,93,80,.08);border:1px solid var(--accent2)}
+  .dist-col .dc-h{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:10px}
+  .dist-col.parasite .dc-h{color:#e0a695} .dist-col.owned .dc-h{color:var(--accent2)}
+  .dtog{display:flex;align-items:center;gap:9px;font-family:'Noto Sans TC',sans-serif;font-size:12px;padding:7px 0;cursor:pointer;line-height:1.4}
+  .dist-col.parasite .dtog{color:#cfc8b8}
+  .dist-col.owned .dtog{color:#2c2a24}
+  .dtog .dt-box{width:16px;height:16px;border-radius:4px;border:1.5px solid currentColor;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:11px;opacity:.6}
+  .dtog.on .dt-box{opacity:1}
+  .dist-col.parasite .dtog.on .dt-box{background:var(--accent);border-color:var(--accent);color:#fff}
+  .dist-col.owned .dtog.on .dt-box{background:var(--accent2);border-color:var(--accent2);color:#fff}
+
+  /* ---- task triage ---- */
+  .triage-grid{display:flex;flex-direction:column;gap:8px}
+  .tk-task{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--line);border-radius:8px;background:var(--paper);cursor:pointer;transition:all .14s}
+  .tk-task:hover{border-color:var(--mute)}
+  .tk-task .tt-name{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:#2c2a24;flex:1;line-height:1.4}
+  .tk-task .tt-bucket{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.04em;font-weight:600;padding:6px 11px;border-radius:20px;white-space:nowrap;transition:all .14s}
+  .tk-task[data-b="0"] .tt-bucket{background:rgba(40,35,25,.07);color:var(--mute)}
+  .tk-task[data-b="1"]{border-color:var(--accent2)} .tk-task[data-b="1"] .tt-bucket{background:rgba(47,93,80,.14);color:var(--accent2)}
+  .tk-task[data-b="2"]{border-color:var(--gold)} .tk-task[data-b="2"] .tt-bucket{background:rgba(154,123,50,.16);color:#8a6d2a}
+  .tk-task[data-b="3"]{border-color:var(--accent)} .tk-task[data-b="3"] .tt-bucket{background:rgba(181,71,45,.12);color:var(--accent)}
+  .triage-hint{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.02em;color:var(--mute);margin-top:11px;text-align:center}
+
+  /* ---- moat stress test ---- */
+  .mt-layer{border:1px solid var(--line);border-radius:9px;padding:14px 15px;margin-bottom:11px;background:var(--paper)}
+  .mt-layer .ml-h{font-family:'Newsreader',serif;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:2px}
+  .mt-layer .ml-d{font-family:'Noto Sans TC',sans-serif;font-size:11.5px;color:var(--mute);line-height:1.5;margin-bottom:10px}
+  .mt-opts{display:flex;gap:7px;flex-wrap:wrap}
+  .mt-opt{font-family:'Noto Sans TC',sans-serif;font-size:12px;padding:7px 14px;border:1px solid var(--line);border-radius:20px;background:var(--card);color:#4a4438;cursor:pointer;transition:all .14s}
+  .mt-opt:hover{border-color:var(--ink)}
+  .mt-opt.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:600}
+
+  /* ---- your-path running example ---- */
+  .pathex{background:rgba(47,93,80,.07);border-left:3px solid var(--accent2);border-radius:0 8px 8px 0;padding:13px 16px;margin-top:18px}
+  .pathex .px-h{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+  .pathex .px-h .nm{font-family:'Newsreader',serif;font-size:14px;font-style:italic;letter-spacing:0;text-transform:none;color:var(--ink)}
+  .pathex .px-b{font-family:'Noto Sans TC',sans-serif;font-size:12.5px;line-height:1.62;color:#2c2a24}
+  .pathex .px-b b{color:var(--accent2)}
+
+  /* current-path badge in rail context */
+  .pathbar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;background:var(--ink);color:var(--paper);border-radius:10px;padding:13px 17px;margin:18px 0 4px}
+  .pathbar .pl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.6}
+  .pathbar .nm{font-family:'Newsreader',serif;font-size:18px;font-weight:600}
+  .pathbar .dom{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;opacity:.7}
+  .pathbar .swap{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--paper);background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:6px 12px;cursor:pointer}
+  .pathbar .swap:hover{background:rgba(255,255,255,.12)}
+
+  /* ---- FLIGHT PLAN summary ---- */
+  .plan{border:2px solid var(--ink);border-radius:4px;background:var(--card);box-shadow:3px 4px 0 var(--shadow);padding:26px 26px 24px;margin-top:18px}
+  .plan-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:16px}
+  .plan-top .pt-t{font-family:'Newsreader',serif;font-size:25px;font-weight:600;color:var(--ink);line-height:1.1}
+  .plan-top .pt-m{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-top:4px}
+  .plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px}
+  @media(max-width:560px){.plan-grid{grid-template-columns:1fr}}
+  .plan-row .pr-l{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:3px}
+  .plan-row .pr-v{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--ink);line-height:1.55}
+  .plan-row .pr-v.muted{color:var(--mute);font-style:italic}
+  .plan-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+  .plan-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;font-weight:600;padding:11px 18px;border-radius:7px;cursor:pointer;border:1px solid var(--ink)}
+  .plan-btn.primary{background:var(--ink);color:var(--paper)}
+  .plan-btn.ghost{background:transparent;color:var(--ink)}
+  .plan-btn:hover{opacity:.85}
+  .plan-foot{font-family:'Newsreader',serif;font-style:italic;font-size:15px;color:var(--accent);margin-top:18px;text-align:center;line-height:1.5}
+
+  /* library appendix intro */
+  .libhead{max-width:920px;margin:46px auto 0;padding:0 22px}
+  /* library filter bar sits just below the sticky rail */
+  .controls{top:46px}
+
+  @media(max-width:520px){
+    .course{padding:4px 16px 24px}
+    .flipgrid{grid-template-columns:1fr}
+    .plan{padding:20px 17px}
+  }
+
+  /* ---- print: only the flight plan ---- */
+  @media print{
+    body{background:#fff}
+    body *{visibility:hidden}
+    #planCard, #planCard *{visibility:visible}
+    #planCard{position:absolute;left:0;top:0;width:100%;box-shadow:none;border:1px solid #000}
+    .plan-actions{display:none}
+  }
 </style>
 </head>
 <body>
@@ -575,26 +791,224 @@
       <span style="font-size:14px">←</span><span>Property Monitor · 投資工具站</span>
     </a>
     <div class="eyebrow">
-      <span>The Solo Co. · Field Guide</span>
-      <span class="spec" id="specCount">N=43 SPECIMENS · REV. 2026.06</span>
+      <span>The Solo Co. · 互動創業課 / Founder Flight School</span>
+      <span class="spec">AI-NATIVE · REV. 2026.06</span>
     </div>
-    <h1>一人公司<br><em>範例標本庫</em></h1>
-    <p class="lede">每一張卡片是一隻被解剖的「一人公司」標本,依四支柱拆解：<span class="mono">可委派系統</span>、<span class="mono">無人力槓桿</span>、<span class="mono">AI 拿不到的護城河</span>、<span class="mono">財務韌性</span>,並標出那條決定生死的分水嶺。每個標本另附 <span class="mono">五維體質評分</span>(可排序橫向比較)與完整檔案：<span class="mono">經濟結構</span>、<span class="mono">具體流程</span>、<span class="mono">隱藏陷阱</span>、<span class="mono">0→1 起步路徑</span>。公式不變、領域在變。</p>
-    <div class="statband" id="statband"></div>
+    <h1>一人創業<br><em>飛行學校</em></h1>
+    <p class="lede">不是讀完一篇文章,是<b>親手飛過一遍</b>。把 Anthropic《The Founder's Playbook》的心法,拆成一條你能走的航線:<span class="mono">選一條適合你的路</span> → 走過 <span class="mono">構想 · MVP · 上線 · 規模化</span> 四個階段 → 在每個會墜機的決策點用「<span class="mono">多鏡頭</span>」換角度想 → 最後印出你自己的飛行計畫。途中所有範例,都接這座站的 43 個一人公司標本。</p>
+    <div class="thesis">
+      <div class="th-q">當「做出來」幾乎免費,「<b>該做什麼</b>」就成了唯一真正難的問題。瓶頸已從「你能做什麼」,移到「你<b>選擇</b>做什麼」。</div>
+      <div class="th-src"><b>這門課只教這件事</b>它的每一個面向、每一個會在路上絆倒你的地方。框架取自 Anthropic《The Founder's Playbook: Building an AI-Native Startup》(2026)。</div>
+    </div>
   </div>
 </header>
 
-<div class="modebar">
-  <div class="modebar-in">
-    <span class="mb-tag">你是 ‣</span>
-    <button class="mode-btn" id="mbRookie">🧭 我是新手 · 帶我預演</button>
-    <button class="mode-btn" id="mbPro">📊 我要比較所有模型</button>
-  </div>
+<div class="railwrap">
+  <div class="rail-prog"><div class="fill" id="railFill"></div></div>
+  <nav class="rail" id="rail">
+    <a href="#m0" data-mod="m0"><span class="rn">心法</span>北極星</a>
+    <a href="#mpick" data-mod="mpick"><span class="rn">選路</span>你的航線</a>
+    <a href="#m1" data-mod="m1"><span class="rn">①</span>構想</a>
+    <a href="#m2" data-mod="m2"><span class="rn">②</span>MVP</a>
+    <a href="#m3" data-mod="m3"><span class="rn">③</span>上線</a>
+    <a href="#m4" data-mod="m4"><span class="rn">④</span>規模化</a>
+    <a href="#mend" data-mod="mend"><span class="rn">抵達</span>選擇</a>
+    <a href="#mplan" data-mod="mplan"><span class="rn">輸出</span>飛行計畫</a>
+    <a href="#mlib" data-mod="mlib"><span class="rn">附錄</span>標本庫</a>
+  </nav>
 </div>
 
-<div class="rookie rookie-only" id="rookie"></div>
+<div class="course">
 
-<div class="controls pro-only">
+  <!-- ============ M0 · 北極星 / 心法 ============ -->
+  <section class="mod" id="m0">
+    <div class="mod-divider"><span class="md-k">00 · 北極星 / Mindset</span><span class="md-l"></span></div>
+    <p class="lead-block">開始前,先換一顆腦袋。AI 原生創業最大的轉變不是工具,是<b>你的角色</b>:你不再是「親手把事做完的人」,而是「<em>指揮 AI 與系統的人</em>」。你的注意力,從「做這件事」移到「<b>決定做什麼、為什麼做</b>」。</p>
+    <div class="principle">
+      <div class="pl-h">三個座艙儀表 · <em>從 IC 到 Orchestrator</em></div>
+      <p>手冊把創辦人的日常拆成三種介面:<b>Chat</b>(快問快答)、<b>Cowork</b>(跨來源整合、寫文件)、<b>Code</b>(直接動程式)。重點不是會用哪個工具,而是:當執行幾乎免費,「精實十人獨角獸」從勵志神話變成可被系統性達成的常態——而傳統順序(<b>募資→請人→開做</b>)會反過來:<b>先驗證、先有營收,再擴編</b>。</p>
+      <div class="cite">Anthropic · Founder's Playbook (2026) · §角色轉變</div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">🔄</span>心態翻轉牌組</div>
+      <div class="tool-sub">點每張牌翻面。左邊是「做事的人」的舊反射,右邊是「指揮者」的新反射——這是整門課的底層作業系統。</div>
+      <div class="flipgrid" id="flipMindset"></div>
+    </div>
+  </section>
+
+  <!-- ============ MPICK · 選你的航線 ============ -->
+  <section class="mod" id="mpick">
+    <div class="mod-divider"><span class="md-k">選路 · Pick Your Flight Path</span><span class="md-l"></span></div>
+    <p class="lead-block">43 條路太多?先回答 5 題,讓系統從中篩出最契合你<b>資金、時間、急迫度、目標、底牌</b>的 3 條。挑一條,它會成為你接下來整趟航程的<b>實際範例</b>——四個階段都用它來示範。</p>
+    <section class="rk-sec" id="quizSec"></section>
+    <div id="pathbar"></div>
+  </section>
+
+  <!-- ============ M1 · 構想 ============ -->
+  <section class="mod" id="m1">
+    <div class="mod-divider"><span class="md-k">01 · 構想 / Ideation · 第 0–1 月</span><span class="md-l"></span></div>
+    <p class="lead-block">這個階段只有一個任務:<b>確認你要解的是一個「真問題」</b>。別急著做。AI 讓你一個下午就生出能跑的東西,但——</p>
+    <div class="principle">
+      <div class="pl-h">陷阱一 · <em>「能跑的原型」是假的驗證</em></div>
+      <p>會動的原型看起來太像「方向對了」的鐵證,但它不是。原型真正的用途,是拿去跟真實用戶對話的<b>道具</b>;<b>那些對話本身才是證據</b>。AI 會用幫你實現好點子時一模一樣的熱情,順著一個錯誤前提幫你生成、測試、除錯一整套東西——它不會替你踩煞車。</p>
+      <div class="cite">Anthropic · Founder's Playbook (2026) · §驗證陷阱</div>
+    </div>
+    <div class="principle">
+      <div class="pl-h">陷阱二 · <em>確認偏誤現在配了研究引擎</em></div>
+      <p>你叫 AI 驗證點子,它就找到支持的證據;叫它估市場,它就給一個讓 TAM 好募資的數字。一個不問難題的創辦人,能比以往更快為一個壞點子建起「看起來研究充分」的論述,還全程深信在做盡職調查。<b>解藥是同一個工具反過來用</b>:叫它當魔鬼代言人。</p>
+      <div class="cite">Anthropic · Founder's Playbook (2026) · §確認偏誤</div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">🔭</span>多鏡頭:這是不是一個「真問題」?</div>
+      <div class="tool-sub">同一個點子,用五種思維模型輪流照一次。換鏡頭,你會看見單一視角藏起來的死角——這就是多模型思維。</div>
+      <div class="lens" id="lensIdea"></div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">😈</span>魔鬼代言人產生器</div>
+      <div class="tool-sub">把你的點子用一句話寫下來。系統會生出一組專門攻擊它的問題,外加一段可直接複製、貼給任何 AI 的對抗性 prompt——逼工具去找推翻你的反證,而不是討好你。</div>
+      <textarea class="dev-in" id="devIn" placeholder="例:我想做一份『給獨立咖啡店主的每週採購情報』電子報…"></textarea>
+      <button class="dev-btn" id="devBtn">生成反證問題 →</button>
+      <div class="dev-out" id="devOut"></div>
+    </div>
+    <div class="tool" style="border-style:solid;background:var(--card)">
+      <div class="tool-h" style="color:var(--accent)"><span class="ico">🎮</span>決策演練</div>
+      <div class="tool-sub">在花真錢真時間之前,先在腦中走一遍。選一個答案,看後果。這不是考試,是預演。</div>
+      <div class="gaunt" id="gauntIdea"></div>
+    </div>
+    <div class="pathex" id="pxIdea"></div>
+  </section>
+
+  <!-- ============ M2 · MVP ============ -->
+  <section class="mod" id="m2">
+    <div class="mod-divider"><span class="md-k">02 · MVP / Prototype · 第 1–3 月</span><span class="md-l"></span></div>
+    <p class="lead-block">做一個最小版本,當作「跟用戶對話的道具」。注意:<b>對話才是目的,原型只是手段</b>。這個階段最會出事的,是一種幾乎無痛、因此最危險的東西——</p>
+    <div class="principle">
+      <div class="pl-h">陷阱 · <em>零摩擦的範圍蔓延</em></div>
+      <p>過去擋住「再加一個功能」的力量,是工程時間的真實成本——現在加功能從一個衝刺變成一個下午,那道煞車消失了。每個新增單獨看都合理(「當然該支援那情境」),產品卻在一堆站得住腳的小決定裡,<b>長到失去方向</b>。解法:動工前先寫「範圍定義」,把問題從「該做嗎」換成「<b>是否有一群用戶說『沒它就不能用』</b>」。</p>
+      <div class="cite">Anthropic · Founder's Playbook (2026) · §範圍蔓延</div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">⚠️</span>功能蔓延模擬器</div>
+      <div class="tool-sub">下面每個功能「看起來都合理」。把你忍不住想加的勾起來,看「範圍蔓延」指針怎麼動——然後注意每個功能旁邊,有沒有「真有人說沒它就不能用」的證據。</div>
+      <div id="scopeSim"></div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">📐</span>範圍定義卡(寫下來才算數)</div>
+      <div class="tool-sub">動工前填這三格。這張卡會進你最後的飛行計畫。</div>
+      <div class="rc-grid" id="scopeDef" style="grid-template-columns:1fr">
+        <div class="rc-in"><label>這版<b style="color:var(--accent2)">一定做</b><span class="hint">核心的那一件事,只一件</span><input type="text" id="sdDo" placeholder="例:每週一封,只給一個可立刻採購的決策"></label></div>
+        <div class="rc-in"><label>這版<b style="color:var(--accent)">刻意不做</b><span class="hint">先砍掉的誘惑</span><input type="text" id="sdDont" placeholder="例:不做 App、不做社群、不做客製化報告"></label></div>
+        <div class="rc-in"><label>什麼<b>證據</b>才值得加新東西<span class="hint">把門檻寫死</span><input type="text" id="sdEvid" placeholder="例:≥5 位付費讀者主動說『沒它就退訂』"></label></div>
+      </div>
+    </div>
+    <div class="tool" style="border-style:solid;background:var(--card)">
+      <div class="tool-h" style="color:var(--accent)"><span class="ico">🎮</span>決策演練</div>
+      <div class="gaunt" id="gauntMvp"></div>
+    </div>
+    <div class="pathex" id="pxMvp"></div>
+  </section>
+
+  <!-- ============ M3 · 上線 ============ -->
+  <section class="mod" id="m3">
+    <div class="mod-divider"><span class="md-k">03 · 上線 / Launch · 第 3–9 月</span><span class="md-l"></span></div>
+    <p class="lead-block">把東西送到人面前。這裡藏著<b>最常見、也最隱形的死法</b>——不是做不出來,是沒人看見。</p>
+    <div class="principle">
+      <div class="pl-h">原則 · <em>擁有觀眾,不只擁有流量</em></div>
+      <p>把流量沉澱成你<b>自有的資產</b>:email 名單、自有社群、直接關係。寄生在別人平台上(演算法分潤、商店排名、SEO 波動)的生意,對方規則一改就一夜斷炊,而你毫無發言權。領域天差地遠,公式驚人地一致:<b>先證明有人要 → 擁有觸及他們的管道</b>。</p>
+      <div class="cite">Anthropic · Founder's Playbook (2026) · §分銷 / 本站跨標本規律</div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">📡</span>觸及體檢:你寄生,還是你自主?</div>
+      <div class="tool-sub">勾選你目前(或打算)用的觸及方式。左欄是「租來的」,右欄是「自己的」。看看你的觸及有多少比例,是別人改個規則就能拿走的。</div>
+      <div id="distCheck"></div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">🔭</span>多鏡頭:我該怎麼「被看見」?</div>
+      <div class="tool-sub">分銷不是只有「下廣告」一種解。換五個鏡頭看,你會找到最適合自己的那條。</div>
+      <div class="lens" id="lensReach"></div>
+    </div>
+    <div class="tool" style="border-style:solid;background:var(--card)">
+      <div class="tool-h" style="color:var(--accent)"><span class="ico">🎮</span>決策演練</div>
+      <div class="gaunt" id="gauntLaunch"></div>
+    </div>
+    <div class="pathex" id="pxLaunch"></div>
+  </section>
+
+  <!-- ============ M4 · 規模化 ============ -->
+  <section class="mod" id="m4">
+    <div class="mod-divider"><span class="md-k">04 · 規模化 / Scale · 第 9 月＋</span><span class="md-l"></span></div>
+    <p class="lead-block">生意起來了。早期你親手做每件事是<b>資產</b>;現在同樣的行為變成<b>瓶頸</b>——決定拖一週、客服只有你會回、什麼都卡在你身上。是時候從「做事」轉向「<b>設計系統</b>」。</p>
+    <div class="principle">
+      <div class="pl-h">原則一 · <em>把判斷編碼成可交接的系統</em></div>
+      <p>把你親手做的事盤點成三類:<b>① 可全自動</b>、<b>② 要人但不必是你</b>、<b>③ 只有你能做</b>。把 ①② 交給 AI 與外包,把只存在你腦袋裡的判斷,變成可被檢查、可被交接的流程。警訊:一小時能拍板的決定拖成一週、客服請求排隊只因為「只有你知道答案」。</p>
+      <div class="cite">Anthropic · Founder's Playbook (2026) · §組織擴張</div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">🗂️</span>工作盤點分流器</div>
+      <div class="tool-sub">點每一項工作,讓它在三個籃子間切換:全自動 / 委派 / 只有你。看看到最後,還有多少壓在你一個人身上。</div>
+      <div class="triage-grid" id="triage"></div>
+      <div class="triage-hint">點一下切換籃子 · 目標:把「只有你」壓到最少</div>
+      <div id="triageOut"></div>
+    </div>
+    <div class="principle">
+      <div class="pl-h">原則二 · <em>當建構變便宜,護城河有三層</em></div>
+      <p>「能做出來」不再是壁壘。真正的護城河來自累積的深度:<b>① 領域內化</b>(把行話、法規眉角、邊緣案例編碼成 AI 能反覆執行的流程)、<b>② 資料飛輪</b>(用戶在你產品裡的行為指紋,抄襲者買不到)、<b>③ 工作流綁定</b>(用戶疊了自動化、接了資料源,換掉你從「產品決定」變成「營運專案」)。手冊把問題收斂成一句——</p>
+      <div class="cite">Anthropic · Founder's Playbook (2026) · §護城河</div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">🏰</span>護城河壓力測試</div>
+      <div class="tool-sub" style="font-family:'Newsreader',serif;font-style:italic;font-size:14px;color:var(--ink)">「一個資金雄厚的對手,今天直接照抄你的產品。你的用戶,會留下來嗎?」</div>
+      <div id="moatTest"></div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">⛽</span>撐得過去嗎?(財務韌性)</div>
+      <div class="tool-sub">填三個你知道的數字,粗估你能撐多久、大概何時回本。AI 時代的好處:固定成本可以壓很低、先獲利再擴編。會依你選的航線「變現速度」推算。</div>
+      <div class="rc-grid">
+        <div class="rc-in"><label>啟動資金<span class="hint">能燒的存糧(元)</span></label><input type="number" id="rcCap" value="300000" min="0" step="10000"></div>
+        <div class="rc-in"><label>每月固定支出<span class="hint">房租生活費等(元)</span></label><input type="number" id="rcBurn" value="30000" min="0" step="1000"></div>
+        <div class="rc-in"><label>每週投入時數<span class="hint">小時</span></label><input type="number" id="rcHrs" value="20" min="1" max="80" step="1"></div>
+      </div>
+      <div class="rc-out" id="rcOut"></div>
+    </div>
+    <div class="tool" style="border-style:solid;background:var(--card)">
+      <div class="tool-h" style="color:var(--accent)"><span class="ico">🎮</span>決策演練</div>
+      <div class="gaunt" id="gauntScale"></div>
+    </div>
+    <div class="pathex" id="pxScale"></div>
+  </section>
+
+  <!-- ============ MEND · 抵達 / 選擇 ============ -->
+  <section class="mod" id="mend">
+    <div class="mod-divider"><span class="md-k">∞ · 抵達 / The Real Bottleneck</span><span class="md-l"></span></div>
+    <p class="lead-block">走完四個階段,你會發現它們指向同一件事:當執行幾乎免費,稀缺的不再是「能力」,而是<b>判斷力與品味</b>。工具會越來越強、人人都拿得到;能不能蓋出東西的差距會被快速抹平。拉開距離的,是你<b>選擇</b>把這幾乎免費的算力,指向哪裡。</p>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">🔭</span>多鏡頭:我該把稀缺的注意力花在哪?</div>
+      <div class="lens" id="lensFocus"></div>
+    </div>
+    <div class="tool">
+      <div class="tool-h"><span class="ico">✅</span>下海前的通用起步清單</div>
+      <div class="tool-sub">不論你選哪條路,這六件事都先做。勾掉再開始——它們會進你的飛行計畫。</div>
+      <div class="checklist" id="checklist"></div>
+    </div>
+  </section>
+
+  <!-- ============ MPLAN · 飛行計畫 ============ -->
+  <section class="mod" id="mplan">
+    <div class="mod-divider"><span class="md-k">輸出 · Your Flight Plan</span><span class="md-l"></span></div>
+    <p class="lead-block">把你這趟航程的所有決定,收成一張可列印、可帶走的<b>飛行計畫</b>。它會隨你上面的操作即時更新。</p>
+    <div class="plan" id="planCard"></div>
+  </section>
+
+</div><!-- /.course -->
+
+<!-- ============ MLIB · 標本庫附錄 ============ -->
+<div class="libhead" id="mlib">
+  <div class="mod-divider"><span class="md-k">附錄 · 43 個一人公司標本 / The Specimen Library</span><span class="md-l"></span></div>
+  <p class="lead-block">課程裡的範例,全部來自這座標本庫。每張卡是一隻被解剖的「一人公司」,依四支柱拆解(可委派系統 · 無人力槓桿 · AI 拿不到的護城河 · 財務韌性),附五維體質評分(可排序橫向比較)與完整檔案。<b>公式不變,領域在變。</b></p>
+  <div class="statband" id="statband"></div>
+  <div class="spec" id="specCount" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--mute);margin-top:10px"></div>
+</div>
+<div class="controls">
   <div class="wrap controls-inner">
     <label class="search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -616,7 +1030,7 @@
 </div>
 
 <div class="wrap">
-  <div class="legend pro-only">
+  <div class="legend">
     <h3>解剖學圖例 · How to read a specimen</h3>
     <div class="legend-item"><div class="li-h">① 可委派系統</div><p>把工作從「你的手」轉移到流程、AI、外包。收入不再綁在你的工時上。</p></div>
     <div class="legend-item"><div class="li-h">② 無人力槓桿</div><p>用程式碼／內容／媒體／資本放大產出,邊際成本趨近零。</p></div>
@@ -625,7 +1039,7 @@
     <div class="legend-item"><div class="li-h">⚠ 分水嶺</div><p>同一條生死線反覆出現——多半不是「做不出」,而是「沒分銷」。</p></div>
   </div>
 
-  <div class="slegend pro-only">
+  <div class="slegend">
     <h3>五維體質評分 · How to read the scores</h3>
     <p class="sub">每個標本以 1–5 分標出五個體質維度,讓你橫向比較。<b>綠＝越高越好的上行軸</b>、<b>金＝起步門檻(越高越難進)</b>、<b>紅＝AI 衝擊(越高越危險)</b>。用上方「排序」可依任一維度重新排列標本。</p>
     <div class="slegend-grid">
@@ -637,7 +1051,7 @@
     </div>
   </div>
 
-  <section class="patterns pro-only">
+  <section class="patterns">
     <div class="pat-head">
       <span class="pat-eyebrow">META · 跨標本模式 / Cross-Specimen Patterns</span>
       <h3 class="pat-title">把 43 個死法並排,規律浮現了</h3>
@@ -702,12 +1116,11 @@
     </div>
   </section>
 
-  <div class="section-rule pro-only"><span class="sr-t">標本庫 · The Specimens</span><span class="sr-l"></span></div>
-  <div class="grid pro-only" id="grid"></div>
-
+  <div class="section-rule"><span class="sr-t">標本庫 · The Specimens</span><span class="sr-l"></span></div>
+  <div class="grid" id="grid"></div>
   <footer>
-    <div class="axiom">「領域會變,公式不變。」</div>
-    一人公司範例標本庫 · 供參考之用,非投資或創業建議 · 每筆案例為原型化角色,非特定真人
+    <div class="axiom">「領域會變,公式不變。瓶頸已從『你能做什麼』,移到『你選擇做什麼』。」</div>
+    一人創業飛行學校 · 互動課程 · 框架取自 Anthropic《The Founder's Playbook: Building an AI-Native Startup》(2026) · 供參考之用,非投資或創業建議 · 每筆案例為原型化角色,非特定真人
   </footer>
 </div>
 
@@ -1876,7 +2289,6 @@ const SCORE_META = [
   {key:'scale',    label:'規模化',   cls:'s-up',   words:['','低','偏低','中','高','近無限']},
   {key:'recurring',label:'經常性',   cls:'s-up',   words:['','一次性','偏低','混合','偏高','高度']}
 ];
-
 const grid = document.getElementById('grid');
 const filtersEl = document.getElementById('filters');
 const levFiltersEl = document.getElementById('levFilters');
@@ -2074,85 +2486,217 @@ ctrlToggle.addEventListener('click',()=>{
 syncControls();
 
 render();
-
 /* ============================================================
-   ROOKIE MODE · 新手創業預演 (AI-Native Pre-flight)
-   框架取自 Anthropic《The Founder's Playbook:
-   Building an AI-Native Startup》(2026) + 本站跨標本死法
+   COURSE LOGIC · 一人創業飛行學校
+   旅程為骨、手冊原則為肉、多模型思維(多鏡頭)貫穿。
+   依賴:DATA / SCORE_META / scorePanel()(皆來自上方標本庫引擎)
+   框架取自 Anthropic《The Founder's Playbook (2026)》
    ============================================================ */
 
-const DEFAULT_PICK = 'S-03';   // 電子報:門檻低、適合新手當範例
-let rkBuilt = false, curPick = null;
-const rkAns = {};
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const parsePath  = p => p.split(/(?=第[一二三四五六]步|里程碑)/).map(x=>x.trim()).filter(Boolean);
+const parseTraps = t => t.split(/(?=[①②③④⑤⑥])/).map(x=>x.trim()).filter(Boolean);
 
-/* ---------- 手冊四階段 ---------- */
-const STAGES = [
-  {t:'構想', en:'Ideation', when:'第 0–1 月',
-   what:'別急著做。先確認你要解的,是不是一個「真問題」。',
-   trap:'把「做出來」誤認為「驗證過」——AI 讓你一個下午就生出能跑的東西,但<b>能跑 ≠ 有人要</b>。'},
-  {t:'MVP', en:'Prototype', when:'第 1–3 月',
-   what:'做一個最小版本,當作「跟用戶對話的道具」——對話本身才是證據,不是原型。',
-   trap:'零摩擦的範圍蔓延——功能一個個加都「合理」,卻在一堆小決定裡<b>長到失去方向</b>。'},
-  {t:'上線', en:'Launch', when:'第 3–9 月',
-   what:'把東西送到人面前,並擁有觸及他們的管道(名單／社群),而不是寄生平台。',
-   trap:'做得出卻沒人知道——最常見、最隱形的死法。<b>不是不會做,是沒分銷</b>。'},
-  {t:'規模化', en:'Scale', when:'第 9 月＋',
-   what:'從「親手做事」轉向「設計系統」:把判斷編碼成 AI 能反覆執行的流程。',
-   trap:'組織卡在你身上——決定拖一週、客服只有你會答。<b>還停在做事,組織卻空轉</b>。'}
+/* 中央狀態:餵給飛行計畫 */
+const P = {
+  path:null,
+  quiz:{},
+  scope:{do:'', dont:'', evid:''},
+  scopeCreep:0,
+  dist:{owned:0, total:0},
+  triage:{},          // task index -> bucket(0..3)
+  moat:[0,0,0],
+  reality:null,
+  gaunt:{done:0, win:0},
+  checks:0
+};
+let curPath = DATA.find(d=>d.id==='S-03') || DATA[0];
+
+/* ============================================================
+   M0 · 心態翻轉牌組
+   ============================================================ */
+const MINDSET = [
+  {o:'我得自己把所有東西做完。', n:'我<b>設計系統</b>,AI 與外包執行;我的注意力只花在「做什麼、為什麼」。'},
+  {o:'先募資 → 請人 → 開做。', n:'順序<b>反過來</b>:先驗證 → 先有營收 → 再擴編。十人獨角獸成了常態。'},
+  {o:'我「能不能」做出來?', n:'執行幾乎免費,真正的問題是:我「<b>該</b>」把這幾乎免費的算力指向哪?'},
+  {o:'忙=有進展,先動起來再說。', n:'瞎忙是逃避選擇。<b>判斷力與品味</b>才是新的稀缺品。'},
+  {o:'功能越多,產品越強。', n:'刻意<b>不做什麼</b>,才定義了產品。範圍即方向。'},
+  {o:'AI 說可行,那就是驗證了。', n:'工具越聽話越危險。我用它當<b>魔鬼代言人</b>,專找推翻我的反證。'}
 ];
+function buildMindset(){
+  $('flipMindset').innerHTML = MINDSET.map(m=>`
+    <div class="flip">
+      <div class="flip-in">
+        <div class="flip-f"><span class="tag">做事的人 · 舊反射</span><span class="txt">${m.o}</span><span class="turn">點一下翻面 ↻</span></div>
+        <div class="flip-b"><span class="tag">指揮者 · AI 原生</span><span class="txt">${m.n}</span><span class="turn">再點一下 ↺</span></div>
+      </div>
+    </div>`).join('');
+  $('flipMindset').querySelectorAll('.flip').forEach(f=>{
+    f.addEventListener('click', ()=>f.classList.toggle('on'));
+  });
+}
 
-/* ---------- 通用 AI 時代八關 ---------- */
+/* ============================================================
+   多鏡頭 · LENS RACK(多模型思維核心)
+   ============================================================ */
+const LENS = {
+  idea:{ q:'這是不是一個「真問題」?', tag:'構想期 · 換五個鏡頭照一次',
+    items:[
+      {ico:'🧮', name:'經濟學', model:'機會成本 · 支付意願',
+       text:'真問題的檢驗是「<b>有人願意掏錢/掏時間</b>」,不是「有人覺得有點煩」。痛點要大到值得他放下手邊現成的替代方案。',
+       ask:'他現在花多少錢或時間在這問題上?夠不夠痛到肯換掉現有的解法?'},
+      {ico:'🧠', name:'心理學', model:'確認偏誤',
+       text:'你是在<b>驗證</b>,還是在找認同?你問問題的方式,決定了你會聽見的答案——AI 只會把這放大成一份精美報告。',
+       ask:'我設計的測試,有沒有可能讓我「失敗」?如果它不可能失敗,它就不是測試。'},
+      {ico:'🦠', name:'演化', model:'會繁殖的需求',
+       text:'好需求會<b>自我複製</b>——用過的人會主動告訴別人。沒有口碑斜率的需求,獲客成本永遠降不下來。',
+       ask:'用過一次的人,會不會不請自來地推薦給第二個人?'},
+      {ico:'♟️', name:'博弈', model:'為什麼是你、為什麼是現在',
+       text:'巨頭與既有玩家不是笨,他們沒做一定有原因(不賺、不值、做不來)。你的<b>不對稱優勢</b>是什麼?',
+       ask:'為什麼這個機會到今天還開著?是時機剛到,還是其實是個坑?'},
+      {ico:'🛰️', name:'系統', model:'症狀 vs 根因',
+       text:'你解的是表面<b>症狀</b>還是上游<b>根因</b>?根因才有槓桿;症狀會無限長出新的來。',
+       ask:'如果這問題消失,上游會不會立刻再生一個一模一樣的?'}
+    ]},
+  reach:{ q:'我該怎麼「被看見」?', tag:'上線期 · 分銷不是只有下廣告',
+    items:[
+      {ico:'🧮', name:'經濟學', model:'CAC vs LTV',
+       text:'獲得一個用戶要花多少(CAC)、他一生帶來多少(LTV)。靠內容自然導流的 CAC 趨近零;買來卻留不住的流量,是個<b>漏水桶</b>。',
+       ask:'我的獲客成本,真的低於這個用戶的終身價值嗎?'},
+      {ico:'🧠', name:'心理學', model:'信任先於交易',
+       text:'人不會跟陌生人買。先<b>給價值、建立信任</b>,銷售只是信任長出來的自然結果。',
+       ask:'在開口要錢之前,我先給了什麼,讓他願意相信我?'},
+      {ico:'🦠', name:'演化', model:'病毒係數',
+       text:'一個用戶平均帶來幾個新用戶?>1 會自己長大,<1 就得一直花錢推。把「<b>可分享</b>」設計進產品本身。',
+       ask:'產品裡有沒有一個「會讓人想轉發、想邀請朋友」的時刻?'},
+      {ico:'♟️', name:'博弈', model:'別在巨頭的主場打',
+       text:'不要在大平台最擅長的渠道跟它正面對撞。找一個它<b>懶得做、你能當第一名</b>的窄渠道。',
+       ask:'有沒有一個小到大廠看不上、但我能壟斷的渠道?'},
+      {ico:'🛰️', name:'系統', model:'自有名單飛輪',
+       text:'把每一次觸及都導回你「<b>自己的</b>」入口(名單/社群),讓觸及變成複利資產,而不是一次性消耗。',
+       ask:'這次曝光,有沒有沉澱成我下次能再免費觸及一次的資產?'}
+    ]},
+  focus:{ q:'我該把稀缺的注意力花在哪?', tag:'全程 · 瓶頸是選擇,不是能力',
+    items:[
+      {ico:'🧮', name:'經濟學', model:'最高槓桿點',
+       text:'你的時間是最貴的資源。花在哪一個決定,能<b>放大十倍</b>而不只是加一?',
+       ask:'這件事,是只有我能做、而且影響最大的那一件嗎?'},
+      {ico:'🧠', name:'心理學', model:'勤奮的逃避',
+       text:'做事有即時回饋、令人安心;選擇要承擔不確定。別用<b>戰術上的勤奮</b>,逃避戰略上的怠惰。',
+       ask:'我現在忙,是因為它重要,還是因為它讓我不必面對更難的選擇?'},
+      {ico:'🦠', name:'演化', model:'砍掉才有得長',
+       text:'資源有限,餵養所有方向=餓死所有方向。要敢於讓 90% 的點子<b>死掉</b>。',
+       ask:'我願不願意為了這一件,刻意不做其他九件?'},
+      {ico:'♟️', name:'博弈', model:'不對稱下注',
+       text:'把注意力放在「<b>輸有限、贏無限</b>」的選項上,而不是平均分散到每件事。',
+       ask:'這個選擇,最壞會怎樣?最好又能多大?'},
+      {ico:'🛰️', name:'系統', model:'把判斷編碼',
+       text:'你做的每個好判斷都該問:能不能變成 AI 與團隊以後<b>自己就能重複</b>的流程?',
+       ask:'這個判斷,下次能不能不用我親自做,也做得出來?'}
+    ]}
+};
+function buildLens(elId, key){
+  const set = LENS[key], el = $(elId);
+  el.innerHTML = `
+    <div class="lens-q"><span class="lq-tag">${set.tag}</span>${set.q}</div>
+    <div class="lens-tabs">${set.items.map((it,i)=>`<button class="lens-tab${i===0?' on':''}" data-i="${i}"><span class="li">${it.ico}</span>${it.name}</button>`).join('')}</div>
+    <div class="lens-body" id="${elId}-body"></div>`;
+  const body = $(elId+'-body');
+  const paint = i=>{
+    const it = set.items[i];
+    body.innerHTML = `<div class="lb-model">${it.ico} ${it.name} · ${it.model}</div><div class="lb-text">${it.text}</div><div class="lb-ask">「${it.ask}」</div>`;
+  };
+  el.querySelectorAll('.lens-tab').forEach(t=>t.addEventListener('click',()=>{
+    el.querySelectorAll('.lens-tab').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on'); paint(+t.dataset.i);
+  }));
+  paint(0);
+}
+
+/* ============================================================
+   魔鬼代言人產生器
+   ============================================================ */
+function buildDevil(){
+  $('devBtn').addEventListener('click', ()=>{
+    const idea = ($('devIn').value || '').trim() || '我的點子';
+    const qs = [
+      `如果這個點子注定失敗,最可能的單一原因是什麼?`,
+      `誰已經在解「${idea}」這件事了?用戶為何不直接用免費的 AI 或現成工具?`,
+      `我手上「支持這個點子」的證據,有幾分是真實用戶說的、有幾分是我自己腦補或 AI 順著我講的?`,
+      `用戶現在沒有我也活得好好的——這問題真的痛到他願意改變習慣、甚至付錢嗎?`,
+      `哪一個我「不願去問」的問題,正是因為我怕聽到答案?`,
+      `如果這只是「能做」而不是「該做」,我會不會只是被執行的快感騙了?`,
+      `把規模放大 100 倍,什麼會先崩?(獲客、毛利、客服、我自己)`
+    ];
+    const prompt = `你是一位冷酷、誠實的魔鬼代言人與早期投資人。\n我的點子是:「${idea}」。\n\n請「不要」鼓勵我。改為:\n1. 列出這個點子最可能致命的 3 個假設,並說明為何它們可能是錯的。\n2. 找出我大概率有「確認偏誤」的地方。\n3. 設計一個「最便宜、最快、且有可能讓我失敗」的驗證實驗(對話 5–10 個真實用戶)。\n4. 如果你是我,你會在投入任何工程之前,先去問哪一個最難回答的問題?\n只給我反證與盲點,不要安慰。`;
+    $('devOut').innerHTML = `
+      <div class="dev-q">${qs.map(q=>`<div class="dev-qi">${q}</div>`).join('')}</div>
+      <div class="dev-prompt"><button class="copybtn" id="devCopy">複製</button><span class="dp-tag">↳ 把這段貼給任何 AI(讓工具反過來攻擊你)</span>${prompt}</div>`;
+    $('devOut').classList.add('on');
+    $('devCopy').addEventListener('click', ()=>{
+      navigator.clipboard?.writeText(prompt).then(()=>{
+        const b=$('devCopy'); b.textContent='已複製 ✓'; setTimeout(()=>b.textContent='複製',1600);
+      });
+    });
+  });
+}
+
+/* ============================================================
+   決策演練 GAUNTLET(依階段分配)
+   內容沿用本站既有八關,皆引手冊原句
+   ============================================================ */
 const GAUNTLET = [
-  {stage:'構想 / MVP', q:'你用 AI 兩週做出會動的 MVP,很興奮。下一步?',
+  {stage:'idea', q:'你用 AI 兩週做出會動的 MVP,很興奮。下一步?',
    opts:[{t:'再加幾個功能,讓它更完整一點',ok:false},
          {t:'拿它去跟 5–10 個真實潛在用戶對話,逼出真反應',ok:true},
          {t:'存著當「已驗證」,開始規劃上線',ok:false}],
    win:'對。原型只是「跟用戶對話的道具」,那些對話本身才是證據——會動 ≠ 有人要。',
-   lose:'把能跑的原型當成「方向對了」的鐵證,正是 42% 新創的死因。',
+   lose:'把能跑的原型當成「方向對了」的鐵證,正是最常見的早期死因。',
    quote:'AI 會用幫你實現好點子時一模一樣的熱情,順著一個錯誤的前提,幫你生成、測試、除錯一整套程式碼。'},
-  {stage:'構想', q:'你想驗證點子,叫 AI 幫你研究市場。它給了一份漂亮、全力支持你的報告。',
+  {stage:'idea', q:'你想驗證點子,叫 AI 幫你研究市場。它給了一份漂亮、全力支持你的報告。',
    opts:[{t:'太好了,證明方向對,開始做',ok:false},
          {t:'叫同一個 AI 反過來當魔鬼代言人,專找推翻你的反證',ok:true},
          {t:'再叫它多找一些支持的數據',ok:false}],
    win:'對。工具越聽話越危險;讓它去找反證,當「需要修正」的證據出現,就是該轉向的時候。',
    lose:'你不問難題,AI 就為一個壞點子建起「看起來研究充分」的論述——你還全程深信在做盡職調查。',
    quote:'工具越聽話,越容易把你的偏見放大成一份精美的報告。'},
-  {stage:'MVP', q:'每個新功能單獨看都合理(「當然該支援那情境」),你忍不住一直加。',
+  {stage:'mvp', q:'每個新功能單獨看都合理(「當然該支援那情境」),你忍不住一直加。',
    opts:[{t:'繼續加,反正用 AI 一個下午就好',ok:false},
          {t:'動工前先寫「範圍定義」:只加「有用戶說沒它就不能用」的',ok:true},
          {t:'全加完再一次砍',ok:false}],
    win:'對。先寫下做什麼、刻意不做什麼;把問題從「該做嗎」變成「是否有人說沒它就無法用」。',
    lose:'產品在一堆站得住腳的小決定裡,長到失去方向。',
    quote:'過去擋住「再加一個功能」的力量——工程時間的真實成本——現在幾乎消失了。'},
-  {stage:'MVP → 上線', q:'AI 幫你把整套系統建好、測好、除好錯了,但它建立在一個你還沒驗證的前提上。',
+  {stage:'mvp', q:'AI 幫你把整套系統建好、測好、除好錯了,但它建立在一個你還沒驗證的前提上。',
    opts:[{t:'系統這麼完整,趕快擴大規模',ok:false},
          {t:'先回頭驗證那個前提是不是真的',ok:true},
          {t:'邊擴大邊驗證',ok:false}],
    win:'對。這叫「無聲的過早規模化」——系統不會替你踩煞車,前提錯了,做得越完整賠得越多。',
    lose:'你會徹底實現一整套基於錯誤前提的東西,而且毫無察覺。',
    quote:'AI 會徹底實現、測試、除錯、重構一整套基於錯誤前提的程式碼,系統無法替你踩煞車。'},
-  {stage:'上線', q:'產品做得很好、系統很順,但訂戶/用戶始終是個位數。',
+  {stage:'launch', q:'產品做得很好、系統很順,但訂戶/用戶始終是個位數。',
    opts:[{t:'一定是還不夠好,回去把產品做得更完美',ok:false},
          {t:'停止打磨,全力建立分銷與「自有名單」',ok:true},
          {t:'等口碑自然發酵',ok:false}],
    win:'對。最隱形的死法不是做不出,是沒人看見。先有觸及管道,再談把產品做更好。',
    lose:'「做得很爽但沒人知道」——幾乎每個失敗案例都有這條,而且最難自己察覺。',
    quote:'領域天差地遠,公式驚人地一致:先證明有人要 → 擁有觸及他們的管道。'},
-  {stage:'規模化', q:'生意起來了,但決定都要等你拍板、客服只有你會回,你開始喘不過氣。',
+  {stage:'scale', q:'生意起來了,但決定都要等你拍板、客服只有你會回,你開始喘不過氣。',
    opts:[{t:'自己更努力、做更快',ok:false},
          {t:'把工作盤點成三類,前兩類交給 AI／外包',ok:true},
          {t:'先撐著,等更穩再說',ok:false}],
    win:'對。盤點成:①可全自動 ②要人但不必是你 ③只有你能做;把判斷編碼成可交接的系統。',
    lose:'你還停在「做事」,組織卻已空轉——一小時的決定拖成一週。',
    quote:'把只存在你腦袋裡的判斷,變成可被檢查、可被交接的系統。'},
-  {stage:'規模化', q:'一個資金雄厚的對手今天直接照抄你的產品。你的用戶會留下來嗎?',
+  {stage:'scale', q:'一個資金雄厚的對手今天直接照抄你的產品。你的用戶會留下來嗎?',
    opts:[{t:'拼更多功能、拼更快',ok:false},
          {t:'靠累積的深度:領域內化 + 資料飛輪 + 工作流綁定',ok:true},
          {t:'降價守住',ok:false}],
    win:'對。「能做出來」不再是壁壘;護城河來自抄不走的深度——這三層越積越深、複利。',
    lose:'只比功能與速度,在 AI 時代會被迅速抹平。',
    quote:'「一個資金雄厚的對手今天照抄你的產品,你的用戶會不會留下來?」'},
-  {stage:'全程', q:'AI 幾乎什麼都能幫你做了。你最該把稀缺的注意力花在哪?',
+  {stage:'scale', q:'AI 幾乎什麼都能幫你做了。你最該把稀缺的注意力花在哪?',
    opts:[{t:'學更多工具、做更多功能',ok:false},
          {t:'鍛鍊判斷力與品味:問對問題、選對方向',ok:true},
          {t:'盡量自動化所有東西',ok:false}],
@@ -2160,48 +2704,74 @@ const GAUNTLET = [
    lose:'工具會越來越強,能不能蓋出東西的差距會被快速抹平——拼工具拉不開距離。',
    quote:'判斷力與品味,成了新的稀缺品。真正的瓶頸,已從「你能做什麼」移到「你選擇做什麼」。'}
 ];
+function gauntCardHtml(g, i){
+  return `
+    <div class="scn" data-i="${i}">
+      <div class="scn-q">${g.q}</div>
+      <div class="scn-opts">${g.opts.map((o,j)=>`<button class="scn-opt" data-ok="${o.ok?1:0}">${o.t}</button>`).join('')}</div>
+      <div class="scn-out">
+        <div class="scn-verdict"></div>
+        <div class="scn-quote">${g.quote}<span class="src">Anthropic · The Founder's Playbook (2026)</span></div>
+      </div>
+    </div>`;
+}
+function buildGauntlets(){
+  const byStage = {idea:'gauntIdea', mvp:'gauntMvp', launch:'gauntLaunch', scale:'gauntScale'};
+  Object.keys(byStage).forEach(stg=>{
+    const host = $(byStage[stg]);
+    host.innerHTML = GAUNTLET.map((g,i)=>g.stage===stg?gauntCardHtml(g,i):'').join('');
+  });
+  document.querySelectorAll('.scn').forEach(scn=>{
+    scn.querySelectorAll('.scn-opt').forEach(opt=>{
+      opt.addEventListener('click', ()=>{
+        if(scn.classList.contains('done')) return;
+        const i = +scn.dataset.i;
+        const chosenOk = opt.dataset.ok==='1';
+        scn.classList.add('done');
+        scn.querySelectorAll('.scn-opt').forEach(o=>{
+          if(o.dataset.ok==='1') o.classList.add('good');
+          else { o.classList.add('bad','dim'); }
+        });
+        if(!chosenOk){ opt.classList.remove('dim'); opt.classList.add('chosen'); }
+        const v = scn.querySelector('.scn-verdict');
+        v.classList.add(chosenOk?'win':'lose');
+        v.innerHTML = chosenOk
+          ? `<span class="vlabel">✓ 選對</span>${GAUNTLET[i].win}`
+          : `<span class="vlabel">✗ 想一下</span>${GAUNTLET[i].lose}`;
+        P.gaunt.done++; if(chosenOk) P.gaunt.win++;
+        updatePlan();
+      });
+    });
+  });
+}
 
-/* ---------- 配對測驗 ---------- */
+/* ============================================================
+   配對測驗 · 選你的航線
+   ============================================================ */
 const QUIZ = [
   {k:'capital', q:'你能投入的啟動資金大概是?', opts:[
-    {v:'low', t:'幾乎沒有,先零成本起步'},
-    {v:'mid', t:'幾萬元,能買工具/小庫存'},
-    {v:'high', t:'十幾萬以上,能投基建'}]},
+    {v:'low', t:'幾乎沒有,先零成本起步'},{v:'mid', t:'幾萬元,能買工具/小庫存'},{v:'high', t:'十幾萬以上,能投基建'}]},
   {k:'time', q:'你每週能投入多少時間?', opts:[
-    {v:'spare', t:'業餘 <10 小時'},
-    {v:'part', t:'兼職 10–25 小時'},
-    {v:'full', t:'全職 25 小時以上'}]},
+    {v:'spare', t:'業餘 <10 小時'},{v:'part', t:'兼職 10–25 小時'},{v:'full', t:'全職 25 小時以上'}]},
   {k:'income', q:'你多久之內「需要」開始有收入?', opts:[
-    {v:'now', t:'越快越好,馬上要進帳'},
-    {v:'6mo', t:'撐得住約半年'},
-    {v:'1y', t:'一年以上沒收入也 OK'}]},
+    {v:'now', t:'越快越好,馬上要進帳'},{v:'6mo', t:'撐得住約半年'},{v:'1y', t:'一年以上沒收入也 OK'}]},
   {k:'goal', q:'你最想要的結果是?', opts:[
-    {v:'passive', t:'被動／副業收入'},
-    {v:'salary', t:'取代正職薪水'},
-    {v:'big', t:'做大、規模化'}]},
+    {v:'passive', t:'被動／副業收入'},{v:'salary', t:'取代正職薪水'},{v:'big', t:'做大、規模化'}]},
   {k:'edge', q:'你有沒有「AI 與別人拿不到」的底?(深度專業／人脈／品味／一手資料)', opts:[
-    {v:'strong', t:'有,而且很深'},
-    {v:'some', t:'有一點'},
-    {v:'none', t:'目前還沒有'}]}
+    {v:'strong', t:'有,而且很深'},{v:'some', t:'有一點'},{v:'none', t:'目前還沒有'}]}
 ];
-
+const QUIZ_LABEL = {
+  capital:{low:'近乎零成本',mid:'幾萬元',high:'十幾萬＋'}, time:{spare:'業餘<10h',part:'兼職10–25h',full:'全職25h＋'},
+  income:{now:'急需進帳',6:'','6mo':'可撐半年','1y':'一年內無壓'}, goal:{passive:'被動/副業',salary:'取代薪水',big:'做大規模'},
+  edge:{strong:'底很深',some:'有一點底',none:'尚無底牌'}
+};
 function matchScore(d, a){
   const s = d.scores; let p = 0;
-  if(a.capital==='low') p += (6-s.barrier)*1.3;
-  else if(a.capital==='mid') p += 3;
-  else p += s.barrier*0.4 + 3;
-  if(a.time==='spare') p += (6-s.barrier) + s.recurring*0.6;
-  else if(a.time==='part') p += 3 + s.recurring*0.4;
-  else p += s.scale*0.5 + 3;
-  if(a.income==='now') p += s.speed*1.4;
-  else if(a.income==='6mo') p += s.speed*0.6 + s.recurring*0.6;
-  else p += s.recurring*0.8 + s.scale*0.6;
-  if(a.goal==='passive') p += s.recurring*1.3 + s.scale*0.5;
-  else if(a.goal==='salary') p += s.recurring*0.8 + s.speed*0.7;
-  else p += s.scale*1.3;
-  if(a.edge==='strong') p += s.scale*0.6 + 2;
-  else if(a.edge==='some') p += (6-s.aiThreat)*0.6 + 1;
-  else p += (6-s.aiThreat)*1.3;
+  if(a.capital==='low') p += (6-s.barrier)*1.3; else if(a.capital==='mid') p += 3; else p += s.barrier*0.4 + 3;
+  if(a.time==='spare') p += (6-s.barrier) + s.recurring*0.6; else if(a.time==='part') p += 3 + s.recurring*0.4; else p += s.scale*0.5 + 3;
+  if(a.income==='now') p += s.speed*1.4; else if(a.income==='6mo') p += s.speed*0.6 + s.recurring*0.6; else p += s.recurring*0.8 + s.scale*0.6;
+  if(a.goal==='passive') p += s.recurring*1.3 + s.scale*0.5; else if(a.goal==='salary') p += s.recurring*0.8 + s.speed*0.7; else p += s.scale*1.3;
+  if(a.edge==='strong') p += s.scale*0.6 + 2; else if(a.edge==='some') p += (6-s.aiThreat)*0.6 + 1; else p += (6-s.aiThreat)*1.3;
   return p;
 }
 function whyReason(d, a){
@@ -2217,15 +2787,227 @@ function whyReason(d, a){
   if(!b.length) b.push('五維體質與你的條件整體最契合');
   return b.slice(0,2).join('；') + '。';
 }
+function buildQuiz(){
+  const qs = QUIZ.map((q,i)=>`
+    <div class="q" data-k="${q.k}">
+      <div class="q-t"><span class="qn">Q${i+1}</span>${q.q}</div>
+      <div class="q-opts">${q.opts.map(o=>`<button class="opt" data-k="${q.k}" data-v="${o.v}">${o.t}</button>`).join('')}</div>
+    </div>`).join('');
+  $('quizSec').innerHTML = `
+    <div class="rk-head"><span class="rk-num">✦</span><span class="rk-t">先找出<em>適合你</em>的那一條</span></div>
+    <div class="rk-desc">把選擇焦慮變成聚焦。回答 5 題,從 43 條路裡篩出最契合你的 3 條。</div>
+    <div class="quiz">${qs}
+      <button class="quiz-go" id="quizGo" disabled>找出我的航線 →</button>
+      <div class="quiz-hint" id="quizHint">回答全部 5 題後解鎖</div>
+      <div class="recs" id="recs"></div>
+    </div>`;
+  const go = $('quizGo'), hint = $('quizHint');
+  $('quizSec').querySelectorAll('.opt').forEach(opt=>{
+    opt.addEventListener('click', ()=>{
+      const k = opt.dataset.k;
+      P.quiz[k] = opt.dataset.v;
+      $('quizSec').querySelectorAll(`.opt[data-k="${k}"]`).forEach(o=>o.classList.remove('sel'));
+      opt.classList.add('sel');
+      const all = QUIZ.every(q=>P.quiz[q.k]);
+      go.disabled = !all;
+      hint.textContent = all ? '✓ 已就緒' : `還有 ${QUIZ.filter(q=>!P.quiz[q.k]).length} 題`;
+      updatePlan();
+    });
+  });
+  go.addEventListener('click', ()=>{
+    const ranked = DATA.map(d=>({d, sc:matchScore(d, P.quiz)})).sort((a,b)=>b.sc-a.sc).slice(0,3);
+    const labels = ['最適合你','次選','備選'];
+    $('recs').innerHTML = ranked.map((r,i)=>`
+      <div class="rec ${i===0?'top':''}">
+        <span class="rec-rank">${labels[i]}</span>
+        <div><span class="rec-name">${r.d.name}</span><span class="rec-dom" style="color:${r.d.color}">${r.d.domain}</span></div>
+        <div class="rec-role">${r.d.role}</div>
+        ${scorePanel(r.d)}
+        <div class="why"><b>為什麼適合你 ▸</b> ${whyReason(r.d, P.quiz)}</div>
+        <button class="rec-go" data-id="${r.d.id}">選這條 · 帶我飛 →</button>
+      </div>`).join('');
+    $('recs').querySelectorAll('.rec-go').forEach(b=>b.addEventListener('click',()=>setPath(b.dataset.id, true)));
+    setPath(ranked[0].d.id, false);
+    $('recs').scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+}
 
-const parseTraps = t => t.split(/(?=[①②③④⑤⑥])/).map(x=>x.trim()).filter(Boolean);
-const parsePath  = p => p.split(/(?=第[一二三四五六]步|里程碑)/).map(x=>x.trim()).filter(Boolean);
+/* ============================================================
+   設定航線(選定標本 → 貫穿四階段範例)
+   ============================================================ */
+function setPath(id, scroll){
+  const d = DATA.find(x=>x.id===id); if(!d) return;
+  curPath = d; P.path = d;
+  $('pathbar').innerHTML = `
+    <div class="pathbar">
+      <span class="pl">你的航線</span>
+      <span class="nm">${d.name}</span><span class="dom">· ${d.domain}</span>
+      <button class="swap" id="pbSwap">↑ 換一條</button>
+    </div>`;
+  $('pbSwap').addEventListener('click', ()=>$('mpick').scrollIntoView({behavior:'smooth'}));
+  // stage-by-stage worked example
+  const steps = parsePath(d.path);
+  const px = (h, b)=>`<div class="px-h">以你的航線示範 · <span class="nm">${d.name}</span></div><div class="px-b">${h}<b>${b}</b></div>`;
+  $('pxIdea').innerHTML   = px('構想期的真實第一步 ▸ ', steps[0] || d.live);
+  $('pxMvp').innerHTML    = px('做出 MVP 後的下一步 ▸ ', steps[1] || '把最小版本拿去跟人對話,而不是繼續加功能。');
+  $('pxLaunch').innerHTML = px('這條路要「活下來」的條件 ▸ ', d.live + `（反例:${d.die}）`);
+  $('pxScale').innerHTML  = px('它 AI 拿不到的護城河 ▸ ', d.moat);
+  recomputeReality();
+  updatePlan();
+  if(scroll) $('m1').scrollIntoView({behavior:'smooth', block:'start'});
+}
 
-/* ---------- 現實檢核 ---------- */
+/* ============================================================
+   功能蔓延模擬器
+   ============================================================ */
+const SCOPE_FEATS = [
+  {t:'做一個漂亮的網站首頁', j:false, ev:'沒有任何用戶說缺它就不用'},
+  {t:'每週一封,只給「一個可立刻行動的決策」', j:true, ev:'這就是核心承諾本身'},
+  {t:'同時開三個主題分版', j:false, ev:'連一個主題都還沒驗證'},
+  {t:'一個能收 email 的登陸頁', j:true, ev:'沒有它就無法「擁有名單」'},
+  {t:'加留言／社群互動功能', j:false, ev:'用戶還沒多到需要互動'},
+  {t:'做一個 App 版', j:false, ev:'email 已能送達,App 是想像出來的需求'},
+  {t:'自動寄送＋一鍵退訂', j:true, ev:'最低的合規與信任要求'},
+  {t:'一對一客製化報告', j:false, ev:'不可規模化,且無人主動要求'}
+];
+function buildScopeSim(){
+  const host = $('scopeSim');
+  host.innerHTML = SCOPE_FEATS.map((f,i)=>`
+    <div class="feat" data-i="${i}">
+      <span class="box">✓</span>
+      <span class="ft">${f.t}<span class="ev ${f.j?'yes':'no'}">${f.j?'✓ 有人說「沒它就不能用」':'✗ 沒有「非它不可」的證據'}</span></span>
+    </div>`).join('') + `
+    <div class="gauge">
+      <div class="gauge-track"><div class="gauge-fill" id="scopeFill"></div></div>
+      <div class="gauge-row"><span>範圍蔓延指針</span><span class="gv" id="scopeVal">0</span></div>
+    </div>
+    <div id="scopeVerdict"></div>`;
+  host.querySelectorAll('.feat').forEach(f=>f.addEventListener('click',()=>{
+    f.classList.toggle('on'); recomputeScope();
+  }));
+  recomputeScope();
+}
+function recomputeScope(){
+  const on = [...$('scopeSim').querySelectorAll('.feat.on')].map(f=>SCOPE_FEATS[+f.dataset.i]);
+  const creep = on.filter(f=>!f.j).length;     // 沒證據卻加的功能數
+  P.scopeCreep = creep;
+  const pct = Math.min(100, creep/4*100);
+  const fill = $('scopeFill');
+  fill.style.width = pct+'%';
+  fill.style.background = creep>=3 ? 'var(--accent)' : creep>=1 ? 'var(--gold)' : 'var(--accent2)';
+  $('scopeVal').textContent = creep===0 ? '守住了' : `蔓延 ${creep}`;
+  const v = $('scopeVerdict');
+  if(creep===0){ v.className='verdict good'; v.innerHTML='<b>你守住了範圍。</b>只留下「非它不可」的核心。把問題從「該做嗎」換成「是否有人說沒它就不能用」。'; }
+  else if(creep<=2){ v.className='verdict warn'; v.innerHTML='<b>開始蔓延了。</b>每個單獨看都合理,但你正在用「都合理的小決定」換掉方向。動工前先把範圍寫死。'; }
+  else { v.className='verdict bad'; v.innerHTML='<b>範圍嚴重蔓延。</b>這正是手冊點名的陷阱——工程成本趨近零,擋不住的功能會把產品稀釋到失去方向。砍回核心那一件事。'; }
+  updatePlan();
+}
+
+/* ============================================================
+   觸及體檢 · 寄生 vs 自主
+   ============================================================ */
+const DIST = {
+  parasite:['平台演算法推薦','App 商店排名','付費廣告(買流量)','SEO 搜尋波動','大平台分潤'],
+  owned:['Email 訂閱名單','自有社群(群組/Discord)','直接付費關係','口碑 / 老客轉介','自有 App / 網站直訪']
+};
+function buildDist(){
+  const tog = (label, kind)=>`<div class="dtog" data-kind="${kind}"><span class="dt-box">✓</span>${label}</div>`;
+  $('distCheck').innerHTML = `
+    <div class="dist-cols">
+      <div class="dist-col parasite"><div class="dc-h">🏚 租來的(別人改規則就拿走)</div>${DIST.parasite.map(l=>tog(l,'p')).join('')}</div>
+      <div class="dist-col owned"><div class="dc-h">🏠 自己的(複利資產)</div>${DIST.owned.map(l=>tog(l,'o')).join('')}</div>
+    </div>
+    <div class="gauge"><div class="gauge-track"><div class="gauge-fill" id="distFill"></div></div>
+      <div class="gauge-row"><span>自主觸及佔比</span><span class="gv" id="distVal">—</span></div></div>
+    <div id="distVerdict"></div>`;
+  $('distCheck').querySelectorAll('.dtog').forEach(t=>t.addEventListener('click',()=>{
+    t.classList.toggle('on'); recomputeDist();
+  }));
+  recomputeDist();
+}
+function recomputeDist(){
+  const owned = $('distCheck').querySelectorAll('.dtog[data-kind="o"].on').length;
+  const para  = $('distCheck').querySelectorAll('.dtog[data-kind="p"].on').length;
+  const total = owned+para;
+  P.dist = {owned, total};
+  const ratio = total ? owned/total : 0;
+  $('distFill').style.width = (ratio*100)+'%';
+  $('distFill').style.background = ratio>=0.6?'var(--accent2)':ratio>=0.34?'var(--gold)':'var(--accent)';
+  $('distVal').textContent = total? Math.round(ratio*100)+'%' : '尚未選';
+  const v=$('distVerdict');
+  if(!total){ v.className='verdict warn'; v.innerHTML='勾選你打算用的觸及方式。'; }
+  else if(ratio>=0.6){ v.className='verdict good'; v.innerHTML='<b>你擁有觀眾,不只擁有流量。</b>大部分觸及是自己的資產——平台改規則也動不了你的根。'; }
+  else if(ratio>=0.34){ v.className='verdict warn'; v.innerHTML='<b>一半租、一半擁有。</b>把每次平台來的流量,想辦法導回你自己的名單/社群,讓它沉澱成複利。'; }
+  else { v.className='verdict bad'; v.innerHTML='<b>你寄生在別人的平台上。</b>對方規則一改,整個生意一夜斷炊,而你毫無發言權。先建一個「自有名單入口」。'; }
+  updatePlan();
+}
+
+/* ============================================================
+   工作盤點分流器
+   ============================================================ */
+const TRIAGE_TASKS = ['回覆客服與常見問題','跑每日資料 / 篩選','設計與美術','寫內容 / 出刊','財報 / 數據掃描','定價與策略決策','社群日常經營','對帳與發票'];
+const BUCKETS = ['未分類','① 全自動','② 委派(不必你)','③ 只有你'];
+function buildTriage(){
+  $('triage').innerHTML = TRIAGE_TASKS.map((t,i)=>`
+    <div class="tk-task" data-i="${i}" data-b="0">
+      <span class="tt-name">${t}</span><span class="tt-bucket">${BUCKETS[0]}</span>
+    </div>`).join('');
+  $('triage').querySelectorAll('.tk-task').forEach(el=>el.addEventListener('click',()=>{
+    let b = (+el.dataset.b + 1) % 4;
+    el.dataset.b = b; el.querySelector('.tt-bucket').textContent = BUCKETS[b];
+    P.triage[el.dataset.i] = b; recomputeTriage();
+  }));
+  recomputeTriage();
+}
+function recomputeTriage(){
+  const vals = Object.values(P.triage);
+  const onlyYou = vals.filter(b=>b===3).length;
+  const unassigned = TRIAGE_TASKS.length - vals.filter(b=>b>0).length;
+  const v=$('triageOut');
+  if(unassigned===TRIAGE_TASKS.length){ v.className='verdict warn'; v.innerHTML='點每一項,把它分進三個籃子。'; return; }
+  if(onlyYou<=2){ v.className='verdict good'; v.innerHTML=`<b>系統在替你運轉。</b>只有 ${onlyYou} 項真正非你不可——其餘交給 AI 與外包,你把判斷編碼成可交接的流程。`; }
+  else if(onlyYou<=4){ v.className='verdict warn'; v.innerHTML=`<b>還有 ${onlyYou} 項卡在你身上。</b>再問一次:這些「只有你」,是真的只有你能做,還是你還沒把判斷寫成系統?`; }
+  else { v.className='verdict bad'; v.innerHTML=`<b>${onlyYou} 項都壓在你一個人身上。</b>組織會卡死在你身上——一小時的決定拖成一週。先把「②要人但不必是你」的先放出去。`; }
+  updatePlan();
+}
+
+/* ============================================================
+   護城河壓力測試(三層)
+   ============================================================ */
+const MOAT_LAYERS = [
+  {h:'① 領域內化', d:'把只在你腦中的行話、法規眉角、邊緣案例,編碼成 AI 能反覆執行的流程。'},
+  {h:'② 資料飛輪', d:'用戶在你產品裡的行為指紋(接受/拒絕、使用模式)持續優化產品,抄襲者買不到。'},
+  {h:'③ 工作流綁定', d:'用戶疊了自動化、接了資料源、訓練了人,換掉你變成一個「營運專案」。'}
+];
+const MOAT_OPTS = ['沒有','部分','很強'];
+function buildMoat(){
+  $('moatTest').innerHTML = MOAT_LAYERS.map((l,i)=>`
+    <div class="mt-layer" data-i="${i}">
+      <div class="ml-h">${l.h}</div><div class="ml-d">${l.d}</div>
+      <div class="mt-opts">${MOAT_OPTS.map((o,j)=>`<button class="mt-opt" data-i="${i}" data-v="${j}">${o}</button>`).join('')}</div>
+    </div>`).join('') + `<div id="moatVerdict"></div>`;
+  $('moatTest').querySelectorAll('.mt-opt').forEach(b=>b.addEventListener('click',()=>{
+    const i=+b.dataset.i;
+    $('moatTest').querySelectorAll(`.mt-opt[data-i="${i}"]`).forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); P.moat[i]=+b.dataset.v; recomputeMoat();
+  }));
+}
+function recomputeMoat(){
+  const score = P.moat.reduce((a,b)=>a+b,0);   // 0..6
+  const v=$('moatVerdict');
+  if(score<=1){ v.className='verdict bad'; v.innerHTML='<b>對手照抄,你的用戶會走。</b>你還在拼功能與速度——那在 AI 時代會被迅速抹平。先深耕至少一層。'; }
+  else if(score<=3){ v.className='verdict warn'; v.innerHTML='<b>有點深度,但還不夠黏。</b>挑一層集中加深——三層會互相複利:資料飛輪養出切換成本,工作流綁定讓離開變成營運專案。'; }
+  else { v.className='verdict good'; v.innerHTML='<b>抄得走產品,抄不走你累積的深度。</b>這三層越積越深,資金雄厚的對手照抄,用戶也留得下來。'; }
+  updatePlan();
+}
+
+/* ============================================================
+   撐得過去嗎 · 財務韌性
+   ============================================================ */
 function realityCheck(d, capital, burn, hours){
   const s = d.scores;
-  const firstBase = {5:1,4:2,3:4,2:6,1:9}[s.speed] || 5;   // 多久有第一塊錢:變現速度主導
-  const beBase    = {5:3,4:5,3:8,2:12,1:16}[s.speed] || 10; // 回本/能靠它生活:同樣由速度主導
+  const firstBase = {5:1,4:2,3:4,2:6,1:9}[s.speed] || 5;
+  const beBase    = {5:3,4:5,3:8,2:12,1:16}[s.speed] || 10;
   const hf = hours>=35?1 : hours>=20?1.3 : hours>=10?1.7 : 2.4;
   const firstRev = Math.max(1, Math.round(firstBase*hf));
   const breakeven = Math.max(firstRev+1, Math.round(beBase*hf));
@@ -2237,233 +3019,138 @@ function realityCheck(d, capital, burn, hours){
   else { light='r'; msg='存糧可能撐不到回本。先別全職下海:用業餘時間驗證,或先拉長 runway。'; }
   return {firstRev, breakeven, runway, light, msg};
 }
-
-/* ---------- HTML builders ---------- */
-function quizSecHtml(){
-  const qs = QUIZ.map((q,i)=>`
-    <div class="q" data-k="${q.k}">
-      <div class="q-t"><span class="qn">Q${i+1}</span>${q.q}</div>
-      <div class="q-opts">${q.opts.map(o=>`<button class="opt" data-k="${q.k}" data-v="${o.v}">${o.t}</button>`).join('')}</div>
-    </div>`).join('');
-  return `
-  <section class="rk-sec" id="rkA">
-    <div class="rk-head"><span class="rk-num">A</span><span class="rk-t">先找出<em>適合你</em>的那一種</span></div>
-    <div class="rk-desc">43 個太多?回答 5 題,從中篩出最適合你條件的 3 個,把選擇焦慮變成聚焦。</div>
-    <div class="quiz">${qs}
-      <button class="quiz-go" id="quizGo" disabled>找出適合我的 →</button>
-      <div class="quiz-hint" id="quizHint">回答全部 5 題後解鎖</div>
-      <div class="recs" id="recs"></div>
+function recomputeReality(){
+  if(!$('rcCap')) return;
+  const r = realityCheck(curPath, +$('rcCap').value||0, +$('rcBurn').value||0, +$('rcHrs').value||1);
+  P.reality = r;
+  const rw = r.runway===Infinity ? '∞ 無壓力' : `${Math.round(r.runway)} 個月`;
+  $('rcOut').innerHTML = `
+    <div class="rc-light ${r.light}"><span class="dot"></span>${r.light==='g'?'綠燈 · 條件健康':r.light==='y'?'黃燈 · 吃緊':'紅燈 · 不足'}</div>
+    <div class="rc-rows">
+      <div class="rc-row"><span>零收入下,你的存糧能撐</span><span class="rv">${rw}</span></div>
+      <div class="rc-row"><span>這類生意通常多久有「第一塊錢」</span><span class="rv">約第 ${r.firstRev} 月</span></div>
+      <div class="rc-row"><span>粗估「回本／損益兩平」</span><span class="rv">約第 ${r.breakeven} 月</span></div>
+      <div class="rc-row" style="border:0"><span>判讀(依〔${curPath.name}〕變現速度)</span><span style="text-align:right;max-width:60%">${r.msg}</span></div>
     </div>
-  </section>`;
+    <div class="rc-note">※ 粗估,非預測。依此航線「變現速度」與你的投入時數推算;實際因人、因執行差異極大。</div>`;
+  updatePlan();
 }
-function recHtml(d, rank){
-  const labels = ['最適合你','次選','備選'];
-  return `
-  <div class="rec ${rank===0?'top':''}">
-    <span class="rec-rank">${labels[rank]}</span>
-    <div><span class="rec-name">${d.name}</span><span class="rec-dom" style="color:${d.color}">${d.domain}</span></div>
-    <div class="rec-role">${d.role}</div>
-    ${scorePanel(d)}
-    <div class="why"><b>為什麼適合你 ▸</b> ${whyReason(d, rkAns)}</div>
-    <button class="rec-go" data-id="${d.id}">預演這條路 →</button>
-  </div>`;
+
+/* ============================================================
+   起步清單
+   ============================================================ */
+const CHECKS = [
+  '找 5–10 個真實潛在用戶,把點子講給他們聽,記錄真反應(對話才是證據)',
+  '叫 AI 當「魔鬼代言人」,專門找推翻你點子的反證',
+  '動工前寫一頁「範圍定義」:做什麼、刻意不做什麼',
+  '建一個自有名單入口(email／社群),別只靠平台演算法',
+  '寫下你「AI 拿不到的底」:領域深度／品味／一手資料／信任',
+  '把要做的事盤點成三類:全自動化／要人但不必是你／只有你能做'
+];
+function buildChecklist(){
+  $('checklist').innerHTML = CHECKS.map((c,i)=>`<label class="chk"><input type="checkbox" data-i="${i}"><span>${c}</span></label>`).join('');
+  $('checklist').querySelectorAll('.chk').forEach(chk=>{
+    chk.querySelector('input').addEventListener('change', e=>{
+      chk.classList.toggle('on', e.target.checked);
+      P.checks = $('checklist').querySelectorAll('.chk input:checked').length;
+      updatePlan();
+    });
+  });
 }
-function journeyHtml(d){
-  const steps = parsePath(d.path);
-  const stepsHtml = steps.map(s=>`<div class="stage-step"><b>▸</b> ${s}</div>`).join('');
-  const stagesHtml = STAGES.map(st=>`
-    <div class="stage">
-      <div class="stage-top"><span class="stage-t">${st.t}</span><span class="stage-when">${st.when} · ${st.en}</span></div>
-      <p class="stage-what">${st.what}</p>
-      <div class="stage-trap">⚠ ${st.trap}</div>
-    </div>`).join('');
-  return `
-  <section class="rk-sec rk-stage">
-    <div class="rk-head"><span class="rk-num">B</span><span class="rk-t">這條路<em>長什麼樣</em></span></div>
-    <div class="rk-desc">先看到整條路。四個階段是通用的(取自手冊),每階段都有一個 AI 時代特有的招牌陷阱。</div>
-    <div class="journey">${stagesHtml}</div>
-    <div class="trap-sub" style="margin-top:18px">▸ <b style="color:var(--accent2)">這個標本的 0→1 實際步驟</b>(來自檔案)</div>
-    <div class="journey" style="padding-left:0">${stepsHtml}</div>
-  </section>`;
-}
-function gauntletHtml(d){
-  const scn = GAUNTLET.map((g,i)=>`
-    <div class="scn" data-i="${i}">
-      <div class="scn-stage">關卡 ${i+1}/8 · ${g.stage}</div>
-      <div class="scn-q">${g.q}</div>
-      <div class="scn-opts">${g.opts.map((o,j)=>`<button class="scn-opt" data-i="${i}" data-j="${j}" data-ok="${o.ok?1:0}">${o.t}</button>`).join('')}</div>
-      <div class="scn-out">
-        <div class="scn-verdict"></div>
-        <div class="scn-quote">${g.quote}<span class="src">Anthropic · The Founder's Playbook (2026)</span></div>
-      </div>
-    </div>`).join('');
-  const traps = parseTraps(d.traps).map(t=>{
-    const mark = t.slice(0,1);
-    const body = t.slice(1).trim();
-    return `<div class="trap-item"><span class="tk">${mark}</span>${body}</div>`;
-  }).join('');
-  return `
-  <section class="rk-sec rk-stage">
-    <div class="rk-head"><span class="rk-num">C</span><span class="rk-t">你<em>會遇到</em>什麼狀況</span></div>
-    <div class="rk-desc">在花真錢真時間之前,先在腦中走一遍。八個 AI 時代通用關卡——選一個,看後果。<span style="color:var(--accent2)">這不是考試,是預演。</span></div>
-    <div class="gaunt">${scn}</div>
-    <div class="gaunt-score" id="gauntScore">已演練 0／8 關</div>
-    <div class="trap-sub">▸ <b>這條路「特有」的雷</b>(來自標本檔案的隱藏陷阱)</div>
-    <div class="trap-list">${traps}</div>
-  </section>`;
-}
-function realityHtml(d){
-  return `
-  <section class="rk-sec rk-stage">
-    <div class="rk-head"><span class="rk-num">D</span><span class="rk-t">你<em>撐得過去</em>嗎</span></div>
-    <div class="rk-desc">填三個你知道的數字,粗估你能撐多久、大概何時回本。AI 時代的好處:固定成本可以壓很低、先獲利再擴編。</div>
-    <div class="rc-grid">
-      <div class="rc-in"><label>啟動資金<span class="hint">能燒的存糧(元)</span></label><input type="number" id="rcCap" value="300000" min="0" step="10000"></div>
-      <div class="rc-in"><label>每月固定支出<span class="hint">房租生活費等(元)</span></label><input type="number" id="rcBurn" value="30000" min="0" step="1000"></div>
-      <div class="rc-in"><label>每週投入時數<span class="hint">小時</span></label><input type="number" id="rcHrs" value="20" min="1" max="80" step="1"></div>
+
+/* ============================================================
+   飛行計畫(隨操作即時更新)
+   ============================================================ */
+function updatePlan(){
+  const row = (l, v, muted)=>`<div class="plan-row"><div class="pr-l">${l}</div><div class="pr-v${muted?' muted':''}">${v}</div></div>`;
+  const q = P.quiz;
+  const cond = Object.keys(q).length===5
+    ? [QUIZ_LABEL.capital[q.capital], QUIZ_LABEL.time[q.time], QUIZ_LABEL.income[q.income], QUIZ_LABEL.goal[q.goal], QUIZ_LABEL.edge[q.edge]].join(' · ')
+    : '（回答上方 5 題自動填入）';
+  const scopeDo = P.scope.do || '（尚未填:這版一定做的核心)';
+  const dist = P.dist.total ? `${Math.round(P.dist.owned/P.dist.total*100)}% 自主觸及` : '（尚未體檢)';
+  const onlyYou = Object.values(P.triage).filter(b=>b===3).length;
+  const triage = Object.keys(P.triage).length ? `仍有 ${onlyYou} 項「只有你」能做` : '（尚未盤點)';
+  const moatScore = P.moat.reduce((a,b)=>a+b,0);
+  const moat = (P.moat.some(x=>x>0)) ? `護城河 ${moatScore}/6（領域${P.moat[0]}·飛輪${P.moat[1]}·綁定${P.moat[2]}）` : '（尚未測試)';
+  const reality = P.reality ? `${P.reality.light==='g'?'🟢綠燈':P.reality.light==='y'?'🟡黃燈':'🔴紅燈'}·約第 ${P.reality.breakeven} 月回本` : '（尚未試算)';
+  $('planCard').innerHTML = `
+    <div class="plan-top">
+      <div><div class="pt-t">我的飛行計畫</div><div class="pt-m">AI-NATIVE FOUNDER · FLIGHT PLAN</div></div>
+      <div class="pt-m" style="text-align:right">演練 ${P.gaunt.done}/8 關 · 選對 ${P.gaunt.win}<br>起步清單 ${P.checks}/6</div>
     </div>
-    <div class="rc-out" id="rcOut"></div>
-  </section>`;
-}
-function firstStepHtml(d){
-  const first = parsePath(d.path)[0] || d.live;
-  const checks = [
-    '找 5–10 個真實潛在用戶,把點子講給他們聽,記錄真反應(對話才是證據)',
-    '叫 AI 當「魔鬼代言人」,專門找推翻你點子的反證',
-    '動工前寫一頁「範圍定義」:做什麼、刻意不做什麼',
-    '建一個自有名單入口(email／社群),別只靠平台演算法',
-    '寫下你「AI 拿不到的底」:領域深度／品味／一手資料／信任',
-    '把要做的事盤點成三類:全自動化 ／ 要人但不必是你 ／ 只有你能做'
-  ];
-  return `
-  <section class="rk-sec rk-stage">
-    <div class="rk-head"><span class="rk-num">E</span><span class="rk-t">這禮拜的<em>第一步</em></span></div>
-    <div class="rk-desc">手冊鐵則:別急著做。第一步永遠是「先確認有人要」,不是「先把東西做出來」。</div>
-    <div class="fstep"><span class="fl">這個標本的第一步</span>${first}</div>
-    <div class="trap-sub" style="margin-top:18px">▸ <b style="color:var(--accent2)">下海前的通用起步清單</b>(勾掉再開始)</div>
-    <div class="checklist">${checks.map((c,i)=>`<label class="chk"><input type="checkbox" data-i="${i}"><span>${c}</span></label>`).join('')}</div>
-  </section>`;
-}
-function rehearseHtml(d){
-  return `
-  <div class="picked-bar">
-    <div><span class="pb-l">正在預演</span><br><span class="pb-n">${d.name}</span> <span style="opacity:.6;font-size:13px">· ${d.domain}</span></div>
-    <button class="pb-swap" id="pbSwap">↑ 換一個標本</button>
-  </div>
-  ${journeyHtml(d)}
-  ${gauntletHtml(d)}
-  ${realityHtml(d)}
-  ${firstStepHtml(d)}`;
+    <div class="plan-grid">
+      ${row('我的航線', P.path ? `${P.path.name} · ${P.path.domain}` : '尚未選擇(回上方「你的航線」挑一條)', !P.path)}
+      ${row('我的條件', cond, Object.keys(q).length!==5)}
+      ${row('構想 · 這版一定做', scopeDo, !P.scope.do)}
+      ${row('構想 · 刻意不做', P.scope.dont || '（尚未填)', !P.scope.dont)}
+      ${row('構想 · 加新功能的證據門檻', P.scope.evid || '（尚未填)', !P.scope.evid)}
+      ${row('上線 · 觸及策略', dist, !P.dist.total)}
+      ${row('規模化 · 工作盤點', triage, !Object.keys(P.triage).length)}
+      ${row('規模化 · 護城河', moat, !P.moat.some(x=>x>0))}
+      ${row('財務韌性', reality, !P.reality)}
+    </div>
+    <div class="plan-foot">先證明有人要 → 擁有觸及他們的管道 → 守住 AI 拿不到的價值 → 讓系統替你運轉。</div>
+    <div class="plan-actions">
+      <button class="plan-btn primary" id="planPrint">🖨 列印 / 存成 PDF</button>
+      <button class="plan-btn ghost" id="planReset">↺ 全部重來</button>
+    </div>`;
+  $('planPrint').addEventListener('click', ()=>window.print());
+  $('planReset').addEventListener('click', ()=>location.reload());
 }
 
-/* ---------- wiring ---------- */
-function selectSpecimen(id, scroll){
-  const d = DATA.find(x=>x.id===id); if(!d) return;
-  curPick = d;
-  const host = document.getElementById('rkRehearse');
-  host.innerHTML = rehearseHtml(d);
-  wireRehearse(d);
-  if(scroll) host.scrollIntoView({behavior:'smooth', block:'start'});
-}
-function wireRehearse(d){
-  const host = document.getElementById('rkRehearse');
-  // gauntlet
-  let done = 0, win = 0;
-  host.querySelectorAll('.scn').forEach(scn=>{
-    scn.querySelectorAll('.scn-opt').forEach(opt=>{
-      opt.addEventListener('click', ()=>{
-        if(scn.classList.contains('done')) return;
-        const i = +scn.dataset.i;
-        const chosenOk = opt.dataset.ok==='1';
-        scn.classList.add('done');
-        scn.querySelectorAll('.scn-opt').forEach(o=>{
-          if(o.dataset.ok==='1') o.classList.add('good');
-          else { o.classList.add('bad'); o.classList.add('dim'); }
-        });
-        if(!chosenOk){ opt.classList.remove('dim'); opt.classList.add('chosen'); }
-        const v = scn.querySelector('.scn-verdict');
-        v.classList.add(chosenOk?'win':'lose');
-        v.innerHTML = chosenOk
-          ? `<span class="vlabel">✓ 選對</span>${GAUNTLET[i].win}`
-          : `<span class="vlabel">✗ 想一下</span>${GAUNTLET[i].lose}`;
-        done++; if(chosenOk) win++;
-        document.getElementById('gauntScore').textContent = `已演練 ${done}／8 關 · 選對 ${win}`;
-      });
+/* ============================================================
+   sticky rail · 進度與目前位置
+   ============================================================ */
+function wireRail(){
+  const links = [...document.querySelectorAll('.rail a')];
+  const ids = links.map(a=>a.dataset.mod);
+  const secs = ids.map(id=>$(id)).filter(Boolean);
+  let curIdx = 0;
+  const setActive = idx=>{
+    curIdx = idx;
+    links.forEach((a,i)=>{ a.classList.toggle('on', i===idx); a.classList.toggle('done', i<idx); });
+    $('railFill').style.width = ((idx+1)/links.length*100)+'%';
+  };
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const idx = ids.indexOf(e.target.id);
+        if(idx>=0) setActive(idx);
+      }
     });
-  });
-  // reality check
-  const cap = host.querySelector('#rcCap'), burn = host.querySelector('#rcBurn'), hrs = host.querySelector('#rcHrs');
-  function recompute(){
-    const r = realityCheck(d, +cap.value||0, +burn.value||0, +hrs.value||1);
-    const rw = r.runway===Infinity ? '∞ 無壓力' : `${Math.round(r.runway)} 個月`;
-    document.getElementById('rcOut').innerHTML = `
-      <div class="rc-light ${r.light}"><span class="dot"></span>${r.light==='g'?'綠燈 · 條件健康':r.light==='y'?'黃燈 · 吃緊':'紅燈 · 不足'}</div>
-      <div class="rc-rows">
-        <div class="rc-row"><span>零收入下,你的存糧能撐</span><span class="rv">${rw}</span></div>
-        <div class="rc-row"><span>這類生意通常多久有「第一塊錢」</span><span class="rv">約第 ${r.firstRev} 月</span></div>
-        <div class="rc-row"><span>粗估「回本／損益兩平」</span><span class="rv">約第 ${r.breakeven} 月</span></div>
-        <div class="rc-row" style="border:0"><span>判讀</span><span style="text-align:right;max-width:62%">${r.msg}</span></div>
-      </div>
-      <div class="rc-note">※ 粗估,非預測。依此標本的「變現速度／經常性／規模化」分數與你投入時數推算;實際因人、因執行差異極大。</div>`;
-  }
-  [cap, burn, hrs].forEach(el=>el.addEventListener('input', recompute));
-  recompute();
-  // checklist
-  host.querySelectorAll('.chk').forEach(chk=>{
-    chk.querySelector('input').addEventListener('change', e=>chk.classList.toggle('on', e.target.checked));
-  });
-  // swap
-  const swap = host.querySelector('#pbSwap');
-  if(swap) swap.addEventListener('click', ()=>document.getElementById('rkA').scrollIntoView({behavior:'smooth', block:'start'}));
-}
-function wireQuiz(){
-  const go = document.getElementById('quizGo'), hint = document.getElementById('quizHint');
-  document.querySelectorAll('#rkA .opt').forEach(opt=>{
-    opt.addEventListener('click', ()=>{
-      const k = opt.dataset.k;
-      rkAns[k] = opt.dataset.v;
-      document.querySelectorAll(`#rkA .opt[data-k="${k}"]`).forEach(o=>o.classList.remove('sel'));
-      opt.classList.add('sel');
-      const all = QUIZ.every(q=>rkAns[q.k]);
-      go.disabled = !all;
-      hint.textContent = all ? '✓ 已就緒' : `還有 ${QUIZ.filter(q=>!rkAns[q.k]).length} 題`;
-    });
-  });
-  go.addEventListener('click', ()=>{
-    const ranked = DATA.map(d=>({d, sc:matchScore(d, rkAns)})).sort((a,b)=>b.sc-a.sc);
-    const top = ranked.slice(0,3);
-    document.getElementById('recs').innerHTML = top.map((r,i)=>recHtml(r.d, i)).join('');
-    document.querySelectorAll('#recs .rec-go').forEach(b=>{
-      b.addEventListener('click', ()=>selectSpecimen(b.dataset.id, true));
-    });
-    selectSpecimen(top[0].d.id, false);
-    document.getElementById('recs').scrollIntoView({behavior:'smooth', block:'nearest'});
-  });
-}
-function buildRookie(){
-  const root = document.getElementById('rookie');
-  root.innerHTML = `
-    <p class="rk-lead">想開一人公司,但不知道<b>會遇到什麼狀況、自己撐不撐得過</b>?<br>先別急著做——這裡帶你<b>預演一遍</b>:找出適合你的方向、走過整條路、演練會撞到的牆、檢查存糧夠不夠。</p>
-    <p class="rk-sub">AI 時代框架取自 Anthropic《The Founder's Playbook: Building an AI-Native Startup》(2026)。公式不變、領域在變。</p>
-    ${quizSecHtml()}
-    <div id="rkRehearse"></div>`;
-  wireQuiz();
-  selectSpecimen(DEFAULT_PICK, false);
+  }, {rootMargin:'-45% 0px -50% 0px', threshold:0});
+  secs.forEach(s=>obs.observe(s));
+  links.forEach(a=>a.addEventListener('click', ()=>{
+    const idx = ids.indexOf(a.dataset.mod); if(idx>=0) setActive(idx);
+  }));
+  setActive(0);
 }
 
-/* ---------- mode switch ---------- */
-function setMode(m){
-  document.body.setAttribute('data-mode', m);
-  try{ localStorage.setItem('soloMode', m); }catch(e){}
-  document.getElementById('mbRookie').classList.toggle('on', m==='rookie');
-  document.getElementById('mbPro').classList.toggle('on', m==='pro');
-  if(m==='rookie' && !rkBuilt){ buildRookie(); rkBuilt = true; }
-}
-document.getElementById('mbRookie').addEventListener('click', ()=>setMode('rookie'));
-document.getElementById('mbPro').addEventListener('click', ()=>setMode('pro'));
-let savedMode = 'rookie';
-try{ savedMode = localStorage.getItem('soloMode') || 'rookie'; }catch(e){}
-setMode(savedMode);
+/* ============================================================
+   BOOT
+   ============================================================ */
+buildMindset();
+buildQuiz();
+buildLens('lensIdea','idea');
+buildLens('lensReach','reach');
+buildLens('lensFocus','focus');
+buildDevil();
+buildGauntlets();
+buildScopeSim();
+buildDist();
+buildTriage();
+buildMoat();
+buildChecklist();
+setPath('S-03', false);   // 預設航線:電子報(門檻低,適合當示範)
+['rcCap','rcBurn','rcHrs'].forEach(id=>$(id).addEventListener('input', recomputeReality));
+['sdDo','sdDont','sdEvid'].forEach(id=>{
+  const key = id==='sdDo'?'do':id==='sdDont'?'dont':'evid';
+  $(id).addEventListener('input', e=>{ P.scope[key]=e.target.value.trim(); updatePlan(); });
+});
+recomputeReality();
+updatePlan();
+wireRail();
 </script>
 </body>
 </html>
