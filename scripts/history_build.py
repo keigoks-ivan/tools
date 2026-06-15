@@ -354,6 +354,8 @@ ENTRIES = [
          zh="把不確定變成生意：保險，與一份關於明天的承諾三千年", en="Insurance: 3,000 Years of Turning Uncertainty into Business", lat=None, lng=None),
     dict(src="經濟史/稅_國家如何伸手進你的口袋.html", slug="taxation", cat="theme",
          zh="國家如何伸手進你的口袋：稅，與一部討價還價的文明史", en="Taxation: How the State Reaches Into Your Pocket", lat=None, lng=None),
+    dict(src="經濟史/主權違約史_賴帳的國王與破產的國家.html", slug="sovereign-default", cat="theme",
+         zh="賴帳的國王，與破產的國家：主權違約三千年", en="Sovereign Default: 3,000 Years of Kings & Nations That Did Not Pay", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
