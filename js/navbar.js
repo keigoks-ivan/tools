@@ -51,7 +51,8 @@ var TOOLS = [
   {k:'playbook',href:'/playbook.html',en:'Playbook',zh:'手冊',icon:'<path d="M4 4h12a3 3 0 013 3v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/><path d="M8 8h8M8 12h8M8 16h5"/>'},
   {k:'reits',href:'/reits.html',en:'REITs',zh:'REITs',icon:'<path d="M3 10l9-7 9 7v10a2 2 0 01-2 2H5a2 2 0 01-2-2V10z"/>'},
   {k:'history',href:'/history/',en:'History',zh:'歷史',icon:'<path d="M4 5h13a3 3 0 013 3v12H7a3 3 0 01-3-3V5z"/><path d="M4 5a3 3 0 013-3h10v15"/><path d="M9 7h6M9 11h6"/>'},
-  {k:'solo-co',href:'/solo-co.html',en:'Solo Co.',zh:'一人公司',icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/>'}
+  {k:'solo-co',href:'/solo-co.html',en:'Solo Co.',zh:'一人公司',icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/>'},
+  {k:'marketing',href:'/marketing.html',en:'Marketing',zh:'學行銷',icon:'<path d="M3 10v4a1 1 0 001 1h3l6 4V5L7 9H4a1 1 0 00-1 1z"/><path d="M16 9.5a3 3 0 010 5"/><path d="M18.5 7a6 6 0 010 10"/>'}
 ];
 
 /* SECONDARY TOOLS — accessed via "Tools ▾" dropdown */
