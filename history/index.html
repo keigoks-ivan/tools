@@ -162,6 +162,10 @@ html[data-lang="en"] .blk[lang-en]{display:block}
 .card .rd{margin-top:auto;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.18em;color:var(--cat,var(--gold));
   text-transform:uppercase;display:flex;align-items:center;gap:6px;opacity:.75;transition:all .18s}
 .card:hover .rd{opacity:1;gap:11px}
+.card .dl{margin-left:auto;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;
+  color:var(--faint);text-transform:uppercase;border:1px solid var(--line);border-radius:4px;
+  padding:2px 7px;opacity:.7;transition:all .18s;cursor:pointer}
+.card .dl:hover{color:var(--cat,var(--gold));border-color:var(--cat,var(--gold));opacity:1}
 .grp{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.16em;color:var(--rust);margin:22px 0 4px;
   grid-column:1/-1;display:flex;align-items:center;gap:12px}
 .grp::after{content:'';flex:1;height:1px;background:var(--line)}
@@ -291,6 +295,13 @@ function pad(n){return (n<10?'0':'')+n;}
 
 var MAP_W=1000,MAP_H=500,PROJ=null,PATH=null;
 
+// 哪些篇章有 EPUB 可下載（敘事長文；互動/資料頁沒有）
+window.__epubs=new Set();
+fetch('epub/index.json').then(function(r){return r.json();}).then(function(list){
+  window.__epubs=new Set(list);
+  if(window.__catalog){ renderTiles(); if(openKey) renderPanel(openKey); }
+}).catch(function(){});
+
 fetch('catalog.json').then(function(r){return r.json();}).then(function(cat){
   window.__catalog=cat;
   document.getElementById('stNation').textContent=cat.items.filter(function(i){return i.cat==='nation';}).length;
@@ -402,7 +413,11 @@ function cardHTML(i,catKey,num){
     '<div class="no">'+CAT_PREFIX[catKey]+' · '+pad(num)+'</div>'+
     '<div class="t">'+primary+'</div>'+
     (sub?'<div class="b">'+sub+'</div>':'')+
-    '<div class="rd">'+label+' <span>→</span></div></a>';
+    '<div class="rd">'+label+' <span>→</span>'+
+      (window.__epubs && window.__epubs.has(i.slug)
+        ? '<span class="dl" title="下載 EPUB / Download" onclick="event.preventDefault();event.stopPropagation();location.href=\'epub/'+i.slug+'.epub\'">⬇ EPUB</span>'
+        : '')+
+    '</div></a>';
 }
 
 /* ---------- d3 world map (warm night-sky) ---------- */
