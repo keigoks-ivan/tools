@@ -277,7 +277,8 @@ def build_css(vars_):
 html,body{{ margin:0; padding:0; background:var(--parchment); color:var(--ink); }}
 body{{
   font-family:"Noto Serif TC","Noto Serif CJK TC",serif;
-  line-height:1.9; text-align:justify;
+  font-size:.85em;            /* 預設略小：Kobo 開啟時的基準字級，仍可用滑桿放大 */
+  line-height:1.85; text-align:justify;
   padding:1.2em 1.1em 2.4em;
 }}
 /* 全部用 em → Kobo 字級滑桿可整體縮放 */
