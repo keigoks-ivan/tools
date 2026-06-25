@@ -72,6 +72,38 @@ P_CLOSERS = {"address", "article", "aside", "blockquote", "details", "div",
              "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr",
              "main", "menu", "nav", "ol", "p", "pre", "section", "table", "ul"}
 
+_FONT_CMAP = None
+def font_cmap():
+    """嵌入 master 字型的 cmap 涵蓋集（用來判斷哪些字會變 tofu）。"""
+    global _FONT_CMAP
+    if _FONT_CMAP is None:
+        try:
+            from fontTools.ttLib import TTFont
+            f = TTFont(FONT_REGULAR)
+            s = set()
+            for t in f["cmap"].tables:
+                s |= set(t.cmap.keys())
+            _FONT_CMAP = s
+        except Exception:
+            _FONT_CMAP = set()
+    return _FONT_CMAP
+
+def strip_tofu(text):
+    """移除字型沒有、且屬於符號/emoji/格式類的字元（會在 e-ink 變亂碼）。
+    保留：字型有的字、所有字母/數字/標點/空白（含韓文等需 fallback 的真實文字）。"""
+    cmap = font_cmap()
+    if not cmap:
+        return text
+    out = []
+    for c in text:
+        if c.isspace() or ord(c) in cmap:
+            out.append(c); continue
+        cat = unicodedata.category(c)
+        if cat and cat[0] in ("S", "C"):   # 符號 / 控制·格式（emoji、dingbat、ZWJ、VS16…）
+            continue
+        out.append(c)
+    return "".join(out)
+
 def _esc_text(t):
     return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
@@ -118,7 +150,7 @@ class _XHTMLNorm(HTMLParser):
                 if t == tag:
                     break
     def handle_data(self, data):
-        self.out.append(_esc_text(data))
+        self.out.append(_esc_text(strip_tofu(data)))
     def result(self):
         while self.stack:
             self.out.append("</%s>" % self.stack.pop())
@@ -135,6 +167,9 @@ def clean_fragment(s, vars_):
     s = resolve_vars(s, vars_)
     # 去掉只在網頁有意義的回目錄連結
     s = re.sub(r'<a[^>]*class="back-toc"[^>]*>.*?</a>', "", s, flags=re.S)
+    # emoji 場景分隔 → 乾淨的排版分隔（e-ink 上不會變亂碼）
+    s = re.sub(r'<div class="div-orn"[^>]*>.*?</div>',
+               '<p class="scene">·　·　·</p>', s, flags=re.S)
     return normalize_xhtml(s).strip()
 
 def slugify_id(i):
@@ -251,13 +286,13 @@ def act_page(a, vars_, title):
     num = clean_fragment(a["num"], vars_)
     ttl = clean_fragment(a["title"], vars_)
     sub = clean_fragment(a["sub"], vars_)
-    orn = clean_fragment(a["orn"], vars_)
     prose = clean_fragment(a["prose"], vars_)
+    # 原本的 emoji 裝飾（⛩🌊⚓✦…）改成乾淨的金線分隔，e-ink 不再亂碼
     inner = (
         f'<section class="{cls}">\n<div class="act-head">\n'
         f'<p class="act-num">{num}</p>\n<h2 class="act-title">{ttl}</h2>\n'
         + (f'<p class="act-sub">{sub}</p>\n' if sub else "")
-        + (f'<p class="ornament">{orn}</p>\n' if orn else "")
+        + '<div class="act-rule"></div>\n'
         + '</div>\n' + prose + '\n</section>\n'
     )
     return inner
@@ -266,83 +301,86 @@ def act_page(a, vars_, title):
 
 def build_css(vars_):
     v = lambda k, d: vars_.get(k, d)
-    return f""":root{{
-  --ink:{v('ink','#1a1410')}; --parchment:{v('parchment','#f4ecdc')};
-  --sea:{v('sea','#1e3a4c')}; --sea-deep:{v('sea-deep','#0f2330')};
-  --gold:{v('gold','#b08d34')}; --gold-bright:{v('gold-bright','#d4af5a')};
-  --rust:{v('rust','#8c3a21')}; --crimson:{v('crimson','#7a2418')};
-  --faint:{v('faint','#6b5d48')}; --line:{v('line','#c9b893')};
-}}
-@page{{ margin:0; }}
-html,body{{ margin:0; padding:0; background:var(--parchment); color:var(--ink); }}
+    ink=v('ink','#1a1410'); parch=v('parchment','#f4ecdc')
+    seaD=v('sea-deep','#0f2330'); gold=v('gold','#b08d34')
+    goldB=v('gold-bright','#d4af5a'); rust=v('rust','#8c3a21')
+    crim=v('crimson','#7a2418'); faint=v('faint','#6b5d48'); line=v('line','#c9b893')
+    box="#ece2ca"   # 評論框淡底（實色，避免 rgba 在舊版 Kobo 引擎失效）
+    # 注意：直接內嵌十六進位色，不用 CSS 變數——Kobo 的 EPUB 引擎不支援 var()
+    return f"""@page{{ margin:0; }}
+html,body{{ margin:0; padding:0; background:{parch}; color:{ink}; }}
 body{{
   font-family:"Noto Serif TC","Noto Serif CJK TC",serif;
-  font-size:.85em;            /* 預設略小：Kobo 開啟時的基準字級，仍可用滑桿放大 */
+  font-size:.85em;            /* 預設略小：Kobo 開啟基準字級，仍可用滑桿放大 */
   line-height:1.85; text-align:justify;
-  padding:1.2em 1.1em 2.4em;
+  padding:1.3em 1.15em 2.6em;
 }}
 /* 全部用 em → Kobo 字級滑桿可整體縮放 */
-p{{ margin:0 0 1em; text-indent:0; }}
-strong{{ font-weight:700; color:var(--crimson); }}
+p{{ margin:0 0 1.05em; }}
+strong{{ font-weight:700; color:{crim}; }}
 em{{ font-style:italic; }}
 
 /* 標題頁 */
-.titlepage-body{{ background:var(--sea-deep); color:var(--parchment); }}
-.titlepage{{ text-align:center; padding:3em 0 1.5em; }}
-.titlepage .kicker{{ font-size:.72em; letter-spacing:.32em; color:var(--gold-bright);
-  text-transform:uppercase; margin-bottom:1.6em; }}
-.titlepage h1{{ font-size:2.3em; font-weight:900; line-height:1.22; margin:0; }}
-.titlepage h1 .em{{ color:var(--gold-bright); }}
-.titlepage .sub{{ font-size:1em; font-style:italic; color:#d9cbb0;
-  margin-top:1.4em; line-height:1.7; text-align:center; }}
-.titlepage .rule{{ width:5em; height:2px; background:var(--gold-bright);
-  margin:1.8em auto 0; }}
-.titlepage-body .lede{{ color:#e6dcc6; margin-top:2.4em; }}
+.titlepage-body{{ background:{seaD}; color:{parch}; }}
+.titlepage{{ text-align:center; padding:3.2em 0 1.6em; }}
+.titlepage .kicker{{ font-size:.7em; letter-spacing:.34em; color:{goldB};
+  text-transform:uppercase; margin:0 0 1.8em; }}
+.titlepage h1{{ font-size:2.2em; font-weight:900; line-height:1.25; margin:0; }}
+.titlepage h1 .em{{ color:{goldB}; }}
+.titlepage .sub{{ font-size:1em; font-style:italic; color:#dcd0b6;
+  margin:1.5em 0 0; line-height:1.7; }}
+.titlepage .rule{{ width:4.5em; height:2px; background:{goldB}; margin:2em auto 0; }}
+.titlepage-body .lede{{ color:#e7ddc8; margin-top:2.6em; }}
 .titlepage-body .lede p{{ font-style:italic; }}
+.lede .drop{{ float:left; font-size:3em; line-height:.8; padding:.04em .14em 0 0;
+  color:{goldB}; font-weight:700; }}
 
-/* 序言 lede（在標題頁底） */
-.lede .drop{{ float:left; font-size:3.1em; line-height:.8; padding:.05em .12em 0 0;
-  color:var(--gold-bright); font-weight:700; }}
+/* 「部」分隔頁 */
+.partdiv{{ text-align:center; padding:2.8em 0 1.6em; margin:0 0 1.8em;
+  border-bottom:1px solid {line}; }}
+.partdiv .pn{{ font-size:.76em; letter-spacing:.32em; color:{gold};
+  text-transform:uppercase; margin:0 0 .5em; }}
+.partdiv .pt{{ font-size:1.65em; font-weight:900; color:{seaD}; margin:0; line-height:1.3; }}
+.partdiv .pe{{ font-size:.85em; font-style:italic; color:{faint}; margin:.6em 0 0; }}
 
-/* 「部」分隔 */
-.partdiv{{ text-align:center; padding:2.6em 0 1.4em; border-bottom:1px solid var(--line);
-  margin-bottom:1.6em; }}
-.partdiv .pn{{ font-size:.78em; letter-spacing:.3em; color:var(--gold);
-  text-transform:uppercase; margin:0 0 .4em; }}
-.partdiv .pt{{ font-size:1.7em; font-weight:900; color:var(--sea-deep); margin:0; }}
-.partdiv .pe{{ font-size:.86em; font-style:italic; color:var(--faint); margin:.5em 0 0; }}
+/* 章首 */
+.act-head{{ text-align:center; margin:.5em 0 2.2em; }}
+.act-num{{ font-size:.72em; letter-spacing:.3em; color:{gold};
+  text-transform:uppercase; margin:0 0 .7em; }}
+.act-title{{ font-size:1.5em; font-weight:900; color:{seaD}; line-height:1.32; margin:0; }}
+.act-sub{{ font-size:.88em; font-style:italic; color:{faint}; margin:.7em 0 0; }}
+.act-rule{{ width:3.2em; height:2px; background:{gold}; margin:1.3em auto 0; }}
 
-/* 章 act */
-.act-head{{ text-align:center; margin:0 0 2em; }}
-.act-num{{ font-size:.74em; letter-spacing:.28em; color:var(--gold);
-  text-transform:uppercase; margin:0 0 .6em; }}
-.act-title{{ font-size:1.55em; font-weight:900; color:var(--sea-deep);
-  line-height:1.3; margin:0; }}
-.act-sub{{ font-size:.9em; font-style:italic; color:var(--faint); margin:.6em 0 0; }}
-.ornament{{ color:var(--gold); letter-spacing:.4em; margin:.9em 0 0; }}
-.prose h3{{ font-size:1.12em; font-weight:700; color:var(--rust);
-  margin:1.8em 0 .6em; line-height:1.4; }}
-.prose blockquote{{ margin:1.4em 1.2em; padding-left:1em;
-  border-left:3px solid var(--gold); color:var(--faint); font-style:italic; }}
+/* 內文小標 */
+.prose h3{{ font-size:1.1em; font-weight:700; color:{rust};
+  margin:2em 0 .7em; line-height:1.45; }}
+.prose blockquote{{ margin:1.5em 1.1em; padding-left:.9em;
+  border-left:3px solid {gold}; color:{faint}; font-style:italic; }}
 
-/* 數據卡 / 評論框 / 引文（finance & finale 區塊） */
-.stats{{ margin:1.6em 0; }}
-.stat{{ border:1px solid var(--line); border-radius:.4em; padding:.7em .9em;
-  margin:.5em 0; text-align:center; }}
-.stat .num{{ font-size:1.5em; font-weight:900; color:var(--rust); line-height:1.2; }}
-.stat .lbl{{ font-size:.82em; color:var(--faint); margin-top:.3em; }}
-.investor,.principle{{ border:1px solid var(--gold); border-left:4px solid var(--gold);
-  border-radius:.3em; background:rgba(176,141,52,.07); padding:1em 1.1em; margin:1.8em 0; }}
-.investor .tag,.principle .tag{{ display:block; font-size:.72em; letter-spacing:.16em;
-  text-transform:uppercase; color:var(--gold); margin-bottom:.6em; font-weight:700; }}
-.pull{{ border-top:1px solid var(--gold); border-bottom:1px solid var(--gold);
-  padding:1em .4em; margin:1.8em 0; text-align:center; }}
-.pull p{{ font-size:1.12em; font-style:italic; color:var(--sea-deep); margin:0; }}
+/* 場景分隔（取代原本的 emoji 裝飾） */
+.scene{{ text-align:center; color:{gold}; letter-spacing:.5em;
+  margin:1.8em 0; font-size:.95em; }}
+
+/* 數據卡 */
+.stats{{ margin:1.8em 0; }}
+.stat{{ border:1px solid {line}; padding:.8em 1em; margin:.6em 0; text-align:center; }}
+.stat .num{{ font-size:1.45em; font-weight:900; color:{rust}; line-height:1.2; }}
+.stat .lbl{{ font-size:.82em; color:{faint}; margin-top:.35em; }}
+
+/* 評論框 / 原則框 */
+.investor,.principle{{ border:1px solid {gold}; border-left:4px solid {gold};
+  background:{box}; padding:1.1em 1.15em; margin:2em 0; }}
+.investor .tag,.principle .tag{{ display:block; font-size:.7em; letter-spacing:.18em;
+  text-transform:uppercase; color:{gold}; margin:0 0 .7em; font-weight:700; }}
+
+/* 引文 */
+.pull{{ border-top:1px solid {gold}; border-bottom:1px solid {gold};
+  padding:1.1em .5em; margin:2em 0; text-align:center; }}
+.pull p{{ font-size:1.1em; font-style:italic; color:{seaD}; margin:0; line-height:1.6; }}
 .wrap{{ margin:0; }}
 
 /* 終章 */
-.finale .act-title{{ color:var(--crimson); }}
-.div-orn{{ text-align:center; color:var(--gold); letter-spacing:.5em; margin:2em 0; }}
+.finale .act-title{{ color:{crim}; }}
 """
 
 # ---------- 字型 subset（可選） ----------
@@ -383,7 +421,7 @@ CONTAINER = (
     '  </rootfiles>\n</container>\n'
 )
 
-def build_epub(slug, embed=False, verbose=True):
+def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
     src = os.path.join(HIST, slug + ".html")
     doc = parse_doc(read(src))
     vars_ = doc["vars"]
@@ -433,14 +471,23 @@ def build_epub(slug, embed=False, verbose=True):
         os.makedirs(OUT, exist_ok=True)
         weights = [("Regular", 400, FONT_REGULAR, "serif-regular.woff2"),
                    ("Bold",    700, FONT_BOLD,    "serif-bold.woff2")]
+        # reuse_fonts：沿用既有 epub 內的 subset woff2（只改內容/CSS 時免重新 subset）
+        existing = None
+        if reuse_fonts:
+            ep = os.path.join(OUT, slug + ".epub")
+            if os.path.exists(ep):
+                existing = zipfile.ZipFile(ep)
         for nm, w, master, href in weights:
-            if not os.path.exists(master):
-                raise FileNotFoundError(f"缺 master 字型 {master}（先實例化 NotoSerifTC）")
-            tmp = os.path.join(OUT, f"_sub_{nm}.woff2")
-            subset_font(master, alltext, tmp)
-            with open(tmp, "rb") as f:
-                data = f.read()
-            os.remove(tmp)
+            if existing is not None:
+                data = existing.read("OEBPS/fonts/" + href)
+            else:
+                if not os.path.exists(master):
+                    raise FileNotFoundError(f"缺 master 字型 {master}（先實例化 NotoSerifTC）")
+                tmp = os.path.join(OUT, f"_sub_{nm}.woff2")
+                subset_font(master, alltext, tmp)
+                with open(tmp, "rb") as f:
+                    data = f.read()
+                os.remove(tmp)
             fid = "font" + nm.lower()
             embedded.append((fid, "fonts/" + href, data))
             manifest.append(f'<item id="{fid}" href="fonts/{href}" media-type="font/woff2"/>')
@@ -448,6 +495,8 @@ def build_epub(slug, embed=False, verbose=True):
                 '@font-face{font-family:"Noto Serif TC";'
                 f'font-weight:{w};font-style:normal;'
                 'font-display:swap;src:url("fonts/' + href + '") format("woff2");}\n')
+        if existing is not None:
+            existing.close()
 
     opf = f"""<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" xml:lang="zh-Hant">
@@ -507,6 +556,8 @@ def main():
     ap.add_argument("slug", nargs="?", help="history slug (不含 .html)")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--embed", action="store_true", help="內嵌 subset Noto Serif TC（兩種字重）")
+    ap.add_argument("--reuse-fonts", action="store_true",
+                    help="沿用既有 epub 的 subset 字型（只改內容/CSS 時快速重建）")
     args = ap.parse_args()
 
     if args.all:
@@ -515,12 +566,12 @@ def main():
         ok = 0
         for s in slugs:
             try:
-                build_epub(s, args.embed); ok += 1
+                build_epub(s, args.embed, reuse_fonts=args.reuse_fonts); ok += 1
             except Exception as e:
                 print(f"✗ {s}: {e}")
         print(f"\n完成 {ok}/{len(slugs)}")
     elif args.slug:
-        build_epub(args.slug, args.embed)
+        build_epub(args.slug, args.embed, reuse_fonts=args.reuse_fonts)
     else:
         ap.print_help()
 
