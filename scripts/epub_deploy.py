@@ -52,11 +52,18 @@ def main():
         json.dump(slugs, f, ensure_ascii=False, separators=(",", ":"))
     print(f"✓ 派送到網站 {SITE}（含 index.json，{len(slugs)} 篇）")
 
-    # 3) Kobo Drive
+    # 3) Kobo Drive（直接放進分類子資料夾，分類邏輯與 epub_organize 共用）
     if os.path.isdir(DRIVE):
+        import epub_organize as org
+        items = org.load_items()
+        for f in org.ALL_FOLDERS:
+            os.makedirs(os.path.join(DRIVE, f), exist_ok=True)
         for s in slugs:
-            shutil.copy2(os.path.join(EPUB, s + ".epub"), os.path.join(DRIVE, s + ".epub"))
-        print(f"✓ 同步到 Kobo Drive：{DRIVE}（{len(slugs)} 篇）")
+            folder = org.classify(s, items)
+            shutil.copy2(os.path.join(EPUB, s + ".epub"),
+                         os.path.join(DRIVE, folder, s + ".epub"))
+        org.organize(DRIVE, verbose=False)   # 收尾：清掉任何位置不對的殘留
+        print(f"✓ 同步到 Kobo Drive（已分類）：{DRIVE}（{len(slugs)} 篇）")
     else:
         print(f"⚠ 找不到 Kobo Drive 資料夾，略過：{DRIVE}")
 
