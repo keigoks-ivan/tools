@@ -582,6 +582,22 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
     title_xhtml = title_page(doc)
     toc_xhtml = toc_page(toc, doc["title"])
 
+    # 封面圖（Pillow 畫；失敗則無封面，不影響其餘）
+    cover_bytes = None
+    try:
+        import epub_cover
+        cover_bytes = epub_cover.cover_for(slug, vars_, doc["h1"], doc["kicker"], doc["sub"])
+    except Exception:
+        cover_bytes = None
+    cover_xhtml = (
+        '<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n'
+        '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-Hant" lang="zh-Hant">\n'
+        '<head><meta charset="utf-8"/><title>封面</title>\n'
+        '<style>html,body{margin:0;padding:0;text-align:center}'
+        'img{max-width:100%;max-height:100%}</style></head>\n'
+        '<body><div><img src="../images/cover.jpg" alt="封面"/></div></body>\n</html>\n'
+    ) if cover_bytes else None
+
     css = build_css(vars_)
 
     # 收集全文字元供 subset
@@ -592,6 +608,10 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
     manifest.append('<item id="css" href="style.css" media-type="text/css"/>')
     manifest.append('<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>')
     manifest.append('<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>')
+    if cover_bytes:
+        manifest.append('<item id="cover-img" href="images/cover.jpg" media-type="image/jpeg" properties="cover-image"/>')
+        manifest.append('<item id="cover" href="text/cover.xhtml" media-type="application/xhtml+xml"/>')
+        spine.append('<itemref idref="cover"/>')
     manifest.append('<item id="title" href="text/title.xhtml" media-type="application/xhtml+xml"/>')
     manifest.append('<item id="toc" href="text/toc.xhtml" media-type="application/xhtml+xml"/>')
     spine.append('<itemref idref="title"/>')
@@ -644,6 +664,7 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
     <dc:language>zh-Hant</dc:language>
     <dc:publisher>investmquest.com</dc:publisher>
     <meta property="dcterms:modified">2026-06-25T00:00:00Z</meta>
+    {'<meta name="cover" content="cover-img"/>' if cover_bytes else ''}
   </metadata>
   <manifest>
     {chr(10).join('    ' + m for m in manifest).strip()}
@@ -680,6 +701,9 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
         zi("OEBPS/toc.ncx", ncx)
         zi("OEBPS/nav.xhtml", nav)
         zi("OEBPS/style.css", css_full)
+        if cover_bytes:
+            z.writestr("OEBPS/images/cover.jpg", cover_bytes, compress_type=zipfile.ZIP_STORED)
+            zi("OEBPS/text/cover.xhtml", cover_xhtml)
         zi("OEBPS/text/title.xhtml", title_xhtml)
         zi("OEBPS/text/toc.xhtml", toc_xhtml)
         for cid, fn, ttl, x in chapters:
