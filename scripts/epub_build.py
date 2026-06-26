@@ -582,11 +582,11 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
     title_xhtml = title_page(doc)
     toc_xhtml = toc_page(toc, doc["title"])
 
-    # 封面圖（Pillow 畫；失敗則無封面，不影響其餘）
+    # 封面圖（Pillow 畫；失敗則無封面，不影響其餘）。風格：裝飾藝術 deco
     cover_bytes = None
     try:
-        import epub_cover
-        cover_bytes = epub_cover.cover_for(slug, vars_, doc["h1"], doc["kicker"], doc["sub"])
+        import cover_styles
+        cover_bytes = cover_styles.cover_for(slug, vars_, doc["h1"], doc["kicker"], doc["sub"])
     except Exception:
         cover_bytes = None
     cover_xhtml = (
