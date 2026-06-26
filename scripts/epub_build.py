@@ -424,6 +424,9 @@ body{{
 }}
 /* 全部用 em → Kobo 字級滑桿可整體縮放 */
 p{{ margin:0 0 1.05em; }}
+/* 內文首行縮排 2 個字（中文書習慣）；即使 Kobo 把段距設成 0，縮排仍能清楚分段 */
+.prose p{{ text-indent:2em; margin:0 0 .9em; }}
+.prose .pull p, .prose .stat .lbl, .prose .stat .num{{ text-indent:0; }}
 strong{{ font-weight:700; color:{crim}; }}
 em{{ font-style:italic; }}
 
