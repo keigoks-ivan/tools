@@ -324,6 +324,55 @@ def part_page(p):
     )
     return inner  # part 與下一章合併在同一檔頂端
 
+def build_ncx(slug, book_title, toc):
+    """產生 EPUB2 NCX —— Kobo 側載書的「目錄」選單靠它，閱讀中可隨時跳章。
+    有「部」則做兩層（部為可收合的父節點，章在其下）；否則平鋪。"""
+    play = [0]
+    def label_of(num, t):
+        return (num + " " + t).strip() if num else t
+    def leaf(label, src):
+        play[0] += 1; pid = play[0]
+        return (f'<navPoint id="np{pid}" playOrder="{pid}">'
+                f'<navLabel><text>{html.escape(label)}</text></navLabel>'
+                f'<content src="text/{src}"/></navPoint>')
+    pts = [leaf("封面・序", "title.xhtml"), leaf("目錄", "toc.xhtml")]
+    i, n = 0, len(toc)
+    while i < n:
+        e = toc[i]
+        if e[0] == "part":
+            name = e[1]; i += 1
+            play[0] += 1; pid = play[0]      # 父節點先取號
+            first_src, kids = None, []
+            while i < n and toc[i][0] == "act":
+                _, cid, num, t = toc[i]
+                if first_src is None:
+                    first_src = cid + ".xhtml"
+                play[0] += 1; kpid = play[0]
+                kids.append(f'<navPoint id="np{kpid}" playOrder="{kpid}">'
+                            f'<navLabel><text>{html.escape(label_of(num, t))}</text></navLabel>'
+                            f'<content src="text/{cid}.xhtml"/></navPoint>')
+                i += 1
+            pts.append(f'<navPoint id="np{pid}" playOrder="{pid}">'
+                       f'<navLabel><text>{html.escape(name)}</text></navLabel>'
+                       f'<content src="text/{first_src or "toc.xhtml"}"/>'
+                       + "".join(kids) + "</navPoint>")
+        else:
+            _, cid, num, t = e
+            pts.append(leaf(label_of(num, t), cid + ".xhtml"))
+            i += 1
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="zh-Hant">\n'
+        '<head>\n'
+        f'<meta name="dtb:uid" content="urn:investmquest:history:{slug}"/>\n'
+        '<meta name="dtb:depth" content="2"/>\n'
+        '<meta name="dtb:totalPageCount" content="0"/>\n'
+        '<meta name="dtb:maxPageNumber" content="0"/>\n'
+        '</head>\n'
+        f'<docTitle><text>{html.escape(book_title)}</text></docTitle>\n'
+        '<navMap>\n' + "\n".join(pts) + '\n</navMap>\n</ncx>\n'
+    )
+
 def toc_page(toc, book_title):
     """書內的目錄頁：列出各部與各章，連到對應章節檔。"""
     rows = []
@@ -538,6 +587,7 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
 
     manifest, spine, navlis = [], [], []
     manifest.append('<item id="css" href="style.css" media-type="text/css"/>')
+    manifest.append('<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>')
     manifest.append('<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>')
     manifest.append('<item id="title" href="text/title.xhtml" media-type="application/xhtml+xml"/>')
     manifest.append('<item id="toc" href="text/toc.xhtml" media-type="application/xhtml+xml"/>')
@@ -595,11 +645,13 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
   <manifest>
     {chr(10).join('    ' + m for m in manifest).strip()}
   </manifest>
-  <spine>
+  <spine toc="ncx">
     {chr(10).join('    ' + s for s in spine).strip()}
   </spine>
 </package>
 """
+
+    ncx = build_ncx(slug, doc["title"], toc)
 
     nav = (
         '<?xml version="1.0" encoding="utf-8"?>\n'
@@ -622,6 +674,7 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
         zi = lambda name, data: z.writestr(name, data, compress_type=zipfile.ZIP_DEFLATED)
         zi("META-INF/container.xml", CONTAINER)
         zi("OEBPS/content.opf", opf)
+        zi("OEBPS/toc.ncx", ncx)
         zi("OEBPS/nav.xhtml", nav)
         zi("OEBPS/style.css", css_full)
         zi("OEBPS/text/title.xhtml", title_xhtml)
