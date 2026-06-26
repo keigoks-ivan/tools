@@ -62,6 +62,45 @@ def resolve_vars(s, vars_):
         return vars_.get(key, fb or "#1a1410")
     return re.sub(r"var\(\s*--([a-z0-9-]+)\s*(?:,([^)]*))?\)", repl, s)
 
+def _is_light_color(val):
+    """color 值是否「淺色」（淺底書頁上會看不見）。"""
+    v = val.strip().lower()
+    r = g = b = None
+    if v.startswith("#"):
+        h = v[1:]
+        if len(h) == 3:
+            h = "".join(c * 2 for c in h)
+        if len(h) >= 6:
+            r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    elif v.startswith("rgb"):
+        nums = re.findall(r"[\d.]+", v)
+        if len(nums) >= 3:
+            r, g, b = float(nums[0]), float(nums[1]), float(nums[2])
+    elif v in ("white", "ivory", "snow", "floralwhite", "cornsilk", "beige", "linen"):
+        return True
+    if r is None:
+        return False
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6
+
+# 行內樣式要丟掉的屬性：深色底/卡片裝飾，不符合「像書一樣」的淺底版面
+_DROP_STYLE = {"background", "background-color", "background-image",
+               "box-shadow", "border-radius"}
+
+def clean_inline_style(style):
+    """清掉行內樣式的深色底/卡片裝飾與淺色字（淺底看不見），保留深色強調等其餘宣告。"""
+    out = []
+    for decl in style.split(";"):
+        if ":" not in decl:
+            continue
+        prop, val = decl.split(":", 1)
+        p = prop.strip().lower()
+        if p in _DROP_STYLE:
+            continue
+        if p == "color" and _is_light_color(val):
+            continue
+        out.append(prop.strip() + ":" + val.strip())
+    return ";".join(out)
+
 from html.parser import HTMLParser
 
 VOID = {"br", "hr", "img", "wbr", "col", "source", "input", "meta",
@@ -122,6 +161,10 @@ class _XHTMLNorm(HTMLParser):
         for k, v in attrs:
             if k == "id":          # 章內 id 在 EPUB 不需要
                 continue
+            if k == "style":       # 清掉深色底/卡片裝飾/淺色字，維持淺底書頁
+                v = clean_inline_style(v or "")
+                if not v:
+                    continue
             val = v if v is not None else k
             s += ' %s="%s"' % (k, _esc_attr(val))
         return s
@@ -281,6 +324,21 @@ def part_page(p):
     )
     return inner  # part 與下一章合併在同一檔頂端
 
+def toc_page(toc, book_title):
+    """書內的目錄頁：列出各部與各章，連到對應章節檔。"""
+    rows = []
+    for e in toc:
+        if e[0] == "part":
+            rows.append(f'<p class="toc-part">{html.escape(e[1])}</p>')
+        else:
+            _, cid, num, t = e
+            n = f'<span class="toc-num">{html.escape(num)}</span>' if num else ""
+            rows.append(f'<p class="toc-item">{n}<a href="{cid}.xhtml">{html.escape(t)}</a></p>')
+    inner = ('<section class="toc">\n'
+             '<h1>目錄<span class="en">Contents</span></h1>\n'
+             + "\n".join(rows) + "\n</section>\n")
+    return page(book_title, "", inner)
+
 def act_page(a, vars_, title):
     cls = "act finale" if a.get("finale") else "act"
     num = clean_fragment(a["num"], vars_)
@@ -320,20 +378,32 @@ p{{ margin:0 0 1.05em; }}
 strong{{ font-weight:700; color:{crim}; }}
 em{{ font-style:italic; }}
 
-/* 標題頁 */
-.titlepage-body{{ background:{seaD}; color:{parch}; }}
+/* 標題頁（淺底書頁，與其餘頁面一致） */
 .titlepage{{ text-align:center; padding:3.2em 0 1.6em; }}
-.titlepage .kicker{{ font-size:.7em; letter-spacing:.34em; color:{goldB};
+.titlepage .kicker{{ font-size:.7em; letter-spacing:.34em; color:{gold};
   text-transform:uppercase; margin:0 0 1.8em; }}
-.titlepage h1{{ font-size:2.2em; font-weight:900; line-height:1.25; margin:0; }}
-.titlepage h1 .em{{ color:{goldB}; }}
-.titlepage .sub{{ font-size:1em; font-style:italic; color:#dcd0b6;
+.titlepage h1{{ font-size:2.2em; font-weight:900; line-height:1.25; margin:0; color:{seaD}; }}
+.titlepage h1 .em{{ color:{rust}; }}
+.titlepage .sub{{ font-size:1em; font-style:italic; color:{faint};
   margin:1.5em 0 0; line-height:1.7; }}
-.titlepage .rule{{ width:4.5em; height:2px; background:{goldB}; margin:2em auto 0; }}
-.titlepage-body .lede{{ color:#e7ddc8; margin-top:2.6em; }}
-.titlepage-body .lede p{{ font-style:italic; }}
+.titlepage .rule{{ width:4.5em; height:2px; background:{gold}; margin:2em auto 0; }}
+.lede{{ margin-top:2.6em; }}
+.lede p{{ font-style:italic; }}
 .lede .drop{{ float:left; font-size:3em; line-height:.8; padding:.04em .14em 0 0;
-  color:{goldB}; font-weight:700; }}
+  color:{rust}; font-weight:700; }}
+
+/* 目錄頁 */
+.toc{{ padding:1em 0 .5em; }}
+.toc h1{{ text-align:center; font-size:1.5em; font-weight:900; color:{seaD};
+  letter-spacing:.18em; margin:.8em 0 1.6em; }}
+.toc h1 .en{{ display:block; font-size:.42em; font-style:italic; font-weight:400;
+  letter-spacing:.2em; color:{faint}; margin-top:.5em; text-transform:uppercase; }}
+.toc-part{{ font-size:.8em; font-weight:700; color:{gold}; letter-spacing:.16em;
+  text-transform:uppercase; margin:1.6em 0 .6em; padding-bottom:.35em;
+  border-bottom:1px solid {line}; }}
+.toc-item{{ margin:.55em 0; line-height:1.5; }}
+.toc-item a{{ color:{ink}; text-decoration:none; }}
+.toc-num{{ color:{gold}; font-size:.85em; margin-right:.5em; }}
 
 /* 「部」分隔頁 */
 .partdiv{{ text-align:center; padding:2.8em 0 1.6em; margin:0 0 1.8em;
@@ -427,39 +497,54 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
     vars_ = doc["vars"]
 
     # 章節組裝：part-div 併入下一個 act 檔頂端
+    def plain(s):
+        return html.unescape(re.sub("<[^>]+>", "", s or "")).strip()
     chapters = []   # (id, filename, title, xhtml)
+    toc = []        # ('part', name) | ('act', cid, num, title)
     pending_part = None
+    pending_part_name = None
     idx = 0
     for kind, _pos, data in doc["seq"]:
         if kind == "part":
             pending_part = part_page(data)
+            pending_part_name = plain(data.get("pt"))
             continue
         idx += 1
         inner = (pending_part or "") + act_page(data, vars_, doc["title"])
-        pending_part = None
         cid = slugify_id(idx)
-        chapters.append((cid, cid + ".xhtml",
-                         html.unescape(re.sub("<[^>]+>", "", data["title"])).strip(),
+        ch_title = plain(data["title"])
+        # 章序：取 act-num 中「·」前的中文段（序章 / 第一章…）
+        num = plain(data["num"]).split("·")[0].strip()
+        if pending_part_name:
+            toc.append(("part", pending_part_name))
+        toc.append(("act", cid, num, ch_title))
+        pending_part = None
+        pending_part_name = None
+        chapters.append((cid, cid + ".xhtml", ch_title,
                          page(doc["title"], "", inner)))
 
     if not chapters:
         raise ValueError("無 act 章節（互動/資料頁，非敘事長文），略過")
 
-    # 標題頁
+    # 標題頁 + 目錄頁
     title_xhtml = title_page(doc)
+    toc_xhtml = toc_page(toc, doc["title"])
 
     css = build_css(vars_)
 
     # 收集全文字元供 subset
     alltext = doc["title"] + doc["h1"] + doc["sub"] + doc["lede"] + \
-        "".join(c[3] for c in chapters)
+        toc_xhtml + "".join(c[3] for c in chapters)
 
     manifest, spine, navlis = [], [], []
     manifest.append('<item id="css" href="style.css" media-type="text/css"/>')
     manifest.append('<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>')
     manifest.append('<item id="title" href="text/title.xhtml" media-type="application/xhtml+xml"/>')
+    manifest.append('<item id="toc" href="text/toc.xhtml" media-type="application/xhtml+xml"/>')
     spine.append('<itemref idref="title"/>')
+    spine.append('<itemref idref="toc"/>')
     navlis.append('<li><a href="text/title.xhtml">封面・序</a></li>')
+    navlis.append('<li><a href="text/toc.xhtml">目錄</a></li>')
     for cid, fn, ttl, _x in chapters:
         manifest.append(f'<item id="{cid}" href="text/{fn}" media-type="application/xhtml+xml"/>')
         spine.append(f'<itemref idref="{cid}"/>')
@@ -540,6 +625,7 @@ def build_epub(slug, embed=False, verbose=True, reuse_fonts=False):
         zi("OEBPS/nav.xhtml", nav)
         zi("OEBPS/style.css", css_full)
         zi("OEBPS/text/title.xhtml", title_xhtml)
+        zi("OEBPS/text/toc.xhtml", toc_xhtml)
         for cid, fn, ttl, x in chapters:
             zi("OEBPS/text/" + fn, x)
         for _fid, href, data in embedded:
