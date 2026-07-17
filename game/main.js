@@ -591,22 +591,23 @@ const rain = (() => {
 })();
 
 // ---------- 角色渲染工具 ----------
-function makeOutlineMat() {
+function makeOutlineMat(width = 0.028) {
   const m = new THREE.MeshBasicMaterial({ color: 0x0a0714, side: THREE.BackSide });
   m.onBeforeCompile = sh => {
     sh.vertexShader = sh.vertexShader.replace(
       '#include <project_vertex>',
-      'transformed += objectNormal * 0.028;\n#include <project_vertex>'
+      `transformed += objectNormal * ${width.toFixed(4)};\n#include <project_vertex>`
     );
   };
+  m.customProgramCacheKey = () => 'outline' + width.toFixed(4);
   return m;
 }
-function addOutline(root, matsArr) {
+function addOutline(root, matsArr, width = 0.028) {
   const targets = [];
   root.traverse(o => {
     if (o.isMesh && o.visible && o.material?.name !== 'Glow' && !o.userData.isOutline) targets.push(o);
   });
-  const mat = makeOutlineMat();
+  const mat = makeOutlineMat(width);
   if (matsArr) matsArr.push(mat);
   for (const m of targets) {
     const oc = m.clone(false);
@@ -811,13 +812,13 @@ const level = { zi: 0, phase: 'fight', zoneKills: 0, spawned: 0, boss: null };
 
 // 攻擊表（Rumi／Knight，1H 劍）
 const LIGHT = [
-  { clip: '1H_Melee_Attack_Slice_Horizontal', ts: 1.7,  range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.38, dir: 1 },
-  { clip: '1H_Melee_Attack_Slice_Diagonal',   ts: 1.7,  range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.38, dir: -1 },
-  { clip: '1H_Melee_Attack_Chop',             ts: 1.6,  range: 3.0, ang: 2.2, dmg: 1, kb: 9,  hitAt: 0.40, dir: 1 },
-  { clip: '1H_Melee_Attack_Stab',             ts: 1.55, range: 3.4, ang: 1.5, dmg: 2, kb: 12, hitAt: 0.40, dir: 1, shake: 0.3 },
+  { clip: 'slash1', ts: 1.45, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.38, dir: 1 },
+  { clip: 'slash2', ts: 1.45, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.38, dir: -1 },
+  { clip: 'slash3', ts: 1.4,  range: 3.0, ang: 2.2, dmg: 1, kb: 9,  hitAt: 0.40, dir: 1 },
+  { clip: 'slash4', ts: 1.35, range: 3.4, ang: 2.4, dmg: 2, kb: 12, hitAt: 0.42, dir: 1, shake: 0.3 },
 ];
-const HEAVY_SOLO   = { clip: '2H_Melee_Attack_Chop', ts: 1.35, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1,  shake: 0.45 };
-const HEAVY_FINISH = { clip: '2H_Melee_Attack_Spin', ts: 1.4,  range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.45, dir: 1,  shake: 0.55 };
+const HEAVY_SOLO   = { clip: 'heavy',    ts: 1.3, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1,  shake: 0.45 };
+const HEAVY_FINISH = { clip: 'heavyfin', ts: 1.3, range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.46, dir: 1,  shake: 0.55 };
 const PLUNGE       = { range: 4.0, ang: 6.3, dmg: 2, kb: 14, shake: 0.6 };
 
 const player = {
@@ -858,30 +859,36 @@ const KINDS = {
 const loader = new GLTFLoader();
 const CITY_PROPS = ['car_sedan', 'car_taxi', 'car_hatchback', 'streetlight', 'trafficlight_A', 'dumpster', 'bench', 'firehydrant'];
 Promise.all([
-  loader.loadAsync('assets/Knight.glb'),
+  loader.loadAsync('assets/maria.glb'),
   loader.loadAsync('assets/Skeleton_Minion.glb'),
   loader.loadAsync('assets/Skeleton_Warrior.glb'),
   ...CITY_PROPS.map(n => loader.loadAsync(`assets/city/${n}.gltf`)),
-]).then(([knight, minion, warrior, ...city]) => {
-  const hide = new Set(['1H_Sword_Offhand', 'Badge_Shield', 'Rectangle_Shield', 'Round_Shield', 'Spike_Shield', '2H_Sword', 'Knight_Helmet']);
-  knight.scene.traverse(o => { if (hide.has(o.name)) o.visible = false; });
-  toonify(knight.scene);
-  knight.scene.traverse(o => {
-    if (o.isMesh && o.name === '1H_Sword') {
-      o.material = o.material.clone();
-      o.material.emissive = new THREE.Color(0x7a2fff);
-      o.material.emissiveIntensity = 1.4;
+]).then(([maria, minion, warrior, ...city]) => {
+  // Mixamo 動作自帶前進位移，鎖定 Hips 水平位移（保留 Y 起伏），移動交給遊戲邏輯
+  for (const clip of maria.animations) {
+    for (const tr of clip.tracks) {
+      if (/Hips\.position$/.test(tr.name)) {
+        const v = tr.values;
+        const x0 = v[0], z0 = v[2];
+        for (let i = 0; i < v.length; i += 3) { v[i] = x0; v[i + 2] = z0; }
+      }
     }
-  });
-  player.root = knight.scene;
+  }
+  const heroRoot = maria.scene;
+  toonify(heroRoot);
+  heroRoot.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+  // 依模型實際身高標定為 1.78m（Mixamo FBX 單位是公分）
+  const bbox = new THREE.Box3().setFromObject(heroRoot);
+  const hScale = 1.78 / (bbox.max.y - bbox.min.y);
+  heroRoot.scale.setScalar(hScale);
+  player.root = heroRoot;
   scene.add(player.root);
-  player.rig = makeRig(player.root, knight.animations, [
-    'Idle', 'Running_A', 'Dodge_Forward', 'Hit_A', 'Death_A', 'Cheer',
-    'Jump_Start', 'Jump_Idle', 'Jump_Land',
+  player.rig = makeRig(player.root, maria.animations, [
+    'idle', 'run', 'roll', 'hurt', 'death', 'win', 'jump',
     ...LIGHT.map(c => c.clip), HEAVY_SOLO.clip, HEAVY_FINISH.clip,
   ]);
-  addOutline(knight.scene);
-  play(player.rig, 'Idle');
+  addOutline(heroRoot, null, 0.028 / hScale);
+  play(player.rig, 'idle');
   player.shadow = makeBlobShadow(1.1);
 
   toonify(minion.scene);
@@ -1226,7 +1233,7 @@ function onBossDown() {
   }
   spawnShockwave(player.x, player.z, { maxR: 14, dur: 0.7 });
   shakeT = 0.4; shakeAmp = 0.5;
-  if (player.rig) play(player.rig, 'Cheer', { once: true, ts: 1 });
+  if (player.rig) play(player.rig, 'win', { once: true, ts: 1 });
   setTimeout(() => {
     const m = Math.floor(runTime / 60), s = Math.round(runTime % 60);
     let score = 0;
@@ -1296,7 +1303,7 @@ function damagePlayer(dmg, from) {
   p.x += (dx / d) * 0.7; p.z += (dz / d) * 0.7;
   if (p.hp <= 0) {
     p.hp = 0; p.st = 'dead';
-    play(p.rig, 'Death_A', { once: true, ts: 1.1 });
+    play(p.rig, 'death', { once: true, ts: 1.1 });
     state = 'dead';
     setTimeout(() => {
       hud.deadStats.textContent = `推進到 ${ZONES[level.zi].name} · 擊殺 ${kills} · 最大連段 ${maxCombo}`;
@@ -1304,8 +1311,8 @@ function damagePlayer(dmg, from) {
     }, 900);
   } else if (dmg >= 10 && (p.st === 'idle' || p.st === 'run')) {
     // 只有重擊會打出硬直，小兵攻擊不打斷 Rumi 的動作
-    play(p.rig, 'Hit_A', { once: true, ts: 1.6 });
-    p.st = 'hurt'; p.hurtT = clipDur(p.rig, 'Hit_A', 1.6) * 0.8;
+    play(p.rig, 'hurt', { once: true, ts: 1.5 });
+    p.st = 'hurt'; p.hurtT = clipDur(p.rig, 'hurt', 1.5) * 0.8;
   }
 }
 
@@ -1328,13 +1335,13 @@ function updatePlayer(dt) {
 
   if (p.st === 'hurt') {
     p.hurtT -= dt;
-    if (p.hurtT <= 0) { p.st = 'idle'; play(p.rig, 'Idle'); }
+    if (p.hurtT <= 0) { p.st = 'idle'; play(p.rig, 'idle'); }
   } else if (p.st === 'dodge') {
     p.dodgeT += dt;
     const k = Math.max(0.2, 1 - p.dodgeT / p.dodgeDur);
     p.x += p.dodgeDx * 10 * k * dt;
     p.z += p.dodgeDz * 10 * k * dt;
-    if (p.dodgeT >= p.dodgeDur) { p.st = 'idle'; play(p.rig, 'Idle'); }
+    if (p.dodgeT >= p.dodgeDur) { p.st = 'idle'; play(p.rig, 'idle'); }
   } else if (p.st === 'jump' || p.st === 'plunge') {
     if (ml > 0) {
       p.x += mx * p.spd * 0.85 * dt;
@@ -1346,9 +1353,7 @@ function updatePlayer(dt) {
       if (atkPressed) {
         atkPressed = false;
         p.st = 'plunge'; p.vy = -22;
-        play(p.rig, '1H_Melee_Attack_Chop', { once: true, ts: 1.2, fade: 0.06 });
-      } else if (p.vy < 0 && p.rig.current === p.rig.actions['Jump_Start']) {
-        play(p.rig, 'Jump_Idle', { ts: 1 });
+        play(p.rig, 'slash4', { once: true, ts: 1.3, fade: 0.06 });
       }
     } else {
       p.vy = -22;
@@ -1364,8 +1369,7 @@ function updatePlayer(dt) {
         if (hits === 0) hitStopT = 0.04;
       }
       p.st = 'idle';
-      play(p.rig, 'Jump_Land', { once: true, ts: 1.8, fade: 0.06 });
-      setTimeout(() => { if (p.st === 'idle') play(p.rig, 'Idle', { fade: 0.15 }); }, 220);
+      play(p.rig, 'idle', { fade: 0.14 });
     }
   } else if (p.st === 'atk') {
     const a = p.curAtk;
@@ -1384,21 +1388,21 @@ function updatePlayer(dt) {
       startAttack(LIGHT[p.atkStage + 1], p.atkStage + 1, mx, mz, ml);
     } else if (p.atkT >= p.atkDur * 0.92) {
       p.st = 'idle';
-      play(p.rig, ml > 0 ? 'Running_A' : 'Idle', { ts: ml > 0 ? 1.3 : 1 });
+      play(p.rig, ml > 0 ? 'run' : 'idle', { ts: ml > 0 ? 1.15 : 1 });
     }
   } else {
     if (ml > 0) {
       p.x += mx * p.spd * dt;
       p.z += mz * p.spd * dt;
       p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 12);
-      if (p.st !== 'run') { p.st = 'run'; play(p.rig, 'Running_A', { ts: 1.3 }); }
-    } else if (p.st !== 'idle') { p.st = 'idle'; play(p.rig, 'Idle'); }
+      if (p.st !== 'run') { p.st = 'run'; play(p.rig, 'run', { ts: 1.15 }); }
+    } else if (p.st !== 'idle') { p.st = 'idle'; play(p.rig, 'idle'); }
     if (atkPressed) { atkPressed = false; startAttack(LIGHT[0], 0, mx, mz, ml); }
     else if (heavyPressed) { heavyPressed = false; startAttack(HEAVY_SOLO, -1, mx, mz, ml); }
     else if (jumpPressed) {
       jumpPressed = false;
       p.st = 'jump'; p.vy = JUMP_V;
-      play(p.rig, 'Jump_Start', { once: true, ts: 1.4, fade: 0.06 });
+      play(p.rig, 'jump', { once: true, ts: 1.15, fade: 0.06 });
     }
     else if (dodgePressed) { dodgePressed = false; startDodge(mx, mz, ml); }
   }
@@ -1439,9 +1443,9 @@ function startDodge(mx, mz, ml) {
   if (ml > 0) { p.dodgeDx = mx; p.dodgeDz = mz; p.yaw = Math.atan2(mx, mz); }
   else { p.dodgeDx = Math.sin(p.yaw); p.dodgeDz = Math.cos(p.yaw); }
   p.st = 'dodge'; p.dodgeT = 0;
-  p.dodgeDur = clipDur(p.rig, 'Dodge_Forward', 1.6);
+  p.dodgeDur = Math.min(0.55, clipDur(p.rig, 'roll', 1.9));
   p.invuln = Math.max(p.invuln, 0.45);
-  play(p.rig, 'Dodge_Forward', { once: true, ts: 1.6, fade: 0.06 });
+  play(p.rig, 'roll', { once: true, ts: 1.9, fade: 0.06 });
 }
 
 // ---------- 特效更新 ----------
@@ -1573,7 +1577,7 @@ function restart() {
   const p = player;
   p.x = 0; p.y = 0; p.z = 0; p.vy = 0; p.yaw = Math.PI;
   p.hp = p.hpMax; p.invuln = 0; p.st = 'idle';
-  play(p.rig, 'Idle', { fade: 0 });
+  play(p.rig, 'idle', { fade: 0 });
   kills = 0; combo = 0; maxCombo = 0;
   level.boss = null;
   state = 'play';

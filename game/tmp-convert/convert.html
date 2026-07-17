@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>FBX→GLB 轉檔器</title></head>
+<body>
+<pre id="log">轉檔中…</pre>
+<script type="importmap">
+{ "imports": { "three": "../lib/three.module.js", "three/addons/": "../lib/addons/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+const log = m => { document.getElementById('log').textContent += '\n' + m; console.log(m); };
+const CLIPS = [
+  'idle', 'run', 'slash1', 'slash2', 'slash3', 'slash4',
+  'heavy', 'heavyfin', 'hurt', 'death', 'jump', 'win', 'roll',
+];
+
+// 黃色系（金髮/金甲）→ 紫色系 的色相搬移
+function purpleShift(img) {
+  const c = document.createElement('canvas');
+  c.width = img.width; c.height = img.height;
+  const g = c.getContext('2d');
+  g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height);
+  const px = d.data;
+  for (let i = 0; i < px.length; i += 4) {
+    let r = px[i] / 255, gg = px[i + 1] / 255, b = px[i + 2] / 255;
+    const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
+    const l = (mx + mn) / 2;
+    const diff = mx - mn;
+    if (diff < 0.04) continue;
+    const s = diff / (1 - Math.abs(2 * l - 1) || 1);
+    let h;
+    if (mx === r) h = ((gg - b) / diff) % 6;
+    else if (mx === gg) h = (b - r) / diff + 2;
+    else h = (r - gg) / diff + 4;
+    h = (h * 60 + 360) % 360;
+    if (h >= 25 && h <= 75 && s > 0.18) {
+      // 黃 → 紫（約 275°），保留明度飽和
+      const nh = 275 / 60;
+      const cc = (1 - Math.abs(2 * l - 1)) * s;
+      const xx = cc * (1 - Math.abs(nh % 2 - 1));
+      const m = l - cc / 2;
+      let nr, ng, nb;
+      if (nh < 5) { nr = xx; ng = 0; nb = cc; }
+      else { nr = cc; ng = 0; nb = xx; }
+      px[i] = Math.round((nr + m) * 255);
+      px[i + 1] = Math.round((ng + m) * 255);
+      px[i + 2] = Math.round((nb + m) * 255);
+    }
+  }
+  g.putImageData(d, 0, 0);
+  return c;
+}
+
+async function main() {
+  const loader = new FBXLoader();
+  log('載入角色 character.fbx…');
+  const char = await loader.loadAsync('character.fbx');
+  log('角色載入完成，mesh 數：' + char.children.length);
+
+  // 貼圖紫化
+  let texCount = 0;
+  const done = [];
+  char.traverse(o => {
+    if (!o.isMesh) return;
+    o.castShadow = true;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of mats) {
+      if (m.map && m.map.image && !m.map.userData?.shifted) {
+        const p = (async () => {
+          const img = m.map.image;
+          if (img.width) {
+            const canvas = purpleShift(img);
+            const nt = new THREE.CanvasTexture(canvas);
+            nt.colorSpace = THREE.SRGBColorSpace;
+            nt.flipY = m.map.flipY;
+            nt.wrapS = m.map.wrapS; nt.wrapT = m.map.wrapT;
+            nt.userData = { shifted: true };
+            m.map = nt;
+            texCount++;
+          }
+        })();
+        done.push(p);
+      }
+      // FBX 的 phong → 標準化屬性收斂
+      if (m.shininess !== undefined) m.shininess = 8;
+    }
+  });
+  await Promise.all(done);
+  log('貼圖紫化完成 ×' + texCount);
+
+  // 載入動作
+  const clips = [];
+  for (const n of CLIPS) {
+    const a = await loader.loadAsync(n + '.fbx');
+    const clip = a.animations[0];
+    clip.name = n;
+    clips.push(clip);
+    log('動作 ' + n + ' ✓ ' + clip.duration.toFixed(2) + 's');
+  }
+
+  // 匯出 GLB
+  log('匯出 GLB…');
+  const exporter = new GLTFExporter();
+  const glb = await exporter.parseAsync(char, { binary: true, animations: clips, embedImages: true });
+  log('GLB 大小：' + (glb.byteLength / 1048576).toFixed(1) + 'MB，上傳中…');
+  await fetch('http://127.0.0.1:8932/maria.glb', { method: 'POST', body: new Blob([glb]) });
+  log('完成！maria.glb 已存檔');
+  document.title = 'DONE';
+}
+main().catch(e => { log('錯誤：' + e.message); console.error(e); document.title = 'ERROR'; });
+</script>
+</body>
+</html>
