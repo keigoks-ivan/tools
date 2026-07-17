@@ -11,7 +11,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const MODEL_YAW = 0;              // glTF 標準：模型原生面向 +Z，rotation.y 直接用 yaw
 const HALF_W = 13.5;              // 街道可走半寬
-const NEON = [0xff4fa3, 0x4fd8ff, 0xffd84f, 0xa04fff, 0x4fff9e, 0xff6a4f];
+const NEON = [0xff4fd8, 0xff2fa0, 0x8a4fff, 0x4fd8ff, 0xff6ab0, 0xb47aff];
 
 // 關卡分區（沿 -Z 推進）
 const ZONES = [
@@ -33,13 +33,13 @@ renderer.toneMappingExposure = 1.15;
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x0a0a1c, 26, 100);
+scene.fog = new THREE.Fog(0x140f28, 26, 100);
 
 const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 400);
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.5, 0.5, 0.62));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.72, 0.55, 0.55));
 composer.addPass(new OutputPass());
 
 addEventListener('resize', () => {
@@ -50,7 +50,7 @@ addEventListener('resize', () => {
 });
 
 // ---------- 燈光（夜街：冷月光主光＋暖鈉燈補光＋青色輪廓光） ----------
-scene.add(new THREE.HemisphereLight(0x8890ff, 0x1a1030, 1.15));
+scene.add(new THREE.HemisphereLight(0x9a8aff, 0x201238, 1.1));
 const sun = new THREE.DirectionalLight(0xbfcaff, 1.35);
 sun.position.set(8, 18, 6);
 sun.castShadow = true;
@@ -61,7 +61,7 @@ sun.shadow.camera.near = 1; sun.shadow.camera.far = 60;
 sun.shadow.bias = -0.0015;
 scene.add(sun);
 scene.add(sun.target);
-const warmFill = new THREE.DirectionalLight(0xffb070, 0.5);
+const warmFill = new THREE.DirectionalLight(0xff4fd0, 0.35);
 warmFill.position.set(-6, 8, 3);
 scene.add(warmFill);
 const rimLight = new THREE.DirectionalLight(0x4fd8ff, 0.55);
@@ -70,39 +70,21 @@ scene.add(rimLight);
 const heroLight = new THREE.PointLight(0xff4fa3, 1.4, 9, 1.6);
 scene.add(heroLight);
 
-// ---------- 天空 ----------
+// ---------- 天空（AI 生成全景） ----------
 (function buildSky() {
-  const c = document.createElement('canvas');
-  c.width = 1024; c.height = 512;
-  const g = c.getContext('2d');
-  const grad = g.createLinearGradient(0, 0, 0, 512);
-  grad.addColorStop(0, '#05050f');
-  grad.addColorStop(0.5, '#0e0c26');
-  grad.addColorStop(0.78, '#251445');
-  grad.addColorStop(1, '#402060');
-  g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
-  for (let i = 0; i < 320; i++) {
-    const y = Math.random() * 340;
-    const a = 0.25 + Math.random() * 0.75;
-    g.fillStyle = `rgba(255,255,255,${a * (1 - y / 400)})`;
-    const s = Math.random() < 0.06 ? 2 : 1;
-    g.fillRect(Math.random() * 1024, y, s, s);
-  }
-  const mx = 660, my = 100;
-  const mg = g.createRadialGradient(mx, my, 8, mx, my, 60);
-  mg.addColorStop(0, 'rgba(255,240,220,1)');
-  mg.addColorStop(0.25, 'rgba(255,220,240,0.55)');
-  mg.addColorStop(1, 'rgba(255,200,255,0)');
-  g.fillStyle = mg;
-  g.beginPath(); g.arc(mx, my, 60, 0, 6.28); g.fill();
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
   const sky = new THREE.Mesh(
-    new THREE.SphereGeometry(230, 32, 16),
-    new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false })
+    new THREE.SphereGeometry(230, 48, 24),
+    new THREE.MeshBasicMaterial({ color: 0x0a0818, side: THREE.BackSide, fog: false })
   );
   sky.position.set(0, 0, -85);
+  sky.rotation.y = Math.PI;
   scene.add(sky);
+  new THREE.TextureLoader().load('assets/gen/sky.jpg', tex => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    sky.material.map = tex;
+    sky.material.color.set(0xffffff);
+    sky.material.needsUpdate = true;
+  });
 })();
 
 // ---------- 共用貼圖工具 ----------
@@ -126,22 +108,28 @@ function makeWindowTex(hue) {
 
 // 韓文招牌
 const KR_WORDS = ['치킨', '노래방', 'PC방', '분식', '호프', '편의점', '미용실', '약국', '곱창', '떡볶이', '삼겹살', '카페', '만화방', '슈퍼', '세탁소', '핸드폰'];
-const SIGN_STYLES = [
-  ['#e8332a', '#ffffff'], ['#ffffff', '#e8332a'], ['#ffd200', '#1a1a1a'],
-  ['#1352c8', '#ffffff'], ['#18b45a', '#ffffff'], ['#1a1a1a', '#ffd200'],
-  ['#ff6ab0', '#ffffff'], ['#7a2fd0', '#ffffff'],
-];
+const SIGN_NEON = ['#ff5fd0', '#5fe0ff', '#b47aff', '#ff8fe0', '#7a9fff', '#ff4fa8'];
+const SIGN_STYLES = SIGN_NEON.map(c => ['#14101f', c]);
 function makeSignTex(word, w = 256, h = 72) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
   const g = c.getContext('2d');
   const [bg, fg] = SIGN_STYLES[Math.floor(Math.random() * SIGN_STYLES.length)];
   g.fillStyle = bg; g.fillRect(0, 0, w, h);
-  g.strokeStyle = 'rgba(0,0,0,0.35)'; g.lineWidth = 4; g.strokeRect(0, 0, w, h);
-  g.fillStyle = fg;
-  g.font = `900 ${Math.floor(h * 0.62)}px "Apple SD Gothic Neo","Noto Sans KR",sans-serif`;
+  g.strokeStyle = fg; g.globalAlpha = 0.5; g.lineWidth = 3;
+  g.shadowColor = fg; g.shadowBlur = 10;
+  g.strokeRect(5, 5, w - 10, h - 10);
+  g.globalAlpha = 1;
+  g.font = `900 ${Math.floor(h * 0.6)}px "Apple SD Gothic Neo","Noto Sans KR",sans-serif`;
   g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.shadowBlur = 18;
+  g.fillStyle = fg;
   g.fillText(word, w / 2, h / 2 + 2);
+  g.fillText(word, w / 2, h / 2 + 2);
+  g.shadowBlur = 0;
+  g.fillStyle = '#ffffff'; g.globalAlpha = 0.85;
+  g.fillText(word, w / 2, h / 2 + 2);
+  g.globalAlpha = 1;
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
@@ -152,13 +140,21 @@ function makeVSignTex(word) {
   const g = c.getContext('2d');
   const [bg, fg] = SIGN_STYLES[Math.floor(Math.random() * SIGN_STYLES.length)];
   g.fillStyle = bg; g.fillRect(0, 0, 64, 256);
-  g.strokeStyle = 'rgba(0,0,0,0.35)'; g.lineWidth = 4; g.strokeRect(0, 0, 64, 256);
-  g.fillStyle = fg;
-  g.font = '900 40px "Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+  g.strokeStyle = fg; g.globalAlpha = 0.5; g.lineWidth = 3;
+  g.shadowColor = fg; g.shadowBlur = 8;
+  g.strokeRect(4, 4, 56, 248);
+  g.globalAlpha = 1;
+  g.font = '900 38px "Apple SD Gothic Neo","Noto Sans KR",sans-serif';
   g.textAlign = 'center'; g.textBaseline = 'middle';
   const chars = [...word].slice(0, 4);
   const step = 256 / (chars.length + 1);
+  g.shadowBlur = 14;
+  g.fillStyle = fg;
+  chars.forEach((ch, i) => { g.fillText(ch, 32, step * (i + 1) + 6); g.fillText(ch, 32, step * (i + 1) + 6); });
+  g.shadowBlur = 0;
+  g.fillStyle = '#ffffff'; g.globalAlpha = 0.85;
   chars.forEach((ch, i) => g.fillText(ch, 32, step * (i + 1) + 6));
+  g.globalAlpha = 1;
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
@@ -169,12 +165,14 @@ function makeStorefrontTex() {
   c.width = 256; c.height = 128;
   const g = c.getContext('2d');
   g.fillStyle = '#191926'; g.fillRect(0, 0, 256, 128);
-  const aw = ['#c8322e', '#2a6fc8', '#1f9e55', '#d89a1e'][Math.floor(Math.random() * 4)];
+  const aw = ['#b02a8a', '#2a4fb0', '#6a2ab0', '#3a3a8a'][Math.floor(Math.random() * 4)];
   g.fillStyle = aw; g.fillRect(0, 0, 256, 18);
   g.fillStyle = 'rgba(255,255,255,0.25)';
   for (let x = 0; x < 256; x += 24) g.fillRect(x, 0, 12, 18);
   const wg = g.createLinearGradient(0, 30, 0, 118);
-  wg.addColorStop(0, '#ffe9b8'); wg.addColorStop(1, '#e8a95e');
+  const cool = Math.random() < 0.5;
+  wg.addColorStop(0, cool ? '#ffc8ee' : '#ffe9b8');
+  wg.addColorStop(1, cool ? '#c878d8' : '#e8a95e');
   g.fillStyle = wg; g.fillRect(14, 30, 150, 88);
   g.fillStyle = 'rgba(30,20,10,0.35)';
   g.fillRect(14, 30, 150, 6);
@@ -189,6 +187,8 @@ function makeStorefrontTex() {
 
 // ---------- 韓國街道 ----------
 let lightPool = null;
+const groundMats = [];
+const flickers = [];
 (function buildKoreanStreet() {
   // 柏油路面
   const ac = document.createElement('canvas');
@@ -203,7 +203,9 @@ let lightPool = null;
   asphalt.wrapS = asphalt.wrapT = THREE.RepeatWrapping;
   asphalt.repeat.set(3, 70);
   asphalt.colorSpace = THREE.SRGBColorSpace;
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(11, 250), new THREE.MeshLambertMaterial({ map: asphalt }));
+  const roadMat = new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.32, metalness: 0.62 });
+  groundMats.push(roadMat);
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(11, 250), roadMat);
   road.rotation.x = -Math.PI / 2;
   road.position.set(0, 0, -85);
   road.receiveShadow = true;
@@ -243,8 +245,18 @@ let lightPool = null;
   paveTex.wrapS = paveTex.wrapT = THREE.RepeatWrapping;
   paveTex.repeat.set(4, 100);
   paveTex.colorSpace = THREE.SRGBColorSpace;
+  const walkMat = new THREE.MeshStandardMaterial({ map: paveTex, roughness: 0.5, metalness: 0.4 });
+  groundMats.push(walkMat);
+  new THREE.TextureLoader().load('assets/gen/pavement.jpg', tex => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(3, 80);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    walkMat.map = tex;
+    walkMat.needsUpdate = true;
+  });
   for (const side of [-1, 1]) {
-    const walk = new THREE.Mesh(new THREE.PlaneGeometry(9.5, 250), new THREE.MeshLambertMaterial({ map: paveTex }));
+    const walk = new THREE.Mesh(new THREE.PlaneGeometry(9.5, 250), walkMat);
     walk.rotation.x = -Math.PI / 2;
     walk.position.set(side * 10.1, 0.03, -85);
     walk.receiveShadow = true;
@@ -267,7 +279,7 @@ let lightPool = null;
 
   // 兩側連棟街屋（店面＋韓文招牌＋樓上窗燈）
   const winTexs = [makeWindowTex(46), makeWindowTex(190), makeWindowTex(285)];
-  const wallMats = [0x2c2838, 0x322c40, 0x282436, 0x363048].map(c => new THREE.MeshLambertMaterial({ color: c }));
+  const wallMats = [0x241f33, 0x2a2340, 0x1f1b2e, 0x2e2545].map(c => new THREE.MeshLambertMaterial({ color: c }));
   let wi = 0;
   for (const side of [-1, 1]) {
     let z = -2;
@@ -308,8 +320,9 @@ let lightPool = null;
       const sign = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.15, w - 0.4), signMats);
       sign.position.set(side * 14.7, 3.85, zc);
       scene.add(sign);
+      if (Math.random() < 0.4) flickers.push({ mat: signMats[0], speed: 0.5 + Math.random(), phase: Math.random() * 10 });
       // 立式霓虹直招（隨機）
-      if (Math.random() < 0.5) {
+      if (Math.random() < 0.85) {
         const vTex = makeVSignTex(KR_WORDS[Math.floor(Math.random() * KR_WORDS.length)]);
         const vDark = new THREE.MeshLambertMaterial({ color: 0x14141f });
         const vMats = [
@@ -326,8 +339,8 @@ let lightPool = null;
   }
 
   // 布帳馬車（橘色帳篷攤）
-  const tentMat = new THREE.MeshLambertMaterial({ color: 0xd8672e });
-  const tentGlow = new THREE.MeshBasicMaterial({ color: 0xffc37a });
+  const tentMats = [0x3a4a8a, 0x4a3a7a, 0x2e3a6e].map(c => new THREE.MeshLambertMaterial({ color: c }));
+  const tentGlow = new THREE.MeshBasicMaterial({ color: 0xffa8d8 });
   const counterMat = new THREE.MeshLambertMaterial({ color: 0x3a3548 });
   const poleMat = new THREE.MeshLambertMaterial({ color: 0x585868 });
   for (let i = 0; i < 9; i++) {
@@ -345,7 +358,7 @@ let lightPool = null;
       pole.position.set(px, 1.15, pz);
       grp.add(pole);
     }
-    const roofL = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 1.35), tentMat);
+    const roofL = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 1.35), tentMats[i % 3]);
     roofL.position.set(0, 2.42, -0.62); roofL.rotation.x = 0.42;
     roofL.castShadow = true;
     const roofR = roofL.clone(); roofR.position.z = 0.62; roofR.rotation.x = -0.42;
@@ -482,7 +495,31 @@ const honmoon = new THREE.Group();
     new THREE.CircleGeometry(9.6, 48),
     new THREE.MeshBasicMaterial({ color: 0x30104f, transparent: true, opacity: 0.6, side: THREE.DoubleSide, fog: false })
   );
-  honmoon.add(ring, ring2, disc);
+  // 旋渦漩流
+  const sc = document.createElement('canvas');
+  sc.width = sc.height = 256;
+  const sg = sc.getContext('2d');
+  sg.translate(128, 128);
+  for (let arm = 0; arm < 3; arm++) {
+    sg.rotate((Math.PI * 2) / 3);
+    sg.beginPath();
+    for (let t = 0; t < 6; t += 0.08) {
+      const r = 6 + t * 19;
+      sg.lineTo(Math.cos(t) * r, Math.sin(t) * r);
+    }
+    sg.strokeStyle = arm === 0 ? 'rgba(255,120,220,0.9)' : 'rgba(190,110,255,0.7)';
+    sg.lineWidth = 10 - arm * 2;
+    sg.shadowColor = '#ff5fd0'; sg.shadowBlur = 12;
+    sg.stroke();
+  }
+  const swirlTex = new THREE.CanvasTexture(sc);
+  const swirl = new THREE.Mesh(
+    new THREE.CircleGeometry(8.8, 48),
+    new THREE.MeshBasicMaterial({ map: swirlTex, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false })
+  );
+  swirl.position.z = 0.1;
+  honmoon.add(ring, ring2, disc, swirl);
+  honmoon.userData.swirl = swirl;
   honmoon.position.set(0, 15, -186);
   scene.add(honmoon);
 })();
@@ -528,14 +565,60 @@ const embers = (() => {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   const pts = new THREE.Points(geo, new THREE.PointsMaterial({
-    color: 0xb07aff, size: 0.13, transparent: true, opacity: 0.7,
+    color: 0xff7ad0, size: 0.17, transparent: true, opacity: 0.75,
     blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   scene.add(pts);
   return { pts, pos, N };
 })();
 
+// ---------- 雨 ----------
+const rain = (() => {
+  const N = 1400;
+  const pos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    pos[i * 3] = (Math.random() * 2 - 1) * 30;
+    pos[i * 3 + 1] = Math.random() * 14;
+    pos[i * 3 + 2] = 10 - Math.random() * 70;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+    color: 0x9ab8ff, size: 0.07, transparent: true, opacity: 0.42, depthWrite: false,
+  }));
+  scene.add(pts);
+  return { pts, pos, N };
+})();
+
 // ---------- 角色渲染工具 ----------
+function makeOutlineMat() {
+  const m = new THREE.MeshBasicMaterial({ color: 0x0a0714, side: THREE.BackSide });
+  m.onBeforeCompile = sh => {
+    sh.vertexShader = sh.vertexShader.replace(
+      '#include <project_vertex>',
+      'transformed += objectNormal * 0.028;\n#include <project_vertex>'
+    );
+  };
+  return m;
+}
+function addOutline(root, matsArr) {
+  const targets = [];
+  root.traverse(o => {
+    if (o.isMesh && o.visible && o.material?.name !== 'Glow' && !o.userData.isOutline) targets.push(o);
+  });
+  const mat = makeOutlineMat();
+  if (matsArr) matsArr.push(mat);
+  for (const m of targets) {
+    const oc = m.clone(false);
+    oc.material = mat;
+    oc.castShadow = false;
+    oc.receiveShadow = false;
+    oc.userData.isOutline = true;
+    oc.raycast = () => {};
+    m.parent.add(oc);
+  }
+}
+
 const gradTex = (() => {
   const t = new THREE.DataTexture(new Uint8Array([70, 150, 255]), 3, 1, THREE.RedFormat);
   t.minFilter = t.magFilter = THREE.NearestFilter;
@@ -797,6 +880,7 @@ Promise.all([
     'Jump_Start', 'Jump_Idle', 'Jump_Land',
     ...LIGHT.map(c => c.clip), HEAVY_SOLO.clip, HEAVY_FINISH.clip,
   ]);
+  addOutline(knight.scene);
   play(player.rig, 'Idle');
   player.shadow = makeBlobShadow(1.1);
 
@@ -808,6 +892,17 @@ Promise.all([
   };
 
   placeCityProps(Object.fromEntries(CITY_PROPS.map((n, i) => [n, city[i].scene])));
+
+  // 濕地面反射：對街景烘一次靜態 cubemap
+  const cubeRT = new THREE.WebGLCubeRenderTarget(256);
+  const cubeCam = new THREE.CubeCamera(0.5, 250, cubeRT);
+  cubeCam.position.set(0, 1.6, -55);
+  cubeCam.update(renderer, scene);
+  for (const m of groundMats) {
+    m.envMap = cubeRT.texture;
+    m.envMapIntensity = m.roughness < 0.4 ? 1.25 : 0.65;
+    m.needsUpdate = true;
+  }
 
   ready = true;
   hud.load.textContent = '載入完成';
@@ -894,6 +989,7 @@ function spawnEnemy(kindName, fx, fz) {
       for (const m of Array.isArray(o.material) ? o.material : [o.material]) mats.push(m);
     }
   });
+  addOutline(root, mats);
   root.scale.setScalar(kind.scale);
   root.position.set(x, 0, z);
   scene.add(root);
@@ -1398,6 +1494,25 @@ function updateAmbient(dt) {
     if (pos[i * 3 + 1] > 9) pos[i * 3 + 1] = 0;
   }
   embers.pts.geometry.attributes.position.needsUpdate = true;
+  // 雨
+  const rp = rain.pos;
+  for (let i = 0; i < rain.N; i++) {
+    rp[i * 3 + 1] -= 24 * dt;
+    if (rp[i * 3 + 1] < 0) {
+      rp[i * 3 + 1] = 13 + Math.random() * 2;
+      rp[i * 3] = player.x + (Math.random() * 2 - 1) * 30;
+      rp[i * 3 + 2] = player.z + (Math.random() * 2 - 1) * 38 - 4;
+    }
+  }
+  rain.pts.geometry.attributes.position.needsUpdate = true;
+  // 魂門旋渦
+  if (honmoon.userData.swirl) honmoon.userData.swirl.rotation.z -= dt * 1.3;
+  // 招牌閃爍
+  for (const f of flickers) {
+    const t = worldT * f.speed + f.phase;
+    const v = Math.sin(t * 7) * Math.sin(t * 13 + 1.7);
+    f.mat.color.setScalar(v > 0.9 ? 0.3 : 1);
+  }
   // 陰影相機跟著玩家
   sun.position.set(player.x + 8, 18, player.z + 6);
   sun.target.position.set(player.x, 0, player.z);
