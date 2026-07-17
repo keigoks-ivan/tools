@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>HUNTR/X：魂門之戰</title>
+<style>
+  html,body{margin:0;height:100%;background:#06060f;overflow:hidden;font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif}
+  #app{position:fixed;inset:0}
+  canvas{display:block}
+  /* ---------- HUD ---------- */
+  #hud{position:fixed;inset:0;pointer-events:none;color:#fff;user-select:none}
+  #hpwrap{position:absolute;top:22px;left:24px;width:280px}
+  #hpname{font-size:13px;font-weight:700;letter-spacing:2px;color:#e8d8ff;text-shadow:0 0 8px #a04fff}
+  #hpbar{margin-top:4px;height:14px;background:rgba(20,20,40,.7);border:1px solid rgba(160,79,255,.5);border-radius:7px;overflow:hidden}
+  #hpfill{height:100%;width:100%;background:linear-gradient(90deg,#ff4fa3,#a04fff);box-shadow:0 0 12px #ff4fa3;transition:width .12s}
+  #kills{position:absolute;top:18px;right:26px;font-size:30px;font-weight:800;text-shadow:0 0 12px rgba(160,79,255,.8)}
+  #combo{position:absolute;top:70px;right:26px;font-size:40px;font-weight:900;color:#e8d8ff;opacity:0;text-shadow:0 0 16px #a04fff;transition:opacity .15s}
+  #combo.hot{color:#ffd84f;text-shadow:0 0 18px #ff9d2e}
+  #objective{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:16px;font-weight:700;color:#e8d8ff;
+    background:rgba(10,10,30,.55);border:1px solid rgba(160,79,255,.4);border-radius:999px;padding:7px 22px;text-shadow:0 0 8px #a04fff}
+  #objective.go{color:#8fffbf;border-color:rgba(80,255,160,.5);text-shadow:0 0 10px #3aff8a}
+  #bosswrap{position:absolute;top:64px;left:50%;transform:translateX(-50%);width:min(560px,70vw);display:none}
+  #bossname{text-align:center;font-size:14px;font-weight:700;letter-spacing:3px;color:#ffb0c8;text-shadow:0 0 10px #ff2050;margin-bottom:4px}
+  #bossbar{height:12px;background:rgba(30,8,16,.75);border:1px solid rgba(255,60,100,.55);border-radius:6px;overflow:hidden}
+  #bossfill{height:100%;width:100%;background:linear-gradient(90deg,#ff2050,#ff7a4f);box-shadow:0 0 12px #ff2050;transition:width .15s}
+  #toast{position:absolute;top:34%;width:100%;text-align:center;font-size:44px;font-weight:900;letter-spacing:10px;
+    color:#e8d8ff;text-shadow:0 0 28px #a04fff;opacity:0;pointer-events:none}
+  #toast.show{animation:toastIn 2.2s ease forwards}
+  @keyframes toastIn{0%{opacity:0;transform:scale(.92)}15%{opacity:1;transform:scale(1)}75%{opacity:1}100%{opacity:0}}
+  #hint{position:absolute;bottom:14px;width:100%;text-align:center;font-size:13px;color:rgba(255,255,255,.45)}
+  /* ---------- 覆蓋層 ---------- */
+  .overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,5,15,.82);color:#fff;z-index:10}
+  .overlay h1{font-size:56px;margin:0 0 10px;color:#b06aff;text-shadow:0 0 30px #a04fff;letter-spacing:4px}
+  .overlay h2{font-size:20px;margin:0 0 30px;font-weight:400;color:#e8d8ff}
+  .overlay p{color:rgba(255,255,255,.78);font-size:16px;margin:5px 0}
+  .overlay .btn{pointer-events:auto;cursor:pointer;margin-top:26px;padding:12px 44px;font-size:18px;font-weight:700;color:#fff;
+    background:linear-gradient(90deg,#a04fff,#ff4fa3);border:none;border-radius:999px;box-shadow:0 0 24px rgba(160,79,255,.6)}
+  .overlay .btn:hover{filter:brightness(1.15)}
+  #dead h1{color:#ff5a7a;text-shadow:0 0 30px #ff2050}
+  #win h1{color:#ffd84f;text-shadow:0 0 34px #ff9d2e}
+  #grade{font-size:120px;font-weight:900;margin:6px 0 2px;color:#ffd84f;text-shadow:0 0 40px #ff9d2e}
+  .hidden{display:none!important}
+  #loadtext{margin-top:18px;color:#a08cc0;font-size:14px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="hud">
+  <div id="hpwrap">
+    <div id="hpname">RUMI</div>
+    <div id="hpbar"><div id="hpfill"></div></div>
+  </div>
+  <div id="objective">－</div>
+  <div id="bosswrap">
+    <div id="bossname">陰差隊長</div>
+    <div id="bossbar"><div id="bossfill"></div></div>
+  </div>
+  <div id="kills">擊殺 0</div>
+  <div id="combo"></div>
+  <div id="toast"></div>
+  <div id="hint">WASD 移動 · J 輕攻擊 · K 重攻擊 · Space 跳躍（空中＋J＝下墜斬） · Shift 翻滾</div>
+</div>
+<div id="title" class="overlay">
+  <h1>HUNTR/X：魂門之戰</h1>
+  <h2>Stage 1 — 首爾夜市・魂門裂縫（Rumi）</h2>
+  <p>WASD 移動 · J 輕攻擊（連段） · K 重攻擊 · Space 跳躍 · Shift 翻滾</p>
+  <p>沿夜市大街往前推進，肅清四個區域，擊破魂門前的陰差隊長</p>
+  <button class="btn" id="startBtn">開始狩獵</button>
+  <div id="loadtext">載入中…</div>
+</div>
+<div id="dead" class="overlay hidden">
+  <h1>妳倒下了</h1>
+  <p id="deadStats"></p>
+  <button class="btn" id="retryBtn">再來一次（R）</button>
+</div>
+<div id="win" class="overlay hidden">
+  <h1>魂門守住了</h1>
+  <div id="grade">S</div>
+  <p id="winStats"></p>
+  <button class="btn" id="againBtn">再打一輪</button>
+</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "./lib/three.module.js",
+    "three/addons/": "./lib/addons/"
+  }
+}
+</script>
+<script type="module" src="main.js"></script>
+</body>
+</html>
