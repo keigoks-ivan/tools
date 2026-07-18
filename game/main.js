@@ -1732,15 +1732,15 @@ function scheduleMusic() {
     const root = midi(ch[0] - 24);
     for (let b = 0; b < 4; b++) {
       const bt = t0 + b * spb;
-      tone('sine', 150, bt, 0.16, 0.5, AU.music, 44);                    // kick
-      if (b === 1 || b === 3) noiseHit(bt, 0.13, 0.24, 'bandpass', 1900, AU.music, 0.9);
-      noiseHit(bt + spb / 2, 0.045, 0.1, 'highpass', 8500, AU.music);
-      if (cfg.hat16) noiseHit(bt + spb * 0.25, 0.03, 0.05, 'highpass', 9800, AU.music);
+      tone('sine', 150, bt, 0.14, 0.28, AU.music, 44);                   // kick（減重）
+      if (b === 1 || b === 3) noiseHit(bt, 0.12, 0.14, 'bandpass', 1900, AU.music, 0.9);
+      noiseHit(bt + spb / 2, 0.045, 0.06, 'highpass', 8500, AU.music);
+      if (cfg.hat16) noiseHit(bt + spb * 0.25, 0.03, 0.032, 'highpass', 9800, AU.music);
       tone('sawtooth', root, bt, spb * 0.46, 0.13, AU.music);            // bass
       tone('sawtooth', root * (b === 2 ? 1.5 : 2), bt + spb / 2, spb * 0.4, 0.08, AU.music);
     }
     if (bi === 3) {                                                      // 第4小節 snare 過門
-      for (let i = 0; i < 4; i++) noiseHit(t0 + barLen - spb / 2 + i * spb / 8, 0.06, 0.1 + i * 0.04, 'bandpass', 2100, AU.music);
+      for (let i = 0; i < 4; i++) noiseHit(t0 + barLen - spb / 2 + i * spb / 8, 0.06, 0.06 + i * 0.022, 'bandpass', 2100, AU.music);
     }
     for (const n of ch) {                                                // 7th 和弦 pad（雙鋸齒＋高八度亮澤）
       tone('sawtooth', midi(n) * 0.998, t0, barLen * 0.95, 0.02, AU.music);
@@ -2091,49 +2091,52 @@ const enemies = [];
 let assets = null;
 
 const KINDS = {
+  // 2026-07-18 全面縮小：骷髏原尺寸比真人比例主角還大隻
   minion: {
-    file: 'minion', scale: 1, hp: 2, spdBase: 2.4, spdVar: 1.1, dmg: 5,
-    atkRange: 2.3, hitRange: 2.4, atkTs: 0.8, kbMul: 1, shadowR: 0.9,
+    file: 'minion', scale: 0.8, hp: 2, spdBase: 2.4, spdVar: 1.1, dmg: 5,
+    atkRange: 2.2, hitRange: 2.3, atkTs: 0.8, kbMul: 1, shadowR: 0.72,
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Punch_B'],
     dropRate: 0.10,
   },
   elite: {
-    file: 'warrior', scale: 1.2, hp: 9, spdBase: 2.2, spdVar: 0.5, dmg: 11,
-    atkRange: 2.7, hitRange: 3.0, atkTs: 0.8, kbMul: 0.35, shadowR: 1.15,
+    file: 'warrior', scale: 1.0, hp: 9, spdBase: 2.2, spdVar: 0.5, dmg: 11,
+    atkRange: 2.6, hitRange: 2.9, atkTs: 0.8, kbMul: 0.35, shadowR: 0.95,
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 1,
   },
   runner: {
-    file: 'minion', scale: 0.92, hp: 1, spdBase: 4.1, spdVar: 0.8, dmg: 4,
-    atkRange: 2.1, hitRange: 2.2, atkTs: 0.95, kbMul: 1.2, shadowR: 0.8,
+    file: 'minion', scale: 0.72, hp: 1, spdBase: 4.1, spdVar: 0.8, dmg: 4,
+    atkRange: 2.0, hitRange: 2.1, atkTs: 0.95, kbMul: 1.2, shadowR: 0.62,
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Punch_B'],
     dropRate: 0.07, tint: 0xff4040,
   },
   boss: {
-    file: 'warrior', scale: 1.6, hp: 70, spdBase: 2.7, spdVar: 0, dmg: 14,
-    atkRange: 3.2, hitRange: 3.6, atkTs: 0.85, kbMul: 0.12, shadowR: 1.5,
+    file: 'warrior', scale: 1.45, hp: 70, spdBase: 2.7, spdVar: 0, dmg: 14,
+    atkRange: 3.1, hitRange: 3.5, atkTs: 0.85, kbMul: 0.12, shadowR: 1.35,
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 0,
   },
   boss2: {
-    file: 'warrior', scale: 1.8, hp: 130, spdBase: 3.0, spdVar: 0, dmg: 17,
-    atkRange: 3.4, hitRange: 3.8, atkTs: 0.9, kbMul: 0.08, shadowR: 1.7,
+    file: 'warrior', scale: 1.6, hp: 130, spdBase: 3.0, spdVar: 0, dmg: 17,
+    atkRange: 3.3, hitRange: 3.7, atkTs: 0.9, kbMul: 0.08, shadowR: 1.5,
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 0, tint: 0xff5050,
   },
   boss3: {
-    file: 'warrior', scale: 2.0, hp: 200, spdBase: 3.2, spdVar: 0, dmg: 20,
-    atkRange: 3.6, hitRange: 4.0, atkTs: 0.95, kbMul: 0.06, shadowR: 1.9,
+    file: 'warrior', scale: 1.75, hp: 200, spdBase: 3.2, spdVar: 0, dmg: 20,
+    atkRange: 3.5, hitRange: 3.9, atkTs: 0.95, kbMul: 0.06, shadowR: 1.65,
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 0, tint: 0xb070ff,
   },
   boss4: {
-    file: 'warrior', scale: 2.2, hp: 280, spdBase: 3.4, spdVar: 0, dmg: 22,
-    atkRange: 3.8, hitRange: 4.2, atkTs: 1.0, kbMul: 0.05, shadowR: 2.1,
+    file: 'warrior', scale: 1.9, hp: 280, spdBase: 3.4, spdVar: 0, dmg: 22,
+    atkRange: 3.7, hitRange: 4.1, atkTs: 1.0, kbMul: 0.05, shadowR: 1.8,
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 0, tint: 0x60c8ff,
   },
 };
+// 每關敵人色調融合（跟場景配色一致，減少「貼上去」感）
+const STAGE_ENEMY_TINT = [null, 0xffb080, 0xbfd8ff, 0xc080ff];
 
 // ---------- 載入 ----------
 const loader = new GLTFLoader();
@@ -2310,6 +2313,12 @@ function spawnEnemy(kindName, fx, fz) {
     const tc = new THREE.Color(kind.tint);
     for (const m of mats) {
       if (m.color && m.name !== 'Glow') m.color.lerp(tc, 0.4);
+    }
+  }
+  if (STAGE_ENEMY_TINT[stageIdx]) {
+    const sc = new THREE.Color(STAGE_ENEMY_TINT[stageIdx]);
+    for (const m of mats) {
+      if (m.color && m.name !== 'Glow') m.color.lerp(sc, 0.16);
     }
   }
   root.scale.setScalar(kind.scale);
