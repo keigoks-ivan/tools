@@ -17,42 +17,43 @@ if (IS_MOBILE) document.body.classList.add('is-touch');
 // 關卡（同一條街廊道，分區沿 -Z 推進；Stage 2 為血月變體）
 const STAGES = [
   {
-    name: '第一關　首爾夜市・魂門裂縫', bossKind: 'boss', bossLabel: '陰差隊長',
+    // 第一關＝千人斬爽關：全程高密度屍潮，滿千見魔王
+    name: '第一關　首爾夜市・千人斬', bossKind: 'boss', bossLabel: '陰差隊長',
     objectives: [
-      { name: '南廣場殲滅戰', type: 'kill',    need: 22, pos: [-27, 18], ambush: true },
-      { name: '東市場據點',   type: 'capture', pos: [27, 18] },
-      { name: '西巷敵將',     type: 'officer', officers: 2, pos: [-27, -21] },
-      { name: '北口大掃蕩',   type: 'kill',    need: 26, pos: [27, -21], fast: 0.3, ambush: true },
+      { name: '千人斬', type: 'horde', need: 1000, pos: [0, 0], fast: 0.28 },
     ],
     bossPos: [0, -35],
   },
   {
-    name: '第二關　魂界・陰差本營', bossKind: 'boss2', bossLabel: '陰差大隊長',
+    // 第二關主打「魂燈防衛戰」：敵人衝魂燈，時限內守住
+    name: '第二關　黃泉花海・魂燈渡口', bossKind: 'boss2', bossLabel: '陰差大隊長',
     objectives: [
-      { name: '裂口殲滅戰',   type: 'kill',    need: 24, pos: [-27, 18], fast: 0.35, ambush: true },
-      { name: '亡者祭壇',     type: 'capture', pos: [27, 18], fast: 0.4 },
-      { name: '厲鬼巢穴',     type: 'kill',    need: 30, pos: [-27, -21], fast: 0.55, ambush: true },
-      { name: '修羅武將團',   type: 'officer', officers: 3, pos: [27, -21], fast: 0.4 },
+      { name: '花田殲滅戰',   type: 'kill',    need: 22, pos: [-27, 18], fast: 0.3, ambush: true },
+      { name: '西渡口魂燈',   type: 'defend',  time: 40, pos: [27, 18], fast: 0.35 },
+      { name: '冥河敵將',     type: 'officer', officers: 3, pos: [-27, -21], fast: 0.35 },
+      { name: '東渡口魂燈',   type: 'defend',  time: 45, pos: [27, -21], fast: 0.45 },
     ],
     bossPos: [0, -35],
   },
   {
+    // 第三關主打「時限試煉」：限時殺夠額度，超時歸零重來
     name: '第三關　天界・魂門之上', bossKind: 'boss3', bossLabel: '陰差王',
     objectives: [
       { name: '雲海據點',     type: 'capture', pos: [-27, 18], fast: 0.4 },
-      { name: '聖域掃蕩',     type: 'kill',    need: 34, pos: [27, 18], fast: 0.5, ambush: true },
+      { name: '百人斬試煉',   type: 'trial',   need: 26, tlimit: 55, pos: [27, 18], fast: 0.45 },
       { name: '星橋敵將',     type: 'officer', officers: 3, pos: [-27, -21], fast: 0.5 },
-      { name: '審判殲滅戰',   type: 'kill',    need: 30, pos: [27, -21], fast: 0.5, ambush: true },
+      { name: '神速試煉',     type: 'trial',   need: 20, tlimit: 38, pos: [27, -21], fast: 0.65 },
     ],
     bossPos: [0, -35],
   },
   {
+    // 第四關主打「封印裂口」：打破會湧敵的裂口水晶
     name: '第四關　虛空・魂門之心', bossKind: 'boss4', bossLabel: '魂門之靈',
     objectives: [
-      { name: '碎星殲滅戰',   type: 'kill',    need: 30, pos: [-27, 18], fast: 0.5, ambush: true },
+      { name: '北裂口封印',   type: 'rift', riftHp: 55, pos: [-27, 18], fast: 0.45 },
       { name: '虛空武將團',   type: 'officer', officers: 3, pos: [27, 18], fast: 0.5 },
-      { name: '星核據點',     type: 'capture', pos: [-27, -21], fast: 0.5 },
-      { name: '深淵大掃蕩',   type: 'kill',    need: 36, pos: [27, -21], fast: 0.6, ambush: true },
+      { name: '西裂口封印',   type: 'rift', riftHp: 70, pos: [-27, -21], fast: 0.55 },
+      { name: '深淵裂口封印', type: 'rift', riftHp: 85, pos: [27, -21], fast: 0.6, ambush: true },
     ],
     bossPos: [0, -35],
   },
@@ -63,9 +64,9 @@ let stageIdx = 0;
 // ---------- 可操作角色（HUNTR/X 三人組） ----------
 // mira.glb / zoey.glb 若存在（tmp-convert 管線產出）自動採用；否則以 Rumi 模型＋靈氣配色代身
 const CHARS = {
-  rumi: { key: 'rumi', name: 'RUMI', tint: null,     fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    light: 0xff4fa3 },
-  mira: { key: 'mira', name: 'MIRA', tint: 0x4a78ff, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, light: 0x5a8aff },
-  zoey: { key: 'zoey', name: 'ZOEY', tint: 0xffc040, fx: 0xffd84f, fxHi: 0xffeaa8, boltCol: 0xffe08a, spd: 7.5, dmgMul: 0.82, hpMul: 0.88, light: 0xffb040 },
+  rumi: { key: 'rumi', name: 'RUMI', weapon: 'sword', tint: null,     fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    atkTs: 1,    rangeMul: 1,    light: 0xff4fa3 },
+  mira: { key: 'mira', name: 'MIRA', weapon: 'great', tint: 0x4a78ff, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, atkTs: 0.86, rangeMul: 1.2,  light: 0x5a8aff },
+  zoey: { key: 'zoey', name: 'ZOEY', weapon: 'short', tint: 0xffc040, fx: 0xffd84f, fxHi: 0xffeaa8, boltCol: 0xffe08a, spd: 7.5, dmgMul: 0.82, hpMul: 0.88, atkTs: 1.18, rangeMul: 0.85, light: 0xffb040 },
 };
 let curChar = CHARS.rumi;
 
@@ -279,24 +280,52 @@ world2.visible = false;
 world3.visible = false;
 world4.visible = false;
 
-// 開放戰場：正方形地圖＋街區障礙（四關共用碰撞佈局）
+// 開放戰場：正方形地圖，每關獨立佈局（碰撞/遮擋/小地圖跟著切換）
 const MAP_HALF = 47;
-const OBSTACLES = [];
-(function planObstacles() {
-  const cells = [-34, -14, 14, 34];
-  const clear = [[-27, 18], [27, 18], [-27, -21], [27, -21], [0, -35], [0, 36], [0, 0]];
-  const ok = (gx, gz, rad) => !clear.some(([px, pz]) => Math.hypot(gx - px, gz - pz) < rad);
-  for (const gx of cells) {
-    for (const gz of cells) {
-      if (ok(gx, gz, 12)) OBSTACLES.push({ x: gx, z: gz, hx: 8, hz: 8 });
-    }
+// 第一關：千人斬大廣場——只留外圈少量街區，中央全開放屍潮
+function genCityBlocks() {
+  return [
+    { x: -34, z: 34, hx: 7, hz: 7 }, { x: 34, z: 34, hx: 7, hz: 7 },
+    { x: -34, z: -34, hx: 7, hz: 7 }, { x: 34, z: -34, hx: 7, hz: 7 },
+    { x: -36, z: 0, hx: 5.5, hz: 5.5 }, { x: 36, z: 0, hx: 5.5, hz: 5.5 },
+  ];
+}
+// 第二關：開闊花海＋樹叢群落（防衛戰要跑位）
+function genMeadowBlocks() {
+  return [
+    { x: -14, z: 30, hx: 4, hz: 4 }, { x: 10, z: 27, hx: 3.5, hz: 3.5 },
+    { x: -32, z: 2, hx: 4.5, hz: 4.5 }, { x: -10, z: 6, hx: 3.5, hz: 3.5 },
+    { x: 12, z: -2, hx: 4, hz: 4 }, { x: 34, z: 0, hx: 4, hz: 4 },
+    { x: -14, z: -32, hx: 4, hz: 4 }, { x: 12, z: -26, hx: 3.5, hz: 3.5 },
+    { x: 32, z: 32, hx: 4.5, hz: 4.5 }, { x: -36, z: 34, hx: 4, hz: 4 },
+    { x: 38, z: -32, hx: 4, hz: 4 },
+  ];
+}
+// 第三關：對稱聖域（十字柱廊＋四角平台）
+function genTempleBlocks() {
+  return [
+    { x: -18, z: 0, hx: 5, hz: 5 }, { x: 18, z: 0, hx: 5, hz: 5 },
+    { x: 0, z: 18, hx: 5, hz: 5 }, { x: 0, z: -18, hx: 5, hz: 5 },
+    { x: -34, z: 34, hx: 6, hz: 6 }, { x: 34, z: 34, hx: 6, hz: 6 },
+    { x: -34, z: -34, hx: 6, hz: 6 }, { x: 34, z: -34, hx: 6, hz: 6 },
+    { x: -36, z: 0, hx: 4, hz: 4 }, { x: 36, z: 0, hx: 4, hz: 4 },
+  ];
+}
+// 第四關：中央六角浮島環＋外圍碎島（不對稱）
+function genVoidBlocks() {
+  const arr = [];
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2 + 0.3;
+    arr.push({ x: Math.round(Math.cos(a) * 20), z: Math.round(Math.sin(a) * 20), hx: 3.5, hz: 3.5 });
   }
-  // 小街區補密
-  for (const [gx, gz] of [[-9, 30], [9, 30], [-30, 9], [30, -9], [-9, -30], [9, -32], [30, 30], [-30, -30]]) {
-    if (ok(gx, gz, 10)) OBSTACLES.push({ x: gx, z: gz, hx: 5.5, hz: 5.5 });
-  }
-})();
-const blockersReg = OBSTACLES.map(() => ({ mats: [], cur: 1, target: 1, applied: 1 }));
+  arr.push({ x: -40, z: 26, hx: 4.5, hz: 4.5 }, { x: 40, z: 30, hx: 4, hz: 4 },
+    { x: -20, z: -38, hx: 5, hz: 5 }, { x: 36, z: -36, hx: 4, hz: 4 });
+  return arr;
+}
+const OBSTACLES_BY_STAGE = [genCityBlocks(), genMeadowBlocks(), genTempleBlocks(), genVoidBlocks()];
+const blockersRegBy = OBSTACLES_BY_STAGE.map(list => list.map(() => ({ mats: [], cur: 1, target: 1, applied: 1 })));
+let OBSTACLES = OBSTACLES_BY_STAGE[0];
+let blockersReg = blockersRegBy[0];
 function segHitsAABB(x0, z0, x1, z1, minx, minz, maxx, maxz) {
   const dx = x1 - x0, dz = z1 - z0;
   let t0 = 0, t1 = 1;
@@ -388,8 +417,9 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   const winTexs = [makeWindowTex(46), makeWindowTex(190), makeWindowTex(285), makeWindowTex(210), makeWindowTex(320)];
   const paveMat = new THREE.MeshLambertMaterial({ color: 0x2e2a3a });
   let wi = 0;
-  for (const b of OBSTACLES) {
-    const blockReg = blockersReg[OBSTACLES.indexOf(b)];
+  const OBS1 = OBSTACLES_BY_STAGE[0], REG1 = blockersRegBy[0];
+  for (const b of OBS1) {
+    const blockReg = REG1[OBS1.indexOf(b)];
     const reg = m => { blockReg.mats.push(m); return m; };
     const plate = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2 + 4, 0.14, b.hz * 2 + 4), paveMat);
     plate.position.set(b.x, 0.07, b.z);
@@ -597,49 +627,64 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
 // ---------- 魂界（第二關場景：黑曜岩裂谷） ----------// ---------- 魂界（第二關：黑曜荒原，開放版） ----------
 let skyTex2 = null;
 const w2anim = { flames: [], rocks: [] };
-(function buildUnderworld() {
+(function buildNetherField() {
+  // 暮金天空＋巨大金月＋雲帶剪影＋疏星
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 512;
   const g = c.getContext('2d');
   const grad = g.createLinearGradient(0, 0, 0, 512);
-  grad.addColorStop(0, '#0a0205');
-  grad.addColorStop(0.5, '#2a0710');
-  grad.addColorStop(0.85, '#5a1218');
-  grad.addColorStop(1, '#7a2018');
+  grad.addColorStop(0, '#2c2050');
+  grad.addColorStop(0.4, '#7a4470');
+  grad.addColorStop(0.72, '#d87858');
+  grad.addColorStop(1, '#ffd98a');
   g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
-  for (let i = 0; i < 60; i++) {
-    const x = Math.random() * 1024, y = 80 + Math.random() * 300;
-    const rg = g.createRadialGradient(x, y, 2, x, y, 30 + Math.random() * 60);
-    rg.addColorStop(0, 'rgba(180,40,50,0.16)');
-    rg.addColorStop(1, 'rgba(120,20,30,0)');
-    g.fillStyle = rg;
-    g.beginPath(); g.arc(x, y, 90, 0, 6.28); g.fill();
-  }
-  const mx = 512, my = 120;
-  const mg = g.createRadialGradient(mx, my, 10, mx, my, 95);
-  mg.addColorStop(0, 'rgba(255,90,70,1)');
-  mg.addColorStop(0.4, 'rgba(220,50,50,0.85)');
-  mg.addColorStop(1, 'rgba(180,30,40,0)');
+  const mx = 700, my = 150;
+  const mg = g.createRadialGradient(mx, my, 8, mx, my, 110);
+  mg.addColorStop(0, 'rgba(255,236,180,1)');
+  mg.addColorStop(0.35, 'rgba(255,210,120,0.9)');
+  mg.addColorStop(1, 'rgba(255,180,80,0)');
   g.fillStyle = mg;
-  g.beginPath(); g.arc(mx, my, 95, 0, 6.28); g.fill();
+  g.beginPath(); g.arc(mx, my, 110, 0, 6.28); g.fill();
+  g.fillStyle = '#fff2cc';
+  g.beginPath(); g.arc(mx, my, 52, 0, 6.28); g.fill();
+  g.fillStyle = 'rgba(230,190,120,0.5)';
+  g.beginPath(); g.arc(mx - 14, my - 10, 9, 0, 6.28); g.fill();
+  g.beginPath(); g.arc(mx + 16, my + 14, 6, 0, 6.28); g.fill();
+  for (let band = 0; band < 4; band++) {
+    g.beginPath();
+    const baseY = 180 + band * 60;
+    for (let x = 0; x <= 1024; x += 16) {
+      const y = baseY + Math.sin(x / 70 + band * 2.4) * 16 + Math.sin(x / 31 + band) * 7;
+      x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
+    }
+    g.strokeStyle = ['rgba(90,50,90,0.4)', 'rgba(150,70,90,0.35)', 'rgba(220,120,90,0.3)', 'rgba(255,180,110,0.28)'][band];
+    g.lineWidth = 20 - band * 3;
+    g.stroke();
+  }
+  g.fillStyle = '#fff';
+  for (let i = 0; i < 90; i++) {
+    g.globalAlpha = 0.25 + Math.random() * 0.5;
+    g.fillRect(Math.random() * 1024, Math.random() * 170, 1, 1);
+  }
+  g.globalAlpha = 1;
   skyTex2 = new THREE.CanvasTexture(c);
   skyTex2.colorSpace = THREE.SRGBColorSpace;
 
+  // 地面：暖土草地＋彼岸花紅點
   const gc = document.createElement('canvas');
   gc.width = gc.height = 512;
   const gg = gc.getContext('2d');
-  gg.fillStyle = '#0d0509'; gg.fillRect(0, 0, 512, 512);
-  for (let i = 0; i < 260; i++) {
-    gg.fillStyle = `rgba(${30 + Math.random() * 30},${10 + Math.random() * 12},${18 + Math.random() * 16},0.5)`;
-    gg.fillRect(Math.random() * 512, Math.random() * 512, 3 + Math.random() * 6, 3 + Math.random() * 6);
+  gg.fillStyle = '#4c4034'; gg.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 700; i++) {
+    gg.fillStyle = `rgba(${70 + Math.random() * 40},${60 + Math.random() * 35},${35 + Math.random() * 25},${0.25 + Math.random() * 0.3})`;
+    gg.fillRect(Math.random() * 512, Math.random() * 512, 2 + Math.random() * 5, 2 + Math.random() * 4);
   }
-  gg.strokeStyle = '#ff4a28'; gg.shadowColor = '#ff3a18'; gg.shadowBlur = 8; gg.lineWidth = 2;
-  for (let i = 0; i < 14; i++) {
-    gg.beginPath();
-    let x = Math.random() * 512, y = Math.random() * 512;
-    gg.moveTo(x, y);
-    for (let j = 0; j < 7; j++) { x += (Math.random() - 0.5) * 90; y += (Math.random() - 0.5) * 90; gg.lineTo(x, y); }
-    gg.stroke();
+  for (let i = 0; i < 260; i++) {
+    const x = Math.random() * 512, y = Math.random() * 512;
+    gg.fillStyle = 'rgba(40,80,40,0.6)';
+    gg.fillRect(x, y + 2, 1.5, 4);
+    gg.fillStyle = `rgba(${215 + Math.random() * 40},${30 + Math.random() * 40},${50 + Math.random() * 40},0.95)`;
+    gg.beginPath(); gg.arc(x, y, 1.6 + Math.random() * 1.8, 0, 6.28); gg.fill();
   }
   const groundTex = new THREE.CanvasTexture(gc);
   groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
@@ -650,87 +695,92 @@ const w2anim = { flames: [], rocks: [] };
   g2.position.y = 0.01;
   g2.receiveShadow = true;
   world2.add(g2);
-  const crackGlow = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), new THREE.MeshBasicMaterial({
-    map: groundTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false,
-  }));
-  crackGlow.rotation.x = -Math.PI / 2;
-  crackGlow.position.y = 0.025;
-  world2.add(crackGlow);
 
-  const rockMat = new THREE.MeshLambertMaterial({ color: 0x171018 });
-  const crystalMat = new THREE.MeshBasicMaterial({ color: 0xff2a3a });
-  for (const b of OBSTACLES) {
-    const rm = rockMat.clone();
-    blockersReg[OBSTACLES.indexOf(b)].mats.push(rm);
-    for (let i = 0; i < 4; i++) {
-      // 嶙峋山岩：多峰交疊＋傾斜＋不等比縮放，去掉正圓錐感
-      const h = 7 + Math.random() * 11;
-      const rock = new THREE.Mesh(new THREE.ConeGeometry(3.5 + Math.random() * 3, h, 7), rm);
-      rock.position.set(b.x + (Math.random() * 2 - 1) * 5.5, h / 2 - 0.8, b.z + (Math.random() * 2 - 1) * 5.5);
-      rock.rotation.set((Math.random() - 0.5) * 0.22, Math.random() * Math.PI, (Math.random() - 0.5) * 0.22);
-      rock.scale.set(0.75 + Math.random() * 0.55, 1, 0.75 + Math.random() * 0.55);
-      rock.castShadow = true;
-      world2.add(rock);
+  // 樹叢群落：冥界紅葉巨木（枯幹＋紅花樹冠）＋石燈籠
+  const trunkMat = new THREE.MeshLambertMaterial({ color: 0x4a3226 });
+  const canopyCols = [0xc03048, 0xd84860, 0xa82840];
+  const stoneMat = new THREE.MeshLambertMaterial({ color: 0x8a8078 });
+  const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0xffd890 });
+  const OBS2 = OBSTACLES_BY_STAGE[1], REG2 = blockersRegBy[1];
+  for (const b of OBS2) {
+    const tm = trunkMat.clone();
+    const cm = new THREE.MeshLambertMaterial({ color: canopyCols[Math.floor(Math.random() * 3)] });
+    REG2[OBS2.indexOf(b)].mats.push(tm, cm);
+    for (let i = 0; i < 2; i++) {
+      const th = 5 + Math.random() * 3;
+      const px2 = b.x + (Math.random() * 2 - 1) * (b.hx - 1.2), pz2 = b.z + (Math.random() * 2 - 1) * (b.hz - 1.2);
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5 + Math.random() * 0.3, 0.9 + Math.random() * 0.4, th, 7), tm);
+      trunk.position.set(px2, th / 2, pz2);
+      trunk.rotation.z = (Math.random() - 0.5) * 0.15;
+      trunk.castShadow = true;
+      world2.add(trunk);
+      for (let j = 0; j < 3; j++) {
+        const cs = 2 + Math.random() * 1.8;
+        const can = new THREE.Mesh(new THREE.SphereGeometry(cs, 8, 6), cm);
+        can.position.set(px2 + (Math.random() * 2 - 1) * 1.8, th + (Math.random() - 0.2) * 1.6, pz2 + (Math.random() * 2 - 1) * 1.8);
+        can.scale.y = 0.75;
+        can.castShadow = true;
+        world2.add(can);
+      }
     }
-    const ch = 2 + Math.random() * 3;
-    const cr = new THREE.Mesh(new THREE.ConeGeometry(0.5, ch, 4), crystalMat);
-    cr.position.set(b.x + b.hx + 1, ch / 2, b.z);
-    cr.rotation.z = 0.3;
-    world2.add(cr);
+    const pill = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.6, 0.5), stoneMat);
+    pill.position.set(b.x + b.hx + 1.2, 0.8, b.z);
+    world2.add(pill);
+    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.6, 0.5, 4), stoneMat);
+    cap.position.set(b.x + b.hx + 1.2, 1.95, b.z);
+    world2.add(cap);
+    const lampCube = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), lampGlowMat);
+    lampCube.position.set(b.x + b.hx + 1.2, 1.62, b.z);
+    world2.add(lampCube);
   }
-  // 熔岩裂縫光斑（地表橘紅輝光）
-  const lavaTex = (() => {
+  // 立體彼岸花叢
+  const flowerMat = new THREE.MeshBasicMaterial({ color: 0xe83a52 });
+  const stemMat = new THREE.MeshLambertMaterial({ color: 0x3a6a3a });
+  for (let i = 0; i < 40; i++) {
+    const fcx = (Math.random() * 2 - 1) * 42, fcz = (Math.random() * 2 - 1) * 42;
+    for (let j = 0; j < 3; j++) {
+      const fh = 0.5 + Math.random() * 0.4;
+      const fx2 = fcx + (Math.random() * 2 - 1) * 0.9, fz2 = fcz + (Math.random() * 2 - 1) * 0.9;
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.03, fh, 4), stemMat);
+      stem.position.set(fx2, fh / 2, fz2);
+      world2.add(stem);
+      const bloom = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.22, 6), flowerMat);
+      bloom.rotation.x = Math.PI;
+      bloom.position.set(fx2, fh + 0.08, fz2);
+      world2.add(bloom);
+    }
+  }
+  // 魂燈光斑（地表金色暖光）
+  const warmTex = (() => {
     const lc = document.createElement('canvas');
     lc.width = lc.height = 128;
     const lg = lc.getContext('2d');
     const rg = lg.createRadialGradient(64, 64, 4, 64, 64, 62);
-    rg.addColorStop(0, 'rgba(255,150,60,0.75)');
-    rg.addColorStop(0.5, 'rgba(255,70,30,0.35)');
-    rg.addColorStop(1, 'rgba(200,40,20,0)');
+    rg.addColorStop(0, 'rgba(255,214,150,0.6)');
+    rg.addColorStop(0.5, 'rgba(255,180,100,0.25)');
+    rg.addColorStop(1, 'rgba(255,160,80,0)');
     lg.fillStyle = rg; lg.fillRect(0, 0, 128, 128);
     return new THREE.CanvasTexture(lc);
   })();
-  for (let i = 0; i < 10; i++) {
-    const s = 3 + Math.random() * 5;
+  for (let i = 0; i < 12; i++) {
+    const s = 3 + Math.random() * 4;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), new THREE.MeshBasicMaterial({
-      map: lavaTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.5 + Math.random() * 0.3,
+      map: warmTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.45 + Math.random() * 0.25,
     }));
     m.rotation.x = -Math.PI / 2;
     m.rotation.z = Math.random() * 6.28;
     m.position.set((Math.random() * 2 - 1) * 40, 0.03, (Math.random() * 2 - 1) * 40);
     world2.add(m);
   }
-  // 黑曜碎晶群
-  for (let i = 0; i < 12; i++) {
-    const cx = (Math.random() * 2 - 1) * 40, cz = (Math.random() * 2 - 1) * 40;
-    for (let j = 0; j < 3; j++) {
-      const sz = 0.3 + Math.random() * 0.7;
-      const sh = new THREE.Mesh(new THREE.OctahedronGeometry(sz, 0), Math.random() < 0.75 ? rockMat : crystalMat);
-      sh.position.set(cx + (Math.random() * 2 - 1) * 1.4, sz * 0.5, cz + (Math.random() * 2 - 1) * 1.4);
-      sh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
-      sh.scale.y = 1.3 + Math.random();
-      world2.add(sh);
-    }
-  }
-  // 遠景火山＋噴發口輝光
-  const volcano = new THREE.Mesh(new THREE.ConeGeometry(22, 30, 7), new THREE.MeshBasicMaterial({ color: 0x150508, fog: false }));
-  volcano.position.set(-42, 9, -68);
-  volcano.scale.set(1.25, 1, 1);
-  world2.add(volcano);
-  const crater = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: lavaTex, color: 0xff6a30, transparent: true, opacity: 0.9,
-    blending: THREE.AdditiveBlending, depthWrite: false,
-  }));
-  crater.position.set(-42, 25, -66);
-  crater.scale.set(14, 8, 1);
-  world2.add(crater);
-  for (let i = 0; i < 14; i++) {
-    const sz = 1.4 + Math.random() * 3.2;
-    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(sz, 0), rockMat);
-    rock.position.set((Math.random() * 2 - 1) * 42, 10 + Math.random() * 14, (Math.random() * 2 - 1) * 42);
-    rock.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
-    world2.add(rock);
-    w2anim.rocks.push({ m: rock, phase: Math.random() * 6.28, speed: 0.3 + Math.random() * 0.4 });
+  // 飄浮花瓣（粉紅薄片，隨風緩浮）
+  const petalMat = new THREE.MeshBasicMaterial({ color: 0xff9ab8 });
+  for (let i = 0; i < 18; i++) {
+    const petal = new THREE.Mesh(new THREE.OctahedronGeometry(0.3, 0), petalMat);
+    petal.scale.set(1, 0.28, 0.7);
+    petal.position.set((Math.random() * 2 - 1) * 42, 2.5 + Math.random() * 9, (Math.random() * 2 - 1) * 42);
+    petal.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+    world2.add(petal);
+    w2anim.rocks.push({ m: petal, phase: Math.random() * 6.28, speed: 0.5 + Math.random() * 0.6 });
   }
   const flameTex = (() => {
     const fc = document.createElement('canvas');
@@ -743,12 +793,13 @@ const w2anim = { flames: [], rocks: [] };
     fg.fillStyle = rg; fg.fillRect(0, 0, 64, 64);
     return new THREE.CanvasTexture(fc);
   })();
-  for (let i = 0; i < 46; i++) {
+  for (let i = 0; i < 40; i++) {
+    // 漂浮魂燈火（金色為主、偶有青色魂火）
     const f = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: flameTex, color: Math.random() < 0.6 ? 0xff5a30 : 0x9a40ff,
+      map: flameTex, color: Math.random() < 0.75 ? 0xffd890 : 0x9ad8ff,
       transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.85,
     }));
-    f.position.set((Math.random() * 2 - 1) * 44, 0.8 + Math.random() * 3.4, (Math.random() * 2 - 1) * 44);
+    f.position.set((Math.random() * 2 - 1) * 44, 1 + Math.random() * 4, (Math.random() * 2 - 1) * 44);
     f.scale.setScalar(0.5 + Math.random() * 0.7);
     world2.add(f);
     w2anim.flames.push({ m: f, phase: Math.random() * 6.28, base: f.position.y, sz: f.scale.x });
@@ -757,8 +808,8 @@ const w2anim = { flames: [], rocks: [] };
     const h = 22 + Math.random() * 30;
     const r = 60 + Math.random() * 12;
     const mtn = new THREE.Mesh(
-      new THREE.ConeGeometry(10 + Math.random() * 12, h, 5),
-      new THREE.MeshBasicMaterial({ color: 0x120409, fog: false })
+      new THREE.ConeGeometry(10 + Math.random() * 12, h, 6),
+      new THREE.MeshBasicMaterial({ color: Math.random() < 0.5 ? 0x3a2a50 : 0x4a3560, fog: false })
     );
     mtn.position.set(Math.cos(a) * r, h / 2 - 4, Math.sin(a) * r);
     world2.add(mtn);
@@ -835,9 +886,10 @@ const w3anim = { clouds: [], lanterns: [], shafts: [] };
   const pillarMat3 = new THREE.MeshLambertMaterial({ color: 0xaebfd8 });
   const capMat = new THREE.MeshBasicMaterial({ color: 0xffd070 });
   const crystalMat3 = new THREE.MeshBasicMaterial({ color: 0x6ae0ff });
-  for (const b of OBSTACLES) {
+  const OBS3 = OBSTACLES_BY_STAGE[2], REG3 = blockersRegBy[2];
+  for (const b of OBS3) {
     const pm = pillarMat3.clone();
-    blockersReg[OBSTACLES.indexOf(b)].mats.push(pm);
+    REG3[OBS3.indexOf(b)].mats.push(pm);
     for (const [cx, cz] of [[-b.hx + 1.2, -b.hz + 1.2], [b.hx - 1.2, -b.hz + 1.2], [-b.hx + 1.2, b.hz - 1.2], [b.hx - 1.2, b.hz - 1.2]]) {
       const h = 7 + Math.random() * 3;
       const col = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, h, 10), pm);
@@ -987,9 +1039,10 @@ const w4anim = { shards: [], rings: [] };
   const darkMat = new THREE.MeshLambertMaterial({ color: 0x0e0a1e });
   const cyanMat = new THREE.MeshBasicMaterial({ color: 0x30e0ff });
   const magMat = new THREE.MeshBasicMaterial({ color: 0xd040ff });
-  for (const b of OBSTACLES) {
+  const OBS4 = OBSTACLES_BY_STAGE[3], REG4 = blockersRegBy[3];
+  for (const b of OBS4) {
     const dm = darkMat.clone();
-    blockersReg[OBSTACLES.indexOf(b)].mats.push(dm);
+    REG4[OBS4.indexOf(b)].mats.push(dm);
     for (let i = 0; i < 3; i++) {
       const h = 9 + Math.random() * 12;
       const mono = new THREE.Mesh(new THREE.ConeGeometry(3 + Math.random() * 2.5, h, 4), dm);
@@ -1371,7 +1424,33 @@ function angDiff(a, b) {
   return d;
 }
 
-// ---------- 主角劍光：劍身能量刃＋揮劍軌跡帶 ----------
+// ---------- 主角武器與劍光：三人武器造型不同＋揮劍軌跡帶 ----------
+// 程序生成武器（Mira 大劍／Zoey 短刃），len 為手部骨骼局部單位的刃長
+function buildWeaponMesh(char, len) {
+  const grp = new THREE.Group();
+  const isGreat = char.weapon === 'great';
+  const w = len * (isGreat ? 0.16 : 0.07);
+  const th = len * (isGreat ? 0.035 : 0.022);
+  const bladeLen = len * 0.78;
+  const y0 = len * 0.2;
+  const steel = new THREE.MeshToonMaterial({ color: isGreat ? 0x9ab0cc : 0xe8d8a0, gradientMap: gradTex4 });
+  const dark = new THREE.MeshToonMaterial({ color: 0x2a2438, gradientMap: gradTex4 });
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(w, bladeLen, th), steel);
+  blade.position.y = y0 + bladeLen / 2;
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(w * 0.62, len * 0.14, 4), steel);
+  tip.position.y = y0 + bladeLen + len * 0.07;
+  const guard = new THREE.Mesh(new THREE.BoxGeometry(w * (isGreat ? 1.8 : 2.4), len * 0.035, th * 2.2), dark);
+  guard.position.y = y0;
+  const grip = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.22, w * 0.25, len * 0.2, 6), dark);
+  grip.position.y = y0 - len * 0.1;
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(w * 2.2, bladeLen + len * 0.16), new THREE.MeshBasicMaterial({
+    color: char.fx, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+  }));
+  glow.position.y = y0 + bladeLen / 2 + len * 0.04;
+  for (const m of [blade, tip, guard, grip]) m.castShadow = true;
+  grp.add(blade, tip, guard, grip, glow);
+  return grp;
+}
 const trail = { pts: [], max: 16, mesh: null, mat: null, base: null, tip: null, color: new THREE.Color(0xc9a4ff) };
 function setupSwordFx(root, char) {
   if (trail.mesh) { scene.remove(trail.mesh); trail.mesh.geometry.dispose(); trail.mat.dispose(); trail.mesh = null; }
@@ -1380,21 +1459,7 @@ function setupSwordFx(root, char) {
   let sword = null;
   root.traverse(o => { if (o.isMesh && /sword/i.test(o.name) && !o.userData.isOutline) sword = o; });
   if (!hand || !sword) return;
-  // 劍身能量刃光：複製劍 mesh，法線外擴＋加法混色（同骨架、跟著揮舞）
-  const glow = sword.clone(false);
-  const gm = new THREE.MeshBasicMaterial({
-    color: char.fx, transparent: true, opacity: 0.55,
-    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.BackSide,
-  });
-  gm.onBeforeCompile = sh => {
-    sh.vertexShader = sh.vertexShader.replace('#include <project_vertex>', 'transformed += normal * 0.012;\n#include <project_vertex>');
-  };
-  gm.customProgramCacheKey = () => 'swordglow';
-  glow.material = gm;
-  glow.userData.isOutline = true;
-  glow.raycast = () => {};
-  sword.parent.add(glow);
-  // 綁定姿勢下算出劍根/劍尖 → 右手骨骼局部座標，掛 marker 供軌跡取樣
+  // 綁定姿勢下算出劍根/劍尖 → 右手骨骼局部座標
   root.updateMatrixWorld(true);
   sword.geometry.computeBoundingBox();
   const bb = sword.geometry.boundingBox, size = new THREE.Vector3();
@@ -1408,8 +1473,40 @@ function setupSwordFx(root, char) {
   const handW = hand.getWorldPosition(new THREE.Vector3());
   const tipW = endA.distanceTo(handW) > endB.distanceTo(handW) ? endA : endB;
   const baseW = tipW === endA ? endB : endA;
-  trail.base = mk(baseW.clone().lerp(tipW, 0.2));
-  trail.tip = mk(tipW.clone().lerp(baseW, -0.15));
+  const nearL = hand.worldToLocal(baseW.clone());
+  const tipL = hand.worldToLocal(tipW.clone());
+  const dirL = tipL.clone().sub(nearL).normalize();
+  const bladeLen = tipL.distanceTo(nearL);
+  if (char.weapon === 'great' || char.weapon === 'short') {
+    // 換裝程序生成武器：隱藏原劍（含描邊複製），大劍 1.3x／短刃 0.68x
+    const swordGeo = sword.geometry;
+    root.traverse(o => { if (o.isMesh && o.geometry === swordGeo) o.visible = false; });
+    const k = char.weapon === 'great' ? 1.3 : 0.68;
+    const wgrp = buildWeaponMesh(char, bladeLen * k);
+    wgrp.position.copy(nearL);
+    wgrp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirL);
+    hand.add(wgrp);
+    const mkL = v => { const o = new THREE.Object3D(); o.position.copy(v); hand.add(o); return o; };
+    trail.base = mkL(nearL.clone().add(dirL.clone().multiplyScalar(bladeLen * k * 0.25)));
+    trail.tip = mkL(nearL.clone().add(dirL.clone().multiplyScalar(bladeLen * k * 1.08)));
+  } else {
+    // Rumi：原長劍＋能量刃光（複製劍 mesh，法線外擴加法混色）
+    const glowM = sword.clone(false);
+    const gm = new THREE.MeshBasicMaterial({
+      color: char.fx, transparent: true, opacity: 0.55,
+      blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.BackSide,
+    });
+    gm.onBeforeCompile = sh => {
+      sh.vertexShader = sh.vertexShader.replace('#include <project_vertex>', 'transformed += normal * 0.012;\n#include <project_vertex>');
+    };
+    gm.customProgramCacheKey = () => 'swordglow';
+    glowM.material = gm;
+    glowM.userData.isOutline = true;
+    glowM.raycast = () => {};
+    sword.parent.add(glowM);
+    trail.base = mk(baseW.clone().lerp(tipW, 0.2));
+    trail.tip = mk(tipW.clone().lerp(baseW, -0.15));
+  }
   // 軌跡帶 geometry（雙頂點帶狀、頂點色淡出）
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(trail.max * 2 * 3), 3));
@@ -1518,14 +1615,14 @@ const MUSIC = [
     ],
     hat16: true,
   },
-  { // 第二關：血月暗黑小調（Am–G–F–E，沉重緩慢）
-    bpm: 116,
-    prog: [[57, 60, 64, 67], [55, 59, 62, 65], [53, 57, 60, 64], [52, 56, 59, 64]],
+  { // 第二關：黃泉花海（C–G–Am–F，溫暖懷舊中版）
+    bpm: 118,
+    prog: [[48, 52, 55, 59], [55, 59, 62, 65], [57, 60, 64, 67], [53, 57, 60, 64]],
     lead: [
-      [69, 0, 1.5], [72, 1.5, 0.5], [71, 2, 1], [69, 3, 1],
-      [67, 4, 1.5], [69, 5.5, 0.5], [71, 6, 2],
-      [74, 8, 1], [72, 9, 0.5], [71, 9.5, 0.5], [69, 10, 1.5], [64, 11.5, 0.5],
-      [65, 12, 1], [64, 13, 1], [63, 14, 2],
+      [72, 0, 1], [76, 1, 0.5], [79, 1.5, 0.5], [81, 2, 1.5], [79, 3.5, 0.5],
+      [76, 4, 1], [74, 5, 0.5], [76, 5.5, 0.5], [72, 6, 2],
+      [69, 8, 1], [72, 9, 0.5], [76, 9.5, 0.5], [81, 10, 1], [84, 11, 1],
+      [81, 12, 0.75], [79, 12.75, 0.25], [76, 13, 1], [74, 14, 0.5], [72, 14.5, 1.5],
     ],
     hat16: false,
   },
@@ -1777,30 +1874,70 @@ let hitStopT = 0, shakeT = 0, shakeAmp = 0;
 let musou = 0;                      // 無雙集氣 0~100
 let worldT = 0, runStartT = 0, runTime = 0;
 
-const level = { objs: [], bossPhase: false, boss: null };
+const level = { objs: [], bossPhase: false, boss: null, props: [] };
 
-// 攻擊表（Rumi／Knight，1H 劍）
-const LIGHT = [
-  { clip: 'slash1', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: 1,  mul: 1 },
-  { clip: 'slash2', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: -1, mul: 1.1 },
-  { clip: 'slash3', ts: 1.8,  range: 3.0, ang: 2.2, dmg: 1, kb: 9,  hitAt: 0.38, dir: 1,  mul: 1.25 },
-  { clip: 'slash4', ts: 1.7,  range: 3.4, ang: 2.4, dmg: 2, kb: 12, hitAt: 0.40, dir: 1,  mul: 1.45, shake: 0.3 },
-];
-const HEAVY_SOLO   = { clip: 'heavy',    ts: 1.55, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1,  shake: 0.45, mul: 1 };
-const HEAVY_FINISH = { clip: 'heavyfin', ts: 1.55, range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.46, dir: 1,  shake: 0.55, mul: 1.5 };
-const PLUNGE       = { range: 4.0, ang: 6.3, dmg: 2, kb: 14, shake: 0.6 };
-// 新招式：衝刺斬（跑動中輕點重攻擊）＋蓄力震地斬（長按重攻擊 0.5s）
-const DASH_ATK   = { clip: 'slash3',   ts: 1.6, range: 3.2, ang: 2.0, dmg: 2, kb: 11, hitAt: 0.34, dir: 1, mul: 1.35, shake: 0.35, dash: 19 };
-const CHARGE_ATK = { clip: 'heavyfin', ts: 1.3, range: 4.6, ang: 6.3, dmg: 5, kb: 19, hitAt: 0.46, dir: 1, mul: 1.6,  shake: 0.75, charged: true };
-// 魂力彈（遠程）：揮劍射出新月劍氣；重擊＝三連新月、蓄力＝五連貫穿新月
-const RLIGHT = [
-  { clip: 'slash1', ts: 2.3, hitAt: 0.33, dir: 1,  bolt: { dmg: 1, speed: 24, pierce: 2, size: 1.6 } },
-  { clip: 'slash2', ts: 2.3, hitAt: 0.33, dir: -1, bolt: { dmg: 1, speed: 24, pierce: 2, size: 1.6 } },
-];
-const RHEAVY  = { clip: 'heavy',    ts: 1.6, hitAt: 0.44, dir: 1, shake: 0.3, fan: 3, bolt: { dmg: 2, speed: 27, pierce: 4,  size: 1.9 } };
-const RCHARGE = { clip: 'heavyfin', ts: 1.4, hitAt: 0.46, dir: 1, shake: 0.5, fan: 5, charged: true, bolt: { dmg: 3, speed: 27, pierce: 99, size: 2.4 } };
+// 攻擊表：三位主角招式組各自不同
+const PLUNGE = { range: 4.0, ang: 6.3, dmg: 2, kb: 14, shake: 0.6 };
+const MOVES = {
+  rumi: {   // 靈力長劍：四段均衡連段
+    light: [
+      { clip: 'slash1', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: 1,  mul: 1 },
+      { clip: 'slash2', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: -1, mul: 1.1 },
+      { clip: 'slash3', ts: 1.8,  range: 3.0, ang: 2.2, dmg: 1, kb: 9,  hitAt: 0.38, dir: 1,  mul: 1.25 },
+      { clip: 'slash4', ts: 1.7,  range: 3.4, ang: 2.4, dmg: 2, kb: 12, hitAt: 0.40, dir: 1,  mul: 1.45, shake: 0.3 },
+    ],
+    heavySolo:   { clip: 'heavy',    ts: 1.55, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1, shake: 0.45, mul: 1,   shock: true },
+    heavyFinish: { clip: 'heavyfin', ts: 1.55, range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.46, dir: 1, shake: 0.55, mul: 1.5, shock: true },
+    dash:   { clip: 'slash3',   ts: 1.6, range: 3.2, ang: 2.0, dmg: 2, kb: 11, hitAt: 0.34, dir: 1, mul: 1.35, shake: 0.35, dash: 19 },
+    charge: { clip: 'heavyfin', ts: 1.3, range: 4.6, ang: 6.3, dmg: 5, kb: 19, hitAt: 0.46, dir: 1, mul: 1.6,  shake: 0.75, charged: true, shock: true },
+    rlight: [
+      { clip: 'slash1', ts: 2.3, hitAt: 0.33, dir: 1,  bolt: { dmg: 1, pierce: 2, size: 1.6 } },
+      { clip: 'slash2', ts: 2.3, hitAt: 0.33, dir: -1, bolt: { dmg: 1, pierce: 2, size: 1.6 } },
+    ],
+    rheavy:  { clip: 'heavy',    ts: 1.6, hitAt: 0.44, dir: 1, shake: 0.3, fan: 3, bolt: { dmg: 2, pierce: 4,  size: 1.9 } },
+    rcharge: { clip: 'heavyfin', ts: 1.4, hitAt: 0.46, dir: 1, shake: 0.5, fan: 5, charged: true, bolt: { dmg: 3, pierce: 99, size: 2.4 } },
+  },
+  mira: {   // 破魔大劍：三段重連段（段段震波）、跳壓地裂、破城衝撞
+    light: [
+      { clip: 'slash1', ts: 1.6,  range: 3.4, ang: 2.9, dmg: 2, kb: 10, hitAt: 0.38, dir: 1,  mul: 1,    shake: 0.2 },
+      { clip: 'slash3', ts: 1.55, range: 3.5, ang: 2.6, dmg: 2, kb: 12, hitAt: 0.40, dir: -1, mul: 1.15, shake: 0.25 },
+      { clip: 'heavy',  ts: 1.5,  range: 3.8, ang: 3.1, dmg: 3, kb: 15, hitAt: 0.44, dir: 1,  mul: 1.35, shake: 0.45, shock: true },
+    ],
+    heavySolo:   { clip: 'slash4',   ts: 1.35, range: 4.2, ang: 6.3, dmg: 4, kb: 16, hitAt: 0.42, dir: 1, mul: 1,   shake: 0.6,  shock: true, slam: true },
+    heavyFinish: { clip: 'heavyfin', ts: 1.4,  range: 4.2, ang: 6.3, dmg: 3, kb: 18, hitAt: 0.46, dir: 1, mul: 1.5, shake: 0.65, shock: true },
+    dash:   { clip: 'heavy',    ts: 1.5, range: 3.6, ang: 2.4, dmg: 3, kb: 22, hitAt: 0.40, dir: 1, mul: 1.3, shake: 0.5, dash: 16, shock: true },
+    charge: { clip: 'heavyfin', ts: 1.1, range: 5.4, ang: 6.3, dmg: 7, kb: 24, hitAt: 0.46, dir: 1, mul: 1.7, shake: 0.9, charged: true, shock: true, slam: true },
+    rlight: [
+      { clip: 'slash1', ts: 2.0, hitAt: 0.35, dir: 1,  bolt: { dmg: 2, pierce: 3, size: 2.0 } },
+      { clip: 'slash3', ts: 2.0, hitAt: 0.36, dir: -1, bolt: { dmg: 2, pierce: 3, size: 2.0 } },
+    ],
+    rheavy:  { clip: 'heavy',    ts: 1.5, hitAt: 0.44, dir: 1, shake: 0.4, bolt: { dmg: 4, pierce: 99, size: 2.8 } },
+    rcharge: { clip: 'heavyfin', ts: 1.3, hitAt: 0.46, dir: 1, shake: 0.6, fan: 3, charged: true, bolt: { dmg: 4, pierce: 99, size: 2.6 } },
+  },
+  zoey: {   // 疾風短刃：六段疾風連段、突刺重擊、穿風突進、散射新月
+    light: [
+      { clip: 'slash1', ts: 2.3, range: 2.5, ang: 2.4, dmg: 1, kb: 5,  hitAt: 0.34, dir: 1,  mul: 1 },
+      { clip: 'slash2', ts: 2.3, range: 2.5, ang: 2.4, dmg: 1, kb: 5,  hitAt: 0.34, dir: -1, mul: 1.05 },
+      { clip: 'slash1', ts: 2.4, range: 2.6, ang: 2.4, dmg: 1, kb: 6,  hitAt: 0.34, dir: 1,  mul: 1.1 },
+      { clip: 'slash2', ts: 2.4, range: 2.6, ang: 2.4, dmg: 1, kb: 6,  hitAt: 0.34, dir: -1, mul: 1.15 },
+      { clip: 'slash3', ts: 2.2, range: 2.8, ang: 2.2, dmg: 1, kb: 8,  hitAt: 0.36, dir: 1,  mul: 1.3, dash: 8 },
+      { clip: 'slash4', ts: 2.0, range: 3.0, ang: 6.3, dmg: 2, kb: 13, hitAt: 0.38, dir: 1,  mul: 1.5, shake: 0.35, shock: true },
+    ],
+    heavySolo:   { clip: 'slash3',   ts: 2.0, range: 3.0, ang: 1.6, dmg: 2, kb: 9,  hitAt: 0.35, dir: 1, mul: 1.2, shake: 0.3,  dash: 14 },
+    heavyFinish: { clip: 'heavyfin', ts: 1.9, range: 3.2, ang: 6.3, dmg: 2, kb: 12, hitAt: 0.44, dir: 1, mul: 1.4, shake: 0.45, shock: true },
+    dash:   { clip: 'slash3',   ts: 2.1, range: 2.9, ang: 1.8, dmg: 2, kb: 9,  hitAt: 0.30, dir: 1, mul: 1.3, shake: 0.3, dash: 26 },
+    charge: { clip: 'heavyfin', ts: 1.7, range: 3.8, ang: 6.3, dmg: 4, kb: 15, hitAt: 0.42, dir: 1, mul: 1.5, shake: 0.6, charged: true, shock: true },
+    rlight: [
+      { clip: 'slash1', ts: 2.6, hitAt: 0.30, dir: 1,  fan: 2, bolt: { dmg: 1, pierce: 1, size: 1.2 } },
+      { clip: 'slash2', ts: 2.6, hitAt: 0.30, dir: -1, fan: 2, bolt: { dmg: 1, pierce: 1, size: 1.2 } },
+    ],
+    rheavy:  { clip: 'heavy',    ts: 1.8, hitAt: 0.42, dir: 1, shake: 0.3, fan: 5, bolt: { dmg: 1, pierce: 2, size: 1.4 } },
+    rcharge: { clip: 'heavyfin', ts: 1.6, hitAt: 0.44, dir: 1, shake: 0.5, fan: 7, charged: true, bolt: { dmg: 2, pierce: 4, size: 1.6 } },
+  },
+};
+const curMoves = () => MOVES[curChar.key];
 let weapon = 'melee';
-const curLight = () => weapon === 'melee' ? LIGHT : RLIGHT;
+const curLight = () => weapon === 'melee' ? curMoves().light : curMoves().rlight;
 function switchWeapon() {
   if (player.st === 'atk' || player.st === 'dead') return;
   weapon = weapon === 'melee' ? 'ranged' : 'melee';
@@ -1845,6 +1982,19 @@ function updateBolts(dt) {
         b.hitSet.add(e);
         hitEnemy(e, b.dmg, 8, b.dx, b.dz, 1.2 + b.dmg * 0.3);
         S.hit(1, b.dmg > 1);
+        b.pierce--;
+        if (b.pierce <= 0) dead = true;
+      }
+    }
+    // 劍氣命中裂口
+    for (const o of level.objs || []) {
+      if (dead) break;
+      if (o.type !== 'rift' || o.state !== 'active' || o.riftHp <= 0 || b.hitSet.has(o)) continue;
+      if (Math.hypot(o.pos[0] - b.x, o.pos[1] - b.z) < 1.8 + 0.4 * b.size) {
+        b.hitSet.add(o);
+        o.riftHp -= b.dmg * curChar.dmgMul;
+        spawnSpark(new THREE.Vector3(o.pos[0], 2.4, o.pos[1]), 1.5, 0x30e0ff);
+        S.hit(1);
         b.pierce--;
         if (b.pierce <= 0) dead = true;
       }
@@ -1964,7 +2114,7 @@ function buildHero(char) {
   scene.add(root);
   player.rig = makeRig(root, base.clips, [
     'idle', 'run', 'roll', 'hurt', 'death', 'win', 'jump',
-    ...LIGHT.map(c => c.clip), HEAVY_SOLO.clip, HEAVY_FINISH.clip,
+    'slash1', 'slash2', 'slash3', 'slash4', 'heavy', 'heavyfin',
   ]);
   addOutline(root, null, 0.028 / base.hScale);
   play(player.rig, 'idle');
@@ -2049,7 +2199,7 @@ function placeCityProps(props) {
   put('trafficlight_A', 6.2, 6.2, Math.PI, 1.3);
   put('trafficlight_A', -6.2, -6.2, 0, 1.3);
   // 雜物散布各街區邊
-  OBSTACLES.forEach((b, i) => {
+  OBSTACLES_BY_STAGE[0].forEach((b, i) => {
     if (i % 2 === 0) put('dumpster', b.x + b.hx + 2.2, b.z - 4, Math.PI / 2, 1.2);
     else put('bench', b.x - b.hx - 2.2, b.z + 3, -Math.PI / 2, 1.2);
     if (i % 3 === 0) put('firehydrant', b.x + 4, b.z + b.hz + 2.4, 0, 1.2);
@@ -2146,6 +2296,11 @@ function killEnemy(e) {
   kills++;
   spawnSpark(new THREE.Vector3(e.x, 1.0, e.z), e.kindName === 'boss' ? 4 : 2.2, 0xa04fff);
   if (!e.noCount && e.obj) e.obj.kills = (e.obj.kills || 0) + 1;
+  else if (!e.noCount && !e.kindName.startsWith('boss')) {
+    // 千人斬：野生敵擊殺也計入
+    const horde = (level.objs || []).find(o => o.type === 'horde' && o.state === 'active');
+    if (horde) horde.kills++;
+  }
   if (Math.random() < e.kind.dropRate) spawnDrop(e.x, e.z);
   if (e.officer) {
     if (e.obj) e.obj.officersLeft--;
@@ -2175,7 +2330,16 @@ function updateEnemies(dt) {
     e.x += e.vx * dt; e.z += e.vz * dt;
     e.vx *= Math.pow(0.002, dt); e.vz *= Math.pow(0.002, dt);
 
-    const dx = p.x - e.x, dz = p.z - e.z;
+    // 防衛戰：鎖定魂燈（玩家貼近時才回頭打玩家）
+    let tX = p.x, tZ = p.z;
+    e.lampTgt = null;
+    if (e.obj && e.obj.type === 'defend' && e.obj.state === 'active') {
+      if (Math.hypot(p.x - e.x, p.z - e.z) > 5.5) {
+        tX = e.obj.pos[0]; tZ = e.obj.pos[1];
+        e.lampTgt = e.obj;
+      }
+    }
+    const dx = tX - e.x, dz = tZ - e.z;
     const d = Math.hypot(dx, dz) || 1;
     const targetYaw = Math.atan2(dx, dz);
     const isBoss = e.kindName.startsWith('boss');
@@ -2220,9 +2384,11 @@ function updateEnemies(dt) {
       e.t += dt;
       if (!e.hitAppl && e.t >= e.atkDur * 0.45) {
         e.hitAppl = true;
-        if (d < e.kind.hitRange && p.y < 1.2 && p.st !== 'dead') {
+        if (e.lampTgt) {
+          if (d < e.kind.hitRange + 1) damageLamp(e.lampTgt, e.kind.dmg);
+        } else if (d < e.kind.hitRange && p.y < 1.2 && p.st !== 'dead') {
           if (p.st === 'dodge' && p.invuln > 0) triggerWitchTime();
-          else if (p.invuln <= 0) damagePlayer(e.kind.dmg, e);
+          else if (p.invuln <= 0) damagePlayer(e.kind.dmg * (e.dmgMul || 1), e);
         }
       }
       if (e.t >= e.atkDur * 0.95) {
@@ -2302,6 +2468,67 @@ function updateEnemies(dt) {
 }
 
 // ---------- 開放戰場目標系統 ----------
+// 魂燈（第二關防衛目標）
+function makeLamp(x, z) {
+  const grp = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.75, 1.3, 8), new THREE.MeshLambertMaterial({ color: 0x8a8078 }));
+  base.position.y = 0.65;
+  base.castShadow = true;
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 10), new THREE.MeshBasicMaterial({ color: 0xffd890 }));
+  orb.position.y = 1.75;
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: sparkTex, color: 0xffc860, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
+  glow.scale.set(3.2, 3.2, 1);
+  glow.position.y = 1.75;
+  const ring = new THREE.Mesh(new THREE.RingGeometry(2.7, 2.95, 40), new THREE.MeshBasicMaterial({ color: 0xffc860, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.06;
+  grp.add(base, orb, glow, ring);
+  grp.position.set(x, 0, z);
+  grp.userData.orb = orb;
+  grp.userData.glow = glow;
+  scene.add(grp);
+  level.props.push(grp);
+  return grp;
+}
+function damageLamp(o, dmg) {
+  o.lampHp -= dmg;
+  spawnSpark(new THREE.Vector3(o.pos[0], 1.8, o.pos[1]), 1.4, 0xff8050);
+  if (AU.ctx) tone('square', 220, AU.ctx.currentTime, 0.1, 0.12, AU.sfx, 120);
+}
+// 虛空裂口（第四關可破壞目標）
+function makeRift(x, z) {
+  const grp = new THREE.Group();
+  const outer = new THREE.Mesh(new THREE.OctahedronGeometry(1.7, 0), new THREE.MeshBasicMaterial({ color: 0xd040ff, transparent: true, opacity: 0.85 }));
+  outer.position.y = 2.4;
+  const inner = new THREE.Mesh(new THREE.OctahedronGeometry(0.9, 0), new THREE.MeshBasicMaterial({ color: 0x30e0ff }));
+  inner.position.y = 2.4;
+  const ring = new THREE.Mesh(new THREE.RingGeometry(2.6, 2.9, 40), new THREE.MeshBasicMaterial({ color: 0xd040ff, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.06;
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: sparkTex, color: 0xc060ff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
+  glow.scale.set(4.5, 4.5, 1);
+  glow.position.y = 2.4;
+  grp.add(outer, inner, ring, glow);
+  grp.position.set(x, 0, z);
+  grp.userData.outer = outer;
+  grp.userData.inner = inner;
+  scene.add(grp);
+  level.props.push(grp);
+  return grp;
+}
+// 玩家攻擊命中裂口
+function damageRifts(x, z, range, dmg) {
+  let hits = 0;
+  for (const o of level.objs || []) {
+    if (o.type !== 'rift' || o.state !== 'active' || o.riftHp <= 0) continue;
+    if (Math.hypot(o.pos[0] - x, o.pos[1] - z) < range + 1.6) {
+      o.riftHp -= dmg * curChar.dmgMul;
+      hits++;
+      spawnSpark(new THREE.Vector3(o.pos[0], 2.4, o.pos[1]), 1.5, 0x30e0ff);
+    }
+  }
+  return hits;
+}
 function objSpawn(o, kindName) {
   const a = Math.random() * 6.28;
   const r = 7 + Math.random() * 9;
@@ -2324,15 +2551,47 @@ function activateObjective(o) {
       makeOfficerBar(off, names[i % names.length]);
     }
     for (let i = 0; i < 4; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+  } else if (o.type === 'defend') {
+    o.lampMax = 120; o.lampHp = 120; o.defT = 0;
+    o.lamp = makeLamp(o.pos[0], o.pos[1]);
+    for (let i = 0; i < 7; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+  } else if (o.type === 'trial') {
+    o.trialT = o.tlimit;
+    for (let i = 0; i < 9; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+  } else if (o.type === 'rift') {
+    o.riftHpMax = o.riftHp;
+    o.rift = makeRift(o.pos[0], o.pos[1]);
+    for (let i = 0; i < 6; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+  } else if (o.type === 'horde') {
+    o.mile = 100; o.spawnT = 0;
+    for (let i = 0; i < 14; i++) {
+      const a = Math.random() * 6.28, r = 9 + Math.random() * 10;
+      const e = spawnEnemy(Math.random() < (o.fast || 0) ? 'runner' : 'minion',
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * r)),
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * r)));
+      e.obj = o;
+    }
   } else {
     for (let i = 0; i < 10; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
   }
 }
 function completeObjective(o) {
   o.state = 'done';
-  showToast(o.type === 'capture' ? '據點制壓！' : o.type === 'officer' ? '敵將全滅！' : '目標達成！');
+  showToast(o.type === 'capture' ? '據點制壓！' : o.type === 'officer' ? '敵將全滅！'
+    : o.type === 'defend' ? '魂燈守住了！' : o.type === 'trial' ? '試煉突破！'
+    : o.type === 'rift' ? '裂口封印！' : '目標達成！');
   S.zone();
   if (o.type === 'capture') capturePoint.visible = false;
+  if (o.lamp) {
+    o.lamp.userData.orb.material.color.set(0x8fffbf);
+    o.lamp.userData.glow.material.color.set(0x8fffbf);
+  }
+  if (o.rift) {
+    spawnShockwave(o.pos[0], o.pos[1], { maxR: 12, dur: 0.6, color: 0xd040ff });
+    spawnPillar(o.pos[0], o.pos[1], 0xd040ff, 1.4);
+    scene.remove(o.rift);
+    o.rift = null;
+  }
   for (const m of [...enemies]) {
     if (m.obj === o && m.st !== 'dead') { m.noCount = true; killEnemy(m); }
   }
@@ -2369,7 +2628,7 @@ function updateLevel(dt) {
     if (o.state === 'done') continue;
     remaining++;
     const d = Math.hypot(player.x - o.pos[0], player.z - o.pos[1]);
-    if (o.state === 'dormant' && d < 20) activateObjective(o);
+    if (o.state === 'dormant' && (o.type === 'horde' || d < 20)) activateObjective(o);
     if (o.state !== 'active') continue;
     if (!engaged || d < Math.hypot(player.x - engaged.pos[0], player.z - engaged.pos[1])) engaged = o;
     const objAlive = enemies.filter(e => e.obj === o && e.st !== 'dead').length;
@@ -2399,6 +2658,73 @@ function updateLevel(dt) {
     } else if (o.type === 'officer') {
       if (objAlive < 13 && alive < 34 && Math.random() < 0.38) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
       if (o.officersLeft <= 0) completeObjective(o);
+    } else if (o.type === 'defend') {
+      o.defT += dt;
+      if (objAlive < 12 && alive < 34 && Math.random() < 0.5) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (o.lamp) {
+        const lk = 1 + Math.sin(worldT * 4) * 0.12;
+        o.lamp.userData.glow.scale.set(3.2 * lk, 3.2 * lk, 1);
+        const hpk = o.lampHp / o.lampMax;
+        o.lamp.userData.orb.material.color.setHex(hpk > 0.5 ? 0xffd890 : hpk > 0.25 ? 0xffa060 : 0xff6050);
+      }
+      if (o.lampHp <= 0) {
+        o.lampHp = o.lampMax; o.defT = 0;
+        showToast('魂燈熄滅！重新點燃');
+        S.roar();
+        spawnShockwave(o.pos[0], o.pos[1], { maxR: 8, dur: 0.5, color: 0xff5a3a });
+      }
+      if (o.defT >= o.time) completeObjective(o);
+    } else if (o.type === 'trial') {
+      o.trialT -= dt;
+      if (objAlive < 16 && alive < 34 && Math.random() < 0.6) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (o.kills >= o.need) completeObjective(o);
+      else if (o.trialT <= 0) {
+        o.kills = 0; o.trialT = o.tlimit;
+        showToast('時限已至——試煉重置！');
+        S.hurt();
+      }
+    } else if (o.type === 'rift') {
+      if (o.rift) {
+        o.rift.userData.outer.rotation.y += dt * 1.2;
+        o.rift.userData.inner.rotation.y -= dt * 2;
+        const rk = 1 + Math.sin(worldT * 5) * 0.1;
+        o.rift.userData.outer.scale.setScalar(rk);
+      }
+      if (objAlive < 10 && alive < 34 && Math.random() < 0.35) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (o.riftHp <= 0) completeObjective(o);
+    } else if (o.type === 'horde') {
+      // 千人斬：貼著玩家高密度刷屍潮，殺越多敵人越強越快
+      const cap = IS_MOBILE ? 24 : 40;
+      const prog = Math.min(1, o.kills / o.need);   // 0→1 難度進度
+      o.spawnT -= dt;
+      if (o.spawnT <= 0 && alive < cap) {
+        o.spawnT = Math.max(0.18, 0.35 - prog * 0.15);
+        const n = Math.min(cap - alive, 3 + Math.floor(Math.random() * 3) + Math.floor(prog * 2));
+        for (let k = 0; k < n; k++) {
+          const roll = Math.random();
+          const kind = roll < 0.04 + prog * 0.14 ? 'elite' : roll < (o.fast || 0) + prog * 0.4 ? 'runner' : 'minion';
+          const a = Math.random() * 6.28, r = 11 + Math.random() * 9;
+          const e = spawnEnemy(kind,
+            Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * r)),
+            Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * r)));
+          e.obj = o;
+          // 屍潮強化：滿千時 HP×2.2、速度+1.5、攻擊+80%
+          e.hp = e.hpMax = e.kind.hp * (1 + prog * 1.2);
+          e.spd += prog * 1.5;
+          e.dmgMul = 1 + prog * 0.8;
+        }
+      }
+      // 每百人斬里程碑：爆氣獎勵；每三百斬敵軍升級吼聲警示
+      if (o.kills >= o.mile && o.mile <= 900) {
+        const digits = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
+        showToast(`${digits[Math.floor(o.mile / 100) - 1]}百人斬！`);
+        if (o.mile % 300 === 0) S.roar();
+        o.mile += 100;
+        S.win();
+        musou = Math.min(100, musou + 25);
+        spawnShockwave(player.x, player.z, { maxR: 8, dur: 0.5, color: 0xffd84f });
+      }
+      if (o.kills >= o.need) completeObjective(o);
     }
   }
   // 目標提示
@@ -2409,6 +2735,10 @@ function updateLevel(dt) {
       const contested = enemies.some(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - engaged.pos[0], e.z - engaged.pos[1]) < 5);
       hud.objective.textContent = `${engaged.name}　制壓 ${Math.round(engaged.capT)}%${inside && contested ? '（拮抗中！）' : ''}`;
     }
+    else if (engaged.type === 'defend') hud.objective.textContent = `${engaged.name}　守護 ${Math.max(0, Math.ceil(engaged.time - engaged.defT))}s ・ 魂燈 ${Math.max(0, Math.round(engaged.lampHp / engaged.lampMax * 100))}%`;
+    else if (engaged.type === 'trial') hud.objective.textContent = `${engaged.name}　${Math.min(engaged.kills, engaged.need)}／${engaged.need} ・ 剩 ${Math.max(0, Math.ceil(engaged.trialT))}s`;
+    else if (engaged.type === 'rift') hud.objective.textContent = `${engaged.name}　攻擊裂口！ ${Math.max(0, Math.round(engaged.riftHp / engaged.riftHpMax * 100))}%`;
+    else if (engaged.type === 'horde') hud.objective.textContent = `千人斬　${Math.min(engaged.kills, engaged.need)}／${engaged.need}`;
     else hud.objective.textContent = `${engaged.name}　討伐敵將 ${engaged.officers - engaged.officersLeft}／${engaged.officers}`;
     hud.objective.classList.remove('go');
   } else {
@@ -2505,12 +2835,13 @@ function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
 function meleeSweep(a) {
   const p = player;
   const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw);
+  const range = a.range * (curChar.rangeMul || 1);
   let hits = 0;
   for (const e of enemies) {
     if (e.st === 'dead' || e.st === 'spawn') continue;
     const dx = e.x - p.x, dz = e.z - p.z;
     const d = Math.hypot(dx, dz);
-    if (d > a.range + (e.kind.scale - 1)) continue;
+    if (d > range + (e.kind.scale - 1)) continue;
     if (a.ang < 6) {
       const dot = (dx * fx + dz * fz) / (d || 1);
       if (d > 1.0 && dot < Math.cos(a.ang / 2)) continue;
@@ -2519,6 +2850,7 @@ function meleeSweep(a) {
     const kd = d || 1;
     hitEnemy(e, a.dmg * (a.mul || 1), a.kb, dx / kd, dz / kd, 1.2 + a.dmg * 0.25);
   }
+  hits += damageRifts(p.x + fx * range * 0.6, p.z + fz * range * 0.6, range * 0.9, a.dmg * (a.mul || 1));
   if (hits > 0) {
     S.hit(hits, !!a.shake);
     hitStopT = Math.min(0.13, 0.045 + hits * 0.008 + (a.shake ? 0.035 : 0));
@@ -2547,7 +2879,12 @@ function applyPlayerHit(a) {
     ang: Math.min(a.ang, 6.3), outer: a.range, dir: a.dir,
     color: a.dmg > 1 ? curChar.fxHi : curChar.fx, dur: a.dmg > 1 ? 0.28 : 0.18,
   });
-  if (a === HEAVY_SOLO || a === HEAVY_FINISH) spawnShockwave(player.x, player.z, { maxR: a.range + 0.6 });
+  if (a.shock) spawnShockwave(player.x, player.z, { maxR: a.range + 0.6 });
+  if (a.slam) {
+    // 跳壓地裂：追加地面裂波
+    spawnShockwave(player.x, player.z, { maxR: a.range + 1.4, dur: 0.45 });
+    spawnSpark(new THREE.Vector3(player.x, 0.6, player.z), 2.6, curChar.fx, { dur: 0.35 });
+  }
   if (a.charged) {
     // 蓄力震地斬：光柱＋三重衝擊波＋閃白
     spawnPillar(player.x, player.z, 0xffd84f, 1.5);
@@ -2668,6 +3005,7 @@ function updatePlayer(dt) {
         const d = Math.hypot(dx, dz);
         if (d < 7) { const kd = d || 1; hitEnemy(e, 3, 9, dx / kd, dz / kd, 1.7); }
       }
+      damageRifts(p.x, p.z, 7, 3);
       spawnSlash(p.x, p.z, Math.random() * 6.28, { ang: 6.3, outer: 7, dir: Math.random() < 0.5 ? 1 : -1, color: [0xd07aff, 0xff7ac8, 0xffd84f][Math.floor(Math.random() * 3)], dur: 0.3 });
       spawnShockwave(p.x, p.z, { maxR: 7, dur: 0.32, color: 0xd07aff });
       spawnSpark(new THREE.Vector3(p.x + (Math.random() * 2 - 1) * 2, 1 + Math.random() * 2, p.z + (Math.random() * 2 - 1) * 2), 1.6, 0xffd84f, { dur: 0.3, rise: 3 });
@@ -2693,6 +3031,7 @@ function updatePlayer(dt) {
         const d = Math.hypot(dx, dz);
         if (d < 12) { const kd = d || 1; hitEnemy(e, 12, 30, dx / kd, dz / kd, 2.6); }
       }
+      damageRifts(p.x, p.z, 12, 12);
       spawnShockwave(p.x, p.z, { maxR: 13, dur: 0.7, color: 0xffd84f });
       spawnShockwave(p.x, p.z, { maxR: 10, dur: 0.6, color: 0xff7ac8 });
       spawnShockwave(p.x, p.z, { maxR: 7, dur: 0.5, color: 0xffffff });
@@ -2731,8 +3070,9 @@ function updatePlayer(dt) {
     if (!heavyHold || p.chargeT > 1.25) {
       const full = p.chargeT >= 0.5;
       p.chargeCue = false;
-      if (weapon === 'melee') startAttack(full ? CHARGE_ATK : (ml > 0 ? DASH_ATK : HEAVY_SOLO), -1, mx, mz, ml);
-      else startAttack(full ? RCHARGE : RHEAVY, -1, mx, mz, ml);
+      const mv = curMoves();
+      if (weapon === 'melee') startAttack(full ? mv.charge : (ml > 0 ? mv.dash : mv.heavySolo), -1, mx, mz, ml);
+      else startAttack(full ? mv.rcharge : mv.rheavy, -1, mx, mz, ml);
     }
   } else if (p.st === 'atk') {
     const a = p.curAtk;
@@ -2748,7 +3088,8 @@ function updatePlayer(dt) {
     if (heavyPressed) { p.queuedHeavy = true; heavyPressed = false; }
     if (dodgePressed && p.didHit) { dodgePressed = false; startDodge(mx, mz, ml); }
     else if (p.atkT >= p.atkDur * 0.5 && p.queuedHeavy) {
-      startAttack(weapon === 'melee' ? (p.atkStage >= 1 ? HEAVY_FINISH : HEAVY_SOLO) : RHEAVY, -1, mx, mz, ml);
+      const mv = curMoves();
+      startAttack(weapon === 'melee' ? (p.atkStage >= 1 ? mv.heavyFinish : mv.heavySolo) : mv.rheavy, -1, mx, mz, ml);
     } else if (p.atkT >= p.atkDur * 0.5 && p.queuedLight && p.atkStage >= 0) {
       const lt = curLight();
       startAttack(lt[(p.atkStage + 1) % lt.length], (p.atkStage + 1) % lt.length, mx, mz, ml);
@@ -2807,8 +3148,9 @@ function startAttack(a, stage, mx, mz, ml) {
   if (ml > 0) p.yaw = Math.atan2(mx, mz);
   p.st = 'atk'; p.curAtk = a; p.atkStage = stage;
   p.atkT = 0; p.didHit = false; p.queuedLight = false; p.queuedHeavy = false;
-  p.atkDur = clipDur(p.rig, a.clip, a.ts);
-  play(p.rig, a.clip, { once: true, ts: a.ts, fade: 0.07 });
+  const ts = a.ts * (curChar.atkTs || 1);   // 角色武器：重刃慢、短刃快
+  p.atkDur = clipDur(p.rig, a.clip, ts);
+  play(p.rig, a.clip, { once: true, ts, fade: 0.07 });
 }
 function startMusou() {
   const p = player;
@@ -3110,32 +3452,32 @@ function nextDialog(first = false) {
 dlgBox.addEventListener('pointerdown', e => { e.stopPropagation(); nextDialog(); });
 const STORY = {
   s1open: [
-    ['RUMI', '魂門出現裂縫了……整條街都是陰差的氣味。'],
-    ['RUMI', '開工吧。今晚的舞台——首爾夜市大街。'],
+    ['RUMI', '魂門出現裂縫了……整條街都是陰差。數不完的陰差。'],
+    ['RUMI', '那就全部斬掉。今晚的目標——千人斬！'],
   ],
   s1boss: [
     ['陰差隊長', '渺小的獵魔士……魂門將為吾等而開！'],
     ['RUMI', '守門是我的工作。你，回地府重新排隊。'],
   ],
   s2open: [
-    ['RUMI', '穿過裂縫……這裡是魂界。陰差的本營。'],
-    ['RUMI', '血月、鬼火、黑曜之地——直搗魂門核心，一次終結。'],
+    ['RUMI', '穿過裂縫……這裡是黃泉的花海。彼岸花開得像一片火。'],
+    ['RUMI', '渡口的魂燈還亮著——別讓陰差把它們吹熄。'],
   ],
   s2boss: [
     ['陰差大隊長', '吾乃陰差大隊長！汝之魂，今夜歸吾！'],
     ['RUMI', '……來取啊。'],
   ],
   s3open: [
-    ['RUMI', '雲海之上……魂門的另一端竟然通到天界。'],
-    ['RUMI', '陰差王就在最深處。終結這一切，就在今晚。'],
+    ['RUMI', '雲海之上……天界以「試煉」迎接闖入者。'],
+    ['RUMI', '時限之內斬出答案——這就是獵魔士的回答。'],
   ],
   s3boss: [
     ['陰差王', '獵魔士……汝竟踏入天界。此地，即汝之墓。'],
     ['RUMI', '墓誌銘我幫你想好了——「敗給了 HUNTR/X」。'],
   ],
   s4open: [
-    ['RUMI', '虛空……魂門的心臟就在這裡跳動。'],
-    ['RUMI', '斬碎它，一切就結束了。最後一戰。'],
+    ['RUMI', '虛空……魂門的心臟在跳動，裂口不斷湧出陰差。'],
+    ['RUMI', '封印所有裂口，直搗核心。最後一戰。'],
   ],
   s4boss: [
     ['魂門之靈', '吾即是門，吾即是界。汝斬不斷「界」本身。'],
@@ -3186,24 +3528,20 @@ function applyStageTint(i) {
     return;
   }
   if (i === 1) {
-    // 魂界：黑曜裂谷、血月漩渦天、鬼火
+    // 黃泉花海：暮金天空、彼岸花田、魂燈——明亮溫暖
     if (skyMat && skyTex2) { skyMat.map = skyTex2; skyMat.needsUpdate = true; }
-    scene.fog.color.set(0x1c0a12);
-    scene.fog.near = 20; scene.fog.far = 78;
-    hemi.color.set(0xff8a7a); hemi.groundColor.set(0x2a0d14); hemi.intensity = 0.85;
-    sun.color.set(0xff9a88); sun.intensity = 1.1;
-    warmFill.color.set(0xff3020); warmFill.intensity = 0.5;
-    if (skyMat) skyMat.color.set(0xffc0b0);
-    honmoon.children[0].material.color.set(0xff3050);
-    honmoon.children[1].material.color.set(0xffa040);
-    for (const m of ENV.signs) m.color.setScalar(0.22);
-    for (const m of ENV.fronts) m.color.setScalar(0.3);
-    for (const m of ENV.wins) m.color.setScalar(0.35);
-    for (const m of ENV.tentGlows) m.color.set(0x662418);
+    scene.fog.color.set(0x6a4a5a);
+    scene.fog.near = 28; scene.fog.far = 105;
+    hemi.color.set(0xffd8b0); hemi.groundColor.set(0x5a4048); hemi.intensity = 1.15;
+    sun.color.set(0xffc890); sun.intensity = 1.3;
+    warmFill.color.set(0xff8a50); warmFill.intensity = 0.45;
+    if (skyMat) skyMat.color.set(0xffffff);
+    honmoon.children[0].material.color.set(0xff7a50);
+    honmoon.children[1].material.color.set(0xffd84f);
     rain.pts.visible = false;
-    embers.pts.material.color.set(0xff5030);
-    embers.pts.material.size = 0.22;
-    heroLight.color.set(0xff6040);
+    embers.pts.material.color.set(0xffc880);
+    embers.pts.material.size = 0.2;
+    heroLight.color.set(0xffc080);
   } else {
     if (skyMat && skyTex1) { skyMat.map = skyTex1; skyMat.needsUpdate = true; }
     scene.fog.color.set(0x140f28);
@@ -3226,6 +3564,9 @@ function applyStageTint(i) {
 }
 function loadStage(i) {
   stageIdx = i;
+  // 切換本關的碰撞/遮擋佈局（小地圖跟著換）
+  OBSTACLES = OBSTACLES_BY_STAGE[Math.min(i, OBSTACLES_BY_STAGE.length - 1)];
+  blockersReg = blockersRegBy[Math.min(i, blockersRegBy.length - 1)];
   applyStageTint(i);
   for (const e of enemies) { scene.remove(e.root); scene.remove(e.shadow); e.rig.mixer.stopAllAction(); }
   enemies.length = 0;
@@ -3233,8 +3574,10 @@ function loadStage(i) {
   drops.length = 0;
   for (const b of bolts) scene.remove(b.spr);
   bolts.length = 0;
+  for (const pr of level.props) scene.remove(pr);
+  level.props = [];
   const cfg = STAGES[i];
-  level.objs = cfg.objectives.map(o => ({ ...o, state: 'dormant', kills: 0, spawned: 0, capT: 0, officersLeft: o.officers || 0, ambushDone: false }));
+  level.objs = cfg.objectives.map(o => ({ ...o, state: 'dormant', kills: 0, spawned: 0, capT: 0, officersLeft: o.officers || 0, ambushDone: false, defT: 0, lampHp: 0, lampMax: 1, trialT: 0, riftHpMax: o.riftHp || 1 }));
   level.bossPhase = false;
   level.boss = null;
   const capObj = level.objs.find(o => o.type === 'capture');

@@ -57,6 +57,27 @@
   world4 能量巨環×3（w4anim.rings）+地表水晶簇
 - flickers 支援 base 色（紅色警示燈不會閃成白色）
 
+## 2026-07-18 第三輪更新（四關玩法/地圖/武器/招式全差異化，已上線）
+
+- **四關玩法各不同**：
+  1. 千人斬（type:'horde'）：單目標斬 1000，貼玩家高密度刷（cap 40/mobile 24），每百人斬里程碑
+     爆氣+25、難度隨 kills 連續升級（HP×2.2/速度+1.5/攻擊+80% at 滿千，e.dmgMul per-spawn）；野生敵擊殺也計入
+  2. 魂燈防衛（type:'defend'）：makeLamp 魂燈（HP120），敵人 AI 鎖定魂燈（玩家距離>5.5 時，e.lampTgt），
+     守 40/45s；燈滅→重置重點燃
+  3. 時限試煉（type:'trial'）：tlimit 秒內殺滿 need，超時 kills 歸零重來
+  4. 封印裂口（type:'rift'）：makeRift 可破壞水晶（meleeSweep/updateBolts/musou 都接 damageRifts），
+     裂口持續湧守衛
+  - 目標 3D 物件登記在 level.props，loadStage 清理
+- **四關地圖佈局獨立**：OBSTACLES_BY_STAGE[4]＋blockersRegBy[4]，loadStage 切換 active 指標
+  （碰撞/遮擋/小地圖全跟隨）。一關＝外圈 6 街區大廣場；二關＝散落樹叢；三關＝對稱聖域；四關＝六角浮島環
+- **第二關換主題**（太暗→明亮）：黑曜血月 → 黃泉花海・魂燈渡口。暮金天空+巨大金月、彼岸花田地表、
+  紅葉巨木、石燈籠、漂浮魂燈火、花瓣、紫山遠景；光照全亮暖化；MUSIC[1] 改 C–G–Am–F 溫暖大調
+- **三人武器不同**：Rumi＝原長劍+能量刃光；Mira＝程序生成破魔大劍（buildWeaponMesh 'great' 1.3x）；
+  Zoey＝疾風短刃（'short' 0.68x）。原劍以 geometry 比對隱藏（含描邊），武器掛右手骨骼、綁定姿勢對齊刃軸
+- **三人招式組不同**（MOVES{rumi,mira,zoey}，curMoves()）：Rumi 四段連段；Mira 三段重連段（段段震波）+
+  跳壓地裂(slam)+破城衝撞；Zoey 六段疾風連段+突刺+穿風突進(dash26)+散射新月(fan)。攻速 atkTs、範圍 rangeMul 分化
+- STAGES[0] 千人斬敘事、s1-s4 開場對白同步更新
+
 ## 已知待辦/可改進
 
 1. 開放地圖敵量/密度、蓄力/衝刺斬傷害數值需實玩回饋再平衡
