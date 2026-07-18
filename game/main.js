@@ -15,13 +15,29 @@ const NEON = [0xff4fd8, 0xff2fa0, 0x8a4fff, 0x4fd8ff, 0xff6ab0, 0xb47aff];
 const IS_MOBILE = matchMedia('(pointer: coarse)').matches;
 if (IS_MOBILE) document.body.classList.add('is-touch');
 
-// 關卡分區（沿 -Z 推進）
-const ZONES = [
-  { name: '夜市街口',  enterZ: 0,    boundZ: -45,  need: 10, cap: 7,  elites: 0 },
-  { name: '夜市主街',  enterZ: -45,  boundZ: -90,  need: 22, cap: 13, elites: 0 },
-  { name: '十字路口',  enterZ: -90,  boundZ: -135, need: 12, cap: 8,  elites: 2 },
-  { name: '魂門裂縫',  enterZ: -135, boundZ: -172, boss: true },
+// 關卡（同一條街廊道，分區沿 -Z 推進；Stage 2 為血月變體）
+const STAGES = [
+  {
+    name: '第一關　首爾夜市・魂門裂縫',
+    zones: [
+      { name: '夜市街口',  enterZ: 0,    boundZ: -45,  need: 10, cap: 7,  elites: 0 },
+      { name: '夜市主街',  enterZ: -45,  boundZ: -90,  need: 22, cap: 13, elites: 0 },
+      { name: '十字路口',  enterZ: -90,  boundZ: -135, need: 12, cap: 8,  elites: 2 },
+      { name: '魂門裂縫',  enterZ: -135, boundZ: -172, boss: true },
+    ],
+  },
+  {
+    name: '第二關　血月大街・陰差軍團',
+    zones: [
+      { name: '血月街口',    enterZ: 0,    boundZ: -45,  need: 16, cap: 9,  elites: 0, fast: 0.35 },
+      { name: '亡者大街',    enterZ: -45,  boundZ: -90,  need: 28, cap: 15, elites: 1, fast: 0.5 },
+      { name: '厲鬼十字路',  enterZ: -90,  boundZ: -135, need: 16, cap: 10, elites: 3, fast: 0.5 },
+      { name: '魂門最終防線', enterZ: -135, boundZ: -172, boss: true, boss2: true },
+    ],
+  },
 ];
+let stageIdx = 0;
+let ZONES = STAGES[0].zones;
 
 // ---------- 基本場景 ----------
 const app = document.getElementById('app');
@@ -52,7 +68,8 @@ addEventListener('resize', () => {
 });
 
 // ---------- 燈光（夜街：冷月光主光＋暖鈉燈補光＋青色輪廓光） ----------
-scene.add(new THREE.HemisphereLight(0x9a8aff, 0x201238, 1.1));
+const hemi = new THREE.HemisphereLight(0x9a8aff, 0x201238, 1.1);
+scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xbfcaff, 1.35);
 sun.position.set(8, 18, 6);
 sun.castShadow = true;
@@ -73,6 +90,7 @@ const heroLight = new THREE.PointLight(0xff4fa3, 1.4, 9, 1.6);
 scene.add(heroLight);
 
 // ---------- 天空（AI 生成全景） ----------
+let skyMat = null;
 (function buildSky() {
   const sky = new THREE.Mesh(
     new THREE.SphereGeometry(230, 48, 24),
@@ -80,6 +98,7 @@ scene.add(heroLight);
   );
   sky.position.set(0, 0, -85);
   sky.rotation.y = Math.PI;
+  skyMat = sky.material;
   scene.add(sky);
   new THREE.TextureLoader().load('assets/gen/sky.jpg', tex => {
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -870,12 +889,17 @@ const keys = new Set();
 let atkPressed = false, heavyPressed = false, jumpPressed = false, dodgePressed = false;
 addEventListener('keydown', e => {
   if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+  if (typeof dlg !== 'undefined' && dlg.active) {
+    if (e.code === 'KeyJ' || e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyZ') nextDialog();
+    return;
+  }
   keys.add(e.code);
   if (e.code === 'KeyJ' || e.code === 'KeyZ') atkPressed = true;
   if (e.code === 'KeyK' || e.code === 'KeyX') heavyPressed = true;
   if (e.code === 'Space') jumpPressed = true;
   if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyL') dodgePressed = true;
   if (e.code === 'KeyM') document.getElementById('mute').click();
+  if (e.code === 'KeyQ' && state === 'play') switchWeapon();
   if (e.code === 'KeyR' && state === 'dead') restart();
   if (state === 'title' && ready && (e.code === 'Enter' || e.code === 'KeyJ')) start();
 });
@@ -924,6 +948,7 @@ const touchMove = { active: false, mx: 0, mz: 0 };
   bind('btnB', () => { heavyPressed = true; });
   bind('btnJ', () => { jumpPressed = true; });
   bind('btnR', () => { dodgePressed = true; });
+  bind('btnW', () => { if (state === 'play') switchWeapon(); });
 })();
 
 // ---------- HUD ----------
@@ -939,6 +964,10 @@ const hud = {
 el('startBtn').addEventListener('click', () => ready && start());
 el('retryBtn').addEventListener('click', () => restart());
 el('againBtn').addEventListener('click', () => restart());
+el('nextBtn').addEventListener('click', () => {
+  hud.win.classList.add('hidden');
+  loadStage(stageIdx + 1);
+});
 function showToast(text) {
   hud.toast.textContent = text;
   hud.toast.classList.remove('show');
@@ -965,6 +994,62 @@ const LIGHT = [
 const HEAVY_SOLO   = { clip: 'heavy',    ts: 1.3, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1,  shake: 0.45 };
 const HEAVY_FINISH = { clip: 'heavyfin', ts: 1.3, range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.46, dir: 1,  shake: 0.55 };
 const PLUNGE       = { range: 4.0, ang: 6.3, dmg: 2, kb: 14, shake: 0.6 };
+// 魂力彈（遠程）：揮劍射出劍氣
+const RLIGHT = [
+  { clip: 'slash1', ts: 1.9, hitAt: 0.35, dir: 1,  bolt: { dmg: 1, speed: 24, pierce: 1, size: 1 } },
+  { clip: 'slash2', ts: 1.9, hitAt: 0.35, dir: -1, bolt: { dmg: 1, speed: 24, pierce: 1, size: 1 } },
+];
+const RHEAVY = { clip: 'heavy', ts: 1.3, hitAt: 0.44, dir: 1, shake: 0.3, bolt: { dmg: 3, speed: 27, pierce: 99, size: 1.9 } };
+let weapon = 'melee';
+const curLight = () => weapon === 'melee' ? LIGHT : RLIGHT;
+function switchWeapon() {
+  if (player.st === 'atk' || player.st === 'dead') return;
+  weapon = weapon === 'melee' ? 'ranged' : 'melee';
+  document.getElementById('wpn').textContent = weapon === 'melee' ? '⚔ 近戰' : '✦ 魂力彈';
+  if (AU.ctx) { const t = AU.ctx.currentTime; tone('triangle', midi(weapon === 'melee' ? 76 : 83), t, 0.12, 0.15, AU.sfx); }
+  spawnSpark(new THREE.Vector3(player.x, 1.4, player.z), 1.6, weapon === 'melee' ? 0xc9a4ff : 0x6ae0ff);
+}
+// 劍氣彈
+const bolts = [];
+function spawnBolt(cfg) {
+  const p = player;
+  const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw);
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: sparkTex, color: cfg.size > 1.2 ? 0xa8f0ff : 0x7ad0ff,
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  spr.position.set(p.x + fx * 0.9, 1.3, p.z + fz * 0.9);
+  spr.scale.setScalar(0.55 * cfg.size);
+  scene.add(spr);
+  bolts.push({ spr, x: p.x + fx * 0.9, z: p.z + fz * 0.9, dx: fx, dz: fz, traveled: 0, pierce: cfg.pierce, dmg: cfg.dmg, size: cfg.size, hitSet: new Set() });
+}
+function updateBolts(dt) {
+  for (let i = bolts.length - 1; i >= 0; i--) {
+    const b = bolts[i];
+    const step = 24 * dt * (b.size > 1.2 ? 1.12 : 1);
+    b.x += b.dx * step; b.z += b.dz * step;
+    b.traveled += step;
+    b.spr.position.set(b.x, 1.3, b.z);
+    b.spr.scale.setScalar(0.55 * b.size * (1 + Math.sin(b.traveled * 6) * 0.12));
+    let dead = b.traveled > 20 || Math.abs(b.x) > HALF_W + 1;
+    for (const e of enemies) {
+      if (dead) break;
+      if (e.st === 'dead' || e.st === 'spawn' || b.hitSet.has(e)) continue;
+      if (Math.hypot(e.x - b.x, e.z - b.z) < 0.95 * b.size + (e.kind.scale - 1) * 0.5) {
+        b.hitSet.add(e);
+        hitEnemy(e, b.dmg, 8, b.dx, b.dz, 1.2 + b.dmg * 0.3);
+        S.hit(1, b.dmg > 1);
+        b.pierce--;
+        if (b.pierce <= 0) dead = true;
+      }
+    }
+    if (dead) {
+      spawnSpark(new THREE.Vector3(b.x, 1.3, b.z), 0.9, 0x7ad0ff);
+      scene.remove(b.spr); b.spr.material.dispose();
+      bolts.splice(i, 1);
+    }
+  }
+}
 
 const player = {
   root: null, rig: null, shadow: null,
@@ -992,11 +1077,23 @@ const KINDS = {
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 1,
   },
+  runner: {
+    file: 'minion', scale: 0.92, hp: 1, spdBase: 4.1, spdVar: 0.8, dmg: 4,
+    atkRange: 2.1, hitRange: 2.2, atkTs: 0.95, kbMul: 1.2, shadowR: 0.8,
+    atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Punch_B'],
+    dropRate: 0.07, tint: 0xff4040,
+  },
   boss: {
     file: 'warrior', scale: 1.6, hp: 70, spdBase: 2.7, spdVar: 0, dmg: 14,
     atkRange: 3.2, hitRange: 3.6, atkTs: 0.85, kbMul: 0.12, shadowR: 1.5,
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 0,
+  },
+  boss2: {
+    file: 'warrior', scale: 1.8, hp: 130, spdBase: 3.0, spdVar: 0, dmg: 17,
+    atkRange: 3.4, hitRange: 3.8, atkTs: 0.9, kbMul: 0.08, shadowR: 1.7,
+    atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
+    dropRate: 0, tint: 0xff5050,
   },
 };
 
@@ -1142,6 +1239,12 @@ function spawnEnemy(kindName, fx, fz) {
     }
   });
   addOutline(root, mats);
+  if (kind.tint) {
+    const tc = new THREE.Color(kind.tint);
+    for (const m of mats) {
+      if (m.color && m.name !== 'Glow') m.color.lerp(tc, 0.4);
+    }
+  }
   root.scale.setScalar(kind.scale);
   root.position.set(x, 0, z);
   scene.add(root);
@@ -1168,9 +1271,9 @@ function killEnemy(e) {
   play(e.rig, 'Death_A', { once: true, ts: 1.3 });
   kills++;
   spawnSpark(new THREE.Vector3(e.x, 1.0, e.z), e.kindName === 'boss' ? 4 : 2.2, 0xa04fff);
-  if (!ZONES[level.zi].boss || e.kindName === 'boss') level.zoneKills++;
+  if (!ZONES[level.zi].boss || e.kindName.startsWith('boss')) level.zoneKills++;
   if (Math.random() < e.kind.dropRate) spawnDrop(e.x, e.z);
-  if (e.kindName === 'boss') onBossDown();
+  if (e.kindName.startsWith('boss')) onBossDown();
 }
 
 function updateEnemies(dt) {
@@ -1188,7 +1291,7 @@ function updateEnemies(dt) {
     const dx = p.x - e.x, dz = p.z - e.z;
     const d = Math.hypot(dx, dz) || 1;
     const targetYaw = Math.atan2(dx, dz);
-    const isBoss = e.kindName === 'boss';
+    const isBoss = e.kindName.startsWith('boss');
 
     if (e.st === 'spawn') {
       e.t -= dt;
@@ -1202,7 +1305,7 @@ function updateEnemies(dt) {
       e.atkCd -= dt;
       if (isBoss) {
         e.aoeCd -= dt; e.summonCd -= dt;
-        if (e.summonCd <= 0 && enemies.filter(x => x.kindName === 'minion' && x.st !== 'dead').length < 6) {
+        if (e.summonCd <= 0 && enemies.filter(x => (x.kindName === 'minion' || x.kindName === 'runner') && x.st !== 'dead').length < 6) {
           e.st = 'cast'; e.castKind = 'summon'; e.castT = 0;
           e.castDur = clipDur(e.rig, 'Spellcast_Summon', 1.1);
           play(e.rig, 'Spellcast_Summon', { once: true, ts: 1.1 });
@@ -1317,13 +1420,17 @@ function startZone(zi) {
   if (zone.boss) {
     hud.bosswrap.style.display = 'block';
     S.roar();
-    level.boss = spawnEnemy('boss', 0, zone.enterZ - 22);
+    level.boss = spawnEnemy(zone.boss2 ? 'boss2' : 'boss', 0, zone.enterZ - 22);
     for (let i = 0; i < 3; i++) spawnEnemy('minion');
+    showDialog(zone.boss2 ? STORY.s2boss : STORY.s1boss);
   } else {
     const elites = zone.elites || 0;
     for (let i = 0; i < elites; i++) { spawnEnemy('elite'); level.spawned++; }
     const first = Math.min(zone.cap - elites, zone.need - elites, 6);
-    for (let i = 0; i < first; i++) { spawnEnemy('minion'); level.spawned++; }
+    for (let i = 0; i < first; i++) {
+      spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
+      level.spawned++;
+    }
   }
 }
 
@@ -1338,7 +1445,8 @@ function updateLevel(dt) {
       hud.objective.textContent = `肅清區域 ${Math.min(level.zoneKills, zone.need)}／${zone.need}`;
       hud.objective.classList.remove('go');
       if (level.spawned < zone.need && alive < zone.cap && Math.random() < 0.3) {
-        spawnEnemy('minion'); level.spawned++;
+        spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
+        level.spawned++;
       }
       if (level.zoneKills >= zone.need && alive === 0) {
         level.phase = 'advance';
@@ -1376,7 +1484,7 @@ function onBossDown() {
   runTime = (performance.now() - runStartT) / 1000;
   hud.bosswrap.style.display = 'none';
   for (const e of enemies) {
-    if (e.st !== 'dead' && e.kindName !== 'boss') {
+    if (e.st !== 'dead' && !e.kindName.startsWith('boss')) {
       e.st = 'dead'; e.deadT = 0;
       play(e.rig, 'Death_A', { once: true, ts: 1.3 });
     }
@@ -1384,7 +1492,7 @@ function onBossDown() {
   spawnShockwave(player.x, player.z, { maxR: 14, dur: 0.7 });
   shakeT = 0.4; shakeAmp = 0.5;
   if (player.rig) play(player.rig, 'win', { once: true, ts: 1 });
-  setTimeout(() => {
+  const showWin = () => {
     const m = Math.floor(runTime / 60), s = Math.round(runTime % 60);
     let score = 0;
     if (player.hp >= 50) score++;
@@ -1392,12 +1500,33 @@ function onBossDown() {
     if (maxCombo >= 35) score++;
     const grade = score >= 3 ? 'S' : score === 2 ? 'A' : score === 1 ? 'B' : 'C';
     hud.grade.textContent = grade;
+    const isLast = stageIdx >= STAGES.length - 1;
+    document.getElementById('winTitle').textContent = isLast ? '魂門守住了' : '關卡突破！';
+    document.getElementById('nextBtn').style.display = isLast ? 'none' : '';
     hud.winStats.textContent = `通關時間 ${m}:${String(s).padStart(2, '0')} · 擊殺 ${kills} · 最大連段 ${maxCombo} · 剩餘 HP ${Math.round(player.hp)}`;
     hud.win.classList.remove('hidden');
+  };
+  setTimeout(() => {
+    if (stageIdx >= STAGES.length - 1) showDialog(STORY.ending, showWin);
+    else showWin();
   }, 1400);
 }
 
 // ---------- 戰鬥 ----------
+function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
+  e.hp -= dmg;
+  e.flash = 0.13;
+  e.vx += ux * kb * e.kind.kbMul;
+  e.vz += uz * kb * e.kind.kbMul;
+  spawnSpark(new THREE.Vector3(e.x, 1.2, e.z), sparkScale);
+  combo++; comboTimer = 2.2;
+  if (combo > maxCombo) maxCombo = combo;
+  if (e.hp <= 0) killEnemy(e);
+  else if (e.st !== 'attack' && e.st !== 'cast' && (e.kindName === 'minion' || e.kindName === 'runner')) {
+    e.st = 'hit'; e.hitT = 0.3;
+    play(e.rig, 'Hit_A', { once: true, ts: 1.6 });
+  }
+}
 function meleeSweep(a) {
   const p = player;
   const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw);
@@ -1412,19 +1541,8 @@ function meleeSweep(a) {
       if (d > 1.0 && dot < Math.cos(a.ang / 2)) continue;
     }
     hits++;
-    e.hp -= a.dmg;
-    e.flash = 0.13;
     const kd = d || 1;
-    e.vx += (dx / kd) * a.kb * e.kind.kbMul;
-    e.vz += (dz / kd) * a.kb * e.kind.kbMul;
-    spawnSpark(new THREE.Vector3(e.x, 1.2, e.z), 1.2 + a.dmg * 0.25);
-    combo++; comboTimer = 2.2;
-    if (combo > maxCombo) maxCombo = combo;
-    if (e.hp <= 0) killEnemy(e);
-    else if (e.st !== 'attack' && e.st !== 'cast' && e.kindName === 'minion') {
-      e.st = 'hit'; e.hitT = 0.3;
-      play(e.rig, 'Hit_A', { once: true, ts: 1.6 });
-    }
+    hitEnemy(e, a.dmg, a.kb, dx / kd, dz / kd, 1.2 + a.dmg * 0.25);
   }
   if (hits > 0) {
     S.hit(hits, !!a.shake);
@@ -1434,6 +1552,12 @@ function meleeSweep(a) {
   return hits;
 }
 function applyPlayerHit(a) {
+  if (a.bolt) {
+    if (AU.ctx) { const t = AU.ctx.currentTime; tone('sawtooth', a.bolt.size > 1.2 ? 500 : 780, t, 0.14, 0.14, AU.sfx, 190); }
+    spawnBolt(a.bolt);
+    if (a.shake) { shakeT = 0.12; shakeAmp = 0.2; }
+    return 1;
+  }
   S.slash();
   const hits = meleeSweep(a);
   spawnSlash(player.x, player.z, player.yaw, {
@@ -1539,9 +1663,10 @@ function updatePlayer(dt) {
     if (heavyPressed) { p.queuedHeavy = true; heavyPressed = false; }
     if (dodgePressed && p.didHit) { dodgePressed = false; startDodge(mx, mz, ml); }
     else if (p.atkT >= p.atkDur * 0.58 && p.queuedHeavy) {
-      startAttack(p.atkStage >= 1 ? HEAVY_FINISH : HEAVY_SOLO, -1, mx, mz, ml);
-    } else if (p.atkT >= p.atkDur * 0.58 && p.queuedLight && p.atkStage >= 0 && p.atkStage < 3) {
-      startAttack(LIGHT[p.atkStage + 1], p.atkStage + 1, mx, mz, ml);
+      startAttack(weapon === 'melee' ? (p.atkStage >= 1 ? HEAVY_FINISH : HEAVY_SOLO) : RHEAVY, -1, mx, mz, ml);
+    } else if (p.atkT >= p.atkDur * 0.58 && p.queuedLight && p.atkStage >= 0) {
+      const lt = curLight();
+      startAttack(lt[(p.atkStage + 1) % lt.length], (p.atkStage + 1) % lt.length, mx, mz, ml);
     } else if (p.atkT >= p.atkDur * 0.92) {
       p.st = 'idle';
       play(p.rig, ml > 0 ? 'run' : 'idle', { ts: ml > 0 ? 1.15 : 1 });
@@ -1553,8 +1678,8 @@ function updatePlayer(dt) {
       p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 12);
       if (p.st !== 'run') { p.st = 'run'; play(p.rig, 'run', { ts: 1.15 }); }
     } else if (p.st !== 'idle') { p.st = 'idle'; play(p.rig, 'idle'); }
-    if (atkPressed) { atkPressed = false; startAttack(LIGHT[0], 0, mx, mz, ml); }
-    else if (heavyPressed) { heavyPressed = false; startAttack(HEAVY_SOLO, -1, mx, mz, ml); }
+    if (atkPressed) { atkPressed = false; startAttack(curLight()[0], 0, mx, mz, ml); }
+    else if (heavyPressed) { heavyPressed = false; startAttack(weapon === 'melee' ? HEAVY_SOLO : RHEAVY, -1, mx, mz, ml); }
     else if (jumpPressed) {
       jumpPressed = false;
       p.st = 'jump'; p.vy = JUMP_V;
@@ -1638,6 +1763,7 @@ function updateFx(dt) {
     m.scale.set(r, r, 1);
     m.material.opacity = 0.9 * (1 - k);
   }
+  updateBolts(dt);
   for (const dr of drops) {
     dr.userData.t += dt;
     dr.position.y = 0.8 + Math.sin(dr.userData.t * 3) * 0.15;
@@ -1714,23 +1840,86 @@ function updateHUD() {
   }
 }
 
-// ---------- 流程 ----------
-function start() {
-  initAudio();
-  hud.title.classList.add('hidden');
-  state = 'play';
-  runStartT = performance.now();
-  startZone(0);
+// ---------- 劇情對話 ----------
+const dlg = { queue: [], active: false, onDone: null };
+const dlgBox = document.getElementById('dialog');
+function showDialog(lines, onDone) {
+  dlg.queue = [...lines];
+  dlg.onDone = onDone || null;
+  dlg.active = true;
+  nextDialog(true);
 }
-function restart() {
-  initAudio();
-  hud.dead.classList.add('hidden');
-  hud.win.classList.add('hidden');
-  hud.bosswrap.style.display = 'none';
+function nextDialog(first = false) {
+  if (!first && !dlg.active) return;
+  const line = dlg.queue.shift();
+  if (!line) {
+    dlg.active = false;
+    dlgBox.style.display = 'none';
+    const cb = dlg.onDone; dlg.onDone = null;
+    if (cb) cb();
+    return;
+  }
+  const [who, text] = line;
+  const nameEl = document.getElementById('dlgName');
+  nameEl.textContent = who;
+  nameEl.classList.toggle('enemy', who !== 'RUMI');
+  document.getElementById('dlgText').textContent = text;
+  dlgBox.style.display = 'block';
+  if (AU.ctx) tone('triangle', midi(81), AU.ctx.currentTime, 0.06, 0.08, AU.sfx);
+}
+dlgBox.addEventListener('pointerdown', e => { e.stopPropagation(); nextDialog(); });
+const STORY = {
+  s1open: [
+    ['RUMI', '魂門出現裂縫了……整條街都是陰差的氣味。'],
+    ['RUMI', '開工吧。今晚的舞台——首爾夜市大街。'],
+  ],
+  s1boss: [
+    ['陰差隊長', '渺小的獵魔士……魂門將為吾等而開！'],
+    ['RUMI', '守門是我的工作。你，回地府重新排隊。'],
+  ],
+  s2open: [
+    ['RUMI', '血月……裂縫比想像的還深，陰差傾巢而出了。'],
+    ['RUMI', 'Mira、Zoey，抱歉——這條街我先清完。'],
+  ],
+  s2boss: [
+    ['陰差大隊長', '吾乃陰差大隊長！汝之魂，今夜歸吾！'],
+    ['RUMI', '……來取啊。'],
+  ],
+  ending: [
+    ['RUMI', '魂門，守住了。'],
+    ['RUMI', '但裂縫的另一端……還有更深的東西在看著我們。'],
+    ['RUMI', '下次，三個人一起來。'],
+  ],
+};
+
+// ---------- 流程 ----------
+function applyStageTint(i) {
+  if (i === 1) {
+    scene.fog.color.set(0x2a0f1e);
+    hemi.color.set(0xff9a9a); hemi.groundColor.set(0x301020);
+    sun.color.set(0xffb0a8);
+    if (skyMat) skyMat.color.set(0xffab9e);
+    honmoon.children[0].material.color.set(0xff3050);
+    honmoon.children[1].material.color.set(0xffa040);
+  } else {
+    scene.fog.color.set(0x140f28);
+    hemi.color.set(0x9a8aff); hemi.groundColor.set(0x201238);
+    sun.color.set(0xbfcaff);
+    if (skyMat) skyMat.color.set(0xffffff);
+    honmoon.children[0].material.color.set(0xa04fff);
+    honmoon.children[1].material.color.set(0xff4fa3);
+  }
+}
+function loadStage(i) {
+  stageIdx = i;
+  ZONES = STAGES[i].zones;
+  applyStageTint(i);
   for (const e of enemies) { scene.remove(e.root); scene.remove(e.shadow); e.rig.mixer.stopAllAction(); }
   enemies.length = 0;
   for (const dr of drops) scene.remove(dr);
   drops.length = 0;
+  for (const b of bolts) scene.remove(b.spr);
+  bolts.length = 0;
   for (const b of barriers) {
     b.open = false;
     if (b.wall) { b.wall.visible = true; b.wall.material.opacity = 0.3; }
@@ -1738,17 +1927,34 @@ function restart() {
   const p = player;
   p.x = 0; p.y = 0; p.z = 0; p.vy = 0; p.yaw = Math.PI;
   p.hp = p.hpMax; p.invuln = 0; p.st = 'idle';
-  play(p.rig, 'idle', { fade: 0 });
-  kills = 0; combo = 0; maxCombo = 0;
+  if (p.rig) play(p.rig, 'idle', { fade: 0 });
   level.boss = null;
+  hud.bosswrap.style.display = 'none';
   state = 'play';
   runStartT = performance.now();
+  showToast(STAGES[i].name);
   startZone(0);
+  showDialog(i === 0 ? STORY.s1open : STORY.s2open);
+}
+function start() {
+  initAudio();
+  hud.title.classList.add('hidden');
+  kills = 0; combo = 0; maxCombo = 0;
+  loadStage(0);
+}
+function restart() {
+  initAudio();
+  hud.dead.classList.add('hidden');
+  hud.win.classList.add('hidden');
+  kills = 0; combo = 0; maxCombo = 0;
+  loadStage(stageIdx);
 }
 
 // 開發用 debug hook
-window.__dbg = () => ({ state, kills, combo, level: { zi: level.zi, phase: level.phase, zoneKills: level.zoneKills, spawned: level.spawned, bossHp: level.boss?.hp }, player, enemies: enemies.length, alive: enemies.filter(e => e.st !== 'dead').length });
+window.__dbg = () => ({ state, stageIdx, weapon, kills, combo, level: { zi: level.zi, phase: level.phase, zoneKills: level.zoneKills, spawned: level.spawned, bossHp: level.boss?.hp }, player, enemies: enemies.length, alive: enemies.filter(e => e.st !== 'dead').length });
 window.__lvl = level;
+window.__stage = loadStage;
+window.__switch = switchWeapon;
 window.__E = enemies;
 window.__P = player;
 window.__warp = zi => {
@@ -1788,7 +1994,9 @@ function loop() {
   let dt = raw;
   if (hitStopT > 0) { hitStopT -= raw; dt = raw * 0.06; }
 
-  if (state === 'play' || state === 'dead' || state === 'win') {
+  if (dlg.active && state === 'play') {
+    if (player.root) player.rig.mixer.update(raw);
+  } else if (state === 'play' || state === 'dead' || state === 'win') {
     updatePlayer(dt);
     updateEnemies(dt);
     if (state === 'play') updateLevel(dt);
