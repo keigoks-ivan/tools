@@ -258,6 +258,43 @@ const OBSTACLES = [];
     if (ok(gx, gz, 13)) OBSTACLES.push({ x: gx, z: gz, hx: 5.5, hz: 5.5 });
   }
 })();
+const blockersReg = OBSTACLES.map(() => ({ mats: [], cur: 1, target: 1, applied: 1 }));
+function segHitsAABB(x0, z0, x1, z1, minx, minz, maxx, maxz) {
+  const dx = x1 - x0, dz = z1 - z0;
+  let t0 = 0, t1 = 1;
+  if (Math.abs(dx) < 1e-6) { if (x0 < minx || x0 > maxx) return false; }
+  else {
+    let ta = (minx - x0) / dx, tb = (maxx - x0) / dx;
+    if (ta > tb) { const t = ta; ta = tb; tb = t; }
+    t0 = Math.max(t0, ta); t1 = Math.min(t1, tb);
+    if (t0 > t1) return false;
+  }
+  if (Math.abs(dz) < 1e-6) { if (z0 < minz || z0 > maxz) return false; }
+  else {
+    let ta = (minz - z0) / dz, tb = (maxz - z0) / dz;
+    if (ta > tb) { const t = ta; ta = tb; tb = t; }
+    t0 = Math.max(t0, ta); t1 = Math.min(t1, tb);
+    if (t0 > t1) return false;
+  }
+  return true;
+}
+function updateOcclusion() {
+  const cx = camera.position.x, cz = camera.position.z;
+  for (let i = 0; i < OBSTACLES.length; i++) {
+    const b = OBSTACLES[i], reg = blockersReg[i];
+    if (!reg.mats.length) continue;
+    reg.target = segHitsAABB(cx, cz, player.x, player.z, b.x - b.hx - 0.8, b.z - b.hz - 0.8, b.x + b.hx + 0.8, b.z + b.hz + 0.8) ? 0.16 : 1;
+    reg.cur += (reg.target - reg.cur) * 0.22;
+    if (Math.abs(reg.cur - reg.applied) > 0.015) {
+      reg.applied = reg.cur;
+      for (const m of reg.mats) {
+        m.transparent = reg.cur < 0.98;
+        m.opacity = reg.cur;
+        m.depthWrite = reg.cur > 0.6;
+      }
+    }
+  }
+}
 function collideCircle(o, r) {
   o.x = Math.max(-MAP_HALF + 1, Math.min(MAP_HALF - 1, o.x));
   o.z = Math.max(-MAP_HALF + 1, Math.min(MAP_HALF - 1, o.z));
@@ -314,6 +351,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   const paveMat = new THREE.MeshLambertMaterial({ color: 0x2e2a3a });
   let wi = 0;
   for (const b of OBSTACLES) {
+    const blockReg = blockersReg[OBSTACLES.indexOf(b)];
     const plate = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2 + 4, 0.14, b.hz * 2 + 4), paveMat);
     plate.position.set(b.x, 0.07, b.z);
     plate.receiveShadow = true;
@@ -321,6 +359,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     const h = 9 + Math.random() * 8;
     const winMat = new THREE.MeshBasicMaterial({ map: winTexs[wi % 3] });
     ENV.wins.push(winMat);
+    blockReg.mats.push(winMat);
     const body = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2, h, b.hz * 2), winMat);
     body.position.set(b.x, h / 2 + 0.1, b.z);
     body.castShadow = true;
@@ -329,12 +368,14 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     for (const [dx, dz, ry] of [[0, b.hz + 0.06, 0], [0, -b.hz - 0.06, Math.PI], [b.hx + 0.06, 0, Math.PI / 2], [-b.hx - 0.06, 0, -Math.PI / 2]]) {
       const frontMat = new THREE.MeshBasicMaterial({ map: makeStorefrontTex() });
       ENV.fronts.push(frontMat);
+      blockReg.mats.push(frontMat);
       const front = new THREE.Mesh(new THREE.PlaneGeometry(b.hx * 2 - 1.2, 3.1), frontMat);
       front.position.set(b.x + dx, 1.68, b.z + dz);
       front.rotation.y = ry;
       world1.add(front);
       const signMat = new THREE.MeshBasicMaterial({ map: makeSignTex(KR_WORDS[Math.floor(Math.random() * KR_WORDS.length)]) });
       ENV.signs.push(signMat);
+      blockReg.mats.push(signMat);
       const sign = new THREE.Mesh(new THREE.PlaneGeometry(b.hx * 2 - 2, 1.2), signMat);
       sign.position.set(b.x + dx * 1.012, 3.95, b.z + dz * 1.012);
       sign.rotation.y = ry;
@@ -350,6 +391,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
       vDark, vDark, vDark, vDark,
     ];
     ENV.signs.push(vMats[0], vMats[1]);
+    blockReg.mats.push(vMats[0], vMats[1], vDark);
     const v = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.6, 1), vMats);
     v.position.set(b.x + b.hx - 0.4, 5.4, b.z + b.hz + 0.35);
     world1.add(v);
@@ -499,9 +541,11 @@ const w2anim = { flames: [], rocks: [] };
   const rockMat = new THREE.MeshLambertMaterial({ color: 0x171018 });
   const crystalMat = new THREE.MeshBasicMaterial({ color: 0xff2a3a });
   for (const b of OBSTACLES) {
+    const rm = rockMat.clone();
+    blockersReg[OBSTACLES.indexOf(b)].mats.push(rm);
     for (let i = 0; i < 3; i++) {
       const h = 8 + Math.random() * 10;
-      const rock = new THREE.Mesh(new THREE.ConeGeometry(4 + Math.random() * 3, h, 5), rockMat);
+      const rock = new THREE.Mesh(new THREE.ConeGeometry(4 + Math.random() * 3, h, 5), rm);
       rock.position.set(b.x + (Math.random() * 2 - 1) * 5, h / 2 - 0.6, b.z + (Math.random() * 2 - 1) * 5);
       rock.rotation.y = Math.random() * Math.PI;
       rock.castShadow = true;
@@ -625,9 +669,11 @@ const w3anim = { clouds: [], lanterns: [] };
   const capMat = new THREE.MeshBasicMaterial({ color: 0xffd070 });
   const crystalMat3 = new THREE.MeshBasicMaterial({ color: 0x6ae0ff });
   for (const b of OBSTACLES) {
+    const pm = pillarMat3.clone();
+    blockersReg[OBSTACLES.indexOf(b)].mats.push(pm);
     for (const [cx, cz] of [[-b.hx + 1.2, -b.hz + 1.2], [b.hx - 1.2, -b.hz + 1.2], [-b.hx + 1.2, b.hz - 1.2], [b.hx - 1.2, b.hz - 1.2]]) {
       const h = 7 + Math.random() * 3;
-      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, h, 10), pillarMat3);
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, h, 10), pm);
       col.position.set(b.x + cx, h / 2, b.z + cz);
       col.castShadow = true;
       world3.add(col);
@@ -740,9 +786,11 @@ const w4anim = { shards: [] };
   const cyanMat = new THREE.MeshBasicMaterial({ color: 0x30e0ff });
   const magMat = new THREE.MeshBasicMaterial({ color: 0xd040ff });
   for (const b of OBSTACLES) {
+    const dm = darkMat.clone();
+    blockersReg[OBSTACLES.indexOf(b)].mats.push(dm);
     for (let i = 0; i < 3; i++) {
       const h = 9 + Math.random() * 12;
-      const mono = new THREE.Mesh(new THREE.ConeGeometry(3 + Math.random() * 2.5, h, 4), darkMat);
+      const mono = new THREE.Mesh(new THREE.ConeGeometry(3 + Math.random() * 2.5, h, 4), dm);
       mono.position.set(b.x + (Math.random() * 2 - 1) * 5, h / 2, b.z + (Math.random() * 2 - 1) * 5);
       mono.rotation.y = Math.random() * Math.PI;
       mono.castShadow = true;
@@ -2077,6 +2125,13 @@ function updatePlayer(dt) {
   if (ml > 1) { mx /= ml; mz /= ml; ml = 1; }
   else if (ml > 0 && !touchMove.active) { mx /= ml; mz /= ml; ml = 1; }
   if (ml < 0.25) { mx = 0; mz = 0; ml = 0; }
+  if (ml > 0) {
+    // 鏡頭相對移動：W＝畫面前方
+    const cfx = Math.sin(camYaw), cfz = Math.cos(camYaw);
+    const wx = cfx * (-mz) + (-cfz) * mx;
+    const wz = cfz * (-mz) + cfx * mx;
+    mx = wx; mz = wz;
+  }
 
   if (p.st === 'hurt') {
     p.hurtT -= dt;
@@ -2396,13 +2451,20 @@ function updateAmbient(dt) {
   sun.target.updateMatrixWorld();
 }
 
-// ---------- 鏡頭 ----------
-const camTarget = new THREE.Vector3();
+// ---------- 鏡頭（真三式：貼背低角度、隨朝向旋轉） ----------
+let camYaw = Math.PI;
+const camPos = { x: 0, z: 0 };
 function updateCamera(dt) {
   const p = player;
-  camTarget.set(p.x * 0.7, 0, p.z);
-  const want = new THREE.Vector3(p.x * 0.7, 10.5, p.z + 13.2);
-  camera.position.lerp(want, Math.min(1, dt * 5));
+  // 鏡頭緩慢轉到玩家背後（移動中轉快、靜止轉慢）
+  const ease = p.st === 'run' || p.st === 'dodge' ? 2.2 : 0.9;
+  camYaw += angDiff(camYaw, p.yaw) * Math.min(1, dt * ease);
+  const fx = Math.sin(camYaw), fz = Math.cos(camYaw);
+  camPos.x = p.x - fx * 8;
+  camPos.z = p.z - fz * 8;
+  collideCircle(camPos, 0.7);   // 鏡頭不穿進建築
+  const want = new THREE.Vector3(camPos.x, 3.9 + p.y * 0.5, camPos.z);
+  camera.position.lerp(want, Math.min(1, dt * 6));
   let ox = 0, oy = 0;
   if (shakeT > 0) {
     shakeT -= dt;
@@ -2410,7 +2472,7 @@ function updateCamera(dt) {
     oy = (Math.random() * 2 - 1) * shakeAmp;
   }
   camera.position.x += ox; camera.position.y += oy;
-  camera.lookAt(camTarget.x, 1.5, camTarget.z - 4);
+  camera.lookAt(p.x + fx * 3.2, 2.1 + p.y * 0.6, p.z + fz * 3.2);
 }
 
 // ---------- 小地圖（方形戰場） ----------
@@ -2659,6 +2721,7 @@ function loadStage(i) {
   hud.bosswrap.style.display = 'none';
   const p = player;
   p.x = 0; p.y = 0; p.z = 48; p.vy = 0; p.yaw = Math.PI;
+  camYaw = Math.PI;
   // 過關升級：體力上限＋攻擊力成長
   p.hpMax = 100 + i * 30;
   p.hp = p.hpMax;
@@ -2686,6 +2749,7 @@ function restart() {
 // 開發用 debug hook
 window.__dbg = () => ({ state, stageIdx, weapon, musou, kills, combo, objs: (level.objs || []).map(o => o.state), bossPhase: level.bossPhase, bossHp: level.boss?.hp, player, enemies: enemies.length, alive: enemies.filter(e => e.st !== 'dead').length });
 window.__lvl = level;
+window.__occ = updateOcclusion;
 window.__stage = loadStage;
 window.__switch = switchWeapon;
 window.__E = enemies;
@@ -2738,6 +2802,7 @@ function loop() {
   }
   updateAmbient(raw);
   updateCamera(raw);
+  updateOcclusion();
   updateHUD();
   composer.render();
 }
