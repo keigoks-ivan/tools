@@ -1635,6 +1635,16 @@ function initAudio() {
   if (AU.ctx) { AU.ctx.resume(); return; }
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   AU.ctx = ctx;
+  ctx.resume();   // iOS：即使在手勢內建立也可能是 suspended
+  // iOS 響鈴靜音開關會蓋掉 WebAudio：播一個近無聲 <audio> 把音訊 session 切到 playback
+  try {
+    const un = document.createElement('audio');
+    un.setAttribute('playsinline', '');
+    un.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+    un.loop = true;
+    un.volume = 0.01;
+    un.play().catch(() => {});
+  } catch (e) { /* 不支援就算了 */ }
   AU.master = ctx.createGain(); AU.master.gain.value = 0.8; AU.master.connect(ctx.destination);
   AU.music = ctx.createGain(); AU.music.gain.value = 0.42; AU.music.connect(AU.master);
   AU.sfx = ctx.createGain(); AU.sfx.gain.value = 0.9; AU.sfx.connect(AU.master);
@@ -1805,6 +1815,10 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) AU.ctx.suspend();
   else AU.ctx.resume();
 });
+// 行動裝置保險：任何觸碰時若音訊被系統暫停就喚醒
+document.addEventListener('pointerdown', () => {
+  if (AU.ctx && AU.ctx.state !== 'running') AU.ctx.resume();
+}, true);
 
 // ---------- 輸入 ----------
 const keys = new Set();
@@ -2248,6 +2262,20 @@ Promise.all([
   if (zoey) CHARS.zoey.model = prepHeroModel(zoey);
   buildHero(CHARS.rumi);
 
+  // 去Q版：KayKit 模型頭身比修正——動畫的 head.scale 軌道整批縮小
+  // 骷髏頭骨最搶眼縮最多；冒險者有兜帽/頭盔，微縮即可
+  const dechibify = (gltf, k) => {
+    for (const clip of gltf.animations) {
+      for (const tr of clip.tracks) {
+        if (/(^|\.)head\.scale$/.test(tr.name)) {
+          for (let i = 0; i < tr.values.length; i++) tr.values[i] *= k;
+        }
+      }
+    }
+  };
+  dechibify(minion, 0.62);
+  dechibify(warrior, 0.62);
+  for (const g of [barb, knight, rogue]) dechibify(g, 0.78);
   toonify(minion.scene);
   toonify(warrior.scene);
   toonify(barb.scene);
@@ -2365,7 +2393,8 @@ function spawnEnemy(kindName, fx, fz) {
       if (m.color && m.name !== 'Glow') m.color.lerp(sc, 0.16);
     }
   }
-  root.scale.setScalar(kind.scale);
+  // 拉高變瘦：配合縮頭把頭身比從 Q 版拉向寫實
+  root.scale.set(kind.scale * 0.94, kind.scale * 1.15, kind.scale * 0.94);
   root.position.set(x, 0, z);
   scene.add(root);
   const rig = makeRig(root, src.clips, E_ANIMS);
