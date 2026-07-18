@@ -20,34 +20,35 @@ const STAGES = [
   {
     name: '第一關　首爾夜市・魂門裂縫',
     zones: [
-      { name: '夜市街口',  enterZ: 0,    boundZ: -48,  need: 14, cap: 9,  elites: 0 },
-      { name: '夜市主街',  enterZ: -48,  boundZ: -96,  need: 28, cap: 14, elites: 0 },
-      { name: '後巷亂戰',  enterZ: -96,  boundZ: -144, need: 24, cap: 13, elites: 1 },
-      { name: '十字路口',  enterZ: -144, boundZ: -192, need: 20, cap: 11, elites: 3 },
+      { name: '夜市街口',  enterZ: 0,    boundZ: -48,  type: 'kill',    need: 14, cap: 9,  elites: 0 },
+      { name: '夜市主街',  enterZ: -48,  boundZ: -96,  type: 'kill',    need: 28, cap: 14, elites: 0, ambush: true },
+      { name: '後巷據點',  enterZ: -96,  boundZ: -144, type: 'capture', cap: 8,  elites: 0 },
+      { name: '十字路口',  enterZ: -144, boundZ: -192, type: 'officer', officers: 2, cap: 8, fast: 0.3 },
       { name: '魂門裂縫',  enterZ: -192, boundZ: -240, boss: true },
     ],
   },
   {
     name: '第二關　魂界・陰差本營',
     zones: [
-      { name: '魂界裂口',    enterZ: 0,    boundZ: -48,  need: 20, cap: 11, elites: 0, fast: 0.35 },
-      { name: '亡者荒道',    enterZ: -48,  boundZ: -96,  need: 34, cap: 16, elites: 1, fast: 0.5 },
-      { name: '厲鬼峽谷',    enterZ: -96,  boundZ: -144, need: 30, cap: 14, elites: 2, fast: 0.55 },
-      { name: '修羅斷崖',    enterZ: -144, boundZ: -192, need: 26, cap: 12, elites: 4, fast: 0.5 },
-      { name: '魂門核心',    enterZ: -192, boundZ: -240, boss: true, boss2: true },
+      { name: '魂界裂口',  enterZ: 0,    boundZ: -48,  type: 'kill',    need: 20, cap: 11, elites: 0, fast: 0.35 },
+      { name: '亡者祭壇',  enterZ: -48,  boundZ: -96,  type: 'capture', cap: 9,  fast: 0.4 },
+      { name: '厲鬼峽谷',  enterZ: -96,  boundZ: -144, type: 'kill',    need: 32, cap: 15, elites: 2, fast: 0.55, ambush: true },
+      { name: '修羅斷崖',  enterZ: -144, boundZ: -192, type: 'officer', officers: 3, cap: 9, fast: 0.4 },
+      { name: '魂門核心',  enterZ: -192, boundZ: -240, boss: true, boss2: true },
     ],
   },
   {
     name: '第三關　天界・魂門之上',
     zones: [
-      { name: '雲海長廊',  enterZ: 0,    boundZ: -48,  need: 24, cap: 12, elites: 1, fast: 0.4 },
-      { name: '聖域迴廊',  enterZ: -48,  boundZ: -96,  need: 40, cap: 17, elites: 2, fast: 0.5 },
-      { name: '星橋斷面',  enterZ: -96,  boundZ: -144, need: 34, cap: 15, elites: 3, fast: 0.55 },
-      { name: '審判之階',  enterZ: -144, boundZ: -192, need: 30, cap: 13, elites: 5, fast: 0.5 },
+      { name: '雲海據點',  enterZ: 0,    boundZ: -48,  type: 'capture', cap: 9,  fast: 0.4 },
+      { name: '聖域迴廊',  enterZ: -48,  boundZ: -96,  type: 'kill',    need: 38, cap: 17, elites: 2, fast: 0.5, ambush: true },
+      { name: '星橋斷面',  enterZ: -96,  boundZ: -144, type: 'officer', officers: 3, cap: 9, fast: 0.5 },
+      { name: '審判之階',  enterZ: -144, boundZ: -192, type: 'kill',    need: 30, cap: 13, elites: 5, fast: 0.5, ambush: true },
       { name: '魂門之上',  enterZ: -192, boundZ: -240, boss: true, boss3: true },
     ],
   },
 ];
+const OFFICER_NAMES = ['陰差百夫長', '陰差千夫長', '夜叉先鋒', '羅刹遊擊', '牛頭督戰', '馬面斥候'];
 let stageIdx = 0;
 let ZONES = STAGES[0].zones;
 
@@ -792,6 +793,27 @@ const w3anim = { clouds: [], lanterns: [] };
     top.position.set(isle.position.x, isle.position.y + w * 0.45 + 1, isle.position.z);
     world3.add(top);
   }
+})();
+
+// ---------- 據點制壓法陣 ----------
+const capturePoint = (() => {
+  const grp = new THREE.Group();
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(3.7, 4.05, 48),
+    new THREE.MeshBasicMaterial({ color: 0x4fd8ff, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+  );
+  ring.rotation.x = -Math.PI / 2;
+  const disc = new THREE.Mesh(
+    new THREE.CircleGeometry(3.6, 48),
+    new THREE.MeshBasicMaterial({ color: 0x2a90c0, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+  );
+  disc.rotation.x = -Math.PI / 2;
+  disc.position.y = 0.01;
+  grp.add(ring, disc);
+  grp.position.y = 0.08;
+  grp.visible = false;
+  scene.add(grp);
+  return grp;
 })();
 
 // ---------- 魂門巨環（關卡終點） ----------
@@ -1643,6 +1665,32 @@ function spawnEnemy(kindName, fx, fz) {
   return e;
 }
 
+function makeOfficerBar(e, name) {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 56;
+  const tex = new THREE.CanvasTexture(c);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  sp.scale.set(3, 0.66, 1);
+  sp.position.y = 2.5;
+  e.root.add(sp);
+  e.bar = { c, tex, sp, name };
+  drawOfficerBar(e);
+}
+function drawOfficerBar(e) {
+  const g = e.bar.c.getContext('2d');
+  g.clearRect(0, 0, 256, 56);
+  g.fillStyle = 'rgba(10,8,20,0.75)';
+  g.fillRect(28, 0, 200, 30);
+  g.font = '900 22px "Apple SD Gothic Neo","PingFang TC",sans-serif';
+  g.textAlign = 'center';
+  g.fillStyle = '#ffb056';
+  g.fillText(e.bar.name, 128, 23);
+  g.fillStyle = 'rgba(30,10,14,0.85)';
+  g.fillRect(48, 36, 160, 12);
+  g.fillStyle = '#ff3a4a';
+  g.fillRect(50, 38, 156 * Math.max(0, e.hp / e.hpMax), 8);
+  e.bar.tex.needsUpdate = true;
+}
 function killEnemy(e) {
   S.kill();
   if (player.st !== 'musou') musou = Math.min(100, musou + 1.5);
@@ -1651,8 +1699,21 @@ function killEnemy(e) {
   play(e.rig, 'Death_A', { once: true, ts: 1.3 });
   kills++;
   spawnSpark(new THREE.Vector3(e.x, 1.0, e.z), e.kindName === 'boss' ? 4 : 2.2, 0xa04fff);
-  if (!ZONES[level.zi].boss || e.kindName.startsWith('boss')) level.zoneKills++;
+  if (!e.noCount && (!ZONES[level.zi].boss || e.kindName.startsWith('boss'))) level.zoneKills++;
   if (Math.random() < e.kind.dropRate) spawnDrop(e.x, e.z);
+  if (e.officer) {
+    level.officersLeft--;
+    showToast('敵將討破！');
+    S.zone();
+    spawnShockwave(e.x, e.z, { maxR: 12, dur: 0.5, color: 0xffb056 });
+    for (const m of [...enemies]) {
+      if (m.st === 'dead' || m.officer || m.kindName.startsWith('boss')) continue;
+      if ((m.kindName === 'minion' || m.kindName === 'runner') && Math.hypot(m.x - e.x, m.z - e.z) < 14) {
+        m.noCount = true;
+        killEnemy(m);
+      }
+    }
+  }
   if (e.kindName.startsWith('boss')) onBossDown();
 }
 
@@ -1803,6 +1864,24 @@ function startZone(zi) {
     level.boss = spawnEnemy(zone.boss3 ? 'boss3' : zone.boss2 ? 'boss2' : 'boss', 0, zone.enterZ - 22);
     for (let i = 0; i < 3; i++) spawnEnemy('minion');
     showDialog(zone.boss3 ? STORY.s3boss : zone.boss2 ? STORY.s2boss : STORY.s1boss);
+  } else if (zone.type === 'capture') {
+    level.capT = 0;
+    capturePoint.position.x = 0;
+    capturePoint.position.z = (zone.enterZ + zone.boundZ) / 2;
+    capturePoint.visible = true;
+    for (let i = 0; i < 5; i++) spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
+  } else if (zone.type === 'officer') {
+    level.officersLeft = zone.officers;
+    const names = [...OFFICER_NAMES].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < zone.officers; i++) {
+      const ox = (Math.random() * 2 - 1) * 9;
+      const oz = zone.enterZ - 10 - (i + 1) * ((zone.enterZ - zone.boundZ - 20) / (zone.officers + 1));
+      const off = spawnEnemy('elite', ox, oz);
+      off.officer = true;
+      off.hp = off.hpMax = 14;
+      makeOfficerBar(off, names[i % names.length]);
+    }
+    for (let i = 0; i < 4; i++) spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
   } else {
     const elites = zone.elites || 0;
     for (let i = 0; i < elites; i++) { spawnEnemy('elite'); level.spawned++; }
@@ -1812,6 +1891,7 @@ function startZone(zi) {
       level.spawned++;
     }
   }
+  level.ambushDone = false;
 }
 
 function updateLevel(dt) {
@@ -1821,12 +1901,56 @@ function updateLevel(dt) {
     if (zone.boss) {
       hud.objective.textContent = '擊破 陰差隊長';
       if (level.boss) hud.bossfill.style.width = Math.max(0, level.boss.hp / level.boss.hpMax * 100) + '%';
+    } else if (zone.type === 'capture') {
+      const inside = Math.hypot(player.x - capturePoint.position.x, player.z - capturePoint.position.z) < 4 && player.y < 1;
+      const contested = enemies.some(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - capturePoint.position.x, e.z - capturePoint.position.z) < 5);
+      if (inside) level.capT = Math.min(100, level.capT + dt * (contested ? 5 : 14));
+      hud.objective.textContent = inside
+        ? `制壓據點 ${Math.round(level.capT)}%${contested ? '（拮抗中！）' : ''}`
+        : `進入光陣制壓據點 ${Math.round(level.capT)}%`;
+      hud.objective.classList.remove('go');
+      if (alive < zone.cap && Math.random() < 0.3) {
+        spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
+      }
+      if (level.capT >= 100) {
+        capturePoint.visible = false;
+        for (const m of [...enemies]) {
+          if (m.st !== 'dead') { m.noCount = true; killEnemy(m); }
+        }
+        level.phase = 'advance';
+        barriers[level.zi].open = true;
+        S.zone();
+        showToast('據點制壓！');
+      }
+    } else if (zone.type === 'officer') {
+      hud.objective.textContent = `討伐敵將 ${zone.officers - level.officersLeft}／${zone.officers}`;
+      hud.objective.classList.remove('go');
+      if (alive < zone.cap && Math.random() < 0.3) {
+        spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
+      }
+      if (level.officersLeft <= 0) {
+        level.phase = 'advance';
+        barriers[level.zi].open = true;
+        S.zone();
+        showToast('敵將全滅！');
+      }
     } else {
       hud.objective.textContent = `肅清區域 ${Math.min(level.zoneKills, zone.need)}／${zone.need}`;
       hud.objective.classList.remove('go');
       if (level.spawned < zone.need && alive < zone.cap && Math.random() < 0.45) {
         spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
         level.spawned++;
+      }
+      if (zone.ambush && !level.ambushDone && level.zoneKills >= zone.need * 0.5) {
+        level.ambushDone = true;
+        showToast('敵　襲　！');
+        S.roar();
+        for (let i = 0; i < 5; i++) {
+          const e = spawnEnemy(Math.random() < 0.5 ? 'runner' : 'minion',
+            (Math.random() * 2 - 1) * 10,
+            Math.min(1.5, player.z + 5 + Math.random() * 5));
+          e.noCount = true;
+        }
       }
       if (level.zoneKills >= zone.need && alive === 0) {
         level.phase = 'advance';
@@ -1896,6 +2020,7 @@ function onBossDown() {
 function comboMul() { return 1 + Math.min(combo, 75) * 0.008; }
 function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
   e.hp -= dmg * comboMul();
+  if (e.bar) drawOfficerBar(e);
   e.flash = 0.13;
   e.vx += ux * kb * e.kind.kbMul;
   e.vz += uz * kb * e.kind.kbMul;
@@ -2302,6 +2427,12 @@ function updateAmbient(dt) {
     const v = Math.sin(t * 7) * Math.sin(t * 13 + 1.7);
     f.mat.color.setScalar(v > 0.9 ? 0.3 : 1);
   }
+  if (capturePoint.visible) {
+    const k = 1 + Math.sin(worldT * 3) * 0.06;
+    capturePoint.scale.set(k, 1, k);
+    capturePoint.rotation.y += dt * 0.8;
+    capturePoint.children[0].material.opacity = 0.6 + Math.sin(worldT * 5) * 0.25;
+  }
   // 陰影相機跟著玩家
   sun.position.set(player.x + 8, 18, player.z + 6);
   sun.target.position.set(player.x, 0, player.z);
@@ -2325,12 +2456,59 @@ function updateCamera(dt) {
   camera.lookAt(camTarget.x, 1.5, camTarget.z - 4);
 }
 
+// ---------- 小地圖 ----------
+const mmCanvas = document.getElementById('minimap');
+const mmCtx = mmCanvas.getContext('2d');
+function drawMinimap() {
+  const W2 = mmCanvas.width, H2 = mmCanvas.height;
+  const zToY = z => 6 + (-z / 240) * (H2 - 12);
+  const xToX = x => W2 / 2 + (x / 13.5) * (W2 / 2 - 8);
+  mmCtx.clearRect(0, 0, W2, H2);
+  mmCtx.fillStyle = 'rgba(60,50,110,0.35)';
+  mmCtx.fillRect(8, 4, W2 - 16, H2 - 8);
+  for (let zi = 0; zi < ZONES.length; zi++) {
+    const b = barriers[zi];
+    const y = zToY(ZONES[zi].boundZ);
+    mmCtx.strokeStyle = b && b.open ? 'rgba(80,255,160,0.9)' : (b && b.wall ? 'rgba(190,120,255,0.9)' : 'rgba(120,120,160,0.5)');
+    mmCtx.lineWidth = 2;
+    mmCtx.beginPath(); mmCtx.moveTo(8, y); mmCtx.lineTo(W2 - 8, y); mmCtx.stroke();
+  }
+  if (capturePoint.visible) {
+    mmCtx.strokeStyle = '#4fd8ff';
+    mmCtx.lineWidth = 1.5;
+    mmCtx.beginPath();
+    mmCtx.arc(xToX(capturePoint.position.x), zToY(capturePoint.position.z), 6, 0, 6.28);
+    mmCtx.stroke();
+  }
+  for (const e of enemies) {
+    if (e.st === 'dead') continue;
+    if (e.kindName.startsWith('boss')) {
+      mmCtx.fillStyle = '#ff2050';
+      mmCtx.fillRect(xToX(e.x) - 3, zToY(e.z) - 3, 6, 6);
+    } else if (e.officer) {
+      mmCtx.fillStyle = '#ffb056';
+      mmCtx.fillRect(xToX(e.x) - 2, zToY(e.z) - 2, 5, 5);
+    } else {
+      mmCtx.fillStyle = 'rgba(255,90,90,0.9)';
+      mmCtx.fillRect(xToX(e.x) - 1, zToY(e.z) - 1, 2.5, 2.5);
+    }
+  }
+  mmCtx.fillStyle = '#ffffff';
+  mmCtx.save();
+  mmCtx.translate(xToX(player.x), zToY(player.z));
+  mmCtx.beginPath();
+  mmCtx.moveTo(0, -4.5); mmCtx.lineTo(3.5, 3.5); mmCtx.lineTo(-3.5, 3.5);
+  mmCtx.closePath(); mmCtx.fill();
+  mmCtx.restore();
+}
+
 // ---------- HUD ----------
 let lastCombo = -1, lastKills = -1, lastHp = -1, lastMusou = -1;
 const musouBarEl = document.getElementById('musoubar');
 const musouFillEl = document.getElementById('musoufill');
 const btnUEl = document.getElementById('btnU');
 function updateHUD() {
+  if (state === 'play') drawMinimap();
   if (player.hp !== lastHp) { lastHp = player.hp; hud.hp.style.width = (player.hp / player.hpMax * 100) + '%'; }
   if (musou !== lastMusou) {
     lastMusou = musou;
@@ -2491,6 +2669,8 @@ function loadStage(i) {
   p.hp = p.hpMax; p.invuln = 0; p.st = 'idle';
   if (p.rig) play(p.rig, 'idle', { fade: 0 });
   level.boss = null;
+  level.capT = 0; level.officersLeft = 0; level.ambushDone = false;
+  capturePoint.visible = false;
   musou = 0;
   if (AU.ctx) { AU.nextBar = AU.ctx.currentTime + 0.15; AU.bar = 0; }
   hud.bosswrap.style.display = 'none';
