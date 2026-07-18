@@ -1353,13 +1353,13 @@ const level = { zi: 0, phase: 'fight', zoneKills: 0, spawned: 0, boss: null };
 
 // 攻擊表（Rumi／Knight，1H 劍）
 const LIGHT = [
-  { clip: 'slash1', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: 1 },
-  { clip: 'slash2', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: -1 },
-  { clip: 'slash3', ts: 1.8,  range: 3.0, ang: 2.2, dmg: 1, kb: 9,  hitAt: 0.38, dir: 1 },
-  { clip: 'slash4', ts: 1.7,  range: 3.4, ang: 2.4, dmg: 2, kb: 12, hitAt: 0.40, dir: 1, shake: 0.3 },
+  { clip: 'slash1', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: 1,  mul: 1 },
+  { clip: 'slash2', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: -1, mul: 1.1 },
+  { clip: 'slash3', ts: 1.8,  range: 3.0, ang: 2.2, dmg: 1, kb: 9,  hitAt: 0.38, dir: 1,  mul: 1.25 },
+  { clip: 'slash4', ts: 1.7,  range: 3.4, ang: 2.4, dmg: 2, kb: 12, hitAt: 0.40, dir: 1,  mul: 1.45, shake: 0.3 },
 ];
-const HEAVY_SOLO   = { clip: 'heavy',    ts: 1.55, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1,  shake: 0.45 };
-const HEAVY_FINISH = { clip: 'heavyfin', ts: 1.55, range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.46, dir: 1,  shake: 0.55 };
+const HEAVY_SOLO   = { clip: 'heavy',    ts: 1.55, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1,  shake: 0.45, mul: 1 };
+const HEAVY_FINISH = { clip: 'heavyfin', ts: 1.55, range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.46, dir: 1,  shake: 0.55, mul: 1.5 };
 const PLUNGE       = { range: 4.0, ang: 6.3, dmg: 2, kb: 14, shake: 0.6 };
 // 魂力彈（遠程）：揮劍射出劍氣
 const RLIGHT = [
@@ -1645,7 +1645,7 @@ function spawnEnemy(kindName, fx, fz) {
 
 function killEnemy(e) {
   S.kill();
-  musou = Math.min(100, musou + 2);
+  if (player.st !== 'musou') musou = Math.min(100, musou + 1.5);
   spawnSpark(new THREE.Vector3(e.x, 1.6, e.z), 1.3, 0xb07aff, { dur: 0.7, rise: 2.6 });
   e.st = 'dead'; e.deadT = 0;
   play(e.rig, 'Death_A', { once: true, ts: 1.3 });
@@ -1893,13 +1893,14 @@ function onBossDown() {
 }
 
 // ---------- 戰鬥 ----------
+function comboMul() { return 1 + Math.min(combo, 75) * 0.008; }
 function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
-  e.hp -= dmg;
+  e.hp -= dmg * comboMul();
   e.flash = 0.13;
   e.vx += ux * kb * e.kind.kbMul;
   e.vz += uz * kb * e.kind.kbMul;
   spawnSpark(new THREE.Vector3(e.x, 1.2, e.z), sparkScale * 1.25);
-  musou = Math.min(100, musou + 1);
+  if (player.st !== 'musou') musou = Math.min(100, musou + 0.5);
   if (dmg >= 2 || Math.random() < 0.4) spawnShockwave(e.x, e.z, { maxR: 1.3, dur: 0.16, color: 0xffffff });
   combo++; comboTimer = 2.2;
   if (combo > maxCombo) maxCombo = combo;
@@ -1929,7 +1930,7 @@ function meleeSweep(a) {
     }
     hits++;
     const kd = d || 1;
-    hitEnemy(e, a.dmg, a.kb, dx / kd, dz / kd, 1.2 + a.dmg * 0.25);
+    hitEnemy(e, a.dmg * (a.mul || 1), a.kb, dx / kd, dz / kd, 1.2 + a.dmg * 0.25);
   }
   if (hits > 0) {
     S.hit(hits, !!a.shake);
@@ -1956,7 +1957,7 @@ function applyPlayerHit(a) {
 }
 function damagePlayer(dmg, from) {
   S.hurt();
-  musou = Math.min(100, musou + 6);
+  musou = Math.min(100, musou + 5);
   const p = player;
   p.hp -= dmg;
   p.invuln = 0.8;
@@ -2341,7 +2342,8 @@ function updateHUD() {
   if (combo !== lastCombo) {
     lastCombo = combo;
     if (combo >= 3) {
-      hud.combo.textContent = `${combo} HITS`;
+      const pct = Math.round((comboMul() - 1) * 100);
+      hud.combo.textContent = `${combo} HITS${pct > 0 ? ` ⚡+${pct}%` : ''}`;
       hud.combo.style.opacity = 1;
       hud.combo.classList.toggle('hot', combo >= 30);
     } else hud.combo.style.opacity = 0;
