@@ -44,10 +44,43 @@
   #grade{font-size:120px;font-weight:900;margin:6px 0 2px;color:#ffd84f;text-shadow:0 0 40px #ff9d2e}
   .hidden{display:none!important}
   #loadtext{margin-top:18px;color:#a08cc0;font-size:14px}
+  /* ---------- 觸控 UI ---------- */
+  #touch{position:fixed;inset:0;pointer-events:none;display:none;z-index:5}
+  body.is-touch #touch{display:block}
+  #stickZone{position:absolute;left:0;bottom:0;width:45%;height:60%;pointer-events:auto;touch-action:none}
+  #stickBase{position:absolute;width:110px;height:110px;border-radius:50%;border:2px solid rgba(200,160,255,.5);
+    background:rgba(120,80,200,.12);display:none;transform:translate(-50%,-50%)}
+  #stickKnob{position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(220,180,255,.55);
+    box-shadow:0 0 14px rgba(160,79,255,.8);display:none;transform:translate(-50%,-50%)}
+  .tbtn{position:absolute;pointer-events:auto;touch-action:none;width:64px;height:64px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;user-select:none;-webkit-user-select:none;
+    background:rgba(120,80,200,.28);border:2px solid rgba(220,180,255,.55);text-shadow:0 0 8px #a04fff}
+  .tbtn:active{background:rgba(255,79,163,.5)}
+  #btnA{right:26px;bottom:86px;width:78px;height:78px;font-size:20px}
+  #btnB{right:118px;bottom:40px}
+  #btnJ{right:36px;bottom:188px}
+  #btnR{right:140px;bottom:132px}
+  #mute{position:fixed;top:64px;right:26px;z-index:6;pointer-events:auto;cursor:pointer;font-size:20px;
+    background:rgba(10,10,30,.5);border:1px solid rgba(160,79,255,.4);border-radius:50%;width:40px;height:40px;color:#fff}
+  #rotate{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;
+    background:rgba(5,5,15,.92);color:#e8d8ff;font-size:22px;text-align:center;line-height:1.8}
+  @media (orientation: portrait){ body.is-touch #rotate{display:flex} }
 </style>
 </head>
 <body>
 <div id="app"></div>
+<button id="mute">🔊</button>
+<div id="rotate">📱 請把手機轉成橫向<br>體驗最佳戰鬥視野</div>
+<div id="touch">
+  <div id="stickZone">
+    <div id="stickBase"></div>
+    <div id="stickKnob"></div>
+  </div>
+  <div class="tbtn" id="btnA">攻</div>
+  <div class="tbtn" id="btnB">重</div>
+  <div class="tbtn" id="btnJ">跳</div>
+  <div class="tbtn" id="btnR">滾</div>
+</div>
 <div id="hud">
   <div id="hpwrap">
     <div id="hpname">RUMI</div>
@@ -90,6 +123,6 @@
   }
 }
 </script>
-<script type="module" src="main.js?v=20260718b"></script>
+<script type="module" src="main.js?v=20260718c"></script>
 </body>
 </html>
