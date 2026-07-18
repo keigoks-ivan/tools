@@ -19,42 +19,42 @@ const STAGES = [
   {
     name: '第一關　首爾夜市・魂門裂縫', bossKind: 'boss', bossLabel: '陰差隊長',
     objectives: [
-      { name: '南廣場殲滅戰', type: 'kill',    need: 22, pos: [-46, 30], ambush: true },
-      { name: '東市場據點',   type: 'capture', pos: [46, 30] },
-      { name: '西巷敵將',     type: 'officer', officers: 2, pos: [-46, -34] },
-      { name: '北口大掃蕩',   type: 'kill',    need: 26, pos: [46, -34], fast: 0.3, ambush: true },
+      { name: '南廣場殲滅戰', type: 'kill',    need: 22, pos: [-36, 24], ambush: true },
+      { name: '東市場據點',   type: 'capture', pos: [36, 24] },
+      { name: '西巷敵將',     type: 'officer', officers: 2, pos: [-36, -28] },
+      { name: '北口大掃蕩',   type: 'kill',    need: 26, pos: [36, -28], fast: 0.3, ambush: true },
     ],
-    bossPos: [0, -60],
+    bossPos: [0, -46],
   },
   {
     name: '第二關　魂界・陰差本營', bossKind: 'boss2', bossLabel: '陰差大隊長',
     objectives: [
-      { name: '裂口殲滅戰',   type: 'kill',    need: 24, pos: [-46, 30], fast: 0.35, ambush: true },
-      { name: '亡者祭壇',     type: 'capture', pos: [46, 30], fast: 0.4 },
-      { name: '厲鬼巢穴',     type: 'kill',    need: 30, pos: [-46, -34], fast: 0.55, ambush: true },
-      { name: '修羅武將團',   type: 'officer', officers: 3, pos: [46, -34], fast: 0.4 },
+      { name: '裂口殲滅戰',   type: 'kill',    need: 24, pos: [-36, 24], fast: 0.35, ambush: true },
+      { name: '亡者祭壇',     type: 'capture', pos: [36, 24], fast: 0.4 },
+      { name: '厲鬼巢穴',     type: 'kill',    need: 30, pos: [-36, -28], fast: 0.55, ambush: true },
+      { name: '修羅武將團',   type: 'officer', officers: 3, pos: [36, -28], fast: 0.4 },
     ],
-    bossPos: [0, -60],
+    bossPos: [0, -46],
   },
   {
     name: '第三關　天界・魂門之上', bossKind: 'boss3', bossLabel: '陰差王',
     objectives: [
-      { name: '雲海據點',     type: 'capture', pos: [-46, 30], fast: 0.4 },
-      { name: '聖域掃蕩',     type: 'kill',    need: 34, pos: [46, 30], fast: 0.5, ambush: true },
-      { name: '星橋敵將',     type: 'officer', officers: 3, pos: [-46, -34], fast: 0.5 },
-      { name: '審判殲滅戰',   type: 'kill',    need: 30, pos: [46, -34], fast: 0.5, ambush: true },
+      { name: '雲海據點',     type: 'capture', pos: [-36, 24], fast: 0.4 },
+      { name: '聖域掃蕩',     type: 'kill',    need: 34, pos: [36, 24], fast: 0.5, ambush: true },
+      { name: '星橋敵將',     type: 'officer', officers: 3, pos: [-36, -28], fast: 0.5 },
+      { name: '審判殲滅戰',   type: 'kill',    need: 30, pos: [36, -28], fast: 0.5, ambush: true },
     ],
-    bossPos: [0, -60],
+    bossPos: [0, -46],
   },
   {
     name: '第四關　虛空・魂門之心', bossKind: 'boss4', bossLabel: '魂門之靈',
     objectives: [
-      { name: '碎星殲滅戰',   type: 'kill',    need: 30, pos: [-46, 30], fast: 0.5, ambush: true },
-      { name: '虛空武將團',   type: 'officer', officers: 3, pos: [46, 30], fast: 0.5 },
-      { name: '星核據點',     type: 'capture', pos: [-46, -34], fast: 0.5 },
-      { name: '深淵大掃蕩',   type: 'kill',    need: 36, pos: [46, -34], fast: 0.6, ambush: true },
+      { name: '碎星殲滅戰',   type: 'kill',    need: 30, pos: [-36, 24], fast: 0.5, ambush: true },
+      { name: '虛空武將團',   type: 'officer', officers: 3, pos: [36, 24], fast: 0.5 },
+      { name: '星核據點',     type: 'capture', pos: [-36, -28], fast: 0.5 },
+      { name: '深淵大掃蕩',   type: 'kill',    need: 36, pos: [36, -28], fast: 0.6, ambush: true },
     ],
-    bossPos: [0, -60],
+    bossPos: [0, -46],
   },
 ];
 const OFFICER_NAMES = ['陰差百夫長', '陰差千夫長', '夜叉先鋒', '羅刹遊擊', '牛頭督戰', '馬面斥候'];
@@ -242,16 +242,20 @@ world3.visible = false;
 world4.visible = false;
 
 // 開放戰場：正方形地圖＋街區障礙（四關共用碰撞佈局）
-const MAP_HALF = 80;
+const MAP_HALF = 62;
 const OBSTACLES = [];
 (function planObstacles() {
-  const cells = [-58, -24, 24, 58];
-  const clear = [[-46, 30], [46, 30], [-46, -34], [46, -34], [0, -60], [0, 64], [0, 0]];
+  const cells = [-45, -18, 18, 45];
+  const clear = [[-36, 24], [36, 24], [-36, -28], [36, -28], [0, -46], [0, 48], [0, 0]];
+  const ok = (gx, gz, rad) => !clear.some(([px, pz]) => Math.hypot(gx - px, gz - pz) < rad);
   for (const gx of cells) {
     for (const gz of cells) {
-      if (clear.some(([px, pz]) => Math.hypot(gx - px, gz - pz) < 19)) continue;
-      OBSTACLES.push({ x: gx, z: gz, hx: 9, hz: 9 });
+      if (ok(gx, gz, 16)) OBSTACLES.push({ x: gx, z: gz, hx: 8, hz: 8 });
     }
+  }
+  // 小街區補密
+  for (const [gx, gz] of [[-12, 40], [12, 40], [-40, 12], [40, -12], [-12, -40], [12, -42], [40, 40], [-40, -40]]) {
+    if (ok(gx, gz, 13)) OBSTACLES.push({ x: gx, z: gz, hx: 5.5, hz: 5.5 });
   }
 })();
 function collideCircle(o, r) {
@@ -289,13 +293,13 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   asphalt.colorSpace = THREE.SRGBColorSpace;
   const roadMat = new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.32, metalness: 0.62 });
   groundMats.push(roadMat);
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), roadMat);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), roadMat);
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   world1.add(ground);
   // 兩條主幹道虛線
   const dashMat = new THREE.MeshBasicMaterial({ color: 0x8a8a80 });
-  for (let k = -76; k <= 76; k += 5) {
+  for (let k = -58; k <= 58; k += 5) {
     const d1 = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 1.8), dashMat);
     d1.rotation.x = -Math.PI / 2;
     d1.position.set(0, 0.012, k);
@@ -376,7 +380,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   ENV.tentGlows.push(tentGlow);
   const counterMat = new THREE.MeshLambertMaterial({ color: 0x3a3548 });
   const poleMat = new THREE.MeshLambertMaterial({ color: 0x585868 });
-  const tentSpots = [[-38, 38], [54, 22], [-54, -26], [38, -42], [-8, 30], [8, -30]];
+  const tentSpots = [[-30, 30], [42, 17], [-42, -20], [30, -33], [-6, 24], [6, -24], [-24, -6], [24, 6], [-45, 33], [45, -34]];
   tentSpots.forEach(([tx, tz], i) => {
     const grp = new THREE.Group();
     const counter = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.0, 1.5), counterMat);
@@ -407,7 +411,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   const mats = [46, 190, 285].map(h => new THREE.MeshBasicMaterial({ map: makeWindowTex(h) }));
   let i = 0;
   for (let a = 0; a < Math.PI * 2; a += 0.16) {
-    const r = 100 + Math.random() * 26;
+    const r = 80 + Math.random() * 20;
     const w = 7 + Math.random() * 9;
     const h = 14 + Math.random() * 28;
     const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), mats[i++ % 3]);
@@ -416,16 +420,16 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     world1.add(b);
   }
   const hill = new THREE.Mesh(new THREE.ConeGeometry(30, 16, 6), new THREE.MeshBasicMaterial({ color: 0x0c0a18, fog: false }));
-  hill.position.set(66, 7, -128);
+  hill.position.set(52, 7, -100);
   world1.add(hill);
   const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.2, 20, 8), new THREE.MeshBasicMaterial({ color: 0x262040, fog: false }));
-  tower.position.set(66, 25, -128);
+  tower.position.set(52, 25, -100);
   world1.add(tower);
   const deck = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.2, 2.2, 10), new THREE.MeshBasicMaterial({ color: 0xffd9a0, fog: false }));
-  deck.position.set(66, 36, -128);
+  deck.position.set(52, 36, -100);
   world1.add(deck);
   const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff3a3a, fog: false }));
-  beacon.position.set(66, 44, -128);
+  beacon.position.set(52, 44, -100);
   world1.add(beacon);
 })();
 
@@ -480,12 +484,12 @@ const w2anim = { flames: [], rocks: [] };
   groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
   groundTex.repeat.set(12, 12);
   groundTex.colorSpace = THREE.SRGBColorSpace;
-  const g2 = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), new THREE.MeshLambertMaterial({ map: groundTex }));
+  const g2 = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), new THREE.MeshLambertMaterial({ map: groundTex }));
   g2.rotation.x = -Math.PI / 2;
   g2.position.y = 0.01;
   g2.receiveShadow = true;
   world2.add(g2);
-  const crackGlow = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), new THREE.MeshBasicMaterial({
+  const crackGlow = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), new THREE.MeshBasicMaterial({
     map: groundTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   crackGlow.rotation.x = -Math.PI / 2;
@@ -512,7 +516,7 @@ const w2anim = { flames: [], rocks: [] };
   for (let i = 0; i < 14; i++) {
     const sz = 1.4 + Math.random() * 3.2;
     const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(sz, 0), rockMat);
-    rock.position.set((Math.random() * 2 - 1) * 70, 10 + Math.random() * 14, (Math.random() * 2 - 1) * 70);
+    rock.position.set((Math.random() * 2 - 1) * 54, 10 + Math.random() * 14, (Math.random() * 2 - 1) * 54);
     rock.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
     world2.add(rock);
     w2anim.rocks.push({ m: rock, phase: Math.random() * 6.28, speed: 0.3 + Math.random() * 0.4 });
@@ -533,14 +537,14 @@ const w2anim = { flames: [], rocks: [] };
       map: flameTex, color: Math.random() < 0.6 ? 0xff5a30 : 0x9a40ff,
       transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.85,
     }));
-    f.position.set((Math.random() * 2 - 1) * 74, 0.8 + Math.random() * 3.4, (Math.random() * 2 - 1) * 74);
+    f.position.set((Math.random() * 2 - 1) * 58, 0.8 + Math.random() * 3.4, (Math.random() * 2 - 1) * 58);
     f.scale.setScalar(0.5 + Math.random() * 0.7);
     world2.add(f);
     w2anim.flames.push({ m: f, phase: Math.random() * 6.28, base: f.position.y, sz: f.scale.x });
   }
   for (let a = 0; a < Math.PI * 2; a += 0.22) {
     const h = 22 + Math.random() * 30;
-    const r = 98 + Math.random() * 20;
+    const r = 78 + Math.random() * 16;
     const mtn = new THREE.Mesh(
       new THREE.ConeGeometry(10 + Math.random() * 12, h, 5),
       new THREE.MeshBasicMaterial({ color: 0x120409, fog: false })
@@ -607,12 +611,12 @@ const w3anim = { clouds: [], lanterns: [] };
   pathTex.wrapS = pathTex.wrapT = THREE.RepeatWrapping;
   pathTex.repeat.set(20, 20);
   pathTex.colorSpace = THREE.SRGBColorSpace;
-  const plat = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), new THREE.MeshLambertMaterial({ map: pathTex }));
+  const plat = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), new THREE.MeshLambertMaterial({ map: pathTex }));
   plat.rotation.x = -Math.PI / 2;
   plat.position.y = 0.01;
   plat.receiveShadow = true;
   world3.add(plat);
-  for (const [px, pz, w, d] of [[0, 81, 172, 0.5], [0, -81, 172, 0.5], [81, 0, 0.5, 172], [-81, 0, 0.5, 172]]) {
+  for (const [px, pz, w, d] of [[0, 63, 136, 0.5], [0, -63, 136, 0.5], [63, 0, 0.5, 136], [-63, 0, 0.5, 136]]) {
     const edge = new THREE.Mesh(new THREE.BoxGeometry(w, 0.3, d), new THREE.MeshBasicMaterial({ color: 0xffd070 }));
     edge.position.set(px, 0.15, pz);
     world3.add(edge);
@@ -652,7 +656,7 @@ const w3anim = { clouds: [], lanterns: [] };
       map: cloudTex, transparent: true, opacity: 0.5, depthWrite: false, color: 0xb8cce4,
     }));
     const a = Math.random() * 6.28;
-    const r = 84 + Math.random() * 34;
+    const r = 66 + Math.random() * 26;
     cl.position.set(Math.cos(a) * r, -1 + Math.random() * 2, Math.sin(a) * r);
     const sz = 8 + Math.random() * 14;
     cl.scale.set(sz, sz * 0.42, 1);
@@ -661,7 +665,7 @@ const w3anim = { clouds: [], lanterns: [] };
   }
   for (let i = 0; i < 30; i++) {
     const lan = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffe0a0 }));
-    lan.position.set((Math.random() * 2 - 1) * 72, 2.5 + Math.random() * 4, (Math.random() * 2 - 1) * 72);
+    lan.position.set((Math.random() * 2 - 1) * 56, 2.5 + Math.random() * 4, (Math.random() * 2 - 1) * 56);
     world3.add(lan);
     w3anim.lanterns.push({ m: lan, phase: Math.random() * 6.28, base: lan.position.y });
   }
@@ -670,7 +674,7 @@ const w3anim = { clouds: [], lanterns: [] };
     const a = (i / 12) * 6.28;
     const isle = new THREE.Mesh(new THREE.ConeGeometry(w, w * 0.9, 6), new THREE.MeshLambertMaterial({ color: 0x8aa8cc }));
     isle.rotation.x = Math.PI;
-    isle.position.set(Math.cos(a) * (110 + Math.random() * 20), 14 + Math.random() * 16, Math.sin(a) * (110 + Math.random() * 20));
+    isle.position.set(Math.cos(a) * (86 + Math.random() * 16), 14 + Math.random() * 16, Math.sin(a) * (86 + Math.random() * 16));
     world3.add(isle);
     const top = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.9, w, 2.2, 6), new THREE.MeshLambertMaterial({ color: 0xd8e6f4 }));
     top.position.set(isle.position.x, isle.position.y + w * 0.45 + 1, isle.position.z);
@@ -725,7 +729,7 @@ const w4anim = { shards: [] };
   voidTex.wrapS = voidTex.wrapT = THREE.RepeatWrapping;
   voidTex.repeat.set(8, 8);
   voidTex.colorSpace = THREE.SRGBColorSpace;
-  const vg = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), new THREE.MeshStandardMaterial({ map: voidTex, roughness: 0.25, metalness: 0.7 }));
+  const vg = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), new THREE.MeshStandardMaterial({ map: voidTex, roughness: 0.25, metalness: 0.7 }));
   vg.rotation.x = -Math.PI / 2;
   vg.position.y = 0.01;
   vg.receiveShadow = true;
@@ -750,13 +754,13 @@ const w4anim = { shards: [] };
   }
   for (let i = 0; i < 26; i++) {
     const sh = new THREE.Mesh(new THREE.OctahedronGeometry(0.7 + Math.random() * 1.4, 0), Math.random() < 0.5 ? cyanMat : magMat);
-    sh.position.set((Math.random() * 2 - 1) * 72, 3 + Math.random() * 12, (Math.random() * 2 - 1) * 72);
+    sh.position.set((Math.random() * 2 - 1) * 56, 3 + Math.random() * 12, (Math.random() * 2 - 1) * 56);
     world4.add(sh);
     w4anim.shards.push({ m: sh, phase: Math.random() * 6.28, base: sh.position.y });
   }
   for (let a = 0; a < Math.PI * 2; a += 0.28) {
     const h = 24 + Math.random() * 26;
-    const r = 96 + Math.random() * 18;
+    const r = 76 + Math.random() * 14;
     const spike = new THREE.Mesh(new THREE.ConeGeometry(6 + Math.random() * 6, h, 4), darkMat);
     spike.position.set(Math.cos(a) * r, h / 2 - 6, Math.sin(a) * r);
     world4.add(spike);
@@ -824,7 +828,7 @@ const honmoon = new THREE.Group();
   swirl.position.z = 0.1;
   honmoon.add(ring, ring2, disc, swirl);
   honmoon.userData.swirl = swirl;
-  honmoon.position.set(0, 17, -102);
+  honmoon.position.set(0, 16, -80);
   scene.add(honmoon);
 })();
 
@@ -836,9 +840,9 @@ const embers = (() => {
   const N = IS_MOBILE ? 350 : 700;
   const pos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
-    pos[i * 3] = (Math.random() * 2 - 1) * 78;
+    pos[i * 3] = (Math.random() * 2 - 1) * 60;
     pos[i * 3 + 1] = Math.random() * 9;
-    pos[i * 3 + 2] = (Math.random() * 2 - 1) * 78;
+    pos[i * 3 + 2] = (Math.random() * 2 - 1) * 60;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -1534,15 +1538,15 @@ function placeCityProps(props) {
   };
   // 路邊停車（沿兩條主幹道）
   const carTypes = ['car_sedan', 'car_taxi', 'car_hatchback'];
-  for (let i = 0; i < 8; i++) {
-    const k = -66 + i * 18 + Math.random() * 4;
+  for (let i = 0; i < 12; i++) {
+    const k = -56 + i * 10 + Math.random() * 4;
     if (Math.abs(k) < 8) continue;
     put(carTypes[i % 3], (i % 2 === 0 ? 3.6 : -3.6), k, i % 2 === 0 ? 0 : Math.PI, 1.05);
     put(carTypes[(i + 1) % 3], k, (i % 2 === 0 ? -3.6 : 3.6), i % 2 === 0 ? Math.PI / 2 : -Math.PI / 2, 1.05);
   }
   // 路燈＋光池（幹道沿線）
   for (let i = 0; i < 7; i++) {
-    const k = -60 + i * 20;
+    const k = -48 + i * 16;
     put('streetlight', 6.2, k, Math.PI, 1.35);
     lightPool?.(4.8, k, 7);
     put('streetlight', k, -6.2, Math.PI / 2, 1.35);
@@ -1565,7 +1569,7 @@ const E_ANIMS = [
   'Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Punch_B', 'Unarmed_Melee_Attack_Kick',
   'Spellcast_Long', 'Spellcast_Summon', 'Taunt',
 ];
-const MAX_ATTACKERS = 3;
+const MAX_ATTACKERS = 4;
 
 function spawnEnemy(kindName, fx, fz) {
   const kind = KINDS[kindName];
@@ -1822,7 +1826,7 @@ function activateObjective(o) {
     }
     for (let i = 0; i < 4; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
   } else {
-    for (let i = 0; i < 6; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+    for (let i = 0; i < 10; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
   }
 }
 function completeObjective(o) {
@@ -1842,7 +1846,7 @@ function startBossPhase() {
   hud.bosswrap.style.display = 'block';
   S.roar();
   level.boss = spawnEnemy(cfg.bossKind, cfg.bossPos[0], cfg.bossPos[1]);
-  for (let i = 0; i < 4; i++) spawnEnemy('minion', cfg.bossPos[0] + (Math.random() * 2 - 1) * 8, cfg.bossPos[1] + (Math.random() * 2 - 1) * 8);
+  for (let i = 0; i < 8; i++) spawnEnemy('minion', cfg.bossPos[0] + (Math.random() * 2 - 1) * 10, cfg.bossPos[1] + (Math.random() * 2 - 1) * 10);
   showToast(cfg.bossLabel + ' 現身！');
   showDialog(STORY['s' + (stageIdx + 1) + 'boss'] || []);
 }
@@ -1852,6 +1856,12 @@ function updateLevel(dt) {
     hud.objective.textContent = '擊破 ' + STAGES[stageIdx].bossLabel;
     hud.objective.classList.remove('go');
     if (level.boss) hud.bossfill.style.width = Math.max(0, level.boss.hp / level.boss.hpMax * 100) + '%';
+    if (alive < 14 && Math.random() < 0.05) {
+      const a = Math.random() * 6.28;
+      spawnEnemy(Math.random() < 0.4 ? 'runner' : 'minion',
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * 18)),
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * 18)));
+    }
     return;
   }
   let remaining = 0;
@@ -1865,7 +1875,7 @@ function updateLevel(dt) {
     if (!engaged || d < Math.hypot(player.x - engaged.pos[0], player.z - engaged.pos[1])) engaged = o;
     const objAlive = enemies.filter(e => e.obj === o && e.st !== 'dead').length;
     if (o.type === 'kill') {
-      if (o.spawned < o.need && objAlive < 12 && alive < 24 && Math.random() < 0.4) {
+      if (o.spawned < o.need && objAlive < 16 && alive < 34 && Math.random() < 0.55) {
         objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
         o.spawned++;
       }
@@ -1873,7 +1883,7 @@ function updateLevel(dt) {
         o.ambushDone = true;
         showToast('敵　襲　！');
         S.roar();
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 8; i++) {
           const a = Math.random() * 6.28;
           const e = spawnEnemy(Math.random() < 0.5 ? 'runner' : 'minion',
             player.x + Math.cos(a) * 9, player.z + Math.sin(a) * 9);
@@ -1885,10 +1895,10 @@ function updateLevel(dt) {
       const inside = Math.hypot(player.x - o.pos[0], player.z - o.pos[1]) < 4 && player.y < 1;
       const contested = enemies.some(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - o.pos[0], e.z - o.pos[1]) < 5);
       if (inside) o.capT = Math.min(100, o.capT + dt * (contested ? 5 : 14));
-      if (objAlive < 9 && alive < 24 && Math.random() < 0.28) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (objAlive < 13 && alive < 34 && Math.random() < 0.42) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
       if (o.capT >= 100) completeObjective(o);
     } else if (o.type === 'officer') {
-      if (objAlive < 9 && alive < 24 && Math.random() < 0.25) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (objAlive < 13 && alive < 34 && Math.random() < 0.38) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
       if (o.officersLeft <= 0) completeObjective(o);
     }
   }
@@ -1908,11 +1918,16 @@ function updateLevel(dt) {
   }
   // 巡遊敵（地圖上的野生威脅）
   const roamers = enemies.filter(e => !e.obj && !e.kindName.startsWith('boss') && e.st !== 'dead').length;
-  if (roamers < 5 && alive < 24 && Math.random() < 0.02) {
+  if (roamers < 12 && alive < 34 && Math.random() < 0.06) {
     const a = Math.random() * 6.28;
-    spawnEnemy(Math.random() < 0.3 ? 'runner' : 'minion',
-      Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * 28)),
-      Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * 28)));
+    const cx = Math.max(-MAP_HALF + 4, Math.min(MAP_HALF - 4, player.x + Math.cos(a) * (18 + Math.random() * 8)));
+    const cz = Math.max(-MAP_HALF + 4, Math.min(MAP_HALF - 4, player.z + Math.sin(a) * (18 + Math.random() * 8)));
+    const n = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < n; i++) {
+      spawnEnemy(Math.random() < 0.3 ? 'runner' : 'minion',
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, cx + (Math.random() * 2 - 1) * 3)),
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, cz + (Math.random() * 2 - 1) * 3)));
+    }
   }
   if (remaining === 0) startBossPhase();
 }
@@ -2643,7 +2658,7 @@ function loadStage(i) {
   if (AU.ctx) { AU.nextBar = AU.ctx.currentTime + 0.15; AU.bar = 0; }
   hud.bosswrap.style.display = 'none';
   const p = player;
-  p.x = 0; p.y = 0; p.z = 64; p.vy = 0; p.yaw = Math.PI;
+  p.x = 0; p.y = 0; p.z = 48; p.vy = 0; p.yaw = Math.PI;
   // 過關升級：體力上限＋攻擊力成長
   p.hpMax = 100 + i * 30;
   p.hp = p.hpMax;
