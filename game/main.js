@@ -10,7 +10,6 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const MODEL_YAW = 0;              // glTF 標準：模型原生面向 +Z，rotation.y 直接用 yaw
-const HALF_W = 13.5;              // 街道可走半寬
 const NEON = [0xff4fd8, 0xff2fa0, 0x8a4fff, 0x4fd8ff, 0xff6ab0, 0xb47aff];
 const IS_MOBILE = matchMedia('(pointer: coarse)').matches;
 if (IS_MOBILE) document.body.classList.add('is-touch');
@@ -18,39 +17,48 @@ if (IS_MOBILE) document.body.classList.add('is-touch');
 // 關卡（同一條街廊道，分區沿 -Z 推進；Stage 2 為血月變體）
 const STAGES = [
   {
-    name: '第一關　首爾夜市・魂門裂縫',
-    zones: [
-      { name: '夜市街口',  enterZ: 0,    boundZ: -48,  type: 'kill',    need: 14, cap: 9,  elites: 0 },
-      { name: '夜市主街',  enterZ: -48,  boundZ: -96,  type: 'kill',    need: 28, cap: 14, elites: 0, ambush: true },
-      { name: '後巷據點',  enterZ: -96,  boundZ: -144, type: 'capture', cap: 8,  elites: 0 },
-      { name: '十字路口',  enterZ: -144, boundZ: -192, type: 'officer', officers: 2, cap: 8, fast: 0.3 },
-      { name: '魂門裂縫',  enterZ: -192, boundZ: -240, boss: true },
+    name: '第一關　首爾夜市・魂門裂縫', bossKind: 'boss', bossLabel: '陰差隊長',
+    objectives: [
+      { name: '南廣場殲滅戰', type: 'kill',    need: 22, pos: [-46, 30], ambush: true },
+      { name: '東市場據點',   type: 'capture', pos: [46, 30] },
+      { name: '西巷敵將',     type: 'officer', officers: 2, pos: [-46, -34] },
+      { name: '北口大掃蕩',   type: 'kill',    need: 26, pos: [46, -34], fast: 0.3, ambush: true },
     ],
+    bossPos: [0, -60],
   },
   {
-    name: '第二關　魂界・陰差本營',
-    zones: [
-      { name: '魂界裂口',  enterZ: 0,    boundZ: -48,  type: 'kill',    need: 20, cap: 11, elites: 0, fast: 0.35 },
-      { name: '亡者祭壇',  enterZ: -48,  boundZ: -96,  type: 'capture', cap: 9,  fast: 0.4 },
-      { name: '厲鬼峽谷',  enterZ: -96,  boundZ: -144, type: 'kill',    need: 32, cap: 15, elites: 2, fast: 0.55, ambush: true },
-      { name: '修羅斷崖',  enterZ: -144, boundZ: -192, type: 'officer', officers: 3, cap: 9, fast: 0.4 },
-      { name: '魂門核心',  enterZ: -192, boundZ: -240, boss: true, boss2: true },
+    name: '第二關　魂界・陰差本營', bossKind: 'boss2', bossLabel: '陰差大隊長',
+    objectives: [
+      { name: '裂口殲滅戰',   type: 'kill',    need: 24, pos: [-46, 30], fast: 0.35, ambush: true },
+      { name: '亡者祭壇',     type: 'capture', pos: [46, 30], fast: 0.4 },
+      { name: '厲鬼巢穴',     type: 'kill',    need: 30, pos: [-46, -34], fast: 0.55, ambush: true },
+      { name: '修羅武將團',   type: 'officer', officers: 3, pos: [46, -34], fast: 0.4 },
     ],
+    bossPos: [0, -60],
   },
   {
-    name: '第三關　天界・魂門之上',
-    zones: [
-      { name: '雲海據點',  enterZ: 0,    boundZ: -48,  type: 'capture', cap: 9,  fast: 0.4 },
-      { name: '聖域迴廊',  enterZ: -48,  boundZ: -96,  type: 'kill',    need: 38, cap: 17, elites: 2, fast: 0.5, ambush: true },
-      { name: '星橋斷面',  enterZ: -96,  boundZ: -144, type: 'officer', officers: 3, cap: 9, fast: 0.5 },
-      { name: '審判之階',  enterZ: -144, boundZ: -192, type: 'kill',    need: 30, cap: 13, elites: 5, fast: 0.5, ambush: true },
-      { name: '魂門之上',  enterZ: -192, boundZ: -240, boss: true, boss3: true },
+    name: '第三關　天界・魂門之上', bossKind: 'boss3', bossLabel: '陰差王',
+    objectives: [
+      { name: '雲海據點',     type: 'capture', pos: [-46, 30], fast: 0.4 },
+      { name: '聖域掃蕩',     type: 'kill',    need: 34, pos: [46, 30], fast: 0.5, ambush: true },
+      { name: '星橋敵將',     type: 'officer', officers: 3, pos: [-46, -34], fast: 0.5 },
+      { name: '審判殲滅戰',   type: 'kill',    need: 30, pos: [46, -34], fast: 0.5, ambush: true },
     ],
+    bossPos: [0, -60],
+  },
+  {
+    name: '第四關　虛空・魂門之心', bossKind: 'boss4', bossLabel: '魂門之靈',
+    objectives: [
+      { name: '碎星殲滅戰',   type: 'kill',    need: 30, pos: [-46, 30], fast: 0.5, ambush: true },
+      { name: '虛空武將團',   type: 'officer', officers: 3, pos: [46, 30], fast: 0.5 },
+      { name: '星核據點',     type: 'capture', pos: [-46, -34], fast: 0.5 },
+      { name: '深淵大掃蕩',   type: 'kill',    need: 36, pos: [46, -34], fast: 0.6, ambush: true },
+    ],
+    bossPos: [0, -60],
   },
 ];
 const OFFICER_NAMES = ['陰差百夫長', '陰差千夫長', '夜叉先鋒', '羅刹遊擊', '牛頭督戰', '馬面斥候'];
 let stageIdx = 0;
-let ZONES = STAGES[0].zones;
 
 // ---------- 基本場景 ----------
 const app = document.getElementById('app');
@@ -81,7 +89,7 @@ addEventListener('resize', () => {
 });
 
 // ---------- 燈光（夜街：冷月光主光＋暖鈉燈補光＋青色輪廓光） ----------
-const hemi = new THREE.HemisphereLight(0x9a8aff, 0x201238, 1.1);
+const hemi = new THREE.HemisphereLight(0x9a8aff, 0x241540, 1.25);
 scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xbfcaff, 1.35);
 sun.position.set(8, 18, 6);
@@ -104,6 +112,7 @@ scene.add(heroLight);
 
 // ---------- 天空（AI 生成全景） ----------
 let skyMat = null;
+let skyTex1 = null;
 (function buildSky() {
   const sky = new THREE.Mesh(
     new THREE.SphereGeometry(290, 48, 24),
@@ -222,21 +231,50 @@ function makeStorefrontTex() {
   return t;
 }
 
-// ---------- 世界群組：一關人間街／二關魂界 ----------
+
 const world1 = new THREE.Group();
 const world2 = new THREE.Group();
 const world3 = new THREE.Group();
-scene.add(world1, world2, world3);
+const world4 = new THREE.Group();
+scene.add(world1, world2, world3, world4);
 world2.visible = false;
 world3.visible = false;
+world4.visible = false;
 
-// ---------- 韓國街道 ----------
+// 開放戰場：正方形地圖＋街區障礙（四關共用碰撞佈局）
+const MAP_HALF = 80;
+const OBSTACLES = [];
+(function planObstacles() {
+  const cells = [-58, -24, 24, 58];
+  const clear = [[-46, 30], [46, 30], [-46, -34], [46, -34], [0, -60], [0, 64], [0, 0]];
+  for (const gx of cells) {
+    for (const gz of cells) {
+      if (clear.some(([px, pz]) => Math.hypot(gx - px, gz - pz) < 19)) continue;
+      OBSTACLES.push({ x: gx, z: gz, hx: 9, hz: 9 });
+    }
+  }
+})();
+function collideCircle(o, r) {
+  o.x = Math.max(-MAP_HALF + 1, Math.min(MAP_HALF - 1, o.x));
+  o.z = Math.max(-MAP_HALF + 1, Math.min(MAP_HALF - 1, o.z));
+  for (const b of OBSTACLES) {
+    const dx = o.x - b.x, dz = o.z - b.z;
+    const px = b.hx + r - Math.abs(dx);
+    const pz = b.hz + r - Math.abs(dz);
+    if (px > 0 && pz > 0) {
+      if (px < pz) o.x = b.x + (dx >= 0 ? 1 : -1) * (b.hx + r);
+      else o.z = b.z + (dz >= 0 ? 1 : -1) * (b.hz + r);
+    }
+  }
+}
+
+// ---------- 韓國街道 ----------// ---------- 開放城區（第一關：首爾夜市街區） ----------
 let lightPool = null;
 const groundMats = [];
 const flickers = [];
 const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
-(function buildKoreanStreet() {
-  // 柏油路面
+(function buildOpenCity() {
+  // 柏油地面
   const ac = document.createElement('canvas');
   ac.width = ac.height = 256;
   const ag = ac.getContext('2d');
@@ -247,160 +285,99 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   }
   const asphalt = new THREE.CanvasTexture(ac);
   asphalt.wrapS = asphalt.wrapT = THREE.RepeatWrapping;
-  asphalt.repeat.set(3, 92);
+  asphalt.repeat.set(24, 24);
   asphalt.colorSpace = THREE.SRGBColorSpace;
   const roadMat = new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.32, metalness: 0.62 });
   groundMats.push(roadMat);
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(11, 330), roadMat);
-  road.rotation.x = -Math.PI / 2;
-  road.position.set(0, 0, -105);
-  road.receiveShadow = true;
-  world1.add(road);
-  // 車道虛線＋邊線
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), roadMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  world1.add(ground);
+  // 兩條主幹道虛線
   const dashMat = new THREE.MeshBasicMaterial({ color: 0x8a8a80 });
-  for (let z = 6; z > -244; z -= 4) {
-    const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 1.6), dashMat);
-    dash.rotation.x = -Math.PI / 2;
-    dash.position.set(0, 0.012, z);
-    world1.add(dash);
+  for (let k = -76; k <= 76; k += 5) {
+    const d1 = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 1.8), dashMat);
+    d1.rotation.x = -Math.PI / 2;
+    d1.position.set(0, 0.012, k);
+    world1.add(d1);
+    const d2 = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.18), dashMat);
+    d2.rotation.x = -Math.PI / 2;
+    d2.position.set(k, 0.012, 0);
+    world1.add(d2);
   }
-  const edgeMat = new THREE.MeshBasicMaterial({ color: 0x8a7228 });
-  for (const side of [-1, 1]) {
-    const line = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 330), edgeMat);
-    line.rotation.x = -Math.PI / 2;
-    line.position.set(side * 5.1, 0.012, -105);
-    world1.add(line);
-  }
-  // 人行道（磚格）
-  const sc = document.createElement('canvas');
-  sc.width = sc.height = 256;
-  const sg = sc.getContext('2d');
-  sg.fillStyle = '#2b2836'; sg.fillRect(0, 0, 256, 256);
-  for (let y = 0; y < 256; y += 32) {
-    for (let x = 0; x < 256; x += 32) {
-      sg.fillStyle = Math.random() < 0.5 ? '#2e2a3a' : '#282433';
-      sg.fillRect(x + 1, y + 1, 30, 30);
-    }
-  }
-  sg.strokeStyle = 'rgba(10,10,18,0.6)'; sg.lineWidth = 2;
-  for (let i = 0; i <= 256; i += 32) {
-    sg.beginPath(); sg.moveTo(i, 0); sg.lineTo(i, 256); sg.stroke();
-    sg.beginPath(); sg.moveTo(0, i); sg.lineTo(256, i); sg.stroke();
-  }
-  const paveTex = new THREE.CanvasTexture(sc);
-  paveTex.wrapS = paveTex.wrapT = THREE.RepeatWrapping;
-  paveTex.repeat.set(4, 132);
-  paveTex.colorSpace = THREE.SRGBColorSpace;
-  const walkMat = new THREE.MeshStandardMaterial({ map: paveTex, roughness: 0.5, metalness: 0.4 });
-  groundMats.push(walkMat);
-  new THREE.TextureLoader().load('assets/gen/pavement.jpg', tex => {
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(3, 106);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    walkMat.map = tex;
-    walkMat.needsUpdate = true;
-  });
-  for (const side of [-1, 1]) {
-    const walk = new THREE.Mesh(new THREE.PlaneGeometry(9.5, 330), walkMat);
-    walk.rotation.x = -Math.PI / 2;
-    walk.position.set(side * 10.1, 0.03, -105);
-    walk.receiveShadow = true;
-    world1.add(walk);
-    const curb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.12, 330), new THREE.MeshLambertMaterial({ color: 0x4a4658 }));
-    curb.position.set(side * 5.35, 0.06, -105);
-    curb.receiveShadow = true;
-    world1.add(curb);
-  }
-  // 斑馬線（各區入口）
-  const zebraMat = new THREE.MeshBasicMaterial({ color: 0x9a9a92 });
-  for (const zz of [-1, ...ZONES.map(z => z.boundZ)]) {
-    for (let x = -4.4; x <= 4.4; x += 1.25) {
-      const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 3), zebraMat);
-      stripe.rotation.x = -Math.PI / 2;
-      stripe.position.set(x, 0.014, zz + 2.6);
-      world1.add(stripe);
-    }
-  }
-
-  // 兩側連棟街屋（店面＋韓文招牌＋樓上窗燈）
+  // 街區：人行道座台＋大樓＋招牌
   const winTexs = [makeWindowTex(46), makeWindowTex(190), makeWindowTex(285)];
-  const wallMats = [0x241f33, 0x2a2340, 0x1f1b2e, 0x2e2545].map(c => new THREE.MeshLambertMaterial({ color: c }));
+  const paveMat = new THREE.MeshLambertMaterial({ color: 0x2e2a3a });
   let wi = 0;
-  for (const side of [-1, 1]) {
-    let z = -2;
-    while (z > -238) {
-      const w = 7 + Math.random() * 3.5;
-      const zc = z - w / 2;
-      z -= w + 0.35;
-      if (ZONES.some(zn => Math.abs(zc - zn.boundZ) < 4)) continue;
-      const h = 7 + Math.random() * 8;
-      const depth = 8;
-      const bx = side * (14.9 + depth / 2);
-      const body = new THREE.Mesh(new THREE.BoxGeometry(depth, h, w), wallMats[wi % wallMats.length]);
-      body.position.set(bx, h / 2, zc);
-      body.castShadow = true; body.receiveShadow = true;
-      world1.add(body);
-      const winMat = new THREE.MeshBasicMaterial({ map: winTexs[wi % 3] });
-      ENV.wins.push(winMat);
-      const win = new THREE.Mesh(
-        new THREE.PlaneGeometry(w - 0.8, h - 4.6),
-        winMat
-      );
-      win.position.set(side * 14.88, (h + 4.2) / 2, zc);
-      win.rotation.y = side * -Math.PI / 2;
-      world1.add(win);
+  for (const b of OBSTACLES) {
+    const plate = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2 + 4, 0.14, b.hz * 2 + 4), paveMat);
+    plate.position.set(b.x, 0.07, b.z);
+    plate.receiveShadow = true;
+    world1.add(plate);
+    const h = 9 + Math.random() * 8;
+    const winMat = new THREE.MeshBasicMaterial({ map: winTexs[wi % 3] });
+    ENV.wins.push(winMat);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2, h, b.hz * 2), winMat);
+    body.position.set(b.x, h / 2 + 0.1, b.z);
+    body.castShadow = true;
+    world1.add(body);
+    // 四面一樓店面＋橫招牌
+    for (const [dx, dz, ry] of [[0, b.hz + 0.06, 0], [0, -b.hz - 0.06, Math.PI], [b.hx + 0.06, 0, Math.PI / 2], [-b.hx - 0.06, 0, -Math.PI / 2]]) {
       const frontMat = new THREE.MeshBasicMaterial({ map: makeStorefrontTex() });
       ENV.fronts.push(frontMat);
-      const front = new THREE.Mesh(
-        new THREE.PlaneGeometry(w - 0.5, 3.1),
-        frontMat
-      );
-      front.position.set(side * 14.87, 1.62, zc);
-      front.rotation.y = side * -Math.PI / 2;
+      const front = new THREE.Mesh(new THREE.PlaneGeometry(b.hx * 2 - 1.2, 3.1), frontMat);
+      front.position.set(b.x + dx, 1.68, b.z + dz);
+      front.rotation.y = ry;
       world1.add(front);
-      // 招牌（整面橫幅，韓國街屋經典）— BoxGeometry 面序：+x,-x,+y,-y,+z,-z
-      const signTex = makeSignTex(KR_WORDS[Math.floor(Math.random() * KR_WORDS.length)]);
-      const darkMat = new THREE.MeshLambertMaterial({ color: 0x1a1a26 });
-      const signMats = [
-        new THREE.MeshBasicMaterial({ map: signTex }),
-        new THREE.MeshBasicMaterial({ map: signTex }),
-        darkMat, darkMat, darkMat, darkMat,
-      ];
-      ENV.signs.push(signMats[0], signMats[1]);
-      const sign = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.15, w - 0.4), signMats);
-      sign.position.set(side * 14.7, 3.85, zc);
+      const signMat = new THREE.MeshBasicMaterial({ map: makeSignTex(KR_WORDS[Math.floor(Math.random() * KR_WORDS.length)]) });
+      ENV.signs.push(signMat);
+      const sign = new THREE.Mesh(new THREE.PlaneGeometry(b.hx * 2 - 2, 1.2), signMat);
+      sign.position.set(b.x + dx * 1.012, 3.95, b.z + dz * 1.012);
+      sign.rotation.y = ry;
       world1.add(sign);
-      if (Math.random() < 0.4) flickers.push({ mat: signMats[0], speed: 0.5 + Math.random(), phase: Math.random() * 10 });
-      // 立式霓虹直招（隨機）
-      if (Math.random() < 0.85) {
-        const vTex = makeVSignTex(KR_WORDS[Math.floor(Math.random() * KR_WORDS.length)]);
-        const vDark = new THREE.MeshLambertMaterial({ color: 0x14141f });
-        const vMats = [
-          new THREE.MeshBasicMaterial({ map: vTex }),
-          new THREE.MeshBasicMaterial({ map: vTex }),
-          vDark, vDark, vDark, vDark,
-        ];
-        ENV.signs.push(vMats[0], vMats[1]);
-        const v = new THREE.Mesh(new THREE.BoxGeometry(0.28, 3.4, 0.9), vMats);
-        v.position.set(side * 14.35, 4.6 + Math.random() * 2, zc - w / 2 + 0.8);
-        world1.add(v);
-      }
-      wi++;
+      if (Math.random() < 0.4) flickers.push({ mat: signMat, speed: 0.5 + Math.random(), phase: Math.random() * 10 });
     }
+    // 立式直招（角落）
+    const vTex = makeVSignTex(KR_WORDS[Math.floor(Math.random() * KR_WORDS.length)]);
+    const vDark = new THREE.MeshLambertMaterial({ color: 0x14141f });
+    const vMats = [
+      new THREE.MeshBasicMaterial({ map: vTex }),
+      new THREE.MeshBasicMaterial({ map: vTex }),
+      vDark, vDark, vDark, vDark,
+    ];
+    ENV.signs.push(vMats[0], vMats[1]);
+    const v = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.6, 1), vMats);
+    v.position.set(b.x + b.hx - 0.4, 5.4, b.z + b.hz + 0.35);
+    world1.add(v);
+    wi++;
   }
-
-  // 布帳馬車（橘色帳篷攤）
+  // 光池
+  const poolTex = (() => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const g = c.getContext('2d');
+    const rg = g.createRadialGradient(64, 64, 4, 64, 64, 62);
+    rg.addColorStop(0, 'rgba(255,214,150,0.5)');
+    rg.addColorStop(1, 'rgba(255,214,150,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+  })();
+  lightPool = (x, z, s2 = 6) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(s2, s2), new THREE.MeshBasicMaterial({
+      map: poolTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+    }));
+    m.rotation.x = -Math.PI / 2;
+    m.position.set(x, 0.05, z);
+    world1.add(m);
+  };
+  // 布帳馬車（各據點廣場旁）
   const tentMats = [0x3a4a8a, 0x4a3a7a, 0x2e3a6e].map(c => new THREE.MeshLambertMaterial({ color: c }));
   const tentGlow = new THREE.MeshBasicMaterial({ color: 0xffa8d8 });
   ENV.tentGlows.push(tentGlow);
   const counterMat = new THREE.MeshLambertMaterial({ color: 0x3a3548 });
   const poleMat = new THREE.MeshLambertMaterial({ color: 0x585868 });
-  for (let i = 0; i < 13; i++) {
-    const side = i % 2 === 0 ? -1 : 1;
-    const z = -12 - i * 17.5 - Math.random() * 6;
-    if (ZONES.some(zn => Math.abs(z - zn.boundZ) < 5)) continue;
-    const x = side * (10.8 + Math.random() * 1.6);
+  const tentSpots = [[-38, 38], [54, 22], [-54, -26], [38, -42], [-8, 30], [8, -30]];
+  tentSpots.forEach(([tx, tz], i) => {
     const grp = new THREE.Group();
     const counter = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.0, 1.5), counterMat);
     counter.position.y = 0.5;
@@ -413,131 +390,49 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     }
     const roofL = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 1.35), tentMats[i % 3]);
     roofL.position.set(0, 2.42, -0.62); roofL.rotation.x = 0.42;
-    roofL.castShadow = true;
     const roofR = roofL.clone(); roofR.position.z = 0.62; roofR.rotation.x = -0.42;
     grp.add(roofL, roofR);
     const glow = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.1), tentGlow);
     glow.rotation.x = -Math.PI / 2;
     glow.position.y = 2.1;
     grp.add(glow);
-    grp.position.set(x, 0, z);
-    grp.rotation.y = Math.random() * 0.4 - 0.2 + (side > 0 ? Math.PI : 0);
+    grp.position.set(tx, 0, tz);
+    grp.rotation.y = Math.random() * 6.28;
     world1.add(grp);
-  }
-
-  // 電線桿＋電線（韓國巷弄記憶點）
-  const wireMat = new THREE.MeshBasicMaterial({ color: 0x08080e });
-  const poleMat2 = new THREE.MeshLambertMaterial({ color: 0x2e2a38 });
-  const polePts = [];
-  for (let i = 0; i < 9; i++) {
-    const z = -8 - i * 26;
-    const side = i % 2 === 0 ? 1 : -1;
-    const x = side * 13.2;
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.14, 7.4, 6), poleMat2);
-    pole.position.set(x, 3.7, z);
-    pole.castShadow = true;
-    world1.add(pole);
-    const cross = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.09, 0.09), poleMat2);
-    cross.position.set(x, 6.6, z);
-    world1.add(cross);
-    polePts.push(new THREE.Vector3(x, 6.9, z));
-    if (i > 0 && i % 2 === 1) {
-      for (const dy of [0, 0.35]) {
-        const from = new THREE.Vector3(x, 6.8 - dy, z);
-        const to = new THREE.Vector3(-x, 6.5 - dy, z - 2);
-        const mid = from.clone().lerp(to, 0.5); mid.y -= 1.1;
-        const curve = new THREE.CatmullRomCurve3([from, mid, to]);
-        const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 10, 0.022, 4), wireMat);
-        world1.add(tube);
-      }
-    }
-  }
-  for (let i = 0; i < polePts.length - 1; i++) {
-    const from = polePts[i], to = polePts[i + 1];
-    const mid = from.clone().lerp(to, 0.5); mid.y -= 1.4;
-    const curve = new THREE.CatmullRomCurve3([from, mid, to]);
-    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 12, 0.022, 4), wireMat);
-    world1.add(tube);
-  }
-
-  // 路燈地面光池
-  const poolTex = (() => {
-    const c = document.createElement('canvas');
-    c.width = c.height = 128;
-    const g = c.getContext('2d');
-    const rg = g.createRadialGradient(64, 64, 4, 64, 64, 62);
-    rg.addColorStop(0, 'rgba(255,214,150,0.5)');
-    rg.addColorStop(1, 'rgba(255,214,150,0)');
-    g.fillStyle = rg; g.fillRect(0, 0, 128, 128);
-    return new THREE.CanvasTexture(c);
-  })();
-  lightPool = (x, z, s = 6) => {
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), new THREE.MeshBasicMaterial({
-      map: poolTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
-    }));
-    m.rotation.x = -Math.PI / 2;
-    m.position.set(x, 0.05, z);
-    world1.add(m);
-  };
+  });
 })();
 
-// ---------- 遠景：城市天際線＋南山塔 ----------
+// ---------- 遠景：外環大樓＋南山塔（world1） ----------
 (function buildBackdrop() {
   const mats = [46, 190, 285].map(h => new THREE.MeshBasicMaterial({ map: makeWindowTex(h) }));
   let i = 0;
-  for (const side of [-1, 1]) {
-    for (let z = 15; z > -262; z -= 10 + Math.random() * 6) {
-      const w = 6 + Math.random() * 8;
-      const h = 12 + Math.random() * 26;
-      const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), mats[i++ % 3]);
-      b.position.set(side * (34 + Math.random() * 20), h / 2 - 0.5, z);
-      world1.add(b);
-    }
-  }
-  for (let x = -60; x <= 60; x += 12) {
-    const h = 16 + Math.random() * 22;
-    const b = new THREE.Mesh(new THREE.BoxGeometry(9, h, 9), mats[i++ % 3]);
-    b.position.set(x, h / 2, -275 - Math.random() * 10);
+  for (let a = 0; a < Math.PI * 2; a += 0.16) {
+    const r = 100 + Math.random() * 26;
+    const w = 7 + Math.random() * 9;
+    const h = 14 + Math.random() * 28;
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), mats[i++ % 3]);
+    b.position.set(Math.cos(a) * r, h / 2 - 0.5, Math.sin(a) * r);
+    b.rotation.y = Math.random() * Math.PI;
     world1.add(b);
   }
-  // 南山塔（山丘剪影＋塔身＋觀景台）
-  const hill = new THREE.Mesh(
-    new THREE.ConeGeometry(30, 16, 6),
-    new THREE.MeshBasicMaterial({ color: 0x0c0a18, fog: false })
-  );
-  hill.position.set(46, 7, -268);
+  const hill = new THREE.Mesh(new THREE.ConeGeometry(30, 16, 6), new THREE.MeshBasicMaterial({ color: 0x0c0a18, fog: false }));
+  hill.position.set(66, 7, -128);
   world1.add(hill);
-  const tower = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.8, 1.2, 20, 8),
-    new THREE.MeshBasicMaterial({ color: 0x262040, fog: false })
-  );
-  tower.position.set(46, 25, -268);
+  const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.2, 20, 8), new THREE.MeshBasicMaterial({ color: 0x262040, fog: false }));
+  tower.position.set(66, 25, -128);
   world1.add(tower);
-  const deck = new THREE.Mesh(
-    new THREE.CylinderGeometry(2.6, 2.2, 2.2, 10),
-    new THREE.MeshBasicMaterial({ color: 0xffd9a0, fog: false })
-  );
-  deck.position.set(46, 36, -268);
+  const deck = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.2, 2.2, 10), new THREE.MeshBasicMaterial({ color: 0xffd9a0, fog: false }));
+  deck.position.set(66, 36, -128);
   world1.add(deck);
-  const antenna = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.1, 0.16, 7, 5),
-    new THREE.MeshBasicMaterial({ color: 0x383050, fog: false })
-  );
-  antenna.position.set(46, 40.5, -268);
-  world1.add(antenna);
-  const beacon = new THREE.Mesh(
-    new THREE.SphereGeometry(0.35, 8, 6),
-    new THREE.MeshBasicMaterial({ color: 0xff3a3a, fog: false })
-  );
-  beacon.position.set(46, 44, -268);
+  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff3a3a, fog: false }));
+  beacon.position.set(66, 44, -128);
   world1.add(beacon);
 })();
 
-// ---------- 魂界（第二關場景：黑曜岩裂谷） ----------
-let skyTex1 = null, skyTex2 = null;
+// ---------- 魂界（第二關場景：黑曜岩裂谷） ----------// ---------- 魂界（第二關：黑曜荒原，開放版） ----------
+let skyTex2 = null;
 const w2anim = { flames: [], rocks: [] };
 (function buildUnderworld() {
-  // 血色漩渦天空貼圖
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 512;
   const g = c.getContext('2d');
@@ -547,7 +442,7 @@ const w2anim = { flames: [], rocks: [] };
   grad.addColorStop(0.85, '#5a1218');
   grad.addColorStop(1, '#7a2018');
   g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
-  for (let i = 0; i < 60; i++) {   // 血雲漩渦
+  for (let i = 0; i < 60; i++) {
     const x = Math.random() * 1024, y = 80 + Math.random() * 300;
     const rg = g.createRadialGradient(x, y, 2, x, y, 30 + Math.random() * 60);
     rg.addColorStop(0, 'rgba(180,40,50,0.16)');
@@ -555,19 +450,16 @@ const w2anim = { flames: [], rocks: [] };
     g.fillStyle = rg;
     g.beginPath(); g.arc(x, y, 90, 0, 6.28); g.fill();
   }
-  const mx = 512, my = 120;   // 巨大血月
+  const mx = 512, my = 120;
   const mg = g.createRadialGradient(mx, my, 10, mx, my, 95);
   mg.addColorStop(0, 'rgba(255,90,70,1)');
   mg.addColorStop(0.4, 'rgba(220,50,50,0.85)');
   mg.addColorStop(1, 'rgba(180,30,40,0)');
   g.fillStyle = mg;
   g.beginPath(); g.arc(mx, my, 95, 0, 6.28); g.fill();
-  g.fillStyle = 'rgba(255,150,120,0.9)';
-  for (let i = 0; i < 100; i++) g.fillRect(Math.random() * 1024, Math.random() * 200, 1, 1);
   skyTex2 = new THREE.CanvasTexture(c);
   skyTex2.colorSpace = THREE.SRGBColorSpace;
 
-  // 黑曜岩地面＋熔岩裂紋
   const gc = document.createElement('canvas');
   gc.width = gc.height = 512;
   const gg = gc.getContext('2d');
@@ -577,7 +469,7 @@ const w2anim = { flames: [], rocks: [] };
     gg.fillRect(Math.random() * 512, Math.random() * 512, 3 + Math.random() * 6, 3 + Math.random() * 6);
   }
   gg.strokeStyle = '#ff4a28'; gg.shadowColor = '#ff3a18'; gg.shadowBlur = 8; gg.lineWidth = 2;
-  for (let i = 0; i < 14; i++) {   // 裂紋
+  for (let i = 0; i < 14; i++) {
     gg.beginPath();
     let x = Math.random() * 512, y = Math.random() * 512;
     gg.moveTo(x, y);
@@ -586,51 +478,45 @@ const w2anim = { flames: [], rocks: [] };
   }
   const groundTex = new THREE.CanvasTexture(gc);
   groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
-  groundTex.repeat.set(5, 24);
+  groundTex.repeat.set(12, 12);
   groundTex.colorSpace = THREE.SRGBColorSpace;
-  const g2 = new THREE.Mesh(new THREE.PlaneGeometry(70, 330), new THREE.MeshLambertMaterial({ map: groundTex }));
+  const g2 = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), new THREE.MeshLambertMaterial({ map: groundTex }));
   g2.rotation.x = -Math.PI / 2;
-  g2.position.set(0, 0.01, -105);
+  g2.position.y = 0.01;
   g2.receiveShadow = true;
   world2.add(g2);
-  const crackGlow = new THREE.Mesh(new THREE.PlaneGeometry(70, 330), new THREE.MeshBasicMaterial({
+  const crackGlow = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), new THREE.MeshBasicMaterial({
     map: groundTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   crackGlow.rotation.x = -Math.PI / 2;
-  crackGlow.position.set(0, 0.025, -105);
+  crackGlow.position.y = 0.025;
   world2.add(crackGlow);
 
-  // 兩側嶙峋岩柱峽谷＋緋紅晶柱
   const rockMat = new THREE.MeshLambertMaterial({ color: 0x171018 });
   const crystalMat = new THREE.MeshBasicMaterial({ color: 0xff2a3a });
-  for (const side of [-1, 1]) {
-    for (let z = 8; z > -244; z -= 5 + Math.random() * 5) {
-      const h = 7 + Math.random() * 14;
-      const rock = new THREE.Mesh(new THREE.ConeGeometry(2.2 + Math.random() * 2.2, h, 5), rockMat);
-      rock.position.set(side * (16 + Math.random() * 4), h / 2 - 0.6, z);
-      rock.rotation.z = side * (0.06 + Math.random() * 0.14);
+  for (const b of OBSTACLES) {
+    for (let i = 0; i < 3; i++) {
+      const h = 8 + Math.random() * 10;
+      const rock = new THREE.Mesh(new THREE.ConeGeometry(4 + Math.random() * 3, h, 5), rockMat);
+      rock.position.set(b.x + (Math.random() * 2 - 1) * 5, h / 2 - 0.6, b.z + (Math.random() * 2 - 1) * 5);
       rock.rotation.y = Math.random() * Math.PI;
       rock.castShadow = true;
       world2.add(rock);
-      if (Math.random() < 0.28) {
-        const ch = 1.6 + Math.random() * 2.6;
-        const cr = new THREE.Mesh(new THREE.ConeGeometry(0.4, ch, 4), crystalMat);
-        cr.position.set(side * (13.5 + Math.random() * 2.5), ch / 2, z + 2);
-        cr.rotation.z = side * (0.3 + Math.random() * 0.4);
-        world2.add(cr);
-      }
     }
+    const ch = 2 + Math.random() * 3;
+    const cr = new THREE.Mesh(new THREE.ConeGeometry(0.5, ch, 4), crystalMat);
+    cr.position.set(b.x + b.hx + 1, ch / 2, b.z);
+    cr.rotation.z = 0.3;
+    world2.add(cr);
   }
-  // 漂浮岩塊
   for (let i = 0; i < 14; i++) {
     const sz = 1.4 + Math.random() * 3.2;
     const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(sz, 0), rockMat);
-    rock.position.set((Math.random() < 0.5 ? -1 : 1) * (22 + Math.random() * 18), 9 + Math.random() * 15, 10 - Math.random() * 250);
+    rock.position.set((Math.random() * 2 - 1) * 70, 10 + Math.random() * 14, (Math.random() * 2 - 1) * 70);
     rock.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
     world2.add(rock);
     w2anim.rocks.push({ m: rock, phase: Math.random() * 6.28, speed: 0.3 + Math.random() * 0.4 });
   }
-  // 鬼火
   const flameTex = (() => {
     const fc = document.createElement('canvas');
     fc.width = fc.height = 64;
@@ -647,25 +533,24 @@ const w2anim = { flames: [], rocks: [] };
       map: flameTex, color: Math.random() < 0.6 ? 0xff5a30 : 0x9a40ff,
       transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.85,
     }));
-    f.position.set((Math.random() * 2 - 1) * 15, 0.8 + Math.random() * 3.4, 10 - Math.random() * 250);
+    f.position.set((Math.random() * 2 - 1) * 74, 0.8 + Math.random() * 3.4, (Math.random() * 2 - 1) * 74);
     f.scale.setScalar(0.5 + Math.random() * 0.7);
     world2.add(f);
     w2anim.flames.push({ m: f, phase: Math.random() * 6.28, base: f.position.y, sz: f.scale.x });
   }
-  // 遠景獄山剪影
-  for (let i = 0; i < 16; i++) {
+  for (let a = 0; a < Math.PI * 2; a += 0.22) {
     const h = 22 + Math.random() * 30;
+    const r = 98 + Math.random() * 20;
     const mtn = new THREE.Mesh(
       new THREE.ConeGeometry(10 + Math.random() * 12, h, 5),
       new THREE.MeshBasicMaterial({ color: 0x120409, fog: false })
     );
-    const side = i % 2 === 0 ? -1 : 1;
-    mtn.position.set(side * (40 + Math.random() * 30), h / 2 - 4, 10 - Math.random() * 280);
+    mtn.position.set(Math.cos(a) * r, h / 2 - 4, Math.sin(a) * r);
     world2.add(mtn);
   }
 })();
 
-// ---------- 天界（第三關場景：雲海聖域） ----------
+// ---------- 天界（第三關場景：雲海聖域） ----------// ---------- 天界（第三關：雲海聖域，開放版） ----------
 let skyTex3 = null;
 const w3anim = { clouds: [], lanterns: [] };
 (function buildHeaven() {
@@ -720,39 +605,36 @@ const w3anim = { clouds: [], lanterns: [] };
   }
   const pathTex = new THREE.CanvasTexture(gc);
   pathTex.wrapS = pathTex.wrapT = THREE.RepeatWrapping;
-  pathTex.repeat.set(4, 44);
+  pathTex.repeat.set(20, 20);
   pathTex.colorSpace = THREE.SRGBColorSpace;
-  const bridge = new THREE.Mesh(new THREE.PlaneGeometry(30, 330), new THREE.MeshLambertMaterial({ map: pathTex }));
-  bridge.rotation.x = -Math.PI / 2;
-  bridge.position.set(0, 0.01, -105);
-  bridge.receiveShadow = true;
-  world3.add(bridge);
-  for (const side of [-1, 1]) {
-    const edge = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 330), new THREE.MeshBasicMaterial({ color: 0xffd070 }));
-    edge.position.set(side * 15, 0.15, -105);
+  const plat = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), new THREE.MeshLambertMaterial({ map: pathTex }));
+  plat.rotation.x = -Math.PI / 2;
+  plat.position.y = 0.01;
+  plat.receiveShadow = true;
+  world3.add(plat);
+  for (const [px, pz, w, d] of [[0, 81, 172, 0.5], [0, -81, 172, 0.5], [81, 0, 0.5, 172], [-81, 0, 0.5, 172]]) {
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(w, 0.3, d), new THREE.MeshBasicMaterial({ color: 0xffd070 }));
+    edge.position.set(px, 0.15, pz);
     world3.add(edge);
   }
   const pillarMat3 = new THREE.MeshLambertMaterial({ color: 0xaebfd8 });
   const capMat = new THREE.MeshBasicMaterial({ color: 0xffd070 });
   const crystalMat3 = new THREE.MeshBasicMaterial({ color: 0x6ae0ff });
-  for (const side of [-1, 1]) {
-    for (let z = 0; z > -240; z -= 16) {
-      const h = 6 + Math.random() * 3;
+  for (const b of OBSTACLES) {
+    for (const [cx, cz] of [[-b.hx + 1.2, -b.hz + 1.2], [b.hx - 1.2, -b.hz + 1.2], [-b.hx + 1.2, b.hz - 1.2], [b.hx - 1.2, b.hz - 1.2]]) {
+      const h = 7 + Math.random() * 3;
       const col = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, h, 10), pillarMat3);
-      col.position.set(side * 14, h / 2, z - Math.random() * 4);
+      col.position.set(b.x + cx, h / 2, b.z + cz);
       col.castShadow = true;
       world3.add(col);
       const cap = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8), capMat);
-      cap.position.set(col.position.x, h + 0.4, col.position.z);
+      cap.position.set(b.x + cx, h + 0.4, b.z + cz);
       world3.add(cap);
-      if (Math.random() < 0.4) {
-        const ch = 2 + Math.random() * 3;
-        const cr = new THREE.Mesh(new THREE.ConeGeometry(0.5, ch, 5), crystalMat3);
-        cr.position.set(side * (17 + Math.random() * 3), ch / 2 - 1, z - 6);
-        cr.rotation.z = side * 0.25;
-        world3.add(cr);
-      }
     }
+    const ch = 4 + Math.random() * 3;
+    const cr = new THREE.Mesh(new THREE.ConeGeometry(1, ch, 5), crystalMat3);
+    cr.position.set(b.x, ch / 2 + 0.3, b.z);
+    world3.add(cr);
   }
   const cloudTex = (() => {
     const cc = document.createElement('canvas');
@@ -765,33 +647,119 @@ const w3anim = { clouds: [], lanterns: [] };
     cg.fillStyle = rg; cg.fillRect(0, 0, 128, 128);
     return new THREE.CanvasTexture(cc);
   })();
-  for (let i = 0; i < 42; i++) {
+  for (let i = 0; i < 56; i++) {
     const cl = new THREE.Sprite(new THREE.SpriteMaterial({
       map: cloudTex, transparent: true, opacity: 0.5, depthWrite: false, color: 0xb8cce4,
     }));
-    const side = Math.random() < 0.5 ? -1 : 1;
-    cl.position.set(side * (17 + Math.random() * 26), -1.2 + Math.random() * 1.6, 12 - Math.random() * 264);
-    const sz = 7 + Math.random() * 12;
+    const a = Math.random() * 6.28;
+    const r = 84 + Math.random() * 34;
+    cl.position.set(Math.cos(a) * r, -1 + Math.random() * 2, Math.sin(a) * r);
+    const sz = 8 + Math.random() * 14;
     cl.scale.set(sz, sz * 0.42, 1);
     world3.add(cl);
     w3anim.clouds.push({ m: cl, phase: Math.random() * 6.28, x0: cl.position.x });
   }
-  for (let i = 0; i < 26; i++) {
+  for (let i = 0; i < 30; i++) {
     const lan = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffe0a0 }));
-    lan.position.set((Math.random() * 2 - 1) * 13, 2.5 + Math.random() * 4, 8 - Math.random() * 252);
+    lan.position.set((Math.random() * 2 - 1) * 72, 2.5 + Math.random() * 4, (Math.random() * 2 - 1) * 72);
     world3.add(lan);
     w3anim.lanterns.push({ m: lan, phase: Math.random() * 6.28, base: lan.position.y });
   }
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 12; i++) {
     const w = 10 + Math.random() * 16;
+    const a = (i / 12) * 6.28;
     const isle = new THREE.Mesh(new THREE.ConeGeometry(w, w * 0.9, 6), new THREE.MeshLambertMaterial({ color: 0x8aa8cc }));
     isle.rotation.x = Math.PI;
-    const side = i % 2 === 0 ? -1 : 1;
-    isle.position.set(side * (46 + Math.random() * 26), 12 + Math.random() * 16, -20 - Math.random() * 230);
+    isle.position.set(Math.cos(a) * (110 + Math.random() * 20), 14 + Math.random() * 16, Math.sin(a) * (110 + Math.random() * 20));
     world3.add(isle);
     const top = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.9, w, 2.2, 6), new THREE.MeshLambertMaterial({ color: 0xd8e6f4 }));
     top.position.set(isle.position.x, isle.position.y + w * 0.45 + 1, isle.position.z);
     world3.add(top);
+  }
+})();
+
+// ---------- 虛空（第四關：魂門之心） ----------
+let skyTex4 = null;
+const w4anim = { shards: [] };
+(function buildVoid() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 512;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0, '#020208');
+  grad.addColorStop(0.6, '#0a0620');
+  grad.addColorStop(1, '#1a0e38');
+  g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
+  for (let i = 0; i < 24; i++) {   // 星雲
+    const x = Math.random() * 1024, y = Math.random() * 420;
+    const cyan = Math.random() < 0.5;
+    const rg = g.createRadialGradient(x, y, 4, x, y, 50 + Math.random() * 80);
+    rg.addColorStop(0, cyan ? 'rgba(60,220,255,0.14)' : 'rgba(210,70,255,0.13)');
+    rg.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = rg;
+    g.beginPath(); g.arc(x, y, 130, 0, 6.28); g.fill();
+  }
+  g.fillStyle = '#ffffff';
+  for (let i = 0; i < 520; i++) {
+    g.globalAlpha = 0.25 + Math.random() * 0.75;
+    g.fillRect(Math.random() * 1024, Math.random() * 512, Math.random() < 0.05 ? 2 : 1, 1);
+  }
+  g.globalAlpha = 1;
+  skyTex4 = new THREE.CanvasTexture(c);
+  skyTex4.colorSpace = THREE.SRGBColorSpace;
+
+  const gc = document.createElement('canvas');
+  gc.width = gc.height = 512;
+  const gg = gc.getContext('2d');
+  gg.fillStyle = '#05040c'; gg.fillRect(0, 0, 512, 512);
+  gg.strokeStyle = 'rgba(70,200,255,0.22)'; gg.lineWidth = 1.5;
+  gg.shadowColor = '#40c8ff'; gg.shadowBlur = 5;
+  for (let i = 0; i <= 512; i += 64) {
+    gg.beginPath(); gg.moveTo(i, 0); gg.lineTo(i, 512); gg.stroke();
+    gg.beginPath(); gg.moveTo(0, i); gg.lineTo(512, i); gg.stroke();
+  }
+  gg.shadowBlur = 0;
+  gg.fillStyle = 'rgba(255,255,255,0.7)';
+  for (let i = 0; i < 200; i++) gg.fillRect(Math.random() * 512, Math.random() * 512, 1, 1);
+  const voidTex = new THREE.CanvasTexture(gc);
+  voidTex.wrapS = voidTex.wrapT = THREE.RepeatWrapping;
+  voidTex.repeat.set(8, 8);
+  voidTex.colorSpace = THREE.SRGBColorSpace;
+  const vg = new THREE.Mesh(new THREE.PlaneGeometry(172, 172), new THREE.MeshStandardMaterial({ map: voidTex, roughness: 0.25, metalness: 0.7 }));
+  vg.rotation.x = -Math.PI / 2;
+  vg.position.y = 0.01;
+  vg.receiveShadow = true;
+  world4.add(vg);
+  groundMats.push(vg.material);
+
+  const darkMat = new THREE.MeshLambertMaterial({ color: 0x0e0a1e });
+  const cyanMat = new THREE.MeshBasicMaterial({ color: 0x30e0ff });
+  const magMat = new THREE.MeshBasicMaterial({ color: 0xd040ff });
+  for (const b of OBSTACLES) {
+    for (let i = 0; i < 3; i++) {
+      const h = 9 + Math.random() * 12;
+      const mono = new THREE.Mesh(new THREE.ConeGeometry(3 + Math.random() * 2.5, h, 4), darkMat);
+      mono.position.set(b.x + (Math.random() * 2 - 1) * 5, h / 2, b.z + (Math.random() * 2 - 1) * 5);
+      mono.rotation.y = Math.random() * Math.PI;
+      mono.castShadow = true;
+      world4.add(mono);
+      const edge = new THREE.Mesh(new THREE.ConeGeometry(0.5, h * 0.7, 4), Math.random() < 0.5 ? cyanMat : magMat);
+      edge.position.set(mono.position.x, h * 0.4, mono.position.z);
+      world4.add(edge);
+    }
+  }
+  for (let i = 0; i < 26; i++) {
+    const sh = new THREE.Mesh(new THREE.OctahedronGeometry(0.7 + Math.random() * 1.4, 0), Math.random() < 0.5 ? cyanMat : magMat);
+    sh.position.set((Math.random() * 2 - 1) * 72, 3 + Math.random() * 12, (Math.random() * 2 - 1) * 72);
+    world4.add(sh);
+    w4anim.shards.push({ m: sh, phase: Math.random() * 6.28, base: sh.position.y });
+  }
+  for (let a = 0; a < Math.PI * 2; a += 0.28) {
+    const h = 24 + Math.random() * 26;
+    const r = 96 + Math.random() * 18;
+    const spike = new THREE.Mesh(new THREE.ConeGeometry(6 + Math.random() * 6, h, 4), darkMat);
+    spike.position.set(Math.cos(a) * r, h / 2 - 6, Math.sin(a) * r);
+    world4.add(spike);
   }
 })();
 
@@ -856,47 +824,21 @@ const honmoon = new THREE.Group();
   swirl.position.z = 0.1;
   honmoon.add(ring, ring2, disc, swirl);
   honmoon.userData.swirl = swirl;
-  honmoon.position.set(0, 15, -254);
+  honmoon.position.set(0, 17, -102);
   scene.add(honmoon);
 })();
 
-// ---------- 區界拱門＋光牆 ----------
+// ---------- 區界拱門＋光牆 ----------// ---------- （開放地圖：無區界關門） ----------
 const barriers = [];
-(function buildGates() {
-  const pillarMat = new THREE.MeshLambertMaterial({ color: 0x221838 });
-  for (let zi = 0; zi < ZONES.length; zi++) {
-    const z = ZONES[zi].boundZ;
-    for (const side of [-1, 1]) {
-      const p = new THREE.Mesh(new THREE.BoxGeometry(0.9, 7.6, 0.9), pillarMat);
-      p.position.set(side * 14.2, 3.8, z);
-      p.castShadow = true;
-      scene.add(p);
-    }
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(30, 0.4, 0.5), pillarMat);
-    bar.position.set(0, 7.6, z);
-    scene.add(bar);
-    const trim = new THREE.Mesh(new THREE.BoxGeometry(30, 0.14, 0.56), new THREE.MeshBasicMaterial({ color: 0xa04fff }));
-    trim.position.set(0, 7.35, z);
-    scene.add(trim);
-    if (zi === ZONES.length - 1) { barriers.push({ wall: null, open: false }); continue; }
-    const wall = new THREE.Mesh(
-      new THREE.PlaneGeometry(28.5, 7.1),
-      new THREE.MeshBasicMaterial({ color: 0x8a3fff, transparent: true, opacity: 0.3, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })
-    );
-    wall.position.set(0, 3.55, z);
-    scene.add(wall);
-    barriers.push({ wall, open: false });
-  }
-})();
 
 // ---------- 環境浮塵 ----------
 const embers = (() => {
   const N = IS_MOBILE ? 350 : 700;
   const pos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
-    pos[i * 3] = (Math.random() * 2 - 1) * 20;
+    pos[i * 3] = (Math.random() * 2 - 1) * 78;
     pos[i * 3 + 1] = Math.random() * 9;
-    pos[i * 3 + 2] = 8 - Math.random() * 258;
+    pos[i * 3 + 2] = (Math.random() * 2 - 1) * 78;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -1168,6 +1110,17 @@ const MUSIC = [
     ],
     hat16: false,
   },
+  { // 第四關：虛空終曲（Am–F–C–E，急速悲壯）——插在此註解前的陣列尾端由下方補上
+    bpm: 140,
+    prog: [[57, 60, 64, 67], [53, 57, 60, 64], [48, 52, 55, 59], [52, 56, 59, 64]],
+    lead: [
+      [81, 0, 0.5], [79, 0.5, 0.5], [81, 1, 0.5], [84, 1.5, 0.5], [81, 2, 1], [76, 3, 1],
+      [77, 4, 0.5], [76, 4.75, 0.25], [77, 5, 0.5], [81, 5.5, 0.5], [79, 6, 2],
+      [84, 8, 0.5], [83, 8.5, 0.5], [84, 9, 0.5], [88, 9.5, 0.5], [86, 10, 1], [81, 11, 1],
+      [80, 12, 1], [81, 13, 0.5], [83, 13.5, 0.5], [84, 14, 2],
+    ],
+    hat16: true,
+  },
   { // 第三關：天界頌歌（C–G–Am–F，明亮上揚）
     bpm: 132,
     prog: [[48, 52, 55, 59], [55, 59, 62, 65], [57, 60, 64, 67], [53, 57, 60, 64]],
@@ -1371,7 +1324,7 @@ let hitStopT = 0, shakeT = 0, shakeAmp = 0;
 let musou = 0;                      // 無雙集氣 0~100
 let worldT = 0, runStartT = 0, runTime = 0;
 
-const level = { zi: 0, phase: 'fight', zoneKills: 0, spawned: 0, boss: null };
+const level = { objs: [], bossPhase: false, boss: null };
 
 // 攻擊表（Rumi／Knight，1H 劍）
 const LIGHT = [
@@ -1425,7 +1378,7 @@ function updateBolts(dt) {
     b.spr.position.set(b.x, 1.3, b.z);
     const pulse = 1 + Math.sin(b.traveled * 6) * 0.12;
     b.spr.scale.set(1.1 * b.size * pulse, 0.62 * b.size * pulse, 1);
-    let dead = b.traveled > 20 || Math.abs(b.x) > HALF_W + 1;
+    let dead = b.traveled > 22 || Math.abs(b.x) > MAP_HALF + 1 || Math.abs(b.z) > MAP_HALF + 1;
     for (const e of enemies) {
       if (dead) break;
       if (e.st === 'dead' || e.st === 'spawn' || b.hitSet.has(e)) continue;
@@ -1494,6 +1447,12 @@ const KINDS = {
     atkRange: 3.6, hitRange: 4.0, atkTs: 0.95, kbMul: 0.06, shadowR: 1.9,
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 0, tint: 0xb070ff,
+  },
+  boss4: {
+    file: 'warrior', scale: 2.2, hp: 280, spdBase: 3.4, spdVar: 0, dmg: 22,
+    atkRange: 3.8, hitRange: 4.2, atkTs: 1.0, kbMul: 0.05, shadowR: 2.1,
+    atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
+    dropRate: 0, tint: 0x60c8ff,
   },
 };
 
@@ -1573,39 +1532,31 @@ function placeCityProps(props) {
     world1.add(m);
     return m;
   };
-  // 路邊停車（貼路緣、順著街道）
+  // 路邊停車（沿兩條主幹道）
   const carTypes = ['car_sedan', 'car_taxi', 'car_hatchback'];
-  for (let i = 0; i < 15; i++) {
-    const side = i % 2 === 0 ? 1 : -1;
-    const z = -9 - i * 15 - Math.random() * 5;
-    if (ZONES.some(zn => Math.abs(z - zn.boundZ) < 4.5)) continue;
-    put(carTypes[i % 3], side * 3.9, z, side > 0 ? 0 : Math.PI, 1.05);
-  }
-  // 路燈＋地面光池
-  for (let i = 0; i < 11; i++) {
-    const side = i % 2 === 0 ? -1 : 1;
-    const z = -16 - i * 21;
-    put('streetlight', side * 5.9, z, side > 0 ? Math.PI : 0, 1.35);
-    lightPool?.(side * 4.6, z, 7);
-  }
-  // 紅綠燈（區界斑馬線旁）
-  for (let zi = 0; zi < ZONES.length - 1; zi++) {
-    const z = ZONES[zi].boundZ;
-    put('trafficlight_A', 5.9, z + 4.6, Math.PI, 1.3);
-    put('trafficlight_A', -5.9, z - 1.2, 0, 1.3);
-  }
-  // 人行道雜物
   for (let i = 0; i < 8; i++) {
-    const side = i % 2 === 0 ? 1 : -1;
-    put('dumpster', side * 12.4, -22 - i * 27, side > 0 ? -Math.PI / 2 : Math.PI / 2, 1.2);
+    const k = -66 + i * 18 + Math.random() * 4;
+    if (Math.abs(k) < 8) continue;
+    put(carTypes[i % 3], (i % 2 === 0 ? 3.6 : -3.6), k, i % 2 === 0 ? 0 : Math.PI, 1.05);
+    put(carTypes[(i + 1) % 3], k, (i % 2 === 0 ? -3.6 : 3.6), i % 2 === 0 ? Math.PI / 2 : -Math.PI / 2, 1.05);
   }
+  // 路燈＋光池（幹道沿線）
   for (let i = 0; i < 7; i++) {
-    const side = i % 2 === 0 ? -1 : 1;
-    put('bench', side * 11.8, -14 - i * 32, side > 0 ? -Math.PI / 2 : Math.PI / 2, 1.2);
+    const k = -60 + i * 20;
+    put('streetlight', 6.2, k, Math.PI, 1.35);
+    lightPool?.(4.8, k, 7);
+    put('streetlight', k, -6.2, Math.PI / 2, 1.35);
+    lightPool?.(k, -4.8, 7);
   }
-  for (let i = 0; i < 6; i++) {
-    put('firehydrant', (i % 2 ? 1 : -1) * 6.1, -30 - i * 38, 0, 1.2);
-  }
+  // 紅綠燈（中央十字路口）
+  put('trafficlight_A', 6.2, 6.2, Math.PI, 1.3);
+  put('trafficlight_A', -6.2, -6.2, 0, 1.3);
+  // 雜物散布各街區邊
+  OBSTACLES.forEach((b, i) => {
+    if (i % 2 === 0) put('dumpster', b.x + b.hx + 2.2, b.z - 4, Math.PI / 2, 1.2);
+    else put('bench', b.x - b.hx - 2.2, b.z + 3, -Math.PI / 2, 1.2);
+    if (i % 3 === 0) put('firehydrant', b.x + 4, b.z + b.hz + 2.4, 0, 1.2);
+  });
 }
 
 // ---------- 敵人 ----------
@@ -1618,15 +1569,13 @@ const MAX_ATTACKERS = 3;
 
 function spawnEnemy(kindName, fx, fz) {
   const kind = KINDS[kindName];
-  const zone = ZONES[level.zi];
   let x, z;
   if (fx !== undefined) { x = fx; z = fz; }
   else {
-    for (let tries = 0; tries < 12; tries++) {
-      x = (Math.random() * 2 - 1) * (HALF_W - 1.5);
-      z = Math.max(zone.boundZ + 3, Math.min(zone.enterZ - 2, player.z - 6 - Math.random() * 20));
-      if (Math.hypot(x - player.x, z - player.z) > 5) break;
-    }
+    const a = Math.random() * 6.28;
+    const r = 12 + Math.random() * 12;
+    x = Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * r));
+    z = Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * r));
   }
   const src = assets[kind.file];
   const root = SkeletonUtils.clone(src.scene);
@@ -1699,10 +1648,10 @@ function killEnemy(e) {
   play(e.rig, 'Death_A', { once: true, ts: 1.3 });
   kills++;
   spawnSpark(new THREE.Vector3(e.x, 1.0, e.z), e.kindName === 'boss' ? 4 : 2.2, 0xa04fff);
-  if (!e.noCount && (!ZONES[level.zi].boss || e.kindName.startsWith('boss'))) level.zoneKills++;
+  if (!e.noCount && e.obj) e.obj.kills = (e.obj.kills || 0) + 1;
   if (Math.random() < e.kind.dropRate) spawnDrop(e.x, e.z);
   if (e.officer) {
-    level.officersLeft--;
+    if (e.obj) e.obj.officersLeft--;
     showToast('敵將討破！');
     S.zone();
     spawnShockwave(e.x, e.z, { maxR: 12, dur: 0.5, color: 0xffb056 });
@@ -1796,8 +1745,8 @@ function updateEnemies(dt) {
         for (let i = 0; i < 4; i++) {
           const a = Math.random() * 6.28, r = 3 + Math.random() * 2;
           spawnEnemy('minion',
-            Math.max(-HALF_W + 1, Math.min(HALF_W - 1, e.x + Math.cos(a) * r)),
-            Math.max(ZONES[level.zi].boundZ + 2, e.z + Math.sin(a) * r));
+            Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, e.x + Math.cos(a) * r)),
+            Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, e.z + Math.sin(a) * r)));
         }
       }
       if (e.castT >= e.castDur) {
@@ -1817,8 +1766,7 @@ function updateEnemies(dt) {
       }
       continue;
     }
-    e.x = Math.max(-HALF_W + 0.8, Math.min(HALF_W - 0.8, e.x));
-    e.z = Math.max(ZONES[level.zi].boundZ + 1, Math.min(1.5, e.z));
+    collideCircle(e, 0.7);
   }
   for (let i = 0; i < enemies.length; i++) {
     const a = enemies[i];
@@ -1850,136 +1798,123 @@ function updateEnemies(dt) {
   }
 }
 
-// ---------- 關卡進度 ----------
-function startZone(zi) {
-  level.zi = zi;
-  level.phase = 'fight';
-  level.zoneKills = 0;
-  level.spawned = 0;
-  const zone = ZONES[zi];
-  showToast(zone.name);
-  if (zone.boss) {
-    hud.bosswrap.style.display = 'block';
-    S.roar();
-    level.boss = spawnEnemy(zone.boss3 ? 'boss3' : zone.boss2 ? 'boss2' : 'boss', 0, zone.enterZ - 22);
-    for (let i = 0; i < 3; i++) spawnEnemy('minion');
-    showDialog(zone.boss3 ? STORY.s3boss : zone.boss2 ? STORY.s2boss : STORY.s1boss);
-  } else if (zone.type === 'capture') {
-    level.capT = 0;
-    capturePoint.position.x = 0;
-    capturePoint.position.z = (zone.enterZ + zone.boundZ) / 2;
-    capturePoint.visible = true;
-    for (let i = 0; i < 5; i++) spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
-  } else if (zone.type === 'officer') {
-    level.officersLeft = zone.officers;
+// ---------- 開放戰場目標系統 ----------
+function objSpawn(o, kindName) {
+  const a = Math.random() * 6.28;
+  const r = 7 + Math.random() * 9;
+  const e = spawnEnemy(kindName,
+    Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, o.pos[0] + Math.cos(a) * r)),
+    Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, o.pos[1] + Math.sin(a) * r)));
+  e.obj = o;
+  return e;
+}
+function activateObjective(o) {
+  o.state = 'active';
+  showToast(o.name);
+  S.zone();
+  if (o.type === 'officer') {
     const names = [...OFFICER_NAMES].sort(() => Math.random() - 0.5);
-    for (let i = 0; i < zone.officers; i++) {
-      const ox = (Math.random() * 2 - 1) * 9;
-      const oz = zone.enterZ - 10 - (i + 1) * ((zone.enterZ - zone.boundZ - 20) / (zone.officers + 1));
-      const off = spawnEnemy('elite', ox, oz);
+    for (let i = 0; i < o.officers; i++) {
+      const off = objSpawn(o, 'elite');
       off.officer = true;
       off.hp = off.hpMax = 14;
       makeOfficerBar(off, names[i % names.length]);
     }
-    for (let i = 0; i < 4; i++) spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
+    for (let i = 0; i < 4; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
   } else {
-    const elites = zone.elites || 0;
-    for (let i = 0; i < elites; i++) { spawnEnemy('elite'); level.spawned++; }
-    const first = Math.min(zone.cap - elites, zone.need - elites, 8);
-    for (let i = 0; i < first; i++) {
-      spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
-      level.spawned++;
-    }
+    for (let i = 0; i < 6; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
   }
-  level.ambushDone = false;
 }
-
+function completeObjective(o) {
+  o.state = 'done';
+  showToast(o.type === 'capture' ? '據點制壓！' : o.type === 'officer' ? '敵將全滅！' : '目標達成！');
+  S.zone();
+  if (o.type === 'capture') capturePoint.visible = false;
+  for (const m of [...enemies]) {
+    if (m.obj === o && m.st !== 'dead') { m.noCount = true; killEnemy(m); }
+  }
+  spawnShockwave(o.pos[0], o.pos[1], { maxR: 10, dur: 0.5, color: 0x8fffbf });
+}
+function startBossPhase() {
+  level.bossPhase = true;
+  const cfg = STAGES[stageIdx];
+  document.getElementById('bossname').textContent = cfg.bossLabel;
+  hud.bosswrap.style.display = 'block';
+  S.roar();
+  level.boss = spawnEnemy(cfg.bossKind, cfg.bossPos[0], cfg.bossPos[1]);
+  for (let i = 0; i < 4; i++) spawnEnemy('minion', cfg.bossPos[0] + (Math.random() * 2 - 1) * 8, cfg.bossPos[1] + (Math.random() * 2 - 1) * 8);
+  showToast(cfg.bossLabel + ' 現身！');
+  showDialog(STORY['s' + (stageIdx + 1) + 'boss'] || []);
+}
 function updateLevel(dt) {
-  const zone = ZONES[level.zi];
   const alive = enemies.filter(e => e.st !== 'dead').length;
-  if (level.phase === 'fight') {
-    if (zone.boss) {
-      hud.objective.textContent = '擊破 陰差隊長';
-      if (level.boss) hud.bossfill.style.width = Math.max(0, level.boss.hp / level.boss.hpMax * 100) + '%';
-    } else if (zone.type === 'capture') {
-      const inside = Math.hypot(player.x - capturePoint.position.x, player.z - capturePoint.position.z) < 4 && player.y < 1;
-      const contested = enemies.some(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - capturePoint.position.x, e.z - capturePoint.position.z) < 5);
-      if (inside) level.capT = Math.min(100, level.capT + dt * (contested ? 5 : 14));
-      hud.objective.textContent = inside
-        ? `制壓據點 ${Math.round(level.capT)}%${contested ? '（拮抗中！）' : ''}`
-        : `進入光陣制壓據點 ${Math.round(level.capT)}%`;
-      hud.objective.classList.remove('go');
-      if (alive < zone.cap && Math.random() < 0.3) {
-        spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
+  if (level.bossPhase) {
+    hud.objective.textContent = '擊破 ' + STAGES[stageIdx].bossLabel;
+    hud.objective.classList.remove('go');
+    if (level.boss) hud.bossfill.style.width = Math.max(0, level.boss.hp / level.boss.hpMax * 100) + '%';
+    return;
+  }
+  let remaining = 0;
+  let engaged = null;
+  for (const o of level.objs) {
+    if (o.state === 'done') continue;
+    remaining++;
+    const d = Math.hypot(player.x - o.pos[0], player.z - o.pos[1]);
+    if (o.state === 'dormant' && d < 26) activateObjective(o);
+    if (o.state !== 'active') continue;
+    if (!engaged || d < Math.hypot(player.x - engaged.pos[0], player.z - engaged.pos[1])) engaged = o;
+    const objAlive = enemies.filter(e => e.obj === o && e.st !== 'dead').length;
+    if (o.type === 'kill') {
+      if (o.spawned < o.need && objAlive < 12 && alive < 24 && Math.random() < 0.4) {
+        objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+        o.spawned++;
       }
-      if (level.capT >= 100) {
-        capturePoint.visible = false;
-        for (const m of [...enemies]) {
-          if (m.st !== 'dead') { m.noCount = true; killEnemy(m); }
-        }
-        level.phase = 'advance';
-        barriers[level.zi].open = true;
-        S.zone();
-        showToast('據點制壓！');
-      }
-    } else if (zone.type === 'officer') {
-      hud.objective.textContent = `討伐敵將 ${zone.officers - level.officersLeft}／${zone.officers}`;
-      hud.objective.classList.remove('go');
-      if (alive < zone.cap && Math.random() < 0.3) {
-        spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
-      }
-      if (level.officersLeft <= 0) {
-        level.phase = 'advance';
-        barriers[level.zi].open = true;
-        S.zone();
-        showToast('敵將全滅！');
-      }
-    } else {
-      hud.objective.textContent = `肅清區域 ${Math.min(level.zoneKills, zone.need)}／${zone.need}`;
-      hud.objective.classList.remove('go');
-      if (level.spawned < zone.need && alive < zone.cap && Math.random() < 0.45) {
-        spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
-        level.spawned++;
-      }
-      if (zone.ambush && !level.ambushDone && level.zoneKills >= zone.need * 0.5) {
-        level.ambushDone = true;
+      if (o.ambush && !o.ambushDone && o.kills >= o.need * 0.5) {
+        o.ambushDone = true;
         showToast('敵　襲　！');
         S.roar();
         for (let i = 0; i < 5; i++) {
+          const a = Math.random() * 6.28;
           const e = spawnEnemy(Math.random() < 0.5 ? 'runner' : 'minion',
-            (Math.random() * 2 - 1) * 10,
-            Math.min(1.5, player.z + 5 + Math.random() * 5));
+            player.x + Math.cos(a) * 9, player.z + Math.sin(a) * 9);
           e.noCount = true;
         }
       }
-      if (level.zoneKills >= zone.need && alive === 0) {
-        level.phase = 'advance';
-        barriers[level.zi].open = true;
-        S.zone();
-        showToast('區域肅清！');
-      }
+      if (o.kills >= o.need) completeObjective(o);
+    } else if (o.type === 'capture') {
+      const inside = Math.hypot(player.x - o.pos[0], player.z - o.pos[1]) < 4 && player.y < 1;
+      const contested = enemies.some(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - o.pos[0], e.z - o.pos[1]) < 5);
+      if (inside) o.capT = Math.min(100, o.capT + dt * (contested ? 5 : 14));
+      if (objAlive < 9 && alive < 24 && Math.random() < 0.28) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (o.capT >= 100) completeObjective(o);
+    } else if (o.type === 'officer') {
+      if (objAlive < 9 && alive < 24 && Math.random() < 0.25) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (o.officersLeft <= 0) completeObjective(o);
     }
-  } else if (level.phase === 'advance') {
-    hud.objective.textContent = '▲ 前進';
+  }
+  // 目標提示
+  if (engaged) {
+    if (engaged.type === 'kill') hud.objective.textContent = `${engaged.name}　殲滅 ${Math.min(engaged.kills, engaged.need)}／${engaged.need}`;
+    else if (engaged.type === 'capture') {
+      const inside = Math.hypot(player.x - engaged.pos[0], player.z - engaged.pos[1]) < 4;
+      const contested = enemies.some(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - engaged.pos[0], e.z - engaged.pos[1]) < 5);
+      hud.objective.textContent = `${engaged.name}　制壓 ${Math.round(engaged.capT)}%${inside && contested ? '（拮抗中！）' : ''}`;
+    }
+    else hud.objective.textContent = `${engaged.name}　討伐敵將 ${engaged.officers - engaged.officersLeft}／${engaged.officers}`;
+    hud.objective.classList.remove('go');
+  } else {
+    hud.objective.textContent = `剩餘目標 ${remaining}——依小地圖光點推進`;
     hud.objective.classList.add('go');
-    const next = ZONES[level.zi + 1];
-    if (next && player.z < next.enterZ - 4) startZone(level.zi + 1);
   }
-  for (const b of barriers) {
-    if (b.open && b.wall && b.wall.material.opacity > 0) {
-      b.wall.material.opacity = Math.max(0, b.wall.material.opacity - dt * 0.5);
-      if (b.wall.material.opacity === 0) b.wall.visible = false;
-    }
+  // 巡遊敵（地圖上的野生威脅）
+  const roamers = enemies.filter(e => !e.obj && !e.kindName.startsWith('boss') && e.st !== 'dead').length;
+  if (roamers < 5 && alive < 24 && Math.random() < 0.02) {
+    const a = Math.random() * 6.28;
+    spawnEnemy(Math.random() < 0.3 ? 'runner' : 'minion',
+      Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * 28)),
+      Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * 28)));
   }
-}
-
-function playerMinZ() {
-  const zone = ZONES[level.zi];
-  if (level.phase === 'advance') {
-    const next = ZONES[level.zi + 1];
-    return next ? next.boundZ + 1 : zone.boundZ + 1;
-  }
-  return zone.boundZ + 1;
+  if (remaining === 0) startBossPhase();
 }
 
 function onBossDown() {
@@ -2007,7 +1942,8 @@ function onBossDown() {
     const isLast = stageIdx >= STAGES.length - 1;
     document.getElementById('winTitle').textContent = isLast ? '魂門守住了' : '關卡突破！';
     document.getElementById('nextBtn').style.display = isLast ? 'none' : '';
-    hud.winStats.textContent = `通關時間 ${m}:${String(s).padStart(2, '0')} · 擊殺 ${kills} · 最大連段 ${maxCombo} · 剩餘 HP ${Math.round(player.hp)}`;
+    hud.winStats.textContent = `通關時間 ${m}:${String(s).padStart(2, '0')} · 擊殺 ${kills} · 最大連段 ${maxCombo} · 剩餘 HP ${Math.round(player.hp)}`
+      + (isLast ? '' : '　｜　升級獎勵：體力上限 +30、攻擊力 +12%');
     hud.win.classList.remove('hidden');
   };
   setTimeout(() => {
@@ -2019,7 +1955,7 @@ function onBossDown() {
 // ---------- 戰鬥 ----------
 function comboMul() { return 1 + Math.min(combo, 75) * 0.008; }
 function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
-  e.hp -= dmg * comboMul();
+  e.hp -= dmg * comboMul() * (1 + stageIdx * 0.12);
   if (e.bar) drawOfficerBar(e);
   e.flash = 0.13;
   e.vx += ux * kb * e.kind.kbMul;
@@ -2097,7 +2033,7 @@ function damagePlayer(dmg, from) {
     play(p.rig, 'death', { once: true, ts: 1.1 });
     state = 'dead';
     setTimeout(() => {
-      hud.deadStats.textContent = `推進到 ${ZONES[level.zi].name} · 擊殺 ${kills} · 最大連段 ${maxCombo}`;
+      hud.deadStats.textContent = `${STAGES[stageIdx].name} · 目標 ${(level.objs || []).filter(o => o.state === 'done').length}／${(level.objs || []).length} · 擊殺 ${kills} · 最大連段 ${maxCombo}`;
       hud.dead.classList.remove('hidden');
     }, 900);
   } else if (dmg >= 10 && (p.st === 'idle' || p.st === 'run')) {
@@ -2263,8 +2199,7 @@ function updatePlayer(dt) {
   }
   atkPressed = heavyPressed = jumpPressed = dodgePressed = musouPressed = false;
 
-  p.x = Math.max(-HALF_W, Math.min(HALF_W, p.x));
-  p.z = Math.max(playerMinZ(), Math.min(1.5, p.z));
+  collideCircle(p, 0.55);
   syncPlayer();
 
   for (let i = drops.length - 1; i >= 0; i--) {
@@ -2397,6 +2332,13 @@ function updateAmbient(dt) {
       l.m.position.y = l.base + Math.sin(worldT * 1.1 + l.phase) * 0.4;
     }
   }
+  if (world4.visible) {
+    for (const sh of w4anim.shards) {
+      sh.m.position.y = sh.base + Math.sin(worldT * 1.4 + sh.phase) * 0.5;
+      sh.m.rotation.y += dt * 1.2;
+      sh.m.rotation.x += dt * 0.6;
+    }
+  }
   if (world2.visible) {
     for (const f of w2anim.flames) {
       f.m.position.y = f.base + Math.sin(worldT * 2.2 + f.phase) * 0.35;
@@ -2456,48 +2398,54 @@ function updateCamera(dt) {
   camera.lookAt(camTarget.x, 1.5, camTarget.z - 4);
 }
 
-// ---------- 小地圖 ----------
+// ---------- 小地圖（方形戰場） ----------
 const mmCanvas = document.getElementById('minimap');
 const mmCtx = mmCanvas.getContext('2d');
 function drawMinimap() {
   const W2 = mmCanvas.width, H2 = mmCanvas.height;
-  const zToY = z => 6 + (-z / 240) * (H2 - 12);
-  const xToX = x => W2 / 2 + (x / 13.5) * (W2 / 2 - 8);
+  const mx = x => (x + MAP_HALF) / (MAP_HALF * 2) * (W2 - 8) + 4;
+  const mz = z => (z + MAP_HALF) / (MAP_HALF * 2) * (H2 - 8) + 4;
   mmCtx.clearRect(0, 0, W2, H2);
-  mmCtx.fillStyle = 'rgba(60,50,110,0.35)';
-  mmCtx.fillRect(8, 4, W2 - 16, H2 - 8);
-  for (let zi = 0; zi < ZONES.length; zi++) {
-    const b = barriers[zi];
-    const y = zToY(ZONES[zi].boundZ);
-    mmCtx.strokeStyle = b && b.open ? 'rgba(80,255,160,0.9)' : (b && b.wall ? 'rgba(190,120,255,0.9)' : 'rgba(120,120,160,0.5)');
-    mmCtx.lineWidth = 2;
-    mmCtx.beginPath(); mmCtx.moveTo(8, y); mmCtx.lineTo(W2 - 8, y); mmCtx.stroke();
+  mmCtx.fillStyle = 'rgba(60,50,110,0.3)';
+  mmCtx.fillRect(4, 4, W2 - 8, H2 - 8);
+  mmCtx.fillStyle = 'rgba(140,130,190,0.35)';
+  for (const b of OBSTACLES) {
+    mmCtx.fillRect(mx(b.x - b.hx), mz(b.z - b.hz), (b.hx * 2) / (MAP_HALF * 2) * (W2 - 8), (b.hz * 2) / (MAP_HALF * 2) * (H2 - 8));
   }
-  if (capturePoint.visible) {
-    mmCtx.strokeStyle = '#4fd8ff';
-    mmCtx.lineWidth = 1.5;
-    mmCtx.beginPath();
-    mmCtx.arc(xToX(capturePoint.position.x), zToY(capturePoint.position.z), 6, 0, 6.28);
-    mmCtx.stroke();
+  for (const o of (level.objs || [])) {
+    const px = mx(o.pos[0]), pz = mz(o.pos[1]);
+    if (o.state === 'done') {
+      mmCtx.fillStyle = 'rgba(80,255,160,0.9)';
+      mmCtx.fillRect(px - 2.5, pz - 2.5, 5, 5);
+    } else {
+      const pulse = 3.5 + Math.sin(worldT * 5) * 1.5;
+      mmCtx.strokeStyle = o.state === 'active' ? '#ffd84f' : 'rgba(200,180,255,0.8)';
+      mmCtx.lineWidth = o.state === 'active' ? 2 : 1.2;
+      mmCtx.beginPath();
+      mmCtx.arc(px, pz, o.state === 'active' ? pulse + 2 : 4, 0, 6.28);
+      mmCtx.stroke();
+    }
+  }
+  if (level.bossPhase && level.boss && level.boss.st !== 'dead') {
+    mmCtx.fillStyle = '#ff2050';
+    mmCtx.fillRect(mx(level.boss.x) - 3.5, mz(level.boss.z) - 3.5, 7, 7);
   }
   for (const e of enemies) {
-    if (e.st === 'dead') continue;
-    if (e.kindName.startsWith('boss')) {
-      mmCtx.fillStyle = '#ff2050';
-      mmCtx.fillRect(xToX(e.x) - 3, zToY(e.z) - 3, 6, 6);
-    } else if (e.officer) {
+    if (e.st === 'dead' || e.kindName.startsWith('boss')) continue;
+    if (e.officer) {
       mmCtx.fillStyle = '#ffb056';
-      mmCtx.fillRect(xToX(e.x) - 2, zToY(e.z) - 2, 5, 5);
+      mmCtx.fillRect(mx(e.x) - 2, mz(e.z) - 2, 4.5, 4.5);
     } else {
-      mmCtx.fillStyle = 'rgba(255,90,90,0.9)';
-      mmCtx.fillRect(xToX(e.x) - 1, zToY(e.z) - 1, 2.5, 2.5);
+      mmCtx.fillStyle = 'rgba(255,90,90,0.85)';
+      mmCtx.fillRect(mx(e.x) - 1, mz(e.z) - 1, 2.2, 2.2);
     }
   }
   mmCtx.fillStyle = '#ffffff';
   mmCtx.save();
-  mmCtx.translate(xToX(player.x), zToY(player.z));
+  mmCtx.translate(mx(player.x), mz(player.z));
+  mmCtx.rotate(Math.atan2(Math.sin(player.yaw), -Math.cos(player.yaw)) + Math.PI);
   mmCtx.beginPath();
-  mmCtx.moveTo(0, -4.5); mmCtx.lineTo(3.5, 3.5); mmCtx.lineTo(-3.5, 3.5);
+  mmCtx.moveTo(0, -4.5); mmCtx.lineTo(3.2, 3.2); mmCtx.lineTo(-3.2, 3.2);
   mmCtx.closePath(); mmCtx.fill();
   mmCtx.restore();
 }
@@ -2581,6 +2529,14 @@ const STORY = {
     ['陰差王', '獵魔士……汝竟踏入天界。此地，即汝之墓。'],
     ['RUMI', '墓誌銘我幫你想好了——「敗給了 HUNTR/X」。'],
   ],
+  s4open: [
+    ['RUMI', '虛空……魂門的心臟就在這裡跳動。'],
+    ['RUMI', '斬碎它，一切就結束了。最後一戰。'],
+  ],
+  s4boss: [
+    ['魂門之靈', '吾即是門，吾即是界。汝斬不斷「界」本身。'],
+    ['RUMI', '界不界的我不懂——我只知道，你擋路了。'],
+  ],
   ending: [
     ['RUMI', '魂門，守住了。'],
     ['RUMI', '但裂縫的另一端……還有更深的東西在看著我們。'],
@@ -2593,8 +2549,22 @@ function applyStageTint(i) {
   world1.visible = i === 0;
   world2.visible = i === 1;
   world3.visible = i === 2;
-  for (const b of barriers) {
-    if (b.wall) b.wall.material.color.set(i === 1 ? 0xff3050 : i === 2 ? 0x4fd8ff : 0x8a3fff);
+  world4.visible = i === 3;
+  if (i === 3) {
+    // 虛空：星雲魂門之心
+    if (skyMat && skyTex4) { skyMat.map = skyTex4; skyMat.needsUpdate = true; skyMat.color.set(0xffffff); }
+    scene.fog.color.set(0x090616);
+    scene.fog.near = 24; scene.fog.far = 95;
+    hemi.color.set(0x8a9aff); hemi.groundColor.set(0x101030); hemi.intensity = 0.9;
+    sun.color.set(0xaac8ff); sun.intensity = 1.1;
+    warmFill.color.set(0x40e0ff); warmFill.intensity = 0.4;
+    honmoon.children[0].material.color.set(0x40e0ff);
+    honmoon.children[1].material.color.set(0xd040ff);
+    rain.pts.visible = false;
+    embers.pts.material.color.set(0x80e8ff);
+    embers.pts.material.size = 0.18;
+    heroLight.color.set(0x9ad8ff);
+    return;
   }
   if (i === 2) {
     if (skyMat && skyTex3) { skyMat.map = skyTex3; skyMat.needsUpdate = true; skyMat.color.set(0xffffff); }
@@ -2634,7 +2604,7 @@ function applyStageTint(i) {
     if (skyMat && skyTex1) { skyMat.map = skyTex1; skyMat.needsUpdate = true; }
     scene.fog.color.set(0x140f28);
     scene.fog.near = 26; scene.fog.far = 100;
-    hemi.color.set(0x9a8aff); hemi.groundColor.set(0x201238); hemi.intensity = 1.1;
+    hemi.color.set(0x9a8aff); hemi.groundColor.set(0x241540); hemi.intensity = 1.25;
     sun.color.set(0xbfcaff); sun.intensity = 1.35;
     warmFill.color.set(0xff4fd0); warmFill.intensity = 0.35;
     if (skyMat) skyMat.color.set(0xffffff);
@@ -2652,7 +2622,6 @@ function applyStageTint(i) {
 }
 function loadStage(i) {
   stageIdx = i;
-  ZONES = STAGES[i].zones;
   applyStageTint(i);
   for (const e of enemies) { scene.remove(e.root); scene.remove(e.shadow); e.rig.mixer.stopAllAction(); }
   enemies.length = 0;
@@ -2660,25 +2629,30 @@ function loadStage(i) {
   drops.length = 0;
   for (const b of bolts) scene.remove(b.spr);
   bolts.length = 0;
-  for (const b of barriers) {
-    b.open = false;
-    if (b.wall) { b.wall.visible = true; b.wall.material.opacity = 0.3; }
-  }
-  const p = player;
-  p.x = 0; p.y = 0; p.z = 0; p.vy = 0; p.yaw = Math.PI;
-  p.hp = p.hpMax; p.invuln = 0; p.st = 'idle';
-  if (p.rig) play(p.rig, 'idle', { fade: 0 });
+  const cfg = STAGES[i];
+  level.objs = cfg.objectives.map(o => ({ ...o, state: 'dormant', kills: 0, spawned: 0, capT: 0, officersLeft: o.officers || 0, ambushDone: false }));
+  level.bossPhase = false;
   level.boss = null;
-  level.capT = 0; level.officersLeft = 0; level.ambushDone = false;
-  capturePoint.visible = false;
+  const capObj = level.objs.find(o => o.type === 'capture');
+  if (capObj) {
+    capturePoint.position.x = capObj.pos[0];
+    capturePoint.position.z = capObj.pos[1];
+    capturePoint.visible = true;
+  } else capturePoint.visible = false;
   musou = 0;
   if (AU.ctx) { AU.nextBar = AU.ctx.currentTime + 0.15; AU.bar = 0; }
   hud.bosswrap.style.display = 'none';
+  const p = player;
+  p.x = 0; p.y = 0; p.z = 64; p.vy = 0; p.yaw = Math.PI;
+  // 過關升級：體力上限＋攻擊力成長
+  p.hpMax = 100 + i * 30;
+  p.hp = p.hpMax;
+  p.invuln = 0; p.st = 'idle';
+  if (p.rig) play(p.rig, 'idle', { fade: 0 });
   state = 'play';
   runStartT = performance.now();
   showToast(STAGES[i].name);
-  startZone(0);
-  showDialog(i === 0 ? STORY.s1open : i === 1 ? STORY.s2open : STORY.s3open);
+  showDialog(i === 0 ? STORY.s1open : i === 1 ? STORY.s2open : i === 2 ? STORY.s3open : STORY.s4open);
 }
 function start() {
   initAudio();
@@ -2695,21 +2669,19 @@ function restart() {
 }
 
 // 開發用 debug hook
-window.__dbg = () => ({ state, stageIdx, weapon, musou, kills, combo, level: { zi: level.zi, phase: level.phase, zoneKills: level.zoneKills, spawned: level.spawned, bossHp: level.boss?.hp }, player, enemies: enemies.length, alive: enemies.filter(e => e.st !== 'dead').length });
+window.__dbg = () => ({ state, stageIdx, weapon, musou, kills, combo, objs: (level.objs || []).map(o => o.state), bossPhase: level.bossPhase, bossHp: level.boss?.hp, player, enemies: enemies.length, alive: enemies.filter(e => e.st !== 'dead').length });
 window.__lvl = level;
 window.__stage = loadStage;
 window.__switch = switchWeapon;
 window.__E = enemies;
 window.__P = player;
-window.__warp = zi => {
-  for (const e of enemies) { scene.remove(e.root); scene.remove(e.shadow); e.rig.mixer.stopAllAction(); }
-  enemies.length = 0;
-  for (let i = 0; i < zi; i++) barriers[i].open = true;
-  player.x = 0; player.z = ZONES[zi].enterZ - 6;
-  startZone(zi);
+window.__warp = k => {   // 測試用：完成前 k 個目標
+  for (let i = 0; i < Math.min(k, level.objs.length); i++) {
+    if (level.objs[i].state !== 'done') completeObjective(level.objs[i]);
+  }
 };
 window.__gl = { renderer, composer, scene, camera };
-window.__cap = (mode = 'composer') => {   // 手動渲染一幀並回傳像素統計（隱藏分頁時驗證用）
+window.__cap = (mode = 'composer') => {
   updateCamera(0.016);
   if (mode === 'direct') renderer.render(scene, camera);
   else composer.render();
@@ -2718,12 +2690,12 @@ window.__cap = (mode = 'composer') => {   // 手動渲染一幀並回傳像素�
   const g = c2.getContext('2d');
   g.drawImage(renderer.domElement, 0, 0, 120, 68);
   const d = g.getImageData(0, 0, 120, 68).data;
-  let sum = 0, mx = 0, bright = 0;
+  let sum = 0, mx = 0;
   for (let i = 0; i < d.length; i += 4) {
     const l = (d[i] + d[i + 1] + d[i + 2]) / 3;
-    sum += l; if (l > mx) mx = l; if (l > 60) bright++;
+    sum += l; if (l > mx) mx = l;
   }
-  return { avg: +(sum / (d.length / 4)).toFixed(1), max: mx, brightPx: bright, url: c2.toDataURL() };
+  return { avg: +(sum / (d.length / 4)).toFixed(1), max: mx };
 };
 window.__key = (code, downMs = 60) => {
   dispatchEvent(new KeyboardEvent('keydown', { code, bubbles: true }));
