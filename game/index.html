@@ -15,6 +15,12 @@
   #hpbar{margin-top:4px;height:14px;background:rgba(20,20,40,.7);border:1px solid rgba(160,79,255,.5);border-radius:7px;overflow:hidden}
   #hpfill{height:100%;width:100%;background:linear-gradient(90deg,#ff4fa3,#a04fff);box-shadow:0 0 12px #ff4fa3;transition:width .12s}
   #wpn{margin-top:5px;font-size:13px;font-weight:700;color:#c9a4ff;text-shadow:0 0 8px #a04fff}
+  #musoubar{position:relative;margin-top:6px;height:11px;background:rgba(30,20,10,.7);border:1px solid rgba(255,200,80,.45);border-radius:6px;overflow:hidden}
+  #musoufill{height:100%;width:0%;background:linear-gradient(90deg,#ffd84f,#ff7ac8);transition:width .15s}
+  #musoubar.full{border-color:#ffd84f;box-shadow:0 0 14px #ffd84f;animation:musouPulse .7s infinite alternate}
+  #musoubar.full #musoufill{background:linear-gradient(90deg,#fff3b0,#ffd84f,#ff7ac8)}
+  @keyframes musouPulse{from{box-shadow:0 0 8px #ffd84f}to{box-shadow:0 0 22px #ffb02e}}
+  #musoulabel{position:absolute;right:6px;top:-1px;font-size:9px;font-weight:800;color:rgba(255,255,255,.75)}
   #kills{position:absolute;top:18px;right:26px;font-size:30px;font-weight:800;text-shadow:0 0 12px rgba(160,79,255,.8)}
   #combo{position:absolute;top:70px;right:26px;font-size:40px;font-weight:900;color:#e8d8ff;opacity:0;text-shadow:0 0 16px #a04fff;transition:opacity .15s}
   #combo.hot{color:#ffd84f;text-shadow:0 0 18px #ff9d2e}
@@ -62,6 +68,8 @@
   #btnJ{right:36px;bottom:188px}
   #btnR{right:140px;bottom:132px}
   #btnW{right:36px;bottom:280px;width:52px;height:52px;font-size:15px}
+  #btnU{right:214px;bottom:52px;width:58px;height:58px;opacity:.35}
+  #btnU.ready{opacity:1;border-color:#ffd84f;color:#ffd84f;box-shadow:0 0 16px #ffd84f;animation:musouPulse .7s infinite alternate}
   #mute{position:fixed;top:64px;right:26px;z-index:6;pointer-events:auto;cursor:pointer;font-size:20px;
     background:rgba(10,10,30,.5);border:1px solid rgba(160,79,255,.4);border-radius:50%;width:40px;height:40px;color:#fff}
   #rotate{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;
@@ -91,6 +99,7 @@
   <div class="tbtn" id="btnJ">跳</div>
   <div class="tbtn" id="btnR">滾</div>
   <div class="tbtn" id="btnW">換</div>
+  <div class="tbtn" id="btnU">絕</div>
 </div>
 <div id="dialog">
   <div id="dlgName">RUMI</div>
@@ -102,6 +111,7 @@
     <div id="hpname">RUMI</div>
     <div id="hpbar"><div id="hpfill"></div></div>
     <div id="wpn">⚔ 近戰</div>
+    <div id="musoubar"><div id="musoufill"></div><span id="musoulabel">絕 E</span></div>
   </div>
   <div id="objective">－</div>
   <div id="bosswrap">
@@ -111,7 +121,7 @@
   <div id="kills">擊殺 0</div>
   <div id="combo"></div>
   <div id="toast"></div>
-  <div id="hint">WASD 移動 · J 輕攻擊 · K 重攻擊 · Space 跳躍（空中＋J＝下墜斬） · Shift 翻滾</div>
+  <div id="hint">WASD 移動 · J 輕攻擊 · K 重攻擊 · Q 換武器 · Space 跳躍 · Shift 翻滾 · E 氣滿放大絕</div>
 </div>
 <div id="title" class="overlay">
   <h1>HUNTR/X：魂門之戰</h1>
@@ -141,6 +151,6 @@
   }
 }
 </script>
-<script type="module" src="main.js?v=20260718g"></script>
+<script type="module" src="main.js?v=20260718i"></script>
 </body>
 </html>

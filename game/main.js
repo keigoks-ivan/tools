@@ -20,19 +20,21 @@ const STAGES = [
   {
     name: '第一關　首爾夜市・魂門裂縫',
     zones: [
-      { name: '夜市街口',  enterZ: 0,    boundZ: -45,  need: 10, cap: 7,  elites: 0 },
-      { name: '夜市主街',  enterZ: -45,  boundZ: -90,  need: 22, cap: 13, elites: 0 },
-      { name: '十字路口',  enterZ: -90,  boundZ: -135, need: 12, cap: 8,  elites: 2 },
-      { name: '魂門裂縫',  enterZ: -135, boundZ: -172, boss: true },
+      { name: '夜市街口',  enterZ: 0,    boundZ: -48,  need: 14, cap: 9,  elites: 0 },
+      { name: '夜市主街',  enterZ: -48,  boundZ: -96,  need: 28, cap: 14, elites: 0 },
+      { name: '後巷亂戰',  enterZ: -96,  boundZ: -144, need: 24, cap: 13, elites: 1 },
+      { name: '十字路口',  enterZ: -144, boundZ: -192, need: 20, cap: 11, elites: 3 },
+      { name: '魂門裂縫',  enterZ: -192, boundZ: -240, boss: true },
     ],
   },
   {
     name: '第二關　血月大街・陰差軍團',
     zones: [
-      { name: '血月街口',    enterZ: 0,    boundZ: -45,  need: 16, cap: 9,  elites: 0, fast: 0.35 },
-      { name: '亡者大街',    enterZ: -45,  boundZ: -90,  need: 28, cap: 15, elites: 1, fast: 0.5 },
-      { name: '厲鬼十字路',  enterZ: -90,  boundZ: -135, need: 16, cap: 10, elites: 3, fast: 0.5 },
-      { name: '魂門最終防線', enterZ: -135, boundZ: -172, boss: true, boss2: true },
+      { name: '血月街口',    enterZ: 0,    boundZ: -48,  need: 20, cap: 11, elites: 0, fast: 0.35 },
+      { name: '亡者大街',    enterZ: -48,  boundZ: -96,  need: 34, cap: 16, elites: 1, fast: 0.5 },
+      { name: '厲鬼後巷',    enterZ: -96,  boundZ: -144, need: 30, cap: 14, elites: 2, fast: 0.55 },
+      { name: '修羅十字路',  enterZ: -144, boundZ: -192, need: 26, cap: 12, elites: 4, fast: 0.5 },
+      { name: '魂門最終防線', enterZ: -192, boundZ: -240, boss: true, boss2: true },
     ],
   },
 ];
@@ -93,7 +95,7 @@ scene.add(heroLight);
 let skyMat = null;
 (function buildSky() {
   const sky = new THREE.Mesh(
-    new THREE.SphereGeometry(230, 48, 24),
+    new THREE.SphereGeometry(290, 48, 24),
     new THREE.MeshBasicMaterial({ color: 0x0a0818, side: THREE.BackSide, fog: false })
   );
   sky.position.set(0, 0, -85);
@@ -210,6 +212,7 @@ function makeStorefrontTex() {
 let lightPool = null;
 const groundMats = [];
 const flickers = [];
+const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
 (function buildKoreanStreet() {
   // 柏油路面
   const ac = document.createElement('canvas');
@@ -222,18 +225,18 @@ const flickers = [];
   }
   const asphalt = new THREE.CanvasTexture(ac);
   asphalt.wrapS = asphalt.wrapT = THREE.RepeatWrapping;
-  asphalt.repeat.set(3, 70);
+  asphalt.repeat.set(3, 92);
   asphalt.colorSpace = THREE.SRGBColorSpace;
   const roadMat = new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.32, metalness: 0.62 });
   groundMats.push(roadMat);
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(11, 250), roadMat);
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(11, 330), roadMat);
   road.rotation.x = -Math.PI / 2;
-  road.position.set(0, 0, -85);
+  road.position.set(0, 0, -105);
   road.receiveShadow = true;
   scene.add(road);
   // 車道虛線＋邊線
   const dashMat = new THREE.MeshBasicMaterial({ color: 0x8a8a80 });
-  for (let z = 6; z > -176; z -= 4) {
+  for (let z = 6; z > -244; z -= 4) {
     const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 1.6), dashMat);
     dash.rotation.x = -Math.PI / 2;
     dash.position.set(0, 0.012, z);
@@ -241,9 +244,9 @@ const flickers = [];
   }
   const edgeMat = new THREE.MeshBasicMaterial({ color: 0x8a7228 });
   for (const side of [-1, 1]) {
-    const line = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 250), edgeMat);
+    const line = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 330), edgeMat);
     line.rotation.x = -Math.PI / 2;
-    line.position.set(side * 5.1, 0.012, -85);
+    line.position.set(side * 5.1, 0.012, -105);
     scene.add(line);
   }
   // 人行道（磚格）
@@ -264,26 +267,26 @@ const flickers = [];
   }
   const paveTex = new THREE.CanvasTexture(sc);
   paveTex.wrapS = paveTex.wrapT = THREE.RepeatWrapping;
-  paveTex.repeat.set(4, 100);
+  paveTex.repeat.set(4, 132);
   paveTex.colorSpace = THREE.SRGBColorSpace;
   const walkMat = new THREE.MeshStandardMaterial({ map: paveTex, roughness: 0.5, metalness: 0.4 });
   groundMats.push(walkMat);
   new THREE.TextureLoader().load('assets/gen/pavement.jpg', tex => {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(3, 80);
+    tex.repeat.set(3, 106);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
     walkMat.map = tex;
     walkMat.needsUpdate = true;
   });
   for (const side of [-1, 1]) {
-    const walk = new THREE.Mesh(new THREE.PlaneGeometry(9.5, 250), walkMat);
+    const walk = new THREE.Mesh(new THREE.PlaneGeometry(9.5, 330), walkMat);
     walk.rotation.x = -Math.PI / 2;
-    walk.position.set(side * 10.1, 0.03, -85);
+    walk.position.set(side * 10.1, 0.03, -105);
     walk.receiveShadow = true;
     scene.add(walk);
-    const curb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.12, 250), new THREE.MeshLambertMaterial({ color: 0x4a4658 }));
-    curb.position.set(side * 5.35, 0.06, -85);
+    const curb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.12, 330), new THREE.MeshLambertMaterial({ color: 0x4a4658 }));
+    curb.position.set(side * 5.35, 0.06, -105);
     curb.receiveShadow = true;
     scene.add(curb);
   }
@@ -304,7 +307,7 @@ const flickers = [];
   let wi = 0;
   for (const side of [-1, 1]) {
     let z = -2;
-    while (z > -170) {
+    while (z > -238) {
       const w = 7 + Math.random() * 3.5;
       const zc = z - w / 2;
       z -= w + 0.35;
@@ -316,16 +319,20 @@ const flickers = [];
       body.position.set(bx, h / 2, zc);
       body.castShadow = true; body.receiveShadow = true;
       scene.add(body);
+      const winMat = new THREE.MeshBasicMaterial({ map: winTexs[wi % 3] });
+      ENV.wins.push(winMat);
       const win = new THREE.Mesh(
         new THREE.PlaneGeometry(w - 0.8, h - 4.6),
-        new THREE.MeshBasicMaterial({ map: winTexs[wi % 3] })
+        winMat
       );
       win.position.set(side * 14.88, (h + 4.2) / 2, zc);
       win.rotation.y = side * -Math.PI / 2;
       scene.add(win);
+      const frontMat = new THREE.MeshBasicMaterial({ map: makeStorefrontTex() });
+      ENV.fronts.push(frontMat);
       const front = new THREE.Mesh(
         new THREE.PlaneGeometry(w - 0.5, 3.1),
-        new THREE.MeshBasicMaterial({ map: makeStorefrontTex() })
+        frontMat
       );
       front.position.set(side * 14.87, 1.62, zc);
       front.rotation.y = side * -Math.PI / 2;
@@ -338,6 +345,7 @@ const flickers = [];
         new THREE.MeshBasicMaterial({ map: signTex }),
         darkMat, darkMat, darkMat, darkMat,
       ];
+      ENV.signs.push(signMats[0], signMats[1]);
       const sign = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.15, w - 0.4), signMats);
       sign.position.set(side * 14.7, 3.85, zc);
       scene.add(sign);
@@ -351,6 +359,7 @@ const flickers = [];
           new THREE.MeshBasicMaterial({ map: vTex }),
           vDark, vDark, vDark, vDark,
         ];
+        ENV.signs.push(vMats[0], vMats[1]);
         const v = new THREE.Mesh(new THREE.BoxGeometry(0.28, 3.4, 0.9), vMats);
         v.position.set(side * 14.35, 4.6 + Math.random() * 2, zc - w / 2 + 0.8);
         scene.add(v);
@@ -362,11 +371,12 @@ const flickers = [];
   // 布帳馬車（橘色帳篷攤）
   const tentMats = [0x3a4a8a, 0x4a3a7a, 0x2e3a6e].map(c => new THREE.MeshLambertMaterial({ color: c }));
   const tentGlow = new THREE.MeshBasicMaterial({ color: 0xffa8d8 });
+  ENV.tentGlows.push(tentGlow);
   const counterMat = new THREE.MeshLambertMaterial({ color: 0x3a3548 });
   const poleMat = new THREE.MeshLambertMaterial({ color: 0x585868 });
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 13; i++) {
     const side = i % 2 === 0 ? -1 : 1;
-    const z = -12 - i * 18 - Math.random() * 6;
+    const z = -12 - i * 17.5 - Math.random() * 6;
     if (ZONES.some(zn => Math.abs(z - zn.boundZ) < 5)) continue;
     const x = side * (10.8 + Math.random() * 1.6);
     const grp = new THREE.Group();
@@ -397,7 +407,7 @@ const flickers = [];
   const wireMat = new THREE.MeshBasicMaterial({ color: 0x08080e });
   const poleMat2 = new THREE.MeshLambertMaterial({ color: 0x2e2a38 });
   const polePts = [];
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 9; i++) {
     const z = -8 - i * 26;
     const side = i % 2 === 0 ? 1 : -1;
     const x = side * 13.2;
@@ -454,7 +464,7 @@ const flickers = [];
   const mats = [46, 190, 285].map(h => new THREE.MeshBasicMaterial({ map: makeWindowTex(h) }));
   let i = 0;
   for (const side of [-1, 1]) {
-    for (let z = 15; z > -195; z -= 10 + Math.random() * 6) {
+    for (let z = 15; z > -262; z -= 10 + Math.random() * 6) {
       const w = 6 + Math.random() * 8;
       const h = 12 + Math.random() * 26;
       const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), mats[i++ % 3]);
@@ -465,7 +475,7 @@ const flickers = [];
   for (let x = -60; x <= 60; x += 12) {
     const h = 16 + Math.random() * 22;
     const b = new THREE.Mesh(new THREE.BoxGeometry(9, h, 9), mats[i++ % 3]);
-    b.position.set(x, h / 2, -205 - Math.random() * 10);
+    b.position.set(x, h / 2, -275 - Math.random() * 10);
     scene.add(b);
   }
   // 南山塔（山丘剪影＋塔身＋觀景台）
@@ -473,31 +483,31 @@ const flickers = [];
     new THREE.ConeGeometry(30, 16, 6),
     new THREE.MeshBasicMaterial({ color: 0x0c0a18, fog: false })
   );
-  hill.position.set(46, 7, -200);
+  hill.position.set(46, 7, -268);
   scene.add(hill);
   const tower = new THREE.Mesh(
     new THREE.CylinderGeometry(0.8, 1.2, 20, 8),
     new THREE.MeshBasicMaterial({ color: 0x262040, fog: false })
   );
-  tower.position.set(46, 25, -200);
+  tower.position.set(46, 25, -268);
   scene.add(tower);
   const deck = new THREE.Mesh(
     new THREE.CylinderGeometry(2.6, 2.2, 2.2, 10),
     new THREE.MeshBasicMaterial({ color: 0xffd9a0, fog: false })
   );
-  deck.position.set(46, 36, -200);
+  deck.position.set(46, 36, -268);
   scene.add(deck);
   const antenna = new THREE.Mesh(
     new THREE.CylinderGeometry(0.1, 0.16, 7, 5),
     new THREE.MeshBasicMaterial({ color: 0x383050, fog: false })
   );
-  antenna.position.set(46, 40.5, -200);
+  antenna.position.set(46, 40.5, -268);
   scene.add(antenna);
   const beacon = new THREE.Mesh(
     new THREE.SphereGeometry(0.35, 8, 6),
     new THREE.MeshBasicMaterial({ color: 0xff3a3a, fog: false })
   );
-  beacon.position.set(46, 44, -200);
+  beacon.position.set(46, 44, -268);
   scene.add(beacon);
 })();
 
@@ -541,7 +551,7 @@ const honmoon = new THREE.Group();
   swirl.position.z = 0.1;
   honmoon.add(ring, ring2, disc, swirl);
   honmoon.userData.swirl = swirl;
-  honmoon.position.set(0, 15, -186);
+  honmoon.position.set(0, 15, -254);
   scene.add(honmoon);
 })();
 
@@ -581,7 +591,7 @@ const embers = (() => {
   for (let i = 0; i < N; i++) {
     pos[i * 3] = (Math.random() * 2 - 1) * 20;
     pos[i * 3 + 1] = Math.random() * 9;
-    pos[i * 3 + 2] = 8 - Math.random() * 190;
+    pos[i * 3 + 2] = 8 - Math.random() * 258;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -807,12 +817,39 @@ function initAudio() {
   const nd = nb.getChannelData(0);
   for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
   AU.noise = nb;
+  // 主旋律匯流排＋節奏延遲（空間感）
+  AU.lead = ctx.createGain(); AU.lead.gain.value = 1;
+  AU.lead.connect(AU.music);
+  const dly = ctx.createDelay(1.5); dly.delayTime.value = 0.34;
+  const fb = ctx.createGain(); fb.gain.value = 0.3;
+  const wet = ctx.createGain(); wet.gain.value = 0.28;
+  AU.lead.connect(dly); dly.connect(fb); fb.connect(dly); dly.connect(wet); wet.connect(AU.music);
   AU.nextBar = ctx.currentTime + 0.1;
   AU.timer = setInterval(scheduleMusic, 200);
 }
-const BPM = 126, SPB = 60 / BPM, BAR = SPB * 4;
-const CHORDS = [
-  [57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62],   // Am F C G
+const MUSIC = [
+  { // 第一關：synthwave 夜街（Am–F–C–G，明快 hook）
+    bpm: 126,
+    prog: [[57, 60, 64, 67], [53, 57, 60, 64], [48, 52, 55, 59], [55, 59, 62, 65]],
+    lead: [
+      [76, 0, 0.75], [74, 0.75, 0.25], [72, 1, 0.5], [74, 1.5, 0.5], [76, 2, 1], [79, 3, 0.5], [76, 3.5, 0.5],
+      [74, 4, 0.75], [72, 4.75, 0.25], [69, 5, 1], [72, 6, 0.5], [74, 6.5, 0.5], [76, 7, 1],
+      [72, 8, 0.75], [74, 8.75, 0.25], [76, 9, 0.5], [79, 9.5, 0.5], [81, 10, 1.25], [79, 11.25, 0.75],
+      [76, 12, 0.75], [74, 12.75, 0.25], [72, 13, 1], [69, 14, 1.5], [64, 15.5, 0.5],
+    ],
+    hat16: true,
+  },
+  { // 第二關：血月暗黑小調（Am–G–F–E，沉重緩慢）
+    bpm: 116,
+    prog: [[57, 60, 64, 67], [55, 59, 62, 65], [53, 57, 60, 64], [52, 56, 59, 64]],
+    lead: [
+      [69, 0, 1.5], [72, 1.5, 0.5], [71, 2, 1], [69, 3, 1],
+      [67, 4, 1.5], [69, 5.5, 0.5], [71, 6, 2],
+      [74, 8, 1], [72, 9, 0.5], [71, 9.5, 0.5], [69, 10, 1.5], [64, 11.5, 0.5],
+      [65, 12, 1], [64, 13, 1], [63, 14, 2],
+    ],
+    hat16: false,
+  },
 ];
 function tone(type, freq, t, dur, gain, dest, freqEnd) {
   const o = AU.ctx.createOscillator(), g = AU.ctx.createGain();
@@ -837,27 +874,40 @@ function noiseHit(t, dur, gain, filterType, freq, dest, q = 1) {
 function scheduleMusic() {
   const ctx = AU.ctx;
   if (!ctx || ctx.state !== 'running') return;
-  while (AU.nextBar < ctx.currentTime + 0.6) {
+  const cfg = MUSIC[Math.min(stageIdx, MUSIC.length - 1)];
+  const spb = 60 / cfg.bpm, barLen = spb * 4;
+  while (AU.nextBar < ctx.currentTime + 0.8) {
     const t0 = AU.nextBar;
-    const ch = CHORDS[AU.bar % 4];
+    const bi = AU.bar % 4;
+    const ch = cfg.prog[bi];
     const root = midi(ch[0] - 24);
     for (let b = 0; b < 4; b++) {
-      const bt = t0 + b * SPB;
+      const bt = t0 + b * spb;
       tone('sine', 150, bt, 0.16, 0.5, AU.music, 44);                    // kick
-      if (b === 1 || b === 3) noiseHit(bt, 0.13, 0.26, 'bandpass', 1900, AU.music, 0.9);  // snare
-      noiseHit(bt + SPB / 2, 0.045, 0.1, 'highpass', 8500, AU.music);    // hat
-      tone('sawtooth', root, bt, SPB * 0.46, 0.14, AU.music);            // bass
-      tone('sawtooth', root * (b === 2 ? 1.5 : 2), bt + SPB / 2, SPB * 0.4, 0.09, AU.music);
+      if (b === 1 || b === 3) noiseHit(bt, 0.13, 0.24, 'bandpass', 1900, AU.music, 0.9);
+      noiseHit(bt + spb / 2, 0.045, 0.1, 'highpass', 8500, AU.music);
+      if (cfg.hat16) noiseHit(bt + spb * 0.25, 0.03, 0.05, 'highpass', 9800, AU.music);
+      tone('sawtooth', root, bt, spb * 0.46, 0.13, AU.music);            // bass
+      tone('sawtooth', root * (b === 2 ? 1.5 : 2), bt + spb / 2, spb * 0.4, 0.08, AU.music);
     }
-    for (const n of ch) {                                                // pad
-      tone('sawtooth', midi(n) * 0.999, t0, BAR * 0.95, 0.028, AU.music);
-      tone('sawtooth', midi(n) * 1.004, t0, BAR * 0.95, 0.028, AU.music);
+    if (bi === 3) {                                                      // 第4小節 snare 過門
+      for (let i = 0; i < 4; i++) noiseHit(t0 + barLen - spb / 2 + i * spb / 8, 0.06, 0.1 + i * 0.04, 'bandpass', 2100, AU.music);
     }
-    const arp = [ch[0] + 12, ch[1] + 12, ch[2] + 12, ch[1] + 24];        // arp 16ths
-    for (let i = 0; i < 16; i++) {
-      tone('triangle', midi(arp[i % 4]), t0 + i * SPB / 4, 0.1, 0.05, AU.music);
+    for (const n of ch) {                                                // 7th 和弦 pad
+      tone('sawtooth', midi(n) * 0.998, t0, barLen * 0.95, 0.02, AU.music);
+      tone('sawtooth', midi(n) * 1.004, t0, barLen * 0.95, 0.02, AU.music);
     }
-    AU.nextBar += BAR;
+    const arp = [ch[0] + 12, ch[1] + 12, ch[2] + 12, ch[3] + 12];        // arp 8ths → 進延遲
+    for (let i = 0; i < 8; i++) {
+      tone('triangle', midi(arp[i % 4]), t0 + i * spb / 2, 0.13, 0.035, AU.lead);
+    }
+    if (bi === 0) {                                                      // 主旋律 hook（4 小節一循環）
+      for (const [n, beat, len] of cfg.lead) {
+        tone('square', midi(n), t0 + beat * spb, len * spb * 0.9, 0.075, AU.lead);
+        tone('sawtooth', midi(n) * 1.004, t0 + beat * spb, len * spb * 0.9, 0.045, AU.lead);
+      }
+    }
+    AU.nextBar += barLen;
     AU.bar++;
   }
 }
@@ -892,7 +942,7 @@ document.addEventListener('visibilitychange', () => {
 
 // ---------- 輸入 ----------
 const keys = new Set();
-let atkPressed = false, heavyPressed = false, jumpPressed = false, dodgePressed = false;
+let atkPressed = false, heavyPressed = false, jumpPressed = false, dodgePressed = false, musouPressed = false;
 addEventListener('keydown', e => {
   if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
   if (typeof dlg !== 'undefined' && dlg.active) {
@@ -906,6 +956,7 @@ addEventListener('keydown', e => {
   if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyL') dodgePressed = true;
   if (e.code === 'KeyM') document.getElementById('mute').click();
   if (e.code === 'KeyQ' && state === 'play') switchWeapon();
+  if (e.code === 'KeyE') musouPressed = true;
   if (e.code === 'KeyR' && state === 'dead') restart();
   if (state === 'title' && ready && (e.code === 'Enter' || e.code === 'KeyJ')) start();
 });
@@ -955,6 +1006,7 @@ const touchMove = { active: false, mx: 0, mz: 0 };
   bind('btnJ', () => { jumpPressed = true; });
   bind('btnR', () => { dodgePressed = true; });
   bind('btnW', () => { if (state === 'play') switchWeapon(); });
+  bind('btnU', () => { musouPressed = true; });
 })();
 
 // ---------- HUD ----------
@@ -974,6 +1026,7 @@ el('nextBtn').addEventListener('click', () => {
   hud.win.classList.add('hidden');
   loadStage(stageIdx + 1);
 });
+function showToastMini(text) { showToast(text); }
 function showToast(text) {
   hud.toast.textContent = text;
   hud.toast.classList.remove('show');
@@ -986,6 +1039,7 @@ let state = 'title';               // title | play | dead | win
 let ready = false;
 let kills = 0, combo = 0, comboTimer = 0, maxCombo = 0;
 let hitStopT = 0, shakeT = 0, shakeAmp = 0;
+let musou = 0;                      // 無雙集氣 0~100
 let worldT = 0, runStartT = 0, runTime = 0;
 
 const level = { zi: 0, phase: 'fight', zoneKills: 0, spawned: 0, boss: null };
@@ -1185,14 +1239,14 @@ function placeCityProps(props) {
   };
   // 路邊停車（貼路緣、順著街道）
   const carTypes = ['car_sedan', 'car_taxi', 'car_hatchback'];
-  for (let i = 0; i < 11; i++) {
+  for (let i = 0; i < 15; i++) {
     const side = i % 2 === 0 ? 1 : -1;
     const z = -9 - i * 15 - Math.random() * 5;
     if (ZONES.some(zn => Math.abs(z - zn.boundZ) < 4.5)) continue;
     put(carTypes[i % 3], side * 3.9, z, side > 0 ? 0 : Math.PI, 1.05);
   }
   // 路燈＋地面光池
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 11; i++) {
     const side = i % 2 === 0 ? -1 : 1;
     const z = -16 - i * 21;
     put('streetlight', side * 5.9, z, side > 0 ? Math.PI : 0, 1.35);
@@ -1205,15 +1259,15 @@ function placeCityProps(props) {
     put('trafficlight_A', -5.9, z - 1.2, 0, 1.3);
   }
   // 人行道雜物
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 8; i++) {
     const side = i % 2 === 0 ? 1 : -1;
-    put('dumpster', side * 12.4, -22 - i * 25, side > 0 ? -Math.PI / 2 : Math.PI / 2, 1.2);
+    put('dumpster', side * 12.4, -22 - i * 27, side > 0 ? -Math.PI / 2 : Math.PI / 2, 1.2);
   }
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 7; i++) {
     const side = i % 2 === 0 ? -1 : 1;
-    put('bench', side * 11.8, -14 - i * 31, side > 0 ? -Math.PI / 2 : Math.PI / 2, 1.2);
+    put('bench', side * 11.8, -14 - i * 32, side > 0 ? -Math.PI / 2 : Math.PI / 2, 1.2);
   }
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 6; i++) {
     put('firehydrant', (i % 2 ? 1 : -1) * 6.1, -30 - i * 38, 0, 1.2);
   }
 }
@@ -1224,7 +1278,7 @@ const E_ANIMS = [
   'Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Punch_B', 'Unarmed_Melee_Attack_Kick',
   'Spellcast_Long', 'Spellcast_Summon', 'Taunt',
 ];
-const MAX_ATTACKERS = 2;
+const MAX_ATTACKERS = 3;
 
 function spawnEnemy(kindName, fx, fz) {
   const kind = KINDS[kindName];
@@ -1277,6 +1331,7 @@ function spawnEnemy(kindName, fx, fz) {
 
 function killEnemy(e) {
   S.kill();
+  musou = Math.min(100, musou + 3);
   spawnSpark(new THREE.Vector3(e.x, 1.6, e.z), 1.3, 0xb07aff, { dur: 0.7, rise: 2.6 });
   e.st = 'dead'; e.deadT = 0;
   play(e.rig, 'Death_A', { once: true, ts: 1.3 });
@@ -1316,7 +1371,7 @@ function updateEnemies(dt) {
       e.atkCd -= dt;
       if (isBoss) {
         e.aoeCd -= dt; e.summonCd -= dt;
-        if (e.summonCd <= 0 && enemies.filter(x => (x.kindName === 'minion' || x.kindName === 'runner') && x.st !== 'dead').length < 6) {
+        if (e.summonCd <= 0 && enemies.filter(x => (x.kindName === 'minion' || x.kindName === 'runner') && x.st !== 'dead').length < 9) {
           e.st = 'cast'; e.castKind = 'summon'; e.castT = 0;
           e.castDur = clipDur(e.rig, 'Spellcast_Summon', 1.1);
           play(e.rig, 'Spellcast_Summon', { once: true, ts: 1.1 });
@@ -1363,7 +1418,7 @@ function updateEnemies(dt) {
       }
       if (e.castKind === 'summon' && !e.hitAppl && e.castT >= e.castDur * 0.6) {
         e.hitAppl = true;
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 4; i++) {
           const a = Math.random() * 6.28, r = 3 + Math.random() * 2;
           spawnEnemy('minion',
             Math.max(-HALF_W + 1, Math.min(HALF_W - 1, e.x + Math.cos(a) * r)),
@@ -1437,7 +1492,7 @@ function startZone(zi) {
   } else {
     const elites = zone.elites || 0;
     for (let i = 0; i < elites; i++) { spawnEnemy('elite'); level.spawned++; }
-    const first = Math.min(zone.cap - elites, zone.need - elites, 6);
+    const first = Math.min(zone.cap - elites, zone.need - elites, 8);
     for (let i = 0; i < first; i++) {
       spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
       level.spawned++;
@@ -1455,7 +1510,7 @@ function updateLevel(dt) {
     } else {
       hud.objective.textContent = `肅清區域 ${Math.min(level.zoneKills, zone.need)}／${zone.need}`;
       hud.objective.classList.remove('go');
-      if (level.spawned < zone.need && alive < zone.cap && Math.random() < 0.3) {
+      if (level.spawned < zone.need && alive < zone.cap && Math.random() < 0.45) {
         spawnEnemy(Math.random() < (zone.fast || 0) ? 'runner' : 'minion');
         level.spawned++;
       }
@@ -1507,7 +1562,7 @@ function onBossDown() {
     const m = Math.floor(runTime / 60), s = Math.round(runTime % 60);
     let score = 0;
     if (player.hp >= 50) score++;
-    if (runTime <= 330) score += 2; else if (runTime <= 450) score++;
+    if (runTime <= 480) score += 2; else if (runTime <= 660) score++;
     if (maxCombo >= 35) score++;
     const grade = score >= 3 ? 'S' : score === 2 ? 'A' : score === 1 ? 'B' : 'C';
     hud.grade.textContent = grade;
@@ -1530,6 +1585,7 @@ function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
   e.vx += ux * kb * e.kind.kbMul;
   e.vz += uz * kb * e.kind.kbMul;
   spawnSpark(new THREE.Vector3(e.x, 1.2, e.z), sparkScale * 1.25);
+  musou = Math.min(100, musou + 2);
   if (dmg >= 2 || Math.random() < 0.4) spawnShockwave(e.x, e.z, { maxR: 1.3, dur: 0.16, color: 0xffffff });
   combo++; comboTimer = 2.2;
   if (combo > maxCombo) maxCombo = combo;
@@ -1586,6 +1642,7 @@ function applyPlayerHit(a) {
 }
 function damagePlayer(dmg, from) {
   S.hurt();
+  musou = Math.min(100, musou + 8);
   const p = player;
   p.hp -= dmg;
   p.invuln = 0.8;
@@ -1668,6 +1725,42 @@ function updatePlayer(dt) {
       p.st = 'idle';
       play(p.rig, 'idle', { fade: 0.14 });
     }
+  } else if (p.st === 'musou') {
+    p.musouT += dt;
+    if (ml > 0) {
+      p.x += mx * 3.2 * dt;
+      p.z += mz * 3.2 * dt;
+      p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 5);
+    }
+    p.musouTick -= dt;
+    if (p.musouTick <= 0) {
+      p.musouTick = 0.22;
+      for (const e of enemies) {
+        if (e.st === 'dead' || e.st === 'spawn') continue;
+        const dx = e.x - p.x, dz = e.z - p.z;
+        const d = Math.hypot(dx, dz);
+        if (d < 5.5) { const kd = d || 1; hitEnemy(e, 2, 7, dx / kd, dz / kd, 1.6); }
+      }
+      spawnSlash(p.x, p.z, Math.random() * 6.28, { ang: 6.3, outer: 5.4, dir: Math.random() < 0.5 ? 1 : -1, color: Math.random() < 0.5 ? 0xd07aff : 0xff7ac8, dur: 0.28 });
+      spawnShockwave(p.x, p.z, { maxR: 5.4, dur: 0.3, color: 0xd07aff });
+      S.slash();
+      shakeT = 0.15; shakeAmp = 0.25;
+    }
+    if (p.musouT >= 2.4) {
+      for (const e of enemies) {
+        if (e.st === 'dead' || e.st === 'spawn') continue;
+        const dx = e.x - p.x, dz = e.z - p.z;
+        const d = Math.hypot(dx, dz);
+        if (d < 8.5) { const kd = d || 1; hitEnemy(e, 6, 22, dx / kd, dz / kd, 2.2); }
+      }
+      spawnShockwave(p.x, p.z, { maxR: 9, dur: 0.55, color: 0xffd84f });
+      spawnShockwave(p.x, p.z, { maxR: 7, dur: 0.45, color: 0xff7ac8 });
+      spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 5.5, 0xffe8b0, { dur: 0.45 });
+      S.boom(); S.roar();
+      hitStopT = 0.15; shakeT = 0.5; shakeAmp = 0.8;
+      p.st = 'idle';
+      play(p.rig, 'idle', { fade: 0.2 });
+    }
   } else if (p.st === 'atk') {
     const a = p.curAtk;
     p.atkT += dt;
@@ -1676,6 +1769,7 @@ function updatePlayer(dt) {
     p.z += Math.cos(p.yaw) * 4.6 * k * dt;
     if (ml > 0) p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 4);
     if (!p.didHit && p.atkT >= p.atkDur * a.hitAt) { p.didHit = true; applyPlayerHit(a); }
+    if (musouPressed && musou >= 100) { musouPressed = false; startMusou(); return; }
     if (atkPressed) { p.queuedLight = true; atkPressed = false; }
     if (heavyPressed) { p.queuedHeavy = true; heavyPressed = false; }
     if (dodgePressed && p.didHit) { dodgePressed = false; startDodge(mx, mz, ml); }
@@ -1695,7 +1789,8 @@ function updatePlayer(dt) {
       p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 12);
       if (p.st !== 'run') { p.st = 'run'; play(p.rig, 'run', { ts: 1.15 }); }
     } else if (p.st !== 'idle') { p.st = 'idle'; play(p.rig, 'idle'); }
-    if (atkPressed) { atkPressed = false; startAttack(curLight()[0], 0, mx, mz, ml); }
+    if (musouPressed && musou >= 100) { musouPressed = false; startMusou(); }
+    else if (atkPressed) { atkPressed = false; startAttack(curLight()[0], 0, mx, mz, ml); }
     else if (heavyPressed) { heavyPressed = false; startAttack(weapon === 'melee' ? HEAVY_SOLO : RHEAVY, -1, mx, mz, ml); }
     else if (jumpPressed) {
       jumpPressed = false;
@@ -1705,7 +1800,7 @@ function updatePlayer(dt) {
     }
     else if (dodgePressed) { dodgePressed = false; startDodge(mx, mz, ml); }
   }
-  atkPressed = heavyPressed = jumpPressed = dodgePressed = false;
+  atkPressed = heavyPressed = jumpPressed = dodgePressed = musouPressed = false;
 
   p.x = Math.max(-HALF_W, Math.min(HALF_W, p.x));
   p.z = Math.max(playerMinZ(), Math.min(1.5, p.z));
@@ -1737,6 +1832,22 @@ function startAttack(a, stage, mx, mz, ml) {
   p.atkT = 0; p.didHit = false; p.queuedLight = false; p.queuedHeavy = false;
   p.atkDur = clipDur(p.rig, a.clip, a.ts);
   play(p.rig, a.clip, { once: true, ts: a.ts, fade: 0.07 });
+}
+function startMusou() {
+  const p = player;
+  p.st = 'musou'; p.musouT = 0; p.musouTick = 0;
+  p.invuln = 2.8;
+  musou = 0;
+  play(p.rig, 'heavyfin', { ts: 1.75 });
+  spawnShockwave(p.x, p.z, { maxR: 6, dur: 0.5, color: 0xffd84f });
+  spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 4, 0xffd84f, { dur: 0.4 });
+  if (AU.ctx) {
+    const t = AU.ctx.currentTime;
+    tone('sawtooth', 180, t, 0.5, 0.3, AU.sfx, 900);
+    S.roar();
+  }
+  showToastMini?.('魂門亂舞！');
+  hitStopT = 0.1; shakeT = 0.3; shakeAmp = 0.5;
 }
 function startDodge(mx, mz, ml) {
   const p = player;
@@ -1844,9 +1955,18 @@ function updateCamera(dt) {
 }
 
 // ---------- HUD ----------
-let lastCombo = -1, lastKills = -1, lastHp = -1;
+let lastCombo = -1, lastKills = -1, lastHp = -1, lastMusou = -1;
+const musouBarEl = document.getElementById('musoubar');
+const musouFillEl = document.getElementById('musoufill');
+const btnUEl = document.getElementById('btnU');
 function updateHUD() {
   if (player.hp !== lastHp) { lastHp = player.hp; hud.hp.style.width = (player.hp / player.hpMax * 100) + '%'; }
+  if (musou !== lastMusou) {
+    lastMusou = musou;
+    musouFillEl.style.width = musou + '%';
+    musouBarEl.classList.toggle('full', musou >= 100);
+    btnUEl?.classList.toggle('ready', musou >= 100);
+  }
   if (kills !== lastKills) { lastKills = kills; hud.kills.textContent = `擊殺 ${kills}`; }
   if (combo !== lastCombo) {
     lastCombo = combo;
@@ -1913,19 +2033,40 @@ const STORY = {
 // ---------- 流程 ----------
 function applyStageTint(i) {
   if (i === 1) {
-    scene.fog.color.set(0x2a0f1e);
-    hemi.color.set(0xff9a9a); hemi.groundColor.set(0x301020);
-    sun.color.set(0xffb0a8);
-    if (skyMat) skyMat.color.set(0xffab9e);
+    // 血月煉獄：霓虹半熄、店面熄燈、雨停、血色餘燼、濃霧
+    scene.fog.color.set(0x1c0a12);
+    scene.fog.near = 20; scene.fog.far = 78;
+    hemi.color.set(0xff8a7a); hemi.groundColor.set(0x2a0d14); hemi.intensity = 0.85;
+    sun.color.set(0xff9a88); sun.intensity = 1.1;
+    warmFill.color.set(0xff3020); warmFill.intensity = 0.5;
+    if (skyMat) skyMat.color.set(0xff8878);
     honmoon.children[0].material.color.set(0xff3050);
     honmoon.children[1].material.color.set(0xffa040);
+    for (const m of ENV.signs) m.color.setScalar(0.22);
+    for (const m of ENV.fronts) m.color.setScalar(0.3);
+    for (const m of ENV.wins) m.color.setScalar(0.35);
+    for (const m of ENV.tentGlows) m.color.set(0x662418);
+    rain.pts.visible = false;
+    embers.pts.material.color.set(0xff5030);
+    embers.pts.material.size = 0.22;
+    heroLight.color.set(0xff6040);
   } else {
     scene.fog.color.set(0x140f28);
-    hemi.color.set(0x9a8aff); hemi.groundColor.set(0x201238);
-    sun.color.set(0xbfcaff);
+    scene.fog.near = 26; scene.fog.far = 100;
+    hemi.color.set(0x9a8aff); hemi.groundColor.set(0x201238); hemi.intensity = 1.1;
+    sun.color.set(0xbfcaff); sun.intensity = 1.35;
+    warmFill.color.set(0xff4fd0); warmFill.intensity = 0.35;
     if (skyMat) skyMat.color.set(0xffffff);
     honmoon.children[0].material.color.set(0xa04fff);
     honmoon.children[1].material.color.set(0xff4fa3);
+    for (const m of ENV.signs) m.color.setScalar(1);
+    for (const m of ENV.fronts) m.color.setScalar(1);
+    for (const m of ENV.wins) m.color.setScalar(1);
+    for (const m of ENV.tentGlows) m.color.set(0xffa8d8);
+    rain.pts.visible = true;
+    embers.pts.material.color.set(0xff7ad0);
+    embers.pts.material.size = 0.17;
+    heroLight.color.set(0xff4fa3);
   }
 }
 function loadStage(i) {
@@ -1947,6 +2088,8 @@ function loadStage(i) {
   p.hp = p.hpMax; p.invuln = 0; p.st = 'idle';
   if (p.rig) play(p.rig, 'idle', { fade: 0 });
   level.boss = null;
+  musou = 0;
+  if (AU.ctx) { AU.nextBar = AU.ctx.currentTime + 0.15; AU.bar = 0; }
   hud.bosswrap.style.display = 'none';
   state = 'play';
   runStartT = performance.now();
@@ -1969,7 +2112,7 @@ function restart() {
 }
 
 // 開發用 debug hook
-window.__dbg = () => ({ state, stageIdx, weapon, kills, combo, level: { zi: level.zi, phase: level.phase, zoneKills: level.zoneKills, spawned: level.spawned, bossHp: level.boss?.hp }, player, enemies: enemies.length, alive: enemies.filter(e => e.st !== 'dead').length });
+window.__dbg = () => ({ state, stageIdx, weapon, musou, kills, combo, level: { zi: level.zi, phase: level.phase, zoneKills: level.zoneKills, spawned: level.spawned, bossHp: level.boss?.hp }, player, enemies: enemies.length, alive: enemies.filter(e => e.st !== 'dead').length });
 window.__lvl = level;
 window.__stage = loadStage;
 window.__switch = switchWeapon;
