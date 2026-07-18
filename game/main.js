@@ -28,13 +28,23 @@ const STAGES = [
     ],
   },
   {
-    name: '第二關　血月大街・陰差軍團',
+    name: '第二關　魂界・陰差本營',
     zones: [
-      { name: '血月街口',    enterZ: 0,    boundZ: -48,  need: 20, cap: 11, elites: 0, fast: 0.35 },
-      { name: '亡者大街',    enterZ: -48,  boundZ: -96,  need: 34, cap: 16, elites: 1, fast: 0.5 },
-      { name: '厲鬼後巷',    enterZ: -96,  boundZ: -144, need: 30, cap: 14, elites: 2, fast: 0.55 },
-      { name: '修羅十字路',  enterZ: -144, boundZ: -192, need: 26, cap: 12, elites: 4, fast: 0.5 },
-      { name: '魂門最終防線', enterZ: -192, boundZ: -240, boss: true, boss2: true },
+      { name: '魂界裂口',    enterZ: 0,    boundZ: -48,  need: 20, cap: 11, elites: 0, fast: 0.35 },
+      { name: '亡者荒道',    enterZ: -48,  boundZ: -96,  need: 34, cap: 16, elites: 1, fast: 0.5 },
+      { name: '厲鬼峽谷',    enterZ: -96,  boundZ: -144, need: 30, cap: 14, elites: 2, fast: 0.55 },
+      { name: '修羅斷崖',    enterZ: -144, boundZ: -192, need: 26, cap: 12, elites: 4, fast: 0.5 },
+      { name: '魂門核心',    enterZ: -192, boundZ: -240, boss: true, boss2: true },
+    ],
+  },
+  {
+    name: '第三關　天界・魂門之上',
+    zones: [
+      { name: '雲海長廊',  enterZ: 0,    boundZ: -48,  need: 24, cap: 12, elites: 1, fast: 0.4 },
+      { name: '聖域迴廊',  enterZ: -48,  boundZ: -96,  need: 40, cap: 17, elites: 2, fast: 0.5 },
+      { name: '星橋斷面',  enterZ: -96,  boundZ: -144, need: 34, cap: 15, elites: 3, fast: 0.55 },
+      { name: '審判之階',  enterZ: -144, boundZ: -192, need: 30, cap: 13, elites: 5, fast: 0.5 },
+      { name: '魂門之上',  enterZ: -192, boundZ: -240, boss: true, boss3: true },
     ],
   },
 ];
@@ -104,9 +114,12 @@ let skyMat = null;
   scene.add(sky);
   new THREE.TextureLoader().load('assets/gen/sky.jpg', tex => {
     tex.colorSpace = THREE.SRGBColorSpace;
-    sky.material.map = tex;
-    sky.material.color.set(0xffffff);
-    sky.material.needsUpdate = true;
+    skyTex1 = tex;
+    if (stageIdx === 0) {
+      sky.material.map = tex;
+      sky.material.color.set(0xffffff);
+      sky.material.needsUpdate = true;
+    }
   });
 })();
 
@@ -208,6 +221,14 @@ function makeStorefrontTex() {
   return t;
 }
 
+// ---------- 世界群組：一關人間街／二關魂界 ----------
+const world1 = new THREE.Group();
+const world2 = new THREE.Group();
+const world3 = new THREE.Group();
+scene.add(world1, world2, world3);
+world2.visible = false;
+world3.visible = false;
+
 // ---------- 韓國街道 ----------
 let lightPool = null;
 const groundMats = [];
@@ -233,21 +254,21 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   road.rotation.x = -Math.PI / 2;
   road.position.set(0, 0, -105);
   road.receiveShadow = true;
-  scene.add(road);
+  world1.add(road);
   // 車道虛線＋邊線
   const dashMat = new THREE.MeshBasicMaterial({ color: 0x8a8a80 });
   for (let z = 6; z > -244; z -= 4) {
     const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 1.6), dashMat);
     dash.rotation.x = -Math.PI / 2;
     dash.position.set(0, 0.012, z);
-    scene.add(dash);
+    world1.add(dash);
   }
   const edgeMat = new THREE.MeshBasicMaterial({ color: 0x8a7228 });
   for (const side of [-1, 1]) {
     const line = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 330), edgeMat);
     line.rotation.x = -Math.PI / 2;
     line.position.set(side * 5.1, 0.012, -105);
-    scene.add(line);
+    world1.add(line);
   }
   // 人行道（磚格）
   const sc = document.createElement('canvas');
@@ -284,11 +305,11 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     walk.rotation.x = -Math.PI / 2;
     walk.position.set(side * 10.1, 0.03, -105);
     walk.receiveShadow = true;
-    scene.add(walk);
+    world1.add(walk);
     const curb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.12, 330), new THREE.MeshLambertMaterial({ color: 0x4a4658 }));
     curb.position.set(side * 5.35, 0.06, -105);
     curb.receiveShadow = true;
-    scene.add(curb);
+    world1.add(curb);
   }
   // 斑馬線（各區入口）
   const zebraMat = new THREE.MeshBasicMaterial({ color: 0x9a9a92 });
@@ -297,7 +318,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
       const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 3), zebraMat);
       stripe.rotation.x = -Math.PI / 2;
       stripe.position.set(x, 0.014, zz + 2.6);
-      scene.add(stripe);
+      world1.add(stripe);
     }
   }
 
@@ -318,7 +339,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
       const body = new THREE.Mesh(new THREE.BoxGeometry(depth, h, w), wallMats[wi % wallMats.length]);
       body.position.set(bx, h / 2, zc);
       body.castShadow = true; body.receiveShadow = true;
-      scene.add(body);
+      world1.add(body);
       const winMat = new THREE.MeshBasicMaterial({ map: winTexs[wi % 3] });
       ENV.wins.push(winMat);
       const win = new THREE.Mesh(
@@ -327,7 +348,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
       );
       win.position.set(side * 14.88, (h + 4.2) / 2, zc);
       win.rotation.y = side * -Math.PI / 2;
-      scene.add(win);
+      world1.add(win);
       const frontMat = new THREE.MeshBasicMaterial({ map: makeStorefrontTex() });
       ENV.fronts.push(frontMat);
       const front = new THREE.Mesh(
@@ -336,7 +357,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
       );
       front.position.set(side * 14.87, 1.62, zc);
       front.rotation.y = side * -Math.PI / 2;
-      scene.add(front);
+      world1.add(front);
       // 招牌（整面橫幅，韓國街屋經典）— BoxGeometry 面序：+x,-x,+y,-y,+z,-z
       const signTex = makeSignTex(KR_WORDS[Math.floor(Math.random() * KR_WORDS.length)]);
       const darkMat = new THREE.MeshLambertMaterial({ color: 0x1a1a26 });
@@ -348,7 +369,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
       ENV.signs.push(signMats[0], signMats[1]);
       const sign = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.15, w - 0.4), signMats);
       sign.position.set(side * 14.7, 3.85, zc);
-      scene.add(sign);
+      world1.add(sign);
       if (Math.random() < 0.4) flickers.push({ mat: signMats[0], speed: 0.5 + Math.random(), phase: Math.random() * 10 });
       // 立式霓虹直招（隨機）
       if (Math.random() < 0.85) {
@@ -362,7 +383,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
         ENV.signs.push(vMats[0], vMats[1]);
         const v = new THREE.Mesh(new THREE.BoxGeometry(0.28, 3.4, 0.9), vMats);
         v.position.set(side * 14.35, 4.6 + Math.random() * 2, zc - w / 2 + 0.8);
-        scene.add(v);
+        world1.add(v);
       }
       wi++;
     }
@@ -400,7 +421,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     grp.add(glow);
     grp.position.set(x, 0, z);
     grp.rotation.y = Math.random() * 0.4 - 0.2 + (side > 0 ? Math.PI : 0);
-    scene.add(grp);
+    world1.add(grp);
   }
 
   // 電線桿＋電線（韓國巷弄記憶點）
@@ -414,10 +435,10 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.14, 7.4, 6), poleMat2);
     pole.position.set(x, 3.7, z);
     pole.castShadow = true;
-    scene.add(pole);
+    world1.add(pole);
     const cross = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.09, 0.09), poleMat2);
     cross.position.set(x, 6.6, z);
-    scene.add(cross);
+    world1.add(cross);
     polePts.push(new THREE.Vector3(x, 6.9, z));
     if (i > 0 && i % 2 === 1) {
       for (const dy of [0, 0.35]) {
@@ -426,7 +447,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
         const mid = from.clone().lerp(to, 0.5); mid.y -= 1.1;
         const curve = new THREE.CatmullRomCurve3([from, mid, to]);
         const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 10, 0.022, 4), wireMat);
-        scene.add(tube);
+        world1.add(tube);
       }
     }
   }
@@ -435,7 +456,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     const mid = from.clone().lerp(to, 0.5); mid.y -= 1.4;
     const curve = new THREE.CatmullRomCurve3([from, mid, to]);
     const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 12, 0.022, 4), wireMat);
-    scene.add(tube);
+    world1.add(tube);
   }
 
   // 路燈地面光池
@@ -455,7 +476,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     }));
     m.rotation.x = -Math.PI / 2;
     m.position.set(x, 0.05, z);
-    scene.add(m);
+    world1.add(m);
   };
 })();
 
@@ -469,14 +490,14 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
       const h = 12 + Math.random() * 26;
       const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), mats[i++ % 3]);
       b.position.set(side * (34 + Math.random() * 20), h / 2 - 0.5, z);
-      scene.add(b);
+      world1.add(b);
     }
   }
   for (let x = -60; x <= 60; x += 12) {
     const h = 16 + Math.random() * 22;
     const b = new THREE.Mesh(new THREE.BoxGeometry(9, h, 9), mats[i++ % 3]);
     b.position.set(x, h / 2, -275 - Math.random() * 10);
-    scene.add(b);
+    world1.add(b);
   }
   // 南山塔（山丘剪影＋塔身＋觀景台）
   const hill = new THREE.Mesh(
@@ -484,31 +505,293 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     new THREE.MeshBasicMaterial({ color: 0x0c0a18, fog: false })
   );
   hill.position.set(46, 7, -268);
-  scene.add(hill);
+  world1.add(hill);
   const tower = new THREE.Mesh(
     new THREE.CylinderGeometry(0.8, 1.2, 20, 8),
     new THREE.MeshBasicMaterial({ color: 0x262040, fog: false })
   );
   tower.position.set(46, 25, -268);
-  scene.add(tower);
+  world1.add(tower);
   const deck = new THREE.Mesh(
     new THREE.CylinderGeometry(2.6, 2.2, 2.2, 10),
     new THREE.MeshBasicMaterial({ color: 0xffd9a0, fog: false })
   );
   deck.position.set(46, 36, -268);
-  scene.add(deck);
+  world1.add(deck);
   const antenna = new THREE.Mesh(
     new THREE.CylinderGeometry(0.1, 0.16, 7, 5),
     new THREE.MeshBasicMaterial({ color: 0x383050, fog: false })
   );
   antenna.position.set(46, 40.5, -268);
-  scene.add(antenna);
+  world1.add(antenna);
   const beacon = new THREE.Mesh(
     new THREE.SphereGeometry(0.35, 8, 6),
     new THREE.MeshBasicMaterial({ color: 0xff3a3a, fog: false })
   );
   beacon.position.set(46, 44, -268);
-  scene.add(beacon);
+  world1.add(beacon);
+})();
+
+// ---------- 魂界（第二關場景：黑曜岩裂谷） ----------
+let skyTex1 = null, skyTex2 = null;
+const w2anim = { flames: [], rocks: [] };
+(function buildUnderworld() {
+  // 血色漩渦天空貼圖
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 512;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0, '#0a0205');
+  grad.addColorStop(0.5, '#2a0710');
+  grad.addColorStop(0.85, '#5a1218');
+  grad.addColorStop(1, '#7a2018');
+  g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
+  for (let i = 0; i < 60; i++) {   // 血雲漩渦
+    const x = Math.random() * 1024, y = 80 + Math.random() * 300;
+    const rg = g.createRadialGradient(x, y, 2, x, y, 30 + Math.random() * 60);
+    rg.addColorStop(0, 'rgba(180,40,50,0.16)');
+    rg.addColorStop(1, 'rgba(120,20,30,0)');
+    g.fillStyle = rg;
+    g.beginPath(); g.arc(x, y, 90, 0, 6.28); g.fill();
+  }
+  const mx = 512, my = 120;   // 巨大血月
+  const mg = g.createRadialGradient(mx, my, 10, mx, my, 95);
+  mg.addColorStop(0, 'rgba(255,90,70,1)');
+  mg.addColorStop(0.4, 'rgba(220,50,50,0.85)');
+  mg.addColorStop(1, 'rgba(180,30,40,0)');
+  g.fillStyle = mg;
+  g.beginPath(); g.arc(mx, my, 95, 0, 6.28); g.fill();
+  g.fillStyle = 'rgba(255,150,120,0.9)';
+  for (let i = 0; i < 100; i++) g.fillRect(Math.random() * 1024, Math.random() * 200, 1, 1);
+  skyTex2 = new THREE.CanvasTexture(c);
+  skyTex2.colorSpace = THREE.SRGBColorSpace;
+
+  // 黑曜岩地面＋熔岩裂紋
+  const gc = document.createElement('canvas');
+  gc.width = gc.height = 512;
+  const gg = gc.getContext('2d');
+  gg.fillStyle = '#0d0509'; gg.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 260; i++) {
+    gg.fillStyle = `rgba(${30 + Math.random() * 30},${10 + Math.random() * 12},${18 + Math.random() * 16},0.5)`;
+    gg.fillRect(Math.random() * 512, Math.random() * 512, 3 + Math.random() * 6, 3 + Math.random() * 6);
+  }
+  gg.strokeStyle = '#ff4a28'; gg.shadowColor = '#ff3a18'; gg.shadowBlur = 8; gg.lineWidth = 2;
+  for (let i = 0; i < 14; i++) {   // 裂紋
+    gg.beginPath();
+    let x = Math.random() * 512, y = Math.random() * 512;
+    gg.moveTo(x, y);
+    for (let j = 0; j < 7; j++) { x += (Math.random() - 0.5) * 90; y += (Math.random() - 0.5) * 90; gg.lineTo(x, y); }
+    gg.stroke();
+  }
+  const groundTex = new THREE.CanvasTexture(gc);
+  groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
+  groundTex.repeat.set(5, 24);
+  groundTex.colorSpace = THREE.SRGBColorSpace;
+  const g2 = new THREE.Mesh(new THREE.PlaneGeometry(70, 330), new THREE.MeshLambertMaterial({ map: groundTex }));
+  g2.rotation.x = -Math.PI / 2;
+  g2.position.set(0, 0.01, -105);
+  g2.receiveShadow = true;
+  world2.add(g2);
+  const crackGlow = new THREE.Mesh(new THREE.PlaneGeometry(70, 330), new THREE.MeshBasicMaterial({
+    map: groundTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  crackGlow.rotation.x = -Math.PI / 2;
+  crackGlow.position.set(0, 0.025, -105);
+  world2.add(crackGlow);
+
+  // 兩側嶙峋岩柱峽谷＋緋紅晶柱
+  const rockMat = new THREE.MeshLambertMaterial({ color: 0x171018 });
+  const crystalMat = new THREE.MeshBasicMaterial({ color: 0xff2a3a });
+  for (const side of [-1, 1]) {
+    for (let z = 8; z > -244; z -= 5 + Math.random() * 5) {
+      const h = 7 + Math.random() * 14;
+      const rock = new THREE.Mesh(new THREE.ConeGeometry(2.2 + Math.random() * 2.2, h, 5), rockMat);
+      rock.position.set(side * (16 + Math.random() * 4), h / 2 - 0.6, z);
+      rock.rotation.z = side * (0.06 + Math.random() * 0.14);
+      rock.rotation.y = Math.random() * Math.PI;
+      rock.castShadow = true;
+      world2.add(rock);
+      if (Math.random() < 0.28) {
+        const ch = 1.6 + Math.random() * 2.6;
+        const cr = new THREE.Mesh(new THREE.ConeGeometry(0.4, ch, 4), crystalMat);
+        cr.position.set(side * (13.5 + Math.random() * 2.5), ch / 2, z + 2);
+        cr.rotation.z = side * (0.3 + Math.random() * 0.4);
+        world2.add(cr);
+      }
+    }
+  }
+  // 漂浮岩塊
+  for (let i = 0; i < 14; i++) {
+    const sz = 1.4 + Math.random() * 3.2;
+    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(sz, 0), rockMat);
+    rock.position.set((Math.random() < 0.5 ? -1 : 1) * (22 + Math.random() * 18), 9 + Math.random() * 15, 10 - Math.random() * 250);
+    rock.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+    world2.add(rock);
+    w2anim.rocks.push({ m: rock, phase: Math.random() * 6.28, speed: 0.3 + Math.random() * 0.4 });
+  }
+  // 鬼火
+  const flameTex = (() => {
+    const fc = document.createElement('canvas');
+    fc.width = fc.height = 64;
+    const fg = fc.getContext('2d');
+    const rg = fg.createRadialGradient(32, 32, 2, 32, 32, 30);
+    rg.addColorStop(0, 'rgba(255,255,255,1)');
+    rg.addColorStop(0.35, 'rgba(255,190,140,0.9)');
+    rg.addColorStop(1, 'rgba(255,90,40,0)');
+    fg.fillStyle = rg; fg.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(fc);
+  })();
+  for (let i = 0; i < 46; i++) {
+    const f = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: flameTex, color: Math.random() < 0.6 ? 0xff5a30 : 0x9a40ff,
+      transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.85,
+    }));
+    f.position.set((Math.random() * 2 - 1) * 15, 0.8 + Math.random() * 3.4, 10 - Math.random() * 250);
+    f.scale.setScalar(0.5 + Math.random() * 0.7);
+    world2.add(f);
+    w2anim.flames.push({ m: f, phase: Math.random() * 6.28, base: f.position.y, sz: f.scale.x });
+  }
+  // 遠景獄山剪影
+  for (let i = 0; i < 16; i++) {
+    const h = 22 + Math.random() * 30;
+    const mtn = new THREE.Mesh(
+      new THREE.ConeGeometry(10 + Math.random() * 12, h, 5),
+      new THREE.MeshBasicMaterial({ color: 0x120409, fog: false })
+    );
+    const side = i % 2 === 0 ? -1 : 1;
+    mtn.position.set(side * (40 + Math.random() * 30), h / 2 - 4, 10 - Math.random() * 280);
+    world2.add(mtn);
+  }
+})();
+
+// ---------- 天界（第三關場景：雲海聖域） ----------
+let skyTex3 = null;
+const w3anim = { clouds: [], lanterns: [] };
+(function buildHeaven() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 512;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0, '#060a1e');
+  grad.addColorStop(0.5, '#0e1e42');
+  grad.addColorStop(0.85, '#1e4468');
+  grad.addColorStop(1, '#2e6a88');
+  g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
+  for (let band = 0; band < 3; band++) {
+    g.beginPath();
+    const baseY = 90 + band * 55;
+    for (let x = 0; x <= 1024; x += 16) {
+      const y = baseY + Math.sin(x / 90 + band * 2.2) * 34 + Math.sin(x / 41 + band) * 12;
+      x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
+    }
+    g.strokeStyle = ['rgba(90,255,190,0.3)', 'rgba(120,200,255,0.26)', 'rgba(200,140,255,0.22)'][band];
+    g.lineWidth = 26 - band * 5;
+    g.shadowColor = ['#5affbe', '#78c8ff', '#c88cff'][band];
+    g.shadowBlur = 24;
+    g.stroke();
+  }
+  g.shadowBlur = 0;
+  for (let i = 0; i < 240; i++) {
+    const y = Math.random() * 360;
+    g.globalAlpha = 0.3 + Math.random() * 0.7;
+    g.fillStyle = '#ffffff';
+    g.fillRect(Math.random() * 1024, y, Math.random() < 0.06 ? 2 : 1, 1);
+  }
+  g.globalAlpha = 1;
+  skyTex3 = new THREE.CanvasTexture(c);
+  skyTex3.colorSpace = THREE.SRGBColorSpace;
+
+  const gc = document.createElement('canvas');
+  gc.width = gc.height = 256;
+  const gg = gc.getContext('2d');
+  gg.fillStyle = '#8ea6c2'; gg.fillRect(0, 0, 256, 256);
+  for (let y = 0; y < 256; y += 64) {
+    for (let x = 0; x < 256; x += 64) {
+      gg.fillStyle = (x + y) % 128 === 0 ? '#849cba' : '#98b0ca';
+      gg.fillRect(x + 2, y + 2, 60, 60);
+    }
+  }
+  gg.strokeStyle = 'rgba(120,200,255,0.85)'; gg.lineWidth = 3;
+  gg.shadowColor = '#78c8ff'; gg.shadowBlur = 8;
+  for (let i = 0; i <= 256; i += 64) {
+    gg.beginPath(); gg.moveTo(i, 0); gg.lineTo(i, 256); gg.stroke();
+    gg.beginPath(); gg.moveTo(0, i); gg.lineTo(256, i); gg.stroke();
+  }
+  const pathTex = new THREE.CanvasTexture(gc);
+  pathTex.wrapS = pathTex.wrapT = THREE.RepeatWrapping;
+  pathTex.repeat.set(4, 44);
+  pathTex.colorSpace = THREE.SRGBColorSpace;
+  const bridge = new THREE.Mesh(new THREE.PlaneGeometry(30, 330), new THREE.MeshLambertMaterial({ map: pathTex }));
+  bridge.rotation.x = -Math.PI / 2;
+  bridge.position.set(0, 0.01, -105);
+  bridge.receiveShadow = true;
+  world3.add(bridge);
+  for (const side of [-1, 1]) {
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 330), new THREE.MeshBasicMaterial({ color: 0xffd070 }));
+    edge.position.set(side * 15, 0.15, -105);
+    world3.add(edge);
+  }
+  const pillarMat3 = new THREE.MeshLambertMaterial({ color: 0xaebfd8 });
+  const capMat = new THREE.MeshBasicMaterial({ color: 0xffd070 });
+  const crystalMat3 = new THREE.MeshBasicMaterial({ color: 0x6ae0ff });
+  for (const side of [-1, 1]) {
+    for (let z = 0; z > -240; z -= 16) {
+      const h = 6 + Math.random() * 3;
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, h, 10), pillarMat3);
+      col.position.set(side * 14, h / 2, z - Math.random() * 4);
+      col.castShadow = true;
+      world3.add(col);
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8), capMat);
+      cap.position.set(col.position.x, h + 0.4, col.position.z);
+      world3.add(cap);
+      if (Math.random() < 0.4) {
+        const ch = 2 + Math.random() * 3;
+        const cr = new THREE.Mesh(new THREE.ConeGeometry(0.5, ch, 5), crystalMat3);
+        cr.position.set(side * (17 + Math.random() * 3), ch / 2 - 1, z - 6);
+        cr.rotation.z = side * 0.25;
+        world3.add(cr);
+      }
+    }
+  }
+  const cloudTex = (() => {
+    const cc = document.createElement('canvas');
+    cc.width = cc.height = 128;
+    const cg = cc.getContext('2d');
+    const rg = cg.createRadialGradient(64, 64, 6, 64, 64, 62);
+    rg.addColorStop(0, 'rgba(235,242,255,0.9)');
+    rg.addColorStop(0.7, 'rgba(210,226,248,0.45)');
+    rg.addColorStop(1, 'rgba(200,220,245,0)');
+    cg.fillStyle = rg; cg.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(cc);
+  })();
+  for (let i = 0; i < 42; i++) {
+    const cl = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: cloudTex, transparent: true, opacity: 0.5, depthWrite: false, color: 0xb8cce4,
+    }));
+    const side = Math.random() < 0.5 ? -1 : 1;
+    cl.position.set(side * (17 + Math.random() * 26), -1.2 + Math.random() * 1.6, 12 - Math.random() * 264);
+    const sz = 7 + Math.random() * 12;
+    cl.scale.set(sz, sz * 0.42, 1);
+    world3.add(cl);
+    w3anim.clouds.push({ m: cl, phase: Math.random() * 6.28, x0: cl.position.x });
+  }
+  for (let i = 0; i < 26; i++) {
+    const lan = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffe0a0 }));
+    lan.position.set((Math.random() * 2 - 1) * 13, 2.5 + Math.random() * 4, 8 - Math.random() * 252);
+    world3.add(lan);
+    w3anim.lanterns.push({ m: lan, phase: Math.random() * 6.28, base: lan.position.y });
+  }
+  for (let i = 0; i < 10; i++) {
+    const w = 10 + Math.random() * 16;
+    const isle = new THREE.Mesh(new THREE.ConeGeometry(w, w * 0.9, 6), new THREE.MeshLambertMaterial({ color: 0x8aa8cc }));
+    isle.rotation.x = Math.PI;
+    const side = i % 2 === 0 ? -1 : 1;
+    isle.position.set(side * (46 + Math.random() * 26), 12 + Math.random() * 16, -20 - Math.random() * 230);
+    world3.add(isle);
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.9, w, 2.2, 6), new THREE.MeshLambertMaterial({ color: 0xd8e6f4 }));
+    top.position.set(isle.position.x, isle.position.y + w * 0.45 + 1, isle.position.z);
+    world3.add(top);
+  }
 })();
 
 // ---------- 魂門巨環（關卡終點） ----------
@@ -710,6 +993,19 @@ function spawnSpark(pos, scale = 1, color = 0xffffff, opts = {}) {
   scene.add(s);
   sparks.push(s);
 }
+const pillars = [];
+function spawnPillar(x, z, color = 0xffd84f, big = 1) {
+  const m = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.9 * big, 1.5 * big, 16, 16, 1, true),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+  );
+  m.position.set(x, 8, z);
+  m.userData = { t: 0, dur: 0.55 * big };
+  scene.add(m);
+  pillars.push(m);
+}
+let screenFlash = 0;
+const flashEl = document.getElementById('flash');
 const shockwaves = [];
 function spawnShockwave(x, z, { maxR = 4, dur = 0.35, color = 0xc9a4ff } = {}) {
   const m = new THREE.Mesh(
@@ -849,6 +1145,17 @@ const MUSIC = [
       [65, 12, 1], [64, 13, 1], [63, 14, 2],
     ],
     hat16: false,
+  },
+  { // 第三關：天界頌歌（C–G–Am–F，明亮上揚）
+    bpm: 132,
+    prog: [[48, 52, 55, 59], [55, 59, 62, 65], [57, 60, 64, 67], [53, 57, 60, 64]],
+    lead: [
+      [84, 0, 0.5], [83, 0.5, 0.5], [79, 1, 1], [76, 2, 0.5], [79, 2.5, 0.5], [81, 3, 1],
+      [79, 4, 0.75], [76, 4.75, 0.25], [74, 5, 1], [76, 6, 0.5], [79, 6.5, 0.5], [81, 7, 1],
+      [84, 8, 0.5], [86, 8.5, 0.5], [88, 9, 1.5], [84, 10.5, 0.5], [83, 11, 1],
+      [81, 12, 0.75], [79, 12.75, 0.25], [76, 13, 1], [74, 14, 0.5], [72, 14.5, 1.5],
+    ],
+    hat16: true,
   },
 ];
 function tone(type, freq, t, dur, gain, dest, freqEnd) {
@@ -1071,9 +1378,10 @@ function switchWeapon() {
 }
 // 劍氣彈
 const bolts = [];
-function spawnBolt(cfg) {
+function spawnBolt(cfg, dirX, dirZ) {
   const p = player;
-  const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw);
+  const fx = dirX !== undefined ? dirX : Math.sin(p.yaw);
+  const fz = dirZ !== undefined ? dirZ : Math.cos(p.yaw);
   const spr = new THREE.Sprite(new THREE.SpriteMaterial({
     map: sparkTex, color: cfg.size > 1.2 ? 0xa8f0ff : 0x7ad0ff,
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
@@ -1159,6 +1467,12 @@ const KINDS = {
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 0, tint: 0xff5050,
   },
+  boss3: {
+    file: 'warrior', scale: 2.0, hp: 200, spdBase: 3.2, spdVar: 0, dmg: 20,
+    atkRange: 3.6, hitRange: 4.0, atkTs: 0.95, kbMul: 0.06, shadowR: 1.9,
+    atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
+    dropRate: 0, tint: 0xb070ff,
+  },
 };
 
 // ---------- 載入 ----------
@@ -1234,7 +1548,7 @@ function placeCityProps(props) {
     m.position.set(x, 0.03, z);
     m.rotation.y = rotY;
     m.scale.setScalar(scale);
-    scene.add(m);
+    world1.add(m);
     return m;
   };
   // 路邊停車（貼路緣、順著街道）
@@ -1331,7 +1645,7 @@ function spawnEnemy(kindName, fx, fz) {
 
 function killEnemy(e) {
   S.kill();
-  musou = Math.min(100, musou + 3);
+  musou = Math.min(100, musou + 2);
   spawnSpark(new THREE.Vector3(e.x, 1.6, e.z), 1.3, 0xb07aff, { dur: 0.7, rise: 2.6 });
   e.st = 'dead'; e.deadT = 0;
   play(e.rig, 'Death_A', { once: true, ts: 1.3 });
@@ -1486,9 +1800,9 @@ function startZone(zi) {
   if (zone.boss) {
     hud.bosswrap.style.display = 'block';
     S.roar();
-    level.boss = spawnEnemy(zone.boss2 ? 'boss2' : 'boss', 0, zone.enterZ - 22);
+    level.boss = spawnEnemy(zone.boss3 ? 'boss3' : zone.boss2 ? 'boss2' : 'boss', 0, zone.enterZ - 22);
     for (let i = 0; i < 3; i++) spawnEnemy('minion');
-    showDialog(zone.boss2 ? STORY.s2boss : STORY.s1boss);
+    showDialog(zone.boss3 ? STORY.s3boss : zone.boss2 ? STORY.s2boss : STORY.s1boss);
   } else {
     const elites = zone.elites || 0;
     for (let i = 0; i < elites; i++) { spawnEnemy('elite'); level.spawned++; }
@@ -1585,7 +1899,7 @@ function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
   e.vx += ux * kb * e.kind.kbMul;
   e.vz += uz * kb * e.kind.kbMul;
   spawnSpark(new THREE.Vector3(e.x, 1.2, e.z), sparkScale * 1.25);
-  musou = Math.min(100, musou + 2);
+  musou = Math.min(100, musou + 1);
   if (dmg >= 2 || Math.random() < 0.4) spawnShockwave(e.x, e.z, { maxR: 1.3, dur: 0.16, color: 0xffffff });
   combo++; comboTimer = 2.2;
   if (combo > maxCombo) maxCombo = combo;
@@ -1642,7 +1956,7 @@ function applyPlayerHit(a) {
 }
 function damagePlayer(dmg, from) {
   S.hurt();
-  musou = Math.min(100, musou + 8);
+  musou = Math.min(100, musou + 6);
   const p = player;
   p.hp -= dmg;
   p.invuln = 0.8;
@@ -1727,37 +2041,58 @@ function updatePlayer(dt) {
     }
   } else if (p.st === 'musou') {
     p.musouT += dt;
+    p.invuln = 0.5;
     if (ml > 0) {
-      p.x += mx * 3.2 * dt;
-      p.z += mz * 3.2 * dt;
+      p.x += mx * 3.6 * dt;
+      p.z += mz * 3.6 * dt;
       p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 5);
     }
     p.musouTick -= dt;
     if (p.musouTick <= 0) {
-      p.musouTick = 0.22;
+      p.musouTick = 0.2;
       for (const e of enemies) {
         if (e.st === 'dead' || e.st === 'spawn') continue;
         const dx = e.x - p.x, dz = e.z - p.z;
         const d = Math.hypot(dx, dz);
-        if (d < 5.5) { const kd = d || 1; hitEnemy(e, 2, 7, dx / kd, dz / kd, 1.6); }
+        if (d < 7) { const kd = d || 1; hitEnemy(e, 3, 9, dx / kd, dz / kd, 1.7); }
       }
-      spawnSlash(p.x, p.z, Math.random() * 6.28, { ang: 6.3, outer: 5.4, dir: Math.random() < 0.5 ? 1 : -1, color: Math.random() < 0.5 ? 0xd07aff : 0xff7ac8, dur: 0.28 });
-      spawnShockwave(p.x, p.z, { maxR: 5.4, dur: 0.3, color: 0xd07aff });
+      spawnSlash(p.x, p.z, Math.random() * 6.28, { ang: 6.3, outer: 7, dir: Math.random() < 0.5 ? 1 : -1, color: [0xd07aff, 0xff7ac8, 0xffd84f][Math.floor(Math.random() * 3)], dur: 0.3 });
+      spawnShockwave(p.x, p.z, { maxR: 7, dur: 0.32, color: 0xd07aff });
+      spawnSpark(new THREE.Vector3(p.x + (Math.random() * 2 - 1) * 2, 1 + Math.random() * 2, p.z + (Math.random() * 2 - 1) * 2), 1.6, 0xffd84f, { dur: 0.3, rise: 3 });
       S.slash();
-      shakeT = 0.15; shakeAmp = 0.25;
+      shakeT = 0.15; shakeAmp = 0.3;
     }
-    if (p.musouT >= 2.4) {
+    // 每 0.55 秒向八方射出劍氣
+    p.musouBoltT = (p.musouBoltT || 0) - dt;
+    if (p.musouBoltT <= 0) {
+      p.musouBoltT = 0.55;
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2 + p.musouT;
+        spawnBolt({ dmg: 2, speed: 24, pierce: 3, size: 1.5 }, Math.sin(a), Math.cos(a));
+      }
+      spawnPillar(p.x, p.z, 0xffd84f, 0.8);
+      if (AU.ctx) tone('sawtooth', 700, AU.ctx.currentTime, 0.12, 0.12, AU.sfx, 260);
+    }
+    if (p.musouT >= 4.0) {
+      // 終結大爆發
       for (const e of enemies) {
         if (e.st === 'dead' || e.st === 'spawn') continue;
         const dx = e.x - p.x, dz = e.z - p.z;
         const d = Math.hypot(dx, dz);
-        if (d < 8.5) { const kd = d || 1; hitEnemy(e, 6, 22, dx / kd, dz / kd, 2.2); }
+        if (d < 12) { const kd = d || 1; hitEnemy(e, 12, 30, dx / kd, dz / kd, 2.6); }
       }
-      spawnShockwave(p.x, p.z, { maxR: 9, dur: 0.55, color: 0xffd84f });
-      spawnShockwave(p.x, p.z, { maxR: 7, dur: 0.45, color: 0xff7ac8 });
-      spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 5.5, 0xffe8b0, { dur: 0.45 });
-      S.boom(); S.roar();
-      hitStopT = 0.15; shakeT = 0.5; shakeAmp = 0.8;
+      spawnShockwave(p.x, p.z, { maxR: 13, dur: 0.7, color: 0xffd84f });
+      spawnShockwave(p.x, p.z, { maxR: 10, dur: 0.6, color: 0xff7ac8 });
+      spawnShockwave(p.x, p.z, { maxR: 7, dur: 0.5, color: 0xffffff });
+      spawnPillar(p.x, p.z, 0xffe8b0, 2.2);
+      spawnSpark(new THREE.Vector3(p.x, 2, p.z), 8, 0xffe8b0, { dur: 0.55 });
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2;
+        spawnBolt({ dmg: 3, speed: 27, pierce: 99, size: 1.8 }, Math.sin(a), Math.cos(a));
+      }
+      screenFlash = 1;
+      S.boom(); S.roar(); S.win();
+      hitStopT = 0.2; shakeT = 0.7; shakeAmp = 1.0;
       p.st = 'idle';
       play(p.rig, 'idle', { fade: 0.2 });
     }
@@ -1835,19 +2170,22 @@ function startAttack(a, stage, mx, mz, ml) {
 }
 function startMusou() {
   const p = player;
-  p.st = 'musou'; p.musouT = 0; p.musouTick = 0;
-  p.invuln = 2.8;
+  p.st = 'musou'; p.musouT = 0; p.musouTick = 0; p.musouBoltT = 0.3;
+  p.invuln = 4.4;
   musou = 0;
   play(p.rig, 'heavyfin', { ts: 1.75 });
-  spawnShockwave(p.x, p.z, { maxR: 6, dur: 0.5, color: 0xffd84f });
-  spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 4, 0xffd84f, { dur: 0.4 });
+  spawnPillar(p.x, p.z, 0xffd84f, 1.8);
+  spawnShockwave(p.x, p.z, { maxR: 8, dur: 0.55, color: 0xffd84f });
+  spawnShockwave(p.x, p.z, { maxR: 5, dur: 0.4, color: 0xffffff });
+  spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 5, 0xffd84f, { dur: 0.45 });
+  screenFlash = 0.7;
   if (AU.ctx) {
     const t = AU.ctx.currentTime;
-    tone('sawtooth', 180, t, 0.5, 0.3, AU.sfx, 900);
+    tone('sawtooth', 160, t, 0.7, 0.32, AU.sfx, 1100);
     S.roar();
   }
   showToastMini?.('魂門亂舞！');
-  hitStopT = 0.1; shakeT = 0.3; shakeAmp = 0.5;
+  hitStopT = 0.22; shakeT = 0.4; shakeAmp = 0.6;
 }
 function startDodge(mx, mz, ml) {
   const p = player;
@@ -1883,6 +2221,19 @@ function updateFx(dt) {
     const s = 1 + k * 0.25;
     m.scale.set(s, 1, s);
   }
+  for (let i = pillars.length - 1; i >= 0; i--) {
+    const m = pillars[i];
+    m.userData.t += dt;
+    const k = m.userData.t / m.userData.dur;
+    if (k >= 1) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); pillars.splice(i, 1); continue; }
+    m.scale.set(1 + k * 1.6, 1, 1 + k * 1.6);
+    m.material.opacity = 0.7 * (1 - k);
+    m.rotation.y += dt * 3;
+  }
+  if (screenFlash > 0) {
+    screenFlash = Math.max(0, screenFlash - dt * 2.6);
+    if (flashEl) flashEl.style.opacity = (screenFlash * 0.85).toFixed(2);
+  }
   for (let i = shockwaves.length - 1; i >= 0; i--) {
     const m = shockwaves[i];
     m.userData.t += dt;
@@ -1912,6 +2263,25 @@ function updateAmbient(dt) {
     if (pos[i * 3 + 1] > 9) pos[i * 3 + 1] = 0;
   }
   embers.pts.geometry.attributes.position.needsUpdate = true;
+  if (world3.visible) {
+    for (const cl of w3anim.clouds) {
+      cl.m.position.x = cl.x0 + Math.sin(worldT * 0.15 + cl.phase) * 3;
+    }
+    for (const l of w3anim.lanterns) {
+      l.m.position.y = l.base + Math.sin(worldT * 1.1 + l.phase) * 0.4;
+    }
+  }
+  if (world2.visible) {
+    for (const f of w2anim.flames) {
+      f.m.position.y = f.base + Math.sin(worldT * 2.2 + f.phase) * 0.35;
+      const k = 1 + Math.sin(worldT * 9 + f.phase * 3) * 0.22;
+      f.m.scale.set(f.sz * k, f.sz * k * 1.25, 1);
+    }
+    for (const r of w2anim.rocks) {
+      r.m.position.y += Math.sin(worldT * r.speed + r.phase) * 0.004;
+      r.m.rotation.y += 0.0008;
+    }
+  }
   // 雨
   const rp = rain.pos;
   for (let i = 0; i < rain.N; i++) {
@@ -2016,12 +2386,20 @@ const STORY = {
     ['RUMI', '守門是我的工作。你，回地府重新排隊。'],
   ],
   s2open: [
-    ['RUMI', '血月……裂縫比想像的還深，陰差傾巢而出了。'],
-    ['RUMI', 'Mira、Zoey，抱歉——這條街我先清完。'],
+    ['RUMI', '穿過裂縫……這裡是魂界。陰差的本營。'],
+    ['RUMI', '血月、鬼火、黑曜之地——直搗魂門核心，一次終結。'],
   ],
   s2boss: [
     ['陰差大隊長', '吾乃陰差大隊長！汝之魂，今夜歸吾！'],
     ['RUMI', '……來取啊。'],
+  ],
+  s3open: [
+    ['RUMI', '雲海之上……魂門的另一端竟然通到天界。'],
+    ['RUMI', '陰差王就在最深處。終結這一切，就在今晚。'],
+  ],
+  s3boss: [
+    ['陰差王', '獵魔士……汝竟踏入天界。此地，即汝之墓。'],
+    ['RUMI', '墓誌銘我幫你想好了——「敗給了 HUNTR/X」。'],
   ],
   ending: [
     ['RUMI', '魂門，守住了。'],
@@ -2032,14 +2410,36 @@ const STORY = {
 
 // ---------- 流程 ----------
 function applyStageTint(i) {
+  world1.visible = i === 0;
+  world2.visible = i === 1;
+  world3.visible = i === 2;
+  for (const b of barriers) {
+    if (b.wall) b.wall.material.color.set(i === 1 ? 0xff3050 : i === 2 ? 0x4fd8ff : 0x8a3fff);
+  }
+  if (i === 2) {
+    if (skyMat && skyTex3) { skyMat.map = skyTex3; skyMat.needsUpdate = true; skyMat.color.set(0xffffff); }
+    scene.fog.color.set(0x1a2c4c);
+    scene.fog.near = 30; scene.fog.far = 115;
+    hemi.color.set(0xc0d4f0); hemi.groundColor.set(0x48608a); hemi.intensity = 0.9;
+    sun.color.set(0xfff0d0); sun.intensity = 1.05;
+    warmFill.color.set(0xffd070); warmFill.intensity = 0.4;
+    honmoon.children[0].material.color.set(0xffd84f);
+    honmoon.children[1].material.color.set(0x4fd8ff);
+    rain.pts.visible = false;
+    embers.pts.material.color.set(0xbfe8ff);
+    embers.pts.material.size = 0.14;
+    heroLight.color.set(0xffe0b0);
+    return;
+  }
   if (i === 1) {
-    // 血月煉獄：霓虹半熄、店面熄燈、雨停、血色餘燼、濃霧
+    // 魂界：黑曜裂谷、血月漩渦天、鬼火
+    if (skyMat && skyTex2) { skyMat.map = skyTex2; skyMat.needsUpdate = true; }
     scene.fog.color.set(0x1c0a12);
     scene.fog.near = 20; scene.fog.far = 78;
     hemi.color.set(0xff8a7a); hemi.groundColor.set(0x2a0d14); hemi.intensity = 0.85;
     sun.color.set(0xff9a88); sun.intensity = 1.1;
     warmFill.color.set(0xff3020); warmFill.intensity = 0.5;
-    if (skyMat) skyMat.color.set(0xff8878);
+    if (skyMat) skyMat.color.set(0xffc0b0);
     honmoon.children[0].material.color.set(0xff3050);
     honmoon.children[1].material.color.set(0xffa040);
     for (const m of ENV.signs) m.color.setScalar(0.22);
@@ -2051,6 +2451,7 @@ function applyStageTint(i) {
     embers.pts.material.size = 0.22;
     heroLight.color.set(0xff6040);
   } else {
+    if (skyMat && skyTex1) { skyMat.map = skyTex1; skyMat.needsUpdate = true; }
     scene.fog.color.set(0x140f28);
     scene.fog.near = 26; scene.fog.far = 100;
     hemi.color.set(0x9a8aff); hemi.groundColor.set(0x201238); hemi.intensity = 1.1;
@@ -2095,7 +2496,7 @@ function loadStage(i) {
   runStartT = performance.now();
   showToast(STAGES[i].name);
   startZone(0);
-  showDialog(i === 0 ? STORY.s1open : STORY.s2open);
+  showDialog(i === 0 ? STORY.s1open : i === 1 ? STORY.s2open : STORY.s3open);
 }
 function start() {
   initAudio();
