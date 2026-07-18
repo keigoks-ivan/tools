@@ -1,6 +1,6 @@
 # HUNTR/X：魂門之戰 — 開發交接文件
 
-> 最後更新：2026-07-18。給下一個 Claude session 的完整脈絡。
+> 最後更新：2026-07-18（第二輪：選角/新招/地圖縮小/寫實背景）。給下一個 Claude session 的完整脈絡。
 > 上線網址：https://tools.investmquest.com/game/（repo push main 即自動部署）
 > 本機測試：`python3 -m http.server 8931`（repo 根目錄）→ http://localhost:8931/game/
 > **改 main.js 後必須 bump index.html 裡的 `main.js?v=xxx` 版本參數（防快取）**
@@ -36,15 +36,35 @@
 - `applyStageTint(i)`：世界可見性＋天空＋霧＋燈光切換
 - Debug hooks（console）：`__dbg() __P __E __lvl __stage(i) __warp(k完成前k目標) __switch() __occ() __key(code) __cap()`
 
+## 2026-07-18 第二輪更新（已上線）
+
+- **地圖縮小 25%**：MAP_HALF 62→47（活動區 94×94），STAGES 目標/街區/裝飾/遠景全座標 ×0.75 連動，
+  目標啟動半徑 26→20、增援/巡遊生成半徑同步縮
+- **鏡頭拉近**：距離 8→6.5、高度 3.9→3.4（真三感、角色更大）
+- **選角系統**：`CHARS{rumi,mira,zoey}`＋`buildHero()`；title→charsel overlay（index.html）→start。
+  Mira（重刃：dmg×1.28/hp×1.18/spd5.9 藍）Zoey（疾風：dmg×0.82/hp×0.88/spd7.5 金）。
+  目前用 Maria 模型＋tint 靈氣代身；`assets/mira.glb`/`zoey.glb` 若存在（tmp-convert 產出）自動採用（`tryLoad`）
+- **新招式**：K 長按 0.5s 蓄力震地斬（CHARGE_ATK，光柱+三重衝擊波+閃白）；跑動中輕點 K＝衝刺斬（DASH_ATK，dash:19）；
+  遠程重擊＝三連新月（RHEAVY fan:3）、遠程蓄力＝五連貫穿新月（RCHARGE fan:5）；
+  完美閃避（翻滾 i-frame 內吃到判定）→ 子彈時間 1.6s（witchT，敵人 dt×0.22）+無雙氣+8
+- **主角細緻化**：四階 toon 漸層（gradTex4）；劍身能量刃光（sword mesh 複製+法線外擴 additive）；
+  揮劍軌跡帶（`setupSwordFx` 綁定姿勢算劍根/劍尖→掛 marker 於 mixamorigRightHand，`updateTrail` 帶狀淡出）；
+  氣滿金環光環（heroAura）；攻擊特效色全部走 curChar.fx
+- **劍氣新月化**：crescentTex（雙層新月）+ sprite rotation 對齊行進方向（螢幕空間）
+- **背景寫實化**：窗戶貼圖 128×256（樓層帶/窗框/窗簾/污漬/AO 漸層）；world1 樓體改組合式
+  （裙樓+退縮塔身×2+女兒牆+屋頂水塔/空調/天線紅燈+霓虹頂緣+斑馬線+直招支柱）；遠景樓加退縮層/尖塔；
+  world2 岩石多峰傾斜不等比+熔岩光斑+黑曜碎晶+遠景火山；world3 金拱門×3+天光光柱（w3anim.shafts）；
+  world4 能量巨環×3（w4anim.rings）+地表水晶簇
+- flickers 支援 base 色（紅色警示燈不會閃成白色）
+
 ## 已知待辦/可改進
 
-1. 鏡頭距離 8（updateCamera）可再拉近至 ~6.5 讓角色更大（真三感更強）
-2. 開放地圖的敵量/密度數值剛調過一輪，需實玩回饋再平衡
-3. Boss 現身時機、勝利/死亡流程在開放地圖版只做過邏輯驗證（__warp），未實玩驗證
-4. M3 計畫:Mira/Zoey 角色（Mixamo 選角→tmp-convert 轉檔→選角畫面）
-5. 音量平衡未實聽調整;BGM 好聽度看用戶回饋
-6. 手機實機未測（觸控/效能）
-7. 劍氣彈視覺可升級成新月形（目前是壓扁光球）
+1. 開放地圖敵量/密度、蓄力/衝刺斬傷害數值需實玩回饋再平衡
+2. Boss 現身時機、勝利/死亡流程未在縮小版地圖完整實玩驗證
+3. Mira/Zoey 專屬模型：Mixamo 選角→tmp-convert 轉檔→丟 assets/mira.glb、zoey.glb 即自動生效（管線就緒）
+4. 音量平衡未實聽調整；BGM 好聽度看用戶回饋
+5. 手機實機未測（觸控/效能；蓄力=長按重鍵已支援）
+6. 揮劍軌跡帶的劍尖偵測用 bounding box 長軸推斷，若視覺歪斜需微調 setupSwordFx 的 lerp 參數
 
 ## 部署習慣
 

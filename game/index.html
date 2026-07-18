@@ -49,6 +49,17 @@
   .overlay .btn{pointer-events:auto;cursor:pointer;margin-top:26px;padding:12px 44px;font-size:18px;font-weight:700;color:#fff;
     background:linear-gradient(90deg,#a04fff,#ff4fa3);border:none;border-radius:999px;box-shadow:0 0 24px rgba(160,79,255,.6)}
   .overlay .btn:hover{filter:brightness(1.15)}
+  /* ---------- 選角 ---------- */
+  #charsel h1{font-size:36px;color:#e8d8ff;text-shadow:0 0 24px #a04fff}
+  #charCards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;padding:0 16px}
+  .ccard{pointer-events:auto;cursor:pointer;width:196px;padding:20px 16px 14px;border-radius:16px;text-align:center;
+    background:rgba(14,10,30,.85);border:2px solid var(--cc);box-shadow:0 0 20px rgba(120,60,220,.35);transition:transform .12s,box-shadow .12s}
+  .ccard:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 0 30px var(--cc)}
+  .ccard .cname{font-size:27px;font-weight:900;letter-spacing:3px;color:var(--cc)}
+  .ccard .ckr{font-size:13px;color:rgba(255,255,255,.6);margin:2px 0 10px}
+  .ccard .cdesc{font-size:13px;line-height:1.65;color:rgba(255,255,255,.85)}
+  .ccard .ckey{margin-top:10px;font-size:11px;color:rgba(255,255,255,.4)}
+  @media (max-width:900px){ .ccard{width:150px;padding:14px 10px 10px} .ccard .cname{font-size:20px} #charsel h1{font-size:26px} }
   #dead h1{color:#ff5a7a;text-shadow:0 0 30px #ff2050}
   #win h1{color:#ffd84f;text-shadow:0 0 34px #ff9d2e}
   #grade{font-size:120px;font-weight:900;margin:6px 0 2px;color:#ffd84f;text-shadow:0 0 40px #ff9d2e}
@@ -125,15 +136,39 @@
   <canvas id="minimap" width="116" height="116"></canvas>
   <div id="combo"></div>
   <div id="toast"></div>
-  <div id="hint">WASD 移動 · J 輕攻擊 · K 重攻擊 · Q 換武器 · Space 跳躍 · Shift 翻滾 · E 氣滿放大絕</div>
+  <div id="hint">WASD 移動 · J 連段 · K 重擊（長按蓄力／跑動中衝刺斬） · Q 換武器 · Space 跳 · Shift 極限閃避 · E 大絕</div>
 </div>
 <div id="title" class="overlay">
   <h1>HUNTR/X：魂門之戰</h1>
-  <h2>Stage 1 — 首爾夜市・魂門裂縫（Rumi）</h2>
+  <h2>四關戰役 · HUNTR/X 三獵魔士選角參戰</h2>
   <p>WASD 移動 · J 輕攻擊（連段） · K 重攻擊 · Space 跳躍 · Shift 翻滾</p>
   <p>沿夜市大街往前推進，肅清四個區域，擊破魂門前的陰差隊長</p>
   <button class="btn" id="startBtn">開始狩獵</button>
   <div id="loadtext">載入中…</div>
+</div>
+<div id="charsel" class="overlay hidden">
+  <h1>選擇獵魔士</h1>
+  <div id="charCards">
+    <div class="ccard" data-char="rumi" style="--cc:#c9a4ff">
+      <div class="cname">RUMI</div>
+      <div class="ckr">루미 · 隊長</div>
+      <div class="cdesc">攻守均衡的王道劍士<br>攻擊 ●●●○○<br>速度 ●●●○○<br>體力 ●●●○○</div>
+      <div class="ckey">按 1 選擇</div>
+    </div>
+    <div class="ccard" data-char="mira" style="--cc:#6aa8ff">
+      <div class="cname">MIRA</div>
+      <div class="ckr">미라 · 重刃</div>
+      <div class="cdesc">一擊粉碎的破壞者<br>攻擊 ●●●●●<br>速度 ●●○○○<br>體力 ●●●●○</div>
+      <div class="ckey">按 2 選擇</div>
+    </div>
+    <div class="ccard" data-char="zoey" style="--cc:#ffd84f">
+      <div class="cname">ZOEY</div>
+      <div class="ckr">조이 · 疾風</div>
+      <div class="cdesc">高速遊走的連段手<br>攻擊 ●●○○○<br>速度 ●●●●●<br>體力 ●●○○○</div>
+      <div class="ckey">按 3 選擇</div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:rgba(255,255,255,.5);margin-top:22px">MIRA／ZOEY 目前為靈氣變體外觀，專屬模型製作中</p>
 </div>
 <div id="dead" class="overlay hidden">
   <h1>妳倒下了</h1>
@@ -155,6 +190,6 @@
   }
 }
 </script>
-<script type="module" src="main.js?v=20260718w"></script>
+<script type="module" src="main.js?v=20260719a"></script>
 </body>
 </html>

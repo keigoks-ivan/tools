@@ -19,46 +19,55 @@ const STAGES = [
   {
     name: '第一關　首爾夜市・魂門裂縫', bossKind: 'boss', bossLabel: '陰差隊長',
     objectives: [
-      { name: '南廣場殲滅戰', type: 'kill',    need: 22, pos: [-36, 24], ambush: true },
-      { name: '東市場據點',   type: 'capture', pos: [36, 24] },
-      { name: '西巷敵將',     type: 'officer', officers: 2, pos: [-36, -28] },
-      { name: '北口大掃蕩',   type: 'kill',    need: 26, pos: [36, -28], fast: 0.3, ambush: true },
+      { name: '南廣場殲滅戰', type: 'kill',    need: 22, pos: [-27, 18], ambush: true },
+      { name: '東市場據點',   type: 'capture', pos: [27, 18] },
+      { name: '西巷敵將',     type: 'officer', officers: 2, pos: [-27, -21] },
+      { name: '北口大掃蕩',   type: 'kill',    need: 26, pos: [27, -21], fast: 0.3, ambush: true },
     ],
-    bossPos: [0, -46],
+    bossPos: [0, -35],
   },
   {
     name: '第二關　魂界・陰差本營', bossKind: 'boss2', bossLabel: '陰差大隊長',
     objectives: [
-      { name: '裂口殲滅戰',   type: 'kill',    need: 24, pos: [-36, 24], fast: 0.35, ambush: true },
-      { name: '亡者祭壇',     type: 'capture', pos: [36, 24], fast: 0.4 },
-      { name: '厲鬼巢穴',     type: 'kill',    need: 30, pos: [-36, -28], fast: 0.55, ambush: true },
-      { name: '修羅武將團',   type: 'officer', officers: 3, pos: [36, -28], fast: 0.4 },
+      { name: '裂口殲滅戰',   type: 'kill',    need: 24, pos: [-27, 18], fast: 0.35, ambush: true },
+      { name: '亡者祭壇',     type: 'capture', pos: [27, 18], fast: 0.4 },
+      { name: '厲鬼巢穴',     type: 'kill',    need: 30, pos: [-27, -21], fast: 0.55, ambush: true },
+      { name: '修羅武將團',   type: 'officer', officers: 3, pos: [27, -21], fast: 0.4 },
     ],
-    bossPos: [0, -46],
+    bossPos: [0, -35],
   },
   {
     name: '第三關　天界・魂門之上', bossKind: 'boss3', bossLabel: '陰差王',
     objectives: [
-      { name: '雲海據點',     type: 'capture', pos: [-36, 24], fast: 0.4 },
-      { name: '聖域掃蕩',     type: 'kill',    need: 34, pos: [36, 24], fast: 0.5, ambush: true },
-      { name: '星橋敵將',     type: 'officer', officers: 3, pos: [-36, -28], fast: 0.5 },
-      { name: '審判殲滅戰',   type: 'kill',    need: 30, pos: [36, -28], fast: 0.5, ambush: true },
+      { name: '雲海據點',     type: 'capture', pos: [-27, 18], fast: 0.4 },
+      { name: '聖域掃蕩',     type: 'kill',    need: 34, pos: [27, 18], fast: 0.5, ambush: true },
+      { name: '星橋敵將',     type: 'officer', officers: 3, pos: [-27, -21], fast: 0.5 },
+      { name: '審判殲滅戰',   type: 'kill',    need: 30, pos: [27, -21], fast: 0.5, ambush: true },
     ],
-    bossPos: [0, -46],
+    bossPos: [0, -35],
   },
   {
     name: '第四關　虛空・魂門之心', bossKind: 'boss4', bossLabel: '魂門之靈',
     objectives: [
-      { name: '碎星殲滅戰',   type: 'kill',    need: 30, pos: [-36, 24], fast: 0.5, ambush: true },
-      { name: '虛空武將團',   type: 'officer', officers: 3, pos: [36, 24], fast: 0.5 },
-      { name: '星核據點',     type: 'capture', pos: [-36, -28], fast: 0.5 },
-      { name: '深淵大掃蕩',   type: 'kill',    need: 36, pos: [36, -28], fast: 0.6, ambush: true },
+      { name: '碎星殲滅戰',   type: 'kill',    need: 30, pos: [-27, 18], fast: 0.5, ambush: true },
+      { name: '虛空武將團',   type: 'officer', officers: 3, pos: [27, 18], fast: 0.5 },
+      { name: '星核據點',     type: 'capture', pos: [-27, -21], fast: 0.5 },
+      { name: '深淵大掃蕩',   type: 'kill',    need: 36, pos: [27, -21], fast: 0.6, ambush: true },
     ],
-    bossPos: [0, -46],
+    bossPos: [0, -35],
   },
 ];
 const OFFICER_NAMES = ['陰差百夫長', '陰差千夫長', '夜叉先鋒', '羅刹遊擊', '牛頭督戰', '馬面斥候'];
 let stageIdx = 0;
+
+// ---------- 可操作角色（HUNTR/X 三人組） ----------
+// mira.glb / zoey.glb 若存在（tmp-convert 管線產出）自動採用；否則以 Rumi 模型＋靈氣配色代身
+const CHARS = {
+  rumi: { key: 'rumi', name: 'RUMI', tint: null,     fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    light: 0xff4fa3 },
+  mira: { key: 'mira', name: 'MIRA', tint: 0x4a78ff, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, light: 0x5a8aff },
+  zoey: { key: 'zoey', name: 'ZOEY', tint: 0xffc040, fx: 0xffd84f, fxHi: 0xffeaa8, boltCol: 0xffe08a, spd: 7.5, dmgMul: 0.82, hpMul: 0.88, light: 0xffb040 },
+};
+let curChar = CHARS.rumi;
 
 // ---------- 基本場景 ----------
 const app = document.getElementById('app');
@@ -135,15 +144,44 @@ let skyTex1 = null;
 
 // ---------- 共用貼圖工具 ----------
 function makeWindowTex(hue) {
+  // 寫實立面：混凝土基底＋樓層帶＋窗框＋污漬＋垂直明暗
   const c = document.createElement('canvas');
-  c.width = 64; c.height = 128;
+  c.width = 128; c.height = 256;
   const g = c.getContext('2d');
-  g.fillStyle = '#0e0e20'; g.fillRect(0, 0, 64, 128);
-  for (let y = 6; y < 122; y += 10) {
-    for (let x = 6; x < 58; x += 10) {
-      if (Math.random() < 0.4) {
-        g.fillStyle = Math.random() < 0.75 ? `hsl(${hue},70%,68%)` : '#fff2cc';
-        g.fillRect(x, y, 5, 6);
+  const bg = g.createLinearGradient(0, 0, 0, 256);
+  bg.addColorStop(0, '#26263a');
+  bg.addColorStop(0.6, '#1b1b2a');
+  bg.addColorStop(1, '#12121f');
+  g.fillStyle = bg; g.fillRect(0, 0, 128, 256);
+  for (let i = 0; i < 42; i++) {           // 立面污漬直紋
+    g.fillStyle = `rgba(${8 + Math.random() * 20},${8 + Math.random() * 18},${16 + Math.random() * 24},${0.1 + Math.random() * 0.16})`;
+    const w = 3 + Math.random() * 9;
+    g.fillRect(Math.random() * 128, Math.random() * 256, w, w * (2 + Math.random() * 6));
+  }
+  for (let y = 8; y < 250; y += 16) {      // 樓層分割帶
+    g.fillStyle = 'rgba(0,0,0,0.35)';
+    g.fillRect(0, y + 12, 128, 2);
+    g.fillStyle = 'rgba(255,255,255,0.05)';
+    g.fillRect(0, y + 14, 128, 1);
+  }
+  for (let y = 8; y < 242; y += 16) {      // 窗（亮/暗/窗簾）
+    for (let x = 6; x < 118; x += 12) {
+      const lit = Math.random() < 0.36;
+      if (lit) {
+        const warm = Math.random() < 0.6;
+        const wg = g.createLinearGradient(0, y, 0, y + 10);
+        wg.addColorStop(0, warm ? '#ffe9c0' : `hsl(${hue},75%,80%)`);
+        wg.addColorStop(1, warm ? '#e8a95e' : `hsl(${hue},60%,52%)`);
+        g.fillStyle = wg;
+      } else {
+        g.fillStyle = `rgba(${20 + Math.random() * 18},${26 + Math.random() * 20},${46 + Math.random() * 26},0.92)`;
+      }
+      g.fillRect(x, y, 8, 10);
+      g.fillStyle = 'rgba(255,255,255,0.12)';
+      g.fillRect(x, y, 8, 1);
+      if (lit && Math.random() < 0.35) {   // 半掩窗簾
+        g.fillStyle = 'rgba(28,18,30,0.6)';
+        g.fillRect(x, y, 8, 3 + Math.random() * 4);
       }
     }
   }
@@ -242,20 +280,20 @@ world3.visible = false;
 world4.visible = false;
 
 // 開放戰場：正方形地圖＋街區障礙（四關共用碰撞佈局）
-const MAP_HALF = 62;
+const MAP_HALF = 47;
 const OBSTACLES = [];
 (function planObstacles() {
-  const cells = [-45, -18, 18, 45];
-  const clear = [[-36, 24], [36, 24], [-36, -28], [36, -28], [0, -46], [0, 48], [0, 0]];
+  const cells = [-34, -14, 14, 34];
+  const clear = [[-27, 18], [27, 18], [-27, -21], [27, -21], [0, -35], [0, 36], [0, 0]];
   const ok = (gx, gz, rad) => !clear.some(([px, pz]) => Math.hypot(gx - px, gz - pz) < rad);
   for (const gx of cells) {
     for (const gz of cells) {
-      if (ok(gx, gz, 16)) OBSTACLES.push({ x: gx, z: gz, hx: 8, hz: 8 });
+      if (ok(gx, gz, 12)) OBSTACLES.push({ x: gx, z: gz, hx: 8, hz: 8 });
     }
   }
   // 小街區補密
-  for (const [gx, gz] of [[-12, 40], [12, 40], [-40, 12], [40, -12], [-12, -40], [12, -42], [40, 40], [-40, -40]]) {
-    if (ok(gx, gz, 13)) OBSTACLES.push({ x: gx, z: gz, hx: 5.5, hz: 5.5 });
+  for (const [gx, gz] of [[-9, 30], [9, 30], [-30, 9], [30, -9], [-9, -30], [9, -32], [30, 30], [-30, -30]]) {
+    if (ok(gx, gz, 10)) OBSTACLES.push({ x: gx, z: gz, hx: 5.5, hz: 5.5 });
   }
 })();
 const blockersReg = OBSTACLES.map(() => ({ mats: [], cur: 1, target: 1, applied: 1 }));
@@ -326,17 +364,17 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   }
   const asphalt = new THREE.CanvasTexture(ac);
   asphalt.wrapS = asphalt.wrapT = THREE.RepeatWrapping;
-  asphalt.repeat.set(24, 24);
+  asphalt.repeat.set(18, 18);
   asphalt.colorSpace = THREE.SRGBColorSpace;
   const roadMat = new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.32, metalness: 0.62 });
   groundMats.push(roadMat);
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), roadMat);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), roadMat);
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   world1.add(ground);
   // 兩條主幹道虛線
   const dashMat = new THREE.MeshBasicMaterial({ color: 0x8a8a80 });
-  for (let k = -58; k <= 58; k += 5) {
+  for (let k = -44; k <= 44; k += 5) {
     const d1 = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 1.8), dashMat);
     d1.rotation.x = -Math.PI / 2;
     d1.position.set(0, 0.012, k);
@@ -346,25 +384,81 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     d2.position.set(k, 0.012, 0);
     world1.add(d2);
   }
-  // 街區：人行道座台＋大樓＋招牌
-  const winTexs = [makeWindowTex(46), makeWindowTex(190), makeWindowTex(285)];
+  // 街區：人行道座台＋組合式樓體（裙樓＋退縮塔身＋女兒牆＋屋頂設備）＋招牌
+  const winTexs = [makeWindowTex(46), makeWindowTex(190), makeWindowTex(285), makeWindowTex(210), makeWindowTex(320)];
   const paveMat = new THREE.MeshLambertMaterial({ color: 0x2e2a3a });
   let wi = 0;
   for (const b of OBSTACLES) {
     const blockReg = blockersReg[OBSTACLES.indexOf(b)];
+    const reg = m => { blockReg.mats.push(m); return m; };
     const plate = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2 + 4, 0.14, b.hz * 2 + 4), paveMat);
     plate.position.set(b.x, 0.07, b.z);
     plate.receiveShadow = true;
     world1.add(plate);
-    const h = 9 + Math.random() * 8;
-    const winMat = new THREE.MeshBasicMaterial({ map: winTexs[wi % 3] });
+    // 裙樓（1-2F 商場帶）＋女兒牆
+    const podMat = reg(new THREE.MeshLambertMaterial({ color: 0x252134 }));
+    const pod = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2, 3.6, b.hz * 2), podMat);
+    pod.position.set(b.x, 1.9, b.z);
+    pod.castShadow = true;
+    world1.add(pod);
+    const lipMat = reg(new THREE.MeshLambertMaterial({ color: 0x171422 }));
+    const podLip = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2 + 0.3, 0.28, b.hz * 2 + 0.3), lipMat);
+    podLip.position.set(b.x, 3.85, b.z);
+    world1.add(podLip);
+    // 塔身（退縮 + 隨機第二段退縮）
+    const h = 10 + Math.random() * 9;
+    const winMat = reg(new THREE.MeshBasicMaterial({ map: winTexs[wi % winTexs.length] }));
     ENV.wins.push(winMat);
-    blockReg.mats.push(winMat);
-    const body = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2, h, b.hz * 2), winMat);
-    body.position.set(b.x, h / 2 + 0.1, b.z);
-    body.castShadow = true;
-    world1.add(body);
-    // 四面一樓店面＋橫招牌
+    const inset = 0.8 + Math.random() * 0.8;
+    const tw = b.hx * 2 - inset * 2, td = b.hz * 2 - inset * 2;
+    const tx = b.x + (Math.random() * 2 - 1) * inset * 0.4, tz = b.z + (Math.random() * 2 - 1) * inset * 0.4;
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(tw, h, td), winMat);
+    tower.position.set(tx, h / 2 + 3.9, tz);
+    tower.castShadow = true;
+    world1.add(tower);
+    let topY = h + 3.9, topW = tw, topD = td;
+    if (Math.random() < 0.55) {
+      const h2 = 3.5 + Math.random() * 5;
+      const winMat2 = reg(new THREE.MeshBasicMaterial({ map: winTexs[(wi + 2) % winTexs.length] }));
+      ENV.wins.push(winMat2);
+      const w2 = tw * 0.62, d2 = td * 0.62;
+      const t2 = new THREE.Mesh(new THREE.BoxGeometry(w2, h2, d2), winMat2);
+      t2.position.set(tx, topY + h2 / 2, tz);
+      t2.castShadow = true;
+      world1.add(t2);
+      const lip1 = new THREE.Mesh(new THREE.BoxGeometry(tw + 0.24, 0.22, td + 0.24), lipMat);
+      lip1.position.set(tx, topY + 0.1, tz);
+      world1.add(lip1);
+      topY += h2; topW = w2; topD = d2;
+    }
+    // 頂部女兒牆＋霓虹頂緣
+    const lipTop = new THREE.Mesh(new THREE.BoxGeometry(topW + 0.24, 0.22, topD + 0.24), lipMat);
+    lipTop.position.set(tx, topY + 0.1, tz);
+    world1.add(lipTop);
+    const trimMat = reg(new THREE.MeshBasicMaterial({ color: NEON[wi % NEON.length] }));
+    const trim = new THREE.Mesh(new THREE.BoxGeometry(topW + 0.34, 0.09, topD + 0.34), trimMat);
+    trim.position.set(tx, topY + 0.26, tz);
+    world1.add(trim);
+    // 屋頂設備：水塔＋空調＋天線（紅色警示燈）
+    const roofMat = reg(new THREE.MeshLambertMaterial({ color: 0x2a2738 }));
+    const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 1.5, 8), roofMat);
+    tank.position.set(tx - topW * 0.26, topY + 0.95, tz - topD * 0.2);
+    world1.add(tank);
+    const tankCap = new THREE.Mesh(new THREE.ConeGeometry(0.78, 0.4, 8), roofMat);
+    tankCap.position.set(tank.position.x, topY + 1.9, tank.position.z);
+    world1.add(tankCap);
+    const ac = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.6, 0.9), roofMat);
+    ac.position.set(tx + topW * 0.24, topY + 0.5, tz + topD * 0.22);
+    world1.add(ac);
+    const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.6, 4), roofMat);
+    ant.position.set(tx + topW * 0.1, topY + 1.5, tz - topD * 0.25);
+    world1.add(ant);
+    const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff3a3a });
+    const bcn = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 5), beaconMat);
+    bcn.position.set(ant.position.x, topY + 2.85, ant.position.z);
+    world1.add(bcn);
+    flickers.push({ mat: beaconMat, base: new THREE.Color(0xff3a3a), speed: 0.3 + Math.random() * 0.3, phase: Math.random() * 10 });
+    // 四面一樓店面＋裙樓頂看板
     for (const [dx, dz, ry] of [[0, b.hz + 0.06, 0], [0, -b.hz - 0.06, Math.PI], [b.hx + 0.06, 0, Math.PI / 2], [-b.hx - 0.06, 0, -Math.PI / 2]]) {
       const frontMat = new THREE.MeshBasicMaterial({ map: makeStorefrontTex() });
       ENV.fronts.push(frontMat);
@@ -377,12 +471,12 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
       ENV.signs.push(signMat);
       blockReg.mats.push(signMat);
       const sign = new THREE.Mesh(new THREE.PlaneGeometry(b.hx * 2 - 2, 1.2), signMat);
-      sign.position.set(b.x + dx * 1.012, 3.95, b.z + dz * 1.012);
+      sign.position.set(b.x + dx * 1.012, 4.62, b.z + dz * 1.012);
       sign.rotation.y = ry;
       world1.add(sign);
       if (Math.random() < 0.4) flickers.push({ mat: signMat, speed: 0.5 + Math.random(), phase: Math.random() * 10 });
     }
-    // 立式直招（角落）
+    // 立式直招（裙樓角落，含支柱）
     const vTex = makeVSignTex(KR_WORDS[Math.floor(Math.random() * KR_WORDS.length)]);
     const vDark = new THREE.MeshLambertMaterial({ color: 0x14141f });
     const vMats = [
@@ -393,9 +487,22 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     ENV.signs.push(vMats[0], vMats[1]);
     blockReg.mats.push(vMats[0], vMats[1], vDark);
     const v = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.6, 1), vMats);
-    v.position.set(b.x + b.hx - 0.4, 5.4, b.z + b.hz + 0.35);
+    v.position.set(b.x + b.hx - 0.4, 5.9, b.z + b.hz + 0.35);
     world1.add(v);
+    const vPole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.2, 5), vDark);
+    vPole.position.set(b.x + b.hx - 0.4, 4.6, b.z + b.hz - 0.1);
+    world1.add(vPole);
     wi++;
+  }
+  // 斑馬線（中央十字路口四向）
+  const cwMat = new THREE.MeshBasicMaterial({ color: 0x8f8f88 });
+  for (let i = -2; i <= 2; i++) {
+    for (const [px, pz, w, d2] of [[i * 1.15, 7.4, 0.55, 2.2], [i * 1.15, -7.4, 0.55, 2.2], [7.4, i * 1.15, 2.2, 0.55], [-7.4, i * 1.15, 2.2, 0.55]]) {
+      const s = new THREE.Mesh(new THREE.PlaneGeometry(w, d2), cwMat);
+      s.rotation.x = -Math.PI / 2;
+      s.position.set(px, 0.014, pz);
+      world1.add(s);
+    }
   }
   // 光池
   const poolTex = (() => {
@@ -422,7 +529,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   ENV.tentGlows.push(tentGlow);
   const counterMat = new THREE.MeshLambertMaterial({ color: 0x3a3548 });
   const poleMat = new THREE.MeshLambertMaterial({ color: 0x585868 });
-  const tentSpots = [[-30, 30], [42, 17], [-42, -20], [30, -33], [-6, 24], [6, -24], [-24, -6], [24, 6], [-45, 33], [45, -34]];
+  const tentSpots = [[-23, 23], [32, 13], [-32, -15], [23, -25], [-5, 18], [5, -18], [-18, -5], [18, 5], [-34, 25], [34, -26]];
   tentSpots.forEach(([tx, tz], i) => {
     const grp = new THREE.Group();
     const counter = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.0, 1.5), counterMat);
@@ -453,25 +560,37 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   const mats = [46, 190, 285].map(h => new THREE.MeshBasicMaterial({ map: makeWindowTex(h) }));
   let i = 0;
   for (let a = 0; a < Math.PI * 2; a += 0.16) {
-    const r = 80 + Math.random() * 20;
+    const r = 62 + Math.random() * 14;
     const w = 7 + Math.random() * 9;
     const h = 14 + Math.random() * 28;
+    const bx = Math.cos(a) * r, bz = Math.sin(a) * r;
     const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), mats[i++ % 3]);
-    b.position.set(Math.cos(a) * r, h / 2 - 0.5, Math.sin(a) * r);
+    b.position.set(bx, h / 2 - 0.5, bz);
     b.rotation.y = Math.random() * Math.PI;
     world1.add(b);
+    if (Math.random() < 0.4) {   // 頂部退縮層：打破方塊剪影
+      const t2 = new THREE.Mesh(new THREE.BoxGeometry(w * 0.55, h * 0.22, w * 0.55), mats[i % 3]);
+      t2.position.set(bx, h + h * 0.11 - 0.5, bz);
+      t2.rotation.y = b.rotation.y;
+      world1.add(t2);
+    }
+    if (Math.random() < 0.35) {  // 天線尖塔
+      const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.2, 5 + Math.random() * 4, 4), new THREE.MeshBasicMaterial({ color: 0x1a1630 }));
+      sp.position.set(bx, h + 3, bz);
+      world1.add(sp);
+    }
   }
   const hill = new THREE.Mesh(new THREE.ConeGeometry(30, 16, 6), new THREE.MeshBasicMaterial({ color: 0x0c0a18, fog: false }));
-  hill.position.set(52, 7, -100);
+  hill.position.set(42, 7, -78);
   world1.add(hill);
   const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.2, 20, 8), new THREE.MeshBasicMaterial({ color: 0x262040, fog: false }));
-  tower.position.set(52, 25, -100);
+  tower.position.set(42, 25, -78);
   world1.add(tower);
   const deck = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.2, 2.2, 10), new THREE.MeshBasicMaterial({ color: 0xffd9a0, fog: false }));
-  deck.position.set(52, 36, -100);
+  deck.position.set(42, 36, -78);
   world1.add(deck);
   const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff3a3a, fog: false }));
-  beacon.position.set(52, 44, -100);
+  beacon.position.set(42, 44, -78);
   world1.add(beacon);
 })();
 
@@ -524,14 +643,14 @@ const w2anim = { flames: [], rocks: [] };
   }
   const groundTex = new THREE.CanvasTexture(gc);
   groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
-  groundTex.repeat.set(12, 12);
+  groundTex.repeat.set(9, 9);
   groundTex.colorSpace = THREE.SRGBColorSpace;
-  const g2 = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), new THREE.MeshLambertMaterial({ map: groundTex }));
+  const g2 = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), new THREE.MeshLambertMaterial({ map: groundTex }));
   g2.rotation.x = -Math.PI / 2;
   g2.position.y = 0.01;
   g2.receiveShadow = true;
   world2.add(g2);
-  const crackGlow = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), new THREE.MeshBasicMaterial({
+  const crackGlow = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), new THREE.MeshBasicMaterial({
     map: groundTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   crackGlow.rotation.x = -Math.PI / 2;
@@ -543,11 +662,13 @@ const w2anim = { flames: [], rocks: [] };
   for (const b of OBSTACLES) {
     const rm = rockMat.clone();
     blockersReg[OBSTACLES.indexOf(b)].mats.push(rm);
-    for (let i = 0; i < 3; i++) {
-      const h = 8 + Math.random() * 10;
-      const rock = new THREE.Mesh(new THREE.ConeGeometry(4 + Math.random() * 3, h, 5), rm);
-      rock.position.set(b.x + (Math.random() * 2 - 1) * 5, h / 2 - 0.6, b.z + (Math.random() * 2 - 1) * 5);
-      rock.rotation.y = Math.random() * Math.PI;
+    for (let i = 0; i < 4; i++) {
+      // 嶙峋山岩：多峰交疊＋傾斜＋不等比縮放，去掉正圓錐感
+      const h = 7 + Math.random() * 11;
+      const rock = new THREE.Mesh(new THREE.ConeGeometry(3.5 + Math.random() * 3, h, 7), rm);
+      rock.position.set(b.x + (Math.random() * 2 - 1) * 5.5, h / 2 - 0.8, b.z + (Math.random() * 2 - 1) * 5.5);
+      rock.rotation.set((Math.random() - 0.5) * 0.22, Math.random() * Math.PI, (Math.random() - 0.5) * 0.22);
+      rock.scale.set(0.75 + Math.random() * 0.55, 1, 0.75 + Math.random() * 0.55);
       rock.castShadow = true;
       world2.add(rock);
     }
@@ -557,10 +678,56 @@ const w2anim = { flames: [], rocks: [] };
     cr.rotation.z = 0.3;
     world2.add(cr);
   }
+  // 熔岩裂縫光斑（地表橘紅輝光）
+  const lavaTex = (() => {
+    const lc = document.createElement('canvas');
+    lc.width = lc.height = 128;
+    const lg = lc.getContext('2d');
+    const rg = lg.createRadialGradient(64, 64, 4, 64, 64, 62);
+    rg.addColorStop(0, 'rgba(255,150,60,0.75)');
+    rg.addColorStop(0.5, 'rgba(255,70,30,0.35)');
+    rg.addColorStop(1, 'rgba(200,40,20,0)');
+    lg.fillStyle = rg; lg.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(lc);
+  })();
+  for (let i = 0; i < 10; i++) {
+    const s = 3 + Math.random() * 5;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), new THREE.MeshBasicMaterial({
+      map: lavaTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.5 + Math.random() * 0.3,
+    }));
+    m.rotation.x = -Math.PI / 2;
+    m.rotation.z = Math.random() * 6.28;
+    m.position.set((Math.random() * 2 - 1) * 40, 0.03, (Math.random() * 2 - 1) * 40);
+    world2.add(m);
+  }
+  // 黑曜碎晶群
+  for (let i = 0; i < 12; i++) {
+    const cx = (Math.random() * 2 - 1) * 40, cz = (Math.random() * 2 - 1) * 40;
+    for (let j = 0; j < 3; j++) {
+      const sz = 0.3 + Math.random() * 0.7;
+      const sh = new THREE.Mesh(new THREE.OctahedronGeometry(sz, 0), Math.random() < 0.75 ? rockMat : crystalMat);
+      sh.position.set(cx + (Math.random() * 2 - 1) * 1.4, sz * 0.5, cz + (Math.random() * 2 - 1) * 1.4);
+      sh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+      sh.scale.y = 1.3 + Math.random();
+      world2.add(sh);
+    }
+  }
+  // 遠景火山＋噴發口輝光
+  const volcano = new THREE.Mesh(new THREE.ConeGeometry(22, 30, 7), new THREE.MeshBasicMaterial({ color: 0x150508, fog: false }));
+  volcano.position.set(-42, 9, -68);
+  volcano.scale.set(1.25, 1, 1);
+  world2.add(volcano);
+  const crater = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: lavaTex, color: 0xff6a30, transparent: true, opacity: 0.9,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  crater.position.set(-42, 25, -66);
+  crater.scale.set(14, 8, 1);
+  world2.add(crater);
   for (let i = 0; i < 14; i++) {
     const sz = 1.4 + Math.random() * 3.2;
     const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(sz, 0), rockMat);
-    rock.position.set((Math.random() * 2 - 1) * 54, 10 + Math.random() * 14, (Math.random() * 2 - 1) * 54);
+    rock.position.set((Math.random() * 2 - 1) * 42, 10 + Math.random() * 14, (Math.random() * 2 - 1) * 42);
     rock.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
     world2.add(rock);
     w2anim.rocks.push({ m: rock, phase: Math.random() * 6.28, speed: 0.3 + Math.random() * 0.4 });
@@ -581,14 +748,14 @@ const w2anim = { flames: [], rocks: [] };
       map: flameTex, color: Math.random() < 0.6 ? 0xff5a30 : 0x9a40ff,
       transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.85,
     }));
-    f.position.set((Math.random() * 2 - 1) * 58, 0.8 + Math.random() * 3.4, (Math.random() * 2 - 1) * 58);
+    f.position.set((Math.random() * 2 - 1) * 44, 0.8 + Math.random() * 3.4, (Math.random() * 2 - 1) * 44);
     f.scale.setScalar(0.5 + Math.random() * 0.7);
     world2.add(f);
     w2anim.flames.push({ m: f, phase: Math.random() * 6.28, base: f.position.y, sz: f.scale.x });
   }
   for (let a = 0; a < Math.PI * 2; a += 0.22) {
     const h = 22 + Math.random() * 30;
-    const r = 78 + Math.random() * 16;
+    const r = 60 + Math.random() * 12;
     const mtn = new THREE.Mesh(
       new THREE.ConeGeometry(10 + Math.random() * 12, h, 5),
       new THREE.MeshBasicMaterial({ color: 0x120409, fog: false })
@@ -600,7 +767,7 @@ const w2anim = { flames: [], rocks: [] };
 
 // ---------- 天界（第三關場景：雲海聖域） ----------// ---------- 天界（第三關：雲海聖域，開放版） ----------
 let skyTex3 = null;
-const w3anim = { clouds: [], lanterns: [] };
+const w3anim = { clouds: [], lanterns: [], shafts: [] };
 (function buildHeaven() {
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 512;
@@ -653,14 +820,14 @@ const w3anim = { clouds: [], lanterns: [] };
   }
   const pathTex = new THREE.CanvasTexture(gc);
   pathTex.wrapS = pathTex.wrapT = THREE.RepeatWrapping;
-  pathTex.repeat.set(20, 20);
+  pathTex.repeat.set(15, 15);
   pathTex.colorSpace = THREE.SRGBColorSpace;
-  const plat = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), new THREE.MeshLambertMaterial({ map: pathTex }));
+  const plat = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), new THREE.MeshLambertMaterial({ map: pathTex }));
   plat.rotation.x = -Math.PI / 2;
   plat.position.y = 0.01;
   plat.receiveShadow = true;
   world3.add(plat);
-  for (const [px, pz, w, d] of [[0, 63, 136, 0.5], [0, -63, 136, 0.5], [63, 0, 0.5, 136], [-63, 0, 0.5, 136]]) {
+  for (const [px, pz, w, d] of [[0, 48, 104, 0.5], [0, -48, 104, 0.5], [48, 0, 0.5, 104], [-48, 0, 0.5, 104]]) {
     const edge = new THREE.Mesh(new THREE.BoxGeometry(w, 0.3, d), new THREE.MeshBasicMaterial({ color: 0xffd070 }));
     edge.position.set(px, 0.15, pz);
     world3.add(edge);
@@ -702,7 +869,7 @@ const w3anim = { clouds: [], lanterns: [] };
       map: cloudTex, transparent: true, opacity: 0.5, depthWrite: false, color: 0xb8cce4,
     }));
     const a = Math.random() * 6.28;
-    const r = 66 + Math.random() * 26;
+    const r = 52 + Math.random() * 20;
     cl.position.set(Math.cos(a) * r, -1 + Math.random() * 2, Math.sin(a) * r);
     const sz = 8 + Math.random() * 14;
     cl.scale.set(sz, sz * 0.42, 1);
@@ -711,16 +878,51 @@ const w3anim = { clouds: [], lanterns: [] };
   }
   for (let i = 0; i < 30; i++) {
     const lan = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffe0a0 }));
-    lan.position.set((Math.random() * 2 - 1) * 56, 2.5 + Math.random() * 4, (Math.random() * 2 - 1) * 56);
+    lan.position.set((Math.random() * 2 - 1) * 42, 2.5 + Math.random() * 4, (Math.random() * 2 - 1) * 42);
     world3.add(lan);
     w3anim.lanterns.push({ m: lan, phase: Math.random() * 6.28, base: lan.position.y });
+  }
+  // 天門（金色鳥居式拱門，戰場邊緣三方）
+  const goldMat = new THREE.MeshLambertMaterial({ color: 0xd8b060, emissive: 0x453310 });
+  const goldCap = new THREE.MeshBasicMaterial({ color: 0xffd070 });
+  for (const [ax, az, ry] of [[0, -44, 0], [-44, 4, Math.PI / 2], [44, 4, Math.PI / 2]]) {
+    const gate = new THREE.Group();
+    for (const px of [-3.4, 3.4]) {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.62, 9.5, 10), goldMat);
+      col.position.set(px, 4.75, 0);
+      col.castShadow = true;
+      gate.add(col);
+    }
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(9.4, 0.65, 1.1), goldMat);
+    beam.position.y = 9.4;
+    const beam2 = new THREE.Mesh(new THREE.BoxGeometry(7.6, 0.45, 0.9), goldMat);
+    beam2.position.y = 8.3;
+    gate.add(beam, beam2);
+    for (const px of [-4.5, 4.5]) {
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 6), goldCap);
+      tip.position.set(px, 9.65, 0);
+      gate.add(tip);
+    }
+    gate.position.set(ax, 0, az);
+    gate.rotation.y = ry;
+    world3.add(gate);
+  }
+  // 天光光柱（雲隙灑落）
+  for (let i = 0; i < 6; i++) {
+    const shaft = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.4 + Math.random(), 2.2 + Math.random(), 24, 10, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0xfff2d0, transparent: true, opacity: 0.09, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+    );
+    shaft.position.set((Math.random() * 2 - 1) * 38, 12, (Math.random() * 2 - 1) * 38);
+    world3.add(shaft);
+    w3anim.shafts.push({ m: shaft, phase: Math.random() * 6.28 });
   }
   for (let i = 0; i < 12; i++) {
     const w = 10 + Math.random() * 16;
     const a = (i / 12) * 6.28;
     const isle = new THREE.Mesh(new THREE.ConeGeometry(w, w * 0.9, 6), new THREE.MeshLambertMaterial({ color: 0x8aa8cc }));
     isle.rotation.x = Math.PI;
-    isle.position.set(Math.cos(a) * (86 + Math.random() * 16), 14 + Math.random() * 16, Math.sin(a) * (86 + Math.random() * 16));
+    isle.position.set(Math.cos(a) * (66 + Math.random() * 12), 14 + Math.random() * 16, Math.sin(a) * (66 + Math.random() * 12));
     world3.add(isle);
     const top = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.9, w, 2.2, 6), new THREE.MeshLambertMaterial({ color: 0xd8e6f4 }));
     top.position.set(isle.position.x, isle.position.y + w * 0.45 + 1, isle.position.z);
@@ -730,7 +932,7 @@ const w3anim = { clouds: [], lanterns: [] };
 
 // ---------- 虛空（第四關：魂門之心） ----------
 let skyTex4 = null;
-const w4anim = { shards: [] };
+const w4anim = { shards: [], rings: [] };
 (function buildVoid() {
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 512;
@@ -773,9 +975,9 @@ const w4anim = { shards: [] };
   for (let i = 0; i < 200; i++) gg.fillRect(Math.random() * 512, Math.random() * 512, 1, 1);
   const voidTex = new THREE.CanvasTexture(gc);
   voidTex.wrapS = voidTex.wrapT = THREE.RepeatWrapping;
-  voidTex.repeat.set(8, 8);
+  voidTex.repeat.set(6, 6);
   voidTex.colorSpace = THREE.SRGBColorSpace;
-  const vg = new THREE.Mesh(new THREE.PlaneGeometry(136, 136), new THREE.MeshStandardMaterial({ map: voidTex, roughness: 0.25, metalness: 0.7 }));
+  const vg = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), new THREE.MeshStandardMaterial({ map: voidTex, roughness: 0.25, metalness: 0.7 }));
   vg.rotation.x = -Math.PI / 2;
   vg.position.y = 0.01;
   vg.receiveShadow = true;
@@ -792,7 +994,8 @@ const w4anim = { shards: [] };
       const h = 9 + Math.random() * 12;
       const mono = new THREE.Mesh(new THREE.ConeGeometry(3 + Math.random() * 2.5, h, 4), dm);
       mono.position.set(b.x + (Math.random() * 2 - 1) * 5, h / 2, b.z + (Math.random() * 2 - 1) * 5);
-      mono.rotation.y = Math.random() * Math.PI;
+      mono.rotation.set((Math.random() - 0.5) * 0.2, Math.random() * Math.PI, (Math.random() - 0.5) * 0.2);
+      mono.scale.set(0.8 + Math.random() * 0.4, 1, 0.8 + Math.random() * 0.4);
       mono.castShadow = true;
       world4.add(mono);
       const edge = new THREE.Mesh(new THREE.ConeGeometry(0.5, h * 0.7, 4), Math.random() < 0.5 ? cyanMat : magMat);
@@ -802,16 +1005,39 @@ const w4anim = { shards: [] };
   }
   for (let i = 0; i < 26; i++) {
     const sh = new THREE.Mesh(new THREE.OctahedronGeometry(0.7 + Math.random() * 1.4, 0), Math.random() < 0.5 ? cyanMat : magMat);
-    sh.position.set((Math.random() * 2 - 1) * 56, 3 + Math.random() * 12, (Math.random() * 2 - 1) * 56);
+    sh.position.set((Math.random() * 2 - 1) * 42, 3 + Math.random() * 12, (Math.random() * 2 - 1) * 42);
     world4.add(sh);
     w4anim.shards.push({ m: sh, phase: Math.random() * 6.28, base: sh.position.y });
   }
   for (let a = 0; a < Math.PI * 2; a += 0.28) {
     const h = 24 + Math.random() * 26;
-    const r = 76 + Math.random() * 14;
+    const r = 58 + Math.random() * 12;
     const spike = new THREE.Mesh(new THREE.ConeGeometry(6 + Math.random() * 6, h, 4), darkMat);
     spike.position.set(Math.cos(a) * r, h / 2 - 6, Math.sin(a) * r);
+    spike.rotation.z = (Math.random() - 0.5) * 0.15;
     world4.add(spike);
+  }
+  // 戰場上空的能量巨環（緩慢旋轉）
+  for (let i = 0; i < 3; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(15 + i * 10, 0.16, 8, 72),
+      new THREE.MeshBasicMaterial({ color: i % 2 ? 0xd040ff : 0x30e0ff, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false })
+    );
+    ring.position.set(0, 20 + i * 8, 0);
+    ring.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+    world4.add(ring);
+    w4anim.rings.push({ m: ring, sp: (0.06 + 0.05 * i) * (i % 2 ? -1 : 1) });
+  }
+  // 地表水晶簇
+  for (let i = 0; i < 12; i++) {
+    const cx = (Math.random() * 2 - 1) * 40, cz = (Math.random() * 2 - 1) * 40;
+    for (let j = 0; j < 3; j++) {
+      const ch = 0.6 + Math.random() * 1.6;
+      const cr = new THREE.Mesh(new THREE.ConeGeometry(0.22 + Math.random() * 0.2, ch, 5), Math.random() < 0.5 ? cyanMat : magMat);
+      cr.position.set(cx + (Math.random() * 2 - 1) * 1.3, ch / 2, cz + (Math.random() * 2 - 1) * 1.3);
+      cr.rotation.set((Math.random() - 0.5) * 0.5, Math.random() * 3, (Math.random() - 0.5) * 0.5);
+      world4.add(cr);
+    }
   }
 })();
 
@@ -876,7 +1102,7 @@ const honmoon = new THREE.Group();
   swirl.position.z = 0.1;
   honmoon.add(ring, ring2, disc, swirl);
   honmoon.userData.swirl = swirl;
-  honmoon.position.set(0, 16, -80);
+  honmoon.position.set(0, 14, -64);
   scene.add(honmoon);
 })();
 
@@ -888,9 +1114,9 @@ const embers = (() => {
   const N = IS_MOBILE ? 350 : 700;
   const pos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
-    pos[i * 3] = (Math.random() * 2 - 1) * 60;
+    pos[i * 3] = (Math.random() * 2 - 1) * 46;
     pos[i * 3 + 1] = Math.random() * 9;
-    pos[i * 3 + 2] = (Math.random() * 2 - 1) * 60;
+    pos[i * 3 + 2] = (Math.random() * 2 - 1) * 46;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -956,13 +1182,20 @@ const gradTex = (() => {
   t.needsUpdate = true;
   return t;
 })();
-function toonify(root) {
+// 主角專用四階漸層（暗部/中間調/亮部層次更細）
+const gradTex4 = (() => {
+  const t = new THREE.DataTexture(new Uint8Array([60, 128, 210, 255]), 4, 1, THREE.RedFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter;
+  t.needsUpdate = true;
+  return t;
+})();
+function toonify(root, grad = gradTex) {
   root.traverse(o => {
     if (!o.isMesh) return;
     o.castShadow = true;
     const conv = m => {
       if (m.name === 'Glow') return new THREE.MeshBasicMaterial({ color: 0xff3a6a, name: 'Glow' });
-      return new THREE.MeshToonMaterial({ map: m.map || null, color: m.color.clone(), gradientMap: gradTex, name: m.name });
+      return new THREE.MeshToonMaterial({ map: m.map || null, color: m.color.clone(), gradientMap: grad, name: m.name });
     };
     o.material = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material);
   });
@@ -997,6 +1230,29 @@ const sparkTex = (() => {
   rg.addColorStop(1, 'rgba(160,79,255,0)');
   g.fillStyle = rg; g.fillRect(0, 0, 64, 64);
   return new THREE.CanvasTexture(c);
+})();
+// 新月形劍氣貼圖（外層彩光＋內層白熱核心）
+const crescentTex = (() => {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const g = c.getContext('2d');
+  const moon = (r1, y1, r2, y2, color, blur) => {
+    g.save();
+    g.shadowColor = color; g.shadowBlur = blur;
+    g.fillStyle = color;
+    g.beginPath(); g.arc(64, y1, r1, 0, 6.29); g.fill();
+    g.globalCompositeOperation = 'destination-out';
+    g.shadowBlur = 0;
+    g.fillStyle = '#000';
+    g.beginPath(); g.arc(64, y2, r2, 0, 6.29); g.fill();
+    g.restore();
+    g.globalCompositeOperation = 'source-over';
+  };
+  moon(46, 72, 52, 96, 'rgba(150,220,255,0.9)', 18);
+  moon(38, 68, 46, 94, 'rgba(255,255,255,0.95)', 8);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
 })();
 const sparks = [];
 function spawnSpark(pos, scale = 1, color = 0xffffff, opts = {}) {
@@ -1114,6 +1370,117 @@ function angDiff(a, b) {
   while (d < -Math.PI) d += Math.PI * 2;
   return d;
 }
+
+// ---------- 主角劍光：劍身能量刃＋揮劍軌跡帶 ----------
+const trail = { pts: [], max: 16, mesh: null, mat: null, base: null, tip: null, color: new THREE.Color(0xc9a4ff) };
+function setupSwordFx(root, char) {
+  if (trail.mesh) { scene.remove(trail.mesh); trail.mesh.geometry.dispose(); trail.mat.dispose(); trail.mesh = null; }
+  trail.pts = []; trail.base = null; trail.tip = null;
+  const hand = root.getObjectByName('mixamorigRightHand');
+  let sword = null;
+  root.traverse(o => { if (o.isMesh && /sword/i.test(o.name) && !o.userData.isOutline) sword = o; });
+  if (!hand || !sword) return;
+  // 劍身能量刃光：複製劍 mesh，法線外擴＋加法混色（同骨架、跟著揮舞）
+  const glow = sword.clone(false);
+  const gm = new THREE.MeshBasicMaterial({
+    color: char.fx, transparent: true, opacity: 0.55,
+    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.BackSide,
+  });
+  gm.onBeforeCompile = sh => {
+    sh.vertexShader = sh.vertexShader.replace('#include <project_vertex>', 'transformed += normal * 0.012;\n#include <project_vertex>');
+  };
+  gm.customProgramCacheKey = () => 'swordglow';
+  glow.material = gm;
+  glow.userData.isOutline = true;
+  glow.raycast = () => {};
+  sword.parent.add(glow);
+  // 綁定姿勢下算出劍根/劍尖 → 右手骨骼局部座標，掛 marker 供軌跡取樣
+  root.updateMatrixWorld(true);
+  sword.geometry.computeBoundingBox();
+  const bb = sword.geometry.boundingBox, size = new THREE.Vector3();
+  bb.getSize(size);
+  const axis = size.x > size.y ? (size.x > size.z ? 'x' : 'z') : (size.y > size.z ? 'y' : 'z');
+  const mk = v => { const o = new THREE.Object3D(); o.position.copy(hand.worldToLocal(v.clone())); hand.add(o); return o; };
+  const mid = bb.getCenter(new THREE.Vector3());
+  const endA = mid.clone(); endA[axis] = bb.min[axis];
+  const endB = mid.clone(); endB[axis] = bb.max[axis];
+  sword.localToWorld(endA); sword.localToWorld(endB);
+  const handW = hand.getWorldPosition(new THREE.Vector3());
+  const tipW = endA.distanceTo(handW) > endB.distanceTo(handW) ? endA : endB;
+  const baseW = tipW === endA ? endB : endA;
+  trail.base = mk(baseW.clone().lerp(tipW, 0.2));
+  trail.tip = mk(tipW.clone().lerp(baseW, -0.15));
+  // 軌跡帶 geometry（雙頂點帶狀、頂點色淡出）
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(trail.max * 2 * 3), 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(trail.max * 2 * 3), 3));
+  const idx = [];
+  for (let i = 0; i < trail.max - 1; i++) {
+    const b = i * 2;
+    idx.push(b, b + 1, b + 2, b + 1, b + 3, b + 2);
+  }
+  geo.setIndex(idx);
+  trail.mat = new THREE.MeshBasicMaterial({
+    vertexColors: true, transparent: true,
+    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+  });
+  trail.mesh = new THREE.Mesh(geo, trail.mat);
+  trail.mesh.frustumCulled = false;
+  trail.mesh.visible = false;
+  scene.add(trail.mesh);
+  trail.color.set(char.fx);
+}
+const _tv1 = new THREE.Vector3(), _tv2 = new THREE.Vector3();
+function updateTrail() {
+  if (!trail.mesh) return;
+  const p = player;
+  const swinging = (p.st === 'atk' || p.st === 'musou' || p.st === 'plunge') && p.root;
+  if (swinging) {
+    trail.base.getWorldPosition(_tv1);
+    trail.tip.getWorldPosition(_tv2);
+    trail.pts.push([_tv1.x, _tv1.y, _tv1.z, _tv2.x, _tv2.y, _tv2.z]);
+  } else if (trail.pts.length) {
+    trail.pts.shift();
+    if (trail.pts.length) trail.pts.shift();
+  }
+  while (trail.pts.length > trail.max) trail.pts.shift();
+  const n = trail.pts.length;
+  if (n < 2) { trail.mesh.visible = false; return; }
+  trail.mesh.visible = true;
+  const posA = trail.mesh.geometry.attributes.position;
+  const colA = trail.mesh.geometry.attributes.color;
+  const last = trail.pts[n - 1];
+  for (let i = 0; i < trail.max; i++) {
+    const pt = i < n ? trail.pts[i] : last;
+    posA.setXYZ(i * 2, pt[0], pt[1], pt[2]);
+    posA.setXYZ(i * 2 + 1, pt[3], pt[4], pt[5]);
+    const fade = i < n ? Math.pow(Math.max(0, 1 - (n - 1 - i) / trail.max), 2) : 0;
+    colA.setXYZ(i * 2, trail.color.r * fade * 0.55, trail.color.g * fade * 0.55, trail.color.b * fade * 0.55);
+    colA.setXYZ(i * 2 + 1, trail.color.r * fade, trail.color.g * fade, trail.color.b * fade);
+  }
+  posA.needsUpdate = true;
+  colA.needsUpdate = true;
+}
+// 氣滿光環（無雙可發動時的腳下金環＋身體輝光）
+const heroAura = (() => {
+  const grp = new THREE.Group();
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.85, 1.1, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffd84f, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.1;
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: sparkTex, color: 0xffd84f, transparent: true, opacity: 0.3,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  glow.scale.set(2.6, 2.6, 1);
+  glow.position.y = 1.1;
+  grp.add(ring, glow);
+  grp.visible = false;
+  scene.add(grp);
+  return grp;
+})();
 
 // ---------- 音訊（Web Audio 全合成：BGM＋SFX，無外部音檔） ----------
 const AU = { ctx: null, master: null, music: null, sfx: null, noise: null, muted: false, timer: null, nextBar: 0, bar: 0 };
@@ -1277,6 +1644,7 @@ document.addEventListener('visibilitychange', () => {
 // ---------- 輸入 ----------
 const keys = new Set();
 let atkPressed = false, heavyPressed = false, jumpPressed = false, dodgePressed = false, musouPressed = false;
+let heavyHold = false;   // 重攻擊按住中（蓄力判定用）
 addEventListener('keydown', e => {
   if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
   if (typeof dlg !== 'undefined' && dlg.active) {
@@ -1285,16 +1653,34 @@ addEventListener('keydown', e => {
   }
   keys.add(e.code);
   if (e.code === 'KeyJ' || e.code === 'KeyZ') atkPressed = true;
-  if (e.code === 'KeyK' || e.code === 'KeyX') heavyPressed = true;
+  if (e.code === 'KeyK' || e.code === 'KeyX') { heavyPressed = true; heavyHold = true; }
   if (e.code === 'Space') jumpPressed = true;
   if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyL') dodgePressed = true;
   if (e.code === 'KeyM') document.getElementById('mute').click();
   if (e.code === 'KeyQ' && state === 'play') switchWeapon();
   if (e.code === 'KeyE') musouPressed = true;
   if (e.code === 'KeyR' && state === 'dead') restart();
-  if (state === 'title' && ready && (e.code === 'Enter' || e.code === 'KeyJ')) start();
+  if (state === 'title' && ready) {
+    const sel = document.getElementById('charsel');
+    if (sel.classList.contains('hidden')) {
+      if (e.code === 'Enter' || e.code === 'KeyJ') {
+        hud.title.classList.add('hidden');
+        sel.classList.remove('hidden');
+      }
+    } else {
+      const pick = { Digit1: 'rumi', Digit2: 'mira', Digit3: 'zoey' }[e.code];
+      if (pick) {
+        buildHero(CHARS[pick]);
+        sel.classList.add('hidden');
+        start();
+      }
+    }
+  }
 });
-addEventListener('keyup', e => keys.delete(e.code));
+addEventListener('keyup', e => {
+  keys.delete(e.code);
+  if (e.code === 'KeyK' || e.code === 'KeyX') heavyHold = false;
+});
 
 // 觸控：左半螢幕虛擬搖桿＋右側按鍵
 const touchMove = { active: false, mx: 0, mz: 0 };
@@ -1336,7 +1722,10 @@ const touchMove = { active: false, mx: 0, mz: 0 };
     el2.addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
   };
   bind('btnA', () => { atkPressed = true; });
-  bind('btnB', () => { heavyPressed = true; });
+  const bB = document.getElementById('btnB');
+  bB.addEventListener('pointerdown', e => { e.preventDefault(); heavyPressed = true; heavyHold = true; });
+  bB.addEventListener('pointerup', () => { heavyHold = false; });
+  bB.addEventListener('pointercancel', () => { heavyHold = false; });
   bind('btnJ', () => { jumpPressed = true; });
   bind('btnR', () => { dodgePressed = true; });
   bind('btnW', () => { if (state === 'play') switchWeapon(); });
@@ -1353,7 +1742,19 @@ const hud = {
   win: el('win'), winStats: el('winStats'), grade: el('grade'),
   load: el('loadtext'),
 };
-el('startBtn').addEventListener('click', () => ready && start());
+el('startBtn').addEventListener('click', () => {
+  if (!ready) return;
+  hud.title.classList.add('hidden');
+  document.getElementById('charsel').classList.remove('hidden');
+});
+for (const card of document.querySelectorAll('.ccard')) {
+  card.addEventListener('click', () => {
+    if (!ready || state !== 'title') return;
+    buildHero(CHARS[card.dataset.char]);
+    document.getElementById('charsel').classList.add('hidden');
+    start();
+  });
+}
 el('retryBtn').addEventListener('click', () => restart());
 el('againBtn').addEventListener('click', () => restart());
 el('nextBtn').addEventListener('click', () => {
@@ -1388,12 +1789,16 @@ const LIGHT = [
 const HEAVY_SOLO   = { clip: 'heavy',    ts: 1.55, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1,  shake: 0.45, mul: 1 };
 const HEAVY_FINISH = { clip: 'heavyfin', ts: 1.55, range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.46, dir: 1,  shake: 0.55, mul: 1.5 };
 const PLUNGE       = { range: 4.0, ang: 6.3, dmg: 2, kb: 14, shake: 0.6 };
-// 魂力彈（遠程）：揮劍射出劍氣
+// 新招式：衝刺斬（跑動中輕點重攻擊）＋蓄力震地斬（長按重攻擊 0.5s）
+const DASH_ATK   = { clip: 'slash3',   ts: 1.6, range: 3.2, ang: 2.0, dmg: 2, kb: 11, hitAt: 0.34, dir: 1, mul: 1.35, shake: 0.35, dash: 19 };
+const CHARGE_ATK = { clip: 'heavyfin', ts: 1.3, range: 4.6, ang: 6.3, dmg: 5, kb: 19, hitAt: 0.46, dir: 1, mul: 1.6,  shake: 0.75, charged: true };
+// 魂力彈（遠程）：揮劍射出新月劍氣；重擊＝三連新月、蓄力＝五連貫穿新月
 const RLIGHT = [
   { clip: 'slash1', ts: 2.3, hitAt: 0.33, dir: 1,  bolt: { dmg: 1, speed: 24, pierce: 2, size: 1.6 } },
   { clip: 'slash2', ts: 2.3, hitAt: 0.33, dir: -1, bolt: { dmg: 1, speed: 24, pierce: 2, size: 1.6 } },
 ];
-const RHEAVY = { clip: 'heavy', ts: 1.6, hitAt: 0.44, dir: 1, shake: 0.3, bolt: { dmg: 3, speed: 27, pierce: 99, size: 2.6 } };
+const RHEAVY  = { clip: 'heavy',    ts: 1.6, hitAt: 0.44, dir: 1, shake: 0.3, fan: 3, bolt: { dmg: 2, speed: 27, pierce: 4,  size: 1.9 } };
+const RCHARGE = { clip: 'heavyfin', ts: 1.4, hitAt: 0.46, dir: 1, shake: 0.5, fan: 5, charged: true, bolt: { dmg: 3, speed: 27, pierce: 99, size: 2.4 } };
 let weapon = 'melee';
 const curLight = () => weapon === 'melee' ? LIGHT : RLIGHT;
 function switchWeapon() {
@@ -1401,7 +1806,7 @@ function switchWeapon() {
   weapon = weapon === 'melee' ? 'ranged' : 'melee';
   document.getElementById('wpn').textContent = weapon === 'melee' ? '⚔ 近戰' : '✦ 魂力彈';
   if (AU.ctx) { const t = AU.ctx.currentTime; tone('triangle', midi(weapon === 'melee' ? 76 : 83), t, 0.12, 0.15, AU.sfx); }
-  spawnSpark(new THREE.Vector3(player.x, 1.4, player.z), 1.6, weapon === 'melee' ? 0xc9a4ff : 0x6ae0ff);
+  spawnSpark(new THREE.Vector3(player.x, 1.4, player.z), 1.6, weapon === 'melee' ? curChar.fx : 0x6ae0ff);
 }
 // 劍氣彈
 const bolts = [];
@@ -1410,13 +1815,13 @@ function spawnBolt(cfg, dirX, dirZ) {
   const fx = dirX !== undefined ? dirX : Math.sin(p.yaw);
   const fz = dirZ !== undefined ? dirZ : Math.cos(p.yaw);
   const spr = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: sparkTex, color: cfg.size > 1.2 ? 0xa8f0ff : 0x7ad0ff,
+    map: crescentTex, color: cfg.size > 1.2 ? 0xc8f4ff : curChar.boltCol,
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   spr.position.set(p.x + fx * 0.9, 1.3, p.z + fz * 0.9);
-  spr.scale.set(1.1 * cfg.size, 0.62 * cfg.size, 1);
+  spr.scale.set(1.7 * cfg.size, 1.15 * cfg.size, 1);
   scene.add(spr);
-  bolts.push({ spr, x: p.x + fx * 0.9, z: p.z + fz * 0.9, dx: fx, dz: fz, traveled: 0, pierce: cfg.pierce, dmg: cfg.dmg, size: cfg.size, hitSet: new Set() });
+  bolts.push({ spr, x: p.x + fx * 0.9, z: p.z + fz * 0.9, dx: fx, dz: fz, yaw: Math.atan2(fx, fz), traveled: 0, pierce: cfg.pierce, dmg: cfg.dmg, size: cfg.size, hitSet: new Set() });
 }
 function updateBolts(dt) {
   for (let i = bolts.length - 1; i >= 0; i--) {
@@ -1429,7 +1834,9 @@ function updateBolts(dt) {
     }
     b.spr.position.set(b.x, 1.3, b.z);
     const pulse = 1 + Math.sin(b.traveled * 6) * 0.12;
-    b.spr.scale.set(1.1 * b.size * pulse, 0.62 * b.size * pulse, 1);
+    b.spr.scale.set(1.7 * b.size * pulse, 1.15 * b.size * pulse, 1);
+    // 新月開口對齊行進方向（螢幕空間）
+    b.spr.material.rotation = -(b.yaw - camYaw) + Math.sin(b.traveled * 3) * 0.08;
     let dead = b.traveled > 22 || Math.abs(b.x) > MAP_HALF + 1 || Math.abs(b.z) > MAP_HALF + 1;
     for (const e of enemies) {
       if (dead) break;
@@ -1511,14 +1918,9 @@ const KINDS = {
 // ---------- 載入 ----------
 const loader = new GLTFLoader();
 const CITY_PROPS = ['car_sedan', 'car_taxi', 'car_hatchback', 'streetlight', 'trafficlight_A', 'dumpster', 'bench', 'firehydrant'];
-Promise.all([
-  loader.loadAsync('assets/maria.glb'),
-  loader.loadAsync('assets/Skeleton_Minion.glb'),
-  loader.loadAsync('assets/Skeleton_Warrior.glb'),
-  ...CITY_PROPS.map(n => loader.loadAsync(`assets/city/${n}.gltf`)),
-]).then(([maria, minion, warrior, ...city]) => {
-  // Mixamo 動作自帶前進位移，鎖定 Hips 水平位移（保留 Y 起伏），移動交給遊戲邏輯
-  for (const clip of maria.animations) {
+// Mixamo 動作自帶前進位移，鎖定 Hips 水平位移（保留 Y 起伏），移動交給遊戲邏輯
+function lockHips(animations) {
+  for (const clip of animations) {
     for (const tr of clip.tracks) {
       if (/Hips\.position$/.test(tr.name)) {
         const v = tr.values;
@@ -1527,22 +1929,65 @@ Promise.all([
       }
     }
   }
-  const heroRoot = maria.scene;
-  toonify(heroRoot);
-  heroRoot.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+}
+let heroBase = null;
+function prepHeroModel(gltf) {
+  lockHips(gltf.animations);
+  toonify(gltf.scene, gradTex4);
+  gltf.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
   // 依模型實際身高標定為 1.78m（Mixamo FBX 單位是公分）
-  const bbox = new THREE.Box3().setFromObject(heroRoot);
-  const hScale = 1.78 / (bbox.max.y - bbox.min.y);
-  heroRoot.scale.setScalar(hScale);
-  player.root = heroRoot;
-  scene.add(player.root);
-  player.rig = makeRig(player.root, maria.animations, [
+  const bbox = new THREE.Box3().setFromObject(gltf.scene);
+  return { scene: gltf.scene, clips: gltf.animations, hScale: 1.78 / (bbox.max.y - bbox.min.y) };
+}
+function buildHero(char) {
+  curChar = char;
+  if (player.root) {
+    scene.remove(player.root);
+    player.rig.mixer.stopAllAction();
+    scene.remove(player.shadow);
+  }
+  const base = char.model || heroBase;
+  const root = SkeletonUtils.clone(base.scene);
+  if (!char.model && char.tint) {
+    // 專屬模型未到位前：靈氣配色代身
+    const tc = new THREE.Color(char.tint);
+    root.traverse(o => {
+      if (!o.isMesh || o.userData.isOutline) return;
+      o.material = Array.isArray(o.material) ? o.material.map(m => m.clone()) : o.material.clone();
+      for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
+        if (m.color && m.name !== 'Glow') m.color.lerp(tc, 0.3);
+      }
+    });
+  }
+  root.scale.setScalar(base.hScale);
+  player.root = root;
+  scene.add(root);
+  player.rig = makeRig(root, base.clips, [
     'idle', 'run', 'roll', 'hurt', 'death', 'win', 'jump',
     ...LIGHT.map(c => c.clip), HEAVY_SOLO.clip, HEAVY_FINISH.clip,
   ]);
-  addOutline(heroRoot, null, 0.028 / hScale);
+  addOutline(root, null, 0.028 / base.hScale);
   play(player.rig, 'idle');
   player.shadow = makeBlobShadow(1.1);
+  player.spd = char.spd;
+  setupSwordFx(root, char);
+  heroLight.color.set(char.light);
+  document.getElementById('hpname').textContent = char.name;
+  syncPlayer();
+}
+const tryLoad = url => loader.loadAsync(url).catch(() => null);
+Promise.all([
+  loader.loadAsync('assets/maria.glb'),
+  loader.loadAsync('assets/Skeleton_Minion.glb'),
+  loader.loadAsync('assets/Skeleton_Warrior.glb'),
+  tryLoad('assets/mira.glb'),
+  tryLoad('assets/zoey.glb'),
+  ...CITY_PROPS.map(n => loader.loadAsync(`assets/city/${n}.gltf`)),
+]).then(([maria, minion, warrior, mira, zoey, ...city]) => {
+  heroBase = prepHeroModel(maria);
+  if (mira) CHARS.mira.model = prepHeroModel(mira);
+  if (zoey) CHARS.zoey.model = prepHeroModel(zoey);
+  buildHero(CHARS.rumi);
 
   toonify(minion.scene);
   toonify(warrior.scene);
@@ -1556,7 +2001,7 @@ Promise.all([
   // 濕地面反射：對街景烘一次靜態 cubemap
   const cubeRT = new THREE.WebGLCubeRenderTarget(256);
   const cubeCam = new THREE.CubeCamera(0.5, 250, cubeRT);
-  cubeCam.position.set(0, 1.6, -55);
+  cubeCam.position.set(0, 1.6, -40);
   cubeCam.update(renderer, scene);
   for (const m of groundMats) {
     m.envMap = cubeRT.texture;
@@ -1587,14 +2032,14 @@ function placeCityProps(props) {
   // 路邊停車（沿兩條主幹道）
   const carTypes = ['car_sedan', 'car_taxi', 'car_hatchback'];
   for (let i = 0; i < 12; i++) {
-    const k = -56 + i * 10 + Math.random() * 4;
+    const k = -44 + i * 8 + Math.random() * 3;
     if (Math.abs(k) < 8) continue;
     put(carTypes[i % 3], (i % 2 === 0 ? 3.6 : -3.6), k, i % 2 === 0 ? 0 : Math.PI, 1.05);
     put(carTypes[(i + 1) % 3], k, (i % 2 === 0 ? -3.6 : 3.6), i % 2 === 0 ? Math.PI / 2 : -Math.PI / 2, 1.05);
   }
   // 路燈＋光池（幹道沿線）
   for (let i = 0; i < 7; i++) {
-    const k = -48 + i * 16;
+    const k = -42 + i * 14;
     put('streetlight', 6.2, k, Math.PI, 1.35);
     lightPool?.(4.8, k, 7);
     put('streetlight', k, -6.2, Math.PI / 2, 1.35);
@@ -1625,7 +2070,7 @@ function spawnEnemy(kindName, fx, fz) {
   if (fx !== undefined) { x = fx; z = fz; }
   else {
     const a = Math.random() * 6.28;
-    const r = 12 + Math.random() * 12;
+    const r = 10 + Math.random() * 8;
     x = Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * r));
     z = Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * r));
   }
@@ -1775,7 +2220,10 @@ function updateEnemies(dt) {
       e.t += dt;
       if (!e.hitAppl && e.t >= e.atkDur * 0.45) {
         e.hitAppl = true;
-        if (d < e.kind.hitRange && p.y < 1.2 && p.invuln <= 0 && p.st !== 'dead') damagePlayer(e.kind.dmg, e);
+        if (d < e.kind.hitRange && p.y < 1.2 && p.st !== 'dead') {
+          if (p.st === 'dodge' && p.invuln > 0) triggerWitchTime();
+          else if (p.invuln <= 0) damagePlayer(e.kind.dmg, e);
+        }
       }
       if (e.t >= e.atkDur * 0.95) {
         e.st = 'chase';
@@ -1790,7 +2238,10 @@ function updateEnemies(dt) {
         spawnSpark(new THREE.Vector3(e.x, 1.5, e.z), 3.5, 0xff3a5a);
         spawnShockwave(e.x, e.z, { maxR: 7, dur: 0.3, color: 0xff5a7a });
         shakeT = 0.3; shakeAmp = 0.4;
-        if (d < 6.5 && p.y < 1.6 && p.invuln <= 0 && p.st !== 'dead') damagePlayer(16, e);
+        if (d < 6.5 && p.y < 1.6 && p.st !== 'dead') {
+          if (p.st === 'dodge' && p.invuln > 0) triggerWitchTime();
+          else if (p.invuln <= 0) damagePlayer(16, e);
+        }
       }
       if (e.castKind === 'summon' && !e.hitAppl && e.castT >= e.castDur * 0.6) {
         e.hitAppl = true;
@@ -1907,8 +2358,8 @@ function updateLevel(dt) {
     if (alive < 14 && Math.random() < 0.05) {
       const a = Math.random() * 6.28;
       spawnEnemy(Math.random() < 0.4 ? 'runner' : 'minion',
-        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * 18)),
-        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * 18)));
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * 15)),
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * 15)));
     }
     return;
   }
@@ -1918,7 +2369,7 @@ function updateLevel(dt) {
     if (o.state === 'done') continue;
     remaining++;
     const d = Math.hypot(player.x - o.pos[0], player.z - o.pos[1]);
-    if (o.state === 'dormant' && d < 26) activateObjective(o);
+    if (o.state === 'dormant' && d < 20) activateObjective(o);
     if (o.state !== 'active') continue;
     if (!engaged || d < Math.hypot(player.x - engaged.pos[0], player.z - engaged.pos[1])) engaged = o;
     const objAlive = enemies.filter(e => e.obj === o && e.st !== 'dead').length;
@@ -1968,8 +2419,8 @@ function updateLevel(dt) {
   const roamers = enemies.filter(e => !e.obj && !e.kindName.startsWith('boss') && e.st !== 'dead').length;
   if (roamers < 12 && alive < 34 && Math.random() < 0.06) {
     const a = Math.random() * 6.28;
-    const cx = Math.max(-MAP_HALF + 4, Math.min(MAP_HALF - 4, player.x + Math.cos(a) * (18 + Math.random() * 8)));
-    const cz = Math.max(-MAP_HALF + 4, Math.min(MAP_HALF - 4, player.z + Math.sin(a) * (18 + Math.random() * 8)));
+    const cx = Math.max(-MAP_HALF + 4, Math.min(MAP_HALF - 4, player.x + Math.cos(a) * (14 + Math.random() * 6)));
+    const cz = Math.max(-MAP_HALF + 4, Math.min(MAP_HALF - 4, player.z + Math.sin(a) * (14 + Math.random() * 6)));
     const n = 2 + Math.floor(Math.random() * 2);
     for (let i = 0; i < n; i++) {
       spawnEnemy(Math.random() < 0.3 ? 'runner' : 'minion',
@@ -2016,9 +2467,21 @@ function onBossDown() {
 }
 
 // ---------- 戰鬥 ----------
+// 完美閃避 → 子彈時間（翻滾 i-frame 內吃到攻擊判定觸發）
+let witchT = 0;
+function triggerWitchTime() {
+  if (witchT > 0) return;
+  witchT = 1.6;
+  screenFlash = Math.max(screenFlash, 0.3);
+  showToast('完美閃避！');
+  musou = Math.min(100, musou + 8);
+  spawnShockwave(player.x, player.z, { maxR: 6, dur: 0.5, color: 0xc06aff });
+  spawnSpark(new THREE.Vector3(player.x, 1.4, player.z), 2.6, 0xc06aff, { dur: 0.4 });
+  if (AU.ctx) { const t = AU.ctx.currentTime; tone('sine', 880, t, 0.5, 0.2, AU.sfx, 220); }
+}
 function comboMul() { return 1 + Math.min(combo, 75) * 0.008; }
 function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
-  e.hp -= dmg * comboMul() * (1 + stageIdx * 0.12);
+  e.hp -= dmg * comboMul() * (1 + stageIdx * 0.12) * curChar.dmgMul;
   if (e.bar) drawOfficerBar(e);
   e.flash = 0.13;
   e.vx += ux * kb * e.kind.kbMul;
@@ -2066,17 +2529,34 @@ function meleeSweep(a) {
 function applyPlayerHit(a) {
   if (a.bolt) {
     if (AU.ctx) { const t = AU.ctx.currentTime; tone('sawtooth', a.bolt.size > 1.2 ? 500 : 780, t, 0.14, 0.14, AU.sfx, 190); }
-    spawnBolt(a.bolt);
+    const n = a.fan || 1;
+    for (let i = 0; i < n; i++) {
+      const off = (i - (n - 1) / 2) * 0.28;
+      spawnBolt(a.bolt, Math.sin(player.yaw + off), Math.cos(player.yaw + off));
+    }
+    if (a.charged) {
+      spawnShockwave(player.x, player.z, { maxR: 4, dur: 0.4, color: curChar.fx });
+      screenFlash = Math.max(screenFlash, 0.3);
+    }
     if (a.shake) { shakeT = 0.12; shakeAmp = 0.2; }
-    return 1;
+    return n;
   }
   S.slash();
   const hits = meleeSweep(a);
   spawnSlash(player.x, player.z, player.yaw, {
     ang: Math.min(a.ang, 6.3), outer: a.range, dir: a.dir,
-    color: a.dmg > 1 ? 0xd9b4ff : 0xc9a4ff, dur: a.dmg > 1 ? 0.28 : 0.18,
+    color: a.dmg > 1 ? curChar.fxHi : curChar.fx, dur: a.dmg > 1 ? 0.28 : 0.18,
   });
   if (a === HEAVY_SOLO || a === HEAVY_FINISH) spawnShockwave(player.x, player.z, { maxR: a.range + 0.6 });
+  if (a.charged) {
+    // 蓄力震地斬：光柱＋三重衝擊波＋閃白
+    spawnPillar(player.x, player.z, 0xffd84f, 1.5);
+    spawnShockwave(player.x, player.z, { maxR: a.range + 2.2, dur: 0.55, color: 0xffd84f });
+    spawnShockwave(player.x, player.z, { maxR: a.range + 0.8, dur: 0.42, color: curChar.fx });
+    spawnSpark(new THREE.Vector3(player.x, 1.2, player.z), 4, 0xffe8b0, { dur: 0.4 });
+    screenFlash = Math.max(screenFlash, 0.45);
+    S.boom();
+  }
   return hits;
 }
 function damagePlayer(dmg, from) {
@@ -2228,12 +2708,39 @@ function updatePlayer(dt) {
       p.st = 'idle';
       play(p.rig, 'idle', { fade: 0.2 });
     }
+  } else if (p.st === 'charge') {
+    // 蓄力：按住重攻擊 0.5s 進入滿蓄，放開釋放
+    p.chargeT += dt;
+    if (ml > 0) {
+      p.x += mx * 2.4 * dt;
+      p.z += mz * 2.4 * dt;
+      p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 6);
+    }
+    p.chargeFx -= dt;
+    if (p.chargeFx <= 0) {
+      p.chargeFx = 0.08;
+      const full = p.chargeT >= 0.5;
+      spawnSpark(new THREE.Vector3(p.x + (Math.random() * 2 - 1) * 0.9, 0.3 + Math.random() * 1.7, p.z + (Math.random() * 2 - 1) * 0.9),
+        full ? 1.1 : 0.6, full ? 0xffd84f : curChar.fx, { dur: 0.25, rise: 2.2 });
+    }
+    if (p.chargeT >= 0.5 && !p.chargeCue) {
+      p.chargeCue = true;
+      spawnShockwave(p.x, p.z, { maxR: 2.6, dur: 0.3, color: 0xffd84f });
+      if (AU.ctx) tone('triangle', midi(90), AU.ctx.currentTime, 0.16, 0.2, AU.sfx);
+    }
+    if (!heavyHold || p.chargeT > 1.25) {
+      const full = p.chargeT >= 0.5;
+      p.chargeCue = false;
+      if (weapon === 'melee') startAttack(full ? CHARGE_ATK : (ml > 0 ? DASH_ATK : HEAVY_SOLO), -1, mx, mz, ml);
+      else startAttack(full ? RCHARGE : RHEAVY, -1, mx, mz, ml);
+    }
   } else if (p.st === 'atk') {
     const a = p.curAtk;
     p.atkT += dt;
     const k = Math.max(0, 1 - p.atkT / (p.atkDur * 0.6));
-    p.x += Math.sin(p.yaw) * 4.6 * k * dt;
-    p.z += Math.cos(p.yaw) * 4.6 * k * dt;
+    p.x += Math.sin(p.yaw) * (a.dash || 4.6) * k * dt;
+    p.z += Math.cos(p.yaw) * (a.dash || 4.6) * k * dt;
+    if (a.dash && Math.random() < 0.6) spawnSpark(new THREE.Vector3(p.x, 0.9 + Math.random() * 0.6, p.z), 0.9, curChar.fx, { dur: 0.2 });
     if (ml > 0) p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 4);
     if (!p.didHit && p.atkT >= p.atkDur * a.hitAt) { p.didHit = true; applyPlayerHit(a); }
     if (musouPressed && musou >= 100) { musouPressed = false; startMusou(); return; }
@@ -2258,7 +2765,11 @@ function updatePlayer(dt) {
     } else if (p.st !== 'idle') { p.st = 'idle'; play(p.rig, 'idle'); }
     if (musouPressed && musou >= 100) { musouPressed = false; startMusou(); }
     else if (atkPressed) { atkPressed = false; startAttack(curLight()[0], 0, mx, mz, ml); }
-    else if (heavyPressed) { heavyPressed = false; startAttack(weapon === 'melee' ? HEAVY_SOLO : RHEAVY, -1, mx, mz, ml); }
+    else if (heavyPressed) {
+      heavyPressed = false;
+      p.st = 'charge'; p.chargeT = 0; p.chargeFx = 0; p.chargeCue = false;
+      play(p.rig, ml > 0 ? 'run' : 'idle', { ts: ml > 0 ? 0.7 : 0.6 });
+    }
     else if (jumpPressed) {
       jumpPressed = false;
       p.st = 'jump'; p.vy = JUMP_V;
@@ -2401,12 +2912,18 @@ function updateAmbient(dt) {
     for (const l of w3anim.lanterns) {
       l.m.position.y = l.base + Math.sin(worldT * 1.1 + l.phase) * 0.4;
     }
+    for (const s of w3anim.shafts) {
+      s.m.material.opacity = 0.07 + (Math.sin(worldT * 0.7 + s.phase) + 1) * 0.03;
+    }
   }
   if (world4.visible) {
     for (const sh of w4anim.shards) {
       sh.m.position.y = sh.base + Math.sin(worldT * 1.4 + sh.phase) * 0.5;
       sh.m.rotation.y += dt * 1.2;
       sh.m.rotation.x += dt * 0.6;
+    }
+    for (const r of w4anim.rings) {
+      r.m.rotation.z += r.sp * dt;
     }
   }
   if (world2.visible) {
@@ -2437,13 +2954,23 @@ function updateAmbient(dt) {
   for (const f of flickers) {
     const t = worldT * f.speed + f.phase;
     const v = Math.sin(t * 7) * Math.sin(t * 13 + 1.7);
-    f.mat.color.setScalar(v > 0.9 ? 0.3 : 1);
+    const k = v > 0.9 ? 0.3 : 1;
+    if (f.base) f.mat.color.copy(f.base).multiplyScalar(k);
+    else f.mat.color.setScalar(k);
   }
   if (capturePoint.visible) {
     const k = 1 + Math.sin(worldT * 3) * 0.06;
     capturePoint.scale.set(k, 1, k);
     capturePoint.rotation.y += dt * 0.8;
     capturePoint.children[0].material.opacity = 0.6 + Math.sin(worldT * 5) * 0.25;
+  }
+  // 氣滿光環
+  heroAura.visible = state === 'play' && musou >= 100 && player.st !== 'dead';
+  if (heroAura.visible) {
+    heroAura.position.set(player.x, player.y + 0.02, player.z);
+    heroAura.rotation.y += dt * 2;
+    const ak = 1 + Math.sin(worldT * 6) * 0.12;
+    heroAura.children[0].scale.set(ak, ak, 1);
   }
   // 陰影相機跟著玩家
   sun.position.set(player.x + 8, 18, player.z + 6);
@@ -2460,10 +2987,10 @@ function updateCamera(dt) {
   const ease = p.st === 'run' || p.st === 'dodge' ? 2.2 : 0.9;
   camYaw += angDiff(camYaw, p.yaw) * Math.min(1, dt * ease);
   const fx = Math.sin(camYaw), fz = Math.cos(camYaw);
-  camPos.x = p.x - fx * 8;
-  camPos.z = p.z - fz * 8;
+  camPos.x = p.x - fx * 6.5;
+  camPos.z = p.z - fz * 6.5;
   collideCircle(camPos, 0.7);   // 鏡頭不穿進建築
-  const want = new THREE.Vector3(camPos.x, 3.9 + p.y * 0.5, camPos.z);
+  const want = new THREE.Vector3(camPos.x, 3.4 + p.y * 0.5, camPos.z);
   camera.position.lerp(want, Math.min(1, dt * 6));
   let ox = 0, oy = 0;
   if (shakeT > 0) {
@@ -2472,7 +2999,7 @@ function updateCamera(dt) {
     oy = (Math.random() * 2 - 1) * shakeAmp;
   }
   camera.position.x += ox; camera.position.y += oy;
-  camera.lookAt(p.x + fx * 3.2, 2.1 + p.y * 0.6, p.z + fz * 3.2);
+  camera.lookAt(p.x + fx * 2.7, 1.95 + p.y * 0.6, p.z + fz * 2.7);
 }
 
 // ---------- 小地圖（方形戰場） ----------
@@ -2574,7 +3101,7 @@ function nextDialog(first = false) {
   }
   const [who, text] = line;
   const nameEl = document.getElementById('dlgName');
-  nameEl.textContent = who;
+  nameEl.textContent = who === 'RUMI' ? curChar.name : who;
   nameEl.classList.toggle('enemy', who !== 'RUMI');
   document.getElementById('dlgText').textContent = text;
   dlgBox.style.display = 'block';
@@ -2720,10 +3247,10 @@ function loadStage(i) {
   if (AU.ctx) { AU.nextBar = AU.ctx.currentTime + 0.15; AU.bar = 0; }
   hud.bosswrap.style.display = 'none';
   const p = player;
-  p.x = 0; p.y = 0; p.z = 48; p.vy = 0; p.yaw = Math.PI;
+  p.x = 0; p.y = 0; p.z = 36; p.vy = 0; p.yaw = Math.PI;
   camYaw = Math.PI;
-  // 過關升級：體力上限＋攻擊力成長
-  p.hpMax = 100 + i * 30;
+  // 過關升級：體力上限＋攻擊力成長（角色體力係數）
+  p.hpMax = Math.round((100 + i * 30) * curChar.hpMul);
   p.hp = p.hpMax;
   p.invuln = 0; p.st = 'idle';
   if (p.rig) play(p.rig, 'idle', { fade: 0 });
@@ -2789,11 +3316,12 @@ function loop() {
   let dt = raw;
   if (hitStopT > 0) { hitStopT -= raw; dt = raw * 0.06; }
 
+  witchT = Math.max(0, witchT - raw);
   if (dlg.active && state === 'play') {
     if (player.root) player.rig.mixer.update(raw);
   } else if (state === 'play' || state === 'dead' || state === 'win') {
     updatePlayer(dt);
-    updateEnemies(dt);
+    updateEnemies(witchT > 0 ? dt * 0.22 : dt);   // 子彈時間：敵人慢動作
     if (state === 'play') updateLevel(dt);
     updateFx(dt);
   } else if (player.root) {
@@ -2803,6 +3331,7 @@ function loop() {
   updateAmbient(raw);
   updateCamera(raw);
   updateOcclusion();
+  updateTrail();
   updateHUD();
   composer.render();
 }
