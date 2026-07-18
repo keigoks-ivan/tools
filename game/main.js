@@ -617,7 +617,7 @@ function makeOutlineMat(width = 0.028) {
   m.onBeforeCompile = sh => {
     sh.vertexShader = sh.vertexShader.replace(
       '#include <project_vertex>',
-      `transformed += objectNormal * ${width.toFixed(4)};\n#include <project_vertex>`
+      `transformed += normal * ${width.toFixed(4)};\n#include <project_vertex>`
     );
   };
   m.customProgramCacheKey = () => 'outline' + width.toFixed(4);
