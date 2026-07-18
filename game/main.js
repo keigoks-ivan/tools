@@ -1743,7 +1743,8 @@ const keys = new Set();
 let atkPressed = false, heavyPressed = false, jumpPressed = false, dodgePressed = false, musouPressed = false;
 let heavyHold = false;   // 重攻擊按住中（蓄力判定用）
 addEventListener('keydown', e => {
-  if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+  if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) e.preventDefault();
+  if (e.code === 'Tab' && state === 'play') { toggleLock(); return; }
   if (typeof dlg !== 'undefined' && dlg.active) {
     if (e.code === 'KeyJ' || e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyZ') nextDialog();
     return;
@@ -1827,6 +1828,7 @@ const touchMove = { active: false, mx: 0, mz: 0 };
   bind('btnR', () => { dodgePressed = true; });
   bind('btnW', () => { if (state === 'play') switchWeapon(); });
   bind('btnU', () => { musouPressed = true; });
+  bind('btnL', () => { if (state === 'play') toggleLock(); });
 })();
 
 // ---------- HUD ----------
@@ -2796,6 +2798,53 @@ function onBossDown() {
   }, 1400);
 }
 
+// ---------- 鎖定武將（Tab / 手機「鎖」鍵） ----------
+let lockTarget = null;
+const lockMarker = (() => {
+  const grp = new THREE.Group();
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.9, 1.1, 32),
+    new THREE.MeshBasicMaterial({ color: 0xff4040, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.08;
+  const tri = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.5, 4), new THREE.MeshBasicMaterial({ color: 0xff4040 }));
+  tri.rotation.x = Math.PI;
+  grp.add(ring, tri);
+  grp.visible = false;
+  scene.add(grp);
+  return grp;
+})();
+function lockRank(e) { return e.kindName.startsWith('boss') ? 0 : e.officer ? 1 : 2; }
+function toggleLock() {
+  const cands = enemies
+    .filter(e => e.st !== 'dead' && e.st !== 'spawn'
+      && (e.officer || e.kindName.startsWith('boss') || e.kindName === 'elite')
+      && Math.hypot(e.x - player.x, e.z - player.z) < 32)
+    .sort((a, b) => (lockRank(a) * 8 + Math.hypot(a.x - player.x, a.z - player.z))
+                  - (lockRank(b) * 8 + Math.hypot(b.x - player.x, b.z - player.z)));
+  if (!cands.length) { lockTarget = null; return; }
+  if (!lockTarget || !cands.includes(lockTarget)) lockTarget = cands[0];
+  else {
+    const i = cands.indexOf(lockTarget);
+    lockTarget = i >= cands.length - 1 ? null : cands[i + 1];   // 循環到底解除
+  }
+  if (lockTarget) {
+    spawnSpark(new THREE.Vector3(lockTarget.x, 1.8 * lockTarget.kind.scale, lockTarget.z), 1.6, 0xff6050, { dur: 0.3 });
+    if (AU.ctx) tone('square', midi(86), AU.ctx.currentTime, 0.09, 0.14, AU.sfx);
+  } else if (AU.ctx) tone('square', midi(74), AU.ctx.currentTime, 0.09, 0.1, AU.sfx);
+}
+function updateLock() {
+  if (lockTarget && (lockTarget.st === 'dead' || Math.hypot(lockTarget.x - player.x, lockTarget.z - player.z) > 40)) lockTarget = null;
+  lockMarker.visible = !!lockTarget && state === 'play';
+  if (lockTarget) {
+    lockMarker.position.set(lockTarget.x, 0, lockTarget.z);
+    lockMarker.children[1].position.y = 2.6 * lockTarget.kind.scale + Math.sin(worldT * 5) * 0.15;
+    lockMarker.children[0].scale.setScalar(lockTarget.kind.scale * (1 + Math.sin(worldT * 6) * 0.08));
+    lockMarker.rotation.y += 0.02;
+  }
+}
+
 // ---------- 戰鬥 ----------
 // 完美閃避 → 子彈時間（翻滾 i-frame 內吃到攻擊判定觸發）
 let witchT = 0;
@@ -3145,7 +3194,8 @@ function syncPlayer() {
 }
 function startAttack(a, stage, mx, mz, ml) {
   const p = player;
-  if (ml > 0) p.yaw = Math.atan2(mx, mz);
+  if (lockTarget && lockTarget.st !== 'dead') p.yaw = Math.atan2(lockTarget.x - p.x, lockTarget.z - p.z);
+  else if (ml > 0) p.yaw = Math.atan2(mx, mz);
   p.st = 'atk'; p.curAtk = a; p.atkStage = stage;
   p.atkT = 0; p.didHit = false; p.queuedLight = false; p.queuedHeavy = false;
   const ts = a.ts * (curChar.atkTs || 1);   // 角色武器：重刃慢、短刃快
@@ -3325,9 +3375,10 @@ let camYaw = Math.PI;
 const camPos = { x: 0, z: 0 };
 function updateCamera(dt) {
   const p = player;
-  // 鏡頭緩慢轉到玩家背後（移動中轉快、靜止轉慢）
+  // 鏡頭緩慢轉到玩家背後（移動中轉快、靜止轉慢）；鎖定中則朝向鎖定目標
   const ease = p.st === 'run' || p.st === 'dodge' ? 2.2 : 0.9;
-  camYaw += angDiff(camYaw, p.yaw) * Math.min(1, dt * ease);
+  const wantYaw = lockTarget && lockTarget.st !== 'dead' ? Math.atan2(lockTarget.x - p.x, lockTarget.z - p.z) : p.yaw;
+  camYaw += angDiff(camYaw, wantYaw) * Math.min(1, dt * (lockTarget ? 3 : ease));
   const fx = Math.sin(camYaw), fz = Math.cos(camYaw);
   camPos.x = p.x - fx * 6.5;
   camPos.z = p.z - fz * 6.5;
@@ -3587,6 +3638,7 @@ function loadStage(i) {
     capturePoint.visible = true;
   } else capturePoint.visible = false;
   musou = 0;
+  lockTarget = null;
   if (AU.ctx) { AU.nextBar = AU.ctx.currentTime + 0.15; AU.bar = 0; }
   hud.bosswrap.style.display = 'none';
   const p = player;
@@ -3672,6 +3724,7 @@ function loop() {
     player.root.rotation.y += raw * 0.4;
   }
   updateAmbient(raw);
+  updateLock();
   updateCamera(raw);
   updateOcclusion();
   updateTrail();
