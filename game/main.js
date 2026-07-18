@@ -1660,9 +1660,9 @@ const MUSIC = [
       // 主歌：音階揚升蓄力
       [72, 0, 0.75], [76, 0.75, 0.25], [79, 1, 0.5], [81, 1.5, 0.5], [84, 2, 1.75],
       [83, 4, 0.75], [79, 4.75, 0.25], [81, 5, 0.5], [79, 5.5, 0.5], [76, 6, 1.5],
-      // 副歌：高音長音爆發（anthem 式拉抬）
-      [81, 8, 1], [84, 9, 1.5], [86, 10.5, 0.5], [84, 11, 1],
-      [81, 12, 0.75], [79, 12.75, 0.25], [77, 13, 0.5], [76, 13.5, 0.5], [79, 14, 2],
+      // 副歌：高音長音爆發（anthem 式拉抬，峰值 E6）
+      [84, 8, 1], [86, 9, 1.5], [88, 10.5, 0.5], [86, 11, 1],
+      [84, 12, 0.75], [81, 12.75, 0.25], [79, 13, 0.5], [77, 13.5, 0.5], [84, 14, 2],
     ],
     hat16: true,
   },
@@ -1759,14 +1759,18 @@ function scheduleMusic() {
         const t = t0 + beat * spb, d = len * spb * 0.9;
         tone('square', midi(n), t, d, 0.075, AU.lead);
         tone('sawtooth', midi(n) * 1.004, t, d, 0.045, AU.lead);
-        // 和聲：從該拍所屬和弦挑出貼在主音下方一個八度內的最高和弦音（自然三/六度）
+        // 三聲部和聲：主音下方一個八度內取最高兩個和弦音（完整三和音堆疊）
         const chd = cfg.prog[Math.floor(beat / 4) % 4];
-        let h = -1;
+        let h = -1, h2 = -1;
         for (const c of chd) for (const o of [0, 12, 24]) {
           const v = c + o;
-          if (v < n && v > n - 12 && v > h) h = v;
+          if (v < n && v > n - 12) {
+            if (v > h) { h2 = h; h = v; }
+            else if (v > h2) h2 = v;
+          }
         }
         if (h > 0) tone('triangle', midi(h), t, d, 0.05, AU.lead);
+        if (h2 > 0) tone('triangle', midi(h2), t, d, 0.034, AU.lead);
       }
     }
     AU.nextBar += barLen;
@@ -3113,6 +3117,7 @@ function updatePlayer(dt) {
     p.musouTick -= dt;
     if (p.musouTick <= 0) {
       p.musouTick = 0.2;
+      p.musouN = (p.musouN || 0) + 1;
       for (const e of enemies) {
         if (e.st === 'dead' || e.st === 'spawn') continue;
         const dx = e.x - p.x, dz = e.z - p.z;
@@ -3120,11 +3125,16 @@ function updatePlayer(dt) {
         if (d < 7) { const kd = d || 1; hitEnemy(e, 3, 9, dx / kd, dz / kd, 1.7); }
       }
       damageRifts(p.x, p.z, 7, 3);
-      spawnSlash(p.x, p.z, Math.random() * 6.28, { ang: 6.3, outer: 7, dir: Math.random() < 0.5 ? 1 : -1, color: [0xd07aff, 0xff7ac8, 0xffd84f][Math.floor(Math.random() * 3)], dur: 0.3 });
-      spawnShockwave(p.x, p.z, { maxR: 7, dur: 0.32, color: 0xd07aff });
-      spawnSpark(new THREE.Vector3(p.x + (Math.random() * 2 - 1) * 2, 1 + Math.random() * 2, p.z + (Math.random() * 2 - 1) * 2), 1.6, 0xffd84f, { dur: 0.3, rise: 3 });
+      // 特效減量：斬痕隔次生成、震波縮小，避免疊加白屏
+      if (p.musouN % 2 === 0) {
+        spawnSlash(p.x, p.z, Math.random() * 6.28, { ang: 6.3, outer: 6.5, dir: Math.random() < 0.5 ? 1 : -1, color: [0xd07aff, 0xff7ac8, 0xffd84f][Math.floor(Math.random() * 3)], dur: 0.26 });
+      }
+      spawnShockwave(p.x, p.z, { maxR: 6, dur: 0.26, color: 0xd07aff });
+      if (p.musouN % 2 === 1) {
+        spawnSpark(new THREE.Vector3(p.x + (Math.random() * 2 - 1) * 2, 1 + Math.random() * 2, p.z + (Math.random() * 2 - 1) * 2), 1.0, 0xffd84f, { dur: 0.25, rise: 3 });
+      }
       S.slash();
-      shakeT = 0.15; shakeAmp = 0.3;
+      shakeT = 0.12; shakeAmp = 0.18;
     }
     // 每 0.55 秒向八方射出劍氣
     p.musouBoltT = (p.musouBoltT || 0) - dt;
@@ -3147,15 +3157,14 @@ function updatePlayer(dt) {
       }
       damageRifts(p.x, p.z, 12, 12);
       spawnShockwave(p.x, p.z, { maxR: 13, dur: 0.7, color: 0xffd84f });
-      spawnShockwave(p.x, p.z, { maxR: 10, dur: 0.6, color: 0xff7ac8 });
-      spawnShockwave(p.x, p.z, { maxR: 7, dur: 0.5, color: 0xffffff });
-      spawnPillar(p.x, p.z, 0xffe8b0, 2.2);
-      spawnSpark(new THREE.Vector3(p.x, 2, p.z), 8, 0xffe8b0, { dur: 0.55 });
+      spawnShockwave(p.x, p.z, { maxR: 9, dur: 0.55, color: 0xff7ac8 });
+      spawnPillar(p.x, p.z, 0xffe8b0, 1.6);
+      spawnSpark(new THREE.Vector3(p.x, 2, p.z), 5, 0xffe8b0, { dur: 0.5 });
       for (let i = 0; i < 12; i++) {
         const a = (i / 12) * Math.PI * 2;
         spawnBolt({ dmg: 3, speed: 27, pierce: 99, size: 1.8 }, Math.sin(a), Math.cos(a));
       }
-      screenFlash = 1;
+      screenFlash = 0.5;
       S.boom(); S.roar(); S.win();
       hitStopT = 0.2; shakeT = 0.7; shakeAmp = 1.0;
       p.st = 'idle';
@@ -3269,15 +3278,14 @@ function startAttack(a, stage, mx, mz, ml) {
 }
 function startMusou() {
   const p = player;
-  p.st = 'musou'; p.musouT = 0; p.musouTick = 0; p.musouBoltT = 0.3;
+  p.st = 'musou'; p.musouT = 0; p.musouTick = 0; p.musouBoltT = 0.3; p.musouN = 0;
   p.invuln = 4.4;
   musou = 0;
   play(p.rig, 'heavyfin', { ts: 1.75 });
-  spawnPillar(p.x, p.z, 0xffd84f, 1.8);
+  spawnPillar(p.x, p.z, 0xffd84f, 1.3);
   spawnShockwave(p.x, p.z, { maxR: 8, dur: 0.55, color: 0xffd84f });
-  spawnShockwave(p.x, p.z, { maxR: 5, dur: 0.4, color: 0xffffff });
-  spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 5, 0xffd84f, { dur: 0.45 });
-  screenFlash = 0.7;
+  spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 3, 0xffd84f, { dur: 0.4 });
+  screenFlash = 0.35;
   if (AU.ctx) {
     const t = AU.ctx.currentTime;
     tone('sawtooth', 160, t, 0.7, 0.32, AU.sfx, 1100);
