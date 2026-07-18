@@ -64,9 +64,9 @@ let stageIdx = 0;
 // ---------- 可操作角色（HUNTR/X 三人組） ----------
 // mira.glb / zoey.glb 若存在（tmp-convert 管線產出）自動採用；否則以 Rumi 模型＋靈氣配色代身
 const CHARS = {
-  rumi: { key: 'rumi', name: 'RUMI', weapon: 'sword', tint: null,     fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    atkTs: 1,    rangeMul: 1,    light: 0xff4fa3 },
-  mira: { key: 'mira', name: 'MIRA', weapon: 'great', tint: 0x4a78ff, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, atkTs: 0.86, rangeMul: 1.2,  light: 0x5a8aff },
-  zoey: { key: 'zoey', name: 'ZOEY', weapon: 'short', tint: 0xffc040, fx: 0xffd84f, fxHi: 0xffeaa8, boltCol: 0xffe08a, spd: 7.5, dmgMul: 0.82, hpMul: 0.88, atkTs: 1.18, rangeMul: 0.85, light: 0xffb040 },
+  rumi: { key: 'rumi', name: 'RUMI', weapon: 'sword', tint: null,     hair: 0x8a5ae0, fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    atkTs: 1,    rangeMul: 1,    light: 0xff4fa3 },
+  mira: { key: 'mira', name: 'MIRA', weapon: 'great', tint: 0x4a78ff, hair: 0x3a5090, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, atkTs: 0.86, rangeMul: 1.2,  light: 0x5a8aff },
+  zoey: { key: 'zoey', name: 'ZOEY', weapon: 'short', tint: 0xffc040, hair: 0xff9ec0, fx: 0xffd84f, fxHi: 0xffeaa8, boltCol: 0xffe08a, spd: 7.5, dmgMul: 0.82, hpMul: 0.88, atkTs: 1.18, rangeMul: 0.85, light: 0xffb040 },
 };
 let curChar = CHARS.rumi;
 
@@ -1451,6 +1451,55 @@ function buildWeaponMesh(char, len) {
   grp.add(blade, tip, guard, grip, glow);
   return grp;
 }
+// 長髮（獵魔女團風）：掛頭部骨骼的程序生成髮型——Rumi 長辮／Mira 長直髮／Zoey 雙馬尾
+function setupHair(root, char, hScale) {
+  const head = root.getObjectByName('mixamorigHead');
+  if (!head) return;
+  root.updateMatrixWorld(true);
+  const headW = head.getWorldPosition(new THREE.Vector3());
+  const bbox = new THREE.Box3().setFromObject(root);
+  const u = Math.max(0.02, bbox.max.y - headW.y) / hScale;   // 頭部高度＝比例尺（頭骨局部單位）
+  const dirL = v => head.worldToLocal(headW.clone().add(v)).normalize();
+  const upL = dirL(new THREE.Vector3(0, 1, 0));
+  const backL = dirL(new THREE.Vector3(0, 0, -1));
+  const rightL = dirL(new THREE.Vector3(1, 0, 0));
+  const grp = new THREE.Group();
+  head.add(grp);
+  const hairMat = new THREE.MeshToonMaterial({ color: char.hair, gradientMap: gradTex4 });
+  const tieMat = new THREE.MeshBasicMaterial({ color: 0xffd070 });
+  const P = (a, b, c) => new THREE.Vector3()
+    .addScaledVector(upL, a * u).addScaledVector(backL, b * u).addScaledVector(rightL, c * u);
+  const ball = (pos, r, mat = hairMat) => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), mat);
+    m.position.copy(pos);
+    m.castShadow = true;
+    grp.add(m);
+    return m;
+  };
+  // 後腦杓髮量
+  ball(P(0.55, 0.35, 0), 0.52 * u);
+  ball(P(0.15, 0.5, 0), 0.46 * u);
+  // 髮鏈：由粗到細的珠鏈沿弧線垂下，髮根繫金色髮繩
+  const chain = (sideC, len, n, r0) => {
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      const a = -0.2 - t * len;
+      const b = 0.55 + Math.sin(t * 2.6) * 0.28;
+      ball(P(a, b, sideC + Math.sin(t * 6 + sideC * 9) * 0.05), r0 * (1 - t * 0.55) * u);
+    }
+    ball(P(-0.2 - len * 0.1, 0.62, sideC), 0.15 * u, tieMat);
+  };
+  if (char.weapon === 'short') {          // Zoey：雙馬尾
+    chain(0.45, 2.0, 7, 0.24);
+    chain(-0.45, 2.0, 7, 0.24);
+  } else if (char.weapon === 'great') {   // Mira：及腰長直髮（中股＋兩側）
+    chain(0, 2.9, 9, 0.34);
+    chain(0.3, 2.2, 7, 0.2);
+    chain(-0.3, 2.2, 7, 0.2);
+  } else {                                // Rumi：招牌長辮
+    chain(0, 3.2, 10, 0.3);
+  }
+}
 const trail = { pts: [], max: 16, mesh: null, mat: null, base: null, tip: null, color: new THREE.Color(0xc9a4ff) };
 function setupSwordFx(root, char) {
   if (trail.mesh) { scene.remove(trail.mesh); trail.mesh.geometry.dispose(); trail.mat.dispose(); trail.mesh = null; }
@@ -1604,14 +1653,16 @@ function initAudio() {
   AU.timer = setInterval(scheduleMusic, 200);
 }
 const MUSIC = [
-  { // 第一關：synthwave 夜街（Am–F–C–G，明快 hook）
-    bpm: 126,
+  { // 第一關：獵魔女團風主題戰歌（原創致敬向：主歌低音蓄力→副歌高音爆發，Am–F–C–G）
+    bpm: 122,
     prog: [[57, 60, 64, 67], [53, 57, 60, 64], [48, 52, 55, 59], [55, 59, 62, 65]],
     lead: [
-      [76, 0, 0.75], [74, 0.75, 0.25], [72, 1, 0.5], [74, 1.5, 0.5], [76, 2, 1], [79, 3, 0.5], [76, 3.5, 0.5],
-      [74, 4, 0.75], [72, 4.75, 0.25], [69, 5, 1], [72, 6, 0.5], [74, 6.5, 0.5], [76, 7, 1],
-      [72, 8, 0.75], [74, 8.75, 0.25], [76, 9, 0.5], [79, 9.5, 0.5], [81, 10, 1.25], [79, 11.25, 0.75],
-      [76, 12, 0.75], [74, 12.75, 0.25], [72, 13, 1], [69, 14, 1.5], [64, 15.5, 0.5],
+      // 主歌：低音區切分蓄力
+      [69, 0, 0.5], [69, 0.5, 0.25], [72, 0.75, 0.25], [74, 1, 0.75], [72, 1.75, 0.25], [74, 2, 0.5], [76, 2.5, 1.5],
+      [65, 4, 0.5], [65, 4.5, 0.25], [69, 4.75, 0.25], [72, 5, 0.75], [69, 5.75, 0.25], [72, 6, 0.5], [74, 6.5, 1.5],
+      // 副歌：戰歌高音爆發
+      [81, 8, 0.75], [79, 8.75, 0.25], [81, 9, 0.5], [84, 9.5, 1], [81, 10.5, 0.5], [79, 11, 0.5], [76, 11.5, 0.5],
+      [77, 12, 0.75], [76, 12.75, 0.25], [77, 13, 0.5], [79, 13.5, 0.75], [76, 14.25, 0.5], [74, 14.75, 0.25], [72, 15, 1],
     ],
     hat16: true,
   },
@@ -1691,18 +1742,31 @@ function scheduleMusic() {
     if (bi === 3) {                                                      // 第4小節 snare 過門
       for (let i = 0; i < 4; i++) noiseHit(t0 + barLen - spb / 2 + i * spb / 8, 0.06, 0.1 + i * 0.04, 'bandpass', 2100, AU.music);
     }
-    for (const n of ch) {                                                // 7th 和弦 pad
+    for (const n of ch) {                                                // 7th 和弦 pad（雙鋸齒＋高八度亮澤）
       tone('sawtooth', midi(n) * 0.998, t0, barLen * 0.95, 0.02, AU.music);
       tone('sawtooth', midi(n) * 1.004, t0, barLen * 0.95, 0.02, AU.music);
+      tone('sine', midi(n + 12), t0, barLen * 0.95, 0.012, AU.music);
     }
+    tone('sine', midi(ch[0] - 12), t0, barLen * 0.95, 0.035, AU.music);  // 低八度根音鋪底
+    tone('sine', midi(ch[2] - 12), t0, barLen * 0.95, 0.018, AU.music);  // 五度撐厚
     const arp = [ch[0] + 12, ch[1] + 12, ch[2] + 12, ch[3] + 12];        // arp 8ths → 進延遲
     for (let i = 0; i < 8; i++) {
       tone('triangle', midi(arp[i % 4]), t0 + i * spb / 2, 0.13, 0.035, AU.lead);
+      if (cfg.hat16) tone('sine', midi(arp[(i + 2) % 4] + 12), t0 + i * spb / 2 + spb / 4, 0.08, 0.018, AU.lead);   // 16 分閃爍
     }
-    if (bi === 0) {                                                      // 主旋律 hook（4 小節一循環）
+    if (bi === 0) {                                                      // 主旋律 hook（4 小節一循環）＋自動和聲
       for (const [n, beat, len] of cfg.lead) {
-        tone('square', midi(n), t0 + beat * spb, len * spb * 0.9, 0.075, AU.lead);
-        tone('sawtooth', midi(n) * 1.004, t0 + beat * spb, len * spb * 0.9, 0.045, AU.lead);
+        const t = t0 + beat * spb, d = len * spb * 0.9;
+        tone('square', midi(n), t, d, 0.075, AU.lead);
+        tone('sawtooth', midi(n) * 1.004, t, d, 0.045, AU.lead);
+        // 和聲：從該拍所屬和弦挑出貼在主音下方一個八度內的最高和弦音（自然三/六度）
+        const chd = cfg.prog[Math.floor(beat / 4) % 4];
+        let h = -1;
+        for (const c of chd) for (const o of [0, 12, 24]) {
+          const v = c + o;
+          if (v < n && v > n - 12 && v > h) h = v;
+        }
+        if (h > 0) tone('triangle', midi(h), t, d, 0.05, AU.lead);
       }
     }
     AU.nextBar += barLen;
@@ -2118,6 +2182,7 @@ function buildHero(char) {
     'idle', 'run', 'roll', 'hurt', 'death', 'win', 'jump',
     'slash1', 'slash2', 'slash3', 'slash4', 'heavy', 'heavyfin',
   ]);
+  setupHair(root, char, base.hScale);   // 在描邊前掛髮，讓頭髮一起吃描邊
   addOutline(root, null, 0.028 / base.hScale);
   play(player.rig, 'idle');
   player.shadow = makeBlobShadow(1.1);
