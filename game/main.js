@@ -2809,7 +2809,7 @@ function triggerWitchTime() {
   spawnSpark(new THREE.Vector3(player.x, 1.4, player.z), 2.6, 0xc06aff, { dur: 0.4 });
   if (AU.ctx) { const t = AU.ctx.currentTime; tone('sine', 880, t, 0.5, 0.2, AU.sfx, 220); }
 }
-function comboMul() { return 1 + Math.min(combo, 75) * 0.008; }
+function comboMul() { return 1 + Math.min(combo, 50) * 0.005; }   // 50 hits 封頂 +25%
 function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
   e.hp -= dmg * comboMul() * (1 + stageIdx * 0.12) * curChar.dmgMul;
   if (e.bar) drawOfficerBar(e);
