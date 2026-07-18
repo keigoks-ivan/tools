@@ -690,13 +690,13 @@ const sparkTex = (() => {
   return new THREE.CanvasTexture(c);
 })();
 const sparks = [];
-function spawnSpark(pos, scale = 1, color = 0xffffff) {
+function spawnSpark(pos, scale = 1, color = 0xffffff, opts = {}) {
   const s = new THREE.Sprite(new THREE.SpriteMaterial({
     map: sparkTex, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   s.position.copy(pos);
   s.scale.setScalar(0.4 * scale);
-  s.userData = { t: 0, dur: 0.22, scale };
+  s.userData = { t: 0, dur: opts.dur || 0.22, scale, rise: opts.rise || 0 };
   scene.add(s);
   sparks.push(s);
 }
@@ -730,15 +730,21 @@ function makeFanGeo(inner, outer, ang, segs = 24) {
 }
 const slashes = [];
 function spawnSlash(x, z, yaw, { ang = 2.4, outer = 2.9, dur = 0.18, color = 0xc9a4ff, dir = 1 }) {
-  const m = new THREE.Mesh(makeFanGeo(0.7, outer, ang), new THREE.MeshBasicMaterial({
-    color, transparent: true, opacity: 0.85, side: THREE.DoubleSide,
-    blending: THREE.AdditiveBlending, depthWrite: false,
-  }));
-  m.position.set(x, 1.15, z);
-  m.rotation.y = yaw;
-  m.userData = { t: 0, dur, dir };
-  scene.add(m);
-  slashes.push(m);
+  const mk = (inner, out, col, op, spinMul, tilt) => {
+    const m = new THREE.Mesh(makeFanGeo(inner, out, ang), new THREE.MeshBasicMaterial({
+      color: col, transparent: true, opacity: op, side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    }));
+    m.position.set(x, 1.15, z);
+    m.rotation.y = yaw;
+    m.rotation.x = tilt;
+    m.userData = { t: 0, dur, dir: dir * spinMul };
+    scene.add(m);
+    slashes.push(m);
+  };
+  mk(0.7, outer, color, 0.7, 1, 0);               // 外圈色彩
+  mk(0.9, outer * 0.82, 0xffffff, 0.9, 1.35, 0);  // 白熱核心（轉更快）
+  mk(0.7, outer * 1.05, color, 0.35, 0.7, 0.18);  // 殘影層（微傾斜）
 }
 const drops = [];
 function spawnDrop(x, z) {
@@ -986,20 +992,20 @@ const level = { zi: 0, phase: 'fight', zoneKills: 0, spawned: 0, boss: null };
 
 // 攻擊表（Rumi／Knight，1H 劍）
 const LIGHT = [
-  { clip: 'slash1', ts: 1.45, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.38, dir: 1 },
-  { clip: 'slash2', ts: 1.45, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.38, dir: -1 },
-  { clip: 'slash3', ts: 1.4,  range: 3.0, ang: 2.2, dmg: 1, kb: 9,  hitAt: 0.40, dir: 1 },
-  { clip: 'slash4', ts: 1.35, range: 3.4, ang: 2.4, dmg: 2, kb: 12, hitAt: 0.42, dir: 1, shake: 0.3 },
+  { clip: 'slash1', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: 1 },
+  { clip: 'slash2', ts: 1.85, range: 2.9, ang: 2.6, dmg: 1, kb: 7,  hitAt: 0.36, dir: -1 },
+  { clip: 'slash3', ts: 1.8,  range: 3.0, ang: 2.2, dmg: 1, kb: 9,  hitAt: 0.38, dir: 1 },
+  { clip: 'slash4', ts: 1.7,  range: 3.4, ang: 2.4, dmg: 2, kb: 12, hitAt: 0.40, dir: 1, shake: 0.3 },
 ];
-const HEAVY_SOLO   = { clip: 'heavy',    ts: 1.3, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1,  shake: 0.45 };
-const HEAVY_FINISH = { clip: 'heavyfin', ts: 1.3, range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.46, dir: 1,  shake: 0.55 };
+const HEAVY_SOLO   = { clip: 'heavy',    ts: 1.55, range: 3.3, ang: 2.5, dmg: 3, kb: 13, hitAt: 0.44, dir: 1,  shake: 0.45 };
+const HEAVY_FINISH = { clip: 'heavyfin', ts: 1.55, range: 3.7, ang: 6.3, dmg: 2, kb: 15, hitAt: 0.46, dir: 1,  shake: 0.55 };
 const PLUNGE       = { range: 4.0, ang: 6.3, dmg: 2, kb: 14, shake: 0.6 };
 // 魂力彈（遠程）：揮劍射出劍氣
 const RLIGHT = [
-  { clip: 'slash1', ts: 1.9, hitAt: 0.35, dir: 1,  bolt: { dmg: 1, speed: 24, pierce: 1, size: 1 } },
-  { clip: 'slash2', ts: 1.9, hitAt: 0.35, dir: -1, bolt: { dmg: 1, speed: 24, pierce: 1, size: 1 } },
+  { clip: 'slash1', ts: 2.3, hitAt: 0.33, dir: 1,  bolt: { dmg: 1, speed: 24, pierce: 2, size: 1.6 } },
+  { clip: 'slash2', ts: 2.3, hitAt: 0.33, dir: -1, bolt: { dmg: 1, speed: 24, pierce: 2, size: 1.6 } },
 ];
-const RHEAVY = { clip: 'heavy', ts: 1.3, hitAt: 0.44, dir: 1, shake: 0.3, bolt: { dmg: 3, speed: 27, pierce: 99, size: 1.9 } };
+const RHEAVY = { clip: 'heavy', ts: 1.6, hitAt: 0.44, dir: 1, shake: 0.3, bolt: { dmg: 3, speed: 27, pierce: 99, size: 2.6 } };
 let weapon = 'melee';
 const curLight = () => weapon === 'melee' ? LIGHT : RLIGHT;
 function switchWeapon() {
@@ -1019,7 +1025,7 @@ function spawnBolt(cfg) {
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   spr.position.set(p.x + fx * 0.9, 1.3, p.z + fz * 0.9);
-  spr.scale.setScalar(0.55 * cfg.size);
+  spr.scale.set(1.1 * cfg.size, 0.62 * cfg.size, 1);
   scene.add(spr);
   bolts.push({ spr, x: p.x + fx * 0.9, z: p.z + fz * 0.9, dx: fx, dz: fz, traveled: 0, pierce: cfg.pierce, dmg: cfg.dmg, size: cfg.size, hitSet: new Set() });
 }
@@ -1029,8 +1035,12 @@ function updateBolts(dt) {
     const step = 24 * dt * (b.size > 1.2 ? 1.12 : 1);
     b.x += b.dx * step; b.z += b.dz * step;
     b.traveled += step;
+    if (Math.floor(b.traveled / 1.2) !== Math.floor((b.traveled - step) / 1.2)) {
+      spawnSpark(new THREE.Vector3(b.x, 1.3, b.z), 0.55 * b.size, 0x6ac0ff, { dur: 0.16 });
+    }
     b.spr.position.set(b.x, 1.3, b.z);
-    b.spr.scale.setScalar(0.55 * b.size * (1 + Math.sin(b.traveled * 6) * 0.12));
+    const pulse = 1 + Math.sin(b.traveled * 6) * 0.12;
+    b.spr.scale.set(1.1 * b.size * pulse, 0.62 * b.size * pulse, 1);
     let dead = b.traveled > 20 || Math.abs(b.x) > HALF_W + 1;
     for (const e of enemies) {
       if (dead) break;
@@ -1267,6 +1277,7 @@ function spawnEnemy(kindName, fx, fz) {
 
 function killEnemy(e) {
   S.kill();
+  spawnSpark(new THREE.Vector3(e.x, 1.6, e.z), 1.3, 0xb07aff, { dur: 0.7, rise: 2.6 });
   e.st = 'dead'; e.deadT = 0;
   play(e.rig, 'Death_A', { once: true, ts: 1.3 });
   kills++;
@@ -1518,9 +1529,15 @@ function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
   e.flash = 0.13;
   e.vx += ux * kb * e.kind.kbMul;
   e.vz += uz * kb * e.kind.kbMul;
-  spawnSpark(new THREE.Vector3(e.x, 1.2, e.z), sparkScale);
+  spawnSpark(new THREE.Vector3(e.x, 1.2, e.z), sparkScale * 1.25);
+  if (dmg >= 2 || Math.random() < 0.4) spawnShockwave(e.x, e.z, { maxR: 1.3, dur: 0.16, color: 0xffffff });
   combo++; comboTimer = 2.2;
   if (combo > maxCombo) maxCombo = combo;
+  if (combo > 0 && combo % 15 === 0) {   // 連段里程碑：紫色新星
+    spawnSpark(new THREE.Vector3(player.x, 1.4, player.z), 3.4, 0xc06aff, { dur: 0.35 });
+    spawnShockwave(player.x, player.z, { maxR: 5, dur: 0.4, color: 0xc06aff });
+    if (AU.ctx) { const t = AU.ctx.currentTime; tone('triangle', midi(88 + Math.min(12, combo / 15)), t, 0.2, 0.18, AU.sfx); }
+  }
   if (e.hp <= 0) killEnemy(e);
   else if (e.st !== 'attack' && e.st !== 'cast' && (e.kindName === 'minion' || e.kindName === 'runner')) {
     e.st = 'hit'; e.hitT = 0.3;
@@ -1655,19 +1672,19 @@ function updatePlayer(dt) {
     const a = p.curAtk;
     p.atkT += dt;
     const k = Math.max(0, 1 - p.atkT / (p.atkDur * 0.6));
-    p.x += Math.sin(p.yaw) * 3.5 * k * dt;
-    p.z += Math.cos(p.yaw) * 3.5 * k * dt;
+    p.x += Math.sin(p.yaw) * 4.6 * k * dt;
+    p.z += Math.cos(p.yaw) * 4.6 * k * dt;
     if (ml > 0) p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 4);
     if (!p.didHit && p.atkT >= p.atkDur * a.hitAt) { p.didHit = true; applyPlayerHit(a); }
     if (atkPressed) { p.queuedLight = true; atkPressed = false; }
     if (heavyPressed) { p.queuedHeavy = true; heavyPressed = false; }
     if (dodgePressed && p.didHit) { dodgePressed = false; startDodge(mx, mz, ml); }
-    else if (p.atkT >= p.atkDur * 0.58 && p.queuedHeavy) {
+    else if (p.atkT >= p.atkDur * 0.5 && p.queuedHeavy) {
       startAttack(weapon === 'melee' ? (p.atkStage >= 1 ? HEAVY_FINISH : HEAVY_SOLO) : RHEAVY, -1, mx, mz, ml);
-    } else if (p.atkT >= p.atkDur * 0.58 && p.queuedLight && p.atkStage >= 0) {
+    } else if (p.atkT >= p.atkDur * 0.5 && p.queuedLight && p.atkStage >= 0) {
       const lt = curLight();
       startAttack(lt[(p.atkStage + 1) % lt.length], (p.atkStage + 1) % lt.length, mx, mz, ml);
-    } else if (p.atkT >= p.atkDur * 0.92) {
+    } else if (p.atkT >= p.atkDur * 0.86) {
       p.st = 'idle';
       play(p.rig, ml > 0 ? 'run' : 'idle', { ts: ml > 0 ? 1.15 : 1 });
     }
@@ -1743,6 +1760,7 @@ function updateFx(dt) {
     if (k >= 1) { scene.remove(s); s.material.dispose(); sparks.splice(i, 1); continue; }
     s.scale.setScalar((0.4 + k * 1.8) * s.userData.scale);
     s.material.opacity = 1 - k;
+    if (s.userData.rise) s.position.y += s.userData.rise * dt;
   }
   for (let i = slashes.length - 1; i >= 0; i--) {
     const m = slashes[i];
