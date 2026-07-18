@@ -2116,25 +2116,57 @@ const KINDS = {
     atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
     dropRate: 0,
   },
+  // 新敵種（KayKit 冒險者模型，自帶武器）
+  brute: {
+    file: 'barbarian', scale: 1.15, hp: 14, spdBase: 1.9, spdVar: 0.3, dmg: 16,
+    atkRange: 3.0, hitRange: 3.4, atkTs: 0.75, kbMul: 0.2, shadowR: 1.05,
+    atks: ['2H_Melee_Attack_Chop', '2H_Melee_Attack_Spin', '2H_Melee_Attack_Slice'],
+    dropRate: 0.5, tint: 0xc05840,
+  },
+  sentinel: {
+    file: 'knight', scale: 1.05, hp: 11, spdBase: 2.5, spdVar: 0.4, dmg: 12,
+    atkRange: 2.6, hitRange: 2.9, atkTs: 0.85, kbMul: 0.15, shadowR: 0.95,
+    atks: ['1H_Melee_Attack_Slice_Horizontal', '1H_Melee_Attack_Chop', 'Block_Attack'],
+    dropRate: 0.5, tint: 0x8890c8,
+  },
+  shade: {
+    file: 'rogue', scale: 0.95, hp: 6, spdBase: 4.6, spdVar: 0.6, dmg: 13,
+    atkRange: 2.3, hitRange: 2.5, atkTs: 1.05, kbMul: 0.8, shadowR: 0.8,
+    atks: ['Dualwield_Melee_Attack_Slice', 'Dualwield_Melee_Attack_Stab', '1H_Melee_Attack_Slice_Diagonal'],
+    dropRate: 0.3, tint: 0x6a4a9a,
+  },
+  // Boss：每關不同模型
   boss2: {
-    file: 'warrior', scale: 1.6, hp: 130, spdBase: 3.0, spdVar: 0, dmg: 17,
+    file: 'barbarian', scale: 1.6, hp: 130, spdBase: 3.0, spdVar: 0, dmg: 17,
     atkRange: 3.3, hitRange: 3.7, atkTs: 0.9, kbMul: 0.08, shadowR: 1.5,
-    atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
+    atks: ['2H_Melee_Attack_Chop', '2H_Melee_Attack_Spin'],
     dropRate: 0, tint: 0xff5050,
   },
   boss3: {
-    file: 'warrior', scale: 1.75, hp: 200, spdBase: 3.2, spdVar: 0, dmg: 20,
+    file: 'knight', scale: 1.75, hp: 200, spdBase: 3.2, spdVar: 0, dmg: 20,
     atkRange: 3.5, hitRange: 3.9, atkTs: 0.95, kbMul: 0.06, shadowR: 1.65,
-    atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
+    atks: ['1H_Melee_Attack_Slice_Horizontal', '1H_Melee_Attack_Chop', 'Block_Attack'],
     dropRate: 0, tint: 0xb070ff,
   },
   boss4: {
-    file: 'warrior', scale: 1.9, hp: 280, spdBase: 3.4, spdVar: 0, dmg: 22,
+    file: 'rogue', scale: 1.9, hp: 280, spdBase: 3.4, spdVar: 0, dmg: 22,
     atkRange: 3.7, hitRange: 4.1, atkTs: 1.0, kbMul: 0.05, shadowR: 1.8,
-    atks: ['Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Kick'],
+    atks: ['Dualwield_Melee_Attack_Slice', 'Dualwield_Melee_Attack_Stab'],
     dropRate: 0, tint: 0x60c8ff,
   },
 };
+// 各關武將模型＋各關雜兵池的特色敵種機率
+const OFFICER_KINDS = ['elite', 'brute', 'sentinel', 'shade'];
+function spawnKindFor(o) {
+  const r = Math.random();
+  if (stageIdx === 1 && r < 0.1) return 'brute';
+  if (stageIdx === 2 && r < 0.12) return 'sentinel';
+  if (stageIdx === 3) {
+    if (r < 0.1) return 'shade';
+    if (r < 0.18) return 'brute';
+  }
+  return Math.random() < (o.fast || 0) ? 'runner' : 'minion';
+}
 // 每關敵人色調融合（跟場景配色一致，減少「貼上去」感）
 const STAGE_ENEMY_TINT = [null, 0xffb080, 0xbfd8ff, 0xc080ff];
 
@@ -2204,10 +2236,13 @@ Promise.all([
   loader.loadAsync('assets/maria.glb'),
   loader.loadAsync('assets/Skeleton_Minion.glb'),
   loader.loadAsync('assets/Skeleton_Warrior.glb'),
+  loader.loadAsync('assets/Barbarian.glb'),
+  loader.loadAsync('assets/Knight.glb'),
+  loader.loadAsync('assets/Rogue.glb'),
   tryLoad('assets/mira.glb'),
   tryLoad('assets/zoey.glb'),
   ...CITY_PROPS.map(n => loader.loadAsync(`assets/city/${n}.gltf`)),
-]).then(([maria, minion, warrior, mira, zoey, ...city]) => {
+]).then(([maria, minion, warrior, barb, knight, rogue, mira, zoey, ...city]) => {
   heroBase = prepHeroModel(maria);
   if (mira) CHARS.mira.model = prepHeroModel(mira);
   if (zoey) CHARS.zoey.model = prepHeroModel(zoey);
@@ -2215,9 +2250,15 @@ Promise.all([
 
   toonify(minion.scene);
   toonify(warrior.scene);
+  toonify(barb.scene);
+  toonify(knight.scene);
+  toonify(rogue.scene);
   assets = {
     minion: { scene: minion.scene, clips: minion.animations },
     warrior: { scene: warrior.scene, clips: warrior.animations },
+    barbarian: { scene: barb.scene, clips: barb.animations },
+    knight: { scene: knight.scene, clips: knight.animations },
+    rogue: { scene: rogue.scene, clips: rogue.animations },
   };
 
   placeCityProps(Object.fromEntries(CITY_PROPS.map((n, i) => [n, city[i].scene])));
@@ -2284,7 +2325,10 @@ function placeCityProps(props) {
 const E_ANIMS = [
   'Spawn_Ground', 'Running_A', 'Hit_A', 'Death_A', 'Idle',
   'Unarmed_Melee_Attack_Punch_A', 'Unarmed_Melee_Attack_Punch_B', 'Unarmed_Melee_Attack_Kick',
-  'Spellcast_Long', 'Spellcast_Summon', 'Taunt',
+  'Spellcast_Long', 'Spellcast_Summon', 'Spellcast_Raise', 'Taunt',
+  '2H_Melee_Attack_Chop', '2H_Melee_Attack_Spin', '2H_Melee_Attack_Slice',
+  '1H_Melee_Attack_Slice_Horizontal', '1H_Melee_Attack_Chop', 'Block_Attack',
+  'Dualwield_Melee_Attack_Slice', 'Dualwield_Melee_Attack_Stab', '1H_Melee_Attack_Slice_Diagonal',
 ];
 const MAX_ATTACKERS = 4;
 
@@ -2325,17 +2369,18 @@ function spawnEnemy(kindName, fx, fz) {
   root.position.set(x, 0, z);
   scene.add(root);
   const rig = makeRig(root, src.clips, E_ANIMS);
+  const hasSpawn = !!rig.actions['Spawn_Ground'];   // 冒險者模型無破土動畫→短暫待機出場
   const e = {
     kind, kindName, root, rig, mats,
     shadow: makeBlobShadow(kind.shadowR),
     x, z, yaw: 0, vx: 0, vz: 0,
     hp: kind.hp, hpMax: kind.hp,
     spd: kind.spdBase + Math.random() * kind.spdVar,
-    st: 'spawn', t: clipDur(rig, 'Spawn_Ground', 1.4),
+    st: 'spawn', t: hasSpawn ? clipDur(rig, 'Spawn_Ground', 1.4) : 0.35,
     atkCd: 0.6 + Math.random() * 1.8, flash: 0, hitT: 0, deadT: 0, hitAppl: false,
     aoeCd: 6, summonCd: 3, castT: 0, castKind: null,
   };
-  play(rig, 'Spawn_Ground', { once: true, ts: 1.4, fade: 0 });
+  if (!play(rig, 'Spawn_Ground', { once: true, ts: 1.4, fade: 0 })) play(rig, 'Idle');
   spawnSpark(new THREE.Vector3(x, 0.6, z), kindName === 'boss' ? 3 : 1.3, 0xa04fff);
   enemies.push(e);
   return e;
@@ -2438,8 +2483,9 @@ function updateEnemies(dt) {
         e.aoeCd -= dt; e.summonCd -= dt;
         if (e.summonCd <= 0 && enemies.filter(x => (x.kindName === 'minion' || x.kindName === 'runner') && x.st !== 'dead').length < 9) {
           e.st = 'cast'; e.castKind = 'summon'; e.castT = 0;
-          e.castDur = clipDur(e.rig, 'Spellcast_Summon', 1.1);
-          play(e.rig, 'Spellcast_Summon', { once: true, ts: 1.1 });
+          const sumClip = e.rig.actions['Spellcast_Summon'] ? 'Spellcast_Summon' : 'Spellcast_Raise';
+          e.castDur = clipDur(e.rig, sumClip, 1.1);
+          play(e.rig, sumClip, { once: true, ts: 1.1 });
           continue;
         }
         if (e.aoeCd <= 0 && d < 7) {
@@ -2625,23 +2671,23 @@ function activateObjective(o) {
   if (o.type === 'officer') {
     const names = [...OFFICER_NAMES].sort(() => Math.random() - 0.5);
     for (let i = 0; i < o.officers; i++) {
-      const off = objSpawn(o, 'elite');
+      const off = objSpawn(o, OFFICER_KINDS[Math.min(stageIdx, OFFICER_KINDS.length - 1)]);
       off.officer = true;
-      off.hp = off.hpMax = 14;
+      off.hp = off.hpMax = 14 + stageIdx * 4;
       makeOfficerBar(off, names[i % names.length]);
     }
-    for (let i = 0; i < 4; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+    for (let i = 0; i < 4; i++) objSpawn(o, spawnKindFor(o));
   } else if (o.type === 'defend') {
     o.lampMax = 120; o.lampHp = 120; o.defT = 0;
     o.lamp = makeLamp(o.pos[0], o.pos[1]);
-    for (let i = 0; i < 7; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+    for (let i = 0; i < 7; i++) objSpawn(o, spawnKindFor(o));
   } else if (o.type === 'trial') {
     o.trialT = o.tlimit;
-    for (let i = 0; i < 9; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+    for (let i = 0; i < 9; i++) objSpawn(o, spawnKindFor(o));
   } else if (o.type === 'rift') {
     o.riftHpMax = o.riftHp;
     o.rift = makeRift(o.pos[0], o.pos[1]);
-    for (let i = 0; i < 6; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+    for (let i = 0; i < 6; i++) objSpawn(o, spawnKindFor(o));
   } else if (o.type === 'horde') {
     o.mile = 100; o.spawnT = 0;
     for (let i = 0; i < 14; i++) {
@@ -2652,7 +2698,7 @@ function activateObjective(o) {
       e.obj = o;
     }
   } else {
-    for (let i = 0; i < 10; i++) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+    for (let i = 0; i < 10; i++) objSpawn(o, spawnKindFor(o));
   }
 }
 function completeObjective(o) {
@@ -2714,7 +2760,7 @@ function updateLevel(dt) {
     const objAlive = enemies.filter(e => e.obj === o && e.st !== 'dead').length;
     if (o.type === 'kill') {
       if (o.spawned < o.need && objAlive < 16 && alive < 34 && Math.random() < 0.55) {
-        objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+        objSpawn(o, spawnKindFor(o));
         o.spawned++;
       }
       if (o.ambush && !o.ambushDone && o.kills >= o.need * 0.5) {
@@ -2733,14 +2779,14 @@ function updateLevel(dt) {
       const inside = Math.hypot(player.x - o.pos[0], player.z - o.pos[1]) < 4 && player.y < 1;
       const contested = enemies.some(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - o.pos[0], e.z - o.pos[1]) < 5);
       if (inside) o.capT = Math.min(100, o.capT + dt * (contested ? 5 : 14));
-      if (objAlive < 13 && alive < 34 && Math.random() < 0.42) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (objAlive < 13 && alive < 34 && Math.random() < 0.42) objSpawn(o, spawnKindFor(o));
       if (o.capT >= 100) completeObjective(o);
     } else if (o.type === 'officer') {
-      if (objAlive < 13 && alive < 34 && Math.random() < 0.38) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (objAlive < 13 && alive < 34 && Math.random() < 0.38) objSpawn(o, spawnKindFor(o));
       if (o.officersLeft <= 0) completeObjective(o);
     } else if (o.type === 'defend') {
       o.defT += dt;
-      if (objAlive < 12 && alive < 34 && Math.random() < 0.5) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (objAlive < 12 && alive < 34 && Math.random() < 0.5) objSpawn(o, spawnKindFor(o));
       if (o.lamp) {
         const lk = 1 + Math.sin(worldT * 4) * 0.12;
         o.lamp.userData.glow.scale.set(3.2 * lk, 3.2 * lk, 1);
@@ -2756,7 +2802,7 @@ function updateLevel(dt) {
       if (o.defT >= o.time) completeObjective(o);
     } else if (o.type === 'trial') {
       o.trialT -= dt;
-      if (objAlive < 16 && alive < 34 && Math.random() < 0.6) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (objAlive < 16 && alive < 34 && Math.random() < 0.6) objSpawn(o, spawnKindFor(o));
       if (o.kills >= o.need) completeObjective(o);
       else if (o.trialT <= 0) {
         o.kills = 0; o.trialT = o.tlimit;
@@ -2770,7 +2816,7 @@ function updateLevel(dt) {
         const rk = 1 + Math.sin(worldT * 5) * 0.1;
         o.rift.userData.outer.scale.setScalar(rk);
       }
-      if (objAlive < 10 && alive < 34 && Math.random() < 0.35) objSpawn(o, Math.random() < (o.fast || 0) ? 'runner' : 'minion');
+      if (objAlive < 10 && alive < 34 && Math.random() < 0.35) objSpawn(o, spawnKindFor(o));
       if (o.riftHp <= 0) completeObjective(o);
     } else if (o.type === 'horde') {
       // 千人斬：貼著玩家高密度刷屍潮，殺越多敵人越強越快
@@ -2782,7 +2828,11 @@ function updateLevel(dt) {
         const n = Math.min(cap - alive, 3 + Math.floor(Math.random() * 3) + Math.floor(prog * 2));
         for (let k = 0; k < n; k++) {
           const roll = Math.random();
-          const kind = roll < 0.04 + prog * 0.14 ? 'elite' : roll < (o.fast || 0) + prog * 0.4 ? 'runner' : 'minion';
+          let kind;
+          if (prog > 0.35 && roll < 0.04 + prog * 0.07) kind = 'brute';        // 中盤起混入蠻力鬼
+          else if (prog > 0.6 && roll < 0.14 + prog * 0.08) kind = 'shade';    // 後段影刺穿插
+          else if (roll < 0.04 + prog * 0.1) kind = 'elite';
+          else kind = Math.random() < (o.fast || 0) + prog * 0.4 ? 'runner' : 'minion';
           const a = Math.random() * 6.28, r = 11 + Math.random() * 9;
           const e = spawnEnemy(kind,
             Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * r)),
@@ -3758,6 +3808,7 @@ window.__stage = loadStage;
 window.__switch = switchWeapon;
 window.__E = enemies;
 window.__P = player;
+window.__spawn = spawnEnemy;
 window.__warp = k => {   // 測試用：完成前 k 個目標
   for (let i = 0; i < Math.min(k, level.objs.length); i++) {
     if (level.objs[i].state !== 'done') completeObjective(level.objs[i]);

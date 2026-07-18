@@ -88,6 +88,18 @@
   低八度根音/五度鋪底、hat16 曲加 16 分閃爍琶音——不再單音
 - 髮鏈無擺動物理（跟頭骨剛體動），之後可加 verlet 擺動
 
+## 2026-07-19 第五輪更新（已上線）
+
+- 大絕減亮（閃白 0.35/0.5、斬痕隔次、震波縮小）；鼓組減重（kick 0.28、snare/hat 減半）；
+  副歌拉高至 E6＋三聲部和聲；敵人全面縮小（minion 0.8/runner 0.72/boss −10%）＋每關色調融合（STAGE_ENEMY_TINT）
+- **新敵種**（KayKit 冒險者 GLB，通用動畫集，無 Spawn_Ground → Idle 出場 fallback）：
+  brute 蠻力鬼（Barbarian 雙手斧，慢硬重劈，S2+）／sentinel 叛天騎士（Knight 劍盾，高擊退抗性，S3）／
+  shade 影刺（Rogue 雙匕首，極快低血高傷，S4）；spawnKindFor(o) 統一各關雜兵池
+- **Boss 換模**：boss2＝巨型蠻力鬼、boss3＝巨型叛天騎士、boss4＝巨型影刺；召喚吟唱缺 Spellcast_Summon
+  時 fallback Spellcast_Raise
+- 武將模型隨關卡換（OFFICER_KINDS），血量 14+關數×4；千人斬中後段混入 brute/shade
+- debug 新增 window.__spawn(kind, x, z)
+
 ## 已知待辦/可改進
 
 1. 開放地圖敵量/密度、蓄力/衝刺斬傷害數值需實玩回饋再平衡
