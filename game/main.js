@@ -92,7 +92,8 @@ const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerW
   samples: IS_MOBILE ? 2 : 4, type: THREE.HalfFloatType,
 }));
 composer.addPass(new RenderPass(scene, camera));
-composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.62, 0.55, 0.6));
+// 泛光用半解析度算（模糊效果看不出差別，GPU 省一大塊）
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.62, 0.55, 0.6));
 composer.addPass(new OutputPass());
 
 addEventListener('resize', () => {
@@ -4212,8 +4213,12 @@ function perfTick(raw) {
 
 // ---------- 主迴圈 ----------
 const clock = new THREE.Clock();
-function loop() {
+let lastFrameTs = 0;
+function loop(ts) {
   requestAnimationFrame(loop);
+  // 鎖 60fps：120Hz 螢幕跳一半幀，GPU 負載/風扇直接砍半
+  if (ts !== undefined && lastFrameTs && ts - lastFrameTs < 15.5) return;
+  if (ts !== undefined) lastFrameTs = ts;
   const raw = Math.min(clock.getDelta(), 0.05);
   let dt = raw;
   if (hitStopT > 0) { hitStopT -= raw; dt = raw * 0.06; }
