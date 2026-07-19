@@ -57,6 +57,8 @@ var TOOLS = [
 
 /* SECONDARY TOOLS — accessed via "Tools ▾" dropdown */
 var SECONDARY_TOOLS = [
+  {k:'game',href:'/game/',en:'HUNTR/X Game',zh:'魂門之戰',icon:'<rect x="2" y="7" width="20" height="10" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/>'},
+  {k:'soccer',href:'/soccer/',en:'World Cup 2026',zh:'世界盃2026',icon:'<circle cx="12" cy="12" r="9"/><path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 3v5M4.5 9.5l4.2 1M19.5 9.5l-4.2 1M7 20l3.7-3.5M17 20l-3.7-3.5"/>'},
   {k:'reit-vs-direct',href:'/reit-vs-direct.html',en:'REIT vs Direct',zh:'REIT vs 實體',icon:'<path d="M3 12h7M14 12h7"/><path d="M3 6h7M14 6h7"/><path d="M3 18h7M14 18h7"/>'},
   {k:'methodology',href:'/methodology.html',en:'Methodology',zh:'方法論',icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/>'},
   {k:'visa',href:'/visa.html',en:'Visa Map',zh:'簽證地圖',icon:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="8" cy="14.5" r="1.5"/><path d="M13 14h5M13 17h4"/>'},
