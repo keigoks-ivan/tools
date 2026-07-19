@@ -64,9 +64,9 @@ let stageIdx = 0;
 // ---------- 可操作角色（HUNTR/X 三人組） ----------
 // mira.glb / zoey.glb 若存在（tmp-convert 管線產出）自動採用；否則以 Rumi 模型＋靈氣配色代身
 const CHARS = {
-  rumi: { key: 'rumi', name: 'RUMI', weapon: 'sword', tint: null,     hair: 0x8a5ae0, fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    atkTs: 1,    rangeMul: 1,    light: 0xff4fa3 },
-  mira: { key: 'mira', name: 'MIRA', weapon: 'great', tint: 0x4a78ff, hair: 0x3a5090, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, atkTs: 0.86, rangeMul: 1.2,  light: 0x5a8aff },
-  zoey: { key: 'zoey', name: 'ZOEY', weapon: 'short', tint: 0xffc040, hair: 0xff9ec0, fx: 0xffd84f, fxHi: 0xffeaa8, boltCol: 0xffe08a, spd: 7.5, dmgMul: 0.82, hpMul: 0.88, atkTs: 1.18, rangeMul: 0.85, light: 0xffb040 },
+  rumi: { key: 'rumi', name: 'RUMI', weapon: 'sword', tint: null,     hair: 0x8a5ae0, outfit: 0x2a2240, metal: 0xc8a860, fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    atkTs: 1,    rangeMul: 1,    light: 0xff4fa3 },
+  mira: { key: 'mira', name: 'MIRA', weapon: 'great', tint: 0x4a78ff, hair: 0x3a5090, outfit: 0x1e2c48, metal: 0x9ab0cc, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, atkTs: 0.86, rangeMul: 1.2,  light: 0x5a8aff },
+  zoey: { key: 'zoey', name: 'ZOEY', weapon: 'short', tint: 0xffc040, hair: 0xff9ec0, outfit: 0x463020, metal: 0xffd070, fx: 0xffd84f, fxHi: 0xffeaa8, boltCol: 0xffe08a, spd: 7.5, dmgMul: 0.82, hpMul: 0.88, atkTs: 1.18, rangeMul: 0.85, light: 0xffb040 },
 };
 let curChar = CHARS.rumi;
 
@@ -1500,6 +1500,89 @@ function setupHair(root, char, hScale) {
     chain(0, 3.2, 10, 0.3);
   }
 }
+// 全身裝備組（KDH 舞台服風）：肩甲/護腕/腰帶側裙/護脛/胸章/背後雙飄帶，全掛骨骼
+function setupOutfit(root, char, hScale) {
+  root.updateMatrixWorld(true);
+  const bone = n => root.getObjectByName(n);
+  const bbox = new THREE.Box3().setFromObject(root);
+  const H = (bbox.max.y - bbox.min.y) / hScale;   // 全身高（骨骼局部單位）
+  const cloth = new THREE.MeshToonMaterial({ color: char.outfit, gradientMap: gradTex4 });
+  const metal = new THREE.MeshToonMaterial({ color: char.metal, gradientMap: gradTex4 });
+  const ribbonMat = new THREE.MeshToonMaterial({ color: char.fx, gradientMap: gradTex4 });
+  const glowMat = new THREE.MeshBasicMaterial({ color: char.fx });
+  // 沿肢體的護具：骨骼指向子關節向量＝方向與長度基準，全自動對齊
+  const limbGuard = (bName, r0, r1, l0, l1, mat) => {
+    const b = bone(bName);
+    if (!b) return;
+    const child = b.children.find(c => c.isBone);
+    if (!child) return;
+    const dir = child.position.clone();
+    const len = dir.length();
+    if (len < 1e-3) return;
+    const grp = new THREE.Group();
+    grp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+    const g = new THREE.Mesh(new THREE.CylinderGeometry(len * r0, len * r1, len * (l1 - l0), 8), mat);
+    g.position.y = len * (l0 + l1) / 2;
+    g.castShadow = true;
+    grp.add(g);
+    b.add(grp);
+  };
+  for (const s of ['Left', 'Right']) {
+    limbGuard(`mixamorig${s}Arm`, 0.32, 0.24, -0.02, 0.32, metal);        // 肩甲
+    limbGuard(`mixamorig${s}ForeArm`, 0.17, 0.2, 0.35, 0.85, metal);      // 護腕
+    limbGuard(`mixamorig${s}ForeArm`, 0.21, 0.21, 0.56, 0.64, glowMat);   // 護腕光紋
+    limbGuard(`mixamorig${s}Leg`, 0.15, 0.185, 0.3, 0.82, cloth);         // 護脛
+  }
+  // 世界方向 → 指定骨骼局部方向
+  const dirsOf = b => {
+    const w = b.getWorldPosition(new THREE.Vector3());
+    const d = v => b.worldToLocal(w.clone().add(v)).normalize();
+    return { up: d(new THREE.Vector3(0, 1, 0)), back: d(new THREE.Vector3(0, 0, -1)), right: d(new THREE.Vector3(1, 0, 0)) };
+  };
+  const hips = bone('mixamorigHips');
+  if (hips) {
+    const { up, back, right } = dirsOf(hips);
+    const P = (a, bk, r) => new THREE.Vector3()
+      .addScaledVector(up, a * H).addScaledVector(back, bk * H).addScaledVector(right, r * H);
+    const belt = new THREE.Mesh(new THREE.TorusGeometry(H * 0.072, H * 0.013, 6, 18), metal);
+    belt.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), up);
+    belt.position.copy(P(0.012, 0, 0));
+    belt.castShadow = true;
+    hips.add(belt);
+    const buckle = new THREE.Mesh(new THREE.OctahedronGeometry(H * 0.018, 0), glowMat);
+    buckle.position.copy(P(0.012, -0.075, 0));
+    hips.add(buckle);
+    for (const sgn of [1, -1]) {   // 側裙甲
+      const flap = new THREE.Mesh(new THREE.BoxGeometry(H * 0.052, H * 0.095, H * 0.015), cloth);
+      flap.position.copy(P(-0.045, 0, sgn * 0.078));
+      flap.castShadow = true;
+      hips.add(flap);
+    }
+  }
+  const spine = bone('mixamorigSpine2') || bone('mixamorigSpine1') || bone('mixamorigSpine');
+  if (spine) {
+    const { up, back, right } = dirsOf(spine);
+    const P = (a, bk, r) => new THREE.Vector3()
+      .addScaledVector(up, a * H).addScaledVector(back, bk * H).addScaledVector(right, r * H);
+    const emblem = new THREE.Mesh(new THREE.OctahedronGeometry(H * 0.02, 0), glowMat);   // 胸前徽章
+    emblem.scale.z = 0.45;
+    emblem.position.copy(P(0.055, -0.062, 0));
+    spine.add(emblem);
+    for (const sgn of [1, -1]) {   // 背後雙飄帶
+      for (let i = 0; i < 8; i++) {
+        const t = i / 7;
+        const seg = new THREE.Mesh(new THREE.BoxGeometry(H * 0.028 * (1 - t * 0.3), H * 0.055, H * 0.008), ribbonMat);
+        seg.position.copy(P(0.03 - t * 0.34, 0.055 + Math.sin(t * 2.4) * 0.022, sgn * (0.02 + t * 0.05)));
+        seg.rotation.x = 0.15 + t * 0.2;
+        seg.castShadow = true;
+        spine.add(seg);
+      }
+      const tip = new THREE.Mesh(new THREE.OctahedronGeometry(H * 0.012, 0), glowMat);   // 飄帶尾光點
+      tip.position.copy(P(0.03 - 0.36, 0.055 + Math.sin(2.4) * 0.022, sgn * 0.072));
+      spine.add(tip);
+    }
+  }
+}
 const trail = { pts: [], max: 16, mesh: null, mat: null, base: null, tip: null, color: new THREE.Color(0xc9a4ff) };
 function setupSwordFx(root, char) {
   if (trail.mesh) { scene.remove(trail.mesh); trail.mesh.geometry.dispose(); trail.mat.dispose(); trail.mesh = null; }
@@ -2357,7 +2440,8 @@ function buildHero(char) {
     'idle', 'run', 'roll', 'hurt', 'death', 'win', 'jump',
     'slash1', 'slash2', 'slash3', 'slash4', 'heavy', 'heavyfin',
   ]);
-  setupHair(root, char, base.hScale);   // 在描邊前掛髮，讓頭髮一起吃描邊
+  setupHair(root, char, base.hScale);     // 在描邊前掛髮/裝備，一起吃描邊
+  setupOutfit(root, char, base.hScale);
   addOutline(root, null, 0.028 / base.hScale);
   play(player.rig, 'idle');
   player.shadow = makeBlobShadow(1.1);

@@ -114,6 +114,16 @@
   勝利/據點/拾取改 FM 鐘（bell()）
 - debug：window.__au() 看 BGM 狀態
 
+## 2026-07-19 第七輪更新（已上線）
+
+- 大絕開場慢動作：musouSlowT 1.1s 全場 dt×0.25＋鏡頭 6.5→5.1 推近（updateCamera camDist）
+- **主角全身裝備組**（setupOutfit，程序生成掛骨骼、吃描邊）：肩甲/護腕+發光紋/護脛
+  （limbGuard：骨骼→子關節向量自動對齊長度方向）＋腰帶/腰扣/側裙甲（Hips）＋
+  胸前發光徽章/背後雙飄帶+尾光點（Spine2）；三人配色 outfit/metal 欄位
+  （Rumi 黑紫×金、Mira 深藍×銀、Zoey 棕×金）
+- 想整個換主角模型：Mixamo 下載需 Adobe 登入（人工），tmp-convert 管線備妥，
+  拿到 FBX 丟 assets/{mira,zoey,新主角}.glb 即自動採用
+
 ## 已知待辦/可改進
 
 1. 開放地圖敵量/密度、蓄力/衝刺斬傷害數值需實玩回饋再平衡
