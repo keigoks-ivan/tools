@@ -3125,6 +3125,8 @@ function updateLock() {
 }
 
 // ---------- 戰鬥 ----------
+// 大絕開場慢動作（發動瞬間全場 0.25 倍速，鏡頭推近）
+let musouSlowT = 0;
 // 完美閃避 → 子彈時間（翻滾 i-frame 內吃到攻擊判定觸發）
 let witchT = 0;
 function triggerWitchTime() {
@@ -3502,7 +3504,8 @@ function startMusou() {
     S.roar();
   }
   showToastMini?.('魂門亂舞！');
-  hitStopT = 0.22; shakeT = 0.4; shakeAmp = 0.6;
+  musouSlowT = 1.1;   // 開場慢動作
+  hitStopT = 0.05; shakeT = 0.4; shakeAmp = 0.6;
 }
 function startDodge(mx, mz, ml) {
   const p = player;
@@ -3663,8 +3666,9 @@ function updateCamera(dt) {
   const wantYaw = lockTarget && lockTarget.st !== 'dead' ? Math.atan2(lockTarget.x - p.x, lockTarget.z - p.z) : p.yaw;
   camYaw += angDiff(camYaw, wantYaw) * Math.min(1, dt * (lockTarget ? 3 : ease));
   const fx = Math.sin(camYaw), fz = Math.cos(camYaw);
-  camPos.x = p.x - fx * 6.5;
-  camPos.z = p.z - fz * 6.5;
+  const camDist = musouSlowT > 0 ? 5.1 : 6.5;   // 大絕慢動作時鏡頭推近
+  camPos.x = p.x - fx * camDist;
+  camPos.z = p.z - fz * camDist;
   collideCircle(camPos, 0.7);   // 鏡頭不穿進建築
   const want = new THREE.Vector3(camPos.x, 3.4 + p.y * 0.5, camPos.z);
   camera.position.lerp(want, Math.min(1, dt * 6));
@@ -3996,6 +4000,7 @@ function loop() {
   const raw = Math.min(clock.getDelta(), 0.05);
   let dt = raw;
   if (hitStopT > 0) { hitStopT -= raw; dt = raw * 0.06; }
+  if (musouSlowT > 0) { musouSlowT -= raw; dt = Math.min(dt, raw * 0.25); }   // 大絕開場慢動作
 
   witchT = Math.max(0, witchT - raw);
   if (dlg.active && state === 'play') {
