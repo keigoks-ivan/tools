@@ -3240,6 +3240,16 @@ function updateLock() {
 // ---------- 戰鬥 ----------
 // 大絕開場慢動作（發動瞬間全場 0.25 倍速，鏡頭推近）
 let musouSlowT = 0;
+// 大絕舞台暗轉：世界壓暗＋主角聚光（取代黃光爆閃）
+let musouDim = 0;
+let LIGHT_BASE = null;
+const vignetteEl = document.getElementById('vignette');
+function captureLightBase() {
+  LIGHT_BASE = {
+    hemi: hemi.intensity, sun: sun.intensity, warm: warmFill.intensity, rim: rimLight.intensity,
+    fog: scene.fog.color.clone(), sky: skyMat ? skyMat.color.clone() : null,
+  };
+}
 // 完美閃避 → 子彈時間（翻滾 i-frame 內吃到攻擊判定觸發）
 let witchT = 0;
 function triggerWitchTime() {
@@ -3434,64 +3444,118 @@ function updatePlayer(dt) {
   } else if (p.st === 'musou') {
     p.musouT += dt;
     p.invuln = 0.5;
-    if (ml > 0) {
-      p.x += mx * 3.6 * dt;
-      p.z += mz * 3.6 * dt;
-      p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 5);
-    }
-    p.musouTick -= dt;
-    if (p.musouTick <= 0) {
-      p.musouTick = 0.2;
-      p.musouN = (p.musouN || 0) + 1;
+    const mkey = curChar.key;
+    const sweep = (r, dmg, kb, spk) => {   // 共用範圍傷害
       for (const e of enemies) {
         if (e.st === 'dead' || e.st === 'spawn') continue;
         const dx = e.x - p.x, dz = e.z - p.z;
         const d = Math.hypot(dx, dz);
-        if (d < 7) { const kd = d || 1; hitEnemy(e, 3, 9, dx / kd, dz / kd, 1.7); }
+        if (d < r) { const kd = d || 1; hitEnemy(e, dmg, kb, dx / kd, dz / kd, spk); }
       }
-      damageRifts(p.x, p.z, 7, 3);
-      // 特效減量：斬痕隔次生成、震波縮小，避免疊加白屏
-      if (p.musouN % 2 === 0) {
-        spawnSlash(p.x, p.z, Math.random() * 6.28, { ang: 6.3, outer: 6.5, dir: Math.random() < 0.5 ? 1 : -1, color: [0xd07aff, 0xff7ac8, 0xffd84f][Math.floor(Math.random() * 3)], dur: 0.26 });
+      damageRifts(p.x, p.z, r, dmg);
+    };
+    if (mkey === 'mira') {
+      // 破魔天墜：連續巨槌震地（慢節奏、大範圍、強震屏）
+      if (ml > 0) {
+        p.x += mx * 2.2 * dt; p.z += mz * 2.2 * dt;
+        p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 4);
       }
-      spawnShockwave(p.x, p.z, { maxR: 6, dur: 0.26, color: 0xd07aff });
-      if (p.musouN % 2 === 1) {
-        spawnSpark(new THREE.Vector3(p.x + (Math.random() * 2 - 1) * 2, 1 + Math.random() * 2, p.z + (Math.random() * 2 - 1) * 2), 1.0, 0xffd84f, { dur: 0.25, rise: 3 });
+      p.musouTick -= dt;
+      if (p.musouTick <= 0) {
+        p.musouTick = 0.85;
+        play(p.rig, 'heavy', { once: true, ts: 1.4, fade: 0.08 });
+        sweep(8.5, 6, 18, 2.0);
+        spawnShockwave(p.x, p.z, { maxR: 9, dur: 0.5, color: curChar.fx });
+        spawnShockwave(p.x, p.z, { maxR: 5.5, dur: 0.36, color: curChar.fxHi });
+        spawnPillar(p.x, p.z, curChar.fx, 0.6);
+        spawnSpark(new THREE.Vector3(p.x, 0.6, p.z), 1.2, curChar.fxHi, { dur: 0.3 });
+        S.boom();
+        hitStopT = 0.05; shakeT = 0.3; shakeAmp = 0.55;
       }
-      S.slash();
-      shakeT = 0.12; shakeAmp = 0.18;
-    }
-    // 每 0.55 秒向八方射出劍氣
-    p.musouBoltT = (p.musouBoltT || 0) - dt;
-    if (p.musouBoltT <= 0) {
-      p.musouBoltT = 0.55;
-      for (let i = 0; i < 8; i++) {
-        const a = (i / 8) * Math.PI * 2 + p.musouT;
-        spawnBolt({ dmg: 2, speed: 24, pierce: 3, size: 1.5 }, Math.sin(a), Math.cos(a));
+    } else if (mkey === 'zoey') {
+      // 疾風無影：瞬步連斬（閃現到敵人身邊、殘影連鎖）
+      p.musouTick -= dt;
+      if (p.musouTick <= 0) {
+        p.musouTick = 0.26;
+        const cands = enemies.filter(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - p.x, e.z - p.z) < 13);
+        spawnSpark(new THREE.Vector3(p.x, 1.2, p.z), 1.4, curChar.fx, { dur: 0.3 });   // 殘影光
+        spawnSlash(p.x, p.z, p.yaw, { ang: 2.6, outer: 3, dir: Math.random() < 0.5 ? 1 : -1, color: curChar.fx, dur: 0.2 });
+        if (cands.length) {
+          const tgt = cands[Math.floor(Math.random() * cands.length)];
+          const a = Math.random() * 6.28;
+          p.x = tgt.x + Math.cos(a) * 1.1;
+          p.z = tgt.z + Math.sin(a) * 1.1;
+          collideCircle(p, 0.55);
+          p.yaw = Math.atan2(tgt.x - p.x, tgt.z - p.z);
+        }
+        sweep(3.2, 4, 8, 1.6);
+        S.slash();
+        shakeT = 0.08; shakeAmp = 0.12;
       }
-      spawnPillar(p.x, p.z, 0xffd84f, 0.8);
-      if (AU.ctx) tone('sawtooth', 700, AU.ctx.currentTime, 0.12, 0.12, AU.sfx, 260);
+    } else {
+      // 魂門亂舞（Rumi）：迴旋劍舞＋八方新月
+      if (ml > 0) {
+        p.x += mx * 3.6 * dt; p.z += mz * 3.6 * dt;
+        p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 5);
+      }
+      p.musouTick -= dt;
+      if (p.musouTick <= 0) {
+        p.musouTick = 0.2;
+        p.musouN = (p.musouN || 0) + 1;
+        sweep(7, 3, 9, 1.7);
+        if (p.musouN % 2 === 0) {
+          spawnSlash(p.x, p.z, Math.random() * 6.28, { ang: 6.3, outer: 6.5, dir: Math.random() < 0.5 ? 1 : -1, color: [curChar.fx, curChar.fxHi, 0xff7ac8][Math.floor(Math.random() * 3)], dur: 0.26 });
+        }
+        spawnShockwave(p.x, p.z, { maxR: 6, dur: 0.26, color: curChar.fx });
+        if (p.musouN % 2 === 1) {
+          spawnSpark(new THREE.Vector3(p.x + (Math.random() * 2 - 1) * 2, 1 + Math.random() * 2, p.z + (Math.random() * 2 - 1) * 2), 1.0, curChar.fxHi, { dur: 0.25, rise: 3 });
+        }
+        S.slash();
+        shakeT = 0.12; shakeAmp = 0.18;
+      }
+      p.musouBoltT = (p.musouBoltT || 0) - dt;
+      if (p.musouBoltT <= 0) {
+        p.musouBoltT = 0.55;
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2 + p.musouT;
+          spawnBolt({ dmg: 2, pierce: 3, size: 1.5 }, Math.sin(a), Math.cos(a));
+        }
+        spawnPillar(p.x, p.z, curChar.fx, 0.5);
+        if (AU.ctx) tone('sawtooth', 700, AU.ctx.currentTime, 0.12, 0.12, AU.sfx, 260);
+      }
     }
     if (p.musouT >= 4.0) {
-      // 終結大爆發
-      for (const e of enemies) {
-        if (e.st === 'dead' || e.st === 'spawn') continue;
-        const dx = e.x - p.x, dz = e.z - p.z;
-        const d = Math.hypot(dx, dz);
-        if (d < 12) { const kd = d || 1; hitEnemy(e, 12, 30, dx / kd, dz / kd, 2.6); }
+      // 終結大爆發（三人各異）
+      if (mkey === 'mira') {
+        sweep(13, 14, 34, 3.0);
+        spawnShockwave(p.x, p.z, { maxR: 14, dur: 0.7, color: curChar.fx });
+        spawnShockwave(p.x, p.z, { maxR: 10, dur: 0.55, color: curChar.fxHi });
+        spawnPillar(p.x, p.z, curChar.fxHi, 1.0);
+        spawnSpark(new THREE.Vector3(p.x, 1, p.z), 2.2, curChar.fxHi, { dur: 0.45 });
+        hitStopT = 0.24; shakeT = 0.9; shakeAmp = 1.3;
+      } else if (mkey === 'zoey') {
+        sweep(10, 9, 22, 2.4);
+        for (let i = 0; i < 14; i++) {
+          const a = (i / 14) * Math.PI * 2;
+          spawnBolt({ dmg: 2, pierce: 4, size: 1.3 }, Math.sin(a), Math.cos(a));
+        }
+        spawnShockwave(p.x, p.z, { maxR: 11, dur: 0.55, color: curChar.fx });
+        spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 2, curChar.fxHi, { dur: 0.4 });
+        hitStopT = 0.16; shakeT = 0.5; shakeAmp = 0.7;
+      } else {
+        sweep(12, 12, 30, 2.6);
+        spawnShockwave(p.x, p.z, { maxR: 13, dur: 0.7, color: curChar.fx });
+        spawnShockwave(p.x, p.z, { maxR: 9, dur: 0.55, color: 0xff7ac8 });
+        spawnPillar(p.x, p.z, curChar.fxHi, 0.9);
+        spawnSpark(new THREE.Vector3(p.x, 2, p.z), 2.2, curChar.fxHi, { dur: 0.45 });
+        for (let i = 0; i < 12; i++) {
+          const a = (i / 12) * Math.PI * 2;
+          spawnBolt({ dmg: 3, pierce: 99, size: 1.8 }, Math.sin(a), Math.cos(a));
+        }
+        hitStopT = 0.2; shakeT = 0.7; shakeAmp = 1.0;
       }
-      damageRifts(p.x, p.z, 12, 12);
-      spawnShockwave(p.x, p.z, { maxR: 13, dur: 0.7, color: 0xffd84f });
-      spawnShockwave(p.x, p.z, { maxR: 9, dur: 0.55, color: 0xff7ac8 });
-      spawnPillar(p.x, p.z, 0xffe8b0, 1.6);
-      spawnSpark(new THREE.Vector3(p.x, 2, p.z), 5, 0xffe8b0, { dur: 0.5 });
-      for (let i = 0; i < 12; i++) {
-        const a = (i / 12) * Math.PI * 2;
-        spawnBolt({ dmg: 3, speed: 27, pierce: 99, size: 1.8 }, Math.sin(a), Math.cos(a));
-      }
-      screenFlash = 0.5;
+      screenFlash = 0.25;
       S.boom(); S.roar(); S.win();
-      hitStopT = 0.2; shakeT = 0.7; shakeAmp = 1.0;
       p.st = 'idle';
       play(p.rig, 'idle', { fade: 0.2 });
     }
@@ -3606,17 +3670,23 @@ function startMusou() {
   p.st = 'musou'; p.musouT = 0; p.musouTick = 0; p.musouBoltT = 0.3; p.musouN = 0;
   p.invuln = 4.4;
   musou = 0;
-  play(p.rig, 'heavyfin', { ts: 1.75 });
-  spawnPillar(p.x, p.z, 0xffd84f, 1.3);
-  spawnShockwave(p.x, p.z, { maxR: 8, dur: 0.55, color: 0xffd84f });
-  spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 3, 0xffd84f, { dur: 0.4 });
-  screenFlash = 0.35;
+  // 三人大絕各異：起手動畫與招式名
+  const intro = {
+    rumi: { clip: 'heavyfin', ts: 1.75, name: '魂門亂舞！' },
+    mira: { clip: 'heavy',    ts: 1.1,  name: '破魔天墜！' },
+    zoey: { clip: 'slash3',   ts: 2.4,  name: '疾風無影！' },
+  }[curChar.key];
+  play(p.rig, intro.clip, { ts: intro.ts });
+  spawnPillar(p.x, p.z, curChar.fx, 0.6);
+  spawnShockwave(p.x, p.z, { maxR: 8, dur: 0.55, color: curChar.fx });
+  spawnSpark(new THREE.Vector3(p.x, 1.5, p.z), 1.6, curChar.fxHi, { dur: 0.4 });
+  screenFlash = 0.15;   // 舞台暗轉本身就是戲劇效果，閃白只留一點
   if (AU.ctx) {
     const t = AU.ctx.currentTime;
     tone('sawtooth', 160, t, 0.7, 0.32, AU.sfx, 1100);
     S.roar();
   }
-  showToastMini?.('魂門亂舞！');
+  showToastMini?.(intro.name);
   musouSlowT = 1.1;   // 開場慢動作
   hitStopT = 0.05; shakeT = 0.4; shakeAmp = 0.6;
 }
@@ -3754,6 +3824,21 @@ function updateAmbient(dt) {
     capturePoint.scale.set(k, 1, k);
     capturePoint.rotation.y += dt * 0.8;
     capturePoint.children[0].material.opacity = 0.6 + Math.sin(worldT * 5) * 0.25;
+  }
+  // 大絕舞台暗轉：世界燈光壓暗、主角聚光燈亮起
+  const dimT = player.st === 'musou' ? 1 : 0;
+  musouDim += (dimT - musouDim) * Math.min(1, dt * 6);
+  if (LIGHT_BASE) {
+    const k = musouDim;
+    hemi.intensity = LIGHT_BASE.hemi * (1 - 0.75 * k);
+    sun.intensity = LIGHT_BASE.sun * (1 - 0.75 * k);
+    warmFill.intensity = LIGHT_BASE.warm * (1 - 0.6 * k);
+    rimLight.intensity = LIGHT_BASE.rim * (1 - 0.5 * k);
+    scene.fog.color.copy(LIGHT_BASE.fog).multiplyScalar(1 - 0.7 * k);
+    if (LIGHT_BASE.sky && skyMat) skyMat.color.copy(LIGHT_BASE.sky).multiplyScalar(1 - 0.65 * k);
+    heroLight.intensity = 1.4 + 2.8 * k;
+    heroLight.distance = 9 + 6 * k;
+    vignetteEl.style.opacity = (k * 0.6).toFixed(2);
   }
   // 氣滿光環
   heroAura.visible = state === 'play' && musou >= 100 && player.st !== 'dead';
@@ -4019,6 +4104,7 @@ function loadStage(i) {
   OBSTACLES = OBSTACLES_BY_STAGE[Math.min(i, OBSTACLES_BY_STAGE.length - 1)];
   blockersReg = blockersRegBy[Math.min(i, blockersRegBy.length - 1)];
   applyStageTint(i);
+  captureLightBase();   // 記錄本關燈光基準（大絕暗轉用）
   for (const e of enemies) { scene.remove(e.root); scene.remove(e.shadow); e.rig.mixer.stopAllAction(); }
   enemies.length = 0;
   for (const dr of drops) scene.remove(dr);
@@ -4079,6 +4165,7 @@ window.__E = enemies;
 window.__P = player;
 window.__spawn = spawnEnemy;
 window.__au = () => ({ cur: AU.bgm.cur, want: AU.bgm.want, loaded: Object.keys(AU.bgm.bufs), ctxState: AU.ctx?.state });
+window.__fill = () => { musou = 100; };
 window.__warp = k => {   // 測試用：完成前 k 個目標
   for (let i = 0; i < Math.min(k, level.objs.length); i++) {
     if (level.objs[i].state !== 'done') completeObjective(level.objs[i]);

@@ -134,6 +134,17 @@
   pixelRatio 一階（2→1.75→…→1.15），順的機器維持最高畫質
 - 注意：decodeAudioData 會 detach ArrayBuffer，解碼一律用 raw.slice(0) 複本
 
+## 2026-07-19 第九輪更新：大絕重製（已上線）
+
+- **呈現改「演唱會暗轉」**取代黃光爆閃：musouDim（updateAmbient）把 hemi/sun/warmFill/rim/霧/天空
+  全部壓暗 50~75%＋#vignette 暗角 0.6＋heroLight 聚光 1.4→4.2；LIGHT_BASE 於 loadStage
+  captureLightBase() 記錄基準；特效色全走 curChar.fx/fxHi（不再黃金）
+- **三人大絕各異**：Rumi 魂門亂舞（迴旋劍舞+八方新月）／Mira 破魔天墜（0.85s 巨槌震地循環，
+  終結 r13 大地震）／Zoey 疾風無影（0.26s 瞬步閃現連斬+殘影，終結 14 向散射新月）；
+  startMusou 依角色換起手動畫與招式名 toast
+- 爆亮修正：推近鏡頭（5.1）下 spawnSpark >2 倍會糊滿全屏——大絕相關 spark 全部 ≤2.2、
+  光柱 big 全部 ≤1.0、閃白 0.15/0.25
+
 ## 已知待辦/可改進
 
 1. 開放地圖敵量/密度、蓄力/衝刺斬傷害數值需實玩回饋再平衡
