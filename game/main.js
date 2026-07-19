@@ -73,7 +73,7 @@ let curChar = CHARS.rumi;
 // ---------- 基本場景 ----------
 const app = document.getElementById('app');
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, IS_MOBILE ? 1.15 : 1.5));
+renderer.setPixelRatio(Math.min(devicePixelRatio, IS_MOBILE ? 1.3 : 2));   // 全解析度渲染（去顆粒）
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -86,9 +86,13 @@ scene.fog = new THREE.Fog(0x140f28, 26, 100);
 
 const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 400);
 
-const composer = new EffectComposer(renderer);
+// 後處理走離屏渲染，renderer 的 antialias 無效 → 用 MSAA 渲染目標抗鋸齒
+const MAX_ANISO = renderer.capabilities.getMaxAnisotropy();
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth, innerHeight, {
+  samples: IS_MOBILE ? 2 : 4, type: THREE.HalfFloatType,
+}));
 composer.addPass(new RenderPass(scene, camera));
-composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.72, 0.55, 0.55));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.62, 0.55, 0.6));
 composer.addPass(new OutputPass());
 
 addEventListener('resize', () => {
@@ -134,6 +138,7 @@ let skyTex1 = null;
   scene.add(sky);
   new THREE.TextureLoader().load('assets/gen/sky.jpg', tex => {
     tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = MAX_ANISO;
     skyTex1 = tex;
     if (stageIdx === 0) {
       sky.material.map = tex;
@@ -145,10 +150,11 @@ let skyTex1 = null;
 
 // ---------- 共用貼圖工具 ----------
 function makeWindowTex(hue) {
-  // 寫實立面：混凝土基底＋樓層帶＋窗框＋污漬＋垂直明暗
+  // 寫實立面：混凝土基底＋樓層帶＋窗框＋污漬＋垂直明暗（2x 解析度繪製）
   const c = document.createElement('canvas');
-  c.width = 128; c.height = 256;
+  c.width = 256; c.height = 512;
   const g = c.getContext('2d');
+  g.scale(2, 2);
   const bg = g.createLinearGradient(0, 0, 0, 256);
   bg.addColorStop(0, '#26263a');
   bg.addColorStop(0.6, '#1b1b2a');
@@ -188,6 +194,7 @@ function makeWindowTex(hue) {
   }
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = MAX_ANISO;
   return t;
 }
 
@@ -197,8 +204,9 @@ const SIGN_NEON = ['#ff5fd0', '#5fe0ff', '#b47aff', '#ff8fe0', '#7a9fff', '#ff4f
 const SIGN_STYLES = SIGN_NEON.map(c => ['#14101f', c]);
 function makeSignTex(word, w = 256, h = 72) {
   const c = document.createElement('canvas');
-  c.width = w; c.height = h;
+  c.width = w * 2; c.height = h * 2;
   const g = c.getContext('2d');
+  g.scale(2, 2);
   const [bg, fg] = SIGN_STYLES[Math.floor(Math.random() * SIGN_STYLES.length)];
   g.fillStyle = bg; g.fillRect(0, 0, w, h);
   g.strokeStyle = fg; g.globalAlpha = 0.5; g.lineWidth = 3;
@@ -217,12 +225,14 @@ function makeSignTex(word, w = 256, h = 72) {
   g.globalAlpha = 1;
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = MAX_ANISO;
   return t;
 }
 function makeVSignTex(word) {
   const c = document.createElement('canvas');
-  c.width = 64; c.height = 256;
+  c.width = 128; c.height = 512;
   const g = c.getContext('2d');
+  g.scale(2, 2);
   const [bg, fg] = SIGN_STYLES[Math.floor(Math.random() * SIGN_STYLES.length)];
   g.fillStyle = bg; g.fillRect(0, 0, 64, 256);
   g.strokeStyle = fg; g.globalAlpha = 0.5; g.lineWidth = 3;
@@ -242,13 +252,15 @@ function makeVSignTex(word) {
   g.globalAlpha = 1;
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = MAX_ANISO;
   return t;
 }
 // 一樓店面（發光玻璃＋門＋雨棚）
 function makeStorefrontTex() {
   const c = document.createElement('canvas');
-  c.width = 256; c.height = 128;
+  c.width = 512; c.height = 256;
   const g = c.getContext('2d');
+  g.scale(2, 2);
   g.fillStyle = '#191926'; g.fillRect(0, 0, 256, 128);
   const aw = ['#b02a8a', '#2a4fb0', '#6a2ab0', '#3a3a8a'][Math.floor(Math.random() * 4)];
   g.fillStyle = aw; g.fillRect(0, 0, 256, 18);
@@ -267,6 +279,7 @@ function makeStorefrontTex() {
   g.fillStyle = '#ffd9a0'; g.fillRect(206, 70, 10, 4);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = MAX_ANISO;
   return t;
 }
 
@@ -384,8 +397,9 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
 (function buildOpenCity() {
   // 柏油地面
   const ac = document.createElement('canvas');
-  ac.width = ac.height = 256;
+  ac.width = ac.height = 512;
   const ag = ac.getContext('2d');
+  ag.scale(2, 2);
   ag.fillStyle = '#191922'; ag.fillRect(0, 0, 256, 256);
   for (let i = 0; i < 900; i++) {
     ag.fillStyle = `rgba(${120 + Math.random() * 60},${120 + Math.random() * 60},${130 + Math.random() * 60},${0.05 + Math.random() * 0.07})`;
@@ -395,6 +409,7 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   asphalt.wrapS = asphalt.wrapT = THREE.RepeatWrapping;
   asphalt.repeat.set(18, 18);
   asphalt.colorSpace = THREE.SRGBColorSpace;
+  asphalt.anisotropy = MAX_ANISO;
   const roadMat = new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.32, metalness: 0.62 });
   groundMats.push(roadMat);
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), roadMat);
@@ -690,6 +705,7 @@ const w2anim = { flames: [], rocks: [] };
   groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
   groundTex.repeat.set(9, 9);
   groundTex.colorSpace = THREE.SRGBColorSpace;
+  groundTex.anisotropy = MAX_ANISO;
   const g2 = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), new THREE.MeshLambertMaterial({ map: groundTex }));
   g2.rotation.x = -Math.PI / 2;
   g2.position.y = 0.01;
@@ -873,6 +889,7 @@ const w3anim = { clouds: [], lanterns: [], shafts: [] };
   pathTex.wrapS = pathTex.wrapT = THREE.RepeatWrapping;
   pathTex.repeat.set(15, 15);
   pathTex.colorSpace = THREE.SRGBColorSpace;
+  pathTex.anisotropy = MAX_ANISO;
   const plat = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), new THREE.MeshLambertMaterial({ map: pathTex }));
   plat.rotation.x = -Math.PI / 2;
   plat.position.y = 0.01;
@@ -1029,6 +1046,7 @@ const w4anim = { shards: [], rings: [] };
   voidTex.wrapS = voidTex.wrapT = THREE.RepeatWrapping;
   voidTex.repeat.set(6, 6);
   voidTex.colorSpace = THREE.SRGBColorSpace;
+  voidTex.anisotropy = MAX_ANISO;
   const vg = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), new THREE.MeshStandardMaterial({ map: voidTex, roughness: 0.25, metalness: 0.7 }));
   vg.rotation.x = -Math.PI / 2;
   vg.position.y = 0.01;
@@ -1713,15 +1731,23 @@ const heroAura = (() => {
 
 // ---------- 音訊（BGM＝授權音樂素材、SFX＝多層合成；合成 BGM 作為載入失敗 fallback） ----------
 const AU = { ctx: null, master: null, music: null, sfx: null, noise: null, muted: false, timer: null, nextBar: 0, bar: 0,
-  bgmGain: null, bgm: { bufs: {}, cur: null, want: null, src: null, srcGain: null } };
+  bgmGain: null, bgm: { bufs: {}, raw: {}, cur: null, want: null, src: null, srcGain: null } };
 const BGM_FILES = ['assets/audio/bgm_stage1.mp3', 'assets/audio/bgm_stage2.ogg', 'assets/audio/bgm_stage3.mp3', 'assets/audio/bgm_stage4.m4a'];
 const BGM_TITLE = 'assets/audio/bgm_title.ogg';
 function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
 function playBgm(key) {
   AU.bgm.want = key;
-  if (!AU.ctx) return;
+  if (!AU.ctx || AU.bgm.cur === key) return;
   const buf = AU.bgm.bufs[key];
-  if (!buf || AU.bgm.cur === key) return;
+  if (!buf) {
+    // 惰性解碼：用到才解（省下整包 PCM 常駐記憶體）；raw 複本保留供之後重解
+    const raw = AU.bgm.raw[key];
+    if (!raw) return;   // 檔案未抓到，抓到後 loadBgm 會回呼
+    AU.ctx.decodeAudioData(raw.slice(0))
+      .then(b => { AU.bgm.bufs[key] = b; if (AU.bgm.want === key) playBgm(key); })
+      .catch(() => {});
+    return;
+  }
   const t = AU.ctx.currentTime;
   if (AU.bgm.src) {
     const old = AU.bgm.src, og = AU.bgm.srcGain;
@@ -1738,6 +1764,10 @@ function playBgm(key) {
   src.connect(g).connect(AU.bgmGain);
   src.start(t);
   AU.bgm.src = src; AU.bgm.srcGain = g; AU.bgm.cur = key;
+  // 釋放其他曲目的解碼 PCM（title 檔小保留），大幅降低常駐記憶體
+  for (const k of Object.keys(AU.bgm.bufs)) {
+    if (k !== String(key) && k !== 'title') delete AU.bgm.bufs[k];
+  }
 }
 function initAudio() {
   if (AU.ctx) { AU.ctx.resume(); return; }
@@ -1773,11 +1803,10 @@ function initAudio() {
   const verbGain = ctx.createGain(); verbGain.gain.value = 0.2;
   verb.connect(verbGain); verbGain.connect(AU.master);
   AU.sfx.connect(verb);
-  // BGM 音樂素材：非同步抓檔解碼，好了就接上（失敗則維持合成 fallback）
+  // BGM 音樂素材：只抓壓縮檔（輕），解碼延後到 playBgm 用到才做（失敗則維持合成 fallback）
   const loadBgm = (key, url) => fetch(url)
     .then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); })
-    .then(ab => ctx.decodeAudioData(ab))
-    .then(buf => { AU.bgm.bufs[key] = buf; if (AU.bgm.want === key) playBgm(key); })
+    .then(ab => { AU.bgm.raw[key] = ab; if (AU.bgm.want === key) playBgm(key); })
     .catch(() => {});
   loadBgm('title', BGM_TITLE);
   BGM_FILES.forEach((u, i) => loadBgm(i, u));
@@ -4077,6 +4106,23 @@ window.__key = (code, downMs = 60) => {
   setTimeout(() => dispatchEvent(new KeyboardEvent('keyup', { code, bubbles: true })), downMs);
 };
 
+// ---------- 自適應畫質：偵測掉幀自動降渲染解析度（速度優先，機器順就保持最高細緻） ----------
+let perfAcc = 0, perfN = 0;
+let curPR = Math.min(devicePixelRatio, IS_MOBILE ? 1.3 : 2);
+function perfTick(raw) {
+  perfAcc += raw; perfN++;
+  if (perfN >= 90) {
+    const avg = perfAcc / perfN;
+    perfAcc = 0; perfN = 0;
+    if (avg > 0.024 && curPR > 1.2) {   // 平均低於 ~42fps 就降一階
+      curPR = Math.max(1.15, curPR - 0.25);
+      renderer.setPixelRatio(curPR);
+      composer.setPixelRatio(curPR);
+      composer.setSize(innerWidth, innerHeight);
+    }
+  }
+}
+
 // ---------- 主迴圈 ----------
 const clock = new THREE.Clock();
 function loop() {
@@ -4098,6 +4144,7 @@ function loop() {
     player.rig.mixer.update(raw);
     player.root.rotation.y += raw * 0.4;
   }
+  perfTick(raw);
   updateAmbient(raw);
   updateLock();
   updateCamera(raw);

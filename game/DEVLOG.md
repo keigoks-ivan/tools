@@ -124,6 +124,16 @@
 - 想整個換主角模型：Mixamo 下載需 Adobe 登入（人工），tmp-convert 管線備妥，
   拿到 FBX 丟 assets/{mira,zoey,新主角}.glb 即自動採用
 
+## 2026-07-19 第八輪更新：畫質細緻化＋效能治理（已上線）
+
+- **去顆粒**：EffectComposer 換 MSAA 渲染目標（桌機 4x/手機 2x，後處理下 renderer antialias 本來無效）；
+  pixelRatio 桌機 1.5→2 全解析度；Canvas 貼圖全部 2x 重繪（窗戶/招牌/店面/柏油）＋全場景貼圖開
+  anisotropy（MAX_ANISO）；bloom 0.72→0.62、threshold 0.6
+- **效能治理**（用戶反映 Chrome 變慢）：BGM 改惰性解碼——只抓壓縮檔（34MB），播放時才 decode、
+  換關釋放上一首 PCM（原本全解碼常駐 ~250MB RAM）；自適應畫質 perfTick——平均幀 >24ms 自動降
+  pixelRatio 一階（2→1.75→…→1.15），順的機器維持最高畫質
+- 注意：decodeAudioData 會 detach ArrayBuffer，解碼一律用 raw.slice(0) 複本
+
 ## 已知待辦/可改進
 
 1. 開放地圖敵量/密度、蓄力/衝刺斬傷害數值需實玩回饋再平衡
