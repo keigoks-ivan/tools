@@ -100,6 +100,20 @@
 - 武將模型隨關卡換（OFFICER_KINDS），血量 14+關數×4；千人斬中後段混入 brute/shade
 - debug 新增 window.__spawn(kind, x, z)
 
+## 2026-07-19 第六輪更新：音訊全面重製（已上線）
+
+- **BGM 改真實音樂素材**（assets/audio/，授權見 LICENSE-audio.txt，標題畫面有 CC-BY 掛名）：
+  標題＝Retro Synthwave（Tomasz Kucza CC-BY4）／一關＝Heroic Demise 史詩管弦（Matthew Pablo CC-BY3）／
+  二關＝太鼓和風戰鼓（jobro CC-BY3）／三關＝史詩管弦搖滾（Cleyton Kauffman CC0）／
+  四關＝交響金屬 loop（nene CC0，zip 檔名標反、opening 才是 loop，已轉 m4a）
+- 播放機制：initAudio 非同步 fetch+decode 全部曲目，playBgm(key) 交叉淡入淡出（0.8s）換歌，
+  loadStage 自動切關卡曲；合成 BGM 引擎保留為載入失敗 fallback（scheduleMusic 開頭 gate）
+- **母帶鏈**：master → DynamicsCompressor → destination；生成脈衝殘響 Convolver，SFX 送 0.2 wet
+- **SFX 全部重做成多層合成**：slash＝揮風+刃鳴+金屬滑音、hit＝重擊+click+拳肉(+重擊餘震)、
+  kill＝滑落+悶響+碎裂、hurt＝失諧雙鋸齒、roar＝雙層咆哮+次低頻、boom＝次低頻下墜+爆點+碎屑、
+  勝利/據點/拾取改 FM 鐘（bell()）
+- debug：window.__au() 看 BGM 狀態
+
 ## 已知待辦/可改進
 
 1. 開放地圖敵量/密度、蓄力/衝刺斬傷害數值需實玩回饋再平衡

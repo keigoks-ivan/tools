@@ -1628,9 +1628,34 @@ const heroAura = (() => {
   return grp;
 })();
 
-// ---------- 音訊（Web Audio 全合成：BGM＋SFX，無外部音檔） ----------
-const AU = { ctx: null, master: null, music: null, sfx: null, noise: null, muted: false, timer: null, nextBar: 0, bar: 0 };
+// ---------- 音訊（BGM＝授權音樂素材、SFX＝多層合成；合成 BGM 作為載入失敗 fallback） ----------
+const AU = { ctx: null, master: null, music: null, sfx: null, noise: null, muted: false, timer: null, nextBar: 0, bar: 0,
+  bgmGain: null, bgm: { bufs: {}, cur: null, want: null, src: null, srcGain: null } };
+const BGM_FILES = ['assets/audio/bgm_stage1.mp3', 'assets/audio/bgm_stage2.ogg', 'assets/audio/bgm_stage3.mp3', 'assets/audio/bgm_stage4.m4a'];
+const BGM_TITLE = 'assets/audio/bgm_title.ogg';
 function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+function playBgm(key) {
+  AU.bgm.want = key;
+  if (!AU.ctx) return;
+  const buf = AU.bgm.bufs[key];
+  if (!buf || AU.bgm.cur === key) return;
+  const t = AU.ctx.currentTime;
+  if (AU.bgm.src) {
+    const old = AU.bgm.src, og = AU.bgm.srcGain;
+    og.gain.setValueAtTime(og.gain.value, t);
+    og.gain.linearRampToValueAtTime(0.0001, t + 0.8);
+    old.stop(t + 0.85);
+  }
+  const src = AU.ctx.createBufferSource();
+  src.buffer = buf;
+  src.loop = true;
+  const g = AU.ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(1, t + 0.7);
+  src.connect(g).connect(AU.bgmGain);
+  src.start(t);
+  AU.bgm.src = src; AU.bgm.srcGain = g; AU.bgm.cur = key;
+}
 function initAudio() {
   if (AU.ctx) { AU.ctx.resume(); return; }
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1645,9 +1670,34 @@ function initAudio() {
     un.volume = 0.01;
     un.play().catch(() => {});
   } catch (e) { /* 不支援就算了 */ }
-  AU.master = ctx.createGain(); AU.master.gain.value = 0.8; AU.master.connect(ctx.destination);
+  // 母帶鏈：master → 壓縮器 → 輸出（把各層黏成一體、避免爆音）
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -16; comp.knee.value = 22; comp.ratio.value = 4;
+  comp.attack.value = 0.004; comp.release.value = 0.16;
+  comp.connect(ctx.destination);
+  AU.master = ctx.createGain(); AU.master.gain.value = 0.8; AU.master.connect(comp);
   AU.music = ctx.createGain(); AU.music.gain.value = 0.42; AU.music.connect(AU.master);
+  AU.bgmGain = ctx.createGain(); AU.bgmGain.gain.value = 0.55; AU.bgmGain.connect(AU.master);
   AU.sfx = ctx.createGain(); AU.sfx.gain.value = 0.9; AU.sfx.connect(AU.master);
+  // 殘響（生成脈衝響應，SFX 送一路，空間感）
+  const ir = ctx.createBuffer(2, Math.floor(ctx.sampleRate * 1.5), ctx.sampleRate);
+  for (let cch = 0; cch < 2; cch++) {
+    const chd = ir.getChannelData(cch);
+    for (let i = 0; i < chd.length; i++) chd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / chd.length, 2.8);
+  }
+  const verb = ctx.createConvolver();
+  verb.buffer = ir;
+  const verbGain = ctx.createGain(); verbGain.gain.value = 0.2;
+  verb.connect(verbGain); verbGain.connect(AU.master);
+  AU.sfx.connect(verb);
+  // BGM 音樂素材：非同步抓檔解碼，好了就接上（失敗則維持合成 fallback）
+  const loadBgm = (key, url) => fetch(url)
+    .then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); })
+    .then(ab => ctx.decodeAudioData(ab))
+    .then(buf => { AU.bgm.bufs[key] = buf; if (AU.bgm.want === key) playBgm(key); })
+    .catch(() => {});
+  loadBgm('title', BGM_TITLE);
+  BGM_FILES.forEach((u, i) => loadBgm(i, u));
   const nb = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
   const nd = nb.getChannelData(0);
   for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
@@ -1733,6 +1783,8 @@ function noiseHit(t, dur, gain, filterType, freq, dest, q = 1) {
 function scheduleMusic() {
   const ctx = AU.ctx;
   if (!ctx || ctx.state !== 'running') return;
+  // 音樂素材檔在放（或標題畫面）就不跑合成 BGM——合成只作為檔案載入失敗的 fallback
+  if (state === 'title' || AU.bgm.cur === AU.bgm.want) { AU.nextBar = ctx.currentTime + 0.1; return; }
   const cfg = MUSIC[Math.min(stageIdx, MUSIC.length - 1)];
   const spb = 60 / cfg.bpm, barLen = spb * 4;
   while (AU.nextBar < ctx.currentTime + 0.8) {
@@ -1787,23 +1839,89 @@ function scheduleMusic() {
     AU.bar++;
   }
 }
+// FM 鐘音（基音＋非整數泛音，比單音 triangle 立體）
+function bell(n, t, dur, gain, dest) {
+  tone('sine', midi(n), t, dur, gain, dest);
+  tone('sine', midi(n) * 2.01, t, dur * 0.6, gain * 0.35, dest);
+  tone('sine', midi(n) * 3.03, t, dur * 0.35, gain * 0.16, dest);
+}
 const S = {
-  slash() { if (AU.ctx) { const t = AU.ctx.currentTime; noiseHit(t, 0.12, 0.22, 'bandpass', 2600, AU.sfx, 2); tone('sawtooth', 900, t, 0.1, 0.05, AU.sfx, 240); } },
+  slash() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    noiseHit(t, 0.15, 0.18, 'bandpass', 3400, AU.sfx, 1.3);      // 破空揮風
+    noiseHit(t + 0.015, 0.09, 0.1, 'highpass', 6500, AU.sfx);    // 高頻刃鳴
+    tone('triangle', 1700, t, 0.09, 0.055, AU.sfx, 480);         // 金屬滑音
+  },
   hit(n = 1, heavy = false) {
     if (!AU.ctx) return;
     const t = AU.ctx.currentTime;
-    tone('sine', heavy ? 150 : 190, t, 0.11, Math.min(0.5, 0.3 + n * 0.05), AU.sfx, 50);
-    noiseHit(t, 0.07, 0.18, 'lowpass', 900, AU.sfx);
+    tone('sine', heavy ? 165 : 205, t, 0.12, Math.min(0.5, 0.28 + n * 0.05), AU.sfx, heavy ? 40 : 56);   // 主體重擊
+    tone('square', 2300, t, 0.015, 0.09, AU.sfx);                // 打點 click
+    noiseHit(t, 0.08, 0.18, 'lowpass', 760, AU.sfx);             // 拳肉身體
+    if (heavy) noiseHit(t + 0.01, 0.22, 0.12, 'lowpass', 280, AU.sfx);   // 重擊餘震
   },
-  kill() { if (AU.ctx) { const t = AU.ctx.currentTime; tone('square', 660, t, 0.16, 0.14, AU.sfx, 110); noiseHit(t, 0.14, 0.14, 'bandpass', 700, AU.sfx); } },
-  hurt() { if (AU.ctx) { const t = AU.ctx.currentTime; tone('sawtooth', 130, t, 0.2, 0.3, AU.sfx, 60); noiseHit(t, 0.1, 0.16, 'lowpass', 500, AU.sfx); } },
-  jump() { if (AU.ctx) tone('sine', 320, AU.ctx.currentTime, 0.16, 0.16, AU.sfx, 620); },
-  roll() { if (AU.ctx) noiseHit(AU.ctx.currentTime, 0.18, 0.14, 'lowpass', 1300, AU.sfx); },
-  pickup() { if (AU.ctx) { const t = AU.ctx.currentTime; tone('triangle', midi(88), t, 0.1, 0.16, AU.sfx); tone('triangle', midi(93), t + 0.09, 0.16, 0.16, AU.sfx); } },
-  zone() { if (AU.ctx) { const t = AU.ctx.currentTime; [76, 81, 85, 88].forEach((n, i) => tone('triangle', midi(n), t + i * 0.1, 0.22, 0.16, AU.sfx)); } },
-  roar() { if (AU.ctx) { const t = AU.ctx.currentTime; tone('sawtooth', 75, t, 0.7, 0.4, AU.sfx, 42); noiseHit(t, 0.55, 0.2, 'lowpass', 300, AU.sfx); } },
-  boom() { if (AU.ctx) { const t = AU.ctx.currentTime; tone('sine', 120, t, 0.35, 0.5, AU.sfx, 34); noiseHit(t, 0.3, 0.3, 'lowpass', 600, AU.sfx); } },
-  win() { if (AU.ctx) { const t = AU.ctx.currentTime; [69, 73, 76, 81, 88].forEach((n, i) => tone('square', midi(n), t + i * 0.13, 0.3, 0.13, AU.sfx)); } },
+  kill() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    tone('square', 720, t, 0.14, 0.12, AU.sfx, 95);              // 魂魄消散滑落
+    tone('sine', 130, t, 0.14, 0.24, AU.sfx, 46);                // 倒地悶響
+    noiseHit(t, 0.16, 0.14, 'bandpass', 900, AU.sfx);
+    noiseHit(t + 0.03, 0.1, 0.07, 'highpass', 5200, AU.sfx);     // 碎裂粒子
+  },
+  hurt() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    tone('sawtooth', 135, t, 0.22, 0.26, AU.sfx, 52);
+    tone('sawtooth', 137, t, 0.2, 0.18, AU.sfx, 55);             // 微失諧疊層＝粗糙痛感
+    noiseHit(t, 0.12, 0.16, 'lowpass', 480, AU.sfx);
+  },
+  jump() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    tone('sine', 300, t, 0.15, 0.14, AU.sfx, 640);
+    noiseHit(t, 0.1, 0.05, 'highpass', 3200, AU.sfx);            // 衣料破風
+  },
+  roll() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    noiseHit(t, 0.2, 0.13, 'lowpass', 1500, AU.sfx);
+    noiseHit(t + 0.06, 0.12, 0.08, 'lowpass', 600, AU.sfx);      // 落地擦音
+  },
+  pickup() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    bell(88, t, 0.14, 0.14, AU.sfx);
+    bell(93, t + 0.08, 0.2, 0.14, AU.sfx);
+  },
+  zone() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    [76, 81, 85, 88].forEach((n, i) => bell(n, t + i * 0.09, 0.24, 0.13, AU.sfx));
+    noiseHit(t, 0.3, 0.05, 'highpass', 7000, AU.sfx);            // 亮片
+  },
+  roar() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    tone('sawtooth', 72, t, 0.8, 0.3, AU.sfx, 40);
+    tone('sawtooth', 75, t, 0.75, 0.24, AU.sfx, 43);             // 失諧雙層咆哮
+    tone('sine', 45, t, 0.7, 0.3, AU.sfx, 30);                   // 胸腔次低頻
+    noiseHit(t, 0.6, 0.16, 'lowpass', 320, AU.sfx);
+  },
+  boom() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    tone('sine', 110, t, 0.5, 0.45, AU.sfx, 26);                 // 次低頻下墜
+    tone('square', 2600, t, 0.012, 0.08, AU.sfx);                // 爆點 click
+    noiseHit(t, 0.4, 0.26, 'lowpass', 550, AU.sfx);
+    noiseHit(t + 0.08, 0.3, 0.08, 'bandpass', 1600, AU.sfx);     // 碎屑尾
+  },
+  win() {
+    if (!AU.ctx) return;
+    const t = AU.ctx.currentTime;
+    [69, 73, 76, 81, 88].forEach((n, i) => bell(n, t + i * 0.12, 0.32, 0.12, AU.sfx));
+    tone('sawtooth', midi(45), t, 1.2, 0.06, AU.sfx);            // 低音鋪底
+  },
 };
 document.getElementById('mute').addEventListener('click', () => {
   AU.muted = !AU.muted;
@@ -1844,6 +1962,8 @@ addEventListener('keydown', e => {
     const sel = document.getElementById('charsel');
     if (sel.classList.contains('hidden')) {
       if (e.code === 'Enter' || e.code === 'KeyJ') {
+        initAudio();
+        playBgm('title');
         hud.title.classList.add('hidden');
         sel.classList.remove('hidden');
       }
@@ -1925,6 +2045,8 @@ const hud = {
 };
 el('startBtn').addEventListener('click', () => {
   if (!ready) return;
+  initAudio();
+  playBgm('title');   // 選角畫面即有音樂
   hud.title.classList.add('hidden');
   document.getElementById('charsel').classList.remove('hidden');
 });
@@ -3800,6 +3922,7 @@ function loadStage(i) {
   } else capturePoint.visible = false;
   musou = 0;
   lockTarget = null;
+  playBgm(Math.min(i, BGM_FILES.length - 1));
   if (AU.ctx) { AU.nextBar = AU.ctx.currentTime + 0.15; AU.bar = 0; }
   hud.bosswrap.style.display = 'none';
   const p = player;
@@ -3838,6 +3961,7 @@ window.__switch = switchWeapon;
 window.__E = enemies;
 window.__P = player;
 window.__spawn = spawnEnemy;
+window.__au = () => ({ cur: AU.bgm.cur, want: AU.bgm.want, loaded: Object.keys(AU.bgm.bufs), ctxState: AU.ctx?.state });
 window.__warp = k => {   // 測試用：完成前 k 個目標
   for (let i = 0; i < Math.min(k, level.objs.length); i++) {
     if (level.objs[i].state !== 'done') completeObjective(level.objs[i]);
