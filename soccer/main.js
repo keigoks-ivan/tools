@@ -1,6 +1,8 @@
 // 世界盃 2026：阿根廷 vs 西班牙 — FIFA 式街機足球（three.js 純前端）
 // TEAMS 為資料驅動：之後擴充選隊只要加名單資料
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 const IS_MOBILE = matchMedia('(pointer: coarse)').matches;
 if (IS_MOBILE) document.body.classList.add('is-touch');
@@ -157,36 +159,37 @@ const XI_ANCHOR = [
 const TEAMS = {
   ARG: {
     short: 'ARG', name: '阿根廷', jerseyStyle: 'stripes', c1: 0x9fd4f7, c2: 0xffffff,
-    shorts: 0x14203a, gk: 0xd9c43a, dir: 1,
+    shorts: 0x14203a, socks: 0xf2f2f2, gk: 0xd9c43a, dir: 1,
+    // sk 膚色 0白皙~3深棕 / hr 髮型 short|curly|long|bald / hc 髮色 / bd 鬍子
     xi: [
-      { num: 23, name: 'E. Martínez', pace: 0.55, skill: 0.7, shot: 0.4 },
-      { num: 26, name: 'Molina', pace: 0.8, skill: 0.72, shot: 0.55 },
-      { num: 13, name: 'Romero', pace: 0.74, skill: 0.7, shot: 0.5 },
-      { num: 19, name: 'Otamendi', pace: 0.62, skill: 0.68, shot: 0.5 },
-      { num: 3, name: 'Tagliafico', pace: 0.76, skill: 0.72, shot: 0.52 },
-      { num: 7, name: 'De Paul', pace: 0.78, skill: 0.84, shot: 0.7 },
-      { num: 24, name: 'E. Fernández', pace: 0.75, skill: 0.88, shot: 0.75 },
-      { num: 20, name: 'Mac Allister', pace: 0.74, skill: 0.88, shot: 0.78 },
-      { num: 10, name: 'Messi', pace: 0.7, skill: 0.98, shot: 0.95 },
-      { num: 9, name: 'J. Álvarez', pace: 0.83, skill: 0.85, shot: 0.86 },
-      { num: 22, name: 'L. Martínez', pace: 0.8, skill: 0.82, shot: 0.9 },
+      { num: 23, name: 'E. Martínez', pace: 0.55, skill: 0.7, shot: 0.4, sk: 0, hr: 'short', hc: 0x241a12, bd: true },
+      { num: 26, name: 'Molina', pace: 0.8, skill: 0.72, shot: 0.55, sk: 1, hr: 'short', hc: 0x241a12, bd: false },
+      { num: 13, name: 'Romero', pace: 0.74, skill: 0.7, shot: 0.5, sk: 0, hr: 'short', hc: 0x241a12, bd: true },
+      { num: 19, name: 'Otamendi', pace: 0.62, skill: 0.68, shot: 0.5, sk: 1, hr: 'bald', hc: 0x2a2422, bd: true },
+      { num: 3, name: 'Tagliafico', pace: 0.76, skill: 0.72, shot: 0.52, sk: 1, hr: 'short', hc: 0x241a12, bd: true },
+      { num: 7, name: 'De Paul', pace: 0.78, skill: 0.84, shot: 0.7, sk: 0, hr: 'short', hc: 0x6a4a2a, bd: false },
+      { num: 24, name: 'E. Fernández', pace: 0.75, skill: 0.88, shot: 0.75, sk: 0, hr: 'short', hc: 0x241a12, bd: false },
+      { num: 20, name: 'Mac Allister', pace: 0.74, skill: 0.88, shot: 0.78, sk: 0, hr: 'short', hc: 0x8a5a30, bd: true },
+      { num: 10, name: 'Messi', pace: 0.7, skill: 0.98, shot: 0.95, sk: 0, hr: 'short', hc: 0x5a4028, bd: true },
+      { num: 9, name: 'J. Álvarez', pace: 0.83, skill: 0.85, shot: 0.86, sk: 0, hr: 'short', hc: 0x3a2c20, bd: false },
+      { num: 22, name: 'L. Martínez', pace: 0.8, skill: 0.82, shot: 0.9, sk: 1, hr: 'short', hc: 0x241a12, bd: true },
     ],
   },
   ESP: {
     short: 'ESP', name: '西班牙', jerseyStyle: 'solid', c1: 0xc32636, c2: 0xe8c018,
-    shorts: 0x1a2a5e, gk: 0x88d840, dir: -1,
+    shorts: 0x1a2a5e, socks: 0x1a2a5e, gk: 0x88d840, dir: -1,
     xi: [
-      { num: 1, name: 'Raya', pace: 0.55, skill: 0.72, shot: 0.4 },
-      { num: 2, name: 'Llorente', pace: 0.84, skill: 0.76, shot: 0.6 },
-      { num: 5, name: 'Cubarsí', pace: 0.72, skill: 0.8, shot: 0.45 },
-      { num: 14, name: 'Laporte', pace: 0.64, skill: 0.74, shot: 0.5 },
-      { num: 24, name: 'Cucurella', pace: 0.78, skill: 0.76, shot: 0.5 },
-      { num: 16, name: 'Rodri', pace: 0.7, skill: 0.93, shot: 0.8 },
-      { num: 6, name: 'Zubimendi', pace: 0.72, skill: 0.85, shot: 0.65 },
-      { num: 8, name: 'Pedri', pace: 0.78, skill: 0.95, shot: 0.7 },
-      { num: 10, name: 'L. Yamal', pace: 0.92, skill: 0.96, shot: 0.85 },
-      { num: 21, name: 'Oyarzabal', pace: 0.78, skill: 0.8, shot: 0.82 },
-      { num: 11, name: 'N. Williams', pace: 0.95, skill: 0.85, shot: 0.75 },
+      { num: 1, name: 'Raya', pace: 0.55, skill: 0.72, shot: 0.4, sk: 0, hr: 'short', hc: 0x241a12, bd: true },
+      { num: 2, name: 'Llorente', pace: 0.84, skill: 0.76, shot: 0.6, sk: 0, hr: 'short', hc: 0x7a5a34, bd: false },
+      { num: 5, name: 'Cubarsí', pace: 0.72, skill: 0.8, shot: 0.45, sk: 0, hr: 'short', hc: 0x241a12, bd: false },
+      { num: 14, name: 'Laporte', pace: 0.64, skill: 0.74, shot: 0.5, sk: 0, hr: 'short', hc: 0x241a12, bd: true },
+      { num: 24, name: 'Cucurella', pace: 0.78, skill: 0.76, shot: 0.5, sk: 0, hr: 'long', hc: 0x2a201a, bd: true },
+      { num: 16, name: 'Rodri', pace: 0.7, skill: 0.93, shot: 0.8, sk: 0, hr: 'short', hc: 0x241a12, bd: false },
+      { num: 6, name: 'Zubimendi', pace: 0.72, skill: 0.85, shot: 0.65, sk: 0, hr: 'short', hc: 0x241a12, bd: false },
+      { num: 8, name: 'Pedri', pace: 0.78, skill: 0.95, shot: 0.7, sk: 0, hr: 'curly', hc: 0x241a12, bd: false },
+      { num: 10, name: 'L. Yamal', pace: 0.92, skill: 0.96, shot: 0.85, sk: 1, hr: 'curly', hc: 0x1a140e, bd: false },
+      { num: 21, name: 'Oyarzabal', pace: 0.78, skill: 0.8, shot: 0.82, sk: 0, hr: 'short', hc: 0x241a12, bd: false },
+      { num: 11, name: 'N. Williams', pace: 0.95, skill: 0.85, shot: 0.75, sk: 3, hr: 'curly', hc: 0x141010, bd: false },
     ],
   },
 };
@@ -230,57 +233,135 @@ function labelTex(p) {
   const t = new THREE.CanvasTexture(c);
   return t;
 }
-const SKINS = [0xf2c9a0, 0xd9a06a, 0xa8734a, 0x8a5a3a, 0xf5d5b5];
+// 膚色：0 白皙 1 淺棕 2 中棕 3 深棕
+const SKINS = [0xf0c8a4, 0xd9a878, 0xa8744c, 0x6e4a30];
+function numberTex(num) {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d');
+  g.font = '900 44px -apple-system,sans-serif';
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = '#ffffff';
+  g.strokeStyle = 'rgba(0,0,0,0.5)'; g.lineWidth = 3;
+  g.strokeText(num, 32, 34);
+  g.fillText(num, 32, 34);
+  const t = new THREE.CanvasTexture(c);
+  return t;
+}
+// 自訂頭部（公尺單位）：膚色/髮型/鬍子/鼻，掛到 Soldier 頭骨上
+function buildCustomHead(info) {
+  const hd = new THREE.Group();
+  const skin = new THREE.MeshLambertMaterial({ color: SKINS[info.sk ?? 0] });
+  const hairMat = new THREE.MeshLambertMaterial({ color: info.hc ?? 0x241a12 });
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 12, 10), skin);
+  head.scale.y = 1.15;
+  head.position.y = 0.1;
+  hd.add(head);
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.05, 6), skin);
+  nose.rotation.x = Math.PI / 2;
+  nose.position.set(0, 0.1, 0.115);
+  hd.add(nose);
+  const hairStyle = info.hr ?? 'short';
+  if (hairStyle !== 'bald') {
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.121, 12, 10, 0, Math.PI * 2, 0, 1.5), hairMat);
+    cap.scale.y = 1.12;
+    cap.position.y = 0.115;
+    hd.add(cap);
+    if (hairStyle === 'curly' || hairStyle === 'long') {
+      for (let i = 0; i < (hairStyle === 'long' ? 6 : 3); i++) {
+        const puff = new THREE.Mesh(new THREE.SphereGeometry(0.055 + Math.random() * 0.02, 8, 6), hairMat);
+        const a = (i / 6) * Math.PI * 2;
+        puff.position.set(Math.cos(a) * 0.08, 0.14 + (hairStyle === 'long' ? -0.015 * i : 0.03), Math.sin(a) * 0.07 - (hairStyle === 'long' ? 0.05 : 0));
+        hd.add(puff);
+      }
+    }
+  } else {
+    const stubble = new THREE.Mesh(new THREE.SphereGeometry(0.117, 12, 10, 0, Math.PI * 2, 0, 1.1), new THREE.MeshLambertMaterial({ color: 0x3a3230 }));
+    stubble.position.y = 0.12;
+    hd.add(stubble);
+  }
+  if (info.bd) {
+    const beard = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8, 0, Math.PI * 2, 1.5, 1.2), hairMat);
+    beard.position.set(0, 0.065, 0.035);
+    beard.scale.set(1, 0.9, 1);
+    hd.add(beard);
+  }
+  return hd;
+}
+// Soldier.glb（three.js 官方範例、Mixamo 真人模型＋Idle/Walk/Run 動畫）
+const HEAD_SHRINK = 0.06;
+let soldierBase = null;   // { scene, clips, hScale }
+let ready = false;
+new GLTFLoader().load('assets/Soldier.glb', gltf => {
+  // 頭盔頭縮沒（動畫自帶 head scale 軌 → 直接改軌道值），自訂頭反向縮放掛回
+  for (const clip of gltf.animations) {
+    for (const tr of clip.tracks) {
+      if (/Head\.scale$/.test(tr.name)) {
+        for (let i = 0; i < tr.values.length; i++) tr.values[i] *= HEAD_SHRINK;
+      }
+    }
+  }
+  gltf.scene.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.castShadow = false; } });
+  const bbox = new THREE.Box3().setFromObject(gltf.scene);
+  soldierBase = { scene: gltf.scene, clips: gltf.animations, hScale: 1.82 / (bbox.max.y - bbox.min.y) };
+  initPlayers();
+  ready = true;
+  document.getElementById('loadtext').textContent = '準備完成';
+}, undefined, err => {
+  document.getElementById('loadtext').textContent = '載入失敗：' + err.message;
+});
+// 真人化球員：Soldier 身體（隊色全身球衣）＋自訂頭＋名牌/背號/影子
 function buildPlayerMesh(team, info, isGK) {
-  const grp = new THREE.Group();
-  const jMat = isGK ? new THREE.MeshLambertMaterial({ color: team.gk }) : new THREE.MeshLambertMaterial({ map: jerseyTex(team) });
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.72, 0.36), jMat);
-  torso.position.y = 1.06;
-  grp.add(torso);
-  const shortsMat = new THREE.MeshLambertMaterial({ color: team.shorts });
-  const hips = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.28, 0.34), shortsMat);
-  hips.position.y = 0.62;
-  grp.add(hips);
-  const skin = new THREE.MeshLambertMaterial({ color: SKINS[Math.floor(Math.random() * SKINS.length)] });
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.21, 10, 8), skin);
-  head.position.y = 1.66;
-  grp.add(head);
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.215, 10, 8, 0, Math.PI * 2, 0, 1.4), new THREE.MeshLambertMaterial({ color: Math.random() < 0.82 ? 0x241a12 : 0x6a4a2a }));
-  hair.position.y = 1.7;
-  grp.add(hair);
-  const legMat = new THREE.MeshLambertMaterial({ color: 0xf2f2f2 });   // 白襪
-  const legs = [];
-  for (const s of [1, -1]) {
-    const leg = new THREE.Group();
-    const th = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.52, 0.22), skin);
-    th.position.y = -0.26;
-    const sock = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.3, 0.2), legMat);
-    sock.position.y = -0.62;
-    leg.add(th, sock);
-    leg.position.set(s * 0.15, 0.52, 0);
-    grp.add(leg);
-    legs.push(leg);
+  const outer = new THREE.Group();
+  const root = SkeletonUtils.clone(soldierBase.scene);
+  const s = soldierBase.hScale;
+  root.scale.setScalar(s);
+  root.rotation.y = Math.PI;   // Soldier 原生面向 -Z，轉正成 +Z（修倒著跑）
+  const kitCol = isGK ? team.gk : team.c1;
+  root.traverse(o => {
+    if (!o.isMesh) return;
+    if (/visor/i.test(o.name)) { o.visible = false; return; }
+    o.material = o.material.clone();
+    o.material.map = null;                     // 素色隊服（貼圖是軍裝，去掉）
+    o.material.color = new THREE.Color(kitCol);
+    o.material.roughness = 0.85;
+    o.material.metalness = 0;
+  });
+  outer.add(root);
+  // 自訂頭掛頭骨：反向縮放＝1/(頭骨世界縮放×動畫縮頭係數)，實測骨骼世界值（含 armature 0.01 層）
+  const headBone = root.getObjectByName('mixamorig:Head') || root.getObjectByName('mixamorigHead');
+  if (headBone) {
+    root.updateMatrixWorld(true);
+    const ws = new THREE.Vector3();
+    headBone.getWorldScale(ws);
+    const hd = buildCustomHead(info);
+    const k = 1 / ((ws.y || 1) * HEAD_SHRINK);
+    hd.scale.setScalar(k);
+    hd.position.y = 0.005 * k;
+    headBone.add(hd);
   }
-  const arms = [];
-  for (const s of [1, -1]) {
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.56, 0.16), jMat);
-    arm.geometry.translate(0, -0.24, 0);
-    arm.position.set(s * 0.4, 1.36, 0);
-    grp.add(arm);
-    arms.push(arm);
-  }
-  // 名牌
+  // 背號（貼在背後、跟著轉身）
+  const numP = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.24), new THREE.MeshBasicMaterial({ map: numberTex(info.num), transparent: true }));
+  numP.position.set(0, 1.32, -0.19);
+  numP.rotation.y = Math.PI;
+  outer.add(numP);
   const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex(info), transparent: true, depthWrite: false }));
-  label.scale.set(2.4, 0.52, 1);
-  label.position.y = 2.15;
-  grp.add(label);
-  // 影子
-  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false }));
+  label.scale.set(2.2, 0.48, 1);
+  label.position.y = 2.08;
+  outer.add(label);
+  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.0), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false }));
   shadow.rotation.x = -Math.PI / 2;
   shadow.position.y = 0.015;
-  grp.add(shadow);
-  scene.add(grp);
-  return { grp, legs, arms, label };
+  outer.add(shadow);
+  scene.add(outer);
+  // 動畫
+  const mixer = new THREE.AnimationMixer(root);
+  const actions = {};
+  for (const name of ['Idle', 'Walk', 'Run']) {
+    const c = THREE.AnimationClip.findByName(soldierBase.clips, name);
+    if (c) actions[name] = mixer.clipAction(c);
+  }
+  actions.Idle?.play();
+  return { grp: outer, mixer, actions, cur: 'Idle', label };
 }
 // 操控指示環
 const ctrlRing = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.72, 24), new THREE.MeshBasicMaterial({ color: 0xffe24f, transparent: true, opacity: 0.95, side: THREE.DoubleSide }));
@@ -439,22 +520,27 @@ function anchorOf(p) {
   const dir = TEAMS[p.team].dir;
   return { x: a[0] * FX * 0.98 * dir, z: a[1] * FZ * 0.9 };
 }
-for (const tk of ['ARG', 'ESP']) {
-  const team = TEAMS[tk];
-  team.xi.forEach((info, idx) => {
-    const isGK = idx === 0;
-    const mesh = buildPlayerMesh(team, info, isGK);
-    const p = {
-      team: tk, idx, info, isGK, ...mesh,
-      x: 0, z: 0, yaw: 0, vx: 0, vz: 0,
-      spd: 5.4 + info.pace * 2.3,
-      slideT: 0, recoverT: 0, decideT: Math.random() * 0.4, animT: Math.random() * 6,
-      gkHoldT: 0,
-    };
-    players.push(p);
-  });
+function initPlayers() {
+  for (const tk of ['ARG', 'ESP']) {
+    const team = TEAMS[tk];
+    team.xi.forEach((info, idx) => {
+      const isGK = idx === 0;
+      const mesh = buildPlayerMesh(team, info, isGK);
+      const p = {
+        team: tk, idx, info, isGK, ...mesh,
+        x: 0, z: 0, yaw: 0, vx: 0, vz: 0,
+        spd: 5.4 + info.pace * 2.3,
+        slideT: 0, recoverT: 0, decideT: Math.random() * 0.4, animT: Math.random() * 6,
+        gkHoldT: 0,
+      };
+      const a = anchorOf(p);
+      p.x = a.x; p.z = a.z;
+      players.push(p);
+    });
+  }
+  controlled = players.find(p => p.team === USER && p.idx === 9);   // 前鋒
 }
-let controlled = players.find(p => p.team === USER && p.idx === 9);   // 前鋒
+let controlled = null;
 let pendingReceiver = null, switchCd = 0;
 
 function resetFormation(kickTeam) {
@@ -483,6 +569,7 @@ function kickBall(kicker, dx, dz, speed, vy) {
   ball.owner = null;
   ball.freeK = kicker; ball.freeT = 0.3;
   ball.lastTeam = kicker.team;
+  kicker.kickT = 0.28;   // 踢球動作
   S.kick(speed / 30);
 }
 function inputDir() {
@@ -548,6 +635,7 @@ function showToast(t, sub) {
   }
 }
 function startMatch() {
+  if (!ready) return;
   initAudio();
   el('title').classList.add('hidden');
   el('fulltime').classList.add('hidden');
@@ -773,14 +861,26 @@ function updatePlayers(dt) {
     p.z = Math.max(-FZ - 1.5, Math.min(FZ + 1.5, p.z));
     p.grp.position.set(p.x, 0, p.z);
     p.grp.rotation.y = p.yaw;
+    // Mixamo 真實動作：Idle/Walk/Run 依速度交叉淡入，步頻隨速度
     const mv = Math.hypot(p.vx, p.vz);
-    const sw = Math.sin(p.animT * 9) * Math.min(0.7, mv * 0.12);
-    p.legs[0].rotation.x = sw;
-    p.legs[1].rotation.x = -sw;
-    p.arms[0].rotation.x = -sw * 0.8;
-    p.arms[1].rotation.x = sw * 0.8;
-    if (p.slideT > 0) { p.grp.rotation.x = -1.1; p.grp.position.y = -0.25; }
-    else p.grp.rotation.x = 0;
+    p.kickT = Math.max(0, (p.kickT || 0) - 1 / 60);
+    p.mixer.update(1 / 60);
+    const want = mv > 4 ? 'Run' : mv > 0.4 ? 'Walk' : 'Idle';
+    if (want !== p.cur && p.actions[want]) {
+      const next = p.actions[want], prev = p.actions[p.cur];
+      next.reset().play();
+      if (prev) next.crossFadeFrom(prev, 0.18, false);
+      p.cur = want;
+    }
+    if (p.actions.Run) p.actions.Run.timeScale = Math.max(0.75, mv / 6.4);
+    if (p.actions.Walk) p.actions.Walk.timeScale = Math.max(0.75, mv / 2.4);
+    if (p.slideT > 0) {
+      p.grp.rotation.x = -1.05;
+      p.grp.position.y = -0.3;
+    } else {
+      p.grp.rotation.x = 0;
+      p.grp.position.y = 0;
+    }
   }
   ctrlRing.position.set(controlled.x, 0.03, controlled.z);
   ctrlRing.rotation.z += dt * 1.5;
@@ -926,6 +1026,7 @@ function loop(ts) {
     match.freezeT -= dt;
     // 凍結時球員緩慢歸位
     for (const p of players) {
+      p.mixer.update(dt);
       if (ball.owner === p) continue;
       const a = anchorOf(p);
       moveToward(p, a.x + (ball.x - a.x) * 0.15, a.z + (ball.z - a.z) * 0.15, p.spd * 0.5, dt);
@@ -947,8 +1048,7 @@ function loop(ts) {
   if (state !== 'title') drawRadar();
   renderer.render(scene, camera);
 }
-document.getElementById('loadtext').textContent = '準備完成';
-window.__dbg = () => ({ state, score: match.score, t: match.t.toFixed(1), half: match.half, owner: ball.owner ? ball.owner.info.name : null, controlled: controlled.info.name, ball: [ball.x.toFixed(1), ball.z.toFixed(1)] });
+window.__dbg = () => ({ state, ready, score: match.score, t: match.t.toFixed(1), half: match.half, owner: ball.owner ? ball.owner.info.name : null, controlled: controlled?.info.name, ball: [ball.x.toFixed(1), ball.z.toFixed(1)] });
 window.__ball = ball;
 window.__players = players;
 window.__match = match;

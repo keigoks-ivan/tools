@@ -26,6 +26,17 @@
 - 貼圖 anisotropy；無泛光後處理（GPU 涼）
 - 版本參數防快取；只 add 自己的檔案；navbar 註冊在 js/navbar.js SECONDARY_TOOLS
 
+## 2026-07-19 二輪：真人化
+
+- 球員改 **Soldier.glb**（three.js 官方範例，Mixamo 真人模型＋Idle/Walk/Run 真動畫，MIT）：
+  SkeletonUtils.clone ×22、素色隊服（去軍裝貼圖、color=隊色）、visor 隱藏
+- **換頭術**：動畫的 Head.scale 軌 ×0.06 縮沒頭盔頭 → 自訂頭（膚色/髮型/鬍子依 22 人外觀資料）
+  掛 mixamorig:Head，反向縮放 = 1/(頭骨世界縮放×0.06)（含 armature 0.01 層，要用 getWorldScale 實測！）
+- Soldier 原生面向 -Z → root.rotation.y=π 修倒著跑
+- 動畫：速度驅動 Idle/Walk/Run crossfade，timeScale 隨速度；freeze 期間也要 mixer.update
+- 外觀資料欄位：sk 膚色 0-3／hr short|curly|long|bald／hc 髮色／bd 鬍子（Cucurella long、Yamal curly、
+  Otamendi bald、Messi 鬍…）
+
 ## 待辦
 
 1. 選隊畫面（TEAMS 擴充更多國家）
