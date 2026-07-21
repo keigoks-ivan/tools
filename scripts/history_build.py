@@ -412,6 +412,9 @@ ENTRIES = [
     dict(src=None, slug="indonesia-political-structure", cat="politics",
          zh="印尼政治結構五稜鏡", en="Indonesia: The Oligarchic Archipelago",
          blurb="寡頭共識下的群島國家", lat=None, lng=None),
+    dict(src=None, slug="philippines-political-structure", cat="politics",
+         zh="菲律賓政治結構五稜鏡", en="The Philippines: A Politics in Five Prisms",
+         blurb="王朝・masa・改革者・摩洛・外國人的五種讀法", lat=None, lng=None),
 ]
 
 # ============================================================
