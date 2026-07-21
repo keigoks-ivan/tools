@@ -114,7 +114,7 @@ html[data-lang="en"] .blk[lang-en]{display:block}
 
 /* ===== category tiles ===== */
 .tilewrap{max-width:1180px;margin:50px auto 0;padding:0 22px}
-.cattiles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.cattiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
 .cattile{cursor:pointer;position:relative;background:linear-gradient(160deg,#fff,var(--parchment-card));
   border:1px solid var(--line);border-left:5px solid var(--cat);border-radius:7px;padding:22px 22px 18px;
   transition:all .2s;text-align:left;display:flex;flex-direction:column;gap:3px;font-family:inherit}
@@ -130,7 +130,7 @@ html[data-lang="en"] .blk[lang-en]{display:block}
 .cattile .carrow{margin-top:9px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.18em;color:var(--cat);
   text-transform:uppercase;display:flex;align-items:center;gap:6px;opacity:.75;transition:all .18s}
 .cattile:hover .carrow{gap:11px;opacity:1}
-.cat-nation{--cat:#1d3640}.cat-city{--cat:#8a3a23}.cat-theme{--cat:#a8842f}.cat-sport{--cat:#33583f}
+.cat-nation{--cat:#1d3640}.cat-city{--cat:#8a3a23}.cat-theme{--cat:#a8842f}.cat-sport{--cat:#33583f}.cat-politics{--cat:#5b4a8a}
 
 /* ===== expandable category panel ===== */
 .catpanel{max-width:1180px;margin:30px auto 0;padding:0 22px;display:none}
@@ -271,13 +271,14 @@ footer a{color:var(--gold-bright)}
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script>
 /* 首頁「歷史的啟示」三則為靜態內容，直接編輯上方 <section class="featured"> 內的 .lesson 卡片 */
-var CAT_PREFIX={nation:'N',city:'C',theme:'T',sport:'S'};
-var CAT_GLYPH ={nation:'⬡',city:'◈',theme:'✦',sport:'⚑'};
+var CAT_PREFIX={nation:'N',city:'C',theme:'T',sport:'S',politics:'P'};
+var CAT_GLYPH ={nation:'⬡',city:'◈',theme:'✦',sport:'⚑',politics:'◉'};
 var CAT_DESC  ={
   nation:{zh:'國家與區域的身世', en:'Nations & Regions'},
   city  :{zh:'城市的身世',       en:'Cities'},
   theme :{zh:'跨越時代的主題',   en:'Themes across the ages'},
-  sport :{zh:'運動的身世',       en:'Sports'}
+  sport :{zh:'運動的身世',       en:'Sports'},
+  politics:{zh:'一國政治的稜鏡拆解', en:'A nation’s politics, in prisms'}
 };
 
 var LANG=(localStorage.getItem('imqHistLang')||'zh');
@@ -311,7 +312,7 @@ fetch('catalog.json').then(function(r){return r.json();}).then(function(cat){
   loadMap(cat);
   // deep-link: #nation / #city / #theme / #sport
   var h=(location.hash||'').replace('#','');
-  if(['nation','city','theme','sport'].indexOf(h)>=0){ openCategory(h,true); }
+  if(['nation','city','theme','sport','politics'].indexOf(h)>=0){ openCategory(h,true); }
 }).catch(function(e){
   document.getElementById('catTiles').innerHTML='<p style="color:#8a3a23">無法載入 catalog.json（'+e+'）</p>';
 });

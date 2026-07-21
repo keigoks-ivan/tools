@@ -30,10 +30,11 @@ SRC_ROOT = ("/Users/ivanchang/Library/CloudStorage/GoogleDrive-keigoks@gmail.com
 
 # ---- 分類顯示順序與標籤 ----
 CATS = [
-    ("nation", "國家／區域史詩", "Nations & Regions"),
-    ("city",   "城市史詩",        "Cities"),
-    ("theme",  "主題史詩",        "Themes"),
-    ("sport",  "運動史",          "Sports"),
+    ("nation",   "國家／區域史詩", "Nations & Regions"),
+    ("city",     "城市史詩",        "Cities"),
+    ("theme",    "主題史詩",        "Themes"),
+    ("sport",    "運動史",          "Sports"),
+    ("politics", "政治結構稜鏡",    "Political Structure"),
 ]
 
 # ============================================================
@@ -398,6 +399,19 @@ ENTRIES = [
          zh="果嶺上的階級：高爾夫六百年", en="Golf: Class on the Green", lat=None, lng=None),
     dict(src=None, slug="esports-history", cat="sport",
          zh="螢幕裡的競技場：電子競技", en="Esports: The Arena in the Screen", lat=None, lng=None),
+
+    # ---------- 政治結構稜鏡 Political Structure ----------
+    # 地緣政治研究長文，以「多稜鏡」拆解一國政治結構。無地理標點（不上世界地圖）。
+    # 日後新篇：把 .html 放進 /history/（先注入返回列）＋在此補一筆 → 跑本腳本更新 catalog。
+    dict(src=None, slug="malaysia-political-structure", cat="politics",
+         zh="馬來西亞政治結構三稜鏡", en="Malaysia: A Politics in Three Prisms",
+         blurb="馬來人・華人・外國人的三種讀法", lat=None, lng=None),
+    dict(src=None, slug="thailand-political-structure", cat="politics",
+         zh="泰國政治結構四色稜鏡", en="Thailand: A Politics in Four Colours",
+         blurb="黃・藍・紅・橘與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="indonesia-political-structure", cat="politics",
+         zh="印尼政治結構五稜鏡", en="Indonesia: The Oligarchic Archipelago",
+         blurb="寡頭共識下的群島國家", lat=None, lng=None),
 ]
 
 # ============================================================
