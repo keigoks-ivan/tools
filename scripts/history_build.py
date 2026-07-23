@@ -424,6 +424,18 @@ ENTRIES = [
     dict(src=None, slug="vietnam-political-structure", cat="politics",
          zh="越南政治結構五稜鏡", en="Vietnam: A Politics in Five Prisms",
          blurb="黨・公安・技術官僚・紅色資本與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="japan-political-structure", cat="politics",
+         zh="日本政治結構五稜鏡", en="Japan: A Politics in Five Prisms",
+         blurb="自民黨・官僚・在野民粹・世代與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="india-political-structure", cat="politics",
+         zh="印度政治結構五稜鏡", en="India: A Politics in Five Prisms",
+         blurb="印度教民族主義・國大黨・種姓・地方聯邦與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="australia-political-structure", cat="politics",
+         zh="澳洲政治結構五稜鏡", en="Australia: A Politics in Five Prisms",
+         blurb="勞工黨・聯盟黨・綠黨獨立・礦業與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="newzealand-political-structure", cat="politics",
+         zh="紐西蘭政治結構五稜鏡", en="New Zealand: A Politics in Five Prisms",
+         blurb="國家黨・工黨・毛利・MMP 小黨與外國人的五種讀法", lat=None, lng=None),
 ]
 
 # ============================================================
