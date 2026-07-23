@@ -436,6 +436,15 @@ ENTRIES = [
     dict(src=None, slug="newzealand-political-structure", cat="politics",
          zh="紐西蘭政治結構五稜鏡", en="New Zealand: A Politics in Five Prisms",
          blurb="國家黨・工黨・毛利・MMP 小黨與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="uk-political-structure", cat="politics",
+         zh="英國政治結構五稜鏡", en="United Kingdom: A Politics in Five Prisms",
+         blurb="保守黨・工黨・改革黨・聯合王國與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="usa-political-structure", cat="politics",
+         zh="美國政治結構五稜鏡", en="United States: A Politics in Five Prisms",
+         blurb="共和黨・民主黨・制度・各州聯邦與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="canada-political-structure", cat="politics",
+         zh="加拿大政治結構五稜鏡", en="Canada: A Politics in Five Prisms",
+         blurb="自由黨・保守黨・魁北克・新民主黨與美國的五種讀法", lat=None, lng=None),
 ]
 
 # ============================================================

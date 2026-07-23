@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美國政治結構五稜鏡 — 共和黨・民主黨・制度・各州聯邦・外國人的五種讀法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@350;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F4EE;        /* 米紙 */
+  --ink:#1B2233;          /* 靛墨 */
+  --ink-soft:#4A5468;
+  --gold:#B08A2E;         /* 織錦金 */
+  --hairline:#D9D4C7;
+  --r:#C0392B;            /* 稜鏡・共和黨與 MAGA = 赤紅 */
+  --r-bg:#F9ECEA;
+  --d:#2C5AA0;            /* 稜鏡・民主黨 = 靛藍 */
+  --d-bg:#EAF0F8;
+  --i:#465059;            /* 稜鏡・制度與法院 = 石墨灰 */
+  --i-bg:#ECEDEE;
+  --s:#6B4A8A;            /* 稜鏡・各州與聯邦 = 帝王紫 */
+  --s-bg:#F0ECF4;
+  --f:#2E7D4F;            /* 稜鏡・外國人 = 翡翠綠 */
+  --f-bg:#EAF3EC;
+  --warn:#8A5A00;
+  --warn-bg:#F7F0DE;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  font-weight:350;
+  line-height:1.95;
+  font-size:16.5px;
+  letter-spacing:.02em;
+}
+::selection{background:var(--gold);color:#fff}
+
+/* ---------- 版心 ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 28px}
+.layout{display:grid;grid-template-columns:236px 1fr;gap:56px;align-items:start}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+
+/* ---------- Hero ---------- */
+header.hero{
+  background:var(--ink);
+  color:#EDE9DE;
+  padding:88px 0 72px;
+  position:relative;
+  overflow:hidden;
+}
+header.hero::after{ /* 五稜鏡光束 */
+  content:'';position:absolute;right:-8%;top:0;bottom:0;width:52%;
+  background:
+    linear-gradient(115deg,transparent 30%,rgba(192,57,43,.32) 30.4%,rgba(192,57,43,.32) 40%,transparent 40.4%),
+    linear-gradient(115deg,transparent 41%,rgba(44,90,160,.32) 41.4%,rgba(44,90,160,.32) 51%,transparent 51.4%),
+    linear-gradient(115deg,transparent 52%,rgba(70,80,89,.34) 52.4%,rgba(70,80,89,.34) 62%,transparent 62.4%),
+    linear-gradient(115deg,transparent 63%,rgba(107,74,138,.32) 63.4%,rgba(107,74,138,.32) 73%,transparent 73.4%),
+    linear-gradient(115deg,transparent 74%,rgba(46,125,79,.32) 74.4%,rgba(46,125,79,.32) 84%,transparent 84.4%);
+  pointer-events:none;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.28em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:26px;
+}
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(34px,4.6vw,56px);line-height:1.3;letter-spacing:.03em;
+  max-width:820px;
+}
+.hero-sub{
+  margin-top:26px;max-width:680px;font-size:17px;line-height:2.05;
+  color:#C9C3B4;font-weight:350;
+}
+.hero-meta{
+  margin-top:40px;display:flex;gap:34px;flex-wrap:wrap;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:#8E96A8;
+}
+.hero-meta b{color:#EDE9DE;font-weight:500;display:block;margin-bottom:3px}
+.prism-legend{margin-top:46px;display:flex;gap:0;max-width:760px;border:1px solid rgba(237,233,222,.22);flex-wrap:wrap}
+.prism-legend div{
+  flex:1;min-width:120px;padding:13px 12px;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:.08em;text-align:center;color:#EDE9DE;
+}
+.prism-legend .pl-r{background:rgba(192,57,43,.80)}
+.prism-legend .pl-d{background:rgba(44,90,160,.80)}
+.prism-legend .pl-i{background:rgba(70,80,89,.84)}
+.prism-legend .pl-s{background:rgba(107,74,138,.80)}
+.prism-legend .pl-f{background:rgba(46,125,79,.80)}
+
+/* ---------- 目錄側欄 ---------- */
+nav.toc{
+  position:sticky;top:0;padding-top:40px;padding-bottom:40px;
+  font-size:13.5px;line-height:1.7;
+  max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:var(--hairline) transparent;
+}
+nav.toc::-webkit-scrollbar{width:5px}
+nav.toc::-webkit-scrollbar-thumb{background:var(--hairline);border-radius:3px}
+nav.toc .toc-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:18px;text-transform:uppercase;
+}
+nav.toc a{
+  display:block;color:var(--ink-soft);text-decoration:none;
+  padding:5px 0 5px 14px;border-left:2px solid var(--hairline);
+  transition:all .18s;
+}
+nav.toc a:hover{color:var(--ink);border-left-color:var(--gold)}
+nav.toc a.t-r{border-left-color:var(--r)}
+nav.toc a.t-d{border-left-color:var(--d)}
+nav.toc a.t-i{border-left-color:var(--i)}
+nav.toc a.t-s{border-left-color:var(--s)}
+nav.toc a.t-f{border-left-color:var(--f)}
+@media(max-width:960px){nav.toc{position:static;padding-top:40px}}
+
+/* ---------- 主文 ---------- */
+main{padding:64px 0 120px;min-width:0}
+section{margin-bottom:96px}
+.sec-label{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.24em;
+  color:var(--gold);margin-bottom:14px;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:900;font-size:30px;
+  line-height:1.45;margin-bottom:30px;padding-bottom:20px;
+  border-bottom:1px solid var(--hairline);letter-spacing:.02em;
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:21px;
+  margin:44px 0 18px;letter-spacing:.02em;
+}
+p{margin-bottom:20px;max-width:74ch}
+p.lede{font-size:18.5px;line-height:2.05;color:var(--ink);font-weight:400;max-width:70ch}
+strong{font-weight:700;color:var(--ink)}
+em{font-style:normal;border-bottom:2px solid var(--gold);padding-bottom:1px}
+
+/* ---------- 稜鏡三聯裝置（本文件的簽名元素） ---------- */
+.prism{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+  margin:36px 0 44px;border:1px solid var(--hairline);
+  background:#fff;
+}
+@media(max-width:820px){.prism{grid-template-columns:1fr}}
+.prism>div{padding:26px 24px 22px;border-top:4px solid}
+.prism>div+div{border-left:1px solid var(--hairline)}
+@media(max-width:820px){.prism>div+div{border-left:none;border-top-width:4px}}
+.prism .pv-r{border-top-color:var(--r);background:linear-gradient(var(--r-bg),#fff 42%)}
+.prism .pv-d{border-top-color:var(--d);background:linear-gradient(var(--d-bg),#fff 42%)}
+.prism .pv-i{border-top-color:var(--i);background:linear-gradient(var(--i-bg),#fff 42%)}
+.prism .pv-s{border-top-color:var(--s);background:linear-gradient(var(--s-bg),#fff 42%)}
+.prism .pv-f{border-top-color:var(--f);background:linear-gradient(var(--f-bg),#fff 42%)}
+.prism .pv-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  margin-bottom:12px;font-weight:500;
+}
+.pv-r .pv-tag{color:var(--r)}
+.pv-d .pv-tag{color:var(--d)}
+.pv-i .pv-tag{color:var(--i)}
+.pv-s .pv-tag{color:var(--s)}
+.pv-f .pv-tag{color:var(--f)}
+.prism p{font-size:14.5px;line-height:1.9;margin-bottom:12px;color:#333B4D}
+.prism p:last-child{margin-bottom:0}
+.prism-caption{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);
+  letter-spacing:.06em;margin:-32px 0 44px;padding-top:10px;
+}
+
+/* ---------- 觀點框（單一視角深入時的左邊條） ---------- */
+.lens{padding:6px 0 6px 22px;margin:28px 0;border-left:4px solid}
+.lens.l-r{border-color:var(--r)}
+.lens.l-d{border-color:var(--d)}
+.lens.l-i{border-color:var(--i)}
+.lens.l-s{border-color:var(--s)}
+.lens.l-f{border-color:var(--f)}
+.lens .lens-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;margin-bottom:8px;font-weight:500;
+}
+.lens.l-r .lens-tag{color:var(--r)}
+.lens.l-d .lens-tag{color:var(--d)}
+.lens.l-i .lens-tag{color:var(--i)}
+.lens.l-s .lens-tag{color:var(--s)}
+.lens.l-f .lens-tag{color:var(--f)}
+
+/* ---------- 數據列 ---------- */
+.figrow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--hairline);border:1px solid var(--hairline);
+  margin:32px 0 40px;
+}
+.figrow div{background:#fff;padding:20px 18px 16px}
+.figrow .fig-n{
+  font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;
+  color:var(--ink);letter-spacing:-.01em;
+}
+.figrow .fig-l{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.6}
+
+/* ---------- 表格（輔助用） ---------- */
+table{width:100%;border-collapse:collapse;margin:28px 0 14px;font-size:14px;background:#fff}
+th{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;
+  text-align:left;padding:12px 14px;background:var(--ink);color:#EDE9DE;font-weight:500;
+}
+td{padding:12px 14px;border-bottom:1px solid var(--hairline);vertical-align:top;line-height:1.75}
+tr:last-child td{border-bottom:none}
+.tbl-note{font-size:13px;color:var(--ink-soft);margin-bottom:36px;max-width:74ch}
+
+/* ---------- 警示框 ---------- */
+.callout{
+  background:var(--warn-bg);border:1px solid #E3D5AE;border-left:4px solid var(--warn);
+  padding:20px 24px;margin:30px 0;font-size:15px;line-height:1.9;max-width:none;
+}
+.callout .co-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  color:var(--warn);margin-bottom:8px;font-weight:500;
+}
+.callout p{margin-bottom:10px;max-width:none}
+.callout p:last-child{margin-bottom:0}
+
+/* ---------- 反方論證（多方論證裝置） ---------- */
+.debate{margin:32px 0;border:1px solid var(--hairline);background:#fff}
+.debate>div{padding:22px 26px}
+.debate .d-pro{border-bottom:1px dashed var(--hairline)}
+.debate .d-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;margin-bottom:10px;font-weight:500;
+}
+.debate .d-pro .d-tag{color:var(--d)}
+.debate .d-con .d-tag{color:var(--r)}
+.debate p{font-size:14.5px;margin-bottom:10px}
+.debate p:last-child{margin-bottom:0}
+
+ul.plain{margin:0 0 22px 0;padding-left:0;list-style:none;max-width:74ch}
+ul.plain li{padding:9px 0 9px 26px;position:relative;line-height:1.85}
+ul.plain li::before{
+  content:'—';position:absolute;left:0;color:var(--gold);font-weight:700;
+}
+footer{
+  background:var(--ink);color:#8E96A8;padding:56px 0 72px;
+  font-size:13px;line-height:2;
+}
+footer .shell{max-width:900px}
+footer h4{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:16px;font-weight:500;
+}
+footer p{max-width:none}
+
+.part-divider{margin:110px 0 70px;padding:34px 0 30px;border-top:3px solid var(--ink);border-bottom:1px solid var(--hairline)}
+.part-divider .pd-num{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
+.part-divider h2{border:none;padding:0;margin:0;font-size:34px}
+.part-divider .pd-sub{margin-top:8px;color:var(--ink-soft);font-size:15px}
+
+.divider-ornament{
+  text-align:center;color:var(--gold);font-size:15px;letter-spacing:.6em;
+  margin:0 0 96px;user-select:none;
+}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<header class="hero">
+  <div class="shell">
+    <div class="eyebrow">InvestMQuest · Geopolitics Research · v1 · 2026-07-23</div>
+    <h1>美國政治結構五稜鏡</h1>
+    <div class="hero-sub">同一個共和國，五種完全不同的處境。世界最古老的成文憲政民主、也是最強大的國家，其政治卻已極化到連「和平轉移、制度獨立、護欄本身」都成為被爭奪的標的。Trump 以掌白宮＋國會兩院的 trifecta、加上一個 6–3 保守多數的最高法院，正在測試這套 1787 年的系統能被行政權彎曲到什麼程度；而 2026 年 2 月最高法院推翻其 IEEPA 關稅、6 月阻止其開除 Fed 理事 Cook，又證明護欄未必如想像中脆弱。以 2024 年大選、2025 年就任與大而美法案、2026 年關稅裁決與期中選舉為切片，逐層論證共和黨・民主黨・制度・各州聯邦・外國人的五種讀法。</div>
+    <div class="hero-meta">
+      <div><b>分析基準日</b>2026-07-23</div>
+      <div><b>前一里程碑</b>2025-01 Trump 二度就任・trifecta</div>
+      <div><b>近期里程碑</b>2026-02 最高法院推翻 IEEPA 關稅</div>
+      <div><b>下一里程碑</b>2026-11 期中選舉</div>
+      <div><b>文件性質</b>結構分析・非投資建議</div>
+    </div>
+    <div class="prism-legend">
+      <div class="pl-r">共和黨・MAGA</div>
+      <div class="pl-d">民主黨</div>
+      <div class="pl-i">制度與法院</div>
+      <div class="pl-s">各州・聯邦</div>
+      <div class="pl-f">外國人視角</div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+<div class="layout">
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <a href="#s0">00 導讀與核心論證</a>
+  <div class="toc-title" style="margin-top:16px">I · 地圖</div>
+  <a href="#s1">01 政治版圖總覽</a>
+  <a href="#s1b">01B 選舉人團與參院的結構偏差</a>
+  <a href="#s2">02 結構的根源：兩黨制與極化</a>
+  <a href="#s2b">02B 極化的機制拆解</a>
+  <a href="#s3">03 兩個不投票的權力</a>
+  <a href="#s3b">03B Fed 獨立性的實戰檢驗</a>
+  <div class="toc-title" style="margin-top:16px">II · 稜鏡</div>
+  <a href="#s4" class="t-r">04 共和黨與 MAGA</a>
+  <a href="#s4b" class="t-r">04B MAGA 聯盟的內部裂縫</a>
+  <a href="#s5" class="t-d">05 民主黨</a>
+  <a href="#s5b" class="t-d">05B 建制 vs 進步的內戰</a>
+  <a href="#s6" class="t-i">06 制度與法院</a>
+  <a href="#s7" class="t-s">07 各州與聯邦</a>
+  <a href="#s7b" class="t-s">07B gerrymandering 與 2026 重劃戰</a>
+  <a href="#s8" class="t-f">08 外國人／投資人</a>
+  <div class="toc-title" style="margin-top:16px">III · 動力</div>
+  <a href="#s9">09 2024 大選與 trifecta</a>
+  <a href="#s9b">09B 和平轉移作為終極紅線</a>
+  <a href="#s10">10 Trump 2.0 與行政國家</a>
+  <a href="#s11">11 大而美法案 OBBBA</a>
+  <a href="#s12">12 關稅戰 2.0 與經濟</a>
+  <a href="#s13">13 移民執法與邊境</a>
+  <a href="#s14">14 民主倒退辨析</a>
+  <div class="toc-title" style="margin-top:16px">IV · 引擎</div>
+  <a href="#s15">15 三角傳導模型</a>
+  <a href="#s16">16 政治×經濟迴路</a>
+  <a href="#s17">17 資本與市場</a>
+  <a href="#s17b">17B 美元的替代品審視</a>
+  <a href="#s18">18 產業與科技</a>
+  <a href="#s19">19 政策連續性與外資</a>
+  <a href="#s20">20 地緣：美中烏俄中東</a>
+  <div class="toc-title" style="margin-top:16px">V · 終章</div>
+  <a href="#s21">21 十大論題</a>
+  <a href="#s22">22 監測儀表板</a>
+  <a href="#s23">23 資料來源</a>
+</nav>
+
+<main>
+<section id="s0">
+  <div class="sec-label">PROLOGUE · CH 00</div>
+  <h2>導讀與核心論證</h2>
+  <p class="lede">美國是世界上最古老的成文憲政民主，也是當今最強大的國家——但它的政治，已經極化到連民主本身最基本的預設都被拉進爭奪：權力是否會和平轉移、獨立機構是否還獨立、護欄本身該不該存在。這份報告的核心命題只有一句：<strong>在美國，憲政制衡是常數、兩黨鐘擺是變數、極化是命門</strong>。前者是一套 1787 年寫下、歷經內戰與大蕭條而未斷的硬體；中者是每兩年一次、把權力在紅藍之間來回擺動的節奏；後者則是這個系統當前最深的病灶——當兩黨把對方視為存在性威脅時，所有制衡都可能被重新詮釋為障礙。</p>
+
+  <p>2025 到 2026 這一年半，恰好把這三者同時攤在世人面前。Trump 於 2024 年 11 月勝選、2025 年 1 月 20 日就任第 47 任總統，共和黨同時掌握白宮與國會兩院，形成完整的 <strong>trifecta</strong>（三權同黨）；加上他首任任命三位大法官所鑄成的 6–3 保守多數最高法院，行政權握有近數十年來罕見的集中籌碼。他用它簽署了逾 250 項行政命令、推動大而美法案（One Big Beautiful Bill Act）、發動關稅戰 2.0、以 DOGE（政府效率部）縮編文官體系、把移民執法推到創紀錄的規模。這是「行政權能把系統彎曲到什麼程度」的一次實測。</p>
+
+  <p>但同一套系統也在回推。2026 年 2 月，最高法院以 6–3 判定 Trump 依《國際緊急經濟權力法》（IEEPA）課徵的關稅違憲——而且執筆的是首席大法官 Roberts、加入多數的是跨越意識形態光譜的六人（含三位自由派與三位保守派），課稅權屬於國會、不屬於總統。同年 6 月，最高法院又以 5–4 阻止 Trump 開除 Fed 理事 Lisa Cook，替聯準會的獨立性劃出一道紅線——即使它在同一批判決裡推翻了 Humphrey's Executor、大幅擴張了總統開除其他獨立機構首長的權力。<strong>護欄既被彎曲、也在反彈</strong>——這種同時性，正是理解 2026 年美國的鑰匙。</p>
+
+  <p>這套結構必須拆成五個社會位置來讀，因為同一組事實，對不同的人意義截然不同：</p>
+  <ul class="plain">
+    <li><strong>對共和黨與 MAGA</strong>：這是一次用選舉授權奪回國家的機會——邊境、通膨、文化議題上「被建制與行政國家背叛的多數」終於掌權，趁 trifecta 之窗把減稅、關稅、移民與縮編做到不可逆，是歷史任務而非越權。</li>
+    <li><strong>對民主黨</strong>：這是一場對憲政的攻擊——行政權擴張、文官清洗、對法院命令的試探，是威權化的滑坡；2026 期中選舉是奪回眾院、恢復國會制衡的第一道、也是最緊迫的機會。</li>
+    <li><strong>對制度與法院</strong>：這是一次三權分立的壓力測試——問題不在誰執政，而在總統、國會、法院這三個獨立授權中心的邊界能否守住；IEEPA 案與 Cook 案顯示司法仍在劃線，但行政國家的縮解也在真實發生。</li>
+    <li><strong>對各州與聯邦</strong>：這是聯邦制作為戰場的復活——紅州與藍州在墮胎、移民、氣候、選制上分道揚鑣，中期重劃（德州＋5、加州＋5）把 gerrymandering 推到全國內戰的規模，州成了兩套美國並存的容器。</li>
+    <li><strong>對外國人與投資人</strong>：面對的是一套「美元霸權下的政策擺盪」規則手冊——真正的風險不在誰當總統，而在<em>關稅與通膨的傳導</em>、<em>Fed 獨立性的侵蝕</em>與<em>美股由 AI 科技七雄高度集中</em>下、政策不連續如何被放大到全球。</li>
+  </ul>
+
+  <h3>全書地圖：五部曲的閱讀動線</h3>
+  <table>
+    <tr><th>部</th><th>章</th><th>回答的問題</th></tr>
+    <tr><td><strong>第一部・地圖</strong></td><td>01–03</td><td>版圖長什麼樣？選舉人團、參院、兩黨制如何把極化鎖進制度？最高法院與 Fed 這兩個不投票的權力，如何成為真正的戰場？</td></tr>
+    <tr><td><strong>第二部・稜鏡</strong></td><td>04–08</td><td>同一個共和國，五種社會位置（共和黨與 MAGA／民主黨／制度與法院／各州與聯邦／外國人）各自看到什麼？</td></tr>
+    <tr><td><strong>第三部・動力</strong></td><td>09–14</td><td>2024 大選與 trifecta 如何形成？Trump 2.0、DOGE、大而美法案、關稅戰、移民執法各揭示什麼？民主是在倒退還是在自我修復？</td></tr>
+    <tr><td><strong>第四部・引擎</strong></td><td>15–20</td><td>政黨×經濟×地緣如何互相傳導？關稅、赤字、美元、Fed、AI、供應鏈、美中、烏俄各卡在哪個齒輪上？</td></tr>
+    <tr><td><strong>第五部・終章</strong></td><td>21–23</td><td>十大論題（附信度與可證偽條件）、監測儀表板、資料來源。</td></tr>
+  </table>
+  <p><strong>一句話結論，供全文檢驗：</strong>憲政制衡是常數、兩黨鐘擺是變數、極化是命門。美國是一個制度硬體異常堅固（分權、聯邦、獨立司法與央行歷經兩百餘年而未斷）、政治權力在兩個彼此視為存在性敵人的陣營間規律擺動、而其擺動因作為全球儲備貨幣與最大市場而外溢全世界的國家。真正的風險不是「美國明天變獨裁」——2026 年的法院判決正相反地證明護欄仍在運作；真正的風險是<em>極化本身</em>把治理拖進癱瘓、把每一次政權輪替變成政策的推倒重來，並透過美元與關稅把這種不確定性輸出到全球。趕時間的讀者可直接讀第 21 章的十大論題與第 22 章儀表板，再回頭按需查閱。</p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART I</div>
+  <h2>地圖 · The Map</h2>
+  <div class="pd-sub">版圖、地基與兩個不投票的權力</div>
+</div>
+
+<section id="s1">
+  <div class="sec-label">PART I · CH 01</div>
+  <h2>政治版圖總覽（2026 年 7 月）</h2>
+  <p class="lede">要讀懂美國的版圖，必須把三個維度疊起來看：橫軸是<strong>兩黨</strong>（共和黨 vs 民主黨）、縱軸是<strong>三權</strong>（總統、國會、最高法院各有獨立的民意或憲法授權）、底層是<strong>聯邦制</strong>（五十州各自為政的第二套政府）。2024 年的選舉罕見地讓共和黨同時掌握了前兩者、並已握有第三者的多數——這種完整的權力集中，正是理解 2025–26 一切動力的起點。</p>
+
+  <h3>第一層：兩黨×紅藍聯盟——版圖的原料</h3>
+  <p>美國的政黨不是歐洲式的意識形態政黨，而是兩個龐大的<strong>選舉聯盟</strong>。當前的<strong>共和黨</strong>是由白人工人階級、鄉村與小鎮、福音派基督徒、傳統企業與能源利益、以及 Trump 重塑後的 MAGA 民粹核心組成的聯盟；<strong>民主黨</strong>則由都會專業階層、少數族裔、年輕世代、工會殘部與進步派組成。過去半世紀最深的結構變化是<em>教育極化</em>與<em>地理分選</em>：大學學歷者持續流向民主黨、非大學白人流向共和黨，而人們越來越傾向與同溫層鄰居同住——都市藍、鄉村紅、郊區成為決戰帶。這使得「紅州—藍州」的分野在多數選區近乎鎖定，全國勝負收縮到七個左右的搖擺州（賓州、密西根、威斯康辛、喬治亞、亞利桑那、內華達、北卡）。</p>
+
+  <h3>第二層：三權分立——版圖的骨架</h3>
+  <p>美國是總統制的原型：行政（總統）、立法（國會兩院）、司法（最高法院）各有獨立來源，互不隸屬。總統由選舉人團間接選出、任期四年可連任一次；眾院 435 席每兩年全部改選、參院 100 席（各州 2 席）每兩年改選約三分之一、任期六年；最高法院 9 位大法官終身任職。這套設計的核心不是效率，而是<strong>以野心制衡野心</strong>（Madison 語）——任何一權都無法單獨行動，重大政策需要跨權合作。當三權同黨（trifecta）時，這道摩擦被暫時移除，執政黨得以高速推進議程；但這也正是反對方最恐懼的時刻。</p>
+
+  <h3>第三層：2024 trifecta 與 2026 期中算術</h3>
+  <p>2024 年 11 月，Trump 勝選重返白宮，共和黨同時守住眾院、翻轉參院——<strong>參院 53 對 47</strong>、<strong>眾院約 220 對 215</strong>（眾院多數僅個位數席次，是近代最薄的多數之一）。這個薄多數是理解 2025 立法的關鍵：大而美法案在參院以 51–50（副總統 Vance 投下決勝票）、在眾院以 218–214 通過，幾乎沒有任何容錯空間。而 2026 年 11 月 3 日的期中選舉將全部改選眾院、約三分之一參院、逾 30 州長——執政黨在期中通常失分（總統黨的歷史平均淨失眾院席次可觀），因此這場選舉是「Trump 後兩年是否受國會制衡」的第一道結構性裁決。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">53 / 47</div><div class="fig-l">119 屆參院：共和黨 vs 民主黨席次（全院 100 席）</div></div>
+    <div><div class="fig-n">~220 / 215</div><div class="fig-l">119 屆眾院：共和黨 vs 民主黨（近代最薄多數之一）</div></div>
+    <div><div class="fig-n">6–3</div><div class="fig-l">最高法院保守 vs 自由派大法官結構</div></div>
+    <div><div class="fig-n">2026-11-03</div><div class="fig-l">期中選舉：全改選眾院、約 1/3 參院、逾 30 州長</div></div>
+  </div>
+
+  <div class="prism">
+    <div class="pv-r"><div class="pv-tag">GOP · MAGA</div><p>版圖是一扇「兩年之窗」：trifecta 加 6–3 法院，是把邊境、減稅、關稅、縮編做到不可逆的歷史機會，但眾院薄多數與期中魔咒意味著窗口可能在 2027 年關上——所以必須趁早、趁狠。</p><p>真正的敵人不是民主黨，是時鐘：2026 若失去眾院，議程立刻進入守勢。</p></div>
+    <div class="pv-d"><div class="pv-tag">DEMOCRATIC</div><p>版圖是一張「制衡地圖」：失去了三權中的每一個，唯一的即時工具是 2026 期中翻轉眾院——只要奪回一院，就能用預算、調查與彈劾權重建護欄。</p><p>期中不是普通選舉，是憲政制衡能否恢復的裁決點。</p></div>
+    <div class="pv-i"><div class="pv-tag">INSTITUTIONS</div><p>版圖是一次「分權壓力測試」：trifecta 移除了政黨間的摩擦，於是制衡的重擔全壓到司法與聯邦制這兩個非選舉維度上——問題不是誰贏，是邊界能否守住。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一張版圖，三種利害：兩年之窗、制衡地圖、壓力測試</div>
+
+  <h3>把三層合起來讀：2026 年的版圖一句話</h3>
+  <p>兩黨是不變的原料，三權是骨架，而 2026 年的特殊性在於——<strong>政黨間的制衡被 trifecta 暫時取消了</strong>。於是全部制衡的重量，轉移到兩個非政黨的維度：<em>司法</em>（6–3 法院既擴權又劃線）與<em>聯邦制</em>（藍州作為抵抗容器）。版圖的下一個裁決點是 2026 年 11 月的期中選舉——它將決定政黨間的制衡是否回歸，也是對 Trump 2.0 第一年的全國期中考。</p>
+</section>
+
+<section id="s1b">
+  <div class="sec-label">PART I · CH 01B</div>
+  <h2>選舉人團與參院的結構偏差：多數如何不等於多數</h2>
+  <p class="lede">第 1 章說「全國勝負收縮到七個搖擺州」——這一節把這句話拆成制度機制。美國的兩個核心選制安排（選舉人團選總統、參院各州 2 席）都不是按人頭等比例分配權力的，它們系統性地把權重從人口密集的（偏藍）大州，轉移到人口稀疏的（偏紅）小州。理解這個偏差，才能理解為什麼「贏了普選票卻輸了白宮」在美國可能發生、以及為什麼參院是保守派結構性的堡壘。</p>
+
+  <h3>選舉人團：贏家全拿如何放大小州與搖擺州</h3>
+  <p>總統不是由全國普選票直接選出，而是由 538 張選舉人票決定（多數 270 勝）。各州的選舉人票數＝該州眾議員數＋2 位參議員數，且除緬因、內布拉斯加外<strong>採贏家全拿</strong>——在某州多贏一票與多贏一百萬票，拿到的選舉人票完全相同。這造成兩個後果：其一，<em>小州被結構性高估</em>（每州保底 3 票，使懷俄明等小州的「每票權重」數倍於加州）；其二，<em>選戰壓縮到搖擺州</em>——因為安全州的結果早已鎖定，兩黨的資源、承諾與政策傾斜全部倒向七個搖擺州的邊際選民。2000 年與 2016 年都出現「普選票落後者入主白宮」，正是這套機制與人口分布交互的產物。</p>
+
+  <h3>參院：小州 2 席的永久性偏差</h3>
+  <p>參院是美國制度裡最反多數的設計：無論人口是四千萬還是六十萬，每州都是 2 席。這意味著人口最少的若干州（多為鄉村、偏共和黨）在參院的代表權，遠超其人口比例；理論上，代表全國少數人口的參議員可以構成參院多數。加上<strong>阻撓議事（filibuster）</strong>慣例——多數立法需 60 票才能終結辯論——參院成為一個「雙重反多數」的機構：席次分配偏小州，程序門檻又偏少數方。這正是為什麼即使民主黨在全國累計選票常居上風，卻長期難以穩定掌控參院；也是為什麼大而美法案必須走「預算調節」（reconciliation）這條只需簡單多數、繞過 filibuster 的窄路。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 兩個偏差的方向一致</div>
+    <p>選舉人團與參院的偏差<strong>方向相同</strong>——都把權重從人口密集的都會（藍）移向人口稀疏的鄉村（紅）。這不是任何一黨設計的陰謀，而是 1787 年為說服小州加入聯邦所做的妥協，歷經兩百餘年人口向都市集中後，恰好對當前的共和黨聯盟有利。它的政治後果是深遠的：它讓「贏得多數人心」與「贏得制度權力」之間出現持續的楔子，也讓民主黨長期抱持「制度對我們不公」的結構性怨懟——這股怨懟，正是後文「民主倒退辨析」爭論的其中一條伏線。</p>
+  </div>
+
+  <h3>眾院：可被重劃的多數</h3>
+  <p>相對於參院的固定偏差，眾院的偏差是<em>可被人為製造</em>的——透過選區重劃（redistricting）。多數州的國會選區由州議會劃定，掌握州議會的政黨可以透過 gerrymandering（把對手選民「打包」進少數選區、或「稀釋」分散進多數選區）放大自己的席次。2025–26 年出現罕見的「期中重劃戰」：德州重劃預估為共和黨增約 5 席、加州以公投反制預估為民主黨增約 5 席，密蘇里、北卡也加入戰局（詳第 7B 章）。<strong>眾院因此是三個制度層中唯一「多數可被工程化」的戰場</strong>——這也是為什麼 2026 期中的席次算術，會被重劃戰而非只被民意直接決定。</p>
+</section>
+
+<section id="s2">
+  <div class="sec-label">PART I · CH 02</div>
+  <h2>結構的根源：兩黨制的制度鎖定與極化</h2>
+  <p class="lede">美國政治為何只有兩個黨、為何極化到今天這種程度？答案不在個別政治人物的性格，在選制與制度的深層設計。單一選區相對多數制（小選區、贏家全拿）在數學上就會把政黨數量壓到兩個；而過去半世紀的教育重組、地理分選與媒體碎裂，又把這兩個黨從「重疊的大帳篷」推成「兩個互不重疊的部落」。制度鎖定了兩黨，社會變遷則把它們拉向兩極。</p>
+
+  <h3>第一層：杜瓦傑法則——為什麼美國只有兩個黨</h3>
+  <p>美國幾乎所有選舉（國會、州、地方）都採<strong>單一選區相對多數制</strong>：一個選區選一人、得票最高者當選。政治學上的杜瓦傑法則指出，這種制度會系統性地擠壓第三黨——因為投給沒有勝算的第三黨等於「浪費選票」，理性選民會回流到兩大黨中較不討厭的一方。這解釋了為什麼美國沒有歐洲那種比例代表制下的多黨聯合政府傳統，而是兩個必須各自容納龐大內部矛盾的「大帳篷」政黨。這個結構有一個關鍵後果：<strong>黨內鬥爭（初選）往往比黨際競爭（大選）更能決定政治走向</strong>——因為在多數安全選區，贏得初選幾乎等於贏得議席。</p>
+
+  <h3>第二層：從重疊到不重疊——極化的長線</h3>
+  <p>1950 年代的美國兩黨在意識形態上高度重疊：既有保守的南方民主黨人，也有自由派的東北共和黨人，跨黨合作是常態。過去半世紀，這種重疊被系統性地清除：南方在民權運動後由藍轉紅、東北由紅轉藍，兩黨在意識形態上完成「分類整齊」（ideological sorting）——現在幾乎每一位共和黨人都在每一位民主黨人的右邊，中間地帶消失。加上<em>教育極化</em>（大學／非大學的分野取代了部分階級分野）與<em>地理分選</em>（人們選擇與政治同溫層同住），美國從「一個國家、兩個政黨」滑向「兩個國家、各有一個政黨」。</p>
+
+  <h3>第三層：情感極化——把對手當敵人</h3>
+  <p>當代極化最危險的形態不是政策分歧，而是<strong>情感極化</strong>（affective polarization）：兩黨支持者對彼此的敵意、不信任與道德鄙視，已達到把對方視為「不只是錯、而是對國家的威脅」的程度。民調長期顯示，越來越多兩黨選民不願子女與對方黨派通婚、認為對方當選會「毀掉美國」。這種把政治對手去正當化的心理，是理解 2020 年後一切爭議（選舉結果承認、1 月 6 日、司法武器化指控）的底層土壤——<strong>當一方認為輸掉選舉等於國家淪陷，遵守遊戲規則的成本就開始上升</strong>。這正是「極化是命門」的精確含義：不是政策吵得兇，而是共享的規則基礎本身在被侵蝕。</p>
+
+  <div class="prism">
+    <div class="pv-r"><div class="pv-tag">GOP · MAGA</div><p>極化不是病、是覺醒：兩黨過去的「重疊」其實是建制共謀，讓工人階級的利益被兩黨一起犧牲。今天的對立是真實民意分歧的誠實呈現。</p></div>
+    <div class="pv-d"><div class="pv-tag">DEMOCRATIC</div><p>極化是不對稱的：兩黨並非同等地走向極端，一方仍接受基本遊戲規則、另一方已開始質疑選舉結果與制度正當性——把它描述成「雙方都一樣」是危險的假平衡。</p></div>
+    <div class="pv-i"><div class="pv-tag">INSTITUTIONS</div><p>極化是制度的溶劑：所有分權制衡都預設了「政治對手是正當的、明天還要一起治國」，一旦這個預設消失，護欄就從硬體變成需要不斷重新協商的軟體。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個「極化」，三種定性：民意覺醒、不對稱威脅、制度溶劑</div>
+
+  <h3>比較視角：為什麼美國極化比多數民主更危險</h3>
+  <p>把美國放進比較政治的座標，它的極化有一個獨特的放大器：<strong>總統制×兩黨制×聯邦制的疊加</strong>。內閣制國家（如英、日）的行政首長由國會多數產生，衝突可透過改組或不信任案在體制內吸收；美國的總統與敵對國會卻可以僵持整整一任，誰也扳不倒誰。兩黨制又讓每一次選舉都是零和的「全有全無」，缺乏多黨協商的緩衝。聯邦制則讓失勢的一方退守州層級繼續抵抗，使衝突無處消解、只能積累。<strong>美國的極化之所以特別棘手，不是因為美國人特別分裂，而是因為它的制度架構把分裂轉化為僵局的效率特別高</strong>——這也是為什麼歷次改革討論（廢除選舉人團、改革 filibuster、獨立重劃委員會）都無法推進：每一項都需要當前受益的一方自願放棄優勢。</p>
+</section>
+
+<section id="s2b">
+  <div class="sec-label">PART I · CH 02B</div>
+  <h2>極化的機制拆解：初選、媒體與金錢</h2>
+  <p class="lede">第 2 章論證了極化的結構根源；這一節把它拆成三個具體的傳動機制——它們解釋了為什麼溫和派在美國政治裡系統性地滅絕、為什麼政治人物有強烈誘因走極端而非妥協。</p>
+
+  <h3>機制一：封閉初選與「被初選掉」的恐懼</h3>
+  <p>在多數安全選區，決定議席的是黨內初選而非大選；而初選的投票者是黨內最積極、最極端的一小群基本盤。這造成一個結構性誘因：<strong>現任者最大的政治風險不是輸給對方黨，而是在初選中「被更極端的同黨挑戰者掀翻」（being primaried）</strong>。於是理性的政治人物會持續向基本盤靠攏、避免任何可被描繪成「與敵人合作」的妥協。Trump 對共和黨的重塑之所以能貫徹，很大程度上正是透過「威脅為不忠者背書初選對手」這個機制——它讓黨內異見的成本變得極高。</p>
+
+  <h3>機制二：媒體碎裂與演算法同溫層</h3>
+  <p>三大電視網主導的年代，多數美國人接收大致相同的事實基礎；今天的媒體生態是碎裂的——有線電視、Podcast、社群演算法各自服務高度分眾的受眾，並以「激起憤怒與認同」為最大化目標。結果是兩套幾乎不重疊的資訊宇宙：同一事件在不同管道被賦予相反的框架，甚至相反的「事實」。<strong>當兩個陣營連基本事實都不共享時，政策辯論就失去了共同地面</strong>——這是情感極化最強的燃料，也是為什麼「選舉是否公正」這種本應有客觀答案的問題，會分裂成兩套互斥的信念。</p>
+
+  <h3>機制三：金錢與去中介化的政治</h3>
+  <p>2010 年 Citizens United 案後，政治獻金的閘門大開，超級政治行動委員會（Super PAC）可以無上限募資。這既讓極端的意識形態金主（兩端都有）能繞過政黨中央、直接資助符合其立場的候選人，也削弱了政黨機器約束候選人的能力——政治因此「去中介化」：候選人不再需要黨的守門，只需直接動員一群小額捐款者與線上追隨者。Trump 現象、以及進步派靠小額捐款崛起的桑德斯路線，都是這個去中介化的產物。<strong>當政黨中央失去守門權，極端者就更容易繞過建制、直接觸達基本盤。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 三機制的合流</div>
+    <p>初選、媒體與金錢這三個機制不是獨立的，它們彼此放大：碎裂媒體餵養極端受眾→極端受眾主導初選→初選威脅逼政治人物走極端→極端政治人物靠去中介的金錢與線上動員繞過政黨→政黨更無力約束。這是一個自我強化的迴路，也是為什麼美國的極化不是暫時的情緒、而是被制度性地鎖進了系統。要打破它，需要同時改動三個機制中的多個，而每一個都有既得利益者護衛——這正是極化「命門」難以拆除的結構原因。</p>
+  </div>
+</section>
+
+<section id="s3">
+  <div class="sec-label">PART I · CH 03</div>
+  <h2>兩個不投票的權力：最高法院與聯準會</h2>
+  <p class="lede">在選舉政治的喧囂之下，美國有兩個不經選舉、卻對國家走向有決定性影響的權力中心：<strong>最高法院</strong>（終身任職、詮釋憲法）與<strong>聯準會 Fed</strong>（獨立於政治、掌控貨幣）。在 trifecta 移除了政黨間制衡的 2026 年，這兩個機構的獨立性，成了整套系統剩下的關鍵護欄——而它們正同時承受著前所未有的壓力測試。</p>
+
+  <h3>最高法院：6–3 保守多數的鑄成</h3>
+  <p>最高法院 9 位大法官終身任職，其構成由「哪位總統在任時出缺」這個近乎隨機的因素決定。Trump 首任任期（2017–21）罕見地填補了三個空缺（Gorsuch、Kavanaugh、Barrett），把法院鑄成<strong>6–3 的保守多數</strong>，其影響將延續數十年、遠超任何一屆政府。這個多數已在多個領域改寫美國：2022 年 Dobbs 案推翻 Roe v. Wade、將墮胎權交還各州（直接引爆紅藍州分歧，詳第 7 章）；並在行政權、槍權、宗教自由、選制等議題上系統性地向保守方向移動。<strong>法院是 Trump 首任留給美國最持久的遺產——一個不隨 2026 或 2028 選舉改變的結構性事實。</strong></p>
+
+  <h3>但 6–3 不等於行政權的橡皮圖章</h3>
+  <p>一個常見的誤解是把「6–3 保守多數」等同於「Trump 的橡皮圖章」。2026 年的兩個判決正相反地證明了法院的獨立性：<strong>2026 年 2 月，最高法院以 6–3 判定 Trump 的 IEEPA 關稅違憲</strong>——執筆的是首席大法官 Roberts，加入多數的六人跨越意識形態（三位自由派 Sotomayor、Kagan、Jackson，加上保守派 Gorsuch、Barrett），理由是課稅權屬於國會、《國際緊急經濟權力法》授權「規範進口」不包含「課徵關稅」；反對的是 Thomas、Kavanaugh、Alito 三位。<strong>2026 年 6 月，最高法院又以 5–4 阻止 Trump 開除 Fed 理事 Lisa Cook</strong>，替央行獨立性劃線。這說明保守多數在「憲政結構」議題（分權、課稅權、央行獨立）上，未必站在擴權的總統一邊——法院既是保守的，也是護欄的。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">6–3</div><div class="fig-l">2026-02 IEEPA 關稅違憲：Roberts 執筆、跨陣營多數</div></div>
+    <div><div class="fig-n">5–4</div><div class="fig-l">2026-06 阻止開除 Fed 理事 Cook</div></div>
+    <div><div class="fig-n">3</div><div class="fig-l">Trump 首任任命的大法官（Gorsuch／Kavanaugh／Barrett）</div></div>
+    <div><div class="fig-n">終身</div><div class="fig-l">大法官任期：不隨任何選舉更替</div></div>
+  </div>
+
+  <h3>聯準會：獨立性作為金融的憲法</h3>
+  <p>Fed 是美國制度裡另一個刻意設計成「隔絕於選舉政治」的機構：理事任期交錯達 14 年、主席雖由總統提名國會同意、但法律上不受總統政策指揮。這個獨立性是美元作為全球儲備貨幣的信任基礎——市場相信 Fed 會按通膨與就業、而非按選舉週期來設定利率。Trump 2.0 對這道護欄發動了直接衝擊：他長期公開施壓要求降息、2025 年 8 月試圖以「就任前涉房貸詐欺」為由開除理事 Lisa Cook（美國央行 111 年史上首次開除理事之舉），並提名立場親己的 Kevin Warsh 接任主席。<strong>Fed 獨立性是否守得住，是外國投資人比任何選舉結果都更該盯的變數</strong>——這一點在第 3B 章與第 17 章深入。</p>
+
+  <div class="prism">
+    <div class="pv-i"><div class="pv-tag">INSTITUTIONS</div><p>兩個機構是系統最後的護欄：當政黨制衡被 trifecta 取消，法院與 Fed 的獨立性成了僅存的邊界。2026 的判決顯示硬體仍運作，但每一次施壓都在消耗它的信用儲備。</p></div>
+    <div class="pv-r"><div class="pv-tag">GOP · MAGA</div><p>兩個機構是「未經選舉的反民主障礙」：法院該尊重行政的憲法權力、Fed 該對民選總統的經濟指令負責——把它們神聖化為「獨立」，是建制保護自己的話術。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN CAPITAL</div><p>兩個機構是「美元信任的抵押品」：司法可預期與 Fed 獨立，是外資把美國國債當無風險資產的前提。任何對這兩者的侵蝕，都比關稅更傷美元的長期地位。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同兩個機構，三種定性：最後護欄、反民主障礙、信任抵押品</div>
+</section>
+
+<section id="s3b">
+  <div class="sec-label">PART I · CH 03B</div>
+  <h2>Fed 獨立性的實戰檢驗：Warsh 接任與 Cook 案</h2>
+  <p class="lede">第 3 章說「Fed 獨立性是否守得住是關鍵變數」——這一節把它變成一組已經發生的、可檢視的事件。2025–26 年，Fed 獨立性不再是抽象原則，而是被 Trump 用兩種手段同時施壓：換掉主席、開除理事。兩條線的結果不同，恰好界定了這道護欄當前的彈性邊界。</p>
+
+  <h3>換帥：Warsh 接替 Powell</h3>
+  <p>Powell 的主席任期於 2026 年 5 月屆滿。Trump 於 2026 年 1 月 30 日提名前 Fed 理事 <strong>Kevin Warsh</strong>，參院於 5 月 13 日以 <strong>54–45</strong> 幾乎完全按黨派界線確認（僅民主黨參議員 Fetterman 跨線支持），Warsh 於 5 月 22 日就任、任期至 2030 年。值得注意的是，Powell 並未離開 Fed——他理事任期尚有兩年，選擇續任理事（近八十年來首見卸任主席回任理事）。這是一個微妙的信號：透過正常的提名—確認程序更換主席，是總統的合法權力、也在制度框架之內；但市場密切觀察 Warsh 領導下的 Fed 是否會在政治壓力下更快降息，那才是獨立性受侵蝕的實質指標。</p>
+
+  <h3>開除：Cook 案與 Humphrey's Executor 的存廢</h3>
+  <p>與「換帥」的合法路徑相反，「開除理事」踩到了紅線。2025 年 8 月，Trump 以「就任前涉房貸詐欺」（Cook 否認）為由宣布開除理事 Lisa Cook。2026 年 6 月 29 日，最高法院以 <strong>5–4</strong> 裁定 Cook 可在訴訟進行期間留任——替 Fed 的獨立性守住了防線。但同一批判決藏著一個更大的結構變化：法院<strong>推翻了 1935 年的 Humphrey's Executor 判例</strong>，允許總統開除其他獨立機構（如聯邦貿易委員會等）的首長，Roberts 寫道「免於被開除的保護違背了憲法所確立的權力分立」——<em>唯獨 Fed 被劃為例外</em>。換言之，法院一手大幅擴張了總統對行政國家的人事控制、另一手把 Fed 單獨圈起來保護。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 「例外的 Fed」意味著什麼</div>
+    <p>Cook 案的深層訊息是雙面的：一方面，Fed 的獨立性在最高壓的測試下守住了（5–4，但守住了）——這對美元與國債市場是重大的定心丸。另一方面，法院推翻 Humphrey's Executor、把 Fed 設為「唯一例外」，意味著<strong>其他所有獨立監理機構的首長，此後都可被總統隨意撤換</strong>——行政國家的政治中立性大範圍崩解，只剩 Fed 這座孤島。對投資人而言，這是一個必須記住的區分：<em>貨幣政策的獨立性（強）</em>與<em>監理／行政機構的獨立性（已大幅削弱）</em>從此走上不同軌道。這也是第 14 章「民主倒退辨析」裡最典型的「不能一概而論」案例——同一批判決，既是護欄的勝利、也是行政擴權的里程碑。</p>
+  </div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART II</div>
+  <h2>稜鏡 · The Prisms</h2>
+  <div class="pd-sub">同一個共和國，五種社會位置的讀法</div>
+</div>
+
+<section id="s4">
+  <div class="sec-label">PART II · CH 04 · 共和黨與 MAGA</div>
+  <h2>共和黨與 MAGA：Trump 重塑的政黨</h2>
+  <p class="lede">今天的共和黨已不是 Reagan 或 Bush 的共和黨。過去十年，Trump 把它從一個「小政府、自由貿易、鷹派外交、商業建制」的政黨，重塑成一個「民粹、保護主義、反建制、以工人階級文化認同為核心」的政黨。理解 MAGA 不是理解一個人，而是理解一場把美國政治右翼的階級基礎與意識形態同時翻轉的重組。</p>
+
+  <h3>聯盟的組成：工人階級與福音派的結合</h3>
+  <p>MAGA 聯盟的兩塊基石，是<strong>非大學白人工人階級</strong>與<strong>福音派基督徒</strong>，外加傳統企業與能源利益的實用主義結盟。前者是過去半世紀全球化與去工業化的相對輸家——製造業外移、社區凋敝、鴉片類藥物危機——他們把 Trump 視為第一個「認真對待他們的怨懟、且願意對菁英開戰」的政治人物。後者則在文化議題（墮胎、宗教自由、性別）上與 Trump 結成交易同盟：即使 Trump 本人並非虔誠信徒，他任命的三位大法官推翻了 Roe v. Wade，兌現了福音派半世紀的核心目標。這是一個<em>經濟民粹＋文化保守</em>的組合。</p>
+
+  <h3>意識形態的翻轉：從自由貿易到保護主義</h3>
+  <p>Trump 對共和黨最深的改造，是在<strong>經濟與外交路線上背離了 Reagan 正統</strong>。老共和黨信奉自由貿易、財政保守、干預主義外交；MAGA 共和黨則擁抱關稅保護、對赤字容忍度更高（大而美法案增債逾 3 兆美元）、外交上走「美國優先」的交易式現實主義（懷疑北約、要求盟友分攤、對永久戰爭疲乏）。這個翻轉的政治邏輯是：<em>把黨的重心從資本移向勞工的文化認同</em>——用關稅與移民管制回應工人階級對「工作被搶走」的焦慮，即使代價是背離黨過去的經濟教條。</p>
+
+  <div class="lens l-r">
+    <div class="lens-tag">GOP · MAGA 的自我敘事</div>
+    <p>「這個國家被一個橫跨兩黨的建制階級綁架了幾十年——他們用自由貿易掏空了工廠、用開放邊境壓低了工資、用永久戰爭消耗了子弟、用文化戰貶低了信仰與傳統。2024 年，被背叛的多數用選票奪回了國家。trifecta 不是越權，是授權；行政命令不是獨裁，是終於有人肯執行人民的意志。護欄？那些所謂的護欄，多數時候只是建制用來癱瘓民選總統的工具。」</p>
+  </div>
+
+  <h3>MAGA 的執政邏輯：速度、行政權、不可逆</h3>
+  <p>MAGA 的執政風格有一個貫穿的邏輯：<strong>用行政權的速度，繞過立法的緩慢與建制的抵抗</strong>。這解釋了 Trump 2.0 為何在頭幾個月就簽署逾 250 項行政命令、為何用 DOGE 直接縮編機構而非等國會授權、為何在關稅上動用緊急權力（IEEPA）而非走正常立法。這種「行政優先」策略的賭注是：趁 trifecta 之窗與司法多數，把政策既成事實化，即使部分後來被法院推翻（如 IEEPA 關稅），既成的組織與人事改變也難以完全復原。速度本身就是一種護城河。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">250+</div><div class="fig-l">Trump 2.0 至 2026-03 簽署的行政命令數（量級）</div></div>
+    <div><div class="fig-n">3</div><div class="fig-l">首任任命大法官，兌現福音派半世紀目標</div></div>
+    <div><div class="fig-n">關稅</div><div class="fig-l">從自由貿易到保護主義：Reagan 正統的翻轉</div></div>
+    <div><div class="fig-n">工人</div><div class="fig-l">黨的重心從資本移向工人階級文化認同</div></div>
+  </div>
+</section>
+
+<section id="s4b">
+  <div class="sec-label">PART II · CH 04B · 共和黨與 MAGA</div>
+  <h2>MAGA 聯盟的內部裂縫</h2>
+  <p class="lede">從外部看，MAGA 是鐵板一塊；從內部看，它是一個由至少三股力量勉強結盟的聯盟，彼此在關鍵議題上有真實矛盾。理解這些裂縫，才能預測 Trump 之後的共和黨走向——因為維繫聯盟的黏合劑目前主要是 Trump 個人，而非一套穩定的綱領。</p>
+
+  <h3>裂縫一：民粹派 vs 傳統企業／自由市場派</h3>
+  <p>MAGA 的經濟民粹（關稅、產業政策、對大科技的敵意）與共和黨傳統的自由市場派（減稅、去監管、自由貿易）存在結構性張力。大而美法案的減稅與去監管讓後者滿意，但關稅戰讓依賴全球供應鏈的企業界不安。這條裂縫在 Musk 與 Trump 的關係演變上尤其戲劇化——Musk 一度領導 DOGE、是科技右翼的象徵，後於 2025 年 5 月離開，兩人關係隨後生變。<strong>「民粹的關稅」與「企業的自由貿易」無法長期共存於同一綱領，這是聯盟最深的經濟斷層。</strong></p>
+
+  <h3>裂縫二：孤立主義 vs 鷹派</h3>
+  <p>在外交上，MAGA 內部同樣分裂：一派是「美國優先」的準孤立主義（反對援烏、懷疑北約、對永久戰爭疲乏），另一派是傳統的國安鷹派（對中國強硬、支持以色列、主張軍力優勢）。Trump 的交易式外交（對烏俄的斡旋、對盟友的施壓）試圖同時安撫兩派，但在具體衝突（如是否軍援烏克蘭、如何對待伊朗）上，這條裂縫會週期性地爆發。</p>
+
+  <h3>裂縫三：後 Trump 的繼承問題</h3>
+  <p>MAGA 最大的結構性不確定，是它高度依賴 Trump 個人的動員力與仲裁權。Vance 作為副總統被視為潛在繼承人，代表 MAGA 的「知識化」版本（把民粹包裝成連貫的意識形態）；但 Trump 之後聯盟能否維持凝聚、還是會裂解回民粹派與建制派的內戰，是 2028 年最大的未知數。<strong>一個依賴單一領袖黏合的聯盟，其最大風險永遠是繼承。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 裂縫為何暫時不裂</div>
+    <p>這三條裂縫目前之所以未使聯盟解體，靠的是兩個黏合劑：其一是 Trump 個人的仲裁權與對「不忠者」發動初選的威懾（見第 2B 章）；其二是<em>共同的敵人</em>——對民主黨與「建制」的共同敵意，暫時壓過了內部分歧。但這兩個黏合劑都是脆弱的：前者隨 Trump 政治生命的自然衰減而遞減，後者在失去共同敵人（例如 2026 期中失利後的檢討）時可能鬆動。對外部觀察者而言，MAGA 的內部裂縫不是「會不會裂」的問題，而是「Trump 之後何時裂、沿哪條縫裂」的問題。</p>
+  </div>
+</section>
+
+<section id="s5">
+  <div class="sec-label">PART II · CH 05 · 民主黨</div>
+  <h2>民主黨：多元聯盟的困境</h2>
+  <p class="lede">如果共和黨的問題是「被一個人重塑得太徹底」，民主黨的問題正相反：它是一個由太多異質群體組成、缺乏統一敘事與單一領袖的聯盟。2024 年的敗選把這個困境暴露無遺——一個在人口結構上「應該」佔優的政黨，為何在關鍵的工人階級與少數族裔選民中持續流失？</p>
+
+  <h3>聯盟的組成：都會專業階層＋少數族裔＋年輕世代</h3>
+  <p>民主黨當前的聯盟由三塊構成：<strong>都會與郊區的大學學歷專業階層</strong>（黨的財源與文化主導者）、<strong>少數族裔選民</strong>（非裔、拉美裔、亞裔，歷史上的鐵票但正在鬆動）、<strong>年輕世代</strong>（進步議題的動力）。這個聯盟的內部矛盾是尖銳的：受過高等教育的白人專業階層在文化議題上最進步，但其經濟利益與工人階級未必一致；少數族裔選民在文化議題上往往比黨的白人進步派更保守（尤其在移民、犯罪、性別議題上）。<strong>民主黨的「多元」既是它的道德資產，也是它難以凝聚統一訊息的結構負擔。</strong></p>
+
+  <h3>核心困境：工人階級的流失</h3>
+  <p>民主黨最深的結構問題，是它作為「勞工政黨」的身分正在瓦解。過去半世紀的教育極化，使非大學白人工人階級大規模流向共和黨；而 2024 年的警訊是，<em>這個流失已擴散到拉美裔與部分非裔工人階級選民</em>——他們在通膨、邊境、經濟焦慮上，越來越傾向共和黨的訊息。這動搖了民主黨長期依賴的「人口結構終將帶來多數」假設（所謂 demographic destiny）。<strong>當一個自我定位為「勞工與弱勢代言人」的政黨，持續失去勞工與部分弱勢族裔的選票時，它的存在理由本身就出現了裂縫。</strong></p>
+
+  <div class="lens l-d">
+    <div class="lens-tag">DEMOCRATIC 的自我敘事</div>
+    <p>「我們是守護憲政、多元與弱勢的政黨。面對的是一場對民主本身的攻擊——行政權在擴張、文官在被清洗、法院命令在被試探、選區在被公然操縱。但我們也必須誠實面對自己的失敗：我們讓文化議題蓋過了經濟訊息，讓工人階級覺得我們更在乎菁英的道德議程而非他們的生計。2026 期中是奪回眾院、恢復制衡的機會，但要贏，我們得先贏回那些離開我們的工人。」</p>
+  </div>
+
+  <h3>身分政治的兩難</h3>
+  <p>民主黨面對一個難解的策略兩難：<strong>身分政治</strong>（環繞種族、性別、性向的權利議題）既是它動員都會進步基本盤與少數族裔的核心，也是它在工人階級選民中失分的來源之一——後者常把民主黨的文化議程感知為「菁英的、與生計無關的、甚至冒犯常識的」。黨內對此有真實分歧：進步派主張堅守道德立場、擴大動員，溫和派主張重回經濟訊息、淡化文化議題。這條路線之爭是第 5B 章的主題，也是民主黨能否在 2026、2028 重建多數的關鍵。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">215</div><div class="fig-l">119 屆眾院民主黨席次：距多數僅數席之遙</div></div>
+    <div><div class="fig-n">流失</div><div class="fig-l">2024 警訊：工人階級流失擴散到拉美裔選民</div></div>
+    <div><div class="fig-n">2026</div><div class="fig-l">期中：奪回眾院、恢復制衡的第一機會</div></div>
+    <div><div class="fig-n">無領袖</div><div class="fig-l">缺乏統一敘事與單一仲裁者的結構弱點</div></div>
+  </div>
+</section>
+
+<section id="s5b">
+  <div class="sec-label">PART II · CH 05B · 民主黨</div>
+  <h2>建制 vs 進步：民主黨的內戰</h2>
+  <p class="lede">民主黨的內部張力，最集中地體現在「建制中間派」與「進步派」的路線之爭。這場內戰不像共和黨那樣被一個強勢領袖壓服，而是持續公開地進行——它決定了民主黨在 2026、2028 會以什麼面貌重返賽場。</p>
+
+  <h3>兩條路線的分歧點</h3>
+  <p>建制中間派（以多數黨內現任者與傳統黨機器為代表）主張：回歸經濟訊息、淡化最激進的文化立場、爭取郊區溫和選民與流失的工人階級。進步派（以桑德斯—AOC 一系與小額捐款動員為代表）主張：用普遍性的經濟政策（全民健保、免學貸、富人稅）與鮮明的道德立場動員年輕與低投票率選民、把黨的重心拉回勞工。兩者在<em>健保、移民、以巴、警政</em>等議題上有真實分歧。</p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">進步派 · 論點</div><p>民主黨敗在「不夠大膽」——溫吞的中間路線無法激起低投票率的年輕與勞工選民。應該用普遍性的經濟重分配（而非針對性的身分議題）重建跨種族的勞工多數，這才是對抗 MAGA 民粹的正解：用左翼民粹回應右翼民粹。</p></div>
+    <div class="d-con"><div class="d-tag">建制中間派 · 反論</div><p>民主黨敗在「離常識太遠」——在移民、犯罪、性別議題上被進步派拖到多數選民無法接受的位置。搖擺州的勝負在溫和郊區選民手裡，激進的經濟與文化議程會嚇跑他們。回歸經濟務實、淡化文化戰，才能奪回眾院。</p></div>
+  </div>
+
+  <h3>為什麼這場內戰難有結論</h3>
+  <p>這場路線之爭之所以持續無解，是因為<strong>兩種診斷各有部分真實、且各自對應黨內不同的選區與金主</strong>。進步派掌握了動員能量與小額捐款、建制派掌握了現任席次與傳統機器；前者在深藍選區與初選中佔優、後者在搖擺選區的大選中更有勝算。加上民主黨缺乏一個像 Trump 那樣能仲裁路線的強勢領袖，這場內戰只能透過一場場初選與選舉逐案裁決，而非一次性解決。<strong>民主黨的碎片化，既是它多元的代價，也是它在對抗一個高度紀律化的 MAGA 共和黨時的結構劣勢。</strong></p>
+</section>
+
+<section id="s6">
+  <div class="sec-label">PART II · CH 06 · 制度與法院</div>
+  <h2>制度與法院：三權分立的壓力測試</h2>
+  <p class="lede">前兩個稜鏡看的是政黨；這個稜鏡看的是不屬於任何政黨的「制度本身」。從制度的視角，2025–26 年最重要的問題不是誰執政，而是三權分立的邊界——尤其是行政權對立法權（課稅、支出）與司法權（是否服從法院命令）的擴張，能被推到多遠。</p>
+
+  <h3>行政權的擴張：單一行政首長理論</h3>
+  <p>Trump 2.0 的法理核心是<strong>單一行政首長理論</strong>（unitary executive theory）——主張憲法把全部行政權授予總統一人，因此總統應能指揮、開除任何行政部門官員、控制所有獨立機構。這個理論在 2026 年 6 月的 Cook 系列判決中取得重大勝利：最高法院推翻 Humphrey's Executor、允許總統開除獨立機構首長（Fed 除外）。這意味著過去被設計成「政治中立」的監理機構（貿易、通訊、勞動關係等），此後都在總統的直接控制之下——<strong>行政國家的政治中立性被大範圍拆解，這是憲政結構層面近數十年最深的變化之一。</strong></p>
+
+  <h3>與立法權的邊界：課稅與支出之爭</h3>
+  <p>行政與立法之爭的核心，是「錢」——課稅權與支出權在憲法上明確屬於國會。IEEPA 關稅案正是這條邊界的裁決：Trump 試圖用緊急權力繞過國會單方面課徵關稅，最高法院 6–3 判定越權，重申「課稅是國會的權力」。與此對應的另一條線是<em>支出</em>——行政部門是否有權拒絕花掉國會已撥的款（impoundment）、或透過 DOGE 事實上凍結機構運作，同樣是行政試探立法權的前沿。<strong>「誰掌握荷包」是分權制衡最古老的戰場，2026 年它在關稅與支出兩端同時被測試。</strong></p>
+
+  <h3>緊急案件表：法院如何在「完整審理前」就改變現實</h3>
+  <p>2025–26 年司法與行政的角力，還有一個少被注意、卻極重要的維度——<strong>緊急案件表</strong>（emergency docket，俗稱「影子案件表」）。當行政命令被下級法院禁令擋下、政府緊急上訴時，最高法院往往在<em>尚未完整言詞辯論、也不附完整理由</em>的情況下，就先裁定是否讓政策在訴訟期間生效。這使緊急案件表成為 Trump 2.0 與法院攻防的實質前線：許多行政擴權措施能否「先做起來」，取決於法院在緊急階段的臨時裁定，而非數月後的正式判決。這個機制的結構意義是雙面的：一方面它讓行政得以用速度創造既成事實（趁緊急裁定放行、事實上推進政策）；另一方面它也讓法院能<em>即時</em>踩煞車（如第三國遣返被即時叫停）。<strong>緊急案件表因此是「行政求快 vs 司法劃線」這場賽跑的計時器——它決定了在完整審理落槌之前，現實會被哪一方先改變。</strong></p>
+
+  <h3>與司法權的邊界：法院命令會被服從嗎</h3>
+  <p>三權分立最終極的護欄，是「行政部門會不會服從法院命令」。這在 2025–26 年成為真實的焦慮點：多起訴訟（移民第三國遣返、機構縮編、人事開除）中，法院對行政部門發出禁令，而觀察的核心是行政是否即時、完整地遵守。到目前為止，<strong>系統的答案大致是「服從」——2026 年 2 月的第三國遣返被判違法後停止、IEEPA 關稅被判違憲後於數日內終止課徵、Cook 依判決留任</strong>。這是護欄仍在運作的最強證據。但每一次「試探邊界—法院劃線—行政服從」的循環，都在消耗這道護欄的信用儲備；真正的憲政危機不是行政擴權，而是行政公然拒絕服從法院——這條線目前尚未被跨越。</p>
+
+  <div class="prism">
+    <div class="pv-i"><div class="pv-tag">INSTITUTIONS · 中性讀法</div><p>制度硬體在承壓下運作：關稅被推翻、遣返被叫停、Cook 留任、行政服從判決。但行政國家的中立性（Humphrey's Executor 之死）已實質改變，這不是暫時的、是結構性的。</p></div>
+    <div class="pv-r"><div class="pv-tag">GOP 讀法</div><p>這是憲法本意的回歸：全部行政權本就屬於總統一人，過去的「獨立機構」才是違憲的第四權。法院拆解行政國家、把權力還給民選總統，是撥亂反正。</p></div>
+    <div class="pv-d"><div class="pv-tag">DEMOCRATIC 讀法</div><p>這是威權化的技術路徑：不是一次政變，而是一連串把權力集中到行政的判決與命令，逐步掏空制衡。每一次「行政最終服從」都被用來證明沒事，但邊界已被永久地往前推。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一組判決，三種定性：硬體運作、憲法回歸、威權技術</div>
+</section>
+
+<section id="s7">
+  <div class="sec-label">PART II · CH 07 · 各州與聯邦</div>
+  <h2>各州與聯邦：聯邦制作為戰場</h2>
+  <p class="lede">美國不是一個政府，是五十一個（聯邦＋五十州）。當聯邦層級被一方掌握時，另一方退守它掌握的州，把州變成抵抗與另類政策的容器。2022 年 Dobbs 案把墮胎權交還各州後，這種「兩套美國並存」的格局急遽加深——聯邦制從行政分工的技術問題，變成了文化戰的主戰場。</p>
+
+  <h3>紅州與藍州：兩套並存的法律現實</h3>
+  <p>在 Dobbs 之後，美國事實上分裂成兩套法律現實：<strong>墮胎</strong>在藍州受保護、在多數紅州被嚴格限制或禁止；<strong>槍枝</strong>在紅州寬鬆、藍州嚴格；<strong>移民</strong>上藍州設「庇護城市」抵制聯邦執法、紅州主動配合甚至加碼；<strong>氣候與能源</strong>上加州等藍州自訂高於聯邦的標準、產能州則反向。同一個公民的權利與義務，越來越取決於他住在哪一州。<strong>聯邦制讓失勢的一方永遠有一塊可以繼續執政、繼續示範另類路線的領土——這既是美式民主的減壓閥（分歧可在州層級各行其是），也是分裂的固化器（兩套美國越走越遠）。</strong></p>
+
+  <h3>聯邦制的雙向武器化</h3>
+  <p>聯邦制在 2025–26 被兩個方向同時武器化：<strong>聯邦向州施壓</strong>——透過附條件的聯邦撥款、移民執法、國民兵部署等手段，逼藍州就範；<strong>州向聯邦抵抗</strong>——藍州州長與檢察長組成法律聯盟，對聯邦行政命令發起一連串訴訟（許多 2026 年的關鍵禁令正源於州檢察長的告訴）。這使得<em>州檢察長</em>成為全國政治的新前線：藍州檢察長是抵抗聯邦行政擴權的主力，紅州檢察長則在民主黨執政時扮演同樣角色。聯邦制因此不是靜態的分權，而是一個雙方輪流攻防的動態戰場。</p>
+
+  <div class="lens l-s">
+    <div class="lens-tag">FEDERALISM · 州作為容器</div>
+    <p>「美國從來不是一個同質的國家，是一個由差異極大的區域拼成的聯邦。聯邦制的天才在於：德州可以是德州、加州可以是加州，不必逼對方變成自己。在極化的年代，這既是救贖也是詛咒——救贖，因為它讓 3.3 億人不必為每一個道德分歧打全國內戰；詛咒，因為當兩套美國的法律現實差異大到公民的基本權利都取決於郵遞區號時，共同的國族身分還剩下多少？」</p>
+  </div>
+
+  <h3>文化戰：教育、圖書、性別作為戰場</h3>
+  <p>聯邦制也是文化戰的容器。在紅州，圍繞學校課綱（如何教種族史）、圖書館藏書、跨性別議題、宗教在公共領域的角色，展開了一連串立法；藍州則反向立法保護相關權利。這些議題的政治能量遠超其直接影響的人數，因為它們是<em>身分與價值的代理戰爭</em>——雙方都用它們動員基本盤、定義「我們 vs 他們」。文化戰之所以在州層級最激烈，正因為 Dobbs 之後許多爭議被交還各州，州議會成了最直接的戰場。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">50</div><div class="fig-l">州：五十套可分道揚鑣的法律現實</div></div>
+    <div><div class="fig-n">Dobbs</div><div class="fig-l">2022 墮胎權交還各州，加深紅藍分裂</div></div>
+    <div><div class="fig-n">州檢察長</div><div class="fig-l">抵抗／配合聯邦的新前線</div></div>
+    <div><div class="fig-n">庇護城市</div><div class="fig-l">藍州抵制聯邦移民執法的制度工具</div></div>
+  </div>
+</section>
+
+<section id="s7b">
+  <div class="sec-label">PART II · CH 07B · 各州與聯邦</div>
+  <h2>gerrymandering 與 2026 中期重劃戰</h2>
+  <p class="lede">聯邦制作為戰場，在 2025–26 年最戲劇化的體現，是一場罕見的「期中重劃戰」——兩黨在非普查年主動重劃國會選區，把 gerrymandering 從十年一次的例行公事，變成即時決定 2026 眾院控制權的軍備競賽。</p>
+
+  <h3>什麼是 gerrymandering</h3>
+  <p>gerrymandering 是操縱選區邊界以放大己方席次的技術，核心手法有二：<strong>packing</strong>（把對手選民集中「打包」進少數幾個選區，讓其他選區都由己方小贏）與<strong>cracking</strong>（把對手選民「打散」稀釋進多個己方選區）。因為多數州的國會選區由州議會（而非獨立委員會）劃定，掌握州議會的政黨可以合法地為自己畫出遠超其得票比例的席次。這正是第 1B 章所說「眾院是唯一多數可被工程化的戰場」的具體機制。</p>
+
+  <h3>2025–26 的軍備競賽：德州＋5、加州＋5</h3>
+  <p>2025–26 年出現了非比尋常的「中期重劃」：共和黨掌控的<strong>德州</strong>重新劃分選區、預估為共和黨增約 5 席，最高法院的保守多數允許該地圖用於 2026 期中（儘管下級法院認定其涉種族性 gerrymander）；民主黨掌控的<strong>加州</strong>則以公投／特別選舉通過反制地圖、預估為民主黨增約 5 席，最高法院亦放行。此外密蘇里、北卡、俄亥俄等州也在 2024–26 間通過新地圖，猶他經訴訟另劃。<strong>這是一場「你劃我也劃」的相互抵銷式軍備競賽——雙方各增約 5 席、淨效果部分對沖，但整體上把眾院多數更深地鎖進了選區工程、而非民意本身。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 重劃戰的深層意義</div>
+    <p>2026 重劃戰的意義超過席次算術。它揭示了三件事：其一，<strong>眾院的多數越來越是「畫」出來的、而非「選」出來的</strong>——當雙方都極致 gerrymander 時，能真正競爭的搖擺選區數量持續萎縮，多數議員只需擔心初選（見第 2B 章），加深極化。其二，<strong>最高法院對兩黨的地圖都放行</strong>，實質上退出了對政治性 gerrymander 的司法審查（2019 年 Rucho 案已裁定政治性 gerrymander 不可由聯邦法院裁決），把它交還政治過程。其三，<strong>它把聯邦制的「州作為戰場」推到極致</strong>——州議會的控制權，直接決定了聯邦眾院的組成。這也是為什麼 2026 期中的席次結果，必須放在「重劃戰」而非單純「民意擺盪」的框架下讀。</p>
+  </div>
+</section>
+
+<section id="s8">
+  <div class="sec-label">PART II · CH 08 · 外國人／投資人</div>
+  <h2>外國人與投資人：美元霸權下的政策擺盪</h2>
+  <p class="lede">前七個稜鏡看的是美國人內部的分歧；這第八個稜鏡，是本報告的讀者最可能站的位置——外國投資人、企業與政府。從這個位置看，美國政治的黨派鬥爭多半是噪音，真正該定價的是三個結構性變數：關稅與通膨的傳導、Fed 與美元的信任、以及美股的極端集中。誰當總統是變數，這三個是命門。</p>
+
+  <h3>第一層：美元霸權——所有分析的地基</h3>
+  <p>理解「為什麼美國的極化會傳導到全世界」，必須從美元說起。美元是全球儲備貨幣、國際貿易與大宗商品的計價單位、各國央行的主要外匯儲備、美國國債是全球「無風險資產」的定錨。這給美國一個獨特的<strong>過度特權</strong>：它能以本幣借貸、幾乎無限地為赤字融資、並透過制裁把美元體系武器化。這也意味著，<em>美國的任何政策擺盪——關稅、赤字、Fed 人事——都會透過美元與國債，即時傳導到每一個持有美元資產的國家</em>。外國投資人對美國政治的關注，本質上是對「這個地基會不會鬆動」的關注。</p>
+
+  <h3>第二層：三個該定價的變數</h3>
+  <ul class="plain">
+    <li><strong>關稅與通膨的傳導</strong>：Trump 的關稅推高美國通膨（Fed 估算若無關稅，核心通膨約 2.3% 而非 3.2%），並打亂全球供應鏈；但 IEEPA 關稅已被最高法院推翻，剩下 Section 232 產業關稅（鋼、鋁、汽車）仍在。關稅政策的高度反覆本身，就是外資最難定價的不確定性。</li>
+    <li><strong>Fed 獨立性與美元信任</strong>：Warsh 接任主席、開除 Cook 未遂——Fed 獨立性被施壓但暫時守住。這是美元長期信用的核心抵押品，其侵蝕比任何單一關稅更傷美國的儲備貨幣地位。</li>
+    <li><strong>美股的極端集中</strong>：美股由 AI／科技七雄高度集中，少數幾家公司佔了指數市值與漲幅的極大比例。這使全球資本對「美國例外論」的下注，實質上高度押注在一個 AI 敘事上——集中既是報酬來源，也是尾部風險。</li>
+  </ul>
+
+  <div class="lens l-f">
+    <div class="lens-tag">FOREIGN CAPITAL · 外資的理性計算</div>
+    <p>「我不需要判斷 Trump 是好是壞、民主是否倒退——那是美國人的內部帳。我需要定價的是：第一，關稅與政策的反覆會給我的供應鏈與現金流帶來多少不確定性？第二，Fed 獨立性與財政赤字會不會侵蝕美元與美債這個我全部資產配置的地基？第三，如果 AI 七雄的敘事逆轉，我對『美國例外論』的超配會有多痛？護欄仍在（法院會推翻越權關稅、會保護 Fed）是我的定心丸；極化導致的政策不連續，才是我真正的成本。」</p>
+  </div>
+
+  <h3>第三層：de-risking 而非 decoupling</h3>
+  <p>對外國政府與企業而言，2025–26 的美國政策擺盪加速了一個既有趨勢：<strong>對美國政策風險的分散（de-risking），而非與美國脫鉤（decoupling）</strong>。美元太深、美國市場太大、AI 與資本市場的引力太強，脫鉤在可見期限內不現實；但把供應鏈、外匯儲備與投資組合對「單一美國政策路徑」的暴露適度分散，成為理性選擇。這正是第 19 章的主題——政策的不連續，如何把全球資本從「無腦超配美國」推向「超配但避險」。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">儲備貨幣</div><div class="fig-l">美元：所有傳導的地基與過度特權</div></div>
+    <div><div class="fig-n">3.2% → 2.3%</div><div class="fig-l">核心通膨：Fed 估關稅的貢獻（有無關稅之差）</div></div>
+    <div><div class="fig-n">七雄</div><div class="fig-l">美股由 AI／科技巨頭極端集中</div></div>
+    <div><div class="fig-n">de-risking</div><div class="fig-l">外資反應：分散政策風險而非脫鉤</div></div>
+  </div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART III</div>
+  <h2>動力 · The Dynamics</h2>
+  <div class="pd-sub">2024 到 2026：trifecta 如何運轉</div>
+</div>
+
+<section id="s9">
+  <div class="sec-label">PART III · CH 09</div>
+  <h2>2024 大選與 trifecta 的形成</h2>
+  <p class="lede">2024 年 11 月，Trump 完成美國政治史上罕見的東山再起——成為繼 Grover Cleveland 之後第二位卸任後再度當選的總統，並帶領共和黨同時奪下白宮與國會兩院。理解這場勝選的驅動力，是理解 Trump 2.0 一切政策授權來源的起點。</p>
+
+  <h3>勝選的三個引擎：通膨、邊境、文化</h3>
+  <p>2024 年 Trump 勝選的核心，不是單一議題，而是三股怨懟的合流：<strong>通膨</strong>（拜登任內的物價上漲侵蝕了實質所得，尤其打擊工人階級與低收入選民的日常體感）、<strong>邊境</strong>（南部邊境的移民數字成為安全與經濟焦慮的象徵）、以及<strong>文化議題</strong>（部分選民對民主黨的文化議程感到疏離）。這三者共同把一批關鍵選民——尤其是搖擺州的工人階級、以及流失中的拉美裔選民——推向共和黨。<strong>2024 不是意識形態的勝利，是「現任者管理不善」加上「文化疏離」的懲罰性投票。</strong></p>
+
+  <h3>trifecta 的算術與其脆弱性</h3>
+  <p>共和黨拿下白宮、翻轉參院（53–47）、守住眾院（約 220–215）。但這個 trifecta 有一個關鍵特徵：<strong>眾院多數極薄</strong>——僅個位數席次。這意味著任何重大立法都不容許幾張反對票，黨內少數議員就能勒索議程（大而美法案在眾院僅以 218–214 通過即是明證）。加上「總統黨在期中通常失分」的鐵律，這個 trifecta 從第一天起就帶著倒數計時器：它的權力窗口很可能只到 2026 期中為止。<strong>這解釋了 Trump 2.0 為何一切求快——因為執政聯盟自己知道，這扇門可能兩年後就關上。</strong></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">第 47 任</div><div class="fig-l">Trump 2025-01-20 就任；卸任後再當選的罕見案例</div></div>
+    <div><div class="fig-n">通膨・邊境・文化</div><div class="fig-l">2024 勝選的三個怨懟引擎</div></div>
+    <div><div class="fig-n">個位數</div><div class="fig-l">眾院多數席次：近代最薄之一</div></div>
+    <div><div class="fig-n">2 年</div><div class="fig-l">trifecta 窗口：很可能只到 2026 期中</div></div>
+  </div>
+</section>
+
+<section id="s9b">
+  <div class="sec-label">PART III · CH 09B</div>
+  <h2>2020 的陰影：和平轉移作為終極紅線</h2>
+  <p class="lede">要理解 2025–26 年的一切焦慮，必須回到 2020 年。那一年的選舉結果爭議、以及 2021 年 1 月 6 日的國會衝擊，第一次讓「權力和平轉移」——這個被視為理所當然的民主基石——變成了美國政治的公開問題。它是本報告「極化是命門」論證中最尖銳的一塊，也是第 14 章三條紅線裡最終極的一條。</p>
+
+  <h3>為什麼和平轉移是最終極的紅線</h3>
+  <p>民主的所有其他機制——選舉、制衡、司法審查——最終都依賴一個前提：<strong>輸掉選舉的一方會承認結果、和平移交權力</strong>。這個前提一旦動搖，整套系統的正當性基礎就開始鬆動。2020 年的爭議之所以是分水嶺，不在於任何具體指控的真偽（法院系統性地駁回了選舉舞弊的訴訟），而在於它把「敗選方是否必然承認結果」從一個沒人會問的預設，變成了一個需要每次重新確認的變數。<strong>當一部分政治精英與選民不再無條件接受選舉結果時，極化就從「政策分歧」升級為「規則本身的分歧」——這正是命門的所在。</strong></p>
+
+  <h3>它如何滲透進 2024 與 2026</h3>
+  <p>2020 的陰影以兩種方式滲透進後續的政治。其一，<strong>選舉行政本身被政治化</strong>——計票、認證、選務人員的中立性，都從技術問題變成了黨派戰場，各州圍繞投票規則的立法戰持續進行。其二，<strong>「選舉是否可信」成為情感極化的核心燃料</strong>（見第 2B 章的媒體機制）：兩套資訊宇宙對同一場選舉的公正性給出相反的信念，使「敗選承認」的社會共識被侵蝕。2024 年 Trump 勝選，這條線暫時沒有被測試（勝方不會質疑自己的勝利）；但真正的考驗會在<em>某一次執政方敗選時</em>降臨——那才是「和平轉移」這條紅線被實測的時刻。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 為什麼這條線目前「未被跨越」</div>
+    <p>第 14 章判定三條紅線截至 2026-07 皆未被跨越，其中「權力和平轉移」這一條需要精確理解：2021 年 1 月的權力移交<em>最終仍然發生了</em>——認證程序在中斷後完成、新政府就任。這既證明了系統的韌性（衝擊未能阻止移交），也暴露了脆弱（移交第一次遇到了實質阻力）。這正是本報告「承壓、未斷」定性的原型案例。對外部觀察者而言，真正該監測的不是「有沒有人質疑選舉」（極化下這已成常態），而是<strong>「某次執政方敗選時，權力是否仍如期、和平地移交」</strong>——這是無法用當前資料預判、只能在事件發生時觀察的終極讀數，也是 2028 年比任何政策都更重要的結構性看點。</p>
+  </div>
+</section>
+
+<section id="s10">
+  <div class="sec-label">PART III · CH 10</div>
+  <h2>Trump 2.0：行政權擴張、DOGE 與文官清洗</h2>
+  <p class="lede">Trump 2.0 與首任最大的不同，是<strong>準備充分、目標明確、執行迅速</strong>。首任的四年很大程度上被建制內部的抵抗與自身的混亂消耗；二任則帶著一套清晰的行政擴權藍圖上任——用行政命令的速度，重塑聯邦政府的人事與結構。</p>
+
+  <h3>行政命令的洪流：以速度繞過摩擦</h3>
+  <p>Trump 2.0 就任後以罕見的速度簽署行政命令，至 2026 年 3 月已逾 250 項，涵蓋移民、能源、關稅、性別、聯邦人事等全部領域。這種「行政優先」策略的邏輯（見第 4 章）是：<em>立法緩慢、司法可繞、既成事實難逆</em>。即使部分命令後來被法院推翻（如 IEEPA 關稅），其造成的組織與人事變動也已既成——速度本身創造了不可逆性。</p>
+
+  <h3>DOGE：政府效率部的興衰</h3>
+  <p><strong>DOGE（Department of Government Efficiency，政府效率部）</strong>是 Trump 2.0 縮編行政國家最具象徵性的工具。它最初由 Musk 領銜，以「刪減浪費、縮編機構、清理文官」為使命，聲稱累計為聯邦節省逾 2,140 億美元（此數字被多方報導指為誇大、重寫或高估）。但 DOGE 的實際軌跡是急起急落：Musk 於 2025 年 5 月離任，DOGE 隨後失去中樞地位，並於 <strong>2026 年 7 月 4 日按原定的臨時組織落日條款自我終結</strong>（部分報導稱其早在 2025 年底已實質解散、人事管理局長甚至稱它「已不存在」）。<strong>DOGE 本身已成歷史，但它造成的縮編、離職與機構重組的後果，散落在各部門延續——它是一個「機構已死、餘波仍在」的案例。</strong></p>
+
+  <h3>文官清洗與行政國家的拆解</h3>
+  <p>DOGE 只是更大工程的前鋒。Trump 2.0 的深層目標是<strong>拆解「行政國家」（administrative state）</strong>——即那個由專業文官、獨立機構、既定程序構成的、被 MAGA 視為「深層政府」的常設官僚體系。手段包括：擴大政治任命範圍（把原本受保護的文官職位重新分類為可隨意撤換）、透過 Cook 系列判決取得開除獨立機構首長的權力（見第 3B、6 章）、以及用預算與重組削弱特定機構。這場拆解的憲政意義是雙面的：支持者視之為「把權力還給民選總統、終結不負責任的官僚第四權」；批評者視之為「摧毀專業中立性、把整個政府變成總統的政治工具」。<strong>這是 Trump 2.0 對美國制度最深、也最可能長期不可逆的改造。</strong></p>
+
+  <div class="prism">
+    <div class="pv-r"><div class="pv-tag">GOP 讀法</div><p>拆解行政國家是撥亂反正：不受選舉問責的文官與獨立機構才是真正的反民主力量。DOGE 雖然收場，但它證明了政府可以被大刀闊斧地精簡，方向是對的。</p></div>
+    <div class="pv-d"><div class="pv-tag">DEMOCRATIC 讀法</div><p>這是威權化的核心工程：把專業中立的文官換成效忠者、把獨立機構變成總統的工具，是把民主制度掏空成外殼。DOGE 的混亂與誇大的省錢數字，正暴露了整場工程的破壞性。</p></div>
+    <div class="pv-i"><div class="pv-tag">INSTITUTIONS 讀法</div><p>行政國家的中立性確實被實質削弱（Humphrey's Executor 已死）；但法院仍在關鍵處劃線（Fed 例外、IEEPA 推翻）。淨結果是行政權顯著擴張、但未達無制衡——邊界被推前、尚未被推倒。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一場拆解，三種定性：撥亂反正、威權工程、邊界推前</div>
+</section>
+
+<section id="s11">
+  <div class="sec-label">PART III · CH 11</div>
+  <h2>大而美法案（OBBBA）：二任的核心議程</h2>
+  <p class="lede">如果說行政命令是 Trump 2.0 的速度武器，那麼《大而美法案》（One Big Beautiful Bill Act, OBBBA）就是它唯一的、也是最重大的立法成就。這部 2025 年 7 月 4 日簽署的法律，把 Trump 二任的財政與社會議程一次打包，也把「減稅優先、赤字容忍、削減福利」的 MAGA 經濟路線寫進了法律。</p>
+
+  <h3>法案的內容：減稅、削福利、增赤字</h3>
+  <p>OBBBA（公法 119-21）是一部透過「預算調節」程序（只需簡單多數、繞過參院 filibuster）通過的龐大法案——參院以 51–50（副總統 Vance 決勝票）、眾院以 218–214、於 2025 年 7 月 4 日簽署。其三大支柱是：<strong>減稅</strong>（將 2017 年即將到期的減稅永久化，並新增免小費稅、免加班稅等臨時減免）、<strong>削減福利</strong>（Medicaid 約削減 6,250 億美元、SNAP 糧食券約削減 2,950 億美元，並加嚴工作要求與資格審查）、<strong>增加赤字</strong>（國會預算辦公室 CBO 估計十年增債約 3.4 兆美元，另加約 5,000 億美元利息）。CBO 並估計其醫療條款將使約 1,180 萬人在 2034 年前失去健保。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">51–50</div><div class="fig-l">參院表決：副總統 Vance 投下決勝票</div></div>
+    <div><div class="fig-n">218–214</div><div class="fig-l">眾院表決：薄多數的極限</div></div>
+    <div><div class="fig-n">+3.4 兆</div><div class="fig-l">CBO 估十年增債（另加約 5,000 億利息）</div></div>
+    <div><div class="fig-n">−6,250 億</div><div class="fig-l">Medicaid 十年削減；SNAP 另削約 2,950 億</div></div>
+  </div>
+
+  <h3>結構意義：MAGA 經濟學的成文化</h3>
+  <p>OBBBA 的深層意義，在於它把 MAGA 經濟路線的內在張力攤在法律裡：<strong>它同時服務了共和黨聯盟中的兩塊利益</strong>——減稅與去監管取悅了傳統企業與高所得者，而「免小費稅、免加班稅」等條款則瞄準工人階級的直接體感。但它削減 Medicaid 與 SNAP（其受益者中有相當比例是共和黨自己的工人階級選民），又埋下了政治風險——這是「減稅給資本、削福利給勞工」的內在矛盾的立法版。<strong>OBBBA 因此不只是一部財政法案，更是理解 MAGA 聯盟能否持續的一塊試金石：當減稅的好處主要流向上層、而福利削減的痛苦落在基層時，這個跨階級聯盟的黏合劑會不會鬆動？</strong></p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">支持方 · 論點</div><p>永久化減稅給了企業與家庭確定性、免小費與加班稅直接嘉惠勞工、削減福利中的浪費與加嚴工作要求恢復了對工作的獎勵。增債是短期代價，成長（2025 年一度報 4.3%）會把它賺回來。</p></div>
+    <div class="d-con"><div class="d-tag">反對方 · 反論</div><p>減稅的好處高度集中於高所得，削減 Medicaid／SNAP 卻直接打擊低收入者（含許多共和黨選民），1,180 萬人恐失健保。3.4 兆增債在利率高企時尤其危險，把財政赤字推向不可持續。</p></div>
+  </div>
+</section>
+
+<section id="s12">
+  <div class="sec-label">PART III · CH 12</div>
+  <h2>關稅戰 2.0 與經濟</h2>
+  <p class="lede">關稅是 Trump 經濟哲學的核心信仰——他長期主張關稅能保護美國製造、逼迫貿易對手讓步、並為財政創收。Trump 2.0 把這個信仰推到極致，發動了全面的關稅戰 2.0；但這場戰爭在 2026 年 2 月撞上了一道意料之外的牆——最高法院。</p>
+
+  <h3>關稅的三重目標與其內在矛盾</h3>
+  <p>Trump 的關稅同時追求三個彼此張力的目標：<strong>保護</strong>（用關稅重建國內製造、逼供應鏈回流）、<strong>談判籌碼</strong>（用關稅威脅逼貿易對手在市場准入、對中立場上讓步）、<strong>創收</strong>（把關稅當作可觀的財政收入來源）。這三者內在矛盾：若關稅成功逼回製造（保護），進口就減少、創收就落空；若當籌碼談成協議而撤稅，保護與創收都不成立。這種目標的內在張力，使關稅政策高度反覆、難以預測——而<em>不可預測性本身</em>正是它對全球供應鏈與投資人最大的成本。</p>
+
+  <h3>IEEPA 關稅的違憲：2026 年 2 月的裁決</h3>
+  <p>Trump 2.0 為求速度，動用《國際緊急經濟權力法》（IEEPA）的緊急權力單方面課徵大範圍關稅，繞過國會的立法程序。這條捷徑在 2026 年 2 月 20 日被最高法院以 <strong>6–3 判定違憲</strong>：法院裁定 IEEPA 授權「規範進口」不包含「課徵關稅」，而課稅權屬於國會（憲法第一條）。政府於同日發布行政命令終止相關關稅、海關於 2 月 24 日停止課徵。被推翻的 IEEPA 關稅原估十年可創收約 1.4 兆美元——這對已因 OBBBA 增債 3.4 兆的財政，是一記重擊。<strong>但 Section 232 產業關稅（鋼、鋁、汽車、重卡）走的是另一條合法授權、不受此判決影響，仍然有效。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 關稅裁決的雙重訊息</div>
+    <p>IEEPA 關稅案是本報告核心論證的最佳範例。它同時傳達兩個訊息：其一，<strong>護欄仍在運作</strong>——一個 6–3 的保守法院，在一個純憲政結構議題上（誰有課稅權），跨越黨派界線推翻了同黨總統的旗艦政策，且行政部門即時服從。這是「憲政制衡是常數」最有力的證據。其二，<strong>政策的巨大不確定性</strong>——一項影響全球貿易、估值 1.4 兆的政策，可以在一夜之間被推翻，也顯示 Trump 2.0「用緊急權力求快」策略的法律脆弱性。對外資而言，這是一堂關於「美國政策為何難以定價」的公開課：不是因為方向不明，而是因為連已實施的政策都可能被另一權迅速逆轉。</p>
+  </div>
+
+  <h3>經濟的體感：成長、通膨與赤字的拉鋸</h3>
+  <p>2025–26 的美國經濟呈現矛盾的訊號。<strong>成長</strong>：2025 年第三季 GDP 年化成長一度報約 4.3%（超出預期，Trump 歸功於關稅），但 2026 年放緩，多數華爾街預測全年約 2%–2.5%、第一季實際約 2%。<strong>通膨</strong>：核心通膨與 PCE 物價維持高檔（PCE 一度升至 4.5%、為 2023 年初以來最高），Fed 估算若無關稅、核心通膨約可低約 0.9 個百分點——關稅的物價傳導是真實的。<strong>赤字與債務</strong>：OBBBA 增債疊加 IEEPA 關稅創收落空，使財政軌跡更陡。<strong>這三者的拉鋸——成長尚可、通膨黏著、赤字擴大——正是 Fed 在 2026 年維持利率於 3.5%–3.75% 區間、且內部罕見分裂的背景。</strong></p>
+</section>
+
+<section id="s13">
+  <div class="sec-label">PART III · CH 13</div>
+  <h2>移民執法與邊境</h2>
+  <p class="lede">移民是 Trump 2024 勝選的三大引擎之一，也是 Trump 2.0 執行最徹底、動員資源最多、爭議最尖銳的領域。它把「邊境安全」的競選承諾，轉化為美國史上規模最大的內部執法擴張之一——並在過程中觸發了關於權力邊界與公民權利的一連串衝突。</p>
+
+  <h3>從邊境到內部：執法重心的轉移</h3>
+  <p>Trump 2.0 的移民政策有一個關鍵轉變：<strong>從「阻止邊境越境」轉向「大規模內部遣返」</strong>。移民及海關執法局（ICE）大幅擴編（2026 年增聘約 12,000 人、幹員數增約 120%），並把執法擴展到社區、移民法庭、定期報到點——ICE 街頭逮捕據報增為約 11 倍、內部遣返增約 5 倍，FY2026 累計遣返約 356,000 人。執法手段還包括把其他聯邦機構納入移民執法、以及把移民遣送至第三國。<strong>這是一場把移民執法從邊境的「防守」轉為全國的「主動搜捕」的重大轉向。</strong></p>
+
+  <h3>爭議的引爆點：權力邊界與公民誤傷</h3>
+  <p>大規模執法必然撞上法律與人權的邊界。2026 年出現多個引爆點：<strong>2026 年 1 月，聯邦幹員在明尼阿波利斯的兩起事件中，分別擊斃兩名美國公民（Renee Good 與 Alex Pretti），引發大規模抗議與跨黨派批評</strong>；<strong>2026 年 2 月，一名聯邦法官裁定行政部門將移民遣送至第三國的政策違法</strong>。這些事件揭示了大規模執法的兩個結構性風險：其一，速度與規模會提高誤傷公民、程序瑕疵的機率；其二，執法手段（第三國遣返、繞過正當程序）會撞上司法審查。<strong>移民執法因此成為「行政擴權 vs 法院劃線」在最有人身衝擊力的領域的縮影。</strong></p>
+
+  <div class="prism">
+    <div class="pv-r"><div class="pv-tag">GOP 讀法</div><p>這是兌現最核心的承諾：邊境失控是拜登任內的最大失敗，大規模執法恢復了法律與主權。個別悲劇令人遺憾，但不能成為癱瘓整體執法的藉口。</p></div>
+    <div class="pv-d"><div class="pv-tag">DEMOCRATIC 讀法</div><p>這是恐懼統治：擊斃公民、第三國遣返、繞過正當程序，把執法變成對整個移民社群（含合法居民與公民）的威嚇。它測試的不是邊境，是憲法對所有人的保護。</p></div>
+    <div class="pv-s"><div class="pv-tag">FEDERALISM 讀法</div><p>這是聯邦與州的正面衝突：藍州以庇護政策抵制、州檢察長提訴訟、聯邦以撥款與國民兵施壓。移民執法把聯邦制的張力推到公民日常生活的最前線。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一場執法，三種定性：兌現承諾、恐懼統治、聯邦衝突</div>
+</section>
+
+<section id="s14">
+  <div class="sec-label">PART III · CH 14</div>
+  <h2>民主倒退辨析：威權化 vs 制度韌性</h2>
+  <p class="lede">這是全報告立場最需要克制的一章。「美國是否正在滑向威權？」是 2025–26 年最激烈的爭論，也最容易被兩種極端敘事綁架：一種說「這只是正常的政黨輪替、大驚小怪」，另一種說「這是民主的終結、法西斯來了」。兩者都是過度簡化。本章的方法，是把爭議<strong>分層</strong>——區分真實的結構性風險與過度解讀的恐慌，比照嚴謹的風險評估、而非黨派宣傳。</p>
+
+  <h3>第一層：確實在發生的結構性變化（真實風險）</h3>
+  <p>誠實地說，有幾件事是真實發生、且對制度有結構性影響的，不該被輕描淡寫：<strong>行政國家的中立性被實質削弱</strong>（Humphrey's Executor 被推翻，總統可開除多數獨立機構首長）；<strong>行政權以緊急權力繞過國會</strong>（IEEPA 關稅，雖被推翻，但顯示了嘗試的意圖與手法）；<strong>文官體系被政治化</strong>（擴大政治任命、清洗中立文官）；<strong>選區工程的極致化</strong>（中期重劃戰把眾院多數更深地鎖進 gerrymander）。這些不是噪音，是護欄被實質地、往往不可逆地往前推。<em>否認這些，是危險的假平衡。</em></p>
+
+  <h3>第二層：護欄仍在運作的強證據（韌性）</h3>
+  <p>但同樣誠實地說，有一整組事實指向制度韌性、不該被恐慌敘事淹沒：<strong>最高法院（6–3 保守多數）推翻了同黨總統的旗艦關稅政策</strong>、<strong>阻止了總統開除 Fed 理事</strong>、<strong>下級法院叫停了第三國遣返</strong>，而且<em>行政部門每一次都服從了法院命令</em>。此外，<strong>2026 期中選舉如期舉行</strong>、聯邦制讓藍州保有完整的抵抗空間、自由媒體與公民社會運作如常。這些都是威權化敘事無法解釋的：真正滑向威權的政體，法院不會推翻元首的旗艦政策、選舉不會如期舉行、地方政府不會公開抵抗。<em>把這些一律說成「威權的偽裝」，是無法證偽的陰謀論。</em></p>
+
+  <h3>第三層：真正該問的問題——不是「是否」，而是「哪條線」</h3>
+  <p>把兩層合起來，正確的問法不是「美國是否已成威權」（答案顯然是否），也不是「一切正常」（答案顯然也否），而是：<strong>哪一條線一旦被跨越，才是真正的憲政危機？</strong>本報告的判斷是：真正的紅線不是行政擴權本身（那可被法院與選舉逆轉），而是以下任一項——<em>行政公然拒絕服從最高法院的明確命令</em>、<em>執政方拒絕承認並移交敗選的權力</em>、<em>用國家暴力壓制選舉或和平抗議</em>。截至 2026 年 7 月，<strong>這三條線都尚未被跨越</strong>。行政試探了邊界、但在法院劃線後服從了；這既非「沒事」、也非「淪陷」，而是「護欄承壓、但未斷」。</p>
+
+  <div class="callout">
+    <div class="co-tag">ANALYTICAL NOTE · 為什麼分層比定性重要</div>
+    <p>對投資人與外部觀察者而言，「美國是否民主倒退」這個是非題本身就是錯的問法——它逼人選邊，卻無助於決策。有用的框架是<strong>監測具體的紅線</strong>：不是問「威權了沒」，而是持續追蹤「行政是否服從法院、選舉是否如期、權力是否和平轉移」這三個可觀察的指標（詳第 22 章儀表板）。只要這三條線守住，系統雖然吵鬧、極化、政策反覆，但仍是一個可預測的、有自我修復能力的憲政民主；一旦任一條被跨越，才需要對整個評估框架重新定價。<strong>把焦慮從抽象的「是否倒退」轉向具體的「哪條線」，是這一章唯一的方法論主張。</strong></p>
+  </div>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">「制度韌性」論 · 論點</div><p>法院推翻關稅、保護 Fed、叫停遣返，行政全數服從；選舉如期、聯邦制運作、媒體自由。這正是健康民主的自我修復機制在最大壓力下運作的樣子。2026 期中就是下一道制衡。</p></div>
+    <div class="d-con"><div class="d-tag">「漸進威權化」論 · 反論</div><p>威權化很少是一次政變，而是一連串「行政最終服從」背後、邊界被永久推前的累積。今天服從，是因為代價還太高；每一次成功的擴權都降低了下一次的門檻。不能用「還沒崩」證明「不會崩」。</p></div>
+  </div>
+  <p>本報告不對這場辯論下單一定性——因為兩種論點各自抓住了真實的一半。制度韌性論正確地描述了「當前」（護欄仍在、行政服從）；漸進威權化論正確地警示了「趨勢」（邊界在被推前、門檻在下降）。理性的立場是：<strong>承認護欄當前仍在運作（不恐慌），同時嚴肅監測紅線是否被跨越（不鬆懈）</strong>——這正是「極化是命門」的實務含義：系統的存亡，不繫於任何單一政策，而繫於那幾條「共享規則」的線是否被守住。</p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART IV</div>
+  <h2>引擎 · The Engine</h2>
+  <div class="pd-sub">政黨×經濟×地緣的完整迴路</div>
+</div>
+
+<section id="s15">
+  <div class="sec-label">PART IV · CH 15</div>
+  <h2>三角傳導模型：政黨×經濟×地緣</h2>
+  <p class="lede">前面的章節把美國政治拆成靜態的結構與稜鏡；這一部要把它接成一個<strong>動態迴路</strong>——三個節點（政黨政治、國內經濟、地緣戰略）、六條互相傳導的邊。理解這個迴路，才能理解為什麼美國的任何一個變動，都會沿著可預測的路徑傳導到其他兩個節點、並最終外溢到全球。</p>
+
+  <h3>三個節點</h3>
+  <ul class="plain">
+    <li><strong>節點 A · 政黨政治</strong>：極化、trifecta、2026 期中、兩黨鐘擺——決定政策的方向與速度。</li>
+    <li><strong>節點 B · 國內經濟</strong>：關稅、通膨、赤字、Fed、股市集中——決定選民體感與資本流向。</li>
+    <li><strong>節點 C · 地緣戰略</strong>：美中競爭、烏俄、中東、同盟重組、美元霸權——決定外部環境與傳導管道。</li>
+  </ul>
+
+  <h3>六條邊：迴路如何運轉</h3>
+  <table>
+    <tr><th>傳導邊</th><th>機制</th></tr>
+    <tr><td><strong>A → B</strong> 政黨驅動經濟</td><td>trifecta 讓 MAGA 經濟路線（減稅、關稅、削福利）成為政策，直接改變通膨、赤字與供應鏈</td></tr>
+    <tr><td><strong>B → A</strong> 經濟回饋政黨</td><td>通膨體感決定 2024 勝負、也將決定 2026 期中；經濟好壞是執政黨最大的政治變數</td></tr>
+    <tr><td><strong>A → C</strong> 政黨塑造地緣</td><td>MAGA 的交易式外交（懷疑北約、要求盟友分攤、對烏俄斡旋）重塑同盟與對手關係</td></tr>
+    <tr><td><strong>C → A</strong> 地緣回饋政黨</td><td>對中強硬是罕見的跨黨共識、可動員選民；外部衝突（如台海）會即時重塑國內政治</td></tr>
+    <tr><td><strong>B → C</strong> 經濟即地緣</td><td>關稅、科技管制、美元武器化，本身就是地緣工具；美元霸權是所有傳導的管道</td></tr>
+    <tr><td><strong>C → B</strong> 地緣衝擊經濟</td><td>供應鏈重組、能源價格、對中脫鉤／de-risking，透過地緣事件傳導回國內物價與市場</td></tr>
+  </table>
+  <p class="tbl-note">關鍵一句：<strong>這六條邊構成一個閉環，任一節點的擾動都會沿邊傳導——而美元霸權（B↔C 的管道）是把這個美國內部迴路放大到全球的擴音器。</strong>後續各章分別深入這個迴路的關鍵段落。</p>
+
+  <div class="prism">
+    <div class="pv-r"><div class="pv-tag">GOP 讀法</div><p>迴路的引擎是「用經濟民族主義同時解決三個問題」：關稅既保護工人（A→B）、又是對中籌碼（B→C）、又動員基本盤（B→A）。三合一是特徵，不是矛盾。</p></div>
+    <div class="pv-d"><div class="pv-tag">DEMOCRATIC 讀法</div><p>迴路的風險是「三個節點的擾動互相放大」：關稅推高通膨（B）→傷害選情（A）→逼政策更極端（A）→衝擊盟友（C）。這是一個正回饋的不穩定迴路。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN CAPITAL 讀法</div><p>迴路對外資的意義是「美元把美國內政變成我的系統性風險」：我無法迴避 A、B、C 任何一個節點，因為美元是我全部資產的地基（B↔C 管道）。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個迴路，三種讀法：三合一引擎、正回饋風險、系統性暴露</div>
+</section>
+
+<section id="s16">
+  <div class="sec-label">PART IV · CH 16</div>
+  <h2>政治×經濟迴路：關稅、通膨、赤字與債務</h2>
+  <p class="lede">這一章深入迴路的 A↔B 段——政黨政治與國內經濟如何互相驅動。它的核心是一個對執政黨極危險的組合：MAGA 的政策（關稅、減稅、削福利）在追求政治目標的同時，正在把通膨、赤字與債務推向一個可能反噬其政治基礎的方向。</p>
+
+  <h3>關稅→通膨：政策的物價傳導</h3>
+  <p>關稅是對進口商品課稅，其成本最終部分由本國消費者承擔——這是經濟學的基本共識，也被 Fed 的估算證實（若無關稅、核心通膨約可低約 0.9 個百分點）。這造成一個政治悖論：<strong>Trump 的核心選民（工人階級）對通膨最敏感（2024 年正是通膨把他們推向共和黨），而 Trump 的核心政策（關稅）又在推高通膨</strong>。IEEPA 關稅被推翻（2026-02）在通膨面上反而是一種紓解，但 Section 232 產業關稅仍在。這條 A→B→A 的迴路——關稅（政策）推高通膨（經濟）、通膨傷害選情（政治）——是 2026 期中最關鍵的經濟變數。</p>
+
+  <h3>減稅＋創收落空→赤字與債務</h3>
+  <p>財政面的迴路同樣危險。OBBBA 十年增債約 3.4 兆美元；而原本被寄望對沖部分成本的 IEEPA 關稅創收（估十年 1.4 兆）又被最高法院推翻。兩者疊加，使美國的財政軌跡更陡：<strong>在利率仍高（Fed 維持 3.5%–3.75%）的環境下，債務的利息負擔本身就是一筆快速膨脹的支出</strong>。這把美國推向一個結構性問題：龐大的赤字需要持續發債融資，而發債規模與利率共同決定了利息成本，利息成本又擠壓其他支出、推升赤字——一個潛在的債務螺旋。這也是外資最該長期盯的美國基本面風險（詳第 17 章）。</p>
+
+  <h3>Fed 的兩難：通膨黏著 vs 政治施壓</h3>
+  <p>迴路的樞紐是 Fed。它面對一個經典兩難：<em>通膨黏著（PCE 一度達 4.5%）要求維持高利率，但高利率既拖累成長、又推升政府利息負擔、也招致 Trump 的降息施壓</em>。2026 年的 Fed 因此罕見地內部分裂（Powell 卸任前的會議出現四票異議），並在 Warsh 接任後被市場密切觀察是否會屈從政治壓力提前降息。<strong>Fed 的獨立性在這裡不是抽象原則，而是決定「利率是按通膨還是按選舉週期設定」的實際問題——這正是政治×經濟迴路裡，護欄是否守得住的最關鍵一環。</strong></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">~0.9pp</div><div class="fig-l">Fed 估關稅對核心通膨的貢獻</div></div>
+    <div><div class="fig-n">4.5%</div><div class="fig-l">PCE 物價一度觸及，2023 年初以來最高</div></div>
+    <div><div class="fig-n">3.5–3.75%</div><div class="fig-l">2026 Fed 基準利率區間（內部分裂）</div></div>
+    <div><div class="fig-n">利息螺旋</div><div class="fig-l">高債務×高利率：擠壓支出、推升赤字的風險</div></div>
+  </div>
+
+  <h3>財政主導的幽靈：當政治開始覬覦印鈔權</h3>
+  <p>政治×經濟迴路裡最深的尾部風險，是經濟學所稱的<strong>財政主導</strong>（fiscal dominance）——當政府債務累積到一定程度，維持債務可持續的壓力會反過來綁架貨幣政策，逼迫央行為了壓低政府的借貸成本而維持低利率、甚至購債，即使通膨並未消退。這正是「為什麼 Fed 獨立性在高赤字時代格外重要」的深層原因：赤字越大、利息負擔越重，總統要求 Fed 降息的政治誘因就越強，Fed 頂住壓力的難度也越高。2025–26 年 Trump 對 Fed 的施壓（要求降息、開除 Cook），放在 OBBBA 增債 3.4 兆的背景下，就不只是個人風格問題，而是<em>財政壓力尋找貨幣出口</em>的結構性徵兆。<strong>財政主導不是當前的現實，而是一個若「高赤字＋Fed 獨立性受侵蝕」兩個條件同時成立才會兌現的尾部——但它恰好是本報告最擔心的那類「慢慢逼近、一旦跨過就難逆轉」的風險。</strong></p>
+</section>
+
+<section id="s17">
+  <div class="sec-label">PART IV · CH 17</div>
+  <h2>資本與市場：美元霸權、Fed 獨立性、股市集中</h2>
+  <p class="lede">這一章是外國投資人最該讀的一章。它把美國政治的迴路，翻譯成三個具體的資本市場變數：美元作為全球地基的信用、Fed 獨立性作為這個信用的抵押品、以及美股由 AI 七雄極端集中所帶來的「美國例外論」的機會與尾部風險。</p>
+
+  <h3>美元霸權：過度特權與它的維繫條件</h3>
+  <p>美元的全球地位（見第 8 章）給美國「過度特權」，但這個特權不是天賦、而是有維繫條件的：它依賴市場對<em>美國制度的可預測性、法治的可靠性、Fed 的獨立性、以及財政的長期可持續性</em>的信任。這些正是美國政治迴路正在施壓的東西。美元霸權的韌性極強（沒有現成的替代品——歐元有結構缺陷、人民幣不自由兌換），所以它不會因單一事件崩塌；但它會因<strong>信任的緩慢折舊</strong>而侵蝕——每一次對 Fed 的施壓、每一次財政紀律的鬆動、每一次政策的劇烈反覆，都在這個信用帳戶裡扣一點分。<strong>美元不會被推翻，但它可以被慢慢地、邊際地去信任化——這是以十年計的慢變數，卻是外資最該盯的長線風險。</strong></p>
+
+  <h3>Fed 獨立性：美元信用的核心抵押品</h3>
+  <p>在美元的所有維繫條件中，Fed 獨立性是最直接、最可觀察的一個。市場對美債作為「無風險資產」的信任，很大程度上建立在「Fed 會按通膨與就業、而非按總統的選舉需求來設定利率」這個信念上。2025–26 年對這個信念的測試（換帥 Warsh、開除 Cook 未遂）目前的結果是「守住、但承壓」（見第 3B 章）。<strong>對外資而言，這是一個必須持續監測的核心讀數：Warsh 領導的 Fed 若在通膨未降時因政治壓力提前降息，將是 Fed 獨立性受侵蝕的實質證據，也將是美元信用折舊加速的訊號。</strong></p>
+
+  <h3>股市集中：AI 七雄與「美國例外論」的賭注</h3>
+  <p>美股是全球資本的引力中心，而這個引力當前高度集中於少數 AI／科技巨頭（「七雄」）——它們佔了主要指數市值與漲幅的極大比例。這造成一個結構：<strong>全球資本對「美國例外論」（美國成長最快、創新最強、值得超配）的下注，實質上高度押注在一個 AI 敘事上</strong>。這既是過去數年美股跑贏全球的報酬來源，也是一個尾部風險：若 AI 的資本支出週期逆轉、或 AI 的獲利兌現不如預期，高度集中的指數會放大跌幅，而全球超配美股的資金會同步受創。<strong>集中是報酬的來源，也是風險的來源——這是外資在「超配美國」時必須同時定價的一體兩面。</strong></p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">FOREIGN CAPITAL</div><p>三個變數構成一張風險地圖：美元（地基、慢折舊）、Fed（抵押品、可監測）、七雄（引擎、尾部風險）。理性的姿勢是超配美國、但對這三者各留避險。</p></div>
+    <div class="pv-i"><div class="pv-tag">INSTITUTIONS</div><p>Fed 獨立性是這三者的樞紐：它一動，美元信用與市場定價同時重估。Cook 案守住了它，但 Humphrey's Executor 之死顯示其他機構的獨立性已不可依賴。</p></div>
+    <div class="pv-r"><div class="pv-tag">GOP 讀法</div><p>市場的強勁（成長 4.3%、股市新高）證明 MAGA 經濟學有效。Fed 該對民選政府的經濟目標負責、而非躲在「獨立性」後面維持傷害成長的高利率。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個資本市場，三種讀法：風險地圖、獨立性樞紐、政策見效</div>
+</section>
+
+<section id="s17b">
+  <div class="sec-label">PART IV · CH 17B</div>
+  <h2>美元的替代品審視：為什麼折舊是「慢」的</h2>
+  <p class="lede">第 17 章說美元會「慢折舊、但不會崩塌」——這一節把這個判斷拆成可檢驗的機制。美元霸權的韌性，不只來自美國自身的強大，更來自一個殘酷的事實：<strong>它沒有現成的替代品</strong>。理解這一點，才能理解為什麼即使美國政治施壓 Fed、擴大赤字、政策反覆，美元的地位仍難以在短期內被撼動——以及為什麼「慢折舊」才是正確的風險框架。</p>
+
+  <h3>逐一審視候選替代品</h3>
+  <p>要取代美元成為全球儲備貨幣，一個貨幣需要同時具備：巨大且開放的資本市場、可自由兌換、深度流動的安全資產（如美債）、可靠的法治與產權保護、以及全球對其發行國制度的信任。用這組標準逐一審視：<strong>歐元</strong>——有規模，但歐元區缺乏統一的財政與共同的安全資產（沒有「歐元區國債」這種等同美債的無風險資產），且歷經主權債務危機暴露了結構缺陷。<strong>人民幣</strong>——有規模，但資本帳未完全開放、不可自由兌換、且其法治與產權的可預測性未獲全球信任，這是根本障礙。<strong>黃金與加密資產</strong>——可作為部分避險與分散工具，但缺乏作為交易媒介與計價單位的規模與穩定性，無法承擔儲備貨幣的日常功能。<strong>結論：沒有任何單一候選者能在可見期限內全面取代美元。</strong></p>
+
+  <h3>「慢折舊」的精確含義</h3>
+  <p>正因為沒有現成替代品，美元的風險不是「被取代」（非線性崩塌），而是「被邊際地分散」（線性折舊）。這個折舊透過幾條慢管道發生：各國央行外匯儲備中美元份額的緩慢下降、跨境貿易中非美元結算的緩慢增加、以及對美債作為唯一無風險資產的依賴度的緩慢降低——多以「多元化避險」而非「拋棄美元」的形式進行。<strong>每一次對 Fed 獨立性的施壓、每一次財政紀律的鬆動、每一次政策的劇烈反覆，都不會引發美元的崩盤，但會讓這個「慢分散」的趨勢加快一點</strong>。這正是 T9 論題的核心：美元的地基穩固到不會塌，但它可以被慢慢地、以十年計地去信任化——而美國當前的政治迴路，正是這個慢折舊的加速器。</p>
+
+  <div class="lens l-f">
+    <div class="lens-tag">FOREIGN CAPITAL · 實務結論</div>
+    <p>「我不會、也不能拋棄美元——沒有替代品，脫鉤不現實。但我會把它從『無腦的唯一地基』，調整為『主要但需監測的地基』：在外匯儲備、供應鏈與投資組合裡，為美元與美債的暴露設一個上限，並把新增的邊際配置適度分散。這不是看空美國，是為一個『慢折舊、不崩塌』的風險結構做理性定價。真正會讓我重估的，不是任何單一政策，而是 Fed 獨立性這條線——因為那是美元信用唯一可能發生非線性崩塌的地方。」</p>
+  </div>
+</section>
+
+<section id="s18">
+  <div class="sec-label">PART IV · CH 18</div>
+  <h2>產業與科技：AI、能源、製造回流、供應鏈</h2>
+  <p class="lede">政治迴路的最終落點，是實體經濟的產業結構。Trump 2.0 的產業圖景由四條主線交織：AI 作為新的國力競賽核心、能源作為「美國優先」的支柱、製造回流作為關稅的目標、以及關鍵供應鏈作為對中競爭的前線。這四者共同定義了美國經濟的未來下注方向。</p>
+
+  <h3>AI：新的國力競賽</h3>
+  <p>AI 已成為美國國力競賽的核心——它既是資本市場的引擎（七雄集中，見第 17 章）、也是對中戰略競爭的主戰場（晶片與運算能力的管制）、還是政策的優先項（能源、資料中心、人才）。這使 AI 成為政治×經濟×地緣三個節點的交會點：<em>它同時是股市的估值支柱、對中科技管制的標的、以及能源需求的爆發來源</em>。AI 的資本支出週期是美國當前成長的重要驅動，但也把整個經濟與市場的敘事，綁在了一個尚未完全兌現獲利的技術賭注上。</p>
+
+  <h3>能源與製造回流：關稅的目標</h3>
+  <p>能源是 MAGA 經濟學的支柱——「能源主導」（energy dominance）主張放鬆油氣開採、降低能源成本、把廉價能源當作製造業競爭力的基礎，這也與 AI 資料中心的爆發性電力需求形成交會。製造回流（reshoring）則是關稅的核心目標——用關稅提高進口成本、逼供應鏈把產能移回美國。但製造回流面對結構性阻力：勞動成本、技術工人短缺、以及重建供應鏈的時間以年計。<strong>關稅能製造回流的「誘因」，但無法快速製造回流的「條件」——這是 MAGA 產業政策最大的時間差風險。</strong></p>
+
+  <h3>關鍵供應鏈：對中競爭的前線</h3>
+  <p>供應鏈是美中競爭最具體的戰場：半導體、關鍵礦物、電池、醫藥原料——美國正試圖在這些領域降低對中國的依賴（de-risking），透過關稅、出口管制、盟友「友岸外包」（friend-shoring）重組全球供應鏈。這條線是跨黨共識最強的領域（對中強硬是兩黨少數的交集），因此政策連續性最高——這對外資是一個重要訊號：<em>在對中供應鏈重組這條線上，政策的方向不隨政黨鐘擺而變，可以下注；變的只是手段的激烈程度。</em></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">AI</div><div class="fig-l">股市引擎×對中戰場×能源需求的交會點</div></div>
+    <div><div class="fig-n">能源主導</div><div class="fig-l">放鬆開採、廉價能源作為製造與 AI 的基礎</div></div>
+    <div><div class="fig-n">回流</div><div class="fig-l">關稅製造誘因，但條件（工人、時間）以年計</div></div>
+    <div><div class="fig-n">de-risking</div><div class="fig-l">供應鏈重組：對中競爭的跨黨共識前線</div></div>
+  </div>
+
+  <h3>半導體：政策連續性最高、地緣暴露最大的交會點</h3>
+  <p>半導體是理解美國產業政策的最佳單一案例，因為它同時具備兩個看似矛盾的特徵：<strong>政策連續性最高、地緣暴露也最大</strong>。連續性——重建國內先進製程、降低對單一地區的依賴，是跨黨的真實共識，前一屆政府以補貼推動、本屆以關稅與管制延續，方向不隨政黨鐘擺而變（見第 19 章的「連續層」）。地緣暴露——全球最先進製程仍高度集中於台灣，使半導體成為台海風險最直接的傳導管道（見第 20 章）。這兩個特徵交會出一個清晰的下注邏輯：<em>「美國要把先進製造搬回本土」這個方向可以下注（連續），但「這個過程需要多久、能否在台海生變前完成」是最大的不確定（地緣暴露）</em>。這也呼應了第 18 章反覆出現的主題——關稅與補貼能製造回流的「誘因」，卻無法快速製造回流的「條件」；而在半導體這個最關鍵的品類上，這個時間差恰好與最大的地緣尾部風險重疊。<strong>對外資而言，半導體是「政策方向確定、但時間與地緣不確定」如何並存的最純粹範例。</strong></p>
+</section>
+
+<section id="s19">
+  <div class="sec-label">PART IV · CH 19</div>
+  <h2>政策連續性與外資：政策擺盪的全球傳導與 de-risking</h2>
+  <p class="lede">對外國政府、企業與投資人而言，關於美國最實用的一個框架，是把美國政策分成「連續的」與「擺盪的」兩層——因為前者可以下注、後者只能避險。這一章把美國的政策光譜按「連續性」排序，並論證外資理性反應為何是 de-risking 而非 decoupling。</p>
+
+  <h3>政策的兩層：連續的 vs 擺盪的</h3>
+  <table>
+    <tr><th>政策領域</th><th>連續性</th><th>對外資的意涵</th></tr>
+    <tr><td><strong>對中戰略競爭</strong></td><td>高（跨黨共識）</td><td>方向不隨政黨變，可下注；變的是手段激烈程度</td></tr>
+    <tr><td><strong>AI／科技領導</strong></td><td>高</td><td>兩黨都視為國力核心，投資與管制方向連續</td></tr>
+    <tr><td><strong>美元與國債地位</strong></td><td>高（但信用可慢折舊）</td><td>地基穩固，但需監測 Fed 獨立性與財政紀律</td></tr>
+    <tr><td><strong>關稅與貿易</strong></td><td>低（高度擺盪）</td><td>隨政黨與個別決策劇烈反覆（IEEPA 一夜被推翻），最難定價</td></tr>
+    <tr><td><strong>氣候與能源</strong></td><td>低</td><td>紅藍政府方向相反，補貼與管制隨政權翻轉</td></tr>
+    <tr><td><strong>移民</strong></td><td>低</td><td>執法強度隨政黨劇變，影響勞動供給與特定產業</td></tr>
+  </table>
+  <p class="tbl-note">關鍵一句：<strong>外資該把資源配置到「連續層」（對中、AI、美元地基）並對「擺盪層」（關稅、氣候、移民）動態避險——把美國政策當成一個「穩定的地基＋擺盪的上層」的結構，而非鐵板一塊。</strong></p>
+
+  <h3>擺盪本身作為成本：政策不連續的全球傳導</h3>
+  <p>美國政策擺盪的成本，不只是任一政策的方向，更是<strong>擺盪本身</strong>——因為它透過美元與貿易，把不確定性輸出到全世界。一項關稅可以在數月內實施、又在一夜間被法院推翻；一套氣候補貼可以在一屆政府建立、又在下一屆被撤銷。這種不連續性，逼迫全球企業在規劃長週期投資（工廠、供應鏈、能源）時，必須為「美國政策可能反轉」計入一個風險溢價。<strong>政策擺盪不是免費的——它以全球資本的風險溢價與投資遲滯的形式，被全世界共同承擔。</strong></p>
+
+  <h3>理性反應：de-risking 而非 decoupling</h3>
+  <p>面對這個結構，外資的理性反應（見第 8 章）是<strong>分散、而非脫鉤</strong>。脫鉤在可見期限內不現實——美元、美國市場、AI 與資本市場的引力太強。但適度分散對「單一美國政策路徑」的暴露，是可行且理性的：分散供應鏈的地理、分散外匯儲備的幣別、分散投資組合對「美國例外論」的超配。<strong>2025–26 的美國政策擺盪，正在加速這個既有的 de-risking 趨勢——不是逃離美國，而是在超配美國的同時，為它的政策不連續性買保險。</strong></p>
+</section>
+
+<section id="s20">
+  <div class="sec-label">PART IV · CH 20</div>
+  <h2>地緣：美中、烏俄、中東、同盟重組與交易式外交</h2>
+  <p class="lede">迴路的第三個節點是地緣。Trump 2.0 的外交有一個貫穿的邏輯——<strong>交易式現實主義</strong>：把同盟、衝突、貿易都當成可談判的交易，用美國的實力槓桿逼對手與盟友讓步。這套邏輯重塑了美國與對手、盟友的全部關係，也定義了美國政治迴路的外部環境。</p>
+
+  <h3>美中：跨黨共識的戰略競爭</h3>
+  <p>對中國的戰略競爭是美國外交中連續性最高的一條線——它是兩黨少數的真實共識。競爭的工具包括關稅、科技與晶片出口管制、供應鏈 de-risking、以及在台海、南海的軍事嚇阻。Trump 2.0 的特點是把這場競爭更「交易化」——既強硬（關稅、管制），又保留用具體議題（貿易、農產品、TikTok 類議題）與北京做交易的空間。<strong>對中強硬的「方向」是常數（不隨政黨變），但 Trump 把它的「手段」變成了可交易的籌碼——這是外資判讀美中關係時的關鍵區分。</strong></p>
+
+  <h3>烏俄與中東：交易式斡旋</h3>
+  <p>在烏俄戰爭上，Trump 採取交易式斡旋的路徑——施壓各方走向談判、對援烏的無限期持續表達疲乏，把「結束戰爭」當成一個可以促成的交易，而非一場必須打贏的道義戰爭。這與傳統的大西洋主義（無條件支持烏克蘭直到俄羅斯失敗）形成張力，也在 MAGA 內部的孤立主義派與鷹派之間製造分歧（見第 4B 章）。在中東，Trump 延續其交易式、以區域協議與施壓為主的路徑。<strong>交易式外交的共同特徵是：把道義框架換成利益框架，把永久承諾換成可談判的條件。</strong></p>
+
+  <h3>同盟重組：從承諾到交易</h3>
+  <p>Trump 2.0 對盟友的路徑，是把同盟從「基於價值的永久承諾」重新定義為「基於分攤的交易關係」——要求北約盟友大幅提高國防支出、要求亞洲盟友分攤駐軍成本、把安全保障與貿易讓步掛鉤。這對盟友是一次深刻的信任衝擊：<em>如果美國的保護是可交易的，盟友就必須為「美國可能不來」的情境做準備</em>——這正在推動歐洲的戰略自主討論、以及亞洲盟友的自我強化。<strong>同盟的交易化，是 Trump 2.0 對戰後美國主導秩序最深遠的改造之一，其後果將以十年計展開。</strong></p>
+
+  <h3>台海：能同時擊穿所有稜鏡的單一變數</h3>
+  <p>在所有地緣變數中，台海是唯一一個能<strong>同時擊穿全部五個稜鏡</strong>的系統性風險——這也是它作為 T10 觸發器的原因。一場台海衝突會：癱瘓全球半導體供應（衝擊 AI 七雄與整個科技產業，擊穿外國投資人與產業稜鏡）；把美中戰略競爭從「可對沖」推向「硬性選邊」（擊穿地緣與外資稜鏡）；在國內即時重塑政黨政治（戰爭會壓過一切內政議題，擊穿共和黨與民主黨稜鏡）；並對美國的同盟承諾與軍事可信度構成終極測試。<em>台積電作為全球先進製程的樞紐，使台海不只是地緣問題，更是全球科技與資本市場的單點故障風險</em>。這是本報告一切內部評估的最大外部前提：所有關於美國政治、經濟、市場的分析，都默默假設了「台海不戰」——一旦這個假設破裂，本報告的每一章都需要整體重寫。<strong>對外部觀察者而言，台海不是眾多風險之一，而是那個必須永遠放在心裡、卻無法用當前資料下注的「一切歸零」變數。</strong></p>
+
+  <div class="prism">
+    <div class="pv-r"><div class="pv-tag">GOP 讀法</div><p>交易式外交是務實的力量政治：讓盟友付錢、逼對手讓步、結束無止境的戰爭。價值外交是菁英的奢侈品，交易外交才真正服務美國利益。</p></div>
+    <div class="pv-d"><div class="pv-tag">DEMOCRATIC 讀法</div><p>交易式外交是霸權的自毀：把可靠性（美國最大的地緣資產）換成短期交易，逼盟友離心、給對手可乘之機。同盟一旦失去信任，重建需數十年。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN CAPITAL 讀法</div><p>交易式外交把「美國承諾」變成需要定價的變數：無論是盟友的安全還是貿易協議，都不再是常數。這增加了全球每一個長週期地緣下注的風險溢價。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一套外交，三種定性：務實力量、霸權自毀、承諾折價</div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART V</div>
+  <h2>終章 · The Verdict</h2>
+  <div class="pd-sub">十大論題、監測儀表板與方法註記</div>
+</div>
+
+<section id="s21">
+  <div class="sec-label">PART V · CH 21</div>
+  <h2>十大論題（附信度與可證偽條件）</h2>
+  <p class="lede">全報告收斂為十個論題，每一個都附上信度評級（★＝推測、★★＝中信度、★★★＝高信度）與可證偽條件——若該條件發生，論題即作廢。這是為了讓分析可被檢驗、而非變成無法反駁的立場。</p>
+  <table>
+    <tr><th style="width:44%">論題</th><th>信度</th><th>可證偽條件（若發生，論題作廢）</th></tr>
+    <tr><td><strong>T1・制衡常數論</strong>：美國的憲政制衡（分權、聯邦、獨立司法與央行）是歷經兩百餘年而未斷的硬體，正確姿勢是視為常數；2026 年法院推翻同黨總統的關稅、保護 Fed 理事、行政服從判決，即其運作證據。（第 3、6、14 章）</td><td>★★★</td><td>出現一次成功的、未被制度即時逆轉的憲政奪權：行政公然拒絕服從最高法院明確命令、拒絕移交敗選權力、或用國家暴力取消選舉</td></tr>
+    <tr><td><strong>T2・鐘擺變數論</strong>：兩黨制與 trifecta 使權力在紅藍間規律擺動，每一次輪替伴隨政策的推倒重來；2026 期中是這個鐘擺的下一個裁決點。（第 1、2、9 章）</td><td>★★★</td><td>某一方取得並鎖定不可經選舉逆轉的長期單黨優勢；或兩黨制被第三勢力實質打破</td></tr>
+    <tr><td><strong>T3・極化命門論</strong>：極化（尤其情感極化與事實基礎的分裂）是系統當前最深的病灶，它侵蝕的是「共享規則」本身，而非個別政策。（第 2、2B 章）</td><td>★★★</td><td>出現可持續的跨黨去極化：兩黨在重大長期議題上恢復穩定合作、情感極化指標顯著且持續收斂</td></tr>
+    <tr><td><strong>T4・行政擴權論</strong>：Trump 2.0 用行政命令的速度、單一行政首長理論與 Humphrey's Executor 之死，實質且多半不可逆地擴張了行政權、削弱了行政國家的中立性。（第 6、10 章）</td><td>★★★</td><td>Humphrey's Executor 被恢復、或文官與獨立機構的中立性經立法／司法重新鞏固至改革前水準</td></tr>
+    <tr><td><strong>T5・護欄承壓未斷論</strong>：截至 2026-07，三條紅線（行政服從法院、選舉如期、權力和平轉移）都未被跨越——系統是「承壓、未斷」，既非淪陷、也非無事。（第 14 章）</td><td>★★★</td><td>三條紅線任一被明確跨越（見 T1 可證偽條件）</td></tr>
+    <tr><td><strong>T6・Fed 例外論</strong>：Fed 獨立性在 Cook 案守住、是美元信用的核心抵押品；但它已成行政國家中唯一的獨立性孤島，其他監理機構的中立性已崩解。（第 3B、17 章）</td><td>★★★</td><td>Fed 在通膨未降時因政治壓力系統性提前降息（獨立性實質侵蝕）、或 Cook 案例外被後續判決推翻</td></tr>
+    <tr><td><strong>T7・關稅擺盪論</strong>：關稅是政策光譜中最擺盪、最難定價的一層（IEEPA 一夜被推翻、Section 232 仍存），其不確定性本身即是對全球資本的成本。（第 12、19 章）</td><td>★★★</td><td>關稅政策取得跨黨、經國會立法的長期穩定框架，反覆性顯著下降</td></tr>
+    <tr><td><strong>T8・財政軌跡論</strong>：OBBBA 增債疊加關稅創收落空、高利率環境，把美國財政推向一個結構性風險軌跡，是外資該盯的長線基本面。（第 11、16 章）</td><td>★★</td><td>赤字與債務／GDP 比在無重大衰退下顯著且持續改善、或跨黨達成可信的財政整頓</td></tr>
+    <tr><td><strong>T9・美元慢折舊論</strong>：美元霸權韌性極強、無現成替代品、不會因單一事件崩塌，但會因對 Fed、法治、財政的信任緩慢折舊而邊際侵蝕。（第 8、17 章）</td><td>★★</td><td>美元儲備份額與美債地位在十年尺度上顯著回升並穩固（證明無折舊）、或反之出現非線性的信心崩塌（證明非「慢」折舊）</td></tr>
+    <tr><td><strong>T10・外部前提論</strong>：全部內部評估預設「無大國熱戰、美中可對沖」；台海衝突、對中全面脫鉤升級或美股 AI 敘事崩塌，是能同時擊穿所有稜鏡的系統性風險。（第 17、18、20 章）</td><td>★</td><td>台海／大國實質軍事衝突、美中脫鉤升級至硬性選邊、或 AI 資本週期逆轉引發市場系統性重估——屆時本報告需整體重寫</td></tr>
+  </table>
+
+  <h3>十論題的內在階層</h3>
+  <p>十個論題有清晰的依賴結構：<strong>T1（制衡常數）、T2（鐘擺變數）、T3（極化命門）是地基</strong>——它們對應標題的核心定錨句，三者成立，其餘七個論題才有意義。T4–T7 是建立在地基上的結構層（高信度，因為描述的是已發生的制度變化與誘因結構，而非事件預測）；T8–T9 是經濟動力層（中信度，涉及趨勢與行為者選擇，尤其 T9 美元折舊是慢變數）；T10 是單點的尾部推測。閱讀本報告的正確方式，是把資源按這個階層倒置分配：<em>花最少時間擔心地基（它們最穩），花最多時間監測結構層（尤其 T5 三條紅線與 T6 Fed 獨立性），並把 T10 當作必須放在心裡、卻無法下注的尾部風險。</em></p>
+
+  <h3>本報告的四個已知盲區</h3>
+  <p>誠實標記分析框架自身的限制：<strong>其一，近因權重</strong>——本報告成稿於 Trump 2.0 執政第一年半、IEEPA 關稅剛被推翻、Warsh 剛接任、2026 期中尚未舉行的特定時點，若干判斷（尤其 T5、T7）帶有近因權重，應以第 22 章儀表板持續校正。<strong>其二，數據的時效與口徑</strong>——本文引用的席次、GDP、通膨、增債等為概略值，旨在呈現量級與結構，精確數字應以官方最新統計（CBO、BLS、BEA、Fed）為準；財政與集中度的衡量口徑不同、結論幅度會有差異。<strong>其三，反事實的不可知</strong>——「若無關稅通膨低約 0.9pp」「trifecta 窗口只到 2026」等判斷含反事實推估，本質上無法被直接驗證，只能以趨勢標記。<strong>其四，立場的自我約束</strong>——五稜鏡中的視角陳述為分析性重構，旨在呈現各社會位置的理性計算結構，不代表任何群體的統一立場、也不作黨派評價；「民主倒退辨析」章刻意採分層而非單一定性，代價是它無法給出「是否倒退」的簡單答案（這正是該章的方法論主張）。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s22">
+  <div class="sec-label">PART V · CH 22</div>
+  <h2>監測儀表板：時間軸與判讀規則</h2>
+  <table>
+    <tr><th>時點</th><th>事件</th><th>判讀規則</th></tr>
+    <tr><td><strong>2026-11-03</strong></td><td>期中選舉：全改選眾院、約 1/3 參院、逾 30 州長</td><td>T2 的核心裁決點。民主黨翻轉眾院＝政黨間制衡恢復、Trump 議程進入守勢；共和黨守住＝trifecta 延續、行政擴權窗口再開兩年（詳第 1、9 章）</td></tr>
+    <tr><td>持續</td><td>三條紅線：行政是否服從法院、選舉是否如期、權力是否和平轉移</td><td>T1／T5 的核心讀數。任一被明確跨越＝從「承壓未斷」轉為憲政危機，本報告全面重估；目前三線皆守（詳第 14 章）</td></tr>
+    <tr><td>每次會議</td><td>Warsh 領導下 Fed 的利率決策與獨立性</td><td>T6 的核心讀數。通膨未降卻因政治壓力提前降息＝獨立性實質侵蝕、美元信用折舊加速；按數據行事＝護欄守住（詳第 3B、17 章）</td></tr>
+    <tr><td>持續</td><td>Section 232 關稅與任何新關稅的法律路徑</td><td>T7 的讀數。IEEPA 已被推翻，觀察政府是否改走國會立法或其他授權、關稅反覆性是否下降——最難定價的一層（詳第 12 章）</td></tr>
+    <tr><td>每季</td><td>通膨（PCE／CPI）、GDP、赤字與利息負擔</td><td>T8 的讀數。通膨黏著＋高利率＋增債的組合是否推向債務螺旋；也是 2026 期中選情的經濟溫度計（詳第 16 章）</td></tr>
+    <tr><td>每季</td><td>移民執法規模與相關司法裁決</td><td>行政擴權與法院劃線在最有人身衝擊力領域的即時讀數；公民誤傷、第三國遣返等事件是護欄承壓的訊號（詳第 13 章）</td></tr>
+    <tr><td>持續</td><td>中期重劃戰的後續（各州地圖與訴訟）</td><td>眾院多數「被畫出而非選出」的程度；影響 2026 期中席次算術與極化深化（詳第 7B 章）</td></tr>
+    <tr><td>持續</td><td>美股 AI 七雄的資本支出與獲利兌現</td><td>T10 的市場尾部讀數。AI 敘事逆轉會放大集中指數的跌幅、衝擊全球超配美國的資金（詳第 17、18 章）</td></tr>
+    <tr><td>持續</td><td>美中關係、台海、烏俄斡旋、同盟分攤談判</td><td>T10 的地緣即時讀數。留意是否出現「被迫選邊」或實質軍事升級；同盟交易化的長期後果（詳第 20 章）</td></tr>
+    <tr><td>2028-11</td><td>下一屆總統與國會大選</td><td>兩黨鐘擺的下一個完整週期；MAGA 在 Trump 之後能否維持凝聚（繼承問題）、民主黨路線內戰的裁決（詳第 4B、5B 章）</td></tr>
+  </table>
+
+  <h3>四個「若發生則改變評估」的觸發器</h3>
+  <ul class="plain">
+    <li><strong>觸發器 A</strong>：行政公然拒絕服從最高法院的明確命令 → T1／T5 作廢，系統從「承壓未斷」轉為真實憲政危機，本報告所有「護欄仍在」的判斷需整體下修（歷史上未發生，是最關鍵的單一紅線）。</li>
+    <li><strong>觸發器 B</strong>：Fed 在通膨未降時因政治壓力系統性提前降息、或 Cook 案例外被推翻 → T6 作廢，美元信用折舊加速，重估「美元地基穩固」的核心前提（詳第 17 章）。</li>
+    <li><strong>觸發器 C</strong>：地緣質變——台海實質衝突、美中脫鉤升級至硬性選邊、或 AI 資本週期逆轉引發市場系統性重估 → T10 兌現，本報告所有經濟與地緣章節需整體重寫（唯一能同時擊穿所有稜鏡的觸發器）。</li>
+    <li><strong>觸發器 D</strong>：去極化訊號——兩黨在重大長期議題（財政、移民、選制改革）上恢復穩定跨黨合作、情感極化持續收斂 → T3 鬆動，「極化是命門」的核心診斷需修正（歷史上罕見，但這是唯一能改寫報告基調的正向訊號）。</li>
+  </ul>
+  <p><strong>總結一句：</strong>憲政制衡是常數、兩黨鐘擺是變數、極化是命門。監測 2026 期中與三條紅線、盯緊 Fed 獨立性與關稅的法律路徑、警惕地緣與 AI 的尾部——但不必為「美國明天變獨裁」焦慮，因為 2026 年的法院判決已經證明，這個系統的護欄仍在運作。真正該擔心的，不是它會不會倒向威權，而是它會不會在無盡的極化與政策擺盪中，錯失處理財政、產業與社會裂痕的窗口——並透過美元與關稅，把這份不確定性輸出給全世界。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s23">
+  <div class="sec-label">PART V · CH 23</div>
+  <h2>資料來源與方法註記</h2>
+  <p>本文件之事實基礎來自 2026 年 7 月中旬檢索之公開報導與研究，主要來源：Reuters、Associated Press、Bloomberg、The New York Times、The Washington Post、The Wall Street Journal、Financial Times、CNBC、NPR、PBS、BBC、Politico、The Economist（選情、立法、行政命令、關稅、移民、Fed 動態）；Ballotpedia 與各州選務機關（2024 大選與 119 屆國會席次、2026 重劃與期中）；美國最高法院與聯邦法院之官方判決（2026-02 IEEPA 關稅違憲案、2026-06 Trump v. Cook 及 Humphrey's Executor 相關判決、Dobbs、Rucho、Citizens United）；國會與白宮官方紀錄（One Big Beautiful Bill Act／公法 119-21 之表決與內容）。經濟與財政數據另參考：國會預算辦公室（CBO，增債與健保覆蓋估計）、勞工統計局（BLS，通膨）、經濟分析局（BEA，GDP）、聯準會（Fed，利率、關稅對通膨之估算、主席更替）；醫療與福利條款參考 KFF、CMS 與相關政策分析。移民數據參考國土安全部（DHS）、ICE 與 CBP 之公開統計及 Deportation Data Project、NBC 追蹤。DOGE 之興衰參考 Politico E&E News、The Washington Post、The Fiscal Times 等報導。地緣章節另參考 CSIS、Council on Foreign Relations、國務院與國防部之公開紀錄。制度與結構分析另參考關於總統制、兩黨制、選舉人團、參院偏差、情感極化、地理分選、行政國家與單一行政首長理論之學術與政策文獻。</p>
+  <p>方法註記：①選舉與表決數字以官方計票與主流媒體一致報導為準；席次、得票率、GDP、通膨與增債等為概略值，旨在呈現量級與結構，精確數字以官方最新統計為準。②財政與市場集中度依衡量口徑不同而有差異，本文採「量級」表述並註明其概略性質。③五稜鏡中的視角陳述為分析性重構，旨在呈現各社會位置的理性計算結構，不代表任何群體的統一立場、亦不作黨派評價。④「民主倒退」相關判斷刻意採分層方法（第 14 章）——區分真實的結構性變化與過度解讀的恐慌，並以「三條紅線是否被跨越」為可觀察指標，不作單一是非定性。⑤本報告成稿於 2026 年 7 月：Trump 2.0 執政第一年半、IEEPA 關稅已被最高法院推翻（Section 232 仍存）、Warsh 已接任 Fed 主席、Cook 依判決留任、DOGE 已終結、大而美法案已簽署逾一年、2026 期中選舉尚未舉行的特定時點；仍在演變的時效性事件（期中結果、關稅新路徑、Fed 決策、移民訴訟）以第 22 章儀表板為持續校正介面。⑥本文件為政治結構分析，非投資建議；涉及部位決策前應依既定流程另行執行冷讀批判。</p>
+</section>
+</main>
+</div>
+</div>
+
+<footer>
+  <div class="shell">
+    <h4>Colophon</h4>
+    <p>美國政治結構五稜鏡 · InvestMQuest Geopolitics Research · 編製於 2026-07-23。設計語彙：靛墨紙面、織錦金界線、五色稜鏡（赤紅＝共和黨與 MAGA、靛藍＝民主黨、石墨灰＝制度與法院、帝王紫＝各州與聯邦、翡翠綠＝外國人）。本文件之稜鏡裝置（同一事實、多種讀法）為分析框架，延續同系列馬來西亞・南韓・泰國・印尼・菲律賓篇之方法，可套用於其他多裂隙政體之結構研究。核心定錨：憲政制衡是常數、兩黨鐘擺是變數、極化是命門。</p>
+  </div>
+</footer>
+
+</body>
+</html>

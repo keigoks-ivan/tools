@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>加拿大政治結構五稜鏡 — 自由黨・保守黨・魁北克・新民主黨・美國的五種讀法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@350;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F4EE;        /* 米紙 */
+  --ink:#1B2233;          /* 靛墨 */
+  --ink-soft:#4A5468;
+  --gold:#B08A2E;         /* 織錦金 */
+  --hairline:#D9D4C7;
+  --lib:#C0392B;          /* 稜鏡・自由黨 Carney = 赤紅 */
+  --lib-bg:#F9ECEA;
+  --con:#1D4E89;          /* 稜鏡・保守黨 Poilievre = 藏青 */
+  --con-bg:#E9EEF4;
+  --que:#6B4A8A;          /* 稜鏡・魁北克與聯邦 = 帝王紫 */
+  --que-bg:#F0ECF4;
+  --ndp:#E8791E;          /* 稜鏡・新民主黨與左翼 = 山吹橙 */
+  --ndp-bg:#FBF0E4;
+  --fore:#2F7E8A;         /* 稜鏡・外國人與美國 = 青灰 */
+  --fore-bg:#E7F1F2;
+  --warn:#8A5A00;
+  --warn-bg:#F7F0DE;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  font-weight:350;
+  line-height:1.95;
+  font-size:16.5px;
+  letter-spacing:.02em;
+}
+::selection{background:var(--gold);color:#fff}
+
+/* ---------- 版心 ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 28px}
+.layout{display:grid;grid-template-columns:236px 1fr;gap:56px;align-items:start}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+
+/* ---------- Hero ---------- */
+header.hero{
+  background:var(--ink);
+  color:#EDE9DE;
+  padding:88px 0 72px;
+  position:relative;
+  overflow:hidden;
+}
+header.hero::after{ /* 五稜鏡光束 */
+  content:'';position:absolute;right:-8%;top:0;bottom:0;width:52%;
+  background:
+    linear-gradient(115deg,transparent 30%,rgba(192,57,43,.34) 30.4%,rgba(192,57,43,.34) 40%,transparent 40.4%),
+    linear-gradient(115deg,transparent 41%,rgba(29,78,137,.32) 41.4%,rgba(29,78,137,.32) 51%,transparent 51.4%),
+    linear-gradient(115deg,transparent 52%,rgba(107,74,138,.32) 52.4%,rgba(107,74,138,.32) 62%,transparent 62.4%),
+    linear-gradient(115deg,transparent 63%,rgba(232,121,30,.32) 63.4%,rgba(232,121,30,.32) 73%,transparent 73.4%),
+    linear-gradient(115deg,transparent 74%,rgba(47,126,138,.32) 74.4%,rgba(47,126,138,.32) 84%,transparent 84.4%);
+  pointer-events:none;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.28em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:26px;
+}
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(34px,4.6vw,56px);line-height:1.3;letter-spacing:.03em;
+  max-width:820px;
+}
+.hero-sub{
+  margin-top:26px;max-width:680px;font-size:17px;line-height:2.05;
+  color:#C9C3B4;font-weight:350;
+}
+.hero-meta{
+  margin-top:40px;display:flex;gap:34px;flex-wrap:wrap;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:#8E96A8;
+}
+.hero-meta b{color:#EDE9DE;font-weight:500;display:block;margin-bottom:3px}
+.prism-legend{margin-top:46px;display:flex;gap:0;max-width:760px;border:1px solid rgba(237,233,222,.22);flex-wrap:wrap}
+.prism-legend div{
+  flex:1;min-width:120px;padding:13px 12px;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:.08em;text-align:center;color:#EDE9DE;
+}
+.prism-legend .pl-l{background:rgba(192,57,43,.78)}
+.prism-legend .pl-c{background:rgba(29,78,137,.80)}
+.prism-legend .pl-q{background:rgba(107,74,138,.78)}
+.prism-legend .pl-n{background:rgba(232,121,30,.82)}
+.prism-legend .pl-f{background:rgba(47,126,138,.80)}
+
+/* ---------- 目錄側欄 ---------- */
+nav.toc{
+  position:sticky;top:0;padding-top:40px;padding-bottom:40px;
+  font-size:13.5px;line-height:1.7;
+  max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:var(--hairline) transparent;
+}
+nav.toc::-webkit-scrollbar{width:5px}
+nav.toc::-webkit-scrollbar-thumb{background:var(--hairline);border-radius:3px}
+nav.toc .toc-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:18px;text-transform:uppercase;
+}
+nav.toc a{
+  display:block;color:var(--ink-soft);text-decoration:none;
+  padding:5px 0 5px 14px;border-left:2px solid var(--hairline);
+  transition:all .18s;
+}
+nav.toc a:hover{color:var(--ink);border-left-color:var(--gold)}
+nav.toc a.t-l{border-left-color:var(--lib)}
+nav.toc a.t-c{border-left-color:var(--con)}
+nav.toc a.t-q{border-left-color:var(--que)}
+nav.toc a.t-n{border-left-color:var(--ndp)}
+nav.toc a.t-f{border-left-color:var(--fore)}
+@media(max-width:960px){nav.toc{position:static;padding-top:40px}}
+
+/* ---------- 主文 ---------- */
+main{padding:64px 0 120px;min-width:0}
+section{margin-bottom:96px}
+.sec-label{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.24em;
+  color:var(--gold);margin-bottom:14px;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:900;font-size:30px;
+  line-height:1.45;margin-bottom:30px;padding-bottom:20px;
+  border-bottom:1px solid var(--hairline);letter-spacing:.02em;
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:21px;
+  margin:44px 0 18px;letter-spacing:.02em;
+}
+p{margin-bottom:20px;max-width:74ch}
+p.lede{font-size:18.5px;line-height:2.05;color:var(--ink);font-weight:400;max-width:70ch}
+strong{font-weight:700;color:var(--ink)}
+em{font-style:normal;border-bottom:2px solid var(--gold);padding-bottom:1px}
+
+/* ---------- 稜鏡三聯裝置 ---------- */
+.prism{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+  margin:36px 0 44px;border:1px solid var(--hairline);
+  background:#fff;
+}
+@media(max-width:820px){.prism{grid-template-columns:1fr}}
+.prism>div{padding:26px 24px 22px;border-top:4px solid}
+.prism>div+div{border-left:1px solid var(--hairline)}
+@media(max-width:820px){.prism>div+div{border-left:none;border-top-width:4px}}
+.prism .pv-l{border-top-color:var(--lib);background:linear-gradient(var(--lib-bg),#fff 42%)}
+.prism .pv-c{border-top-color:var(--con);background:linear-gradient(var(--con-bg),#fff 42%)}
+.prism .pv-q{border-top-color:var(--que);background:linear-gradient(var(--que-bg),#fff 42%)}
+.prism .pv-n{border-top-color:var(--ndp);background:linear-gradient(var(--ndp-bg),#fff 42%)}
+.prism .pv-f{border-top-color:var(--fore);background:linear-gradient(var(--fore-bg),#fff 42%)}
+.prism .pv-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  margin-bottom:12px;font-weight:500;
+}
+.pv-l .pv-tag{color:var(--lib)}
+.pv-c .pv-tag{color:var(--con)}
+.pv-q .pv-tag{color:var(--que)}
+.pv-n .pv-tag{color:var(--ndp)}
+.pv-f .pv-tag{color:var(--fore)}
+.prism p{font-size:14.5px;line-height:1.9;margin-bottom:12px;color:#333B4D}
+.prism p:last-child{margin-bottom:0}
+.prism-caption{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);
+  letter-spacing:.06em;margin:-32px 0 44px;padding-top:10px;
+}
+
+/* ---------- 觀點框 ---------- */
+.lens{padding:6px 0 6px 22px;margin:28px 0;border-left:4px solid}
+.lens.l-l{border-color:var(--lib)}
+.lens.l-c{border-color:var(--con)}
+.lens.l-q{border-color:var(--que)}
+.lens.l-n{border-color:var(--ndp)}
+.lens.l-f{border-color:var(--fore)}
+.lens .lens-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;margin-bottom:8px;font-weight:500;
+}
+.lens.l-l .lens-tag{color:var(--lib)}
+.lens.l-c .lens-tag{color:var(--con)}
+.lens.l-q .lens-tag{color:var(--que)}
+.lens.l-n .lens-tag{color:var(--ndp)}
+.lens.l-f .lens-tag{color:var(--fore)}
+
+/* ---------- 數據列 ---------- */
+.figrow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--hairline);border:1px solid var(--hairline);
+  margin:32px 0 40px;
+}
+.figrow div{background:#fff;padding:20px 18px 16px}
+.figrow .fig-n{
+  font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;
+  color:var(--ink);letter-spacing:-.01em;
+}
+.figrow .fig-l{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.6}
+
+/* ---------- 表格 ---------- */
+table{width:100%;border-collapse:collapse;margin:28px 0 14px;font-size:14px;background:#fff}
+th{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;
+  text-align:left;padding:12px 14px;background:var(--ink);color:#EDE9DE;font-weight:500;
+}
+td{padding:12px 14px;border-bottom:1px solid var(--hairline);vertical-align:top;line-height:1.75}
+tr:last-child td{border-bottom:none}
+.tbl-note{font-size:13px;color:var(--ink-soft);margin-bottom:36px;max-width:74ch}
+
+/* ---------- 警示框 ---------- */
+.callout{
+  background:var(--warn-bg);border:1px solid #E3D5AE;border-left:4px solid var(--warn);
+  padding:20px 24px;margin:30px 0;font-size:15px;line-height:1.9;max-width:none;
+}
+.callout .co-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  color:var(--warn);margin-bottom:8px;font-weight:500;
+}
+.callout p{margin-bottom:10px;max-width:none}
+.callout p:last-child{margin-bottom:0}
+
+/* ---------- 反方論證 ---------- */
+.debate{margin:32px 0;border:1px solid var(--hairline);background:#fff}
+.debate>div{padding:22px 26px}
+.debate .d-pro{border-bottom:1px dashed var(--hairline)}
+.debate .d-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;margin-bottom:10px;font-weight:500;
+}
+.debate .d-pro .d-tag{color:var(--lib)}
+.debate .d-con .d-tag{color:var(--con)}
+.debate p{font-size:14.5px;margin-bottom:10px}
+.debate p:last-child{margin-bottom:0}
+
+ul.plain{margin:0 0 22px 0;padding-left:0;list-style:none;max-width:74ch}
+ul.plain li{padding:9px 0 9px 26px;position:relative;line-height:1.85}
+ul.plain li::before{
+  content:'—';position:absolute;left:0;color:var(--gold);font-weight:700;
+}
+footer{
+  background:var(--ink);color:#8E96A8;padding:56px 0 72px;
+  font-size:13px;line-height:2;
+}
+footer .shell{max-width:900px}
+footer h4{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:16px;font-weight:500;
+}
+footer p{max-width:none}
+
+.part-divider{margin:110px 0 70px;padding:34px 0 30px;border-top:3px solid var(--ink);border-bottom:1px solid var(--hairline)}
+.part-divider .pd-num{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
+.part-divider h2{border:none;padding:0;margin:0;font-size:34px}
+.part-divider .pd-sub{margin-top:8px;color:var(--ink-soft);font-size:15px}
+
+.divider-ornament{
+  text-align:center;color:var(--gold);font-size:15px;letter-spacing:.6em;
+  margin:0 0 96px;user-select:none;
+}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<header class="hero">
+  <div class="shell">
+    <div class="eyebrow">InvestMQuest · Geopolitics Research · v1 · 2026-07-23</div>
+    <h1>加拿大政治結構五稜鏡</h1>
+    <div class="hero-sub">同一個聯邦，五種完全不同的處境。一個由「管理三件事」定義的國家——魁北克、西部、以及南邊那個十倍體量的巨鄰——為何能讓瀕死的自由黨在四個月內從落後 25 點逆轉勝選？當 Trump 用 25%（後升至 50%）關稅與「第 51 州」的併吞言論把七十年的經濟依賴變成存在性的主權威脅，加拿大的紅藍鐘擺、FPTP 選制、魁獨、西部脫離主義與原住民和解各自看到什麼？以 Trudeau 下台、Carney 崛起、2025-04-28 大選、以及 2026 年自由黨由少數翻為多數為切片，逐層論證。</div>
+    <div class="hero-meta">
+      <div><b>分析基準日</b>2026-07-23</div>
+      <div><b>前一里程碑</b>2025-04 聯邦大選（Carney 自由黨勝、少數政府）</div>
+      <div><b>近期里程碑</b>2026-04 補選＋轉籍：少數翻多數／2026-07 美對加 50% 關稅</div>
+      <div><b>下一里程碑</b>2026-10-19 Alberta 主權公投・對美關稅與主權談判</div>
+      <div><b>文件性質</b>結構分析・非投資建議</div>
+    </div>
+    <div class="prism-legend">
+      <div class="pl-l">自由黨</div>
+      <div class="pl-c">保守黨</div>
+      <div class="pl-q">魁北克・聯邦</div>
+      <div class="pl-n">新民主黨・原住民</div>
+      <div class="pl-f">外國人・美國</div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+<div class="layout">
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <a href="#s0">00 導讀與核心論證</a>
+  <div class="toc-title" style="margin-top:16px">I · 地圖</div>
+  <a href="#s1">01 政治版圖總覽</a>
+  <a href="#s1b">01B 從少數到多數：席次算術</a>
+  <a href="#s2">02 結構的根源：聯邦・FPTP・區域</a>
+  <a href="#s2b">02B 魁獨兩次公投與 Bloc</a>
+  <a href="#s3">03 兩個不投票的力量：最高法院與各省</a>
+  <div class="toc-title" style="margin-top:16px">II · 稜鏡</div>
+  <a href="#s4" class="t-l">04 自由黨／Carney</a>
+  <a href="#s4b" class="t-l">04B Carney 其人：央行家從政</a>
+  <a href="#s5" class="t-c">05 保守黨／Poilievre</a>
+  <a href="#s6" class="t-q">06 魁北克與聯邦</a>
+  <a href="#s7" class="t-n">07 新民主黨與原住民</a>
+  <a href="#s8" class="t-f">08 外國人與美國</a>
+  <div class="toc-title" style="margin-top:16px">III · 動力</div>
+  <a href="#s9">09 Trudeau 下台與 Carney 崛起</a>
+  <a href="#s10">10 2025 大選深讀：Trump 如何救了自由黨</a>
+  <a href="#s11">11 少數政府與 Poilievre 的困境</a>
+  <a href="#s12">12 主權與關稅：對美的新現實</a>
+  <a href="#s13">13 西部疏離與 Alberta</a>
+  <a href="#s13b">13B Alberta 主權公投：十道題</a>
+  <a href="#s14">14 民主韌性辨析</a>
+  <div class="toc-title" style="margin-top:16px">IV · 引擎</div>
+  <a href="#s15">15 三角傳導模型</a>
+  <a href="#s16">16 政治×經濟迴路</a>
+  <a href="#s17">17 資源與資本：石油・礦產・管道</a>
+  <a href="#s18">18 產業與人口：移民・住房・生產力</a>
+  <a href="#s19">19 政策連續性與外資</a>
+  <a href="#s20">20 地緣：美國作為一切的中心</a>
+  <div class="toc-title" style="margin-top:16px">V · 終章</div>
+  <a href="#s21">21 十大論題</a>
+  <a href="#s22">22 監測儀表板</a>
+  <a href="#s23">23 資料來源與方法註記</a>
+</nav>
+
+<main>
+<section id="s0">
+  <div class="sec-label">PROLOGUE · CH 00</div>
+  <h2>導讀與核心論證</h2>
+  <p class="lede">加拿大是全球治理指標上最無聊的成功故事之一：一個 G7 成員、能源與礦產出口大國、擁有普選、法治、和平政權輪替與一部載明權利的《憲章》，過去半世紀從未有過政變、內戰或憲政崩潰。但這份無聊底下藏著一個由「管理三件事」定義的聯邦——<strong>魁北克</strong>（一個講法語、兩度公投幾乎脫離的民族）、<strong>西部</strong>（以 Alberta 為首、覺得被東部與聯邦長期剝奪的能源腹地）、以及<strong>南邊那個巨鄰</strong>（體量十倍、吸走約四分之三出口的美國）。加拿大的政治穩定，本質上就是這三顆離心力被聯邦制、紅藍兩黨的中間鐘擺與 FPTP 選制反覆收攏的結果。<strong>它的制度硬體極穩，軟肋卻始終只有一個：美國。</strong></p>
+
+  <p>2025 年，這個軟肋第一次變成了主角。1 月，執政近十年、民調跌到谷底的 Justin Trudeau 宣布辭去自由黨黨魁；此時保守黨在全國民調領先自由黨達 25 至 27 個百分點，Pierre Poilievre 的「axe the tax（砍掉碳稅）」民粹攻勢看似已鎖定一場壓倒性勝利。然後，南邊發生了一件改寫劇本的事：重返白宮的 Donald Trump 對加拿大貨物課徵 25% 關稅，並反覆公開揚言要把加拿大變成美國的「<strong>第 51 州（51st state）</strong>」、稱 Trudeau 為「州長（Governor）」。一場原本關於生活成本與碳稅的國內選舉，一夜之間變成一場關於<strong>國家生死存亡</strong>的公投——而選民要問的問題也變了：不是「誰能讓生活更便宜」，而是「誰最能站在 Trump 對面替加拿大談判」。</p>
+
+  <p>答案是一個從未當過一天民選議員的央行家。<strong>Mark Carney</strong>——2008 金融海嘯時的加拿大央行行長、Brexit 動盪時的英格蘭銀行行長——於 2025-03-09 以 85.9% 的黨員票當選自由黨黨魁，3 月 14 日宣誓就任總理，隨即宣布提前大選。4 月 28 日投票：<strong>自由黨以約 43.8% 的得票（自 1984 年 Mulroney 以來單一政黨最高）拿下 169 席</strong>，距過半的 172 席只差 3 席，組成少數政府；保守黨 144 席，Poilievre 甚至連自己在安大略 Carleton 經營二十年的選區都以約 4,500 票輸給自由黨素人 Bruce Fanjoy。這是加拿大現代史上最戲劇性的逆轉：<strong>一個外國領袖的併吞威脅，以民族主義救活了瀕死的執政黨</strong>。</p>
+
+  <p>但這套結構必須拆成不同的社會位置來讀，因為它對不同的人意義完全不同：</p>
+  <ul class="plain">
+    <li><strong>對自由黨與 Carney 陣營</strong>：加拿大是一個需要「大人」在危機中掌舵的中間國家——都市、移民、專業階層與跨黨的「反 Trump 多數」臨時集結在紅旗下，賭的是能力與穩健，而非意識形態。</li>
+    <li><strong>對保守黨與 Poilievre</strong>：加拿大是一個被 Trudeau 十年揮霍、生活成本與住房失控、被覺醒左派與臃腫官僚拖垮的國家——真正的敵人在渥太華，不在華盛頓；關稅只是暫時偷走了他們已到手的勝利。</li>
+    <li><strong>對魁北克</strong>：聯邦是一場永遠未完成的談判——語言（Bill 101、96）、世俗（Bill 21）與省權是不可退讓的底線，Bloc Québécois 在渥太華扮演造王與否決的槓桿，而 Trump 的威脅第一次讓「加拿大人」這個身分蓋過了「魁北克人」。</li>
+    <li><strong>對新民主黨與原住民</strong>：加拿大是一份尚未清償的和解帳單——工會、勞工、公醫（medicare）與對 First Nations 的 reconciliation 是道德核心；但 2025 年，兩極化的存亡選舉把左翼第三黨擠到失去官方政黨地位的邊緣。</li>
+    <li><strong>對外國人與投資人</strong>：加拿大是一套「北美折價＋政策連續性」的規則手冊——真正的風險不在誰執政的紅藍鐘擺，而在<em>對美單一市場的過度依賴</em>、<em>能源與關鍵礦產的地緣槓桿</em>、以及<em>魁獨與 Alberta 脫離主義這兩條長期的離心裂縫</em>。</li>
+  </ul>
+
+  <h3>全書地圖：五部曲的閱讀動線</h3>
+  <table>
+    <tr><th>部</th><th>章</th><th>回答的問題</th></tr>
+    <tr><td><strong>第一部・地圖</strong></td><td>01–03</td><td>版圖長什麼樣？FPTP、聯邦制、魁北克與西部如何塑造區域政治？最高法院與各省這兩個不投票的權力如何約束聯邦？</td></tr>
+    <tr><td><strong>第二部・稜鏡</strong></td><td>04–08</td><td>同一個聯邦，五種社會位置（自由黨／保守黨／魁北克／新民主黨與原住民／外國人與美國）各自看到什麼？</td></tr>
+    <tr><td><strong>第三部・動力</strong></td><td>09–14</td><td>Trudeau 為何下台？Trump 如何救了自由黨？少數政府如何翻成多數？主權與關稅、Alberta 脫離主義各揭示了什麼？民主是在倒退還是在自我修復？</td></tr>
+    <tr><td><strong>第四部・引擎</strong></td><td>15–20</td><td>政黨×資源經濟×美國如何互相傳導？石油、關鍵礦產、移民、住房、外資、對中與北極各卡在哪個齒輪上？</td></tr>
+    <tr><td><strong>第五部・終章</strong></td><td>21–23</td><td>十大論題（附信度與可證偽條件）、監測儀表板、資料來源。</td></tr>
+  </table>
+  <p><strong>一句話結論，供全文檢驗：</strong>聯邦是常數、紅藍鐘擺是變數、美國是命門——加拿大是一個制度硬體極穩、政治權力在中間偏左的自由黨與中間偏右的保守黨之間規律擺盪、而國家命運被一個十倍體量的南方鄰居永久定義的聯邦。民主的形式（競爭性選舉、司法審查、和平轉移、聯邦—省的分權）真實且穩固；但它承載著三條長期的離心裂縫（魁北克、西部、原住民），平時被經濟繁榮與聯邦轉移支付吸收，一旦外部衝擊（Trump 的關稅與併吞言論）襲來，這些裂縫要嘛被民族主義暫時焊合（2025 的自由黨奇蹟），要嘛被激化（Alberta 的 2026 公投）。趕時間的讀者可直接讀第 21 章的十大論題與第 22 章儀表板，再回頭按需查閱。</p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART I</div>
+  <h2>地圖 · The Map</h2>
+  <div class="pd-sub">版圖、地基與兩個不投票的權力</div>
+</div>
+
+<section id="s1">
+  <div class="sec-label">PART I · CH 01</div>
+  <h2>政治版圖總覽（2026 年 7 月）</h2>
+  <p class="lede">要讀懂加拿大的版圖，必須把三層疊在一起看：最底層是把約四成選票放大成整院多數的<strong>FPTP 小選區選制</strong>，中間層是由五個政黨（自由黨、保守黨、Bloc Québécois、新民主黨、綠黨）組裝出的<strong>紅藍為主、多黨為輔的競爭格局</strong>，最上層是聯邦下議院 343 席的<strong>多數／少數算術與強烈的區域分布</strong>。2025 年的加拿大，這三層被一個外部衝擊（Trump）罕見地重新洗牌——把一個原本板上釘釘的保守黨大勝，翻成了自由黨的少數政府。</p>
+
+  <h3>第一層：FPTP——把區域鑄成整席的放大器</h3>
+  <p>加拿大聯邦下議院（House of Commons）共 <strong>343 席</strong>，全部由「單一選區相對多數制」（First-Past-The-Post, FPTP）產生：每個選區（riding）得票最高者獨得整席，過半需 <strong>172 席</strong>。這個承襲自西敏制（Westminster）的設計有一個決定性後果——<strong>票席嚴重不成比例</strong>：一個政黨可以用全國約四成的得票拿下過半席次，也可以在得票不低的情況下因選票「攤得太平」而席次稀少。FPTP 因此系統性地<em>獎勵區域集中的政黨、懲罰全國均勻分布的政黨</em>：Bloc Québécois 的選票 100% 集中在魁北克，遂能以全國約 6% 的得票換得 22 席；綠黨的選票撒在全國，2025 年約 1.2% 得票只換得 1 席。這是理解加拿大一切席次結果的第一把鑰匙——<strong>版圖不是得票的直接翻譯，而是「得票 × 地理集中度」經過 FPTP 放大後的產物</strong>。</p>
+
+  <h3>第二層：五黨格局——紅藍為主、三黨為輔</h3>
+  <p>加拿大聯邦政治由五個政黨組裝：<strong>自由黨（Liberal Party）</strong>——中間偏左、都市與移民聯盟、加拿大史上執政最久的「天然執政黨」；<strong>保守黨（Conservative Party）</strong>——中間偏右、西部與郊區基礎、2003 年由老保守黨與西部的加拿大聯盟合併而成；<strong>Bloc Québécois（魁人政團）</strong>——只在魁北克參選的主權派，聯邦層級扮演造王與否決的槓桿；<strong>新民主黨（NDP）</strong>——社會民主派、工會與勞工基礎，公醫制度（medicare）的歷史推手；<strong>綠黨（Green Party）</strong>——環境優先的小黨，長期在 2 至 7% 間浮沉。兩大黨長年合計約六成多得票，但 2025 年出現一個七十年未見的現象：<strong>自由黨與保守黨合計得票首度超過 85%</strong>——在存亡選舉的兩極化下，選民大量「歸隊」到兩大黨，Bloc、NDP、綠黨同時被擠壓。</p>
+
+  <h3>第三層：席次算術與區域分布——2025-04-28 的裁決</h3>
+  <p>把三層合起來看 2025 年 4 月 28 日的結果，區域的力量一目了然：</p>
+  <table>
+    <tr><th>政黨</th><th>席次（343）</th><th>約略得票</th><th>核心區域基礎</th></tr>
+    <tr><td><strong>自由黨（Carney）</strong></td><td>169</td><td>~43.8%</td><td>大多倫多、大蒙特婁、大西洋四省、都市與移民密集區</td></tr>
+    <tr><td><strong>保守黨（Poilievre）</strong></td><td>144</td><td>~41%</td><td>Alberta、Saskatchewan（近乎橫掃）、安大略郊區、鄉村</td></tr>
+    <tr><td><strong>Bloc Québécois</strong></td><td>22</td><td>~6%</td><td>魁北克（僅此一省參選）</td></tr>
+    <tr><td><strong>新民主黨（NDP）</strong></td><td>7</td><td>~6.3%</td><td>BC、都市工人票——大幅崩盤，失去官方政黨地位</td></tr>
+    <tr><td><strong>綠黨</strong></td><td>1</td><td>~1.2%</td><td>BC 島嶼</td></tr>
+  </table>
+  <p class="tbl-note">數字為官方計票之概略值，旨在呈現量級與區域結構。關鍵一句：<strong>自由黨 169 席仍差 3 席過半，須以少數政府執政；而 Alberta 與 Saskatchewan 幾乎全紅（保守黨橫掃），構成西部疏離的選票地基（詳第 13 章）。</strong></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">169 / 172</div><div class="fig-l">2025 自由黨席次 vs 過半門檻——少數政府</div></div>
+    <div><div class="fig-n">~25–27 pt</div><div class="fig-l">2025 年初保守黨對自由黨的民調領先（後全數蒸發）</div></div>
+    <div><div class="fig-n">85%+</div><div class="fig-l">2025 兩大黨合計得票——約七十年來首見</div></div>
+    <div><div class="fig-n">~4,500</div><div class="fig-l">Poilievre 在自身選區 Carleton 落選的票差</div></div>
+  </div>
+
+  <div class="prism">
+    <div class="pv-l"><div class="pv-tag">LIBERAL</div><p>版圖是一張「臨時聯盟圖」：都市、移民、大西洋省與跨黨的反 Trump 選民在紅旗下集結。這個聯盟是危機催生的，強在此刻、脆在未來——一旦關稅威脅退潮，臨時借來的選票隨時可能回流。</p><p>它盯的一欄，是這個借來的多數能否在關稅退潮前，轉化為對經濟能力的長期信任。</p></div>
+    <div class="pv-c"><div class="pv-tag">CONSERVATIVE</div><p>版圖是一張「被偷走的地圖」：保守黨得票其實大幅成長（約 41%，歷史高位），席次卻不夠——因為選票過度集中在西部的安全席，在關鍵的安大略搖擺選區被自由黨的反 Trump 浪潮擋下。</p><p>對保守黨，痛點不是不受歡迎，而是 FPTP 下「贏很多票卻贏不夠席」。</p></div>
+    <div class="pv-q"><div class="pv-tag">QUÉBEC</div><p>版圖是一張「槓桿縮水圖」：Trump 的威脅催出加拿大民族主義，把原本會投給 Bloc 的魁北克選民推向自由黨，Bloc 從造王者退為旁觀者——魁北克身分第一次讓位給加拿大身分。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一張版圖，三種利害：臨時聯盟、被偷走的地圖、縮水的槓桿</div>
+</section>
+
+<section id="s1b">
+  <div class="sec-label">PART I · CH 01B</div>
+  <h2>從少數到多數：2026 年席次算術的重寫</h2>
+  <p class="lede">第 1 章停在 2025 年 4 月的少數政府；但到 2026 年年中，這個算術已被悄悄改寫。加拿大的西敏制有一個常被外界忽略的特性：<strong>下議院的多數不是選舉當晚一次凍結的，而是可以在任期中透過「轉籍（floor crossing）」與「補選（by-election）」持續變動的活數字。</strong>Carney 政府正是靠這兩個工具，把 169 席的少數，一步步推過了 172 席的過半線。</p>
+
+  <h3>兩個把少數變多數的工具</h3>
+  <p><strong>其一是轉籍（floor crossing）</strong>：在西敏制下，議員效忠的是自己的席位而非政黨，可以中途「過走道」加入執政黨——2025 至 2026 年間，數名在野議員（含保守黨籍者）陸續加入自由黨陣營，直接為執政方增加席次。<strong>其二是補選（by-election）</strong>：當某選區出缺（議員辭職、去世或轉任），該選區單獨補選；執政黨在補選中的表現，既是民意的期中考，也是實質的席次增減。2026 年 4 月，自由黨在一輪補選中連下數城，加上先前的轉籍，<strong>把總數推到約 173–174 席，越過 172 的過半線，正式從少數政府翻為多數政府</strong>。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL UPDATE · 少數→多數的意義</div>
+    <p>這個轉變的重量，遠超過「多幾席」的算術。少數政府在西敏制下時刻活在「信任投票（confidence vote）」的刀口上——任何預算案或重大法案被在野黨聯手否決，都可能觸發倒閣與提前大選；執政黨因此必須不斷向 NDP 或 Bloc 讓步換取支持。<strong>翻成多數後，Carney 政府一舉擺脫了這種要脅：內閣能穩過信任投票、法案能順利通過委員會、且理論上可以不必再面對大選直到 2029 年。</strong>換言之，2025 年那個「借來的、脆弱的」勝利，到 2026 年被鞏固成一個「可執政四年的、穩固的」授權——這正是本報告把「少數國會的存續」從『下一里程碑』下修、改以『對美關稅與 Alberta 公投』為真正變數的原因。</p>
+  </div>
+
+  <h3>為什麼這在加拿大不算「政變」而是常態</h3>
+  <p>對習慣總統制的讀者，「沒有重新選舉就從少數變多數」聽起來像操弄；但在西敏制的邏輯裡，這是內建的正常機制。因為政府的正當性來自「能否維持下議院多數的信任」，而非一次性的選票凍結——只要能持續集結過半議員的支持，執政就是合法的。轉籍議員通常要面對選民「背叛」的道德指控（其中一些人會在下次選舉付出代價），補選則提供了真實的民意校準。<strong>加拿大的多數，因此是一個「持續協商、隨時可變」的動態均衡，而非四年一凍結的靜態結果</strong>——這也是為什麼監測加拿大政局，不能只看大選夜，還要盯著轉籍與補選這兩條低調卻關鍵的暗流。</p>
+</section>
+
+<section id="s2">
+  <div class="sec-label">PART I · CH 02</div>
+  <h2>結構的根源：聯邦制、魁北克、西部疏離與 FPTP</h2>
+  <p class="lede">加拿大政治為何長成今天這副模樣——為何政黨的命運如此受區域擺布、為何魁北克能挾持全國議程、為何西部長年懷恨？答案不在個別政治人物，在四塊互相咬合的地基：一部把權力大幅下放給省的<strong>聯邦憲法</strong>、一個講法語且差點脫離的<strong>魁北克</strong>、一片覺得被東部剝奪的<strong>西部能源腹地</strong>、以及一套把區域鑄成鐵票的<strong>FPTP 選制</strong>。</p>
+
+  <h3>第一層：一個「去中心化」的聯邦</h3>
+  <p>加拿大由 <strong>10 個省（provinces）與 3 個地區（territories）</strong>組成，是全世界最去中心化的聯邦之一。1867 年《英屬北美法》（後來的《憲法法》）與百餘年的司法解釋，把大量關鍵權力交給了省：<strong>醫療、教育、天然資源、財產與民事權利、市政</strong>幾乎都是省的管轄。這意味著省長（premier）不是聯邦的下屬，而是各自擁有直接民意授權的權力中心——一位 Alberta 或 Quebec 省長，可以在能源、語言、移民乃至憲法議題上與渥太華正面對撞。加拿大政治因此不是「中央對地方」的單向命令，而是「聯邦與省之間永無止境的談判」（executive federalism）。<strong>這種去中心化是加拿大穩定的來源（區域矛盾有制度化的宣洩管道），也是它離心的來源（省隨時能挑戰聯邦）。</strong></p>
+
+  <h3>第二層：魁北克——聯邦內部的「另一個民族」</h3>
+  <p>加拿大的第一道、也是最深的裂縫是語言與民族。<strong>魁北克</strong>約佔全國人口兩成多，以法語為主體，擁有獨特的《民法》傳統、天主教文化底蘊與強烈的民族認同。從 1960 年代的「寧靜革命（Quiet Revolution）」起，魁北克從一個天主教農業社會迅速世俗化、國家化，催生了主權運動——並在 1980 與 1995 兩度舉行獨立公投（詳第 2B 章）。聯邦對此的長期回應是「不對稱的安撫」：承認魁北克為「加拿大內部的一個 nation」、給予移民與文化的特殊權限、容忍其語言法對英語的限制。<strong>魁北克因此是聯邦裡的一個「半獨立單位」——它的存在，永久地把加拿大的政治從『多數決』推向『協商與否決』的邏輯。</strong></p>
+
+  <h3>第三層：西部疏離——被東部定義的能源腹地</h3>
+  <p>第二道裂縫在西部，尤其 Alberta 與 Saskatchewan。這片草原與洛磯山下的土地擁有加拿大絕大部分的石油與天然氣，卻長期覺得自己是「聯邦的提款機、卻沒有相稱的政治權力」——人口與席次集中在安大略與魁北克，東部的自由黨政府一次次以環境、碳稅與管道政策「掐住西部的經濟命脈」。這種怨恨有具體的歷史坐標：1980 年 Trudeau（老杜魯道）的「國家能源計畫（NEP）」被西部視為對 Alberta 財富的公然掠奪，其創傷至今未消。<strong>西部疏離（Western alienation）</strong>因此不是抽象情緒，而是一整套「我們生產財富、他們制定規則、還拿走我們的錢」的結構性委屈——它是保守黨西部鐵票的燃料，也是 Alberta 脫離主義的溫床（詳第 13 章）。</p>
+
+  <h3>第四層：FPTP 如何把區域鑄成鐵票</h3>
+  <p>前三層的區域矛盾，被第四層的選制放大並固化。FPTP 的小選區制讓「區域集中」成為政治的最高美德：一個政黨只要在某片區域壓倒性領先，就能把該區席次幾乎全包。於是保守黨在 Alberta/Saskatchewan 動輒橫掃八九成席次、Bloc 在魁北克以一省之力拿下二十餘席、自由黨在大多倫多與大西洋省連成一片。<strong>FPTP 因此不只是計票規則，而是加拿大「區域政治」的鑄模</strong>：它讓政黨有強烈誘因去深耕區域鐵票、而非追求全國均勻的溫和多數，從而把魁北克—西部—中部的地理裂縫，年復一年地重新刻進國會的席次結構。這也解釋了一個反覆出現的病灶——<strong>「席次的區域極化，往往比選票的區域極化更嚴重」</strong>：自由黨在 Alberta 明明有兩三成選票，卻可能一席未得，讓西部在聯邦內閣裡近乎「無代表」，反過來又加深了疏離。</p>
+
+  <div class="prism">
+    <div class="pv-q"><div class="pv-tag">QUÉBEC</div><p>聯邦制是「必要的緩衝，也是永遠的戰場」：省權讓魁北克能守住語言與文化的自治，但聯邦的每一次集權嘗試都是威脅。魁北克要的從來不是全贏，而是永遠保留否決與退出的選項。</p></div>
+    <div class="pv-c"><div class="pv-tag">CONSERVATIVE</div><p>去中心化是「對抗渥太華過度伸手的堡壘」：西部與保守省份透過省權抵擋聯邦的碳稅與能源管制。FPTP 給了西部安全席，卻也把保守黨鎖進「贏票不贏席」的困局。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>聯邦制是「政策不確定性的來源」：外資面對的不是一個加拿大，而是十個省各有的稅制、能源與勞動規則。一條輸美管道能否興建，往往卡在省與聯邦、以及原住民同意權的多重關卡上。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一部聯邦憲法，三種利害：文化堡壘、反渥太華盾牌、政策迷宮</div>
+</section>
+
+<section id="s2b">
+  <div class="sec-label">PART I · CH 02B</div>
+  <h2>魁獨兩次公投與 Bloc 的角色</h2>
+  <p class="lede">第 2 章說魁北克「兩度公投幾乎脫離」；這一節把它拆成可檢視的歷史。加拿大聯邦最接近解體的兩個時刻——1980 與 1995——都不是戰爭或政變，而是兩場和平的省級公投。它們的結果與餘波，至今定義著魁北克在聯邦裡的角色，也解釋了 Bloc Québécois 這個「只想拆掉聯邦、卻長期坐在聯邦國會裡」的弔詭政黨。</p>
+
+  <h3>1980 與 1995：兩張差點改寫北美地圖的選票</h3>
+  <p><strong>1980 年第一次公投</strong>：由主權派的魁北克人黨（Parti Québécois, PQ）政府發動，詢問是否授權談判「主權—聯繫（sovereignty-association）」，結果約 <strong>60% 反對、40% 贊成</strong>，聯邦暫時鬆一口氣。但真正驚險的是<strong>1995 年第二次公投</strong>：這一次問題更接近直接獨立，開票結果是 <strong>50.58% 反對、49.42% 贊成</strong>——不到一個百分點的差距，約五萬張票，決定了加拿大不解體。這一夜是加拿大現代史上最接近終結的時刻。此後聯邦通過《清晰法案（Clarity Act, 2000）》，規定未來任何脫離公投必須有「清晰的問題」與「清晰的多數」，並須經聯邦談判——把脫離的門檻從此提高、程序化。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">59.6% : 40.4%</div><div class="fig-l">1980 公投：反對 vs 贊成主權談判</div></div>
+    <div><div class="fig-n">50.58% : 49.42%</div><div class="fig-l">1995 公投：反對 vs 贊成——約五萬票之差</div></div>
+    <div><div class="fig-n">2000</div><div class="fig-l">《清晰法案》——把脫離門檻程序化的聯邦回應</div></div>
+  </div>
+
+  <h3>Bloc Québécois：坐在聯邦國會裡的分離主義者</h3>
+  <p>Bloc Québécois（BQ）是加拿大政治最獨特的存在：一個<strong>只在魁北克參選、以推動魁北克主權為終極目標、卻長期在聯邦下議院佔據數十席的政黨</strong>。它與省級的 PQ 是姊妹關係，1990 年代因憲法談判破裂而生。BQ 從不指望在渥太華執政（它根本不在其他省參選），它的策略是<strong>「守住魁北克利益、當造王者」</strong>——在少數國會裡，BQ 的二十餘席往往是執政黨過關或倒閣的關鍵籌碼，藉此為魁北克換取語言保障、移民權限、農業供給管理與財政轉移。現任黨魁 <strong>Yves-François Blanchet</strong>，2025 年於 Beloeil—Chambly 連任、率 BQ 保住 22 席，並公開表示將協助省級 PQ 在 2026 年的魁北克省選中勝出——把聯邦的槓桿與省級的主權議程重新接上。</p>
+
+  <h3>2025 的反諷：Trump 如何暫時壓過魁獨</h3>
+  <p>2025 年出現了一個耐人尋味的反諷：<strong>一個外部威脅，暫時壓過了加拿大最古老的內部裂縫。</strong>當 Trump 威脅併吞整個加拿大，魁北克選民——即使是平時傾向主權的那些——也感受到「作為加拿大人被威脅」的共同體情緒，於是大量把選票從 Bloc 轉向被視為最能對抗 Trump 的自由黨。BQ 因此未能在 2025 年擴大戰果，主權議程在存亡選舉中退居次要。<strong>但這只是暫時的焊合，不是癒合</strong>：語言法、世俗法與省權的長期張力並未消失（詳第 6 章），一旦外部威脅退潮，魁北克身分與加拿大身分的張力隨時可能重新浮現——尤其若 2026 年 PQ 在省選中勝出，第三次公投的討論就可能重回議程。<strong>魁獨是加拿大的一個「休眠火山」：長期不噴發，但從未熄滅。</strong></p>
+</section>
+
+<section id="s3">
+  <div class="sec-label">PART I · CH 03</div>
+  <h2>兩個不投票的力量：最高法院與各省</h2>
+  <p class="lede">在下議院與總理這兩個選出來的權力之外，加拿大政治真正的邊界，由兩個不投票、卻能否決聯邦意志的力量劃定：一個是握有《憲章》審查權的<strong>最高法院（Supreme Court of Canada）</strong>，另一個是十位擁有直接民意、掌管醫療能源資源的<strong>省長（premiers）</strong>。理解加拿大，必須理解——渥太華的總理權力雖大，卻永遠被這兩道非選舉的牆框住。</p>
+
+  <h3>最高法院與《憲章》：1982 年後的新裁決者</h3>
+  <p>1982 年，加拿大完成「憲法回歸（patriation）」——把修憲權從英國國會拿回本土，並寫入一部《權利與自由憲章（Charter of Rights and Freedoms）》。這是加拿大憲政史的分水嶺：《憲章》讓<strong>最高法院（9 名大法官）</strong>從此擁有「違憲審查」的權力，可以推翻任何違反基本權利的聯邦或省級法律。從語言權、原住民權利、同性婚姻、醫療協助死亡（MAID）到墮胎，過去四十年許多最具爭議的社會議題，最終都不是由國會、而是由最高法院拍板。<strong>《憲章》因此把加拿大政治的一部分，從「多數決的立法」外包給了「不投票的法官」</strong>——這既是權利的保障，也是一種對民選多數的制度性約束。</p>
+
+  <h3>「但書條款」：一個讓政客繞過法院的憲法後門</h3>
+  <p>但加拿大的《憲章》藏著一個獨特的、在成熟民主中罕見的裝置：<strong>第 33 條「但書條款（notwithstanding clause）」</strong>。它允許聯邦或省的議會，宣布某項法律「即使違反《憲章》的某些條款，仍然有效」，有效期五年、可續。這是 1982 年制憲時為了說服各省接受《憲章》而作的妥協——本質上是給民選議會一個「推翻法院、五年為期」的後門。長年它被視為「核選項」而少被動用，但近年——尤其在魁北克（Bill 21 世俗法、Bill 96 語言法）與部分保守省份——它被越來越常態化地援用，先發制人地把爭議法律「憲章豁免」，讓法院無從介入。<strong>但書條款的復活，是加拿大憲政近年最重要的張力：它讓「議會至上」與「權利司法保障」這兩個原則，重新在同一部憲法裡開戰。</strong></p>
+
+  <h3>各省與省長：十個不受渥太華節制的權力中心</h3>
+  <p>第二道牆是省。加拿大的省長不是地方官，而是各自握有數百萬人民授權、掌管醫療、教育、能源、資源與財政的獨立權力者。他們透過「聯邦會議（Council of the Federation）」集體向渥太華施壓，也各自為戰——Alberta 的省長可以立法抵制聯邦碳稅、魁北克的省長可以用但書條款推語言法、安大略的省長掌握著全國最大的人口與經濟。聯邦許多雄心勃勃的計畫（全國藥保、全國托育、能源轉型、輸美之外的管道）都必須經過與省的漫長談判，任何一個省都可能是否決點。<strong>加拿大的「聯邦政策」，因此極少是渥太華單方面的意志，而多半是聯邦與十省討價還價後的最大公約數</strong>——這是它政策連續性的來源（劇烈轉向很難），也是它治理低效的來源（很多事卡在省聯邦之間動不了）。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 均等化轉移與西部的委屈</div>
+    <p>聯邦與省的財政關係裡，藏著西部疏離最具體的火藥：<strong>均等化轉移（equalization）</strong>。這是聯邦把稅收重新分配、補貼財政能力較弱省份的機制，目的是讓各省能提供大致相當的公共服務。問題在於——富裕的 Alberta 長年是最大的淨貢獻者，卻眼看自己的石油財富被轉移去補貼魁北克等「受款省」，而那些省還反過來反對 Alberta 的管道。「我們出錢、他們收錢、還擋我們的財路」——這個關於均等化的委屈，是 Alberta 脫離主義最頻繁援引的具體證據（詳第 13 章）。均等化因此不只是一條財政公式，更是聯邦內部「誰養誰」的認同戰爭的引爆點。</p>
+  </div>
+
+  <div class="prism">
+    <div class="pv-q"><div class="pv-tag">QUÉBEC</div><p>兩個不投票的力量是「守護自治的雙刃」：最高法院有時保護魁北克的語言權，有時又威脅它的世俗法——所以魁北克寧可用但書條款先發制人，把法院擋在門外。省權是魁北克的命根，法院則是可用可防的工具。</p></div>
+    <div class="pv-l"><div class="pv-tag">LIBERAL</div><p>《憲章》是「自由派的道德資產」：它是老 Trudeau 留下的遺產，把權利保障寫進憲法、把加拿大定義為一個多元包容的國家。但書條款的濫用，在自由黨眼中是對這份遺產的侵蝕。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>省與法院是「盡職調查的必修課」：外資評估一項投資，不能只看聯邦政策，還要看該省的省長顏色、資源監管與原住民同意權，以及法院對環境與原住民權利的判例走向——這些才是專案能否落地的真正變數。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同兩個不投票的力量，三種定性：自治雙刃、道德資產、盡調必修</div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART II</div>
+  <h2>稜鏡 · The Prisms</h2>
+  <div class="pd-sub">同一個聯邦，五種社會位置的讀法</div>
+</div>
+
+<section id="s4">
+  <div class="sec-label">PART II · CH 04 · 稜鏡 I</div>
+  <h2>稜鏡 I・自由黨／Carney 視角：危機中的中間派帝國</h2>
+  <p class="lede">若說加拿大有一個「天然執政黨」，那就是自由黨——20 世紀執政時間最長的政黨，靠的不是鮮明的意識形態，而是一種<strong>永遠站在加拿大政治中間、隨風向左右微調的實用主義</strong>。它的核心選民聯盟是都市、移民與專業階層；它的品牌是「包容的加拿大民族主義」；它最擅長的，是在危機時刻把自己包裝成「唯一夠格掌舵的大人」。2025 年，這套本領被 Trump 推到了極致。</p>
+
+  <h3>自由黨的 DNA：中間、都市、移民聯盟</h3>
+  <p>自由黨的選民地圖有清晰的輪廓：<strong>大多倫多（GTA）、大蒙特婁、大溫哥華的都會區，加上大西洋四省</strong>。它的聯盟建立在三塊基石上——<strong>移民與少數族裔</strong>（自由黨長期是高移民、多元文化政策的推手，收穫了新移民社群的高度忠誠）、<strong>都市專業與知識階層</strong>（醫生、律師、教授、公部門、金融），以及<strong>不願投給右派的溫和中間選民</strong>。它在意識形態上刻意保持模糊：財政上比 NDP 溫和、社會議題上比保守黨進步，永遠佔據那個「既不太左也不太右」的中間地帶。<strong>這種「刻意的中間」不是缺乏立場，而是自由黨最精密的政治技術</strong>——它讓自由黨能在保守黨過右時吸收中間選民、在 NDP 過左時吸收溫和左派，成為加拿大政治的預設引力中心。</p>
+
+  <h3>Trudeau 十年：從「陽光路線」到選民疲勞</h3>
+  <p>但 2015 至 2025 年的 Justin Trudeau，把這個引力中心耗損到了谷底。他上台時以「陽光路線（sunny ways）」、女性內閣、大麻合法化、氣候承諾與難民接納，重塑了自由黨的進步形象；但十年執政累積了沉重的疲勞——<strong>住房危機失控</strong>（房價與租金飆到全球最不可負擔之列）、<strong>生活成本高漲</strong>、<strong>移民急增引發的公共服務與住房壓力反彈</strong>、以及一連串治理爭議。到 2024 年底，Trudeau 的個人聲望跌到執政以來最低，自由黨在民調上落後保守黨達 25 個百分點以上。<strong>對許多選民，2025 年初的問題已不是「自由黨好不好」，而是「換誰都比 Trudeau 好」</strong>——這正是他在 2025-01 宣布辭去黨魁的直接背景。</p>
+
+  <h3>Carney 聯盟：一次危機催生的重組</h3>
+  <p>Mark Carney 接手的，是一個瀕死的品牌與一個天賜的外部衝擊。他做的第一件事，是<strong>迅速與 Trudeau 時代的兩個最大包袱切割</strong>：上任幾乎立刻取消了不受歡迎的「消費者碳稅（consumer carbon tax）」——直接拔掉了保守黨「axe the tax」攻勢的引信；同時把自己定位為財政穩健、務實、非意識形態的「經濟管理者」，而非 Trudeau 式的進步旗手。然後 Trump 的關稅與併吞言論到來，把選舉的主軸從「生活成本（保守黨的主場）」硬生生扭轉為「誰能對抗 Trump（Carney 的主場）」。<strong>自由黨的 2025 勝利，因此不是舊聯盟的復活，而是一個新聯盟的臨時重組</strong>：原本的都市移民基本盤，加上大量從 NDP、Bloc 甚至溫和保守派回流的「反 Trump 選民」，在紅旗下集結。它強在此刻，但這個借來的多數能否長久，是自由黨最大的問號。</p>
+
+  <div class="lens l-l">
+    <div class="lens-tag">LIBERAL ▸ 自我敘事</div>
+    <p>「加拿大現在需要的不是一個政客，是一個在真正的金融危機裡掌過舵的人。Trump 要打一場經濟戰，你要派誰上桌——一個喊口號砍碳稅的民粹主義者，還是一個管過兩國央行、和全球央行行長們同桌開過會的人？這不是左右之爭，是能力之爭。加拿大要團結、要冷靜、要有能力，elbows up（舉起手肘、備戰），我們自己照顧自己。」</p>
+  </div>
+
+  <div class="prism">
+    <div class="pv-l"><div class="pv-tag">LIBERAL</div><p>自身是「危機中的成年人」：務實、穩健、能在對美談判桌上代表加拿大。切割碳稅、切割 Trudeau，把黨重新定位為經濟管理者而非進步旗手。</p></div>
+    <div class="pv-c"><div class="pv-tag">CONSERVATIVE</div><p>自由黨是「換了張臉的同一批人」：Carney 是達沃斯的全球主義精英、Trudeau 政策的共犯，關稅只是讓他僥倖偷走了本該屬於保守黨的勝利。住房與生活成本的爛帳，還是自由黨十年造的。</p></div>
+    <div class="pv-n"><div class="pv-tag">NDP</div><p>自由黨是「向右偷走我們選民的中間派」：Carney 是前高盛銀行家，自由黨用「反 Trump」的恐懼吸乾了 NDP 的勞工票，卻不會真正站在工人這邊——它是資本的溫和管理者。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個自由黨，三種定性：危機成年人、換臉舊勢力、偷票的中間派</div>
+</section>
+
+<section id="s4b">
+  <div class="sec-label">PART II · CH 04B</div>
+  <h2>Carney 其人：一個央行家如何成為總理</h2>
+  <p class="lede">Mark Carney 的崛起，在民主政治裡近乎孤例：一個從未擔任過任何民選職務的人，在成為政黨黨魁的同一年就當上總理、並贏得大選。理解他這個人，是理解 2025 年自由黨奇蹟的關鍵——因為他被選上，靠的正是「他不是一個典型政客」這件事本身。</p>
+
+  <h3>兩場危機的掌舵者</h3>
+  <p>Carney 的履歷是一份「危機管理」的認證書。他在高盛（Goldman Sachs）任職多年後轉入公部門，於 <strong>2008 年全球金融海嘯期間出任加拿大央行（Bank of Canada）行長</strong>——加拿大在那場危機中的相對穩健（銀行體系未崩、衰退較淺），為他贏得國際聲譽。隨後他成為史上第一個非英國籍的<strong>英格蘭銀行（Bank of England）行長（2013–2020）</strong>，在英國經歷 Brexit 公投的金融動盪期間坐鎮貨幣政策。<strong>兩場都是「體系性危機」，兩場他都被記住為那個穩住陣腳的人</strong>——這份「在真正的金融戰爭裡掌過舵」的資歷，正是 2025 年面對 Trump 經濟戰時，選民最想要的那一種可信度。</p>
+
+  <h3>「外來者」如何成為資產而非負債</h3>
+  <p>在正常年份，「從未選過一次舉、沒有基層黨務歷練」是致命弱點；但 2025 年不是正常年份。當國家面臨的核心問題被重新定義為「如何在對美貿易戰中生存」，Carney 的「非政客」身分反而成了最大賣點：<strong>他不欠任何派系人情、不帶 Trudeau 的政治包袱、被視為一個能與全球金融與政治精英平起平坐的技術官僚</strong>。他 3 月 9 日以 85.9% 的壓倒性黨員票當選黨魁，本身就說明自由黨黨內對「換一個完全不同類型的領袖」的渴望。<strong>Carney 的政治品牌，本質是「反政治」的政治</strong>——在一個對傳統政客普遍厭倦、又突然需要危機能力的時刻，這個定位精準地擊中了選民。</p>
+
+  <h3>從貨幣到主權：Carney 的對美路線</h3>
+  <p>執政後，Carney 對美的基調可以濃縮為幾句他反覆講的話：<strong>「我們與美國的舊關係已經結束（the old relationship is over）」、「我們過去把對美的緊密經濟連結當成優勢，現在它成了必須修補的弱點」、「我們得自己照顧自己」。</strong>具體策略是「兩條腿走路」：一方面對美關稅採取對等反制、不在 Trump 撤回所有威脅前先鬆手；另一方面加速<strong>貿易多元化</strong>（歐洲、亞太、印太）與<strong>對內經濟自主</strong>（拆除省際貿易壁壘、加速能源與基建、鞏固關鍵礦產）。這條路線的賭注是：把「對美依賴」這個加拿大七十年的結構，第一次認真地當成一個要主動降低的風險——雖然現實上（詳第 16、17 章），在可見的期限內，加拿大幾乎不可能真正擺脫那個吸走四分之三出口的南方市場。</p>
+</section>
+
+<section id="s5">
+  <div class="sec-label">PART II · CH 05 · 稜鏡 II</div>
+  <h2>稜鏡 II・保守黨／Poilievre 視角：贏了選票卻輸了選舉的民粹右</h2>
+  <p class="lede">加拿大保守黨在 2025 年遭遇了現代政治最殘酷的一種失敗：<strong>它拿下約 41% 的得票，是幾十年來的歷史高位、比 2021 年大幅成長，卻依然輸掉了選舉、還讓黨魁丟了自己的席位。</strong>這個「贏票不贏選」的悖論，濃縮了保守黨在 FPTP 下的結構困境，也濃縮了 Pierre Poilievre 那套鋒利卻兩面刃的民粹右翼路線。</p>
+
+  <h3>保守黨的地基：西部、郊區與鄉村</h3>
+  <p>今天的加拿大保守黨，是 2003 年由老進步保守黨（Progressive Conservatives）與西部民粹的加拿大聯盟（Canadian Alliance）合併而成，血統裡混著兩種基因：東部的傳統保守與西部的草根民粹。它的鐵票地基極度區域集中——<strong>Alberta 與 Saskatchewan 近乎橫掃、BC 內陸、安大略的郊區與鄉村、草原三省</strong>。它的選民畫像是：西部能源省份、市郊有房家庭、小企業主、鄉村社群、以及對移民與文化變遷感到不安的中產。這個地基的優勢是忠誠而集中，劣勢也正是「太集中」——大量選票堆在本來就穩贏的西部安全席，在真正決定勝負的<strong>大多倫多與大溫哥華搖擺選區</strong>卻始終差臨門一腳。<strong>保守黨的百年難題，就是如何「把西部的票搬到安大略」——2025 年，Trump 讓這道題變得更難。</strong></p>
+
+  <h3>Poilievre 路線：民粹、鋒利、反建制</h3>
+  <p>Pierre Poilievre 是加拿大最能打的攻擊型政治人物之一：職業政客出身、辯才犀利、擅長社群媒體與短影音，把保守黨從溫和的中間右派，推向更鮮明的<strong>民粹反建制路線</strong>。他的核心訊息是「加拿大壞了（Canada is broken）」——住房買不起、生活成本失控、犯罪與吸毒惡化、官僚臃腫、「覺醒（woke）」意識形態氾濫，而這一切都是 Trudeau 自由黨十年造的孽。他最成功的單一攻勢是<strong>「Axe the Tax（砍掉碳稅）」</strong>：把碳稅塑造成生活成本高漲的元兇，簡單、易懂、直擊痛點。這套路線在 2024 年極其有效，一度把保守黨推到領先 25 點的位置。<strong>但它有一個內建的脆弱：它高度依賴「這是一場關於國內生活成本的選舉」這個前提——一旦選舉的主題被外部衝擊換掉，整套攻勢就瞬間失去靶心。</strong></p>
+
+  <h3>2025 的崩塌：當靶心被 Trump 換走</h3>
+  <p>這正是 2025 年發生的事。Trump 的關稅與併吞言論，把選舉主題從「生活成本」硬換成「國家主權」，Poilievre 的兩個最大資產瞬間變成負債：<strong>其一，「Canada is broken」的悲觀敘事，在一個外敵當前、需要團結與信心的時刻顯得刺耳、甚至不愛國</strong>；<strong>其二，Poilievre 的民粹風格、反建制語彙與部分政策姿態，被對手成功地與 Trump「連連看」</strong>——「你想要一個加拿大版的 Trump 嗎？」這個框架，對怕 Trump 的選民極具殺傷力。當 Carney 取消碳稅、拔掉「axe the tax」的引信後，保守黨最鋒利的那把刀也鈍了。結果：得票大漲、席次不足，而 Poilievre 本人甚至以約 4,500 票輸掉了自己經營二十年的 Carleton 選區（詳第 11 章）。</p>
+
+  <div class="debate">
+    <div class="d-pro">
+      <div class="d-tag">論題 ▸ 保守黨 2025 是慘敗</div>
+      <p>黨魁丟了自己的席位、又一次與執政擦身、把 25 點的領先揮霍殆盡——這是領導失敗。Poilievre 的悲觀民粹在關鍵時刻嚇跑了中間選民，也把黨與 Trump 綁在一起。若換一個更溫和、更能安撫都市中產的領袖，這場「反 Trump 浪潮」下的選舉，保守黨或許本能守住甚至勝出。</p>
+    </div>
+    <div class="d-con">
+      <div class="d-tag">反論 ▸ 保守黨 2025 是被外力偷走的成功</div>
+      <p>約 41% 得票是幾十年新高、比上屆大幅成長，基本盤其實在擴大。輸的唯一原因是一個無法控制的外部衝擊（Trump）在投票前幾週改寫了整場選舉——這不是路線失敗，是運氣。Poilievre 隨後在補選中以八成得票重返國會，證明其基礎穩固；下一次沒有 Trump 因素的選舉，保守黨仍是強勁的執政競爭者。</p>
+    </div>
+  </div>
+
+  <div class="prism">
+    <div class="pv-c"><div class="pv-tag">CONSERVATIVE</div><p>自身是「被建制與外力聯手擋下的多數民意」：我們代表買不起房的年輕人、被通膨壓垮的家庭、被渥太華忽視的西部。這次輸給運氣，不是輸給路線。</p></div>
+    <div class="pv-l"><div class="pv-tag">LIBERAL</div><p>保守黨是「加拿大版的 MAGA 風險」：Poilievre 的民粹、反建制與親 Trump 氣味，在一個需要成熟掌舵的時刻是危險的。選民選擇了穩定，拒絕了憤怒。</p></div>
+    <div class="pv-q"><div class="pv-tag">QUÉBEC</div><p>保守黨是「聽不懂魁北克的英語西部黨」：它在魁北克始終水土不服——世俗主義、語言、社會保守的組合與魁北克格格不入。保守黨要執政，繞不開它在魁北克與大都市的結構性弱勢。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個保守黨，三種定性：被偷走的多數、MAGA 風險、聽不懂魁北克</div>
+</section>
+
+<section id="s6">
+  <div class="sec-label">PART II · CH 06 · 稜鏡 III</div>
+  <h2>稜鏡 III・魁北克與聯邦視角：語言、世俗與省權的永恆談判</h2>
+  <p class="lede">對魁北克而言，加拿大聯邦不是一個需要無條件效忠的祖國，而是一場<strong>永遠未完成、隨時可重啟的談判</strong>。談判桌上的籌碼始終是三樣東西：<strong>語言</strong>（法語作為公共生活的唯一官方語言）、<strong>世俗</strong>（一種把宗教徹底逐出公領域的 laïcité）、以及<strong>省權</strong>（在移民、文化、財政上盡可能大的自治）。理解魁北克，就是理解這三條紅線為何不可退讓、以及它們如何一次次與聯邦的《憲章》正面對撞。</p>
+
+  <h3>語言：Bill 101 到 Bill 96 的防衛工事</h3>
+  <p>魁北克政治的第一根支柱是語言防衛。作為北美兩億英語人口海洋中的一座六百萬法語孤島，魁北克把「保護法語」提升到近乎存亡的高度。<strong>1977 年的《法語憲章》（Bill 101）</strong>奠定基礎——規定商業招牌、工作場所、公共服務以法語為主，並限制哪些孩子能上英語學校。<strong>2022 年的 Bill 96</strong>進一步收緊：強化法語作為魁北克「唯一官方語言」的地位、限制英語在政府與大企業的使用、對法院與移民的語言要求加碼——並<em>先發制人地援用但書條款</em>，把整部法律「憲章豁免」，讓聯邦法院無從以違反《憲章》為由推翻。<strong>對魁北克，語言法不是歧視，是生存工事；對法語外的社群（英語裔、原住民、移民），它是被強加的排他規則</strong>——這條張力線從未消失。</p>
+
+  <h3>世俗：Bill 21 與「laïcité」的爭議</h3>
+  <p>第二根支柱是世俗主義，體現在爭議最大的<strong>2019 年 Bill 21（世俗法）</strong>。它禁止部分公職人員（教師、警察、法官等處於「權威位置」者）在執勤時配戴明顯的宗教象徵——頭巾、基帕、十字架、錫克頭巾等。支持者稱這是魁北克「寧靜革命」以來擺脫天主教會控制、把宗教徹底逐出公領域的 laïcité 傳統的延伸；批評者（包括許多加拿大英語省份與人權團體）稱它實質歧視穆斯林女性與宗教少數，違反《憲章》的宗教自由。魁北克同樣<em>動用但書條款</em>把 Bill 21 護住。<strong>Bill 21 是加拿大兩種「多元」觀的正面衝突</strong>：英語加拿大的「多元文化主義（每個人保留自己的認同）」對上魁北克的「共和式世俗（公領域必須中立、宗教退回私域）」——兩者都自認進步，卻水火不容。</p>
+
+  <h3>省權與 Bloc 的槓桿：把否決權變成資源</h3>
+  <p>第三根支柱是把「省權」與「Bloc 在聯邦的否決權」變成可兌現的資源。魁北克長年爭取並守住一系列特殊安排：<strong>自己的移民甄選權限、自己的退休金計畫（QPP）、農業供給管理的保護、以及在聯邦財政轉移中的份額</strong>。在聯邦層級，Bloc Québécois 的策略（詳第 2B 章）就是把這些訴求「槓桿化」——在少數國會裡，用自己二十餘席的關鍵票，逼執政黨在語言、農業、文化與財政上讓步。<strong>魁北克因此發展出一種獨特的政治智慧：不必真的獨立，只要永遠保有『可能獨立』的威脅與『可以否決』的槓桿，就能持續從聯邦提取利益。</strong>這也是為什麼許多魁北克選民「情感上同情主權、投票上務實留在聯邦」——獨立的成本太高，但獨立的威脅太好用。</p>
+
+  <div class="lens l-q">
+    <div class="lens-tag">QUÉBEC ▸ 自我敘事</div>
+    <p>「我們不是加拿大的一個省，我們是一個民族（nation）。法語不是一種選擇，是我們作為北美唯一法語社會的生存條件。世俗不是排斥宗教，是我們好不容易才從教會手裡奪回公領域的成果。我們留在加拿大，是一筆划算的交易，不是效忠——只要這筆交易還划算、只要渥太華還尊重我們的自治，我們就留下。哪一天不划算了，1995 年那條線隨時可以重來。」</p>
+  </div>
+
+  <div class="prism">
+    <div class="pv-q"><div class="pv-tag">QUÉBEC</div><p>聯邦是「一筆可談判的交易」：語言、世俗、省權是三條不退讓的紅線，Bloc 是把否決權變現的工具。獨立不必真做，威脅本身就是資源。</p></div>
+    <div class="pv-l"><div class="pv-tag">LIBERAL</div><p>魁北克是「必須安撫、不能失去的關鍵票倉」：自由黨靠爭取魁北克的溫和留邦派立足，對語言與省權採取務實包容，但對 Bill 21 的宗教限制在原則上不安。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>魁北克是「一套獨立的規則體系」：在魁北克經營，要面對法語營運要求、獨立的《民法》、以及不同的能源（水電豐沛廉價）與勞動環境——它幾乎是聯邦內的另一個法域。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個魁北克，三種讀法：可談判的交易、關鍵票倉、獨立的法域</div>
+</section>
+
+<section id="s7">
+  <div class="sec-label">PART II · CH 07 · 稜鏡 IV</div>
+  <h2>稜鏡 IV・新民主黨與原住民視角：一份尚未清償的和解帳單</h2>
+  <p class="lede">新民主黨（NDP）是加拿大的良心與帳單保管者：一個從未在聯邦執政、卻深刻改變了加拿大的社會民主政黨——全民健保（medicare）這個加拿大人最珍視的制度，正是 NDP 前身在 1960 年代於 Saskatchewan 率先實現、再逼聯邦採納的。它的道德核心是工會、勞工、社會公義，以及過去十年日益中心化的<strong>對原住民（First Nations、Inuit、Métis）的和解（reconciliation）</strong>。但 2025 年，這個良心政黨遭遇了生存級的崩塌。</p>
+
+  <h3>NDP 的角色：從不執政、卻改寫議程</h3>
+  <p>NDP 的政治功能，從來不是贏得政權，而是<strong>「當自由黨的左翼良心、把整個議程往左拉」</strong>。它的歷史成就都是這樣達成的：medicare、公共退休金、勞工權利，多半是在少數國會裡，NDP 用關鍵票逼自由黨政府讓步的產物。2022 至 2024 年，NDP 與 Trudeau 自由黨簽了「信任與供給協議（supply-and-confidence agreement）」，換來了全國牙保（dental care）與藥保（pharmacare）的起步——這是 NDP 影響力的高峰，卻也埋下了它崩塌的種子：<strong>當 NDP 與執政的自由黨綁得太緊，選民就分不清它與自由黨的區別，它作為「反對現狀的左翼選項」的辨識度被稀釋了。</strong></p>
+
+  <h3>2025 的崩塌：失去官方政黨地位</h3>
+  <p>2025 年的存亡選舉，對 NDP 是災難。在「反 Trump 就要投給最可能贏的自由黨」的策略性投票浪潮下，大量 NDP 的傳統勞工與都市進步選民「借票」給自由黨，NDP 得票崩到約 <strong>6.3%</strong>、席次從解散前的二十餘席暴跌到 <strong>僅 7 席</strong>——<strong>低於 12 席的門檻，失去了「官方政黨地位（official party status）」</strong>，這意味著在國會失去提問時間、委員會席位與研究經費等制度資源。黨魁 <strong>Jagmeet Singh 連自己在 BC 的選區都落選、當晚含淚宣布辭職</strong>。<strong>NDP 的崩塌，是 2025 兩極化選舉最沉重的代價</strong>：當政治被壓縮成「紅 vs 藍、加拿大 vs Trump」的二選一，中間的第三黨與小黨（NDP、Bloc、綠黨）就被無情擠出——這也是自由黨與保守黨合計得票七十年來首破 85% 的另一面。</p>
+
+  <h3>原住民與和解：加拿大最深的道德帳</h3>
+  <p>加拿大政治過去十年最重要的道德轉向，是對原住民的和解。<strong>寄宿學校（residential schools）</strong>的歷史——政府與教會長期強制原住民兒童離家、切斷語言與文化、伴隨大量死亡與虐待——在近年（尤其多處疑似無名墓地被探測到之後）成為全國性的清算，「和解（reconciliation）」成為橫跨黨派的官方語言。但和解遠不只是道歉：它牽動<strong>條約權利、土地與資源的「原住民同意權」、自治政府、以及《聯合國原住民權利宣言（UNDRIP）》的落實</strong>。這條線與經濟直接對撞——<strong>幾乎每一條跨越原住民傳統領地的管道、礦場與大型基建，都必須面對原住民社群的同意與訴訟</strong>（詳第 17 章）。原住民因此不是一個邊緣議題，而是嵌在加拿大資源經濟核心的結構性關卡：<strong>它既是道德的必答題，也是每一個資源專案的實質否決點之一。</strong></p>
+
+  <div class="prism">
+    <div class="pv-n"><div class="pv-tag">NDP</div><p>自身是「加拿大的社會良心」：medicare、勞工權利、和解都是我們逼出來的。2025 的崩塌是策略性投票的犧牲品，不是理念的失敗——沒有 NDP，自由黨會更快向右、向資本傾斜。</p></div>
+    <div class="pv-l"><div class="pv-tag">LIBERAL</div><p>NDP 是「可以吸收的左翼盟友」：自由黨樂於在 NDP 崩塌後接收其進步選民與部分政策（牙保、藥保），把自己定位為「務實的進步」，同時不必付出 NDP 那種意識形態成本。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>原住民同意權是「資源專案的關鍵路徑風險」：外資評估任何跨原住民領地的能源或礦業投資，UNDRIP、條約權利與『自由、事前、知情同意（FPIC）』是不能略過的盡職調查項，也是專案延宕與訴訟的主要來源。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一組左翼與原住民議題，三種讀法：社會良心、可吸收盟友、路徑風險</div>
+</section>
+
+<section id="s8">
+  <div class="sec-label">PART II · CH 08 · 稜鏡 V</div>
+  <h2>稜鏡 V・外國人與美國視角：命門、槓桿與折價</h2>
+  <p class="lede">對外國投資人與觀察者，加拿大是一個「無聊的優等生」：法治穩固、產權清晰、制度可預測、天然資源豐沛。但這份穩定底下有一個壓倒一切的變數——<strong>美國</strong>。加拿大的經濟、安全與如今的主權，全都繫於南方那個十倍體量的鄰居。對外國人視角，讀懂加拿大只需先讀懂一件事：<strong>它既是美國最緊密的夥伴，也是最脆弱的人質。</strong></p>
+
+  <h3>命門：約四分之三的出口輸美</h3>
+  <p>加拿大對美依賴的量級，在大型經濟體中幾乎絕無僅有：<strong>約四分之三（~75%）的出口銷往美國</strong>，涵蓋能源（石油、天然氣、電力）、汽車與零件（安大略與美國中西部的汽車業高度整合）、木材、鋁、農產品。這種依賴是七十年北美一體化（從 Auto Pact 到 NAFTA 到 USMCA）的成果，帶來了巨大的繁榮，也埋下了致命的不對稱：<strong>美國佔加拿大出口約四分之三，加拿大卻只佔美國進口的一小部分</strong>——當兩國翻臉，加拿大受的傷遠比美國深。這正是 2025 年 Trump 關稅之所以是「存在性威脅」而非「貿易摩擦」的根本原因：<strong>對加拿大，對美貿易不是一個部門，是整個經濟的地基。</strong></p>
+
+  <h3>2025–2026：從 25% 關稅到 50% 關稅，從貿易戰到主權戰</h3>
+  <p>Trump 第二任期把這個命門直接握在手裡。2025 年初，他對加拿大貨物課徵 <strong>25% 關稅</strong>，並以「芬太尼、邊境、貿易逆差」等理由反覆加碼、豁免、再威脅，把加拿大的出口產業拖入持續的不確定。更具衝擊力的是言論層面——他多次公開稱加拿大應成為美國的<strong>「第 51 州」</strong>、稱加拿大「靠美國補貼才能存在」、嘲諷加拿大領導人為「州長」。到 <strong>2026 年 7 月，關稅進一步升級到對多數加拿大貨物 50%</strong>，Carney 則表示將與 Trump「加強談判」，同時堅持在美方撤回所有關稅威脅前不解除加方的反制。<strong>這條時間線的意義是：對加關係的性質，已從「管理一段緊密但偶有摩擦的夥伴關係」，質變為「在一個把併吞掛在嘴邊的鄰居面前捍衛主權」</strong>——這是加拿大立國以來未曾面對的處境。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">~75%</div><div class="fig-l">加拿大出口銷往美國的比重——結構性命門</div></div>
+    <div><div class="fig-n">25% → 50%</div><div class="fig-l">Trump 對加關稅：2025 初 → 2026-07 升級</div></div>
+    <div><div class="fig-n">「第 51 州」</div><div class="fig-l">Trump 反覆的併吞言論——把貿易戰升級為主權戰</div></div>
+    <div><div class="fig-n">elbows up</div><div class="fig-l">加拿大民族主義的反擊口號（借自冰球）</div></div>
+  </div>
+
+  <h3>槓桿：加拿大並非全無反手</h3>
+  <p>但外國人視角若只看到脆弱，就漏掉了另一半：<strong>加拿大握有真實的、非對稱的反制槓桿</strong>。它是美國最大的<strong>石油與天然氣進口來源</strong>（美國中西部煉油廠高度依賴 Alberta 的重油）、最大的<strong>電力供應者</strong>之一、關鍵的<strong>鉀肥（potash，農業必需）與鈾</strong>供應國，以及<strong>關鍵礦產</strong>的重要來源。它可以對美能源、電力與特定商品加徵出口稅或限制供應，直接打進美國的通膨與農業成本。加拿大還可以加速<strong>報復性關稅的精準打擊</strong>（瞄準政治敏感的美國州與產業）。<strong>這場對決因此不是純粹的以卵擊石，而是「一個高度依賴、但握有能源與礦產咽喉的小夥伴，對上一個體量巨大、但也離不開這些資源的大鄰居」</strong>——加拿大的策略，就是把這些咽喉槓桿與貿易多元化結合，把「純受害者」的處境，盡量談成一個「痛苦但可談判」的僵局。</p>
+
+  <h3>折價：政策連續性 vs 地緣風險溢價</h3>
+  <p>對長線資本，加拿大呈現一種特殊的「折價與溢價並存」。<strong>溢價的一面</strong>：法治、產權、制度連續性、G7 成員、豐沛資源、與美國的深度整合——這些讓加拿大長期是低風險的投資目的地，紅藍鐘擺對外資的核心規則（產權保障、市場經濟、對外開放）極少實質改變（詳第 19 章）。<strong>折價的一面</strong>：對美單一市場的過度依賴、能源專案受制於管道與原住民同意權的漫長梗阻、以及如今 Trump 帶來的地緣風險溢價——當你的最大客戶隨時可能課 50% 關稅甚至談論併吞你，任何跨境供應鏈的定價都得重新計入這層不確定。<strong>外國人視角的結論是：加拿大的內政（紅藍鐘擺）大致可下注，真正需要動態定價的，是它與美國的關係這條唯一能同時擊穿所有稜鏡的變數。</strong></p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>加拿大是「穩定的優等生，但綁在一個危險的鄰居身上」：內政可預測、產權有保障，但對美依賴是必須動態定價的核心風險。能源與關鍵礦產是它的槓桿，也是外資的機會。</p></div>
+    <div class="pv-l"><div class="pv-tag">LIBERAL</div><p>美國是「必須從優勢重估為風險的舊夥伴」：Carney 路線就是承認『舊關係已結束』，一邊反制、一邊多元化與自主化——雖然真正擺脫依賴是十年以上的工程。</p></div>
+    <div class="pv-c"><div class="pv-tag">CONSERVATIVE</div><p>美國是「該務實打交道、而非對抗的最大客戶」：保守黨傾向認為過度對抗 Trump 會兩敗俱傷，該做的是穩住能源出口、加速管道與資源開發，用供給實力換談判空間。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個對美關係，三種讀法：需定價的風險、重估的舊夥伴、務實的最大客戶</div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART III</div>
+  <h2>動力 · The Dynamics</h2>
+  <div class="pd-sub">下台、逆轉、翻盤與主權戰的因果鏈</div>
+</div>
+
+<section id="s9">
+  <div class="sec-label">PART III · CH 09</div>
+  <h2>Trudeau 下台與 Carney 的崛起（2025-01 至 03）</h2>
+  <p class="lede">2025 年的加拿大奇蹟，起點是一場看似板上釘釘的敗局。要理解自由黨如何從谷底翻身，必須先理解它為何跌到谷底、以及它換帥的時機為何如此關鍵——這是一個「在最壞的時刻換上最對的人」的故事。</p>
+
+  <h3>谷底：一個耗盡了政治資本的政府</h3>
+  <p>2024 年底，Justin Trudeau 的自由黨在幾乎所有民調中都遠遠落後。累積十年的執政疲勞——<strong>住房危機、生活成本、移民急增的反彈、一連串治理爭議</strong>——把 Trudeau 的個人聲望壓到執政以來最低。壓垮駱駝的最後一根稻草是 2024 年底的內閣分裂：財政部長兼副總理 Chrystia Freeland 在與 Trudeau 就財政與對美策略分歧後戲劇性辭職，公開信直指政府方向有誤，引爆黨內對 Trudeau 續任的公開反叛。<strong>此時保守黨領先達 25–27 個百分點，若立即大選，自由黨面對的是一場歷史級的潰敗。</strong></p>
+
+  <h3>換帥：2025-01-06 的辭職與 03-09 的加冕</h3>
+  <p>在黨內壓力下，<strong>Trudeau 於 2025 年 1 月 6 日宣布辭去自由黨黨魁</strong>，但留任總理直到選出繼任者，並讓國會休會為領導權競選騰出空間。自由黨的黨魁選舉在 3 月 9 日揭曉——<strong>Mark Carney 以約 85.9% 的壓倒性黨員票勝出</strong>，擊敗 Freeland 等對手。3 月 14 日，Carney 宣誓就任總理。這個換帥的時機是決定性的：它讓自由黨得以<strong>「用一個全新的、沒有 Trudeau 包袱的面孔重新開始」</strong>，把選舉的問題從「你要不要再給 Trudeau 一次機會（答案是壓倒性的不要）」，重設為「Carney vs Poilievre，誰更能應付眼前的危機」。</p>
+
+  <h3>時機的煉金術：外部衝擊與新面孔的疊加</h3>
+  <p>Carney 的崛起若只發生在正常年份，未必能扭轉 25 點的落後——一個沒有選舉經驗的央行家，很可能被 Poilievre 的民粹攻勢碾過。真正完成煉金的，是<strong>換帥的時機恰好與 Trump 的關稅衝擊重疊</strong>。當一個「全新的、被視為危機專家的面孔」遇上一個「把選舉主題從生活成本換成國家存亡的外部衝擊」，兩個變數相乘，產生了遠超任一單獨因素的效果：新面孔洗掉了 Trudeau 的疲勞，外部衝擊換掉了保守黨的靶心，而 Carney 的央行家履歷正好是新主題（對抗 Trump 經濟戰）下最想要的資歷。<strong>2025 年的自由黨奇蹟，本質是一次精準的『時機煉金術』——換帥、切割碳稅、外部衝擊三者在四個月內完美對齊。</strong></p>
+</section>
+
+<section id="s10">
+  <div class="sec-label">PART III · CH 10</div>
+  <h2>2025 大選深讀：Trump 如何救了自由黨</h2>
+  <p class="lede">加拿大 2025 年 4 月 28 日的大選，是研究「外部衝擊如何改寫國內政治」的一則教科書案例。一個政黨在四個月內從落後 25 點到勝選——這種幅度的逆轉，不可能來自國內因素的自然演化，只能來自一個把整場遊戲規則掀翻的外力。那個外力，就是 Trump。</p>
+
+  <h3>逆轉的機制：主題轉換與策略性投票</h3>
+  <p>Trump 因素透過兩條機制救了自由黨。<strong>第一條是「主題轉換」</strong>：Poilievre 苦心經營的選舉主軸是生活成本與碳稅（保守黨的主場）；Trump 的關稅與併吞言論，把全國的注意力硬生生轉向「主權與對美談判」（自由黨與 Carney 的主場）。當選民心中最重要的問題從「誰能讓生活變便宜」變成「誰能保護加拿大不被 Trump 吞掉」，答案就從 Poilievre 換成了 Carney。<strong>第二條是「策略性投票（strategic voting）」</strong>：在「必須選出最能對抗 Trump 的政府」的恐懼下，原本分散在 NDP、Bloc、綠黨的進步與中間選民，大量集中到最可能贏、最能代表「反 Trump 加拿大」的自由黨——這既推高了自由黨的席次，也直接造成了 NDP 的崩塌與 Bloc 的縮水。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">-25 pt → +勝選</div><div class="fig-l">自由黨四個月內的民調逆轉幅度</div></div>
+    <div><div class="fig-n">43.8%</div><div class="fig-l">自由黨得票——自 1984 Mulroney 以來單一政黨最高</div></div>
+    <div><div class="fig-n">169 席</div><div class="fig-l">自由黨席次（少數政府，差 3 席過半）</div></div>
+    <div><div class="fig-n">85%+</div><div class="fig-l">兩大黨合計得票——約七十年來首破</div></div>
+  </div>
+
+  <h3>「加拿大民族主義」的意外復興</h3>
+  <p>2025 年最深刻的社會現象，是一種久違的<strong>加拿大民族主義的集體爆發</strong>。面對 Trump 的併吞言論，加拿大人以罕見的一致做出反應：抵制美國貨、在超市尋找「Product of Canada」標籤、體育賽事上向美國國歌喝倒彩、以及借用冰球術語的全國口號<strong>「elbows up（舉起手肘、備戰）」</strong>。這股情緒的政治後果是巨大的——它<em>暫時壓過了加拿大所有的內部裂縫</em>：魁北克人先是加拿大人（Bloc 因此縮水）、西部的怨恨暫時退居次要、紅藍之間的溫和選民向「捍衛加拿大」的旗幟集結。<strong>Trump 無意間做了加拿大政治人物幾十年做不到的事：他讓一個以「沒有強烈民族認同」著稱的國家，突然找到了強烈的民族認同——而收割這股認同的，正是把自己包裝成「加拿大隊長」的自由黨。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">COUNTERFACTUAL · 若沒有 Trump</div>
+    <p>一個誠實的反事實推演：<strong>若 Trump 沒有發動關稅與併吞言論，2025 年的加拿大大選幾乎確定是保守黨的壓倒性勝利。</strong>Poilievre 的「axe the tax」與「Canada is broken」在生活成本主導的選舉中所向披靡，25 點的領先足以轉化為多數政府，Poilievre 會是總理。這個反事實的重要性在於：<strong>它證明 2025 的結果不是加拿大國內政治的自然產物，而是一個外部變數的直接輸出</strong>——這也意味著，一旦 Trump 因素退潮（關稅緩解、威脅消失），2025 借來的自由黨多數就失去了它的生成條件。自由黨執政的真正考驗，是能否在民族主義退潮前，把「危機隊長」的信任轉化為「經濟管理」的長期政績（詳第 21 章 T2）。</p>
+  </div>
+
+  <h3>誰被擠出：小黨的系統性犧牲</h3>
+  <p>2025 年的兩極化，對小黨是一次系統性的清洗。策略性投票的邏輯——「別浪費選票，集中投給最能擋 Trump 的一方」——直接抽乾了第三勢力的血：<strong>NDP 崩到 7 席、失去官方政黨地位、黨魁落選辭職；Bloc 未能擴大、槓桿縮水；綠黨僅存 1 席</strong>。這是 FPTP 與兩極化疊加的必然結果：當選舉被壓縮成一場二元的存亡抉擇，任何「第三選項」都會被視為「幫倒忙的分票」而遭懲罰。<strong>兩大黨合計得票七十年來首破 85%，不是加拿大選民變得更兩極，而是他們在一個外部威脅下，理性地把選票集中到了兩個最可能組成政府的選項——代價是多元聲音的暫時消音。</strong></p>
+</section>
+
+<section id="s11">
+  <div class="sec-label">PART III · CH 11</div>
+  <h2>少數政府與 Poilievre 的困境</h2>
+  <p class="lede">選舉之夜，加拿大出現了一個罕見的雙重弔詭：贏得選舉的自由黨沒能拿到多數（少數政府），而輸掉選舉的保守黨得票創新高、黨魁卻丟了自己的席位。這兩個弔詭，把 FPTP 與存亡選舉的殘酷邏輯展現得淋漓盡致，也定義了 Poilievre 此後一年的處境。</p>
+
+  <h3>黨魁落選：Carleton 的 4,500 票</h3>
+  <p>2025 年最戲劇性的個人結局，屬於 Pierre Poilievre。他自 2004 年起代表安大略的 <strong>Carleton</strong> 選區、經營二十年，卻在 2025 年<strong>以約 4,513 票之差，輸給了自由黨的政治素人 Bruce Fanjoy</strong>。這個結果濃縮了保守黨的整體困境：即使在黨的全國得票大漲的同時，安大略的搖擺選區（Carleton 正是這樣一個渥太華近郊選區）被反 Trump 浪潮翻藍——連黨魁本人也未能倖免。<strong>一個帶領政黨拿下四十年新高得票的領袖，卻連自己的席位都保不住，這在西敏制裡是極其罕見、也極其難堪的處境</strong>：一個沒有國會席位的反對黨領袖，甚至無法進入下議院質詢政府。</p>
+
+  <h3>重返國會：Battle River—Crowfoot 補選</h3>
+  <p>解方來自西敏制的另一個機制——補選。保守黨在 Alberta 的絕對安全席 <strong>Battle River—Crowfoot</strong> 的當選議員 <strong>Damien Kurek 主動辭職，為 Poilievre 讓出席位</strong>。2025 年 <strong>8 月 18 日</strong>的補選中，Poilievre 以 <strong>約 80.9% 的壓倒性得票</strong>贏回國會席位，重新以反對黨領袖（Leader of the Official Opposition）身分進入下議院。這場補選還創下一個奇觀：因抗議選制的「最長選票」運動，登記候選人多達 <strong>214 名</strong>，是加拿大聯邦史上單一選票最多候選人的紀錄。<strong>Poilievre 從『在安大略搖擺區落選』到『在 Alberta 鐵票區八成得票』的對比，本身就是加拿大區域極化的完美縮影</strong>：同一個人、同一套主張，在西部是壓倒性英雄，在中部搖擺區卻輸掉——這正是保守黨「贏票不贏選」結構困境的個人版。</p>
+
+  <h3>雙重困境：黨的處境與領導權的懸念</h3>
+  <p>Poilievre 回到國會，卻面對雙重困境。<strong>其一是政策困境</strong>：他賴以崛起的「Canada is broken」與「axe the tax」在 Trump 主權戰的框架下失效，而 Carney 又佔據了經濟穩健的中間位置——保守黨需要一套新的、不顯得「不愛國」也不像 Trump 的論述，這在民族主義高漲期極難拿捏。<strong>其二是領導權困境</strong>：一個輸掉「必勝之選」、還丟過自己席位的黨魁，其領導權必然受到黨內質疑；而隨著自由黨在 2026 年翻成多數、下次大選可能遠至 2029 年，保守黨究竟該續用 Poilievre 賭下一輪、還是另尋更能攻下大都市與魁北克的領袖，成為懸而未決的問號。<strong>保守黨的處境因此是一個苦澀的悖論：它從未如此接近多數選民（得票新高），卻也從未如此遠離執政（對手翻成穩固多數）。</strong></p>
+</section>
+
+<section id="s12">
+  <div class="sec-label">PART III · CH 12</div>
+  <h2>主權與關稅：對美的新現實（「51 州」威脅）</h2>
+  <p class="lede">2025–2026 年，加拿大與美國七十年的關係發生了一次性質上的斷裂。這不是又一輪貿易摩擦，而是一個結構性前提的崩塌：<strong>加拿大過去把「與美國深度整合」當成不言而喻的優勢與安全保障，如今第一次必須把它當成一個需要主動管理、甚至防範的風險。</strong>Carney 那句「舊關係已經結束」，是對這個斷裂最精準的官方確認。</p>
+
+  <h3>關稅的升級：25% 到 50%</h3>
+  <p>Trump 對加關稅是一條持續升級的曲線。2025 年初以「芬太尼、邊境安全、貿易失衡」為由對加拿大貨物課 <strong>25% 關稅</strong>，其間夾雜豁免、延期與再威脅，讓出口產業（汽車、鋼鋁、木材）陷入持續的不確定與供應鏈重估。到 <strong>2026 年 7 月，關稅升級到對多數加拿大貨物 50%</strong>——Trump 指控加拿大在汽車、酒類與乳製品上「不公平地歧視」美國，Carney 則回應將與 Trump「加強貿易談判」（涉及 USMCA 的重新協商），同時堅持在美方撤回所有關稅威脅前，加方不會解除報復性關稅。<strong>這條升級曲線的殺傷力，不只在稅率本身，更在它的不可預測——當你的最大客戶隨時可能把稅率翻倍，任何跨境投資與供應鏈的長期規劃都被迫計入一層無法定價的政治風險。</strong></p>
+
+  <h3>「第 51 州」：當貿易戰變成主權戰</h3>
+  <p>真正把這件事從經濟提升到存在層次的，是 Trump 的併吞言論。他反覆公開表示加拿大「應該成為美國的第 51 州」、稱加拿大「靠美國補貼才能生存」、嘲諷加拿大領導人為「州長」。無論這些言論有幾分認真，它們的政治效果是真實而巨大的：<strong>它把一場關於關稅的談判，重新框定為一場關於『加拿大是否還能作為一個獨立國家存在』的鬥爭。</strong>對一個向來低調、甚至有點認同焦慮的國家，這是一記把民族意識瞬間點燃的重擊——它既激起了前述的「elbows up」民族主義（第 10 章），也為 Carney 政府提供了近乎無限的政治正當性去採取強硬立場：當對手談論併吞你，任何反制都顯得理所當然。</p>
+
+  <h3>Carney 的兩腿策略：反制與自主</h3>
+  <p>面對這個新現實，Carney 政府的策略是「兩條腿走路」。<strong>第一條腿是對等反制與談判</strong>：以報復性關稅精準打擊政治敏感的美國產業與州、在 USMCA 重談中守住核心利益、不在 Trump 撤回威脅前先鬆手——用加拿大的能源與礦產槓桿（第 8 章）換取一個「痛苦但可接受」的僵局。<strong>第二條腿是結構性自主</strong>：加速拆除加拿大長期存在的<em>省際貿易壁壘</em>（諷刺的是，加拿大內部各省之間的貿易障礙，某些估算下比對外貿易障礙還高）、推動能源與基建、鞏固關鍵礦產、並積極尋求<em>貿易多元化</em>（歐盟、印太、亞洲）。<strong>這條策略的誠實面是：它是一場十年以上的長期工程，短期內加拿大不可能真正擺脫那個吸走四分之三出口的市場</strong>——自主化更多是「降低脆弱性」而非「切斷依賴」，其成效要以年、以十年計來檢驗（詳第 16、17 章）。</p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>對美關係是「唯一需要動態定價的宏觀變數」：關稅的稅率與不可預測性、USMCA 的走向、以及主權言論的政治外溢，共同構成加拿大資產的地緣風險溢價。能源與礦產槓桿是這場對決中加方最實在的籌碼。</p></div>
+    <div class="pv-l"><div class="pv-tag">LIBERAL</div><p>主權戰是「執政正當性的永久燃料」：只要 Trump 威脅還在，Carney 的『危機隊長』定位就有效，強硬反制永遠有民意支撐。但它也是雙刃——經濟若因關稅重創，責任最終會回到執政者身上。</p></div>
+    <div class="pv-c"><div class="pv-tag">CONSERVATIVE</div><p>對美策略是「該務實、別逞英雄」：過度對抗會兩敗俱傷、傷及依賴出口的西部與汽車業。該做的是穩住能源供給、加速資源開發，用供給不可替代性換談判空間，而非把關係推向零和。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一場主權戰，三種讀法：需定價的風險、執政的燃料、該務實的僵局</div>
+</section>
+
+<section id="s13">
+  <div class="sec-label">PART III · CH 13</div>
+  <h2>西部疏離與 Alberta：能源、怨恨與脫離主義</h2>
+  <p class="lede">如果魁北克是加拿大東邊的離心力，Alberta 就是西邊的。2025 年有一個容易被外界忽略的反諷：<strong>當 Trump 的威脅把全國推向團結、把自由黨推上台的同時，它也間接激化了西部的疏離</strong>——因為 Alberta 眼睜睜看著一個「東部的、反能源的、自由黨的」政府又一次執政，而自己整省近乎全紅（保守黨橫掃）、在聯邦內閣裡再度近乎「無代表」。這股怨恨，在 2026 年凝結成一場真實的主權公投（詳第 13B 章）。</p>
+
+  <h3>怨恨的地質層：從 NEP 到碳稅</h3>
+  <p>Alberta 的疏離不是一時情緒，而是層層堆疊的歷史地質。<strong>最底層是 1980 年老 Trudeau 的「國家能源計畫（NEP）」</strong>——聯邦以壓低油價、擴大聯邦份額的方式介入 Alberta 的石油財富，被西部視為赤裸裸的掠奪，成為西部反自由黨情緒的原型創傷。<strong>中間層是均等化轉移</strong>（第 3 章）：富裕的 Alberta 長年是最大淨貢獻者，卻眼看財富被轉去補貼其他省（尤其反對其管道的魁北克）。<strong>最上層是氣候政策</strong>：小 Trudeau 政府的聯邦碳稅、對油砂的排放管制、以及一連串管道專案的受阻或取消，被 Alberta 讀成「東部聯合起來系統性地扼殺我們的核心產業」。<strong>三層疊加，形成了一句 Alberta 的政治信條：『我們生產全國的財富，東部制定規則、拿走我們的錢、還擋我們的財路。』</strong></p>
+
+  <h3>管道之戰：被卡住的咽喉</h3>
+  <p>西部疏離最具體的戰場是輸油管道。Alberta 的石油要變現，必須運到海岸出口，但幾乎每一條大型管道都陷入漫長的政治與法律梗阻：<strong>Keystone XL（輸美）於 2021 年被美方取消</strong>；<strong>Northern Gateway、Energy East</strong> 等因環境、BC 省反對與原住民訴訟而流產；唯一實際擴建完成的是聯邦為了「保住專案」而<strong>收歸國有的 Trans Mountain 擴建（TMX，2024 年投運）</strong>——但即便如此，其造價暴漲與過程之艱難，反而更印證了西部「在加拿大蓋一條管道有多難」的怨氣。<strong>對 Alberta，管道不只是基建，是一個象徵：它證明了西部的經濟命脈，被東部的政治、BC 的環境立場與原住民的同意權層層卡住</strong>——這正是脫離主義者最有力的論據：「留在加拿大，我們的財富永遠出不了門。」</p>
+
+  <h3>Danielle Smith 與 UCP：把怨恨制度化</h3>
+  <p>把這股怨恨轉化為制度行動的，是 Alberta 省長 <strong>Danielle Smith 與她的聯合保守黨（UCP）</strong>。Smith 走的是一條「以省權對抗聯邦」的強硬路線：推動《Alberta 主權法（Alberta Sovereignty Act）》宣稱有權拒絕執行她認定違憲或損害 Alberta 利益的聯邦法律、成立省級養老金與警察的可行性研究、對聯邦碳稅與能源管制正面抵制。2025–2026 年，她更進一步——<strong>通過降低公投門檻的立法（Bill 14），為一場包含「Alberta 是否留在加拿大」的省級公投鋪路</strong>（詳第 13B 章）。<strong>Smith 的策略是精算的：她本人多半並不主張真正獨立，而是把『獨立的威脅』當成向渥太華勒索能源政策讓步的槓桿</strong>——這與魁北克「不必真獨立、威脅本身就是資源」的邏輯如出一轍，只是換成了石油而非法語。</p>
+
+  <div class="prism">
+    <div class="pv-c"><div class="pv-tag">CONSERVATIVE</div><p>西部疏離是「對聯邦剝奪的正當反抗」：Alberta 養活全國卻被東部的環境教條扼殺，脫離主義是渥太華一手逼出來的。解方是尊重省權、放行管道、廢除碳稅——把西部的怨恨導向政策，而非分裂。</p></div>
+    <div class="pv-l"><div class="pv-tag">LIBERAL</div><p>脫離主義是「被政客操弄放大的槓桿」：Smith 用『獨立威脅』勒索能源讓步，但多數 Alberta 人並不真想離開加拿大。聯邦要做的是安撫（收購 TMX 已是明證）、而非屈服於分裂勒索。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>Alberta 是「能源機會與政治風險並存的樞紐」：全球級的油氣與礦產儲量，卻被管道梗阻、聯邦省級對立與脫離主義的不確定性折價。TMX 投運改善了外運，但西部的政治噪音是能源投資必須計入的變數。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個 Alberta，三種讀法：正當反抗、操弄的槓桿、折價的能源樞紐</div>
+</section>
+
+<section id="s13b">
+  <div class="sec-label">PART III · CH 13B</div>
+  <h2>Alberta 主權公投：2026-10-19 的十道題</h2>
+  <p class="lede">第 13 章的怨恨，在 2026 年凝結成加拿大自 1995 魁北克公投以來，第一場觸及「脫離聯邦」的正式省級公投。這場定於 <strong>2026 年 10 月 19 日</strong>的 Alberta 公投，是本報告『下一里程碑』的核心，也是檢驗西部疏離究竟是「宣洩」還是「行動」的關鍵測試。</p>
+
+  <h3>公投的來龍去脈</h3>
+  <p>公投的路徑經歷了法律與政治的層層鋪墊。原本的脫離主義團體<strong>「Alberta Prosperity Project」</strong>（法律代表 Jeffrey Rath）試圖以公民聯署強制一場獨立公投，但一度因法院裁定「現行公民倡議法不允許就獨立舉行公投」而受阻；<strong>Smith 政府的 Bill 14 修法降低了聯署門檻、掃清了法律障礙</strong>。2026 年 2 月 19 日，Smith 宣布將於 10 月 19 日舉行一場包含<strong>多達十道題</strong>的公投；5 月 21 日，她加上了關鍵的<strong>第十道題——關於 Alberta 應留在加拿大、還是走向一場具約束力的脫離公投</strong>。這道題的措辭與門檻本身就充滿爭議：脫離主義者嫌它不夠直接、聯邦派憂心它把「脫離」正常化，Smith 則試圖走在兩者之間——既回應基本盤的怒火，又不真的推向解體。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">2026-10-19</div><div class="fig-l">Alberta 公投日——含「留在加拿大」一題</div></div>
+    <div><div class="fig-n">10 道題</div><div class="fig-l">公投題數（第 10 題涉及脫離路徑）</div></div>
+    <div><div class="fig-n">25% : 75%</div><div class="fig-l">Angus Reid 民調：支持 vs 反對 Alberta 脫離</div></div>
+    <div><div class="fig-n">~$400B</div><div class="fig-l">Smith 估算的脫離「過渡成本」（另加每年數百億）</div></div>
+  </div>
+
+  <h3>民意的真相：怒火高、脫離意願低</h3>
+  <p>公投的政治張力，來自「情緒」與「意願」之間的巨大落差。一方面，對聯邦的怒火廣泛而真實；另一方面，<strong>真正支持脫離的比例其實是少數</strong>：2026 年初 Angus Reid 的民調顯示，Alberta 人對脫離的支持約 <strong>25%、反對約 75%</strong>。連 Smith 本人都公開警告，脫離的「過渡成本」估計高達約 <strong>4,000 億加元</strong>、外加每年數百億——一個內陸、無出海口、經濟與貨幣深嵌於加拿大與美國的省，獨立的實務代價極其高昂。<strong>這個落差揭示了公投的真實性質：它與其說是一場邁向獨立的動員，不如說是一場『把怨恨制度化、用來向渥太華施壓的高風險政治操作』</strong>——Smith 想收割怒火的能量，卻不想真的引爆解體。</p>
+
+  <h3>三種可能的結局</h3>
+  <p>這場公投可能導向三種結局，各自對加拿大有不同意涵。<strong>其一，象徵性宣洩</strong>（最可能）：脫離題被否決或門檻未達，但高投票率與可觀的贊成比例，成為 Smith 向聯邦勒索能源讓步的新籌碼——怨恨被制度化、但聯邦不解體。<strong>其二，意外升溫</strong>：若聯邦（尤其一個東部自由黨政府）在能源或關稅上再有刺激動作，贊成票意外走高，把「脫離」從邊緣推向主流討論，複製 1995 魁北克那種「差一點」的驚險。<strong>其三，回火</strong>：公投分裂了 UCP 自身（部分脫離派已揚言若題目不夠強硬就要罷免 Smith），也可能激起 Alberta 內部反脫離的商界與都市選民反彈。<strong>無論哪種結局，這場公投都確認了一件事：西部疏離已從情緒進入制度化的行動階段，成為與魁獨並列的加拿大第二條長期離心裂縫。</strong></p>
+</section>
+
+<section id="s14">
+  <div class="sec-label">PART III · CH 14</div>
+  <h2>民主韌性辨析：穩定的制度與離心的區域</h2>
+  <p class="lede">走過 Trudeau 下台、Trump 衝擊、政權逆轉、少數翻多數、Alberta 公投這一連串動盪，一個關鍵的判斷題浮現：加拿大的民主，是在倒退、還是在自我修復？本報告的答案是——<strong>加拿大的制度硬體異常穩健，真正的風險從來不在威權崩壞，而在區域離心力的長期累積與治理效能的緩慢流失。</strong></p>
+
+  <h3>穩健的一面：制度硬體從未鬆動</h3>
+  <p>對照許多正在民主退化的國家，加拿大 2025–2026 這輪動盪最值得注意的，恰恰是它的<strong>平淡與有序</strong>：一個不受歡迎的總理和平交棒、一個從未參選的央行家透過正常程序當上總理、一場自由公正的選舉、一次和平的政權去留、少數政府透過西敏制內建的機制（轉籍、補選）合法地轉為多數、司法獨立與《憲章》審查照常運作、新聞自由與公民社會活躍。即便面對 Trump 這種級別的外部脅迫，加拿大的回應完全在制度軌道內——沒有戒嚴、沒有政變、沒有選舉舞弊的指控、沒有拒絕交權。<strong>加拿大的民主韌性，不表現為戲劇性的『抗體反應』，而表現為一種近乎無聊的『制度慣性』——最大的壓力測試，換來的是最平淡的合憲運作。</strong></p>
+
+  <h3>脆弱的一面：離心力與治理效能</h3>
+  <p>但穩健不等於沒有風險，只是風險的性質不同。加拿大真正的長期脆弱有兩條。<strong>其一是區域離心力</strong>：魁獨（休眠但未熄）與西部脫離主義（2026 正在制度化）這兩條裂縫，平時被繁榮與聯邦轉移吸收，卻在外部衝擊或聯邦失衡時被激活——它們不會讓加拿大「變成威權」，但可能讓加拿大「變得更小」或陷入長期的憲政消耗。<strong>其二是治理效能的流失</strong>：去中心化的聯邦、省際壁壘、原住民同意權、環境與司法的多重關卡，讓加拿大在最需要行動的領域（住房、能源基建、生產力、對美自主）越來越難「把事情做成」——第 21 章 T9 將論證，加拿大的真正威脅，是「什麼都很穩、但什麼大事都推不動」的緩慢僵化。</p>
+
+  <div class="debate">
+    <div class="d-pro">
+      <div class="d-tag">論題 ▸ 加拿大民主極其穩健</div>
+      <p>經歷了領袖更替、外部脅迫、政權逆轉與省級脫離公投，全程沒有一次脫離憲政軌道——這是成熟民主的教科書表現。制度硬體（選舉、司法、《憲章》、聯邦制的宣洩管道）強到足以把最大的壓力都吸收成合法程序。加拿大不會走向威權，這一點的信度極高。</p>
+    </div>
+    <div class="d-con">
+      <div class="d-tag">反論 ▸ 穩健也是僵化的另一面</div>
+      <p>制度的穩健有其代價：同一套讓加拿大不會崩壞的去中心化與多重否決點，也讓它極難推動任何需要跨省、跨黨、跨原住民共識的大改革。住房危機拖了十年無解、能源基建卡在管道戰、生產力長期落後美國——加拿大的病不是威權復辟，是『繁榮下的緩慢僵化』與區域裂縫的持續消耗。穩定與停滯，往往是同一枚硬幣的兩面。</p>
+    </div>
+  </div>
+
+  <p><strong>綜合判斷：</strong>加拿大是一個「制度極穩、區域極散、效能漸弱」的民主。它幾乎不可能發生南韓式的戒嚴或美國式的選舉否認危機；它真正該被監測的，是三條慢變數——<em>魁北克與 Alberta 兩條離心裂縫是否被外部衝擊激活</em>、<em>對美依賴能否在受迫下真正降低</em>、以及<em>治理效能能否在僵化中重新啟動</em>。這三條，都不是「會不會倒向威權」的問題，而是「這個穩定的聯邦能否在一個更敵意的世界裡，保持完整並把大事做成」的問題（詳第 21 章）。</p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART IV</div>
+  <h2>引擎 · The Engine</h2>
+  <div class="pd-sub">政黨×資源經濟×美國的完整迴路</div>
+</div>
+
+<section id="s15">
+  <div class="sec-label">PART IV · CH 15</div>
+  <h2>三角傳導：政黨×資源經濟×美國的完整迴路</h2>
+  <p class="lede">前面的稜鏡與動力，最終都收攏到一個由三個節點、六條邊構成的傳導迴路。加拿大政治經濟的所有主要事件——關稅、碳稅、管道、公投、選舉逆轉——都可以被定位成這個迴路上某條邊的擾動。理解這張圖，就理解了加拿大這台機器如何運轉。</p>
+
+  <h3>三個節點</h3>
+  <p>迴路的三個節點是：<strong>節點 A・政黨與區域政治</strong>（紅藍鐘擺、魁北克、西部、原住民——決定誰執政、政策往哪偏）；<strong>節點 B・資源與資本經濟</strong>（石油與油砂、關鍵礦產、汽車、木材、農產、住房——加拿大的財富引擎與痛點）；<strong>節點 C・美國</strong>（最大市場、安全夥伴、如今的主權威脅——加拿大的外部命門）。三者互為因果，沒有一個能被單獨理解：政黨政策塑造資源經濟、資源經濟決定對美籌碼、美國的動作又回過頭改寫政黨政治（2025 就是活例）。</p>
+
+  <h3>六條邊：迴路如何傳導</h3>
+  <table>
+    <tr><th>邊</th><th>傳導方向</th><th>機制與實例</th></tr>
+    <tr><td><strong>A → B</strong></td><td>政黨塑造資源經濟</td><td>自由黨的碳稅與排放管制 vs 保守黨的放行管道；聯邦與省對能源、住房、移民政策的角力，直接決定資源與資本的流向</td></tr>
+    <tr><td><strong>B → A</strong></td><td>資源經濟餵養區域政治</td><td>Alberta 的石油財富與被卡的管道，餵養西部疏離與脫離主義；住房與生活成本的痛點，餵養民粹右翼（axe the tax）</td></tr>
+    <tr><td><strong>B → C</strong></td><td>資源給加拿大對美籌碼</td><td>美國中西部依賴 Alberta 重油、加拿大的電力鉀肥鈾與關鍵礦產——這些是加拿大對美反制的咽喉槓桿（第 8 章）</td></tr>
+    <tr><td><strong>C → B</strong></td><td>美國衝擊資源經濟</td><td>Trump 的 25%→50% 關稅直接打擊汽車、鋼鋁、木材出口；USMCA 的走向決定整條北美供應鏈的定價</td></tr>
+    <tr><td><strong>C → A</strong></td><td>美國改寫政黨政治</td><td>2025 的教科書案例：Trump 的關稅與『51 州』言論，把選舉主題從生活成本換成主權，四個月逆轉、救活自由黨</td></tr>
+    <tr><td><strong>A → C</strong></td><td>政黨決定對美路線</td><td>Carney 的『舊關係已結束＋反制＋多元化』vs 保守黨的『務實打交道』——執政顏色決定對美是對抗還是妥協</td></tr>
+  </table>
+  <p class="tbl-note">六條邊構成一個閉環：任何一條邊的擾動都會沿環傳導。2025 的完整迴路可讀為——<strong>C→A（Trump 改寫選舉）→ A→C（Carney 強硬反制）→ C→B（關稅打擊出口）→ B→A（經濟痛點回饋政治）</strong>，環環相扣。</p>
+
+  <h3>迴路的定錨：美國是唯一能同時擾動全環的節點</h3>
+  <p>三個節點的地位並不對等。節點 A（政黨）與節點 B（資源經濟）之間的互動，是加拿大百年來的內部常態，波動有限、可預測；<strong>唯有節點 C（美國）具備『一擊擾動全環』的能量</strong>——一個美國的政策轉向（關稅、USMCA、能源、安全承諾），能同時改寫加拿大的經濟（B）、政治（A）與主權處境。這正是本報告把「美國＝命門」列為核心定錨的迴路依據：<strong>聯邦制與紅藍鐘擺（A）決定加拿大『如何』反應，資源經濟（B）決定加拿大『有多少籌碼』反應，但『何時、以多大力度被迫反應』，越來越由美國（C）單方面決定。</strong>加拿大的戰略自主，本質就是一場試圖削弱 C 對全環支配力的長期努力（第 16、17 章）。</p>
+</section>
+
+<section id="s16">
+  <div class="sec-label">PART IV · CH 16</div>
+  <h2>政治×經濟迴路：對美依賴、能源、住房、生活成本</h2>
+  <p class="lede">第 15 章的三角是骨架，這一章給它填上經濟的血肉。加拿大政治的經濟底層，可以濃縮為四條互相牽動的傳動帶：<strong>對美依賴</strong>、<strong>能源</strong>、<strong>住房</strong>與<strong>生活成本</strong>。前兩條是對外的命門與籌碼，後兩條是對內的政治火藥——它們共同決定了選票往哪走、以及政府能不能連任。</p>
+
+  <h3>對美依賴：繁榮的來源與脆弱的根源</h3>
+  <p>加拿大的經濟繁榮，很大程度是北美一體化的紅利：約四分之三的出口通往一個富裕、龐大、地理相鄰的市場，讓加拿大的能源、汽車與資源產業享有規模與便利。但這份繁榮的代價是<strong>結構性的脆弱與談判上的弱勢</strong>——當單一客戶佔了你四分之三的生意，你在任何爭端中都缺乏「掉頭走人」的可信威脅。這正是 Carney「把優勢重估為弱點」的核心洞察：<strong>對美依賴不是可以簡單切斷的選擇，而是一個必須長期、緩慢降低脆弱性的結構</strong>。貿易多元化（歐盟 CETA、印太、亞洲）喊了很多年，但地理與慣性的引力太強——把出口從南方轉向海外，是以十年計的工程，短期內無法改變命門的位置。</p>
+
+  <h3>能源：財富引擎與政治斷層線</h3>
+  <p>能源是加拿大經濟中最政治化的部門。它既是巨大的財富引擎（石油、天然氣、水電、鈾），也是最深的政治斷層線——因為它把「氣候政策」「西部疏離」「對美籌碼」三件事焊在一起。聯邦的每一個能源決定，都同時是一個氣候立場、一個對西部的態度、以及一個對美的戰略選擇：<strong>放行管道會激怒環保與部分原住民、討好西部、增強對美（與海外）的能源籌碼；壓制油砂會討好氣候選民與部分魁北克票、激化 Alberta、削弱能源籌碼。</strong>沒有一個能源政策是純經濟的，每一個都牽動整個三角。這也是為什麼 Carney 政府在關稅壓力下，對能源的姿態比 Trudeau 時代更務實——因為在主權戰的框架下，能源從「氣候問題」被重新定義為「國家安全與談判籌碼」。</p>
+
+  <h3>住房與生活成本：民粹右翼的燃料庫</h3>
+  <p>對內政治的最大火藥，是住房與生活成本。加拿大的房價與租金已飆到<strong>全球最不可負擔之列</strong>（溫哥華、多倫多長年名列全球住房負擔最差的城市），年輕世代「永遠買不起房」的絕望，是過去十年最強的政治情緒。它由多重因素疊加：<strong>移民與人口急增推升需求（第 18 章）、供給端因分區管制與建設緩慢而長期不足、低利率時代的資產通膨、以及把房產當投資標的的結構</strong>。這個痛點是 Poilievre 民粹右翼的燃料庫——「Canada is broken」最有力的證據就是住房。<strong>而它也是自由黨最大的內政軟肋</strong>：2025 靠 Trump 因素暫時蓋過了住房怒火，但一旦民族主義退潮、選舉主題回到生活成本，這座燃料庫隨時可能重新引爆——這是 Carney 政府能否把「危機授權」轉化為「長期執政」的最關鍵測試。</p>
+
+  <div class="callout">
+    <div class="co-tag">MECHANISM · 為什麼四條傳動帶會互相放大</div>
+    <p>這四條傳動帶不是獨立的，而是互相餵養：<strong>對美關稅（C→B）打擊出口與就業 → 經濟走弱、加元承壓 → 生活成本進一步上升 → 住房與物價怒火升高（B→A）→ 政治壓力逼政府在能源與對美上表態 → 能源決定又回頭牽動西部與對美籌碼。</strong>這個相互放大的機制，解釋了為什麼加拿大的政治情緒對「外部衝擊」如此敏感：一個源自華盛頓的關稅，能在幾個月內沿著這四條傳動帶，傳導成渥太華的選舉地震。反過來，這也是 Carney 自主化策略的邏輯——只有同時鬆動這四條傳動帶（降低對美依賴、鞏固能源、增加住房供給、控制生活成本），才能讓加拿大政治不再如此容易被南方單方面點燃。</p>
+  </div>
+</section>
+
+<section id="s17">
+  <div class="sec-label">PART IV · CH 17</div>
+  <h2>資源與資本：石油、關鍵礦產、管道與貿易多元化</h2>
+  <p class="lede">加拿大是一個「資源立國」的已開發經濟體——這在 G7 中相當獨特。它的地緣槓桿、對美籌碼、以及與美國討價還價的底氣，都根植於地下的財富。這一章拆解這座資源寶庫的三塊核心：<strong>石油與油砂、關鍵礦產、以及把它們變現的管道與貿易通路</strong>，並檢視「貿易多元化」這個喊了多年、卻始終被地理引力拖住的戰略。</p>
+
+  <h3>石油與油砂：Alberta 的黑金與它的枷鎖</h3>
+  <p>加拿大擁有全球數一數二的原油儲量，絕大部分是 <strong>Alberta 的油砂（oil sands）</strong>——一種開採成本高、碳排較重、且因地處內陸而高度依賴管道外運的重油。這造就了一個結構性的兩難：<strong>油砂是加拿大最大的出口創匯來源與對美能源籌碼（美國中西部煉油廠專為加拿大重油設計），卻同時是加拿大氣候政策的最大靶心與外運瓶頸的受害者。</strong>它幾乎全部賣給美國——這既是收入的保障，也是脆弱的極致（一個客戶、一條主要通路）。因此對 Alberta，石油不只是經濟，是政治認同本身；對聯邦，油砂是「氣候承諾」與「經濟現實／對美籌碼」之間永遠拉扯的那條繩子。</p>
+
+  <h3>關鍵礦產：對美「新籌碼」與對中「新戰場」</h3>
+  <p>在傳統油氣之外，<strong>關鍵礦產（critical minerals）</strong>正成為加拿大新的戰略資產。鎳、鈷、鋰、銅、石墨、稀土、鉀肥、鈾——這些是電池、國防與能源轉型的命脈，而加拿大擁有可觀儲量。這給了加拿大一個雙重機會：<strong>對美，它可以成為『去中國化』供應鏈中，美國最信任的關鍵礦產夥伴</strong>（在美國急於擺脫對中國礦產依賴的當下，這是加拿大的新籌碼）；<strong>對中，它成了地緣角力的新戰場</strong>——加拿大依《投資加拿大法》以國家安全為由，要求中資企業從其關鍵礦產資產撤資、審查中資併購（第 19 章）。<strong>關鍵礦產因此把加拿大的資源牌，從『對美單向依賴』升級為『在美中之間有選擇的槓桿』</strong>——這是 Carney 自主化戰略中最有實質前景的一塊。</p>
+
+  <h3>管道與通路：把財富運出去的政治工程</h3>
+  <p>但資源要變成籌碼，必須運得出去——而這正是加拿大最大的自縛。前述的管道戰（第 13 章）證明，在加拿大蓋一條大型能源通路，要闖過<strong>聯邦環評、省級（尤其 BC）反對、原住民同意權與訴訟、以及氣候政治</strong>的重重關卡，動輒數年、數百億、甚至流產。TMX 靠國有化才勉強建成，Keystone XL、Energy East、Northern Gateway 全數受挫。<strong>這造成一個殘酷的悖論：加拿大坐擁世界級的資源與潛在買家（美國、亞洲、歐洲），卻常常因為運不出去，只能低價賣給唯一觸手可及的客戶——美國</strong>。因此「貿易多元化」的真正瓶頸，往往不在找不到新買家，而在<em>缺乏把資源運到新買家手上的通路</em>——這也是為什麼 Carney 政府在主權戰壓力下，開始把能源基建重新定義為「國家安全項目」、試圖加速鬆綁審批。</p>
+
+  <div class="prism">
+    <div class="pv-c"><div class="pv-tag">CONSERVATIVE</div><p>資源是「被自縛的國家財富」：加拿大坐在寶庫上卻運不出去，全因聯邦的環境教條與繁瑣審批。解方是放行管道、簡化審批、把資源優勢變成真正的對美與對外籌碼。</p></div>
+    <div class="pv-n"><div class="pv-tag">NDP</div><p>資源是「和解與氣候不能繞過的關卡」：每一條管道、每一座礦場都跨越原住民土地，FPIC 與環境正義不是障礙、是底線。資源開發必須先過和解這一關，不能為了對美籌碼犧牲原住民權利與氣候承諾。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>資源是「世界級儲量配上執行風險」：油砂、關鍵礦產、鈾的儲量一流，但管道梗阻、審批不確定與原住民同意權，是把估值打折的執行層風險。關鍵礦產的『去中國化』紅利，是外資最值得關注的新主題。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一座資源寶庫，三種讀法：被自縛的財富、和解的關卡、有折價的機會</div>
+</section>
+
+<section id="s18">
+  <div class="sec-label">PART IV · CH 18</div>
+  <h2>產業與人口：移民、住房危機與生產力</h2>
+  <p class="lede">加拿大的長期經濟命運，繫於三個互相糾纏的結構變數：<strong>移民</strong>（過去十年成長的主引擎，卻在急增後急煞）、<strong>住房</strong>（政治火藥與社會焦慮的核心）、以及<strong>生產力</strong>（長期落後美國、被稱為加拿大『安靜的危機』）。這三者共同決定了加拿大能否在對美自主化的同時，維持繁榮與社會契約。</p>
+
+  <h3>移民：從急增到急煞</h3>
+  <p>移民是加拿大的立國敘事，也是過去十年經濟成長的主引擎。在低生育率與人口老化下，加拿大靠高移民維持勞動力與消費——2021 年後，年度新增人口（含永久居民與大量臨時居民、國際學生、外勞）一度衝到創紀錄的高位，某些年份人口增速居 G7 之冠。但這個急增引發了強烈反彈：<strong>它被廣泛歸咎為推升住房需求與租金、擠壓公共服務與醫療、壓低部分工資</strong>，連傳統上親移民的主流民意都出現轉向。於是 Trudeau 政府在 2024–2025 年<strong>大幅下調移民目標、收緊臨時居民與國際學生的規模</strong>。<strong>移民政策的這個急轉彎，是加拿大近年最重要的政策轉向之一</strong>：它承認了「用移民衝高成長」的模式已經撞上住房與社會承載力的天花板，也把移民從「共識」重新變成了「爭議」。</p>
+
+  <h3>住房：需求爆炸與供給僵化的結構危機</h3>
+  <p>住房危機是移民急增、供給僵化與資產通膨三者交會的產物（第 16 章）。需求端：人口急增與投資性購房推升需求。供給端：市級的分區管制（zoning）、審批緩慢、勞動力與土地限制，讓新建住房長期跟不上——這是一個「省市管轄、聯邦難以直接插手」的典型多層治理困局。結果是溫哥華、多倫多等城市的房價收入比達到全球最惡劣之列，年輕世代的絕望成為跨黨派都無法迴避的政治現實。<strong>住房是檢驗加拿大『治理效能』的最尖銳指標</strong>：它十年無解，不是因為沒人在乎，而是因為解方需要聯邦、省、市與市場的協同，而加拿大的去中心化結構恰恰最不擅長這種協同（第 14、21 章 T9）。</p>
+
+  <h3>生產力：加拿大『安靜的危機』</h3>
+  <p>最少被公眾討論、卻可能最致命的，是生產力落後。加拿大的人均產出與勞動生產力長期低於美國，且差距在擴大——連加拿大央行都罕見地公開把它稱為需要「緊急處理」的問題。成因包括：<strong>企業投資（尤其機器設備與研發）不足、經濟過度依賴資源與房地產而非高附加值產業、市場規模受省際壁壘割裂、以及創新與規模化的生態不如美國</strong>。生產力的重要性在於——<strong>它是加拿大能否『真正降低對美依賴』的底層約束</strong>：一個生產力落後的經濟體，很難靠自身創造足以替代美國市場的高值產業，也很難在對美談判中擁有真正的實力。<strong>Carney 反覆強調的『建設、投資、拆除內部壁壘』，本質上就是對這場安靜危機的回應</strong>——它比關稅更慢、更不吸睛，卻是加拿大長期戰略自主的真正地基。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">G7 之冠 → 急煞</div><div class="fig-l">2021 後加拿大人口增速一度居 G7 首位，2024–25 大幅下調移民</div></div>
+    <div><div class="fig-n">全球最差之列</div><div class="fig-l">溫哥華・多倫多的住房負擔——房價收入比全球墊底群</div></div>
+    <div><div class="fig-n">長期落後美國</div><div class="fig-l">加拿大勞動生產力——央行稱之為『緊急』的安靜危機</div></div>
+  </div>
+</section>
+
+<section id="s19">
+  <div class="sec-label">PART IV · CH 19</div>
+  <h2>政策連續性與外資：Investment Canada Act 與對中審查</h2>
+  <p class="lede">對長線外資，最關鍵的問題不是「誰執政」，而是「規則會不會變」。這一章論證加拿大對外資的核心規則具有高度的跨黨連續性——紅藍鐘擺改變的是稅率與氣候政策的邊際，極少動搖產權保障、市場開放與法治這些地基；真正在近年顯著收緊的，是<strong>基於國家安全的外資審查，尤其針對中國</strong>。</p>
+
+  <h3>連續性：紅藍都不碰的地基</h3>
+  <p>無論自由黨或保守黨執政，加拿大對外資的幾條核心規則幾乎不變：<strong>穩固的產權與法治、獨立的司法、對外資的普遍開放、可預測的稅制與監管、以及對契約的尊重</strong>。政權更替會改變邊際變數——碳稅的存廢、能源審批的鬆緊、勞動與福利政策的取向、特定產業的補貼——但不會出現「沒收合規外資、退出市場經濟、實質廢除股東保護」這種體制級斷裂。<strong>這種連續性，是加拿大在動盪世界中對外資最大的賣點</strong>：你可以合理地預期，五年、十年後加拿大仍是一個尊重產權、遵守法治的市場經濟——這在許多新興市場是奢侈品。對外資而言，加拿大的內政風險，因此更多是「政策邊際的擺盪」而非「體制的斷裂」（第 21 章 T5）。</p>
+
+  <h3>收緊的一面：Investment Canada Act 與國安審查</h3>
+  <p>連續性的例外，是國家安全審查的持續收緊。<strong>《投資加拿大法（Investment Canada Act, ICA）</strong>賦予政府審查、附條件甚至否決外資併購的權力，理由涵蓋「淨利益」與「國家安全」。近年這套機制明顯轉向、且矛頭主要對準中國：<strong>加拿大以國安為由，要求中資企業從其關鍵礦產資產撤資、加強對中資在敏感科技與資源領域併購的審查、並更緊密地與美國等盟友的投資審查機制協調。</strong>這是全球「經濟安全化」大潮在加拿大的投影——外資的自由度，在「盟友資本」與「戰略對手資本」之間出現了明顯的分岔。<strong>對外資的實務意涵是：來自美、歐、日等盟友的資本，面對的是高度連續、開放的加拿大；而來自中國（尤其在關鍵礦產、科技、電信、基建）的資本，面對的是一道越來越高、且跨黨共識越來越強的國安牆。</strong></p>
+
+  <h3>供應鏈重組：加拿大的「盟友外包（friend-shoring）」定位</h3>
+  <p>把政策連續性與國安審查合起來看，加拿大正在為自己找一個新的全球定位：<strong>「盟友外包（friend-shoring）」體系中，美國最信任的資源與製造夥伴</strong>。當美國與盟友試圖把關鍵供應鏈（半導體、電池、關鍵礦產、國防）從中國轉移到「可信任」的夥伴時，加拿大憑藉其資源、法治、地理相鄰與盟友身分，是天然的候選——這也是加拿大對美依賴的另一面：依賴讓它脆弱，但也讓它在美國的『去風險』佈局中成為優先夥伴。<strong>對外資，這個定位是加拿大未來十年最重要的結構性主題</strong>：關鍵礦產、電池供應鏈、國防工業、能源出口的『盟友化』紅利，可能部分抵銷 Trump 關稅帶來的地緣折價——前提是這些專案能闖過加拿大自己的審批與原住民同意權關卡（第 17 章）。</p>
+</section>
+
+<section id="s20">
+  <div class="sec-label">PART IV · CH 20</div>
+  <h2>地緣：美國作為一切的中心、對中、北極與 G7</h2>
+  <p class="lede">加拿大的所有內部評估，都建立在一個外部前提上：它嵌在一個以美國為中心的西方安全與經濟體系裡。這個前提一旦動搖——尤其若美國本身從『盟友』滑向『威脅』——本報告所有的政治與經濟章節都需要重估。這是唯一能同時擊穿五個稜鏡的系統性風險。</p>
+
+  <h3>美國：安全、經濟、主權的三重中心</h3>
+  <p>加拿大的地緣現實可以一句話概括：<strong>美國是它的一切的中心。</strong>安全上，加拿大透過 <strong>NORAD（北美防空司令部）、NATO、Five Eyes</strong> 與美國深度綁定，國防長期「搭美國的便車」（防務支出佔 GDP 長期低於 NATO 的 2% 目標，Carney 政府已承諾加速達標並配合 NATO 更高的新目標）。經濟上，四分之三出口輸美（第 8、16 章）。而 2025 年新增的第三重——<strong>主權</strong>——是前所未有的：當這個安全與經濟的中心，同時開始威脅你的領土完整（「51 州」），加拿大就陷入一個結構性的認知失調：<strong>你最大的保護者，同時成了你最大的威脅來源</strong>。這是加拿大立國以來未曾處理過的處境，也是 Carney「舊關係已結束」判斷的地緣根源。</p>
+
+  <h3>對中：從「兩個 Michael」到關鍵礦產戰場</h3>
+  <p>加拿大對中關係的基調，被 2018–2021 年的一場外交危機永久改寫。加拿大應美方要求逮捕華為高管孟晚舟後，中國拘押了兩名加拿大公民 <strong>Michael Kovrig 與 Michael Spavor（『兩個 Michael』）</strong>近三年，作為報復——這場「人質外交」讓加拿大對中的天真徹底破滅，對中信任降到冰點。此後加拿大對中全面轉向強硬：<strong>選舉干預的疑慮、關鍵礦產的中資撤資令、對中電動車加徵關稅、科技與電信的國安審查</strong>。加拿大的對中政策因此與美國高度同步——它是西方「去風險」陣營的堅定一員。<strong>對中關係於是成了加拿大地緣的一條清晰主線：它是加拿大『向美國靠攏』的黏合劑，即便在對美主權緊張的當下，共同的對中戒心仍是維繫加美同盟的重要基礎。</strong></p>
+
+  <h3>北極主權與 G7：加拿大的兩張國際牌</h3>
+  <p>加拿大還握有兩張與大國博弈相關的牌。<strong>其一是北極主權</strong>：氣候暖化讓北極航道（尤其加拿大主張為內水、美國主張為國際水道的『西北航道』）與資源日益可及，俄羅斯、中國、美國都在北極擴大存在。加拿大對北極的主權主張，既是與美國的長期分歧點，也是它必須投入國防與存在感去捍衛的戰略前沿——在一個更競爭的世界，北極從『無人問津的冰原』變成了『大國角力的新邊疆』。<strong>其二是 G7 與多邊身分</strong>：加拿大是 G7 成員（2025 年於 Alberta 的 Kananaskis 主辦峰會），這個身分是它「超越單純對美雙邊」的重要籌碼——透過 G7、G20、NATO 與各種聯盟，加拿大得以把自己嵌入一個多邊網絡，稀釋對美的單一依賴、並在對美談判中借力於盟友。<strong>多邊主義因此不只是加拿大的價值偏好，更是一個高度依賴單一鄰居的中等強國，為自己爭取戰略縱深的理性選擇。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">TAIL RISK · 唯一的「一切重寫」觸發器</div>
+    <p>本報告的所有經濟與政治判斷，都預設了一個外部前提：<strong>美國儘管在貿易上敵意升高，但仍是加拿大的安全夥伴，且不會真的把『併吞』從言論推向行動；西方同盟（NATO、Five Eyes）大體維繫。</strong>若這個前提破裂——<strong>美國把主權威脅實體化（實質脅迫、能源封鎖級的經濟戰、或安全同盟的根本背棄）、或全球陣營化升級到加拿大的資源與地緣被迫硬性選邊</strong>——則五個稜鏡、三角迴路與所有引擎章節都需整體重估。這是唯一一個能同時擊穿自由黨、保守黨、魁北克、原住民與外資所有內部評估的尾部風險；它機率不高（美國真正併吞一個 G7 盟友的代價極高），但一旦發生，其他所有分析都失效。這也是為什麼美國被列為全書『命門』定錨的原因。</p>
+  </div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART V</div>
+  <h2>終章 · The Ledger</h2>
+  <div class="pd-sub">論題、儀表板與來源</div>
+</div>
+
+<section id="s21">
+  <div class="sec-label">PART V · CH 21</div>
+  <h2>終章綜合：十大論題——信度分級與可證偽條件</h2>
+  <p class="lede">一份分析的價值不在觀點的數量，在於每個觀點是否標明了「我對它有多確定」以及「什麼證據會推翻它」。本章把全報告收攏為十個論題，各附信度分級（★★★＝高信度結構判斷／★★＝中信度趨勢判斷／★＝低信度前瞻推測）與明確的可證偽條件——這既是結論，也是這份報告未來自我修正的介面。</p>
+
+  <table>
+    <tr><th style="width:44%">論題</th><th>信度</th><th>可證偽條件（若發生，論題作廢）</th></tr>
+    <tr><td><strong>T1・聯邦常數論</strong>：去中心化的聯邦制、省權與 FPTP 選制，把加拿大政治永久地塑造為『區域協商』而非『多數決』；這套地基在可見期限內不可撼動，是常數而非變數。（第 2、3 章）</td><td>★★★</td><td>完成一次根本性的憲政重構（重大集權、廢除但書條款、選制改為比例代表），或一個省真正脫離聯邦</td></tr>
+    <tr><td><strong>T2・紅藍鐘擺論</strong>：政治權力在中間偏左的自由黨與中間偏右的保守黨之間規律擺盪，兩黨都錨定中間、極少走極端；2025 的逆轉是外力擾動而非鐘擺本身斷裂。（第 1、4、5、10 章）</td><td>★★★</td><td>某一大黨長期走向體制外的極端（拒絕承認選舉結果、反民主），或第三黨崛起為穩定的執政競爭者、打破兩黨格局</td></tr>
+    <tr><td><strong>T3・美國命門論</strong>：美國是唯一能同時擾動政治、經濟與主權全環的節點；加拿大約四分之三出口輸美的結構，使對美關係成為唯一能擊穿所有稜鏡的變數。（第 8、15、16、20 章）</td><td>★★★</td><td>加拿大在可見期限內把對美出口依賴降到顯著低於半數（結構性脫鉤成功），或美國徹底退出對加的經濟與安全連結</td></tr>
+    <tr><td><strong>T4・制度韌性論</strong>：加拿大民主的制度硬體極穩，能把領袖更替、外部脅迫、政權逆轉與脫離公投全部吸收為合憲程序；真正風險不在威權崩壞。（第 9、11、14 章）</td><td>★★★</td><td>出現一次脫離憲政軌道的事件：拒絕交權、選舉舞弊指控成立、戒嚴、或司法獨立被實質摧毀</td></tr>
+    <tr><td><strong>T5・政策連續性論</strong>：外資面對的核心規則（產權、法治、市場開放）跨黨高度連續，紅藍鐘擺只改變邊際（稅率、氣候、補貼）；例外是對中的國安審查持續收緊。（第 19 章）</td><td>★★★</td><td>出現體制級斷裂：沒收合規外資、退出市場經濟、實質廢除股東與產權保障；或對盟友資本也築起普遍的准入壁壘</td></tr>
+    <tr><td><strong>T6・2025 外力逆轉論</strong>：自由黨的勝選是 Trump 衝擊的直接輸出（主題轉換＋策略性投票），而非國內政治的自然產物；沒有 Trump，2025 幾乎確定是保守黨大勝。（第 10 章）</td><td>★★★</td><td>證據顯示自由黨的逆轉主要源自國內因素（Carney 個人魅力、政策說服），Trump 因素只是次要——反事實推演不成立</td></tr>
+    <tr><td><strong>T7・借來的多數論</strong>：Carney 2025 的聯盟是危機催生的臨時重組，其長期存續取決於能否在民族主義退潮前，把『危機隊長』信任轉化為『經濟與住房』政績；2026 翻多數鞏固了席次，但未鞏固民意基礎。（第 4、16 章）</td><td>★★</td><td>自由黨在關稅退潮、主題回到生活成本後，仍能穩定保有多數民意支持（證明聯盟已從危機借票轉為長期認同）</td></tr>
+    <tr><td><strong>T8・區域離心論</strong>：魁獨（休眠未熄）與西部脫離主義（2026 正在制度化）是兩條長期離心裂縫，平時被繁榮與轉移吸收，會被外部衝擊或聯邦失衡激活；它們不會使加拿大威權化，但可能使它變小或陷入憲政消耗。（第 2B、6、13、13B 章）</td><td>★★</td><td>兩條裂縫長期顯著鈍化（魁獨與 Alberta 脫離支持度持續走低至邊緣），或反之，一場脫離公投真正通過並啟動解體</td></tr>
+    <tr><td><strong>T9・治理僵化論</strong>：加拿大的真實威脅不是威權復辟，而是去中心化與多重否決點導致的治理癱瘓——住房、能源基建、生產力等需跨層協同的大改革被系統性擱置。（第 14、16、18 章）</td><td>★★</td><td>加拿大在住房、能源審批、生產力或省際壁壘之一上，達成並執行一項顯著見效的跨層重大改革</td></tr>
+    <tr><td><strong>T10・外部前提論</strong>：全部內部評估預設『美國仍是安全夥伴、不把併吞付諸行動、西方同盟維繫』；美國從盟友滑向威脅的實體化，是唯一能同時擊穿所有稜鏡的系統性風險。（第 20 章）</td><td>★</td><td>美國把主權威脅實體化（實質脅迫、安全同盟根本背棄）、或全球陣營化升級至加拿大被迫硬性選邊——屆時本報告所有章節需整體重寫</td></tr>
+  </table>
+
+  <h3>十論題的內在階層</h3>
+  <p>十個論題不是並列的，有清晰的依賴結構：<strong>T10（外部前提）與 T1（聯邦常數）、T3（美國命門）是地基</strong>——三者成立，其餘論題才有意義。T2、T4、T5 是建立在地基上的結構層（高信度，因為它們描述的是制度硬體與誘因結構，而非事件預測）；T6 是對 2025 這個特定事件的因果判斷（高信度，因為反事實清晰）；T7、T8、T9 是動力層（中信度，涉及行為者選擇與趨勢，尤其 T7 借來的多數與 T8 區域離心最會變）；T10 是單點的尾部推測。閱讀本報告的正確方式，是把資源按這個階層倒置分配：<em>花最少時間擔心地基（它們最穩），花最多時間監測動力層（尤其 T7 自由黨聯盟的存續與 T8 Alberta 公投的走向），並把 T10 當作一個必須放在心裡、但無法下注的尾部風險</em>。</p>
+
+  <h3>本報告的四個已知盲區</h3>
+  <p>誠實標記分析框架自身的限制：<strong>其一，美國內部視角缺席</strong>——本報告以加拿大為主體，美國僅作為外部變數處理，Trump 政策的內在邏輯與美國國內政治的演化未納入框架，而這恰是 T3、T10 風險的震源。<strong>其二，經濟數據的時效與口徑</strong>——本文引用的出口佔比、席次、得票率、住房與移民數字為概略值，旨在呈現量級與結構，精確數字應以官方最新統計（Elections Canada、Statistics Canada）為準。<strong>其三，事件路徑依賴</strong>——本報告成稿於 Carney 執政第一年、自由黨於 2026-04 由少數翻為多數、Trump 關稅升級至 50%（2026-07）、Alberta 公投定於 2026-10-19 的特定時點，若干判斷（尤其 T7、T8）帶有近因權重，應以第 22 章儀表板為持續校正介面。<strong>其四，量化的刻意留白</strong>——本報告在得票、席次、支持度等處多採『量級』與『趨勢』表述而非精確數字（例如『約四分之三』『約 41%』『25% vs 75%』），這是為了避免以偽精確誤導；代價是某些論斷（尤其涉及邊際變化的 T7、T8）無法附上嚴謹的置信區間，須以官方最新統計交叉驗證。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s22">
+  <div class="sec-label">PART V · CH 22</div>
+  <h2>監測儀表板：時間軸與判讀規則</h2>
+  <table>
+    <tr><th>時點</th><th>事件</th><th>判讀規則</th></tr>
+    <tr><td><strong>持續（每季）</strong></td><td>對美關稅稅率與 USMCA 重談進展</td><td>T3 的核心讀數。50% 關稅是否緩解、豁免範圍、USMCA 走向——關稅升級＝經濟與政治壓力沿三角迴路傳導；達成談判＝Carney『危機隊長』燃料減弱、主題可能回到住房（詳第 12、15 章）</td></tr>
+    <tr><td><strong>2026-10-19</strong></td><td>Alberta 主權公投（含『留在加拿大』一題）</td><td>T8 的核心讀數。脫離題被否但高贊成＝怨恨制度化、Smith 取得對聯邦的新籌碼；贊成意外走高＝西部離心從邊緣進入主流，複製 1995 驚險；公投回火分裂 UCP＝脫離主義自我消耗（詳第 13、13B 章）</td></tr>
+    <tr><td>2026（年內）</td><td>魁北克省選與 PQ 的表現</td><td>T8 的魁北克讀數。若 PQ 勝出、重提第三次公投的可能，魁獨這座休眠火山的溫度上升；Bloc 的聯邦槓桿與省級主權議程重新接軌（詳第 2B、6 章）</td></tr>
+    <tr><td>持續</td><td>住房價格、租金與生活成本</td><td>T7 的核心讀數。民族主義退潮後選舉主題若回到住房，這是自由黨最大軟肋、保守黨最大燃料。房價失控＝Carney 聯盟的『借票』面臨清算（詳第 16、18 章）</td></tr>
+    <tr><td>持續</td><td>自由黨多數的穩固度（轉籍、補選、民調）</td><td>T7 讀數。2026 翻多數後理論上可撐到 2029；觀察補選與民調是否顯示『借來的多數』正轉為長期認同，或關稅退潮後開始鬆動（詳第 1B 章）</td></tr>
+    <tr><td>每季</td><td>能源與關鍵礦產：管道審批、對美出口、對中撤資</td><td>資源槓桿的溫度計。管道審批鬆綁＝對美與對外籌碼增強；關鍵礦產『去中國化』進展＝加拿大在美中間的槓桿升級（詳第 17、19 章）</td></tr>
+    <tr><td>每年</td><td>移民目標、人口增速、生產力數據</td><td>T9 的長線讀數。移民急煞後的人口與勞動力走向、生產力差距是否收斂——加拿大能否真正降低對美依賴的底層約束（詳第 18 章）</td></tr>
+    <tr><td>持續</td><td>NATO 防務支出、北極存在、對中同步</td><td>T10 的地緣溫度計。防務達標與否牽動加美同盟的信任；北極主權爭議與對中戒心，是維繫『向美靠攏』的黏合劑（詳第 20 章）</td></tr>
+    <tr><td>持續</td><td>保守黨領導權與路線</td><td>T2 讀數。Poilievre 續任賭 2029、還是保守黨另尋能攻大都市與魁北克的領袖——決定紅藍鐘擺下一次擺回的力度（詳第 5、11 章）</td></tr>
+    <tr><td>尾部</td><td>美國主權威脅的實體化訊號</td><td>T10 的唯一『一切重寫』觸發器。若『51 州』從言論轉向實質脅迫、或安全同盟根本背棄——全系統重估（詳第 20 章尾部風險）</td></tr>
+  </table>
+
+  <h3>三個「若發生則改變評估」的觸發器</h3>
+  <ul class="plain">
+    <li><strong>觸發器 A</strong>：對美關稅長期化並實質重創出口（汽車、能源、木材）→ 經濟痛點沿三角迴路傳導、生活成本與失業升高 → T7『借來的多數』面臨清算，自由黨可能在下一輪失去民意基礎（但不改變制度韌性的 T4）。</li>
+    <li><strong>觸發器 B</strong>：Alberta 公投贊成脫離意外走高、或魁北克 PQ 勝出重啟公投討論 → T8 區域離心從『休眠／宣洩』升級為『行動』，加拿大進入 1995 式的憲政消耗風險，需重估聯邦完整性。</li>
+    <li><strong>觸發器 C</strong>：美國把主權威脅實體化、或全球陣營化升級至加拿大被迫硬性選邊 → 全系統重估，本報告所有經濟與政治章節需整體重寫（T10 兌現，唯一的『一切重寫』觸發器）。</li>
+    <li><strong>觸發器 D</strong>：結構鬆動訊號——完成憲政重構、或加拿大在住房／生產力／對美自主之一達成顯著見效的跨層改革 → 質疑『聯邦常數＋治理僵化』的部分前提，啟動對 T1／T9 的重估（歷史上罕見，但這是能鬆動全報告地基的訊號）。</li>
+  </ul>
+  <p><strong>總結一句：</strong>聯邦是常數，紅藍鐘擺是變數，美國是命門。監測對美關稅與 Alberta 公投兩條主線、警惕美國主權威脅的尾部、不必為『加拿大在滑向威權』焦慮——因為 2025–2026 的整輪動盪已經證明，這個民主的制度慣性，穩到近乎無聊。真正該擔心的，不是它會不會倒向威權，而是它會不會在對美依賴的重壓與區域離心的拉扯下，錯過把住房、能源與生產力這些大事做成的窗口。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s23">
+  <div class="sec-label">PART V · CH 23</div>
+  <h2>資料來源與方法註記</h2>
+  <p>本文件之事實基礎來自 2026 年 7 月中旬檢索之公開報導與研究，主要來源：CBC News、CTV News、Global News、The Globe and Mail、National Post、Toronto Star、Radio-Canada、La Presse（選情、政黨動態、Trudeau 辭職、Carney 崛起、少數翻多數、補選、Alberta 公投）；Reuters、AP、BBC、CNN、Financial Times、The Economist、Bloomberg、Al Jazeera、Politico（Trump 關稅與『51 州』言論、對美談判、國際視角）；Elections Canada（2025-04-28 大選與各補選之官方計票、席次與得票率）、加拿大下議院（House of Commons）之官方紀錄（席次、政黨地位、轉籍）；Angus Reid、Ipsos 等民調機構（脫離主義支持度、政黨支持度）。制度與結構分析另參考關於『西敏制』『聯邦制與省權』『但書條款（Section 33）』『魁北克主權運動』『西部疏離』『FPTP 與區域主義』之學術與政策文獻，以及《憲章（1982）》《清晰法案（2000）》《法語憲章 Bill 101》《Bill 96》《Bill 21》《Alberta 主權法》《Bill 14》之條文與相關報導。經濟與資源數據另參考：Statistics Canada（人口、移民、住房、生產力、貿易）、加拿大央行（Bank of Canada，利率與生產力評估）、加拿大自然資源部與能源監管機構（油砂、管道、關鍵礦產）、《投資加拿大法（ICA）》相關審查紀錄，以及 OECD／IMF／World Bank 之加拿大評估。地緣章節另參考：NATO、NORAD、Five Eyes 相關公開紀錄，孟晚舟與『兩個 Michael』事件之報導，以及北極主權與 G7（2025 Kananaskis 峰會）之分析。</p>
+  <p>方法註記：①選舉與計票數字以 Elections Canada 官方與主流媒體一致報導為準；席次、得票率、出口佔比、民調等為概略值，旨在呈現量級與結構，精確數字以官方最新統計為準。②2026 年的席次（自由黨由 169 少數翻為約 173–174 多數）為透過轉籍與補選累積之動態數字，隨後續變動應以下議院即時席次為準。③五稜鏡中的視角陳述為分析性重構，旨在呈現各社會位置的理性計算結構，不代表任何群體、政黨或個人的統一立場。④『Trump 救了自由黨』『美國是命門』等判斷為結構性歸納與反事實推演，個別因果的權重可辯論，本文於第 10、14 章明確標示其推測性質、附可證偽條件。⑤本報告成稿於 2026 年 7 月：Carney 執政第一年、自由黨已由少數翻為多數、Trump 對加關稅升級至 50%、加美就 USMCA 加強談判、Alberta 主權公投定於 2026-10-19、Poilievre 已於 2025-08 補選重返國會的特定時點；仍在演變的時效性事件（關稅與 USMCA 談判、Alberta 與魁北克公投／省選、自由黨多數之穩固度）以第 22 章儀表板為持續校正介面。⑥本文件為政治結構分析，非投資建議；涉及部位決策前應依既定流程另行執行冷讀批判。</p>
+</section>
+</main>
+</div>
+</div>
+
+<footer>
+  <div class="shell">
+    <h4>Colophon</h4>
+    <p>加拿大政治結構五稜鏡 · InvestMQuest Geopolitics Research · 編製於 2026-07-23。設計語彙：靛墨紙面、織錦金界線、五色稜鏡（赤紅＝自由黨 Carney、藏青＝保守黨 Poilievre、帝王紫＝魁北克與聯邦、山吹橙＝新民主黨與原住民和解、青灰＝外國人與美國）。本文件之稜鏡裝置（同一事實、多種讀法）為分析框架，延續同系列馬來西亞・泰國・印尼・菲律賓・南韓篇之方法，可套用於其他多裂隙聯邦之結構研究。核心定錨：聯邦是常數、紅藍鐘擺是變數、美國是命門。</p>
+  </div>
+</footer>
+
+</body>
+</html>

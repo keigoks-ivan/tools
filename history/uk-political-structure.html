@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英國政治結構五稜鏡 — 保守黨・工黨・改革黨・聯合王國・外國人的五種讀法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@350;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F4EE;        /* 米紙 */
+  --ink:#1B2233;          /* 靛墨 */
+  --ink-soft:#4A5468;
+  --gold:#B08A2E;         /* 織錦金 */
+  --hairline:#D9D4C7;
+  --con:#1D4E89;          /* 稜鏡・保守黨 Conservative = 藏青 */
+  --con-bg:#E9EEF4;
+  --lab:#C0392B;          /* 稜鏡・工黨 Labour = 赤紅 */
+  --lab-bg:#F9ECEA;
+  --ref:#12A99E;          /* 稜鏡・改革黨 Reform UK = 松石綠 */
+  --ref-bg:#E4F3F1;
+  --uni:#6B4A8A;          /* 稜鏡・聯合王國 Union = 帝王紫 */
+  --uni-bg:#F0ECF4;
+  --for:#C67C1E;          /* 稜鏡・外國人 = 琥珀金 */
+  --for-bg:#F8F1E4;
+  --warn:#8A5A00;
+  --warn-bg:#F7F0DE;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  font-weight:350;
+  line-height:1.95;
+  font-size:16.5px;
+  letter-spacing:.02em;
+}
+::selection{background:var(--gold);color:#fff}
+
+/* ---------- 版心 ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 28px}
+.layout{display:grid;grid-template-columns:236px 1fr;gap:56px;align-items:start}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+
+/* ---------- Hero ---------- */
+header.hero{
+  background:var(--ink);
+  color:#EDE9DE;
+  padding:88px 0 72px;
+  position:relative;
+  overflow:hidden;
+}
+header.hero::after{ /* 五稜鏡光束 */
+  content:'';position:absolute;right:-8%;top:0;bottom:0;width:52%;
+  background:
+    linear-gradient(115deg,transparent 30%,rgba(29,78,137,.34) 30.4%,rgba(29,78,137,.34) 40%,transparent 40.4%),
+    linear-gradient(115deg,transparent 41%,rgba(192,57,43,.32) 41.4%,rgba(192,57,43,.32) 51%,transparent 51.4%),
+    linear-gradient(115deg,transparent 52%,rgba(18,169,158,.32) 52.4%,rgba(18,169,158,.32) 62%,transparent 62.4%),
+    linear-gradient(115deg,transparent 63%,rgba(107,74,138,.32) 63.4%,rgba(107,74,138,.32) 73%,transparent 73.4%),
+    linear-gradient(115deg,transparent 74%,rgba(198,124,30,.32) 74.4%,rgba(198,124,30,.32) 84%,transparent 84.4%);
+  pointer-events:none;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.28em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:26px;
+}
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(34px,4.6vw,56px);line-height:1.3;letter-spacing:.03em;
+  max-width:820px;
+}
+.hero-sub{
+  margin-top:26px;max-width:680px;font-size:17px;line-height:2.05;
+  color:#C9C3B4;font-weight:350;
+}
+.hero-meta{
+  margin-top:40px;display:flex;gap:34px;flex-wrap:wrap;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:#8E96A8;
+}
+.hero-meta b{color:#EDE9DE;font-weight:500;display:block;margin-bottom:3px}
+.prism-legend{margin-top:46px;display:flex;gap:0;max-width:760px;border:1px solid rgba(237,233,222,.22);flex-wrap:wrap}
+.prism-legend div{
+  flex:1;min-width:120px;padding:13px 12px;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:.08em;text-align:center;color:#EDE9DE;
+}
+.prism-legend .pl-c{background:rgba(29,78,137,.80)}
+.prism-legend .pl-l{background:rgba(192,57,43,.78)}
+.prism-legend .pl-r{background:rgba(18,169,158,.80)}
+.prism-legend .pl-u{background:rgba(107,74,138,.80)}
+.prism-legend .pl-f{background:rgba(198,124,30,.82)}
+
+/* ---------- 目錄側欄 ---------- */
+nav.toc{
+  position:sticky;top:0;padding-top:40px;padding-bottom:40px;
+  font-size:13.5px;line-height:1.7;
+  max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:var(--hairline) transparent;
+}
+nav.toc::-webkit-scrollbar{width:5px}
+nav.toc::-webkit-scrollbar-thumb{background:var(--hairline);border-radius:3px}
+nav.toc .toc-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:18px;text-transform:uppercase;
+}
+nav.toc a{
+  display:block;color:var(--ink-soft);text-decoration:none;
+  padding:5px 0 5px 14px;border-left:2px solid var(--hairline);
+  transition:all .18s;
+}
+nav.toc a:hover{color:var(--ink);border-left-color:var(--gold)}
+nav.toc a.t-c{border-left-color:var(--con)}
+nav.toc a.t-l{border-left-color:var(--lab)}
+nav.toc a.t-r{border-left-color:var(--ref)}
+nav.toc a.t-u{border-left-color:var(--uni)}
+nav.toc a.t-f{border-left-color:var(--for)}
+@media(max-width:960px){nav.toc{position:static;padding-top:40px}}
+
+/* ---------- 主文 ---------- */
+main{padding:64px 0 120px;min-width:0}
+section{margin-bottom:96px}
+.sec-label{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.24em;
+  color:var(--gold);margin-bottom:14px;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:900;font-size:30px;
+  line-height:1.45;margin-bottom:30px;padding-bottom:20px;
+  border-bottom:1px solid var(--hairline);letter-spacing:.02em;
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:21px;
+  margin:44px 0 18px;letter-spacing:.02em;
+}
+p{margin-bottom:20px;max-width:74ch}
+p.lede{font-size:18.5px;line-height:2.05;color:var(--ink);font-weight:400;max-width:70ch}
+strong{font-weight:700;color:var(--ink)}
+em{font-style:normal;border-bottom:2px solid var(--gold);padding-bottom:1px}
+
+/* ---------- 稜鏡三聯裝置（本文件的簽名元素） ---------- */
+.prism{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+  margin:36px 0 44px;border:1px solid var(--hairline);
+  background:#fff;
+}
+@media(max-width:820px){.prism{grid-template-columns:1fr}}
+.prism>div{padding:26px 24px 22px;border-top:4px solid}
+.prism>div+div{border-left:1px solid var(--hairline)}
+@media(max-width:820px){.prism>div+div{border-left:none;border-top-width:4px}}
+.prism .pv-c{border-top-color:var(--con);background:linear-gradient(var(--con-bg),#fff 42%)}
+.prism .pv-l{border-top-color:var(--lab);background:linear-gradient(var(--lab-bg),#fff 42%)}
+.prism .pv-r{border-top-color:var(--ref);background:linear-gradient(var(--ref-bg),#fff 42%)}
+.prism .pv-u{border-top-color:var(--uni);background:linear-gradient(var(--uni-bg),#fff 42%)}
+.prism .pv-f{border-top-color:var(--for);background:linear-gradient(var(--for-bg),#fff 42%)}
+.prism .pv-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  margin-bottom:12px;font-weight:500;
+}
+.pv-c .pv-tag{color:var(--con)}
+.pv-l .pv-tag{color:var(--lab)}
+.pv-r .pv-tag{color:var(--ref)}
+.pv-u .pv-tag{color:var(--uni)}
+.pv-f .pv-tag{color:var(--for)}
+.prism p{font-size:14.5px;line-height:1.9;margin-bottom:12px;color:#333B4D}
+.prism p:last-child{margin-bottom:0}
+.prism-caption{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);
+  letter-spacing:.06em;margin:-32px 0 44px;padding-top:10px;
+}
+
+/* ---------- 觀點框（單一視角深入時的左邊條） ---------- */
+.lens{padding:6px 0 6px 22px;margin:28px 0;border-left:4px solid}
+.lens.l-c{border-color:var(--con)}
+.lens.l-l{border-color:var(--lab)}
+.lens.l-r{border-color:var(--ref)}
+.lens.l-u{border-color:var(--uni)}
+.lens.l-f{border-color:var(--for)}
+.lens .lens-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;margin-bottom:8px;font-weight:500;
+}
+.lens.l-c .lens-tag{color:var(--con)}
+.lens.l-l .lens-tag{color:var(--lab)}
+.lens.l-r .lens-tag{color:var(--ref)}
+.lens.l-u .lens-tag{color:var(--uni)}
+.lens.l-f .lens-tag{color:var(--for)}
+
+/* ---------- 數據列 ---------- */
+.figrow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--hairline);border:1px solid var(--hairline);
+  margin:32px 0 40px;
+}
+.figrow div{background:#fff;padding:20px 18px 16px}
+.figrow .fig-n{
+  font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;
+  color:var(--ink);letter-spacing:-.01em;
+}
+.figrow .fig-l{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.6}
+
+/* ---------- 表格（輔助用） ---------- */
+table{width:100%;border-collapse:collapse;margin:28px 0 14px;font-size:14px;background:#fff}
+th{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;
+  text-align:left;padding:12px 14px;background:var(--ink);color:#EDE9DE;font-weight:500;
+}
+td{padding:12px 14px;border-bottom:1px solid var(--hairline);vertical-align:top;line-height:1.75}
+tr:last-child td{border-bottom:none}
+.tbl-note{font-size:13px;color:var(--ink-soft);margin-bottom:36px;max-width:74ch}
+
+/* ---------- 警示框 ---------- */
+.callout{
+  background:var(--warn-bg);border:1px solid #E3D5AE;border-left:4px solid var(--warn);
+  padding:20px 24px;margin:30px 0;font-size:15px;line-height:1.9;max-width:none;
+}
+.callout .co-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  color:var(--warn);margin-bottom:8px;font-weight:500;
+}
+.callout p{margin-bottom:10px;max-width:none}
+.callout p:last-child{margin-bottom:0}
+
+/* ---------- 反方論證（多方論證裝置） ---------- */
+.debate{margin:32px 0;border:1px solid var(--hairline);background:#fff}
+.debate>div{padding:22px 26px}
+.debate .d-pro{border-bottom:1px dashed var(--hairline)}
+.debate .d-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;margin-bottom:10px;font-weight:500;
+}
+.debate .d-pro .d-tag{color:var(--lab)}
+.debate .d-con .d-tag{color:var(--con)}
+.debate p{font-size:14.5px;margin-bottom:10px}
+.debate p:last-child{margin-bottom:0}
+
+ul.plain{margin:0 0 22px 0;padding-left:0;list-style:none;max-width:74ch}
+ul.plain li{padding:9px 0 9px 26px;position:relative;line-height:1.85}
+ul.plain li::before{
+  content:'—';position:absolute;left:0;color:var(--gold);font-weight:700;
+}
+footer{
+  background:var(--ink);color:#8E96A8;padding:56px 0 72px;
+  font-size:13px;line-height:2;
+}
+footer .shell{max-width:900px}
+footer h4{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:16px;font-weight:500;
+}
+footer p{max-width:none}
+
+.part-divider{margin:110px 0 70px;padding:34px 0 30px;border-top:3px solid var(--ink);border-bottom:1px solid var(--hairline)}
+.part-divider .pd-num{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
+.part-divider h2{border:none;padding:0;margin:0;font-size:34px}
+.part-divider .pd-sub{margin-top:8px;color:var(--ink-soft);font-size:15px}
+
+.divider-ornament{
+  text-align:center;color:var(--gold);font-size:15px;letter-spacing:.6em;
+  margin:0 0 96px;user-select:none;
+}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<header class="hero">
+  <div class="shell">
+    <div class="eyebrow">InvestMQuest · Geopolitics Research · v1 · 2026-07-23</div>
+    <h1>英國政治結構五稜鏡</h1>
+    <div class="hero-sub">同一個聯合王國，五種完全不同的處境。一個發明了議會民主、把「西敏制」輸出到半個地球的原型國家，為何自 2016 年脫歐公投以來陷入十年七位首相的長期動盪？兩黨制正在被 Reform 撕裂、蘇格蘭與北愛的離心力在鬆動聯合王國本身、而 2024 年工黨那場看似壓倒性的大勝，其實建立在僅約三分之一得票的脆弱地基上——到 2026 年 6 月 Starmer 辭職、7 月 Burnham 接任，它幾乎在兩年內就崩塌。以西敏制的常數、脫歐後政黨重組的變數、聯合王國的命門為三條主線，逐層論證。</div>
+    <div class="hero-meta">
+      <div><b>分析基準日</b>2026-07-23</div>
+      <div><b>前一里程碑</b>2026-06 Starmer 辭職・Burnham 接任</div>
+      <div><b>下一里程碑</b>下屆大選（須於 2029 前）與 Reform 崛起</div>
+      <div><b>文件性質</b>結構分析・非投資建議</div>
+    </div>
+    <div class="prism-legend">
+      <div class="pl-c">保守黨</div>
+      <div class="pl-l">工黨</div>
+      <div class="pl-r">改革黨・民粹右</div>
+      <div class="pl-u">聯合王國・地方分權</div>
+      <div class="pl-f">外國人視角</div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+<div class="layout">
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <a href="#s0">00 導讀與核心論證</a>
+  <div class="toc-title" style="margin-top:16px">I · 地圖</div>
+  <a href="#s1">01 政治版圖總覽</a>
+  <a href="#s1b">01B FPTP 選制的量化斷裂</a>
+  <a href="#s2">02 結構的根源：議會主權與無成文憲法</a>
+  <a href="#s2b">02B 西敏制的閥門：內閣制的吸收與放大</a>
+  <a href="#s3">03 兩個不投票的權力：文官與英格蘭銀行</a>
+  <div class="toc-title" style="margin-top:16px">II · 稜鏡</div>
+  <a href="#s4" class="t-c">04 保守黨／Tory</a>
+  <a href="#s4b" class="t-c">04B 14 年執政的崩解剖析</a>
+  <a href="#s5" class="t-l">05 工黨／Labour</a>
+  <a href="#s5b" class="t-l">05B 從大勝到崩塌：Starmer 兩年</a>
+  <a href="#s6" class="t-r">06 改革黨與民粹右</a>
+  <a href="#s7" class="t-u">07 聯合王國與地方分權</a>
+  <a href="#s7b" class="t-u">07B 蘇格蘭公投史與北愛難題</a>
+  <a href="#s8" class="t-f">08 外國人／投資人</a>
+  <div class="toc-title" style="margin-top:16px">III · 動力</div>
+  <a href="#s9">09 2024 大選深讀</a>
+  <a href="#s10">10 Starmer 崩塌與 Burnham 接任</a>
+  <a href="#s11">11 Reform 崛起與兩黨制瓦解</a>
+  <a href="#s12">12 生活成本、移民與小船</a>
+  <a href="#s13">13 蘇格蘭獨立與聯合王國的未來</a>
+  <a href="#s14">14 民主韌性辨析</a>
+  <div class="toc-title" style="margin-top:16px">IV · 引擎</div>
+  <a href="#s15">15 三角傳導模型</a>
+  <a href="#s16">16 政治×經濟迴路</a>
+  <a href="#s16b">16B 脫歐的長期帳</a>
+  <a href="#s17">17 資本與 City</a>
+  <a href="#s17b">17B Truss 的 49 天</a>
+  <a href="#s18">18 產業與人口：移民・NHS・住房</a>
+  <a href="#s19">19 政策連續性與外資</a>
+  <a href="#s20">20 地緣：脫歐後的英國</a>
+  <div class="toc-title" style="margin-top:16px">V · 終章</div>
+  <a href="#s21">21 十大論題</a>
+  <a href="#s22">22 監測儀表板</a>
+  <a href="#s23">23 資料來源與方法註記</a>
+</nav>
+
+<main>
+<section id="s0">
+  <div class="sec-label">PROLOGUE · CH 00</div>
+  <h2>導讀與核心論證</h2>
+  <p class="lede">英國是議會民主的原型：它沒有一部成文憲法，卻用數百年的慣例、判例與「議會主權」四個字，長出了全世界最多被模仿的政府形式——西敏制。它把首相、內閣、反對黨、下議院質詢、文官中立這一整套語彙輸出到印度、加拿大、澳洲、馬來西亞乃至半個大英國協。然而，這個政治穩定曾是其最大出口品的國家，自 2016 年 6 月那場脫歐公投以來，卻陷入了一段連自己都認不得的長期動盪——<strong>十年之內換了七位首相</strong>（Cameron、May、Johnson、Truss、Sunak、Starmer、Burnham），兩黨制被一個 2021 年才改名的政黨撕開，而聯合王國本身的四塊拼圖，正沿著蘇格蘭與北愛的裂縫悄悄鬆動。</p>
+
+  <p>2026 年的夏天，這種弔詭以最戲劇性的方式攤開。2024 年 7 月，工黨的 Keir Starmer 以約 411 席的巨大多數結束保守黨 14 年執政，看似開啟了一個新的十年。但這場大勝的地基脆弱得驚人：工黨的全國得票率僅約 34%——<strong>史上「效率最高、也最脆弱」的多數之一</strong>，席次的山峰底下是一片薄薄的民意土壤。不到兩年，這片土壤就塌了：經濟停滯、財政拮据、移民與小船問題持續發酵，Starmer 的支持度跌到歷任首相最低區間，並於 <strong>2026 年 6 月 22 日辭去黨魁與首相</strong>。原大曼徹斯特市長 Andy Burnham 辭去市長、透過 6 月 18 日的 Makerfield 補選重返國會，在 7 月中的特別黨大會上獲 401 名工黨議員中 379 票支持當選黨魁，並於 7 月中下旬由查爾斯國王主持交接、就任首相——<strong>十年來第 7 位首相</strong>。與此同時，多家民調顯示 Nigel Farage 的 Reform UK 領先或與工黨並列（YouGov 7 月 19–20 日：Ref 23、Con 21、Lab 20、Grn 14、LD 12），英國第一次真正逼近「五黨政治」的碎片化。</p>
+
+  <p>英國的政治結構，可以拆成三個互相咬合的齒輪：<strong>一套把權力高度集中、卻幾乎不設剎車的制度硬體</strong>（議會主權、無成文憲法、FPTP 單一選區、鐵一般的政黨紀律——首相只要掌握下議院多數，權力大到近乎「民選的君主」）、<strong>一個正在裂解重組的政黨體系</strong>（保守與工黨的兩黨壟斷，被 Reform、自由民主黨、綠黨、蘇格蘭民族黨從左右與邊陲同時侵蝕）、以及<strong>一個名叫「聯合王國」卻由四個不對等民族拼成的國家本體</strong>（英格蘭佔絕對人口與財政份量，蘇格蘭、威爾斯、北愛各有自己的議會、政黨與離心力）。這三個齒輪決定了一件事：<strong>英國的制度極其穩定，它承載的政治卻極其不穩定</strong>——沒有政變、沒有街頭革命、沒有戒嚴，政權在西敏寺的地毯上平順轉移，但轉移的頻率、幅度與方向，已經失去了它曾引以為傲的可預測性。</p>
+
+  <p>這套結構必須拆成不同的社會與政治位置來讀，因為它對不同的人意義完全不同：</p>
+  <ul class="plain">
+    <li><strong>對保守黨</strong>：一個從「自然執政黨」跌成「可能被取代的第二右翼」的生存危機——14 年執政以脫歐、緊縮、Boris 的混亂與 Truss 的 49 天告終，如今在民調上被 Reform 從右側抄後路，存亡問題第一次壓過路線問題。</li>
+    <li><strong>對工黨</strong>：一場「贏得太快、也輸得太快」的教訓——2024 用一場脆弱的大勝拿到政權，卻在兩年內證明：低得票的多數撐不起艱難的執政，Starmer 的崩塌與 Burnham 的接任，是這條教訓的最新註腳。</li>
+    <li><strong>對改革黨與民粹右</strong>：一次「脫歐尚未完成」的動員——脫歐兌現的不是承諾中的復興，而是停滯與更高的移民數字；Farage 把 Red Wall 的被背叛感、把小船與淨移民的憤怒，鑄成一把撬開兩黨制的槓桿。</li>
+    <li><strong>對聯合王國與地方分權</strong>：一道「英格蘭的多數決定一切、邊陲卻被脫歐拖著走」的憲政張力——蘇格蘭以近六成投票留歐卻被拖出歐盟，SNP 把它變成獨立的最新理由；北愛則被卡在一條海上邊界與愛爾蘭統一的長期問句裡。</li>
+    <li><strong>對外國人／投資人</strong>：面對的是一套「脫歐後折價」的規則手冊——真正的風險不在誰當首相的黨派輪替，而在<em>脫歐後結構性放緩的成長軌跡</em>、<em>對財政紀律高度敏感的英鎊與 gilts</em>、以及<em>Truss 那 49 天示範過的、市場對財政失信的即時懲罰</em>。</li>
+  </ul>
+
+  <h3>全書地圖：五部曲的閱讀動線</h3>
+  <table>
+    <tr><th>部</th><th>章</th><th>回答的問題</th></tr>
+    <tr><td><strong>第一部・地圖</strong></td><td>01–03</td><td>版圖長什麼樣？議會主權、FPTP、無成文憲法與政黨紀律如何把權力集中又不設剎車？文官與英格蘭銀行這兩個不投票的權力扮演什麼角色？</td></tr>
+    <tr><td><strong>第二部・稜鏡</strong></td><td>04–08</td><td>同一個聯合王國，五種位置（保守黨／工黨／改革黨／聯合王國邊陲／外國人）各自看到什麼？</td></tr>
+    <tr><td><strong>第三部・動力</strong></td><td>09–14</td><td>2024 大選、Starmer 的崩塌與 Burnham 接任、Reform 的崛起、生活成本與小船、蘇格蘭獨立各揭示了什麼？民主是在崩壞還是在自我運轉？</td></tr>
+    <tr><td><strong>第四部・引擎</strong></td><td>15–20</td><td>政黨×經濟×聯盟如何互相傳導？脫歐後的停滯、City 與英鎊、移民與住房、政策連續性、脫歐後的地緣定位各卡在哪個齒輪上？</td></tr>
+    <tr><td><strong>第五部・終章</strong></td><td>21–23</td><td>十大論題（附信度與可證偽條件）、監測儀表板、資料來源。</td></tr>
+  </table>
+  <p><strong>一句話結論，供全文檢驗：</strong>西敏制是常數、脫歐後的政黨重組是變數、聯合王國是命門。英國是一個制度硬體極其穩定、政黨政治卻正在裂解、而國家本體沿民族邊界鬆動的國家。它的民主形式（自由選舉、和平轉移、獨立司法、中立文官、新聞自由）真實且強壯，強到能在十年內平順地換掉七位首相而毫無憲政斷裂；但它承載的政黨體系正在從兩黨走向多黨碎片、它的經濟自脫歐後陷入低成長的長期軌道、而它的聯合王國正被蘇格蘭與北愛的離心力慢慢拉扯。只要「制度硬體＋和平轉移＋財政市場的即時紀律」這組吸收機制運轉，系統雖然動盪卻不會崩潰。趕時間的讀者可直接讀第 21 章的十大論題與第 22 章儀表板，再回頭按需查閱。</p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART I</div>
+  <h2>地圖 · The Map</h2>
+  <div class="pd-sub">版圖、地基與兩個不投票的權力</div>
+</div>
+
+<section id="s1">
+  <div class="sec-label">PART I · CH 01</div>
+  <h2>政治版圖總覽（2026 年 7 月）</h2>
+  <p class="lede">要讀懂英國的版圖，必須把三層疊在一起看：最底層是把約三分之一得票放大成絕對多數的<strong>FPTP 單一選區制</strong>，中間層是正從「兩黨」裂解為「五黨碎片」的<strong>政黨體系</strong>，最上層是決定政府壽命與方向的<strong>下議院 650 席的分立算術</strong>。2024 年，這三層合力製造了一場席次的大山峰（工黨 411 席）與民意的小丘陵（得票約 34%）之間的巨大落差；到 2026 年，這個落差開始以最劇烈的方式反噬。</p>
+
+  <h3>第一層：FPTP——把少數票放大成多數席的引擎</h3>
+  <p>英國下議院 650 席，每一席由一個單一選區以「相對多數決」（First Past the Post）產生：在該選區得票最高者獨得整席，第二名之後的所有選票化為烏有。這個設計有一個決定性後果——<strong>席次與得票嚴重不成比例</strong>。當反對票分裂在多個政黨之間，領先者往往以三成多的得票就能拿下整席；於是全國僅約 34% 得票的工黨，2024 年換得逼近三分之二的席次。FPTP 的歷史邏輯，是用「不成比例」換取「單一政黨的穩定多數」，讓英國避免歐陸常見的聯合政府拉鋸；但這套邏輯有一個前提：選民大體分屬兩大黨。<strong>一旦選票碎裂成四五塊，同一部放大器就會從「製造穩定多數」翻轉成「製造極端不穩定」</strong>——這正是 2026 年英國政治的核心變數。</p>
+
+  <h3>第二層：從兩黨到五黨——正在裂解的政黨體系</h3>
+  <p>戰後英國政治長期是保守黨與工黨的雙頭壟斷，兩黨合計得票常年在 70% 以上。但這個結構正在崩解：脫歐把保守黨的右翼選票交給了 Reform UK，把親歐的中間選票推向自由民主黨；蘇格蘭的席次被 SNP 長期把持；氣候與左翼青年票流向綠黨。到 2026 年 7 月，YouGov 的投票意向已呈現前所未見的<strong>「五黨擠在 12%–23% 之間」</strong>的碎片格局（Ref 23、Con 21、Lab 20、Grn 14、LD 12），三大黨的差距落在統計誤差之內。這意味著——在 FPTP 之下，全國得票只要略有位移，席次就可能天翻地覆，因為每一個選區都可能由四五方混戰、以二十幾個百分點「低空」勝出。</p>
+
+  <h3>第三層：下議院的算術——為什麼 2024 的巨大多數如此脆弱</h3>
+  <p>英國實行議會內閣制，首相由下議院多數黨黨魁擔任，政府的存續繫於能否掌握下議院多數。2024 年 7 月，工黨拿下約 411 席、保守黨崩跌至約 121 席（史上最慘之一），Starmer 手握逾 160 席的多數，理論上可以無阻施政到 2029 年。但這座席次山峰的底下，是僅約 34% 得票的薄土——<strong>大量席位是在 Reform 分走保守票的三方混戰中、以微小差距贏得的「借來的席次」</strong>。一旦執政不順、選民回流或改投 Reform，這些邊際席位就會像骨牌一樣倒下。這正是 2026 年的處境：民調上工黨已從 34% 進一步下滑至 20% 上下，若此時大選，那座 411 席的山峰會在同一部 FPTP 放大器下崩塌成殘丘。<strong>巨大多數與脆弱地基的落差，是理解 Starmer 兩年即崩的算術前提。</strong></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">411 / 121</div><div class="fig-l">2024 大選：工黨 vs 保守黨席次（全院 650 席）</div></div>
+    <div><div class="fig-n">~34%</div><div class="fig-l">2024 工黨全國得票率——史上最「脆弱」的多數之一</div></div>
+    <div><div class="fig-n">23 / 21 / 20</div><div class="fig-l">2026-07 YouGov：Reform／保守／工黨（%），差距在誤差內</div></div>
+    <div><div class="fig-n">7 位</div><div class="fig-l">2016–2026 十年間更替的首相人數</div></div>
+  </div>
+
+  <div class="prism">
+    <div class="pv-c"><div class="pv-tag">CONSERVATIVE</div><p>版圖是一張「兩線作戰的地圖」：右邊被 Reform 抄後路搶走脫歐選票，中間被工黨與自民黨侵蝕溫和票。FPTP 曾是保守黨的護城河，如今卻可能把右翼分裂懲罰到黨的生存線以下。</p><p>當務之急不是路線，而是止血——避免右翼選票永久性地流向 Reform、讓保守黨從「執政黨」跌成「第二右翼」。</p></div>
+    <div class="pv-l"><div class="pv-tag">工黨</div><p>版圖是一張「借來的多數」：411 席看似安全，實則坐在 34% 得票的薄土上，大量邊際席位是在保守票分裂時撿到的。這是一份到期即還的貸款。</p><p>唯一的續命之道，是在下次大選前把治理績效兌現成真實民意——但經濟停滯與移民壓力，讓這件事幾乎不可能在一屆內完成。</p></div>
+    <div class="pv-r"><div class="pv-tag">改革黨</div><p>版圖是一張「撬開兩黨制的槓桿」：五黨碎片化下，只要在 FPTP 的三方混戰中以二十幾趴「低空」勝出，就能把民調領先轉化為真實席次。同一部曾排擠小黨的放大器，這次可能替 Reform 效力。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一張版圖，三種利害：兩線作戰、借來的多數、撬動的槓桿</div>
+
+  <h3>把三層合起來讀：2026 年的版圖一句話</h3>
+  <p>FPTP 是不變的放大器，政黨體系是它當前放大的對象，而 2026 年的特殊性在於——<strong>放大器的輸入從「兩黨」變成了「五黨」</strong>。同一部把 34% 放大成 411 席的機器，一旦輸入端碎裂成四五塊勢均力敵的勢力，輸出端就會變得極不穩定、極難預測：可能是懸峙國會（hung parliament）、可能是 Reform 以低得票爆出高席次、也可能是工黨的多數一夜蒸發。版圖的下一個裁決點是<strong>下屆大選（法定須於 2029 年前舉行）</strong>——但在此之前，每一場補選、每一次地方選舉，都是對這部放大器新輸入的即時測試。</p>
+</section>
+
+<section id="s1b">
+  <div class="sec-label">PART I · CH 01B</div>
+  <h2>FPTP 選制的量化斷裂：得票與席次為何脫鉤</h2>
+  <p class="lede">第 1 章說「FPTP 把少數票放大成多數席」——這一節把這句話拆成可檢驗的機制。答案藏在一個簡單卻致命的算術裡：當選票分裂在越多政黨之間，「勝選門檻」就越低，而「浪費的選票」就越多。前者讓少數派得票就能贏，後者讓輸家的民意徹底蒸發——兩者相乘，得票與席次就被撕裂成兩條無關的曲線。</p>
+
+  <h3>放大器的算術：勝選門檻如何隨政黨數下降</h3>
+  <p>在一個純粹的兩黨選區，勝選需要 50% 以上；但在一個三方混戰的選區，34% 可能就夠；四方混戰，可能 28% 就贏；五方混戰，二十幾趴即可「低空」奪席。<strong>政黨越多，勝選門檻越低</strong>——這是 FPTP 最反直覺、也最關鍵的性質。2024 年工黨正是這條算術的最大受益者：保守票被 Reform 分走，使工黨在數百個選區以「相對多數但絕對少數」的姿態勝出，把 34% 的全國得票放大成 63% 的席次。同一條算術，到 2026 年可能反過來讓 Reform 受益——若 Reform 在民調領先、而保守與工黨互相分票，Reform 就能在許多選區以二十幾趴奪席，把民調的第一名轉化為席次的爆量。</p>
+
+  <h3>浪費的選票：三分之二的選票不決定任何事</h3>
+  <p>FPTP 的另一面是「浪費票」（wasted votes）：所有投給落選者的票、以及勝選者超過次名所需的多餘票，都不轉化為任何代表性。在多黨混戰下，浪費票的比例可高達六成以上——<strong>意味著全國多數選票對席次結果毫無影響</strong>。這對小而分散的政黨（如綠黨、脫歐前的 UKIP）尤其殘酷：Reform 的前身 UKIP 曾在 2015 年拿下近 13% 的全國得票，卻只換得 1 席。這正是為什麼 Reform 的支持者對選制積怨已深——他們的選票長年被 FPTP 系統性地丟棄。<strong>但當一個政黨的支持從「分散」變成「地域集中」，FPTP 的懲罰就會翻轉成獎賞</strong>：這是 2026 年 Reform 能否從「被浪費」變成「被放大」的關鍵分水嶺。</p>
+
+  <table>
+    <tr><th>情境</th><th>全國得票結構</th><th>FPTP 的席次後果</th></tr>
+    <tr><td><strong>經典兩黨</strong></td><td>兩大黨合計 &gt;70%</td><td>放大器製造穩定的單一多數，聯合政府罕見</td></tr>
+    <tr><td><strong>2024 型</strong></td><td>工黨約 34%、保守崩、Reform 分右票</td><td>低得票換巨大多數（工黨 411 席）——最脆弱的多數</td></tr>
+    <tr><td><strong>五黨碎片（2026 民調）</strong></td><td>五黨擠在 12–23%</td><td>結果高度不確定：懸峙國會、或某黨低票爆量席次</td></tr>
+    <tr><td><strong>地域集中</strong></td><td>某黨得票集中於特定選區群</td><td>SNP 模式：以全國小比例、換地域壟斷席次</td></tr>
+  </table>
+  <p class="tbl-note">關鍵一句：<strong>FPTP 不是中性的計票規則，而是一部會依「選票如何分布」給出天差地別結果的放大器——同樣的全國得票率，在兩黨結構下製造穩定，在五黨結構下製造混沌。</strong></p>
+
+  <h3>SNP 的地域集中：FPTP 的另一種玩法</h3>
+  <p>蘇格蘭民族黨（SNP）示範了 FPTP 的鏡像玩法：把支持<strong>地理集中</strong>於蘇格蘭，就能以全國個位數的得票，換得對蘇格蘭席次的近乎壟斷。2015 年 SNP 曾以蘇格蘭 50% 的得票拿下當地 59 席中的 56 席。這與 UKIP「支持分散、席次歸零」形成尖銳對比：<strong>FPTP 獎賞地域集中、懲罰全國分散</strong>。這條規則深刻地形塑了英國的政黨策略——它讓民族主義政黨（SNP、威爾斯的 Plaid Cymru）得以在西敏寺放大聲量，也讓 Reform 的戰略核心變成「把分散的抗議票，鎖進特定的地理票倉（尤其英格蘭北部的 Red Wall）」。</p>
+
+  <h3>為什麼選制改革幾乎不可能</h3>
+  <p>既然 FPTP 製造了如此劇烈的扭曲，為何不改？答案藏在一個囚徒困境裡：<strong>每一個當下的執政黨，都是 FPTP 的受益者</strong>——正是這部放大器把它的少數得票變成了多數席次，它沒有動機拆掉抬自己上台的梯子。2011 年英國曾就改用「另類投票制」（AV）辦過公投，結果以約 68% 對 32% 大幅否決——當時的兩大黨與多數選民都無意改變。於是 FPTP 成了一個「所有人都抱怨、卻沒有人有動機廢除」的制度活化石。<strong>它的存廢，因此不是技術問題，而是誰在當下掌權的問題</strong>——而這，正是 Reform 若真的執政後，最可能翻轉立場的議題之一。</p>
+</section>
+
+<section id="s2">
+  <div class="sec-label">PART I · CH 02</div>
+  <h2>結構的根源：議會主權、無成文憲法與政黨紀律</h2>
+  <p class="lede">英國政府為何能把權力如此高度集中、卻幾乎不設剎車？答案不在任何一部憲法文件裡——因為英國根本沒有一部。它的權力集中，來自三個互相加乘的支柱：至高無上的「議會主權」、沒有成文憲法可以擋路、以及鐵一般的政黨紀律。三者相乘，造就了一個掌握下議院多數的首相，其權力之集中，在成熟民主中近乎異數。</p>
+
+  <h3>第一支柱：議會主權——沒有更高的法</h3>
+  <p>英國憲政的基石是「議會主權」（Parliamentary Sovereignty）：國會（嚴格說是「國王在國會中」）是最高立法權威，<strong>沒有任何法律高於國會通過的法律，也沒有任何法院能推翻國會的立法</strong>。這與美國截然不同——美國有一部成文憲法、有最高法院的違憲審查，國會的立法可以被判違憲作廢。英國沒有這道剎車：理論上，一個掌握下議院多數的政府，可以立法做幾乎任何事，包括改變自身的任期、廢除地方議會、乃至改寫「憲政慣例」本身。<strong>約束政府的，不是一部凌駕性的憲法，而是慣例、政治成本與選民的最終審判</strong>——這是一套「靠自我克制運轉」的制度，它的穩定不來自剎車，而來自參與者對不成文規則的普遍尊重。</p>
+
+  <h3>第二支柱：無成文憲法——規則寫在慣例裡</h3>
+  <p>英國沒有一份叫「憲法」的文件。它的憲政規則散落在成文法（如《大憲章》《權利法案》《人權法》）、判例、國會慣例、以及大量「憲政慣例」（constitutional conventions）之中——例如「君主必須任命下議院多數黨黨魁為首相」「君主不否決國會通過的法案」「政府在失去信任時應辭職或改選」，這些至關重要的規則沒有一條寫在任何具法律效力的文件裡，全靠慣例維繫。<strong>這帶來極大的彈性（制度能隨情勢演化，不需修憲），也帶來極大的脆弱（當有人願意打破慣例，幾乎沒有硬性的法律防線）</strong>。2019 年 Johnson 政府「非法擱置國會」（prorogation）被最高法院裁定違法，正是這套不成文體制罕見地被推到司法攤牌的一刻——它提醒世人，慣例的邊界，往往要到有人越界時才被劃清。</p>
+
+  <h3>第三支柱：政黨紀律——首相的多數是鐵板還是流沙</h3>
+  <p>權力集中的最後一塊拼圖，是英國政黨異常嚴格的紀律。下議院議員在關鍵表決上受「黨鞭」（whip）約束，跨黨投票（rebellion）代價高昂——可能被「取消黨鞭資格」（withdraw the whip），形同逐出黨團。這讓掌握多數的首相，通常能讓自己的立法暢行無阻，行政與立法之間幾乎沒有美國式的僵局。<strong>但這把雙面刃的另一面是：當多數黨的後座議員（backbenchers）大規模造反，首相會在一夜之間失去權力基礎</strong>——這正是保守黨在 2022 年連換 Johnson、Truss，以及工黨在 2026 年逼退 Starmer 的機制。英國首相的權力，因此不繫於固定任期，而繫於「能否持續掌握自己黨團的信任」——<strong>他隨時可以是最有權力的西方領袖，也隨時可以在一週內被自己人拉下台</strong>。</p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">外國人</div><p>無成文憲法對投資人是「彈性與脆弱的雙面」：它讓英國能快速立法、政策轉向敏捷，但也意味著沒有一部硬性憲法能保證政策的長期穩定——一切繫於慣例與政治自制。</p><p>真正該盯的不是條文，而是「慣例是否還被尊重」——一旦慣例開始被突破，制度的可預測性就會折價。</p></div>
+    <div class="pv-c"><div class="pv-tag">保守黨</div><p>議會主權是「保守派最珍視的傳統」：它讓英國免於歐陸式的成文憲法與強勢憲法法院，把最終權力留在民選國會手中——這正是脫歐「奪回控制權」（take back control）論述的憲政內核。</p></div>
+    <div class="pv-r"><div class="pv-tag">改革黨</div><p>議會主權是「反建制的武器」：Reform 主張，正是脫歐奪回的這個主權，被文官、司法審查與國際條約層層架空——它要用「人民主權」之名，去衝撞那套約束多數的慣例與機構。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一套不成文憲政，三種讀法：彈性風險、珍貴傳統、反建制武器</div>
+
+  <h3>比較視角：為什麼英國是「選舉的專制」</h3>
+  <p>把英國放進比較政治的座標，權力集中的異常更清楚。19 世紀的保守派思想家 Lord Hailsham 曾用「選舉的專制」（elective dictatorship）形容英國制度：<strong>一個贏得選舉的政府，在兩次大選之間，其權力幾乎不受制衡</strong>。相對於美國的三權分立、成文憲法與聯邦制，英國的行政與立法融為一體（首相就是多數黨領袖）、沒有成文憲法設限、上議院（House of Lords）非民選且權力有限、司法違憲審查極弱。<strong>唯一真正的剎車，是「五年一次的大選」與「自己黨團的信任」</strong>——前者週期太長、後者波動太快。這解釋了英國政治的一個核心特徵：它能在強勢多數下高效施政（如工黨 1945、柴契爾 1980 年代、Blair 1997 的大改革），也能在多數瓦解時瞬間陷入癱瘓與內鬥——<strong>權力的集中與脆弱，是同一套制度設計的一體兩面。</strong></p>
+</section>
+
+<section id="s2b">
+  <div class="sec-label">PART I · CH 02B</div>
+  <h2>西敏制的閥門：內閣制如何吸收與放大衝突</h2>
+  <p class="lede">第 2 章論證了英國權力的集中；這一節要問一個對照性的問題——既然權力如此集中，為什麼英國十年換七位首相，卻從未發生憲政斷裂？答案在於「內閣制」這套設計本身：它把衝突內建了一個吸收閥門（不信任與換黨魁），讓政權能在不改選、不動盪的情況下平順轉移，但同一個閥門，也讓首相的更替變得異常頻繁。</p>
+
+  <h3>閥門的機制：換首相不必換政府</h3>
+  <p>英國內閣制最關鍵的性質是：<strong>首相由議會多數黨產生，因此「換首相」可以不必「換政府」，更不必「改選」</strong>。當一位首相失去自己黨團的信任，執政黨可以透過黨內程序更換黨魁，新黨魁自動成為新首相，政府照常運轉，國會照常存續——這正是 2022 年保守黨從 Johnson 換到 Truss、再換到 Sunak，以及 2026 年工黨從 Starmer 換到 Burnham 的機制。<strong>Burnham 之所以能「沒有經過大選就當上首相」，不是制度出了錯，而是制度按設計運作</strong>：他成為工黨黨魁，而工黨仍握有下議院多數，於是他自動成為首相。這套閥門把「領導危機」關進了執政黨內部，避免它外溢成「政權危機」或「憲政危機」。</p>
+
+  <h3>閥門的代價：首相變得可拋棄</h3>
+  <p>但這個吸收閥門有一個沉重的副作用：<strong>它讓首相變得高度可拋棄</strong>。既然換首相如此「便宜」（不必改選、不必解散國會、不必經過選民），執政黨的議員在民調低迷時，就有強烈誘因把首相當成「止血的祭品」——換一張臉、賭一次民調反彈，比走向必敗的大選容易得多。這正是十年七位首相的制度根源：<strong>不是英國政治特別失敗，而是英國制度讓「換掉首相」的成本異常低廉</strong>。相對於美國總統有固定四年任期、除非彈劾否則無法中途更換，英國首相的任期是「浮動的」，繫於黨團每一天的信任——這讓英國的領導層在承平時期極其穩定，在動盪時期卻極其易變。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 「沒有大選的換相」為何合法且正常</div>
+    <p>2026 年 Burnham 未經大選就任首相，在國際輿論引發「這是否民主」的討論。但依英國憲政慣例，這完全合法且正常：英國選民從不直接選首相，他們選的是自己選區的議員；首相是「下議院多數所支持的人」。只要工黨仍是多數黨、Burnham 是其黨魁，他就是憲政上正當的首相。事實上，戰後 Chamberlain→Churchill、Eden→Macmillan、Blair→Brown、Cameron→May、Johnson→Truss→Sunak 都是「任期中換相、不改選」的先例。<strong>反對者的真正論點不是「非法」，而是「缺乏新的民意授權」——這是一個政治正當性問題，不是憲政合法性問題。</strong></p>
+  </div>
+
+  <h3>閥門的另一面：懸峙國會與聯合政府</h3>
+  <p>當 FPTP 在碎片化選民下無法產出單一多數，內閣制的閥門會啟動另一套機制：<strong>懸峙國會</strong>（hung parliament）與聯合政府。2010 年保守黨與自由民主黨的聯合政府，是戰後英國少見的例子。在五黨碎片化的 2026 年民調格局下，下屆大選產出懸峙國會的機率大增——這將迫使英國政黨學習它們並不熟悉的歐陸式聯合談判與少數政府治理。<strong>對一個習慣了「單一政黨強勢多數」的政治文化而言，這是一種陌生且不穩定的狀態</strong>：它可能帶來更多協商與制衡，也可能帶來更頻繁的政府垮台與提前改選——這是脫歐後政黨重組（變數）對西敏制（常數）施加的最大壓力測試。</p>
+</section>
+
+<section id="s3">
+  <div class="sec-label">PART I · CH 03</div>
+  <h2>兩個不投票的權力：文官體系與英格蘭銀行</h2>
+  <p class="lede">在首相與國會這兩個選出來的權力之外，英國政治還有兩個不投票、卻深刻形塑治理的機構——中立的常任文官體系（Whitehall／Civil Service）與獨立的英格蘭銀行（BoE）。前者是政策的連續性引擎，後者是財政紀律的即時裁判。理解英國，必須理解這兩個「不隨政權更替」的權力如何為劇烈的政黨動盪提供減震。</p>
+
+  <h3>文官體系：政權更替時的連續性引擎</h3>
+  <p>英國文官體系的核心原則是<strong>政治中立與永業常任</strong>：文官不隨政黨輪替而更換，他們服務於任何一屆民選政府，並被要求對執政黨保持忠誠而不涉黨派。這與美國「政治任命大量高階官員、政權更替時整批換血」的制度截然不同。這套設計的最大功能，是<strong>在十年七位首相的動盪中，維持國家機器的日常運轉與政策記憶</strong>——當政治層在西敏寺上演走馬燈，Whitehall 的常任次官與文官們維持著稅收、國防、外交、公共服務的連續性。批評者（尤其民粹右翼）指控文官體系是一個「深層國家」（deep state）、一個未經民選卻能拖延與稀釋民意的建制堡壘——Reform 與部分保守右翼把「Whitehall 的抵抗」當成脫歐承諾未能兌現的代罪羔羊。<strong>但對外資與盟邦而言，正是這套中立文官，構成了英國政策「無論誰執政都大體可預測」的最重要保證。</strong></p>
+
+  <h3>英格蘭銀行：財政紀律的即時裁判</h3>
+  <p>1997 年，Blair 政府的財相 Gordon Brown 賦予英格蘭銀行<strong>貨幣政策的獨立性</strong>——利率由 BoE 的貨幣政策委員會（MPC）決定，不再由財政部政治操控。這是一項深刻的制度改革：它把「印鈔誘惑」從政治人物手中拿走，交給一個以通膨目標為使命的獨立機構。到 2026 年 7 月，BoE 的基準利率維持在 3.75%（G7 中僅次於美聯儲的最高水準之一），下次 MPC 會議定於 7 月 30 日。<strong>BoE 的獨立性，是英國財政信譽的制度錨</strong>：它讓市場相信，英國不會靠貨幣化債務來逃避財政紀律。但 BoE 只管貨幣、不管財政——當一個政府的財政政策失去市場信任時（如 2022 年 Truss 的無資金減稅），BoE 能做的只有被動救火（緊急購債穩定 gilt 市場），而懲罰則由債券市場即時執行。這引出了英國治理最尖銳的一課：<strong>財政的最終裁判，不是選民、不是國會，而是 gilt 市場（詳第 17B 章 Truss 的 49 天）。</strong></p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">外國人</div><p>兩個不投票的權力是「政策可預測性的雙錨」：中立文官保證行政連續性、獨立央行保證貨幣紀律。它們是外資在英國政治動盪中，最重要的兩個「不隨政權變動的常數」。</p><p>對外資，重點不是誰當首相，而是這兩個錨是否穩固——一旦文官中立或央行獨立被政治侵蝕，英國的折價就會擴大。</p></div>
+    <div class="pv-r"><div class="pv-tag">改革黨</div><p>兩者都是「未經民選的建制」：Reform 眼中，Whitehall 是稀釋脫歐民意的深層國家、獨立央行是把利率決策交給技術官僚而非人民。它要挑戰的正是這套「不投票卻掌權」的建制邏輯。</p></div>
+    <div class="pv-l"><div class="pv-tag">工黨</div><p>兩者都是「治理的專業基礎設施」：工黨傳統上尊重文官中立與央行獨立，視之為負責任治理的前提——尤其在 Truss 之後，捍衛 BoE 獨立與財政紀律，成了工黨自我定位為「穩健之黨」的核心。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同兩個機構，三種定性：可預測性雙錨、未選建制、治理基礎設施</div>
+
+  <h3>一個比較的參照：英國央行獨立為何是「反 Truss 的疫苗」</h3>
+  <p>BoE 獨立性的價值，在 2022 年 Truss 事件中被反向證明。當 Truss 政府推出無資金支撐的大規模減稅（mini-budget），市場對英國財政信譽的信心瞬間崩解，gilt 殖利率暴衝、英鎊重挫、養老金的 LDI（負債驅動投資）策略引爆連鎖清算危機。<strong>正是獨立的 BoE 緊急入市購債，才止住了這場可能演變成系統性金融危機的風暴</strong>——而 Truss 本人則在 49 天後下台。這場危機留下一個深刻的制度教訓：<strong>在英國，財政與貨幣的分工是——政府管財政（可能犯錯）、央行管貨幣（負責善後）、市場管紀律（即時懲罰）</strong>。這套「三方制衡」比任何成文憲法條款都更直接地約束著英國政府的財政行為，也是理解為什麼英國歷任財相都對「財政可信度」（fiscal credibility）如此戰戰兢兢的關鍵（詳第 17、17B 章）。</p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART II</div>
+  <h2>稜鏡 · The Prisms</h2>
+  <div class="pd-sub">同一個聯合王國，五種位置的讀法</div>
+</div>
+
+<section id="s4">
+  <div class="sec-label">PART II · CH 04</div>
+  <h2>保守黨：從「自然執政黨」到生存危機</h2>
+  <p class="lede">保守黨（Conservative Party，俗稱 Tory）常被稱為「西方世界最成功的政黨」——它執政的年份多過任何一個現代民主政黨，兼具實用主義與適應力，善於在時代轉折時重塑自己。但 2024 年結束的 14 年執政，以脫歐的內耗、緊縮的疲勞、Boris 的醜聞與 Truss 的 49 天告終；到 2026 年，它在民調上被 Reform 從右側超車，第一次面對的不是「如何贏」，而是「如何不被取代」。</p>
+
+  <h3>保守黨是什麼：一個聯盟，不是一種意識形態</h3>
+  <p>要理解保守黨的危機，先要理解它從來不是單一意識形態的政黨，而是一個<strong>由多股互相拉扯的傳統拼成的選舉聯盟</strong>：自由市場的柴契爾主義者、重視傳統與秩序的社會保守派、親商的中間務實派、以及疑歐的民族主義右翼。這個聯盟長期靠「贏得選舉、掌握權力」這個共同目標黏合。脫歐把它撕裂了——公投把「疑歐 vs 親歐」這條裂縫從黨內邊緣推到中心，此後的每一任保守黨首相（Cameron、May、Johnson、Truss、Sunak）都在這條裂縫上被拉扯至斷裂。<strong>脫歐贏了公投，卻輸掉了保守黨的內部凝聚力</strong>——它讓黨從一個「務實的執政聯盟」，退化成一個「為脫歐純度互鬥的意識形態戰場」。</p>
+
+  <h3>14 年的弧線：從 Cameron 到崩盤</h3>
+  <p>保守黨這 14 年執政，是一條清晰的下墜弧線：<strong>Cameron（2010–16）</strong>以「緊縮」（austerity）回應金融危機後的財政赤字，並豪賭一場脫歐公投來平息黨內疑歐派——結果賭輸，辭職。<strong>May（2016–19）</strong>困在無法通過的脫歐協議裡，被黨內強硬派與國會癱瘓拖垮。<strong>Johnson（2019–22）</strong>以「搞定脫歐」（Get Brexit Done）贏得 2019 大選、攻下工黨的 Red Wall，卻在 Partygate（防疫期間違規聚會）醜聞中垮台。<strong>Truss（2022，49 天）</strong>以無資金減稅引爆市場危機，創下最短命首相紀錄。<strong>Sunak（2022–24）</strong>試圖以技術官僚的穩健止血，卻已無力回天，2024 年 7 月大選慘敗、保守黨席次崩跌至約 121 席。<strong>這條弧線的每一段，都是同一個病灶的不同症狀：一個為脫歐純度內耗、無法就國家方向達成共識的執政聯盟，在治理的重壓下逐段瓦解。</strong></p>
+
+  <h3>Badenoch 的難題：兩線作戰的第二右翼</h3>
+  <p>2024 年 11 月，Kemi Badenoch 當選保守黨魁（黨史上首位黑人黨魁），接手一個崩盤後的政黨。她的難題是英國政治最棘手的處境之一——<strong>兩線作戰</strong>：右側，Reform 用更純粹的反移民、反建制論述，正在把保守黨的脫歐選票整批吸走；中間，工黨與自由民主黨佔據著溫和選民。Badenoch 若向右追趕 Reform，會失去中間；若守住中間，會被 Reform 掏空右翼票倉。到 2026 年 7 月，民調顯示保守黨（約 21%）已與工黨並列、甚至落後 Reform，<strong>第一次面對「淪為第二右翼、乃至第三大黨」的生存威脅</strong>。Badenoch 本人以強硬的文化戰論述與「保守黨有一個計畫」的訊息試圖穩住基本盤，並在 2026 年一度獲得意外不錯的支持度，但她始終未能解開那道結構性的兩線困境。</p>
+
+  <div class="lens l-c">
+    <div class="lens-tag">CONSERVATIVE ▸ 內部視角</div>
+    <p>「我們不是輸給工黨，是輸給自己人。」——保守黨的核心焦慮不是工黨執政，而是右翼票被 Reform 永久性地分走。在 FPTP 之下，右翼分裂等於把席次拱手讓給工黨；保守黨若不能收復或整合 Reform 的選票，可能被同一部放大器懲罰到黨的生存線以下。這是「合併、還是被取代」的存亡之問——歷史上，加拿大保守黨曾在 1993 年因右翼分裂崩盤至 2 席，花了十年才透過合併重生。這個幽靈，如今盤旋在英國保守黨頭上。</p>
+  </div>
+
+  <h3>保守黨的結構性資產：韌性與地方組織</h3>
+  <p>但不應低估保守黨的韌性——這正是它兩百年來的招牌。它擁有 Reform 尚不具備的東西：<strong>綿密的地方黨組織、龐大的地方議員基礎、與商界及既有建制的深厚連結、以及在 FPTP 下累積的選戰機器</strong>。Reform 的民調領先大多是「情緒的抗議票」，尚未經過一場全國大選轉化為席次的考驗；而保守黨即使在最慘的 2024 年，仍保住約 121 席與一個全國性的組織骨架。保守黨的賭注，是<strong>Reform 的泡沫會在真正的選戰壓力下洩氣、選民最終會回到「唯一能真正執政的右翼政黨」</strong>。這是一場關於「抗議票能否變成執政票」的豪賭——它的答案，將定義英國右翼未來十年的形狀（詳第 11 章）。</p>
+</section>
+
+<section id="s4b">
+  <div class="sec-label">PART II · CH 04B</div>
+  <h2>14 年執政的崩解剖析：緊縮、脫歐與治理疲勞</h2>
+  <p class="lede">第 4 章勾勒了保守黨崩盤的弧線；這一節把它拆成三條互相纏繞的失敗線索——緊縮政策的長期政治代價、脫歐的內部撕裂、以及治理疲勞的累積。三者相加，解釋了為什麼一個「最成功的政黨」會在一屆之內從 365 席（2019）崩跌到約 121 席（2024）。</p>
+
+  <h3>緊縮的長帳：省下的財政，付出的民意</h3>
+  <p>保守黨執政的第一個十年，主軸是「緊縮」——金融危機後，Cameron／Osborne 政府以削減公共支出來壓低赤字。財政帳面上，赤字確實下降；但政治帳上，緊縮留下了深遠的傷口：<strong>地方政府預算被大幅削減、公共服務（NHS、警力、地方設施）品質下滑、實質工資長期停滯</strong>。這些成本並非均勻分布，而是集中壓在英格蘭北部與後工業地帶——那些曾是工黨鐵票、後來在 2019 年因脫歐倒向保守黨的 Red Wall 選區。<strong>緊縮播下了「被拋棄感」的種子，脫歐讓它發芽，Reform 則來收割</strong>：這條從緊縮到 Red Wall 憤怒的因果鏈，是理解英國民粹右翼崛起的經濟根源（詳第 6、12 章）。</p>
+
+  <h3>脫歐的內耗：贏了公投，輸了凝聚</h3>
+  <p>脫歐是保守黨崩解的核心加速器。它把黨內「疑歐 vs 親歐」的裂縫制度化、公開化、白熱化：<strong>May 被強硬派逼到無法通過任何協議、Johnson 靠「純度」清洗了黨內親歐派、留下一個向右傾斜卻仍無法滿足疑歐純度的政黨</strong>。更致命的是，脫歐把保守黨的選戰承諾釘死在一個無法兌現的期待上——選民被許諾脫歐會帶來復興、控制移民、更多資金給 NHS；但脫歐後移民數字不降反升（勞動力短缺迫使放寬簽證）、經濟不升反停、NHS 危機加劇。<strong>當「搞定脫歐」的口號兌現成「脫歐搞定了，然後呢？」的失望，保守黨就失去了它最強的動員故事，而 Reform 接手了「脫歐被背叛」的憤怒。</strong></p>
+
+  <table>
+    <tr><th>首相（任期）</th><th>崩解的一步</th><th>留給繼任者的遺產</th></tr>
+    <tr><td><strong>Cameron</strong>（2010–16）</td><td>緊縮＋豪賭脫歐公投失敗</td><td>Red Wall 的被拋棄感、一場無人有計畫執行的脫歐</td></tr>
+    <tr><td><strong>May</strong>（2016–19）</td><td>困於無法通過的脫歐協議、失去 2017 多數</td><td>被強硬派挾持的黨、國會癱瘓</td></tr>
+    <tr><td><strong>Johnson</strong>（2019–22）</td><td>Get Brexit Done 大勝，卻毀於 Partygate</td><td>攻下又失去的 Red Wall、崩壞的誠信信任</td></tr>
+    <tr><td><strong>Truss</strong>（2022，49 天）</td><td>無資金減稅引爆 gilt／英鎊危機</td><td>保守黨「財政不可信」的市場烙印</td></tr>
+    <tr><td><strong>Sunak</strong>（2022–24）</td><td>技術官僚穩健止血，但為時已晚</td><td>2024 慘敗、崩至約 121 席、把政權交給工黨</td></tr>
+  </table>
+  <p class="tbl-note">五任首相、一條下墜弧線：每一任都在同一個病灶（脫歐內耗＋治理疲勞＋財政與生活成本壓力）上，走完自己那一段。</p>
+
+  <h3>治理疲勞：14 年後的「該換人了」</h3>
+  <p>第三條線索最無形、卻最致命——<strong>單純的執政疲勞</strong>。任何政黨執政 14 年後，都會累積一種「該換人了」（time for a change）的社會情緒：醜聞疊加、承諾落空、面孔陳舊、問題積壓。保守黨的疲勞被四件事放大：<strong>Partygate 摧毀了誠信、Truss 摧毀了經濟能力的信譽、生活成本危機摧毀了民生體感、而連續五位首相的走馬燈摧毀了穩定感</strong>。到 2024 年，選民要的不是一套更好的保守黨政策，而是「讓保守黨下台」本身——這正是為什麼工黨能以區區 34% 得票拿下 411 席：<strong>2024 不是工黨的勝利，而是保守黨的落敗；選民不是在擁抱 Starmer，而是在懲罰保守黨。</strong>而這也埋下了工黨兩年即崩的種子——一個建立在「反對現任」而非「認同新任」的多數，本質上就是脆弱的（詳第 9 章）。</p>
+</section>
+
+<section id="s5">
+  <div class="sec-label">PART II · CH 05</div>
+  <h2>工黨：贏得太快，也輸得太快</h2>
+  <p class="lede">工黨（Labour Party）是英國的中間偏左大黨，發源於 20 世紀初的工會與社會主義運動，締造過 NHS（1945 Attlee）、也經歷過 Blair 的「新工黨」中間路線盛世。2024 年，它在 Keir Starmer 領導下以一場巨大的席次勝利重返執政；但這場勝利的脆弱地基，讓它在不到兩年內就崩塌——到 2026 年 6 月 Starmer 辭職、7 月 Burnham 接任，工黨示範了一個殘酷的教訓：低得票的多數，撐不起艱難的執政。</p>
+
+  <h3>工黨是什麼：工會、社會民主與 Blair 遺產的合成</h3>
+  <p>工黨同樣是一個聯盟：它的根在工會與勞工運動（組織與資金的基礎）、它的靈魂在社會民主的再分配理想（NHS、公共服務、福利國家）、而它的執政方法論則深受 Blair「新工黨」的影響——即接受市場經濟、爭取中間選民、以務實換取政權。這個聯盟內部長期有一條張力：<strong>左翼（如 Corbyn 時代）主張回歸社會主義原則，中間派（如 Blair、Starmer）主張向中間靠攏以贏得選舉</strong>。Starmer 的路線是後者的極致——他上任後系統性地把黨從 Corbyn 的左翼拉回中間，以「穩健、可信、能執政」重塑工黨形象，這在反對保守黨疲勞的 2024 年極其有效。<strong>但「向中間靠攏以贏得選舉」的策略，換來的是一個沒有熱情、只有反對現任的脆弱多數</strong>——選民選工黨不是因為愛它，而是因為厭倦保守黨。</p>
+
+  <h3>2024 的勝利與它的原罪</h3>
+  <p>2024 年 7 月，工黨拿下約 411 席，卻只有約 34% 的得票——這是工黨勝利的「原罪」。它的多數是「借來的」：大量席位是在保守票被 Reform 分走的三方混戰中、以微小差距贏得的。<strong>這個多數在席次上巨大、在民意上淺薄、在熱情上近乎於零</strong>。這帶來一個致命的執政困境：Starmer 政府沒有真正的民意授權去做艱難的事（財政緊縮、移民管制、結構改革），卻又繼承了保守黨留下的財政爛攤與經濟停滯。當它試圖治理，每一個艱難決定都在快速消耗那薄薄的支持；當它不做艱難決定，問題持續惡化、選民的失望加深。<strong>脆弱的多數，讓工黨陷入「做也死、不做也死」的兩難——這是 Starmer 崩塌的結構前提。</strong></p>
+
+  <div class="lens l-l">
+    <div class="lens-tag">LABOUR ▸ 內部視角</div>
+    <p>「我們贏得了西敏寺，卻沒贏得人民的心。」——工黨執政圈的痛苦自省是：411 席是一座建在流沙上的宮殿。他們繼承了一個財政被 Truss 與疫情掏空、經濟被脫歐拖入停滯、公共服務被 14 年緊縮掏虛的爛攤子，卻只有 34% 的授權去修補。每一次加稅、每一次撙節、每一次對移民與小船的無力，都在啃食那個本就脆弱的多數。到 2026 年，工黨面對的不是「如何連任」，而是「如何避免在下屆大選被 FPTP 的同一部放大器反向碾碎」——那座 411 席的山峰，隨時可能崩成殘丘。</p>
+  </div>
+
+  <h3>Starmer 路線的內在矛盾：穩健之黨遇上憤怒之國</h3>
+  <p>Starmer 的核心賭注是「工黨＝穩健、負責任、成人房間裡的政黨」——這是對 Truss 混亂與保守疲勞的直接回應，在 2024 年極其奏效。但這套定位有一個內在矛盾：<strong>「穩健」意味著不做激進承諾、不大灑幣、尊重財政紀律；但 2026 年的英國選民，要的不是穩健，而是對停滯、移民與生活成本的憤怒出口。</strong>當 Reform 用激烈的反移民、反建制論述點燃憤怒，工黨的「穩健」顯得蒼白無力、甚至像是建制的一部分。Starmer 因此被兩面夾擊：右邊，Reform 搶走了憤怒的勞工票（尤其 Red Wall）；左邊，綠黨與失望的左翼選民抱怨工黨太保守、太像保守黨。<strong>穩健之黨遇上憤怒之國——這是 Starmer 路線在 2026 年的根本失效（詳第 5B、10 章）。</strong></p>
+
+  <h3>Burnham 的接任：一次「路線的重置」賭注</h3>
+  <p>2026 年 7 月接任的 Andy Burnham，代表工黨的一次路線重置。作為原大曼徹斯特市長，Burnham 建立了「軟左翼、地方主義、更貼近勞工情緒」的形象——他曾在市長任內以對抗中央撙節、爭取北方權益著稱，被視為比 Starmer 更能與 Red Wall 選民共鳴的人物。他就任時宣示要當國家的「斷路器」（circuit-breaker），承諾一個「新的政治與經濟模型」與一份十年計畫。<strong>工黨的賭注是：用一個更有情緒感染力、更左傾、更地方色彩的領袖，去奪回被 Reform 搶走的憤怒票，同時重新點燃基本盤的熱情。</strong>但他接手的仍是同一個脆弱多數、同一個停滯經濟、同一個財政牢籠——他能否把「路線重置」兌現成民意反彈，是 2026 年下半到下屆大選之間英國政治最大的懸念（詳第 10 章）。</p>
+</section>
+
+<section id="s5b">
+  <div class="sec-label">PART II · CH 05B</div>
+  <h2>從大勝到崩塌：Starmer 執政的兩年解剖</h2>
+  <p class="lede">第 5 章論證了工黨多數的脆弱；這一節把 Starmer 的兩年（2024-07 至 2026-06）拆成一條可檢視的下墜曲線，並解剖崩塌的四個推手——財政牢籠、移民失守、缺乏熱情、以及 Reform 的持續壓迫。這條曲線是「脆弱多數＋艱難執政」如何在兩年內耗盡一個政府的教科書案例。</p>
+
+  <h3>推手一：財政牢籠——繼承的爛攤與市場的紅線</h3>
+  <p>Starmer 政府上台就撞上一堵財政高牆：脫歐後的低成長侵蝕稅基、Truss 事件抬高了 gilt 殖利率與借貸成本、疫情與能源危機留下的債務高企、加上 14 年緊縮已把公共服務削到骨頭、難以再省。<strong>工黨想投資公共服務（它的靈魂），卻沒有財政空間；想加稅籌錢，又會打擊本已疲弱的成長並激怒選民；想借錢，又受制於 Truss 之後市場對財政紀律的嚴厲監視。</strong>這個「三面都是牆」的財政牢籠，讓工黨的每一份預算都是在得罪某一群人——它無法既當「投資公共服務的工黨」，又當「財政負責任的工黨」，兩個承諾在 2026 年的財政現實下無法兼得（詳第 16、17 章）。</p>
+
+  <h3>推手二：移民與小船——最刺眼的失守</h3>
+  <p>移民、尤其是跨越英吉利海峽的「小船」（Channel crossings），是啃食 Starmer 支持度最刺眼的議題。儘管 2026 年小船跨越數字實際上有所下降（截至 5 月的一年約 3.6 萬人，較前一年降約 13%）、淨移民數也大幅回落（2025 年降約 48% 至約 17.1 萬），但<strong>「政府控制不了邊界」的體感與政治敘事，遠比實際數字更具殺傷力</strong>。Reform 把每一艘小船、每一則移民新聞，都轉化為「工黨與保守黨都無力保衛英國」的證據。Starmer 的「穩健」在這個議題上顯得束手無策——他既不願採取 Reform 式的激烈手段（也受國際法與人權法約束），又無法快速壓下數字給選民一個交代。<strong>移民成了「穩健之黨遇上憤怒之國」矛盾最集中的爆點（詳第 12 章）。</strong></p>
+
+  <h3>推手三：沒有熱情的多數——崩塌的加速器</h3>
+  <p>2024 的多數缺乏熱情這一原罪，在執政受挫時變成崩塌的加速器。<strong>當一個政府的支持是「反對現任」而非「認同新任」堆出來的，它就沒有一批會在逆境中護盤的死忠基本盤。</strong>順境時，這個多數看似龐大；逆境時，它以驚人的速度蒸發——因為當初選它的人，本來就對它沒有情感承諾。Starmer 的個人支持度跌到歷任首相最低區間之一，工黨的民調從 34% 一路滑到 20% 上下、被 Reform 超車。<strong>沒有熱情的勝利，在執政的第一次逆風中就露出了它的空心——這是 2024 型脆弱多數的宿命。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 為什麼是兩年，不是一屆</div>
+    <p>英國首相的任期繫於黨團信任，而非固定年限——這解釋了為什麼 Starmer 撐不到 2029 年的下屆大選，而在 2026 年中就被逼退。當工黨議員看著民調從 34% 崩到 20%、看著自己那些「借來的邊際席次」在下屆必將崩塌，他們面對的抉擇是：帶著必敗的 Starmer 走向大選，還是趁早換一張臉賭一次反彈？內閣制的「低成本換相」閥門（詳第 2B 章）讓後者成為理性選擇。<strong>Starmer 的崩塌不是個人的失敗，而是「脆弱多數＋艱難執政＋低成本換相」三者相乘的結構性結局——換成任何人坐在那個位置，結局可能相去不遠。</strong></p>
+  </div>
+
+  <h3>推手四：Reform 的持續壓迫——把工黨困在防守</h3>
+  <p>第四個推手是外部的：Reform 的持續崛起，讓工黨從執政第一天起就處於防守。<strong>Reform 不需要提出可執行的治理方案，它只需要放大每一個工黨的失敗——每一艘小船、每一次加稅、每一份令人失望的成長數據——並把它們鑄成「兩大黨都背叛了人民」的敘事。</strong>這讓工黨陷入一個無法脫身的困境：向右追趕 Reform 的移民立場，會失去左翼與都會選民、且永遠比不過 Reform 的純度；守住中間，又持續失血給 Reform。到 2026 年，Reform 已在多家民調領先或並列，把英國政治從「工黨 vs 保守」的舊軸線，徹底改寫成「建制 vs 反建制」的新軸線——而工黨，被迫站在了它最不想站的「建制」那一邊（詳第 6、11 章）。</p>
+</section>
+
+<section id="s6">
+  <div class="sec-label">PART II · CH 06</div>
+  <h2>改革黨與民粹右：撬開兩黨制的槓桿</h2>
+  <p class="lede">改革黨（Reform UK）是英國政治近十年最重要的變數。它由 Nigel Farage 主導，前身是脫歐黨（Brexit Party）、更早可追溯到 UKIP——這條系譜貫穿了英國民粹右翼二十年的動員史。它從一個「單一議題壓力團體」進化成 2026 年民調領先的政治力量，正在用脫歐的遺緒、Red Wall 的憤怒與反建制的能量，撬開延續了一世紀的兩黨制。</p>
+
+  <h3>系譜：從 UKIP 到脫歐黨到 Reform</h3>
+  <p>要理解 Reform，必須把它放進 Farage 二十年的動員系譜。<strong>UKIP</strong>（英國獨立黨）在 2010 年代把「脫離歐盟」從邊緣議題推成全國焦點，2015 年拿下近 13% 的全國得票——卻因 FPTP 只換得 1 席，這場「被浪費的勝利」正是脫歐公投的政治壓力來源。公投後，Farage 成立<strong>脫歐黨</strong>，在 2019 年歐洲議會選舉大勝，逼迫保守黨走向硬脫歐。脫歐兌現後，這股能量一度沉寂，卻在脫歐「未能帶來復興」的失望中重新點燃——2021 年更名為 <strong>Reform UK</strong>，把戰線從「脫歐」擴展到「移民、反建制、反淨零、反 Whitehall」。<strong>這條系譜的核心不變的是 Farage 本人與一種情緒：對建制（無論保守或工黨）背叛了「真正的英國」的憤怒。</strong></p>
+
+  <h3>脫歐的遺緒：被背叛的承諾</h3>
+  <p>Reform 崛起最深的燃料，是「脫歐被背叛」的敘事。2016 年脫歐被許諾三件事：<strong>奪回邊界控制（減少移民）、奪回財政主權（更多錢給 NHS）、奪回經濟自主（貿易復興）。</strong>到 2026 年，這三個承諾在多數選民體感中都落空了：移民數字在脫歐後一度不降反升（勞動力短缺迫使放寬非歐盟簽證）、NHS 危機加深、經濟陷入停滯。<strong>對脫歐選民而言，這不是「脫歐失敗」，而是「脫歐被建制搞砸、被背叛」</strong>——這個框架至關重要，因為它讓失望不指向「脫歐是個錯誤」，而指向「執行脫歐的兩大黨都是叛徒」。Reform 正是這個框架的收割者：它把自己定位為「唯一沒有背叛脫歐、唯一敢真正控制移民」的政黨，從保守黨右翼與工黨的 Red Wall 兩側同時吸票。</p>
+
+  <div class="prism">
+    <div class="pv-r"><div class="pv-tag">改革黨</div><p>Reform 是「被建制背叛者的復仇」：脫歐兌現了形式、卻沒兌現實質，移民更多、經濟更差、NHS 更糟。兩大黨都是同一個建制的兩張臉。人民要的不是換一張臉，是掀桌。</p></div>
+    <div class="pv-c"><div class="pv-tag">保守黨</div><p>Reform 是「分裂右翼的自殺炸彈」：它搶不到執政，卻能在 FPTP 下把右翼票分光、把席次拱手送給工黨。它是抗議的奢侈品，不是治理的選項——選它等於幫左翼上台。</p></div>
+    <div class="pv-l"><div class="pv-tag">工黨</div><p>Reform 是「把 Red Wall 從我們手中奪走的對手」：它用移民與被拋棄感，動員了那些本該屬於左翼的後工業勞工票。它把階級政治，偷換成了身分與文化政治。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個 Reform，三種定性：復仇、自殺炸彈、奪票對手</div>
+
+  <h3>Red Wall 與五黨政治：民粹右的地理與算術</h3>
+  <p>Reform 的戰略核心，是把分散的抗議票<strong>鎖進特定的地理票倉</strong>——尤其英格蘭中北部的 Red Wall（曾長期投工黨的後工業選區）。這些地方是緊縮的最大受害者、脫歐的最堅定支持者、也是「被兩大黨都拋棄」感受最深的地帶。2019 年 Johnson 曾以脫歐攻下它們，但保守黨未能兌現「升級」（levelling up）承諾，如今 Reform 來收割這份雙重背叛的憤怒。<strong>若 Reform 能把 Red Wall 從「抗議票」變成「地域集中的席次票」（複製 SNP 在蘇格蘭的模式），它就能在 FPTP 下把民調領先轉化為席次爆量。</strong>這正是 2026 年英國政治最大的未知數：在五黨擠在 12–23% 的碎片格局下，FPTP 這部放大器會給 Reform 什麼樣的席次結果？答案可能是懸峙國會、也可能是一場席次的地震（詳第 11 章）。</p>
+
+  <h3>Reform 的天花板：抗議票能否變執政票</h3>
+  <p>但 Reform 面對一道尚未證明能跨越的天花板：<strong>民調領先的是「抗議票」，而抗議票在真正的大選壓力下往往洩氣。</strong>Reform 的弱點是實在的——它缺乏保守黨那樣綿密的地方組織、缺乏執政的人才儲備與治理紀錄、其政策細節在受檢視時常顯粗糙、且高度依賴 Farage 個人。歷史上，UKIP 曾在民調與歐選中聲勢浩大，卻始終無法在西敏寺的大選中突破 FPTP 的鐵壁。<strong>Reform 能否從「情緒的抗議」進化成「可執政的政黨」，取決於三件事：能否建立地方組織、能否把地理票倉固化、以及 Farage 之外能否長出第二代領袖。</strong>這三題的答案，將決定 Reform 是曇花一現的抗議泡沫，還是重塑英國右翼的永久力量——這是全書對英國政治未來最關鍵的一個開放問句。</p>
+</section>
+
+<section id="s7">
+  <div class="sec-label">PART II · CH 07</div>
+  <h2>聯合王國與地方分權：英格蘭的多數與邊陲的離心</h2>
+  <p class="lede">「聯合王國」（United Kingdom）這個名字本身就是一則政治聲明——它由四個不對等的民族拼成：英格蘭（人口與財政的絕對主體）、蘇格蘭、威爾斯、北愛爾蘭。1998 年後的「地方分權」（devolution）給了後三者各自的議會與政府，卻沒有解決一個根本張力：<strong>英格蘭的多數決定一切，而邊陲卻可能被拖著走它們不想去的方向</strong>。脫歐把這道張力推到極致——這是聯合王國的「命門」。</p>
+
+  <h3>不對稱的聯盟：英格蘭的重量</h3>
+  <p>聯合王國的第一個事實，是它的極度不對稱。<strong>英格蘭佔全聯合王國約 84% 的人口、更高比例的經濟產出</strong>，而蘇格蘭約 8%、威爾斯約 5%、北愛約 3%。這意味著在任何全國性投票（包括脫歐公投）中，英格蘭的多數幾乎必然壓過其他三者的總和。這種不對稱是聯合王國離心力的結構根源：<strong>當英格蘭的多數與邊陲的多數方向相反時，邊陲會感到「自己的民主意志被英格蘭否決」</strong>。脫歐正是這樣一個時刻——英格蘭與威爾斯多數投脫歐，蘇格蘭（約 62% 留歐）與北愛（約 56% 留歐）多數投留歐，結果整個聯合王國被英格蘭的多數拖出歐盟。這場「違背蘇格蘭意志的脫歐」，成了 SNP 推動第二次獨立公投最有力的新論據。</p>
+
+  <h3>地方分權的設計：給了議會，沒給出口</h3>
+  <p>1998 年，Blair 政府推動地方分權，設立了蘇格蘭議會（Holyrood）、威爾斯議會（Senedd）與北愛議會（Stormont），把衛生、教育、部分稅收等權力下放。這套設計的本意，是<strong>用「有限的自治」來紓解民族主義的離心壓力、鞏固聯合王國</strong>。但它有一個內在矛盾：地方分權滿足了部分自治慾望，卻也<strong>建立了民族主義政黨（SNP、Plaid Cymru、Sinn Féin）的權力平台，讓它們有了推動更多自治乃至獨立的制度基地</strong>。分權沒有消解離心力，反而給了它一個引擎。到 2026 年，蘇格蘭的 SNP 在 5 月的 Holyrood 選舉後續掌政（John Swinney 領導、有望第五個任期），並把選舉勝利詮釋為推動第二次獨立公投的授權——分權這個「安全閥」，正變成獨立這個「壓力源」的孵化器。</p>
+
+  <div class="lens l-u">
+    <div class="lens-tag">UNION ▸ 邊陲視角</div>
+    <p>「我們有議會，卻沒有否決權。」——蘇格蘭、北愛的核心怨懟是：地方分權給了它們管理自己事務的表象，卻在真正重大的問題（脫歐、外交、宏觀財政、憲政）上，仍由英格蘭主導的西敏寺說了算。蘇格蘭以近 62% 投票留歐，卻被拖出歐盟；北愛則被脫歐強加了一條把它與英國本島分開的「海上邊界」（Irish Sea border）。對邊陲而言，聯合王國的問題不是「分權不夠」，而是「分權掩蓋了一個英格蘭主導的權力現實」——這正是離心力的燃料。</p>
+  </div>
+
+  <h3>三塊邊陲的不同算術</h3>
+  <p>聯合王國的三塊非英格蘭拼圖，各有截然不同的政治算術：<strong>蘇格蘭</strong>是離心力最強的——SNP 長期主政、獨立支持度在 50% 上下擺盪、脫歐提供了新的正當性理由，是聯合王國最迫近的裂縫。<strong>威爾斯</strong>的獨立支持度遠低於蘇格蘭，但脫歐與經濟不滿也在滋養 Plaid Cymru 的民族主義；工黨長期在威爾斯執政，其在西敏寺的失勢也牽動威爾斯政局。<strong>北愛爾蘭</strong>則是最複雜的——它的分裂不是「獨立 vs 留在英國」，而是「留在英國 vs 與愛爾蘭統一」，疊加著新教／天主教、聯合派（Unionist）／民族派（Nationalist）的百年裂痕，並被 1998 年《貝爾法斯特協議》（Good Friday Agreement）的和平框架約束。脫歐在北愛製造了最尖銳的難題——一條無法同時滿足「不在愛爾蘭島設硬邊界」與「不在英國內部設邊界」的方形圓（詳第 7B 章）。</p>
+
+  <h3>聯合王國的未來：慢裂還是重整</h3>
+  <p>聯合王國會解體嗎？誠實的答案是：<strong>短期不會、長期是開放問題</strong>。蘇格蘭獨立在 2014 年公投以 55:45 否決，此後獨立支持度雖因脫歐上升，但仍未穩定過半；北愛統一在民調中也仍是少數（近年多次民調平均約 58:42 傾向留在英國）。獨立與統一都需要一場公投，而公投的舉行與否，最終繫於西敏寺是否同意——這給了聯合王國一道法律上的剎車。<strong>但真正的風險不是一次戲劇性的解體，而是「慢裂」</strong>：民族認同的世代性移轉（年輕世代在蘇格蘭更傾向獨立、在北愛更傾向統一）、脫歐持續累積的離心怨懟、以及若 Reform 這個「英格蘭民族主義」色彩濃厚的政黨崛起，可能反過來刺激蘇格蘭與北愛的離心。<strong>聯合王國是英國政治的命門——它不會明天崩解，但它正在以世代為單位鬆動（詳第 13 章）。</strong></p>
+</section>
+
+<section id="s7b">
+  <div class="sec-label">PART II · CH 07B</div>
+  <h2>蘇格蘭公投史與北愛難題：兩條不同的裂縫</h2>
+  <p class="lede">第 7 章勾勒了聯合王國的離心結構；這一節深入兩條最尖銳的裂縫——蘇格蘭的獨立公投史，與北愛爾蘭的統一難題。兩者性質截然不同：蘇格蘭是「民主授權的獨立訴求」，北愛是「被和平協議凍結的主權爭議」；但脫歐同時激化了兩者。</p>
+
+  <h3>蘇格蘭：2014 公投與脫歐後的再起</h3>
+  <p>蘇格蘭獨立運動的關鍵節點是 <strong>2014 年 9 月 18 日的獨立公投</strong>：在「你是否認為蘇格蘭應成為獨立國家」的問題上，結果以約 55% 反對、45% 贊成否決獨立。當時 SNP 領袖 Salmond 承認這是「一代人一次」（once in a generation）的機會。但兩年後的脫歐公投改變了一切——蘇格蘭以約 62% 投票留歐，卻被英格蘭主導的多數拖出歐盟。<strong>SNP 主張，這是「情勢的重大改變」，正當化了第二次獨立公投的訴求</strong>：既然 2014 年蘇格蘭選擇留在英國的前提之一是「留在英國＝留在歐盟」，而這個前提已被脫歐推翻，蘇格蘭就有權重新選擇。到 2026 年，SNP 在 5 月 Holyrood 選舉後續掌政，Swinney 把選舉勝利（尤其若取得議會多數）詮釋為推動第二次公投的授權。<strong>但關鍵的法律事實是：公投的舉行需要西敏寺同意（2022 年英國最高法院裁定蘇格蘭議會無權單方面舉行具法律效力的獨立公投）</strong>——這給了獨立訴求一道剎車，也讓它成為一場關於「民主授權 vs 法律程序」的持久拉鋸。</p>
+
+  <table>
+    <tr><th>節點</th><th>事件</th><th>對獨立訴求的意義</th></tr>
+    <tr><td><strong>2014-09</strong></td><td>第一次獨立公投，55:45 否決</td><td>「一代人一次」的承諾——但被脫歐推翻了前提</td></tr>
+    <tr><td><strong>2016-06</strong></td><td>脫歐公投，蘇格蘭約 62% 投留歐卻被拖出</td><td>SNP 的新正當性：「違背蘇格蘭意志的脫歐」</td></tr>
+    <tr><td><strong>2022</strong></td><td>英國最高法院裁定 Holyrood 無權單方辦公投</td><td>法律剎車：公投須經西敏寺同意</td></tr>
+    <tr><td><strong>2026-05</strong></td><td>Holyrood 選舉，SNP（Swinney）續掌政</td><td>把選舉勝利詮釋為推動二次公投的授權</td></tr>
+  </table>
+  <p class="tbl-note">獨立支持度長期在 50% 上下擺盪，年輕世代（40 歲以下）明顯更傾向獨立——這讓獨立成為一個「以世代為單位緩慢升溫」的結構性議題，而非一次性事件。</p>
+
+  <h3>北愛：Good Friday、Brexit protocol 與統一問句</h3>
+  <p>北愛爾蘭的裂縫更古老也更危險。1998 年的《貝爾法斯特／Good Friday 協議》結束了「北愛問題」（The Troubles）數十年的暴力，其核心設計是：<strong>權力分享（聯合派與民族派共治）、承認北愛人可同時持有英國與愛爾蘭身分、並保證「北愛的憲政地位（留英或統一）由北愛人民公投決定」</strong>。這套精巧的平衡，被脫歐撕開了一道口子——因為脫歐後，英國（含北愛）離開歐盟，但愛爾蘭共和國仍在歐盟，兩者之間需要一條海關與監管邊界。<strong>這條邊界設在哪裡，成了一道方形圓</strong>：設在愛爾蘭島上（英國與愛爾蘭之間），會違反 Good Friday「不設硬邊界」的精神、可能重燃暴力；設在愛爾蘭海上（北愛與英國本島之間），則等於在聯合王國內部設界、激怒聯合派。最終的《北愛議定書》（Protocol）與後來的《Windsor 框架》（Windsor Framework）選擇了後者——把邊界放在愛爾蘭海，這讓聯合派（尤其 DUP）強烈反彈，一度癱瘓北愛的權力分享政府。</p>
+
+  <h3>統一的民調與世代變數</h3>
+  <p>脫歐與人口變遷，讓「愛爾蘭統一」（Irish reunification）從一個遙遠的夢想變成一個被認真討論的政策選項。Sinn Féin（主張統一的民族派政黨）近年成為北愛第一大黨，並主張舉行「邊界公投」（border poll）。但民調現實是：<strong>近年多次北愛統一民調平均約 58:42 傾向留在英國</strong>——多數北愛人仍未準備好統一。真正的變數同樣是世代與人口：北愛的天主教（傾向民族派）人口比例已在近年首度超過新教（傾向聯合派），加上年輕世代對統一更開放，讓統一成為一個「長期趨勢在累積、但尚未跨過門檻」的議題。<strong>Good Friday 協議規定，只有當北愛國務大臣認為統一「可能獲得多數支持」時，才須舉行邊界公投——這道模糊的門檻，是北愛主權爭議的引信，也是它的保險絲。</strong></p>
+</section>
+
+<section id="s8">
+  <div class="sec-label">PART II · CH 08</div>
+  <h2>外國人／投資人：脫歐後的折價規則手冊</h2>
+  <p class="lede">對外國投資人、跨國企業與盟邦而言，英國政治動盪的意義，不在誰當首相的黨派輪替，而在一套「脫歐後折價」的規則手冊。真正的風險不是政權更替（英國的和平轉移與制度連續性依然可靠），而是三個結構性變數：脫歐後放緩的成長軌道、對財政紀律高度敏感的英鎊與 gilts、以及 Truss 那 49 天示範過的市場即時懲罰。</p>
+
+  <h3>脫歐後折價：從「歐洲門戶」到「單獨的中型經濟體」</h3>
+  <p>外資看英國，最根本的重估發生在 2016 年——脫歐把英國從「進入歐洲單一市場的英語門戶」，變成了「一個單獨的、與歐盟有貿易摩擦的中型經濟體」。這帶來一系列結構性折價：<strong>失去與歐盟無縫貿易的成本、金融業部分功能（clearing、passporting）的流失、對歐盟勞動力的限制、以及長期投資因不確定性而遞延。</strong>脫歐後英國的成長軌道明顯放緩——2026 年 GDP 成長預估僅約 1.0–1.2%，生產力長期低迷。對外資而言，這意味著英國從一個「高成長的歐洲入口」，降級為一個「低成長但制度成熟、法治可靠」的成熟市場。<strong>英國的投資論述，因此從「成長故事」轉為「穩定與價值故事」——它的吸引力不再是動能，而是相對的制度可預測性與資產的折價定價。</strong></p>
+
+  <h3>英鎊與 gilts：財政信譽的即時溫度計</h3>
+  <p>外資面對的第二個核心變數，是英鎊與 gilt（英國國債）對財政信譽的高度敏感。英國有一個結構性弱點：<strong>經常帳與財政「雙赤字」，使它高度依賴外國資本流入來融資——這讓英鎊與 gilts 成為「善意的人質」（kindness of strangers）</strong>。當市場對英國財政紀律有信心時，資本流入、英鎊穩定、gilt 殖利率溫和；當信心動搖時（如 Truss），資本外逃、英鎊重挫、gilt 殖利率暴衝。到 2026 年 7 月，英國 10 年期 gilt 殖利率約 5.05%（高於美債約 35–45bp）、BoE 基準利率 3.75%（G7 前段）、英鎊兌美元在 1.34–1.38 區間。<strong>對外資，這組數字是英國財政信譽的即時溫度計——每一份預算、每一次首相更替，都會被債券市場即時定價（詳第 17 章）。</strong></p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">外國人</div><p>英國是「低成長但高確定性的成熟市場」：脫歐折價已大體定價，政治動盪不改制度硬體的可靠。真正要盯的是財政信譽——gilt 殖利率與英鎊，比誰當首相更重要。</p></div>
+    <div class="pv-c"><div class="pv-tag">保守黨</div><p>對保守派，外資的信心是「低稅、親商、財政紀律」路線正確的證明。Truss 之後，保守黨的財政可信度受創，重建市場信任成了它經濟論述的核心——這也是它與 Reform「大灑幣式民粹」的區隔線。</p></div>
+    <div class="pv-r"><div class="pv-tag">改革黨</div><p>對 Reform，「市場」與「gilt 義警」是建制用來否決人民意志的工具——正如 Truss 被市場「政變」推翻。它要挑戰的正是「財政必須討好債券市場」這條建制鐵律，即使代價是外資的疑慮。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個外資視角，三種利害：確定性定價、信譽證明、建制枷鎖</div>
+
+  <h3>City of London：脫歐後的自我重塑</h3>
+  <p>倫敦金融城（City of London）是英國最重要的經濟資產，也是脫歐衝擊的最前線。脫歐讓 City 失去了「passporting」（在歐盟自由提供金融服務的權利），部分歐元清算、資產管理與交易功能流向巴黎、法蘭克福、都柏林、阿姆斯特丹。<strong>但 City 並未如末日預言般崩潰</strong>——它憑藉英語、法治、時區、深厚的專業生態與監管彈性，仍維持全球頂級金融中心的地位，並試圖在脫歐後轉向新的增長點（金融科技、綠色金融、與非歐盟市場的連結）。對外資，City 是英國「制度成熟、法治可靠」論述的最強證據，也是英國經濟中最國際化、最不受政黨輪替影響的部分。<strong>City 的健康，是英國能否維持「全球金融中心」地位的關鍵指標，也是脫歐後英國經濟論述最重要的一塊拼圖（詳第 17 章）。</strong></p>
+
+  <h3>美歐中之間：外資眼中的地緣定位</h3>
+  <p>外資評估英國，還有一層地緣定位的考量。脫歐後的英國，在美、歐、中之間尋找一個新的位置：<strong>它強化了與美國的「特殊關係」（安全上倚賴、貿易上尋求協議）、試圖與歐盟在脫歐後重新靠攏（reset）、對中國採取比美國稍軟但漸趨謹慎的立場、並透過 AUKUS、Five Eyes、對烏克蘭的強力支持來錨定自己作為「西方核心成員」的身分。</strong>對外資，這個地緣定位意味著英國是一個「可靠的西方盟邦、規則導向、不會突然選邊突變」的投資環境——這是英國在動盪政治下，對國際資本最重要的一個「連續性承諾」。<strong>只要這個地緣錨不變（無論保守或工黨執政都大體維持），英國的地緣風險就是可控的、可定價的（詳第 20 章）。</strong></p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART III</div>
+  <h2>動力 · The Dynamics</h2>
+  <div class="pd-sub">大選、崩塌、崛起與離心——版圖如何運動</div>
+</div>
+
+<section id="s9">
+  <div class="sec-label">PART III · CH 09</div>
+  <h2>2024 大選深讀：一場「懲罰」而非「擁抱」的地震</h2>
+  <p class="lede">2024 年 7 月 4 日的大選，表面是工黨的壓倒性大勝（約 411 席），實質卻是英國政治史上一場最不尋常的地震——它是一場「懲罰保守黨」而非「擁抱工黨」的選舉，其結果由 FPTP 放大成巨大的席次山峰，卻建立在史上最脆弱的民意地基上。讀懂 2024，就讀懂了 2026 崩塌的種子。</p>
+
+  <h3>數字的悖論：巨大席次，淺薄民意</h3>
+  <p>2024 大選最刺眼的事實，是席次與得票的極端脫節：<strong>工黨約 411 席（63% 的席次），卻只有約 34% 的得票</strong>。這意味著工黨的得票率甚至低於 2017 年 Corbyn 領導下敗選時的水準——它是英國史上「以最低得票率換得最大多數」的政府之一。與此同時，保守黨崩跌至約 121 席（史上最慘），Reform 拿下約 14% 的全國得票卻只換得個位數席次（FPTP 對分散票的懲罰），自由民主黨則憑藉地域集中策略拿下逾 70 席。<strong>這組數字揭示了 FPTP 放大器在多黨碎片下的極端行為：工黨的勝利不是民意的浪潮，而是反對票分裂的產物——保守票被 Reform 分走，讓工黨在數百個選區以相對多數「低空」奪席。</strong></p>
+
+  <h3>崩盤的解剖：保守黨為何輸掉一切</h3>
+  <p>2024 更準確的描述，是「保守黨的崩盤」。保守黨的選票同時流向三個方向：<strong>向右流向 Reform（脫歐純度與移民憤怒）、向中間流向自由民主黨（溫和親歐的反 Boris 選民）、以及向工黨流失（單純的「該換人了」）。</strong>這三股流失疊加 14 年的執政疲勞、Partygate 的誠信崩壞、Truss 的經濟信譽毀滅、生活成本危機的民生痛感——保守黨的聯盟在四面漏水中徹底瓦解。<strong>關鍵在於：Reform 的分票，是保守黨崩盤的加速器。</strong>在許多原本安全的保守選區，Reform 分走的右翼票，剛好足以讓工黨或自民黨以相對多數勝出——這是 FPTP 懲罰「分裂陣營」的鐵律，2024 年它懲罰的是右翼。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">411</div><div class="fig-l">工黨席次（約），63% 的席次</div></div>
+    <div><div class="fig-n">~34%</div><div class="fig-l">工黨全國得票率——史上最低的「多數政府」得票之一</div></div>
+    <div><div class="fig-n">~14%</div><div class="fig-l">Reform 全國得票率，卻僅換得個位數席次（FPTP 懲罰）</div></div>
+    <div><div class="fig-n">~121</div><div class="fig-l">保守黨席次——黨史上最慘之一</div></div>
+  </div>
+
+  <h3>為什麼這是崩塌的種子</h3>
+  <p>2024 的結構，內建了 2026 崩塌的三顆種子。<strong>種子一：借來的席次。</strong>工黨大量席位是在保守票分裂時撿到的邊際勝利，一旦保守票回流或選民改投 Reform，這些席位就會崩解。<strong>種子二：沒有熱情的授權。</strong>選民選工黨是為了懲罰保守黨，不是為了擁抱工黨的願景——這個「反對式的多數」沒有會在逆境中護盤的死忠基本盤。<strong>種子三：無法兌現的期待。</strong>選民雖不熱愛工黨，卻仍期待它能修好保守黨搞砸的一切（經濟、NHS、移民、生活成本），而工黨繼承的財政牢籠讓這幾乎不可能。<strong>這三顆種子，在 Starmer 執政的第一次逆風中同時發芽——2024 的巨大勝利，本質上就是 2026 崩塌的預付款（詳第 5B、10 章）。</strong></p>
+</section>
+
+<section id="s10">
+  <div class="sec-label">PART III · CH 10</div>
+  <h2>Starmer 的崩塌與 Burnham 接任：十年七相的第七章</h2>
+  <p class="lede">2026 年 6 月至 7 月，英國上演了它十年動盪的最新一幕：執政不到兩年的 Starmer 辭職，由原大曼徹斯特市長 Andy Burnham 接任——十年來第 7 位首相。這一幕沒有大選、沒有憲政斷裂，完全在西敏制的閥門內完成，卻深刻揭示了「脆弱多數＋低成本換相＋民粹壓迫」如何規律地吞噬英國首相。</p>
+
+  <h3>崩塌的時序：從 34% 到辭職</h3>
+  <p>Starmer 的兩年是一條陡峭的下墜曲線。上任初期尚有蜜月，但財政牢籠、移民壓力、缺乏熱情的基本盤與 Reform 的持續壓迫（詳第 5B 章）四力交攻，讓工黨民調從 2024 的 34% 一路滑向 20% 上下，被 Reform 超車，Starmer 個人支持度更跌到歷任首相最低區間之一。到 2026 年上半，工黨後座議員面對一個殘酷的算術：帶著民調崩盤的 Starmer 走向下屆大選，那些「借來的邊際席次」幾乎必然崩解、大批議員將失去議席。<strong>在內閣制「低成本換相」的邏輯下（詳第 2B 章），換掉 Starmer 賭一次反彈，成了黨團的理性選擇。</strong>2026 年 6 月 22 日，Starmer 宣布辭去黨魁與首相，稱要「為我擔任首相的時期闔上這一頁」。</p>
+
+  <h3>Burnham 的路徑：市長、補選、黨魁、首相</h3>
+  <p>Andy Burnham 的接任路徑，是英國內閣制彈性的一次教科書展示。作為原大曼徹斯特市長，Burnham 當時並非國會議員（沒有議席就無法當首相）。他的路徑是：<strong>先透過 2026 年 6 月 18 日的 Makerfield 補選重返下議院（原議員 Josh Simons 辭職讓路，Burnham 在補選中擊敗 Reform UK 的候選人勝出），取得議席；再在 7 月中的工黨特別黨大會上，獲 401 名工黨議員中 379 票支持當選黨魁；最後由查爾斯國王依慣例邀其組閣，於 7 月中下旬（週一）就任首相。</strong>他在唐寧街的首次演說中，宣示要成為國家的「斷路器」（circuit-breaker），承諾一個「新的政治與經濟模型」與一份十年計畫，並呼籲英國要證明「我們能重獲穩定」。</p>
+
+  <div class="callout">
+    <div class="co-tag">FACTUAL ANCHOR · Burnham 接任的關鍵事實</div>
+    <p><strong>Starmer</strong>於 2026-06-22 辭去工黨黨魁與首相。<strong>Burnham</strong>於 2026-06-18 透過 Makerfield 補選（Josh Simons 辭職讓路）重返國會、擊敗 Reform 候選人；於 7 月中特別黨大會獲 401 名工黨議員中 379 票當選黨魁；並於 7 月中下旬（週一）由查爾斯國王主持交接、就任首相——<strong>十年來第 7 位首相</strong>。故 2026-07-23 現任首相＝Andy Burnham（工黨），甫上任數日。他「未經大選」就任，在憲政上完全正當（首相＝下議院多數黨黨魁），但缺乏「新的民意授權」，是其正當性的政治軟肋（詳第 2B 章）。<strong>Kemi Badenoch 仍為保守黨黨魁</strong>（2024-11 當選，2026 年 7 月仍在任、續任反對黨領袖）。</p>
+  </div>
+
+  <h3>「沒有大選的首相」：正當性的軟肋</h3>
+  <p>Burnham 接任引發了「這是否民主」的辯論。如第 2B 章所論，這在憲政上完全正當——英國選民從不直接選首相，Burnham 作為多數黨黨魁自動成為首相，有大量歷史先例（Brown、May、Sunak 皆如此）。<strong>但反對者（尤其 Reform 與保守黨）的真正論點，不是「非法」，而是「缺乏新的民意授權」</strong>：一個在 2024 年以 Starmer 為招牌贏得的多數，如今換上了一個路線更左、風格迥異的 Burnham，選民從未對這個組合投過票。這個「授權赤字」是 Burnham 最大的政治軟肋——它給了 Reform 與保守黨一個強力的攻擊點（「還政於民、立即大選」），也讓 Burnham 承受著「必須快速證明自己、否則正當性存疑」的壓力。</p>
+
+  <div class="debate">
+    <div class="d-pro">
+      <div class="d-tag">論點 ▸ Burnham 能穩住工黨</div>
+      <p>Burnham 的軟左翼、地方主義形象，比 Starmer 的技術官僚穩健，更能與被 Reform 搶走的 Red Wall 憤怒票共鳴。他以「斷路器」自居、承諾路線重置，若能在移民與生活成本上給出更有力的回應、重新點燃基本盤熱情，工黨或能止血。他在市長任內對抗中央撙節、爭取北方權益的紀錄，是他最大的本錢。</p>
+    </div>
+    <div class="d-con">
+      <div class="d-tag">反方 ▸ 換人救不了結構</div>
+      <p>Starmer 的崩塌不是個人失敗，而是「脆弱多數＋財政牢籠＋民粹壓迫」的結構性結局。Burnham 接手的是同一個 34% 地基、同一個停滯經濟、同一個財政死結，外加「無授權」的軟肋。換一張臉改變不了算術——十年七相的歷史證明，英國的問題不在領袖人選，而在制度與經濟的結構。Burnham 很可能只是走馬燈的第七個、而非最後一個。</p>
+    </div>
+  </div>
+
+  <h3>十年七相的診斷：領袖問題還是結構問題</h3>
+  <p>把七位首相排成一列（Cameron、May、Johnson、Truss、Sunak、Starmer、Burnham），一個結構性的診斷就浮現了：<strong>英國的動盪，不是七次個別的領袖失敗，而是同一台機器反覆輸出的結果。</strong>這台機器由三個零件組成：脫歐撕裂了兩大黨的內部凝聚（Cameron、May、Johnson、保守黨的內耗）；財政與市場的鐵律懲罰了每一次冒進（Truss）；而內閣制的低成本換相閥門，讓每一次民調低迷都迅速兌現成換相（Johnson、Truss、Starmer）。<strong>只要這台機器運轉——脫歐後政黨重組未沉澱、經濟停滯未緩解、換相成本仍低廉——第八位、第九位首相的走馬燈就不會停。這是「西敏制是常數、政黨重組是變數」這句核心定錨最直接的體現。</strong></p>
+</section>
+
+<section id="s11">
+  <div class="sec-label">PART III · CH 11</div>
+  <h2>Reform 的崛起與兩黨制的瓦解</h2>
+  <p class="lede">英國政治一百年來的骨架是「保守 vs 工黨」的兩黨制——但 2026 年，這個骨架第一次真正面臨瓦解。Reform UK 在多家民調領先或並列，把政治的主軸線從「左 vs 右」改寫成「建制 vs 反建制」。這一章要問：Reform 的崛起，是一場會退潮的抗議泡沫，還是一次重塑英國政黨體系的永久斷裂？</p>
+
+  <h3>民調的地震：三大黨擠在誤差之內</h3>
+  <p>2026 年 7 月的民調呈現英國史上罕見的碎片格局。YouGov 7 月 19–20 日：<strong>Reform 23%、保守 21%、工黨 20%、綠黨 14%、自民黨 12%</strong>——三大黨的差距落在統計誤差之內，這是自 2024 年 7 月以來工黨首次落入 Reform 的誤差範圍、保守黨自 2025 年 4 月以來首次。更早的 7 月民調（YouGov 5–6 日 Ref 25%、12–13 日 Ref 24%）與多家機構（Opinium、Deltapoll、PollCheck 七日均值 Ref 約 24.6%）都顯示 Reform 穩定領先或並列。<strong>這組數字的歷史意義在於：它是英國第一次真正意義上的「五黨政治」——沒有任何一黨接近多數，前兩名的差距在誤差內，第三、四、五名都握有可觀的選票。</strong>兩黨制的骨架，第一次在民調上碎裂。</p>
+
+  <h3>FPTP 的裁決：碎片化會產出什麼</h3>
+  <p>但民調不是席次——真正的問題是：在 FPTP 之下，這種五黨碎片會被放大成什麼？答案高度不確定，取決於 Reform 的支持是「分散」還是「地域集中」（詳第 1B 章）。<strong>情境一（Reform 分散）：</strong>若 Reform 的 23% 均勻分布，它會像 2015 年的 UKIP、2024 年的自己一樣，被 FPTP 懲罰、席次遠低於得票——這對保守黨是災難（右翼分票讓工黨或工黨的殘餘撿席），對 Reform 是挫折。<strong>情境二（Reform 集中）：</strong>若 Reform 能把 Red Wall 變成地域票倉（複製 SNP 模式），它就能在那些選區以相對多數奪席、席次爆量。<strong>情境三（懸峙國會）：</strong>最可能的結果或許是「沒有任何一黨過半」，迫使英國進入陌生的聯合政府或少數政府談判。<strong>FPTP 這部為兩黨設計的放大器，在五黨輸入下會給出什麼，是英國政治未來最大的未知數。</strong></p>
+
+  <div class="prism">
+    <div class="pv-r"><div class="pv-tag">改革黨</div><p>兩黨制的瓦解是「人民終於有了第三個選項」：一百年來被迫在保守與工黨這兩個建制的臉之間二選一，如今 Reform 打破了這個假選擇。民調領先證明，多數人要的是掀桌，不是換臉。</p></div>
+    <div class="pv-c"><div class="pv-tag">保守黨</div><p>Reform 崛起是「右翼的內戰」：它分裂右翼、在 FPTP 下把席次送給左翼。真正的問題是——右翼是合併（保守吸收 Reform 或反之），還是永久分裂、讓工黨長期執政？加拿大 1993 的崩盤是前車之鑑。</p></div>
+    <div class="pv-l"><div class="pv-tag">工黨</div><p>兩黨制瓦解是「政治主軸的位移」：從我們熟悉的「左 vs 右」（工黨的主場），變成「建制 vs 反建制」（Reform 的主場）。工黨被迫站在它最不想站的「建制」一邊——這是一場我們不擅長打的戰爭。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一場瓦解，三種讀法：真選項、右翼內戰、主軸位移</div>
+
+  <h3>抗議票 vs 執政票：Reform 的試煉</h3>
+  <p>Reform 崛起的核心懸念，是「民調的抗議票能否轉化為選舉的執政票」。歷史上，英國的第三勢力（UKIP、脫歐黨、乃至 2010 年代的自民黨）都曾在民調與非大選中聲勢浩大，卻在真正的全國大選中被 FPTP 與「不想浪費選票」的策略性投票壓回原形。<strong>Reform 的試煉有三關：組織關（能否建立媲美兩大黨的地方組織與選戰機器）、人才關（Farage 之外能否長出可信的治理團隊與第二代領袖）、可信度關（其政策在執政檢視下能否經得起推敲）。</strong>若 Reform 過不了這三關，它可能重蹈 UKIP 覆轍——聲勢驚人卻席次寥寥，成為「分裂右翼、幫工黨執政」的抗議泡沫。若它過得了，英國將迎來百年來最大的政黨體系重組。<strong>這道分水嶺的答案，將定義英國政治的下一個十年（詳第 14 章）。</strong></p>
+</section>
+
+<section id="s12">
+  <div class="sec-label">PART III · CH 12</div>
+  <h2>生活成本、移民與小船：憤怒的三重燃料</h2>
+  <p class="lede">2026 年英國政治的憤怒，燒的是三種燃料：長期的生活成本壓力、居高的淨移民數字、以及最具象徵性的英吉利海峽「小船」。這三者交織，構成了 Reform 崛起的社會基礎，也構成了工黨與保守黨都無力撲滅的火場。這一章解剖為什麼「數字在改善、憤怒卻在升溫」的弔詭。</p>
+
+  <h3>生活成本：停滯的實質工資與被掏空的體感</h3>
+  <p>憤怒的最深層燃料，是十餘年的生活成本壓力。英國自金融危機以來的實質工資長期停滯——這是先進經濟體中罕見的「失落的十五年」。緊縮削弱了公共服務、能源危機推高了帳單、脫歐後的低成長壓抑了薪資增長、通膨侵蝕了購買力。<strong>對普通家庭而言，體感是「工作越來越辛苦、生活卻沒有變好、公共服務（NHS 排隊、地方設施）越來越糟」</strong>。這種長期的、瀰漫性的「被拋在後面」感，是所有政治憤怒的底層。它不指向任何具體政黨，而是一種對「整個建制（保守與工黨都執政過）都無法讓生活變好」的普遍失望——這正是 Reform「掀桌」論述能夠共鳴的土壤。</p>
+
+  <h3>移民與小船：數字改善，憤怒升溫的弔詭</h3>
+  <p>移民議題呈現一個關鍵弔詭：<strong>實際數字在改善，政治憤怒卻在升溫。</strong>2026 年，小船跨越海峽的數字實際上在下降（截至 5 月的一年約 3.6 萬人，較前一年降約 13%；淨移民更大幅回落，2025 年降約 48% 至約 17.1 萬，為 2012 年以來除疫情外最低）。但這些改善，完全沒有平息政治憤怒——因為<strong>移民問題的政治能量，來自象徵與體感，而非統計</strong>。每一艘登陸的小船、每一則安置尋求庇護者的旅館新聞，都被 Reform 轉化為「政府控制不了邊界、無力保衛英國」的鐵證。工黨為降低數字所做的努力（如與法國達成協議，2026/27–2028/29 提供法國約 6.62 億英鎊強化北法反偷渡），在「還有小船登陸」的畫面前顯得蒼白。<strong>這是「穩健之黨遇上憤怒之國」矛盾最尖銳的爆點——理性的數字改善，敵不過感性的失控敘事。</strong></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">~3.6 萬</div><div class="fig-l">截至 2026-05 一年小船跨越數，較前年降約 13%</div></div>
+    <div><div class="fig-n">~17.1 萬</div><div class="fig-l">2025 淨移民，降約 48%，2012 年來（除疫情）最低</div></div>
+    <div><div class="fig-n">~75%</div><div class="fig-l">小船抵達者中成年男性比例</div></div>
+    <div><div class="fig-n">£6.62 億</div><div class="fig-l">英國承諾 2026/27–28/29 給法國的反偷渡經費</div></div>
+  </div>
+
+  <h3>為什麼兩大黨都撲不滅這場火</h3>
+  <p>移民與小船，是工黨與保守黨都無力撲滅的火場，原因是結構性的。<strong>工黨的困境：</strong>它受國際法（難民公約）、人權法（ECHR）與自身左翼基本盤的約束，無法採取 Reform 式的激烈手段（如全面拒收、大規模遣返），又無法快速把數字降到讓選民滿意；它的「穩健」在這議題上等於「無力」。<strong>保守黨的困境：</strong>它 14 年執政期間移民數字不降反升（脫歐後為填補勞動力缺口而放寬非歐盟簽證），已徹底喪失在此議題上的可信度，被 Reform 譏為「說一套做一套」。<strong>只有 Reform 能在這議題上「贏」——因為它從不需要真的執政、真的解決問題，只需要不斷放大憤怒、承諾一個兩大黨都不敢承諾的激烈方案。</strong>這是反對者的優勢：它可以只開空頭支票，而不必兌現（詳第 6、11 章）。</p>
+</section>
+
+<section id="s13">
+  <div class="sec-label">PART III · CH 13</div>
+  <h2>蘇格蘭獨立與聯合王國的未來</h2>
+  <p class="lede">如果說 Reform 是撕裂政黨體系的力量，那麼蘇格蘭獨立與北愛統一，就是撕裂國家本體的力量。這一章要論證：聯合王國的解體不是一個迫近的戲劇性事件，而是一個以世代為單位緩慢累積的結構性壓力——它是英國政治真正的「命門」，因為一旦聯合王國瓦解，一切其他問題都將被重新定義。</p>
+
+  <h3>脫歐如何重啟蘇格蘭問題</h3>
+  <p>蘇格蘭獨立在 2014 年公投以 55:45 否決後，本應沉寂一代人。是脫歐重啟了它——蘇格蘭以約 62% 投票留歐，卻被英格蘭主導的多數拖出歐盟。<strong>這給了 SNP 一個強力的新論述：2014 年蘇格蘭選擇留在英國，部分前提是「留英＝留歐」；當脫歐推翻了這個前提，蘇格蘭有權重新選擇。</strong>脫歐把獨立訴求從「經濟與民族認同」的舊框架，升級為「民主意志被否決」的新框架——這是一個更有力、更難反駁的道德論述。到 2026 年，SNP 在 5 月 Holyrood 選舉後續掌政（Swinney 領導），把選舉結果詮釋為推動第二次公投的授權；獨立支持度則長期在 50% 上下擺盪、尚未穩定過半。</p>
+
+  <h3>法律的剎車 vs 民主的壓力</h3>
+  <p>蘇格蘭獨立面對一道關鍵的法律剎車：<strong>2022 年英國最高法院裁定，蘇格蘭議會無權單方面舉行具法律效力的獨立公投——公投的合法舉行，需要西敏寺的同意。</strong>這造成一個僵局：SNP 有民主授權（選舉勝利）要求公投，西敏寺卻有法律權力拒絕同意。這場「民主授權 vs 法律程序」的拉鋸，讓蘇格蘭獨立成為一個「無法透過一次事件解決、只能長期僵持」的議題。<strong>對聯合王國，這既是保險（西敏寺可拒絕公投、避免即刻解體），也是隱患（長期否決蘇格蘭的民主訴求，反而可能積累更深的離心怨懟，把「獨立」從政策選擇升級為「反抗英格蘭壓迫」的認同鬥爭）。</strong></p>
+
+  <div class="lens l-u">
+    <div class="lens-tag">UNION ▸ 命門視角</div>
+    <p>「聯合王國不會在一場公投中解體，它會在一代人的認同移轉中鬆動。」——聯合王國真正的風險不是明天的獨立公投，而是世代的緩變：蘇格蘭年輕世代（40 歲以下）明顯更傾向獨立、北愛年輕世代更傾向統一、天主教人口已首度超過新教。這些趨勢以十年為單位累積，短期不會跨過門檻，長期卻可能不可逆。若此時英格蘭又選出一個「英格蘭民族主義」色彩濃厚的政黨（Reform），可能反過來加速邊陲的離心——聯合王國的命門，正是「英格蘭的政治選擇，可能親手推開邊陲」。</p>
+  </div>
+
+  <h3>Reform 的英格蘭民族主義：離心的加速器？</h3>
+  <p>一個常被忽略的動力是：<strong>Reform 的崛起，可能反過來加速聯合王國的離心。</strong>Reform 的支持高度集中在英格蘭（尤其英格蘭的後工業地帶），它帶有濃厚的「英格蘭民族主義」色彩——反移民、反歐、反建制的論述，在蘇格蘭與北愛的共鳴遠低於英格蘭。若下屆大選 Reform 崛起、甚至進入執政，一個「由英格蘭民族主義驅動的西敏寺政府」，恰恰是 SNP 與蘇格蘭獨立派最有力的動員素材——「看，英格蘭選擇了一條蘇格蘭從未投票支持的道路，我們為什麼還要被綁在一起？」<strong>這是英國政治最深的一層弔詭：撕裂政黨體系的力量（Reform）與撕裂國家本體的力量（蘇獨），可能互相餵養——英格蘭越向右民粹，蘇格蘭越想離開。</strong></p>
+
+  <h3>聯合王國的未來：三種情境</h3>
+  <p>聯合王國的未來，大致有三種情境。<strong>情境一（維持現狀）：</strong>西敏寺持續拒絕蘇格蘭公投、獨立與統一支持度都無法穩定過半、聯合王國在張力中維持——這是最可能的短中期結果。<strong>情境二（慢裂）：</strong>世代認同移轉持續累積、脫歐與 Reform 的離心效應發酵，蘇格蘭或北愛的分離支持在某個時點穩定過半，迫使一場公投——這是最可能的長期風險。<strong>情境三（重整）：</strong>英國透過更深的地方分權、乃至走向某種聯邦制，重新設計四個民族的關係，以自治換取統一——這需要英格蘭政治精英的遠見，歷史上罕見。<strong>對這份報告的所有其他分析，聯合王國都是一個底層前提：若它瓦解，英國的人口、經濟、財政、地緣地位都將被徹底重寫——這是為什麼它是「命門」。</strong></p>
+</section>
+
+<section id="s14">
+  <div class="sec-label">PART III · CH 14</div>
+  <h2>民主韌性辨析：政治不穩定 vs 制度韌性</h2>
+  <p class="lede">看到十年七相、兩黨制瓦解、聯合王國鬆動，一個自然的問題是：英國民主是在崩壞嗎？這一章要做一個關鍵的辨析——把「政治的不穩定」與「制度的韌性」分開。答案是：英國正經歷劇烈的政治動盪，但它的制度硬體依然強壯；真正的風險不是威權崩壞，而是「治理癱瘓」與「慣例侵蝕」。</p>
+
+  <h3>區分兩個層次：政治 vs 制度</h3>
+  <p>辨析英國民主健康，必須區分兩個層次。<strong>政治層（軟體）：</strong>政黨體系、領袖、選情、政策——這一層極不穩定，十年七相、兩黨裂解、民粹崛起、邊陲離心，都是這一層的動盪。<strong>制度層（硬體）：</strong>自由選舉、和平轉移、獨立司法、中立文官、新聞自由、法治、獨立央行——這一層依然強壯。關鍵證據是：<strong>十年間換了七位首相，每一次轉移都在西敏制的規則內平順完成，沒有政變、沒有選舉舞弊、沒有拒絕交權、沒有動用軍隊、沒有街頭流血。</strong>Burnham 未經大選就任，引發正當性辯論，但完全在憲政慣例內。這是英國民主的核心韌性：<strong>它的政治可以極度混亂，它的制度卻拒絕斷裂。</strong>對照許多政治動盪就滑向威權的國家，英國的制度硬體展現了驚人的吸收能力。</p>
+
+  <div class="debate">
+    <div class="d-pro">
+      <div class="d-tag">論點 ▸ 英國民主依然強壯</div>
+      <p>十年七相卻零憲政斷裂，正是韌性的證明——制度能在最劇烈的政治動盪中維持和平轉移、法治與中立文官。2019 年最高法院能推翻 Johnson 的非法擱置國會、選舉持續自由公正、新聞持續自由監督、Truss 的冒進被市場與黨團在 49 天內糾正。這不是崩壞，是一個成熟民主在自我運轉、自我糾錯。</p>
+    </div>
+    <div class="d-con">
+      <div class="d-tag">反方 ▸ 韌性掩蓋了慢性病</div>
+      <p>制度沒斷裂，不代表健康。真正的病灶是「治理癱瘓」——十年七相意味著沒有任何政府能推動需要長期堅持的結構改革（生產力、住房、NHS、聯合王國重整），問題持續累積。更深的隱憂是「慣例侵蝕」：當民粹力量以「人民主權」之名衝撞約束多數的慣例（擱置國會、質疑司法、攻擊文官中立），這套「靠自我克制運轉」的不成文憲政，可能被逐步掏空——它沒有成文憲法的硬性防線。</p>
+    </div>
+  </div>
+
+  <h3>真正的風險：不是威權，是癱瘓與侵蝕</h3>
+  <p>綜合兩方，最誠實的診斷是：<strong>英國民主的真正風險，不是滑向威權崩壞（制度硬體太強），而是兩個更隱蔽的慢性病——治理癱瘓與慣例侵蝕。</strong>治理癱瘓：領袖走馬燈、多數脆弱、政黨碎片化，使英國無法就任何需要跨屆堅持的長期問題（生產力停滯、住房短缺、NHS 危機、人口老化、聯合王國重整）形成穩定共識並持續執行——問題被一屆又一屆地推遲，緩慢惡化。慣例侵蝕：英國的憲政靠不成文慣例維繫，而非成文憲法的硬性條款；當民粹力量以「人民 vs 建制」之名，把「擱置國會」「攻擊司法審查」「質疑文官中立」「藐視國際法」正常化，這套精巧的自我克制體系可能被逐步磨損——它的脆弱正在於沒有硬防線。<strong>英國不會變成威權國家，但它可能變成一個「制度still在、卻越來越難把事情做好」的國家。</strong></p>
+
+  <h3>核心定錨的回歸：常數、變數、命門</h3>
+  <p>把韌性辨析放回全書的核心定錨，三條主線就清晰了：<strong>西敏制是常數</strong>——制度硬體（選舉、轉移、司法、文官、央行）強壯到能在十年七相中不斷裂，這是英國最可靠的資產，也是本報告對「不會崩壞」的信心來源。<strong>脫歐後的政黨重組是變數</strong>——兩黨制裂解為五黨碎片、民粹右崛起、領袖走馬燈，這是最劇烈也最難預測的動盪，是本報告最大的不確定性。<strong>聯合王國是命門</strong>——蘇格蘭與北愛的離心是唯一能從根本上重寫英國一切前提的力量，它以世代為單位緩慢鬆動，是本報告最深的長期風險。<strong>讀懂這三條線的分工——哪個穩、哪個變、哪個致命——就讀懂了 2026 年的英國。</strong></p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART IV</div>
+  <h2>引擎 · The Engine</h2>
+  <div class="pd-sub">政黨×經濟×聯盟的完整傳導迴路</div>
+</div>
+
+<section id="s15">
+  <div class="sec-label">PART IV · CH 15</div>
+  <h2>三角傳導模型：政黨×經濟×聯盟</h2>
+  <p class="lede">前面各章分別剖析了政黨、經濟與聯合王國；這一章把它們接成一個完整的傳導系統。英國政治的引擎，是三個節點（政黨體系、經濟表現、聯盟凝聚）與它們之間六條傳導邊的迴路。理解這六條邊如何互相餵養，就理解了為什麼英國陷入一個難以自拔的動盪循環。</p>
+
+  <h3>三個節點的定義</h3>
+  <p>先定義三個節點。<strong>節點 P（政黨／Party）：</strong>政黨體系的狀態——兩黨穩定、還是五黨碎片、民粹右的強弱、領袖的更替。<strong>節點 E（經濟／Economy）：</strong>經濟表現——成長、生產力、實質工資、財政空間、gilt 與英鎊。<strong>節點 U（聯盟／Union）：</strong>聯合王國的凝聚——蘇格蘭與北愛的離心強弱、地方分權的張力。這三個節點不是獨立的，而是透過六條邊（每兩個節點之間有雙向傳導）互相牽動。英國動盪的本質，是這個三節點系統陷入了一組互相強化的負迴路——每個節點的惡化，都在推動其他節點惡化。</p>
+
+  <h3>六條傳導邊</h3>
+  <table>
+    <tr><th>邊</th><th>傳導方向</th><th>機制</th></tr>
+    <tr><td><strong>E → P</strong></td><td>經濟停滯 → 政黨動盪</td><td>停滯與生活成本壓力，餵養對建制的憤怒、推升民粹右（Reform）、逼退執政首相</td></tr>
+    <tr><td><strong>P → E</strong></td><td>政黨動盪 → 經濟受損</td><td>領袖走馬燈與政策不連續，抑制長期投資；財政冒進（Truss）遭市場懲罰</td></tr>
+    <tr><td><strong>E → U</strong></td><td>經濟不滿 → 聯盟離心</td><td>邊陲的經濟被拋棄感（蘇格蘭、北愛、威爾斯），轉化為對西敏寺的離心</td></tr>
+    <tr><td><strong>U → E</strong></td><td>聯盟不確定 → 經濟折價</td><td>獨立／統一的不確定性，抬高蘇格蘭與北愛的投資風險溢價、抑制資本</td></tr>
+    <tr><td><strong>P → U</strong></td><td>政黨變化 → 聯盟壓力</td><td>英格蘭民粹右（Reform）崛起，刺激蘇格蘭與北愛的離心（「英格蘭選的路我們沒選」）</td></tr>
+    <tr><td><strong>U → P</strong></td><td>聯盟離心 → 政黨重組</td><td>民族主義政黨（SNP、Sinn Féin）壟斷邊陲席次，加劇西敏寺的碎片化與懸峙</td></tr>
+  </table>
+  <p class="tbl-note">六條邊構成一個閉環：脫歐同時衝擊了三個節點（撕裂政黨、放緩經濟、激化離心），啟動了這組互相強化的負迴路——這是英國動盪為何「系統性」而非偶發的結構解釋。</p>
+
+  <h3>迴路的啟動器：脫歐是三重衝擊</h3>
+  <p>這個三角迴路的啟動器，是脫歐——因為脫歐罕見地<strong>同時衝擊了三個節點</strong>。它撕裂了政黨體系（P：保守黨內耗、Reform 崛起）、放緩了經濟（E：貿易摩擦、投資遞延、低成長）、並激化了聯盟離心（U：蘇格蘭被違背意志拖出歐盟、北愛的海上邊界）。<strong>一次事件同時點燃三個節點，然後六條邊讓它們互相餵養、正回饋放大——這就是為什麼脫歐十年後，英國的動盪不但沒有平息，反而透過這組迴路持續自我強化。</strong>要打破這個迴路，需要至少一個節點出現決定性的改善（經濟重回成長、政黨重組沉澱出新穩定、或聯合王國關係重新錨定），把負迴路轉為正迴路——但截至 2026 年，三個節點都仍在惡化的一側。</p>
+
+  <h3>核心定錨的機制化：常數、變數、命門如何對應三節點</h3>
+  <p>這個三角模型，正是核心定錨的機制化表達。<strong>西敏制是常數</strong>——它不是三個節點之一，而是承載整個迴路的「制度平台」：無論 P、E、U 如何動盪，西敏制保證了轉移的和平與制度的連續（這是迴路不會崩成革命或政變的原因）。<strong>脫歐後的政黨重組是變數</strong>——對應節點 P，是當前最劇烈、最主動的動盪源。<strong>聯合王國是命門</strong>——對應節點 U，是唯一能從根本上摧毀整個平台的節點（若 U 崩解，整個三角的前提都要重寫）。<strong>接下來的第 16–20 章，就是逐條深入這六條邊——先看 E↔P（政經迴路）、再看 E 本身（脫歐長期帳、City、產業人口）、政策連續性、以及地緣如何從外部影響整個系統。</strong></p>
+</section>
+
+<section id="s16">
+  <div class="sec-label">PART IV · CH 16</div>
+  <h2>政治×經濟迴路：停滯如何餵養動盪</h2>
+  <p class="lede">三角模型的第一條核心邊，是政治與經濟的雙向傳導（E↔P）。這一章論證：脫歐後的經濟停滯，是英國政治動盪最深的燃料；而政治動盪反過來又抑制了經濟的修復——兩者鎖進一個互相拖累的負迴路，這是英國「十年七相」背後最根本的經濟結構。</p>
+
+  <h3>E → P：停滯如何製造憤怒與換相</h3>
+  <p>第一個方向：經濟停滯如何餵養政治動盪。英國自金融危機以來陷入「生產力低迷、實質工資停滯」的長期困境，脫歐後成長進一步放緩（2026 年 GDP 成長預估僅約 1.0–1.2%）。<strong>這種停滯的政治後果是致命的：當經濟的餅不再變大，政治就從「如何分配增長」變成「如何分配痛苦」——這是一種零和的、更容易滋生憤怒與極化的政治。</strong>停滯讓每個政府都只能在加稅、撙節、借債之間選一種得罪人的方式，快速消耗支持度；停滯讓「生活沒有變好」的普遍失望，轉化為對建制的憤怒、對民粹（Reform）的擁抱；停滯讓每一位首相都在經濟無力回天中被民調拖垮、被黨團換掉。<strong>經濟停滯，是十年七相最深的結構原因——不是七位首相都無能，而是他們都在一個不增長的經濟上，被要求做不可能的事。</strong></p>
+
+  <h3>P → E：動盪如何抑制修復</h3>
+  <p>第二個方向（負回饋）：政治動盪如何反過來抑制經濟修復。<strong>領袖走馬燈與政策不連續，是投資的毒藥。</strong>長期投資（基礎建設、產業升級、外資設廠）需要政策的可預測性與跨屆的連續性；但當首相十年換七位、每一任都可能推翻前任的政策方向，企業與投資人就會遞延決策、要求更高的風險溢價。更直接的是財政冒進的市場懲罰——Truss 的 49 天示範了，一次失去市場信任的財政政策，能在幾天內推高整國的借貸成本、衝擊養老金、重創英鎊（詳第 17B 章）。<strong>政治動盪，讓英國經濟背上了一層「不確定性稅」：更高的風險溢價、更保守的投資、更受限的財政空間——這反過來又加深了停滯，完成了負迴路。</strong></p>
+
+  <div class="prism">
+    <div class="pv-l"><div class="pv-tag">工黨</div><p>政經迴路是「工黨執政的死結」：它繼承了停滯的經濟（E 低迷），卻因政治脆弱（P 動盪）而無法推動修復所需的長期投資與改革。工黨想用「穩定」打破迴路，但穩定本身需要它沒有的東西——時間與授權。</p></div>
+    <div class="pv-c"><div class="pv-tag">保守黨</div><p>迴路的解方是「供給側改革」：鬆綁管制、降低稅負、釋放企業活力——這是柴契爾主義的信條。但 Truss 證明了，供給側改革若無財政信譽支撐，會被市場當場否決。保守黨仍在尋找「改革與可信」的平衡。</p></div>
+    <div class="pv-r"><div class="pv-tag">改革黨</div><p>迴路的解方是「掀掉建制的束縛」：脫離淨零、砍移民、廢管制、對抗 Whitehall 與 gilt 義警。Reform 承諾用民粹的激進打破停滯——但這正是市場最擔心的「Truss 2.0」風險。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一條政經死結，三種解方：穩定、供給側、掀桌</div>
+
+  <h3>財政的鐵三角：稅、支出、借債都是牆</h3>
+  <p>政經迴路的核心約束，是英國的財政鐵三角——加稅、撙節、借債，三條路都是牆。<strong>加稅：</strong>英國稅負已達戰後高點，進一步加稅會打擊本已疲弱的成長、激怒選民、且可能適得其反（拉弗曲線效應）。<strong>撙節：</strong>14 年緊縮已把公共服務削到骨頭，NHS、地方政府、司法系統都在崩潰邊緣，再撙節政治上不可行。<strong>借債：</strong>受制於 Truss 之後市場對財政紀律的嚴厲監視、以及居高的 gilt 殖利率（約 5%）推高的利息負擔，借債空間有限。<strong>這個「三面都是牆」的財政鐵三角，是每一位英國首相（尤其工黨）的牢籠——它讓「打破政經迴路」所需的財政動作（大規模投資）幾乎無法執行。要打破它，唯一的長期出路是提升生產力、把餅做大——而這，恰恰是英國三十年來最失敗的領域（詳第 16B、18 章）。</strong></p>
+</section>
+
+<section id="s16b">
+  <div class="sec-label">PART IV · CH 16B</div>
+  <h2>脫歐的長期帳：貿易、投資與生產力</h2>
+  <p class="lede">脫歐是這整個政經迴路的啟動器；這一節結算它的長期經濟帳。脫歐的成本不是一次性的衝擊，而是一種「持續的摩擦稅」——它以貿易障礙、投資遞延與生產力拖累的形式，長期壓低英國的成長軌道。這筆帳是理解英國停滯的關鍵，也是政治上最難誠實面對的一頁。</p>
+
+  <h3>貿易摩擦：從無縫到有縫</h3>
+  <p>脫歐最直接的經濟成本，是與最大貿易夥伴（歐盟）之間，從「單一市場的無縫貿易」變成「有海關、有監管障礙的有縫貿易」。這對英國經濟的傷害是結構性的：<strong>出口商面對更多文書、延遲與成本，中小企業尤其難以承受；供應鏈的效率下降；部分企業乾脆減少或放棄對歐貿易。</strong>雖然英國尋求與其他市場（美國、CPTPP、印度）的新貿易協議來彌補，但這些新協議的經濟量級，遠不足以取代與近在咫尺、規模龐大的歐盟單一市場的損失。<strong>地理與規模是無法談判的——歐盟是英國無可替代的最大市場，而脫歐在這個市場與英國之間，永久性地加了一道摩擦稅。</strong></p>
+
+  <h3>投資的遞延：不確定性的長影</h3>
+  <p>脫歐的第二筆帳，是投資的長期抑制。從 2016 公投到脫歐落地，長達數年的不確定性，讓企業（尤其需要長期承諾的製造業與外資）遞延或取消了在英國的投資決策。<strong>脫歐後，英國作為「進入歐洲單一市場的門戶」這一核心投資論述消失了——一家想服務歐洲市場的跨國企業，不再有把英國當作歐洲基地的理由。</strong>這導致商業投資長期低迷，而投資正是生產力增長的引擎。缺乏投資，英國的資本存量老化、技術更新放緩、生產力停滯——這是脫歐透過「投資遞延」這條管道，對英國長期成長潛力的深層侵蝕。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 脫歐帳為何在政治上無法誠實結算</div>
+    <p>脫歐的長期經濟成本，在英國政治中是一個近乎「不能說的真相」。對脫歐派（保守右翼、Reform），承認脫歐拖累經濟，等於承認自己主張的世紀決策是個錯誤——政治上不可能。對留歐派（部分工黨、自民黨），高調攻擊脫歐，會被指控「想推翻民主公投、開民意倒車」，且無助於解決當下問題。於是形成一個弔詭：<strong>幾乎所有主流政黨都選擇「不談脫歐」——保守黨不能認錯、工黨不敢翻案、Reform 則把失敗歸咎於「脫歐執行得不夠純」。</strong>結果是，脫歐的經濟帳被政治性地擱置、無人願意結算，而它的成本卻持續透過政經迴路，餵養著英國的停滯與憤怒。這是英國政治「誠實赤字」最深的一個角落。</p>
+  </div>
+
+  <h3>生產力之謎：脫歐加劇了老問題</h3>
+  <p>必須誠實指出：<strong>英國的生產力停滯，早於脫歐、深於脫歐。</strong>英國自 2008 金融危機以來就陷入「生產力之謎」——生產力增長遠低於歷史趨勢與其他先進經濟體，原因複雜（投資不足、技能缺口、區域不平衡、金融業偏重、公共投資低落）。脫歐不是這個問題的起源，但它<strong>顯著加劇</strong>了：透過抑制投資、增加貿易摩擦、限制勞動力流動、加深不確定性，脫歐把一個既有的慢性病推向了更嚴重的階段。<strong>這個區分很重要：英國的經濟困境，是一個「脫歐前就存在、脫歐後更惡化」的結構性生產力危機——它不能只靠「取消脫歐」來解決，也不能只靠「更純的脫歐」來解決，它需要英國政治三十年來始終無法凝聚的、跨屆的、痛苦的長期改革（投資、技能、住房、區域均衡）——而政治動盪恰恰讓這種長期改革無法發生（詳第 18 章）。</strong></p>
+</section>
+
+<section id="s17">
+  <div class="sec-label">PART IV · CH 17</div>
+  <h2>資本與 City：金融、英鎊、養老金與財政信譽</h2>
+  <p class="lede">英國經濟有一個異常突出的節點——倫敦金融城（City of London），以及它所代表的「資本與財政信譽」的複合體。這一章論證：英國高度依賴金融業與外國資本，這既是它的核心資產，也是它的核心脆弱——它讓英鎊與 gilts 成為「善意的人質」，讓財政信譽成為英國治理最不能碰的紅線。</p>
+
+  <h3>金融業的雙面性：資產還是失衡</h3>
+  <p>金融業是英國經濟的皇冠，也是它失衡的根源。<strong>作為資產：</strong>City 是全球頂級金融中心之一，貢獻大量的稅收、就業、出口盈餘與國際影響力；它憑藉英語、法治、時區、專業生態，維持著全球競爭力。<strong>作為失衡：</strong>英國經濟過度偏重金融與服務業，製造業與實體經濟相對萎縮，這帶來嚴重的區域不平衡（倫敦與東南部繁榮、其他地區落後）與結構脆弱（過度依賴一個對全球金融週期高度敏感的部門）。<strong>這種「金融過重、製造過輕」的失衡，正是 Red Wall 後工業地帶被拋棄感的經濟根源——倫敦的金融繁榮，與英格蘭北部的去工業化衰敗，是同一個經濟結構的一體兩面（詳第 6、12 章）。</strong></p>
+
+  <h3>英鎊與 gilts：善意的人質</h3>
+  <p>英國經濟最深的脆弱，是它對外國資本的高度依賴。英國有結構性的<strong>經常帳與財政「雙赤字」</strong>，這意味著它必須持續吸引外國資本流入來融資——用前央行行長 Mark Carney 的話說，英國依賴「陌生人的善意」（kindness of strangers）。<strong>這讓英鎊與 gilts 成為財政信譽的即時人質：當市場對英國財政紀律有信心，資本流入、英鎊穩、gilt 殖利率溫和；一旦信心動搖，資本外逃、英鎊崩、gilt 殖利率暴衝。</strong>到 2026 年 7 月，10 年期 gilt 殖利率約 5.05%（高於美債約 35–45bp）、英鎊兌美元約 1.34–1.38、BoE 基準利率 3.75%。這組數字是英國財政信譽的即時儀表——它意味著英國政府在財政上幾乎沒有犯錯的空間，任何被市場解讀為「不負責任」的財政動作，都會被 gilt 市場即時、殘酷地懲罰。</p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">外國人</div><p>City 與 gilts 是「英國最國際化、最可定價的部分」：它不隨政黨輪替而變，其健康取決於財政信譽與監管穩定。對外資，gilt 殖利率與英鎊，是比首相更新率更重要的即時風險訊號。</p></div>
+    <div class="pv-l"><div class="pv-tag">工黨</div><p>財政信譽是「工黨必須捍衛的生命線」：Truss 之後，市場對工黨財政的信任是它執政的前提。工黨寧可得罪基本盤（撙節、不加稅承諾），也不敢碰 gilt 市場的紅線——這是它「穩健」定位的財政內核。</p></div>
+    <div class="pv-r"><div class="pv-tag">改革黨</div><p>「gilt 義警」是 Reform 眼中的「未民選的市場暴政」：它否決了 Truss、綁架了每一屆政府的財政。Reform 主張人民意志不該被債券市場否決——但這正是外資最擔心的「財政民粹」風險。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個財政信譽，三種讀法：定價訊號、生命線、市場暴政</div>
+
+  <h3>養老金與 LDI：Truss 危機的傳導管道</h3>
+  <p>2022 年 Truss 危機揭示了英國金融的一個隱蔽脆弱——養老金的 LDI（負債驅動投資）策略。英國的確定給付型養老金，普遍採用 LDI 策略來對沖利率風險，而這套策略高度依賴 gilt 價格的穩定。<strong>當 Truss 的 mini-budget 引爆 gilt 殖利率暴衝（gilt 價格暴跌），LDI 策略觸發連鎖的追加保證金（margin call）與被迫拋售，形成「gilt 下跌 → 拋售 → gilt 更跌」的死亡螺旋——一場可能演變成系統性金融危機的風暴。</strong>正是 BoE 緊急入市購債，才在最後關頭切斷了這個螺旋（詳第 3、17B 章）。這場危機的教訓是深刻的：<strong>英國的財政、貨幣與養老金系統，透過 gilt 市場緊密相連——一次財政失信，能透過 gilt→LDI→養老金的管道，瞬間放大成系統性風險。這讓「財政信譽」在英國不只是政治問題，更是金融穩定問題。</strong></p>
+</section>
+
+<section id="s17b">
+  <div class="sec-label">PART IV · CH 17B</div>
+  <h2>Truss 的 49 天：財政信譽的市場審判</h2>
+  <p class="lede">2022 年 9 月至 10 月，Liz Truss 以 49 天寫下英國史上最短命首相的紀錄，也留下了英國政治最深刻的一課。這一節把 Truss 事件拆解成一個完整的因果鏈——它不只是一次個人的政治失敗，更是「市場如何即時審判財政失信」的經典案例，是理解英國財政紀律鐵律的活教材。</p>
+
+  <h3>因果鏈：從 mini-budget 到 49 天</h3>
+  <p>Truss 事件的因果鏈清晰而殘酷。<strong>第一步（點火）：</strong>2022 年 9 月 23 日，Truss 與財相 Kwarteng 公布「mini-budget」——一套大規模減稅方案（包括取消最高稅率），卻<strong>沒有相應的財政節流計畫、也沒有 OBR（預算責任辦公室）的獨立評估背書</strong>。市場立刻解讀為「不負責任的、無資金支撐的借債式減稅」。<strong>第二步（市場反應）：</strong>gilt 殖利率暴衝、英鎊兌美元一度跌至歷史低點附近，市場對英國財政信譽的信心崩解。<strong>第三步（金融傳導）：</strong>gilt 暴跌觸發養老金 LDI 策略的追加保證金與被迫拋售，形成死亡螺旋，逼得 BoE 緊急入市購債救火。<strong>第四步（政治崩塌）：</strong>市場的否決轉化為政治的崩塌——Truss 被迫撤回減稅、撤換財相，權威盡失，於 10 月下台，執政僅 49 天。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">49 天</div><div class="fig-l">Truss 執政天數——英國史上最短命首相</div></div>
+    <div><div class="fig-n">2022-09-23</div><div class="fig-l">mini-budget 公布日——危機的點火點</div></div>
+    <div><div class="fig-n">LDI</div><div class="fig-l">養老金負債驅動投資——危機的金融傳導管道</div></div>
+    <div><div class="fig-n">BoE</div><div class="fig-l">緊急購債救火者——獨立央行的最後防線</div></div>
+  </div>
+
+  <h3>三個制度教訓</h3>
+  <p>Truss 的 49 天，濃縮了三個關於英國治理的深刻教訓。<strong>教訓一：財政的最終裁判是市場，不是選民或國會。</strong>Truss 有下議院多數、有黨員授權（她是保守黨員選出的黨魁），但這些都擋不住 gilt 市場的否決——在英國，一個失去市場信任的財政政策，會在幾天內被債券市場「政變」推翻，比任何選舉或不信任案都快。<strong>教訓二：制度的護欄（OBR、獨立央行）不能繞過。</strong>Truss 的致命錯誤之一是繞過 OBR 的獨立評估——這摧毀了市場對其財政數字的信任。而正是獨立的 BoE，在最後關頭救了場。這證明了那些「不投票的機構」（詳第 3 章）是英國財政穩定不可或缺的護欄。<strong>教訓三：財政可信度是一種難以重建的資產。</strong>Truss 的 49 天，給整個保守黨烙上了「財政不可信」的印記，並抬高了此後數年英國的借貸成本（gilt 殖利率的「Truss 溢價」），這個成本由後來的每一屆政府（包括工黨）共同承擔。</p>
+
+  <h3>Truss 的長影：為什麼每一位首相都怕市場</h3>
+  <p>Truss 事件的最深遺產，是它在英國政治中植入了一種對市場的集體恐懼——一種「反 Truss 的疫苗」。<strong>此後的每一位財相與首相（Sunak、Starmer、乃至 Burnham）都戰戰兢兢地捍衛「財政可信度」，寧可得罪選民與基本盤，也不敢碰 gilt 市場的紅線。</strong>這深刻地約束了英國的財政政策空間：它讓大規模的公共投資（打破政經迴路所需）變得政治上與市場上都極其困難，把英國鎖在第 16 章所述的「財政鐵三角」牢籠裡。<strong>對 Reform 這樣的民粹力量，Truss 是「市場暴政否決人民意志」的證據；對主流政黨與外資，Truss 是「財政紀律不可違背」的鐵律。這兩種解讀的對立，正是英國經濟政策未來最深的一條斷層線——而它的答案，可能在 Reform 若真的執政時被殘酷地測試。</strong></p>
+</section>
+
+<section id="s18">
+  <div class="sec-label">PART IV · CH 18</div>
+  <h2>產業與人口：移民、NHS、住房</h2>
+  <p class="lede">英國政經迴路的底層，是三個互相糾纏的長期結構問題——移民、NHS 與住房。它們是需要跨屆堅持才能解決的慢變數，卻恰恰是政治動盪最無力處理的領域。這一章論證：這三個問題的僵局，既是停滯的結果，也是憤怒的來源，構成了英國最深的治理失敗。</p>
+
+  <h3>移民的兩難：經濟需要、政治拒斥</h3>
+  <p>移民是英國最尖銳的結構矛盾——<strong>經濟上需要、政治上拒斥。</strong>經濟面：英國人口老化、勞動力短缺、NHS 與照護體系高度依賴外籍員工、部分產業（農業、服務業）缺工嚴重——移民是填補這些缺口的必需品。這正是為什麼保守黨脫歐後承諾減少移民，實際數字卻不降反升（為填補歐盟勞工離開後的缺口而放寬非歐盟簽證）。政治面：移民（尤其小船與尋求庇護者）是選民憤怒的焦點、Reform 動員的核心、「失控」敘事的載體。<strong>這個「經濟拉、政治推」的兩難，讓移民成為一個無解的政治死結——任何政府都同時被「經濟需要更多移民」與「選民要求更少移民」兩股力量拉扯，怎麼做都是錯（詳第 12 章）。</strong></p>
+
+  <h3>NHS：國家信仰與財政黑洞</h3>
+  <p>國民保健署（NHS）是英國最接近「國家信仰」的機構——免費、普及的醫療，是英國人身分認同的核心。但它也是一個持續擴大的財政與治理黑洞：<strong>人口老化推高需求、醫護人力短缺、等待名單居高不下、14 年緊縮留下的欠帳、以及一個高度政治敏感、難以結構改革的體制。</strong>NHS 的困境是英國治理失敗的縮影：所有人都同意它需要根本改革，但任何改革都在政治上碰觸「國家信仰」的紅線（被指控「私有化 NHS」是政治自殺），於是改革被一屆又一屆地擱置，問題持續惡化。<strong>NHS 吸走越來越多的財政資源，卻提供越來越差的服務——這是英國「財政鐵三角」與「治理癱瘓」最痛的交會點。</strong></p>
+
+  <h3>住房：世代不公的引擎</h3>
+  <p>住房短缺是英國最深的世代不公引擎。<strong>數十年的住房供給不足（規劃管制嚴格、地方反對開發、公共住房萎縮），推高了房價與租金，把年輕世代鎖在「買不起、租不起」的困境中。</strong>這造成了尖銳的世代財富鴻溝：擁有房產的老一代（多數投票率高、傾向保守）資產增值，而年輕世代（傾向工黨、綠黨）被高房價困住、難以成家立業。住房危機的政治後果深遠：它是年輕世代對建制失望、對現狀憤怒的核心來源，也是英國生育率下降、家庭形成延遲的推手。<strong>住房是一個「所有人都知道解方（多蓋房子）、卻因政治阻力（既有屋主反對、規劃管制）而數十年無法執行」的典型治理失敗——它需要跨屆的堅持與得罪既有利益的政治勇氣，而這恰恰是十年七相的英國最缺乏的。</strong></p>
+
+  <div class="prism">
+    <div class="pv-r"><div class="pv-tag">改革黨</div><p>三個問題的答案是「移民」：砍移民既能平息政治憤怒，又能（在 Reform 敘事中）緩解 NHS 與住房的壓力。這是一個把複雜的結構問題，簡化成單一敵人的民粹框架——強力、動員，卻迴避了經濟現實。</p></div>
+    <div class="pv-l"><div class="pv-tag">工黨</div><p>三個問題的答案是「投資與改革」：蓋更多房子、改革 NHS、有序管理移民——但這需要工黨沒有的財政空間與政治時間。工黨知道正解，卻被財政牢籠與脆弱多數困住，無法執行。</p></div>
+    <div class="pv-c"><div class="pv-tag">保守黨</div><p>三個問題暴露了保守黨 14 年的失敗：它承諾減移民卻增加、承諾修 NHS 卻惡化、承諾建房卻受制於自己選區的既有屋主反對。這份失敗紀錄，是它如今喪失可信度的根源。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同三個結構問題，三種框架：單一敵人、投資改革、失敗紀錄</div>
+</section>
+
+<section id="s19">
+  <div class="sec-label">PART IV · CH 19</div>
+  <h2>政策連續性與外資：動盪中的不變之錨</h2>
+  <p class="lede">面對十年七相的動盪，外資最關心的問題是：英國的政策到底有多少會隨政權更替而變、多少不會變？這一章要做一個關鍵的分層——把英國政策拆成「高連續性層」（無論誰執政都大體不變）與「隨政黨擺盪層」（隨政權更替而變動）。這個分層，是外資在英國政治動盪中定價風險的核心框架。</p>
+
+  <h3>高連續性層：跨政黨的英國常數</h3>
+  <p>有一批政策，無論保守或工黨執政，都大體維持連續——這是英國作為投資環境的「不變之錨」。<strong>制度層：</strong>法治、獨立司法、產權保護、中立文官、央行獨立、合約神聖性——這些是英國最深的制度承諾，任何主流政黨都不會碰。<strong>地緣層：</strong>親美的「特殊關係」、北約承諾、對烏克蘭的支持、Five Eyes、AUKUS——英國的西方核心身分是跨黨共識。<strong>金融層：</strong>維護 City 作為全球金融中心、財政信譽（Truss 之後尤其）——這是跨黨的經濟命脈。<strong>對外資，這一層是英國「即使政治動盪也可靠」的核心——它意味著英國的基本投資環境（法治、產權、地緣定位、金融中心地位）不會因為換首相、甚至換執政黨而突變。這是英國最重要的「連續性折價保護」。</strong></p>
+
+  <h3>隨政黨擺盪層：需要動態定價的變數</h3>
+  <p>另一批政策則隨政權更替而擺盪，需要外資動態定價。<strong>財政與稅制：</strong>企業稅、資本利得稅、個人所得稅的高低，工黨與保守黨方向不同（工黨傾向對高所得與資本加稅、保守傾向減稅）。<strong>管制與勞動：</strong>勞工權益、環境與淨零管制、產業政策的鬆緊，隨執政黨而變。<strong>公共服務與國有化：</strong>工黨傾向更多公共投資與部分國有化（如鐵路），保守傾向市場化。<strong>移民政策：</strong>雖然大方向都受經濟現實約束，但具體的簽證與邊界政策隨政黨（尤其若 Reform 崛起）而變。<strong>對外資，這一層是「幅度」的變動，而非「體制」的變動——它需要在投資決策中動態定價，但不改變英國的基本遊戲規則。</strong></p>
+
+  <table>
+    <tr><th>政策層</th><th>性質</th><th>外資的定價方式</th></tr>
+    <tr><td><strong>制度層</strong>（法治、產權、文官、央行）</td><td>高連續性，跨黨共識</td><td>視為常數——英國的核心投資保護</td></tr>
+    <tr><td><strong>地緣層</strong>（親美、北約、烏克蘭、AUKUS）</td><td>高連續性，跨黨共識</td><td>視為常數——可靠的西方盟邦定位</td></tr>
+    <tr><td><strong>金融層</strong>（City、財政信譽）</td><td>高連續性（Truss 之後強化）</td><td>視為常數——但盯 gilt 與英鎊的即時訊號</td></tr>
+    <tr><td><strong>財稅／管制層</strong></td><td>隨政黨擺盪</td><td>動態定價——幅度變動，非體制變動</td></tr>
+    <tr><td><strong>移民／民粹層</strong></td><td>隨政黨擺盪（Reform 是變數）</td><td>動態定價——留意 Reform 崛起的體制風險</td></tr>
+  </table>
+  <p class="tbl-note">關鍵一句：<strong>英國政策的擺盪，絕大多數是「幅度」而非「體制」——除非出現一個願意衝撞制度層與地緣層的力量（Reform 的財政民粹是唯一的潛在體制風險），否則英國的基本投資環境在政治動盪中依然可靠。</strong></p>
+
+  <h3>Reform 是唯一的體制級變數</h3>
+  <p>這個分層框架有一個關鍵的例外風險——Reform。與保守和工黨不同，Reform 的部分主張直接觸及「高連續性層」：它質疑財政必須討好市場的鐵律（可能重演 Truss）、挑戰文官中立與司法審查（衝撞制度層）、對淨零與國際條約（如 ECHR）的立場更激進、其地緣立場也帶有更多不確定性。<strong>這意味著，Reform 若真的執政，可能是三十年來第一個試圖改動「高連續性層」的力量——它是外資眼中唯一的「體制級變數」。</strong>這也是為什麼 Reform 的崛起，對外資的意義遠大於一次普通的政黨輪替：它可能改變的不是政策的幅度，而是英國投資環境的基本規則。<strong>對外資，監測 Reform 從「抗議泡沫」到「執政力量」的進程（詳第 11 章），是評估英國體制級風險的核心指標——這是「隨政黨擺盪」與「體制斷裂」之間的分水嶺。</strong></p>
+</section>
+
+<section id="s20">
+  <div class="sec-label">PART IV · CH 20</div>
+  <h2>地緣：脫歐後的英國，在美歐中之間</h2>
+  <p class="lede">三角引擎的最後一個外部輸入，是地緣。脫歐後的英國，失去了「歐盟成員」這個定位，被迫重新尋找自己在世界上的位置。這一章論證：英國的地緣定位，是它政策中連續性最高、跨黨共識最強的一層——無論誰執政，「可靠的西方核心盟邦」這個錨都大體不變，這是動盪政治中最穩定的常數。</p>
+
+  <h3>脫歐後的定位困境：「全球英國」的虛與實</h3>
+  <p>脫歐後，英國提出「全球英國」（Global Britain）的願景——擺脫歐盟束縛、以獨立姿態在全球尋求貿易與影響力。但這個願景虛實參半。<strong>虛的一面：</strong>脫歐後與其他市場（美國、CPTPP、印度）的新貿易協議，經濟量級遠不足以彌補失去歐盟單一市場的損失；「全球英國」在貿易上更多是修辭而非實質。<strong>實的一面：</strong>在安全與外交上，英國確實維持了可觀的全球影響力——聯合國安理會常任理事國、核武國、北約核心、Five Eyes 情報同盟、對烏克蘭的堅定支持、AUKUS 的印太布局。<strong>英國的地緣現實是：經濟上是一個「失去歐洲門戶的中型經濟體」，但安全與外交上仍是一個「超出其經濟量級的西方核心強權」——這個「經濟收縮、影響力維持」的落差，是脫歐後英國地緣定位的核心特徵。</strong></p>
+
+  <h3>美英特殊關係 vs 對歐再靠攏</h3>
+  <p>英國地緣的核心張力，是「美英特殊關係」與「對歐盟再靠攏」之間的平衡。<strong>特殊關係：</strong>脫歐後，英國更加倚重與美國的安全與情報同盟，在防務、AUKUS、對俄與對中政策上與美國緊密協調——這是英國地緣安全的基石。<strong>對歐再靠攏（reset）：</strong>但英國也認識到，地理與經濟現實使它無法真正遠離歐洲——脫歐後的歷屆政府都試圖在不重返單一市場的前提下，與歐盟在安全、貿易、監管上「重新靠攏」，修補脫歐造成的裂痕。<strong>這個「安全靠美、經濟修歐」的雙軌平衡，是脫歐後英國外交的主線——它在不同政黨執政下有微調（工黨更傾向對歐修好、保守右翼更疑歐），但大方向跨黨一致。</strong>對美國的川普式不確定性、以及歐盟自身的戰略自主傾向，是這個平衡未來最大的外部變數。</p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">外國人</div><p>地緣是「英國最可靠的連續性」：親美、北約、挺烏、Five Eyes、AUKUS——這些是跨黨共識，不隨政權更替而變。對外資，這意味著英國是一個「地緣立場可預測、不會突然選邊突變」的可靠西方盟邦。</p></div>
+    <div class="pv-c"><div class="pv-tag">保守黨</div><p>地緣是「全球英國」的舞台：脫歐讓英國重獲外交自主，可以獨立地在印太、在貿易、在安全上發揮影響力。保守派把強大的國防、核威懾與特殊關係，視為英國國家尊嚴的核心。</p></div>
+    <div class="pv-l"><div class="pv-tag">工黨</div><p>地緣是「務實的西方主義」：工黨同樣堅定挺烏、守北約、重特殊關係，但更傾向對歐盟修好、更強調國際法與多邊主義。它的地緣路線是「連續性中的微調」，而非方向的改變。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個地緣定位，三種強調：可靠盟邦、全球舞台、務實西方</div>
+
+  <h3>對烏克蘭、AUKUS 與對中：跨黨的戰略共識</h3>
+  <p>英國地緣的三個具體支點，展現了跨黨的高度共識。<strong>烏克蘭：</strong>英國是烏克蘭最堅定的支持者之一，跨黨一致地提供軍援與外交支持——這是英國「捍衛歐洲安全秩序」的核心承諾。<strong>AUKUS：</strong>英美澳的印太安全夥伴關係（核潛艦與先進技術合作），代表英國把戰略觸角延伸至印太、配合美國制衡中國——這也是跨黨延續的布局。<strong>對中國：</strong>英國的對中政策從 Cameron 時代的「黃金時代」，逐步轉向更謹慎、更防範的立場（安全審查、去風險），但仍比美國稍軟、保留經貿往來——這個「去風險但不脫鉤」的立場，也大體跨黨一致。<strong>這三個支點證明了核心論斷：英國的地緣定位是它政策中最穩定的一層——它是動盪的政黨政治（變數）之下，一個可靠的西方戰略常數。對外資與盟邦，這是英國在十年七相的混亂中，最重要的一個「不變的承諾」。</strong></p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART V</div>
+  <h2>終章 · The Verdict</h2>
+  <div class="pd-sub">十大論題、監測儀表板與方法註記</div>
+</div>
+
+<section id="s21">
+  <div class="sec-label">PART V · CH 21</div>
+  <h2>十大論題：附信度與可證偽條件</h2>
+  <p class="lede">把全書的分析收斂成十個可檢驗的論題，每一個都附上信度評級（★★★＝結構性高信度，★★＝中信度趨勢判斷，★＝單點推測）與可證偽條件——若該條件發生，論題即應作廢。這是本報告最重要的「可問責」章節：它把判斷攤開，供未來的事實檢驗與推翻。</p>
+
+  <table>
+    <tr><th style="width:44%">論題</th><th>信度</th><th>可證偽條件（若發生，論題作廢）</th></tr>
+    <tr><td><strong>T1・西敏制常數論</strong>：制度硬體（自由選舉、和平轉移、獨立司法、中立文官、央行獨立）強壯到能在十年七相的動盪中維持不斷裂，是應視為常數的地基。（第 2、2B、14 章）</td><td>★★★</td><td>出現一次成功的、未被制度即時糾正的憲政斷裂：拒絕交權、選舉舞弊、動用軍隊、實質廢除司法或文官中立</td></tr>
+    <tr><td><strong>T2・脆弱多數論</strong>：FPTP 在多黨碎片下會把低得票放大成脆弱的巨大多數；2024 工黨約 34% 得票換 411 席、兩年即崩（Starmer 辭、Burnham 接），是這條機制的鐵證。（第 1、1B、9、10 章）</td><td>★★★</td><td>某黨在多黨碎片下贏得的巨大多數，證明能穩定執政滿一屆而不崩解、且民意基礎與席次相稱</td></tr>
+    <tr><td><strong>T3・兩黨制瓦解論</strong>：脫歐後政黨體系正從兩黨走向五黨碎片，Reform 在民調領先、把主軸從「左右」改寫成「建制 vs 反建制」。（第 6、11 章）</td><td>★★★</td><td>保守與工黨兩黨合計得票穩定回升至 70% 以上、Reform 泡沫化退回邊緣、政治重回兩黨主導</td></tr>
+    <tr><td><strong>T4・聯合王國命門論</strong>：蘇格蘭與北愛的離心以世代為單位緩慢累積，是唯一能從根本重寫英國一切前提的力量；脫歐與（若崛起的）英格蘭民粹右是加速器。（第 7、7B、13 章）</td><td>★★★</td><td>蘇格蘭與北愛的分離／統一支持度長期穩定下滑、離心力結構性消退、聯合王國關係重新錨定鞏固</td></tr>
+    <tr><td><strong>T5・財政信譽鐵律論</strong>：英國因雙赤字高度依賴外資，財政的最終裁判是 gilt 市場而非選民；Truss 的 49 天是這條鐵律的活教材，約束了此後每一屆政府。（第 3、17、17B 章）</td><td>★★★</td><td>某政府在無市場信譽支撐下推行大規模財政擴張，卻未遭 gilt／英鎊懲罰、且財政可持續——證明鐵律失效</td></tr>
+    <tr><td><strong>T6・經濟停滯燃料論</strong>：脫歐後的低成長與生產力停滯，是政治動盪最深的燃料；經濟不增長把政治從「分配增長」變成「分配痛苦」，餵養民粹與換相。（第 16、16B、18 章）</td><td>★★</td><td>英國生產力與實質工資重回持續增長軌道、經濟停滯緩解、而政治動盪未同步消退（證明停滯非動盪主因）</td></tr>
+    <tr><td><strong>T7・治理癱瘓論</strong>：真正的風險不是威權崩壞（制度太強），而是領袖走馬燈與脆弱多數導致的治理癱瘓——長期改革（住房、NHS、生產力、聯合王國）被系統性擱置。（第 14、18 章）</td><td>★★</td><td>某政府達成並持續執行一項需跨屆堅持的重大長期改革（住房大規模增供、NHS 結構改革、生產力躍升之一）</td></tr>
+    <tr><td><strong>T8・Reform 分水嶺論</strong>：Reform 能否從「抗議泡沫」進化為「執政力量」（過組織、人才、可信度三關），是重塑英國右翼與政黨體系的分水嶺，尚未證明。（第 6、11、19 章）</td><td>★★</td><td>Reform 在一次全國大選中把民調領先轉化為可觀席次、或反之徹底泡沫化退回 UKIP 式的席次寥寥——兩者之一兌現</td></tr>
+    <tr><td><strong>T9・政策分層論</strong>：外資風險應分兩層——制度／地緣／金融層跨黨高連續（可視為常數），財稅／管制／移民層隨政黨擺盪（需動態定價），但擺盪是幅度非體制。（第 19 章）</td><td>★★</td><td>某主流政黨執政後改動「高連續性層」：沒收合規外資產權、退出北約／特殊關係、實質廢除央行獨立或司法審查之一</td></tr>
+    <tr><td><strong>T10・Reform 體制風險論</strong>：Reform 是唯一可能改動「高連續性層」的體制級變數（財政民粹、衝撞慣例、質疑國際條約），若執政將是三十年來首次體制級測試。（第 11、17B、19 章）</td><td>★</td><td>Reform 執政後證明其治理實際上尊重財政紀律、制度慣例與地緣連續性（僅在幅度上調整），未構成體制斷裂</td></tr>
+  </table>
+
+  <h3>十論題的內在階層</h3>
+  <p>十個論題不是並列的，有清晰的依賴結構：<strong>T1（西敏制常數）、T2（脆弱多數）、T4（聯合王國命門）、T5（財政鐵律）是地基</strong>——四者描述的是制度硬體與結構性算術，最穩、信度最高。T3（兩黨瓦解）與 T6（停滯燃料）是建立在地基上的當前動力（高信度趨勢）。T7（治理癱瘓）、T8（Reform 分水嶺）、T9（政策分層）是動力層（中信度，涉及行為者選擇與趨勢，尤其 T8 最會變）。T10（Reform 體制風險）是單點的尾部推測。閱讀本報告的正確方式，是把資源按這個階層倒置分配：<em>花最少時間擔心地基（T1、T2、T4、T5 最穩），花最多時間監測動力層（尤其 T8 Reform 的進化與 T3 兩黨瓦解的走向），並把 T10 當作一個必須放在心裡、卻只有在 Reform 真正執政時才能驗證的體制尾部風險。</em></p>
+
+  <h3>本報告的四個已知盲區</h3>
+  <p>誠實標記分析框架自身的限制：<strong>其一，事件的高度時效性</strong>——本報告成稿於 Burnham 就任僅數日的時點，其路線重置能否奏效、工黨能否止血、下屆大選何時舉行，都是尚未展開的變數，若干判斷（尤其 T3、T8）帶有強烈近因權重。<strong>其二，Reform 的未經檢驗</strong>——Reform 的民調領先尚未經過一次全國大選轉化為席次的考驗，它是「抗議泡沫」還是「執政力量」的答案（T8、T10）本質上是未知的，本報告只能標記分水嶺、無法預判結果。<strong>其三，數據的口徑與時效</strong>——本文引用的席次、得票率、民調、移民數、gilt 殖利率等為特定時點的概略值，旨在呈現量級與結構，精確數字應以官方最新統計為準；民調尤其波動快速。<strong>其四，量化的刻意留白</strong>——本報告在脫歐的經濟成本、生產力缺口、聯合王國離心的世代速度等處，多採「量級」與「趨勢」表述而非精確數字，這是為了避免以偽精確誤導；代價是某些論斷（尤其涉及長期趨勢的 T4、T6）無法附上嚴謹的置信區間，須以官方最新統計交叉驗證。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s22">
+  <div class="sec-label">PART V · CH 22</div>
+  <h2>監測儀表板：時間軸與判讀規則</h2>
+  <table>
+    <tr><th>時點</th><th>事件</th><th>判讀規則</th></tr>
+    <tr><td><strong>2026-07（甫發生）</strong></td><td>Burnham 就任首相、宣示路線重置</td><td>觀察「斷路器」能否兌現：工黨民調是否止跌反彈、能否奪回被 Reform 搶走的 Red Wall 票。反彈＝路線重置奏效；持續下滑＝證明 T7 治理癱瘓、換人救不了結構（詳第 10 章）</td></tr>
+    <tr><td>2026-07-30</td><td>BoE 貨幣政策委員會（MPC）利率決議</td><td>基準利率 3.75%（G7 前段）。觀察降息路徑與 gilt 反應——利率與 gilt 殖利率是財政信譽與經濟溫度的即時儀表（詳第 17 章）</td></tr>
+    <tr><td>每月／每次</td><td>YouGov 等民調的五黨動向</td><td>T3 的核心讀數。Reform 能否穩定領先、三大黨差距、綠黨與自民黨的分票——五黨碎片格局是懸峙國會或席次地震的前兆（詳第 11 章）</td></tr>
+    <tr><td>每次</td><td>各地補選與地方選舉</td><td>T8 的核心讀數。Reform 能否把民調轉化為真實席次、能否在 Red Wall 建立地域票倉（複製 SNP 模式）——「抗議票變執政票」分水嶺的即時測試（詳第 1B、11 章）</td></tr>
+    <tr><td>每季</td><td>GDP、生產力、實質工資、gilt 殖利率、英鎊</td><td>T6 的核心讀數。經濟停滯是政治動盪最深的燃料；成長若持續低迷（約 1%），憤怒與換相壓力不減。gilt 與英鎊是財政信譽的即時溫度計（詳第 16、17 章）</td></tr>
+    <tr><td>每月</td><td>小船跨越數、淨移民、庇護安置</td><td>T6／政治憤怒的讀數。留意「數字改善、憤怒升溫」的弔詭——象徵與體感比統計更具政治殺傷力（詳第 12 章）</td></tr>
+    <tr><td>持續</td><td>蘇格蘭獨立支持度、SNP 對二次公投的推進</td><td>T4 命門的長線讀數。西敏寺是否鬆動對公投的否決、獨立支持是否穩定過半、年輕世代傾向——聯合王國離心的即時溫度（詳第 7B、13 章）</td></tr>
+    <tr><td>持續</td><td>北愛統一民調、Windsor 框架運作、Stormont 穩定</td><td>T4 命門的另一讀數。統一支持是否跨過門檻（近年約 58:42 傾向留英）、天主教／新教人口移轉、聯合派反彈——北愛主權爭議的引信（詳第 7B 章）</td></tr>
+    <tr><td>持續</td><td>Reform 的組織、人才、可信度建設</td><td>T8／T10 的核心讀數。Reform 能否過三關（組織、人才、可信度）、Farage 之外的接班、政策在檢視下的可信度——決定它是泡沫還是永久力量（詳第 6、11 章）</td></tr>
+    <tr><td>下屆大選（須於 2029 前）</td><td>下一次全國大選</td><td>所有變數的總裁決。FPTP 在五黨碎片下的輸出（懸峙國會／Reform 席次爆量／工黨崩塌）、Reform 分水嶺的兌現、聯合王國的連鎖效應——英國政治十年動盪的下一個定義性時刻（詳第 11、15 章）</td></tr>
+    <tr><td>持續</td><td>親美特殊關係、對歐 reset、挺烏、AUKUS、對中去風險</td><td>T9 的地緣讀數。跨黨高連續，留意是否出現體制級斷裂（僅 Reform 執政是潛在變數）——英國動盪政治中最可靠的常數（詳第 20 章）</td></tr>
+  </table>
+
+  <h3>三個「若發生則改變評估」的觸發器</h3>
+  <ul class="plain">
+    <li><strong>觸發器 A</strong>：Reform 在下屆大選把民調領先轉化為可觀席次、甚至進入執政 → T8 分水嶺向「執政力量」兌現，英國政黨體系完成百年來最大重組；同時啟動 T10 的體制級測試，重估英國「高連續性層」是否會被改動（財政、慣例、地緣）。</li>
+    <li><strong>觸發器 B</strong>：蘇格蘭獨立或北愛統一支持度穩定過半、迫使一場公投 → T4 命門兌現，本報告所有以「聯合王國完整」為前提的分析（人口、經濟、財政、地緣）需整體重估——這是唯一能重寫全報告地基的觸發器。</li>
+    <li><strong>觸發器 C</strong>：某政府（無論哪黨）推行 Truss 式財政冒進、卻未遭 gilt／英鎊懲罰，或反之遭到懲罰而崩塌 → 前者作廢 T5 財政鐵律論（重估英國財政約束），後者則再度確認 T5、加深「財政信譽不可違背」的市場紀律。</li>
+  </ul>
+  <p><strong>總結一句：</strong>西敏制是常數、脫歐後的政黨重組是變數、聯合王國是命門。監測 Reform 的分水嶺與兩黨瓦解、盯住 gilt 與英鎊的財政信譽訊號、警惕聯合王國的世代離心、不必為「英國滑向威權」焦慮——因為十年七相卻零憲政斷裂已經證明，這個民主的制度硬體，比它的政治動盪更強壯。真正該擔心的，不是它會不會崩壞，而是它會不會在無盡的政黨動盪與領袖走馬燈中，錯過修好經濟停滯、住房、NHS 與聯合王國關係的最後窗口——並在某個時點，被 Reform 的體制級變數，或蘇格蘭與北愛的離心，推向一個連西敏制都無法吸收的斷裂。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s23">
+  <div class="sec-label">PART V · CH 23</div>
+  <h2>資料來源與方法註記</h2>
+  <p>本文件之事實基礎來自 2026 年 7 月中下旬檢索之公開報導與研究，主要來源：BBC、The Guardian、The Times、Financial Times、The Economist、Sky News、Reuters、AP、NPR、Al Jazeera、PBS（選情、政黨動態、Starmer 辭職與 Burnham 接任、施政與民調）；YouGov、Opinium、Deltapoll、PollCheck、BritPolls（投票意向與民調趨勢，2026 年 7 月：YouGov 7/19–20 為 Ref 23／Con 21／Lab 20／Grn 14／LD 12，PollCheck 七日均值 Ref 約 24.6）；英國國會（UK Parliament，Makerfield 補選結果、席次）、下議院圖書館（House of Commons Library，小船跨越統計、邊界公投）與 Migration Observatory（移民與淨移民數據）。經濟與財政數據另參考：英格蘭銀行（BoE，基準利率 3.75%、MPC）、OBR、Office for National Statistics、UK Finance、KPMG、Goldman Sachs、Trading Economics（GDP 約 1.0–1.2%、10 年 gilt 約 5.05%、英鎊兌美元 1.34–1.38、生產力）。制度與結構分析另參考關於「議會主權」「無成文憲法」「選舉的專制」「FPTP 與選制改革」「地方分權」之學術與政策文獻，以及脫歐長期經濟帳、Truss mini-budget 與 LDI 危機、Red Wall 政治、民粹右崛起之研究。聯合王國章節另參考：2014 蘇格蘭獨立公投、2022 英國最高法院公投裁定、2026 Holyrood 選舉、《貝爾法斯特／Good Friday 協議》、《北愛議定書》與《Windsor 框架》、北愛統一與蘇格蘭獨立民調（Institute for Government、Queen's University Belfast 等）。地緣章節另參考：北約、AUKUS、Five Eyes、對烏克蘭政策與美英特殊關係之公開紀錄與分析。</p>
+  <p>方法註記：①選舉、席次、民調與經濟數字以官方計票、主流民調機構與一致報導為準；席次、得票率、民調與市值等為概略值，旨在呈現量級與結構，精確數字以官方最新統計為準；民調波動快速，本文所引為 2026 年 7 月中下旬的時點快照。②脫歐的經濟成本、生產力缺口等依衡量口徑與模型假設不同而有差異，本文採「量級」與「趨勢」表述並註明其概略性質。③五稜鏡中的視角陳述為分析性重構，旨在呈現各政治位置的理性計算結構，不代表任何政黨或群體的統一立場。④「兩黨制瓦解」「治理癱瘓」「聯合王國命門」等判斷為結構性歸納，個別事件的走向須逐案判讀，本文於第 14 章明確區分「政治不穩定」與「制度韌性」、不作單一定性。⑤本報告成稿於 2026 年 7 月 23 日：Burnham 就任首相僅數日、Starmer 於 6 月辭職、Reform 在民調領先或並列、Badenoch 仍為保守黨魁、下屆大選尚未確定日期（法定須於 2029 前）的特定時點；仍在演變的時效性事件（Burnham 政府走向、下屆大選、Reform 進化、蘇格蘭與北愛離心）以第 22 章儀表板為持續校正介面。⑥本文件為政治結構分析，非投資建議；涉及部位決策前應依既定流程另行執行冷讀批判。</p>
+</section>
+</main>
+</div>
+</div>
+
+<footer>
+  <div class="shell">
+    <h4>Colophon</h4>
+    <p>英國政治結構五稜鏡 · InvestMQuest Geopolitics Research · 編製於 2026-07-23。設計語彙：靛墨紙面、織錦金界線、五色稜鏡（藏青＝保守黨 Conservative、赤紅＝工黨 Labour、松石綠＝改革黨 Reform 與民粹右、帝王紫＝聯合王國與地方分權、琥珀金＝外國人視角）。本文件之稜鏡裝置（同一事實、多種讀法）為分析框架，延續同系列馬來西亞・泰國・印尼・菲律賓・南韓篇之方法，可套用於其他多裂隙政體之結構研究。核心定錨：西敏制是常數、脫歐後的政黨重組是變數、聯合王國是命門。</p>
+  </div>
+</footer>
+
+</body>
+</html>
