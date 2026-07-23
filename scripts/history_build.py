@@ -421,6 +421,9 @@ ENTRIES = [
     dict(src=None, slug="taiwan-political-structure", cat="politics",
          zh="台灣政治結構五稜鏡", en="Taiwan: A Politics in Five Prisms",
          blurb="綠・藍・白・地方派系與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="vietnam-political-structure", cat="politics",
+         zh="越南政治結構五稜鏡", en="Vietnam: A Politics in Five Prisms",
+         blurb="黨・公安・技術官僚・紅色資本與外國人的五種讀法", lat=None, lng=None),
 ]
 
 # ============================================================
