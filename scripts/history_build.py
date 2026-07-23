@@ -415,6 +415,12 @@ ENTRIES = [
     dict(src=None, slug="philippines-political-structure", cat="politics",
          zh="菲律賓政治結構五稜鏡", en="The Philippines: A Politics in Five Prisms",
          blurb="王朝・masa・改革者・摩洛・外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="southkorea-political-structure", cat="politics",
+         zh="南韓政治結構五稜鏡", en="South Korea: A Politics in Five Prisms",
+         blurb="財閥・嶺南・湖南・世代與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="taiwan-political-structure", cat="politics",
+         zh="台灣政治結構五稜鏡", en="Taiwan: A Politics in Five Prisms",
+         blurb="綠・藍・白・地方派系與外國人的五種讀法", lat=None, lng=None),
 ]
 
 # ============================================================

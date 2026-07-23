@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台灣政治結構五稜鏡 — 綠・藍・白・地方派系・外國人的五種讀法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@350;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F4EE;        /* 米紙 */
+  --ink:#1B2233;          /* 靛墨 */
+  --ink-soft:#4A5468;
+  --gold:#B08A2E;         /* 織錦金 */
+  --hairline:#D9D4C7;
+  --green:#2E7D4F;        /* 稜鏡・綠 台灣認同 民進黨 = 翠綠 */
+  --green-bg:#EAF3EC;
+  --blue:#2C5AA0;         /* 稜鏡・藍 中華民國 國民黨 = 靛藍 */
+  --blue-bg:#EAF0F8;
+  --tpp:#148F8F;          /* 稜鏡・白 民眾黨・世代 TPP = 青碧 */
+  --tpp-bg:#E4F2F1;
+  --faction:#6B4A8A;      /* 稜鏡・地方派系 樁腳・黑金 = 帝王紫 */
+  --faction-bg:#F0ECF4;
+  --fore:#C67C1E;         /* 稜鏡・外國人 投資人・護國神山 = 琥珀橘 */
+  --fore-bg:#F8F1E4;
+  --warn:#8A5A00;
+  --warn-bg:#F7F0DE;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  font-weight:350;
+  line-height:1.95;
+  font-size:16.5px;
+  letter-spacing:.02em;
+}
+::selection{background:var(--gold);color:#fff}
+
+/* ---------- 版心 ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 28px}
+.layout{display:grid;grid-template-columns:236px 1fr;gap:56px;align-items:start}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+
+/* ---------- Hero ---------- */
+header.hero{
+  background:var(--ink);
+  color:#EDE9DE;
+  padding:88px 0 72px;
+  position:relative;
+  overflow:hidden;
+}
+header.hero::after{ /* 五稜鏡光束 */
+  content:'';position:absolute;right:-8%;top:0;bottom:0;width:52%;
+  background:
+    linear-gradient(115deg,transparent 30%,rgba(46,125,79,.34) 30.4%,rgba(46,125,79,.34) 40%,transparent 40.4%),
+    linear-gradient(115deg,transparent 41%,rgba(44,90,160,.32) 41.4%,rgba(44,90,160,.32) 51%,transparent 51.4%),
+    linear-gradient(115deg,transparent 52%,rgba(20,143,143,.32) 52.4%,rgba(20,143,143,.32) 62%,transparent 62.4%),
+    linear-gradient(115deg,transparent 63%,rgba(107,74,138,.32) 63.4%,rgba(107,74,138,.32) 73%,transparent 73.4%),
+    linear-gradient(115deg,transparent 74%,rgba(198,124,30,.32) 74.4%,rgba(198,124,30,.32) 84%,transparent 84.4%);
+  pointer-events:none;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.28em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:26px;
+}
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(34px,4.6vw,56px);line-height:1.3;letter-spacing:.03em;
+  max-width:820px;
+}
+.hero-sub{
+  margin-top:26px;max-width:680px;font-size:17px;line-height:2.05;
+  color:#C9C3B4;font-weight:350;
+}
+.hero-meta{
+  margin-top:40px;display:flex;gap:34px;flex-wrap:wrap;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:#8E96A8;
+}
+.hero-meta b{color:#EDE9DE;font-weight:500;display:block;margin-bottom:3px}
+.prism-legend{margin-top:46px;display:flex;gap:0;max-width:760px;border:1px solid rgba(237,233,222,.22);flex-wrap:wrap}
+.prism-legend div{
+  flex:1;min-width:120px;padding:13px 12px;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:.08em;text-align:center;color:#EDE9DE;
+}
+.prism-legend .pl-g{background:rgba(46,125,79,.78)}
+.prism-legend .pl-b{background:rgba(44,90,160,.78)}
+.prism-legend .pl-w{background:rgba(20,143,143,.80)}
+.prism-legend .pl-x{background:rgba(107,74,138,.78)}
+.prism-legend .pl-f{background:rgba(198,124,30,.80)}
+
+/* ---------- 目錄側欄 ---------- */
+nav.toc{
+  position:sticky;top:0;padding-top:40px;padding-bottom:40px;
+  font-size:13.5px;line-height:1.7;
+  max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:var(--hairline) transparent;
+}
+nav.toc::-webkit-scrollbar{width:5px}
+nav.toc::-webkit-scrollbar-thumb{background:var(--hairline);border-radius:3px}
+nav.toc .toc-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:18px;text-transform:uppercase;
+}
+nav.toc a{
+  display:block;color:var(--ink-soft);text-decoration:none;
+  padding:5px 0 5px 14px;border-left:2px solid var(--hairline);
+  transition:all .18s;
+}
+nav.toc a:hover{color:var(--ink);border-left-color:var(--gold)}
+nav.toc a.t-g{border-left-color:var(--green)}
+nav.toc a.t-b{border-left-color:var(--blue)}
+nav.toc a.t-w{border-left-color:var(--tpp)}
+nav.toc a.t-x{border-left-color:var(--faction)}
+nav.toc a.t-f{border-left-color:var(--fore)}
+@media(max-width:960px){nav.toc{position:static;padding-top:40px}}
+
+/* ---------- 主文 ---------- */
+main{padding:64px 0 120px;min-width:0}
+section{margin-bottom:96px}
+.sec-label{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.24em;
+  color:var(--gold);margin-bottom:14px;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:900;font-size:30px;
+  line-height:1.45;margin-bottom:30px;padding-bottom:20px;
+  border-bottom:1px solid var(--hairline);letter-spacing:.02em;
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:21px;
+  margin:44px 0 18px;letter-spacing:.02em;
+}
+p{margin-bottom:20px;max-width:74ch}
+p.lede{font-size:18.5px;line-height:2.05;color:var(--ink);font-weight:400;max-width:70ch}
+strong{font-weight:700;color:var(--ink)}
+em{font-style:normal;border-bottom:2px solid var(--gold);padding-bottom:1px}
+
+/* ---------- 稜鏡三聯裝置（本文件的簽名元素） ---------- */
+.prism{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+  margin:36px 0 44px;border:1px solid var(--hairline);
+  background:#fff;
+}
+@media(max-width:820px){.prism{grid-template-columns:1fr}}
+.prism>div{padding:26px 24px 22px;border-top:4px solid}
+.prism>div+div{border-left:1px solid var(--hairline)}
+@media(max-width:820px){.prism>div+div{border-left:none;border-top-width:4px}}
+.prism .pv-g{border-top-color:var(--green);background:linear-gradient(var(--green-bg),#fff 42%)}
+.prism .pv-b{border-top-color:var(--blue);background:linear-gradient(var(--blue-bg),#fff 42%)}
+.prism .pv-w{border-top-color:var(--tpp);background:linear-gradient(var(--tpp-bg),#fff 42%)}
+.prism .pv-x{border-top-color:var(--faction);background:linear-gradient(var(--faction-bg),#fff 42%)}
+.prism .pv-f{border-top-color:var(--fore);background:linear-gradient(var(--fore-bg),#fff 42%)}
+.prism .pv-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  margin-bottom:12px;font-weight:500;
+}
+.pv-g .pv-tag{color:var(--green)}
+.pv-b .pv-tag{color:var(--blue)}
+.pv-w .pv-tag{color:var(--tpp)}
+.pv-x .pv-tag{color:var(--faction)}
+.pv-f .pv-tag{color:var(--fore)}
+.prism p{font-size:14.5px;line-height:1.9;margin-bottom:12px;color:#333B4D}
+.prism p:last-child{margin-bottom:0}
+.prism-caption{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);
+  letter-spacing:.06em;margin:-32px 0 44px;padding-top:10px;
+}
+
+/* ---------- 觀點框（單一視角深入時的左邊條） ---------- */
+.lens{padding:6px 0 6px 22px;margin:28px 0;border-left:4px solid}
+.lens.l-g{border-color:var(--green)}
+.lens.l-b{border-color:var(--blue)}
+.lens.l-w{border-color:var(--tpp)}
+.lens.l-x{border-color:var(--faction)}
+.lens.l-f{border-color:var(--fore)}
+.lens .lens-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;margin-bottom:8px;font-weight:500;
+}
+.lens.l-g .lens-tag{color:var(--green)}
+.lens.l-b .lens-tag{color:var(--blue)}
+.lens.l-w .lens-tag{color:var(--tpp)}
+.lens.l-x .lens-tag{color:var(--faction)}
+.lens.l-f .lens-tag{color:var(--fore)}
+
+/* ---------- 數據列 ---------- */
+.figrow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--hairline);border:1px solid var(--hairline);
+  margin:32px 0 40px;
+}
+.figrow div{background:#fff;padding:20px 18px 16px}
+.figrow .fig-n{
+  font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;
+  color:var(--ink);letter-spacing:-.01em;
+}
+.figrow .fig-l{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.6}
+
+/* ---------- 表格（輔助用） ---------- */
+table{width:100%;border-collapse:collapse;margin:28px 0 14px;font-size:14px;background:#fff}
+th{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;
+  text-align:left;padding:12px 14px;background:var(--ink);color:#EDE9DE;font-weight:500;
+}
+td{padding:12px 14px;border-bottom:1px solid var(--hairline);vertical-align:top;line-height:1.75}
+tr:last-child td{border-bottom:none}
+.tbl-note{font-size:13px;color:var(--ink-soft);margin-bottom:36px;max-width:74ch}
+
+/* ---------- 警示框 ---------- */
+.callout{
+  background:var(--warn-bg);border:1px solid #E3D5AE;border-left:4px solid var(--warn);
+  padding:20px 24px;margin:30px 0;font-size:15px;line-height:1.9;max-width:none;
+}
+.callout .co-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  color:var(--warn);margin-bottom:8px;font-weight:500;
+}
+.callout p{margin-bottom:10px;max-width:none}
+.callout p:last-child{margin-bottom:0}
+
+/* ---------- 反方論證（多方論證裝置） ---------- */
+.debate{margin:32px 0;border:1px solid var(--hairline);background:#fff}
+.debate>div{padding:22px 26px}
+.debate .d-pro{border-bottom:1px dashed var(--hairline)}
+.debate .d-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;margin-bottom:10px;font-weight:500;
+}
+.debate .d-pro .d-tag{color:var(--green)}
+.debate .d-con .d-tag{color:var(--blue)}
+.debate p{font-size:14.5px;margin-bottom:10px}
+.debate p:last-child{margin-bottom:0}
+
+ul.plain{margin:0 0 22px 0;padding-left:0;list-style:none;max-width:74ch}
+ul.plain li{padding:9px 0 9px 26px;position:relative;line-height:1.85}
+ul.plain li::before{
+  content:'—';position:absolute;left:0;color:var(--gold);font-weight:700;
+}
+footer{
+  background:var(--ink);color:#8E96A8;padding:56px 0 72px;
+  font-size:13px;line-height:2;
+}
+footer .shell{max-width:900px}
+footer h4{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:16px;font-weight:500;
+}
+footer p{max-width:none}
+
+.part-divider{margin:110px 0 70px;padding:34px 0 30px;border-top:3px solid var(--ink);border-bottom:1px solid var(--hairline)}
+.part-divider .pd-num{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
+.part-divider h2{border:none;padding:0;margin:0;font-size:34px}
+.part-divider .pd-sub{margin-top:8px;color:var(--ink-soft);font-size:15px}
+
+.divider-ornament{
+  text-align:center;color:var(--gold);font-size:15px;letter-spacing:.6em;
+  margin:0 0 96px;user-select:none;
+}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<header class="hero">
+  <div class="shell">
+    <div class="eyebrow">InvestMQuest · Geopolitics Research · v1 · 2026-07-23</div>
+    <h1>台灣政治結構五稜鏡</h1>
+    <div class="hero-sub">同一座島，五種完全不同的處境。一個把「我是誰」幾乎徹底解決的社會——六成以上自認台灣人、統一支持趨近於零——為何在自己的立法院裡卻三黨不過半、政府與國會全面卡死？綠營守住了認同卻守不住國會、藍營握住了國會卻贏不回總統、白營用八席當關鍵少數、地方派系在顏色之下經營恩庇網絡、外國人只盯著護國神山與台海——以 2024 三腳督大選、國會改革之亂、2025 大罷免全數未過為切片，逐層論證。</div>
+    <div class="hero-meta">
+      <div><b>分析基準日</b>2026-07-23</div>
+      <div><b>前一里程碑</b>2026-05 國防特別預算三讀（US$40→25bn）</div>
+      <div><b>下一里程碑</b>2026-11 九合一地方選舉</div>
+      <div><b>文件性質</b>結構分析・非投資建議</div>
+    </div>
+    <div class="prism-legend">
+      <div class="pl-g">綠 台灣認同</div>
+      <div class="pl-b">藍 中華民國</div>
+      <div class="pl-w">白 民眾黨・世代</div>
+      <div class="pl-x">地方派系</div>
+      <div class="pl-f">外國人視角</div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+<div class="layout">
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <a href="#s0">00 導讀與核心論證</a>
+  <div class="toc-title" style="margin-top:16px">I · 地圖</div>
+  <a href="#s1">01 政治版圖三層讀法</a>
+  <a href="#s2">02 結構的根源：半總統制與認同的重整</a>
+  <a href="#s3">03 兩個不投票的力量：憲法法庭與對岸的手</a>
+  <div class="toc-title" style="margin-top:16px">II · 稜鏡</div>
+  <a href="#s4" class="t-g">04 綠／台灣認同</a>
+  <a href="#s4b" class="t-g">05 賴清德其人與內閣</a>
+  <a href="#s5" class="t-b">06 藍／中華民國</a>
+  <a href="#s6" class="t-w">07 白與世代／民眾黨</a>
+  <a href="#s7" class="t-x">08 地方派系與樁腳</a>
+  <a href="#s7b" class="t-x">09 派系個案：花蓮與農漁會</a>
+  <a href="#s8" class="t-f">10 外國人／投資人</a>
+  <div class="toc-title" style="margin-top:16px">III · 動力</div>
+  <a href="#s9">11 2024 三腳督大選深讀</a>
+  <a href="#s10">12 三黨不過半：立法院權力重組</a>
+  <a href="#s11">13 國會改革之亂與青鳥行動</a>
+  <a href="#s12">14 大罷免的失敗（2025）</a>
+  <a href="#s13">15 預算凍結與憲政僵局</a>
+  <a href="#s14">16 民主韌性 vs 治理僵局</a>
+  <div class="toc-title" style="margin-top:16px">IV · 引擎</div>
+  <a href="#s15">17 三角傳導模型</a>
+  <a href="#s16">18 政治×經濟迴路</a>
+  <a href="#s17">19 護國神山的資本憲法</a>
+  <a href="#s17b">20 台積電接班與海外設廠</a>
+  <a href="#s18">21 產業・半導體・人口</a>
+  <a href="#s19">22 政策連續性與外資</a>
+  <a href="#s20">23 台海與美中變數</a>
+  <a href="#s20b">24 對中經濟脅迫案例</a>
+  <div class="toc-title" style="margin-top:16px">V · 終章</div>
+  <a href="#s21">25 十大論題</a>
+  <a href="#s22">26 監測儀表板</a>
+  <a href="#s23">27 資料來源</a>
+</nav>
+
+<main>
+<section id="s0">
+  <div class="sec-label">PROLOGUE · CH 00</div>
+  <h2>導讀與核心論證</h2>
+  <p class="lede">台灣是一則罕見的政治悖論。在「我是誰」這道題上，它幾乎已經徹底解決了——政大選研中心三十年的長期追蹤顯示，六成以上的居民自認是台灣人、約三成自認「都是」台灣人與中國人、單純自認中國人者已掉到個位數；主張立即統一者長年趨近於零，維持現狀是壓倒性多數。這是一個在認同上高度收斂的社會。然而，就是這個把身分問題解決得如此徹底的島嶼，卻永遠無法靠自己解決另一道題——<strong>「我們是什麼」</strong>。它的主權地位、它與對岸和世界的關係，這個最重要的變數，大半不掌握在它自己手裡。</p>
+
+  <p>這個悖論外顯為一種奇特的政治風景：<strong>對內，台灣的民主極其自由而激烈</strong>——政黨惡鬥、國會全武行、街頭運動、罷免、彈劾與釋憲輪番上陣，是全球最喧鬧的華人民主體；<strong>對外，它的關鍵處境卻由不得自己</strong>——一場總統大選能決定誰住進總統府，卻決定不了共機共艦是否繞台、決定不了台積電的先進製程要不要被要求分散到亞利桑那、決定不了華府下一任政府會給多少承諾。台灣把民主的形式練到爐火純青，卻把最致命的變數留在了牆外。</p>
+
+  <p>本報告用一句話為全書定錨，供逐章檢驗：<strong>認同是常數、府會是變數、對岸是風險。</strong>「認同」（台灣主體意識）已經是一個高度穩定、跨世代延續的常數，它決定了統一沒有市場、任何政黨都必須在「守護台灣」的語法內競爭；「府會」（總統與立法院的分立算術）是真正每四年翻動一次的變數，2024 年它翻出了台灣史上少見的「總統綠、國會藍白過半」的分立政府與僵局；「對岸」（中國的軍事、經濟、認知施壓）則是能穿透一切內部評估、無法由台灣單方面消除的系統性風險。</p>
+
+  <p>但這套結構必須拆成五種社會位置來讀，因為同一座島，對不同的人意義完全不同：</p>
+  <ul class="plain">
+    <li><strong>對綠／台灣認同</strong>：這是一場尚未完成的「正常國家」工程——民進黨連續第三任總統證明本土政權已是常態，但認同上的勝利換不來主權上的承認，而且守住總統卻失去國會，讓「完全執政」的黃金時代戛然而止。</li>
+    <li><strong>對藍／中華民國</strong>：這是一個必須被守護、卻在總統層級節節敗退的正統——它守住了立法院的多數與地方縣市的執政版圖，卻連續三屆拿不回總統府，被困在「贏地方、輸中央」與「兩岸論述失去年輕人」的雙重焦慮裡。</li>
+    <li><strong>對白與世代／民眾黨</strong>：這是一群厭倦藍綠世仇、被高房價與低薪背叛的世代——他們用八席立委撐起「關鍵少數」，卻也困在「離開柯文哲能不能存活」與「一票在藍綠之間換什麼」的槓桿難題裡。</li>
+    <li><strong>對地方派系與樁腳</strong>：這是顏色之下的第四種讀法——農漁會、水利會、宗親、椿腳與恩庇網絡跨越藍綠在地方層級運作，前三個稜鏡（意識形態的稜鏡）根本看不見這一層以「服務與利益」而非「認同」為貨幣的政治底層。</li>
+    <li><strong>對外國人／投資人</strong>：這是一套「護國神山＋台海折價」的規則手冊——真正牽動他們的不是誰當總統的藍綠鬥爭，而是<em>台積電的集中風險與「去台化」</em>、<em>全球最低生育率的人口懸崖</em>，以及<em>台海與美中角力這個能為所有資產定價的外部變數</em>。</li>
+  </ul>
+
+  <h3>全書地圖：五部曲的閱讀動線</h3>
+  <table>
+    <tr><th>部</th><th>章</th><th>回答的問題</th></tr>
+    <tr><td><strong>第一部・地圖</strong></td><td>01–03</td><td>版圖長什麼樣？半總統制如何逼出少數政府與僵局？憲法法庭與「對岸的手」這兩個不投票的力量如何運作？</td></tr>
+    <tr><td><strong>第二部・稜鏡</strong></td><td>04–10</td><td>同一座島，五種社會位置（綠／藍／白世代／地方派系／外國人）各自看到什麼？賴清德是誰、地方派系怎麼運作？</td></tr>
+    <tr><td><strong>第三部・動力</strong></td><td>11–16</td><td>三腳督大選如何造成三黨不過半？國會改革之亂、青鳥行動、大罷免失敗、預算凍結各揭示了什麼？民主是在倒退還是在自我拉扯？</td></tr>
+    <tr><td><strong>第四部・引擎</strong></td><td>17–24</td><td>認同×府會×台海如何互相傳導？護國神山、半導體、人口懸崖、外資、對中脅迫、美中各卡在哪個齒輪上？</td></tr>
+    <tr><td><strong>第五部・終章</strong></td><td>25–27</td><td>十大論題（附信度與可證偽條件）、監測儀表板、資料來源。</td></tr>
+  </table>
+  <p><strong>一句話結論，供全文檢驗：</strong>認同是常數、府會是變數、對岸是風險——台灣是一個「內部認同已幾乎解決、外部地位卻無法自決」的社會。它的民主形式（競爭性選舉、和平轉移、釋憲、罷免、街頭問責）真實且強壯，強到能在一年內連續上演國會擴權、憲法法庭反制、公民大罷免；但它承載的最大變數（兩岸與國際）大半不在自己手裡。只要「認同錨定＋制度制衡＋護國神山的籌碼」這組吸收機制運轉，系統雖然吵鬧卻穩定且可預測。趕時間的讀者可直接讀第 25 章的十大論題與第 26 章儀表板，再回頭按需查閱。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART I</div>
+  <h2>地圖 · The Map</h2>
+  <div class="pd-sub">版圖、地基與兩個不投票的力量</div>
+</div>
+
+<section id="s1">
+  <div class="sec-label">PART I · CH 01</div>
+  <h2>政治版圖總覽（2026 年 7 月）：三層讀法</h2>
+  <p class="lede">台灣政治初看是一場永不停歇的藍綠口水戰，但只要用「三層讀法」拆開，版圖立刻清晰：<strong>最底層是幾乎已成常數的認同分布（我是誰）、中間層是把認同組裝成藍綠白三黨的政黨競爭、最上層是決定政府能否施政的府會分立算術（誰過 57 席）。</strong>2024 年的特殊性在於——這三層第一次罕見地錯開了：認同這一層綠營大勝，府會那一層綠營卻大敗。</p>
+
+  <h3>第一層：認同——已經收斂的「原料」</h3>
+  <p>台灣政黨政治最深的地基不是階級、不是族群語言，而是<strong>國族認同與兩岸關係定位</strong>。但與二十年前不同的是，這一層如今已高度收斂：自認台灣人穩定在六成以上、「都是」約三成、單純中國人個位數；統一支持長年極低、維持現狀（廣義）是絕對多數。這意味著<strong>「要不要當中國人」這道題其實已經被社會回答了</strong>——藍綠真正的分歧不在認同的終點（幾乎沒人主張現在統一），而在通往維持現狀的路徑：綠營強調「台灣主體、拒絕一國兩制、對抗滲透」，藍營強調「中華民國、九二共識的模糊空間、維持交流以降低戰爭風險」。認同是常數，路線之爭才是變數。</p>
+
+  <h3>第二層：藍綠白三黨——認同的「當前組裝方式」</h3>
+  <p>認同這批原料，當前被組裝成三個政黨。<strong>綠（民主進步黨）</strong>：台灣主體意識＋抗中保台＋本土社團與公民團體＋能源轉型與轉型正義，價值語彙是「守護主權、深化民主、對抗威權」。<strong>藍（中國國民黨）</strong>：中華民國正統＋兩岸交流降低敵意＋地方派系與軍公教基礎＋經濟優先，價值語彙是「和平、穩定、拚經濟、反對民進黨一黨獨大」。<strong>白（台灣民眾黨）</strong>：厭倦藍綠世仇的中間與年輕選民＋「理性務實科學」的技術官僚品牌＋世代不公的怨氣，價值語彙是「終結藍綠惡鬥、居住正義、國家治理」。三黨之外，第三勢力（時代力量、基進、新黨等）已被大黨與白營的崛起大幅壓縮。</p>
+
+  <h3>第三層：府會算術——為什麼 2024 是「分立政府」的關鍵年</h3>
+  <p>台灣採半總統制，總統（四年、得連任一次）與立法院（四年一屆、113 席）分開選舉，因此可能出現「總統一個顏色、國會另一個顏色」的分立政府。這正是 2024 年的處境：賴清德以約 40% 當選總統、民進黨連續第三任執政；但同日的立委選舉，民進黨只拿 51 席、國民黨 52 席、民眾黨 8 席、無黨籍 2 席（親藍），<strong>過半需 57 席，沒有任何單一政黨過半（三黨不過半）</strong>。藍＋白＋親藍無黨籍構成多數，民眾黨 8 席成為決定每一次表決的「關鍵少數」。這是本報告一切動力章節的政治前提：<strong>一個沒有國會多數的總統，遇上一個由對手掌握議事主導權的立法院。</strong></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">51 / 52 / 8</div><div class="fig-l">2024 立委：民進黨 / 國民黨 / 民眾黨席次（全院 113、過半需 57）</div></div>
+    <div><div class="fig-n">~40.05%</div><div class="fig-l">2024 總統：賴清德得票率（三腳督下的相對多數）</div></div>
+    <div><div class="fig-n">~71.9%</div><div class="fig-l">2024 大選投票率</div></div>
+    <div><div class="fig-n">0</div><div class="fig-l">2025 大罷免中通過的國民黨立委罷免案（全數未過）</div></div>
+  </div>
+
+  <div class="prism">
+    <div class="pv-g"><div class="pv-tag">GREEN</div><p>版圖是一張「贏了認同、輸了國會」的錯位圖：民進黨連三任證明本土執政已是常態，卻首次面對一個能凍結預算、擴權自肥的敵對國會——完全執政的黃金十年結束了。</p></div>
+    <div class="pv-b"><div class="pv-tag">BLUE</div><p>版圖是一張「贏地方、贏國會、輸總統」的困局圖：國民黨守住立法院多數與多數縣市，卻連三屆拿不回總統府——它掌握了制衡的鑰匙，卻仍缺一個能贏回中央的兩岸論述。</p></div>
+    <div class="pv-w"><div class="pv-tag">WHITE</div><p>版圖是一張「以小博大」的槓桿圖：8 席撐起關鍵少數，讓民眾黨在每次表決都待價而沽——但也把它綁進「離開柯文哲能否存活、投給誰換到什麼」的生存難題。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一張版圖，三種利害結構：錯位圖、困局圖、槓桿圖</div>
+
+  <h3>把三層合起來讀：2026 年的版圖一句話</h3>
+  <p>認同是不變的地基、三黨是它的當前組裝，而 2024 年的特殊性在於——<strong>認同層與府會層第一次明顯背離</strong>：綠營在總統與認同上勝出，藍白卻在國會取得多數，形成一個「總統推不動、國會關不了」的分立僵局。這個僵局在 2024–2025 一年之內就演成國會改革釋憲戰、青鳥行動、預算大砍與大罷免。版圖的下一個裁決點是 2026 年 11 月的九合一地方選舉——它將是對賴清德政府與分立僵局的期中考，也是藍白能否延續氣勢、綠營能否止血的第一道測試。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s2">
+  <div class="sec-label">PART I · CH 02</div>
+  <h2>結構的根源：半總統制與認同的重整</h2>
+  <p class="lede">台灣政治為何會在 2024 之後陷入少數政府的僵局？答案不在個別政治人物，在兩個結構性根源：一是 1997 年修憲定型的<strong>半總統制</strong>——它讓總統可以不理國會多數而任命閣揆，卻又讓內閣對國會負責，天生埋著分立政府的引信；二是三十年來<strong>認同的重整</strong>——它讓政黨競爭從「統獨光譜」收斂成「維持現狀下的路線之爭」，也讓每一次選舉都同時是認同的公投。</p>
+
+  <h3>第一層：1997 修憲——總統任命閣揆不需國會同意</h3>
+  <p>台灣的憲政體制經過 1990 年代多次修憲，最關鍵的一步是 1997 年第四次修憲：<strong>取消立法院對行政院長的同意權</strong>，總統得直接任命行政院長；作為交換，立法院取得對行政院的不信任投票權，總統則取得（在被倒閣後）解散國會的權力。這套「雙首長制」設計，在總統所屬政黨同時掌握國會多數時運作順暢（如 2016–2024 的完全執政）；但一旦總統的黨在國會是少數，它就會製造一種奇特的僵局：<strong>總統可以任命一個國會多數不支持的內閣，國會可以杯葛這個內閣的每一項法案與預算，雙方都無法輕易解決對方。</strong>倒閣需承擔改選風險、覆議門檻與釋憲程序又冗長——制度沒有給僵局一個乾淨的出口。</p>
+
+  <h3>第二層：少數政府的誕生——2024 的制度後果</h3>
+  <p>2024 年正是這套制度的壓力測試。賴清德當選總統，卻沒有國會多數，於是台灣出現了民主化以來少見的完整「少數政府」局面（陳水扁時代亦曾朝小野大，但當時在野的泛藍協調度與此不同）。行政院提出的法案在立法院動輒被擋、被修、被退；中央政府總預算被大幅刪減與凍結；人事同意權（如大法官、監委、考試委員）被立法院擱置。<strong>半總統制的內在矛盾——總統有民意、國會有多數，兩個都宣稱代表人民——在 2024 之後被完全引爆。</strong>這不是誰特別惡意的結果，是制度設計在「府會不同黨」時的必然產物。</p>
+
+  <h3>第三層：認同的重整——從統獨光譜到「現狀共識」</h3>
+  <p>與制度並行的，是認同結構的深層重整。1990 年代的台灣政治還是一條真實的「統—獨」光譜；但三十年來，隨著世代更替、民主鞏固、以及香港「一國兩制」的破滅示範，這條光譜的兩端都萎縮了：主張立即統一者趨近於零，主張立即法理獨立者也是少數，社會的重心壓縮到「維持現狀」這個巨大的中間。<strong>這帶來一個弔詭：認同上藍綠的距離其實縮小了（都主張維持現狀、都不要現在統一），但情緒上的對立卻沒有緩和</strong>——因為爭的不再是終點，而是「用什麼路徑守住現狀」與「誰有資格代表台灣」。認同從一道待解的難題，變成一個已收斂的常數，卻依然是動員的核心。</p>
+
+  <h3>第四層：族群語言的退位與新分野的上場</h3>
+  <p>值得注意的是台灣政治分野本身的演化：早年的省籍（本省／外省）矛盾已大幅淡化，閩客與原住民的族群動員也不再是主軸；取而代之的新分野是<strong>世代（世代不公、居住正義）</strong>與<strong>兩岸路線（抗中 vs 交流）</strong>的交叉。這正是民眾黨與白色力量崛起的土壤：一群不吃藍綠省籍老帳、卻對高房價與低薪深感被背叛的年輕世代，成為認同已定、但對兩大黨都不信任的浮動票。認同的收斂，反而騰出了「經濟與世代」這條新戰線的空間。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 為什麼僵局沒有乾淨的出口</div>
+    <p>與內閣制不同，台灣的半總統制在府會僵持時缺乏一個低成本的重設鍵。<strong>倒閣</strong>會觸發解散國會、全體立委改選，在野黨未必願賭；<strong>覆議</strong>只需二分之一立委維持原決議即可推翻行政院；<strong>釋憲</strong>（憲法法庭）程序漫長、且其正當性本身可被政治質疑（見第 3 章）。於是分立政府的雙方最理性的策略往往是「僵持到下一次選舉」——把裁決權丟回選民。這解釋了為什麼 2024 之後的每一場衝突（國會擴權、預算凍結、大罷免）本質上都是「用制度外或準制度手段，試圖打破選票造成的僵局」，而每一次嘗試又都被另一個制度環節（釋憲、罷免門檻）擋回。<strong>台灣民主的韌性，恰恰體現在它沒有讓任何一方能單方面終結僵局。</strong></p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s3">
+  <div class="sec-label">PART I · CH 03</div>
+  <h2>兩個不投票的力量：憲法法庭與「對岸的手」</h2>
+  <p class="lede">在總統與立法院這兩個選出來的權力之外，台灣政治還有兩個不投票、卻能決定結構走向的力量。一個在島內——<strong>憲法法庭</strong>，它能宣告立法院的法律違憲、成為分立僵局的仲裁者；一個在海峽對岸——<strong>中國的手</strong>，透過軍事、經濟與認知作戰，持續為台灣的每一場選舉與每一項政策施加無法投票、卻無所不在的壓力。理解台灣，必須理解這兩股「不在選票上、卻在結構裡」的力量。</p>
+
+  <h3>憲法法庭：分立僵局的島內仲裁者</h3>
+  <p>台灣的違憲審查權由司法院大法官組成的<strong>憲法法庭</strong>行使。在府會分立、雙方都宣稱代表人民的僵局裡，憲法法庭成了唯一能對「誰逾越憲法界線」做出終局裁定的機構。2024 年這一角色被推到聚光燈下：立法院多數（藍白）通過的《立法院職權行使法》修正案（國會改革法案），被行政院、總統與民進黨團聲請釋憲；憲法法庭於 2024 年 10 月 25 日作出<strong>「113 年憲判字第 9 號」</strong>，宣告其中多數擴權條文（如反質詢入罪、部分調查權與聽證權設計）違憲。<strong>對綠營，這是憲政守門人擋下國會擴權；對藍白，這是總統用他任命的大法官推翻國會多數的民意</strong>——同一份判決，兩種讀法，正是政治司法化在台灣的縮影。</p>
+
+  <h3>大法官出缺與憲法訴訟法修正：反制的反制</h3>
+  <p>更關鍵的是隨後的攻防。藍白在釋憲受挫後，於 2024 年 12 月修正《憲法訴訟法》，<strong>提高憲法法庭作成判決所需的評議與同意人數門檻</strong>；而此時大法官正好多位任期屆滿出缺、賴清德提名的人選又被立法院擱置不予同意——兩者疊加，使憲法法庭在可作成判決的大法官人數不足下，實質陷入難以運作的狀態。<strong>這是分立僵局最精巧、也最危險的一手</strong>：不直接對抗守門人，而是修改守門人的開門規則、同時卡住補人的程序，讓仲裁者本身失能。這也是第 14 章「威權化辨析」必須小心處理的灰區——它是合法程序內的政治鬥爭，還是對制衡機制的侵蝕？</p>
+
+  <h3>對岸的手：軍事、經濟、認知的三重施壓</h3>
+  <p>台灣政治最特殊之處，是它有一個能穿透一切、卻不在任何選票上的外部行為者：中華人民共和國。北京的施壓分三個層次同步進行：<strong>軍事灰帶</strong>（共機共艦常態化擾台、圍台軍演如 2024 年 10 月的「聯合利劍-2024B」，在賴清德就職與敏感時點加壓）；<strong>經濟脅迫</strong>（農漁產品輸入禁令、ECFA 早收清單的部分中止、對特定台企的調查與制裁——詳第 24 章）；<strong>認知作戰</strong>（假訊息、統戰、扶植在地協力者、操作「疑美論」與「戰爭恐懼」，尤其在選舉期間）。這三重施壓的目標不是立即攻台，而是長期塑造台灣的內部氛圍、影響選舉、離間台美互信。<strong>它是台灣所有內部評估的外部前提，也是本報告「對岸是風險」定錨的來源。</strong></p>
+
+  <h3>認知作戰的內部傳導：為什麼「疑美論」有市場</h3>
+  <p>對岸的手之所以有效，是因為它能嫁接台灣真實存在的內部焦慮。「疑美論」（懷疑美國會為台灣而戰、質疑美國要求的軍購與供應鏈分散是「掏空台灣」）之所以有市場，並非全是境外操作，而是它接上了部分選民對「台灣是否被當棋子」的真實不安；「戰爭與和平」的選舉框架之所以動員力強，是因為沒有人真的想打仗。<strong>認知作戰最厲害之處，不是無中生有，而是放大與扭曲台灣社會裡本來就有的裂縫。</strong>這使得「哪些是民主社會正常的政策辯論、哪些是被外力操作的認知滲透」變得極難切割——這正是它作為「風險」的難纏之處：它不像軍演那樣清晰可見，而是溶進了每一次日常的公共討論裡。</p>
+
+  <div class="prism">
+    <div class="pv-g"><div class="pv-tag">GREEN</div><p>兩股力量都是「守護民主的防線」：憲法法庭擋下國會擴權、揭穿在地協力者與認知作戰，是台灣抵禦威權滲透的抗體。藍白癱瘓憲法法庭、複述北京話術，是在替對岸拆自家的防線。</p></div>
+    <div class="pv-b"><div class="pv-tag">BLUE</div><p>兩股力量被綠營工具化了：憲法法庭成了總統推翻國會多數的橡皮圖章，「認知作戰」成了給在野監督扣紅帽的標籤——把每一個反對意見都說成「中共同路人」，才是對民主真正的傷害。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>兩股力量都是「政策不確定性的來源」：憲法法庭失能升高了法律環境的不可預測性，對岸的軍事與經濟施壓則是台海風險溢價的直接來源——這是外資評估台灣時最難量化、卻最真實的兩塊。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同兩股不投票的力量，三種定性：民主抗體、工具化、不確定性來源</div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART II</div>
+  <h2>稜鏡 · The Prisms</h2>
+  <div class="pd-sub">同一座島，五種社會位置的讀法</div>
+</div>
+
+<section id="s4">
+  <div class="sec-label">PART II · CH 04 · 稜鏡 I</div>
+  <h2>稜鏡 I・綠／台灣認同視角：一場尚未完成的「正常國家」工程</h2>
+  <p class="lede">綠營看台灣，看到的是一部「本土從被壓抑到當家」的進行式史詩。從黨外、美麗島、到三次政黨輪替、再到 2024 年民進黨連續第三任總統，這個陣營的自我認同建立在「台灣主體」這條主線上。對他們而言，認同的戰役幾乎已經打贏了——但認同上的勝利，換不來主權上的承認，也保不住國會的多數。</p>
+
+  <h3>從黨外到執政：本土政權的常態化</h3>
+  <p>民進黨的骨幹是台灣民主化與本土化運動的產物。它的道德正當性來自對威權時代的反抗（黨外、美麗島事件、街頭運動），也塑造了它的政治語彙：台灣主體、深化民主、轉型正義、抗中保台。2024 年賴清德當選、民進黨史無前例地連續執政第三任，對綠營是一個里程碑式的確認——<strong>本土執政已不再是「輪替」的例外，而是台灣政治的常態</strong>。這是三十年運動的成果，也是認同結構收斂到綠營有利一側的反映：當六成以上自認台灣人，一個以「守護台灣」為核心語彙的政黨，取得了結構性的敘事優勢。</p>
+
+  <h3>認同的勝利與主權的天花板</h3>
+  <p>但綠營的稜鏡有一個深刻的內在張力：<strong>它幾乎贏得了認同，卻撞上了主權的天花板。</strong>台灣人可以在民調上壓倒性地自認台灣人、拒絕一國兩制，卻無法讓國際社會正式承認台灣是一個「正常國家」——邦交國寥寥、無法加入以主權國家為門檻的國際組織、連國號與旗幟在國際場合都受限。這是綠營理想主義的邊界：認同是它能靠自己解決的，主權卻不是。於是務實的路線（如蔡英文「維持現狀、不挑釁不冒進」）與理想的路線（法理台獨）之間，綠營長年在「守住已有的、不去觸碰做不到的」之間走鋼索——賴清德的挑戰，正是如何在延續蔡英文務實路線的同時，回應深綠對「更進一步」的期待，而不越過北京的紅線。</p>
+
+  <h3>失去國會：完全執政黃金時代的終結</h3>
+  <p>2024 對綠營還有一層苦澀：<strong>贏了總統，卻失去了國會。</strong>2016–2024 的八年，民進黨同時掌握總統與立法院多數，是「完全執政」的黃金時代，年金改革、能源轉型、同婚立法、《反滲透法》等重大工程得以推動。但 2024 之後，這扇窗關上了——一個沒有國會多數的總統，面對的是被凍結的預算、被擱置的人事、被擴權的國會。綠營必須重新學習一件它八年來不熟悉的事：<strong>如何在少數政府下治理，如何把街頭動員（青鳥）與公民力量（大罷免）當作補足國會席次不足的工具</strong>——而大罷免的失敗（第 14 章），正是這條路徑的第一次重挫。</p>
+
+  <h3>內部結構：派系共治與「務實—理想」的光譜張力</h3>
+  <p>綠營並非鐵板一塊，它是一個由派系共治、且在「務實」與「理想」之間持續拉扯的聯盟。歷史上民進黨內派系林立（如以組織動員見長的新潮流系，以及其他圍繞政治人物形成的次團體），權力分配、提名協調與路線走向都是派系折衝的結果——這使它在動員上綿密，卻也常有內鬥與整合成本。更深的張力在路線光譜：<strong>一端是蔡英文式的「務實維持現狀」（守住已有的、不觸碰做不到的、不給北京口實），另一端是深綠對「更進一步邁向正常國家」的期待。</strong>賴清德的「務實的台獨工作者」自我定位，正好卡在這條光譜的張力點上——他要同時安撫深綠基本盤與國際（尤其美國）對「不挑釁」的期待。這條內部光譜，決定了綠營在任何兩岸議題上的動作幅度，也是它與白營、藍營競逐中間選民時的自我約束。</p>
+
+  <div class="lens l-g">
+    <div class="lens-tag">GREEN LENS · 小結</div>
+    <p>綠營稜鏡看到的台灣，是一個「認同已定、主權未竟、國會新失」的進行式。它的力量在於收斂到有利一側的認同結構、連三任執政的常態化、以及旺盛的公民社會動員力；它的風險在於「認同的勝利換不來主權的承認」的理想邊界，以及「失去國會後如何治理」的現實難題。這是全書的第一個定錨：<strong>對綠營而言，認同是它幾乎已經拿下的常數——但常數贏不了戰爭，也補不了國會的 6 席之差。</strong></p>
+  </div>
+</section>
+
+<section id="s4b">
+  <div class="sec-label">PART II · CH 04B · 人物</div>
+  <h2>賴清德其人與少數政府的內閣</h2>
+  <p class="lede">要讀懂 2024 之後的綠營，必須讀懂賴清德這個人——他比蔡英文更深綠、更直白、更具草根動員色彩，卻在上任第一天就繼承了一副蔡英文不曾面對的牌：一個由對手掌握多數的國會。他的個人風格與他的結構處境之間的張力，是理解這一屆政府的鑰匙。</p>
+
+  <h3>從醫師到總統：務實中的深綠底色</h3>
+  <p>賴清德的軌跡有鮮明的台灣色彩：礦工之子、成大與哈佛公衛背景的醫師、從台南立委與市長崛起，以清廉勤政的形象與草根動員能力著稱。他的政治底色比蔡英文更深綠——曾自稱「務實的台獨工作者」，這既是他在深綠基本盤的資產，也是北京定性他為「台獨」、對他個人格外警戒的原因。2024 年 5 月 20 日就職後，他必須在兩件事間走鋼索：<strong>對內延續蔡英文的務實維持現狀路線（不挑釁）、對深綠回應「更堅定守護主權」的期待，同時不給北京升高施壓的口實。</strong>就職前後，北京以「聯合利劍-2024B」等圍台軍演與灰帶施壓回應，正是這條鋼索張力的外顯。</p>
+
+  <h3>少數政府的內閣：權力與掣肘</h3>
+  <p>賴清德的內閣（行政院）面對的是台灣民主化以來罕見的「有權任命、無力施政」處境。依半總統制，總統可任命行政院長而不需國會同意——所以內閣是綠的；但內閣的每一項法案與預算都要送進藍白過半的立法院——所以施政是卡的。這造成一種奇特的權責錯位：<strong>行政院握有行政權，卻對一個敵對的國會負責；它可以繼續運作，卻推不動任何需要立法或預算的新政。</strong>於是這一屆政府的施政重心，被迫從「推動新法」轉向「守住既有政策、對抗國會的刪減與擴權、並訴諸公民社會（青鳥、罷免）補足席次」。這是一個以防守為主軸的政府。</p>
+
+  <h3>2026 就職兩週年談話：「台灣前途由 2,300 萬人決定」</h3>
+  <p>賴清德在 2026 年 5 月 20 日的就職兩週年談話，濃縮了他在「認同／對岸」這條軸線上的定位。他重申<strong>台灣的前途只能由 2,300 萬人共同決定、不容外力（境外勢力）決定</strong>，堅持維持現狀（其定義包含台灣民主自由的生活方式與「中華民國台灣」的主權事實），同時表達願在「對等、尊嚴」的前提下與北京進行有序交流。這段談話的三個元素——<strong>「由自己人決定」（認同）、「維持現狀」（務實）、「對等尊嚴下交流」（對北京留一道門）</strong>——正是綠營務實路線的標準配方：對深綠基本盤展示堅定（台灣前途自決），對國際展示可預測（維持現狀、不挑釁），對北京留一道細縫（願交流，但要對等）。</p>
+  <p>但這段談話也再次照出全書的核心弔詭：<strong>賴清德可以斬釘截鐵地宣示「台灣前途由 2,300 萬人決定」，但這句話本身就是對一個現實的抗議——因為台灣的前途，恰恰是它最無法單方面決定的那件事。</strong>「不容外力決定」是一個主權宣示，也是一個未竟的願望：北京的軍演、經濟脅迫、以及華府的戰略模糊，每一項都是「外力」對台灣前途的實質施壓。認同可以由 2,300 萬人決定，主權與安全卻不能——這正是「認同是常數、對岸是風險」在一場週年談話裡的並置。</p>
+
+  <div class="callout">
+    <div class="co-tag">TENSION · 深綠底色 vs 少數處境</div>
+    <p>賴清德的核心張力可以濃縮成一句話：<strong>他個人的政治能量在「更堅定的台灣主體」上，但他的結構處境卻要求他極度謹慎。</strong>對外，他越是展現深綠底色，北京越有藉口升高施壓、也越可能被在野貼上「挑釁、走向戰爭」的標籤；對內，他若太過謹慎，又會讓深綠基本盤失望、削弱動員力。而這一切，都必須在一個他無法主導議程的國會前上演。這使賴清德政府的每一步都像在多重約束下解一道方程式——這也是為什麼本報告把「府會」列為變數、把「對岸」列為風險：這兩者共同定義了賴清德的行動空間，而它們大半不由他決定。</p>
+  </div>
+</section>
+
+<section id="s5">
+  <div class="sec-label">PART II · CH 05 · 稜鏡 II</div>
+  <h2>稜鏡 II・藍／中華民國視角：贏地方、輸中央的正統焦慮</h2>
+  <p class="lede">藍營看台灣，看到的是一個必須被守護、卻在總統層級節節敗退的「中華民國」。這個陣營的世界觀由三根支柱撐起：對中華民國法統的守護、對兩岸交流降低戰爭風險的信念、以及對「民進黨一黨獨大會走向對抗與戰爭」的警戒。它守住了立法院與多數地方縣市，卻連續三屆拿不回總統府——這是它最深的焦慮。</p>
+
+  <h3>三根支柱：法統、和平、拚經濟</h3>
+  <p>國民黨的地基是歷史的。它是把中華民國帶到台灣的政黨，其核心認同建立在「中華民國正統」之上，支持基礎包含軍公教、部分外省族群、以及廣大的地方派系網絡。對這個陣營而言，兩岸關係不是「對抗」的對象，而是「管理」的對象——透過交流、經貿、以及「九二共識」的模糊空間降低敵意與戰爭風險，是它的核心兩岸論述。與此配套的是「經濟優先於意識形態」（兩岸和緩才能拚經濟）、以及對「民進黨完全執政會走向威權與對抗」的長期警戒。這套價值語彙在中南部以外的部分地區、年長世代、軍公教與地方派系中有深厚基礎。</p>
+
+  <h3>結構性困境：贏得了立法院，贏不回總統府</h3>
+  <p>藍營最深的困境，是一種奇特的「上下錯位」：<strong>它能贏地方（多數縣市長）、能贏國會（2024 立法院第一大黨），卻連續三屆（2016、2020、2024）拿不回總統府。</strong>這個錯位揭示了一個殘酷的結構事實——在「認同」這一層，藍營處於守勢：當六成以上自認台灣人，一個被貼上「親中」標籤的政黨，在總統這種「代表台灣面對世界」的職位上，天然吃虧；但在「治理與服務」這一層（地方選舉、國會席次），派系動員、經濟議題與對執政黨的不滿，仍能讓它取得優勢。<strong>藍營贏在認同不是主軸的選舉，輸在認同是主軸的選舉。</strong></p>
+
+  <h3>兩岸論述失去年輕人：世代的斷層</h3>
+  <p>藍營困境的核心，是它的兩岸論述在年輕世代失去了說服力。「九二共識」在香港「一國兩制」破滅後，對年輕人越來越像一個與北京綁定的負資產；「交流降低敵意」的敘事，在共機繞台常態化、經濟脅迫頻傳的現實前顯得越來越難自圓其說。<strong>藍營守得住地方派系與年長選民，卻在「認同已定、對中國高度警戒」的年輕世代面前節節失血</strong>——這正是白營崛起搶走的那塊票源（厭倦藍綠、但對藍營的親中形象也不買單）。藍營的未來，取決於它能否找到一套「既守護中華民國、又不被綁上北京、還能對年輕人說話」的新兩岸論述——這是它目前最大的、尚未解開的結構課題。</p>
+
+  <h3>地方執政版圖：藍營的另一個底盤</h3>
+  <p>要理解藍營為何能在總統連敗下仍是強大的一方，必須看它的地方執政版圖。國民黨長年掌握多數縣市的執政權——這不只是面子，而是實質的政治資本：<strong>地方執政意味著掌握地方預算、人事、工程與服務資源的分配，能豢養並整合地方派系（第 7 章），也能作為中央選舉的動員基地與人才苗圃。</strong>「贏地方、贏國會、輸總統」的上下錯位，正說明藍營的力量集中在「治理與服務」這一層（地方選舉、派系動員），弱在「代表台灣面對世界」這一層（總統與認同）。地方執政版圖，是藍營在總統層級失利時仍能維持元氣、並在 2026 九合一有機會展現實力的底盤——這也是為什麼九合一對藍營格外重要：它是藍營主場的期中考。</p>
+
+  <h3>黨內裂痕：深藍、本土藍與世代焦慮</h3>
+  <p>藍營的困境還有一層內部裂痕。黨內大致存在「深藍」（強調中華民國法統與兩岸連結，年長世代與部分外省族群為基礎）與「本土藍／改革派」（主張淡化統一色彩、更貼近台灣主體、以爭取中間與年輕選民）之間的路線張力。這條裂痕與世代焦慮交織：<strong>年長支持者是藍營最穩固的鐵票，但也讓藍營的形象與論述難以年輕化；一旦太過本土化又恐流失深藍基本盤、且與白營在中間地帶正面衝突。</strong>藍營因此陷入一個兩難——守住深藍就贏不回年輕人，追年輕人就可能鬆動基本盤。這正是它「缺一套能贏回中央的新兩岸論述」的內部根源：問題不只是對外的論述，更是黨內共識的分裂。</p>
+
+  <div class="lens l-b">
+    <div class="lens-tag">BLUE LENS · 小結</div>
+    <p>藍營稜鏡看到的台灣，是一個「守成者在中央被邊緣化」的島。它的力量在於立法院多數、多數地方執政、地方派系的綿密動員、以及「和平與拚經濟」對厭戰選民的訴求；它的弱點在於認同結構的長期不利、兩岸論述對年輕世代的失效、以及「贏地方輸中央」的天花板。藍營握有制衡總統的鑰匙（國會多數），卻缺一把能打開總統府的鑰匙（能贏回中間與年輕人的論述）——這是它在 2024 之後最深的自我拉扯。</p>
+  </div>
+</section>
+
+<section id="s6">
+  <div class="sec-label">PART II · CH 06 · 稜鏡 III</div>
+  <h2>稜鏡 III・白與世代／民眾黨視角：厭倦藍綠的關鍵少數</h2>
+  <p class="lede">白營看台灣，看到的是一個被藍綠世仇綁架、被高房價與低薪背叛的島。台灣民眾黨（TPP）與它所代表的「白色力量」，是認同收斂後騰出的新空間的產物——一群不吃省籍老帳、對兩大黨都不信任、關心居住正義與世代公平的年輕與中間選民。他們用 8 席立委撐起「關鍵少數」，卻也困在一連串生存難題裡。</p>
+
+  <h3>白色力量的崛起：認同之外的第三條路</h3>
+  <p>民眾黨的興起，建立在一個結構縫隙上：當認同已定（大家都是台灣人、都要維持現狀），藍綠的統獨對立對一部分選民就變成了「無意義的內耗」。這群選民——以年輕世代、都會、非典型就業者為主——的核心關切不是統獨，而是<strong>高房價、低薪、世代不公、以及對藍綠「只會惡鬥、不會治理」的厭倦</strong>。柯文哲以「理性、務實、科學」的技術官僚品牌、以及在網路與年輕族群的高聲量，把這股怨氣組織起來。2024 年柯文哲以約 26.5% 的總統得票、民眾黨拿下 8 席不分區立委，證明了這塊「非藍非綠」票源的真實存在與規模。</p>
+
+  <h3>關鍵少數的槓桿：8 席如何撬動 113 席</h3>
+  <p>民眾黨的政治能量，遠大於它的 8 席所暗示的。在三黨不過半的立法院裡，民進黨 51、國民黨 52，任何一方要過半（57 席）都需要民眾黨的票——<strong>這使 8 席的民眾黨成為決定每一次表決的「關鍵少數」，一票在藍綠之間待價而沽。</strong>在國會改革、預算、人事等重大表決上，民眾黨多數時候選擇與國民黨合作（藍白合），構成了對抗綠營的國會多數。這是民眾黨在體制內最大的資產：它用最小的席次，換到了最大的議程影響力。但這個槓桿也是雙面刃——每一次投票都是選邊，而選邊會稀釋它「超越藍綠」的品牌。</p>
+
+  <h3>生存難題：離開柯文哲能否存活</h3>
+  <p>但白營的稜鏡有一個致命的脆弱：<strong>它高度依賴柯文哲個人的魅力與聲量，制度化與地方組織極其薄弱。</strong>民眾黨幾乎沒有地方派系、沒有綿密的樁腳網絡、沒有穩固的地方執政版圖，它的票源是高流動性的「個人粉絲」而非「組織鐵票」。這使它面對一個存在性問題：一旦柯文哲因故無法領導（如司法案件纏身），這個黨能不能存活？它的第二個難題是路線：作為關鍵少數，它每一次與藍或綠合作，都會被對方的支持者質疑「其實是藍（或綠）」，稀釋它「第三勢力」的獨立性。<strong>民眾黨的槓桿越大，它被藍綠磁吸、失去自我定位的風險也越大。</strong></p>
+
+  <h3>網路政治與小草：高聲量、低組織的動員模式</h3>
+  <p>民眾黨的動員模式，與藍綠傳統的「組織動員」（派系、樁腳、社團）截然不同——它是一種以網路為主場的「聲量動員」。柯文哲與民眾黨在 YouTube、直播、短影音與網路社群的高聲量，以及被稱為「小草」的年輕支持者群體，構成它的動員核心。<strong>這種模式的優勢是成本低、擴散快、直接觸及對傳統媒體與藍綠都不信任的年輕世代；它的致命弱點是「高聲量不等於高組織」</strong>——網路聲量是流動的、去中心的、且高度依附於個人魅力，一旦領導者失勢或議題退燒，聲量可以在短時間內蒸發，而它背後沒有派系與樁腳那樣的實體組織能兜底。這正是白營「離開柯文哲能否存活」難題的技術根源：它的動員基礎建立在流量與個人上，而非可繼承的組織資產上。這也使民眾黨在需要綿密地面組織的地方選舉（尤其基層）遠比在全國性的聲量戰場吃力。</p>
+
+  <div class="lens l-w">
+    <div class="lens-tag">WHITE LENS · 小結</div>
+    <p>白營與世代稜鏡看到的台灣，是一個「認同已定、但世代被背叛」的島。它的力量在於填補了藍綠之外的縫隙、在年輕與都會族群的高聲量、以及 8 席換來的關鍵少數槓桿；它的風險在於高度依賴柯文哲個人、地方組織空洞、以及「每次選邊都稀釋品牌」的路線困境。白營是認同收斂後最重要的政治新變數——但它能否從「一個人的政黨」進化成一個制度化的第三勢力，是它 2026、2028 最大的生死題。</p>
+  </div>
+</section>
+
+<section id="s7">
+  <div class="sec-label">PART II · CH 07 · 稜鏡 IV</div>
+  <h2>稜鏡 IV・地方派系與樁腳視角：顏色之下的恩庇底層</h2>
+  <p class="lede">前三個稜鏡（綠、藍、白）都是「意識形態的稜鏡」——它們以認同、路線、世代為軸。但台灣政治還有一個這三個稜鏡根本看不見的第四讀法：<strong>地方派系與樁腳。</strong>在縣市與鄉鎮的層級，真正驅動選票的往往不是統獨、不是認同，而是農漁會、水利會、宗親、椿腳所構成的恩庇網絡——它以「服務與利益」而非「意識形態」為貨幣，且跨越藍綠運作。看不懂這一層，就看不懂台灣地方政治的一半。</p>
+
+  <h3>恩庇網絡：以服務與利益為貨幣的政治</h3>
+  <p>台灣的地方派系，是威權時代國民黨為了在地方鞏固統治而扶植、並在民主化後獨立演化的產物。它的運作邏輯與中央的意識形態政治完全不同：<strong>樁腳（地方動員的節點）透過綿密的人情網絡——婚喪喜慶、急難救助、關說服務、地方建設的分配——把選票組織起來，換取當選者對派系利益的回報（工程、人事、預算、特定產業的照顧）。</strong>對這一層的選民而言，「你上次幫我兒子喬了工作」遠比「你支持統還是獨」更能決定選票。這是一種以人際義務與利益交換為基礎的政治，它的貨幣是服務，不是認同。</p>
+
+  <h3>農漁會、水利會與宗親：組織票的基礎設施</h3>
+  <p>地方派系的組織基礎，是幾類特殊的社會團體：<strong>農會與漁會</strong>（掌握農漁民的信用、供銷、保險，是農漁業縣市最綿密的動員機器）、<strong>水利會</strong>（掌握灌溉用水的分配，在農業地區有強大影響力，其官派化改革本身即是朝野角力焦點）、以及<strong>宗親會與地方社團</strong>。這些組織的理事長、總幹事等職位，是地方派系的權力節點，也是選舉時的動員樞紐。<strong>誰掌握了農漁會與水利會，誰就握有一個縣市最穩定的組織票基礎</strong>——這也是為什麼這些看似「非政治」的團體的人事與改革，總是引發激烈的政治鬥爭。</p>
+
+  <h3>黑金與賄選：恩庇政治的陰暗面</h3>
+  <p>恩庇網絡的陰暗面是「黑金」——地方派系、樁腳與地方型企業（尤其營建、砂石、地方工程）的利益結合，以及選舉時的賄選買票。台灣有長期的賄選查察史，地方選舉（尤其鄉鎮市民代表、村里長、農漁會選舉）的買票文化雖經多年掃蕩而淡化，但從未根絕。<strong>黑金是恩庇政治的必然副產品：當政治以利益交換為貨幣，利益就會流向能提供組織票的人與能回報利益的人。</strong>值得注意的是，黑金與地方派系並非某一顏色專屬——它跨越藍綠，哪個政黨在地方執政、能分配資源，派系就傾向靠攏哪一邊，這正是地方派系「顏色可以流動、利益才是本質」的特徵。</p>
+
+  <h3>派系與中央顏色的鬆耦合：跨藍綠的流動</h3>
+  <p>地方派系與中央政黨的關係，是「鬆耦合」的。傳統上多數地方派系與國民黨淵源較深（威權時代的扶植遺產），但民進黨長期執政中央與部分縣市後，也吸納、收編了一部分地方派系——派系的忠誠，往往流向「能分配資源的執政者」，而非固定的意識形態。<strong>這造成一個關鍵現象：中央的藍綠對決是意識形態的、清晰的；地方的派系政治是利益的、流動的。</strong>一個縣市可能總統票投綠、地方派系卻與藍營盤根錯節，或反之。看懂這一層鬆耦合，才能解釋為什麼「總統大選的顏色」與「地方選舉的顏色」經常不一致——它們根本是兩套不同貨幣的政治。</p>
+
+  <div class="lens l-x">
+    <div class="lens-tag">FACTION LENS · 小結</div>
+    <p>地方派系稜鏡看到的台灣，是一個「認同在天上、利益在地上」的雙層島。上層（總統、國會）是意識形態的戰場，下層（縣市、鄉鎮、農漁會）是恩庇網絡的市場——兩層以不同的貨幣運轉，鬆耦合地連在一起。這一層是前三個稜鏡的盲區：綠藍白都在爭「代表台灣」，而地方派系在爭「分配資源」。理解台灣政治，必須同時看見這兩層——尤其在 2026 九合一地方選舉這種「派系政治壓過意識形態」的戰場上，看不見這一層的分析會嚴重失真。</p>
+  </div>
+</section>
+
+<section id="s7b">
+  <div class="sec-label">PART II · CH 07B · 個案</div>
+  <h2>派系個案：花蓮的傅崐萁與農漁會的組織票</h2>
+  <p class="lede">抽象的「地方派系」需要具體的個案才能落地。這一節用兩個案例——花蓮的地方勢力，以及農漁會作為組織票機器——把上一章的恩庇邏輯做成可觸摸的實體，展示「顏色之下的第四讀法」如何在真實的政治中運作。</p>
+
+  <h3>個案一：花蓮模式——一個地方強人的能量</h3>
+  <p>花蓮是理解台灣地方派系與中央政治交會的絕佳樣本。國民黨的傅崐萁長期是花蓮地方政治的核心人物，其個人與家族在花蓮的影響力橫跨縣長、立委等職位，構成一個以個人為中心的地方強勢網絡。在 2024 立法院三黨不過半的格局下，作為國民黨立法院黨團的關鍵人物，一個地方型的政治強人得以在中央的府會攻防（國會改革、預算、兩岸議題）中扮演遠超其單一選區份量的角色。<strong>花蓮案例揭示了一件事：在席次極度接近的分立國會裡，一個掌握地方鐵票、進而在黨團有份量的地方強人，其槓桿會被放大到中央層級</strong>——地方派系與中央政治的界線，在三黨不過半的算術下變得模糊。</p>
+
+  <h3>個案二：農漁會——最穩定的組織票機器</h3>
+  <p>農漁會是台灣地方組織票的教科書。它的力量來自於一個結構事實：<strong>農漁會同時掌握農漁民的信用部（金融）、供銷（生產資材與農產運銷）、與保險——它嵌進了農漁民的整個經濟生活。</strong>這種深度嵌入使農漁會的動員力遠超一般社團：總幹事與理事長的一句話，能牽動整個地方的農漁民網絡。因此，每逢選舉，農漁會系統就成為兵家必爭之地；而農漁會本身的選舉與人事，也成為地方派系角力的前哨戰。這也解釋了為什麼「對中農漁產品輸入禁令」（第 24 章）在台灣的政治殺傷力如此精準——北京鎖定的正是這些嵌在農漁會網絡裡、政治敏感度極高的品項與縣市。</p>
+
+  <div class="callout">
+    <div class="co-tag">READING · 為什麼這一層對外部觀察者最容易被忽略</div>
+    <p>國際媒體與外部分析報導台灣，幾乎總是聚焦在「藍綠、統獨、台海」這條意識形態主軸——因為它清晰、戲劇性強、且符合地緣政治的敘事框架。但這條主軸只解釋了台灣政治的一半（總統與國會的中央層級）。另一半——縣市與鄉鎮的派系恩庇政治——因為它瑣碎、在地、以利益而非理念運轉，幾乎完全在外部視野之外。<strong>結果是：外部分析常常高估「認同／統獨」對地方選舉的解釋力，低估「派系／服務／利益」的份量。</strong>2026 九合一地方選舉將是這個盲區的最佳檢驗——若一個分析只用藍綠統獨去預測地方選舉，它很可能會錯得很離譜，因為那是派系恩庇政治的主場，不是意識形態的主場。</p>
+  </div>
+</section>
+
+<section id="s8">
+  <div class="sec-label">PART II · CH 08 · 稜鏡 V</div>
+  <h2>稜鏡 V・外國人／投資人視角：護國神山與台海折價的規則手冊</h2>
+  <p class="lede">外國人看台灣，看到的是一套與本地公民完全不同的規則。他們不投票、不站隊，關心的是三件本地政治新聞很少放在頭版的事：護國神山（台積電）的集中風險與「去台化」、全球最低生育率的人口懸崖、以及台海與美中角力如何為所有資產定價。對外資而言，藍綠鬥爭是雜訊，這三條結構線才是本體。</p>
+
+  <h3>護國神山：一家公司定義一個國家的風險</h3>
+  <p>對外資而言，台灣在很大程度上「就是台積電」。台積電一家的市值長年佔台股大盤的三成以上，是全球晶圓代工的絕對龍頭、先進製程的全球主導者——這使它成為「護國神山」與「矽盾」（silicon shield）論述的核心：世界對台灣先進晶片的依賴，被認為是嚇阻中國動武的一道無形防線。<strong>對外資，這是台灣最大的資產，也是它最大的集中風險</strong>：一個經濟體的命運、乃至安全論述，高度綁定於單一公司、單一產業的興衰。台積電打噴嚏，台股就重感冒；台積電的先進製程若被迫大規模分散海外（「去台化」），矽盾的邏輯本身就會被侵蝕。</p>
+
+  <h3>去台化：矽盾的悖論</h3>
+  <p>「去台化」（de-Taiwanization）是外資稜鏡最微妙的一塊。在美國的產業安全與供應鏈韌性要求下，台積電已赴美國亞利桑那、日本熊本、德國德勒斯登設廠——這被部分台灣輿論稱為「去台化」，擔憂護國神山被掏空、矽盾被稀釋。<strong>這裡有一個結構性悖論：分散生產能降低「單點被摧毀」的風險（對客戶與美國有利），卻可能削弱「世界必須保護台灣本島」的矽盾嚇阻邏輯（對台灣安全的無形資產不利）。</strong>對外資而言，關鍵讀數不是「台積電有沒有去海外設廠」（這是趨勢），而是「最先進的製程與研發核心是否仍留在台灣本島」——只要研發與最尖端節點的重心留在台灣，矽盾就仍成立；一旦重心外移，台灣的風險溢價就會結構性上升（詳第 19、20 章）。</p>
+
+  <h3>人口懸崖：比任何選舉都深的長線變數</h3>
+  <p>對長線資本而言，台灣最深的風險之一不是政治，是人口。台灣的總和生育率約 0.87–0.9，是全球最低之一、且遠低於維持人口所需的 2.1；2025 年台灣進入「超高齡社會」（65 歲以上人口占比逾兩成）。這意味著在數十年尺度上，勞動人口萎縮、內需縮小、財政（年金與健保）承壓、乃至兵源短缺。<strong>這是一條無論藍綠執政都難以逆轉的結構線</strong>——它使台灣的長期成長敘事必須從「人口紅利」轉向「生產力、自動化與高階製造」，也使任何「台灣長期看多」的論述都必須先回答人口這一題。</p>
+
+  <div class="lens l-f">
+    <div class="lens-tag">FOREIGN LENS · 小結</div>
+    <p>外國人稜鏡看到的台灣，是一個「世界級護國神山＋台海級地緣折價」的市場。真正牽動外資評估的不是藍綠鬥爭，是三條結構線：<strong>護國神山的集中風險與去台化（先進製程重心是否留台）、人口懸崖（無人能逆轉的長線侵蝕）、以及台海與美中的地緣溢價</strong>。政治的顏色會變，這三條線只會緩慢移動——外資的正確姿勢，是把藍綠新聞當雜訊過濾掉，緊盯這三條線的斜率。這也是全書對外資給出的核心姿勢：<strong>對外國人而言，認同與府會都是雜訊，對岸（台海）才是唯一真正需要為之定價的風險。</strong></p>
+  </div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART III</div>
+  <h2>動力 · The Dynamics</h2>
+  <div class="pd-sub">三腳督、國會之亂、大罷免與僵局的循環</div>
+</div>
+
+<section id="s9">
+  <div class="sec-label">PART III · CH 09</div>
+  <h2>2024 三腳督大選深讀：分立政府的誕生</h2>
+  <p class="lede">2024 年 1 月 13 日的大選，是理解此後一切的原點。它同時產生了兩個結果：賴清德以約 40% 的相對多數當選總統（民進黨連三任），以及一個三黨不過半的立法院。這兩個結果的錯位，直接製造了本報告所有動力章節的舞台——一個少數政府，對上一個由對手主導的國會。</p>
+
+  <h3>三腳督的算術：40% 如何當選</h3>
+  <p>2024 是罕見的「三腳督」（三強鼎立）總統選舉：民進黨賴清德／蕭美琴、國民黨侯友宜／趙少康、民眾黨柯文哲／吳欣盈。最終結果為賴清德約 40.05%、侯友宜約 33.5%、柯文哲約 26.5%，投票率約 71.9%。<strong>在相對多數制下，賴清德以四成得票當選——這意味著約六成選民投給了非綠陣營。</strong>這個數字有雙重意涵：一方面，它讓民進黨完成了史無前例的連續第三任（打破了台灣總統「兩任政黨輪替」的慣例）；另一方面，四成的當選基礎，也讓賴清德從第一天就缺乏壓倒性的民意授權，為少數政府的正當性爭議埋下伏筆。</p>
+
+  <h3>藍白合的破局：一場沒有成局的整合</h3>
+  <p>2024 最戲劇性的插曲，是「藍白合」的破局。若國民黨與民眾黨在總統選舉整合成單一候選人，理論上有機會擊敗賴清德——雙方確曾協商合作，卻在候選人正副排序（誰正誰副）與民調解讀上談判破裂，最終各自參選。<strong>藍白合的破局，是賴清德能以四成當選的直接原因</strong>——分裂的在野讓相對多數的綠營勝出。但值得注意的是：藍白合在總統層級破局，卻在<strong>立法院層級成局</strong>——選後在國會裡，國民黨與民眾黨在多數重大表決上合作，構成對抗綠營的多數。這個「總統破局、國會成局」的落差，正是三黨不過半格局的核心特徵。</p>
+
+  <h3>兩張選票的錯位：為什麼總統綠、國會藍白</h3>
+  <p>2024 揭示了台灣選民行為的一個深層特徵：<strong>「總統票」與「立委票」遵循不同的邏輯。</strong>總統票是「代表台灣面對世界」的認同票——在這一層，抗中保台的綠營有結構優勢；立委票則混合了地方服務、派系動員、對執政黨的制衡心理——在這一層，藍營的地方組織與「不要一黨獨大」的制衡訴求得以發揮。部分選民甚至刻意「分裂投票」（總統投綠、立委投藍或白），以「制衡」為目的。<strong>這種兩張選票的錯位，不是選民的錯亂，而是一種理性的制衡設計——它親手造出了 2024 之後的分立政府。</strong></p>
+
+  <h3>蕭美琴與副手效應：對美信號的一環</h3>
+  <p>賴清德的副手選擇本身，是一個對外的信號。搭檔蕭美琴長期擔任台灣駐美代表，被視為熟稔華府、能穩定台美關係的人物；「賴蕭配」的組合，向美國傳達了「這一屆政府會延續務實、重視對美溝通」的訊息。<strong>這揭示了台灣總統選舉一個獨特的維度：候選人的組合不只對內動員，還要對外（尤其對美國）釋放可預測性的信號</strong>——因為台灣的安全高度依賴美國，一個被華府信任的團隊，本身就是降低地緣不確定性的資產。這與其他民主體「副手主要用於平衡國內派系或地域」的邏輯不同：在台灣，副手的國際履歷，是對抗「疑美論」與安撫盟友的一環。這也再次印證全書弔詭——連一場國內選舉的人事，都必須顧及那個不投票的外部變數。</p>
+
+  <div class="prism">
+    <div class="pv-g"><div class="pv-tag">GREEN</div><p>三腳督是「認同勝利、席次受挫」的一役：賴清德連三任證明本土執政常態化，但四成當選與國會失守，讓完全執政的黃金時代結束——綠營必須學會在少數下防守。</p></div>
+    <div class="pv-b"><div class="pv-tag">BLUE</div><p>三腳督是「差一步」的遺憾：藍白若合，可能贏回總統；破局讓綠營以四成勝出。但立法院第一大黨與國會多數，是藍營的實質戰果——制衡的鑰匙到手了。</p></div>
+    <div class="pv-w"><div class="pv-tag">WHITE</div><p>三腳督是「證明存在」的一役：柯文哲二成六的得票與 8 席立委，證明白色力量是真實的第三塊；藍白合破局讓民眾黨保住獨立性，也讓它成為國會的關鍵少數。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一場大選，三種讀法：認同勝利、差一步、證明存在</div>
+</section>
+
+<section id="s10">
+  <div class="sec-label">PART III · CH 10</div>
+  <h2>三黨不過半：立法院的權力重組</h2>
+  <p class="lede">2024 的立委選舉，把台灣帶進一個陌生的政治地形：三黨不過半。這一章拆解這個新國會的權力如何重組——韓國瑜如何當上立法院長、藍白合如何在議事上成局、以及民眾黨 8 席如何成為決定一切的樞紐。這是理解國會之亂、預算凍結與大罷免的席次基礎。</p>
+
+  <h3>韓國瑜出任立法院長：藍白合的第一個戰果</h3>
+  <p>三黨不過半後的第一場權力戰，是立法院長的選舉（2024 年 2 月）。立法院長掌握議事主導權，是分立政府下極關鍵的位置。<strong>國民黨的韓國瑜在民眾黨的支持下當選立法院長</strong>——這是藍白合在國會層級成局的第一個、也是最重要的戰果。它的意義遠超一個職位：掌握了議長，藍白就掌握了議程設定、表決安排、以及議事攻防的主動權。對綠營而言，這意味著它不只是國會少數，連議事的節奏都握在對手手裡——這是少數政府「有行政權、無議事權」困境的具體體現。</p>
+
+  <h3>藍白合的成局與張力：合作中的競爭</h3>
+  <p>藍白合在國會的成局，並非鐵板一塊。國民黨（52 席）與民眾黨（8 席）在「對抗綠營」上有共同利益，因此在國會改革、預算、人事等重大表決上合作；但兩黨在票源上其實是競爭關係——民眾黨的年輕、都會、厭倦藍綠的選民，有相當部分是從藍營（以及對綠營失望者）分流而來。<strong>這造成一種「合作中的競爭」張力：民眾黨既要靠與藍合作展現關鍵少數的份量，又要避免被藍營吸收、失去「第三勢力」的獨立品牌。</strong>每一次藍白合的表決，對民眾黨都是一次品牌與槓桿的權衡——這也是為什麼民眾黨在某些議題上會刻意與國民黨保持距離、甚至倒向綠營，以證明自己不是「藍的側翼」。</p>
+
+  <h3>民眾黨作為樞紐：關鍵少數的權力與代價</h3>
+  <p>在 51（綠）對 52（藍）的席次結構下，民眾黨的 8 席成為數學上的樞紐：<strong>藍要湊過半需要白、綠要翻盤更需要白。</strong>這使民眾黨在每一次表決前都成為被爭取的對象，其影響力遠超 8 席的比例。這是關鍵少數的權力。但它也有代價：其一，每次選邊都會得罪另一邊的支持者、稀釋「超越藍綠」的品牌；其二，作為樞紐意味著它必須為每一次表決的結果負責——當藍白合推動的國會改革被釋憲宣告違憲、或引發青鳥行動的民怨時，民眾黨也必須分攤政治成本。<strong>樞紐的位置給了民眾黨最大的槓桿，也讓它承受了超過其席次的責任與風險。</strong></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">57</div><div class="fig-l">立法院過半門檻（全院 113 席）</div></div>
+    <div><div class="fig-n">52 + 8</div><div class="fig-l">國民黨 + 民眾黨（＋2 親藍無黨）＝ 國會多數</div></div>
+    <div><div class="fig-n">8</div><div class="fig-l">民眾黨席次——數學上的樞紐</div></div>
+    <div><div class="fig-n">6</div><div class="fig-l">民進黨距過半的席次差（51→57）</div></div>
+  </div>
+</section>
+
+<section id="s11">
+  <div class="sec-label">PART III · CH 11</div>
+  <h2>國會改革之亂與青鳥行動：釋憲與街頭</h2>
+  <p class="lede">三黨不過半的國會，第一場大戰就是「國會改革」。2024 年 5 月，藍白多數三讀通過《立法院職權行使法》修正案，大幅擴張國會權力；綠營以行政、街頭、釋憲三線反制，數萬群眾包圍立法院（青鳥行動）；最終憲法法庭宣告多數條文違憲。這是分立僵局第一次全面引爆，也是「制度制衡 vs 國會擴權」的教科書案例。</p>
+
+  <h3>國會改革法案：擴權的內容</h3>
+  <p>2024 年 5 月 28 日，立法院在藍白多數下三讀通過《立法院職權行使法》及相關法律修正案，核心內容包括：<strong>藐視國會罪</strong>（官員在國會答詢時若被認定虛偽或拒答，可能負刑責）、<strong>反質詢的限制</strong>（禁止被質詢者反問質詢的立委）、以及大幅擴張的<strong>國會調查權與聽證權</strong>（要求政府、法人、乃至人民提供資料、出席作證）。<strong>對藍白，這是「強化國會監督行政、終結行政獨大」的正當改革；對綠營，這是「國會擴權自肥、逼迫官員、侵犯人權與權力分立」的擴權奪權。</strong>爭議的核心不只是條文內容，還有立法過程——法案在委員會實質討論不足、以表決通過的程序爭議（「沒有討論的表決」），成為綠營質疑其正當性的焦點。</p>
+
+  <h3>青鳥行動：街頭作為少數政府的補位</h3>
+  <p>國會改革法案的表決，觸發了「青鳥行動」——數萬民眾（尤以年輕世代為主）自發包圍立法院，抗議「國會擴權、程序黑箱」。這場運動之所以重要，在於它揭示了少數政府的一種新政治工具：<strong>當綠營在國會席次不足、擋不下藍白多數時，它訴諸公民社會的街頭動員，作為席次不足的補位。</strong>青鳥行動與 2014 年太陽花學運有精神上的傳承（都是年輕世代對「黑箱程序」的反彈、都以包圍立法院為形式），但脈絡不同：太陽花反的是完全執政下的兩岸協議黑箱，青鳥反的是分立國會裡的擴權法案。<strong>青鳥行動證明了台灣公民社會的動員力仍在，也預示了綠營將把「街頭＋公民」當作對抗國會多數的長期策略——這條路徑的下一步，就是大罷免。</strong></p>
+
+  <h3>憲法法庭的反制：113 年憲判字第 9 號</h3>
+  <p>綠營反制的第三線，是釋憲。行政院、總統、監察院與民進黨立院黨團分別聲請釋憲，主張國會改革法案違憲。憲法法庭於 2024 年 10 月 25 日作出<strong>「113 年憲判字第 9 號」判決，宣告多數擴權條文違憲或應限縮解釋</strong>——包括反質詢的限制、藐視國會罪的部分設計、以及調查權聽證權逾越權力分立的部分。這是分立僵局第一次由憲法法庭做出終局裁定。<strong>它證明了台灣的制度制衡確實運作——一個試圖擴權的國會多數，被違憲審查擋了回去。</strong>但它也埋下了下一輪衝突的種子：藍白隨後修正《憲法訴訟法》、癱瘓憲法法庭本身（第 3 章），把戰場從「國會 vs 憲法法庭」升級為「國會 vs 憲法法庭的存續」。</p>
+
+  <div class="callout">
+    <div class="co-tag">READING · 這一役為什麼是全書的縮影</div>
+    <p>國會改革之亂把本報告的核心動力壓縮進半年：<strong>一個分立僵局，被三種力量輪番拉扯——國會多數（藍白）試圖用立法擴權打破僵局、行政與街頭（綠與青鳥）試圖用公民動員反制、憲法法庭（不投票的力量）做出終局裁定、而藍白再用修法反制裁定者。</strong>沒有任何一方能單方面終結僵局，每一次出手都被另一個制度環節擋回。這既證明了台灣民主的制衡韌性（沒有人能贏者全拿），也暴露了它的代價（治理陷入無盡的攻防僵局）。這正是第 16 章「民主韌性 vs 治理僵局」辨析的起點：台灣的問題不是制度失靈，而是制衡太強、以致僵局無解。</p>
+  </div>
+</section>
+
+<section id="s12">
+  <div class="sec-label">PART III · CH 12</div>
+  <h2>大罷免的失敗（2025）：公民動員的天花板</h2>
+  <p class="lede">2025 年，綠營與公民團體發動了台灣史上規模最大的一次罷免行動——大罷免，目標是罷免多位國民黨立委，以扭轉國會的藍白多數。2025 年 7 月 26 日與 8 月 23 日兩波罷免投票，針對國民黨立委的罷免案<strong>全數未通過</strong>。這是綠營「以公民動員補國會席次」路徑的重大挫敗，也揭示了街頭動員的結構天花板。</p>
+
+  <h3>大罷免的邏輯：用罷免翻轉席次</h3>
+  <p>大罷免的政治邏輯直接而大膽：既然綠營在 2024 的立委選舉輸掉了國會多數（51 對藍白 60），而席次差距只有 6 席，那麼——<strong>如果能透過罷免拉下足夠多的國民黨立委、並在補選中由綠營勝出，理論上就能翻轉國會的多數。</strong>這是青鳥行動之後，綠營「以公民力量對抗國會多數」路徑的升級版：從街頭抗議（表達民怨）升級為罷免投票（實際奪回席次）。公民團體與綠營發動連署、罷免多位藍委，把 2024 大選的分立僵局，變成了一場 2025 年的「延長賽公投」。</p>
+
+  <h3>全數未過：門檻、動員與民意的三重限制</h3>
+  <p>2025 年 7 月 26 日與 8 月 23 日的兩波罷免投票結果，是針對國民黨立委的罷免案<strong>全數未通過</strong>。這個結果由三重限制共同造成：<strong>其一，罷免門檻的設計</strong>——台灣的罷免需同意票超過不同意票、且同意票達選區選舉人一定比例，這是一個對「發動方」不利的高門檻；<strong>其二，反動員的成功</strong>——國民黨與其支持者、地方派系有效組織了「不同意罷免」或「拒領票」的反制動員；<strong>其三，民意的邊界</strong>——大罷免試圖把「反對國會擴權」的青鳥民怨，轉化為「罷免特定立委」的行動，但這個轉化並不完全：許多在 2024 投給藍委的選民，並不因國會改革爭議就改變支持。<strong>民怨可以上街，卻未必轉得成罷免票。</strong></p>
+
+  <h3>失敗的後果：藍白多數的鞏固與綠營的路徑重估</h3>
+  <p>大罷免全數失敗，有三層後果。<strong>其一，藍白國會多數獲得鞏固與正當性</strong>——它們挺過了一場針對性的罷免攻勢，等於得到選民對「維持 2024 席次結構」的再確認。<strong>其二，對綠營與公民社會是重大挫敗</strong>——它證明「以公民動員補足國會席次」這條路徑有明確的天花板：街頭聲量再大，也翻不過罷免門檻與反動員。<strong>其三，路徑必須重估</strong>——綠營若想翻轉國會，只剩下等待 2028 的下一次立委選舉，而非透過罷免走捷徑。這使分立僵局在 2025 之後進入一個更穩定、卻也更僵持的狀態：藍白確定守住國會到 2028，綠營確定推不動、也罷不掉，雙方都只能把裁決權留給下一次大選。</p>
+
+  <div class="prism">
+    <div class="pv-g"><div class="pv-tag">GREEN</div><p>大罷免是「一次悲壯的嘗試與挫敗」：公民社會試圖用民主的工具（罷免）矯正 2024 的席次，卻撞上了高門檻與反動員的牆。它證明了民怨的動員有極限，綠營必須認清少數政府會撐到 2028。</p></div>
+    <div class="pv-b"><div class="pv-tag">BLUE</div><p>大罷免是「一次被擊退的政治鬥爭」：綠營輸掉了選舉，卻想用罷免翻盤，被選民否決。全數未過，是選民對「尊重 2024 結果、不要沒完沒了」的表態——藍白多數得到了再確認。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>大罷免是「制度韌性的又一次證明」：一場高強度的政治對抗，透過選票而非街頭暴力解決，結果被和平接受。對外資，這降低了「台灣政治失控」的尾部風險——僵局雖僵，但仍在制度軌道內。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一場大罷免，三種讀法：悲壯挫敗、被擊退、韌性證明</div>
+</section>
+
+<section id="s13">
+  <div class="sec-label">PART III · CH 13</div>
+  <h2>預算凍結與憲政僵局：分立政府的代價</h2>
+  <p class="lede">分立政府的僵局，最終會體現在最實際的地方：錢。2024–2025 年，藍白國會多數大幅刪減與凍結中央政府總預算，並擱置人事同意權——這是分立政府「以預算與人事為武器」的攻防。這一章拆解僵局如何滲入治理的日常，以及它對台灣的實際代價。</p>
+
+  <h3>預算作為武器：刪減與凍結</h3>
+  <p>在分立政府下，立法院對中央政府總預算的審查權，成為在野多數制衡（或反制）行政的最強武器。2024–2025 年，藍白多數對行政院提出的總預算進行了大幅的<strong>刪減與凍結</strong>——刪減是直接砍掉，凍結是暫緩動支、須符合特定條件（如提出報告、經委員會同意）才能解凍。這些操作針對的往往是綠營的政策重點（如特定的政策宣導、國防特別預算的部分項目、對特定機構的補助）。<strong>對藍白，這是國會嚴格把關納稅錢、監督浪費的正當職權；對綠營，這是在野黨用預算癱瘓政府、傷害國防與施政的政治報復。</strong>同一份預算刪減，兩種讀法——這是分立政府最日常、也最消耗的戰場。</p>
+
+  <h3>人事同意權的擱置：制度的空轉</h3>
+  <p>僵局的另一個戰場是人事同意權。台灣的多個重要職位——大法官、監察委員、考試委員、部分獨立機關委員——由總統提名、經立法院同意後任命。在分立國會下，<strong>藍白多數對賴清德提名的部分人選（尤其是大法官）予以擱置或不同意</strong>，造成這些機構的成員出缺、難以補實。最尖銳的後果就是憲法法庭——大法官出缺、提名被卡，加上《憲法訴訟法》門檻的提高，使憲法法庭實質難以運作（第 3 章）。<strong>人事同意權的擱置，是分立僵局最具結構破壞力的一手：它不只卡住一屆政府的施政，還可能讓憲政機關本身空轉。</strong></p>
+
+  <h3>僵局的代價：治理的空轉與國防的隱憂</h3>
+  <p>預算與人事的僵局，有真實的治理代價。<strong>其一，施政的空轉</strong>——需要新預算或新立法的政策幾乎全面停擺，政府淪為「維持現狀的看守者」。<strong>其二，國防的隱憂</strong>——在台海壓力升高、且美國期待台灣提高國防投入的背景下，國防相關預算若被刪凍，會傳導成對台美互信與嚇阻能力的疑慮（這也是外部觀察者最關注的一塊）。<strong>其三，憲政機關的失能風險</strong>——憲法法庭若長期無法運作，台灣就失去了裁決憲政爭議的終局機制，僵局將更無解。這三重代價，是台灣為「府會分立」這個結構變數付出的實際帳單——它不會讓台灣的民主崩潰，但會讓它的治理效能與戰略準備付出可觀的機會成本。</p>
+
+  <h3>2026 焦點：國防特別預算，從 400 億砍到 250 億美元</h3>
+  <p>分立僵局在 2026 上半年結出最具體、也最攸關存亡的果實——國防特別預算之戰。賴清德於 2025 年 11 月宣布提高國防投入：2026 年國防支出提高至約 GDP 3.3%、2030 年達 5%，並提出一筆規模約新台幣 1.25 兆元（約 400 億美元）的<strong>特別國防預算</strong>，用於強化不對稱戰力與對美軍購。但這筆預算在藍白過半的立法院遭大幅刪減——在野一度主張砍到僅約新台幣 3,800 億元，最終於 2026 年 5 月三讀通過的版本約為新台幣 7,800 億元（約 250 億美元），<strong>僅約原提案的三分之二</strong>；刪減的刀口尤其落在國內自主研發項目（如無人機等），而對美軍購相關經費則相對保留。</p>
+  <p>這一役把「認同是常數、府會是變數、對岸是風險」三者的交會壓進同一個預算案：<strong>總統（認同／對岸）要備戰、國會多數（府會）要把關、而對岸（風險）正是備戰的對象。</strong>對綠營，這是在野黨在台海壓力最高的時刻削弱國防、動搖台美互信與嚇阻；對藍白，這是國會依職權嚴審一筆舉債龐大、必要性與透明度受質疑的特別預算。同一筆預算，兩種讀法——但它的後果直接外溢到台海（第 20 章）：一個被砍掉三分之一的國防特別預算，會被華府與北京同時解讀為「台灣自我防衛的決心與能力」的訊號。這是分立僵局代價最昂貴的一次體現，也是本報告「府會是變數、對岸是風險」定錨最鮮明的當前佐證。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">~US$40bn</div><div class="fig-l">賴政府原提特別國防預算（約新台幣 1.25 兆元）</div></div>
+    <div><div class="fig-n">~US$25bn</div><div class="fig-l">2026-05 三讀通過版（約新台幣 7,800 億元，約原案 2/3）</div></div>
+    <div><div class="fig-n">3.3% → 5%</div><div class="fig-l">國防支出佔 GDP 目標：2026 / 2030 年</div></div>
+    <div><div class="fig-n">56 – 50</div><div class="fig-l">2026-05-19 對賴清德彈劾案表決（未達 2/3、未過）</div></div>
+  </div>
+
+  <h3>彈劾案的失敗（2026/5/19）：藍白多數的另一次出手</h3>
+  <p>與預算戰平行，藍白國會多數在 2026 上半年還發動了對總統的<strong>彈劾</strong>。用詞須精確：這是「彈劾」而非「罷免」——彈劾由立法院提案、經全體立委三分之二通過後送憲法法庭審理；罷免則是提案通過後交由公民投票決定，兩者是不同的憲政程序。此案源於 2025 年 11 月藍白通過《財政收支劃分法》修正所引發的憲政爭議（行政院拒絕副署、總統未予公布），在野遂於 2025 年 12 月 26 日以 60 比 51 通過彈劾提案、並定 2026 年 5 月 19 日為表決日。最終表決結果為<strong>56 票贊成、50 票反對，因未達全體立委三分之二（約 76 票）的門檻而未通過。</strong></p>
+  <p>這場失敗的彈劾揭示兩件事。其一，<strong>藍白雖過半，卻遠不及三分之二</strong>——它們能杯葛、能砍預算、能發動彈劾，卻無法真正扳倒總統，這正是「三黨不過半」格局下雙方都無法贏者全拿的制度寫照。其二，一個尖銳的憲政反諷：<strong>即便彈劾案在立法院通過，它的下一站是憲法法庭——而憲法法庭此刻正因《憲訴法》門檻與大法官出缺而實質癱瘓（第 3、13 章）。</strong>換言之，2026 年的台灣，連「彈劾總統」這條憲政程序的終點站，都因分立僵局而處於熄火狀態。僵局不只卡住施政，還卡住了解決僵局本身的憲政機制——這是分立政府代價最深的一層。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 僵局的「穩定」與「代價」是一體兩面</div>
+    <p>分立政府的僵局有一個弔詭的性質：它既是台灣民主韌性的證明，也是治理效能的損失，而這兩者是同一枚硬幣。<strong>正因為沒有任何一方能贏者全拿（韌性），所以雙方僵持、治理空轉（代價）。</strong>一個外部觀察者若只看「制衡運作、無人獨大」，會讚嘆台灣民主的成熟；若只看「預算被凍、人事被卡、國防受掣」，會憂慮台灣的治理失能。正確的讀法是同時持有這兩者：<strong>台灣的分立僵局不是民主的失敗，而是民主制衡的成本——它保證了自由，卻犧牲了效率，尤其是在一個需要高效備戰的地緣處境下，這個效率的犧牲格外昂貴。</strong>這正是第 16 章威權化辨析必須拆清的核心。</p>
+  </div>
+</section>
+
+<section id="s14">
+  <div class="sec-label">PART III · CH 14</div>
+  <h2>民主韌性 vs 治理僵局：威權化辨析（含中國因素的特殊性）</h2>
+  <p class="lede">國會擴權、憲法法庭被癱瘓、預算凍結、大罷免——台灣看起來像陷入某種民主危機。但「危機」有很多種，把它們混為一談會導致誤判。這一章把「台灣民主出了什麼問題」拆成四個層次，區分哪些是真實風險、哪些是被過度解讀的雜訊，並處理台灣獨有的中國因素，為第四、五部的評估劃定邊界。</p>
+
+  <h3>層次一：制度制衡 vs 制度侵蝕</h3>
+  <p>2024–2025 一連串衝突的正確讀法，不是「台灣在走向威權」，也不是「台灣民主毫無問題」，而是<strong>兩者的張力</strong>：一方面，制度的制衡確實在運作——憲法法庭擋下了國會擴權（韌性真實存在）、大罷免透過選票和平解決（沒有街頭暴力）、沒有任何一方能贏者全拿；另一方面，也出現了侵蝕制衡的動作——藍白修法提高憲法法庭門檻、加上擱置大法官提名，使仲裁者本身失能（風險同樣真實）。<strong>結論：台灣的風險不是「單一強人的威權化」（沒有一個賴清德版的戒嚴），而是「分立雙方在僵局中互相侵蝕制度」——問題在僵局的誘因結構，不在制度硬體被某人推翻。</strong></p>
+
+  <h3>層次二：治理僵局 vs 民主倒退</h3>
+  <p>台灣真實的病，不是威權化，是<strong>治理僵局</strong>——分立政府使能量耗在府會攻防上，而人口、能源、產業升級、國防準備這些真正的長期課題被擱置。這與「民主倒退」（democratic backsliding，指選舉不公、打壓異議、司法被行政俘獲）是不同的病：台灣的選舉依然自由公正、政黨依然和平輪替、媒體與言論依然多元喧鬧、司法依然獨立到能擋下國會多數。<strong>台灣的威脅，比起「獨裁復辟」，更像是「僵局失能」——它的民主形式極其健全，但它承載的分立僵局，讓它在最需要高效治理的時刻陷入空轉。</strong></p>
+
+  <h3>層次三：中國因素——台灣獨有的特殊變數</h3>
+  <p>台灣的威權化辨析，有一個所有其他民主體都沒有的變數：<strong>一個強大的、以「統一」為目標的威權鄰國，主動介入它的內部政治。</strong>這使台灣的每一場內部鬥爭都多了一個維度——「這個力量／這個論述，是否在客觀上服務了北京的目標？」認知作戰、在地協力者、疑美論的操作（第 3 章），使台灣的政治鬥爭無法被純粹當作「正常的民主內部分歧」來讀。但這也帶來一個危險：<strong>「中國因素」可能被過度使用——把每一個反對意見都貼上「中共同路人」的標籤，本身就會傷害民主的多元。</strong>正確的辨析必須同時避免兩種錯誤：既不能忽視中國因素的真實滲透（天真），也不能把它當成給所有異見扣紅帽的工具（麥卡錫主義）。這條線極難拿捏，卻是理解台灣民主健康的核心。</p>
+
+  <h3>層次四：對外國人的實際傳導路徑</h3>
+  <p>對外資與外部觀察者，以上三個層次真正需要監測的傳導路徑只有幾條：<strong>（1）制度硬體是否仍運作</strong>（選舉、和平轉移、司法獨立、言論自由——目前答案是肯定的，這是最重要的定錨）；<strong>（2）治理是否因府會僵局而長期空轉</strong>（預算、國防、人口與能源等長期改革的可推動性）；<strong>（3）中國因素是否升級到改變台海現狀</strong>（從認知作戰、灰帶施壓，升級到實質封鎖或軍事衝突）。只要第（1）條成立，台灣就仍是一個吵鬧但可預測的成熟民主，藍綠鬥爭是需要過濾的雜訊；真正需要為之定價的，是第（3）條——中國因素這個台灣獨有、且不由台灣單方面決定的系統性風險。這正是全書「對岸是風險」定錨的最終落點。</p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART IV</div>
+  <h2>引擎 · The Engine</h2>
+  <div class="pd-sub">認同、府會、護國神山與台海的完整迴路</div>
+</div>
+
+<section id="s15">
+  <div class="sec-label">PART IV · CH 15</div>
+  <h2>三角傳導：認同×府會×台海的完整迴路</h2>
+  <p class="lede">前三部把台灣拆成五個稜鏡與六段動力，這一部把它們重新組裝成一個運轉的系統。台灣的政治經濟，可以化約為三個節點——認同、府會、台海——之間六條傳導邊構成的迴路。理解這個迴路，就理解了為什麼某個節點的擾動會傳遍全身，以及為什麼「認同是常數、府會是變數、台海是風險」這句定錨能成立。</p>
+
+  <h3>三個節點與六條邊</h3>
+  <p>三個節點是：<strong>認同</strong>（台灣主體意識，已收斂的常數）、<strong>府會</strong>（總統與立法院的分立算術，每四年翻動的變數）、<strong>台海</strong>（中國施壓與美中角力，外部的系統性風險）。它們兩兩之間有雙向傳導：</p>
+  <ul class="plain">
+    <li><strong>邊①（認同→府會）</strong>：收斂到「台灣主體」的認同，給了抗中保台的綠營總統層級的結構優勢——這是民進黨連三任的深層原因；但認同不決定立委票（那是服務與制衡的邏輯），於是造成「總統綠、國會藍白」的錯位。</li>
+    <li><strong>邊②（府會→認同）</strong>：分立僵局的攻防（國會擴權、大罷免）本身會反過來動員與強化認同的對立——每一次府會鬥爭都被包裝成「守護台灣 vs 中共同路人」或「反獨裁 vs 綠色威權」，把制度之爭重新認同化。</li>
+    <li><strong>邊③（府會→台海）</strong>：分立政府若刪凍國防預算、癱瘓決策，會傳導成台美互信與嚇阻能力的疑慮——2026 年 5 月三讀的特別國防預算被藍白從約 400 億美元砍到約 250 億美元（第 13 章），正是這條邊的具體實例：府會僵局的代價，直接外溢到台海的戰略準備與盟友信心。</li>
+    <li><strong>邊④（台海→府會）</strong>：中國的軍演、經濟脅迫與認知作戰，會即時牽動島內的府會攻防與選舉動員——「戰爭與和平」成為藍綠白互相攻擊的框架，對岸的壓力成了內部鬥爭的燃料。</li>
+    <li><strong>邊⑤（認同→台海）</strong>：台灣主體意識的鞏固（拒絕一國兩制、自認台灣人），是北京「和平統一無望、須加大施壓」判斷的來源之一——認同的收斂，弔詭地升高了對岸的焦慮與壓力。</li>
+    <li><strong>邊⑥（台海→認同）</strong>：中國的軍事與經濟施壓、香港的示範，反過來進一步鞏固了台灣的主體認同與對統一的抗拒——對岸每施一次壓，認同就更收斂一分（「芒果乾／亡國感」的動員邏輯）。</li>
+  </ul>
+  <p>這六條邊構成一個閉環：<strong>沒有任何一個節點可以獨立分析。</strong>特別是邊⑤與邊⑥構成一個危險的正回饋——<strong>認同收斂→北京焦慮加壓→認同更收斂</strong>——這個螺旋是台海風險長期上升的結構根源，也是為什麼「認同」雖是常數，卻透過台海這個節點，持續為台灣製造它無法自己解決的外部壓力。</p>
+</section>
+
+<section id="s16">
+  <div class="sec-label">PART IV · CH 16</div>
+  <h2>政治×經濟迴路：護國神山依賴、能源與世代不公</h2>
+  <p class="lede">台灣的經濟引擎正面對三股結構逆風：對護國神山（半導體）的過度依賴、能源轉型與供電安全的兩難、以及低薪與高房價背叛的年輕世代。政治能不能處理這三股逆風，比任何一次選舉都更決定台灣的長期軌跡——而分立僵局，恰恰讓這三題都更難解。</p>
+
+  <h3>護國神山依賴：一條產業定義的經濟</h3>
+  <p>台灣經濟高度依賴半導體，而半導體又高度集中於台積電——台積電一家市值佔台股大盤三成以上，半導體與 ICT 是出口的絕對主力。這種集中帶來了「護國神山」的優勢（全球不可替代的地位、矽盾的安全論述），也帶來了脆弱：<strong>當半導體週期下行、或地緣衝擊供應鏈，整個出口與股市隨之震盪；當「去台化」壓力升高，台灣的核心資產面臨被稀釋的長期疑慮。</strong>更深一層的問題是「荷蘭病」式的隱憂——半導體的超額成功吸走了資本、人才與政策注意力，使其他產業（傳統製造、服務業、內需）相對受擠壓，經濟的成長果實高度集中於少數高階科技從業者，加劇了世代與階層的分配落差。</p>
+
+  <h3>能源的兩難：非核家園與供電安全</h3>
+  <p>能源是台灣政治×經濟迴路裡最尖銳的一題。民進黨長年推動「非核家園」——2025 年，核三廠（馬鞍山）最後機組除役，台灣一度全面停用核電。這條路線的兩難是：<strong>一方面，反核是綠營與部分公民社會的核心價值（核安、核廢料、地震風險）；另一方面，在半導體等高耗能產業擴張、AI 資料中心用電暴增、且要兼顧減碳的背景下，供電穩定與能源安全成為嚴峻課題。</strong>供電是否充足、電價是否要漲、要不要重啟核電，成為朝野與公投的角力焦點。2025 年曾有核能相關的公民投票，但（在資訊有限、且為求保守的前提下）其結果應理解為未達改變既有政策的門檻／未實質翻轉政策方向。能源這一題，把「價值（反核）」與「現實（供電）」的張力，直接壓在台灣的產業命脈（半導體用電）上——它是分立僵局下最難達成跨黨共識的長期課題之一。</p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">綠營：非核家園是價值也是安全</div><p>核電的核安、核廢料與地震風險，是台灣這種地狹人稠、位處地震帶的島嶼無法承受的尾部風險；非核家園是公民社會多年的共識。能源安全的答案是加速再生能源與電網韌性，而非回頭依賴核電——把國家命脈押在核災的萬一上，才是真正的不安全。</p></div>
+    <div class="d-con"><div class="d-tag">藍白：供電穩定是產業與民生的底線</div><p>在半導體高耗能、AI 資料中心用電暴增、又要減碳的三重壓力下，貿然全面棄核會犧牲供電穩定與電價，動搖護國神山與外資信心；核電是低碳基載的現實選項。反核是價值，但價值不能以缺電與跳電為代價——能源政策該由科學與供需決定，不是由意識形態決定。</p></div>
+  </div>
+
+  <h3>世代不公：低薪、高房價與被背叛的一代</h3>
+  <p>台灣經濟×政治迴路的另一端，是世代不公。年輕世代面對的是「低薪與高房價」的雙重擠壓：實質薪資成長長期停滯、而都會區（尤其雙北）房價所得比高居世界前列，使「靠薪水買房」對許多年輕人成為不可能。這種結構性的世代不公，是白色力量（民眾黨）崛起的土壤——一群不吃藍綠統獨老帳、卻對「居住正義」與「世代公平」深感被背叛的年輕人，成為兩大黨都無法穩定持有的浮動票。<strong>低薪與高房價，把「世代」推成了認同之外的新政治分野</strong>——這也是為什麼認同的收斂反而騰出了「經濟與世代」這條新戰線（第 2 章）。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">≈ 0.87–0.9</div><div class="fig-l">總和生育率（全球最低之一，維持人口需 2.1）</div></div>
+    <div><div class="fig-n">&gt; 30%</div><div class="fig-l">台積電佔台股大盤市值比重（概略）</div></div>
+    <div><div class="fig-n">&gt; 20%</div><div class="fig-l">65 歲以上人口占比（2025 進入超高齡社會）</div></div>
+    <div><div class="fig-n">2025</div><div class="fig-l">核三最後機組除役、台灣一度全面停用核電</div></div>
+  </div>
+
+  <h3>迴路：政治如何為經濟定價、經濟如何重寫政治</h3>
+  <p>政治與經濟在台灣雙向咬合：<strong>政治→經濟</strong>——分立僵局使需要立法或預算的經濟改革（能源、勞動、稅制、產業）幾乎全面停擺，政府淪為看守者；能源路線的價值之爭，直接壓在半導體的用電命脈上。<strong>經濟→政治</strong>——低薪與高房價把年輕世代推成白色力量與浮動票、把「世代不公」推上選舉議程；護國神山的「大到不能倒」則綁架了每一屆政府的產業與能源政策。這條迴路的結論偏悲觀：<strong>台灣最需要的結構改革（能源、人口、產業多元化、居住正義），恰恰是分立僵局最難達成的——因為它們需要跨黨的長期共識，而三黨不過半的格局正是為了讓這種共識難以出現。</strong></p>
+</section>
+
+<section id="s17">
+  <div class="sec-label">PART IV · CH 17</div>
+  <h2>護國神山的資本憲法：台積電、集中風險與去台化</h2>
+  <p class="lede">若要用一個問題概括外資對台灣的所有疑慮，那就是：「護國神山會不會被掏空、或被摧毀？」這一章拆解台積電作為台灣「資本憲法」的三個面向——它為何是護國神山、集中風險有多深、以及「去台化」如何構成矽盾的內在悖論。</p>
+
+  <h3>一、護國神山與矽盾：一家公司的地緣角色</h3>
+  <p>台積電在台灣的角色，遠超一家公司。它是全球晶圓代工的絕對龍頭、先進製程（最尖端節點）的全球主導者，全世界從蘋果、輝達到各國國防系統的高階晶片，高度依賴它的產能。這種不可替代性，孕育了「矽盾」（silicon shield）的安全論述：<strong>因為世界（尤其美國）離不開台灣的先進晶片，所以世界有動機保護台灣不被中國攻佔——台積電成了台灣的一道無形國防。</strong>「護國神山」一詞正由此而來。這是台灣獨有的地緣資產：它的經濟核心資產，同時是它的安全論述核心。沒有任何其他經濟體，把國家安全如此程度地押注在單一企業的全球不可替代性上。</p>
+
+  <h3>二、集中風險：台股與國運的單點綁定</h3>
+  <p>矽盾的另一面是集中風險。台積電一家市值佔台股大盤三成以上，這意味著<strong>台灣資本市場、乃至相當程度的國運，與單一公司、單一產業高度綁定。</strong>其後果是雙向的：台積電的興盛帶動整個台灣（就業、稅收、外匯、股市），但台積電的任何重大波動（先進製程競爭失利、地緣衝擊、關鍵客戶轉單、天災）也會被放大成國家級的震盪。對外資，這是一個「買台灣幾乎就是買台積電」的市場——它提供了世界級的營運曝險，卻也把雞蛋高度集中在一個籃子裡。<strong>集中是台灣的力量來源，也是它最深的脆弱來源。</strong></p>
+
+  <h3>三、去台化：矽盾的內在悖論</h3>
+  <p>「去台化」是護國神山稜鏡最微妙的一塊，它構成一個真實的悖論。在美國的供應鏈安全要求、以及分散地緣風險的商業邏輯下，台積電赴美國亞利桑那、日本熊本、德國德勒斯登設廠，把部分產能移出台灣本島。<strong>從供應鏈韌性看，分散是好事（降低單點被摧毀的風險）；但從矽盾邏輯看，分散是隱憂——如果先進晶片不再只能在台灣生產，「世界必須保護台灣」的嚇阻邏輯就被稀釋了。</strong>這就是去台化的悖論：讓台積電更安全的分散，可能讓台灣更不安全。對外資與對台灣安全評估而言，關鍵讀數不是「有沒有去海外設廠」，而是——<strong>最先進的製程與研發核心（R&D、最尖端節點的量產）是否仍牢牢留在台灣本島。</strong>只要研發與最尖端節點的重心留台，矽盾就仍成立；一旦重心外移，台灣的地緣風險溢價就會結構性上升。</p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">看「矽盾仍穩固」</div><p>台積電的最先進製程、研發總部與最頂尖人才仍在台灣本島，海外廠多為較成熟或次先進節點、且進度與良率仍受本島支援。全球對台灣先進晶片的依賴短期內無可取代，矽盾的嚇阻邏輯依然成立——分散只是降低單點風險，沒有掏空核心。</p></div>
+    <div class="d-con"><div class="d-tag">看「矽盾正被稀釋」</div><p>一旦海外廠的製程持續追上、且美國以政策力量要求最先進節點也在美生產，台灣「唯一能造最尖端晶片」的地位就會鬆動；矽盾一旦被稀釋，台灣最重要的無形國防也隨之削弱。去台化是趨勢而非事件，它以年計、緩慢卻不可逆地侵蝕矽盾的邏輯基礎。</p></div>
+  </div>
+</section>
+
+<section id="s17b">
+  <div class="sec-label">PART IV · CH 17B · 個案</div>
+  <h2>個案：台積電的接班與海外設廠</h2>
+  <p class="lede">抽象的「護國神山」需要具體的個案才能落地。這一節用兩個案例——台積電的世代接班，以及它在美國亞利桑那的設廠——把上一章的集中風險與去台化悖論做成可觸摸的實體。</p>
+
+  <h3>接班：從創辦人到專業經營的世代交替</h3>
+  <p>台積電由張忠謀創辦，其個人的願景與經營哲學，是台積電崛起為全球龍頭的核心。隨著創辦人退休，台積電進入專業經理人主導的世代（由劉德音、魏哲家等接棒的領導層）。<strong>對一家佔國家市值三成、承載矽盾論述的公司而言，接班的平順與否具有國家級的意義</strong>——它關乎技術領先能否延續、經營文化能否傳承、以及在美中地緣壓力下的策略定力能否維持。與家族企業式的財閥接班不同，台積電的接班是專業經理人的制度化交替，這降低了「單一家族繼承風險」，但也把重心放在「制度與文化能否延續張忠謀時代的技術偏執與長期主義」上。台積電的接班，是台灣「資本憲法」最重要的一次人事延續。</p>
+
+  <h3>亞利桑那設廠：去台化悖論的實體</h3>
+  <p>台積電在美國亞利桑那的設廠，是「去台化」悖論最具體的案例。它是美國《晶片法案》（CHIPS Act）與供應鏈安全戰略的旗艦成果，也是台積電因應「把生產靠近客戶、分散地緣風險」的商業與政治要求。<strong>圍繞它的爭議，正是去台化悖論的縮影：</strong>支持者（與美方）視之為深化台美產業紐帶、降低單點風險的必要之舉；台灣輿論的疑慮則是「先進製程外移、人才外流、掏空護國神山、稀釋矽盾」。實際的關鍵，仍回到第 17 章的那條判準——亞利桑那廠生產的是哪一級的製程、最先進的節點與研發是否仍留在台灣本島。<strong>亞利桑那不是矽盾存廢的答案，而是一個持續的溫度計：它讓「先進製程重心是否留台」這個抽象問題，變成一個可以逐年觀察廠區製程等級的具體讀數。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">READING · 台積電為什麼是全書引擎的樞紐</div>
+    <p>台積電是唯一同時嵌在本報告三個節點上的實體：<strong>它是經濟的核心（政治×經濟迴路的引擎）、是安全論述的核心（矽盾＝台海風險的緩衝）、也是美中角力的核心籌碼（美國要它去美設廠、中國要它的技術）。</strong>這使它成為「認同×府會×台海」三角迴路的一個特殊樞紐——它不投票、不屬於任何政黨，卻是每一個稜鏡都必須面對的共同事實。對綠營，它是台灣的驕傲與矽盾；對藍營，它證明兩岸和緩才能保住經濟命脈；對外資，它就是台灣本身。理解台積電，就理解了為什麼台灣的經濟、政治與安全，最終都收束到這一座護國神山上——而它的最大變數（去台化、美中施壓），恰恰又大半不由台灣單方面決定，完美呼應了全書的核心弔詭。</p>
+  </div>
+</section>
+
+<section id="s18">
+  <div class="sec-label">PART IV · CH 18</div>
+  <h2>產業結構：半導體獨大、ICT 供應鏈與人口／人才</h2>
+  <p class="lede">台灣的出口實力世界級，卻也高度集中——集中於半導體、集中於少數科技巨頭、集中於 ICT 供應鏈。這種集中是「全球不可替代」的優勢來源，也是「單點失守即全身受創」的脆弱來源。這一章盤點台灣的產業引擎，以及它們共同面對的最深約束：人口與人才。</p>
+
+  <h3>半導體獨大與 ICT 供應鏈的縱深</h3>
+  <p>台灣產業的核心是一條由半導體領銜、ICT（資通訊）撐起的完整供應鏈：<strong>上游有台積電、聯電的晶圓代工，設計端有聯發科等 IC 設計，封測有日月光，記憶體、被動元件、乃至下游的伺服器與電子代工（鴻海等）——構成一個從設計、製造、封測到組裝的完整生態縱深。</strong>這條供應鏈的深度與完整度，是台灣在全球科技產業不可替代的真正來源：不只是一家台積電，而是一整個群聚。在 AI 浪潮下，台灣的伺服器代工、先進封裝、散熱等環節更成為全球 AI 基礎設施的關鍵節點。這是台灣經濟最強的護城河，也是它在美中科技戰中既是籌碼、也是軟肋的原因。</p>
+
+  <h3>集中風險：群聚的兩面刃</h3>
+  <p>這套「半導體＋ICT 群聚」模式讓台灣能以中等體量的經濟，在全球高階製造佔據不可替代的地位——集中帶來群聚效應與技術縱深。但它的代價是脆弱：<strong>當半導體週期下行，整個出口與股市隨之震盪；當地緣衝擊供應鏈或客戶轉單，牽動的是國家級的產業命脈。</strong>而且這種集中還有「排擠效應」——半導體的超額報酬吸走了最優秀的人才與最多的資本，使其他產業（傳統製造、服務業、生技、內需）相對難以獲得資源，經濟的成長果實高度集中，加劇了世代與階層的分配落差（第 16 章）。台灣的產業結構，是一座極高、卻也極窄的高峰。</p>
+
+  <h3>紅色供應鏈與技術外流：護城河的另一面壓力</h3>
+  <p>台灣產業護城河還面對來自對岸的雙重侵蝕。<strong>其一是「紅色供應鏈」的替代競爭</strong>——中國以國家力量扶植本土半導體與電子產業（尤其在成熟製程與部分中低階環節），試圖擺脫對台灣的依賴、並以規模與補貼壓縮台廠的市場。台灣的護城河在最先進製程仍穩固，但在成熟製程與中下游，紅色供應鏈的產能擴張構成實質的價格與市佔壓力。<strong>其二是技術與人才的外流</strong>——中國長期以高薪、優惠條件挖角台灣的半導體工程師與管理人才，構成對台灣技術領先的直接威脅，也是台灣近年強化營業秘密保護與相關管制的原因。這兩股壓力使台灣的產業安全，不只是「守住最先進製程」，還包括「守住人才、守住成熟製程的市場、守住技術不被系統性移轉」——這是護城河看不見、卻持續承壓的另一面。</p>
+
+  <h3>最深的約束：人口懸崖與人才競逐</h3>
+  <p>所有產業引擎的最終約束，是人口與人才。台灣總和生育率約 0.87–0.9、2025 進入超高齡社會，這意味著<strong>勞動人口將長期萎縮、內需縮小、且高階人才的供給趨緊。</strong>更嚴峻的是人才的雙向壓力：一方面，半導體的高薪吸走了本土最優秀的理工人才（排擠其他產業）；另一方面，台灣的高階人才（尤其科技、醫療）也面臨被中國、美國、東南亞高薪挖角的外流壓力。<strong>人口是台灣所有長期敘事的最終約束條件</strong>——它使台灣的成長必須從「人口紅利」轉向「生產力、自動化與高階製造」，也使「留住並吸引人才」成為比任何一次選舉都更決定台灣長期命運的課題。而分立僵局，恰恰讓催生、移民、人才等需要長期立法的政策更難推動。</p>
+</section>
+
+<section id="s19">
+  <div class="sec-label">PART IV · CH 19</div>
+  <h2>政策連續性與外資：跨政權的產業政策 vs 兩岸經貿的擺盪</h2>
+  <p class="lede">對外資最關鍵的問題之一，是政策的可預測性：換了藍綠，遊戲規則會不會被推翻？台灣的答案是分層的——某些政策（半導體扶植、對美關係、出口導向）有跨政權的高度連續性，另一些（兩岸經貿、能源、勞動）則隨顏色顯著擺盪。分清這兩層，是外資評估的關鍵。</p>
+
+  <h3>連續的那一層：半導體、出口與對美</h3>
+  <p>無論藍綠執政，有幾條線幾乎不變：<strong>對半導體與高階製造的國家級扶植</strong>（人才、水電土地、研發補助、產業聚落）、<strong>出口導向的經濟模式</strong>、以及<strong>對美關係的基本重要性</strong>（安全與科技高度依賴美國）。這種連續性源於一個現實：這些政策關乎台灣的生存與命脈，超越了藍綠分歧——半導體是台灣的經濟與安全核心，沒有任何政黨敢動搖對它的扶植；對美關係是台灣安全的支柱，藍綠或有親疏之別，但都不會真正切斷。對外資而言，這一層提供了可依賴的定錨：<strong>台灣的產業與對美這條線，是「國是」而非「黨爭」。</strong></p>
+
+  <h3>擺盪的那一層：兩岸經貿與能源</h3>
+  <p>另一些政策則隨顏色顯著擺盪，其中最關鍵的是<strong>兩岸經貿</strong>。藍營傾向擴大兩岸交流與經貿（ECFA、服貿的思路——降低敵意、拚經濟），綠營傾向分散對中依賴、強化供應鏈安全（新南向、對美日歐的多元化）。這條線的擺盪，直接影響台商的佈局、農漁產品的市場、以及台灣經濟對單一市場的曝險。<strong>能源</strong>則是另一條擺盪線（綠營非核、藍營相對支持核電與穩定供電）。但要注意，擺盪的是「親疏與力度」而非「體制」：即使藍營執政擴大兩岸經貿，也不會放棄對美安全依賴；即使綠營分散對中依賴，也不會退出全球貿易。<strong>台灣的政策擺盪是幅度問題，不是體制問題</strong>——這是它與威權市場政治風險的關鍵區別。</p>
+
+  <h3>對中依賴的長期趨勢：下降但仍高</h3>
+  <p>一個貫穿兩岸經貿的長期事實是：<strong>台灣對中國／香港的出口依賴，近年已明顯下降，但仍維持在相當高的水準。</strong>這個趨勢由多重力量共同驅動——綠營的分散政策、美中科技戰下的供應鏈重組、台商回流與轉向東南亞（新南向），以及中國自身的經濟放緩與紅色供應鏈的替代。對外資，這是一個雙面訊號：一方面，對中依賴下降降低了「北京經濟脅迫」的殺傷力（第 24 章）；另一方面，依賴仍高意味著兩岸經貿的擺盪、以及對中出口的任何劇烈波動，仍會對台灣經濟造成可觀衝擊。<strong>對中依賴的斜率（下降的速度與程度），是外資評估台灣經濟地緣曝險的一個關鍵長期讀數。</strong></p>
+
+  <div class="prism">
+    <div class="pv-b"><div class="pv-tag">BLUE</div><p>連續性應建立在「兩岸和緩、經濟優先」上：綠營切斷兩岸經貿、走向對抗，是對台灣經濟命脈的傷害。擴大交流、降低敵意，才能為台商與農漁民保住中國這個市場。</p></div>
+    <div class="pv-g"><div class="pv-tag">GREEN</div><p>連續性不該建立在對單一威權市場的依賴上：分散對中依賴、強化供應鏈安全與對美日的連結，才是真正的經濟安全。兩岸經貿的「和緩」隨時可被北京當武器（脅迫），依賴本身就是風險。</p></div>
+    <div class="pv-f"><div class="pv-tag">FOREIGN</div><p>連續性分兩層讀：半導體與對美這層可依賴、可下注；兩岸經貿與能源這層需按藍綠週期動態定價。真正的體制風險極低，真正要管理的是政策擺盪的幅度，與對中依賴斜率的變化。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一組政策連續性，三種利害：拚經濟、經濟安全、可下注性</div>
+</section>
+
+<section id="s20">
+  <div class="sec-label">PART IV · CH 20</div>
+  <h2>台海與美中：能穿透一切的外部變數</h2>
+  <p class="lede">台灣所有的內部評估，都建立在一個外部前提上：台海維持「不戰的緊張」、且台灣能在美中之間維持某種平衡。這個前提一旦破裂——台海衝突或被迫在美中間硬性選邊——本報告所有的經濟與政治章節都需要整體重寫。這是唯一能同時擊穿五個稜鏡的系統性風險，也是全書「對岸是風險」定錨的最終落點。</p>
+
+  <h3>中國的施壓：軍事、經濟、認知的長期消耗</h3>
+  <p>北京對台灣的施壓，是一場長期的多維消耗戰。<strong>軍事上</strong>，共機共艦繞台常態化、圍台軍演（如聯合利劍系列）在敏感時點加壓，以「灰帶」方式持續消耗台灣的防衛資源與心理韌性，同時避免觸發全面戰爭的紅線；<strong>經濟上</strong>，以農漁產品輸入禁令、ECFA 部分中止、對特定台企的調查與制裁進行精準脅迫（第 24 章）；<strong>認知上</strong>，以假訊息、統戰、在地協力者、疑美論的操作，長期塑造台灣的內部氛圍與選舉（第 3 章）。這三重施壓的目標不是立即攻台，而是<strong>「以壓促談、以拖待變」——長期消耗台灣的意志、影響它的選舉、離間台美互信，等待一個有利於統一的內外條件出現。</strong></p>
+
+  <h3>美中之間：安全靠美、經濟的多重曝險</h3>
+  <p>台灣被夾在美中角力的正中央，且處境比多數國家更極端：<strong>安全上高度依賴美國</strong>（軍售、情報、以及美國對台海的戰略承諾——雖是「戰略模糊」而非明確的防衛條約）；<strong>經濟上則是多重曝險</strong>——對中國仍有相當的出口依賴（下降但仍高）、對美國是關鍵的科技與市場夥伴、且台積電成為美中科技戰的核心籌碼（美國要它去美設廠、限制對中出口先進晶片，中國要它的技術與產能）。台灣無法像其他國家那樣在美中之間「避險」——它的安全命脈綁在美國、它的經濟命脈（半導體）被美中同時盯上、它的主權被中國視為核心利益。<strong>這是台灣獨有的結構性兩難：它是美中角力中風險最高、迴旋空間最小的那個節點。</strong></p>
+
+  <p>2026 年的國防特別預算之戰，把這個兩難擺上了檯面。一筆用於強化不對稱戰力與對美軍購的特別預算，被藍白多數從約 400 億美元砍到約 250 億美元（第 13 章），刪減尤其落在國內自主研發、對美軍購相對保留。這個結果被華府與北京同時當作讀數——它既測試了台灣自我防衛的決心，也讓「分立僵局是否會拖累台海備戰」成為台美互信的新變數。<strong>對岸是風險，而府會的僵局，正在讓台灣回應這個風險的能力打折——這是 2026 年台灣處境最尖銳的一句話。</strong></p>
+
+  <h3>戰略模糊與台灣的兩難：被承諾與被拋棄的雙重恐懼</h3>
+  <p>台灣安全的最終依託是美國，但這份依託建立在一個刻意保留的不確定性上——「戰略模糊」。美國長期不明確承諾「一定會為台灣而戰」，也不明確排除，藉此同時嚇阻中國（別輕舉妄動，美國可能介入）與約束台灣（別挑釁，別把美國拖下水）。<strong>這使台灣活在一種雙重恐懼裡：一方面怕「被拋棄」（美國關鍵時刻不來），另一方面怕「被牽連」（成為美中博弈的棋子、被推上前線）。</strong>「疑美論」（第 3 章）正是「被拋棄恐懼」的內部投射，而它又極易被對岸的認知作戰放大。這條戰略模糊的鋼索，是台灣所有安全評估的底層設定：它既是台灣最重要的保障，也是它最無法自己掌控的變數——因為承諾的內容、模糊的程度，都由華府而非台北決定。這是全書弔詭在安全維度的最終體現：<strong>台灣連「誰會來保護我」這個最攸關生存的問題，答案都不在自己手裡。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">TAIL RISK · 唯一的「一切重寫」觸發器</div>
+    <p>本報告的所有經濟與政治判斷，都預設了「台海不戰、美中可對沖」這個外部前提。若出現以下情形之一——<strong>台海爆發實質軍事衝突或封鎖、中國對台實施全面經濟封鎖、或美中脫鉤升級到台灣被迫硬性選邊並犧牲半導體的中立性</strong>——則五個稜鏡、三角迴路與所有引擎章節都需整體重估。這是唯一一個能同時擊穿認同、府會與所有內部評估的尾部風險；它機率不易估計，但一旦發生，其他所有分析都失效。這也是為什麼「對岸／台海」被列為全書「風險」定錨的原因：<strong>台灣可以自己決定認同、可以自己決定府會，卻無法自己決定台海——這正是全書核心弔詭的最終體現：它解決了「我是誰」，卻永遠無法自己解決「我們是什麼、以及會不會被迫捲入戰爭」。</strong></p>
+  </div>
+</section>
+
+<section id="s20b">
+  <div class="sec-label">PART IV · CH 20B · 個案</div>
+  <h2>個案：對中經濟脅迫——農漁產品與 ECFA 的武器化</h2>
+  <p class="lede">抽象的「經濟脅迫」需要具體的個案才能落地。這一節用北京對台的經濟施壓案例——農漁產品輸入禁令與 ECFA 的部分中止——展示中國如何把經貿當武器、精準打擊台灣政治最敏感的神經，以及台灣為何仍有一定的抵抗力。</p>
+
+  <h3>農漁產品禁令：精準打擊政治敏感群體</h3>
+  <p>北京對台經濟脅迫最典型的手法，是對台灣農漁產品（如特定水果、水產品）祭出輸入禁令或暫停，理由常為檢疫或技術問題，但時點與對象往往具政治針對性。<strong>這種脅迫之所以「精準」，是因為它打擊的正是嵌在農漁會網絡、政治敏感度極高的中南部農漁民群體（第 7B 章）</strong>——這些群體的選票組織化、且對經濟衝擊高度敏感，北京意在透過經濟痛感，動搖這些選區對執政黨兩岸政策的支持、製造內部矛盾。這是「以商圍政」的教科書操作：用小額但精準的經濟痛點，換取政治上的動搖與分化。</p>
+
+  <h3>ECFA 的武器化：從讓利到收回</h3>
+  <p>ECFA（海峽兩岸經濟合作架構協議）是馬英九時代兩岸經貿的旗艦，其「早收清單」讓部分台灣產品享有輸中優惠。<strong>但北京近年將 ECFA 從「讓利工具」轉為「脅迫工具」——中止部分早收清單項目的關稅優惠，以此對台灣施壓。</strong>這揭示了兩岸經貿依賴的內在風險：當經濟連結被一方當作政治槓桿，「讓利」隨時可以變成「收回」，依賴本身就成了脆弱。這也印證了綠營的核心論述（第 19 章）——對單一威權市場的依賴，本身就是一種可被武器化的風險。</p>
+
+  <h3>為什麼台灣仍有抵抗力：依賴下降與市場分散</h3>
+  <p>但北京的經濟脅迫，效果不如其軍事施壓那樣具威懾力，原因在於台灣的抵抗力正在增強：<strong>其一，對中出口依賴近年明顯下降</strong>（第 19 章）——依賴越低，脅迫的殺傷力越小；<strong>其二，被鎖定的農漁產品雖政治敏感，但在總體經濟中占比有限</strong>，且政府可透過補貼、拓展替代市場（日本、東南亞）緩衝；<strong>其三，脅迫可能適得其反</strong>——過度的經濟施壓反而印證了綠營「中國不可靠、依賴有風險」的論述，鞏固而非削弱台灣的主體認同（呼應第 15 章邊⑥的正回饋）。<strong>經濟脅迫是北京工具箱裡最鈍的一把刀：它能製造痛感與雜音，卻難以真正扭轉台灣的認同與政治方向——這與軍事施壓的長期消耗效果，構成鮮明對比。</strong></p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART V</div>
+  <h2>終章 · The Ledger</h2>
+  <div class="pd-sub">論題、儀表板與來源</div>
+</div>
+
+<section id="s21">
+  <div class="sec-label">PART V · CH 21</div>
+  <h2>終章綜合：十大論題——信度分級與可證偽條件</h2>
+  <p class="lede">一份分析的價值不在觀點的數量，在於每個觀點是否標明了「我對它有多確定」以及「什麼證據會推翻它」。本章把全報告收攏為十個論題，各附信度分級（★★★＝高信度結構判斷／★★＝中信度趨勢判斷／★＝低信度前瞻推測）與明確的可證偽條件——這既是結論，也是這份報告未來自我修正的介面。</p>
+
+  <table>
+    <tr><th style="width:44%">論題</th><th>信度</th><th>可證偽條件（若發生，論題作廢）</th></tr>
+    <tr><td><strong>T1・認同常數論</strong>：台灣主體認同已高度收斂為跨世代的常數（六成以上自認台灣人、統一趨近於零、維持現狀為多數），任何政黨都必須在「守護台灣」的語法內競爭。（第 1、4 章）</td><td>★★★</td><td>政大選研長期趨勢出現持續數年的實質逆轉（自認中國人／支持統一顯著回升至具動員力的水準），或維持現狀不再是多數共識</td></tr>
+    <tr><td><strong>T2・府會變數論</strong>：半總統制在府會不同黨時必然製造少數政府與僵局；2024 的「總統綠、國會藍白」錯位，源於總統票與立委票遵循不同邏輯。（第 1、2、9 章）</td><td>★★★</td><td>完成修憲改變體制（如內閣制／閣揆同意權回復），或連續多屆選舉不再出現總統與國會多數分屬不同陣營的錯位</td></tr>
+    <tr><td><strong>T3・對岸風險論</strong>：台海與美中是唯一能同時擊穿所有稜鏡的系統性風險，且大半不由台灣單方面決定——這是全書核心弔詭（能解決「我是誰」、無法自決「我們是什麼」）的根源。（第 3、15、20 章）</td><td>★★★</td><td>兩岸達成一個被台灣社會廣泛接受、且穩定的長期地位安排（使台海不再是懸而未決的系統性風險）——歷史上從未接近</td></tr>
+    <tr><td><strong>T4・制度韌性論</strong>：台灣民主的形式強壯到能自我制衡——國會擴權被憲法法庭擋下、大罷免透過選票和平解決、無人能贏者全拿；風險是僵局失能而非強人威權。（第 11、12、14 章）</td><td>★★★</td><td>出現一次成功的、未被制度即時逆轉的憲政奪權（選舉被取消或做票、司法被行政俘獲、言論自由被系統性壓制）</td></tr>
+    <tr><td><strong>T5・護國神山論</strong>：台灣經濟與安全論述高度綁定於台積電（市值佔比三成以上＋矽盾），這既是最大資產也是最大集中風險；關鍵讀數是先進製程重心是否留台。（第 8、17 章）</td><td>★★★</td><td>出現一個能與半導體分庭抗禮的新產業支柱使集中度顯著下降，或台積電最先進製程與研發核心實質移出台灣本島（矽盾瓦解）</td></tr>
+    <tr><td><strong>T6・政策分層論</strong>：外資風險應分兩層——半導體與對美高度連續（可下注），兩岸經貿與能源隨藍綠擺盪（需動態定價），但擺盪是幅度而非體制。（第 19 章）</td><td>★★★</td><td>出現體制級斷裂：某陣營執政後沒收合規外資產權、退出全球貿易體系、或放棄對美安全依賴的基本框架</td></tr>
+    <tr><td><strong>T7・僵局失能論</strong>：台灣真實威脅不是威權化，而是分立僵局導致治理空轉——2026 年特別國防預算遭藍白從約 400 億砍至約 250 億美元、總預算持續卡關、憲法法庭因憲訴法門檻與大法官出缺而癱瘓（連彈劾案的終點站都熄火），都是能源、人口、產業與國防等跨黨改革被系統性擱置的實例。（第 13、16 章）</td><td>★★</td><td>朝野達成並執行一項需跨黨共識的重大長期改革（能源路線、實質催生政策、國防投入、修憲之一），或某陣營重新取得完全執政打破僵局</td></tr>
+    <tr><td><strong>T8・世代裂變論</strong>：認同的收斂騰出「世代與經濟」新戰線，低薪與高房價把年輕世代推成兩大黨都無法穩定持有的浮動票，是白色力量崛起的土壤。（第 6、16 章）</td><td>★★</td><td>年輕世代重新沿藍綠認同穩定歸隊、世代不公顯著緩解（房價所得比與實質薪資明顯改善），或白色力量泡沫化、票源回流兩大黨</td></tr>
+    <tr><td><strong>T9・派系底層論</strong>：地方派系與恩庇網絡（農漁會／水利會／樁腳）以「服務與利益」而非「認同」為貨幣、跨越藍綠運作，是前三個意識形態稜鏡看不見的第四讀法，尤其主導地方選舉。（第 7、7B 章）</td><td>★★</td><td>地方選舉的結果能被純粹的藍綠認同軸穩定解釋（派系恩庇的解釋力顯著消退），或農漁會／水利會等組織票基礎瓦解</td></tr>
+    <tr><td><strong>T10・經濟脅迫鈍刀論</strong>：中國的經濟脅迫（農漁禁令、ECFA 武器化）效果不如軍事施壓，因對中依賴下降＋市場分散＋反可能鞏固台灣認同；軍事灰帶施壓才是更有效的長期消耗。（第 20、24 章）</td><td>★</td><td>一次對中依賴仍高的產業遭全面經濟封鎖，造成足以改變選舉與兩岸政策方向的經濟與政治衝擊（證明經濟脅迫仍具決定性）</td></tr>
+  </table>
+
+  <h3>十論題的內在階層</h3>
+  <p>十個論題不是並列的，有清晰的依賴結構：<strong>T1（認同常數）、T2（府會變數）、T3（對岸風險）是地基</strong>——這三者正是全書定錨「認同是常數、府會是變數、對岸是風險」的三根支柱，它們成立，其餘七個論題才有意義。T4–T6 是建立在地基上的結構層（高信度，因為它們描述的是制度硬體、經濟集中與誘因結構，而非事件預測）；T7–T9 是動力層（中信度，涉及行為者選擇與趨勢，尤其 T7 僵局失能與 T8 世代裂變最會隨選舉週期變動）；T10 是單點的前瞻推測。閱讀本報告的正確方式，是把資源按這個階層倒置分配：<em>花最少時間擔心地基（它們最穩），花最多時間監測動力層（尤其 T7 僵局能否被打破、T5 先進製程是否留台），並把 T3 的兌現（台海衝突）當作一個必須放在心裡、但無法下注的尾部風險。</em></p>
+
+  <h3>本報告的三個已知盲區</h3>
+  <p>誠實標記分析框架自身的限制：<strong>其一，北京決策視角缺席</strong>——本報告以台灣為主體，中國僅作為外部變數處理，其內部政局、對台決策的演化未納入框架，而這恰是 T3 風險的震源，也是全書最大的外生不確定性。<strong>其二，經濟數據的時效與口徑</strong>——本文引用的台積電市值佔比、生育率、席次、得票率等為概略值，旨在呈現量級與結構，精確數字應以官方最新統計（中選會、主計總處、證交所、國發會）為準。<strong>其三，事件路徑依賴</strong>——本報告成稿於賴清德執政、三黨不過半、大罷免全數失敗、憲法法庭實質失能的特定時點（2026-07），若干判斷（尤其 T7、T9）帶有近因權重，2026 九合一與 2028 大選都可能顯著改寫府會格局，應以第 26 章儀表板為持續校正介面。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s22">
+  <div class="sec-label">PART V · CH 22</div>
+  <h2>監測儀表板：時間軸與判讀規則</h2>
+  <table>
+    <tr><th>時點</th><th>事件</th><th>判讀規則</th></tr>
+    <tr><td><strong>2026-11</strong></td><td>九合一地方選舉</td><td>賴清德政府與分立僵局的期中考。綠營止血、藍白氣勢是否延續、白營能否從中央槓桿轉為地方版圖——注意這是「派系恩庇政治」的主場，勿以純藍綠認同軸預測（詳第 1、7B、25 章 T9）</td></tr>
+    <tr><td>持續</td><td>憲法法庭能否恢復運作（大法官補實與《憲訴法》門檻）</td><td>T4 的核心讀數。若大法官長期出缺、憲法法庭持續無法作成判決＝制衡機制實質失能、僵局更無解；若補實或門檻鬆動＝仲裁者回位（詳第 3、13 章）</td></tr>
+    <tr><td><strong>2026-05（已發生）</strong></td><td>特別國防預算三讀（US$40→25bn）、對賴清德彈劾案未過（56-50）</td><td>分立僵局最新、最具體的實例。國防特別預算被砍至約原案 2/3、刪減落在自主研發＝傳導成台美互信與嚇阻疑慮；彈劾案未達 2/3——藍白能杯葛卻扳不倒總統（詳第 13、20 章）</td></tr>
+    <tr><td>每年</td><td>中央政府總預算與後續年度國防預算的刪減／凍結</td><td>T7 僵局失能的即時讀數。看 2027 年度預算與後續特別預算是否再度卡關、國防投入 GDP 占比能否逼近 3.3% 目標；解凍或朝野妥協＝僵局出現局部出口（詳第 13 章）</td></tr>
+    <tr><td>持續</td><td>台積電先進製程與研發核心是否留台（去台化溫度計）</td><td>T5 的核心讀數。最尖端節點與 R&D 留台＝矽盾仍成立；若最先進製程重心外移＝台灣地緣風險溢價結構性上升（詳第 17、17B 章）</td></tr>
+    <tr><td>每季</td><td>共機共艦擾台、圍台軍演、灰帶施壓的頻率與強度</td><td>T3 對岸風險的即時溫度計。留意是否從「常態化騷擾」升級到「實質封鎖演練」或跨越紅線的行動（詳第 3、20 章）</td></tr>
+    <tr><td>每季</td><td>對中／港出口依賴度、經濟脅迫案例（農漁禁令、ECFA）</td><td>T6、T10 的讀數。依賴斜率持續下降＝經濟脅迫殺傷力遞減；若對中依賴仍高的產業遭全面封鎖＝T10 面臨證偽（詳第 19、24 章）</td></tr>
+    <tr><td>每年</td><td>生育率、超高齡化、能源供電與電價、房價所得比</td><td>T7、T8 的長線讀數：生育率是否止跌、供電是否穩定、房價所得比是否改善——台灣長期敘事的最終約束與世代政治的溫度計（詳第 16、18 章）</td></tr>
+    <tr><td>持續</td><td>民眾黨的存續與路線（尤其柯文哲個人狀態）</td><td>T8 的關鍵讀數。若民眾黨因領導斷層而泡沫化、票源回流藍綠＝世代新戰線收斂；若成功制度化＝三黨格局固化（詳第 6、10 章）</td></tr>
+    <tr><td>2028-01</td><td>下屆總統與立委大選</td><td>分立僵局的裁決點：能否打破「總統一色、國會另一色」的錯位。綠營若奪回國會或藍營若奪回總統＝僵局出口；若再度分立＝少數政府常態化（詳第 1、25 章）</td></tr>
+  </table>
+
+  <h3>三個「若發生則改變評估」的觸發器</h3>
+  <ul class="plain">
+    <li><strong>觸發器 A（府會）</strong>：2026 九合一或 2028 大選出現一方完全執政（同時掌握總統與國會多數）→ 分立僵局結束、T7 僵局失能論的前提消失，重估治理效能與政策推動力（但不改變 T1 認同常數與 T3 對岸風險）。</li>
+    <li><strong>觸發器 B（護國神山）</strong>：台積電最先進製程與研發核心實質移出台灣本島 → T5 矽盾論被侵蝕，台灣地緣風險溢價結構性上升，重估「世界必須保護台灣」的安全論述基礎與外資的核心多頭邏輯。</li>
+    <li><strong>觸發器 C（對岸）</strong>：台海地緣質變——實質軍事衝突、全面經濟封鎖、或台灣被迫在美中間硬性選邊並犧牲半導體中立性 → 全系統重估，本報告所有經濟與政治章節需整體重寫（T3 兌現，唯一的「一切重寫」觸發器）。</li>
+    <li><strong>觸發器 D（認同）</strong>：政大選研長期趨勢出現持續數年的實質逆轉（自認台灣人明顯下滑、統一支持回升至具動員力水準）→ 質疑「認同常數」的核心前提，啟動對 T1 的重估（歷史上從未接近，但這是唯一能推翻全報告地基的內生訊號）。</li>
+  </ul>
+  <p><strong>總結一句：</strong>認同是常數，府會是變數，對岸是風險。監測 2026 九合一與憲法法庭能否回位、緊盯先進製程是否留台、警惕台海尾部、不必為「台灣在走向威權」焦慮——因為國會擴權被釋憲擋下、大罷免透過選票和平解決，已經證明這個民主的制衡，比任何一方的擴權野心都更強壯。真正該擔心的，不是它會不會倒向威權，而是它會不會在無盡的府會僵局中，錯過處理人口、能源與國防準備的最後窗口——以及那個它永遠無法自己解決的問題：對岸。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s23">
+  <div class="sec-label">PART V · CH 23</div>
+  <h2>資料來源與方法註記</h2>
+  <p>本文件之事實基礎來自 2026 年 7 月中旬檢索之公開報導與研究，主要來源：中央社（CNA）、公視、聯合報、中國時報、自由時報、蘋果／鏡週刊、天下、報導者、風傳媒（大選、國會攻防、罷免、施政動態）；Reuters、AP、BBC、The New York Times、Financial Times、Nikkei Asia、The Diplomat、The Economist（國際視角與時間線）；中央選舉委員會（歷屆總統與立委計票、罷免結果）、立法院與司法院憲法法庭之官方紀錄（表決、113 年憲判字第 9 號）。結構與制度分析另參考關於「半總統制」「少數政府」「地方派系與恩庇政治」「認知作戰與中國因素」之學術與政策文獻，以及政治大學選舉研究中心關於台灣人／中國人認同與統獨立場之長期趨勢資料。經濟與產業數據另參考：行政院主計總處（成長、薪資、人口、生育率）、國家發展委員會（人口推估、超高齡社會）、台灣證券交易所（台積電市值結構）、經濟部（能源、產業）、以及 OECD／IMF／World Bank 之台灣相關評估。地緣與兩岸章節另參考：國防部、大陸委員會、CSIS、以及關於聯合利劍軍演、ECFA 與經濟脅迫、去台化與晶片供應鏈之報導與分析。2026 年上半年之時效性事件另參考：關於特別國防預算刪減（US$40→25bn、2026-05 三讀）之 Bloomberg、Reuters、Focus Taiwan、Jamestown Foundation、Global Taiwan Institute、War on the Rocks 報導與分析；關於總統彈劾案（2025-12 立法院以 60-51 通過提案、2026-05-19 表決 56-50 未達三分之二門檻而未過）之中央社、今周刊、商業周刊等報導；以及賴清德 2026-05-20 就職兩週年談話之總統府新聞稿與主流媒體報導。</p>
+  <p>方法註記：①選舉與表決數字以官方計票與主流媒體一致報導為準；席次、得票率與市值佔比等為概略值，旨在呈現量級與結構，精確數字以官方最新統計為準。②2025 能源相關公投之結果，因求保守而以「未達改變既有政策之門檻／未實質翻轉政策方向」表述，未引用具體票數，實際結果以中選會公告為準。③五稜鏡中的視角陳述為分析性重構，旨在呈現各社會位置的理性計算結構，不代表任何群體的統一立場。④「認知作戰／中國因素」與「政治的司法化」等判斷為結構性歸納，個案是否構成外力操作或制度侵蝕須逐案判讀，本文於第 14 章明確區分「真實滲透」與「給異見扣紅帽」的灰區、不作單一定性。⑤本報告成稿於 2026 年 7 月——賴清德執政、三黨不過半、大罷免全數失敗（2025）、特別國防預算遭刪至約原案三分之二且對總統彈劾案未過（2026-05）、憲法法庭實質失能的特定時點，時效性事件（2026-11 九合一、憲法法庭能否回位、後續年度預算與國防投入、去台化進程）以第 26 章儀表板為持續校正介面。⑥本文件為政治結構分析，非投資建議；涉及部位決策前應依既定流程另行執行冷讀批判。</p>
+</section>
+</main>
+</div>
+</div>
+
+<footer>
+  <div class="shell">
+    <h4>Colophon</h4>
+    <p>台灣政治結構五稜鏡 · InvestMQuest Geopolitics Research · 編製於 2026-07-23。設計語彙：靛墨紙面、織錦金界線、五色稜鏡（翠綠＝台灣認同民進黨、靛藍＝中華民國國民黨、青碧＝民眾黨與世代、帝王紫＝地方派系樁腳黑金、琥珀橘＝外國人與護國神山）。本文件之稜鏡裝置（同一事實、多種讀法）為分析框架，延續同系列南韓・馬來西亞・泰國・印尼・菲律賓篇之方法，可套用於其他多裂隙政體之結構研究。核心弔詭：台灣把「我是誰」幾乎徹底解決了，卻永遠無法自己解決「我們是什麼」——它的民主極其自由而激烈，但最重要的變數大半不在自己手裡。核心定錨：認同是常數、府會是變數、對岸是風險。</p>
+  </div>
+</footer>
+
+</body>
+</html>
