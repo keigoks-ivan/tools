@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>德國政治結構五稜鏡 — 聯盟黨・社民黨・另類選擇・綠黨左翼・外國人的五種讀法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@350;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F4EE;        /* 米紙 */
+  --ink:#1B2233;          /* 靛墨 */
+  --ink-soft:#4A5468;
+  --gold:#B08A2E;         /* 織錦金 */
+  --hairline:#D9D4C7;
+  --u:#2C2C2C;            /* 稜鏡・聯盟黨 CDU/CSU = 深灰黑 */
+  --u-bg:#EAEAEA;
+  --s:#C0392B;            /* 稜鏡・社民黨 SPD = 赤紅 */
+  --s-bg:#F9ECEA;
+  --a:#1C6FB5;            /* 稜鏡・另類選擇 AfD = 天藍 */
+  --a-bg:#E7F0F8;
+  --g:#2E8B4E;            /* 稜鏡・綠黨與左翼 = 綠 */
+  --g-bg:#E9F3EC;
+  --f:#C67C1E;            /* 稜鏡・外國人 = 琥珀金 */
+  --f-bg:#F8F1E4;
+  --warn:#8A5A00;
+  --warn-bg:#F7F0DE;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  font-weight:350;
+  line-height:1.95;
+  font-size:16.5px;
+  letter-spacing:.02em;
+}
+::selection{background:var(--gold);color:#fff}
+
+/* ---------- 版心 ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 28px}
+.layout{display:grid;grid-template-columns:236px 1fr;gap:56px;align-items:start}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+
+/* ---------- Hero ---------- */
+header.hero{
+  background:var(--ink);
+  color:#EDE9DE;
+  padding:88px 0 72px;
+  position:relative;
+  overflow:hidden;
+}
+header.hero::after{ /* 五稜鏡光束 */
+  content:'';position:absolute;right:-8%;top:0;bottom:0;width:52%;
+  background:
+    linear-gradient(115deg,transparent 30%,rgba(44,44,44,.42) 30.4%,rgba(44,44,44,.42) 40%,transparent 40.4%),
+    linear-gradient(115deg,transparent 41%,rgba(192,57,43,.34) 41.4%,rgba(192,57,43,.34) 51%,transparent 51.4%),
+    linear-gradient(115deg,transparent 52%,rgba(28,111,181,.34) 52.4%,rgba(28,111,181,.34) 62%,transparent 62.4%),
+    linear-gradient(115deg,transparent 63%,rgba(46,139,78,.34) 63.4%,rgba(46,139,78,.34) 73%,transparent 73.4%),
+    linear-gradient(115deg,transparent 74%,rgba(198,124,30,.34) 74.4%,rgba(198,124,30,.34) 84%,transparent 84.4%);
+  pointer-events:none;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.28em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:26px;
+}
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(34px,4.6vw,56px);line-height:1.3;letter-spacing:.03em;
+  max-width:820px;
+}
+.hero-sub{
+  margin-top:26px;max-width:680px;font-size:17px;line-height:2.05;
+  color:#C9C3B4;font-weight:350;
+}
+.hero-meta{
+  margin-top:40px;display:flex;gap:34px;flex-wrap:wrap;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:#8E96A8;
+}
+.hero-meta b{color:#EDE9DE;font-weight:500;display:block;margin-bottom:3px}
+.prism-legend{margin-top:46px;display:flex;gap:0;max-width:760px;border:1px solid rgba(237,233,222,.22);flex-wrap:wrap}
+.prism-legend div{
+  flex:1;min-width:120px;padding:13px 12px;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:.08em;text-align:center;color:#EDE9DE;
+}
+.prism-legend .pl-u{background:rgba(44,44,44,.86)}
+.prism-legend .pl-s{background:rgba(192,57,43,.78)}
+.prism-legend .pl-a{background:rgba(28,111,181,.80)}
+.prism-legend .pl-g{background:rgba(46,139,78,.80)}
+.prism-legend .pl-f{background:rgba(198,124,30,.82)}
+
+/* ---------- 目錄側欄 ---------- */
+nav.toc{
+  position:sticky;top:0;padding-top:40px;padding-bottom:40px;
+  font-size:13.5px;line-height:1.7;
+  max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:var(--hairline) transparent;
+}
+nav.toc::-webkit-scrollbar{width:5px}
+nav.toc::-webkit-scrollbar-thumb{background:var(--hairline);border-radius:3px}
+nav.toc .toc-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:18px;text-transform:uppercase;
+}
+nav.toc a{
+  display:block;color:var(--ink-soft);text-decoration:none;
+  padding:5px 0 5px 14px;border-left:2px solid var(--hairline);
+  transition:all .18s;
+}
+nav.toc a:hover{color:var(--ink);border-left-color:var(--gold)}
+nav.toc a.t-u{border-left-color:var(--u)}
+nav.toc a.t-s{border-left-color:var(--s)}
+nav.toc a.t-a{border-left-color:var(--a)}
+nav.toc a.t-g{border-left-color:var(--g)}
+nav.toc a.t-f{border-left-color:var(--f)}
+@media(max-width:960px){nav.toc{position:static;padding-top:40px}}
+
+/* ---------- 主文 ---------- */
+main{padding:64px 0 120px;min-width:0}
+section{margin-bottom:96px}
+.sec-label{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.24em;
+  color:var(--gold);margin-bottom:14px;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:900;font-size:30px;
+  line-height:1.45;margin-bottom:30px;padding-bottom:20px;
+  border-bottom:1px solid var(--hairline);letter-spacing:.02em;
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:21px;
+  margin:44px 0 18px;letter-spacing:.02em;
+}
+p{margin-bottom:20px;max-width:74ch}
+p.lede{font-size:18.5px;line-height:2.05;color:var(--ink);font-weight:400;max-width:70ch}
+strong{font-weight:700;color:var(--ink)}
+em{font-style:normal;border-bottom:2px solid var(--gold);padding-bottom:1px}
+
+/* ---------- 稜鏡三聯裝置（本文件的簽名元素） ---------- */
+.prism{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+  margin:36px 0 44px;border:1px solid var(--hairline);
+  background:#fff;
+}
+@media(max-width:820px){.prism{grid-template-columns:1fr}}
+.prism>div{padding:26px 24px 22px;border-top:4px solid}
+.prism>div+div{border-left:1px solid var(--hairline)}
+@media(max-width:820px){.prism>div+div{border-left:none;border-top-width:4px}}
+.prism .pv-u{border-top-color:var(--u);background:linear-gradient(var(--u-bg),#fff 42%)}
+.prism .pv-s{border-top-color:var(--s);background:linear-gradient(var(--s-bg),#fff 42%)}
+.prism .pv-a{border-top-color:var(--a);background:linear-gradient(var(--a-bg),#fff 42%)}
+.prism .pv-g{border-top-color:var(--g);background:linear-gradient(var(--g-bg),#fff 42%)}
+.prism .pv-f{border-top-color:var(--f);background:linear-gradient(var(--f-bg),#fff 42%)}
+.prism .pv-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  margin-bottom:12px;font-weight:500;
+}
+.pv-u .pv-tag{color:var(--u)}
+.pv-s .pv-tag{color:var(--s)}
+.pv-a .pv-tag{color:var(--a)}
+.pv-g .pv-tag{color:var(--g)}
+.pv-f .pv-tag{color:var(--f)}
+.prism p{font-size:14.5px;line-height:1.9;margin-bottom:12px;color:#333B4D}
+.prism p:last-child{margin-bottom:0}
+.prism-caption{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);
+  letter-spacing:.06em;margin:-32px 0 44px;padding-top:10px;
+}
+
+/* ---------- 觀點框（單一視角深入時的左邊條） ---------- */
+.lens{padding:6px 0 6px 22px;margin:28px 0;border-left:4px solid}
+.lens.l-u{border-color:var(--u)}
+.lens.l-s{border-color:var(--s)}
+.lens.l-a{border-color:var(--a)}
+.lens.l-g{border-color:var(--g)}
+.lens.l-f{border-color:var(--f)}
+.lens .lens-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;margin-bottom:8px;font-weight:500;
+}
+.lens.l-u .lens-tag{color:var(--u)}
+.lens.l-s .lens-tag{color:var(--s)}
+.lens.l-a .lens-tag{color:var(--a)}
+.lens.l-g .lens-tag{color:var(--g)}
+.lens.l-f .lens-tag{color:var(--f)}
+
+/* ---------- 數據列 ---------- */
+.figrow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--hairline);border:1px solid var(--hairline);
+  margin:32px 0 40px;
+}
+.figrow div{background:#fff;padding:20px 18px 16px}
+.figrow .fig-n{
+  font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;
+  color:var(--ink);letter-spacing:-.01em;
+}
+.figrow .fig-l{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.6}
+
+/* ---------- 表格（輔助用） ---------- */
+table{width:100%;border-collapse:collapse;margin:28px 0 14px;font-size:14px;background:#fff}
+th{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;
+  text-align:left;padding:12px 14px;background:var(--ink);color:#EDE9DE;font-weight:500;
+}
+td{padding:12px 14px;border-bottom:1px solid var(--hairline);vertical-align:top;line-height:1.75}
+tr:last-child td{border-bottom:none}
+.tbl-note{font-size:13px;color:var(--ink-soft);margin-bottom:36px;max-width:74ch}
+
+/* ---------- 警示框 ---------- */
+.callout{
+  background:var(--warn-bg);border:1px solid #E3D5AE;border-left:4px solid var(--warn);
+  padding:20px 24px;margin:30px 0;font-size:15px;line-height:1.9;max-width:none;
+}
+.callout .co-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  color:var(--warn);margin-bottom:8px;font-weight:500;
+}
+.callout p{margin-bottom:10px;max-width:none}
+.callout p:last-child{margin-bottom:0}
+
+/* ---------- 反方論證（多方論證裝置） ---------- */
+.debate{margin:32px 0;border:1px solid var(--hairline);background:#fff}
+.debate>div{padding:22px 26px}
+.debate .d-pro{border-bottom:1px dashed var(--hairline)}
+.debate .d-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;margin-bottom:10px;font-weight:500;
+}
+.debate .d-pro .d-tag{color:var(--g)}
+.debate .d-con .d-tag{color:var(--u)}
+.debate p{font-size:14.5px;margin-bottom:10px}
+.debate p:last-child{margin-bottom:0}
+
+ul.plain{margin:0 0 22px 0;padding-left:0;list-style:none;max-width:74ch}
+ul.plain li{padding:9px 0 9px 26px;position:relative;line-height:1.85}
+ul.plain li::before{
+  content:'—';position:absolute;left:0;color:var(--gold);font-weight:700;
+}
+footer{
+  background:var(--ink);color:#8E96A8;padding:56px 0 72px;
+  font-size:13px;line-height:2;
+}
+footer .shell{max-width:900px}
+footer h4{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:16px;font-weight:500;
+}
+footer p{max-width:none}
+
+.part-divider{margin:110px 0 70px;padding:34px 0 30px;border-top:3px solid var(--ink);border-bottom:1px solid var(--hairline)}
+.part-divider .pd-num{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
+.part-divider h2{border:none;padding:0;margin:0;font-size:34px}
+.part-divider .pd-sub{margin-top:8px;color:var(--ink-soft);font-size:15px}
+
+.divider-ornament{
+  text-align:center;color:var(--gold);font-size:15px;letter-spacing:.6em;
+  margin:0 0 96px;user-select:none;
+}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<header class="hero">
+  <div class="shell">
+    <div class="eyebrow">InvestMQuest · Geopolitics Research · v1 · 2026-07-23</div>
+    <h1>德國政治結構五稜鏡</h1>
+    <div class="hero-sub">同一個聯邦，五種完全不同的處境。一個把「共識」寫進骨架的戰後民主模範——聯邦制、聯盟政治、社會市場經濟、對極右築起的「防火牆」（Brandmauer）——為何在 2026 年，會讓一個被主流視為極右的政黨躍居全國民調第一？聯盟黨為何守著「中間」卻擋不住流失、社民黨為何從百年工人黨崩成第三、另類選擇（AfD）如何把東部變成堡壘、綠黨與左翼在都市與東部各據一角、外國人與投資人面對的又是哪一套規則——以 2024 年 11 月紅綠燈聯盟崩解、2025 年 2 月大選、Merz 的大聯合政府為切片，逐層論證。</div>
+    <div class="hero-meta">
+      <div><b>分析基準日</b>2026-07-23</div>
+      <div><b>前一里程碑</b>2025-02 聯邦大選（Merz 大聯合政府）</div>
+      <div><b>近期里程碑</b>2026-09 東部邦選（薩安、梅前）</div>
+      <div><b>下一里程碑</b>AfD 民調領先下的施政與 2029 大選</div>
+      <div><b>文件性質</b>結構分析・非投資建議</div>
+    </div>
+    <div class="prism-legend">
+      <div class="pl-u">聯盟黨CDU/CSU</div>
+      <div class="pl-s">社民黨SPD</div>
+      <div class="pl-a">另類選擇AfD</div>
+      <div class="pl-g">綠黨與左翼</div>
+      <div class="pl-f">外國人視角</div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+<div class="layout">
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <a href="#s0">00 導讀與核心論證</a>
+  <div class="toc-title" style="margin-top:16px">I · 地圖</div>
+  <a href="#s1">01 政治版圖總覽</a>
+  <a href="#s1b">01B 比例代表與 5% 門檻</a>
+  <a href="#s2">02 結構的根源：聯邦・聯盟・共識</a>
+  <a href="#s2b">02B 防火牆（Brandmauer）解剖</a>
+  <a href="#s3">03 兩個不投票的權力：憲法法院與央行</a>
+  <a href="#s3b">03B 債務煞車的憲政史</a>
+  <div class="toc-title" style="margin-top:16px">II · 稜鏡</div>
+  <a href="#s4" class="t-u">04 聯盟黨 CDU/CSU・Merz</a>
+  <a href="#s5" class="t-s">05 社民黨 SPD 的衰退</a>
+  <a href="#s6" class="t-a">06 另類選擇 AfD</a>
+  <a href="#s6b" class="t-a">06B 東部（Ossis）的政治</a>
+  <a href="#s7" class="t-g">07 綠黨與左翼</a>
+  <a href="#s8" class="t-f">08 外國人／投資人</a>
+  <div class="toc-title" style="margin-top:16px">III · 動力</div>
+  <a href="#s9">09 紅綠燈聯盟的崩解</a>
+  <a href="#s10">10 2025 大選深讀</a>
+  <a href="#s11">11 大聯合政府與防火牆壓力</a>
+  <a href="#s12">12 移民・能源・債務煞車鬆綁</a>
+  <a href="#s13">13 東西德的持久裂痕</a>
+  <a href="#s14">14 民主韌性辨析</a>
+  <div class="toc-title" style="margin-top:16px">IV · 引擎</div>
+  <a href="#s15">15 三角傳導模型</a>
+  <a href="#s16">16 政治×經濟迴路</a>
+  <a href="#s17">17 資本與模式</a>
+  <a href="#s18">18 產業與人口</a>
+  <a href="#s19">19 政策連續性與外資</a>
+  <a href="#s20">20 地緣：Zeitenwende 與兩難</a>
+  <div class="toc-title" style="margin-top:16px">V · 終章</div>
+  <a href="#s21">21 十大論題</a>
+  <a href="#s22">22 監測儀表板</a>
+  <a href="#s23">23 資料來源</a>
+</nav>
+
+<main>
+<section id="s0">
+  <div class="sec-label">PROLOGUE · CH 00</div>
+  <h2>導讀與核心論證</h2>
+  <p class="lede">德國是戰後民主的模範生：一個曾把整個歐洲拖進兩次浩劫的國家，在 1945 年的廢墟上，用聯邦制、比例代表制、聯盟政治、社會市場經濟與對極右的制度性防疫，建成了西方最穩定、最富裕、最被信任的共識民主之一。它的《基本法》（Grundgesetz）刻意把權力打散給十六個邦、憲法法院、獨立央行與必須協商的多黨聯盟，讓任何單一勢力都難以複製威瑪的崩潰。然而 2026 年的德國，正目睹一件在這套設計裡本不該發生的事：<strong>一個被國內情報機關列為極右嫌疑、被主流政黨用「防火牆」隔離的政黨（另類選擇黨，AfD），躍居全國民調第一，把執政的大聯合政府壓在身後。</strong></p>
+
+  <p>這不是一次尋常的民意波動。2024 年 11 月，社民黨（SPD）總理蕭茲（Olaf Scholz）領導的「紅綠燈」三黨聯盟（社民黨—綠黨—自民黨）因預算與債務煞車的路線衝突而崩解，德國被迫提前大選。2025 年 2 月 23 日的投票，交出一份撕裂的成績單：聯盟黨（CDU/CSU）以約 28.5%、208 席重回第一；AfD 以約 20.8%、152 席拿下史上最佳、躍為第二大黨；曾是百年工人政黨的社民黨崩至約 16.4%、121 席的歷史低點；自民黨（4.3%）與剛崛起的薩拉·瓦根克內希特聯盟（BSW，4.97%）雙雙跌破 5% 門檻、被清出聯邦議會。梅爾茨（Friedrich Merz）於 2025 年 5 月就任總理，聯合社民黨組成「大聯合政府」——這是德國政治的老配方：當中間的兩大黨都受傷，它們就抱團守住中間、把邊緣擋在門外。</p>
+
+  <p>但守成的代價正在浮現。到 2026 年 7 月，各家民調把 AfD 推上 27～29% 的高點，聯盟黨滑落至約 22%，綠黨約 14%，社民黨僅約 12%，左翼黨（Die Linke）約 11%，自民黨在 4% 上下徘徊——<strong>執政的大聯合政府（聯盟黨＋社民黨）的合計民調，已經失去了它在國會裡的多數基礎。</strong>德國政治因此進入一個罕見的張力狀態：一個靠「防火牆」把第一大黨排除在權力之外的政府，正在治理一個第一大黨不斷擴張的國家。這道防火牆能撐多久、以何種代價維持，是理解 2026 年德國的鑰匙。</p>
+
+  <p>要讀懂這個弔詭，必須看清侵蝕德國模式的三股力量同時發作：<strong>其一是 AfD 的常態化</strong>——它已不是抗議性的暫時現象，而是東部第一大黨、全國第一大黨的結構性存在；<strong>其二是東西德三十五年未癒的裂痕</strong>——前東德地區在經濟、認同、對俄態度上與西部持續分歧，成為 AfD 的堡壘；<strong>其三是德國經濟模式的崩壞</strong>——那套以廉價俄氣＋對中出口＋汽車工業為支柱的「德國模式」，在俄烏戰爭切斷俄氣、中國電動車反攻、能源與勞動成本高企之下，正陷入去工業化（Deindustrialisierung）的焦慮。這三股力量互相餵養：經濟不安推高極右支持，極右壯大又讓治理更難。</p>
+
+  <p>而這套結構，對不同的社會位置意義完全不同——這正是本報告用「五稜鏡」拆解德國的理由：</p>
+  <ul class="plain">
+    <li><strong>對聯盟黨（CDU/CSU）</strong>：德國是一艘需要穩住的大船——守住「中間」（die Mitte）、守住跨大西洋同盟與歐盟核心地位、守住社會市場經濟的框架；防火牆是必要的紀律，但把選民逼向 AfD 的，恰恰可能是自己的守成無力。</li>
+    <li><strong>對社民黨（SPD）</strong>：一場關於自身存亡的戰役——曾經代表產業工人的百年老黨，眼看工人票大批流向 AfD，被迫在「大聯合政府裡當小夥伴」與「重新奪回社會正義話語」之間拉扯。</li>
+    <li><strong>對另類選擇（AfD）</strong>：一個被建制排斥、卻被越來越多選民擁抱的「唯一真正反對派」——反移民、反歐盟建制、質疑對烏援助與能源轉型，在東部已是常態、在全國正走向常態，時間站在它這邊。</li>
+    <li><strong>對綠黨與左翼</strong>：兩種進步的分身——綠黨是西部都會受過高等教育者的氣候與公民權政黨，左翼黨（與分裂出去的 BSW）則在東部與經濟弱勢間爭奪那批「經濟上左、文化上不那麼進步」的選民。</li>
+    <li><strong>對外國人／投資人</strong>：面對的是一台「出口機器」的引擎室——真正的變數不在誰組閣的口水，而在<em>去工業化的結構風險</em>、<em>債務煞車鬆綁後的財政轉向</em>、<em>對中依賴的去風險兩難</em>與<em>能源價格的長期水位</em>。</li>
+  </ul>
+
+  <h3>全書地圖：五部曲的閱讀動線</h3>
+  <table>
+    <tr><th>部</th><th>章</th><th>回答的問題</th></tr>
+    <tr><td><strong>第一部・地圖</strong></td><td>01–03</td><td>版圖長什麼樣？比例代表＋5% 門檻如何逼出多黨聯盟？聯邦制、共識民主與防衛型民主的地基是什麼？憲法法院與央行這兩個不投票的權力如何約束政治？</td></tr>
+    <tr><td><strong>第二部・稜鏡</strong></td><td>04–08</td><td>同一個聯邦，五種社會位置（聯盟黨／社民黨／AfD／綠黨與左翼／外國人）各自看到什麼？</td></tr>
+    <tr><td><strong>第三部・動力</strong></td><td>09–14</td><td>紅綠燈聯盟如何崩解？2025 大選、大聯合政府、防火牆、移民與能源、東西裂痕各揭示了什麼？德國民主是在倒退還是在自我防衛？</td></tr>
+    <tr><td><strong>第四部・引擎</strong></td><td>15–20</td><td>政黨×出口經濟×地緣如何互相傳導？去工業化、能源、對中依賴、人口老化、再武裝各卡在哪個齒輪上？</td></tr>
+    <tr><td><strong>第五部・終章</strong></td><td>21–23</td><td>十大論題（附信度與可證偽條件）、監測儀表板、資料來源。</td></tr>
+  </table>
+  <p><strong>一句話結論，供全文檢驗：戰後共識是常數、聯盟組合是變數、AfD 與去工業化是命門。</strong>德國是一個把「制衡、協商、反極端」寫進制度硬體的共識民主，這套硬體真實且強壯——聯邦制、憲法法院、比例代表、獨立央行至今運作如常。但它承載的社會契約，正被 AfD 的常態化、東西裂痕與經濟模式的崩壞三面拉扯。2025 年 Merz 的大聯合政府，是「中間」對這股拉扯的守成回應；它能穩住體制，卻擋不住 AfD 在民調上的常態化領先。趕時間的讀者可直接讀第 21 章的十大論題與第 22 章儀表板，再回頭按需查閱。</p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART I</div>
+  <h2>地圖 · The Map</h2>
+  <div class="pd-sub">版圖、地基與兩個不投票的權力</div>
+</div>
+
+<section id="s1">
+  <div class="sec-label">PART I · CH 01</div>
+  <h2>政治版圖總覽（2026 年 7 月）</h2>
+  <p class="lede">要讀懂德國的版圖，必須把三層疊在一起看：最底層是<strong>選制</strong>——比例代表＋5% 門檻，它決定了德國永遠是多黨、永遠要聯合；中間層是<strong>政黨光譜</strong>——從左翼黨、綠黨、社民黨、自民黨、聯盟黨到 AfD 的六黨格局；最上層是<strong>組閣算術</strong>——誰能湊出過半、誰被防火牆擋在門外。2026 年的德國，這三層第一次同時失衡：第一大黨被排除在政府之外，而執政聯盟已失去民調多數。</p>
+
+  <h3>第一層：選制決定了「德國必然是聯盟政治」</h3>
+  <p>德國聯邦議會（Bundestag）採「聯立式比例代表制」（personalisierte Verhältniswahl）：選民投兩票，第一票選區、第二票政黨名單，而<strong>最終席次分配由第二票的政黨得票率決定</strong>。這個設計有一個根本後果——席次幾乎完全比例化，沒有任何政黨能靠地域鐵票「以少換多」拿下絕對多數。二戰後除了 1957 年的阿登納（Konrad Adenauer），沒有任何政黨單獨過半。<strong>在德國，執政的常態不是「一黨勝出」，而是「兩到三黨談判出一個過半聯盟」</strong>——這是理解德國政治溫度為何遠低於南韓、美國的制度起點：既然人人都要與人合作，就沒有人能贏者全拿。</p>
+  <p>2025 年大選後的聯邦議會共 630 席，過半需 316 席。聯盟黨 208 席、社民黨 121 席，合計 329 席——剛好過半，這正是大聯合政府成形的算術基礎。若沒有社民黨，聯盟黨要湊過半就只剩「與 AfD 合作」或「與綠黨＋另一小黨」兩條路，前者被防火牆封死、後者席次不足，於是「聯盟黨＋社民黨」成了唯一可行的多數組合。</p>
+
+  <h3>第二層：六黨光譜——從左翼到極右的完整排列</h3>
+  <p>德國當前的政黨體系可沿左右軸排開：<strong>左翼黨（Die Linke）</strong>——社會主義左翼，前東德執政黨的後裔，反北約、要求財富重分配；<strong>綠黨（Grüne）</strong>——氣候、公民權與親歐的都會進步派；<strong>社民黨（SPD）</strong>——中間偏左的百年勞工政黨；<strong>自民黨（FDP）</strong>——市場自由派、財政鷹派；<strong>聯盟黨（CDU/CSU）</strong>——基督教民主／保守中間偏右（CSU 為巴伐利亞的姊妹黨）；<strong>另類選擇（AfD）</strong>——民族保守／極右，反移民、疑歐、質疑對烏援助。此外還有從左翼黨分裂、揉合「經濟左派＋文化保守＋親俄」的 BSW（薩拉·瓦根克內希特聯盟）。這個六到七黨的光譜，正是比例代表制的自然產物——它讓每一種社會情緒都有政黨代言，也讓組閣越來越像拼圖。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">630</div><div class="fig-l">2025 大選後聯邦議會總席次（過半需 316）</div></div>
+    <div><div class="fig-n">208 / 121</div><div class="fig-l">聯盟黨 vs 社民黨席次＝大聯合政府基礎（合計 329）</div></div>
+    <div><div class="fig-n">~27–29%</div><div class="fig-l">2026-07 AfD 全國民調（躍居第一）</div></div>
+    <div><div class="fig-n">5%</div><div class="fig-l">進入聯邦議會的政黨得票門檻</div></div>
+  </div>
+
+  <h3>第三層：組閣算術——2026 的例外年</h3>
+  <p>把三層合起來，2026 年的特殊性就浮現了。正常年份，德國的組閣是「第一大黨主導、找一到兩個夥伴湊過半」，權力與民意大致對齊。但 2026 年出現了一個史無前例的錯位：<strong>民調第一大黨（AfD）被所有其他政黨以防火牆拒絕合作，而執政聯盟（聯盟黨＋社民黨）的民調合計已跌破多數。</strong>換言之，能組閣的政黨失去了民意多數，而擁有民意多數潛力的政黨被排除在組閣之外。這個錯位不會立刻推翻政府——大聯合政府在國會裡仍有 329 席的實質多數，能撐到 2029 年的下次大選——但它讓「防火牆的正當性」成為此後每一場選舉、每一次施政爭論的底層問題。</p>
+  <p>更尖銳的是 2026 年 9 月的兩場東部邦選：薩克森-安哈特（Sachsen-Anhalt，9 月 6 日）與梅克倫堡-前波美恩（Mecklenburg-Vorpommern，9 月 20 日）。多份民調顯示 AfD 在薩安逼近絕對多數（一度達 41～42%），若成真，將是二戰後首次有被列為極右嫌疑的政黨在邦層級贏得近乎單獨執政的規模——這會把「其他所有黨聯合起來只為擋住 AfD」的異常聯盟邏輯，推到肉眼可見的極限。</p>
+
+  <div class="prism">
+    <div class="pv-u"><div class="pv-tag">CDU/CSU</div><p>版圖是一張「守成地圖」：聯盟黨重回第一，卻只贏回一個受傷的中間。真正的敵人不是社民黨，而是自己的支持者持續向 AfD 滲漏——每一次施政無力，都在替 AfD 加分。</p><p>它真正盯的一欄，是能否在 2029 前證明「中間仍能解決問題」，否則防火牆將越守越吃力。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD</div><p>版圖是一張「時間表」：全國第一、東部稱霸，被排除只是暫時。每一次被拒於門外，都被轉化成「唯一真正反對派」的敘事燃料——建制越團結排斥它，它的局外人紅利越大。</p><p>它盯的那一欄，是防火牆何時因算術現實而第一次出現裂縫。</p></div>
+    <div class="pv-f"><div class="pv-tag">外國人</div><p>版圖對外資是一張「連續性地圖」：無論誰組閣，德國的歐盟核心地位、法治與契約穩定不變——這正是德國資產的定價之錨。真正該定價的，不是選舉噪音，而是防火牆若破裂對政策連續性的尾部衝擊。</p><p>它盯的那一欄，是政治極化是否開始滲入財政、能源與對中政策的長期路徑。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一張版圖，三種利害結構：守成地圖、時間表、連續性地圖</div>
+
+  <h3>把三層合起來讀：2026 年的版圖一句話</h3>
+  <p>選制是不變的地基（比例代表＋門檻＝必然聯合），光譜是它的當前排列（六到七黨），而 2026 年的特殊性在於——<strong>民意多數與可組閣多數第一次脫節</strong>。大聯合政府握有國會多數卻失去民調多數，AfD 握有民調多數卻被排除在組閣之外。這既讓體制得以繼續運轉（防火牆維持了政策的可預測性），也讓「這道牆是民主的自我防衛、還是對三成選民的排斥」成為未來三年一切爭論的軸線。版圖的下一個裁決點，是 2026 年 9 月的東部兩場邦選。</p>
+</section>
+
+<section id="s1b">
+  <div class="sec-label">PART I · CH 01B</div>
+  <h2>比例代表與 5% 門檻：德國為何永遠是聯盟政治</h2>
+  <p class="lede">第 1 章說「德國必然是聯盟政治」——這一節把這句話拆成可檢驗的機制。答案藏在兩個刻意的制度設計裡：一是把席次幾乎完全比例化的「聯立制」，二是把碎片化擋在門外的 5% 門檻。前者確保沒有人能贏者全拿，後者確保議會不會碎成威瑪那樣的一盤散沙——兩者相乘，就把德國政治永久性地推向協商與妥協。</p>
+
+  <h3>聯立制的骨架：第二票決定一切</h3>
+  <p>德國選民投兩票：第一票（Erststimme）在選區選人、相對多數當選；第二票（Zweitstimme）投政黨名單。關鍵在於——<strong>一個政黨在聯邦議會的總席次，基本由它的第二票全國得票率決定</strong>，第一票只決定這些席次裡有多少來自選區直選。這意味著席次分配高度比例化：拿到 20% 第二票的政黨，大致就拿到約 20% 的席次，不會像英美單一選區制那樣「以四成選票換六成席次」。這個設計的直接後果，就是<strong>沒有任何政黨能靠選制放大器單獨過半</strong>——聯合政府因此不是政治文化的偶然，而是選制的必然。</p>
+  <p>2023 年的選制改革還取消了「超額席次與平衡席次」導致議會無限膨脹的舊機制，把總席次固定下來（2025 年為 630 席），代價是少數贏得選區的候選人可能因政黨第二票不足而無法就任——這是德國在「比例純度」與「選區代表性」之間的最新一次微調。</p>
+
+  <h3>5% 門檻：威瑪教訓的制度化</h3>
+  <p>德國選制最著名的設計，是政黨須跨過 <strong>5% 的第二票門檻</strong>（或贏得至少 3 個選區直選）才能分配席次。這道門檻的歷史動機非常明確：威瑪共和的純比例代表制沒有門檻，導致議會被幾十個小黨切碎、無法形成穩定多數，最終為極端政黨的崛起與體制癱瘓埋下伏筆。戰後的《基本法》設計者刻意加上門檻，用「犧牲極端的比例純度」換取「議會的可治理性」。<strong>5% 門檻因此是德國「防衛型民主」在選制上的第一道閘門</strong>——它不針對任何特定政黨，而是系統性地把碎片擋在門外。</p>
+  <p>這道門檻在 2025 年大選發揮了決定性作用：自民黨（4.3%）與 BSW（4.97%，僅差約 0.03 個百分點）雙雙落馬。BSW 差之毫釐的出局，把它本可拿下的席次按比例重分配給了跨過門檻的政黨，實質上放大了聯盟黨、AfD、社民黨、綠黨、左翼黨的席次——<strong>門檻不只是篩選器，更是一個把「落選票」重新分配的放大器</strong>，這也是為什麼在門檻邊緣的小黨生死，往往牽動整個組閣算術。</p>
+
+  <h3>聯盟政治的常見組合：一張顏色配對表</h3>
+  <p>因為必須聯合，德國政治發展出一套用顏色命名的聯盟文化——每種組合都有一個綽號，反映其意識形態拼裝：</p>
+  <table>
+    <tr><th>聯盟綽號</th><th>組成政黨</th><th>顏色邏輯與特徵</th></tr>
+    <tr><td><strong>大聯合（GroKo）</strong></td><td>聯盟黨＋社民黨</td><td>黑＋紅：兩大中間政黨抱團，穩定但常被批「中間趨同、養大兩翼」——2025 Merz 政府即此</td></tr>
+    <tr><td><strong>紅綠燈（Ampel）</strong></td><td>社民黨＋綠黨＋自民黨</td><td>紅＋綠＋黃：中左＋生態＋自由市場，理念張力大，2021–2024 蕭茲政府因財政路線內爆</td></tr>
+    <tr><td><strong>黑綠（Schwarz-Grün）</strong></td><td>聯盟黨＋綠黨</td><td>黑＋綠：保守＋生態，在多個邦已實行，被視為未來聯邦可能組合之一</td></tr>
+    <tr><td><strong>牙買加</strong></td><td>聯盟黨＋綠黨＋自民黨</td><td>黑＋綠＋黃（似牙買加國旗）：2017 年談判破裂的組合</td></tr>
+    <tr><td><strong>肯亞／德國</strong></td><td>聯盟黨＋社民黨＋綠黨</td><td>三黨大聯合，多見於東部邦為擋住 AfD 而組成的「防火牆聯盟」</td></tr>
+  </table>
+  <p class="tbl-note">聯盟綽號為德國政治慣用語，反映組閣的顏色拼裝。關鍵一句：<strong>當 AfD 在東部躍為第一大黨，其他所有黨被迫組成「肯亞」式的三黨甚至四黨大聯合，只為湊出一個不含 AfD 的多數——聯盟政治的協商邏輯，在防火牆的壓力下被推向極限（詳第 6B、11 章）。</strong></p>
+
+  <h3>為什麼這套設計壓低了政治溫度——以及它的極限</h3>
+  <p>比例代表＋門檻＋聯盟政治，共同壓低了德國政治的零和程度：<strong>敗選只是「席次變少、進在野或退為小夥伴」，不是「失去一切」</strong>；施政必須協商，極端主張在談判桌上被稀釋；權力分散讓任何單一勢力都難以壟斷。這正是德國政治數十年來遠比南韓、美國「無聊而穩定」的結構原因。<strong>但這套設計有一個內建極限：它假設所有夠大的政黨都願意、也能夠彼此合作。</strong>一旦出現一個夠大（近三成）卻被所有人拒絕合作的政黨，協商邏輯就開始失靈——可組閣的政黨越來越少、剩下的被迫組成理念差距越來越大的「什麼都聯合」政府，而這種勉強的聯合又反過來坐實了 AfD「建制卡特爾」的指控。<strong>德國選制擅長吸收溫和的多元，卻不擅長處理一個被系統性排斥的巨大少數——這正是 2026 年德國的結構困境。</strong></p>
+</section>
+
+<section id="s2">
+  <div class="sec-label">PART I · CH 02</div>
+  <h2>結構的根源：聯邦制、聯盟政治與防衛型民主</h2>
+  <p class="lede">德國政治為何如此分權、如此協商、如此執著於「反極端」？答案不在當代的個別領導人，而在 1949 年《基本法》的設計哲學本身。它是一套從威瑪的失敗與納粹的浩劫中「逆向工程」出來的制度：凡是當年讓民主崩潰的機制，戰後都被刻意拆掉或反轉。理解德國，必須先理解這套「以史為鑑」的制度基因。</p>
+
+  <h3>第一層：聯邦制——把權力垂直打散給十六個邦</h3>
+  <p>德國是聯邦國家，由 16 個邦（Länder）組成，每個邦有自己的憲法、議會、政府與相當大的自治權，尤其在教育、警政、文化與部分財政上。聯邦層級的立法，許多需經由各邦組成的<strong>聯邦參議院（Bundesrat）</strong>同意——這意味著即使一個政黨掌握了聯邦議會，只要它在各邦執政版圖上不占優勢，重大立法仍可能在參議院被卡住。這種「垂直分權」是德國對「中央集權導致獨裁」的制度性免疫：權力被打散到十六個各自選舉、各自輪替的邦，任何勢力都難以一舉通吃。<strong>聯邦制也讓邦選舉成為聯邦政治的溫度計與練兵場</strong>——AfD 正是先在東部各邦坐大，才逐步改變全國格局（詳第 13 章）。</p>
+  <p>聯邦制還塑造了一種「政策的多點試驗」文化：不同的邦可以嘗試不同的能源、教育、移民與治安路線，成功的做法再擴散到聯邦層級。這讓德國的政策變遷傾向漸進、可回溯，而非一次性的全國豪賭——這是德國模式穩定卻也常被批「改革遲緩」的一體兩面。</p>
+
+  <h3>第二層：聯盟政治與共識民主——把權力水平打散給多黨</h3>
+  <p>如果聯邦制是垂直分權，那麼比例代表制下的聯盟政治就是水平分權。政治學者把德國歸類為典型的<strong>「共識民主」（consensus democracy）</strong>——相對於英美的「多數決民主」（贏者組閣、輸者在野），共識民主的特徵是：多黨、聯合政府、比例代表、強勢的第二議院、獨立的憲法法院與央行、以及大量需要跨黨協商的「共決」機制。它的優點是包容、穩定、少劇烈擺盪；缺點是決策慢、責任分散、難以推動需要痛苦取捨的大改革。<strong>德國的「無聊」與「穩定」是同一枚硬幣的兩面：正因為權力被層層打散、凡事都要協商，它既難以走向極端，也難以雷厲風行。</strong></p>
+
+  <h3>第三層：社會市場經濟——把資本主義與社會保障焊在一起</h3>
+  <p>德國模式的第三根支柱，是戰後由基民盟的艾哈德（Ludwig Erhard）等人確立的<strong>「社會市場經濟」（Soziale Marktwirtschaft）</strong>：既非放任的自由市場，也非計劃經濟，而是「市場競爭＋強力社會保障＋勞資共決」的混合體。它的制度標誌包括：企業監事會裡的勞工共決（Mitbestimmung）、強大的產業工會與集體協商、綿密的社會保險網、以及對中小企業（Mittelstand）的制度友善。這套模式是德國社會凝聚力的經濟基礎——它讓工人分享成長果實，緩和了階級對立。<strong>但當去工業化威脅到製造業工作，社會市場經濟承諾的「努力就有穩定生活」開始鬆動，被拋下的產業工人正是 AfD 與 BSW 爭奪的核心票源（詳第 5、16 章）。</strong></p>
+
+  <h3>第四層：防衛型民主——一部「不會自殺的憲法」</h3>
+  <p>德國制度最獨特的基因，是<strong>「防衛型民主」（wehrhafte Demokratie / streitbare Demokratie）</strong>：《基本法》從威瑪「民主用民主程序選出了摧毀民主的納粹」這一教訓出發，刻意賦予體制自我防衛的工具。具體機制包括：憲法法院有權<strong>宣布反民主政黨違憲並解散</strong>（戰後曾解散過極右的 SRP 與共產黨 KPD）；設有<strong>「憲法保衛局」（Verfassungsschutz）</strong>這一國內情報機關，可監控被評估為威脅自由民主基本秩序的組織；基本人權中的某些條款「不得因濫用而被用來摧毀自由秩序」。這套設計的核心信念是：<strong>民主不是價值中立的程序，它有權、也有義務防衛自己不被反民主力量用民主手段顛覆。</strong>這正是理解「防火牆」與「情報機關評估 AfD」等當代爭議的憲法根源（詳第 2B、14 章）。</p>
+
+  <div class="prism">
+    <div class="pv-u"><div class="pv-tag">CDU/CSU</div><p>這套地基是「必須守護的資產」：聯邦制、共識民主、社會市場經濟與防衛型民主，正是德國戰後成功與穩定的來源。守住中間、守住這套制度，就是守住德國之所以為德國。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD</div><p>這套地基是「建制的自我保護裝置」：防衛型民主、情報機關監控、防火牆——在 AfD 眼中，這些都被用來排斥一個合法政黨與它代表的數百萬選民，是「表面民主、實則卡特爾」的證據。</p></div>
+    <div class="pv-g"><div class="pv-tag">綠黨與左翼</div><p>這套地基是「未竟的進步工程」：防衛型民主必須真的用來對抗極右、社會市場經濟必須擴展到氣候正義與少數權益。制度是好的，但它需要被推向更包容、而非僅僅守成。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一部《基本法》，三種讀法：必守資產、自我保護裝置、未竟工程</div>
+
+  <h3>比較視角：為什麼德國選了「共識」而非「多數決」</h3>
+  <p>把德國放進比較政治的座標，它的設計選擇就更清楚。英美是「多數決民主」——單一選區制、兩黨為主、贏者組閣、政策可劇烈擺盪；德國則是「共識民主」——比例代表、多黨聯合、權力層層分立、政策漸進。這不是偶然，而是對本國歷史的直接回應：<strong>威瑪的教訓不是「民主太少」，而是「民主太脆弱、太容易被極端俘獲」</strong>；於是戰後德國選擇用「分權＋門檻＋防衛機制」把體制加固到近乎不可顛覆。代價是決策緩慢、改革困難、容易陷入「大聯合政府式的中間趨同」；紅利則是七十多年的穩定與對極端的高度免疫。<strong>2026 年的問題，正是這套為「防止顛覆」而生的制度，如何面對一個不試圖顛覆體制、而是試圖在體制內合法壯大的挑戰者。</strong></p>
+</section>
+
+<section id="s2b">
+  <div class="sec-label">PART I · CH 02B</div>
+  <h2>防火牆（Brandmauer）解剖：一道政治禁忌的機制與代價</h2>
+  <p class="lede">「防火牆」（Brandmauer）是理解 2026 年德國的核心概念，卻常被誤解為一條法律。它不是——它是一項<strong>政治承諾</strong>：所有主流政黨（聯盟黨、社民黨、綠黨、自民黨、左翼黨）約定，不與 AfD 組閣、不依賴其票數通過議案、不與其正式合作。這道牆沒有寫進任何法條，全靠政黨自律維繫；也正因如此，它的每一道裂縫都是全國新聞。這一節把這道牆拆開，看它如何運作、為何存在、又付出什麼代價。</p>
+
+  <h3>防火牆是什麼、不是什麼</h3>
+  <p>先釐清邊界：防火牆<strong>不是</strong>禁止 AfD 參選或存在（那需要憲法法院的政黨禁令程序，是另一回事）；它<strong>是</strong>其他政黨的自我約束——拒絕讓 AfD 觸碰行政權力或成為立法多數的一部分。它的憲法精神來自防衛型民主：既然 AfD 的部分派系被情報機關評估為威脅自由民主基本秩序，主流政黨便以「不合作」來阻止其正常化。<strong>防火牆因此是一種「體制外的防衛型民主」——不靠法院禁令，而靠政黨的集體紀律，把一個合法政黨隔離在權力之外。</strong></p>
+
+  <h3>裂縫時刻：2025 年的圖林根與聯邦移民案</h3>
+  <p>防火牆最受考驗的時刻，往往發生在「AfD 的票剛好能決定結果」時。2020 年圖林根（Thüringen）邦的一場地方選舉中，一位自民黨候選人曾在 AfD 票數的幫助下短暫當選邦總理，引發全國政治地震、幾天內被迫辭職，梅克爾（Angela Merkel）稱該結果「不可原諒」——這件事把防火牆的紅線劃得更清楚。2025 年初，Merz 領導的聯盟黨在聯邦議會推動一項收緊移民的動議，該動議因獲得 AfD 的贊成票而達到多數，被反對者指為「首次讓 AfD 的票決定了聯邦層級的結果」，引發大規模抗議與黨內爭議。<strong>這些事件揭示了防火牆的結構性弱點：只要 AfD 夠大，議會裡就會反覆出現「不靠 AfD 的票就無法通過某案」的算術情境，而每一次這樣的情境，都在測試主流政黨的紀律。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 防火牆的三個支撐點</div>
+    <p>防火牆能維持，靠三個互相支撐的機制：<strong>其一是歷史道德權威</strong>——德國社會對納粹的集體反省，使「與極右合作」成為強力政治禁忌；<strong>其二是情報機關的背書</strong>——憲法保衛局對 AfD（尤其其部分邦黨部與青年組織）的極右評估，給了主流政黨「不合作」的正當性依據；<strong>其三是選票算術的可行性</strong>——只要不含 AfD 仍能湊出多數，防火牆就不需付出「無法組閣」的代價。這三點中，第三點最脆弱：一旦 AfD 大到「不含它就湊不出多數」，前兩點的道德與法理正當性將面臨最嚴峻的現實壓力（薩安 2026 的近絕對多數即是預演）。</p>
+  </div>
+
+  <h3>防火牆的兩難：它究竟是解藥還是養料？</h3>
+  <p>防火牆最深的爭議，在於它對 AfD 的實際效果究竟是抑制還是助長——這是一個沒有定論、卻決定德國未來的問題：</p>
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">論點・防火牆是必要的防衛</div><p>支持者主張：一個被情報機關評估為部分極右、質疑憲政基本秩序的政黨，本就不該被賦予行政權力；德國從威瑪學到的教訓正是「不能用正常化來馴服極端」。防火牆守住了政策底線（移民、對歐、對俄），也守住了「某些立場不可觸碰」的社會共識。拆掉它，等於賭 AfD 會被權力馴化——這正是威瑪的致命錯誤。</p></div>
+    <div class="d-con"><div class="d-tag">反論・防火牆餵養了它所要對抗的東西</div><p>批評者反駁：防火牆讓 AfD 得以永遠扮演「唯一真正反對派」與「被建制迫害的人民之聲」，把每一次被排斥都轉化為受害者敘事與局外人紅利；它還逼使理念天差地遠的政黨組成勉強的大聯合，坐實「建制卡特爾」的指控、催化中間趨同。當三成選民支持一個被系統性排斥的政黨，防火牆保護的究竟是民主，還是建制自身對這三成民意的不回應？</p></div>
+  </div>
+  <p>本報告不對這場辯論下單一判決——因為它的答案取決於一個經驗問題：<strong>AfD 的支持究竟是「對特定議題（移民、能源、經濟）的抗議」，還是「對自由民主秩序的根本敵意」？</strong>若是前者，防火牆可能透過排斥反而固化它；若是後者，防火牆就是防衛型民主的正當運用。真相很可能是兩者的混合，且比例隨地區（東西）、隨派系而不同——這正是為什麼防火牆在德國是一場持久的、無法一次解決的政治鬥爭（辨析詳第 14 章）。</p>
+</section>
+
+<section id="s3">
+  <div class="sec-label">PART I · CH 03</div>
+  <h2>兩個不投票的權力：憲法法院與央行</h2>
+  <p class="lede">在聯邦議會與總理這兩個選出來的權力之外，德國政治真正的護欄，是兩個不投票、卻能否決民選政府的機構——位於卡爾斯魯厄（Karlsruhe）的<strong>聯邦憲法法院</strong>，與掌管貨幣的<strong>央行體系（Bundesbank／歐洲央行 ECB）</strong>。它們是德國「把重大決定從日常政治手中拿走、交給規則與專家」這一制度哲學的最高體現，也是理解「債務煞車」為何能綁住整個財政的關鍵。</p>
+
+  <h3>卡爾斯魯厄：一部能否決總理的憲法法院</h3>
+  <p>聯邦憲法法院（Bundesverfassungsgericht）是德國制度的守護神，其權威在西方民主中名列前茅。它的權力極大：可審查任何法律是否違憲、可受理個人的憲法訴願、可裁決聯邦與各邦的權限爭議、可解散反民主政黨。歷史上它一次次改寫德國的政策走向——從限制反恐監控、保障資料自主權，到 2020 年裁定歐洲央行的購債計畫在德國需受比例原則審查、2021 年裁定《氣候保護法》因未充分保障後代權益而部分違憲、以及最關鍵的<strong>2021 年推翻政府一項用「疫情特別基金結餘挪作氣候投資」的操作，直接引爆了紅綠燈聯盟的財政危機（詳第 9、3B 章）</strong>。<strong>在德國，一項政策合不合法、一筆錢能不能花，最終常不由議會多數、而由卡爾斯魯厄的法官裁定</strong>——這是德國「把政治關進法治籠子」最尖銳的體現。</p>
+  <p>與此相對，憲法法院的權威之所以能維繫，靠的是一種刻意的節制與去政治化：法官由聯邦議會與參議院以三分之二多數選出（迫使跨黨共識）、任期十二年不得連任、判決以嚴謹的法理而非黨派立場著稱。正因為它被普遍視為「在黨爭之上」，它的裁決才具有連民選政府都必須服從的分量——這也是為什麼「是否讓 AfD 影響憲法法院法官的任命」會成為防衛型民主的一條敏感紅線。</p>
+
+  <h3>央行體系：從德意志聯邦銀行到歐洲央行</h3>
+  <p>德國制度的第二個「不投票的權力」，是貨幣。戰後德國對威瑪的惡性通膨有近乎創傷性的記憶，因此把<strong>央行獨立與物價穩定</strong>奉為準憲法原則。德意志聯邦銀行（Bundesbank）曾是歐洲最令人敬畏的央行，其「反通膨鷹派」文化深植德國政治 DNA。1999 年歐元啟用後，貨幣主權上交給<strong>歐洲央行（ECB）</strong>，但德國把自己的偏好深深烙進了 ECB 的設計——ECB 總部設在法蘭克福、以物價穩定為首要職責、獨立於各國政府。這對德國政治有雙重意涵：<strong>其一，德國政府無法用印鈔來解決財政問題（貨幣政策已不在柏林手裡）；其二，德國的財政紀律偏好，透過歐元區的規則約束了整個南歐。</strong>歐債危機期間「德國要求撙節、南歐承受痛苦」的張力，根源正在於此。</p>
+
+  <h3>債務煞車：把財政紀律寫進憲法</h3>
+  <p>如果說憲法法院管「合不合法」、央行管「貨幣」，那麼<strong>「債務煞車」（Schuldenbremse）</strong>就是德國把「財政紀律」也升格為憲法規則的產物。2009 年，德國在《基本法》中寫入債務煞車：<strong>聯邦政府的結構性新增借貸原則上不得超過 GDP 的 0.35%，各邦則原則上不得舉新債</strong>（緊急狀態可經議會多數暫停）。這條規則把「量入為出」從政治選擇變成憲法義務，是德國財政保守主義的最高象徵。它讓德國在歐債危機中維持了 AAA 信用與道德權威，卻也在 2020 年代成為激烈爭議的核心——因為當國防（Zeitenwende）與基建投資的需求暴增，債務煞車就從「紀律的勳章」變成「發展的枷鎖」（憲政史詳第 3B 章）。</p>
+
+  <div class="prism">
+    <div class="pv-u"><div class="pv-tag">CDU/CSU</div><p>兩個不投票的權力是「德國穩定的基石」：憲法法院守法治、央行守幣值、債務煞車守財政。它們把德國從短視的政治衝動中保護出來——即使 Merz 政府為國防鬆綁了債務煞車，也是「例外授權」而非「拋棄原則」。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD</div><p>兩個不投票的權力是「主權外流的證據」：貨幣交給了法蘭克福的 ECB、財政被布魯塞爾與撙節規則綁住、關鍵決定被沒有選票的法官與銀行家把持——AfD 把「奪回主權」（對歐元、對歐盟、對移民）當作核心賣點。</p></div>
+    <div class="pv-f"><div class="pv-tag">外國人</div><p>兩個不投票的權力是「德國資產的定價之錨」：獨立的憲法法院與央行、憲法級的財政紀律，正是德國國債被視為歐洲無風險資產、德國契約被信任的制度基礎。債務煞車的鬆綁值得密切定價——它既是成長機會，也是紀律轉向的訊號。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同兩個機構，三種定性：穩定基石、主權外流、定價之錨</div>
+
+  <h3>把三者合起來：德國的「去政治化」治理哲學</h3>
+  <p>憲法法院、央行、債務煞車——這三者背後是同一個治理哲學：<strong>把最重要、最容易被短期民粹裹挾的決定（基本權利、貨幣、財政），從日常政治的手裡拿走，交給規則、專家與獨立機構。</strong>這是德國對「威瑪式民主容易被情緒俘獲」的終極解方，也是它長期穩定的深層來源。但這套哲學有一個當代代價：<strong>當越來越多決定被移出選舉政治，感到「投票改變不了什麼」的選民，就越容易被一個承諾「把權力還給人民」的政黨吸引</strong>——AfD 對 ECB、對歐盟、對「專家統治」的攻擊，正是瞄準了這套去政治化哲學的正當性缺口。德國的護欄很堅固，但護欄越多，「民主赤字」的指控就越有市場。</p>
+</section>
+
+<section id="s3b">
+  <div class="sec-label">PART I · CH 03B</div>
+  <h2>債務煞車的憲政史：從紀律勳章到鬆綁豪賭</h2>
+  <p class="lede">第 3 章把債務煞車列為德國的第三個「不投票的權力」；這一節把它的憲政軌跡攤開，因為 2025 年的鬆綁，是理解德國財政與地緣轉向的樞紐事件。債務煞車的故事，是一部「德國如何把財政保守主義寫進憲法、又如何在生存壓力下被迫為它開一道口」的縮影。</p>
+
+  <h3>2009：把撙節刻進《基本法》</h3>
+  <p>債務煞車誕生於 2008–09 全球金融危機的陰影下。當時德國朝野（大聯合政府）達成共識：為了長期財政永續、避免債務失控，把「結構性赤字上限」寫進憲法。2009 年通過的條款規定聯邦結構性新債不超過 GDP 的 0.35%、各邦原則零新債，並設緩衝機制與緊急暫停條款。這在當時被視為德國財政德性的最高體現——它讓德國在隨後的歐債危機中站上道德高地，要求希臘、義大利等國撙節時底氣十足。<strong>債務煞車因此不只是財政工具，更是一種國族自我認同：一個「不靠借錢過日子、把負擔留給後代是不道德的」的德國。</strong></p>
+
+  <h3>2020–2023：三次緊急暫停與一次憲法法院的重擊</h3>
+  <p>債務煞車的緊急條款在 2020 年新冠疫情期間首次大規模啟用，德國連續數年暫停煞車、大舉借債救經濟。真正的憲政地震發生在 2023 年 11 月：紅綠燈政府試圖把一筆「疫情期間授權、但未用完的 600 億歐元借貸額度」轉挪去支應氣候與轉型基金，<strong>聯邦憲法法院裁定此舉違憲</strong>——理由是不能把某一緊急年度授權的借款額度挪到未來年度使用。這一判決在政府預算裡炸出一個大洞，直接引爆了紅綠燈聯盟關於「如何補洞」的路線惡鬥（詳第 9 章）。<strong>卡爾斯魯厄用一紙判決，證明了它確實是那個能否決民選政府財政操作的「不投票的權力」。</strong></p>
+
+  <h3>2025：Zeitenwende 逼出的歷史性鬆綁</h3>
+  <p>2022 年俄羅斯全面入侵烏克蘭後，蕭茲宣告「時代轉折」（Zeitenwende），德國承諾大幅提高國防開支、支援烏克蘭。但債務煞車讓這筆錢無處可出。2025 年 2 月大選後、Merz 政府正式上任前，<strong>由聯盟黨與社民黨主導、並取得綠黨支持，在即將卸任的第 20 屆聯邦議會，於 2025 年 3 月 18 日通過了修憲</strong>：把超過 GDP 1% 的國防開支排除在債務煞車之外（實質上為國防解除了借貸上限），並設立一個<strong>總額 5000 億歐元、須在十二年內花完的基礎設施特別基金（其中約 1000 億歐元指定用於氣候投資）</strong>。修憲需三分之二多數，因此必須拉入綠黨——這是一次跨越大選、由「新舊多數」共同完成的憲政操作。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">0.35%</div><div class="fig-l">債務煞車原設的聯邦結構性新債上限（占 GDP）</div></div>
+    <div><div class="fig-n">€5,000 億</div><div class="fig-l">2025 修憲設立的基建特別基金（12 年內動用）</div></div>
+    <div><div class="fig-n">&gt;1% GDP</div><div class="fig-l">2025 修憲：超此門檻的國防開支免受煞車限制</div></div>
+    <div><div class="fig-n">2/3</div><div class="fig-l">修憲所需的聯邦議會多數（故須拉入綠黨）</div></div>
+  </div>
+
+  <h3>鬆綁的政治意涵：三個層次</h3>
+  <p>2025 年的鬆綁，其意涵遠超財政本身：<strong>其一是路線的轉向</strong>——一個以財政保守著稱的聯盟黨，在剛贏得大選後就領導了德國數十年來最大的舉債擴張，象徵「安全與投資」壓過了「零赤字」的舊教條，被批評者稱為 Merz 的「債務豪賭」。<strong>其二是憲法工具的雙面性</strong>——同一部《基本法》，既能用債務煞車綁住財政，也能透過修憲為特定目的鬆綁，顯示德國制度在「規則」與「彈性」之間仍保有調節空間。<strong>其三是政治風險的轉移</strong>——鬆綁讓 AfD 得到新的攻擊點（「建制在大選後立刻背叛了財政承諾、要用你的錢去打別人的仗」），而 BSW 與左翼黨則從反軍事的角度批判再武裝。<strong>債務煞車的鬆綁，因此同時是德國地緣覺醒的財政基礎，也是極左與極右各自的動員燃料（詳第 12、20 章）。</strong></p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART II</div>
+  <h2>稜鏡 · The Prisms</h2>
+  <div class="pd-sub">同一個聯邦，五種社會位置的讀法</div>
+</div>
+
+<section id="s4">
+  <div class="sec-label">PART II · CH 04 · 稜鏡一</div>
+  <h2>聯盟黨（CDU/CSU）：中間的守成者</h2>
+  <p class="lede">第一片稜鏡，是重回執政的聯盟黨。它是德國戰後最成功的政治品牌——阿登納、艾哈德、柯爾、梅克爾都出自這個陣營，長期定義了「德國中間」是什麼。但 2026 年的聯盟黨，是一個贏了選舉卻贏得吃力的守成者：它守住了總理府，卻守不住持續向 AfD 滲漏的右翼選民，被夾在「向右搶回選票」與「守住中間、維持防火牆」之間。</p>
+
+  <h3>兩個政黨、一個聯盟：CDU 與 CSU 的分工</h3>
+  <p>先釐清一個常被混淆的結構：聯盟黨其實是<strong>兩個政黨</strong>——在巴伐利亞邦（Bayern）以外運作的<strong>基督教民主聯盟（CDU）</strong>，與只在巴伐利亞運作、更保守的姊妹黨<strong>基督教社會聯盟（CSU）</strong>。兩黨在聯邦議會組成聯合黨團、共推一位總理候選人，但 CSU 在移民、治安、文化認同等議題上長期扮演「更右的施壓者」，用以吸收巴伐利亞的保守選票、防止它流向 AfD。這種「一個中間偏右的 CDU＋一個更保守的 CSU」的分工，是聯盟黨數十年來守住右翼側翼的制度設計，但在 AfD 崛起後，這道側翼防線正承受前所未有的壓力。</p>
+
+  <h3>梅克爾遺產與 Merz 的路線修正</h3>
+  <p>要理解 Merz，必須先理解他要修正的對象——梅克爾。梅克爾主政十六年（2005–2021），把 CDU 帶向中間、甚至在能源（廢核）、移民（2015 年開放難民）、社會議題上採取被黨內右翼視為「過度中間偏左」的路線。這條路線贏得了都會與溫和選民，卻被批評「掏空了保守派的家、把右翼選民推向了 AfD」。<strong>Merz 的政治生涯，某種意義上就是「反梅克爾」的化身</strong>——他是黨內經濟自由派與保守派的代表，主張在移民、經濟、安全上向右修正，把流失的選票搶回來。他 2025 年推動的收緊移民動議（一度依賴 AfD 票達到多數），正是這條路線的體現，也正是它引爆防火牆爭議的原因。</p>
+
+  <div class="lens l-u">
+    <div class="lens-tag">CDU/CSU 的核心兩難</div>
+    <p>聯盟黨面對一道無解的算術：向右移，可能搶回一些猶豫的 AfD 選民，卻有風險讓自己「AfD 化」、正常化了對手的議題、並流失中間與都會選民給綠黨；守中間，能維持防火牆的道德權威與治理聯盟的可行性，卻眼睜睜看著右翼選票持續滲漏。<strong>無論往哪走都在流血——這是「中間政黨面對崛起極右」的經典困境，梅克爾選了守中間、Merz 傾向向右修正，但至今沒有證據顯示任何一條路能真正止血。</strong></p>
+  </div>
+
+  <h3>聯盟黨的當前處境：贏了選舉，輸了民調</h3>
+  <p>2025 年 2 月，聯盟黨以約 28.5%、208 席重回第一，Merz 於 5 月就任總理、組成與社民黨的大聯合政府。但這場勝利的成色並不飽滿——28.5% 是聯盟黨歷史上偏低的「第一名」得票，而到 2026 年 7 月，其民調已滑落至約 22%，被 AfD 的 27～29% 明顯超越。這意味著：<strong>執政不到一年，聯盟黨已從「第一大黨」跌為民調上的「第二」，而它的執政夥伴社民黨更弱（約 12%）——大聯合政府的兩個支柱同時失去民意動能。</strong>對聯盟黨，這是一個殘酷的訊號：僅僅「重新執政」並不能自動修復選民對中間政黨解決問題能力的信任。</p>
+
+  <h3>Merz 政府的三張王牌與三個弱點</h3>
+  <p>Merz 政府的施政豪賭，押在三張王牌上：<strong>其一是財政火力</strong>——透過債務煞車鬆綁與 5000 億基建基金，試圖用大規模投資重振經濟、對沖去工業化（詳第 3B、12 章）；<strong>其二是安全領導</strong>——在 Zeitenwende 下領導歐洲再武裝、支援烏克蘭，塑造「危機時刻的可靠掌舵者」形象；<strong>其三是移民收緊</strong>——用更嚴的移民與治安政策，回應 AfD 的核心議題、堵住右翼滲漏。但三張王牌各有對應的弱點：財政擴張可能推高通膨與債務、被批背叛保守原則；安全領導的成本（軍費、對烏援助）成為 AfD 與 BSW 的攻擊點；移民收緊則可能在「不夠嚴」（保不住右翼）與「太嚴」（流失中間與觸碰防火牆）之間兩面不討好。<strong>Merz 的核心賭注是：在 2029 年下次大選前，用「投資＋安全＋秩序」證明「中間仍能解決問題」——若失敗，防火牆將越守越吃力。</strong></p>
+
+  <div class="prism">
+    <div class="pv-u"><div class="pv-tag">CDU/CSU 自視</div><p>我們是德國的穩定之錨、負責任的治理者。在危機四伏的年代，德國需要的是能同時管好經濟、安全與秩序的中間力量，不是喊口號的極端。守住中間就是守住德國。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD 眼中的聯盟黨</div><p>聯盟黨是「假保守」：選前喊右、選後左轉，跟社民黨組大聯合、繼續開放移民、繼續為別人的戰爭掏錢。它守的不是德國，是建制自己的位子——我們才是真正的保守替代。</p></div>
+    <div class="pv-s"><div class="pv-tag">社民黨眼中的聯盟黨</div><p>聯盟黨是「不得不合作、卻理念相左的資深夥伴」：我們需要它來維持防火牆與穩定，但它的財政保守與移民鷹派，正在侵蝕我們賴以生存的社會正義議程與工人票基。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個聯盟黨，三種定性：穩定之錨、假保守、相左的資深夥伴</div>
+</section>
+
+<section id="s5">
+  <div class="sec-label">PART II · CH 05 · 稜鏡二</div>
+  <h2>社民黨（SPD）：百年工人黨的歷史性衰退</h2>
+  <p class="lede">第二片稜鏡，是德國最古老的政黨——社會民主黨（SPD），一個有超過一百六十年歷史、曾定義了「德國社會市場經濟」與福利國家的百年老黨。2025 年，它交出了戰後最慘的成績單：約 16.4%、跌到第三。它的衰退不是一次選舉的失手，而是一個結構性問題的爆發——<strong>當它賴以立黨的產業工人正大批流向 AfD，一個「工人政黨」該如何存在？</strong></p>
+
+  <h3>從執政黨到第三黨：一次歷史性的崩塌</h3>
+  <p>把時間拉長，社民黨的軌跡令人心驚。它曾是能與聯盟黨分庭抗禮的「人民政黨」（Volkspartei），布蘭特（Willy Brandt）、施密特（Helmut Schmidt）、施若德（Gerhard Schröder）都曾是它的總理；就在 2021 年，蕭茲還帶領它以第一大黨之姿組成紅綠燈政府。然而僅僅四年後的 2025 年，它崩至約 16.4%、121 席，從執政第一黨跌為第三，且到 2026 年民調更掉到約 12%——低於綠黨、逼近左翼黨。<strong>一個曾經定義德國政治半壁江山的百年政黨，在一個選舉周期內失去了它的中心地位。</strong>這是德國政黨體系「去人民政黨化」（兩大黨壟斷瓦解、選票流向多黨）最劇烈的體現。</p>
+
+  <h3>核心病灶：工人票的流失</h3>
+  <p>社民黨衰退的最深層原因，是它與自身歷史基本盤的斷裂。傳統上，社民黨代表產業工人、工會、藍領階級。但過去二十年，這個基本盤在兩個方向上被侵蝕：<strong>向左流向綠黨與左翼黨</strong>（受過教育的都會進步派被氣候、公民權議題吸引），<strong>向右流向 AfD</strong>（在去工業化、移民與文化焦慮下，大批藍領工人把票投給了承諾「保護德國工人、限制移民、恢復秩序」的極右）。尤其在後者上，出現了一個令社民黨痛苦的逆轉——<strong>在許多工業城鎮與東部地區，AfD 已成為「工人階級政黨」，而社民黨反而更像一個由公部門、都會中產與工會官僚組成的政黨。</strong>當一個工人政黨失去了工人，它的存在理由就出現了根本裂縫。</p>
+
+  <div class="lens l-s">
+    <div class="lens-tag">SPD 的存在危機</div>
+    <p>社民黨面對的不是「如何贏回一次選舉」，而是「一個工人政黨在後工業、去工業化的德國還有沒有位置」。它的傳統議程（勞工權益、福利、集體協商）在服務業與知識經濟裡動員力下降；它的文化立場（親移民、多元）與它殘存工人基本盤的文化焦慮相衝突。<strong>它被夾在「向左爭進步都會選民（與綠黨競爭）」與「向右安撫工人文化焦慮（與 AfD 競爭）」之間，兩頭都不討好——這正是全歐洲傳統社會民主政黨共同的結構性困境，德國 SPD 只是其中最戲劇性的一例。</strong></p>
+  </div>
+
+  <h3>Hartz 改革的長期陰影</h3>
+  <p>社民黨與工人基本盤的裂痕，有一個常被追溯的歷史源頭：2000 年代施若德政府推動的<strong>「哈茨改革」（Hartz-Reformen）</strong>，尤其是削減長期失業救濟、推動勞動市場彈性化的 Hartz IV。這套改革被廣泛認為提升了德國經濟競爭力、壓低了失業率，卻也在許多傳統社民黨支持者心中留下「自己的政黨背叛了工人、擁抱了新自由主義」的創傷。<strong>對一部分藍領選民而言，社民黨在 Hartz IV 之後就不再是「他們的黨」了</strong>——這道二十年前埋下的裂縫，為日後工人票流向左翼黨、再流向 AfD 提供了情感土壤。這也解釋了為什麼社民黨在「重新左轉搶回工人」與「維持中間執政信譽」之間如此掙扎。</p>
+
+  <h3>大聯合政府裡的小夥伴：穩定還是溫水？</h3>
+  <p>2025 年後，社民黨以「大聯合政府裡的小夥伴」身分留在權力核心——它拿到重要部會、維持了對政策的影響力，尤其在勞動、社會與部分財政議題上。但這個位置是雙面的：<strong>好處是留在治理中心、維持防火牆、避免被邊緣化；壞處是作為「較弱的一方」，它難以彰顯自身特色，容易被選民視為「聯盟黨政策的背書者」，進一步模糊它與中間的區隔。</strong>對一個正在流失基本盤的政黨，「當一個看不出差異的小夥伴」可能是溫水煮青蛙——這正是社民黨內部「該不該退出、重建反對黨身分」路線爭論的根源。歷史上社民黨當過大聯合小夥伴後常在下次選舉受挫，這個陰影加深了黨內的焦慮。</p>
+
+  <div class="prism">
+    <div class="pv-s"><div class="pv-tag">SPD 自視</div><p>我們是社會正義與勞動尊嚴的守護者，是把德國從冷戰、統一到福利國家一路帶過來的百年政黨。衰退是暫時的，只要我們重新站到工人與弱勢那一邊、對抗不平等，就能重建。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD 眼中的 SPD</div><p>社民黨早就背叛了德國工人：Hartz IV 砍你的救濟、開放移民壓低你的工資、為氣候政策關掉你的工廠。它口稱工人、實則服務都會菁英與移民——真正保護德國工人的是我們。</p></div>
+    <div class="pv-g"><div class="pv-tag">綠黨眼中的 SPD</div><p>社民黨是「必要卻步履蹣跚的進步盟友」：我們在許多價值上站在一起（社會正義、親歐、反極右），但它在氣候與現代化上太慢、太受工會與傳統產業牽制，跟不上時代的緊迫。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個社民黨，三種定性：正義守護者、背叛工人者、蹣跚的盟友</div>
+</section>
+
+<section id="s6">
+  <div class="sec-label">PART II · CH 06 · 稜鏡三</div>
+  <h2>另類選擇（AfD）：從抗議政黨到全國第一</h2>
+  <p class="lede">第三片稜鏡，是 2026 年德國政治的核心變數——另類選擇黨（AfD）。它從 2013 年一個反歐元的學者型小黨，一路演變為 2025 年的全國第二、2026 年民調的全國第一、以及東部無可爭議的第一大黨。理解德國，必須誠實地理解 AfD 的支持者在算什麼——不是把它簡化為「一群納粹」，也不是為它辯護，而是拆解它為何能在一個對極右有最強制度免疫的國家裡，走向常態化。本節以結構分析呈現其理性計算，不作黨派評價。</p>
+
+  <h3>演化史：反歐元→反難民→民族保守極右</h3>
+  <p>AfD 的意識形態重心經歷了三次遷移，每一次都吸附了新的憤怒。<strong>第一階段（2013 年成立）</strong>：一群經濟學者與保守派因反對歐元紓困、主張德國退出歐元區而創黨，是一個「疑歐的學術右派」。<strong>第二階段（2015 年難民危機）</strong>：梅克爾開放難民後，AfD 的重心轉向反移民、反伊斯蘭，支持度隨難民議題暴漲，並在 2017 年首次進入聯邦議會。<strong>第三階段（2020 年代至今）</strong>：黨內更激進的民族主義派系（尤其其東部邦黨部與已被列為極右的部分組織）主導方向，議題擴展到反對氣候政策、質疑對烏援助、親俄、批判「建制卡特爾」。<strong>這條演化線的關鍵在於：AfD 每一次都精準卡位在主流政黨不願或不能碰觸的議題上——歐元、難民、能源、戰爭——把主流的「共識」轉化為自己的「唯一反對」。</strong></p>
+
+  <h3>誰在投 AfD：三組疊加的支持者</h3>
+  <p>AfD 的選民不是鐵板一塊，而是三組動機疊加：<strong>其一是文化保守的抗議者</strong>——對移民、多元、快速社會變遷感到疏離與失控的人，AfD 承諾「恢復秩序與德國認同」；<strong>其二是經濟上的失落者</strong>——在去工業化、能源漲價、實質工資停滯中感到被拋下的藍領與小鎮居民，尤其在東部（詳第 6B 章）；<strong>其三是反建制的抗議票</strong>——對主流政黨（尤其大聯合政府式的中間趨同）失望、認為「投誰都一樣」的人，把 AfD 當作「懲罰建制」的唯一有效選項。<strong>這三組動機的疊加，讓 AfD 的支持既有深層的（認同與經濟）、也有淺層的（抗議）成分——這正是「AfD 究竟是體制威脅還是抗議出口」難以定論的根源（辨析詳第 14 章）。</strong></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">2013</div><div class="fig-l">AfD 成立（以反歐元起家）</div></div>
+    <div><div class="fig-n">~20.8%</div><div class="fig-l">2025 大選得票（152 席，史上最佳、躍居第二）</div></div>
+    <div><div class="fig-n">~27–29%</div><div class="fig-l">2026-07 全國民調（躍居第一）</div></div>
+    <div><div class="fig-n">~41–42%</div><div class="fig-l">2026 薩克森-安哈特邦選前 AfD 民調（逼近絕對多數）</div></div>
+  </div>
+
+  <h3>AfD 的核心政策立場</h3>
+  <p>把 AfD 的主張系統化，可見一套內在自洽的「反建制共識」綱領：<strong>移民</strong>——大幅收緊庇護、遣返、反對家庭團聚，主張「德國優先」的文化認同；<strong>歐盟</strong>——強烈疑歐，反對進一步整合，部分派系主張退出歐元甚至重新談判成員身分，要求「奪回主權」；<strong>俄烏與外交</strong>——質疑或反對對烏克蘭的軍事援助與制裁俄羅斯，主張與俄關係正常化、恢復能源進口（尤其在東部有共鳴）；<strong>能源</strong>——反對能源轉型（Energiewende）的成本與步調，主張回歸核能與化石能源、降低電價；<strong>經濟</strong>——民族經濟主義，保護德國產業與工人。<strong>這套綱領的共同線索，是把德國的每一個痛點（移民、能源、去工業化、對烏成本），都歸因於「建制的錯誤決定」，並承諾用「主權回歸＋德國優先」來逆轉——它的力量正在於這套敘事的簡單、一致與情緒共鳴。</strong></p>
+
+  <div class="lens l-a">
+    <div class="lens-tag">AfD 的理性計算</div>
+    <p>從純策略角度看，AfD 的處境近乎「無論如何都在贏」：被防火牆排除，就扮演「唯一真反對派」；經濟越差、移民越受關注、對烏成本越高，它的議題越發燙手。它不需要執政就能壯大——每一次被拒於門外，都強化「建制卡特爾聯合起來對付人民」的敘事。<strong>時間站在它這邊：只要主流政黨繼續組成中間趨同的大聯合、只要去工業化與移民焦慮持續，AfD 的結構性上升空間就不會關閉。它的最大風險不是外部排斥，而是內部——過於激進的言行可能觸發憲法法院的政黨禁令程序，或嚇跑淺層抗議選民。</strong></p>
+  </div>
+
+  <h3>情報機關的評估與政黨禁令的爭議</h3>
+  <p>AfD 的特殊性，在於它是一個被國家情報機關正式盯上的政黨。德國聯邦與各邦的<strong>憲法保衛局（Verfassungsschutz）</strong>已將 AfD 的部分邦黨部（尤其東部）及其青年組織評估為「確認的極右勢力」或「極右嫌疑」，部分並置於觀察之下。這一評估是防火牆的法理支柱之一，但也引發激烈爭論：<strong>由一個行政機關來「認證」一個合法在野黨的極右性質，本身是否有濫用之虞？</strong>更尖銳的是「政黨禁令」的討論——理論上憲法法院可依防衛型民主條款解散反民主政黨，但要禁掉一個近三成選民支持的政黨，在政治上幾乎不可想像，且可能反過來坐實 AfD 的受害者敘事、引爆更大的正當性危機。<strong>這使德國陷入一個防衛型民主的極限困境：它有對抗極端的法律工具，卻在面對一個「太大而不能禁、太極端而不能合作」的政黨時，找不到乾淨的出口（詳第 14 章）。</strong></p>
+
+  <div class="prism">
+    <div class="pv-a"><div class="pv-tag">AfD 自視</div><p>我們是唯一敢說真話的政黨、是被建制卡特爾聯手打壓的人民之聲。移民失控、電價高企、為別人的戰爭掏錢——這些主流不敢碰的真相，只有我們替德國人民說出來。防火牆證明了他們怕我們。</p></div>
+    <div class="pv-u"><div class="pv-tag">CDU/CSU 眼中的 AfD</div><p>AfD 是必須被隔離的極端：它的部分派系被情報機關認定為極右、親俄、反歐盟，若讓它碰觸權力，將動搖德國的西方定位與制度根基。但它壯大也是對我們自身失能的警訊。</p></div>
+    <div class="pv-g"><div class="pv-tag">綠黨與左翼眼中的 AfD</div><p>AfD 是對開放社會與少數群體的直接威脅：它的仇外、反氣候與親俄立場，是德國民主必須以防衛型民主全力對抗的對象。與它的任何正常化，都是危險的滑坡。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一個 AfD，三種定性：人民之聲、必隔離的極端、開放社會的威脅</div>
+</section>
+
+<section id="s6b">
+  <div class="sec-label">PART II · CH 06B · 稜鏡三之延伸</div>
+  <h2>東部（Ossis）的政治：AfD 的堡壘從何而來</h2>
+  <p class="lede">要理解 AfD 為何能崛起，必須理解德國一個未曾真正癒合的傷口——前東德。統一三十五年後，前東德地區（Ossis 是對東德人的俗稱）在經濟、認同、政治行為與對俄態度上，仍與西部（Wessis）系統性不同。AfD 之所以先在東部稱霸、再向全國擴張，根源正在這道東西裂痕。這一節把它拆開。</p>
+
+  <h3>統一的隱形帳單：三十五年未平的落差</h3>
+  <p>1990 年兩德統一，西德的制度、貨幣與資本迅速覆蓋東德。但這場「以西併東」的統一留下了長期後遺：<strong>去工業化的第一波衝擊</strong>——東德的國營工業在市場化中大批倒閉，數百萬人失業或西遷；<strong>持續的經濟落差</strong>——儘管西部透過「團結稅」等機制長期輸血，東部的人均產出、工資、財富與大企業總部數量至今仍明顯低於西部；<strong>人口的流失與老化</strong>——年輕人（尤其女性）大量西遷，留下更老、更男性、更小鎮化的人口結構。<strong>對許多東部居民而言，統一不是「被解放」，而是「被接管」——自己的工廠關了、履歷歸零、被西部菁英俯視。這種「二等公民」的集體感受，是 AfD 最肥沃的土壤。</strong></p>
+
+  <h3>認同的裂痕：被貶低的東德經驗</h3>
+  <p>經濟之外，還有一道更難量化的認同裂痕。統一後的主流敘事把東德史框定為「一段需要被克服的獨裁錯誤」，這在客觀上有其依據，卻也讓許多東部人覺得「自己四十年的人生經驗被整體否定」。加上西部菁英長期主導政治、媒體、學術與大企業高層，東部人在「誰代表德國、誰定義正常」的話語權上處於下風。<strong>AfD 精準地把這股「不被承認、不被尊重」的情緒政治化——它把自己塑造成「東部尊嚴的代言人」，對抗「西部建制的傲慢」。</strong>這解釋了為什麼 AfD 在東部的支持，往往超出單純的經濟或移民議題，帶有一種「終於有人替我們說話」的認同性忠誠。</p>
+
+  <h3>對俄態度的東西之別</h3>
+  <p>東西裂痕還體現在一個對地緣至關重要的維度——對俄羅斯的態度。相較於西部，前東德地區對俄羅斯（及蘇聯時代）的態度更複雜、更不敵對：部分源於歷史記憶（曾同屬東方陣營）、部分源於對「北約東擴挑釁論」的接受度較高、部分源於對廉價俄氣的經濟依賴記憶。這使得<strong>「反對對烏援助、主張與俄和解、恢復能源進口」的立場，在東部有遠比西部更廣的市場</strong>——這正是 AfD 與 BSW（瓦根克內希特聯盟）在東部共同的重要賣點。對地緣分析而言，這意味著德國對俄、對烏政策的國內共識，存在一條沿東西線的結構性裂縫（詳第 20 章）。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 東部作為「德國的未來實驗室」</div>
+    <p>一個常被提出的問題是：東部是德國的「例外」，還是「先行指標」？悲觀的讀法認為，東部的政治行為（AfD 稱霸、對建制的深度不信任、對俄的相對親善）正逐步向西部擴散，東部是「德國政治未來的預告片」。樂觀的讀法則強調，東部有其特殊的歷史成因（統一創傷、去工業化第一波、人口結構），未必能簡單外推到西部。真相可能介於兩者之間：<strong>東部的成因是特殊的，但它揭示的機制——當一群人感到經濟被拋下、認同被貶低、聲音被建制忽略，就會轉向承諾「奪回控制」的政黨——是普遍的。這個機制在西部的去工業化地區同樣可能被觸發，這才是 AfD 全國化的真正引擎。</strong></p>
+  </div>
+
+  <h3>2026 東部邦選：防火牆的極限測試</h3>
+  <p>這一切將在 2026 年 9 月接受最直接的檢驗。<strong>薩克森-安哈特（9 月 6 日）</strong>與<strong>梅克倫堡-前波美恩（9 月 20 日）</strong>兩場東部邦選，多份民調顯示 AfD 大幅領先，在薩安一度逼近 41～42% 的絕對多數門檻。若 AfD 真的在某個邦贏得接近單獨過半的規模，將迫使其他所有政黨組成理念差距極大的「肯亞式」多黨聯盟（如聯盟黨＋社民黨＋左翼黨）只為擋住它——<strong>這會把防火牆的內在矛盾推到極限：為了不讓第一大黨執政，第二、三、四名必須聯合起來，而這種「輸家聯盟」恰恰坐實了 AfD「建制卡特爾對抗人民」的核心指控。</strong>東部因此不只是 AfD 的堡壘，更是整套防火牆邏輯的壓力測試場（詳第 11、13 章）。</p>
+</section>
+
+<section id="s7">
+  <div class="sec-label">PART II · CH 07 · 稜鏡四</div>
+  <h2>綠黨與左翼：兩種進步的分身</h2>
+  <p class="lede">第四片稜鏡，是德國的進步光譜——但它不是單一的一塊，而是分裂成兩個彼此競爭、社會基礎迥異的部分：以都會、高教育、氣候為核心的<strong>綠黨（Grüne）</strong>，與紮根東部、經濟弱勢、社會主義傳統的<strong>左翼黨（Die Linke）</strong>及從它分裂出去、揉合「經濟左派＋文化保守＋親俄」的 <strong>BSW（瓦根克內希特聯盟）</strong>。這三者共同構成德國進步政治的內在張力：進步的經濟訴求與進步的文化訴求，在德國正在分家。</p>
+
+  <h3>綠黨：都會進步派的氣候政黨</h3>
+  <p>綠黨源於 1980 年代的環境、和平與反核運動，如今已是德國政治的成熟力量，2025 年獲約 11.6% 得票、2026 年民調升至約 14%（一度成為第三大黨）。它的社會基礎鮮明：<strong>大城市、受過高等教育、相對年輕、經濟較寬裕的都會進步派</strong>。核心議程是氣候與能源轉型（Energiewende）、公民權與少數保障、親歐盟、以及（近年顯著轉向的）對俄強硬與支持烏克蘭。綠黨曾是紅綠燈政府的一員，主導了能源與氣候政策，也因此背負了「能源轉型成本」的政治責任——它的一項供暖法案曾引發強烈反彈，被批「不食人間煙火地強推綠色轉型」，這正是綠黨的結構弱點：<strong>它的議程在都會菁英中極受歡迎，卻容易被描繪成「有錢人的環保、讓工人與小鎮買單」，成為 AfD 攻擊的靶子。</strong></p>
+
+  <h3>左翼黨：東部與經濟弱勢的社會主義左翼</h3>
+  <p>左翼黨（Die Linke）的血脈可追溯至前東德的執政黨，是德國政治光譜的最左端：主張大幅財富重分配、強化社會國家、反北約、對軍事化與對烏軍援持批判態度。它的傳統基本盤是東部與經濟弱勢者。2025 年，左翼黨表現超乎預期，獲約 8.8% 得票、2026 年民調升至約 11%——一部分原因是它成功吸引了年輕、都會、關注租金與生活成本的選民，出現了「基本盤東移西補」的重組。<strong>但左翼黨面對一個深刻的競爭者，來自它自己的內部分裂。</strong></p>
+
+  <h3>BSW：從左翼黨裂解出的「左翼民族主義」</h3>
+  <p>2024 年，左翼黨的知名人物薩拉·瓦根克內希特（Sahra Wagenknecht）帶著一批人出走，另組<strong>「薩拉·瓦根克內希特聯盟」（BSW）</strong>。BSW 的意識形態是一個罕見的組合：<strong>經濟上左（反新自由主義、要求重分配與強社會國），文化上保守（對移民持批判態度），外交上親俄（強烈反對對烏軍援、主張與俄和解）</strong>。它精準瞄準了一批「傳統上投左派、但在移民與戰爭議題上與都會進步派決裂」的選民，尤其在東部與 AfD 爭奪同一批經濟弱勢、文化焦慮、反戰的選票。2025 年大選，BSW 以約 4.97%、僅差約 0.03 個百分點跌破 5% 門檻、無緣聯邦議會——這是德國選制門檻效應最戲劇性的一次體現。<strong>BSW 的出現，把「進步」這塊招牌徹底拆成了兩半：經濟左派與文化左派不再必然是同一群人。</strong></p>
+
+  <div class="lens l-g">
+    <div class="lens-tag">進步陣營的內在分裂</div>
+    <p>德國進步政治的核心張力，是一道橫貫全歐的裂縫：<strong>「經濟左、文化左」的綠黨式進步（都會、高教育、親移民、親歐、對俄強硬），與「經濟左、文化保守」的 BSW 式左派（小鎮、藍領、疑移民、反戰、親俄），正在爭奪同一塊「反建制、要重分配」的選票。</strong>綠黨吸走了都會進步票，BSW 與 AfD 則瓜分了經濟弱勢、文化保守的那一半。這道分裂讓「團結左翼對抗右翼」在德國幾乎不可能——因為左翼自己就沿著文化軸線裂成了互不相容的兩半，而 AfD 正從這道裂縫中獲益。</p>
+  </div>
+
+  <h3>綠黨與左翼在防火牆中的角色</h3>
+  <p>在防火牆的維繫上，綠黨與左翼黨扮演著關鍵卻矛盾的角色。它們是防火牆最堅定的支持者——對它們而言，對抗 AfD 的極右是不容妥協的原則。在多個東部邦，為了擋住 AfD，綠黨、左翼黨常被迫與意識形態相距甚遠的聯盟黨、社民黨組成「肯亞式」多黨聯盟。<strong>這既彰顯了防火牆的力量（連光譜兩端的政黨都能為擋住 AfD 而合作），也暴露了它的代價（這種勉強聯合模糊了政黨界線、餵養了「建制卡特爾」的敘事）。</strong>更微妙的是 BSW——它在對烏、對移民立場上與 AfD 有部分重疊，這讓「防火牆是否也該適用於 BSW」成為一個尚無定論的灰區，也顯示防火牆的邊界並非涇渭分明。</p>
+
+  <div class="prism">
+    <div class="pv-g"><div class="pv-tag">綠黨與左翼自視</div><p>我們是氣候正義、社會公平與開放社會的守護者。德國的未來在能源轉型、在包容多元、在對抗不平等與極右——我們是防火牆最堅定的那一端，也是把德國推向更進步未來的引擎。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD 眼中的綠黨與左翼</div><p>綠黨是「毀掉德國工業的意識形態菁英」：用氣候教條關掉核電、推高電價、強推供暖改造，讓工人為都會有錢人的環保買單。左翼與 BSW 則在瓜分我們的反戰、反建制票。</p></div>
+    <div class="pv-f"><div class="pv-tag">外國人眼中的綠黨與左翼</div><p>綠黨是「能源與對俄政策的關鍵變數」：它主導的能源轉型直接影響電價與去工業化路徑，它的對俄強硬則支撐了德國的地緣轉向。左翼與 BSW 的親俄、反軍援立場，則是德國對外政策連續性的一個潛在裂縫。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一塊進步光譜，三種定性：進步引擎、意識形態菁英、能源與地緣變數</div>
+</section>
+
+<section id="s8">
+  <div class="sec-label">PART II · CH 08 · 稜鏡五</div>
+  <h2>外國人／投資人：出口機器的引擎室</h2>
+  <p class="lede">第五片稜鏡，是從德國之外看德國——投資人、歐盟夥伴、貿易對手、跨國企業的視角。對他們而言，德國不是一個需要選邊的政治戰場，而是一台<strong>歐洲的「出口機器」與經濟壓艙石</strong>，一個必須讀懂其引擎室的對象。這個視角關心的不是誰組閣的口水，而是四個結構性變數：去工業化、能源、對中依賴與財政轉向。它把政治噪音過濾掉，只問一件事——<strong>德國模式還撐得住嗎？</strong></p>
+
+  <h3>德國作為「歐洲的引擎」：一台出口機器</h3>
+  <p>要理解外部視角，先要理解德國在歐洲經濟中的分量。德國是歐盟最大經濟體、歐元區的財政壓艙石、全球數一數二的商品出口國。它的經濟模式高度依賴<strong>製造業出口</strong>——汽車、機械、化工、電機是四大支柱，由眾多隱形冠軍的中小企業（Mittelstand）與少數巨型集團共同撐起。這台機器過去二十年的高效運轉，建立在三個外部條件上：<strong>廉價的俄羅斯天然氣（低能源成本）、龐大的中國市場（出口與利潤來源）、以及開放的全球貿易秩序（美國安全傘下的自由貿易）。</strong>對外部觀察者而言，德國的整個繁榮，可以濃縮成「用便宜的能源與中間財，製造高附加值商品，賣給全世界（尤其中國）」這一句話——而這三個外部條件，如今全部同時鬆動。</p>
+
+  <h3>去工業化焦慮：德國模式的三根支柱同時搖晃</h3>
+  <p>2020 年代，支撐德國出口機器的三根支柱同時受衝擊，構成外部視角最核心的擔憂——「去工業化」（Deindustrialisierung）：<strong>其一，廉價俄氣沒了</strong>——俄烏戰爭後德國切斷對俄天然氣依賴，能源成本結構性上升，對能源密集的化工、鋼鐵、玻璃等產業是直接打擊，部分產能外移或關閉；<strong>其二，中國從客戶變對手</strong>——中國電動車與機械業快速崛起，從德國汽車與機械的買家，變成在全球市場（乃至德國本土）的強勁競爭者，德國引以為傲的汽車業首當其衝；<strong>其三，全球貿易秩序碎片化</strong>——保護主義升溫、美國政策轉向（詳第 20 章），衝擊德國賴以生存的開放貿易。<strong>對投資人，這意味著要重新評估一個核心問題：德國的製造業競爭力，是週期性的疲軟，還是結構性的侵蝕？</strong></p>
+
+  <div class="lens l-f">
+    <div class="lens-tag">外資的真正定價對象</div>
+    <p>對外部資本，德國的政治戲劇（防火牆、AfD 民調）大多是噪音，真正該定價的是四條結構線：<strong>其一，去工業化的深度——是週期還是趨勢，決定德國資產的長期折現率；其二，債務煞車鬆綁後的財政擴張——5000 億基建＋國防投資能否轉化為生產力提升，是最大的多頭變數；其三，對中去風險的路徑——德國汽車與機械對中國的深度依賴如何拆解，決定尾部風險；其四，能源價格的長期水位——它是德國製造業成本曲線的地基。</strong>政治只有在它衝擊到這四條線時（例如防火牆破裂導致政策不連續、或財政擴張失控）才需要被定價——否則德國的制度連續性本身，就是最強的定價之錨。</p>
+  </div>
+
+  <h3>對中依賴的兩難：脫鉤還是去風險？</h3>
+  <p>外部視角中最尖銳的一條，是德國對中國的依賴。中國長期是德國最大或前列的貿易夥伴，德國汽車巨頭（如福斯集團）曾把中國視為最重要的利潤來源，化工與機械業同樣深度嵌入中國市場與供應鏈。這在過去是德國模式的引擎，如今卻成了最大的地緣風險：<strong>當中國從客戶轉為對手、當美中對抗要求盟友選邊、當「對俄氣依賴」的教訓歷歷在目，德國該如何拆解對中依賴？</strong>官方路線是「去風險而非脫鉤」（de-risking, not decoupling）——降低關鍵領域的依賴、但不放棄龐大的中國市場。但這條中間路線知易行難：德國企業（尤其汽車業）的商業利益與國家的地緣安全利益之間存在張力，而「歐氣教訓」的陰影讓「會不會又押錯一次」成為揮之不去的問題（詳第 16、20 章）。</p>
+
+  <h3>財政轉向：從紀律到投資的多頭訊號</h3>
+  <p>但外部視角並非全然悲觀——2025 年的債務煞車鬆綁，被許多投資人視為德國模式的一次重大、且方向正確的自我修正。長期以來，德國被批「財政過度保守、投資不足」——道路、橋樑、鐵路、數位基建、國防長期欠帳。5000 億歐元的基建基金與國防開支的解綁，代表德國<strong>從「零赤字的紀律」轉向「用債務撬動投資」</strong>，若這筆錢能有效轉化為生產力提升與需求擴張，將是對沖去工業化、重振成長的最大槓桿。<strong>對外部資本，這是德國故事中最重要的多頭變數：一個坐擁極低負債率、極高信用、卻長期投資不足的經濟體，終於決定動用它的財政空間——執行得好，這是歐洲最大的內需刺激；執行不好，則是紀律鬆動與通膨的開端（詳第 17 章）。</strong></p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">外國人／投資人自視</div><p>德國是歐洲的壓艙石與無風險資產之錨，但它的引擎正在換擋——從廉價能源＋對中出口的舊模式，轉向財政投資＋去風險＋再武裝的新模式。我們定價的是這次換擋的成敗，不是選舉噪音。</p></div>
+    <div class="pv-u"><div class="pv-tag">CDU/CSU 眼中的外資視角</div><p>外資看重的正是我們守護的東西：法治、契約穩定、歐盟核心、財政信用。我們的責任，是讓德國在轉型中仍是全球資本最信任的目的地——這也是守住中間的經濟意義。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD 眼中的外資視角</div><p>全球資本與布魯塞爾、跨國企業的利益，正是把德國工人賣掉的那股力量：為了他們的市場，我們依賴中國、承受移民、放棄主權。德國優先，意味著先照顧德國人，而非全球資本。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一台出口機器，三種定性：換擋中的引擎、資本信任的目的地、賣掉工人的力量</div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART III</div>
+  <h2>動力 · The Dynamics</h2>
+  <div class="pd-sub">崩解、大選、防火牆與裂痕</div>
+</div>
+
+<section id="s9">
+  <div class="sec-label">PART III · CH 09</div>
+  <h2>紅綠燈聯盟的崩解：一場路線的內爆</h2>
+  <p class="lede">2026 年德國政治的起點，是 2024 年 11 月的一場政府崩塌。蕭茲領導的「紅綠燈」三黨聯盟（社民黨—綠黨—自民黨）在執政不到三年後解體，把德國推向提前大選。這場崩解不是一次偶然的人事衝突，而是三個理念相距太遠的政黨，被一連串危機（疫情、戰爭、能源、通膨、憲法法院判決）逼到路線攤牌的必然結果——它是理解 2025 大選與後續一切的入口。</p>
+
+  <h3>一個理念張力過大的聯盟</h3>
+  <p>紅綠燈聯盟從一開始就是一場高難度的拼裝。社民黨（中左、重社會支出）、綠黨（生態、重氣候投資）、自民黨（自由市場、財政鷹派、堅守債務煞車）——三者在「政府該花多少錢、花在哪」這個最核心的問題上，立場幾乎不相容。2021 年組閣時，這道張力被「共同對抗疫情、推動現代化」的樂觀氣氛暫時壓住；但隨後接踵而至的衝擊——俄烏戰爭、能源危機、高通膨、經濟停滯——把「錢從哪來」的矛盾一次次推到檯面，三黨的世界觀差異再也無法被和諧修辭掩蓋。</p>
+
+  <h3>致命一擊：憲法法院的預算判決</h3>
+  <p>壓垮聯盟的關鍵，是第 3B 章提到的那紙憲法法院判決。2023 年 11 月，卡爾斯魯厄裁定政府「把疫情緊急借貸的未用額度挪去氣候基金」違憲，在預算中炸出一個以百億歐元計的大洞。這個洞把三黨的矛盾推向終局：<strong>綠黨要保住氣候投資、社民黨要保住社會支出、自民黨要守住債務煞車、拒絕加稅或再舉債。</strong>三個訴求在數學上無法同時滿足——要嘛鬆綁債務煞車（自民黨反對）、要嘛砍社福或氣候投資（社民黨、綠黨反對）、要嘛加稅（自民黨反對）。這道無解的財政三難，成了聯盟的死結。</p>
+
+  <h3>2024 年 11 月：攤牌與解體</h3>
+  <p>2024 年 11 月，矛盾終於爆發：蕭茲解除了自民黨籍的財政部長林德納（Christian Lindner）的職務，自民黨隨即退出聯盟，紅綠燈政府失去國會多數。蕭茲其後在聯邦議會尋求並主動輸掉了一場信任投票（這是德國提前解散國會的憲政途徑），聯邦總統隨之解散聯邦議會、訂於 2025 年 2 月提前大選。<strong>一個曾被寄予「現代化德國」厚望的進步聯盟，在能源、通膨與財政的三重擠壓下，因無法就「錢」達成共識而自我了斷。</strong></p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURAL NOTE · 崩解的結構教訓</div>
+    <p>紅綠燈的崩解揭示了德國聯盟政治的一個結構性弱點：<strong>當外部衝擊夠大、需要痛苦的財政取捨時，理念差距過大的多黨聯盟會因無法分擔痛苦而解體。</strong>在承平年代，共識民主的協商優勢明顯；但在危機年代，需要快速、痛苦的決斷時，「凡事協商」反而可能導致癱瘓與內爆。這也解釋了為什麼 2025 年後德國退回到「大聯合政府」這個更穩定（兩黨、理念較近）但更缺乏活力（中間趨同）的老配方——它是對紅綠燈式「高張力聯盟在危機中失能」的直接反應。而崩解過程中「政府忙於內鬥、無力解決民生」的畫面，本身又替 AfD 的「建制無能」敘事提供了最生動的素材。</p>
+  </div>
+</section>
+
+<section id="s10">
+  <div class="sec-label">PART III · CH 10</div>
+  <h2>2025 大選深讀：一次版圖的重組</h2>
+  <p class="lede">2025 年 2 月 23 日的聯邦大選，是德國政黨體系一次深刻重組的快照。它同時完成了四件事：聯盟黨溫和回歸、AfD 創下史上最佳、社民黨崩至歷史低點、以及自民黨與 BSW 雙雙出局。把這四條線並排讀，就能看清德國政治的板塊如何移動——以及大聯合政府為何成為唯一出路。</p>
+
+  <h3>四條線同時發生</h3>
+  <table>
+    <tr><th>政黨</th><th>得票率（約）</th><th>席次（約）</th><th>相對於預期的意義</th></tr>
+    <tr><td><strong>聯盟黨 CDU/CSU</strong></td><td>28.5%</td><td>208</td><td>重回第一，但以歷史偏低的「第一名」得票；贏得吃力</td></tr>
+    <tr><td><strong>另類選擇 AfD</strong></td><td>20.8%</td><td>152</td><td>史上最佳、躍居第二大黨；東部普遍第一</td></tr>
+    <tr><td><strong>社民黨 SPD</strong></td><td>16.4%</td><td>121</td><td>戰後最慘、跌至第三；百年工人黨的歷史低點</td></tr>
+    <tr><td><strong>綠黨 Grüne</strong></td><td>11.6%</td><td>—</td><td>小幅回落，守住都會進步基本盤</td></tr>
+    <tr><td><strong>左翼黨 Die Linke</strong></td><td>8.8%</td><td>—</td><td>超乎預期，靠年輕都會與租金議題重組基本盤</td></tr>
+    <tr><td><strong>自民黨 FDP</strong></td><td>4.3%</td><td>0</td><td>跌破 5% 門檻、被清出聯邦議會——紅綠燈崩解的直接受懲者</td></tr>
+    <tr><td><strong>BSW</strong></td><td>4.97%</td><td>0</td><td>僅差約 0.03 個百分點跌破門檻、無緣國會——門檻效應最戲劇性一例</td></tr>
+  </table>
+  <p class="tbl-note">得票率與席次為主流報導之概略值，精確數字以官方計票為準。聯邦議會共 630 席、過半需 316 席。未列席次者為次要或分配細節從略。</p>
+
+  <h3>解讀一：AfD 的「東部普遍第一」</h3>
+  <p>這次大選最具結構意義的訊號，是 AfD 在前東德地區的普遍勝出——它在東部多數選區成為第一大黨，把「東部堡壘」從邦層級擴展到聯邦層級的清晰版圖。這意味著德國出現了一條可見的「政治東西線」：西部仍以聯盟黨為主、進步政黨有相當基礎；東部則由 AfD 主導。<strong>這條線的出現，讓「東西裂痕」從一個社會學概念，變成了選舉地圖上肉眼可見的顏色分界（詳第 13 章）。</strong></p>
+
+  <h3>解讀二：兩個「出局者」的不同命運</h3>
+  <p>自民黨與 BSW 雙雙出局，但意義截然不同。<strong>自民黨的出局是「執政懲罰」</strong>——作為紅綠燈聯盟中引爆崩解的一方，它被選民清算，跌破門檻，失去全部聯邦席次，這是德國選民對「把政府搞垮」的直接懲罰。<strong>BSW 的出局則是「門檻的殘酷」</strong>——一個成立不到兩年的新黨，以近 5% 的得票，僅差約 0.03 個百分點就能進入國會、甚至可能改變組閣算術，卻因門檻的一刀切而全軍覆沒。這兩個出局共同放大了留在國會的政黨的席次比例，也直接促成了「聯盟黨＋社民黨剛好過半」的算術（詳第 1、1B 章）。</p>
+
+  <h3>解讀三：為什麼大聯合是唯一出路</h3>
+  <p>把席次攤開，大聯合政府的必然性就清楚了。聯盟黨（208）需要夥伴湊過 316。可能的組合中：<strong>與 AfD 合作——被防火牆封死；與綠黨——席次不足以過半、且理念在移民與經濟上有摩擦；與社民黨——剛好過半（329），且兩黨都是維護防火牆與體制的中間政黨。</strong>於是「聯盟黨＋社民黨」的大聯合，成為唯一既能過半、又不觸碰防火牆的組合。<strong>這是一個由選舉結果與防火牆共同「算」出來的政府——不是因為兩黨情投意合，而是因為所有其他選項都被算術或禁忌排除了。這也註定了它的先天弱點：一個沒有共同願景、只因別無選擇而結合的政府（詳第 11 章）。</strong></p>
+</section>
+
+<section id="s11">
+  <div class="sec-label">PART III · CH 11</div>
+  <h2>大聯合政府與防火牆的壓力</h2>
+  <p class="lede">2025 年 5 月，Merz 就任總理，聯盟黨與社民黨組成大聯合政府。這是一個由算術與禁忌逼出來的組合，也是德國政治「中間抱團守住邊緣」的經典動作。但這個政府從誕生之日起就承受一種特殊壓力：<strong>它必須在民調第一大黨（AfD）不斷擴張的背景下治理，而它維持正當性的核心工具——防火牆——正隨著 AfD 的壯大而越來越難維繫。</strong>本章拆解這個政府的結構張力。</p>
+
+  <h3>大聯合政府的雙面性：穩定與趨同</h3>
+  <p>大聯合政府（GroKo）是德國屢試不爽的危機配方——當兩大中間政黨都受傷、又需擋住邊緣，它們就抱團執政。它的好處明確：<strong>兩黨理念較近（都是體制中間派）、席次穩固、能維持防火牆與政策連續性。</strong>但它的代價同樣明確，且正是 AfD 崛起的養料之一：<strong>當第一（聯盟黨）與第三（社民黨）大黨聯合執政，「政府」與「主流反對」的界線就模糊了，選民難以在兩者間找到真正的替代選項，於是「唯一鮮明的反對聲音」的位置，就留給了被排除在外的 AfD。</strong>換言之，大聯合政府在穩定體制的同時，可能在結構上餵養它要對抗的極右——這是德國「中間趨同」困境的核心。</p>
+
+  <h3>民調多數的流失：一個失去民意動能的政府</h3>
+  <p>大聯合政府最尖銳的處境，是它在執政不到一年內就失去了民調多數。2025 年大選時，聯盟黨（28.5%）＋社民黨（16.4%）合計約 45%，是清楚的多數。但到 2026 年 7 月，聯盟黨約 22%、社民黨約 12%，合計僅約 34%——<strong>而同期 AfD 已達 27～29%，加上左翼黨約 11%，「反大聯合政府」的力量在民調上已超過執政聯盟。</strong>這造成一種罕見的正當性張力：一個在國會擁有實質多數（329 席）、能治理到 2029 年的政府，卻已不再擁有它賴以組成的那份民意多數。它在制度上穩固，在民意上懸空——這種「制度多數」與「民意多數」的背離，是防火牆時代德國治理的結構特徵。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">~45%</div><div class="fig-l">2025 大選：聯盟黨＋社民黨合計得票（清楚多數）</div></div>
+    <div><div class="fig-n">~34%</div><div class="fig-l">2026-07 民調：大聯合政府兩黨合計（已失多數）</div></div>
+    <div><div class="fig-n">329</div><div class="fig-l">大聯合政府的國會席次（仍過半，可治理至 2029）</div></div>
+    <div><div class="fig-n">2029</div><div class="fig-l">下次聯邦大選（除非政府提前崩解）</div></div>
+  </div>
+
+  <h3>防火牆的算術壓力：從全國到東部</h3>
+  <p>防火牆在聯邦層級尚能維繫，因為大聯合政府仍有實質多數、不需依賴 AfD。但在東部邦層級，這道牆正被算術逼到極限。當 AfD 在薩克森-安哈特等邦逼近絕對多數，其他政黨要組成不含 AfD 的多數，就必須把聯盟黨、社民黨、綠黨、左翼黨等意識形態橫跨半個光譜的政黨全部拉進來，組成勉強、脆弱、常為少數的「肯亞式」聯盟。<strong>每一次這樣的「輸家大聯合」，都在放大 AfD 的核心敘事：「第二、三、四名聯合起來，只為阻止第一名執政——這不是民主，是卡特爾。」</strong>防火牆因此面臨一個結構性的兩難：維持它需要越來越極端的聯盟拼裝，而這種拼裝本身又在削弱它的正當性（詳第 2B、6B 章）。</p>
+
+  <h3>Merz 政府的成敗判準</h3>
+  <p>把這些張力收攏，Merz 大聯合政府的歷史任務可以歸結為一句話：<strong>在 2029 年前，用治理績效證明「中間仍能解決德國的真問題」，從而遏止 AfD 的常態化。</strong>它手上的籌碼是財政火力（基建與國防投資）、安全領導（Zeitenwende）與移民收緊（詳第 12 章）。它的判準也很清楚：若經濟在投資刺激下回穩、去工業化焦慮緩解、移民議題降溫，AfD 的抗議動能可能見頂；若經濟持續疲軟、財政擴張未見成效、移民與能源議題持續發酵，AfD 的結構性上升就不會停，防火牆也將越守越吃力。<strong>大聯合政府因此是一場與時間的賽跑——它要在民意動能耗盡前，把「中間能解決問題」從口號變成選民可感的現實。</strong></p>
+</section>
+
+<section id="s12">
+  <div class="sec-label">PART III · CH 12</div>
+  <h2>移民、能源與債務煞車鬆綁：三個決定成敗的戰場</h2>
+  <p class="lede">Merz 政府的成敗，將在三個具體戰場上見分曉，而這三個戰場恰好對應 AfD 崛起的三大燃料：移民、能源、經濟（財政）。這一章把這三條政策線分別拆開，因為它們既是政府的施政重點，也是防火牆能否守住的實質戰場——政府若能在這三線上交出選民可感的成果，就能抽掉 AfD 的部分燃料；若失敗，則是替 AfD 添薪。</p>
+
+  <h3>移民：從「歡迎文化」到「秩序回歸」</h3>
+  <p>移民是 AfD 崛起的第一燃料，也是 Merz 路線修正的核心。2015 年梅克爾的「我們做得到」（Wir schaffen das）開放難民，被右翼視為推動選民流向 AfD 的原罪。Merz 上台後推動明顯的收緊：更嚴的邊境管控、加快遣返、限制家庭團聚、收緊庇護。2025 年初那場「依賴 AfD 票通過的移民動議」正是這條路線的高調體現，也因此引爆防火牆爭議。<strong>移民政策的政治邏輯是：聯盟黨試圖用「秩序回歸」搶回被移民焦慮推向 AfD 的選民。</strong>但這條路有雙重風險——收得不夠，保不住右翼、AfD 仍在；收得太過，則流失中間與都會選民、觸碰人道與法律底線、並可能坐實「聯盟黨在替 AfD 抬轎、把它的議題正常化」的批評。這是聯盟黨「向右修正」路線最尖銳的試驗場。</p>
+
+  <h3>能源：Energiewende 的成本與去工業化</h3>
+  <p>能源是第二燃料。德國的能源轉型（Energiewende）——廢核、發展再生能源、減碳——是一項雄心勃勃的長期工程，卻在俄烏戰爭切斷廉價俄氣後，遭遇成本與可靠性的雙重壓力。高電價直接衝擊能源密集產業，加劇去工業化焦慮；綠黨主導的一項供暖改造法案曾引發強烈民怨。<strong>AfD 精準地把「高電價、工廠外移、工人失業」全部歸因於「意識形態化的綠色轉型」，主張回歸核能與化石能源。</strong>對 Merz 政府，能源是一道艱難的平衡題：既要維持減碳與能源安全的長期方向（歐盟承諾、氣候目標），又要壓低企業與家庭的能源成本、緩解去工業化。任何在電價上的可感改善，都能抽掉 AfD 的燃料；任何新的能源成本衝擊，都是替它添薪（詳第 16、18 章）。</p>
+
+  <h3>債務煞車鬆綁：用投資對沖去工業化的豪賭</h3>
+  <p>第三戰場是財政——這是 Merz 政府最大的主動出擊。透過 2025 年的債務煞車修憲（詳第 3B 章），政府解鎖了 5000 億歐元基建基金與國防開支的舉債空間，試圖用大規模公共投資重振經濟、對沖去工業化、並補上數十年的基建欠帳。<strong>這是一場典型的凱因斯式豪賭：用債務撬動投資與需求，賭它能在幾年內轉化為生產力提升與成長回穩。</strong>賭贏了，德國經濟重獲動能、AfD 的「經濟失落」燃料被抽掉、大聯合政府的治理正當性重建；賭輸了（錢花不出去、效率低下、只推高通膨與債務），則不僅經濟未振，還讓聯盟黨背上「背叛財政保守原則」的罵名，替 AfD 提供「建制連自己的原則都守不住」的新彈藥。<strong>債務煞車鬆綁，因此是 Merz 政府成敗的最大單一變數（詳第 17 章）。</strong></p>
+
+  <div class="prism">
+    <div class="pv-u"><div class="pv-tag">CDU/CSU</div><p>三條線都是「用治理成果贏回信任」：收緊移民恢復秩序、穩住能源降低成本、用投資重振經濟——證明中間政黨能解決真問題，就是遏止 AfD 的正道。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD</div><p>三條線都是「太少、太晚、太假」：移民只是做做樣子、能源仍被綠色教條綁架、舉債是拿人民的錢補建制的洞。真正的解方是奪回主權、回歸俄氣、德國優先。</p></div>
+    <div class="pv-f"><div class="pv-tag">外國人</div><p>三條線中，只有債務煞車鬆綁對資產定價至關重要：它是德國從紀律轉向投資的結構性轉折。移民與能源是政治溫度計，財政擴張才是真正的成長槓桿與通膨變數。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同三個戰場，三種讀法：贏回信任、太少太晚、成長槓桿</div>
+</section>
+
+<section id="s13">
+  <div class="sec-label">PART III · CH 13</div>
+  <h2>東西德的持久裂痕：AfD 的東部堡壘</h2>
+  <p class="lede">第 6B 章從 AfD 的角度解剖了東部；這一章從「裂痕」本身的角度，把東西德的分歧當作德國政治的一條結構性斷層線來讀。統一三十五年，這道裂痕不但沒有隨時間彌合，反而在 AfD 的崛起中被重新政治化、清晰化——它已成為理解德國全國政治走向的一把關鍵鑰匙。</p>
+
+  <h3>裂痕的四個維度</h3>
+  <p>東西差異不是單一維度，而是四層疊加：<strong>其一是經濟</strong>——人均產出、工資、財富、大企業總部數量，東部至今系統性低於西部，儘管有長期的財政轉移；<strong>其二是人口</strong>——統一後年輕人（尤其女性）大量西遷，東部人口更老、更男性、更小鎮化，形成利於極右的人口結構；<strong>其三是認同</strong>——東部人普遍感到自己的歷史經驗被貶低、在「誰定義正常」上被西部菁英壓過，累積出「二等公民」的集體情緒；<strong>其四是地緣態度</strong>——東部對俄羅斯的態度更複雜、對北約與對烏援助的疑慮更深。這四層彼此強化，共同構成 AfD 東部堡壘的地基。</p>
+
+  <h3>從社會學裂痕到選舉地圖</h3>
+  <p>2025 大選讓這道裂痕第一次在聯邦選舉地圖上一目了然——AfD 在東部多數地區成為第一大黨，一條清晰的「政治東西線」浮現。這條線的意義重大：<strong>它把「東部落差」從一個學術與社會議題，變成了一個具體的、可動員的政治板塊。</strong>對 AfD，東部提供了穩固的席次基本盤與「人民代言人」的敘事根據地；對其他所有政黨，東部則成為防火牆最吃力的戰場——因為在這裡，AfD 往往不是「邊緣的抗議者」，而是「多數的第一大黨」，防火牆等於要求「用少數聯合起來統治多數支持的政黨的選區」，其正當性壓力達到最大。</p>
+
+  <div class="lens l-a">
+    <div class="lens-tag">東部裂痕的政治後果</div>
+    <p>東部裂痕對德國全國政治有三重後果：<strong>其一，它為 AfD 提供了無法被輕易撼動的席次地基</strong>——即使全國情緒波動，東部的結構性支持也讓 AfD 保有基本盤；<strong>其二，它把防火牆的矛盾集中引爆在邦層級</strong>——2026 年 9 月的薩安、梅前邦選，正是這道矛盾的最尖銳測試；<strong>其三，它揭示了一個可能向西擴散的機制</strong>——當西部的去工業化地區也開始積累「被拋下、被忽略」的情緒，東部的政治模式就可能成為西部的預告片。東部因此既是 AfD 的堡壘，也是觀察德國政治未來的最重要窗口。</p>
+  </div>
+
+  <h3>裂痕會癒合還是擴大？</h3>
+  <p>一個決定德國中長期走向的問題是：東西裂痕會隨世代更替而癒合，還是會固化甚至向西擴散？<strong>樂觀論</strong>認為，隨著在統一後出生、成長的世代成為主流，「東德創傷」的直接記憶會淡化，經濟差距也在長期收斂，裂痕終將弭平。<strong>悲觀論</strong>則指出，AfD 已在東部建立起跨世代的政治文化與組織網絡，年輕東部選民同樣大量支持 AfD，顯示這不只是「老一輩的懷舊」，而是一種正在自我複製的政治認同；同時西部的去工業化地區也開始出現類似情緒。<strong>本報告的判斷是：經濟差距的長期收斂是慢變數（利於癒合），但政治認同的自我複製與向西擴散是快變數（利於固化）——兩者的競速，將決定 AfD 是見頂於東部，還是全國化。這是德國最重要的長線觀察指標之一（詳第 21、22 章）。</strong></p>
+</section>
+
+<section id="s14">
+  <div class="sec-label">PART III · CH 14</div>
+  <h2>民主韌性辨析：防衛型民主 vs 極右常態化</h2>
+  <p class="lede">本報告全篇以結構分析呈現各方（含 AfD）的理性計算，不作黨派評價。但在動力部分的結尾，必須直面一個所有讀者都會問的問題：德國民主，是在自我防衛，還是在滑向危險？這一章刻意分層，把「真實的風險」與「過度的解讀」分開——因為對這個問題的誠實回答，既不是「德國要變天了」的恐慌，也不是「一切都在掌控中」的輕忽，而是一套需要持續校準的判斷。</p>
+
+  <h3>先講韌性：德國制度硬體仍在穩健運作</h3>
+  <p>誠實的評估必須從韌性講起。到 2026 年，德國的制度硬體沒有任何鬆動的跡象：<strong>選舉自由公正、政權和平輪替、憲法法院獨立且權威、央行獨立、聯邦制分權、新聞自由、防火牆維持。</strong>紅綠燈聯盟崩解後，德國透過完全合憲的程序（信任投票、解散國會、提前大選）完成了政府更替；AfD 的崛起是在選舉框架內、透過選票發生的，而非透過體制外的暴力或顛覆。<strong>這與「民主崩潰」的典型劇本（選舉舞弊、鎮壓反對派、架空法院、軍事政變）完全不同——德國目前面對的，是「一個反建制政黨在完整運作的民主框架內合法壯大」，而不是「民主框架本身被摧毀」。</strong>這是判斷德國風險時最重要的定錨：制度硬體的完好，是最強的抗體。</p>
+
+  <h3>再講風險：三個真實的、不該被輕忽的隱憂</h3>
+  <p>但韌性不等於高枕無憂。有三個真實的結構性風險值得嚴肅對待：<strong>其一是常態化風險</strong>——當一個被情報機關部分列為極右的政黨長期穩居民調第一，「極右」與「正常」的邊界會被逐漸磨平，社會對某些立場的容忍度可能永久性移動；<strong>其二是治理癱瘓風險</strong>——防火牆迫使中間政黨組成越來越勉強的聯盟，若這些聯盟因理念不合而失能，「建制無能」的敘事會進一步壯大 AfD；<strong>其三是防火牆破裂風險</strong>——當算術上「不含 AfD 就無法組閣」成為某些邦的現實，總有一天某個地方政治人物會第一次跨過那條線，而一旦破例，禁忌的力量將迅速消解。<strong>這三個風險的共同點是：它們都不是「一夜崩潰」，而是「緩慢侵蝕」——德國民主的威脅不是一場政變，而是一種溫水式的規範磨損。</strong></p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">論點・德國民主韌性充足</div><p>制度硬體完好、政權和平輪替、法院與央行獨立、防火牆維持——德國有全世界最完備的防衛型民主工具與最深刻的歷史教訓。AfD 的崛起是抗議情緒在民主框架內的宣洩，只要經濟改善、議題降溫，它的動能就會見頂。把德國類比為「威瑪重演」是危言聳聽。</p></div>
+    <div class="d-con"><div class="d-tag">反論・侵蝕正在發生</div><p>危險不在一夜崩潰，而在緩慢常態化：當極右穩居第一、當防衛型民主的工具（情報評估、防火牆）本身被指為反民主、當中間政黨為守牆而失能——民主的規範會被一點一點磨損。等到「界線」被磨平，就沒有一個清晰的時刻可供警覺。德國的抗體很強，但它面對的是一種它的免疫系統不擅長處理的、體制內的慢性壓力。</p></div>
+  </div>
+
+  <h3>辨析的結論：不恐慌、不輕忽的持續校準</h3>
+  <p>把兩面合起來，本報告的辨析結論是一套「不恐慌、不輕忽」的判斷框架：<strong>不恐慌</strong>——因為德國的制度硬體完好、抗體強壯，「威瑪重演」的類比誇大了風險、低估了七十多年累積的制度韌性與社會共識；<strong>不輕忽</strong>——因為真正的威脅本就不是政變式的崩潰，而是常態化、治理癱瘓與規範磨損這三種慢性侵蝕，它們無聲、漸進、沒有清晰的警報。<strong>正確的姿勢，是把注意力從「德國會不會突然變天」（低機率）轉向「規範磨損的速度」（真變數）——具體而言，就是監測防火牆的裂縫、大聯合政府的治理績效、AfD 是否從東部向西全國化，以及極右立場的社會可接受度是否移動（詳第 21、22 章）。德國民主大概率不會崩潰，但它正在經歷一場對其共識根基的持久壓力測試。</strong></p>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART IV</div>
+  <h2>引擎 · The Engine</h2>
+  <div class="pd-sub">政黨×出口經濟×地緣的完整迴路</div>
+</div>
+
+<section id="s15">
+  <div class="sec-label">PART IV · CH 15</div>
+  <h2>三角傳導：政黨×出口經濟×地緣的完整迴路</h2>
+  <p class="lede">前四部分別拆解了版圖、稜鏡與動力。這一部要把它們接回一個完整的機器——德國政治經濟的傳導迴路。這個迴路有三個節點：<strong>政黨政治</strong>（防火牆、AfD、聯盟組合）、<strong>出口經濟</strong>（去工業化、能源、對中依賴）、與<strong>地緣</strong>（Zeitenwende、對美、對中、EU 領導）。三個節點之間有六條雙向的邊，任何一個節點的擾動都會沿邊傳導、放大——理解這六條邊，才能把德國當成一個系統來讀，而非一堆孤立的新聞。</p>
+
+  <h3>三節點六條邊：迴路的骨架</h3>
+  <p>先把六條傳導邊逐一列出，這是全章的骨架：</p>
+  <table>
+    <tr><th>傳導邊</th><th>方向與機制</th></tr>
+    <tr><td><strong>① 經濟 → 政黨</strong></td><td>去工業化與能源漲價製造「經濟失落者」，推高 AfD 與 BSW 的支持，侵蝕社民黨工人票</td></tr>
+    <tr><td><strong>② 政黨 → 經濟</strong></td><td>政黨組合決定財政（債務煞車鬆綁）、能源（轉型步調）、勞動與移民政策，直接影響經濟路徑</td></tr>
+    <tr><td><strong>③ 地緣 → 經濟</strong></td><td>俄烏戰爭切斷俄氣、美中對抗要求對中去風險、貿易保護主義衝擊出口——地緣直接重塑經濟成本結構</td></tr>
+    <tr><td><strong>④ 經濟 → 地緣</strong></td><td>對中出口依賴限制德國的對中強硬空間、能源需求塑造對俄政策、出口利益定義德國的貿易外交</td></tr>
+    <tr><td><strong>⑤ 地緣 → 政黨</strong></td><td>對烏援助成本、再武裝、能源制裁成為 AfD／BSW 的動員議題，尤其在東部；同時強化綠黨的對俄強硬定位</td></tr>
+    <tr><td><strong>⑥ 政黨 → 地緣</strong></td><td>誰執政決定德國的對烏、對俄、對美、對中與 EU 領導路線；防火牆守住了德國的西方定位</td></tr>
+  </table>
+  <p class="tbl-note">六條邊構成一個閉合迴路：任一節點的擾動都會沿邊傳導。關鍵在於它們往往互相放大，形成正回饋——這正是德國當前困境「難以單點解決」的結構原因。</p>
+
+  <h3>正回饋迴路：為什麼困境會自我強化</h3>
+  <p>這台機器最危險的特性，是它的幾條邊構成了自我強化的正回饋。舉一個核心迴路：<strong>地緣衝擊（俄烏戰爭）切斷廉價俄氣 → 能源成本上升、去工業化加劇（邊③）→ 製造經濟失落者、推高 AfD（邊①）→ AfD 質疑對烏援助與制裁、主張回歸俄氣（邊⑤）→ 若其主張影響政策，將動搖德國的地緣定位（邊⑥）。</strong>這個迴路的每一步都在放大下一步：經濟越差、極右越強；極右越強、地緣共識越脆弱；地緣越動盪、經濟越受衝擊。<strong>德國當前的結構困境之所以難解，正是因為它不是三個獨立的問題（政治極化、經濟疲軟、地緣動盪），而是一個互相咬合、彼此餵養的單一系統。</strong>要打破它，必須在某個節點上做出足以逆轉迴路方向的干預——這正是 Merz 政府「用財政投資重振經濟」豪賭的系統意義：它試圖從「經濟」這個節點注入正能量，逆轉整條迴路（詳第 16、17 章）。</p>
+
+  <div class="callout">
+    <div class="co-tag">SYSTEM NOTE · 常數、變數、命門</div>
+    <p>把整台機器對照本報告的核心定錨——<strong>戰後共識是常數、聯盟組合是變數、AfD 與去工業化是命門</strong>：常數（制度硬體：聯邦制、憲法法院、央行、比例代表）是迴路運轉的穩定框架，短期內不會鬆動；變數（聯盟組合）是迴路的當前配置，隨每次選舉重組；而兩個命門——AfD 的常態化與去工業化——正是那兩個能讓正回饋迴路失控的節點。監測德國，就是監測這兩個命門是否被 Merz 政府的干預所遏制，還是繼續沿正回饋自我放大。</p>
+  </div>
+</section>
+
+<section id="s16">
+  <div class="sec-label">PART IV · CH 16</div>
+  <h2>政治×經濟迴路：去工業化的解剖</h2>
+  <p class="lede">第 15 章給出了迴路的骨架；這一章聚焦其中最關鍵的一條——去工業化如何從經濟現象變成政治力量。「去工業化」（Deindustrialisierung）是 2020 年代德國最沉重的詞，也是理解 AfD 崛起與德國模式危機的經濟核心。這一章把它的成因、傳導與政治後果逐一拆開。</p>
+
+  <h3>去工業化的三重成因</h3>
+  <p>德國去工業化焦慮的成因，是三股力量的疊加：<strong>其一是能源成本的結構性上升</strong>——俄烏戰爭後切斷廉價俄氣，能源密集產業（化工、鋼鐵、玻璃、造紙）的成本競爭力受到直接衝擊，部分產能外移至能源更便宜的地區（如美國）；<strong>其二是中國從客戶變對手</strong>——中國在汽車（尤其電動車）、機械、化工等德國核心領域快速追趕甚至反超，既搶走第三方市場，又在德國本土形成競爭，德國對中出口的黃金時代結束；<strong>其三是結構性競爭力問題</strong>——高勞動成本、老化人口、官僚繁瑣、數位化與基建投資長期不足，讓德國製造業的整體效率面臨質疑。<strong>這三股力量的共同結果，是德國賴以立國的製造業出口模式，第一次面臨「不是週期性衰退、而是結構性侵蝕」的嚴肅拷問。</strong></p>
+
+  <h3>汽車業與中國：德國模式的縮影</h3>
+  <p>沒有哪個產業比汽車業更能濃縮德國的困境。汽車及其供應鏈是德國製造業的心臟——就業、出口、研發的核心。過去二十年，德國車廠（尤其在燃油車時代）把中國當作最大的成長引擎與利潤來源。但電動車時代逆轉了這個關係：<strong>中國憑藉電池供應鏈、成本與速度，在電動車上實現彎道超車，從德國車廠的最大客戶，變成在中國市場、歐洲市場乃至全球的最強競爭者。</strong>德國車廠同時面臨三重擠壓——在中國市場份額下滑、在電動化轉型上落後、在成本上難與中國競爭。汽車業的困境因此是整個德國模式的縮影：<strong>一個建立在「對中出口＋燃油車技術優勢」上的成功模式，被「中國崛起＋技術範式轉移」雙重顛覆——這既是經濟問題，也是德國國族自信的問題（德國人對汽車工業的情感，近乎國家認同的一部分）。</strong></p>
+
+  <div class="figrow">
+    <div><div class="fig-n">4 大支柱</div><div class="fig-l">德國製造業核心：汽車・機械・化工・電機</div></div>
+    <div><div class="fig-n">俄氣→0</div><div class="fig-l">俄烏戰後德國對俄天然氣依賴的結構性切斷</div></div>
+    <div><div class="fig-n">客戶→對手</div><div class="fig-l">中國在汽車與機械領域的角色逆轉</div></div>
+    <div><div class="fig-n">€5,000 億</div><div class="fig-l">基建基金——政府對沖去工業化的主要財政工具</div></div>
+  </div>
+
+  <h3>從經濟到政治的傳導</h3>
+  <p>去工業化之所以是「命門」，在於它精準地把經濟痛苦轉化為政治能量。傳導鏈條清晰：<strong>工廠外移或關閉 → 產業工人失業或恐懼失業 → 對「保護德國工人、限制移民競爭、恢復廉價能源」的訴求上升 → 這批選民離開社民黨（被視為背叛工人）、轉向 AfD（承諾德國優先）與 BSW（承諾反戰＋重分配）。</strong>這條鏈條在去工業化的重災區（東部、部分西部工業城鎮）最為顯著，正是 AfD 與 BSW 的核心票倉來源。<strong>換言之，去工業化不只是 GDP 的問題，它是重塑德國政黨版圖的地質力量——經濟失落者的政治歸屬遷移，正在把德國從「兩大人民政黨」的舊格局，推向「碎片化＋極端崛起」的新格局。</strong></p>
+
+  <h3>能源迴路：轉型、成本與政治的三角</h3>
+  <p>能源是去工業化迴路中最政治化的一環，它自身構成一個小三角：<strong>減碳目標（歐盟承諾、氣候壓力）× 能源安全（俄氣切斷後的供應）× 成本競爭力（企業與家庭的電價）</strong>——三者難以同時滿足。廢核與再生能源轉型服務減碳，卻在俄氣切斷後推高了成本與供應焦慮；回歸化石能源或核能能壓低成本，卻違背減碳承諾。<strong>Merz 政府的能源政策，本質是在這個「不可能三角」中尋找一個政治上可持續的平衡點——既不能放棄長期減碳方向（否則失去綠黨與都會選民、違背歐盟承諾），又必須壓低短期能源成本（否則去工業化加劇、AfD 得利）。</strong>能源因此是政治×經濟迴路中最敏感的節點：任何電價的可感改善都能抽掉 AfD 燃料，任何新的能源衝擊都會沿迴路放大成政治動盪（詳第 18 章）。</p>
+</section>
+
+<section id="s17">
+  <div class="sec-label">PART IV · CH 17</div>
+  <h2>資本與模式：出口導向、Mittelstand 與投資赤字</h2>
+  <p class="lede">這一章從資本與經濟模式的角度，深入德國的「引擎憲法」——那套決定德國如何賺錢、如何分配、如何投資的深層規則。它由三個相扣的部分組成：出口導向的成長模式、以中小企業（Mittelstand）為骨幹的產業結構、以及長期的投資赤字與債務煞車的關係。理解這套資本憲法，才能判斷 2025 年財政轉向的真正分量。</p>
+
+  <h3>出口導向：一個結構性順差的經濟體</h3>
+  <p>德國經濟模式的第一特徵，是高度的出口導向與長期的經常帳順差。德國生產遠超本國消費所需的高品質工業品，把大量產出賣到國外——這讓它累積了龐大的貿易順差與對外資產。這套模式的優勢是明顯的：世界級的製造業、強勢的品牌與技術、穩定的就業。但它也有一個常被批評的結構弱點：<strong>過度依賴外需、內需相對疲弱、國內投資與消費長期不足。</strong>德國的繁榮建立在「把東西賣給世界」上，這使它高度暴露於外部衝擊——全球需求放緩、貿易保護、關鍵市場（中國）逆轉，都會直接打擊這台以出口為心臟的機器。<strong>2020 年代的困境，本質上是這套「過度依賴外需」模式的外部條件（廉價能源、中國市場、開放貿易）同時惡化的總爆發。</strong></p>
+
+  <h3>Mittelstand：隱形冠軍的骨幹與軟肋</h3>
+  <p>德國產業結構的獨特之處，是它的骨幹不是少數巨型集團，而是成千上萬家專精、家族經營、常在細分市場稱霸全球的中小企業——<strong>Mittelstand（中堅企業）</strong>，其中不乏「隱形冠軍」（Hidden Champions）：規模不大、名不見經傳，卻在某個利基產品上是世界龍頭。Mittelstand 是德國就業、出口與技術創新的真正基礎，也是社會穩定的支柱（提供大量穩定的技術性工作與學徒制培訓）。<strong>但 Mittelstand 也是去工業化衝擊下的軟肋</strong>——它們往往能源密集、深度嵌入全球供應鏈、對成本敏感、且不像巨型集團有能力快速全球佈局。當能源漲價、對中競爭加劇、國內基建與數位化落後，Mittelstand 承受的壓力最直接，而它們的困境會沿供應鏈與地方就業快速傳導成政治情緒——這也是為什麼「保護 Mittelstand」成為跨黨派的共識訴求。</p>
+
+  <h3>投資赤字：債務煞車的隱藏代價</h3>
+  <p>德國資本憲法的第三個特徵，也是 2025 年財政轉向要處理的核心問題，是<strong>長期的投資赤字</strong>。過去二十年，德國以財政保守著稱、以低負債率自豪，卻付出了一個隱藏代價：<strong>公共投資長期不足——道路、橋樑、鐵路、學校、數位基建、國防都累積了龐大的欠帳。</strong>債務煞車在守住財政紀律的同時，也系統性地壓抑了公共投資，讓德國的基礎設施在「維持而非更新」中緩慢老化。這是一個典型的「德國式權衡」：用當代的紀律，換來了信用與道德權威，卻犧牲了對未來的投資。<strong>2025 年 5000 億基建基金的意義正在於此——它是德國對「過度撙節、投資不足」這一長期失衡的一次性、大規模的糾正嘗試。</strong></p>
+
+  <div class="lens l-f">
+    <div class="lens-tag">財政轉向的多頭與空頭情境</div>
+    <p>對資本，2025 年財政轉向是德國故事最大的分岔點，有兩種情境：<strong>多頭情境</strong>——德國坐擁極低負債率、極高信用、龐大的投資欠帳與閒置的財政空間，5000 億基建＋國防投資若能有效轉化為生產力提升與內需擴張，將是歐洲最大的內生刺激，重振成長、對沖去工業化、抽掉 AfD 的經濟燃料。<strong>空頭情境</strong>——若這筆錢因官僚遲緩、規劃不良、勞動力與產能瓶頸而花不出去或效率低下，則只推高通膨與債務、未見成長，反讓聯盟黨背上「背叛財政保守」的政治代價、替 AfD 添薪。<strong>兩種情境的分野，不在錢的規模（規模已定），而在執行力——這是德國未來三到五年最重要的單一觀察變數。</strong></p>
+  </div>
+
+  <h3>德國模式的自我修正能力</h3>
+  <p>把這三部分合起來，一個關鍵問題浮現：德國模式有沒有自我修正的能力？歷史提供了審慎樂觀的證據——1990 年代末、2000 年代初，德國曾被稱為「歐洲病夫」，隨後透過 Hartz 勞動改革與工資克制，在 2010 年代重獲競爭力（儘管付出了社會代價，詳第 5 章）。這顯示德國模式並非僵化，它有在危機中痛苦重整的先例。<strong>2020 年代的挑戰在某種意義上更難——因為它同時涉及能源結構、地緣依賴與人口三個慢變數，不是單靠勞動市場改革就能解決。</strong>但 2025 年的財政轉向（放棄零赤字教條、大舉投資）本身，就是德國模式又一次自我修正的證據：一個以路徑依賴著稱的體制，在生存壓力下仍能調整其最核心的財政信條。<strong>對外部資本，這既是德國最令人擔憂之處（模式受到根本挑戰），也是最值得下注之處（它有調整的制度能力與財政空間）。</strong></p>
+</section>
+
+<section id="s18">
+  <div class="sec-label">PART IV · CH 18</div>
+  <h2>產業與人口：老化、技術移民與能源轉型</h2>
+  <p class="lede">這一章處理德國經濟的三個長期慢變數——人口老化、技術移民與能源轉型（Energiewende）。它們的時間尺度以十年計，短期內不會決定選舉，卻在深層決定德國的長期競爭力，並與政治形成一個尖銳的悖論：<strong>德國在經濟上需要移民來填補勞動力缺口，在政治上卻正因移民議題而右傾——這道經濟需求與政治情緒的背離，是德國最深的結構張力之一。</strong></p>
+
+  <h3>人口老化：勞動力的長期收縮</h3>
+  <p>德國面臨與多數發達經濟體相同、但因其製造業依賴技術工人而更尖銳的問題——人口老化與勞動力收縮。出生率長期低於替代水準，戰後嬰兒潮世代大規模退休，勞動年齡人口在缺乏移民補充下將持續萎縮。這對德國模式是根本性威脅：<strong>製造業與 Mittelstand 高度依賴熟練技術工人（Facharbeiter）與學徒制培訓的人才管道，而這個管道正因人口老化而收窄。</strong>技術工人短缺（Fachkräftemangel）已是德國企業普遍反映的瓶頸，它限制產能、推高成本、拖累投資的落地（包括 5000 億基建基金能否被有效執行，也受制於是否有足夠的技術人力）。人口老化因此不只是社福負擔問題，更是德國生產能力的長期上限。</p>
+
+  <h3>技術移民：經濟解方與政治炸藥的矛盾</h3>
+  <p>從純經濟角度，德國勞動力缺口的解方相當明確——技術移民。德國近年也確實推動了移民法改革，試圖吸引國外技術人才。但這裡出現了德國政治最深的悖論：<strong>經濟理性要求德國歡迎更多移民（補勞動力、養退休金、維持產能），政治現實卻是移民議題正把選民推向反移民的 AfD。</strong>這兩股力量直接對撞——政府若為經濟需求擴大移民，會激化反移民情緒、壯大 AfD；若為政治壓力收緊移民（如 Merz 的路線），則可能加劇勞動力短缺、拖累經濟。<strong>更複雜的是，德國需要的「技術移民」與政治爭議焦點的「庇護／難民移民」是不同的人群，但在公共辯論中常被混為一談，使理性的移民政策難以與情緒化的移民政治切割。這道「經濟要移民、政治反移民」的背離，是德國長期難解的結構張力。</strong></p>
+
+  <h3>能源轉型：長期方向與短期成本的拉扯</h3>
+  <p>能源轉型（Energiewende）是德國第三個長期工程，第 16 章已從政治角度觸及，這裡從產業角度補充。德國承諾走向低碳能源系統——廢核、發展再生能源、電氣化。這個長期方向有其戰略邏輯（減碳承諾、擺脫化石燃料進口依賴、發展綠色產業）。但轉型的短期成本高昂：<strong>再生能源的間歇性需要昂貴的儲能與電網升級、廢核減少了低碳基載電力、俄氣切斷推高了過渡期的能源成本。</strong>這造成一個時間錯配——轉型的收益（能源獨立、綠色產業、長期低成本）在遠期，成本（高電價、供應焦慮、去工業化壓力）在近期。<strong>對德國產業，關鍵問題是它能否「熬過」這段高成本的過渡期而不喪失製造業基礎——若能，德國可能在綠色工業上建立新優勢；若不能，去工業化將在轉型完成前就掏空德國的產業根基。這是能源轉型與去工業化賽跑的本質（詳第 16 章）。</strong></p>
+
+  <div class="prism">
+    <div class="pv-f"><div class="pv-tag">外國人／投資人</div><p>人口、移民、能源是德國長期競爭力的三個慢變數。技術工人短缺限制產能與財政投資的落地效率；能源轉型的過渡成本決定製造業能否存續。這些比選舉噪音更值得長期定價。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD</div><p>移民不是勞動力解方，是壓低工資、耗竭社福、稀釋認同的問題。能源轉型是意識形態豪賭，用高電價毀掉德國工業。答案是德國人優先、回歸廉價能源、鼓勵本國生育。</p></div>
+    <div class="pv-g"><div class="pv-tag">綠黨與左翼</div><p>移民是德國的必需與道義，能源轉型是不可迴避的未來。真正的任務是公正轉型——讓氣候政策的成本由有能力者承擔、讓移民融入得到支持，而非在極右壓力下退縮。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同三個慢變數，三種讀法：長期競爭力、認同威脅、不可迴避的未來</div>
+</section>
+
+<section id="s19">
+  <div class="sec-label">PART IV · CH 19</div>
+  <h2>政策連續性與外資：哪些能下注、哪些需動態定價</h2>
+  <p class="lede">對外部資本，最實用的問題不是「誰會贏下次選舉」，而是「不同政黨執政下，哪些政策是高度連續、可以下注的，哪些是隨陣營擺盪、需要動態定價的」。這一章把德國的政策空間分層，並回答一個關鍵問題：AfD 的崛起與防火牆的張力，究竟在多大程度上威脅到德國政策的連續性？</p>
+
+  <h3>高度連續、可下注的政策層</h3>
+  <p>德國有一大類政策，無論哪個主流政黨執政都高度連續，構成外資可以下注的穩定地基：<strong>其一是制度框架</strong>——法治、契約穩定、憲法法院獨立、央行獨立、聯邦制、財產權保障，這些是《基本法》層級的常數，任何主流政府都不會動搖；<strong>其二是歐盟核心地位</strong>——德國作為歐盟與歐元區支柱的定位，是跨黨派的深層共識；<strong>其三是社會市場經濟的基本框架</strong>——勞資共決、社會保險、產業政策的基本盤，主流政黨只在程度上調整、不在體制上顛覆；<strong>其四是跨大西洋與西方定位</strong>——只要防火牆守住、主流政黨執政，德國的西方陣營定位就穩定。<strong>這一層是德國資產「無風險之錨」的來源——它的連續性強到讓選舉的政黨輪替，在多數時候只是政策程度的微調，而非方向的翻轉。</strong></p>
+
+  <h3>隨陣營擺盪、需動態定價的政策層</h3>
+  <p>另一類政策則隨執政組合而擺盪，需要動態定價：<strong>財政路線</strong>（債務煞車的鬆緊、投資與撙節的偏好，聯盟黨／自民黨偏緊、社民黨／綠黨／左翼偏鬆）；<strong>能源與氣候</strong>（轉型的步調與成本分攤，綠黨激進、AfD 反轉）；<strong>移民</strong>（開放與收緊，隨陣營顯著擺盪）；<strong>稅收與重分配</strong>（左右差異明顯）；<strong>勞動市場</strong>（彈性化 vs 保障）。<strong>這一層的擺盪，是外資需要根據選舉結果動態調整的部分——但關鍵在於，這些擺盪是「幅度」而非「體制」：它們改變的是稅率、支出、步調，而非市場經濟本身、產權本身、歐盟成員身分本身。</strong></p>
+
+  <div class="lens l-f">
+    <div class="lens-tag">AfD 因子：連續性的唯一真實尾部風險</div>
+    <p>對外資，德國政策連續性的唯一真實尾部風險，來自「防火牆破裂、AfD 影響或進入聯邦政府」這一低機率但高衝擊的情境。因為 AfD 的部分核心主張（疑歐、質疑歐元、反對現行對俄/對烏路線、可能動搖歐盟核心定位）觸及的正是「高度連續層」——它是唯一一個其執政可能改變「方向」而非僅「幅度」的政治力量。<strong>因此，對德國資產的正確定價方式是：把「高度連續層」當作近乎確定的常數來下注，把「擺盪層」當作隨選舉動態調整的變數，而把「AfD 進入聯邦權力」當作一個需持續監測、機率不高但一旦兌現需重估的尾部情境。防火牆的完整性，因此是外資監測德國政治連續性的最重要單一指標（詳第 22 章）。</strong></p>
+  </div>
+
+  <h3>把政策分層對照政治現實</h3>
+  <p>把這套分層對照 2026 年的政治現實，可得出一個相對安定的結論：<strong>只要大聯合政府維持、防火牆守住，德國政策的「高度連續層」就穩固，選舉的政黨輪替主要影響「擺盪層」，外資面對的是一個可預測、可動態定價的環境。</strong>真正需要警惕的觸發器只有一個——防火牆的實質破裂，即 AfD 開始影響或進入聯邦層級的行政權力。在此之前，德國政治的喧囂（AfD 民調領先、防火牆爭議、邦選震盪）大多屬於「擺盪層」與政治溫度的範疇，尚未穿透到威脅「連續性地基」的層級。<strong>這也是本報告對外部資本的核心訊息：不必為選舉噪音焦慮，但必須為「防火牆是否守得住」持續定價——因為那是連續層與擺盪層之間的那道閘門。</strong></p>
+</section>
+
+<section id="s20">
+  <div class="sec-label">PART IV · CH 20</div>
+  <h2>地緣：Zeitenwende、對美對中的兩難與 EU 領導</h2>
+  <p class="lede">迴路的第三個節點是地緣。2020 年代，德國被迫從一個「以經濟利益為外交主軸、在美中之間左右逢源、依賴俄氣、搭美國安全便車」的舒適位置，猛然拋進一個要求它在安全、能源、對中、對美上做出痛苦選擇的新現實。這一章拆解德國地緣處境的三重轉折——對俄的 Zeitenwende、對中的去風險兩難、對美的不確定，以及貫穿其中的 EU 領導角色。</p>
+
+  <h3>Zeitenwende：一次被迫的地緣覺醒</h3>
+  <p>2022 年俄羅斯全面入侵烏克蘭，蕭茲宣告「時代轉折」（Zeitenwende），標誌德國安全政策的根本轉向。轉折的內容包括：<strong>大幅提高國防開支（承諾達到並超過 GDP 的 2%）、對烏克蘭提供軍事援助、切斷對俄能源依賴、重新武裝長期被忽視的聯邦國防軍（Bundeswehr）。</strong>這對德國是深刻的心理與政策斷裂——戰後德國的國族認同建立在「和平主義、克制軍事、以貿易促和平」之上，Zeitenwende 要求它重新學習「用實力維護安全」。2025 年債務煞車為國防鬆綁（詳第 3B 章），正是 Zeitenwende 的財政落實。<strong>但這場覺醒並不徹底也不無爭議：再武裝的成本、對烏援助的持久性、以及東部與左右兩翼（AfD、BSW、部分左翼黨）的反戰／親俄情緒，都讓德國的地緣轉向充滿內部張力。</strong></p>
+
+  <h3>對中的去風險兩難</h3>
+  <p>德國地緣困境最尖銳的一環，是對中國的關係，這與第 8、16 章的經濟依賴直接相扣。德國同時面對三股拉力：<strong>經濟拉力</strong>——中國仍是德國（尤其汽車、化工、機械）龐大的市場與供應鏈環節，脫鉤代價巨大；<strong>安全拉力</strong>——美中對抗加劇，美國要求盟友在關鍵技術與供應鏈上對中設限、選邊；<strong>教訓拉力</strong>——「對俄氣依賴」的慘痛教訓，讓「會不會又在對中依賴上重蹈覆轍」成為揮之不去的警惕。官方路線是「去風險而非脫鉤」（de-risking），試圖在保留中國市場與降低關鍵依賴之間走鋼索。<strong>但這條中間路線知易行難：德國企業（尤其汽車業）的短期商業利益，與國家的長期地緣安全，存在真實的張力——這是德國「用經濟理性主導外交」的舊模式，撞上「地緣安全壓倒經濟利益」的新現實時，最痛苦的一道題（詳第 16 章）。</strong></p>
+
+  <h3>對美的不確定：安全傘的鬆動</h3>
+  <p>德國地緣的第三重轉折，來自跨大西洋關係的不確定。戰後德國的安全建立在美國的保護傘（北約）之上，這讓德國得以「安全靠美國、貿易靠中國、能源靠俄國」地輕裝發展。但美國政治的轉向（尤其在川普路線下對北約承諾、對歐防務分攤、對貿易的態度）動搖了這個前提——德國第一次必須認真面對「如果美國的安全承諾不再無條件，歐洲（與德國）如何自保」的問題。<strong>這推動德國（與法國等）重新思考歐洲的「戰略自主」，也讓 Zeitenwende 的再武裝有了雙重動機：既為對抗俄羅斯，也為對沖美國承諾的不確定。</strong>對德國，這是一個歷史性的角色轉變——從「美國安全傘下的經濟巨人、政治侏儒」，被迫走向「歐洲安全的實質承擔者」，而這個轉變的財政、軍事與心理成本，德國仍在痛苦地消化。</p>
+
+  <h3>EU 領導：德國的放大器與約束</h3>
+  <p>貫穿以上三重轉折的，是德國的歐盟角色。作為歐盟最大經濟體與財政壓艙石，德國的每一個地緣選擇都透過歐盟被放大，也被歐盟約束：<strong>放大</strong>——德國的對俄制裁、對烏援助、對中去風險，往往需要並塑造整個歐盟的立場，德國的分量讓它成為歐洲政策的實質領導者之一（常與法國構成「德法軸心」）；<strong>約束</strong>——德國無法單獨行動，它的選擇必須與 27 國協調，這既限制了它的自主，也讓它承擔「領導歐洲卻不能命令歐洲」的協調重擔。<strong>對德國，EU 既是它地緣影響力的載體（透過歐盟，德國的偏好成為歐洲的政策），也是它的約束框架（德國的選擇必須是歐洲能接受的選擇）。這也是為什麼「維持歐盟核心地位」是德國跨黨派最深的共識之一，而 AfD 對歐盟的攻擊，觸及的正是德國地緣影響力的這根支柱（詳第 19 章）。</strong></p>
+
+  <div class="prism">
+    <div class="pv-u"><div class="pv-tag">CDU/CSU</div><p>地緣轉向是必要的成熟：德國必須承擔起與其分量相稱的安全責任，領導歐洲再武裝、支援烏克蘭、對中去風險、維繫跨大西洋與歐盟核心。這是負責任的德國該做的事。</p></div>
+    <div class="pv-a"><div class="pv-tag">AfD</div><p>地緣轉向是替別人火中取栗：為烏克蘭掏空國庫、為制裁犧牲廉價能源、為美國的對抗綁架德國利益。德國該做的是奪回主權、與俄和解、優先照顧德國人，而非當歐洲的錢包與砲灰。</p></div>
+    <div class="pv-f"><div class="pv-tag">外國人</div><p>地緣是德國資產的最大外生變數：Zeitenwende 的財政擴張是成長機會、對中去風險是供應鏈重估的訊號、對美不確定是歐洲戰略自主的催化劑。德國的西方定位是否穩固，繫於防火牆。</p></div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一場地緣轉向，三種定性：必要的成熟、替人火中取栗、最大外生變數</div>
+</section>
+
+<div class="part-divider">
+  <div class="pd-num">PART V</div>
+  <h2>終章 · The Ledger</h2>
+  <div class="pd-sub">十大論題、監測儀表板與方法註記</div>
+</div>
+
+<section id="s21">
+  <div class="sec-label">PART V · CH 21</div>
+  <h2>十大論題（附信度與可證偽條件）</h2>
+  <p class="lede">本報告把全篇論證收斂為十個可檢驗的論題。每個論題標註信度（★★★＝高／結構性、★★＝中／趨勢性、★＝低／推測性）與「可證偽條件」——若該條件發生，論題即應被推翻或重估。這是一份可被證偽的分析，而非不可反駁的斷言。核心定錨貫穿全部十題：<strong>戰後共識是常數、聯盟組合是變數、AfD 與去工業化是命門。</strong></p>
+  <table>
+    <tr><th style="width:44%">論題</th><th>信度</th><th>可證偽條件（若發生，論題作廢）</th></tr>
+    <tr><td><strong>T1・共識民主常數論</strong>：德國制度硬體（聯邦制、比例代表、憲法法院、獨立央行、防衛型民主）是高度穩定的常數，短期內不會鬆動，是理解德國一切變動的穩定框架。（第 2、3 章）</td><td>★★★</td><td>出現制度硬體的實質崩壞：選舉不再自由公正、憲法法院或央行獨立性被實質侵蝕、聯邦制被中央集權取代、或防衛型民主機制被廢除</td></tr>
+    <tr><td><strong>T2・必然聯盟論</strong>：比例代表＋5% 門檻使德國永遠是多黨聯盟政治，沒有政黨能單獨過半，執政的常態是協商而非贏者全拿；這壓低了政治零和程度，但也在面對被排斥的巨大少數時失靈。（第 1、1B 章）</td><td>★★★</td><td>選制改為單一選區多數制、或某政黨在比例代表下單獨取得聯邦議會過半（戰後僅 1957 年一次）</td></tr>
+    <tr><td><strong>T3・AfD 常態化論</strong>：AfD 已從抗議性現象演變為結構性存在——東部第一大黨、全國民調第一，其崛起是在民主框架內合法發生的，時間傾向站在它這邊。（第 6、6B、13 章）</td><td>★★★</td><td>AfD 全國支持度結構性回落至邊緣政黨水準（長期低於 10%）、或其東部堡壘明顯瓦解</td></tr>
+    <tr><td><strong>T4・防火牆張力論</strong>：防火牆是維繫政策連續性與西方定位的關鍵政治承諾，但它隨 AfD 壯大而承受越來越大的算術與正當性壓力，尤其在東部邦層級；它既可能抑制、也可能餵養 AfD。（第 2B、11 章）</td><td>★★★</td><td>防火牆在聯邦或重要邦層級實質破裂（主流政黨與 AfD 正式組閣或穩定合作）、或 AfD 因常態化而使防火牆變得無關緊要</td></tr>
+    <tr><td><strong>T5・去工業化命門論</strong>：以廉價俄氣＋對中出口＋汽車工業為支柱的德國模式正遭結構性侵蝕，去工業化是驅動經濟失落者轉向極右的地質力量，是重塑德國政黨版圖的經濟核心。（第 8、16、17 章）</td><td>★★★</td><td>德國製造業競爭力在能源與對中衝擊下明確回穩（證明是週期而非結構）、且經濟失落者的極右轉向出現逆轉</td></tr>
+    <tr><td><strong>T6・財政轉向論</strong>：2025 年債務煞車鬆綁（5000 億基建＋國防解綁）是德國從撙節紀律轉向投資的結構性轉折，是對沖去工業化、重振成長的最大槓桿，成敗取決於執行力而非規模。（第 3B、12、17 章）</td><td>★★</td><td>財政擴張因執行不力而未轉化為生產力／成長（只推高通膨與債務）、或後續政府全面逆轉、重回嚴格債務煞車</td></tr>
+    <tr><td><strong>T7・東西裂痕論</strong>：統一三十五年未癒的東西裂痕（經濟、人口、認同、對俄態度）是 AfD 東部堡壘的地基，且其政治模式有向西部去工業化地區擴散的機制。（第 6B、13 章）</td><td>★★</td><td>東部經濟與政治行為向西部顯著收斂、AfD 東部優勢因世代更替而瓦解；或反向——證明裂痕純屬東部特殊而無擴散性</td></tr>
+    <tr><td><strong>T8・民主韌性論</strong>：德國面對的不是政變式崩潰（低機率），而是常態化、治理癱瘓與規範磨損三種慢性侵蝕；制度抗體強壯，但對這種體制內慢性壓力的免疫力較弱。（第 14 章）</td><td>★★</td><td>出現政變式的憲政崩潰（低機率端）、或 AfD 動能明確見頂且防火牆穩固、規範磨損停止（樂觀端）之一</td></tr>
+    <tr><td><strong>T9・政策連續性分層論</strong>：外資風險應分層——制度框架／歐盟核心／西方定位高度連續（可下注），財政／能源／移民隨陣營擺盪（需動態定價），且擺盪是幅度而非體制。（第 19 章）</td><td>★★★</td><td>出現體制級斷裂：某政府沒收合規外資產權、退出歐元或歐盟、或廢除市場經濟基本框架</td></tr>
+    <tr><td><strong>T10・地緣外生論</strong>：全部內部評估預設「歐洲安全框架不崩、美中可對沖、對烏路線大體維持」；防火牆破裂使 AfD 影響聯邦外交、或俄烏局勢與跨大西洋關係質變，是唯一能同時擊穿所有稜鏡的系統性風險。（第 20 章）</td><td>★</td><td>AfD 進入或實質影響聯邦政府並逆轉德國西方定位、歐洲安全框架崩解、或美國安全承諾實質撤除——屆時本報告所有章節需整體重寫</td></tr>
+  </table>
+
+  <h3>十論題的內在階層</h3>
+  <p>十個論題不是並列的，有清晰的依賴結構：<strong>T1（共識民主常數）、T2（必然聯盟）、T10（地緣外生前提）是地基</strong>——三者成立，其餘七題才有意義。T3–T5、T9 是建立在地基上的結構層（高信度，因為描述的是制度硬體、選制與經濟結構，而非事件預測）；T6–T8 是動力層（中信度，涉及行為者選擇與趨勢，尤其 T6 財政轉向與 T8 民主韌性最會變）；T10 是單點的尾部推測。閱讀本報告的正確方式，是把資源按這個階層倒置分配：<em>花最少時間擔心地基（它們最穩），花最多時間監測動力層（尤其 T6 財政投資的執行與 T4 防火牆的完整性），並把 T10 當作一個必須放在心裡、但難以下注的尾部風險。</em></p>
+
+  <h3>本報告的四個已知盲區</h3>
+  <p>誠實標記分析框架自身的限制：<strong>其一，歐盟與跨國層次的簡化</strong>——本報告以德國為主體，歐盟、法國、其他成員國與跨大西洋動態僅作為外部變數處理，而德國的許多命運實際由這些更大的框架共同決定。<strong>其二，經濟數據的時效與口徑</strong>——本文引用的席次、民調、財政數字為概略值，旨在呈現量級與結構，精確數字應以官方最新統計與各家民調的差異區間為準；民調尤其波動，AfD 與各黨的具體百分點隨機構與時點而異。<strong>其三，事件路徑依賴</strong>——本報告成稿於 Merz 大聯合政府執政第一年、2026 年 9 月東部邦選之前的特定時點，若干判斷（尤其 T4、T6、T8）帶有近因權重，應以第 22 章儀表板為持續校正介面。<strong>其四，AfD 內部異質性的簡化</strong>——本文多以「AfD」整體論之，但該黨在不同邦、不同派系間的激進程度差異顯著（部分被列為確認極右、部分較溫和），這種內部異質性對「防火牆該如何適用」至關重要，本報告未能逐一細分。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s22">
+  <div class="sec-label">PART V · CH 22</div>
+  <h2>監測儀表板：時間軸與判讀規則</h2>
+  <table>
+    <tr><th>時點</th><th>事件</th><th>判讀規則</th></tr>
+    <tr><td><strong>2026-09-06</strong></td><td>薩克森-安哈特（Sachsen-Anhalt）邦選</td><td>T3／T4 的核心讀數。AfD 選前民調逼近 41～42% 絕對多數。AfD 若近乎單獨過半＝防火牆被逼到極限、需組「輸家大聯合」擋牆；AfD 若未達預期＝常態化敘事鬆動（詳第 6B、11、13 章）</td></tr>
+    <tr><td><strong>2026-09-20</strong></td><td>梅克倫堡-前波美恩（Mecklenburg-Vorpommern）邦選</td><td>與薩安同為東部堡壘測試。觀察 AfD 是否連下兩城、其他政黨能否組成不含 AfD 的可行多數——東部防火牆可維繫性的直接指標（詳第 13 章）</td></tr>
+    <tr><td>持續</td><td>AfD 全國民調水位與趨勢</td><td>T3 的即時溫度計。持續穩居第一（27%+）＝常態化深化；若結構性回落至 20% 以下＝抗議動能見頂訊號。留意民調機構間的差異區間（詳第 6 章）</td></tr>
+    <tr><td>持續</td><td>防火牆的完整性（聯邦與各邦）</td><td>T4／T9／T10 的最關鍵單一指標。任何主流政黨與 AfD 的正式組閣、穩定合作、或依賴其票通過重大議案＝防火牆實質破裂、政策連續性尾部風險兌現（詳第 2B、19 章）</td></tr>
+    <tr><td>每季／每年</td><td>5000 億基建基金與國防投資的執行進度</td><td>T6 的核心讀數。觀察資金能否有效撥付、是否受技術人力與產能瓶頸拖累、是否轉化為投資與成長——財政轉向成敗的直接指標（詳第 17、18 章）</td></tr>
+    <tr><td>每季</td><td>製造業景氣、能源價格、汽車業對中份額</td><td>T5 去工業化命門的即時溫度計。電價與汽車業對中競爭力是關鍵——任何可感改善會抽掉 AfD 燃料，任何新衝擊沿迴路放大成政治動盪（詳第 16 章）</td></tr>
+    <tr><td>持續</td><td>移民政策的收緊與其政治效果</td><td>觀察 Merz 的移民收緊是否搶回右翼選票（AfD 降溫）、還是正常化了 AfD 議題（反助其勢）。移民議題的溫度是 AfD 支持的重要驅動（詳第 12 章）</td></tr>
+    <tr><td>持續</td><td>大聯合政府（聯盟黨＋社民黨）的內部張力</td><td>T4／T8 的治理讀數。兩黨在財政、移民、社會政策上的摩擦是否升級至危及政府存續；社民黨是否因當小夥伴受損而萌生退意（詳第 5、11 章）</td></tr>
+    <tr><td>持續</td><td>對烏援助的持久性與 Zeitenwende 的內部共識</td><td>T10 的即時溫度計。觀察對烏軍援、國防開支是否因成本與東部／兩翼反戰情緒而動搖——德國西方定位穩固度的指標（詳第 20 章）</td></tr>
+    <tr><td>持續</td><td>對中去風險的實際進展</td><td>觀察德國（尤其汽車業）對中依賴的拆解速度與代價，以及「去風險而非脫鉤」路線能否維持——供應鏈與地緣尾部風險的讀數（詳第 16、20 章）</td></tr>
+    <tr><td>持續</td><td>憲法保衛局對 AfD 的評估與政黨禁令討論</td><td>防衛型民主的運用邊界。情報評估升級或政黨禁令程序啟動＝防衛型民主與 AfD 正當性敘事的正面對撞，牽動整個防火牆的法理基礎（詳第 6、14 章）</td></tr>
+    <tr><td><strong>2029（預定）</strong></td><td>下屆聯邦大選</td><td>大聯合政府「用治理績效遏止 AfD」豪賭的總驗收。若 AfD 續漲、大聯合續縮，則防火牆的算術基礎面臨根本考驗——德國政治走向的裁決點（詳第 11 章）</td></tr>
+  </table>
+
+  <h3>三個「若發生則改變評估」的觸發器</h3>
+  <ul class="plain">
+    <li><strong>觸發器 A · 防火牆破裂</strong>：主流政黨在聯邦或重要邦層級與 AfD 正式組閣、穩定合作或系統性依賴其票 → T4、T9、T10 連動重估，德國政策連續性的「高度連續層」出現裂縫，外資須重新定價德國的西方定位與歐盟核心承諾（這是唯一能穿透「連續層」的政治觸發器）。</li>
+    <li><strong>觸發器 B · 財政豪賭失敗</strong>：5000 億基建與國防投資因執行不力而未轉化為成長、只推高通膨與債務 → T6 財政轉向論作廢，「用投資對沖去工業化、重建治理正當性」的核心多頭論述崩解，去工業化命門（T5）加深、AfD 燃料增加。</li>
+    <li><strong>觸發器 C · 地緣質變</strong>：歐洲安全框架崩解、美國安全承諾實質撤除、俄烏局勢劇變、或 AfD 進入聯邦政府並逆轉對俄/對烏路線 → 全系統重估，本報告所有經濟與政治章節需整體重寫（T10 兌現，唯一的「一切重寫」觸發器）。</li>
+    <li><strong>觸發器 D · 結構鬆動訊號</strong>：AfD 全國支持結構性回落至邊緣水準、東部堡壘瓦解、或去工業化明確回穩並逆轉極右轉向 → 質疑「AfD 常態化＋去工業化命門」的核心前提，啟動對 T3／T5 的樂觀重估（這是唯一能推翻「兩個命門」論的訊號）。</li>
+  </ul>
+  <p><strong>總結一句：戰後共識是常數，聯盟組合是變數，AfD 與去工業化是命門。</strong>監測東部兩場邦選與防火牆的完整性、盯緊財政投資的執行與去工業化的溫度、警惕地緣尾部，不必為「德國會不會突然變天」焦慮——因為它的制度抗體強壯、政權在完整的民主框架內和平運作。真正該監測的，不是它會不會崩潰，而是它的共識根基被 AfD 常態化與去工業化這兩個命門侵蝕的速度，以及 Merz 政府的財政豪賭能否在民意動能耗盡前逆轉這條正回饋迴路。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s23">
+  <div class="sec-label">PART V · CH 23</div>
+  <h2>資料來源與方法註記</h2>
+  <p>本文件之事實基礎來自 2026 年 7 月中旬檢索之公開報導與研究，主要來源：德國主流媒體 Der Spiegel、Die Zeit、Süddeutsche Zeitung、Frankfurter Allgemeine Zeitung（FAZ）、Handelsblatt、Tagesschau／ARD、ZDF、Deutsche Welle（選情、政黨動態、施政與民調）；國際媒體 Reuters、AP、BBC、Financial Times、The Economist、Politico Europe、Bloomberg、The New York Times（國際視角與時間線）；民調彙整平台（PolitPro、Statista、各機構如 Insa、Forsa、Infratest dimap、Ipsos 之德國選舉意向調查，2026 年 7 月）。制度與結構分析另參考關於「共識民主」「防衛型民主（wehrhafte Demokratie）」「聯邦制」「社會市場經濟」「Mittelstand」「東西德裂痕」之學術與政策文獻，以及對 AfD 演化、Brandmauer、Verfassungsschutz 評估、政黨禁令爭議、BSW 分裂之報導與分析。選舉與制度數據參考：德國聯邦選舉主任（Bundeswahlleiter，2025 年 2 月 23 日聯邦大選計票——聯盟黨約 28.5%／208 席、AfD 約 20.8%／152 席、社民黨約 16.4%／121 席、綠黨約 11.6%、左翼黨約 8.8%、自民黨約 4.3% 出局、BSW 約 4.97% 出局；聯邦議會 630 席、過半 316 席）；聯邦議會（Bundestag）與聯邦憲法法院之官方紀錄（債務煞車修憲、預算判決、政黨相關裁決）；2026 年薩克森-安哈特（9 月 6 日）與梅克倫堡-前波美恩（9 月 20 日）邦選之選前民調。經濟與財政數據另參考：德意志聯邦銀行（Bundesbank）、歐洲央行（ECB）、聯邦統計局（Destatis）、德國經濟研究機構（如 ifo、DIW）、以及 OECD／IMF／歐盟執委會對德國經濟、去工業化、能源與財政的評估；債務煞車鬆綁（2025 年 3 月 18 日修憲、5000 億歐元基建特別基金、國防開支逾 GDP 1% 免受煞車限制）之報導與政策分析。地緣章節另參考：關於 Zeitenwende、對烏援助、北約、德法軸心、對中去風險、跨大西洋關係之公開紀錄與智庫分析（如 ISPI、Atlantic Council、American-German Institute、Bruegel）。</p>
+  <p>方法註記：①選舉與表決數字以官方計票與主流媒體一致報導為準；席次、得票率與民調百分點為概略值，旨在呈現量級與結構，精確數字以官方最新統計為準。②民調數字尤其波動，AfD 與各黨的具體百分點隨調查機構、時點與方法而異，本文採「約」與「區間」表述（如 AfD 約 27～29%），2026 年 7 月的相對排序（AfD 第一、聯盟黨第二、大聯合政府失去民調多數）為多家民調一致之趨勢，個別百分點不應被視為精確值。③五稜鏡中的視角陳述為分析性重構，旨在呈現各社會位置的理性計算結構，不代表任何群體的統一立場；對 AfD 的呈現為結構分析，不構成對其主張的認可或評價。④「防火牆」「防衛型民主」「常態化」「規範磨損」等判斷為結構性歸納，個案的正當性須逐案判讀，本文於第 14 章明確區分「真實風險」與「過度解讀」的灰區、不作單一定性。⑤本報告成稿於 2026 年 7 月：Merz 大聯合政府（聯盟黨＋社民黨）執政第一年、AfD 躍居全國民調第一、2026 年 9 月東部兩場邦選之前、債務煞車已於 2025 年 3 月鬆綁的特定時點；仍在演變的時效性事件（東部邦選結果、防火牆的後續張力、財政投資的執行、對烏與對中路線）以第 22 章儀表板為持續校正介面。⑥本文件為政治結構分析，非投資建議；涉及部位決策前應依既定流程另行執行冷讀批判。</p>
+</section>
+
+</main>
+</div>
+</div>
+
+<footer>
+  <div class="shell">
+    <h4>Colophon</h4>
+    <p>德國政治結構五稜鏡 · InvestMQuest Geopolitics Research · 編製於 2026-07-23。設計語彙：靛墨紙面、織錦金界線、五色稜鏡（深灰黑＝聯盟黨 CDU/CSU、赤紅＝社民黨 SPD、天藍＝另類選擇 AfD、綠＝綠黨與左翼、琥珀金＝外國人與投資人）。本文件之稜鏡裝置（同一事實、多種讀法）為分析框架，延續同系列馬來西亞・南韓・泰國・印尼・菲律賓篇之方法，可套用於其他多裂隙政體之結構研究。核心定錨：戰後共識是常數、聯盟組合是變數、AfD 與去工業化是命門。</p>
+  </div>
+</footer>
+
+</body>
+</html>
