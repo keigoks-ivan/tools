@@ -457,6 +457,18 @@ ENTRIES = [
     dict(src=None, slug="mexico-political-structure", cat="politics",
          zh="墨西哥政治結構五稜鏡", en="Mexico: A Politics in Five Prisms",
          blurb="Morena・反對派・販毒集團・制度與美國的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="brazil-political-structure", cat="politics",
+         zh="巴西政治結構五稜鏡", en="Brazil: A Politics in Five Prisms",
+         blurb="Lula・Bolsonarismo・Centrão・制度軍方與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="argentina-political-structure", cat="politics",
+         zh="阿根廷政治結構五稜鏡", en="Argentina: A Politics in Five Prisms",
+         blurb="Milei・庇隆主義・傳統右派・省工會與 IMF 的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="switzerland-political-structure", cat="politics",
+         zh="瑞士政治結構五稜鏡", en="Switzerland: A Politics in Five Prisms",
+         blurb="直接民主・協和共治・聯邦語言・中立與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="italy-political-structure", cat="politics",
+         zh="義大利政治結構五稜鏡", en="Italy: A Politics in Five Prisms",
+         blurb="右翼聯盟・中左 M5S・南北地方・技術官僚與外國人的五種讀法", lat=None, lng=None),
 ]
 
 # ============================================================
