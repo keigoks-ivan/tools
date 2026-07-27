@@ -469,6 +469,21 @@ ENTRIES = [
     dict(src=None, slug="italy-political-structure", cat="politics",
          zh="義大利政治結構五稜鏡", en="Italy: A Politics in Five Prisms",
          blurb="右翼聯盟・中左 M5S・南北地方・技術官僚與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="israel-political-structure", cat="politics",
+         zh="以色列政治結構五稜鏡", en="Israel: A Politics in Five Prisms",
+         blurb="右翼宗教聯盟・世俗中左・哈雷迪・阿拉伯裔與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="china-political-structure", cat="politics",
+         zh="中國政治結構五稜鏡", en="China: A Politics in Five Prisms",
+         blurb="黨與習核心・官僚・軍隊安全・民營資本與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="russia-political-structure", cat="politics",
+         zh="俄羅斯政治結構五稜鏡", en="Russia: A Politics in Five Prisms",
+         blurb="克里姆林・siloviki・寡頭・反對社會與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="saudi-political-structure", cat="politics",
+         zh="沙烏地阿拉伯政治結構五稜鏡", en="Saudi Arabia: A Politics in Five Prisms",
+         blurb="王室MBS・宗教建制・租金國家・社會世代與外國人的五種讀法", lat=None, lng=None),
+    dict(src=None, slug="southafrica-political-structure", cat="politics",
+         zh="南非政治結構五稜鏡", en="South Africa: A Politics in Five Prisms",
+         blurb="ANC・DA・MK與EFF・種族不平等與外國人的五種讀法", lat=None, lng=None),
 ]
 
 # ============================================================

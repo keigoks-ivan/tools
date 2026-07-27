@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中國政治結構五稜鏡 — 黨與習核心・官僚・軍隊安全・民營資本・外國人的五種讀法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@350;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F4EE;        /* 米紙 */
+  --ink:#1B2233;          /* 靛墨 */
+  --ink-soft:#4A5468;
+  --gold:#B08A2E;         /* 織錦金 */
+  --hairline:#D9D4C7;
+  --party:#C0392B;        /* 稜鏡・黨與習核心 = 正紅 */
+  --party-bg:#F9ECEA;
+  --bur:#465059;          /* 稜鏡・官僚與技術官僚 = 石墨灰 */
+  --bur-bg:#ECEDEE;
+  --sec:#24476E;          /* 稜鏡・軍隊安全政法 = 藏青 */
+  --sec-bg:#E9EDF3;
+  --priv:#6B4A8A;         /* 稜鏡・民營資本與地方 = 帝王紫 */
+  --priv-bg:#F0ECF4;
+  --fore:#C67C1E;         /* 稜鏡・外國人 = 琥珀金 */
+  --fore-bg:#F8F1E4;
+  --warn:#8A5A00;
+  --warn-bg:#F7F0DE;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  font-weight:350;
+  line-height:1.95;
+  font-size:16.5px;
+  letter-spacing:.02em;
+}
+::selection{background:var(--gold);color:#fff}
+
+/* ---------- 版心 ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 28px}
+.layout{display:grid;grid-template-columns:236px 1fr;gap:56px;align-items:start}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+
+/* ---------- Hero ---------- */
+header.hero{
+  background:var(--ink);
+  color:#EDE9DE;
+  padding:88px 0 72px;
+  position:relative;
+  overflow:hidden;
+}
+header.hero::after{ /* 五稜鏡光束 */
+  content:'';position:absolute;right:-8%;top:0;bottom:0;width:52%;
+  background:
+    linear-gradient(115deg,transparent 30%,rgba(192,57,43,.34) 30.4%,rgba(192,57,43,.34) 40%,transparent 40.4%),
+    linear-gradient(115deg,transparent 41%,rgba(70,80,89,.34) 41.4%,rgba(70,80,89,.34) 51%,transparent 51.4%),
+    linear-gradient(115deg,transparent 52%,rgba(36,71,110,.32) 52.4%,rgba(36,71,110,.32) 62%,transparent 62.4%),
+    linear-gradient(115deg,transparent 63%,rgba(107,74,138,.32) 63.4%,rgba(107,74,138,.32) 73%,transparent 73.4%),
+    linear-gradient(115deg,transparent 74%,rgba(198,124,30,.32) 74.4%,rgba(198,124,30,.32) 84%,transparent 84.4%);
+  pointer-events:none;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.28em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:26px;
+}
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(34px,4.6vw,56px);line-height:1.3;letter-spacing:.03em;
+  max-width:820px;
+}
+.hero-sub{
+  margin-top:26px;max-width:680px;font-size:17px;line-height:2.05;
+  color:#C9C3B4;font-weight:350;
+}
+.hero-meta{
+  margin-top:40px;display:flex;gap:34px;flex-wrap:wrap;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:#8E96A8;
+}
+.hero-meta b{color:#EDE9DE;font-weight:500;display:block;margin-bottom:3px}
+.prism-legend{margin-top:46px;display:flex;gap:0;max-width:760px;border:1px solid rgba(237,233,222,.22);flex-wrap:wrap}
+.prism-legend div{
+  flex:1;min-width:120px;padding:13px 12px;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:.08em;text-align:center;color:#EDE9DE;
+}
+.prism-legend .pl-p{background:rgba(192,57,43,.78)}
+.prism-legend .pl-b{background:rgba(70,80,89,.82)}
+.prism-legend .pl-s{background:rgba(36,71,110,.80)}
+.prism-legend .pl-c{background:rgba(107,74,138,.78)}
+.prism-legend .pl-f{background:rgba(198,124,30,.80)}
+
+/* ---------- 目錄側欄 ---------- */
+nav.toc{
+  position:sticky;top:0;padding-top:40px;padding-bottom:40px;
+  font-size:13.5px;line-height:1.7;
+  max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:var(--hairline) transparent;
+}
+nav.toc::-webkit-scrollbar{width:5px}
+nav.toc::-webkit-scrollbar-thumb{background:var(--hairline);border-radius:3px}
+nav.toc .toc-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:18px;text-transform:uppercase;
+}
+nav.toc a{
+  display:block;color:var(--ink-soft);text-decoration:none;
+  padding:5px 0 5px 14px;border-left:2px solid var(--hairline);
+  transition:all .18s;
+}
+nav.toc a:hover{color:var(--ink);border-left-color:var(--gold)}
+nav.toc a.t-p{border-left-color:var(--party)}
+nav.toc a.t-b{border-left-color:var(--bur)}
+nav.toc a.t-s{border-left-color:var(--sec)}
+nav.toc a.t-c{border-left-color:var(--priv)}
+nav.toc a.t-f{border-left-color:var(--fore)}
+@media(max-width:960px){nav.toc{position:static;padding-top:40px}}
+
+/* ---------- 主文 ---------- */
+main{padding:64px 0 120px;min-width:0}
+section{margin-bottom:96px}
+.sec-label{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.24em;
+  color:var(--gold);margin-bottom:14px;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:900;font-size:30px;
+  line-height:1.45;margin-bottom:30px;padding-bottom:20px;
+  border-bottom:1px solid var(--hairline);letter-spacing:.02em;
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:21px;
+  margin:44px 0 18px;letter-spacing:.02em;
+}
+p{margin-bottom:20px;max-width:74ch}
+p.lede{font-size:18.5px;line-height:2.05;color:var(--ink);font-weight:400;max-width:70ch}
+strong{font-weight:700;color:var(--ink)}
+em{font-style:normal;border-bottom:2px solid var(--gold);padding-bottom:1px}
+
+/* ---------- 稜鏡三聯裝置（本文件的簽名元素） ---------- */
+.prism{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+  margin:36px 0 44px;border:1px solid var(--hairline);
+  background:#fff;
+}
+@media(max-width:820px){.prism{grid-template-columns:1fr}}
+.prism>div{padding:26px 24px 22px;border-top:4px solid}
+.prism>div+div{border-left:1px solid var(--hairline)}
+@media(max-width:820px){.prism>div+div{border-left:none;border-top-width:4px}}
+.prism .pv-p{border-top-color:var(--party);background:linear-gradient(var(--party-bg),#fff 42%)}
+.prism .pv-b{border-top-color:var(--bur);background:linear-gradient(var(--bur-bg),#fff 42%)}
+.prism .pv-s{border-top-color:var(--sec);background:linear-gradient(var(--sec-bg),#fff 42%)}
+.prism .pv-c{border-top-color:var(--priv);background:linear-gradient(var(--priv-bg),#fff 42%)}
+.prism .pv-f{border-top-color:var(--fore);background:linear-gradient(var(--fore-bg),#fff 42%)}
+.prism .pv-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  margin-bottom:12px;font-weight:500;
+}
+.pv-p .pv-tag{color:var(--party)}
+.pv-b .pv-tag{color:var(--bur)}
+.pv-s .pv-tag{color:var(--sec)}
+.pv-c .pv-tag{color:var(--priv)}
+.pv-f .pv-tag{color:var(--fore)}
+.prism p{font-size:14.5px;line-height:1.9;margin-bottom:12px;color:#333B4D}
+.prism p:last-child{margin-bottom:0}
+.prism-caption{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);
+  letter-spacing:.06em;margin:-32px 0 44px;padding-top:10px;
+}
+
+/* ---------- 觀點框（單一視角深入時的左邊條） ---------- */
+.lens{padding:6px 0 6px 22px;margin:28px 0;border-left:4px solid}
+.lens.l-p{border-color:var(--party)}
+.lens.l-b{border-color:var(--bur)}
+.lens.l-s{border-color:var(--sec)}
+.lens.l-c{border-color:var(--priv)}
+.lens.l-f{border-color:var(--fore)}
+.lens .lens-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;margin-bottom:8px;font-weight:500;
+}
+.lens.l-p .lens-tag{color:var(--party)}
+.lens.l-b .lens-tag{color:var(--bur)}
+.lens.l-s .lens-tag{color:var(--sec)}
+.lens.l-c .lens-tag{color:var(--priv)}
+.lens.l-f .lens-tag{color:var(--fore)}
+
+/* ---------- 數據列 ---------- */
+.figrow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--hairline);border:1px solid var(--hairline);
+  margin:32px 0 40px;
+}
+.figrow div{background:#fff;padding:20px 18px 16px}
+.figrow .fig-n{
+  font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;
+  color:var(--ink);letter-spacing:-.01em;
+}
+.figrow .fig-l{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.6}
+
+/* ---------- 表格（輔助用） ---------- */
+table{width:100%;border-collapse:collapse;margin:28px 0 14px;font-size:14px;background:#fff}
+th{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;
+  text-align:left;padding:12px 14px;background:var(--ink);color:#EDE9DE;font-weight:500;
+}
+td{padding:12px 14px;border-bottom:1px solid var(--hairline);vertical-align:top;line-height:1.75}
+tr:last-child td{border-bottom:none}
+.tbl-note{font-size:13px;color:var(--ink-soft);margin-bottom:36px;max-width:74ch}
+
+/* ---------- 警示框 ---------- */
+.callout{
+  background:var(--warn-bg);border:1px solid #E3D5AE;border-left:4px solid var(--warn);
+  padding:20px 24px;margin:30px 0;font-size:15px;line-height:1.9;max-width:none;
+}
+.callout .co-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  color:var(--warn);margin-bottom:8px;font-weight:500;
+}
+.callout p{margin-bottom:10px;max-width:none}
+.callout p:last-child{margin-bottom:0}
+
+/* ---------- 反方論證（多方論證裝置） ---------- */
+.debate{margin:32px 0;border:1px solid var(--hairline);background:#fff}
+.debate>div{padding:22px 26px}
+.debate .d-pro{border-bottom:1px dashed var(--hairline)}
+.debate .d-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;margin-bottom:10px;font-weight:500;
+}
+.debate .d-pro .d-tag{color:var(--priv)}
+.debate .d-con .d-tag{color:var(--party)}
+.debate p{font-size:14.5px;margin-bottom:10px}
+.debate p:last-child{margin-bottom:0}
+
+ul.plain{margin:0 0 22px 0;padding-left:0;list-style:none;max-width:74ch}
+ul.plain li{padding:9px 0 9px 26px;position:relative;line-height:1.85}
+ul.plain li::before{
+  content:'—';position:absolute;left:0;color:var(--gold);font-weight:700;
+}
+footer{
+  background:var(--ink);color:#8E96A8;padding:56px 0 72px;
+  font-size:13px;line-height:2;
+}
+footer .shell{max-width:900px}
+footer h4{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:16px;font-weight:500;
+}
+footer p{max-width:none}
+
+.part-divider{margin:110px 0 70px;padding:34px 0 30px;border-top:3px solid var(--ink);border-bottom:1px solid var(--hairline)}
+.part-divider .pd-num{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
+.part-divider h2{border:none;padding:0;margin:0;font-size:34px}
+.part-divider .pd-sub{margin-top:8px;color:var(--ink-soft);font-size:15px}
+
+.divider-ornament{
+  text-align:center;color:var(--gold);font-size:15px;letter-spacing:.6em;
+  margin:0 0 96px;user-select:none;
+}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<header class="hero">
+  <div class="shell">
+    <div class="eyebrow">InvestMQuest · Geopolitics Research · v1 · 2026-07-24</div>
+    <h1>中國政治結構五稜鏡</h1>
+    <div class="hero-sub">同一個黨國，五種完全不同的處境。中國已經解決了「誰統治」——共產黨；但真正的政治全在黨的「內部」、且極不透明。從集體領導走向習近平個人核心的集權算術、廢除任期制後懸而未決的接班、軍隊高層被連根整肅到中央軍委副主席層級、民營資本在整頓與再拉攏之間的政治脆弱、以及外國人面對的可預測性與台海尾部風險——以 2025 年四中全會與 15 五規劃、2025 年秋軍隊大整肅為切片，逐層論證。</div>
+    <div class="hero-meta">
+      <div><b>分析基準日</b>2026-07-24</div>
+      <div><b>前一里程碑</b>2025 四中全會與 15 五規劃、軍隊整肅</div>
+      <div><b>下一里程碑</b>2027 二十一大（接班觀察）與經濟去通縮</div>
+      <div><b>文件性質</b>結構分析・非投資建議</div>
+    </div>
+    <div class="prism-legend">
+      <div class="pl-p">黨與習核心</div>
+      <div class="pl-b">官僚體系</div>
+      <div class="pl-s">軍隊安全政法</div>
+      <div class="pl-c">民營資本與地方</div>
+      <div class="pl-f">外國人視角</div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+<div class="layout">
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <a href="#s0">00 導讀與核心論證</a>
+  <div class="toc-title" style="margin-top:16px">I · 地圖</div>
+  <a href="#s1">01 政治版圖總覽</a>
+  <a href="#s2">02 結構的根源</a>
+  <a href="#s2b">02B 接班難題解剖</a>
+  <a href="#s3">03 兩個不投票的力量</a>
+  <div class="toc-title" style="margin-top:16px">II · 稜鏡</div>
+  <a href="#s4" class="t-p">04 黨與習核心</a>
+  <a href="#s5" class="t-b">05 官僚與技術官僚</a>
+  <a href="#s6" class="t-s">06 軍隊・安全・政法</a>
+  <a href="#s7" class="t-c">07 民營資本與地方</a>
+  <a href="#s8" class="t-f">08 外國人／投資人</a>
+  <div class="toc-title" style="margin-top:16px">III · 動力</div>
+  <a href="#s9">09 習近平的集權之路</a>
+  <a href="#s9b">09B 反腐作為權力工具</a>
+  <a href="#s10">10 2025 軍隊整肅與權力波動</a>
+  <a href="#s11">11 經濟換檔</a>
+  <a href="#s11b">11B 房地產危機的傳導</a>
+  <a href="#s12">12 共同富裕與民企</a>
+  <a href="#s13">13 台海與美中</a>
+  <a href="#s13b">13B 台海的成本效益</a>
+  <a href="#s14">14 韌性 vs 脆弱辨析</a>
+  <div class="toc-title" style="margin-top:16px">IV · 引擎</div>
+  <a href="#s15">15 三角傳導模型</a>
+  <a href="#s16">16 政治×經濟迴路</a>
+  <a href="#s17">17 資本的黨國憲法</a>
+  <a href="#s18">18 產業與人口</a>
+  <a href="#s18b">18B 國家隊產業政策</a>
+  <a href="#s19">19 政策連續性與外資</a>
+  <a href="#s20">20 地緣：美中與台海</a>
+  <div class="toc-title" style="margin-top:16px">V · 終章</div>
+  <a href="#s21">21 十大論題</a>
+  <a href="#s22">22 監測儀表板</a>
+  <a href="#s23">23 資料來源</a>
+</nav>
+
+<main>
+<section id="s0">
+  <div class="sec-label">PROLOGUE · CH 00</div>
+  <h2>導讀與核心論證</h2>
+  <p class="lede">中國的政治結構，與多數國家問的問題不同。在西方民主或半民主政體裡，核心問題是「誰會贏得下一次執政權」；在中國，這個問題早已被回答——<strong>共產黨，永遠是共產黨</strong>。一黨執政、黨領導一切、黨政軍一體，這不是變數而是常數。真正的政治不在黨與黨之間，而在<strong>黨的內部</strong>：誰在黨內上升、誰被拿下、集權集中到什麼程度、以及那個永遠說不出口的問題——習近平之後是誰。</p>
+  <p>這使得分析中國政治，本質上是一門「讀不透明」的手藝。它的權力鬥爭沒有公開的選票，只有人事任免、落馬名單、會議公報的措辭變化、以及誰出現在主席台、誰消失了。本報告的任務，是把這團看似鐵板一塊、實則暗流湧動的結構，拆成五個可各自追蹤的稜鏡：</p>
+  <ul class="plain">
+    <li><strong>黨與習核心</strong>：政治的絕對中心。從鄧小平設計的集體領導，到習近平任內回歸「個人核心」、「兩個確立」寫入黨的意識形態、2018 年修憲取消國家主席任期限制——這是全報告的第一顆齒輪，其餘一切都被它帶動。</li>
+    <li><strong>官僚與技術官僚</strong>：黨國體制的執行層。八千多萬黨員、龐大的幹部體系、中央與地方的「條塊」關係。它是政策落地的傳送帶，也是「政令不出中南海」問題的所在地——集權未必等於執行力。</li>
+    <li><strong>軍隊・安全・政法</strong>：兩個不投票、卻決定政權生死的力量。「黨指揮槍」的解放軍、以反腐為權力武器的紀檢系統、公安國安構成的安全與監控體制。2025 年秋軍隊高層被連根整肅至中央軍委副主席層級，把這個稜鏡推到了台前。</li>
+    <li><strong>民營資本與地方</strong>：貢獻了經濟大半就業與稅收、卻在政治上最脆弱的一群。平台與教培整頓的餘波、2025 年《民營經濟促進法》釋出的再拉攏訊號、以及土地財政崩塌後負債累累的地方政府。</li>
+    <li><strong>外國人／投資人</strong>：面對的是一整套與本國人平行、且政治風險難以定價的規則。增長模式換檔、資本管制、美中脫鉤／去風險、供應鏈重組，而在這一切之上懸著一個能穿透所有稜鏡的變數——台海。</li>
+  </ul>
+
+  <h3>核心貫穿線：黨是常數，集權與派系是變數，增長與台海是命門</h3>
+  <p>如果全報告只能留下一句話，就是這句：<strong>黨是常數、集權程度與派系是變數、增長與台海是命門</strong>。共產黨的執政地位在可見期限內不可撼動，這是地基（常數）；但集權集中到什麼程度、黨內派系與人事如何洗牌，是持續變動的（變數）；而真正能動搖這個體制根基的，是兩個「命門」——績效合法性能否在成長換檔（房地產、通縮、人口）中維持，以及台海是否失控。這個框架同時決定了讀者該把注意力放在哪裡：不必為「共產黨會不會倒台」這種低概率命題焦慮，而應緊盯集權的治理代價、接班的不確定性、以及增長與台海這兩條命門線。</p>
+
+  <h3>與越南的對照：同屬列寧黨國，風險量級卻完全不同</h3>
+  <p>中國與越南同屬列寧式一黨國家，共享民主集中制、黨領導一切、以增長換順從的社會契約。但兩者的風險量級不在同一個數量級上，原因有三：<strong>其一，規模</strong>——中國是全球第二大經濟體、擁核大國、聯合國安理會常任理事國，其內部波動具有全球外溢性；<strong>其二，集權度</strong>——越南維持著相對制度化的集體領導（總書記、國家主席、總理、國會主席「四駕馬車」分權），而中國在習近平任內明確走向個人核心，集體領導的制衡功能大幅弱化；<strong>其三，對外對抗</strong>——越南在美中之間「竹子外交」左右逢源，中國則身處與美國的結構性戰略競爭正中央。同樣的制度骨架，因為這三個放大器，產生了完全不同的風險輪廓。</p>
+
+  <h3>全書地圖：五部曲的閱讀動線</h3>
+  <table>
+    <tr><th>部</th><th>章</th><th>回答的問題</th></tr>
+    <tr><td><strong>第一部・地圖</strong></td><td>01–03</td><td>權力版圖長什麼樣？結構的根源在哪？兩個不投票的力量（軍隊與紀檢政法）如何運作？</td></tr>
+    <tr><td><strong>第二部・稜鏡</strong></td><td>04–08</td><td>同一個黨國，五種身分（黨與習核心／官僚／軍隊安全／民營資本／外國人）各自看到什麼？</td></tr>
+    <tr><td><strong>第三部・動力</strong></td><td>09–14</td><td>集權之路怎麼走來的？2025 軍隊整肅的訊號、經濟換檔、民企整頓到再拉攏、台海與美中、韌性 vs 脆弱如何辨析？</td></tr>
+    <tr><td><strong>第四部・引擎</strong></td><td>15–20</td><td>黨×增長×地緣如何互相傳導？資本的黨國憲法、產業與人口、政策連續性、地緣各卡在哪個齒輪？</td></tr>
+    <tr><td><strong>第五部・終章</strong></td><td>21–23</td><td>十大論題（附信度與可證偽條件）、監測儀表板、資料來源與方法註記。</td></tr>
+  </table>
+  <p><strong>一句話結論，供全文檢驗：</strong>中國是一個已經解決「誰統治」、卻把全部政治風險壓縮進「黨內不透明」的體制——它的穩定來自集權的動員力與績效合法性，它的脆弱也來自同一個集權（資訊失真、接班懸空、糾錯機制退化）。趕時間的讀者可直接讀第 21 章十大論題與第 22 章儀表板，再回頭按需查閱。本報告立場中立：既不作「即將崩潰」的預言，也不作「不可撼動」的頌歌，而是把真實風險（接班、資訊、通縮）與過度解讀（崩潰論）分層辨析。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART I</div>
+  <h2>地圖 · The Map</h2>
+  <div class="pd-sub">版圖、地基與兩個不投票的力量</div>
+</div>
+
+<section id="s1">
+  <div class="sec-label">PART I · CH 01</div>
+  <h2>政治版圖總覽：黨—國—軍—社的權力層級</h2>
+  <p class="lede">理解中國政治，第一步是拋棄「政府是最高權力機關」的直覺。在中國，<strong>黨在國之上、黨在軍之上、黨在社會之上</strong>。國務院（政府）、全國人大（立法）、法院檢察院（司法）——這些在其他國家彼此制衡的機關，在中國都是黨領導下的執行與背書機構。真正的權力階梯，要從黨的內部一層一層讀上去。</p>
+
+  <h3>第一層：權力金字塔——從九千萬黨員到一個人</h3>
+  <p>把中國的權力結構還原成一座金字塔，從底到頂是：約 9,900 萬名<strong>黨員</strong> → 每五年一次的<strong>全國代表大會</strong>（二十大 2022 年召開）→ 約 200 名的<strong>中央委員會</strong> → 24 名的<strong>中央政治局</strong> → 7 名的<strong>政治局常委</strong>（最高決策核心）→ 頂端的<strong>總書記</strong>。權力在每一層急劇收窄，而真正的決策集中在常委會與總書記手中。全國人大代表近三千人、每年開會約十天，其功能是把黨的決定轉化為國家法律形式——它是「橡皮圖章」的制度化身，而非西方意義上的議會。</p>
+
+  <h3>第二層：三位一體——習近平的三頂帽子</h3>
+  <p>習近平同時握有三個最高職位，構成「三位一體」：<strong>中共中央總書記</strong>（黨的最高領導）、<strong>國家主席</strong>（國家元首）、<strong>中央軍委主席</strong>（軍隊最高統帥）。三者中，總書記與軍委主席是實權核心，國家主席相對是禮儀性的國家代表職。這個組合意味著黨、國、軍的最高權力集於一身——這正是「黨領導一切」在人身上的具象化。值得注意的是，2018 年修憲取消的是<strong>國家主席</strong>的任期限制（原為兩屆十年），而總書記與軍委主席本就無明文任期上限；廢除國家主席任期限制，是為了讓「三位一體」能夠同步無限延續。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">~9,900萬</div><div class="fig-l">中共黨員總數，全球最大政黨</div></div>
+    <div><div class="fig-n">7</div><div class="fig-l">政治局常委——最高決策核心人數</div></div>
+    <div><div class="fig-n">三位一體</div><div class="fig-l">總書記＋國家主席＋中央軍委主席集於一身</div></div>
+    <div><div class="fig-n">2018</div><div class="fig-l">修憲取消國家主席任期限制之年</div></div>
+  </div>
+
+  <h3>第三層：習核心與派系——集權的算術</h3>
+  <p>2022 年二十大是集權算術的分水嶺。習近平打破鄧小平以來「兩屆十年」的接班慣例，續任第三個任期；新一屆政治局常委會（習近平、李強、趙樂際、王滬寧、蔡奇、丁薛祥、李希）被廣泛評估為由習近平的親信與長期共事者主導，過去用來平衡的「團派」（共青團系統出身）與其他派系的代表性顯著下降。這意味著傳統上以「派系平衡」來理解中國高層的框架，其解釋力正在下降——當一個人的意志能主導人事，「派系」更像是尚未被完全整合的殘留，而非對等的制衡力量。但需謹慎：黨內政治極不透明，「習家軍完全掌控」與「仍存在暗流」都是外部推測，真實的內部張力無法從公開資訊確證（2025 年軍隊整肅正是這種暗流的一次外顯，詳第 10 章）。</p>
+
+  <div class="prism">
+    <div class="pv-p"><div class="pv-tag">黨與習核心</div>
+      <p>版圖的核心事實是集權的完成度：黨、國、軍最高權力集於一人，常委會由親信主導，接班慣例被打破。從黨的官方敘事看，這是「兩個確立」（確立習近平黨中央的核心、全黨的核心地位，確立習近平新時代中國特色社會主義思想的指導地位）的制度成果，是應對「百年變局」所需的集中統一領導。</p>
+    </div>
+    <div class="pv-b"><div class="pv-tag">官僚體系</div>
+      <p>版圖對官僚而言意味著「唯上」的強化：當權力高度集中，幹部的生存邏輯從「對結果負責」轉向「對上級與政治正確負責」。這提高了政策動員的速度，卻也放大了資訊上報的失真與「層層加碼／層層甩鍋」的執行病理。</p>
+    </div>
+    <div class="pv-f"><div class="pv-tag">外國人</div>
+      <p>版圖對外資的意義是「決策極度集中＝可預測性的雙面性」：頂層一旦定調，執行力驚人（如新能源、基建）；但也意味著單一意志的轉向（監管突襲、政治運動）可以在無預警下改變整個產業的遊戲規則，且缺乏制度化的申訴管道。集中是效率的來源，也是尾部風險的來源。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一張權力版圖，三種利害結構</div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s2">
+  <div class="sec-label">PART I · CH 02</div>
+  <h2>結構的根源：為什麼一黨體制能維持</h2>
+  <p class="lede">要回答「這個體制為什麼穩定、又在哪裡脆弱」，必須先確認它建立在什麼地基上。答案是四層地基：一套組織原則（民主集中制）、一條最高律令（黨領導一切）、一份隱形契約（增長與民族主義換順從）、以及一個未解的結構性缺陷（接班難題）。</p>
+
+  <h3>第一層：民主集中制——組織的鋼骨</h3>
+  <p>「民主集中制」是列寧主義政黨的核心組織原則，也是理解中共紀律的鑰匙。其公式是：<strong>「少數服從多數、下級服從上級、全黨服從中央、全國各族人民服從黨中央」</strong>。名義上先有「民主」的討論、再有「集中」的決定；實務上，隨著集權深化，天平明顯偏向「集中」一端。這套原則的威力在於它把整個組織變成一個能一致行動的整體——一旦中央定調，理論上九千萬黨員與整個國家機器都必須對齊。這是中國能在治理上「集中力量辦大事」（如高鐵、脫貧攻堅、疫情初期封控）的組織基礎，也是異議在體制內幾乎沒有合法生存空間的原因。</p>
+
+  <h3>第二層：黨領導一切——沒有邊界的權力</h3>
+  <p>「黨政軍民學，東西南北中，黨是領導一切的」——這句寫入黨章的表述，界定了黨權的無邊界性。與西方「政黨在憲政框架內執政」不同，中國是「黨在憲法與國家機器之上」。具體機制包括：各級國家機關、國企、大學乃至部分大型民企內都設有<strong>黨組／黨委</strong>，重大決策須經黨組織；幹部任免走<strong>黨管幹部</strong>原則（組織部而非人事部門主導）；意識形態、宣傳、政法都由黨的專門機構統管。習近平任內強化了這一點，把過去一度「黨政分開」的探索明確逆轉為「黨政合一、黨要管黨」。</p>
+
+  <h3>第三層：社會契約——以增長與民族主義換順從</h3>
+  <p>一黨體制的合法性不來自選票，而來自兩根支柱構成的隱形契約：<strong>績效（增長）＋民族主義</strong>。改革開放後四十年的高速增長，讓數億人脫貧、生活水準劇變，這是黨最強的合法性來源——「你們別管政治，我讓你們富起來」。當增長放緩，第二根支柱——民族主義（民族復興、大國崛起、對外強硬、統一台灣的願景）——的權重就上升，用以填補績效合法性的缺口。這解釋了為什麼在經濟換檔期，官方敘事更強調「中華民族偉大復興」與對外強硬：這不只是外交姿態，更是合法性配方的內部再平衡。</p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">正方論證：績效合法性正在被侵蝕</div>
+      <p>當高速增長不再、房地產這個家庭財富的主要載體崩跌、青年失業率一度高企到官方一度暫停公布、通縮讓收入與資產預期同步下修——契約的「增長」那一半正在失效。歷史上多個威權政體的動搖，都始於「經濟奇蹟」敘事的破產。若成長換檔失敗、民眾預期系統性轉悲觀，黨將被迫更依賴民族主義與強制（維穩、監控）來維持順從，而這是成本更高、更脆弱的合法性配方。</p>
+    </div>
+    <div class="d-con"><div class="d-tag">反方論證：契約有彈性、國家能力極強</div>
+      <p>把「增長放緩」直接等同於「合法性崩潰」是線性外推的謬誤。其一，中國仍在中高速增長區間（2026 目標 4.5–5%），是「奇蹟退場」而非「衰退」；其二，黨握有極強的國家能力——財政與貨幣工具、對敘事的近乎壟斷、世界級的監控與維穩體系——足以吸收相當程度的不滿；其三，民族主義在對外對抗升溫時能有效轉移內部壓力。真實的風險不是「明天崩潰」，而是「合法性配方從增長悄悄滑向民族主義與強制」所帶來的長期治理品質下降與對外風險上升。</p>
+    </div>
+  </div>
+
+  <p><strong>本節結論：</strong>一黨體制的地基在組織（民主集中制）與意識形態（黨領導一切）兩層是極其牢固的，短期內無鬆動可能。真正在變動的是第三層的社會契約——增長這根支柱正在承壓，民族主義這根支柱的權重上升。而第四層（接班難題）則是這個結構最深、最無解的缺陷，值得單獨解剖（見下一節）。</p>
+</section>
+
+<section id="s2b">
+  <div class="sec-label">PART I · CH 02B</div>
+  <h2>接班難題解剖：列寧黨國永遠沒解好的一道題</h2>
+  <p class="lede">所有威權與一黨體制都有一個共同的阿基里斯腱——<strong>權力如何和平、可預測地移交</strong>。民主制度用選舉解決了這件事；列寧黨國沒有內建的接班機制，只能靠一次次試錯與慣例來湊。中國曾一度看似解決了它，如今又親手把答案抹掉。這是本報告認為最被低估、卻最深遠的結構性風險。</p>
+
+  <h3>鄧小平的解法：把接班「制度化」的三十年實驗</h3>
+  <p>毛澤東時代的接班是災難——指定接班人（劉少奇、林彪）非死即叛，權力移交伴隨清洗與動盪。鄧小平的歷史貢獻之一，是試圖把接班「制度化」：透過<strong>任期限制（兩屆十年）、年齡紅線（「七上八下」的退休慣例）、隔代指定（鄧指定江澤民、胡錦濤兩代）、集體領導（常委分工、避免一人獨大）</strong>，讓權力移交變得可預測。江澤民 → 胡錦濤 → 習近平的兩次交接，是這套實驗看似成功的證據，一度被視為「威權韌性」的典範。</p>
+
+  <h3>2018 年的逆轉：親手拆掉自己的保險絲</h3>
+  <p>2018 年修憲取消國家主席任期限制、2022 年二十大習近平續任第三任期並打破退休慣例，等於把鄧小平三十年建立的接班制度化成果<strong>大部分逆轉</strong>。這帶來一個根本性的不確定：<strong>沒有人知道權力下一次會如何、何時、移交給誰</strong>。二十大的政治局常委中，也沒有出現一個被明確培養為「接班人」的年輕世代領導人（過去接班人通常會提前一屆進入常委歷練）。這意味著接班問題不是「延後解決」，而是「被移除了解決機制」。</p>
+
+  <h3>為什麼這是最深的風險：三個傳導管道</h3>
+  <ul class="plain">
+    <li><strong>繼承危機的空窗</strong>：一旦最高領導人因健康、意外或其他原因無法視事，而沒有制度化的繼任安排，權力真空可能引發高層的激烈角力——這是列寧黨國歷史上最危險的時刻（蘇聯史達林、毛澤東身後皆然）。</li>
+    <li><strong>「強人不可替代」的鎖定效應</strong>：當體制圍繞一個人建構，這個人就越難退出——因為退出本身會製造不穩定，於是集權自我強化、越陷越深，晚年政治的風險（決策僵化、資訊繭房、諂媚上行）隨時間累積。</li>
+    <li><strong>糾錯機制的退化</strong>：集體領導雖然效率低，卻提供了一種內部糾錯與制衡；當它被個人核心取代，重大決策失誤（如某項政策運動）缺乏體制內的煞車，錯誤可能被放大並延續更久。</li>
+  </ul>
+
+  <div class="callout">
+    <div class="co-tag">辨析 · 真實風險 vs 過度解讀</div>
+    <p><strong>真實風險</strong>：接班無明確安排，是一個結構性的、長期的不確定來源，其兌現時點不可預測但後果可能劇烈——這是需要嚴肅對待的。</p>
+    <p><strong>過度解讀</strong>：把「接班不明」直接推論為「政權即將動盪」或「習近平隨時被推翻」則是過度戲劇化。集權者恰恰握有最強的工具來維持穩定與壓制挑戰；接班風險是一個「不連續」的尾部風險（平時貼近於零、一旦兌現則劇烈），而非一個「正在發生的進行式」。正確的姿勢是把它放在心裡當作長期監測項，而非日常交易的觸發器。</p>
+  </div>
+</section>
+
+<section id="s3">
+  <div class="sec-label">PART I · CH 03</div>
+  <h2>兩個不投票的力量：軍隊與紀檢政法</h2>
+  <p class="lede">在民主國家，選民與法院是制約權力的力量；在中國，有兩個「不投票」卻決定政權生死的力量：<strong>槍桿子（軍隊）與刀把子（紀檢與政法）</strong>。前者確保政權不被推翻，後者確保黨內紀律與社會控制。理解它們，才理解這個體制真正靠什麼站著。</p>
+
+  <h3>槍桿子：黨指揮槍，而非國指揮槍</h3>
+  <p>中國一個關鍵的、常被外界誤解的事實是：<strong>解放軍（PLA）是黨的軍隊，不是國家的軍隊</strong>。它效忠的對象是中國共產黨，最高統帥機構是<strong>中央軍事委員會（CMC）</strong>，主席由黨的最高領導人（習近平）擔任。「黨指揮槍」是鐵律——毛澤東的名言「槍桿子裡面出政權」與「黨要指揮槍，而槍絕不容許指揮黨」定義了黨軍關係。這意味著軍隊不是一個中立的國家機構，而是政權的最終保障；也意味著誰控制軍委、誰的人馬進入軍隊高層，是黨內權力的終極指標。2025 年軍隊高層被連根整肅（詳第 6、10 章），正是因為軍隊的忠誠與純潔對政權而言是不可談判的。</p>
+
+  <h3>刀把子：紀檢——反腐作為權力的雙刃</h3>
+  <p><strong>中央紀律檢查委員會（CCDI，中紀委）</strong>是黨的內部監察機構，與 2018 年成立的<strong>國家監察委員會（監委）</strong>合署辦公，形成覆蓋所有行使公權力者的監察網。習近平上台後發動的反腐運動（「打虎拍蠅」）由中紀委主導，十餘年間查處了包括周永康、徐才厚、郭伯雄、孫政才等「大老虎」在內的數百萬幹部。反腐有雙重性：<strong>它既是真實的治理需求</strong>（腐敗在改革開放後確實蔓延、危及執政基礎），<strong>也是強大的權力工具</strong>——反腐的選擇性、對政治對手的清除效果，使它成為集權過程中最有效的武器（詳第 9B 章專門解剖）。</p>
+
+  <h3>刀把子之二：政法與安全——維穩的機器</h3>
+  <p>第二把刀是政法與安全體系：<strong>公安（治安與監控）、國安（國家安全）、政法委（協調公檢法）</strong>，加上覆蓋全國的技術監控網絡（攝影機、社會信用、網路長城、大數據維穩）。「維穩」（維護穩定）曾是與國防預算相當量級的財政項目。這套體系的邏輯是「把不穩定因素消滅在萌芽狀態」——從街頭抗議到網路言論，都在其監控與處置範圍內。它的效能極高，是社會層面順從的直接保障；但它也是成本高昂的（財政與治理注意力），且過度依賴強制的合法性配方本身是脆弱的訊號。</p>
+
+  <div class="prism">
+    <div class="pv-s"><div class="pv-tag">軍隊安全政法</div>
+      <p>對這個稜鏡而言，「黨指揮槍」與「刀把子牢牢握在黨手中」是政權存續的第一原理。軍隊的絕對忠誠、紀檢的持續反腐、政法的社會控制，共同構成「不可談判的核心」。2025 年整肅的意義正在於此：寧可承受高層動盪的短期成本，也要確保軍隊的政治可靠。</p>
+    </div>
+    <div class="pv-b"><div class="pv-tag">官僚體系</div>
+      <p>對官僚而言，紀檢是頭頂懸著的劍。反腐常態化意味著每個幹部都活在「被查」的可能性下，這帶來兩個後果：一是不敢貪（正面），二是不敢為（負面）——「多做多錯、少做少錯、不做不錯」的避責心態蔓延，形成「懶政怠政」，反過來侵蝕政策執行力。</p>
+    </div>
+    <div class="pv-f"><div class="pv-tag">外國人</div>
+      <p>對外資，這兩把力量意味著「政治風險的深不可測」：軍隊與安全體系的動向極不透明，反腐與國安可以在無預警下觸及外商（如反間諜法擴大、盡職調查公司被查）。它們是評估中國「制度性政治風險溢價」時最難量化、卻最不能忽略的分項。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 兩個不投票的力量，三種利害讀法</div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART II</div>
+  <h2>稜鏡 · The Prisms</h2>
+  <div class="pd-sub">同一個黨國，五種身分的五種讀法</div>
+</div>
+
+<section id="s4">
+  <div class="sec-label">PART II · CH 04</div>
+  <h2>黨與習核心：從集體領導到個人核心</h2>
+  <p class="lede">第一個稜鏡，是這個體制的絕對中心。它不是「五分之一」，而是帶動其餘四個稜鏡的主齒輪。要理解 2012 年以來的中國，核心變化只有一句話：<strong>從鄧小平設計的「集體領導」，回歸到「個人核心」</strong>。這一節解剖這個轉變的機制、意識形態工程與它的內在張力。</p>
+
+  <h3>集體領導的興衰：一個被主動終結的均衡</h3>
+  <p>鄧小平在文革的個人崇拜災難後，刻意設計了「集體領導」——常委分工、集體決策、避免任何一人凌駕於黨之上，並輔以任期與年齡限制。江澤民、胡錦濤時代大致遵循此模式（胡錦濤時期甚至被批評為「九龍治水」、政令分散、改革停滯）。習近平的判斷恰恰相反：他認為分散的集體領導導致<strong>「宗派林立、政令不出中南海、腐敗失控」</strong>，解方是重新集中權力於核心。於是「集體領導」這個均衡，是被一個明確的政治判斷主動終結的，而非自然演變。</p>
+
+  <h3>意識形態工程：「習近平思想」與「兩個確立」</h3>
+  <p>個人核心需要意識形態的加持。2017 年十九大，「習近平新時代中國特色社會主義思想」寫入黨章；2018 年寫入憲法。2021 年六中全會通過《歷史決議》（黨史上第三份，前兩份分屬毛澤東、鄧小平），把習近平置於與毛、鄧並列的歷史敘事高度。2021 年底提出<strong>「兩個確立」</strong>（確立習近平的核心地位、確立習近平思想的指導地位），成為全黨必須表態的政治規矩。這一整套意識形態工程的功能，是把「習核心」從人事現實升級為<strong>制度與信仰的雙重鎖定</strong>——質疑核心不再只是政治不正確，而是動搖「黨的根本」。</p>
+
+  <h3>黨建：把黨「重新武裝」</h3>
+  <p>習近平任內大力推動「全面從嚴治黨」與「黨的建設」：強化基層黨組織、恢復思想學習（「學習強國」App、主題教育）、整頓黨風、把黨的觸角重新伸入國企與社會。這與改革開放中後期「黨逐漸退居幕後、讓市場與技術官僚主導」的趨勢正好相反。其邏輯是：黨若鬆懈、腐化、被利益集團俘獲，政權就會從內部瓦解（蘇聯亡黨亡國是反覆援引的教訓）。因此「黨建」不是空洞的口號，而是政權自我維護的核心工程。</p>
+
+  <div class="lens l-p">
+    <div class="lens-tag">黨與習核心的內在邏輯</div>
+    <p>從這個稜鏡的自我論述看，集權不是目的而是手段：面對「百年未有之大變局」（美中對抗、經濟換檔、內部風險），分散的集體領導無力應對，唯有集中統一領導才能「辦成大事、應對大戰」。「兩個確立」被論述為「黨心所向、眾望所歸」的必然。這套論述的內在自洽性很強——它把一切集權都框定為「應對危機的必要」，使反對集權者在論述上處於「製造分裂、危害大局」的不利位置。</p>
+  </div>
+
+  <h3>內在張力：集權的「委託—代理」悖論</h3>
+  <p>但個人核心有一個無法迴避的內在張力。集權在「決策」層面提升了速度與一致性，卻在「資訊」與「執行」層面製造了新問題：當所有人都必須對齊核心、當講真話的風險上升，<strong>向上呈報的資訊會系統性地被過濾、美化、諂媚化</strong>；核心看到的世界，可能與真實世界越來越有落差。這是所有高度集權體制的共同悖論——權力越集中，決策者越可能被「報喜不報憂」的資訊繭房包圍，而糾錯的難度隨集權程度上升。這個張力不會立刻爆發，但它是集權模式長期治理品質的一個結構性隱患，也是本報告在「脆弱」一側最看重的機制（詳第 14 章）。</p>
+</section>
+
+<section id="s5">
+  <div class="sec-label">PART II · CH 05</div>
+  <h2>官僚與技術官僚：黨國體制如何運作</h2>
+  <p class="lede">第二個稜鏡，是政策從「中南海的決定」變成「地方的現實」之間的那條漫長傳送帶。中國的治理奇蹟與治理病理，都藏在這個龐大官僚體系的運作細節裡。集權解決了「定調」，但「落地」是另一回事——這裡是「政令不出中南海」這句老話的所在地。</p>
+
+  <h3>條與塊：中國治理的坐標系</h3>
+  <p>理解中國官僚，先要理解「<strong>條塊關係</strong>」這個坐標系。「條」是垂直的部委系統（如從中央到地方的財政、公安、環保系統）；「塊」是水平的地方黨政（省—市—縣—鄉的黨委與政府）。一個地方官員，既要聽上級「塊」（地方黨委）的話，又要執行各條「條」（部委）的政策，經常面對「條塊衝突」——上面千條線、下面一根針。中央與地方的權責、財權與事權的劃分，是這個體系永恆的張力來源（如 1994 年分稅制把財權上收中央、事權留給地方，埋下地方財政對土地依賴的伏筆，詳第 7、11 章）。</p>
+
+  <h3>幹部考核：官員的「KPI 政治學」</h3>
+  <p>中國官僚體系高效的一面，來自一套精密的<strong>幹部考核與晉升錦標賽</strong>。地方官員的升遷長期與可量化的政績掛鉤——過去是 GDP 增速、招商引資，如今權重轉向「高質量發展」、科技創新、防範風險、政治忠誠。這套「晉升錦標賽」曾是中國增長的隱形引擎：官員為了升遷而拼經濟、招商、建基建，形成地方間的競爭。但它也有副作用：<strong>唯 GDP 導致的重複建設、環境破壞、債務堆積、數據造假</strong>。近年考核指標的轉向（從增長到忠誠與風控），改變了官員的激勵函數——當「政治正確」的權重上升、「發展實績」的權重下降，官員的行為也隨之從「敢闖敢幹」轉向「求穩避責」。</p>
+
+  <h3>政令不出中南海：執行的漏損</h3>
+  <p>集權的一個反直覺後果是：權力越集中在頂端，中間層的執行反而可能越走樣。原因有三：<strong>其一，資訊不對稱</strong>——中央的政策是原則性的，地方的情況是具體的，落地時的「自由裁量」空間巨大；<strong>其二，激勵扭曲</strong>——「層層加碼」（下級為了政治安全而過度執行，如某些運動式治理）與「上有政策、下有對策」（地方為了自身利益而選擇性執行）並存；<strong>其三，避責文化</strong>——反腐高壓與問責常態化下，「不做不錯」的心態導致政策在基層「空轉」。這解釋了一個表面矛盾：一個高度集權的體制，為什麼常常抱怨「政策落實不到位」。集權不等於執行力，這是官僚稜鏡最重要的洞察。</p>
+
+  <div class="prism">
+    <div class="pv-b"><div class="pv-tag">官僚體系</div>
+      <p>官僚的生存邏輯是「對上負責」。當考核從 GDP 轉向忠誠與風控、當反腐高壓常態化，理性的幹部選擇「求穩避責」。這在宏觀上表現為地方投資意願下降、政策執行打折——集權的一個非預期後果，是基層活力的收縮。</p>
+    </div>
+    <div class="pv-p"><div class="pv-tag">黨與習核心</div>
+      <p>對核心而言，官僚的「懶政怠政」是集權必須付出的代價，也是需要用「壓實責任」「督查問責」持續對抗的頑疾。核心的邏輯是：與其容忍腐敗與宗派，不如以嚴治黨換取政治可靠，執行力的漏損可以靠制度督導補救。</p>
+    </div>
+    <div class="pv-c"><div class="pv-tag">民營資本與地方</div>
+      <p>對地方政府與企業，官僚的避責化直接影響營商環境：審批變慢、政策解讀趨嚴、「新官不理舊帳」的風險上升。當幹部把「不出事」置於「促發展」之上，市場主體感受到的是可預期性下降與交易成本上升。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一套官僚體系，三種利害讀法</div>
+</section>
+
+<section id="s6">
+  <div class="sec-label">PART II · CH 06</div>
+  <h2>軍隊・安全・政法：PLA 現代化與整肅</h2>
+  <p class="lede">第三個稜鏡，是政權的最終保障，也是 2025 年最劇烈震盪的所在。解放軍在習近平任內經歷了規模空前的現代化與同樣空前的整肅——這兩件事看似矛盾，實則是同一枚硬幣的兩面：一支越來越強大的軍隊，越需要確保它在政治上絕對可靠。</p>
+
+  <h3>現代化：一支為「打贏」而重塑的軍隊</h3>
+  <p>習近平上台後推動了 1949 年以來最大規模的軍改：2015 年起重組指揮體系，把原七大軍區改為五大戰區、裁軍三十萬、組建<strong>火箭軍</strong>（原第二炮兵，掌管常規與核導彈）、戰略支援部隊（後於 2024 年再重組為信息支援部隊等）、加強海空軍與聯合作戰能力。目標明確：把一支以陸軍為主、打「人民戰爭」的軍隊，改造成能打「現代化聯合作戰」、具備區域拒止與跨海作戰能力的力量，並設定了「建軍百年（2027）奮鬥目標」等節點。這支軍隊的現代化直接關聯台海（詳第 13、20 章）——它的能力提升是真實的、量級可觀的。</p>
+
+  <h3>整肅：反腐深入軍隊高層</h3>
+  <p>但現代化的另一面是持續而深入的整肅。習近平第一任期就拿下了徐才厚、郭伯雄兩名前中央軍委副主席（軍中最高階的兩隻「老虎」）。近年整肅重新加速並直指要害：<strong>火箭軍</strong>成為重災區，2023 年司令員、政委等高層被撤換；<strong>國防部長</strong>接連出事——李尚福 2023 年被免、其前任魏鳳和亦被查處；前<strong>外交部長</strong>秦剛 2023 年閃電下台。整肅的邏輯是雙重的：既清除真實的腐敗（軍隊採購、工程、晉升中的貪腐），也確保軍隊高層對核心的絕對忠誠——在台海可能攤牌的背景下，一支「政治不可靠」的軍隊比「不夠現代化」的軍隊更危險。</p>
+
+  <div class="callout">
+    <div class="co-tag">2025 整肅 · 已證實事實</div>
+    <p>2025 年 10 月，中國官方（國防部）宣布開除<strong>何衛東</strong>（時任中央軍委副主席、軍中第二號人物）、<strong>苗華</strong>（軍委政治工作部主任）等九名高級將領的黨籍與軍籍，以嚴重違紀違法（腐敗）為由。何衛東是自文革以來首位被整肅的、有職業軍人背景的在任軍委副主席，也是自二十大現任軍委組成以來第三位被拿下的軍委委員。其職務由<strong>張升民</strong>接任軍委副主席。</p>
+    <p><strong>已證實與傳聞的界線</strong>：以上為官方公布的事實。但「整肅背後是否存在權力鬥爭、習近平的權力是否因此被削弱或反而更鞏固」等解讀，屬於外部推測，黨內政治的真實動因無法從公開資訊確證——本報告在第 10 章專門辨析這一層，並明確區分「已證實的人事變動」與「對其政治含義的推測」。</p>
+  </div>
+
+  <h3>安全與政法：維穩機器的日常運作</h3>
+  <p>軍隊之外，是覆蓋社會的安全與政法體系。<strong>公安</strong>（治安、戶籍、出入境、部分監控）、<strong>國安</strong>（反間諜、境外勢力、政治安全，近年因《反間諜法》擴大而權力擴張）、<strong>政法委</strong>（黨對公檢法的領導協調）、加上武警（維穩的準軍事力量）。其技術底座是全球最綿密的監控網絡之一：遍布的攝影機、人臉識別、網路審查（防火長城）、社會信用探索、大數據維穩。這套體系的目標是「把風險化解在源頭」，其效能極高，是社會層面順從的直接保障，也構成外資與外籍人士在中國感知到的「無形邊界」。</p>
+</section>
+
+<section id="s7">
+  <div class="sec-label">PART II · CH 07</div>
+  <h2>民營資本與地方：貢獻最大、政治最脆弱</h2>
+  <p class="lede">第四個稜鏡，是一群矛盾的存在：民營企業貢獻了中國經濟大約「五六七八九」（約 50% 稅收、60% GDP、70% 技術創新、80% 城鎮就業、90% 企業數量），卻在政治上是最脆弱的一群——因為它們的財富與地位，最終仰賴黨的容許而非制度的保障。地方政府則是另一個承壓點：土地財政崩塌後，它們正陷入債務的泥潭。</p>
+
+  <h3>民企的政治脆弱：容許而非保障</h3>
+  <p>民營資本在中國的根本處境，是<strong>其財產權與經營自由建立在「政治容許」而非「制度保障」之上</strong>。憲法雖已承認私有財產與民營經濟的地位，但在「黨領導一切」與「國有經濟為主導」的框架下，民企始終是「被允許存在」而非「不可侵犯」的。這種脆弱性在 2020–2022 年集中爆發：<strong>螞蟻集團 IPO 被叫停、阿里巴巴被反壟斷重罰、平台經濟整頓、教培行業近乎一夜歸零、房地產「三條紅線」收緊融資</strong>。這一輪整頓對民營企業家的信心造成深遠衝擊——它傳遞的訊號是：無論你多大、多成功，黨的意志可以在任何時候重新定義你的邊界。</p>
+
+  <h3>再定位：從「整頓」到「再拉攏」</h3>
+  <p>但 2024–2025 年出現了明顯的政策再平衡。當經濟換檔壓力上升、民間投資與信心低迷，黨轉向「重新拉攏」民企：<strong>2025 年 5 月《民營經濟促進法》正式施行</strong>——這是中國首部專門促進民營經濟的基礎性法律，宣示「平等對待、公平競爭、產權保護」；習近平召開民營企業家座談會、釋出支持訊號；對平台經濟的定調從「整頓」轉向「支持健康發展」。這是一次可觀察的鐘擺回擺。但需辨析其性質：<strong>這是「政策工具的再平衡」，而非「民企政治地位的根本改變」</strong>。促進法能否落地、產權保護在遇到「政治需要」時是否可靠，仍取決於黨的意志——法律在黨國體制中是治理工具，而非凌駕於黨之上的制約（詳第 12、17 章）。</p>
+
+  <h3>地方政府與土地財政：崩塌的第二財政</h3>
+  <p>地方政府是這個稜鏡的另一半。1994 年分稅制後，地方「事權大、財權小」，長期靠<strong>賣地收入（土地財政）</strong>填補缺口——地方政府把土地出讓給開發商的收入，一度是許多地方的「第二財政」，支撐了基建、公共服務與地方融資平台的償債。房地產危機直接擊穿了這個模式：<strong>土地出讓金大幅萎縮</strong>，地方財政收入承壓，而過去累積的<strong>地方政府隱性債務（透過融資平台 LGFV 舉借）</strong>則成為系統性風險的焦點。中央近年推動化債（debt swap，用地方政府債券置換隱性債務、展期降息），但這是「化解」而非「消除」——它把風險攤平到更長時間，代價是地方投資能力與公共服務的持續收縮（詳第 11、11B 章）。</p>
+
+  <div class="prism">
+    <div class="pv-c"><div class="pv-tag">民營資本與地方</div>
+      <p>對民企而言，經歷了整頓的信心創傷後，2025 年的再拉攏是「謹慎的解凍」而非「回到過去」。理性的企業家學到的教訓是：把政治風險內化為經營常量——不做「大到讓黨不安」的事、在戰略上與國家方向（如硬科技、製造業）對齊，才是穿越週期的生存之道。</p>
+    </div>
+    <div class="pv-p"><div class="pv-tag">黨與習核心</div>
+      <p>對核心而言，民企是「要用、也要管」的力量：它們是就業、稅收與創新的引擎，必須支持；但它們的資本與影響力若失控（如金融無序擴張、輿論影響、貧富差距），則被視為對「黨領導」與「共同富裕」的威脅。整頓與拉攏的擺盪，反映的正是這種「既要又要」的內在張力。</p>
+    </div>
+    <div class="pv-f"><div class="pv-tag">外國人</div>
+      <p>對外資，民企的遭遇是一面鏡子：連本國最成功的企業家都可能一夜之間被重新定義邊界，外資的「制度性保障」只會更薄。這使外資對中國的評估從「成長故事」轉向「風險定價」——不是不投，而是要求更高的政治風險溢價，並更看重「與國家方向對齊」的賽道（詳第 8、19 章）。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一群民營資本，三種利害讀法</div>
+</section>
+
+<section id="s8">
+  <div class="sec-label">PART II · CH 08</div>
+  <h2>外國人／投資人：平行規則與難以定價的風險</h2>
+  <p class="lede">第五個稜鏡，是外部世界看中國的窗口。對外國投資人而言，中國過去二十年是「不可錯過的成長故事」；如今這個敘事正在被重寫——不是「中國不再重要」，而是「中國從一個成長題材，變成一個需要嚴肅定價政治與地緣風險的題材」。這一節勾勒外資面對的整體圖景，後續各章再逐一深入。</p>
+
+  <h3>從「成長故事」到「風險定價」：敘事的質變</h3>
+  <p>2000 年代到 2010 年代中期，外資對中國的主導敘事是「數億人進入中產、無限的市場、世界工廠的效率」——這是一個關於「上行」的故事。2018 年美中貿易戰以來，這個敘事逐步被三個現實侵蝕：<strong>增長換檔</strong>（高速增長退場、房地產與通縮拖累）、<strong>政治風險上升</strong>（監管突襲、民企整頓、國安擴權）、<strong>地緣脫鉤</strong>（美中戰略競爭、供應鏈重組、去風險）。結果是外資的心態從「不投就錯過」轉為「投多少、投哪裡、如何對沖政治風險」——中國從「配置的必選項」變成「需要主動論證的選項」。</p>
+
+  <h3>資本管制與「進得來、出得去」的不對稱</h3>
+  <p>外資面對的一個結構性事實是<strong>資本管制</strong>：人民幣資本項目未完全開放，資金「進來」相對容易，「出去」（利潤匯回、資本撤離）則受制於管制與匯率維穩的優先順序。在人民幣承壓、資本外流壓力上升時，管制可能收緊。這使外資在評估中國時，除了考慮「能不能賺」，還要考慮「賺了能不能拿走」——這是新興市場政治風險的典型分項，而中國因其體量與管制能力，這一分項尤其需要重視。</p>
+
+  <h3>台海：懸在一切之上的尾部變數</h3>
+  <p>對外資，中國所有的經濟與商業評估，都建立在一個外部前提上：<strong>台海維持「不戰的緊張」、美中維持「競爭而不失控」</strong>。這個前提一旦破裂——台海爆發衝突、或美中對抗升級到全面脫鉤與制裁——則所有的財務模型都需整體重寫（資產可能被凍結、供應鏈斷裂、市場准入歸零）。這是唯一一個能同時擊穿所有稜鏡的系統性尾部風險，本報告在第 13、20 章專門處理。它機率不高，但一旦兌現，其他所有分析都失效——這正是「台海是命門」的含義。</p>
+
+  <div class="lens l-f">
+    <div class="lens-tag">外國人視角的操作結論</div>
+    <p>把以上合起來，外資面對中國的正確姿勢可以濃縮成三句：<strong>其一，區分「賽道」</strong>——與國家戰略方向對齊的領域（先進製造、綠色能源、部分消費）政治風險較低、且有政策順風；與國家意志可能衝突的領域（金融無序擴張、涉敏感數據與意識形態、可被國安觸及者）風險最高。<strong>其二，定價政治風險溢價</strong>——不是不投，而是為監管突襲、資本管制、地緣尾部要求更高的補償。<strong>其三，把台海當作不可定價的尾部</strong>——用「不連續風險」的框架處理（平時貼近零、一旦兌現則災難級），而非用常規機率折現。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART III</div>
+  <h2>動力 · The Dynamics</h2>
+  <div class="pd-sub">集權之路、軍隊整肅、經濟換檔與台海</div>
+</div>
+
+<section id="s9">
+  <div class="sec-label">PART III · CH 09</div>
+  <h2>習近平的集權之路：十八大以來的十四年</h2>
+  <p class="lede">前面的稜鏡是「靜態的結構」，這一部處理「動態的力量」。而所有動力的源頭，是一個人在十四年間如何一步步把分散的權力收歸核心。這一節按時間軸重建集權的路徑，因為理解它「怎麼走來」，才能判斷它「往哪裡去」。</p>
+
+  <h3>2012–2017：以反腐立威、集權的第一階段</h3>
+  <p>2012 年十八大習近平接任總書記時，外界一度預期他是一個「集體領導下的協調者」。但他很快展現出不同的路徑：以<strong>反腐運動</strong>為突破口，「打虎拍蠅」既回應了民間對腐敗的憤怒（真實治理需求），也系統性地清除了潛在的政治對手與盤根錯節的利益網絡（權力集中）。周永康（前政法委書記、常委級「老虎」）、令計劃、徐才厚、郭伯雄的落馬，拆解了幾個關鍵的權力山頭。同時，他透過設立與親自掌管一系列「領導小組」（後升格為委員會，如中央全面深化改革委員會、國家安全委員會、網絡安全和信息化委員會），把決策權從國務院等部門收攏到自己主持的黨的機構——這是「以黨代政、以我為核心」的制度化。</p>
+
+  <h3>2017–2018：核心地位與修憲</h3>
+  <p>2016 年，習近平被確立為黨中央的「核心」；2017 年十九大，「習近平思想」入黨章、且未按慣例安排明確的接班人進入常委；<strong>2018 年 3 月，全國人大通過修憲，取消國家主席任期限制</strong>。這一步是集權路徑上最具象徵性的節點——它明確終結了鄧小平以來的任期制度化實驗，向外界宣告「兩屆十年」的慣例不再適用於最高領導人。修憲當時在體制內外都引發討論，但在高度集中的政治環境下並無實質阻力。</p>
+
+  <h3>2022：二十大——集權的制度完成</h3>
+  <p>2022 年二十大是集權的「制度完成式」：習近平續任第三任期（打破慣例）、新常委會由親信主導、「兩個確立」與「兩個維護」成為全黨政治規矩。一個廣受關注的畫面是前總書記胡錦濤在閉幕會上被工作人員引離會場（官方稱其身體不適），這一幕被外界廣泛解讀為時代交替的象徵。二十大之後，「以派系平衡理解中國高層」的傳統框架解釋力大幅下降——但這不意味著黨內再無張力，只意味著張力轉入更深、更不透明的層面（2025 年軍隊整肅正是這種深層張力的一次外顯，詳第 10 章）。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">2012</div><div class="fig-l">十八大接任總書記，反腐立威第一階段</div></div>
+    <div><div class="fig-n">2016</div><div class="fig-l">確立為黨中央的「核心」</div></div>
+    <div><div class="fig-n">2018</div><div class="fig-l">修憲取消國家主席任期限制</div></div>
+    <div><div class="fig-n">2022</div><div class="fig-l">二十大續任第三任期、集權制度完成</div></div>
+  </div>
+</section>
+
+<section id="s9b">
+  <div class="sec-label">PART III · CH 09B</div>
+  <h2>反腐作為權力工具：一把治理與集權的雙刃劍</h2>
+  <p class="lede">第 9 章多次提到反腐是集權的關鍵手段；這一節把這把「雙刃劍」單獨拆開。反腐是理解中國十四年政治最核心的機制之一——它既是真實的、必要的治理行動，也是有史以來最有效的集權與清洗工具。這兩重性同時為真，且無法乾淨地分離，這正是它難以評價的原因。</p>
+
+  <h3>刃之一：真實的治理需求</h3>
+  <p>反腐的第一重性是真實的。改革開放後，權力與市場交界處滋生了大規模腐敗——賣官鬻爵、工程回扣、金融尋租、軍隊採購貪腐。到 2012 年，腐敗已被黨自己判斷為「亡黨亡國」的威脅（民間怨氣、幹部集團的利益俘獲、政策被特殊利益綁架）。從這個角度，反腐是政權的自我修復：查處數百萬幹部、追回贓款、重塑紀律，客觀上回應了民間對公平的訴求，也確實震懾了明目張膽的貪腐。</p>
+
+  <h3>刃之二：最有效的權力武器</h3>
+  <p>反腐的第二重性同樣真實：<strong>它是選擇性的</strong>。在一個幾乎「無人完全乾淨」的官場，「查誰、不查誰」本身就是巨大的權力。反腐因此成為集權的完美工具——它可以在「反腐敗」這個無可指摘的正當性外衣下，清除政治對手、瓦解對立山頭、震懾整個官僚集團使其對核心效忠。周永康、徐才厚、郭伯雄、孫政才的落馬，客觀上都拆解了潛在的權力中心。這種「選擇性」不必然意味著被查者無罪（他們多半確有腐敗問題），而是意味著<strong>「是否被查」的決定權，本身就是政治權力的行使</strong>。</p>
+
+  <h3>為什麼兩重性無法分離</h3>
+  <p>反腐難以評價的根源，在於這兩重性焊死在一起、無法拆分。你不能說「這次反腐是純治理」或「那次是純清洗」——因為<strong>同一個行動同時實現兩者</strong>：查處一個真正貪腐的政治對手，既是反腐（他確實貪了），也是清洗（他恰好是對手）。這使得外部觀察者永遠無法純化其動機。正確的分析姿勢不是二選一，而是<strong>承認雙重性、逐案動態判讀</strong>：看被查者的政治位置（是否構成潛在權力中心）、看時機（是否在關鍵權力節點前後）、看後續人事（誰接替、是否為核心人馬）——這三個維度的組合，能提示某次反腐的「治理權重 vs 集權權重」，但永遠無法給出確定答案。2025 年軍隊整肅正是這種判讀的最新考題（詳第 10 章）。</p>
+
+  <div class="callout">
+    <div class="co-tag">機制註記 · 反腐的長期副作用</div>
+    <p>反腐高壓常態化有一個重要的非預期後果：<strong>它改變了整個官僚體系的風險偏好</strong>。當每個幹部都活在「被查」的陰影下、當「幹事」意味著暴露於問責、而「不幹事」相對安全，理性的選擇是「不做不錯」。這就是「懶政怠政」「躺平式幹部」現象的制度根源——反腐在清除貪腐的同時，也可能抑制了官僚的積極性與冒險精神，進而拖累政策執行與地方發展活力。這是集權治理的一個深層權衡：純潔與活力，難以兼得。</p>
+  </div>
+</section>
+
+<section id="s10">
+  <div class="sec-label">PART III · CH 10</div>
+  <h2>2025 軍隊整肅與權力波動：訊號的解讀</h2>
+  <p class="lede">2025 年秋天，中國軍隊高層被連根整肅到中央軍委副主席層級——這是自文革以來最引人注目的軍中政治事件之一。它為外界提供了一個罕見的窗口，得以窺見黨國內部深層的暗流。但這個窗口也極易被過度解讀。這一節的任務，是嚴格區分「已證實的事實」與「對其含義的推測」。</p>
+
+  <h3>已證實的事實層</h3>
+  <p>先確立事實。2025 年 10 月，中國官方宣布開除包括<strong>何衛東（在任中央軍委副主席）、苗華（軍委政治工作部主任）</strong>在內的九名高級將領的黨籍與軍籍，罪名為嚴重違紀違法。這延續了 2023 年以來針對<strong>火箭軍</strong>（司令員、政委等被撤換）、<strong>國防部</strong>（李尚福被免、魏鳳和被查）、乃至<strong>外交系統</strong>（秦剛下台）的整肅浪潮。何衛東的落馬尤其罕見——他是自文革以來首位被整肅的、具職業軍人背景的在任軍委副主席。其職務由張升民接任。這些人事變動本身是官方確認的、無爭議的事實。</p>
+
+  <h3>推測層：三種相互競爭的解讀</h3>
+  <p>事實之上，是外部觀察者的推測，且存在三種相互競爭、都無法被公開資訊證實或證偽的解讀：</p>
+  <ul class="plain">
+    <li><strong>解讀 A（習權力更鞏固）</strong>：整肅顯示習近平有足夠權力拿下自己親手提拔的高層（何衛東是習提拔的），持續「純潔軍隊」、確保絕對忠誠——這是集權者主動清理、而非被動失控。</li>
+    <li><strong>解讀 B（習權力受挑戰）</strong>：整肅範圍之大、觸及層級之高（連軍委副主席都出事），暗示軍中忠誠出了問題、或高層存在習需要處理的暗流——這是被動應對、而非主動清理。</li>
+    <li><strong>解讀 C（純治理／派系清算）</strong>：這可能主要是軍隊採購與晉升腐敗的真實清查（火箭軍尤涉軍工利益），或是特定人事網絡（如與某前領導人相關者）的清算，政治含義被外界誇大。</li>
+  </ul>
+  <p>本報告的立場是：<strong>三種解讀都是合理推測，且沒有任何一種能被現有公開資訊確證</strong>。負責任的分析不是押注其中一種，而是承認這種「根本的不可知性」本身，就是中國政治風險的核心特徵——一個連「軍中第二號人物為何落馬」都無法從外部確知的體制，其內部張力的規模與方向，永遠對外部觀察者部分不透明。</p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">傾向解讀：整肅≠不穩</div>
+      <p>從基準率看，威權強人在鞏固期持續清洗高層（包括自己提拔的人）是常態而非例外——這通常是「猜疑鏈」與「防範任何潛在權力中心」的產物，反映的是集權的邏輯而非集權的崩解。史達林、毛澤東都在權力最盛時期進行最劇烈的清洗。因此「整肅頻繁」的預設解讀，應偏向「集權的持續運作」，而非「政權動搖」。</p>
+    </div>
+    <div class="d-con"><div class="d-tag">警示：但不能排除深層張力</div>
+      <p>然而，把整肅一律解讀為「盡在掌握」也有風險。當整肅觸及軍委副主席這種最核心的層級、當被拿下的是自己親手提拔的人，至少說明<strong>用人與忠誠的判斷出了問題</strong>，這本身是集權模式資訊失真（第 4、14 章）的一個可能症狀。謹慎的姿勢是：把 2025 整肅記錄為一個「高不確定性訊號」——它既可能是強人清理門戶的常規動作，也可能是深層張力的冰山一角，兩種可能都應保留，並以後續的人事與政策走向持續校正。</p>
+    </div>
+  </div>
+</section>
+
+<section id="s11">
+  <div class="sec-label">PART III · CH 11</div>
+  <h2>經濟換檔：房地產、通縮、地方債與新質生產力</h2>
+  <p class="lede">政治的第一根命門是增長。中國經濟正在經歷一場深刻的「換檔」——從投資與房地產驅動的高速增長，轉向一個增長更慢、且被通縮陰影籠罩的新常態。這一節勾勒換檔的全景，下一節專門解剖房地產這個震央。</p>
+
+  <h3>增長目標的下修：一個時代訊號</h3>
+  <p>最直觀的訊號來自增長目標本身。<strong>2026 年，中國把 GDP 增長目標設定在 4.5%–5%，是 1990 年代初以來的最低水平</strong>（2020 年因疫情未設目標除外），較過去三年的「5% 左右」進一步下調。官方以「嚴峻複雜」形容外部與內部形勢，並明確表示政策思路從「數量優先」轉向「質量優先」。這不是一次普通的目標微調，而是一個時代性的訊號：黨已經在為「增速永久性下台階」做預期管理與敘事調整。2025 年四中全會通過的「十五五」規劃建議（2026–2030），甚至沒有設定明確的年度 GDP 增長目標，而是把重心放在科技自立、擴大內需、產業競爭力上——這是增長模式轉向的制度化表達。</p>
+
+  <h3>通縮：最危險的慢性病</h3>
+  <p>換檔期最危險的病症是通縮。中國已經歷了大約十個季度的物價下行壓力——<strong>消費者物價（CPI）2025 年全年約為零、生產者物價（PPI）連續多年為負</strong>——這是自 1970 年代末市場化轉型以來最長的一段。通縮的危險在於它的自我強化：物價下跌 → 企業利潤與居民收入預期下修 → 推遲消費與投資 → 需求進一步萎縮 → 物價再跌。更關鍵的是，<strong>通縮是「債務人的稅」</strong>：當物價下跌，債務的實質負擔上升，對負債累累的房企、地方政府與有房貸的家庭尤其懲罰性。這使通縮與房地產、地方債危機互相強化，形成一個難以打破的負向循環。打破通縮預期，是政治上「保增長、保就業、保合法性」的當務之急，也是本報告在增長命門上最關注的單一指標。</p>
+
+  <h3>地方債與化債：把風險攤平到時間裡</h3>
+  <p>換檔的第三個承壓點是地方政府債務。土地財政崩塌（土地出讓金大減）疊加多年基建投資累積的隱性債務（透過融資平台舉借），使地方財政陷入「收入減少、還債壓力增大」的困境。中央的應對是大規模「化債」——用地方政府債券置換隱性債務、展期、降低利息成本。這能避免短期的違約與系統性金融風險爆發，但它的本質是「<strong>用時間換空間</strong>」：把風險攤平到更長的期限，代價是地方政府的投資能力與公共服務支出被長期壓縮，進而拖累整體需求。化債不是解決問題，而是管理問題——真正的解，需要重構央地財政關係與地方的收入來源，這是更深、更慢的改革。</p>
+
+  <h3>新質生產力：換檔的「上半身」</h3>
+  <p>如果說房地產、通縮、地方債是換檔的「下半身」（舊引擎熄火），那麼「<strong>新質生產力</strong>」就是官方寄望的「上半身」（新引擎）。這個概念指向由科技創新驅動的先進生產力——<strong>先進製造、電動車、鋰電池、半導體、人工智慧、生物科技、綠色能源</strong>。策略邏輯是：透過國家主導的產業政策（補貼、國家隊、集中攻關），在這些戰略性新興產業建立全球競爭力，以「高質量」增長替代「高速度」增長，同時實現科技自立、降低對外依賴。這在部分領域已見成效（如電動車與鋰電池的全球份額）。但它也有隱憂：<strong>投資驅動的產業擴張可能導致產能過剩與「內捲」（過度競爭、價格戰、利潤率壓縮），並引發貿易夥伴的反制</strong>（詳第 16、18、20 章）。新質生產力能否真正接棒成為增長主引擎、抵消房地產的拖累，是換檔成敗的核心懸念。</p>
+</section>
+
+<section id="s11b">
+  <div class="sec-label">PART III · CH 11B</div>
+  <h2>房地產危機的傳導：從一個行業到整個經濟</h2>
+  <p class="lede">房地產不只是一個行業——它曾是中國經濟的「支柱」（含上下游一度估算佔 GDP 相當高的比重）、家庭財富的主要載體、地方財政的命脈、金融體系的重要抵押品。因此它的危機不是「一個行業的困難」，而是一場透過多條管道傳導到整個經濟與社會的系統性事件。這一節拆解傳導的路徑。</p>
+
+  <h3>震央：從「三條紅線」到房企違約</h3>
+  <p>危機的直接導火線是 2020 年的「<strong>三條紅線</strong>」——監管為抑制房企高槓桿擴張而設的融資限制。這在一個高度依賴滾動融資的行業裡，迅速引發了流動性斷裂：頭部房企（恒大、碧桂園等）相繼陷入違約與債務重組，「保交樓」成為維穩重點（大量已售未交付的房子牽動購房家庭）。房價與成交量下行，開發投資大幅萎縮（從高峰下滑幅度可觀）。這不是週期性的調整，而是一次結構性的去槓桿與模式終結——「高負債、高周轉、高槓桿」的舊房地產模式已無法回頭。</p>
+
+  <h3>傳導管道一：家庭財富與消費</h3>
+  <p>對中國家庭而言，房子是財富的最主要形式（家庭資產中房產佔比極高）。房價下跌直接造成<strong>「負財富效應」</strong>：家庭感到變窮 → 削減消費、增加儲蓄（預防性儲蓄上升）→ 內需疲弱。這正是通縮壓力的重要來源之一，也是「消費不振」這個結構性難題的核心：當家庭最大的資產在貶值、對未來收入的預期又不確定，任何刺激消費的政策都事倍功半。這條管道把房地產危機直接轉化為需求側的長期拖累。</p>
+
+  <h3>傳導管道二：地方財政與投資</h3>
+  <p>第二條管道通向地方政府。土地出讓金曾是地方的「第二財政」，房地產下行使這塊收入大幅萎縮，地方財政承壓、化債壓力上升（詳第 11 章）。結果是地方政府的<strong>投資能力收縮</strong>——過去靠賣地收入支撐的基建與公共支出被迫縮減，這又反過來拖累了固定資產投資與經濟增長。房地產、地方財政、投資三者，因此被鎖進一個互相拖累的下行螺旋。</p>
+
+  <h3>傳導管道三：金融與信心</h3>
+  <p>第三條管道通向金融體系與預期。房地產是銀行貸款的重要抵押品、是影子銀行與理財產品的重要底層資產。房價下行侵蝕抵押品價值、增加金融機構的潛在壞帳風險（雖然中國的金融體系由國家主導、有較強的風險吸收與展期能力，尚未演變為系統性金融危機）。更難量化但同樣重要的，是<strong>對「預期」的傷害</strong>：房地產只漲不跌的信仰破滅，動搖了整個社會對「投資、置業、致富」路徑的信心，這種信心的重建遠比修復資產負債表更慢。</p>
+
+  <div class="callout">
+    <div class="co-tag">辨析 · 「日本化」還是「有中國特色的調整」</div>
+    <p>一個流行的類比是中國正在重演日本 1990 年代的「資產負債表衰退」與「失落的數十年」。這個類比有其洞察（房地產泡沫、通縮、去槓桿、人口拐點的相似性），但也有重要差異：<strong>中國仍處於較低的人均收入與城鎮化階段（有補漲空間）、國家對金融與資源的掌控力更強（可強力干預、避免無序崩潰）、且政策工具箱尚未用盡</strong>。因此更審慎的判斷是：中國面對的是「真實且嚴峻的結構性調整」，可能導致「較長期的低增長與去通縮拉鋸」，但把它直接等同於「日本式失落」或「即將崩潰」，都是把一個開放結局的複雜過程，過早地塞進一個現成的劇本。真實風險是「拖得久、修得慢」，而非「明天崩」。</p>
+  </div>
+</section>
+
+<section id="s12">
+  <div class="sec-label">PART III · CH 12</div>
+  <h2>共同富裕與民企：從整頓到再拉攏的鐘擺</h2>
+  <p class="lede">2021 年，「共同富裕」成為政治熱詞，伴隨對平台、教培、房地產、娛樂圈的整頓，一度讓外界擔憂中國「向左轉」。2024–2025 年，鐘擺明顯回擺，政策重新強調支持民營經濟。這一節解讀這個鐘擺的邏輯——它不是「路線反覆」，而是同一套「既要又要」的內在張力在不同經濟環境下的不同呈現。</p>
+
+  <h3>共同富裕的雙重含義</h3>
+  <p>「共同富裕」有兩層含義，理解其鐘擺必須先分清。<strong>其一是分配正義</strong>——回應改革開放後擴大的貧富差距（基尼係數長期偏高、區域與城鄉差距顯著），這有真實的社會與合法性基礎。<strong>其二是政治規訓</strong>——把「資本無序擴張」「防止兩極分化」與「黨的領導」綁定，藉此重申黨對資本的支配權，防止民營資本坐大到形成獨立的政治—輿論力量。2021 年的整頓，兩層含義兼而有之，但外界（尤其資本市場）更強烈地感受到第二層的「規訓」意味，導致民企信心與外資評價的重挫。</p>
+
+  <h3>鐘擺回擺：為什麼 2024–2025 轉向拉攏</h3>
+  <p>鐘擺回擺的驅動力是經濟現實。整頓的副作用超出預期：<strong>民間投資低迷、企業家信心受創、資本外流、青年就業惡化</strong>（教培整頓一度直接衝擊大量就業）。當經濟換檔的壓力上升、當「保就業、保增長」的優先級蓋過「規訓資本」，理性的政策選擇就是回擺——重新給民企吃「定心丸」。於是有了 2025 年 5 月施行的<strong>《民營經濟促進法》</strong>（首部專門立法，宣示產權保護與公平競爭）、習近平的民營企業家座談會、對平台經濟從「整頓」到「支持健康發展」的定調轉變。這是一次可觀察、且相當明確的政策再平衡。</p>
+
+  <h3>辨析：這是「根本轉變」還是「工具再平衡」</h3>
+  <p>關鍵問題是：這次回擺意味著民企政治地位的根本改善，還是只是週期性的工具調整？本報告傾向後者，理由是<strong>底層結構未變</strong>：民企的財產權仍建立在「政治容許」而非「制度保障」之上；促進法是黨國體制內的治理工具，而非凌駕於黨之上的制約；「黨領導一切」與「國有經濟主導」的框架依舊。因此更準確的描述是：<strong>黨在「規訓資本」與「利用資本」之間，根據經濟環境調整權重</strong>——經濟好時可以強調規訓，經濟承壓時就必須拉攏。企業家從兩輪擺盪中學到的真實教訓，不是「現在安全了」，而是「政治風險是一個必須永久內化的經營常量」——這種學到的謹慎本身，會長期抑制民間投資的動物精神，即使政策訊號轉暖。</p>
+
+  <div class="prism">
+    <div class="pv-c"><div class="pv-tag">民營資本與地方</div>
+      <p>對民企，回擺是「謹慎歡迎、但不天真」。定心丸能改善短期預期與融資環境，但兩輪整頓留下的心理疤痕不會因一部法律而癒合。理性策略是與國家戰略對齊（投硬科技、製造業）、避開敏感地帶、把政治風險當常量管理。</p>
+    </div>
+    <div class="pv-p"><div class="pv-tag">黨與習核心</div>
+      <p>對核心，這不是「認輸」而是「策略調整」：在保就業保增長的當下需要民企出力，故釋放善意；但「黨對資本的最終支配權」這條底線從未讓步。共同富裕的長期目標與支持民企的短期需要，在核心眼中並不矛盾——都是為了「黨領導下的高質量發展」。</p>
+    </div>
+    <div class="pv-f"><div class="pv-tag">外國人</div>
+      <p>對外資，鐘擺本身就是風險：一個政策能在幾年內從「整頓」擺到「拉攏」再擺回去，說明遊戲規則的可預測性有限。外資的讀法是「歡迎善意、但為政策反覆定價」——把中國的監管環境視為「方向可能對、但幅度與時機難測」的變數。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一次政策回擺，三種利害讀法</div>
+</section>
+
+<section id="s13">
+  <div class="sec-label">PART III · CH 13</div>
+  <h2>台海與美中：能穿透一切的外部變數</h2>
+  <p class="lede">政治的第二根命門是台海與美中關係。這是唯一一個能同時擊穿所有五個稜鏡的系統性變數——它一旦失控，本報告所有的經濟與政治分析都需整體重寫。這一節處理美中結構性競爭的全景與台海的現狀，下一節專門用「成本效益」框架拆解武力攻台的算術。</p>
+
+  <h3>美中：一場結構性的長期競爭</h3>
+  <p>美中關係已從「接觸與合作」轉為「戰略競爭」，且這是<strong>結構性、跨黨派、長期的</strong>——不因某任美國總統或某次峰會而根本改變。競爭的主戰場包括：<strong>科技（半導體與 AI 的出口管制、實體清單、先進製程封鎖）、貿易（關稅、供應鏈脫鉤/去風險）、地緣（印太、南海、台海）、以及制度與價值的競爭</strong>。中國的反制手段包括<strong>稀土與關鍵礦產的出口管制</strong>（中國在全球稀土加工佔主導地位，這是其最有力的反制槓桿之一）、擴大內需與科技自立以降低脆弱性、以及深化與全球南方及俄羅斯的關係。這場競爭的基調是「競而不裂」——雙方都想避免全面脫鉤的兩敗俱傷，但都在為更激烈的對抗做準備。</p>
+
+  <h3>峰會外交：管理競爭、而非結束競爭</h3>
+  <p>2026 年 5 月，特朗普與習近平在北京舉行峰會（特朗普自 2017 年以來首次訪華）。峰會的成果是「<strong>管理性的</strong>」而非「突破性的」：達成農產品採購承諾（若履行可使美中農業貿易回到 2025 年前水平）、據稱習近平同意購買 200 架波音客機、雙方承諾合作管控芬太尼前體外流；但<strong>未達成重大貿易協議（包括稀土與 AI 投資）</strong>。台灣是明顯的分歧點——習近平稱台灣是雙邊關係中「最重要的問題」、對台措辭最為嚴厲，而特朗普聚焦於貿易與商業，美方「知悉北京立場」後話題即轉向下一項。這次峰會的意義正在於它揭示了美中關係的本質：<strong>領導人可以「管理」競爭的溫度、達成交易性的緩和，但無法「結束」這場結構性競爭</strong>——尤其在台灣這個根本分歧上，雙方的立場沒有交集。</p>
+
+  <h3>台海現狀：能力上升，但受制約</h3>
+  <p>台海的現狀可以概括為「<strong>能力快速上升、動武仍受制約</strong>」。一方面，解放軍的軍力（尤其海空與導彈）快速提升，常態化的軍演與「灰色地帶」施壓（軍機艦繞台、劃設演習區、法律與認知作戰）已成新常態，意在「不戰而屈」、消耗台灣的心理與國際空間。另一方面，<strong>真正動武仍受多重內外因素制約</strong>：跨海登陸作戰的巨大軍事難度與不確定性、美國（及可能的盟友）介入的風險、對中國經濟的災難性後果（制裁、貿易斷裂、外資撤離）、以及軍隊自身在整肅後的狀態疑問。多數評估認為「2026 年並非攤牌之年」，但這是一個需要持續校正的判斷，而非永久的保證（詳第 13B 章成本效益分析）。</p>
+
+  <div class="callout">
+    <div class="co-tag">TAIL RISK · 唯一的「一切重寫」觸發器</div>
+    <p>本報告的所有經濟與政治判斷，都預設「台海維持不戰的緊張、美中維持競爭而不失控」這個外部前提。若出現以下情形之一——<strong>台海爆發實質軍事衝突（封鎖、隔離或攻台）、或美中對抗升級到全面脫鉤與金融制裁</strong>——則五個稜鏡、三角迴路與所有引擎章節都需整體重估（資產凍結、供應鏈斷裂、市場准入歸零）。這是唯一一個能同時擊穿黨、官僚、軍隊、資本與外資所有稜鏡的系統性尾部風險；它機率不高，但一旦發生，其他所有分析都失效。這正是「台海是命門」被列為全書風險定錨的原因。</p>
+  </div>
+</section>
+
+<section id="s13b">
+  <div class="sec-label">PART III · CH 13B</div>
+  <h2>台海的成本效益：北京的算術題</h2>
+  <p class="lede">分析台海不能只問「能力夠不夠」，更要問「北京的成本效益算式如何」。武力攻台不是一個純軍事決定，而是一個政治—經濟—軍事的綜合計算。這一節用「成本效益」框架，中立地拆解北京面對的算術——不預測結果，而是呈現決策的結構。</p>
+
+  <h3>效益側：為什麼統一有巨大吸引力</h3>
+  <p>對北京，「解決台灣問題、實現完全統一」有巨大的政治效益：<strong>它是「中華民族偉大復興」敘事的核心、是共產黨合法性的終極來源之一、是習近平個人歷史地位的可能封頂之作</strong>。當績效合法性（增長）承壓，民族主義與統一的象徵權重上升，這使台海議題與國內政治的合法性配方直接掛鉤。此外，台灣的地緣位置（第一島鏈突破口）與半導體產業，也有戰略與經濟價值。這些效益是真實且巨大的，構成「動武誘因」的一側。</p>
+
+  <h3>成本側：為什麼動武的代價可能是災難級</h3>
+  <p>但成本側同樣巨大，且可能是災難級的：<strong>其一，軍事風險</strong>——渡海登陸是最複雜的軍事行動之一，勝負不確定，失敗的政治後果不堪設想；美國及盟友介入的可能性使風險倍增。<strong>其二，經濟毀滅</strong>——衝突將引發西方的全面制裁、金融脫鉤、外資撤離、供應鏈斷裂（尤其半導體），對已處於換檔承壓期的中國經濟是災難性打擊，直接威脅「保增長、保就業」的合法性根基。<strong>其三，政治風險</strong>——一場失敗或代價慘重的戰爭，可能反過來動搖政權本身（戰爭是威權政體最危險的賭注）。這些成本構成強大的「動武抑制」。</p>
+
+  <h3>算式的動態：什麼會改變平衡</h3>
+  <p>成本效益不是靜態的，有幾個變數會改變平衡：<strong>台灣方面</strong>（是否跨越北京的「紅線」，如宣布法理獨立）——這會急劇提升動武的效益／必要性；<strong>美國方面</strong>（介入意願的可信度、對台支持的力度）——這會改變成本側的軍事風險；<strong>中國內部</strong>（經濟與合法性壓力、領導人的風險偏好、軍隊的準備與可靠度）——經濟越糟、民族主義牌越可能被打，但軍隊整肅後的狀態又增加不確定性；<strong>時間窗口</strong>（軍力對比的變化、美國的相對實力、中國自身的人口與經濟軌跡）——這催生「機會窗口」與「衰退窗口」兩種相反的推論。</p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">「機會窗口」論</div>
+      <p>一種論點認為存在一個「危險窗口」：當中國軍力達到相對高峰、而美國尚未完成印太軍事調整、且中國自身的經濟與人口紅利即將見頂——北京可能判斷「現在不打、以後更難」，從而在某個時點鋌而走險。這種「趁窗口未關」的邏輯，是台海風險不能被完全排除的原因。</p>
+    </div>
+    <div class="d-con"><div class="d-tag">「理性抑制」論</div>
+      <p>另一種論點認為成本效益的天平明顯偏向「不動武」：對一個把「發展」與「穩定」視為執政根基的政權，發動一場可能摧毀自身經濟與政權的戰爭是非理性的。北京更可能的策略是「以壓促統、以拖待變」——透過軍事與經濟脅迫、認知作戰、以及等待台灣內部與國際環境的變化來實現目標，而非付出戰爭的巨大代價。多數評估的「2026 非攤牌之年」正是基於此。但「理性抑制」的前提是決策者理性且資訊充分——這恰恰是集權模式下不能完全保證的（呼應第 4、14 章的資訊失真隱憂）。</p>
+    </div>
+  </div>
+</section>
+
+<section id="s14">
+  <div class="sec-label">PART III · CH 14</div>
+  <h2>韌性 vs 脆弱辨析：一黨體制的兩面</h2>
+  <p class="lede">這是全報告最重要的辨析章。關於中國，市場上充斥著兩種極端敘事：「中國崩潰論」（體制不可持續、即將動盪）與「中國不可撼動論」（集權高效、韌性無限）。兩者都是懶惰的。本章的任務，是把一黨集權體制的「韌性」與「脆弱」拆成具體機制，分層辨析——哪些是真實風險，哪些是過度解讀。</p>
+
+  <h3>韌性的來源：這個體制真正強在哪</h3>
+  <p>先誠實地列出韌性。<strong>其一，動員力</strong>——集中統一領導使中國能「集中力量辦大事」（基建、產業政策、危機動員），這是分散決策體制難以企及的。<strong>其二，國家能力</strong>——強大的財政、貨幣、行政工具，對經濟與社會的深度掌控，使它能吸收相當程度的衝擊（如金融風險的展期化解）。<strong>其三，敘事掌控</strong>——對資訊與輿論的近乎壟斷，使它能管理預期、壓制異議、維持合法性敘事。<strong>其四，維穩體系</strong>——世界級的監控與社會控制能力，把不穩定因素消滅在萌芽。這些韌性是真實的，「即將崩潰論」系統性地低估了它們——這正是過去數十年無數「中國崩潰」預言落空的原因。</p>
+
+  <h3>脆弱的來源：集權自身製造的風險</h3>
+  <p>但同一個集權，也是脆弱的來源，且這些脆弱恰恰是韌性的「另一面」：</p>
+  <ul class="plain">
+    <li><strong>資訊失真</strong>：權力越集中、講真話風險越高，向上呈報的資訊越可能被過濾美化，決策者的「認知—現實」落差擴大，重大誤判的風險上升（第 4 章）。</li>
+    <li><strong>糾錯機制退化</strong>：個人核心取代集體領導後，重大決策失誤缺乏體制內煞車，錯誤可能被放大並延續更久（第 2B 章）。</li>
+    <li><strong>接班懸空</strong>：廢除任期制後接班無明確安排，繼承危機是一個不連續的、後果可能劇烈的尾部風險（第 2B 章）。</li>
+    <li><strong>績效合法性承壓</strong>：增長換檔、房地產、通縮、人口拐點侵蝕契約的「增長」支柱，迫使合法性配方滑向成本更高的民族主義與強制（第 2、11 章）。</li>
+    <li><strong>對外對抗的自我強化</strong>：民族主義作為合法性補充，可能使對外政策更難轉圜、台海風險上升（第 13 章）。</li>
+  </ul>
+
+  <h3>辨析框架：真實風險 vs 過度解讀</h3>
+  <table>
+    <tr><th>命題</th><th>定性</th><th>辨析</th></tr>
+    <tr><td>接班無明確安排是結構性風險</td><td>真實風險</td><td>不連續尾部風險，兌現時點不可測、後果可能劇烈——嚴肅對待，但非進行式</td></tr>
+    <tr><td>集權導致資訊失真與糾錯退化</td><td>真實風險</td><td>長期治理品質的慢性侵蝕，非戲劇性，但真實且累積——最被低估的機制</td></tr>
+    <tr><td>通縮與增長換檔失敗的可能</td><td>真實風險</td><td>命門之一，需緊盯去通縮與新舊引擎交棒——但「換檔慢」≠「崩潰」</td></tr>
+    <tr><td>「中國即將崩潰／政權即將倒台」</td><td>過度解讀</td><td>系統性低估韌性；數十年來反覆落空；把慢性病誤讀為急性猝死</td></tr>
+    <tr><td>「集權高效、韌性無限、不可撼動」</td><td>過度解讀</td><td>系統性忽視集權的內生脆弱；把「未崩潰」誤讀為「無風險」</td></tr>
+  </table>
+  <p class="tbl-note">本報告的核心辨析立場：中國既非「即將崩潰」，也非「不可撼動」。它是一個<strong>韌性極強、但內生脆弱在緩慢累積</strong>的體制——真實的風險不是「明天倒台」，而是「集權的治理代價（資訊失真、糾錯退化、接班懸空）在增長換檔的壓力下，緩慢侵蝕長期的治理品質與決策質量」。這是一個以「年到十年」為單位的慢變量，而非以「日到月」為單位的事件。</p>
+
+  <div class="prism">
+    <div class="pv-p"><div class="pv-tag">黨與習核心</div>
+      <p>從核心視角，集權正是應對「百年變局」所需的韌性來源：唯有集中統一領導才能辦大事、抗風險、應對美中對抗。所謂「脆弱」在此敘事中被重構為「西方唱衰」，而糾錯則靠黨的自我革命（從嚴治黨、反腐、督查）內部完成。</p>
+    </div>
+    <div class="pv-b"><div class="pv-tag">官僚體系</div>
+      <p>從官僚視角，脆弱最直接地體現在執行層：資訊失真、避責文化、政令空轉，使頂層的「集中力量」在傳導到基層時大打折扣。官僚體系既是韌性的執行者，也是脆弱的放大器。</p>
+    </div>
+    <div class="pv-f"><div class="pv-tag">外國人</div>
+      <p>從外資視角，正確的姿勢是拒絕兩種極端敘事，改用「慢變量」框架：不押注崩潰、也不假設無風險，而是持續監測那幾條緩慢移動卻真正定價的結構斜率（去通縮、接班訊號、台海溫度、集權的治理代價）。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 韌性與脆弱，三種利害讀法</div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART IV</div>
+  <h2>引擎 · The Engine</h2>
+  <div class="pd-sub">黨×增長×地緣的完整傳導迴路</div>
+</div>
+
+<section id="s15">
+  <div class="sec-label">PART IV · CH 15</div>
+  <h2>三角傳導：黨×增長×地緣的完整迴路</h2>
+  <p class="lede">前面三部把中國拆成靜態結構與動態力量；這一部把它們重新組裝成一個運轉的引擎。引擎的核心是一個三角：<strong>黨（政治集權）、增長（經濟績效）、地緣（美中台海）</strong>三個節點，六條相互傳導的邊。理解這六條邊，就理解了中國政經如何互相牽動、以及一個衝擊如何在系統內傳播。</p>
+
+  <h3>三個節點</h3>
+  <ul class="plain">
+    <li><strong>節點一・黨（政治集權）</strong>：以習核心為中心的一黨集權，是系統的「控制中樞」——它定義優先級、分配資源、決定其他兩個節點的運作邏輯。</li>
+    <li><strong>節點二・增長（經濟績效）</strong>：績效合法性的來源，是社會契約的「增長」那一半——它為政權提供正當性，也為集權提供物質基礎。</li>
+    <li><strong>節點三・地緣（美中台海）</strong>：外部約束與民族主義的來源——它既是威脅（脫鉤、圍堵），也是合法性的補充燃料（民族復興、對外強硬）。</li>
+  </ul>
+
+  <h3>六條傳導邊</h3>
+  <table>
+    <tr><th>傳導邊</th><th>方向與機制</th></tr>
+    <tr><td><strong>① 黨 → 增長</strong></td><td>集權決定經濟路線：產業政策（新質生產力）、對民企的整頓/拉攏、化債節奏。集權提升動員力（辦大事），但也帶來資訊失真與執行漏損，可能損害增長效率。</td></tr>
+    <tr><td><strong>② 增長 → 黨</strong></td><td>績效是合法性的來源：增長good則契約穩固、集權有物質底氣；增長承壓則合法性缺口擴大，迫使黨更依賴民族主義與強制，並收緊控制。</td></tr>
+    <tr><td><strong>③ 黨 → 地緣</strong></td><td>集權與民族主義敘事塑造對外強硬：合法性越依賴民族主義，對外（尤其台海）的轉圜空間越小，對抗姿態越難軟化。</td></tr>
+    <tr><td><strong>④ 地緣 → 黨</strong></td><td>外部壓力強化集權正當性：「百年變局」「外部圍堵」被用以論證「集中統一領導」的必要，美中對抗反而鞏固了對內動員與控制。</td></tr>
+    <tr><td><strong>⑤ 增長 → 地緣</strong></td><td>經濟實力是地緣籌碼：強大的製造與市場是槓桿（稀土、市場准入），但增長承壓也可能誘發「以外部衝突轉移內部矛盾」的風險（雙向）。</td></tr>
+    <tr><td><strong>⑥ 地緣 → 增長</strong></td><td>脫鉤/去風險直接衝擊增長：出口管制、供應鏈重組、外資態度轉變，既是威脅（技術封鎖），也倒逼科技自立（內生動力）。台海衝突則是「歸零」級的尾部。</td></tr>
+  </table>
+
+  <h3>迴路的關鍵洞察：一個危險的自我強化環</h3>
+  <p>把六條邊合起來讀，最值得警惕的是一個潛在的自我強化環：<strong>增長承壓（②）→ 合法性缺口 → 更依賴民族主義（③）→ 對外更強硬 → 地緣對抗升溫（④反饋回來強化集權）→ 脫鉤加劇（⑥）→ 增長進一步承壓</strong>。這個環一旦啟動並自我加速，會把系統推向「經濟越差、對外越硬、脫鉤越深、經濟更差」的下行螺旋。當然，這只是一種潛在路徑而非必然——黨也有強烈的動機打破它（如 2025 年對民企的拉攏、對美的峰會緩和，都是為經濟爭取空間的「拆環」努力）。<strong>這個引擎能否維持「增長優先」的正向運轉、避免滑入「民族主義優先」的下行環，是判斷中國中長期走向的核心問題</strong>——也是本報告全部監測項的底層邏輯。</p>
+</section>
+
+<section id="s16">
+  <div class="sec-label">PART IV · CH 16</div>
+  <h2>政治×經濟迴路：投資驅動的極限</h2>
+  <p class="lede">這一節深入三角中「黨—增長」這條軸，處理中國經濟模式的核心結構性問題：一個靠投資驅動的增長模式，正在撞上它的極限，而向消費驅動的轉型卻困難重重。這是「增長命門」的經濟學底層。</p>
+
+  <h3>舊模式：投資驅動的奇蹟與極限</h3>
+  <p>中國過去數十年的增長，很大程度上由<strong>高投資率</strong>驅動——基建、房地產、製造業產能的持續擴張。這個模式在追趕階段極其有效（城鎮化、工業化的巨大空間），但它有內在極限：<strong>投資報酬遞減</strong>。當基建與地產的邊際回報下降（修到第 N 條高鐵、蓋到過剩的房子），繼續靠投資拉動增長，只會堆積更多債務與過剩產能，而不再產生相應的增長與回報。房地產危機、地方債、產能過剩（內捲），本質上都是這個「投資驅動撞牆」的症狀。舊引擎不是熄火，而是效率遞減到難以為繼。</p>
+
+  <h3>轉型難題：為什麼消費起不來</h3>
+  <p>教科書的答案是「轉向消費驅動」——讓內需（家庭消費）成為增長主引擎。但中國的消費長期「不振」，有深層的結構原因：<strong>其一，居民收入佔 GDP 比重偏低</strong>（相對於投資與政府）；<strong>其二，社會保障不足</strong>（醫療、養老、教育的不確定性，迫使家庭高儲蓄以防萬一）；<strong>其三，房地產的財富與債務效應</strong>（房子既套牢了家庭財富，房貸又擠壓了消費能力，房價下跌更帶來負財富效應）；<strong>其四，收入與信心預期轉弱</strong>（換檔期對未來收入的不確定，抑制當期消費）。這些結構問題不是靠短期刺激（發消費券）能解決的，需要收入分配、社會保障、財政體制的深層改革——而這些改革既慢又觸動既得利益。</p>
+
+  <h3>人口與債務：兩個長期約束</h3>
+  <p>疊加在投資—消費轉型之上的，是兩個更長期的約束。<strong>人口</strong>：中國人口自 2022 年起負增長，並快速老齡化——勞動人口萎縮、撫養比上升、養老金與醫療壓力增大，這從供給（勞動力）與需求（老齡社會的消費結構）兩端改變經濟的長期潛能。<strong>債務</strong>：宏觀槓桿率（總債務/GDP）處於高位，房企、地方政府、部分家庭的資產負債表承壓，在通縮環境下實質債務負擔上升。人口與債務都是「慢變量」，不會在某一天引爆，但它們持續壓低長期增長潛能、收窄政策空間——是「增長命門」上兩條最難逆轉的結構線。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">2022</div><div class="fig-l">中國人口開始負增長之年</div></div>
+    <div><div class="fig-n">~0%</div><div class="fig-l">2025 年 CPI 全年約為零，通縮壓力持續</div></div>
+    <div><div class="fig-n">4.5–5%</div><div class="fig-l">2026 增長目標，1990 年代初以來最低</div></div>
+    <div><div class="fig-n">投資→消費</div><div class="fig-l">尚未完成的增長模式轉型</div></div>
+  </div>
+</section>
+
+<section id="s17">
+  <div class="sec-label">PART IV · CH 17</div>
+  <h2>資本的黨國憲法：國企—民企的界線</h2>
+  <p class="lede">這一節處理一個根本問題：在中國，資本是按什麼規則運作的？答案是一部「不成文的黨國憲法」——它規定了國企與民企的等級、金融的角色、產權的邊界。理解這部憲法，才理解為什麼中國的資本市場與西方的邏輯如此不同。</p>
+
+  <h3>國有為主導，民營為補充：不對稱的等級</h3>
+  <p>這部憲法的第一條，是<strong>「兩個毫不動搖」</strong>：毫不動搖鞏固和發展公有制經濟、毫不動搖鼓勵支持引導非公有制經濟。措辭看似對等，實質有等級：<strong>國有經濟是「主導」與「命脈」</strong>（掌控金融、能源、電信、軍工等戰略領域），<strong>民營經濟是「重要組成」與「補充」</strong>。國企享有制度性優勢——融資更易（銀行偏好）、准入更廣（壟斷領域）、政治更安全（不會被「整頓」的一方）。近年還有「做強做優做大國有資本」與「國企黨建強化」的取向。這條界線決定了資本的「安全等級」：越靠近國有與國家戰略，越安全；越是純民營、越涉及被視為敏感的領域，政治脆弱性越高。</p>
+
+  <h3>金融壓抑：把儲蓄導向國家想要的地方</h3>
+  <p>這部憲法的第二條是<strong>金融壓抑（financial repression）</strong>。中國的金融體系由國家主導（大型銀行國有、資本項目管制、利率與信貸的行政影響）。其功能是把居民的巨額儲蓄，以較低的成本導向國家優先的領域（國企、基建、戰略產業）。這在追趕階段是強大的資源動員工具，但也有代價：<strong>資本配置效率受政治扭曲</strong>（國企擠佔民企的信貸）、居民的投資回報被壓低（存款利率低、投資渠道有限，這又反過來推高了房地產作為儲蓄替代的需求）。房地產危機後，居民的儲蓄「無處可去」，成為經濟循環的一個堵點。</p>
+
+  <h3>產權的邊界：容許而非神聖</h3>
+  <p>這部憲法的第三條，是產權的性質：<strong>在中國，私有產權是「被容許的」而非「神聖不可侵犯的」</strong>。憲法與法律承認並保護私有財產，《民營經濟促進法》進一步宣示產權保護；但在「黨領導一切」的框架下，當「政治需要」（如共同富裕、國家安全、反壟斷）與私有產權衝突時，前者可以壓過後者。這不是說產權沒有意義（多數時候它是有效的），而是說它有一個「政治上限」——這正是民企政治脆弱的法理根源，也是外資要求政治風險溢價的核心理由。</p>
+
+  <div class="lens l-c">
+    <div class="lens-tag">資本的黨國憲法・操作含義</div>
+    <p>對任何在中國配置資本的參與者（本國民企或外資），這部憲法給出的操作準則是清晰的：<strong>其一，讀懂安全等級</strong>——與國家戰略對齊（硬科技、先進製造、國家隊產業）的資本最安全且有政策順風；純民營、涉敏感數據/金融/意識形態的資本最脆弱。<strong>其二，理解金融壓抑的方向</strong>——信貸與政策資源流向國家優先領域，順風處與逆風處由此劃分。<strong>其三，為「產權的政治上限」定價</strong>——把「政治需要可能壓過產權」這件事，內化為一個永久的風險折扣，而非一個偶發的意外。</p>
+  </div>
+</section>
+
+<section id="s18">
+  <div class="sec-label">PART IV · CH 18</div>
+  <h2>產業與人口：國家隊、內捲與人口懸崖</h2>
+  <p class="lede">這一節處理中國經濟的「供給側」——產業升級的雄心與人口結構的約束。這是一場賽跑：中國能否在人口紅利消退、勞動力萎縮之前，透過產業升級（新質生產力）跨越中等收入陷阱、建立可持續的新增長引擎。</p>
+
+  <h3>產業升級的成績：電動車與新能源的突圍</h3>
+  <p>先看成績。中國在若干戰略性新興產業已建立起全球競爭力：<strong>電動車與鋰電池</strong>（比亞迪等企業與完整的產業鏈，使中國成為全球最大的電動車生產與出口國）、<strong>太陽能光伏</strong>（全球主導地位）、<strong>部分先進製造與 AI 應用</strong>。這些成就是真實的，且部分得益於國家主導的產業政策（補貼、規模、完整供應鏈）。它們是「新質生產力」敘事的實證支撐，也是中國在美中競爭中的籌碼。</p>
+
+  <h3>內捲與產能過剩：成功的另一面</h3>
+  <p>但產業升級的模式有一個內在副作用：<strong>「內捲」（過度競爭）與產能過剩</strong>。當國家政策與地方競賽同時湧入一個「賽道」（如電動車、光伏），結果往往是產能過度擴張、慘烈的價格戰、全行業利潤率被壓縮到極低甚至虧損。這在國內表現為「內捲」（企業在存量中殘酷廝殺、利潤微薄），在國外表現為<strong>「產能過剩輸出」的指控</strong>——貿易夥伴（美、歐）指責中國以補貼支撐的過剩產能低價傾銷、衝擊本國產業，並以關稅與貿易壁壘反制（詳第 20 章）。這使中國的產業成功，同時成為地緣摩擦的新戰場。「內捲」也是通縮的一個供給側來源（過度競爭壓低價格）。</p>
+
+  <h3>人口懸崖：紅利的終結</h3>
+  <p>約束產業升級的最深變量是人口。<strong>中國人口自 2022 年起負增長，並以極快的速度老齡化</strong>（生育率遠低於更替水平、且短期難以逆轉）。這帶來多重衝擊：<strong>勞動力供給萎縮</strong>（人口紅利終結，勞動成本上升，部分低端製造外移）、<strong>撫養比惡化</strong>（養老與醫療的財政壓力劇增，養老金體系承壓）、<strong>需求結構改變</strong>（老齡社會的消費與投資需求不同）、<strong>創新與活力的長期隱憂</strong>（年輕人口減少對創新的潛在影響）。人口是「慢變量」中最慢、也最不可逆的一個——它為中國的長期增長潛能設定了一個逐步收緊的天花板，也讓「在紅利消退前完成升級」這場賽跑充滿緊迫感。</p>
+
+  <h3>青年就業與「內捲/躺平」：社會契約的裂縫</h3>
+  <p>人口與產業問題在社會層面的交匯點，是青年就業。經濟換檔期，<strong>青年失業率一度高企到官方一度暫停公布、後調整統計口徑</strong>，成為敏感議題。高學歷青年面對「學歷貶值、好工作稀缺、房價與生活成本高企」的困境，催生了「<strong>內捲</strong>」（無意義的過度競爭）與「<strong>躺平</strong>」（消極不合作、降低慾望）的社會情緒。這是社會契約的一道裂縫：當年輕一代對「努力就能向上流動」的信念鬆動，績效合法性在最有活力的群體中就出現了侵蝕。這不是「即將動盪」的訊號，而是「合法性配方在青年群體中承壓」的慢性症狀——值得長期監測（詳第 16 章消費、第 22 章儀表板）。</p>
+</section>
+
+<section id="s18b">
+  <div class="sec-label">PART IV · CH 18B</div>
+  <h2>國家隊產業政策：舉國體制的攻與守</h2>
+  <p class="lede">第 18 章提到產業成就得益於「國家主導的產業政策」；這一節專門解剖這套「舉國體制」——它如何運作、為何在某些領域極其有效、又付出什麼代價。這是理解中國產業競爭力（與其地緣摩擦）的關鍵。</p>
+
+  <h3>運作機制：集中力量攻關鍵賽道</h3>
+  <p>中國產業政策的核心是「<strong>新型舉國體制</strong>」——由國家設定戰略優先賽道（半導體、AI、電動車、生物科技等），透過多種工具集中資源攻堅：<strong>國家級產業基金</strong>（如大基金投資半導體）、<strong>補貼與稅收優惠</strong>、<strong>政府採購與市場培育</strong>（早期用政策創造需求）、<strong>國家隊企業</strong>（國企或準國企牽頭）、<strong>地方競賽</strong>（各地爭相佈局同一產業）。這套機制在「有明確技術路徑、需要大規模資本與長期投入、且有國家戰略需求」的領域（如高鐵、光伏、電動車、5G）證明了驚人的動員效率——它能在短時間內把一個產業從零做到全球規模。</p>
+
+  <h3>攻的一面：半導體的自立攻堅</h3>
+  <p>舉國體制當前最重要的戰場是<strong>半導體</strong>。在美國的出口管制與先進製程封鎖下，中國把半導體自立提升到「國家安全」的高度，傾全國之力攻堅——大基金持續注資、扶持本土晶圓製造與設備、材料、設計的全鏈條國產替代。這是一場「攻堅」：目標是在被「卡脖子」的關鍵環節（先進製程、EDA 工具、光刻設備等）實現突破，降低對外依賴。進展是真實但不均衡的——成熟製程與部分環節國產化加速，但最先進製程仍存在顯著差距。這場攻堅的成敗，直接關係中國在美中科技戰中的長期地位。</p>
+
+  <h3>守的一面：代價與扭曲</h3>
+  <p>但舉國體制有清晰的代價。<strong>其一，資源錯配與浪費</strong>——地方一哄而上導致重複建設、爛尾項目、以及借產業之名的騙補（半導體領域曾有多起大型項目爛尾）。<strong>其二，產能過剩與內捲</strong>——政策與資本湧入同一賽道，造就過剩產能與價格戰（第 18 章）。<strong>其三，效率 vs 市場的張力</strong>——行政主導的資源配置，在「路徑明確」的追趕領域有效，但在「需要試錯與原創」的前沿創新領域，可能不如市場的分散試錯（能不能靠舉國體制做出原創性突破，是一個未定的問題）。<strong>其四，地緣反制</strong>——補貼支撐的產業擴張引發貿易夥伴的反傾銷、關稅與「去風險」，把產業成功轉化為地緣摩擦。這套體制的淨效果，因此高度取決於「賽道的性質」——追趕明確路徑時是利器，探索未知前沿時利弊參半。</p>
+
+  <div class="prism">
+    <div class="pv-c"><div class="pv-tag">民營資本與地方</div>
+      <p>對民企與地方，國家隊產業政策是「順風也是擠壓」：對齊賽道能拿到補貼、信貸與市場（順風）；但國家隊與地方競賽也帶來慘烈內捲、產能過剩與利潤壓縮（擠壓）。理性策略是「借政策順風、避免死磕紅海」。</p>
+    </div>
+    <div class="pv-p"><div class="pv-tag">黨與習核心</div>
+      <p>對核心，舉國體制是「新質生產力」與科技自立的核心抓手，是應對美中科技戰、實現高質量發展的戰略選擇。效率損失與浪費被視為「必要學費」，戰略自主的價值高於配置效率的損失。</p>
+    </div>
+    <div class="pv-f"><div class="pv-tag">外國人</div>
+      <p>對外資，國家隊既是機會也是威脅：對齊的賽道有巨大市場與政策紅利（機會），但補貼扭曲的競爭與「國進民退/內資替代」的取向，可能壓縮外資的空間（威脅）。且產業政策引發的地緣反制，直接影響供應鏈佈局。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一套舉國產業政策，三種利害讀法</div>
+</section>
+
+<section id="s19">
+  <div class="sec-label">PART IV · CH 19</div>
+  <h2>政策連續性與外資：可預測性 vs 政治風險</h2>
+  <p class="lede">對外資最關鍵的問題之一，是政策的可預測性。中國的答案是分層的——某些政策有跨越運動與週期的高度連續性，另一些則可能在無預警下突變。分清這兩層，是外資評估的關鍵，也是本章的任務。</p>
+
+  <h3>連續的那一層：戰略方向的穩定</h3>
+  <p>有幾條線，無論短期政策如何擺盪，方向都高度連續：<strong>黨的執政地位與「黨領導一切」</strong>（不會改變的地基）、<strong>科技自立與產業升級的國家戰略</strong>（新質生產力、半導體攻堅——跨越週期的「國是」）、<strong>國有經濟主導的框架</strong>、<strong>對美戰略競爭的長期基調</strong>、<strong>統一台灣的長期目標</strong>。這些是中國政策的「地基層」，它們提供了一種宏觀的可預測性——外資可以確定這些方向不會逆轉。對齊這些方向的投資，享有政策的長期順風。</p>
+
+  <h3>突變的那一層：監管的不連續性</h3>
+  <p>但另一層——<strong>具體的監管與運動式治理</strong>——則可能在無預警下突變。這是外資對中國最大的不確定性來源：<strong>平台經濟一夜整頓、教培行業近乎歸零、房地產「三條紅線」急剎、反壟斷與數據安全的突然收緊、國安與反間諜的擴權</strong>。這些「監管突襲」的共同特徵是：<strong>來得快、幅度大、缺乏制度化的預告與申訴管道</strong>——因為在集權體制中，一個頂層的政治判斷可以迅速轉化為整個行業的規則重寫，而不必經過漫長的立法辯論或司法制衡。這正是外資面對中國的核心痛點：宏觀方向可預測，微觀規則卻可能突變。</p>
+
+  <h3>分層表：哪些可下注、哪些需動態管理</h3>
+  <table>
+    <tr><th>政策領域</th><th>連續 or 突變</th><th>外資讀法</th></tr>
+    <tr><td>黨的執政地位與框架</td><td>高度連續</td><td>地基常數——不必猜測，直接當前提</td></tr>
+    <tr><td>科技自立與產業升級</td><td>高度連續</td><td>可下注的長期順風——對齊即受益</td></tr>
+    <tr><td>對美競爭與台海目標</td><td>高度連續（方向）</td><td>方向確定，但時點與烈度需動態監測</td></tr>
+    <tr><td>平台/數據/反壟斷監管</td><td>可能突變</td><td>高不確定——需為監管突襲定價，避免過度暴露</td></tr>
+    <tr><td>對民企的整頓/拉攏</td><td>週期性擺盪</td><td>方向可能對、幅度時機難測——為擺盪定價</td></tr>
+    <tr><td>資本管制與匯率</td><td>相機收緊</td><td>「賺了能否拿走」的風險——壓力期可能收緊</td></tr>
+    <tr><td>國安/反間諜適用範圍</td><td>趨嚴</td><td>盡調、數據、人員的合規風險上升——需重新評估</td></tr>
+  </table>
+  <p class="tbl-note">關鍵區分：中國的政策風險不是「體制會不會變」（地基極穩），而是「微觀規則會不會在無預警下突變」。與典型新興市場「政權更替帶來政策逆轉」不同，中國的風險是「同一個政權內、頂層意志的相機轉向」——這種風險無法靠「押注選舉」對沖，只能靠「賽道選擇＋政治風險溢價＋分散暴露」來管理。</p>
+</section>
+
+<section id="s20">
+  <div class="sec-label">PART IV · CH 20</div>
+  <h2>地緣：美中戰略競爭、台海、一帶一路與全球南方</h2>
+  <p class="lede">這一節把地緣這個節點展開成完整的圖景。中國的對外戰略，是一個「以美中競爭為主軸、以台海為核心、以全球南方與一帶一路為腹地、以對俄關係為側翼」的多層佈局。理解這個佈局，才理解中國如何在美國主導的體系中為自己爭取空間。</p>
+
+  <h3>主軸：美中的結構性競爭</h3>
+  <p>如第 13 章所述，美中競爭是結構性、長期、跨黨派的。中國的應對戰略有幾條主線：<strong>科技自立</strong>（降低被「卡脖子」的脆弱性）、<strong>擴大內需</strong>（降低對外部市場的依賴，「雙循環」中的內循環）、<strong>反制槓桿</strong>（稀土與關鍵礦產出口管制——中國在全球稀土加工的主導地位，使其成為對抗美國科技封鎖的最有力反制之一）、<strong>統一戰線</strong>（拉攏對美有分歧的經濟體、深化與全球南方的關係）。基調是「鬥而不破」——在對抗中避免全面脫鉤的兩敗俱傷，同時為長期競爭積累實力。</p>
+
+  <h3>核心：台海（見第 13、13B 章）</h3>
+  <p>台海是地緣佈局的核心，已在第 13、13B 章詳述：能力快速上升、灰色地帶施壓常態化、但動武受成本效益制約、「2026 非攤牌之年」的評估、以及它作為「唯一能穿透一切的尾部風險」的定位。此處不贅，僅強調它在整個地緣佈局中的中心性——所有其他地緣行動（對美、對俄、對全球南方），某種程度上都服務於「為可能的台海攤牌創造有利條件、或降低攤牌的必要性」這個終極考量。</p>
+
+  <h3>腹地：一帶一路與全球南方</h3>
+  <p>面對美國主導的體系，中國的戰略腹地是「<strong>全球南方</strong>」（發展中國家）。工具包括：<strong>一帶一路</strong>（基建投資、貿易與融資網絡，儘管近年從「大水漫灌」轉向「小而美」、且面臨部分國家的債務可持續性質疑）、<strong>金磚擴容與多邊機制</strong>（構建非西方的合作平台）、<strong>人民幣國際化的漸進推動</strong>。目標是構建一個不完全受制於西方、以中國為重要節點的經濟與外交網絡，既是市場與資源的來源，也是地緣競爭中的「票倉」與迴旋空間。</p>
+
+  <h3>側翼：對俄關係與「無上限」的限度</h3>
+  <p>對俄關係是地緣佈局的重要側翼。中俄在對抗美國主導秩序上有共同利益，關係密切（能源、貿易、外交協調、宣稱的「無上限」夥伴關係）。但這個夥伴關係有其限度與風險：中國需要避免因對俄過度靠攏而觸發西方的次級制裁、損害對歐關係與自身經濟利益；且中俄關係本質上是「不對稱的」（中國是更大的經濟體）。中國的策略是「借重俄羅斯牽制美國，但不為俄羅斯承擔過高的代價」——這是一種精算式的、有保留的靠攏，而非無條件的結盟。</p>
+
+  <div class="prism">
+    <div class="pv-p"><div class="pv-tag">黨與習核心</div>
+      <p>對核心，地緣佈局服務於「民族復興」與「百年變局中的東升西降」判斷：透過科技自立、全球南方、對俄側翼，構建一個能對抗西方圍堵、最終為統一與復興創造條件的戰略態勢。對外強硬也對內強化合法性。</p>
+    </div>
+    <div class="pv-s"><div class="pv-tag">軍隊安全政法</div>
+      <p>對這個稜鏡，地緣的核心是台海與國家安全：軍隊現代化、反介入能力、國安擴權（反間諜、數據安全），都是為應對「最壞情況」（台海衝突、外部滲透）的準備。安全邏輯常常壓過經濟邏輯。</p>
+    </div>
+    <div class="pv-f"><div class="pv-tag">外國人</div>
+      <p>對外資，地緣是「需要持續定價的動態變數＋一個不可定價的尾部」：美中競爭、脫鉤/去風險、稀土反制是可觀察、可定價的動態；台海衝突則是不連續的尾部，用「平時貼近零、兌現即災難」的框架處理，不用常規機率折現。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一套地緣佈局，三種利害讀法</div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART V</div>
+  <h2>終章 · The Ledger</h2>
+  <div class="pd-sub">論題、儀表板與來源</div>
+</div>
+
+<section id="s21">
+  <div class="sec-label">PART V · CH 21</div>
+  <h2>終章綜合：十大論題——信度分級與可證偽條件</h2>
+  <p class="lede">一份分析的價值不在觀點的數量，在於每個觀點是否標明了「我對它有多確定」以及「什麼證據會推翻它」。本章把全報告收攏為十個論題，各附信度分級（★★★＝高信度結構判斷／★★＝中信度趨勢判斷／★＝低信度前瞻推測）與明確的可證偽條件——這既是結論，也是這份報告未來自我修正的介面。</p>
+
+  <table>
+    <tr><th style="width:44%">論題</th><th>信度</th><th>可證偽條件（若發生，論題作廢）</th></tr>
+    <tr><td><strong>T1・黨是常數論</strong>：中共一黨執政與「黨領導一切」在可見期限內不可撼動，正確姿勢是視為常數而非變數；「即將崩潰」是被數十年證偽的懶惰敘事。（第 1、2、14 章）</td><td>★★★</td><td>出現一黨執政地位的實質性動搖：多黨競爭合法化、或黨對軍隊/政法/幹部任免的壟斷被實質打破</td></tr>
+    <tr><td><strong>T2・個人核心論</strong>：政治已從集體領導轉向習近平個人核心，「兩個確立」入意識形態、2018 廢國家主席任期制、2022 續第三任期，是集權的制度完成；派系平衡框架的解釋力大幅下降。（第 4、9 章）</td><td>★★★</td><td>恢復明確的任期/年齡制度化接班安排、常委會重現制度化的派系制衡、或個人核心的意識形態表述被淡化撤除</td></tr>
+    <tr><td><strong>T3・接班懸空論</strong>：廢除任期制後接班無明確安排，是最深、最被低估的結構性風險——一個不連續的尾部風險，兌現時點不可測而後果可能劇烈。（第 2B 章）</td><td>★★★</td><td>出現制度化、可預測的接班安排（明確的接班人培養路徑、或恢復任期制度）</td></tr>
+    <tr><td><strong>T4・集權雙面論</strong>：同一個集權既是韌性來源（動員力、國家能力）也是脆弱來源（資訊失真、糾錯退化）；真實風險不是崩潰，而是治理品質的慢性侵蝕。（第 4、14 章）</td><td>★★★</td><td>集權在維持動員力的同時，出現制度化的資訊糾錯與內部制衡機制（證明可兼得純潔與活力）</td></tr>
+    <tr><td><strong>T5・增長命門論</strong>：績效合法性能否在成長換檔（房地產、通縮、人口、地方債）中維持，是政權的第一根命門；換檔失敗會迫使合法性配方滑向民族主義與強制。（第 2、11、16 章）</td><td>★★★</td><td>成功完成向消費/創新驅動的轉型、打破通縮、且增長企穩於健康區間——證明換檔已軟著陸</td></tr>
+    <tr><td><strong>T6・軍隊整肅雙義論</strong>：2025 軍隊高層被整肅至軍委副主席層級是已證實事實，但其政治含義（習更鞏固/受挑戰/純治理）無法從公開資訊確證，應記為高不確定訊號。（第 6、10 章）</td><td>★★</td><td>出現能明確判定整肅性質的可信證據（如權力結構的公開變動）；或整肅停止、軍隊高層趨於穩定</td></tr>
+    <tr><td><strong>T7・民企脆弱論</strong>：民營資本的財產權建立在「政治容許」而非「制度保障」之上；2025 促進法的再拉攏是「工具再平衡」而非「地位根本改變」，政治風險是永久經營常量。（第 7、12、17 章）</td><td>★★</td><td>出現凌駕於黨意志之上的、可靠的產權司法保護（民企在與國家利益衝突時勝訴並得到執行的穩定先例）</td></tr>
+    <tr><td><strong>T8・監管突變論</strong>：外資風險應分兩層——戰略方向高度連續（可下注），微觀監管可能在無預警下突變（需為突襲定價）；風險是「同一政權內頂層意志的相機轉向」，無法靠押注選舉對沖。（第 8、19 章）</td><td>★★</td><td>建立起制度化、可預期、有申訴管道的監管程序，使「監管突襲」不再是常態</td></tr>
+    <tr><td><strong>T9・產業雙刃論</strong>：舉國體制在追趕明確路徑的賽道（電動車、光伏）極有效，但帶來內捲、產能過剩與地緣反制；能否在人口紅利消退前完成向原創前沿的升級，是關鍵懸念。（第 18、18B 章）</td><td>★★</td><td>舉國體制在原創前沿（如最先進半導體）實現決定性突破且無重大資源錯配；或產能過剩與地緣反制使產業戰略明顯失效</td></tr>
+    <tr><td><strong>T10・台海命門論</strong>：全部內部評估預設「台海不戰、美中競而不裂」；台海衝突或全面脫鉤是唯一能同時擊穿所有稜鏡的系統性風險，用「不連續尾部」框架處理。（第 13、13B、20 章）</td><td>★</td><td>台海爆發實質軍事衝突、或美中升級至全面脫鉤與金融制裁——屆時本報告所有章節需整體重寫</td></tr>
+  </table>
+
+  <h3>十論題的內在階層</h3>
+  <p>十個論題不是並列的，有清晰的依賴結構：<strong>T1（黨是常數）、T10（台海命門）、T5（增長命門）是地基</strong>——三者定義了「常數／兩根命門」的核心框架，其餘七個論題都在這個框架內運作。T2–T4 是描述集權「結構與性質」的高信度判斷（因為它們刻畫的是制度硬體與內生機制，而非事件預測）；T6–T9 是「動力層」（中信度，涉及行為者選擇與趨勢，尤其 T6 軍隊整肅與 T9 產業升級最會變）；T10 是單點的尾部推測。閱讀本報告的正確方式，是把注意力按這個階層分配：<em>不必為 T1（黨會不會倒）焦慮（它最穩），把最多注意力放在兩根命門（T5 增長、T10 台海）的溫度、以及集權雙面性（T4）與接班（T3）這兩個慢性/尾部風險上</em>。</p>
+
+  <h3>本報告的四個已知盲區</h3>
+  <p>誠實標記分析框架自身的限制：<strong>其一，黨內政治的根本不透明</strong>——本報告對高層權力鬥爭、派系、軍隊整肅的分析，受限於公開資訊的貧乏，多數「政治含義」的判讀是推測而非確證（T6 尤然）；一個連「軍委副主席為何落馬」都無法從外部確知的體制，其內部真實狀態對觀察者永遠部分不可知。<strong>其二，經濟數據的口徑與可信度</strong>——本文引用的增長目標、CPI/PPI、人口、失業等為概略值與官方數據，而官方數據的口徑調整（如青年失業率統計的變更）與可信度本身即是一個變量，精確數字應以多源交叉驗證為準。<strong>其三，事件路徑依賴</strong>——本報告成稿於 2025 四中全會與軍隊整肅之後、2026 增長目標下修、Trump-習北京峰會（2026-05）之後的特定時點，若干判斷（尤其 T6、T8）帶有近因權重，應以第 22 章儀表板為持續校正介面。<strong>其四，量化的刻意留白</strong>——本報告在許多結構性判斷處採「量級」與「趨勢」表述而非精確數字（例如「約十個季度通縮」「五六七八九」），這是為避免偽精確誤導；代價是某些論斷無法附上嚴謹的置信區間，須以官方最新統計交叉驗證。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s22">
+  <div class="sec-label">PART V · CH 22</div>
+  <h2>監測儀表板：時點×事件×判讀規則</h2>
+  <table>
+    <tr><th>時點</th><th>事件</th><th>判讀規則</th></tr>
+    <tr><td><strong>2026-03（已發生）</strong></td><td>全國兩會設定 2026 增長目標 4.5–5%</td><td>已確認為 1990 年代初以來最低。觀察後續：是否進一步下修（合法性壓力上升訊號）、是否加碼刺激（保增長優先）、政策從「數量」轉「質量」的敘事是否持續（詳第 11、16 章）</td></tr>
+    <tr><td>每季（進行中）</td><td>CPI／PPI、房價、社會消費零售、青年失業</td><td>增長命門（T5）的即時溫度計。核心讀數是「去通縮」——CPI/PPI 能否轉正、房價能否止跌、消費能否回暖。持續通縮＝負向循環未破、合法性承壓（詳第 11、11B、16 章）</td></tr>
+    <tr><td>持續</td><td>軍隊高層人事（軍委組成、後續整肅）</td><td>T6 的核心讀數。觀察整肅是否停止/擴大、軍委是否趨穩、新晉高層的背景——但牢記其政治含義的根本不可知性，記為「高不確定訊號」而非確定結論（詳第 6、10 章）</td></tr>
+    <tr><td>持續</td><td>接班訊號（是否出現培養中的接班梯隊）</td><td>T3 的長線讀數。觀察是否有年輕領導人被明確培養、是否恢復任期/年齡的制度化安排——目前為「懸空」狀態，任何制度化訊號都是重大變化（詳第 2B 章）</td></tr>
+    <tr><td>2027（預期）</td><td>二十一大（下一次黨代會）</td><td>集權與接班的關鍵校驗點。觀察習近平的地位、常委會構成、是否出現接班安排、「建軍百年」節點的軍隊狀態——這是本報告最重要的前瞻里程碑（詳第 9 章）</td></tr>
+    <tr><td>持續</td><td>民企政策（促進法落地、民間投資、信心）</td><td>T7 的讀數。觀察《民營經濟促進法》是否真正落地、民間投資與企業家信心是否回暖、是否出現新的整頓——鐘擺回擺的實效檢驗（詳第 12、17 章）</td></tr>
+    <tr><td>持續</td><td>監管動向（平台、數據、反壟斷、國安/反間諜）</td><td>T8 的讀數。觀察是否出現新的「監管突襲」、國安適用範圍是否再擴大、監管程序是否趨向制度化——外資風險溢價的直接輸入（詳第 19 章）</td></tr>
+    <tr><td>持續</td><td>美中關係（關稅、出口管制、稀土反制、峰會）</td><td>地緣動態變數。Trump-習北京峰會（2026-05）已顯示「可管理不可終結」的競爭本質；觀察脫鉤/去風險的節奏、雙方的交易性緩和與結構性對抗（詳第 13、20 章）</td></tr>
+    <tr><td>持續（TAIL）</td><td>台海：軍演、灰色地帶施壓、台灣內部與美方訊號</td><td>T10 的即時溫度計。核心是「是否偏離不戰的緊張」——常態化施壓是新常態（可觀察），實質軍事升級是尾部（用不連續框架）。留意台灣紅線、美方可信度、中國內部壓力的變化（詳第 13、13B 章）</td></tr>
+    <tr><td>每年</td><td>人口、老齡化、地方債化債進度</td><td>T5 的慢變量讀數：人口負增長與老齡化的軌跡、化債是否從「攤平風險」轉向「解決問題」、地方財政能否重建收入來源——長期增長潛能的最終約束（詳第 16、18 章）</td></tr>
+  </table>
+
+  <h3>三個「若發生則改變評估」的觸發器</h3>
+  <ul class="plain">
+    <li><strong>觸發器 A（命門兌現・增長）</strong>：通縮長期化並演變為「資產負債表衰退」、換檔明確失敗、增長系統性失速 → T5 命門承壓兌現，合法性配方加速滑向民族主義與強制，對外風險（含台海）上升——下修中國的中長期治理品質與穩定性評估（但不改變 T1 黨是常數的地基）。</li>
+    <li><strong>觸發器 B（命門兌現・台海）</strong>：台海實質軍事衝突、或美中升級至全面脫鉤與金融制裁 → T10 兌現，全系統重估，本報告所有經濟與政治章節需整體重寫（資產凍結、供應鏈斷裂、市場歸零）——唯一的「一切重寫」觸發器。</li>
+    <li><strong>觸發器 C（結構鬆動・雙向）</strong>：向鬆——出現制度化的接班安排或集權的內部糾錯機制（T3/T4 改善）；向緊——出現繼承危機、高層公開分裂、或重大政策失誤缺乏煞車（T3/T4 惡化）。任一方向都需重估集權模式的穩定性與治理品質（歷史上未接近，但這是能改變全報告結構判斷的訊號）。</li>
+  </ul>
+  <p><strong>總結一句：</strong>黨是常數，集權程度與派系是變數，增長與台海是命門。監測去通縮與換檔（增長命門）、警惕台海尾部（台海命門）、追蹤接班與集權的治理代價（最深的慢性/尾部風險）；不必為「共產黨會不會倒」焦慮——那是被反覆證偽的懶惰敘事。真正該關注的，不是它會不會崩潰，而是集權的治理代價能否被增長的成果所抵消——當增長這根支柱承壓，這道加減法的答案，就決定了這個體制未來十年的品質與風險。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s23">
+  <div class="sec-label">PART V · CH 23</div>
+  <h2>資料來源與方法註記</h2>
+  <p>本文件之事實基礎來自 2026 年 7 月中旬檢索之公開報導與研究，主要來源：官方管道（新華社、人民日報、中國政府網、國防部、國家統計局之公報與白皮書，用於確認人事、政策與官方數據）；國際媒體與研究（Reuters、AP、BBC、The New York Times、Financial Times、Nikkei Asia、CNBC、CNN、The Economist、南華早報 SCMP、The Diplomat、East Asia Forum，用於時間線、國際視角與交叉查證）；智庫與學術（CSIS、Brookings、Council on Foreign Relations、Asia Pacific Foundation、Georgetown CSET、Yale Law China Center、以及關於「黨國體制」「民主集中制」「威權韌性」「接班政治」「反腐與集權」之學術文獻）。具體事件之查證要點：2025 四中全會（2025-10-20 至 23）通過「十五五」規劃建議、未設明確年度 GDP 目標；2026 年 GDP 增長目標 4.5–5%（2026-03 兩會，1990 年代初以來最低）；2025 年 10 月官方宣布開除何衛東（中央軍委副主席）、苗華等九名高級將領、張升民接任軍委副主席；《民營經濟促進法》2025-05-20 施行；Trump-習北京峰會（2026-05）之農產品採購與波音訂單承諾、未達成重大貿易/稀土協議、台灣為主要分歧點；房地產危機、約十個季度的通縮壓力（2025 年 CPI 約為零、PPI 連續多年為負）、地方債與化債、人口自 2022 年負增長等經濟事實。</p>
+  <p>方法註記：①人事與政策以官方公布為準；增長目標、CPI/PPI、人口、席次等為概略值或官方口徑，旨在呈現量級與結構，精確數字以官方最新統計及多源交叉驗證為準，並注意官方數據口徑調整（如青年失業率統計變更）本身即為變量。②本報告嚴格區分「已證實事實」（如軍隊人事變動）與「對其政治含義的推測」（如整肅背後的權力鬥爭）——凡屬推測，均明確標示，並在第 10、14 章專門辨析「真實風險 vs 過度解讀」。③五稜鏡中的視角陳述為分析性重構，旨在呈現各社會位置的理性計算結構，不代表任何群體、機構或官方的統一立場。④本報告立場中立：既不作「即將崩潰」的預言，也不作「不可撼動」的頌歌，而是以結構與誘因分析呈現，並將真實風險（接班、資訊失真、通縮）與過度解讀（崩潰論）分層辨析。⑤黨內政治高度不透明，本報告對高層動態的判讀受限於公開資訊，多屬概率性推測而非確證，此為框架的根本盲區（見第 21 章）。⑥本報告成稿於 2026 年 7 月：2025 四中全會與軍隊整肅之後、2026 增長目標下修、Trump-習北京峰會之後的特定時點；仍在演變的時效性事件（去通縮進度、軍隊人事、接班訊號、二十一大佈局、台海與美中動態）以第 22 章儀表板為持續校正介面。⑦本文件為政治結構分析，非投資建議；涉及部位決策前應依既定流程另行執行冷讀批判。</p>
+</section>
+</main>
+</div>
+</div>
+
+<footer>
+  <div class="shell">
+    <h4>Colophon</h4>
+    <p>中國政治結構五稜鏡 · InvestMQuest Geopolitics Research · 編製於 2026-07-24。設計語彙：靛墨紙面、織錦金界線、五色稜鏡（正紅＝黨與習核心、石墨灰＝官僚與技術官僚、藏青＝軍隊安全政法、帝王紫＝民營資本與地方、琥珀金＝外國人）。本文件之稜鏡裝置（同一事實、多種讀法）為分析框架，延續同系列馬來西亞・越南・南韓・泰國・印尼・菲律賓篇之方法，可套用於其他黨國與多裂隙政體之結構研究；與越南篇同屬列寧黨國之對照，但規模、集權與美中對抗使其風險量級完全不同。核心定錨：黨是常數、集權程度與派系是變數、增長與台海是命門。立場中立、分析為體：既不預言崩潰，也不頌揚不可撼動，而是把真實風險與過度解讀分層辨析。本報告不構成投資建議。</p>
+  </div>
+</footer>
+
+</body>
+</html>

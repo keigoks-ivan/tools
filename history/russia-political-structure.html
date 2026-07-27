@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>俄羅斯政治結構五稜鏡 — 克里姆林・siloviki・寡頭・反對社會・外國人的五種讀法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@350;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F4EE;        /* 米紙 */
+  --ink:#1B2233;          /* 靛墨 */
+  --ink-soft:#4A5468;
+  --gold:#B08A2E;         /* 織錦金 */
+  --hairline:#D9D4C7;
+  --putin:#24476E;        /* 稜鏡・普丁與克里姆林 = 藏青 */
+  --putin-bg:#E9EDF3;
+  --silov:#465059;        /* 稜鏡・siloviki 強力集團 = 石墨灰 */
+  --silov-bg:#ECEDEE;
+  --olig:#6B4A8A;         /* 稜鏡・寡頭與國家資本 = 帝王紫 */
+  --olig-bg:#F0ECF4;
+  --diss:#C0392B;         /* 稜鏡・反對與社會 = 赤紅 */
+  --diss-bg:#F9ECEA;
+  --fore:#C67C1E;         /* 稜鏡・外國人 = 琥珀金 */
+  --fore-bg:#F8F1E4;
+  --warn:#8A5A00;
+  --warn-bg:#F7F0DE;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  font-weight:350;
+  line-height:1.95;
+  font-size:16.5px;
+  letter-spacing:.02em;
+}
+::selection{background:var(--gold);color:#fff}
+
+/* ---------- 版心 ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 28px}
+.layout{display:grid;grid-template-columns:236px 1fr;gap:56px;align-items:start}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+
+/* ---------- Hero ---------- */
+header.hero{
+  background:var(--ink);
+  color:#EDE9DE;
+  padding:88px 0 72px;
+  position:relative;
+  overflow:hidden;
+}
+header.hero::after{ /* 五稜鏡光束 */
+  content:'';position:absolute;right:-8%;top:0;bottom:0;width:52%;
+  background:
+    linear-gradient(115deg,transparent 30%,rgba(36,71,110,.36) 30.4%,rgba(36,71,110,.36) 40%,transparent 40.4%),
+    linear-gradient(115deg,transparent 41%,rgba(70,80,89,.34) 41.4%,rgba(70,80,89,.34) 51%,transparent 51.4%),
+    linear-gradient(115deg,transparent 52%,rgba(107,74,138,.34) 52.4%,rgba(107,74,138,.34) 62%,transparent 62.4%),
+    linear-gradient(115deg,transparent 63%,rgba(192,57,43,.32) 63.4%,rgba(192,57,43,.32) 73%,transparent 73.4%),
+    linear-gradient(115deg,transparent 74%,rgba(198,124,30,.34) 74.4%,rgba(198,124,30,.34) 84%,transparent 84.4%);
+  pointer-events:none;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.28em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:26px;
+}
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(34px,4.6vw,56px);line-height:1.3;letter-spacing:.03em;
+  max-width:820px;
+}
+.hero-sub{
+  margin-top:26px;max-width:680px;font-size:17px;line-height:2.05;
+  color:#C9C3B4;font-weight:350;
+}
+.hero-meta{
+  margin-top:40px;display:flex;gap:34px;flex-wrap:wrap;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:#8E96A8;
+}
+.hero-meta b{color:#EDE9DE;font-weight:500;display:block;margin-bottom:3px}
+.prism-legend{margin-top:46px;display:flex;gap:0;max-width:760px;border:1px solid rgba(237,233,222,.22);flex-wrap:wrap}
+.prism-legend div{
+  flex:1;min-width:120px;padding:13px 12px;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:.08em;text-align:center;color:#EDE9DE;
+}
+.prism-legend .pl-p{background:rgba(36,71,110,.82)}
+.prism-legend .pl-s{background:rgba(70,80,89,.86)}
+.prism-legend .pl-o{background:rgba(107,74,138,.80)}
+.prism-legend .pl-d{background:rgba(192,57,43,.78)}
+.prism-legend .pl-f{background:rgba(198,124,30,.82)}
+
+/* ---------- 目錄側欄 ---------- */
+nav.toc{
+  position:sticky;top:0;padding-top:40px;padding-bottom:40px;
+  font-size:13.5px;line-height:1.7;
+  max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:var(--hairline) transparent;
+}
+nav.toc::-webkit-scrollbar{width:5px}
+nav.toc::-webkit-scrollbar-thumb{background:var(--hairline);border-radius:3px}
+nav.toc .toc-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:18px;text-transform:uppercase;
+}
+nav.toc a{
+  display:block;color:var(--ink-soft);text-decoration:none;
+  padding:5px 0 5px 14px;border-left:2px solid var(--hairline);
+  transition:all .18s;
+}
+nav.toc a:hover{color:var(--ink);border-left-color:var(--gold)}
+nav.toc a.t-p{border-left-color:var(--putin)}
+nav.toc a.t-s{border-left-color:var(--silov)}
+nav.toc a.t-o{border-left-color:var(--olig)}
+nav.toc a.t-d{border-left-color:var(--diss)}
+nav.toc a.t-f{border-left-color:var(--fore)}
+@media(max-width:960px){nav.toc{position:static;padding-top:40px}}
+
+/* ---------- 主文 ---------- */
+main{padding:64px 0 120px;min-width:0}
+section{margin-bottom:96px}
+.sec-label{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.24em;
+  color:var(--gold);margin-bottom:14px;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:900;font-size:30px;
+  line-height:1.45;margin-bottom:30px;padding-bottom:20px;
+  border-bottom:1px solid var(--hairline);letter-spacing:.02em;
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:21px;
+  margin:44px 0 18px;letter-spacing:.02em;
+}
+p{margin-bottom:20px;max-width:74ch}
+p.lede{font-size:18.5px;line-height:2.05;color:var(--ink);font-weight:400;max-width:70ch}
+strong{font-weight:700;color:var(--ink)}
+em{font-style:normal;border-bottom:2px solid var(--gold);padding-bottom:1px}
+
+/* ---------- 稜鏡三聯裝置（本文件的簽名元素） ---------- */
+.prism{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+  margin:36px 0 44px;border:1px solid var(--hairline);
+  background:#fff;
+}
+@media(max-width:820px){.prism{grid-template-columns:1fr}}
+.prism>div{padding:26px 24px 22px;border-top:4px solid}
+.prism>div+div{border-left:1px solid var(--hairline)}
+@media(max-width:820px){.prism>div+div{border-left:none;border-top-width:4px}}
+.prism .pv-p{border-top-color:var(--putin);background:linear-gradient(var(--putin-bg),#fff 42%)}
+.prism .pv-s{border-top-color:var(--silov);background:linear-gradient(var(--silov-bg),#fff 42%)}
+.prism .pv-o{border-top-color:var(--olig);background:linear-gradient(var(--olig-bg),#fff 42%)}
+.prism .pv-d{border-top-color:var(--diss);background:linear-gradient(var(--diss-bg),#fff 42%)}
+.prism .pv-f{border-top-color:var(--fore);background:linear-gradient(var(--fore-bg),#fff 42%)}
+.prism .pv-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  margin-bottom:12px;font-weight:500;
+}
+.pv-p .pv-tag{color:var(--putin)}
+.pv-s .pv-tag{color:var(--silov)}
+.pv-o .pv-tag{color:var(--olig)}
+.pv-d .pv-tag{color:var(--diss)}
+.pv-f .pv-tag{color:var(--fore)}
+.prism p{font-size:14.5px;line-height:1.9;margin-bottom:12px;color:#333B4D}
+.prism p:last-child{margin-bottom:0}
+.prism-caption{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);
+  letter-spacing:.06em;margin:-32px 0 44px;padding-top:10px;
+}
+
+/* ---------- 觀點框（單一視角深入時的左邊條） ---------- */
+.lens{padding:6px 0 6px 22px;margin:28px 0;border-left:4px solid}
+.lens.l-p{border-color:var(--putin)}
+.lens.l-s{border-color:var(--silov)}
+.lens.l-o{border-color:var(--olig)}
+.lens.l-d{border-color:var(--diss)}
+.lens.l-f{border-color:var(--fore)}
+.lens .lens-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;margin-bottom:8px;font-weight:500;
+}
+.lens.l-p .lens-tag{color:var(--putin)}
+.lens.l-s .lens-tag{color:var(--silov)}
+.lens.l-o .lens-tag{color:var(--olig)}
+.lens.l-d .lens-tag{color:var(--diss)}
+.lens.l-f .lens-tag{color:var(--fore)}
+
+/* ---------- 數據列 ---------- */
+.figrow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--hairline);border:1px solid var(--hairline);
+  margin:32px 0 40px;
+}
+.figrow div{background:#fff;padding:20px 18px 16px}
+.figrow .fig-n{
+  font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;
+  color:var(--ink);letter-spacing:-.01em;
+}
+.figrow .fig-l{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.6}
+
+/* ---------- 表格（輔助用） ---------- */
+table{width:100%;border-collapse:collapse;margin:28px 0 14px;font-size:14px;background:#fff}
+th{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;
+  text-align:left;padding:12px 14px;background:var(--ink);color:#EDE9DE;font-weight:500;
+}
+td{padding:12px 14px;border-bottom:1px solid var(--hairline);vertical-align:top;line-height:1.75}
+tr:last-child td{border-bottom:none}
+.tbl-note{font-size:13px;color:var(--ink-soft);margin-bottom:36px;max-width:74ch}
+
+/* ---------- 警示框 ---------- */
+.callout{
+  background:var(--warn-bg);border:1px solid #E3D5AE;border-left:4px solid var(--warn);
+  padding:20px 24px;margin:30px 0;font-size:15px;line-height:1.9;max-width:none;
+}
+.callout .co-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;
+  color:var(--warn);margin-bottom:8px;font-weight:500;
+}
+.callout p{margin-bottom:10px;max-width:none}
+.callout p:last-child{margin-bottom:0}
+
+/* ---------- 反方論證（多方論證裝置） ---------- */
+.debate{margin:32px 0;border:1px solid var(--hairline);background:#fff}
+.debate>div{padding:22px 26px}
+.debate .d-pro{border-bottom:1px dashed var(--hairline)}
+.debate .d-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;margin-bottom:10px;font-weight:500;
+}
+.debate .d-pro .d-tag{color:var(--diss)}
+.debate .d-con .d-tag{color:var(--putin)}
+.debate p{font-size:14.5px;margin-bottom:10px}
+.debate p:last-child{margin-bottom:0}
+
+ul.plain{margin:0 0 22px 0;padding-left:0;list-style:none;max-width:74ch}
+ul.plain li{padding:9px 0 9px 26px;position:relative;line-height:1.85}
+ul.plain li::before{
+  content:'—';position:absolute;left:0;color:var(--gold);font-weight:700;
+}
+footer{
+  background:var(--ink);color:#8E96A8;padding:56px 0 72px;
+  font-size:13px;line-height:2;
+}
+footer .shell{max-width:900px}
+footer h4{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.26em;
+  color:var(--gold);margin-bottom:16px;font-weight:500;
+}
+footer p{max-width:none}
+
+.part-divider{margin:110px 0 70px;padding:34px 0 30px;border-top:3px solid var(--ink);border-bottom:1px solid var(--hairline)}
+.part-divider .pd-num{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
+.part-divider h2{border:none;padding:0;margin:0;font-size:34px}
+.part-divider .pd-sub{margin-top:8px;color:var(--ink-soft);font-size:15px}
+
+.divider-ornament{
+  text-align:center;color:var(--gold);font-size:15px;letter-spacing:.6em;
+  margin:0 0 96px;user-select:none;
+}
+</style>
+</head>
+<body>
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span data-imq-zh>返回歷史總覽</span><span data-imq-en style="display:none">All Histories</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+  <button onclick="(function(){var z=document.documentElement.getAttribute('data-imq-lang')!=='en';document.documentElement.setAttribute('data-imq-lang',z?'en':'zh');document.querySelectorAll('[data-imq-zh]').forEach(function(e){e.style.display=z?'none':'';});document.querySelectorAll('[data-imq-en]').forEach(function(e){e.style.display=z?'':'none';});})()"
+    style="margin-left:auto;background:transparent;border:1px solid #665a45;color:#cda551;border-radius:4px;
+    padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">EN / 中</button>
+</div>
+
+
+<header class="hero">
+  <div class="shell">
+    <div class="eyebrow">InvestMQuest · Geopolitics Research · v1 · 2026-07-24</div>
+    <h1>俄羅斯政治結構五稜鏡</h1>
+    <div class="hero-sub">同一個國家，五種完全不同的處境。這裡有形式上的總統、國會與選舉，真正的權力卻不在票箱，而在克里姆林高牆內 siloviki 與寡頭之間的恩庇均衡。普丁自 2000 年建起的「權力垂直」為何比任何選舉都更接近常數、強力部門如何因戰爭而升格為統治核心、能源租金如何供養整台機器、殘餘的反對空間如何被 Navalny 之死與戰時鎮壓抹平、外國人面對的又是哪一套制裁與孤立的規則——以 2022 年全面入侵烏克蘭至 2026 年仍未乾淨結束的戰爭為切片，逐層論證。</div>
+    <div class="hero-meta">
+      <div><b>分析基準日</b>2026-07-24</div>
+      <div><b>前一里程碑</b>2026-05 有限停火與談判</div>
+      <div><b>下一里程碑</b>烏克蘭戰爭結局與 2030 接班觀察</div>
+      <div><b>文件性質</b>結構分析・非投資建議</div>
+    </div>
+    <div class="prism-legend">
+      <div class="pl-p">普丁與克里姆林</div>
+      <div class="pl-s">Siloviki 強力集團</div>
+      <div class="pl-o">寡頭與國家資本</div>
+      <div class="pl-d">反對與社會</div>
+      <div class="pl-f">外國人視角</div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+<div class="layout">
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <a href="#s0">00 導讀與核心論證</a>
+  <div class="toc-title" style="margin-top:16px">I · 地圖</div>
+  <a href="#s1">01 政治版圖總覽</a>
+  <a href="#s1b">01B 2024 續任的算術</a>
+  <a href="#s2">02 結構的五個根源</a>
+  <a href="#s2b">02B 接班黑箱</a>
+  <a href="#s3">03 兩個不投票的力量</a>
+  <div class="toc-title" style="margin-top:16px">II · 稜鏡</div>
+  <a href="#s4" class="t-p">04 普丁與克里姆林</a>
+  <a href="#s5" class="t-s">05 Siloviki 強力集團</a>
+  <a href="#s6" class="t-o">06 寡頭與國家資本</a>
+  <a href="#s7" class="t-d">07 反對與社會</a>
+  <a href="#s8" class="t-f">08 外國人／投資人</a>
+  <div class="toc-title" style="margin-top:16px">III · 動力</div>
+  <a href="#s9">09 普丁體制的形成</a>
+  <a href="#s10">10 戰爭如何重塑國內政治</a>
+  <a href="#s11">11 Prigozhin 兵變解剖</a>
+  <a href="#s12">12 戰爭經濟的可持續性</a>
+  <a href="#s13">13 停火談判與 Trump 因素</a>
+  <a href="#s14">14 韌性 vs 脆弱辨析</a>
+  <div class="toc-title" style="margin-top:16px">IV · 引擎</div>
+  <a href="#s15">15 三角傳導模型</a>
+  <a href="#s16">16 政治×經濟迴路</a>
+  <a href="#s17">17 資本與國家：能源租金</a>
+  <a href="#s18">18 產業與人口</a>
+  <a href="#s19">19 政策連續性與外資</a>
+  <a href="#s20">20 地緣：戰爭與軸線</a>
+  <div class="toc-title" style="margin-top:16px">V · 終章</div>
+  <a href="#s21">21 十大論題</a>
+  <a href="#s22">22 監測儀表板</a>
+  <a href="#s23">23 資料來源</a>
+</nav>
+
+<main>
+<section id="s0">
+  <div class="sec-label">PROLOGUE · CH 00</div>
+  <h2>導讀與核心論證</h2>
+  <p class="lede">俄羅斯的政治結構由三個互相咬合的齒輪構成：<strong>權力垂直</strong>（vertikal vlasti，一條從克里姆林向下貫穿聯邦、地方、企業、媒體的指揮鏈）、<strong>租金國家</strong>（財政與精英財富的根基是能源與原物料出口的租金，而非稅基廣泛的生產性經濟）、以及<strong>恩庇均衡</strong>（真正的權力分配發生在克里姆林內部 siloviki 強力集團與國家資本寡頭之間，由普丁一人仲裁）。這三個齒輪決定了一件事：在俄羅斯，形式選舉是正當性的儀式而非權力的來源，理解這個政體要看的不是票數，而是塔樓之間的均衡。</p>
+  <p>但「普丁體制」需要拆成不同層次來讀，因為它對不同的人意義完全不同：</p>
+  <ul class="plain">
+    <li><strong>對普丁與克里姆林</strong>：一套以個人化威權運作的仲裁機器——普丁不是任何派系的頭目，而是所有派系賴以協調的唯一節點；他的價值在於「不可替代的平衡者」，而這正是接班之所以是黑箱的原因。</li>
+    <li><strong>對 siloviki（強力部門）</strong>：FSB、軍、近衛軍等安全機構不投票卻主宰結果——戰爭把它們從「政權的看門人」升格為「政權的主人」，這是 2022 年以來俄羅斯政治最深刻的結構位移。</li>
+    <li><strong>對寡頭與國家資本</strong>：Gazprom、Rosneft 等能源國企與私人寡頭共享的，是一套「臣服換租金」的契約——財產權以政治忠誠為前提，制裁則迫使這套租金重新流向東方。</li>
+    <li><strong>對反對與社會</strong>：Navalny 2024 年獄中之死與反對派的系統性摧毀後，體制外反對幾乎歸零；剩下的是體制內「系統性反對」的裝飾、地方與族群共和國的沉默不滿、以及一種難以量化卻真實的戰爭疲乏。</li>
+    <li><strong>對外國人</strong>：面對的是一套與世界脫鉤的平行經濟——制裁、資本外逃、盧布的行政管控、對中印的能源轉向；真正的風險不在「俄羅斯即將崩潰」的戲劇性想像，而在一個孤立、可預測、卻長期侵蝕自身技術與人口基礎的體制。</li>
+  </ul>
+
+  <h3>全書地圖：五部曲的閱讀動線</h3>
+  <table>
+    <tr><th>部</th><th>章</th><th>回答的問題</th></tr>
+    <tr><td><strong>第一部・地圖</strong></td><td>01–03</td><td>版圖長什麼樣？權力垂直與塔樓政治如何運作？兩個不投票的力量是誰？</td></tr>
+    <tr><td><strong>第二部・稜鏡</strong></td><td>04–08</td><td>同一個政體，五種位置（克里姆林／siloviki／寡頭／反對社會／外國人）各自看到什麼？</td></tr>
+    <tr><td><strong>第三部・動力</strong></td><td>09–14</td><td>普丁體制怎麼形成的、戰爭怎麼重塑它、Prigozhin 兵變揭示了什麼、戰爭經濟能撐多久、談判走到哪、它到底是韌還是脆？</td></tr>
+    <tr><td><strong>第四部・引擎</strong></td><td>15–20</td><td>克里姆林×租金×戰爭如何互相傳導？能源、產業、人口、外資、地緣各卡在哪個齒輪上？</td></tr>
+    <tr><td><strong>第五部・終章</strong></td><td>21–23</td><td>十大論題（附信度與可證偽條件）、監測儀表板、資料來源。</td></tr>
+  </table>
+  <p><strong>一句話結論，供全文檢驗：</strong><em>權力垂直是常數、克里姆林派系是變數、戰爭與接班是命門</em>。俄羅斯是一個以個人化威權運作的租金國家，烏克蘭戰爭把這套體制推入戰時模式——強化了強力部門、催出軍工凱因斯主義、也摧毀了殘餘的反對空間。它最深的命門有二：一場無法乾淨結束的戰爭，與一個沒有安排的接班。趕時間的讀者可直接讀第 21 章的十大論題與第 22 章儀表板，再回頭按需查閱。</p>
+
+  <div class="callout">
+    <div class="co-tag">READING PROTOCOL · 立場聲明</div>
+    <p>本報告是結構與誘因分析，不是宣傳也不是醜化。它既不採信「俄羅斯是鐵板一塊、普丁全知全能」的官方敘事，也不採信「政權即將崩潰、精英政變在即」的鏡像式一廂情願。傳聞（如 2026 年 5 月西方媒體關於精英密謀換人的報導）與已證實的事實（如 VAT 於 2026 年 1 月由 20% 調升至 22%）會被明確區分；辨析章（第 14 章）會分層區分真實的結構性風險（接班、戰爭無法乾淨結束、過度依賴戰爭與能源）與過度解讀（「明天就垮」論）。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART I</div>
+  <h2>地圖 · The Map</h2>
+  <div class="pd-sub">權力垂直、塔樓與兩個不投票的力量</div>
+</div>
+
+<section id="s1">
+  <div class="sec-label">PART I · CH 01</div>
+  <h2>政治版圖總覽：權力垂直與塔樓政治</h2>
+  <p class="lede">俄羅斯的憲法文本讀起來像一個尋常的半總統制聯邦共和國：直選總統、聯邦議會（下院國家杜馬＋上院聯邦委員會）、聯邦政府與八十餘個聯邦主體。但這套形式架構是一層外殼，真正的運作邏輯要用三個關鍵詞讀：<strong>權力垂直（誰對誰負責）、塔樓政治（權力在克里姆林內部如何分配）、形式選舉（票箱扮演什麼角色）</strong>。所有看似費解的現象，都是這三者互相擠壓的結果。</p>
+
+  <h3>第一層：權力垂直——一條從克里姆林向下的指揮鏈</h3>
+  <p>「權力垂直」（vertikal vlasti）是理解俄羅斯的第一把鑰匙。普丁 2000 年上台後，把 1990 年代葉爾欽時代那個地方諸侯割據、寡頭綁架政策、媒體各自為政的鬆散結構，逐步改造成一條自上而下的單一指揮鏈：<strong>州長從民選改為總統提名（2004 年別斯蘭事件後一度全面取消直選，2012 年恢復但設「政黨過濾」與可信候選人篩選）、全國電視台收歸國家或親政權寡頭控制、大企業被明示「遠離政治」、司法與檢察成為可被指令的工具</strong>。這條垂直線的特徵不是把所有決定都集中到普丁桌上，而是讓體制內每一個節點都清楚知道「向上負責」——地方官員、法官、企業主的職業安全，取決於對克里姆林意志的預判與服從，而非對選民、股東或法律的問責。</p>
+  <p>這條垂直線解釋了為何俄羅斯的形式民主指標與實質運作嚴重背離：選舉照辦、法院照開、議會照表決，但每一個環節的結果在關鍵議題上都是可預測的，因為它們都嵌在同一條指揮鏈裡。學界通常用「個人化威權」（personalist authoritarianism）或「競爭性威權」向「霸權型威權」滑落的軌跡來描述這個演化——1990 年代的葉爾欽俄羅斯尚有真實競爭，2000 年代普丁把它管理化（「管理式民主」managed democracy），2012 年後尤其是 2022 年戰爭以來則進一步硬化為近乎純粹的個人化威權。</p>
+
+  <h3>第二層：塔樓政治——克里姆林內部的派系均衡</h3>
+  <p>權力垂直的頂端不是一個點，而是一組互相制衡的「塔樓」（башни Кремля，Kremlin towers）。這是俄羅斯政治分析中最有解釋力也最需謹慎的隱喻：克里姆林內部並非鐵板一塊，而是由若干個以人脈、機構與利益為核心的非正式派系構成，它們爭奪的是資源、職位、案件的裁量權與對政策的影響力。<strong>常被提及的塔樓包括：以 FSB／安全機構為核心的強硬 siloviki、以國家能源與軍工企業為核心的國家資本集團、以總統辦公廳政治管理板塊（如副主任 Sergey Kiriyenko 一系）為核心的技術官僚，以及各種以個人親信網絡為軸的圈子</strong>。這些塔樓沒有正式的組織章程，它們的邊界模糊、成員重疊、隨事件流動——因此外界對「哪座塔樓在上升」的判讀往往帶有很大不確定性，這一點必須誠實標記。</p>
+  <p>塔樓政治的核心機制是：<strong>普丁不是任何一座塔樓的頭目，而是所有塔樓賴以協調的唯一仲裁者</strong>。他的權力不來自領導某個派系去壓倒其他派系，而來自「沒有他，塔樓之間就沒有可信的均衡點」。這是理解普丁體制穩定性與脆弱性的同一把鑰匙：只要仲裁者在位，塔樓之間的競爭被限制在體制內、不外溢為公開衝突（Prigozhin 兵變是罕見的例外，見第 11 章）；但這也意味著，仲裁者一旦缺位，沒有制度化的機制能替代他的協調功能——這正是接班問題之所以是「黑箱」而非「程序」的結構原因（第 2B 章）。</p>
+
+  <h3>第三層：形式選舉——正當性的儀式</h3>
+  <p>俄羅斯的選舉不是不重要，而是它的功能與民主選舉不同。它不是用來「選出」統治者或「更替」政權，而是用來<strong>展示動員能力、生產正當性、並向精英與社會確認「無替代選項」（Путину нет альтернативы）這個政治事實</strong>。選舉的結果在事前已被權力垂直與塔樓均衡決定，真正被管理的是「以多高的得票率、多高的投票率」來呈現這個結果——過高顯得造假、過低顯得虛弱，因此存在一個被精心校準的目標區間。反對候選人的角色是提供「有競爭的表象」而非真實挑戰：真正有動員力的挑戰者（如 Navalny）會被以行政與司法手段排除在選票之外。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">2000</div><div class="fig-l">普丁首次當選總統，權力垂直的起點</div></div>
+    <div><div class="fig-n">2020</div><div class="fig-l">修憲「歸零」任期，理論上可續任至 2036</div></div>
+    <div><div class="fig-n">2024-03</div><div class="fig-l">普丁再度「當選」，官方得票率逾八成，任期至 2030</div></div>
+    <div><div class="fig-n">2036</div><div class="fig-l">2020 修憲下的理論任期上限</div></div>
+  </div>
+
+  <div class="prism">
+    <div class="pv-p"><div class="pv-tag">克里姆林視角</div>
+      <p>版圖的核心事實是「權力垂直運作良好」：戰時體制下，指揮鏈的服從度不降反升，地方與精英在外部壓力面前更依賴中心的仲裁。選舉的高得票率被讀為「團結」的證明，而非統治的空洞。</p>
+      <p>對克里姆林而言，塔樓之間的競爭是特徵而非缺陷——它讓普丁保持不可或缺，只要沒有任何一座塔樓大到能自成均衡。</p>
+    </div>
+    <div class="pv-s"><div class="pv-tag">siloviki 視角</div>
+      <p>對強力部門而言，權力垂直意味著它們是「垂直線的執行末端」——鎮壓、監控、清算的工具。戰爭把它們的相對地位抬升：當正當性從經濟增長轉向安全與動員，掌握暴力工具的機構自然上位。</p>
+      <p>但它們也清楚：自己的權力是普丁授予的，不是自有的；沒有仲裁者，塔樓之間的競爭可能反噬自身。</p>
+    </div>
+    <div class="pv-f"><div class="pv-tag">外國人視角</div>
+      <p>版圖對外部觀察者的意義是「不要看票箱，要看塔樓」：俄羅斯的政策連續性不由選舉週期決定，而由塔樓均衡與普丁的偏好決定，因此在他在位期間高度可預測。</p>
+      <p>真正的不確定性集中在單一節點：仲裁者的健康、意志與最終的離場方式。這是評估俄羅斯「政治風險上限」時唯一真正的尾部變數。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 同一張版圖，三種利害結構</div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s1b">
+  <div class="sec-label">PART I · CH 01B</div>
+  <h2>形式選舉與 2024 續任的算術</h2>
+  <p class="lede">若選舉不決定權力，為何還要辦、還要辦得如此隆重？答案在於：在個人化威權裡，選舉是一套「正當性生產技術」，它的產出不是政權更替，而是三樣東西——精英的協調預期、社會的服從展示、以及對外的「無替代」訊號。2024 年 3 月普丁的續任，是這套技術在戰時的一次滿功率運轉。</p>
+
+  <h3>2024 續任的「算術」不是票數，是設計</h3>
+  <p>2024 年 3 月的總統選舉，官方結果是普丁以逾八成得票率、在高投票率下當選，任期至 2030 年。要正確讀這個結果，關鍵不在數字本身（在管理式選舉裡，具體百分比是被校準的產物），而在它揭示的三層設計：<strong>其一，法律地基已於 2020 年鋪好</strong>——當年的修憲把普丁先前的任期「歸零」，使他理論上可再任兩屆、執政至 2036 年，這意味著 2024 的續任不是「例外」而是「早已寫好的劇本」。<strong>其二，真實挑戰者被系統性排除</strong>——最具動員力的 Navalny 早在選前已被關押（並於 2024 年 2 月選前一個月在獄中死亡，見第 7 章），一位反戰立場的候選人以「連署瑕疵」被拒於選票之外，留在票上的是被默許的、無威脅的陪選者。<strong>其三，戰爭被轉化為動員燃料</strong>——選舉被框定為對「特別軍事行動」與國家團結的公投，投票本身被賦予「愛國」意涵。</p>
+
+  <h3>續任的真正含義：把「無替代」變成既成事實</h3>
+  <p>2024 續任的結構性後果，是把「普丁之外無替代選項」從一個政治判斷變成一個被制度確認的既成事實，並把這個事實的有效期延長到 2030（甚至 2036）。這對塔樓均衡是雙面的：一方面，它給了各派系一個穩定的協調錨點——未來六年（乃至更久）的仲裁者是誰，沒有懸念；另一方面，它也把接班問題進一步推遲、進一步不透明化——當在位者可以合法執政到七十歲後段，任何公開的接班安排都會削弱他作為「不可或缺仲裁者」的地位，因此理性的選擇是「不安排」。這就是為什麼 2024 的高票續任，非但沒有緩解、反而加深了本報告視為兩大命門之一的接班黑箱（第 2B 章）。</p>
+
+  <table>
+    <tr><th>選舉的表面功能</th><th>選舉的實際功能</th><th>對誰產生訊號</th></tr>
+    <tr><td>選出總統</td><td>確認既定的仲裁者、生產正當性</td><td>對精英：協調預期已定</td></tr>
+    <tr><td>反映民意</td><td>展示動員與服從能力</td><td>對社會：抵抗無意義</td></tr>
+    <tr><td>提供替代選項</td><td>製造「有競爭」的表象、排除真實挑戰者</td><td>對反對者：門是關的</td></tr>
+    <tr><td>更替權力</td><td>延長「無替代」的有效期、推遲接班</td><td>對外界：政策連續、下注在位者偏好</td></tr>
+  </table>
+  <p class="tbl-note">此表的核心洞見：把左欄當作理解俄羅斯選舉的框架，會系統性誤讀；用中欄的功能主義視角，才能解釋為何一場結果毫無懸念的選舉仍值得政權投入巨大資源去舉辦。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s2">
+  <div class="sec-label">PART I · CH 02</div>
+  <h2>結構的五個根源：為什麼這套體制如此穩定又如此脆</h2>
+  <p class="lede">要回答「這個體制能撐多久」，必須先確認它建立在什麼地基上。答案是五層互相加固的根源——前四層解釋它為何在普丁在位期間異常穩定，第五層則埋著它最深的裂縫。</p>
+
+  <h3>根源一：個人化威權——制度的空心化</h3>
+  <p>俄羅斯的政治制度（議會、政黨、法院、聯邦制）在文本上齊備，在實質上被抽空為個人權力的載具。這種「個人化」不是普丁天生獨裁，而是二十餘年權力垂直建設的累積結果：<strong>每一個本應獨立運作的制度，都被逐步改造成向單一中心負責的傳動裝置</strong>。個人化威權的優勢是決策快、協調成本低、無否決點；代價是它把整個體制的穩定性押注在一個人身上——制度越空心，領導人越不可替代，接班越危險。這是理解俄羅斯的第一組張力：<em>它的短期穩定與長期脆弱，來自同一個原因</em>。</p>
+
+  <h3>根源二：siloviki—寡頭的恩庇均衡</h3>
+  <p>個人化威權需要一個精英聯盟來承載，這個聯盟的核心是 siloviki（強力集團）與國家資本寡頭之間的恩庇均衡。<strong>siloviki 提供強制力與安全，寡頭提供租金與資源，普丁在兩者之間分配職位、案件、資產與保護</strong>。這套均衡的黏合劑不是意識形態，而是「共同的把柄與共同的利益」：精英彼此持有對方的黑材料（kompromat），同時共享一個只有在體制存續下才能兌現的財富與地位。這種「相互確保的臣服」使聯盟異常穩定——沒有人有單獨背叛的誘因，因為任何背叛都會啟動所有人的把柄。但它也異常剛性：均衡由普丁一人維繫，缺乏在他之外重新分配的機制。</p>
+
+  <h3>根源三：租金國家——財政的能源臍帶</h3>
+  <p>俄羅斯的國家財政與精英財富，根基是能源與原物料出口的租金，而非稅基廣泛、來自千萬企業與家戶的生產性稅收。<strong>石油與天然氣長期貢獻聯邦預算相當可觀的比重，Gazprom、Rosneft 等能源巨頭既是國庫的金源，也是地緣政治的工具</strong>。租金國家的政治後果深遠：當政府的錢來自地下的資源而非人民的生產，它對人民的問責需求就低——「無代表則無稅」的邏輯反過來運作，政府不太需要向納稅人交代，因為它的收入不依賴他們。這是租金國家與威權穩定之間的經典連結，也解釋了為何能源價格與制裁對俄羅斯的財政與行為有如此直接的傳導（第 12、17 章）。</p>
+
+  <h3>根源四：聯邦制的空心化</h3>
+  <p>俄羅斯名義上是聯邦，實質上是高度中央集權的單一制。<strong>州長人事由中心掌控、地方預算高度依賴聯邦轉移支付、聯邦委員會（上院）的地方代表性被稀釋</strong>——這使得八十餘個聯邦主體幾乎沒有制度化的槓桿去挑戰中心。族群共和國（如車臣、韃靼斯坦、達吉斯坦等）保留一定的形式自治與文化特殊性，但在財政與強制力上被牢牢綁定：車臣的卡德羅夫（Kadyrov）模式是極端案例——以近乎藩鎮的個人化統治換取對克里姆林的忠誠與武力供給。聯邦制的空心化消除了地方作為反對力量的可能，但也埋下另一種風險：一旦中心的仲裁能力鬆動，被壓抑的地方與族群張力可能重新浮現（第 7、14 章）。</p>
+
+  <h3>根源五：接班黑箱——體制自帶的裂縫</h3>
+  <p>前四層根源共同造就了一個異常穩定的體制，但它們也共同造就了它最深的結構性裂縫：<strong>沒有接班機制</strong>。個人化威權使領導人不可替代、恩庇均衡由一人仲裁、租金分配以個人裁量為軸、聯邦制無獨立的權力中心——這一切都意味著，當普丁離場（無論因健康、意外或最終的自然規律），沒有任何制度化的程序能保證均衡平順轉移。這不是一個可以「事先安排好」的問題，因為任何公開的安排都會削弱在位者的仲裁地位；因此體制的理性選擇是「不安排」，而「不安排」正是它最大的尾部風險。這一層根源值得單獨深入，見下一節。</p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">正方論證：這是一個異常脆弱的體制</div>
+      <p>五層根源中有四層都把系統的穩定性押在單一個人身上。制度被空心化到無法自我運作、精英聯盟無普丁不能自持、財政被綁在波動的能源租金與制裁風險上、接班完全無安排——這是一個「一人否決點即全系統風險」的結構。歷史上，個人化威權在領導人離場時的動盪機率遠高於制度化威權（如中國式的集體領導與任期制）。因此表面的鐵板，其實是一塊沒有備援的單點故障系統。</p>
+    </div>
+    <div class="d-con"><div class="d-tag">反方論證：這是一個被低估的韌性體制</div>
+      <p>「單點故障」論忽略了這套體制在壓力下的自我加固能力。2022 年以來，面對史上最嚴厲的制裁、一場消耗巨大的戰爭、與 Prigozhin 兵變的直接衝擊，體制不僅沒有崩潰，反而在每一次衝擊後強化了強力部門、清洗了不穩定因素、並讓精英更依賴中心。租金國家找到了東方的新買家、戰爭經濟創造了新的動員與分配管道。把它想成「隨時會垮」的西方鏡像式期待，已被過去數年反覆證偽——真正的風險不是明天崩潰，而是長期的、緩慢的侵蝕。</p>
+    </div>
+  </div>
+  <p><strong>本節結論：</strong>正反雙方其實在講兩件不同的事——正方講的是「接班那一刻」的尾部風險，反方講的是「普丁在位期間」的當期韌性。兩者都對。正確的綜合是：<em>把權力垂直與恩庇均衡當作普丁在位期間的常數（高韌性），把接班與戰爭終局當作無法定價的尾部命門（真脆弱）</em>。這正是本報告的核心定錨。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s2b">
+  <div class="sec-label">PART I · CH 02B</div>
+  <h2>接班黑箱：為什麼「不安排」是理性選擇</h2>
+  <p class="lede">接班問題是俄羅斯政治的「房間裡的大象」——所有人都知道它存在，卻幾乎沒有人能公開談論，因為公開談論本身就會改變均衡。這一節把黑箱拆開，說明它為何是黑箱、以及可能的幾種出口。</p>
+
+  <h3>為什麼公開安排接班是政治自殺</h3>
+  <p>在個人化威權裡，領導人的權力核心是「不可替代的仲裁者」地位。一旦他指定接班人，就創造了一個「未來的權力中心」——精英會開始向這個未來下注、重新排隊，而每一份對未來的下注，都是從當下在位者身上抽走的一份權力。這就是「跛腳鴨」邏輯在威權體制裡的加強版：民主體制的跛腳鴨有任期保護，威權體制的跛腳鴨連這個都沒有。因此，<strong>對普丁而言，最理性的選擇是永遠不指定接班人、永遠保持所有塔樓對「後普丁時代」的不確定</strong>——這既是他維持仲裁地位的手段，也是體制無法平順接班的根源。這是一個「理性的個人選擇造就集體的結構風險」的典型案例。</p>
+
+  <h3>接班的三種可能出口（皆高度不確定）</h3>
+  <ul class="plain">
+    <li><strong>指定繼承</strong>：普丁在某個時點選定一位「安全」的繼承者（如 2008–2012 由梅德韋傑夫看守總統職位的「王車易位」模式的升級版），透過一次管理式選舉完成移交。優點是形式上平順；風險是繼承者缺乏普丁的個人仲裁權威，塔樓可能不接受一個「被指定的均衡點」。</li>
+    <li><strong>集體看守</strong>：普丁離場後由一個強力部門與國家資本精英組成的非正式集體暫時共治。優點是分散風險；風險是集體領導在俄羅斯無制度傳統，容易滑向塔樓之間的公開權鬥。</li>
+    <li><strong>強力部門主導的清算</strong>：在缺乏仲裁者的真空中，掌握暴力工具的 siloviki 直接主導權力重組，以強制力取代協調——這是最接近「政變」情境的出口，也是 2026 年若干西方報導所暗示的方向（見下）。</li>
+  </ul>
+
+  <div class="callout">
+    <div class="co-tag">傳聞 vs 事實 · 誠實標記</div>
+    <p><strong>已證實的結構事實：</strong>普丁未指定接班人、體制無制度化接班程序、2020 修憲把在位期限延長至理論上的 2036——這些是有文本與公開紀錄支撐的。</p>
+    <p><strong>屬於傳聞／未證實的推測：</strong>2026 年 5 月前後，若干西方媒體報導稱普丁在權力結構中的地位「顯著削弱」、精英內部「正醞釀換人計畫」，並有分析指 FSB 與總統辦公廳 Kiriyenko 一系在 2026 年 9 月選舉前的政治管理上出現分歧。這類報導多來自匿名或外部情報來源，難以獨立查證，且與「精英仍高度依賴普丁仲裁、無公開分裂」的另一組觀察並存。本報告的處理原則是：<em>把「精英內部存在張力與競爭」當作結構常識（各塔樓本就競爭），但不把「政變在即」當作可下注的判斷</em>——後者是過去數年被反覆提出又反覆落空的一類預測，屬於第 14 章要辨析的「過度解讀」。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s3">
+  <div class="sec-label">PART I · CH 03</div>
+  <h2>兩個不投票的力量：強力部門與宣傳機器</h2>
+  <p class="lede">在民主政體裡，權力最終回溯到選票；在俄羅斯，兩個完全不投票的力量卻對結果有決定性影響——掌握暴力的強力部門，與掌握敘事的宣傳機器。理解這兩者，比理解任何政黨或選舉都更接近權力的真相。</p>
+
+  <h3>強力部門（siloviki）：政權的骨架</h3>
+  <p>siloviki（силовики，字面意為「強力人士」）泛指來自安全、軍事與執法機構的精英，核心包括：<strong>FSB（聯邦安全局，KGB 的主要繼承者，普丁本人的出身機構）、SVR（對外情報局）、FSO（聯邦警衛局）、軍隊與總參謀部、以及 Rosgvardiya（國民近衛軍，2016 年成立、直屬總統的內部安全部隊，約數十萬人）</strong>。這些機構的共同特徵是：不受選舉問責、掌握合法暴力、並在權力垂直中扮演「執行末端」——監控、鎮壓、反間、以及對精英的紀律維持。普丁本人出身 KGB，siloviki 既是他的權力基礎，也是他必須持續平衡的對象（不能讓任何單一安全機構大到失控，故有 FSB 與 Rosgvardiya、軍與情報之間的相互制衡設計）。第 5 章將深入這個稜鏡。</p>
+
+  <h3>宣傳機器：正當性的日常生產線</h3>
+  <p>第二個不投票的力量是國家與親政權媒體構成的宣傳機器。<strong>三大全國電視台（Channel One、Rossiya-1、NTV）與大量國家通訊社（如 RT、Sputnik 對外，塔斯社、RIA 對內）</strong>構成一個高度協調的敘事系統，其功能不只是「說服」，更是「設定現實」——決定什麼是新聞、什麼不存在、戰爭該用什麼詞（「特別軍事行動」而非「戰爭」）。這套機器的效力不在讓每個人都相信，而在製造一種「多數人似乎都接受」的共同知識，使異議者感到孤立、使服從顯得正常。2022 年戰爭以來，最後殘存的獨立媒體（如 Echo of Moscow、Novaya Gazeta 的部分運作、TV Rain）被關閉或流亡，「假訊息」與「詆毀軍隊」入罪化，宣傳機器的壟斷達到蘇聯解體以來的最高點。</p>
+
+  <h3>兩個力量的分工：暴力設定底線，敘事設定天花板</h3>
+  <p>強力部門與宣傳機器不是各自為政，而是分工協作：<strong>宣傳機器負責讓多數人自願服從（降低統治成本），強力部門負責處理不肯服從的少數（設定不可逾越的底線）</strong>。這個「胡蘿蔔與棍子」的組合，是所有穩定威權的標配，但俄羅斯的特殊之處在於兩者都高度集中、且都直接嵌在權力垂直中。戰爭放大了兩者的角色：宣傳把戰爭正當化為文明存亡之戰，強力部門把反戰言論入罪化為叛國——一推一拉，共同壓縮了社會的異議空間到接近於零（第 7 章）。</p>
+
+  <div class="lens l-s">
+    <div class="lens-tag">SILOVIKI LENS · 強力部門如何看自己</div>
+    <p>對強力部門的精英而言，他們不是「鎮壓工具」，而是「國家的骨架」——在他們的自我敘事裡，是安全機構在 1990 年代混亂後重建了國家、在 2022 年後守護了國家免於西方顛覆。這種自我認知很重要：它意味著 siloviki 的行動不僅出於服從，也出於一種真實的、以國家安全為名的使命感——這使他們比單純的僱傭者更可靠，也比單純的意識形態者更危險（因為他們相信自己在做對的事）。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART II</div>
+  <h2>稜鏡 · The Prisms</h2>
+  <div class="pd-sub">同一個政體，五種位置，五種讀法</div>
+</div>
+
+<section id="s4">
+  <div class="sec-label">PART II · CH 04 · 稜鏡一</div>
+  <h2 style="color:var(--putin)">普丁與克里姆林</h2>
+  <p class="lede">第一個稜鏡是權力的頂點：普丁本人與環繞他的克里姆林核心。這個稜鏡的關鍵不是「普丁想要什麼」，而是「這個位置的結構誘因是什麼」——即使換一個人坐上去，只要結構不變，許多行為也會重複。</p>
+
+  <h3>權力垂直的頂點：仲裁者而非君主</h3>
+  <p>一個常見的誤讀是把普丁想成一個無所不能的沙皇，事事親裁。更準確的圖像是：<strong>他是一個仲裁者，而非執行者</strong>。日常的治理由技術官僚、部會與塔樓自行運作，普丁介入的是塔樓之間的爭端、重大資產與案件的最終裁量、以及戰略方向的設定。他的權力不在「管所有事」，而在「是所有爭端的最後法庭」。這個角色決定了他的行為模式：他傾向維持模糊、避免過早選邊、讓塔樓互相牽制——因為一旦他明確偏袒某一方，就削弱了自己作為中立仲裁者的價值。理解這一點，能解釋許多看似「猶豫」或「拖延」的決策，其實是仲裁者維持均衡的理性選擇。</p>
+
+  <h3>塔樓政治：頂點內部的競爭</h3>
+  <p>克里姆林內部的塔樓競爭，是這個稜鏡最動態的部分。<strong>塔樓爭奪的不是「取代普丁」，而是「在普丁的體系內獲得更多資源與影響」</strong>——這是一場有邊界的競爭：越界（如挑戰普丁本人）會招致毀滅（Prigozhin 是最鮮明的教訓），但在界內爭奪案件、資產、職位與政策影響則被默許甚至鼓勵（因為競爭讓塔樓互相牽制、讓普丁保持仲裁地位）。戰爭改變了塔樓的相對權重：<strong>提供暴力與安全的塔樓（siloviki、軍工）上升，提供經濟增長與對外開放的塔樓（自由派技術官僚、與西方連結的資本）下降</strong>。這個權重的轉移，是 2022 年以來俄羅斯內部政治最重要的結構變化。</p>
+
+  <h3>正當性來源的演變：從增長到安全</h3>
+  <p>普丁體制的正當性來源經歷了一次深刻的轉軌。<strong>2000 年代的正當性建立在「秩序與繁榮」上</strong>——普丁被視為終結了葉爾欽時代的混亂與貧困，2000–2008 年高油價帶來的實質收入增長，是他最初支持度的物質基礎（可稱為「績效正當性」或「石油社會契約」：政府提供增長與穩定，社會讓渡政治參與）。<strong>2012 年後，隨著增長放緩，正當性逐步轉向民族主義與大國地位</strong>——2014 年併吞克里米亞帶來的「愛國高潮」（rally-around-the-flag）是一次典型的正當性補給。<strong>2022 年戰爭後，正當性進一步硬化為「安全與生存」敘事</strong>：政權把自己定位為在西方顛覆與存亡威脅面前守護俄羅斯的唯一屏障。這個演變的意義在於：<em>當正當性從「讓你變富」轉為「保護你免於威脅」，體制對經濟表現的依賴下降，對外部敵人的需求上升</em>——這使戰爭不只是外交事件，更是內部正當性的結構性需要（第 10 章）。</p>
+
+  <div class="callout">
+    <div class="co-tag">MECHANISM · 為何「勝利敘事」難以退場</div>
+    <p>當正當性建立在「守護俄羅斯免於存亡威脅」的戰爭敘事上，任何被解讀為「失敗」或「投降」的戰爭結局，都會直接侵蝕政權的正當性根基。這產生一個結構性後果：<strong>政權需要的不是「和平」，而是「可被包裝為勝利的結局」</strong>。這解釋了停火談判的深層困難（第 13 章）——問題不只是領土條件的分歧，更是任何結局都必須通過「國內正當性審查」這一關。一場為正當性而打的戰爭，很難為了和平而乾淨結束，這正是本報告視為兩大命門之一的原因。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s5">
+  <div class="sec-label">PART II · CH 05 · 稜鏡二</div>
+  <h2 style="color:var(--silov)">Siloviki 強力集團</h2>
+  <p class="lede">第二個稜鏡是這場戰爭最大的內部贏家：強力集團。安全機構從「政權的看門人」升格為「政權的統治核心」，是 2022 年以來俄羅斯政治最深刻的結構位移——這個稜鏡回答的是：當一個國家把正當性押在安全上，掌握安全的人會得到什麼。</p>
+
+  <h3>安全機構作為統治核心</h3>
+  <p>siloviki 的權力不是新事物——普丁出身 KGB，2000 年代就大量把安全背景的人安插進政府、國企與地方（學界稱之為 siloviki 的「殖民」）。但戰前，siloviki 是統治聯盟的一支，與技術官僚、國家資本共享權力。<strong>戰爭改變了均衡：當國家進入戰時、正當性轉向安全、社會被要求動員，掌握暴力、監控與強制力的機構自然成為體制運轉的中軸</strong>。FSB 負責反間與內部鎮壓、軍與軍工負責戰爭、Rosgvardiya 負責內部秩序——這三者的預算、人員與政治份量在戰時全面擴張。與此同時，主張對外開放、與西方接軌的自由派技術官僚（如央行、財政部的專業官員）雖仍在崗、且在維持宏觀穩定上不可或缺，但他們的政策影響力被壓縮到「執行者」而非「方向設定者」。</p>
+
+  <h3>戰爭如何強化 siloviki 的地位</h3>
+  <p>戰爭對 siloviki 的強化是多管道的：<strong>其一，資源</strong>——軍費與安全預算的大幅擴張（2026 年國防預算計 14.9 兆盧布、約占 GDP 6.3%），意味著巨額資源流經強力部門控制的管道。<strong>其二，正當性</strong>——當敘事是「存亡之戰」，質疑安全機構就等於「幫敵人」，這給了 siloviki 幾乎不受挑戰的政治保護。<strong>其三，人事</strong>——戰時的清洗、監控與紀律維持需求，使 FSB 的裁量權擴大到經濟與精英管理領域。<strong>其四，敘事所有權</strong>——安全機構成為「誰是叛徒、誰是愛國者」的定義者。這四條管道共同把 siloviki 從聯盟一支推向聯盟中軸。</p>
+
+  <h3>siloviki 的內部制衡：它不是鐵板一塊</h3>
+  <p>但把 siloviki 想成一個團結的集團會是誤讀。<strong>強力部門內部本身就是多座塔樓：FSB 與 GRU（軍情）、與 SVR（對外情報）、軍與國民近衛軍之間，存在資源、管轄與影響力的競爭</strong>。普丁的一貫策略是讓這些機構相互制衡、彼此監督——例如 Rosgvardiya 的設立，部分被解讀為對軍隊與內政部力量的一種平衡。這種內部競爭對普丁是功能性的：它防止任何單一安全機構坐大到能挑戰仲裁者。但戰爭放大了機構間的摩擦（如戰場失利的責任歸屬、資源分配的爭奪），Prigozhin 事件就是這種摩擦外溢的極端案例（第 11 章）。</p>
+
+  <div class="callout">
+    <div class="co-tag">CASE · Prigozhin/Wagner 的教訓（詳見第 11 章）</div>
+    <p>2023 年 6 月，Wagner 集團首領 Prigozhin 率部向莫斯科進軍，是普丁執政以來對其權威最直接的武裝挑戰。兵變在向莫斯科推進數百公里後戛然而止、Prigozhin 撤回；兩個月後（8 月），他所乘飛機墜毀身亡。這起事件對強力集團稜鏡的教訓有二：<strong>其一，越界者必被清算</strong>——即使是為政權立過戰功的武裝力量，一旦挑戰仲裁者，結局是毀滅；這重申了塔樓競爭的鐵律。<strong>其二，體制的脆弱曾被短暫照亮</strong>——兵變推進途中，正規軍與安全機構的反應遲緩，暴露了戰時體制內部協調的裂縫。事後，克里姆林迅速把 Wagner 的力量國家化、收編或解散，堵上了「私人武裝」這個結構漏洞。</p>
+  </div>
+
+  <div class="prism">
+    <div class="pv-s"><div class="pv-tag">siloviki 視角</div>
+      <p>從強力部門的位置看，戰爭是一次地位的正名：多年來被自由派技術官僚視為「阻礙現代化」的安全思維，如今被證明是「守護國家的先見」。資源、影響力、正當性同步到手。</p>
+      <p>但精明的 siloviki 也知道，這一切依附於普丁的仲裁——沒有仲裁者，機構間的競爭可能失控，自己既是最大受益者，也可能是真空中的最大風險承擔者。</p>
+    </div>
+    <div class="pv-p"><div class="pv-tag">克里姆林視角</div>
+      <p>對普丁而言，siloviki 的上升是可控的、甚至是被設計的——戰時需要強制力，抬升強力部門符合需要。關鍵是維持機構間的相互制衡，不讓任何一座安全塔樓大到能自成均衡。</p>
+      <p>Prigozhin 事件是一次警訊：私人武裝是不可接受的例外，必須國家化。教訓已被吸收，漏洞已被堵上。</p>
+    </div>
+    <div class="pv-d"><div class="pv-tag">反對與社會視角</div>
+      <p>對社會而言，siloviki 上升意味著鎮壓的日常化：反戰言論入罪、監控擴大、異議成本升到流亡或牢獄。強力部門的擴權，直接對應公民空間的收縮。</p>
+      <p>但社會也看到 siloviki 內部並非團結——戰爭的責任、動員的痛苦、經濟的代價，都可能在強力集團內部製造裂縫，這是被壓抑的希望與不確定並存的來源。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 強力集團上升，三種位置的不同讀法</div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s6">
+  <div class="sec-label">PART II · CH 06 · 稜鏡三</div>
+  <h2 style="color:var(--olig)">寡頭與國家資本</h2>
+  <p class="lede">第三個稜鏡是錢的來源與歸屬：能源國企、國家資本主義、與臣服於克里姆林的寡頭。這個稜鏡回答的是——在一個租金國家裡，財產權以什麼為前提、租金如何分配、制裁又如何迫使這套機器重新配線。</p>
+
+  <h3>能源作為國家財政與地緣工具</h3>
+  <p>俄羅斯的經濟命脈是能源。<strong>Gazprom（天然氣）與 Rosneft（石油）等國家控股巨頭，既是聯邦預算的主要金源，也是地緣政治的直接工具</strong>——對歐洲的天然氣供應曾是莫斯科的戰略槓桿，戰爭後這條槓桿的雙面性充分顯現（俄羅斯失去了歐洲市場，歐洲承受了能源衝擊，雙輸但俄方受創更深遠）。能源租金的政治意義在於：它讓國家財政獨立於廣泛稅基，強化了租金國家的邏輯（第 2 章）。同時，能源企業的高階職位是塔樓政治的重要籌碼——掌控 Rosneft 或 Gazprom，等於掌控一條巨大的租金管道與人事網絡。</p>
+
+  <h3>國家資本主義：所有權的政治化</h3>
+  <p>俄羅斯的經濟結構是一種國家資本主義：<strong>戰略部門（能源、軍工、金融、基礎設施、部分媒體）由國家或親政權實體控制，私人資本則在國家設定的邊界內運作</strong>。1990 年代的私有化製造了第一代寡頭，他們一度綁架政策（葉爾欽時代的「七寡頭」）；普丁上台後的核心工程之一，就是重新確立「國家在寡頭之上」——2003 年逮捕並瓦解首富 Khodorkovsky（尤科斯 Yukos 石油被國家化）是這個工程的分水嶺，它向所有寡頭發出明確訊號：<strong>你可以富有，但財富以政治臣服為前提；碰政治，財富與自由都會被沒收</strong>。這確立了普丁體制下政商關係的基本契約。</p>
+
+  <h3>寡頭的臣服與租金分配</h3>
+  <p>當代俄羅斯的寡頭因此與 1990 年代的寡頭質不同：<strong>他們不是政策的綁架者，而是租金的受益者兼人質</strong>。他們的財富在很大程度上是「被允許持有的」——來自國家給予的許可、合約、資源與保護，而這一切以忠誠為條件、以把柄為擔保。這套安排使寡頭高度依附體制：他們的財富無法安全地帶離俄羅斯（尤其戰後西方資產被凍結），也無法在體制外複製，因此他們是體制存續最堅定的利益相關者之一。這是理解「為何寡頭不反普丁」的關鍵——不是他們不敢，而是他們的財富與體制綁死，反體制等於自毀。</p>
+
+  <h3>制裁下的重組：租金的東向與國產化</h3>
+  <p>2022 年後的制裁對這個稜鏡衝擊巨大：<strong>大量寡頭被西方制裁、海外資產（遊艇、豪宅、帳戶）被凍結、與西方的資本連結被切斷</strong>。這迫使租金經濟重組：能源出口從歐洲轉向中國與印度（第 17 章）、進口從西方轉向平行進口與國產替代、金融從 SWIFT 與美元轉向本幣結算與替代支付管道。這場重組有兩面：<strong>短期它展現了驚人的適應力（俄羅斯經濟並未如西方最初預期般崩潰），長期它把俄羅斯鎖入對單一夥伴（中國）的不對稱依賴、並侵蝕了高端技術與資本的可得性</strong>（第 12、18 章）。對寡頭而言，制裁強化了「無處可逃、只能依附」的處境——這反而進一步鞏固了他們對體制的忠誠。</p>
+
+  <div class="lens l-o">
+    <div class="lens-tag">OLIGARCH LENS · 寡頭如何盤算</div>
+    <p>對一個被西方制裁、資產被凍結的寡頭而言，理性計算其實很簡單：留在體制內，財富雖以忠誠為代價，但至少存在且受保護；反對體制，則財富與人身安全同時歸零。制裁弔詭地強化了這個計算——它切斷了寡頭的「西方退路」，使他們別無選擇，只能更深地綁定克里姆林。這是西方制裁一個未被充分預期的後果：它意在分化精英，實際效果在許多案例中卻是把精英更緊地推向政權。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s7">
+  <div class="sec-label">PART II · CH 07 · 稜鏡四</div>
+  <h2 style="color:var(--diss)">反對與社會</h2>
+  <p class="lede">第四個稜鏡是被壓到最低的一極：反對力量與廣義社會。這個稜鏡回答的是——當體制外反對被系統性摧毀、體制內反對只是裝飾，社會的不滿去了哪裡、又以什麼形式潛伏。</p>
+
+  <h3>Navalny 之死與體制外反對的摧毀</h3>
+  <p>Alexei Navalny 是普丁時代最重要的反對派人物——他以反貪腐調查（其基金會 FBK 的調查影片動員了大量年輕觀眾）與草根組織建立了唯一具全國動員力的反對網絡。他的軌跡濃縮了體制對真實反對的處理邏輯：<strong>2020 年遭神經毒劑「諾維喬克」中毒（他與西方調查歸因於國家安全機構，克里姆林否認），赴德治療後於 2021 年返俄即遭逮捕，此後在嚴酷監獄系統中被以不斷疊加的罪名延長刑期，最終於 2024 年 2 月在北極圈流放地監獄中死亡</strong>（官方稱自然死亡，反對派與西方廣泛質疑）。Navalny 之死發生在 2024 年 3 月總統大選前一個月，象徵性地宣告了體制外反對的終結——最有動員力的人物被清除，其組織被列為「極端主義」而取締，骨幹或入獄或流亡。</p>
+
+  <h3>體制內「系統性反對」：被馴化的多黨制</h3>
+  <p>俄羅斯的杜馬裡有多個政黨，但它們構成的是「系統性反對」（systemic opposition）——被允許存在、甚至被鼓勵存在，因為它們提供多元的表象卻不構成真實挑戰。<strong>俄羅斯聯邦共產黨（KPRF）、自由民主黨（LDPR，已故 Zhirinovsky 的民粹民族主義政黨）、公正俄羅斯等，在關鍵議題（尤其是戰爭與普丁本人）上與執政的統一俄羅斯黨並無實質對立</strong>——它們吸納並馴化了本可能流向真實反對的不滿，把抗議情緒導入安全的、可控的管道。這是威權「管理式多黨制」的經典設計：反對不是被禁止，而是被馴化與工具化。真正被禁止的，是體制外的、不受控的反對（如 Navalny 一系）。</p>
+
+  <h3>地方與族群共和國：沉默的不均衡</h3>
+  <p>俄羅斯是一個多民族國家，非俄羅斯族群集中的共和國（如車臣、達吉斯坦、韃靼斯坦、巴什科爾托斯坦、圖瓦、布里亞特等）在戰爭中承受了不成比例的代價：<strong>動員的人力更多來自貧困的邊疆與少數民族地區，而非莫斯科、聖彼得堡的都會核心</strong>——這是一種把戰爭成本從政治敏感的中心轉嫁到政治邊緣的地區的機制。2022 年 9 月「部分動員」在若干族群地區引發了罕見的抗議（如達吉斯坦），顯示地方與族群的不滿是真實存在的潛流。但這種不滿在聯邦制空心化（第 2 章）與強力鎮壓下，缺乏組織化的出口，只能以沉默、逃避（大量適齡男性外逃）與局部零星抗議的形式存在。</p>
+
+  <h3>戰爭疲乏與動員：難以量化的潛流</h3>
+  <p>社會對戰爭的態度是這個稜鏡最難讀的部分。官方民調顯示對戰爭與普丁的高支持度，但威權體制下的民調有系統性偏誤（「偏好偽裝」：人們對陌生訪員不敢說真話）。更可靠的訊號是行為而非表態：<strong>2022 年動員令下數十萬適齡男性外逃、對進一步大規模動員的迴避、以及政權本身極力避免再次全面動員（改以高薪招募、囚犯招募、邊疆徵召填補兵源）——這些行為揭示了一種真實的戰爭疲乏</strong>。這種疲乏不是反對（它不挑戰政權），而是一種消極的抽離：多數人既不熱情支持也不公開反對，而是希望戰爭「別碰到我」。政權的動員策略——盡量不動員都會核心、用錢與邊疆兵源打仗——正是對這種社會心理的精確回應：它知道社會的容忍有底線，因此小心避開那條線。</p>
+
+  <div class="debate">
+    <div class="d-pro"><div class="d-tag">正方論證：社會的沉默是脆弱的裂縫</div>
+      <p>官方的高支持度是偏好偽裝的產物，底下是真實的疲乏與不滿——動員外逃、對徵兵的迴避、族群地區的抗議都是證據。一旦戰爭成本觸及都會核心、或經濟代價傳導到日常生活（通膨、勞動短缺、傷亡累積），這種沉默的不滿可能轉化為真實的政治壓力。社會的順從是條件性的，不是無條件的。</p>
+    </div>
+    <div class="d-con"><div class="d-tag">反方論證：沉默的抽離正是穩定的來源</div>
+      <p>恰恰因為多數人選擇「抽離」而非「反對」，體制才穩定。抽離的社會不會組織抗議、不會挑戰政權，只會設法讓戰爭別碰到自己——而政權的策略正是滿足這個願望（用邊疆兵源與金錢打仗、不動員都會核心）。歷史經驗顯示，威權體制的崩潰極少來自「疲乏的社會」，而幾乎總是來自「分裂的精英」。把希望寄託在社會不滿上的預測，過去數年已反覆落空。</p>
+    </div>
+  </div>
+  <p><strong>本節結論：</strong>兩方都對，但講的是不同時間尺度。反方描述的是當期的穩定機制（抽離＝穩定），正方描述的是條件性的長期風險（成本觸及核心＝壓力）。正確的綜合是：<em>社會不滿是真實的潛流，但它不是政權的即期威脅；它的政治意義要到「精英分裂＋成本上升」同時發生時才會被激活</em>——這也是為何本報告把「戰爭無法乾淨結束」（持續累積成本）列為命門，而非把「社會革命」列為主要情境。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s8">
+  <div class="sec-label">PART II · CH 08 · 稜鏡五</div>
+  <h2 style="color:var(--fore)">外國人／投資人</h2>
+  <p class="lede">第五個稜鏡是外部視角：投資人、企業、與觀察者面對的俄羅斯。這個稜鏡回答的是——當一個經濟體被史上最嚴厲的制裁與世界主要市場脫鉤，外部參與者面對的是哪一套規則、哪一種風險。</p>
+
+  <h3>制裁經濟：一個平行的、與世界脫鉤的系統</h3>
+  <p>2022 年後，俄羅斯經濟進入一種前所未有的狀態：<strong>一個大型經濟體被系統性地與西方金融、技術、市場脫鉤</strong>——主要銀行被逐出 SWIFT、央行約半數外匯儲備被凍結、高端技術與零件被出口管制、數千家西方企業撤出或減記。但俄羅斯並未如西方最初預期般崩潰，原因在於它的適應：<strong>能源出口轉向亞洲（第 17 章）、進口轉向平行進口與國產替代、金融轉向本幣與替代支付</strong>。對外國參與者而言，這意味著俄羅斯已成為一個「平行系統」——留在系統內的（主要是中國、印度、部分全球南方國家的企業）面對的是一套與西方規則脫鉤、以規避制裁為日常的商業環境；系統外的（西方企業與投資人）則面對的是資產被凍結、退出被課以重稅、再進入近乎不可能的封閉。</p>
+
+  <h3>盧布、資本外逃與行政管控</h3>
+  <p>盧布的故事是理解制裁經濟的一個窗口：<strong>2022 年初戰爭爆發時盧布暴跌，但央行以極端手段（大幅升息、強制結匯、資本管制）在數週內把它拉回甚至升值</strong>——這展示了行政管控的力量，也揭示了它的本質：盧布的匯率不是自由市場的結果，而是行政意志與資本管制的產物，其「穩定」以犧牲可兌換性與市場信號為代價。與此同時，<strong>戰爭觸發了大規模資本與人才外逃</strong>：估計數十萬受過高等教育的專業人士（IT、金融、科研）在戰爭與動員後離境，帶走了資本、技能與創業能量——這是「腦力流失」（brain drain），其長期代價比短期的匯率波動深遠得多（第 18 章）。</p>
+
+  <h3>制裁的悖論：適應 vs 侵蝕</h3>
+  <p>對制裁效果的評估必須避免兩種極端誤讀。<strong>「制裁無效」論</strong>指出俄羅斯經濟未崩潰、甚至在軍費刺激下維持了增長——這是事實，但只看了短期。<strong>「制裁致命」論</strong>則預期經濟崩潰、政權垮台——這被反覆證偽。正確的圖像是第三種：<strong>制裁的效果是「侵蝕」而非「休克」</strong>——它不製造戲劇性的崩潰，而是緩慢抽走高端技術、外資、人才與長期增長潛力，把俄羅斯鎖入一條「當期靠戰爭與能源租金維持、長期技術與人口基礎持續退化」的軌跡。對外部投資人而言，這意味著俄羅斯不是一個「即將崩潰的機會」，也不是一個「照常運轉的市場」，而是一個結構性收縮、且對非俄實體高度封閉與高風險的環境。</p>
+
+  <div class="callout">
+    <div class="co-tag">INVESTOR NOTE · 給外部觀察者的三條校準</div>
+    <p><strong>一、別把「未崩潰」讀成「健康」。</strong>俄羅斯經濟的當期穩定由軍費刺激與能源租金支撐，這掩蓋了民用部門停滯、技術退化與人口流失的長期病灶——本報告第 12、18 章專門辨析這個「軍工凱因斯主義」的可持續性。</p>
+    <p><strong>二、別把「政策可預測」讀成「可投資」。</strong>普丁在位期間政策高度連續、可預測，但這種可預測性建立在制裁、脫鉤與財產權政治化之上——對西方實體而言，可預測的是「持續的高風險與封閉」，而非「穩定的投資環境」。</p>
+    <p><strong>三、把接班與戰爭終局當作唯一能改變全局的變數。</strong>其餘一切（盧布波動、GDP 數字、局部戰況）都是這兩個命門的下游噪音。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART III</div>
+  <h2>動力 · The Dynamics</h2>
+  <div class="pd-sub">體制如何形成、戰爭如何重塑、命門在哪</div>
+</div>
+
+<section id="s9">
+  <div class="sec-label">PART III · CH 09</div>
+  <h2>普丁體制的形成：從管理式民主到個人化威權</h2>
+  <p class="lede">今天的俄羅斯不是 2000 年的俄羅斯。理解這個體制，必須看它二十餘年的演化軌跡——一條從「有真實競爭的混亂民主」逐步硬化為「近乎純粹的個人化威權」的單向路徑。</p>
+
+  <h3>1990 年代的遺產：混亂、寡頭與屈辱</h3>
+  <p>普丁體制是對 1990 年代的反動。葉爾欽時代的俄羅斯經歷了三重創傷：<strong>經濟崩潰</strong>（休克療法下的惡性通膨、產出腰斬、1998 年債務違約）、<strong>寡頭俘獲</strong>（私有化製造的少數巨富綁架了政策與媒體，「七寡頭」左右了 1996 年大選）、<strong>國家失能與地位崩落</strong>（車臣戰爭失利、地方諸侯化、蘇聯解體帶來的「大國淪落」屈辱感）。這三重創傷塑造了普丁體制的合法性敘事：<strong>它承諾終結混亂、馴服寡頭、重建國家與大國地位</strong>——而在 2000 年代初高油價的助力下，它相當程度地兌現了這些承諾，這是普丁最初支持度的真實基礎。</p>
+
+  <h3>2000 年代：權力垂直的建設與「石油社會契約」</h3>
+  <p>普丁的第一、二任期（2000–2008）是權力垂直的建設期：<strong>收編全國電視台、瓦解不聽話的寡頭（Khodorkovsky/尤科斯案是分水嶺）、取消州長直選（別斯蘭事件後）、把地方拉回中央、建立「統一俄羅斯」作為政權黨</strong>。這一切在高油價帶來的實質收入增長掩護下進行——民眾用政治自由換取了穩定與繁榮，這就是「石油社會契約」。這個時期的俄羅斯常被稱為「管理式民主」：形式民主的外殼仍在，但已被系統性地管理與去競爭化。</p>
+
+  <h3>2008–2012 的過渡與 2012 的轉折</h3>
+  <p>2008 年因憲法任期限制，普丁把總統職位交給梅德韋傑夫、自任總理（「王車易位」tandem），2012 年再回任總統——這次「王車易位」揭示了一個關鍵事實：<strong>權力隨普丁本人移動，而非隨職位移動</strong>，這是個人化威權的鮮明證據。2011–2012 年，因議會選舉舞弊與普丁回任引發的莫斯科大規模抗議（Bolotnaya 廣場），是普丁時代最大的一次城市中產抗議。政權的回應是體制硬化的轉折點：<strong>加強對 NGO（「外國代理人」法）、集會、網路的管控，並在意識形態上轉向保守民族主義與傳統價值</strong>——正當性的重心從「繁榮」向「認同與大國」轉移的過程，從此加速。</p>
+
+  <h3>2014 與 2022：兩次戰爭，兩次硬化</h3>
+  <p>2014 年併吞克里米亞是第一次戰爭性硬化：<strong>它帶來「愛國高潮」、把正當性錨定在民族主義與大國復興上、並開啟了與西方對抗的長週期（第一輪制裁）</strong>。2022 年全面入侵烏克蘭則是第二次、也是決定性的硬化：<strong>它把體制推入戰時模式——鎮壓升級、反戰入罪、siloviki 上位、經濟軍事化、與西方全面脫鉤</strong>。從 2000 到 2022，這條軌跡的方向始終如一：每一次危機或衝突，都被用來進一步集中權力、壓縮多元、強化個人化。理解這條單向軌跡，是判斷「體制會不會自我鬆綁」的基礎——過去二十餘年，它從未逆轉過方向。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">2003</div><div class="fig-l">Khodorkovsky 被捕、尤科斯國家化：馴服寡頭的分水嶺</div></div>
+    <div><div class="fig-n">2011–12</div><div class="fig-l">Bolotnaya 抗議與體制硬化轉折</div></div>
+    <div><div class="fig-n">2014</div><div class="fig-l">併吞克里米亞，正當性轉向民族主義</div></div>
+    <div><div class="fig-n">2022</div><div class="fig-l">全面入侵烏克蘭，體制進入戰時模式</div></div>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s10">
+  <div class="sec-label">PART III · CH 10</div>
+  <h2>烏克蘭戰爭如何重塑國內政治</h2>
+  <p class="lede">2022 年 2 月的全面入侵是一次外交事件，但它對俄羅斯內部政治的重塑，可能比對國際秩序的衝擊更深遠。戰爭不只是俄羅斯做的一件事，它變成了俄羅斯體制運轉的新模式——戰時體制。</p>
+
+  <h3>戰時體制：把社會與經濟重新編組</h3>
+  <p>全面入侵把俄羅斯推入一種戰時體制，其特徵是社會、經濟與政治圍繞戰爭重新編組：<strong>經濟軍事化（軍工擴張、軍費成為增長引擎）、社會動員化（愛國敘事、志願兵與動員、戰爭經濟的分配管道）、政治鎮壓化（反戰入罪、獨立媒體清除、異議流亡）</strong>。這個編組的政治後果是體制的進一步集中：戰時的「團結需要」被用來壓制一切內部分歧，質疑戰爭等於「幫敵人」，這給了政權壓縮異議的道德授權。戰爭因此不只是政權在做的事，它成了政權賴以維持高壓與集中的正當性引擎。</p>
+
+  <h3>鎮壓升級：反戰入罪與公民空間歸零</h3>
+  <p>戰爭觸發了蘇聯解體以來最嚴厲的鎮壓：<strong>2022 年 3 月迅速立法把「散布關於軍隊的假訊息」與「詆毀軍隊」入罪（可判重刑），實質上把任何反戰言論刑事化</strong>；最後殘存的獨立媒體被關閉或宣布為「外國代理人」；反對組織被列為「極端主義」而取締；大量記者、活動家、學者流亡海外。這場鎮壓的效率之高，使公民社會的組織化反對空間在戰爭頭一年內就被壓縮到接近於零——這也是為何本報告把「體制外反對」視為一個已被清空的變數（第 7 章）。</p>
+
+  <h3>siloviki 上位與自由派邊緣化</h3>
+  <p>戰爭重塑了塔樓均衡（第 4、5 章）：<strong>提供暴力、安全與軍工的塔樓上升，主張開放、增長與對西接軌的塔樓下降</strong>。但需精確：主張宏觀穩定的自由派技術官僚（如央行行長 Nabiullina 一系）並未被清除——他們在維持金融穩定、管理制裁衝擊上不可或缺，反而在戰時證明了自己的技術價值。被邊緣化的是他們的「方向設定權」：戰略方向由 siloviki 邏輯主導，技術官僚淪為「在既定戰爭路線下維持穩定」的執行者。這個區分很重要：俄羅斯的戰時體制不是「消滅了理性的經濟管理」，而是「把理性的經濟管理降格為服務戰爭的工具」。</p>
+
+  <h3>戰爭作為正當性引擎：為何難以退場</h3>
+  <p>戰爭對國內政治最深刻的重塑，是它成為正當性的引擎（第 4 章）。當政權把自己定位為「在西方存亡威脅前守護俄羅斯的唯一屏障」，戰爭就從一個可以了結的軍事行動，變成了政權身分認同的核心。<strong>這產生一個結構性困境：任何被解讀為「失敗」的結局都威脅正當性，而任何「勝利」的定義又難以在戰場上乾淨達成</strong>——這使戰爭既難以升級到全面勝利，也難以體面地結束。戰爭於是傾向於「凍結」而非「解決」：既不徹底打贏，也不徹底停止，而是維持在一種可持續的、供養戰時體制的低強度持續狀態。這是理解 2025–26 停火談判反覆卡關的深層結構原因（第 13 章）。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s11">
+  <div class="sec-label">PART III · CH 11</div>
+  <h2>Prigozhin 兵變（2023）解剖：體制的一次照明</h2>
+  <p class="lede">2023 年 6 月 23–24 日的 Wagner 兵變，是普丁執政以來對其權威最直接的一次武裝挑戰。它像一道閃電，短暫照亮了戰時體制內部平時看不見的裂縫——也讓我們得以檢驗塔樓政治的鐵律。</p>
+
+  <h3>兵變經過：一場戛然而止的進軍</h3>
+  <p>Wagner 集團是一支半私人的軍事承包力量，由普丁的舊識、餐飲商人出身的 Yevgeny Prigozhin 統領，在烏克蘭戰場（尤其巴赫穆特/Bakhmut 血戰）承擔了重要角色。2023 年上半年，Prigozhin 與國防部（Shoigu、Gerasimov）就彈藥供給、指揮權與 Wagner 的地位爆發日益公開的衝突。<strong>2023 年 6 月 23 日，Prigozhin 指控國防部襲擊其部隊，率 Wagner 部隊佔領了南部軍事重鎮頓河畔羅斯托夫（Rostov-on-Don）的軍事指揮中樞，並派一支縱隊沿 M4 公路向莫斯科推進，一度前進到距莫斯科約 200 公里</strong>。沿途正規軍幾乎未有效抵抗，暴露了體制的措手不及。6 月 24 日晚，在白俄羅斯總統 Lukashenko 斡旋下，Prigozhin 突然下令撤回，宣稱為「避免流血」，換取指控被撤與（表面上的）安全保證。</p>
+
+  <h3>結局與清算：越界者的鐵律</h3>
+  <p>兵變的結局重申了塔樓政治的鐵律：<strong>2023 年 8 月 23 日，Prigozhin 所乘私人飛機在莫斯科與聖彼得堡之間墜毀，機上人員全數罹難，包括 Wagner 若干核心人物</strong>。墜機原因官方調查含糊，但廣泛被解讀為對兵變的最終清算——時間點（兵變後恰兩個月）、對象（兵變核心）與方式（乾淨俐落地一次性清除）都符合「越界者必被清算」的邏輯。事後，克里姆林迅速處置 Wagner 的遺產：<strong>部分武裝被國家化、收編進國防部或 Rosgvardiya 體系，海外業務（非洲的僱傭與礦業）被改組為國家直接控制的「非洲軍團」</strong>——「私人武裝」這個結構漏洞被系統性堵上。</p>
+
+  <h3>兵變揭示了什麼：三個結構事實</h3>
+  <ul class="plain">
+    <li><strong>其一，戰時體制的內部協調有裂縫。</strong>兵變推進途中正規軍與安全機構反應遲緩，揭示戰時各塔樓（軍、FSB、Rosgvardiya）之間的協調並不如表面順暢——這是「siloviki 不是鐵板一塊」的直接證據。</li>
+    <li><strong>其二，普丁的仲裁權威被短暫挑戰但最終重申。</strong>兵變當日普丁公開稱之為「背叛」與「捅刀」，但隨後接受了斡旋方案——這被部分解讀為一時的示弱，但兩個月後的清算表明：仲裁者可以暫時退讓以避免流血，但絕不容忍越界者存活，鐵律最終被執行。</li>
+    <li><strong>其三，私人武裝是不可接受的體制例外。</strong>Wagner 之所以能兵變，正因為它是一支半獨立於正規指揮鏈的武裝——兵變後體制的核心修補，就是消滅這種「垂直線外的暴力」，把一切強制力收回國家壟斷。</li>
+  </ul>
+
+  <div class="callout">
+    <div class="co-tag">辨析 · 兵變是「脆弱的證明」還是「韌性的證明」</div>
+    <p>兵變常被兩種相反的方式解讀。<strong>「脆弱論」</strong>強調：一支私人武裝竟能一路推進到距莫斯科 200 公里而幾乎無抵抗，證明體制外強內虛、隨時可能崩解。<strong>「韌性論」</strong>強調：最嚴重的武裝挑戰在一天內就被化解、無其他塔樓響應加入、兩個月後發起者被乾淨清算、漏洞被系統性修補——證明體制的自我修復能力極強。本報告的判讀傾向韌性論但保留脆弱論的警示：<em>兵變證明的是「單一塔樓的越界會被壓制，但體制內部的協調裂縫與離心力真實存在」</em>。它是一次照明，不是一次崩解——但它照出的裂縫，在仲裁者缺位時可能放大（第 2B、14 章）。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s12">
+  <div class="sec-label">PART III · CH 12</div>
+  <h2>戰爭經濟的可持續性：軍工凱因斯主義的代價</h2>
+  <p class="lede">俄羅斯經濟沒有如西方 2022 年最初預期般崩潰，這是事實；但把「未崩潰」讀成「健康」是嚴重誤判。這一節解剖「軍工凱因斯主義」的機制、它為何在短期有效、以及它正在累積的長期代價。</p>
+
+  <h3>軍工凱因斯主義：戰爭如何變成增長引擎</h3>
+  <p>「軍工凱因斯主義」（military Keynesianism）指的是：<strong>國家透過巨額軍費支出創造需求、就業與名目收入，從而在短期內拉動經濟增長</strong>。俄羅斯的戰時經濟正是這個機制的教科書案例：<strong>2026 年國防預算計列 14.9 兆盧布、約占 GDP 6.3%；2026 年第一季軍費更飆至創紀錄的 5.9 兆盧布（約 750–800 億美元），較前一年同期高出近 30%</strong>。這些支出流向軍工廠、士兵薪餉（前線高薪吸引邊疆與貧困地區男性）、與撫卹賠償，在特定地區與階層創造了實質的收入增長與「戰爭繁榮」感。這解釋了為何俄羅斯經濟在制裁下仍維持了正增長——是軍費在托底。</p>
+
+  <h3>代價一：通膨與勞動短缺</h3>
+  <p>但軍工凱因斯主義有一個致命的內在缺陷：<strong>軍費創造收入，卻幾乎不增加消費品的供給</strong>——坦克與砲彈不能吃穿。當更多的錢追逐沒有相應增加的民用商品，結果就是通膨。俄羅斯央行為此被迫維持高利率以抑制通膨，形成「財政踩油門、貨幣踩剎車」的內在矛盾。同時，戰爭與動員抽走了大量勞動力（前線傷亡、動員、外逃三管齊下），製造了嚴重的勞動短缺，推高工資、進一步餵養通膨。<strong>官方將 2026 年通膨預估上修至 6–7% 區間，GDP 增長則被下修至 0 至約 1.3% 的低檔——這是「管理式降溫」滑向停滯的訊號</strong>。</p>
+
+  <h3>代價二：財政壓力與把成本轉嫁社會</h3>
+  <p>戰爭的財政負擔在能源收入承壓（油價走低、對俄能源的西方壓力）下日益吃緊，預算赤字擴大。政權的因應是把成本轉嫁給全社會：<strong>2026 年 1 月起把增值稅（VAT）由 20% 調升至 22%</strong>，並以其他加稅與撙節措施填補缺口。這揭示了戰爭經濟的一個政治經濟學真相：<strong>當能源租金不足以支付戰爭，成本最終由消費者與納稅人承擔</strong>——「克里姆林向消費者收戰爭費」。這是一個緩慢累積的社會壓力來源，雖不構成即期威脅，卻是戰爭疲乏（第 7 章）的物質基礎。</p>
+
+  <h3>代價三：長期的技術與結構退化</h3>
+  <p>最深的代價是長期的、不易察覺的結構退化：<strong>資源被大規模抽調到軍工與非生產性的戰爭支出，民用部門（製造、服務、科技）投資不足、停滯甚至萎縮；制裁切斷了高端技術與零件的取得，迫使進口替代與品質降級；人才外逃抽走了創新能量</strong>。這意味著俄羅斯正在「吃老本」——用蘇聯遺產與能源租金支撐當期的戰爭繁榮，同時透支未來的生產力基礎。多家智庫（如 SIPRI、Kiel Institute、CSIS 等）的評估共識是：戰爭經濟的「甜蜜期」正在消退，俄羅斯正從軍費刺激的短期增長，滑向增長乏力、通膨黏著、結構退化的長期停滯。</p>
+
+  <div class="figrow">
+    <div><div class="fig-n">14.9兆</div><div class="fig-l">2026 國防預算（盧布），約占 GDP 6.3%</div></div>
+    <div><div class="fig-n">5.9兆</div><div class="fig-l">2026 Q1 軍費（盧布），約 750–800 億美元，年增近 30%</div></div>
+    <div><div class="fig-n">6–7%</div><div class="fig-l">2026 通膨官方預估區間</div></div>
+    <div><div class="fig-n">20→22%</div><div class="fig-l">VAT 於 2026-01 調升，把戰爭成本轉嫁消費者</div></div>
+  </div>
+  <p class="tbl-note">數字為 2026 年上半年公開來源（SIPRI、俄經濟發展部、Moscow Times、Meduza 等）之綜合，年度預算慣例會多次修訂（2025 年即修訂兩次），故應以官方最新版本為準；此處旨在呈現量級與趨勢，而非精確終值。</p>
+
+  <div class="callout">
+    <div class="co-tag">MECHANISM · 戰爭經濟的「路徑鎖定」</div>
+    <p>軍工凱因斯主義製造了一個危險的路徑依賴：<strong>戰爭創造的收入、就業與分配管道，本身變成了需要被維持的既得利益</strong>——軍工城的就業、士兵家庭的薪餉、軍工複合體的訂單，都在戰爭中被制度化。這意味著「結束戰爭」不只是外交問題，也是內部經濟問題：戰爭經濟養活的那部分人口與產業，會在和平到來時面臨劇烈調整（軍工訂單驟減、退伍軍人重返勞動市場）。這是「戰爭無法乾淨結束」這一命門的又一層——不只正當性（第 4、10 章），還有既得利益，都在把體制鎖進戰爭狀態。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s13">
+  <div class="sec-label">PART III · CH 13</div>
+  <h2>2025–26 停火談判與 Trump 因素</h2>
+  <p class="lede">2025 年以來，在美國新政府的推動下，結束烏克蘭戰爭的外交努力進入了一個新階段。但截至 2026 年 7 月，這些努力產出的是一連串短暫停火與無果的直接談判，而非全面和平——理解「為何談不成」，比追蹤每一輪談判的細節更重要。</p>
+
+  <h3>Trump 因素：施壓、期限與槓桿的錯配</h3>
+  <p>美國新政府把「結束戰爭」列為外交優先，Trump 本人反覆施壓推動談判。<strong>2026 年 2 月，美、俄、烏在日內瓦等地舉行多輪會談，聚焦領土問題；美方一度設下「6 月前達成協議」的期限</strong>。但這套施壓有一個結構性錯配：<strong>美國能對烏克蘭施加的槓桿（軍援、情報、外交承認）遠大於它能對俄羅斯施加的槓桿</strong>——因此施壓的實際效果，常是迫使基輔讓步多於迫使莫斯科讓步。澤倫斯基公開抱怨烏克蘭承受了來自華盛頓的最大壓力。這個錯配是理解談判動態的關鍵：談判的天平因槓桿不對稱而傾斜，但傾斜不等於能達成莫斯科願意接受的結局。</p>
+
+  <h3>有限停火的清單：象徵大於實質</h3>
+  <p>2026 年出現了數次短暫、局部的停火，但都未通向全面停火：</p>
+  <ul class="plain">
+    <li><strong>2026 年 4 月，圍繞東正教復活節的約 32 小時停火</strong>——象徵性的人道暫停，隨即恢復交火。</li>
+    <li><strong>2026 年 5 月 9–11 日，配合俄羅斯「勝利日」的三日停火</strong>（由 Trump 宣布促成），伴隨大規模作戰的暫時中止與換俘安排——這對應本報告扉頁所列「2026-05 有限停火與談判」里程碑。</li>
+    <li><strong>2026 年 4 月至 6 月初的多次換俘</strong>，以及圍繞若干節點的短暫火砲暫停。</li>
+    <li><strong>近三年來俄烏首次的直接談判（如伊斯坦堡管道）雖然重啟，卻無實質突破</strong>；澤倫斯基 6 月 4 日致普丁的公開信提議前線立即停火、雙邊會談與「全部換全部」，未獲正面回應。</li>
+    <li><strong>截至 2026 年 7 月下旬，美烏正討論一項「空中停火」（停止空襲）提案，擬向俄方提出</strong>；克里姆林稱評論相關報導「為時尚早」，同時仍在加大對烏空襲。</li>
+  </ul>
+
+  <h3>為何談不成：三層結構障礙</h3>
+  <p>停火談判的反覆卡關，根源是三層疊加的結構障礙，而非單純的技術分歧：<strong>其一，領土的不可調和</strong>——俄方要求基輔割讓其尚未完全佔領的頓涅茨克（Donetsk）剩餘部分等，基輔拒絕；領土是雙方都難以在國內正當性上讓步的核心。<strong>其二，正當性的綁架</strong>（第 4、10 章）——俄方需要的不是「和平」，而是「可被包裝為勝利的結局」，任何被國內解讀為失敗的協議都威脅政權正當性，這使莫斯科對「乾淨結束」缺乏誘因。<strong>其三，戰爭經濟的既得利益</strong>（第 12 章）——戰爭養活的產業與人口構成了維持戰爭的內部壓力。三者疊加，使戰爭傾向於「凍結」而非「解決」：短暫停火（象徵、換俘、人道）可行，全面和平（涉及領土、正當性、既得利益）極難。</p>
+
+  <div class="callout">
+    <div class="co-tag">分析原則 · 追戰況不如追結構</div>
+    <p>停火談判是高度時效性、每週變動的事件——本報告的分析基準日為 2026 年 7 月 24 日，任何具體進展（新一輪會談、新的局部停火、戰場態勢變化）都應以最新公開來源查證，不宜以本文為即時戰情依據。但本節的三層結構障礙（領土不可調和、正當性綁架、既得利益）是相對穩定的分析框架：<strong>只要這三層未鬆動，任何具體的停火都傾向於是戰術性、可逆的暫停，而非戰略性、不可逆的和平</strong>。讀者應以此框架去解讀每一則新聞，而非被個別停火的樂觀或悲觀情緒牽動。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s14">
+  <div class="sec-label">PART III · CH 14</div>
+  <h2>韌性 vs 脆弱辨析：分層區分真實風險與過度解讀</h2>
+  <p class="lede">關於俄羅斯，市面上有兩種對稱的誤讀：一種說它是不可撼動的鐵板，一種說它明天就會崩潰。兩者都錯，且錯在同一個地方——把不同時間尺度、不同層次的問題混為一談。這一節做本報告最重要的辨析工作：把真實風險與過度解讀分層拆開。</p>
+
+  <h3>個人化威權的當期韌性：為何「明天崩潰」論反覆落空</h3>
+  <p>過去數年，「俄羅斯即將崩潰」「精英政變在即」「經濟撐不過這個冬天」的預測反覆被提出、反覆落空。這不是偶然，而是低估了個人化威權的當期韌性來源：<strong>其一，恩庇均衡的黏性</strong>——精英被相互把柄與共同利益綁死，缺乏單獨背叛的誘因（第 2 章）。<strong>其二，強制力的壟斷</strong>——公民社會反對被清空、私人武裝被消滅（Prigozhin 後），沒有可組織化的挑戰力量。<strong>其三，租金與軍費的托底</strong>——能源東向與軍工凱因斯主義維持了當期的財政與就業（第 12、17 章）。<strong>其四，社會的抽離而非反對</strong>——多數人選擇「別碰到我」而非挑戰政權（第 7 章）。這四條共同構成一個結論：<em>在普丁在位、戰爭維持在可承受強度、能源仍有買家的條件下，體制的即期崩潰機率低</em>。把希望或恐懼寄託在「明天崩潰」上，是一種鏡像式的一廂情願。</p>
+
+  <h3>真實的結構性風險：三個命門</h3>
+  <p>但當期韌性不等於長期無虞。俄羅斯體制有三個真實的、結構性的命門，它們不製造「明天的崩潰」，而製造「長期的脆弱」：</p>
+  <ul class="plain">
+    <li><strong>命門一：一場無法乾淨結束的戰爭。</strong>戰爭被正當性、領土與既得利益三重鎖定，難以體面結束，只能凍結——但凍結持續累積成本（傷亡、財政、通膨、人口、技術退化）。這是一個緩慢失血的傷口，不致命於一時，卻侵蝕於長期。</li>
+    <li><strong>命門二：一個沒有安排的接班。</strong>個人化威權把系統穩定押在單一仲裁者身上，卻因結構誘因而無法安排接班（第 2B 章）。這是體制自帶的、無法在普丁在位時解決的尾部風險——它不會在「明天」兌現，但它一旦兌現（無論何時），沒有制度化機制能保證平順。</li>
+    <li><strong>命門三：過度依賴戰爭與能源的單一結構。</strong>當期的穩定由軍費與能源租金支撐，這兩者都是脆弱的：戰爭不能永遠打、能源需求與價格會波動、對中依賴是不對稱的（第 17 章）。把雞蛋放在這兩個籃子裡，使體制對外部衝擊（油價崩、需求萎縮、戰爭終局）的緩衝變薄。</li>
+  </ul>
+
+  <h3>過度解讀清單：哪些說法要打折</h3>
+  <table>
+    <tr><th>常見說法</th><th>問題所在</th><th>正確的校準</th></tr>
+    <tr><td>「經濟撐不過去，政權要垮」</td><td>把「侵蝕」誤讀為「休克」；低估軍費與能源東向的托底</td><td>經濟是慢性退化，不是急性崩潰；短期穩、長期病</td></tr>
+    <tr><td>「精英政變在即」</td><td>把「塔樓本就競爭」誤讀為「即將分裂」；傳聞被當事實</td><td>精英張力是常態，但恩庇均衡黏性極高；政變需仲裁者先失能</td></tr>
+    <tr><td>「社會不滿會引爆革命」</td><td>把「抽離」誤讀為「反對」；威權崩潰極少源於疲乏社會</td><td>社會不滿是潛流，非即期威脅；須配合精英分裂才被激活</td></tr>
+    <tr><td>「普丁全知全能、鐵板一塊」</td><td>官方敘事的鏡像；忽略塔樓競爭、協調裂縫、接班黑箱</td><td>他是仲裁者非全能者；體制有真實的內部張力與尾部裂縫</td></tr>
+    <tr><td>「制裁毫無效果」</td><td>只看短期未崩潰，忽略長期技術、人才、增長的侵蝕</td><td>制裁效果是慢性侵蝕，以年計、以結構退化計，非以崩潰計</td></tr>
+  </table>
+
+  <p><strong>本節結論：</strong>把俄羅斯讀對的方式，是同時持有兩個看似矛盾的判斷——<em>它在普丁在位期間異常有韌性（別賭它明天崩潰），它在接班與戰爭終局上異常脆弱（別賭它能長治久安）</em>。真正該監測的不是「崩潰訊號」，而是三個命門的緩慢演變：戰爭能否凍結在可承受強度、接班問題如何被推遲或觸發、對戰爭與能源的依賴如何被外部衝擊測試。這正是第 22 章監測儀表板的設計邏輯。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART IV</div>
+  <h2>引擎 · The Engine</h2>
+  <div class="pd-sub">克里姆林 × 租金 × 戰爭的完整迴路</div>
+</div>
+
+<section id="s15">
+  <div class="sec-label">PART IV · CH 15</div>
+  <h2>三角傳導模型：克里姆林、租金經濟、地緣戰爭的完整迴路</h2>
+  <p class="lede">前面各章拆解了個別的稜鏡與動力，這一章把它們接成一個完整的迴路。俄羅斯體制的運轉，可以化約為三個節點與它們之間的六條邊——理解這個三角，就理解了整台引擎為何自我維持，也理解了它從哪裡漏氣。</p>
+
+  <h3>三個節點</h3>
+  <ul class="plain">
+    <li><strong>節點 A：克里姆林（權力垂直與塔樓均衡）</strong>——政治權力的中樞，由普丁仲裁、siloviki 與寡頭承載。</li>
+    <li><strong>節點 B：租金經濟（能源與軍工）</strong>——物質基礎，提供財政、精英財富與分配管道。</li>
+    <li><strong>節點 C：地緣／戰爭（對外對抗與軍事）</strong>——正當性引擎與安全邏輯的外在化身。</li>
+  </ul>
+
+  <h3>六條邊：迴路如何自我維持</h3>
+  <table>
+    <tr><th>邊</th><th>傳導方向</th><th>機制</th></tr>
+    <tr><td><strong>A → B</strong></td><td>克里姆林 → 租金經濟</td><td>政治權力分配租金：誰掌控 Rosneft/Gazprom、誰拿到合約與資產，由塔樓均衡決定；財產權以政治忠誠為前提</td></tr>
+    <tr><td><strong>B → A</strong></td><td>租金經濟 → 克里姆林</td><td>能源租金供養國家財政與精英財富，使政權獨立於稅基、降低對社會的問責需求（租金國家邏輯）</td></tr>
+    <tr><td><strong>A → C</strong></td><td>克里姆林 → 地緣戰爭</td><td>政權以對外對抗生產正當性（從增長轉向安全）、以戰爭壓制內部異議、抬升 siloviki</td></tr>
+    <tr><td><strong>C → A</strong></td><td>地緣戰爭 → 克里姆林</td><td>戰時體制強化權力垂直、清空反對空間、把正當性錨定在「守護國家」上，使政權更集中</td></tr>
+    <tr><td><strong>B → C</strong></td><td>租金經濟 → 地緣戰爭</td><td>能源租金與軍工產能提供打仗的錢與武器；軍工凱因斯主義把戰爭變成經濟引擎</td></tr>
+    <tr><td><strong>C → B</strong></td><td>地緣戰爭 → 租金經濟</td><td>戰爭與制裁迫使能源東向、經濟軍事化、租金重新配線；戰爭需求托底軍工就業與增長</td></tr>
+  </table>
+
+  <h3>迴路的自我維持與漏氣點</h3>
+  <p>這六條邊構成一個高度自我維持的正回饋迴路：<strong>克里姆林用戰爭生產正當性、戰爭用租金供養、租金由克里姆林分配、分配鞏固克里姆林——三個節點互相加固，形成一個閉環</strong>。這解釋了體制的當期韌性：每個節點的產出都是另一個節點的燃料。但同一個迴路也標示出它的漏氣點：<strong>租金經濟這個節點（B）是整個迴路的物質瓶頸</strong>——若能源需求萎縮、油價崩跌、對中依賴被壓榨（第 17 章），節點 B 供油不足，B→C（打仗的錢）與 B→A（供養政權的租金）同時變弱，整個迴路的轉速下降。這就是為何本報告把「過度依賴戰爭與能源」列為第三命門：<em>它是這台三角引擎唯一的、無可替代的燃料箱</em>。</p>
+
+  <div class="callout">
+    <div class="co-tag">SYSTEM · 三角引擎的兩個熄火情境</div>
+    <p>三角引擎有兩種熄火方式，對應兩個命門。<strong>情境一（節點 C 失控）：</strong>戰爭無法凍結、成本失控上升——傷亡觸及都會核心、財政無法支撐、戰場潰敗損及正當性；此時 C→A 由「強化政權」翻轉為「侵蝕正當性」，迴路開始逆轉。<strong>情境二（節點 A 真空）：</strong>仲裁者離場、接班無安排——A 節點失去協調功能，塔樓競爭失去邊界，A→B（租金分配）與 A→C（戰爭指揮）同時失序。兩個情境都不是「明天」會發生，但都是無法在體制內事先化解的結構性尾部——這就是把它們稱為「命門」而非「風險」的原因。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s16">
+  <div class="sec-label">PART IV · CH 16</div>
+  <h2>政治×經濟迴路：軍費、通膨與制裁的長期侵蝕</h2>
+  <p class="lede">第 15 章給出宏觀三角，這一章聚焦其中最緊張的一條軸線——政治與經濟如何互相拉扯。戰時的政治需要（打仗、動員、鎮壓）與經濟現實（通膨、勞動短缺、制裁侵蝕）之間，存在一組難以同時滿足的矛盾。</p>
+
+  <h3>軍費驅動：財政踩油門</h3>
+  <p>政治需要（維持戰爭、供養戰時體制）驅動軍費不斷擴張（第 12 章），這是財政的「油門」。軍費在短期創造需求、就業與收入，托底了增長與特定階層的「戰爭繁榮」。但軍費是純消耗性的支出——它不創造未來的生產能力，砲彈打出去就沒了。因此軍費驅動的增長是「借來的」：它把資源從未來（投資、民用、創新）挪到現在（戰爭），製造當期的活躍，透支長期的潛力。</p>
+
+  <h3>通膨與勞動短缺：貨幣踩剎車</h3>
+  <p>軍費製造收入卻不增加消費品供給，加上戰爭與外逃造成的勞動短缺推高工資，共同餵養通膨（第 12 章）。央行為壓制通膨被迫維持高利率，這是貨幣的「剎車」。於是俄羅斯經濟陷入「財政踩油門、貨幣踩剎車」的內在矛盾：<strong>政治要增長與戰爭（油門），經濟穩定要控通膨（剎車），兩者互相抵消，把經濟拖入高通膨、高利率、低增長的滯脹式狀態</strong>。這個矛盾無法根除，只能管理——而管理的空間隨戰爭延續、能源承壓、赤字擴大而不斷收窄。</p>
+
+  <h3>制裁的長期侵蝕：慢性而非急性</h3>
+  <p>制裁的作用機制是這條迴路上最容易被誤讀的部分（第 8 章）。它不製造急性休克（俄羅斯已證明能適應），而製造慢性侵蝕：<strong>高端技術與零件被切斷 → 進口替代品質降級、關鍵產業（航空、精密製造、能源上游技術）逐步退化；外資撤出 → 生產力與管理知識流失；金融脫鉤 → 融資成本上升、長期資本形成受阻；人才外逃 → 創新能量抽空</strong>。這些侵蝕都是以年計、甚至以十年計的，不會在任何單一時點爆發，卻在累積中不斷降低經濟的長期天花板。對迴路的意義是：<strong>制裁緩慢削弱節點 B（租金經濟）的產能與韌性，使整個三角引擎的燃料供應逐年變薄</strong>。</p>
+
+  <div class="lens l-f">
+    <div class="lens-tag">INVESTOR LENS · 如何讀俄羅斯的宏觀數字</div>
+    <p>對外部觀察者，正確讀俄羅斯宏觀數字的三條原則：<strong>其一，區分名目與實質</strong>——軍費撐起的名目增長掩蓋了民用部門的實質停滯。<strong>其二，區分當期與結構</strong>——當期的財政與就業由戰爭托底，結構性的技術與人口基礎在退化，兩者方向相反。<strong>其三，區分官方與行為</strong>——官方數字（增長、支持度）有系統性樂觀偏誤，行為數字（外逃、迴避動員、資本外流、進口替代的品質問題）更能揭示真實狀態。把這三條疊起來，就能避免「未崩潰＝健康」的誤判。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s17">
+  <div class="sec-label">PART IV · CH 17</div>
+  <h2>資本與國家：能源租金、國家資本主義與東向轉軌</h2>
+  <p class="lede">這一章深入三角引擎的燃料箱——能源租金，看它在制裁下如何被迫重新配線：從歐洲轉向中國與印度、被影子艦隊承載、並把俄羅斯鎖入一種不對稱的東方依賴。</p>
+
+  <h3>能源東向：從歐洲市場到亞洲買家</h3>
+  <p>戰前，俄羅斯能源出口的核心市場是歐洲（尤其管道天然氣）。戰爭與制裁切斷了這條臍帶——歐洲加速去俄化，俄羅斯失去了最富裕、最穩定的能源客戶。因應之道是大規模東向：<strong>2026 年 1 月，俄羅斯對中國的海運原油出口達到創紀錄的每日 186 萬桶、年增約 46%，Moscow 超越沙烏地成為中國最大原油供應國；ESPO 管道原油首次 100% 東流</strong>。與此同時，<strong>印度因美國關稅壓力顯著削減了對俄石油的採購（2025 年印度曾占俄海運石油出口約四分之一），中國進一步填補了印度退出的空缺</strong>。能源東向讓俄羅斯保住了租金的主體，但代價是議價地位的下降——賣給更集中的買家、常需折價、且運輸與結算的成本上升。</p>
+
+  <h3>影子艦隊：規避制裁的海上基礎設施</h3>
+  <p>能源東向的物理載體是「影子艦隊」（shadow fleet）——一支由所有權不透明、常無合規保險、船齡偏高的油輪組成的船隊，用來規避西方對俄油的價格上限與航運限制。<strong>2026 年 1 月，約 68% 的俄羅斯原油出口由受制裁的「影子」船隻承載，僅約 24% 由 G7+ 油輪運輸；分析識別出用於出口俄油的油輪約 138 艘，其中逾百艘屬核心影子船隊、近百艘已被列入制裁</strong>。影子艦隊是制裁與反制裁攻防的前線：它讓俄羅斯維持了出口量，但也帶來環境與航運安全風險（老舊無保險油輪）、並成為西方進一步制裁的靶點。這是一場持續的貓鼠遊戲——每一輪新制裁針對影子艦隊，俄方就以更多船隻、更複雜的規避結構回應。</p>
+
+  <h3>對中依賴的不對稱性：戰略脆弱的來源</h3>
+  <p>能源東向的最深後果，是把俄羅斯鎖入對中國的不對稱依賴。<strong>對俄羅斯而言，中國正成為其能源出口、進口來源、與金融結算的核心夥伴，替代性極低；對中國而言，俄羅斯是眾多能源供應國之一、且是議價地位下降的賣方</strong>。這種不對稱意味著：中俄「無上限」夥伴關係（第 20 章）在經濟上並非對等——俄羅斯把大量雞蛋放進中國這一個籃子，而中國保有多元選項。這是一個戰略脆弱點：<strong>俄羅斯的能源租金（三角引擎的燃料）越來越取決於單一買家的需求與意願</strong>，一旦這個買家的需求萎縮（經濟放緩）或意願改變（地緣算計），俄羅斯缺乏對沖。這是把「過度依賴能源」這個命門進一步收窄為「過度依賴對中能源出口」的關鍵環節。</p>
+
+  <div class="prism">
+    <div class="pv-o"><div class="pv-tag">寡頭／國家資本視角</div>
+      <p>對能源國企與寡頭而言，東向是「保住租金」的成功適應——市場沒了就換市場，出口量守住了，租金管道仍在運轉。制裁沒有殺死能源租金，只是改了流向。</p>
+      <p>但精明者看到議價地位的流失：折價賣、對單一買家、運輸與結算成本升——租金的「品質」在下降，即使「數量」被守住。</p>
+    </div>
+    <div class="pv-p"><div class="pv-tag">克里姆林視角</div>
+      <p>能源東向與對中深化，被官方敘事為「向多極世界的戰略轉向」、擺脫對西方的依賴。這符合「與西方脫鉤、向全球南方靠攏」的大方向。</p>
+      <p>但克里姆林也清楚不對稱依賴的風險——把能源命脈押在單一買家上，是戰時的必要，卻是戰略的脆弱。這是被接受的、暫時的代價。</p>
+    </div>
+    <div class="pv-f"><div class="pv-tag">外國人視角</div>
+      <p>對外部觀察者，能源東向是評估俄羅斯韌性的核心變數：它是俄經濟未崩潰的主因（租金保住了），也是俄長期脆弱的來源（依賴不對稱、議價地位降）。</p>
+      <p>監測重點：中國對俄能源的需求與價格、印度的進出、影子艦隊被制裁的力度——這三者決定三角引擎的燃料是否充足。</p>
+    </div>
+  </div>
+  <div class="prism-caption">PRISM ▸ 能源東向，三種位置的不同讀法</div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s18">
+  <div class="sec-label">PART IV · CH 18</div>
+  <h2>產業與人口：軍工、人口外流與腦力流失</h2>
+  <p class="lede">三角引擎的燃料是能源，但它的長期地基是產業與人口。這一章看戰爭如何扭曲產業結構、抽空人口與人才——這些是最不易察覺、卻可能最致命的長期侵蝕。</p>
+
+  <h3>軍工獨大：產業結構的戰時扭曲</h3>
+  <p>戰爭把俄羅斯的產業結構推向軍工獨大：<strong>在國家預算慷慨支持下，軍工部門（國防工業複合體，OPK）是增長的主要動能；而多數民用製造與服務業則停滯或萎縮</strong>。這種扭曲有雙重代價：其一，資源錯配——資本、勞動、原料被吸入軍工，民用部門投資不足、更新停滯。其二，路徑鎖定（第 12 章）——軍工的就業與訂單變成需要被維持的既得利益，使產業結構越來越難在和平後重新平衡。俄羅斯正在製造一個「戰爭依賴型」的產業結構，這個結構在戰時是引擎，在和平時會是包袱。</p>
+
+  <h3>人口外流：戰爭與動員觸發的離境潮</h3>
+  <p>戰爭觸發了蘇聯解體以來最大規模的一波人口外流：<strong>2022 年入侵後、尤其 9 月「部分動員」令下，估計數十萬人（以受過高等教育的專業人士、適齡男性為主）離境</strong>——目的地包括高加索、中亞、土耳其、塞爾維亞、以及更遠的地方。這波外流疊加在俄羅斯本就嚴峻的長期人口困境之上：<strong>低生育率、高（尤其男性）死亡率、蘇聯解體以來的人口收縮趨勢</strong>——戰爭的直接傷亡進一步加劇了人口與勞動力的損耗。人口是一切的地基：它決定勞動力、兵源、消費市場與長期增長潛力，而俄羅斯的人口地基正在被戰爭三管齊下地侵蝕（傷亡、外逃、生育下降）。</p>
+
+  <h3>腦力流失：最深的長期代價</h3>
+  <p>在所有人口損耗中，「腦力流失」（brain drain）是最深的長期代價。外逃者以 IT、金融、科研、創意產業的高技能專業人士為主——正是一個經濟現代化與創新最需要的人群。<strong>他們帶走的不只是人口數字，而是技能、創業能量、與接軌全球的網絡</strong>。這與制裁的技術封鎖（第 16 章）疊加，形成雙重打擊：外部切斷了先進技術的輸入，內部流失了消化與創造技術的人才。其後果不會在短期顯現（存量人才與蘇聯遺產尚可支撐一段時間），但會在長期以「創新停滯、生產力天花板下降、關鍵產業退化」的形式緩慢兌現。這是「制裁侵蝕」與「戰爭損耗」在人口維度上的交匯點，也是評估俄羅斯長期軌跡時最該重視、卻最難量化的變數。</p>
+
+  <div class="callout">
+    <div class="co-tag">STRUCTURE · 產業與人口為何是「慢命門」</div>
+    <p>產業扭曲與人口／人才流失，不像戰爭終局或接班那樣是「快命門」（可能在某個時點突然兌現），而是「慢命門」——它們以年、以十年為單位緩慢侵蝕，不製造戲劇性的崩潰時刻，卻持續降低俄羅斯的長期天花板。它們的政治意義在於：<strong>它們讓「軍工凱因斯主義的當期繁榮」與「長期國力的持續退化」同時為真</strong>，這正是為何看短期的人說「俄羅斯很好」、看長期的人說「俄羅斯在衰弱」，兩者其實描述的是同一個體制的不同時間切片。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s19">
+  <div class="sec-label">PART IV · CH 19</div>
+  <h2>政策連續性與外資：孤立中的可預測性</h2>
+  <p class="lede">對任何評估俄羅斯的外部參與者，最實用的問題是：這個體制的政策是連續還是多變？答案有一個弔詭的結構——它在孤立中提供了高度的政策連續性與可預測性，但這種可預測性本身，對西方實體而言是一種被鎖在門外的可預測性。</p>
+
+  <h3>政策連續性的來源：個人化威權的一個副產品</h3>
+  <p>俄羅斯的政策連續性，來自其個人化威權結構的一個副產品：<strong>當權力集中於單一仲裁者、且他長期在位（至 2030、理論上至 2036），戰略方向就由他的偏好穩定決定，不隨選舉週期擺盪</strong>。這與民主體制形成鮮明對比——後者每次政權輪替都可能帶來政策的方向性變化（如同系列南韓篇所述的「陣營擺盪」）。俄羅斯沒有這種擺盪：對西方的敵對、能源東向、戰時體制、財產權政治化——這些大方向在普丁在位期間高度連續、可預測。對想理解俄羅斯行為的觀察者，這是好消息：它的行為邏輯是穩定的、可推演的。</p>
+
+  <h3>可預測性的另一面：被鎖在門外的穩定</h3>
+  <p>但對西方投資人與企業，這種可預測性是一種殘酷的可預測性——<strong>可預測的是「持續的敵對、脫鉤、封閉與財產權風險」</strong>。俄羅斯對西方實體提供的不是「穩定的投資環境」，而是「穩定的高風險」：資產可能因政治對抗被凍結或反制沒收、退出被課以懲罰性條件、再進入近乎不可能。對非西方實體（中國、印度、部分全球南方國家），則面對一套不同的可預測性：<strong>在規避制裁的框架下有真實的機會（能源、平行進口、被騰空的市場份額），但也承擔次級制裁風險與在不透明環境中經營的成本</strong>。同一個「政策連續」，對不同外部參與者意義截然相反。</p>
+
+  <h3>財產權的政治化：連續性的黑暗面</h3>
+  <p>政策連續性的一個核心內容，是財產權的政治化這一點的連續（第 6 章）。<strong>在俄羅斯，財產權以政治忠誠為前提——這對本國寡頭如此，對外國資產同樣如此</strong>。戰爭期間，撤出的西方企業資產被以各種方式接管、國有化或轉手給親政權實體；被凍結的西方資產成為與被凍結的俄羅斯儲備對等的談判籌碼。這揭示了俄羅斯體制對「財產」的根本態度：<strong>財產不是不可侵犯的法律權利，而是政治關係的函數</strong>。這個態度是連續且可預測的——它可預測地意味著，任何外國資產在俄羅斯都缺乏獨立於政治關係的法律保護。這是評估俄羅斯作為投資目的地時，比任何宏觀數字都更根本的結構事實。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s20">
+  <div class="sec-label">PART IV · CH 20</div>
+  <h2>地緣：烏克蘭、對中軸線、對美談判與能源武器</h2>
+  <p class="lede">俄羅斯的內部結構與它的地緣位置密不可分——戰爭是內部正當性的引擎，能源是外交的武器，對中軸線是脫鉤後的生命線。這一章把三角引擎的地緣面攤開，看它如何連接內外。</p>
+
+  <h3>烏克蘭：內部與外部的交匯點</h3>
+  <p>烏克蘭戰爭是理解當代俄羅斯的樞紐，因為它同時是外交事件與內部引擎（第 10 章）。在地緣層面，這場戰爭把俄羅斯與西方推入一個長週期的對抗結構：<strong>北約東翼強化、對俄制裁的長期化、俄羅斯與「西方集體」的全面脫鉤</strong>。戰爭的結局（第 13 章）將決定俄羅斯地緣位置的基本參數——但如本報告反覆論證，這個結局被正當性、領土與既得利益三重鎖定，傾向於「凍結」而非「解決」。因此在可預見的未來，「與西方的長期對抗」是俄羅斯地緣位置的常數，而非變數。</p>
+
+  <h3>對中「無上限」夥伴：不對稱的軸線</h3>
+  <p>脫鉤後的俄羅斯把戰略重心轉向中國。中俄在 2022 年戰爭前夕宣示的「無上限」夥伴關係，在戰爭中被深化為經濟、外交與部分軍事層面的實質靠攏。但如第 17 章所析，這條軸線在經濟上是不對稱的：<strong>俄羅斯對中國的能源與貿易依賴上升到近乎生命線的程度，而中國保有多元選項、且審慎避免因俄承擔過重的次級制裁風險</strong>。這種不對稱塑造了軸線的性質：它對俄羅斯是必需的、對中國是機會主義的。俄羅斯以此換取了脫鉤後的生存空間，代價是戰略自主性的部分讓渡——一個歷史上以大國自居的國家，正在結構上滑向對一個崛起鄰國的依賴。這是俄羅斯戰時外交最深刻、也最少被官方承認的轉變。</p>
+
+  <h3>對美（Trump 談判）：槓桿不對稱的博弈</h3>
+  <p>2025 年以來美國推動的談判（第 13 章）為俄美關係注入了新的動態。對俄羅斯而言，與 Trump 政府的接觸提供了一個機會：<strong>在談判中利用美國「想快速結束戰爭」的意願，換取對俄有利的條件（領土現狀承認、制裁鬆綁、把烏克蘭問題「凍結」在有利位置）</strong>。俄方的策略是「既談判又施壓」——參與談判以測試能否低成本取得目標，同時維持軍事壓力（如加大空襲）以增加籌碼。這反映了俄方對談判的根本盤算：談判是取得戰爭目標的另一種手段，而非放棄戰爭目標的途徑。只要「可包裝為勝利的結局」未到手，莫斯科就缺乏簽署全面和平的誘因。</p>
+
+  <h3>能源作為武器與全球南方</h3>
+  <p>能源始終是俄羅斯地緣工具箱的核心。戰前它是對歐洲的槓桿，戰後這條槓桿失效（歐洲去俄化），但能源作為武器的邏輯轉向了新的維度：<strong>透過對全球南方的能源與糧食供應、透過在 OPEC+ 與產油國的協調、透過影子艦隊維持出口，俄羅斯試圖在「西方集體」之外構建一個對沖網絡</strong>。對全球南方許多國家而言，俄羅斯提供的是折價能源、糧食、武器與「不干涉內政」的外交姿態——這使俄羅斯在聯合國等場域維持了相當的非西方支持，避免了完全的國際孤立。這是理解「為何制裁未能徹底孤立俄羅斯」的地緣答案：世界不是只有西方，而俄羅斯精準地經營了西方之外的空間。</p>
+
+  <div class="callout">
+    <div class="co-tag">GEOPOLITICS · 地緣三角與內部三角的耦合</div>
+    <p>本章的地緣三角（烏克蘭戰爭／對中軸線／對美談判）與第 15 章的內部三角（克里姆林／租金／戰爭）是耦合的：<strong>對外的戰爭餵養對內的正當性，對外的能源東向維持對內的租金，對外的談判受制於對內的正當性需要</strong>。這種內外耦合意味著，俄羅斯的地緣行為無法脫離其內部結構來理解——它打仗不只為了地緣目標，也為了內部正當性；它談判不只為了和平，也為了不損及內部正當性。對外部觀察者，這是最重要的一條分析原則：<em>讀俄羅斯的外交，要同時讀它的內政；兩者是同一台引擎的兩個面</em>。</p>
+  </div>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<div class="part-divider">
+  <div class="pd-num">PART V</div>
+  <h2>終章 · The Verdict</h2>
+  <div class="pd-sub">十大論題、監測儀表板、方法註記</div>
+</div>
+
+<section id="s21">
+  <div class="sec-label">PART V · CH 21</div>
+  <h2>十大論題：附信度與可證偽條件</h2>
+  <p class="lede">本報告的全部分析，收斂為十個可檢驗的論題。每個論題附上信度（★＝推測性、★★＝有相當支撐、★★★＝結構性高信度）與可證偽條件——若該條件發生，論題即應被推翻或重估。這是把分析變成可被證偽的判斷、而非不可反駁的斷言的紀律。</p>
+  <table>
+    <tr><th style="width:44%">論題</th><th>信度</th><th>可證偽條件（若發生，論題作廢）</th></tr>
+    <tr><td><strong>T1・權力垂直常數論</strong>：以個人化威權運作的權力垂直，在普丁在位期間是常數而非變數；真正的權力不在形式選舉，而在克里姆林內部塔樓均衡。（第 1、2、4 章）</td><td>★★★</td><td>出現一個獨立於克里姆林、能實質約束或替代權力垂直的權力中心（真實競爭的選舉、獨立的司法或聯邦力量）並持續運作</td></tr>
+    <tr><td><strong>T2・恩庇均衡論</strong>：統治核心是 siloviki 與國家資本寡頭之間、由普丁仲裁的恩庇均衡；精英被相互把柄與共同利益綁死，缺乏單獨背叛的誘因。（第 2、5、6 章）</td><td>★★★</td><td>出現一次成功的、由精英聯盟主導且未經普丁仲裁的權力重組（即恩庇均衡在仲裁者仍在位時自行斷裂）</td></tr>
+    <tr><td><strong>T3・siloviki 上位論</strong>：戰爭把強力部門從政權的看門人升格為統治核心，這是 2022 年以來最深刻的結構位移；但 siloviki 內部並非鐵板一塊，仍受普丁的相互制衡設計約束。（第 5、10、11 章）</td><td>★★★</td><td>戰後 siloviki 的預算、人事與政治份量系統性回落到戰前水準，且自由派技術官僚重獲方向設定權</td></tr>
+    <tr><td><strong>T4・租金國家論</strong>：財政與精英財富的根基是能源與原物料租金而非廣泛稅基，這降低了政權對社會的問責需求，並使能源價格與制裁對政權行為有直接傳導。（第 2、17 章）</td><td>★★★</td><td>俄羅斯完成向稅基廣泛、以生產性經濟為主的財政轉型，能源租金佔財政與精英財富的比重顯著且持久下降</td></tr>
+    <tr><td><strong>T5・戰爭正當性引擎論</strong>：正當性從增長轉向安全後，戰爭成為政權身分認同的核心，任何被國內解讀為失敗的結局都威脅正當性——這使戰爭傾向凍結而非解決。（第 4、10、13 章）</td><td>★★★</td><td>俄羅斯簽署並執行一項在國內被廣泛承認為「非勝利」的全面和平協議，而政權正當性未受實質衝擊</td></tr>
+    <tr><td><strong>T6・軍工凱因斯主義論</strong>：戰爭經濟以軍費創造當期需求與就業，托底了增長與「戰爭繁榮」，但以通膨、勞動短缺、財政轉嫁與長期結構退化為代價，是借來的增長。（第 12、16、18 章）</td><td>★★</td><td>俄羅斯在維持高軍費的同時，實現民用部門的實質復甦、通膨與勞動短缺緩解、且長期生產力天花板未下降</td></tr>
+    <tr><td><strong>T7・制裁侵蝕論</strong>：制裁的效果是慢性侵蝕而非急性休克——它不製造崩潰，而緩慢抽走技術、外資、人才與長期增長潛力，把俄鎖入當期靠戰爭與能源、長期持續退化的軌跡。（第 8、16、18 章）</td><td>★★</td><td>俄羅斯在制裁持續下實現高端技術自主、人才回流、外資或等值替代資本恢復，長期增長潛力未受侵蝕</td></tr>
+    <tr><td><strong>T8・反對清空論</strong>：Navalny 之死與戰時鎮壓後，體制外反對已被系統性摧毀至接近於零；剩下的是被馴化的系統性反對、沉默的地方不滿與消極的戰爭疲乏，皆非政權的即期威脅。（第 3、7 章）</td><td>★★★</td><td>出現一個未被即時鎮壓、具全國動員力、且能持續運作的體制外反對力量或社會運動</td></tr>
+    <tr><td><strong>T9・對中不對稱依賴論</strong>：能源東向把俄羅斯鎖入對中國的不對稱依賴——對俄是生命線、對中是機會主義；這是「過度依賴能源」命門收窄為「過度依賴對中出口」的關鍵脆弱點。（第 17、20 章）</td><td>★★</td><td>俄羅斯的能源出口與貿易恢復多元化（歐洲回流、或全球南方買家分散到對單一夥伴依賴顯著下降），或中俄依賴變為對等</td></tr>
+    <tr><td><strong>T10・雙命門論</strong>：體制在普丁在位期間異常有韌性，但有兩個無法在體制內事先化解的尾部命門——一場無法乾淨結束的戰爭、與一個沒有安排的接班；能同時擊穿所有稜鏡的系統性風險集中於此。（第 2B、14、15 章）</td><td>★★</td><td>俄羅斯建立並實際運作一套制度化的接班程序、同時乾淨結束戰爭而正當性無損——即雙命門被結構性拆除</td></tr>
+  </table>
+
+  <h3>十論題的內在階層</h3>
+  <p>十個論題不是並列的，有清晰的依賴結構：<strong>T1（權力垂直）、T2（恩庇均衡）、T4（租金國家）是地基</strong>——三者描述的是制度硬體與物質基礎，信度最高、最穩定，其餘論題都建立在它們之上。<strong>T3、T5、T8 是結構層</strong>（高信度，描述戰爭帶來的結構位移與反對清空，都有堅實的事件與趨勢支撐）。<strong>T6、T7、T9 是動力層</strong>（中信度，涉及趨勢的長期演化與外部變數，最會隨戰況與全球市場變動）。<strong>T10 是尾部層</strong>——它把兩個命門收攏為一個判斷，信度標為中，不是因為命門不真實，而是因為「何時、以何種方式兌現」無法預測。閱讀本報告的正確方式，是把注意力按這個階層倒置分配：<em>花最少時間懷疑地基（它們最穩），花最多時間監測動力層（尤其 T6 軍工凱因斯主義的可持續性與 T9 對中依賴的張力），並把 T10 的兩個命門當作必須放在心裡、卻無法定價的尾部風險</em>。</p>
+
+  <h3>本報告的四個已知盲區</h3>
+  <p>誠實標記分析框架自身的限制：<strong>其一，塔樓政治的內部視角缺席</strong>——本報告以外部結構分析為主，對克里姆林內部塔樓的具體人事、派系邊界與即時消長，依賴的是公開報導與推測，其精確度有限；「哪座塔樓在上升」的判讀帶有很大不確定性，本文已盡量以「結構誘因」而非「人事八卦」立論。<strong>其二，傳聞與事實的灰區</strong>——關於接班、精英分裂、普丁健康與意志的資訊，大量來自難以獨立查證的情報與匿名來源；本文已明確區分結構事實與傳聞（第 2B 章），但這個灰區本身是俄羅斯不透明性的產物，無法完全消除。<strong>其三，經濟數據的時效與口徑</strong>——本文引用的軍費、通膨、能源出口等為 2026 年上半年公開來源的概略值，旨在呈現量級與趨勢；預算慣例會多次修訂，精確數字應以官方最新統計為準。<strong>其四，事件路徑依賴</strong>——本報告成稿於 2026 年 7 月、戰爭仍在持續、停火談判反覆卡關、Prigozhin 事件已過去兩年、Navalny 已逝的特定時點；若干判斷（尤其 T5、T6、T9、T10）帶有近因權重，應以第 22 章儀表板為持續校正介面。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s22">
+  <div class="sec-label">PART V · CH 22</div>
+  <h2>監測儀表板：訊號與判讀規則</h2>
+  <p class="lede">結構分析的價值在於它能被持續校正。以下儀表板列出應監測的訊號、與每個訊號對應的判讀規則——它把靜態的十大論題轉化為一套動態的追蹤介面。</p>
+  <table>
+    <tr><th>監測項</th><th>頻率</th><th>判讀規則</th></tr>
+    <tr><td><strong>停火談判與戰爭強度</strong></td><td>持續</td><td>T5、T10 的核心讀數。區分「戰術性暫停」（局部停火、換俘、人道停火——象徵性，可逆）與「戰略性和平」（涉及領土、正當性、既得利益的全面協議——極難）。只要三層結構障礙（領土／正當性／既得利益）未鬆動，任何停火傾向於是前者（詳第 13 章）</td></tr>
+    <tr><td><strong>接班訊號</strong></td><td>持續</td><td>T10 的最深尾部。監測普丁健康、是否出現公開的接班安排、塔樓均衡是否出現異常位移。原則：把「精英張力」當常態、把「政變在即」的傳聞打折；真正的觸發是仲裁者失能而非精英不滿（詳第 2B、14 章）</td></tr>
+    <tr><td><strong>軍費、通膨、GDP、盧布</strong></td><td>每季</td><td>T6 的即時溫度計。留意「財政踩油門、貨幣踩剎車」的張力：軍費是否持續擴張、通膨是否黏著在 6–7% 以上、增長是否滑向停滯、盧布的行政管控成本。區分軍費托底的名目增長與民用部門的實質狀態（詳第 12、16 章）</td></tr>
+    <tr><td><strong>能源東向與對中依賴</strong></td><td>每月／每季</td><td>T4、T9 的核心讀數，也是三角引擎的燃料表。監測對中原油出口量與折價幅度、印度的進出、影子艦隊被制裁的力度、ESPO 東流比重。中國需求或意願的變化是俄能源租金最大的單一外部變數（詳第 17、20 章）</td></tr>
+    <tr><td><strong>siloviki 與塔樓均衡</strong></td><td>持續</td><td>T2、T3 的讀數。監測強力部門的預算與人事份量、機構間摩擦（軍／FSB／近衛軍）、是否出現類 Prigozhin 的越界事件。原則：塔樓競爭是常態，關鍵是它是否越界、是否外溢為公開衝突（詳第 5、11 章）</td></tr>
+    <tr><td><strong>制裁與技術封鎖的長期效果</strong></td><td>每年</td><td>T7 的長線讀數。以年為單位觀察高端技術的退化（航空、精密製造、能源上游）、進口替代的品質、關鍵產業的維繫能力——制裁效果以結構退化計，不以崩潰計（詳第 8、16、18 章）</td></tr>
+    <tr><td><strong>人口、動員與人才外流</strong></td><td>每年</td><td>T6、T7 的最慢命門。監測是否再次大規模動員（觸及都會核心的紅線）、傷亡累積、人才是否回流或持續外逃、生育與死亡的長期趨勢——人口是一切的地基（詳第 7、18 章）</td></tr>
+    <tr><td><strong>社會戰爭疲乏</strong></td><td>持續</td><td>T8 的潛流讀數。以行為（迴避動員、抗議零星化、外逃）而非官方民調判讀；原則：疲乏是真實潛流但非即期威脅，其政治意義須配合精英分裂才被激活（詳第 7、14 章）</td></tr>
+    <tr><td><strong>對美談判與地緣軸線</strong></td><td>持續</td><td>T5、T9 的外部讀數。監測俄美接觸的實質進展、中俄軸線的深化或摩擦、全球南方對俄的支持度——讀俄外交要同時讀其內政，兩者是同一引擎的兩面（詳第 20 章）</td></tr>
+  </table>
+
+  <h3>三個「若發生則改變評估」的觸發器</h3>
+  <ul class="plain">
+    <li><strong>觸發器 A（戰爭失控）</strong>：戰爭成本失控上升——傷亡觸及都會核心、財政無法支撐、戰場潰敗損及正當性 → C→A 由「強化政權」翻轉為「侵蝕正當性」，三角引擎開始逆轉，重估 T5、T6 與體制的當期韌性。</li>
+    <li><strong>觸發器 B（接班真空）</strong>：仲裁者失能且無安排 → 恩庇均衡失去協調節點、塔樓競爭失去邊界，A 節點的兩條輸出邊（租金分配、戰爭指揮）同時失序 → T1、T2、T10 進入兌現情境，本報告所有稜鏡需整體重估（唯一能同時擊穿全部五稜鏡的觸發器）。</li>
+    <li><strong>觸發器 C（燃料枯竭）</strong>：能源租金被外部衝擊持續壓縮——油價崩、中國需求萎縮、影子艦隊被有效封堵 → 節點 B 供油不足，B→C 與 B→A 同時變弱，三角引擎轉速下降，重估 T4、T6、T9 與整體財政韌性。</li>
+    <li><strong>觸發器 D（結構鬆動）</strong>：出現制度化接班程序、或戰爭乾淨結束而正當性無損、或能源依賴顯著多元化 → 雙命門被部分拆除、或核心地基鬆動 → 啟動對 T5、T9、T10 乃至地基論題的重估（歷史上從未接近，但這是唯一能推翻本報告核心悲觀判斷的正向訊號）。</li>
+  </ul>
+  <p><strong>總結一句：</strong>權力垂直是常數，克里姆林派系是變數，戰爭與接班是命門。監測能源燃料表與塔樓均衡、警惕兩個命門的緩慢演變、不必為「俄羅斯明天崩潰」焦慮——因為過去數年已反覆證明它的當期韌性；但也不必相信「普丁全知全能、體制長治久安」——因為它把整個系統押在一個無法安排接班的仲裁者、與一場無法乾淨結束的戰爭上。真正該追蹤的，不是它會不會在明天倒下，而是它如何在長期的緩慢侵蝕中，走向那個無人安排、也無人能安排的路口。</p>
+</section>
+
+<div class="divider-ornament">◆ ◆ ◆</div>
+
+<section id="s23">
+  <div class="sec-label">PART V · CH 23</div>
+  <h2>資料來源與方法註記</h2>
+  <p>本文件之事實基礎來自 2026 年 7 月下旬檢索之公開報導與研究，主要來源：Reuters、AP、BBC、The New York Times、Financial Times、The Guardian、Al Jazeera、Nikkei Asia、The Economist（戰況、談判、制裁與國內政治時間線）；The Moscow Times、Meduza、Novaya Gazeta（流亡版）等關注俄羅斯內政的媒體（經濟、鎮壓、精英動態，須注意其立場並與多源交叉）；SIPRI、Kiel Institute、CSIS、Council on Foreign Relations、Carnegie（Russia Eurasia）、OSW（華沙東方研究中心）、New Eurasian Strategies Centre、BTI（Bertelsmann Transformation Index）等智庫與研究機構之俄羅斯評估（軍費、戰爭經濟、精英與接班分析）；能源與制裁數據參考 CREA（能源與清潔空氣研究中心）、Atlantic Council 能源制裁儀表板、OilPrice、以及油輪與影子艦隊追蹤之公開分析。制度與結構分析另參考關於「權力垂直」「個人化威權／競爭性威權」「siloviki」「租金國家」「塔樓政治」「管理式民主」之政治學與區域研究文獻，以及 Prigozhin/Wagner 兵變（2023-06）、Navalny 之死（2024-02）、2024-03 總統選舉、2020 修憲、2022-09 部分動員等關鍵事件之報導與分析。2025–26 停火談判與戰爭經濟指標（軍費、通膨、VAT 調升、對中原油出口、影子艦隊份額）之具體數字，以本文成稿時（2026 年 7 月下旬）之公開來源為準，並於正文標註其概略與時效性質。</p>
+  <p>方法註記：①戰況、談判與經濟數字為高度時效性內容，本文之分析基準日為 2026 年 7 月 24 日；任何即時進展（新一輪會談、局部停火、戰場態勢、預算修訂）應以最新公開來源查證，不宜以本文為即時戰情或財經依據。②軍費、通膨、能源出口等為概略值，旨在呈現量級與結構，精確數字以官方最新統計為準；俄羅斯預算慣例會多次修訂、且部分官方數據有系統性樂觀偏誤，本文於相關處已提示以行為數據交叉驗證。③關於接班、精英分裂、普丁健康與意志的資訊，大量來自難以獨立查證的情報與匿名來源；本文明確區分結構事實與傳聞（尤見第 2B、14 章），對「政變在即」一類反覆被提出又落空的預測採打折處理。④五稜鏡中的視角陳述為分析性重構，旨在呈現各結構位置的理性計算，不代表任何群體或個人的統一立場，亦不構成對任何一方的宣傳或醜化。⑤「權力垂直常數」「戰爭正當性引擎」「雙命門」等判斷為結構性歸納，個別事件（如某次停火、某起清算）的意義須逐案判讀；本文於第 14 章明確分層區分真實的結構性風險與過度解讀，不作單一定性。⑥本報告成稿於 2026 年 7 月：烏克蘭戰爭仍在持續、2025–26 停火談判反覆卡關、Prigozhin 兵變已過去兩年、Navalny 已於 2024 年逝、普丁 2024 年續任至 2030（理論上可至 2036）的特定時點；仍在演變的時效性事件以第 22 章儀表板為持續校正介面。⑦本文件為政治結構分析，非投資建議；涉及部位決策前應依既定流程另行執行冷讀批判。</p>
+</section>
+</main>
+</div>
+</div>
+
+<footer>
+  <div class="shell">
+    <h4>Colophon</h4>
+    <p>俄羅斯政治結構五稜鏡 · InvestMQuest Geopolitics Research · 編製於 2026-07-24。設計語彙：靛墨紙面、織錦金界線、五色稜鏡（藏青＝普丁與克里姆林權力垂直、石墨灰＝siloviki 強力集團、帝王紫＝寡頭與國家資本租金經濟、赤紅＝反對與社會、琥珀金＝外國人與制裁）。本文件之稜鏡裝置（同一事實、多種讀法）為分析框架，延續同系列馬來西亞・南韓・泰國・印尼・菲律賓篇之方法，可套用於其他個人化威權與多裂隙政體之結構研究。核心定錨：權力垂直是常數、克里姆林派系是變數、戰爭與接班是命門。立場中立、分析性——不作宣傳、不作醜化，區分已證實事實與傳聞，分層辨析真實風險與過度解讀。</p>
+  </div>
+</footer>
+
+</body>
+</html>
