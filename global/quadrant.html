@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Four-Quadrant Model — Interactive Consistency Test | Cross-market · Property Check</title>
+<meta name="description" content="DiPasquale-Wheaton four-quadrant model as an interactive calculator: enter rent, price, completions and stock for any market and read which quadrant is lying.">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=IBM+Plex+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/kl-theme.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+.wrap{max-width:960px;margin:0 auto;padding:26px 20px 10px}
+body.zh{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif}
+.wrap p,.wrap li{line-height:1.9}
+
+/* header */
+.pg-head{margin-bottom:16px}
+.pg-title{font-family:'Playfair Display','Noto Serif TC',serif;font-weight:700;color:var(--navy);font-size:26px;letter-spacing:-.01em;margin:0 0 8px;line-height:1.3}
+.pg-sub{font-size:13px;color:var(--muted);margin:0 0 12px;line-height:1.7;max-width:820px}
+.pg-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* lede / sections */
+.lede{background:linear-gradient(135deg,#0d2244 0%,#173564 100%);color:#fff;border-radius:14px;padding:20px 24px;margin:6px 0 24px;font-size:13.5px;line-height:1.9;box-shadow:var(--shadow-md)}
+.lede b,.lede strong{color:var(--gold-light);font-weight:600}
+.lede .lk{display:block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light);margin-bottom:8px}
+body.zh .lede .lk{letter-spacing:.04em}
+.sec-rule{display:flex;align-items:center;gap:12px;margin:38px 0 14px}
+.sec-rule h2{font-family:'Playfair Display','Noto Serif TC',serif;font-weight:700;color:var(--navy);font-size:20px;margin:0;white-space:nowrap;line-height:1.3}
+.sec-rule::after{content:'';flex:1;height:1px;background:var(--gold-line)}
+.sub-h{font-family:'Playfair Display','Noto Serif TC',serif;color:var(--navy);font-size:15px;font-weight:600;margin:22px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border-light)}
+.narr{font-size:13.5px;color:var(--text-soft);margin:0 0 14px}
+.narr b{color:var(--navy);font-weight:600}
+.pull{font-family:'Playfair Display','Noto Serif TC',serif;font-size:17px;line-height:1.75;color:var(--navy);border-left:3px solid var(--gold);padding:3px 0 3px 16px;margin:16px 0 16px;font-weight:600}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:14px 0;box-shadow:var(--shadow-sm)}
+.card>:first-child{margin-top:0}.card>:last-child{margin-bottom:0}
+.chartbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 14px 8px;box-shadow:var(--shadow-sm);margin:14px 0}
+.chartbox .kick{font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);margin:2px 4px 2px}
+body.zh .chartbox .kick{letter-spacing:.04em}
+.chartbox h3{font-size:13.5px;font-weight:700;color:var(--navy);margin:2px 4px 2px}
+.chartbox .csub{font-size:11px;color:var(--muted);margin:0 4px 8px;line-height:1.6}
+.chart{width:100%;height:300px}
+#chartQQuad{height:460px}
+@media(max-width:640px){#chartQQuad{height:380px}}
+
+/* controls */
+.ctrlwrap{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px 12px;margin:14px 0;box-shadow:var(--shadow-sm)}
+.ctrl-lbl{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:7px;display:block}
+body.zh .ctrl-lbl{text-transform:none;letter-spacing:0}
+.seg{display:inline-flex;background:var(--bg-soft,#f4f0e6);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:none;background:transparent;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 13px;border-radius:8px;cursor:pointer;transition:all .15s;line-height:1.2}
+.seg button.active{background:var(--navy);color:#fff;box-shadow:0 1px 4px rgba(13,34,68,.18)}
+.grp{margin-top:16px;padding-top:14px;border-top:1px dashed var(--border)}
+.grp:first-of-type{border-top:none;padding-top:0}
+.grp-h{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);margin:0 0 2px}
+body.zh .grp-h{text-transform:none;letter-spacing:0}
+.grp-s{font-size:11px;color:var(--muted);margin:0 0 10px;line-height:1.6}
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2px 28px}
+.calc-field{margin-bottom:14px}
+.calc-field .cf-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:3px}
+.calc-field label{font-size:12.5px;font-weight:600;color:var(--text-soft)}
+.calc-field .cf-val{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:var(--gold-deep);white-space:nowrap}
+.calc-field input[type=range]{width:100%;accent-color:var(--gold);cursor:pointer;height:22px;margin:0}
+.calc-field .cf-hint{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.55}
+.calc-field .cf-hint.assume{color:#a16207}
+.numin{font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:700;color:var(--navy);border:1px solid var(--border);border-radius:9px;padding:7px 11px;width:100%;background:var(--card)}
+.assumetag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.06em;color:#a16207;background:var(--warning-bg);border:1px solid #e8d5a8;border-radius:5px;padding:1px 5px;margin-left:5px;vertical-align:1px}
+body.zh .assumetag{letter-spacing:0}
+.nulltag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.06em;color:#b91c1c;background:var(--negative-bg);border:1px solid #f0cccc;border-radius:5px;padding:1px 5px;margin-left:5px;vertical-align:1px}
+body.zh .nulltag{letter-spacing:0}
+.pshrow{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.pshbtn{font-family:inherit;font-size:10px;font-weight:700;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--gold-deep);cursor:pointer}
+.pshbtn.reset{color:var(--muted)}
+
+/* test cells */
+.tests{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 6px}
+@media(max-width:700px){.tests{grid-template-columns:1fr}}
+.tcell{border:1px solid var(--border);border-left-width:4px;border-radius:12px;padding:14px 16px;background:var(--card);box-shadow:var(--shadow-sm)}
+.tcell.ok{border-left-color:#15803d}
+.tcell.warn{border-left-color:#a16207}
+.tcell.bad{border-left-color:#b91c1c}
+.tcell.na{border-left-color:#9aa7b8}
+/* no text-transform here: uppercasing would turn δ into Δ and change the formula */
+.tcell .tno{font-size:9.5px;font-weight:800;letter-spacing:.1em;color:var(--gold-deep)}
+body.zh .tcell .tno{letter-spacing:.02em}
+.tcell .tname{font-size:13px;font-weight:700;color:var(--navy);margin:3px 0 6px}
+.tcell .tflag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;border-radius:999px;padding:4px 11px;margin:6px 0 8px}
+.tflag.ok{color:#15803d;background:var(--positive-bg)}
+.tflag.warn{color:#a16207;background:var(--warning-bg)}
+.tflag.bad{color:#b91c1c;background:var(--negative-bg)}
+.tflag.na{color:#5a6b80;background:#eef1f5}
+.tcell .tval{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:700;color:var(--navy);margin:0 0 6px;line-height:1.35}
+.tcell .tplain{font-size:13px;color:var(--text-soft);line-height:1.85;margin:0}
+.tcell .tplain b{color:var(--navy);font-weight:700}
+.tcell .tsub{font-size:11px;color:var(--muted);margin:0 0 8px;line-height:1.6}
+.tcell .tdiag{font-size:12px;color:var(--text-soft);line-height:1.75;border-top:1px solid var(--border-light);padding-top:8px}
+.tcell .tdiag b{color:var(--navy);font-weight:700}
+.tcell .tbias{font-size:10.5px;color:#a16207;line-height:1.6;margin-top:6px;background:var(--warning-bg);border-radius:7px;padding:6px 9px}
+
+/* collapsible technical detail — reused for per-cell footnotes and the identity block */
+.deet{margin:10px 0 0;font-size:11.5px}
+.deet summary{cursor:pointer;font-weight:700;color:var(--gold-deep);list-style:none;letter-spacing:.02em}
+.deet summary::-webkit-details-marker{display:none}
+.deet summary::before{content:'▸ ';display:inline-block}
+.deet[open] summary::before{content:'▾ '}
+.deet .deetbody{margin-top:8px;line-height:1.85;color:var(--text-soft)}
+.deet .deetbody code{background:var(--bg-soft,#f4f0e6);padding:1px 4px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:11px}
+.tcell .deet{padding-top:8px;border-top:1px dashed var(--border-light)}
+
+/* callouts */
+.cl{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:12.5px;line-height:1.85;color:var(--text-soft)}
+.cl b,.cl strong{color:var(--navy);font-weight:600}
+.cl-info{background:var(--accent-light,#eef3f9);border-left:3px solid var(--neutral,#1d4ed8)}
+.cl-warn{background:var(--gold-bg);border:1px solid var(--gold-soft);border-left:3px solid var(--gold-deep)}
+.cl-warn h4{color:var(--gold-deep);margin:0 0 6px;font-size:13px;font-weight:700}
+.cl-red{background:var(--negative-bg);border-left:3px solid var(--negative)}
+.cl-red h4{color:var(--negative);margin:0 0 6px;font-size:13px;font-weight:700}
+.cl ul{margin:6px 0 0;padding-left:18px}
+.cl li{margin-bottom:5px;font-size:12.5px}
+
+/* experiment box */
+.expbox{background:var(--gold-bg);border:1px solid var(--gold-soft);border-radius:12px;padding:16px 18px;margin:14px 0}
+.expbox h4{color:var(--gold-deep);margin:0 0 8px;font-size:13.5px;font-weight:700}
+.expbox p{font-size:12.5px;color:var(--text-soft);line-height:1.85;margin:0 0 10px}
+.expbox p b{color:var(--navy)}
+.expbtn{font-family:inherit;font-size:12px;font-weight:700;color:#fff;background:var(--navy);border:none;border-radius:8px;padding:8px 15px;cursor:pointer;margin:0 8px 4px 0}
+.expbtn.reset{background:transparent;color:var(--navy);border:1px solid var(--border)}
+.expresult{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--gold-deep);margin-top:8px;min-height:16px}
+
+/* how-to card */
+.qhow{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:14px 0;box-shadow:var(--shadow-sm)}
+.qhow ol{margin:0;padding-left:20px}
+.qhow li{font-size:13px;color:var(--text-soft);line-height:1.85;margin-bottom:10px}
+.qhow li:last-child{margin-bottom:0}
+.qhow li b{color:var(--navy)}
+
+/* tables */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:14px 0}
+.atbl{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;margin:0;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);min-width:600px}
+.atbl thead th{background:linear-gradient(135deg,#0d2244,#173564);color:var(--gold-light);text-align:left;padding:10px 12px;font-weight:600;font-size:11.5px}
+.atbl td{padding:9px 12px;border-top:1px solid var(--border-light);vertical-align:top;color:var(--text-soft);line-height:1.65}
+.atbl tbody tr:nth-child(even){background:var(--bg-card-alt,#faf7ef)}
+.atbl td b{color:var(--navy);font-weight:600}
+.atbl .num{font-family:'IBM Plex Mono',monospace;color:var(--navy);font-weight:600;text-align:right;white-space:nowrap}
+.atbl td.lbl{font-weight:600;color:var(--navy);white-space:nowrap}
+.atbl tr.dead td{background:#fbeceb}
+.atbl tr.dead td.lbl{color:#b91c1c}
+
+/* stock decomposition figure */
+.stk{margin:16px 0 6px}
+.stkrow{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center;margin-bottom:9px}
+@media(max-width:600px){.stkrow{grid-template-columns:1fr;gap:3px}}
+.stkrow .sl{font-size:12px;font-weight:700;color:var(--navy);text-align:right}
+@media(max-width:600px){.stkrow .sl{text-align:left}}
+.stkbar{height:30px;border-radius:7px;display:flex;overflow:hidden;border:1px solid var(--border)}
+.stkseg{display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden}
+.seg-total{background:linear-gradient(135deg,#0d2244,#234a86)}
+.seg-over{background:#b91c1c}
+.seg-shadow{background:repeating-linear-gradient(45deg,#8a8fa0,#8a8fa0 6px,#b6bcc9 6px,#b6bcc9 12px);color:#20293a}
+.seg-eff{background:#15803d}
+.stknote{font-size:11px;color:var(--muted);line-height:1.7;margin:8px 0 0}
+.stknote b{color:var(--navy)}
+
+/* honesty */
+.hbox{border:1px solid #f0cccc;background:#fdf6f5;border-radius:12px;padding:16px 18px;margin:12px 0}
+.hbox h4{color:#b91c1c;margin:0 0 6px;font-size:13.5px;font-weight:700}
+.hbox p{font-size:12.5px;color:var(--text-soft);line-height:1.85;margin:0}
+.hbox p b{color:var(--navy)}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:720px){.hgrid{grid-template-columns:1fr}}
+
+/* source / footer */
+.src{font-size:11px;color:var(--muted);line-height:1.75;margin:8px 4px 0}
+.src a{color:var(--gold-deep)}
+.foot{margin:34px 0 20px;padding-top:16px;border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.8}
+.foot a{color:var(--gold-deep)}
+
+/* minimal top bar (this page stands alone on tools.investmquest.com — no shared site nav) */
+.tm-topbar{max-width:960px;margin:0 auto;padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.tm-back{font-size:12.5px;font-weight:600;color:var(--gold-deep);text-decoration:none;white-space:nowrap}
+.tm-back:hover{color:var(--navy)}
+</style>
+</head>
+<body>
+
+<div class="tm-topbar">
+  <a class="tm-back" href="/"><span class="lang-en">← Tools home</span><span class="lang-zh" style="display:none">← 回工具首頁</span></a>
+  <div class="lang-btns">
+    <button class="lang-btn" data-lang="en" type="button">EN</button>
+    <button class="lang-btn" data-lang="zh" type="button">中文</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <div class="pg-head">
+    <h1 class="pg-title"><span class="lang-en">Can these four numbers be true at the same time?</span><span class="lang-zh" style="display:none">這個市場的四個數字，能不能同時是真的？</span></h1>
+    <p class="pg-sub"><span class="lang-en">Rent, price, new construction and existing stock are locked together by definitions, not by estimated correlations. Put a market's numbers in below and this page works out whether they add up — and if they do not, which one has to move.</span><span class="lang-zh" style="display:none">租金、價格、新建量與存量，彼此的關係是定義出來的，不是估計出來的。把一個市場的數字填進去，這頁會算出它們對不對得起來，對不起來的話，哪一個必須動。</span></p>
+    <div class="pg-badges">
+      <span class="kpi-badge badge-blue"><span class="lang-en">Accounting identity · not a forecast</span><span class="lang-zh" style="display:none">會計恆等式 · 非預測</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Method: four-quadrant v1.0, frozen 2026-08-01</span><span class="lang-zh" style="display:none">方法論 four-quadrant v1.0 · 2026-08-01 凍結</span></span>
+      <span class="kpi-badge badge-green"><span class="lang-en">Malaysia calibration · NAPIC + DOSM</span><span class="lang-zh" style="display:none">馬來西亞校準 · NAPIC ＋ DOSM</span></span>
+      <span class="kpi-badge badge-red"><span class="lang-en">Malaysia is the only market with vetted defaults</span><span class="lang-zh" style="display:none">僅馬來西亞有 vetted 預設值</span></span>
+    </div>
+  </div>
+
+  <div class="lede">
+    <span class="lk"><span class="lang-en">What this page answers</span><span class="lang-zh" style="display:none">這頁在回答什麼</span></span>
+    <span class="lang-en">This page answers one question: can a market's four numbers be true at the same time? Rent, price, new construction and stock are tied together by a mathematical relationship. If price is high but rent is low, and the market is still building fast, those three things cannot all be right at once. This page works out which one has to give.<br><br>It does not predict where prices go. It only tells you which number is under strain.</span><span class="lang-zh" style="display:none">這頁在回答一個問題：這個市場的四個數字，能不能同時是真的？租金、價格、新建量、存量，這四個數字彼此有數學上的約束。如果房價很高但租金很低，同時還一直在蓋，那這三件事不可能同時合理。這頁幫你算出哪一件事說不通。<br><br>它不預測漲跌。它只告訴你哪個數字必須動。</span>
+  </div>
+
+  <!-- ================= HOW TO READ IT ================= -->
+  <div class="sec-rule"><h2><span class="lang-en">How to read the chart</span><span class="lang-zh" style="display:none">圖怎麼看</span></h2></div>
+
+  <p class="narr"><span class="lang-en">The axes run left and down on purpose. Think of it as a four-way intersection — each corner handles one relationship.</span><span class="lang-zh" style="display:none">軸往左、往下走是故意的。想成一個十字路口，四個角落各管一件事。</span></p>
+
+  <div class="tscroll">
+    <table class="atbl">
+      <thead><tr>
+        <th><span class="lang-en">Corner</span><span class="lang-zh" style="display:none">位置</span></th>
+        <th><span class="lang-en">What it governs</span><span class="lang-zh" style="display:none">管什麼</span></th>
+        <th><span class="lang-en">In plain terms</span><span class="lang-zh" style="display:none">白話</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="lbl"><span class="lang-en">Top-right</span><span class="lang-zh" style="display:none">右上</span></td><td><span class="lang-en">Rent vs. stock</span><span class="lang-zh" style="display:none">租金 vs 存量</span></td><td><span class="lang-en">More units, lower rent</span><span class="lang-zh" style="display:none">房子越多，租金越低</span></td></tr>
+        <tr><td class="lbl"><span class="lang-en">Top-left</span><span class="lang-zh" style="display:none">左上</span></td><td><span class="lang-en">Rent → price</span><span class="lang-zh" style="display:none">租金 → 價格</span></td><td><span class="lang-en">Higher rent, more valuable the asset</span><span class="lang-zh" style="display:none">租金越高，房子越值錢</span></td></tr>
+        <tr><td class="lbl"><span class="lang-en">Bottom-left</span><span class="lang-zh" style="display:none">左下</span></td><td><span class="lang-en">Price → building</span><span class="lang-zh" style="display:none">價格 → 蓋房</span></td><td><span class="lang-en">Higher price, more developers want to build</span><span class="lang-zh" style="display:none">房價越高，建商越想蓋</span></td></tr>
+        <tr><td class="lbl"><span class="lang-en">Bottom-right</span><span class="lang-zh" style="display:none">右下</span></td><td><span class="lang-en">Building → stock</span><span class="lang-zh" style="display:none">蓋房 → 存量</span></td><td><span class="lang-en">More building, bigger the stock</span><span class="lang-zh" style="display:none">蓋得越多，存量越大</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cl cl-info">
+    <span class="lang-en"><b>Read it clockwise only.</b> Growth pushes rent up, rent pushes price up, price gets developers building, building grows the stock, and the bigger stock presses rent back down. <b>Reading it backwards has no meaning.</b> Do not take the stock number and back it into a rent forecast, or take completions and back them into a price forecast — that is the single most common way people misread this diagram. The dashed rectangle in the chart below closes when all four corners agree with each other; that is what "self-consistent" means here.</span><span class="lang-zh" style="display:none"><b>只能順時針讀。</b>成長推升租金，租金推升價格，價格帶動開發商動工，動工讓存量變大，變大的存量把租金壓回去。<b>逆著讀沒有意義。</b>不要拿存量倒推租金、拿新建量倒推價格——這是這張圖最常見的誤讀方式。下面圖裡的虛線矩形，四個角接得起來就是「自洽」的意思。</span>
+  </div>
+
+  <details class="deet">
+    <summary><span class="lang-en">The four cells' formal names and identities (for checking the math)</span><span class="lang-zh" style="display:none">四個象限的正式代號與恆等式（給想核對算法的人看）</span></summary>
+    <p class="deetbody"><span class="lang-en">Each corner has a name and an equation, and the rest of this page refers to them by these labels. <b>NW</b> capitalises rent into a price, <code>P = R / i</code>. <b>NE</b> clears the space market, <code>D(R, X) = S</code>. <b>SW</b> is the build decision, <code>C = f(P, K)</code>, with <code>P &lt; K ⇒ C = 0</code>. <b>SE</b> rolls the stock forward, <code>ΔS = C − δS</code>, so the steady state is <code>S* = C / δ</code>. Nothing below assumes any market is sitting exactly at that steady state. Most are not, and that is the point of running the test.</span><span class="lang-zh" style="display:none">每個角落都有一個代號與一條方程式，這頁後面都用這些代號來指稱。<b>NW</b> 把租金資本化成價格，<code>P = R / i</code>。<b>NE</b> 是空間市場出清，<code>D(R, X) = S</code>。<b>SW</b> 是開發決策，<code>C = f(P, K)</code>，且 <code>P &lt; K ⇒ C = 0</code>。<b>SE</b> 讓存量往前滾，<code>ΔS = C − δS</code>，穩態為 <code>S* = C / δ</code>。以下沒有任何一處假設某個市場正好落在那個穩態上。大多數市場不會，而這正是要跑這項檢定的原因。</span></p>
+  </details>
+
+  <!-- ================= INTERACTIVE ================= -->
+  <div class="sec-rule"><h2><span class="lang-en">Put your own numbers in</span><span class="lang-zh" style="display:none">帶入你的數字</span></h2></div>
+
+  <div class="ctrlwrap">
+    <span class="ctrl-lbl"><span class="lang-en">Preset</span><span class="lang-zh" style="display:none">預設值</span></span>
+    <div class="seg" id="segGeo">
+      <button data-v="kl" class="active" type="button"><span class="lang-en">Kuala Lumpur</span><span class="lang-zh" style="display:none">吉隆坡</span></button>
+      <button data-v="nat" type="button"><span class="lang-en">Malaysia (national stock)</span><span class="lang-zh" style="display:none">馬來西亞（全國存量口徑）</span></button>
+      <button data-v="manual" type="button"><span class="lang-en">Another market (manual)</span><span class="lang-zh" style="display:none">其他市場（手動輸入）</span></button>
+    </div>
+    <p class="cf-hint" id="geoNote" style="margin-top:8px;font-size:11.5px;line-height:1.7"></p>
+
+    <div class="grp">
+      <p class="grp-h"><span class="lang-en">Observations: the four corners</span><span class="lang-zh" style="display:none">觀察值：四個角</span></p>
+      <p class="grp-s"><span class="lang-en">These are numbers a market can, in principle, actually be measured on. Keep them apples to apples: net rent against the price actually paid, completions against the same stock they land in.</span><span class="lang-zh" style="display:none">這些原則上是可以直接量到的數字。記得同口徑：淨租金要對成交價，完工量要對它落進去的那個存量。</span></p>
+      <div class="calc-grid">
+        <div class="calc-field">
+          <div class="cf-top"><label for="s-R"><span class="lang-en">R · annual rent per unit</span><span class="lang-zh" style="display:none">R · 每戶年租金</span></label><span class="cf-val" id="v-R">—</span></div>
+          <input type="range" id="s-R" min="0" max="80000" step="500" value="39000">
+          <p class="cf-hint" id="h-R"></p>
+        </div>
+        <div class="calc-field">
+          <div class="cf-top"><label for="s-P"><span class="lang-en">P · price per unit</span><span class="lang-zh" style="display:none">P · 每戶價格</span></label><span class="cf-val" id="v-P">—</span></div>
+          <input type="range" id="s-P" min="0" max="1500000" step="10000" value="750000">
+          <p class="cf-hint" id="h-P"></p>
+        </div>
+        <div class="calc-field">
+          <div class="cf-top"><label for="s-C"><span class="lang-en">C · annual completions</span><span class="lang-zh" style="display:none">C · 年完工量</span></label><span class="cf-val" id="v-C">—</span></div>
+          <input type="range" id="s-C" min="0" max="20000" step="50" value="9958">
+          <p class="cf-hint" id="h-C"></p>
+        </div>
+        <div class="calc-field">
+          <div class="cf-top"><label for="s-S"><span class="lang-en">S · total stock (units)</span><span class="lang-zh" style="display:none">S · 存量（戶）</span></label><span class="cf-val" id="v-S">—</span></div>
+          <input type="range" id="s-S" min="0" max="1200000" step="1000" value="576409">
+          <p class="cf-hint" id="h-S"></p>
+        </div>
+        <div class="calc-field">
+          <div class="cf-top"><label for="n-OH"><span class="lang-en">Overhang · completed unsold (units)</span><span class="lang-zh" style="display:none">餘屋 · 完工未售（戶）</span></label></div>
+          <input type="number" class="numin" id="n-OH" value="3964" min="0" step="1">
+          <p class="cf-hint" id="h-OH"></p>
+        </div>
+        <div class="calc-field">
+          <div class="cf-top"><label for="n-DS"><span class="lang-en">ΔS · recorded stock change (units, optional)</span><span class="lang-zh" style="display:none">ΔS · 存量年變動（戶，選填）</span></label></div>
+          <input type="number" class="numin" id="n-DS" value="15307" min="0" step="1">
+          <p class="cf-hint" id="h-DS"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <p class="grp-h"><span class="lang-en">Parameters: three of these are assumptions, not measurements</span><span class="lang-zh" style="display:none">參數：其中三個是假設，不是量測</span></p>
+      <p class="grp-s"><span class="lang-en">ρ, δ and K have no official Malaysian series — the sliders below are propped up by assumptions, not data. Each has a "push to extreme" button next to it: press it and watch whether the verdicts above still hold. A conclusion that flips does not stand.</span><span class="lang-zh" style="display:none">ρ、δ 與 K 在馬來西亞都沒有官方序列——下面的滑桿是用假設撐著，不是量出來的。每個旁邊都有一個「拉到極端」的按鈕：按下去，看看上面的裁決還撐不撐得住。會翻的結論就不成立。</span></p>
+      <div class="calc-grid">
+        <div class="calc-field">
+          <div class="cf-top"><label for="s-rf"><span class="lang-en">r_f · risk-free rate</span><span class="lang-zh" style="display:none">r_f · 無風險利率</span></label><span class="cf-val" id="v-rf">—</span></div>
+          <input type="range" id="s-rf" min="0" max="10" step="0.05" value="2.75">
+          <p class="cf-hint" id="h-rf"></p>
+        </div>
+        <div class="calc-field">
+          <div class="cf-top"><label for="s-rho"><span class="lang-en">ρ · risk premium<span class="assumetag">ASSUMPTION</span></span><span class="lang-zh" style="display:none">ρ · 風險溢酬<span class="assumetag">假設參數</span></span></label><span class="cf-val" id="v-rho">—</span></div>
+          <input type="range" id="s-rho" min="0" max="10" step="0.05" value="3">
+          <p class="cf-hint assume" id="h-rho"></p>
+          <div class="pshrow">
+            <button type="button" class="pshbtn" id="btnPushRho"><span class="lang-en">Push to extreme</span><span class="lang-zh" style="display:none">拉到極端</span></button>
+            <button type="button" class="pshbtn reset" id="btnResetRho"><span class="lang-en">Reset</span><span class="lang-zh" style="display:none">還原</span></button>
+          </div>
+        </div>
+        <div class="calc-field">
+          <div class="cf-top"><label for="s-delta"><span class="lang-en">δ · depreciation / retirement<span class="assumetag">ASSUMPTION</span></span><span class="lang-zh" style="display:none">δ · 汰換率<span class="assumetag">假設參數</span></span></label><span class="cf-val" id="v-delta">—</span></div>
+          <input type="range" id="s-delta" min="0" max="4" step="0.05" value="1">
+          <p class="cf-hint assume" id="h-delta"></p>
+          <div class="pshrow">
+            <button type="button" class="pshbtn" id="btnPushDelta"><span class="lang-en">Push to extreme</span><span class="lang-zh" style="display:none">拉到極端</span></button>
+            <button type="button" class="pshbtn reset" id="btnResetDelta"><span class="lang-en">Reset</span><span class="lang-zh" style="display:none">還原</span></button>
+          </div>
+        </div>
+        <div class="calc-field">
+          <div class="cf-top"><label for="n-K"><span class="lang-en">K · replacement cost per unit<span class="nulltag">NO SOURCE</span></span><span class="lang-zh" style="display:none">K · 每戶重置成本<span class="nulltag">無來源</span></span></label></div>
+          <input type="number" class="numin" id="n-K" placeholder="—" min="0" step="1000">
+          <p class="cf-hint" id="h-K"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <p class="grp-h"><span class="lang-en">Benchmarks: what the implied values are judged against</span><span class="lang-zh" style="display:none">對照基準：隱含值拿來跟什麼比</span></p>
+      <p class="grp-s"><span class="lang-en">Without a benchmark there is nothing to test against, just an arithmetic result. Leave a field blank and that cell reports "not scoreable" instead of guessing on your behalf.</span><span class="lang-zh" style="display:none">沒有基準就沒有檢定，只是一個算術結果。留空的話，對應那一格會老實說「無法評分」，不會幫你猜一個。</span></p>
+      <div class="calc-grid">
+        <div class="calc-field">
+          <div class="cf-top"><label for="n-gb"><span class="lang-en">Historical nominal rent growth (%/yr)</span><span class="lang-zh" style="display:none">歷史名目租金成長（%／年）</span></label></div>
+          <input type="number" class="numin" id="n-gb" value="2.088" step="0.001">
+          <p class="cf-hint" id="h-gb"></p>
+        </div>
+        <div class="calc-field">
+          <div class="cf-top"><label for="n-db"><span class="lang-en">Demand growth benchmark (%/yr)</span><span class="lang-zh" style="display:none">需求成長基準（%／年）</span></label></div>
+          <input type="number" class="numin" id="n-db" value="1.4" step="0.01">
+          <p class="cf-hint" id="h-db"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chartbox">
+    <p class="kick"><span class="lang-en">The rectangle</span><span class="lang-zh" style="display:none">矩形</span></p>
+    <h3><span class="lang-en">The four corners, and the shape they draw</span><span class="lang-zh" style="display:none">四個角，還有它們連出來的形狀</span></h3>
+    <p class="csub"><span class="lang-en">Price runs left, stock runs right, rent runs up, completions run down. The dashed rectangle joins your four numbers. The more it looks like a proper rectangle, the more the market's numbers agree with each other.</span><span class="lang-zh" style="display:none">價格向左、存量向右、租金向上、新建量向下。虛線矩形連起你輸入的四個數字。矩形長得越端正，代表這個市場的數字彼此越合得來。</span></p>
+    <div id="chartQQuad" class="chart"></div>
+    <p class="src"><span class="lang-en"><b>Each half-axis has its own scale.</b> Price is in currency per unit, rent in currency per unit per year, stock and completions in units, four different magnitudes. Lengths are normalised to each half-axis's own maximum, exactly as in the original DiPasquale-Wheaton figure. <b>Do not compare a length on one axis with a length on another</b>; only the direction of movement and the shape carry meaning. Hover any corner for the real numbers.</span><span class="lang-zh" style="display:none"><b>每個半軸各自有自己的尺度。</b>P 是每戶幣值、R 是每戶每年幣值、S 與 C 是戶數，四者量級不同。長度是各自對該半軸的最大值正規化，這正是 DiPasquale-Wheaton 原圖的畫法。<b>不可拿一個軸上的長度去比另一個軸上的長度</b>；只有移動方向與形狀變化有意義。滑鼠移到任一個角上可以看到真實數字。</span></p>
+  </div>
+
+  <!-- ================= RESULTS ================= -->
+  <div class="sub-h"><span class="lang-en">What the four cells say</span><span class="lang-zh" style="display:none">四格怎麼說</span></div>
+  <p class="narr"><span class="lang-en">Each cell backs one number out of the identity and checks it against something independent. A check mark means it holds up; a warning means there is tension; an ✗ means it does not add up — and either way, the cell names what has to move.</span><span class="lang-zh" style="display:none">每一格從恆等式反推出一個數字，再跟一個獨立的東西對比。打勾代表撐得住；警示代表有張力；打叉代表對不起來——不管哪一種，那一格都會指名什麼東西必須動。</span></p>
+
+  <p class="pull" id="qDiag"></p>
+
+  <div class="tests">
+    <div class="tcell na" id="qt1"></div>
+    <div class="tcell na" id="qt2"></div>
+    <div class="tcell na" id="qt3"></div>
+    <div class="tcell na" id="qt4"></div>
+  </div>
+
+  <div class="expbox">
+    <h4><span class="lang-en">The ✓ in cell 1 is fragile: try breaking it yourself</span><span class="lang-zh" style="display:none">第 1 格的那個 ✓ 很脆弱：自己動手試試看</span></h4>
+    <p><span class="lang-en">It is built on <b>gross rent</b> (a 5.2% gross yield), but the identity wants <b>net rent</b>: after management fees, tax and vacancy. Malaysia does not publish a net-rent series at any geography.</span><span class="lang-zh" style="display:none">它算的是<b>毛租金</b>（5.2% 毛收益率），但恆等式要的是<b>淨租金</b>：扣掉管理費、稅、空置之後的數字。馬來西亞在任何地理層級都沒有淨租金的官方數據。</span></p>
+    <p><span class="lang-en">If net rent runs at roughly seventy percent of gross, the yield drops from 5.2% to about 3.6%, and the implied rent growth this price needs jumps from +0.55%/yr to about +2.11%/yr. That lands almost exactly on the 2.088%/yr rent has actually delivered since 2010. The comfortable cushion this cell was showing disappears. The colour on this page may not cross its own display threshold, but the substance already has — and the display threshold is only this page's choice, not part of the frozen method.</span><span class="lang-zh" style="display:none">如果淨租金大約只有毛租金的七成，收益率會從 5.2% 掉到約 3.6%，這個價格所需要的隱含租金成長會從 +0.55%／年跳到約 +2.11%／年。幾乎正好貼上 2010 年以來租金實際交出的 2.088%／年。這一格原本看起來的舒適空間就消失了。這頁的顏色不一定會跨過自己設的門檻，但實質已經變了——而門檻本來就只是這頁自己的選擇，不屬於凍結的方法論。</span></p>
+    <button type="button" class="expbtn" id="btnTryNet"><span class="lang-en">Try it</span><span class="lang-zh" style="display:none">試給我看</span></button>
+    <button type="button" class="expbtn reset" id="btnResetNet"><span class="lang-en">Reset</span><span class="lang-zh" style="display:none">還原</span></button>
+    <p class="expresult" id="expNetResult"></p>
+    <p style="margin-top:10px"><span class="lang-en">ρ and δ carry the same weakness. Their sliders in the panel above each have a push-to-extreme button of their own. Use them, and treat any conclusion that flips as not standing.</span><span class="lang-zh" style="display:none">ρ 與 δ 也背著同樣的弱點。上面控制面板裡它們的滑桿旁邊都有各自的「拉到極端」按鈕。按下去，會翻的結論就不算數。</span></p>
+    <p style="margin:0"><span class="lang-en">The four legs are not one product, either: price and rent are KL condos, stock and completions are every residential type, landed housing included. More on that below the sourcing table.</span><span class="lang-zh" style="display:none">四條腿也不是同一個產品：價格與租金是 KL 公寓，存量與完工量是含有地住宅在內的全部住宅型別。詳見下面資料來源表格之後的說明。</span></p>
+  </div>
+
+  <div class="cl cl-red">
+    <h4><span class="lang-en">What you can't do with the four cells above</span><span class="lang-zh" style="display:none">上面四格不能拿來做的事</span></h4>
+    <ul>
+      <li><span class="lang-en"><b>Never turn this into a price target or an annual return.</b> Nothing here converts into "prices will fall X%" or "expect Y% a year". The moment a result gets turned into a number like that, it has stopped being this framework.</span><span class="lang-zh" style="display:none"><b>不能把結果換算成價格目標或年化報酬。</b>這裡的任何輸出都不會變成「價格會跌 X%」或「預期年化 Y%」。一旦被換算成那種數字，它就已經不是這個框架了。</span></li>
+      <li><span class="lang-en"><b>Never call a turning point from one snapshot.</b> One reading of the four cells cannot tell you a top or a bottom. This framework has no sense of timing at all.</span><span class="lang-zh" style="display:none"><b>不能用單一次的四格讀數宣告轉折。</b>一次快照判斷不了頭部或底部。這個框架對時點完全沒有感覺。</span></li>
+      <li><span class="lang-en"><b>⚠ and ✗ say what has to move, never when.</b> "Rent has to give" is a direction. "Rent gives next year" is not something this page can tell you.</span><span class="lang-zh" style="display:none"><b>⚠ 與 ✗ 只說什麼必須動，不說何時動。</b>「租金必須讓」是方向；「租金明年就會讓」不是這頁說得出來的事。</span></li>
+      <li><span class="lang-en">The three colours are <b>a display choice made by this page</b>, picked for readability. They are not part of the frozen method itself, which defines the tests and the diagnoses but never the cut-points.</span><span class="lang-zh" style="display:none">三種顏色是<b>本頁自己選的顯示方式</b>，為了好讀。它們不屬於凍結的方法論本身：方法論定義了檢定與診斷，但沒有定義切點在哪。</span></li>
+    </ul>
+  </div>
+
+  <!-- ================= HOW TO USE ================= -->
+  <div class="sec-rule"><h2><span class="lang-en">How to actually use this</span><span class="lang-zh" style="display:none">你會怎麼用它</span></h2></div>
+
+  <div class="qhow">
+    <ol>
+      <li><span class="lang-en">See a project or a market and want to know if the story holds up. Put its numbers in and find the cell that disagrees with the other three: <b>that cell is the direction to go dig into.</b></span><span class="lang-zh" style="display:none">看到一個建案或一個市場，想知道那套說法站不站得住。把數字填進去，找出跟其他三格不合的那一格：<b>那一格就是要去查的方向。</b></span></li>
+      <li><span class="lang-en">Push the assumption sliders (ρ, δ, K) to their extremes and watch whether the verdict survives. <b>A conclusion that flips inside a reasonable range does not stand.</b></span><span class="lang-zh" style="display:none">把假設參數（ρ、δ、K）拉到極端，看結論撐不撐得住。<b>在合理範圍內會翻的結論，就不成立。</b></span></li>
+      <li><span class="lang-en">Use it to stop a "prices here are going up" story in its tracks. This page tells you exactly how fast rent would need to grow for that story to hold. One look at history tells you whether that number is realistic.</span><span class="lang-zh" style="display:none">拿它擋掉「這裡房價會漲」的說法。這頁能算出那個說法要成立，租金得每年漲幾個百分比。歷史數字一擺出來，就知道那個故事站不站得住。</span></li>
+    </ol>
+  </div>
+
+  <!-- ================= DEFAULTS ================= -->
+  <div class="sec-rule"><h2><span class="lang-en">Where the defaults come from</span><span class="lang-zh" style="display:none">預設值從哪來</span></h2></div>
+
+  <p class="narr"><span class="lang-en"><b>Malaysia is the only market on this site with a properly sourced stock and completions series</b>, so it is the only one with real default numbers filled in. Every figure below traces back to a file in this repository or the frozen methodology note. Nothing is an international average, a regional rule of thumb, or a round number that just looks about right.</span><span class="lang-zh" style="display:none"><b>馬來西亞是本站唯一有完整存量與完工資料來源的市場</b>，所以也是唯一有真實預設值的市場。以下每個數字都能追回本 repo 裡的檔案或凍結的方法論文件。沒有一個是國際平均值、區域經驗法則，或看起來合理就拿來用的整數。</span></p>
+
+  <div class="tscroll">
+    <table class="atbl">
+      <thead><tr>
+        <th><span class="lang-en">Field</span><span class="lang-zh" style="display:none">欄位</span></th>
+        <th><span class="lang-en">KL</span><span class="lang-zh" style="display:none">吉隆坡</span></th>
+        <th><span class="lang-en">Malaysia</span><span class="lang-zh" style="display:none">全國</span></th>
+        <th><span class="lang-en">Source · caliber</span><span class="lang-zh" style="display:none">來源 · 口徑</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="lbl">C</td><td class="num">9,958</td><td class="num">99,877</td><td><span class="lang-en">NAPIC Property Stock Report, 2025 quarterly completion flows summed. <code>data/napic-stock.json</code> → <code>derived.annual.2025.byRegion</code>.</span><span class="lang-zh" style="display:none">NAPIC Property Stock Report，2025 四季完工流量加總。<code>data/napic-stock.json</code> → <code>derived.annual.2025.byRegion</code>。</span></td></tr>
+        <tr><td class="lbl">S</td><td class="num">576,409</td><td class="num">6,528,296</td><td><span class="lang-en">Same file, existing stock at 2025Q4. All residential types.</span><span class="lang-zh" style="display:none">同檔案，2025Q4 現有存量。全住宅型別。</span></td></tr>
+        <tr><td class="lbl">ΔS</td><td class="num">15,307</td><td class="num">184,309</td><td><span class="lang-en">Same file. Recorded stock change, <b>not</b> a construction flow. See the SE identity failure below.</span><span class="lang-zh" style="display:none">同檔案。帳面存量變動，<b>不是</b>營建流量。見下方 SE 恆等式不成立。</span></td></tr>
+        <tr><td class="lbl"><span class="lang-en">Overhang</span><span class="lang-zh" style="display:none">餘屋</span></td><td class="num">3,964</td><td class="num">30,471</td><td><span class="lang-en">NAPIC Property Market Status Table FY2025, residential. A <b>different publication</b> from the stock report; recorded in the methodology note §5.</span><span class="lang-zh" style="display:none">NAPIC Property Market Status Table FY2025，住宅。與存量報告是<b>不同的出版品</b>；記載於方法論 §5。</span></td></tr>
+        <tr><td class="lbl">P</td><td class="num">750,000</td><td class="num">750,000</td><td><span class="lang-en">Median transacted KL condo price, NAPIC Q4 2024 (<code>data/markets-summary.json</code>). <b>KL condos only</b>: there is no vetted national median, so the national preset keeps this KL figure and the NW leg stays KL-caliber.</span><span class="lang-zh" style="display:none">KL 公寓中位成交價，NAPIC 2024Q4（<code>data/markets-summary.json</code>）。<b>僅 KL 公寓</b>：無 vetted 的全國中位價，因此全國預設沿用此 KL 數字，NW 腿維持 KL 口徑。</span></td></tr>
+        <tr><td class="lbl">R</td><td class="num">39,000</td><td class="num">39,000</td><td><span class="lang-en">= 5.2% gross yield × P. Yield from PropertyGuru Malaysia 2024 via <code>data/markets-summary.json</code>. <b>Gross, not net</b>. The experiment box above the results shows exactly how far a net estimate moves this.</span><span class="lang-zh" style="display:none">＝ 5.2% 毛收益率 × P。收益率來自 PropertyGuru Malaysia 2024，經 <code>data/markets-summary.json</code>。<b>是毛額不是淨額</b>。上面結果區的「試給我看」實驗，示範了換成淨額估計後會差多少。</span></td></tr>
+        <tr><td class="lbl">r_f</td><td class="num">2.75%</td><td class="num">2.75%</td><td><span class="lang-en">OPR, BNM July 2026 meeting. <b>Substitution</b>: the specification asks for MGS 10Y, which is 🟡 not yet sourced on this site.</span><span class="lang-zh" style="display:none">OPR，BNM 2026 年 7 月會議。<b>替代品</b>：規格要求的是 MGS 10Y，該序列在本站尚未取數（🟡）。</span></td></tr>
+        <tr><td class="lbl"><span class="lang-en">rent growth</span><span class="lang-zh" style="display:none">租金成長</span></td><td class="num">2.088%</td><td class="num">2.088%</td><td><span class="lang-en">DOSM CPI 041 annual average 2010 → 2025, national. <code>data/my-rent-index.json</code>. <b>National only</b>: no KL rent series exists.</span><span class="lang-zh" style="display:none">DOSM CPI 041 年均，2010 → 2025，全國。<code>data/my-rent-index.json</code>。<b>僅全國</b>：不存在 KL 租金序列。</span></td></tr>
+        <tr><td class="lbl"><span class="lang-en">demand benchmark</span><span class="lang-zh" style="display:none">需求基準</span></td><td class="num">1.4%</td><td class="num">1.4%</td><td><span class="lang-en">Population growth, DOSM 2024, via <code>data/markets-summary.json</code>. A <b>proxy</b>: the specification wants household formation plus an income term, neither of which is vetted here.</span><span class="lang-zh" style="display:none">人口成長率，DOSM 2024，經 <code>data/markets-summary.json</code>。這是<b>代理值</b>：規格要的是家戶形成率加所得項，兩者在本站都未經 vetted。</span></td></tr>
+        <tr class="dead"><td class="lbl">K</td><td class="num">—</td><td class="num">—</td><td><span class="lang-en"><b>Empty on purpose.</b> KL land cost has no public series and building-cost indices give change rates only, so replacement cost cannot be built without inventing a land-share assumption. Test 4 stays unscoreable until you type a K yourself.</span><span class="lang-zh" style="display:none"><b>刻意留空。</b>KL 地價無公開序列，建材成本指數只給變動率，因此重置成本無法在不捏造土地佔比假設的情況下組出來。檢定 4 在你自己輸入 K 之前維持無法評分。</span></td></tr>
+        <tr class="dead"><td class="lbl">ρ, δ</td><td class="num">—</td><td class="num">—</td><td><span class="lang-en"><b>Assumption parameters.</b> Neither has an official Malaysian series. δ's slider opens at 1.0%, the midpoint of the 0.5–1.5% residential retirement band the methodology carries; ρ opens at 3.0% purely so the slider has a position. <b>Neither starting value is an estimate.</b></span><span class="lang-zh" style="display:none"><b>假設參數。</b>兩者在馬來西亞都沒有官方序列。δ 的滑桿起於 1.0%，是方法論所載 0.5–1.5% 住宅汰換帶的中點；ρ 起於 3.0%，純粹是為了讓滑桿有個位置。<b>兩個起始值都不是估計值。</b></span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cl cl-red">
+    <h4><span class="lang-en">One more caliber break, whichever preset you use</span><span class="lang-zh" style="display:none">不論用哪個預設，還背著一個口徑破口</span></h4>
+    <span class="lang-en"><b>The four legs are not one product.</b> Price and rent are KL condos; stock and completions are every residential type, landed housing included. The methodology rules landed housing out of the rent test entirely, because landed rent cannot be observed at all. So tests 2 and 3 are actually running on a denominator wider than the product the rent leg describes.</span><span class="lang-zh" style="display:none"><b>四條腿不是同一個產品。</b>P 與 R 是 KL 公寓的數字；S 與 C 卻是含有地住宅在內的全部住宅型別。方法論把有地住宅整個排除在租金檢定之外，因為有地住宅的租金根本觀察不到。所以檢定 2 與檢定 3 其實是在一個比租金那條腿更寬的分母上跑。</span>
+  </div>
+
+  <!-- ================= MY CALIBRATION ================= -->
+  <div class="sec-rule"><h2><span class="lang-en">The Malaysia calibration</span><span class="lang-zh" style="display:none">馬來西亞校準結果</span></h2></div>
+
+  <p class="narr"><span class="lang-en">Three readings from the sourced files. All of them are in-sample: the framework was applied to history that was already on the table, so none of this counts as a forward result.</span><span class="lang-zh" style="display:none">三張來自 vetted 檔案的讀數。全部為 in-sample：框架套用在已經攤在桌上的歷史資料，所以這些都不計入任何前瞻成績。</span></p>
+
+  <div class="chartbox">
+    <p class="kick"><span class="lang-en">Test 1 · the NW tension</span><span class="lang-zh" style="display:none">檢定 1 · NW 的張力</span></p>
+    <h3><span class="lang-en">Real rent barely moved in fifteen years</span><span class="lang-zh" style="display:none">實質租金十五年幾乎沒動</span></h3>
+    <p class="csub"><span class="lang-en">DOSM CPI 041 (actual rentals for housing) against headline CPI, annual averages, both published on 2010 = 100. The third line is the ratio (real rent), computed by division and nothing else.</span><span class="lang-zh" style="display:none">DOSM CPI 041（住宅實際租金）對 headline CPI，年均值，兩者的公布基期都是 2010 = 100。第三條線是兩者相除（實質租金），除法之外沒有任何處理。</span></p>
+    <div id="chartQRent" class="chart"></div>
+    <p class="src"><span class="lang-en">Source: <code>data/my-rent-index.json</code>, DOSM OpenDOSM CPI parquet files. Annual average = mean of the twelve published months. CPI 041 nominal <b>+2.088%/yr</b>, headline <b>+2.001%/yr</b>, so real rent compounds at <b>+0.085%/yr</b> — zero, to any rounding that matters.</span><span class="lang-zh" style="display:none">來源：<code>data/my-rent-index.json</code>，DOSM OpenDOSM CPI parquet 檔。年均值＝該年十二個公布月份的平均。CPI 041 名目 <b>+2.088%／年</b>，headline <b>+2.001%／年</b>，因此實質租金複合成長 <b>+0.085%／年</b>——在任何有意義的四捨五入下都是零。</span></p>
+  </div>
+
+  <p class="pull"><span class="lang-en">Rent stood still in real terms while real prices rose every year. Under <code>P = R / i</code>, the decade's real house-price gain was not carried by rent. It was carried by the compression of i.</span><span class="lang-zh" style="display:none">實質租金原地不動，實質房價卻年年上行。在 <code>P = R / i</code> 之下，這十年的實質房價漲幅不是租金撐的，是資本化率 i 壓縮撐的。</span></p>
+
+  <p class="narr"><span class="lang-en">The price leg comes from a different NAPIC publication, and only two anchors are recorded in the frozen note: <b>MHPI (2010 = 100) 164.5 in 2015 → 233.1 in 2025</b>, roughly <b>+3.5%/yr nominal</b> and about +1.5% real, with 1Q2026 at 235.2. Those are two endpoints and an annualisation between them, not a year-by-year series. Read them as anchors, not as a path.</span><span class="lang-zh" style="display:none">價格腿來自另一份 NAPIC 出版品，凍結文件裡只記載了兩個錨點：<b>MHPI（2010 = 100）2015 年 164.5 → 2025 年 233.1</b>，名目年化約 <b>+3.5%</b>、實質約 +1.5%，2026 年第一季為 235.2。那是兩個端點與它們之間的年化，不是逐年序列，請當錨點讀，不要當路徑讀。</span></p>
+
+  <div class="cl cl-warn">
+    <h4><span class="lang-en">What this does not say</span><span class="lang-zh" style="display:none">這句話沒有說的事</span></h4>
+    <span class="lang-en">It does not say prices will fall back. Compression of i can be driven by the risk-free rate, by the risk premium, or by expected growth, and the identity cannot separate them, because ρ is an assumption parameter with no observation behind it. The status of this finding is: <b>here is where the tension in the NW quadrant sits.</b> It is not a forecast, and it carries no date.</span><span class="lang-zh" style="display:none">它沒有說價格會回跌。i 的壓縮可以由無風險利率、風險溢酬或預期成長任一項驅動，恆等式分不出是哪一項，因為 ρ 是背後沒有任何觀察值的假設參數。這條結論的地位是：<b>NW 象限的張力在這裡。</b>它不是預測，也不帶時點。</span>
+  </div>
+
+  <div class="chartbox">
+    <p class="kick"><span class="lang-en">Test 2 · a bracket, not a point</span><span class="lang-zh" style="display:none">檢定 2 · 只能報區間，不能報點估</span></p>
+    <h3><span class="lang-en">The implied retirement rate has a floor and a ceiling, and they do not meet</span><span class="lang-zh" style="display:none">隱含汰換率有下界也有上界，而兩者對不上</span></h3>
+    <p class="csub"><span class="lang-en">Malaysia, national, by year. <code>C/S</code> is the lower bound, <code>ΔS/S</code> the upper bound, shaded band = the 0.5–1.5% residential retirement range the methodology carries. 2016 and 2017 are documented NAPIC series breaks and are marked.</span><span class="lang-zh" style="display:none">馬來西亞全國，逐年。<code>C/S</code> 是下界，<code>ΔS/S</code> 是上界，網底帶＝方法論所載 0.5–1.5% 住宅汰換範圍。2016 與 2017 是 NAPIC 已載明的序列斷點，已標註。</span></p>
+    <div id="chartQDelta" class="chart"></div>
+    <p class="src"><span class="lang-en">Source: <code>data/napic-stock.json</code> → <code>derived.annual[year].byRegion.MALAYSIA</code>. Denominator is end-of-year stock for both measures. 2025 national: <code>C/S</code> = <b>1.53%</b>, <code>ΔS/S</code> = <b>2.82%</b>. The 2016 dip and the 2017 spike are the service-apartment recategorisation and the backlog restatement respectively, not construction.</span><span class="lang-zh" style="display:none">來源：<code>data/napic-stock.json</code> → <code>derived.annual[年].byRegion.MALAYSIA</code>。兩個口徑的分母都是年末存量。2025 全國：<code>C/S</code> = <b>1.53%</b>，<code>ΔS/S</code> = <b>2.82%</b>。2016 的下陷與 2017 的尖峰分別是服務式公寓改列與積壓重述，不是營建活動。</span></p>
+  </div>
+
+  <div class="chartbox">
+    <p class="kick"><span class="lang-en">Test 2 · cross-section</span><span class="lang-zh" style="display:none">檢定 2 · 橫斷面</span></p>
+    <h3><span class="lang-en">δ* across the sixteen states, 2025</span><span class="lang-zh" style="display:none">16 州 δ* 排序，2025 年</span></h3>
+    <p class="csub"><span class="lang-en">Both measures, same year, same denominator. Where the two bars diverge sharply the state's stock grew mostly through book-keeping accretion rather than completions.</span><span class="lang-zh" style="display:none">同一年、同一分母、兩個口徑。兩根柱子分岔很大的州，表示該州的存量主要透過帳務增量而非完工量成長。</span></p>
+    <div id="chartQStates" class="chart" style="height:430px"></div>
+    <p class="src"><span class="lang-en">Source: same file, 2025, the sixteen states and federal territories with the MALAYSIA aggregate excluded. Labuan and Putrajaya recorded zero completions in 2025. Ranking on the two measures is broadly but <b>not interchangeably</b> similar: Spearman averaged 0.710 across 2018–2025 and fell to 0.550 in 2020, below the 0.6 line the forward ledger requires of ranking predictions.</span><span class="lang-zh" style="display:none">來源：同檔案，2025 年，16 個州與聯邦直轄區，排除 MALAYSIA 合計列。納閩與布城 2025 年完工量為零。兩個口徑的排序大致相似但<b>不可互換</b>：2018–2025 年 Spearman 平均 0.710，2020 年低到 0.550，低於前瞻帳本對排序型預測要求的 0.6 及格線。</span></p>
+  </div>
+
+  <!-- ================= ASIA MOD ================= -->
+  <div class="sec-rule"><h2><span class="lang-en">The Asian modification</span><span class="lang-zh" style="display:none">亞洲修改</span></h2></div>
+
+  <p class="narr"><span class="lang-en">The original NE identity writes <code>D(R, X) = S</code>. That embeds an assumption: <b>every unit of stock enters the space market.</b> It holds for US commercial real estate, where an empty office is a pure loss and the owner goes looking for a tenant. <b>It does not hold in Kuala Lumpur, Bangkok or Dubai.</b> Units get built, get sold, and then sit. The buyer bought an asset, not space. Those units are counted in the SE quadrant and never enter the NE rent-setting process. The rectangle leaks here.</span><span class="lang-zh" style="display:none">原始的 NE 恆等式寫 <code>D(R, X) = S</code>。這隱含一個假設：<b>每一單位存量都會進入空間市場。</b>在美國商用不動產成立：空著的辦公室對業主純粹是損失，一定去找租客。<b>在吉隆坡、曼谷、杜拜不成立。</b>單位蓋了、賣了、然後空著。買家買的不是空間，是資產。這些單位在 SE 象限計入存量，卻從未進入 NE 的租金決定過程。矩形在這裡漏水。</span></p>
+
+  <div class="card">
+    <div class="stk">
+      <div class="stkrow"><span class="sl">S_total</span><div class="stkbar"><div class="stkseg seg-total" style="width:100%"><span class="lang-en">576,409 units · NAPIC, KL, 2025Q4</span><span class="lang-zh" style="display:none">576,409 戶 · NAPIC，吉隆坡，2025Q4</span></div></div></div>
+      <div class="stkrow"><span class="sl">− S_overhang</span><div class="stkbar" style="border:none;background:none"><div class="stkseg seg-over" style="width:24%;border-radius:7px"><span class="lang-en">3,964 units = 0.69% · measured</span><span class="lang-zh" style="display:none">3,964 戶 ＝ 0.69% · 可量測</span></div></div></div>
+      <div class="stkrow"><span class="sl">− S_shadow</span><div class="stkbar" style="border:none;background:none"><div class="stkseg seg-shadow" style="width:24%;border-radius:7px"><span class="lang-en">? · not measurable in MY</span><span class="lang-zh" style="display:none">？· 在馬來西亞量不到</span></div></div></div>
+      <div class="stkrow"><span class="sl">= S_effective</span><div class="stkbar"><div class="stkseg seg-eff" style="width:100%"><span class="lang-en">the real NE denominator: an upper bound only</span><span class="lang-zh" style="display:none">真正的 NE 分母：只有上界</span></div></div></div>
+    </div>
+    <p class="stknote"><span class="lang-en"><b>This figure is schematic. Neither deduction bar is drawn to scale.</b> Both are set to a readable width. The overhang deduction is genuinely 0.69% of KL stock, which at true scale would be four pixels wide; the shadow layer has no true scale at all, because it cannot be measured. Nothing about the lengths here is an estimate.</span><span class="lang-zh" style="display:none"><b>這是示意圖。兩條扣減列都不按比例畫。</b>兩者都設成可讀的寬度。餘屋這一層真實佔吉隆坡存量的 0.69%，按真實比例畫只有四個像素寬；陰影層則根本沒有真實比例，因為它量不到。此處的長度不含任何估計成分。</span></p>
+  </div>
+
+  <p class="narr"><span class="lang-en">The fifth equation is the release valve: <code>ΔS_effective = ΔS_total − ΔS_overhang − ΔS_shadow</code>, with <code>ΔS_shadow = −Λ(h, g^e) · S_shadow</code>. Λ, the release rate, rises with holding cost h and falls with expected appreciation g^e. This is what explains why KL, Bangkok and Dubai carry years of overhang without rents collapsing — not strong demand, but the fact that those units are not in the NE denominator at all. They are suspended supply. When holding cost rises (mortgage rates, a vacancy tax, a change in rental income tax) or when the appreciation story stops working, Λ rises and the suspended stock pours into S_effective. That is where the real downside for rent lives, and its relationship to price is counter-intuitive.</span><span class="lang-zh" style="display:none">第五式是釋放閥：<code>ΔS_effective = ΔS_total − ΔS_overhang − ΔS_shadow</code>，其中 <code>ΔS_shadow = −Λ(h, g^e) · S_shadow</code>。Λ 是釋放率，隨持有成本 h 遞增、隨預期漲幅 g^e 遞減。這解釋了為什麼吉隆坡、曼谷、杜拜餘屋高企多年而租金沒有崩——原因不是需求強，而是那些單位根本不在 NE 象限的分母裡。它們是懸而未落的供給。一旦持有成本上升（房貸利率、空屋稅、租金所得稅制改變）或漲幅預期熄火，Λ 上升，懸置存量就會倒進 S_effective。那才是租金真正的下行風險點，而且它跟價格的關係是反直覺的。</span></p>
+
+  <div class="cl cl-red">
+    <h4><span class="lang-en">And the shadow layer cannot be measured in Malaysia: so this stays qualitative</span><span class="lang-zh" style="display:none">而陰影層在馬來西亞量不到：所以這一段只能是定性的</span></h4>
+    <span class="lang-en">Five candidate proxies were evaluated and closed on 2026-08-02: utility zero-consumption (the utility company publishes account counts by tariff class with no consumption bands, and its account total exceeds peninsular residential stock by 51%, a different population), CCC against assessment tax (assessment is levied on valuation and is blind to occupancy; the vacancy allowance provision selects owners who <b>tried and failed</b> to let, which is the complement of the shadow layer), tenancy registration (Malaysia has no mandatory regime, so the premise fails), and the OpenDOSM state living-quarters series (which returns negative vacancy rates for KL 2017–2019 and has an 11.3pp break at 2019→2020). One source timed out and is recorded as unresolved rather than as confirmed-absent. <b>Consequence: the Asian modification is a mechanism and a single anchor, not a quantified layer.</b> The only observation is the KL 2020 census — 92,429 vacant units (14.6%), of which 18,036 are holiday or transit dwellings; the true range 18,036–92,429 is too wide to discriminate, and its denominator is the census population, which must not be divided into NAPIC stock.</span><span class="lang-zh" style="display:none">五個候選代理已於 2026-08-02 全數評估並結案：公用事業零用量（電力公司只公佈按關稅類別的帳戶總數，無用量分級，且帳戶數比半島住宅存量多 51%，母體根本不同）、CCC 對評估稅（評估稅按估值課徵、對占用狀態失明；空置減免條款篩出來的是<b>已努力出租而未果</b>的業主，正好是陰影層的補集）、租賃登記（馬來西亞無強制登記制度，前提不成立）、OpenDOSM 州別居住單位序列（KL 2017–2019 算出負空置率，2019→2020 有 11.3 個百分點的斷點）。另有一個來源連線逾時，記為未結而非「已確認無資料」。<b>後果：亞洲修改降級為定性機制加單點錨，不是可量化的分層。</b>唯一的觀察值是吉隆坡 2020 年普查——空置 92,429 戶（14.6%），其中可對應的度假屋與過境屋 18,036 戶；真值區間 18,036～92,429 寬到沒有判別力，而且它的分母是普查母體，不得拿去除 NAPIC 存量。</span>
+  </div>
+
+  <!-- ================= HONEST LIMITS ================= -->
+  <div class="sec-rule"><h2><span class="lang-en">Honest limits</span><span class="lang-zh" style="display:none">誠實邊界</span></h2></div>
+
+  <p class="narr"><span class="lang-en">Recorded as they are, not softened. The first four are the ones that decide whether a reading from this page is worth anything.</span><span class="lang-zh" style="display:none">照登，不修飾。前四條決定這頁的一次讀數到底值不值錢。</span></p>
+
+  <div class="hgrid">
+    <div class="hbox">
+      <h4><span class="lang-en">1 · Blind to timing</span><span class="lang-zh" style="display:none">1 · 轉折時點失明</span></h4>
+      <p><span class="lang-en">This is a <b>comparative-statics</b> framework. It says which side the new equilibrium is on and which variable has to move to get there. It does not say how long, or whether the market overshoots on the way. Turning-point detection stays outsourced to tripwires — four blind tests caught this failure mode twice.</span><span class="lang-zh" style="display:none">這是<b>比較靜態</b>框架。它說新均衡在哪一邊、哪個變數必須動才到得了，不說要走多久、也不說路上會不會超調。轉折偵測仍然外包給絆線——四場盲測裡這個失效模式現形過兩次。</span></p>
+    </div>
+    <div class="hbox">
+      <h4><span class="lang-en">2 · Landed housing is out, entirely</span><span class="lang-zh" style="display:none">2 · 有地住宅完全不適用</span></h4>
+      <p><span class="lang-en">In an owner-occupier market the rental sector covers only part of the stock, so the NE test <b>only works on rental-active products</b>: KL high-rise, serviced apartments. <b>Landed housing does not qualify: its R cannot be observed, and applying the test anyway means fabricating it.</b> This is a product-level boundary, not a detail to wave through.</span><span class="lang-zh" style="display:none">自住為主的市場裡，租賃只覆蓋部分存量，因此 NE 檢定<b>只在租賃活躍的產品有效</b>：吉隆坡高層公寓、服務式公寓。<b>有地住宅不合格：它的 R 無法觀察，硬套等於捏造。</b>這是產品層的適用邊界，不是可以揮手帶過的細節。</span></p>
+    </div>
+    <div class="hbox">
+      <h4><span class="lang-en">3 · δ and ρ are assumptions</span><span class="lang-zh" style="display:none">3 · δ 與 ρ 是假設參數</span></h4>
+      <p><span class="lang-en">Neither has an official series in Malaysia. Every conclusion must carry a sensitivity band, and <b>if a conclusion flips inside the plausible band for these parameters, that conclusion does not stand.</b> g* is worse than an assumption-dependent number — it is the <b>residual</b> of the identity, so it absorbs the entire error in ρ. Use it to ask "is this g* plausible", never as a projected growth rate.</span><span class="lang-zh" style="display:none">兩者在馬來西亞都沒有官方序列。任何結論都必須附敏感度區間，而且<b>若結論在這兩個參數的合理帶內會翻轉，該結論即不成立</b>。g* 比「依賴假設的數字」更糟——它是恆等式的<b>殘差</b>，會把 ρ 的誤差全部吸收。它只能用來問「這個 g* 合理嗎」，永遠不能當預測的成長率引用。</span></p>
+    </div>
+    <div class="hbox">
+      <h4><span class="lang-en">4 · Test 3's denominator is knowingly too big</span><span class="lang-zh" style="display:none">4 · 檢定 3 的分母明知偏大</span></h4>
+      <p><span class="lang-en">Because S_shadow cannot be measured, the denominator falls back to <code>S_total − S_overhang</code>. The bias direction is fixed and must travel with the number: <b>a denominator that is too big means implied demand growth is systematically understated, which means the fallback version of test 3 reads optimistic.</b> This sentence follows that number everywhere.</span><span class="lang-zh" style="display:none">因為 S_shadow 量不到，分母退回 <code>S_total − S_overhang</code>。偏誤方向是固定的，而且必須跟著數字走：<b>分母偏大 ⇒ 隱含需求成長被系統性低估 ⇒ 退回版的檢定 3 偏樂觀。</b>這句話必須永遠跟著那個數字。</span></p>
+    </div>
+  </div>
+
+  <div class="cl cl-warn">
+    <h4><span class="lang-en">5 · The SE identity does not hold on NAPIC data, and the failure has a fixed sign</span><span class="lang-zh" style="display:none">5 · SE 恆等式在 NAPIC 資料上不成立，且方向固定</span></h4>
+    <span class="lang-en"><code>ΔS = C − δS</code> with δ ≥ 0 requires ΔS &lt; C. In the data, <b>ΔS exceeds C by 0.6–1.3% of stock every year, and the gap is positive in 64 of 71 non-break quarters.</b> Four hypotheses were tested and falsified. The reason is in NAPIC's own Technical Notes: the survey "has not reached a total population count", so <b>the stock series is an expanding survey frame</b> that absorbs old units newly brought into scope, while completions count only units issued a certificate within the existing scope this quarter. Two columns, two coverage definitions — a definitional problem, not a data error. NAPIC does not publish the adjustment breakdown, so the cumulative 436,237 units cannot be split by channel and the magnitude is recorded as unknown. <b>This is why δ* is reported as a bracket and never as a point.</b></span><span class="lang-zh" style="display:none"><code>ΔS = C − δS</code> 在 δ ≥ 0 之下要求 ΔS 小於 C。實際資料裡，<b>ΔS 每年比 C 多出存量的 0.6–1.3%，非斷點季 71 季中有 64 季為正。</b>四個假設逐一證偽。真正原因寫在 NAPIC 自己的 Technical Notes：調查「has not reached a total population count」，所以<b>存量序列是一個還在擴張的調查底冊</b>，會吸收本來就存在、這季才納入調查範圍的舊單位；完工量則只計既有範圍內當季發證者。兩欄、兩套涵蓋定義——這是定義問題不是資料錯誤。NAPIC 不公布調整項分解，累計 436,237 戶無法拆成各管道佔比，量級照實記為不明。<b>這就是 δ* 只能報區間、永遠不能報點估的原因。</b></span>
+  </div>
+
+  <div class="card">
+    <p class="narr" style="margin-bottom:10px"><span class="lang-en"><b>The remaining recorded limits</b>, unabridged.</span><span class="lang-zh" style="display:none"><b>其餘已記錄的邊界</b>，未刪減。</span></p>
+    <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-soft)">
+      <li><span class="lang-en"><b>NE's demand function mixes consumption and investment demand.</b> That weakness is in the original DiPasquale-Wheaton; the shadow-stock split only patches the supply-side leak. Foreign buyers and residency-linked purchase demand remain blended into D(·). Unresolved.</span><span class="lang-zh" style="display:none"><b>NE 的需求函數混了消費需求與投資需求。</b>這是 DiPasquale-Wheaton 原版就有的弱點；陰影存量的拆解只補了供給側的漏水。外籍買家與居留連動的購買需求仍然混在 D(·) 裡。未解。</span></li>
+      <li><span class="lang-en"><b>The institutional layer has not landed.</b> Plot-ratio rules, buildable land stock and commuting accessibility are all unsourced for KL. The SW quadrant therefore carries a price-cost relationship and <b>no supply-elasticity dimension</b> — which is precisely the cell that a prior six-test round judged not scoreable.</span><span class="lang-zh" style="display:none"><b>制度層尚未落地。</b>容積制度、可建地存量、通勤可及性三項在吉隆坡全部無來源。因此 SW 象限只有價格—成本關係，<b>沒有制度彈性維度</b>——而那正是先前六個測試判定為無法評分的那一格。</span></li>
+      <li><span class="lang-en"><b>Counter-clockwise is unreadable.</b> Repeated here because it is the misuse that keeps happening.</span><span class="lang-zh" style="display:none"><b>逆時針不可讀。</b>在此重申，因為這是不斷發生的誤用。</span></li>
+      <li><span class="lang-en"><b>The rent index cannot date a turn.</b> CPI 041 prices the stock of continuing tenancies: across 197 month-on-month steps it moved only 68 times, 66 of them in the second month of a quarter. It is a quarterly series wearing monthly clothes, with 66 effective observations and zero redundancy. It also reprices only as contracts renew, so it is <b>structurally slower than a transaction price index</b> — pairing it against MHPI to date a lead or lag measures the instrument, not the market.</span><span class="lang-zh" style="display:none"><b>租金指數無法判定轉折時點。</b>CPI 041 量的是續約中的租約存量：197 次月變動只動了 68 次，其中 66 次落在季度的第二個月。它是季頻序列穿著月頻的衣服，有效觀察 66 個、零冗餘。它也只隨換約才逐批反映市場租金，因此<b>結構上比成交價指數慢</b>——拿它去對 MHPI 判定領先或落後，量到的是儀器不是市場。</span></li>
+      <li><span class="lang-en"><b>A frozen proposition already known to be unscoreable.</b> Screening the states for "δ* at or above 3% for three consecutive years" returns only two states on either measure, too few for the rank test the ledger specifies. <b>The threshold will not be loosened to manufacture sample size</b>; at the scoring date it will be recorded as "sample too small, not scoreable".</span><span class="lang-zh" style="display:none"><b>一條已知無法評分的凍結命題。</b>以「δ* 連續 3 年 ≥3%」掃各州，兩個口徑都只篩出 2 州，遠不足以做帳本指定的排序檢定。<b>門檻不會為了湊樣本量而放寬</b>；評分日將照實記為「樣本不足、無法評分」。</span></li>
+    </ul>
+  </div>
+
+  <p class="src"><span class="lang-en"><b>Sources.</b> Method: <code>docs/methodology/four-quadrant-v1.md</code> (v1.0, spec frozen 2026-08-01, first data run 2026-08-02). Stock and completions: <code>data/napic-stock.json</code>, NAPIC Property Stock Report (Laporan Stok Harta Tanah), 2007Q4–2026Q1, 74 periods × 17 regions. Rent and CPI: <code>data/my-rent-index.json</code>, DOSM CPI COICOP 041 and headline, 2010-01–2026-06. Price, yield, population growth: <code>data/markets-summary.json</code>. Overhang and MHPI anchors: NAPIC Property Market Status Tables, recorded in the methodology note §5 and §9.2. Theory: DiPasquale &amp; Wheaton (1992), AREUEA Journal; Renaud, Pretorius &amp; Pasadilla, <i>Markets at Work</i> for the Asian application.</span><span class="lang-zh" style="display:none"><b>來源。</b>方法：<code>docs/methodology/four-quadrant-v1.md</code>（v1.0，規格 2026-08-01 凍結，首次取數 2026-08-02）。存量與完工：<code>data/napic-stock.json</code>，NAPIC Property Stock Report（Laporan Stok Harta Tanah），2007Q4–2026Q1，74 期 × 17 地區。租金與 CPI：<code>data/my-rent-index.json</code>，DOSM CPI COICOP 041 與 headline，2010-01–2026-06。價格、收益率、人口成長：<code>data/markets-summary.json</code>。餘屋與 MHPI 錨點：NAPIC Property Market Status Tables，記載於方法論 §5 與 §9.2。理論：DiPasquale &amp; Wheaton (1992), AREUEA Journal；亞洲套用先例為 Renaud, Pretorius &amp; Pasadilla, <i>Markets at Work</i>。</span></p>
+
+  <div class="foot">
+    <span class="lang-en">Property Check · cross-market tools. This page is a consistency instrument, not investment advice. It produces no price forecast and no return estimate, by construction.</span><span class="lang-zh" style="display:none">Property Check · 跨市場工具。本頁是一致性檢定儀器，不是投資建議。依其構造，它不產出價格預測，也不產出報酬估計。</span>
+    <br>
+    <a href="/global/compass"><span class="lang-en">← Other markets compass</span><span class="lang-zh" style="display:none">← 其他市場羅盤</span></a>
+  </div>
+
+</main>
+
+<script>
+// ============ palette + base echarts settings (echarts-spec.md) ============
+var C = {
+  navy:   '#1e3a5f',
+  green:  '#16a34a',
+  orange: '#d97706',
+  red:    '#dc2626',
+  blue:   '#2563eb',
+  muted:  '#5a7a9a',
+  grid:   '#e8f0f9',
+  text:   '#1e3a5f'
+};
+var baseText    = {color:C.muted, fontFamily:'Inter, sans-serif', fontSize:11};
+var baseGrid    = {left:50, right:20, top:40, bottom:30, containLabel:true};
+var baseTooltip = {trigger:'axis', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1, textStyle:{color:C.navy, fontSize:11, fontFamily:'Inter'}};
+var baseLegend  = {top:8, textStyle:baseText, icon:'circle', itemWidth:8, itemHeight:8};
+function mkAxis(o){return Object.assign({axisLine:{lineStyle:{color:C.grid}},axisTick:{show:false},axisLabel:baseText,splitLine:{lineStyle:{color:C.grid}}},o||{});}
+
+// ============ embedded derived data ============
+// Every array below was precomputed from repo JSON by arithmetic only. No smoothing, no interpolation.
+// rentYears / cpi041 / cpiHead : data/my-rent-index.json -> data.cpi_041_national and data.cpi_overall_national,
+//                                annual average = mean of the 12 published months of that year. Base 2010 = 100 as published.
+// rentReal                     : cpi041 / cpiHead * 100. Division only.
+// dYears / natCS / natDS       : data/napic-stock.json -> derived.annual[year].byRegion.MALAYSIA
+//                                natCS = delta_star_C_over_S * 100, natDS = stock_growth_dS_over_S * 100.
+// stEn / stZh / stCS / stDS    : same file, year 2025, the 16 states with the MALAYSIA aggregate excluded,
+//                                sorted ascending on C/S.
+var QD = {
+  rentYears: ["2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],
+  cpi041:  [100.008,101.725,103.567,105.858,109.258,113.208,116.233,119.467,122.475,125.2,126.892,127.533,129.033,131.492,133.683,136.342],
+  cpiHead: [100.017,103.2,104.908,107.117,110.483,112.808,115.15,119.525,120.683,121.483,120.1,123.075,127.233,130.4,132.792,134.625],
+  rentReal:[99.992,98.571,98.721,98.825,98.891,100.355,100.941,99.951,101.485,103.059,105.655,103.622,101.415,100.837,100.671,101.275],
+  dYears: ["2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"],
+  natCS:  [2.976,2.286,1.922,1.287,1.368,1.443,1.725,1.356,1.582,1.735,1.677,1.532,1.317,1.282,1.184,1.207,1.295,1.53],
+  natDS:  [3.486,3.002,2.49,1.714,2.371,2.085,2.344,1.97,0.329,8.904,2.679,2.617,2.015,1.872,2.026,1.995,2.206,2.823],
+  stEn: ["W.P. Putrajaya","W.P. Labuan","Kedah","Johor","Terengganu","Perlis","Pulau Pinang","Pahang","Selangor","Perak","W.P. Kuala Lumpur","Sabah","Sarawak","Negeri Sembilan","Melaka","Kelantan"],
+  stZh: ["布城","納閩","吉打","柔佛","登嘉樓","玻璃市","檳城","彭亨","雪蘭莪","霹靂","吉隆坡","沙巴","砂拉越","森美蘭","馬六甲","吉蘭丹"],
+  stCS: [0.0,0.0,0.926,1.084,1.109,1.152,1.231,1.258,1.285,1.581,1.728,1.93,2.105,2.756,2.839,4.762],
+  stDS: [0.482,0.0,3.777,1.909,6.052,1.152,1.618,2.05,2.159,3.918,2.656,3.847,2.225,4.973,6.042,5.579]
+};
+
+// ============ presets ============
+// KL and national numbers come from data/napic-stock.json (2025) and the methodology note section 5
+// (overhang, NAPIC Property Market Status Table FY2025). P and R come from data/markets-summary.json
+// and are KL-condo caliber in BOTH presets, because no vetted national median price or rent level exists.
+var PRESETS = {
+  kl:  {R:39000, P:750000, Cc:9958,  S:576409,  OH:3964,  DS:15307,  rf:2.75, rho:3, delta:1, K:null, gb:2.088, db:1.4},
+  nat: {R:39000, P:750000, Cc:99877, S:6528296, OH:30471, DS:184309, rf:2.75, rho:3, delta:1, K:null, gb:2.088, db:1.4},
+  manual:{R:24000, P:500000, Cc:10000, S:650000, OH:0, DS:null, rf:3, rho:3, delta:1, K:null, gb:null, db:null}
+};
+var GEO = 'kl';
+var IN = {};
+var AX = {R:80000, P:1500000, Cc:20000, S:1200000};
+var CURLANG = 'en';
+var allCharts = [];
+var qChart = null;
+
+function nf(v, d){ d = d || 0; return Number(v).toLocaleString('en-US',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+function shortNum(v){
+  var a = Math.abs(v);
+  if (a >= 1000000) return (v/1000000).toFixed(a >= 10000000 ? 0 : 1) + 'M';
+  if (a >= 1000) return Math.round(v/1000) + 'K';
+  return Math.round(v);
+}
+function txt(en, zh){ return CURLANG === 'zh' ? zh : en; }
+
+// ============ scale + control wiring ============
+function niceMax(v){
+  if (!v || v <= 0) return 1;
+  var t = v * 2;
+  var mag = Math.pow(10, Math.floor(Math.log10(t)));
+  return Math.ceil(t / (mag/2)) * (mag/2);
+}
+function rescale(){
+  AX.R  = niceMax(IN.R);
+  AX.P  = niceMax(IN.P);
+  AX.Cc = niceMax(IN.Cc);
+  AX.S  = niceMax(IN.S);
+  setSlider('s-R',  AX.R,  IN.R);
+  setSlider('s-P',  AX.P,  IN.P);
+  setSlider('s-C',  AX.Cc, IN.Cc);
+  setSlider('s-S',  AX.S,  IN.S);
+}
+// step stays at 1 so the preset value is exactly representable and the slider never
+// snaps the observation to a rounder number than the source published.
+function setSlider(id, max, val){
+  var el = document.getElementById(id);
+  el.max = max; el.step = 1; el.value = val;
+}
+
+function loadPreset(k){
+  GEO = k;
+  var p = PRESETS[k];
+  IN = {R:p.R, P:p.P, Cc:p.Cc, S:p.S, OH:p.OH, DS:p.DS, rf:p.rf, rho:p.rho, delta:p.delta, K:p.K, gb:p.gb, db:p.db};
+  rescale();
+  document.getElementById('s-rf').value    = IN.rf;
+  document.getElementById('s-rho').value   = IN.rho;
+  document.getElementById('s-delta').value = IN.delta;
+  document.getElementById('n-OH').value = IN.OH === null ? '' : IN.OH;
+  document.getElementById('n-DS').value = IN.DS === null ? '' : IN.DS;
+  document.getElementById('n-K').value  = IN.K  === null ? '' : IN.K;
+  document.getElementById('n-gb').value = IN.gb === null ? '' : IN.gb;
+  document.getElementById('n-db').value = IN.db === null ? '' : IN.db;
+  document.querySelectorAll('#segGeo button').forEach(function(b){ b.classList.toggle('active', b.dataset.v === k); });
+}
+
+// ============ hints (rebuilt per language) ============
+function renderHints(){
+  var kl = (GEO === 'kl'), nat = (GEO === 'nat'), man = (GEO === 'manual');
+  var geoTxt;
+  if (kl) geoTxt = txt(
+    'Kuala Lumpur. Stock, completions and overhang are NAPIC W.P. Kuala Lumpur, all residential types, 2025. Price and rent are KL condos — a narrower product than the stock denominator.',
+    '吉隆坡。存量、完工量與餘屋是 NAPIC 的 W.P. Kuala Lumpur、全住宅型別、2025 年。價格與租金是 KL 公寓——比存量分母更窄的產品。');
+  else if (nat) geoTxt = txt(
+    'Malaysia. Only the SE and SW legs change geography: stock, completions, overhang and ΔS are national 2025. Price and rent stay KL-condo, because no vetted national median exists. So test 1 still speaks only about KL condos.',
+    '馬來西亞。只有 SE 與 SW 兩條腿換了地理口徑：存量、完工量、餘屋與 ΔS 是 2025 年全國值。價格與租金仍是 KL 公寓，因為不存在 vetted 的全國中位數。所以檢定 1 講的仍然只是 KL 公寓。');
+  else geoTxt = txt(
+    'Another market. This site has no vetted stock or completions series for Thailand, the UAE, or any market other than Malaysia, so nothing here is pre-filled with a real figure. The numbers showing now are round placeholders to keep the chart drawable. Replace all of them with your own sourced values before reading anything into the four cells.',
+    '其他市場。本站尚無泰國、阿聯或馬來西亞以外任何市場的 vetted 存量／完工資料，所以這裡沒有任何欄位帶入真實數字。目前顯示的是為了讓圖畫得出來而放的整數佔位值。在把四格當結論讀之前，請把它們全部換成你自己有來源的數值。');
+  document.getElementById('geoNote').textContent = geoTxt;
+
+  var h = {
+    'h-R': man ? txt('Placeholder. Net of management fee, tax, vacancy and collection loss.','佔位值。須為扣管理費、稅、空置與收租損失後的淨額。')
+               : txt('5.2% gross yield × P (PropertyGuru 2024, markets-summary.json). GROSS: the identity wants net.','5.2% 毛收益率 × P（PropertyGuru 2024，markets-summary.json）。這是毛額：恆等式要的是淨額。'),
+    'h-P': man ? txt('Placeholder. Transacted price, never asking.','佔位值。須為成交價，永不用開價。')
+               : txt('Median transacted KL condo, NAPIC Q4 2024 (markets-summary.json).','KL 公寓中位成交價，NAPIC 2024Q4（markets-summary.json）。'),
+    'h-C': man ? txt('Placeholder. Completions, not starts and not launches.','佔位值。是完工量，不是開工、不是推案。')
+               : txt(nat ? 'NAPIC 2025 national, four quarterly flows summed (napic-stock.json).' : 'NAPIC 2025 W.P. Kuala Lumpur, four quarterly flows summed (napic-stock.json).',
+                     nat ? 'NAPIC 2025 全國，四季流量加總（napic-stock.json）。' : 'NAPIC 2025 W.P. Kuala Lumpur，四季流量加總（napic-stock.json）。'),
+    'h-S': man ? txt('Placeholder. Existing stock, all residential.','佔位值。現有存量，全住宅。')
+               : txt(nat ? 'NAPIC existing stock at 2025Q4, national (napic-stock.json).' : 'NAPIC existing stock at 2025Q4, W.P. Kuala Lumpur (napic-stock.json).',
+                     nat ? 'NAPIC 2025Q4 現有存量，全國（napic-stock.json）。' : 'NAPIC 2025Q4 現有存量，W.P. Kuala Lumpur（napic-stock.json）。'),
+    'h-OH': man ? txt('Leave 0 if the market publishes no completed-unsold statistic.','若該市場不公布完工未售統計，留 0。')
+                : txt(nat ? 'NAPIC Status Table FY2025, residential, national.' : 'NAPIC Status Table FY2025, residential, W.P. Kuala Lumpur.',
+                      nat ? 'NAPIC Status Table FY2025，住宅，全國。' : 'NAPIC Status Table FY2025，住宅，W.P. Kuala Lumpur。'),
+    'h-DS': man ? txt('Optional. Without it, test 2 reports only the lower bound.','選填。沒有它，檢定 2 只報下界。')
+                : txt('Recorded stock change 2024Q4 → 2025Q4. Supplies the UPPER bound of δ*; it is not a construction flow.','2024Q4 → 2025Q4 的帳面存量變動。提供 δ* 的上界；它不是營建流量。'),
+    'h-rf': txt('OPR 2.75%, BNM July 2026. The spec asks for MGS 10Y, which is not sourced on this site.','OPR 2.75%，BNM 2026 年 7 月。規格要求的是 MGS 10Y，該序列本站未取數。'),
+    'h-rho': txt('No observation exists. This slider position is not an estimate. g* moves one-for-one with ρ: every +1pp here adds +1pp to g*.','沒有任何觀察值。這個滑桿位置不是估計值。g* 與 ρ 一比一同動：這裡每 +1 個百分點，g* 就 +1 個百分點。'),
+    'h-delta': txt('No official series. The methodology carries a 0.5–1.5% residential band; 1.0% is its midpoint, not a measurement.','沒有官方序列。方法論所載的住宅汰換帶是 0.5–1.5%；1.0% 是它的中點，不是量測值。'),
+    'h-K': txt('Empty because KL land cost has no public series. Type a value to score test 4; it will be your assumption, not this site’s.','留空是因為 KL 地價沒有公開序列。輸入數值即可評分檢定 4；那會是你的假設，不是本站的。'),
+    'h-gb': man ? txt('Empty for markets with no vetted rent series. Test 1 stays unscoreable until you supply one.','無 vetted 租金序列的市場請留空。在你提供之前，檢定 1 維持無法評分。')
+                : txt('DOSM CPI 041, annual average 2010 → 2025, national and nominal (my-rent-index.json). Real growth over the same window is +0.085%.','DOSM CPI 041 年均值，2010 → 2025，全國、名目（my-rent-index.json）。同期實質成長為 +0.085%。'),
+    'h-db': man ? txt('Empty. Household formation plus an income term is what the spec wants.','留空。規格要的是家戶形成率加所得項。')
+                : txt('Population growth 1.4%, DOSM 2024 (markets-summary.json). A proxy: household formation normally runs faster, so this benchmark is set low and the test reads harsh.','人口成長率 1.4%，DOSM 2024（markets-summary.json）。這是代理值：家戶形成通常較快，所以這個基準偏低，檢定會讀得偏嚴。')
+  };
+  Object.keys(h).forEach(function(k){ var el = document.getElementById(k); if (el) el.textContent = h[k]; });
+}
+
+function syncChips(){
+  document.getElementById('v-R').textContent     = nf(IN.R);
+  document.getElementById('v-P').textContent     = nf(IN.P);
+  document.getElementById('v-C').textContent     = nf(IN.Cc) + txt(' units',' 戶');
+  document.getElementById('v-S').textContent     = nf(IN.S) + txt(' units',' 戶');
+  document.getElementById('v-rf').textContent    = IN.rf.toFixed(2) + '%';
+  document.getElementById('v-rho').textContent   = IN.rho.toFixed(2) + '%';
+  document.getElementById('v-delta').textContent = IN.delta.toFixed(2) + '%';
+}
+
+// ============ the four tests ============
+// Each test carries a `plain` sentence (the primary, human-readable verdict, embedding the
+// live numbers) alongside the original `diag` (technical framing, now shown inside a collapsed
+// footnote). None of the arithmetic or thresholds below differ from the frozen v1.0 spec run —
+// only the presentation is new.
+function computeTests(){
+  var out = [];
+  var i = (IN.P > 0) ? (IN.R / IN.P * 100) : null;
+
+  // Test 1 -- implied rent growth. g* = r_f + rho - R/P
+  var t1 = {no:'01', quad:'NW', name: txt('Implied rent growth g*','隱含租金成長 g*'), formula:'g* = r_f + ρ − R/P'};
+  if (i === null) {
+    t1.state='na'; t1.val='—';
+    t1.plain = txt('P must be above zero to compute this.','P 必須大於零才能算。');
+    t1.diag = t1.plain;
+  }
+  else {
+    var g = IN.rf + IN.rho - i;
+    t1.val = (g >= 0 ? '+' : '') + g.toFixed(2) + '%';
+    t1.sub = txt('i = R/P = ' + i.toFixed(2) + '% · r_f ' + IN.rf.toFixed(2) + '% · ρ ' + IN.rho.toFixed(2) + '%',
+                 'i = R/P = ' + i.toFixed(2) + '% · r_f ' + IN.rf.toFixed(2) + '% · ρ ' + IN.rho.toFixed(2) + '%');
+    if (IN.gb === null || isNaN(IN.gb)) {
+      t1.state='na';
+      t1.plain = txt('This price needs rent to grow <b>' + t1.val + '/yr</b> to justify itself, but there is no historical rent-growth number to compare it against, so there is no way to say if that is reasonable.',
+                     '這個價格要求租金每年漲 <b>' + t1.val + '</b> 才撐得住，但沒有歷史租金成長的數字可以比較，沒法判斷這樣合不合理。');
+      t1.diag = txt('<b>Not scoreable.</b> No historical rent-growth benchmark supplied, so g* is arithmetic without a comparison. This site has a vetted rent series for Malaysia only.',
+                    '<b>無法評分。</b>未提供歷史租金成長基準，因此 g* 只是一個沒有對照的算術結果。本站僅有馬來西亞的 vetted 租金序列。');
+    } else {
+      var gap = g - IN.gb;
+      var gbTxt = IN.gb.toFixed(2) + '%';
+      if (gap <= 1) {
+        t1.state='ok';
+        t1.plain = txt('At today\'s price, rent only needs to grow <b>' + t1.val + '/yr</b> to justify it. History has actually delivered <b>' + gbTxt + '/yr</b> — the price is not betting on rent growing faster than it already has.',
+                       '以現在的房價，租金只要每年漲 <b>' + t1.val + '</b> 就撐得住。歷史實際交出的是 <b>' + gbTxt + '</b>——房價沒有在賭一個超出過去的租金成長。');
+        t1.diag = txt('g* sits within 1pp of the historical rent path (' + gbTxt + '/yr). <b>Nothing in the NW quadrant needs to move</b> on this test alone.',
+                                                   'g* 落在歷史租金路徑（' + gbTxt + '／年）的 1 個百分點以內。<b>單就這項檢定，NW 象限沒有任何東西需要動。</b>');
+      }
+      else if (gap <= 3) {
+        t1.state='warn';
+        t1.plain = txt('At today\'s price, rent needs to grow <b>' + t1.val + '/yr</b> to justify it — ' + gap.toFixed(2) + 'pp faster than the <b>' + gbTxt + '/yr</b> history has delivered. Some of this price is riding on rent growing faster than it has.',
+                       '以現在的房價，租金得每年漲 <b>' + t1.val + '</b> 才撐得住，比過去實際的 <b>' + gbTxt + '</b> 快了 ' + gap.toFixed(2) + ' 個百分點。價格裡摻了一些「租金會漲更快」的預期。');
+        t1.diag = txt('g* runs ' + gap.toFixed(2) + 'pp above the historical rent path. <b>Tension: price is partly carried by expectation, not by rent.</b> The variable that must adjust is <b>P in NW, or R in NE</b>, or ρ is set too high. Direction only; no date.',
+                                                          'g* 比歷史租金路徑高 ' + gap.toFixed(2) + ' 個百分點。<b>張力：價格有一部分是預期撐的，不是租金撐的。</b>必須調整的變數是 <b>NW 的 P 或 NE 的 R</b>，或者 ρ 設得太高。只有方向，沒有時點。');
+      }
+      else {
+        t1.state='bad';
+        t1.plain = txt('At today\'s price, rent needs to grow <b>' + t1.val + '/yr</b> to justify it — ' + gap.toFixed(2) + 'pp faster than the <b>' + gbTxt + '/yr</b> history has delivered, and that gap is hard to explain away. Either the price is too high or ρ is set too high; one of the two does not hold.',
+                       '以現在的房價，租金得每年漲 <b>' + t1.val + '</b> 才撐得住，比過去實際的 <b>' + gbTxt + '</b> 快了 ' + gap.toFixed(2) + ' 個百分點，怎麼看都說不過去。不是房價太高，就是 ρ 設得太高，兩者至少有一個不對。');
+        t1.diag = txt('g* runs ' + gap.toFixed(2) + 'pp above the historical rent path and cannot be explained by the other quadrants. <b>Either P is too high, R is too low, or ρ is wrong.</b> One of the three must give. Which one, this test cannot say; when, no test here can say.',
+                                           'g* 比歷史租金路徑高 ' + gap.toFixed(2) + ' 個百分點，且無法用其他象限解釋。<b>不是 P 太高、就是 R 太低、要不然就是 ρ 錯了。</b>三者必有一者要讓。是哪一個，這項檢定說不了；何時，這裡沒有任何檢定說得了。');
+      }
+      t1.bias = txt('R is gross here, so i is overstated and g* is understated: this cell is biased toward ✓.',
+                    '此處的 R 是毛額，因此 i 被高估、g* 被低估：這一格偏向 ✓。');
+    }
+  }
+  out.push(t1);
+
+  // Test 2 -- implied retirement rate delta*, reported as a bracket
+  var t2 = {no:'02', quad:'SE', name: txt('Implied retirement rate δ*','隱含汰換率 δ*'), formula:'δ* = C / S'};
+  if (IN.S <= 0) {
+    t2.state='na'; t2.val='—';
+    t2.plain = txt('S must be above zero to compute this.','S 必須大於零才能算。');
+    t2.diag = t2.plain;
+  }
+  else {
+    var lo = IN.Cc / IN.S * 100;
+    var hi = (IN.DS !== null && !isNaN(IN.DS) && IN.DS > 0) ? (IN.DS / IN.S * 100) : null;
+    // The bracket only holds while C and ΔS come from the same source period. If a slider
+    // has moved C past the recorded ΔS the two stop bracketing, so show them side by side
+    // instead of printing a reversed range.
+    var bracketOk = (hi !== null && hi >= lo);
+    t2.val = hi === null ? ('≥ ' + lo.toFixed(2) + '%')
+           : bracketOk ? (lo.toFixed(2) + '% – ' + hi.toFixed(2) + '%')
+           : ('C/S ' + lo.toFixed(2) + '%  ·  ΔS/S ' + hi.toFixed(2) + '%');
+    t2.sub = hi === null
+      ? txt('lower bound only · no ΔS supplied','僅下界 · 未提供 ΔS')
+      : bracketOk ? txt('lower bound C/S · upper bound ΔS/S','下界 C/S · 上界 ΔS/S')
+      : txt('C/S now exceeds ΔS/S — the two no longer bracket, because C and ΔS are no longer from the same observation',
+            'C/S 已超過 ΔS/S——兩者不再構成區間，因為 C 與 ΔS 已不是同一組觀察值');
+    var band = txt('the 0.5–1.5% residential retirement band','0.5–1.5% 的住宅汰換帶');
+    var rangeTxt = hi === null ? txt('at least ' + lo.toFixed(2) + '%/yr', '至少每年 ' + lo.toFixed(2) + '%')
+                                : txt(lo.toFixed(2) + '%–' + hi.toFixed(2) + '%/yr', lo.toFixed(2) + '%–' + hi.toFixed(2) + '%');
+    if (lo > 2.5) {
+      t2.state='bad';
+      t2.plain = txt('A reasonable pace of housing retirement runs about 0.5–1.5%/yr. Right now <b>even the lower bound alone</b> runs <b>' + lo.toFixed(2) + '%/yr</b> — more than double the retirement pace. The stock is inflating.',
+                     '合理的房屋汰換速度大概是每年 0.5–1.5%。現在<b>光是下界</b>就有 <b>' + lo.toFixed(2) + '%</b>，比汰換速度快了一倍以上。存量在膨脹。');
+      t2.diag = txt('The <b>lower</b> bound alone is far above ' + band + '. <b>The stock is inflating.</b> The variable that must adjust is <b>R in NE: rent has to fall, unless demand grows at the same speed.</b>',
+                                                  '<b>光是下界</b>就遠高於' + band + '。<b>存量在膨脹。</b>必須調整的變數是 <b>NE 的 R：租金必須下跌，除非需求以同樣速度成長。</b>');
+    }
+    else if (lo > 1.5) {
+      t2.state='warn';
+      t2.plain = txt('A reasonable pace of housing retirement runs about 0.5–1.5%/yr. Right now the pace is <b>' + rangeTxt + '</b>, already above that band. Either supply is running ahead of retirement, or the δ assumption is set too low.',
+                     '合理的房屋汰換速度大概是每年 0.5–1.5%。現在的速度是 <b>' + rangeTxt + '</b>，已經超出這個帶子。不是供給跑在汰換之前，就是 δ 的假設設得太低。');
+      t2.diag = txt('The lower bound is already above ' + band + '. <b>Tension</b>: either supply is running ahead of retirement, or the δ assumption is set too low. <b>R in NE, or the δ assumption, must move.</b>',
+                                                        '下界已經高於' + band + '。<b>張力</b>：不是供給跑在汰換之前，就是 δ 的假設設得太低。<b>NE 的 R 或 δ 的假設必須動。</b>');
+    }
+    else if (bracketOk && hi > 1.5) {
+      t2.state='warn';
+      t2.plain = txt('A reasonable pace of housing retirement runs about 0.5–1.5%/yr. The pace here brackets <b>' + rangeTxt + '</b> — the floor is inside that band, the ceiling is not, so this cannot collapse into a single clean verdict.',
+                     '合理的房屋汰換速度大概是每年 0.5–1.5%。現在的區間是 <b>' + rangeTxt + '</b>——下界還在帶子裡，上界已經超出，這格說不準。');
+      t2.diag = txt('The bracket straddles ' + band + ': the floor is compatible, the ceiling is not. <b>The bracket cannot be collapsed to a point</b>, so this cell is a ⚠ by construction, not by judgement.',
+                                                                       '區間跨過' + band + '：下界相容，上界不相容。<b>區間不能塌縮成一個點</b>，所以這一格依其構造就是 ⚠，不是判斷的結果。');
+    }
+    else {
+      t2.state='ok';
+      t2.plain = txt('A reasonable pace of housing retirement runs about 0.5–1.5%/yr. What is happening now, <b>' + rangeTxt + '</b>, sits inside that band. The stock is not visibly inflating.',
+                     '合理的房屋汰換速度大概是每年 0.5–1.5%。現在算出來是 <b>' + rangeTxt + '</b>，落在這個帶子裡。存量沒有明顯膨脹。');
+      t2.diag = txt('Both bounds sit inside ' + band + '. <b>SE is compatible with the stock rolling forward at trend.</b>',
+                                        '兩個界線都落在' + band + '之內。<b>SE 與存量按趨勢往前滾是相容的。</b>');
+    }
+    t2.bias = txt('C/S misses completions outside the survey frame; ΔS/S includes book-keeping accretion that is not construction. True growth lies between. Never quote either alone as a point.',
+                  'C/S 漏掉調查範圍外的完工；ΔS/S 含有非營建的帳務增量。真值在兩者之間。永遠不要單獨引用其中一個當點估。');
+  }
+  out.push(t2);
+
+  // Test 3 -- implied demand growth. (C - delta*S) / S_effective
+  var t3 = {no:'03', quad:'NE', name: txt('Implied demand growth','隱含需求成長'), formula:'(C − δ·S) / S_effective'};
+  var oh = (IN.OH !== null && !isNaN(IN.OH)) ? IN.OH : 0;
+  var seff = IN.S - oh;
+  if (seff <= 0) {
+    t3.state='na'; t3.val='—';
+    t3.plain = txt('S minus overhang must be above zero to compute this.','S 減餘屋必須大於零才能算。');
+    t3.diag = t3.plain;
+  }
+  else {
+    var need = (IN.Cc - IN.delta/100 * IN.S) / seff * 100;
+    t3.val = (need >= 0 ? '+' : '') + need.toFixed(2) + '%';
+    t3.sub = txt('S_effective = S − overhang = ' + nf(seff) + ' units','S_effective = S − 餘屋 = ' + nf(seff) + ' 戶');
+    if (IN.db === null || isNaN(IN.db)) {
+      t3.state='na';
+      t3.plain = txt('These new units need demand to grow <b>' + t3.val + '/yr</b> to be absorbed, but there is no demand-growth benchmark to compare against, so there is no way to say if that is a lot.',
+                     '這些新房子需要需求每年成長 <b>' + t3.val + '</b> 才吸收得掉，但沒有需求成長的基準可以比對，沒法判斷這樣算不算多。');
+      t3.diag = txt('<b>Not scoreable.</b> No demand-growth benchmark supplied. The arithmetic still stands: this is how fast demand must grow to absorb net new supply.',
+                    '<b>無法評分。</b>未提供需求成長基準。算術本身仍然成立：這是吸收淨新增供給所需要的需求成長速度。');
+    } else {
+      var dgap = need - IN.db;
+      var dbTxt = IN.db.toFixed(2) + '%';
+      if (dgap <= 0) {
+        t3.state='ok';
+        t3.plain = txt('These new units need demand to grow <b>' + t3.val + '/yr</b> to be absorbed. The benchmark is <b>' + dbTxt + '/yr</b> — that already covers it.',
+                       '這些新房子需要需求每年成長 <b>' + t3.val + '</b> 才吸收得掉。基準是 <b>' + dbTxt + '</b>，吸收得掉。');
+        t3.diag = txt('Net new supply needs less demand growth than the benchmark (' + dbTxt + '/yr) already delivers. <b>No mechanical overhang accumulation implied.</b>',
+                                                    '淨新增供給所需要的需求成長，低於基準（' + dbTxt + '／年）本來就提供的。<b>不隱含機械性的餘屋累積。</b>');
+      }
+      else if (dgap <= 1) {
+        t3.state='warn';
+        t3.plain = txt('These new units need demand to grow <b>' + t3.val + '/yr</b> to be absorbed — ' + dgap.toFixed(2) + 'pp faster than the benchmark (<b>' + dbTxt + '/yr</b>). Overhang may slowly build unless building slows.',
+                       '這些新房子需要需求每年成長 <b>' + t3.val + '</b> 才吸收得掉，比基準（<b>' + dbTxt + '</b>）快了 ' + dgap.toFixed(2) + ' 個百分點。除非蓋的速度放慢，餘屋可能慢慢堆積。');
+        t3.diag = txt('Absorption needs ' + dgap.toFixed(2) + 'pp more demand growth than the benchmark. <b>Tension: overhang accumulates unless C falls.</b> The variable that must adjust is <b>C in SW</b>, or R in NE has to give.',
+                                                           '吸收所需的需求成長比基準多 ' + dgap.toFixed(2) + ' 個百分點。<b>張力：除非 C 下降，否則餘屋會累積。</b>必須調整的變數是 <b>SW 的 C</b>，否則 NE 的 R 必須讓。');
+      }
+      else {
+        t3.state='bad';
+        t3.plain = txt('These new units need demand to grow <b>' + t3.val + '/yr</b> to be absorbed — ' + dgap.toFixed(2) + 'pp faster than the benchmark (<b>' + dbTxt + '/yr</b>). This is the mechanical prediction of future overhang, unless C in SW falls or R in NE gives.',
+                       '這些新房子需要需求每年成長 <b>' + t3.val + '</b> 才吸收得掉，比基準（<b>' + dbTxt + '</b>）快了 ' + dgap.toFixed(2) + ' 個百分點。這是餘屋會累積的機械推論，除非 SW 的 C 降下來，或 NE 的 R 讓。');
+        t3.diag = txt('Absorption needs ' + dgap.toFixed(2) + 'pp more demand growth than the benchmark. <b>This is the mechanical prediction of future overhang</b> — the one cell here that needs no behavioural assumption and no elasticity. <b>C in SW must fall, or R in NE must give.</b> Direction only.',
+                                           '吸收所需的需求成長比基準多 ' + dgap.toFixed(2) + ' 個百分點。<b>這是未來餘屋的機械預測</b>——這裡唯一不需要任何行為假設、也不需要估任何彈性的一格。<b>SW 的 C 必須下降，或 NE 的 R 必須讓。</b>只有方向。');
+      }
+    }
+    t3.bias = txt('S_shadow cannot be measured in Malaysia, so the denominator falls back to S − overhang. A denominator that is too big understates implied demand growth — this cell reads optimistic.',
+                  'S_shadow 在馬來西亞量不到，因此分母退回 S − 餘屋。分母偏大 ⇒ 隱含需求成長被低估 ⇒ 這一格偏樂觀。');
+  }
+  out.push(t3);
+
+  // Test 4 -- Tobin's q
+  var t4 = {no:'04', quad:'SW', name: txt("Implied Tobin's q", "隱含 Tobin's q"), formula:'q = P / K'};
+  if (IN.K === null || isNaN(IN.K) || IN.K <= 0) {
+    t4.state='na'; t4.val='—';
+    t4.sub = txt('K not supplied','未提供 K');
+    t4.plain = txt('This one needs to know what it costs to build a unit. KL land cost has no public number, so this cell stays empty. Type in your own K above to score it.',
+                   '算這個要知道蓋一間房的成本。KL 地價沒有公開資料，所以這格空著。在上面自己輸入一個 K 就能算。');
+    t4.diag = txt('<b>Not scoreable, on purpose.</b> Replacement cost needs land cost, and KL has no public land-price series; building-cost indices publish change rates only. Rather than invent a land-share assumption, this cell stays empty until you enter your own K.',
+                  '<b>刻意無法評分。</b>重置成本需要土地成本，而吉隆坡沒有公開的地價序列；建材成本指數只公布變動率。與其捏造一個土地佔比假設，這一格在你自己輸入 K 之前維持空白。');
+  } else {
+    var q = IN.P / IN.K;
+    var dstar = IN.S > 0 ? (IN.Cc / IN.S * 100) : 0;
+    var buildingHard = dstar >= 1.5;
+    t4.val = q.toFixed(2) + '×';
+    t4.sub = txt('benchmark 1.0 · δ* = ' + dstar.toFixed(2) + '%','基準 1.0 · δ* = ' + dstar.toFixed(2) + '%');
+    if (q >= 0.9 && q <= 1.1) {
+      t4.state='ok';
+      t4.plain = txt('Price is roughly equal to what it costs to build (q = <b>' + t4.val + '</b>). Building is neither especially profitable nor unprofitable — that matches what theory expects.',
+                     '房價大概等於蓋一間房的成本（q = <b>' + t4.val + '</b>）。蓋房子賺不多也不少，跟理論預期一致。');
+      t4.diag = txt('q sits at replacement cost. <b>SW is behaving the way the identity says it should.</b>','q 就在重置成本上。<b>SW 的行為與恆等式所說的一致。</b>');
+    }
+    else if (q > 1.1 && !buildingHard) {
+      t4.state='warn';
+      t4.plain = txt('Price sits well above the cost of building (q = <b>' + t4.val + '</b>), which should make building very profitable — but completions have not picked up. Something is blocking supply, likely land or planning rules.',
+                     '房價比蓋房成本高出不少（q = <b>' + t4.val + '</b>），照理蓋房子應該很賺，但完工量卻沒有跟上，像是有什麼卡住了供給——地或法規。');
+      t4.diag = txt('<b>q above 1 but completions are low.</b> Building is profitable and it is not happening: that points at a blockage in SW — land supply or planning rules. <b>The variable to look at is the institutional constraint on C, not P.</b>','<b>q 大於 1 而完工量卻低。</b>蓋房子有利可圖卻沒在蓋，這指向 SW 的阻塞——土地供給或法規。<b>要看的變數是 C 的制度限制，不是 P。</b>');
+    }
+    else if (q > 1.1) {
+      t4.state='ok';
+      t4.plain = txt('Price sits above the cost of building (q = <b>' + t4.val + '</b>), and completions are keeping up. That matches the "build more when it pays" logic.',
+                     '房價比蓋房成本高（q = <b>' + t4.val + '</b>），完工量也確實在跟上，符合「有利可圖就多蓋」的邏輯。');
+      t4.diag = txt('q above 1 and completions responding. <b>SW is doing what f(P, K) says.</b>','q 大於 1 且完工量有反應。<b>SW 正在做 f(P, K) 說的事。</b>');
+    }
+    else if (q < 0.9 && buildingHard) {
+      t4.state='bad';
+      t4.plain = txt('Price sits below the cost of building (q = <b>' + t4.val + '</b>) and building is still happening at a fast pace. By rights, building should have stopped. Something outside the market is driving supply: land financing, a political programme, or a pre-sale regime that moves the decision point to launch rather than completion.',
+                     '房價低於蓋房成本（q = <b>' + t4.val + '</b>）卻還在快速興建。照理蓋房子應該虧錢沒人蓋。有市場以外的力量在推供給：土地融資、政治工程，或把決策點挪到推案而不是完工的預售制度。');
+      t4.diag = txt('<b>q below 1 and still building.</b> The identity says P &lt; K ⇒ C = 0, and it is being violated. Something other than the market is driving supply — land financing, a political programme, or a pre-sale regime that moves the decision point to launch rather than completion. <b>The SW behavioural assumption fails here.</b>','<b>q 小於 1 卻還在蓋。</b>恆等式說 P &lt; K ⇒ C = 0，而它正在被違反。驅動供給的是市場以外的東西——土地融資、政治工程，或把決策點從完工挪到推案的預售制度。<b>SW 的行為假設在此失效。</b>');
+    }
+    else {
+      t4.state='ok';
+      t4.plain = txt('Price sits below the cost of building (q = <b>' + t4.val + '</b>), and completions are indeed running low. That matches the "do not build when it does not pay" logic.',
+                     '房價低於蓋房成本（q = <b>' + t4.val + '</b>），完工量也確實偏低，符合「不划算就少蓋」的邏輯。');
+      t4.diag = txt('q below 1 and completions low. <b>Consistent with P &lt; K ⇒ C = 0.</b>','q 小於 1 且完工量低。<b>與 P &lt; K ⇒ C = 0 一致。</b>');
+    }
+  }
+  out.push(t4);
+  return out;
+}
+
+function renderTests(){
+  var res = computeTests();
+  var flagTxt = {ok: txt('✓ compatible','✓ 相容'), warn: txt('⚠ tension','⚠ 張力'), bad: txt('✗ incompatible','✗ 不相容'), na: txt('— not scoreable','— 無法評分')};
+  res.forEach(function(t, idx){
+    var el = document.getElementById('qt' + (idx+1));
+    el.className = 'tcell ' + t.state;
+    var html = '<p class="tno">' + txt('TEST ','檢定 ') + t.no + ' &nbsp;·&nbsp; ' + t.quad + '</p>' +
+               '<span class="tflag ' + t.state + '">' + flagTxt[t.state] + '</span>' +
+               '<p class="tval">' + (t.val || '—') + '</p>' +
+               '<p class="tplain">' + t.plain + '</p>' +
+               '<details class="deet"><summary>' + txt('formula and technical read', '公式與技術讀法') + '</summary>' +
+                 '<div class="deetbody">' +
+                 '<p class="tname" style="margin-top:0">' + t.name + ' &nbsp;·&nbsp; <code>' + t.formula + '</code></p>' +
+                 (t.sub ? '<p class="tsub">' + t.sub + '</p>' : '') +
+                 '<div class="tdiag">' + t.diag + '</div>' +
+                 (t.bias ? '<div class="tbias">' + t.bias + '</div>' : '') +
+                 '</div></details>';
+    el.innerHTML = html;
+  });
+  renderDiagnosis(res);
+}
+
+// ============ one-line diagnosis banner ============
+// Purely a narration layer over the four states already computed above — it does not
+// introduce any new arithmetic or thresholds.
+function renderDiagnosis(res){
+  var st = res.map(function(t){ return t.state; });
+  var phrase = [
+    {ok:txt('pricing checks out','定價沒問題'), warn:txt('pricing runs rich','定價偏貴'), bad:txt('pricing does not add up','定價說不通'), na:txt('pricing unscored','定價無法判斷')},
+    {ok:txt('supply is normal','供給正常'), warn:txt('supply is under pressure','供給有壓力'), bad:txt('supply is inflating','供給在膨脹'), na:txt('supply unscored','供給無法判斷')},
+    {ok:txt('demand can keep up','需求吃得下'), warn:txt('demand is stretched','需求有點吃緊'), bad:txt('demand cannot keep up','需求吃不下'), na:txt('demand unscored','需求無法判斷')},
+    {ok:txt('build behaviour is normal','蓋房邏輯正常'), warn:txt('build behaviour looks strained','蓋房行為有異常'), bad:txt('build behaviour breaks down','蓋房邏輯不通'), na:txt('cell 4 has no data yet','第 4 格還沒有資料')}
+  ];
+  var rank = {na:0, ok:1, warn:2, bad:3};
+  var worst = 0;
+  for (var idx=1; idx<4; idx++){ if (rank[st[idx]] > rank[st[worst]]) worst = idx; }
+  var p1 = phrase[0][st[0]], p2 = phrase[1][st[1]], p3 = phrase[2][st[2]];
+  var conn2 = (worst !== 2 && rank[st[2]] <= 1) ? txt(', but ', '，但') : txt(', ', '，');
+  var body = p1 + txt(', ', '，') + p2 + conn2 + p3 + txt('.', '。');
+  var pieces = [body];
+  if (rank[st[worst]] >= 2) pieces.push(txt('The problem sits in cell ' + (worst+1) + '.', '問題出在第 ' + (worst+1) + ' 格。'));
+  else pieces.push(txt('The four cells line up.', '四格目前互相對得上。'));
+  if (st[3] === 'na') pieces.push(txt('(Cell 4 has no K yet, so it stays unscored.)', '（第 4 格還沒有 K，暫時無法評分。）'));
+  document.getElementById('qDiag').innerHTML = pieces.join(' ');
+}
+
+// ============ the quadrant chart ============
+function quadOption(){
+  var p = AX.P  > 0 ? IN.P  / AX.P  : 0;
+  var r = AX.R  > 0 ? IN.R  / AX.R  : 0;
+  var s = AX.S  > 0 ? IN.S  / AX.S  : 0;
+  var c = AX.Cc > 0 ? IN.Cc / AX.Cc : 0;
+  function ray(x, y){
+    var tx = x !== 0 ? 1/Math.abs(x) : Infinity;
+    var ty = y !== 0 ? 1/Math.abs(y) : Infinity;
+    var t = Math.min(tx, ty);
+    if (!isFinite(t)) t = 0;
+    return [[0,0],[x*t, y*t]];
+  }
+  var lineStyleFor = function(col){ return {width:2, color:col}; };
+  function rayS(name, pt, col){
+    return {name:name, type:'line', data:ray(pt[0], pt[1]), showSymbol:false, silent:true,
+            lineStyle:lineStyleFor(col), z:2};
+  }
+  var series = [
+    rayS('NW', [-p, r], C.blue),
+    rayS('NE', [ s, r], C.green),
+    rayS('SE', [ s,-c], C.navy),
+    rayS('SW', [-p,-c], C.orange),
+    {name:'rect', type:'line', data:[[-p,r],[s,r],[s,-c],[-p,-c],[-p,r]], showSymbol:false, silent:true,
+     lineStyle:{width:1.6, color:'#b8924a', type:'dashed'}, z:3},
+    {name:'corners', type:'scatter', symbolSize:9, z:6,
+     itemStyle:{color:'#b8924a', borderColor:'#fff', borderWidth:1.5},
+     data:[
+       {value:[-p, r], q:'NW', a:txt('P (price)','P（價格）'), av:nf(IN.P), b:txt('R (rent)','R（租金）'), bv:nf(IN.R)},
+       {value:[ s, r], q:'NE', a:txt('S (stock)','S（存量）'), av:nf(IN.S), b:txt('R (rent)','R（租金）'), bv:nf(IN.R)},
+       {value:[ s,-c], q:'SE', a:txt('S (stock)','S（存量）'), av:nf(IN.S), b:txt('C (completions)','C（完工量）'), bv:nf(IN.Cc)},
+       {value:[-p,-c], q:'SW', a:txt('P (price)','P（價格）'), av:nf(IN.P), b:txt('C (completions)','C（完工量）'), bv:nf(IN.Cc)}
+     ]}
+  ];
+  // steady-state completions: C* = delta * S, drawn across the SE quadrant
+  var cstar = IN.delta/100 * IN.S;
+  if (AX.Cc > 0 && cstar/AX.Cc <= 1 && s > 0) {
+    var yc = -cstar/AX.Cc;
+    series.push({name:'ss', type:'line', data:[[0,yc],[s,yc]], showSymbol:false, silent:true, z:4,
+      lineStyle:{width:1.4, color:C.red, type:'dotted'},
+      endLabel:{show:false},
+      markPoint:{silent:true, symbol:'circle', symbolSize:1, data:[{coord:[s*0.55, yc],
+        label:{show:true, formatter: txt('steady-state C = δ·S','存量穩態所需 C = δ·S'), color:C.red, fontSize:10, fontFamily:'Inter', backgroundColor:'#fff', padding:[2,4], borderRadius:3}}]}});
+  }
+  // P = K reference, only when K has been supplied
+  if (IN.K && AX.P > 0 && IN.K/AX.P <= 1) {
+    var xk = -IN.K/AX.P;
+    series.push({name:'k', type:'line', data:[[xk,0],[xk,-1]], showSymbol:false, silent:true, z:4,
+      lineStyle:{width:1.4, color:'#7c3aed', type:'dotted'},
+      markPoint:{silent:true, symbol:'circle', symbolSize:1, data:[{coord:[xk, -0.62],
+        label:{show:true, formatter:'P = K  (q = 1)', color:'#7c3aed', fontSize:10, fontFamily:'Inter', backgroundColor:'#fff', padding:[2,4], borderRadius:3}}]}});
+  }
+
+  return {
+    animation:false,
+    grid:{left:56, right:56, top:34, bottom:34, containLabel:false},
+    tooltip:{trigger:'item', backgroundColor:'#fff', borderColor:'#ccd9e8', borderWidth:1,
+      textStyle:{color:C.navy, fontSize:11, fontFamily:'Inter'},
+      formatter:function(pm){
+        if (!pm.data || !pm.data.q) return '';
+        return '<b>' + pm.data.q + '</b><br>' + pm.data.a + ': ' + pm.data.av + '<br>' + pm.data.b + ': ' + pm.data.bv;
+      }},
+    xAxis:{type:'value', min:-1, max:1, interval:0.5, axisLine:{show:true, onZero:true, lineStyle:{color:'#9aa7b8'}},
+      axisTick:{show:false}, splitLine:{lineStyle:{color:C.grid}},
+      axisLabel:Object.assign({}, baseText, {formatter:function(v){
+        if (Math.abs(v) < 0.001) return '0';
+        return v < 0 ? shortNum(-v*AX.P) : shortNum(v*AX.S);
+      }})},
+    yAxis:{type:'value', min:-1, max:1, interval:0.5, axisLine:{show:true, onZero:true, lineStyle:{color:'#9aa7b8'}},
+      axisTick:{show:false}, splitLine:{lineStyle:{color:C.grid}},
+      axisLabel:Object.assign({}, baseText, {formatter:function(v){
+        if (Math.abs(v) < 0.001) return '0';
+        return v > 0 ? shortNum(v*AX.R) : shortNum(-v*AX.Cc);
+      }})},
+    graphic:[
+      {type:'text', left:62, top:40, style:{text: txt('NW · asset pricing  P = R / i','NW · 資產定價  P = R / i'), fill:C.blue, font:'600 11px Inter, sans-serif'}},
+      {type:'text', right:60, top:40, style:{text: txt('NE · space market  D(R, X) = S','NE · 空間市場  D(R, X) = S'), fill:C.green, font:'600 11px Inter, sans-serif', align:'right'}},
+      {type:'text', left:62, bottom:40, style:{text: txt('SW · development  C = f(P, K)','SW · 開發決策  C = f(P, K)'), fill:C.orange, font:'600 11px Inter, sans-serif'}},
+      {type:'text', right:60, bottom:40, style:{text: txt('SE · stock adjustment  ΔS = C − δS','SE · 存量調整  ΔS = C − δS'), fill:C.navy, font:'600 11px Inter, sans-serif', align:'right'}},
+      {type:'text', left:'center', top:6, style:{text: txt('↑  R  rent per unit per year','↑  R  每戶年租金'), fill:C.muted, font:'600 10px Inter, sans-serif', align:'center'}},
+      {type:'text', left:'center', bottom:6, style:{text: txt('↓  C  completions per year (units)','↓  C  年完工量（戶）'), fill:C.muted, font:'600 10px Inter, sans-serif', align:'center'}},
+      {type:'text', left:6, top:'middle', style:{text: txt('←  P','←  P'), fill:C.muted, font:'600 10px Inter, sans-serif'}},
+      {type:'text', right:6, top:'middle', style:{text: txt('S  →','S  →'), fill:C.muted, font:'600 10px Inter, sans-serif', align:'right'}}
+    ],
+    series:series
+  };
+}
+
+function renderQuad(){
+  if (!qChart) return;
+  qChart.setOption(quadOption(), true);
+}
+
+// ============ static charts ============
+function initStaticCharts(){
+  // real rent chart
+  var c1 = echarts.init(document.getElementById('chartQRent'));
+  allCharts.push(c1);
+  c1.setOption({
+    tooltip:Object.assign({}, baseTooltip, {valueFormatter:function(v){return Number(v).toFixed(1);}}),
+    legend:Object.assign({}, baseLegend, {data:[txt('CPI 041 rent (nominal)','CPI 041 租金（名目）'), txt('Headline CPI','整體 CPI'), txt('Real rent = 041 / headline','實質租金 = 041 ／整體')]}),
+    grid:Object.assign({}, baseGrid, {top:46}),
+    xAxis:mkAxis({type:'category', data:QD.rentYears, boundaryGap:false, splitLine:{show:false}}),
+    yAxis:mkAxis({type:'value', min:95, max:140, name: txt('index, 2010 = 100','指數，2010 = 100'), nameTextStyle:Object.assign({}, baseText, {align:'left'}), nameGap:12}),
+    series:[
+      {name:txt('CPI 041 rent (nominal)','CPI 041 租金（名目）'), type:'line', data:QD.cpi041, symbol:'none', lineStyle:{width:2.4, color:C.blue}, itemStyle:{color:C.blue}},
+      {name:txt('Headline CPI','整體 CPI'), type:'line', data:QD.cpiHead, symbol:'none', lineStyle:{width:2, color:C.muted, type:'dashed'}, itemStyle:{color:C.muted}},
+      {name:txt('Real rent = 041 / headline','實質租金 = 041 ／整體'), type:'line', data:QD.rentReal, symbol:'circle', symbolSize:5, lineStyle:{width:2.8, color:C.red}, itemStyle:{color:C.red},
+       markLine:{silent:true, symbol:'none', data:[{yAxis:100}], lineStyle:{color:'#c9bfa8', type:'dotted', width:1},
+         label:{formatter: txt('flat in real terms','實質持平'), color:C.muted, fontSize:10, position:'insideEndTop'}}}
+    ]
+  });
+
+  // delta bracket chart
+  var c2 = echarts.init(document.getElementById('chartQDelta'));
+  allCharts.push(c2);
+  c2.setOption({
+    tooltip:Object.assign({}, baseTooltip, {valueFormatter:function(v){return Number(v).toFixed(2)+'%';}}),
+    legend:Object.assign({}, baseLegend, {data:[txt('C / S  (lower bound)','C ／ S（下界）'), txt('ΔS / S  (upper bound)','ΔS ／ S（上界）')]}),
+    grid:Object.assign({}, baseGrid, {top:46}),
+    xAxis:mkAxis({type:'category', data:QD.dYears, splitLine:{show:false},
+      axisLabel:Object.assign({}, baseText, {interval:0, rotate:45, fontSize:9.5})}),
+    yAxis:mkAxis({type:'value', min:0, max:9, axisLabel:Object.assign({}, baseText, {formatter:'{value}%'})}),
+    series:[
+      {name:txt('C / S  (lower bound)','C ／ S（下界）'), type:'bar', data:QD.natCS, itemStyle:{color:C.navy, borderRadius:[3,3,0,0]}, barMaxWidth:14,
+       markArea:{silent:true, itemStyle:{color:'rgba(22,163,74,.10)'},
+         data:[[{yAxis:0.5, name: txt('0.5–1.5% retirement band','0.5–1.5% 汰換帶'), label:{color:'#15803d', fontSize:10, position:'insideTopLeft', backgroundColor:'#fff', padding:[2,4], borderRadius:3}}, {yAxis:1.5}]]},
+       markLine:{silent:true, symbol:'none', lineStyle:{color:'#b91c1c', type:'dotted', width:1.2},
+         data:[{xAxis:'2016', label:{formatter: txt('breaks','斷點'), color:'#b91c1c', fontSize:9.5}}, {xAxis:'2017', label:{show:false}}]}},
+      {name:txt('ΔS / S  (upper bound)','ΔS ／ S（上界）'), type:'bar', data:QD.natDS, itemStyle:{color:C.orange, borderRadius:[3,3,0,0]}, barMaxWidth:14}
+    ]
+  });
+
+  // states chart
+  var c3 = echarts.init(document.getElementById('chartQStates'));
+  allCharts.push(c3);
+  c3.setOption({
+    tooltip:Object.assign({}, baseTooltip, {valueFormatter:function(v){return Number(v).toFixed(2)+'%';}}),
+    legend:Object.assign({}, baseLegend, {data:[txt('C / S  (lower bound)','C ／ S（下界）'), txt('ΔS / S  (upper bound)','ΔS ／ S（上界）')]}),
+    grid:Object.assign({}, baseGrid, {top:46, left:80}),
+    xAxis:mkAxis({type:'value', min:0, max:7, axisLabel:Object.assign({}, baseText, {formatter:'{value}%'})}),
+    yAxis:mkAxis({type:'category', data: CURLANG === 'zh' ? QD.stZh : QD.stEn, splitLine:{show:false},
+      axisLabel:Object.assign({}, baseText, {fontSize:10.5})}),
+    series:[
+      {name:txt('C / S  (lower bound)','C ／ S（下界）'), type:'bar', data:QD.stCS, itemStyle:{color:C.navy, borderRadius:[0,3,3,0]}, barMaxWidth:9,
+       markLine:{silent:true, symbol:'none', lineStyle:{color:'#15803d', type:'dashed', width:1.2},
+         data:[{xAxis:1.5, label:{formatter: txt('1.5% band top','1.5% 帶頂'), color:'#15803d', fontSize:10}}]}},
+      {name:txt('ΔS / S  (upper bound)','ΔS ／ S（上界）'), type:'bar', data:QD.stDS, itemStyle:{color:C.orange, borderRadius:[0,3,3,0]}, barMaxWidth:9}
+    ]
+  });
+}
+
+function initCharts(lang){
+  CURLANG = lang;
+  allCharts.length = 0;
+  qChart = echarts.init(document.getElementById('chartQQuad'));
+  allCharts.push(qChart);
+  renderQuad();
+  initStaticCharts();
+}
+
+function render(){
+  syncChips();
+  renderTests();
+  renderQuad();
+}
+
+function setLang(lang){
+  CURLANG = lang;
+  document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+  document.body.classList.toggle('zh', lang === 'zh');
+  document.querySelectorAll('.lang-en').forEach(function(e){ e.style.display = lang === 'en' ? '' : 'none'; });
+  document.querySelectorAll('.lang-zh').forEach(function(e){ e.style.display = lang === 'zh' ? '' : 'none'; });
+  document.querySelectorAll('.lang-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.lang === lang); });
+  try { localStorage.setItem('lang', lang); } catch(e) {}
+  allCharts.forEach(function(c){ if (c) c.dispose(); });
+  allCharts = [];
+  qChart = null;
+  renderHints();
+  syncChips();
+  renderTests();
+  initCharts(lang);
+}
+window.setLang = setLang;
+
+function numOrNull(el){
+  var v = el.value.trim();
+  if (v === '') return null;
+  var n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+// ============ experiment buttons ============
+// These do not add any new arithmetic — they set an input to a specific value through the
+// same IN.* + render() path a manual slider drag would use, then let the existing computeTests()
+// logic decide the outcome. No thresholds are touched.
+function tryNetRent(){
+  var netR = Math.round(IN.R * 0.7 / 100) * 100;
+  document.getElementById('s-R').value = netR;
+  IN.R = netR;
+  render();
+  document.getElementById('expNetResult').textContent =
+    txt('R set to ' + nf(netR) + ' (≈70% of gross). Look at cell 1 above.', 'R 已設為 ' + nf(netR) + '（毛額的約 70%）。回頭看上面第 1 格。');
+}
+function resetNetRent(){
+  var base = PRESETS[GEO].R;
+  document.getElementById('s-R').value = base;
+  IN.R = base;
+  render();
+  document.getElementById('expNetResult').textContent = '';
+}
+function pushRhoExtreme(){
+  var el = document.getElementById('s-rho');
+  var v = parseFloat(el.max);
+  el.value = v;
+  IN.rho = v;
+  render();
+}
+function resetRhoExtreme(){
+  var base = PRESETS[GEO].rho;
+  document.getElementById('s-rho').value = base;
+  IN.rho = base;
+  render();
+}
+function pushDeltaExtreme(){
+  var el = document.getElementById('s-delta');
+  var v = parseFloat(el.min);
+  el.value = v;
+  IN.delta = v;
+  render();
+}
+function resetDeltaExtreme(){
+  var base = PRESETS[GEO].delta;
+  document.getElementById('s-delta').value = base;
+  IN.delta = base;
+  render();
+}
+
+window.addEventListener('load', function(){
+  loadPreset('kl');
+
+  document.querySelectorAll('#segGeo button').forEach(function(b){
+    b.addEventListener('click', function(){
+      loadPreset(b.dataset.v);
+      renderHints();
+      render();
+    });
+  });
+
+  var sliderMap = {'s-R':'R', 's-P':'P', 's-C':'Cc', 's-S':'S', 's-rf':'rf', 's-rho':'rho', 's-delta':'delta'};
+  Object.keys(sliderMap).forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){
+      IN[sliderMap[id]] = parseFloat(this.value);
+      render();
+    });
+  });
+
+  var numMap = {'n-OH':'OH', 'n-DS':'DS', 'n-K':'K', 'n-gb':'gb', 'n-db':'db'};
+  Object.keys(numMap).forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){
+      IN[numMap[id]] = numOrNull(this);
+      render();
+    });
+  });
+
+  document.getElementById('btnTryNet').addEventListener('click', tryNetRent);
+  document.getElementById('btnResetNet').addEventListener('click', resetNetRent);
+  document.getElementById('btnPushRho').addEventListener('click', pushRhoExtreme);
+  document.getElementById('btnResetRho').addEventListener('click', resetRhoExtreme);
+  document.getElementById('btnPushDelta').addEventListener('click', pushDeltaExtreme);
+  document.getElementById('btnResetDelta').addEventListener('click', resetDeltaExtreme);
+
+  document.querySelectorAll('.lang-btn').forEach(function(b){
+    b.addEventListener('click', function(){ setLang(b.dataset.lang); });
+  });
+
+  var lang = 'en';
+  try { lang = localStorage.getItem('lang') || 'en'; } catch(e) {}
+  setLang(lang);
+});
+
+window.addEventListener('resize', function(){
+  allCharts.forEach(function(c){ if (c) c.resize(); });
+});
+</script>
+
+</body>
+</html>

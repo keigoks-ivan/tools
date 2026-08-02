@@ -7,8 +7,8 @@
 - 所有修改直接編輯 HTML 檔案
 
 ## 部署
-- Repo: github.com/keigoks-ivan/malaysia-property
-- 網站: myproperty.investmquest.com（Cloudflare Pages 自動 deploy）
+- Repo: github.com/keigoks-ivan/tools
+- 網站: tools.investmquest.com（Cloudflare Pages 自動 deploy）
 - Push 到 main 後約 1-2 分鐘生效
 
 ## 目錄結構
@@ -19,6 +19,7 @@
 /jp/                 ← Japan
 /nz/                 ← New Zealand
 /uk/                 ← United Kingdom
+/global/             ← 跨市場獨立工具（四象限模型、其他市場羅盤；從 myproperty 遷入）
 /docs/dd/            ← 深度研究報告（獨立 HTML）
 /css/style.css       ← 主樣式（所有頁面共用）
 /tw/tw.css           ← 補丁 CSS（所有子目錄頁面都引用）
