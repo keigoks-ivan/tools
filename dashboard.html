@@ -121,6 +121,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
 .compare-tbl td:first-child{text-align:left;font-weight:600}
 .compare-tbl tr:last-child td{border-bottom:none}
 .compare-tbl tr:hover td{background:#f8fbff;cursor:pointer}
+.compare-tbl tr.no-link:hover td{cursor:default}
 .note{font-size:10px;color:#94a3b8;margin-top:10px;line-height:1.5}
 
 /* City Comparison Filter Bar + Pin & Compare */
@@ -193,22 +194,19 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
 @media(max-width:760px){#t5-controls > div:nth-child(2){grid-template-columns:repeat(2,1fr)!important}}
 @media(max-width:480px){#t5-controls > div:nth-child(2){grid-template-columns:1fr!important}}
 
-/* Cost Calculator */
-.cc-preset{font-size:10px;padding:4px 9px;background:#f0f6ff;border:1px solid #dce8f5;color:#5a7a9a;border-radius:4px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .12s}
-.cc-preset:hover{background:#3b82f6;color:#fff;border-color:#3b82f6}
-#cc-output .cc-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid #e8eef7}
-#cc-output .cc-row:last-of-type{border-bottom:none}
-#cc-output .cc-lbl{font-size:10.5px;color:#5a7a9a;font-weight:500}
-#cc-output .cc-amt{font-size:13px;font-weight:700;color:#1e3a5f;font-variant-numeric:tabular-nums}
-#cc-output .cc-pct{font-size:9.5px;color:#94a3b8;font-weight:500;margin-left:6px}
-#cc-output .cc-row.total{border-top:2px solid #1e3a5f;border-bottom:none;margin-top:6px;padding-top:10px}
-#cc-output .cc-row.total .cc-amt{font-size:16px;color:#0f1e33}
-#cc-output .cc-cliff{margin-top:10px;padding:8px 10px;border-radius:6px;font-size:10px;line-height:1.5}
-#cc-output .cc-cliff strong{font-weight:700}
-#cc-output .cc-be{margin-top:8px;padding:8px 10px;background:#eef6ff;border-radius:6px;font-size:10px;color:#1e3a5f;line-height:1.5;border-left:3px solid #3b82f6}
-@media(max-width:760px){
-  #costCalc > div:nth-child(2){grid-template-columns:1fr!important}
-}
+/* Foreign buyer badge + quarterly movers */
+.fc-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:600;white-space:nowrap;cursor:help}
+.fc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block}
+.ath-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;background:#f0fdf4;color:#166534;border:1px solid #86efac;white-space:nowrap}
+.mv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.mv-card{background:#fff;border:1px solid #dce8f5;border-radius:10px;padding:12px 14px}
+.mv-card h4{font-size:10px;letter-spacing:.06em;color:#5a7a9a;font-weight:700;margin-bottom:8px;text-transform:uppercase}
+.mv-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid #f0f5fb;font-size:11px}
+.mv-row:last-child{border-bottom:none}
+.mv-name{display:flex;align-items:center;gap:6px;min-width:0;color:#1e3a5f;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mv-val{font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+@media(max-width:920px){.mv-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.mv-grid{grid-template-columns:1fr}}
 
 @media(max-width:900px){
   .hero-inner{grid-template-columns:1fr;gap:24px}
@@ -249,8 +247,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
     <div class="hero-title-block">
       <h1 class="hero-h1 lang-en">Global Real Estate Intelligence</h1>
       <h1 class="hero-h1 lang-zh">全球房地產智能監測</h1>
-      <span class="hero-eyebrow lang-en">· 18 markets · 81 cities · 25 countries</span>
-      <span class="hero-eyebrow lang-zh">· 18 市場 · 81 城市 · 25 國家</span>
+      <span class="hero-eyebrow lang-en">· 18 markets · <span id="hero-city-count-en">84</span> cities · 25 countries</span>
+      <span class="hero-eyebrow lang-zh">· 18 市場 · <span id="hero-city-count-zh">84</span> 城市 · 25 國家</span>
     </div>
   </div>
 </section>
@@ -262,7 +260,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
       <span class="section-title lang-zh">市場覆蓋</span>
       <span class="section-desc lang-en">Click to enter any market</span>
       <span class="section-desc lang-zh">點擊進入各市場</span>
-      <span class="upd-stamp"><span class="upd-dot"></span><span class="lang-en">Updated 2026-05 · <a href="/methodology.html">Methodology</a></span><span class="lang-zh">2026-05 更新 · <a href="/methodology.html">方法論</a></span></span>
+      <span class="upd-stamp"><span class="upd-dot"></span><span class="lang-en">Updated 2026-08 · <a href="/methodology.html">Methodology</a></span><span class="lang-zh">2026-08 更新 · <a href="/methodology.html">方法論</a></span></span>
     </div>
     <div class="markets-grid">
       <div class="mcard" style="--accent:#e65100">
@@ -456,9 +454,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
     <div class="section-hdr">
       <span class="section-title lang-en">CITY COMPARISON</span>
       <span class="section-title lang-zh">城市比較</span>
-      <span class="section-desc lang-en">84 cities &middot; Price &middot; YoY &middot; Yield &middot; PTI &middot; Supply &middot; P/R Ratio &middot; Pipeline &middot; Mortgage &middot; All columns sortable</span>
-      <span class="section-desc lang-zh">84 城市 &middot; 房價 &middot; 年增率 &middot; 收益率 &middot; 房價收入比 &middot; 現在供需 &middot; 房租比 &middot; 在建供給 &middot; 3年展望 &middot; 按揭利率 &middot; 所有欄位可排序</span>
-      <span class="upd-stamp"><span class="upd-dot"></span><span class="lang-en">Q1 2026 &middot; <a href="/methodology.html">Sources</a></span><span class="lang-zh">2026-Q1 &middot; <a href="/methodology.html">來源</a></span></span>
+      <span class="section-desc lang-en">84 cities &middot; Price &middot; vs Peak &middot; YoY &middot; Rent YoY &middot; Yield &middot; PTI &middot; Supply &middot; P/R Ratio &middot; Pipeline &middot; DOM &middot; Mortgage &middot; Foreign Buyer Cost &middot; All columns sortable</span>
+      <span class="section-desc lang-zh">84 城市 &middot; 房價 &middot; 距高點 &middot; 年增率 &middot; 租金年增 &middot; 收益率 &middot; 房價收入比 &middot; 現在供需 &middot; 房租比 &middot; 在建供給 &middot; 在售天數 &middot; 按揭利率 &middot; 外資成本 &middot; 所有欄位可排序</span>
+      <span class="upd-stamp"><span class="upd-dot"></span><span class="lang-en">Q3 2026 &middot; <a href="/methodology.html">Sources</a></span><span class="lang-zh">2026-Q3 &middot; <a href="/methodology.html">來源</a></span></span>
     </div>
 
     <!-- FILTER BAR -->
@@ -500,19 +498,23 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
         <thead><tr>
           <th class="th-tip" style="text-align:left;cursor:pointer;user-select:none;width:105px" data-key="name" onclick="sortBy('name')"><span class="lang-en">City</span><span class="lang-zh">城市</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>City</strong><br>Click to enter the city's deep-dive page. Click header to sort A-Z.</span><span class="lang-zh"><strong>城市</strong><br>點擊列進入深度分析頁。點擊欄頭按字母排序。</span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:72px" data-key="d10y" onclick="sortBy('d10y')"><span class="lang-en">10yr</span><span class="lang-zh">10年漲幅</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>10yr Cumulative</strong><br>Apartment price index Q1 2026 ÷ Q1 2016 − 100%. Local currency, not USD.<br><em>Source: country apartment-segment HPI</em></span><span class="lang-zh"><strong>10年累計漲幅</strong><br>公寓房價指數 2026Q1 ÷ 2016Q1 − 100%。當地貨幣計，非美元。<br><em>來源：各國公寓區段 HPI</em></span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:70px" data-key="peakDD" onclick="sortBy('peakDD')"><span class="lang-en">vs Peak</span><span class="lang-zh">距高點</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Distance from Nominal Peak</strong><br>% below the city's all-time nominal price high. 0% / ATH = at or near the all-time high.<br><em>Source: national/city HPI series</em></span><span class="lang-zh"><strong>距名目歷史高點</strong><br>距該城市歷史最高名目房價的百分比。0%／歷史新高＝處於或接近歷史新高。<br><em>來源：各國／城市房價指數</em></span></span></th>
           <th class="th-tip" style="text-align:center;width:70px"><span class="lang-en">5yr Trend</span><span class="lang-zh">5年走勢</span><span class="tip-bubble"><span class="lang-en"><strong>5-Year Indicative Trajectory</strong><br>Sparkline derived from 10yr cumulative + latest YoY. <em>Indicative shape only — not a precise quarterly path.</em> Green = positive YoY · Red = negative YoY.</span><span class="lang-zh"><strong>5 年走勢示意</strong><br>由 10 年累計與最新 YoY 推算。<em>僅示意形狀，不代表精確季度走勢。</em>綠 = 正成長 · 紅 = 衰退。</span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:72px" data-key="yoy" onclick="sortBy('yoy')"><span class="lang-en">YoY</span><span class="lang-zh">年增率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Year over Year</strong><br>Latest available quarter vs same quarter prior year. Apartment segment.</span><span class="lang-zh"><strong>年增率</strong><br>最新可得季度 vs 去年同季。公寓區段。</span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:68px" data-key="rentYoY" onclick="sortBy('rentYoY')"><span class="lang-en">Rent YoY</span><span class="lang-zh">租金年增</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Residential Rent YoY</strong><br>Asking/contract residential rent, latest available period vs same period prior year.</span><span class="lang-zh"><strong>住宅租金年增率</strong><br>最新可得期間住宅租金（開價／簽約）vs 去年同期。</span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:72px" data-key="yield" onclick="sortBy('yield')"><span class="lang-en">Yield</span><span class="lang-zh">收益率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Gross Rental Yield</strong><br>Annual rent ÷ price, before tax, vacancy, and management fees. Actual net is typically 60–80% of gross.</span><span class="lang-zh"><strong>毛租金收益率</strong><br>年租 ÷ 房價，未扣稅、空置、管理費。實際淨值通常為毛值的 60–80%。</span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:72px" data-key="carry" onclick="sortBy('carry')"><span class="lang-en">Carry</span><span class="lang-zh">利差</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Carry Spread</strong><br>Yield − local mortgage rate. Positive = rent covers debt service.<br><em>+2% income · 0~+2% neutral · &lt;-3% deep negative</em></span><span class="lang-zh"><strong>利差</strong><br>收益率 − 當地房貸利率。正值代表租金可負擔利息。<br><em>+2% 收租 · 0~+2% 中性 · &lt;-3% 深度負利差</em></span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:62px" data-key="pti" onclick="sortBy('pti')"><span class="lang-en">PTI</span><span class="lang-zh">房價收入比</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Price-to-Income</strong><br>Median apartment price ÷ median annual household income.<br><em>&lt;5× affordable · 5–10× stretched · &gt;10× severely unaffordable</em></span><span class="lang-zh"><strong>房價收入比</strong><br>中位公寓房價 ÷ 中位家庭年收入。<br><em>&lt;5 倍可負擔 · 5–10 倍偏高 · &gt;10 倍嚴重不可負擔</em></span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:58px" data-key="pr" onclick="sortBy('pr')"><span class="lang-en">P/R</span><span class="lang-zh">房租比</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Price-to-Rent</strong><br>Median price ÷ gross annual rent of comparable unit.<br><em>&lt;20× buy favored · 20–30× neutral · &gt;30× rent favored</em></span><span class="lang-zh"><strong>房租比</strong><br>中位房價 ÷ 同類單位毛年租。<br><em>&lt;20 倍買有利 · 20–30 倍中性 · &gt;30 倍租有利</em></span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:55px" data-key="vacancy" onclick="sortBy('vacancy')"><span class="lang-en">Vac%</span><span class="lang-zh">空置率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Vacancy Rate</strong><br>Rental vacancy rate. Listings-to-stock proxy where unavailable.<br><em>&lt;1% crisis tight · 1–2% tight · 2–3.5% balanced · &gt;3.5% soft</em></span><span class="lang-zh"><strong>空置率</strong><br>租賃空置率。無資料時以掛牌／存量替代。<br><em>&lt;1% 危機緊張 · 1–2% 緊張 · 2–3.5% 平衡 · &gt;3.5% 鬆軟</em></span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:58px" data-key="txYoY" onclick="sortBy('txYoY')"><span class="lang-en">Tx YoY</span><span class="lang-zh">量增率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Transaction Volume YoY</strong><br>Number of completed sales vs same period prior year. Positive = rising activity, negative = cooling.</span><span class="lang-zh"><strong>成交量年增率</strong><br>完成交易筆數 vs 去年同期。正值=活絡，負值=降溫。</span></span></th>
+          <th class="th-tip" style="cursor:pointer;user-select:none;width:56px" data-key="dom" onclick="sortBy('dom')"><span class="lang-en">DOM</span><span class="lang-zh">在售天數</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Days on Market</strong><br>Median days from listing to sale/contract. Lower = faster-moving, seller-favored market.</span><span class="lang-zh"><strong>在售天數</strong><br>從掛牌到成交／簽約的中位天數。數字越低代表市場越熱、賣方越有利。</span></span></th>
           <th class="th-tip" style="text-align:center;cursor:pointer;user-select:none;width:105px" data-key="supply" onclick="sortBy('supply')"><span class="lang-en">Now</span><span class="lang-zh">現在供需</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Current Supply Pressure</strong><br>Inventory level today. <strong style="color:#fca5a5">🔴Tight</strong> = sellers hold pricing power. <strong style="color:#fcd34d">🟡Balanced</strong>. <strong style="color:#86efac">🟢Loose</strong> = buyer leverage.</span><span class="lang-zh"><strong>當前供需</strong><br>當下庫存水位。<strong style="color:#fca5a5">🔴緊張</strong>=賣方掌握定價權。<strong style="color:#fcd34d">🟡平衡</strong>。<strong style="color:#86efac">🟢寬鬆</strong>=買方有議價空間。</span></span></th>
           <th class="th-tip" style="text-align:center;cursor:pointer;user-select:none;width:105px" data-key="pipeline" onclick="sortBy('pipeline')"><span class="lang-en">Pipeline</span><span class="lang-zh">未來供給</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Construction Pipeline</strong><br>Units under construction as % of existing housing stock.<br><em>Low &lt;1% · Mod 1–2.5% · High &gt;2.5%</em></span><span class="lang-zh"><strong>在建供給</strong><br>在建單位 ÷ 現有住宅存量。<br><em>低 &lt;1% · 中 1–2.5% · 高 &gt;2.5%</em></span></span></th>
           <th class="th-tip" style="text-align:left;width:200px"><span class="lang-en">3yr Outlook</span><span class="lang-zh">3年展望</span><span class="tip-bubble"><span class="lang-en"><strong>3-Year Forward Outlook</strong><br>Qualitative supply-demand assessment for the next 3 years, combining pipeline, vacancy, mortgage rate trajectory, and policy signals.</span><span class="lang-zh"><strong>3 年前瞻展望</strong><br>未來 3 年定性供需評估，綜合在建、空置、利率走勢與政策訊號。</span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:90px" data-key="priceUSD" onclick="sortBy('priceUSD')"><span class="lang-en">Apt Price</span><span class="lang-zh">公寓房價</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Apartment Median Price</strong><br>Local currency total price. Bangkok / Chiang Mai shown as price per m². Sorted by USD equivalent.</span><span class="lang-zh"><strong>公寓中位房價</strong><br>當地貨幣總價。曼谷／清邁顯示每平方米單價。按美元等值排序。</span></span></th>
           <th class="th-tip" style="cursor:pointer;user-select:none;width:55px" data-key="mortgage" onclick="sortBy('mortgage')"><span class="lang-en">Rate</span><span class="lang-zh">利率</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Mortgage Rate</strong><br>Prevailing 2026 mortgage rate (typically 30yr fixed or country equivalent). Foreign-buyer rates may be 50–150bp higher.</span><span class="lang-zh"><strong>房貸利率</strong><br>2026 年現行房貸利率（通常為 30 年固定或當地對應期限）。外國買家利率可能加 50–150bp。</span></span></th>
+          <th class="th-tip" style="text-align:center;cursor:pointer;user-select:none;width:118px" data-key="fc" onclick="sortBy('fc')"><span class="lang-en">Foreign Buyer</span><span class="lang-zh">外資成本</span><span class="sort-arrow" style="font-size:9px;color:#94a3b8"> ↕</span><span class="tip-bubble"><span class="lang-en"><strong>Foreign Buyer Cost &amp; Access</strong><br>🟢 Friendly = no/minimal surcharge · 🟡 Conditional = restrictions or extra tax apply · 🔴 High barrier = heavy surcharge or largely blocked · 🚫 = purchase banned for foreign individuals. Hover a row's badge for jurisdiction detail.</span><span class="lang-zh"><strong>外資買家成本與准入</strong><br>🟢友善＝無或極低附加稅 · 🟡有條件＝有限制或需額外稅費 · 🔴高門檻＝重稅或大幅受限 · 🚫＝禁止外國自然人購買。將滑鼠移到列上的徽章可看該國詳情。</span></span></th>
         </tr></thead>
         <tbody id="city-tbody"></tbody>
       </table>
@@ -535,8 +537,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
       <span class="lang-zh" style="display:none"><strong>公寓房價</strong> &mdash; 公寓/大樓中位總價，當地貨幣顯示。曼谷/清邁為每平方米單價。按美元等值排序。</span>
       <span class="lang-en"><strong>10yr</strong> &mdash; Cumulative apartment price change over 10 years (2016&ndash;2026).</span>
       <span class="lang-zh" style="display:none"><strong>10年漲幅</strong> &mdash; 過去10年公寓累計漲跌幅（2016&ndash;2026）。</span>
+      <span class="lang-en"><strong>vs Peak</strong> &mdash; % below the city's all-time nominal price high. ATH = at/near the high.</span>
+      <span class="lang-zh" style="display:none"><strong>距高點</strong> &mdash; 距該城市歷史最高名目房價的百分比。歷史新高＝處於或接近高點。</span>
       <span class="lang-en"><strong>YoY</strong> &mdash; Latest available quarter vs same quarter prior year.</span>
       <span class="lang-zh" style="display:none"><strong>YoY</strong> &mdash; 最新可得季度 vs 去年同季。</span>
+      <span class="lang-en"><strong>Rent YoY</strong> &mdash; Residential rent change, latest period vs same period prior year.</span>
+      <span class="lang-zh" style="display:none"><strong>租金年增</strong> &mdash; 住宅租金最新期間 vs 去年同期變化。</span>
       <span class="lang-en"><strong>Yield</strong> &mdash; Gross rental yield, before tax and fees.</span>
       <span class="lang-zh" style="display:none"><strong>收益率</strong> &mdash; 毛租金收益率，未扣稅費。</span>
       <span class="lang-en"><strong>Carry</strong> &mdash; Yield minus mortgage rate. Positive = rental income covers debt.</span>
@@ -549,6 +555,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
       <span class="lang-zh" style="display:none"><strong>空置率</strong> &mdash; 租賃空置率。&lt;1%=危機性緊張 &middot; 1&ndash;2%=緊張 &middot; 2&ndash;3.5%=平衡 &middot; &gt;3.5%=鬆軟。</span>
       <span class="lang-en"><strong>Tx YoY</strong> &mdash; Transaction volume year-on-year change. Positive = rising activity &middot; Negative = cooling.</span>
       <span class="lang-zh" style="display:none"><strong>量增率</strong> &mdash; 成交量年增率。正數=交易活絡 &middot; 負數=市場降溫。</span>
+      <span class="lang-en"><strong>DOM</strong> &mdash; Median days on market, listing to sale/contract.</span>
+      <span class="lang-zh" style="display:none"><strong>在售天數</strong> &mdash; 從掛牌到成交／簽約的中位天數。</span>
       <span class="lang-en"><strong>Now</strong> &mdash; Current inventory level. 🔴 Tight &middot; 🟡 Balanced &middot; 🟢 Loose (buyer leverage).</span>
       <span class="lang-zh" style="display:none"><strong>現在供需</strong> &mdash; 當前庫存水位。🔴 緊張 &middot; 🟡 平衡 &middot; 🟢 寬鬆（買方有議價空間）。</span>
       <span class="lang-en"><strong>Pipeline</strong> &mdash; Units under construction as % of existing stock. Low &lt;1% &middot; Mod 1&ndash;2.5% &middot; High &gt;2.5%.</span>
@@ -557,8 +565,41 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
       <span class="lang-zh" style="display:none"><strong>3年展望</strong> &mdash; 定性前瞻供需評估。</span>
       <span class="lang-en"><strong>Rate</strong> &mdash; Prevailing mortgage rate, 2026.</span>
       <span class="lang-zh" style="display:none"><strong>利率</strong> &mdash; 2026年現行房貸利率。</span>
-      <span class="lang-en" style="grid-column:span 2;margin-top:4px;color:#94a3b8">Sources: Numbeo / Case-Shiller / CBRE / CoreLogic / REINZ / Land Registry / NAPIC / MOI / URA / DLD &middot; Updated Q2 2026 &middot; Not investment advice.</span>
-      <span class="lang-zh" style="display:none;grid-column:span 2;margin-top:4px;color:#94a3b8">來源：Numbeo / Case-Shiller / CBRE / CoreLogic / REINZ / 土地登記處 / NAPIC / 內政部 / URA / DLD &middot; 2026年Q2更新 &middot; 非投資建議。</span>
+      <span class="lang-en"><strong>Foreign Buyer</strong> &mdash; 🟢 Friendly &middot; 🟡 Conditional &middot; 🔴 High barrier &middot; 🚫 Banned. Extra tax % shown when &gt;0. Hover badge for detail.</span>
+      <span class="lang-zh" style="display:none"><strong>外資成本</strong> &mdash; 🟢友善 &middot; 🟡有條件 &middot; 🔴高門檻 &middot; 🚫禁止。附加稅率 &gt;0 時顯示。將滑鼠移到徽章看詳情。</span>
+      <span class="lang-en" style="grid-column:span 2;margin-top:4px;color:#94a3b8">Sources: Numbeo / Case-Shiller / CBRE / CoreLogic / REINZ / Land Registry / NAPIC / MOI / URA / DLD &middot; Updated Q3 2026 &middot; Not investment advice.</span>
+      <span class="lang-zh" style="display:none;grid-column:span 2;margin-top:4px;color:#94a3b8">來源：Numbeo / Case-Shiller / CBRE / CoreLogic / REINZ / 土地登記處 / NAPIC / 內政部 / URA / DLD &middot; 2026年Q3更新 &middot; 非投資建議。</span>
+    </div>
+  </div>
+</section>
+
+<!-- Quarterly Movers -->
+<section style="background:#f8f9fc;border-bottom:1px solid #dce8f5">
+  <div class="section">
+    <div class="section-hdr">
+      <span class="section-title lang-en">QUARTERLY MOVERS</span>
+      <span class="section-title lang-zh">本季最大變動</span>
+      <span class="section-desc lang-en">Computed live from the 84-city table above</span>
+      <span class="section-desc lang-zh">即時由上方 84 城市表格計算</span>
+      <span class="upd-stamp"><span class="upd-dot"></span><span class="lang-en">Q3 2026 &middot; <a href="/methodology.html">Sources</a></span><span class="lang-zh">2026-Q3 &middot; <a href="/methodology.html">來源</a></span></span>
+    </div>
+    <div class="mv-grid">
+      <div class="mv-card">
+        <h4><span class="lang-en">Top 5 Price YoY Gainers</span><span class="lang-zh">房價年增最大 5 城</span></h4>
+        <div id="mv-price-up"></div>
+      </div>
+      <div class="mv-card">
+        <h4><span class="lang-en">Top 5 Price YoY Losers</span><span class="lang-zh">房價年減最大 5 城</span></h4>
+        <div id="mv-price-dn"></div>
+      </div>
+      <div class="mv-card">
+        <h4><span class="lang-en">Top 5 Rent YoY Gainers</span><span class="lang-zh">租金年增最大 5 城</span></h4>
+        <div id="mv-rent-up"></div>
+      </div>
+      <div class="mv-card">
+        <h4><span class="lang-en">Top 5 Deepest vs-Peak Drawdowns</span><span class="lang-zh">距高點最深 5 城</span></h4>
+        <div id="mv-peak-dd"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -617,120 +658,120 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fc;color:#1e
   <div class="footer">
     <span class="footer-l">INVESTMQUEST &middot; PROPERTY MONITOR</span>
     <span class="footer-r">
-      <span class="lang-en">Data: CS / BOT / REIC / CAR / REINZ / Land Registry &middot; Updated Q2 2026</span>
-      <span class="lang-zh">數據來源：CS / BOT / REIC / CAR / REINZ / 土地登記處 &middot; 2026年Q2更新</span>
+      <span class="lang-en">Data: CS / BOT / REIC / CAR / REINZ / Land Registry &middot; Updated Q3 2026</span>
+      <span class="lang-zh">數據來源：CS / BOT / REIC / CAR / REINZ / 土地登記處 &middot; 2026年Q3更新</span>
     </span>
   </div>
 </footer>
 
 <script>
 var CITIES=[
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'Silicon Valley',nameZh:'矽谷',priceUSD:1500000,priceDisp:'$1.50M',d10y:80,yoy:-2.5,vacancy:1.8,txYoY:-5,yield:3.2,pti:19.5,supply:'tight',pr:30,pipeline:0.4,dom:15,mortgage:6.30,outlook:{en:'Santa Clara County ZHVI ~-1.6% · Low builds',zh:'Santa Clara ZHVI約-1.6% · 低建量'},link:'us/sv.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'San Francisco',nameZh:'舊金山',priceUSD:1290000,priceDisp:'$1.29M',d10y:40,yoy:2.1,vacancy:5.2,txYoY:-5,yield:3.5,pti:18.0,supply:'tight',pr:37,pipeline:0.6,dom:13,mortgage:6.30,outlook:{en:'Zillow ZHVI +2.1% · SFH house +18% YoY',zh:'Zillow ZHVI +2.1% · 獨棟房+18%'},link:'us/sf.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'Los Angeles',nameZh:'洛杉磯',priceUSD:910000,priceDisp:'$910K',d10y:80,yoy:-1.6,vacancy:4.6,txYoY:-3,yield:4.5,pti:12.0,supply:'balanced',pr:40,pipeline:0.8,dom:35,mortgage:6.30,outlook:{en:'LA County median $910K · -1.6% YoY Redfin',zh:'LA郡中位$910K · Redfin年-1.6%'},link:'us/la.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'San Diego',nameZh:'聖地牙哥',priceUSD:950000,priceDisp:'$950K',d10y:95,yoy:-1.5,vacancy:3.2,txYoY:2,yield:4.0,pti:11.5,supply:'balanced',pr:30,pipeline:1.0,dom:27,mortgage:6.30,outlook:{en:'Redfin city $950K · +95% 10yr Case-Shiller',zh:'Redfin市$950K · Case-Shiller 10年+95%'},link:'us/sandiego.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'NYC',nameZh:'紐約',priceUSD:1225000,priceDisp:'$1.23M',d10y:58,yoy:5.2,vacancy:2.8,txYoY:5,yield:2.8,pti:14.75,supply:'balanced',pr:20,pipeline:0.9,dom:60,mortgage:6.30,outlook:{en:'Manhattan Q1 2026 +5.2% · Case-Shiller +4.9%',zh:'曼哈頓2026Q1 +5.2% · Case-Shiller +4.9%'},link:'us/nyc.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'Boston',nameZh:'波士頓',priceUSD:868000,priceDisp:'$868K',d10y:70,yoy:3.3,vacancy:2.3,txYoY:-2,yield:4.5,pti:10.0,supply:'tight',pr:28,pipeline:0.5,dom:12,mortgage:6.30,outlook:{en:'Redfin city $868K · MA SFH +4.4% YoY',zh:'Redfin市$868K · 麻州獨棟+4.4%'},link:'us/boston.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'Seattle',nameZh:'西雅圖',priceUSD:840000,priceDisp:'$840K',d10y:100,yoy:0.5,vacancy:2.8,txYoY:-3,yield:5.5,pti:10.5,supply:'tight',pr:34,pipeline:1.2,dom:18,mortgage:6.30,outlook:{en:'NWMLS $840K · listings +34.9% YoY King Co.',zh:'NWMLS $840K · King郡掛牌+34.9%'},link:'us/seattle.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'Miami',nameZh:'邁阿密',priceUSD:674000,priceDisp:'$674K',d10y:115,yoy:10.6,vacancy:7.5,txYoY:-12,yield:6.5,pti:7.0,supply:'loose',pr:29,pipeline:3.5,dom:61,mortgage:6.30,outlook:{en:'Dade SFH +10.6% YoY · Condo 12mo inventory',zh:'Dade獨棟+10.6% · 公寓12個月庫存'},link:'us/miami.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'Denver',nameZh:'丹佛',priceUSD:590000,priceDisp:'$590K',d10y:72,yoy:-3.6,vacancy:3.9,txYoY:-6,yield:6.0,pti:6.8,supply:'balanced',pr:24,pipeline:2.1,dom:38,mortgage:6.30,outlook:{en:'DMAR $590K all · Zillow ZHVI -3.6% YoY',zh:'DMAR全$590K · Zillow ZHVI年-3.6%'},link:'us/denver.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'Phoenix',nameZh:'鳳凰城',priceUSD:455000,priceDisp:'$455K',d10y:130,yoy:-1.5,vacancy:3.3,txYoY:-4,yield:5.5,pti:5.2,supply:'balanced',pr:31,pipeline:2.8,dom:45,mortgage:6.30,outlook:{en:'ARMLS $455K · Case-Shiller -1.5%',zh:'ARMLS $455K · Case-Shiller -1.5%'},link:'us/phoenix.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'Austin',nameZh:'奧斯丁',priceUSD:426000,priceDisp:'$426K',d10y:85,yoy:-3.0,vacancy:4.8,txYoY:-8,yield:5.7,pti:3.5,supply:'loose',pr:23,pipeline:2.5,dom:52,mortgage:6.30,outlook:{en:'Unlock MLS metro $426K · -24% from 2022 peak',zh:'Unlock MLS都會$426K · 較2022高峰-24%'},link:'us/austin.html'},
-  {flag:'\u{1F1FA}\u{1F1F8}',name:'Chicago',nameZh:'芝加哥',priceUSD:411000,priceDisp:'$411K',d10y:48,yoy:5.4,vacancy:3.5,txYoY:8,yield:8.3,pti:4.5,supply:'tight',pr:19,pipeline:0.7,dom:22,mortgage:6.30,outlook:{en:'Redfin $411K · Case-Shiller +4.6% · 8.3% yield',zh:'Redfin $411K · Case-Shiller +4.6% · 8.3%收益'},link:'us/chicago.html'},
-  {flag:'\u{1F1EC}\u{1F1E7}',name:'London',nameZh:'倫敦',priceUSD:858000,priceDisp:'£681K',d10y:15,yoy:-3.0,vacancy:1.2,txYoY:5,yield:3.8,pti:8.6,supply:'balanced',pr:31,pipeline:0.6,dom:45,mortgage:4.85,outlook:{en:'Rightmove TTM -3% vs 2023 peak -8%',zh:'Rightmove TTM -3% · 較2023峰-8%'},link:'uk/london.html'},
-  {flag:'\u{1F1EC}\u{1F1E7}',name:'Edinburgh',nameZh:'愛丁堡',priceUSD:370000,priceDisp:'£294K',d10y:35,yoy:3.9,vacancy:0.8,txYoY:3,yield:5.7,pti:8.0,supply:'tight',pr:16,pipeline:0.4,dom:22,mortgage:4.10,outlook:{en:'ONS +3.9% · EH3 compact up to 7.4% yield',zh:'ONS +3.9% · EH3緊湊單位收益率達7.4%'},link:'uk/edinburgh.html'},
-  {flag:'\u{1F1EC}\u{1F1E7}',name:'Birmingham',nameZh:'伯明翰',priceUSD:291000,priceDisp:'£231K',d10y:30,yoy:0.0,vacancy:1.5,txYoY:8,yield:5.6,pti:5.5,supply:'tight',pr:21,pipeline:1.1,dom:32,mortgage:4.10,outlook:{en:'ONS flat · HS2 Curzon regen',zh:'ONS持平 · HS2 Curzon再造'},link:'uk/birmingham.html'},
-  {flag:'\u{1F1EC}\u{1F1E7}',name:'Manchester',nameZh:'曼徹斯特',priceUSD:320000,priceDisp:'£254K',d10y:40,yoy:4.4,vacancy:1.0,txYoY:6,yield:6.1,pti:6.8,supply:'tight',pr:18,pipeline:0.8,dom:28,mortgage:4.10,outlook:{en:'ONS +4.4% · M11/13/14 yields 6.7-7.9%',zh:'ONS +4.4% · M11/13/14收益率6.7-7.9%'},link:'uk/manchester.html'},
-  {flag:'\u{1F1EC}\u{1F1E7}',name:'Newcastle',nameZh:'紐卡斯爾',priceUSD:261000,priceDisp:'£207K',d10y:28,yoy:5.1,vacancy:1.8,txYoY:4,yield:6.0,pti:5.0,supply:'balanced',pr:15,pipeline:0.5,dom:35,mortgage:4.10,outlook:{en:'ONS +5.1% · NE1-NE6 HMO yields 7.6-9.5%',zh:'ONS +5.1% · NE1-NE6 HMO收益7.6-9.5%'},link:'uk/newcastle.html'},
-  {flag:'\u{1F1E6}\u{1F1FA}',name:'Sydney',nameZh:'雪梨',priceUSD:817000,priceDisp:'A$1.30M',d10y:65,yoy:0.0,vacancy:1.1,txYoY:-2,yield:3.0,pti:13.5,supply:'tight',pr:21,pipeline:0.8,dom:28,mortgage:4.85,outlook:{en:'Cotality HVI flat · vacancy 1.1% SQM',zh:'Cotality HVI持平 · SQM空置1.1%'},link:'au/sydney.html'},
-  {flag:'\u{1F1E6}\u{1F1FA}',name:'Gold Coast',nameZh:'黃金海岸',priceUSD:851000,priceDisp:'A$1.35M',d10y:100,yoy:10.5,vacancy:1.1,txYoY:5,yield:4.5,pti:11.2,supply:'tight',pr:33,pipeline:0.5,dom:28,mortgage:4.85,outlook:{en:'Cotality 2nd most expensive after Syd/Mel',zh:'Cotality 僅次於雪/墨的次貴市場'},link:'au/goldcoast.html'},
-  {flag:'\u{1F1E6}\u{1F1FA}',name:'Brisbane',nameZh:'布里斯本',priceUSD:694000,priceDisp:'A$1.10M',d10y:93,yoy:19.1,vacancy:1.2,txYoY:8,yield:4.4,pti:9.5,supply:'tight',pr:30,pipeline:0.9,dom:22,mortgage:4.85,outlook:{en:'Cotality +19.1% · strongest capital',zh:'Cotality +19.1% · 首都最強'},link:'au/brisbane.html'},
-  {flag:'\u{1F1E6}\u{1F1FA}',name:'Melbourne',nameZh:'墨爾本',priceUSD:522000,priceDisp:'A$828K',d10y:15,yoy:3.4,vacancy:1.6,txYoY:-5,yield:3.8,pti:10.2,supply:'balanced',pr:30,pipeline:1.5,dom:35,mortgage:4.85,outlook:{en:'Cotality +3.4% · recovery inflecting',zh:'Cotality +3.4% · 復甦拐點'},link:'au/melbourne.html'},
-  {flag:'\u{1F1E6}\u{1F1FA}',name:'Perth',nameZh:'伯斯',priceUSD:644000,priceDisp:'A$1.02M',d10y:90,yoy:24.3,vacancy:0.7,txYoY:12,yield:4.8,pti:7.5,supply:'tight',pr:22,pipeline:0.6,dom:12,mortgage:6.29,outlook:{en:'Cotality +24.3% · resources-driven',zh:'Cotality +24.3% · 礦業帶動'},link:'#'},
-  {flag:'\u{1F1E6}\u{1F1FA}',name:'Adelaide',nameZh:'阿德萊德',priceUSD:593000,priceDisp:'A$937K',d10y:75,yoy:11.4,vacancy:0.9,txYoY:10,yield:3.3,pti:8.0,supply:'tight',pr:24,pipeline:0.5,dom:15,mortgage:6.29,outlook:{en:'Cotality +11.4% · AUKUS + migration',zh:'Cotality +11.4% · AUKUS+移民'},link:'#'},
-  {flag:'\u{1F1EF}\u{1F1F5}',name:'Tokyo',nameZh:'東京',priceUSD:812000,priceDisp:'¥121M',d10y:110,yoy:20.0,vacancy:3.5,txYoY:3,yield:3.3,pti:12.0,supply:'tight',pr:43,pipeline:0.3,dom:30,mortgage:2.32,outlook:{en:'Kantei used 70㎡ Jan-26 · +34% peaking',zh:'Kantei二手70㎡ Jan-26 · +34%見頂'},link:'jp/tokyo.html'},
-  {flag:'\u{1F1EF}\u{1F1F5}',name:'Fukuoka',nameZh:'福岡',priceUSD:342000,priceDisp:'¥53M',d10y:120,yoy:9.0,vacancy:1.5,txYoY:15,yield:5.0,pti:11.0,supply:'tight',pr:71,pipeline:0.4,dom:25,mortgage:2.32,outlook:{en:'REEI ¥53M · land +9% 2nd year · 13yr gain',zh:'REEI ¥53M · 地價連2年+9% · 13年上漲'},link:'jp/fukuoka.html'},
-  {flag:'\u{1F1EF}\u{1F1F5}',name:'Osaka',nameZh:'大阪',priceUSD:259000,priceDisp:'¥40M',d10y:75,yoy:7.0,vacancy:2.0,txYoY:21,yield:3.3,pti:12.0,supply:'tight',pr:35,pipeline:0.5,dom:35,mortgage:2.32,outlook:{en:'Kinki REINS +21% sales · Expo legacy',zh:'近畿REINS成交+21% · 世博效應'},link:'jp/osaka.html'},
-  {flag:'\u{1F1EF}\u{1F1F5}',name:'Nagoya',nameZh:'名古屋',priceUSD:254000,priceDisp:'¥39M',d10y:50,yoy:4.25,vacancy:2.5,txYoY:4,yield:4.3,pti:8.5,supply:'balanced',pr:28,pipeline:0.4,dom:35,mortgage:2.32,outlook:{en:'REEI ¥39M new · MacroMicro +4.25%',zh:'REEI ¥39M新建 · MacroMicro +4.25%'},link:'#'},
-  {flag:'\u{1F1EF}\u{1F1F5}',name:'Sapporo',nameZh:'札幌',priceUSD:388000,priceDisp:'¥60M',d10y:85,yoy:17.0,vacancy:2.2,txYoY:6,yield:4.7,pti:8.0,supply:'tight',pr:22,pipeline:0.5,dom:30,mortgage:2.32,outlook:{en:'REEI ¥60M +17% · Shinkansen extension',zh:'REEI ¥60M +17% · 新幹線延伸'},link:'#'},
-  {flag:'\u{1F1F9}\u{1F1FC}',name:'Taipei',nameZh:'台北',priceUSD:580000,priceDisp:'NT$19M',d10y:35,yoy:-0.6,vacancy:7.1,txYoY:-56,yield:1.8,pti:15.4,supply:'tight',pr:75,pipeline:0.3,dom:35,mortgage:2.32,outlook:{en:'Sinyi HPI -0.6% · vacancy 7.1% MOI',zh:'信義HPI-0.6% · 空置7.1%內政部'},link:'tw/taipei.html'},
-  {flag:'\u{1F1F9}\u{1F1FC}',name:'Hsinchu',nameZh:'新竹',priceUSD:310000,priceDisp:'NT$10M',d10y:58,yoy:-2.3,vacancy:2.0,txYoY:-80,yield:2.3,pti:12.5,supply:'balanced',pr:51,pipeline:0.8,dom:35,mortgage:2.32,outlook:{en:'Sinyi HPI 242.57 (highest) -2.3% decel',zh:'信義HPI 242.57(最高) -2.3%減速'},link:'tw/hsinchu.html'},
-  {flag:'\u{1F1F9}\u{1F1FC}',name:'Taichung',nameZh:'台中',priceUSD:280000,priceDisp:'NT$9M',d10y:55,yoy:-6.8,vacancy:2.8,txYoY:-68,yield:2.5,pti:11.9,supply:'balanced',pr:60,pipeline:1.2,dom:40,mortgage:2.32,outlook:{en:'Sinyi -6.8% · Yungching Q1-26 only +0.1%',zh:'信義-6.8% · 永慶Q1-26僅+0.1%'},link:'tw/taichung.html'},
-  {flag:'\u{1F1F9}\u{1F1FC}',name:'Kaohsiung',nameZh:'高雄',priceUSD:220000,priceDisp:'NT$7M',d10y:40,yoy:-7.3,vacancy:3.0,txYoY:-71,yield:3.0,pti:10.1,supply:'loose',pr:45,pipeline:1.5,dom:40,mortgage:2.32,outlook:{en:'Sinyi -7.3% · new case -16% Q1-26',zh:'信義-7.3% · 新案Q1-26 -16%'},link:'tw/kaohsiung.html'},
-  {flag:'\u{1F1F9}\u{1F1FC}',name:'New Taipei',nameZh:'新北市',priceUSD:370000,priceDisp:'NT$12M',d10y:30,yoy:-3.0,vacancy:7.5,txYoY:-60,yield:2.1,pti:14.0,supply:'balanced',pr:62,pipeline:1.0,dom:35,mortgage:2.32,outlook:{en:'Sinyi -3.0% · cumulative -5% vs peak',zh:'信義-3.0% · 累計較高峰-5%'},link:'#'},
-  {flag:'\u{1F1F9}\u{1F1FC}',name:'Tainan',nameZh:'台南',priceUSD:190000,priceDisp:'NT$6M',d10y:50,yoy:-2.6,vacancy:2.5,txYoY:-65,yield:2.9,pti:9.0,supply:'balanced',pr:50,pipeline:1.8,dom:42,mortgage:2.32,outlook:{en:'Sinyi -2.6% · cumulative -8 to -9% credit ctrl',zh:'信義-2.6% · 信用管制後累計-8至-9%'},link:'#'},
-  {flag:'\u{1F1F9}\u{1F1FC}',name:'Taoyuan',nameZh:'桃園',priceUSD:250000,priceDisp:'NT$8M',d10y:42,yoy:-3.7,vacancy:2.2,txYoY:-58,yield:2.4,pti:8.7,supply:'balanced',pr:55,pipeline:1.5,dom:38,mortgage:2.32,outlook:{en:'Sinyi -3.7% · cumulative -6 to -7%',zh:'信義-3.7% · 累計-6至-7%'},link:'#'},
-  {flag:'\u{1F1F3}\u{1F1FF}',name:'Auckland',nameZh:'奧克蘭',priceUSD:589000,priceDisp:'NZ$1.015M',d10y:45,yoy:-1.2,vacancy:2.5,txYoY:15,yield:4.0,pti:9.8,supply:'loose',pr:28,pipeline:2.5,dom:55,mortgage:4.25,outlook:{en:'REINZ median NZ$1.015M · HPI -1.2% YoY',zh:'REINZ中位 NZ$1.015M · HPI年-1.2%'},link:'nz/auckland.html'},
-  {flag:'\u{1F1F3}\u{1F1FF}',name:'Christchurch',nameZh:'基督城',priceUSD:426000,priceDisp:'NZ$735K',d10y:55,yoy:6.7,vacancy:2.3,txYoY:8,yield:4.4,pti:6.5,supply:'balanced',pr:25,pipeline:2.0,dom:38,mortgage:4.25,outlook:{en:'REINZ record NZ$735K · city +6.7%',zh:'REINZ紀錄 NZ$735K · 城+6.7%'},link:'nz/christchurch.html'},
-  {flag:'\u{1F1F2}\u{1F1FE}',name:'Kuala Lumpur',nameZh:'吉隆坡',priceUSD:181000,priceDisp:'RM 805K',d10y:10,yoy:-4.3,vacancy:18.0,txYoY:6,yield:4.9,pti:6.2,supply:'loose',pr:27,pipeline:2.8,dom:90,mortgage:4.25,outlook:{en:'NAPIC RM805K -4.3% · overhang 2,287 units',zh:'NAPIC RM805K -4.3% · 積壓2,287套'},link:'kl.html'},
-  {flag:'\u{1F1F2}\u{1F1FE}',name:'Penang',nameZh:'檳城',priceUSD:113000,priceDisp:'RM 505K',d10y:25,yoy:6.3,vacancy:12.0,txYoY:4,yield:5.7,pti:5.8,supply:'balanced',pr:23,pipeline:1.5,dom:75,mortgage:4.25,outlook:{en:'NAPIC RM505K +6.3% · overhang 2,730 units',zh:'NAPIC RM505K +6.3% · 積壓2,730套'},link:'penang.html'},
-  {flag:'\u{1F1F9}\u{1F1ED}',name:'Bangkok CBD',nameZh:'曼谷CBD',priceUSD:null,priceDisp:'THB 238K/m²',d10y:40,yoy:4.0,vacancy:12.0,txYoY:-5,yield:6.0,pti:8.5,supply:'loose',pr:31,pipeline:3.0,dom:120,mortgage:3.00,outlook:{en:'Knight Frank Q2-25 · CBD +3-5% · CBRE 2026 +15% fcst',zh:'萊坊Q2-25 · CBD +3-5% · CBRE 2026預測+15%'},link:'th/bangkok.html'},
-  {flag:'\u{1F1F9}\u{1F1ED}',name:'Chiang Mai',nameZh:'清邁',priceUSD:null,priceDisp:'THB 85K/m²',d10y:35,yoy:9.5,vacancy:8.0,txYoY:3,yield:5.5,pti:6.0,supply:'balanced',pr:21,pipeline:2.0,dom:90,mortgage:3.00,outlook:{en:'Nimman +9-10% · DTV visa demand',zh:'尼曼+9-10% · DTV簽證需求'},link:'th/chiangmai.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Silicon Valley',nameZh:'矽谷',priceUSD:1500000,priceDisp:'$1.50M',d10y:80,yoy:-2.5,vacancy:1.8,txYoY:-5,yield:3.2,pti:19.5,supply:'tight',pr:30,pipeline:0.4,dom:15,mortgage:6.30,outlook:{en:'Santa Clara County ZHVI ~-1.6% · Low builds',zh:'Santa Clara ZHVI約-1.6% · 低建量'},rentYoY:6.1,peakDD:-4.7,fc:'US',link:'us/sv.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'San Francisco',nameZh:'舊金山',priceUSD:1290000,priceDisp:'$1.29M',d10y:40,yoy:2.1,vacancy:5.2,txYoY:-5,yield:3.5,pti:18.0,supply:'tight',pr:37,pipeline:0.6,dom:13,mortgage:6.30,outlook:{en:'Zillow ZHVI +2.1% · SFH house +18% YoY',zh:'Zillow ZHVI +2.1% · 獨棟房+18%'},rentYoY:8.5,peakDD:-9.4,fc:'US',link:'us/sf.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Los Angeles',nameZh:'洛杉磯',priceUSD:910000,priceDisp:'$910K',d10y:80,yoy:-1.6,vacancy:4.6,txYoY:-3,yield:4.5,pti:12.0,supply:'balanced',pr:40,pipeline:0.8,dom:35,mortgage:6.30,outlook:{en:'LA County median $910K · -1.6% YoY Redfin',zh:'LA郡中位$910K · Redfin年-1.6%'},rentYoY:0.8,peakDD:-1.5,fc:'US',link:'us/la.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'San Diego',nameZh:'聖地牙哥',priceUSD:950000,priceDisp:'$950K',d10y:95,yoy:-1.5,vacancy:3.2,txYoY:2,yield:4.0,pti:11.5,supply:'balanced',pr:30,pipeline:1.0,dom:27,mortgage:6.30,outlook:{en:'Redfin city $950K · +95% 10yr Case-Shiller',zh:'Redfin市$950K · Case-Shiller 10年+95%'},rentYoY:1.0,peakDD:-2.3,fc:'US',link:'us/sandiego.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'NYC',nameZh:'紐約',priceUSD:1225000,priceDisp:'$1.23M',d10y:58,yoy:5.2,vacancy:2.8,txYoY:5,yield:2.8,pti:14.75,supply:'balanced',pr:20,pipeline:0.9,dom:60,mortgage:6.30,outlook:{en:'Manhattan Q1 2026 +5.2% · Case-Shiller +4.9%',zh:'曼哈頓2026Q1 +5.2% · Case-Shiller +4.9%'},rentYoY:4.5,peakDD:0,fc:'US',link:'us/nyc.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Boston',nameZh:'波士頓',priceUSD:868000,priceDisp:'$868K',d10y:70,yoy:3.3,vacancy:2.3,txYoY:-2,yield:4.5,pti:10.0,supply:'tight',pr:28,pipeline:0.5,dom:12,mortgage:6.30,outlook:{en:'Redfin city $868K · MA SFH +4.4% YoY',zh:'Redfin市$868K · 麻州獨棟+4.4%'},rentYoY:2.9,peakDD:-1.8,fc:'US',link:'us/boston.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Seattle',nameZh:'西雅圖',priceUSD:840000,priceDisp:'$840K',d10y:100,yoy:0.5,vacancy:2.8,txYoY:-3,yield:5.5,pti:10.5,supply:'tight',pr:34,pipeline:1.2,dom:18,mortgage:6.30,outlook:{en:'NWMLS $840K · listings +34.9% YoY King Co.',zh:'NWMLS $840K · King郡掛牌+34.9%'},rentYoY:0.6,peakDD:-5.3,fc:'US',link:'us/seattle.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Miami',nameZh:'邁阿密',priceUSD:674000,priceDisp:'$674K',d10y:115,yoy:10.6,vacancy:7.5,txYoY:-12,yield:6.5,pti:7.0,supply:'loose',pr:29,pipeline:3.5,dom:61,mortgage:6.30,outlook:{en:'Dade SFH +10.6% YoY · Condo 12mo inventory',zh:'Dade獨棟+10.6% · 公寓12個月庫存'},rentYoY:-1.8,peakDD:-3.0,fc:'US',link:'us/miami.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Denver',nameZh:'丹佛',priceUSD:590000,priceDisp:'$590K',d10y:72,yoy:-3.6,vacancy:3.9,txYoY:-6,yield:6.0,pti:6.8,supply:'balanced',pr:24,pipeline:2.1,dom:38,mortgage:6.30,outlook:{en:'DMAR $590K all · Zillow ZHVI -3.6% YoY',zh:'DMAR全$590K · Zillow ZHVI年-3.6%'},rentYoY:-2.0,peakDD:-13.0,fc:'US',link:'us/denver.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Phoenix',nameZh:'鳳凰城',priceUSD:455000,priceDisp:'$455K',d10y:130,yoy:-1.5,vacancy:3.3,txYoY:-4,yield:5.5,pti:5.2,supply:'balanced',pr:31,pipeline:2.8,dom:45,mortgage:6.30,outlook:{en:'ARMLS $455K · Case-Shiller -1.5%',zh:'ARMLS $455K · Case-Shiller -1.5%'},rentYoY:-3.7,peakDD:-4.8,fc:'US',link:'us/phoenix.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Austin',nameZh:'奧斯丁',priceUSD:426000,priceDisp:'$426K',d10y:85,yoy:-3.0,vacancy:4.8,txYoY:-8,yield:5.7,pti:3.5,supply:'loose',pr:23,pipeline:2.5,dom:52,mortgage:6.30,outlook:{en:'Unlock MLS metro $426K · -24% from 2022 peak',zh:'Unlock MLS都會$426K · 較2022高峰-24%'},rentYoY:-1.7,peakDD:-24.6,fc:'US',link:'us/austin.html'},
+  {flag:'\u{1F1FA}\u{1F1F8}',name:'Chicago',nameZh:'芝加哥',priceUSD:411000,priceDisp:'$411K',d10y:48,yoy:5.4,vacancy:3.5,txYoY:8,yield:8.3,pti:4.5,supply:'tight',pr:19,pipeline:0.7,dom:22,mortgage:6.30,outlook:{en:'Redfin $411K · Case-Shiller +4.6% · 8.3% yield',zh:'Redfin $411K · Case-Shiller +4.6% · 8.3%收益'},rentYoY:4.8,peakDD:0,fc:'US',link:'us/chicago.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'London',nameZh:'倫敦',priceUSD:858000,priceDisp:'£681K',d10y:15,yoy:-3.0,vacancy:1.2,txYoY:5,yield:3.8,pti:8.6,supply:'balanced',pr:31,pipeline:0.6,dom:45,mortgage:4.85,outlook:{en:'Rightmove TTM -3% vs 2023 peak -8%',zh:'Rightmove TTM -3% · 較2023峰-8%'},rentYoY:2.2,peakDD:-7,fc:'UK',link:'uk/london.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'Edinburgh',nameZh:'愛丁堡',priceUSD:370000,priceDisp:'£294K',d10y:35,yoy:3.9,vacancy:0.8,txYoY:3,yield:5.7,pti:8.0,supply:'tight',pr:16,pipeline:0.4,dom:22,mortgage:4.10,outlook:{en:'ONS +3.9% · EH3 compact up to 7.4% yield',zh:'ONS +3.9% · EH3緊湊單位收益率達7.4%'},rentYoY:2.7,peakDD:0,fc:'UK',link:'uk/edinburgh.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'Birmingham',nameZh:'伯明翰',priceUSD:291000,priceDisp:'£231K',d10y:30,yoy:0.0,vacancy:1.5,txYoY:8,yield:5.6,pti:5.5,supply:'tight',pr:21,pipeline:1.1,dom:32,mortgage:4.10,outlook:{en:'ONS flat · HS2 Curzon regen',zh:'ONS持平 · HS2 Curzon再造'},rentYoY:3.0,peakDD:0,fc:'UK',link:'uk/birmingham.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'Manchester',nameZh:'曼徹斯特',priceUSD:320000,priceDisp:'£254K',d10y:40,yoy:4.4,vacancy:1.0,txYoY:6,yield:6.1,pti:6.8,supply:'tight',pr:18,pipeline:0.8,dom:28,mortgage:4.10,outlook:{en:'ONS +4.4% · M11/13/14 yields 6.7-7.9%',zh:'ONS +4.4% · M11/13/14收益率6.7-7.9%'},rentYoY:3.5,peakDD:0,fc:'UK',link:'uk/manchester.html'},
+  {flag:'\u{1F1EC}\u{1F1E7}',name:'Newcastle',nameZh:'紐卡斯爾',priceUSD:261000,priceDisp:'£207K',d10y:28,yoy:5.1,vacancy:1.8,txYoY:4,yield:6.0,pti:5.0,supply:'balanced',pr:15,pipeline:0.5,dom:35,mortgage:4.10,outlook:{en:'ONS +5.1% · NE1-NE6 HMO yields 7.6-9.5%',zh:'ONS +5.1% · NE1-NE6 HMO收益7.6-9.5%'},rentYoY:9.9,peakDD:0,fc:'UK',link:'uk/newcastle.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Sydney',nameZh:'雪梨',priceUSD:817000,priceDisp:'A$1.30M',d10y:65,yoy:0.0,vacancy:1.1,txYoY:-2,yield:3.0,pti:13.5,supply:'tight',pr:21,pipeline:0.8,dom:28,mortgage:4.85,outlook:{en:'Cotality HVI flat · vacancy 1.1% SQM',zh:'Cotality HVI持平 · SQM空置1.1%'},rentYoY:7.8,peakDD:-3.7,fc:'AU',link:'au/sydney.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Gold Coast',nameZh:'黃金海岸',priceUSD:851000,priceDisp:'A$1.35M',d10y:100,yoy:10.5,vacancy:1.1,txYoY:5,yield:4.5,pti:11.2,supply:'tight',pr:33,pipeline:0.5,dom:28,mortgage:4.85,outlook:{en:'Cotality 2nd most expensive after Syd/Mel',zh:'Cotality 僅次於雪/墨的次貴市場'},rentYoY:null,peakDD:null,fc:'AU',link:'au/goldcoast.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Brisbane',nameZh:'布里斯本',priceUSD:694000,priceDisp:'A$1.10M',d10y:93,yoy:19.1,vacancy:1.2,txYoY:8,yield:4.4,pti:9.5,supply:'tight',pr:30,pipeline:0.9,dom:22,mortgage:4.85,outlook:{en:'Cotality +19.1% · strongest capital',zh:'Cotality +19.1% · 首都最強'},rentYoY:7.1,peakDD:0,fc:'AU',link:'au/brisbane.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Melbourne',nameZh:'墨爾本',priceUSD:522000,priceDisp:'A$828K',d10y:15,yoy:3.4,vacancy:1.6,txYoY:-5,yield:3.8,pti:10.2,supply:'balanced',pr:30,pipeline:1.5,dom:35,mortgage:4.85,outlook:{en:'Cotality +3.4% · recovery inflecting',zh:'Cotality +3.4% · 復甦拐點'},rentYoY:5.0,peakDD:-4.0,fc:'AU',link:'au/melbourne.html'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Perth',nameZh:'伯斯',priceUSD:644000,priceDisp:'A$1.02M',d10y:90,yoy:24.3,vacancy:0.7,txYoY:12,yield:4.8,pti:7.5,supply:'tight',pr:22,pipeline:0.6,dom:12,mortgage:6.29,outlook:{en:'Cotality +24.3% · resources-driven',zh:'Cotality +24.3% · 礦業帶動'},rentYoY:2.4,peakDD:0,fc:'AU',link:'#'},
+  {flag:'\u{1F1E6}\u{1F1FA}',name:'Adelaide',nameZh:'阿德萊德',priceUSD:593000,priceDisp:'A$937K',d10y:75,yoy:11.4,vacancy:0.9,txYoY:10,yield:3.3,pti:8.0,supply:'tight',pr:24,pipeline:0.5,dom:15,mortgage:6.29,outlook:{en:'Cotality +11.4% · AUKUS + migration',zh:'Cotality +11.4% · AUKUS+移民'},rentYoY:6.0,peakDD:0,fc:'AU',link:'#'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Tokyo',nameZh:'東京',priceUSD:812000,priceDisp:'¥121M',d10y:110,yoy:20.0,vacancy:3.5,txYoY:3,yield:3.3,pti:12.0,supply:'tight',pr:43,pipeline:0.3,dom:30,mortgage:2.32,outlook:{en:'Kantei used 70㎡ Jan-26 · +34% peaking',zh:'Kantei二手70㎡ Jan-26 · +34%見頂'},rentYoY:8.5,peakDD:0,fc:'JP',link:'jp/tokyo.html'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Fukuoka',nameZh:'福岡',priceUSD:342000,priceDisp:'¥53M',d10y:120,yoy:9.0,vacancy:1.5,txYoY:15,yield:5.0,pti:11.0,supply:'tight',pr:71,pipeline:0.4,dom:25,mortgage:2.32,outlook:{en:'REEI ¥53M · land +9% 2nd year · 13yr gain',zh:'REEI ¥53M · 地價連2年+9% · 13年上漲'},rentYoY:9.5,peakDD:0,fc:'JP',link:'jp/fukuoka.html'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Osaka',nameZh:'大阪',priceUSD:259000,priceDisp:'¥40M',d10y:75,yoy:7.0,vacancy:2.0,txYoY:21,yield:3.3,pti:12.0,supply:'tight',pr:35,pipeline:0.5,dom:35,mortgage:2.32,outlook:{en:'Kinki REINS +21% sales · Expo legacy',zh:'近畿REINS成交+21% · 世博效應'},rentYoY:1.9,peakDD:0,fc:'JP',link:'jp/osaka.html'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Nagoya',nameZh:'名古屋',priceUSD:254000,priceDisp:'¥39M',d10y:50,yoy:4.25,vacancy:2.5,txYoY:4,yield:4.3,pti:8.5,supply:'balanced',pr:28,pipeline:0.4,dom:35,mortgage:2.32,outlook:{en:'REEI ¥39M new · MacroMicro +4.25%',zh:'REEI ¥39M新建 · MacroMicro +4.25%'},rentYoY:1.5,peakDD:0,fc:'JP',link:'#'},
+  {flag:'\u{1F1EF}\u{1F1F5}',name:'Sapporo',nameZh:'札幌',priceUSD:388000,priceDisp:'¥60M',d10y:85,yoy:17.0,vacancy:2.2,txYoY:6,yield:4.7,pti:8.0,supply:'tight',pr:22,pipeline:0.5,dom:30,mortgage:2.32,outlook:{en:'REEI ¥60M +17% · Shinkansen extension',zh:'REEI ¥60M +17% · 新幹線延伸'},rentYoY:3.7,peakDD:0,fc:'JP',link:'#'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Taipei',nameZh:'台北',priceUSD:580000,priceDisp:'NT$19M',d10y:35,yoy:-0.6,vacancy:7.1,txYoY:-56,yield:1.8,pti:15.4,supply:'tight',pr:75,pipeline:0.3,dom:35,mortgage:2.32,outlook:{en:'Sinyi HPI -0.6% · vacancy 7.1% MOI',zh:'信義HPI-0.6% · 空置7.1%內政部'},rentYoY:1.7,peakDD:0,fc:'TW',link:'tw/taipei.html'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Hsinchu',nameZh:'新竹',priceUSD:310000,priceDisp:'NT$10M',d10y:58,yoy:-2.3,vacancy:2.0,txYoY:-80,yield:2.3,pti:12.5,supply:'balanced',pr:51,pipeline:0.8,dom:35,mortgage:2.32,outlook:{en:'Sinyi HPI 242.57 (highest) -2.3% decel',zh:'信義HPI 242.57(最高) -2.3%減速'},rentYoY:1.7,peakDD:-6,fc:'TW',link:'tw/hsinchu.html'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Taichung',nameZh:'台中',priceUSD:280000,priceDisp:'NT$9M',d10y:55,yoy:-6.8,vacancy:2.8,txYoY:-68,yield:2.5,pti:11.9,supply:'balanced',pr:60,pipeline:1.2,dom:40,mortgage:2.32,outlook:{en:'Sinyi -6.8% · Yungching Q1-26 only +0.1%',zh:'信義-6.8% · 永慶Q1-26僅+0.1%'},rentYoY:1.7,peakDD:-8,fc:'TW',link:'tw/taichung.html'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Kaohsiung',nameZh:'高雄',priceUSD:220000,priceDisp:'NT$7M',d10y:40,yoy:-7.3,vacancy:3.0,txYoY:-71,yield:3.0,pti:10.1,supply:'loose',pr:45,pipeline:1.5,dom:40,mortgage:2.32,outlook:{en:'Sinyi -7.3% · new case -16% Q1-26',zh:'信義-7.3% · 新案Q1-26 -16%'},rentYoY:1.7,peakDD:-7,fc:'TW',link:'tw/kaohsiung.html'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'New Taipei',nameZh:'新北市',priceUSD:370000,priceDisp:'NT$12M',d10y:30,yoy:-3.0,vacancy:7.5,txYoY:-60,yield:2.1,pti:14.0,supply:'balanced',pr:62,pipeline:1.0,dom:35,mortgage:2.32,outlook:{en:'Sinyi -3.0% · cumulative -5% vs peak',zh:'信義-3.0% · 累計較高峰-5%'},rentYoY:1.7,peakDD:-4,fc:'TW',link:'#'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Tainan',nameZh:'台南',priceUSD:190000,priceDisp:'NT$6M',d10y:50,yoy:-2.6,vacancy:2.5,txYoY:-65,yield:2.9,pti:9.0,supply:'balanced',pr:50,pipeline:1.8,dom:42,mortgage:2.32,outlook:{en:'Sinyi -2.6% · cumulative -8 to -9% credit ctrl',zh:'信義-2.6% · 信用管制後累計-8至-9%'},rentYoY:1.7,peakDD:-8,fc:'TW',link:'#'},
+  {flag:'\u{1F1F9}\u{1F1FC}',name:'Taoyuan',nameZh:'桃園',priceUSD:250000,priceDisp:'NT$8M',d10y:42,yoy:-3.7,vacancy:2.2,txYoY:-58,yield:2.4,pti:8.7,supply:'balanced',pr:55,pipeline:1.5,dom:38,mortgage:2.32,outlook:{en:'Sinyi -3.7% · cumulative -6 to -7%',zh:'信義-3.7% · 累計-6至-7%'},rentYoY:1.7,peakDD:-6,fc:'TW',link:'#'},
+  {flag:'\u{1F1F3}\u{1F1FF}',name:'Auckland',nameZh:'奧克蘭',priceUSD:589000,priceDisp:'NZ$1.015M',d10y:45,yoy:-1.2,vacancy:2.5,txYoY:15,yield:4.0,pti:9.8,supply:'loose',pr:28,pipeline:2.5,dom:55,mortgage:4.25,outlook:{en:'REINZ median NZ$1.015M · HPI -1.2% YoY',zh:'REINZ中位 NZ$1.015M · HPI年-1.2%'},rentYoY:-3.1,peakDD:-24.7,fc:'NZ',link:'nz/auckland.html'},
+  {flag:'\u{1F1F3}\u{1F1FF}',name:'Christchurch',nameZh:'基督城',priceUSD:426000,priceDisp:'NZ$735K',d10y:55,yoy:6.7,vacancy:2.3,txYoY:8,yield:4.4,pti:6.5,supply:'balanced',pr:25,pipeline:2.0,dom:38,mortgage:4.25,outlook:{en:'REINZ record NZ$735K · city +6.7%',zh:'REINZ紀錄 NZ$735K · 城+6.7%'},rentYoY:null,peakDD:0,fc:'NZ',link:'nz/christchurch.html'},
+  {flag:'\u{1F1F2}\u{1F1FE}',name:'Kuala Lumpur',nameZh:'吉隆坡',priceUSD:181000,priceDisp:'RM 805K',d10y:10,yoy:-4.3,vacancy:18.0,txYoY:6,yield:4.9,pti:6.2,supply:'loose',pr:27,pipeline:2.8,dom:90,mortgage:4.25,outlook:{en:'NAPIC RM805K -4.3% · overhang 2,287 units',zh:'NAPIC RM805K -4.3% · 積壓2,287套'},rentYoY:4.0,peakDD:0,fc:'MY',link:'kl.html'},
+  {flag:'\u{1F1F2}\u{1F1FE}',name:'Penang',nameZh:'檳城',priceUSD:113000,priceDisp:'RM 505K',d10y:25,yoy:6.3,vacancy:12.0,txYoY:4,yield:5.7,pti:5.8,supply:'balanced',pr:23,pipeline:1.5,dom:75,mortgage:4.25,outlook:{en:'NAPIC RM505K +6.3% · overhang 2,730 units',zh:'NAPIC RM505K +6.3% · 積壓2,730套'},rentYoY:5.5,peakDD:0,fc:'MY',link:'penang.html'},
+  {flag:'\u{1F1F9}\u{1F1ED}',name:'Bangkok CBD',nameZh:'曼谷CBD',priceUSD:null,priceDisp:'THB 238K/m²',d10y:40,yoy:4.0,vacancy:12.0,txYoY:-5,yield:6.0,pti:8.5,supply:'loose',pr:31,pipeline:3.0,dom:120,mortgage:3.00,outlook:{en:'Knight Frank Q2-25 · CBD +3-5% · CBRE 2026 +15% fcst',zh:'萊坊Q2-25 · CBD +3-5% · CBRE 2026預測+15%'},rentYoY:5.0,peakDD:-6.5,fc:'TH',link:'th/bangkok.html'},
+  {flag:'\u{1F1F9}\u{1F1ED}',name:'Chiang Mai',nameZh:'清邁',priceUSD:null,priceDisp:'THB 85K/m²',d10y:35,yoy:9.5,vacancy:8.0,txYoY:3,yield:5.5,pti:6.0,supply:'balanced',pr:21,pipeline:2.0,dom:90,mortgage:3.00,outlook:{en:'Nimman +9-10% · DTV visa demand',zh:'尼曼+9-10% · DTV簽證需求'},rentYoY:5.0,peakDD:null,fc:'TH',link:'th/chiangmai.html'},
   // SG
-  {flag:'\u{1F1F8}\u{1F1EC}',name:'Singapore',nameZh:'新加坡',priceUSD:1330000,priceDisp:'S$1.80M',d10y:30,yoy:3.0,vacancy:3.2,txYoY:-40,yield:3.3,pti:15.0,supply:'tight',pr:29,pipeline:1.5,dom:25,mortgage:2.70,outlook:{en:'URA PPI +0.3% QoQ · slowest in 6Q · -41% resale vol',zh:'URA PPI +0.3% · 6季最慢 · 轉售量-41%'},link:'#'},
+  {flag:'\u{1F1F8}\u{1F1EC}',name:'Singapore',nameZh:'新加坡',priceUSD:1330000,priceDisp:'S$1.80M',d10y:30,yoy:3.0,vacancy:3.2,txYoY:-40,yield:3.3,pti:15.0,supply:'tight',pr:29,pipeline:1.5,dom:25,mortgage:2.70,outlook:{en:'URA PPI +0.3% QoQ · slowest in 6Q · -41% resale vol',zh:'URA PPI +0.3% · 6季最慢 · 轉售量-41%'},rentYoY:1.8,peakDD:0,fc:'SG',link:'#'},
   // HK
-  {flag:'\u{1F1ED}\u{1F1F0}',name:'Hong Kong',nameZh:'香港',priceUSD:897000,priceDisp:'HK$7.0M',d10y:-10,yoy:2.0,vacancy:4.5,txYoY:0,yield:3.4,pti:16.7,supply:'tight',pr:45,pipeline:0.4,dom:55,mortgage:3.75,outlook:{en:'Centaline CCL 11mo of gains · near 2yr high',zh:'中原CCL連11月升 · 近2年高'},link:'#'},
+  {flag:'\u{1F1ED}\u{1F1F0}',name:'Hong Kong',nameZh:'香港',priceUSD:897000,priceDisp:'HK$7.0M',d10y:-10,yoy:2.0,vacancy:4.5,txYoY:0,yield:3.4,pti:16.7,supply:'tight',pr:45,pipeline:0.4,dom:55,mortgage:3.75,outlook:{en:'Centaline CCL 11mo of gains · near 2yr high',zh:'中原CCL連11月升 · 近2年高'},rentYoY:5.0,peakDD:-18.8,fc:'HK',link:'#'},
   // KR
-  {flag:'\u{1F1F0}\u{1F1F7}',name:'Seoul',nameZh:'首爾',priceUSD:917000,priceDisp:'₩1.35B',d10y:60,yoy:9.0,vacancy:2.8,txYoY:8,yield:3.0,pti:15.0,supply:'tight',pr:40,pipeline:0.6,dom:30,mortgage:4.19,outlook:{en:'KREB median · 2025 YoY +8.98% highest since 2013',zh:'KREB中位 · 2025年增+8.98%自2013新高'},link:'kr/seoul.html'},
-  {flag:'\u{1F1F0}\u{1F1F7}',name:'Busan',nameZh:'釜山',priceUSD:435000,priceDisp:'₩640M',d10y:25,yoy:1.0,vacancy:4.0,txYoY:3,yield:4.5,pti:7.0,supply:'loose',pr:22,pipeline:1.2,dom:40,mortgage:4.19,outlook:{en:'MOLIT ₩7.5M/sqm · LH buyback 5K unsold',zh:'MOLIT ₩7.5M/sqm · LH回購5K未售'},link:'kr/busan.html'},
+  {flag:'\u{1F1F0}\u{1F1F7}',name:'Seoul',nameZh:'首爾',priceUSD:917000,priceDisp:'₩1.35B',d10y:60,yoy:9.0,vacancy:2.8,txYoY:8,yield:3.0,pti:15.0,supply:'tight',pr:40,pipeline:0.6,dom:30,mortgage:4.19,outlook:{en:'KREB median · 2025 YoY +8.98% highest since 2013',zh:'KREB中位 · 2025年增+8.98%自2013新高'},rentYoY:1.6,peakDD:0,fc:'KR',link:'kr/seoul.html'},
+  {flag:'\u{1F1F0}\u{1F1F7}',name:'Busan',nameZh:'釜山',priceUSD:435000,priceDisp:'₩640M',d10y:25,yoy:1.0,vacancy:4.0,txYoY:3,yield:4.5,pti:7.0,supply:'loose',pr:22,pipeline:1.2,dom:40,mortgage:4.19,outlook:{en:'MOLIT ₩7.5M/sqm · LH buyback 5K unsold',zh:'MOLIT ₩7.5M/sqm · LH回購5K未售'},rentYoY:null,peakDD:-10.5,fc:'KR',link:'kr/busan.html'},
   // AE
-  {flag:'\u{1F1E6}\u{1F1EA}',name:'Dubai',nameZh:'杜拜',priceUSD:572000,priceDisp:'AED 2.1M',d10y:80,yoy:12.5,vacancy:8.5,txYoY:25,yield:6.6,pti:5.5,supply:'loose',pr:15,pipeline:6.5,dom:35,mortgage:3.70,outlook:{en:'Property Finder +12.5% · 99K+ units 2026 pipeline',zh:'Property Finder +12.5% · 2026年99K+供應'},link:'#'},
+  {flag:'\u{1F1E6}\u{1F1EA}',name:'Dubai',nameZh:'杜拜',priceUSD:572000,priceDisp:'AED 2.1M',d10y:80,yoy:12.5,vacancy:8.5,txYoY:25,yield:6.6,pti:5.5,supply:'loose',pr:15,pipeline:6.5,dom:35,mortgage:3.70,outlook:{en:'Property Finder +12.5% · 99K+ units 2026 pipeline',zh:'Property Finder +12.5% · 2026年99K+供應'},rentYoY:null,peakDD:-8,fc:'AE',link:'#'},
   // VN
-  {flag:'\u{1F1FB}\u{1F1F3}',name:'Ho Chi Minh City',nameZh:'胡志明市',priceUSD:295000,priceDisp:'$295K',d10y:100,yoy:23.0,vacancy:6.0,txYoY:82,yield:4.0,pti:10.0,supply:'tight',pr:18,pipeline:2.5,dom:45,mortgage:13.00,outlook:{en:'Cushman+W $4,222/m² +23% · Savills Q4 absorption 82%',zh:'C&W $4,222/m² +23% · Savills Q4吸收82%'},link:'vn/hochiminh.html'},
+  {flag:'\u{1F1FB}\u{1F1F3}',name:'Ho Chi Minh City',nameZh:'胡志明市',priceUSD:295000,priceDisp:'$295K',d10y:100,yoy:23.0,vacancy:6.0,txYoY:82,yield:4.0,pti:10.0,supply:'tight',pr:18,pipeline:2.5,dom:45,mortgage:13.00,outlook:{en:'Cushman+W $4,222/m² +23% · Savills Q4 absorption 82%',zh:'C&W $4,222/m² +23% · Savills Q4吸收82%'},rentYoY:null,peakDD:0,fc:'VN',link:'vn/hochiminh.html'},
   // ID
-  {flag:'\u{1F1EE}\u{1F1E9}',name:'Jakarta',nameZh:'雅加達',priceUSD:120000,priceDisp:'IDR 1.9B',d10y:15,yoy:2.0,vacancy:40.0,txYoY:2,yield:5.5,pti:8.0,supply:'loose',pr:25,pipeline:1.5,dom:90,mortgage:8.60,outlook:{en:'BI IHPR +0.83% · vacancy 40% · only 2.2K 2025 supply',zh:'BI IHPR +0.83% · 空置40% · 2025年僅2.2K供應'},link:'#'},
+  {flag:'\u{1F1EE}\u{1F1E9}',name:'Jakarta',nameZh:'雅加達',priceUSD:120000,priceDisp:'IDR 1.9B',d10y:15,yoy:2.0,vacancy:40.0,txYoY:2,yield:5.5,pti:8.0,supply:'loose',pr:25,pipeline:1.5,dom:90,mortgage:8.60,outlook:{en:'BI IHPR +0.83% · vacancy 40% · only 2.2K 2025 supply',zh:'BI IHPR +0.83% · 空置40% · 2025年僅2.2K供應'},rentYoY:1.9,peakDD:null,fc:'ID',link:'#'},
   // IE
-  {flag:'\u{1F1EE}\u{1F1EA}',name:'Dublin',nameZh:'都柏林',priceUSD:486000,priceDisp:'€450K',d10y:70,yoy:4.8,vacancy:0.5,txYoY:5,yield:3.5,pti:8.5,supply:'tight',pr:28,pipeline:1.5,dom:25,mortgage:3.50,outlook:{en:'MyHome €450K asking · CSO RPPI +4.8% easing',zh:'MyHome €450K開價 · CSO RPPI +4.8%趨緩'},link:'ie/dublin.html'},
-  {flag:'\u{1F1EE}\u{1F1EA}',name:'Cork',nameZh:'科克',priceUSD:373000,priceDisp:'€345K',d10y:65,yoy:4.2,vacancy:0.6,txYoY:8,yield:7.0,pti:6.2,supply:'tight',pr:22,pipeline:1.2,dom:22,mortgage:3.50,outlook:{en:'CSO county €345K · SW region +4.2% · yield 7-9%',zh:'CSO郡 €345K · 西南+4.2% · 收益7-9%'},link:'ie/cork.html'},
+  {flag:'\u{1F1EE}\u{1F1EA}',name:'Dublin',nameZh:'都柏林',priceUSD:486000,priceDisp:'€450K',d10y:70,yoy:4.8,vacancy:0.5,txYoY:5,yield:3.5,pti:8.5,supply:'tight',pr:28,pipeline:1.5,dom:25,mortgage:3.50,outlook:{en:'MyHome €450K asking · CSO RPPI +4.8% easing',zh:'MyHome €450K開價 · CSO RPPI +4.8%趨緩'},rentYoY:4.2,peakDD:0,fc:'IE',link:'ie/dublin.html'},
+  {flag:'\u{1F1EE}\u{1F1EA}',name:'Cork',nameZh:'科克',priceUSD:373000,priceDisp:'€345K',d10y:65,yoy:4.2,vacancy:0.6,txYoY:8,yield:7.0,pti:6.2,supply:'tight',pr:22,pipeline:1.2,dom:22,mortgage:3.50,outlook:{en:'CSO county €345K · SW region +4.2% · yield 7-9%',zh:'CSO郡 €345K · 西南+4.2% · 收益7-9%'},rentYoY:13.3,peakDD:0,fc:'IE',link:'ie/cork.html'},
   // NL
-  {flag:'\u{1F1F3}\u{1F1F1}',name:'Amsterdam',nameZh:'阿姆斯特丹',priceUSD:641000,priceDisp:'€594K',d10y:85,yoy:3.6,vacancy:1.5,txYoY:12,yield:3.5,pti:10.0,supply:'tight',pr:28,pipeline:0.8,dom:20,mortgage:4.05,outlook:{en:'Amsterdam €594K +3.6% · NL shortage 350K homes',zh:'阿姆斯特丹€594K +3.6% · NL短缺35萬套'},link:'#'},
+  {flag:'\u{1F1F3}\u{1F1F1}',name:'Amsterdam',nameZh:'阿姆斯特丹',priceUSD:641000,priceDisp:'€594K',d10y:85,yoy:3.6,vacancy:1.5,txYoY:12,yield:3.5,pti:10.0,supply:'tight',pr:28,pipeline:0.8,dom:20,mortgage:4.05,outlook:{en:'Amsterdam €594K +3.6% · NL shortage 350K homes',zh:'阿姆斯特丹€594K +3.6% · NL短缺35萬套'},rentYoY:5.1,peakDD:0,fc:'NL',link:'#'},
   // DE
-  {flag:'\u{1F1E9}\u{1F1EA}',name:'Berlin',nameZh:'柏林',priceUSD:358000,priceDisp:'€331K',d10y:60,yoy:3.0,vacancy:1.2,txYoY:-3,yield:3.8,pti:7.5,supply:'balanced',pr:26,pipeline:1.0,dom:40,mortgage:3.75,outlook:{en:'vdp +4% 2025 · €5,100/m² Berlin · rent cap',zh:'vdp 2025 +4% · 柏林 €5,100/m² · 租金管制'},link:'#'},
+  {flag:'\u{1F1E9}\u{1F1EA}',name:'Berlin',nameZh:'柏林',priceUSD:358000,priceDisp:'€331K',d10y:60,yoy:3.0,vacancy:1.2,txYoY:-3,yield:3.8,pti:7.5,supply:'balanced',pr:26,pipeline:1.0,dom:40,mortgage:3.75,outlook:{en:'vdp +4% 2025 · €5,100/m² Berlin · rent cap',zh:'vdp 2025 +4% · 柏林 €5,100/m² · 租金管制'},rentYoY:-4.3,peakDD:-5,fc:'DE',link:'#'},
   // PT
-  {flag:'\u{1F1F5}\u{1F1F9}',name:'Lisbon',nameZh:'里斯本',priceUSD:429000,priceDisp:'€397K',d10y:95,yoy:4.0,vacancy:1.8,txYoY:8,yield:4.3,pti:12.0,supply:'tight',pr:22,pipeline:1.2,dom:30,mortgage:4.00,outlook:{en:'INE €397K · Lisbon +4% · Portugal nat +15%',zh:'INE €397K · 里斯本+4% · 葡萄牙全國+15%'},link:'#'},
+  {flag:'\u{1F1F5}\u{1F1F9}',name:'Lisbon',nameZh:'里斯本',priceUSD:429000,priceDisp:'€397K',d10y:95,yoy:4.0,vacancy:1.8,txYoY:8,yield:4.3,pti:12.0,supply:'tight',pr:22,pipeline:1.2,dom:30,mortgage:4.00,outlook:{en:'INE €397K · Lisbon +4% · Portugal nat +15%',zh:'INE €397K · 里斯本+4% · 葡萄牙全國+15%'},rentYoY:-2.7,peakDD:0,fc:'PT',link:'#'},
   // FR
-  {flag:'\u{1F1EB}\u{1F1F7}',name:'Paris',nameZh:'巴黎',priceUSD:511000,priceDisp:'€473K',d10y:10,yoy:2.0,vacancy:2.5,txYoY:-10,yield:3.5,pti:14.0,supply:'balanced',pr:35,pipeline:0.5,dom:50,mortgage:3.25,outlook:{en:'Notaires €10,523/m² +2% · rent cap active',zh:'公證 €10,523/m² +2% · 租金管制'},link:'#'},
-  {flag:'\u{1F1EB}\u{1F1F7}',name:'Lyon',nameZh:'里昂',priceUSD:351000,priceDisp:'€325K',d10y:25,yoy:0.0,vacancy:3.0,txYoY:-5,yield:4.1,pti:8.5,supply:'balanced',pr:25,pipeline:0.8,dom:40,mortgage:3.25,outlook:{en:'SeLoger €4,640/m² stabilizing · zone tendue',zh:'SeLoger €4,640/m²趨穩 · 緊張區'},link:'#'},
-  {flag:'\u{1F1EB}\u{1F1F7}',name:'Marseille',nameZh:'馬賽',priceUSD:272000,priceDisp:'€252K',d10y:25,yoy:-3.0,vacancy:3.5,txYoY:2,yield:5.4,pti:6.5,supply:'balanced',pr:19,pipeline:1.0,dom:45,mortgage:3.25,outlook:{en:'Investropa €3,604/m² -3% · DPE discount F/G',zh:'Investropa €3,604/m² -3% · DPE F/G折讓'},link:'#'},
+  {flag:'\u{1F1EB}\u{1F1F7}',name:'Paris',nameZh:'巴黎',priceUSD:511000,priceDisp:'€473K',d10y:10,yoy:2.0,vacancy:2.5,txYoY:-10,yield:3.5,pti:14.0,supply:'balanced',pr:35,pipeline:0.5,dom:50,mortgage:3.25,outlook:{en:'Notaires €10,523/m² +2% · rent cap active',zh:'公證 €10,523/m² +2% · 租金管制'},rentYoY:2.0,peakDD:-12,fc:'FR',link:'#'},
+  {flag:'\u{1F1EB}\u{1F1F7}',name:'Lyon',nameZh:'里昂',priceUSD:351000,priceDisp:'€325K',d10y:25,yoy:0.0,vacancy:3.0,txYoY:-5,yield:4.1,pti:8.5,supply:'balanced',pr:25,pipeline:0.8,dom:40,mortgage:3.25,outlook:{en:'SeLoger €4,640/m² stabilizing · zone tendue',zh:'SeLoger €4,640/m²趨穩 · 緊張區'},rentYoY:3.5,peakDD:-18.5,fc:'FR',link:'#'},
+  {flag:'\u{1F1EB}\u{1F1F7}',name:'Marseille',nameZh:'馬賽',priceUSD:272000,priceDisp:'€252K',d10y:25,yoy:-3.0,vacancy:3.5,txYoY:2,yield:5.4,pti:6.5,supply:'balanced',pr:19,pipeline:1.0,dom:45,mortgage:3.25,outlook:{en:'Investropa €3,604/m² -3% · DPE discount F/G',zh:'Investropa €3,604/m² -3% · DPE F/G折讓'},rentYoY:2.1,peakDD:-3,fc:'FR',link:'#'},
   // DE
-  {flag:'\u{1F1E9}\u{1F1EA}',name:'Munich',nameZh:'慕尼黑',priceUSD:620000,priceDisp:'€574K',d10y:55,yoy:3.5,vacancy:0.8,txYoY:-8,yield:2.5,pti:12.0,supply:'tight',pr:33,pipeline:0.4,dom:35,mortgage:3.75,outlook:{en:'vdp €8,200/m² +3-4% · vacancy <1%',zh:'vdp €8,200/m² +3-4% · 空置<1%'},link:'#'},
-  {flag:'\u{1F1E9}\u{1F1EA}',name:'Frankfurt',nameZh:'法蘭克福',priceUSD:524000,priceDisp:'€485K',d10y:45,yoy:3.5,vacancy:1.2,txYoY:-5,yield:2.8,pti:9.0,supply:'balanced',pr:28,pipeline:0.6,dom:38,mortgage:3.75,outlook:{en:'vdp €6,480/m² +3-4% · ECB/finance demand',zh:'vdp €6,480/m² +3-4% · 歐央行+金融需求'},link:'#'},
-  {flag:'\u{1F1E9}\u{1F1EA}',name:'Hamburg',nameZh:'漢堡',priceUSD:419000,priceDisp:'€388K',d10y:50,yoy:3.5,vacancy:2.0,txYoY:-2,yield:3.2,pti:8.0,supply:'balanced',pr:26,pipeline:0.7,dom:35,mortgage:3.75,outlook:{en:'vdp €5,970/m² · port+media · vacancy <2%',zh:'vdp €5,970/m² · 港口+媒體 · 空置<2%'},link:'#'},
+  {flag:'\u{1F1E9}\u{1F1EA}',name:'Munich',nameZh:'慕尼黑',priceUSD:620000,priceDisp:'€574K',d10y:55,yoy:3.5,vacancy:0.8,txYoY:-8,yield:2.5,pti:12.0,supply:'tight',pr:33,pipeline:0.4,dom:35,mortgage:3.75,outlook:{en:'vdp €8,200/m² +3-4% · vacancy <1%',zh:'vdp €8,200/m² +3-4% · 空置<1%'},rentYoY:5.4,peakDD:-10,fc:'DE',link:'#'},
+  {flag:'\u{1F1E9}\u{1F1EA}',name:'Frankfurt',nameZh:'法蘭克福',priceUSD:524000,priceDisp:'€485K',d10y:45,yoy:3.5,vacancy:1.2,txYoY:-5,yield:2.8,pti:9.0,supply:'balanced',pr:28,pipeline:0.6,dom:38,mortgage:3.75,outlook:{en:'vdp €6,480/m² +3-4% · ECB/finance demand',zh:'vdp €6,480/m² +3-4% · 歐央行+金融需求'},rentYoY:2.4,peakDD:-11,fc:'DE',link:'#'},
+  {flag:'\u{1F1E9}\u{1F1EA}',name:'Hamburg',nameZh:'漢堡',priceUSD:419000,priceDisp:'€388K',d10y:50,yoy:3.5,vacancy:2.0,txYoY:-2,yield:3.2,pti:8.0,supply:'balanced',pr:26,pipeline:0.7,dom:35,mortgage:3.75,outlook:{en:'vdp €5,970/m² · port+media · vacancy <2%',zh:'vdp €5,970/m² · 港口+媒體 · 空置<2%'},rentYoY:4.7,peakDD:-7,fc:'DE',link:'#'},
   // PL
-  {flag:'\u{1F1F5}\u{1F1F1}',name:'Warsaw',nameZh:'華沙',priceUSD:251000,priceDisp:'PLN 990K',d10y:75,yoy:2.0,vacancy:2.0,txYoY:15,yield:5.0,pti:7.5,supply:'tight',pr:20,pipeline:2.5,dom:30,mortgage:7.50,outlook:{en:'PLN 18K/m² +2% nominal (-1% real) · NBP 3.75%',zh:'PLN 18K/m² +2%名目(-1%實質) · NBP 3.75%'},link:'#'},
+  {flag:'\u{1F1F5}\u{1F1F1}',name:'Warsaw',nameZh:'華沙',priceUSD:251000,priceDisp:'PLN 990K',d10y:75,yoy:2.0,vacancy:2.0,txYoY:15,yield:5.0,pti:7.5,supply:'tight',pr:20,pipeline:2.5,dom:30,mortgage:7.50,outlook:{en:'PLN 18K/m² +2% nominal (-1% real) · NBP 3.75%',zh:'PLN 18K/m² +2%名目(-1%實質) · NBP 3.75%'},rentYoY:-0.8,peakDD:0,fc:'PL',link:'#'},
   // CZ
-  {flag:'\u{1F1E8}\u{1F1FF}',name:'Prague',nameZh:'布拉格',priceUSD:378000,priceDisp:'CZK 8.7M',d10y:90,yoy:10.0,vacancy:1.5,txYoY:10,yield:4.0,pti:11.0,supply:'tight',pr:25,pipeline:1.0,dom:28,mortgage:4.89,outlook:{en:'CZK 145K/m² · Deloitte Real Index +15.3% YoY',zh:'CZK 145K/m² · Deloitte Real Index +15.3%'},link:'#'},
+  {flag:'\u{1F1E8}\u{1F1FF}',name:'Prague',nameZh:'布拉格',priceUSD:378000,priceDisp:'CZK 8.7M',d10y:90,yoy:10.0,vacancy:1.5,txYoY:10,yield:4.0,pti:11.0,supply:'tight',pr:25,pipeline:1.0,dom:28,mortgage:4.89,outlook:{en:'CZK 145K/m² · Deloitte Real Index +15.3% YoY',zh:'CZK 145K/m² · Deloitte Real Index +15.3%'},rentYoY:8.0,peakDD:0,fc:'CZ',link:'#'},
   // ES
-  {flag:'\u{1F1EA}\u{1F1F8}',name:'Madrid',nameZh:'馬德里',priceUSD:508000,priceDisp:'€470K',d10y:35,yoy:14.0,vacancy:1.8,txYoY:18,yield:5.1,pti:7.5,supply:'tight',pr:22,pipeline:1.2,dom:25,mortgage:2.85,outlook:{en:'Idealista €5,820/m² +14% nominal · zona tensionada',zh:'Idealista €5,820/m² +14%名目 · 緊張區'},link:'#'},
-  {flag:'\u{1F1EA}\u{1F1F8}',name:'Barcelona',nameZh:'巴塞隆納',priceUSD:443000,priceDisp:'€410K',d10y:30,yoy:10.4,vacancy:1.5,txYoY:12,yield:5.6,pti:9.0,supply:'tight',pr:25,pipeline:0.8,dom:30,mortgage:2.85,outlook:{en:'Idealista €5,034/m² +10.35% · STR phase-out 2028',zh:'Idealista €5,034/m² +10.35% · 2028短租汰除'},link:'#'},
-  {flag:'\u{1F1EA}\u{1F1F8}',name:'Valencia',nameZh:'瓦倫西亞',priceUSD:307000,priceDisp:'€284K',d10y:45,yoy:14.4,vacancy:1.2,txYoY:22,yield:6.2,pti:5.5,supply:'balanced',pr:17,pipeline:1.5,dom:35,mortgage:2.85,outlook:{en:'Idealista €3,339/m² +14.4% · near historic peak',zh:'Idealista €3,339/m² +14.4% · 近歷史高'},link:'#'},
-  {flag:'\u{1F1EA}\u{1F1F8}',name:'Malaga',nameZh:'馬拉加',priceUSD:378000,priceDisp:'€350K',d10y:70,yoy:10.0,vacancy:1.0,txYoY:20,yield:6.6,pti:6.0,supply:'tight',pr:18,pipeline:1.8,dom:20,mortgage:2.85,outlook:{en:'E&V €4,111/m² +10% · Costa del Sol yield 6.3-7%',zh:'E&V €4,111/m² +10% · 太陽海岸收益6.3-7%'},link:'#'},
+  {flag:'\u{1F1EA}\u{1F1F8}',name:'Madrid',nameZh:'馬德里',priceUSD:508000,priceDisp:'€470K',d10y:35,yoy:14.0,vacancy:1.8,txYoY:18,yield:5.1,pti:7.5,supply:'tight',pr:22,pipeline:1.2,dom:25,mortgage:2.85,outlook:{en:'Idealista €5,820/m² +14% nominal · zona tensionada',zh:'Idealista €5,820/m² +14%名目 · 緊張區'},rentYoY:7.6,peakDD:0,fc:'ES',link:'#'},
+  {flag:'\u{1F1EA}\u{1F1F8}',name:'Barcelona',nameZh:'巴塞隆納',priceUSD:443000,priceDisp:'€410K',d10y:30,yoy:10.4,vacancy:1.5,txYoY:12,yield:5.6,pti:9.0,supply:'tight',pr:25,pipeline:0.8,dom:30,mortgage:2.85,outlook:{en:'Idealista €5,034/m² +10.35% · STR phase-out 2028',zh:'Idealista €5,034/m² +10.35% · 2028短租汰除'},rentYoY:-3.9,peakDD:0,fc:'ES',link:'#'},
+  {flag:'\u{1F1EA}\u{1F1F8}',name:'Valencia',nameZh:'瓦倫西亞',priceUSD:307000,priceDisp:'€284K',d10y:45,yoy:14.4,vacancy:1.2,txYoY:22,yield:6.2,pti:5.5,supply:'balanced',pr:17,pipeline:1.5,dom:35,mortgage:2.85,outlook:{en:'Idealista €3,339/m² +14.4% · near historic peak',zh:'Idealista €3,339/m² +14.4% · 近歷史高'},rentYoY:7.2,peakDD:0,fc:'ES',link:'#'},
+  {flag:'\u{1F1EA}\u{1F1F8}',name:'Malaga',nameZh:'馬拉加',priceUSD:378000,priceDisp:'€350K',d10y:70,yoy:10.0,vacancy:1.0,txYoY:20,yield:6.6,pti:6.0,supply:'tight',pr:18,pipeline:1.8,dom:20,mortgage:2.85,outlook:{en:'E&V €4,111/m² +10% · Costa del Sol yield 6.3-7%',zh:'E&V €4,111/m² +10% · 太陽海岸收益6.3-7%'},rentYoY:5.6,peakDD:0,fc:'ES',link:'#'},
   // CH
-  {flag:'\u{1F1E8}\u{1F1ED}',name:'Zurich',nameZh:'蘇黎世',priceUSD:1231000,priceDisp:'CHF 1.10M',d10y:25,yoy:4.3,vacancy:0.1,txYoY:-3,yield:2.5,pti:8.5,supply:'tight',pr:38,pipeline:0.3,dom:20,mortgage:1.81,outlook:{en:'Wüest CHF 16,900/m² +4.3% · 235 empty units',zh:'Wüest CHF 16,900/m² +4.3% · 僅235空屋'},link:'#'},
-  {flag:'\u{1F1E8}\u{1F1ED}',name:'Geneva',nameZh:'日内瓦',priceUSD:1128000,priceDisp:'CHF 1.01M',d10y:20,yoy:3.0,vacancy:0.3,txYoY:-2,yield:3.0,pti:9.0,supply:'tight',pr:42,pipeline:0.2,dom:18,mortgage:1.81,outlook:{en:'Neho CHF 15,494/m² +3% · intl org demand',zh:'Neho CHF 15,494/m² +3% · 國際組織需求'},link:'#'},
+  {flag:'\u{1F1E8}\u{1F1ED}',name:'Zurich',nameZh:'蘇黎世',priceUSD:1231000,priceDisp:'CHF 1.10M',d10y:25,yoy:4.3,vacancy:0.1,txYoY:-3,yield:2.5,pti:8.5,supply:'tight',pr:38,pipeline:0.3,dom:20,mortgage:1.81,outlook:{en:'Wüest CHF 16,900/m² +4.3% · 235 empty units',zh:'Wüest CHF 16,900/m² +4.3% · 僅235空屋'},rentYoY:3.0,peakDD:-2,fc:'CH',link:'#'},
+  {flag:'\u{1F1E8}\u{1F1ED}',name:'Geneva',nameZh:'日内瓦',priceUSD:1128000,priceDisp:'CHF 1.01M',d10y:20,yoy:3.0,vacancy:0.3,txYoY:-2,yield:3.0,pti:9.0,supply:'tight',pr:42,pipeline:0.2,dom:18,mortgage:1.81,outlook:{en:'Neho CHF 15,494/m² +3% · intl org demand',zh:'Neho CHF 15,494/m² +3% · 國際組織需求'},rentYoY:3.0,peakDD:-2,fc:'CH',link:'#'},
   // IT
-  {flag:'\u{1F1EE}\u{1F1F9}',name:'Milan',nameZh:'米蘭',priceUSD:454000,priceDisp:'€420K',d10y:10,yoy:3.5,vacancy:2.5,txYoY:8,yield:5.3,pti:8.5,supply:'balanced',pr:24,pipeline:1.5,dom:35,mortgage:3.50,outlook:{en:'Immobiliare €5,100-5,500/m² +2-6% · decel',zh:'Immobiliare €5,100-5,500/m² +2-6% · 減速'},link:'#'},
-  {flag:'\u{1F1EE}\u{1F1F9}',name:'Rome',nameZh:'羅馬',priceUSD:346000,priceDisp:'€320K',d10y:0,yoy:6.3,vacancy:4.0,txYoY:3,yield:7.0,pti:7.5,supply:'balanced',pr:22,pipeline:0.5,dom:55,mortgage:3.50,outlook:{en:'Immobiliare €3,759/m² +6.28% · Jubilee legacy',zh:'Immobiliare €3,759/m² +6.28% · 禧年遺產'},link:'#'},
-  {flag:'\u{1F1EE}\u{1F1F9}',name:'Florence',nameZh:'佛羅倫斯',priceUSD:408000,priceDisp:'€378K',d10y:20,yoy:7.4,vacancy:2.0,txYoY:5,yield:6.2,pti:9.0,supply:'tight',pr:21,pipeline:0.3,dom:30,mortgage:3.50,outlook:{en:'Immobiliare €4,719/m² peak +7.4% · Airbnb ban',zh:'Immobiliare €4,719/m²高峰+7.4% · Airbnb禁'},link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F9}',name:'Milan',nameZh:'米蘭',priceUSD:454000,priceDisp:'€420K',d10y:10,yoy:3.5,vacancy:2.5,txYoY:8,yield:5.3,pti:8.5,supply:'balanced',pr:24,pipeline:1.5,dom:35,mortgage:3.50,outlook:{en:'Immobiliare €5,100-5,500/m² +2-6% · decel',zh:'Immobiliare €5,100-5,500/m² +2-6% · 減速'},rentYoY:5.0,peakDD:0,fc:'IT',link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F9}',name:'Rome',nameZh:'羅馬',priceUSD:346000,priceDisp:'€320K',d10y:0,yoy:6.3,vacancy:4.0,txYoY:3,yield:7.0,pti:7.5,supply:'balanced',pr:22,pipeline:0.5,dom:55,mortgage:3.50,outlook:{en:'Immobiliare €3,759/m² +6.28% · Jubilee legacy',zh:'Immobiliare €3,759/m² +6.28% · 禧年遺產'},rentYoY:4.2,peakDD:-1,fc:'IT',link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F9}',name:'Florence',nameZh:'佛羅倫斯',priceUSD:408000,priceDisp:'€378K',d10y:20,yoy:7.4,vacancy:2.0,txYoY:5,yield:6.2,pti:9.0,supply:'tight',pr:21,pipeline:0.3,dom:30,mortgage:3.50,outlook:{en:'Immobiliare €4,719/m² peak +7.4% · Airbnb ban',zh:'Immobiliare €4,719/m²高峰+7.4% · Airbnb禁'},rentYoY:6.9,peakDD:0,fc:'IT',link:'#'},
   // TR
-  {flag:'\u{1F1F9}\u{1F1F7}',name:'Istanbul',nameZh:'伊斯坦堡',priceUSD:99000,priceDisp:'TRY 3.5M',d10y:180,yoy:27.8,vacancy:3.0,txYoY:30,yield:7.0,pti:6.0,supply:'balanced',pr:18,pipeline:3.5,dom:40,mortgage:36.00,outlook:{en:'TCMB +27.8% nominal / -3.4% real · TCMB 37%',zh:'TCMB +27.8%名目/-3.4%實質 · TCMB 37%'},link:'#'},
+  {flag:'\u{1F1F9}\u{1F1F7}',name:'Istanbul',nameZh:'伊斯坦堡',priceUSD:99000,priceDisp:'TRY 3.5M',d10y:180,yoy:27.8,vacancy:3.0,txYoY:30,yield:7.0,pti:6.0,supply:'balanced',pr:18,pipeline:3.5,dom:40,mortgage:36.00,outlook:{en:'TCMB +27.8% nominal / -3.4% real · TCMB 37%',zh:'TCMB +27.8%名目/-3.4%實質 · TCMB 37%'},rentYoY:35.0,peakDD:0,fc:'TR',link:'#'},
   // IN
-  {flag:'\u{1F1EE}\u{1F1F3}',name:'Mumbai',nameZh:'孟買',priceUSD:240000,priceDisp:'INR 2.0Cr',d10y:20,yoy:11.0,vacancy:5.0,txYoY:18,yield:3.8,pti:12.0,supply:'balanced',pr:33,pipeline:3.5,dom:60,mortgage:7.70,outlook:{en:'ANAROCK +10-12% · Q1-26 32.8K sales',zh:'ANAROCK +10-12% · Q1-26 32.8K成交'},link:'#'},
-  {flag:'\u{1F1EE}\u{1F1F3}',name:'Bangalore',nameZh:'班加羅爾',priceUSD:130000,priceDisp:'INR 1.1Cr',d10y:55,yoy:13.0,vacancy:4.5,txYoY:22,yield:4.5,pti:7.5,supply:'balanced',pr:28,pipeline:4.5,dom:45,mortgage:7.70,outlook:{en:'ANAROCK +13% · APAC office rent +14% Knight Frank',zh:'ANAROCK +13% · APAC辦公租金+14%'},link:'#'},
-  {flag:'\u{1F1EE}\u{1F1F3}',name:'Delhi NCR',nameZh:'德里首都圈',priceUSD:105000,priceDisp:'INR 88L',d10y:80,yoy:15.0,vacancy:8.0,txYoY:15,yield:5.8,pti:8.0,supply:'loose',pr:30,pipeline:5.5,dom:75,mortgage:7.70,outlook:{en:'+81% 5yr · ANAROCK Q1-26 +15% highest',zh:'5年+81% · ANAROCK Q1-26 +15%最高'},link:'#'},
-  {flag:'\u{1F1EE}\u{1F1F3}',name:'Hyderabad',nameZh:'海得拉巴',priceUSD:95000,priceDisp:'INR 80L',d10y:65,yoy:9.0,vacancy:3.5,txYoY:25,yield:3.5,pti:5.5,supply:'balanced',pr:25,pipeline:4.0,dom:40,mortgage:7.70,outlook:{en:'Outlook +9% Q1-26 · launches +46% QoQ',zh:'Outlook Q1-26 +9% · 推案QoQ+46%'},link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F3}',name:'Mumbai',nameZh:'孟買',priceUSD:240000,priceDisp:'INR 2.0Cr',d10y:20,yoy:11.0,vacancy:5.0,txYoY:18,yield:3.8,pti:12.0,supply:'balanced',pr:33,pipeline:3.5,dom:60,mortgage:7.70,outlook:{en:'ANAROCK +10-12% · Q1-26 32.8K sales',zh:'ANAROCK +10-12% · Q1-26 32.8K成交'},rentYoY:null,peakDD:0,fc:'IN',link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F3}',name:'Bangalore',nameZh:'班加羅爾',priceUSD:130000,priceDisp:'INR 1.1Cr',d10y:55,yoy:13.0,vacancy:4.5,txYoY:22,yield:4.5,pti:7.5,supply:'balanced',pr:28,pipeline:4.5,dom:45,mortgage:7.70,outlook:{en:'ANAROCK +13% · APAC office rent +14% Knight Frank',zh:'ANAROCK +13% · APAC辦公租金+14%'},rentYoY:null,peakDD:0,fc:'IN',link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F3}',name:'Delhi NCR',nameZh:'德里首都圈',priceUSD:105000,priceDisp:'INR 88L',d10y:80,yoy:15.0,vacancy:8.0,txYoY:15,yield:5.8,pti:8.0,supply:'loose',pr:30,pipeline:5.5,dom:75,mortgage:7.70,outlook:{en:'+81% 5yr · ANAROCK Q1-26 +15% highest',zh:'5年+81% · ANAROCK Q1-26 +15%最高'},rentYoY:null,peakDD:0,fc:'IN',link:'#'},
+  {flag:'\u{1F1EE}\u{1F1F3}',name:'Hyderabad',nameZh:'海得拉巴',priceUSD:95000,priceDisp:'INR 80L',d10y:65,yoy:9.0,vacancy:3.5,txYoY:25,yield:3.5,pti:5.5,supply:'balanced',pr:25,pipeline:4.0,dom:40,mortgage:7.70,outlook:{en:'Outlook +9% Q1-26 · launches +46% QoQ',zh:'Outlook Q1-26 +9% · 推案QoQ+46%'},rentYoY:null,peakDD:0,fc:'IN',link:'#'},
   // PH
-  {flag:'\u{1F1F5}\u{1F1ED}',name:'Manila',nameZh:'馬尼拉',priceUSD:134000,priceDisp:'PHP 7.5M',d10y:40,yoy:1.6,vacancy:26.0,txYoY:19,yield:5.8,pti:12.0,supply:'loose',pr:16,pipeline:2.5,dom:80,mortgage:7.50,outlook:{en:'BSP RPPI +1.6% (6yr low) · 30K unsold 8yr',zh:'BSP RPPI +1.6% (6年低) · 3萬未售8年消化'},link:'#'},
+  {flag:'\u{1F1F5}\u{1F1ED}',name:'Manila',nameZh:'馬尼拉',priceUSD:134000,priceDisp:'PHP 7.5M',d10y:40,yoy:1.6,vacancy:26.0,txYoY:19,yield:5.8,pti:12.0,supply:'loose',pr:16,pipeline:2.5,dom:80,mortgage:7.50,outlook:{en:'BSP RPPI +1.6% (6yr low) · 30K unsold 8yr',zh:'BSP RPPI +1.6% (6年低) · 3萬未售8年消化'},rentYoY:1.0,peakDD:null,fc:'PH',link:'#'},
   // CA
-  {flag:'\u{1F1E8}\u{1F1E6}',name:'Toronto',nameZh:'多倫多',priceUSD:690000,priceDisp:'C$942K',d10y:50,yoy:-7.4,vacancy:3.0,txYoY:-5,yield:3.8,pti:10.5,supply:'loose',pr:26,pipeline:2.0,dom:45,mortgage:4.04,outlook:{en:'TRREB HPI -7.4% · 3% vacancy highest since 2021',zh:'TRREB HPI -7.4% · 空置3%自2021新高'},link:'ca/toronto.html'},
-  {flag:'\u{1F1E8}\u{1F1E6}',name:'Vancouver',nameZh:'溫哥華',priceUSD:810000,priceDisp:'C$1.10M',d10y:60,yoy:-6.8,vacancy:3.7,txYoY:-3,yield:4.0,pti:12.5,supply:'loose',pr:32,pipeline:1.4,dom:50,mortgage:4.04,outlook:{en:'REBGV HPI -6.8% · 7.3mo inventory · vac 3.7%',zh:'REBGV HPI -6.8% · 7.3月庫存 · 空置3.7%'},link:'ca/vancouver.html'},
+  {flag:'\u{1F1E8}\u{1F1E6}',name:'Toronto',nameZh:'多倫多',priceUSD:690000,priceDisp:'C$942K',d10y:50,yoy:-7.4,vacancy:3.0,txYoY:-5,yield:3.8,pti:10.5,supply:'loose',pr:26,pipeline:2.0,dom:45,mortgage:4.04,outlook:{en:'TRREB HPI -7.4% · 3% vacancy highest since 2021',zh:'TRREB HPI -7.4% · 空置3%自2021新高'},rentYoY:-0.8,peakDD:-18.5,fc:'CA',link:'ca/toronto.html'},
+  {flag:'\u{1F1E8}\u{1F1E6}',name:'Vancouver',nameZh:'溫哥華',priceUSD:810000,priceDisp:'C$1.10M',d10y:60,yoy:-6.8,vacancy:3.7,txYoY:-3,yield:4.0,pti:12.5,supply:'loose',pr:32,pipeline:1.4,dom:50,mortgage:4.04,outlook:{en:'REBGV HPI -6.8% · 7.3mo inventory · vac 3.7%',zh:'REBGV HPI -6.8% · 7.3月庫存 · 空置3.7%'},rentYoY:-4.5,peakDD:-13.1,fc:'CA',link:'ca/vancouver.html'},
   // LATAM
-  {flag:'\u{1F1F2}\u{1F1FD}',name:'Mexico City',nameZh:'墨西哥城',priceUSD:260000,priceDisp:'MXN 4.5M',d10y:55,yoy:4.6,vacancy:4.0,txYoY:10,yield:6.0,pti:7.0,supply:'balanced',pr:17,pipeline:2.0,dom:55,mortgage:11.00,outlook:{en:'SHF HPI +4.6% · nearshoring + DN',zh:'SHF HPI +4.6% · 近岸+數位遊民'},link:'#'},
-  {flag:'\u{1F1E7}\u{1F1F7}',name:'São Paulo',nameZh:'聖保羅',priceUSD:135000,priceDisp:'R$765K',d10y:25,yoy:5.0,vacancy:5.0,txYoY:8,yield:6.3,pti:8.0,supply:'balanced',pr:18,pipeline:2.5,dom:60,mortgage:10.30,outlook:{en:'FipeZap +5% · Selic 14.75% constrains',zh:'FipeZap +5% · Selic 14.75%制約'},link:'#'},
-  {flag:'\u{1F1E8}\u{1F1F1}',name:'Santiago',nameZh:'聖地牙哥',priceUSD:235000,priceDisp:'CLP 223M',d10y:30,yoy:2.0,vacancy:5.5,txYoY:3,yield:4.8,pti:8.5,supply:'balanced',pr:22,pipeline:1.8,dom:65,mortgage:4.10,outlook:{en:'BCCh 5,600 UF median · +2% UF · subsidy program',zh:'BCCh 5,600 UF中位 · UF +2% · 補貼計劃'},link:'#'},
-  {flag:'\u{1F1E6}\u{1F1F7}',name:'Buenos Aires',nameZh:'布宜諾斯艾利斯',priceUSD:147000,priceDisp:'USD 2,450/m²',d10y:-12,yoy:5.6,vacancy:8.0,txYoY:170,yield:4.8,pti:12.0,supply:'loose',pr:28,pipeline:1.5,dom:120,mortgage:10.00,outlook:{en:'Zonaprop USD +5.6% · Milei rental repeal +170% supply',zh:'Zonaprop USD +5.6% · Milei廢租金法+170%供應'},link:'#'},
-  {flag:'\u{1F1F5}\u{1F1EA}',name:'Lima',nameZh:'利馬',priceUSD:138000,priceDisp:'PEN 511K',d10y:20,yoy:4.0,vacancy:6.0,txYoY:5,yield:5.0,pti:7.5,supply:'balanced',pr:18,pipeline:2.2,dom:75,mortgage:6.30,outlook:{en:'BCRP PEN 511K +4% · credit +7.1% YoY',zh:'BCRP PEN 511K +4% · 信貸年+7.1%'},link:'#'},
-  {flag:'\u{1F1E8}\u{1F1F4}',name:'Bogotá',nameZh:'波哥大',priceUSD:120000,priceDisp:'COP 504M',d10y:15,yoy:6.0,vacancy:5.5,txYoY:4,yield:5.5,pti:8.0,supply:'balanced',pr:17,pipeline:2.0,dom:70,mortgage:12.00,outlook:{en:'Banrep national +5-7% · policy rate 11.25%',zh:'Banrep全國+5-7% · 政策利率11.25%'},link:'#'}
+  {flag:'\u{1F1F2}\u{1F1FD}',name:'Mexico City',nameZh:'墨西哥城',priceUSD:260000,priceDisp:'MXN 4.5M',d10y:55,yoy:4.6,vacancy:4.0,txYoY:10,yield:6.0,pti:7.0,supply:'balanced',pr:17,pipeline:2.0,dom:55,mortgage:11.00,outlook:{en:'SHF HPI +4.6% · nearshoring + DN',zh:'SHF HPI +4.6% · 近岸+數位遊民'},rentYoY:8.7,peakDD:0,fc:'MX',link:'#'},
+  {flag:'\u{1F1E7}\u{1F1F7}',name:'São Paulo',nameZh:'聖保羅',priceUSD:135000,priceDisp:'R$765K',d10y:25,yoy:5.0,vacancy:5.0,txYoY:8,yield:6.3,pti:8.0,supply:'balanced',pr:18,pipeline:2.5,dom:60,mortgage:10.30,outlook:{en:'FipeZap +5% · Selic 14.75% constrains',zh:'FipeZap +5% · Selic 14.75%制約'},rentYoY:6.1,peakDD:0,fc:'BR',link:'#'},
+  {flag:'\u{1F1E8}\u{1F1F1}',name:'Santiago',nameZh:'聖地牙哥',priceUSD:235000,priceDisp:'CLP 223M',d10y:30,yoy:2.0,vacancy:5.5,txYoY:3,yield:4.8,pti:8.5,supply:'balanced',pr:22,pipeline:1.8,dom:65,mortgage:4.10,outlook:{en:'BCCh 5,600 UF median · +2% UF · subsidy program',zh:'BCCh 5,600 UF中位 · UF +2% · 補貼計劃'},rentYoY:3.6,peakDD:0,fc:'CL',link:'#'},
+  {flag:'\u{1F1E6}\u{1F1F7}',name:'Buenos Aires',nameZh:'布宜諾斯艾利斯',priceUSD:147000,priceDisp:'USD 2,450/m²',d10y:-12,yoy:5.6,vacancy:8.0,txYoY:170,yield:4.8,pti:12.0,supply:'loose',pr:28,pipeline:1.5,dom:120,mortgage:10.00,outlook:{en:'Zonaprop USD +5.6% · Milei rental repeal +170% supply',zh:'Zonaprop USD +5.6% · Milei廢租金法+170%供應'},rentYoY:31.3,peakDD:-11.8,fc:'AR',link:'#'},
+  {flag:'\u{1F1F5}\u{1F1EA}',name:'Lima',nameZh:'利馬',priceUSD:138000,priceDisp:'PEN 511K',d10y:20,yoy:4.0,vacancy:6.0,txYoY:5,yield:5.0,pti:7.5,supply:'balanced',pr:18,pipeline:2.2,dom:75,mortgage:6.30,outlook:{en:'BCRP PEN 511K +4% · credit +7.1% YoY',zh:'BCRP PEN 511K +4% · 信貸年+7.1%'},rentYoY:4.3,peakDD:-20.9,fc:'PE',link:'#'},
+  {flag:'\u{1F1E8}\u{1F1F4}',name:'Bogotá',nameZh:'波哥大',priceUSD:120000,priceDisp:'COP 504M',d10y:15,yoy:6.0,vacancy:5.5,txYoY:4,yield:5.5,pti:8.0,supply:'balanced',pr:17,pipeline:2.0,dom:70,mortgage:12.00,outlook:{en:'Banrep national +5-7% · policy rate 11.25%',zh:'Banrep全國+5-7% · 政策利率11.25%'},rentYoY:5.3,peakDD:0,fc:'CO',link:'#'}
 ];
 function supplyBadge(supply,lang){
   var cfg={
@@ -841,6 +882,53 @@ var FLAG_META={
   '\u{1F1F5}\u{1F1EA}':{code:'pe',region:'americas',foreignOK:true,visa:false},
   '\u{1F1E8}\u{1F1F4}':{code:'co',region:'americas',foreignOK:true,visa:false}
 };
+var FOREIGN_COSTS={
+"US":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "No federal/NYC restriction and no foreign-buyer surcharge tax; buyer pays same NYS transfer tax (0.4%) + NYC RPTT (up to 2.625%) + mansion tax (1-3.9% over $1M) as locals; FIRPTA 15% withholding applies only to sellers, not buyers."},
+"UK":{"extraTaxPct": 2, "canBuy": "free", "tier": "yellow", "note": "Non-UK residents pay a flat 2% SDLT surcharge on top of standard SDLT rates (which are steeply progressive and can reach ~10-12% marginal on prime London prices), in force since April 2021."},
+"AU":{"extraTaxPct": 9, "canBuy": "restricted", "tier": "red", "note": "Foreign persons are banned from buying established (resale) dwellings in NSW/Sydney under the federal ban extended in the 2026-27 Budget to 30 June 2029 (new-build purchases still allowed with FIRB approval), plus NSW charges a 9% surcharge purchaser duty (raised from 8% on 1 Jan 2025) and 5% annual surcharge land tax on top."},
+"JP":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "No ownership restriction and no foreigner-specific tax; acquisition tax (~3%) + registration tax (~1.5-2%) apply equally to all buyers, though a new nationality-disclosure rule (not a tax) started April 2026."},
+"TW":{"extraTaxPct": 0, "canBuy": "restricted", "tier": "yellow", "note": "Purchase requires MOI reciprocity approval (buyer's home country must allow Taiwanese to buy there) plus a ban near military/security zones, but tax (6% deed tax) is identical to locals."},
+"NZ":{"extraTaxPct": 0, "canBuy": "banned", "tier": "red", "note": "Ordinary foreign individuals are banned from buying existing Auckland homes under the Overseas Investment Act; only a narrow developer exemption (large 20+ unit apartment blocks, up to 60% sold to overseas buyers) or a Dec-2025 carve-out for Investor visa holders on NZ$5m+ homes (effective Mar 2026) allow purchase."},
+"MY":{"extraTaxPct": 5, "canBuy": "restricted", "tier": "yellow", "note": "Foreigners face a flat 8% stamp duty from Jan 2026 (vs ~3% progressive rate for locals) plus a Kuala Lumpur/Selangor minimum purchase price of RM1,000,000 and state consent fee."},
+"TH":{"extraTaxPct": 0, "canBuy": "restricted", "tier": "yellow", "note": "Foreigners can buy condo units freehold up to 49% of a building's total floor area (no landed houses/land), paying the same 2% transfer fee (plus SBT/stamp duty on resale) as Thai nationals."},
+"SG":{"extraTaxPct": 60, "canBuy": "free", "tier": "red", "note": "Foreigners can buy private condos without approval but pay 60% ABSD (since April 2023) on top of standard BSD (up to 6%), making Singapore one of the costliest markets for foreign buyers globally."},
+"HK":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "BSD (15%) and NRSD for non-permanent-residents were removed in the Feb 2024 Budget and remain suspended in 2026, so foreigners now pay the same Scale-2 ad valorem stamp duty (~1.5-4.25%, new 6.5% band only above HK$100M) as locals."},
+"KR":{"extraTaxPct": 0, "canBuy": "restricted", "tier": "red", "note": "No foreigner-specific transfer tax, but since Aug 2025 all of Seoul is a Land Transaction Permit Zone requiring the buyer to move in within 4 months and reside 2 years, which blocks pure non-resident investment purchases (extended through end of 2026)."},
+"AE":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Dubai Land Department charges a flat 4% transfer fee to everyone in the 60+ designated freehold zones (Marina, Downtown, Business Bay, JVC, Palm Jumeirah, etc.), no foreigner surcharge."},
+"VN":{"extraTaxPct": 0, "canBuy": "restricted", "tier": "yellow", "note": "Under the 2023 Housing Law (effective Aug 2024), foreigners get a 50-year leasehold (renewable once, ~100 years total, not freehold), capped at 30% of units per building, paying the same ~0.5% registration fee as locals."},
+"ID":{"extraTaxPct": 0, "canBuy": "restricted", "tier": "yellow", "note": "Foreigners with a valid stay permit can only hold Hak Pakai (leasehold, up to 80 years total, not freehold Hak Milik) on Jakarta apartments above a roughly IDR 3 billion minimum price, paying the same 5% BPHTB transfer duty as locals."},
+"IE":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Stamp duty is 1% up to €1m, 2% on €1m-1.5m, 6% above €1.5m, identical for residents and non-residents with no nationality-based surcharge."},
+"NL":{"extraTaxPct": 0, "canBuy": "restricted", "tier": "yellow", "note": "Overdrachtsbelasting is 2% if you occupy the home yourself but 8% (down from 10.4% in 2025) for non-owner-occupied purchases, the realistic bracket for a non-resident buy-to-let investor; Amsterdam also imposes a self-occupancy rule (zelfbewoningsplicht) on cheaper existing apartments that blocks buy-to-let regardless of nationality (verify current WOZ threshold)."},
+"DE":{"extraTaxPct": 0, "canBuy": "free", "tier": "yellow", "note": "Grunderwerbsteuer in Berlin is a flat 6% for every buyer regardless of nationality or residency, with no ownership restrictions on foreigners."},
+"PT":{"extraTaxPct": 1.5, "canBuy": "free", "tier": "yellow", "note": "From 1 Sept 2026 non-tax-residents pay a new flat 7.5% IMT (Decree-Law 97/2026) versus progressive local rates up to ~8% plus 0.8% stamp duty, and the Golden Visa real-estate route remains ended since 2023 (verify exact resident-comparison delta)."},
+"FR":{"extraTaxPct": 0, "canBuy": "free", "tier": "yellow", "note": "Frais de notaire on an existing Paris apartment run about 7-8% of price (mostly droits de mutation transfer tax plus notary fee), identical for foreign and French buyers with no nationality restriction."},
+"PL":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Non-EU foreigners need no Ministry of Interior permit to buy a single standalone residential apartment (permit only required for houses-with-land/plots); PCC transfer tax is 2% on secondary market, same as locals."},
+"CZ":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Foreign ownership restrictions on residential property were abolished; non-EU buyers treated like locals, and the former 4% property transfer tax was itself abolished in 2020."},
+"ES":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "PM Sánchez's proposed 100% surcharge on non-EU/non-resident buyers (announced Jan 2025) stalled in Congress and was never passed into law as of 2026; buyers pay normal ITP transfer tax, 6% in Madrid (Catalonia/Barcelona runs higher, ~10%) (verify)."},
+"CH":{"extraTaxPct": 0, "canBuy": "banned", "tier": "red", "note": "Lex Koller requires cantonal authorization for property acquisition by persons domiciled abroad, and Zurich canton receives zero holiday-home quota, so a non-resident foreign individual cannot buy a residential apartment there (Zurich also levies no cantonal transfer tax at 0%)."},
+"IT":{"extraTaxPct": 0, "canBuy": "free", "tier": "yellow", "note": "Reciprocity principle still applies but is satisfied for most Western nationals (US, UK, etc.), so purchase is free with no foreigner surcharge; registration tax is 9% of cadastral value for buyers who can't claim primary-residence status (vs 2% for prima casa), which most foreign buyers can't."},
+"TR":{"extraTaxPct": 0, "canBuy": "restricted", "tier": "yellow", "note": "Foreigners buy freely in most areas subject to reciprocity, but are barred near military/security zones and once a neighborhood hits the 10%-foreign-ownership cap; tapu harcı title tax is 4% (legally split 2%/2% buyer-seller but buyer often pays it all in practice); citizenship-by-investment threshold remains $400,000, unchanged for 2026."},
+"IN":{"extraTaxPct": 0, "canBuy": "banned", "tier": "red", "note": "A foreign national with no Indian origin (not NRI/OCI/PIO) is barred by FEMA from buying residential property in India except by inheritance or special RBI permission."},
+"PH":{"extraTaxPct": 0, "canBuy": "restricted", "tier": "yellow", "note": "Foreigners cannot own land but may own condo units outright as long as foreign ownership in the building stays under 40% (RA 4726), paying the same ~1.5% DST + up to 1% local transfer tax + registration fee as Filipino buyers."},
+"CA":{"extraTaxPct": 25, "canBuy": "banned", "tier": "red", "note": "Federal Prohibition on the Purchase of Residential Property by Non-Canadians Act remains in force through at least 1 Jan 2027, effectively banning most non-resident individuals from buying in Toronto; if an exemption applies, Ontario's 25% Non-Resident Speculation Tax plus a Toronto municipal foreign-buyer tax still apply (verify exact status closer to purchase date)."},
+"MX":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Mexico City lies outside the constitutional 'restricted zone' (50km coast/100km border), so foreigners can hold freehold title directly with no fideicomiso and pay the same progressive ISAI transfer tax (~4-6.5%, up to 8.7% on high-value units) as Mexican nationals."},
+"BR":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Foreigners may freely buy urban apartments in São Paulo with no surcharge; ITBI transfer tax is ~2-4% (typically ~3%), same as locals."},
+"CL":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Foreigners buy on identical terms to locals with no extra tax; Chile has no dedicated transfer tax, only notary + Conservador de Bienes Raíces registration fees of roughly 0.4-0.7% (total closing costs ~1.5-4.5% incl. legal/agent fees)."},
+"AR":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Foreigners buy freely in Buenos Aires City with no nationality-based tax; Impuesto de Sellos stamp tax is 3.6% of declared value, same for all buyers."},
+"PE":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Lima sits outside Peru's 50km international-border restriction zone, so foreigners buy freely under the same 3% Alcabala tax as locals (first ~10 UIT of value exempt)."},
+"CO":{"extraTaxPct": 0, "canBuy": "free", "tier": "green", "note": "Foreigners buy freely in Bogotá with no nationality-based restriction (only some land-border regions are restricted); notary (~0.5-1.2%) plus registration (~0.3-1%) fees total roughly 1.5-2.5%."}
+};
+var FC_TIER_ORDER={green:0,yellow:1,red:2};
+function fcBadge(code,lang){
+  var d=FOREIGN_COSTS[code];
+  if(!d)return '<span style="color:#94a3b8">—</span>';
+  var tierCfg={green:{dot:'#16a34a',en:'Friendly',zh:'友善'},yellow:{dot:'#d97706',en:'Conditional',zh:'有條件'},red:{dot:'#dc2626',en:'High barrier',zh:'高門檻'}};
+  var tc=tierCfg[d.tier]||tierCfg.yellow;
+  var label=d.canBuy==='banned' ? '🚫' : ('<span class="fc-dot" style="background:'+tc.dot+'"></span>'+(lang==='zh'?tc.zh:tc.en));
+  var extra=d.extraTaxPct>0?(' <span style="color:#94a3b8">+'+d.extraTaxPct+'%</span>'):'';
+  var noteEsc=(d.note||'').replace(/"/g,'&quot;');
+  return '<span class="fc-badge" title="'+noteEsc+'">'+label+extra+'</span>';
+}
 var ctPinned=[];
 function ctSparkline(c){
   var d10=c.d10y||0,yoy=c.yoy||0;
@@ -953,6 +1041,7 @@ renderTable=function(lang){
     if(bv===null||bv===undefined)bv=sortDir===1?-Infinity:Infinity;
     if(sortKey==='carry'){av=a.yield-a.mortgage;bv=b.yield-b.mortgage;}
     if(sortKey==='supply'){av=SUPPLY_ORDER[av]!==undefined?SUPPLY_ORDER[av]:1;bv=SUPPLY_ORDER[bv]!==undefined?SUPPLY_ORDER[bv]:1;}
+    if(sortKey==='fc'){var fca=FOREIGN_COSTS[a.fc],fcb=FOREIGN_COSTS[b.fc];av=fca?FC_TIER_ORDER[fca.tier]:1;bv=fcb?FC_TIER_ORDER[fcb.tier]:1;}
     if(typeof av==='string')return sortDir*(av.localeCompare(bv));
     return sortDir*(bv-av);
   });
@@ -961,6 +1050,14 @@ renderTable=function(lang){
   tbody.innerHTML=sorted.map(function(c){
     var nm=lang==='zh'?c.nameZh:c.name;
     var yoyH=c.yoy>0?'<span style="color:#16a34a;font-weight:600">+'+c.yoy+'%</span>':c.yoy<0?'<span style="color:#dc2626;font-weight:600">'+c.yoy+'%</span>':'<span style="color:#94a3b8">—</span>';
+    var rentYoYH=(c.rentYoY===null||c.rentYoY===undefined)?'<span style="color:#94a3b8">—</span>':(c.rentYoY>0?'<span style="color:#16a34a;font-weight:600">+'+c.rentYoY+'%</span>':c.rentYoY<0?'<span style="color:#dc2626;font-weight:600">'+c.rentYoY+'%</span>':'<span style="color:#94a3b8">0%</span>');
+    var peakH=(function(){
+      var p=c.peakDD;
+      if(p===null||p===undefined)return '<span style="color:#94a3b8">—</span>';
+      if(p===0)return '<span class="ath-badge">'+(lang==='zh'?'歷史新高':'ATH')+'</span>';
+      var pc=p>=-10?'#d97706':p>=-25?'#dc2626':'#991b1b';
+      return '<span style="color:'+pc+';font-weight:600">−'+Math.abs(p).toFixed(1)+'%</span>';
+    })();
     var yClr=c.yield>=5?'#16a34a':c.yield>=3.5?'#1e3a5f':'#94a3b8';
     var yW=c.yield>=5?700:600;
     var pClr=c.pti<=5?'#16a34a':c.pti<=10?'#d97706':'#dc2626';
@@ -970,33 +1067,61 @@ renderTable=function(lang){
     var pinned=ctPinned.indexOf(c.name)>=0;
     var nameEsc=c.name.replace(/'/g,"\\'");
     var stickyBg=pinned?'#fff8e6':'#fff';
-    return '<tr onclick="location.href=\''+c.link+'\'" style="cursor:pointer" class="'+(pinned?'pinned':'')+'">'+
+    var hasLink=c.link && c.link!=='#';
+    var trAttrs=hasLink?(' onclick="location.href=\''+c.link+'\'" style="cursor:pointer"'):' style="cursor:default"';
+    return '<tr'+trAttrs+' class="'+(pinned?'pinned':'')+(hasLink?'':' no-link')+'">'+
       '<td style="position:sticky;left:0;background:'+stickyBg+';z-index:1;border-right:1px solid #f0f5fb;font-weight:600;min-width:90px"><span class="ct-pin '+(pinned?'on':'')+'" onclick="ctTogglePin(\''+nameEsc+'\',event)" title="'+(lang==='zh'?'點擊釘選比較':'Click to pin')+'">'+(pinned?'★':'☆')+'</span><span style="font-size:11px;margin-right:4px">'+c.flag+'</span><span style="font-size:10.5px">'+nm+'</span></td>'+
       (function(){var d=c.d10y;var dc=d>=80?'#16a34a':d>=40?'#1e3a5f':d>=0?'#94a3b8':'#dc2626';return '<td style="color:'+dc+';font-weight:600">'+(d>0?'+':'')+d+'%</td>';})()+
+      '<td>'+peakH+'</td>'+
       '<td style="text-align:center;padding:5px 6px">'+ctSparkline(c)+'</td>'+
       '<td>'+yoyH+'</td>'+
+      '<td>'+rentYoYH+'</td>'+
       '<td style="color:'+yClr+';font-weight:'+yW+'">'+c.yield.toFixed(1)+'%</td>'+
       (function(){var cv=+(c.yield-c.mortgage).toFixed(2);var cc=cv>=1?'#16a34a':cv>=0?'#1e3a5f':'#dc2626';return '<td style="color:'+cc+';font-weight:700">'+(cv>0?'+':'')+cv.toFixed(1)+'%</td>';})()+
       '<td style="color:'+pClr+';font-weight:600">'+c.pti+'×</td>'+
       '<td style="color:'+prClr+';font-weight:'+prW+'">'+c.pr+'×</td>'+
       (function(){var v=c.vacancy;var vc=v<=1?'#dc2626':v<=2?'#d97706':v<=3.5?'#1e3a5f':'#94a3b8';return '<td style="color:'+vc+';font-weight:600">'+v.toFixed(1)+'%</td>';})()+
       (function(){var t=c.txYoY;var tc=t>=10?'#16a34a':t>=0?'#1e3a5f':'#dc2626';return '<td style="color:'+tc+';font-weight:600">'+(t>0?'+':'')+t+'%</td>';})()+
+      '<td style="font-weight:600;color:#1e3a5f">'+c.dom+(lang==='zh'?' 天':'d')+'</td>'+
       '<td style="text-align:center">'+supplyBadge(c.supply,lang)+'</td>'+
       '<td style="text-align:center">'+pipelineBadge(c.pipeline,lang)+'</td>'+
       '<td style="font-size:9.5px;color:#475569;line-height:1.35;font-family:Inter,sans-serif;white-space:normal;text-align:left">'+(c.outlook?(lang==='zh'?c.outlook.zh:c.outlook.en):'')+'</td>'+
       '<td style="font-weight:600;color:#0f2a45;font-size:10px">'+c.priceDisp+'</td>'+
       '<td style="color:'+mClr+';font-weight:600;font-size:10px">'+c.mortgage.toFixed(1)+'%</td>'+
+      '<td style="text-align:center">'+fcBadge(c.fc,lang)+'</td>'+
       '</tr>';
   }).join('');
 };
+function mvRow(c,lang,val){
+  var nm=lang==='zh'?c.nameZh:c.name;
+  var cl=val>=0?'#16a34a':'#dc2626';
+  return '<div class="mv-row"><span class="mv-name">'+c.flag+' '+nm+'</span><span class="mv-val" style="color:'+cl+'">'+(val>0?'+':'')+val.toFixed(1)+'%</span></div>';
+}
+function renderMovers(lang){
+  var priceUp=document.getElementById('mv-price-up');
+  if(!priceUp)return;
+  var byYoyDesc=CITIES.slice().sort(function(a,b){return b.yoy-a.yoy;});
+  var byYoyAsc=CITIES.slice().sort(function(a,b){return a.yoy-b.yoy;});
+  var rentCities=CITIES.filter(function(c){return c.rentYoY!==null && c.rentYoY!==undefined;});
+  var byRentDesc=rentCities.slice().sort(function(a,b){return b.rentYoY-a.rentYoY;});
+  var peakCities=CITIES.filter(function(c){return c.peakDD!==null && c.peakDD!==undefined;});
+  var byPeakAsc=peakCities.slice().sort(function(a,b){return a.peakDD-b.peakDD;});
+  priceUp.innerHTML=byYoyDesc.slice(0,5).map(function(c){return mvRow(c,lang,c.yoy);}).join('');
+  document.getElementById('mv-price-dn').innerHTML=byYoyAsc.slice(0,5).map(function(c){return mvRow(c,lang,c.yoy);}).join('');
+  document.getElementById('mv-rent-up').innerHTML=byRentDesc.slice(0,5).map(function(c){return mvRow(c,lang,c.rentYoY);}).join('');
+  document.getElementById('mv-peak-dd').innerHTML=byPeakAsc.slice(0,5).map(function(c){return mvRow(c,lang,c.peakDD);}).join('');
+}
 function setLang(lang){
   currentLang=lang;localStorage.setItem('lang',lang);
   document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?(e.tagName==='SPAN'?'inline':'block'):'none';});
   document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?(e.tagName==='SPAN'?'inline':'block'):'none';});
   document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.textContent.trim()===(lang==='en'?'EN':'中文'));});
+  var hcEn=document.getElementById('hero-city-count-en');if(hcEn)hcEn.textContent=CITIES.length;
+  var hcZh=document.getElementById('hero-city-count-zh');if(hcZh)hcZh.textContent=CITIES.length;
   renderTable(lang);
+  renderMovers(lang);
 }
-window.addEventListener('load',function(){setLang(currentLang);ccInit();});
+window.addEventListener('load',function(){setLang(currentLang);});
 // Close city dropdowns when clicking outside
 document.addEventListener('click',function(e){
   if(!e.target.closest('.mcard-city-dd')){
@@ -1073,7 +1198,7 @@ function t5Card(rk,idx,horizonKey,lang){
   var c=rk.city;
   var rankNum=idx+1;
   var isBench=rankNum===6;
-  var defaultIdx=T5_DEFAULT[horizonKey][c.name];
+  var defaultIdx=(T5_DEFAULT[horizonKey]||{})[c.name];
   var delta=(typeof defaultIdx==='number')?(defaultIdx-idx):0;
   var deltaHTML='';
   if(delta>0)deltaHTML='<span class="t5-delta" style="background:rgba(34,197,94,0.18);color:#22c55e;border:1px solid rgba(34,197,94,0.4)">▲'+delta+'</span>';
