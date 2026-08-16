@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 · Capstone | CRE Investing Course | InvestMQuest</title>
+<meta name="description" content="A full end-to-end deal underwriting exercise: rent roll, T-12 actuals, pro-forma inflation, cap rate, DSCR, WALT, and exit cap stress on one hypothetical property. 一次端到端的完整交易核保練習：在同一個假設物件上檢驗租金明細表、T-12 實際數字、預估值灌水、資本化率、償債保障比率、加權平均到期年限與出場資本化率壓力測試。">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/learn-cre/learn.css">
+<style>
+.spec-table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+.spec-table th{text-align:left;padding:9px 10px;background:var(--lc-accent-light);border-bottom:2px solid var(--lc-accent-border);font-size:11.5px;letter-spacing:.03em;color:var(--lc-navy);white-space:nowrap}
+.spec-table td{padding:8px 10px;border-bottom:1px solid var(--lc-border);color:var(--lc-text)}
+.spec-table tr.total-row td{font-weight:700;background:#f8fafc;border-top:2px solid var(--lc-accent-border)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.ctr{text-align:center}
+.t12-table{width:100%;border-collapse:collapse;font-size:13.5px;max-width:520px}
+.t12-table td{padding:7px 4px;border-bottom:1px solid var(--lc-border)}
+.t12-table td.amt{text-align:right;font-variant-numeric:tabular-nums}
+.t12-table tr.subtotal td{font-weight:700;background:#f8fafc}
+.t12-table tr.pending td{font-weight:700;background:var(--lc-accent-light);color:var(--lc-navy)}
+.task-lead{margin:30px 0 14px}
+.task-eyebrow{font-size:11px;letter-spacing:.1em;font-weight:700;color:var(--lc-accent);text-transform:uppercase;display:block;margin-bottom:6px}
+.next-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px 0 8px}
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <div class="course-nav-inner">
+    <div class="course-nav-brand">
+      <a href="/cre.html">&larr; <span class="lang-en">CRE Monitor</span><span class="lang-zh" style="display:none">CRE 監測儀表板</span></a>
+      <span class="course-nav-sep">/</span>
+      <a href="/learn-cre/index.html" class="course-nav-home"><span class="lang-en">Course Home</span><span class="lang-zh" style="display:none">課程首頁</span></a>
+    </div>
+    <div class="course-nav-pager">
+      <a href="11-access.html">&larr; <span class="lang-en">How Individuals Invest</span><span class="lang-zh" style="display:none">散戶的參與管道</span></a>
+      <a href="/learn-cre/index.html"><span class="lang-en">Course Home</span><span class="lang-zh" style="display:none">課程首頁</span> &rarr;</a>
+    </div>
+    <div class="course-nav-lang">
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</nav>
+
+<div class="lc-wrap">
+
+  <header class="module-header">
+    <span class="module-eyebrow lang-en">MODULE 12</span>
+    <span class="module-eyebrow lang-zh" style="display:none">第 12 課</span>
+    <h1 class="lang-en">Capstone</h1>
+    <h1 class="lang-zh" style="display:none">畢業考</h1>
+    <div class="module-goals">
+      <div class="module-goals-title"><span class="lang-en">What You'll Learn</span><span class="lang-zh" style="display:none">這一課學什麼</span></div>
+      <ul>
+        <li><span class="lang-en">Underwrite a full offering memorandum end to end — rent roll, T-12 actuals, and a marketed pro-forma — on one hypothetical deal.</span><span class="lang-zh" style="display:none">端到端核保一份完整的招標書——租金明細表、T-12 實際數字、與行銷用預估值——全部套用在同一筆假設交易上。</span></li>
+        <li><span class="lang-en">Detect pro-forma NOI inflation and recompute the going-in cap rate on actual numbers.</span><span class="lang-zh" style="display:none">抓出預估淨營運收益的灌水成分，並用實際數字重新算出進場資本化率。</span></li>
+        <li><span class="lang-en">Test whether a quoted loan actually clears its DSCR covenant on actual NOI, not marketed NOI.</span><span class="lang-zh" style="display:none">檢驗報價貸款用實際淨營運收益（而非行銷用數字）計算，是否真的能過償債保障比率條款。</span></li>
+        <li><span class="lang-en">Read a WALT figure for what it can hide — a lease rollover cliff concentrated in a narrow window.</span><span class="lang-zh" style="display:none">讀懂加權平均到期年限數字可能掩蓋什麼——集中在一段狹窄期間的租約到期懸崖。</span></li>
+        <li><span class="lang-en">Stress an exit cap rate and decide, with judgment, whether to proceed, renegotiate, or restructure.</span><span class="lang-zh" style="display:none">對出場資本化率做壓力測試，並運用判斷力決定：續行、重新議價，還是重新架構交易。</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <section>
+    <p class="lang-en">$1,439,250 in gross potential rent. A marketed 5.75% cap rate. A $23,450,000 asking price. Every number in an offering memorandum is true in the narrow sense that someone actually typed it — the question this module asks is whether it survives contact with the T-12 actuals, the rent roll's own expiration dates, and a lender's DSCR covenant.</p>
+    <p class="lang-zh" style="display:none">毛潛在租金 1,439,250 美元。行銷資本化率 5.75%。開價 2,345 萬美元。招標書裡的每個數字，在「有人確實打進去」這層狹義意義上都是真的——這一課要問的是：這些數字能不能撐過 T-12 實際數字、租金明細表自己的到期日、以及放款方 <span class="key-term" tabindex="0">償債保障比率<span class="key-term-tip"><span class="lang-en">Debt Service Coverage Ratio — annual NOI divided by annual debt service, the ratio a lender uses to test whether a property's income comfortably covers its loan payment.</span><span class="lang-zh" style="display:none">償債保障比率（DSCR）——年淨營運收益除以年度還款額，放款方用來檢驗物件收益是否能舒服覆蓋貸款還款的比率。</span></span></span>（DSCR）條款這幾關考驗。</p>
+
+    <p class="lang-en">Meridian Logistics &amp; Office Park is not a real building; every figure below is fabricated for this exercise. But the mechanics — a pro-forma that leans on unsigned renewals, a <span class="key-term" tabindex="0">WALT<span class="key-term-tip"><span class="lang-en">Weighted Average Lease Term — the rent-weighted average of years remaining across every lease in a rent roll, in years.</span><span class="lang-zh" style="display:none">加權平均到期年限——以租金加權計算，租金明細表中所有租約剩餘年數的平均值，單位為年。</span></span></span> average that hides a rollover cliff, a DSCR that clears on marketed NOI and fails on actual NOI — are drawn from the same failure modes covered in Modules 02 through 11. This is where those pieces get assembled into one deal, worked through in order, the way an underwriter would actually work it.</p>
+    <p class="lang-zh" style="display:none">Meridian Logistics &amp; Office Park 並非真實建築物；以下所有數字都是為本練習虛構的。但其中的機制——倚賴未簽約續約的預估值、掩蓋租約到期懸崖的加權平均到期年限（WALT）平均值、在行銷淨營運收益下過關、換成實際淨營運收益就過不了的償債保障比率——都取材自第 02 到 11 課涵蓋過的同一批失敗模式。這一課要做的，是把這些片段按照真正核保人員的順序，組裝進同一筆交易裡逐項算過一遍。</p>
+
+    <p class="lang-en">Eight staged tasks follow, each building on the last: compute the actual NOI, spot where the marketed NOI diverges from it, reprice the cap rate, stress-test the loan, read the lease rollover schedule for what it hides, stress the exit, decide how to respond, and finally synthesize the two sharpest risks into one. A calculator at the end lets the same deal be rerun under different assumptions of your own.</p>
+    <p class="lang-zh" style="display:none">接下來是八個逐步遞進的任務，每一題都建立在前一題之上：算出實際淨營運收益、抓出行銷用數字跟它的落差在哪裡、重新反映進資本化率、對貸款做壓力測試、讀懂租約到期時程表掩蓋了什麼、對出場做壓力測試、決定該怎麼回應，最後把兩個最尖銳的風險綜合成同一個判斷。文末附有一個計算器，讓你可以用自己的假設重跑同一筆交易。</p>
+  </section>
+
+  <section>
+    <h2 class="lang-en">Offering Memorandum: Meridian Logistics &amp; Office Park</h2>
+    <h2 class="lang-zh" style="display:none">招標書：Meridian Logistics &amp; Office Park</h2>
+
+    <div style="background:var(--lc-accent-light);border:1px solid var(--lc-accent-border);border-radius:var(--lc-radius);padding:14px 18px;margin:16px 0;font-size:13.5px">
+      <strong><span class="lang-en">Hypothetical property:</span><span class="lang-zh" style="display:none">假設物件：</span></strong>
+      <span class="lang-en">Meridian Logistics &amp; Office Park, its tenants, rent roll, and every figure on this page are fabricated for teaching purposes. No such address, ownership, or transaction exists.</span>
+      <span class="lang-zh" style="display:none">Meridian Logistics &amp; Office Park 及其承租戶、租金明細表，以及本頁所有數字，皆為教學目的虛構。並無對應的真實地址、產權或交易存在。</span>
+    </div>
+
+    <p class="lang-en">The property is a 120,000-square-foot mixed industrial and office park leased to eight tenants across warehouse-distribution suites and office suites. Roughly 88,000 SF (73%) is industrial space leased to logistics, distribution, and parts-supply tenants; the remaining 32,000 SF (27%) is office space leased to smaller professional-services tenants. The broker's teaser markets it against a Year-1 pro-forma NOI and a 5.75% cap rate.</p>
+    <p class="lang-zh" style="display:none">該物件是一座 120,000 平方英尺的工業與辦公室混合園區，由八個承租戶承租，涵蓋倉儲物流套房與辦公室套房。其中約 88,000 平方英尺（73%）為工業空間，承租戶為物流、配送與零件供應業者；其餘 32,000 平方英尺（27%）為辦公室空間，承租戶為規模較小的專業服務業者。仲介的招標書用第一年預估淨營運收益與 5.75% 資本化率來行銷這筆交易。</p>
+
+    <p class="lang-en">That split matters for how the deal reads later in this exercise: the industrial tenants carry longer, staggered lease terms (2028&ndash;2031), while all three office tenants happen to renew in the same year. A mixed-use property can look diversified on paper &mdash; two different tenant categories, eight different companies &mdash; while still concentrating its real rollover risk in one use type and one narrow calendar window. Task 5 below returns to exactly this point.</p>
+    <p class="lang-zh" style="display:none">這個分佈比例，對這次練習後面怎麼解讀這筆交易很重要：工業承租戶的租約期限較長，且到期時間錯開（2028 至 2031 年），但三個辦公室承租戶卻剛好都在同一年到期。混合用途物件在紙面上可以看起來很分散——兩種不同的承租戶類別、八家不同的公司——但真正的到期風險，仍可能集中在單一用途類別、單一狹窄的時間窗口內。下方任務五會再回到這一點。</p>
+
+    <div class="calc-outputs" style="margin-top:18px">
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Asking Price</span><span class="lang-zh" style="display:none">開價</span></span>
+        <span class="calc-output-value">$23,450,000</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Marketed Pro-Forma NOI (Yr 1)</span><span class="lang-zh" style="display:none">行銷用第一年預估淨營運收益</span></span>
+        <span class="calc-output-value">$1,348,150</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Marketed Cap Rate</span><span class="lang-zh" style="display:none">行銷資本化率</span></span>
+        <span class="calc-output-value">5.75%</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Loan Quote</span><span class="lang-zh" style="display:none">報價貸款條件</span></span>
+        <span class="calc-output-value" style="font-size:14px">65% LTV / 6.25% / 30yr am / 5yr term</span>
+      </div>
+    </div>
+    <p class="lang-en" style="font-size:12.5px;color:var(--lc-text-muted);margin-top:8px">Loan amount at 65% LTV: $15,242,500. This is the same 30-year amortization paired with a 5-year balloon term flagged in Module 05 as a structure that forces a refinancing event well before the loan is actually paid off.</p>
+    <p class="lang-zh" style="display:none;font-size:12.5px;color:var(--lc-text-muted);margin-top:8px">以 65% LTV 計算的貸款金額為 15,242,500 美元。這正是第 05 課點名過的結構——30 年攤還期搭配 5 年期氣球到期——會在貸款真正還清之前，就先逼出一次再融資事件。</p>
+
+    <h3 style="margin-top:26px"><span class="lang-en">Rent Roll (8 Tenants)</span><span class="lang-zh" style="display:none">租金明細表（8 個承租戶）</span></h3>
+    <div style="overflow-x:auto;margin:14px 0">
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Tenant</span><span class="lang-zh" style="display:none">承租戶</span></th>
+            <th><span class="lang-en">Use</span><span class="lang-zh" style="display:none">用途</span></th>
+            <th class="num">SF</th>
+            <th class="num">$/SF/Yr</th>
+            <th class="num"><span class="lang-en">Annual Rent</span><span class="lang-zh" style="display:none">年租金</span></th>
+            <th class="ctr"><span class="lang-en">Expiration</span><span class="lang-zh" style="display:none">到期年</span></th>
+            <th class="num"><span class="lang-en">Yrs Remaining</span><span class="lang-zh" style="display:none">剩餘年數</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Anchor Logistics Co.</td><td><span class="lang-en">Industrial</span><span class="lang-zh" style="display:none">工業</span></td><td class="num">45,000</td><td class="num">$8.50</td><td class="num">$382,500</td><td class="ctr">2031</td><td class="num">5.3</td></tr>
+          <tr><td>BrightPath Distribution</td><td><span class="lang-en">Industrial</span><span class="lang-zh" style="display:none">工業</span></td><td class="num">20,000</td><td class="num">$9.00</td><td class="num">$180,000</td><td class="ctr">2029</td><td class="num">3.3</td></tr>
+          <tr><td>Cascade Office Solutions</td><td><span class="lang-en">Office</span><span class="lang-zh" style="display:none">辦公室</span></td><td class="num">12,000</td><td class="num">$24.00</td><td class="num">$288,000</td><td class="ctr">2027</td><td class="num">0.8</td></tr>
+          <tr><td>Delta Freight Partners</td><td><span class="lang-en">Industrial</span><span class="lang-zh" style="display:none">工業</span></td><td class="num">15,000</td><td class="num">$8.75</td><td class="num">$131,250</td><td class="ctr">2030</td><td class="num">4.3</td></tr>
+          <tr><td>Evergreen Consulting</td><td><span class="lang-en">Office</span><span class="lang-zh" style="display:none">辦公室</span></td><td class="num">8,000</td><td class="num">$26.00</td><td class="num">$208,000</td><td class="ctr">2027</td><td class="num">1.0</td></tr>
+          <tr><td>Falcon Parts Supply</td><td><span class="lang-en">Industrial</span><span class="lang-zh" style="display:none">工業</span></td><td class="num">10,000</td><td class="num">$9.25</td><td class="num">$92,500</td><td class="ctr">2031</td><td class="num">5.0</td></tr>
+          <tr><td>Greenline Fulfillment</td><td><span class="lang-en">Industrial</span><span class="lang-zh" style="display:none">工業</span></td><td class="num">6,000</td><td class="num">$9.50</td><td class="num">$57,000</td><td class="ctr">2028</td><td class="num">2.3</td></tr>
+          <tr><td>Harbor Admin Services</td><td><span class="lang-en">Office</span><span class="lang-zh" style="display:none">辦公室</span></td><td class="num">4,000</td><td class="num">$25.00</td><td class="num">$100,000</td><td class="ctr">2027</td><td class="num">1.3</td></tr>
+          <tr class="total-row">
+            <td><span class="lang-en">Total</span><span class="lang-zh" style="display:none">總計</span></td>
+            <td></td>
+            <td class="num">120,000</td>
+            <td></td>
+            <td class="num">$1,439,250</td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lang-en" style="font-size:12.5px;color:var(--lc-text-muted)">As of this analysis date (mid/late 2026), years remaining are measured against each lease's stated expiration year.</p>
+    <p class="lang-zh" style="display:none;font-size:12.5px;color:var(--lc-text-muted)">以本次分析日期（約 2026 年中至下半年）為準，剩餘年數是依各租約載明的到期年份計算。</p>
+
+    <p class="lang-en">All figures on this page are modeled on a gross-lease basis for simplicity: the reimbursement line in the T-12 table below already nets out estimated recoveries from tenants, so no separate triple-net pass-through schedule needs to be built out for this exercise. A real deal would require confirming that lease-by-lease, since a rent roll with a mix of gross and triple-net leases can distort a same-basis NOI comparison if reimbursements are not modeled consistently.</p>
+    <p class="lang-zh" style="display:none">為求簡化，本頁所有數字都以毛租約基礎建模：下方 T-12 表格中的費用回收這一行，已經把向承租戶收取的估計回收金額淨額列入，因此本練習不需要另外建構三淨租約的轉嫁費用時程表。真實交易則需要逐份租約確認這件事，因為租金明細表裡若混合了毛租約與三淨租約，一旦費用回收沒有用一致的基礎建模，就可能扭曲同基礎的淨營運收益比較。</p>
+  </section>
+
+  <section>
+    <h2 class="lang-en">T-12 Actual Summary</h2>
+    <h2 class="lang-zh" style="display:none">T-12 實際數字總表</h2>
+    <p class="lang-en">This is what the trailing twelve months of actual operating history show, independent of anyone's forecast.</p>
+    <p class="lang-zh" style="display:none">這是不受任何人預測影響、真實發生過的最近十二個月營運歷史數字。</p>
+
+    <div style="overflow-x:auto;margin:14px 0">
+      <table class="t12-table">
+        <tbody>
+          <tr><td><span class="lang-en">Gross Potential Rent (from rent roll)</span><span class="lang-zh" style="display:none">毛潛在租金（來自租金明細表）</span></td><td class="amt">$1,439,250</td></tr>
+          <tr><td><span class="lang-en">Plus: Expense Reimbursements / CAM Recoveries</span><span class="lang-zh" style="display:none">加：費用回收／共用區域維護費（CAM）回收</span></td><td class="amt">+$186,000</td></tr>
+          <tr><td><span class="lang-en">Less: Vacancy &amp; Credit Loss (actual T-12)</span><span class="lang-zh" style="display:none">減：空置與呆帳損失（T-12 實際數字）</span></td><td class="amt">($64,000)</td></tr>
+          <tr><td><span class="lang-en">Plus: Other Income (parking, storage)</span><span class="lang-zh" style="display:none">加：其他收入（停車、儲物）</span></td><td class="amt">+$18,750</td></tr>
+          <tr class="subtotal"><td><span class="lang-en">Effective Gross Income (EGI)</span><span class="lang-zh" style="display:none">有效毛收入（EGI）</span></td><td class="amt">$1,580,000</td></tr>
+          <tr><td><span class="lang-en">Operating Expenses — Property Taxes</span><span class="lang-zh" style="display:none">營運費用——地價稅</span></td><td class="amt">$186,000</td></tr>
+          <tr><td><span class="lang-en">Operating Expenses — Insurance</span><span class="lang-zh" style="display:none">營運費用——保險</span></td><td class="amt">$42,000</td></tr>
+          <tr><td><span class="lang-en">Operating Expenses — Repairs &amp; Maintenance</span><span class="lang-zh" style="display:none">營運費用——維修保養</span></td><td class="amt">$58,000</td></tr>
+          <tr><td><span class="lang-en">Operating Expenses — Management Fee (3% of EGI)</span><span class="lang-zh" style="display:none">營運費用——管理費（EGI 的 3%）</span></td><td class="amt">$47,400</td></tr>
+          <tr><td><span class="lang-en">Operating Expenses — Utilities (common area)</span><span class="lang-zh" style="display:none">營運費用——水電（共用區域）</span></td><td class="amt">$31,000</td></tr>
+          <tr><td><span class="lang-en">Operating Expenses — G&amp;A / Admin</span><span class="lang-zh" style="display:none">營運費用——一般行政費用</span></td><td class="amt">$19,000</td></tr>
+          <tr class="subtotal"><td><span class="lang-en">Total Operating Expenses</span><span class="lang-zh" style="display:none">總營運費用</span></td><td class="amt">$383,400</td></tr>
+          <tr class="pending"><td><span class="lang-en">Actual T-12 NOI = EGI &minus; Total OpEx</span><span class="lang-zh" style="display:none">實際 T-12 淨營運收益＝有效毛收入－總營運費用</span></td><td class="amt">&rarr; <span class="lang-en">Task 1</span><span class="lang-zh" style="display:none">見任務一</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lang-en" style="font-size:12.5px;color:var(--lc-text-muted)">The final line is left open on purpose — Task 1 below walks through computing it.</p>
+    <p class="lang-zh" style="display:none;font-size:12.5px;color:var(--lc-text-muted)">最後一行刻意留白——下方任務一會逐步帶你算出這個數字。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">In 2006, Tishman Speyer and BlackRock paid $5.4 billion for Manhattan's Stuyvesant Town–Peter Cooper Village, underwriting to a pro-forma that assumed thousands of rent-stabilized apartments would convert to market rate far faster than New York rent law actually allowed. Actual NOI never came close to tracking that projected path. By 2010 the venture defaulted on its debt and handed the property back to its lenders — one of the largest real estate losses of that cycle, built on the same mechanism Task 2 below asks you to spot: a projected NOI that leaned on income that had not been legally secured yet.</p>
+      <p class="lang-zh" style="display:none">2006 年，Tishman Speyer 與 BlackRock 以 54 億美元買下曼哈頓的 Stuyvesant Town–Peter Cooper Village，核保時採用的預估值假設數千戶租金管制公寓能比紐約租金法實際允許的速度更快轉為市場租金。實際淨營運收益從未接近那條預測路徑。到了 2010 年，這筆投資對其債務違約，將物件交還給放款方——那個週期裡最大的不動產虧損案例之一，其構成機制正是下方任務二要你抓出來的那一種：預估的淨營運收益，倚賴的是尚未經過法律程序確保的收入。</p>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="lang-en">Why This Order</h2>
+    <h2 class="lang-zh" style="display:none">為什麼是這個順序</h2>
+    <p class="lang-en">The eight tasks below are not eight unrelated questions — they run in the order a working underwriter actually runs them, and each one gates the next. NOI has to be pinned to actuals (Task 1) before a pro-forma gap even means anything (Task 2). Once the gap is named, it has to be repriced into a cap rate (Task 3) and stress-tested against the loan the deal is actually financed with (Task 4) before it is safe to look past income entirely to lease structure (Task 5) and exit assumptions (Task 6). Only once all of that is on the table does a decision (Task 7) mean anything more than a guess — and the synthesis (Task 8) exists because real risk rarely arrives as one clean problem at a time.</p>
+    <p class="lang-zh" style="display:none">下面八個任務不是八個互不相干的問題——它們是照一個實際在做核保的人真正會走的順序排列，前一題會卡住後一題。淨營運收益必須先釘在實際數字上（任務一），預估值的落差才有意義可言（任務二）。一旦落差被指認出來，就得重新反映進資本化率（任務三），並用這筆交易真正的融資條件做壓力測試（任務四），之後才能放心地把視角從收入本身，移到租約結構（任務五）與出場假設（任務六）。所有這些都攤在桌上之後，一個決定（任務七）才有意義、而不只是用猜的——而綜合判斷（任務八）之所以存在，是因為真實風險很少一次只丟出一個乾淨的問題。</p>
+
+    <p class="lang-en">This mirrors the arc of Modules 02 through 11: <span class="key-term" tabindex="0">NOI<span class="key-term-tip"><span class="lang-en">Net Operating Income — rental and other property income minus operating expenses, before debt service and capital expenditure.</span><span class="lang-zh" style="display:none">淨營運收益——租金與其他物業收入，扣除營運費用後、尚未扣除還款與資本支出前的金額。</span></span></span> discipline from reading a deal (Module 03), valuation logic from the three-way framework (Module 04), the debt mechanics of amortization and balloon terms (Module 05), the cap-rate-expansion math that hits every exit regardless of property performance (Module 06), and the deal-structuring instinct that turns a broken number into a negotiated fix rather than a dead deal (Module 09). The capstone does not introduce new formulas. It tests whether the formulas can be run in the right order, under time pressure, on numbers that were never designed to be easy.</p>
+    <p class="lang-zh" style="display:none">這呼應了第 02 到 11 課的整個脈絡：來自「看懂一個 Deal」（第 03 課）的淨營運收益紀律、來自估值三法框架（第 04 課）的估值邏輯、攤還與氣球到期的債務機制（第 05 課）、無論物件表現如何都會打到每一次出場的資本化率擴張數學（第 06 課）、以及把一個算不過關的數字變成可談判的解方、而非直接宣告交易死亡的架構直覺（第 09 課）。這場畢業考沒有引入任何新公式，它測試的是：在時間壓力下、面對從一開始就不打算讓人輕鬆算過的數字，能不能把這些公式用對的順序跑一遍。</p>
+
+    <p class="lang-en">One caution before starting: none of the eight tasks below can be solved by pattern-matching a keyword in the question to a formula. Two of the eight are pure arithmetic, three ask what a correct-looking number is hiding, and the last three ask for a judgment call that a spreadsheet cannot make on its own.</p>
+    <p class="lang-zh" style="display:none">開始之前先提醒一點：下面八個任務裡，沒有一個能靠把題目裡的關鍵字對應到某個公式就解出來。八題裡有兩題是純算術，三題問的是一個看起來正確的數字背後藏了什麼，最後三題則需要試算表自己做不出來的判斷。</p>
+  </section>
+
+  <section class="task-lead">
+    <span class="task-eyebrow lang-en">TASK 1 OF 8</span>
+    <span class="task-eyebrow lang-zh" style="display:none">任務一／共八個任務</span>
+    <h3 class="lang-en">Compute NOI From the T-12</h3>
+    <h3 class="lang-zh" style="display:none">從 T-12 算出淨營運收益</h3>
+    <p class="lang-en">Start where every underwriter starts: not the marketed number, but the trailing twelve months of actual operating history. The T-12 table above gives every line item needed to build NOI from the ground up — gross potential rent, reimbursements, actual vacancy and credit loss, other income, and six operating expense line items. Work through it before checking the answer below.</p>
+    <p class="lang-zh" style="display:none">從每個核保人員都會開始的地方下手：不是行銷用的數字，而是真實發生過的最近十二個月營運歷史。上方 T-12 表格提供了從零開始建構淨營運收益所需的每一項——毛潛在租金、費用回收、實際空置與呆帳損失、其他收入，以及六項營運費用明細。先自己算過一遍，再對照下方答案。</p>
+    <p class="lang-en">Nothing in this task requires new information — every figure needed is already sitting in the T-12 table further up this page. The only new work here is the arithmetic itself, done in the right order.</p>
+    <p class="lang-zh" style="display:none">這個任務不需要任何新資訊——所有需要的數字都已經在上方的 T-12 表格裡了。這裡唯一的新工作，就是把這些算術，用對的順序算一遍。</p>
+  </section>
+
+  <div class="worked-example">
+    <div class="worked-example-title"><span class="lang-en">Worked Example</span><span class="lang-zh" style="display:none">逐步演算範例</span></div>
+    <ol class="worked-example-steps">
+      <li class="worked-example-step">
+        <span class="we-step-num">1</span>
+        <span class="we-step-body">
+          <span class="lang-en">Start with Gross Potential Rent from the rent roll: <span class="we-formula">$1,439,250</span>.</span>
+          <span class="lang-zh" style="display:none">從租金明細表的毛潛在租金開始：<span class="we-formula">$1,439,250</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">2</span>
+        <span class="we-step-body">
+          <span class="lang-en">Add expense reimbursements/CAM recoveries: <span class="we-formula">$1,439,250 + $186,000 = $1,625,250</span>.</span>
+          <span class="lang-zh" style="display:none">加上費用回收／共用區域維護費回收：<span class="we-formula">$1,439,250 + $186,000 = $1,625,250</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">3</span>
+        <span class="we-step-body">
+          <span class="lang-en">Subtract actual T-12 vacancy and credit loss: <span class="we-formula">$1,625,250 − $64,000 = $1,561,250</span>.</span>
+          <span class="lang-zh" style="display:none">減去 T-12 實際空置與呆帳損失：<span class="we-formula">$1,625,250 − $64,000 = $1,561,250</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">4</span>
+        <span class="we-step-body">
+          <span class="lang-en">Add other income (parking, storage) to reach EGI: <span class="we-formula">$1,561,250 + $18,750 = $1,580,000</span>.</span>
+          <span class="lang-zh" style="display:none">加上其他收入（停車、儲物），得出有效毛收入：<span class="we-formula">$1,561,250 + $18,750 = $1,580,000</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">5</span>
+        <span class="we-step-body">
+          <span class="lang-en">Sum the six operating expense lines: <span class="we-formula">$186,000 + $42,000 + $58,000 + $47,400 + $31,000 + $19,000 = $383,400</span>.</span>
+          <span class="lang-zh" style="display:none">加總六項營運費用：<span class="we-formula">$186,000 + $42,000 + $58,000 + $47,400 + $31,000 + $19,000 = $383,400</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">6</span>
+        <span class="we-step-body">
+          <span class="lang-en">NOI = EGI &minus; Total Operating Expenses: <span class="we-formula">$1,580,000 − $383,400 = $1,196,600</span>.</span>
+          <span class="lang-zh" style="display:none">淨營運收益＝有效毛收入－總營運費用：<span class="we-formula">$1,580,000 − $383,400 = $1,196,600</span>。</span>
+        </span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="quiz-block" data-quiz-id="m12-t1" data-quiz='[
+    {
+      "q":{"en":"Using the T-12 actual figures above (EGI = $1,580,000, Total Operating Expenses = $383,400), what is the actual T-12 NOI for this property?","zh":"根據上方 T-12 實際數字（有效毛收入＝1,580,000 美元，總營運費用＝383,400 美元），這個物件的實際 T-12 淨營運收益是多少？"},
+      "opts":[
+        {"en":"$1,196,600","zh":"1,196,600 美元"},
+        {"en":"$1,348,150 (the marketed pro-forma NOI, not the actual figure)","zh":"1,348,150 美元（行銷用預估淨營運收益，並非實際數字）"},
+        {"en":"$1,580,000 (this is EGI before operating expenses)","zh":"1,580,000 美元（這是扣除營運費用前的有效毛收入）"},
+        {"en":"$1,439,250 (this is gross potential rent only)","zh":"1,439,250 美元（這只是毛潛在租金）"}
+      ],
+      "a":0,
+      "exp":{"en":"NOI = EGI minus Total Operating Expenses = $1,580,000 minus $383,400 = $1,196,600. EGI itself was built from GPR $1,439,250 plus reimbursements $186,000 minus vacancy and credit loss $64,000 plus other income $18,750. Do not stop at EGI, and do not substitute the marketed pro-forma figure for the actual T-12 result.","zh":"淨營運收益＝有效毛收入減總營運費用＝1,580,000－383,400＝1,196,600 美元。有效毛收入本身是由毛潛在租金 1,439,250 美元，加上費用回收 186,000 美元，減去空置與呆帳損失 64,000 美元，再加上其他收入 18,750 美元組成。不要算到有效毛收入就停下，也不要把行銷用的預估數字當成 T-12 實際結果。"}
+    }
+  ]'></div>
+
+  <p class="lang-en">$1,196,600 is now the fixed anchor for the rest of this exercise. Every later task either compares something to it, discounts something back from it, or grows something forward from it — which is exactly why it had to be pinned down first, before any comparison to the marketed number could mean anything.</p>
+  <p class="lang-zh" style="display:none">1,196,600 美元，現在成了這次練習後續所有計算的固定錨點。之後的每一個任務，都要不是拿別的東西跟它比較，就是從它折現回去，或是從它往前成長——這正是為什麼它必須第一個被釘死，之後再跟行銷數字比較才會有意義。</p>
+
+  <section class="task-lead">
+    <span class="task-eyebrow lang-en">TASK 2 OF 8</span>
+    <span class="task-eyebrow lang-zh" style="display:none">任務二／共八個任務</span>
+    <h3 class="lang-en">Spot the Pro-Forma Inflation</h3>
+    <h3 class="lang-zh" style="display:none">抓出預估值的灌水成分</h3>
+    <p class="lang-en">The offering memorandum teaser markets a Year-1 pro-forma NOI of $1,348,150 against the same $23,450,000 asking price — a materially larger number than the T-12 actual just computed. Before comparing cap rates, it is worth asking exactly what the pro-forma assumes that the T-12 does not.</p>
+    <p class="lang-zh" style="display:none">招標書用第一年 1,348,150 美元的預估淨營運收益，來搭配同一個 2,345 萬美元的開價行銷這筆交易——這個數字比剛剛算出來的 T-12 實際數字大出不少。在比較資本化率之前，值得先問清楚：預估值假設了哪些 T-12 沒有假設的東西？</p>
+  </section>
+
+  <div style="overflow-x:auto;margin:14px 0">
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th><span class="lang-en">Assumption</span><span class="lang-zh" style="display:none">假設項目</span></th>
+          <th><span class="lang-en">Marketed Pro-Forma</span><span class="lang-zh" style="display:none">行銷用預估值</span></th>
+          <th><span class="lang-en">T-12 Actual</span><span class="lang-zh" style="display:none">T-12 實際數字</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="lang-en">2027 office rollover rent</span><span class="lang-zh" style="display:none">2027 年辦公室到期租金</span></td><td><span class="lang-en">Marked to unsigned market rent</span><span class="lang-zh" style="display:none">提高到尚未簽約的市場租金</span></td><td><span class="lang-en">In-place lease rent only</span><span class="lang-zh" style="display:none">僅按現行租約租金計算</span></td></tr>
+        <tr><td><span class="lang-en">Vacancy &amp; credit loss</span><span class="lang-zh" style="display:none">空置與呆帳損失</span></td><td class="num">~2%</td><td class="num">~4.4% ($64,000)</td></tr>
+        <tr><td><span class="lang-en">Total operating expenses</span><span class="lang-zh" style="display:none">總營運費用</span></td><td class="num">~$356,000</td><td class="num">$383,400</td></tr>
+        <tr class="total-row"><td><span class="lang-en">Resulting Year-1 NOI</span><span class="lang-zh" style="display:none">最終算出的第一年淨營運收益</span></td><td class="num">$1,348,150</td><td class="num">$1,196,600</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lang-en" style="font-size:12.5px;color:var(--lc-text-muted)">Three separate assumptions, none of them individually outrageous, stacked into one number.</p>
+  <p class="lang-zh" style="display:none;font-size:12.5px;color:var(--lc-text-muted)">三個各自看起來都不算離譜的假設，疊加成了同一個數字。</p>
+
+  <div class="quiz-block" data-quiz-id="m12-t2" data-quiz='[
+    {
+      "q":{"en":"The marketed pro-forma projects Year-1 NOI of $1,348,150, about 12.7 percent above the actual T-12 NOI of $1,196,600. Which combination of assumptions most plausibly explains that gap?","zh":"行銷用預估值把第一年淨營運收益抓在 1,348,150 美元，比實際 T-12 淨營運收益 1,196,600 美元高出約 12.7%。下列哪個假設組合最可能解釋這個落差？"},
+      "opts":[
+        {"en":"Marking the 2027 office rollover tenants up to unsigned market rent, cutting the vacancy factor to an unrealistic 2 percent against a roughly 4.4 percent actual rate, and understating operating expenses by about $27,000","zh":"把 2027 年到期的辦公室承租戶提高到尚未簽約的市場租金水準、把空置率壓到不切實際的 2%（實際約為 4.4%）、並低估營運費用約 27,000 美元"},
+        {"en":"A one-time capital repair that reduced actual NOI but will not recur","zh":"一次性資本修繕支出壓低了實際淨營運收益，但不會再發生"},
+        {"en":"An error in the rent roll square footage totals","zh":"租金明細表坪數總計出現錯誤"},
+        {"en":"A property tax reassessment that only affects the pro-forma","zh":"只影響預估值的地價稅重新評估"}
+      ],
+      "a":0,
+      "exp":{"en":"Three levers compound: (1) marking Cascade, Evergreen, and Harbor to market rent on renewal, before any lease is actually signed; (2) a 2 percent vacancy assumption against an actual T-12 rate of roughly 4.4 percent (64,000 divided by 1,439,250); and (3) operating expenses trimmed to roughly $356,000 versus the actual $383,400. None of these is fraud on its own — pro-forma NOI is supposed to be forward-looking — but stacked together they inflate NOI by about 12.7 percent, exactly the gap between the two cap rates quoted later in this exercise.","zh":"三個槓桿疊加：（一）在租約尚未簽署前，就把 Cascade、Evergreen、Harbor 的續約租金抓到市場水準；（二）把空置率假設壓到 2%，而實際 T-12 空置率約為 4.4%（64,000 除以 1,439,250）；（三）把營運費用修剪到約 356,000 美元，低於實際的 383,400 美元。單獨看這些假設都不算造假——預估值本來就該是前瞻性的——但疊加起來就讓淨營運收益灌水約 12.7%，這正好對應到本練習後面兩個資本化率之間的落差。"}
+    }
+  ]'></div>
+
+  <div class="pitfall">
+    <span class="pitfall-icon">⚠️</span>
+    <div class="pitfall-body">
+      <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+      <span class="lang-en">A marketed cap rate is only as trustworthy as the NOI in its numerator. A 5.75% cap on a pro-forma that assumes zero downtime on three unsigned 2027 renewals is not the same instrument as a 5.75% cap on trailing actual income — treating them as interchangeable is how buyers overpay.</span>
+      <span class="lang-zh" style="display:none">行銷資本化率的可信度，取決於分子裡的淨營運收益是否可信。用假設三份 2027 年未簽約續約完全零空窗期的預估值算出來的 5.75%，跟用歷史實際收入算出來的 5.75%，根本不是同一種東西——把兩者當成可以互換，正是買方買貴的原因。</span>
+    </div>
+  </div>
+
+  <section class="task-lead">
+    <span class="task-eyebrow lang-en">TASK 3 OF 8</span>
+    <span class="task-eyebrow lang-zh" style="display:none">任務三／共八個任務</span>
+    <h3 class="lang-en">Compute the Going-In Cap Rate</h3>
+    <h3 class="lang-zh" style="display:none">算出進場資本化率</h3>
+    <p class="lang-en">With the actual T-12 NOI in hand from Task 1, recompute the <span class="key-term" tabindex="0">going-in cap rate<span class="key-term-tip"><span class="lang-en">NOI at acquisition divided by purchase price — the yield a buyer is underwriting to on day one, before any operating improvement.</span><span class="lang-zh" style="display:none">收購時的淨營運收益除以購買價格——買方在第一天、尚未做任何營運改善之前所核保的殖利率。</span></span></span> on the same $23,450,000 asking price and compare it against the 5.75% the deal is marketed at.</p>
+    <p class="lang-zh" style="display:none">用任務一算出的實際 T-12 淨營運收益，在同一個 2,345 萬美元開價下重新算出進場資本化率，並跟這筆交易行銷用的 5.75% 相比。</p>
+  </section>
+
+  <div class="worked-example">
+    <div class="worked-example-title"><span class="lang-en">Worked Example</span><span class="lang-zh" style="display:none">逐步演算範例</span></div>
+    <ol class="worked-example-steps">
+      <li class="worked-example-step">
+        <span class="we-step-num">1</span>
+        <span class="we-step-body">
+          <span class="lang-en">Actual T-12 NOI (from Task 1): <span class="we-formula">$1,196,600</span>.</span>
+          <span class="lang-zh" style="display:none">實際 T-12 淨營運收益（來自任務一）：<span class="we-formula">$1,196,600</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">2</span>
+        <span class="we-step-body">
+          <span class="lang-en">Asking price: <span class="we-formula">$23,450,000</span>.</span>
+          <span class="lang-zh" style="display:none">開價：<span class="we-formula">$23,450,000</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">3</span>
+        <span class="we-step-body">
+          <span class="lang-en">Going-in cap rate = NOI ÷ price: <span class="we-formula">$1,196,600 ÷ $23,450,000 = 5.10%</span>.</span>
+          <span class="lang-zh" style="display:none">進場資本化率＝淨營運收益÷價格：<span class="we-formula">$1,196,600 ÷ $23,450,000 = 5.10%</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">4</span>
+        <span class="we-step-body">
+          <span class="lang-en">Compare to the marketed rate: $1,348,150 (pro-forma NOI) ÷ $23,450,000 = <span class="we-formula">5.75%</span>.</span>
+          <span class="lang-zh" style="display:none">與行銷資本化率相比：1,348,150 美元（預估淨營運收益）÷ 23,450,000 美元 ＝ <span class="we-formula">5.75%</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">5</span>
+        <span class="we-step-body">
+          <span class="lang-en">The 65bp gap (5.75% marketed vs. 5.10% actual) is the direct fingerprint of the pro-forma inflation identified in Task 2.</span>
+          <span class="lang-zh" style="display:none">這 65 個基點的落差（行銷 5.75% 對比實際 5.10%）正是任務二找出的預估值灌水的直接指紋。</span>
+        </span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="quiz-block" data-quiz-id="m12-t3" data-quiz='[
+    {
+      "q":{"en":"At the $23,450,000 asking price, what is the going-in cap rate on the actual T-12 NOI, and how does it compare with the marketed rate?","zh":"以 2,345 萬美元的開價計算，用實際 T-12 淨營運收益算出的進場資本化率是多少？跟行銷資本化率相比又如何？"},
+      "opts":[
+        {"en":"About 5.10 percent on actual NOI, tighter (lower, more expensive) than the marketed 5.75 percent","zh":"用實際淨營運收益算出約 5.10%，比行銷的 5.75% 更緊（更低、代表買得更貴）"},
+        {"en":"About 5.75 percent on actual NOI, matching the marketed rate exactly","zh":"用實際淨營運收益算出約 5.75%，與行銷資本化率完全相符"},
+        {"en":"About 6.25 percent on actual NOI, wider than the marketed rate","zh":"用實際淨營運收益算出約 6.25%，比行銷資本化率更寬"},
+        {"en":"About 4.40 percent, which is actually the vacancy rate, not a cap rate","zh":"約 4.40%，這其實是實際空置率，不是資本化率"}
+      ],
+      "a":0,
+      "exp":{"en":"Going-in cap rate = actual NOI divided by price = $1,196,600 divided by $23,450,000 = about 5.10 percent. The marketed 5.75 percent was built on the $1,348,150 pro-forma over the same price. A buyer underwriting to actuals is really paying a lower, more expensive cap rate than advertised — the same dollars buy a smaller slice of income than the marketing implied.","zh":"進場資本化率＝實際淨營運收益除以價格＝1,196,600 除以 23,450,000＝約 5.10%。行銷端 5.75% 是用 1,348,150 美元的預估值除以同一個價格算出來的。用實際數字核保的買方，實際上是用比廣告更低、更貴的資本化率在買——同樣的錢，買到的收益比行銷宣稱的還要少一截。"}
+    }
+  ]'></div>
+
+  <p class="lang-en">A cap rate answers whether the price is fair for the income. It says nothing about whether the loan the buyer is actually using to close can be serviced by that same income — which is a separate test, run on a different threshold, with a different failure mode.</p>
+  <p class="lang-zh" style="display:none">資本化率回答的是：這個價格對這筆收益來說算不算公道。它完全沒有回答另一件事：買方實際用來成交的這筆貸款，能不能靠同一筆收益償還——這是另一項測試，用不同的門檻，會用不同的方式失敗。</p>
+
+  <section class="task-lead">
+    <span class="task-eyebrow lang-en">TASK 4 OF 8</span>
+    <span class="task-eyebrow lang-zh" style="display:none">任務四／共八個任務</span>
+    <h3 class="lang-en">Compute DSCR at the Quoted Loan</h3>
+    <h3 class="lang-zh" style="display:none">用報價貸款算出償債保障比率</h3>
+    <p class="lang-en">The loan quote — 65% LTV, 6.25%, 30-year amortization, 5-year term — is the same structure flagged in Module 05: a 30-year amortization schedule paired with a 5-year balloon that forces a refinancing event at year five, not year thirty. Before that refinancing question even arises, the loan has to clear its DSCR covenant today. Run the covenant test on both NOI figures.</p>
+    <p class="lang-zh" style="display:none">報價貸款條件——LTV 65%、利率 6.25%、30 年攤還、5 年期——正是第 05 課點名過的結構：30 年攤還排程搭配 5 年期氣球到期，會在第五年、而非第三十年就逼出一次再融資事件。但在談到那個再融資問題之前，這筆貸款今天就得先過償債保障比率條款這一關。分別用兩個淨營運收益數字做一次條款測試。</p>
+  </section>
+
+  <div class="worked-example">
+    <div class="worked-example-title"><span class="lang-en">Worked Example</span><span class="lang-zh" style="display:none">逐步演算範例</span></div>
+    <ol class="worked-example-steps">
+      <li class="worked-example-step">
+        <span class="we-step-num">1</span>
+        <span class="we-step-body">
+          <span class="lang-en">Loan amount = 65% × $23,450,000 = <span class="we-formula">$15,242,500</span>.</span>
+          <span class="lang-zh" style="display:none">貸款金額＝65% × $23,450,000 ＝ <span class="we-formula">$15,242,500</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">2</span>
+        <span class="we-step-body">
+          <span class="lang-en">Monthly rate = 6.25% ÷ 12 ≈ 0.5208%; amortization term n = <span class="we-formula">360 months</span>.</span>
+          <span class="lang-zh" style="display:none">月利率＝6.25% ÷ 12 ≈ 0.5208%；攤還期數 n ＝ <span class="we-formula">360 個月</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">3</span>
+        <span class="we-step-body">
+          <span class="lang-en">Standard amortizing-loan payment formula gives an estimated monthly payment of roughly <span class="we-formula">$93,850</span>.</span>
+          <span class="lang-zh" style="display:none">用標準攤還貸款還款公式算出，估計每月還款額約為 <span class="we-formula">$93,850</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">4</span>
+        <span class="we-step-body">
+          <span class="lang-en">Annual debt service ≈ $93,850 × 12 ≈ <span class="we-formula">$1,126,200</span>.</span>
+          <span class="lang-zh" style="display:none">年度還款額 ≈ $93,850 × 12 ≈ <span class="we-formula">$1,126,200</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">5</span>
+        <span class="we-step-body">
+          <span class="lang-en">DSCR on marketed pro-forma NOI: $1,348,150 ÷ $1,126,200 ≈ <span class="we-formula">1.20x</span> — appears to clear a typical covenant.</span>
+          <span class="lang-zh" style="display:none">用行銷用預估淨營運收益算的 DSCR：$1,348,150 ÷ $1,126,200 ≈ <span class="we-formula">1.20 倍</span>——看起來剛好過常見條款門檻。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">6</span>
+        <span class="we-step-body">
+          <span class="lang-en">DSCR on actual T-12 NOI: $1,196,600 ÷ $1,126,200 ≈ <span class="we-formula">1.06x</span> — fails a typical 1.20x&ndash;1.25x covenant.</span>
+          <span class="lang-zh" style="display:none">用實際 T-12 淨營運收益算的 DSCR：$1,196,600 ÷ $1,126,200 ≈ <span class="we-formula">1.06 倍</span>——過不了常見的 1.20 至 1.25 倍條款門檻。</span>
+        </span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="quiz-block" data-quiz-id="m12-t4" data-quiz='[
+    {
+      "q":{"en":"The loan quote is 65 percent LTV, 6.25 percent interest, 30-year amortization, 5-year term, giving roughly $1,126,200 in annual debt service. Which statement about DSCR is correct?","zh":"報價貸款條件為 LTV 65%、利率 6.25%、30 年攤還、5 年期，年度還款額約 1,126,200 美元。下列關於償債保障比率（DSCR）的敘述何者正確？"},
+      "opts":[
+        {"en":"DSCR on the marketed pro-forma NOI is about 1.20x, appearing to clear a typical 1.20x covenant, but DSCR on actual T-12 NOI is only about 1.06x, which would fail that covenant","zh":"用行銷預估淨營運收益算出的 DSCR 約為 1.20 倍，看起來剛好過 1.20 倍的常見條款門檻，但用實際 T-12 淨營運收益算出的 DSCR 只有約 1.06 倍，會過不了這個條款"},
+        {"en":"DSCR is identical whether measured against pro-forma or actual NOI, because annual debt service does not change","zh":"無論用預估或實際淨營運收益計算，DSCR 都一樣，因為年度還款額不會變"},
+        {"en":"DSCR on actual NOI is higher than on pro-forma NOI, because actual NOI already excludes vacancy loss","zh":"用實際淨營運收益算出的 DSCR 反而比用預估值算出的高，因為實際淨營運收益本來就已經扣除空置損失"},
+        {"en":"This loan structure carries no DSCR covenant because it has a 5-year term rather than a 10-year term","zh":"因為這筆貸款是 5 年期而非 10 年期，所以不受 DSCR 條款約束"}
+      ],
+      "a":0,
+      "exp":{"en":"DSCR = NOI divided by annual debt service. On the pro-forma: $1,348,150 divided by $1,126,200 is about 1.20x — right at a typical covenant line. On actual T-12 NOI: $1,196,600 divided by $1,126,200 is about 1.06x — below a typical 1.20x to 1.25x covenant. The pro-forma inflation from Task 2 is not academic here: it is the difference between a loan that qualifies and one that does not. This is the same 30-year amortization and 5-year balloon structure flagged in Module 05 as forcing a refinancing event, now compounded by a covenant that may already be broken on day one when underwritten to actuals.","zh":"DSCR＝淨營運收益除以年度還款額。用預估值算：1,348,150 除以 1,126,200，約為 1.20 倍——剛好卡在常見條款的門檻線上。用實際 T-12 淨營運收益算：1,196,600 除以 1,126,200，約為 1.06 倍——低於常見的 1.20 至 1.25 倍條款門檻。第二題的預估值灌水在這裡不只是學術問題：它就是一筆貸款過不過關的分水嶺。這正是第 05 課點名過、會逼出再融資事件的 30 年攤還、5 年期氣球型貸款結構，如今再疊加一個用實際數字核保就可能從第一天開始就過不了關的條款。"}
+    }
+  ]'></div>
+
+  <p class="lang-en">In practice, a DSCR shortfall like this one rarely just kills a deal outright — a lender who sees 1.06x against a 1.20x requirement typically responds by sizing the loan down to whatever proceeds actual NOI can support, rather than lending against the marketed number and hoping the pro-forma catches up. A smaller loan means more buyer equity is required to close at the same price, which is exactly the kind of gap Task 7 asks how to close.</p>
+  <p class="lang-zh" style="display:none">實務上，像這樣的 DSCR 缺口很少直接讓一筆交易破局——放款方看到 1.06 倍對上 1.20 倍的要求，通常的反應是把貸款金額縮減到實際淨營運收益所能支撐的規模，而不是照行銷數字放款、再期待預估值日後追上來。貸款金額變小，代表買方要用更多股權才能以同樣的價格成交，而這正是任務七要問的、該怎麼補上的缺口。</p>
+
+  <section class="task-lead">
+    <span class="task-eyebrow lang-en">TASK 5 OF 8</span>
+    <span class="task-eyebrow lang-zh" style="display:none">任務五／共八個任務</span>
+    <h3 class="lang-en">WALT and the Rollover Cliff</h3>
+    <h3 class="lang-zh" style="display:none">加權平均到期年限與到期懸崖</h3>
+    <p class="lang-en">WALT compresses eight lease expirations into a single rent-weighted number. A single number is easy to read — and easy to be misled by. Compute it, then look at what it is averaging over.</p>
+    <p class="lang-zh" style="display:none">加權平均到期年限（WALT）把八份租約的到期日壓縮成單一個租金加權數字。單一數字很好讀——也很容易誤導人。先算出這個數字，再看看它到底在對什麼東西取平均。</p>
+  </section>
+
+  <div class="worked-example">
+    <div class="worked-example-title"><span class="lang-en">Worked Example</span><span class="lang-zh" style="display:none">逐步演算範例</span></div>
+    <ol class="worked-example-steps">
+      <li class="worked-example-step">
+        <span class="we-step-num">1</span>
+        <span class="we-step-body">
+          <span class="lang-en">WALT = sum of (years remaining × annual rent) for every tenant, divided by total annual rent.</span>
+          <span class="lang-zh" style="display:none">加權平均到期年限＝每個承租戶（剩餘年數 × 年租金）加總後，除以總年租金。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">2</span>
+        <span class="we-step-body">
+          <span class="lang-en">Summing all eight tenants' (years remaining × annual rent) products gives roughly <span class="we-formula">$4,347,600</span>.</span>
+          <span class="lang-zh" style="display:none">把八個承租戶的（剩餘年數 × 年租金）加總，約得出 <span class="we-formula">$4,347,600</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">3</span>
+        <span class="we-step-body">
+          <span class="lang-en">Divide by total annual rent: <span class="we-formula">$4,347,600 ÷ $1,439,250 ≈ 3.02 years</span> — the WALT that looks acceptable in isolation.</span>
+          <span class="lang-zh" style="display:none">除以總年租金：<span class="we-formula">$4,347,600 ÷ $1,439,250 ≈ 3.02 年</span>——單獨看起來相當可以接受的 WALT。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">4</span>
+        <span class="we-step-body">
+          <span class="lang-en">But three office tenants — Cascade ($288,000), Evergreen ($208,000), and Harbor ($100,000) — all expire in 2027, within roughly an 18-month window of each other: <span class="we-formula">$596,000 combined</span>.</span>
+          <span class="lang-zh" style="display:none">但三個辦公室承租戶——Cascade（288,000 美元）、Evergreen（208,000 美元）、Harbor（100,000 美元）——全都在 2027 年到期，彼此相距約 18 個月：<span class="we-formula">合計 $596,000</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">5</span>
+        <span class="we-step-body">
+          <span class="lang-en">$596,000 ÷ $1,439,250 ≈ <span class="we-formula">41.4%</span> of in-place rent clustered in that one window — the concentration a 3.0-year average does not show.</span>
+          <span class="lang-zh" style="display:none">$596,000 ÷ $1,439,250 ≈ <span class="we-formula">41.4%</span> 的在收租金集中在那一個窗口內——這正是 3.0 年平均值沒有顯示出來的集中度。</span>
+        </span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="quiz-block" data-quiz-id="m12-t5" data-quiz='[
+    {
+      "q":{"en":"Rent-weighted WALT for the rent roll comes out to about 3.0 years. What does that single average conceal?","zh":"以租金加權計算的加權平均到期年限（WALT）約為 3.0 年。這個單一平均數掩蓋了什麼？"},
+      "opts":[
+        {"en":"That 41.4 percent of in-place rent, $596,000 from Cascade, Evergreen, and Harbor, expires within roughly an 18-month window in 2027, well before a 3.0-year average would suggest","zh":"有 41.4% 的在收租金（來自 Cascade、Evergreen、Harbor，共 596,000 美元）會在 2027 年一段約 18 個月的窗口內集中到期，遠比 3.0 年的平均值給人的印象要早"},
+        {"en":"Nothing — a 3.0-year WALT means every tenant lease expires close to the 3-year mark","zh":"沒有掩蓋任何東西——WALT 為 3.0 年代表每一份租約都在接近 3 年時到期"},
+        {"en":"That the industrial tenants are paying below-market rent relative to the office tenants","zh":"工業承租戶相對辦公室承租戶付的是低於市場行情的租金"},
+        {"en":"That the property carries more debt than its appraised value supports","zh":"該物件的負債超過其估值所能支撐的水準"}
+      ],
+      "a":0,
+      "exp":{"en":"WALT is a rent-weighted average: sum each tenant&#39;s years-remaining times annual rent, divide by total rent. That math produces about 3.0 years here, which reads as comfortable in isolation. But averages hide distribution — three office tenants (Cascade, Evergreen, Harbor) all expire in 2027, together worth $596,000, or 41.4 percent of the $1,439,250 rent roll, clustered in about an 18-month window. A reader who only checks the average would miss a concentrated releasing event the average was never designed to reveal.","zh":"WALT 是租金加權平均：把每個承租戶的剩餘年數乘以其年租金加總，再除以總租金。這裡算出來約為 3.0 年，單獨看起來相當穩健。但平均數會掩蓋分布——三個辦公室承租戶（Cascade、Evergreen、Harbor）全都在 2027 年到期，合計 596,000 美元，佔 1,439,250 美元租金明細表的 41.4%，集中在約 18 個月的窗口內。只看平均值的讀者，會錯過一個平均數從一開始就不是設計來揭露的集中式重新招租事件。"}
+    }
+  ]'></div>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Westfield San Francisco Centre carried anchor leases from Nordstrom and other department stores that had underpinned its income for years. When Nordstrom announced its departure in 2022 amid falling downtown foot traffic, and other tenants followed, the mall's owner, Unibail-Rodamco-Westfield, stopped payments on the property's loan and handed the keys back to its lenders in 2023. The mechanism was not one bad quarter — it was concentrated tenant risk meeting a loan that needed steady income to service, the same combination Task 8 below asks about.</p>
+      <p class="lang-zh" style="display:none">Westfield San Francisco Centre 多年來的收入，靠的是 Nordstrom 與其他百貨公司主力承租戶撐起的租約。2022 年，隨著市中心人流下滑，Nordstrom 宣布撤出，其他承租戶也陸續跟進，該購物中心的業主 Unibail-Rodamco-Westfield 於 2023 年停止繳付物件貸款，並將鑰匙交還給放款方。這個機制不是單一個壞季度造成的——而是集中的承租戶風險，撞上一筆需要穩定收入才能還款的貸款，正是下方任務八要問的同一種組合。</p>
+    </div>
+  </div>
+
+  <section class="task-lead">
+    <span class="task-eyebrow lang-en">TASK 6 OF 8</span>
+    <span class="task-eyebrow lang-zh" style="display:none">任務六／共八個任務</span>
+    <h3 class="lang-en">Stress the Exit Cap</h3>
+    <h3 class="lang-zh" style="display:none">為出場資本化率做壓力測試</h3>
+    <p class="lang-en">Nothing about the rent roll or the loan has to change for this deal to lose value at exit — only the market's appetite for risk has to shift. Hold the five-year NOI growth path fixed and test what a 100 basis point move in the exit cap rate alone does to the number the buyer walks away with at sale.</p>
+    <p class="lang-zh" style="display:none">這筆交易在出場時要虧掉價值，並不需要租金明細表或貸款本身出任何變化——只要市場的風險胃納改變就夠了。固定五年的淨營運收益成長路徑，測試單單出場資本化率移動 100 個基點，會對買方賣出時拿到的數字造成什麼影響。</p>
+  </section>
+
+  <div class="worked-example">
+    <div class="worked-example-title"><span class="lang-en">Worked Example</span><span class="lang-zh" style="display:none">逐步演算範例</span></div>
+    <ol class="worked-example-steps">
+      <li class="worked-example-step">
+        <span class="we-step-num">1</span>
+        <span class="we-step-body">
+          <span class="lang-en">Actual T-12 NOI base: <span class="we-formula">$1,196,600</span>.</span>
+          <span class="lang-zh" style="display:none">實際 T-12 淨營運收益基期：<span class="we-formula">$1,196,600</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">2</span>
+        <span class="we-step-body">
+          <span class="lang-en">Grow at roughly 3%/year for a 5-year hold to get forward Year-6 NOI: <span class="we-formula">$1,196,600 × (1.03)^5 ≈ $1,387,000</span>.</span>
+          <span class="lang-zh" style="display:none">以每年約 3% 成長、持有五年，得出前瞻第六年淨營運收益：<span class="we-formula">$1,196,600 × (1.03)^5 ≈ $1,387,000</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">3</span>
+        <span class="we-step-body">
+          <span class="lang-en">Exit value at an unchanged 5.75% cap: <span class="we-formula">$1,387,000 ÷ 0.0575 ≈ $24,120,000</span>.</span>
+          <span class="lang-zh" style="display:none">若出場資本化率維持 5.75% 不變：<span class="we-formula">$1,387,000 ÷ 0.0575 ≈ $24,120,000</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">4</span>
+        <span class="we-step-body">
+          <span class="lang-en">Exit value at a stressed 6.75% cap (+100bp, per the cap-rate-expansion math from Module 06): <span class="we-formula">$1,387,000 ÷ 0.0675 ≈ $20,550,000</span>.</span>
+          <span class="lang-zh" style="display:none">若出場資本化率壓力測試至 6.75%（+100 個基點，依第 06 課的資本化率擴張數學）：<span class="we-formula">$1,387,000 ÷ 0.0675 ≈ $20,550,000</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">5</span>
+        <span class="we-step-body">
+          <span class="lang-en">Value reduction from the cap move alone: ($24,120,000 − $20,550,000) ÷ $24,120,000 ≈ <span class="we-formula">14.8%</span>, with the underlying NOI forecast unchanged.</span>
+          <span class="lang-zh" style="display:none">單單資本化率移動造成的價值減損：($24,120,000 − $20,550,000) ÷ $24,120,000 ≈ <span class="we-formula">14.8%</span>，且背後的淨營運收益預測完全沒有改變。</span>
+        </span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="quiz-block" data-quiz-id="m12-t6" data-quiz='[
+    {
+      "q":{"en":"Holding NOI growth at roughly 3 percent per year off the $1,196,600 actual base over a 5-year hold, what happens to exit value if the exit cap rate widens 100 basis points from 5.75 percent to 6.75 percent?","zh":"假設 5 年持有期內淨營運收益以每年約 3% 成長（以 1,196,600 美元的實際數字為基期），如果出場資本化率從 5.75% 擴大 100 個基點到 6.75%，出場價值會怎麼變？"},
+      "opts":[
+        {"en":"Exit value falls from about $24.12 million to about $20.55 million, roughly a 14.8 percent reduction, even though the underlying NOI forecast did not change","zh":"出場價值從約 2,412 萬美元降到約 2,055 萬美元，減幅約 14.8%，即使背後的淨營運收益預測完全沒有改變"},
+        {"en":"Exit value rises, because a higher cap rate always increases value","zh":"出場價值會上升，因為資本化率越高，價值就越高"},
+        {"en":"Exit value is unaffected, because NOI growth fully offsets any cap rate move","zh":"出場價值不受影響，因為淨營運收益成長會完全抵銷資本化率的變動"},
+        {"en":"Exit value falls by exactly 100 basis points measured in dollars","zh":"出場價值會剛好以美元計算下跌 100 個基點"}
+      ],
+      "a":0,
+      "exp":{"en":"Forward Year-6 NOI = $1,196,600 times 1.03 to the 5th power, about $1,387,000. At an unchanged 5.75 percent exit cap: $1,387,000 divided by 0.0575 is about $24.12 million. At a stressed 6.75 percent exit cap: $1,387,000 divided by 0.0675 is about $20.55 million — roughly a 14.8 percent value reduction from the cap rate move alone. This is the same same-NOI, higher-cap, lower-value mechanism from Module 06: cap rate expansion does not require any operating problem at the property to destroy value.","zh":"第 6 年（前瞻）淨營運收益＝1,196,600 乘以 1.03 的 5 次方，約為 1,387,000 美元。若出場資本化率維持 5.75% 不變：1,387,000 除以 0.0575，約為 2,412 萬美元。若出場資本化率壓力測試至 6.75%：1,387,000 除以 0.0675，約為 2,055 萬美元——單單資本化率擴大就造成約 14.8% 的價值減損。這正是第 06 課提過的「淨營運收益不變、資本化率上升、價值下降」機制——資本化率擴張根本不需要物件本身出任何營運問題，就能吃掉價值。"}
+    }
+  ]'></div>
+
+  <div class="pitfall">
+    <span class="pitfall-icon">⚠️</span>
+    <div class="pitfall-body">
+      <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+      <span class="lang-en">It is tempting to assume the cap rate a buyer purchases at is the cap rate a buyer will sell at five years later. Module 06 covered why that assumption breaks whenever the rate cycle turns — and a hold period long enough to let NOI grow 3% a year is also long enough to sit through at least one full turn of that cycle.</span>
+      <span class="lang-zh" style="display:none">很容易假設買方買進時的資本化率，就是五年後賣出時的資本化率。第 06 課解釋過，只要利率週期一轉向，這個假設就會失靈——而一個長到足以讓淨營運收益每年成長 3% 的持有期，同樣也長到足以撐過至少一整輪的週期轉向。</span>
+    </div>
+  </div>
+
+  <section class="task-lead">
+    <span class="task-eyebrow lang-en">TASK 7 OF 8</span>
+    <span class="task-eyebrow lang-zh" style="display:none">任務七／共八個任務</span>
+    <h3 class="lang-en">Decide: Price, Restructure, or Walk</h3>
+    <h3 class="lang-zh" style="display:none">決定：續行、重新架構，還是退場</h3>
+    <p class="lang-en">The math is now on the table: a marketed NOI running about 12.7 percent hot, a DSCR that clears on the pro-forma and fails on actuals, and an exit that loses about 14.8 percent of its value on a 100bp cap move alone. None of that automatically means the deal is dead — it means it needs a decision, not a reflex.</p>
+    <p class="lang-zh" style="display:none">現在數字都攤在桌上了：行銷用的淨營運收益虛高約 12.7%，DSCR 用預估值算過關、用實際數字算不過關，出場價值光是資本化率移動 100 個基點就要蒸發約 14.8%。這些都不代表這筆交易一定該放棄——而是代表它需要一個經過判斷的決定，而不是一個反射動作。</p>
+  </section>
+
+  <div class="quiz-block" data-quiz-id="m12-t7" data-quiz='[
+    {
+      "q":{"en":"Given the roughly 12.7 percent pro-forma inflation identified in Task 2 and a DSCR that fails a typical covenant on actual NOI from Task 4, what is the soundest next move at the negotiating table?","zh":"根據第 2 題找出的約 12.7% 預估值灌水，以及第 4 題顯示用實際淨營運收益算會過不了常見 DSCR 條款門檻，在談判桌上最合理的下一步是什麼？"},
+      "opts":[
+        {"en":"Proceed at the full asking price, trusting the marketed pro-forma since the broker stands behind the mark-to-market assumptions","zh":"以完整開價續行，相信行銷用的預估值，因為仲介對市場化租金假設背書"},
+        {"en":"Walk away immediately with no further negotiation, since the pro-forma cannot be trusted at all","zh":"立刻退場、不再進一步談判，因為完全不能信任這份預估值"},
+        {"en":"Renegotiate price toward the cap rate implied by actual NOI, and/or restructure the deal with seller credits, a rollover reserve escrow for the 2027 cliff, or reduced initial loan proceeds, rather than either blindly proceeding or reflexively walking","zh":"把價格往實際淨營運收益所隱含的資本化率方向重新議價，並／或用賣方讓價、為 2027 年到期懸崖設立信託監管重新招租準備金、或降低初始貸款成數等方式重新架構交易，而不是盲目續行或反射性退場"},
+        {"en":"Proceed at asking price but ask the lender to waive the DSCR covenant entirely for the life of the loan","zh":"以開價續行，但要求放款方在整筆貸款存續期間完全豁免 DSCR 條款"}
+      ],
+      "a":2,
+      "exp":{"en":"Both a blind yes and a reflexive walk skip the work an underwriter is paid to do. The 12.7 percent pro-forma gap and a covenant that already fails on actual NOI are strong evidence the deal is mispriced or overleveraged as structured — not necessarily dead. Renegotiating price toward the actual-NOI-implied 5.10 percent cap rate, or structuring around the risk with seller credits, a reserve escrow sized to the 2027 rollover, or a smaller initial loan draw, addresses the actual problem instead of reacting to it with a binary yes or no. A lender waiving a DSCR covenant entirely is not a realistic outcome to underwrite to.","zh":"盲目答應和反射性退場，兩者都跳過了核保人員該做的功課。12.7% 的預估值落差、以及用實際淨營運收益算會過不了條款的事實，都強烈顯示這筆交易照目前的架構來看不是定價錯誤就是槓桿過高——但不一定代表這筆交易該放棄。把價格往實際淨營運收益所隱含的 5.10% 資本化率方向重新議價，或是用賣方讓價、依 2027 年重新招租規模設立準備金、或降低初始貸款動撥成數等方式圍繞風險重新架構交易，才是真正處理問題本身，而不是用二選一去回應它。指望放款方整筆豁免 DSCR 條款，並不是可以拿來核保的現實結果。"}
+    }
+  ]'></div>
+
+  <p class="lang-en">A renegotiated price or a restructured deal is only a good decision if it is aimed at the right risk. Task 8 asks whether the DSCR problem and the rollover cliff are actually two separate risks to price for, or one risk wearing two names.</p>
+  <p class="lang-zh" style="display:none">重新議價或重新架構交易，只有在瞄準正確的風險時才算是好決定。任務八要問的是：DSCR 問題和到期懸崖，究竟是兩個各自需要單獨定價的風險，還是同一個風險用了兩個不同的名字。</p>
+
+  <section class="task-lead">
+    <span class="task-eyebrow lang-en">TASK 8 OF 8</span>
+    <span class="task-eyebrow lang-zh" style="display:none">任務八／共八個任務</span>
+    <h3 class="lang-en">Synthesis: The Biggest Risk in This Deal</h3>
+    <h3 class="lang-zh" style="display:none">綜合判斷：這筆交易最大的風險</h3>
+    <p class="lang-en">Every prior task tested one thread in isolation. This last one asks what happens when the two sharpest threads — the financing math from Task 4 and the leasing math from Task 5 — are read together instead of separately. A real underwriting memo does not present risks as a numbered list; it has to say, in one sentence, what actually keeps a lender or an investment committee up at night.</p>
+    <p class="lang-zh" style="display:none">前面每個任務都只單獨測試一條線索。最後這一題要問的是：當任務四的融資數字，和任務五的租賃數字，放在一起讀而不是分開讀時，會發生什麼事。一份真正的核保備忘錄不會把風險列成編號清單就交差；它必須用一句話說清楚，究竟是什麼真正會讓放款方或投資委員會夜不成眠。</p>
+  </section>
+
+  <div class="quiz-block" data-quiz-id="m12-t8" data-quiz='[
+    {
+      "q":{"en":"Combining the DSCR result from Task 4 with the rollover cliff from Task 5, what is the single biggest risk in this deal if bought at asking price on the quoted loan terms?","zh":"把第 4 題的 DSCR 結果和第 5 題的到期懸崖結合起來看，如果以開價、依報價貸款條件買下這筆交易，最大的單一風險是什麼？"},
+      "opts":[
+        {"en":"The loan already fails its DSCR covenant on actual in-place NOI, leaving zero cushion if the 2027 office rollover, 41.4 percent of rent, does not release on schedule — a leasing shortfall and a financing failure compound into one event","zh":"這筆貸款用實際在收淨營運收益算就已經過不了 DSCR 條款，代表如果佔租金 41.4% 的 2027 年辦公室到期租約沒能如期重新招租，完全沒有緩衝空間——招租不順與融資違約會疊加成同一個事件"},
+        {"en":"The industrial tenants are overpaying relative to market rent, which will suppress renewal rents at their own expirations","zh":"工業承租戶付的租金高於市場行情，會壓低他們自己續約時的租金"},
+        {"en":"The 5-year loan term is irrelevant, since the property will be sold before maturity regardless of leasing performance","zh":"5 年貸款期無關緊要，因為無論招租表現如何，物件都會在到期前出售"},
+        {"en":"The going-in cap rate is simply too high relative to the exit cap rate assumed in the underwriting","zh":"進場資本化率相對於核保假設的出場資本化率來說單純太高"}
+      ],
+      "a":0,
+      "exp":{"en":"The two threads are not independent risks — they are the same risk seen from two angles. A DSCR of about 1.06x on actual NOI already means debt service is barely covered with no room for error. The 2027 rollover cliff is exactly the kind of event that could push NOI below what actual DSCR needs: if even one of the three office tenants does not renew on schedule, or renews at a discount to cover downtime, actual coverage drops further below the covenant, at the same moment the loan is approaching its 5-year balloon and needing to refinance. Underwriting each risk in isolation misses that they land in the same window and amplify each other.","zh":"這兩條線索不是各自獨立的風險——它們是同一個風險的兩個角度。用實際淨營運收益算出的約 1.06 倍 DSCR，已經代表還款金額幾乎沒有容錯空間。2027 年的到期懸崖正是那種可能把淨營運收益再往下推、低於實際 DSCR 所需水準的事件：只要三個辦公室承租戶裡有一個沒能如期續約，或是用降價來換取續約，實際覆蓋率就會進一步跌破條款門檻——而這正好發生在貸款即將面對 5 年期氣球到期、需要再融資的同一個時間點。分開核保這兩個風險，會錯過它們落在同一個時間窗口、彼此放大的事實。"}
+    }
+  ]'></div>
+
+  <p class="lang-en">Before moving on, it is worth being able to state each of the eight answers above out loud, in one sentence, without looking back at the worked examples. That is the actual test this capstone is administering — not whether the arithmetic can be followed once, but whether the conclusions stick.</p>
+  <p class="lang-zh" style="display:none">在往下走之前，值得檢查自己能不能不回頭看逐步演算範例，就用一句話把上面八個答案都講出來。這才是這場畢業考真正在測試的東西——不是能不能跟著算一遍，而是這些結論有沒有真的留下來。</p>
+
+  <section>
+    <h2 class="lang-en">Recompute the Deal With Your Own Assumptions</h2>
+    <h2 class="lang-zh" style="display:none">用你自己的假設重新算這筆交易</h2>
+    <p class="lang-en">Move price, vacancy, interest rate, and exit cap rate independently and watch the going-in cap rate, DSCR, and rough return profile respond. None of the eight answers above change — this calculator exists to show how sensitive they are to assumptions that were held fixed throughout the exercise.</p>
+    <p class="lang-zh" style="display:none">分別調整價格、空置率、利率、出場資本化率，觀察進場資本化率、DSCR、以及粗估報酬輪廓如何變化。上面八個答案本身不會改變——這個計算器的用途，是呈現這些答案對整個練習中一直維持固定的假設有多敏感。</p>
+  </section>
+
+  <div class="calc-card" id="calc-master-deal">
+    <div class="calc-card-title"><span class="lang-en">Try It: Meridian Deal Calculator</span><span class="lang-zh" style="display:none">動手試算：Meridian 交易計算器</span></div>
+
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Purchase Price ($)</span><span class="lang-zh" style="display:none">購買價格（美元）</span></span>
+        <span class="calc-row-echo" data-echo="calc-price">23450000</span>
+      </div>
+      <input type="range" id="calc-price" name="price" min="15000000" max="30000000" step="50000" value="23450000">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Vacancy Rate (%)</span><span class="lang-zh" style="display:none">空置率（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc-vacancy">4.4</span>
+      </div>
+      <input type="range" id="calc-vacancy" name="vacancy" min="0" max="15" step="0.1" value="4.4">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Interest Rate (%)</span><span class="lang-zh" style="display:none">利率（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc-rate">6.25</span>
+      </div>
+      <input type="range" id="calc-rate" name="rate" min="3" max="9" step="0.05" value="6.25">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Exit Cap Rate (%)</span><span class="lang-zh" style="display:none">出場資本化率（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc-exitcap">5.75</span>
+      </div>
+      <input type="range" id="calc-exitcap" name="exitCap" min="4" max="8.5" step="0.05" value="5.75">
+    </div>
+
+    <div class="calc-outputs">
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Going-In Cap Rate</span><span class="lang-zh" style="display:none">進場資本化率</span></span>
+        <span class="calc-output-value" data-out="capRate">5.10%</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label">DSCR</span>
+        <span class="calc-output-value" data-out="dscr">1.06x</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Approx. 5-Year IRR</span><span class="lang-zh" style="display:none">約略五年內部報酬率</span></span>
+        <span class="calc-output-value" data-out="irr">&mdash;</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Equity Multiple</span><span class="lang-zh" style="display:none">股權倍數</span></span>
+        <span class="calc-output-value" data-out="equityMultiple">&mdash;</span>
+      </div>
+    </div>
+  </div>
+  <p class="lang-en" style="font-size:12.5px;color:var(--lc-text-muted);margin-top:8px">Fixed assumptions held constant while you move the sliders: 65% LTV, 30-year amortization, 5-year hold, NOI growth of 3%/year during the hold, gross potential rent/reimbursements/other income/operating expenses held at the T-12 actual levels above (only the vacancy slider adjusts income), and 2% sale costs at exit.</p>
+  <p class="lang-zh" style="display:none;font-size:12.5px;color:var(--lc-text-muted);margin-top:8px">拉桿變動時維持不變的固定假設：LTV 65%、30 年攤還、持有 5 年、持有期間淨營運收益每年成長 3%、毛潛在租金／費用回收／其他收入／營運費用維持在上方 T-12 實際水準（只有空置率拉桿會影響收入），出場時銷售成本為 2%。</p>
+  <p class="lang-en" style="font-size:12.5px;color:var(--lc-text-muted)">This is a simplified teaching approximation — constant-growth NOI, no closing costs on entry, and no property-level tax or depreciation modeling — not an investment-grade IRR model.</p>
+  <p class="lang-zh" style="display:none;font-size:12.5px;color:var(--lc-text-muted)">這是簡化過的教學用近似值——固定成長率的淨營運收益、進場時未計入交割成本、也未建模物件層級的稅務或折舊——並非投資等級的內部報酬率模型。</p>
+
+  <section>
+    <h2 class="lang-en">Deal Scorecard</h2>
+    <h2 class="lang-zh" style="display:none">交易總表</h2>
+    <p class="lang-en">Every number from the eight tasks above, marketed versus actual, in one place.</p>
+    <p class="lang-zh" style="display:none">把上方八個任務算出的每個數字，行銷版與實際版並列在同一處。</p>
+    <p class="lang-en">Nothing here is new math. It is the same five results from Tasks 1 through 6, laid side by side instead of scattered across sections, so the pattern across all five is easier to see at once than it was reading through the tasks one at a time.</p>
+    <p class="lang-zh" style="display:none">這裡沒有任何新的計算。只是把任務一到六的同一批結果，並排放在一起看，而不是分散在各個段落裡，這樣一次看完所有五個結果，會比逐題往下讀更容易看出其中的模式。</p>
+    <div style="overflow-x:auto;margin:14px 0">
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Metric</span><span class="lang-zh" style="display:none">指標</span></th>
+            <th><span class="lang-en">Marketed / Naive</span><span class="lang-zh" style="display:none">行銷版／未查核版</span></th>
+            <th><span class="lang-en">Actual / Stress-Tested</span><span class="lang-zh" style="display:none">實際版／壓力測試版</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="lang-en">Year-1 NOI (Task 1&ndash;2)</span><span class="lang-zh" style="display:none">第一年淨營運收益（任務一至二）</span></td><td class="num">$1,348,150</td><td class="num">$1,196,600</td></tr>
+          <tr><td><span class="lang-en">Going-In Cap Rate (Task 3)</span><span class="lang-zh" style="display:none">進場資本化率（任務三）</span></td><td class="num">5.75%</td><td class="num">5.10%</td></tr>
+          <tr><td><span class="lang-en">DSCR at Quoted Loan (Task 4)</span><span class="lang-zh" style="display:none">報價貸款下的 DSCR（任務四）</span></td><td class="num">1.20x</td><td class="num">1.06x</td></tr>
+          <tr><td><span class="lang-en">WALT / 2027 Cliff Share (Task 5)</span><span class="lang-zh" style="display:none">WALT／2027 懸崖佔比（任務五）</span></td><td class="num">3.0 yrs (headline)</td><td class="num">41.4% of rent in ~18mo</td></tr>
+          <tr><td><span class="lang-en">Exit Value, Yr 6 (Task 6)</span><span class="lang-zh" style="display:none">第六年出場價值（任務六）</span></td><td class="num">$24.12M @ 5.75%</td><td class="num">$20.55M @ 6.75%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lang-en" style="font-size:12.5px;color:var(--lc-text-muted)">Read across any row and the pattern repeats: the marketed column always clears more comfortably than the actual/stress-tested column. That is not a coincidence in this exercise — it is the point.</p>
+    <p class="lang-zh" style="display:none;font-size:12.5px;color:var(--lc-text-muted)">橫向讀任何一列都是同一個模式：行銷欄永遠比實際／壓力測試欄看起來更輕鬆過關。這在這次練習裡不是巧合——這正是重點所在。</p>
+  </section>
+
+  <section>
+    <h2 class="lang-en">Glossary Recap</h2>
+    <h2 class="lang-zh" style="display:none">名詞回顧</h2>
+    <p class="lang-en">Five terms carried the entire exercise. If any of these need a second look before the checklist below, this is the moment to look back rather than after.</p>
+    <p class="lang-zh" style="display:none">五個名詞撐起了整個練習。如果下方檢查清單前，這五個裡有哪個需要再確認一次，現在就是回頭看的時機，不要等到之後。</p>
+  </section>
+
+  <ul class="checklist">
+    <li class="checklist-item"><input type="checkbox" id="chk-g1"><label for="chk-g1"><span class="lang-en"><strong>NOI</strong> — rental and other property income minus operating expenses, before debt service and capital expenditure. Computed in Task 1.</span><span class="lang-zh" style="display:none"><strong>淨營運收益</strong>——租金與其他物業收入，扣除營運費用後、尚未扣除還款與資本支出前的金額。於任務一算出。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-g2"><label for="chk-g2"><span class="lang-en"><strong>Going-in cap rate</strong> — NOI at acquisition divided by purchase price. Computed in Task 3.</span><span class="lang-zh" style="display:none"><strong>進場資本化率</strong>——收購時的淨營運收益除以購買價格。於任務三算出。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-g3"><label for="chk-g3"><span class="lang-en"><strong>DSCR</strong> — annual NOI divided by annual debt service, the covenant a lender tests. Computed in Task 4.</span><span class="lang-zh" style="display:none"><strong>償債保障比率</strong>——年淨營運收益除以年度還款額，放款方用來測試的條款。於任務四算出。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-g4"><label for="chk-g4"><span class="lang-en"><strong>WALT</strong> — the rent-weighted average of years remaining across every lease in a rent roll. Computed in Task 5.</span><span class="lang-zh" style="display:none"><strong>加權平均到期年限</strong>——以租金加權計算，租金明細表中所有租約剩餘年數的平均值。於任務五算出。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-g5"><label for="chk-g5"><span class="lang-en"><strong>Rollover cliff</strong> — a concentration of lease expirations clustered in a narrow window, invisible to a single WALT average. Identified in Task 5.</span><span class="lang-zh" style="display:none"><strong>到期懸崖</strong>——租約到期日集中在一段狹窄期間內，單一 WALT 平均值無法顯示。於任務五指認出來。</span></label></li>
+  </ul>
+
+  <section>
+    <h2 class="lang-en">Decision Framework Recap</h2>
+    <h2 class="lang-zh" style="display:none">決策框架回顧</h2>
+    <p class="lang-en">The order this exercise ran in is not incidental — it is the judgment sequence the whole course has been building toward, one link at a time. Six checks, run in this order, on any deal, real or hypothetical.</p>
+    <p class="lang-zh" style="display:none">這次練習的執行順序並非隨意安排——這正是整個課程一路建構下來、環環相扣的判斷順序。以下六項檢查，可以按這個順序，套用在任何一筆交易上，不論是真實的還是假設的。</p>
+  </section>
+
+  <ul class="checklist">
+    <li class="checklist-item"><input type="checkbox" id="chk-1"><label for="chk-1"><span class="lang-en"><strong>NOI integrity</strong> — is NOI built from actual T-12 income and expenses, not a pro-forma leaning on unsigned renewals, an unrealistic vacancy factor, or trimmed operating expenses?</span><span class="lang-zh" style="display:none"><strong>淨營運收益的可信度</strong>——淨營運收益是用實際 T-12 收入與費用算出來的，還是倚賴未簽約續約、不切實際的空置率假設、或修剪過的營運費用？</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-2"><label for="chk-2"><span class="lang-en"><strong>Going-in cap rate vs. market</strong> — does the cap rate on actual NOI still make sense against comparable trades, or only the marketed cap rate on pro-forma NOI?</span><span class="lang-zh" style="display:none"><strong>進場資本化率對照市場行情</strong>——用實際淨營運收益算出的資本化率，跟可比成交案例相比是否還說得通，還是只有用預估值算的行銷資本化率才說得通？</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-3"><label for="chk-3"><span class="lang-en"><strong>Financing and DSCR cushion</strong> — does the loan clear its DSCR covenant on actual NOI with room for downside, not only on the marketed number?</span><span class="lang-zh" style="display:none"><strong>融資與 DSCR 緩衝空間</strong>——這筆貸款用實際淨營運收益算是否過得了 DSCR 條款、還留有下行緩衝，而不是只有用行銷數字算才過得了？</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-4"><label for="chk-4"><span class="lang-en"><strong>Lease rollover risk</strong> — does a single WALT number hide a concentration of expirations clustered in a narrow window?</span><span class="lang-zh" style="display:none"><strong>租約到期風險</strong>——單一的 WALT 數字，是否掩蓋了一段集中在狹窄期間內的到期懸崖？</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-5"><label for="chk-5"><span class="lang-en"><strong>Exit assumptions</strong> — does the underwriting still work if the exit cap rate is 50 to 100bp wider than today, not only flat or compressing?</span><span class="lang-zh" style="display:none"><strong>出場假設</strong>——如果出場資本化率比今天寬 50 到 100 個基點，而不是持平或收斂，這筆核保還站得住腳嗎？</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-6"><label for="chk-6"><span class="lang-en"><strong>Deal structure</strong> — if the numbers do not clear cleanly, is there a structure — price, credits, reserves, reduced leverage — that resolves the gap, short of a binary walk?</span><span class="lang-zh" style="display:none"><strong>交易架構</strong>——如果數字沒有乾淨地過關，是否有價格、讓價、準備金、降低槓桿等架構方式可以解決落差，而不必二選一直接退場？</span></label></li>
+  </ul>
+
+  <p class="lang-en">None of the six items above are a formula. They are questions a formula cannot ask on its own — which is the point this whole course has been building toward since Module 01. A calculator will always return a number for whatever is typed into it; it will never flag that the number typed in was itself the wrong one to trust.</p>
+  <p class="lang-zh" style="display:none">上面六項都不是公式。它們是公式自己問不出來的問題——而這正是本課程從第 01 課開始一路要建立的東西。計算機永遠會針對輸入的東西給出一個答案；它永遠不會提醒你，輸入進去的那個數字，一開始就不值得信任。</p>
+
+  <section>
+    <h2 class="lang-en">Where to Go Next</h2>
+    <h2 class="lang-zh" style="display:none">接下來去哪裡</h2>
+    <p class="lang-en">This exercise ran on fabricated numbers so the mechanics could stay clean. The next step is running the same judgment sequence against real markets.</p>
+    <p class="lang-zh" style="display:none">這次練習用的是虛構數字，目的是讓機制保持乾淨清楚。下一步，是把同一套判斷順序套用在真實市場上。</p>
+    <p class="lang-en">Real offering memoranda will not label their pro-forma line items as inflated, and no rent roll will flag its own rollover cliff in bold. The eight questions this capstone asked are the same eight questions worth asking of any real deal — the numbers will simply be less considerate about making the gap easy to find.</p>
+    <p class="lang-zh" style="display:none">真實的招標書不會把預估值灌水的項目特別標出來，也不會有租金明細表用粗體字提醒自己藏著到期懸崖。這場畢業考問的八個問題，正是面對任何一筆真實交易時都值得問的同一批問題——只是真實數字不會這麼貼心，把落差擺得這麼容易找。</p>
+    <div class="next-grid">
+      <a class="module-card" href="/cre.html">
+        <div class="module-card-title"><span class="lang-en">Use the real 57-city dataset to find your market</span><span class="lang-zh" style="display:none">用真實 57 城數據找你的市場</span></div>
+        <div class="module-card-meta"><span class="module-card-time lang-en">CRE Monitor &rarr;</span><span class="module-card-time lang-zh" style="display:none">CRE 監測儀表板 &rarr;</span></div>
+      </a>
+      <a class="module-card" href="/learn-cre/index.html">
+        <div class="module-card-title"><span class="lang-en">Course Home</span><span class="lang-zh" style="display:none">課程首頁</span></div>
+        <div class="module-card-meta"><span class="module-card-time lang-en">Review any module &rarr;</span><span class="module-card-time lang-zh" style="display:none">回顧任一模組 &rarr;</span></div>
+      </a>
+    </div>
+  </section>
+
+  <div class="lc-pager">
+    <a href="11-access.html">
+      <span class="lc-pager-dir lang-en">Previous</span><span class="lc-pager-dir lang-zh" style="display:none">上一課</span>
+      <div class="lc-pager-label lang-en">How Individuals Invest</div>
+      <div class="lc-pager-label lang-zh" style="display:none">散戶的參與管道</div>
+    </a>
+    <a href="/learn-cre/index.html" class="lc-pager-next">
+      <span class="lc-pager-dir lang-en">Next</span><span class="lc-pager-dir lang-zh" style="display:none">下一課</span>
+      <div class="lc-pager-label lang-en">Course Home</div>
+      <div class="lc-pager-label lang-zh" style="display:none">課程首頁</div>
+    </a>
+  </div>
+
+  <footer class="lc-footer">
+    <a href="/learn-cre/index.html"><span class="lang-en">&larr; Course Home</span><span class="lang-zh" style="display:none">&larr; 課程首頁</span></a>
+    <span class="lc-footer-note">INVESTMQUEST &middot; LEARN CRE &middot; MODULE 12</span>
+  </footer>
+
+</div>
+
+<script src="/learn-cre/learn.js"></script>
+<script>
+  initCalc('calc-master-deal', function(values){
+    var GPR = 1439250, REIMB = 186000, OTHER = 18750, OPEX = 383400;
+    var price = values.price || 0;
+    var vacancy = values.vacancy || 0;
+    var rate = values.rate || 0;
+    var exitCap = values.exitCap || 0;
+
+    function fmt(n, suffix, decimals){
+      if(n===null || n===undefined || isNaN(n) || !isFinite(n)) return '—';
+      return n.toFixed(decimals===undefined ? 1 : decimals) + (suffix || '');
+    }
+
+    var EGI = GPR*(1-vacancy/100) + REIMB + OTHER;
+    var NOI = EGI - OPEX;
+    var capRate = price > 0 ? (NOI/price*100) : NaN;
+
+    var loanAmount = price*0.65;
+    var r = rate/100/12;
+    var n = 360;
+    var payment = r===0 ? loanAmount/n : loanAmount*r/(1-Math.pow(1+r,-n));
+    var annualDS = payment*12;
+    var DSCR = annualDS > 0 ? (NOI/annualDS) : NaN;
+
+    var totalCF = 0;
+    for(var t=1;t<=5;t++){
+      var NOIt = NOI*Math.pow(1.03, t-1);
+      totalCF += (NOIt - annualDS);
+    }
+
+    var NOIforward = NOI*Math.pow(1.03,5);
+    var exitValue = exitCap > 0 ? (NOIforward/(exitCap/100)) : NaN;
+
+    var balance60 = r===0
+      ? (loanAmount - payment*60)
+      : (loanAmount*Math.pow(1+r,60) - payment*(Math.pow(1+r,60)-1)/r);
+
+    var saleCosts = isFinite(exitValue) ? exitValue*0.02 : NaN;
+    var netSaleProceeds = (isFinite(exitValue) && isFinite(balance60)) ? (exitValue - saleCosts - balance60) : NaN;
+    var equity = price*0.35;
+    var totalReturn = (isFinite(totalCF) && isFinite(netSaleProceeds)) ? (totalCF + netSaleProceeds) : NaN;
+    var equityMultiple = (equity > 0 && isFinite(totalReturn)) ? (totalReturn/equity) : NaN;
+    var irrApprox = (isFinite(equityMultiple) && equityMultiple > 0)
+      ? ((Math.pow(equityMultiple, 1/5) - 1) * 100)
+      : NaN;
+
+    return {
+      capRate: fmt(capRate, '%', 2),
+      dscr: fmt(DSCR, 'x', 2),
+      irr: fmt(irrApprox, '%', 1),
+      equityMultiple: fmt(equityMultiple, 'x', 2)
+    };
+  });
+</script>
+</body>
+</html>

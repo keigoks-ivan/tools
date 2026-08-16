@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02 · The Language of Money | CRE Investing Course | InvestMQuest</title>
+<meta name="description" content="NOI, cap rate, cash-on-cash, DSCR, LTV/LTC and IRR vs equity multiple, built up step by step from worked numeric examples on the same handful of buildings. 淨營運收益、資本化率、現金報酬率、償債保障比、貸款成數與內部報酬率，全部用同一批建築物的逐步演算範例講清楚。">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/learn-cre/learn.css">
+</head>
+<body>
+
+<nav class="course-nav">
+  <div class="course-nav-inner">
+    <div class="course-nav-brand">
+      <a href="/cre.html">&larr; <span class="lang-en">CRE Monitor</span><span class="lang-zh" style="display:none">CRE 監測儀表板</span></a>
+      <span class="course-nav-sep">/</span>
+      <a href="/learn-cre/index.html" class="course-nav-home"><span class="lang-en">Course Home</span><span class="lang-zh" style="display:none">課程首頁</span></a>
+    </div>
+    <div class="course-nav-pager">
+      <a href="01-basics.html">&larr; <span class="lang-en">What CRE Is</span><span class="lang-zh" style="display:none">CRE 是什麼</span></a>
+      <a href="03-deal-reading.html"><span class="lang-en">Reading a Deal</span><span class="lang-zh" style="display:none">看懂一個 Deal</span> &rarr;</a>
+    </div>
+    <div class="course-nav-lang">
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</nav>
+
+<div class="lc-wrap">
+
+  <header class="module-header">
+    <span class="module-eyebrow lang-en">MODULE 02</span>
+    <span class="module-eyebrow lang-zh" style="display:none">第 02 課</span>
+    <h1 class="lang-en">The Language of Money</h1>
+    <h1 class="lang-zh" style="display:none">錢的語言</h1>
+    <div class="module-goals">
+      <div class="module-goals-title"><span class="lang-en">What You'll Learn</span><span class="lang-zh" style="display:none">這一課學什麼</span></div>
+      <ul>
+        <li><span class="lang-en">Build net operating income from gross potential rent down to the bottom line, and know exactly what does not belong in it.</span><span class="lang-zh" style="display:none">從潛在總租金收入一路往下算出淨營運收益，並清楚知道哪些項目絕對不該算進去。</span></li>
+        <li><span class="lang-en">Solve cap rate in both directions — price to yield, and yield to price — and see why the same 1-point move hits low-cap assets far harder in dollar terms than high-cap assets.</span><span class="lang-zh" style="display:none">在「價格求殖利率」與「殖利率求價格」兩個方向都能求出資本化率，並看懂為什麼同樣 1 個百分點的變動，對低資本化率資產的美元衝擊遠大於高資本化率資產。</span></li>
+        <li><span class="lang-en">Calculate cash-on-cash return and see, with real numbers, how leverage can amplify it — or turn it negative.</span><span class="lang-zh" style="display:none">計算現金報酬率，並用真實數字看懂槓桿如何放大它——或讓它變成負數。</span></li>
+        <li><span class="lang-en">Read DSCR, LTV and LTC the way a lender does, and know which one actually constrains a given deal.</span><span class="lang-zh" style="display:none">用放款方的角度讀懂償債保障比、貸款成數（以價值計）與貸款成數（以成本計），並判斷哪一個才是真正卡住某筆交易的限制。</span></li>
+        <li><span class="lang-en">Distinguish IRR from equity multiple, and recognize when a high IRR is a timing artifact rather than real wealth creation.</span><span class="lang-zh" style="display:none">分辨內部報酬率與權益倍數的差異，並認出一個亮眼的內部報酬率何時只是時間點的假象，而非真正創造的財富。</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <section>
+    <p class="lang-en">One building anchors most of this module: purchase price $10,000,000, in-place net operating income $650,000, financed with a $6,500,000 loan at 6% interest-only. That is a 6.5% going-in cap rate and 65% leverage. Every metric covered below — cap rate, cash-on-cash, DSCR, LTV — is a different lens turned on those same four numbers: price, NOI, loan amount, interest rate. Learn to read the numbers and the formulas stop being separate things to memorize; they turn into different questions asked of the same underlying deal.</p>
+    <p class="lang-zh" style="display:none">本課大部分內容都繞著同一棟建築物打轉：購買價格 $10,000,000，現況淨營運收益 $650,000，以 $6,500,000 貸款、年利率 6%、只付利息的方式融資。這相當於進場資本化率 6.5%、槓桿 65%。以下每一個指標——資本化率、現金報酬率、償債保障比、貸款成數——都只是從不同角度檢視同樣四個數字：價格、淨營運收益、貸款金額、利率。學會讀懂這些數字，公式就不再是要分開背誦的東西，而會變成對同一筆交易提出的不同問題。</p>
+
+    <p class="lang-en">The number every other metric in this chapter is built from is <span class="key-term" tabindex="0">net operating income<span class="key-term-tip"><span class="lang-en">Rental and other property income minus operating expenses, before debt service and capital expenditure.</span><span class="lang-zh" style="display:none">租金與其他物業收入，扣除營運費用後、尚未扣除還款與資本支出前的金額。</span></span></span> (NOI). Get NOI wrong — inflate it, or quietly exclude a real cost — and every downstream number (cap rate, DSCR, LTV) inherits the error. Section 1 builds it line by line.</p>
+    <p class="lang-zh" style="display:none">本章其他所有指標都建立在同一個數字之上——<span class="key-term" tabindex="0">淨營運收益<span class="key-term-tip"><span class="lang-en">Rental and other property income minus operating expenses, before debt service and capital expenditure.</span><span class="lang-zh" style="display:none">租金與其他物業收入，扣除營運費用後、尚未扣除還款與資本支出前的金額。</span></span></span>（NOI）。如果淨營運收益算錯了——虛增它，或悄悄漏掉一項真實成本——後面每一個衍生數字（資本化率、償債保障比、貸款成數）都會繼承這個錯誤。第一節就從逐項堆疊開始。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 1. NOI -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">1. Net Operating Income: What Counts, What Doesn't</h2>
+    <h2 class="lang-zh" style="display:none">一、淨營運收益：什麼算進去、什麼不算</h2>
+
+    <p class="lang-en">NOI is built top-down from <span class="key-term" tabindex="0">Gross Potential Rent<span class="key-term-tip"><span class="lang-en">The maximum rental income a property could generate if 100% leased at full market rent, before any vacancy or credit loss.</span><span class="lang-zh" style="display:none">若物業 100% 出租、且全數收取市場租金，在扣除任何空置或壞帳損失之前所能產生的最大租金收入。</span></span></span> (GPR) — the rent roll if every unit were leased at market rate with nobody defaulting. Subtract vacancy and credit loss to get <span class="key-term" tabindex="0">Effective Gross Income<span class="key-term-tip"><span class="lang-en">Gross potential rent minus vacancy and credit loss, before other income is added.</span><span class="lang-zh" style="display:none">潛在總租金收入扣除空置與壞帳損失後、加計其他收入之前的金額。</span></span></span> (EGI). Add other property income — parking, laundry, storage fees, application fees, anything the building collects besides base rent. Subtract operating expenses. What's left is NOI.</p>
+    <p class="lang-zh" style="display:none">淨營運收益是由上往下堆疊出來的：先從<span class="key-term" tabindex="0">潛在總租金收入<span class="key-term-tip"><span class="lang-en">The maximum rental income a property could generate if 100% leased at full market rent, before any vacancy or credit loss.</span><span class="lang-zh" style="display:none">若物業 100% 出租、且全數收取市場租金，在扣除任何空置或壞帳損失之前所能產生的最大租金收入。</span></span></span>（GPR）開始——也就是假設每一戶都以市場租金租出、也沒有人違約時的租金明細表。扣除空置與壞帳損失後得到<span class="key-term" tabindex="0">有效總收入<span class="key-term-tip"><span class="lang-en">Gross potential rent minus vacancy and credit loss, before other income is added.</span><span class="lang-zh" style="display:none">潛在總租金收入扣除空置與壞帳損失後、加計其他收入之前的金額。</span></span></span>（EGI）。再加上其他物業收入——停車費、洗衣、倉儲費、申請費，任何除了基本租金以外物業收取的錢。最後扣除營運費用，剩下的就是淨營運收益。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — NOI Build-Up</span><span class="lang-zh" style="display:none">逐步演算範例——淨營運收益堆疊</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume a 60-unit apartment building with Gross Potential Rent of <span class="we-formula">$1,800,000/yr</span> if fully leased at market rent.</span>
+            <span class="lang-zh" style="display:none">假設一棟 60 戶的公寓大樓，若以市場租金全數出租，潛在總租金收入為 <span class="we-formula">$1,800,000/yr</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Underwrite 5% vacancy and credit loss, typical for this submarket's stabilized occupancy: <span class="we-formula">$1,800,000 × 5% = $90,000</span>.</span>
+            <span class="lang-zh" style="display:none">依照該次市場穩定出租率的典型水準，核保 5% 的空置與壞帳損失：<span class="we-formula">$1,800,000 × 5% = $90,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Effective Gross Income: <span class="we-formula">$1,800,000 − $90,000 = $1,710,000</span>.</span>
+            <span class="lang-zh" style="display:none">有效總收入：<span class="we-formula">$1,800,000 − $90,000 = $1,710,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Add other income — reserved parking, coin laundry, storage units — of <span class="we-formula">$40,000</span>. Total income: <span class="we-formula">$1,710,000 + $40,000 = $1,750,000</span>.</span>
+            <span class="lang-zh" style="display:none">加上其他收入——保留車位、投幣式洗衣機、倉儲單位——共 <span class="we-formula">$40,000</span>。總收入：<span class="we-formula">$1,710,000 + $40,000 = $1,750,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">Subtract operating expenses: property tax <span class="we-formula">$210,000</span>, insurance <span class="we-formula">$35,000</span>, management fee at 5% of total income <span class="we-formula">$87,500</span>, repairs &amp; maintenance <span class="we-formula">$95,000</span>, owner-paid utilities <span class="we-formula">$42,500</span>, admin/professional fees <span class="we-formula">$20,000</span> — total opex <span class="we-formula">$490,000</span>.</span>
+            <span class="lang-zh" style="display:none">扣除營運費用：房產稅 <span class="we-formula">$210,000</span>、保險 <span class="we-formula">$35,000</span>、管理費（總收入的 5%）<span class="we-formula">$87,500</span>、維修保養 <span class="we-formula">$95,000</span>、業主負擔水電 <span class="we-formula">$42,500</span>、行政／專業費用 <span class="we-formula">$20,000</span>——營運費用合計 <span class="we-formula">$490,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">6</span>
+          <span class="we-step-body">
+            <span class="lang-en">NOI: <span class="we-formula">$1,750,000 − $490,000 = $1,260,000</span>. The building's operating expense ratio is <span class="we-formula">$490,000 ÷ $1,750,000 ≈ 28%</span> of total income — worth remembering as a plausibility check later in this module.</span>
+            <span class="lang-zh" style="display:none">淨營運收益：<span class="we-formula">$1,750,000 − $490,000 = $1,260,000</span>。這棟大樓的營運費用率為 <span class="we-formula">$490,000 ÷ $1,750,000 ≈ 28%</span>——這個數字值得記住，本課後面會用來做合理性檢查。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">Operating expense ratio — total opex divided by total income — is a useful plausibility check because it clusters within a range by property type, even though no single number is "correct" for every deal. Multifamily typically runs roughly 35%–45% of income; office often runs somewhat higher once utilities and common-area services are included; industrial and single-tenant net-lease assets often run far lower, sometimes under 15%, because many operating costs are passed through directly to the tenant under the lease. A pro-forma opex ratio that sits well outside the normal band for that property type — in either direction — deserves a second look before the NOI built on top of it is trusted.</p>
+    <p class="lang-zh" style="display:none">營運費用率——營運費用總額除以總收入——是一個實用的合理性檢查工具，因為它會依物業類型落在一個大致的範圍內，即使沒有哪一個數字對每筆交易都「正確」。集合住宅的營運費用率通常落在總收入的 35% 至 45% 左右；辦公大樓在計入水電與公共區域服務後，往往稍高一些；工業與單一租戶淨租賃資產的營運費用率則常常低得多，有時低於 15%，因為許多營運成本會依租約直接轉嫁給租戶。如果一份預估的營運費用率明顯偏離該物業類型的正常區間——無論偏高或偏低——在信任建立在它之上的淨營運收益之前，都值得再仔細檢視一次。</p>
+
+    <p class="lang-en">Three things stay out of NOI on purpose, and confusing any of them with an operating expense is one of the most common ways underwriting goes wrong. <span class="key-term" tabindex="0">Capital expenditure<span class="key-term-tip"><span class="lang-en">Spending on items that extend a building's useful life or add value — a new roof, an HVAC system replacement, a full unit renovation — capitalized on the balance sheet rather than expensed against a single year's income.</span><span class="lang-zh" style="display:none">用於延長建築物使用年限或增加價值的支出——例如更換屋頂、汰換空調系統、整戶翻新——會資本化列入資產負債表，而不是計入單一年度的費用。</span></span></span> (capex) — replacing a roof, swapping out an HVAC system — is a capital item, not a recurring operating cost, so it sits below NOI, typically funded from a separate reserve. Debt service does not appear either, because financing is a capital-structure choice the owner makes after buying the building, not a property-level operating outcome; leaving it out is exactly what lets NOI compare two buildings independent of how each happens to be financed. Depreciation is excluded for a different reason: it is a non-cash accounting concept for tax and book purposes, irrelevant to the actual cash economics NOI is meant to capture.</p>
+    <p class="lang-zh" style="display:none">有三樣東西刻意被排除在淨營運收益之外，把其中任何一項誤當成營運費用，是核保最常見的出錯方式之一。<span class="key-term" tabindex="0">資本支出<span class="key-term-tip"><span class="lang-en">Spending on items that extend a building's useful life or add value — a new roof, an HVAC system replacement, a full unit renovation — capitalized on the balance sheet rather than expensed against a single year's income.</span><span class="lang-zh" style="display:none">用於延長建築物使用年限或增加價值的支出——例如更換屋頂、汰換空調系統、整戶翻新——會資本化列入資產負債表，而不是計入單一年度的費用。</span></span></span>（capex）——更換屋頂、汰換空調系統——屬於資本性支出，而非經常性的營運成本，因此排在淨營運收益之外，通常由另立的準備金支付。還款金額也不列入，因為融資是業主買下建築物之後才做的資本結構選擇，不是物業本身的營運成果；正因為排除了還款，淨營運收益才能拿來比較兩棟融資方式完全不同的建築物。折舊被排除則是另一個原因：它是稅務與帳面上的非現金會計概念，與淨營運收益想捕捉的真實現金經濟毫無關係。</p>
+
+    <p class="lang-en">This is also why NOI is not the same figure as the "net income" line on a GAAP financial statement, even for the same property in the same year. GAAP net income includes depreciation as a real expense and includes interest on debt — both of which NOI deliberately strips out — while excluding some items NOI deliberately keeps at the property level. Two people can be looking at completely accurate numbers for the identical building and still be arguing past each other if one is quoting NOI and the other is quoting book net income. When in doubt, ask which line item set is actually being used, not just what the bottom-line number is.</p>
+    <p class="lang-zh" style="display:none">這也是為什麼淨營運收益跟一般公認會計準則（GAAP）財務報表上的「淨利」，即使是同一物業、同一年度，也不是同一個數字。GAAP 淨利把折舊當作真實費用計入，也把貸款利息計入，而這兩者正是淨營運收益刻意排除的項目；同時淨營運收益又刻意保留了一些 GAAP 淨利可能不放在物業層級的項目。兩個人可能都在看同一棟建築物、完全正確的數字，卻仍然雞同鴨講——因為一個人講的是淨營運收益，另一個人講的是帳面淨利。有疑慮時，該問的是對方實際用的是哪一組科目，而不只是問「最終數字」是多少。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Much of the wave of CMBS loan defaults that followed the 2008 financial crisis traces back to a single underwriting habit: lenders and rating agencies sizing loans off pro-forma, forward-looking NOI — the income a property was projected to generate once rents were pushed to market and turnover was completed — rather than trailing actual NOI already in hand. When the downturn hit and projected rent growth and lease-up assumptions didn't materialize, actual NOI came in well short of the number the loan was sized against, and debt service coverage that looked comfortable on paper evaporated. Post-crisis CMBS underwriting standards moved toward heavier reliance on in-place, trailing income specifically because of that experience.</p>
+      <p class="lang-zh" style="display:none">2008 年金融危機後爆發的一波商業不動產抵押貸款證券（CMBS）違約潮，有不少可以追溯到同一個核保習慣：放款方與信評機構以預估、前瞻性的淨營運收益——也就是假設租金已推升到市場水準、租戶更替也已完成之後「預期能達到」的收入——來核定貸款金額，而不是採用已經到手的過去實際淨營運收益。當景氣反轉、預期的租金成長與去化假設沒有兌現時，實際淨營運收益遠低於貸款核定時所依據的數字，帳面上看起來充裕的償債保障比也隨之蒸發。這段經驗正是危機後 CMBS 核保標準轉向更倚重現況、過去實際收入的原因之一。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <span class="pitfall-icon">⚠️</span>
+    <div class="pitfall-body">
+      <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+      <span class="lang-en">A broker's marketing pro-forma NOI is not the same thing as underwritten NOI. Common ways a pro-forma inflates the number: zero or below-market vacancy, rent bumps that haven't actually been signed yet, a management fee omitted because the seller self-manages (a buyer won't), and capex quietly folded into a single "repairs" line to keep the opex ratio looking thin. Rebuild NOI from the actual rent roll and trailing operating statements before trusting any quoted cap rate.</span>
+      <span class="lang-zh" style="display:none">仲介行銷用的預估淨營運收益，跟核保後的淨營運收益不是同一回事。預估數字常見的灌水手法包括：假設零空置或低於市場水準的空置率、還沒真正簽約生效的租金調漲、因為賣方自行管理而省略的管理費（買方不會自己管理）、以及把資本支出悄悄併進單一「維修」科目以壓低營運費用率。在相信任何一個報出來的資本化率之前，先用實際租金明細表與過去的營運報表重新算一次淨營運收益。</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 2. Cap rate -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">2. Cap Rate: One Formula, Two Directions</h2>
+    <h2 class="lang-zh" style="display:none">二、資本化率：一個公式，兩個方向</h2>
+
+    <p class="lang-en">The <span class="key-term" tabindex="0">cap rate<span class="key-term-tip"><span class="lang-en">Net operating income divided by price (or value): the unlevered annual yield a buyer is underwriting to at a given price.</span><span class="lang-zh" style="display:none">淨營運收益除以價格（或價值）：買方在某個價格下所核算出的無槓桿年化殖利率。</span></span></span> is one ratio, but it gets used to answer two different questions depending on which two of its three variables (NOI, price, cap rate) you already know.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">資本化率<span class="key-term-tip"><span class="lang-en">Net operating income divided by price (or value): the unlevered annual yield a buyer is underwriting to at a given price.</span><span class="lang-zh" style="display:none">淨營運收益除以價格（或價值）：買方在某個價格下所核算出的無槓桿年化殖利率。</span></span></span> 是同一個比率，但依照三個變數（淨營運收益、價格、資本化率）中已知哪兩個，會被拿來回答兩種不同的問題。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — Price to Yield</span><span class="lang-zh" style="display:none">逐步演算範例——由價格求殖利率</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">The 60-unit building from Section 1 has NOI of <span class="we-formula">$1,260,000</span> and is on the market at <span class="we-formula">$18,000,000</span>.</span>
+            <span class="lang-zh" style="display:none">第一節那棟 60 戶大樓的淨營運收益為 <span class="we-formula">$1,260,000</span>，目前開價 <span class="we-formula">$18,000,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Going-in cap rate = NOI ÷ price: <span class="we-formula">$1,260,000 ÷ $18,000,000 = 7.0%</span>. That is the unlevered annual yield on offer at the asking price — before any financing is layered on.</span>
+            <span class="lang-zh" style="display:none">進場資本化率＝淨營運收益÷價格：<span class="we-formula">$1,260,000 ÷ $18,000,000 = 7.0%</span>。這是在開價下、疊加任何融資之前所能取得的無槓桿年化殖利率。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — Yield to Price</span><span class="lang-zh" style="display:none">逐步演算範例——由殖利率求價格</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume a different building — an office/flex asset currently mid-renovation — is projected to reach stabilized NOI of <span class="we-formula">$780,000</span> once the renovation and lease-up are complete.</span>
+            <span class="lang-zh" style="display:none">假設另一棟建築物——目前正在整修中的辦公／彈性空間資產——預計在整修與去化完成後，穩定淨營運收益可達 <span class="we-formula">$780,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Recent trades of comparable stabilized assets in this submarket cluster around a 6.0% cap rate. That is the market's required yield for this risk profile.</span>
+            <span class="lang-zh" style="display:none">該次市場近期可比穩定資產的成交案例，資本化率大致集中在 6.0% 附近，這就是市場對這種風險等級要求的殖利率。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Value = NOI ÷ cap rate: <span class="we-formula">$780,000 ÷ 6.0% = $13,000,000</span>. That is the stabilized value an investor should be willing to pay — the number that anchors both the acquisition underwriting and, later, the construction lender's appraisal.</span>
+            <span class="lang-zh" style="display:none">價值＝淨營運收益÷資本化率：<span class="we-formula">$780,000 ÷ 6.0% = $13,000,000</span>。這是投資人應該願意支付的穩定價值——同時也是收購核保與後續營建貸款鑑價共同依據的錨定數字。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">A 1-percentage-point move in cap rate is not a uniform dollar shock — it is far more violent at low cap rates than at high cap rates, because the cap rate sits in the denominator of the value formula and division is nonlinear.</p>
+    <p class="lang-zh" style="display:none">資本化率變動 1 個百分點，在美元金額上絕不是均勻的衝擊——資本化率低的資產，受到的衝擊遠比資本化率高的資產劇烈，原因在於資本化率位於價值公式的分母，而除法本身就是非線性的。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — Why Low-Cap Assets Are More Rate-Sensitive</span><span class="lang-zh" style="display:none">逐步演算範例——為什麼低資本化率資產對利率更敏感</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume a building with a fixed <span class="we-formula">$1,000,000</span> NOI. At a 4% cap rate: <span class="we-formula">$1,000,000 ÷ 4% = $25,000,000</span>.</span>
+            <span class="lang-zh" style="display:none">假設一棟建築物淨營運收益固定為 <span class="we-formula">$1,000,000</span>。以 4% 資本化率計算：<span class="we-formula">$1,000,000 ÷ 4% = $25,000,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Cap rate rises 1 point to 5%: <span class="we-formula">$1,000,000 ÷ 5% = $20,000,000</span>. That 1-point move cost <span class="we-formula">$25,000,000 − $20,000,000 = $5,000,000</span>, or <span class="we-formula">$5,000,000 ÷ $25,000,000 = 20%</span> of the building's value.</span>
+            <span class="lang-zh" style="display:none">資本化率上升 1 個百分點到 5%：<span class="we-formula">$1,000,000 ÷ 5% = $20,000,000</span>。這 1 個百分點的變動，讓價值損失了 <span class="we-formula">$25,000,000 − $20,000,000 = $5,000,000</span>，等於建築物價值的 <span class="we-formula">$5,000,000 ÷ $25,000,000 = 20%</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Now take the identical <span class="we-formula">$1,000,000</span> NOI at an 8% cap rate: <span class="we-formula">$1,000,000 ÷ 8% = $12,500,000</span>.</span>
+            <span class="lang-zh" style="display:none">現在把同樣的 <span class="we-formula">$1,000,000</span> 淨營運收益，改用 8% 資本化率計算：<span class="we-formula">$1,000,000 ÷ 8% = $12,500,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Cap rate rises 1 point to 9%: <span class="we-formula">$1,000,000 ÷ 9% = $11,111,111</span>. This 1-point move cost <span class="we-formula">$12,500,000 − $11,111,111 = $1,388,889</span>, or only <span class="we-formula">$1,388,889 ÷ $12,500,000 ≈ 11.1%</span> of value — barely half the percentage impact of the identical 1-point move at 4%→5%.</span>
+            <span class="lang-zh" style="display:none">資本化率上升 1 個百分點到 9%：<span class="we-formula">$1,000,000 ÷ 9% = $11,111,111</span>。這 1 個百分點的變動，只讓價值損失了 <span class="we-formula">$12,500,000 − $11,111,111 = $1,388,889</span>，僅約占價值的 <span class="we-formula">$1,388,889 ÷ $12,500,000 ≈ 11.1%</span>——只有 4%→5% 那次同樣 1 個百分點變動衝擊幅度的一半左右。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">The lesson generalizes: the lower the starting cap rate, the more dollars — and the more percentage points of value — a given basis-point move in cap rate destroys or creates. Ultra-low-cap-rate markets and trophy assets are precisely the ones with the most price sensitivity to interest-rate moves, not the least.</span>
+            <span class="lang-zh" style="display:none">這個結論可以推廣：起始資本化率越低，同樣的基點變動所摧毀或創造的美元金額、以及占價值的百分比，就越大。超低資本化率的市場與指標型資產，恰恰是對利率變動價格敏感度最高的一群，而不是最低的一群。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">Cap rate is often described loosely as "the interest rate of real estate," but it is more precisely a risk premium: the baseline yield an investor demands, plus compensation for everything about this particular property and market that makes it riskier or less liquid than a safer alternative. Two identical-NOI buildings a block apart can trade at different cap rates if one has a single credit tenant on a 15-year lease and the other has ten month-to-month tenants — the second is riskier income, and the market prices that risk into a higher required yield, independent of what benchmark rates are doing. Interest rates set the floor cap rates tend to move around; property-specific and market-specific risk sets how far above that floor any given asset actually trades.</p>
+    <p class="lang-zh" style="display:none">資本化率常被籠統地形容為「不動產的利率」，但更精確地說，它是一種風險溢酬：投資人要求的基準殖利率，再加上補償這棟特定物業與特定市場相對於更安全替代方案，在風險與流動性上額外承擔的部分。兩棟淨營運收益相同、相隔一條街的建築物，可能以不同的資本化率成交——如果其中一棟只有一個信用良好的租戶、簽了 15 年長約，另一棟則是十個按月續約的租戶，後者的收入風險明顯更高，市場會把這份風險反映在更高的要求殖利率上，這與基準利率本身的變化無關。利率決定了資本化率大致圍繞著波動的地板；而物業本身與市場本身的風險，則決定了任何一項資產實際上會在這個地板之上交易多高。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">The rapid rise in US benchmark interest rates through 2022–2024 pushed office cap rates up sharply from the ultra-low levels of the prior decade, and — exactly as the arithmetic above predicts — the value destruction it caused was outsized precisely because those assets had been trading at such low starting cap rates. Major central business district office towers that had traded near cycle-low cap rates a few years earlier changed hands, or were valued in refinancings and distressed sales, at prices representing large percentage declines from their prior peaks, with remote-work-driven vacancy compounding the cap-rate expansion. The office sector's distress in this period is widely documented as a cap-rate story as much as a fundamentals story — the same NOI, discounted at a meaningfully higher rate, is simply worth a lot less.</p>
+      <p class="lang-zh" style="display:none">2022 至 2024 年間美國基準利率快速上升，把辦公大樓的資本化率從前十年的超低水準大幅推升，而正如上面的算式所預示，這造成的價值損失格外劇烈，原因就在於這類資產原本正是在極低的起始資本化率上交易。幾年前才以接近週期低點資本化率成交的主要中央商業區辦公大樓，在後續轉手，或在再融資與困境出售的鑑價中，價格相對於先前高點出現大幅度的百分比下滑，同一時期居家辦公帶來的空置率上升更放大了資本化率擴張的效果。這段時期辦公室資產的困境，普遍被視為既是基本面問題，也同等程度是一個資本化率的故事——同樣的淨營運收益，用明顯更高的利率折現，價值自然大幅縮水。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <span class="pitfall-icon">⚠️</span>
+    <div class="pitfall-body">
+      <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+      <span class="lang-en">Not every quoted cap rate is computed on the same NOI convention. One listing might quote cap rate on trailing 12-month actual NOI, another on a forward stabilized pro-forma, and a third on in-place NOI with a still-unsigned rent bump baked in. Two "comparable" 6% cap rates built on different conventions are not actually comparable at all — always ask which NOI, and for which 12-month period, sits under the number before comparing it to anything else.</span>
+      <span class="lang-zh" style="display:none">不是每一個報出來的資本化率，都用同一套淨營運收益的計算慣例。有的物件用過去 12 個月的實際淨營運收益報資本化率，有的用前瞻性的穩定預估值，還有的用現況淨營運收益、但已經先把還沒簽約生效的租金調漲算了進去。兩個看似「可比」、都標榜 6% 的資本化率，如果背後採用的慣例不同，其實根本不能直接比較——在拿任何資本化率跟別的數字比較之前，一定要先問清楚它是用哪個淨營運收益、對應哪一段 12 個月期間算出來的。</span>
+    </div>
+  </div>
+
+  <ul class="checklist">
+    <li class="checklist-item"><input type="checkbox" id="chk-1"><label for="chk-1"><span class="lang-en">Is the NOI trailing actual (T-12) or a forward pro-forma / stabilized projection?</span><span class="lang-zh" style="display:none">這個淨營運收益是過去 12 個月的實際數字，還是前瞻性的預估／穩定值？</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-2"><label for="chk-2"><span class="lang-en">What vacancy and credit-loss assumption is embedded — the property's actual historical rate, or a hypothetical stabilized rate that hasn't been achieved yet?</span><span class="lang-zh" style="display:none">裡面用的空置與壞帳損失假設是什麼——是這棟物業實際的歷史水準，還是一個尚未達到過的假設穩定水準？</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-3"><label for="chk-3"><span class="lang-en">Has any capex been folded into an operating expense line to keep the opex ratio — and therefore NOI — looking better than it is?</span><span class="lang-zh" style="display:none">有沒有把任何資本支出併入營運費用科目，讓營運費用率——進而讓淨營運收益——看起來比實際更好？</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-4"><label for="chk-4"><span class="lang-en">Does the expense schedule include a market-rate management fee, even if the current owner self-manages and doesn't actually pay one?</span><span class="lang-zh" style="display:none">費用明細裡有沒有按市場水準列入管理費，即使現任業主自行管理、實際上並未支付這筆費用？</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-5"><label for="chk-5"><span class="lang-en">If comparing this cap rate to other deals, is everyone using the same convention (going-in vs. stabilized, actual vs. pro-forma)?</span><span class="lang-zh" style="display:none">如果要拿這個資本化率跟其他交易比較，大家用的是不是同一套慣例（進場 vs. 穩定、實際 vs. 預估）？</span></label></li>
+  </ul>
+
+  <div class="calc-card" id="calc-noi-caprate">
+    <div class="calc-card-title"><span class="lang-en">Try It: NOI &amp; Cap Rate Calculator</span><span class="lang-zh" style="display:none">動手試算：淨營運收益與資本化率</span></div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Gross Potential Rent ($/yr)</span><span class="lang-zh" style="display:none">潛在總租金收入（美元／年）</span></span>
+        <span class="calc-row-echo" data-echo="calc1-rent">800000</span>
+      </div>
+      <input type="range" id="calc1-rent" name="rent" min="200000" max="2000000" step="10000" value="800000">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Vacancy &amp; Credit Loss (%)</span><span class="lang-zh" style="display:none">空置與壞帳損失（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc1-vacancy">5</span>
+      </div>
+      <input type="range" id="calc1-vacancy" name="vacancy" min="0" max="20" step="1" value="5">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Operating Expense Ratio (%)</span><span class="lang-zh" style="display:none">營運費用率（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc1-opex">35</span>
+      </div>
+      <input type="range" id="calc1-opex" name="opexRatio" min="20" max="50" step="1" value="35">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Market Cap Rate (%)</span><span class="lang-zh" style="display:none">市場資本化率（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc1-caprate">6.0</span>
+      </div>
+      <input type="range" id="calc1-caprate" name="capRate" min="3" max="10" step="0.1" value="6.0">
+    </div>
+    <div class="calc-outputs">
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">NOI</span><span class="lang-zh" style="display:none">淨營運收益</span></span>
+        <span class="calc-output-value" data-out="noi">$494,000</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Implied Value</span><span class="lang-zh" style="display:none">隱含價值</span></span>
+        <span class="calc-output-value" data-out="value">$8,233,333</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 3. Cash-on-cash -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">3. Cash-on-Cash Return: What Leverage Does to Your Money</h2>
+    <h2 class="lang-zh" style="display:none">三、現金報酬率：槓桿對你的錢做了什麼</h2>
+
+    <p class="lang-en"><span class="key-term" tabindex="0">Cash-on-cash return<span class="key-term-tip"><span class="lang-en">Annual levered cash flow (NOI minus debt service) divided by the equity dollars actually invested; a levered, single-year cash yield measure.</span><span class="lang-zh" style="display:none">年度槓桿後現金流（淨營運收益減去年度還款）除以實際投入的權益金額；是一種有槓桿的單年現金殖利率指標。</span></span></span> answers a different question than cap rate. Cap rate asks what yield the property itself produces, ignoring financing. Cash-on-cash asks what yield the investor's actual cash produces, after the lender is paid.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">現金報酬率<span class="key-term-tip"><span class="lang-en">Annual levered cash flow (NOI minus debt service) divided by the equity dollars actually invested; a levered, single-year cash yield measure.</span><span class="lang-zh" style="display:none">年度槓桿後現金流（淨營運收益減去年度還款）除以實際投入的權益金額；是一種有槓桿的單年現金殖利率指標。</span></span></span>回答的是跟資本化率不同的問題。資本化率問的是物業本身、不考慮融資能產生的殖利率；現金報酬率問的是在付完放款方之後，投資人實際投入的現金能產生多少殖利率。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — Cash-on-Cash on the Anchor Building</span><span class="lang-zh" style="display:none">逐步演算範例——用本課錨定建築物算現金報酬率</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Price <span class="we-formula">$10,000,000</span>, NOI <span class="we-formula">$650,000</span> (a 6.5% going-in cap rate). Financed at 65% LTV: loan = <span class="we-formula">$10,000,000 × 65% = $6,500,000</span>. Equity invested = <span class="we-formula">$10,000,000 − $6,500,000 = $3,500,000</span>.</span>
+            <span class="lang-zh" style="display:none">價格 <span class="we-formula">$10,000,000</span>，淨營運收益 <span class="we-formula">$650,000</span>（進場資本化率 6.5%）。以 65% 貸款成數融資：貸款金額＝<span class="we-formula">$10,000,000 × 65% = $6,500,000</span>。投入權益＝<span class="we-formula">$10,000,000 − $6,500,000 = $3,500,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Loan is interest-only at 6%: annual debt service = <span class="we-formula">$6,500,000 × 6% = $390,000</span>.</span>
+            <span class="lang-zh" style="display:none">貸款為只付利息、年利率 6%：年度還款＝<span class="we-formula">$6,500,000 × 6% = $390,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Levered cash flow = NOI − debt service: <span class="we-formula">$650,000 − $390,000 = $260,000</span>.</span>
+            <span class="lang-zh" style="display:none">槓桿後現金流＝淨營運收益－年度還款：<span class="we-formula">$650,000 − $390,000 = $260,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Cash-on-cash = levered cash flow ÷ equity invested: <span class="we-formula">$260,000 ÷ $3,500,000 ≈ 7.43%</span> — higher than the 6.5% unlevered cap rate. That's positive leverage: because the 6% interest rate is below the 6.5% cap rate, borrowing added money to the return rather than subtracting it.</span>
+            <span class="lang-zh" style="display:none">現金報酬率＝槓桿後現金流÷投入權益：<span class="we-formula">$260,000 ÷ $3,500,000 ≈ 7.43%</span>——高於 6.5% 的無槓桿資本化率。這就是正向槓桿：因為 6% 的利率低於 6.5% 的資本化率，借錢反而為報酬率加了分，而不是扣分。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">Cash-on-cash matters most to investors who are actually living off distributions rather than underwriting purely for eventual sale proceeds — a retiree in a syndication, a passive limited partner comparing two deals with similar risk profiles, anyone for whom this year's check size is the point. It is a weaker tool for comparing deals with very different hold periods or exit strategies, since it says nothing about what happens at sale; equity multiple and IRR, covered later in this module, fill that gap.</p>
+    <p class="lang-zh" style="display:none">現金報酬率對這類投資人最重要：真正靠分配收入過活、而不是純粹為了最終出售所得而核保的投資人——例如聯合投資案裡的退休人士、正在比較兩筆風險相近交易的被動有限合夥人，任何在意今年這張支票金額大小的人。但用它比較持有期或出場策略差異很大的交易時，效果較弱，因為它完全沒有反映出售時會發生什麼——本課後面談到的權益倍數與內部報酬率，正是用來補上這個缺口。</p>
+
+    <p class="lang-en">That relationship is not a coincidence — it is the whole mechanism. Whenever the interest rate paid on debt is below the property's cap rate, adding leverage pushes cash-on-cash above the unlevered yield: <strong>positive leverage</strong>. Whenever the interest rate exceeds the cap rate, the opposite happens — leverage drags cash-on-cash below the unlevered yield, and can push it negative: <strong>negative leverage</strong>. The next calculator lets you move both dials and watch the crossover happen.</p>
+    <p class="lang-zh" style="display:none">這個關係並非巧合——它正是整套機制的核心。只要借款利率低於物業的資本化率，加上槓桿就會把現金報酬率推升到無槓桿殖利率之上，這稱為<strong>正向槓桿</strong>。只要借款利率高於資本化率，情況就會反過來——槓桿會把現金報酬率壓到無槓桿殖利率以下，甚至可能推成負數，這稱為<strong>負向槓桿</strong>。下面的試算器可以讓你同時調整兩個變數，親眼看到這個交叉點是怎麼發生的。</p>
+  </section>
+
+  <div class="calc-card" id="calc-leverage-coc">
+    <div class="calc-card-title"><span class="lang-en">Try It: Leverage &amp; Cash-on-Cash Calculator</span><span class="lang-zh" style="display:none">動手試算：槓桿與現金報酬率</span></div>
+    <p style="font-size:12.5px;color:var(--lc-text-muted);margin:-6px 0 16px">
+      <span class="lang-en">Backdrop: same anchor building — price $10,000,000, NOI $650,000 (6.5% cap rate). Debt service is calculated interest-only (principal not amortized), which keeps the math transparent for teaching purposes; an amortizing loan would show a similar pattern with somewhat higher debt service.</span>
+      <span class="lang-zh" style="display:none">背景設定：沿用同一棟錨定建築物——價格 $10,000,000，淨營運收益 $650,000（資本化率 6.5%）。還款金額按只付利息（本金不攤還）計算，這是為了教學上算式清楚；若採攤還型貸款，模式類似，但還款金額會略高一些。</span>
+    </p>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">LTV (%)</span><span class="lang-zh" style="display:none">貸款成數（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc2-ltv">65</span>
+      </div>
+      <input type="range" id="calc2-ltv" name="ltv" min="0" max="85" step="1" value="65">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Interest Rate (%)</span><span class="lang-zh" style="display:none">利率（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc2-rate">6.0</span>
+      </div>
+      <input type="range" id="calc2-rate" name="rate" min="3" max="9" step="0.1" value="6.0">
+    </div>
+    <div class="calc-outputs">
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Loan Amount</span><span class="lang-zh" style="display:none">貸款金額</span></span>
+        <span class="calc-output-value" data-out="loan">$6,500,000</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Annual Debt Service</span><span class="lang-zh" style="display:none">年度還款</span></span>
+        <span class="calc-output-value" data-out="debtService">$390,000</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Cash-on-Cash</span><span class="lang-zh" style="display:none">現金報酬率</span></span>
+        <span class="calc-output-value" data-out="coc">7.43%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 4. DSCR -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">4. DSCR: The Lender's Only Question</h2>
+    <h2 class="lang-zh" style="display:none">四、償債保障比：放款方唯一在意的問題</h2>
+
+    <p class="lang-en">A lender doesn't care whether the deal makes the sponsor's target IRR. A lender cares about one thing: does the property's income cover the loan payment, with enough cushion to survive a bad year? That question is answered by <span class="key-term" tabindex="0">DSCR<span class="key-term-tip"><span class="lang-en">Debt Service Coverage Ratio: net operating income divided by annual debt service. Measures how many times over a property's income covers its loan payments.</span><span class="lang-zh" style="display:none">償債保障比：淨營運收益除以年度還款金額，衡量物業收入能覆蓋貸款還款的倍數。</span></span></span> (Debt Service Coverage Ratio).</p>
+    <p class="lang-zh" style="display:none">放款方並不在乎這筆交易能不能讓發起人達到目標內部報酬率。放款方只在乎一件事：物業的收入能不能覆蓋貸款還款，而且有足夠的緩衝撐過壞年冬？這個問題由<span class="key-term" tabindex="0">償債保障比<span class="key-term-tip"><span class="lang-en">Debt Service Coverage Ratio: net operating income divided by annual debt service. Measures how many times over a property's income covers its loan payments.</span><span class="lang-zh" style="display:none">償債保障比：淨營運收益除以年度還款金額，衡量物業收入能覆蓋貸款還款的倍數。</span></span></span>（DSCR）來回答。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — DSCR Across Leverage and Rate</span><span class="lang-zh" style="display:none">逐步演算範例——不同槓桿與利率下的償債保障比</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">At 65% LTV and 6% interest-only, the anchor building's annual debt service is <span class="we-formula">$390,000</span>. DSCR = NOI ÷ debt service: <span class="we-formula">$650,000 ÷ $390,000 ≈ 1.67x</span>. Comfortably above most conventional minimums.</span>
+            <span class="lang-zh" style="display:none">在 65% 貸款成數、6% 只付利息利率下，錨定建築物的年度還款為 <span class="we-formula">$390,000</span>。償債保障比＝淨營運收益÷年度還款：<span class="we-formula">$650,000 ÷ $390,000 ≈ 1.67x</span>，明顯高於多數傳統貸款的最低要求。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Push leverage up to 75% LTV, same 6% rate: loan <span class="we-formula">$7,500,000</span>, debt service <span class="we-formula">$450,000</span>. DSCR: <span class="we-formula">$650,000 ÷ $450,000 ≈ 1.44x</span>. Still passes, but the cushion has thinned.</span>
+            <span class="lang-zh" style="display:none">把槓桿拉高到 75% 貸款成數，利率仍為 6%：貸款金額 <span class="we-formula">$7,500,000</span>，年度還款 <span class="we-formula">$450,000</span>。償債保障比：<span class="we-formula">$650,000 ÷ $450,000 ≈ 1.44x</span>。仍然過關，但緩衝已經變薄。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Same 75% LTV, but rates rise 150 basis points to 7.5%: debt service <span class="we-formula">$7,500,000 × 7.5% = $562,500</span>. DSCR: <span class="we-formula">$650,000 ÷ $562,500 ≈ 1.16x</span> — below the 1.20x–1.35x range commonly cited as a minimum for stabilized conventional CRE loans. Nothing about the property changed; the same NOI simply no longer covers debt service by enough to qualify.</span>
+            <span class="lang-zh" style="display:none">同樣是 75% 貸款成數，但利率上升 150 個基點到 7.5%：年度還款＝<span class="we-formula">$7,500,000 × 7.5% = $562,500</span>。償債保障比：<span class="we-formula">$650,000 ÷ $562,500 ≈ 1.16x</span>——低於一般傳統穩定型商用不動產貸款常見的 1.20x 至 1.35x 最低門檻範圍。物業本身什麼都沒變；只是同樣的淨營運收益，已經不足以覆蓋還款到能過關的程度。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">The specific minimum a lender requires varies by property type, sponsor track record, and loan program — 1.20x–1.35x is a widely cited range for stabilized conventional loans, not a universal rule, and construction or bridge loans, or loans on riskier property types, often demand a higher cushion. But the direction of the logic never changes: the higher the required DSCR, the less debt a given NOI can support, and the more equity a deal needs.</p>
+    <p class="lang-zh" style="display:none">放款方實際要求的最低門檻，會因物業類型、發起人過往紀錄、貸款方案而異——1.20x 至 1.35x 是傳統穩定型貸款常見引用的範圍，並非放諸四海皆準的鐵律，營建貸款、過渡性貸款或風險較高的物業類型，往往要求更高的緩衝。但這個邏輯的方向從不改變：要求的償債保障比越高，同樣的淨營運收益能撐起的債務就越少，交易所需的權益金額也就越多。</p>
+
+    <p class="lang-en">DSCR and cash-on-cash are related but not interchangeable: DSCR is the lender's solvency test, measured against the loan payment alone, while cash-on-cash is the equity investor's yield test, measured against what's left after that payment. A deal can carry a comfortable DSCR — plenty of cushion for the lender — while still delivering a mediocre or negative cash-on-cash return to the equity holder, because DSCR says nothing about how much equity was required to get the loan in the first place.</p>
+    <p class="lang-zh" style="display:none">償債保障比與現金報酬率彼此相關，但不能互相取代：償債保障比是放款方的清償能力測試，只針對貸款還款本身衡量；現金報酬率則是權益投資人的殖利率測試，衡量的是付完還款之後剩下的部分。一筆交易可能有相當寬裕的償債保障比——對放款方而言緩衝充足——卻仍然只能給權益持有人平庸甚至負值的現金報酬率，因為償債保障比完全沒有說明當初取得這筆貸款需要投入多少權益。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">WeWork's business, stripped to its real estate bones, was a coverage mismatch at scale: the company signed long-term leases — often 10 to 15 years — committing to fixed, lease-like payment obligations on buildings it didn't own, while selling short-term, cancellable memberships to its own tenants. That structure works only as long as growth capital keeps flowing and occupancy stays high; it is fragile precisely because the "income" side of the equation could evaporate far faster than the long-dated obligation side could be renegotiated. When capital markets turned in 2019 and again through the pandemic, WeWork's collapse into bankruptcy in 2023 was, at its core, a story about fixed long-term obligations no longer being covered by the income backing them — the same coverage logic DSCR is built to test at the level of a single building, playing out at the scale of a portfolio.</p>
+      <p class="lang-zh" style="display:none">若把 WeWork 的商業模式還原到不動產本質，它其實是一個規模龐大的覆蓋率錯配：這家公司簽下常達 10 到 15 年的長期租約，對自己不擁有的建築物承諾固定、類似債務的支付義務，卻同時把這些空間以短期、可隨時解約的會員資格賣給租戶。這種結構只有在成長資本持續湧入、出租率維持高檔時才撐得住；它之所以脆弱，正是因為方程式中「收入」這一端蒸發的速度，可能遠快於「長期義務」那一端能夠重新談判的速度。當資本市場在 2019 年、以及疫情期間再度轉向時，WeWork 於 2023 年走向破產的核心故事，本質上就是固定的長期義務不再被支撐它的收入覆蓋——這正是償債保障比在單一建築物層級要檢驗的覆蓋率邏輯，只是這次是在整個投資組合的規模上上演。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 5. LTV / LTC -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">5. LTV and LTC: Two Different Denominators</h2>
+    <h2 class="lang-zh" style="display:none">五、貸款成數：兩種不同的分母</h2>
+
+    <p class="lang-en"><span class="key-term" tabindex="0">LTV<span class="key-term-tip"><span class="lang-en">Loan-to-Value: loan amount divided by the property's appraised value.</span><span class="lang-zh" style="display:none">貸款成數（以價值計）：貸款金額除以物業的鑑定價值。</span></span></span> (loan-to-value) and <span class="key-term" tabindex="0">LTC<span class="key-term-tip"><span class="lang-en">Loan-to-Cost: loan amount divided by total project cost (purchase price plus capital improvements or construction budget).</span><span class="lang-zh" style="display:none">貸款成數（以成本計）：貸款金額除以專案總成本（購買價格加上資本改善或營建預算）。</span></span></span> (loan-to-cost) both measure how much of a deal is financed with debt, but they divide by different denominators — and which one binds depends on the deal type. On a stabilized acquisition, value and cost are close together, so LTV is typically the binding constraint. On a value-add or ground-up construction deal, total cost sits well below the projected stabilized value, and lenders often size the loan off the lower of the two calculated amounts — which is frequently the LTC number.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">貸款成數（以價值計）<span class="key-term-tip"><span class="lang-en">Loan-to-Value: loan amount divided by the property's appraised value.</span><span class="lang-zh" style="display:none">貸款成數（以價值計）：貸款金額除以物業的鑑定價值。</span></span></span>（LTV）與<span class="key-term" tabindex="0">貸款成數（以成本計）<span class="key-term-tip"><span class="lang-en">Loan-to-Cost: loan amount divided by total project cost (purchase price plus capital improvements or construction budget).</span><span class="lang-zh" style="display:none">貸款成數（以成本計）：貸款金額除以專案總成本（購買價格加上資本改善或營建預算）。</span></span></span>（LTC）都在衡量一筆交易有多少比例用債務融資，但兩者的分母不同——而哪一個才是真正卡住交易的限制，取決於交易類型。在穩定型收購案裡，價值與成本相當接近，因此貸款成數（以價值計）通常是主要限制。在增值型或全新營建案裡，總成本明顯低於預計的穩定價值，放款方往往會依照兩種算法中較低的貸款金額核定——而這通常正是以成本計算出的數字。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — LTV on a Stabilized Acquisition</span><span class="lang-zh" style="display:none">逐步演算範例——穩定型收購案的貸款成數（以價值計）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">The anchor building: appraised value <span class="we-formula">$10,000,000</span>, loan <span class="we-formula">$6,500,000</span>.</span>
+            <span class="lang-zh" style="display:none">錨定建築物：鑑定價值 <span class="we-formula">$10,000,000</span>，貸款金額 <span class="we-formula">$6,500,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">LTV = loan ÷ value: <span class="we-formula">$6,500,000 ÷ $10,000,000 = 65%</span>. Because this is a stabilized, income-producing asset with no material renovation planned, value and cost are essentially the same number, so LTV is the number the lender actually underwrites to.</span>
+            <span class="lang-zh" style="display:none">貸款成數＝貸款÷價值：<span class="we-formula">$6,500,000 ÷ $10,000,000 = 65%</span>。因為這是一棟穩定、已產生收入、且沒有重大整修計畫的資產，價值與成本基本上是同一個數字，因此貸款成數（以價值計）就是放款方實際核保依據的數字。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — LTC Binding on a Value-Add Deal</span><span class="lang-zh" style="display:none">逐步演算範例——增值型交易中被貸款成數（以成本計）卡住</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">The office/flex renovation building from Section 2: purchase price <span class="we-formula">$8,000,000</span>, renovation budget <span class="we-formula">$2,000,000</span>. Total project cost: <span class="we-formula">$8,000,000 + $2,000,000 = $10,000,000</span>. Projected stabilized value once renovated (from the yield-to-price calculation earlier): <span class="we-formula">$13,000,000</span>.</span>
+            <span class="lang-zh" style="display:none">第二節那棟辦公／彈性空間整修案：購買價格 <span class="we-formula">$8,000,000</span>，整修預算 <span class="we-formula">$2,000,000</span>。專案總成本：<span class="we-formula">$8,000,000 + $2,000,000 = $10,000,000</span>。整修完成後的預計穩定價值（來自前面「由殖利率求價格」的計算）：<span class="we-formula">$13,000,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Lender offer: up to 70% LTC, or 65% LTV of stabilized value, whichever is lower. LTC-based amount: <span class="we-formula">70% × $10,000,000 = $7,000,000</span>.</span>
+            <span class="lang-zh" style="display:none">放款方報價：最高 70% 貸款成數（以成本計），或穩定價值的 65% 貸款成數（以價值計），以較低者為準。以成本計算的金額：<span class="we-formula">70% × $10,000,000 = $7,000,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">LTV-based amount on the projected stabilized value: <span class="we-formula">65% × $13,000,000 = $8,450,000</span>.</span>
+            <span class="lang-zh" style="display:none">以預計穩定價值計算的貸款金額：<span class="we-formula">65% × $13,000,000 = $8,450,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">The lender sizes the loan to the lower of the two: <span class="we-formula">min($7,000,000, $8,450,000) = $7,000,000</span>. LTC is the binding constraint, not LTV — even though the stabilized LTV limit would technically allow a bigger loan, the cost basis doesn't support it yet. The sponsor needs <span class="we-formula">$10,000,000 − $7,000,000 = $3,000,000</span> of equity to close.</span>
+            <span class="lang-zh" style="display:none">放款方會依照兩者中較低的金額核定貸款：<span class="we-formula">min($7,000,000, $8,450,000) = $7,000,000</span>。真正卡住這筆交易的是貸款成數（以成本計），而非貸款成數（以價值計）——即使穩定價值的貸款成數上限技術上允許更高的貸款金額，成本基礎目前還撐不起來。發起人需要 <span class="we-formula">$10,000,000 − $7,000,000 = $3,000,000</span> 的權益才能完成交易。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">Typical LTV ceilings also shift with who is lending. Life insurance companies, which generally want low-risk, long-duration paper, often cap conservative loans on trophy stabilized assets well below what a bank or agency lender would offer. Agency lenders (in the US, Fannie Mae and Freddie Mac programs) support relatively high leverage specifically on stabilized multifamily. Debt funds and bridge lenders, who accept more risk and charge for it, will often push both LTC and LTV higher on transitional assets that conventional lenders won't touch at all — at a materially higher interest rate. The lending source is itself part of the underwriting: the same building can face a meaningfully different maximum loan amount depending on which pool of capital is asked.</p>
+    <p class="lang-zh" style="display:none">典型的貸款成數上限，也會因放款來源而不同。壽險公司通常偏好低風險、長天期的資產，對指標型穩定資產的保守貸款上限，往往明顯低於銀行或政府支持機構放款方願意提供的水準。政府支持機構放款方（在美國指房利美與房地美相關方案）則特別在穩定型集合住宅上支持相對較高的槓桿。債權基金與過渡性貸款方由於願意承擔更高風險並收取相應對價，對傳統放款方完全不願碰的過渡性資產，往往會把貸款成數（以成本計）與貸款成數（以價值計）都拉得更高——但利率也會明顯更高。放款來源本身就是核保的一環：同一棟建築物向不同資金池詢價，可能會得到明顯不同的最高貸款金額。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">The US savings-and-loan crisis of the 1980s is a widely documented cautionary tale about what happens when the LTV/LTC discipline breaks down at an industry-wide scale. Deregulation loosened what thrifts could lend against, and many piled into speculative commercial real estate development — office parks, shopping centers, condominiums — often financed at high loan-to-cost ratios against appraisals that assumed rents and occupancy the local market couldn't actually support. When the commercial real estate cycle turned in the late 1980s, hundreds of savings-and-loan institutions failed, and the resulting government cleanup (the Resolution Trust Corporation) ended up disposing of a huge volume of foreclosed commercial property. The lesson that outlived the episode: an appraisal or a stabilized-value projection is only as reliable as the rent and occupancy assumptions underneath it, and a loan sized off an overly optimistic one is a loan sized to fail in a downturn.</p>
+      <p class="lang-zh" style="display:none">1980 年代美國儲蓄貸款危機是一個廣為人知的警世案例，說明當貸款成數紀律在整個產業層級崩壞時會發生什麼事。法規鬆綁放寬了儲貸機構能承作的放款標的，許多機構因此大舉投入投機性的商用不動產開發——辦公園區、購物中心、集合住宅——往往以偏高的貸款成數（以成本計）融資，而鑑價所依據的租金與出租率假設，當地市場其實根本撐不起來。當商用不動產週期在 1980 年代末反轉時，數百家儲貸機構倒閉，隨後政府成立的清理機構（Resolution Trust Corporation）最終處理了數量龐大的法拍商用不動產。這段插曲留下的教訓延續至今：一份鑑價或穩定價值預估，可靠程度完全取決於底下的租金與出租率假設有多務實，而依據過度樂觀假設核定的貸款，本質上就是一筆註定在景氣反轉時失敗的貸款。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 6. IRR vs equity multiple -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">6. IRR vs. Equity Multiple: Same Deal, Two Different Stories</h2>
+    <h2 class="lang-zh" style="display:none">六、內部報酬率 vs. 權益倍數：同一筆交易，兩種不同的說法</h2>
+
+    <p class="lang-en"><span class="key-term" tabindex="0">Equity multiple<span class="key-term-tip"><span class="lang-en">Total cash distributed to investors divided by total equity invested; a simple multiple that ignores the timing of cash flows.</span><span class="lang-zh" style="display:none">分配給投資人的總現金除以投入的總權益；是一個忽略現金流時間點的簡單倍數。</span></span></span> answers "how many total dollars came back for every dollar invested." <span class="key-term" tabindex="0">IRR<span class="key-term-tip"><span class="lang-en">Internal Rate of Return: the discount rate at which the net present value of all cash flows in and out of a deal equals zero. A time-weighted annualized return measure, heavily sensitive to when cash is received.</span><span class="lang-zh" style="display:none">內部報酬率：讓一筆交易所有進出現金流的淨現值等於零的折現率。這是一種時間加權的年化報酬率指標，對現金收到的時間點非常敏感。</span></span></span> answers "what annualized rate of return did that money earn, given exactly when it came back." Those are different questions, and a deal can look excellent on one and only average on the other.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">權益倍數<span class="key-term-tip"><span class="lang-en">Total cash distributed to investors divided by total equity invested; a simple multiple that ignores the timing of cash flows.</span><span class="lang-zh" style="display:none">分配給投資人的總現金除以投入的總權益；是一個忽略現金流時間點的簡單倍數。</span></span></span>回答的是「每投入一塊錢，總共拿回幾塊錢」。<span class="key-term" tabindex="0">內部報酬率<span class="key-term-tip"><span class="lang-en">Internal Rate of Return: the discount rate at which the net present value of all cash flows in and out of a deal equals zero. A time-weighted annualized return measure, heavily sensitive to when cash is received.</span><span class="lang-zh" style="display:none">內部報酬率：讓一筆交易所有進出現金流的淨現值等於零的折現率。這是一種時間加權的年化報酬率指標，對現金收到的時間點非常敏感。</span></span></span>回答的是「考量現金確切的回收時間點，這筆錢賺到了多少年化報酬率」。這是兩個不同的問題，同一筆交易可能在其中一個指標上看起來很出色，在另一個指標上卻只是普通。</p>
+
+    <p class="lang-en">This gap is not just theoretical — it can be actively exploited. Because IRR is time-weighted, getting cash back sooner mechanically raises it, even if the total dollars earned barely change. A quick cash-out refinance early in a hold period is the classic way this happens: it returns a large chunk of capital to investors years before the eventual sale, which can inflate the annualized IRR dramatically while doing almost nothing for — or even slightly reducing — the equity multiple.</p>
+    <p class="lang-zh" style="display:none">這個落差並不只是理論上的差異——它可以被主動利用。因為內部報酬率是時間加權的，只要現金越早拿回來，它就會機械性地被拉高，即使賺到的總金額幾乎沒變。持有期初期進行一次快速的套現再融資，是最經典的手法：它讓投資人在最終出售前好幾年就拿回一大筆資本，這可能大幅拉高年化內部報酬率，卻對權益倍數幾乎沒有幫助——甚至還可能讓權益倍數略微下降。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — How an Early Refi Inflates IRR</span><span class="lang-zh" style="display:none">逐步演算範例——提前再融資如何拉高內部報酬率</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume a deal requiring <span class="we-formula">$2,000,000</span> of equity, held for 5 years. Scenario A, no refinance: cash flow of <span class="we-formula">$100,000</span> in each of years 1–4, then <span class="we-formula">$100,000</span> plus net sale proceeds of <span class="we-formula">$2,900,000</span> in year 5, for total year-5 cash of <span class="we-formula">$3,000,000</span>.</span>
+            <span class="lang-zh" style="display:none">假設一筆交易需要 <span class="we-formula">$2,000,000</span> 的權益，持有 5 年。情境甲，不進行再融資：第 1 到第 4 年每年現金流 <span class="we-formula">$100,000</span>，第 5 年為 <span class="we-formula">$100,000</span> 加上淨出售所得 <span class="we-formula">$2,900,000</span>，第 5 年現金總額為 <span class="we-formula">$3,000,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Scenario A total cash returned: <span class="we-formula">4 × $100,000 + $3,000,000 = $3,400,000</span>. Equity multiple: <span class="we-formula">$3,400,000 ÷ $2,000,000 = 1.70x</span>. Solving for the discount rate that zeroes out the net present value of {-$2,000,000; $100,000; $100,000; $100,000; $100,000; $3,000,000} across years 0–5 gives an <strong>IRR of approximately 12.1%</strong>.</span>
+            <span class="lang-zh" style="display:none">情境甲拿回的現金總額：<span class="we-formula">4 × $100,000 + $3,000,000 = $3,400,000</span>。權益倍數：<span class="we-formula">$3,400,000 ÷ $2,000,000 = 1.70x</span>。針對第 0 到第 5 年的現金流 {-$2,000,000；$100,000；$100,000；$100,000；$100,000；$3,000,000}，求出讓淨現值為零的折現率，得到<strong>內部報酬率約為 12.1%</strong>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Scenario B, identical property but refinanced at the end of year 2: the refi returns <span class="we-formula">$1,200,000</span> of cash-out proceeds to investors, on top of that year's <span class="we-formula">$100,000</span> operating distribution, for total year-2 cash of <span class="we-formula">$1,300,000</span>. Because the property now carries more debt, years 3–4 distributions fall to <span class="we-formula">$60,000</span> each, and year-5 net sale proceeds (after paying off the larger loan) fall to <span class="we-formula">$1,700,000</span>, for total year-5 cash of <span class="we-formula">$1,760,000</span> — wait, plus the <span class="we-formula">$60,000</span> operating distribution that year: <span class="we-formula">$60,000 + $1,700,000 = $1,760,000</span>.</span>
+            <span class="lang-zh" style="display:none">情境乙，同一棟物業，但在第 2 年底進行再融資：再融資讓投資人拿回 <span class="we-formula">$1,200,000</span> 的套現所得，加上當年 <span class="we-formula">$100,000</span> 的營運分配，第 2 年現金總額為 <span class="we-formula">$1,300,000</span>。由於物業現在背負更高的債務，第 3 到第 4 年的分配降為每年 <span class="we-formula">$60,000</span>，第 5 年清償較大額貸款後的淨出售所得降為 <span class="we-formula">$1,700,000</span>，加上當年 <span class="we-formula">$60,000</span> 的營運分配：<span class="we-formula">$60,000 + $1,700,000 = $1,760,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Scenario B total cash returned: <span class="we-formula">$100,000 + $1,300,000 + $60,000 + $60,000 + $1,760,000 = $3,280,000</span>. Equity multiple: <span class="we-formula">$3,280,000 ÷ $2,000,000 = 1.64x</span> — slightly <em>lower</em> than Scenario A's 1.70x. But solving for IRR on {-$2,000,000; $100,000; $1,300,000; $60,000; $60,000; $1,760,000} gives an <strong>IRR of approximately 14.8%</strong> — meaningfully <em>higher</em> than Scenario A's 12.1%, purely because a large chunk of capital came back three years earlier.</span>
+            <span class="lang-zh" style="display:none">情境乙拿回的現金總額：<span class="we-formula">$100,000 + $1,300,000 + $60,000 + $60,000 + $1,760,000 = $3,280,000</span>。權益倍數：<span class="we-formula">$3,280,000 ÷ $2,000,000 = 1.64x</span>——比情境甲的 1.70x 略<em>低</em>。但針對 {-$2,000,000；$100,000；$1,300,000；$60,000；$60,000；$1,760,000} 求解內部報酬率，得到<strong>內部報酬率約為 14.8%</strong>——明顯<em>高於</em>情境甲的 12.1%，純粹是因為有一大筆資本提早三年就回到投資人手上。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">A sponsor's track-record slide showing "14.8% IRR" for Scenario B looks better than "12.1% IRR" for Scenario A — but investors actually earned fewer total dollars per dollar invested. Always ask for equity multiple alongside IRR, and ask specifically whether any refinancing distributions are embedded in the return, before taking a headline IRR at face value.</span>
+            <span class="lang-zh" style="display:none">發起人過往績效簡報上，情境乙那句「內部報酬率 14.8%」看起來比情境甲的「內部報酬率 12.1%」更亮眼——但投資人實際上每投入一塊錢，賺到的總金額其實比較少。在直接採信任何一個亮眼的內部報酬率數字之前，一定要同時要求對方提供權益倍數，並具體詢問報酬數字裡是否包含了任何再融資分配。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">None of this makes equity multiple the honest metric and IRR the dishonest one — equity multiple has its own blind spot. Because it ignores timing entirely, it treats a dollar received in year 1 exactly the same as a dollar received in year 10, which hides how long capital was actually at risk. A deal that returns 1.70x over five years and a deal that returns 1.70x over fifteen years look identical on equity multiple alone, even though the second one is a far worse use of capital on a time-adjusted basis. The two metrics cover for each other's weaknesses, which is precisely why both belong on the same page, side by side, rather than either one standing in for "the return" on its own.</p>
+    <p class="lang-zh" style="display:none">這並不代表權益倍數是誠實的指標、內部報酬率是不誠實的指標——權益倍數也有自己的盲點。因為它完全忽略時間因素，第 1 年拿到的一塊錢跟第 10 年拿到的一塊錢，在它眼中完全一樣，這掩蓋了資本實際承擔風險的時間有多長。一筆五年拿回 1.70 倍、另一筆十五年拿回同樣 1.70 倍的交易，光看權益倍數會完全一樣，即使就資金運用效率而言，後者明顯差得多。這兩個指標剛好互補彼此的弱點，這正是為什麼兩者應該並列呈現，而不是讓任何一個單獨代表「報酬」本身。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 7. Sensitivity closing frame -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">7. Why One Number Is Never the Answer</h2>
+    <h2 class="lang-zh" style="display:none">七、為什麼單一數字永遠不是答案</h2>
+
+    <p class="lang-en">Every metric in this module has been presented as a single point estimate — one cap rate, one interest rate, one exit value — because that's the only way to teach the mechanics cleanly. Real underwriting never gets that luxury. The exit cap rate five years from now is unknown. The interest rate on a refinance is unknown. Whether the market lets rents grow at the pace assumed is unknown. <span class="key-term" tabindex="0">Sensitivity analysis<span class="key-term-tip"><span class="lang-en">Testing how a deal's projected returns change as one or more underwriting assumptions (cap rate, rent growth, exit timing, leverage) move away from the base case.</span><span class="lang-zh" style="display:none">測試當一項或多項核保假設（資本化率、租金成長、出場時點、槓桿）偏離基準情境時，交易的預期報酬會如何變動。</span></span></span> is the discipline of deliberately moving those assumptions and watching what happens to the return, instead of underwriting to one fragile base case and hoping it holds.</p>
+    <p class="lang-zh" style="display:none">本課到目前為止呈現的每一個指標，都是用單一的點估計來說明——一個資本化率、一個利率、一個出場價值——因為這是把運算機制講清楚的唯一方式。真實的核保工作從來沒有這種奢侈。五年後的出場資本化率是未知的。再融資時的利率是未知的。市場會不會讓租金按假設的速度成長也是未知的。<span class="key-term" tabindex="0">敏感度分析<span class="key-term-tip"><span class="lang-en">Testing how a deal's projected returns change as one or more underwriting assumptions (cap rate, rent growth, exit timing, leverage) move away from the base case.</span><span class="lang-zh" style="display:none">測試當一項或多項核保假設（資本化率、租金成長、出場時點、槓桿）偏離基準情境時，交易的預期報酬會如何變動。</span></span></span>，就是刻意移動這些假設、觀察報酬如何變化的紀律，而不是只依賴一個脆弱的基準情境並祈禱它能成真。</p>
+
+    <p class="lang-en">Put the pieces of this module together and the reason should be obvious: a 1-point cap rate move can swing exit value by double-digit percentages (Section 2), leverage can turn a modest cap rate spread into a meaningfully higher — or negative — cash-on-cash return (Section 3), and the timing of a single refinance can shift a headline IRR by several points without changing the underlying property at all (Section 6). Stack those three sources of variance on top of each other and a single "the deal returns 16% IRR" projection is really a narrow slice of a much wider range of plausible outcomes.</p>
+    <p class="lang-zh" style="display:none">把這一課的各個部分拼在一起，原因應該很清楚：資本化率變動 1 個百分點，就能讓出場價值出現兩位數百分比的震盪（第二節）；槓桿可以把一個不起眼的資本化率利差，放大成明顯更高——或負值——的現金報酬率（第三節）；而單一一次再融資的時間點，就能在物業本身完全沒變的情況下，讓亮眼的內部報酬率數字移動好幾個百分點（第六節）。把這三種變異來源疊加在一起，一個「這筆交易內部報酬率 16%」的單一預測，其實只是一個更寬廣的可能結果範圍中很窄的一個切片。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — One Assumption, a Very Different Return</span><span class="lang-zh" style="display:none">逐步演算範例——同一個假設變動，報酬天差地遠</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Take the anchor building's entry underwriting as fixed: <span class="we-formula">$10,000,000</span> price, <span class="we-formula">$3,500,000</span> equity, <span class="we-formula">$6,500,000</span> interest-only loan at 6%, and — for simplicity — flat annual cash flow of <span class="we-formula">$260,000</span> for a 5-year hold, for total hold-period cash flow of <span class="we-formula">5 × $260,000 = $1,300,000</span>. At exit, the loan balance is unchanged (interest-only) at <span class="we-formula">$6,500,000</span>, and stabilized NOI has grown modestly to <span class="we-formula">$700,000</span>.</span>
+            <span class="lang-zh" style="display:none">把錨定建築物的進場核保條件視為固定：價格 <span class="we-formula">$10,000,000</span>，權益 <span class="we-formula">$3,500,000</span>，只付利息貸款 <span class="we-formula">$6,500,000</span>、利率 6%，為求簡化，假設 5 年持有期間每年現金流固定為 <span class="we-formula">$260,000</span>，持有期現金流合計為 <span class="we-formula">5 × $260,000 = $1,300,000</span>。出場時，貸款餘額因只付利息而維持不變，為 <span class="we-formula">$6,500,000</span>，穩定淨營運收益已溫和成長至 <span class="we-formula">$700,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Only the exit cap rate assumption changes across three scenarios. Flat exit at 6.0%: value = <span class="we-formula">$700,000 ÷ 6.0% = $11,666,667</span>. Net sale proceeds after loan payoff: <span class="we-formula">$11,666,667 − $6,500,000 = $5,166,667</span>. Total cash returned: <span class="we-formula">$1,300,000 + $5,166,667 = $6,466,667</span>. Equity multiple: <span class="we-formula">$6,466,667 ÷ $3,500,000 ≈ 1.85x</span>.</span>
+            <span class="lang-zh" style="display:none">三個情境唯一改變的只有出場資本化率假設。出場資本化率持平於 6.0%：價值＝<span class="we-formula">$700,000 ÷ 6.0% = $11,666,667</span>。清償貸款後的淨出售所得：<span class="we-formula">$11,666,667 − $6,500,000 = $5,166,667</span>。拿回的現金總額：<span class="we-formula">$1,300,000 + $5,166,667 = $6,466,667</span>。權益倍數：<span class="we-formula">$6,466,667 ÷ $3,500,000 ≈ 1.85x</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Exit cap rate expands 1 point to 7.0%: value = <span class="we-formula">$700,000 ÷ 7.0% = $10,000,000</span>. Net sale proceeds: <span class="we-formula">$3,500,000</span>. Total cash returned: <span class="we-formula">$1,300,000 + $3,500,000 = $4,800,000</span>. Equity multiple: <span class="we-formula">$4,800,000 ÷ $3,500,000 ≈ 1.37x</span>.</span>
+            <span class="lang-zh" style="display:none">出場資本化率擴張 1 個百分點到 7.0%：價值＝<span class="we-formula">$700,000 ÷ 7.0% = $10,000,000</span>。淨出售所得：<span class="we-formula">$3,500,000</span>。拿回的現金總額：<span class="we-formula">$1,300,000 + $3,500,000 = $4,800,000</span>。權益倍數：<span class="we-formula">$4,800,000 ÷ $3,500,000 ≈ 1.37x</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Exit cap rate expands 2 points to 8.0%: value = <span class="we-formula">$700,000 ÷ 8.0% = $8,750,000</span>. Net sale proceeds: <span class="we-formula">$2,250,000</span>. Total cash returned: <span class="we-formula">$1,300,000 + $2,250,000 = $3,550,000</span>. Equity multiple: <span class="we-formula">$3,550,000 ÷ $3,500,000 ≈ 1.01x</span> — essentially a wash after five years of risk.</span>
+            <span class="lang-zh" style="display:none">出場資本化率擴張 2 個百分點到 8.0%：價值＝<span class="we-formula">$700,000 ÷ 8.0% = $8,750,000</span>。淨出售所得：<span class="we-formula">$2,250,000</span>。拿回的現金總額：<span class="we-formula">$1,300,000 + $2,250,000 = $3,550,000</span>。權益倍數：<span class="we-formula">$3,550,000 ÷ $3,500,000 ≈ 1.01x</span>——扛了五年風險，幾乎等於白忙一場。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">Nothing about the entry price, the leverage, or the operating performance changed across these three scenarios — only the market's exit cap rate assumption, which the sponsor does not control and cannot know in advance. The equity multiple swings from 1.85x to 1.01x on that single variable alone. A model that reports only the middle scenario, without showing the other two, is not wrong so much as incomplete.</span>
+            <span class="lang-zh" style="display:none">在這三個情境中，進場價格、槓桿與營運表現完全沒有改變——唯一變動的是市場出場資本化率的假設，而這是發起人無法控制、也無法事先得知的變數。權益倍數光憑這一個變數，就從 1.85x 擺盪到 1.01x。一個只呈現中間情境、不展示另外兩個情境的模型，與其說是錯誤，不如說是不完整。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="quiz-block" data-quiz-id="02-numbers-quiz" data-quiz='[
+    {
+      "q":{"en":"A property has Gross Potential Rent of $600,000, 8% vacancy/credit loss, $25,000 of other income, and $180,000 of operating expenses. What is NOI?","zh":"某物業潛在總租金收入為 $600,000，空置與壞帳損失 8%，其他收入 $25,000，營運費用 $180,000，淨營運收益是多少？"},
+      "opts":[
+        {"en":"$397,000","zh":"$397,000"},
+        {"en":"$420,000","zh":"$420,000"},
+        {"en":"$445,000","zh":"$445,000"},
+        {"en":"$552,000","zh":"$552,000"}
+      ],
+      "a":0,
+      "exp":{"en":"EGI = $600,000 − ($600,000 × 8%) = $552,000. Total income = $552,000 + $25,000 = $577,000. NOI = $577,000 − $180,000 = $397,000.","zh":"有效總收入＝$600,000 − ($600,000 × 8%) = $552,000。總收入＝$552,000 + $25,000 = $577,000。淨營運收益＝$577,000 − $180,000 = $397,000。"}
+    },
+    {
+      "q":{"en":"A roof replacement costing $150,000 is being underwritten. Where does it belong?","zh":"一筆 $150,000 的屋頂更換工程正在被核保計算，它應該歸在哪裡？"},
+      "opts":[
+        {"en":"As a capital expenditure, below NOI — not as an operating expense","zh":"歸為資本支出，列在淨營運收益之下——而非營運費用"},
+        {"en":"As an operating expense in the year it&#39;s paid, reducing NOI","zh":"歸為支出當年的營運費用，扣減淨營運收益"},
+        {"en":"As debt service, since it will likely be financed","zh":"歸為還款，因為這筆錢很可能用融資支付"},
+        {"en":"It should be ignored entirely since it&#39;s non-recurring","zh":"應該完全忽略，因為這是非經常性支出"}
+      ],
+      "a":0,
+      "exp":{"en":"Capex extends useful life or adds value and is capitalized, not expensed against a single year&#39;s operating income — that&#39;s exactly why NOI excludes it.","zh":"資本支出會延長使用年限或增加價值，應予資本化，而非計入單一年度的營運費用——這正是淨營運收益要排除它的原因。"}
+    },
+    {
+      "q":{"en":"Building X trades at $22,000,000 with $1,540,000 NOI. Building Y trades at $9,000,000 with $720,000 NOI. Which has the higher cap rate, and what does that alone tell you?","zh":"X 大樓以 $22,000,000 成交、淨營運收益 $1,540,000。Y 大樓以 $9,000,000 成交、淨營運收益 $720,000。哪一棟資本化率較高？光憑這一點能告訴你什麼？"},
+      "opts":[
+        {"en":"Building Y (8.0% vs 7.0%) — a higher unlevered yield at that price, but not necessarily the better investment without knowing risk, location and NOI quality","zh":"Y 大樓（8.0% 對 7.0%）——在該價格下無槓桿殖利率較高，但不知道風險、地段與淨營運收益品質之前，不能就此斷定是較好的投資"},
+        {"en":"Building X (7.0% vs 8.0%) — it is automatically the better deal","zh":"X 大樓（7.0% 對 8.0%）——這自動代表它是比較好的交易"},
+        {"en":"They have the same cap rate, so it doesn&#39;t matter which one you buy","zh":"兩者資本化率相同，買哪一棟都無所謂"},
+        {"en":"Cap rate can&#39;t be computed without knowing the loan terms","zh":"不知道貸款條件就無法算出資本化率"}
+      ],
+      "a":0,
+      "exp":{"en":"X: $1,540,000 ÷ $22,000,000 = 7.0%. Y: $720,000 ÷ $9,000,000 = 8.0%. A higher cap rate means a higher unlevered yield at that price, but cap rate alone says nothing about NOI quality, location risk or capex needs — it&#39;s a starting point, not a verdict.","zh":"X：$1,540,000 ÷ $22,000,000 = 7.0%。Y：$720,000 ÷ $9,000,000 = 8.0%。資本化率較高代表在該價格下無槓桿殖利率較高，但單看資本化率完全無法判斷淨營運收益品質、地段風險或資本支出需求——它只是起點，不是結論。"}
+    },
+    {
+      "q":{"en":"Cap rates on two identical-NOI buildings rise by 1 percentage point: Building A from 4% to 5%, Building B from 8% to 9%. Which building loses more value in percentage terms, and why?","zh":"兩棟淨營運收益相同的大樓，資本化率都上升 1 個百分點：A 大樓從 4% 升到 5%，B 大樓從 8% 升到 9%。哪一棟的價值百分比損失較大？為什麼？"},
+      "opts":[
+        {"en":"Building A — the same absolute cap-rate move produces a larger percentage value swing at a lower starting cap rate","zh":"A 大樓——同樣的資本化率絕對變動幅度，在起始資本化率較低時會造成更大的價值百分比波動"},
+        {"en":"Building B — higher cap rates are always more volatile in percentage terms","zh":"B 大樓——資本化率越高，百分比波動性一定越大"},
+        {"en":"They lose the same percentage of value, since the point move is identical","zh":"兩者損失的價值百分比相同，因為變動的百分點幅度一樣"},
+        {"en":"It can&#39;t be determined without knowing the properties&#39; locations","zh":"不知道兩棟物業的地段就無法判斷"}
+      ],
+      "a":0,
+      "exp":{"en":"At $1,000,000 NOI, 4%→5% moves value from $25,000,000 to $20,000,000 (−20%). 8%→9% moves value from $12,500,000 to $11,111,111 (−11.1%). The same point move hits harder at a lower starting cap rate because cap rate sits in the denominator.","zh":"以 $1,000,000 淨營運收益計算，4%→5% 讓價值從 $25,000,000 降到 $20,000,000（−20%）。8%→9% 讓價值從 $12,500,000 降到 $11,111,111（−11.1%）。同樣的百分點變動，在起始資本化率較低時衝擊更大，因為資本化率位於價值公式的分母。"}
+    },
+    {
+      "q":{"en":"A deal has a 6.5% cap rate and is financed at a 7.5% interest rate. What happens to cash-on-cash return as leverage (LTV) increases, and why?","zh":"某交易資本化率為 6.5%，融資利率為 7.5%，隨著槓桿（貸款成數）提高，現金報酬率會發生什麼變化？為什麼？"},
+      "opts":[
+        {"en":"It falls below the 6.5% unlevered yield, and can go negative — negative leverage, because the interest rate exceeds the cap rate","zh":"會跌破 6.5% 的無槓桿殖利率，甚至可能變成負數——這是負向槓桿，因為利率高於資本化率"},
+        {"en":"It rises above the 6.5% unlevered yield — positive leverage, because borrowing always improves cash-on-cash","zh":"會升到 6.5% 無槓桿殖利率之上——這是正向槓桿，因為借款一定會改善現金報酬率"},
+        {"en":"It stays exactly at 6.5% regardless of leverage, since leverage only affects total dollars, not yield","zh":"無論槓桿多高，都會維持在 6.5%，因為槓桿只影響總金額，不影響殖利率"},
+        {"en":"It becomes undefined once any debt is added","zh":"只要加上任何債務，現金報酬率就會變成無法定義"}
+      ],
+      "a":0,
+      "exp":{"en":"When the interest rate (7.5%) exceeds the cap rate (6.5%), each additional dollar of debt costs more than it earns — that&#39;s negative leverage, and cash-on-cash falls further below the unlevered yield (and can go negative) as LTV rises.","zh":"當利率（7.5%）高於資本化率（6.5%）時，每多借一塊錢的成本都超過它能賺到的收益——這就是負向槓桿，隨著貸款成數提高，現金報酬率會進一步低於無槓桿殖利率（甚至變成負數）。"}
+    },
+    {
+      "q":{"en":"A property has $500,000 NOI and $370,000 of annual debt service on a proposed loan. A lender&#39;s minimum DSCR is 1.25x. Does this loan qualify, and by how much room?","zh":"某物業淨營運收益為 $500,000，某筆擬議貸款的年度還款為 $370,000。放款方要求的最低償債保障比為 1.25x，這筆貸款能過關嗎？緩衝空間有多少？"},
+      "opts":[
+        {"en":"Yes — DSCR is about 1.35x, above the 1.25x minimum","zh":"能過關——償債保障比約為 1.35x，高於 1.25x 的最低要求"},
+        {"en":"No — DSCR is about 1.14x, below the 1.25x minimum","zh":"無法過關——償債保障比約為 1.14x，低於 1.25x 的最低要求"},
+        {"en":"Yes, but only exactly at the 1.25x minimum with no cushion","zh":"能過關，但剛好卡在 1.25x 最低門檻，沒有任何緩衝"},
+        {"en":"DSCR cannot be computed without knowing the LTV","zh":"不知道貸款成數就無法算出償債保障比"}
+      ],
+      "a":0,
+      "exp":{"en":"DSCR = $500,000 ÷ $370,000 ≈ 1.35x, which clears the 1.25x minimum with roughly 0.10x of cushion.","zh":"償債保障比＝$500,000 ÷ $370,000 ≈ 1.35x，高於 1.25x 的最低要求，緩衝空間約 0.10x。"}
+    },
+    {
+      "q":{"en":"A value-add deal costs $12,000,000 total (purchase + renovation) and is projected to stabilize at a $16,000,000 value. The lender offers 70% LTC or 60% LTV of stabilized value, whichever is lower. What loan amount results, and which constraint binds?","zh":"某增值型交易總成本（購買加整修）為 $12,000,000，預計穩定後價值為 $16,000,000。放款方提供 70% 貸款成數（以成本計）或穩定價值 60% 貸款成數（以價值計），以較低者為準，最終貸款金額是多少？哪一項是主要限制？"},
+      "opts":[
+        {"en":"$8,400,000 — LTC binds ($8,400,000 LTC vs. $9,600,000 LTV)","zh":"$8,400,000——由貸款成數（以成本計）主導（成本計 $8,400,000 對比價值計 $9,600,000）"},
+        {"en":"$9,600,000 — LTV binds","zh":"$9,600,000——由貸款成數（以價值計）主導"},
+        {"en":"$12,000,000 — the full project cost is financed","zh":"$12,000,000——全額專案成本都以貸款融資"},
+        {"en":"$16,000,000 — the loan is sized to stabilized value","zh":"$16,000,000——貸款依穩定價值核定"}
+      ],
+      "a":0,
+      "exp":{"en":"LTC amount: 70% × $12,000,000 = $8,400,000. LTV amount: 60% × $16,000,000 = $9,600,000. The lender takes the lower, so LTC ($8,400,000) is the binding constraint — typical for value-add deals where cost sits well below projected stabilized value.","zh":"以成本計算的金額：70% × $12,000,000 = $8,400,000。以價值計算的金額：60% × $16,000,000 = $9,600,000。放款方取較低者，因此以成本計算的貸款成數（$8,400,000）是主要限制——這在成本明顯低於預計穩定價值的增值型交易中很常見。"}
+    },
+    {
+      "q":{"en":"Two exit scenarios return the same $2,000,000 equity investment. Scenario A returns most cash in year 5 (equity multiple 1.70x, IRR ~12%). Scenario B does a large cash-out refinance in year 2 (equity multiple 1.64x, IRR ~15%). What is the correct read?","zh":"兩個出場情境都投入相同的 $2,000,000 權益。情境甲大部分現金在第 5 年拿回（權益倍數 1.70x，內部報酬率約 12%）。情境乙在第 2 年進行一次大額套現再融資（權益倍數 1.64x，內部報酬率約 15%）。正確的解讀是什麼？"},
+      "opts":[
+        {"en":"Scenario B&#39;s higher IRR is a timing effect from getting cash back sooner, not proof it created more wealth — Scenario A actually returned more total dollars","zh":"情境乙較高的內部報酬率是因為現金較早拿回的時間效果，並不代表它創造了更多財富——情境甲實際上拿回的總金額更多"},
+        {"en":"Scenario B is unambiguously the better investment because IRR is the single best measure of return","zh":"情境乙毫無疑問是較好的投資，因為內部報酬率是衡量報酬最好的單一指標"},
+        {"en":"The two scenarios are financially identical since they started with the same equity","zh":"兩個情境在財務上完全相同，因為起始權益金額一樣"},
+        {"en":"Equity multiple is meaningless once a refinance occurs","zh":"一旦發生再融資，權益倍數就失去意義"}
+      ],
+      "a":0,
+      "exp":{"en":"IRR rewards getting cash back sooner regardless of total dollars earned. Scenario A&#39;s 1.70x equity multiple means more total dollars per dollar invested than Scenario B&#39;s 1.64x, even though B&#39;s IRR is higher — always check both metrics together.","zh":"內部報酬率會獎勵較早拿回現金，無論最終賺到的總金額多寡。情境甲 1.70x 的權益倍數，代表每投入一塊錢賺到的總金額比情境乙的 1.64x 更多，即使情境乙的內部報酬率較高——務必同時檢視這兩個指標。"}
+    }
+  ]'></div>
+
+  <div class="lc-pager">
+    <a href="01-basics.html">
+      <span class="lc-pager-dir lang-en">Previous</span><span class="lc-pager-dir lang-zh" style="display:none">上一課</span>
+      <div class="lc-pager-label lang-en">What CRE Is</div>
+      <div class="lc-pager-label lang-zh" style="display:none">CRE 是什麼</div>
+    </a>
+    <a href="03-deal-reading.html" class="lc-pager-next">
+      <span class="lc-pager-dir lang-en">Next</span><span class="lc-pager-dir lang-zh" style="display:none">下一課</span>
+      <div class="lc-pager-label lang-en">Reading a Deal</div>
+      <div class="lc-pager-label lang-zh" style="display:none">看懂一個 Deal</div>
+    </a>
+  </div>
+
+  <footer class="lc-footer">
+    <a href="/learn-cre/index.html"><span class="lang-en">&larr; Course Home</span><span class="lang-zh" style="display:none">&larr; 課程首頁</span></a>
+    <span class="lc-footer-note">INVESTMQUEST &middot; LEARN CRE &middot; MODULE 02</span>
+  </footer>
+
+</div>
+
+<script src="/learn-cre/learn.js"></script>
+<script>
+  initCalc('calc-noi-caprate', function(values){
+    var rent = values.rent || 0;
+    var vacancy = values.vacancy || 0;
+    var opexRatio = values.opexRatio || 0;
+    var capRate = values.capRate || 0;
+    var noi = rent * (1 - vacancy / 100) * (1 - opexRatio / 100);
+    var value = capRate > 0 ? noi / (capRate / 100) : 0;
+    return {
+      noi: '$' + Math.round(noi).toLocaleString('en-US'),
+      value: '$' + Math.round(value).toLocaleString('en-US')
+    };
+  });
+
+  initCalc('calc-leverage-coc', function(values){
+    var ltv = values.ltv || 0;
+    var rate = values.rate || 0;
+    var price = 10000000;
+    var noi = 650000;
+    var loan = price * (ltv / 100);
+    var equity = price - loan;
+    var debtService = loan * (rate / 100);
+    var leveredCF = noi - debtService;
+    var coc = equity > 0 ? (leveredCF / equity) * 100 : 0;
+    return {
+      loan: '$' + Math.round(loan).toLocaleString('en-US'),
+      debtService: '$' + Math.round(debtService).toLocaleString('en-US'),
+      coc: coc.toFixed(2) + '%'
+    };
+  });
+</script>
+</body>
+</html>

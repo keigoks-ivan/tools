@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05 &middot; Debt: The Lifeline | CRE Investing Course | InvestMQuest</title>
+<meta name="description" content="How CRE loans are actually built — term vs. amortization, recourse carveouts, DSCR covenants, the lender menu, and why refinancing risk is the deal-killer this cycle keeps proving. CRE 貸款究竟如何搭建：貸款期限與攤還年限、追索權條款、DSCR 契約、貸款人選單，以及為何再融資風險才是這一輪週期真正的殺手。">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/learn-cre/learn.css">
+<style>
+  /* page-scoped: capital stack diagram (module 05 only) */
+  .cap-stack{margin:18px 0 10px;border-radius:var(--lc-radius);overflow:hidden;border:1px solid var(--lc-border)}
+  .cap-stack-layer{padding:16px 18px;color:#fff;position:relative}
+  .cap-stack-layer + .cap-stack-layer{border-top:1px solid rgba(255,255,255,.18)}
+  .cap-stack-name{font-size:14px;font-weight:800;letter-spacing:.01em;margin-bottom:4px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .cap-stack-pct{font-size:11px;font-weight:700;opacity:.85;font-variant-numeric:tabular-nums}
+  .cap-stack-desc{font-size:12.5px;line-height:1.6;opacity:.92}
+  .cap-stack-common{background:linear-gradient(135deg,#b91c1c,#dc2626)}
+  .cap-stack-pref{background:linear-gradient(135deg,#c2650a,#d97706)}
+  .cap-stack-mezz{background:linear-gradient(135deg,#1d4a7a,#2f6cad)}
+  .cap-stack-senior{background:linear-gradient(135deg,#0f1e33,#1e3a5f);padding-top:22px;padding-bottom:22px}
+  .cap-stack-axis{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--lc-text-muted);margin:8px 2px 24px}
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <div class="course-nav-inner">
+    <div class="course-nav-brand">
+      <a href="/cre.html">&larr; <span class="lang-en">CRE Monitor</span><span class="lang-zh" style="display:none">CRE 監測儀表板</span></a>
+      <span class="course-nav-sep">/</span>
+      <a href="/learn-cre/index.html" class="course-nav-home"><span class="lang-en">Course Home</span><span class="lang-zh" style="display:none">課程首頁</span></a>
+    </div>
+    <div class="course-nav-pager">
+      <a href="04-valuation.html">&larr; <span class="lang-en">Three Ways to Value</span><span class="lang-zh" style="display:none">估值三法</span></a>
+      <a href="06-cycles.html"><span class="lang-en">Cycles &amp; Rates</span><span class="lang-zh" style="display:none">週期與利率</span> &rarr;</a>
+    </div>
+    <div class="course-nav-lang">
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</nav>
+
+<div class="lc-wrap">
+
+  <header class="module-header">
+    <span class="module-eyebrow lang-en">MODULE 05</span>
+    <span class="module-eyebrow lang-zh" style="display:none">第 05 課</span>
+    <h1 class="lang-en">Debt: The Lifeline</h1>
+    <h1 class="lang-zh" style="display:none">債：CRE 的命門</h1>
+    <div class="module-goals">
+      <div class="module-goals-title"><span class="lang-en">What You'll Learn</span><span class="lang-zh" style="display:none">這一課學什麼</span></div>
+      <ul>
+        <li><span class="lang-en">Why CRE is structurally a leveraged bet, and how that leverage cuts both ways</span><span class="lang-zh" style="display:none">為什麼商用不動產本質上是一個槓桿交易，而槓桿是雙面刃</span></li>
+        <li><span class="lang-en">How loan term, amortization, and balloon payments create a forced refinancing event on a fixed calendar</span><span class="lang-zh" style="display:none">貸款期限、攤還年限與氣球式尾款如何在固定的日曆時點上，製造出一次強制性的再融資事件</span></li>
+        <li><span class="lang-en">Recourse vs. non-recourse debt, and the "bad boy" acts that spring personal liability</span><span class="lang-zh" style="display:none">有追索權與無追索權貸款的差異，以及哪些「壞小子」行為會觸發個人連帶責任</span></li>
+        <li><span class="lang-en">How DSCR/LTV covenants and cash-sweep mechanics actually function once a loan underperforms</span><span class="lang-zh" style="display:none">當貸款表現不如預期時，DSCR／LTV
+          契約與現金歸集機制實際如何運作</span></li>
+        <li><span class="lang-en">The lender menu (banks, life cos, CMBS, debt funds, agency debt, mezz/pref) — and why refinancing risk, not day-one cash
+          flow, kills more CRE deals than anything else</span><span class="lang-zh" style="display:none">貸款人選單（銀行、壽險公司、CMBS、私募債務基金、政府代理房貸、夾層與優先股權），以及為什麼再融資風險而非首日現金流，才是擊垮最多
+          CRE 交易的元兇</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <section>
+    <p class="lang-en">Roughly $2 trillion of U.S. commercial real estate debt was scheduled to mature between 2024 and 2026, according to tallies widely
+      cited by the Mortgage Bankers Association and Trepp — most of it written when the 10-year Treasury yield sat near 1&ndash;2%. None of that debt disappears
+      on its maturity date. It has to be replaced, in full, at whatever interest rate and whatever loan-to-value the market is willing to offer on the day
+      it comes due — not the day the sponsor underwrote the deal.</p>
+    <p class="lang-zh" style="display:none">根據房貸銀行協會（MBA）與 Trepp 廣為引用的統計，2024 至 2026 年間，美國商用不動產約有 2 兆美元的債務陸續到期——其中大部分是在十年期公債殖利率仍徘徊在 1%～2% 時所承作。這些債務不會因為到期日一到就憑空消失，而是必須在到期當天、以市場當下願意提供的利率與貸款成數，全額重新融資——而不是以當初操盤者核保時的條件。</p>
+
+    <p class="lang-en">Put a number on what leverage means for a single deal. A property worth $10,000,000, financed with 65% debt — an entirely ordinary
+      leverage level — carries a $6,500,000 loan against $3,500,000 of equity. A 10% decline in the property's value is a $1,000,000 loss on paper. Against
+      $10,000,000 of assets that is "only" 10%. Against $3,500,000 of equity, it is a 28.6% wipeout. Leverage does not just finance a CRE deal; it is the
+      single largest lever determining how violent the swing in equity value turns out to be — in both directions, and debt is the mechanism through which
+      that swing happens.</p>
+    <p class="lang-zh" style="display:none">把槓桿對單一交易的意義換算成具體數字。一棟價值 $10,000,000 的物業，以 65% 舉債融資——這是完全普通的槓桿水準——代表 $6,500,000 的貸款，對應 $3,500,000 的股權。物業價值若下跌
+      10%，帳面上就是 $1,000,000 的損失。相對於 $10,000,000 的資產，這「只是」10%；但相對於 $3,500,000 的股權，卻是 28.6% 的重創。槓桿不只是替 CRE 交易融資的工具，它本身就是決定股權價值波動幅度最重要的變數——無論漲跌都一樣，而債務正是這個波動實際發生的機制。</p>
+  </section>
+
+  <section>
+    <h2 class="lang-en">Loan Anatomy: Term vs. Amortization</h2>
+    <h2 class="lang-zh" style="display:none">貸款結構：貸款期限 vs. 攤還年限</h2>
+
+    <p class="lang-en">Every amortizing CRE loan carries two independent clocks, and confusing them is the single most common mistake a first-time borrower
+      makes. The <span class="key-term" tabindex="0">amortization period<span class="key-term-tip"><span class="lang-en">The number of years used to calculate
+      the loan's monthly principal-and-interest payment — e.g. 25 or 30 years — as if the loan were going to be paid off entirely over that span.</span><span class="lang-zh" style="display:none">用來計算貸款每月本息還款金額所假設的年限（例如
+      25 年或 30 年）——彷彿貸款真的會在這段期間內全數還清。</span></span></span> is the schedule used purely to compute the monthly payment — say, as if the loan were going to
+      be paid down to zero over 25 or 30 years. The loan's <span class="key-term" tabindex="0">term<span class="key-term-tip"><span class="lang-en">The
+      date by which the loan legally must be repaid in full or refinanced — independent of, and usually much shorter than, the amortization period.</span><span class="lang-zh" style="display:none">貸款依法必須全數清償或重新融資的日期——與攤還年限無關，且通常短得多。</span></span></span>
+      is the date by which the loan must legally be repaid or refinanced in full — and it is almost always far shorter than the amortization period.</p>
+    <p class="lang-zh" style="display:none">每一筆有攤還安排的 CRE 貸款都帶著兩個各自獨立的時鐘，混淆這兩者是首次借款人最常犯的錯誤。<span class="key-term" tabindex="0">攤還年限<span class="key-term-tip"><span class="lang-en">The
+      number of years used to calculate the loan's monthly principal-and-interest payment — e.g. 25 or 30 years — as if the loan were going to be paid off
+      entirely over that span.</span><span class="lang-zh" style="display:none">用來計算貸款每月本息還款金額所假設的年限（例如 25 年或 30 年）——彷彿貸款真的會在這段期間內全數還清。</span></span></span>純粹是用來計算每月還款金額的假設期程——例如假設貸款會在
+      25 年或 30 年內攤還至零。而貸款<span class="key-term" tabindex="0">期限<span class="key-term-tip"><span class="lang-en">The date by which the loan legally must
+      be repaid in full or refinanced — independent of, and usually much shorter than, the amortization period.</span><span class="lang-zh" style="display:none">貸款依法必須全數清償或重新融資的日期——與攤還年限無關，且通常短得多。</span></span></span>則是貸款依法必須全額清償或重新融資的日期——而這個日期幾乎永遠遠短於攤還年限。</p>
+
+    <p class="lang-en">A loan described as "25-year amortization, 5-year term" pays down principal on the assumption of a 25-year payoff, but the entire
+      remaining balance falls due at the end of year 5 — while only a small sliver of principal has actually been repaid. That remaining balance is the
+      <span class="key-term" tabindex="0">balloon payment<span class="key-term-tip"><span class="lang-en">The large lump-sum principal balance still outstanding
+      at loan maturity, because the amortization schedule assumed a payoff period far longer than the loan's actual term.</span><span class="lang-zh" style="display:none">貸款到期時仍未清償的大額本金餘額——因為攤還時程所假設的還款期間，遠長於貸款實際的期限。</span></span></span>,
+      and it is not a risk that might occur. It is a structural, calendar-certain event: on a fixed date years before the loan is anywhere close to paid
+      off, the borrower must produce a large sum of cash from refinancing, a sale, or their own pocket — regardless of what interest rates or property values
+      happen to be doing that year.</p>
+    <p class="lang-zh" style="display:none">一筆標示為「25 年攤還、5 年期限」的貸款，本金攤還是依 25 年還清的假設計算，但到了第 5 年年底，剩餘的全部本金就要一次到期——而此時實際攤還掉的本金其實只佔一小部分。這筆剩餘餘額就是<span class="key-term" tabindex="0">氣球式尾款<span class="key-term-tip"><span class="lang-en">The
+      large lump-sum principal balance still outstanding at loan maturity, because the amortization schedule assumed a payoff period far longer than the
+      loan's actual term.</span><span class="lang-zh" style="display:none">貸款到期時仍未清償的大額本金餘額——因為攤還時程所假設的還款期間，遠長於貸款實際的期限。</span></span></span>，而它並非一個「可能發生」的風險，而是一個結構性、日曆上早已確定的事件：在貸款遠未還清之前的某個固定日期，借款人就必須靠再融資、出售物業、或自掏腰包，一次拿出一大筆現金——不管那一年利率或物業價值走向如何。</p>
+  </section>
+
+  <div class="worked-example">
+    <div class="worked-example-title"><span class="lang-en">Worked Example (Hypothetical Sample Loan)</span><span class="lang-zh" style="display:none">逐步演算範例（假設範例貸款）</span></div>
+    <ol class="worked-example-steps">
+      <li class="worked-example-step">
+        <span class="we-step-num">1</span>
+        <span class="we-step-body">
+          <span class="lang-en">A sponsor takes out a <span class="we-formula">$6,500,000</span> loan at a fixed <span class="we-formula">5.0%</span> rate.
+            Monthly payments are calculated on a <span class="we-formula">25-year (300-month)</span> amortization schedule, but the loan's legal term is
+            only <span class="we-formula">5 years</span>.</span>
+          <span class="lang-zh" style="display:none">某操盤者取得一筆 <span class="we-formula">$6,500,000</span> 的貸款，固定利率 <span class="we-formula">5.0%</span>。每月還款金額依
+            <span class="we-formula">25 年（300 期）</span>攤還時程計算，但貸款的法定期限只有 <span class="we-formula">5 年</span>。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">2</span>
+        <span class="we-step-body">
+          <span class="lang-en">On the 25-year schedule, the monthly principal-and-interest payment is <span class="we-formula">≈ $37,998</span> — annual
+            debt service of <span class="we-formula">≈ $455,980</span>. That is the number underwritten as "affordable" relative to NOI on day one.</span>
+          <span class="lang-zh" style="display:none">依 25 年時程計算，每月本息還款金額約為 <span class="we-formula">$37,998</span>——年還款總額約 <span class="we-formula">$455,980</span>。這就是核保當下拿來對照淨營運收益、判斷「負擔得起」的那個數字。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">3</span>
+        <span class="we-step-body">
+          <span class="lang-en">After 60 monthly payments (5 years), the remaining principal balance is still <span class="we-formula">≈ $5,757,712</span>
+            — about <span class="we-formula">88.6%</span> of the original loan. Five years of "amortizing" payments barely dented the principal, because
+            25 years' worth of scheduled paydown was compressed into only 5 years' worth of actual payments.</span>
+          <span class="lang-zh" style="display:none">繳完 60 期（5 年）月付款後，剩餘本金仍高達約 <span class="we-formula">$5,757,712</span>——約為原始貸款金額的 <span class="we-formula">88.6%</span>。五年的「攤還」付款幾乎沒有動到本金，因為原本設計要
+            25 年才還完的攤還進度，被壓縮成只繳了 5 年份的實際還款。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">4</span>
+        <span class="we-step-body">
+          <span class="lang-en">That remaining ≈$5,757,712 is the balloon payment due at year 5 — the borrower must refinance it, sell the property, or
+            write a check for it, no matter how comfortable the monthly payment felt for the previous five years.</span>
+          <span class="lang-zh" style="display:none">這筆約 $5,757,712 的餘額，就是第 5 年到期時必須一次清償的氣球式尾款——借款人必須將它再融資、出售物業變現、或直接自掏腰包清償，不論過去五年每月還款繳得多麼輕鬆自在。</span>
+        </span>
+      </li>
+    </ol>
+  </div>
+
+  <section>
+    <p class="lang-en">This is not a fringe structure. A typical bank loan runs a 3&ndash;10 year term against a 25&ndash;30 year amortization; a typical
+      CMBS loan runs a 10-year term, often partly or fully interest-only (meaning no principal reduction at all before maturity); even agency multifamily
+      debt, generous as it is, usually still terms out well before its amortization schedule finishes. Nearly every CRE loan in existence has a balloon
+      payment baked in somewhere on its calendar — the only real variable is how far away that date sits and how large the balloon has grown by then.</p>
+    <p class="lang-zh" style="display:none">這絕非邊緣結構。典型的銀行貸款期限通常是 3～10 年，攤還年限則是 25～30 年；典型的 CMBS 貸款期限通常是 10 年，且往往部分或全部採「只付息」方式（意即到期前完全沒有本金減少）；即便是條件相對寬鬆的政府代理型多戶住宅貸款，通常也會在攤還時程結束前就先到期。幾乎每一筆存在的
+      CRE 貸款，日曆上某處都內建了一次氣球式尾款——真正的變數只在於那個日期還有多遠、以及屆時尾款規模會膨脹到多大。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">&#9888;</span>
+      <span class="war-story-intro lang-en">Hypothetical Case</span>
+      <span class="war-story-intro lang-zh" style="display:none">假設案例</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en"><strong>This scenario is hypothetical but structurally realistic</strong> — it illustrates a mechanism seen repeatedly across the
+        sector, without describing any single real property. A sponsor bought a 180-unit suburban apartment complex in 2021 for $28,500,000 at a 4.2% cap
+        rate. The deal was financed with a $19,950,000 (70% LTV) floating-rate bridge loan, three-year initial term, interest-only, with a lender-required
+        interest rate cap purchased for the first two years of the loan. The business plan assumed unit renovations would push rents up 18% and NOI from
+        $1,197,000 to roughly $1,550,000 by refinance time into permanent, fixed-rate agency debt.</p>
+      <p class="lang-en">Renovations ran slower and costlier than budgeted; by 2023, actual NOI was closer to $1,260,000 — a fraction of plan. The rate
+        cap expired in mid-2023, just as the floating reference rate had risen sharply from origination; the loan's actual interest cost jumped well above
+        what the original underwriting had modeled. The DSCR covenant — 1.20x, tested quarterly — was breached first on a soft basis, triggering a cash
+        sweep that stripped the sponsor's distributions entirely. NOI never recovered enough to cure it. With the bridge loan's term expiring, no permanent
+        lender would size a refinance anywhere near the outstanding balance at the property's now-lower, higher-cap-rate value, and the sponsor could not
+        fund the gap. The loan went into default; the property was transferred to the lender via a deed-in-lieu of foreclosure in 2024, wiping out the sponsor's
+        equity.</p>
+      <p class="lang-zh" style="display:none"><strong>此情境為假設案例，但結構上真實可信</strong>——它呈現的是業界一再重演的機制，並非描述任何單一真實物業。某操盤者於 2021 年以 4.2% 資本化率、$28,500,000 的價格買下一棟
+        180 戶的郊區公寓社區。交易以一筆 $19,950,000（70% 貸款成數）的浮動利率過渡型貸款融資，初始期限三年、只付息，並依貸款人要求為前兩年購買了利率上限（cap）避險。原始營運計畫假設單位翻新能將租金推升 18%，使淨營運收益從 $1,197,000 成長到再融資時約 $1,550,000，屆時轉為固定利率的政府代理型長期貸款。</p>
+      <p class="lang-zh" style="display:none">結果翻新進度遠比預算慢、成本也更高；到 2023 年，實際淨營運收益僅約 $1,260,000——遠低於計畫。利率上限保護恰好在 2023 年中到期，而此時浮動指標利率相較承作初期已大幅上升；貸款實際利息成本大幅跳升，遠超原始核保模型的預估。DSCR
+        契約門檻（1.20x，每季測試）首先在軟性層次上被觸發，啟動現金歸集機制，操盤者的分配款項因此完全被截斷。淨營運收益始終未能恢復到足以解除契約違約。隨著過渡型貸款期限逼近到期，沒有任何長期貸款人願意依物業當下較低、資本化率較高的價值，核准接近原貸款餘額的再融資額度，操盤者也無力填補這個缺口。貸款進入違約，物業於
+        2024 年以「以物抵債」（deed-in-lieu of foreclosure）方式轉移給貸款人，操盤者的股權全數歸零。</p>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="lang-en">Rate Structure: Fixed, Floating, and the Hedges That Bridge Them</h2>
+    <h2 class="lang-zh" style="display:none">利率結構：固定、浮動，以及銜接兩者的避險工具</h2>
+
+    <p class="lang-en">Fixed-rate debt locks in a single interest rate for the entire loan term: the payment is predictable, but the borrower gets no benefit
+      if market rates fall, and prepaying early usually triggers a penalty designed to make the lender whole for the interest income it expected to earn.
+      <span class="key-term" tabindex="0">Floating-rate debt<span class="key-term-tip"><span class="lang-en">A loan whose interest rate resets periodically
+      based on a reference rate (post-2023, typically SOFR) plus a fixed spread — so the payment moves up and down with the broader rate environment.</span><span class="lang-zh" style="display:none">利率會依參考利率（2023
+      年後多以 SOFR 為準）加上固定利差、定期重新設定的貸款——因此還款金額會隨整體利率環境上下浮動。</span></span></span> is priced instead as a reference rate (today, typically SOFR — the Secured
+      Overnight Financing Rate, which replaced LIBOR) plus a fixed spread, and it resets periodically, so the monthly payment moves with the broader rate
+      environment. Floating-rate debt is the default structure for bridge loans, construction loans, and value-add repositioning plays, where the sponsor
+      is deliberately taking on rate risk alongside execution risk.</p>
+    <p class="lang-zh" style="display:none">固定利率貸款在整個貸款期限內鎖定單一利率：還款金額可預測，但如果市場利率下跌，借款人無法享受任何好處，且提前清償通常會觸發罰款，用來補足貸款人原本預期能賺到的利息收入。<span class="key-term" tabindex="0">浮動利率貸款<span class="key-term-tip"><span class="lang-en">A
+      loan whose interest rate resets periodically based on a reference rate (post-2023, typically SOFR) plus a fixed spread — so the payment moves up and
+      down with the broader rate environment.</span><span class="lang-zh" style="display:none">利率會依參考利率（2023 年後多以 SOFR 為準）加上固定利差、定期重新設定的貸款——因此還款金額會隨整體利率環境上下浮動。</span></span></span>則以參考利率（目前通常是
+      SOFR——擔保隔夜融資利率，已取代 LIBOR）加上固定利差計價，並定期重設，因此每月還款金額會隨整體利率環境變動。浮動利率是過渡型貸款、營建貸款與價值提升型改造案的預設結構，因為操盤者本來就是刻意在承接利率風險的同時，也承接執行風險。</p>
+
+    <p class="lang-en">Two derivatives let a borrower manage that floating-rate exposure without actually refinancing into a fixed-rate loan. An <span class="key-term" tabindex="0">interest
+      rate cap<span class="key-term-tip"><span class="lang-en">A derivative bought for an upfront premium that pays the borrower the difference whenever
+      the floating reference rate rises above an agreed "strike" level — capping the borrower's maximum effective interest cost while leaving the full benefit
+      if rates fall.</span><span class="lang-zh" style="display:none">借款人支付一筆前期權利金購買的衍生性金融商品，只要浮動參考利率高於約定的「履約」水準，就由賣方支付差額給借款人——為借款人的有效利率成本設下上限，同時利率下跌時的好處完全不受影響。</span></span></span>
+      is a purchased option: the borrower pays a premium upfront, and the seller pays the borrower the difference whenever the floating rate rises above
+      an agreed strike level. It caps the borrower's maximum effective cost while leaving full upside if rates fall — and on most floating-rate loans, the
+      lender requires the borrower to buy one as a condition of closing. An <span class="key-term" tabindex="0">interest rate swap<span class="key-term-tip"><span class="lang-en">A
+      derivative that exchanges a borrower's floating interest payments for a fixed payment stream on a matching notional amount and schedule — converting
+      floating exposure to a fixed economic cost without refinancing the underlying loan, but carrying its own mark-to-market and potential breakage cost
+      if unwound early.</span><span class="lang-zh" style="display:none">將借款人的浮動利息支出，依相同名目金額與期程交換為固定支付流的衍生性金融商品——在不重新融資標的貸款的前提下，把浮動利率風險轉換成固定的經濟成本，但本身有市值評價，若提前解除可能產生解約成本。</span></span></span>
+      instead exchanges the borrower's floating payments for a fixed payment stream on a matching notional amount and schedule — economically converting
+      a floating loan into a fixed-cost obligation without touching the underlying mortgage, but it carries its own mark-to-market value and can trigger
+      a real cash breakage cost if unwound before maturity.</p>
+    <p class="lang-zh" style="display:none">有兩種衍生性金融商品，能讓借款人在不真正把貸款轉為固定利率再融資的情況下，管理這種浮動利率曝險。<span class="key-term" tabindex="0">利率上限（cap）<span class="key-term-tip"><span class="lang-en">A
+      derivative bought for an upfront premium that pays the borrower the difference whenever the floating reference rate rises above an agreed "strike"
+      level — capping the borrower's maximum effective interest cost while leaving the full benefit if rates fall.</span><span class="lang-zh" style="display:none">借款人支付一筆前期權利金購買的衍生性金融商品，只要浮動參考利率高於約定的「履約」水準，就由賣方支付差額給借款人——為借款人的有效利率成本設下上限，同時利率下跌時的好處完全不受影響。</span></span></span>是一種借款人事先支付權利金購買的選擇權：只要浮動利率高於約定的履約水準，賣方就支付差額給借款人。它為借款人的最高有效成本設下上限，同時利率下跌時的好處完全保留——而在多數浮動利率貸款中，貸款人會將購買利率上限列為撥款的必要條件。<span class="key-term" tabindex="0">利率交換（swap）<span class="key-term-tip"><span class="lang-en">A
+      derivative that exchanges a borrower's floating interest payments for a fixed payment stream on a matching notional amount and schedule — converting
+      floating exposure to a fixed economic cost without refinancing the underlying loan, but carrying its own mark-to-market and potential breakage cost
+      if unwound early.</span><span class="lang-zh" style="display:none">將借款人的浮動利息支出，依相同名目金額與期程交換為固定支付流的衍生性金融商品——在不重新融資標的貸款的前提下，把浮動利率風險轉換成固定的經濟成本，但本身有市值評價，若提前解除可能產生解約成本。</span></span></span>則是把借款人的浮動利息支出，依相同名目金額與期程交換為固定支付流——在不動用標的貸款、不需重新融資的情況下，把浮動曝險轉換成固定的經濟成本，但交換合約本身有市值評價，若在到期前提前解約，可能產生真實的現金解約成本。</p>
+  </section>
+
+  <section>
+    <h2 class="lang-en">Recourse vs. Non-Recourse: What "Bad Boy" Really Means</h2>
+    <h2 class="lang-zh" style="display:none">有追索權 vs. 無追索權：「壞小子」條款到底是什麼</h2>
+
+    <p class="lang-en">Most loans against stabilized, income-producing CRE are structured as <span class="key-term" tabindex="0">non-recourse debt<span class="key-term-tip"><span class="lang-en">A
+      loan where the lender's only remedy on default is to foreclose on the collateral property itself — the borrower's other assets, and the sponsor's
+      personal balance sheet, are not on the hook.</span><span class="lang-zh" style="display:none">貸款人違約時唯一的救濟手段是取回抵押物業本身——借款人的其他資產，以及操盤者的個人資產負債表，都不受牽連。</span></span></span>:
+      on default, the lender's only remedy is to foreclose on the property itself. The borrowing entity is almost always a single-purpose LLC that owns
+      nothing else, and the sponsor's personal wealth sits outside the loan's reach entirely. That is one of the structural reasons real estate attracts
+      leverage-hungry capital that other asset classes can't: the downside on any single deal is, in principle, capped at the equity invested.</p>
+    <p class="lang-zh" style="display:none">大多數以已穩定、有收益的 CRE 為抵押的貸款，結構上都設計為<span class="key-term" tabindex="0">無追索權貸款<span class="key-term-tip"><span class="lang-en">A
+      loan where the lender's only remedy on default is to foreclose on the collateral property itself — the borrower's other assets, and the sponsor's
+      personal balance sheet, are not on the hook.</span><span class="lang-zh" style="display:none">貸款人違約時唯一的救濟手段是取回抵押物業本身——借款人的其他資產，以及操盤者的個人資產負債表，都不受牽連。</span></span></span>：一旦違約，貸款人唯一的救濟手段就是取回抵押物業本身。借款主體幾乎總是一個不擁有其他資產的單一目的
+      LLC，操盤者的個人財富完全在貸款觸及範圍之外。這正是房地產能吸引其他資產類別無法比擬的、渴望槓桿的資金的結構性原因之一：原則上，任何單一交易的下檔風險都被限制在投入的股權範圍內。</p>
+
+    <p class="lang-en">But "non-recourse" is not unconditional. Essentially every non-recourse CRE loan carries a set of <span class="key-term" tabindex="0">"bad
+      boy" carveouts<span class="key-term-tip"><span class="lang-en">Specific acts by the borrower or sponsor — fraud, waste, unauthorized transfer, voluntary
+      bankruptcy filing — that "spring" personal recourse liability onto the guarantor, converting some or all of an otherwise non-recourse loan into a
+      personal obligation.</span><span class="lang-zh" style="display:none">借款人或操盤者的特定行為——詐欺、怠於維護、未經同意的移轉、自願聲請破產——會使個人追索責任「彈出」，落到保證人身上，把原本無追索權的貸款部分或全部轉為個人義務。</span></span></span>
+      written into the loan and guaranty documents. Standard carveout triggers include: fraud or material misrepresentation in obtaining the loan; waste
+      (letting the property physically deteriorate — failing to maintain insurance, letting it fall into disrepair, or misapplying insurance or condemnation
+      proceeds instead of using them to restore the property); an unauthorized transfer of the property, or of ownership interests in the borrowing entity,
+      without the lender's consent; and the borrower entity (or an affiliate colluding in an involuntary petition) filing for bankruptcy. Some of these
+      carveouts spring recourse only up to the lender's actual loss caused by the act — but an unauthorized transfer or a voluntary bankruptcy filing is
+      typically drafted as "springing full recourse," meaning it can convert the entire outstanding loan balance, not just the incremental loss, into a
+      personal debt of the guarantor.</p>
+    <p class="lang-zh" style="display:none">但「無追索權」並非無條件。幾乎每一筆無追索權的 CRE 貸款，都在貸款與保證文件中埋入一組<span class="key-term" tabindex="0">「壞小子」條款<span class="key-term-tip"><span class="lang-en">Specific
+      acts by the borrower or sponsor — fraud, waste, unauthorized transfer, voluntary bankruptcy filing — that "spring" personal recourse liability onto
+      the guarantor, converting some or all of an otherwise non-recourse loan into a personal obligation.</span><span class="lang-zh" style="display:none">借款人或操盤者的特定行為——詐欺、怠於維護、未經同意的移轉、自願聲請破產——會使個人追索責任「彈出」，落到保證人身上，把原本無追索權的貸款部分或全部轉為個人義務。</span></span></span>。標準的觸發行為包括：取得貸款過程中的詐欺或重大不實陳述；怠於維護（任由物業實體狀況惡化——未維持保險、放任物業失修、或未依規定將保險或徵收補償款用於修復物業，而挪作他用）；未經貸款人同意，移轉物業本身或借款主體的所有權權益；以及借款主體（或協同他人提出非自願聲請的關係企業）聲請破產。這些觸發行為之中，有些只會在貸款人因該行為實際受有損失的範圍內觸發追索——但未經同意的移轉，或自願聲請破產，通常被撰寫為「全額彈出追索」條款，意即可將整筆未償貸款餘額——而不只是增量損失——轉為保證人的個人債務。</p>
+  </section>
+
+  <div class="pitfall">
+    <span class="pitfall-icon">&#9888;&#65039;</span>
+    <div class="pitfall-body">
+      <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+      <span class="lang-en">Sponsors under financial stress often reach for exactly the two moves most likely to spring full personal recourse — filing
+        bankruptcy to buy time against a maturing loan, or quietly transferring an ownership interest (even a small LP stake, to raise emergency capital)
+        without lender consent — at precisely the moment they can least afford a newly personal liability. Read the full carveout list before you sign,
+        not after you're in trouble.</span>
+      <span class="lang-zh" style="display:none">財務吃緊的操盤者，往往正好在最無力承受新增個人責任的時刻，伸手去做最容易觸發全額彈出追索的兩件事——為了拖延到期貸款而聲請破產，或未經貸款人同意就悄悄移轉股權（哪怕只是為了籌措緊急資金而移轉一小筆有限合夥人權益）。務必在簽約前、而非陷入困境後，完整讀過整份「壞小子」條款清單。</span>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="lang-en">Covenants: What a Breach Actually Triggers</h2>
+    <h2 class="lang-zh" style="display:none">契約條款：違約之後究竟會觸發什麼</h2>
+
+    <p class="lang-en">Loan documents embed ongoing financial tests, checked periodically (often quarterly) against trailing financials — most commonly
+      a <span class="key-term" tabindex="0">DSCR<span class="key-term-tip"><span class="lang-en">Debt Service Coverage Ratio: NOI divided by annual debt
+      service. A DSCR of 1.25x means the property's NOI covers its debt payments with 25% headroom to spare.</span><span class="lang-zh" style="display:none">還款覆蓋率：淨營運收益除以年度還款總額。DSCR
+      為 1.25x，代表物業的淨營運收益足以覆蓋還款，且還有 25% 的緩衝空間。</span></span></span> minimum (commonly 1.20x&ndash;1.30x depending on property type and lender) and, on a
+      lender's periodic reappraisal, an <span class="key-term" tabindex="0">LTV<span class="key-term-tip"><span class="lang-en">Loan-to-Value: the outstanding
+      loan balance divided by the property's current appraised value. A lender's re-appraisal can trip an LTV covenant even if the borrower hasn't missed
+      a payment, purely because the property's value fell.</span><span class="lang-zh" style="display:none">貸款成數：未償貸款餘額除以物業當前的鑑價金額。即便借款人從未漏繳任何一期款項，貸款人重新鑑價時仍可能單純因物業價值下跌而觸發
+      LTV 契約違約。</span></span></span> threshold. A breach of either is not, in most modern loan structures, an automatic event of default. It more commonly
+      trips a "soft" trigger first: a <span class="key-term" tabindex="0">cash sweep<span class="key-term-tip"><span class="lang-en">A soft-trigger mechanism:
+      cash flow above scheduled debt service (and sometimes above approved operating and leasing costs) is redirected out of the borrower's control into
+      a lender-controlled reserve account until the covenant is cured — without technically defaulting the loan.</span><span class="lang-zh" style="display:none">軟性觸發機制：超過排定還款金額（有時甚至包含已核准的營運與招租費用）以上的現金流，會被移出借款人的掌控範圍，導入由貸款人控管的準備金帳戶，直到契約條件恢復合格為止——過程中貸款技術上並未違約。</span></span></span>
+      (sometimes called a cash trap): cash flow above scheduled debt service — and sometimes above approved operating expenses and leasing costs too — is
+      redirected out of the borrower's control into a lender-controlled reserve account, where it sits until the ratio recovers above the trigger for a
+      set number of consecutive quarters. The sponsor's distributions get squeezed to zero, but the loan is not technically in default.</p>
+    <p class="lang-zh" style="display:none">貸款文件內嵌了持續性的財務測試，依過往一段期間的財務數字定期（通常每季）檢視——最常見的是<span class="key-term" tabindex="0">DSCR<span class="key-term-tip"><span class="lang-en">Debt
+      Service Coverage Ratio: NOI divided by annual debt service. A DSCR of 1.25x means the property's NOI covers its debt payments with 25% headroom to
+      spare.</span><span class="lang-zh" style="display:none">還款覆蓋率：淨營運收益除以年度還款總額。DSCR 為 1.25x，代表物業的淨營運收益足以覆蓋還款，且還有 25% 的緩衝空間。</span></span></span>最低門檻（依物業類型與貸款人不同，通常為
+      1.20x～1.30x），以及貸款人定期重新鑑價時所設的<span class="key-term" tabindex="0">LTV<span class="key-term-tip"><span class="lang-en">Loan-to-Value: the outstanding
+      loan balance divided by the property's current appraised value. A lender's re-appraisal can trip an LTV covenant even if the borrower hasn't missed
+      a payment, purely because the property's value fell.</span><span class="lang-zh" style="display:none">貸款成數：未償貸款餘額除以物業當前的鑑價金額。即便借款人從未漏繳任何一期款項，貸款人重新鑑價時仍可能單純因物業價值下跌而觸發
+      LTV 契約違約。</span></span></span>門檻。在多數現代貸款結構中，違反這兩者之一並不會自動構成違約事件。更常見的是先觸發一個「軟性」機制：<span class="key-term" tabindex="0">現金歸集<span class="key-term-tip"><span class="lang-en">A
+      soft-trigger mechanism: cash flow above scheduled debt service (and sometimes above approved operating and leasing costs) is redirected out of the
+      borrower's control into a lender-controlled reserve account until the covenant is cured — without technically defaulting the loan.</span><span class="lang-zh" style="display:none">軟性觸發機制：超過排定還款金額（有時甚至包含已核准的營運與招租費用）以上的現金流，會被移出借款人的掌控範圍，導入由貸款人控管的準備金帳戶，直到契約條件恢復合格為止——過程中貸款技術上並未違約。</span></span></span>（有時也稱為現金陷阱）：超過排定還款金額——有時甚至包含已核准的營運費用與招租成本——以上的現金流，會被移出借款人的掌控，導入由貸款人控管的準備金帳戶，直到比率連續數季恢復到門檻之上為止。操盤者的分配款項會被壓縮到零，但貸款技術上尚未違約。</p>
+
+    <p class="lang-en">
+      If performance keeps deteriorating past a second, lower threshold — or if the borrower simply stops making scheduled payments —
+      the loan crosses into a hard trigger: an event of default, which gives the lender the right to accelerate (declare the entire
+      outstanding balance immediately due) and begin foreclosure. The mechanics and timeline of foreclosure vary enormously by
+      jurisdiction (judicial vs. non-judicial process), but absent a negotiated workout, the endpoint is the same: the lender, or a
+      third party who buys the note or the property at a foreclosure sale, ends up owning the asset.
+    </p>
+    <p class="lang-zh" style="display:none">
+      如果表現持續惡化、跌破第二道更低的門檻——或借款人直接停止繳付排定的還款——貸款就會跨入硬性觸發：構成違約事件，
+      賦予貸款人加速到期（宣告全部未償餘額立即到期）並展開法拍程序的權利。法拍的具體機制與時程因司法管轄區
+      （司法程序 vs. 非司法程序）而有極大差異，但若沒有透過協商達成展延或重組，最終結果都一樣：貸款人、
+      或在法拍拍賣中買下債權或物業的第三方，最終取得該資產的所有權。
+    </p>
+
+    <h3 class="lang-en">A Third Test: Debt Yield</h3>
+    <h3 class="lang-zh" style="display:none">第三道測試：債務殖利率</h3>
+
+    <p class="lang-en">
+      DSCR has a weakness lenders learned the hard way in the run-up to 2008: it can be inflated by the loan structure itself.
+      Stretch the amortization period to 30 or 40 years, or make the loan interest-only, and the same loan amount produces a lower
+      annual debt service — and therefore a healthier-looking DSCR — without the underlying property or the loan amount changing at
+      all. <span class="key-term" tabindex="0">Debt yield<span class="key-term-tip"><span class="lang-en">NOI divided by the loan amount, expressed as a
+        percentage. Unlike DSCR, it makes no reference to the interest rate or amortization period at all, so it can't be artificially inflated by stretching
+        the amortization schedule or making a loan interest-only.</span><span class="lang-zh" style="display:none">淨營運收益除以貸款金額所得的百分比。與 DSCR 不同，它完全不涉及利率或攤還年限，因此無法透過拉長攤還時程或採用只付息結構人為墊高。</span></span></span>
+        closes that loophole: it is simply NOI divided by the loan amount, with no reference to the interest rate or amortization schedule at all. A lender
+        using a debt yield floor — commonly 8&ndash;10% for stabilized income property — can't be fooled by a borrower requesting an artificially generous
+        amortization period to make the deal pencil. CMBS lenders in particular adopted debt yield widely after 2008 specifically because DSCR-inflating
+        structures had been used to over-lever a large share of the loans originated in 2005&ndash;2007.
+    </p>
+    <p class="lang-zh" style="display:none">
+      DSCR 有一個弱點，是貸款人在 2008 年金融危機前的那波多頭中痛苦學到的：它可能被貸款結構本身人為墊高。只要把攤還年限拉長到
+      30 年甚至 40 年，或把貸款設計成只付息，同樣的貸款金額就能算出更低的年還款總額——因此 DSCR 看起來更健康——而標的物業與
+      貸款金額本身其實完全沒有改變。<span class="key-term" tabindex="0">債務殖利率<span class="key-term-tip"><span class="lang-en">NOI divided by the loan amount, expressed
+        as a percentage. Unlike DSCR, it makes no reference to the interest rate or amortization period at all, so it can't be artificially inflated by
+        stretching the amortization schedule or making a loan interest-only.</span><span class="lang-zh" style="display:none">淨營運收益除以貸款金額所得的百分比。與 DSCR 不同，它完全不涉及利率或攤還年限，因此無法透過拉長攤還時程或採用只付息結構人為墊高。</span></span></span>正是為了堵住這個漏洞：它單純是淨營運收益除以貸款金額，完全不涉及利率或攤還時程。貸款人若設下債務殖利率下限
+      （對已穩定的收益型物業通常為 8%～10%），就不會被借款人要求以人為寬鬆的攤還年限來讓數字好看的手法所矇騙。CMBS 貸款人
+      在 2008 年後尤其廣泛採用債務殖利率，正是因為 DSCR 可被人為墊高的結構，曾被用來讓 2005～2007 年間承作的大量貸款過度舉債。
+    </p>
+  </section>
+
+  <section>
+    <h2 class="lang-en">The Lender Menu and the Capital Stack</h2>
+    <h2 class="lang-zh" style="display:none">貸款人選單與資本堆疊</h2>
+
+    <p class="lang-en">Every CRE deal is financed by layering different sources of capital, each with its own risk, return, and control rights. That layered
+      structure is the <span class="key-term" tabindex="0">capital stack<span class="key-term-tip"><span class="lang-en">The full layered structure of capital
+      financing a deal, ranked by priority of payment and loss absorption — senior debt at the bottom (paid first, lowest risk), common equity at the top
+      (paid last, highest risk and highest potential upside).</span><span class="lang-zh" style="display:none">為一筆交易提供資金的完整分層結構，依還款優先順序與吸收虧損的順序排列——最底層為優先順位貸款（最先受償、風險最低），最上層為普通股權（最後受償、風險最高，但潛在報酬也最高）。</span></span></span>.
+      It is worth drawing out in full, because which layer a piece of capital sits in determines everything about how it gets treated when a deal goes wrong.</p>
+    <p class="lang-zh" style="display:none">每一筆 CRE 交易的資金，都是由不同來源的資本層層堆疊而成，每一層都有各自的風險、報酬與控制權利。這種分層結構就是<span class="key-term" tabindex="0">資本堆疊<span class="key-term-tip"><span class="lang-en">The
+      full layered structure of capital financing a deal, ranked by priority of payment and loss absorption — senior debt at the bottom (paid first, lowest
+      risk), common equity at the top (paid last, highest risk and highest potential upside).</span><span class="lang-zh" style="display:none">為一筆交易提供資金的完整分層結構，依還款優先順序與吸收虧損的順序排列——最底層為優先順位貸款（最先受償、風險最低），最上層為普通股權（最後受償、風險最高，但潛在報酬也最高）。</span></span></span>。值得完整攤開來看，因為一筆資金坐落在哪一層，決定了交易出狀況時它會被如何對待的一切。</p>
+
+    <div class="cap-stack">
+      <div class="cap-stack-layer cap-stack-common">
+        <div class="cap-stack-name">
+          <span><span class="lang-en">Common Equity</span><span class="lang-zh" style="display:none">普通股權</span></span>
+          <span class="cap-stack-pct lang-en">~0&ndash;25% of stack &middot; last paid</span>
+          <span class="cap-stack-pct lang-zh" style="display:none">堆疊中約 0～25% &middot; 最後受償</span>
+        </div>
+        <div class="cap-stack-desc lang-en">The sponsor and LP investors. Gets paid only after every layer below is satisfied, absorbs the first dollar
+          of loss, and in exchange keeps unlimited upside above everyone else's fixed or preferred return.</div>
+        <div class="cap-stack-desc lang-zh" style="display:none">操盤者與有限合夥投資人。必須等下方每一層都獲得滿足後才能受償，也最先吸收虧損；作為交換，它握有超越所有固定或優先報酬之上、不設上限的潛在報酬空間。</div>
+      </div>
+      <div class="cap-stack-layer cap-stack-pref">
+        <div class="cap-stack-name">
+          <span><span class="lang-en">Preferred Equity</span><span class="lang-zh" style="display:none">優先股權</span></span>
+          <span class="cap-stack-pct lang-en">~0&ndash;15% of stack</span>
+          <span class="cap-stack-pct lang-zh" style="display:none">堆疊中約 0～15%</span>
+        </div>
+        <div class="cap-stack-desc lang-en">Legally an equity investment, not a loan, structured to receive a preferred (often quasi-fixed) return ahead
+          of common equity. Default remedies are governance-based — e.g. control flips or forced-sale rights — not foreclosure.</div>
+        <div class="cap-stack-desc lang-zh" style="display:none">法律上屬於股權投資，而非貸款，設計成能優先於普通股權取得一筆優先（通常近似固定）報酬。違約時的救濟手段是治理層面的——例如控制權轉移或強制出售權利——而非法拍。</div>
+      </div>
+      <div class="cap-stack-layer cap-stack-mezz">
+        <div class="cap-stack-name">
+          <span><span class="lang-en">Mezzanine Debt</span><span class="lang-zh" style="display:none">夾層貸款</span></span>
+          <span class="cap-stack-pct lang-en">~5&ndash;20% of stack</span>
+          <span class="cap-stack-pct lang-zh" style="display:none">堆疊中約 5～20%</span>
+        </div>
+        <div class="cap-stack-desc lang-en">A loan secured by a pledge of ownership interests in the borrowing entity, not a direct mortgage lien — governed
+          by an intercreditor agreement that limits its remedies while the senior loan is outstanding. Foreclosing on mezz debt takes over the ownership
+          entity, not the real estate directly.</div>
+        <div class="cap-stack-desc lang-zh" style="display:none">以借款主體的所有權權益作為質押擔保的貸款，而非直接對不動產設定抵押權——受「債權人間協議」約束，在優先順位貸款存續期間限制其救濟手段。夾層貸款法拍取得的是借款主體的所有權，而非直接取得不動產本身。</div>
+      </div>
+      <div class="cap-stack-layer cap-stack-senior">
+        <div class="cap-stack-name">
+          <span><span class="lang-en">Senior (Mortgage) Debt</span><span class="lang-zh" style="display:none">優先順位（抵押）貸款</span></span>
+          <span class="cap-stack-pct lang-en">~50&ndash;75% of stack &middot; paid first</span>
+          <span class="cap-stack-pct lang-zh" style="display:none">堆疊中約 50～75% &middot; 最先受償</span>
+        </div>
+        <div class="cap-stack-desc lang-en">A direct mortgage lien on the real estate itself — banks, life insurance companies, CMBS conduits, debt funds,
+          and agency lenders all compete here. Paid first, lowest risk, lowest fixed return.</div>
+        <div class="cap-stack-desc lang-zh" style="display:none">直接對不動產本身設定的抵押權——銀行、壽險公司、CMBS 平台、私募債務基金與政府代理型貸款人都在這一層競爭。最先受償、風險最低、固定報酬也最低。</div>
+      </div>
+    </div>
+    <div class="cap-stack-axis">
+      <span class="lang-en">&uarr; highest risk / highest potential return</span>
+      <span class="lang-zh" style="display:none">&uarr; 風險最高／潛在報酬最高</span>
+    </div>
+    <div class="cap-stack-axis" style="margin-top:-16px">
+      <span class="lang-en">&darr; lowest risk / paid first</span>
+      <span class="lang-zh" style="display:none">&darr; 風險最低／最先受償</span>
+    </div>
+
+    <h3 class="lang-en">The Senior Lender Menu</h3>
+    <h3 class="lang-zh" style="display:none">優先順位貸款人選單</h3>
+
+    <p class="lang-en"><strong>Banks</strong> are relationship-based balance-sheet lenders, often the most flexible counterparty in a workout because the
+      same institution that made the credit decision also owns the resulting loss or gain, and can move quickly to modify or restructure. Bank CRE lending
+      has also been under sustained regulatory pressure since 2023 given existing concentration on many banks' books; terms run shorter (3&ndash;10 years),
+      and construction or bridge loans frequently carry partial or full recourse even when the eventual permanent loan will not.</p>
+    <p class="lang-zh" style="display:none"><strong>銀行</strong>是以關係為基礎的資產負債表放款人，往往是重組過程中最靈活的對手方，因為做出授信決策的機構，同時也承擔最終的損失或獲利，因此能迅速做出修改或重組的決定。自 2023 年以來，由於許多銀行帳上既有的集中度已高，銀行的
+      CRE 放款業務也持續承受監管壓力；期限通常較短（3～10 年），營建貸款或過渡型貸款即便最終的長期貸款不需要，往往在此階段仍要求部分或全額追索。</p>
+
+    <p class="lang-en"><strong>Life insurance companies</strong> deploy policyholder premiums into long-duration, conservatively underwritten first mortgages
+      on stabilized, high-quality assets. They typically offer the lowest leverage (often 50&ndash;65% LTV) and the most conservative underwriting in the
+      market, in exchange for the longest available terms and the most reliable non-recourse pricing — but they are selective about property quality and
+      location, and close more slowly than a debt fund.</p>
+    <p class="lang-zh" style="display:none"><strong>壽險公司</strong>把保單保費投入長天期、核保保守的優先順位抵押貸款，標的通常是已穩定、品質優良的資產。它們提供的槓桿通常是市場上最低的（常見為 50%～65% LTV），核保也最保守，但作為交換，能提供最長的可用期限與最穩定可靠的無追索權定價——不過它們對物業品質與地段挑剔，撥款速度也比私募債務基金慢。</p>
+
+    <p class="lang-en">
+      <strong>CMBS (Commercial Mortgage-Backed Securities)</strong> loans are originated by an investment bank, then pooled with many
+      other loans into a trust; bonds backed by that pool are sold in tranches, ranked by seniority, to bondholders. Terms are
+      non-recourse, standardized around a 10-year term (often partly or fully interest-only), fixed-rate, with prepayment tightly
+      restricted through <span class="key-term" tabindex="0">yield maintenance<span class="key-term-tip"><span class="lang-en">A prepayment penalty formula
+        requiring the borrower, on early payoff, to pay the lender a lump sum equal to the discounted present value of the interest income the lender would
+        otherwise have earned through maturity — designed to leave the lender financially indifferent to the early payoff.</span><span class="lang-zh" style="display:none">一種提前清償罰款公式：借款人若提前清償，須支付貸款人一筆一次性金額，金額等於貸款人若貸款持有到期原本可賺取利息收入的折現現值——設計目的是讓貸款人在財務上對提前清償無感、不受影響。</span></span></span>
+        or <span class="key-term" tabindex="0">defeasance<span class="key-term-tip"><span class="lang-en">A CMBS-specific prepayment mechanism: instead
+        of a cash penalty, the borrower buys a portfolio of government securities that exactly replicates the loan's remaining scheduled payments, substitutes
+        that portfolio as collateral in place of the real estate, and the property itself is released free and clear.</span><span class="lang-zh" style="display:none">CMBS
+        特有的提前清償機制：借款人不支付現金罰款，而是購買一組政府公債，其現金流精確複製貸款剩餘的排定還款，並以這組公債取代不動產作為擔保品，讓物業本身完全解除擔保、乾淨釋出。</span></span></span> — the latter a complex, expensive process
+        usually requiring specialized consultants to execute.
+    </p>
+    <p class="lang-zh" style="display:none">
+      <strong>CMBS（商用不動產抵押貸款證券化）</strong>貸款由投資銀行發起承作，隨後與大量其他貸款一併打包進一個信託；以該資產池
+      為擔保發行的證券，依受償順位分成不同等級的層級，賣給不同的債券持有人。條件通常為無追索權、以 10 年期為標準化期限
+      （往往部分或全部為只付息）、固定利率，並透過<span class="key-term" tabindex="0">殖利率維持罰款<span class="key-term-tip"><span class="lang-en">A prepayment penalty formula requiring
+        the borrower, on early payoff, to pay the lender a lump sum equal to the discounted present value of the interest income the lender would otherwise
+        have earned through maturity — designed to leave the lender financially indifferent to the early payoff.</span><span class="lang-zh" style="display:none">一種提前清償罰款公式：借款人若提前清償，須支付貸款人一筆一次性金額，金額等於貸款人若貸款持有到期原本可賺取利息收入的折現現值——設計目的是讓貸款人在財務上對提前清償無感、不受影響。</span></span></span>（yield
+        maintenance）或<span class="key-term" tabindex="0">抵繳<span class="key-term-tip"><span class="lang-en">A CMBS-specific prepayment mechanism: instead
+        of a cash penalty, the borrower buys a portfolio of government securities that exactly replicates the loan's remaining scheduled payments, substitutes
+        that portfolio as collateral in place of the real estate, and the property itself is released free and clear.</span><span class="lang-zh" style="display:none">CMBS
+        特有的提前清償機制：借款人不支付現金罰款，而是購買一組政府公債，其現金流精確複製貸款剩餘的排定還款，並以這組公債取代不動產作為擔保品，讓物業本身完全解除擔保、乾淨釋出。</span></span></span>（defeasance）機制限制提前清償——後者是複雜且昂貴的程序，通常需要專業顧問協助執行。
+    </p>
+
+    <p class="lang-en">
+      The catch surfaces only when something goes wrong: a defaulted loan is transferred to a <span class="key-term" tabindex="0">special servicer<span class="key-term-tip"><span class="lang-en">The
+        entity that takes over day-to-day handling of a defaulted or distressed CMBS loan. Its fiduciary duty runs to the trust's bondholders collectively
+        — particularly the lowest-remaining "controlling class" tranche — not to the borrower, and it must justify any modification as being in the collective
+        interest of certificate holders under a rigid pooling-and-servicing agreement.</span><span class="lang-zh" style="display:none">接手處理已違約或陷入困境的 CMBS
+        貸款日常事務的機構。其信託義務對象是信託中的全體債券持有人——尤其是目前仍存續、最低順位的「控制類別」層——而非借款人本身，且必須依嚴格的「資產池暨服務協議」（PSA），證明任何修改都符合全體憑證持有人的集體利益。</span></span></span>, whose fiduciary
+        duty runs to the trust's bondholders collectively — particularly the "controlling class," the lowest tranche still with an economic interest — rather
+        than to the individual borrower. Because that servicer must justify any loan modification, extension, or write-down as being in the collective interest
+        of certificate holders spread across multiple, often conflicting tranches, and must operate within a rigid pooling-and-servicing agreement rather
+        than exercising independent business judgment, working out a defaulted CMBS loan is a slow, legally constrained, multi-stakeholder process — the
+        opposite of the fast, unilateral modification a balance-sheet bank can grant on its own loan.
+    </p>
+    <p class="lang-zh" style="display:none">
+      麻煩只有在出狀況時才會浮現：一旦貸款違約，就會被移轉給<span class="key-term" tabindex="0">特別服務機構<span class="key-term-tip"><span class="lang-en">The entity that takes over day-to-day
+        handling of a defaulted or distressed CMBS loan. Its fiduciary duty runs to the trust's bondholders collectively — particularly the lowest-remaining
+        "controlling class" tranche — not to the borrower, and it must justify any modification as being in the collective interest of certificate holders
+        under a rigid pooling-and-servicing agreement.</span><span class="lang-zh" style="display:none">接手處理已違約或陷入困境的 CMBS 貸款日常事務的機構。其信託義務對象是信託中的全體債券持有人——尤其是目前仍存續、最低順位的「控制類別」層——而非借款人本身，且必須依嚴格的「資產池暨服務協議」（PSA），證明任何修改都符合全體憑證持有人的集體利益。</span></span></span>處理，而該機構的信託義務對象是信託中的全體債券持有人——尤其是目前仍具經濟利益、順位最低的「控制類別」層——而非個別借款人。由於該特別服務機構必須證明任何貸款修改、展延或減記，都符合橫跨多個、且往往利益互相衝突的層級的憑證持有人集體利益，並且必須在嚴格的「資產池暨服務協議」框架內運作，而不能自行做出獨立的商業判斷，因此重組一筆違約的
+        CMBS 貸款，是一個緩慢、受法律高度約束、涉及多方利害關係人的過程——正好與資產負債表銀行能對自己的貸款迅速、單方面做出修改的能力相反。
+    </p>
+
+    <p class="lang-en"><strong>Debt funds</strong> — non-bank lenders backed by private capital, insurance sidecars, or CLOs — stepped into the bridge and
+      transitional lending space banks retrenched from after 2023. They offer higher leverage, floating rates, and much faster execution than a bank or
+      life co, at a meaningfully higher all-in cost. They also tend to be less patient in a downturn: the fund itself often faces its own leverage and investor-redemption
+      pressure, which can push it to force a resolution rather than extend, in contrast to a bank that may prefer to work with a borrower quietly.</p>
+    <p class="lang-zh" style="display:none"><strong>私募債務基金</strong>——由私募資金、壽險關聯附屬平台或 CLO 支持的非銀行放款人——填補了 2023 年後銀行緊縮所讓出的過渡型與轉型貸款市場空間。它們提供更高的槓桿、浮動利率，撥款速度也遠比銀行或壽險公司快，但整體成本明顯較高。它們在景氣下行時也往往較沒耐性：基金本身經常面臨自身的槓桿與投資人贖回壓力，這可能促使它傾向強制解決，而非展延，與銀行可能更願意悄悄與借款人協商形成對比。</p>
+
+    <p class="lang-en"><strong>Agency debt</strong> — loans purchased and guaranteed by Fannie Mae or Freddie Mac through approved lender networks (e.g.
+      Fannie's DUS program) — is available only against multifamily housing (and some senior/manufactured housing), not office, retail, or industrial. It
+      is historically the most reliable, cheapest, and most counter-cyclical source of leverage in the market: the agencies kept lending through both the
+      2008&ndash;09 financial crisis and the 2020 pandemic shock when private capital pulled back sharply. Non-recourse with standard carveouts, generally
+      up to roughly 75&ndash;80% LTV and a DSCR minimum near 1.25x.</p>
+    <p class="lang-zh" style="display:none"><strong>政府代理型貸款</strong>——透過核准的貸款人網絡（例如 Fannie Mae 的 DUS 計畫），由 Fannie Mae 或 Freddie Mac 收購並提供保證的貸款——只適用於多戶住宅（以及部分銀髮住宅、組合式住宅），不適用於辦公室、零售或工業物業。它在歷史上是市場中最可靠、最便宜、也最具逆週期特性的槓桿來源：無論是
+      2008～09 年金融危機、還是 2020 年疫情衝擊、私募資金大幅撤退之際，這些代理機構都持續放款。屬無追索權貸款、附標準壞小子條款，貸款成數通常上限約 75%～80%，DSCR 最低門檻約 1.25x。</p>
+
+    <p class="lang-en"><strong>Mezzanine debt and preferred equity</strong>, as shown in the capital stack above, layer in when a sponsor wants more total
+      leverage than the senior lender is willing to size. Both cost meaningfully more than senior debt but are far less dilutive to the sponsor's ownership
+      than raising additional common equity — which is exactly the tool used to plug a refinancing gap, as the next section shows.</p>
+    <p class="lang-zh" style="display:none"><strong>夾層貸款與優先股權</strong>，如上方資本堆疊圖所示，會在操盤者想要的總槓桿超過優先順位貸款人願意核給的額度時填補進來。兩者的成本都明顯高於優先順位貸款，但相較於再籌措額外的普通股權，對操盤者持股的稀釋程度都小得多——這正是下一節將說明、用來填補再融資缺口的工具。</p>
+  </section>
+
+  <section>
+    <h2 class="lang-en">Refinancing Risk: The Real Killer</h2>
+    <h2 class="lang-zh" style="display:none">再融資風險：真正的殺手</h2>
+
+    <p class="lang-en">Vacancy problems and rent-growth misses are visible early and tend to erode a deal slowly. Refinancing risk is different: it can
+      sit completely dormant for years — payments made on time, covenants comfortably in compliance — and then arrive all at once, on a single calendar
+      date, as a wall the borrower cannot climb over no matter how well the property has performed operationally. It is, deal for deal, the single largest
+      destroyer of CRE equity value across a rate cycle.</p>
+    <p class="lang-zh" style="display:none">空置率問題與租金成長不如預期，通常很早就能被察覺，且往往是緩慢侵蝕交易價值。再融資風險則不同：它可能連續好幾年完全潛伏不動——還款準時、契約條件也舒適地維持合格——然後在單一日曆日期一次性全部湧現，形成一道無論物業營運表現多好、借款人都跨不過去的高牆。以單筆交易計算，它是整個利率週期中，摧毀 CRE 股權價值最大的單一元兇。</p>
+  </section>
+
+  <div class="worked-example">
+    <div class="worked-example-title"><span class="lang-en">Worked Example — 2021 Purchase, 2024 Refinance (Hypothetical, Internally Consistent Figures)</span><span class="lang-zh" style="display:none">逐步演算範例——2021
+      年購入、2024 年再融資（假設情境，數字內部一致）</span></div>
+    <ol class="worked-example-steps">
+      <li class="worked-example-step">
+        <span class="we-step-num">1</span>
+        <span class="we-step-body">
+          <span class="lang-en"><strong>2021 acquisition (hypothetical).</strong> A sponsor buys a property with $800,000 of NOI at a 4.0% cap rate: price
+            = $800,000 ÷ 4.0% = <span class="we-formula">$20,000,000</span>. Financing is 65% LTV, interest-only, 3.5% fixed: loan = <span class="we-formula">$13,000,000</span>,
+            annual debt service = $13,000,000 × 3.5% = <span class="we-formula">$455,000</span>, opening DSCR = $800,000 ÷ $455,000 = <span class="we-formula">1.76x</span>
+            — comfortable.</span>
+          <span class="lang-zh" style="display:none"><strong>2021 年購入（假設情境）。</strong>操盤者以 4.0% 資本化率買下一棟淨營運收益為 $800,000 的物業：價格 ＝ $800,000 ÷ 4.0% ＝ <span class="we-formula">$20,000,000</span>。融資條件為
+            65% 貸款成數、只付息、固定利率 3.5%：貸款金額 ＝ <span class="we-formula">$13,000,000</span>，年還款總額 ＝ $13,000,000 × 3.5% ＝ <span class="we-formula">$455,000</span>，起始
+            DSCR ＝ $800,000 ÷ $455,000 ＝ <span class="we-formula">1.76x</span>——相當舒適。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">2</span>
+        <span class="we-step-body">
+          <span class="lang-en"><strong>2024 refinance — the property.</strong> NOI has grown modestly to $840,000, but market cap rates have widened to
+            5.75%. New value = $840,000 ÷ 5.75% = <span class="we-formula">≈$14,608,700</span> — a 27% decline from the 2021 purchase price, despite NOI
+            growth, purely from cap-rate expansion.</span>
+          <span class="lang-zh" style="display:none"><strong>2024 年再融資——物業端。</strong>淨營運收益溫和成長至 $840,000，但市場資本化率已擴大至 5.75%。新估值 ＝ $840,000 ÷ 5.75% ＝ <span class="we-formula">約
+            $14,608,700</span>——儘管淨營運收益成長，僅因資本化率擴大，價值就較 2021 年購入價下滑了 27%。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">3</span>
+        <span class="we-step-body">
+          <span class="lang-en"><strong>2024 refinance — the loan.</strong> Lenders have also tightened to 55% LTV. Max new loan = $14,608,700 × 55% ≈ <span class="we-formula">$8,034,800</span>.
+            But the 2021 loan was interest-only — no principal was ever paid down — so the old balance is still the full <span class="we-formula">$13,000,000</span>.
+            The refinancing gap is $13,000,000 − $8,034,800 ≈ <span class="we-formula">$4,965,200</span> that must come from somewhere else entirely.</span>
+          <span class="lang-zh" style="display:none"><strong>2024 年再融資——貸款端。</strong>貸款人同時也把貸款成數收緊至 55%。新貸款上限 ＝ $14,608,700 × 55% ≈ <span class="we-formula">$8,034,800</span>。但
+            2021 年的貸款是只付息貸款——本金從未被攤還過——因此舊餘額仍是全額的 <span class="we-formula">$13,000,000</span>。再融資缺口 ＝ $13,000,000 − $8,034,800 ≈ <span class="we-formula">$4,965,200</span>，必須完全另尋來源填補。</span>
+        </span>
+      </li>
+      <li class="worked-example-step">
+        <span class="we-step-num">4</span>
+        <span class="we-step-body">
+          <span class="lang-en"><strong>Even right-sized to the new value, DSCR is thin.</strong> On the new $8,034,800 loan at a 7.0% rate, 25-year amortization,
+            annual debt service ≈ <span class="we-formula">$681,458</span>. DSCR = $840,000 ÷ $681,458 ≈ <span class="we-formula">1.23x</span> — likely
+            below a 1.25x covenant, right at the edge of a cash sweep. If the sponsor instead tried to refinance the entire original $13,000,000 balance
+            at the same new terms, annual debt service would be ≈$1,102,576 and DSCR would collapse to <span class="we-formula">≈0.76x</span> — NOI wouldn't
+            even cover debt service, which is exactly why no lender will size the loan that large.</span>
+          <span class="lang-zh" style="display:none"><strong>即便依新估值合理調整貸款規模，DSCR 仍然吃緊。</strong>以新的 $8,034,800 貸款、7.0% 利率、25 年攤還計算，年還款總額約為 <span class="we-formula">$681,458</span>。DSCR
+            ＝ $840,000 ÷ $681,458 ≈ <span class="we-formula">1.23x</span>——可能低於 1.25x 契約門檻，正好卡在觸發現金歸集的邊緣。若操盤者反而想按同樣的新條件，把原本全額的 $13,000,000 餘額重新融資，年還款總額將約為
+            $1,102,576，DSCR 將崩落至 <span class="we-formula">約 0.76x</span>——淨營運收益連還款都覆蓋不了，這正是為什麼沒有任何貸款人願意核給這麼大額度的原因。</span>
+        </span>
+      </li>
+    </ol>
+  </div>
+
+  <section>
+    <p class="lang-en">With a roughly $5,000,000 gap between what the property can support and what the sponsor owes, the realistic options are narrow:
+      (1) pay down the loan with fresh cash equity, shrinking it to what the new lender will support; (2) bring in mezzanine debt or preferred equity to
+      fill part of the gap, at meaningfully higher cost than the senior loan but less dilutive than raising all-new common equity; (3) sell the asset outright,
+      realizing whatever equity value remains (or accepting a loss) rather than refinancing at all; or (4) default, and negotiate a deed-in-lieu of foreclosure
+      or hand the keys back, when the gap is too large relative to any remaining equity value to justify funding it. None of these options existed as a
+      live question the day the deal was underwritten in 2021 — they only became real the day the 2024 maturity arrived.</p>
+    <p class="lang-zh" style="display:none">在物業所能支撐的額度、與操盤者實際所欠金額之間，存在約 $5,000,000 的缺口，現實中的選項相當有限：（一）以新籌措的現金股權償還部分貸款，把餘額縮小到新貸款人願意核給的規模；（二）引入夾層貸款或優先股權填補部分缺口，成本明顯高於優先順位貸款，但比重新募集全新的普通股權稀釋程度更低；（三）直接出售物業，實現剩餘的股權價值（或接受虧損），而不進行再融資；（四）違約，並協商「以物抵債」或直接交出鑰匙——當缺口相對於剩餘股權價值過大、不值得投入資金填補時。這些選項在
+      2021 年核保交易的當下，根本不是活生生的問題——它們只有在 2024 年到期日真正來臨時，才變成真實的抉擇。</p>
+
+    <h3 class="lang-en">Extend and Pretend</h3>
+    <h3 class="lang-zh" style="display:none">延展與粉飾</h3>
+
+    <p class="lang-en">When the refinancing math genuinely doesn't work — but neither the lender nor the borrower wants to force the issue right now — both
+      sides sometimes reach for <span class="key-term" tabindex="0">extend and pretend<span class="key-term-tip"><span class="lang-en">A lender/borrower
+      coping mechanism: modifying and extending a maturing loan on largely similar terms, rather than forcing a sale, foreclosure, or writedown, in the
+      hope that rates fall or fundamentals improve before the next maturity date arrives.</span><span class="lang-zh" style="display:none">貸款人與借款人的一種應對機制：以大致相同的條件修改並展延即將到期的貸款，而非強制出售、法拍或減記，寄望在下一次到期日來臨前，利率下降或基本面改善。</span></span></span>:
+      modifying and extending the maturing loan on largely similar terms, rather than forcing a sale, foreclosure, or write-down. This can be entirely rational
+      for a lender who doesn't want to crystallize a loss right now — realizing it might hit its own capital ratios or invite regulatory scrutiny — and
+      for a borrower who believes the gap is temporary. It is not free of consequence: it simply relocates the refinancing risk to a later date, on the
+      hope that rates fall or property fundamentals recover before that date arrives. Widespread use of this tactic across the banking and CMBS sector is
+      one reason the volume of visibly "resolved" distress can understate how much refinancing risk is quietly still sitting on lenders' books.</p>
+    <p class="lang-zh" style="display:none">當再融資的數字真的算不過來——但貸款人與借款人此刻都不想強硬把問題攤開處理時——雙方有時會選擇<span class="key-term" tabindex="0">延展與粉飾<span class="key-term-tip"><span class="lang-en">A
+      lender/borrower coping mechanism: modifying and extending a maturing loan on largely similar terms, rather than forcing a sale, foreclosure, or writedown,
+      in the hope that rates fall or fundamentals improve before the next maturity date arrives.</span><span class="lang-zh" style="display:none">貸款人與借款人的一種應對機制：以大致相同的條件修改並展延即將到期的貸款，而非強制出售、法拍或減記，寄望在下一次到期日來臨前，利率下降或基本面改善。</span></span></span>：以大致相同的條件修改並展延即將到期的貸款，而非強制出售、法拍或減記。對於不想在此刻確認虧損——因為這可能衝擊自身資本適足率或招來監管審視——的貸款人來說，這麼做完全合理；對於相信缺口只是暫時性的借款人來說也是如此。但這並非沒有代價：它只是把再融資風險搬到之後的某個日期，寄望在那之前利率下降或物業基本面回升。這種手法在銀行業與
+      CMBS 業界廣泛被使用，也正是為什麼表面上「已解決」的困境案件數字，可能低估了貸款人帳上實際上仍靜靜潛伏著多少再融資風險。</p>
+  </section>
+
+  <section>
+    <h2 class="lang-en">The 2023&ndash;2026 Office Wall and the Regional-Bank Reckoning</h2>
+    <h2 class="lang-zh" style="display:none">2023～2026 辦公室再融資高牆與區域銀行危機</h2>
+
+    <p class="lang-en">Office loans originated between roughly 2013 and 2021 face a genuinely unusual maturity wall running through 2026, because two variables
+      moved against borrowers at the same time. Rates rose sharply from the near-zero environment those loans were underwritten in — the mechanism worked
+      through in the worked example above. And, unlike a typical rate-driven refinancing squeeze, office NOI itself came under structural pressure at the
+      very same time, as hybrid and remote work adoption pushed vacancy meaningfully higher across many U.S. office markets. A single-factor refinancing
+      problem is hard enough; office faced a double whammy of higher debt cost and lower NOI simultaneously — which is why office has been the most visibly
+      distressed CRE subsector of this cycle.</p>
+    <p class="lang-zh" style="display:none">大約在 2013 至 2021 年間承作的辦公室貸款，正面臨一道貫穿到 2026 年、確實不尋常的再融資高牆，因為有兩個變數同時對借款人不利地移動。利率從這些貸款當初核保時接近零的環境大幅上升——這正是上方逐步演算範例所拆解的機制。而與典型「純粹由利率驅動」的再融資壓力不同的是，辦公室的淨營運收益本身也同時承受結構性壓力，因為混合辦公與遠距工作的普及，讓美國多數辦公室市場的空置率明顯攀升。單一因素造成的再融資問題已經夠棘手了；辦公室卻同時面臨還款成本上升與淨營運收益下滑的雙重夾擊——這正是為什麼辦公室成為這一輪週期中，最明顯陷入困境的
+      CRE 子類別。</p>
+
+    <p class="lang-en">That distress has landed disproportionately on regional and community banks, which — relative to the largest money-center banks —
+      hold an outsized share of outstanding U.S. CRE debt, including office and, in New York specifically, rent-regulated multifamily loans. Regulators
+      have flagged this concentration repeatedly since 2023 as a systemic point of vulnerability worth watching, and two episodes made the mechanism concrete.</p>
+    <p class="lang-zh" style="display:none">這股困境不成比例地落在區域銀行與社區銀行身上——相較於最大型的大都會銀行，這些銀行持有的美國未償 CRE 債務比重明顯偏高，其中包括辦公室貸款，以及在紐約特別顯著的、有租金管制的多戶住宅貸款。自 2023 年以來，監管機關多次點名這種集中度是值得持續關注的系統性脆弱環節，而以下兩起事件把這個機制具體呈現了出來。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">&#127908;</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Signature Bank was one of three U.S. regional banks that failed within days of each other in March 2023, alongside Silicon Valley
+        Bank and, weeks later, First Republic. Signature had built a large, concentrated book of loans against New York City rent-regulated apartment buildings
+        — a segment whose economics had already been squeezed by New York's 2019 rent-law reforms, which sharply limited owners' ability to raise regulated
+        rents to fund capital improvements. When deposit-flight contagion from SVB's collapse hit Signature — compounded by its unusually concentrated deposit
+        base, including crypto-related deposits — regulators seized the bank on March 12, 2023, in one of the largest bank failures in U.S. history at the
+        time. The FDIC subsequently split Signature's assets: most deposits and branches went to Flagstar Bank, a subsidiary of New York Community Bancorp,
+        while a large share of the commercial real estate loan book — including much of the rent-regulated multifamily exposure — stayed with the FDIC to
+        be worked out and sold off separately over time.</p>
+      <p class="lang-zh" style="display:none">簽名銀行（Signature Bank）是 2023 年 3 月接連在幾天內倒閉的三家美國區域銀行之一，另外兩家是矽谷銀行（Silicon Valley Bank），以及幾週後倒閉的第一共和銀行（First Republic）。簽名銀行過去建立了一大批高度集中、以紐約市有租金管制的公寓大樓為擔保的貸款——這個板塊的經濟性，早已因紐約
+        2019 年的租金法改革而受到擠壓，該項改革大幅限制了業主能透過調漲受管制租金來資助資本性修繕的空間。當矽谷銀行倒閉引發的存款外逃蔓延到簽名銀行——再加上其存款基礎異常集中（其中包含與加密貨幣相關的存款）——監管機關於 2023 年 3 月 12 日接管了該銀行，成為當時美國史上規模最大的銀行倒閉案之一。聯邦存款保險公司（FDIC）隨後拆分了簽名銀行的資產：大部分存款與分行歸入紐約社區銀行集團（New
+        York Community Bancorp）旗下的 Flagstar 銀行，而商用不動產貸款帳本中相當大一部分——包括大量有租金管制的多戶住宅曝險——則留在 FDIC 手中，後續逐步分批處理並出售。</p>
+    </div>
+  </div>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">&#127908;</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">On January 31, 2024, New York Community Bancorp — which had roughly doubled its balance sheet after absorbing Flagstar and a large
+        share of Signature Bank's assets the year before, pushing it past the $100 billion asset threshold that triggers tougher regulatory capital and
+        stress-testing requirements — stunned markets with its fourth-quarter 2023 results. The company slashed its quarterly dividend and booked a loan-loss
+        provision far larger than analysts had modeled, citing weakness concentrated in its office loan book and its rent-regulated multifamily portfolio.
+        The stock lost roughly 40% of its value within days, credit-rating agencies cut NYCB's debt to junk within about a week, and the company brought
+        in roughly $1 billion of emergency capital in March 2024, led by investor Steven Mnuchin's Liberty Strategic Capital. NYCB later rebranded itself
+        Flagstar Financial. The episode showed regulators and markets that concentrated CRE exposure — especially office and rent-regulated multifamily
+        — could resurface as a solvency question for a regional bank nearly a year after the spring 2023 failures, not only in the panicked days immediately
+        following them.</p>
+      <p class="lang-zh" style="display:none">2024 年 1 月 31 日，紐約社區銀行集團（New York Community Bancorp）——該公司前一年才在收購 Flagstar 及簽名銀行大部分資產後，資產規模大約翻倍，跨過了 1,000 億美元的門檻，觸發更嚴格的監管資本與壓力測試要求——公布的
+        2023 年第四季財報震驚市場。公司大幅削減季度股利，並提列了遠超分析師預期的呆帳準備，理由是其辦公室貸款帳本與有租金管制的多戶住宅投資組合出現集中性弱化。股價在幾天內重挫約 40%，信評機構在約一週內就把 NYCB 的債信評等調降至垃圾等級，公司於 2024 年 3 月引進約 10 億美元的緊急資本，由投資人史蒂文．梅努欽（Steven
+        Mnuchin）的 Liberty Strategic Capital 領投。NYCB 後來將自己更名為 Flagstar Financial。這起事件向監管機關與市場證明：集中的 CRE 曝險——尤其是辦公室與有租金管制的多戶住宅——可能在 2023 年春季銀行倒閉潮過後將近一年，才作為區域銀行的清償能力問題重新浮現，而不只是在那波倒閉潮剛發生後恐慌蔓延的那幾天。</p>
+    </div>
+  </div>
+
+  <ul class="checklist">
+    <li class="checklist-item"><input type="checkbox" id="chk-1"><label for="chk-1"><span class="lang-en">Confirm both the loan term AND the amortization
+      period are stated in the term sheet, and calculate the balloon balance actually due at maturity — not just the monthly payment.</span><span class="lang-zh" style="display:none">確認條款書中同時列明貸款期限與攤還年限，並實際算出到期時真正須清償的氣球式尾款餘額——而不是只看每月還款金額。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-2"><label for="chk-2"><span class="lang-en">Read the full non-recourse carveout list line
+      by line, and know exactly which specific acts spring personal liability onto the guarantor.</span><span class="lang-zh" style="display:none">逐行讀完完整的無追索權條款清單，確切了解哪些具體行為會使個人追索責任落到保證人身上。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-3"><label for="chk-3"><span class="lang-en">Confirm the DSCR and LTV covenant levels, the
+      testing frequency, and — precisely — what a soft-trigger cash sweep does mechanically versus what a hard default triggers.</span><span class="lang-zh" style="display:none">確認
+      DSCR 與 LTV 契約門檻、測試頻率，並精確了解軟性觸發的現金歸集機制實際如何運作，與硬性違約會觸發什麼有何不同。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-4"><label for="chk-4"><span class="lang-en">If the rate is floating, confirm whether a rate
+      cap purchase is a closing requirement — and price its cost into the deal, not treat it as an afterthought.</span><span class="lang-zh" style="display:none">若利率為浮動，確認撥款是否強制要求購買利率上限，並把其成本納入交易試算——而不是事後才想到。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-5"><label for="chk-5"><span class="lang-en">Confirm the prepayment penalty structure (yield
+      maintenance, defeasance, step-down) and how it interacts with your realistic hold and exit timeline.</span><span class="lang-zh" style="display:none">確認提前清償罰款結構（殖利率維持、抵繳、階梯式遞減），並釐清它與你實際的持有及退場時間規劃之間的互動關係。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-6"><label for="chk-6"><span class="lang-en">If mezzanine debt or preferred equity sits above
+      the senior loan, read the intercreditor agreement to know exactly what happens to your control rights in a default.</span><span class="lang-zh" style="display:none">若夾層貸款或優先股權位於優先順位貸款之上，務必讀懂「債權人間協議」，確切了解違約時你的控制權利會發生什麼變化。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-7"><label for="chk-7"><span class="lang-en">Model the refinance at maturity under a stress
+      case — higher rate, wider cap rate, flat or lower NOI — not just the base case you underwrote on day one.</span><span class="lang-zh" style="display:none">用壓力情境（更高的利率、更寬的資本化率、持平或下滑的淨營運收益）試算到期時的再融資，而不是只用第一天核保時的基準情境。</span></label></li>
+  </ul>
+
+  <div class="calc-card" id="calc-dscr-stress">
+    <div class="calc-card-title"><span class="lang-en">Try It: DSCR Stress Tester</span><span class="lang-zh" style="display:none">動手試算：DSCR 壓力測試器</span></div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Property Value ($)</span><span class="lang-zh" style="display:none">物業價值（美元）</span></span>
+        <span class="calc-row-echo" data-echo="calc-value">10000000</span>
+      </div>
+      <input type="range" id="calc-value" name="value" min="1000000" max="50000000" step="100000" value="10000000">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Annual NOI ($)</span><span class="lang-zh" style="display:none">年淨營運收益（美元）</span></span>
+        <span class="calc-row-echo" data-echo="calc-noi">700000</span>
+      </div>
+      <input type="range" id="calc-noi" name="noi" min="50000" max="4000000" step="10000" value="700000">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">LTV (%)</span><span class="lang-zh" style="display:none">貸款成數（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc-ltv">65</span>
+      </div>
+      <input type="range" id="calc-ltv" name="ltv" min="30" max="85" step="1" value="65">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Interest Rate (%)</span><span class="lang-zh" style="display:none">貸款利率（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc-rate">6.5</span>
+      </div>
+      <input type="range" id="calc-rate" name="rate" min="3" max="10" step="0.1" value="6.5">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Amortization (years)</span><span class="lang-zh" style="display:none">攤還年限（年）</span></span>
+        <span class="calc-row-echo" data-echo="calc-amort">25</span>
+      </div>
+      <input type="range" id="calc-amort" name="amort" min="10" max="30" step="1" value="25">
+    </div>
+    <div class="calc-outputs">
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">DSCR</span><span class="lang-zh" style="display:none">DSCR 還款覆蓋率</span></span>
+        <span class="calc-output-value" data-out="dscr">1.33x</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Annual Debt Service</span><span class="lang-zh" style="display:none">年還款總額</span></span>
+        <span class="calc-output-value" data-out="debtService">$526,662</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Breakeven Occupancy</span><span class="lang-zh" style="display:none">損益兩平出租率</span></span>
+        <span class="calc-output-value" data-out="breakeven">75.2%</span>
+      </div>
+    </div>
+  </div>
+  <section>
+    <p class="lang-en" style="font-size:12.5px;color:var(--lc-text-muted)"><em>Note: breakeven occupancy here is a teaching simplification — it assumes
+      NOI scales linearly with occupancy from $0 at 0% occupancy up to the entered NOI at full occupancy, ignoring the fact that a real property's fixed
+      operating costs (insurance, taxes, base staffing) don't fall to zero as occupancy drops. Treat it as a directional signal, not a precise underwriting
+      number.</em></p>
+    <p class="lang-zh" style="display:none;font-size:12.5px;color:var(--lc-text-muted)"><em>備註：此處的損益兩平出租率只是教學用的簡化計算——它假設淨營運收益會隨出租率從 0% 時的 $0，線性成長到輸入的滿租淨營運收益，但忽略了真實物業的固定營運成本（保險、稅賦、基本人力）並不會隨出租率下降而歸零這個事實。請把它當作方向性的參考訊號，而非精確的核保數字。</em></p>
+  </section>
+
+  <div class="quiz-block" data-quiz-id="m05-q1" data-quiz='[
+    {
+      "q":{"en":"Which loan structure creates the greatest refinancing risk?","zh":"下列哪一種貸款結構會製造出最大的再融資風險？"},
+      "opts":[
+        {"en":"10-year term, 25-year amortization, fixed rate","zh":"10 年期限、25 年攤還、固定利率"},
+        {"en":"5-year term, interest-only, uncapped floating rate","zh":"5 年期限、只付息、未設利率上限的浮動利率"},
+        {"en":"25-year term, fully amortizing over 25 years, fixed rate","zh":"25 年期限、25 年內完全攤還、固定利率"},
+        {"en":"7-year term, 30-year amortization, fixed rate","zh":"7 年期限、30 年攤還、固定利率"}
+      ],
+      "a":1,
+      "exp":{"en":"A short term stacks a near-term forced refinancing event on top of an interest-only structure (100% of the original principal still owed at maturity) and an uncapped floating rate (no ceiling on how high the payment can move before that date arrives) — the maximum combination of all three refinancing-risk drivers at once.","zh":"短期限疊加只付息結構（到期時全部原始本金都還沒還）與未設上限的浮動利率（到期日前還款金額可以無限上升），等於同時把三種再融資風險驅動因子都疊到最大。"}
+    }
+  ]'></div>
+
+  <div class="quiz-block" data-quiz-id="m05-q2" data-quiz='[
+    {
+      "q":{"en":"A loan requires a minimum 1.25x DSCR, tested quarterly. NOI falls and DSCR drops to 1.15x, but the borrower is still current on every payment. Under a typical soft-trigger structure, what happens?","zh":"某貸款要求最低 1.25x DSCR，每季測試。淨營運收益下滑，DSCR 降到 1.15x，但借款人每一期還款仍然準時繳付。在典型的軟性觸發結構下，會發生什麼事？"},
+      "opts":[
+        {"en":"Foreclosure begins immediately","zh":"立即啟動法拍程序"},
+        {"en":"The lender sweeps cash above debt service into a lender-controlled reserve account until the ratio is cured","zh":"貸款人把超過還款金額的現金歸集到貸款人控管的準備金帳戶，直到比率恢復合格為止"},
+        {"en":"Nothing happens, since payments are current","zh":"什麼事都不會發生，因為還款仍然準時"},
+        {"en":"The loan balance is automatically reduced","zh":"貸款餘額會自動減少"}
+      ],
+      "a":1,
+      "exp":{"en":"A DSCR breach on its own — with payments still current — typically trips a soft cash-sweep trigger first, not a foreclosure. Distributions get squeezed to zero, but the loan is not yet in default.","zh":"單純 DSCR 違反契約——在還款仍準時的情況下——通常先觸發軟性的現金歸集機制，而非法拍。分配款項會被壓縮到零，但貸款尚未進入違約狀態。"}
+    }
+  ]'></div>
+
+  <div class="quiz-block" data-quiz-id="m05-q3" data-quiz='[
+    {
+      "q":{"en":"Why is a defaulted CMBS loan typically harder to restructure than a defaulted balance-sheet bank loan?","zh":"為什麼違約的 CMBS 貸款，通常比違約的資產負債表銀行貸款更難重組？"},
+      "opts":[
+        {"en":"CMBS loans can never be modified under any circumstances","zh":"CMBS 貸款在任何情況下都完全無法修改"},
+        {"en":"The special servicer answers to bondholders spread across multiple tranches with conflicting interests, constrained by a rigid pooling-and-servicing agreement, rather than owning the credit decision itself","zh":"特別服務機構必須對橫跨多個、利益互相衝突層級的債券持有人負責，並受嚴格的資產池暨服務協議約束，而非自己擁有授信決策權"},
+        {"en":"CMBS loans always carry full personal recourse, so lenders have no urgency to negotiate","zh":"CMBS 貸款一律帶有全額個人追索權，因此貸款人沒有協商的急迫性"},
+        {"en":"CMBS loan servicing is handled directly by a federal government agency","zh":"CMBS 貸款的服務業務直接由聯邦政府機構負責"}
+      ],
+      "a":1,
+      "exp":{"en":"A bank that made the loan also owns the resulting gain or loss, so it can modify quickly on its own judgment. A CMBS special servicer must instead justify any modification as being in the collective interest of bondholders scattered across tranches with different, often conflicting priorities — a slower, legally constrained, multi-stakeholder process.","zh":"發放貸款的銀行同時也承擔最終的損益，因此能憑自身判斷迅速修改條件。CMBS 的特別服務機構則必須證明任何修改都符合橫跨不同層級、利益優先順序往往互相衝突的債券持有人的集體利益——這是一個更緩慢、受法律高度約束、涉及多方利害關係人的過程。"}
+    }
+  ]'></div>
+
+  <div class="quiz-block" data-quiz-id="m05-q4" data-quiz='[
+    {
+      "q":{"en":"Which act is most likely to spring full personal recourse liability under standard \"bad boy\" carveouts, even on an otherwise non-recourse loan?","zh":"在下列選項中，哪一項行為最可能觸發標準「壞小子」條款的全額個人追索責任——即便貸款原本屬於無追索權？"},
+      "opts":[
+        {"en":"Missing one payment because of a market-wide downturn","zh":"因整體市場景氣下滑而漏繳一期還款"},
+        {"en":"NOI declining because of normal, market-wide vacancy softness","zh":"因整體市場空置率軟化而導致淨營運收益下滑"},
+        {"en":"The borrowing entity filing for voluntary bankruptcy without lender consent","zh":"借款主體未經貸款人同意而自願聲請破產"},
+        {"en":"The sponsor taking an extended vacation","zh":"操盤者休了一段較長的假"}
+      ],
+      "a":2,
+      "exp":{"en":"A voluntary bankruptcy filing (like an unauthorized transfer) is typically drafted as a \"springing full recourse\" carveout — it can convert the entire outstanding loan balance into the guarantor&#39;s personal obligation, unlike ordinary market-driven underperformance.","zh":"自願聲請破產（如同未經同意的移轉一樣）通常被撰寫為「全額彈出追索」條款——它能把整筆未償貸款餘額轉為保證人的個人義務，這與一般由市場因素驅動的表現不佳截然不同。"}
+    }
+  ]'></div>
+
+  <div class="quiz-block" data-quiz-id="m05-q5" data-quiz='[
+    {
+      "q":{"en":"A sponsor bought a building in 2021 at a 4.0% cap rate with a 65% LTV, interest-only loan. By 2024, cap rates have widened and the same (or slightly higher) NOI supports a materially lower valuation. What best describes the borrower&#39;s realistic options at refinancing?","zh":"某操盤者於 2021 年以 4.0% 資本化率、65% 貸款成數、只付息貸款買下一棟建築物。到 2024 年，資本化率已擴大，相同（甚至略高）的淨營運收益，卻只能支撐明顯較低的估值。下列何者最能描述借款人在再融資時的現實選項？"},
+      "opts":[
+        {"en":"Refinance the exact same loan amount automatically, since NOI hasn&#39;t fallen","zh":"由於淨營運收益未下滑，可以自動用同樣的金額再融資"},
+        {"en":"Pay down principal with fresh equity, bring in mezzanine/preferred equity to fill the gap, sell the asset, or default","zh":"以新籌措的股權償還部分本金、引入夾層貸款或優先股權填補缺口、出售資產，或選擇違約"},
+        {"en":"Demand the original lender extend the loan forever at the original 2021 rate","zh":"要求原貸款人以 2021 年當初的原始利率永久展延貸款"},
+        {"en":"There is no issue at all, because the loan is non-recourse","zh":"完全沒有問題，因為貸款屬於無追索權"}
+      ],
+      "a":1,
+      "exp":{"en":"Cap-rate expansion plus tighter lender leverage standards can create a refinancing gap even when NOI hasn&#39;t fallen. The realistic paths are new equity, mezz/pref, a sale, or default — non-recourse status limits the sponsor&#39;s personal liability but does nothing to close the funding gap itself.","zh":"資本化率擴大加上貸款人收緊槓桿標準，即便淨營運收益沒有下滑，也可能製造出再融資缺口。現實的路徑是新股權、夾層貸款／優先股權、出售，或違約——無追索權的性質能限制操盤者的個人責任，但完全無法填補資金缺口本身。"}
+    }
+  ]'></div>
+
+  <div class="quiz-block" data-quiz-id="m05-q6" data-quiz='[
+    {
+      "q":{"en":"What is \"extend and pretend\"?","zh":"什麼是「延展與粉飾」（extend and pretend）？"},
+      "opts":[
+        {"en":"A formal government program that forgives CRE loan balances","zh":"一項由政府正式推動、豁免 CRE 貸款餘額的計畫"},
+        {"en":"A lender/borrower coping mechanism of modifying and extending a maturing loan on similar terms rather than forcing a sale or write-down, hoping conditions improve before the next maturity","zh":"貸款人與借款人的一種應對機制：以相近條件修改並展延即將到期的貸款，而非強制出售或減記，寄望在下一次到期前情勢改善"},
+        {"en":"A type of interest rate swap used to hedge floating-rate debt","zh":"一種用來避險浮動利率貸款的利率交換工具"},
+        {"en":"A mandatory disclosure requirement under CMBS pooling agreements","zh":"CMBS 資產池協議下的強制揭露要求"}
+      ],
+      "a":1,
+      "exp":{"en":"Extend and pretend relocates refinancing risk to a later date rather than resolving it — a lender avoids crystallizing a loss now, and a borrower buys time betting the gap is temporary.","zh":"延展與粉飾是把再融資風險搬到之後的日期，而非真正解決它——貸款人藉此避免此刻確認虧損，借款人則爭取時間，賭這個缺口只是暫時性的。"}
+    }
+  ]'></div>
+
+  <div class="quiz-block" data-quiz-id="m05-q7" data-quiz='[
+    {
+      "q":{"en":"Agency multifamily debt (Fannie Mae/Freddie Mac) is often considered the most reliable source of leverage across a full cycle mainly because:","zh":"政府代理型多戶住宅貸款（Fannie Mae／Freddie Mac）之所以常被視為整個週期中最可靠的槓桿來源，主要原因是："},
+      "opts":[
+        {"en":"It carries no interest rate at all","zh":"它完全不收取任何利息"},
+        {"en":"It is available for any property type, including office and retail","zh":"它適用於任何物業類型，包括辦公室與零售"},
+        {"en":"The agencies have historically kept lending through downturns (e.g. 2008&ndash;09, 2020) when bank and CMBS liquidity pulled back sharply","zh":"這些代理機構在歷史上，即便在銀行與 CMBS 流動性大幅緊縮的景氣下行期間（例如 2008～09 年、2020 年），仍持續放款"},
+        {"en":"It never requires any DSCR or LTV covenant","zh":"它完全不要求任何 DSCR 或 LTV 契約條件"}
+      ],
+      "a":2,
+      "exp":{"en":"Agency debt&#39;s defining feature is being counter-cyclical — the GSEs kept multifamily lending flowing through both the 2008-09 financial crisis and the 2020 pandemic shock, when private capital pulled back sharply. It is restricted to multifamily (and some senior/manufactured housing) and does carry standard DSCR/LTV covenants.","zh":"政府代理型貸款最鮮明的特徵，是它的逆週期性——在 2008～09 年金融危機與 2020 年疫情衝擊、私募資金大幅撤退之際，這些政府支持企業（GSE）仍持續維持多戶住宅放款不中斷。它僅限於多戶住宅（以及部分銀髮住宅、組合式住宅），且確實附有標準的 DSCR／LTV 契約條件。"}
+    }
+  ]'></div>
+
+  <div class="quiz-block" data-quiz-id="m05-q8" data-quiz='[
+    {
+      "q":{"en":"Which best explains why regional and community banks faced outsized CRE stress concerns in 2023&ndash;2024?","zh":"下列何者最能解釋，為什麼區域銀行與社區銀行在 2023～2024 年間面臨格外突出的 CRE 壓力疑慮？"},
+      "opts":[
+        {"en":"They had essentially no CRE exposure at all","zh":"它們幾乎完全沒有 CRE 曝險"},
+        {"en":"They hold a disproportionately large share of outstanding CRE debt — including office and rent-regulated multifamily — relative to the largest money-center banks, concentrating refinancing-wall and asset-quality risk on smaller balance sheets","zh":"相較於最大型的大都會銀行，它們持有的未償 CRE 債務比重明顯偏高——包括辦公室與有租金管制的多戶住宅——使再融資高牆與資產品質風險，集中落在規模較小的資產負債表上"},
+        {"en":"CRE debt held by large banks is federally guaranteed, while debt held by small banks is not","zh":"大型銀行持有的 CRE 債務受聯邦政府保證，而小型銀行持有的則沒有"},
+        {"en":"Small banks are legally prohibited from originating CRE loans","zh":"小型銀行依法被禁止承作 CRE 貸款"}
+      ],
+      "a":1,
+      "exp":{"en":"Regional and community banks hold a disproportionately large share of outstanding U.S. CRE debt relative to their balance-sheet size, which is exactly why episodes like Signature Bank&#39;s failure and NYCB&#39;s January 2024 dividend cut and reserve build landed where they did.","zh":"相對於自身的資產負債表規模，區域銀行與社區銀行持有的美國未償 CRE 債務比重明顯偏高，這正是為什麼簽名銀行倒閉、以及 NYCB 於 2024 年 1 月削減股利並提列準備金等事件，會發生在這些銀行身上的原因。"}
+    }
+  ]'></div>
+
+  <div class="lc-pager">
+    <a href="04-valuation.html">
+      <span class="lc-pager-dir lang-en">Previous</span><span class="lc-pager-dir lang-zh" style="display:none">上一課</span>
+      <div class="lc-pager-label lang-en">Three Ways to Value</div>
+      <div class="lc-pager-label lang-zh" style="display:none">估值三法</div>
+    </a>
+    <a href="06-cycles.html" class="lc-pager-next">
+      <span class="lc-pager-dir lang-en">Next</span><span class="lc-pager-dir lang-zh" style="display:none">下一課</span>
+      <div class="lc-pager-label lang-en">Cycles &amp; Rates</div>
+      <div class="lc-pager-label lang-zh" style="display:none">週期與利率</div>
+    </a>
+  </div>
+
+  <footer class="lc-footer">
+    <a href="/learn-cre/index.html"><span class="lang-en">&larr; Course Home</span><span class="lang-zh" style="display:none">&larr; 課程首頁</span></a>
+    <span class="lc-footer-note">INVESTMQUEST &middot; LEARN CRE &middot; MODULE 05</span>
+  </footer>
+
+</div>
+
+<script src="/learn-cre/learn.js"></script>
+<script>
+  initCalc('calc-dscr-stress', function(values){
+    var propertyValue = values.value || 0;
+    var noi = values.noi || 0;
+    var ltv = values.ltv || 0;
+    var rate = values.rate || 0;
+    var amortYears = values.amort || 25;
+
+    var loanAmount = propertyValue * (ltv / 100);
+    var r = (rate / 100) / 12;
+    var n = amortYears * 12;
+    var monthlyPayment;
+    if (r === 0) {
+      monthlyPayment = n > 0 ? loanAmount / n : 0;
+    } else {
+      monthlyPayment = (loanAmount * r) / (1 - Math.pow(1 + r, -n));
+    }
+    var annualDebtService = monthlyPayment * 12;
+    var dscr = annualDebtService > 0 ? (noi / annualDebtService) : 0;
+
+    var breakevenRaw = annualDebtService > 0 && noi > 0 ? (annualDebtService / noi) * 100 : 0;
+    var breakevenDisplay;
+    if (noi <= 0) {
+      breakevenDisplay = '—';
+    } else if (breakevenRaw > 100) {
+      breakevenDisplay = '> 100%';
+    } else {
+      breakevenDisplay = breakevenRaw.toFixed(1) + '%';
+    }
+
+    function fmtMoney(n){
+      return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    return {
+      dscr: dscr.toFixed(2) + 'x',
+      debtService: fmtMoney(annualDebtService),
+      breakeven: breakevenDisplay
+    };
+  });
+</script>
+</body>
+</html>
