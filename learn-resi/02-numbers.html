@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02 · The Language of Money | Residential Investing Course | InvestMQuest</title>
+<meta name="description" content="Gross vs net rental yield, mortgage amortization mechanics, cash-on-cash return under leverage, price-to-rent/price-to-income ratios, total return decomposition and transaction cost round-trips, built step by step on one hypothetical home's numbers. 總租金殖利率與淨殖利率、房貸攤還機制、槓桿下的現金報酬率、房價租金比與房價所得比、總報酬拆解與交易成本來回損耗，全部用一間假設住宅的數字逐步演算講清楚。">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="./learn.css">
+<style>
+.table-scroll{overflow-x:auto;margin:14px 0}
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
+.compare-table th,.compare-table td{border:1px solid var(--lc-border);padding:8px 10px;text-align:right}
+.compare-table th{background:var(--lc-accent-light);color:var(--lc-navy);font-weight:700;text-align:center}
+.compare-table td:first-child,.compare-table th:first-child{text-align:left}
+.compare-table tbody tr:nth-child(odd){background:#fbfdff}
+.compare-table tfoot td{font-weight:700;background:#f0f6fd}
+.compare-note{font-size:12px;color:var(--lc-text-muted);margin:6px 0 0}
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <div class="course-nav-inner">
+    <div class="course-nav-brand">
+      <a href="/dashboard.html">&larr; <span class="lang-en">🏠 Residential Dashboard</span><span class="lang-zh" style="display:none">🏠 住宅儀表板</span></a>
+      <span class="course-nav-sep">/</span>
+      <a href="./index.html" class="course-nav-home"><span class="lang-en">Course Home</span><span class="lang-zh" style="display:none">課程首頁</span></a>
+    </div>
+    <div class="course-nav-pager">
+      <a href="01-basics.html">&larr; <span class="lang-en">What Residential Investing Is</span><span class="lang-zh" style="display:none">住宅投資是什麼</span></a>
+      <a href="03-property-reading.html"><span class="lang-en">Reading a Property</span><span class="lang-zh" style="display:none">看懂一個物件</span> &rarr;</a>
+    </div>
+    <div class="course-nav-lang">
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</nav>
+
+<div class="lc-wrap">
+
+  <header class="module-header">
+    <span class="module-eyebrow lang-en">MODULE 02</span>
+    <span class="module-eyebrow lang-zh" style="display:none">第 02 課</span>
+    <h1 class="lang-en">The Language of Money</h1>
+    <h1 class="lang-zh" style="display:none">錢的語言</h1>
+    <div class="module-goals">
+      <div class="module-goals-title"><span class="lang-en">What You'll Learn</span><span class="lang-zh" style="display:none">這一課學什麼</span></div>
+      <ul>
+        <li><span class="lang-en">Build net rental yield from gross yield line by line, and know exactly which costs belong in the stack.</span><span class="lang-zh" style="display:none">從總殖利率逐項堆疊出淨殖利率，並清楚知道哪些成本該算進這個堆疊裡。</span></li>
+        <li><span class="lang-en">Understand mortgage amortization from first principles — why a fixed payment doesn't mean a fixed interest/principal split, and how much interest a 30-year loan really costs.</span><span class="lang-zh" style="display:none">從第一原理理解房貸攤還——為什麼固定月付金不代表利息與本金的比例固定，以及一筆 30 年房貸實際上要付多少利息。</span></li>
+        <li><span class="lang-en">Calculate cash-on-cash return under leverage in both directions — when borrowing helps, and when it quietly makes things worse.</span><span class="lang-zh" style="display:none">計算槓桿下的現金報酬率，看懂兩個方向——借錢什麼時候有幫助，什麼時候在不知不覺間讓情況變差。</span></li>
+        <li><span class="lang-en">Read price-to-rent and price-to-income ratios and know what each one is actually signaling.</span><span class="lang-zh" style="display:none">讀懂房價租金比與房價所得比，並知道每一個指標真正在傳達什麼訊號。</span></li>
+        <li><span class="lang-en">Decompose total return into its components and size the round-trip cost of buying and selling before assuming a short hold works.</span><span class="lang-zh" style="display:none">把總報酬拆解成各個組成部分，並在假設短期持有可行之前，先算清楚買賣一趟的來回成本。</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <section>
+    <h2 class="lang-en">1. One Home, Six Numbers</h2>
+    <h2 class="lang-zh" style="display:none">一、一間住宅，六個數字</h2>
+
+    <p class="lang-en">Assume (假設) a single home anchors this entire module: purchase price <span class="we-formula">$600,000</span>, achievable monthly rent <span class="we-formula">$2,000</span>, financed with 20% down (<span class="we-formula">$120,000</span> cash) and a <span class="we-formula">$480,000</span> mortgage at a fixed <span class="we-formula">6%</span> rate over 30 years. Six numbers — price, rent, down payment, loan amount, rate, term — and every metric in this module is a different question asked of that same handful of inputs. Gross yield, net yield, monthly payment, cash-on-cash return, total return: none of them require new information once you have those six numbers. What changes is which of them you divide by which.</p>
+    <p class="lang-zh" style="display:none">假設本課從頭到尾都繞著同一間住宅打轉：購買價格 <span class="we-formula">$600,000</span>，可達成的月租金 <span class="we-formula">$2,000</span>，以兩成頭期款（現金 <span class="we-formula">$120,000</span>）加上 <span class="we-formula">$480,000</span> 房貸融資，貸款利率固定 <span class="we-formula">6%</span>、期限 30 年。六個數字——價格、租金、頭期款、貸款金額、利率、年期——本課的每一個指標，都只是對這同一批輸入值提出的不同問題。總殖利率、淨殖利率、月付金、現金報酬率、總報酬：一旦有了這六個數字，都不需要額外資訊。真正變化的，只是用哪個數字去除哪個數字。</p>
+
+    <p class="lang-en">The number every downstream metric in this chapter depends on is <span class="key-term" tabindex="0">gross rental yield<span class="key-term-tip"><span class="lang-en">Annual rent divided by purchase price, before any costs are subtracted — the headline number that is almost always quoted, and almost never the real return.</span><span class="lang-zh" style="display:none">年租金除以購買價格，尚未扣除任何成本——這是幾乎總是被報出來的頭條數字，但幾乎從來不是真正的報酬。</span></span></span>. It is the easiest number to compute and the easiest one to mistake for the real return. Section 2 builds the full cost stack that separates the two.</p>
+    <p class="lang-zh" style="display:none">本章後續所有指標都建立在同一個數字之上——<span class="key-term" tabindex="0">總租金殖利率<span class="key-term-tip"><span class="lang-en">Annual rent divided by purchase price, before any costs are subtracted — the headline number that is almost always quoted, and almost never the real return.</span><span class="lang-zh" style="display:none">年租金除以購買價格，尚未扣除任何成本——這是幾乎總是被報出來的頭條數字，但幾乎從來不是真正的報酬。</span></span></span>（總殖利率）。它是最容易算的數字，也是最容易被誤當成真正報酬的數字。第二節會把區分這兩者的完整成本堆疊建立起來。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 2. Gross vs net yield -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">2. Gross vs Net Rental Yield</h2>
+    <h2 class="lang-zh" style="display:none">二、總殖利率與淨殖利率</h2>
+
+    <p class="lang-en">Gross yield is simple: annual rent divided by price. On the anchor home, <span class="we-formula">$2,000 × 12 = $24,000</span> of annual rent divided by <span class="we-formula">$600,000</span> gives a gross yield of <span class="we-formula">4.0%</span>. That number, on its own, tells you almost nothing about what you'll actually keep. <span class="key-term" tabindex="0">Net rental yield<span class="key-term-tip"><span class="lang-en">Gross yield minus the full stack of real operating costs — vacancy, management, maintenance reserve, property tax, insurance and HOA/strata fees — divided by price. The number that actually matters.</span><span class="lang-zh" style="display:none">總殖利率扣除完整的實際營運成本堆疊——空置、管理費、維護準備金、房產稅、保險與社區管理費——之後除以價格，是真正重要的數字。</span></span></span> is what's left after every real, recurring cost of owning and renting the property is subtracted. The gap between the two is not a rounding error — it routinely cuts the headline number by a third or more.</p>
+    <p class="lang-zh" style="display:none">總殖利率算法很單純：年租金除以價格。以假設的這間住宅為例，年租金 <span class="we-formula">$2,000 × 12 = $24,000</span> 除以 <span class="we-formula">$600,000</span>，得出總殖利率 <span class="we-formula">4.0%</span>。這個數字本身，幾乎無法告訴你最後真正能留下多少。<span class="key-term" tabindex="0">淨租金殖利率<span class="key-term-tip"><span class="lang-en">Gross yield minus the full stack of real operating costs — vacancy, management, maintenance reserve, property tax, insurance and HOA/strata fees — divided by price. The number that actually matters.</span><span class="lang-zh" style="display:none">總殖利率扣除完整的實際營運成本堆疊——空置、管理費、維護準備金、房產稅、保險與社區管理費——之後除以價格，是真正重要的數字。</span></span></span>（淨殖利率）才是扣除持有與出租這間房產所有真實、經常性成本之後剩下的數字。兩者之間的落差不是誤差——它經常把頭條數字砍掉三分之一以上。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — Building Net Yield From Gross (Hypothetical)</span><span class="lang-zh" style="display:none">逐步演算範例——從總殖利率堆疊出淨殖利率（假設數字）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Gross annual rent on the anchor home: <span class="we-formula">$2,000/mo × 12 = $24,000/yr</span>. Gross yield: <span class="we-formula">$24,000 ÷ $600,000 = 4.00%</span>.</span>
+            <span class="lang-zh" style="display:none">假設住宅的年總租金：<span class="we-formula">$2,000／月 × 12 = $24,000／年</span>。總殖利率：<span class="we-formula">$24,000 ÷ $600,000 = 4.00%</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Subtract a 5% vacancy allowance — months the unit sits empty between tenants, or rent that never gets collected: <span class="we-formula">$24,000 × 5% = $1,200</span>. Effective rent: <span class="we-formula">$24,000 − $1,200 = $22,800</span>.</span>
+            <span class="lang-zh" style="display:none">扣除 5% 的空置準備——租客更替之間房子空著的月份，或收不到的租金：<span class="we-formula">$24,000 × 5% = $1,200</span>。有效租金：<span class="we-formula">$24,000 − $1,200 = $22,800</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Subtract a property management fee at 8% of collected rent — even if you plan to self-manage, underwrite this cost, because your own time is not free and a future buyer will price it in: <span class="we-formula">$22,800 × 8% = $1,824</span>. Running total: <span class="we-formula">$22,800 − $1,824 = $20,976</span>.</span>
+            <span class="lang-zh" style="display:none">扣除按已收租金 8% 計算的物業管理費——即使你打算自行管理，也要把這筆成本核算進去，因為你自己的時間不是免費的，未來的買方也會把這筆成本算進估值：<span class="we-formula">$22,800 × 8% = $1,824</span>。累計剩餘：<span class="we-formula">$22,800 − $1,824 = $20,976</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Subtract a maintenance/capex reserve of <span class="we-formula">$2,000/yr</span> — a sinking fund for the roof, water heater and appliances that will eventually need replacing, even in a year nothing breaks. Running total: <span class="we-formula">$20,976 − $2,000 = $18,976</span>.</span>
+            <span class="lang-zh" style="display:none">扣除 <span class="we-formula">$2,000／年</span> 的維護／資本支出準備金——為屋頂、熱水器與家電等終究會需要更換的項目預留的償債基金，即使某一年什麼都沒壞也要提列。累計剩餘：<span class="we-formula">$20,976 − $2,000 = $18,976</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">Subtract property tax of <span class="we-formula">$2,400/yr</span> (依司法轄區而異 — varies enormously by jurisdiction, see the benchmark table below). Running total: <span class="we-formula">$18,976 − $2,400 = $16,576</span>.</span>
+            <span class="lang-zh" style="display:none">扣除房產稅 <span class="we-formula">$2,400／年</span>（依司法轄區而異——各地差異極大，詳見下方基準表）。累計剩餘：<span class="we-formula">$18,976 − $2,400 = $16,576</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">6</span>
+          <span class="we-step-body">
+            <span class="lang-en">Subtract insurance of <span class="we-formula">$1,000/yr</span> (依司法轄區而異 — much higher in flood, wildfire or earthquake-exposed markets). Running total: <span class="we-formula">$16,576 − $1,000 = $15,576</span>.</span>
+            <span class="lang-zh" style="display:none">扣除保險費 <span class="we-formula">$1,000／年</span>（依司法轄區而異——在洪水、野火或地震風險較高的市場會高出許多）。累計剩餘：<span class="we-formula">$16,576 − $1,000 = $15,576</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">7</span>
+          <span class="we-step-body">
+            <span class="lang-en">Subtract HOA/strata fees of <span class="we-formula">$576/yr</span> (依司法轄區而異 — can be $0 for a detached house with no association, or several hundred dollars a month for a full-amenity condo). Net operating income: <span class="we-formula">$15,576 − $576 = $15,000/yr</span>.</span>
+            <span class="lang-zh" style="display:none">扣除社區管理費（HOA／管委會費）<span class="we-formula">$576／年</span>（依司法轄區而異——沒有管委會的獨棟住宅可能是 $0，全套設施的公寓大樓則可能一個月就要數百美元）。淨營運收益：<span class="we-formula">$15,576 − $576 = $15,000／年</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">8</span>
+          <span class="we-step-body">
+            <span class="lang-en">Net yield: <span class="we-formula">$15,000 ÷ $600,000 = 2.5%</span>. The 4.0% headline number collapsed to 2.5% — a loss of well over a third — before a single dollar of mortgage interest was even considered. This net figure, not gross yield, is what section 3 onward builds on.</span>
+            <span class="lang-zh" style="display:none">淨殖利率：<span class="we-formula">$15,000 ÷ $600,000 = 2.5%</span>。4.0% 的頭條數字，在還沒算進任何一塊錢房貸利息之前，就已經萎縮到 2.5%——蒸發了超過三分之一。從第三節開始，本課建立在這個淨數字之上，而不是總殖利率。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <h3 class="lang-en">Cost-Stack Line Items — Typical Ranges</h3>
+    <h3 class="lang-zh" style="display:none">成本堆疊各項目——典型區間</h3>
+    <p class="lang-en">The illustrative figures above are a single hypothetical example, not a template to copy into a real underwriting spreadsheet. The table below gives rough, typical ranges for each line item — useful as a plausibility check, not as a source of truth. Property tax, insurance and HOA/strata conventions in particular vary enormously by jurisdiction, and any individual property can sit outside its typical band for perfectly ordinary reasons.</p>
+    <p class="lang-zh" style="display:none">上面的示範數字只是單一個假設範例，並不是可以直接套用到真實核算試算表的模板。下表列出各項目的大致典型區間——用來做合理性檢查，而不是當成絕對真理。房產稅、保險與社區管理費（HOA／管委會費）的慣例，尤其會因司法轄區而有極大差異，任何一間物業都可能因為完全正常的理由而落在典型區間之外。</p>
+    <div class="table-scroll">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Line Item</span><span class="lang-zh" style="display:none">項目</span></th>
+            <th><span class="lang-en">Typical Range</span><span class="lang-zh" style="display:none">典型區間</span></th>
+            <th><span class="lang-en">Note</span><span class="lang-zh" style="display:none">說明</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="lang-en">Vacancy allowance</span><span class="lang-zh" style="display:none">空置準備</span></td>
+            <td><span class="lang-en">3%–8% of gross rent</span><span class="lang-zh" style="display:none">總租金的 3%–8%</span></td>
+            <td><span class="lang-en">Higher in markets with short average tenancies or seasonal demand</span><span class="lang-zh" style="display:none">在平均租期較短或需求有季節性的市場會更高</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">Property management fee</span><span class="lang-zh" style="display:none">物業管理費</span></td>
+            <td><span class="lang-en">6%–12% of collected rent</span><span class="lang-zh" style="display:none">已收租金的 6%–12%</span></td>
+            <td><span class="lang-en">Underwrite it even if self-managing — your time is a real cost, and a future buyer will price it in</span><span class="lang-zh" style="display:none">即使自行管理也要核算進去——你的時間是真實成本，未來買方也會把它算進估值</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">Maintenance / capex reserve</span><span class="lang-zh" style="display:none">維護／資本支出準備金</span></td>
+            <td><span class="lang-en">5%–15% of gross rent, or a rough "1% of value per year" rule of thumb</span><span class="lang-zh" style="display:none">總租金的 5%–15%，或粗略的「每年物業價值 1%」經驗法則</span></td>
+            <td><span class="lang-en">A rule of thumb, not a law — older buildings and buildings with elevators, pools or shared mechanical systems typically run higher</span><span class="lang-zh" style="display:none">只是經驗法則，不是鐵律——屋齡較老、有電梯、泳池或共用機電系統的建築物通常會更高</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">Property tax（依司法轄區而異）</span><span class="lang-zh" style="display:none">房產稅（依司法轄區而異）</span></td>
+            <td><span class="lang-en">Roughly 0.3%–2.5%+ of assessed value per year</span><span class="lang-zh" style="display:none">約為評估價值的 0.3%–2.5%＋／年</span></td>
+            <td><span class="lang-en">One of the widest-varying line items in the entire stack — some jurisdictions sit well outside this band in either direction</span><span class="lang-zh" style="display:none">整個成本堆疊中差異最大的項目之一——有些司法轄區明顯落在這個區間之外，無論偏高或偏低</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">Insurance（依司法轄區而異）</span><span class="lang-zh" style="display:none">保險（依司法轄區而異）</span></td>
+            <td><span class="lang-en">Roughly 0.2%–0.5% of value per year</span><span class="lang-zh" style="display:none">約為物業價值的 0.2%–0.5%／年</span></td>
+            <td><span class="lang-en">Substantially higher in flood, wildfire, hurricane or earthquake-exposed regions, and rising in many such markets</span><span class="lang-zh" style="display:none">在洪水、野火、颶風或地震風險較高的地區明顯更高，且在許多這類市場持續上升</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">HOA / strata / management fee（依司法轄區而異）</span><span class="lang-zh" style="display:none">HOA／管委會／社區管理費（依司法轄區而異）</span></td>
+            <td><span class="lang-en">$0 for many detached homes to several hundred dollars/month for full-amenity buildings</span><span class="lang-zh" style="display:none">許多獨棟住宅為 $0，全套設施大樓則可能每月數百美元</span></td>
+            <td><span class="lang-en">Covers shared building costs and a reserve fund — a building with an underfunded reserve is a hidden liability, see the war story below</span><span class="lang-zh" style="display:none">涵蓋共用建築成本與準備金——準備金提列不足的大樓是一項隱藏負債，見下方實戰案例</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lang-en compare-note">These bands are a plausibility check, not a valuation input — a cost stack far outside the typical range for its market deserves a second look before the net yield built on top of it is trusted.</p>
+    <p class="lang-zh compare-note" style="display:none">這些區間是用來做合理性檢查，不是直接拿來估值的輸入——如果一份成本堆疊明顯偏離該市場的典型範圍，在信任建立在它之上的淨殖利率之前，都值得再仔細檢視一次。</p>
+  </section>
+
+  <div class="pitfall">
+    <span class="pitfall-icon">⚠️</span>
+    <div class="pitfall-body">
+      <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+      <span class="lang-en">Quoting gross yield as if it were the real return. A listing or a spreadsheet that shows only "annual rent ÷ price" and calls it "yield" has skipped every cost that separates gross from net — and skipped the mortgage entirely. Always ask, and always rebuild: which yield, net of what?</span>
+      <span class="lang-zh" style="display:none">把總殖利率當作真正報酬來報。一份物件資訊或試算表如果只列出「年租金÷價格」就稱之為「殖利率」，等於跳過了把總殖利率變成淨殖利率的所有成本——而且完全沒算房貸。務必每次都問清楚，也每次都重新算一遍：這是扣除了哪些成本之後的殖利率？</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 3. Mortgage math -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">3. Mortgage Math From Scratch</h2>
+    <h2 class="lang-zh" style="display:none">三、從頭建立房貸的數學</h2>
+
+    <p class="lang-en"><span class="key-term" tabindex="0">Amortization<span class="key-term-tip"><span class="lang-en">The process of paying down a loan through equal periodic payments, where each payment covers that period's interest and the remainder reduces the principal balance.</span><span class="lang-zh" style="display:none">透過等額分期還款逐步償還貸款的過程，每一期的還款先支付當期利息，剩餘部分才用來減少本金餘額。</span></span></span> is the mechanism behind a fixed-rate mortgage's fixed monthly payment — and the single most common source of confusion for a first-time investor. A fixed payment does not mean a fixed split between interest and principal. Early in the loan, most of each payment is interest; late in the loan, most of each payment is principal. Same dollar amount every month, completely different composition.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">攤還（Amortization）<span class="key-term-tip"><span class="lang-en">The process of paying down a loan through equal periodic payments, where each payment covers that period's interest and the remainder reduces the principal balance.</span><span class="lang-zh" style="display:none">透過等額分期還款逐步償還貸款的過程，每一期的還款先支付當期利息，剩餘部分才用來減少本金餘額。</span></span></span>是固定利率房貸月付金維持不變背後的機制——也是首購投資人最常搞混的一點。月付金固定，不代表利息與本金的比例固定。貸款早期，每一筆月付金大部分是利息；貸款後期，每一筆月付金大部分是本金。每個月的金額一模一樣，組成卻完全不同。</p>
+
+    <p class="lang-en">Why? Interest for any given month is charged only on the loan's remaining balance: <span class="we-formula">interest = balance × monthly rate</span>. In month 1, the balance is the full loan amount, so the interest charge is at its largest — and whatever's left of the fixed payment after covering that interest is all that goes to principal, which is at its smallest. As the balance shrinks month after month, the interest charge shrinks with it, which leaves more and more of the fixed payment free to go toward principal. The payment doesn't change; the split inside it does, automatically, as a mechanical consequence of the balance getting smaller.</p>
+    <p class="lang-zh" style="display:none">為什麼？因為任何一個月的利息，都只針對貸款剩餘的本金餘額計算：<span class="we-formula">利息 = 餘額 × 月利率</span>。第一個月，餘額是全額貸款金額，所以利息負擔最大——固定月付金扣除這筆利息之後剩下的部分，就是還進本金的錢，此時是最少的。隨著餘額一個月一個月縮小，利息負擔也跟著縮小，這就讓固定月付金裡有越來越多的部分能還進本金。月付金本身沒有變，變的是它內部的比例——這是餘額變小之後，機械式、自動發生的結果。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — The Anchor Mortgage, Amortized (Hypothetical)</span><span class="lang-zh" style="display:none">逐步演算範例——假設住宅的房貸攤還（假設數字）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Loan <span class="we-formula">$480,000</span> at <span class="we-formula">6%</span> fixed, 30 years (360 monthly payments). Monthly rate: <span class="we-formula">6% ÷ 12 = 0.5%</span>.</span>
+            <span class="lang-zh" style="display:none">貸款 <span class="we-formula">$480,000</span>，固定利率 <span class="we-formula">6%</span>，年期 30 年（共 360 期月付款）。月利率：<span class="we-formula">6% ÷ 12 = 0.5%</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Using the standard amortizing-payment formula, the fixed monthly payment is <span class="we-formula">$2,877.84</span> — the same figure every single month for 30 years.</span>
+            <span class="lang-zh" style="display:none">用標準的分期還款公式，固定月付金為 <span class="we-formula">$2,877.84</span>——這個數字在整整 30 年內每個月都一樣。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Month 1's interest charge: <span class="we-formula">$480,000 × 0.5% = $2,400</span>. Principal paid in month 1: <span class="we-formula">$2,877.84 − $2,400 = $477.84</span> — only about 17% of the payment.</span>
+            <span class="lang-zh" style="display:none">第 1 個月的利息：<span class="we-formula">$480,000 × 0.5% = $2,400</span>。第 1 個月還進本金的部分：<span class="we-formula">$2,877.84 − $2,400 = $477.84</span>——只占月付金約 17%。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">By year 30's final payments, the balance has shrunk to almost nothing, so almost the entire payment is principal — the interest/principal ratio has effectively flipped over the life of the loan, without the payment amount ever moving.</span>
+            <span class="lang-zh" style="display:none">到了第 30 年的最後幾期，餘額已經幾乎歸零，所以幾乎整筆月付金都是本金——在整個貸款期間，利息與本金的比例實質上完全反轉，而月付金金額卻從未變動過。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <h3 class="lang-en">The Amortization Schedule, Sampled by Year</h3>
+    <h3 class="lang-zh" style="display:none">攤還時間表——按年份取樣</h3>
+    <div class="table-scroll">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Year</span><span class="lang-zh" style="display:none">年份</span></th>
+            <th><span class="lang-en">That Year's Interest</span><span class="lang-zh" style="display:none">當年利息（單月）</span></th>
+            <th><span class="lang-en">That Year's Principal</span><span class="lang-zh" style="display:none">當年本金（單月）</span></th>
+            <th><span class="lang-en">Remaining Balance</span><span class="lang-zh" style="display:none">剩餘餘額</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>$2,373</td><td>$505</td><td>$474,106</td></tr>
+          <tr><td>5</td><td>$2,237</td><td>$641</td><td>$446,661</td></tr>
+          <tr><td>10</td><td>$2,013</td><td>$865</td><td>$401,691</td></tr>
+          <tr><td>15</td><td>$1,711</td><td>$1,167</td><td>$341,034</td></tr>
+          <tr><td>20</td><td>$1,304</td><td>$1,574</td><td>$259,217</td></tr>
+          <tr><td>25</td><td>$755</td><td>$2,123</td><td>$148,858</td></tr>
+          <tr><td>30</td><td>$14</td><td>$2,864</td><td>$0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lang-en compare-note">"That Year's Interest/Principal" is the split within that year's final monthly payment, not the full year's total — it shows the crossover in miniature: by year 15 the payment is still mostly interest; by year 25 it has mostly flipped to principal.</p>
+    <p class="lang-zh compare-note" style="display:none">「當年利息／本金（單月）」指的是該年最後一期月付款內部的拆分，不是整年的加總——它以縮影方式呈現了交叉點：到第 15 年，月付金仍以利息為主；到第 25 年，已大致反轉為以本金為主。</p>
+
+    <p class="lang-en">Now the reveal that surprises most first-time buyers: sum every interest payment over all 360 months, and the total comes to <span class="we-formula">$556,023</span> — <strong>more than the original $480,000 loan amount itself</strong>, or about 116% of principal. Borrow $480,000 over 30 years at 6%, and you pay back roughly $1,036,000 in total: the original loan plus more than its own value again in interest. This is not a trick or an edge case — it is the ordinary arithmetic of a long-amortization loan at a plausible rate, and it is exactly why the interest rate on a mortgage matters as much as, or more than, the price of the home itself.</p>
+    <p class="lang-zh" style="display:none">現在來看多數首購族最驚訝的一個真相：把 360 期的利息全部加總起來，總額是 <span class="we-formula">$556,023</span>——<strong>比原始 $480,000 的貸款金額本身還多</strong>，約占本金的 116%。以 6% 的利率借 $480,000、分 30 年攤還，總共要還大約 $1,036,000：原始貸款金額，再加上超過它本身價值一次的利息。這不是話術，也不是特殊個案——這是長年期攤還貸款在一個合理利率下的正常算術，也正是為什麼房貸利率跟房屋本身的價格一樣重要，甚至更重要。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Much of the wave of US mortgage defaults that fed the 2008 financial crisis traces directly to a payment mechanic, not just a lending-standards failure. Millions of adjustable-rate and "teaser rate" mortgages issued from roughly 2004 to 2006 carried a low introductory interest rate — often fixed for just two or three years — that then reset to a much higher market-linked rate. Underwriting was frequently done against the low teaser payment, not the payment the loan would actually carry after reset. When large cohorts of these loans reset in 2007–2008, monthly payments jumped sharply for borrowers whose income had not grown to match, a phenomenon widely referred to at the time as "payment shock." Rising defaults on these resetting loans were a central thread in the broader crisis that followed. The lesson generalizes directly: underwriting a purchase off the rate you have today, when that rate is contractually scheduled to reset, is underwriting off the wrong number.</p>
+      <p class="lang-zh" style="display:none">2008 年金融危機中，美國房貸違約潮很大一部分可以直接追溯到一項還款機制，而不只是放款標準失守。大約 2004 到 2006 年間發行的數百萬筆可調整利率與「優惠利率（teaser rate）」房貸，帶有一段偏低的入門利率——通常只固定兩到三年——之後就會重設為與市場連動、明顯更高的利率。核保時經常是以偏低的優惠期月付金去計算，而不是貸款重設之後實際要負擔的月付金。當大批這類貸款在 2007 至 2008 年集中重設時，收入沒有同步成長的借款人，月付金金額大幅跳升，當時普遍稱之為「還款衝擊（payment shock）」。這批重設貸款違約率上升，是隨後整場危機的核心線索之一。這個教訓可以直接推廣：如果核算購屋預算時用的是今天的利率，而這個利率依合約排定之後會重設，那就是用了錯誤的數字在核算。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <span class="pitfall-icon">⚠️</span>
+    <div class="pitfall-body">
+      <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+      <span class="lang-en">Underwriting cash-on-cash return off a teaser or introductory mortgage rate instead of the rate it resets to. If a loan is fixed for only two or three years and then floats or resets, every return calculation in this module should be run twice — once at today's rate, once at the reset rate — before deciding the deal actually works.</span>
+      <span class="lang-zh" style="display:none">用優惠利率或入門利率來核算現金報酬率，而不是用它重設之後的利率。如果一筆貸款只固定兩、三年、之後就會浮動或重設，本課的每一項報酬計算都應該算兩次——一次用今天的利率，一次用重設後的利率——才能判斷這筆交易是否真的划算。</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 4. Cash-on-cash and leverage -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">4. Cash-on-Cash With Leverage, Both Directions</h2>
+    <h2 class="lang-zh" style="display:none">四、槓桿下的現金報酬率，兩個方向</h2>
+
+    <p class="lang-en"><span class="key-term" tabindex="0">Cash-on-cash return<span class="key-term-tip"><span class="lang-en">Annual net operating income minus the full annual mortgage payment (principal and interest), divided by the actual cash invested (down payment plus closing costs) — the return on the cash you actually put in, not on the property's full price.</span><span class="lang-zh" style="display:none">年淨營運收益扣除全年房貸月付金總額（本金加利息）之後，除以實際投入的現金（頭期款加交易成本）——這是你實際投入的現金所獲得的報酬，而不是整個物業總價的報酬。</span></span></span> asks a different question than net yield does. Net yield measures return on the full purchase price. Cash-on-cash measures return on only the cash actually invested — and because a mortgage lets a small amount of cash control a much larger asset, leverage can push cash-on-cash well above the unlevered net yield, or well below it, depending entirely on one comparison: is the property's net yield above or below the mortgage rate?</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">現金報酬率（Cash-on-Cash Return）<span class="key-term-tip"><span class="lang-en">Annual net operating income minus the full annual mortgage payment (principal and interest), divided by the actual cash invested (down payment plus closing costs) — the return on the cash you actually put in, not on the property's full price.</span><span class="lang-zh" style="display:none">年淨營運收益扣除全年房貸月付金總額（本金加利息）之後，除以實際投入的現金（頭期款加交易成本）——這是你實際投入的現金所獲得的報酬，而不是整個物業總價的報酬。</span></span></span>問的是跟淨殖利率不同的問題。淨殖利率衡量的是整個購買價格的報酬。現金報酬率衡量的只是實際投入現金的報酬——而因為房貸讓一小筆現金能撬動一個大得多的資產，槓桿可以把現金報酬率推到遠高於無槓桿淨殖利率，也可能推到遠低於它，完全取決於一個比較：物業的淨殖利率高於還是低於房貸利率？</p>
+
+    <p class="lang-en">To see both directions cleanly, use a different, explicitly hypothetical (假設) property — one from a lower price-to-rent market where rental yields run higher relative to price. Assume a <span class="we-formula">$180,000</span> property renting for <span class="we-formula">$1,500/mo</span> (<span class="we-formula">$18,000/yr</span> gross, a 10.0% gross yield), which after the same kind of cost stack built in Section 2 nets down to <span class="we-formula">$11,700/yr</span> of net operating income — a <span class="we-formula">6.5%</span> net yield. Finance it with 25% down (<span class="we-formula">$45,000</span> cash) and a <span class="we-formula">$135,000</span> loan, 30-year fixed.</p>
+    <p class="lang-zh" style="display:none">為了清楚看出兩個方向，這裡改用另一個明確標示為假設的物業——來自房價租金比較低、租金殖利率相對於價格較高的市場。假設一間 <span class="we-formula">$180,000</span> 的物業，月租金 <span class="we-formula">$1,500</span>（年租金 <span class="we-formula">$18,000</span>，總殖利率 10.0%），依照第二節同樣的成本堆疊邏輯，淨營運收益為 <span class="we-formula">$11,700／年</span>——淨殖利率 <span class="we-formula">6.5%</span>。融資方式為兩成五頭期款（現金 <span class="we-formula">$45,000</span>）加上 <span class="we-formula">$135,000</span> 貸款，30 年固定利率。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — Positive Leverage (Rate Below Yield)</span><span class="lang-zh" style="display:none">逐步演算範例——正向槓桿（利率低於殖利率）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Mortgage rate: <span class="we-formula">5.0%</span>, below the property's 6.5% net yield. Monthly payment on the $135,000 loan: <span class="we-formula">$724.71</span>. Annual debt service: <span class="we-formula">$724.71 × 12 = $8,697</span>.</span>
+            <span class="lang-zh" style="display:none">房貸利率：<span class="we-formula">5.0%</span>，低於這間物業 6.5% 的淨殖利率。$135,000 貸款的月付金：<span class="we-formula">$724.71</span>。年度還款總額：<span class="we-formula">$724.71 × 12 = $8,697</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Annual cash flow after debt service: <span class="we-formula">$11,700 − $8,697 = $3,003</span>.</span>
+            <span class="lang-zh" style="display:none">扣除還款後的年度現金流：<span class="we-formula">$11,700 − $8,697 = $3,003</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Cash-on-cash return: <span class="we-formula">$3,003 ÷ $45,000 = 6.67%</span> — higher than the 6.5% unlevered net yield. Because the mortgage rate (5.0%) is below the property's net yield (6.5%), every dollar borrowed earns more than it costs, and leverage pulls the return on cash up above the return on the whole property.</span>
+            <span class="lang-zh" style="display:none">現金報酬率：<span class="we-formula">$3,003 ÷ $45,000 = 6.67%</span>——高於 6.5% 的無槓桿淨殖利率。因為房貸利率（5.0%）低於物業淨殖利率（6.5%），每借一塊錢賺到的都比它的成本多，槓桿把現金報酬率拉到高於整個物業報酬率之上。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — Negative Leverage (Rate Above Yield)</span><span class="lang-zh" style="display:none">逐步演算範例——負向槓桿（利率高於殖利率）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Same property, same $135,000 loan — but now assume the rate available is <span class="we-formula">8.5%</span>, above the property's 6.5% net yield. Monthly payment: <span class="we-formula">$1,038.03</span>. Annual debt service: <span class="we-formula">$1,038.03 × 12 = $12,456</span>.</span>
+            <span class="lang-zh" style="display:none">同一間物業、同樣 $135,000 貸款——但這次假設能取得的利率是 <span class="we-formula">8.5%</span>，高於物業 6.5% 的淨殖利率。月付金：<span class="we-formula">$1,038.03</span>。年度還款總額：<span class="we-formula">$1,038.03 × 12 = $12,456</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Annual cash flow after debt service: <span class="we-formula">$11,700 − $12,456 = −$756</span>. The property now costs money out of pocket every year, despite renting at a perfectly respectable 10.0% gross / 6.5% net yield.</span>
+            <span class="lang-zh" style="display:none">扣除還款後的年度現金流：<span class="we-formula">$11,700 − $12,456 = −$756</span>。儘管租金殖利率相當不錯（總殖利率 10.0%／淨殖利率 6.5%），這間物業現在每年卻要倒貼現金。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Cash-on-cash return: <span class="we-formula">−$756 ÷ $45,000 = −1.68%</span>. Same property, same rent, same leverage ratio — only the rate changed, and it was enough to flip a 6.5% net yield into a negative cash-on-cash return. Leverage did not create this loss; it amplified an unfavorable spread between yield and rate into a larger swing than the unlevered numbers alone would show.</span>
+            <span class="lang-zh" style="display:none">現金報酬率：<span class="we-formula">−$756 ÷ $45,000 = −1.68%</span>。同一間物業、同樣的租金、同樣的槓桿比例——只有利率變了，就足以把 6.5% 的淨殖利率翻轉成負的現金報酬率。虧損不是槓桿創造出來的；槓桿只是把殖利率與利率之間不利的利差，放大成比無槓桿數字本身更大的波動。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">The rule generalizes cleanly: leverage amplifies whatever spread already exists between yield and borrowing cost. A favorable spread (yield above rate) becomes a more favorable cash-on-cash number than the unlevered yield alone. An unfavorable spread (rate above yield) becomes a worse cash-on-cash number — and can turn a perfectly reasonable rental yield into an annual cash drain. This is the same "leverage cuts both ways" lesson from Module 01, now with the actual cash-flow arithmetic behind it instead of just appreciation.</p>
+    <p class="lang-zh" style="display:none">這個規則可以清楚地推廣：槓桿會放大殖利率與借款成本之間原本就存在的利差。有利的利差（殖利率高於利率）會讓現金報酬率比無槓桿殖利率本身更好看。不利的利差（利率高於殖利率）會讓現金報酬率變得更差——甚至可能把一個相當合理的租金殖利率，變成每年持續失血的現金黑洞。這正是第一課「槓桿是雙面刃」的同一個教訓，只是這次背後有實際的現金流算式支撐，而不只是增值。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 5. Price-to-rent and price-to-income -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">5. Price-to-Rent and Price-to-Income Ratios</h2>
+    <h2 class="lang-zh" style="display:none">五、房價租金比與房價所得比</h2>
+
+    <p class="lang-en">The <span class="key-term" tabindex="0">price-to-rent ratio<span class="key-term-tip"><span class="lang-en">Purchase price divided by annual rent — the inverse of gross yield, expressed as a multiple of years' rent instead of a percentage.</span><span class="lang-zh" style="display:none">購買價格除以年租金——是總殖利率的倒數，以「幾年租金」的倍數表示，而不是百分比。</span></span></span> is simply gross yield expressed the other way around: price divided by annual rent instead of rent divided by price. On the anchor home, <span class="we-formula">$600,000 ÷ $24,000 = 25</span> — the property is worth 25 years of its own rent. A low price-to-rent ratio signals a market priced for cash flow; a high one signals a market priced for something other than the rent it currently produces — usually expected appreciation, scarcity, or capital seeking a safe store of value rather than income.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">房價租金比<span class="key-term-tip"><span class="lang-en">Purchase price divided by annual rent — the inverse of gross yield, expressed as a multiple of years' rent instead of a percentage.</span><span class="lang-zh" style="display:none">購買價格除以年租金——是總殖利率的倒數，以「幾年租金」的倍數表示，而不是百分比。</span></span></span>其實就是把總殖利率反過來表示：用價格除以年租金，而不是租金除以價格。以假設的這間住宅為例，<span class="we-formula">$600,000 ÷ $24,000 = 25</span>——這間物業的價值等於它自身 25 年的租金。房價租金比低，代表這個市場的定價是為了現金流；房價租金比高，則代表這個市場的定價反映的是租金以外的其他東西——通常是預期增值、稀缺性，或是尋求保值而非收益的資金。</p>
+
+    <p class="lang-en">The <span class="key-term" tabindex="0">price-to-income ratio<span class="key-term-tip"><span class="lang-en">Median home price divided by median household income — an affordability and debt-serviceability indicator, distinct from price-to-rent, which is a yield-market indicator.</span><span class="lang-zh" style="display:none">房價中位數除以家戶所得中位數——這是可負擔性與償債能力的指標，跟屬於殖利率市場指標的房價租金比是不同的東西。</span></span></span> asks a completely different question. It divides median home price by median household income, and it signals affordability and debt-serviceability for local buyers — not yield for investors. A market can have a perfectly healthy price-to-rent ratio for an investor while having a punishing price-to-income ratio for a local family trying to buy, or the reverse. The two ratios are frequently confused because both put "price" in the numerator, but one is about what a renter's cash flow supports and the other is about what a local income can service.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">房價所得比<span class="key-term-tip"><span class="lang-en">Median home price divided by median household income — an affordability and debt-serviceability indicator, distinct from price-to-rent, which is a yield-market indicator.</span><span class="lang-zh" style="display:none">房價中位數除以家戶所得中位數——這是可負擔性與償債能力的指標，跟屬於殖利率市場指標的房價租金比是不同的東西。</span></span></span>問的是完全不同的問題。它用房價中位數除以家戶所得中位數，反映的是當地買家的可負擔性與償債能力——而不是投資人的殖利率。一個市場對投資人來說房價租金比可能相當健康，同時對想買房的當地家庭來說房價所得比卻高得驚人，反之亦然。這兩個比率經常被搞混，因為兩者分子都是「價格」，但一個講的是租客的現金流能支撐什麼，另一個講的是當地所得能償還什麼。</p>
+
+    <p class="lang-en">Concrete, well-known reference points help calibrate both without needing a single precise current statistic. Markets like Hong Kong and, at various points, cities such as Taipei or Vancouver have for years been cited in international affordability surveys and commentary as having among the highest price-to-income multiples in the world — housing priced at a level that requires extraordinary income multiples, extended family support, or very long holding horizons for a typical local household to buy. At the other end, parts of the US Midwest and former industrial "Rust Belt" cities have long carried a reputation for the opposite: home prices low enough, relative to achievable rents, that gross yields comfortably support positive cash-flow rental economics even before accounting for that market's typically slower appreciation. Neither reputation is a precise number you can underwrite today — for the actual, current multiple in a specific market, use the <span class="key-term" tabindex="0">live dashboard<span class="key-term-tip"><span class="lang-en">This site's cross-market residential dashboard, which tracks price-to-rent and price-to-income multiples across dozens of cities.</span><span class="lang-zh" style="display:none">本站的跨市場住宅儀表板，追蹤數十個城市的房價租金比與房價所得比。</span></span></span> covering 84 cities rather than a remembered reputation.</p>
+    <p class="lang-zh" style="display:none">一些具體、廣為人知的參考點，能在不需要單一精確當前數字的情況下，幫助校準這兩個比率。像香港，以及在不同時期的台北、溫哥華等城市，多年來一直被國際可負擔性調查與評論引用為全球房價所得比數一數二高的市場——房價高到需要驚人的所得倍數、大家庭支援，或非常長的持有期限，一般當地家庭才買得起。在光譜另一端，美國中西部部分地區與昔日的工業「鐵鏽帶」城市，長期以來則有相反的名聲：相對於可達成的租金，房價低到即使不計入這類市場通常較慢的增值速度，總殖利率也能相當寬裕地支撐正現金流的租賃經濟。這兩種名聲都不是可以直接拿來核算的精確數字——若要查某個特定市場實際、當下的倍數，請使用涵蓋 84 個城市的<span class="key-term" tabindex="0">即時儀表板<span class="key-term-tip"><span class="lang-en">This site's cross-market residential dashboard, which tracks price-to-rent and price-to-income multiples across dozens of cities.</span><span class="lang-zh" style="display:none">本站的跨市場住宅儀表板，追蹤數十個城市的房價租金比與房價所得比。</span></span></span>，而不是憑印象中的名聲。</p>
+
+    <p class="lang-en">Neither ratio, alone, is a buy or sell signal. A low price-to-rent ratio can mean genuine value — or it can mean a market with structurally weak long-term price growth, which is exactly why rent yields have to be higher to attract capital in the first place. A high price-to-income ratio can mean a bubble — or it can mean a market with durable land scarcity and deep, persistent demand that has traded at elevated multiples for decades without a correction. Both ratios are inputs to judgment, not verdicts on their own; see the live dashboard for where a specific market sits today before drawing any conclusion.</p>
+    <p class="lang-zh" style="display:none">單獨看任何一個比率，都不能當作買進或賣出的訊號。房價租金比低，可能代表真正的價值——也可能代表這個市場的長期房價成長結構性偏弱，而這正是為什麼租金殖利率一開始就必須更高才能吸引資金進場。房價所得比高，可能代表泡沫——也可能代表這個市場有持久的土地稀缺性與深厚、持續的需求，數十年來都以偏高的倍數交易卻從未修正。這兩個比率都只是判斷的輸入項，不是本身就能下結論的裁決；在得出任何結論之前，請先查即時儀表板了解某個特定市場目前所在的位置。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Hong Kong has been ranked at or near the top of international housing affordability surveys — including the long-running Demographia International Housing Affordability report — for well over a decade, typically cited with a "median multiple" (median home price divided by median household income) in the high teens or beyond, several times the multiple most affordability frameworks consider "severely unaffordable." The structural drivers behind it are well documented and durable: an unusually constrained land supply relative to population density, and government land-sale and planning policy that has historically limited the pace at which new supply reaches the market. The result is a market where an ordinary local household's income, even a well-above-median one, has for years struggled to service the price-to-income multiple a home in the territory commands — a live illustration of a price-to-income ratio decoupled from what typical local income can actually support.</p>
+      <p class="lang-zh" style="display:none">香港在國際住房可負擔性調查中——包括長期發布的 Demographia 國際住房可負擔性報告——十多年來一直排名在最頂端或接近最頂端，通常被引用的「所得倍數中位數」（房價中位數除以家戶所得中位數）落在接近二十倍甚至更高，是多數可負擔性框架認定「嚴重不可負擔」門檻的好幾倍。背後的結構性驅動因素有充分紀錄，且持久存在：相對於人口密度而言異常受限的土地供給，加上政府賣地與規劃政策長期以來限制了新供給進入市場的速度。結果是，即使是收入明顯高於中位數的一般本地家庭，多年來也難以負擔香港房價所隱含的所得倍數——這正是房價所得比與當地一般所得實際能負擔的水準脫鉤的活生生案例。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 6. Total return decomposition -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">6. Total Return Decomposition</h2>
+    <h2 class="lang-zh" style="display:none">六、總報酬拆解</h2>
+
+    <p class="lang-en">Cash-on-cash return only captures one slice of what a levered rental property actually returns — the cash that lands in your bank account each year. It misses two other real components of return: <span class="key-term" tabindex="0">total return decomposition<span class="key-term-tip"><span class="lang-en">Splitting a property's full equity return into its component parts — operating income, mortgage interest cost, principal paydown (equity built via amortization) and price appreciation — rather than looking at cash flow alone.</span><span class="lang-zh" style="display:none">把一間物業完整的權益報酬拆解成各個組成部分——營運收入、房貸利息成本、本金攤還（透過分期還款累積的權益）與房價增值——而不是只看現金流。</span></span></span> pulls all of them together: the operating income earned, the interest cost paid, the equity quietly built through principal paydown even in a cash-flow-negative year, and any price appreciation. A property can show a negative cash-on-cash number and still be building real equity value — or the reverse.</p>
+    <p class="lang-zh" style="display:none">現金報酬率只捕捉到一間有槓桿的出租物業真正報酬中的一小部分——也就是每年真正進到你銀行帳戶裡的現金。它遺漏了另外兩個真實的報酬組成部分：<span class="key-term" tabindex="0">總報酬拆解<span class="key-term-tip"><span class="lang-en">Splitting a property's full equity return into its component parts — operating income, mortgage interest cost, principal paydown (equity built via amortization) and price appreciation — rather than looking at cash flow alone.</span><span class="lang-zh" style="display:none">把一間物業完整的權益報酬拆解成各個組成部分——營運收入、房貸利息成本、本金攤還（透過分期還款累積的權益）與房價增值——而不是只看現金流。</span></span></span>把所有這些因素放在一起檢視：賺到的營運收入、付出的利息成本、即使在現金流為負的一年仍在悄悄累積的本金攤還權益，以及任何房價增值。一間物業可能現金報酬率是負的，卻仍在累積真正的權益價值——反之亦然。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — Five-Year Hold on the Anchor Home (Hypothetical)</span><span class="lang-zh" style="display:none">逐步演算範例——假設住宅持有五年（假設數字）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume flat rent and flat costs for simplicity: net operating income stays at $15,000/yr for all 5 years. Cumulative NOI: <span class="we-formula">$15,000 × 5 = $75,000</span>.</span>
+            <span class="lang-zh" style="display:none">為簡化計算，假設租金與成本維持不變：淨營運收益在整整 5 年都維持在 $15,000／年。累計淨營運收益：<span class="we-formula">$15,000 × 5 = $75,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">From the amortization schedule in Section 3, cumulative mortgage interest paid over the first 5 years on the $480,000/6% loan: <span class="we-formula">$139,331</span>. Cumulative principal paid down over the same 5 years: <span class="we-formula">$33,339</span> — this is equity built, not a loss, since it converts cash into home ownership rather than spending it.</span>
+            <span class="lang-zh" style="display:none">依照第三節的攤還時間表，$480,000、利率 6% 的貸款在頭 5 年累計支付的房貸利息：<span class="we-formula">$139,331</span>。同樣 5 年累計還進本金的部分：<span class="we-formula">$33,339</span>——這是累積出的權益，不是損失，因為它把現金轉換成了房屋所有權，而不是花掉。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Cash actually out of pocket over 5 years (NOI minus the full debt service of interest plus principal): <span class="we-formula">$75,000 − $139,331 − $33,339 = −$97,671</span>. On paper, this looks like a losing rental — but principal paydown isn't gone, it's now sitting in the home as equity.</span>
+            <span class="lang-zh" style="display:none">5 年內實際自掏腰包的現金（淨營運收益扣除利息加本金的完整還款）：<span class="we-formula">$75,000 − $139,331 − $33,339 = −$97,671</span>。表面上看起來像是一筆虧錢的租賃投資——但攤還掉的本金並沒有消失，它現在以權益的形式留在房子裡。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume (假設) modest 3%/yr price appreciation: <span class="we-formula">$600,000 × (1.03)^5 ≈ $695,564</span>. Appreciation over 5 years: <span class="we-formula">$695,564 − $600,000 = $95,564</span>.</span>
+            <span class="lang-zh" style="display:none">假設每年 3% 的溫和房價增值：<span class="we-formula">$600,000 × (1.03)^5 ≈ $695,564</span>。5 年累計增值：<span class="we-formula">$695,564 − $600,000 = $95,564</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">Add the pieces back together correctly: total 5-year equity dollar gain = cumulative NOI − cumulative interest + appreciation (the principal-paydown term cancels out algebraically, because it was subtracted as cash and added back as equity in the same amount): <span class="we-formula">$75,000 − $139,331 + $95,564 = $31,233</span>.</span>
+            <span class="lang-zh" style="display:none">把各個部分正確地重新加總：5 年累計權益金額增益＝累計淨營運收益－累計利息＋增值（本金攤還這一項在代數上會互相抵銷，因為它先以現金形式被扣除、再以完全相同的金額以權益形式加回）：<span class="we-formula">$75,000 − $139,331 + $95,564 = $31,233</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">6</span>
+          <span class="we-step-body">
+            <span class="lang-en">Ending equity: <span class="we-formula">$120,000 (cash invested) + $31,233 = $151,233</span>. Equity multiple: <span class="we-formula">$151,233 ÷ $120,000 = 1.26x</span>. Annualized equity return over the 5 years: <span class="we-formula">1.26^(1/5) − 1 ≈ 4.7%/yr</span> — a positive result built almost entirely from appreciation and interest cost offsetting negative cash flow, not from cash flow itself. Change the appreciation assumption to zero, and this same property's total return collapses toward a loss.</span>
+            <span class="lang-zh" style="display:none">期末權益：<span class="we-formula">$120,000（投入現金）+ $31,233 = $151,233</span>。權益倍數：<span class="we-formula">$151,233 ÷ $120,000 = 1.26x</span>。5 年年化權益報酬率：<span class="we-formula">1.26^(1/5) − 1 ≈ 4.7%／年</span>——這個正報酬幾乎完全來自增值與利息成本抵銷負現金流之後的結果，而不是來自現金流本身。如果把增值假設改成零，同一間物業的總報酬就會崩向虧損。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">This is the real lesson of decomposition: a property that looks like a cash-flow loser on a year-by-year basis can still be a reasonable total-return investment if enough of the return is arriving as appreciation and equity buildup instead of cash flow — but that also means the investment's success now depends heavily on an appreciation assumption that, unlike rent, is not contractually guaranteed. Total return decomposition doesn't make a weak cash-flow deal safe; it makes explicit exactly how much of the deal's success rests on an assumption rather than a fact.</p>
+    <p class="lang-zh" style="display:none">這正是報酬拆解真正的教訓：一間逐年來看像是現金流虧損者的物業，如果報酬有足夠比例是以增值與權益累積、而不是現金流的形式到來，仍然可能是一筆合理的總報酬投資——但這也代表這筆投資能否成功，如今高度仰賴一項增值假設，而這項假設不像租金那樣有合約保障。總報酬拆解並不會讓一筆現金流疲弱的交易變得安全；它只是把這筆交易的成功有多少比例建立在假設、而非事實之上，講得清清楚楚。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 7. Transaction cost round trip -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">7. The Transaction Cost Round-Trip</h2>
+    <h2 class="lang-zh" style="display:none">七、交易成本來回一趟</h2>
+
+    <p class="lang-en">Buying and later selling a home both carry real costs on top of the price itself. Buy-side costs typically include legal/conveyancing fees, a buyer's agent commission where applicable, mortgage-origination fees, and in many jurisdictions a transfer tax or stamp duty (依司法轄區而異 — rates and even which side of the transaction pays vary enormously by market). Sell-side costs typically include a listing agent's commission, closing/legal fees again, and in some jurisdictions capital gains tax on any price appreciation (依司法轄區而異). Combined, round-trip transaction costs commonly fall somewhere in a mid-single-digit to low-double-digit percentage of price, depending heavily on jurisdiction — and that combined percentage is not a small tax on the deal, it is often the difference between a short hold that works and one that quietly loses money even while the property itself appreciated.</p>
+    <p class="lang-zh" style="display:none">買進與日後賣出一間住宅，除了價格本身之外，都帶有真實成本。買方一側的成本通常包括法律／過戶手續費、適用時的買方仲介佣金、貸款設定手續費，以及許多司法轄區課徵的過戶稅或印花稅（依司法轄區而異——稅率、甚至交易哪一方負擔，各市場差異極大）。賣方一側的成本通常包括銷售仲介佣金、再一次的過戶／法律手續費，以及某些司法轄區對房價增值課徵的資本利得稅（依司法轄區而異）。合計來看，來回一趟的交易成本，常落在價格的中個位數到低兩位數百分比之間，高度取決於司法轄區——而這個合計百分比並不是交易上的小額稅金，它經常正是一筆短期持有能不能真正划算、還是即使物業本身有增值卻仍悄悄虧錢的關鍵差異。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example — Breakeven Appreciation for a Round Trip (Hypothetical)</span><span class="lang-zh" style="display:none">逐步演算範例——來回一趟所需的損益兩平增值（假設數字）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume (假設) buy-side costs of 2% of price on the anchor home: <span class="we-formula">$600,000 × 2% = $12,000</span>. All-in cost basis: <span class="we-formula">$600,000 + $12,000 = $612,000</span>.</span>
+            <span class="lang-zh" style="display:none">假設買方一側成本為價格的 2%：<span class="we-formula">$600,000 × 2% = $12,000</span>。全部投入的成本基礎：<span class="we-formula">$600,000 + $12,000 = $612,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume (假設) sell-side costs of 6% of the eventual sale price (agent commission plus closing costs). To break even, the sale price must cover both the $612,000 basis and the 6% taken off the top of the sale itself.</span>
+            <span class="lang-zh" style="display:none">假設賣方一側成本為最終成交價的 6%（仲介佣金加過戶成本）。要達到損益兩平，成交價必須同時覆蓋 $612,000 的成本基礎，以及從成交金額本身扣除的 6%。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Solving <span class="we-formula">SalePrice × (1 − 6%) = $612,000</span> gives <span class="we-formula">SalePrice = $612,000 ÷ 0.94 = $651,064</span>.</span>
+            <span class="lang-zh" style="display:none">求解 <span class="we-formula">成交價 × (1 − 6%) = $612,000</span>，得出 <span class="we-formula">成交價 = $612,000 ÷ 0.94 = $651,064</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Appreciation needed just to break even: <span class="we-formula">($651,064 − $600,000) ÷ $600,000 ≈ 8.5%</span>. Note this is higher than the simple 2% + 6% = 8% sum of the two cost percentages, because the sell-side cost is charged against the higher sale price, not the original purchase price — costs compound slightly against the seller. Anything less than roughly 8.5% price appreciation over the hold, and this round trip loses money even before financing costs or holding-period cash flow are considered.</span>
+            <span class="lang-zh" style="display:none">單純為了損益兩平所需的增值：<span class="we-formula">($651,064 − $600,000) ÷ $600,000 ≈ 8.5%</span>。注意這個數字高於單純把兩項成本百分比相加的 2% + 6% = 8%，因為賣方一側的成本是按較高的成交價計算，而不是按原始購買價格——成本會對賣方形成些微複利效果。如果整個持有期間的房價增值低於大約 8.5%，那麼即使還沒把融資成本或持有期間的現金流算進去，這趟來回交易本身就已經在虧錢。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">This is exactly why a short hold is a fundamentally different bet from a long hold, even on the identical property. A buyer planning to hold for one or two years needs price appreciation (or a below-market purchase) large enough to clear the round-trip cost hurdle in that short window. A buyer planning to hold for ten or fifteen years amortizes that same fixed round-trip cost over far more years of rental income and far more time for appreciation to accumulate — the transaction cost hurdle barely moves the long-hold math, while it can dominate the short-hold math entirely.</p>
+    <p class="lang-zh" style="display:none">這正是為什麼即使是同一間物業，短期持有跟長期持有本質上是完全不同的賭注。計劃只持有一、兩年的買方，需要在這麼短的窗口內，達成足以跨過來回交易成本門檻的房價增值（或以低於市價買進）。計劃持有十年、十五年的買方，則能把同樣固定的來回交易成本，攤在多得多年份的租金收入與多得多的增值累積時間裡——交易成本門檻幾乎不會撼動長期持有的算式，卻可能完全主導短期持有的算式。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Hong Kong and Singapore have both, at various points over the past two decades, imposed steep additional stamp duties specifically targeting short-hold residential resales and non-resident buyers, as a deliberate policy tool to cool speculative flipping. Hong Kong's Special Stamp Duty, introduced in 2010 and tightened in 2012, layered an extra charge of up to 20% of the transaction price on residential properties resold within a short holding window (originally two years, later extended to three), on top of the ordinary stamp duty already due — a combined round-trip friction large enough to make short-hold flipping arithmetic simply not work for most buyers. Singapore has run a broadly comparable Seller's Stamp Duty regime targeting resales within a set holding period. Both are well-documented, deliberate examples of a government using transaction-cost friction as a lever to discourage exactly the kind of short-hold speculation this section's breakeven math describes.</p>
+      <p class="lang-zh" style="display:none">過去二十年間，香港與新加坡都曾在不同時期，針對短期持有的住宅轉售與非本地買家，課徵高額的額外印花稅，做為刻意用來為投機轉手降溫的政策工具。香港的額外印花稅（Special Stamp Duty）於 2010 年推出、2012 年加碼，對在短期持有窗口內（最初為兩年，後延長為三年）轉售的住宅物業，在原本已需繳納的一般印花稅之上，再疊加最高達成交價 20% 的額外稅負——合計的來回交易摩擦大到讓多數買方的短期轉手算式根本行不通。新加坡也運行著大致可比的賣方印花稅（Seller's Stamp Duty）制度，針對在特定持有期限內轉售的物業課稅。這兩者都是有充分紀錄、政府刻意運用交易成本摩擦做為槓桿、來遏止本節損益兩平算式所描述的那種短期持有投機行為的例子。</p>
+    </div>
+  </div>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">The June 2021 collapse of the Champlain Towers South condominium in Surfside, Florida, in which nearly 100 residents died, triggered a wave of structural re-inspections across older Florida condo buildings and, in its wake, new state legislation requiring regular structural integrity reserve studies. The direct financial consequence for many existing condo owners, far beyond that single building, was a surge in large special assessments — one-time bills layered on top of ordinary HOA fees — as associations across the state moved to fund structural repairs and legally mandated reserve funds that many buildings had gone years without adequately building up. Owners who had underwritten a property's net yield off the advertised monthly HOA fee alone, with no allowance for an underfunded reserve, found that number could be dwarfed by a single special-assessment bill running into the tens of thousands of dollars. It is a documented, large-scale illustration of exactly the HOA/reserve-fund risk flagged in this module's cost-stack section.</p>
+      <p class="lang-zh" style="display:none">2021 年 6 月，佛羅里達州瑟夫賽德（Surfside）的尚普蘭大廈南棟（Champlain Towers South）公寓倒塌，造成近百名住戶死亡，事件之後引發佛州各地老舊公寓大樓一波結構性複檢，並促成新的州立法，要求定期進行結構完整性準備金研究。對遠遠不只這一棟大樓的許多既有公寓業主而言，直接的財務後果，是大額特別攤提（special assessment）——疊加在一般 HOA 費用之上的一次性帳單——大量湧現，因為全州各地的管委會紛紛著手籌措資金，用於結構修繕以及許多大樓多年來未能足額提列的法定準備金。那些只憑廣告上的每月 HOA 費用去核算物業淨殖利率、卻沒有為準備金提列不足預留任何空間的業主，這才發現這個數字可能被單一一筆高達數萬美元的特別攤提帳單徹底比下去。這是一個有充分紀錄、大規模的真實案例，恰恰印證了本課成本堆疊章節所提醒的 HOA／準備金風險。</p>
+    </div>
+  </div>
+
+  <ul class="checklist">
+    <li class="checklist-item"><input type="checkbox" id="chk-1"><label for="chk-1"><span class="lang-en">I've built net yield from gross, line by line, rather than quoting gross yield as if it were the real return.</span><span class="lang-zh" style="display:none">我已經逐項從總殖利率堆疊出淨殖利率，而不是把總殖利率當成真正的報酬來報。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-2"><label for="chk-2"><span class="lang-en">I know whether my mortgage rate is fixed for the full term or will reset — and I've run the numbers at the reset rate, not just today's rate.</span><span class="lang-zh" style="display:none">我知道自己的房貸利率是整個年期固定，還是會重設——而且我已經用重設後的利率算過一次，而不只是用今天的利率。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-3"><label for="chk-3"><span class="lang-en">I've checked which direction leverage cuts by comparing the property's net yield to the actual mortgage rate, not just assumed borrowing helps.</span><span class="lang-zh" style="display:none">我已經用物業淨殖利率跟實際房貸利率比較過，確認槓桿是往哪個方向走，而不是直接假設借錢一定有幫助。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-4"><label for="chk-4"><span class="lang-en">I've checked the local price-to-rent and price-to-income multiples via the dashboard before assuming this market is cheap or expensive.</span><span class="lang-zh" style="display:none">在假設這個市場便宜或昂貴之前，我已經透過儀表板查過當地的房價租金比與房價所得比。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-5"><label for="chk-5"><span class="lang-en">I've decomposed total return into cash flow, principal paydown and appreciation, rather than judging the deal off cash-on-cash alone.</span><span class="lang-zh" style="display:none">我已經把總報酬拆解成現金流、本金攤還與增值，而不是只憑現金報酬率單一數字來判斷這筆交易。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-6"><label for="chk-6"><span class="lang-en">I've sized the round-trip transaction cost and the appreciation needed to clear it before assuming a short hold works.</span><span class="lang-zh" style="display:none">在假設短期持有可行之前，我已經算清楚來回一趟的交易成本，以及需要多少增值才能跨過這個門檻。</span></label></li>
+  </ul>
+
+  <div class="calc-card" id="calc-rental-yield">
+    <div class="calc-card-title"><span class="lang-en">Try It: Rental Yield Calculator</span><span class="lang-zh" style="display:none">動手試算：租金殖利率</span></div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Purchase Price ($)</span><span class="lang-zh" style="display:none">購買價格（美元）</span></span>
+        <span class="calc-row-echo" data-echo="ry-price">600000</span>
+      </div>
+      <input type="range" id="ry-price" name="price" min="100000" max="2000000" step="10000" value="600000">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Monthly Rent ($)</span><span class="lang-zh" style="display:none">月租金（美元）</span></span>
+        <span class="calc-row-echo" data-echo="ry-rent">2000</span>
+      </div>
+      <input type="range" id="ry-rent" name="rent" min="500" max="10000" step="50" value="2000">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Vacancy Allowance (%)</span><span class="lang-zh" style="display:none">空置準備（%）</span></span>
+        <span class="calc-row-echo" data-echo="ry-vacancy">5</span>
+      </div>
+      <input type="range" id="ry-vacancy" name="vacancyPct" min="0" max="15" step="1" value="5">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Management Fee (% of collected rent)</span><span class="lang-zh" style="display:none">管理費（占已收租金 %）</span></span>
+        <span class="calc-row-echo" data-echo="ry-mgmt">8</span>
+      </div>
+      <input type="range" id="ry-mgmt" name="mgmtPct" min="0" max="15" step="1" value="8">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Tax + Insurance (% of price/yr, 依司法轄區而異)</span><span class="lang-zh" style="display:none">房產稅＋保險（占價格 %／年，依司法轄區而異）</span></span>
+        <span class="calc-row-echo" data-echo="ry-taxins">1.5</span>
+      </div>
+      <input type="range" id="ry-taxins" name="taxInsPct" min="0" max="4" step="0.1" value="1.5">
+    </div>
+    <div class="calc-outputs">
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Gross Yield</span><span class="lang-zh" style="display:none">總殖利率</span></span>
+        <span class="calc-output-value" data-out="grossYield">4.00%</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Net Yield</span><span class="lang-zh" style="display:none">淨殖利率</span></span>
+        <span class="calc-output-value" data-out="netYield">2.00%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-card" id="calc-mortgage">
+    <div class="calc-card-title"><span class="lang-en">Try It: Mortgage Calculator</span><span class="lang-zh" style="display:none">動手試算：房貸計算機</span></div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Loan Amount ($)</span><span class="lang-zh" style="display:none">貸款金額（美元）</span></span>
+        <span class="calc-row-echo" data-echo="mc-loan">480000</span>
+      </div>
+      <input type="range" id="mc-loan" name="loanAmount" min="50000" max="1500000" step="10000" value="480000">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Interest Rate (%)</span><span class="lang-zh" style="display:none">利率（%）</span></span>
+        <span class="calc-row-echo" data-echo="mc-rate">6.0</span>
+      </div>
+      <input type="range" id="mc-rate" name="rate" min="0" max="12" step="0.1" value="6.0">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Term (years)</span><span class="lang-zh" style="display:none">年期（年）</span></span>
+        <span class="calc-row-echo" data-echo="mc-years">30</span>
+      </div>
+      <input type="range" id="mc-years" name="years" min="5" max="40" step="1" value="30">
+    </div>
+    <div class="calc-outputs">
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Monthly Payment</span><span class="lang-zh" style="display:none">月付金</span></span>
+        <span class="calc-output-value" data-out="payment">$2,878</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Total Interest Paid</span><span class="lang-zh" style="display:none">累計支付利息</span></span>
+        <span class="calc-output-value" data-out="totalInterest">$556,023</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Payment vs. $2,000/mo Rent</span><span class="lang-zh" style="display:none">月付金相對 $2,000／月租金</span></span>
+        <span class="calc-output-value" data-out="pctRent">144%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-block" data-quiz-id="m02-q1" data-quiz='[
+    {
+      "q":{"en":"A home costs $500,000 and rents for $2,500/month. What is its gross yield, and what does that number alone tell you about the real return?","zh":"某住宅價格 $500,000，月租金 $2,500，總殖利率是多少？光憑這個數字能告訴你多少真正的報酬？"},
+      "opts":[
+        {"en":"6.0% — but this is before any costs, so it overstates the real return, sometimes by a third or more","zh":"6.0%——但這是扣除任何成本之前的數字，因此高估了真正的報酬，有時會高估三分之一以上"},
+        {"en":"6.0%, and this is already the investor&#39;s real annual return after costs","zh":"6.0%，而且這已經是投資人扣除成本後的真正年報酬"},
+        {"en":"0.5% — gross yield is rent divided by price, expressed monthly","zh":"0.5%——總殖利率是租金除以價格，以月為單位表示"},
+        {"en":"It cannot be computed without knowing the mortgage rate","zh":"不知道房貸利率就無法算出來"}
+      ],
+      "a":0,
+      "exp":{"en":"Gross yield = $2,500 × 12 ÷ $500,000 = 6.0%. It is the headline number before vacancy, management, maintenance, tax, insurance and HOA are subtracted — the real (net) return is routinely well below it.","zh":"總殖利率＝$2,500 × 12 ÷ $500,000 = 6.0%。這是扣除空置、管理費、維護、稅金、保險與 HOA 費用之前的頭條數字——真正的（淨）報酬通常明顯低於這個數字。"}
+    },
+    {
+      "q":{"en":"Which of the following does NOT belong in the cost stack used to go from gross yield to net yield?","zh":"以下哪一項不應該算進「從總殖利率算到淨殖利率」的成本堆疊裡？"},
+      "opts":[
+        {"en":"Mortgage principal repayment","zh":"房貸本金攤還"},
+        {"en":"Property management fee","zh":"物業管理費"},
+        {"en":"Vacancy allowance","zh":"空置準備"},
+        {"en":"Maintenance/capex reserve","zh":"維護／資本支出準備金"}
+      ],
+      "a":0,
+      "exp":{"en":"Net yield is an unlevered figure — it excludes financing entirely (both interest and principal), the same way NOI excludes debt service. Mortgage payments come into play only later, in cash-on-cash and total return.","zh":"淨殖利率是無槓桿的數字——它完全排除融資（利息與本金都不算），就像淨營運收益排除還款一樣。房貸月付金要到後面現金報酬率與總報酬的計算才會出現。"}
+    },
+    {
+      "q":{"en":"A 30-year fixed mortgage has the same payment every month. What actually changes over the life of the loan?","zh":"30 年固定利率房貸每個月的月付金都一樣，那在貸款期間，真正在改變的是什麼？"},
+      "opts":[
+        {"en":"The split between interest and principal within that fixed payment — mostly interest early, mostly principal late","zh":"這筆固定月付金內部利息與本金的比例——早期以利息為主，後期以本金為主"},
+        {"en":"Nothing — a fixed payment means a fixed interest/principal split too","zh":"什麼都沒變——固定月付金也代表利息與本金的比例是固定的"},
+        {"en":"The interest rate itself, which resets every year on a fixed-rate loan","zh":"利率本身，因為固定利率貸款每年都會重設一次"},
+        {"en":"Only the remaining term, with the payment&#39;s composition being irrelevant","zh":"只有剩餘年期會變，月付金的組成無關緊要"}
+      ],
+      "a":0,
+      "exp":{"en":"Interest each month is charged only on the remaining balance, so as the balance shrinks, the interest portion shrinks and the principal portion grows — even though the total payment stays fixed.","zh":"每個月的利息只針對剩餘餘額計算，所以隨著餘額縮小，利息占比縮小、本金占比擴大——即使整筆月付金金額維持不變。"}
+    },
+    {
+      "q":{"en":"A $480,000 loan at 6% for 30 years ends up costing $556,023 in total interest. What does this figure roughly represent?","zh":"一筆 $480,000、利率 6%、30 年期的貸款，最終總共要付 $556,023 的利息，這個數字大致代表什麼？"},
+      "opts":[
+        {"en":"More than the original loan amount itself — a normal outcome for a long-amortization loan at a plausible rate, not an unusual or extreme case","zh":"比原始貸款金額本身還多——這是長年期攤還貸款在合理利率下的正常結果，不是異常或極端的個案"},
+        {"en":"Roughly 10% of the loan amount, a typical figure for any mortgage","zh":"大約是貸款金額的 10%，任何房貸都是這樣的典型數字"},
+        {"en":"An error, since total interest should always be less than the principal","zh":"這是算錯了，因為總利息本來就應該低於本金"},
+        {"en":"The amount that would be owed if the loan were paid off in year 1","zh":"這是如果第 1 年就把貸款還清所欠的金額"}
+      ],
+      "a":0,
+      "exp":{"en":"$556,023 is about 116% of the $480,000 principal — total interest exceeding the original loan amount is ordinary arithmetic for a 30-year loan at a plausible rate, not an edge case.","zh":"$556,023 約為 $480,000 本金的 116%——總利息超過原始貸款金額，是 30 年期貸款在合理利率下的正常算術，不是特殊個案。"}
+    },
+    {
+      "q":{"en":"A property has a 6.5% net yield. The mortgage rate available is 5.0%. What happens to cash-on-cash return as leverage increases, and why?","zh":"某物業淨殖利率為 6.5%，可取得的房貸利率為 5.0%，隨著槓桿提高，現金報酬率會發生什麼變化？為什麼？"},
+      "opts":[
+        {"en":"It rises above the 6.5% unlevered yield — positive leverage, because each borrowed dollar earns more than it costs","zh":"會升到 6.5% 無槓桿殖利率之上——這是正向槓桿，因為每借一塊錢賺到的比它的成本多"},
+        {"en":"It falls below 6.5% regardless of rates, since borrowing always reduces yield","zh":"無論利率如何，都會跌破 6.5%，因為借錢一定會拉低殖利率"},
+        {"en":"It stays exactly at 6.5%, since leverage only changes total dollars, not the rate of return","zh":"會維持在 6.5%，因為槓桿只改變總金額，不改變報酬率"},
+        {"en":"It becomes impossible to calculate once a mortgage is involved","zh":"一旦涉及房貸，就無法計算"}
+      ],
+      "a":0,
+      "exp":{"en":"When the mortgage rate (5.0%) is below the property&#39;s net yield (6.5%), borrowing is favorable — this is positive leverage, and cash-on-cash return rises above the unlevered net yield as leverage increases.","zh":"當房貸利率（5.0%）低於物業淨殖利率（6.5%）時，借款是有利的——這是正向槓桿，隨著槓桿提高，現金報酬率會升到無槓桿淨殖利率之上。"}
+    },
+    {
+      "q":{"en":"Same property, same 6.5% net yield, but the only mortgage rate available is now 8.5%. What is the correct read?","zh":"同一間物業，同樣 6.5% 淨殖利率，但現在唯一能取得的房貸利率是 8.5%，正確的解讀是什麼？"},
+      "opts":[
+        {"en":"Negative leverage — the rate now exceeds the yield, so cash-on-cash falls below 6.5% and can turn negative even though the property rents perfectly well","zh":"負向槓桿——利率現在高於殖利率，因此現金報酬率會跌破 6.5%，甚至可能變成負數，即使這間物業租金收益其實相當不錯"},
+        {"en":"Nothing changes, since the property&#39;s rent and net yield are unaffected by the mortgage rate","zh":"什麼都不會變，因為物業的租金與淨殖利率不受房貸利率影響"},
+        {"en":"The deal becomes unfinanceable and cash-on-cash cannot be computed","zh":"這筆交易會變得無法融資，現金報酬率也就無法計算"},
+        {"en":"Cash-on-cash automatically adjusts to stay equal to the net yield regardless of rate","zh":"現金報酬率會自動調整，無論利率多少都會等於淨殖利率"}
+      ],
+      "a":0,
+      "exp":{"en":"Once the mortgage rate exceeds the net yield, each additional borrowed dollar costs more than it earns — negative leverage — pulling cash-on-cash below the unlevered yield and potentially into negative territory, exactly as the worked example showed (6.67% at 5.0% rate vs. −1.68% at 8.5%).","zh":"一旦房貸利率超過淨殖利率，每多借一塊錢的成本就超過它能賺到的收益——這就是負向槓桿——把現金報酬率拉到無槓桿殖利率之下，甚至可能落入負值區間，正如逐步演算範例所示（5.0% 利率下為 6.67%，8.5% 利率下為 −1.68%）。"}
+    },
+    {
+      "q":{"en":"What does the price-to-rent ratio actually measure, as distinct from the price-to-income ratio?","zh":"房價租金比實際上衡量的是什麼，與房價所得比有什麼不同？"},
+      "opts":[
+        {"en":"How many years of rent the price represents — a yield-market indicator — while price-to-income measures local affordability and debt-serviceability","zh":"價格相當於幾年租金——這是殖利率市場的指標——而房價所得比衡量的是當地可負擔性與償債能力"},
+        {"en":"The same thing as price-to-income, just expressed with a different denominator","zh":"跟房價所得比是同一件事，只是分母不同"},
+        {"en":"The percentage of local income spent on rent each month","zh":"每個月花在租金上占當地所得的百分比"},
+        {"en":"A measure of how quickly a property will sell once listed","zh":"衡量一間物業上市後多快能賣掉"}
+      ],
+      "a":0,
+      "exp":{"en":"Price-to-rent (price ÷ annual rent, the inverse of gross yield) signals whether a market is priced for cash flow. Price-to-income (median price ÷ median household income) signals affordability for local buyers — a different question entirely, even though both ratios use price in the numerator.","zh":"房價租金比（價格÷年租金，是總殖利率的倒數）反映的是市場定價是否為了現金流。房價所得比（房價中位數÷家戶所得中位數）反映的是當地買家的可負擔性——即使兩者分子都是價格，這其實是完全不同的問題。"}
+    },
+    {
+      "q":{"en":"A market has a very low price-to-rent ratio. Is that automatically a buy signal?","zh":"某市場房價租金比非常低，這是不是自動代表值得買進的訊號？"},
+      "opts":[
+        {"en":"Not automatically — it can mean genuine value, or it can mean the market has structurally weak long-term appreciation, which is why yields have to be higher to attract capital","zh":"不是自動如此——它可能代表真正的價值，也可能代表這個市場結構性長期增值偏弱，這正是為什麼殖利率必須更高才能吸引資金"},
+        {"en":"Yes, a low price-to-rent ratio always means the market is undervalued and about to appreciate","zh":"是的，房價租金比低永遠代表這個市場被低估，即將增值"},
+        {"en":"No, price-to-rent has no relationship to yield at all","zh":"不是，房價租金比跟殖利率完全沒有關係"},
+        {"en":"It only matters for commercial property, not residential","zh":"這只跟商用不動產有關，跟住宅無關"}
+      ],
+      "a":0,
+      "exp":{"en":"A low price-to-rent ratio is an input to judgment, not a verdict on its own — it can reflect genuine value or a market where higher yields exist precisely because long-term price growth is structurally weaker.","zh":"房價租金比低只是判斷的輸入項，不是本身就能下結論——它可能反映真正的價值，也可能反映一個殖利率較高、正是因為長期房價成長結構性較弱的市場。"}
+    },
+    {
+      "q":{"en":"In the 5-year total return decomposition worked example, the property showed a negative cumulative cash flow of about −$97,671, yet the total 5-year equity gain was positive at about $31,233. How is that possible?","zh":"在五年期總報酬拆解的逐步演算範例中，該物業累計現金流約為 −$97,671，是負的，但 5 年累計權益增益卻是正的，約 $31,233，這怎麼可能？"},
+      "opts":[
+        {"en":"Because principal paydown, though subtracted as a cash cost, is added back as home equity, and price appreciation contributed a further gain — cash flow is only one component of total return","zh":"因為本金攤還雖然以現金成本的形式被扣除，卻會以房屋權益的形式加回，而房價增值又貢獻了額外的增益——現金流只是總報酬的一個組成部分"},
+        {"en":"It isn&#39;t actually possible — this would be a calculation error","zh":"這其實不可能——這應該是計算錯誤"},
+        {"en":"Because net operating income was double-counted","zh":"因為淨營運收益被重複計算了"},
+        {"en":"Because the mortgage interest was ignored in the total return figure","zh":"因為總報酬數字忽略了房貸利息"}
+      ],
+      "a":0,
+      "exp":{"en":"Cash flow subtracts the full debt service (interest + principal). Principal paydown isn&#39;t lost — it becomes home equity — so adding it back, plus appreciation, can turn a cash-flow loser into a positive total-return investment, provided the appreciation assumption holds.","zh":"現金流計算會扣除完整的還款（利息＋本金）。本金攤還並沒有消失——它變成了房屋權益——所以把它加回、再加上增值，可以把一筆現金流虧損的投資轉為總報酬為正，前提是增值假設真的成立。"}
+    },
+    {
+      "q":{"en":"Why does relying heavily on appreciation to make total return positive carry more risk than relying on rental cash flow?","zh":"為什麼高度仰賴增值來讓總報酬轉正，比仰賴租金現金流承擔更多風險？"},
+      "opts":[
+        {"en":"Because appreciation is an assumption about the future, not a contractual, already-earned amount the way rent is","zh":"因為增值是對未來的假設，不像租金那樣是已經賺到、有合約保障的金額"},
+        {"en":"Because appreciation is always taxed at a higher rate than rental income","zh":"因為增值一律要按比租金收入更高的稅率課稅"},
+        {"en":"There is no additional risk — appreciation and rent are equally reliable sources of return","zh":"並沒有額外風險——增值跟租金是同樣可靠的報酬來源"},
+        {"en":"Because appreciation cannot be included in a total return calculation at all","zh":"因為增值根本不能算進總報酬計算裡"}
+      ],
+      "a":0,
+      "exp":{"en":"Rent, once a lease is signed, is a contracted cash flow. Appreciation is an assumption about a future sale price that may or may not materialize — leaning on it to make the numbers work means the investment&#39;s success depends on something outside the investor&#39;s control.","zh":"租金一旦租約簽訂，就是有合約約束的現金流。增值則是對未來成交價的假設，不一定會實現——仰賴它讓數字看起來划算，代表這筆投資能否成功，取決於投資人無法控制的因素。"}
+    },
+    {
+      "q":{"en":"Buy-side costs run 2% of price and sell-side costs run 6% of the sale price. Why is the breakeven appreciation needed slightly more than the simple sum of 2% + 6% = 8%?","zh":"買方一側成本占價格 2%，賣方一側成本占成交價 6%，為什麼損益兩平所需的增值會略高於單純相加的 2% + 6% = 8%？"},
+      "opts":[
+        {"en":"Because the sell-side percentage is charged against the higher eventual sale price, not the original purchase price, so costs compound slightly against the seller","zh":"因為賣方一側的百分比是按較高的最終成交價計算，而不是按原始購買價格，所以成本會對賣方形成些微複利效果"},
+        {"en":"Because the 2% and 6% figures should actually be multiplied, not added, from the start","zh":"因為 2% 跟 6% 這兩個數字一開始就應該相乘，而不是相加"},
+        {"en":"It isn&#39;t actually higher — 8% is always the exact breakeven figure","zh":"其實不會更高——8% 永遠就是精確的損益兩平數字"},
+        {"en":"Because closing costs are charged twice under most jurisdictions&#39; rules","zh":"因為多數司法轄區的規則下，過戶成本會被收兩次"}
+      ],
+      "a":0,
+      "exp":{"en":"Solving SalePrice × (1 − 6%) = $612,000 gives a breakeven sale price requiring about 8.5% appreciation, not exactly 8%, because the 6% sell-side cost is taken off a larger, appreciated sale price rather than the original $600,000.","zh":"求解成交價 × (1 − 6%) = $612,000，得出損益兩平所需的增值約為 8.5%，而不是剛好 8%，因為 6% 的賣方成本是從較大、已經增值後的成交價中扣除，而不是從原始的 $600,000 扣除。"}
+    },
+    {
+      "q":{"en":"Why does a short 1–2 year hold face a much harder round-trip transaction cost hurdle than a 10–15 year hold on the identical property?","zh":"為什麼同一間物業，持有 1 到 2 年的短期持有，來回一趟的交易成本門檻會比持有 10 到 15 年難跨過得多？"},
+      "opts":[
+        {"en":"Because the fixed round-trip cost has to be cleared by appreciation within a much shorter window, while a long hold spreads that same fixed cost over far more years of rent and appreciation","zh":"因為固定的來回交易成本必須在短得多的窗口內靠增值跨過去，而長期持有則能把同樣固定的成本，攤在多得多年份的租金與增值裡"},
+        {"en":"Because transaction costs are charged annually, so a longer hold pays them more times","zh":"因為交易成本是按年課徵，所以持有越久要付越多次"},
+        {"en":"There is no real difference — round-trip cost hurdles are identical regardless of hold length","zh":"其實沒有真正的差別——來回交易成本門檻無論持有多久都一樣"},
+        {"en":"Because mortgage rates are always higher for short holds","zh":"因為短期持有的房貸利率一定比較高"}
+      ],
+      "a":0,
+      "exp":{"en":"Round-trip transaction costs are roughly a fixed percentage of price, paid once at each end. A short hold must clear that hurdle with appreciation achieved in just 1–2 years; a long hold amortizes the identical fixed cost across far more years of rental income and accumulated appreciation, so it barely affects the long-hold math.","zh":"來回交易成本大致是按價格計算的固定百分比，在交易兩端各付一次。短期持有必須在短短 1 到 2 年內用增值跨過這個門檻；長期持有則能把同樣固定的成本，攤銷在多得多年份的租金收入與累積增值裡，因此幾乎不會影響長期持有的算式。"}
+    }
+  ]'></div>
+
+  <div class="lc-pager">
+    <a href="01-basics.html">
+      <span class="lc-pager-dir lang-en">Previous</span><span class="lc-pager-dir lang-zh" style="display:none">上一課</span>
+      <div class="lc-pager-label lang-en">What Residential Investing Is</div>
+      <div class="lc-pager-label lang-zh" style="display:none">住宅投資是什麼</div>
+    </a>
+    <a href="03-property-reading.html" class="lc-pager-next">
+      <span class="lc-pager-dir lang-en">Next</span><span class="lc-pager-dir lang-zh" style="display:none">下一課</span>
+      <div class="lc-pager-label lang-en">Reading a Property</div>
+      <div class="lc-pager-label lang-zh" style="display:none">看懂一個物件</div>
+    </a>
+  </div>
+
+  <footer class="lc-footer">
+    <a href="./index.html"><span class="lang-en">&larr; Course Home</span><span class="lang-zh" style="display:none">&larr; 課程首頁</span></a>
+    <span class="lc-footer-note">INVESTMQUEST &middot; LEARN RESIDENTIAL &middot; MODULE 02</span>
+  </footer>
+
+</div>
+
+<script src="./learn.js"></script>
+<script>
+  initCalc('calc-rental-yield', function(values){
+    var price = values.price || 0;
+    var rent = values.rent || 0;
+    var vacancyPct = values.vacancyPct || 0;
+    var mgmtPct = values.mgmtPct || 0;
+    var taxInsPct = values.taxInsPct || 0;
+
+    var grossAnnual = rent * 12;
+    var grossYield = price > 0 ? (grossAnnual / price) * 100 : 0;
+
+    var vacancyLoss = grossAnnual * (vacancyPct / 100);
+    var effectiveRent = grossAnnual - vacancyLoss;
+    var mgmtFee = effectiveRent * (mgmtPct / 100);
+    var taxIns = price * (taxInsPct / 100);
+    var netAnnual = effectiveRent - mgmtFee - taxIns;
+    var netYield = price > 0 ? (netAnnual / price) * 100 : 0;
+
+    return {
+      grossYield: grossYield.toFixed(2) + '%',
+      netYield: netYield.toFixed(2) + '%'
+    };
+  });
+
+  initCalc('calc-mortgage', function(values){
+    var loan = values.loanAmount || 0;
+    var ratePct = values.rate || 0;
+    var years = values.years || 0;
+    var n = Math.round(years * 12);
+    var r = ratePct / 100 / 12;
+    var refRent = 2000; // static reference: the module's anchor home rent
+
+    var M = 0;
+    if(n > 0){
+      if(r === 0){
+        M = loan / n;
+      } else {
+        var f = Math.pow(1 + r, n);
+        M = (f - 1) !== 0 ? (loan * r * f) / (f - 1) : 0;
+      }
+    }
+    var totalPaid = M * n;
+    var totalInterest = totalPaid - loan;
+    var pctRent = refRent > 0 ? (M / refRent) * 100 : 0;
+
+    return {
+      payment: '$' + Math.round(M).toLocaleString('en-US'),
+      totalInterest: '$' + Math.round(totalInterest).toLocaleString('en-US'),
+      pctRent: Math.round(pctRent) + '%'
+    };
+  });
+</script>
+</body>
+</html>

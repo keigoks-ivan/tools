@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 · Market &amp; District Analysis | Residential Investing Course | InvestMQuest</title>
+<meta name="description" content="Demand and supply fundamentals for residential markets, how to screen 84 cities on one dashboard, gentrification signals at the district level, and a worked three-year district study. 住宅市場的需求與供給基本面、如何用單一儀表板篩選 84 個城市、區域層級的仕紳化訊號，以及一份完整演算的三年期區域研究。">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="./learn.css">
+</head>
+<body>
+
+<nav class="course-nav">
+  <div class="course-nav-inner">
+    <div class="course-nav-brand">
+      <a href="/dashboard.html">&larr; <span class="lang-en">🏠 Residential Dashboard</span><span class="lang-zh" style="display:none">🏠 住宅儀表板</span></a>
+      <span class="course-nav-sep">/</span>
+      <a href="./index.html" class="course-nav-home"><span class="lang-en">Course Home</span><span class="lang-zh" style="display:none">課程首頁</span></a>
+    </div>
+    <div class="course-nav-pager">
+      <a href="12-capstone.html">&larr; <span class="lang-en">Capstone</span><span class="lang-zh" style="display:none">畢業考</span></a>
+      <a href="14-presale-new.html"><span class="lang-en">Pre-Sales &amp; New Builds</span><span class="lang-zh" style="display:none">預售與新成屋</span> &rarr;</a>
+    </div>
+    <div class="course-nav-lang">
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</nav>
+
+<div class="lc-wrap">
+
+  <header class="module-header">
+    <span class="module-eyebrow lang-en">ADVANCED 13</span>
+    <span class="module-eyebrow lang-zh" style="display:none">進階 13</span>
+    <h1 class="lang-en">Market &amp; District Analysis</h1>
+    <h1 class="lang-zh" style="display:none">市場與區域分析</h1>
+    <div class="module-goals">
+      <div class="module-goals-title"><span class="lang-en">What You'll Learn</span><span class="lang-zh" style="display:none">這一課學什麼</span></div>
+      <ul>
+        <li><span class="lang-en">Why household formation, not population, is the number that actually drives unit demand &mdash; and how shrinking household size can push demand up in a city whose population is flat or shrinking.</span><span class="lang-zh" style="display:none">為什麼家戶形成而非人口，才是真正驅動戶數需求的數字&mdash;&mdash;以及家戶規模縮小如何能在人口持平甚至萎縮的城市裡，把需求往上推。</span></li>
+        <li><span class="lang-en">The permits &rarr; starts &rarr; completions supply pipeline, months-of-inventory, and the difference between geographic and regulatory land-scarcity typologies using documented, real cities.</span><span class="lang-zh" style="display:none">許可到動工到完工的供給管線、庫存去化月數，以及用真實有紀錄的城市對比地理限制與法規限制兩種土地稀缺類型。</span></li>
+        <li><span class="lang-en">How to combine the dashboard's price YoY, rent YoY, vs-peak drawdown, days-on-market, and foreign-buyer-cost columns into an actual screen, not just five numbers read in isolation.</span><span class="lang-zh" style="display:none">如何把儀表板上的價格年增率、租金年增率、距高點跌幅、上架天數與外國買家成本欄位，組合成一個真正的篩選器，而不是五個各自獨立看的數字。</span></li>
+        <li><span class="lang-en">The district-level gentrification signal stack &mdash; permit activity, rent-vs-own shifts, school trajectories, transit openings &mdash; and the risk-reward logic behind the "second-best district" thesis.</span><span class="lang-zh" style="display:none">區域層級的仕紳化訊號組合&mdash;&mdash;許可活動、租買比變化、學區走勢、交通開通&mdash;&mdash;以及「次佳區域」論點背後的風險報酬邏輯。</span></li>
+        <li><span class="lang-en">A full worked district study, and when to trust a macro rate shock over any district-level read at all.</span><span class="lang-zh" style="display:none">一份完整演算的區域研究，以及什麼時候該相信總體利率衝擊、而不是任何區域層級的判讀。</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <section>
+    <p class="lang-en">Detroit and Austin both had roughly flat citywide population growth over stretches of the last two decades, and yet one built almost nothing new for years while the other added tens of thousands of units and still couldn't keep rents from climbing through most of that period. The difference was never really about how many people lived in each city. It was about how many <em>households</em> those people formed, how much new supply each city's land-use and permitting system allowed to meet that household count, and what was happening three blocks over in specific districts that a citywide average erases completely. A buyer who reads only the population headline gets the story roughly backwards half the time. This module builds the actual toolkit: demand read correctly through household formation rather than population, supply read through the permits-to-completions pipeline and land-constraint typology, a practical way to screen dozens of cities on one dashboard, the signal stack that reads a gentrifying district before the headline stories catch up, the data discipline that keeps a thin-sample district from producing a false read, and the one condition &mdash; a macro rate shock &mdash; under which none of the district-level work matters at all.</p>
+    <p class="lang-zh" style="display:none">底特律與奧斯汀在過去二十年的某些時段，全市人口成長都大致持平，但其中一個城市多年幾乎沒蓋什麼新房，另一個卻新增了數萬戶，租金卻還是在那段期間的大部分時間持續往上爬。差別從來就不是每個城市住了多少人。差別在於這些人形成了多少<em>家戶</em>、每個城市的土地使用與許可制度允許多少新供給去對應這個家戶數，以及某個特定區域三個街區之外正在發生什麼事&mdash;&mdash;而這些全市平均值會完全抹平。只看人口頭條的買家，得出的故事有一半機率是徹底顛倒的。這一課會建立真正的工具箱：用家戶形成而非人口正確判讀需求、用許可到完工的管線與土地限制類型判讀供給、一個能在一個儀表板上篩選數十個城市的實用方法、能在頭條故事跟上之前就讀出正在仕紳化的區域的訊號組合、避免薄樣本區域產生假訊號的資料紀律，以及唯一一種情況&mdash;&mdash;總體利率衝擊&mdash;&mdash;會讓所有區域層級的功夫全都失去意義。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 1. DEMAND FUNDAMENTALS -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">1. Demand fundamentals: households, migration, income, and life events</h2>
+    <h2 class="lang-zh" style="display:none">一、需求基本面：家戶、遷徙、所得與人生事件</h2>
+
+    <h3 class="lang-en">Population growth is not household formation</h3>
+    <h3 class="lang-zh" style="display:none">人口成長不等於家戶形成</h3>
+    <p class="lang-en">A house or an apartment is filled by a household, not by a person, and the number of households a given population produces depends on <span class="key-term" tabindex="0">average household size<span class="key-term-tip"><span class="lang-en">The average number of people living in one housing unit in a given area. It has been falling in most developed economies for decades &mdash; smaller family sizes, more people living alone, later marriage &mdash; independent of whether total population is growing, flat, or shrinking.</span><span class="lang-zh" style="display:none">在特定地區，一個住宅單位裡平均居住的人數。這個數字在多數已開發經濟體已經下降了數十年&mdash;&mdash;家庭規模變小、更多人獨居、結婚年齡延後&mdash;&mdash;而且與總人口是成長、持平或萎縮無關。</span></span></span>, a number that has been trending down for decades across most developed economies for reasons that have nothing to do with total population: smaller family sizes, later marriage, more people living alone at every age bracket, more divorce splitting one household into two. The arithmetic matters because it runs in a direction most people don't intuit. If a city's population is exactly flat but its average household size falls from 2.6 people per unit to 2.4, the number of households &mdash; and therefore the number of housing units needed &mdash; rises even though not one additional person moved in. A market can show zero population growth on the headline and still be structurally short of housing, because the same number of people are now organizing themselves into more, smaller households.</p>
+    <p class="lang-zh" style="display:none">一間房子或一戶公寓是被一個家戶填滿的，不是被一個人填滿的，而一定的人口能產生多少家戶，取決於<span class="key-term" tabindex="0">平均家戶規模<span class="key-term-tip"><span class="lang-en">The average number of people living in one housing unit in a given area. It has been falling in most developed economies for decades &mdash; smaller family sizes, more people living alone, later marriage &mdash; independent of whether total population is growing, flat, or shrinking.</span><span class="lang-zh" style="display:none">在特定地區，一個住宅單位裡平均居住的人數。這個數字在多數已開發經濟體已經下降了數十年&mdash;&mdash;家庭規模變小、更多人獨居、結婚年齡延後&mdash;&mdash;而且與總人口是成長、持平或萎縮無關。</span></span></span>，這個數字在多數已開發經濟體已經下降了數十年，原因跟總人口完全無關：家庭規模變小、結婚年齡延後、每個年齡層獨居的人變多、離婚把一個家戶拆成兩個。這個算術之所以重要，是因為它的方向跟多數人的直覺相反。如果一個城市的人口完全持平，但平均家戶規模從每戶 2.6 人降到 2.4 人，家戶數&mdash;&mdash;因此需要的住宅單位數&mdash;&mdash;會上升，即使一個新增居民都沒有搬進來。一個市場的頭條人口成長可以是零，卻仍然結構性地缺房，因為同樣多的人，現在正把自己組織成更多、更小的家戶。</p>
+
+    <div class="pitfall">
+      <span class="pitfall-icon">⚠️</span>
+      <div class="pitfall-body">
+        <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+        <span class="lang-en">Reading "flat population growth" as "flat housing demand." A city can post 0% population growth for a decade and still be structurally undersupplied, because falling average household size means the same people need more units than before. Always check the household-formation number, not just the population headline.</span>
+        <span class="lang-zh" style="display:none">把「人口成長持平」解讀成「住房需求持平」。一個城市可以連續十年繳出 0% 的人口成長，卻仍然結構性供給不足，因為平均家戶規模下降代表同樣的人口需要比以前更多的單位數。永遠要查家戶形成數字，而不是只看人口頭條。</span>
+      </div>
+    </div>
+
+    <h3 class="lang-en">Migration flows: domestic and international, and why they behave differently</h3>
+    <h3 class="lang-zh" style="display:none">遷徙流向：國內與國際，以及為什麼它們的行為不同</h3>
+    <p class="lang-en"><span class="key-term" tabindex="0">Domestic migration<span class="key-term-tip"><span class="lang-en">Population movement between regions within the same country. It is highly sensitive to relative cost of living, job availability, and (in some countries) climate or tax policy, and tends to respond quickly to changes in those relative conditions.</span><span class="lang-zh" style="display:none">同一國家內部、不同地區之間的人口流動。對相對生活成本、就業機會，以及（部分國家）氣候或稅制政策非常敏感，通常會對這些相對條件的變化快速反應。</span></span></span> and <span class="key-term" tabindex="0">international migration<span class="key-term-tip"><span class="lang-en">Population movement across national borders, driven mostly by work visas, family reunification, refugee/asylum flows, and student enrollment. It is generally slower-moving and more policy-dependent than domestic migration, since it requires a legal pathway to enter, not just a decision to move.</span><span class="lang-zh" style="display:none">跨越國境的人口流動，主要由工作簽證、家庭團聚、難民／庇護流動與留學生註冊所驅動。通常比國內遷徙移動得更慢、更依賴政策，因為它需要合法入境途徑，而不只是搬家的決定。</span></span></span> pull on housing demand through different mechanisms and at different speeds, and conflating them produces a wrong read on how durable a given inflow actually is. Domestic migration &mdash; people moving between cities and states within the same country &mdash; responds quickly to relative cost of living and job availability, which means it can reverse quickly too: a metro that pulled in domestic movers chasing cheap housing and remote-work flexibility can lose that same cohort just as fast once its own housing costs catch up to the market they left. International migration moves on a slower clock because it's gated by visas, family-reunification queues, refugee and asylum processing, and student-enrollment cycles &mdash; all of which are policy decisions made outside the housing market entirely, and all of which change more slowly than a domestic renter's decision to pack a moving truck. A city whose growth is mostly international-migration-driven tends to have a stickier, more policy-durable demand base than one whose growth is mostly domestic arbitrage-driven, but that stickiness cuts both ways: a sudden visa-policy tightening can choke off an international inflow just as sharply as a rent-cost narrowing chokes off a domestic one, just on a different trigger.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">國內遷徙<span class="key-term-tip"><span class="lang-en">Population movement between regions within the same country. It is highly sensitive to relative cost of living, job availability, and (in some countries) climate or tax policy, and tends to respond quickly to changes in those relative conditions.</span><span class="lang-zh" style="display:none">同一國家內部、不同地區之間的人口流動。對相對生活成本、就業機會，以及（部分國家）氣候或稅制政策非常敏感，通常會對這些相對條件的變化快速反應。</span></span></span>與<span class="key-term" tabindex="0">國際遷徙<span class="key-term-tip"><span class="lang-en">Population movement across national borders, driven mostly by work visas, family reunification, refugee/asylum flows, and student enrollment. It is generally slower-moving and more policy-dependent than domestic migration, since it requires a legal pathway to enter, not just a decision to move.</span><span class="lang-zh" style="display:none">跨越國境的人口流動，主要由工作簽證、家庭團聚、難民／庇護流動與留學生註冊所驅動。通常比國內遷徙移動得更慢、更依賴政策，因為它需要合法入境途徑，而不只是搬家的決定。</span></span></span>透過不同的機制、以不同的速度拉動住房需求，把兩者混為一談會對某個流入有多持久做出錯誤判讀。國內遷徙&mdash;&mdash;人們在同一國家內的城市與州之間搬遷&mdash;&mdash;對相對生活成本與就業機會反應很快，這也代表它可以同樣快速地逆轉：一個靠國內移民追逐便宜房價與遠距工作彈性而吸引到人口流入的都會區，一旦自己的房價追上了那些人原本離開的市場，就可能同樣快速地失去這批人。國際遷徙的時鐘走得比較慢，因為它受到簽證、家庭團聚排隊、難民與庇護審查、留學生註冊週期的限制&mdash;&mdash;這些全都是完全在住房市場之外做出的政策決定，變化速度也比一個國內租客打包搬家車的決定慢得多。一個成長主要由國際遷徙驅動的城市，往往比主要靠國內套利驅動成長的城市擁有更黏著、更受政策保護的需求基礎，但這種黏著性是雙面刃：一次突然收緊的簽證政策，能像租金落差收斂扼殺國內流入一樣，猛然掐斷國際流入，只是觸發的原因不同。</p>
+
+    <h3 class="lang-en">Employment and income growth: the pull that funds the household</h3>
+    <h3 class="lang-zh" style="display:none">就業與所得成長：資助家戶的拉力</h3>
+    <p class="lang-en">Migration and household formation describe how many households exist and where; employment and income growth describe whether those households can actually afford to occupy the housing being built for them. The relevant number is not aggregate job count but job quality and wage growth relative to the local cost of housing &mdash; a metro adding jobs concentrated in low-wage service categories can technically show employment growth while its renter base's ability to absorb rent increases is actually deteriorating, and a metro with modest headline job growth concentrated in high-wage categories can support faster rent growth than the jobs number alone would suggest. The practical check is a simple ratio: is local wage growth outpacing, matching, or lagging local rent and price growth. When wages lag for several consecutive years, the market is quietly building an affordability ceiling that eventually caps how much further price and rent growth can run, regardless of how tight the physical supply looks on paper.</p>
+    <p class="lang-zh" style="display:none">遷徙與家戶形成描述的是有多少家戶存在、位在哪裡；就業與所得成長描述的則是這些家戶是否真的負擔得起入住正在為他們興建的房子。相關的數字不是總就業人數，而是相對於當地住房成本的職缺品質與薪資成長&mdash;&mdash;一個新增就業集中在低薪服務業職類的都會區，在技術上可以顯示就業成長，但其租客基礎吸收租金上漲的能力實際上正在惡化；一個頭條就業成長不起眼、但集中在高薪職類的都會區，卻可能支撐比就業數字本身所暗示更快的租金成長。實務上的檢查很簡單：當地薪資成長跑贏、追平還是落後於當地租金與房價成長。當薪資連續好幾年落後時，這個市場正在悄悄建立一道可負擔性天花板，最終會限制價格與租金還能再漲多少，無論帳面上的實體供給看起來有多緊。</p>
+
+    <h3 class="lang-en">Marriage, birth, and divorce: the life events that set unit-size demand</h3>
+    <h3 class="lang-zh" style="display:none">結婚、生育與離婚：決定戶型需求的人生事件</h3>
+    <p class="lang-en">Beneath the aggregate household-formation number sits a mix of very specific life events, and each one pulls demand toward a different unit type. Marriage typically combines two smaller households (often two one-bedroom renters) into one larger one, temporarily reducing the number of separate households even as it changes what size unit that new household wants next. A birth pushes a household that was comfortable in a one-bedroom or studio toward a two-bedroom, and a second or third child pushes further toward three-plus bedrooms or a school-district-constrained single-family home &mdash; which is why national and local birth-rate trends, lagged by roughly two to five years, are a leading indicator specifically for family-sized unit demand rather than for housing demand overall. Divorce runs the arithmetic in reverse: one household splits into two, each typically smaller than a share of the original, which is a source of net new household formation that shows up even in a market with zero population growth and no net in-migration at all. A market analyst forecasting demand by unit size &mdash; studios and one-beds versus family-sized three-plus-bedroom units &mdash; gets a materially better forecast by decomposing household formation into these underlying life-event drivers than by applying one aggregate household-growth number uniformly across every unit type.</p>
+    <p class="lang-zh" style="display:none">在總體家戶形成數字底下，藏著一組非常具體的人生事件，每一種都把需求拉向不同的戶型。結婚通常會把兩個較小的家戶（常常是兩個租一房公寓的人）合併成一個較大的家戶，暫時減少獨立家戶的數量，同時也改變了這個新家戶接下來想要的戶型大小。生育會把一個原本住一房或套房就很舒適的家戶推向兩房，第二個或第三個孩子則進一步把需求推向三房以上、或受學區限制的獨棟住宅&mdash;&mdash;這也是為什麼全國與地方的出生率趨勢（大約落後二到五年）是專門針對家庭規模戶型需求、而非整體住房需求的領先指標。離婚則是反向的算術：一個家戶分裂成兩個，各自通常比原本的份額還小，這是一個即使在人口成長為零、也完全沒有淨遷入的市場裡，依然會出現的淨新增家戶形成來源。一個依戶型預測需求的市場分析師&mdash;&mdash;套房與一房對比三房以上的家庭型單位&mdash;&mdash;把家戶形成拆解成這些底層人生事件驅動因子，會比對每一種戶型一律套用同一個總體家戶成長數字，得出明顯更準確的預測。</p>
+
+    <div class="quiz-block" data-quiz-id="m13-q1" data-quiz='[
+      {
+        "q":{"en":"City X&#39;s population has been flat for a decade, but its average household size fell from 2.7 to 2.3 people per unit over the same period. What does this imply for housing demand?","zh":"X 城市的人口十年來持平，但同期平均家戶規模從每戶 2.7 人降到 2.3 人。這對住房需求代表什麼？"},
+        "opts":[
+          {"en":"Housing demand has been flat too, since population is the number that drives unit demand.","zh":"住房需求也一直持平，因為人口才是驅動戶數需求的數字。"},
+          {"en":"Housing demand has actually grown, because the same population is now organizing into more, smaller households &mdash; the household count, not the population count, sets unit demand.","zh":"住房需求其實一直在成長，因為同樣的人口現在正組織成更多、更小的家戶&mdash;&mdash;決定戶數需求的是家戶數，不是人口數。"},
+          {"en":"Housing demand has fallen, since a smaller household size means less space is needed overall.","zh":"住房需求下降了，因為家戶規模變小代表整體需要的空間變少。"},
+          {"en":"The household-size change is irrelevant to demand and only affects unit interior layout.","zh":"家戶規模的變化跟需求無關，只影響單位內部的格局。"}
+        ],
+        "a":1,
+        "exp":{"en":"A unit is filled by a household, not a person. If the same population splits into more, smaller households, the number of units needed rises even with zero population growth &mdash; this is exactly the mechanism by which a city can be structurally undersupplied while its population headline shows nothing alarming.","zh":"一個單位是被一個家戶填滿的，不是被一個人填滿的。如果同樣的人口分裂成更多、更小的家戶，即使人口成長為零，所需要的單位數也會上升&mdash;&mdash;這正是一個城市能在人口頭條數字毫無異狀的情況下，卻結構性供給不足的機制。"}
+      }
+    ]'></div>
+
+    <div class="quiz-block" data-quiz-id="m13-q2" data-quiz='[
+      {
+        "q":{"en":"A metro sees strong headline employment growth, but the growth is concentrated in low-wage service jobs while local rents have risen 12% this year. What is the correct read?","zh":"某都會區頭條就業成長強勁，但成長集中在低薪服務業，同期當地租金卻上漲了 12%。正確的判讀是什麼？"},
+        "opts":[
+          {"en":"Strong job growth always signals strong, sustainable housing demand regardless of wage composition.","zh":"強勁的就業成長永遠代表強勁、可持續的住房需求，與薪資組成無關。"},
+          {"en":"The renter base&#39;s ability to absorb further rent increases is likely deteriorating even as the jobs headline looks strong &mdash; wage growth relative to rent growth, not the job count, is the number that matters for affordability durability.","zh":"即使就業頭條看起來強勁，租客基礎吸收後續租金上漲的能力可能正在惡化&mdash;&mdash;相對於租金成長的薪資成長，而不是就業人數，才是決定可負擔性能否持久的數字。"},
+          {"en":"Rent growth will automatically self-correct downward whenever job growth is concentrated in low-wage categories.","zh":"只要就業成長集中在低薪職類，租金成長就會自動向下自我修正。"},
+          {"en":"Wage composition is irrelevant once total employment is rising.","zh":"只要總就業在上升，薪資組成就無關緊要。"}
+        ],
+        "a":1,
+        "exp":{"en":"The relevant check is wage growth relative to rent/price growth, not the raw jobs number. Job growth concentrated in low-wage categories with rents running well ahead of wages is quietly building an affordability ceiling, even while the employment headline looks healthy.","zh":"相關的檢查是薪資成長相對於租金／房價成長，而不是原始就業數字。就業成長集中在低薪職類、租金成長又遠遠超前薪資，正在悄悄建立一道可負擔性天花板，即使就業頭條看起來很健康。"}
+      }
+    ]'></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 2. SUPPLY ANALYSIS -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">2. Supply analysis: the pipeline and the land-constraint typology</h2>
+    <h2 class="lang-zh" style="display:none">二、供給分析：管線與土地限制類型</h2>
+    <p class="lang-en">Housing supply moves through the same predictable funnel as any other built asset: a developer files <span class="key-term" tabindex="0">permits<span class="key-term-tip"><span class="lang-en">Government building approvals filed before construction can legally begin. Permit issuance is the earliest, most visible signal of future housing supply &mdash; and the least reliable one, since a meaningful share of permitted projects never break ground.</span><span class="lang-zh" style="display:none">動工前依法須先取得的政府建築核准。核發許可是未來住房供給最早、最容易觀察到的訊號&mdash;&mdash;但也是最不可靠的一個，因為有相當一部分取得許可的專案最終並未真的動工。</span></span></span>, some share of permitted projects actually break ground (<em>starts</em>), and some share of started projects actually reach completion and hit the market (<em>completions</em>). Attrition happens at every stage &mdash; financing falls through, a lender pulls a construction loan, a project gets shelved when pre-sale targets aren't hit &mdash; so a permit count overstates coming supply and a completions count alone misses the wave still working through the pipeline. <span class="key-term" tabindex="0">Months of inventory<span class="key-term-tip"><span class="lang-en">Current active listings divided by the trailing monthly sales pace &mdash; how many months it would take to sell off everything currently listed at the current sales rate, holding that rate constant. Under roughly 4&ndash;5 months is conventionally read as a seller&#39;s market; over 6&ndash;7 months as a buyer&#39;s market, though the exact thresholds vary by market and housing type.</span><span class="lang-zh" style="display:none">目前在市面上待售的物件數除以近期月均成交速度&mdash;&mdash;假設成交速度維持不變，要花多少個月才能把目前所有待售物件賣完。傳統上大約 4 到 5 個月以下讀作賣方市場；6 到 7 個月以上讀作買方市場，但確切門檻依市場與住宅類型而異。</span></span></span> is the demand-side complement: it turns the raw pipeline and existing-listing count into a read on how tight the market actually is right now, and reading pipeline size against months-of-inventory together &mdash; a large pipeline landing on a market already sitting at low months-of-inventory versus the same pipeline landing on a market already loose &mdash; produces very different forward reads even from an identical permit count.</p>
+    <p class="lang-zh" style="display:none">住房供給跟其他任何營建資產一樣，會經過同樣可預測的漏斗：開發商申請<span class="key-term" tabindex="0">建照許可<span class="key-term-tip"><span class="lang-en">Government building approvals filed before construction can legally begin. Permit issuance is the earliest, most visible signal of future housing supply &mdash; and the least reliable one, since a meaningful share of permitted projects never break ground.</span><span class="lang-zh" style="display:none">動工前依法須先取得的政府建築核准。核發許可是未來住房供給最早、最容易觀察到的訊號&mdash;&mdash;但也是最不可靠的一個，因為有相當一部分取得許可的專案最終並未真的動工。</span></span></span>，其中一部分取得許可的專案真正動工（<em>動工量</em>），動工的專案中又有一部分真正完工、推向市場（<em>完工量</em>）。每一個階段都會有流失&mdash;&mdash;融資談不成、貸款方抽手、預售目標沒達到導致專案被擱置&mdash;&mdash;所以許可數字會高估即將到來的供給，而只看完工數字又會漏掉還在管線裡走的那一波。<span class="key-term" tabindex="0">庫存去化月數<span class="key-term-tip"><span class="lang-en">Current active listings divided by the trailing monthly sales pace &mdash; how many months it would take to sell off everything currently listed at the current sales rate, holding that rate constant. Under roughly 4&ndash;5 months is conventionally read as a seller&#39;s market; over 6&ndash;7 months as a buyer&#39;s market, though the exact thresholds vary by market and housing type.</span><span class="lang-zh" style="display:none">目前在市面上待售的物件數除以近期月均成交速度&mdash;&mdash;假設成交速度維持不變，要花多少個月才能把目前所有待售物件賣完。傳統上大約 4 到 5 個月以下讀作賣方市場；6 到 7 個月以上讀作買方市場，但確切門檻依市場與住宅類型而異。</span></span></span>是需求端的補充指標：它把原始的管線與待售物件數，轉換成對「這個市場現在到底有多緊」的判讀，而把管線規模對照庫存去化月數一起讀&mdash;&mdash;一大波管線落在一個庫存去化月數已經很低的市場、跟同樣一波管線落在一個已經很鬆的市場&mdash;&mdash;即使起始的許可數字相同，得出的前瞻判讀也會截然不同。</p>
+
+    <h3 class="lang-en">Land-constraint typology: geographic scarcity versus regulatory scarcity</h3>
+    <h3 class="lang-zh" style="display:none">土地限制類型：地理稀缺對比法規稀缺</h3>
+    <p class="lang-en">Every land-constrained housing market fits, roughly, into one of two categories, and the distinction matters because they respond to policy and rate changes very differently. <span class="key-term" tabindex="0">Geographic scarcity<span class="key-term-tip"><span class="lang-en">Land constraint caused by physical geography &mdash; mountains, water, protected wetlands, an island boundary &mdash; that no policy change can undo. Supply stays structurally limited regardless of how permitting rules evolve.</span><span class="lang-zh" style="display:none">由山脈、水域、受保護濕地、島嶼邊界等實體地理因素造成的土地限制，沒有任何政策改變能夠解除。無論許可規則如何演變，供給都維持結構性受限。</span></span></span> is a hard physical boundary &mdash; mountains, ocean, bay, protected wetland, an island's coastline &mdash; that no zoning reform or political shift can undo; the constraint is permanent by definition. <span class="key-term" tabindex="0">Regulatory scarcity<span class="key-term-tip"><span class="lang-en">Land constraint created by policy choices &mdash; restrictive zoning, lengthy entitlement processes, height limits, minimum lot sizes, urban growth boundaries &mdash; rather than physical geography. Because it is policy-made, it is, in principle, policy-reversible, though political economy often makes it just as durable in practice as a geographic constraint.</span><span class="lang-zh" style="display:none">由政策選擇&mdash;&mdash;限制性分區、冗長的權益審核流程、高度限制、最小基地面積、都市成長邊界&mdash;&mdash;而非實體地理所造成的土地限制。因為是政策造成的，原則上可以透過政策改變解除，但政治經濟的現實往往讓它在實務上跟地理限制一樣持久。</span></span></span> is created entirely by policy choices &mdash; restrictive zoning, lengthy entitlement and environmental-review processes, height limits, minimum lot sizes, urban growth boundaries &mdash; and is, in principle, reversible by a future policy change, even though political economy often keeps it just as durable in practice as a mountain range. Hong Kong and San Francisco sit at the far end of both categories simultaneously and are documented, frequently studied cases of it: Hong Kong is bounded by harbor and steep terrain (geographic) and layers a slow, tightly controlled land-release and approval process on top of it (regulatory); San Francisco is bounded by the bay and ocean on three sides (geographic) and layers height limits, extensive discretionary review, and organized local opposition to new development on top of that (regulatory). Houston sits at the opposite end on both dimensions and is equally well documented: flat, largely unconstrained land extending in every direction (no meaningful geographic limit) combined with no formal citywide zoning code and comparatively fast permitting (minimal regulatory limit), which is the standard textbook explanation for why Houston's housing supply has historically been able to expand elastically in response to demand in a way few major U.S. metros can match.</p>
+    <p class="lang-zh" style="display:none">每一個土地受限的住房市場，大致都能歸進兩大類之一，而這個區分之所以重要，是因為它們對政策與利率變化的反應方式截然不同。<span class="key-term" tabindex="0">地理稀缺<span class="key-term-tip"><span class="lang-en">Land constraint caused by physical geography &mdash; mountains, water, protected wetlands, an island boundary &mdash; that no policy change can undo. Supply stays structurally limited regardless of how permitting rules evolve.</span><span class="lang-zh" style="display:none">由山脈、水域、受保護濕地、島嶼邊界等實體地理因素造成的土地限制，沒有任何政策改變能夠解除。無論許可規則如何演變，供給都維持結構性受限。</span></span></span>是硬性的實體邊界&mdash;&mdash;山脈、海洋、海灣、受保護濕地、島嶼海岸線&mdash;&mdash;沒有任何分區改革或政治轉向能夠解除；這個限制依定義就是永久的。<span class="key-term" tabindex="0">法規稀缺<span class="key-term-tip"><span class="lang-en">Land constraint created by policy choices &mdash; restrictive zoning, lengthy entitlement processes, height limits, minimum lot sizes, urban growth boundaries &mdash; rather than physical geography. Because it is policy-made, it is, in principle, policy-reversible, though political economy often makes it just as durable in practice as a geographic constraint.</span><span class="lang-zh" style="display:none">由政策選擇&mdash;&mdash;限制性分區、冗長的權益審核流程、高度限制、最小基地面積、都市成長邊界&mdash;&mdash;而非實體地理所造成的土地限制。因為是政策造成的，原則上可以透過政策改變解除，但政治經濟的現實往往讓它在實務上跟地理限制一樣持久。</span></span></span>則完全是由政策選擇&mdash;&mdash;限制性分區、冗長的權益審核與環境評估流程、高度限制、最小基地面積、都市成長邊界&mdash;&mdash;所造成的，原則上未來的政策改變可以將其解除，即使政治經濟的現實往往讓它在實務上跟一座山脈一樣持久。香港與舊金山同時位在這兩個類別的極端，是有紀錄可循、常被研究的案例：香港受海港與陡峭地形所限（地理），又在其上疊加了緩慢、嚴格管控的土地釋出與審批流程（法規）；舊金山三面受海灣與海洋所限（地理），又在其上疊加了高度限制、大量裁量式審查，以及對新開發案有組織的在地反對聲浪（法規）。休士頓則在兩個維度上都位於相反的極端，同樣有充分紀錄：平坦、大致不受限、向四面八方延伸的土地（沒有明顯的地理限制），加上沒有正式的全市分區法規、許可速度相對快（法規限制極小），這是解釋為什麼休士頓的住房供給歷來能以少數美國主要都會區難以匹敵的彈性回應需求的標準教科書說法。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example &mdash; Pipeline Math for a Hypothetical Suburb</span><span class="lang-zh" style="display:none">逐步演算範例&mdash;&mdash;假設郊區的管線算法</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Hypothetical suburb "Cresthaven": existing housing stock <span class="we-formula">= 22,000 units</span>; permits issued trailing 12 months <span class="we-formula">= 1,800 units</span>.</span>
+            <span class="lang-zh" style="display:none">假設郊區「Cresthaven」：既有住宅存量<span class="we-formula">＝22,000 戶</span>；過去 12 個月核發許可<span class="we-formula">＝1,800 戶</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Apply this metro's historical permit-to-start attrition rate (hypothetical, 15%): <span class="we-formula">1,800 &times; (1 &minus; 15%) &asymp; 1,530 units start construction</span>.</span>
+            <span class="lang-zh" style="display:none">套用該都會區歷史上的「許可到動工」流失率（假設值，15%）：<span class="we-formula">1,800 &times;（1 &minus; 15%）&asymp; 1,530 戶實際動工</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Apply a start-to-completion attrition rate (hypothetical, 8%, for financing failures and delays): <span class="we-formula">1,530 &times; (1 &minus; 8%) &asymp; 1,408 units expected to complete</span>.</span>
+            <span class="lang-zh" style="display:none">再套用「動工到完工」的流失率（假設值，8%，融資失敗與延遲所致）：<span class="we-formula">1,530 &times;（1 &minus; 8%）&asymp; 1,408 戶預期完工</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Pipeline as % of existing stock: <span class="we-formula">1,408 &divide; 22,000 &asymp; 6.4%</span>. Current active listings: <span class="we-formula">310</span>; trailing monthly sales pace: <span class="we-formula">95/month</span> &rarr; months of inventory <span class="we-formula">= 310 &divide; 95 &asymp; 3.3 months</span> &mdash; already a tight, seller-leaning market before a single pipeline unit lands.</span>
+            <span class="lang-zh" style="display:none">管線佔既有存量比例：<span class="we-formula">1,408 &divide; 22,000 &asymp; 6.4%</span>。目前待售物件數：<span class="we-formula">310</span>；近期月均成交速度：<span class="we-formula">每月 95 戶</span> &rarr; 庫存去化月數<span class="we-formula">＝310 &divide; 95 &asymp; 3.3 個月</span>&mdash;&mdash;在管線中任何一戶落地之前，這已經是一個緊、偏賣方的市場。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">Read: a 6.4% pipeline-to-stock ratio landing on a market already at 3.3 months of inventory is a materially different signal than the same 6.4% landing on a market already sitting at 8 months of inventory &mdash; the first case is a pipeline easing a genuine shortage; the second is a pipeline piling onto an already-loose market.</span>
+            <span class="lang-zh" style="display:none">判讀：6.4% 的管線佔存量比例落在一個庫存去化月數已經只有 3.3 個月的市場，跟同樣的 6.4% 落在一個庫存去化月數已經有 8 個月的市場，訊號截然不同&mdash;&mdash;前者是管線正在緩解真正的短缺；後者則是管線疊加在一個已經偏鬆的市場之上。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="quiz-block" data-quiz-id="m13-q3" data-quiz='[
+      {
+        "q":{"en":"Two suburbs each have a pipeline equal to 6% of existing stock. Suburb A currently sits at 3 months of inventory; Suburb B sits at 8 months. What does the same pipeline number mean for each?","zh":"兩個郊區的管線都等於既有存量的 6%。A 郊區目前的庫存去化月數是 3 個月；B 郊區是 8 個月。同樣的管線數字對兩者分別代表什麼？"},
+        "opts":[
+          {"en":"The pipeline means the same thing in both cases, since the pipeline-to-stock ratio is identical.","zh":"兩者的管線意義相同，因為管線佔存量比例是一樣的。"},
+          {"en":"In Suburb A, the pipeline is easing a genuine shortage (tight starting point); in Suburb B, the same pipeline is piling onto an already-loose market &mdash; months-of-inventory context changes what an identical pipeline number implies.","zh":"在 A 郊區，這波管線是在緩解真正的短缺（起點很緊）；在 B 郊區，同樣的管線是疊加在一個已經偏鬆的市場上&mdash;&mdash;庫存去化月數的背景脈絡，會改變同一個管線數字所代表的意義。"},
+          {"en":"Suburb B is automatically the better investment since its market is already looser and therefore cheaper.","zh":"B 郊區自動是比較好的投資標的，因為它的市場已經比較鬆，所以比較便宜。"},
+          {"en":"Months of inventory is irrelevant once the pipeline-to-stock ratio is known.","zh":"一旦知道管線佔存量比例，庫存去化月數就無關緊要。"}
+        ],
+        "a":1,
+        "exp":{"en":"Pipeline size alone doesn&#39;t tell you whether new supply is closing a gap or adding to a glut &mdash; that depends on the starting tightness, read through months of inventory. The same raw pipeline number carries opposite implications depending on that starting point.","zh":"管線規模本身無法告訴你新供給究竟是在補上缺口還是加劇過剩&mdash;&mdash;這取決於起始的緊度，也就是透過庫存去化月數判讀出來的結果。同樣的原始管線數字，依起始點不同，會帶來截然相反的意涵。"}
+      }
+    ]'></div>
+
+    <div class="quiz-block" data-quiz-id="m13-q4" data-quiz='[
+      {
+        "q":{"en":"Why do Hong Kong and San Francisco function as textbook examples of severe housing supply constraint, while Houston is the textbook counter-example?","zh":"為什麼香港與舊金山是嚴重住房供給限制的教科書案例，而休士頓是相反的教科書反例？"},
+        "opts":[
+          {"en":"Hong Kong and San Francisco have high housing demand while Houston has low demand.","zh":"香港與舊金山住房需求高，而休士頓需求低。"},
+          {"en":"Hong Kong and San Francisco stack geographic constraint (water, terrain) with regulatory constraint (slow approvals, height limits, opposition); Houston has minimal constraint on either dimension &mdash; flat unconstrained land and fast, largely unzoned permitting.","zh":"香港與舊金山把地理限制（水域、地形）疊加在法規限制之上（審批慢、高度限制、反對聲浪）；休士頓在兩個維度上的限制都極小&mdash;&mdash;平坦不受限的土地，加上快速、大致無分區的許可流程。"},
+          {"en":"Houston has stricter zoning than Hong Kong or San Francisco but more available land.","zh":"休士頓的分區法規比香港或舊金山更嚴格，但可用土地更多。"},
+          {"en":"The distinction is purely about population size, not land-use policy or geography.","zh":"這個區別純粹跟人口規模有關，跟土地使用政策或地理無關。"}
+        ],
+        "a":1,
+        "exp":{"en":"The land-constraint typology has two independent dimensions &mdash; geographic and regulatory. Hong Kong and San Francisco are constrained on both simultaneously, which is why supply stays structurally limited regardless of demand. Houston is essentially unconstrained on both, which is the standard explanation for its historically elastic supply response.","zh":"土地限制類型有兩個獨立維度&mdash;&mdash;地理與法規。香港與舊金山同時在兩個維度上都受限，這也是為什麼無論需求如何，供給都維持結構性受限。休士頓在兩個維度上大致都不受限，這正是解釋它歷來供給彈性回應的標準說法。"}
+      }
+    ]'></div>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Houston has no citywide zoning code &mdash; a fact repeatedly documented in urban-economics research and journalism comparing it against coastal peer cities &mdash; and its metro area sits on flat, largely unconstrained land in every direction. Through the 2010s and into the 2020s, this combination let Houston's housing stock expand at a pace few large U.S. metros could match, and price growth in Houston has historically tracked well below coastal, land-constrained metros like San Francisco over multi-decade windows, even during periods of comparable or stronger population and job growth. San Francisco, over the same multi-decade span, added dramatically fewer new housing units relative to its job growth &mdash; a gap extensively documented by California housing-policy researchers and repeatedly cited in state legislative debates over zoning reform &mdash; while being hemmed in by the bay and ocean on three sides and layering discretionary review, height limits, and organized local opposition on top of that geography. The result was some of the steepest home-price appreciation of any major U.S. metro over the same period. Neither outcome required a demand shock to explain it; both are close to what the land-constraint typology alone predicts.</p>
+      <p class="lang-zh" style="display:none">休士頓沒有全市分區法規&mdash;&mdash;這在都市經濟學研究與拿它對照沿海同儕城市的新聞報導中，被反覆記載&mdash;&mdash;而且其都會區坐落在四面八方都平坦、大致不受限的土地上。從 2010 年代到 2020 年代，這個組合讓休士頓的住宅存量以少數美國大型都會區能匹敵的速度擴張，休士頓的房價成長歷來在數十年的時間跨度上，明顯低於舊金山這類沿海、土地受限的都會區，即使在人口與就業成長相當或更強的時期也是如此。同一段數十年跨度裡，舊金山相對於其就業成長，新增的住宅單位數少得多&mdash;&mdash;這個落差被加州住房政策研究者廣泛記錄，也在州議會關於分區改革的辯論中被反覆引用&mdash;&mdash;同時三面受海灣與海洋所限，又在這個地理限制之上疊加了裁量式審查、高度限制與有組織的在地反對聲浪。結果是同一時期美國主要都會區中房價漲幅最陡峭的其中之一。這兩種結果都不需要用需求衝擊來解釋；兩者都幾乎正是土地限制類型本身所預測出來的結果。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 3. CITY-LEVEL SCREENING -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">3. City-level screening: reading the 84-city dashboard as a system</h2>
+    <h2 class="lang-zh" style="display:none">三、城市層級篩選：把 84 城儀表板當成一套系統來讀</h2>
+    <p class="lang-en">The <a href="/dashboard.html">84-city Residential Dashboard</a> is built for exactly one job: a fast first-pass filter across many cities before spending real time on any one of them, using five columns read together rather than in isolation &mdash; <strong>price YoY</strong>, <strong>rent YoY</strong>, <strong>drawdown from peak</strong>, <strong>days-on-market</strong>, and <strong>foreign-buyer costs</strong> (transaction taxes, surcharges, or restrictions a non-resident buyer faces). None of the five columns means much alone. Price YoY without rent YoY can't tell you whether price growth is being validated by rental income growth or is running ahead of it on sentiment alone. Drawdown-from-peak without days-on-market can't tell you whether a discount is stabilizing or still actively deepening. The combinations below are the practical screens that turn five raw columns into an actual read.</p>
+    <p class="lang-zh" style="display:none"><a href="/dashboard.html">涵蓋 84 個城市的住宅儀表板</a>是為了做一件事而設計的：在真正花時間深入研究任何一個城市之前，先做跨多個城市的快速初步篩選，把五個欄位一起讀，而不是分開看&mdash;&mdash;<strong>價格年增率</strong>、<strong>租金年增率</strong>、<strong>距高點跌幅</strong>、<strong>上架天數</strong>與<strong>外國買家成本</strong>（非居民買家面對的交易稅、附加費或限制）。這五個欄位單獨看，沒有一個能說明太多。價格年增率沒有租金年增率對照，無法判斷價格成長是被租金收入成長驗證，還是純粹靠情緒跑在前面。距高點跌幅沒有上架天數對照，無法判斷折價是正在穩定下來、還是仍在持續加深。以下的組合，是把五個原始欄位變成一個真正判讀的實務篩選法。</p>
+
+    <p class="lang-en"><strong><span class="lang-en">Early-recovery candidate:</span></strong> rent YoY positive and holding, price still below its prior peak, and days-on-market shortening quarter over quarter. This combination reads as rental demand already validating the market while price hasn't caught up yet and the shortening DOM shows buyers starting to move before the price recovery is obvious in the headline number &mdash; the classic setup for a market that has bottomed on fundamentals before it bottoms on price.</p>
+    <p class="lang-zh" style="display:none"><strong><span class="lang-en">早期復甦候選：</span></strong>租金年增率為正且維持穩定、價格仍低於前波高點、上架天數逐季縮短。這個組合讀出的是租賃需求已經在驗證這個市場，而價格還沒跟上，上架天數縮短則顯示買家已經開始行動，早於價格復甦在頭條數字上變得明顯&mdash;&mdash;這是市場基本面已經觸底、但價格還沒觸底這種經典佈局的訊號。</p>
+
+    <p class="lang-en"><strong><span class="lang-en">Speculation flag:</span></strong> rent YoY flat or negative while price YoY is running hot &mdash; price appreciation with no rental-income growth backing it is being driven by something other than the income the property can actually generate: sentiment, leverage-fueled bidding, or a narrative that hasn't been tested by an income statement yet. This is not automatically a sell signal, but it is a flag that the price move needs a non-fundamental explanation before it's trusted, and it's exactly the pattern that historically precedes a sharp correction once the narrative funding it runs out.</p>
+    <p class="lang-zh" style="display:none"><strong><span class="lang-en">投機訊號：</span></strong>租金年增率持平或為負，但價格年增率卻很火熱&mdash;&mdash;沒有租金收入成長支撐的價格上漲，是被物件實際能產生的收入以外的東西所驅動：情緒、槓桿推動的競價，或是一個還沒被損益表驗證過的敘事。這不會自動代表賣出訊號，但它標記出這個價格走勢在被信任之前，需要一個非基本面的解釋，而這正是歷史上，在支撐這個敘事的動能耗盡後，經常先於急遽修正出現的模式。</p>
+
+    <p class="lang-en"><strong><span class="lang-en">Deepening trouble flag:</span></strong> drawdown from peak still widening and days-on-market still lengthening together &mdash; this combination says the correction hasn't found a floor yet, as opposed to a market where drawdown is large but DOM has started shortening (which would suggest the correction is stabilizing even if the price level itself hasn't recovered). <strong>Foreign-buyer costs</strong> function as a filter layer on top of all of the above rather than a standalone signal: a market that screens attractively on the other four columns but carries steep transaction taxes or ownership restrictions for non-resident buyers needs that cost built into the return math before the screen is treated as investable for a cross-border buyer specifically.</p>
+    <p class="lang-zh" style="display:none"><strong><span class="lang-en">惡化中訊號：</span></strong>距高點跌幅仍在擴大、上架天數也同時在拉長&mdash;&mdash;這個組合說明修正還沒找到底部，相對之下，一個跌幅雖大但上架天數已經開始縮短的市場，則暗示修正正在穩定下來，即使價格水準本身還沒回升。<strong>外國買家成本</strong>則是疊加在以上所有欄位之上的一層過濾器，而不是一個獨立訊號：一個在其他四個欄位篩選結果都有吸引力的市場，如果對非居民買家課徵高額交易稅或有持有限制，這筆成本就必須在被視為對跨境買家具有投資價值之前，先被算進報酬算式裡。</p>
+
+    <ul class="checklist">
+      <li class="checklist-item"><input type="checkbox" id="chk-dash-1"><label for="chk-dash-1"><span class="lang-en">Price YoY never read alone &mdash; always checked against rent YoY before concluding a price move is fundamentally supported.</span><span class="lang-zh" style="display:none">價格年增率絕不單獨解讀&mdash;&mdash;在斷定一個價格走勢有基本面支撐之前，一律對照租金年增率查核。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-dash-2"><label for="chk-dash-2"><span class="lang-en">Drawdown-from-peak read together with days-on-market direction (widening vs. shortening) to distinguish a deepening correction from a stabilizing one.</span><span class="lang-zh" style="display:none">距高點跌幅與上架天數的方向（拉長或縮短）一起讀，用以區分正在惡化的修正與正在穩定的修正。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-dash-3"><label for="chk-dash-3"><span class="lang-en">Foreign-buyer costs built directly into the underwritten return before treating a favorable screen as investable for a non-resident buyer.</span><span class="lang-zh" style="display:none">在把一個看似有利的篩選結果視為對非居民買家具投資價值之前，先把外國買家成本直接算進核算的報酬裡。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-dash-4"><label for="chk-dash-4"><span class="lang-en">A city that screens well treated as a shortlist candidate for district-level work (Section 4), not as a purchase decision on its own.</span><span class="lang-zh" style="display:none">篩選結果良好的城市，被當成值得進一步做區域層級功夫（第四節）的候選名單，而不是本身就等於一項購買決策。</span></label></li>
+    </ul>
+
+    <div class="quiz-block" data-quiz-id="m13-q5" data-quiz='[
+      {
+        "q":{"en":"City P shows price YoY at +14%, rent YoY at +1%, and days-on-market shortening. City Q shows price YoY at +2%, rent YoY at +9%, price still 18% below its prior peak, and days-on-market shortening. Which city screens as the early-recovery candidate, and which flags as speculative?","zh":"P 城市顯示價格年增率 +14%、租金年增率 +1%、上架天數正在縮短。Q 城市顯示價格年增率 +2%、租金年增率 +9%、價格仍比前波高點低 18%、上架天數正在縮短。哪個城市篩選出早期復甦候選，哪個標記為投機訊號？"},
+        "opts":[
+          {"en":"City P is the early-recovery candidate; City Q is speculative.","zh":"P 城市是早期復甦候選；Q 城市是投機訊號。"},
+          {"en":"City Q screens as the early-recovery candidate (rent growth validating demand, price still below peak, shortening DOM); City P flags as speculative (price running far ahead of rent growth).","zh":"Q 城市篩選出早期復甦候選（租金成長驗證需求、價格仍低於高點、上架天數縮短）；P 城市標記為投機訊號（價格漲幅遠遠跑在租金成長之前）。"},
+          {"en":"Both cities screen identically since both show shortening days-on-market.","zh":"兩個城市的篩選結果一樣，因為兩者的上架天數都在縮短。"},
+          {"en":"Neither city can be screened without a foreign-buyer-cost figure.","zh":"沒有外國買家成本數字，兩個城市都無法篩選。"}
+        ],
+        "a":1,
+        "exp":{"en":"City Q matches the early-recovery pattern exactly: rent growth positive and meaningfully ahead of price growth, price still below peak, DOM shortening. City P&#39;s price growth (14%) running far ahead of rent growth (1%) is the textbook speculation flag &mdash; appreciation without income growth to back it.","zh":"Q 城市完全符合早期復甦的模式：租金成長為正、且明顯領先價格成長，價格仍低於高點，上架天數正在縮短。P 城市的價格成長（14%）遠遠跑在租金成長（1%）之前，正是教科書級的投機訊號&mdash;&mdash;漲幅沒有收入成長支撐。"}
+      }
+    ]'></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 4. DISTRICT / NEIGHBORHOOD ANALYSIS -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">4. District analysis: reading a neighborhood before the headline story catches up</h2>
+    <h2 class="lang-zh" style="display:none">四、區域分析：在頭條故事跟上之前先讀懂一個社區</h2>
+    <p class="lang-en">A citywide dashboard screen narrows dozens of cities to a shortlist; it says almost nothing about which specific streets within a chosen city are worth targeting, because the variance between adjacent districts in the same city is often wider than the variance between cities. District analysis is where that gap gets closed, and the most useful lens for a district in transition is a signal stack read together rather than any one indicator trusted alone.</p>
+    <p class="lang-zh" style="display:none">一個全城儀表板篩選能把數十個城市縮小成候選名單；但它幾乎無法告訴你在選定的城市裡，哪些具體街道值得鎖定，因為同一個城市裡相鄰區域之間的差異，往往比城市之間的差異還要大。區域分析正是用來補上這個落差的地方，而對一個正在轉變中的區域來說，最有用的視角是一組訊號一起讀，而不是單獨信任任何一個指標。</p>
+
+    <h3 class="lang-en">The gentrification signal stack</h3>
+    <h3 class="lang-zh" style="display:none">仕紳化訊號組合</h3>
+    <p class="lang-en">A widely observed, informally documented sequencing pattern in gentrifying districts runs roughly: independent cafés and small creative studios arrive first, drawn by cheap rent and willing to tolerate a rough-edged block; art galleries and boutique retail follow once the café-and-studio crowd has established enough foot traffic to make a storefront viable; national chain retail and formula restaurants arrive last, once the district's foot traffic and household income have risen enough to clear a corporate site-selection committee's threshold. By the time the chain-retail stage is visible, most of the pricing opportunity is typically already gone &mdash; chains are lagging, not leading, indicators, because their leasing decisions run through slow corporate approval processes based on data that is itself a year or more old by the time it's acted on. The useful window is earlier: permit activity for renovations and change-of-use filings ticking up before rents move, the rent-to-own-cost ratio narrowing as buyers start pricing in expected appreciation ahead of current rental yield, school-quality trajectories improving (test scores, enrollment demand, not just the current-year snapshot but the multi-year trend), and any transit-line extension or new station opening nearby.</p>
+    <p class="lang-zh" style="display:none">在正在仕紳化的區域中，一個被廣泛觀察到、非正式有紀錄可循的排序模式大致是：獨立咖啡館與小型創意工作室最先進駐，被便宜的租金吸引，也願意忍受一個還粗糙的街區；等咖啡館與工作室群聚出足夠的人流，讓一間店面變得可行之後，藝廊與精品零售隨之跟進；全國連鎖零售與制式化餐廳最後才進駐，等到區域的人流與家戶所得已經提升到足以通過企業選址委員會的門檻。等到連鎖零售這個階段變得明顯時，大部分的定價機會通常都已經消失了&mdash;&mdash;連鎖品牌是落後指標而非領先指標，因為它們的租賃決策要經過緩慢的企業核准流程，而依據的資料本身在被採用時往往已經是一年以上以前的。真正有用的窗口更早：翻新與用途變更的許可申請在租金開始變動之前先升溫、租買比隨著買家開始把預期增值提前反映進定價（而不只是看目前的租金收益率）而收窄、學區品質軌跡改善（測驗成績、入學需求，不只是當年度快照，而是多年趨勢），以及附近任何交通線延伸或新車站開通。</p>
+
+    <p class="lang-en">Transit access specifically is one of the most consistently documented value drivers in urban real-estate research: proximity to a new or improved rail or metro station has been shown, across many transit systems and metros studied by urban economists, to lift nearby residential values over time, because a station converts a location's core input &mdash; commute-time access to job centers &mdash; without anyone having to build anything on the parcel itself. The mechanism runs in a fairly mechanical order: a new station cuts commute time, which widens the pool of buyers and renters willing to consider that location, which raises achievable rents and prices, which raises land value &mdash; and because the station's location and opening date are typically public knowledge years before it opens, this is one of the few district-level catalysts an analyst can actually see coming rather than infer after the fact.</p>
+    <p class="lang-zh" style="display:none">交通可及性尤其是都市不動產研究中最一致被記錄的價值驅動因子之一：許多都市經濟學家研究過的運輸系統與都會區都顯示，鄰近新增或改善的鐵路或捷運車站，會隨時間拉抬周邊住宅價值，因為一座車站改變了一個地點的核心輸入條件&mdash;&mdash;到就業中心的通勤時間可及性&mdash;&mdash;卻不需要任何人在這塊地本身動一磚一瓦。這個機制大致依一個相當機械式的順序發生：新車站縮短通勤時間，擴大願意考慮這個地點的買家與租客池，進而拉高可實現的租金與價格，再拉高土地價值&mdash;&mdash;而因為車站的位置與開通日期通常在開通前好幾年就是公開資訊，這是少數分析師能真正提前看見、而不是事後才推論出來的區域層級催化劑之一。</p>
+
+    <div class="pitfall">
+      <span class="pitfall-icon">⚠️</span>
+      <div class="pitfall-body">
+        <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+        <span class="lang-en">Waiting for a national chain retailer or a well-known coffee brand to open before deciding a district is "arriving." By that stage the district has typically already cleared a corporate site-selection committee's income and foot-traffic threshold, which means much of the pricing gap has already closed. Chain retail is a lagging confirmation signal, not a leading one.</span>
+        <span class="lang-zh" style="display:none">等到一家全國連鎖零售商或知名咖啡品牌開幕，才判定一個區域「正在崛起」。到了那個階段，這個區域通常已經通過了企業選址委員會的所得與人流門檻，代表大部分的定價落差已經收斂。連鎖零售是落後的確認訊號，不是領先訊號。</span>
+      </div>
+    </div>
+
+    <h3 class="lang-en">The "second-best district" thesis</h3>
+    <h3 class="lang-zh" style="display:none">「次佳區域」論點</h3>
+    <p class="lang-en">The practical trade-off underneath district selection is often framed as the <span class="key-term" tabindex="0">"second-best district" thesis<span class="key-term-tip"><span class="lang-en">The argument that the #2 district adjacent to (or one tier below) a city&#39;s established, expensive core can offer a better risk-adjusted entry than the core itself &mdash; a less-competed basis capturing meaningful demand spillover, at the cost of less certainty that the district ever fully develops the core&#39;s amenity base, school quality, and liquidity.</span><span class="lang-zh" style="display:none">主張緊鄰（或比）城市既有、昂貴核心區低一級的第二佳區域，能提供比核心區本身更好的風險調整後進場條件&mdash;&mdash;以較不被競爭的基準價格，捕捉有意義的需求溢出，代價是這個區域是否真的能完整發展出核心區的生活機能、學區品質與流動性，確定性較低。</span></span></span>: a district adjacent to, or one tier below, an already-established expensive core can offer a better entry basis than the core itself, because it's less competed while still capturing meaningful spillover demand from the core next door. This is a real edge, not a guaranteed one &mdash; adjacency to a strong core does not guarantee a district ever develops institutional-grade fundamentals of its own: a deep enough buyer pool at resale, school quality that actually improves rather than staying flat, and enough transaction liquidity that an eventual exit isn't a forced sale into a thin buyer pool. Some second-best districts do graduate into their own right over a five-to-ten-year horizon; others remain permanently in the shadow of the core next door, absorbing overflow demand in good years and getting hit hardest when demand pulls back toward the safer, more liquid core in a downturn.</p>
+    <p class="lang-zh" style="display:none">區域選擇背後的實務取捨，常被框定成<span class="key-term" tabindex="0">「次佳區域」論點<span class="key-term-tip"><span class="lang-en">The argument that the #2 district adjacent to (or one tier below) a city&#39;s established, expensive core can offer a better risk-adjusted entry than the core itself &mdash; a less-competed basis capturing meaningful demand spillover, at the cost of less certainty that the district ever fully develops the core&#39;s amenity base, school quality, and liquidity.</span><span class="lang-zh" style="display:none">主張緊鄰（或比）城市既有、昂貴核心區低一級的第二佳區域，能提供比核心區本身更好的風險調整後進場條件&mdash;&mdash;以較不被競爭的基準價格，捕捉有意義的需求溢出，代價是這個區域是否真的能完整發展出核心區的生活機能、學區品質與流動性，確定性較低。</span></span></span>：緊鄰、或比一個既已成熟且昂貴的核心區低一級的區域，能提供比核心區本身更好的進場基準，因為它競爭較少，卻仍然能捕捉到核心區隔壁溢出的可觀需求。這是一個真實的優勢，但不保證一定會實現&mdash;&mdash;緊鄰強勢核心區，不保證一個區域一定會發展出屬於自己的機構級基本面：轉售時是否有足夠深的買家池、學區品質是否真的在改善而不只是持平，以及是否有足夠的交易流動性，讓最終出場不會被迫在一個買家稀少的市場中賤賣。有些次佳區域確實能在五到十年的時間跨度內，發展成獨當一面的自身格局；有些則永久停留在隔壁核心區的陰影下，好年冬吸收溢出需求，一旦景氣反轉，需求撤回更安全、流動性更高的核心區時，也是它們受創最重。</p>
+
+    <div class="quiz-block" data-quiz-id="m13-q6" data-quiz='[
+      {
+        "q":{"en":"A national coffee chain just opened its first location in District Z. Building-permit filings for renovations in the district have been rising for three years, and rent-to-own-cost ratios have been narrowing for two. What should an investor conclude about timing?","zh":"某全國連鎖咖啡品牌剛在 Z 區開了第一家分店。該區的翻新建照申請已經連續三年上升，租買比也已經收窄了兩年。投資人應該對進場時機得出什麼結論？"},
+        "opts":[
+          {"en":"The chain opening is the real signal to act on now; the permit and rent-to-own trends were just noise until confirmed by the chain.","zh":"連鎖品牌開幕才是現在該行動的真正訊號；許可與租買比趨勢在被連鎖品牌確認之前只是雜訊。"},
+          {"en":"The chain opening is a lagging confirmation signal &mdash; the permit-activity and rent-to-own-ratio trends, already running for two to three years, were the earlier, more useful signals, and much of the pricing gap the investor hoped to capture has likely already closed by the time a chain commits.","zh":"連鎖品牌開幕是落後的確認訊號&mdash;&mdash;已經跑了兩到三年的許可活動與租買比趨勢，才是更早、更有用的訊號，而等到連鎖品牌決定進駐時，投資人原本希望捕捉的定價落差，很可能大部分已經收斂了。"},
+          {"en":"None of these signals matter without a citywide dashboard screen first.","zh":"沒有先做全城儀表板篩選，這些訊號都不重要。"},
+          {"en":"Rent-to-own-ratio narrowing means the district is becoming less attractive to buyers.","zh":"租買比收窄代表這個區域對買家的吸引力正在下降。"}
+        ],
+        "a":1,
+        "exp":{"en":"Chain retail decisions run through slow corporate approval on lagging data, which is why chain openings confirm a district has already arrived rather than predicting it. Permit activity and narrowing rent-to-own ratios move earlier in the sequence and are the more actionable signals; by the chain-retail stage, an investor is typically buying near the top of the available pricing gap.","zh":"連鎖零售的決策要經過依據落後資料的緩慢企業核准流程，這也是為什麼連鎖品牌開幕確認的是一個區域已經崛起，而不是預測它即將崛起。許可活動與收窄中的租買比在序列中更早出現，是更能據以行動的訊號；到了連鎖零售這個階段，投資人買進的通常已經接近可獲得定價落差的高點附近。"}
+      }
+    ]'></div>
+
+    <div class="quiz-block" data-quiz-id="m13-q7" data-quiz='[
+      {
+        "q":{"en":"An investor is choosing between District Core (established, expensive, deep amenity base) and District Adjacent (one tier below Core, cheaper, capturing spillover demand). What is the honest risk in the \"second-best district\" thesis favoring District Adjacent?","zh":"投資人在核心區（成熟、昂貴、生活機能深厚）與鄰接區（比核心區低一級、較便宜、正在捕捉溢出需求）之間做選擇。「次佳區域」論點傾向選擇鄰接區，其誠實的風險是什麼？"},
+        "opts":[
+          {"en":"There is no real risk &mdash; adjacency to a strong core always guarantees the second-best district eventually matches it.","zh":"沒有真正的風險&mdash;&mdash;緊鄰強勢核心區永遠保證次佳區域最終會與其匹敵。"},
+          {"en":"District Adjacent may never develop its own institutional-grade fundamentals (deep buyer pool, improving schools, real liquidity) and could instead remain in Core&#39;s shadow &mdash; absorbing overflow in good times but getting hit hardest in a downturn as demand retreats to the safer, more liquid Core.","zh":"鄰接區可能永遠發展不出屬於自己的機構級基本面（深厚的買家池、改善中的學區、真正的流動性），反而可能永久停留在核心區的陰影下&mdash;&mdash;好年冬吸收溢出需求，但景氣反轉時受創最重，因為需求會撤回更安全、流動性更高的核心區。"},
+          {"en":"District Adjacent is riskier only because it is physically farther from downtown, which is a fixed, unrelated fact.","zh":"鄰接區風險較高只是因為它在實體距離上離市中心更遠，這是一個固定、不相關的事實。"},
+          {"en":"The thesis has no risk once permit activity has already started rising in District Adjacent.","zh":"一旦鄰接區的許可活動已經開始上升，這個論點就沒有風險了。"}
+        ],
+        "a":1,
+        "exp":{"en":"The second-best district thesis is a real edge but not a guarantee. Some adjacent districts do graduate into their own right; others stay permanently dependent on the core, which means they get the upside of spillover demand in good times but disproportionate downside when demand pulls back toward safety.","zh":"次佳區域論點是一個真實的優勢，但不是保證。有些鄰接區確實會發展成獨當一面的格局；有些則永久依賴核心區，代表它們在好年冬能享受溢出需求的上檔，但需求撤回安全區時，卻要承受不成比例的下檔風險。"}
+      }
+    ]'></div>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Bushwick, Brooklyn is a widely documented example of the signal-stack sequencing described above. Through the 2000s, cheap warehouse and industrial space in Bushwick drew independent artists and small galleries priced out of neighboring Williamsburg, followed through the 2010s by an expanding cluster of independent coffee shops, bars, and small-format retail as foot traffic built. National chain retail arrived meaningfully later, well after median rents in the district had already risen sharply from their early-2000s base, according to real-estate data widely reported at the time. A buyer underwriting purely off the eventual arrival of national retail brands was, by the time that signal showed up, buying well after most of the district's repricing had already happened; a buyer reading the earlier signals &mdash; renovation permit filings, small-business lease-up, the L and J/M subway lines' existing service &mdash; had a materially longer window to act before the broader market caught on.</p>
+      <p class="lang-zh" style="display:none">布魯克林的布希維克（Bushwick）是上述訊號組合排序的一個廣為記載的案例。整個 2000 年代，布希維克便宜的倉庫與工業空間，吸引了被鄰近威廉斯堡（Williamsburg）房價擠出的獨立藝術家與小型藝廊，接著在 2010 年代，隨著人流累積，獨立咖啡店、酒吧與小型零售店群聚逐漸擴大。根據當時廣泛報導的不動產資料，全國連鎖零售明顯較晚才進駐，遠在該區中位數租金已經從 2000 年代初的基期大幅上漲之後。一個純粹以全國連鎖品牌最終進駐作為核算依據的買家，等到這個訊號出現時，其實已經是在這個區域大部分重新定價已經發生之後才買進；一個讀懂更早訊號的買家&mdash;&mdash;翻新許可申請、小型商家租賃進駐、既有的 L 線與 J/M 線地鐵服務&mdash;&mdash;則有一個明顯更長的時間窗口，能在更廣泛的市場跟上之前先行動。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 5. MICRO-MARKET DATA DISCIPLINE -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">5. Micro-market data discipline: the small-sample trap</h2>
+    <h2 class="lang-zh" style="display:none">五、微觀市場的資料紀律：小樣本陷阱</h2>
+    <p class="lang-en">A city-level dashboard is drawing on thousands of transactions and rarely misleads on basic direction; a single district, and especially a single block or building type within a district, can be drawing on a genuinely small number of closed transactions in any given quarter, and small samples behave very differently from large ones. Three disciplines keep a thin district from producing a false read.</p>
+    <p class="lang-zh" style="display:none">一個城市層級的儀表板，背後有數千筆交易做支撐，在基本方向上很少會誤導人；但單一區域、尤其是區域裡的單一街區或某種建築類型，在任一季度裡可能真的只有少數幾筆成交，而小樣本的行為跟大樣本截然不同。三項紀律能避免一個薄樣本的區域產生假訊號。</p>
+
+    <p class="lang-en"><strong><span class="lang-en">Closed transactions only, not listing prices.</span></strong> An asking price is a seller's opening negotiating position, not a market clearing price, and a district full of ambitious asking prices that never actually transact at those levels will show an inflated trend if listing data is treated as if it were sales data. Only closed, recorded transactions reflect what a buyer was actually willing to pay and a seller actually willing to accept.</p>
+    <p class="lang-zh" style="display:none"><strong><span class="lang-en">只看已成交交易，不看開價。</span></strong>開價是賣方的談判起始立場，不是市場出清價格，一個充滿雄心開價、但實際上從未真正以那個價位成交的區域，如果把上架資料當成成交資料處理，會顯示出一個虛高的趨勢。只有已完成、有登記的交易，才反映買方真正願意付出、賣方真正願意接受的價格。</p>
+
+    <p class="lang-en"><strong><span class="lang-en">Controlling for building age and unit type.</span></strong> Averaging together a handful of sales from a 1920s walk-up, a 1980s mid-rise, and a brand-new development in the same district produces a number that describes nothing real, because those three building types carry structurally different price-per-square-foot bases regardless of what's happening to the district's underlying trend. A trend read has to hold building vintage and unit type roughly constant, or compare like-for-like sales across time, rather than averaging across fundamentally different product types and mistaking a shift in transaction mix for a shift in the underlying market.</p>
+    <p class="lang-zh" style="display:none"><strong><span class="lang-en">控制建物屋齡與單位類型。</span></strong>把一棟 1920 年代的無電梯公寓、一棟 1980 年代的中層大樓，與同一區域內一棟全新開發案的少數幾筆成交平均在一起，得出的數字不會描述任何真實的東西，因為無論這個區域底層趨勢正在發生什麼事，這三種建物類型本來就帶有結構性不同的每坪單價基期。一個趨勢判讀必須讓建物年代與單位類型大致維持不變，或是跨時間比較同類型的成交案，而不是把根本不同的產品類型平均在一起，把交易組合的變化誤認成底層市場的變化。</p>
+
+    <p class="lang-en"><strong><span class="lang-en">The small-sample trap itself.</span></strong> If a district records only four or five closed sales in a quarter, one unusually motivated seller (a divorce, an estate sale, a job relocation on a deadline) or one unusually motivated buyer (an all-cash offer above ask to win a bidding war) can swing the quarter's median price by a double-digit percentage without reflecting any change in the district's underlying fundamentals at all. The practical fix is widening the window &mdash; rolling trailing-twelve-month or even trailing-24-month medians instead of single-quarter snapshots &mdash; specifically in thin districts, and treating any single-quarter move in a low-transaction-volume district with real skepticism until it's confirmed by a second quarter or a larger rolling window.</p>
+    <p class="lang-zh" style="display:none"><strong><span class="lang-en">小樣本陷阱本身。</span></strong>如果一個區域一季只登記了四、五筆成交，一位動機異常強烈的賣方（離婚、遺產出售、有期限壓力的工作搬遷）或一位動機異常強烈的買方（為了贏得搶購熱潮、出價高於開價的全現金報價），就能讓當季中位數價格波動雙位數百分比，卻完全沒有反映這個區域底層基本面的任何變化。實務上的解方是拉長觀察窗口&mdash;&mdash;尤其在薄樣本區域，用滾動的近十二個月甚至近二十四個月中位數，而不是單一季度的快照&mdash;&mdash;並且對低成交量區域裡任何單一季度的波動保持真正的懷疑，直到第二個季度或更大的滾動窗口確認為止。</p>
+
+    <div class="pitfall">
+      <span class="pitfall-icon">⚠️</span>
+      <div class="pitfall-body">
+        <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+        <span class="lang-en">Treating a single quarter's median-price jump in a five-transaction district as confirmation of a district-wide trend. Check the transaction count behind any district-level statistic before trusting it &mdash; a headline number built on a handful of closings can be moved dramatically by one outlier sale that has nothing to do with the district's actual trajectory.</span>
+        <span class="lang-zh" style="display:none">把一個只有五筆交易的區域裡，單一季度中位數價格的跳動，當成整個區域趨勢的確認。在信任任何區域層級統計數字之前，先查核背後的交易數量&mdash;&mdash;一個建立在少數幾筆成交上的頭條數字，可能被一筆跟該區域真正走向毫無關係的離群成交案大幅拉動。</span>
+      </div>
+    </div>
+
+    <div class="quiz-block" data-quiz-id="m13-q8" data-quiz='[
+      {
+        "q":{"en":"District M&#39;s median sale price jumped 22% in one quarter, based on 4 closed transactions. One of those was an estate sale that closed 30% above the district&#39;s typical price after a bidding war. What is the correct next step before concluding the district has repriced?","zh":"M 區的中位數成交價在一季內跳升 22%，根據的是 4 筆已成交交易。其中一筆是遺產出售，在搶購熱潮後以高於該區典型價格 30% 成交。在斷定這個區域已經重新定價之前，正確的下一步是什麼？"},
+        "opts":[
+          {"en":"Accept the 22% jump as the district&#39;s new trend immediately, since it is the most recent data available.","zh":"立刻接受這 22% 的跳升是該區的新趨勢，因為這是最新可得的資料。"},
+          {"en":"Widen the observation window (trailing 12&ndash;24 months instead of one quarter) and check whether the trend holds with the outlier estate sale excluded or weighted down, before trusting a single-quarter, 4-transaction move.","zh":"拉長觀察窗口（用近 12 到 24 個月而非單一季度），並檢查在排除或降低那筆離群遺產出售案的權重後，這個趨勢是否依然成立，再信任一個只有 4 筆交易的單季波動。"},
+          {"en":"Ignore the district entirely going forward, since any market with only 4 transactions in a quarter is inherently uninvestable.","zh":"從此完全忽略這個區域，因為任何一季只有 4 筆交易的市場本質上就不值得投資。"},
+          {"en":"Report the 22% figure to clients as-is, since closed transactions are always reliable regardless of sample size.","zh":"直接把 22% 這個數字回報給客戶，因為已成交交易永遠可靠，無論樣本大小。"}
+        ],
+        "a":1,
+        "exp":{"en":"A 4-transaction quarter is a textbook small-sample trap &mdash; one motivated outlier sale can swing the median double digits with no bearing on underlying fundamentals. Widening the window and checking sensitivity to the outlier is the correct discipline before treating the move as a real trend.","zh":"一季只有 4 筆交易，是教科書等級的小樣本陷阱&mdash;&mdash;一筆動機強烈的離群成交案，就能讓中位數波動雙位數百分比，卻與底層基本面毫無關係。拉長觀察窗口、檢查對離群值的敏感度，才是在把這個波動當成真實趨勢之前正確的紀律。"}
+      }
+    ]'></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 6. WORKED DISTRICT STUDY -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">6. Worked example: a full district study</h2>
+    <h2 class="lang-zh" style="display:none">六、逐步演算範例：一份完整的區域研究</h2>
+    <p class="lang-en">The following walks through all of this module's tools applied to one hypothetical (<span class="key-term" tabindex="0">假設<span class="key-term-tip"><span class="lang-en">Hypothetical &mdash; a constructed example built to illustrate the method, not a real district or a real forecast. The method transfers to a real district; the specific numbers below do not.</span><span class="lang-zh" style="display:none">假設案例&mdash;&mdash;為了示範方法而建構的範例，不是一個真實的區域或真實的預測。方法可以套用到真實區域上；下面的具體數字則不能。</span></span></span>) district, step by step, from raw inputs to a three-year rent-and-price read.</p>
+    <p class="lang-zh" style="display:none">以下逐步示範，把本課所有工具套用到一個假設區域上，從原始輸入一路走到三年期的租金與價格判讀。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example &mdash; District Study: "Milldale" (Hypothetical)</span><span class="lang-zh" style="display:none">逐步演算範例&mdash;&mdash;區域研究：「Milldale」（假設）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Migration input:</strong> the metro containing Milldale has posted <span class="we-formula">2.1% annual net in-migration</span> for three consecutive years, roughly two-thirds domestic (job-driven) and one-third international (a large university's graduate program expanding). Household formation in the metro is running at <span class="we-formula">1.6%/yr</span>, below population growth of 2.1%, but still positive and outpacing the metro&#39;s historical average of 0.9%/yr.</span>
+            <span class="lang-zh" style="display:none"><strong>遷徙輸入：</strong>Milldale 所在的都會區已連續三年繳出<span class="we-formula">年淨遷入 2.1%</span>，大約三分之二來自國內（就業驅動）、三分之一來自國際（一所大型大學研究所計畫擴大招生）。都會區家戶形成率為<span class="we-formula">每年 1.6%</span>，低於 2.1% 的人口成長，但仍為正值，且超過該都會區 0.9%／年的歷史平均值。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Supply pipeline input:</strong> Milldale district-specific permits filed trailing 12 months <span class="we-formula">= 340 units</span> against existing district stock of <span class="we-formula">4,800 units</span>. Applying the metro&#39;s historical permit-to-completion attrition (28% combined across both stages): <span class="we-formula">340 &times; (1 &minus; 28%) &asymp; 245 units expected to complete</span> &rarr; pipeline as % of stock <span class="we-formula">= 245 &divide; 4,800 &asymp; 5.1%</span>, spread roughly evenly over an expected 3-year build-out.</span>
+            <span class="lang-zh" style="display:none"><strong>供給管線輸入：</strong>Milldale 區過去 12 個月的許可申請<span class="we-formula">＝340 戶</span>，對比既有區域存量<span class="we-formula">4,800 戶</span>。套用該都會區歷史上「許可到完工」的合併流失率（兩階段合計 28%）：<span class="we-formula">340 &times;（1 &minus; 28%）&asymp; 245 戶預期完工</span> &rarr; 管線佔存量比例<span class="we-formula">＝245 &divide; 4,800 &asymp; 5.1%</span>，大致平均分布在預期的三年建設期內。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>School-trajectory input:</strong> the district&#39;s elementary school has moved from the metro&#39;s 40th percentile to 62nd percentile on standardized scores over four years, and enrollment applications (a leading indicator of demand ahead of the score itself) are up 18% year-over-year for the coming term.</span>
+            <span class="lang-zh" style="display:none"><strong>學區軌跡輸入：</strong>該區的小學在標準化測驗成績上，四年內從都會區第 40 百分位進步到第 62 百分位，而入學申請人數（先於分數本身出現的需求領先指標）在即將到來的學期年增 18%。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Signal-stack check:</strong> renovation and change-of-use permits in the district (separate from the new-build pipeline above) have risen for three consecutive years; rent-to-own-cost ratio has narrowed from 1.35&times; to 1.18&times; over two years (buyers pricing in expected appreciation); no chain retail has arrived yet. Per Section 4, this reads as mid-sequence &mdash; past the earliest café/studio signal, not yet at the lagging chain-retail confirmation stage.</span>
+            <span class="lang-zh" style="display:none"><strong>訊號組合檢查：</strong>該區的翻新與用途變更許可（有別於上述的新建管線）已連續三年上升；租買比在兩年內從 1.35 倍收窄到 1.18 倍（買家正把預期增值提前反映進定價）；連鎖零售尚未進駐。依第四節的框架，這讀作序列中段&mdash;&mdash;已經過了最早期的咖啡館／工作室訊號，但還沒到落後的連鎖零售確認階段。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Data-discipline check:</strong> the district recorded 38 closed transactions in the most recent quarter (large enough sample to trust a single-quarter read), all controlled to the same unit type (2&ndash;3 bedroom attached housing built 1995&ndash;2015) to avoid mixing in the small handful of pre-war stock sales that carry a structurally different price base.</span>
+            <span class="lang-zh" style="display:none"><strong>資料紀律檢查：</strong>該區最近一季記錄了 38 筆已成交交易（樣本量足以信任單季判讀），全部控制在同一種單位類型（1995 至 2015 年建造的二至三房連棟住宅），以避免混入少數帶有結構性不同價格基期的戰前存量成交案。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">6</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Three-year read:</strong> household formation (1.6%/yr) outpacing the district&#39;s modest 5.1%-over-three-years supply pipeline, an improving and demand-generating school trajectory, and a mid-sequence gentrification signal stack together point toward continued, moderating (not accelerating) rent and price growth over the next three years &mdash; not the sharp early-recovery inflection of Section 3&#39;s screen (this district was never depressed to begin with), but a district still early enough in its signal sequence that most of the repricing opportunity has not yet been captured by the market. The specific risk to flag: if metro-wide net migration decelerates from its recent 2.1%/yr pace, Milldale&#39;s demand tailwind weakens even though nothing about the district itself has changed &mdash; a reminder that a district-level read is only as good as the metro-level demand assumption underneath it.</span>
+            <span class="lang-zh" style="display:none"><strong>三年期判讀：</strong>家戶形成率（1.6%／年）跑贏該區三年累計僅 5.1% 的溫和供給管線，加上改善中且能創造需求的學區軌跡，以及一個處於序列中段的仕紳化訊號組合，三者共同指向未來三年租金與價格將持續、但趨於溫和（而非加速）的成長&mdash;&mdash;這不是第三節篩選器裡那種急遽的早期復甦轉折（這個區域從一開始就不曾蕭條），而是一個訊號序列仍處於早段、市場尚未捕捉大部分重新定價機會的區域。需要標記的具體風險：如果都會區整體淨遷入從近期 2.1%／年的速度放緩，Milldale 的需求順風就會減弱，即使這個區域本身完全沒有任何變化&mdash;&mdash;提醒我們，區域層級的判讀，其可靠程度終究取決於底層的都會區層級需求假設。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="quiz-block" data-quiz-id="m13-q9" data-quiz='[
+      {
+        "q":{"en":"In the Milldale worked example, what is the single biggest external risk to the three-year bullish read, given how the read was constructed?","zh":"在 Milldale 演算範例中，考量這個判讀是如何建構出來的，最大的單一外部風險是什麼？"},
+        "opts":[
+          {"en":"A sudden increase in chain retail openings, which would undermine the thesis.","zh":"連鎖零售開幕數量突然增加，這會削弱這個論點。"},
+          {"en":"A deceleration in metro-wide net migration, since the district-level demand read depends directly on the metro-level migration assumption holding &mdash; if that weakens, Milldale&#39;s tailwind weakens even with nothing changing locally.","zh":"都會區整體淨遷入放緩，因為區域層級的需求判讀直接依賴於都會區層級的遷徙假設能否維持&mdash;&mdash;一旦這個假設減弱，即使當地什麼都沒改變，Milldale 的順風也會跟著減弱。"},
+          {"en":"The school&#39;s test scores declining, which was already ruled out by the trajectory data.","zh":"學校測驗成績下滑，這已經被學區軌跡資料排除了。"},
+          {"en":"The 38-transaction sample size, which is too small to trust.","zh":"38 筆交易的樣本量太小，不足以信任。"}
+        ],
+        "a":1,
+        "exp":{"en":"The district-level demand read (household formation outpacing supply) is built directly on top of the metro-level migration trend. Any district study inherits the fragility of its metro-level demand assumption &mdash; if migration decelerates, the entire read has to be revisited even though nothing in the district itself changed.","zh":"區域層級的需求判讀（家戶形成率跑贏供給）是直接建立在都會區層級的遷徙趨勢之上。任何區域研究都繼承了其都會區層級需求假設的脆弱性&mdash;&mdash;如果遷徙放緩，即使區域本身什麼都沒變，整個判讀都必須重新檢視。"}
+      }
+    ]'></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 7. WHEN MACRO TRUMPS MICRO -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">7. When macro trumps micro: rate shocks flatten every district at once</h2>
+    <h2 class="lang-zh" style="display:none">七、什麼時候總體壓過微觀：利率衝擊會同時壓平所有區域</h2>
+    <p class="lang-en">Every framework in this module is built to distinguish one district or city from another &mdash; which one has better fundamentals, which one is earlier in its signal sequence, which one is more overbuilt. There is exactly one condition under which almost all of that differentiation temporarily stops mattering: a sharp, broad-based move in mortgage rates. A rate shock hits affordability through the monthly payment math in a way that applies almost uniformly across every district in a market simultaneously, regardless of how strong any individual district's local fundamentals are, because the mechanism runs through the buyer's financing cost, not through anything specific to a given block.</p>
+    <p class="lang-zh" style="display:none">本課裡的每一個框架，都是為了區分一個區域或城市與另一個之間的差異而建構的&mdash;&mdash;哪一個基本面較好、哪一個訊號序列較早、哪一個較為過度興建。恰好存在一種情況，會讓幾乎所有這種區分暫時失去意義：房貸利率出現劇烈、廣泛的變動。利率衝擊透過每月月付金的算術打擊可負擔性，這個打擊幾乎均勻地同時施加在一個市場裡的每一個區域上，無論任何一個特定區域的在地基本面有多強，因為這個機制是透過買家的融資成本運作的，跟任何一個特定街區的特性無關。</p>
+
+    <p class="lang-en">The 2022&ndash;2024 period is a widely documented, recent illustration. As benchmark policy rates rose sharply starting in 2022, average 30-year fixed mortgage rates in the U.S. climbed from roughly 3% to over 7% within about eighteen months &mdash; a move extensively covered across financial and housing media and confirmed in national mortgage-rate survey data. That single change roughly doubled the monthly payment on a given loan amount, and existing-home sales volume and mortgage application activity fell sharply across essentially every U.S. metro over the same window, strong-fundamentals districts and weak-fundamentals districts alike, because the payment math hit every buyer using financing at the same time. Districts that had scored well on every micro-level signal in this module &mdash; tight supply, strong migration, an improving school trajectory &mdash; still saw transaction volume and price momentum cool sharply, not because anything about the district itself had changed, but because the financing cost of acting on those fundamentals had changed for every buyer in every district at once.</p>
+    <p class="lang-zh" style="display:none">2022 至 2024 年是一個廣為記載的近期例證。隨著基準政策利率從 2022 年開始劇烈上升，美國 30 年期固定房貸利率的平均值，在大約十八個月內從約 3% 攀升到超過 7%&mdash;&mdash;這個變動被財經與房地產媒體廣泛報導，也在全國性房貸利率調查資料中獲得確認。單單這一個變化，就讓同樣貸款金額的每月月付金大約翻倍，同一時期，美國幾乎每一個都會區的成屋銷售量與房貸申請活動都劇烈下滑，無論是基本面強勁的區域還是薄弱的區域都一樣，因為月付金的算術在同一時間打擊了每一位使用融資的買家。那些在本課每一項微觀層級訊號上都表現良好的區域&mdash;&mdash;供給緊、遷徙強勁、學區軌跡改善&mdash;&mdash;成交量與價格動能依然劇烈降溫，不是因為區域本身有任何改變，而是因為所有區域裡的每一位買家，付諸行動去回應這些基本面的融資成本，在同一時間全都改變了。</p>
+
+    <p class="lang-en">The practical implication is not that district-level work becomes useless during a rate shock &mdash; it's that its role changes. During a broad-based rate move, relative district ranking (which district is likely to recover fastest, which was overbuilt going into the shock and will take longest to clear) still holds real information; absolute price and volume forecasts built on pre-shock trend lines generally do not, because the entire baseline they were extrapolated from has shifted. Recognizing when a macro shock is in progress &mdash; a benchmark rate move measured in percentage points, not basis points, over a matter of months &mdash; and switching from absolute forecasting to relative ranking during that window is itself part of the discipline this module is building.</p>
+    <p class="lang-zh" style="display:none">實務上的含意，不是說區域層級的功夫在利率衝擊期間變得沒用&mdash;&mdash;而是它的角色改變了。在一次廣泛的利率變動期間，區域之間的相對排名（哪個區域可能最快復甦、哪個在衝擊發生前就已過度興建、需要最久時間才能去化）仍然帶有真實的資訊；但建立在衝擊前趨勢線上的絕對價格與成交量預測，通常就不再可靠了，因為它們外推所依據的整個基期都已經轉移。辨識出總體衝擊正在發生&mdash;&mdash;一個以百分點、而非基點計、在短短數月內完成的基準利率變動&mdash;&mdash;並在那個窗口期間，把預測方式從絕對預測切換成相對排名，這件事本身，就是本課正在建立的這套紀律的一部分。</p>
+
+    <ul class="checklist">
+      <li class="checklist-item"><input type="checkbox" id="chk-macro-1"><label for="chk-macro-1"><span class="lang-en">Any active rate move checked against its size and speed (percentage points over months, not basis points over quarters) before deciding whether district-level differentiation still applies.</span><span class="lang-zh" style="display:none">在判斷區域層級的區分是否仍然適用之前，先檢查任何進行中的利率變動的幅度與速度（數月內的百分點，而非季度內的基點）。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-macro-2"><label for="chk-macro-2"><span class="lang-en">During a confirmed broad-based rate shock, forecasting mode switched from absolute price/volume targets to relative district ranking.</span><span class="lang-zh" style="display:none">在確認發生廣泛利率衝擊期間，把預測模式從絕對價格／成交量目標，切換成相對區域排名。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-macro-3"><label for="chk-macro-3"><span class="lang-en">A strong district-level signal stack never treated as immune to a financing-cost shock, since the shock operates through every buyer's payment math regardless of local fundamentals.</span><span class="lang-zh" style="display:none">一個強勁的區域層級訊號組合，絕不被當成對融資成本衝擊免疫，因為這種衝擊是透過每一位買家的月付金算術運作的，跟在地基本面無關。</span></label></li>
+    </ul>
+
+    <div class="quiz-block" data-quiz-id="m13-q10" data-quiz='[
+      {
+        "q":{"en":"During 2022&ndash;2024, U.S. mortgage rates rose from roughly 3% to over 7% within about eighteen months, and transaction volume fell sharply across essentially every metro &mdash; including districts that scored well on every micro-level signal this module covers. What is the correct lesson?","zh":"2022 至 2024 年間，美國房貸利率在約十八個月內從約 3% 升到超過 7%，幾乎每個都會區的成交量都劇烈下滑&mdash;&mdash;包括在本課每一項微觀層級訊號上都表現良好的區域。正確的教訓是什麼？"},
+        "opts":[
+          {"en":"District-level signal-stack analysis was proven wrong or useless by this episode.","zh":"這段插曲證明區域層級的訊號組合分析是錯的、沒用的。"},
+          {"en":"A large, fast, broad-based rate move hits affordability through the payment math almost uniformly across districts &mdash; during such a shock, absolute price/volume forecasts built on pre-shock trends break down, though relative district ranking still carries information.","zh":"一次劇烈、快速、廣泛的利率變動，會透過月付金算術幾乎均勻地打擊各個區域的可負擔性&mdash;&mdash;在這類衝擊期間，建立在衝擊前趨勢上的絕對價格／成交量預測會失靈，但區域之間的相對排名仍然帶有資訊。"},
+          {"en":"Only districts with weak fundamentals were affected by the rate move; strong-signal districts were insulated.","zh":"只有基本面薄弱的區域受到利率變動影響；訊號強勁的區域則不受影響。"},
+          {"en":"Rate shocks only affect new-construction pipelines, not existing-home transaction volume.","zh":"利率衝擊只影響新建管線，不影響既有住宅的成交量。"}
+        ],
+        "a":1,
+        "exp":{"en":"A rate shock operates through every financed buyer&#39;s payment math simultaneously, which is why it flattens district-level differentiation on an absolute basis even for districts with excellent local fundamentals. Relative ranking (who recovers first) still holds information; absolute pre-shock trend extrapolation generally does not.","zh":"利率衝擊是透過每一位使用融資買家的月付金算術同時運作的，這也是為什麼即使是在地基本面優異的區域，在絕對基礎上也會被壓平區域層級的區分。相對排名（誰會最先復甦）仍然帶有資訊；建立在衝擊前趨勢上的絕對外推則通常不再可靠。"}
+      }
+    ]'></div>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Austin, Texas is a widely documented case of how fast a strong micro-level story can be overwhelmed by a macro shock. Through 2020 and 2021, Austin posted some of the strongest home-price appreciation of any major U.S. metro, driven by heavy domestic in-migration, high-profile corporate relocations, and a supply pipeline that, while large in absolute terms, initially lagged the pace of demand &mdash; a textbook early-recovery-turned-boom read on nearly every metric this module covers. Median home prices in the metro, according to widely reported regional MLS data, rose roughly 40% from early 2020 through their 2022 peak. As national mortgage rates then climbed sharply through 2022, Austin's price trend reversed hard: the same MLS data showed the metro posting some of the steepest year-over-year price declines of any major U.S. market through 2023, even as its underlying migration and job-growth story remained comparatively strong versus most peer metros. The reversal wasn't a verdict on Austin's fundamentals &mdash; it was the rate shock hitting a market that had, on the way up, priced in an unusually large share of its fundamentals-driven momentum through leverage-fueled affordability that a 3% mortgage rate made possible and a 7% mortgage rate took away.</p>
+      <p class="lang-zh" style="display:none">德州奧斯汀是一個廣為記載的案例，說明強勁的微觀層級故事，能被總體衝擊多快地壓垮。整個 2020 年到 2021 年，奧斯汀繳出美國主要都會區中數一數二強勁的房價漲幅，由強勁的國內遷入、高知名度的企業遷址，以及一個雖然絕對規模不小、但起初仍落後於需求速度的供給管線所驅動&mdash;&mdash;在本課涵蓋的幾乎每一項指標上，都是一個教科書等級「早期復甦轉為熱潮」的判讀。根據廣泛報導的區域 MLS 資料，該都會區的中位數房價從 2020 年初到 2022 年高點，大約上漲了 40%。隨後，隨著全國房貸利率在 2022 年劇烈攀升，奧斯汀的價格趨勢急遽反轉：同一份 MLS 資料顯示，該都會區在 2023 年繳出美國主要市場中數一數二陡峭的年增率跌幅，即使其底層的遷徙與就業成長故事，相對多數同儕都會區仍算相對強勁。這次反轉不是對奧斯汀基本面的否定&mdash;&mdash;而是利率衝擊打在一個市場上，這個市場在上漲過程中，把一部分不成比例的基本面驅動動能，透過 3% 房貸利率所帶來、又被 7% 房貸利率收走的槓桿可負擔性，提前反映進了價格裡。</p>
+    </div>
+  </div>
+
+  <div class="lc-pager">
+    <a href="12-capstone.html">
+      <span class="lc-pager-dir lang-en">Previous</span><span class="lc-pager-dir lang-zh" style="display:none">上一課</span>
+      <div class="lc-pager-label lang-en">Capstone</div>
+      <div class="lc-pager-label lang-zh" style="display:none">畢業考</div>
+    </a>
+    <a href="14-presale-new.html" class="lc-pager-next">
+      <span class="lc-pager-dir lang-en">Next</span><span class="lc-pager-dir lang-zh" style="display:none">下一課</span>
+      <div class="lc-pager-label lang-en">Pre-Sales &amp; New Builds</div>
+      <div class="lc-pager-label lang-zh" style="display:none">預售與新成屋</div>
+    </a>
+  </div>
+
+  <footer class="lc-footer">
+    <a href="./index.html"><span class="lang-en">&larr; Course Home</span><span class="lang-zh" style="display:none">&larr; 課程首頁</span></a>
+    <span class="lc-footer-note">INVESTMQUEST &middot; LEARN RESIDENTIAL &middot; MODULE 13</span>
+  </footer>
+
+</div>
+
+<script src="./learn.js"></script>
+</body>
+</html>

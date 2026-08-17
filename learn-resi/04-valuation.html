@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 · Valuation & Bubble Metrics | Residential Investing Course | InvestMQuest</title>
+<meta name="description" content="Comps adjustments, the gross-vs-net area trap, negative carry, replacement cost, a six-metric bubble toolkit, appraisal lag and shopping, and why land vs. building depreciation changes old-vs-new math across markets. 逐項拆解可比較交易調整、公設比等灌水面積陷阱、負利差、重置成本、六種泡沫指標、鑑價滯後與鑑價師選購，以及土地與建物折舊邏輯如何在不同市場改變新舊物件的估值算法。">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="./learn.css">
+<style>
+.table-scroll{overflow-x:auto;margin:14px 0}
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
+.compare-table th,.compare-table td{border:1px solid var(--lc-border);padding:8px 10px;text-align:right}
+.compare-table th{background:var(--lc-accent-light);color:var(--lc-navy);font-weight:700;text-align:center}
+.compare-table td:first-child,.compare-table th:first-child{text-align:left}
+.compare-table tbody tr:nth-child(odd){background:#fbfdff}
+.compare-table tfoot td{font-weight:700;background:#f0f6fd}
+.compare-note{font-size:12px;color:var(--lc-text-muted);margin:6px 0 0}
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <div class="course-nav-inner">
+    <div class="course-nav-brand">
+      <a href="/dashboard.html">&larr; <span class="lang-en">🏠 Residential Dashboard</span><span class="lang-zh" style="display:none">🏠 住宅儀表板</span></a>
+      <span class="course-nav-sep">/</span>
+      <a href="./index.html" class="course-nav-home"><span class="lang-en">Course Home</span><span class="lang-zh" style="display:none">課程首頁</span></a>
+    </div>
+    <div class="course-nav-pager">
+      <a href="03-property-reading.html">&larr; <span class="lang-en">Reading a Property</span><span class="lang-zh" style="display:none">看懂一個物件</span></a>
+      <a href="05-mortgage.html"><span class="lang-en">Mortgages &amp; Leverage</span><span class="lang-zh" style="display:none">房貸與槓桿</span> &rarr;</a>
+    </div>
+    <div class="course-nav-lang">
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</nav>
+
+<div class="lc-wrap">
+
+  <header class="module-header">
+    <span class="module-eyebrow lang-en">MODULE 04</span>
+    <span class="module-eyebrow lang-zh" style="display:none">第 04 課</span>
+    <h1 class="lang-en">Valuation &amp; Bubble Metrics</h1>
+    <h1 class="lang-zh" style="display:none">估值與泡沫指標</h1>
+    <div class="module-goals">
+      <div class="module-goals-title"><span class="lang-en">What You'll Learn</span><span class="lang-zh" style="display:none">這一課學什麼</span></div>
+      <ul>
+        <li><span class="lang-en">Adjust a raw comparable sale price for floor level, age, orientation and condition — and recognize the gross-vs-net floor area trap (公設比 and its equivalents elsewhere) that quietly breaks price-per-area comparisons.</span><span class="lang-zh" style="display:none">學會把一筆可比較交易的成交價，依樓層、屋齡、朝向與屋況逐項調整——並認出灌水面積（公設比及其他市場的對應概念）這個會悄悄搞砸單價比較的陷阱。</span></li>
+        <li><span class="lang-en">Check any asking price against the rental yield it implies, and understand exactly what "negative carry" quietly assumes about future price appreciation.</span><span class="lang-zh" style="display:none">用任何開價所隱含的租金殖利率做反向檢查，並清楚理解「負利差」到底默默假設了什麼樣的未來漲幅。</span></li>
+        <li><span class="lang-en">Use replacement cost — land plus construction — as a supply-side floor on new-build pricing, then read a six-metric bubble toolkit through real, documented historical episodes.</span><span class="lang-zh" style="display:none">用重置成本（土地加營建成本）當作新成屋定價的供給面下限，並透過真實、有紀錄的歷史案例讀懂一套六指標泡沫工具箱。</span></li>
+        <li><span class="lang-en">Understand why bank appraisals structurally lag the market in both directions, and recognize appraisal shopping as a real, documented conflict of interest in mortgage lending.</span><span class="lang-zh" style="display:none">理解銀行鑑價為什麼在漲跌兩個方向上都有結構性的滯後，並認出鑑價師選購是房貸放款史上真實存在過的利益衝突。</span></li>
+        <li><span class="lang-en">See why "land doesn't depreciate but buildings do" gives the word "old" a completely different valuation meaning depending on whether a market is structure-depreciating or land-value-dominant.</span><span class="lang-zh" style="display:none">看懂「土地不折舊、建物會折舊」這件事，為什麼會讓「舊」這個字在不同市場裡代表完全不同的估值意義。</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <section>
+    <p class="lang-en">Assume a seller and a buyer are negotiating over the exact same 90-square-meter unit on the 12th floor of a 20-year-old building. The seller anchors on $850,000 — what a comparable unit two floors up sold for eight months ago, before mortgage rates rose. The buyer anchors on $680,000 — what that same square footage would rent for, capitalized at a yield that actually clears today's financing cost. Both numbers come from a real calculation. Both sides can defend theirs on paper. Neither one, by itself, is "the value."</p>
+    <p class="lang-zh" style="display:none">假設一位賣方與一位買方，正在為同一間位於屋齡 20 年大樓 12 樓、90 平方公尺的單位議價。賣方的定錨價是 $850,000——這是兩層樓上方的類似單位，在房貸利率上升之前、八個月前的成交價。買方的定錨價是 $680,000——這是同樣坪數若拿去出租，用一個真正能打平今天融資成本的殖利率反推回去的價格。兩個數字都各自經過真實計算，雙方也都能在紙面上為自己的數字辯護。但單獨看任何一個，都不是「真正的價值」。</p>
+
+    <p class="lang-en">That disagreement is the honest starting point for this module, not a definition. Valuation is not one formula that spits out one right answer — it is several independent checks (what similar units actually traded for, what the rent can support, what it would cost to build new, what the historical relationship between prices and incomes looks like) that should roughly agree on a healthy, fairly priced asset. When they diverge sharply, the disagreement itself is informative: it tells you which check each side is implicitly leaning on, and which one is quietly being ignored. This module builds each check in turn — comps, income/yield, replacement cost, a documented bubble-metrics toolkit, the appraisal system that sits underneath most financed deals, a sensitivity view of how fragile a "fair" price really is, and finally why the same building age can mean opposite things in different markets.</p>
+    <p class="lang-zh" style="display:none">這種分歧，正是本課誠實的出發點，而不是一個定義。估值從來不是一個能吐出單一正確答案的公式——而是好幾套彼此獨立的檢查（類似單位實際成交多少、租金撐得起多少價格、蓋一間新的要花多少錢、房價與所得的歷史關係長什麼樣子），對一項健康、合理定價的資產來說，這幾套檢查應該要大致對得上。當它們出現明顯分歧時，這個分歧本身就是有意義的資訊：它告訴你雙方各自暗中倚賴的是哪一套檢查、又悄悄忽略了哪一套。本課會依序建構每一套檢查——可比較交易法、收益／殖利率檢查、重置成本檢查、一套有紀錄可查的泡沫指標工具箱、幾乎每一筆貸款交易背後都有的鑑價制度、一個看清「合理」價格其實有多脆弱的敏感度分析，最後再談為什麼同樣的屋齡，在不同市場裡代表的意義可能完全相反。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 1. Comps adjustments + gross/net area trap -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">1. Comps Adjustments: Floor, Age, Orientation, Condition</h2>
+    <h2 class="lang-zh" style="display:none">一、可比較交易調整：樓層、屋齡、朝向、屋況</h2>
+
+    <p class="lang-en">No two units are identical, so <span class="key-term" tabindex="0">comps adjustment<span class="key-term-tip"><span class="lang-en">The practice of moving a comparable sale's price up or down, factor by factor, to account for differences between the comp and the subject property before treating it as evidence of the subject's value.</span><span class="lang-zh" style="display:none">把一筆可比較交易的成交價，依因素逐一往上或往下調整，以反映該比較案例與標的物之間的差異，才能把它當作標的物價值的證據。</span></span></span> is not optional — it is the actual work of the comps method, not a footnote to it. A raw comp sale price only becomes useful evidence once it has been walked, feature by feature, toward the subject unit.</p>
+    <p class="lang-zh" style="display:none">沒有兩間單位是完全一樣的，所以<span class="key-term" tabindex="0">可比較交易調整（comps adjustment）<span class="key-term-tip"><span class="lang-en">The practice of moving a comparable sale's price up or down, factor by factor, to account for differences between the comp and the subject property before treating it as evidence of the subject's value.</span><span class="lang-zh" style="display:none">把一筆可比較交易的成交價，依因素逐一往上或往下調整，以反映該比較案例與標的物之間的差異，才能把它當作標的物價值的證據。</span></span></span>不是可有可無的步驟——它才是可比較交易法真正的核心工作，而不是附註。一筆原始的比較成交價，唯有一項一項因素往標的物靠攏調整之後，才會變成有用的證據。</p>
+
+    <p class="lang-en">Four factors do most of the work in a typical residential adjustment: floor level (higher floors usually carry a premium — less street noise, more light, sometimes a view), age (a newer building generally commands more than an older one, all else equal), orientation (which direction a unit faces affects sunlight, heat gain, and in many climates, whether it gets direct sun exposure at all), and condition (a fully renovated unit is not the same product as one in original, decades-old condition, even in the identical floor plan). Each factor gets priced separately, and the adjustments are added or subtracted from the comp's actual sale price to arrive at an adjusted value — an estimate of what that comp would have sold for if it had the subject's features instead of its own.</p>
+    <p class="lang-zh" style="display:none">典型的住宅調整，主要靠四個因素撐起：樓層（樓層較高通常有溢價——街道噪音較小、採光較好，有時還有景觀）、屋齡（其他條件相同下，較新的大樓通常比較舊的大樓更值錢）、朝向（座向會影響採光、熱量增益，在許多氣候條件下，甚至決定這個單位到底有沒有直接日照）、以及屋況（一間全屋翻新的單位，即使格局完全相同，也不會跟一間屋齡幾十年、仍維持原始屋況的單位是同一種商品）。每個因素都要分開估價，再把調整金額加減到比較案例的實際成交價上，得出一個調整後價值——也就是估算：如果這筆比較案例當初擁有的不是自己的條件、而是標的物的條件，它會賣多少錢。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example (Hypothetical) — Adjusting a Comp Across Three Factors</span><span class="lang-zh" style="display:none">逐步演算範例（假設）——同時調整三個因素</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">The subject unit is on the 15th floor, 8 years old, and fully renovated. A comp of the identical floor plan and square footage sold for <span class="we-formula">$600,000</span> — but it is on the 5th floor, 20 years old, and in original, unrenovated condition.</span>
+            <span class="lang-zh" style="display:none">標的物位於 15 樓、屋齡 8 年，已全屋翻新。一筆格局與坪數完全相同的比較案例，成交價為 <span class="we-formula">$600,000</span>——但它位於 5 樓、屋齡 20 年，且仍是未翻新的原始屋況。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Floor adjustment: the subject is 10 floors higher. This local market prices a floor-level premium of roughly $6,000/floor, so the comp is adjusted up: <span class="we-formula">$600,000 + (10 × $6,000) = $660,000</span>.</span>
+            <span class="lang-zh" style="display:none">樓層調整：標的物比比較案例高 10 個樓層。這個在地市場的樓層溢價大約是每層 $6,000，因此比較案例向上調整：<span class="we-formula">$600,000 + (10 × $6,000) = $660,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Age adjustment: the subject is 12 years newer. At roughly $2,500/year of age difference in this market: <span class="we-formula">$660,000 + (12 × $2,500) = $690,000</span>.</span>
+            <span class="lang-zh" style="display:none">屋齡調整：標的物比比較案例年輕 12 年。在這個市場中，屋齡差異大約每年價值 $2,500：<span class="we-formula">$660,000 + (12 × $2,500) = $690,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Condition adjustment: the subject is fully renovated versus the comp's original condition — a flat adjustment of <span class="we-formula">$50,000</span> for this size and finish level: <span class="we-formula">$690,000 + $50,000 = $740,000</span>.</span>
+            <span class="lang-zh" style="display:none">屋況調整：標的物已全屋翻新，比較案例則仍是原始屋況——以這個坪數與裝修等級估算，固定調整 <span class="we-formula">$50,000</span>：<span class="we-formula">$690,000 + $50,000 = $740,000</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">Adjusted comp value: <span class="we-formula">$740,000</span>. Orientation was not adjusted here because both units happen to face the same direction — in a case where they differed, a fourth line item would sit between condition and the final total, priced the same way. If the subject is currently listed at, say, $760,000, that listing is only about 2.7% above this single adjusted comp — close enough to be plausible, but a gap worth checking against a second and third comp before accepting it at face value.</span>
+            <span class="lang-zh" style="display:none">調整後比較案例價值：<span class="we-formula">$740,000</span>。此處沒有做朝向調整，因為兩間單位剛好座向相同——如果座向不同，就會在屋況調整與最終總額之間再插入第四項，以同樣方式估價。如果標的物目前開價為 $760,000，那麼這個開價只比這筆單一調整後的比較案例高出約 2.7%——差距小到還算合理，但這樣的落差值得再拿第二筆、第三筆比較案例交叉核對，而不是照單全收。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <h3 class="lang-en">The Gross-vs-Net Floor Area Trap</h3>
+    <h3 class="lang-zh" style="display:none">灌水面積陷阱：計價面積並非全世界一致</h3>
+
+    <p class="lang-en">Comps adjustments assume the two units are being measured the same way in the first place — and that assumption is not always safe, even within a single market. Different property markets define "size" differently. Some quote a unit's floor area gross, including a share of shared or common spaces — lobbies, stairwells, elevator shafts, mechanical rooms, sometimes even outdoor common areas — folded into the number on the listing. Others quote only the private, exclusively-usable net area, excluding all of that. A raw price-per-square-meter (or per-ping [坪] or per-square-foot) comparison across two markets, or even across two buildings in the same market, can silently be comparing two different denominators — and the buyer paying the same headline price per unit of area may be getting meaningfully less private living space for the money.</p>
+    <p class="lang-zh" style="display:none">可比較交易調整，前提是兩間單位一開始就用同一套方式在計算面積——而這個前提未必成立，即使在同一個市場內也不一定成立。不同的不動產市場，對「坪數」的定義並不相同。有些市場用毛面積計價，把一部分共用空間——大廳、樓梯間、電梯井、機電設備空間，有時甚至包含公共戶外空間——都併入標示在物件資訊上的坪數；有些市場則只用私有、可獨家使用的淨面積計價，把上述空間全部排除在外。跨市場比較每平方公尺（或每坪、每平方英尺）的單價，甚至同一市場內跨大樓比較，都可能在不知不覺間比較著兩個不同的分母——而買方付出同樣的每坪開價，實際到手的私有居住空間卻可能明顯較少。</p>
+
+    <p class="lang-en">Taiwan's <span class="key-term" tabindex="0">公設比 (public-facility ratio)<span class="key-term-tip"><span class="lang-en">A Taiwan-specific term for the share of a unit's quoted floor area that is actually shared common space — lobby, stairwells, mechanical rooms, and similar — rather than private, exclusively-usable space.</span><span class="lang-zh" style="display:none">台灣特有的名詞，指一個單位標示坪數中，實際上屬於共用空間（大廳、樓梯間、機電設備空間等）而非私有可獨家使用空間的比例。</span></span></span> is a concrete, named example of exactly this general trap — and it flags clearly that the precise convention and even the terminology varies by market (依司法轄區而異): a unit listed at 100 square meters with a 30% public-facility ratio has only about 70 square meters of private usable space; the other 30 square meters is a pro-rata share of the building's shared infrastructure. A buyer comparing two otherwise similar units at the same headline price-per-area, without checking each one's public-facility ratio, can easily rank the wrong one as cheaper.</p>
+    <p class="lang-zh" style="display:none">台灣的<span class="key-term" tabindex="0">公設比<span class="key-term-tip"><span class="lang-en">A Taiwan-specific term for the share of a unit's quoted floor area that is actually shared common space — lobby, stairwells, mechanical rooms, and similar — rather than private, exclusively-usable space.</span><span class="lang-zh" style="display:none">台灣特有的名詞，指一個單位標示坪數中，實際上屬於共用空間（大廳、樓梯間、機電設備空間等）而非私有可獨家使用空間的比例。</span></span></span>，正是這個一般性陷阱的一個具體、有名字的例子——這裡也要清楚標示：確切的計算慣例，甚至連用語本身，都依司法轄區而異。一個標示 100 平方公尺、公設比 30% 的單位，實際私有可用空間只有約 70 平方公尺；剩下的 30 平方公尺，是這棟大樓共用設施依比例分攤到這戶頭上的份額。如果買方在比較兩間條件相近、單價（每坪開價）相同的單位時，沒有先確認各自的公設比，很容易誤判哪一間才是真正比較划算的。</p>
+
+    <p class="lang-en">The arithmetic makes the trap concrete: two buildings both quoting NT$1,000,000 per 坪 look identically priced on the listing page. Building A has a 20% public-facility ratio; Building B has a 35% public-facility ratio. On a true private-usable-space basis, Building A actually costs roughly NT$1,000,000 ÷ 0.80 ≈ NT$1,250,000 per 坪 of private space, while Building B costs roughly NT$1,000,000 ÷ 0.65 ≈ NT$1,538,000 per 坪 of private space — a gap of over 20% that the identical headline price completely hides. This is not unique to Taiwan; any market that mixes gross-quoted and net-quoted comps, or compares against a market that uses a different convention, needs the same check before trusting a price-per-area number at all.</p>
+    <p class="lang-zh" style="display:none">用數字算一次，這個陷阱就很具體了：兩棟大樓都標示每坪 NT$1,000,000，在物件頁面上看起來單價一模一樣。A 棟公設比 20%，B 棟公設比 35%。若換算成真正私有可用空間的單價，A 棟實際上每坪私有空間約為 NT$1,000,000 ÷ 0.80 ≈ NT$1,250,000，而 B 棟則約為 NT$1,000,000 ÷ 0.65 ≈ NT$1,538,000——兩者差距超過 20%，而完全相同的標示單價，把這個落差徹底藏了起來。這不是台灣獨有的現象；任何一個混用毛面積與淨面積計價比較案例的市場，或是拿不同計價慣例的市場互相比較，在信任任何一個每坪／每平方公尺單價之前，都需要做同樣的檢查。</p>
+  </section>
+
+  <div class="pitfall">
+    <span class="pitfall-icon">⚠️</span>
+    <div class="pitfall-body">
+      <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+      <span class="lang-en">Comparing price-per-area across two buildings — or two markets — without first confirming both quotes use the same gross/net area convention. The unit that looks cheaper per square meter on the listing page can easily be the more expensive one once measured on a true private-usable-space basis. Always ask what the quoted area actually includes before trusting a per-area comparison.</span>
+      <span class="lang-zh" style="display:none">在沒有先確認兩者是否採用同一套毛面積／淨面積計價慣例之前，就直接比較兩棟大樓——或兩個市場——的每坪／每平方公尺單價。物件頁面上看起來單價較便宜的那間，換算成真正的私有可用空間之後，很可能反而是比較貴的那間。在信任任何一個單價比較之前，一定要先問清楚標示的坪數究竟包含了什麼。</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 2. Income/yield sanity check + negative carry -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">2. The Yield Check: What Negative Carry Really Assumes</h2>
+    <h2 class="lang-zh" style="display:none">二、殖利率檢查：負利差背後到底假設了什麼</h2>
+
+    <p class="lang-en">Even in a market driven mostly by owner-occupiers rather than investors, checking what net rental yield the current price implies is a useful sanity bound — a second, independent opinion on a price that comps alone cannot provide. Comps tell you what similar units have traded for; the yield check tells you what current income, capitalized at the actual cost of financing, can rationally support.</p>
+    <p class="lang-zh" style="display:none">即使在一個主要由自住買方而非投資客驅動的市場，檢查目前開價所隱含的淨租金殖利率，仍然是一個有用的合理性下限——一個單靠可比較交易法無法提供的、獨立的第二意見。可比較交易法告訴你類似單位過去成交多少錢；殖利率檢查則告訴你，用目前的收入、以實際的融資成本資本化之後，理性上能支撐多少價格。</p>
+
+    <p class="lang-en">When the yield a property would earn as a rental falls below the rate a buyer would pay to finance it, that gap has a name: <span class="key-term" tabindex="0">negative carry<span class="key-term-tip"><span class="lang-en">When a property's net rental yield is lower than the mortgage rate financing it — the property costs more to hold via financing than it earns in current rental income.</span><span class="lang-zh" style="display:none">當一項物業的淨租金殖利率低於為它融資的房貸利率時——用融資方式持有這項物業的成本，高於它目前租金收入所能賺到的金額。</span></span></span>. The property costs more to hold via financing than it earns in current rent. That is not automatically irrational, but it is not free either — it is a specific, quantifiable bet. A price that produces negative carry implicitly assumes that the buyer, and the broader market pricing similar units the same way, is underwriting most or all of the expected return to future price appreciation rather than to current income. Negative carry is the price of admission to that bet, made visible in a single number.</p>
+    <p class="lang-zh" style="display:none">當一項物業若拿去出租所能賺到的殖利率，低於買方為它融資所要付出的房貸利率時，這個落差有個名字：<span class="key-term" tabindex="0">負利差（negative carry）<span class="key-term-tip"><span class="lang-en">When a property's net rental yield is lower than the mortgage rate financing it — the property costs more to hold via financing than it earns in current rental income.</span><span class="lang-zh" style="display:none">當一項物業的淨租金殖利率低於為它融資的房貸利率時——用融資方式持有這項物業的成本，高於它目前租金收入所能賺到的金額。</span></span></span>。用融資方式持有這項物業的成本，高於目前租金能賺到的收入。這不代表一定不理性，但也絕非沒有代價——這是一個具體、可以量化的賭注。一個會產生負利差的價格，隱含著一個假設：買方，以及更廣泛以相同方式為類似單位定價的市場，把預期報酬的絕大部分甚至全部，都押注在未來的價格增值上，而不是目前的收入上。負利差，就是這個賭注的入場費，被一個數字清楚地顯示出來。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example (Hypothetical) — Pricing In Negative Carry</span><span class="lang-zh" style="display:none">逐步演算範例（假設）——把負利差算出來</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume a unit priced at <span class="we-formula">$500,000</span> would rent for <span class="we-formula">$1,800/month</span> in this market, and the buyer's mortgage rate is <span class="we-formula">6.5%</span>. Annual gross rent: <span class="we-formula">$1,800 × 12 = $21,600</span>.</span>
+            <span class="lang-zh" style="display:none">假設一間單位開價 <span class="we-formula">$500,000</span>，在這個市場能租到 <span class="we-formula">$1,800／月</span>，買方的房貸利率為 <span class="we-formula">6.5%</span>。年租金總額：<span class="we-formula">$1,800 × 12 = $21,600</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume operating costs — property tax, insurance, maintenance reserve, and a vacancy allowance — run roughly 30% of gross rent, typical for this property type: <span class="we-formula">$21,600 × 30% = $6,480</span>. Net annual rent: <span class="we-formula">$21,600 − $6,480 = $15,120</span>.</span>
+            <span class="lang-zh" style="display:none">假設營運成本——房產稅、保險、維護準備金、空置率預留——大約占毛租金的 30%，這在該物業類型屬於典型水準：<span class="we-formula">$21,600 × 30% = $6,480</span>。淨年租金：<span class="we-formula">$21,600 − $6,480 = $15,120</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Net rental yield: <span class="we-formula">$15,120 ÷ $500,000 = 3.02%</span>.</span>
+            <span class="lang-zh" style="display:none">淨租金殖利率：<span class="we-formula">$15,120 ÷ $500,000 = 3.02%</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Carry gap = net yield − mortgage rate: <span class="we-formula">3.02% − 6.5% = −3.48%</span>. This is negative carry — the property costs 3.48 percentage points more to finance each year than it earns in net rent.</span>
+            <span class="lang-zh" style="display:none">利差＝淨殖利率－房貸利率：<span class="we-formula">3.02% − 6.5% = −3.48%</span>。這就是負利差——每年融資這項物業的成本，比它賺到的淨租金多出 3.48 個百分點。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">Now make the implicit assumption explicit. Assume the buyer requires a modest risk premium of 1.5% over the pure financing cost for the total unlevered return to be worthwhile: required return ≈ <span class="we-formula">6.5% + 1.5% = 8.0%</span>. Annual price appreciation needed to close the remaining gap: <span class="we-formula">8.0% − 3.02% = 4.98% ≈ 5.0%/yr</span> — a real, meaningful bet on future price growth that a price quoted without any yield check leaves completely invisible.</span>
+            <span class="lang-zh" style="display:none">現在把這個隱含假設明說出來。假設買方要求在純融資成本之上再加 1.5% 的風險溢酬，總報酬才算划算：要求報酬率約為 <span class="we-formula">6.5% + 1.5% = 8.0%</span>。要補上剩下的缺口，每年需要的房價增值率為：<span class="we-formula">8.0% − 3.02% = 4.98% ≈ 5.0%／年</span>——這是一個對未來房價成長真實且重要的賭注，而一個沒有做過任何殖利率檢查的開價，會把它完全藏起來、讓人看不見。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="calc-card" id="calc-carry">
+    <div class="calc-card-title"><span class="lang-en">Try It: Yield vs. Mortgage-Rate Carry Calculator</span><span class="lang-zh" style="display:none">動手試算：殖利率與房貸利差計算機</span></div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Purchase Price ($)</span><span class="lang-zh" style="display:none">購買價格（美元）</span></span>
+        <span class="calc-row-echo" data-echo="calc-price">500000</span>
+      </div>
+      <input type="range" id="calc-price" name="price" min="100000" max="2000000" step="10000" value="500000">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Monthly Rent ($)</span><span class="lang-zh" style="display:none">月租金（美元）</span></span>
+        <span class="calc-row-echo" data-echo="calc-rent">1800</span>
+      </div>
+      <input type="range" id="calc-rent" name="rent" min="500" max="8000" step="50" value="1800">
+    </div>
+    <div class="calc-row">
+      <div class="calc-row-head">
+        <span class="calc-row-label"><span class="lang-en">Mortgage Rate (%)</span><span class="lang-zh" style="display:none">房貸利率（%）</span></span>
+        <span class="calc-row-echo" data-echo="calc-rate">6.5</span>
+      </div>
+      <input type="range" id="calc-rate" name="rate" min="2" max="9" step="0.1" value="6.5">
+    </div>
+    <div class="calc-outputs">
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Gross Yield</span><span class="lang-zh" style="display:none">毛殖利率</span></span>
+        <span class="calc-output-value" data-out="grossYield">4.32%</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Net Yield (assumes 30% opex)</span><span class="lang-zh" style="display:none">淨殖利率（假設營運成本 30%）</span></span>
+        <span class="calc-output-value" data-out="netYield">3.02%</span>
+      </div>
+      <div class="calc-output">
+        <span class="calc-output-label"><span class="lang-en">Carry Gap (Net Yield − Rate)</span><span class="lang-zh" style="display:none">利差（淨殖利率－房貸利率）</span></span>
+        <span class="calc-output-value" data-out="gap">−3.48%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 3. Replacement cost -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">3. Replacement Cost: The Supply-Side Floor</h2>
+    <h2 class="lang-zh" style="display:none">三、重置成本：供給面的下限</h2>
+
+    <p class="lang-en"><span class="key-term" tabindex="0">Replacement cost<span class="key-term-tip"><span class="lang-en">What it would actually cost a developer to buy the underlying land and build a comparable new unit today — land value plus construction cost plus a reasonable developer margin.</span><span class="lang-zh" style="display:none">開發商今天要買下同樣的土地並蓋出一間可比較的新單位，實際需要花費的成本——土地價值加上營建成本，再加上合理的開發商利潤。</span></span></span> answers a different question from either comps or the yield check: not "what have similar units sold for" or "what can current rent support," but "what would it actually cost to build a comparable unit brand new, right now." Add the land's current market value to the construction cost (materials, labor, permitting, soft costs) and a reasonable developer margin, and the result is a floor — and, loosely, a ceiling — on rational new-build pricing.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">重置成本（replacement cost）<span class="key-term-tip"><span class="lang-en">What it would actually cost a developer to buy the underlying land and build a comparable new unit today — land value plus construction cost plus a reasonable developer margin.</span><span class="lang-zh" style="display:none">開發商今天要買下同樣的土地並蓋出一間可比較的新單位，實際需要花費的成本——土地價值加上營建成本，再加上合理的開發商利潤。</span></span></span>回答的是跟可比較交易法或殖利率檢查都不同的問題：不是「類似單位過去賣多少錢」，也不是「目前的租金撐得起多少價格」，而是「現在要蓋出一間可比較的全新單位，實際上要花多少錢」。把土地目前的市場價值，加上營建成本（材料、人工、報建與許可、其他軟成本），再加上合理的開發商利潤，得出的結果就是一條理性新成屋定價的下限——大致上，也是一條上限。</p>
+
+    <p class="lang-en">The logic runs through the supply side, and it is the one check in this module that comps and yield analysis cannot substitute for. When new-build price per square meter falls below replacement cost, building new stops making economic sense — no rational developer buys land and builds at a loss on purpose. New permits and groundbreakings slow or stop, existing under-construction projects may get shelved, and the pipeline of future supply dries up. That supply response is itself an important signal, independent of anything a pure comps-based valuation view can tell you.</p>
+    <p class="lang-zh" style="display:none">這個邏輯是從供給面切入的，也是本課中唯一一項無法被可比較交易法或殖利率分析取代的檢查。當新成屋每平方公尺售價低於重置成本時，蓋新房子在經濟上就不再說得通——沒有理性的開發商會故意買地、蓋房子，然後虧本賣出。新的建照與動工會放慢甚至停止，已經在興建中的案子可能被擱置，未來的供給管線也會逐漸乾涸。這個供給端的反應本身就是一個重要訊號，而且是純粹以可比較交易法為基礎的估值觀點，完全無法告訴你的訊號。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example (Hypothetical) — When New-Build Pricing Falls Below Cost</span><span class="lang-zh" style="display:none">逐步演算範例（假設）——當新成屋定價低於成本</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assume land value in this submarket, allocated per square meter of buildable floor area, is <span class="we-formula">$3,200/sqm</span>, and construction cost (hard and soft costs combined) runs <span class="we-formula">$2,800/sqm</span>. Base cost: <span class="we-formula">$3,200 + $2,800 = $6,000/sqm</span>.</span>
+            <span class="lang-zh" style="display:none">假設這個次市場的土地價值，依可興建樓地板面積換算為每平方公尺 <span class="we-formula">$3,200/sqm</span>，營建成本（硬成本與軟成本合計）為每平方公尺 <span class="we-formula">$2,800/sqm</span>。基礎成本：<span class="we-formula">$3,200 + $2,800 = $6,000/sqm</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">A developer typically requires roughly a 15% margin on total cost to justify the risk and time of a project: <span class="we-formula">$6,000 × 1.15 = $6,900/sqm</span>. This is the estimated replacement cost — the price per square meter below which building new does not pencil out.</span>
+            <span class="lang-zh" style="display:none">開發商通常需要總成本約 15% 的利潤，才足以合理化這個案子的風險與時間成本：<span class="we-formula">$6,000 × 1.15 = $6,900/sqm</span>。這就是估算出來的重置成本——低於這個每平方公尺價格，蓋新房子在財務上就划不來。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">If comparable new-build units are currently asking <span class="we-formula">$6,200/sqm</span> in this submarket — below the <span class="we-formula">$6,900/sqm</span> replacement cost — the conclusion is not "this is a great deal for buyers." It is that no developer can rationally break ground at that price. Expect new starts to slow or stop until asking prices rise back above replacement cost, or land prices fall enough to bring the cost side down to meet them.</span>
+            <span class="lang-zh" style="display:none">如果這個次市場目前可比較的新成屋開價為 <span class="we-formula">$6,200/sqm</span>——低於重置成本 <span class="we-formula">$6,900/sqm</span>——結論並不是「這對買方來說是超值好康」，而是沒有任何開發商能在這個價格下理性動工。可以預期新開工案量會放慢甚至停滯，直到開價回升到重置成本之上，或土地價格跌到足以把成本端拉低、與售價對齊為止。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 4. Bubble metrics I -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">4. Bubble Metrics I: Price, Income &amp; Affordability Signals</h2>
+    <h2 class="lang-zh" style="display:none">四、泡沫指標（上）：價格、所得與可負擔性訊號</h2>
+
+    <p class="lang-en">The checks so far look at one price at one point in time. A different question worth asking is whether the broader market is showing signs of a valuation excess relative to its own history — and a small toolkit of metrics exists for exactly that, each one repeatedly, and honestly, credited with having flagged real historical episodes. Being clear about what these metrics actually are matters here: they are qualitative, directional signals illustrated by documented episodes, not a claim that any one of them reliably predicts when a turn will happen. Markets can stay stretched by these measures for years before anything breaks, and they can also correct for reasons a metric never captured.</p>
+    <p class="lang-zh" style="display:none">前面幾項檢查，看的都是某個時間點上的某個價格。另一個值得問的問題是：整體市場相對於自身的歷史，是否出現估值過度的跡象——剛好有一小套指標工具箱，正是為了回答這個問題而存在，其中每一個都曾被反覆、如實地認為曾經示警過真實的歷史事件。這裡有必要說清楚這些指標到底是什麼：它們是用有紀錄可查的歷史案例所呈現的定性、方向性訊號，而不是宣稱其中任何一個能可靠地預測轉折會在什麼時候發生。市場依這些指標衡量可能維持偏貴好幾年都不出事，也可能因為某個這些指標從未捕捉到的原因而修正。</p>
+
+    <div class="table-scroll">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Metric</span><span class="lang-zh" style="display:none">指標</span></th>
+            <th><span class="lang-en">What It Measures</span><span class="lang-zh" style="display:none">衡量的是什麼</span></th>
+            <th><span class="lang-en">Documented Episode</span><span class="lang-zh" style="display:none">有紀錄的歷史案例</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="lang-en">Price-to-income ratio divergence</span><span class="lang-zh" style="display:none">房價所得比偏離</span></td>
+            <td><span class="lang-en">Whether home prices have pulled away from what local incomes can sustain, relative to that market's own historical norm</span><span class="lang-zh" style="display:none">房價相對於當地所得所能負擔的水準、以及該市場自身歷史常態，是否已經明顯脫鉤</span></td>
+            <td><span class="lang-en">US price-to-income ratios climbed well above historical norms through 2004–2007, ahead of the 2008 financial crisis</span><span class="lang-zh" style="display:none">美國房價所得比在 2004 至 2007 年間大幅攀升至遠高於歷史常態的水準，發生在 2008 年金融危機之前</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">Price-to-rent ratio divergence</span><span class="lang-zh" style="display:none">房價租金比偏離</span></td>
+            <td><span class="lang-en">Whether prices are outrunning what achievable rental income can support — a sign of appreciation-driven rather than income-driven buying</span><span class="lang-zh" style="display:none">房價漲幅是否已經超越實際可達成租金收入所能支撐的水準——顯示買盤動機偏向追逐增值，而非以租金收入為基礎</span></td>
+            <td><span class="lang-en">Ireland's price-to-rent ratio diverged sharply during its 2000s property boom, ahead of the 2007–2013 crash</span><span class="lang-zh" style="display:none">愛爾蘭房價租金比在 2000 年代房市榮景期間大幅偏離，發生在 2007 至 2013 年崩盤之前</span></td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">Mortgage-payment-to-income at current rates</span><span class="lang-zh" style="display:none">以現行利率計算的房貸月付所得比</span></td>
+            <td><span class="lang-en">Real-time affordability using today's borrowing cost — not a rate a borrower may have locked years earlier</span><span class="lang-zh" style="display:none">用今天的借貸成本計算的即時可負擔性——而不是借款人可能在多年前鎖定的利率</span></td>
+            <td><span class="lang-en">A rising-rate environment can silently erode affordability even when headline prices barely move — a mechanical, rate-driven effect distinct from any single historical crash</span><span class="lang-zh" style="display:none">升息環境即使在房價幾乎不動的情況下，也能悄悄侵蝕可負擔性——這是一種純機械式、由利率驅動的效果，不同於任何單一歷史崩盤事件</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lang-en compare-note">These pairings illustrate what each metric is for, not a promise that watching it will call the top or bottom.</p>
+    <p class="lang-zh compare-note" style="display:none">這些配對呈現的是每個指標「是用來衡量什麼的」，而不是保證盯著它看就能抓到高點或低點。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Ireland's property boom through the 2000s was fueled by mortgage credit expanding consistently faster than incomes, as Irish and foreign banks competed aggressively for share in a small, fast-growing economy. House prices and price-to-rent ratios climbed well above their own historical norms and above comparable levels elsewhere in the eurozone, while household mortgage debt swelled alongside them. When the global financial crisis hit in 2007–2008, Irish property values fell by roughly half from their peak over the following years, credit access dried up, and the resulting banking crisis was severe enough that Ireland required an international EU/IMF bailout in 2010. The episode is widely cited as a textbook illustration of credit growth and price-to-rent divergence as leading signals — worth watching well before price alone shows anything unusual.</p>
+      <p class="lang-zh" style="display:none">愛爾蘭在 2000 年代的房市榮景，是由持續快於所得成長的房貸信用擴張所推動——愛爾蘭本土與外國銀行，在一個規模不大、成長迅速的經濟體中，激烈爭奪市場份額。房價與房價租金比雙雙攀升到遠高於自身歷史常態、也高於歐元區其他可比較市場的水準，家庭房貸債務也隨之膨脹。當 2007 至 2008 年全球金融危機爆發後，愛爾蘭房地產價值在接下來幾年內從高點下跌約一半，信用管道枯竭，隨之而來的銀行業危機嚴重到讓愛爾蘭在 2010 年不得不接受歐盟／國際貨幣基金組織的國際紓困。這個案例經常被當作教科書等級的範例，用來說明信用成長與房價租金比偏離作為領先訊號的價值——值得在單看價格本身還看不出任何異狀之前，就先關注它們。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 5. Bubble metrics II -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">5. Bubble Metrics II: Credit &amp; Volume Signals</h2>
+    <h2 class="lang-zh" style="display:none">五、泡沫指標（下）：信用與交易量訊號</h2>
+
+    <p class="lang-en"><span class="key-term" tabindex="0">Credit growth<span class="key-term-tip"><span class="lang-en">The rate at which mortgage and household debt is expanding, compared to the rate at which the incomes that have to service that debt are growing.</span><span class="lang-zh" style="display:none">房貸與家庭債務擴張的速度，相對於必須用來償還這些債務的所得成長速度。</span></span></span> — how fast mortgage and household debt is expanding relative to the incomes that have to service it — is one of the more reliable early signals precisely because it captures a mechanism, not just an outcome. Rising prices financed increasingly by expanding leverage, rather than by rising ability to pay from income, is a specific and identifiable pattern that tends to show up in the credit data well before it shows up in price data. Hong Kong's property market illustrates this clearly: rapid mortgage credit expansion through the mid-1990s, fueled by intense demand ahead of the 1997 handover, preceded the region's sharp downturn once the Asian Financial Crisis hit later that year.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">信用成長（credit growth）<span class="key-term-tip"><span class="lang-en">The rate at which mortgage and household debt is expanding, compared to the rate at which the incomes that have to service that debt are growing.</span><span class="lang-zh" style="display:none">房貸與家庭債務擴張的速度，相對於必須用來償還這些債務的所得成長速度。</span></span></span>——房貸與家庭債務擴張的速度，相對於必須償還這些債務的所得成長速度——是相對可靠的早期訊號之一，正是因為它捕捉的是一個機制，而不只是一個結果。房價上漲愈來愈仰賴擴張中的槓桿來支撐融資，而不是靠所得支付能力的提升，這是一個具體、可辨識的模式，而且往往會先出現在信用資料中，比出現在價格資料中還要早。香港的房地產市場正好清楚呈現了這一點：在 1990 年代中期，因應 1997 年回歸前夕的強勁需求，房貸信用快速擴張，隨後在同年稍晚亞洲金融風暴襲來時，這個地區就出現了急遽的下修。</p>
+
+    <p class="lang-en">Transaction volume divergence works differently: it looks at activity, not price or credit. When the number of properties actually changing hands starts falling while headline asking prices keep climbing, that is a classic late-cycle exhaustion signal — buyers stepping back from prices they can no longer justify, while sellers have not yet adjusted their expectations downward to match. Volume tends to turn before price does, which is exactly what makes it useful: it can flag exhaustion while the price chart still looks healthy.</p>
+    <p class="lang-zh" style="display:none">交易量背離的運作方式不同：它看的是成交活動，而不是價格或信用。當實際成交的物件數量開始下滑、但開價卻仍持續攀升時，這是典型的末段行情衰竭訊號——買方開始對已經無法自圓其說的價格卻步，而賣方尚未把預期價格向下調整以配合這個變化。交易量往往比價格更早出現轉折，這正是它有用的地方：即使價格線圖看起來還很健康，交易量卻可能已經率先示警行情正在衰竭。</p>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Hong Kong residential prices fell by roughly half or more from their 1997 peak over the following years once the Asian Financial Crisis hit, leaving a large share of mortgage borrowers in negative equity for an extended period. The episode remains one of the most frequently cited examples of a credit-fueled property cycle unwinding in a supply-constrained, land-scarce market, and it shaped Hong Kong's property-market psychology and regulatory approach — including later rounds of mortgage tightening measures — for years afterward.</p>
+      <p class="lang-zh" style="display:none">亞洲金融風暴衝擊後，香港住宅價格在接下來幾年內，從 1997 年的高點下跌約一半或更多，讓為數眾多的房貸借款人長期陷入負資產。這個案例至今仍是「信用推動的房地產週期在供給受限、土地稀缺的市場中反轉」最常被引用的範例之一，也在往後多年持續形塑著香港房地產市場的心理與監管取向——包括之後多輪房貸收緊措施。</p>
+    </div>
+  </div>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">During Japan's asset price bubble of the second half of the 1980s, commercial and residential land values in major cities reached levels still cited today as among the most extreme in modern financial history — land under the Imperial Palace grounds in Tokyo was, by widely repeated calculations from the period, worth more on paper than the entire state of California. Transaction volume told the story before prices did: as the bubble matured, the number of properties actually changing hands began falling even as headline asking prices kept climbing, buyers stepping back from prices they could no longer justify while sellers had not yet adjusted expectations downward. The Bank of Japan's rate increases starting in 1989, followed by tighter real estate lending controls, punctured the bubble; nationwide land prices peaked around 1990–1991 and then entered a prolonged, multi-decade decline that reshaped how an entire generation of Japanese households thought about property as a store of value.</p>
+      <p class="lang-zh" style="display:none">在 1980 年代後半日本的資產價格泡沫期間，各大城市的商用與住宅土地價值攀升到今天仍被引用為現代金融史上最極端案例之一的水準——東京皇居用地，依當時廣為流傳的估算，紙面價值甚至超過整個加州。交易量比價格更早說出了這個故事：隨著泡沫逐漸成熟，即使開價持續攀升，實際成交的物件數量卻已開始下滑——買方開始對已無法自圓其說的價格卻步，而賣方尚未把預期向下調整。日本銀行從 1989 年開始升息，隨後又收緊不動產放款管制，戳破了這個泡沫；全國土地價格約在 1990 至 1991 年見頂，隨後進入長達數十年的下滑期，徹底改變了整整一個世代日本家庭對「房地產作為保值工具」的看法。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 6. Appraisal system -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">6. The Appraisal System: Lag, Shopping &amp; Reform</h2>
+    <h2 class="lang-zh" style="display:none">六、鑑價制度：滯後、選購與改革</h2>
+
+    <p class="lang-en">Nearly every financed purchase runs through a bank or lender appraisal, and it is worth being precise about what that appraisal actually is: a comps-based estimate produced by a professional following a defined methodology, not an independent, ground-truth measurement of value. Appraisers rely heavily on recently closed comparable sales — sales that, by construction, are backward-looking. That single structural fact produces a predictable, two-directional lag. In a rising market, appraisals systematically under-shoot true current value, because the comps feeding the estimate closed at yesterday's, lower prices. In a falling market, appraisals over-shoot, or at minimum fail to fall as fast as true market value, for the identical reason — the comps still closing are from before the downturn fully set in.</p>
+    <p class="lang-zh" style="display:none">幾乎每一筆有融資的交易，都會經過銀行或放款方的鑑價，而值得說清楚的是：這個鑑價究竟是什麼——它是一位專業人員依照既定方法論、以可比較交易為基礎所做出的估算，而不是一個獨立、代表絕對真值的價值量測。鑑價師高度仰賴近期成交的可比較交易——而依其本質，這些交易都是回顧過去的。這個單一的結構性事實，會產生一種可預期、雙方向都存在的滯後。在上漲行情中，鑑價會系統性地低估目前的真實價值，因為餵進估算的那些比較案例，成交於昨天、較低的價格。在下跌行情中，鑑價則會高估，或至少跟不上真實市場價值下滑的速度，原因完全相同——目前還在成交、可以拿來當比較案例的交易，都是行情尚未完全反轉之前的產物。</p>
+
+    <p class="lang-en">A separate and more troubling issue is <span class="key-term" tabindex="0">appraisal shopping<span class="key-term-tip"><span class="lang-en">A borrower or loan originator seeking out the appraiser likely to deliver the valuation needed to make a deal work, rather than an independent one — a documented conflict of interest in mortgage lending history.</span><span class="lang-zh" style="display:none">借款人或放款業務員刻意尋找可能給出交易所需鑑價金額的鑑價師，而非尋求獨立的鑑價結果——這是房貸放款史上真實有紀錄可查的利益衝突。</span></span></span>: a borrower or loan originator, needing a valuation high enough to make a deal or a refinance work, seeking out the appraiser likely to deliver that number rather than an independent one. This is not a theoretical concern — it is a real, well-documented conflict of interest that surfaced repeatedly in US mortgage lending in the years leading up to the 2008 financial crisis, and it is precisely the pattern that later regulatory reform was built to address.</p>
+    <p class="lang-zh" style="display:none">另一個獨立、而且更令人擔憂的問題是<span class="key-term" tabindex="0">鑑價師選購（appraisal shopping）<span class="key-term-tip"><span class="lang-en">A borrower or loan originator seeking out the appraiser likely to deliver the valuation needed to make a deal work, rather than an independent one — a documented conflict of interest in mortgage lending history.</span><span class="lang-zh" style="display:none">借款人或放款業務員刻意尋找可能給出交易所需鑑價金額的鑑價師，而非尋求獨立的鑑價結果——這是房貸放款史上真實有紀錄可查的利益衝突。</span></span></span>：借款人或放款業務員，因為需要一個夠高的鑑價金額才能讓交易或再融資成立，於是刻意尋找可能給出這個數字的鑑價師，而不是尋求一個獨立的鑑價結果。這不是紙上談兵的疑慮——這是一個真實、有充分紀錄可查的利益衝突，在邁向 2008 年金融危機的那幾年，於美國房貸放款業界反覆出現，也正是後來監管改革所要處理的核心問題。</p>
+  </section>
+
+  <div class="pitfall">
+    <span class="pitfall-icon">⚠️</span>
+    <div class="pitfall-body">
+      <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+      <span class="lang-en">Treating a bank appraisal as ground truth rather than what it actually is — a lagging, comps-based estimate produced under a specific methodology. That gap matters most right after a sharp market turn in either direction, when a stale appraisal can be meaningfully wrong in a way that affects loan sizing, refinancing decisions, or a sense of how much equity actually exists in a property.</span>
+      <span class="lang-zh" style="display:none">把銀行鑑價當成絕對真值，而不是它實際上的樣子——一個依特定方法論、以落後的可比較交易為基礎所做出的估算。這個落差在市場出現急遽反轉（不論漲跌方向）之後最為重要，一份過時的鑑價，可能在貸款額度、再融資決策、或對一項物業實際持有多少淨值的判斷上，造成有實質意義的誤差。</span>
+    </div>
+  </div>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">In the years leading up to the 2008 financial crisis, US mortgage lending practice included well-documented cases of loan originators and mortgage brokers pressuring appraisers — implicitly or explicitly — to hit a target value needed to make a deal close, with appraisers who pushed back sometimes finding themselves cut off from future assignments. In response, the Home Valuation Code of Conduct (HVCC) took effect in 2009, followed by further appraisal-independence requirements under the Dodd-Frank Act, aimed at walling off loan production staff from the appraisal-ordering process — typically by routing assignments through independent appraisal management companies rather than letting the loan officer pick the appraiser directly. The reform era is widely cited as a direct regulatory response to a real, structural conflict of interest in how mortgage-backed valuations had been produced.</p>
+      <p class="lang-zh" style="display:none">在邁向 2008 年金融危機的那幾年，美國房貸放款業界存在著有充分紀錄可查的案例：放款業務員與房貸經紀人，明示或暗示地向鑑價師施壓，要求做出足以讓交易成立的目標鑑價金額，而拒絕配合的鑑價師，有時就會發現自己往後接不到案子了。作為回應，美國的鑑價價值準則（Home Valuation Code of Conduct，HVCC）於 2009 年生效，隨後多德-弗蘭克法案（Dodd-Frank Act）又進一步加上鑑價獨立性的規定，目的是把放款業務人員與鑑價指派流程隔開——通常做法是把鑑價案件交由獨立的鑑價管理公司統一指派，而不是讓貸款經辦人員直接挑選鑑價師。這波改革，普遍被認為是監管機關對房貸鑑價產製過程中一項真實、結構性利益衝突的直接回應。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 7. Sensitivity table -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">7. Sensitivity Check: Rates &times; Income Growth</h2>
+    <h2 class="lang-zh" style="display:none">七、敏感度檢查：利率 × 所得成長</h2>
+
+    <p class="lang-en">Section 2's yield logic can be extended into a full sensitivity grid, making explicit how much a "fair" price actually depends on two assumptions that are usually left implicit: the financing rate, and the appreciation (or income growth) rate a buyer is implicitly underwriting. Using the same hypothetical unit — net annual rent of $15,120 from the Section 2 example — define a required return as the mortgage rate plus a fixed 1.5% risk premium, and back out the price at which net yield plus assumed appreciation equals that required return: <span class="we-formula" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--lc-accent-light);padding:2px 6px;border-radius:4px;color:var(--lc-navy)">Fair Price = Net Annual Rent ÷ (Required Return − Assumed Appreciation)</span>.</p>
+    <p class="lang-zh" style="display:none">第 2 節的殖利率邏輯，可以延伸成一份完整的敏感度網格，把「合理」價格實際上有多依賴兩個平常不會明說的假設——融資利率，以及買方隱含承作的增值（或所得成長）率——清楚呈現出來。沿用同一間假設單位——第 2 節範例中每年淨租金 $15,120——把要求報酬率定義為房貸利率再加上固定 1.5% 的風險溢酬，並反推出使淨殖利率加上假設增值率等於這個要求報酬率的價格：<span class="we-formula" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--lc-accent-light);padding:2px 6px;border-radius:4px;color:var(--lc-navy)">合理價格＝每年淨租金 ÷（要求報酬率－假設增值率）</span>。</p>
+
+    <div class="table-scroll">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Appreciation ↓ / Mortgage Rate &rarr;</span><span class="lang-zh" style="display:none">增值率 ↓／房貸利率 &rarr;</span></th>
+            <th>4.0%</th>
+            <th>6.5%</th>
+            <th>9.0%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="lang-en">1%/yr</span><span class="lang-zh" style="display:none">1%／年</span></td>
+            <td>$336,000</td>
+            <td>$216,000</td>
+            <td>$159,200</td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">3%/yr</span><span class="lang-zh" style="display:none">3%／年</span></td>
+            <td>$604,800</td>
+            <td>$302,400</td>
+            <td>$201,600</td>
+          </tr>
+          <tr>
+            <td><span class="lang-en">5%/yr</span><span class="lang-zh" style="display:none">5%／年</span></td>
+            <td>$3,024,000</td>
+            <td>$504,000</td>
+            <td>$274,900</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lang-en compare-note">Every cell is hypothetical (假設), holding net annual rent fixed at $15,120 and using a flat 1.5% risk premium for illustration only — real required returns vary by asset and market. The point is the shape, not any individual cell: at a 4% mortgage rate, moving the appreciation assumption from 3% to 5% multiplies the "justified" price roughly five-fold, because assumed appreciation is approaching the required return itself and the denominator is collapsing toward zero. That is exactly the arithmetic that makes low-rate eras structurally bubble-prone — the closer an assumed appreciation rate creeps toward the required return, the more explosively a given rent stream can be made to "justify" almost any price.</p>
+    <p class="lang-zh compare-note" style="display:none">每一格都是假設情境，固定每年淨租金為 $15,120，並僅為示範目的採用固定 1.5% 的風險溢酬——真實世界的要求報酬率會依資產與市場而異。重點不在於個別哪一格的數字，而在於整體的形狀：在房貸利率 4% 的情況下，把增值假設從 3% 提高到 5%，「合理」價格會放大約五倍，因為假設增值率正在逼近要求報酬率本身，使分母趨近於零而崩潰。這正是低利率年代結構性容易滋生泡沫的算式——假設的增值率越逼近要求報酬率，同一筆租金收入就越能被用來「合理化」幾乎任何價格。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 8. Land vs building depreciation -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">8. Land vs. Building: Why "Old" Means Different Things in Different Markets</h2>
+    <h2 class="lang-zh" style="display:none">八、土地與建物：「舊」在不同市場代表不同意義</h2>
+
+    <p class="lang-en">A basic accounting distinction quietly reshapes how "old" should be read in a valuation: land does not physically wear out, but the structure sitting on it does. A building's roof, wiring, plumbing, and structural systems age, degrade, and eventually need major capital replacement — the same physical logic behind the capex concept from earlier modules. Land itself has no comparable physical decay; a parcel of dirt in a given location does not get structurally worse with the passage of time the way a 40-year-old roof does. That single distinction means the answer to "should an old property be worth less" depends entirely on how much of that property's total value sits in the depreciating structure versus the non-depreciating land beneath it — and that split varies enormously by market.</p>
+    <p class="lang-zh" style="display:none">一個基本的會計區分，悄悄改變了估值時該如何解讀「舊」這個字：土地本身不會物理性地磨損，但坐落在土地上的建物會。建物的屋頂、電線、水管與結構系統，都會隨時間老化、劣化，最終需要重大的資本性更換——這正是前面課程提到的資本支出概念背後同一套物理邏輯。土地本身沒有可與之相比的物理性劣化；一塊位在特定地點的土地，不會像一個屋齡 40 年的屋頂那樣，隨著時間推移而結構性地變差。單單這一個區分，就決定了「一間老房子是否理應更便宜」這個問題的答案，完全取決於這間物業的總價值中，有多少比例落在會折舊的建物、又有多少比例落在不會折舊的土地上——而這個比例，會因市場而有極大差異。</p>
+
+    <p class="lang-en">One important clarification before contrasting two market cultures: "land doesn't depreciate" is a physical/structural statement, not a promise that land prices can never fall. Land prices are still set by market supply and demand and can fall sharply in a bubble unwind — Japan's own land price index, discussed earlier in this module, fell for years after its 1990–1991 peak. That is a market-cycle phenomenon, distinct from the physical depreciation this section is about; a parcel of land losing market value in a downturn has not physically deteriorated the way an aging roof has.</p>
+    <p class="lang-zh" style="display:none">在對比兩種市場文化之前，有一點需要先澄清：「土地不折舊」是一個物理／結構層面的陳述，而不是承諾土地價格永遠不會下跌。土地價格仍然是由市場供需所決定，在泡沫反轉時同樣可能大幅下跌——本課稍早提到的日本地價指數，就在 1990 至 1991 年見頂之後連跌了好幾年。那是一種市場週期現象，與本節談的物理折舊是兩回事；一塊土地在下跌行情中損失市場價值，並不代表它像老化的屋頂那樣發生了物理性的劣化。</p>
+
+    <p class="lang-en">Japan's housing stock is widely and extensively documented as an example of a structure-depreciating culture taken to an extreme: many homes are treated as a rapidly depreciating asset, with a large share effectively valued near zero, or torn down and rebuilt, within a few decades of construction. Several forces reinforce this pattern (依司法轄區而異 — the specifics are Japan-specific, not universal): a strong cultural preference for new construction over renovated older stock, periodic seismic building-code revisions following major earthquakes that make pre-code structures relatively less desirable and sometimes costly to bring up to current standard, and a construction industry oriented around new-build activity. In that kind of market, "old" is a straightforward negative for the structure's value, and much of what a buyer is paying for an older home is really just the land.</p>
+    <p class="lang-zh" style="display:none">日本的住宅存量，廣泛且大量被記載為「建物折舊文化」發展到極致的一個例子：許多房屋被當作快速折舊的資產，其中相當一部分在興建後短短幾十年內，實際上就被視為價值趨近於零，或是直接拆除重建。有幾股力量共同強化了這個模式（依司法轄區而異——這些細節是日本特有的，並非放諸四海皆準）：社會文化上強烈偏好全新建案而非翻新的舊屋、重大地震過後定期修訂的耐震建築法規，讓不符合新規範的舊建物相對較不受青睞、有時還需要付出可觀成本才能補強到現行標準，以及一個以新建案為主要導向的營建產業。在這種市場裡，「舊」對建物價值來說幾乎就是直接的負面因素，而買方為一間老房子所支付的價格，很大一部分其實只是在買土地。</p>
+
+    <p class="lang-en">Dense, land-constrained major cities elsewhere often show close to the opposite pattern — land-value-dominant markets where a well-located older structure retains most of its value, because it is the scarce land underneath, not the aging building on top, that is really being priced. In those markets, an old building on a prime, tightly constrained site can trade at a similar or higher price than a comparable new building on a lesser site, because the land component so heavily dominates the total. Whether a given market behaves more like the first pattern or the second is genuinely a local, jurisdiction-specific question (依司法轄區而異) — one that changes what "old" should be assumed to mean for price before any comps adjustment, yield check, or replacement-cost analysis is even applied.</p>
+    <p class="lang-zh" style="display:none">其他地方那些密集、土地受限的重要城市，則往往呈現出接近相反的模式——這類土地價值主導型市場中，位置好的老建物大多能保住原有的價值，因為真正被定價的，是底下稀缺的土地，而不是上面逐漸老化的建物本身。在這類市場裡，位於精華、供給嚴重受限地段的老建物，成交價可能跟位於次級地段的可比較新建物相當、甚至更高，因為土地這個成分在總價值中佔的比重實在太大。一個特定市場究竟比較接近前者還是後者，其實是個真正因地而異、依司法轄區而異的問題——而這個問題，會在做任何可比較交易調整、殖利率檢查或重置成本分析之前，就先決定了「舊」這個字對價格到底該被假設代表什麼意義。</p>
+  </section>
+
+  <ul class="checklist">
+    <li class="checklist-item"><input type="checkbox" id="chk-1"><label for="chk-1"><span class="lang-en">I've confirmed whether quoted floor area is gross or net (公設比 or the local equivalent) before comparing price-per-area across units or markets.</span><span class="lang-zh" style="display:none">在跨單位或跨市場比較單價之前，我已經確認過標示坪數是毛面積還是淨面積（公設比或當地對應概念）。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-2"><label for="chk-2"><span class="lang-en">I've checked the implied rental yield against current mortgage rates — not the rate I hope to eventually qualify for.</span><span class="lang-zh" style="display:none">我已經用目前的房貸利率、而不是我希望未來能拿到的利率，去檢查隱含的租金殖利率。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-3"><label for="chk-3"><span class="lang-en">I've sanity-checked new-build pricing in this submarket against a rough replacement-cost estimate (land value plus construction cost).</span><span class="lang-zh" style="display:none">我已經用一個粗估的重置成本（土地價值加營建成本），對這個次市場的新成屋定價做過合理性檢查。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-4"><label for="chk-4"><span class="lang-en">I've checked at least one bubble-metric signal (price-to-income, price-to-rent, credit growth, or transaction volume trend) for this market via the dashboard.</span><span class="lang-zh" style="display:none">我已經透過儀表板，為這個市場檢查過至少一項泡沫指標訊號（房價所得比、房價租金比、信用成長，或交易量趨勢）。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-5"><label for="chk-5"><span class="lang-en">I'm treating any bank appraisal as a lagging, comps-based estimate — not as ground truth — and I'm aware of appraisal-shopping risk where it applies.</span><span class="lang-zh" style="display:none">我把任何銀行鑑價都當作一個落後的、以可比較交易為基礎的估算來看待——而不是絕對真值——並且知道在適用的情況下，存在鑑價師選購的風險。</span></label></li>
+    <li class="checklist-item"><input type="checkbox" id="chk-6"><label for="chk-6"><span class="lang-en">I understand whether this market treats structures as a depreciating asset or is land-value-dominant, before judging whether an "old" property's price makes sense.</span><span class="lang-zh" style="display:none">在判斷一間「舊」物業的價格是否合理之前，我已經理解這個市場究竟把建物當成折舊資產、還是屬於土地價值主導型市場。</span></label></li>
+  </ul>
+
+  <div class="quiz-block" data-quiz-id="m04-q1" data-quiz='[
+    {
+      "q":{"en":"A comp sold for $600,000. It is on a lower floor, older, and in original (unrenovated) condition compared to the subject unit. To estimate the subject&#39;s value from this comp, an appraiser should:","zh":"某筆可比較交易成交價為 $600,000。相較於標的物，該案例位於較低樓層、屋齡較大，且仍是原始（未翻新）屋況。要用這筆交易估算標的物的價值，鑑價人員應該："},
+      "opts":[
+        {"en":"Adjust the comp price upward for each factor where the subject is more desirable, since a fair comparison should account for feature differences.","zh":"針對標的物條件較好的每一項因素，把比較案例的價格向上調整，因為公平的比較必須考慮條件差異。"},
+        {"en":"Use the comp price as-is, since actual sale prices are always more reliable than adjusted estimates.","zh":"直接採用比較案例的原始成交價，因為實際成交價一定比調整後的估算更可靠。"},
+        {"en":"Adjust the comp price downward, since the subject unit will eventually depreciate too.","zh":"把比較案例的價格向下調整，因為標的物未來也終究會折舊。"},
+        {"en":"Discard the comp entirely, since it has any differences at all from the subject unit.","zh":"直接捨棄這筆比較案例，因為它跟標的物存在任何差異就不該使用。"}
+      ],
+      "a":0,
+      "exp":{"en":"Comps adjustment means pricing each difference — floor, age, condition, orientation — and moving the comp price toward what it would have sold for with the subject&#39;s features, as done step by step in the worked example.","zh":"可比較交易調整，指的是把每一項差異——樓層、屋齡、屋況、朝向——各自估價，並把比較案例的價格調整到「如果它擁有標的物的條件，會賣多少錢」，就像逐步演算範例中做的那樣。"}
+    },
+    {
+      "q":{"en":"Two buildings both list units at the same headline price per square meter. Building A has a low public-facility ratio (公設比); Building B has a much higher one. What does this most likely mean?","zh":"兩棟大樓的物件標示每平方公尺單價相同。A 棟的公設比較低，B 棟的公設比高出許多。這最可能代表什麼？"},
+      "opts":[
+        {"en":"Building B&#39;s buyers are paying the same price for meaningfully less actual private living space.","zh":"B 棟的買方，用同樣的價格買到的實際私有居住空間明顯較少。"},
+        {"en":"The two buildings are priced identically in every meaningful sense, since the headline number is the same.","zh":"兩棟大樓在任何有意義的層面上都是同樣的價格，因為標示的單價相同。"},
+        {"en":"Building A must be a lower-quality building, since a lower public-facility ratio always signals fewer amenities.","zh":"A 棟的品質一定比較差，因為公設比較低必然代表公共設施較少。"},
+        {"en":"The public-facility ratio only matters for commercial buildings, not residential comparisons.","zh":"公設比只在商用不動產比較時重要，跟住宅比較無關。"}
+      ],
+      "a":0,
+      "exp":{"en":"The same headline price per area can hide very different private-usable-space economics once the public-facility ratio is accounted for — a higher ratio means more of the quoted area is shared, not private, space.","zh":"一旦把公設比考慮進去，同樣的標示單價可能隱藏著完全不同的私有可用空間經濟性——公設比越高，代表標示坪數中屬於共用而非私有空間的比例越高。"}
+    },
+    {
+      "q":{"en":"A property&#39;s current price implies a net rental yield below the buyer&#39;s mortgage rate — negative carry. What does this price implicitly assume?","zh":"某物業目前的價格，隱含的淨租金殖利率低於買方的房貸利率——也就是負利差。這個價格隱含了什麼假設？"},
+      "opts":[
+        {"en":"That the buyer is underwriting most or all of the expected return to future price appreciation, not current rental income.","zh":"買方把預期報酬的絕大部分甚至全部，都押注在未來的房價增值上，而不是目前的租金收入。"},
+        {"en":"That the property is definitely overpriced and should not be purchased under any circumstances.","zh":"這項物業一定被高估了，在任何情況下都不應該購買。"},
+        {"en":"That the landlord made an arithmetic error in setting the rent.","zh":"房東在訂租金時算錯數字了。"},
+        {"en":"That mortgage rates will fall to match the rental yield within the next year.","zh":"房貸利率會在一年內下降到與租金殖利率相同的水準。"}
+      ],
+      "a":0,
+      "exp":{"en":"Negative carry doesn&#39;t automatically mean irrational — it makes visible a specific, quantifiable bet that most of the return has to come from future appreciation rather than current income.","zh":"負利差不代表這筆交易一定不理性——它讓一個具體、可量化的賭注浮現出來：報酬的大部分必須來自未來增值，而不是目前的收入。"}
+    },
+    {
+      "q":{"en":"New-build price per square meter in a submarket falls below the estimated replacement cost (land plus construction plus a reasonable developer margin). What is the most likely supply-side consequence?","zh":"某次市場的新成屋每平方公尺售價，跌破了估算出的重置成本（土地加營建成本，再加合理開發商利潤）。最可能的供給面後果是什麼？"},
+      "opts":[
+        {"en":"Developers slow or stop new construction, since building at a loss is not economically rational.","zh":"開發商會放慢或停止新的興建案，因為虧本蓋房子在經濟上說不通。"},
+        {"en":"Developers accelerate construction to sell before prices fall further.","zh":"開發商會加速興建，趁價格進一步下跌前趕快賣出。"},
+        {"en":"Land prices in the area will immediately rise to match construction costs.","zh":"該地區地價會立即上漲，以配合營建成本。"},
+        {"en":"Replacement cost has no bearing on new supply decisions — only comps determine what gets built.","zh":"重置成本跟新供給決策無關——只有可比較交易才會決定蓋什麼。"}
+      ],
+      "a":0,
+      "exp":{"en":"When price falls below what it actually costs to build new, breaking ground stops making economic sense, and new starts slow — a supply-side signal that comps or yield analysis alone cannot provide.","zh":"當價格跌破實際興建新屋的成本時，動工在經濟上就不再合理，新開工量也會隨之放慢——這是單靠可比較交易法或殖利率分析都無法提供的供給面訊號。"}
+    },
+    {
+      "q":{"en":"The price-to-income ratio metric is best described as measuring:","zh":"房價所得比這項指標，最適合被描述為在衡量什麼？"},
+      "opts":[
+        {"en":"How stretched home prices are relative to what local incomes can support, versus historical norms.","zh":"房價相對於當地所得所能負擔的水準、以及自身歷史常態，究竟偏貴到什麼程度。"},
+        {"en":"The exact number of years before a bubble will burst.","zh":"泡沫破裂前確切還剩下幾年。"},
+        {"en":"The ratio of a bank&#39;s mortgage book to its total deposits.","zh":"銀行房貸放款餘額佔總存款的比率。"},
+        {"en":"How much a specific property has appreciated since the buyer purchased it.","zh":"某項特定物業自買方購入以來已經漲了多少。"}
+      ],
+      "a":0,
+      "exp":{"en":"US price-to-income ratios climbed well above historical norms through 2004-2007, ahead of the 2008 financial crisis — an illustration of what the metric is for, not a timing tool.","zh":"美國房價所得比在 2004 至 2007 年間大幅攀升至遠高於歷史常態，發生在 2008 年金融危機之前——這說明了這項指標是用來衡量什麼的，而不是一個能算出時機的工具。"}
+    },
+    {
+      "q":{"en":"A market where home prices are rising much faster than achievable rents is showing:","zh":"某市場的房價漲幅遠快於實際可達成的租金，這代表什麼？"},
+      "opts":[
+        {"en":"Price-to-rent divergence — a signal often associated with speculative, appreciation-driven buying rather than income-driven demand.","zh":"房價租金比偏離——這個訊號通常與追逐增值的投機性買盤有關，而非以租金收入為基礎的需求。"},
+        {"en":"A healthy, income-supported housing market by definition.","zh":"依定義而言，這就是一個健康、由所得支撐的住宅市場。"},
+        {"en":"Proof that rents are set below their true market-clearing level.","zh":"這證明了租金被訂在低於真正市場出清水準的價格。"},
+        {"en":"No useful information, since rents and prices always move independently of each other.","zh":"沒有任何有用的資訊，因為租金與房價本來就總是各自獨立變動。"}
+      ],
+      "a":0,
+      "exp":{"en":"Ireland&#39;s price-to-rent ratio diverged sharply during its 2000s boom, ahead of the 2007-2013 crash — the metric flags buying driven by appreciation expectations rather than rental economics.","zh":"愛爾蘭的房價租金比在 2000 年代榮景期間大幅偏離，發生在 2007 至 2013 年崩盤之前——這項指標示警的是由增值預期驅動、而非由租金經濟性驅動的買盤。"}
+    },
+    {
+      "q":{"en":"Why is mortgage-payment-to-income calculated at CURRENT interest rates a more useful real-time affordability check than looking only at price-to-income?","zh":"為什麼用「現行利率」計算的房貸月付所得比，是比單看房價所得比更有用的即時可負擔性檢查？"},
+      "opts":[
+        {"en":"Because it captures how a rising-rate environment can silently erode affordability even when the headline price has not changed at all.","zh":"因為它能捕捉到升息環境即使在房價完全沒變的情況下，也能悄悄侵蝕可負擔性這件事。"},
+        {"en":"Because interest rates never actually affect what a household can afford to borrow.","zh":"因為利率其實從來不會影響一個家庭能負擔多少借款。"},
+        {"en":"Because it removes the need to ever check price-to-income at all.","zh":"因為有了它之後，就完全不需要再檢查房價所得比了。"},
+        {"en":"Because it reflects the rate a borrower locked in years ago, which is what matters most for new buyers today.","zh":"因為它反映的是借款人多年前鎖定的利率，而這正是今天新買方最該關心的數字。"}
+      ],
+      "a":0,
+      "exp":{"en":"Using today&#39;s borrowing cost — not a legacy locked-in rate — is what makes this metric a genuine real-time affordability signal, distinct from a static price-to-income snapshot.","zh":"用今天的借貸成本、而不是過去鎖定的舊利率，正是這項指標之所以是真正的即時可負擔性訊號，而有別於靜態的房價所得比快照。"}
+    },
+    {
+      "q":{"en":"Rapid mortgage/household debt growth that consistently outpaces income growth is a bubble-metric warning sign because:","zh":"房貸／家庭債務持續快於所得成長而快速擴張，之所以是一項泡沫指標警訊，原因是？"},
+      "opts":[
+        {"en":"It signals that rising prices are increasingly being financed by expanding leverage rather than by rising ability to pay from income.","zh":"它顯示上漲的房價，越來越仰賴擴張中的槓桿來融資，而不是靠所得支付能力的提升。"},
+        {"en":"It always means banks are acting irresponsibly and should be shut down immediately.","zh":"這永遠代表銀行行為不負責任，應該立即被勒令停業。"},
+        {"en":"Debt growth and income growth are unrelated to housing valuations.","zh":"債務成長與所得成長跟房市估值毫無關係。"},
+        {"en":"It guarantees a crash will occur within twelve months.","zh":"這保證了崩盤會在十二個月內發生。"}
+      ],
+      "a":0,
+      "exp":{"en":"Hong Kong&#39;s rapid mortgage credit expansion into 1997, and Ireland&#39;s 2000s credit boom, both preceded sharp corrections — credit growth is a leading, mechanism-based signal, not a timing guarantee.","zh":"香港在 1997 年前的快速房貸信用擴張，以及愛爾蘭 2000 年代的信用榮景，都在急遽修正之前出現——信用成長是一個基於機制的領先訊號，而不是一個保證時機的工具。"}
+    },
+    {
+      "q":{"en":"Falling transaction volume while prices keep rising is considered a classic bubble signal because:","zh":"價格持續上漲、但成交量卻下滑，這被視為典型的泡沫訊號，原因是？"},
+      "opts":[
+        {"en":"It suggests buyers are stepping back from prices they can no longer justify, even before sellers have adjusted their price expectations downward.","zh":"這顯示買方已經開始對無法自圓其說的價格卻步，即使賣方尚未把預期價格向下調整。"},
+        {"en":"It always means construction has stopped entirely in that market.","zh":"這永遠代表該市場的興建活動已經完全停止。"},
+        {"en":"Fewer transactions automatically cause prices to rise mechanically.","zh":"成交量減少會機械式地自動推高價格。"},
+        {"en":"It has no relationship to buyer sentiment or market exhaustion.","zh":"這跟買方情緒或行情衰竭完全沒有關係。"}
+      ],
+      "a":0,
+      "exp":{"en":"Japan&#39;s transaction volumes weakened as its 1980s bubble matured, ahead of the 1990-1991 peak — volume tends to turn before price, making it a useful early-warning read.","zh":"日本的交易量在 1980 年代泡沫成熟過程中轉弱，發生在 1990 至 1991 年見頂之前——交易量往往比價格更早轉折，使它成為有用的早期預警讀數。"}
+    },
+    {
+      "q":{"en":"Because bank appraisals rely heavily on recently closed comparable sales, they tend to:","zh":"因為銀行鑑價高度仰賴近期成交的可比較交易，它們往往會："},
+      "opts":[
+        {"en":"Under-shoot true value in a rising market and over-shoot (or fail to fall as fast as) true value in a falling market.","zh":"在上漲行情中低估真實價值，在下跌行情中則高估（或跟不上下跌速度）真實價值。"},
+        {"en":"Always overstate value, regardless of which direction the market is moving.","zh":"無論市場朝哪個方向變動，永遠都會高估價值。"},
+        {"en":"Perfectly track real-time market value in both rising and falling markets.","zh":"無論漲跌，都能完美即時反映市場價值。"},
+        {"en":"Under-shoot value in a falling market and over-shoot value in a rising market.","zh":"在下跌行情中低估價值，在上漲行情中高估價值。"}
+      ],
+      "a":0,
+      "exp":{"en":"Backward-looking comps mean appraisals structurally lag in both directions — under-shooting a rising market, over-shooting (or lagging the fall of) a falling one.","zh":"因為所用的比較案例本質上是回顧過去的，鑑價在漲跌兩個方向都存在結構性滯後——在上漲行情中低估，在下跌行情中則高估（或跟不上下跌的速度）。"}
+    },
+    {
+      "q":{"en":"Appraisal shopping refers to:","zh":"鑑價師選購指的是什麼？"},
+      "opts":[
+        {"en":"A borrower or loan originator seeking out the appraiser likely to deliver the valuation needed to make a deal work, rather than an independent one.","zh":"借款人或放款業務員刻意尋找可能給出交易所需鑑價金額的鑑價師，而不是尋求獨立的鑑價結果。"},
+        {"en":"A homeowner hiring several contractors to compare renovation quotes.","zh":"屋主找好幾家承包商比較裝修報價。"},
+        {"en":"A regulator randomly assigning appraisers to prevent bias.","zh":"監管機關隨機指派鑑價師以防止偏誤。"},
+        {"en":"A buyer comparing several similar listings before making an offer.","zh":"買方在出價前比較好幾筆類似的物件。"}
+      ],
+      "a":0,
+      "exp":{"en":"This was a real, documented conflict of interest in US mortgage lending before 2008, and it is exactly what post-crisis reforms like HVCC were built to wall off.","zh":"這是 2008 年之前美國房貸放款業界真實、有紀錄可查的利益衝突，也正是危機後 HVCC 等改革措施所要隔絕的對象。"}
+    },
+    {
+      "q":{"en":"Why can the same building age imply very different valuation conclusions in two different property markets?","zh":"為什麼同樣的屋齡，在兩個不同的不動產市場，可能代表截然不同的估值結論？"},
+      "opts":[
+        {"en":"Because whether a market treats structures as a rapidly depreciating asset (as is well documented in Japan) or as land-value-dominant changes how much of an old property&#39;s price is really the structure versus the land beneath it.","zh":"因為一個市場究竟把建物當成快速折舊資產（如日本的情況有充分紀錄），還是屬於土地價值主導型市場，會改變一間老物業的價格中，究竟有多少真正屬於建物、又有多少屬於底下的土地。"},
+        {"en":"Because building materials used in Japan are fundamentally different from materials used everywhere else in the world.","zh":"因為日本使用的建材，跟世界其他地方使用的建材本質上完全不同。"},
+        {"en":"Because older buildings are always worth more everywhere, once inflation is accounted for.","zh":"因為只要考慮通膨，舊建物在任何地方都一定比較值錢。"},
+        {"en":"Because land, unlike structures, is not subject to any market supply and demand dynamics.","zh":"因為土地不像建物，完全不受任何市場供需動態影響。"}
+      ],
+      "a":0,
+      "exp":{"en":"Whether a market is structure-depreciating (Japan) or land-value-dominant (many dense, land-constrained cities) determines what fraction of an old property&#39;s value is the aging structure versus the non-depreciating land — a genuinely jurisdiction-dependent question.","zh":"一個市場屬於建物折舊型（如日本）還是土地價值主導型（許多密集、土地受限的城市），決定了一間老物業的價值中，有多少比例是逐漸老化的建物、多少比例是不折舊的土地——這是一個真正因司法轄區而異的問題。"}
+    }
+  ]'></div>
+
+  <div class="lc-pager">
+    <a href="03-property-reading.html">
+      <span class="lc-pager-dir lang-en">Previous</span><span class="lc-pager-dir lang-zh" style="display:none">上一課</span>
+      <div class="lc-pager-label lang-en">Reading a Property</div>
+      <div class="lc-pager-label lang-zh" style="display:none">看懂一個物件</div>
+    </a>
+    <a href="05-mortgage.html" class="lc-pager-next">
+      <span class="lc-pager-dir lang-en">Next</span><span class="lc-pager-dir lang-zh" style="display:none">下一課</span>
+      <div class="lc-pager-label lang-en">Mortgages &amp; Leverage</div>
+      <div class="lc-pager-label lang-zh" style="display:none">房貸與槓桿</div>
+    </a>
+  </div>
+
+  <footer class="lc-footer">
+    <a href="./index.html"><span class="lang-en">&larr; Course Home</span><span class="lang-zh" style="display:none">&larr; 課程首頁</span></a>
+    <span class="lc-footer-note">INVESTMQUEST &middot; LEARN RESIDENTIAL &middot; MODULE 04</span>
+  </footer>
+
+</div>
+
+<script src="./learn.js"></script>
+<script>
+  initCalc('calc-carry', function(values){
+    var price = values.price || 1;
+    var rent = values.rent || 0;
+    var rate = values.rate || 0;
+    var annualRent = rent * 12;
+    var grossYield = (annualRent / price) * 100;
+    var netYield = grossYield * 0.70;
+    var gap = netYield - rate;
+    var gapText;
+    if (gap >= 0) {
+      gapText = '+' + gap.toFixed(2) + '% · Positive carry 正利差';
+    } else {
+      gapText = gap.toFixed(2) + '% · Negative carry 負利差';
+    }
+    return {
+      grossYield: grossYield.toFixed(2) + '%',
+      netYield: netYield.toFixed(2) + '%',
+      gap: gapText
+    };
+  });
+</script>
+</body>
+</html>
