@@ -12,16 +12,26 @@ var currentLang = (function(){
   try{ return localStorage.getItem('lang') || 'en'; }catch(e){ return 'en'; }
 })();
 
+function elDisplay(el){
+  // Return the natural display value for an element so CSS .lang-zh{display:none}
+  // doesn't win when we clear the inline style on visible elements.
+  var t = el.tagName;
+  if(t==='SPAN'||t==='A'||t==='EM'||t==='STRONG'||t==='BR') return 'inline';
+  if(t==='TR') return 'table-row';
+  if(t==='TD'||t==='TH') return 'table-cell';
+  return 'block';
+}
+
 function setLang(lang){
   if(lang!=='en' && lang!=='zh') lang='en';
   currentLang = lang;
   try{ localStorage.setItem('lang', lang); }catch(e){}
 
   document.querySelectorAll('.lang-en').forEach(function(e){
-    e.style.display = lang==='en' ? (e.tagName==='SPAN' ? 'inline' : '') : 'none';
+    e.style.display = lang==='en' ? elDisplay(e) : 'none';
   });
   document.querySelectorAll('.lang-zh').forEach(function(e){
-    e.style.display = lang==='zh' ? (e.tagName==='SPAN' ? 'inline' : '') : 'none';
+    e.style.display = lang==='zh' ? elDisplay(e) : 'none';
   });
   document.querySelectorAll('.lang-btn').forEach(function(b){
     b.classList.toggle('active', b.getAttribute('data-lang')===lang);
